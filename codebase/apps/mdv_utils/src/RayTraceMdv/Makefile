@@ -32,7 +32,7 @@ TARGET_FILE = RayTraceMdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lFmq -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lFmq -ldsserver \
 	-leuclid -ldidss -lcidd -lrapformats \
 	-ltoolsa -ldataport -ltdrp -lrapmath \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \

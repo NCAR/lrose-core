@@ -39,7 +39,7 @@ TARGET_FILE = MdvCreateConstantFile
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -leuclid \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -leuclid \
 	-lrapformats -ldidss -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 

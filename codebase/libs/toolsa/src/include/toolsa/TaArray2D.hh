@@ -101,6 +101,7 @@ private:
   
   TaArray2D &_copy(const TaArray2D &rhs);
   void _alloc(int sizeMajor, int sizeMinor);
+  void _init();
 
 };
 
@@ -111,11 +112,7 @@ private:
 template <class T>
   TaArray2D<T>::TaArray2D()
 {
-  _dat2D = NULL;
-  _dat1D = NULL;
-  _size1D = 0;
-  _sizeMajor = 0;
-  _sizeMinor = 0;
+  _init();
 }
 
 // constructor specifying array dimension
@@ -123,6 +120,7 @@ template <class T>
 template <class T>
   TaArray2D<T>::TaArray2D(int sizeMajor, int sizeMinor)
 {
+  _init();
   _alloc(sizeMajor, sizeMinor);
 }
 
@@ -138,6 +136,7 @@ template <class T>
 
 template <class T>
   TaArray2D<T>::TaArray2D(const TaArray2D<T> &rhs) {
+  _init();
   if (this != &rhs) {
     free();
     _copy(rhs);
@@ -176,6 +175,18 @@ template <class T>
   for (size_t ii = 0; ii < _sizeMajor; ii++) {
     _dat2D[ii] = _dat1D + ii * _sizeMinor;
   }
+}
+
+// initialize in constructor
+
+template <class T>
+  void TaArray2D<T>::_init()
+{
+  _dat2D = NULL;
+  _dat1D = NULL;
+  _size1D = 0;
+  _sizeMajor = 0;
+  _sizeMinor = 0;
 }
 
 // free up

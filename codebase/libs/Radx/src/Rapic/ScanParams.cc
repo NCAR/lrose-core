@@ -78,6 +78,16 @@ void ScanParams::clear()
                               // as VIDEO field not always included in radar data. 
   MEM_zero(img_fmt);
 
+  hbeamwidth = -9999.0;
+  vbeamwidth = -9999.0;
+  antdiam = -9999.0;
+  peakpowerh = -9999.0;
+  peakpowerv = -9999.0;
+  rxnoise_h = -9999.0;
+  rxnoise_v = -9999.0;
+  rxgain_h = -9999.0;
+  rxgain_v = -9999.0;
+
 }
 
 
@@ -96,7 +106,7 @@ int ScanParams::set(const char *line, int nScansFull)
 
   char _radar_name[128];
   if (sscanf(line, "NAME:%s", _radar_name) == 1) {
-    strcpy(radar_name, _radar_name);
+    strncpy(radar_name, _radar_name, 128);
     setDone = true;
     return 0;
   }
@@ -338,7 +348,7 @@ int ScanParams::set(const char *line, int nScansFull)
 
   char _img_fmt[64];
   if (sscanf(line, "IMGFMT:%s", _img_fmt) == 1) {
-    strcpy(img_fmt, _img_fmt);
+    strncpy(img_fmt, _img_fmt, 64);
     return 0;
   }
 
@@ -350,7 +360,7 @@ int ScanParams::set(const char *line, int nScansFull)
 
   char _field_name[64];
   if (sscanf(line, "VIDEO:%s", _field_name) == 1) {
-    strcpy(field_name, _field_name);
+    strncpy(field_name, _field_name, 64);
     return 0;
   }
 
@@ -404,6 +414,50 @@ int ScanParams::set(const char *line, int nScansFull)
     hiprf_str = line + 7;
     return 0;
   } 
+
+  if (strncmp(line, "POLARISATION: ", 14) == 0) {
+    polarization_str.append(line + 14);
+    return 0;
+  } 
+
+
+  double dval;
+  if (sscanf(line, "HBEAMWIDTH:%lg", &dval) == 1) {
+    hbeamwidth = dval;
+    return 0;
+  }
+  if (sscanf(line, "VBEAMWIDTH:%lg", &dval) == 1) {
+    vbeamwidth = dval;
+    return 0;
+  }
+  if (sscanf(line, "ANTDIAM:%lg", &dval) == 1) {
+    antdiam = dval;
+    return 0;
+  }
+  if (sscanf(line, "PEAKPOWERH:%lg", &dval) == 1) {
+    peakpowerh = dval;
+    return 0;
+  }
+  if (sscanf(line, "PEAKPOWERV:%lg", &dval) == 1) {
+    peakpowerv = dval;
+    return 0;
+  }
+  if (sscanf(line, "RXNOISE_H:%lg", &dval) == 1) {
+    rxnoise_h = dval;
+    return 0;
+  }
+  if (sscanf(line, "RXNOISE_V:%lg", &dval) == 1) {
+    rxnoise_v = dval;
+    return 0;
+  }
+  if (sscanf(line, "RXGAIN_H:%lg", &dval) == 1) {
+    rxgain_h = dval;
+    return 0;
+  }
+  if (sscanf(line, "RXGAIN_V:%lg", &dval) == 1) {
+    rxgain_v = dval;
+    return 0;
+  }
 
   if (_debug) {
     cerr << "Unknown params: " << line << endl;
@@ -460,6 +514,18 @@ void ScanParams::print(ostream &out) const
   out << "  product_str: " << product_str << endl;
   out << "  copyright_str: " << copyright_str << endl;
   out << "  hiprf_str: " << hiprf_str << endl;
+  out << "  polarization_str: " << polarization_str << endl;
+
+  out << "  hbeamwidth: " << hbeamwidth << endl;
+  out << "  vbeamwidth: " << vbeamwidth << endl;
+  out << "  antdiam: " << antdiam << endl;
+  out << "  peakpowerh: " << peakpowerh << endl;
+  out << "  peakpowerv: " << peakpowerv << endl;
+  out << "  rxnoise_h: " << rxnoise_h << endl;
+  out << "  rxnoise_v: " << rxnoise_v << endl;
+  out << "  rxgain_h: " << rxgain_h << endl;
+  out << "  rxgain_v: " << rxgain_v << endl;
+
   out << endl;
 
 }

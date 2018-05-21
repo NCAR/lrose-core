@@ -1,0 +1,6 @@
+.deps
+SpdbXml2Table
+__makefile.template
+makefile
+makefile.am
+makefile.in

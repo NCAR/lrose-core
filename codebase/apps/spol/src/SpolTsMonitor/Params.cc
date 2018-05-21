@@ -1,9 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -33,8 +50,6 @@
  * @author Automatically generated
  *
  */
-using namespace std;
-
 #include "Params.hh"
 #include <cstring>
 
@@ -800,19 +815,55 @@ using namespace std;
     tt->descr = tdrpStrDup("Tag to delineate test pulse block in output XML.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &test_pulse_xml_tag - &_start_;
-    tt->single_val.s = tdrpStrDup("KaBandTestPulse");
+    tt->single_val.s = tdrpStrDup("SBandTestPulse");
     tt++;
     
-    // Parameter 'test_pulse_range_km'
+    // Parameter 'test_pulse_range_km_hc'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("test_pulse_range_km");
-    tt->descr = tdrpStrDup("Range to test pulse (km).");
-    tt->help = tdrpStrDup("We compute the gate number from this range. The power at this gate is averaged over the monitoring interval.");
-    tt->val_offset = (char *) &test_pulse_range_km - &_start_;
-    tt->single_val.d = 145;
+    tt->param_name = tdrpStrDup("test_pulse_range_km_hc");
+    tt->descr = tdrpStrDup("Range to test pulse for HC channel (km).");
+    tt->help = tdrpStrDup("We compute the gate number from this range.");
+    tt->val_offset = (char *) &test_pulse_range_km_hc - &_start_;
+    tt->single_val.d = 148.7;
+    tt++;
+    
+    // Parameter 'test_pulse_range_km_hx'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("test_pulse_range_km_hx");
+    tt->descr = tdrpStrDup("Range to test pulse for HX channel (km).");
+    tt->help = tdrpStrDup("We compute the gate number from this range.");
+    tt->val_offset = (char *) &test_pulse_range_km_hx - &_start_;
+    tt->single_val.d = 148.7;
+    tt++;
+    
+    // Parameter 'test_pulse_range_km_vc'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("test_pulse_range_km_vc");
+    tt->descr = tdrpStrDup("Range to test pulse for VC channel (km).");
+    tt->help = tdrpStrDup("We compute the gate number from this range.");
+    tt->val_offset = (char *) &test_pulse_range_km_vc - &_start_;
+    tt->single_val.d = 149;
+    tt++;
+    
+    // Parameter 'test_pulse_range_km_vx'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("test_pulse_range_km_vx");
+    tt->descr = tdrpStrDup("Range to test pulse for VX channel (km).");
+    tt->help = tdrpStrDup("We compute the gate number from this range.");
+    tt->val_offset = (char *) &test_pulse_range_km_vx - &_start_;
+    tt->single_val.d = 149;
     tt++;
     
     // Parameter 'test_pulse_n_samples'
@@ -827,28 +878,28 @@ using namespace std;
     tt->single_val.i = 5000;
     tt++;
     
-    // Parameter 'dual_pol_alternating_mode'
+    // Parameter 'alternating_mode'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("dual_pol_alternating_mode");
-    tt->descr = tdrpStrDup("If this is a dual-polarization system, is it operating in fast alternating mode?");
+    tt->param_name = tdrpStrDup("alternating_mode");
+    tt->descr = tdrpStrDup("Is it operating in fast alternating mode");
     tt->help = tdrpStrDup("If true, the HV flag is used to determine which receiver path to use.");
-    tt->val_offset = (char *) &dual_pol_alternating_mode - &_start_;
+    tt->val_offset = (char *) &alternating_mode - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'dual_pol_switching_receivers'
+    // Parameter 'switching_receivers'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("dual_pol_switching_receivers");
-    tt->descr = tdrpStrDup("If this is a dual-polarization system, does it have switching receivers?");
+    tt->param_name = tdrpStrDup("switching_receivers");
+    tt->descr = tdrpStrDup("Does it have switching receivers");
     tt->help = tdrpStrDup("If true, then there is a co-pol receiver path and a cross-pol receiver path. If false, there is an H and V receiver path.");
-    tt->val_offset = (char *) &dual_pol_switching_receivers - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->val_offset = (char *) &switching_receivers - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'Comment 5'

@@ -1,13 +1,14 @@
-/Params.cc/1.13/Mon Aug 29 17:17:21 2016//
-/Params.hh/1.11/Mon Aug 29 17:17:21 2016//
-/Args.cc/1.2/Thu Aug 11 22:50:42 2016//
-/Args.hh/1.2/Thu Aug 11 22:50:42 2016//
-/Main.cc/1.2/Thu Aug 11 22:50:42 2016//
-/Makefile/1.7/Thu Aug 11 22:50:42 2016//
-/NcGeneric2Mdv.cc/1.24/Fri Sep 23 16:47:31 2016//
-/NcGeneric2Mdv.hh/1.11/Thu Aug 11 22:50:42 2016//
-/NcGeneric2Mdv.test/1.2/Thu Aug 11 22:50:42 2016//
-/SunAngle.cc/1.2/Thu Aug 11 22:50:42 2016//
-/SunAngle.hh/1.2/Thu Aug 11 22:50:42 2016//
-/paramdef.NcGeneric2Mdv/1.12/Thu Aug 11 22:50:42 2016//
+/Args.cc/1.2/Thu Dec 29 22:57:34 2016//
+/Args.hh/1.2/Thu Dec 29 22:57:34 2016//
+/Main.cc/1.2/Thu Dec 29 22:57:34 2016//
+/NcGeneric2Mdv.test/1.2/Thu Dec 29 22:57:34 2016//
+/SunAngle.cc/1.2/Thu Dec 29 22:57:34 2016//
+/SunAngle.hh/1.2/Thu Dec 29 22:57:34 2016//
+/paramdef.NcGeneric2Mdv/1.12/Thu Dec 29 22:57:34 2016//
+/Params.cc/1.14/Sat Jan  7 22:23:58 2017//
+/Params.hh/1.12/Sat Jan  7 22:23:58 2017//
+/.cvsignore/1.1/Sat Sep  9 21:16:14 2017//
+/NcGeneric2Mdv.cc/1.25/Fri Jun  2 22:02:26 2017//
+/NcGeneric2Mdv.hh/1.12/Fri Jun  2 22:01:27 2017//
+/Makefile/1.9/Fri Nov  3 21:10:38 2017//
 D

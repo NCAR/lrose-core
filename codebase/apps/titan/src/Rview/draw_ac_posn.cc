@@ -96,10 +96,12 @@ static double ejectable_icon_size;
 static int Plot_ejectables_as_cross = TRUE;
 static int Plot_ejectables_as_plus = TRUE;
 static int LineWidthPerFlare = 1;
+static int DryIceLineWidth = 2;
 
 GC End_burn_gc;
 GC Bip_gc;
 GC End_burn_and_bip_gc;
+GC Dry_ice_gc;
 
 /*
  * prototypes
@@ -643,6 +645,7 @@ static void draw_spdb_posn(int dev,
 	GC gc;
 	int n_end_burn = 0;
 	int n_bip = 0;
+        int dry_ice = 0;
 
 	if (PlotFlares) {
 
@@ -653,6 +656,9 @@ static void draw_spdb_posn(int dev,
 			 ac->points[i].x, ac->points[i].y,
 			 &ac->wposns[i]);
 	  
+	  if (ac->wposns[i-1].flare_flags & DRY_ICE_FLAG) {
+	    dry_ice = 1;
+	  }
 	  if (ac->wposns[i-1].flare_flags & RIGHT_BURN_FLAG) {
 	    n_end_burn++;
 	  }
@@ -661,7 +667,12 @@ static void draw_spdb_posn(int dev,
 	  }
 	  n_bip = ac->wposns[i-1].n_burn_in_place;
 	  
-	  if (n_end_burn && n_bip) {
+	  if (dry_ice) {
+	    XSetLineAttributes(Glob->rdisplay, Dry_ice_gc,
+			       DryIceLineWidth,
+			       LineSolid, CapButt, JoinMiter);
+	    gc = Dry_ice_gc;
+          } else if (n_end_burn && n_bip) {
 	    XSetLineAttributes(Glob->rdisplay, End_burn_and_bip_gc,
 			       (n_end_burn + n_bip) * LineWidthPerFlare,
 			       LineSolid, CapButt, JoinMiter);
@@ -1026,6 +1037,10 @@ static void init_setup()
     uGetParamLong(Glob->prog_name,
 		  "line_width_per_flare", 1);
 
+  DryIceLineWidth =
+    uGetParamLong(Glob->prog_name,
+		  "dry_ice_line_width", 3);
+
   /*
    * flare colors
    */
@@ -1044,6 +1059,11 @@ static void init_setup()
     uGetParamString(Glob->prog_name, "end_burn_and_bip_color", "magenta");
   End_burn_and_bip_gc = xGetColorGC(Glob->rdisplay, Cmap,
 				    &Glob->color_index, color);
+  
+  color =
+    uGetParamString(Glob->prog_name, "dry_ice_color", "white");
+  Dry_ice_gc = xGetColorGC(Glob->rdisplay, Cmap,
+                           &Glob->color_index, color);
   
   /*
    * sizes - Initialize these last since they can depend on the above
@@ -1125,6 +1145,10 @@ GC get_bip_gc() {
 
 GC get_end_burn_and_bip_gc() {
   return End_burn_and_bip_gc;
+}
+
+GC get_dry_ice_gc() {
+  return Dry_ice_gc;
 }
 
 int get_plot_ac_posn() {

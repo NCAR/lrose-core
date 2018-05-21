@@ -22,12 +22,9 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 #include <math.h>
+#include <toolsa/toolsa_macros.h>
+#include <toolsa/pjg.h>
 
-#ifndef M_PI
-#define M_PI		3.14159265358979323846
-#endif
-
-#define EARTH_RAD 6378.16   /* @ equator- From Handbook of Chemistry & Physics */
 #define DEGREES_PER_RADIAN (180.0/M_PI)
 #define RADIANS_PER_DEGREE (M_PI/180.0)
 
@@ -68,9 +65,9 @@ void latlong_to_xy(double center_lat, double center_long, double other_lat, doub
   diff_lat = (center_lat - other_lat) * RADIANS_PER_DEGREE;
 
   /* the length of the circular segment is r * theta */
-  *py = EARTH_RAD * (-diff_lat); /* y direction */
+  *py = PJG_get_earth_radius() * (-diff_lat); /* y direction */
 
-  /* the radius at center_lat latitude is EARTH_RAD * cos_center_lat */
+  /* the radius at center_lat latitude is earth radius * cos_center_lat */
   cos_other_lat = cos((double)theta);
-  *px = EARTH_RAD * diff_long * cos_other_lat; /* x direction */
+  *px = PJG_get_earth_radius() * diff_long * cos_other_lat; /* x direction */
 }

@@ -67,7 +67,7 @@ protected:
 
   // add a ray
   
-  void addRay(RadxRay *ray);
+  void _addRay(RadxRay *ray);
   
   // data members
 
@@ -119,40 +119,8 @@ private:
   void _runSimPpi();
   void _runSimVert();
   void _simulatePpiBeam(double elev, double az, int volNum, int sweepNum);
+  void _simulateRhiBeam(double elev, double az, int volNum, int sweepNum);
   void _simulateVertBeam(double elev, double az, int volNum, int sweepNum);
-
-};
-
-////////////////////////////
-// Simulated RHI reader
-
-class SimRhiReader : public Reader
-{
-
-public:
-
-  SimRhiReader(const Params &params);
-
-  class Field {
-  public:
-    string name;
-    string units;
-    double minVal;
-    double maxVal;
-  };
-
-  void setFields(const vector<Field> fields) { _fields = fields; }
-
-protected:
-
-  // start running
-
-  virtual void run();
-
-private:
-
-  vector<Field> _fields;
-  void _simulateBeam(double elev, double az, int volNum, int sweepNum);
 
 };
 

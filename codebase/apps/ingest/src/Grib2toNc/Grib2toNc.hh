@@ -33,8 +33,6 @@
 
 #include <string>
 #include <tdrp/tdrp.h>
-#include <toolsa/str.h>
-#include <toolsa/Path.hh>
 
 #include "Params.hh"
 #include "Args.hh"
@@ -76,45 +74,24 @@ class Grib2toNc {
    int run();
    
  private:
-
-   // 
-   // Initialization
-   //
-   Path _program;
    
    // Constructor -- private because this is a singleton object
    Grib2toNc(int argc, char **argv);
 
-   void _usage();
-   int _processArgs( int argc, char **argv,
-		     tdrp_override_t& override ,
-		     int* nFiles, char*** fileList );
-   
+  // Copyright display
+   void _ucopyright(const char *prog_name);
+
    //
    // Singleton instance pointer
    //
    static Grib2toNc *_instance;  // singleton instance
 
-   //
-   // Parameter processing
-   //
-   char   *_paramsPath;
-   int _processParams( int nFiles, char** fileList );
-
-   //
-   // Processing
-   //
-   string _inputFileSuffix;
    Grib2Nc *_grib2Nc;
 
    // Program parameters.
-
-   char *_progName;
+   char _progName[10];
    Args *_args;
    Params *_params;
-
-   int _nfiles;
-   char *_flist;
 
 };
 

@@ -39,7 +39,7 @@ TARGET_FILE = MdvMerge2
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lFmq -lMdv -lRadx -ldsdata \
+LOC_LIBS = -lFmq -lMdv -lRadx -lNcxx -ldsdata \
 	-ldsserver -ldidss -leuclid -lFmq \
 	-lrapformats -ltoolsa -ltdrp -ldataport \
 	$(NETCDF4_LIBS) -lbz2 -lz

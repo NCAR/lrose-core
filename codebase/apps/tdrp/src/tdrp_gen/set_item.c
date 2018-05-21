@@ -148,7 +148,6 @@ int set_int(token_handle_t *tok_handle,
       fprintf(stderr, "\n>>> TDRP_ERROR <<<, param '%s'\n", tt->param_name);
       fprintf(stderr, "Cannot load int p_default.\n");
       fprintf(stderr, "%s\n", tdrpLineInfo(tok_handle, &tokens[tt->start_tok]));
-      return (-1);
       iret = -1;
     }
   }
@@ -208,7 +207,6 @@ int set_long(token_handle_t *tok_handle,
       fprintf(stderr, "\n>>> TDRP_ERROR <<<, param '%s'\n", tt->param_name);
       fprintf(stderr, "Cannot load long p_default.\n");
       fprintf(stderr, "%s\n", tdrpLineInfo(tok_handle, &tokens[tt->start_tok]));
-      return (-1);
       iret = -1;
     }
   }
@@ -268,7 +266,6 @@ int set_float(token_handle_t *tok_handle,
       fprintf(stderr, "\n>>> TDRP_ERROR <<<, param '%s'\n", tt->param_name);
       fprintf(stderr, "Cannot load float p_default.\n");
       fprintf(stderr, "%s\n", tdrpLineInfo(tok_handle, &tokens[tt->start_tok]));
-      return (-1);
       iret = -1;
     }
   }
@@ -328,7 +325,6 @@ int set_double(token_handle_t *tok_handle,
       fprintf(stderr, "\n>>> TDRP_ERROR <<<, param '%s'\n", tt->param_name);
       fprintf(stderr, "Cannot load double p_default.\n");
       fprintf(stderr, "%s\n", tdrpLineInfo(tok_handle, &tokens[tt->start_tok]));
-      return (-1);
       iret = -1;
     }
   }
@@ -389,7 +385,6 @@ int set_string(token_handle_t *tok_handle,
       fprintf(stderr, "\n>>> TDRP_ERROR <<<, param '%s'\n", tt->param_name);
       fprintf(stderr, "Cannot load string p_default.\n");
       fprintf(stderr, "%s\n", tdrpLineInfo(tok_handle, &tokens[tt->start_tok]));
-      return (-1);
       iret = -1;
     }
   }
@@ -871,7 +866,7 @@ int set_struct_fields(token_handle_t *tok_handle,
     itok++;
     
     fname = tokens[itok].tok;
-    if (tdrpReservedStr(ftype)) {
+    if (tdrpReservedStr(fname)) {
       fprintf(stderr, "\n>>> TDRP_ERROR <<< set_struct_fields\n");
       fprintf(stderr, "    struct name %s\n", struct_name);
       fprintf(stderr, "    Invalid struct var\n");

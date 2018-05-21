@@ -51,8 +51,8 @@ DsEnsembleAnyTrigger::DsEnsembleAnyTrigger(void) :
   ThreadAny(),
   _sleepSeconds(ensembleAnyTrigger::defaultSleepSeconds),
   _archive_mode(false),
-  _archive_t0(-1),
-  _archive_t1(-1),
+  // _archive_t0(-1),
+  // _archive_t1(-1),
   _archive_index(-1)
 {
   ThreadAny::setContext(this);
@@ -68,14 +68,17 @@ DsEnsembleAnyTrigger(const vector<string> &url,
   ThreadAny(),
   _sleepSeconds(ensembleAnyTrigger::defaultSleepSeconds),
   _archive_mode(false),
-  _archive_t0(-1),
-  _archive_t1(-1),
+  // _archive_t0(-1),
+  // _archive_t1(-1),
   _archive_index(-1),
   _urls(url)
 {
   for (size_t i=0; i<url.size(); ++i)
   {
-    _elem.push_back(DsEnsembleAnyTrigger1(url[i], leadSeconds, this));
+    DsEnsembleAnyTrigger1 *t1 = new DsEnsembleAnyTrigger1(url[i],
+							  leadSeconds,
+							  this);
+    _elem.push_back(t1); //DsEnsembleAnyTrigger1(url[i], leadSeconds, this));
   }
 
   ThreadAny::setContext(this);
@@ -92,8 +95,8 @@ DsEnsembleAnyTrigger(const time_t &t0, const time_t &t1,
   ThreadAny(),
   _sleepSeconds(ensembleAnyTrigger::defaultSleepSeconds),
   _archive_mode(true),
-  _archive_t0(t0),
-  _archive_t1(t1),
+  // _archive_t0(t0),
+  // _archive_t1(t1),
   _archive_index(-1),
   _urls(url)
 {
@@ -129,6 +132,10 @@ DsEnsembleAnyTrigger(const time_t &t0, const time_t &t1,
 //----------------------------------------------------------------
 DsEnsembleAnyTrigger::~DsEnsembleAnyTrigger(void)
 {
+  for (size_t i=0; i<_elem.size(); ++i)
+  {
+    delete _elem[i];
+  }
 }
 
 //------------------------------------------------------------------
@@ -143,7 +150,7 @@ void DsEnsembleAnyTrigger::filterNames(const std::string &remove)
 {
   for (size_t i=0; i<_elem.size(); ++i)
   {
-    _elem[i].filterName(remove);
+    _elem[i]->filterName(remove);
   }
 }
 
@@ -153,7 +160,7 @@ void DsEnsembleAnyTrigger::setSleepSeconds(const int seconds)
   _sleepSeconds = seconds;
   for (size_t i=0; i<_elem.size(); ++i)
   {
-    _elem[i].setSleepSeconds(seconds);
+    _elem[i]->setSleepSeconds(seconds);
   }
 }
 
@@ -162,7 +169,7 @@ void DsEnsembleAnyTrigger::setMaximumAgeSeconds(const int maxSeconds)
 {
   for (size_t i=0; i<_elem.size(); ++i)
   {
-    _elem[i].setMaximumAgeSeconds(maxSeconds);
+    _elem[i]->setMaximumAgeSeconds(maxSeconds);
   }
 }
 
@@ -171,7 +178,7 @@ void DsEnsembleAnyTrigger::setTriggerMaxWaitSeconds(const int maxSeconds)
 {
   for (size_t i=0; i<_elem.size(); ++i)
   {
-    _elem[i].setTriggerMaxWaitSeconds(maxSeconds);
+    _elem[i]->setTriggerMaxWaitSeconds(maxSeconds);
   }
 }
   
@@ -263,7 +270,8 @@ bool DsEnsembleAnyTrigger::nextTime(time_t &t, int &lt, std::string &url,
 }
 
 //----------------------------------------------------------------
-bool DsEnsembleAnyTrigger::_nextArchiveTime(time_t &t, int &lt, std::string &url,
+bool DsEnsembleAnyTrigger::_nextArchiveTime(time_t &t, int &lt,
+					    std::string &url,
 					    bool &hasData)
 {
   if (++_archive_index >= static_cast<int>(_archive_events.size()))
@@ -290,8 +298,9 @@ bool DsEnsembleAnyTrigger::_nextRealTime(time_t &t, int &lt, std::string &url,
     for (size_t i = 0; i<_elem.size(); ++i)
     {
       LOGC(TaTriggerLog::name()) << "creating a thread for " << 
-	_elem[i].sprintState();
-      ThreadAny::thread(i, (void *)&_elem[i]);
+	_elem[i]->sprintState();
+      ThreadAny::thread(i, (void *)_elem[i]);
+      //ThreadAny::thread(i, (void *)&_elem[i]);
     }
   }
 
@@ -566,7 +575,13 @@ bool DsEnsembleAnyTrigger1::_next_time_sequence(void)
     TriggerInfo i;
     if (T->next(i) != 0)
     {
-      LOGC(TaTriggerLog::name()) << "call to next empty return " << _name;
+      LOGC(TaTriggerLog::name()) << "call to next empty return, "
+				 << _name << " sleep " << _sleepSeconds
+				 << " total sleep " << totalSleep;
+      char buf[1000];
+      sprintf(buf, "_next_time_sequence_sleep(%d of %d)", _sleepSeconds,
+	      totalSleep);
+      PMU_auto_register(buf);
       sleep(_sleepSeconds);
       totalSleep += _sleepSeconds;
       if (totalSleep >= _maxWaitSeconds)
@@ -592,6 +607,10 @@ bool DsEnsembleAnyTrigger1::_next_time_sequence(void)
       {
 	LOGC(TaTriggerLog::name()) << "Same gen and lead as before, "
 				   << _name;
+	char buf[1000];
+	sprintf(buf, "_next_time_sequence_sleep(%d of %d)", _sleepSeconds,
+		totalSleep);
+	PMU_auto_register(buf);
 	sleep(_sleepSeconds);
 	totalSleep += _sleepSeconds;
 	if (totalSleep >= _maxWaitSeconds)

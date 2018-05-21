@@ -1,9 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.hh
 //
@@ -32,8 +49,6 @@
 #ifndef Params_hh
 #define Params_hh
 
-using namespace std;
-
 #include <tdrp/tdrp.h>
 #include <iostream>
 #include <cstdio>
@@ -41,6 +56,8 @@ using namespace std;
 #include <cstring>
 #include <climits>
 #include <cfloat>
+
+using namespace std;
 
 // Class definition
 
@@ -61,8 +78,7 @@ public:
     IWRF_FMQ_INPUT = 0,
     IWRF_TCP_INPUT = 1,
     SIMULATED_INPUT = 2,
-    SIMULATED_RHI_INPUT = 3,
-    DSR_FMQ_INPUT = 4
+    DSR_FMQ_INPUT = 3
   } input_mode_t;
 
   typedef enum {
@@ -431,6 +447,8 @@ public:
 
   debug_t debug;
 
+  tdrp_bool_t check_ray_alloc;
+
   tdrp_bool_t register_with_procmap;
 
   char* instance;
@@ -451,13 +469,9 @@ public:
 
   char* archive_start_time;
 
-  int archive_scan_interval_secs;
-
-  int archive_n_scans;
+  double archive_time_span_secs;
 
   char* archive_data_url;
-
-  int archive_search_margin_secs;
 
   show_status_t show_status_in_gui;
 
@@ -555,6 +569,8 @@ public:
   tdrp_bool_t rhi_elevation_lines_on_at_startup;
 
   legend_pos_t rhi_main_legend_pos;
+
+  int rhi_beam_queue_size;
 
   double bscan_time_span_secs;
 
@@ -678,6 +694,8 @@ public:
 
   char* images_archive_end_time;
 
+  int images_scan_interval_secs;
+
   tdrp_bool_t images_set_sweep_index_list;
 
   int *_images_sweep_index_list;
@@ -698,7 +716,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[155];
+  mutable TDRPtable _table[156];
 
   const char *_className;
 

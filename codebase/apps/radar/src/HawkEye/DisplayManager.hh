@@ -52,6 +52,7 @@
 #include <Radx/RadxField.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxGeoref.hh>
+#include "SweepManager.hh"
 
 class QApplication;
 class QButtonGroup;
@@ -61,11 +62,12 @@ class QDialog;
 class QLabel;
 class QGroupBox;
 class QGridLayout;
+class QHBoxLayout;
 class QVBoxLayout;
 class QLineEdit;
+class QSlider;
 class QWidget;
 
-class ColorBar;
 class DisplayField;
 class Reader;
 
@@ -76,11 +78,11 @@ class DisplayManager : public QMainWindow {
 public:
 
   // constructor
-
+  
   DisplayManager(const Params &params,
-             Reader *reader,
-             const vector<DisplayField *> &fields,
-             bool haveFilteredFields);
+                 Reader *reader,
+                 const vector<DisplayField *> &fields,
+                 bool haveFilteredFields);
   
   // destructor
   
@@ -143,14 +145,11 @@ protected:
   int _beamTimerId;
   bool _frozen;
 
+
   // data fields
 
-  const vector<DisplayField *> &_fields;
+  vector<DisplayField *> _fields;
   bool _haveFilteredFields;
-
-  // colors
-  
-  ColorBar *_colorBar;
 
   // windows
 
@@ -167,6 +166,7 @@ protected:
   QAction *_howtoAct;
   QAction *_aboutAct;
   QAction *_aboutQtAct;
+  QAction *_openFileAct;
 
   // status panel
 
@@ -316,8 +316,11 @@ protected slots:
   virtual void _freeze() = 0;
   virtual void _unzoom() = 0;
   virtual void _refresh() = 0;
-  virtual void _changeField(int fieldId, bool guiMode = true) = 0;
-  
+  virtual void _changeField(int fieldId, bool guiMode) = 0;
+  virtual void _openFile();
+
+  void _changeFieldVariable(bool value);
+
 };
 
 #endif

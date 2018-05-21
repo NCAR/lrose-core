@@ -59,7 +59,7 @@ ConvectionFinder::ConvectionFinder(const string &progName,
 
   // set up ConvStrat object
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     _convStrat.setVerbose(true);
   } else if (_params.debug) {
     _convStrat.setDebug(true);

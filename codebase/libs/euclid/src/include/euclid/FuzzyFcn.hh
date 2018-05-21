@@ -26,8 +26,6 @@
 //  Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 //  January 1998
 //
-// $Id: FuzzyFcn.hh,v 1.14 2016/03/03 19:21:31 dixon Exp $
-//
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef _FUZZY_FCN_INC_

@@ -66,8 +66,15 @@ const int Forever = 1;
 InputDirRecurse::InputDirRecurse(const string &dir_name,
 				 const string &file_substring,
 				 const string &exclude_substring,
-				 const bool process_old_files) :
-  InputDir(dir_name, file_substring, process_old_files, exclude_substring)
+				 bool process_old_files,
+                                 bool debug,
+                                 bool verbose) :
+        InputDir(dir_name, 
+                 file_substring,
+                 process_old_files,
+                 exclude_substring,
+                 debug,
+                 verbose)
 {
 }
 
@@ -75,8 +82,15 @@ InputDirRecurse::InputDirRecurse(const string &dir_name,
 InputDirRecurse::InputDirRecurse(const char *dir_name,
 				 const char *file_substring,
 				 const char *exclude_substring,
-				 const int process_old_files) :
-  InputDir(dir_name, file_substring, process_old_files, exclude_substring)
+				 int process_old_files,
+                                 bool debug,
+                                 bool verbose) :
+        InputDir(dir_name, 
+                 file_substring,
+                 process_old_files,
+                 exclude_substring,
+                 debug,
+                 verbose)
 {
 }
 

@@ -113,7 +113,7 @@ int InputMdv::read(time_t data_time)
     mdvx.setReadComposite();
   }
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     mdvx.printReadRequest(cerr);
   }
   

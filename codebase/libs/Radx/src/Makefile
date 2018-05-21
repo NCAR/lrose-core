@@ -20,7 +20,9 @@ MODULE_NAME = Radx
 LIBNAME = lib$(MODULE_NAME).a
 
 SUB_DIRS = \
+	Bufr \
 	Cf2 \
+	Cfarr \
 	DOE \
 	D3R \
 	Dorade \
@@ -32,6 +34,7 @@ SUB_DIRS = \
 	Leosphere \
 	Ncf \
 	Nexrad \
+	NoaaFsl \
 	Noxp \
 	NsslMrd \
 	Odim \

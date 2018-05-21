@@ -45,8 +45,9 @@ AcSim::AcSim (const string &callsign,
 	      bool right_burn,
 	      bool left_burn,
 	      double ejectable_interval,
-	      int burn_in_place_interval,
+	      double burn_in_place_interval,
 	      int n_bip_at_a_time,
+              double dry_ice_interval,
 	      int n_optional_fields,
 	      const Params::field_name_t *optional_field_names) :
   _optionalFieldNames(optional_field_names)
@@ -79,11 +80,13 @@ AcSim::AcSim (const string &callsign,
   _ejectableInterval = ejectable_interval;
   _burnInPlaceInterval = burn_in_place_interval;
   _nBipAtaTime = n_bip_at_a_time;
+  _dryIceInterval = dry_ice_interval;
 
   _burnInPlace = 0;
   _ejectable = 0;
   _nBurnInPlace = 0;
   _nEjectable = 0;
+  _dryIce = 0;
   _lastEjectableTime = time(NULL);
   _lastBipTime = time(NULL);
 
@@ -125,47 +128,52 @@ string AcSim::getNextPos ()
 
     switch (_optionalFieldNames[i]) {
 
-    case Params::GS:
-      sprintf(str, ",%g", _speed);
-      pos += str;
-      break;
+      case Params::GS:
+        sprintf(str, ",%g", _speed);
+        pos += str;
+        break;
 
-    case Params::ERROR_FLAGS:
-      sprintf(str, ",%.4d", _errorFlags);
-      pos += str;
-      break;
+      case Params::ERROR_FLAGS:
+        sprintf(str, ",%.4d", _errorFlags);
+        pos += str;
+        break;
 
-    case Params::R_BURN:
-      sprintf(str, ",%d", _rBurn);
-      pos += str;
-      break;
+      case Params::R_BURN:
+        sprintf(str, ",%d", _rBurn);
+        pos += str;
+        break;
 
-    case Params::L_BURN:
-      sprintf(str, ",%d", _lBurn);
-      pos += str;
-      break;
+      case Params::L_BURN:
+        sprintf(str, ",%d", _lBurn);
+        pos += str;
+        break;
 
-    case Params::BURN_IN_PLACE:
-      sprintf(str, ",%d", _burnInPlace);
-      pos += str;
-      break;
+      case Params::BURN_IN_PLACE:
+        sprintf(str, ",%d", _burnInPlace);
+        pos += str;
+        break;
 
-    case Params::EJECTABLE:
-      sprintf(str, ",%d", _ejectable);
-      pos += str;
-      break;
+      case Params::DRY_ICE:
+        sprintf(str, ",%d", _dryIce);
+        pos += str;
+        break;
 
-    case Params::N_BURN_IN_PLACE:
-      sprintf(str, ",%d", _nBurnInPlace);
-      pos += str;
-      break;
+      case Params::EJECTABLE:
+        sprintf(str, ",%d", _ejectable);
+        pos += str;
+        break;
 
-    case Params::N_EJECTABLE:
-      sprintf(str, ",%d", _nEjectable);
-      pos += str;
-      break;
+      case Params::N_BURN_IN_PLACE:
+        sprintf(str, ",%d", _nBurnInPlace);
+        pos += str;
+        break;
 
-    default: {}
+      case Params::N_EJECTABLE:
+        sprintf(str, ",%d", _nEjectable);
+        pos += str;
+        break;
+
+      default: {}
 
     } // switch
 
@@ -240,13 +248,22 @@ void AcSim::_computeNext()
     int tdiff = now - _lastBipTime;
     if (tdiff >= _burnInPlaceInterval) {
       _burnInPlace = 1;
-       _nBurnInPlace += _nBipAtaTime;
+      _nBurnInPlace += _nBipAtaTime;
       _lastBipTime = now;
     } else {
       _burnInPlace = 0;
     }
   }
 
+  if (_dryIceInterval >= 0) {
+    int nint = now / (int) _dryIceInterval;
+    if (nint % 2 == 0) {
+      _dryIce = 1;
+    } else {
+      _dryIce = 0;
+    }
+  }
+  
 }
 
 

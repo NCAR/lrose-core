@@ -37,7 +37,7 @@ TARGET_FILE = Mdv2Surfer
 
 LOC_INCLUDES = -I../include $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -ldidss \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldidss \
 	-lrapformats -ltoolsa -ltdrp -ldataport \
 	$(NETCDF4_LIBS) -lbz2 -lz
 

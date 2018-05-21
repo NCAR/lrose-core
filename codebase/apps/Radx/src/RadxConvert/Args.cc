@@ -645,6 +645,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "apply_strict_angle_limits = false;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-sort_sweeps")) {
+      
+      sprintf(tmp_str, "sort_sweeps_by_fixed_angle = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-radar_num")) {
       
       if (i < argc - 1) {
@@ -688,6 +693,92 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	sprintf(tmp_str, "time_offset_secs = %s;", argv[i]);
 	TDRP_add_override(&override, tmp_str);
         sprintf(tmp_str, "apply_time_offset = true;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
+    } else if (!strcmp(argv[i], "-instrument_type")) {
+      
+      if (i < argc - 1) {
+        i++;
+        if (!strcmp(argv[i], "radar")) {
+          sprintf(tmp_str, "instrument_type = INSTRUMENT_RADAR;");
+        } else if (!strcmp(argv[i], "lidar")) {
+          sprintf(tmp_str, "instrument_type = INSTRUMENT_LIDAR;");
+        } else {
+          _usage(cerr);
+          cerr << "ERROR - INVALID INSTRUMENT TYPE >>> " << argv[i] << " <<<" << endl;
+          return -1;
+        }
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "override_instrument_type = true;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
+    } else if (!strcmp(argv[i], "-platform_type")) {
+      
+      if (i < argc - 1) {
+        i++;
+        if (!strcmp(argv[i], "fixed")) {
+          sprintf(tmp_str, "platform_type = PLATFORM_FIXED;");
+        } else if (!strcmp(argv[i], "vehicle")) {
+          sprintf(tmp_str, "platform_type = PLATFORM_VEHICLE;");
+        } else if (!strcmp(argv[i], "ship")) {
+          sprintf(tmp_str, "platform_type = PLATFORM_SHIP;");
+        } else if (!strcmp(argv[i], "aircraft_fore")) {
+          sprintf(tmp_str, "platform_type = PLATFORM_AIRCRAFT_FORE;");
+        } else if (!strcmp(argv[i], "aircraft_aft")) {
+          sprintf(tmp_str, "platform_type = PLATFORM_AIRCRAFT_AFT;");
+        } else if (!strcmp(argv[i], "aircraft_tail")) {
+          sprintf(tmp_str, "platform_type = PLATFORM_AIRCRAFT_TAIL;");
+        } else if (!strcmp(argv[i], "aircraft_belly")) {
+          sprintf(tmp_str, "platform_type = PLATFORM_AIRCRAFT_BELLY;");
+        } else if (!strcmp(argv[i], "aircraft_roof")) {
+          sprintf(tmp_str, "platform_type = PLATFORM_AIRCRAFT_ROOF;");
+        } else if (!strcmp(argv[i], "aircraft_nose")) {
+          sprintf(tmp_str, "platform_type = PLATFORM_AIRCRAFT_NOSE;");
+        } else if (!strcmp(argv[i], "sat_orbit")) {
+          sprintf(tmp_str, "platform_type = PLATFORM_SATELLITE_ORBIT;");
+        } else if (!strcmp(argv[i], "sat_geostat")) {
+          sprintf(tmp_str, "platform_type = PLATFORM_SATELLITE_GEOSTAT;");
+        } else {
+          _usage(cerr);
+          cerr << "ERROR - INVALID PLATFORM TYPE >>> " << argv[i] << " <<<" << endl;
+          return -1;
+        }
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "override_platform_type = true;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
+    } else if (!strcmp(argv[i], "-primary_axis")) {
+      
+      if (i < argc - 1) {
+        i++;
+        if (!strcmp(argv[i], "z")) {
+          sprintf(tmp_str, "primary_axis = PRIMARY_AXIS_Z;");
+        } else if (!strcmp(argv[i], "y")) {
+          sprintf(tmp_str, "primary_axis = PRIMARY_AXIS_Y;");
+        } else if (!strcmp(argv[i], "x")) {
+          sprintf(tmp_str, "primary_axis = PRIMARY_AXIS_X;");
+        } else if (!strcmp(argv[i], "z_prime")) {
+          sprintf(tmp_str, "primary_axis = PRIMARY_AXIS_Z_PRIME;");
+        } else if (!strcmp(argv[i], "y_prime")) {
+          sprintf(tmp_str, "primary_axis = PRIMARY_AXIS_Y_PRIME;");
+        } else if (!strcmp(argv[i], "x_prime")) {
+          sprintf(tmp_str, "primary_axis = PRIMARY_AXIS_X_PRIME;");
+        } else {
+          _usage(cerr);
+          cerr << "ERROR - INVALID INSTRUMENT TYPE >>> " << argv[i] << " <<<" << endl;
+          return -1;
+        }
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "override_primary_axis = true;");
         TDRP_add_override(&override, tmp_str);
       } else {
 	OK = false;
@@ -833,6 +924,9 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -institution ? ] override the institution string\n"
       << "\n"
+      << "  [ -instrument_type ? ] override instrument type\n"
+      << "     Options are: radar, lidar\n"
+      << "\n"
       << "  [ -keep_long ] keep long range rays\n"
       << "     Keep NEXRAD long-range non-Doppler sweeps\n"
       << "     Default is to remove them\n"
@@ -873,6 +967,11 @@ void Args::_usage(ostream &out)
       << "  [ -out_start ? ] compute output path using start time\n"
       << "     default is to use both start and end times\n"
       << "\n"
+      << "  [ -platform_type ? ] override platform type. Options are:\n"
+      << "     fixed, vehicle, ship, aircraft_fore, aircraft_aft, aircraft_tail\n"
+      << "     aircraft_belly, aircraft_roof, aircraft_nose\n"
+      << "     sat_orbit, sat_geostat\n"
+      << "\n"
       << "  [ -predom_geom ] remap to predominant range geometry\n"
       << "\n"
       << "  [ -preserve_sweeps ] preserve sweep details as they are in file.\n"
@@ -880,6 +979,9 @@ void Args::_usage(ostream &out)
       << "     consolidate sweeps by combining split-cut sweeps\n"
       << "     into a single sweep.\n"
       << "     If this flag is true, we leave the sweeps unchanged.\n"
+      << "\n"
+      << "  [ -primary_axis ? ] override primary axis\n"
+      << "     Options are: z, y, x, z_prime, y_prime, x_prime\n"
       << "\n"
       << "  [ -prop_std_name ] use 'proposed_standard_name' attribute\n"
       << "                     instead of 'standard_name' attribute\n"
@@ -915,6 +1017,9 @@ void Args::_usage(ostream &out)
       << "     Remove NEXRAD short-range Doppler sweeps\n"
       << "\n"
       << "  [ -rem_trans ] remove rays with antenna transitions\n"
+      << "\n"
+      << "  [ -sort_sweeps ] sort sweeps by fixed angle\n"
+      << "     Sorts in ascending order. Rays are reordered accordingly\n"
       << "\n"
       << "  [ -source ? ] override the source string\n"
       << "\n"

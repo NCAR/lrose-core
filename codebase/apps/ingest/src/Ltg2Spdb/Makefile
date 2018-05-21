@@ -38,7 +38,7 @@ TARGET_FILE = Ltg2Spdb
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-ltoolsa -ldataport -leuclid -ltdrp \
+	-ldataport -leuclid -ltdrp -ltoolsa \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

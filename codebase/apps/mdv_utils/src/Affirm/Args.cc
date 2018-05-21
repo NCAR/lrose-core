@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 // RCS info
-//   $Author: dixon $
+//   $Author: prestop $
 //   $Locker:  $
-//   $Date: 2016/03/04 02:22:09 $
-//   $Id: Args.cc,v 1.6 2016/03/04 02:22:09 dixon Exp $
-//   $Revision: 1.6 $
+//   $Date: 2017/06/14 18:41:37 $
+//   $Id: Args.cc,v 1.7 2017/06/14 18:41:37 prestop Exp $
+//   $Revision: 1.7 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -82,9 +82,11 @@ Args::Args (int argc, char **argv, char *prog_name) :
   {
     if (STRequal_exact(argv[i], "--") ||
 	STRequal_exact(argv[i], "-help") ||
+	STRequal_exact(argv[i], "-h") ||
+	STRequal_exact(argv[i], "--help") ||
 	STRequal_exact(argv[i], "-man"))
     {
-      _usage(prog_name, stdout);
+      usage(prog_name, stdout);
       exit(0);
     }
     else if (STRequal_exact(argv[i], "-debug"))
@@ -164,7 +166,7 @@ Args::Args (int argc, char **argv, char *prog_name) :
 
   if (!okay)
   {
-    _usage(prog_name, stderr);
+    usage(prog_name, stderr);
     exit(-1);
   }
     
@@ -213,22 +215,21 @@ time_t Args::_convertTimeString(const char *time_string)
 
 
 /**********************************************************************
- * _usage() - Print the usage for this program.
+ * usage() - Print the usage for this program.
  */
 
-void Args::_usage(char *prog_name, FILE *stream)
+void Args::usage(char *prog_name, FILE *stream)
 {
   fprintf(stream, "%s%s%s",
 	  "Usage:\n\n", prog_name, " [options] as below:\n\n"
-	  "       [ --, -help, -man ] produce this list.\n"
+	  "       [ --, -help, -man, --help, -h ] produce this list.\n"
 	  "       [ -debug ] debugging on\n"
 	  "       [ -end \"yyyy mm dd hh mm ss\" ] end time\n"
 	  "                             ARCHIVE mode only\n"
 	  "       [ -mode mode ] operating mode\n"
 	  "                           can be either ARCHIVE or REALTIME\n"
 	  "       [ -start \"yyyy mm dd hh mm ss\" ] start time\n"
-	  "                                 ARCHIVE mode only\n"
-	  "\n");
+	  "                                 ARCHIVE mode only\n");
 
 
   TDRP_usage(stream);

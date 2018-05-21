@@ -134,6 +134,26 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
 	
+    } else if (!strcmp(argv[i], "-mode")) {
+      
+      if (i < argc - 1) {
+	char *modestr = argv[++i];
+	if (!strcmp(modestr, "vol")) {
+	  sprintf(tmp_str, "test_type = TEST_RADX_VOL;");
+	  TDRP_add_override(&override, tmp_str);
+	} else if (!strcmp(modestr, "rays")) {
+	  sprintf(tmp_str, "test_type = TEST_RADX_RAYS;");
+	  TDRP_add_override(&override, tmp_str);
+	} else if (!strcmp(modestr, "fields")) {
+	  sprintf(tmp_str, "test_type = TEST_RADX_FIELDS;");
+	  TDRP_add_override(&override, tmp_str);
+	} else {
+	  iret = -1;
+	}
+      } else {
+	iret = -1;
+      }
+
     } else if (!strcmp(argv[i], "-f")) {
 	
       if (i < argc - 1) {
@@ -175,9 +195,12 @@ void Args::usage(string &prog_name, ostream &out)
       << "    Sets mode to ARCHIVE\n"
       << "  [ -f ? ?] input file list\n"
       << "    Sets mode to FILELIST\n"
-      << "  [ -mode ?] ARCHIVE or FILELIST\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "    Sets mode to ARCHIVE\n"
+      << "  [ -type ?] set the type of test to be performed\n"
+      << "    vol - test entire vol (the default)\n"
+      << "    rays - test individual rays\n"
+      << "    fields - test individual fields\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "  [ -vv, -extra ] print extra verbose debug messages\n"
       << endl;

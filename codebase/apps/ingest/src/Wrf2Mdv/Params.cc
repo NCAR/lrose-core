@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -759,6 +759,18 @@ using namespace std;
     tt->help = tdrpStrDup("Otherwise the forecast time is determined via the 'TIMES' variable,  generation time is determined from the START_TIME attribute, and domain is set to the GRID_ID attribute.  The filename must be in the format dn.yyyymmddhh.tmHHMM.wrf where n is the domain, yyyymmddhh is the gen time and HHMM is the forecast lead time");
     tt->val_offset = (char *) &get_times_from_filenames - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'gen_time_offset'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("gen_time_offset");
+    tt->descr = tdrpStrDup("Number of seconds to apply as an offset to the gen time.");
+    tt->help = tdrpStrDup("This is useful if the file name time or the time found in the data has an offset error. The default is no offset. Use negative values to decrease the time.");
+    tt->val_offset = (char *) &gen_time_offset - &_start_;
+    tt->single_val.i = 0;
     tt++;
     
     // Parameter 'max_realtime_valid_age'

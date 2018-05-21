@@ -25,7 +25,7 @@
  * @file DigitalElevationHandler.cc
  */
 #include "DigitalElevationHandler.hh"
-#include <BeamBlock/spheroid.h>
+#include "spheroid.h"
 #include <toolsa/LogMsg.hh>
 using namespace rainfields;
 using namespace rainfields::ancilla;

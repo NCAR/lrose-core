@@ -27,7 +27,7 @@ TARGET_FILE = Affirm
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -leuclid \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -leuclid \
 	-ldsserver -lrapformats -ldidss -ltdrp \
 	-ltoolsa -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz

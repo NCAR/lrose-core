@@ -152,10 +152,10 @@ void SymprodRenderText::draw(RenderContext *context)
     return;
   }
 
-  double iconScale = _context->iconScale;
-  if (_hdr.detail_level == -1) {
-    iconScale = 1.0;
-  }
+  // double iconScale = _context->iconScale;
+  // if (_hdr.detail_level == -1) {
+  //   iconScale = 1.0;
+  // }
 
   // set the colors
 

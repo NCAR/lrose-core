@@ -1,0 +1,6 @@
+.deps
+__makefile.template
+TrecGauge2Spdb
+makefile
+makefile.am
+makefile.in

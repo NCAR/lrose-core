@@ -28,13 +28,11 @@
 // Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 // February 1999
 //
-// $Id: ProjRUC2Lambert.cc,v 1.6 2016/03/03 18:19:28 dixon Exp $
-//
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
 #include <math.h>
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 #include <euclid/Projection.hh>
 #include <euclid/ProjRUC2Lambert.hh>
 using namespace std;

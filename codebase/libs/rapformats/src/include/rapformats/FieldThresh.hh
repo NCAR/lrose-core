@@ -3,13 +3,13 @@
  * @brief Simple class to store a field name and threshold
  * @class FieldThresh
  * @brief Simple class to store a field name and threshold
- *
  */
 
 # ifndef    FieldThresh_hh
 # define    FieldThresh_hh
 
 #include <string>
+#include <vector>
 
 //----------------------------------------------------------------
 class FieldThresh
@@ -64,8 +64,15 @@ public:
 
   /**
    * @return XML representation
+   * @param[in] indent  Number of tabs to indent XML
    */
-  std::string toXml(void) const;
+  std::string toXml(int indent=0) const;
+
+  /**
+   * @return XML representation without enclosing tag
+   * @param[in] indent  Number of tabs to indent XML
+   */
+  std::string toXmlContent(int indent=0) const;
 
   /**
    * @return a debug representation
@@ -87,7 +94,7 @@ public:
    * @param[in] thresh
    */
   inline void setThresh(double thresh) {_thresh=thresh;}
-
+  
   /**
    * Set threshold to input objects threshold
    *
@@ -129,18 +136,18 @@ public:
   }
 
   /**
-   * @return field name associated with this data
-   * @param[in] nameChars  Number of leading chars of field name to use
-   * @param[in] precision  Number of digits precision in threshold
+   * If the _fieldName matches one of the the input strings,
+   * set _thresh to corresponding input double.
+   * If no matches, do nothing.
+   *
+   * @param[in] nameThresh  pairs of fieldnames/thresholds
    */
-  std::string dataFieldName(int nameChars=2, int precision=2) const;
+  void update(const std::vector<std::pair<std::string,double> > &nameThresh);
 
   /**
    * @return true if object is set
    */
   inline bool ok(void) const {return _ok;}
-
-
 
   /**
    * Value of XML tag
@@ -148,11 +155,12 @@ public:
   static const std::string _tag;
 
 protected:
-private:  
 
   bool _ok;                /**< True if set */
   std::string _fieldName;  /**< Name */
   double _thresh;          /**< Threshold */
+
+private:  
 
 };
 

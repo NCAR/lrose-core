@@ -133,6 +133,7 @@ DsMdvx &DsMdvx::_copy(const DsMdvx &rhs)
   _ncfOutputLatlonArrays = rhs._ncfOutputLatlonArrays;
   _ncfOutputMdvAttr = rhs._ncfOutputMdvAttr;
   _ncfOutputMdvChunks = rhs._ncfOutputMdvChunks;
+  _ncfOutputStartEndTimes =  rhs._ncfOutputStartEndTimes;
   _ncfRadialFileType = rhs._ncfRadialFileType;
 
   return *this;
@@ -1603,14 +1604,15 @@ void DsMdvx::setRadialFileType(radial_file_type_t fileType)
 
 void DsMdvx::setMdv2NcfOutput(bool outputLatlonArrays,
                               bool outputMdvAttr,
-                              bool outputMdvChunks)
+                              bool outputMdvChunks,
+                              bool outputStartEndTimes)
 
 {
 
   _ncfOutputLatlonArrays = outputLatlonArrays;
   _ncfOutputMdvAttr = outputMdvAttr;
   _ncfOutputMdvChunks = outputMdvChunks;
-
+  _ncfOutputStartEndTimes = outputStartEndTimes;
 }
 
 //////////////////////////////////////////
@@ -1661,6 +1663,7 @@ void DsMdvx::clearMdv2Ncf()
   _ncfOutputLatlonArrays = true;
   _ncfOutputMdvAttr = true;
   _ncfOutputMdvChunks = true;
+  _ncfOutputStartEndTimes = true;
   _ncfRadialFileType = RADIAL_TYPE_CF;
 
 }
@@ -3174,6 +3177,9 @@ void DsMdvx::printConvertMdv2NcfRequest(ostream &out)
        << (_ncfOutputMdvAttr? "Y" : "N") << endl;
   cerr << "  OutputMdvChunks? "
        << (_ncfOutputMdvChunks? "Y" : "N") << endl;
+  cerr << "  OutputStartEndTimes? "
+       << (_ncfOutputStartEndTimes? "Y" : "N") << endl;
+
   cerr << endl;
 
   for (int ii = 0; ii < (int) _mdv2NcfTransArray.size(); ii++) {

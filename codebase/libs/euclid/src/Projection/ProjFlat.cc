@@ -28,14 +28,13 @@
 // Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 // February 1999
 //
-// $Id: ProjFlat.cc,v 1.8 2016/03/03 18:19:28 dixon Exp $
-//
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <math.h>
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 #include <euclid/Projection.hh>
 #include <euclid/ProjFlat.hh>
+#include <euclid/Pjg.hh>
 using namespace std;
 
 //
@@ -156,7 +155,7 @@ ProjFlat::latlon2Rtheta( double colat1,
   if (xx > 1.0) xx = 1.0;
   darc = acos(xx);
 
-  *r = darc* EARTH_RADIUS;
+  *r = darc* Pjg::EradKm;
 
   denom = sin_colat1 * sin(darc);
 
@@ -202,7 +201,7 @@ ProjFlat::latlonPlusRtheta( double cos_colat1,
   double cos_colat2, sin_colat2;
   double xx;
 
-  darc = r / EARTH_RADIUS;
+  darc = r / Pjg::EradKm;
   cos_theta = cos(theta_rad);
 
   xx = cos_colat1 * cos(darc) + sin_colat1 * sin(darc) * cos_theta;

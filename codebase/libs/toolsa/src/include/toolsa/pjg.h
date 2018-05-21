@@ -105,6 +105,13 @@
  */
 
 
+/*****************************************************************************
+ * earth radius
+ */
+
+extern void PJG_set_earth_radius(double val);
+extern double PJG_get_earth_radius();
+
 /***************** General routines **************/
 
 extern double PJGrange360( double angle);

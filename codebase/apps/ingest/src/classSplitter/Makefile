@@ -39,7 +39,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ldsserver -ldidss -ltoolsa -leuclid \
+	-ldsserver -ldidss -leuclid -ltoolsa \
 	-ldataport -ltdrp -lrapmath -lbz2 \
 	-lz -lpthread -lm
 

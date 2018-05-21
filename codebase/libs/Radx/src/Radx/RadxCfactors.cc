@@ -161,7 +161,7 @@ void RadxCfactors::serialize(RadxMsg &msg)
   // init
 
   msg.clearAll();
-  msg.setMsgType(RadxMsg::RadxCfactorsMsgType);
+  msg.setMsgType(RadxMsg::RadxCfactorsMsg);
 
   // add metadata numbers
   
@@ -184,7 +184,7 @@ int RadxCfactors::deserialize(const RadxMsg &msg)
 
   // check type
 
-  if (msg.getMsgType() != RadxMsg::RadxCfactorsMsgType) {
+  if (msg.getMsgType() != RadxMsg::RadxCfactorsMsg) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxCfactors::deserialize" << endl;
     cerr << "  incorrect message type" << endl;
@@ -254,8 +254,8 @@ void RadxCfactors::_loadMetaNumbersToMsg()
 // set the meta number data from the message struct
 
 int RadxCfactors::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
-                                       size_t bufLen,
-                                       bool swap)
+                                         size_t bufLen,
+                                         bool swap)
   
 {
   

@@ -21,19 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-/* RCS info
- *   $Author: dixon $
- *   $Locker:  $
- *   $Date: 2016/03/03 18:09:41 $
- *   $Id: MdvxPjg.hh,v 1.19 2016/03/03 18:09:41 dixon Exp $
- *   $Revision: 1.19 $
- *   $State: Exp $
- */
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-
 /************************************************************************
  * MdvxPjg.hh: class implementing projective geometry transformations
  *             based on Mdvx data.
@@ -266,7 +253,7 @@ public:
    * getProjType() - Retrieve the Mdvx projection type.
    */
 
-  const int getProjType(void) const;
+  int getProjType(void) const;
   
 
   /**********************************************************************

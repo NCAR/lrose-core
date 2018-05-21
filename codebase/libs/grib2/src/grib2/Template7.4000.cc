@@ -487,7 +487,7 @@ int Template7_pt_4000::encode_jpeg2000 (ui08 *cin,int pwidth,int pheight,int pnb
     image.clrspc_=JAS_CLRSPC_SGRAY;         /* grayscale Image */
     image.cmprof_=0; 
 #endif
-    image.inmem_=1;
+    //image.inmem_=1;
 
     cmpt.tlx_=0;
     cmpt.tly_=0;

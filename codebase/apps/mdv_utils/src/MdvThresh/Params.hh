@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -397,6 +397,10 @@ public:
 
   double PassValue;
 
+  tdrp_bool_t ReplaceFailValues;
+
+  double FailValue;
+
   char* OutUrl;
 
   char* *_OutFieldName;
@@ -440,7 +444,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[43];
+  mutable TDRPtable _table[45];
 
   const char *_className;
 

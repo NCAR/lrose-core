@@ -56,7 +56,7 @@ DiskFullDeleteList::DiskFullDeleteList(const string &progName,
                                        const Params &params) :
         _progName(progName),
         _params(params),
-        _delete(progName, params)
+        _delete(progName, &params)
 {
   // Do nothing
 }

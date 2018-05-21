@@ -39,7 +39,7 @@ TARGET_FILE = TamdarAsciiSndg2Spdb
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx \
+LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
 	-ldsserver -ldidss -lrapformats -lphysics \
 	-leuclid -ltoolsa -ldataport -ltdrp \
 	-lrapmath $(NETCDF4_LIBS) -lbz2 -lz \

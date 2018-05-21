@@ -33,7 +33,7 @@
 
 #include "Parms.hh"
 #include "RayHandler.hh"
-#include <BeamBlock/angle.h>
+#include "angle.h"
 #include <string>
 #include <vector>
 

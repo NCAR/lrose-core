@@ -769,6 +769,13 @@ paramdef boolean {
   p_help = "The CF convention requires that these arrays are present in the netCDF file; however, the information is redundant since the lat and lon arrays could be constructed using the other projection and grid information required with a gridded data field";
 } ncf_output_latlon_arrays;
 
+ paramdef boolean {
+   p_default = true;
+   p_descr = "If true Mdv start_time and end_time are output";
+   p_help = "In the case in which the the information contained in the Mdv start_time and end_time may be redundant or irrelevant the user can choose not to output these variables ";
+ } ncf_output_start_end_times;
+
+
 paramdef boolean {
   p_default = true;
   p_descr = "Option to output non-CF compliant MDV attributes.";

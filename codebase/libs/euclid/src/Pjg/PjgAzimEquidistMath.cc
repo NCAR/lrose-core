@@ -61,10 +61,10 @@ PjgAzimEquidistMath::PjgAzimEquidistMath(double origin_lat,
 
   _rotation = rotation;
 
-  _origin_lat_rad = origin_lat * Deg2Rad;
-  _origin_lon_rad = origin_lon * Deg2Rad;
-  _rotation_rad = rotation * Deg2Rad;
-  _origin_colat_rad = (90.0 - _origin_lat) * Deg2Rad;
+  _origin_lat_rad = origin_lat * Pjg::Deg2Rad;
+  _origin_lon_rad = origin_lon * Pjg::Deg2Rad;
+  _rotation_rad = rotation * Pjg::Deg2Rad;
+  _origin_colat_rad = (90.0 - _origin_lat) * Pjg::Deg2Rad;
   
   EG_sincos(_origin_lat_rad, &_sin_origin_lat, &_cos_origin_lat);
   EG_sincos(_origin_colat_rad, &_sin_origin_colat, &_cos_origin_colat);
@@ -151,9 +151,9 @@ void PjgAzimEquidistMath::latlon2xy(double lat, double lon,
     // Reference: Map Projections used by the USGS
 
     double sinLat, cosLat;
-    EG_sincos(lat * Deg2Rad, &sinLat, &cosLat);
+    EG_sincos(lat * Pjg::Deg2Rad, &sinLat, &cosLat);
     
-    double deltaLonRad = (lon * Deg2Rad) - _origin_lon_rad;
+    double deltaLonRad = (lon * Pjg::Deg2Rad) - _origin_lon_rad;
     double sinDeltaLon, cosDeltaLon;
     EG_sincos(deltaLonRad, &sinDeltaLon, &cosDeltaLon);
     
@@ -170,7 +170,7 @@ void PjgAzimEquidistMath::latlon2xy(double lat, double lon,
     }
     
     double kk = cc / sinCC;
-    double rk = EradKm * kk;
+    double rk = Pjg::EradKm * kk;
     
     xx = rk * cosLat * sinDeltaLon;
     yy = rk * (_cos_origin_lat * sinLat -
@@ -218,12 +218,12 @@ void PjgAzimEquidistMath::xy2latlon(double x, double y,
 
     double dist = sqrt(x * x + y * y);
     if (dist == 0.0) {
-      lat = _origin_lat_rad * Rad2Deg;
-      lon = _origin_lon_rad * Rad2Deg;
+      lat = _origin_lat_rad * Pjg::Rad2Deg;
+      lon = _origin_lon_rad * Pjg::Rad2Deg;
       return;
     }
     
-    double cc = dist / EradKm;
+    double cc = dist / Pjg::EradKm;
     double sinCC, cosCC;
     EG_sincos(cc, &sinCC, &cosCC);
     
@@ -241,8 +241,8 @@ void PjgAzimEquidistMath::xy2latlon(double x, double y,
               dist * _cos_origin_lat * cosCC - y * _sin_origin_lat * sinCC);
     }
     
-    lat = latRad * Rad2Deg;
-    lon = lonRad * Rad2Deg;
+    lat = latRad * Pjg::Rad2Deg;
+    lon = lonRad * Pjg::Rad2Deg;
     lon = conditionRange180(lon);
     conditionLon2Origin(lon);
     
@@ -274,7 +274,7 @@ void PjgAzimEquidistMath::_latlon_plus_r_theta(double r, double theta_rad,
   double sin_theta, cos_theta;
   double xx;
 
-  darc = r / EradKm;
+  darc = r / Pjg::EradKm;
   EG_sincos(darc, &sin_darc, &cos_darc);
   EG_sincos(theta_rad, &sin_theta, &cos_theta);
 
@@ -283,7 +283,7 @@ void PjgAzimEquidistMath::_latlon_plus_r_theta(double r, double theta_rad,
   if (xx > 1.0) xx = 1.0;
   colat2 = acos(xx);
   EG_sincos(colat2, &sin_colat2, &cos_colat2);
-  lat2 = 90.0 - colat2 * Rad2Deg;
+  lat2 = 90.0 - colat2 * Pjg::Rad2Deg;
   
   denom = _sin_origin_colat * sin_colat2;
   
@@ -303,7 +303,7 @@ void PjgAzimEquidistMath::_latlon_plus_r_theta(double r, double theta_rad,
   if (sin_theta < 0.0)
     delta_lon *= -1.0;
   
-  lon2 = (_origin_lon_rad + delta_lon) * Rad2Deg;
+  lon2 = (_origin_lon_rad + delta_lon) * Pjg::Rad2Deg;
 
   if (lon2 < -180.0)
     lon2 += 360.0;
@@ -332,11 +332,11 @@ void PjgAzimEquidistMath::_latlon_2_r_theta(double lat, double lon,
   double sin_darc, cos_darc;
   double xx;
 
-  colat2 = (90.0 - lat) * Deg2Rad;
+  colat2 = (90.0 - lat) * Pjg::Deg2Rad;
 
   EG_sincos(colat2, &sin_colat2, &cos_colat2);
 
-  delon = (lon - _origin_lon) * Deg2Rad;
+  delon = (lon - _origin_lon) * Pjg::Deg2Rad;
   
   if (delon < -M_PI) {
     delon += 2.0 * M_PI;
@@ -353,7 +353,7 @@ void PjgAzimEquidistMath::_latlon_2_r_theta(double lat, double lon,
   darc = acos(xx);
   EG_sincos(darc, &sin_darc, &cos_darc);
   
-  r = darc* EradKm;
+  r = darc* Pjg::EradKm;
   
   denom = _sin_origin_colat * sin_darc;
 

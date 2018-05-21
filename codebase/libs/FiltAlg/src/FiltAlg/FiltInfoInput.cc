@@ -37,11 +37,13 @@ FiltInfoInput::FiltInfoInput(void) :
 }
 
 //------------------------------------------------------------------
-FiltInfoInput::FiltInfoInput(const VlevelSlice *gi, const Filter *f,
+FiltInfoInput::FiltInfoInput(const VlevelSlice *gi,
+			     const std::vector<double> &vlevels,
+			     const Filter *f,
 			     const Data *g, const int index,
 			     const double vlevel, const GridProj &gp) :
-  _has_vlevels(true), _gin(gi), _filter(f), _gout(g), _vIndex(index),
-  _vlevel(vlevel), _gp(gp), _in(NULL), _out(NULL)
+  _has_vlevels(true), _vlevels(vlevels), _gin(gi), _filter(f), _gout(g),
+  _vIndex(index), _vlevel(vlevel), _gp(gp), _in(NULL), _out(NULL)
 {
   
 }

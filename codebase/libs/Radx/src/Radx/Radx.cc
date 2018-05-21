@@ -47,13 +47,13 @@ const Radx::InstrumentType_t Radx::missingInstrumentType
 const Radx::PlatformType_t Radx::missingPlatformType
   = Radx::PLATFORM_TYPE_FIXED;
 const Radx::SweepMode_t Radx::missingSweepMode
-  = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+  = Radx::SWEEP_MODE_NOT_SET;
 const Radx::FollowMode_t Radx::missingFollowMode
   = Radx::FOLLOW_MODE_NONE;
 const Radx::PolarizationMode_t Radx::missingPolarizationMode
-  = Radx::POL_MODE_HORIZONTAL;
+  = Radx::POL_MODE_NOT_SET;
 const Radx::PrtMode_t Radx::missingPrtMode
-  = Radx::PRT_MODE_FIXED;
+  = Radx::PRT_MODE_NOT_SET;
 const Radx::EventCause_t Radx::missingEventCause
   = Radx::EVENT_CAUSE_NOT_SET;
 

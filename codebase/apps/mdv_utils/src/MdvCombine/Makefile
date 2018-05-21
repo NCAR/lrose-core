@@ -39,7 +39,7 @@ TARGET_FILE = MdvCombine
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -leuclid \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -leuclid \
 	-lSpdb -ldsserver -lrapformats -ldidss \
 	-ltdrp -ltoolsa -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm

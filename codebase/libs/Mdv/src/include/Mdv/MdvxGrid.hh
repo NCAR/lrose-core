@@ -21,9 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//
-// $Id: MdvxGrid.hh,v 1.8 2016/03/03 18:09:41 dixon Exp $
-//
 
 #ifndef _MDVX_GRID_INC_
 #define _MDVX_GRID_INC_

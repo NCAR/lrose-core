@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/03 18:06:33 $
-//   $Id: DsTrigger.cc,v 1.12 2016/03/03 18:06:33 dixon Exp $
-//   $Revision: 1.12 $
+//   $Date: 2017/12/14 15:47:01 $
+//   $Id: DsTrigger.cc,v 1.13 2017/12/14 15:47:01 dixon Exp $
+//   $Revision: 1.13 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -56,7 +56,9 @@ using namespace std;
  */
 
 DsTrigger::DsTrigger(const trigger_type_t type) :
-  _type(type)
+        _type(type),
+        _debug(false),
+        _verbose(false)
 {
   // Do nothing
 }

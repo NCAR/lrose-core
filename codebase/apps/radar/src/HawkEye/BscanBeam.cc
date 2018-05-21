@@ -27,7 +27,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <Radx/RadxGeoref.hh>
 
-#include <qtimer.h>
+#include <QTimer>
 #include <QBrush>
 #include <QPalette>
 #include <QPaintEngine>
@@ -183,11 +183,11 @@ void BscanBeam::paint(QImage *image,
                 _instRect.width, _instRect.height);
     rect.setRect(_instRect.x, _instRect.y,
                  _instRect.width, _instRect.height);
-    painter.setPen(_params.bscan_instrument_height_color);
-    painter.drawRect(rect);
     QBrush brush(QColor(_params.bscan_instrument_height_color));
-    painter.fillRect(rect, brush);
-  }
+    painter.setBrush(brush);
+    painter.drawRect(rect);
+  } // if (useHeight && drawInstHt) 
+
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -221,7 +221,7 @@ void BscanBeam::_paintRects(QPainter &painter,
 
     QRectF rect(rects[igate].x, rects[igate].y,
                 rects[igate].width, height);
-    
+
     painter.setBrush(*brush);
     painter.drawRect(rect);
     

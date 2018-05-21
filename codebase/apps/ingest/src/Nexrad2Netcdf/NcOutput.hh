@@ -27,14 +27,13 @@
 // Jaimi Yee, RAP, NCAR, Boulder, CO, 80307, USA
 // August 2004
 //
-// $Id: NcOutput.hh,v 1.13 2016/03/07 01:23:03 dixon Exp $
+// $Id: NcOutput.hh,v 1.14 2017/06/07 22:34:17 jcraig Exp $
 //
 ////////////////////////////////////////////////////////////////
 #ifndef _NC_OUTPUT_INC_
 #define _NC_OUTPUT_INC_
 
 #include <string>
-#include <dirent.h>
 #include <netcdf.hh>
 #include <toolsa/Path.hh>
 

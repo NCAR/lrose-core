@@ -60,12 +60,16 @@ public :
   InputDirRecurse(const string &dir_name = "",
 		  const string &file_substring = "",
 		  const string &exclude_substring = "",
-		  const bool process_old_files = false);
+		  const bool process_old_files = false,
+                  bool debug = false,
+                  bool verbose = false);
 
   InputDirRecurse(const char *dir_name,
 		  const char *file_substring,
 		  const char *exclude_substring,
-		  const int process_old_files);  // Set to 1 to force scan of old files
+		  int process_old_files,  // Set to 1 to force scan of old files
+                  bool debug = false,
+                  bool verbose = false);
 
   // Destructor
 

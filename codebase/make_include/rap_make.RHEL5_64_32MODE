@@ -194,33 +194,87 @@ NCAR_CC=ncargcc
 NCAR_CPPC=ncarg++
 
 # netCDF - note that your environment may not have all the listed versions
-#          of netCDF installed. The need for both default netCDF and netCDF 4
-#          is driven by the current mix of some apps using the default and
-#          some using netCDF 4.
-#	NETCDF_INCS	defines location of default netCDF include files
-#	NETCDF_LDFLAGS	defines location of default netCDF libraries
-#	PGI_NETCDF_INCS	defines location of PGI netCDF include files
-#	PGI_NETCDF_LDFLAGS	defines location of PGI-compiled netCDF libraries
-#       NETCDF4_INCS defines location of netCDF 4 include files
-#       NETCDF4_LDFLAGS defines location of netCDF 4 libraries
-#	PGI_NETCDF4_INCS	defines location of PGI netCDF 4 include files
-#	PGI_NETCDF4_LDFLAGS	defines location of PGI-compiled netCDF 4 libraries
+#          of netCDF installed.
+# Important: in Debian lenny netCDF3 was the default, starting with Debian
+#            squeeze netCDF4 is the default. netCDF4 has an implicit dependency
+#            on HDF5 and udunits that was not the case in netCDF 3. Please
+#            use HOST_OS set to rap_make.LINUX_64_squeeze for squeeze.
+#            in Debian jessie netCDF3 is no longer supported.
+#
+#       HDF5_INCLUDES    defines location of HDF5 include files
+#       HDF5_LD_FLAGS    defines location of HDF5 linker flags
+#       HDF5_LIBS        defines list of HDF5 libraries in correct order
+#       ZLIB_INCLUDES    defines location of zlib include files
+#       ZLIB_LD_FLAGS    defines location of zlib linker flags
+#       ZLIB_LIBS        defines list of zlib libraries in correct order
+#       SZIP_INCLUDES    defines location of SZIP include files
+#       SZIP_LD_FLAGS    defines location of SZIP linker flags
+#       SZIP_LIBS        defines list of SZIP libraries in correct order
+#       UDUNITS_INCS     defines location of udunits include files
+#       UDUNITS_LDFLAGS  defines location of udunits linkger flags
+#       NETCDF4_INCS 	 defines location of netCDF 4 include files
+#       NETCDF4_LDFLAGS  defines location of netCDF 4 libraries
+#	PGI_NETCDF4_INCS defines location of PGI netCDF 4 include files
+#	PGI_NETCDF4_LDFLAGS defines location of PGI-compiled netCDF 4 libraries
+#	INTEL_NETCDF4_INCS defines location of ifort netCDF 4 include files
+#	INTEL_NETCDF4_LDFLAGS defines location of ifort-compiled netCDF 4 libraries
 
-NETCDF_INCS=$(MY_NETCDF_INCS) -I/usr/local/netcdf/include
-NETCDF_LDFLAGS=$(MY_NETCDF_LDFLAGS) -L/usr/local/netcdf/lib
-PGI_NETCDF_INCS=$(MY_PGI_NETCDF_INCS) -I/usr/local/netcdf-3.6.2-pgi7/include
-PGI_NETCDF_LDFLAGS=$(MY_PGI_NETCDF_LDFLAGS) -L/usr/local/netcdf-3.6.2-pgi7/lib
-NETCDF4_INCS=$(MY_NETCDF4_INCS) -I/usr/local/netcdf4/include
-NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS) -L/usr/local/netcdf4/lib
+HDF_INCLUDES = -I/opt/HDF4.2r1/include
+HDF_LDFLAGS = -L/opt/HDF4.2r1/lib
+HDF_LIBS = -lmfhdf -ldf -ljpeg -lz
+
+ZLIB_INCLUDES=$(MY_ZLIB_INCS) -I/opt/zlib/include -I/usr/local/zlib/include
+ZLIB_LDFLAGS=$(MY_ZLIB_LDFLAGS) -Wl,-rpath,/usr/local/zlib/lib -L/opt/zlib/lib -L/usr/local/zlib/lib
+ZLIB_LIBS=$(MY_ZLIB_LIBS) -lz
+
+SZIP_INCLUDES=$(MY_SZIP_INCS) -I/opt/szip/include -I/usr/local/szip/include
+SZIP_LDFLAGS=$(MY_SZIP_LDFLAGS) -Wl,-rpath,/usr/local/szip/lib -L/opt/szip/lib -L/usr/local/szip/lib
+SZIP_LIBS=$(MY_SZIP_LIBS) -lsz
+
+UDUNITS_INCS=$(MY_UDUNITS_INCS) -I/opt/udunits2/include -I/usr/local/udunits2/include -I/usr/local/include
+UDUNITS_LDFLAGS=$(MY_UDUNITS_LDFLAGS) -Wl,-rpath,/usr/local/udunits2/lib -L/opt/udunits2/lib -L/usr/local/udunits2/lib
+
+HDF5_INCLUDES =$(MY_HDF5_INCS) -I/opt/hdf5/include -I/usr/local/hdf5/include $(SZIP_INCLUDES) $(ZLIB_INCLUDES)
+HDF5_LDFLAGS =$(MY_HDF5_LDFLAGS) -Wl,-rpath,/usr/local/hdf5/lib -L/opt/hdf5/lib -L/usr/local/hdf5/lib $(SZIP_LDFLAGS) $(ZLIB_LDFLAGS)
+HDF5_LIBS = $(MY_HDF5_LIBS) -lhdf5_cpp -lhdf5 -lhdf5_hl $(SZIP_LIBS) $(ZLIB_LIBS)
+
+NETCDF4_INCS=$(MY_NETCDF4_INCS) -I/opt/netcdf4/include -I/usr/local/netcdf4/include -I/usr/local/include $(HDF5_INCLUDES) $(ZLIB_INCLUDES) $(UDUNITS_INCS)
+NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS) -Wl,-rpath,/usr/local/netcdf4/lib -L/opt/netcdf4/lib -L/usr/local/netcdf4/lib -L/usr/local/lib $(HDF5_LDFLAGS) $(UDUNITS_LDFLAGS) $(ZLIB_LDFLAGS)
+
 PGI_NETCDF4_INCS=$(MY_PGI_NETCDF4_INCS) -I/usr/local/netcdf4-pgi/include
 PGI_NETCDF4_LDFLAGS=$(MY_PGI_NETCDF4_LDFLAGS) -L/usr/local/netcdf4-pgi/lib
+
+INTEL_NETCDF4_INCS=$(MY_INTEL_NETCDF4_INCS) -I/usr/local/netcdf4-ifort/include
+INTEL_NETCDF4_LDFLAGS=$(MY_INTEL_NETCDF4_LDFLAGS) -L/usr/local/netcdf4-ifort/lib
+
+# !!!
+# These are to be removed, Only netcdf4 will be supported starting Debian Jessie !!!
+NETCDF3_INCS=$(MY_NETCDF3_INCS) -I/usr/local/netcdf/include -I/usr/local/include -I/opt/include -I/opt/netcdf/include
+NETCDF3_LIBS=$(MY_NETCDF3_LIBS) -L/usr/local/netcdf/lib -L/usr/local/lib -L/opt/netcdf/lib -L/opt/lib
+NETCDF_INCS=$(MY_NETCDF_INCS) $(NETCDF3_INCS) $(UDUNITS_INCS) -I/opt/netcdf4/include
+NETCDF_LDFLAGS=$(MY_NETCDF_LDFLAGS) $(NETCDF3_LIBS) -L/opt/netcdf4/lib
+
+PGI_NETCDF3_INCS=$(MY_PGI_NETCDF3_INCS) -I/usr/local/netcdf-3.6.2-pgi7/include
+PGI_NETCDF3_LIBS=$(MY_PGI_NETCDF3_LIBS) -L/usr/local/netcdf-3-6-2-pgi7/lib
+PGI_NETCDF_INCS=$(MY_PGI_NETCDF_INCS) $(PGI_NETCDF3_INCS)
+PGI_NETCDF_LDFLAGS=$(MY_PGI_NETCDF_LDFLAGS) $(PGI_NETCDF3_LIBS)
+
+INTEL_NETCDF3_INCS=$(MY_INTEL_NETCDF3_INCS) -I/usr/local/netcdf3-ifort/include
+INTEL_NETCDF3_LIBS=$(MY_INTEL_NETCDF3_LIBS) -L/usr/local/netcdf3-ifort/lib
+INTEL_NETCDF_INCS=$(MY_INTEL_NETCDF_INCS) $(INTEL_NETCDF3_INCS)
+INTEL_NETCDF_LDFLAGS=$(MY_INTEL_NETCDF_LDFLAGS) $(INTEL_NETCDF3_LIBS)
+# To Be Removed Above !!!
 
 NETCDF_C_LIB=-lnetcdf
 NETCDF_C++_LIB=-lnetcdf_c++
 NETCDF_FF_LIB=-lnetcdff
 NETCDF_C_AND_C++_LIBS=-lnetcdf -lnetcdf_c++
 NETCDF_C_AND_F_LIBS=-lnetcdff -lnetcdf
-NETCDF4_LIBS=-lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 -lz -ludunits2
+NETCDF4_LIBS=-lnetcdf_c++ -lnetcdf -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat
+NETCDF_LIB_LIST=$(NETCDF4_LIBS)
+NETCDF_INCLUDES=$(NETCDF4_INCS)
+NETCDF_LDFLAGS=$(NETCDF4_LDFLAGS)
+
 
 #
 # Java

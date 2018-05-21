@@ -109,6 +109,7 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
   _wavelengthM = wavelengthM;
   _tempProfile = tempProfile;
   _atmos.setAttenCrpl(_wavelengthM * 100.0);
+  _zdrInIceElev.clear();
   _zdrInIceResults.clear();
   _zdrInBraggResults.clear();
   _zdrmInIceResults.clear();
@@ -1404,7 +1405,7 @@ void ComputeEngine::_accumForZdrBiasInIce()
       continue;
     }
     
-    double zdr = _zdrmArray[igate];
+    double zdr = _zdrArray[igate];
     if (zdr == missingDbl ||
         fabs(zdr) > _params.zdr_bias_max_abs_zdr) {
       continue;
@@ -1517,6 +1518,7 @@ void ComputeEngine::_accumForZdrBiasInIce()
       _zdrInIceResults.push_back(zdr);
       _zdrmInIce[igate] = zdrm;
       _zdrmInIceResults.push_back(zdrm);
+      _zdrInIceElev.push_back(_elevation);
       // cerr << "IIII ice el, az, range, zdrm: "
       //      << _elevation << ", "
       //      << _azimuth << ", "

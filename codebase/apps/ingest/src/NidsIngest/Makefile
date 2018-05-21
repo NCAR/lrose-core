@@ -35,7 +35,7 @@ TARGET_FILE = NidsIngest
 
 LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lMdv -lRadx -leuclid \
+LOC_LIBS = -lSpdb -lMdv -lRadx -lNcxx -leuclid \
 	-lrapmath -ldsserver -lrapformats -ldidss \
 	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz -lpthread

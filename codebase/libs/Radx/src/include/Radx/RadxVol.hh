@@ -239,6 +239,10 @@ public:
     _userGlobAttr.push_back(attr);
   }
 
+  void clearUserGlobAttr() {
+    _userGlobAttr.clear();
+  }
+
   /// Set the scan strategy name, if available.
 
   inline void setScanName(const string &val) { _scanName = val; }
@@ -646,16 +650,6 @@ public:
   
   void adjustSurSweepLimitsToFixedAzimuth(double azimuth);
   
-  /// Compute sweep fixed angles from ray data.
-  /// Also sets the fixed angle on the sweeps and rays.
-  ///
-  /// Normally the sweep angles are set using the scan strategy angles -
-  /// i.e., the theoretically perfect angles. This option allows you to
-  /// recompute the sweep angles using the measured elevation angles (in
-  /// PPI mode) or azimuth angles (in RHI mode).
-  
-  void computeSweepFixedAnglesFromRays();
-
   /// compute the geometry limits from rays
 
   void computeGeomLimitsFromRays(double &minElev,
@@ -663,6 +657,19 @@ public:
                                  double &minRange,
                                  double &maxRange);
   
+  /// Compute the fixed angle for each sweep from the rays.
+  /// Also sets the fixed angle on rays and sweeps.
+  ///
+  /// If useMean is true, computes using the mean
+  /// If useMean is false, uses the median
+  ///
+  /// If force is true, the angles will be computed for all sweeps.
+  /// If force is false, the angles will only be computed for
+  /// sweeps with a missing fixed angle.
+
+  void computeFixedAnglesFromRays(bool force = true, 
+                                  bool useMean = true);
+
   /// Compute sweep scan rates from ray data - in deg/sec.
   ///
   /// This is done using the angle information on the rays.
@@ -709,6 +716,13 @@ public:
   
   void loadFixedAnglesFromSweepsToRays();
 
+  /// Load the ray metadata from sweep information.
+  ///
+  /// This loops through all of the sweeps, setting the
+  /// sweep-related info on the rays
+  
+  void loadMetadataFromSweepsToRays();
+  
   /// load the calbration index on the rays, using the pulse width to
   /// determine which calibration is relevant.
   ///
@@ -761,8 +775,19 @@ public:
 
   /////////////////////////////////////////////////////////////////
   /// Sort rays by time
-
+  
   void sortRaysByTime();
+
+  /////////////////////////////////////////////////////////////////
+  // Sort sweeps by fixed angle, reordering the rays accordingly
+
+  void sortSweepsByFixedAngle();
+  
+  /////////////////////////////////////////////////////////////////
+  /// Sort rays by number
+
+  void setRayNumbersInOrder();
+  void sortRaysByNumber();
 
   /////////////////////////////////////////////////////////////////
   /// Sort sweep rays by azimuth
@@ -907,16 +932,6 @@ public:
   /// Also sets the fixed angle for the rays in the sweep
   
   void setFixedAngleDeg(int sweepNum, double fixedAngle);
-
-  /// Compute the fixed angle from the rays
-  /// Also sets the fixed angle on rays and sweeps
-  /// Uses the mean pointing angle to estimate the fixed angle
-  ///
-  /// If force is true, the angles will be computed for all sweeps.
-  /// If force is false, the angles will only be computed for
-  /// sweeps with a missing fixed angle.
-
-  void computeFixedAngleFromRays(bool force = true);
 
   /// combine rays from sweeps with common fixed angle and
   /// gate geometry, but with different fields
@@ -1642,6 +1657,20 @@ public:
 
   //@}
 
+  /// \name Serialization:
+  //@{
+
+  // serialize into a RadxMsg
+  
+  void serialize(RadxMsg &msg);
+  
+  // deserialize from a RadxMsg
+  // return 0 on success, -1 on failure
+
+  int deserialize(const RadxMsg &msg);
+
+  //@}
+  
 protected:
   
 private:
@@ -1678,20 +1707,40 @@ private:
     }
   };
   
-  /// sorting rays by time or azimuth
+  /// sorting rays
 
   class RayPtr {
   public:
     RadxRay *ptr;
     RayPtr(RadxRay *p) : ptr(p) {}
   };
+
   class SortByRayTime {
   public:
     bool operator()(const RayPtr &lhs, const RayPtr &rhs) const;
   };
+
+  class SortByRayNumber {
+  public:
+    bool operator()(const RayPtr &lhs, const RayPtr &rhs) const;
+  };
+
   class SortByRayAzimuth {
   public:
     bool operator()(const RayPtr &lhs, const RayPtr &rhs) const;
+  };
+
+  /// sorting sweeps
+
+  class SweepPtr {
+  public:
+    RadxSweep *ptr;
+    SweepPtr(RadxSweep *p) : ptr(p) {}
+  };
+
+  class SortByFixedAngle {
+  public:
+    bool operator() (const SweepPtr &lhs, const SweepPtr &rhs) const;
   };
 
   // meta strings
@@ -1711,18 +1760,14 @@ private:
 
   vector<UserGlobAttr> _userGlobAttr;
   
+  // volume number
+
+  int _volNum;
+
   // scan details
 
   string _scanName;
   int _scanId; // VCP
-
-  // platform parameters
-
-  RadxPlatform _platform;
-
-  // volume number
-
-  int _volNum;
 
   // predominant sweep mode for volume, by checking angles
   // surveillance, sector or rhi
@@ -1742,13 +1787,13 @@ private:
 
   bool _rayTimesIncrease;
 
-  // transitions
-
-  vector<bool> _transitionFlags;
-  
   // path in use - for reading/writing
   
   mutable string _pathInUse; ///< path in use
+
+  // platform parameters
+
+  RadxPlatform _platform;
 
   // sweeps
   
@@ -1758,27 +1803,34 @@ private:
   
   vector<RadxSweep *> _sweepsAsInFile;
 
-  // rays
-
-  vector<RadxRay *> _rays;
-
   // calibrations
 
   vector<RadxRcalib *> _rcalibs;
 
-  // fields
-  
-  vector<RadxField *> _fields;
+  // rays
+
+  vector<RadxRay *> _rays;
 
   // correction factors
 
   RadxCfactors *_cfactors;
 
+  // fields
+  
+  vector<RadxField *> _fields;
+
+  // transitions array used in removeTransitionRays()
+  // not required in serialization
+
+  vector<bool> _transitionFlags;
+  
   // pseudo RHIs
+  // not required in serialization
 
   vector<PseudoRhi *> _pseudoRhis;
 
   // searching for angle match between sweeps
+  // not required in serialization
 
   static const int _searchAngleN = 36000;
   static const double _searchAngleRes;
@@ -1815,6 +1867,67 @@ private:
 
   int _getTransIndex(const RadxSweep *sweep, double azimuth);
 
+  /////////////////////////////////////////////////
+  // serialization
+  /////////////////////////////////////////////////
+  
+  static const int _metaStringsPartId = 1;
+  static const int _metaNumbersPartId = 2;
+  static const int _platformPartId = 3;
+  static const int _sweepPartId = 4;
+  static const int _sweepAsInFilePartId = 5;
+  static const int _cfactorsPartId = 6;
+  static const int _rcalibPartId = 7;
+  static const int _rayPartId = 8;
+  static const int _fieldPartId = 9;
+  
+  // struct for metadata numbers in messages
+  // strings not included - they are passed as XML
+  
+  typedef struct {
+    
+    Radx::si64 startTimeSecs;
+    Radx::si64 endTimeSecs;
+    Radx::si64 startNanoSecs;
+    Radx::si64 endNanoSecs;
+    
+    Radx::fl64 spareFl64[12];
+  
+    Radx::si32 volNum;
+    Radx::si32 scanId;
+    Radx::si32 rayTimesIncrease;
+
+    Radx::si32 spareSi32[13];
+    
+  } msgMetaNumbers_t;
+
+  msgMetaNumbers_t _metaNumbers;
+  
+  /// convert metadata to XML
+  
+  void _loadMetaStringsToXml(string &xml, int level = 0) const;
+  
+  /// set metadata from XML
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaStringsFromXml(const char *xml, 
+                             size_t bufLen);
+
+  /// load meta numbers to message struct
+  
+  void _loadMetaNumbersToMsg();
+  
+  /// set the meta number data from the message struct
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                             size_t bufLen,
+                             bool swap);
+  
+  /// swap meta numbers
+  
+  static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
+          
 };
 
 #endif

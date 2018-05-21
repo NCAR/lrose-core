@@ -153,13 +153,6 @@ bool BrightBand::init()
   
   PMU_auto_init(name, params->instance, PROCMAP_REGISTER_INTERVAL);
 
-  // Make the output directory. Exit if we can't do this.
-
-  if ( ta_makedir_recurse(params->output_dir) ){
-    cerr << "Failed to create output directory " << params->output_dir << endl;
-    exit(-1);
-  }
-
   return true;
 }
 
@@ -449,9 +442,11 @@ bool BrightBand::_initTrigger()
       DsFileListTrigger *file_list_trigger = new DsFileListTrigger();
     
       vector< string > file_list;
-      for (int i = 0; i < args->nFiles; ++i)
+      cerr << "Setting file list" << endl;
+      for (int i = 0; i < args->nFiles; ++i) {
+	cerr << "Adding: " << args->filePaths[i] << endl;
 	file_list.push_back(args->filePaths[i]);
-      
+      }
       if (file_list_trigger->init(file_list) != 0)
       {
 	cerr << "ERROR: " << name << endl;

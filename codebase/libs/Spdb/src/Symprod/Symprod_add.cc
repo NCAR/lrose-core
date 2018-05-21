@@ -1204,7 +1204,7 @@ void Symprod::addWindBarb(double lat, double lon, const char* color, double spee
 		     0, detail_level);
 
     speed_left -= 50.0;
-    shaft_left =- tick_spacing;
+    shaft_left -= tick_spacing;
 
   } // while (speed_left >= 47.5)
 
@@ -1240,7 +1240,7 @@ void Symprod::addWindBarb(double lat, double lon, const char* color, double spee
 		     0, detail_level);
     
     speed_left -= 10.0;
-    shaft_left =- tick_spacing;
+    shaft_left -= tick_spacing;
 
   } // while (speed_left >= 7.5)
 

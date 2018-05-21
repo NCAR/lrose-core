@@ -27,12 +27,20 @@
 #include <stdio.h>
 #include <math.h>
 #include <euclid/geometry.h>
+#include <toolsa/toolsa_macros.h>
 
-#define EARTH_RADIUS 6378.137  /* kilometers */
-#define PI  3.14159265358979323846
-#define RAD_TO_DEG 57.29577951308092
-#define DEG_TO_RAD 0.01745329251994372
 #define TOLERANCE 1.e-8
+
+static double _earthRadius = EARTH_RADIUS; /* from toolsa_macros.h */
+
+/*********************************************************************
+ * override the earth radius
+ ********************************************************************/
+
+void EG_set_earth_radius_km(double earth_radius_km)
+{
+  _earthRadius = earth_radius_km;
+}
 
 /*********************************************************************
  * EG_lat_lon_to_dx_dy()
@@ -64,7 +72,7 @@ void EG_lat_lon_to_dx_dy(double lat1, double lon1,
    */
 
   if (fabs(delon) <= TOLERANCE) {
-    r = fabs(colat2 - colat1) * EARTH_RADIUS;
+    r = fabs(colat2 - colat1) * _earthRadius;
     *dx = 0.0;
     *dy = ((colat2 < colat1) ? r : -r);
     return;
@@ -75,7 +83,7 @@ void EG_lat_lon_to_dx_dy(double lat1, double lon1,
    */
 
   if (fabs(180.0*DEG_TO_RAD - delon) <= TOLERANCE) {
-    r = fabs(colat2 + colat1) * EARTH_RADIUS;
+    r = fabs(colat2 + colat1) * _earthRadius;
     *dx = 0.0;
     *dy = r;
     return;
@@ -84,7 +92,7 @@ void EG_lat_lon_to_dx_dy(double lat1, double lon1,
   darc = acos(cos(colat1)*cos(colat2) +
               sin(colat1)*sin(colat2)*cos( delon));
   
-  r = darc* EARTH_RADIUS;
+  r = darc* _earthRadius;
   
   denom = sin(colat1) * sin (darc);
 
@@ -127,7 +135,7 @@ void EG_lat_lon_to_r_theta(double lat1, double lon1,
    */
 
   if (fabs(delon) <= TOLERANCE) {
-    *r = fabs(colat2 - colat1) * EARTH_RADIUS;
+    *r = fabs(colat2 - colat1) * _earthRadius;
     *theta = ((colat2 < colat1) ? 0.0 : 180.0);
     return;
   }
@@ -137,7 +145,7 @@ void EG_lat_lon_to_r_theta(double lat1, double lon1,
    */
 
   if (fabs(180.0*DEG_TO_RAD - delon) <= TOLERANCE) {
-    *r = fabs(colat2 + colat1) * EARTH_RADIUS;
+    *r = fabs(colat2 + colat1) * _earthRadius;
     *theta = 0.0;
     return;
   }
@@ -145,7 +153,7 @@ void EG_lat_lon_to_r_theta(double lat1, double lon1,
   darc = acos(cos(colat1)*cos(colat2) +
               sin(colat1)*sin(colat2)*cos( delon));
   
-  *r = darc* EARTH_RADIUS;
+  *r = darc* _earthRadius;
   
   denom = sin(colat1) * sin (darc);
 
@@ -214,7 +222,7 @@ void EG_lat_lon_plus_r_theta(double lat1, double lon1,
   
   double darc, colat1, colat2, denom, delta_lon, cost;
   
-  darc = r / EARTH_RADIUS;
+  darc = r / _earthRadius;
   
   if (fabs(darc) < TOLERANCE) {
     *lon2 = lon1;

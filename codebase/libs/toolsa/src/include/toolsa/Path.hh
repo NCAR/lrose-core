@@ -159,6 +159,16 @@ public:
   // file portion.
 
   static void stripDir(const string &dir, const string &path, string &file);
+  static void stripDir1(const string &dir, const string &path, string &file);
+
+  // Get the path of the executable binary that is running
+
+  static string getExecPath();
+
+  // Get the path of a file relative to the
+  // executable binary that is running
+  
+  static string getPathRelToExec(const string &relPath);
 
 private:
 

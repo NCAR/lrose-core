@@ -36,14 +36,12 @@
 #ifndef Args_HH
 #define Args_HH
 
+#include <toolsa/DateTime.hh>
+#include <tdrp/tdrp.h>
+
 #include <stdio.h>
 #include <string>
 #include <time.h>
-
-#include <tdrp/tdrp.h>
-
-using namespace std;
-
 
 /** 
  * @class Args

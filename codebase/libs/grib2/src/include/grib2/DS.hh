@@ -140,7 +140,7 @@ private:
   si32 _drsTemplateNum;
 
   /** @brief The unpacked unbitmaped data */
-  fl32 *_data;
+  // fl32 *_data;
 
   /** @brief The DataTemp stores additional infromation needed for the encoding type */
   DataTemp *_dataTemp;

@@ -164,6 +164,12 @@ paramdef int {
 
 paramdef boolean {
   p_default = false;
+  p_descr = "Option to pad all rays out to the maximum number of gates in the file.";
+  p_help = "If true, we read through the file to determine the maximum number of gates in the file. Then, if the number of gates varies from ray to ray, the shorter rays are padded out to the maximum number of gates found. Also, the number of gates per ray is stored out as a netCDF variable nGatesRay. This option is not compatible with 'specify_n_gates_save'.";
+} pad_n_gates_to_max;
+
+paramdef boolean {
+  p_default = false;
   p_descr = "If true, write one file only and then quit.";
 } one_file_only;
 

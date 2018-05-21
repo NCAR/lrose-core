@@ -26,7 +26,7 @@
 //
 // NsslMrdRadxFile object
 //
-// Support for radial data in NSSL MRD raw format
+// Support for radial data in NSSL MRD format
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA

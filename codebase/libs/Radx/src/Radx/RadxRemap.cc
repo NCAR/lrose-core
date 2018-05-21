@@ -137,8 +137,10 @@ RadxRemap &RadxRemap::_copy(const RadxRemap &rhs)
 ///     getStartRangeKm() and getGateSpacingKm() if spacing is constant.
 ///     getRangeArray() for saved range array.
 ///     getLookupNearest() for lookup table.
+///
+/// Returns 0 on success, -1 on error
 
-void RadxRemap::computeRangeLookup(const vector<double> &rangeArray)
+int RadxRemap::computeRangeLookup(const vector<double> &rangeArray)
 
 {
   
@@ -147,15 +149,22 @@ void RadxRemap::computeRangeLookup(const vector<double> &rangeArray)
   
   if (_rangeArray.size() < 1) {
     _gateSpacingIsConstant = true;
-    return;
+    return 0;
   }
   _startRangeKm = _rangeArray[0];
   
   if (_rangeArray.size() < 2) {
     _gateSpacingIsConstant = true;
-    return;
+    return 0;
   }
   _gateSpacingKm = fabs(_rangeArray[1] - _rangeArray[0]);
+  if (_gateSpacingKm <= 0) {
+    cerr << "ERROR - RadxRemap::computeRangeLookup()" << endl;
+    cerr << "  Bad range array" << endl;
+    cerr << "  _rangeArray[0]: " << _rangeArray[0] << endl;
+    cerr << "  _rangeArray[1]: " << _rangeArray[1] << endl;
+    return -1;
+  }
   
   // check for constant geometry
 
@@ -173,7 +182,7 @@ void RadxRemap::computeRangeLookup(const vector<double> &rangeArray)
   
   if (!_remappingRequired) {
     _gateSpacingIsConstant = true;
-    return;
+    return 0;
   }
   
   // spacing is not constant, compute remap lookup table
@@ -183,6 +192,14 @@ void RadxRemap::computeRangeLookup(const vector<double> &rangeArray)
 
   double maxRange = _rangeArray[_rangeArray.size()-1];
   double rangeSpan = maxRange - _startRangeKm;
+
+  if (rangeSpan <= 0) {
+    cerr << "ERROR - RadxRemap::computeRangeLookup()" << endl;
+    cerr << "  Bad range span" << endl;
+    cerr << "  first gate range: " << _rangeArray[0] << endl;
+    cerr << "  last  gate range: " << _rangeArray[_rangeArray.size()-1] << endl;
+    return -1;
+  }
 
   // create lookup vector
   
@@ -283,7 +300,8 @@ void RadxRemap::computeRangeLookup(const vector<double> &rangeArray)
 
   _gateSpacingIsConstant = false;
   _nGatesInterp = _nearest.size();
-  return;
+
+  return 0;
 
 }
 

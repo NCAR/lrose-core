@@ -21,18 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-/* RCS info
- *   $Author: dixon $
- *   $Locker:  $
- *   $Date: 2016/03/03 19:21:31 $
- *   $Id: WorldPolygon2D.hh,v 1.11 2016/03/03 19:21:31 dixon Exp $
- *   $Revision: 1.11 $
- *   $State: Exp $
- */
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 
 /************************************************************************
  * WorldPolygon2D.hh: class implementing a polygon specified by
@@ -146,7 +134,19 @@ class WorldPolygon2D
 		    const double missing_data_value,
 		    const double bad_data_value,
 		    const fl32 *data_grid) const;
-  
+
+  /**********************************************************************
+   * getGridAvg() - Get the average data value from the given grid within
+   *                this polygon.
+   *
+   * Returns the average data value found, or missing_data_value if no
+   * data values were found.
+   */
+
+  double getGridAvg(const Pjg &projection,
+                    const double missing_data_value,
+                    const double bad_data_value,
+                    const fl32 *data_grid) const;
 
   /**********************************************************************
    * getGridNumValues() - Get the number of grid squares within this polygon

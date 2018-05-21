@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -814,6 +814,30 @@ using namespace std;
     tt->help = tdrpStrDup("Has effect only if ReplacePassValues is TRUE");
     tt->val_offset = (char *) &PassValue - &_start_;
     tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'ReplaceFailValues'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ReplaceFailValues");
+    tt->descr = tdrpStrDup("Set this to replace values that fail the thresholding\nwith a contsant value specified by FailValue");
+    tt->help = tdrpStrDup("If FALSE the data values that fail set to missing.");
+    tt->val_offset = (char *) &ReplaceFailValues - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'FailValue'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("FailValue");
+    tt->descr = tdrpStrDup("Value to use for data points that fails the threshold test.");
+    tt->help = tdrpStrDup("Has effect only if ReplaceFailValues is TRUE");
+    tt->val_offset = (char *) &FailValue - &_start_;
+    tt->single_val.d = 0;
     tt++;
     
     // Parameter 'OutUrl'

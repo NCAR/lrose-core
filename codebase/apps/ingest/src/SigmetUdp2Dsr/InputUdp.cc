@@ -114,7 +114,7 @@ int InputUdp::openUdp()
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = htonl(INADDR_ANY);
   
-  if (bind (_udpFd, (struct sockaddr *) &addr, sizeof (addr)) < 0) {
+  if (::bind (_udpFd, (struct sockaddr *) &addr, sizeof (addr)) < 0) {
     int errNum = errno;
     cerr << "ERROR - InputUdp::open" << endl;
     cerr << "  Bind error, udp port: " << _params.udp_port << endl;
@@ -185,9 +185,9 @@ int InputUdp::readPacket()
   }
 
   struct sockaddr_in from_name;
-  int fromlen = sizeof(from_name);
+  socklen_t fromLen = sizeof(from_name);
   int len = recvfrom(_udpFd, _buf, maxUdpBytes, 0,
-		     (struct sockaddr *) &from_name, (socklen_t*)&fromlen);
+		     (struct sockaddr *) &from_name, &fromLen);
   if (len < 0) {
     int errNum = errno;
     cerr << "ERROR - InputUdp::readPacket()" << endl;

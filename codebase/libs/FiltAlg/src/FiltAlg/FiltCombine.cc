@@ -210,6 +210,12 @@ void FiltCombine::set_input_info(Info **info) const
 }
 
 //------------------------------------------------------------------
+void FiltCombine::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+
+//------------------------------------------------------------------
 bool FiltCombine::_filter_slice(const FiltInfoInput &inp,
 				FiltInfoOutput &o) const
 {
@@ -245,7 +251,7 @@ bool FiltCombine::_filter_slice(const FiltInfoInput &inp,
     stat = _comb.weighted_sum(vlevel, _weight0, false, false, v);
     break;
   case FiltAlgParams::WEIGHTED_ORIENTATION_SUM:
-    stat = _comb.weighted_sum(vlevel, _weight0, false, true, v);
+    stat = _comb.weighted_sum(vlevel, _weight0, true, true, v);
     break;
   case FiltAlgParams::NORM_WEIGHTED_SUM:
     stat = _comb.weighted_sum(vlevel, _weight0, true, false, v);
@@ -374,4 +380,5 @@ bool FiltCombine::_check_data(const Data::Data_t type,
   }
   return _comb.check_data(type);
 }
+
 

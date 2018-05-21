@@ -31,14 +31,10 @@
  *
  */
 
-#include <stdio.h>
-
+#include "PhaseDiff.hh"
+#include <cstdio>
 #include <toolsa/port.h>
 #include <toolsa/umisc.h>
-
-#include "PhaseDiff.hh"
-
-using namespace std;
 
 
 // Prototypes for static functions

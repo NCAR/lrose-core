@@ -385,21 +385,21 @@ void DoradeFile::read_headers() throw (Fault){
 
 	while(((block = read_next_block()) != NULL) && (blockCount < 30)){
 
-	    if(local_sswb = block->castToDoradeBlockSswb()){
+          if((local_sswb = block->castToDoradeBlockSswb())){
 		sswb_ = local_sswb;
-	    }else if(local_vold = block->castToDoradeBlockVold()){
+	    }else if((local_vold = block->castToDoradeBlockVold())){
 		vold_ = local_vold;
-	    }else if(local_radd = block->castToDoradeBlockRadd()){
+	    }else if((local_radd = block->castToDoradeBlockRadd())){
 		radd_ = local_radd;
-	    }else if(local_parm = block->castToDoradeBlockParm()){
+	    }else if((local_parm = block->castToDoradeBlockParm())){
 		parmVector_.push_back(local_parm);
-	    }else if(local_celv = block->castToDoradeBlockCelv()){
+	    }else if((local_celv = block->castToDoradeBlockCelv())){
 		celv_ = local_celv;
-	    }else if(local_csfd = block->castToDoradeBlockCsfd()){
+	    }else if((local_csfd = block->castToDoradeBlockCsfd())){
 		csfd_ = local_csfd;
-	    }else if(local_swib = block->castToDoradeBlockSwib()){
+	    }else if((local_swib = block->castToDoradeBlockSwib())){
 		swib_ = local_swib;
-	    }else if(local_ryib = block->castToDoradeBlockRyib()){
+	    }else if((local_ryib = block->castToDoradeBlockRyib())){
 		// End of header blocks
 		delete local_ryib;
 		break;
@@ -765,7 +765,7 @@ bool DoradeFile::find_next_ray() throw (Fault){
     try {
 	while((block = read_next_block()) != NULL){
 
-	    if(ryib = block->castToDoradeBlockRyib()){
+          if((ryib = block->castToDoradeBlockRyib())){
 		// Found RYIB
 		break;
 	    }else{
@@ -823,17 +823,17 @@ bool DoradeFile::find_next_ray() throw (Fault){
 	DoradeBlockXstf *xstf(NULL);
 	while((fieldCount < numberOfFields) && ((block = read_next_block()) != NULL)){
 
-	    if(ryib2 = block->castToDoradeBlockRyib()){
+          if((ryib2 = block->castToDoradeBlockRyib())){
 		// Found an RYIB block; this is an error.
 		delete ryib2;
 		char msg[2048];
-		sprintf(msg,"DoradeFile::find_next_ray : Found only %d RDAT blocks, should be % RDAT blocks.\n",
+		sprintf(msg,"DoradeFile::find_next_ray : Found only %d RDAT blocks, should be %d RDAT blocks.\n",
 			fieldCount + 1,
 			numberOfFields);
 		throw Fault(msg);
 	    }
 
-	    if(rdat = block->castToDoradeBlockRdat()){
+          if((rdat = block->castToDoradeBlockRdat())){
 		rdatVector_.push_back(rdat);
 		fieldCount++;
 	    }else if((xstf = block->castToDoradeBlockXstf()) != NULL){
@@ -880,7 +880,7 @@ void DoradeFile::set_cell_spacing_vector(vector<double> &vector) throw (Fault){
 	char msg[2048];
 	sprintf(msg,"DoradeFile::set_cell_spacing_vector : number_of_cells not equal to vector size: %d != %d \n",
 		get_integer("number_of_cells"),
-		vector.size());
+		(int) vector.size());
 	throw Fault(msg);
     }
 

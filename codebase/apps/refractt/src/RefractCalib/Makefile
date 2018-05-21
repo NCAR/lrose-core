@@ -38,6 +38,8 @@ MODULE_TYPE=progcpp
 TARGET_FILE = RefractCalib
 
 LOC_INCLUDES = $(NETCDF4_INCS)
+LOC_INC_DIR = .
+MY_CPPCHECKFLAGS = -E Params.hh -E Params.cc 
 
 LOC_LIBS = -lRefract -ldsdata -lFmq -lSpdb \
 	-lMdv -lRadx -ldsserver -ldidss \
@@ -50,19 +52,18 @@ LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_CFLAGS =
 LOC_CPPC_CFLAGS = -DLINUX -DSYSV
 
+
 HDRS = \
 	Params.hh \
-	Args.hh \
 	Input.hh \
-	Processor.hh \
+	Calib.hh \
 	RefractCalib.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Main.cc \
-	Args.cc \
 	Input.cc \
-	Processor.cc \
+	Calib.cc \
 	RefractCalib.cc
 
 #

@@ -88,6 +88,7 @@ public:
   void sndg(void *data);
   void sndg_plus(int data_len, void *data);
   void edr_point(int data_len, void *data);
+  void EDR_point(int data_len, void *data);
   void vergrid_region(int data_len, void *data);
   void gen_poly(int data_len, void *data);
   void usgs_data(int data_len, void *data);

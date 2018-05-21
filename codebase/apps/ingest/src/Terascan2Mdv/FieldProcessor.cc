@@ -343,10 +343,39 @@ bool FieldProcessor::_init()
 
   // Find the center lat/lon
 
-  etxll(mxfm, _numLines / 2, _numSamples / 2,
-	&_centerLat, &_centerLon);
-  PJGflat_init(_centerLat, _centerLon, 0.0);
-  
+  if (gpgetatt(_inputDataset, C_CENTERLAT, (double *) &_centerLat) < 0)
+  {
+    cerr << "ERROR: " << method_name << endl;
+    cerr << "Error getting time from dataset" << endl;
+    msgout(terrno);
+    return false;
+  }
+
+  if (gpgetatt(_inputDataset, C_CENTERLON, (double *) &_centerLon) < 0)
+  {
+    cerr << "ERROR: " << method_name << endl;
+    cerr << "Error getting time from dataset" << endl;
+    msgout(terrno);
+    return false;
+  }
+
+  if (gpgetatt(_inputDataset, C_PROJPARAM, (double *) &_projParam) < 0)
+  {
+    cerr << "ERROR: " << method_name << endl;
+    cerr << "Error getting time from dataset" << endl;
+    msgout(terrno);
+    return false;
+  }
+
+  if (gpgetatt(_inputDataset, C_PROJECTION, (long *) &_projection) < 0)
+  {
+    cerr << "ERROR: " << method_name << endl;
+    cerr << "Error getting time from dataset" << endl;
+    msgout(terrno);
+    return false;
+  }
+
+
   // Find the lower left lat/lon
 
   etxll(mxfm, _numLines, 1,

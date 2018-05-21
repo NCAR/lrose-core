@@ -35,12 +35,7 @@
 
 #ifndef TargetInfo_H
 #define TargetInfo_H
-
-#include <iostream>
-#include <string>
-
-using namespace std;
-
+#include <Refract/IQ.hh>
 
 /** 
  * @class TargetInfo
@@ -74,16 +69,9 @@ public:
   float phase_diff_er;
 
   /**
-   * @brief I component of the scan-to-scan difference (phase_diff).
+   * @brief scan-to-scan difference (phase_diff).
    */
-
-  float dif_i;
-
-  /**
-   * @brief Q component of the scan-to-scan difference (phase_diff).
-   */
-
-  float dif_q;
+  IQ dif_iq;
 
   /**
    * @brief Scan-to-reference difference.
@@ -101,20 +89,12 @@ public:
    * @brief Scan-to-reference difference (phase) corrected for dN/dz,
    *        sub-range.
    */
-
   float phase_cor;
 
   /**
-   * @brief I component of phase_cor.
+   * @brief IQ phase_cor.
    */
-
-  float i;
-
-  /**
-   * @brief Q component of phase_cor.
-   */
-
-  float q;
+  IQ iq;
 
 
   ////////////////////
@@ -133,7 +113,9 @@ public:
 
   virtual ~TargetInfo();
 
-
+  void compute_phase_diff(const IQ &difPrevScan, double norm,
+			  const IQ &difFromRef);
+  void setStrength(float snr, bool snrIsBad);
 };
 
 #endif

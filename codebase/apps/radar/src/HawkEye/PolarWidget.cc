@@ -29,13 +29,14 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/uusleep.h>
 
-#include <qtimer.h>
+#include <QTimer>
 #include <QBrush>
 #include <QPalette>
 #include <QPaintEngine>
 #include <QPen>
 #include <QResizeEvent>
 #include <QStylePainter>
+#include <QToolTip>
 
 #include "PolarWidget.hh"
 #include "PolarManager.hh"
@@ -51,13 +52,15 @@ PolarWidget::PolarWidget(QWidget* parent,
                          const PolarManager &manager,
                          const Params &params,
                          const RadxPlatform &platform,
-                         size_t n_fields) :
+                         const vector<DisplayField *> &fields,
+                         bool haveFilteredFields) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
         _params(params),
         _platform(platform),
-        _nFields(n_fields),
+        _fields(fields),
+        _haveFilteredFields(haveFilteredFields),
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
         _gridRingsColor(_params.grid_and_range_ring_color),
@@ -98,10 +101,11 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   // create the field renderers
   
-  for (size_t i = 0; i < _nFields; ++i) {
-    FieldRenderer *field = new FieldRenderer(_params, i);
-    field->createImage(width(), height());
-    _fieldRenderers.push_back(field);
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+    FieldRenderer *fieldRenderer =
+      new FieldRenderer(_params, ii, *_fields[ii]);
+    fieldRenderer->createImage(width(), height());
+    _fieldRenderers.push_back(fieldRenderer);
   }
 
   // init other values
@@ -379,6 +383,15 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     double y_km = _worldReleaseY;
     _pointClicked = true;
 
+
+    /***** testing ******
+    // QToolTip::showText(mapToGlobal(QPoint(_mouseReleaseX, _mouseReleaseY)), "louigi")  
+    QToolTip::showText(QPoint(0,0), "louigi");
+
+    smartBrush(_mouseReleaseX, _mouseReleaseY);
+
+    // ***** end testing ****/
+
     // get ray closest to click point
 
     const RadxRay *closestRay = _getClosestRay(x_km, y_km);
@@ -419,6 +432,23 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   update();
 
 }
+
+/**************   testing ******/
+void PolarWidget::smartBrush(int xPixel, int yPixel) {
+  //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
+  //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
+
+  QImage qImage;
+  qImage.load("/h/eol/brenda/octopus.jpg");
+  // get the Image from somewhere ...   
+  //qImage->convertToFormat(QImage::Format_RGB32);
+  //qImage->invertPixels();
+  QPainter painter(this);
+  painter.drawImage(0, 0, qImage);
+  _drawOverlays(painter);
+
+}
+
 
 
 /*************************************************************************

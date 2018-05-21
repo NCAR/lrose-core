@@ -41,6 +41,8 @@
 #if defined(__linux)
 #include <asm/ioctls.h>
 #include <sys/ioctl.h>
+#elif defined(__APPLE__)
+#include <sys/ioctl.h>
 #else
 #include <sys/filio.h>
 #endif
@@ -152,11 +154,7 @@ EdgePkt::readUdp()
   struct sockaddr_in fromAddress;
   int                status;
 
-#if defined(__linux)
-  socklen_t          addrLen = sizeof( struct sockaddr_in );
-#else
-  int                addrLen = sizeof( struct sockaddr_in );
-#endif
+  socklen_t addrLen = sizeof( struct sockaddr_in );
 
   //
   // Wait on socket for up to 10 secs at a time

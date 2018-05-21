@@ -26,8 +26,6 @@
 // Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 // January 1998
 //
-// $Id: Grid.cc,v 1.86 2016/03/03 18:19:27 dixon Exp $
-//
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <cstdio>
@@ -487,7 +485,7 @@ Grid::getZLevel( float height ) const
    //
    // Otherwise, calculate z from height/minz/dz
    //
-   size_t zIndex = (size_t) ( ((height - geometry.minz) / geometry.dz) + 0.5 );
+   ssize_t zIndex = (ssize_t) ( ((height - geometry.minz) / geometry.dz) + 0.5 );
 
    if ( zIndex < 0 || zIndex >= geometry.nz ) {
       return -1;

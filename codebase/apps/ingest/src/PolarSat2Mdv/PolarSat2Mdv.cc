@@ -6,11 +6,9 @@
 
 #include <cmath>
 #include <math.h>
-#include <netcdf>
+#include <Ncxx/Ncxx.hh>
 
 using namespace std;
-using namespace netCDF;
-using namespace netCDF::exceptions;
 
 const float PolarSat2Mdv::GEO_MISSING = -999.9;
 const float PolarSat2Mdv::SAT_MISSING = -9999.9;
@@ -464,7 +462,7 @@ int PolarSat2Mdv::_readNetcdf(char *filename)
   //
   // Open the file. 
   // 
-  NcFile ncFile(filename, NcFile::read);
+  NcxxFile ncFile(filename, NcxxFile::read);
 
 
   if (_params.check_domain_before_process)
@@ -472,9 +470,9 @@ int PolarSat2Mdv::_readNetcdf(char *filename)
     //
     // Get g-ring data to determine swath boundaries and processing
     //
-    NcGroupAtt latGRingAtt =  ncFile.getAtt(GRING_LAT_ATT_NAME);
+    NcxxGroupAtt latGRingAtt =  ncFile.getAtt(GRING_LAT_ATT_NAME);
     
-    NcGroupAtt lonGRingAtt =  ncFile.getAtt(GRING_LON_ATT_NAME);
+    NcxxGroupAtt lonGRingAtt =  ncFile.getAtt(GRING_LON_ATT_NAME);
     
     float latGRingData [NUM_GRING_PTS];
 
@@ -493,7 +491,7 @@ int PolarSat2Mdv::_readNetcdf(char *filename)
   //
   // Get start time
   //
-  NcGroupAtt startTimeAtt = ncFile.getAtt("time_coverage_start");
+  NcxxGroupAtt startTimeAtt = ncFile.getAtt("time_coverage_start");
   
   string startTime;
   
@@ -501,10 +499,9 @@ int PolarSat2Mdv::_readNetcdf(char *filename)
   
   _startTime.setFromW3c(startTime.c_str());
 
-  //
   // Get end time
-  //
-  NcGroupAtt stopTimeAtt = ncFile.getAtt("time_coverage_end");
+
+  NcxxGroupAtt stopTimeAtt = ncFile.getAtt("time_coverage_end");
   
   string endTime;
   
@@ -522,7 +519,7 @@ int PolarSat2Mdv::_readNetcdf(char *filename)
   //
   // Get sparse latitude data
   //
-  NcVar latData =  ncFile.getVar(_params.sparse_lat_fieldname);
+  NcxxVar latData =  ncFile.getVar(_params.sparse_lat_fieldname);
 
   if(latData.isNull()) 
   {
@@ -533,12 +530,12 @@ int PolarSat2Mdv::_readNetcdf(char *filename)
 
   float lats[_params.along_track_dim][NUM_SPARSE_PTS_CROSS_TRACK];
   
-  latData.getVar(lats);
+  latData.getVal(lats);
 
   //
   // Get sparse longitude data
   //
-  NcVar lonData =  ncFile.getVar(_params.sparse_lon_fieldname);
+  NcxxVar lonData =  ncFile.getVar(_params.sparse_lon_fieldname);
  
   if (lonData.isNull())
   {
@@ -549,12 +546,12 @@ int PolarSat2Mdv::_readNetcdf(char *filename)
 
   float lons [_params.along_track_dim][NUM_SPARSE_PTS_CROSS_TRACK];
 
-  lonData.getVar(lons);
+  lonData.getVal(lons);
   
   //
   // Get data field
   //
-  NcVar satData = ncFile.getVar(_params.sat_data_fieldname);
+  NcxxVar satData = ncFile.getVar(_params.sat_data_fieldname);
   
   if (satData.isNull())
   {
@@ -565,12 +562,12 @@ int PolarSat2Mdv::_readNetcdf(char *filename)
 
   unsigned short *satShortVals = new ushort[_numPtsAlongTrack* _numPtsCrossTrack];
    
-  satData.getVar(satShortVals);
+  satData.getVal(satShortVals);
 
   //
   //  Get scale and bias
   //
-  NcVarAtt scaleAtt = satData.getAtt("scale_factor");
+  NcxxVarAtt scaleAtt = satData.getAtt("scale_factor");
 
   if (scaleAtt.isNull())
   {
@@ -584,7 +581,7 @@ int PolarSat2Mdv::_readNetcdf(char *filename)
   scaleAtt.getValues(&satFieldScale);
   
   
-  NcVarAtt biasAtt = satData.getAtt("add_offset");
+  NcxxVarAtt biasAtt = satData.getAtt("add_offset");
 
   if (biasAtt.isNull())
   {
@@ -843,31 +840,32 @@ float PolarSat2Mdv::_bearing (float lat0Deg, float lon0Deg, float lat1Deg, float
   }
   else
   {
-    //
-    //                        B ( angle at pole = lon0 - lon1)
-    //                        ^
-    //    side c = 90-lat1   / \ side a  = 90- lat0
-    //                      /	\
-    //         (lon1,lat1)A ----- C (lon0,lat0)
-    //                      side b  solve: cos(b) = cos (a) * cos (c) + sin (a) * sin (c) * cos (B)
-    //                          
-    // Law of Cosines (spherical)  cos(c) = cos(a) * cos(b) * + sin(a) * sin(b) * cos(C)
-    // Law of Cosines (spherical)  cos(b) = cos (a) * cos (c) + sin (a) * sin (c) * cos (B)
-    // Law of Sines (spherical) 	 sin(B)/sin(b) = sin(A)/sin(a) = sin(C)/sin(c)
-    //
-    //   
+    /*
+    *                        B ( angle at pole = lon0 - lon1)
+    *                        ^
+    *    side c = 90-lat1   / \ side a  = 90- lat0
+    *                      /                    \
+    *         (lon1,lat1)A ----- C (lon0,lat0)
+    *    side b  solve: cos(b) = cos (a) * cos (c) + sin (a) * sin (c) * cos (B)
+    *                          
+    * Law of Cosines (spherical) cos(c) = cos(a) * cos(b) * + sin(a) * sin(b) * cos(C)
+    * Law of Cosines (spherical) cos(b) = cos(a) * cos(c) + sin(a) * sin (c) * cos (B)
+    * Law of Sines (spherical) 	 sin(B)/sin(b) = sin(A)/sin(a) = sin(C)/sin(c)
+    *
+    */
+  
     float a = (90 - lat0Deg)*MYPI/180;
     
     float c = (90 - lat1Deg) * MYPI/180;
     
     float B = fabs((lon0Deg-lon1Deg)* MYPI/180);
     
-    float b = acos ( cos(a)*cos (c) + sin (a)*sin(c)*cos (  (lon1Deg - lon0Deg)*  MYPI/180   ));
+    float b = acos(cos(a) * cos(c) + sin(a) * sin(c) * 
+                   cos ((lon1Deg - lon0Deg) * MYPI/180));
     
-    //
     // bearing from C to A:
     // cos(C) = (cos(c) - cos(a)*cos(b))/(sin(a)*sin(b))
-    //
+
     float bearing = acos ( (cos(c) - cos(a)*cos(b))/(sin(a)*sin(b)) );
     
     bool pt1IsEast = false;
@@ -896,15 +894,16 @@ float PolarSat2Mdv::_bearing (float lat0Deg, float lon0Deg, float lat1Deg, float
 void PolarSat2Mdv::_startPtBearingDist2LatLon(float startLatDeg, float startLonDeg, float bearingDeg, 
 					      float distanceKm, float &endLatDeg, float &endLonDeg) 
 {
-  //                        B ( angle at pole = lon0 - lon1)
-  //                        ^
-  //    side c = 90-lat1   / \ side a  = 90- lat0
-  //                      /   \
-  //         (lon1,lat1)A ----- C  (lon0,lat0)
-  //                      side b 
-  //                         
-  // Law of Cosines (spherical) 
-  // cos(c) = cos(a) * cos(b)  + sin(a) * sin(b) * cos(C)
+  /*                        B ( angle at pole = lon0 - lon1)
+   *                        ^
+   *    side c = 90-lat1   / \ side a  = 90- lat0
+   *                      /                     \
+   *         (lon1,lat1)A ----- C  (lon0,lat0)
+   *                      side b 
+   *                         
+   * Law of Cosines (spherical) 
+   * cos(c) = cos(a) * cos(b)  + sin(a) * sin(b) * cos(C)
+   */
  
   float a = (90 - startLatDeg)*MYPI/180;
   
@@ -923,9 +922,8 @@ void PolarSat2Mdv::_startPtBearingDist2LatLon(float startLatDeg, float startLonD
   
   float cosc =  cos(a) * cos(b)  + sin(a) * sin(b) * cos(C);
   
-  //
   // bounds check for inverse cosine application
-  //
+
   if (cosc < -1.0) 
   {
     cosc = -1.0;
@@ -951,15 +949,14 @@ void PolarSat2Mdv::_startPtBearingDist2LatLon(float startLatDeg, float startLonD
   }
   else
   {
-    //
+
     // cos(b) = cos(a) * cos(c)  + sin(a) * sin(c) * cos(B)
     // so  cos(B) = (cos(b) - cos(a) * cos(c))/ sin(a) * sin(c)
-    //
+
     float cosB = (cos(b) -  cos(a)*cos(c))/(sin (a)*sin(c));
    
-    //
     // bounds check for inverse cosine application
-    //
+
     if (cosB < -1.0)
     {
        cosB = -1.0;
@@ -974,22 +971,16 @@ void PolarSat2Mdv::_startPtBearingDist2LatLon(float startLatDeg, float startLonD
 
     if (  bearingDeg >180) 
     {
-      //
       // west
-      //
       endLonDeg =  startLonDeg - B*180/MYPI;
     }
     else
     {
-      //
       // east
-      //
       endLonDeg =  startLonDeg + B*180/MYPI;
     }
 
-    //
     // check bounds
-    //
     if ( endLonDeg > 180)
     {
       endLonDeg = 360 - endLonDeg;
@@ -1026,9 +1017,7 @@ void PolarSat2Mdv::_masterHdrAdjustTime()
 }
 void PolarSat2Mdv::_setMasterHeader()
 {
-  //
   // Fill out Master Header
-  //
   Mdvx::master_header_t _master_hdr;
 
   memset(&_master_hdr, 0, sizeof(_master_hdr));
@@ -1043,10 +1032,11 @@ void PolarSat2Mdv::_setMasterHeader()
 
   strncpy(_master_hdr.data_set_info,
           "VIIRS satellite data ingested by PolarSat2Mdv", MDV_INFO_LEN);
-
+  
   strncpy(_master_hdr.data_set_name, "PolarSat2Mdv", MDV_NAME_LEN);
-
-  strncpy(_master_hdr.data_set_source, "VIIRS-I1-IMG-EDR, VIIRS-IMG-GTM-EDR-GEO", MDV_NAME_LEN);
+  
+  strncpy(_master_hdr.data_set_source,
+          "VIIRS-I1-IMG-EDR, VIIRS-IMG-GTM-EDR-GEO", MDV_NAME_LEN);
 }
 
 void PolarSat2Mdv::_setVlevelHdr()

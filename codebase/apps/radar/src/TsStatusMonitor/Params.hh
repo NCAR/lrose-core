@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -81,6 +81,9 @@ public:
     double graph_min_val;
     double graph_max_val;
     char* comment;
+    tdrp_bool_t include_in_catalog_stats;
+    tdrp_bool_t catalog_omit_if_zero;
+    tdrp_bool_t catalog_interpret_as_time;
   } xml_entry_t;
 
   ///////////////////////////
@@ -433,6 +436,32 @@ public:
 
   tdrp_bool_t compress_spdb;
 
+  tdrp_bool_t write_stats_files_to_catalog;
+
+  int stats_interval_secs;
+
+  char* stats_output_dir;
+
+  tdrp_bool_t stats_write_to_day_dir;
+
+  char* stats_file_name_category;
+
+  char* stats_file_name_platform;
+
+  char* stats_file_name_extension;
+
+  char* stats_file_name_delimiter;
+
+  tdrp_bool_t stats_include_time_part_in_file_name;
+
+  tdrp_bool_t stats_include_seconds_in_time_part;
+
+  tdrp_bool_t stats_include_field_label_in_file_name;
+
+  char* stats_file_field_label;
+
+  tdrp_bool_t stats_write_latest_data_info;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -440,7 +469,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[56];
 
   const char *_className;
 

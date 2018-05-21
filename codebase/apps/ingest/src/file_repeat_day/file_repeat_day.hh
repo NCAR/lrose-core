@@ -38,8 +38,10 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <vector>
+#include <string>
 #include <toolsa/udatetime.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/file_io.h>
 using namespace std;
 
 class FileInfo {
@@ -81,6 +83,7 @@ private:
   
   vector<FileInfo> _inputFiles;
 
+  static const size_t YYYYMMDDHH_LEN = 10;
   static const size_t YYYYMMDDHHMMSS_LEN = 14;
   static const size_t HH_YYYYMMDDHHMMSS_LEN = 17;
   static const size_t YYYYMMDD_HHMM_LEN = 13;
@@ -111,6 +114,18 @@ private:
 		const char *outputPath,
 		time_t outputTime);
     
+  int _copyAsciiFile(FILE *ifp,
+	             FILE *ofp,
+		     time_t outputTime);
+    
+  int _straightCopy(FILE *ifp,
+		    FILE *ofp,
+		    time_t outputTime);
+    
+  int _copyNetcdfFile(const char *inputPath,
+	             const char *outputPath,
+		     time_t outputTime);
+    
   void _substituteTime(char *line,
 		       time_t outputTime);
 
@@ -120,7 +135,18 @@ private:
   void _tokenize(const string &str,
                  const string &spacer,
                  vector<string> &toks);
+
+  void _callNcap2(const vector<string> &args);  
+
+  void _execScript(const vector<string> &args,
+		   const char *script_to_call);
   
+  void _killAsRequired(pid_t pid,
+		       time_t terminate_time);
+
+  
+  int _buildCmdList(time_t output_time,
+		    string &cmd_list);
 };
 
 

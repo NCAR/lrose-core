@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -667,6 +667,8 @@ public:
 
   tdrp_bool_t ncf_output_latlon_arrays;
 
+  tdrp_bool_t ncf_output_start_end_times;
+
   tdrp_bool_t ncf_output_mdv_attributes;
 
   tdrp_bool_t ncf_output_mdv_chunks;
@@ -697,7 +699,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[110];
+  mutable TDRPtable _table[111];
 
   const char *_className;
 

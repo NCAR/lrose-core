@@ -2763,7 +2763,7 @@ int DoradeRadxFile::_printBlock(const string &idStr, int nBytes,
       if (nn > nBytes) nn = nBytes;
       memcpy(&swib32, block, nn);
       if (_ddIsSwapped) DoradeData::swap(swib32, true);
-      DoradeData::print(swib32, cout);
+      DoradeData::print(swib32, out);
     }
 
   } else if (idStr == "VOLD") {

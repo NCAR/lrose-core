@@ -1304,7 +1304,7 @@ int LeoRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - LeoRadxFile::writeToDir" << endl;
-  cerr << "  Writing Leosphere raw format files not supported" << endl;
+  cerr << "  Writing Leosphere format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -1343,7 +1343,7 @@ int LeoRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - LeoRadxFile::writeToPath" << endl;
-  cerr << "  Writing Leosphere raw format files not supported" << endl;
+  cerr << "  Writing Leosphere format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object

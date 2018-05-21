@@ -39,6 +39,7 @@
 #include <Mdv/NcfGridInfo.hh>
 #include <Mdv/NcfMdv.hh>
 #include <toolsa/TaStr.hh>
+#include <toolsa/TaPjg.hh>
 
 NcfGridInfo::NcfGridInfo ( Mdvx::field_header_t fHdr) :
         _fHdr(fHdr)
@@ -288,6 +289,10 @@ int NcfGridInfo::addProjVar(int gridNum, Nc3File *ncFile, string &errStr)
                                  mdvxCoord.proj_origin_lat);
       iret |= !_projVar->add_att(NcfMdv::false_easting, mdvxCoord.false_easting);
       iret |= !_projVar->add_att(NcfMdv::false_northing, mdvxCoord.false_northing);
+      
+      double earthRadiusMeters  = TaPjg::getEarthRadius() * 1000;
+      iret  |= !_projVar->add_att(NcfMdv::earth_radius, earthRadiusMeters);
+     
       break;
     }
       
@@ -312,6 +317,10 @@ int NcfGridInfo::addProjVar(int gridNum, Nc3File *ncFile, string &errStr)
       }
       iret |= !_projVar->add_att(NcfMdv::false_easting, mdvxCoord.false_easting);
       iret |= !_projVar->add_att(NcfMdv::false_northing, mdvxCoord.false_northing);
+
+      double earthRadiusMeters  = TaPjg::getEarthRadius() * 1000;
+      iret  |= !_projVar->add_att(NcfMdv::earth_radius, earthRadiusMeters);
+
       break;
     }
       
@@ -337,6 +346,10 @@ int NcfGridInfo::addProjVar(int gridNum, Nc3File *ncFile, string &errStr)
                                  mdvxCoord.proj_params.ps.central_scale);
       iret |= !_projVar->add_att(NcfMdv::false_easting, mdvxCoord.false_easting);
       iret |= !_projVar->add_att(NcfMdv::false_northing, mdvxCoord.false_northing);
+
+      double earthRadiusMeters  = TaPjg::getEarthRadius() * 1000;
+      iret  |= !_projVar->add_att(NcfMdv::earth_radius, earthRadiusMeters);
+
       break;
     }
       
@@ -360,6 +373,10 @@ int NcfGridInfo::addProjVar(int gridNum, Nc3File *ncFile, string &errStr)
                                  mdvxCoord.proj_origin_lat);
       iret |= !_projVar->add_att(NcfMdv::false_easting, mdvxCoord.false_easting);
       iret |= !_projVar->add_att(NcfMdv::false_northing, mdvxCoord.false_northing);
+
+      double earthRadiusMeters  = TaPjg::getEarthRadius() * 1000;
+      iret  |= !_projVar->add_att(NcfMdv::earth_radius, earthRadiusMeters);
+
       break;
     }
       
@@ -373,6 +390,10 @@ int NcfGridInfo::addProjVar(int gridNum, Nc3File *ncFile, string &errStr)
                                  mdvxCoord.proj_params.tmerc.central_scale);
       iret |= !_projVar->add_att(NcfMdv::false_easting, mdvxCoord.false_easting);
       iret |= !_projVar->add_att(NcfMdv::false_northing, mdvxCoord.false_northing);
+
+      double earthRadiusMeters  = TaPjg::getEarthRadius() * 1000;
+      iret  |= !_projVar->add_att(NcfMdv::earth_radius, earthRadiusMeters);
+
       break;
     }
       
@@ -412,7 +433,7 @@ int NcfGridInfo::addProjVar(int gridNum, Nc3File *ncFile, string &errStr)
                                  mdvxCoord.proj_origin_lon);
       iret |= !_projVar->add_att(NcfMdv::latitude_of_projection_origin,
                                  mdvxCoord.proj_origin_lat);
-      double pptHtm = (mdvxCoord.proj_params.vp.persp_radius - PjgMath::EradKm) * 1000.0;
+      double pptHtm = (mdvxCoord.proj_params.vp.persp_radius - Pjg::EradKm) * 1000.0;
       iret |= !_projVar->add_att(NcfMdv::perspective_point_height, pptHtm);
       iret |= !_projVar->add_att(NcfMdv::false_easting, mdvxCoord.false_easting);
       iret |= !_projVar->add_att(NcfMdv::false_northing, mdvxCoord.false_northing);

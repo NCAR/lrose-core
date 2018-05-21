@@ -24,63 +24,41 @@
 /**
  *
  * @file RefractCalib.hh
- *
  * @class RefractCalib
- *
  * RefractCalib program object.
- *  
  * @date 1/15/2008
- *
  */
 
 #ifndef RefractCalib_HH
 #define RefractCalib_HH
 
+#include "Params.hh"
+#include "Calib.hh"
+#include <Refract/RefParms.hh>
+
 #include <string>
 #include <vector>
 #include <sys/stat.h>
 
-#include "Args.hh"
-#include "Params.hh"
-#include "Processor.hh"
-
-using namespace std;
-
-
 /** 
  * @class RefractCalib
+ * @brief the Algorithm class
  */
-
 class RefractCalib
 {
  public:
 
-  ////////////////////
-  // Public members //
-  ////////////////////
-
   /**
-   * @brief Flag indicating whether the program status is currently okay.
+   * Flag indicating whether the program status is currently okay.
    */
-
   bool okay;
 
-
-  ////////////////////
-  // Public methods //
-  ////////////////////
-
-  //////////////////////////////
-  // Constructors/Destructors //
-  //////////////////////////////
 
   /**
    * @brief Destructor
    */
-
   virtual ~RefractCalib(void);
   
-
   /**
    * @brief Retrieve the singleton instance of this class.
    *
@@ -89,7 +67,6 @@ class RefractCalib
    *
    * @return Returns a pointer to the program instance.
    */
-
   static RefractCalib *Inst(int argc, char **argv);
 
   /**
@@ -97,72 +74,31 @@ class RefractCalib
    *
    * @return Returns a pointer to the program instance.
    */
-
-  static RefractCalib *Inst();
+  static RefractCalib *Inst(void);
   
-
   /**
    * @brief Initialize the local data.
    *
    * @return Returns true if the initialization was successful,
    *         false otherwise.
    */
-
-  bool init();
+  bool init(void);
   
-
-  /////////////////////
-  // Running methods //
-  /////////////////////
 
   /**
    * @brief Run the program.
    */
-
-  void run();
+  void run(void);
   
 
  private:
 
-  /////////////////////
-  // Private members //
-  /////////////////////
-
-  /**
-   * @brief Singleton instance pointer.
-   */
-
-  static RefractCalib *_instance;
+  static RefractCalib *_instance; /**< Singleton instance pointer */
+  char *_progName; /**< program name */
+  Params _params; /**< Parameter file paramters. */
+  RefParms _refparms;
+  Calib _driver; /**< Data processing object. */
   
-  /**
-   * @brief Program name.
-   */
-
-  char *_progName;
-
-  /**
-   * @brief Command line arguments.
-   */
-
-  Args *_args;
-
-  /**
-   * @brief Parameter file paramters.
-   */
-
-  Params *_params;
-  
-  /**
-   * @brief Data processor object.
-   */
-
-  Processor _processor;
-  
-
-  /////////////////////
-  // Private methods //
-  /////////////////////
-
   /**
    * @brief Constructor
    *
@@ -171,23 +107,44 @@ class RefractCalib
    *
    * @note Private because this is a singleton object.
    */
-
   RefractCalib(int argc, char **argv);
   
   /**
    * @brief Create the quality field colorscale used in the original
    *        applications.
    */
-
-  void _createQualityColorscale() const;
+  void _createQualityColorscale(void) const;
 
   /**
    * @brief Create the strength field colorscale used in the original
    *        applications.
    */
+  void _createStrengthColorscale(void) const;
 
-  void _createStrengthColorscale() const;
+  std::vector<string>_setupFiles(int numFiles,
+				 char ** fileList,
+				 Params::Time_t *timeRange,
+				 const std::string &host,
+				 const std::string &filesPath);
+  /**
+   * Create a time_t from the Time_t struct in the params class
+   * @parm[in] p  The struct
+   * @return the time
+   */
+  time_t _timeFromParams(const Params::Time_t &p) const;
 
+  /**
+   * Create and return a list of files within a time range
+   * @param[in] path  Place to search for files
+   * @param[in] t0  Earliest time
+   * @param[in] t1  Latest time
+   * @param[out] files  The file names
+   *
+   * @return true if able to get some files onto the vector
+   */
+  bool _identifyFiles(const std::string &host, const std::string &path,
+		      const time_t &t0, const time_t &t1,
+		      std::vector<string> &files) const;
 
 };
 

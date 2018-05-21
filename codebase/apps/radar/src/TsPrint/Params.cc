@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -1016,6 +1016,18 @@ using namespace std;
     tt->help = tdrpStrDup("See 'check_radar_id' above.");
     tt->val_offset = (char *) &radar_id - &_start_;
     tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'use_secondary_georeference'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_secondary_georeference");
+    tt->descr = tdrpStrDup("If true, use the secondary georeference packet.");
+    tt->help = tdrpStrDup("By default, we use the primary georeference packet. And most mobile radars only have one georeference. For those radars that have 2 georef devices, set this to true to use the secondary reference.");
+    tt->val_offset = (char *) &use_secondary_georeference - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 5'

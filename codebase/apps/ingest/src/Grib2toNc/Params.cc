@@ -817,6 +817,18 @@ using namespace std;
     tt->single_val.i = 86400;
     tt++;
     
+    // Parameter 'force_lead_time_output'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("force_lead_time_output");
+    tt->descr = tdrpStrDup("Option to always output lead time variables.");
+    tt->help = tdrpStrDup("This forcess output of forecast_period and forecast_reference_time even when lead_time is 0. Used for model data to have output files all contain the same variables.");
+    tt->val_offset = (char *) &force_lead_time_output - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'output_dir'
     // ctype is 'char*'
     
@@ -1024,15 +1036,17 @@ using namespace std;
       tt->struct_def.fields[7].rel_offset = 
         (char *) &_output_fields->packing_type - (char *) _output_fields;
         tt->struct_def.fields[7].enum_def.name = tdrpStrDup("data_pack_t");
-        tt->struct_def.fields[7].enum_def.nfields = 3;
+        tt->struct_def.fields[7].enum_def.nfields = 4;
         tt->struct_def.fields[7].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[7].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[7].enum_def.fields[0].name = tdrpStrDup("DATA_PACK_NONE");
-        tt->struct_def.fields[7].enum_def.fields[0].val = DATA_PACK_NONE;
-        tt->struct_def.fields[7].enum_def.fields[1].name = tdrpStrDup("DATA_PACK_BYTE");
-        tt->struct_def.fields[7].enum_def.fields[1].val = DATA_PACK_BYTE;
-        tt->struct_def.fields[7].enum_def.fields[2].name = tdrpStrDup("DATA_PACK_SHORT");
-        tt->struct_def.fields[7].enum_def.fields[2].val = DATA_PACK_SHORT;
+        tt->struct_def.fields[7].enum_def.fields[0].name = tdrpStrDup("DATA_PACK_AUTO");
+        tt->struct_def.fields[7].enum_def.fields[0].val = DATA_PACK_AUTO;
+        tt->struct_def.fields[7].enum_def.fields[1].name = tdrpStrDup("DATA_PACK_NONE");
+        tt->struct_def.fields[7].enum_def.fields[1].val = DATA_PACK_NONE;
+        tt->struct_def.fields[7].enum_def.fields[2].name = tdrpStrDup("DATA_PACK_BYTE");
+        tt->struct_def.fields[7].enum_def.fields[2].val = DATA_PACK_BYTE;
+        tt->struct_def.fields[7].enum_def.fields[3].name = tdrpStrDup("DATA_PACK_SHORT");
+        tt->struct_def.fields[7].enum_def.fields[3].val = DATA_PACK_SHORT;
       tt->struct_def.fields[8].ftype = tdrpStrDup("qc_default_t");
       tt->struct_def.fields[8].fname = tdrpStrDup("qc_default_type");
       tt->struct_def.fields[8].ptype = ENUM_TYPE;
@@ -1096,15 +1110,17 @@ using namespace std;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &packing_type - &_start_;
     tt->enum_def.name = tdrpStrDup("data_pack_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("DATA_PACK_NONE");
-      tt->enum_def.fields[0].val = DATA_PACK_NONE;
-      tt->enum_def.fields[1].name = tdrpStrDup("DATA_PACK_BYTE");
-      tt->enum_def.fields[1].val = DATA_PACK_BYTE;
-      tt->enum_def.fields[2].name = tdrpStrDup("DATA_PACK_SHORT");
-      tt->enum_def.fields[2].val = DATA_PACK_SHORT;
+      tt->enum_def.fields[0].name = tdrpStrDup("DATA_PACK_AUTO");
+      tt->enum_def.fields[0].val = DATA_PACK_AUTO;
+      tt->enum_def.fields[1].name = tdrpStrDup("DATA_PACK_NONE");
+      tt->enum_def.fields[1].val = DATA_PACK_NONE;
+      tt->enum_def.fields[2].name = tdrpStrDup("DATA_PACK_BYTE");
+      tt->enum_def.fields[2].val = DATA_PACK_BYTE;
+      tt->enum_def.fields[3].name = tdrpStrDup("DATA_PACK_SHORT");
+      tt->enum_def.fields[3].val = DATA_PACK_SHORT;
     tt->single_val.e = DATA_PACK_NONE;
     tt++;
     
@@ -1154,6 +1170,18 @@ using namespace std;
     tt->help = tdrpStrDup("Only applies to NETCDF4 and NETCDF4_CLASSIC files.");
     tt->val_offset = (char *) &compression_level - &_start_;
     tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'include_lat_lon'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_lat_lon");
+    tt->descr = tdrpStrDup("Option to include latitutde and longitude auxillary variables.");
+    tt->help = tdrpStrDup("Only applies to non lat/lon grids as those already have lat/lon.");
+    tt->val_offset = (char *) &include_lat_lon - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'remap_output'

@@ -260,7 +260,7 @@ public:
   // Returns 0 on success, -1 on error.
   // getErrStr() retrieves the error string.
   
-  virtual int writeToDir(const string &output_url);
+  int writeToDir(const string &output_url);
   
   // Write to path
   //
@@ -270,7 +270,7 @@ public:
   // Returns 0 on success, -1 on error.
   // getErrStr() retrieves the error string.
   
-  virtual int writeToPath(const string &output_path);
+  int writeToPath(const string &output_path);
   
   // write files for an object which contains data for multiple times
   //
@@ -404,7 +404,8 @@ public:
   
   void setMdv2NcfOutput(bool outputLatlonArrays,
                         bool outputMdvAttr,
-                        bool outputMdvChunks);
+                        bool outputMdvChunks,
+                        bool outputStartEndTimes = true);
   
   // add field translation info for MDV to NetCDF CF conversion
   
@@ -549,6 +550,7 @@ protected:
   bool _ncfOutputLatlonArrays;
   bool _ncfOutputMdvAttr;
   bool _ncfOutputMdvChunks;
+  bool _ncfOutputStartEndTimes;
 
   ///////////////////
   // socket to server
@@ -557,7 +559,7 @@ protected:
 
   // functions
 
-  virtual DsMdvx &_copy(const DsMdvx &rhs);
+  DsMdvx &_copy(const DsMdvx &rhs);
 
   int _resolveReadUrl(DsURL &url, bool *contact_server);
 
@@ -566,8 +568,8 @@ protected:
 
   int _resolveTimeListUrl(DsURL &url, bool *contact_server);
 
-  virtual int _communicate(const DsURL &url, DsMdvxMsg &msg,
-			   const void *msgBuf, const int msgLen);
+  int _communicate(const DsURL &url, DsMdvxMsg &msg,
+                   const void *msgBuf, const int msgLen);
 
   int _readAllHeadersLocal(const DsURL &url);
   int _readAllHeadersRemote(const DsURL &url);

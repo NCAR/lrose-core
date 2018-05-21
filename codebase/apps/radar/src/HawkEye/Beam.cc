@@ -27,7 +27,7 @@
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
 
-#include <qtimer.h>
+#include <QTimer>
 #include <QBrush>
 #include <QPalette>
 #include <QPaintEngine>
@@ -37,6 +37,7 @@
 
 #include "Beam.hh"
 #include "ColorMap.hh"
+#include "AllocCheck.hh"
 
 using namespace std;
 
@@ -70,6 +71,11 @@ Beam::Beam(const Params &params,
     _brushes[field].resize(_nGates);
   }
 
+  // initialize client counting for this object
+
+  _nClients = 0;
+  pthread_mutex_init(&_nClientsMutex, NULL);
+
   // increment client count on the ray
 
   _ray->addClient();
@@ -88,7 +94,12 @@ Beam::~Beam()
 
   if (_ray->removeClient() == 0) {
     delete _ray;
+    AllocCheck::inst().addFree();
   }
+
+  // clear client reference counting mutex
+
+  pthread_mutex_destroy(&_nClientsMutex);
 
 }
 
@@ -131,5 +142,49 @@ void Beam::fillColors(const std::vector<std::vector<double> >& beam_data,
 
   }
 
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Memory management.
+// This class optionally uses the notion of clients to decide when it
+// should be deleted.
+// If removeClient() returns 0, the object should be deleted.
+// These functions are protected by a mutex for multi-threaded ops
+
+int Beam::addClient() const
+  
+{
+  pthread_mutex_lock(&_nClientsMutex);
+  _nClients++;
+  pthread_mutex_unlock(&_nClientsMutex);
+  return _nClients;
+}
+
+int Beam::removeClient() const
+
+{
+  pthread_mutex_lock(&_nClientsMutex);
+  if (_nClients > 0) {
+    _nClients--;
+  }
+  pthread_mutex_unlock(&_nClientsMutex);
+  return _nClients;
+}
+
+int Beam::removeAllClients() const
+
+{
+  pthread_mutex_lock(&_nClientsMutex);
+  _nClients = 0;
+  pthread_mutex_unlock(&_nClientsMutex);
+  return _nClients;
+}
+
+void Beam::deleteIfUnused(const Beam *beam)
+  
+{
+  if (beam->removeClient() == 0) {
+    delete beam;
+  }
 }
 

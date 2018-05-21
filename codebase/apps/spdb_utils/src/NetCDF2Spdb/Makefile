@@ -39,8 +39,8 @@ TARGET_FILE = NetCDF2Spdb
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-lrapmath -lphysics -ltoolsa -ldataport \
-	-ltdrp -lnetcdf_c++4 $(NETCDF4_LIBS) -lbz2 \
+	-lrapmath -lphysics -leuclid -ltoolsa -ldataport \
+	-ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

@@ -222,7 +222,8 @@ static void SendOut( int priority, char *message)
       static FILE *Logf = NULL;
 
       /* construct the message */
-      sprintf(buffer, "%s: %s on %s ", Application, PriorityName[ priority],
+      snprintf(buffer, ERR_MESS_MAX,
+               "%s: %s on %s ", Application, PriorityName[ priority],
 	  GetTime());
       STRconcat(buffer, message, ERR_MESS_MAX); 
       STRconcat(buffer, "\n\n",  ERR_MESS_MAX); 
@@ -267,7 +268,7 @@ static void SendOut( int priority, char *message)
 
       /* system logger */
       if (SysLog)
-	 syslog( PriorityLevel[priority] | LOG_FACILITY, message);
+        syslog( PriorityLevel[priority] | LOG_FACILITY, message, "%s");
    }
 
 

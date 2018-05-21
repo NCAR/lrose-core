@@ -33,8 +33,10 @@ PpiWidget::PpiWidget(QWidget* parent,
                      const PolarManager &manager,
                      const Params &params,
                      const RadxPlatform &platform,
-                     size_t n_fields) :
-        PolarWidget(parent, manager, params, platform, n_fields)
+                     const vector<DisplayField *> &fields,
+                     bool haveFilteredFields) :
+        PolarWidget(parent, manager, params, platform,
+                    fields, haveFilteredFields)
         
 {
 
@@ -70,7 +72,7 @@ PpiWidget::~PpiWidget()
   // delete all of the dynamically created beams
   
   for (size_t i = 0; i < _ppiBeams.size(); ++i) {
-    delete _ppiBeams[i];
+    Beam::deleteIfUnused(_ppiBeams[i]);
   }
   _ppiBeams.clear();
 
@@ -85,7 +87,7 @@ void PpiWidget::clear()
   // Clear out the beam array
   
   for (size_t i = 0; i < _ppiBeams.size(); i++) {
-    delete _ppiBeams[i];
+    Beam::deleteIfUnused(_ppiBeams[i]);
   }
   _ppiBeams.clear();
   
@@ -109,8 +111,8 @@ void PpiWidget::selectVar(const size_t index)
   }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> selectVar for field: "
-         << _params._fields[index].label << endl;
+    cerr << "=========>> PpiWidget::selectVar() for field index: " 
+         << index << endl;
   }
 
   // If this field isn't being rendered in the background, render all of
@@ -147,7 +149,7 @@ void PpiWidget::selectVar(const size_t index)
 void PpiWidget::clearVar(const size_t index)
 {
 
-  if (index >= _nFields) {
+  if (index >= _fields.size()) {
     return;
   }
 
@@ -176,6 +178,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
                         const std::vector< std::vector< double > > &beam_data,
                         const std::vector< DisplayField* > &fields)
 {
+
   // add a new beam to the display. 
   // The steps are:
   // 1. preallocate mode: find the beam to be drawn, or dynamic mode:
@@ -200,15 +203,16 @@ void PpiWidget::addBeam(const RadxRay *ray,
   // Normalize the start and stop angles.  I'm not convinced that this works
   // for negative angles, but leave it for now.
 
-  float n_start_angle = start_angle - ((int)(start_angle/360.0))*360.0;
-  float n_stop_angle = stop_angle - ((int)(stop_angle/360.0))*360.0;
-  
+  double n_start_angle = start_angle - ((int)(start_angle/360.0))*360.0;
+  double n_stop_angle = stop_angle - ((int)(stop_angle/360.0))*360.0;
+
   if (n_start_angle <= n_stop_angle) {
 
     // This beam does not cross the 0 degree angle.  Just add the beam to
     // the beam list.
 
-    PpiBeam* b = new PpiBeam(_params, ray, _nFields, n_start_angle, n_stop_angle);
+    PpiBeam* b = new PpiBeam(_params, ray, _fields.size(), n_start_angle, n_stop_angle);
+    b->addClient();
     _cullBeams(b);
     _ppiBeams.push_back(b);
     newBeams.push_back(b);
@@ -218,14 +222,16 @@ void PpiWidget::addBeam(const RadxRay *ray,
     // The beam crosses the 0 degree angle.  First add the portion of the
     // beam to the left of the 0 degree point.
 
-    PpiBeam* b1 = new PpiBeam(_params, ray, _nFields, n_start_angle, 360.0);
+    PpiBeam* b1 = new PpiBeam(_params, ray, _fields.size(), n_start_angle, 360.0);
+    b1->addClient();
     _cullBeams(b1);
     _ppiBeams.push_back(b1);
     newBeams.push_back(b1);
 
     // Now add the portion of the beam to the right of the 0 degree point.
 
-    PpiBeam* b2 = new PpiBeam(_params, ray, _nFields, 0.0, n_stop_angle);
+    PpiBeam* b2 = new PpiBeam(_params, ray, _fields.size(), 0.0, n_stop_angle);
+    b2->addClient();
     _cullBeams(b2);
     _ppiBeams.push_back(b2);
     newBeams.push_back(b2);
@@ -254,6 +260,11 @@ void PpiWidget::addBeam(const RadxRay *ray,
     
   } // if (newBeams.size() > 0) 
 
+
+  if (_params.debug >= Params::DEBUG_VERBOSE &&
+      _ppiBeams.size() % 10 == 0) {
+    cerr << "==>> _ppiBeams.size(): " << _ppiBeams.size() << endl;
+  }
 
   // newBeams has pointers to all of the newly added beams.  Render the
   // beam data.
@@ -474,8 +485,14 @@ void PpiWidget::_setGridSpacing()
     _ringSpacing = 5.0;
   } else if (diagonal <= 200.0) {
     _ringSpacing = 10.0;
-  } else {
+  } else if (diagonal <= 300.0) {
     _ringSpacing = 20.0;
+  } else if (diagonal <= 400.0) {
+    _ringSpacing = 25.0;
+  } else if (diagonal <= 500.0) {
+    _ringSpacing = 50.0;
+  } else {
+    _ringSpacing = 50.0;
   }
 
 }
@@ -507,7 +524,6 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
   // painter.setWindow(_zoomWindow);
   
-  painter.setPen(_gridRingsColor);
 
   // Draw rings
 
@@ -517,6 +533,15 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
     painter.save();
     painter.setTransform(_zoomTransform);
+
+    // set color
+    painter.setPen(_gridRingsColor);
+
+    // set narrow line width
+    QPen pen = painter.pen();
+    pen.setWidth(0);
+    painter.setPen(pen);
+
     double ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
       QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
@@ -606,6 +631,49 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
     painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
 
+    /****** testing ******
+    // do smart brush ...
+  QImage qImage;
+  qImage = *(_fieldRenderers[_selectedField]->getImage());
+  // qImage.load("/h/eol/brenda/octopus.jpg");
+  // get the Image from somewhere ...   
+  // qImage.invertPixels();
+  qImage.convertToFormat(QImage::Format_RGB32);
+
+  // get the color of the selected pixel
+  QRgb colorToMatch = qImage.pixel(_mouseReleaseX, _mouseReleaseY);
+  // walk to all adjacent pixels of the same color and make them white
+
+  vector<QPoint> pixelsToConsider;
+  vector<QPoint> neighbors = {QPoint(-1, 1), QPoint(0, 1), QPoint(1, 1),
+                              QPoint(-1, 0),               QPoint(1, 0),
+                              QPoint(-1,-1), QPoint(0,-1), QPoint(1,-1)};
+
+  pixelsToConsider.push_back(QPoint(_mouseReleaseX, _mouseReleaseY));
+  while (!pixelsToConsider.empty()) {
+    QPoint currentPix = pixelsToConsider.back();
+    pixelsToConsider.pop_back();
+    if (qImage.pixel(currentPix) ==  colorToMatch) {
+      // set currentPix to white
+      qImage.setPixelColor(currentPix, QColor("white"));
+      // cout << "setting pixel " << currentPix.x() << ", " << currentPix.y() << " to white" << endl;
+      // add the eight adjacent neighbors
+      for (vector<QPoint>::iterator noffset = neighbors.begin(); 
+           noffset != neighbors.end(); ++noffset) {
+        QPoint neighbor;
+        neighbor = currentPix + *noffset; // QPoint(-1,1);
+        if (qImage.valid(neighbor)) {
+          pixelsToConsider.push_back(neighbor);
+        }
+      } // end for neighbors iterator
+    }
+  }
+
+  pixelsToConsider.clear();
+  QPainter painter(this);
+  painter.drawImage(0, 0, qImage);
+    ****** end testing *****/
+
   }
 
   // reset painter state
@@ -615,7 +683,8 @@ void PpiWidget::_drawOverlays(QPainter &painter)
   // draw the color scale
 
   const DisplayField &field = _manager.getSelectedField();
-  _zoomWorld.drawColorScale(field.getColorMap(), painter);
+  _zoomWorld.drawColorScale(field.getColorMap(), painter,
+                            _params.label_font_size);
 
   if (_archiveMode) {
 
@@ -626,7 +695,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
     // time legend
 
-    sprintf(text, "Start time: %s", _plotStartTime.asString(3).c_str());
+    sprintf(text, "Start time: %s", _plotStartTime.asString(0).c_str());
     legends.push_back(text);
     
     // radar and site name legend
@@ -640,7 +709,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
       siteName = _params.site_name;
     }
     string radarSiteLabel = radarName;
-    if (siteName.size() > 0) {
+    if (siteName.size() > 0 && siteName != radarName) {
       radarSiteLabel += "/";
       radarSiteLabel += siteName;
     }
@@ -648,8 +717,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
     // field name legend
 
-    string fieldName =
-      _fieldRenderers[_selectedField]->getParams().label;
+    string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
     sprintf(text, "Field: %s", fieldName.c_str());
     legends.push_back(text);
 
@@ -952,7 +1020,7 @@ void PpiWidget::_cullBeams(const PpiBeam *beamAB)
 
       if (_ppiBeams[i]->hidden && !_ppiBeams[i]->isBeingRendered())
       {
-	delete _ppiBeams[i];
+        Beam::deleteIfUnused(_ppiBeams[i]);
 	_ppiBeams.erase(_ppiBeams.begin()+i);
       }
     }

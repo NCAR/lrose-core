@@ -371,7 +371,7 @@ void NIDS_Reverse_2byte_vals(unsigned short* array, int num)
 
 void swap_nids_row_header(NIDS_row_header_t *head) 
 {
-     NIDS_Reverse_2byte_vals(&head->num_bytes,1);
+  NIDS_Reverse_2byte_vals((unsigned short *) &head->num_bytes,1);
 }
 
 
@@ -381,7 +381,7 @@ void swap_nids_row_header(NIDS_row_header_t *head)
 
 void swap_nids_beam_header(NIDS_beam_header_t *head) 
 {
-     NIDS_Reverse_2byte_vals(&head->num_halfwords,3);
+  NIDS_Reverse_2byte_vals((unsigned short *) &head->num_halfwords,3);
 }
 
 /******************************************************************************
@@ -390,7 +390,7 @@ void swap_nids_beam_header(NIDS_beam_header_t *head)
 
 void swap_nids_raster_header(NIDS_raster_header_t *head) 
 {
-     NIDS_Reverse_2byte_vals(&head->packet_code1,11);
+  NIDS_Reverse_2byte_vals((unsigned short *) &head->packet_code1,11);
 }
 
 /******************************************************************************
@@ -399,7 +399,7 @@ void swap_nids_raster_header(NIDS_raster_header_t *head)
 
 void swap_nids_radial_header(NIDS_radial_header_t *head) 
 {
-     NIDS_Reverse_2byte_vals(&head->packet_code,7);
+     NIDS_Reverse_2byte_vals((unsigned short *) &head->packet_code,7);
 }
 
 /******************************************************************************
@@ -408,18 +408,18 @@ void swap_nids_radial_header(NIDS_radial_header_t *head)
 
 void swap_nids_header(NIDS_header_t *head) 
 {
-     NIDS_Reverse_2byte_vals(&head->mcode,2);
-     NIDS_Reverse_4byte_vals(&head->mtime,2);
-     NIDS_Reverse_2byte_vals(&head->msource,4);
-     NIDS_Reverse_4byte_vals(&head->lat,2);
-     NIDS_Reverse_2byte_vals(&head->height,10);
-     NIDS_Reverse_4byte_vals(&head->pgtime,1);
-     NIDS_Reverse_2byte_vals(&head->pd1,28);
-     NIDS_Reverse_4byte_vals(&head->soffset,3);
-     NIDS_Reverse_2byte_vals(&head->bdivider,2);
-     NIDS_Reverse_4byte_vals(&head->blength,1);
-     NIDS_Reverse_2byte_vals(&head->nlayers,2);
-     NIDS_Reverse_4byte_vals(&head->lendat,1);
+     NIDS_Reverse_2byte_vals((unsigned short *) &head->mcode,2);
+     NIDS_Reverse_4byte_vals((unsigned int *) &head->mtime,2);
+     NIDS_Reverse_2byte_vals((unsigned short *) &head->msource,4);
+     NIDS_Reverse_4byte_vals((unsigned int *) &head->lat,2);
+     NIDS_Reverse_2byte_vals((unsigned short *) &head->height,10);
+     NIDS_Reverse_4byte_vals((unsigned int *) &head->pgtime,1);
+     NIDS_Reverse_2byte_vals((unsigned short *) &head->pd1,28);
+     NIDS_Reverse_4byte_vals((unsigned int *) &head->soffset,3);
+     NIDS_Reverse_2byte_vals((unsigned short *) &head->bdivider,2);
+     NIDS_Reverse_4byte_vals((unsigned int *) &head->blength,1);
+     NIDS_Reverse_2byte_vals((unsigned short *) &head->nlayers,2);
+     NIDS_Reverse_4byte_vals((unsigned int *) &head->lendat,1);
 }
 
 

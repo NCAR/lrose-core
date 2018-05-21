@@ -72,6 +72,21 @@ NexradVcp::NexradVcp(int num)
     return;
   }
 
+  // VCP 35
+
+  if (num == 35) {
+    _fixedAngles.push_back(0.5);
+    _fixedAngles.push_back(0.9);
+    _fixedAngles.push_back(1.3);
+    _fixedAngles.push_back(1.8);
+    _fixedAngles.push_back(2.4);
+    _fixedAngles.push_back(3.1);
+    _fixedAngles.push_back(4.0);
+    _fixedAngles.push_back(5.1);
+    _fixedAngles.push_back(6.4);
+    return;
+  }
+
   // VCP 21 or 221
 
   if (num == 21 || num == 221) {
@@ -134,6 +149,27 @@ NexradVcp::NexradVcp(int num)
     _fixedAngles.push_back(10.0);
     _fixedAngles.push_back(12.5);
     _fixedAngles.push_back(15.6);
+    _fixedAngles.push_back(19.5);
+    return;
+  }
+
+  // VCP 215
+
+  if (num == 215) {
+    _fixedAngles.push_back(0.5);
+    _fixedAngles.push_back(0.9);
+    _fixedAngles.push_back(1.3);
+    _fixedAngles.push_back(1.8);
+    _fixedAngles.push_back(2.4);
+    _fixedAngles.push_back(3.1);
+    _fixedAngles.push_back(4.0);
+    _fixedAngles.push_back(5.1);
+    _fixedAngles.push_back(6.4);
+    _fixedAngles.push_back(8.0);
+    _fixedAngles.push_back(10.0);
+    _fixedAngles.push_back(12.0);
+    _fixedAngles.push_back(14.0);
+    _fixedAngles.push_back(16.7);
     _fixedAngles.push_back(19.5);
     return;
   }

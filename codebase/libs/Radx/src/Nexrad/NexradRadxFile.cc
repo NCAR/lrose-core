@@ -85,9 +85,11 @@ NexradRadxFile::NexradRadxFile() :
         _vcp21(21),
         _vcp31(31),
         _vcp32(32),
+        _vcp35(35),
         _vcp121(121),
         _vcp211(211),
         _vcp212(212),
+        _vcp215(215),
         _vcp221(221)
   
 {
@@ -581,7 +583,6 @@ int NexradRadxFile::readFromPath(const string &path,
         }
 
       }
-
     } else if (msgHdr.message_type == NexradData::DIGITAL_RADAR_DATA_1) {
 
       // create ray from message
@@ -604,7 +605,7 @@ int NexradRadxFile::readFromPath(const string &path,
       }
 
     } else if (msgHdr.message_type == NexradData::VOLUME_COVERAGE_PATTERN) {
-
+      
       _handleVcpHdr(buf);
       
     } else if (msgHdr.message_type == NexradData::RDA_ADAPTATION_DATA) {
@@ -635,7 +636,7 @@ int NexradRadxFile::readFromPath(const string &path,
   // compute the fixed angle by averaging the elevation angles per sweep
   // if no VCP segment was found
 
-  if (_vcpNElev < 1) {
+  if (_readComputeSweepAnglesFromVcpTables){
     _computeFixedAngles();
   }
 
@@ -1980,12 +1981,16 @@ void NexradRadxFile::_computeFixedAngles()
       fixedAngle = _vcp31.getClosestFixedAngle(meanElev, sweepNum);
     } else if (_vcpNum == 32) {
       fixedAngle = _vcp32.getClosestFixedAngle(meanElev, sweepNum);
+    } else if (_vcpNum == 35) {
+      fixedAngle = _vcp35.getClosestFixedAngle(meanElev, sweepNum);
     } else if (_vcpNum == 121) {
       fixedAngle = _vcp121.getClosestFixedAngle(meanElev, sweepNum);
     } else if (_vcpNum == 211) {
       fixedAngle = _vcp211.getClosestFixedAngle(meanElev, sweepNum);
     } else if (_vcpNum == 212) {
       fixedAngle = _vcp212.getClosestFixedAngle(meanElev, sweepNum);
+    } else if (_vcpNum == 215) {
+      fixedAngle = _vcp215.getClosestFixedAngle(meanElev, sweepNum);
     } else {
       // default to 11
       fixedAngle = _vcp11.getClosestFixedAngle(meanElev, sweepNum);
@@ -3627,6 +3632,7 @@ int NexradRadxFile::_unzipFile(const string &path)
   RadxBuf uncomp;
   uncomp.add(header, 24);
 
+  bool lastBlock = false;
   while (!feof(in)) {
 
     // read in sub-buffer length
@@ -3641,9 +3647,11 @@ int NexradRadxFile::_unzipFile(const string &path)
       _addErrStr("  Path: ", path);
     }
     length = ntohl(length);
+
     if(length < 0) {
+      // a negative length indicates this is the last block
       length = -length;
-      break;
+      lastBlock = true;
     }
 
     // read in sub-buffer
@@ -3691,6 +3699,10 @@ int NexradRadxFile::_unzipFile(const string &path)
     // add to uncomp buffer
     
     uncomp.add(outBuf, outLen);
+
+    if (lastBlock) {
+      break;
+    }
 
   } // while
 

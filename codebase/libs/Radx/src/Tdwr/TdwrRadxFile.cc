@@ -238,7 +238,7 @@ int TdwrRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - TdwrRadxFile::writeToDir" << endl;
-  cerr << "  Writing TDWR raw format files not supported" << endl;
+  cerr << "  Writing TDWR format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -279,7 +279,7 @@ int TdwrRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - TdwrRadxFile::writeToPath" << endl;
-  cerr << "  Writing TDWR raw format files not supported" << endl;
+  cerr << "  Writing TDWR format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -670,7 +670,7 @@ int TdwrRadxFile::_setVolMetaData(const string &path)
   _readVol->setFrequencyHz(_frequency);
 
   _readVol->loadSweepInfoFromRays();
-  _readVol->computeFixedAngleFromRays();
+  _readVol->computeFixedAnglesFromRays();
 
   // constrain the sweep data as appropriate
   

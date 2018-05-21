@@ -41,10 +41,6 @@ using namespace std;
 #define TINY_DIST 1.e-2
 #define TINY_DBL 1.e-10
 
-const double PjgMath::EradKm = 6378.137;
-const double PjgMath::Rad2Deg = 180.0 / M_PI;
-const double PjgMath::Deg2Rad = 1.0 / PjgMath::Rad2Deg;
-
 ////////////////////////
 // Default constructor
 //
@@ -60,7 +56,7 @@ PjgMath::PjgMath() :
         _tangent_lon(0.0),
         _pole_is_north (true),
         _central_scale(1.0),
-        _persp_radius(6.0 * EradKm),
+        _persp_radius(6.0 * Pjg::EradKm),
         _offset_lat(0.0),
         _offset_lon(0.0),
         _false_northing(0.0),

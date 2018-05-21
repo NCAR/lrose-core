@@ -37,7 +37,7 @@ TARGET_FILE = UpdateMdvCollectionType
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx \
+LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
 	-leuclid -ldsserver -lrapformats -ldidss \
 	-ltdrp -ltoolsa -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz

@@ -34,6 +34,8 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/RadxSweep.hh>
+#include <Radx/ByteOrder.hh>
+#include <cstring>
 using namespace std;
 
 /////////////////////////////////////////////////////////
@@ -192,3 +194,164 @@ void RadxSweep::print(ostream &out) const
 }
 
 
+/////////////////////////////////////////////////////////
+// serialize into a RadxMsg
+
+void RadxSweep::serialize(RadxMsg &msg,
+                          RadxMsg::RadxMsg_t msgType /* = RadxMsg::RadxSweepMsg */) 
+  
+{
+  
+  // init
+
+  msg.clearAll();
+  msg.setMsgType(msgType);
+
+  // add metadata numbers
+  
+  _loadMetaNumbersToMsg();
+  msg.addPart(_metaNumbersPartId, &_metaNumbers, sizeof(msgMetaNumbers_t));
+
+}
+
+/////////////////////////////////////////////////////////
+// deserialize from a RadxMsg
+// return 0 on success, -1 on failure
+
+int RadxSweep::deserialize(const RadxMsg &msg)
+  
+{
+  
+  // initialize object
+
+  _init();
+
+  // check type
+
+  if (msg.getMsgType() != RadxMsg::RadxSweepMsg &&
+      msg.getMsgType() != RadxMsg::RadxSweepAsInFileMsg) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxSweep::deserialize" << endl;
+    cerr << "  incorrect message type" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata numbers
+  
+  const RadxMsg::Part *metaNumsPart = msg.getPartByType(_metaNumbersPartId);
+  if (metaNumsPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxSweep::deserialize" << endl;
+    cerr << "  No metadata numbers part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaNumbersFromMsg((msgMetaNumbers_t *) metaNumsPart->getBuf(),
+                             metaNumsPart->getLength(),
+                             msg.getSwap())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxSweep::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// load the meta number to the message struct
+
+void RadxSweep::_loadMetaNumbersToMsg()
+  
+{
+
+  // clear
+
+  memset(&_metaNumbers, 0, sizeof(_metaNumbers));
+  
+  // set
+
+  _metaNumbers.fixedAngle = _fixedAngle;
+  _metaNumbers.targetScanRate = _targetScanRate;
+  _metaNumbers.measuredScanRate = _measuredScanRate;
+  _metaNumbers.angleRes = _angleRes;
+  _metaNumbers.intermedFreqHz = _intermedFreqHz;
+  _metaNumbers.startRayIndex = _startRayIndex;
+  _metaNumbers.endRayIndex = _endRayIndex;
+
+  _metaNumbers.volNum = _volNum;
+  _metaNumbers.sweepNum = _sweepNum;
+  _metaNumbers.sweepMode = _sweepMode;
+  _metaNumbers.polarizationMode = _polarizationMode;
+  _metaNumbers.prtMode = _prtMode;
+  _metaNumbers.followMode = _followMode;
+  _metaNumbers.raysAreIndexed = _raysAreIndexed;
+  _metaNumbers.isLongRange = _isLongRange;
+
+}
+
+/////////////////////////////////////////////////////////
+// set the meta number data from the message struct
+
+int RadxSweep::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                                       size_t bufLen,
+                                       bool swap)
+  
+{
+  
+  // check size
+  
+  if (bufLen != sizeof(msgMetaNumbers_t)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxSweep::_setMetaNumbersFromMsg" << endl;
+    cerr << "  Incorrect message size: " << bufLen << endl;
+    cerr << "  Should be: " << sizeof(msgMetaNumbers_t) << endl;
+    return -1;
+  }
+
+  // copy into local struct
+  
+  _metaNumbers = *metaNumbers;
+  
+  // swap as needed
+
+  if (swap) {
+    _swapMetaNumbers(_metaNumbers); 
+  }
+
+  // set members
+  
+  _fixedAngle = _metaNumbers.fixedAngle;
+  _targetScanRate = _metaNumbers.targetScanRate;
+  _measuredScanRate = _metaNumbers.measuredScanRate;
+  _angleRes = _metaNumbers.angleRes;
+  _intermedFreqHz = _metaNumbers.intermedFreqHz;
+  _startRayIndex = _metaNumbers.startRayIndex;
+  _endRayIndex = _metaNumbers.endRayIndex;
+
+  _volNum = _metaNumbers.volNum;
+  _sweepNum = _metaNumbers.sweepNum;
+  _sweepMode = (Radx::SweepMode_t) _metaNumbers.sweepMode;
+  _polarizationMode = (Radx::PolarizationMode_t) _metaNumbers.polarizationMode;
+  _prtMode = (Radx::PrtMode_t) _metaNumbers.prtMode;
+  _followMode = (Radx::FollowMode_t) _metaNumbers.followMode;
+  _raysAreIndexed = _metaNumbers.raysAreIndexed;
+  _isLongRange = _metaNumbers.isLongRange;
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// swap meta numbers
+
+void RadxSweep::_swapMetaNumbers(msgMetaNumbers_t &meta)
+{
+  ByteOrder::swap64(&meta.fixedAngle, 16 * sizeof(Radx::fl64));
+  ByteOrder::swap32(&meta.volNum, 16 * sizeof(Radx::fl32));
+}

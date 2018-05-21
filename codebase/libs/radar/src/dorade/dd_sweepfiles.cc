@@ -38,7 +38,7 @@
 const int dd_sweepfile::angle_ndx_size = 360;
 const int dd_mem_sweepfile::angle_ndx_size = 360;
 
-static const int MAX_FILE_SIZE = 10*1024*1024;
+// static const int MAX_FILE_SIZE = 10*1024*1024;
 
 
 

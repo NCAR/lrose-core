@@ -115,3 +115,9 @@ void FiltMedianNoOverlap::set_input_info(Info **info) const
   return;
 }
 
+//------------------------------------------------------------------
+void FiltMedianNoOverlap::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+

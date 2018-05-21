@@ -1,4 +1,4 @@
-`// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 // ** Copyright UCAR (c) 1990 - 2016                                         
 // ** University Corporation for Atmospheric Research (UCAR)                 
 // ** National Center for Atmospheric Research (NCAR)                        
@@ -41,6 +41,7 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxRay.hh>
+#include <Radx/RadxRcalib.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
@@ -99,7 +100,7 @@ void CfarrNcRadxFile::clear()
   _antennaDiameterVar = NULL;
   _pulsePeriodVar = NULL;
   _transmitPowerVar = NULL;
-
+  _sweepVar = NULL;
   _azimuthVar = NULL;
   _elevationVar = NULL;
 
@@ -180,17 +181,25 @@ bool CfarrNcRadxFile::isCfarrNc(const string &path)
 {
 
   clear();
-  
+  if (_debug) {
+    cerr << "DEBUG - inside isCfarrNc file" << endl;
+  }
   // open file
 
   if (_file.openRead(path)) {
+    if (_debug) {
+      cerr << "DEBUG openRead failed" << endl;
+    }
     if (_verbose) {
       cerr << "DEBUG - not CfarrNc file" << endl;
       cerr << _file.getErrStr() << endl;
     }
     return false;
   }
-
+  
+  if (_debug) {
+    cerr << "DEBUG - before read dimensions " << endl;
+  }
   // read dimensions
   
   if (_readDimensions()) {
@@ -203,23 +212,28 @@ bool CfarrNcRadxFile::isCfarrNc(const string &path)
   }
 
   // check existence of some variables
-
-  Nc3Var *baseTimeVar = _file.getNc3File()->get_var("base_time");
+  if (_debug) {
+    cerr << "DEBUG - before reading beamwidthV" << endl;
+  }
+  Nc3Var *baseTimeVar = _file.getNc3File()->get_var("beamwidthV");
   if (baseTimeVar == NULL) {
     _file.close();
     if (_verbose) {
       cerr << "DEBUG - not CfarrNc file" << endl;
-      cerr << "  base_time variable missing" << endl;
+      cerr << "  beamwidthV variable missing" << endl;
     }
     return false;
   }
-
-  Nc3Var *qcTimeVar = _file.getNc3File()->get_var("qc_time");
+  
+  if (_debug) {
+    cerr << "DEBUG - before reading transmit_power" << endl;
+  }
+  Nc3Var *qcTimeVar = _file.getNc3File()->get_var("transmit_power");
   if (qcTimeVar == NULL) {
     _file.close();
     if (_verbose) {
       cerr << "DEBUG - not CfarrNc file" << endl;
-      cerr << "  qc_time variable missing" << endl;
+      cerr << "  transmit_power variable missing" << endl;
     }
     return false;
   }
@@ -227,6 +241,9 @@ bool CfarrNcRadxFile::isCfarrNc(const string &path)
   // file has the correct dimensions, so it is a CfarrNc file
 
   _file.close();
+  if (_debug) {
+    cerr << "DEBUG - it's all good! we have a Cfarr file " << endl;
+  }
   return true;
 
 }
@@ -250,7 +267,7 @@ int CfarrNcRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
   
   cerr << "WARNING - CfarrNcRadxFile::writeToDir" << endl;
-  cerr << "  Writing CfarrNc raw format files not supported" << endl;
+  cerr << "  Writing CfarrNc format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
   
   // set up NcfRadxFile object
@@ -290,7 +307,7 @@ int CfarrNcRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - CfarrNcRadxFile::writeToPath" << endl;
-  cerr << "  Writing CfarrNc raw format files not supported" << endl;
+  cerr << "  Writing CfarrNc format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -466,12 +483,17 @@ int CfarrNcRadxFile::readFromPath(const string &path,
   }
   
   // read global attributes
-  
+  if (_debug) {
+    cerr << "Reading global attributes " << endl; 
+  }
   if (_readGlobalAttributes()) {
     _addErrStr(errStr);
     return -1;
   }
-  
+ 
+  if (_debug) {
+    cerr << " reading time variable " << endl; 
+  }
   // read time variable
   
   if (_readTimes()) {
@@ -482,28 +504,37 @@ int CfarrNcRadxFile::readFromPath(const string &path,
   // read range variable
   // the range array size will be the max of the arrays found in
   // the files
-  
+   
+  if (_debug) {
+    cerr << " reading range  variable " << endl; 
+  }
   if (_readRangeVariable()) {
     _addErrStr(errStr);
     return -1;
   }
   
-  // read position variables - lat/lon/alt
-  
+  // read position variables - lat/lon/alt 
+  if (_debug) {
+    cerr << " reading position  variable " << endl; 
+  }
   if (_readPositionVariables()) {
     _addErrStr(errStr);
     return -1;
   }
 
-  // read in sweep variables
-
-  if (_readSweepVariables()) {
+  // read scalar variables
+  if (_debug) {
+    cerr << " reading scalar variables " << endl; 
+  }
+  if (_readScalarVariables()) {
     _addErrStr(errStr);
     return -1;
   }
-
+  
   // read in ray variables
-
+  if (_debug) {
+    cerr << " reading ray  variable " << endl; 
+  }
   if (_readRayVariables()) {
     _addErrStr(errStr);
     return -1;
@@ -521,7 +552,6 @@ int CfarrNcRadxFile::readFromPath(const string &path,
   } else {
 
     // create the rays to be read in, filling out the metadata
-    
     if (_createRays(path)) {
       _addErrStr(errStr);
       return -1;
@@ -535,7 +565,9 @@ int CfarrNcRadxFile::readFromPath(const string &path,
     }
 
   }
-
+  if (_debug) {
+    cerr << " finished reading  " << endl; 
+  }
   // close file
 
   _file.close();
@@ -545,7 +577,7 @@ int CfarrNcRadxFile::readFromPath(const string &path,
   _raysValid.clear();
   for (size_t ii = 0; ii < _raysToRead.size(); ii++) {
     
-    RadxRay *ray = _raysToRead[ii].ray;
+    RadxRay *ray = _raysToRead[ii];
     
     // check if we should keep this ray or discard it
     
@@ -573,18 +605,22 @@ int CfarrNcRadxFile::readFromPath(const string &path,
   _readPaths.push_back(path);
 
   // load the data into the read volume
-
+  if (_debug) {
+    cerr << "before _loadReadVolume() " << endl; 
+  }
   if (_loadReadVolume()) {
     return -1;
   }
-  
+  if (_debug) {
+    cerr << "after _loadReadVolume() " << endl;
+  }
   // compute fixed angles as mean angle from sweeps
   
   _computeFixedAngles();
   
   // set format as read
 
-  _fileFormat = FILE_FORMAT_DOE_NC;
+  _fileFormat = FILE_FORMAT_CFARR;
 
   // clean up
 
@@ -611,14 +647,12 @@ int CfarrNcRadxFile::_readDimensions()
   }
 
   _nRangeInFile = 0;
-  iret |= _file.readDim("range_gates", _rangeDim);
+  iret |= _file.readDim("range", _rangeDim);
   if (iret == 0) {
     _nRangeInFile = _rangeDim->size();
   }
   
-  // _nGatesVary = false;
-
-  iret |= _file.readDim("sweep", _sweepDim);
+  // There is only one sweep in a Cfarr file.
 
   if (iret) {
     _addErrStr("ERROR - CfarrNcRadxFile::_file.readDimensions");
@@ -636,127 +670,44 @@ int CfarrNcRadxFile::_readGlobalAttributes()
 
 {
 
-  _file.readGlobAttr("command_line", _command_line_attr);
-  _file.readGlobAttr("process_version", _process_version_attr);
-  _file.readGlobAttr("ingest_software", _ingest_software_attr);
-  _file.readGlobAttr("dod_version", _dod_version_attr);
-  _file.readGlobAttr("site_id", _site_id_attr);
-  _file.readGlobAttr("facility_id", _facility_id_attr);
-  _file.readGlobAttr("data_level", _data_level_attr);
-  _file.readGlobAttr("input_source", _input_source_attr);
-  _file.readGlobAttr("resolution_description", _resolution_description_attr);
-  _file.readGlobAttr("sample_int", _sample_int_attr);
-  _file.readGlobAttr("serial_number", _serial_number_attr);
-  _file.readGlobAttr("calibration_constant", _calibration_constant_attr);
-  _file.readGlobAttr("averaging_int", _averaging_int_attr);
-  _file.readGlobAttr("pulse_length", _pulse_length_attr);
-  _file.readGlobAttr("corner_power", _corner_power_attr);
-  _file.readGlobAttr("center_freq", _center_freq_attr);
-  _file.readGlobAttr("decimation", _decimation_attr);
-  _file.readGlobAttr("drx_gcsync", _drx_gcsync_attr);
-  _file.readGlobAttr("drx_ncosync", _drx_ncosync_attr);
-  _file.readGlobAttr("drx_zerorx", _drx_zerorx_attr);
-  _file.readGlobAttr("external_clock", _external_clock_attr);
-  _file.readGlobAttr("integration", _integration_attr);
-  _file.readGlobAttr("resolution_setpoint", _resolution_setpoint_attr);
-  _file.readGlobAttr("radar_operating_frequency",
-                     _radar_operating_frequency_attr);
-  _file.readGlobAttr("radar_wavelength", _radar_wavelength_attr);
-  _file.readGlobAttr("pedestal_true_north", _pedestal_true_north_attr);
-  _file.readGlobAttr("nyquist_velocity", _nyquist_velocity_attr);
-  _file.readGlobAttr("nearfield_correction_description",
-                     _nearfield_correction_description_attr);
-  _file.readGlobAttr("NumSpectralAverages", _NumSpectralAverages_attr);
-  _file.readGlobAttr("fftlen", _fftlen_attr);
-  _file.readGlobAttr("prf", _prf_attr);
-  _file.readGlobAttr("StartGateDelay", _StartGateDelay_attr);
-  _file.readGlobAttr("GateSpacing", _GateSpacing_attr);
-  _file.readGlobAttr("pol_mode", _pol_mode_attr);
-  _file.readGlobAttr("antenna_altitude", _antenna_altitude_attr);
-  _file.readGlobAttr("antenna_diameter", _antenna_diameter_attr);
-  _file.readGlobAttr("elevation_correction", _elevation_correction_attr);
-  _file.readGlobAttr("scan_mode", _scan_mode_attr);
-  _file.readGlobAttr("comment", _comment_attr);
-  _file.readGlobAttr("polarization_state", _polarization_state_attr);
-  _file.readGlobAttr("qc_standards_version", _qc_standards_version_attr);
-  _file.readGlobAttr("qc_method", _qc_method_attr);
-  _file.readGlobAttr("qc_comment", _qc_comment_attr);
-  _file.readGlobAttr("qc_bit_1_description", _qc_bit_1_description_attr);
-  _file.readGlobAttr("qc_bit_1_assessment", _qc_bit_1_assessment_attr);
-  _file.readGlobAttr("qc_bit_2_description", _qc_bit_2_description_attr);
-  _file.readGlobAttr("qc_bit_2_assessment", _qc_bit_2_assessment_attr);
-  _file.readGlobAttr("qc_bit_3_description", _qc_bit_3_description_attr);
-  _file.readGlobAttr("qc_bit_3_assessment", _qc_bit_3_assessment_attr);
-  _file.readGlobAttr("qc_bit_4_description", _qc_bit_4_description_attr);
-  _file.readGlobAttr("qc_bit_4_assessment", _qc_bit_4_assessment_attr);
-  _file.readGlobAttr("zeb_platform", _zeb_platform_attr);
-  _file.readGlobAttr("history", _history_attr);
+   _file.readGlobAttr("scan_number", _scan_number_attr);
+   _file.readGlobAttr("file_number", _file_number_attr);
 
-  _title = _dod_version_attr;
-  _institution = _facility_id_attr;
-  _references = _command_line_attr;
-  _source = _input_source_attr;
-  _history = _history_attr;
-  _comment = _comment_attr;
-  _comment += _qc_comment_attr;
+   _file.readGlobAttr("scantype", _scantype_attr);
+   _file.readGlobAttr("experiment_id", _experiment_id_attr);
+   _file.readGlobAttr("operator", _operator_attr);
+   _file.readGlobAttr("scan_velocity", _scan_velocity_attr);
+   _file.readGlobAttr("min_range", _min_range_attr);
+   _file.readGlobAttr("max_range", _max_range_attr);
+   _file.readGlobAttr("min_angle", _min_angle_attr);
+   _file.readGlobAttr("max_angle", _max_angle_attr);
+   _file.readGlobAttr("scan_angle", _scan_angle_attr);
+   _file.readGlobAttr("scan_datetime", _scan_datetime_attr);
+   _file.readGlobAttr("extra_attenuation", _extra_attenuation_attr);
+   _file.readGlobAttr("ADC_bits_per_sample", _ADC_bits_per_sample_attr);
+   _file.readGlobAttr("samples_per_pulse", _samples_per_pulse_attr);
+   _file.readGlobAttr("pulses_per_daq_cycle", _pulses_per_daq_cycle_attr);
+   _file.readGlobAttr("ADC_channels", _ADC_channels_attr);
+   _file.readGlobAttr("delay_clocks", _delay_clocks_attr);
+   _file.readGlobAttr("pulses_per_ray", _pulses_per_ray_attr);
+   _file.readGlobAttr("radar_constant", _radar_constant_attr);
+   _file.readGlobAttr("receiver_gain", _receiver_gain_attr);
+   _file.readGlobAttr("cable_losses", _cable_losses_attr);
+   _file.readGlobAttr("year", _year_attr);
+   _file.readGlobAttr("month", _month_attr);
+   _file.readGlobAttr("day", _day_attr);
+   _file.readGlobAttr("British_National_Grid_Reference", _British_National_Grid_Reference_attr);
+   _file.readGlobAttr("history", _history);
+   _file.readGlobAttr("source", _source);
+   _file.readGlobAttr("radar", _radar_attr);
+   _file.readGlobAttr("Conventions", _Conventions_attr);
+   _file.readGlobAttr("title", _title);
+   _file.readGlobAttr("comment", _comment);
+   _file.readGlobAttr("institution", _institution);
+   _file.readGlobAttr("references", _references);
 
-  _siteName = _site_id_attr;
-  _scanName = _scan_mode_attr;
-
-  _instrumentName = _dod_version_attr;
-  
-  double dval;
-  _pulseLenNs = Radx::missingMetaDouble;
-  if (sscanf(_pulse_length_attr.c_str(), "%lg", &dval) == 1) {
-    _pulseLenNs = dval;
-  }
-
-  _frequencyGhz = Radx::missingMetaDouble;
-  if (sscanf(_radar_operating_frequency_attr.c_str(), "%lg", &dval) == 1) {
-    _frequencyGhz = dval;
-  }
-
-  _wavelengthM = Radx::missingMetaDouble;
-  if (sscanf(_radar_wavelength_attr.c_str(), "%lg", &dval) == 1) {
-    _wavelengthM = dval;
-  }
-
-  _nyquistMps = Radx::missingMetaDouble;
-  if (sscanf(_nyquist_velocity_attr.c_str(), "%lg", &dval) == 1) {
-    _nyquistMps = dval;
-  }
-
-  _prfHz = Radx::missingMetaDouble;
-  if (sscanf(_prf_attr.c_str(), "%lg", &dval) == 1) {
-    _prfHz = dval;
-  }
-
-  _antennaHtAgl = Radx::missingMetaDouble;
-  if (sscanf(_antenna_altitude_attr.c_str(), "%lg", &dval) == 1) {
-    _antennaHtAgl = dval;
-  }
-
-  _antennaDiameterInches = Radx::missingMetaDouble;
-  if (sscanf(_antenna_diameter_attr.c_str(), "%lg", &dval) == 1) {
-    _antennaDiameterInches = dval;
-  }
-
-  // set the status XML from the attributes
-
-  _statusXml.clear();
-  _statusXml += RadxXml::writeStartTag("STATUS", 0);
-  for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
-    Nc3Att *att = _file.getNc3File()->get_att(ii);
-    if (att != NULL) {
-      const char* strc = att->as_string(0);
-      string val(strc);
-      delete[] strc;
-      string name(att->name());
-      delete att;
-      _statusXml += RadxXml::writeString(name, 1, val);
-    }
-  }
-  _statusXml += RadxXml::writeEndTag("STATUS", 0);
+   _siteName = _radar_attr;
+   _instrumentName = _radar_attr;
 
   return 0;
 
@@ -913,21 +864,21 @@ int CfarrNcRadxFile::_readPositionVariables()
   // find latitude, longitude, height
 
   int iret = 0;
-  if (_file.readDoubleVar(_latitudeVar, "lat", _latitudeDeg, 0, true)) {
+  if (_file.readDoubleVar(_latitudeVar, "latitude", _latitudeDeg, 0, true)) {
     _addErrStr("ERROR - CfarrNcRadxFile::_readPositionVariables");
     _addErrStr("  Cannot read latitude");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     iret = -1;
   }
 
-  if (_file.readDoubleVar(_longitudeVar, "lon", _longitudeDeg, 0, true)) {
+  if (_file.readDoubleVar(_longitudeVar, "longitude", _longitudeDeg, 0, true)) {
     _addErrStr("ERROR - CfarrNcRadxFile::_readPositionVariables");
     _addErrStr("  Cannot read longitude");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     iret = -1;
   }
 
-  if (_file.readDoubleVar(_heightVar, "alt", _heightKm, 0, true)) {
+  if (_file.readDoubleVar(_heightVar, "height", _heightKm, 0, true)) {
     _addErrStr("ERROR - CfarrNcRadxFile::_readPositionVariables");
     _addErrStr("  Cannot read height");
     _addErrStr(_file.getNc3Error()->get_errmsg());
@@ -944,64 +895,66 @@ int CfarrNcRadxFile::_readPositionVariables()
   
   return iret;
 
-}
+}///////////////////////////////////
+// read scalar variables
 
-///////////////////////////////////
-// read the sweep meta-data
-
-int CfarrNcRadxFile::_readSweepVariables()
+int CfarrNcRadxFile::_readScalarVariables()
 
 {
 
-  // create vector for the sweeps
+  // 
 
-  size_t nSweepsInFile = _sweepDim->size();
-
-  // initialize
-
-  vector<int> sweepTypes, sweepStartIndexes, sweepLengths;
-  
   int iret = 0;
-  
-  _readSweepVar(_sweepTypeVar, "sweep_type", sweepTypes);
-  if (sweepTypes.size() != nSweepsInFile) {
+  if (_file.readDoubleVar(_beamwidthHVar, "beamwidthH", _beamwidthHDeg , 0, true)) {
+    _addErrStr("ERROR - CfarrNcRadxFile::_readScalarVariables");
+    _addErrStr("  Cannot read beam width H");
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     iret = -1;
   }
 
-  _readSweepVar(_sweepStartIndexVar, "sweep_start_index", sweepStartIndexes);
-  if (sweepStartIndexes.size() != nSweepsInFile) {
+  if (_file.readDoubleVar(_beamwidthVVar, "beamwidthV", _beamwidthVDeg , 0, true)) {
+    _addErrStr("ERROR - CfarrNcRadxFile::_readScalarVariables");
+    _addErrStr("  Cannot read beam width V");
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     iret = -1;
   }
 
-  _readSweepVar(_sweepLengthVar, "sweep_length", sweepLengths);
-  if (sweepLengths.size() != nSweepsInFile) {
+  if (_file.readDoubleVar(_frequencyVar, "frequency", _frequencyGhz, 0, true)) {
+    _addErrStr("ERROR - CfarrNcRadxFile::_readScalarVariables");
+    _addErrStr("  Cannot read frequency");
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     iret = -1;
   }
 
-  if (iret) {
-    return -1;
+  if (_file.readDoubleVar(_prfVar, "prf", _prfHz, 0, true)) {
+    _addErrStr("ERROR - CfarrNcRadxFile::_readScalarVariables");
+    _addErrStr("  Cannot read prf");
+    _addErrStr(_file.getNc3Error()->get_errmsg());
+    iret = -1;
   }
 
-  _sweeps.clear();
-  for (size_t ii = 0; ii < nSweepsInFile; ii++) {
-    RadxSweep *sweep = new RadxSweep;
-    sweep->setSweepNumber(ii);
-    if (sweepTypes[ii] == 0) {
-      sweep->setSweepMode(Radx::SWEEP_MODE_VERTICAL_POINTING);
-    } else if (sweepTypes[ii] == 1) {
-      sweep->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
-    } else if (sweepTypes[ii] == 2) {
-      sweep->setSweepMode(Radx::SWEEP_MODE_RHI);
-    } else if (sweepTypes[ii] == 3) {
-      sweep->setSweepMode(Radx::SWEEP_MODE_COPLANE);
-    }
-    sweep->setStartRayIndex(sweepStartIndexes[ii]);
-    int endIndex = sweepStartIndexes[ii] + sweepLengths[ii] - 1;
-    sweep->setEndRayIndex(endIndex);
-    _sweeps.push_back(sweep);
-  } // ii
+  if (_file.readDoubleVar(_antennaDiameterVar, "antenna_diameter", _antennaDiameterM, 0, true)) {
+    _addErrStr("ERROR - CfarrNcRadxFile::_readScalarVariables");
+    _addErrStr("  Cannot read antenna diameter");
+    _addErrStr(_file.getNc3Error()->get_errmsg());
+    iret = -1;
+  }
 
-  return 0;
+  if (_file.readDoubleVar(_transmitPowerVar, "transmit_power", _transmitPowerW, 0, true)) {
+    _addErrStr("ERROR - CfarrNcRadxFile::_readScalarVariables");
+    _addErrStr("  Cannot read transmit power");
+    _addErrStr(_file.getNc3Error()->get_errmsg());
+    iret = -1;
+  }
+
+  if (_file.readDoubleVar(_pulsePeriodVar, "pulse_period", _pulsePeriodUs, 0, true)) {
+    _addErrStr("ERROR - CfarrNcRadxFile::_readScalarVariables");
+    _addErrStr("  Cannot read pulse period");
+    _addErrStr(_file.getNc3Error()->get_errmsg());
+    iret = -1;
+  }
+
+  return iret;
 
 }
 
@@ -1011,15 +964,8 @@ int CfarrNcRadxFile::_readSweepVariables()
 void CfarrNcRadxFile::_clearRayVariables()
 
 {
-
   _azimuths.clear();
   _elevations.clear();
-  _azScanRates.clear();
-  _elScanRates.clear();
-  _noiseDbms.clear();
-  _pedestalOpModes.clear();
-  _polarizations.clear();
-
 }
 
 ///////////////////////////////////
@@ -1032,23 +978,17 @@ int CfarrNcRadxFile::_readRayVariables()
   _clearRayVariables();
   int iret = 0;
 
-  _readRayVar(_azimuthVar, "Azimuth_current", _azimuths);
+  _readRayVar(_azimuthVar, "azimuth", _azimuths);
   if ((int) _azimuths.size() != _timeDim->size()) {
     _addErrStr("ERROR - Azimuth_current variable required");
     iret = -1;
   }
   
-  _readRayVar(_elevationVar, "Elevation_current", _elevations);
+  _readRayVar(_elevationVar, "elevation", _elevations);
   if ((int) _elevations.size() != _timeDim->size()) {
     _addErrStr("ERROR - Elevation_current variable required");
     iret = -1;
   }
-
-  _readRayVar(_azimuthRateVar, "Azimuth_scan_rate", _azScanRates, false);
-  _readRayVar(_elevationRateVar, "Elevation_scan_rate", _elScanRates, false);
-  _readRayVar(_pedestalOpModeVar, "Pedestal_op_mode", _pedestalOpModes, false);
-  _readRayVar(_noiseVar, "Noise", _noiseDbms, false);
-  _readRayVar(_polarizationVar, "Polarization", _polarizations, false);
 
   if (iret) {
     _addErrStr("ERROR - CfarrNcRadxFile::_readRayVariables");
@@ -1066,43 +1006,22 @@ int CfarrNcRadxFile::_readRayVariables()
 int CfarrNcRadxFile::_createRays(const string &path)
 
 {
-
-  // compile a list of the rays to be read in, using the list of
-  // sweeps to read
-
-  vector<RayInfo> raysToRead;
-  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
-    RadxSweep *sweep = _sweeps[isweep];
-    for (size_t ii = sweep->getStartRayIndex();
-         ii <= sweep->getEndRayIndex(); ii++) {
-      // add ray to list to be read
-      RayInfo info;
-      info.indexInFile = ii;
-      info.sweep = sweep;
-      raysToRead.push_back(info);
-    } // ii
-  } // isweep
-
-  // create the rays
+  // create the rays array
 
   _raysToRead.clear();
   
-  for (size_t ii = 0; ii < raysToRead.size(); ii++) {
-    
-    RayInfo rayInfo = raysToRead[ii];
-    size_t rayIndex = rayInfo.indexInFile;
-    RadxSweep *sweep = rayInfo.sweep;
+  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
 
     // new ray
-
+    
     RadxRay *ray = new RadxRay;
-    rayInfo.ray = ray;
+    // rayInfo.ray = ray;
 
     ray->copyRangeGeom(_geom);
     
     // set time
     
-    double rayTimeDouble = _dTimes[rayIndex];
+    double rayTimeDouble = _dTimes[ii];
     time_t rayUtimeSecs = _refTimeSecsFile + (time_t) rayTimeDouble;
     double rayIntSecs;
     double rayFracSecs = modf(rayTimeDouble, &rayIntSecs);
@@ -1111,46 +1030,15 @@ int CfarrNcRadxFile::_createRays(const string &path)
     
     // sweep info
     
-    ray->setSweepNumber(sweep->getSweepNumber());
-    ray->setAzimuthDeg(_azimuths[rayIndex]);
-    ray->setElevationDeg(_elevations[rayIndex]);
-    
-    if (_pedestalOpModes.size() > rayIndex) {
-      int opMode = _pedestalOpModes[rayIndex];
-      Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_NOT_SET;
-      switch (opMode) {
-        case 2: sweepMode = Radx::SWEEP_MODE_IDLE; break;
-        case 3: sweepMode = Radx::SWEEP_MODE_POINTING; break;
-        case 7: sweepMode = Radx::SWEEP_MODE_RHI; break;
-        case 8: sweepMode = Radx::SWEEP_MODE_SECTOR; break;
-        case 9: sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE; break;
-      }
-      ray->setSweepMode(sweepMode);
-    }
-    
-    if (_polarizations.size() > rayIndex) {
-      // int pol = _polarizations[rayIndex];
-      ray->setPolarizationMode(Radx::POL_MODE_HV_SIM);
-    }
-    
-    if (_noiseDbms.size() > rayIndex) {
-      double noiseDbm = _noiseDbms[rayIndex];
-      ray->setEstimatedNoiseDbmHc(noiseDbm);
-      ray->setEstimatedNoiseDbmVc(noiseDbm);
-    }
-    
-    if (_azScanRates.size() > rayIndex) {
-      ray->setTrueScanRateDegPerSec(_azScanRates[rayIndex]);
-    }
-    if (_elScanRates.size() > rayIndex) {
-      if (ray->getSweepMode() == Radx::SWEEP_MODE_RHI) {
-        ray->setTrueScanRateDegPerSec(_elScanRates[rayIndex]);
-      }
-    }
+    ray->setAzimuthDeg(_azimuths[ii]);
+    ray->setElevationDeg(_elevations[ii]);
+    ray->setPrtSec(1.0/_prfHz);
+    ray->setTargetScanRateDegPerSec(_scan_velocity_attr);
+    ray->setNSamples(_pulses_per_ray_attr);
 
-    // add to ray vector
+    // add to ray vector for reading
 
-    _raysToRead.push_back(rayInfo);
+    _raysToRead.push_back(ray);
 
   } // ii
 
@@ -1219,7 +1107,7 @@ int CfarrNcRadxFile::_readFieldVariables(bool metaOnly)
     string name = var->name();
     
     string standardName;
-    Nc3Att *standardNameAtt = var->get_att("standard_name");
+    Nc3Att *standardNameAtt = var->get_att("chilbolton_standard_name");
     if (standardNameAtt != NULL) {
       standardName = Nc3xFile::asString(standardNameAtt);
       delete standardNameAtt;
@@ -1238,16 +1126,28 @@ int CfarrNcRadxFile::_readFieldVariables(bool metaOnly)
       units = Nc3xFile::asString(unitsAtt);
       delete unitsAtt;
     }
-
+ 
     // folding
+    string shortName;
+    Nc3Att *shortNameAtt = var->get_att("short_name");
+    if (shortNameAtt != NULL) {
+      shortName = Nc3xFile::asString(shortNameAtt);
+      delete shortNameAtt;
+    }
 
     bool fieldFolds = false;
     float foldLimitLower = Radx::missingMetaFloat;
     float foldLimitUpper = Radx::missingMetaFloat;
-    if (name.find("DopplerVelocity") != string::npos) {
+    if (shortName.find("Doppler velocity") != string::npos) {
       fieldFolds = true;
-      foldLimitLower = _nyquistMps * -1.0;
-      foldLimitUpper = _nyquistMps;
+      float foldingVelocity = 0.0;
+      Nc3Att *foldingVelocityAtt = var->get_att("folding_velocity");
+      if (foldingVelocityAtt != NULL) {
+        foldingVelocity = foldingVelocityAtt->as_double(0);
+        delete foldingVelocityAtt;
+      }
+      foldLimitLower = foldingVelocity * -1.0;
+      foldLimitUpper = foldingVelocity;
     }
     
     // if metadata only, don't read in fields
@@ -1466,100 +1366,6 @@ Nc3Var* CfarrNcRadxFile::_getRayVar(const string &name, bool required)
 
 }
 
-///////////////////////////////////
-// read a sweep variable - integer
-
-int CfarrNcRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
-                                   vector<int> &vals, bool required)
-
-{
-
-  vals.clear();
-
-  // get var
-
-  int nSweeps = _sweepDim->size();
-  var = _getSweepVar(name);
-  if (var == NULL) {
-    if (!required) {
-      for (int ii = 0; ii < nSweeps; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - CfarrNcRadxFile::_readSweepVar");
-      return -1;
-    }
-  }
-
-  // load up data
-
-  int *data = new int[nSweeps];
-  int *dd = data;
-  int iret = 0;
-  if (var->get(data, nSweeps)) {
-    for (int ii = 0; ii < nSweeps; ii++, dd++) {
-      vals.push_back(*dd);
-    }
-  } else {
-    if (!required) {
-      for (int ii = 0; ii < nSweeps; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - CfarrNcRadxFile::_readSweepVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      iret = -1;
-    }
-  }
-  delete[] data;
-  return iret;
-
-}
-
-///////////////////////////////////
-// get a sweep variable
-// returns NULL on failure
-
-Nc3Var* CfarrNcRadxFile::_getSweepVar(const string &name)
-
-{
-  
-  // get var
-  
-  Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
-  if (var == NULL) {
-    _addErrStr("ERROR - CfarrNcRadxFile::_getSweepVar");
-    _addErrStr("  Cannot read variable, name: ", name);
-    _addErrStr(_file.getNc3Error()->get_errmsg());
-    return NULL;
-  }
-
-  // check sweep dimension
-
-  if (var->num_dims() < 1) {
-    _addErrStr("ERROR - CfarrNcRadxFile::_getSweepVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has no dimensions");
-    return NULL;
-  }
-  Nc3Dim *sweepDim = var->get_dim(0);
-  if (sweepDim != _sweepDim) {
-    _addErrStr("ERROR - CfarrNcRadxFile::_getSweepVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has incorrect dimension, dim name: ",
-               sweepDim->name());
-    _addErrStr("  should be: ", "sweep");
-    return NULL;
-  }
-
-  return var;
-
-}
-
 //////////////////////////////////////////////////////////////
 // Add fl64 fields to _raysFromFile
 // The _raysFromFile array has previously been set up by _createRays()
@@ -1595,30 +1401,35 @@ int CfarrNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
     delete missingValueAtt;
   }
 
+  // look for fill value, if not present, then use missing value
+
+  Radx::fl64 fillVal = missingVal;
+  Nc3Att *fillValueAtt = var->get_att("_FillValue");
+  if (fillValueAtt != NULL) {
+    fillVal = fillValueAtt->as_double(0);
+    delete fillValueAtt;
+  }
+
+  // replace any NaN's with fill value
+  for (size_t jj = 0; jj < _nTimesInFile * _nRangeInFile; jj++) {
+    if (std::isnan(data[jj]))
+      data[jj] = fillVal;
+  }
+
   // load field on rays
 
   for (size_t ii = 0; ii < _raysToRead.size(); ii++) {
     
-    size_t rayIndex = _raysToRead[ii].indexInFile;
-
-    if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - CfarrNcRadxFile::_addSi16FieldToRays" << endl;
-      cerr << "  Trying to access ray beyond data" << endl;
-      cerr << "  Trying to read ray index: " << rayIndex << endl;
-      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
-      cerr << "  skipping ...." << endl;
-      continue;
-    }
-    
     int nGates = _nRangeInFile;
-    int startIndex = rayIndex * _nRangeInFile;
+    int startIndex = ii * _nRangeInFile;
     
     RadxField *field =
-      _raysToRead[ii].ray->addField(name, units, nGates,
-                                    missingVal,
-                                    data + startIndex,
-                                    true);
+      _raysToRead[ii]->addField(name, units, nGates,
+				missingVal,
+				data + startIndex,
+				true);
 
+    field->setMissingFl64(missingVal);
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
@@ -1670,34 +1481,39 @@ int CfarrNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
   Radx::fl32 missingVal = Radx::missingFl32;
   Nc3Att *missingValueAtt = var->get_att("missing_value");
   if (missingValueAtt != NULL) {
-    missingVal = missingValueAtt->as_double(0);
+    missingVal = missingValueAtt->as_float(0);
     delete missingValueAtt;
+  }
+
+  // look for fill value, if not present, then use missing value
+
+  Radx::fl32 fillVal = missingVal;
+  Nc3Att *fillValueAtt = var->get_att("_FillValue");
+  if (fillValueAtt != NULL) {
+    fillVal = fillValueAtt->as_float(0);
+    delete fillValueAtt;
+  }
+
+  // replace any NaN's with fill value
+  for (size_t jj = 0; jj < _nTimesInFile * _nRangeInFile; jj++) {
+    if (std::isnan(data[jj]))
+      data[jj] = fillVal;
   }
   
   // load field on rays
 
   for (size_t ii = 0; ii < _raysToRead.size(); ii++) {
     
-    size_t rayIndex = _raysToRead[ii].indexInFile;
-
-    if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - CfarrNcRadxFile::_addSi16FieldToRays" << endl;
-      cerr << "  Trying to access ray beyond data" << endl;
-      cerr << "  Trying to read ray index: " << rayIndex << endl;
-      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
-      cerr << "  skipping ...." << endl;
-      continue;
-    }
-    
     int nGates = _nRangeInFile;
-    int startIndex = rayIndex * _nRangeInFile;
+    int startIndex = ii * _nRangeInFile;
 
     RadxField *field =
-      _raysToRead[ii].ray->addField(name, units, nGates,
-                                    missingVal,
-                                    data + startIndex,
-                                    true);
+      _raysToRead[ii]->addField(name, units, nGates,
+				missingVal,
+				data + startIndex,
+				true);
     
+    field->setMissingFl32(missingVal);
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
@@ -1727,7 +1543,7 @@ int CfarrNcRadxFile::_loadReadVolume()
 
   // set metadata
 
-  _readVol->setOrigFormat("DOE");
+  _readVol->setOrigFormat("Cfarr");
   _readVol->setVolumeNumber(_volumeNumber);
   _readVol->setInstrumentType(_instrumentType);
   _readVol->setPlatformType(_platformType);
@@ -1753,6 +1569,29 @@ int CfarrNcRadxFile::_loadReadVolume()
 
   _readVol->copyRangeGeom(_geom);
 
+  _readVol->setRadarBeamWidthDegH(_beamwidthHDeg);
+  _readVol->setRadarBeamWidthDegV(_beamwidthVDeg);
+
+  // add calibration 
+  RadxRcalib *cal = new RadxRcalib;
+  cal->setPulseWidthUsec(_pulsePeriodUs);
+  cal->setRadarConstantH(_radar_constant_attr);
+  cal->setRadarConstantV(_radar_constant_attr);
+  cal->setReceiverGainDbHc(_receiver_gain_attr);
+  cal->setReceiverGainDbHx(_receiver_gain_attr);
+  cal->setReceiverGainDbVc(_receiver_gain_attr);
+  cal->setReceiverGainDbVx(_receiver_gain_attr);
+  cal->setPowerMeasLossDbH(_cable_losses_attr);
+  cal->setPowerMeasLossDbV(_cable_losses_attr);
+  double transmitPowerDbm = 10.0 * log10(_transmitPowerW * 1000.0);
+  cal->setXmitPowerDbmH(transmitPowerDbm);
+  cal->setXmitPowerDbmV(transmitPowerDbm);
+  _readVol->addCalib(cal); 
+
+  if (_readSetMaxRange) {
+    _readVol->setMaxRangeKm(_readMaxRangeKm);
+  }
+  
   for (int ii = 0; ii < (int) _raysValid.size(); ii++) {
     _raysValid[ii]->setVolumeNumber(_volumeNumber);
   }
@@ -1760,29 +1599,21 @@ int CfarrNcRadxFile::_loadReadVolume()
   // add rays to vol - they will be freed by vol
 
   for (size_t ii = 0; ii < _raysValid.size(); ii++) {
-
-    // fake angles for testing
-    // double el = 0.5;
-    // double az = ii * 0.5;
-    // while (az > 360) {
-    //   az -= 360;
-    // }
-    // _raysValid[ii]->setElevationDeg(el);
-    // _raysValid[ii]->setAzimuthDeg(az);
-    // _raysValid[ii]->setFixedAngleDeg(el);
-    // _raysValid[ii]->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
-
     _readVol->addRay(_raysValid[ii]);
-  }
-
-  if (_readSetMaxRange) {
-    _readVol->setMaxRangeKm(_readMaxRangeKm);
   }
   
   // memory responsibility has passed to the volume object, so clear
   // the vectors without deleting the objects to which they point
 
   _raysValid.clear();
+
+  // set sweep mode from the ray angles
+
+  Radx::SweepMode_t sweepMode = _readVol->getPredomSweepModeFromAngles();
+  vector<RadxRay *> &rays = _readVol->getRays();
+  for (size_t ii = 0; ii < rays.size(); ii++) {
+    rays[ii]->setSweepMode(sweepMode);
+  }
   
   // load the sweep information from the rays
 
@@ -1834,18 +1665,22 @@ void CfarrNcRadxFile::_computeFixedAngles()
 
     RadxSweep &sweep = *_readVol->getSweeps()[isweep];
 
-    double sumElev = 0.0;
+    double sumAngle = 0.0;
     double count = 0.0;
 
     for (size_t iray = sweep.getStartRayIndex();
          iray <= sweep.getEndRayIndex(); iray++) {
       const RadxRay &ray = *_readVol->getRays()[iray];
-      sumElev += ray.getElevationDeg();
+      if (ray.getSweepMode() == Radx::SWEEP_MODE_RHI) {
+	sumAngle += ray.getAzimuthDeg();
+      } else {
+	sumAngle += ray.getElevationDeg();
+      }
       count++;
     }
 
-    double meanElev = sumElev / count;
-    double fixedAngle = ((int) (meanElev * 100.0 + 0.5)) / 100.0;
+    double meanAngle = sumAngle / count;
+    double fixedAngle = ((int) (meanAngle * 100.0 + 0.5)) / 100.0;
 
     sweep.setFixedAngleDeg(fixedAngle);
       

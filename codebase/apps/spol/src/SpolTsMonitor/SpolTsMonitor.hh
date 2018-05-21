@@ -100,6 +100,7 @@ private:
   
   // test pulse
 
+  iwrf_xmit_rcv_mode _xmitRcvMode;
   int _nSamplesTestPulse;
   time_t _testPulseLatestTime;
   string _testPulseXml;

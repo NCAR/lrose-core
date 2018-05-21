@@ -36,7 +36,7 @@ TARGET_FILE = Ltg2RampClosures
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-ltoolsa -ldataport -leuclid -ltdrp \
+	-leuclid -ldataport -ltoolsa -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

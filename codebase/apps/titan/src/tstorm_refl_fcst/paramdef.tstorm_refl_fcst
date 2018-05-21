@@ -166,14 +166,18 @@ commentdef
 typedef enum
 {
   GENERATE_TIME,
-  FORECAST_TIME
+  FORECAST_TIME,
+  FORECAST_DIR
 } file_time_stamp_t;
 
 paramdef enum file_time_stamp_t
 {
   p_descr = "File time stamp";
-  p_help = "If GENERATE_TIME, file names match generate data time.\n"
-           "If FORECAST_TIME, file names match forecast time.";
+    p_help = "If GENERATE_TIME, files are written into a flat directory structure and "
+             "file names match generate data time.\n"
+	     "If FORECAST_TIME, files are written into a flat directory structure and "
+	     "file names match forecast time.\n"
+             "If FORECAST_DIR, files are written into a forecast directory structure.\n";
   p_default = GENERATE_TIME;
 } file_time_stamp;
 

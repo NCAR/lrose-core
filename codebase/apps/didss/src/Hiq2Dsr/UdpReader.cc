@@ -48,6 +48,7 @@
 #include <cerrno>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <toolsa/pmu.h>
@@ -181,11 +182,7 @@ int UdpReader::_readBytes(char *buffer, const int buffer_size)
   struct sockaddr_in from_address;
   int status;
 
-#if defined(__linux)
   socklen_t addrLen = sizeof(struct sockaddr_in);
-#else
-  int addrLen = sizeof(struct sockaddr_in);
-#endif
 
   // Wait on socket for up to 10 secs at a time
 

@@ -101,8 +101,8 @@ void PJGs_ps_latlon2xy(PJGstruct *ps, double lat, double lon, double *x, double 
 	ta_sincos( lat, &sin1, &cos1);
 
 	k = 2.0 * cs->Ps_scale / (1.0 + cs->Ps_sin * sin1 + cs->Ps_cos * cos1 * cd);
-	*x = EARTH_RADIUS * k * cos1 * sd - cs->Ps_x0;
-	*y = EARTH_RADIUS * k * ( cs->Ps_cos * sin1 - cs->Ps_sin * cos1 * cd) - cs->Ps_y0;
+	*x = PJG_get_earth_radius() * k * cos1 * sd - cs->Ps_x0;
+	*y = PJG_get_earth_radius() * k * ( cs->Ps_cos * sin1 - cs->Ps_sin * cos1 * cd) - cs->Ps_y0;
     }
 
 
@@ -121,7 +121,7 @@ void PJGs_ps_xy2latlon(PJGstruct *ps, double x, double y, double *lat, double *l
 	y += cs->Ps_y0;
 
 	rho = sqrt( x*x + y*y);
-	c = 2.0 * atan2( rho, 2.0*EARTH_RADIUS*cs->Ps_scale);	
+	c = 2.0 * atan2( rho, 2.0 * PJG_get_earth_radius() * cs->Ps_scale);	
 	ta_sincos( c, &sinc, &cosc);
 
 	if (fabs(rho) < TINY_FLOAT)

@@ -61,6 +61,9 @@ SRCS = \
 	pjg_util.c \
 	sincos.c
 
+CPPC_SRCS = \
+	TaPjg.cc
+
 # testing
 
 TEST_PJG = test_pjg

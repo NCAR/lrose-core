@@ -1,9 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -33,8 +50,6 @@
  * @author Automatically generated
  *
  */
-using namespace std;
-
 #include "Params.hh"
 #include <cstring>
 
@@ -841,6 +856,18 @@ using namespace std;
     tt->help = tdrpStrDup("The platform georeference objects, if they are included in the data stream, are asynchronous with the pulse objects. Therefore we need to match a georeference object with a pulse object. If the times of the two objects differ by less than this specified margin, the georeference is attached to the pulse. If the time difference exceeds this margin, no georeference is attached to the pulse.");
     tt->val_offset = (char *) &georef_time_margin_secs - &_start_;
     tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'use_secondary_georeference'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_secondary_georeference");
+    tt->descr = tdrpStrDup("If true, use the secondary georeference packet.");
+    tt->help = tdrpStrDup("By default, we use the primary georeference packet. And most mobile radars only have one georeference. For those radars that have 2 georef devices, set this to true to use the secondary reference.");
+    tt->val_offset = (char *) &use_secondary_georeference - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'check_radar_id'
@@ -1881,6 +1908,30 @@ using namespace std;
     tt->single_val.d = 0;
     tt++;
     
+    // Parameter 'threshold_zdr_using_snr'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("threshold_zdr_using_snr");
+    tt->descr = tdrpStrDup("Option to threshold ZDR using SNR.");
+    tt->help = tdrpStrDup("If true, we will only compute ZDR if the SNR in both the H and V co-polar channels exceeds this value. See 'min_snr_db_for_zdr'.");
+    tt->val_offset = (char *) &threshold_zdr_using_snr - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_snr_db_for_zdr'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_snr_db_for_zdr");
+    tt->descr = tdrpStrDup("Min SNR for computing ZDR (dB).");
+    tt->help = tdrpStrDup("If the SNR is below this threshold for either the H or V co-polar channels, ZDR will be set to missing. See 'threshold_zdr_using_snr'.");
+    tt->val_offset = (char *) &min_snr_db_for_zdr - &_start_;
+    tt->single_val.d = -7;
+    tt++;
+    
     // Parameter 'override_cal_ldr_corrections'
     // ctype is 'tdrp_bool_t'
     
@@ -1915,6 +1966,30 @@ using namespace std;
     tt->help = tdrpStrDup("See 'override_cal_ldr_corrections'.");
     tt->val_offset = (char *) &ldr_correction_db_v - &_start_;
     tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'threshold_ldr_using_snr'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("threshold_ldr_using_snr");
+    tt->descr = tdrpStrDup("Option to threshold LDR using SNR.");
+    tt->help = tdrpStrDup("If true, we will only compute LDR if the SNR in both the co- and cross-polar channels exceeds this value. Since the cross-polar channel is generally the weaker channel, it is the SNR on the cross-polar channel that will be limiting. See 'min_snr_db_for_ldr'.");
+    tt->val_offset = (char *) &threshold_ldr_using_snr - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_snr_db_for_ldr'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_snr_db_for_ldr");
+    tt->descr = tdrpStrDup("Min SNR for computing LDR (dB).");
+    tt->help = tdrpStrDup("For LDR, the cross polar channel is the weaker return. Therefore effectively this threshold will be applied to the cross channel. If the SNR is below this threshold for either the co- or cross-polar channels, LDR will be set to missing. See 'threshold_ldr_using_snr'.");
+    tt->val_offset = (char *) &min_snr_db_for_ldr - &_start_;
+    tt->single_val.d = -7;
     tt++;
     
     // Parameter 'override_cal_system_phidp'
@@ -3822,6 +3897,63 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 22");
+    tt->comment_hdr = tdrpStrDup("RHOHV TEST to AUGMENT CMD");
+    tt->comment_text = tdrpStrDup("If clutter is present the RHOHV value should increase after application of the clutter filter. We can use a RHOHV test to locate gates at which CMD fails to identify weak clutter. This allows us to improve clutter identification in cases with low CSR.");
+    tt++;
+    
+    // Parameter 'apply_rhohv_test_after_cmd'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("apply_rhohv_test_after_cmd");
+    tt->descr = tdrpStrDup("Apply the RHOHV test after filtering based on CMD.");
+    tt->help = tdrpStrDup("This allows us to identify areas of weak clutter contamination that CMD missed.");
+    tt->val_offset = (char *) &apply_rhohv_test_after_cmd - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'rhohv_test_min_rhohv'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("rhohv_test_min_rhohv");
+    tt->descr = tdrpStrDup("Min RHOHV for application of the RHOHV test.");
+    tt->help = tdrpStrDup("If RHOHV is less than this, no weather is likely to be present. Therefore do not apply the test to this gate.");
+    tt->val_offset = (char *) &rhohv_test_min_rhohv - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'rhohv_test_max_rhohv'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("rhohv_test_max_rhohv");
+    tt->descr = tdrpStrDup("Max RHOHV for application of the RHOHV test.");
+    tt->help = tdrpStrDup("If RHOHV is greater than this, the weather return is highly coherent, so clutter contamination is unlikely.");
+    tt->val_offset = (char *) &rhohv_test_max_rhohv - &_start_;
+    tt->single_val.d = 0.98;
+    tt++;
+    
+    // Parameter 'rhohv_improvement_factor_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("rhohv_improvement_factor_threshold");
+    tt->descr = tdrpStrDup("The RHOHV improvment factor is a measure of the change in RHOHV towards 1.0.");
+    tt->help = tdrpStrDup("The RHOHV test identifies clutter if the improvement factor exceeds this value.");
+    tt->val_offset = (char *) &rhohv_improvement_factor_threshold - &_start_;
+    tt->single_val.d = 4;
+    tt++;
+    
+    // Parameter 'Comment 23'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("OUTPUT TO DSRADAR FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4889,11 +5021,11 @@ using namespace std;
       tt->struct_vals[566].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("SWEEP TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-sweep and start-of-sweep conditions found in the time series.");
     tt++;
@@ -4970,11 +5102,11 @@ using namespace std;
     tt->single_val.i = 32;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("VOLUME TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-volume conditions found in the time series. This section only applies if 'use_volume_info_from_time_series' is set to FALSE.");
     tt++;
@@ -5065,11 +5197,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("TRANSITION FLAG");
     tt->comment_text = tdrpStrDup("");
     tt++;

@@ -39,9 +39,9 @@ TARGET_FILE = Ts2NetCDF
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lradar -lRadx -lFmq -ldsserver \
-	-lrapformats -ldidss -ltoolsa -ldataport \
-	-leuclid -ltdrp $(NETCDF4_LIBS) -lbz2 \
-	-lz
+	-lrapformats -ldidss -ldataport \
+	-leuclid -ltoolsa -ltdrp $(NETCDF4_LIBS) \
+	-lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

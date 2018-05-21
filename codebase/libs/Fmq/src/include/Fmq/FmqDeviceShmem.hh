@@ -95,7 +95,11 @@ public:
   // Check that the device is the valid size.
   // Returns 0 on success, -1 on failure
   
-  int check_size(ident_t id, size_t expectedSize);
+  virtual int check_size(ident_t id, size_t expectedSize);
+  
+  // Get size of device buffer
+
+  virtual int get_size(ident_t id);
   
 protected:
 
@@ -115,8 +119,8 @@ private:
   char *_bufPtr;  // pointer to buffer segment
   char *_ptr[N_IDENT];
 
-  off_t _statOffset; // current offset in status segment
-  off_t _bufOffset; // current offset in buf segment
+  // off_t _statOffset; // current offset in status segment
+  // off_t _bufOffset; // current offset in buf segment
   off_t _offset[N_IDENT];
 
   // lock file for synchronization

@@ -31,16 +31,14 @@
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
-MODULE_TYPE=progcpp
-
 TARGET_FILE = PtypeIngest
 
 LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -lSpdb \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -lSpdb \
 	-ldsserver -ldidss -lrapformats -leuclid \
 	-lphysics -ltoolsa -ldataport -ltdrp \
-	-lnetcdf_c++ -lnetcdf $(NETCDF4_LIBS) -lbz2 \
+	$(NETCDF4_LIBS) -lbz2 \
 	-lz
 
 LOC_LDFLAGS = $(NETCDF_LDFLAGS) $(NETCDF4_LDFLAGS)
@@ -64,10 +62,22 @@ CPPC_SRCS = \
 	NetcdfFile.cc
 
 #
-# standard targets
+# tdrp macros
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+
+#
+# C++ targets
 #
 
 include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+
+#
+# tdrp targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 
 #
 # local targets
@@ -75,16 +85,4 @@ include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
 
 depend: depend_generic
 
-#
-# TDRP support
-#
-
-Params.cc: paramdef.$(TARGET_FILE)
-	tdrp_gen -f paramdef.$(TARGET_FILE) -c++ \
-		-prog $(TARGET_FILE)
-
-clean_tdrp:
-	$(RM) Params.hh Params.cc
-
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-

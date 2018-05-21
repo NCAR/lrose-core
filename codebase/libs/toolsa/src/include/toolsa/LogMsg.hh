@@ -184,6 +184,12 @@
  */
 #define LOG_SET_CLASS_AND_METHOD(s) (LogMsg::getPointer()->setLoggingClassAndMethod((s)))
 
+/**
+ * Set showing all severity output types in the messages, if true
+ * If false, show only WARNING, ERROR, SEVERE, FATAL
+ */
+#define LOG_SET_SHOW_ALL_SEVERITY_KEYS(s) (LogMsg::getPointer()->setLoggingShowAllSeverityKeys((s)))
+
 class LogMsg
 {
 public:
@@ -261,7 +267,7 @@ public:
    */
   void logf(const std::string &fname, const int line,
 	    const std::string &method, const Severity_t severity,
-	    const std::string &format, ... );
+	    const std::string format, ... );
 
   /**
    * Set severity status for the debugging states, and set other state variables
@@ -303,6 +309,17 @@ public:
   void setLoggingClassAndMethod(const bool state);
 
   /**
+   * Set state for showing all severity keys in logged messages, or not
+   * If state=true, messages will show DEBUG, VERBOSE, strings as part of all enabled
+   *                messages
+   * If state=false, messages will show WARNING, ERROR, SEVERE, and FATAL only. Other
+   *                 enabled messages will not have a type string 
+   *
+   * @param[in] state  True to turn on showing all keys
+   */
+  void setLoggingShowAllSeverityKeys(const bool state);
+
+  /**
    * @return true if input severity level is enabled
    *
    * @param[in] severity  The severity
@@ -314,7 +331,7 @@ public:
    * a formatted argument list
    * @param[in] format  The format for the variable args
    */
-  void accumulatef(const std::string &format, ...) const;
+  void accumulatef(std::string format, ...) const;
 
   /**
    * Accumulate input information into a local string without logging,
@@ -386,6 +403,11 @@ private:
   bool pLogClassAndMethod;
 
   /**
+   * True to put severity key strings into logged messages for all types
+   */
+  bool pLogShowAllKeys;
+
+  /**
    * Temporary storage for the severity/status pairs
    */
   std::vector<std::pair<Severity_t, bool> > pTempOriginalState;
@@ -428,9 +450,18 @@ private:
 
   /**
    * @return the string associated with a particular severity level
+   * when not all are shown
    * @param[in] severity  The severity
    */
   std::string pSeverityString(const Severity_t severity) const;
+
+  /**
+   * @return the string associated with a particular severity level
+   * when all are shown
+   *
+   * @param[in] severity  The severity
+   */
+  std::string pSeverityStringAll(const Severity_t severity) const;
 };
 
 #endif

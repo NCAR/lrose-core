@@ -1,9 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.hh
 //
@@ -32,8 +49,6 @@
 #ifndef Params_hh
 #define Params_hh
 
-using namespace std;
-
 #include <tdrp/tdrp.h>
 #include <iostream>
 #include <cstdio>
@@ -41,6 +56,8 @@ using namespace std;
 #include <cstring>
 #include <climits>
 #include <cfloat>
+
+using namespace std;
 
 // Class definition
 
@@ -736,6 +753,8 @@ public:
 
   double georef_time_margin_secs;
 
+  tdrp_bool_t use_secondary_georeference;
+
   tdrp_bool_t check_radar_id;
 
   int radar_id;
@@ -840,11 +859,19 @@ public:
 
   double zdr_correction_db;
 
+  tdrp_bool_t threshold_zdr_using_snr;
+
+  double min_snr_db_for_zdr;
+
   tdrp_bool_t override_cal_ldr_corrections;
 
   double ldr_correction_db_h;
 
   double ldr_correction_db_v;
+
+  tdrp_bool_t threshold_ldr_using_snr;
+
+  double min_snr_db_for_ldr;
 
   tdrp_bool_t override_cal_system_phidp;
 
@@ -1088,6 +1115,14 @@ public:
 
   double phidp_sdev_interest_weight;
 
+  tdrp_bool_t apply_rhohv_test_after_cmd;
+
+  double rhohv_test_min_rhohv;
+
+  double rhohv_test_max_rhohv;
+
+  double rhohv_improvement_factor_threshold;
+
   char* output_fmq_url;
 
   int output_fmq_size;
@@ -1160,7 +1195,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[249];
+  mutable TDRPtable _table[259];
 
   const char *_className;
 

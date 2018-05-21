@@ -9,8 +9,6 @@ D/DsServer////
 D/DsSvrMgrSocket////
 D/_makefiles////
 D/include////
-/.cvsignore/1.1/Thu Aug 11 22:12:17 2016//
-/Makefile/1.33/Thu Aug 11 22:12:17 2016//
 D/DsFmq////
 D/DsGetHost////
 D/DsMdv////
@@ -19,3 +17,5 @@ D/DsMessage////
 D/DsTitan////
 D/ThreadSocket////
 D/client_utils////
+/.cvsignore/1.1/Thu Dec 29 22:57:37 2016//
+/Makefile/1.33/Thu Dec 29 22:57:37 2016//

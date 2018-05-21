@@ -113,7 +113,8 @@ public:
     FILE_FORMAT_NCXX,         ///< NetCDF CF RADIAL using Ncxx Classes
     FILE_FORMAT_CFRADIAL2,    ///< NetCDF CF RADIAL2
     FILE_FORMAT_CFARR,        ///< Chilbolton radars
-    FILE_FORMAT_NIMROD        ///< UK Met Office Polar NIMROD
+    FILE_FORMAT_NIMROD,       ///< UK Met Office Polar NIMROD
+    FILE_FORMAT_NOAA_FSL      ///< NOAA Forecast Systems Lab NetCDF
   } file_format_t;
 
   /// write format for CfRadial
@@ -557,6 +558,17 @@ public:
   
   void setReadPreserveSweeps(bool val);
 
+  /////////////////////////////////////////////////////////////////
+  /// Set flag to indicate that we want to compute the
+  /// sweep angles using the VCP tables.
+  /// This applies to NEXRAD data - by default we
+  /// use the fixed angles in the file.
+  /// If this flag is true, the sweeps are computed using
+  /// the VCP tables.
+  /// Defaults to false.
+
+  void setReadComputeSweepAnglesFromVcpTables(bool val);
+
   /// Set flag to indicate removal of rays for long range sweeps.
   /// This generally only applies to NEXRAD data, in which
   /// the long range sweeps only include DBZ data.
@@ -794,9 +806,9 @@ public:
   /// The intended use is to provide a tmp file path to which a file
   /// is written prior to renaming to the final name.
   /// The tmp path is in the same directory as the final path.
-  /// If tmp_file_name is non-empty, it is used for the file name.
-  /// If it is empty, the name is 'tmp.pid.tmp', where pid is
-  /// determined using the getpid() function.
+  /// If tmpFileName is non-empty, it is used for the file name.
+  /// If it is empty, the name is 'tmp.pid.timesec.timeusec.tmp',
+  /// where pid is determined using the getpid() function.
   
   static string tmpPathFromDir(const string &dir,
                                const string &tmpFileName);
@@ -807,9 +819,9 @@ public:
   /// The intended use is to provide a tmp file path to which a file
   /// is written prior to renaming to the final name.
   /// The tmp path is in the same directory as the final file.
-  /// If tmp_file_name is non-empty, it is used for the file name.
-  /// If it is empty, the name is 'tmp.pid.tmp', where pid is
-  /// determined using the getpid() function.
+  /// If tmpFileName is non-empty, it is used for the file name.
+  /// If it is empty, the name is 'tmp.pid.timesec.timeusec.tmp',
+  /// where pid is determined using the getpid() function.
   
   static string tmpPathFromFilePath(const string &finalFilePath,
                                     const string &tmpFileName);
@@ -875,6 +887,7 @@ protected:
   bool _readSetMaxRange; ///< remove gates beyond a given max range
   double _readMaxRangeKm; ///< max read range in km
   bool _readPreserveSweeps; ///< preserve sweeps as they are read in
+  bool _readComputeSweepAnglesFromVcpTables; ///< compute Sweep angles from VCP tables
   bool _readRemoveLongRange; ///< remove long range scans on read
   bool _readRemoveShortRange; ///< remove short range scans on read
   bool _readMetadataOnly; ///< only read sweep metadata, not rays

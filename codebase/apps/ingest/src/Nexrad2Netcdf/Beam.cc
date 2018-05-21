@@ -31,7 +31,7 @@
 //
 // July 2005
 //
-// $Id: Beam.cc,v 1.25 2016/03/07 01:23:03 dixon Exp $
+// $Id: Beam.cc,v 1.26 2017/06/07 22:34:17 jcraig Exp $
 //
 ///////////////////////////////////////////////////////////////
 
@@ -411,32 +411,23 @@ Beam::Beam( Params *params, RIDDS_data_31_hdr* nexradData,
 
     if(_saveZdr && nexradData->zdr_ptr != 0) {
       RIDDS_data_31 *zdrData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->zdr_ptr);
-      if(zdrData->num_gates != _nVelGates) {
-	POSTMSG( ERROR, "ZDR num_gates does not equal Vel num_gates." );
-      }
       _zdrScale = 1.0 / zdrData->scale;
       _zdrBias = (zdrData->offset / zdrData->scale) * -1.0;
-      _storeData( ((ui08*)zdrData + sizeof(RIDDS_data_31)), _nVelGates, &_zdr);
+      _storeData( ((ui08*)zdrData + sizeof(RIDDS_data_31)), _nVelGates, zdrData->num_gates, &_zdr);
     }
 
     if(_savePhi && nexradData->phi_ptr != 0) {
       RIDDS_data_31 *phiData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->phi_ptr);
-      if(phiData->num_gates != _nVelGates) {
-	POSTMSG( ERROR, "PHI num_gates does not equal Vel num_gates." );
-      }
       _phiScale = 1.0 / phiData->scale;
       _phiBias = (phiData->offset / phiData->scale) * -1.0;
-      _storeData( ((ui08*)phiData + sizeof(RIDDS_data_31)), _nVelGates, &_phi);
+      _storeData( ((ui08*)phiData + sizeof(RIDDS_data_31)), _nVelGates, phiData->num_gates, &_phi);
     }
 
     if(_saveRho && nexradData->rho_ptr != 0) {
       RIDDS_data_31 *rhoData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->rho_ptr);
-      if(rhoData->num_gates != _nVelGates) {
-	POSTMSG( ERROR, "RHO num_gates does not equal Vel num_gates." );
-      }
       _rhoScale = 1.0 / rhoData->scale;
       _rhoBias = (rhoData->offset / rhoData->scale) * -1.0;
-      _storeData( ((ui08*)rhoData + sizeof(RIDDS_data_31)), _nVelGates, &_rho);
+      _storeData( ((ui08*)rhoData + sizeof(RIDDS_data_31)), _nVelGates, rhoData->num_gates, &_rho);
     }
 
     _beamComplete = true;
@@ -499,33 +490,23 @@ Beam::Beam( Params *params, RIDDS_data_31_hdr* nexradData,
 
     if(_saveZdr && nexradData->zdr_ptr != 0) {
       RIDDS_data_31 *zdrData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->zdr_ptr);
-      if(zdrData->num_gates != _nVelGates) {
-	cout << zdrData->num_gates<< "  " << _nVelGates << endl;
-	POSTMSG( ERROR, "ZDR num_gates does not equal Vel num_gates" );
-      }
       _zdrScale = 1.0 / zdrData->scale;
       _zdrBias = (zdrData->offset / zdrData->scale) * -1.0;
-      _storeData( ((ui08*)zdrData + sizeof(RIDDS_data_31)), _nVelGates, &_zdr);
+      _storeData( ((ui08*)zdrData + sizeof(RIDDS_data_31)), _nVelGates, zdrData->num_gates, &_zdr);
     }
 
     if(_savePhi && nexradData->phi_ptr != 0) {
       RIDDS_data_31 *phiData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->phi_ptr);
-      if(phiData->num_gates != _nVelGates) {
-	POSTMSG( ERROR, "PHI num_gates does not equal Vel num_gates." );
-      }
       _phiScale = 1.0 / phiData->scale;
       _phiBias = (phiData->offset / phiData->scale) * -1.0;
-      _storeData( ((ui08*)phiData + sizeof(RIDDS_data_31)), _nVelGates, &_phi);
+      _storeData( ((ui08*)phiData + sizeof(RIDDS_data_31)), _nVelGates, phiData->num_gates, &_phi);
     }
 
     if(_saveRho && nexradData->rho_ptr != 0) {
       RIDDS_data_31 *rhoData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->rho_ptr);
-      if(rhoData->num_gates != _nVelGates) {
-	POSTMSG( ERROR, "RHO num_gates does not equal Vel num_gates." );
-      }
       _rhoScale = 1.0 / rhoData->scale;
       _rhoBias = (rhoData->offset / rhoData->scale) * -1.0;
-      _storeData( ((ui08*)rhoData + sizeof(RIDDS_data_31)), _nVelGates, &_rho);
+      _storeData( ((ui08*)rhoData + sizeof(RIDDS_data_31)), _nVelGates, rhoData->num_gates, &_rho);
     }
 
     if(_calcSnr)
@@ -889,14 +870,14 @@ void Beam::computeRec( const deque<Beam *> beams,
 
 }
 
-void Beam::_storeData(ui08* nexradData, int numGates, ui08** data) 
+void Beam::_storeData(ui08* nexradData, int numGatesIn, ui08** data) 
 {
-  *data = new ui08 [numGates];
+  *data = new ui08 [numGatesIn];
 
   //
   // Loop through all the values in our input data buffer
   //
-  for( int i = 0; i < numGates; i++ ) {
+  for( int i = 0; i < numGatesIn; i++ ) {
     
     ui08 value = nexradData[i];
     
@@ -910,6 +891,39 @@ void Beam::_storeData(ui08* nexradData, int numGates, ui08** data)
     }
     
   }  
+}
+
+void Beam::_storeData(ui08* nexradData, int numGatesOut, int numGatesIn, ui08** data) 
+{
+  *data = new ui08 [numGatesOut];
+
+  //
+  // Store only the numGatesOut from the input data buffer
+  // or if input data is smaller, store missing after input buffer ends
+  //
+  int numGates = numGatesOut;
+  if(numGatesIn < numGatesOut)
+    numGates = numGatesIn;
+
+  for( int i = 0; i < numGates; i++ ) {
+    
+    ui08 value = nexradData[i];
+    
+    //
+    // 0: below SNR, 1: ambiguous range
+    //
+    if ( value != 0  &&  value != 1 ) {
+      (*data)[i] = value;
+    } else {
+      (*data)[i] = 0;
+    }
+    
+  }
+
+  if(numGates < numGatesOut)
+    for( int i = numGates; i < numGatesOut; i++ )
+      (*data)[i] = 0;
+
 }
 
 void Beam::_storeData(RIDDS_data_31* nexradData, int compression, int length, ui08** data) 

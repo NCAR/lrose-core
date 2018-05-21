@@ -282,9 +282,11 @@ protected:
   NexradVcp _vcp21;
   NexradVcp _vcp31;
   NexradVcp _vcp32;
+  NexradVcp _vcp35;
   NexradVcp _vcp121;
   NexradVcp _vcp211;
   NexradVcp _vcp212;
+  NexradVcp _vcp215;
   NexradVcp _vcp221;
   
   // read methods

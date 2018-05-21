@@ -269,7 +269,16 @@ int Process::Derive(Params *P, time_t T){
       else if (ThreshData[tIndex] < minThresh ||
 	       ThreshData[tIndex] > maxThresh)
       {
-	InData[index] = InFhdr.missing_data_value;
+        if (P->ReplaceFailValues)
+        {
+	  if (InData[index] != InFhdr.missing_data_value &&
+	      InData[index] != InFhdr.bad_data_value)
+	  {
+	    InData[index]=P->FailValue;
+	  }
+	} else {
+  	  InData[index] = InFhdr.missing_data_value;
+	}
       }
       //
       // Replace passed values with a single value, if desired.
@@ -483,7 +492,7 @@ bool Process::_getThreshField(const Mdvx &New,
     
     if (thresh_mdvx.readVolume())
     {
-      cerr << "Thresh URL read failed at " << utimstr(data_time)
+      cerr << "ERROR: Thresh URL read failed at " << utimstr(data_time)
 	   << " from " << url << endl;
       return false;
     }

@@ -54,6 +54,17 @@ paramdef string {
   p_help = "Used for registration with procmap.";
 } instance;
 
+paramdef int {
+  p_default = 60;
+  p_min = 60;
+  p_descr = "Interval for procmap registration";
+  p_help = "Set to a high value if processing takes a long time. This "
+           "will prevent the auto_restarter from killing and restarting the app. "
+           "If this value is less than or equal to the "
+           "PROCMAP_REGISTER_INTERVAL (60) then that value will be used.";
+} procmap_register_interval_secs;
+
+
 commentdef {
   p_header = "OPERATIONAL MODE AND TRIGGERING.";
 }

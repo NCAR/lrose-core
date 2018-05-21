@@ -99,7 +99,8 @@ class DLL_EXPORT BscanWidget : public QWidget
   BscanWidget(QWidget* parent,
               const BscanManager &manager,
               const Params &params,
-              size_t n_fields);
+              const vector<DisplayField *> &fields,
+              bool haveFilteredFields);
   
   /**
    * @brief Destructor.
@@ -114,8 +115,7 @@ class DLL_EXPORT BscanWidget : public QWidget
                      double max_range,
                      double min_altitude,
                      double max_altitude,
-                     double time_span_secs,
-                     bool archive_mode);
+                     double time_span_secs);
 
   /**
    * @brief Select the field to display.
@@ -309,9 +309,10 @@ class DLL_EXPORT BscanWidget : public QWidget
 
   const Params &_params;
 
-  // number of fields
+  // data fields
 
-  size_t _nFields;
+  const vector<DisplayField *> &_fields;
+  bool _haveFilteredFields;
 
   /**
    * @brief Pointers to all of the active beams are saved here.
@@ -372,7 +373,6 @@ class DLL_EXPORT BscanWidget : public QWidget
   RadxTime _plotStartTime;
   RadxTime _plotEndTime;
   double _timeSpanSecs;
-  bool _archiveMode;
 
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for

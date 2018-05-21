@@ -21,9 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//
-// $Id: IndexPoint.hh,v 1.7 2016/03/03 18:19:28 dixon Exp $
-//
 
 #ifndef _INDEX_POINT_INC_
 #define _INDEX_POINT_INC_

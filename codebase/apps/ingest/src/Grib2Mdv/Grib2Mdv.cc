@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
 //  Grib2Mdv top-level application class
-//  $Id: Grib2Mdv.cc,v 1.10 2016/03/07 01:23:01 dixon Exp $
+//  $Id: Grib2Mdv.cc,v 1.11 2017/06/09 16:27:58 prestop Exp $
 
 //  This application was created to unify a number of grib converters
 //  already in existence.  Author:  Carl Drews, circa 2004.
@@ -88,7 +88,7 @@ Grib2Mdv::Grib2Mdv(int argc, char **argv) :
 
   // get TDRP params
   _params = new Params();
-  char *paramsPath = "unknown";
+  char *paramsPath;// = "unknown";
   if (_params->loadFromArgs(argc, argv, _args->override.list, 
 			    &paramsPath)) {
     _errStr += "\tProblem with TDRP parameters.\n";

@@ -1183,6 +1183,18 @@ paramdef double {
   p_descr = "Percentiles to write to SPDB output.";
 } zdr_bias_ice_percentiles[];
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to save the ZDR values in ice to file.";
+  p_help = "If true, we will write the ZDR values in the ice regions to a file, in ASCII.";
+} save_ice_zdr_to_file;
+
+paramdef string {
+  p_default = "/tmp/zdr_in_ice";
+  p_descr = "Directory for saving ZDR in ice data to files.";
+  p_help = "See write_ice_zdr_to_file. Two files will be written for each volume, one for uncorrected ZDRM and one for corrected ZDR. Also, global files will be appended to.";
+} ice_zdr_save_dir;
+
 commentdef {
   p_header = "ZDR BIAS IN BRAGG";
 }

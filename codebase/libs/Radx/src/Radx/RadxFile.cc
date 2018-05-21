@@ -36,6 +36,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/Cf2RadxFile.hh>
+#include <Radx/CfarrNcRadxFile.hh>
 #include <Radx/D3rNcRadxFile.hh>
 #include <Radx/DoeNcRadxFile.hh>
 #include <Radx/DoradeRadxFile.hh>
@@ -50,6 +51,7 @@
 #include <Radx/NexradCmdRadxFile.hh>
 #include <Radx/NexradRadxFile.hh>
 #include <Radx/NidsRadxFile.hh>
+#include <Radx/NoaaFslRadxFile.hh>
 #include <Radx/NoxpNcRadxFile.hh>
 #include <Radx/NsslMrdRadxFile.hh>
 #include <Radx/OdimHdf5RadxFile.hh>
@@ -60,12 +62,14 @@
 #include <Radx/UfRadxFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
-#include <Ncxx/Hdf5xx.hh>
 #include <Radx/RadxSweep.hh>
+#include <Radx/RadxPath.hh>
+#include <Ncxx/Hdf5xx.hh>
 #include <unistd.h>
 #include <cstring>
 #include <cstdio>
 #include <sys/stat.h>
+#include <sys/time.h>
 using namespace std;
 
 const char *RadxFile::PATH_SEPARATOR = "/";
@@ -186,6 +190,14 @@ bool RadxFile::_isSupportedNetCDF(const string &path)
     }
   }
   
+  // try EEC Edge netcdf
+  {
+    EdgeNcRadxFile file;
+    if (file.isEdgeNc(path)) {
+      return true;
+    }
+  }
+ 
   // try NOXP netcdf
   {
     NoxpNcRadxFile file;
@@ -209,11 +221,19 @@ bool RadxFile::_isSupportedNetCDF(const string &path)
       return true;
     }
   }
-    
-  // try EEC Edge netcdf
+  
+  // try NOAA FSL netcdf
   {
-    EdgeNcRadxFile file;
-    if (file.isEdgeNc(path)) {
+    NoaaFslRadxFile file;
+    if (file.isNoaaFsl(path)) {
+      return true;
+    }
+  }
+  
+  // try Cfarr netcdf
+  {
+    CfarrNcRadxFile file;
+    if (file.isCfarrNc(path)) {
       return true;
     }
   }
@@ -469,6 +489,7 @@ void RadxFile::copyReadDirectives(const RadxFile &other)
   _readMaxRangeKm = other._readMaxRangeKm;
   _readRemoveLongRange = other._readRemoveLongRange;
   _readPreserveSweeps = other._readPreserveSweeps;
+  _readComputeSweepAnglesFromVcpTables = other._readComputeSweepAnglesFromVcpTables;
   _readRemoveShortRange = other._readRemoveShortRange;
   _readMetadataOnly = other._readMetadataOnly;
   _readTimesOnly = other._readTimesOnly;
@@ -525,6 +546,7 @@ int RadxFile::writeToDir(const RadxVol &vol,
       _fileFormat == FILE_FORMAT_DOE_NC ||
       _fileFormat == FILE_FORMAT_NOXP_NC ||
       _fileFormat == FILE_FORMAT_D3R_NC ||
+      _fileFormat == FILE_FORMAT_NOAA_FSL ||
       _fileFormat == FILE_FORMAT_NEXRAD_CMD ||
       _fileFormat == FILE_FORMAT_LEOSPHERE ||
       _fileFormat == FILE_FORMAT_TWOLF ||
@@ -820,6 +842,7 @@ int RadxFile::writeToPath(const RadxVol &vol,
       _fileFormat == FILE_FORMAT_DOE_NC ||
       _fileFormat == FILE_FORMAT_NOXP_NC ||
       _fileFormat == FILE_FORMAT_D3R_NC ||
+      _fileFormat == FILE_FORMAT_NOAA_FSL ||
       _fileFormat == FILE_FORMAT_NEXRAD_CMD ||
       _fileFormat == FILE_FORMAT_LEOSPHERE ||
       _fileFormat == FILE_FORMAT_TWOLF ||
@@ -1249,6 +1272,29 @@ int RadxFile::_readFromPathNetCDF(const string &path,
     }
   }
 
+  // try NOAA FSL netcdf next
+
+  {
+    NoaaFslRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isNoaaFsl(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read NOAA FSL NC file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
   // try NEXRAD CMD next
   
   {
@@ -1289,6 +1335,29 @@ int RadxFile::_readFromPathNetCDF(const string &path,
         if (_debug) {
           cerr << "INFO: RadxFile::readFromPath" << endl;
           cerr << "  Read DOE NC file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // try Cfarr netcdf next
+
+  {
+    CfarrNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isCfarrNc(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read Cfarr NC file, path: " << _pathInUse << endl;
         }
       }
       return iret;
@@ -1947,26 +2016,32 @@ int RadxFile::makeDirRecurse(const string &dir)
 //
 // The tmp path is in the same directory as the final path.
 //
-// If tmp_file_name is non-null, it is used for the file name.
-// If it is NULL, the name is 'tmp.pid.tmp', where pid is
-// determined using the getpid() function.
+// If tmpFileName is non-empty, it is used for the file name.
+// If it is empty, the name is 'tmp.pid.timesec.timeusec.tmp',
+// where pid is determined using the getpid() function.
 
 string RadxFile::tmpPathFromDir(const string &dir,
                                 const string &tmpFileName)
   
 {
 
-  // load up the tmp path
+  // get current time
 
+  struct timeval now;
+  gettimeofday(&now, NULL);
+
+  // load up the tmp path
+  
   string tmpPath(dir);
   tmpPath += PATH_SEPARATOR;
   
   if (tmpFileName.size() > 0) {
     tmpPath += tmpFileName;
   } else {
-    char tmpPidName[128];
-    sprintf(tmpPidName, "tmp.%d.tmp", getpid());
-    tmpPath += tmpPidName;
+    char tmpName[1024];
+    sprintf(tmpName, "tmp.%d.%ld.%ld.tmp", getpid(),
+            (long) now.tv_sec, (long) now.tv_usec);
+    tmpPath += tmpName;
   }
 
   return tmpPath;
@@ -1982,23 +2057,22 @@ string RadxFile::tmpPathFromDir(const string &dir,
 //
 // The tmp path is in the same directory as the final file.
 //
-// If tmp_file_name is non-null, it is used for the file name.
-// If it is NULL, the name is 'tmp.pid.tmp', where pid is
-// determined using the getpid() function.
+// If tmpFileName is non-empty, it is used for the file name.
+// If it is empty, the name is 'tmp.pid.timesec.timeusec.tmp',
+// where pid is determined using the getpid() function.
 
 string RadxFile::tmpPathFromFilePath(const string &finalFilePath,
                                      const string &tmpFileName)
 
 {
 
-  // get the dir by stripping off the last delimiter
+  // get the dir
 
-  size_t delimPos = finalFilePath.find_last_of(PATH_SEPARATOR);
-  if (delimPos == string::npos) {
+  RadxPath path(finalFilePath);
+  if (path.isDir()) {
     return tmpPathFromDir(finalFilePath, tmpFileName);
   } else {
-    string dir(finalFilePath, 0, delimPos);
-    return tmpPathFromDir(dir, tmpFileName);
+    return tmpPathFromDir(path.getDirectory(), tmpFileName);
   }
 
 }
@@ -2027,6 +2101,7 @@ void RadxFile::clearRead()
   _readMaxRangeKm = Radx::missingMetaDouble;
   _readRemoveLongRange = false;
   _readPreserveSweeps = false;
+  _readComputeSweepAnglesFromVcpTables = false;
   _readRemoveShortRange = false;
   _readMetadataOnly = false;
   _readTimesOnly = false;
@@ -2233,6 +2308,21 @@ void RadxFile::setReadPreserveSweeps(bool val)
 }
 
 /////////////////////////////////////////////////////////////////
+/// Set flag to indicate that we want to preserve the
+/// sweep angles in the file we read in.
+/// This generally applies to NEXRAD data - by default we
+/// compute fixed angles when the file does not contain
+/// a vcp header.
+/// If this flag is true, we leave the sweeps unchanged.
+/// Defaults to false.
+
+void RadxFile::setReadComputeSweepAnglesFromVcpTables(bool val)
+
+{
+  _readComputeSweepAnglesFromVcpTables = val;
+}
+
+/////////////////////////////////////////////////////////////////
 /// Set flag to indicate removal of rays for long range sweeps.
 /// This generally only applies to NEXRAD data, in which
 /// the long range sweeps only include DBZ data.
@@ -2346,7 +2436,6 @@ void RadxFile::printReadRequest(ostream &out) const
 {
   
   out << "======= RadxFile read request =======" << endl;
-
   out << "  debug: " << (_debug?"Y":"N") << endl;
   out << "  verbose: " << (_verbose?"Y":"N") << endl;
 
@@ -2494,6 +2583,8 @@ string RadxFile::getFileFormatAsString() const
     return "TWOLF";
   } else if (_fileFormat == FILE_FORMAT_D3R_NC) {
     return "D3R_NC";
+  } else if (_fileFormat == FILE_FORMAT_NOAA_FSL) {
+    return "NOAA_FSL";
   } else if (_fileFormat == FILE_FORMAT_NOXP_NC) {
     return "NOXP_NC";
   } else if (_fileFormat == FILE_FORMAT_CFARR) {
@@ -2627,6 +2718,19 @@ int RadxFile::_printNativeNetCDF(const string &path, ostream &out,
     }
   }
   
+  // try NOAA FSL netcdf next
+  {
+    NoaaFslRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isNoaaFsl(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
   // try NEXRAD CMD next
   {
     NexradCmdRadxFile file;
@@ -2645,6 +2749,19 @@ int RadxFile::_printNativeNetCDF(const string &path, ostream &out,
     EdgeNcRadxFile file;
     file.copyReadDirectives(*this);
     if (file.isEdgeNc(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  // try Cfarr netcdf next
+  {
+    CfarrNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isCfarrNc(path)) {
       int iret = file.printNative(path, out, printRays, printData);
       if (iret) {
         _errStr = file.getErrStr();
@@ -2917,6 +3034,7 @@ int RadxFile::_doReadRaysInInterval(const string &dir,
       _addErrStr(_readTimeList.getRequestString());
       return -1;
     }
+    vol.copyMeta(fileVol);
 
     const vector<RadxRay *> &fileRays = fileVol.getRays();
     for (size_t iray = 0; iray < fileRays.size(); iray++) {

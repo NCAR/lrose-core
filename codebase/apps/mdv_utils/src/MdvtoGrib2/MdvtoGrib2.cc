@@ -24,9 +24,9 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
- *   $Date: 2016/03/04 02:22:13 $
- *   $Revision: 1.29 $
+ *   $Author: prestop $
+ *   $Date: 2017/06/09 16:27:58 $
+ *   $Revision: 1.30 $
  */
 
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -133,7 +133,7 @@ MdvtoGrib2::MdvtoGrib2(int argc, char **argv) :
   // Get TDRP parameters.
 
   _params = new Params();
-  char *params_path = "unknown";
+  char *params_path;
 
   if (_params->loadFromArgs(argc, argv,
                             _args->override.list,

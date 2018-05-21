@@ -30,6 +30,8 @@ from time import strftime
 
 from ldata import Ldata
 
+import re
+
 import icing_message
 
 #
@@ -244,7 +246,9 @@ def find_file(data_dir, file_substr, idx=0, print_list=0, print_debug=1):
 
   test_files = []
   for filename in filelist:
-    if not filename.find(file_substr):
+    regex = re.compile(file_substr)
+    if re.match(file_substr,filename):
+#    if not filename.find(file_substr):
       test_files.append(filename)
 
   if len(test_files) and print_list:

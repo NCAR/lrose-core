@@ -37,12 +37,16 @@
 ///////////////////////////////////////////////////////////////
 
 #include "RadxPartRain.hh"
+#include <cerrno>
 #include <algorithm>
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
+#include <toolsa/file_io.h>
+#include <toolsa/TaFile.hh>
 #include <toolsa/TaArray.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <rapformats/WxObs.hh>
+#include <rapmath/stats.h>
 #include <Spdb/DsSpdb.hh>
 #include <rapmath/trig.h>
 #include <Mdv/GenericRadxFile.hh>
@@ -431,6 +435,7 @@ int RadxPartRain::_processFile(const string &filePath)
 
   // initialize for ZDR bias and self consistency results
 
+  _zdrInIceElev.clear();
   _zdrInIceResults.clear();
   _zdrInBraggResults.clear();
   _zdrmInIceResults.clear();
@@ -699,6 +704,7 @@ int RadxPartRain::_writeVol()
     _vol.addRay(_derivedRays[iray]);
   }
   
+  _vol.sortRaysByNumber();
   _vol.loadVolumeInfoFromRays();
   _vol.loadSweepInfoFromRays();
   _vol.setPackingFromRays();
@@ -879,8 +885,14 @@ void RadxPartRain::_addExtraFieldsToOutput()
 int RadxPartRain::_compute()
 {
 
-  _derivedRays.clear();
+  // initialize the volume with ray numbers
+  
+  _vol.setRayNumbersInOrder();
 
+  // initialize derived
+
+  _derivedRays.clear();
+  
   if (_params.use_multiple_threads) {
     if (_computeMultiThreaded()) {
       return -1;
@@ -1003,6 +1015,12 @@ int RadxPartRain::_storeDerivedRay(ComputeThread *thread)
   
   // load ZDR bias results
 
+  const vector<double> &threadZdrInIceElev =
+    thread->getComputeEngine()->getZdrInIceElev();
+  for (size_t ii = 0; ii < threadZdrInIceElev.size(); ii++) {
+    _zdrInIceElev.push_back(threadZdrInIceElev[ii]);
+  }
+
   const vector<double> &threadZdrInIceResults =
     thread->getComputeEngine()->getZdrInIceResults();
   for (size_t ii = 0; ii < threadZdrInIceResults.size(); ii++) {
@@ -1046,55 +1064,72 @@ int RadxPartRain::_retrieveTempProfile()
   
 {
 
-  if (!_params.use_soundings_from_spdb) {
-    _tempProfile.clear();
-    return 0;
-  }
-
-  _tempProfile.setSoundingLocationName
-    (_params.sounding_location_name);
-  _tempProfile.setSoundingSearchTimeMarginSecs
-    (_params.sounding_search_time_margin_secs);
-  
-  _tempProfile.setCheckPressureRange
-    (_params.sounding_check_pressure_range);
-  _tempProfile.setSoundingRequiredMinPressureHpa
-    (_params.sounding_required_pressure_range_hpa.min_val);
-  _tempProfile.setSoundingRequiredMaxPressureHpa
-    (_params.sounding_required_pressure_range_hpa.max_val);
-  
-  _tempProfile.setCheckHeightRange
-    (_params.sounding_check_height_range);
-  _tempProfile.setSoundingRequiredMinHeightM
-    (_params.sounding_required_height_range_m.min_val);
-  _tempProfile.setSoundingRequiredMaxHeightM
-    (_params.sounding_required_height_range_m.max_val);
-  
-  _tempProfile.setCheckPressureMonotonicallyDecreasing
-    (_params.sounding_check_pressure_monotonically_decreasing);
-
-  _tempProfile.setHeightCorrectionKm
-    (_params.sounding_height_correction_km);
-
-  if (_params.sounding_use_wet_bulb_temp) {
-    _tempProfile.setUseWetBulbTemp(true);
-  }
-  
-  time_t retrievedTime;
+  time_t retrievedTime = time(NULL);
   vector<TempProfile::PointVal> retrievedProfile;
-  if (_tempProfile.getTempProfile(_params.sounding_spdb_url,
-                                  _vol.getStartTimeSecs(),
-                                  retrievedTime,
-                                  retrievedProfile)) {
-    cerr << "ERROR - RadxPartRain::_tempProfileInit" << endl;
-    cerr << "  Cannot retrive profile for time: "
-         << RadxTime::strm(_vol.getStartTimeSecs()) << endl;
-    cerr << "  url: " << _params.sounding_spdb_url << endl;
-    cerr << "  station name: " << _params.sounding_location_name << endl;
-    cerr << "  time margin secs: " << _params.sounding_search_time_margin_secs << endl;
-    return -1;
-  }
+  _tempProfile.clear();
+
+  if (_params.use_soundings_from_spdb) {
+    
+    _tempProfile.setSoundingLocationName
+      (_params.sounding_location_name);
+    _tempProfile.setSoundingSearchTimeMarginSecs
+      (_params.sounding_search_time_margin_secs);
+    
+    _tempProfile.setCheckPressureRange
+      (_params.sounding_check_pressure_range);
+    _tempProfile.setSoundingRequiredMinPressureHpa
+      (_params.sounding_required_pressure_range_hpa.min_val);
+    _tempProfile.setSoundingRequiredMaxPressureHpa
+      (_params.sounding_required_pressure_range_hpa.max_val);
+    
+    _tempProfile.setCheckHeightRange
+      (_params.sounding_check_height_range);
+    _tempProfile.setSoundingRequiredMinHeightM
+      (_params.sounding_required_height_range_m.min_val);
+    _tempProfile.setSoundingRequiredMaxHeightM
+      (_params.sounding_required_height_range_m.max_val);
+    
+    _tempProfile.setCheckPressureMonotonicallyDecreasing
+      (_params.sounding_check_pressure_monotonically_decreasing);
+    
+    _tempProfile.setHeightCorrectionKm
+      (_params.sounding_height_correction_km);
+    
+    if (_params.sounding_use_wet_bulb_temp) {
+      _tempProfile.setUseWetBulbTemp(true);
+    }
+    
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      _tempProfile.setDebug();
+    }
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      _tempProfile.setVerbose();
+    }
   
+    if (_tempProfile.getTempProfile(_params.sounding_spdb_url,
+                                    _vol.getStartTimeSecs(),
+                                    retrievedTime,
+                                    retrievedProfile)) {
+      cerr << "ERROR - RadxPartRain::_tempProfileInit" << endl;
+      cerr << "  Cannot retrive profile for time: "
+           << RadxTime::strm(_vol.getStartTimeSecs()) << endl;
+      cerr << "  url: " << _params.sounding_spdb_url << endl;
+      cerr << "  station name: " << _params.sounding_location_name << endl;
+      cerr << "  time margin secs: " << _params.sounding_search_time_margin_secs << endl;
+      return -1;
+    }
+
+  } else {
+    
+    // get profile from PID file
+
+    if (_tempProfile.getProfileForPid(_params.pid_thresholds_file_path,
+                                      retrievedProfile)) {
+      return -1;
+    }
+
+  }
+
   if (_params.debug) {
     cerr << "=====================================" << endl;
     cerr << "Got temp profile, URL: " << _params.sounding_spdb_url << endl;
@@ -1215,31 +1250,39 @@ void RadxPartRain::_computeZdrBias()
   _zdrmStatsBragg.clear();
 
   if ((int) _zdrInIceResults.size() > _params.zdr_bias_ice_min_npoints_valid) {
-    _loadZdrResults(_zdrInIceResults,
+    _loadZdrResults("ZdrInIce",
+                    _zdrInIceResults,
                     _zdrStatsIce,
                     _params.zdr_bias_ice_percentiles_n,
                     _params._zdr_bias_ice_percentiles);
   }
   
   if ((int) _zdrmInIceResults.size() > _params.zdr_bias_ice_min_npoints_valid) {
-    _loadZdrResults(_zdrmInIceResults,
+    _loadZdrResults("ZdrmInIce",
+                    _zdrmInIceResults,
                     _zdrmStatsIce,
                     _params.zdr_bias_ice_percentiles_n,
                     _params._zdr_bias_ice_percentiles);
   }
   
   if ((int) _zdrInBraggResults.size() > _params.zdr_bias_bragg_min_npoints_valid) {
-    _loadZdrResults(_zdrInBraggResults,
+    _loadZdrResults("ZdrInBragg",
+                    _zdrInBraggResults,
                     _zdrStatsBragg,
                     _params.zdr_bias_bragg_percentiles_n,
                     _params._zdr_bias_bragg_percentiles);
   }
   
   if ((int) _zdrmInBraggResults.size() > _params.zdr_bias_bragg_min_npoints_valid) {
-    _loadZdrResults(_zdrmInBraggResults,
+    _loadZdrResults("ZdrmInBragg",
+                    _zdrmInBraggResults,
                     _zdrmStatsBragg,
                     _params.zdr_bias_bragg_percentiles_n,
                     _params._zdr_bias_bragg_percentiles);
+  }
+
+  if (_params.save_ice_zdr_to_file) {
+    _saveZdrInIceToFile();
   }
 
   // write results to SPDB
@@ -1258,6 +1301,9 @@ void RadxPartRain::_computeZdrBias()
   
   xml += RadxXml::writeInt("ZdrInIceNpts", 1, (int) _zdrStatsIce.count);
   xml += RadxXml::writeDouble("ZdrInIceMean", 1, _zdrStatsIce.mean);
+  xml += RadxXml::writeDouble("ZdrInIceSdev", 1, _zdrStatsIce.sdev);
+  xml += RadxXml::writeDouble("ZdrInIceSkewness", 1, _zdrStatsIce.skewness);
+  xml += RadxXml::writeDouble("ZdrInIceKurtosis", 1, _zdrStatsIce.kurtosis);
   for (size_t ii = 0; ii < _zdrStatsIce.percentiles.size(); ii++) {
     double percent = _params._zdr_bias_ice_percentiles[ii];
     double val = _zdrStatsIce.percentiles[ii];
@@ -1268,6 +1314,9 @@ void RadxPartRain::_computeZdrBias()
 
   xml += RadxXml::writeInt("ZdrmInIceNpts", 1, (int) _zdrmStatsIce.count);
   xml += RadxXml::writeDouble("ZdrmInIceMean", 1, _zdrmStatsIce.mean);
+  xml += RadxXml::writeDouble("ZdrmInIceSdev", 1, _zdrmStatsIce.sdev);
+  xml += RadxXml::writeDouble("ZdrmInIceSkewness", 1, _zdrmStatsIce.skewness);
+  xml += RadxXml::writeDouble("ZdrmInIceKurtosis", 1, _zdrmStatsIce.kurtosis);
   for (size_t ii = 0; ii < _zdrmStatsIce.percentiles.size(); ii++) {
     double percent = _params._zdr_bias_ice_percentiles[ii];
     double val = _zdrmStatsIce.percentiles[ii];
@@ -1278,6 +1327,9 @@ void RadxPartRain::_computeZdrBias()
 
   xml += RadxXml::writeInt("ZdrInBraggNpts", 1, (int) _zdrStatsBragg.count);
   xml += RadxXml::writeDouble("ZdrInBraggMean", 1, _zdrStatsBragg.mean);
+  xml += RadxXml::writeDouble("ZdrInBraggSdev", 1, _zdrStatsBragg.sdev);
+  xml += RadxXml::writeDouble("ZdrInBraggSkewness", 1, _zdrStatsBragg.skewness);
+  xml += RadxXml::writeDouble("ZdrInBraggKurtosis", 1, _zdrStatsBragg.kurtosis);
   for (size_t ii = 0; ii < _zdrStatsBragg.percentiles.size(); ii++) {
     double percent = _params._zdr_bias_bragg_percentiles[ii];
     double val = _zdrStatsBragg.percentiles[ii];
@@ -1288,6 +1340,9 @@ void RadxPartRain::_computeZdrBias()
 
   xml += RadxXml::writeInt("ZdrmInBraggNpts", 1, (int) _zdrmStatsBragg.count);
   xml += RadxXml::writeDouble("ZdrmInBraggMean", 1, _zdrmStatsBragg.mean);
+  xml += RadxXml::writeDouble("ZdrmInBraggSdev", 1, _zdrmStatsBragg.sdev);
+  xml += RadxXml::writeDouble("ZdrmInBraggSkewness", 1, _zdrmStatsBragg.skewness);
+  xml += RadxXml::writeDouble("ZdrmInBraggKurtosis", 1, _zdrmStatsBragg.kurtosis);
   for (size_t ii = 0; ii < _zdrmStatsBragg.percentiles.size(); ii++) {
     double percent = _params._zdr_bias_bragg_percentiles[ii];
     double val = _zdrmStatsBragg.percentiles[ii];
@@ -1334,29 +1389,177 @@ void RadxPartRain::_computeZdrBias()
 //////////////////////////////////
 // load stats for zdr results
 
-void RadxPartRain::_loadZdrResults(vector<double> &results,
+void RadxPartRain::_loadZdrResults(string label,
+                                   vector<double> &results,
                                    ZdrStats &stats,
                                    int nPercentiles,
                                    double *percentiles)
 
 {
 
-  stats.clear();
-
-  for (size_t ii = 0; ii < results.size(); ii++) {
-    stats.sum += results[ii];
-    stats.count++;
-  }
-  stats.mean = stats.sum / stats.count;
-
   // sort results vector
   
   sort(results.begin(), results.end());
+
+  // compute stats
+
+  stats.clear();
+
+  double mean, sdev;
+  STATS_normal_fit(results.size(), &results[0], &mean, &sdev);
+  double skewness = STATS_normal_skewness(results.size(), &results[0], mean, sdev);
+  double kurtosis = STATS_normal_kurtosis(results.size(), &results[0], mean, sdev);
+
+  stats.count = results.size();
+  stats.mean = mean;
+  stats.sdev = sdev;
+  stats.skewness = skewness;
+  stats.kurtosis = kurtosis;
 
   for (int ii = 0; ii < nPercentiles; ii++) {
     stats.percentiles.push_back(_computeZdrPerc(results, percentiles[ii]));
   }
 
+}
+
+////////////////////////////////////////////
+// save ZDR data in ice to files
+
+void RadxPartRain::_saveZdrInIceToFile()
+
+{
+
+  // make output dir
+
+  if (ta_makedir_recurse(_params.ice_zdr_save_dir)) {
+    int errNum = errno;
+    cerr << "ERROR - RadxPartRain::_saveZdrInIceToFile()" << endl;
+    cerr << "  Cannot make dir: " << _params.ice_zdr_save_dir << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+  
+  // compute file names
+
+  RadxTime startTime(_vol.getStartTimeSecs());
+
+  char appendPath[1024];
+  sprintf(appendPath, "%s%sZdrInIce.txt", 
+          _params.ice_zdr_save_dir, PATH_DELIM);
+
+  char appendmPath[1024];
+  sprintf(appendmPath, "%s%sZdrmInIce.txt", 
+          _params.ice_zdr_save_dir, PATH_DELIM);
+  
+  char volPath[1024];
+  sprintf(volPath, "%s%sZdrInIce_%.4d%.2d%.2d_%.2d%.2d%.2d.txt", 
+          _params.ice_zdr_save_dir, PATH_DELIM,
+          startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+          startTime.getHour(), startTime.getMin(), startTime.getSec());
+
+  char volmPath[1024];
+  sprintf(volmPath, "%s%sZdrmInIce_%.4d%.2d%.2d_%.2d%.2d%.2d.txt", 
+          _params.ice_zdr_save_dir, PATH_DELIM,
+          startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+          startTime.getHour(), startTime.getMin(), startTime.getSec());
+
+  // open files
+
+  TaFile append; // closes when goes out of scope
+  FILE *appendFile;
+  if ((appendFile = append.fopen(appendPath, "a")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - RadxPartRain::_saveZdrInIceToFile()" << endl;
+    cerr << "  Cannot open zdr output file: " << appendPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+  _writeHeaderZdrInIce(appendFile);
+  
+  TaFile appendm; // closes when goes out of scope
+  FILE *appendmFile;
+  if ((appendmFile = append.fopen(appendmPath, "a")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - RadxPartRain::_saveZdrInIceToFile()" << endl;
+    cerr << "  Cannot open zdr output file: " << appendmPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+  _writeHeaderZdrInIce(appendmFile);
+  
+  TaFile vol; // closes when goes out of scope
+  FILE *volFile;
+  if ((volFile = vol.fopen(volPath, "w")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - RadxPartRain::_saveZdrInIceToFile()" << endl;
+    cerr << "  Cannot open zdr output file: " << volPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+  _writeHeaderZdrInIce(volFile);
+  
+  TaFile volm; // closes when goes out of scope
+  FILE *volmFile;
+  if ((volmFile = vol.fopen(volmPath, "w")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - RadxPartRain::_saveZdrInIceToFile()" << endl;
+    cerr << "  Cannot open zdr output file: " << volmPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+  _writeHeaderZdrInIce(volmFile);
+  
+  // write to files
+
+  for (size_t ii = 0; ii < _zdrInIceResults.size(); ii++) {
+    fprintf(appendFile, "%.3f %.4f\n", _zdrInIceElev[ii], _zdrInIceResults[ii]);
+    fprintf(volFile, "%.3f %.4f\n", _zdrInIceElev[ii], _zdrInIceResults[ii]);
+  }
+
+  for (size_t ii = 0; ii < _zdrmInIceResults.size(); ii++) {
+    fprintf(appendmFile, "%.3f %.4f\n", _zdrInIceElev[ii], _zdrmInIceResults[ii]);
+    fprintf(volmFile, "%.3f %.4f\n", _zdrInIceElev[ii], _zdrmInIceResults[ii]);
+  }
+
+  fflush(appendFile);
+  fflush(appendmFile);
+  fflush(volFile);
+  fflush(volmFile);
+  
+}
+
+/////////////////////////////////////////////////////////////
+// write header to zdr in ice file
+// if the file is zero length
+
+void RadxPartRain::_writeHeaderZdrInIce(FILE *out)
+
+{
+
+  // is the file 0-length?
+
+  struct stat fstat;
+  bool fileIsNew = false;
+  if (ta_fstat(fileno(out), &fstat) == 0) {
+    if (fstat.st_size == 0) {
+      fileIsNew = true;
+    }
+  }
+
+  if (!fileIsNew) {
+    // file is not new, no need to add header
+    return;
+  }
+
+  fprintf(out, "# elev zdr\n");
+  fprintf(out, "#============================================\n");
+  fprintf(out, "# Table produced by RadxPartRain\n");
+  fprintf(out, "#------------ Table column list -------------\n");
+  fprintf(out, "#    col 000: elev\n");
+  fprintf(out, "#    col 001: zdr\n");
+  fprintf(out, "#--------------------------------------------\n");
+  fprintf(out, "#============================================\n");
+  
 }
 
 /////////////////////////////////////////////////////////////
@@ -1486,7 +1689,7 @@ void RadxPartRain::_computeSelfConZBias()
                      xml.c_str(),
                      dataType2);
     
-    if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Writing self consistency results to SPDB, url: "
            << _params.self_consistency_spdb_output_url << endl;
       cerr << xml << endl;
@@ -2365,9 +2568,14 @@ RadxPartRain::ComputeThread::ComputeThread(RadxPartRain *obj,
   // create compute engine object
   
   _engine = new ComputeEngine(_params, _threadNum);
-  if (!_engine->OK) {
-    delete _engine;
+  if (_engine == NULL) {
     OK = FALSE;
+    return;
+  }
+  if (!_engine->OK) {
+    OK = FALSE;
+    _engine = NULL;
+    return;
   }
 
 }  

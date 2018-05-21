@@ -1,9 +1,8 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2015
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
-// ** Research Applications Laboratory(RAL)
-// ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA
+// ** Boulder, Colorado, USA
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.hh
@@ -52,13 +51,6 @@ public:
   // enum typedefs
 
   typedef enum {
-    DEBUG_OFF = 0,
-    DEBUG_NORM = 1,
-    DEBUG_EXTRA = 2,
-    DEBUG_VERBOSE = 3
-  } debug_level_t;
-
-  typedef enum {
     ENTER_N = 0,
     ENTER_P_T_TD = 1
   } entry_type_t;
@@ -66,9 +58,13 @@ public:
   // struct typedefs
 
   typedef struct {
-    double min_angle;
-    double max_angle;
-  } elevation_angle_t;
+    int year;
+    int month;
+    int day;
+    int hour;
+    int min;
+    int sec;
+  } Time_t;
 
   ///////////////////////////
   // Member functions
@@ -355,35 +351,15 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  debug_level_t debug_level;
-
   tdrp_bool_t write_debug_mdv_files;
 
   char* debug_mdv_url;
 
-  char* instance;
+  tdrp_bool_t file_list_inputs;
 
-  tdrp_bool_t raw_iq_in_input;
+  char* target_files_host;
 
-  char* raw_i_field_name;
-
-  char* raw_q_field_name;
-
-  char* niq_field_name;
-
-  double input_niq_scale;
-
-  tdrp_bool_t invert_target_angle_sign;
-
-  char* aiq_field_name;
-
-  char* snr_field_name;
-
-  tdrp_bool_t specify_elevation_by_index;
-
-  long elevation_num;
-
-  elevation_angle_t elevation_angle;
+  char* calibration_files_host;
 
   char* *_target_id_file_list;
   int target_id_file_list_n;
@@ -391,11 +367,19 @@ public:
   char* *_calibration_file_list;
   int calibration_file_list_n;
 
+  char* target_files_path;
+
+  Time_t *_target_files_time_range;
+  int target_files_time_range_n;
+
+  char* calibration_files_path;
+
+  Time_t *_calibration_files_time_range;
+  int calibration_files_time_range_n;
+
   char* ref_file_path;
 
-  long num_azim;
-
-  long num_range_bins;
+  char* ref_url;
 
   double beam_width;
 
@@ -428,7 +412,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[39];
+  mutable TDRPtable _table[29];
 
   const char *_className;
 

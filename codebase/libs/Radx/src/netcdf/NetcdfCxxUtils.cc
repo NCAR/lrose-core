@@ -1209,7 +1209,7 @@ int NetcdfCxxUtils::writeStringVar(Nc3Var &var, const void *str)
     Nc3Dim &dim0 = dims[0];
     if (dim0.isNull()) {
       _addErrStr("ERROR - NetcdfCxxUtils::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var.getName());
+      _addErrStr("  Cannot write var, name: ", var.getName());
       _addErrStr("  dim 0 is NULL");
       _addErrStr("  file: ", _pathInUse);
       return -1;
@@ -1222,7 +1222,7 @@ int NetcdfCxxUtils::writeStringVar(Nc3Var &var, const void *str)
       var.putVar(starts, counts, (char *) str);
     } catch (NcException& e) {
       _addErrStr("ERROR - NetcdfCxxUtils::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var.getName());
+      _addErrStr("  Cannot write var, name: ", var.getName());
       _addErrStr("  file: ", _pathInUse);
       _addErrStr("  exception: ", e.what());
       return -1;
@@ -1239,7 +1239,7 @@ int NetcdfCxxUtils::writeStringVar(Nc3Var &var, const void *str)
     Nc3Dim &dim0 = dims[0];
     if (dim0.isNull()) {
       _addErrStr("ERROR - NetcdfCxxUtils::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var.getName());
+      _addErrStr("  Cannot write var, name: ", var.getName());
       _addErrStr("  dim 0 is NULL");
       _addErrStr("  file: ", _pathInUse);
       return -1;
@@ -1248,7 +1248,7 @@ int NetcdfCxxUtils::writeStringVar(Nc3Var &var, const void *str)
     Nc3Dim &dim1 = dims[1];
     if (dim1.isNull()) {
       _addErrStr("ERROR - NetcdfCxxUtils::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var.getName());
+      _addErrStr("  Cannot write var, name: ", var.getName());
       _addErrStr("  dim 1 is NULL");
       _addErrStr("  file: ", _pathInUse);
       return -1;
@@ -1261,7 +1261,7 @@ int NetcdfCxxUtils::writeStringVar(Nc3Var &var, const void *str)
       var.putVar(starts, counts, (char *) str);
     } catch (NcException& e) {
       _addErrStr("ERROR - NetcdfCxxUtils::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var.getName());
+      _addErrStr("  Cannot write var, name: ", var.getName());
       _addErrStr("  file: ", _pathInUse);
       _addErrStr("  exception: ", e.what());
       return -1;
@@ -1274,7 +1274,7 @@ int NetcdfCxxUtils::writeStringVar(Nc3Var &var, const void *str)
   // more than 2 is an error
   
   _addErrStr("ERROR - NetcdfCxxUtils::writeStringVar");
-  _addErrStr("  Canont write var, name: ", var.getName());
+  _addErrStr("  Cannot write var, name: ", var.getName());
   _addErrInt("  more than 2 dimensions: ", nDims);
   _addErrStr("  file: ", _pathInUse);
   return -1;

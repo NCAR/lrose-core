@@ -1,3 +1,9 @@
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+// ** Copyright UCAR (c)
+// ** University Corporation for Atmospheric Research(UCAR)
+// ** National Center for Atmospheric Research(NCAR)
+// ** Boulder, Colorado, USA
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.hh
 //
@@ -45,8 +51,10 @@ public:
   // enum typedefs
 
   typedef enum {
-    TIME_LIST = 0
-  } trigger_mode_t;
+    ALL_SCAN_STRATEGIES = 0,
+    MULTIPLE_ELEV_ONLY = 1,
+    SINGLE_ELEV_ONLY = 2
+  } scan_mode_t;
 
   ///////////////////////////
   // Member functions
@@ -333,43 +341,11 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  tdrp_bool_t debug;
-
-  tdrp_bool_t verbose;
-
-  char* instance;
-
-  trigger_mode_t trigger_mode;
-
-  char* input_url;
-
-  tdrp_bool_t raw_iq_in_input;
-
-  char* raw_i_field_name;
-
-  char* raw_q_field_name;
-
-  char* niq_field_name;
-
-  double input_niq_scale;
-
-  tdrp_bool_t invert_target_angle_sign;
-
-  char* aiq_field_name;
-
-  tdrp_bool_t snr_in_input;
-
-  char* snr_field_name;
-
-  char* power_field_name;
-
-  char* output_url;
-
   long lookback_secs;
 
   long lookback_search_margin;
 
-  long elevation_num;
+  scan_mode_t scan_mode;
 
   tdrp_bool_t create_phase_diff_colorscale;
 
@@ -386,7 +362,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[31];
+  mutable TDRPtable _table[11];
 
   const char *_className;
 

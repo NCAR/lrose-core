@@ -720,6 +720,7 @@ protected:
   
   int _read_device(FmqDevice::ident_t id, void *mess, size_t len);
   int _update_last_id_read();
+  int _add_read_msg(void *msg, int msg_size);
   
   // write
 

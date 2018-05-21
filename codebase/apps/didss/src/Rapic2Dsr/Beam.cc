@@ -32,7 +32,6 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <malloc.h>
 #include "Beam.hh"
 #include "ScanParams.hh"
 #include "sRadl.hh"

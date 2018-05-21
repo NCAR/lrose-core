@@ -36,10 +36,15 @@
 #ifndef PhaseFit_HH
 #define PhaseFit_HH
 
+#include <Refract/VectorIQ.hh>
+#include <Refract/VectorData.hh>
 #include <dataport/port_types.h>
+#include <vector>
 
-using namespace std;
-
+class TargetVector;
+class FieldDataPair;
+class VectorData;
+class LinearInterpArgs;
 
 /** 
  * @class PhaseFit
@@ -48,45 +53,6 @@ using namespace std;
 class PhaseFit
 {
  public:
-
-  ////////////////////
-  // Public members //
-  ////////////////////
-
-  /**
-   * @brief Pointer to the phase data to fit.  The calling method must set
-   *        these values after calling init() and before calling
-   *        fitPhaseField().  There are num_beams * num_gates values in this
-   *        array.
-   */
-
-  float *phase;
-
-  /**
-   * @brief Pointer to the quality data to fit.  The calling method must set
-   *        these values after calling init() and before calling
-   *        fitPhaseField().  There are num_beams * num_gates values in this
-   *        array.
-   */
-
-  float *quality;
-
-  /**
-   * @brief Pointer to the I data.  The calling method must set these values
-   *        after calling init() and before calling fitPhaseField().  There
-   *        are num_beams * num_gates values in this array.
-   */
-
-  float *inphase;
-
-  /**
-   * @brief Pointer to the Q data.  The calling method must set these values
-   *        after calling init() and before calling fitPhaseField().  There
-   *        are num_beams * num_gates values in this array.
-   */
-
-  float *quadrature;
-
 
   ////////////////////
   // Public methods //
@@ -119,23 +85,17 @@ class PhaseFit
    *                            the measurement.  Higher means smaller
    *                            coverage of better data.
    * @param[in] r_min Minimum rage get of ground echo.
-   * @param[in] debug_flag Debug flag.
-   * @param[in] verbose_flag Verbose flag.
    *
    * @return Returns true on success, false on failure.
    */
 
-  bool init(const int num_beams,
-	    const int num_gates,
-	    const double gate_spacing,
-	    const double wavelength,
-	    const double min_consistency,
-	    const int r_min,
-	    const bool debug_flag = false,
-	    const bool verbose_flag = false);
+  bool init(const int num_beams, const int num_gates, const double gate_spacing,
+	    const double wavelength, const double min_consistency,
+	    const int r_min);
+
+  void initFit(const TargetVector &target, const FieldDataPair &_difPrevScan,
+	       bool isPhaseDiff);
   
-
-
   /**
    * @brief Smooth the given phase field and compute the related N-field and
    *        its error.  Before calling this method, the caller must call
@@ -168,14 +128,18 @@ class PhaseFit
 
   /**
    * @brief Set the smoothing side length value to use in the calculations.
+   * and set derived member values
    */
 
   void setSmoothSideLen(const double smooth_sidelen)
   {
     _smoothSideLen = smooth_sidelen;
+    _smoothRange = (int)(_smoothSideLen / 2.0 / _gateSpacing);
+    if (_smoothRange <= 0)
+      _smoothRange = 1;
+    _twoSmoothRange = 2*_smoothRange;
   }
   
-
   /**
    * @brief Set the N output pointer.  This is the pointer to the location
    *        where the calculated N values will be written.  This array must
@@ -200,24 +164,16 @@ class PhaseFit
     _nError = n_error;
   }
   
+  /**
+   * Debug test
+   */
+  bool outOfBounds(int offset) const;
+  /**
+   * Debug test
+   */
+  bool outOfBounds(int max, int offset) const;
 
  private:
-
-  ///////////////////////
-  // Private constants //
-  ///////////////////////
-
-  /**
-   * @brief Very large data value.
-   */
-
-  static const double VERY_LARGE;
-
-  /**
-   * @brief Invalid data value.
-   */
-
-  static const float INVALID;
 
   /**
    * @brief Number of azimuths to smooth over when calculating the average
@@ -264,22 +220,8 @@ class PhaseFit
   static const double MIN_ABS_CONSISTENCY;
 
 
-  /////////////////////
-  // Private members //
-  /////////////////////
+  int _scanSize;            /**< Size of scan */
 
-  /**
-   * @brief Debug flag.
-   */
-
-  bool _debug;
-  
-  /**
-   * @brief Verbose debug flag.
-   */
-
-  bool _verbose;
-  
   /**
    * @brief Number of beams in the data.
    */
@@ -330,34 +272,39 @@ class PhaseFit
   double _refN;
 
   /**
+   * @brief phase data to fit. 
+   */
+  VectorData _phase;
+
+  /**
+   * @brief quality data to fit. 
+   */
+  VectorData _quality;
+
+  /**
+   * @brief IQ data.
+   */
+  VectorIQ _iq;
+
+  /**
    * @brief Smoothed phase field.
    */
-
-  float *_phaseFit;
+  VectorData _phaseFit;
 
   /**
    * @brief Error in the smoothed phase field.
    */
-
-  float *_phaseError;
+  VectorData _phaseError;
 
   /**
    * @brief I component of the smoothed phase field.
    */
-
-  float *_smoothI;
-
-  /**
-   * @brief Q component of the smoothed phase field.
-   */
-
-  float *_smoothQ;
+  VectorIQ _smoothIQ;
 
   /**
    * @brief Calculated N values.  This pointer points to space not owned by
    *        this object and must not be deleted by this object.
    */
-
   fl32 *_nOutput;
 
   /**
@@ -365,45 +312,29 @@ class PhaseFit
    *        and the input data density/quality.  This pointer points to space
    *        not owned by this object and must not be deleted by this object.
    */
-
   fl32 *_nError;
 
   /**
    * @brief Expected phase for 1st range.
    */
-
   double _expectedPhaseRange0;
 
   /**
    * @brief Average d(Phase)/d(range)
    */
-
   double _rangeSlope;
 
   /**
    * @brief Smoothing side length in meters.
    */
-
   double _smoothSideLen;
 
+  int _smoothRange;     /**< Used in smoothing */
+  int _twoSmoothRange;  /**< Used in smoothing */
 
   /////////////////////
   // Private methods //
   /////////////////////
-
-  /**
-   * @brief Calculate the square of the given value.
-   *
-   * @param[in] Value to square.
-   *
-   * @return Returns the square of the given value.
-   */
-
-  static double SQR(double value)
-  {
-    return value * value;
-  }
-  
 
   /**
    * @brief Smooth the phase measurements of the map information loaded
@@ -413,7 +344,11 @@ class PhaseFit
    *         INVALID on error.
    */
 
-  float _doSmoothing();
+  float _doSmoothing(double phaseSlopeInit);
+  void _doSmoothingRange(int r, const VectorData &slope_in_range,
+			 VectorData &next_slope_in_range,
+			 VectorIQ &slope_ab,
+			 float range_slope, float init_slope);
   
 
   /**
@@ -445,7 +380,7 @@ class PhaseFit
    *         error.
    */
 
-  double _meanPhaseSlopeAvg() const;
+  double _meanPhaseSlopeAvg(void) const;
   
 
   /**
@@ -456,8 +391,12 @@ class PhaseFit
    *         error.
    */
 
-  double _meanPhaseSlopeInit() const;
+  double _meanPhaseSlopeInit(void) const;
   
+  IQ _sectorMeanPhaseSlope(int az, int max_r, int smear_az) const;
+  // void _meanPhaseSlopeIncrementAtAz(int az, int max_r, int smear_az,
+  // 				    IQ &slope_iq) const;
+  IQ _meanPhaseSlopeAtRange(int r, int offset, int smear_az) const;
 
   /**
    * @brief Evaluate the phase at range RMin.  Since it is at very close
@@ -467,8 +406,45 @@ class PhaseFit
    * @return Returns the calculated phase value.
    */
 
-  double _phaseRange0();
+  double _phaseRange0(void);
   
+  void _setNOneBeam(int azn, float slope_to_n, float tmp, float er_decorel);
+
+  float _guessPhase(int az, int r, float slope_in_range, int &rjump) const;
+
+  void _linearInterp(const LinearInterpArgs &args,
+		     const VectorData &slope_in_range,
+		     const VectorIQ &slope_ab, const VectorData &guess_phase,
+		     VectorIQ &sum_iq, VectorData &max_quality,
+		     VectorData &next_slope_in_range);
+  double _linearInterpUpdateMaxQual(const LinearInterpArgs &args, int j) const;
+  IQ _linearInterpUpdateSumIQ(const LinearInterpArgs &args, int j,
+			      const VectorData &slope_in_range,
+			      const VectorIQ &slope_ab) const;
+  void _linearInterpIncConsistency(int daz, const LinearInterpArgs &args,
+				   const VectorIQ &sum_iq,
+				   const VectorIQ &slope_ab,
+				   const VectorData &guess_phase,
+				   const VectorData &max_quality,
+				   IQ &tmp_ab, float &max_consistency) const;
+  void _setConsistencyAndQuality(const IQ &tmp_ab,
+				 float weight_fact,
+				 float maxconsistency,
+				 float &consistency,
+				 float &quality) const;
+void  _setPhaseAndNextSlopeInRange(const LinearInterpArgs &args,
+				   const IQ &tmp_ab,
+				   const VectorData &guess_phase,
+				   float quality, float consistency,
+				   float maxconsistency,
+				   const VectorData &slope_in_range,
+				   VectorData &next_slope_in_range);
+void _resetSmoothIQAndNextSlopeInRange(const LinearInterpArgs &args,
+				       const VectorData &guess_phase,
+				       const VectorData &slope_in_range,
+				       VectorData &next_slope_in_range);
+void _lowQualityAdjust(const LinearInterpArgs &args,
+		       VectorData &next_slope_in_range);
 
   /**
    * @brief Perform a quality-dependent iterative smoothing of the
@@ -485,6 +461,10 @@ class PhaseFit
 
   int _relax(float *ndata);
   
+  inline double _defaultSlope(void) const
+  {
+    return 1000000.0 / _gateSpacing * _wavelength / 720.0;
+  }
 
 };
 

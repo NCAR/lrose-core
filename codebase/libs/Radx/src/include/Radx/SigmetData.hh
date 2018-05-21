@@ -38,12 +38,14 @@
 #define FIELD_VEL           3
 #define FIELD_WIDTH         4
 #define FIELD_ZDR           5
+#define FIELD_ORAIN         6
 #define FIELD_DBZ_CORR      7
 #define FIELD_DBZ_TOT_2     8
 #define FIELD_DBZ_2         9
 #define FIELD_VEL_2        10
 #define FIELD_WIDTH_2      11
 #define FIELD_ZDR_2        12
+#define FIELD_RAINRATE_2   13
 #define FIELD_KDP          14
 #define FIELD_KDP_2        15
 #define FIELD_PHIDP        16
@@ -59,8 +61,10 @@
 #define FIELD_LDRH_2       26
 #define FIELD_LDRV         27
 #define FIELD_LDRV_2       28
-
-#define FIELD_HEIGHT       32
+#define FIELD_FLAGS        29
+#define FIELD_FLAGS_2      30
+#define FIELD_FLOAT32      31
+#define FIELD_ECHO_TOPS    32
 #define FIELD_VIL_2        33
 #define FIELD_RAW          34
 #define FIELD_SHEAR        35
@@ -68,7 +72,6 @@
 #define FIELD_FLIQUID_2    37
 #define FIELD_USER         38
 #define FIELD_OTHER        39
-
 #define FIELD_DEFORM_2     40
 #define FIELD_VVEL_2       41
 #define FIELD_HVEL_2       42
@@ -88,10 +91,22 @@
 #define FIELD_HCLASS_2     56
 #define FIELD_ZDRC         57
 #define FIELD_ZDRC_2       58
-
-#define FIELD_DBZ_TOT_V_2  62
-#define FIELD_DBZ_V_2      64
+#define FIELD_TEMP_2       59
+#define FIELD_VIR_2        60
+#define FIELD_DBTV         61
+#define FIELD_DBTV_2       62
+#define FIELD_DBZV         63
+#define FIELD_DBZV_2       64
+#define FIELD_SNR          65
 #define FIELD_SNR_2        66
+#define FIELD_ALBEDO       67
+#define FIELD_ALBEDO_2     68
+#define FIELD_VILD_2       69
+#define FIELD_TURB_2       70
+#define FIELD_DBTE         71
+#define FIELD_DBTE_2       72
+#define FIELD_DBZE         73
+#define FIELD_DBZE_2       74
 
 // PRF pulsing types
 

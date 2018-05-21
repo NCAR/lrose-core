@@ -75,7 +75,7 @@ EsdAcIngest::EsdAcIngest(int argc, char **argv)
 
   // get TDRP params
   
-  _paramsPath = "unknown";
+  _paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv, _args.override.list,
 			   &_paramsPath)) {
     cerr << "ERROR: " << _progName << endl;
@@ -405,57 +405,62 @@ int EsdAcIngest::_decodeCommaDelimited(const char *line,
   // decode remaining tokens
 
   for (int ii = 10; ii < nEnd; ii++) {
-
+    
     switch (_params._optional_field_names[ii - 10]) {
-
-    case Params::GS:
-      posn.gs = atof(tokens[ii].c_str());
-      break;
-    case Params::TAS:
-      posn.tas = atof(tokens[ii].c_str());
-      break;
-    case Params::TEMP:
-      posn.temp = atof(tokens[ii].c_str());
-      break;
-    case Params::DEW_PT:
-      posn.dew_pt = atof(tokens[ii].c_str());
-      break;
-    case Params::LW:
-      posn.lw = atof(tokens[ii].c_str());
-      break;
-    case Params::ERROR_FLAGS: {}
-      break;
-    case Params::R_BURN:
-      if (tokens[ii] == "1") {
-	posn.flare_flags |= RIGHT_BURN_FLAG;
-      }
-      break;
-    case Params::L_BURN:
-      if (tokens[ii] == "1") {
-	posn.flare_flags |= LEFT_BURN_FLAG;
-      }
-      break;
-    case Params::BURN_IN_PLACE:
-      if (tokens[ii] == "1") {
-	posn.flare_flags |= BURN_IN_PLACE_FLAG;
-      }
-      break;
-    case Params::EJECTABLE:
-      if (tokens[ii] == "1") {
-	posn.flare_flags |= EJECTABLE_FLAG;
-      }
-      break;
-    case Params::N_BURN_IN_PLACE:
-      posn.n_burn_in_place = atoi(tokens[ii].c_str());
-      break;
-    case Params::N_EJECTABLE:
-      posn.n_ejectable = atoi(tokens[ii].c_str());
-      break;
-
-    default: {}
       
+      case Params::GS:
+        posn.gs = atof(tokens[ii].c_str());
+        break;
+      case Params::TAS:
+        posn.tas = atof(tokens[ii].c_str());
+        break;
+      case Params::TEMP:
+        posn.temp = atof(tokens[ii].c_str());
+        break;
+      case Params::DEW_PT:
+        posn.dew_pt = atof(tokens[ii].c_str());
+        break;
+      case Params::LW:
+        posn.lw = atof(tokens[ii].c_str());
+        break;
+      case Params::ERROR_FLAGS: {}
+        break;
+      case Params::R_BURN:
+        if (tokens[ii] == "1") {
+          posn.flare_flags |= RIGHT_BURN_FLAG;
+        }
+        break;
+      case Params::L_BURN:
+        if (tokens[ii] == "1") {
+          posn.flare_flags |= LEFT_BURN_FLAG;
+        }
+        break;
+      case Params::BURN_IN_PLACE:
+        if (tokens[ii] == "1") {
+          posn.flare_flags |= BURN_IN_PLACE_FLAG;
+        }
+        break;
+      case Params::DRY_ICE:
+        if (tokens[ii] == "1") {
+          posn.flare_flags |= DRY_ICE_FLAG;
+        }
+        break;
+      case Params::EJECTABLE:
+        if (tokens[ii] == "1") {
+          posn.flare_flags |= EJECTABLE_FLAG;
+        }
+        break;
+      case Params::N_BURN_IN_PLACE:
+        posn.n_burn_in_place = atoi(tokens[ii].c_str());
+        break;
+      case Params::N_EJECTABLE:
+        posn.n_ejectable = atoi(tokens[ii].c_str());
+        break;
+        
+      default: {}
+        
     } // switch
-
+    
   } // ii
 
   return 0;
@@ -746,6 +751,9 @@ int EsdAcIngest::_decodeWmiLongString(const char *line,
   }
   if (ejectable) {
     posn.flare_flags |= EJECTABLE_FLAG;
+  }
+  if (ice_hopper) {
+    posn.flare_flags |= DRY_ICE_FLAG;
   }
   posn.n_ejectable = n_ejectable;
   posn.n_burn_in_place = n_burn_in_place;

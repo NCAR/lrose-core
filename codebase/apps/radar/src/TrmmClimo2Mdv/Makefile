@@ -38,7 +38,7 @@ TARGET_FILE = TrmmClimo2Mdv
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lrapformats -ldsserver -ldidss \
-	-ltoolsa -ltdrp -ldataport -leuclid \
+	-leuclid -ltdrp -ldataport -ltoolsa \
 	-lRadx -lnetcdf_c++ -lnetcdf -lhdf5_hl \
 	-lhdf5 -ludunits2 $(NETCDF4_LIBS) -lbz2 \
 	-lz

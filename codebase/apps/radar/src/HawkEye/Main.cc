@@ -33,11 +33,26 @@
 
 #include "HawkEye.hh"
 #include <QApplication>
+#include <toolsa/uusleep.h>
 
 // file scope
 
 static void tidy_and_exit (int sig);
 static HawkEye *Prog;
+static QApplication *app;
+
+// override QApplication exception handling
+// via notify
+
+// class Application final : public QApplication {
+//  public:
+//   Application(int& argc, char** argv) : QApplication(argc, argv) {}
+//   virtual bool notify(QObject *receiver, QEvent *e) override {
+//     // cerr << "Main Application - caught exception" << endl;
+//     // cerr << *e << endl;
+//     return false;
+//   }
+// };
 
 // main
 
@@ -47,22 +62,28 @@ int main(int argc, char **argv)
 
   // create program object
 
-  QApplication app(argc, argv);
-  HawkEye *Prog;
-  Prog = new HawkEye(argc, argv);
-  if (!Prog->OK) {
-    return(-1);
+  try {
+    
+    app = new QApplication(argc, argv);
+    HawkEye *Prog;
+    Prog = new HawkEye(argc, argv);
+    if (!Prog->OK) {
+      return(-1);
+    }
+    
+    // run it
+    
+    int iret = Prog->Run(*app);
+    
+    // clean up
+    
+    tidy_and_exit(iret);
+    return (iret);
+    
+  } catch (std::bad_alloc &a) {
+    cerr << ">>>>> bad alloc: " << a.what() << endl;
   }
 
-  // run it
-
-  int iret = Prog->Run(app);
-
-  // clean up
-
-  tidy_and_exit(iret);
-  return (iret);
-  
 }
 
 // tidy up on exit
@@ -70,6 +91,8 @@ int main(int argc, char **argv)
 static void tidy_and_exit (int sig)
 
 {
+  app->exit();
   delete(Prog);
+  umsleep(1000);
   exit(sig);
 }

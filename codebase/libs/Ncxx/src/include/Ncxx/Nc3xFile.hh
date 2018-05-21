@@ -211,6 +211,12 @@ public:
   int readIntVal(const string &name, int &val, 
                  int missingVal, bool required = true);
   
+  /// read int variable, set val, with units if available
+  /// Returns 0 on success, -1 on failure
+
+  int readIntVal(const string &name, int &val, string &units, 
+                 int missingVal, bool required = true);
+  
   /// read float variable
   /// Returns 0 on success, -1 on failure
   
@@ -223,6 +229,12 @@ public:
   int readFloatVal(const string &name, float &val,
                    float missingVal, bool required = true);
 
+  /// read float value, with units if available
+  /// Returns 0 on success, -1 on failure
+  
+  int readFloatVal(const string &name, float &val, string &units,
+                   float missingVal, bool required = true);
+
   /// read double variable
   /// Returns 0 on success, -1 on failure
   
@@ -233,6 +245,12 @@ public:
   /// Returns 0 on success, -1 on failure
   
   int readDoubleVal(const string &name, double &val,
+                    double missingVal, bool required = true);
+
+  /// read double value, with units if available
+  /// Returns 0 on success, -1 on failure
+  
+  int readDoubleVal(const string &name, double &val, string &units,
                     double missingVal, bool required = true);
 
   /// read a scalar string variable

@@ -110,6 +110,12 @@
    */
   virtual void set_input_info(Info **info) const = 0;
 
+  /**
+   * virtual function 
+   * Take action when the vertical levels have changed.
+   */
+  virtual void vertical_level_change(void);
+
 #else
 
   /**
@@ -198,5 +204,11 @@
    * @param[in,out] info  Pointer to the Info object
    */
    virtual void set_input_info(Info **info) const;
+
+  /**
+   * virtual function 
+   * Take action when the vertical levels have changed.
+   */
+  void vertical_level_change(void);
 
 #endif

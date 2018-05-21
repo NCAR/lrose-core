@@ -245,10 +245,10 @@ void RadxField::setMissingFl64(Radx::fl64 missingValue)
     return;
   }
 
-  Radx::fl64 *ddata = new Radx::fl64[_nPoints];
+  Radx::fl64 *xdata = getDataFl64();
   for (size_t ii = 0; ii < _nPoints; ii++) {
-    if (ddata[ii] == _missingFl64) {
-      ddata[ii] = missingValue;
+    if (xdata[ii] == _missingFl64) {
+      xdata[ii] = missingValue;
     }
   }
 
@@ -279,10 +279,10 @@ void RadxField::setMissingFl32(Radx::fl32 missingValue)
     return;
   }
 
-  Radx::fl32 *ddata = new Radx::fl32[_nPoints];
+  Radx::fl32 *xdata = getDataFl32();
   for (size_t ii = 0; ii < _nPoints; ii++) {
-    if (ddata[ii] == _missingFl32) {
-      ddata[ii] = missingValue;
+    if (xdata[ii] == _missingFl32) {
+      xdata[ii] = missingValue;
     }
   }
 
@@ -313,10 +313,10 @@ void RadxField::setMissingSi32(Radx::si32 missingValue)
     return;
   }
 
-  Radx::si32 *ddata = new Radx::si32[_nPoints];
+  Radx::si32 *xdata = getDataSi32();
   for (size_t ii = 0; ii < _nPoints; ii++) {
-    if (ddata[ii] == _missingSi32) {
-      ddata[ii] = missingValue;
+    if (xdata[ii] == _missingSi32) {
+      xdata[ii] = missingValue;
     }
   }
 
@@ -347,10 +347,10 @@ void RadxField::setMissingSi16(Radx::si16 missingValue)
     return;
   }
 
-  Radx::si16 *ddata = new Radx::si16[_nPoints];
+  Radx::si16 *xdata = getDataSi16();
   for (size_t ii = 0; ii < _nPoints; ii++) {
-    if (ddata[ii] == _missingSi16) {
-      ddata[ii] = missingValue;
+    if (xdata[ii] == _missingSi16) {
+      xdata[ii] = missingValue;
     }
   }
 
@@ -381,10 +381,10 @@ void RadxField::setMissingSi08(Radx::si08 missingValue)
     return;
   }
 
-  Radx::si08 *ddata = new Radx::si08[_nPoints];
+  Radx::si08 *xdata = getDataSi08();
   for (size_t ii = 0; ii < _nPoints; ii++) {
-    if (ddata[ii] == _missingSi08) {
-      ddata[ii] = missingValue;
+    if (xdata[ii] == _missingSi08) {
+      xdata[ii] = missingValue;
     }
   }
 
@@ -3269,7 +3269,7 @@ void RadxField::serialize(RadxMsg &msg)
   // init
 
   msg.clearAll();
-  msg.setMsgType(RadxMsg::RadxFieldMsgType);
+  msg.setMsgType(RadxMsg::RadxFieldMsg);
 
   // add metadata strings as xml part
   // include null at string end
@@ -3303,7 +3303,7 @@ int RadxField::deserialize(const RadxMsg &msg)
 
   // check type
 
-  if (msg.getMsgType() != RadxMsg::RadxFieldMsgType) {
+  if (msg.getMsgType() != RadxMsg::RadxFieldMsg) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxField::deserialize" << endl;
     cerr << "  incorrect message type" << endl;

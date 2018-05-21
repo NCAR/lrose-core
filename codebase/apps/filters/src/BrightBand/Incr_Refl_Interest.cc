@@ -97,8 +97,9 @@ bool Incr_Refl_Interest::calcInterestFields(MdvxField *dbz_field)
       {
 	start_plane++;
       }
-	 
-      if (start_plane*_dbzFieldHdr.grid_dz + _dbzFieldHdr.grid_minz < _maxDown)
+
+      float dz = _vlevelHdr.level[start_plane] - _vlevelHdr.level[start_plane-1];
+      if (start_plane*dz + _dbzFieldHdr.grid_minz < _maxDown)      
       {
 	for (int iz = start_plane + 1; iz < _maxUp; iz++)
 	{ 

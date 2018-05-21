@@ -29,6 +29,7 @@
 #include "MdvPlaybackData.hh"
 #include <toolsa/DateTime.hh>
 #include <cstdio>
+#include <unistd.h>
 
 //----------------------------------------------------------------
 Sync::Sync(const bool obs, const ParmsMdvPlayback &parm) :

@@ -24,85 +24,39 @@
 /**
  *
  * @file Processor.hh
+ * Class for doing all of the data processing.
  *
  * @class Processor
- *
  * Class for doing all of the data processing.
- *  
- * @date 12/1/2008
- *
  */
 
 #ifndef Processor_HH
 #define Processor_HH
 
 #include <string>
-#include <sys/stat.h>
+#include "Params.hh"
+#include "TargetVector.hh"
+#include "CalibDayNight.hh"
+#include <Refract/RefParms.hh>
+#include <Refract/FieldWithData.hh>
+#include <Refract/FieldDataPair.hh>
 
-#include <Mdv/DsMdvx.hh>
-#include <Mdv/MdvxField.hh>
-
-#include "TargetData.hh"
-#include "TargetInfo.hh"
-
-using namespace std;
-
-
-/** 
- * @class Processor
- */
+class DsMdvx;
+class MdvxField;
 
 class Processor
 {
  public:
 
-  //////////////////
-  // Public types //
-  //////////////////
-
-  typedef enum
-  {
-    QUALITY_FROM_WIDTH,
-    QUALITY_FROM_CPA
-  } quality_type_t;
-  
-    
-  //////////////////////
-  // Public constants //
-  //////////////////////
-
-  /**
-   * @brief Invalid data value.
-   */
-
-  static const float INVALID;
-
-  /**
-   * @brief Very large data value.
-   */
-
-  static const double VERY_LARGE;
-
-
-  ////////////////////
-  // Public methods //
-  ////////////////////
-
-  //////////////////////////////
-  // Constructors/Destructors //
-  //////////////////////////////
-
   /**
    * @brief Constructor
    */
-
   Processor();
   
 
   /**
    * @brief Destructor
    */
-
   virtual ~Processor(void);
   
 
@@ -110,41 +64,13 @@ class Processor
    * @brief Initialize the local data.
    *
    * @param[in] calib_file Pointer to the calibration file information.
-   * @param[in] num_beams Number of beams in the data.
-   * @param[in] num_gates Number of gates in the data.
-   * @param[in] r_min Minimum rage gate of ground echo.
-   * @param[in] frequency Frequency of the radar.
-   * @param[in] quality_type The type of quality field being used.  This
-   *                         determines the quality calculation to perform.
-   * @param[in] min_consistency Minimum consistency of phase to accept the
-   *                            N/deltaN measurements.  Higher means smaller
-   *                            coverage of better data.
-   * @param[in] do_relax Flag indicating whether to perform the relaxation
-   *                     stage of the phase-fitting algorithm.
-   * @param[in] n_smoothing_side_len Smoothing side length, in meters, to use
-   *                                 in the N calculation.
-   * @param[in] dn_smoothing_side_len Smoothing side length, in meters, to use
-   *                                  in the delta N calculation.
-   * @param[in] debug_flag Debug flag.
-   * @param[in] verbose_flag Verbose flag.
-   *
+   * @param[in] parms  params
    * @return Returns true if the initialization was successful,
    *         false otherwise.
    */
 
-  bool init(DsMdvx *calib_file,
-	    const int num_beams,
-	    const int num_gates,
-	    const int r_min,
-	    const double frequency,
-	    const quality_type_t quality_type,
-	    const double min_consistency,
-	    const bool do_relax,
-	    const double n_smoothing_side_len,
-	    const double dn_smoothing_side_len,
-	    const bool debug_flag = false,
-	    const bool verbose_flag = false);
-  
+  bool init(CalibDayNight *calib, const RefParms &refparms,
+	    const Params &params);
 
   /**
    * @brief Process the given scan data.
@@ -152,36 +78,15 @@ class Processor
    * @param[in,out] data_file The file containing the scan data.  The output
    *                          fields are added to this file before returning.
    *
-   * @return Returns true on success, false on failure.
+   * @return true on success, false on failure.
    */
 
-  bool processScan(DsMdvx &data_file);
+  bool processScan(const RefractInput &input, const time_t &t,
+		   DsMdvx &data_file);
   
 
  private:
 
-  ///////////////////////
-  // Private constants //
-  ///////////////////////
-
-  /**
-   * @brief The field name of the average I field in the calibration file.
-   */
-
-  static const string CALIB_AV_I_FIELD_NAME;
-  
-  /**
-   * @brief The field name of the average Q field in the calibration file.
-   */
-
-  static const string CALIB_AV_Q_FIELD_NAME;
-  
-  /**
-   * @brief The field name of the phase error field in the calibration file.
-   */
-
-  static const string CALIB_PHASE_ER_FIELD_NAME;
-  
   /**
    * @brief The speed of light in a vacuum.
    */
@@ -250,182 +155,80 @@ class Processor
   static const double MAX_SIGMA_DN_VALUE;
   
 
-  /////////////////////////////////////////////
-  // Private members -- algorithm parameters //
-  /////////////////////////////////////////////
-
-  /**
-   * @brief Debug flag.
-   */
-
-  bool _debug;
-  
-  /**
-   * @brief Verbose debug flag.
-   */
-
-  bool _verbose;
-  
   /**
    * @brief Pointer to the calibration file.  This pointer is owned by the
    *        parent class and must not be deleted here.
    */
+  CalibDayNight *_calib;
 
-  DsMdvx *_calibFile;
-  
-  /**
-   * @brief Number of azimuths used in data processing.
-   */
-
-  int _numBeams;
-  
-  /**
-   * @brief Number of range bins.
-   */
-
-  int _numGates;
-  
-  /**
-   * @brief The type of quality calculation to perform.
-   */
-
-  quality_type_t _qualityType;
-  
-  /**
-   * @brief Minimum range gate of ground echo.
-   */
-
-  int _rMin;
-  
-  /**
-   * @brief Minimum consistency of phase to accept N (DN) measurement.
-   *        Higher means smaller coverage of (hopefully) better data.
-   */
-
-  double _minConsistency;
-  
-  /**
-   * @brief Flag indicating whether to do the relaxation stage.
-   */
-
-  bool _doRelax;
-  
-  /**
-   * @brief N smoothing side lenth in meters.
-   */
-
-  double _nSmoothingSideLen;
-  
-  /**
-   * @brief DN smoothing side length in meters.
-   */
-
-  double _dnSmoothingSideLen;
-  
-
-  /////////////////////
-  // Private members //
-  /////////////////////
+  RefParms _refparms;  /**< Parameters */
+  Params _parms;       /**< Parameters */
 
   /**
    * @brief Flag indicating whether we are currently processing the first
    *        input file.
    */
-  
   bool _firstFile;
 
   /**
    * @brief Phase difference between current and reference target phase.
-   *        There are _numBeams * _numGates values in this array.
    */
-
-  TargetData *_difFromRef;
+  FieldDataPair _difFromRef;
   
   /**
    * @brief Phase (in I/Q form) difference between 2 successive scans.
-   *        There are _numBeams * _numGates values in this array.
    */
-
-  TargetData *_difPrevScan;
+  FieldDataPair _difPrevScan;
 
   /**
    * @brief In-phase (I) and quadrature (Q) components of phase of target.
-   *        There are _numBeams * _numGates values in this array.
    */
-
-  TargetData *_rawPhase;
+  FieldDataPair _rawPhase;
 
   /**
-   * @brief Information on targets at each azimuth-range cell.  There are
-   *        _numBeams * _numGates values in this array.
+   * @brief Information on targets at each azimuth-range cell.
    */
-
-  TargetInfo *_target;
+  TargetVector _target;
 
   /**
    * @brief The calculated N field.
    */
-
-  MdvxField *_nField;
+  FieldWithData _nField;
 
   /**
    * @brief The calculated delta N field.
    */
-
-  MdvxField *_dnField;
+  FieldWithData _dnField;
 
   /**
    * @brief The calculated sigma N field.
    */
-
-  MdvxField *_sigmaNField;
+  FieldWithData _sigmaNField;
 
   /**
    * @brief The calculated sigma delta N field.
    */
-
-  MdvxField *_sigmaDnField;
+  FieldWithData _sigmaDnField;
 
   /**
    * @brief The wavelength of the radar beam.
    */
-
   double _wavelength;
   
+  /**
+   * Number of points per scan
+   */
+  int _nptScan;
+
+  /**
+   * True for first scan
+   */
+  bool _first;
+
 
   /////////////////////
   // Private methods //
   /////////////////////
-
-  /**
-   * @brief Calculate the square of the given value.
-   *
-   * @param[in] Value to square.
-   *
-   * @return Returns the square of the given value.
-   */
-
-  static double SQR(double value)
-  {
-    return value * value;
-  }
-  
-
-  /**
-   * @brief Create the indicated MDV field and fill in the data with
-   *        missing data values.
-   *
-   * @param[in] base_field The base field that this field should look like.
-   * @param[in] field_name The field name.
-   * @param[in] units the field units.
-   *
-   * @return Returns a pointer to the new field on success, 0 on failure.
-   */
-
-  MdvxField *_createMdvField(const MdvxField &base_field,
-			     const string &field_name,
-			     const string &units) const;
-  
 
   /**
    * @brief Create the output field objects, filling in the data values with
@@ -437,7 +240,7 @@ class Processor
    * @return Returns true on success, false on failure.
    */
 
-  bool _createOutputFields(const MdvxField &base_field);
+  bool _createOutputFields(const FieldDataPair &iq);
   
 
   /**
@@ -447,7 +250,7 @@ class Processor
    * @return Returns true on success, false on failure.
    */
 
-  bool _difPhase();
+  bool _difPhase(const time_t &t);
   
 
   /**
@@ -461,7 +264,7 @@ class Processor
    * @return Returns true on success, false on failure.
    */
 
-  bool _fitPhases(const double gate_spacing);
+  bool _fitPhases(int numBeams, int numGates,  double gate_spacing);
   
 
   /**
@@ -483,10 +286,9 @@ class Processor
    * @return Returns true on success, false on failure.
    */
 
-  bool _getQuality(const MdvxField &snr_field,
-		   const MdvxField &sw_field);
+  bool _getQuality(const FieldWithData &snr, const FieldWithData &quality,
+		   const time_t &t);
   
-
   /**
    * @brief Create the masked output field to be added to the output
    *        file.
@@ -500,7 +302,7 @@ class Processor
    */
 
   MdvxField *_maskOutputField(const MdvxField &mask_field,
-			      const MdvxField &output_field,
+			      const FieldWithData &output_field,
 			      const double min_data_value,
 			      const double max_data_value) const;
   

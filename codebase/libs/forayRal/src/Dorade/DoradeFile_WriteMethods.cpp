@@ -128,7 +128,6 @@ void DoradeFile::write_ground_headers() throw(Fault){
 	integerValues_["ray_index"] = 0;
 	
     }catch(Fault &fault){
-	char msg[2048];
 	fault.add_msg("DoradeFile::write_ground_headers: Caught Fault.\n");
 	throw(fault);
     }
@@ -285,7 +284,6 @@ void DoradeFile::build_sswb(Buffer &buffer)  throw(Fault){
 	sswb.encode(buffer);
 			
     }catch(Fault &fault){
-	char msg[2048];
 	fault.add_msg("DoradeFile::build_sswb: Caught Fault \n");
 	throw(fault);
     }
@@ -323,7 +321,6 @@ void DoradeFile::build_vold(Buffer &buffer)  throw(Fault){
 	vold.encode(buffer);
 			
     }catch(Fault &fault){
-	char msg[2048];
 	fault.add_msg("DoradeFile::build_vold: Caught Fault \n");
 	throw(fault);
     }
@@ -388,7 +385,6 @@ void DoradeFile::build_radd(Buffer &buffer)  throw(Fault){
 	radd.encode(buffer);
 			
     }catch(Fault &fault){
-	char msg[2048];
 	fault.add_msg("DoradeFile::build_radd: Caught Fault \n");
 	throw(fault);
     }
@@ -448,7 +444,6 @@ void DoradeFile::build_parm(Buffer &buffer,const int index)  throw(Fault){
 	parm.encode(buffer);
 
     }catch(Fault &fault){
-	char msg[2048];
 	fault.add_msg("DoradeFile::build_parm: Caught Fault \n");
 	throw(fault);
 
@@ -498,8 +493,7 @@ void DoradeFile::build_csfd(Buffer &buffer)  throw(Fault){
 	csfd.encode(buffer);
 
     }catch(Fault &fault){
-	char msg[2048];
-	fault.add_msg("DoradeFile::build_csfd: Caught Fault \n");
+        fault.add_msg("DoradeFile::build_csfd: Caught Fault \n");
 	throw(fault);
     }
 }
@@ -522,7 +516,6 @@ void DoradeFile::build_celv(Buffer &buffer)  throw(Fault){
 	celv.encode(buffer);
 
     }catch(Fault &fault){
-	char msg[2048];
 	fault.add_msg("DoradeFile::build_celv: Caught Fault \n");
 	throw(fault);
     }
@@ -543,7 +536,6 @@ void DoradeFile::build_cfac(Buffer &buffer)  throw(Fault){
 	cfac.encode(buffer);
 
     }catch(Fault &fault){
-	char msg[2048];
 	fault.add_msg("DoradeFile::build_celv: Caught Fault \n");
 	throw(fault);
     }
@@ -748,7 +740,7 @@ void DoradeFile::set_ray_data(int fieldIndex, RayIntegers &ri) throw(Fault){
     if(ri.size() < numberOfCells){
 	char msg[2048];
 	sprintf(msg,"DoradeFile::set_ray_data: RayInteger size of %d is less then number_of_cells value of %d.\n",
-		ri.size(),numberOfCells);
+		(int) ri.size(),numberOfCells);
 	throw Fault(msg);
     }
     
@@ -811,7 +803,7 @@ void DoradeFile::set_ray_data(int fieldIndex, RayDoubles  &rd) throw(Fault){
     if(rd.size() < numberOfCells){
 	char msg[2048];
 	sprintf(msg,"DoradeFile::set_ray_data: RayDoubles size of %d is less then number_of_cells value of %d.\n",
-		rd.size(),numberOfCells);
+		(int) rd.size(),numberOfCells);
 	throw Fault(msg);
     }
     

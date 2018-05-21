@@ -63,6 +63,7 @@
 #define NCF_CALIB_RADAR_HH
 
 #include <Radx/Radx.hh>
+class RadxMsg;
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
@@ -324,6 +325,20 @@ public:
   
   int readFromXmlFile(const string &calPath, string &errStr);
 
+  /// \name Serialization:
+  //@{
+
+  // serialize into a RadxMsg
+  
+  void serialize(RadxMsg &msg);
+  
+  // deserialize from a RadxMsg
+  // return 0 on success, -1 on failure
+
+  int deserialize(const RadxMsg &msg);
+
+  //@}
+
 private:
 
   string _radarName;
@@ -468,6 +483,108 @@ private:
   double _testPowerDbmH;
   double _testPowerDbmV;
 
+  /////////////////////////////////////////////////
+  // serialization
+  /////////////////////////////////////////////////
+
+  static const int _metaStringsPartId = 1;
+  static const int _metaNumbersPartId = 2;
+  
+  // struct for metadata numbers in messages
+  // strings not included - they are passed as XML
+  
+  typedef struct {
+    
+    Radx::si64 timeSecs;
+    Radx::fl64 wavelengthCm;
+    Radx::fl64 beamWidthDegH;
+    Radx::fl64 beamWidthDegV;
+    Radx::fl64 antennaGainDbH;
+    Radx::fl64 antennaGainDbV;
+    Radx::fl64 pulseWidthUsec;
+    Radx::fl64 xmitPowerDbmH;
+    Radx::fl64 xmitPowerDbmV;
+    Radx::fl64 twoWayWaveguideLossDbH;
+    Radx::fl64 twoWayWaveguideLossDbV;
+    Radx::fl64 twoWayRadomeLossDbH;
+    Radx::fl64 twoWayRadomeLossDbV;
+    Radx::fl64 receiverMismatchLossDb;
+    Radx::fl64 kSquaredWater;
+    Radx::fl64 radarConstH;
+    Radx::fl64 radarConstV;
+    Radx::fl64 noiseDbmHc;
+    Radx::fl64 noiseDbmHx;
+    Radx::fl64 noiseDbmVc;
+    Radx::fl64 noiseDbmVx;
+    Radx::fl64 i0DbmHc;
+    Radx::fl64 i0DbmHx;
+    Radx::fl64 i0DbmVc;
+    Radx::fl64 i0DbmVx;
+    Radx::fl64 receiverGainDbHc;
+    Radx::fl64 receiverGainDbHx;
+    Radx::fl64 receiverGainDbVc;
+    Radx::fl64 receiverGainDbVx;
+    Radx::fl64 receiverSlopeDbHc;
+    Radx::fl64 receiverSlopeDbHx;
+    Radx::fl64 receiverSlopeDbVc;
+    Radx::fl64 receiverSlopeDbVx;
+    Radx::fl64 dynamicRangeDbHc;
+    Radx::fl64 dynamicRangeDbHx;
+    Radx::fl64 dynamicRangeDbVc;
+    Radx::fl64 dynamicRangeDbVx;
+    Radx::fl64 baseDbz1kmHc;
+    Radx::fl64 baseDbz1kmHx;
+    Radx::fl64 baseDbz1kmVc;
+    Radx::fl64 baseDbz1kmVx;
+    Radx::fl64 sunPowerDbmHc;
+    Radx::fl64 sunPowerDbmHx;
+    Radx::fl64 sunPowerDbmVc;
+    Radx::fl64 sunPowerDbmVx;
+    Radx::fl64 noiseSourcePowerDbmH;
+    Radx::fl64 noiseSourcePowerDbmV;
+    Radx::fl64 powerMeasLossDbH;
+    Radx::fl64 powerMeasLossDbV;
+    Radx::fl64 couplerForwardLossDbH;
+    Radx::fl64 couplerForwardLossDbV;
+    Radx::fl64 dbzCorrection;
+    Radx::fl64 zdrCorrectionDb;
+    Radx::fl64 ldrCorrectionDbH;
+    Radx::fl64 ldrCorrectionDbV;
+    Radx::fl64 systemPhidpDeg;
+    Radx::fl64 testPowerDbmH;
+    Radx::fl64 testPowerDbmV;
+    
+    Radx::fl64 spareFl64[13];
+    
+  } msgMetaNumbers_t;
+
+  msgMetaNumbers_t _metaNumbers;
+  
+  /// convert metadata to XML
+  
+  void _loadMetaStringsToXml(string &xml, int level = 0) const;
+  
+  /// set metadata from XML
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaStringsFromXml(const char *xml, 
+                             size_t bufLen);
+  
+  /// load meta numbers to message struct
+  
+  void _loadMetaNumbersToMsg();
+  
+  /// set the meta number data from the message struct
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                             size_t bufLen,
+                             bool swap);
+  
+  /// swap meta numbers
+  
+  static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
+          
 };
 
 #endif

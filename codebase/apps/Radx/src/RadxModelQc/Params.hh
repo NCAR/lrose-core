@@ -1,26 +1,9 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+// ** Copyright UCAR (c) 1992 - 2016
+// ** University Corporation for Atmospheric Research(UCAR)
+// ** National Center for Atmospheric Research(NCAR)
+// ** Boulder, Colorado, USA
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.hh
 //
@@ -71,14 +54,16 @@ public:
     AZ_GRADIENT = 0,
     CLUTTER_2D_QUAL = 1,
     COMMENT = 2,
-    GAUSSIAN_2D_REMAP = 3,
-    GRIDDED_MATH = 4,
-    MASK = 5,
-    MATH = 6,
-    PASSTHROUGH = 7,
-    QSCALE = 8,
-    SW_NORM = 9,
-    THRESH = 10
+    CONSTRAIN = 3,
+    FIR = 4,
+    GAUSSIAN_2D_REMAP = 5,
+    GRIDDED_MATH = 6,
+    MASK = 7,
+    MATH = 8,
+    PASSTHROUGH = 9,
+    QSCALE = 10,
+    SW_NORM = 11,
+    THRESH = 12
   } filter_t;
 
   typedef enum {
@@ -95,6 +80,13 @@ public:
     GREATER_OR_EQUAL = 3,
     MISSING = 4
   } thresh_e;
+
+  typedef enum {
+    USE_FIRST_DATA = 0,
+    MIRROR = 1,
+    MEAN = 2,
+    INTERP = 3
+  } FIR_edge_e;
 
   // struct typedefs
 
@@ -169,6 +161,17 @@ public:
     double replacement;
     tdrp_bool_t replace_with_missing;
   } thresh_t;
+
+  typedef struct {
+    int coeff_index;
+    FIR_edge_e edge_compute;
+    char* noise_field_name;
+  } fir_t;
+
+  typedef struct {
+    int min_gate_index;
+    int max_gate_index;
+  } constrain_t;
 
   ///////////////////////////
   // Member functions
@@ -488,6 +491,21 @@ public:
   thresh_t *_parm_thresh;
   int parm_thresh_n;
 
+  fir_t *_parm_fir;
+  int parm_fir_n;
+
+  constrain_t *_parm_constrain;
+  int parm_constrain_n;
+
+  double *_coeff0;
+  int coeff0_n;
+
+  double *_coeff1;
+  int coeff1_n;
+
+  double *_coeff2;
+  int coeff2_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -495,7 +513,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[14];
+  mutable TDRPtable _table[19];
 
   const char *_className;
 

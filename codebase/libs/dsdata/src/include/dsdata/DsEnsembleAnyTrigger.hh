@@ -231,9 +231,9 @@ private:
 
   /**
    * the triggering handler for each URL which is basically the information that
-   * goes into each thread.
+   * goes into each thread, set as pointers to help it be thread safe.
    */
-  std::vector<DsEnsembleAnyTrigger1> _elem;
+  std::vector<DsEnsembleAnyTrigger1 *> _elem;
 
   /**
    * Seconds to sleep in polling loops
@@ -243,8 +243,8 @@ private:
   //------------------------- archive mode state ----------------------------
 
   bool _archive_mode;
-  time_t _archive_t0;
-  time_t _archive_t1;
+  // time_t _archive_t0;
+  // time_t _archive_t1;
   std::vector<AnyTriggerData> _archive_events; 
   int _archive_index;   /**< Index to Last gen time returned in archivemode */
   std::vector<std::string> _urls;

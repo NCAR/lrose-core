@@ -63,7 +63,7 @@ public:
   // Returns number of bytes read.
   // Use getBuf() for access to buffer.
   
-  int readPacket();
+  int readPacket(bool &timedOut);
 
   // get the data
 

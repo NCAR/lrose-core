@@ -37,7 +37,7 @@ TARGET_FILE = Tracks2Ascii
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -ltitan \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ltitan \
 	-lrapmath -ldidss -lrapformats -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm

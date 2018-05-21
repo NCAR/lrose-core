@@ -464,7 +464,8 @@ public:
   //    0 on success, -1 on failure.
   //
 
-  virtual int readForced(int max_valid_age = -1);
+  virtual int readForced(int max_valid_age = -1,
+                         bool update_prev_mod_time = true);
   
   /////////////////////////////////////////////////////////////
   // write()
@@ -480,6 +481,8 @@ public:
   // If latest_time is not specified or is set to 0 (the default)
   // the latest time stored in the object is used.
   //
+  // NOTE: datatype only used by derived classes (DsLdataInfo)
+  //
   // Returns:
   //   0 on success, -1 on failure.
   //
@@ -490,7 +493,8 @@ public:
   //        If $LDATA_FMQ_ACTIVE is set to 'false', the FMQ files will not
   //        be written.
 
-  virtual int write(time_t latest_time = 0) const;
+  virtual int write(time_t latest_time = 0,
+		    const string &datatype = "") const;
 
   /////////////////////////////////////////////////////////////
   // writeFmq()

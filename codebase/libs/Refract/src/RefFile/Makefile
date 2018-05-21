@@ -19,6 +19,7 @@
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 LOC_INCLUDES = -I../include
+LOC_INC_DIR = ../include
 LOC_CPPC_CFLAGS =
 
 TARGET_FILE = ../libRefract.a

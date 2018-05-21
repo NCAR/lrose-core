@@ -693,7 +693,8 @@ void LdataInfo::readBlocking(int max_valid_age,
 //    0 on success, -1 on failure.
 //
 
-int LdataInfo::readForced(int max_valid_age /* = -1*/ )
+int LdataInfo::readForced(int max_valid_age /* = -1*/ ,
+                          bool update_prev_mod_time /* = true */)
 {
 
   bool newData = false;
@@ -724,8 +725,7 @@ int LdataInfo::readForced(int max_valid_age /* = -1*/ )
   // try XML
 
   if (_useXml && xmlOK) {
-    bool forced = true;
-    if (_readXml(max_valid_age, forced, newData) == 0) {
+    if (_readXml(max_valid_age, update_prev_mod_time, newData) == 0) {
       return 0;
     } else {
       return -1;
@@ -735,8 +735,7 @@ int LdataInfo::readForced(int max_valid_age /* = -1*/ )
   // try ASCII
 
   if (_useAscii && asciiOK) {
-    bool forced = true;
-    if (_readAscii(max_valid_age, forced, newData) == 0) {
+    if (_readAscii(max_valid_age, update_prev_mod_time, newData) == 0) {
       return 0;
     } else {
       return -1;
@@ -761,6 +760,8 @@ int LdataInfo::readForced(int max_valid_age /* = -1*/ )
 // If latest_time is not specified or is set to 0 (the default)
 // the latest time stored in the object is used.
 //
+// NOTE: datatype only used by derived classes (DsLdataInfo)
+//
 // Returns:
 //   0 on success, -1 on failure.
 //
@@ -771,7 +772,8 @@ int LdataInfo::readForced(int max_valid_age /* = -1*/ )
 //        If $LDATA_FMQ_ACTIVE is set to 'false', the FMQ files will not
 //        be written.
 
-int LdataInfo::write(time_t latest_time) const
+int LdataInfo::write(time_t latest_time,
+		    const string &datatype) const
 
 {
 

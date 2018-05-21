@@ -30,6 +30,7 @@
 //
 /////////////////////////////////////////////////////////////
 
+#include <csignal>
 #include <cstdlib>
 #include <unistd.h>
 #include <cerrno>
@@ -50,7 +51,7 @@ using namespace std;
 // Constructor
 
 Delete::Delete (const string &progName,
-                      const Params &params) :
+                const Params *params) :
         _progName(progName),
         _params(params)
 
@@ -93,11 +94,11 @@ int Delete::removeFile(const string &filePath)
     return -1;
   }
   
-  if (_params.debug) {
+  if (_params->debug) {
     cerr << "DEBUG - removed file: " << filePath << endl;
   }
   
-  if (_params.call_script_on_file_deletion) {
+  if (_params->call_script_on_file_deletion) {
     _callScriptOnFileDeletion(filePath, fstat.st_mtime);
   }
 
@@ -137,9 +138,9 @@ void Delete::_callScriptOnFileDeletion(const string &filePath,
   
   vector<string> args;
 
-  for (int ii = 0; ii < _params.delete_script_arg_list_n; ii++) {
+  for (int ii = 0; ii < _params->delete_script_arg_list_n; ii++) {
 
-    const Params::delete_script_arg_t &arg = _params._delete_script_arg_list[ii];
+    const Params::delete_script_arg_t &arg = _params->_delete_script_arg_list[ii];
 
     switch (arg.id) {
       case Params::DELETE_DATA_TIME:
@@ -177,12 +178,12 @@ void Delete::_callScriptOnFileDeletion(const string &filePath,
 
   // add supplementary args
 
-  for (int ii = 0; ii < _params.delete_supplementary_args_n; ii++) {
-    args.push_back(_params._delete_supplementary_args[ii]);
+  for (int ii = 0; ii < _params->delete_supplementary_args_n; ii++) {
+    args.push_back(_params->_delete_supplementary_args[ii]);
   }
 
-  _callScript(_params.run_delete_script_in_background, args,
-	      _params.script_to_call_on_file_deletion);
+  _callScript(_params->run_delete_script_in_background, args,
+	      _params->script_to_call_on_file_deletion);
 
 }
 
@@ -199,14 +200,14 @@ void Delete::_callScript(bool run_in_background,
   sprintf(pmuStr, "Starting %s", script_to_call.c_str());
   PMU_force_register(pmuStr);
 
-  if (_params.debug) {
+  if (_params->debug) {
     cerr << "Calling script: " << script_to_call << endl;
   }
   
   // Fork a child to run the script
   
   time_t start_time = time(NULL);
-  time_t terminate_time = start_time + _params.delete_script_max_run_secs;
+  time_t terminate_time = start_time + _params->delete_script_max_run_secs;
   pid_t childPid = fork();
   
   if (childPid == 0) {
@@ -217,7 +218,7 @@ void Delete::_callScript(bool run_in_background,
     
     // exit
     
-    if (_params.debug) {
+    if (_params->debug) {
       cerr << "Child process exiting ..." << endl;
     }
 
@@ -227,7 +228,7 @@ void Delete::_callScript(bool run_in_background,
 
   // this is the parent
 
-  if (_params.debug) {
+  if (_params->debug) {
     cerr << endl;
     cerr << "Script started, child pid: " << childPid << endl;
   }
@@ -241,7 +242,7 @@ void Delete::_callScript(bool run_in_background,
     pp.second = terminate_time;
     _active.insert(_active.begin(), pp);
 
-    if (_params.debug) {
+    if (_params->debug) {
       activeMap_t::iterator ii;
       for (ii = _active.begin(); ii != _active.end(); ii++) {
 	cerr << "pid: " << ii->first << "  terminate_time: "
@@ -265,7 +266,7 @@ void Delete::_callScript(bool run_in_background,
 	sprintf(pmuStr, "%s took %d secs",
 		script_to_call.c_str(), runtime);
 	PMU_force_register(pmuStr);
-	if (_params.debug) {
+	if (_params->debug) {
 	  cerr << "Child exited, pid: " << childPid << endl;
 	  cerr << "  Runtime in secs: " << runtime << endl;
 	}
@@ -310,7 +311,7 @@ void Delete::_execScript(const vector<string> &args,
   }
   argArray[narray-1] = NULL;
   
-  if (_params.debug) {
+  if (_params->debug) {
     cerr << "Calling execvp with following args:" << endl;
     for (int i = 0; i < narray; i++) {
       cerr << "  " << argArray[i] << endl;
@@ -338,7 +339,7 @@ void Delete::_reapChildren()
   while ((deadPid = waitpid((pid_t) -1, &status,
 			    (int) (WNOHANG | WUNTRACED))) > 0) {
     
-    if (_params.debug) {
+    if (_params->debug) {
       cerr << "Reaped child: " << deadPid << endl;
     }
     
@@ -368,7 +369,7 @@ void Delete::_killAsRequired(pid_t pid,
 
 {
   
-  if (!_params.terminate_delete_script_if_hung) {
+  if (!_params->terminate_delete_script_if_hung) {
     return;
   }
 
@@ -380,7 +381,7 @@ void Delete::_killAsRequired(pid_t pid,
 
   // Time to terminate script, will be reaped elsewhere
   
-  if (_params.debug) {
+  if (_params->debug) {
     cerr << "Child has run too long, pid: " << pid << endl;
     cerr << "  Sending child kill signal" << endl;
   }
@@ -412,7 +413,7 @@ void Delete::_killRemainingChildren()
   activeMap_t::iterator ii;
   for (ii = _active.begin(); ii != _active.end(); ii++) {
     pid_t pid = ii->first;
-    if (_params.debug) {
+    if (_params->debug) {
       cerr << "  Program will exit, kill child, pid: " << pid << endl;
     }
     if(kill(pid,SIGKILL)) {

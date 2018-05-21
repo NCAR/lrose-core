@@ -33,19 +33,20 @@
 //
 // May 2005
 //
-// $Id: NexradInput.cc,v 1.12 2016/03/07 01:23:03 dixon Exp $
+// $Id: NexradInput.cc,v 1.13 2017/06/07 22:34:17 jcraig Exp $
 //
 ///////////////////////////////////////////////////////////
 #include <cerrno>
 #include <assert.h>
-#include <toolsa/os_config.h>
 #include <bzlib.h>
+#include <netinet/in.h>
+
 #include <dataport/port_types.h>
+#include <toolsa/os_config.h>
 #include <toolsa/pmu.h>
 #include <toolsa/str.h>
 #include <toolsa/Path.hh>
 #include <dsserver/DsLdataInfo.hh>
-#include <netinet/in.h>
 #include <rapformats/ridds.h>
 
 #include "NexradInput.hh"

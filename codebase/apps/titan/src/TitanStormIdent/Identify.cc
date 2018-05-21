@@ -38,6 +38,7 @@
 #include <titan/TitanSpdb.hh>
 #include <Spdb/DsSpdb.hh>
 #include <dsserver/DsLdataInfo.hh>
+#include <toolsa/DateTime.hh>
 #include <toolsa/pmu.h>
 
 //////////////
@@ -354,12 +355,15 @@ int Identify::_output(int scan_num)
   if (_hasLead)  {
     spdb.setLeadTimeStorage(Spdb::LEAD_TIME_IN_DATA_TYPE2);
     id2 = _lead;
-    validTime = _time + _lead;
+    validTime = _time + id2;
 
     // NOTE: it appears putModeOver works in all cases because the
     // valid time AND the data_type2 and data_type are used to give
     // the put its position in the data base.  For our use, validTime
     // and id2 should be unique per put.  validTime alone is not unique
+    //
+    // Except when _lead = 0, in which case it doesn't work properly!!!
+    // beware!!
 
   } else {
     id2 = SPDB_TSTORMS_ID;

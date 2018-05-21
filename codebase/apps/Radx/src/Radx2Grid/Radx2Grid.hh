@@ -122,7 +122,8 @@ private:
   void _checkFields(const string &filePath);
   void _loadInterpRays();
   void _censorInterpRay(Interp::Ray *interpRay);
-  void _addTestAndCoverageInputFields();
+  void _addGeometryFields();
+  void _addTimeField();
   void _setupTransformFields();
 
   bool _isRhi();

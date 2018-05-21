@@ -34,6 +34,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/RadxRay.hh>
+#include <Radx/RadxSweep.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxCfactors.hh>
@@ -97,6 +98,7 @@ void RadxRay::_init()
   
 {
 
+  _rayNum = Radx::missingMetaInt;
   _volNum = Radx::missingMetaInt;
   _sweepNum = Radx::missingMetaInt;
   _calibIndex = -1;
@@ -199,6 +201,7 @@ void RadxRay::copyMetaData(const RadxRay &rhs)
     return;
   }
   
+  _rayNum = rhs._rayNum;
   _volNum = rhs._volNum;
   _sweepNum = rhs._sweepNum;
   _calibIndex = rhs._calibIndex;
@@ -265,6 +268,34 @@ void RadxRay::copyMetaData(const RadxRay &rhs)
   
   clearFields();
 
+}
+
+//////////////////////////////////////////////////
+/// copy meta data from sweep
+///
+
+void RadxRay::setMetadataFromSweep(const RadxSweep &sweep)
+
+{
+  _sweepNum = sweep.getSweepNumber();
+  _volNum = sweep.getVolumeNumber();
+  if (_sweepMode == Radx::SWEEP_MODE_NOT_SET) {
+    _sweepMode = sweep.getSweepMode();
+  }
+  if (_polarizationMode == Radx::POL_MODE_NOT_SET) {
+    _polarizationMode = sweep.getPolarizationMode();
+  }
+  if (_prtMode == Radx::PRT_MODE_NOT_SET) {
+    _prtMode = sweep.getPrtMode();
+  }
+  if (_followMode == Radx::FOLLOW_MODE_NOT_SET) {
+    _followMode = sweep.getFollowMode();
+  }
+  _isIndexed = sweep.getRaysAreIndexed();
+  _angleRes = sweep.getAngleResDeg();
+  _targetScanRate = sweep.getTargetScanRateDegPerSec();
+  _trueScanRate = sweep.getMeasuredScanRateDegPerSec();
+  _isLongRange = sweep.getIsLongRange();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -1335,6 +1366,9 @@ void RadxRay::print(ostream &out) const
 {
   
   out << "=============== RadxRay ===============" << endl;
+  if (_rayNum != Radx::missingMetaInt) {
+    out << "  rayNum: " << _rayNum << endl;
+  }
   out << "  volNum: " << _volNum << endl;
   out << "  sweepNum: " << _sweepNum << endl;
   out << "  calibIndex: " << _calibIndex << endl;
@@ -1773,7 +1807,7 @@ void RadxRay::serialize(RadxMsg &msg)
   // init
 
   msg.clearAll();
-  msg.setMsgType(RadxMsg::RadxRayMsgType);
+  msg.setMsgType(RadxMsg::RadxRayMsg);
 
   // add metadata strings as xml part
   // include null at string end
@@ -1817,7 +1851,7 @@ void RadxRay::serialize(RadxMsg &msg)
 
     // serialize
 
-    RadxMsg fieldMsg(RadxMsg::RadxFieldMsgType);
+    RadxMsg fieldMsg(RadxMsg::RadxFieldMsg);
     field->serialize(fieldMsg);
     fieldMsg.assemble();
     msg.addPart(_fieldPartId,
@@ -1842,7 +1876,7 @@ int RadxRay::deserialize(const RadxMsg &msg)
 
   // check type
 
-  if (msg.getMsgType() != RadxMsg::RadxRayMsgType) {
+  if (msg.getMsgType() != RadxMsg::RadxRayMsg) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxRay::deserialize" << endl;
     cerr << "  incorrect message type" << endl;
@@ -2074,6 +2108,7 @@ void RadxRay::_loadMetaNumbersToMsg()
 
   // set 32-bit values
 
+  _metaNumbers.rayNum = _rayNum;
   _metaNumbers.volNum = _volNum;
   _metaNumbers.sweepNum = _sweepNum;
   _metaNumbers.calibIndex = _calibIndex;
@@ -2154,6 +2189,7 @@ int RadxRay::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
 
   // set 32-bit values
 
+  _rayNum = _metaNumbers.rayNum;
   _volNum = _metaNumbers.volNum;
   _sweepNum = _metaNumbers.sweepNum;
   _calibIndex = _metaNumbers.calibIndex;
@@ -2183,5 +2219,5 @@ int RadxRay::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
 void RadxRay::_swapMetaNumbers(msgMetaNumbers_t &meta)
 {
   ByteOrder::swap64(&meta.startRangeKm, 32 * sizeof(Radx::si64));
-  ByteOrder::swap32(&meta.volNum, 32 * sizeof(Radx::si32));
+  ByteOrder::swap32(&meta.rayNum, 32 * sizeof(Radx::si32));
 }

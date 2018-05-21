@@ -21,17 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/03 18:19:27 $
-//   $Id: PjgCalc.cc,v 1.16 2016/03/03 18:19:27 dixon Exp $
-//   $Revision: 1.16 $
-//   $State: Exp $
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * PjgCalc.cc: Base class for classes that calculate transformations
  *             for a particular projection.
@@ -44,6 +33,7 @@
  *
  *********************************************************************/
 
+#include <euclid/Pjg.hh>
 #include <euclid/PjgCalc.hh>
 #include <euclid/PjgFlatCalc.hh>
 #include <euclid/PjgLatlonCalc.hh>
@@ -53,7 +43,7 @@
 #include <euclid/PjgPolarRadarCalc.hh>
 #include <euclid/PjgPolarStereoCalc.hh>
 #include <euclid/PjgObliqueStereoCalc.hh>
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 using namespace std;
 
 // Static definitions
@@ -199,7 +189,7 @@ void PjgCalc::latlon2RTheta(const double lat1, const double lon1,
   if (xx > 1.0) xx = 1.0;
   darc = acos(xx);
   
-  r = darc* EARTH_RADIUS;
+  r = darc* Pjg::EradKm;
   
   denom = sin(colat1) * sin (darc);
 
@@ -239,7 +229,7 @@ void PjgCalc::latlonPlusRTheta(const double lat1, const double lon1,
   double darc, colat1, colat2, denom, delta_lon, cost, therad;
   double xx;
   
-  darc = r / EARTH_RADIUS;
+  darc = r / Pjg::EradKm;
   therad = theta * DEG_TO_RAD;
   cost = cos(therad);
 
@@ -404,7 +394,7 @@ void PjgCalc::_latlonPlusRTheta(const double cos_colat1,
   double cos_colat2, sin_colat2;
   double xx;
   
-  darc = r / EARTH_RADIUS;
+  darc = r / Pjg::EradKm;
   cos_theta = cos(theta_rad);
 
   xx = cos_colat1 * cos(darc) + sin_colat1 * sin(darc) * cos_theta;
@@ -486,7 +476,7 @@ void PjgCalc::_latlon2RTheta(const double colat1,
   if (xx > 1.0) xx = 1.0;
   darc = acos(xx);
   
-  r = darc* EARTH_RADIUS;
+  r = darc* Pjg::EradKm;
   
   denom = sin_colat1 * sin(darc);
 

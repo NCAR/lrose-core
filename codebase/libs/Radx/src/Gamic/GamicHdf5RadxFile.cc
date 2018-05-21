@@ -262,7 +262,7 @@ int GamicHdf5RadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
   
   cerr << "WARNING - GamicHdf5RadxFile::writeToDir" << endl;
-  cerr << "  Writing GamicHdf5 raw format files not supported" << endl;
+  cerr << "  Writing GamicHdf5 format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
   
   // set up NcfRadxFile object
@@ -302,7 +302,7 @@ int GamicHdf5RadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - GamicHdf5RadxFile::writeToPath" << endl;
-  cerr << "  Writing GamicHdf5 raw format files not supported" << endl;
+  cerr << "  Writing GamicHdf5 format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -1061,29 +1061,17 @@ int GamicHdf5RadxFile::_readSweepExtended(Group &extended)
   sprintf(tag, "SweepExtendedAttr_%d", _sweepNumber);
   _sweepStatusXml += RadxXml::writeStartTag(tag, 1);
 
-  // get attribute names
-  
-  vector<string> attrNames;
-  extended.iterateAttrs(Hdf5xx::appendAttrNames, NULL, &attrNames);
-  
   // loop through attributes, decoding each
   
   Hdf5xx::DecodedAttr decodedAttr;
-  for (size_t ii = 0; ii < attrNames.size(); ii++) {
-    
-    string name(attrNames[ii]);
-    
-    Attribute *attr = NULL;
-    try {
-      attr = new Attribute(extended.openAttribute(name));
-    }
-    catch (H5::Exception e) {
-      if (attr) delete attr;
-      continue;
-    }
+  for (int ii = 0; ii < extended.getNumAttrs(); ii++) {
+
+    hid_t attrId = H5Aopen_idx(extended.getId(), ii);
+    Attribute attr(attrId);
+    string name(attr.getName());
     
     if (_utils.loadAttribute(extended, name, 
-                       "sweep-extended-group", decodedAttr) == 0) {
+                             "sweep-extended-group", decodedAttr) == 0) {
       if (decodedAttr.isString()) {
         _sweepStatusXml += 
           RadxXml::writeString(name, 2, decodedAttr.getAsString());
@@ -1098,10 +1086,8 @@ int GamicHdf5RadxFile::_readSweepExtended(Group &extended)
       }
     }
 
-    delete attr;
-
   } // ii
-
+  
   // finalize XML
   
   _sweepStatusXml += RadxXml::writeEndTag(tag, 1);

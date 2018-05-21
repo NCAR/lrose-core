@@ -466,7 +466,7 @@ string Path::computeTmpPath(const char *tmp_name /* = NULL*/ )
   struct timeval tv;
   gettimeofday(&tv, NULL);
   char timeStr[128];
-  sprintf(timeStr, "%ld.%ld_", tv.tv_sec, tv.tv_usec);
+  sprintf(timeStr, "%ld.%ld_", tv.tv_sec, (long) tv.tv_usec);
 
   // get PID and make a string from it
   
@@ -544,6 +544,93 @@ void Path::stripDir(const string &dir, const string &path, string &file)
 
 }
 
+//////////////////////////////////////////////////////////////////
+// getExecPath()
+// For apple osx, for now we need to use the C-function in cpath.c
+// because of some problems with the includes in a C++ compile
 
+//////////////////////////////////////////////////////////////////
+// Get the path of the executable binary that is running
+
+extern "C" {
+  extern char *get_exec_path();
+}
+
+string Path::getExecPath()
+{
+
+  char *epath = get_exec_path();
+  string execPath(epath);
+  delete[] epath;
+  return execPath;
+
+}
+
+#ifdef NOTNOW
+
+//////////////////////////////////////////////////////////////////
+// Get the path of the executable binary that is running
+
+string Path::getExecPath()
+{
+
+#if defined(__linux__)
+
+#include <linux/limits.h>
+
+  char execPath[PATH_MAX];
+  int length = readlink("/proc/self/exe", execPath, sizeof(execPath));
+  if (length < 0) {
+    return "";
+  }
+  if (length >= PATH_MAX) {
+    return "";
+  }
+  execPath[length] = '\0';
+  return execPath;
+
+#elif defined (__APPLE__)
+
+#include <libproc.h>
+
+  pid_t pid = getpid();
+  char execPath[PROC_PIDPATHINFO_MAXSIZE];
+  int ret = proc_pidpath(pid, execPath, sizeof(execPath));
+  if ( ret <= 0 ) {
+    return "";
+  }
+  
+  return execPath;
+
+#else
+
+  return "";
+
+#endif
+
+}
+
+#endif
+
+//////////////////////////////////////////////////////////////////
+// Get the path of a file relative to the
+// executable binary that is running
+
+string Path::getPathRelToExec(const string &relPath)
+{
+
+  // get executable path
+
+  Path execPath(getExecPath());
+
+  // combine the base with the rel path
+  
+  string absPath = execPath.getDirectory();
+  absPath += UNIX_FILE_DELIMITER;
+  absPath += relPath;
+
+  return absPath;
+
+}
 
 

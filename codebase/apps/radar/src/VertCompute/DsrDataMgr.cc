@@ -525,7 +525,7 @@ void DsrDataMgr::_processMoments()
 
     // add to layer statss
 
-    _statsMgr.addLayerData(range, mdata);
+    _statsMgr.addDataPoint(range, mdata);
     
   } // igate
 

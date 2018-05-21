@@ -38,7 +38,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS = -L/usr/local/lib
 LOC_LIBS = \
 	-ldsdata -lFmq -ldsserver -ldidss \
-	-lrapformats -ltoolsa -leuclid -ldataport \
+	-lrapformats -leuclid -ltoolsa -ldataport \
 	-ltdrp -lbz2 -lz -lpthread \
 	-lm
 

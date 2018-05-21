@@ -90,7 +90,6 @@ void DataTemp::_applyBitMapUnpack(fl32 *data)
     int n = 0;
     for (int i = 0; i < gridSz; i++) {
       if (bitMap[i]) {
-	//cout << i << " " << n << endl;
         _data[i] = data[n++];
       }
       else
@@ -122,7 +121,6 @@ fl32 *DataTemp::_applyBitMapPack(fl32 *data)
     int ndpts = 0;
     for(int j = 0; j < gridSz; j++)
       if(bitMap[j]) {
-	//cout << j << " " << ndpts << endl;
 	pdata[ndpts++] = data[j];
       }
 

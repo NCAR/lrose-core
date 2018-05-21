@@ -30,6 +30,10 @@
 #ifndef _GRIB2NC
 #define _GRIB2NC
 
+// Defining NOT_RAL turns off NCAR-RAL specific 
+// file triggering and process management
+//#define NOT_RAL true
+
 #include <string>
 #include <map>
 #include <vector>
@@ -93,6 +97,9 @@ public:
     fl32 tan_lon;
     fl32 central_scale;
     si32 pole_type; // 0 - POLE_NORTH, 1 - POLE_SOUTH
+    fl32 earth_radius;  // in m
+    fl32 earth_major_axis; // used if earth_radius is 0
+    fl32 earth_minor_axis;
   } GridInfo;
   
   // Vertical Information
@@ -189,6 +196,7 @@ private:
 
   bool _reOrderNS_2_SN;
   bool _reOrderAdjacent_Rows;
+  bool _reOrderDate_Line;
   bool _reMapField;
   vector<FieldInfo*> _outputFields;
   NcOutput *_outputFile;
@@ -201,6 +209,7 @@ private:
 		    vector<Grib2::Grib2Record::Grib2Sections_t>::iterator end);
   void _reOrderNS2SN(fl32 *data, int numX, int numY);
   void _reOrderAdjacentRows(fl32 *data, int numX, int numY);
+  void _reOrderDateLine (fl32 *data, int numX, int numY, fl32 dX);
   fl32 *_reMapReducedOrGaussian(fl32 *data);
   void _setFieldNames(int paramsIndex);
   void _limitDataRange(int paramsIndex,fl32 *dataPtr);
@@ -208,9 +217,10 @@ private:
   void _convertUnits(int paramsIndex,fl32 *dataPtr); 
   void _convertGribLevel2CFLevel(const string &GribLevel, const string &GribLevelUnits, const string &GribLevelLong);
 
+  fl32 *_calcMinMax(fl32 *dataPtr);
   fl32 *_encode(fl32 *dataPtr, Params::data_pack_t output_encoding);
-  void *_float32_to_int8(fl32 *inDataPtr);
-  void *_float32_to_int16(fl32 *inDataPtr); 
+  void *_float32_to_int8(fl32 *inDataPtr, fl32 scaleFactor = 0.0);
+  void *_float32_to_int16(fl32 *inDataPtr, fl32 scaleFactor = 0.0); 
 
 };
 

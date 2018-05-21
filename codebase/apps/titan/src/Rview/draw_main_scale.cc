@@ -300,6 +300,14 @@ void draw_main_scale(int dev,
 	vector_legend_psgc[n_vector_legends] = get_aircraft_psgc(0);
 	n_vector_legends++;
 	n_symbol_legends++;
+        
+	strcpy(vector_legend_str[n_vector_legends], "dry_ice");
+	XSetLineAttributes(Glob->rdisplay, get_dry_ice_gc(), 1,
+			   LineSolid, CapButt, JoinMiter);
+	vector_legend_gc[n_vector_legends] = get_dry_ice_gc();
+	vector_legend_psgc[n_vector_legends] = get_aircraft_psgc(0);
+	n_vector_legends++;
+	n_symbol_legends++;
 	
       }
 

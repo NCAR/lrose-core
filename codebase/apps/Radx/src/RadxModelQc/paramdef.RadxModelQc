@@ -23,6 +23,8 @@ commentdef {
     "AZ_GRADIENT = Compute gradient azimuthally at each point\n"
     "CLUTTER_2D_QUAL = Compute quality factor based on clutter\n"
     "COMMENT = Non filter that just prints out 'input field' as a comment followeed by a more extensive message\n"
+    "CONSTRAIN = set missing outside a range\n"
+    "FIR = 1 dimensional FIR filter along beams\n"
     "GAUSSIAN_2D_REMAP = Map 2 variables to a gaussian result\n"
     "GRIDDED_MATH = Do math operations pointwise using 2 grids\n"
     "MASK = change data when mask has particular value\n"
@@ -39,6 +41,8 @@ typedef enum
   AZ_GRADIENT,
   CLUTTER_2D_QUAL,
   COMMENT,
+  CONSTRAIN,
+  FIR,
   GAUSSIAN_2D_REMAP,
   GRIDDED_MATH,
   MASK,
@@ -255,3 +259,60 @@ paramdef struct thresh_t
     "replace_with_missing = true to ignore replacement value and replace with missing value when test satisfied\n";
   p_default = {};
 } parm_thresh[];
+
+typedef enum
+{
+  USE_FIRST_DATA,
+  MIRROR,
+  MEAN,
+  INTERP
+} FIR_edge_e;
+
+typedef struct {
+  int coeff_index;
+  FIR_edge_e edge_compute;
+  string noise_field_name;
+} fir_t;
+
+paramdef struct fir_t
+{
+  p_descr = "FIR params";
+  p_help = "FIR filter, 1 dimensional over beam\n"
+    "coeff_index = index to coefficients array coeff\n"
+    "edge_compute = USE_FIRST_DATA, MIRROR, MEAN, or INTERP\n"
+    "noise_field_name = name of output field noise (main output is signal)";
+  p_default = {};
+} parm_fir[];
+
+
+typedef struct {
+  int min_gate_index;
+  int max_gate_index;
+} constrain_t;
+
+paramdef struct constrain_t
+{
+  p_descr = "CONSTRAIN params";
+  p_help = "Constrain values to a range, missing elsewhere\n"
+    "min_gate_indexx = index to first valid data\n"
+    "max_gate_indexx = index to last valid data";
+  p_default = {};
+} parm_constrain[];
+
+paramdef double
+{
+  p_descr = "coeff0";
+  p_default = {};
+} coeff0[];
+
+paramdef double
+{
+  p_descr = "coeff1";
+  p_default = {};
+} coeff1[];
+
+paramdef double
+{
+  p_descr = "coeff2";
+  p_default = {};
+} coeff2[];

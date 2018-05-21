@@ -15,7 +15,6 @@ SUB_DIRS = \
         EchoTops \
 	EsdAcIngest \
 	FilterStorms \
-        OpticalFlow \
 	PrintTitanFiles \
 	PrintTitanServer \
 	RdasSim \
@@ -40,13 +39,13 @@ SUB_DIRS = \
 	Tstorms2Spdb \
 	Tstorms2Xml \
 	UpdateStormFields \
+        UpdateStormSpeeds \
 	acmg_acpos_filter \
 	bearing2latlon \
 	forecast_monitor \
 	suncal \
 	titan_print \
-	tstorm_refl_fcst \
-	UpdateStormSpeeds
+	tstorm_refl_fcst
 
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

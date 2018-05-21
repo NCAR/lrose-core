@@ -1,0 +1,30 @@
+#
+# Recursive make - makes the subdirectory code
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+         AcTrack2Polygon \
+         AcarsNc2GenPt \
+         Awos2Spdb \
+         Aws2Spdb \
+         BomAws2Spdb \
+         BomSounding2Spdb \
+         GemScan2Dsr \
+         GemVolXml2Dsr \
+         Grib2Mdv \
+         Grib2toMdv \
+         GtsSockIngest \
+         Ltg2Spdb \
+         madis2Spdb \
+         Metar2Spdb \
+         MrmsGribIngest \
+         NWSsoundingIngest \
+         NcarAcPosn2Spdb \
+         ShipObsIngest \
+         SigAirMet2Spdb
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

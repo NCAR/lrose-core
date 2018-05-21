@@ -260,6 +260,16 @@ DsUrlTriggerArchive::_initFcstLeadSpdb(const time_t &t0, const time_t &t1)
 
   // sort into increasing order
   _times.sort(DsFcstTime::lessOrEqual);
+  
+#ifdef NOTNOW
+  printf("Times:\n");
+  
+  std::list <DsFcstTime>::const_iterator i;
+  for (i=_times.begin(); i!=_times.end(); ++i)
+  {
+    i->print();
+  }
+#endif
 
   // initialize the index
   _times_index = _times.begin();

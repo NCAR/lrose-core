@@ -84,12 +84,14 @@ Grib2toMdv::Grib2toMdv(int argc, char **argv) {
 
   // Get TDRP parameters.
   _params = new Params();
-  char *params_path = new char[300];
-  strcpy(params_path, "unknown");
+  //  char *params_path = new char[300];
+  //  strcpy(params_path, "unknown");
 
-  if (_params->loadFromArgs(argc, argv, _args->override.list, &params_path))
+  //  if (_params->loadFromArgs(argc, argv, _args->override.list, &params_path))
+  if (_params->loadFromArgs(argc, argv, _args->override.list, NULL))  
   {
-    fprintf(stderr, "ERROR: Problem reading TDRP parameters in file <%s>\n", params_path);
+    //    fprintf(stderr, "ERROR: Problem reading TDRP parameters in file <%s>\n", params_path);
+    fprintf(stderr, "ERROR: Problem reading TDRP parameters\n");    
     okay = false;
     return;
   }

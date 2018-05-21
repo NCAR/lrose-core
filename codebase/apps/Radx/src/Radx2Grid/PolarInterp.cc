@@ -593,7 +593,7 @@ void PolarInterp::_fillLeft()
 
 {
 
-  for (int iel = 0; iel < _nEl - 1; iel++) {
+  for (int iel = 0; iel < _nEl; iel++) {
     
     for (int iaz = 0; iaz < _searchNAz - 1; iaz++) {
       
@@ -625,7 +625,7 @@ void PolarInterp::_fillRight()
 
 {
  
-  for (int iel = 0; iel < _nEl - 1; iel++) {
+  for (int iel = 0; iel < _nEl; iel++) {
 
     for (int iaz = _searchNAz - 1; iaz > 0; iaz--) {
       

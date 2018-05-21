@@ -38,9 +38,9 @@ TARGET_FILE = CronusPointSelect
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -ldidss \
-	-lrapformats -ltoolsa -ldataport -lrapmath \
-	-ltdrp -leuclid $(NETCDF4_LIBS) -lbz2 \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
+	-lrapformats -ldataport -lrapmath \
+	-ltdrp -leuclid -ltoolsa $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

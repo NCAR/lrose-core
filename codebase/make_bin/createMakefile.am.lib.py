@@ -453,8 +453,8 @@ def writeMakefileAm():
     fo.write("# compile flags - include header subdirectory\n")
     fo.write("\n")
     fo.write("AM_CFLAGS = -I./include\n")
-    fo.write("# NOTE: X11R6 is for Mac OSX location of XQuartz\n")
-    fo.write("AM_CFLAGS += -I/usr/X11R6/include\n")
+    fo.write("# NOTE: add in Mac OSX location of XQuartz\n")
+    fo.write("AM_CFLAGS += -I/usr/X11R6/include -I/opt/X11/include\n")
     if (options.shared == True):
         fo.write("ACLOCAL_AMFLAGS = -I m4\n")
     #    fo.write("AM_CFLAGS += -I$(prefix)/include\n")

@@ -38,7 +38,7 @@ TARGET_FILE = nsslQPE2mdv
 
 LOC_INCLUDES = -I../include $(NETCDF4_INCS)
 
-LOC_LIBS = -lnetcdf -lMdv -lRadx -leuclid \
+LOC_LIBS = -lnetcdf -lMdv -lRadx -lNcxx -leuclid \
 	-ldsserver -lrapformats -ldidss -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread

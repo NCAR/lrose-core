@@ -1,9 +1,8 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2015
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
-// ** Research Applications Laboratory(RAL)
-// ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA
+// ** Boulder, Colorado, USA
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.cc
@@ -455,8 +454,8 @@ using namespace std;
   {
     out << "TDRP args: [options as below]\n"
         << "   [ -params/--params path ] specify params file path\n"
-        << "   [ -check_params] check which params are not set\n"
-        << "   [ -print_params [mode]] print parameters\n"
+        << "   [ -check_params/--check_params] check which params are not set\n"
+        << "   [ -print_params/--print_params [mode]] print parameters\n"
         << "     using following modes, default mode is 'norm'\n"
         << "       short:   main comments only, no help or descr\n"
         << "                structs and arrays on a single line\n"
@@ -537,39 +536,6 @@ using namespace std;
     tt->comment_text = tdrpStrDup("This program creates the calibration file used by Refract.");
     tt++;
     
-    // Parameter 'Comment 1'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 1");
-    tt->comment_hdr = tdrpStrDup("DEBUGGING PARAMETERS");
-    tt->comment_text = tdrpStrDup("Parameters controlling debug outputs.");
-    tt++;
-    
-    // Parameter 'debug_level'
-    // ctype is '_debug_level_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("debug_level");
-    tt->descr = tdrpStrDup("Debug level");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &debug_level - &_start_;
-    tt->enum_def.name = tdrpStrDup("debug_level_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("DEBUG_OFF");
-      tt->enum_def.fields[0].val = DEBUG_OFF;
-      tt->enum_def.fields[1].name = tdrpStrDup("DEBUG_NORM");
-      tt->enum_def.fields[1].val = DEBUG_NORM;
-      tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_EXTRA");
-      tt->enum_def.fields[2].val = DEBUG_EXTRA;
-      tt->enum_def.fields[3].name = tdrpStrDup("DEBUG_VERBOSE");
-      tt->enum_def.fields[3].val = DEBUG_VERBOSE;
-    tt->single_val.e = DEBUG_OFF;
-    tt++;
-    
     // Parameter 'write_debug_mdv_files'
     // ctype is 'tdrp_bool_t'
     
@@ -594,184 +560,40 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("mdvp:://localhost::mdv/debug/RefractCalib");
     tt++;
     
-    // Parameter 'Comment 2'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("PROCESS PARAMETERS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'instance'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("instance");
-    tt->descr = tdrpStrDup("Process instance");
-    tt->help = tdrpStrDup("Used for registration with procmap.");
-    tt->val_offset = (char *) &instance - &_start_;
-    tt->single_val.s = tdrpStrDup("Test");
-    tt++;
-    
-    // Parameter 'Comment 3'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("INPUT DATA PARAMETERS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'raw_iq_in_input'
+    // Parameter 'file_list_inputs'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("raw_iq_in_input");
-    tt->descr = tdrpStrDup("Flag indicating whether the raw I and Q values are included in the input stream.");
-    tt->help = tdrpStrDup("If true, the raw fields will be read from the input stream. If false, the raw fields will be calculated from the NIQ/AIQ values which must be inluded in the input stream instead.");
-    tt->val_offset = (char *) &raw_iq_in_input - &_start_;
+    tt->param_name = tdrpStrDup("file_list_inputs");
+    tt->descr = tdrpStrDup("Flag indicating whether to use a file list for input data, or a range of times");
+    tt->help = tdrpStrDup("TRUE means use the file list, FALSE means use a range of times.");
+    tt->val_offset = (char *) &file_list_inputs - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'raw_i_field_name'
+    // Parameter 'target_files_host'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("raw_i_field_name");
-    tt->descr = tdrpStrDup("Raw I field name in the input stream.");
-    tt->help = tdrpStrDup("Used only if raw_iq_in_input is set to TRUE.");
-    tt->val_offset = (char *) &raw_i_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("MeanI");
-    tt++;
-    
-    // Parameter 'raw_q_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("raw_q_field_name");
-    tt->descr = tdrpStrDup("Raw Q field name in the input stream.");
-    tt->help = tdrpStrDup("Used only if raw_iq_in_input is set to TRUE.");
-    tt->val_offset = (char *) &raw_q_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("MeanQ");
-    tt++;
-    
-    // Parameter 'niq_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("niq_field_name");
-    tt->descr = tdrpStrDup("NIQ field name in the input stream.");
-    tt->help = tdrpStrDup("Used only if raw_iq_in_input is set to FALSE.");
-    tt->val_offset = (char *) &niq_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("NIQ");
-    tt++;
-    
-    // Parameter 'input_niq_scale'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("input_niq_scale");
-    tt->descr = tdrpStrDup("Input NIQ scale value");
-    tt->help = tdrpStrDup("The NIQ value from the input source is multiplied by this value before the data is used. For most radars this value should be 0.1. For SPOL this value should be 0.025.");
-    tt->val_offset = (char *) &input_niq_scale - &_start_;
-    tt->single_val.d = 0.1;
-    tt++;
-    
-    // Parameter 'invert_target_angle_sign'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("invert_target_angle_sign");
-    tt->descr = tdrpStrDup("Flag indicating whether to invert the sign of the target angles.");
-    tt->help = tdrpStrDup("This fix should be done upstream, but is added here just in case.\nUsed only if raw_iq_in_input is set to FALSE.");
-    tt->val_offset = (char *) &invert_target_angle_sign - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'aiq_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("aiq_field_name");
-    tt->descr = tdrpStrDup("AIQ field name in the input stream.");
-    tt->help = tdrpStrDup("Used only if raw_iq_in_input is set to FALSE.");
-    tt->val_offset = (char *) &aiq_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("AIQ");
-    tt++;
-    
-    // Parameter 'snr_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("snr_field_name");
-    tt->descr = tdrpStrDup("Signal-to-noise ratio field name in the input stream.");
+    tt->param_name = tdrpStrDup("target_files_host");
+    tt->descr = tdrpStrDup("Host on which target files are found");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &snr_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("SNR");
+    tt->val_offset = (char *) &target_files_host - &_start_;
+    tt->single_val.s = tdrpStrDup("localhost");
     tt++;
     
-    // Parameter 'specify_elevation_by_index'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'calibration_files_host'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_elevation_by_index");
-    tt->descr = tdrpStrDup("Flag indicating whether to specify the desired elevation by index or by angle limits.");
-    tt->help = tdrpStrDup("If true, the elevation is specfied by index in the elevation_num parameter.\nIf false, the elevation is specified by angle in the elevation_angle parameter.\n");
-    tt->val_offset = (char *) &specify_elevation_by_index - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'elevation_num'
-    // ctype is 'long'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = LONG_TYPE;
-    tt->param_name = tdrpStrDup("elevation_num");
-    tt->descr = tdrpStrDup("Elevation number to use from the MDV files.");
-    tt->help = tdrpStrDup("Used only if specify_elevation_by_index is set to true.");
-    tt->val_offset = (char *) &elevation_num - &_start_;
-    tt->single_val.l = 0;
-    tt++;
-    
-    // Parameter 'elevation_angle'
-    // ctype is '_elevation_angle_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("elevation_angle");
-    tt->descr = tdrpStrDup("The angle limits for the desired elevation angle. Only sweeps with elevation angles between these limits will be used in the calibration.");
-    tt->help = tdrpStrDup("Used only if specify_elevation_by_index is set to false.");
-    tt->val_offset = (char *) &elevation_angle - &_start_;
-    tt->struct_def.name = tdrpStrDup("elevation_angle_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("min_angle");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &elevation_angle.min_angle - (char *) &elevation_angle;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("max_angle");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &elevation_angle.max_angle - (char *) &elevation_angle;
-    tt->n_struct_vals = 2;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 0.3;
-      tt->struct_vals[1].d = 0.5;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("calibration_files_host");
+    tt->descr = tdrpStrDup("Host on which calibration files are found");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &calibration_files_host - &_start_;
+    tt->single_val.s = tdrpStrDup("localhost");
     tt++;
     
     // Parameter 'target_id_file_list'
@@ -780,7 +602,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("target_id_file_list");
-    tt->descr = tdrpStrDup("List of files to use for target identification");
+    tt->descr = tdrpStrDup("List of files to use for target identification, when file_list_inputs=true");
     tt->help = tdrpStrDup("");
     tt->array_offset = (char *) &_target_id_file_list - &_start_;
     tt->array_n_offset = (char *) &target_id_file_list_n - &_start_;
@@ -823,7 +645,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("calibration_file_list");
-    tt->descr = tdrpStrDup("List of files to use for calibration");
+    tt->descr = tdrpStrDup("List of files to use for calibration, when file_list_inputs=true");
     tt->help = tdrpStrDup("");
     tt->array_offset = (char *) &_calibration_file_list - &_start_;
     tt->array_n_offset = (char *) &calibration_file_list_n - &_start_;
@@ -844,11 +666,165 @@ using namespace std;
       tt->array_vals[8].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807004539.KFTG_RVP.0.0.5_SUR_v64");
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'target_files_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("target_files_path");
+    tt->descr = tdrpStrDup("Path with files to use for target identification when file_list_inputs = false, can be relative to $RAP_DATA_DIR");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &target_files_path - &_start_;
+    tt->single_val.s = tdrpStrDup("./data");
+    tt++;
+    
+    // Parameter 'target_files_time_range'
+    // ctype is '_Time_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("target_files_time_range");
+    tt->descr = tdrpStrDup("Starting/ending time for target identification data when file_list_inputs = false");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_target_files_time_range - &_start_;
+    tt->array_n_offset = (char *) &target_files_time_range_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = TRUE;
+    tt->array_elem_size = sizeof(Time_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("Time_t");
+    tt->struct_def.nfields = 6;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[0].fname = tdrpStrDup("year");
+      tt->struct_def.fields[0].ptype = INT_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_target_files_time_range->year - (char *) _target_files_time_range;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[1].fname = tdrpStrDup("month");
+      tt->struct_def.fields[1].ptype = INT_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_target_files_time_range->month - (char *) _target_files_time_range;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[2].fname = tdrpStrDup("day");
+      tt->struct_def.fields[2].ptype = INT_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_target_files_time_range->day - (char *) _target_files_time_range;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[3].fname = tdrpStrDup("hour");
+      tt->struct_def.fields[3].ptype = INT_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_target_files_time_range->hour - (char *) _target_files_time_range;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[4].fname = tdrpStrDup("min");
+      tt->struct_def.fields[4].ptype = INT_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_target_files_time_range->min - (char *) _target_files_time_range;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[5].fname = tdrpStrDup("sec");
+      tt->struct_def.fields[5].ptype = INT_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_target_files_time_range->sec - (char *) _target_files_time_range;
+    tt->n_struct_vals = 12;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].i = 2017;
+      tt->struct_vals[1].i = 3;
+      tt->struct_vals[2].i = 21;
+      tt->struct_vals[3].i = 0;
+      tt->struct_vals[4].i = 0;
+      tt->struct_vals[5].i = 0;
+      tt->struct_vals[6].i = 2017;
+      tt->struct_vals[7].i = 3;
+      tt->struct_vals[8].i = 22;
+      tt->struct_vals[9].i = 0;
+      tt->struct_vals[10].i = 0;
+      tt->struct_vals[11].i = 0;
+    tt++;
+    
+    // Parameter 'calibration_files_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("calibration_files_path");
+    tt->descr = tdrpStrDup("Path with files to use for calibration when file_list_inputs = false, can be relative to $RAP_DATA_DIR");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &calibration_files_path - &_start_;
+    tt->single_val.s = tdrpStrDup("./data");
+    tt++;
+    
+    // Parameter 'calibration_files_time_range'
+    // ctype is '_Time_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("calibration_files_time_range");
+    tt->descr = tdrpStrDup("Starting/ending time for calibration data when file_list_inputs = false");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_calibration_files_time_range - &_start_;
+    tt->array_n_offset = (char *) &calibration_files_time_range_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = TRUE;
+    tt->array_elem_size = sizeof(Time_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("Time_t");
+    tt->struct_def.nfields = 6;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[0].fname = tdrpStrDup("year");
+      tt->struct_def.fields[0].ptype = INT_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_calibration_files_time_range->year - (char *) _calibration_files_time_range;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[1].fname = tdrpStrDup("month");
+      tt->struct_def.fields[1].ptype = INT_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_calibration_files_time_range->month - (char *) _calibration_files_time_range;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[2].fname = tdrpStrDup("day");
+      tt->struct_def.fields[2].ptype = INT_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_calibration_files_time_range->day - (char *) _calibration_files_time_range;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[3].fname = tdrpStrDup("hour");
+      tt->struct_def.fields[3].ptype = INT_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_calibration_files_time_range->hour - (char *) _calibration_files_time_range;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[4].fname = tdrpStrDup("min");
+      tt->struct_def.fields[4].ptype = INT_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_calibration_files_time_range->min - (char *) _calibration_files_time_range;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[5].fname = tdrpStrDup("sec");
+      tt->struct_def.fields[5].ptype = INT_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_calibration_files_time_range->sec - (char *) _calibration_files_time_range;
+    tt->n_struct_vals = 12;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].i = 2017;
+      tt->struct_vals[1].i = 3;
+      tt->struct_vals[2].i = 21;
+      tt->struct_vals[3].i = 0;
+      tt->struct_vals[4].i = 0;
+      tt->struct_vals[5].i = 0;
+      tt->struct_vals[6].i = 2017;
+      tt->struct_vals[7].i = 3;
+      tt->struct_vals[8].i = 22;
+      tt->struct_vals[9].i = 0;
+      tt->struct_vals[10].i = 0;
+      tt->struct_vals[11].i = 0;
+    tt++;
+    
+    // Parameter 'Comment 1'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 1");
     tt->comment_hdr = tdrpStrDup("ALGORITHM PARAMETERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -865,32 +841,16 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'num_azim'
-    // ctype is 'long'
+    // Parameter 'ref_url'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = LONG_TYPE;
-    tt->param_name = tdrpStrDup("num_azim");
-    tt->descr = tdrpStrDup("Number of azimuths used in data processing");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &num_azim - &_start_;
-    tt->has_min = TRUE;
-    tt->min_val.l = 1;
-    tt->single_val.l = 360;
-    tt++;
-    
-    // Parameter 'num_range_bins'
-    // ctype is 'long'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = LONG_TYPE;
-    tt->param_name = tdrpStrDup("num_range_bins");
-    tt->descr = tdrpStrDup("Number of range bins");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &num_range_bins - &_start_;
-    tt->has_min = TRUE;
-    tt->min_val.l = 1;
-    tt->single_val.l = 450;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ref_url");
+    tt->descr = tdrpStrDup("Reference file url");
+    tt->help = tdrpStrDup("Second path in which time stamped MDV is written so as to be useful in display");
+    tt->val_offset = (char *) &ref_url - &_start_;
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'beam_width'
@@ -1001,11 +961,11 @@ using namespace std;
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 2");
     tt->comment_hdr = tdrpStrDup("COLORSCALE PARAMETERS");
     tt->comment_text = tdrpStrDup("These colorscale files can be generated as a convenience to the user. They are not required for the calculating of the calibration.");
     tt++;

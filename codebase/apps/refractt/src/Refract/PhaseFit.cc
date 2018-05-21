@@ -33,21 +33,21 @@
  *
  */
 
-#include <iostream>
-#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <rapmath/math_macros.h>
-
 #include "PhaseFit.hh"
+#include "TargetVector.hh"
+#include "LinearInterpArgs.hh"
+#include <Refract/VectorData.hh>
+#include <Refract/FieldDataPair.hh>
+#include <Refract/RefractInput.hh>
+#include <Refract/RefractConstants.hh>
+#include <rapmath/math_macros.h>
+#include <toolsa/LogStream.hh>
 
-using namespace std;
 
 // Global variables
-
-const double PhaseFit::VERY_LARGE = 2147483647.0;
-const float PhaseFit::INVALID = -99999.0;
 
 const int PhaseFit::SMEAR_AZ = 10;
 const int PhaseFit::SMEAR_AZ_INIT = 30;
@@ -57,62 +57,37 @@ const int PhaseFit::MIN_ITER = 3;
 const int PhaseFit::MAX_ITER = 1000;
 const double PhaseFit::MIN_ABS_CONSISTENCY = 4.0;
 
-
 /*********************************************************************
  * Constructor
  */
 
 PhaseFit::PhaseFit() :
-  phase(0),
-  quality(0),
-  inphase(0),
-  quadrature(0),
-  _debug(false),
-  _verbose(false),
-  _phaseFit(0),
-  _phaseError(0),
-  _smoothI(0),
-  _smoothQ(0),
   _nOutput(0),
   _nError(0)
 {
 }
 
 
+//----------------------------------------------------------------------------
 /*********************************************************************
  * Destructor
  */
 
 PhaseFit::~PhaseFit()
 {
-  delete [] phase;
-  delete [] quality;
-  delete [] inphase;
-  delete [] quadrature;
-  delete [] _phaseFit;
-  delete [] _phaseError;
-  delete [] _smoothI;
-  delete [] _smoothQ;
 }
 
 
+//----------------------------------------------------------------------------
 /*********************************************************************
  * init()
  */
 
 bool PhaseFit::init(const int num_beams, const int num_gates,
-		    const double gate_spacing,
-		    const double wavelength,
-		    const double min_consistency, const int r_min,
-		    const bool debug_flag, const bool verbose_flag)
+		    const double gate_spacing, const double wavelength,
+		    const double min_consistency, const int r_min)
 {
-  // Save the debug flags
-
-  _debug = debug_flag;
-  _verbose = verbose_flag;
-  
   // Save the radar and phase fitting information
-
   _numBeams = num_beams;
   _numGates = num_gates;
   _gateSpacing = gate_spacing;
@@ -121,27 +96,82 @@ bool PhaseFit::init(const int num_beams, const int num_gates,
   _rMin = r_min;
   
   // Allocate space for the internal arrays
-
-  int scan_size = _numBeams * _numGates;
+  _scanSize = _numBeams * _numGates;
+  int scan_size = _scanSize;
   
-  phase = new float[scan_size];
-  quality = new float[scan_size];
-  inphase = new float[scan_size];
-  quadrature = new float[scan_size];
-
-  _phaseFit = new float[scan_size];
-  _phaseError = new float[scan_size];
-  _smoothI = new float[scan_size];
-  _smoothQ = new float[scan_size];
+  _phase = VectorData(scan_size, 0.0);
+  _quality = VectorData(scan_size, 0.0);
+  _iq = VectorIQ(scan_size, 0.0);
+  _phaseFit = VectorData(scan_size, 0.0);
+  _phaseError = VectorData(scan_size, 0.0);
+  _smoothIQ = VectorIQ(scan_size, 0.0);
 
   // Calculate other needed values
-
   _azimSpacing = 360.0 / (double)_numBeams;
   
   return true;
 }
 
+/*********************************************************************/
+void PhaseFit::initFit(const TargetVector &target,
+		       const FieldDataPair &difData, bool isPhaseDiff)
+{      
+  // copy from target phasediff or phase into _phase local array
+  if (isPhaseDiff)
+  {
+    target.copyPhaseDiff(_phase);
+  }
+  else
+  {
+    target.copyPhase(_phase);
+  }
 
+  // set iq based on difData
+  _iq.setAllZero();
+  _iq.copyLargeR(_rMin, _numGates, _numBeams, difData);
+
+  // set quality and iq based on difData or target iq
+  int offset = 0;
+  _quality.setAllZero();
+
+  if (isPhaseDiff)
+  {
+    _quality.setInitialQuality(_rMin, target.getPhaseDiffErr(), 
+			       difData, _numBeams, _numGates);
+  }
+  else
+  {
+    _quality.setInitialQuality(_rMin, target.getPhaseDiffErr(), 
+			       target.getIQ(), _numBeams, _numGates);
+  }
+			     
+// #ifdef NOT
+//   for (int az=0; az < _numBeams; ++az)
+//   {
+//     for (int r = 0 ; r < _numGates ; ++r, ++offset)
+//     {
+//       if (r >= _rMin)
+//       {
+// 	if (target.phase_dif_er_is_valid(offset))
+// 	// if (target[offset].phase_diff_er != refract::INVALID)
+// 	{
+// 	  if (isPhaseDiff)
+// 	  {
+// 	    _quality[offset] = difData[offset].norm();
+// 	  }
+// 	  else
+// 	  {
+// 	    _quality[offset] = target.iqNorm(offset); //target[offset].iq.norm();
+// 	  }
+// 	}
+// 	// _iq[offset] = difData[offset];
+//       }
+//     } /* endfor - r */
+//   } /* endfor - az */
+// #endif
+}
+
+//----------------------------------------------------------------------------
 /*********************************************************************
  * fitPhaseField()
  */
@@ -151,89 +181,85 @@ bool PhaseFit::fitPhaseField(const bool do_relax)
   // Initialize
 
   float slope = _meanPhaseSlopeInit();
-  if (slope == INVALID)
+  if (slope == refract::INVALID)
     return false;
   
-  _expectedPhaseRange0 = _phaseRange0() - _rMin * slope;
+  // diff between average phase angle at _rMin and what the slope indicates
+  // (linear values, I guess asuming phase at 0 is 0)
+  _expectedPhaseRange0 = _phaseRange0() - _rMin*slope;
 
   // Get the smoothed phase field
-
-  _rangeSlope = _doSmoothing();
-  if (_rangeSlope == INVALID)
+  _rangeSlope = _doSmoothing(slope);
+  if (_rangeSlope == refract::INVALID)
+  {
     return false;
+  }
   
-  if (_verbose)
-    cerr << "Smoothing complete!" << endl;
+  LOG(DEBUG_VERBOSE) << "Smoothing complete!";
 
   // Compute the resulting refractivity field and its error
-
-  float slope_to_n =
-    1000000.0 / _gateSpacing * _wavelength / 720.0 *
-    _numGates / _numGates / DEG_TO_RAD;
-  float tmp = _rangeSlope * 1000000.0 /
-    _gateSpacing * _wavelength / 720.0 + _refN;
-  float er_decorrel = 2.0 * _gateSpacing * _numGates /
-    _numGates / _smoothSideLen;
+  float slope_to_n = _defaultSlope()/DEG_TO_RAD;
+  // float slope_to_n = _defaultSlope()*_numGates/_numGates/DEG_TO_RAD;
+  // float slope_to_n = 1000000.0/_gateSpacing*_wavelength/720.0*_numGates/_numGates/DEG_TO_RAD;
+  // float tmp = _rangeSlope*1000000.0/_gateSpacing*_wavelength/720.0 + _refN;
+  float tmp = _rangeSlope*_defaultSlope() + _refN;
+  // float er_decorrel = 2.0*_gateSpacing*_numGates/_numGates/_smoothSideLen;
+  float er_decorrel = 2.0*_gateSpacing*_smoothSideLen;
   if (er_decorrel > 1.0)
     er_decorrel = 1.0;
 
-  if (_debug)
-  {
-    cerr << "---> Initializing output data" << endl;
-    cerr << "      num az = " << _numBeams << endl;
-    cerr << "      num range = " <<  _numGates << endl;
-  }
+  LOG(DEBUG) << "---> Initializing output data";
+  LOG(DEBUG) << "      num az = " << _numBeams;
+  LOG(DEBUG) << "      num range = " <<  _numGates;
   
-  for (int azn = 0, offsetn = 0; azn < _numBeams; ++azn, ++offsetn)
+  for (int azn = 0; azn < _numBeams; ++azn)
   {
-    _nOutput[offsetn] = tmp;
-    _nError[offsetn] = VERY_LARGE;
-
-    int rn;
-    
-    for (rn = 1, ++offsetn; rn < _numGates - 1;
-	 ++rn, ++offsetn)
-    {
-      float tmp_a = _smoothI[offsetn] * _smoothI[offsetn-1] +
-	_smoothQ[offsetn] * _smoothQ[offsetn-1] +
-	_smoothI[offsetn+1] * _smoothI[offsetn] +
-	_smoothQ[offsetn+1] * _smoothQ[offsetn];
-      float tmp_b = _smoothQ[offsetn] * _smoothI[offsetn-1] -
-	_smoothI[offsetn] * _smoothQ[offsetn-1] +
-	_smoothQ[offsetn+1] * _smoothI[offsetn] -
-	_smoothI[offsetn+1] * _smoothQ[offsetn];
-      _nOutput[offsetn] = atan2(tmp_b, tmp_a) * slope_to_n + _refN;
-      _nError[offsetn] =
-	er_decorrel * sqrt((SQR(_phaseError[offsetn+1]) +
-			    SQR(_phaseError[offsetn]) +
-			    SQR(_phaseError[offsetn-1])) / 6.0) *
-	slope_to_n * DEG_TO_RAD ;
-    } /* endfor - rn */
-
-    _nOutput[offsetn] = tmp;
-    _nError[offsetn] = VERY_LARGE;
+    _setNOneBeam(azn, slope_to_n, tmp, er_decorrel);
   } /* endfor - azn */
 
-  if (_verbose)
-    cerr << "N and N-error derived from smoothed field." << endl;
+  LOG(DEBUG_VERBOSE) << "N and N-error derived from smoothed field.";
 
   // Improve estimates of refractivity through a relaxation process
-
   if (do_relax)
   {
     _relax(_nOutput);
-    if (_verbose)
-      cerr << "Relaxation complete." << endl;
+    LOG(DEBUG_VERBOSE) << "Relaxation complete.";
   }
 
   return true;
 }
 
+//----------------------------------------------------------------------------
+void PhaseFit::_setNOneBeam(int azn, float slope_to_n, float tmp,
+			    float er_decorrel)
+{
+  int offsetn = azn*_numGates;
+  _nOutput[offsetn] = tmp;
+  _nError[offsetn] = refract::VERY_LARGE;
+
+  int r;
+  for (r = 1; r < _numGates - 1; ++r)
+  {
+    int ri = offsetn + r;
+    _nOutput[ri] = _smoothIQ.refractivity(ri, slope_to_n) + _refN;
+    _nError[ri] =
+      er_decorrel*sqrt(_phaseError.sumSquares(3, ri)/6.0)*slope_to_n*DEG_TO_RAD;
+      // er_decorrel * sqrt((RefractUtil::SQR(_phaseError[ri+1]) +
+      // 			  RefractUtil::SQR(_phaseError[ri]) +
+      // 			  RefractUtil::SQR(_phaseError[ri-1])) / 6.0) *
+      // slope_to_n * DEG_TO_RAD ;
+  } /* endfor - rn */
+
+  int ri = offsetn + _numGates -1;
+  _nOutput[ri] = tmp;
+  _nError[ri] = refract::VERY_LARGE;
+}
 
 /**********************************************************************
  *              Private Member Functions                              *
  **********************************************************************/
 
+//----------------------------------------------------------------------------
 /*********************************************************************
  * _doSmoothing()
  *
@@ -270,171 +296,149 @@ bool PhaseFit::fitPhaseField(const bool do_relax)
  *   - _phaseFit[]: Smoothed dealiased phase data;
  */
 
-float PhaseFit::_doSmoothing()
+float PhaseFit::_doSmoothing(double phaseSlopeInit)
 {
-  if (_debug)
-    cerr << "    Entered _doSmoothing()" << endl;
-
+  LOG(DEBUG_VERBOSE) << "    Entered _doSmoothing()";
+  if (phaseSlopeInit == refract::INVALID)
+  {
+    return refract::INVALID;
+  }
+  
   // Estimate the initial slope (slope near range = 0) and average one
   // (throughout the whole field).  These will act as anchors to prevent
   // the algorithm from running away from the reasonable.
-
-  float init_slope = _meanPhaseSlopeInit();
-  _rangeSlope = init_slope;
+  // float init_slope = _meanPhaseSlopeInit();   // this is done previously
+  _rangeSlope = phaseSlopeInit; //init_slope;
   float range_slope = _meanPhaseSlopeAvg();
-
-  if (init_slope == INVALID || range_slope == INVALID)
-    return INVALID;
-  
-  if (_debug)
+  if (range_slope == refract::INVALID)
   {
-    cerr << "    range_slope = " << (range_slope * 1000.0 / _gateSpacing)
-	 << " deg/km; init_slope = "
-	 << (init_slope * 1000 / _gateSpacing) << " deg/km" << endl;
+    return refract::INVALID;
   }
+  LOG(DEBUG) << "    range_slope = " << (range_slope * 1000.0 / _gateSpacing)
+	     << " deg/km; init_slope = "
+	     << (phaseSlopeInit * 1000 / _gateSpacing) << " deg/km";
 
   // Compute smoothed field where enough data is available.
-
   // Allocate memory and prepare some tables
+  VectorData slope_in_range(_numBeams, phaseSlopeInit);
+  VectorData next_slope_in_range(_numBeams, phaseSlopeInit);
 
-  int maxbins = _numBeams * _numGates;
+  int numAb = _numBeams*(2*_smoothRange + 1);
+  VectorIQ slope_ab(numAb, 0.0);
 
-  float *guess_phase = new float[_numBeams];
+  _phaseFit.setAllToValue(refract::INVALID);
+  _phaseError.setAllToValue(refract::VERY_LARGE);
+  // for (int index = 0; index < _numGates * _numBeams; ++index)
+  // {
+  //   outOfBounds(index);
+  //   _phaseFit[index] = refract::INVALID;
+  //   _phaseError[index] = refract::VERY_LARGE;
+  // }
 
-  float *slope_in_range = new float[_numBeams];
-  float *next_slope_in_range = new float[_numBeams];
-  
-  int smooth_range =
-    (int)(_smoothSideLen / 2.0 / _gateSpacing);
-  if (smooth_range <= 0)
-    smooth_range = 1;
-  int two_smooth_range = 2 * smooth_range;
+  // slope_ab is the slope along each azimuth (angle) at range indices
+  // 0 to twoSmoothRange+1, which is the smoothing box length
+  // slope_ab.setSlopes(_numBeams, _smoothRange);
+  slope_ab.setSlopes(_numBeams, _smoothRange);
 
-  double *sum_inphase = new double[_numBeams / 4];
-  double *sum_quadra = new double[_numBeams / 4];
-  double *max_quality = new double[_numBeams / 4];
-  float *slope_a = new float[360 * (two_smooth_range + 1)];
-  float *slope_b = new float[360 * (two_smooth_range + 1)];
-
-  for (int index = 0;
-       index < _numGates * _numBeams;
-       ++index)
-  {
-    _phaseFit[index] = INVALID;
-    _phaseError[index] = VERY_LARGE;
-  }
-
-  for (int angle = 0, index = 0; angle < 360; angle++)
-  {
-    for (int dr = 0; dr <= two_smooth_range; dr++, index++)
-    {
-      slope_a[index] = cos((smooth_range - dr) * angle * DEG_TO_RAD);
-      slope_b[index] = sin((smooth_range - dr) * angle * DEG_TO_RAD);
-    } /* endfor - dr */
-  } /* endfor - angle, index */
-  
-  for (int az = 0; az < _numBeams; ++az)
-  {
-    slope_in_range[az] = init_slope;
-    next_slope_in_range[az] = init_slope;
-  }
+  // for (int angle = 0, index = 0; angle < _numBeams; angle++)
+  // {
+  //   for (int dr = 0; dr <= _twoSmoothRange; dr++, index++)
+  //   {
+  //     outOfBounds(numAb, index);
+  //     slope_ab[index] = IQ((_smoothRange-dr)*angle);
+  //   } /* endfor - dr */
+  // } /* endfor - angle, index */
   
   // For each range, we determine the smoothing area in range-azim system 
-
-  float minconsistency;
-
   for (int r = 0; r < _numGates; ++r)
   {
-    int smooth_azim =
-      (int)(_smoothSideLen * 360.0 /
-	    (_azimSpacing * r *
-	     _gateSpacing * 4.0 * M_PI));
-    if (smooth_azim >= _numBeams / 8)
-      smooth_azim = _numBeams / 8 - 1;
-    if (smooth_azim <= 0)
-      smooth_azim = 1;
+    _doSmoothingRange(r, slope_in_range, next_slope_in_range, slope_ab,
+		      range_slope, phaseSlopeInit);
+    slope_in_range = next_slope_in_range;
+  } /* endfor - r */
+  
+  // Task completed!
+  return _rangeSlope;
+}
 
-    int two_smooth_azim = 2 * smooth_azim;
-    minconsistency =
-      (two_smooth_range + 1) * (two_smooth_azim + 1) * _minConsistency;
-    if (minconsistency < MIN_ABS_CONSISTENCY)
-      minconsistency = MIN_ABS_CONSISTENCY;
+//----------------------------------------------------------------------------
+void PhaseFit::_doSmoothingRange(int r, const VectorData &slope_in_range,
+				 VectorData &next_slope_in_range,
+				 VectorIQ &slope_ab,
+				 float range_slope, float init_slope)
+{
+  LinearInterpArgs l_args(r, _smoothSideLen, _azimSpacing, _gateSpacing,
+  			  _numBeams,_twoSmoothRange, _minConsistency,
+   			  MIN_ABS_CONSISTENCY, range_slope, init_slope);
+  
+  // int num_sum_iq = _numBeams/4;
+  int smooth_azim = (int)(_smoothSideLen*360.0/
+  			  (_azimSpacing*r*_gateSpacing*4.0*M_PI));
+  if (smooth_azim >= _numBeams/8) smooth_azim = _numBeams/8 - 1;
+  if (smooth_azim <= 0) smooth_azim = 1;
+  int two_smooth_azim = 2*smooth_azim;
+  float minconsistency = (_twoSmoothRange + 1)*(two_smooth_azim + 1)*
+    _minConsistency;
+  if (minconsistency < MIN_ABS_CONSISTENCY)
+    minconsistency = MIN_ABS_CONSISTENCY;
 
-    // The smoothed value of phase(r+dr) is precomputed for the last azimuth
-    // (done to speed up computation afterwards when azimuths are shifted).
-    // The weighting function of I/Q data follows a (1-a(r-r0)^2) like function
+  VectorIQ sum_iq(_numBeams/4, 0.0);
+  VectorData max_quality(_numBeams/4, 0.0);
+  VectorData guess_phase(_numBeams, 0.0);
 
-    int az2 = _numBeams - 1;
-    
-    for (int daz = 0; daz <= two_smooth_azim; daz++)
+  // The smoothed value of phase(r+dr) is precomputed for the last azimuth
+  // (done to speed up computation afterwards when azimuths are shifted).
+  // The weighting function of I/Q data follows a (1-a(r-r0)^2) like function
+
+  // int az2 = _numBeams - 1;
+
+  sum_iq.setRangeZero(0, l_args._two_smooth_azim);
+  max_quality.setRangeZero(0, l_args._two_smooth_azim);
+
+  // for (int daz = 0; daz <= l_args._two_smooth_azim; daz++)
+  // {
+  //   if (daz >= _scanSize)
+  //   {
+  //     printf("Out of bounds daz\n");
+  //   }
+  //   outOfBounds(num_sum_iq, daz);
+  //   sum_iq[daz].set(0.0, 0.0);
+  //   max_quality[daz] = 0.0;
+  // } /* endfor - daz */
+
+  for (int dr = 0; dr <= _twoSmoothRange; dr++)
+  {
+    float weight_fact =
+      sqrt(2.0)*(1.0 - RefractUtil::SQR((_smoothRange-dr)/
+					((float)_smoothRange + 0.5)));
+    if ((r + dr - _smoothRange >= _rMin) &&
+	(r + dr - _smoothRange < _numGates))
     {
-      sum_inphase[daz] = 0.0;
-      sum_quadra[daz] = 0.0;
-      max_quality[daz] = 0.0;
-    } /* endfor - daz */
-
-    for (int dr = 0; dr <= two_smooth_range; dr++)
-    {
-      float weight_fact =
-	sqrt(2.0) * (1.0 - SQR((smooth_range-dr) / ((float)smooth_range + 0.5)));
-      if ((r + dr - smooth_range >= _rMin) &&
-	  (r + dr - smooth_range < _numGates))
+      for (int daz = -l_args._smooth_azim; daz <= l_args._smooth_azim; daz++)
       {
-	for (int daz = -smooth_azim; daz <= smooth_azim; daz++)
-	{
-	  int az =
-	    (az2 + daz + _numBeams) % _numBeams;
-	  int offset = az * _numGates + r + dr - smooth_range;
-	  int k =
-	    (((int)(floor(slope_in_range[az] + 0.5)) + 360000) % 360) *
-	    (2 * smooth_range + 1);
-	  sum_inphase[daz + smooth_azim] +=
-	    weight_fact * (inphase[offset] * slope_a[k+dr] -
-			   quadrature[offset] * slope_b[k+dr]);
-	  sum_quadra[daz + smooth_azim] +=
-	    weight_fact * (quadrature[offset] * slope_a[k+dr] +
-			   inphase[offset] * slope_b[k+dr]);
-	  max_quality[daz + smooth_azim] += weight_fact * quality[offset];
-	} /* endfor - daz */
-      }
+	//int az = (_numBeams - 1 + daz + _numBeams) % _numBeams;
+	int az = (_numBeams - 1 + daz) % _numBeams;
+	int offset = az * _numGates + r + dr - _smoothRange;
+	int k = slope_in_range.slopeFloor(az)*(2*_smoothRange + 1);
+	IQ tmp = _iq[offset].phaseDiffFitC(slope_ab[k+dr]);
+	tmp *= weight_fact;
+	sum_iq[daz+l_args._smooth_azim] += tmp;
+	outOfBounds(offset);
+	max_quality[daz+l_args._smooth_azim] += weight_fact*_quality[offset];
+      } /* endfor - daz */
+    }
       
-    } /* endfor - dr */
+  } /* endfor - dr */
 
     // For each azimuth, we guess what the next phase(range) should be based on
     // the previously computed d(Phase)/d(range) at that azimuth.  This step will
     // be needed for optimum smoothing.
 
-    int rjump = 0;
-
-    for (int az = 0; az < _numBeams; az++)
-    {
-      rjump = 1;
-      
-      int off2 = az * _numGates + r;
-
-      if (r <= _rMin)
-      {
-	guess_phase[az] = _expectedPhaseRange0;
-      }
-      else
-      {
-	while (_phaseFit[off2-rjump] == INVALID && rjump < r)
-	  rjump++;
-
-	if (r - rjump >= _rMin)
-	{
-	  guess_phase[az] =
-	    _phaseFit[off2 - rjump] + rjump * slope_in_range[az];
-	}
-	else
-	{
-	  rjump = r - _rMin;
-	  
-	  guess_phase[az] =
-	    _expectedPhaseRange0 + rjump * slope_in_range[az];
-	}
-      } /* endelse - r <= _rMin */
-    } /* endfor - az */
+  int rjump = 0;
+  for (int az = 0; az < _numBeams; az++)
+  {
+    guess_phase[az] = _guessPhase(az, r, slope_in_range[az], rjump);
+  }
 
     // Additional step: If num_azim > output_numa, interpolate linearly
     // guess_phase[az] entries between az rays instead of interpolating to
@@ -447,303 +451,369 @@ float PhaseFit::_doSmoothing()
     // range taking into account the slope d(Phase)/d(range) and the shape
     // of the weighting function.
 
-    int oldaz = _numBeams - 1;
-    for (int azn = 0; azn < _numBeams; azn++)
-    {
-      int azjump =
-	(azn - oldaz + _numBeams) % _numBeams;
-      int off2 = azn * _numGates + r;
+  int oldaz = _numBeams - 1;
+  for (int azn = 0; azn < _numBeams; azn++)
+  {
+    int azjump = (azn - oldaz + _numBeams) % _numBeams;
+    l_args.initForAz(azn, azjump, rjump);
+    _linearInterp(l_args,
+		  slope_in_range, slope_ab, guess_phase, sum_iq, max_quality,
+		  next_slope_in_range);
+    oldaz = azn;
+  } /* endfor - azn */
 
-      for (int j = 0; j < azjump; j++)
-      {
-	for (int daz = 0; daz < two_smooth_azim; daz++)
-	{
-	  // Shift sums
-
-	  sum_inphase[daz] = sum_inphase[daz+1];
-	  sum_quadra[daz] = sum_quadra[daz+1];
-	  max_quality[daz] = max_quality[daz+1];
-	} /* endfor - daz */
-
-	sum_inphase[two_smooth_azim] = 0.0; // Sum slope-corrected I/Q
-	sum_quadra[two_smooth_azim] = 0.0;
-	max_quality[two_smooth_azim] = 0.0;
-
-	int az = (azn + j + smooth_azim) % _numBeams;
-
-	int k = (((int)(floor(slope_in_range[az] + 0.5)) + 360000) % 360) *
-	  (two_smooth_range + 1);
-
-	for (int dr = 0; dr <= two_smooth_range; dr++)
-	{
-	  if ((r + dr - smooth_range >= _rMin) &&
-	      (r + dr - smooth_range < _numGates))
-	  {
-	    float weight_fact = sqrt(2.0) *
-	      (1.0 - SQR((smooth_range-dr) / ((float)smooth_range + 0.5)));
-	    int offset =
-	      off2 + (smooth_azim + j) * _numGates + dr - smooth_range;
-	    if (offset >= maxbins)
-	      offset -= maxbins;
-
-	    sum_inphase[two_smooth_azim] +=
-	      weight_fact * (inphase[offset] * slope_a[k + dr] -
-			     quadrature[offset] * slope_b[k + dr]);
-	    sum_quadra[two_smooth_azim] +=
-	      weight_fact * (quadrature[offset] * slope_a[k + dr] +
-			     inphase[offset] * slope_b[k + dr]);
-	    max_quality[two_smooth_azim] += weight_fact * quality[offset];
-	  }
-	} /* endfor - dr */
-	
-      } /* endfor - j */
-      
-      oldaz = azn;
-
-      // Combine all azimuths of smoothing area, correcting for mean phase
-      // of row
-
-      float tmp_a = 0.0;
-      float tmp_b = 0.0;
-      float maxconsistency = 0.0;
-
-      for (int daz = 0; daz <= two_smooth_azim; daz++)
-      {
-	int az = (azn + daz - smooth_azim + _numBeams) % _numBeams;
-
-	float cor_i;
-	float cor_q;
-	
-	if (r > 0 &&
-	    _phaseFit[az * _numGates + r - 1] != INVALID &&
-	    _phaseFit[off2 - 1] != INVALID)
-	{
-	  int k = (((int)(floor(guess_phase[azn] - guess_phase[az] + 0.5)) + 
-		360000) % 360);
-	  if (k < 180)    // Dampen phase correction, otherwise it misbehaves
-	    k = k / 2;
-	  else
-	    k = k + (360 - k) / 2;
-	  k = k * (two_smooth_range + 1) + smooth_range - 1;
-	  cor_i = sum_inphase[daz] * slope_a[k] - sum_quadra[daz] * slope_b[k];
-	  cor_q = sum_quadra[daz] * slope_a[k] + sum_inphase[daz] * slope_b[k];
-	}
-	else
-	{
-	  cor_i = sum_inphase[daz];
-	  cor_q = sum_quadra[daz];
-	}
-	float weight_fact =
-	  sqrt(2.0) * (1.0 - SQR(smooth_azim-daz) / SQR(smooth_azim + 0.5));
-	tmp_a += weight_fact * cor_i;
-	tmp_b += weight_fact * cor_q;
-	maxconsistency += weight_fact * max_quality[daz];
-      } /* endfor - daz */
-
-      // Save results.  Update next_slope_in_range.
-
-      float weight_fact =
-	(float)((two_smooth_range + 1) * (two_smooth_azim + 1));
-      _smoothI[off2] = tmp_a / weight_fact;
-      _smoothQ[off2] = tmp_b / weight_fact;
-      float consistency = sqrt(SQR(tmp_a) + SQR(tmp_b));
-      if (consistency < sqrt(2.0 / weight_fact) * maxconsistency)
-	consistency = 0.0;
-      else
-	consistency =
-	  sqrt(SQR(consistency) - 2.0 / weight_fact * SQR(maxconsistency));
-
-      float quality;
-      
-      if (weight_fact > maxconsistency)    // Should always be true, but...
-	quality = consistency / sqrt(maxconsistency * weight_fact);
-      else
-	quality = consistency / maxconsistency;
-      if (quality > 0.99)
-	quality = 0.99;
-      if (quality < _minConsistency)
-	consistency = 0.0;
-      if (consistency > minconsistency)
-      {
-	float tmp_phase = atan2(tmp_b, tmp_a) / DEG_TO_RAD;
-	while (tmp_phase - guess_phase[azn] < -180.0)
-	  tmp_phase += 360.0;
-	while (tmp_phase - guess_phase[azn] >= 180.0)
-	  tmp_phase -= 360.0;
-	_phaseFit[off2] = tmp_phase;
-	_phaseError[off2] =
-	  sqrt(-2.0 * log(quality) / quality) / DEG_TO_RAD /
-	  sqrt(maxconsistency / 2.0);
-	if (consistency > 4.0 * minconsistency)
-	{
-	  next_slope_in_range[azn] +=
-	    2.0 * _gateSpacing / _smoothSideLen /
-	    rjump * (tmp_phase - guess_phase[azn]);
-	}
-	else
-	{
-	  next_slope_in_range[azn] +=
-	    0.5 * consistency / minconsistency *
-	    _gateSpacing / _smoothSideLen / rjump *
-	    (tmp_phase - guess_phase[azn]);
-
-	  int prev_az = (azn + _numBeams - 1) % _numBeams;
-	  int next_az = (azn + 1) % _numBeams;
-	  
-	  next_slope_in_range[azn] +=
-	    (1.0 - 0.25 * consistency / minconsistency) *
-	    _gateSpacing / _smoothSideLen *
-	    (slope_in_range[prev_az]
-	     + slope_in_range[next_az] +
-	     0.25 * range_slope - 2.25 * slope_in_range[azn]);
-
-	}
-      }
-      else
-      {
-	next_slope_in_range[azn] +=
-	  _gateSpacing / _smoothSideLen *
-	  (slope_in_range[(azn + _numBeams - 1) %
-			  _numBeams] +
-	   slope_in_range[(azn + 1) % _numBeams] +
-	   0.25 * range_slope - 2.25 * slope_in_range[azn]);
-
-	_smoothI[off2] =
-	  0.1 * minconsistency * cos(guess_phase[azn]*DEG_TO_RAD);
-	_smoothQ[off2] =
-	  0.1 * minconsistency * sin(guess_phase[azn]*DEG_TO_RAD);
-      }
-
-      // If quality is really poor, slope might be wrong; compute it the
-      // raw way
-
-      if (quality < sqrt(2.0 / weight_fact))
-      {
-	double rawslope_a = 0.0;
-	double rawslope_b = 0.0;
-	tmp_a = 0.0;
-	tmp_b = 0.0;
-	for (int dr = -two_smooth_range; dr <= two_smooth_range; dr++)
-	{
-	  if ((r+dr >= _rMin) &&
-	      (r+dr < _numGates))
-	  {
-	    float old_tmp_a = tmp_a;
-	    float old_tmp_b = tmp_b;
-	    tmp_a = 0.0;
-	    tmp_b = 0.0;
-	    for (int daz = -two_smooth_azim; daz <= two_smooth_azim; daz++)
-	    {
-	      int az =
-		(azn + daz + _numBeams) % _numBeams;
-	      int offset = az * _numGates + r + dr;
-	      tmp_a += inphase[offset];
-	      tmp_b += quadrature[offset];
-	    } /* endfor - daz */
-	    rawslope_a += tmp_a * old_tmp_a + tmp_b * old_tmp_b;
-	    rawslope_b += tmp_b * old_tmp_a - tmp_a * old_tmp_b;
-	  }
-	} /* endfor - dr */
-	
-	consistency = sqrt(SQR(rawslope_a) + SQR(rawslope_b));
-	if (consistency >
-	    _minConsistency * SQR(2 * two_smooth_azim + 1) *
-	    (2 * two_smooth_range + 1))
-	{
-	  slope_in_range[azn] = atan2(rawslope_b, rawslope_a) / DEG_TO_RAD;
-	  if (fabs(slope_in_range[azn] - range_slope) < 60.0)
-	  {
-	    next_slope_in_range[azn] +=
-	      0.2 * (slope_in_range[azn] - next_slope_in_range[azn]);
-	  }
-	  
-	}
-      }
-
-      if (r < INITIAL_SLOPE_LEN_M / _gateSpacing)
-      {
-	next_slope_in_range[azn] +=
-	  0.1 * (1.0 - r / (INITIAL_SLOPE_LEN_M / _gateSpacing)) *
-	  (init_slope - next_slope_in_range[azn]);
-      }
-      
-      if (next_slope_in_range[azn] > range_slope + 60.0)    // Occasionally-needed railing
-	next_slope_in_range[azn] = range_slope + 60.0;
-      if (next_slope_in_range[azn] < range_slope - 60.0)
-	next_slope_in_range[azn] = range_slope - 60.0;
-    } /* endfor - azn */
-
-    memcpy(slope_in_range, next_slope_in_range, _numBeams * sizeof(float));
-  } /* endfor - r */
-  
-  // Task completed!
-
-  delete [] slope_b;
-  delete [] slope_a;
-  delete [] max_quality;
-  delete [] sum_quadra;
-  delete [] sum_inphase;
-  delete [] next_slope_in_range;
-  delete [] slope_in_range;
-  delete [] guess_phase;
-
-  return _rangeSlope;
 }
 
+//----------------------------------------------------------------------------
+void PhaseFit::_linearInterp(const LinearInterpArgs &args,
+			     const VectorData &slope_in_range,
+			     const VectorIQ &slope_ab,
+			     const VectorData &guess_phase,
+			     VectorIQ &sum_iq, VectorData &max_quality,
+			     VectorData &next_slope_in_range)
+{
+  int off2 = args._azn*_numGates + args._r;
+  float weight_fact = (float)((_twoSmoothRange+1)*(args._two_smooth_azim+1));
 
+  for (int j = 0; j < args._azjump; j++)
+  {
+    sum_iq.shiftDown(0, args._two_smooth_azim);
+    max_quality.shiftDown(0, args._two_smooth_azim);
+    sum_iq[args._two_smooth_azim] = _linearInterpUpdateSumIQ(args, j,
+							     slope_in_range,
+							     slope_ab);
+    max_quality[args._two_smooth_azim] = _linearInterpUpdateMaxQual(args, j);
+	
+  } /* endfor - j */
+      
+  // Combine all azimuths of smoothing area, correcting for mean phase
+  // of row
+
+  IQ tmp_ab(0.0, 0.0);
+  float maxconsistency = 0.0;
+  for (int daz = 0; daz <= args._two_smooth_azim; daz++)
+  {
+    _linearInterpIncConsistency(daz, args, sum_iq, slope_ab, guess_phase,
+				max_quality, tmp_ab, maxconsistency);
+  }
+
+  // Save results.  Update next_slope_in_range.
+  outOfBounds(off2);
+  _smoothIQ[off2] = tmp_ab;
+  _smoothIQ[off2] /= weight_fact;
+
+  float consistency, quality;
+  _setConsistencyAndQuality(tmp_ab, weight_fact, maxconsistency, consistency,
+			    quality);
+  if (consistency > args._minconsistency)
+  {
+    _setPhaseAndNextSlopeInRange(args, tmp_ab, guess_phase, quality,
+				 consistency, maxconsistency,
+				 slope_in_range, next_slope_in_range);
+  }
+  else
+  {
+    _resetSmoothIQAndNextSlopeInRange(args, guess_phase, slope_in_range,
+				      next_slope_in_range);
+  }
+
+  // If quality is really poor, slope might be wrong; compute it the
+  // raw way
+
+  if (quality < sqrt(2.0 / weight_fact))
+  {
+    _lowQualityAdjust(args, next_slope_in_range);
+
+  }
+
+  if (args._r < INITIAL_SLOPE_LEN_M / _gateSpacing)
+  {
+    next_slope_in_range[args._azn] +=
+      0.1 * (1.0 - args._r / (INITIAL_SLOPE_LEN_M / _gateSpacing)) *
+      (args._init_slope - next_slope_in_range[args._azn]);
+  }
+      
+  if (next_slope_in_range[args._azn] > args._range_slope + 60.0)    // Occasionally-needed railing
+    next_slope_in_range[args._azn] = args._range_slope + 60.0;
+  if (next_slope_in_range[args._azn] < args._range_slope - 60.0)
+    next_slope_in_range[args._azn] = args._range_slope - 60.0;
+}
+
+//----------------------------------------------------------------------------
+double PhaseFit::_linearInterpUpdateMaxQual(const LinearInterpArgs &args,
+					    int j) const
+{
+  double ret = 0.0;
+  for (int dr = 0; dr <= _twoSmoothRange; dr++)
+  {
+    int r_i = args._r + dr - _smoothRange;
+    if (r_i >= _rMin && r_i < _numGates)
+    {
+      float weight_fact = sqrt(2.0) *
+	(1.0 - RefractUtil::SQR((_smoothRange-dr) /
+				((float)_smoothRange + 0.5)));
+
+      int offset = args.offsetAzimuthIndex(j)*_numGates + r_i;
+      if (offset >= _numBeams*_numGates)
+	offset -= _numBeams*_numGates;
+      ret += weight_fact*_quality[offset];
+    }
+  }
+  return ret;
+}
+
+//----------------------------------------------------------------------------
+IQ PhaseFit::_linearInterpUpdateSumIQ(const LinearInterpArgs &args, int j,
+				      const VectorData &slope_in_range,
+				      const VectorIQ &slope_ab) const
+{
+  IQ ret(0.0, 0.0);
+  int az = args.offsetAzimuthIndex(j) % _numBeams;
+  int k = slope_in_range.slopeFloor(az)*(_twoSmoothRange + 1);
+  for (int dr = 0; dr <= _twoSmoothRange; dr++)
+  {
+    int r_i = args._r + dr - _smoothRange;
+    if (r_i >= _rMin && r_i < _numGates)
+    {
+      float weight_fact = sqrt(2.0) *
+	(1.0 - RefractUtil::SQR((_smoothRange-dr) /
+				((float)_smoothRange + 0.5)));
+
+      int offset = args.offsetAzimuthIndex(j)*_numGates + r_i;
+      if (offset >= _numBeams*_numGates)
+	offset -= _numBeams*_numGates;
+
+      IQ tmp = _iq[offset].phaseDiffFitC(slope_ab[k+dr]);
+      tmp *= weight_fact;
+      ret += tmp;
+    }
+  }
+  return ret;
+}
+
+//----------------------------------------------------------------------------
+void PhaseFit::_lowQualityAdjust(const LinearInterpArgs &args,
+				 VectorData &next_slope_in_range)
+{    
+  IQ rawslope_ab(0.0, 0.0);
+  IQ tmp_ab(0.0, 0.0);
+  for (int dr = -_twoSmoothRange; dr <= _twoSmoothRange; dr++)
+  {
+    if ((args._r+dr >= _rMin) &&
+	(args._r+dr < _numGates))
+    {
+      IQ old_tmp_ab = tmp_ab;
+      tmp_ab.set(0.0, 0.0);
+      for (int daz = -args._two_smooth_azim; daz <= args._two_smooth_azim; daz++)
+      {
+	int az =(args._azn + daz + _numBeams) % _numBeams;
+	int offset = az * _numGates + args._r + dr;
+	outOfBounds(offset);
+	tmp_ab += _iq[offset];
+      } /* endfor - daz */
+	    
+      rawslope_ab += old_tmp_ab.phaseDiffC(tmp_ab);
+    }
+  } /* endfor - dr */
+	
+  float consistency = rawslope_ab.norm();
+  if (consistency > _minConsistency*
+      RefractUtil::SQR(2*args._two_smooth_azim + 1)*
+      (2 * _twoSmoothRange + 1))
+  {
+    float xxx = rawslope_ab.phase();
+    if (fabs(xxx - args._range_slope) < 60.0)
+    {
+      next_slope_in_range[args._azn] += 0.2*(xxx - next_slope_in_range[args._azn]);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------
+void PhaseFit::_linearInterpIncConsistency(int daz,
+					   const LinearInterpArgs &args,
+					   const VectorIQ &sum_iq,
+					   const VectorIQ &slope_ab,
+					   const VectorData &guess_phase,
+					   const VectorData &max_quality,
+					   IQ &tmp_ab,
+					   float &maxconsistency) const
+{
+  // int az = (args._azn + daz - args._smooth_azim + _numBeams) % _numBeams;
+  int off2 = args._azn*_numGates + args._r;
+  int az = (args.offsetAzimuthIndexNeg(daz) + _numBeams) % _numBeams;
+  int off1 = az*_numGates + args._r;
+  int num_sum_iq = sum_iq.num();
+  outOfBounds(num_sum_iq, daz);
+  IQ cor_iq = sum_iq[daz];
+  if (args._r > 0)
+  {
+    if (_phaseFit[off1 - 1] != refract::INVALID && 
+	_phaseFit[off2 - 1] != refract::INVALID)
+    {
+      int k = (((int)(floor(guess_phase[args._azn] - guess_phase[az] + 0.5)) + 
+		360000) % 360);
+      if (k < 180)    // Dampen phase correction, otherwise it misbehaves
+	k = k / 2;
+      else
+	k = k + (360 - k) / 2;
+      k = k * (_twoSmoothRange + 1) + _smoothRange - 1;
+      cor_iq = sum_iq[daz].phaseDiffFitC(slope_ab[k]);
+    }
+  }
+  float weight_fact =
+    sqrt(2.0) * (1.0 - RefractUtil::SQR(args._smooth_azim-daz) /
+		 RefractUtil::SQR(args._smooth_azim + 0.5));
+  IQ x = cor_iq;
+  x *= weight_fact;
+  tmp_ab += x;
+  maxconsistency += weight_fact * max_quality[daz];
+}
+
+//----------------------------------------------------------------------------
 /*********************************************************************
  * _meanPhaseSlope()
  */
 
 double PhaseFit::_meanPhaseSlope(const int max_r, const int smear_az) const
 {
-  static const string method_name = "PhaseFit::_meanPhaseSlope()";
-  
-  double slope_i = 0.0;
-  double slope_q = 0.0;
+  IQ slope_iq(0.0, 0.0);
 
+  // process over sectors smear_az beams wide,
+  // incrementing slope_iq once for each sector
   for (int az = 0; az < _numBeams; az += smear_az)
   {
-    int offset = az * _numGates + _rMin;
-    double tmp_a = 0.0;
-    double tmp_b = 0.0;
-
-    for (int r = _rMin; r < max_r; r += SMEAR_RA, offset += SMEAR_RA)
-    {
-      double old_tmp_a = tmp_a;
-      double old_tmp_b = tmp_b;
-      tmp_a = 0.0;
-      tmp_b = 0.0;
-
-      for (int j = 0; j < smear_az; ++j)
-      {
-	for (int k = 1; k <= SMEAR_RA; ++k)
-	{
-	  int bin_index = offset + (j * _numGates) + k;
-	  
-	  tmp_a += inphase[bin_index];
-	  tmp_b += quadrature[bin_index];
-	} /* endfor - k */
-      } /* endfor - j */
-      
-      slope_i += tmp_a * old_tmp_a + tmp_b * old_tmp_b;
-      slope_q += tmp_b * old_tmp_a - tmp_a * old_tmp_b;
-    } /* endfor - r */
-  } /* endfor - az */
-
-  if (slope_i == 0.0 && slope_q == 0.0)
-  {
-    cerr << "ERROR: " << method_name << endl;
-    cerr << "Cannot calculate mean phase slope" << endl;
-    cerr << "I and Q values are all 0" << endl;
-    
-    return INVALID;
+    slope_iq += _sectorMeanPhaseSlope(az, max_r, smear_az);
   }
-  
-  return atan2(slope_q, slope_i) / DEG_TO_RAD / SMEAR_RA;
+  if (slope_iq.isZero())
+  {
+    LOG(ERROR) << "Cannot calculate mean phase slope I and Q values are all 0";
+    return refract::INVALID;
+  }
+  return slope_iq.phase()/SMEAR_RA;
 }
 
+//----------------------------------------------------------------------------
+IQ PhaseFit::_sectorMeanPhaseSlope(int az, int max_r, int smear_az) const
+{
+  IQ ret(0.0, 0.0);
+  IQ tmp_ab(0.0, 0.0);
+  // process SMEAR_RA (=2) ranges at a time out to max
+  // _rMin = 4 in current settings, max_r is 30, so from 4 to 30, 2 at a time
+  // compare results from one range with previous doing a phase diff
+  // for example r=10, first set old_tmp_ab to mean from r=8 and 9, then
+  // compute for 10 and 11  a new slope, and increment result by phase diff
+  // between the two
+  for (int r = _rMin; r < max_r; r += SMEAR_RA) 
+  {
+    IQ old_tmp_ab = tmp_ab;
+    tmp_ab = _meanPhaseSlopeAtRange(r, az, smear_az);
+    ret += old_tmp_ab.phaseDiffC(tmp_ab);
+  }
+  return ret;
+}
 
+//----------------------------------------------------------------------------
+IQ PhaseFit::_meanPhaseSlopeAtRange(int r, int az, int smear_az) const
+{
+  // take the average of a ring of width 2 gates over the sector with
+  // starting point az
+  bool debug = false;
+  IQ tmp_ab(0.0, 0.0);
+
+  // for the entire sector
+  for (int j = 0; j < smear_az; ++j)
+  {
+    // for the SMEAR_RA ranges (2)
+    for (int k = 1; k <= SMEAR_RA; ++k)
+    {
+      // accumulate _iq by summing
+      int bin_index = (az+j)*_numGates + r + k;
+      if (bin_index > 0 && bin_index < _scanSize)
+      {
+	// it was going out of bounds like crazy
+	tmp_ab += _iq[bin_index];
+      }
+      else
+      {
+	if (debug) printf("bin index %d out of bounds\n", bin_index);
+      }
+    } /* endfor - k */
+  } /* endfor - j */
+  return tmp_ab;
+}
+
+//----------------------------------------------------------------------------
+void
+PhaseFit::_resetSmoothIQAndNextSlopeInRange(const LinearInterpArgs &args,
+					    const VectorData &guess_phase,
+					    const VectorData &slope_in_range,
+					    VectorData &next_slope_in_range)
+{
+  int off2 = args._azn*_numGates + args._r;
+  double minConsist = args._minconsistency;
+  int ai = args._azn;
+  
+  int nextBeamAi = (ai + _numBeams -1)%_numBeams;
+  int nextAi = (ai+1)%_numBeams;
+
+  next_slope_in_range[ai] += _gateSpacing / _smoothSideLen *
+    (slope_in_range[nextBeamAi]
+     + slope_in_range[nextAi] +
+     0.25 * args._range_slope - 2.25 * slope_in_range[ai]);
+
+  outOfBounds(off2);
+  _smoothIQ[off2].set(
+		      0.1*minConsist*cos(guess_phase[ai]*DEG_TO_RAD),
+		      0.1*minConsist*sin(guess_phase[ai]*DEG_TO_RAD));
+}
+ 
+//----------------------------------------------------------------------------
+void PhaseFit::_setPhaseAndNextSlopeInRange(const LinearInterpArgs &args,
+					    const IQ &tmp_ab,
+					    const VectorData &guess_phase,
+					    float quality, float consistency,
+					    float maxconsistency,
+					    const VectorData &slope_in_range,
+					    VectorData &next_slope_in_range)
+{    
+  int off2 = args._azn*_numGates + args._r;
+  float tmp_phase = tmp_ab.phase();
+  while (tmp_phase - guess_phase[args._azn] < -180.0)
+    tmp_phase += 360.0;
+  while (tmp_phase - guess_phase[args._azn] >= 180.0)
+    tmp_phase -= 360.0;
+
+  outOfBounds(off2);
+  _phaseFit[off2] = tmp_phase;
+  _phaseError[off2] =
+    sqrt(-2.0 * log(quality) / quality) / DEG_TO_RAD /
+    sqrt(maxconsistency / 2.0);
+  if (consistency > 4.0 * args._minconsistency)
+  {
+    next_slope_in_range[args._azn] +=
+      2.0 * _gateSpacing / _smoothSideLen /
+      args._rjump * (tmp_phase - guess_phase[args._azn]);
+  }
+  else
+  {
+    next_slope_in_range[args._azn] +=
+      0.5 * consistency / args._minconsistency *
+      _gateSpacing / _smoothSideLen / args._rjump *
+      (tmp_phase - guess_phase[args._azn]);
+
+    int prev_az = (args._azn + _numBeams - 1) % _numBeams;
+    int next_az = (args._azn + 1) % _numBeams;
+	  
+    next_slope_in_range[args._azn] +=
+      (1.0 - 0.25 * consistency / args._minconsistency) *
+      _gateSpacing / _smoothSideLen * (slope_in_range[prev_az]
+       + slope_in_range[next_az] +
+       0.25 * args._range_slope - 2.25 * slope_in_range[args._azn]);
+  }
+}
+
+//----------------------------------------------------------------------------
 /*********************************************************************
  * _meanPhaseSlopeAvg()
  */
@@ -752,48 +822,67 @@ double PhaseFit::_meanPhaseSlopeAvg() const
 {
   int max_r = _numGates - SMEAR_RA;
   int smear_az = (int)(SMEAR_AZ * _numBeams / 360.0);
-
   return _meanPhaseSlope(max_r, smear_az);
 }
 
-
+//----------------------------------------------------------------------------
 /*********************************************************************
  * _meanPhaseSlopeInit()
  */
-
 double PhaseFit::_meanPhaseSlopeInit() const
 {
-  int max_r = _rMin +
-    (int)(INITIAL_SLOPE_LEN_M / _gateSpacing);
+  int max_r = _rMin + (int)(INITIAL_SLOPE_LEN_M / _gateSpacing);
   int smear_az = (int)(SMEAR_AZ_INIT * _numBeams / 360.0);
-
   return _meanPhaseSlope(max_r, smear_az);
 }
 
-
+//----------------------------------------------------------------------------
 /*********************************************************************
  * _phaseRange0()
  */
 
 double PhaseFit::_phaseRange0()
 {
-  double tmp_a = 0.0;
-  double tmp_b = 0.0;
-
+  IQ tmp_ab(0.0, 0.0);
   for (int az = 0; az < _numBeams; ++az)
   {
     int offset = az * _numGates + _rMin;
-    tmp_a += inphase[offset];
-    tmp_b += quadrature[offset];
+    tmp_ab += _iq[offset];
+    outOfBounds(offset);
   }
 
-  if (tmp_a != 0.0 || tmp_b != 0.0)
-    return atan2(tmp_b, tmp_a) / DEG_TO_RAD;
-
-  return INVALID;
+  return tmp_ab.phase();
 }
 
+//----------------------------------------------------------------------------
+float PhaseFit::_guessPhase(int az, int r, float slope_in_range,
+			    int &rjump) const
+{
+  rjump = 1;
+  int off2 = az*_numGates + r;
+  if (r <= _rMin)
+  {
+    return _expectedPhaseRange0;
+  }
 
+  outOfBounds(off2-rjump);
+  while (_phaseFit[off2-rjump] == refract::INVALID && rjump < r)
+  {
+    rjump++;
+  }
+  
+  if (r - rjump >= _rMin)
+  {
+    return _phaseFit[off2-rjump] + rjump*slope_in_range;
+  }
+  else
+  {
+    rjump = r - _rMin;
+    return _expectedPhaseRange0 + rjump*slope_in_range;
+  }
+}
+
+//----------------------------------------------------------------------------
 /*********************************************************************
  * _relax()
  *
@@ -810,8 +899,9 @@ int PhaseFit::_relax(float *ndata)
 {
   // Initialize variables and arrays
 
-  if (_debug)
-    cerr << "Now starting relaxation" << endl;
+  LOG(DEBUG) << "Now starting relaxation";
+
+  int nsmooth = 21*_numGates;
 
   float *smooth = new float[21 * _numGates];
   memset(smooth, 0, 21 * _numGates * sizeof(float));
@@ -819,9 +909,10 @@ int PhaseFit::_relax(float *ndata)
   float *work_array = new float[_numBeams * _numGates];
   int *st_d_az = new int[_numGates];
 
-  float slope_to_n = 1000000.0 / _gateSpacing * _wavelength / 720.0;
-  float force_factor = SQR(_gateSpacing / _smoothSideLen);	/* Sets how field follows data (>0); small -> loose */
-  int num_iterat = (int)(0.5 * SQR(0.5 * _smoothSideLen / _gateSpacing));
+  //float slope_to_n = 1000000.0 / _gateSpacing * _wavelength / 720.0;
+  float slope_to_n = _defaultSlope();
+  float force_factor = RefractUtil::SQR(_gateSpacing/_smoothSideLen);	/* Sets how field follows data (>0); small -> loose */
+  int num_iterat = (int)(0.5*RefractUtil::SQR(0.5*_smoothSideLen/_gateSpacing));
   if (num_iterat < MIN_ITER)
     num_iterat = MIN_ITER;
   if (num_iterat > MAX_ITER)
@@ -847,11 +938,14 @@ int PhaseFit::_relax(float *ndata)
       tmp = -1.0;
       for (int d_az = 10; d_az <= 20; ++d_az)
       {
+	outOfBounds(nsmooth, 21*r+d_az);
+	outOfBounds(nsmooth, 21*r + 20 - d_az);
 	if (((d_az + 0.5) - 10.0) * equiv_dist < 1.5)
 	{
 	  smooth[21 * r + d_az] = 1.0;
 	  smooth[21 * r + 20 - d_az] = 1.0;
 	  tmp += 2.0;
+	  outOfBounds(_numGates, r);
 	  st_d_az[r] = 20 - d_az;
 	}
 	else if (((d_az - 0.5) - 10.0) * equiv_dist < 1.5)
@@ -868,7 +962,9 @@ int PhaseFit::_relax(float *ndata)
     {
       // In this case, the gates are closer together along the beam than they
       // are across azimuths so we are further out from the radar
-
+      outOfBounds(nsmooth, 21*r+9);
+      outOfBounds(nsmooth, 21*r+10);
+      outOfBounds(nsmooth, 21*r+11);
       smooth[21 * r + 10] = 1.0;
       smooth[21 * r + 11] = 1.0 / sqrt(equiv_dist);  // #### sqrt for faster diffusion at far range with limited data
       smooth[21 * r + 9] = smooth[21 * r + 11];
@@ -877,11 +973,14 @@ int PhaseFit::_relax(float *ndata)
     } /* endif - equiv_dist < 1.0 */
 
     for (int d_az = 0; d_az <= 20; ++d_az)
+    {
+      outOfBounds(nsmooth, 21*r+d_az);
       smooth[21 * r + d_az] *= 3.0 / tmp;
+    }
   } /* endfor - r */
 
-  // Main loop: perform relaxation: nudge each path towards the right sum
-  // (account for errors)
+    // Main loop: perform relaxation: nudge each path towards the right sum
+    // (account for errors)
 
   int iterat = 0;
   do
@@ -895,8 +994,8 @@ int PhaseFit::_relax(float *ndata)
     memcpy(work_array, ndata, sizeof(float) * _numGates * _numBeams);
     if (iterat < 1)
     {
-      // old_forcing = VERY_LARGE;
-      forcing = 0.5 * VERY_LARGE;
+      // old_forcing = refract::VERY_LARGE;
+      forcing = 0.5 * refract::VERY_LARGE;
       count_forcing = 1;
     }
     else
@@ -915,7 +1014,8 @@ int PhaseFit::_relax(float *ndata)
 	for (int r = 1; r < _numGates; ++r, ++k)
 	{
 	  cur_phase += (ndata[k]- _refN) / slope_to_n;
-	  if (_phaseFit[k] != INVALID)
+	  outOfBounds(k);
+	  if (_phaseFit[k] != refract::INVALID)
 	  {
 	    float delta_phase =
 	      (float)((int)(100.0 * (_phaseFit[k] - cur_phase) + 36000000) %
@@ -926,15 +1026,18 @@ int PhaseFit::_relax(float *ndata)
 				_phaseError[k]) / M_PI * 2.0;  // Error-corrected value
 	    float tmp = delta_phase * slope_to_n / (float)(r - prev_r);
 	    for (int dr = 0; dr > prev_r - r; --dr)
+	    {
+	      outOfBounds(k+dr);
 	      work_array[k + dr] += tmp;
+	    }
 	    cur_phase += delta_phase;
 	    prev_r = r;
-	  } /* endif - _phaseFit[k] != INVALID */
+	  } /* endif - _phaseFit[k] != refract::INVALID */
 	} /* endfor - r */
       } /* endfor - az */
     } /* endif - iterat < 1 */
 
-    // And then diffuse
+      // And then diffuse
 
     for (int az = 0, k = 0; az < _numBeams; ++az)
     {
@@ -942,13 +1045,16 @@ int PhaseFit::_relax(float *ndata)
       {
 	int count = 3;
 	float tmp = 0;
+	outOfBounds(k);
 	if (r != 0)
 	{
+	  outOfBounds(k-1);
 	  tmp = work_array[k-1] ; // #### May have more weight than local point!!!
 	  count++;
 	}
 	if (r != _numGates - 1)
 	{
+	  outOfBounds(k+1);
 	  tmp += work_array[k+1];
 	  count++;
 	}
@@ -956,6 +1062,8 @@ int PhaseFit::_relax(float *ndata)
 	for (int d_az = st_d_az[r]; d_az <= 20 - st_d_az[r]; ++d_az)
 	{
 	  int az2 = (az - 10 + d_az + _numBeams) % _numBeams;
+	  outOfBounds(az2*_numGates+1);
+	  outOfBounds(nsmooth, 21*r+d_az);
 	  tmp += smooth[21 * r + d_az] * work_array[az2 * _numGates + r];
 	} /* endfor - d_az */
 
@@ -965,13 +1073,12 @@ int PhaseFit::_relax(float *ndata)
       } /* endfor - r */
     } /* endfor - az */
     
-    // Check how much change there was.  If changes were limited, call it quit
+      // Check how much change there was.  If changes were limited, call it quit
 
     forcing /= count_forcing;
     iterat++;
 
-    if (_verbose)
-      cerr << iterat << "    " << forcing << endl;
+    //LOG(DEBUG_VERBOSE) << iterat << "    " << forcing;
 
   } while (iterat < num_iterat);
   
@@ -983,3 +1090,53 @@ int PhaseFit::_relax(float *ndata)
 
   return TRUE;
 }
+
+bool PhaseFit::outOfBounds(int offset) const
+{
+  if (offset >= _scanSize || offset < 0)
+  {
+    printf("Out of bounds %d\n", offset);
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+bool PhaseFit::outOfBounds(int max, int offset) const
+{
+  if (offset >= max || offset < 0)
+  {
+    printf("Out of bounds %d\n", offset);
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+//----------------------------------------------------------------------------
+void PhaseFit::_setConsistencyAndQuality(const IQ &tmp_ab,
+					 float weight_fact,
+					 float maxconsistency,
+					 float &consistency,
+					 float &quality) const
+{
+  consistency = tmp_ab.norm();
+  if (consistency < sqrt(2.0/weight_fact)*maxconsistency)
+    consistency = 0.0;
+  else
+    consistency = sqrt(RefractUtil::SQR(consistency) -
+		       2.0/weight_fact*RefractUtil::SQR(maxconsistency));
+
+  if (weight_fact > maxconsistency)    // Should always be true, but...
+    quality = consistency / sqrt(maxconsistency * weight_fact);
+  else
+    quality = consistency / maxconsistency;
+  if (quality > 0.99)
+    quality = 0.99;
+  if (quality < _minConsistency)
+    consistency = 0.0;
+}
+

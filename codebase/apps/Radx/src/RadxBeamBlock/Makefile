@@ -38,9 +38,9 @@ TARGET_FILE = RadxBeamBlock
 
 LOC_INCLUDES = $(NETCDF4_INCS) -I.
 
-LOC_LIBS = -lBeamBlock -lMdv -lFmq -leuclid \
+LOC_LIBS = -lMdv -lFmq -leuclid \
 	-lrapmath -ldsserver -lrapformats -ldidss \
-	-lRadx -ltoolsa -ldataport -ltdrp \
+	-lRadx -lNcxx -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS) $(HDF5_LDFLAGS) -L.
@@ -74,7 +74,19 @@ CPPC_SRCS = \
 	RadxBeamBlock.cc \
 	RadxBeamBlockMgr.cc \
 	Main.cc \
-	Parms.cc
+	Parms.cc \
+        angle.cc \
+	beam_power.cc \
+	beam_propagation.cc \
+	digital_elevation.cc \
+	field.cc \
+	latlon.cc \
+	metadata.cc \
+	spheroid.cc \
+	string_utils.cc  \
+	timestamp.cc \
+	trace.cc \
+	xml.cc
 
 #
 # tdrp macros

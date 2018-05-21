@@ -38,8 +38,8 @@ TARGET_FILE = profilerIngest
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -ldsserver -ldidss -ltoolsa \
-	-leuclid -ldataport -ltdrp -lrapmath \
+LOC_LIBS = -lSpdb -ldsserver -ldidss \
+	-leuclid -ltoolsa -ldataport -ltdrp -lrapmath \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \
 	-lm
 

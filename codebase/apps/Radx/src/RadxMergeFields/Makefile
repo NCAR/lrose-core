@@ -37,9 +37,9 @@ TARGET_FILE = RadxMergeFields
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -ldidss \
-	-lrapformats -ltoolsa -ltdrp -ldataport \
-	-leuclid $(NETCDF4_LIBS) -lbz2 -lz
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
+	-lrapformats -ltdrp -ldataport \
+	-leuclid -ltoolsa $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

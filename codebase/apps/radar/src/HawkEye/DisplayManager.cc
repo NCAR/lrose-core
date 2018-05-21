@@ -38,8 +38,8 @@
 
 #include "DisplayManager.hh"
 #include "DisplayField.hh"
+#include "DisplayElevation.hh"
 #include "ColorMap.hh"
-#include "ColorBar.hh"
 #include "Params.hh"
 #include "Reader.hh"
 
@@ -61,6 +61,8 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QRadioButton>
+#include <QScrollBar>
+#include <QAbstractSlider>
 #include <QStatusBar>
 #include <QVBoxLayout>
 #include <QLineEdit>
@@ -470,6 +472,9 @@ void DisplayManager::_createFieldPanel()
     _fieldsLayout->addWidget(key, row, 1, alignCenter);
     _fieldsLayout->addWidget(rawButton, row, 2, alignCenter);
     _fieldGroup->addButton(rawButton, ifield);
+    // connect slot for field change
+    connect(rawButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
+
     _fieldButtons.push_back(rawButton);
     if (filtField != NULL) {
       QRadioButton *filtButton = new QRadioButton(_fieldPanel);
@@ -477,6 +482,8 @@ void DisplayManager::_createFieldPanel()
       _fieldsLayout->addWidget(filtButton, row, 3, alignCenter);
       _fieldGroup->addButton(filtButton, ifield + 1);
       _fieldButtons.push_back(filtButton);
+      // connect slot for field change
+      connect(filtButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
     }
 
     if (filtField != NULL) {
@@ -492,12 +499,32 @@ void DisplayManager::_createFieldPanel()
   row++;
 
   // connect slot for field change
-
-  connect(_fieldGroup, SIGNAL(buttonClicked(int)),
-          this, SLOT(_changeField(int)));
+  
+  //connect(_fieldGroup, SIGNAL(buttonClicked(int)),
+  //        this, SLOT(_changeField(int)));
 
 }
- 
+
+void DisplayManager::_changeFieldVariable(bool value) {
+
+  if (_params.debug) {
+    cerr << "DisplayManager:: the field variable was changed ";
+    cerr << endl;
+  }
+  if (value) {
+    for (size_t i = 0; i < _fieldButtons.size(); i++) {
+      if (_fieldButtons.at(i)->isChecked()) {
+        if (_params.debug) cout << "_fieldButton " << i << " is checked" << endl;
+ 	_changeField(i, true);
+      }
+    }
+  }
+
+}
+
+void DisplayManager::_openFile() {
+}
+
 ///////////////////////////////////////////////////////
 // create the click report dialog
 //
@@ -692,12 +719,10 @@ QLineEdit *DisplayManager::_addInputRow(QWidget *parent,
   QLabel *left = new QLabel(frame);
   left->setText(leftLabel.c_str());
   horiz->addWidget(left);
-  // layout->addWidget(left, row, 0, Qt::AlignLeft);
   
   QLineEdit *right = new QLineEdit(frame);
   right->setText(rightContent.c_str());
   horiz->addWidget(right);
-  // layout->addWidget(right, row, 1, 1, 2, Qt::AlignCenter);
 
   layout->addWidget(frame);
   
@@ -788,9 +813,9 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
           rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
   _dateVal->setText(text);
 
-  sprintf(text, "%.2d:%.2d:%.2d.%.6d",
+  sprintf(text, "%.2d:%.2d:%.2d.%.3d",
           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
-          ((int) ray->getNanoSecs() / 1000));
+          ((int) ray->getNanoSecs() / 1000000));
   _timeVal->setText(text);
   
   if (_volNumVal) {
@@ -1162,7 +1187,35 @@ void DisplayManager::_howto()
 
 void DisplayManager::_about()
 {
-  QMessageBox::about(this, tr("About Menu"),
-		     tr("DisplayManager is an engineering display for beam-by-beam radar data."));
-}
+  //QMessageBox::about(this, tr("About Menu"),
+		     //tr("HawkEye is an engineering display for beam-by-beam radar data. "));
+  string text;
+  
+  text += "HawkEye is an LROSE application for engineering and research display of radar data. \n\n";
+  text += "Get help with HawkEye ...  \n ";
+  text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
+  text += "\nHawkEye Version ... \n ";  
+  text += "\nCopyright UCAR (c) 1990 - 2018  ";  
+  text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
+  text += "\nNational Center for Atmospheric Research (NCAR)   ";  
+  text += "\nBoulder, Colorado, USA ";  
+  text += "\n\nBSD licence applies - redistribution and use in source and binary";  
+  text += " forms, with or without modification, are permitted provided that";  
+  text += " the following conditions are met: ";  
+  text += "\n1) If the software is modified to produce derivative works,";  
+  text += " such modified software should be clearly marked, so as not";  
+  text += " to confuse it with the version available from UCAR. ";  
+  text += "\n2) Redistributions of source code must retain the above copyright";  
+  text += " notice, this list of conditions and the following disclaimer.";  
+  text += "\n3) Redistributions in binary form must reproduce the above copyright";  
+  text += " notice, this list of conditions and the following disclaimer in the";  
+  text += " documentation and/or other materials provided with the distribution.";  
+  text += "\n4) Neither the name of UCAR nor the names of its contributors,";  
+  text += "if any, may be used to endorse or promote products derived from";  
+  text += " this software without specific prior written permission.";  
+  text += "\n\nDISCLAIMER: THIS SOFTWARE IS PROVIDED \"AS IS\" AND WITHOUT ANY EXPRESS ";  
+  text += " OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED";  
+  text += " WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.";  
 
+  QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
+}

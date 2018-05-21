@@ -618,54 +618,54 @@ int DmapMessage::disassemble(void *in_msg, const int msg_len)
 // print
 //
 
-void DmapMessage::print(ostream &out)
+void DmapMessage::print(ostream &out , const char *spacer) const
   
 {
 
   switch (_subType) {
     
   case DMAP_REG_LATEST_DATA_INFO:
-    out << "Message type: DMAP_REG_LATEST_DATA_INFO" << endl;
-    out << "  latest_time: " << utimstr(_info[0].latest_time) << endl;
-    out << "  last_reg_time: " << utimstr(_info[0].last_reg_time) << endl;
+    out << spacer << "Message type: DMAP_REG_LATEST_DATA_INFO" << endl;
+    out << spacer << "  latest_time: " << utimstr(_info[0].latest_time) << endl;
+    out << spacer << "  last_reg_time: " << utimstr(_info[0].last_reg_time) << endl;
     if (_info[0].forecast_lead_time >= 0) {
-      out << "  forecast_lead_time: " << _info[0].forecast_lead_time << endl;
+      out << spacer << "  forecast_lead_time: " << _info[0].forecast_lead_time << endl;
     }
-    out << "  hostname: " << _info[0].hostname << endl;
-    out << "  ipaddr: " << _info[0].ipaddr << endl;
-    out << "  datatype: " << _info[0].datatype << endl;
-    out << "  dir: " << _info[0].dir << endl;
+    out << spacer << "  hostname: " << _info[0].hostname << endl;
+    out << spacer << "  ipaddr: " << _info[0].ipaddr << endl;
+    out << spacer << "  datatype: " << _info[0].datatype << endl;
+    out << spacer << "  dir: " << _info[0].dir << endl;
     break;
 
   case DMAP_REG_DATA_SET_INFO:
-    out << "Message type: DMAP_REG_DATA_SET_INFO" << endl;
-    out << "  start_time: " << utimstr(_info[0].start_time) << endl;
-    out << "  end_time: " << utimstr(_info[0].end_time) << endl;
-    out << "  last_reg_time: " << utimstr(_info[0].last_reg_time) << endl;
-    out << "  nfiles: " << _info[0].nfiles << endl;
-    out << "  total_bytes: " << _info[0].total_bytes << endl;
-    out << "  hostname: " << _info[0].hostname << endl;
-    out << "  ipaddr: " << _info[0].ipaddr << endl;
-    out << "  datatype: " << _info[0].datatype << endl;
-    out << "  dir: " << _info[0].dir << endl;
+    out << spacer << "Message type: DMAP_REG_DATA_SET_INFO" << endl;
+    out << spacer << "  start_time: " << utimstr(_info[0].start_time) << endl;
+    out << spacer << "  end_time: " << utimstr(_info[0].end_time) << endl;
+    out << spacer << "  last_reg_time: " << utimstr(_info[0].last_reg_time) << endl;
+    out << spacer << "  nfiles: " << _info[0].nfiles << endl;
+    out << spacer << "  total_bytes: " << _info[0].total_bytes << endl;
+    out << spacer << "  hostname: " << _info[0].hostname << endl;
+    out << spacer << "  ipaddr: " << _info[0].ipaddr << endl;
+    out << spacer << "  datatype: " << _info[0].datatype << endl;
+    out << spacer << "  dir: " << _info[0].dir << endl;
     break;
     
   case DMAP_REQ_SELECTED_SETS_INFO:
-    out << "Message type: DMAP_REQ_SELECTED_SETS_INFO" << endl;
-    out << "  datatype: " << _info[0].datatype << endl;
-    out << "  dir: " << _info[0].dir << endl;
+    out << spacer << "Message type: DMAP_REQ_SELECTED_SETS_INFO" << endl;
+    out << spacer << "  datatype: " << _info[0].datatype << endl;
+    out << spacer << "  dir: " << _info[0].dir << endl;
     break;
     
   case DMAP_REQ_ALL_SETS_INFO:
-    out << "Message type: DMAP_REQ_ALL_SETS_INFO" << endl;
+    out << spacer << "Message type: DMAP_REQ_ALL_SETS_INFO" << endl;
     break;
     
   case DMAP_REPLY_REG_STATUS:
-    out << "Message type: DMAP_REPLY_REG_STATUS" << endl;
+    out << spacer << "Message type: DMAP_REPLY_REG_STATUS" << endl;
     break;
     
   case DMAP_REPLY_WITH_INFO:
-    out << "Message type: DMAP_REPLY_WITH_INFO" << endl;
+    out << spacer << "Message type: DMAP_REPLY_WITH_INFO" << endl;
     break;
     
   default:

@@ -37,8 +37,8 @@ TARGET_FILE = Mdv2NesdisArchive
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -ldsserver \
-	-lrapformats -ldidss -ltdrp -leuclid \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
+	-lrapformats -ldidss -ltdrp \
 	-ltoolsa -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 

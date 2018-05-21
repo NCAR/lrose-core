@@ -36,7 +36,7 @@ TARGET_FILE = Tstorms2Shapefile
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -ltitan \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ltitan \
 	-lSpdb -lrapformats -ldsserver -ldidss \
 	-ltoolsa -ldataport -ltdrp -lshapelib \
 	$(NETCDF4_LIBS) -lbz2 -lz

@@ -21,17 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/03 18:19:27 $
-//   $Id: GridPoint.cc,v 1.7 2016/03/03 18:19:27 dixon Exp $
-//   $Revision: 1.7 $
-//   $State: Exp $
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * GridPoint.cc: class implementing grid index points.
  *
@@ -50,7 +39,7 @@
 
 #include <euclid/GridOffset.hh>
 #include <euclid/GridPoint.hh>
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 using namespace std;
 
 /**********************************************************************

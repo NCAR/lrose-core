@@ -875,6 +875,7 @@ static int define_enum_from_typedef(token_handle_t *tok_handle,
   if (set_enum_fields(tok_handle, tdef_handle->start_tok, tdef_handle->end_tok,
 		    tokens, ntok, tdef_handle->name, NULL,
 		    field_buf)) {
+    tdrpBufDelete(field_buf);
     return (-1);
   }
   
@@ -887,7 +888,9 @@ static int define_enum_from_typedef(token_handle_t *tok_handle,
   
   if (enum_def_add(tdef_handle->name, n_fields, fields)) {
     fprintf(stderr, "\n>>> TDRP_ERROR <<< \n");
-    fprintf(stderr, "  %s\n", tdrpLineInfo(tok_handle, &tokens[tdef_handle->start_tok]));
+    fprintf(stderr, "  %s\n",
+            tdrpLineInfo(tok_handle, &tokens[tdef_handle->start_tok]));
+    tdrpBufDelete(field_buf);
     return (-1);
   }
 
@@ -955,6 +958,7 @@ define_enum_from_paramdef(token_handle_t *tok_handle,
     fprintf(stderr, "\n>>> TDRP_ERROR <<< enum '%s'\n", enum_name);
     fprintf(stderr, "Cannot set fields, check syntax.\n");
     fprintf(stderr, "%s\n", tdrpLineInfo(tok_handle, &tokens[start_tok]));
+    tdrpBufDelete(field_buf);
     return (-1);
   }
   
@@ -968,6 +972,7 @@ define_enum_from_paramdef(token_handle_t *tok_handle,
   if (enum_def_add(enum_name, nfields, fields)) {
     fprintf(stderr, "\n>>> TDRP_ERROR <<<\n");
     fprintf(stderr, "%s\n", tdrpLineInfo(tok_handle, &tokens[start_tok]));
+    tdrpBufDelete(field_buf);
     return (-1);
   }
   
@@ -1005,6 +1010,7 @@ static int define_struct_from_typedef(token_handle_t *tok_handle,
   if (set_struct_fields(tok_handle, tdef_handle->start_tok, tdef_handle->end_tok,
 		      tokens, ntok, tdef_handle->name, NULL,
 		      field_buf)) {
+    tdrpBufDelete(field_buf);
     return (-1);
   }
   
@@ -1018,6 +1024,7 @@ static int define_struct_from_typedef(token_handle_t *tok_handle,
   if (struct_def_add(tdef_handle->name, n_fields, fields)) {
     fprintf(stderr, "\n>>> TDRP_ERROR <<<\n");
     fprintf(stderr, "%s\n", tdrpLineInfo(tok_handle, &tokens[tdef_handle->start_tok]));
+    tdrpBufDelete(field_buf);
     return (-1);
   }
 
@@ -1135,6 +1142,10 @@ static int define_struct_from_paramdef(token_handle_t *tok_handle,
     fprintf(stderr, "  Cannot parse p_field_name in struct '%s'\n",
 	    struct_name);
     fprintf(stderr, "  %s\n", tdrpLineInfo(tok_handle, &tokens[start_tok]));
+    for (ifield = 0; ifield < nfields; ifield++) {
+      tdrpFree(fields[ifield].ftype);
+    }
+    tdrpFree(fields);
     return (-1);
   }
   nvars = tdrpNTokenList(tok_handle);
@@ -1149,6 +1160,10 @@ static int define_struct_from_paramdef(token_handle_t *tok_handle,
     fprintf(stderr, "  Struct must have same number of names as types\n");
     fprintf(stderr, "  Found %d types and %d names\n", nfields, nvars);
     fprintf(stderr, "  %s\n", tdrpLineInfo(tok_handle, &tokens[start_tok]));
+    for (ifield = 0; ifield < nfields; ifield++) {
+      tdrpFree(fields[ifield].ftype);
+    }
+    tdrpFree(fields);
     return (-1);
   }
 
@@ -1169,6 +1184,11 @@ static int define_struct_from_paramdef(token_handle_t *tok_handle,
   if (struct_def_add(struct_name, nfields, fields)) {
     fprintf(stderr, "\n>>> TDRP_ERROR <<<\n");
     fprintf(stderr, "%s\n", tdrpLineInfo(tok_handle, &tokens[start_tok]));
+    for (ifield = 0; ifield < nfields; ifield++) {
+      tdrpFree(fields[ifield].fname);
+      tdrpFree(fields[ifield].ftype);
+    }
+    tdrpFree(fields);
     return (-1);
   }
 

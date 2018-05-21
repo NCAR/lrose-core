@@ -27,8 +27,6 @@
 // Used wgrib by Wesley Ebisuzaki at NOAA as
 // reference (http://wesley.wwb.noaa.gov/wgrib.html)
 //
-// $Id: IdSec.hh,v 1.12 2016/03/03 19:22:03 dixon Exp $
-//
 ////////////////////////////////////////////
 #ifndef _ID_SECTION
 #define _ID_SECTION

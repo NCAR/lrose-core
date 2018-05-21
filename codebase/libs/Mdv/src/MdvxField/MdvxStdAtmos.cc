@@ -97,7 +97,7 @@ double MdvxStdAtmos::pres2ht(double pres) const
 
 {
 
-  int ii = 7;
+  int ii = 6;
   if (pres > _pb[1]) {
     ii = 0;
   } else {
@@ -135,7 +135,7 @@ double MdvxStdAtmos::ht2pres(double ht) const
 
 {
 
-  int ii = 7;
+  int ii = 6;
   if (ht < _limits[1]) {
     ii = 0;
   } else {
@@ -173,7 +173,7 @@ double MdvxStdAtmos::ht2temp(double ht) const
 
 {
 
-  int ii = 7;
+  int ii = 6;
   if (ht < _limits[1]) {
     ii = 0;
   } else {

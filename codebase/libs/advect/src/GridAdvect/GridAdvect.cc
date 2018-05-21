@@ -46,15 +46,19 @@
 // Constructor
 
 GridAdvect::GridAdvect(const double image_val_min,
-		       const double image_val_max,
-		       const bool debug_flag) :
-  _debugFlag(debug_flag),
-  _imageValMin(image_val_min),
-  _imageValMax(image_val_max),
-  _checkImageValues(image_val_min < image_val_max),
-  _forecastData(0)
+                       const double image_val_max,
+                       const bool debug_flag,
+                       const bool replace_value_with_max) :
+        _debugFlag(debug_flag),
+        _imageValMin(image_val_min),
+        _imageValMax(image_val_max),
+        _checkImageValues(image_val_min < image_val_max),
+        _replaceValueWithMax(replace_value_with_max),
+        _forecastData(0)
 {
-  // Do nothing
+  if (_debugFlag) {
+    cerr << "In debug mode" << endl;
+  }
 }
 
 /////////////
@@ -62,7 +66,7 @@ GridAdvect::GridAdvect(const double image_val_min,
 
 GridAdvect::~GridAdvect()
 {
-  delete [] _forecastData;
+  delete[] _forecastData;
 }
 
 ////////////////////////////
@@ -73,27 +77,27 @@ GridAdvect::~GridAdvect()
 // Returns true on success, false on failure
 
 bool GridAdvect::compute(Advector &advector,
-			 const Pjg &projection,
-			 const fl32 *image_data,
-			 const fl32 missing_data_value)
+                         const Pjg &projection,
+                         const fl32 *image_data,
+                         const fl32 missing_data_value)
 {
   // Create the forecast field
-  
+
   int nx, ny, nz;
   projection.getGridDims(nx, ny, nz);
-  
-  delete [] _forecastData;
+
+  delete[] _forecastData;
   _forecastData = new fl32[nx * ny];
   for (int i = 0; i < nx * ny; ++i)
     _forecastData[i] = missing_data_value;
-  
+
   _forecastProj = projection;
-  
+
   // load up forecast grid using image data and forecast vectors
 
   fl32 *forecast = _forecastData;
-  fl32 *image = (fl32 *)image_data;
-  
+  fl32 *image = (fl32 *) image_data;
+
   for (int x_index = 0; x_index < nx; x_index++)
   {
     PMU_auto_register("GridAdvect::compute...computing ...");
@@ -101,27 +105,39 @@ bool GridAdvect::compute(Advector &advector,
     for (int y_index = 0; y_index < ny; y_index++)
     {
       int fcst_index = advector.calcFcstIndex(x_index, y_index);
-      
+
       if (fcst_index < 0)
-	continue;
-      
+        continue;
+
       int index = x_index + (y_index * nx);
-      
+
       if (_checkImageValues)
       {
-	if (image[fcst_index] >= _imageValMin &&
-	    image[fcst_index] <= _imageValMax &&
-	    image[fcst_index] != missing_data_value)
-	  forecast[index] = image[fcst_index];
-      }
-      else
+        if (_replaceValueWithMax)
+        {
+          if (image[fcst_index] >= _imageValMin &&
+              image[fcst_index] != missing_data_value)
+          {
+            if (image[fcst_index] > _imageValMax)
+            {
+              image[fcst_index] = _imageValMax;
+            }
+            forecast[index] = image[fcst_index];
+          }
+        } else if (image[fcst_index] >= _imageValMin &&
+                   image[fcst_index] <= _imageValMax &&
+                   image[fcst_index] != missing_data_value)
+        {
+          forecast[index] = image[fcst_index];
+        }
+      } else
       {
-	if (image[fcst_index] != missing_data_value)
-	  forecast[index] = image[fcst_index];
+        if (image[fcst_index] != missing_data_value)
+          forecast[index] = image[fcst_index];
       }
-	
+
     } /* endfor - y_index */
   } /* endfor - x_index */
-    
+
   return true;
 }

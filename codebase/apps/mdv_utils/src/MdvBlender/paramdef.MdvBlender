@@ -267,11 +267,10 @@ typedef struct {
 } blender_input_t;
 
 paramdef struct blender_input_t {
-  p_descr = "Define the inputs to blend";
-  p_help = "fieldNames is a comma separated list & must have the same number of elements."
+  p_descr = "Define the inputs to blend.  Fields in the first input are blended with fields in the second (and third, etc.) inputs.";
+  p_help = "fieldNames is a comma separated list.  Each structure must have the same number of elements in field_names."
            "If a weight field is an empty string, the constant weight is used instead."
-	   "All fields in a single struct are tied together"
-	   "(i.e. one probabilistic deicision is made and then applied to all fields in the same blender_info element";
+	   "All fields blended with dithering use the same decision.  (i.e. one probabilistic deicision is made and then applied to all dithered fields in field_names).";
   p_default = {
     { "mdvp:://::mdv/input1",
       3600,
@@ -307,25 +306,40 @@ paramdef string {
   };
 } input_pass_throughs[][];
 
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_help = "This is the URL to write output";
+  p_default = "mdvp:://::mdv/blended";
+} output_url;
+
+typedef enum {
+  BLEND_DITHER,
+  BLEND_AVERAGE
+} blender_t;
+
 typedef struct {
-  string url;
   string field_names;
   string field_long_names;
   string field_units;
   string rounding;
+  string blend_methods;
 } blender_output_t;
 
 paramdef struct blender_output_t {
   p_descr = "Define the output";
-  p_help = "";
+  p_help = "blend_method consist of BLEND_AVERAGE and BLEND_DITHER";
   p_default = {
-      "mdvp:://::mdv/blended",
       "FIELD_ONE,FIELD_TWO",
       "Field One,Field Two",
       "none,none",
-      "ROUND_NONE,ROUND_UP"
+      "ROUND_NONE,ROUND_UP",
+      "BLEND_AVERAGE,BLEND_DITHER"
   };
 } output;
+
+    
 
 paramdef double
 {
@@ -334,10 +348,6 @@ paramdef double
   p_default = { 0.01 };
 } grid_delta_tol;
 
-typedef enum {
-  BLEND_DITHER,
-  BLEND_AVERAGE
-} blender_t;
  
 paramdef enum blender_t
 {

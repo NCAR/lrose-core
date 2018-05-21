@@ -40,7 +40,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <euclid/point.h>
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 
 /* Constant, macro and type definitions */
 

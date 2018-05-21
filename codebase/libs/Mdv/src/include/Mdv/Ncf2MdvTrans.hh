@@ -134,6 +134,11 @@ public:
   
   int translateRadxVol(const string &path, RadxVol &vol, Mdvx &mdv);
 
+  // finalization steps in normal circumstances, made public because used
+  // outside the lib
+
+  void finalizeNormal(void);
+
   // clear error string
   
   void clearErrStr();

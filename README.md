@@ -1,8 +1,11 @@
 # lrose-core
 
-![SPOL](./docs/images/spol_dynamo.jpg)
+<img align="left" width="175" height="175" src="./docs/images/LROSE_logo.small.png">
+<img align="right" width="175" height="175" src="./docs/images/spol_dynamo.jpg">
 
-## **L**:rose: - The Lidar Radar Open Software Environment
+--------------------------------------------
+
+## **LROSE** - The Lidar Radar Open Software Environment
 
 LROSE is a co-operative project between:
 
@@ -20,6 +23,10 @@ To download LROSE, run:
 ```
 git clone https://github.com/NCAR/lrose-core
 ```
+
+### :exclamation: :exclamation: NOTES :exclamation: :exclamation:
+
+LROSE now depends on QT5, not QT4. You will need to install QT5 to build LROSE on your host.
 
 ### Organization of the LROSE repository
 
@@ -64,21 +71,17 @@ If you are performing development, it is best to use the NCAR development enviro
 
 If you just wish to build and use the software, the automake/configure build is preferable.
 
-See [README_BUILD.md](./docs/README_BUILD.md) for details.
+See [README_BUILD.md](./docs/dev/README_BUILD.md) for details.
 
 ### Installing a binary LROSE release
 
-See [README_INSTALL_BIN.md](./docs/README_INSTALL_BIN.md)
+See [README_INSTALL_BIN.md](./docs/dev/README_INSTALL_BIN.md)
 
 ### Creating an LROSE release
 
-See [README_CREATE_RELEASE.md](./docs/README_CREATE_RELEASE.md)
+See [README_CREATE_RELEASE.md](./docs/dev/README_CREATE_RELEASE.md)
 
+This page is published at:
 
-
-
-
-
-
-
+  [https://ncar.github.io/lrose-core](https://ncar.github.io/lrose-core)
 

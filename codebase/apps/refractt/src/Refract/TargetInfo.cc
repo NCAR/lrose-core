@@ -34,9 +34,7 @@
  */
 
 #include "TargetInfo.hh"
-
-using namespace std;
-
+#include <Refract/RefractConstants.hh>
 
 /*********************************************************************
  * Constructors
@@ -46,17 +44,14 @@ TargetInfo::TargetInfo() :
   strength(0.0),
   phase_diff(0.0),
   phase_diff_er(0.0),
-  dif_i(0.0),
-  dif_q(0.0),
+  dif_iq(0.0, 0.0),
   phase(0.0),
   phase_er(0.0),
   phase_cor(0.0),
-  i(0.0),
-  q(0.0)
+  iq(0.0, 0.0)
 {
 }
 
-  
 /*********************************************************************
  * Destructor
  */
@@ -65,6 +60,46 @@ TargetInfo::~TargetInfo()
 {
 }
 
+//----------------------------------------------------------------------
+void TargetInfo::compute_phase_diff(const IQ &difPrevScan, double norm,
+				    const IQ &difFromRef)
+{
+  if (norm != 0.0)
+  {
+    phase_diff = difPrevScan.phase();
+    phase_diff_er = sqrt(-2.0*log(norm)/norm)/DEG_TO_RAD;
+    dif_iq = difPrevScan;
+  }
+  else
+  {
+    phase_diff = refract::INVALID;
+    phase_diff_er = refract::INVALID;
+    dif_iq.set(0.0, 0.0);
+  }
+  if (difFromRef.hasZero())
+  {
+    phase = refract::INVALID;
+    phase_cor = refract::INVALID;
+  }
+  else
+  {
+    phase = difFromRef.phase();
+    phase_cor = phase;
+  }
+}
+
+//----------------------------------------------------------------------
+void TargetInfo::setStrength(float snr, bool isBad)
+{
+  if (isBad)
+  {
+    strength = refract::INVALID;
+  }
+  else
+  {
+    strength = snr;
+  }
+}
 
 /**********************************************************************
  *              Protected/Private Member Functions                    *

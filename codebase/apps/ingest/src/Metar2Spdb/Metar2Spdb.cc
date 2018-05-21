@@ -38,6 +38,8 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include <cerrno>
+#include<fstream>
+#include<sstream>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/umisc.h>
 #include <toolsa/file_io.h>
@@ -47,13 +49,12 @@
 #include <toolsa/TaArray.hh>
 #include <didss/DsInputPath.hh>
 #include "Metar2Spdb.hh"
+
 using namespace std;
 
 // Constructor
 
-Metar2Spdb::Metar2Spdb(int argc, char **argv)
-
-{
+Metar2Spdb::Metar2Spdb(int argc, char **argv) {
 
   isOK = true;
 
@@ -72,10 +73,10 @@ Metar2Spdb::Metar2Spdb(int argc, char **argv)
   }
 
   // get TDRP params
-  
+
   _paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv, _args.override.list,
-			   &_paramsPath)) {
+                           &_paramsPath)) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "Problem with TDRP parameters" << endl;
     isOK = FALSE;
@@ -92,8 +93,8 @@ Metar2Spdb::Metar2Spdb(int argc, char **argv)
   // init process mapper registration
 
   PMU_auto_init((char *) _progName.c_str(),
-		_params.instance,
-		PROCMAP_REGISTER_INTERVAL);
+                _params.instance,
+                PROCMAP_REGISTER_INTERVAL);
 
   return;
 
@@ -101,9 +102,7 @@ Metar2Spdb::Metar2Spdb(int argc, char **argv)
 
 // destructor
 
-Metar2Spdb::~Metar2Spdb()
-
-{
+Metar2Spdb::~Metar2Spdb() {
 
   // unregister process
 
@@ -114,73 +113,72 @@ Metar2Spdb::~Metar2Spdb()
 //////////////////////////////////////////////////
 // Run
 
-int Metar2Spdb::Run ()
-{
+int Metar2Spdb::Run() {
 
   // register with procmap
-  
+
   PMU_auto_register("Run");
 
   // file input object
-  
+
   DsInputPath *input = NULL; // Set to NULL to get around compiler warnings.
-  
+
   if (_params.mode == Params::FILELIST) {
-    
+
     // FILELIST mode
-    
+
     input = new DsInputPath(_progName,
-			    _params.debug >= Params::DEBUG_VERBOSE,
-			    _args.inputFileList);
-    
+                            _params.debug >= Params::DEBUG_VERBOSE,
+                            _args.inputFileList);
+
   } else if (_params.mode == Params::ARCHIVE) {
-    
+
     // archive mode - start time to end time
-    
+
     input = new DsInputPath(_progName,
-			    _params.debug >= Params::DEBUG_VERBOSE,
-			    _params.input_dir,
-			    _args.startTime, _args.endTime);
-    
+                            _params.debug >= Params::DEBUG_VERBOSE,
+                            _params.input_dir,
+                            _args.startTime, _args.endTime);
+
   } else if (_params.mode == Params::REALTIME) {
-    
+
     // realtime mode - no latest_data_info file
-    
+
     input = new DsInputPath(_progName,
-			    _params.debug >= Params::DEBUG_VERBOSE,
-			    _params.input_dir,
-			    _params.max_realtime_valid_age,
-			    PMU_auto_register,
-			    _params.latest_data_info_avail,
-			    true);
-    
+                            _params.debug >= Params::DEBUG_VERBOSE,
+                            _params.input_dir,
+                            _params.max_realtime_valid_age,
+                            PMU_auto_register,
+                            _params.latest_data_info_avail,
+                            true);
+
     if (_params.strict_subdir_check) {
       input->setStrictDirScan(true);
     }
-    
+
     if (_params.file_name_check) {
       input->setSubString(_params.file_match_string);
     }
-    
+
   }
-  
+
   // loop through available files
-  
+
   char *inputPath;
   while ((inputPath = input->next()) != NULL) {
-    
+
     time_t inputTime;
     input->getDataTime(inputPath, inputTime);
-    
+
     if (_processFile(inputPath, inputTime)) {
       cerr << "WARNING - Metar2Spdb::Run" << endl;
       cerr << "  Errors in processing file: " << inputPath << endl;
     }
-    
+
   } // while
 
   delete input;
-    
+
   return 0;
 
 }
@@ -189,9 +187,7 @@ int Metar2Spdb::Run ()
 // process the file
 
 int Metar2Spdb::_processFile(const char *file_path,
-			     time_t file_time)
-  
-{
+                             time_t file_time) {
 
   if (_params.debug) {
     cerr << "Processing file: " << file_path << endl;
@@ -221,16 +217,14 @@ int Metar2Spdb::_processFile(const char *file_path,
 
   // Open the file
 
-  FILE *fp;
-  if((fp = fopen(file_path, "r")) == NULL) {
-    int errNum = errno;
-    cerr << "ERROR - Metar2Spdb::_processFile" << endl;
-    cerr << "  Cannot open metar file: "
-	 << file_path << endl;
-    cerr << "  " << strerror(errNum) << endl;
+  ifstream fp(file_path);
+
+  if( ! fp.is_open() ){
+    cerr << "ERROR - Metar2Spdb::_processFile\n";
+    cerr << "  Cannot open metar file: " << file_path << endl;
     return -1;
   }
-   
+
   //
   // Concatenate the lines in the file until we reach a blank line,
   // or until the line added contains an '='.
@@ -238,13 +232,13 @@ int Metar2Spdb::_processFile(const char *file_path,
   // create a metar object and store this information.  Then add this
   // metar object to our list of metars.
   //
-  
+
   // we have to handle METAR's in two forms
   // (a) A lines starts with METAR and is followed by the data record
   // (b) A line with only the word METAR in it signifies the beginning of a 
   //     block of metars, which is terminated by a blank line or ^C.
   // We also have to deal with SPECIs, in the same way as METARs.
-  
+
   string metarMessage = "";
   string reportType = "";
   bool inBlock = false;
@@ -254,98 +248,110 @@ int Metar2Spdb::_processFile(const char *file_path,
 
   char line[BUFSIZ];
   time_t curr_valid_time = -1;
-  
+
   int iret = 0;
 
-  while( fgets(line, BUFSIZ, fp) != NULL ) {
-    
+  while(!fp.eof()){
+
+    fp.getline(line,BUFSIZ);
+
     // if start of SA Block, start block metar
-    
+
     if (_startOfSABlock(line, blockHour, blockMin, blockDate)) {
       metarMessage = "";
       inBlock = true;
       continue;
     }
-     
+
     // if METAR or SPECI is present, start new metar
-    
+
     char *startChar = line;
 
-    if (strstr(line, "METAR") || strstr(line, "SPECI")) {
-      
+    istringstream iss(line);
+    string firstWord;
+    iss >> firstWord;
+
+    if (firstWord == "METAR" || firstWord == "SPECI") {
+
       // Assune type of METAR
       reportType = "METAR";
-    
-      if (strstr(line, "SPECI")) {
-	reportType = "SPECI";
+
+      if (firstWord ==  "SPECI") {
+        reportType = "SPECI";
       }
-      
+
       metarMessage = "";
       inBlock = true;
-      
+
       if (strlen(line) < 10) {
-	// only METAR or SPECI on line, must be start of block
-	continue;
+        // only METAR or SPECI on line, must be start of block
+        continue;
       }
-      
+
       //
       // Jump ahead of METAR or SPECI prefix, if it exists
       //
-      
+
       if (strlen(line) > 7 && !strncmp(line, " METAR ", 7)) {
-	startChar = line + 7;
-      } else if (strlen(line) > 6 && !strncmp(line, "METAR ", 6)) { 
-	startChar = line + 6;
+        startChar = line + 7;
+      } else if (strlen(line) > 6 && !strncmp(line, "METAR ", 6)) {
+        startChar = line + 6;
       } else if (strlen(line) > 7 && !strncmp(line, " SPECI ", 7)) {
-	startChar = line + 7;	
-	reportType = "SPECI";
-      } else if (strlen(line) > 6 && !strncmp(line, "SPECI ", 6)) { 
-	startChar = line + 6;
-	reportType = "SPECI";
+        startChar = line + 7;
+        reportType = "SPECI";
+      } else if (strlen(line) > 6 && !strncmp(line, "SPECI ", 6)) {
+        startChar = line + 6;
+        reportType = "SPECI";
       } else {
-	startChar = line;
+        startChar = line;
       }
-      
+
     }
-    
+
     // if we are not in a METAR block, continue
-    
+
     if (!inBlock) {
       continue;
     }
-    
+
     // add line to metar string if not blank
-    
-    if( !STRequal(startChar, "\n")) {
+
+    if (!STRequal(startChar, "\n")) {
       metarMessage += startChar;
     }
-    
+
     // check if complete
-    
+
     bool complete = false;
     if (STRequal(startChar, "\n") || strchr(startChar, '=')) {
       complete = true;
     }
-    
+
     // check for end of block - blank line or Ctrl-C
-    
+
     if (strstr(startChar, "NNNN") || strchr(startChar, 0x03)) {
       inBlock = false;
       blockHour = -1;
       blockMin = -1;
     }
-    
+
     if (complete) {
+
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << endl;
+        cerr << "Processing metar message: " << metarMessage << endl;
+        cerr << endl;
+    }
 
       MemBuf buf;
       time_t valid_time;
       string stationName;
 
       if (_decodeMetar(file_path, file_time, blockHour, blockMin, blockDate,
-		       metarMessage, reportType, stationName, buf, valid_time) == 0) {
+                       metarMessage, reportType, stationName, buf, valid_time) == 0) {
 
         if (_params.force_put_when_valid_time_changes) {
-          
+
           if (curr_valid_time != valid_time) {
             if (curr_valid_time > 0) {
               if (_doPut(spdbDecoded, spdbAscii)) {
@@ -354,50 +360,50 @@ int Metar2Spdb::_processFile(const char *file_path,
             }
             curr_valid_time = valid_time;
           }
-          
+
         } // if (_params.force_put_when_valid_time_changes)
-	
 
-	// add chunks to spdb objects
 
-	int stationId = Spdb::hash4CharsToInt32(stationName.c_str());
+        // add chunks to spdb objects
 
-	if (_params.write_decoded_metars) {
-	  spdbDecoded.addPutChunk(stationId,
-				  valid_time,
-				  valid_time + _params.expire_seconds,
-				  buf.getLen(), buf.getPtr());
-	}
-      
-	if (_params.write_ascii_metars) {
+        int stationId = Spdb::hash4CharsToInt32(stationName.c_str());
 
-	  if (_params.dress_raw_metar_text) {
-	    metarMessage = reportType + " " + metarMessage;
-	  }
+        if (_params.write_decoded_metars) {
+          spdbDecoded.addPutChunk(stationId,
+                                  valid_time,
+                                  valid_time + _params.expire_seconds,
+                                  buf.getLen(), buf.getPtr());
+        }
 
-	  spdbAscii.addPutChunk(stationId,
-				valid_time,
-				valid_time + _params.expire_seconds,
-				metarMessage.size() + 1,
-				metarMessage.c_str());
-	}
+        if (_params.write_ascii_metars) {
+
+          if (_params.dress_raw_metar_text) {
+            metarMessage = reportType + " " + metarMessage;
+          }
+
+          spdbAscii.addPutChunk(stationId,
+                                valid_time,
+                                valid_time + _params.expire_seconds,
+                                metarMessage.size() + 1,
+                                metarMessage.c_str());
+        }
       } /* endif - _decodeMetar(...) == 0) */
 
       metarMessage = "";
-    } 
-    
+    }
+
   } // while (fgets ...
-  
-  fclose(fp);
+
+  fp.close();
 
   // write the output
 
   if (_doPut(spdbDecoded, spdbAscii)) {
     iret = -1;
   }
-  
+
   return iret;
-   
+
 }
 
 //////////////////////////////
@@ -409,18 +415,16 @@ int Metar2Spdb::_processFile(const char *file_path,
 // ^BSAXX99 EBBR 172100 (AFTN)
 
 bool Metar2Spdb::_startOfSABlock(const char *line,
-				 int &blockHour,
-				 int &blockMin,
-				 int &blockDate)
-  
-{
+                                 int &blockHour,
+                                 int &blockMin,
+                                 int &blockDate) {
 
   // check for SA weather group - not start of SA group
-  
+
   if (strstr(line, " SA ")) {
     return false;
   }
-  
+
   // check for SA characters close to start of line
 
   const char *sa = strstr(line, "SA");
@@ -438,13 +442,13 @@ bool Metar2Spdb::_startOfSABlock(const char *line,
       return false;
     }
   }
-  
+
   // SA should not be followed by a space
 
   if (sa[2] == ' ') {
     return false;
   }
-  
+
   if (strlen(sa) < 6) {
     return false;
   }
@@ -452,7 +456,7 @@ bool Metar2Spdb::_startOfSABlock(const char *line,
   if (strlen(sa) > 128) {
     return false;
   }
-  
+
   // check for "SA* stid ddhhmm"
 
   char sagroup[128];
@@ -484,51 +488,52 @@ bool Metar2Spdb::_startOfSABlock(const char *line,
 
 ///////////////////
 // decode the metar
-  
+
 int Metar2Spdb::_decodeMetar(const char *file_path,
-			     time_t file_time,
-			     int blockHour,
-			     int blockMin,
-			     int blockDate,
-			     const string &metarMessage,
-			     const string &reportType,
+                             time_t file_time,
+                             int blockHour,
+                             int blockMin,
+                             int blockDate,
+                             const string &metarMessage,
+                             const string &reportType,
                              string &stationName,
                              MemBuf &buf,
-			     time_t &valid_time)
-  
-{
+                             time_t &valid_time) {
 
   // Ignore blank messages - need at least 4 chars for station name
-  
+
   if (metarMessage.size() < 4) {
     return -1;
   }
-  
+
   // check if in the main list
-       
+
   stationName = metarMessage.substr(0, 4);
-  map< string, StationLoc, less<string> >::iterator iloc;
+  map<string, StationLoc, less<string> >::iterator iloc;
   iloc = _locations.find(stationName);
   if (iloc == _locations.end()) {
+    if(_params.debug >= Params::DEBUG_VERBOSE){
+      cerr << "Station " << stationName << " not fond in list...skipping.\n";
+    }
     return -1;
   }
   StationLoc &stationLoc = iloc->second;
-  
+
   // should we check acceptedStations?
 
   if (_params.useAcceptedStationsList) {
     bool accept = false;
     for (int ii = 0; ii < _params.acceptedStations_n; ii++) {
       if (stationName == _params._acceptedStations[ii]) {
-	accept = true;
-	break;
+        accept = true;
+        break;
       }
     }
     if (!accept) {
       if (_params.debug >= Params::DEBUG_VERBOSE) {
-	cerr << endl;
-	cerr << "Rejecting station: " << stationName << endl;
-	cerr << "  Not in acceptedStations list" << endl;
+        cerr << endl;
+        cerr << "Rejecting station: " << stationName << endl;
+        cerr << "  Not in acceptedStations list" << endl;
       }
       return -1;
     }
@@ -545,15 +550,15 @@ int Metar2Spdb::_decodeMetar(const char *file_path,
     bool reject = false;
     for (int ii = 0; ii < _params.rejectedStations_n; ii++) {
       if (stationName == _params._rejectedStations[ii]) {
-	reject = true;
-	break;
+        reject = true;
+        break;
       }
     }
     if (reject) {
       if (_params.debug >= Params::DEBUG_VERBOSE) {
-	cerr << endl;
-	cerr << "Rejecting station: " << stationName << endl;
-	cerr << "  Station name is in rejectedStations list" << endl;
+        cerr << endl;
+        cerr << "Rejecting station: " << stationName << endl;
+        cerr << "  Station name is in rejectedStations list" << endl;
       }
       return -1;
     }
@@ -563,13 +568,13 @@ int Metar2Spdb::_decodeMetar(const char *file_path,
 
   if (_params.checkBoundingBox) {
     if (stationLoc.lat < _params.boundingBox.min_lat ||
-	stationLoc.lat > _params.boundingBox.max_lat ||
-	stationLoc.lon < _params.boundingBox.min_lon ||
-	stationLoc.lon > _params.boundingBox.max_lon) {
+        stationLoc.lat > _params.boundingBox.max_lat ||
+        stationLoc.lon < _params.boundingBox.min_lon ||
+        stationLoc.lon > _params.boundingBox.max_lon) {
       if (_params.debug >= Params::DEBUG_VERBOSE) {
-	cerr << endl;
-	cerr << "Rejecting station: " << stationName << endl;
-	cerr << "  Station position not within bounding box" << endl;
+        cerr << endl;
+        cerr << "Rejecting station: " << stationName << endl;
+        cerr << "  Station position not within bounding box" << endl;
       }
       return -1;
     }
@@ -579,18 +584,12 @@ int Metar2Spdb::_decodeMetar(const char *file_path,
   // Decode the METAR
   // this uses strtok() which corrupts the message, so make a copy
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << endl;
-    cerr << "Decoding METAR message: " << endl;
-    cerr << metarMessage << endl;
-  }
-  
   TaArray<char> messageCopy_;
   char *messageCopy = messageCopy_.alloc(metarMessage.size() + 1);
   strcpy(messageCopy, metarMessage.c_str());
-  
+
   Decoded_METAR dcdMetar;
-  if(DcdMETAR(messageCopy, &dcdMetar, true) != 0) {
+  if (DcdMETAR(messageCopy, &dcdMetar, true) != 0) {
     return -1;
   }
 
@@ -628,11 +627,11 @@ int Metar2Spdb::_decodeMetar(const char *file_path,
     date_time_t tvalid;
     tvalid.unix_time = file_time;
     uconvert_from_utime(&tvalid);
-    if (_params.use_metar_date)  
+    if (_params.use_metar_date)
       tvalid.day = ob_date;
     tvalid.hour = ob_hour;
     tvalid.min = ob_minute;
-    tvalid.sec = 0;  
+    tvalid.sec = 0;
     uconvert_to_utime(&tvalid);
     valid_time = tvalid.unix_time;
     // correct for time in the future if hour and minute is from
@@ -640,37 +639,34 @@ int Metar2Spdb::_decodeMetar(const char *file_path,
     if (_params.mode == Params::REALTIME && !_params.use_metar_date) {
       time_t now = time(NULL);
       if (valid_time > (now + 43200)) {
-	valid_time -= 86400;
+        valid_time -= 86400;
       }
     }
   }
 
   //check if the metar should be rejected because it is from the future or past
-  if (_params.use_metar_date)
-    {
-      time_t now = time(NULL);
-      if ( (_params.valid_past_margin > 0) && 
-	   ((now - valid_time) > _params.valid_past_margin))
-	{
-	  cerr << "Rejecting METAR from the past:" << metarMessage
-	       << "\nvalid time: " << valid_time
-	       << " now: " << now << " valid_past_margin: " 
-	       << _params.valid_past_margin << endl;
+  if (_params.use_metar_date) {
+    time_t now = time(NULL);
+    if ((_params.valid_past_margin > 0) &&
+        ((now - valid_time) > _params.valid_past_margin)) {
+      cerr << "Rejecting METAR from the past:" << metarMessage
+           << "\nvalid time: " << valid_time
+           << " now: " << now << " valid_past_margin: "
+           << _params.valid_past_margin << endl;
 
-	  return -1;
-	}
-      if ( (_params.valid_future_margin > 0) && 
-	   ((valid_time - now) > _params.valid_future_margin))
-	{
-	  cerr << "Rejecting METAR from the future:" << metarMessage
-	       << "\nvalid time: " << valid_time
-	       << " now: " << now << " valid_future_margin: " 
-	       << _params.valid_future_margin << endl;
-
-	  return -1;
-	  
-	}
+      return -1;
     }
+    if ((_params.valid_future_margin > 0) &&
+        ((valid_time - now) > _params.valid_future_margin)) {
+      cerr << "Rejecting METAR from the future:" << metarMessage
+           << "\nvalid time: " << valid_time
+           << " now: " << now << " valid_future_margin: "
+           << _params.valid_future_margin << endl;
+
+      return -1;
+
+    }
+  }
 
 
   switch (_params.output_report_type) {
@@ -686,7 +682,7 @@ int Metar2Spdb::_decodeMetar(const char *file_path,
       }
       break;
     }
-      
+
     case Params::REPORT_PLUS_METAR_XML:
     case Params::REPORT_PLUS_FULL_XML:
     case Params::XML_ONLY: {
@@ -701,7 +697,7 @@ int Metar2Spdb::_decodeMetar(const char *file_path,
     default: {
       return -1;
     }
-      
+
   } // switch
 
   return 0;
@@ -715,16 +711,14 @@ int Metar2Spdb::_decodeMetar(const char *file_path,
 
 int Metar2Spdb::_loadReport(const Decoded_METAR &dcdMetar,
                             time_t valid_time,
-			    double lat,
-			    double lon,
-			    double alt,
-                            MemBuf &buf)
+                            double lat,
+                            double lon,
+                            double alt,
+                            MemBuf &buf) {
 
-{
-  
   station_report_t report;
   memset(&report, 0, sizeof(station_report_t));
-  
+
   if (_params.output_report_type == Params::METAR_REPORT) {
     if (decoded_metar_to_report(&dcdMetar, &report,
                                 valid_time, lat, lon, alt)) {
@@ -743,8 +737,8 @@ int Metar2Spdb::_loadReport(const Decoded_METAR &dcdMetar,
     }
   } else if (_params.output_report_type == Params::METAR_WITH_REMARKS_REPORT) {
     if (decoded_metar_to_report_with_remarks(&dcdMetar, &report,
-                                                 valid_time,
-                                                 lat, lon, alt)) {
+                                             valid_time,
+                                             lat, lon, alt)) {
       return -1;
     }
 
@@ -758,7 +752,7 @@ int Metar2Spdb::_loadReport(const Decoded_METAR &dcdMetar,
   }
   station_report_to_be(&report);
   buf.add(&report, sizeof(report));
-  
+
   return 0;
 
 }
@@ -776,10 +770,7 @@ int Metar2Spdb::_loadWxObs(const string &metarText,
                            double lat,
                            double lon,
                            double alt,
-                           MemBuf &buf)
-
-
-{
+                           MemBuf &buf) {
 
   WxObs obs;
   if (obs.setFromDecodedMetar(metarText, stationName, dcdMetar, valid_time,
@@ -802,9 +793,9 @@ int Metar2Spdb::_loadWxObs(const string &metarText,
   } else {
     return -1;
   }
-  
+
   buf.add(obs.getBufPtr(), obs.getBufLen());
-  
+
   return 0;
 
 }
@@ -812,44 +803,42 @@ int Metar2Spdb::_loadWxObs(const string &metarText,
 ////////////////////////////////
 // load up the station locations
 
-int Metar2Spdb::_loadLocations(const char* station_location_path)
-  
-{
+int Metar2Spdb::_loadLocations(const char *station_location_path) {
 
   FILE *fp;
   char line[BUFSIZ];
   char station[128];
   double lat, lon, alt;
-  
+
   string stationId;
-  
-  if((fp = fopen(station_location_path, "r")) == NULL) {
+
+  if ((fp = fopen(station_location_path, "r")) == NULL) {
     int errNum = errno;
     cerr << "ERROR - Metar2Spdb::loadLocations" << endl;
     cerr << "  Cannot open station location file: "
-	 << station_location_path << endl;
+         << station_location_path << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
   }
-   
+
   int count = 0;
 
-  while( fgets(line, BUFSIZ, fp) != NULL ) {
+  while (fgets(line, BUFSIZ, fp) != NULL) {
 
     // If the line is not a comment, process it
-    
-    if(line[0] == '#' || line[0] == '!' || strlen(line) < 4) {
+
+    if (line[0] == '#' || line[0] == '!' || strlen(line) < 4) {
       continue;
     }
 
     // Read in the line - try different formats
-    
-    if(sscanf(line, "%4s, %lg, %lg, %lg", 
-              station, &lat, &lon, &alt) != 4 ) {
-      if(sscanf(line, "%4s,%lg,%lg,%lg", 
-                station, &lat, &lon, &alt) != 4 ) {
-	if(sscanf(line, "%3s,%lg,%lg,%lg", 
-                  station, &lat, &lon, &alt) != 4 ) {
+
+    if (sscanf(line, "%4s, %lg, %lg, %lg",
+               station, &lat, &lon, &alt) != 4) {
+      if (sscanf(line, "%4s,%lg,%lg,%lg",
+                 station, &lat, &lon, &alt) != 4) {
+        if (sscanf(line, "%3s,%lg,%lg,%lg",
+                   station, &lat, &lon, &alt) != 4) {
           if (_readThompsonLocation(line, station, lat, lon, alt)) {
             if (_params.debug >= Params::DEBUG_VERBOSE) {
               cerr << "WARNING - Metar2Spdb::loadLocations" << endl;
@@ -862,30 +851,29 @@ int Metar2Spdb::_loadLocations(const char* station_location_path)
         }
       }
     }
-    
+
     count++;
-      
+
     // Convert station to a string
-    
+
     stationId = station;
-    
+
     // Convert altitude to meters
 
-    if( alt == -999.0 ||
-	alt == 999.0) {
+    if (alt == -999.0 ||
+        alt == 999.0) {
       alt = STATION_NAN;
     } else {
-      switch (_params.altUnits)
-      {
-      case Params::ALT_FEET :
-	alt *= M_PER_FT;
-	break;
-      case Params::ALT_METERS :
-	// do nothing
-	break;
+      switch (_params.altUnits) {
+        case Params::ALT_FEET :
+          alt *= M_PER_FT;
+          break;
+        case Params::ALT_METERS :
+          // do nothing
+          break;
       }
     }
-    
+
     // Create new metar location and add it to the map
 
     pair<string, StationLoc> pr;
@@ -900,7 +888,7 @@ int Metar2Spdb::_loadLocations(const char* station_location_path)
   if (count == 0) {
     cerr << "ERROR - Metar2Spdb::loadLocations" << endl;
     cerr << "  No suitable locations in file: : "
-	 << station_location_path << endl;
+         << station_location_path << endl;
     return -1;
   }
 
@@ -916,13 +904,11 @@ AK ADAK NAS         PADK  ADK   70454  51 53N  176 39W    4   X     T          7
 CO DENVER (DIA)     KDEN  DEN   72565  39 51N  104 39W 1640   X     U     A    0 US
 #endif
 
-int Metar2Spdb::_readThompsonLocation(const char* line,
+int Metar2Spdb::_readThompsonLocation(const char *line,
                                       char *station,
-                                      double &lat, 
+                                      double &lat,
                                       double &lon,
-                                      double &alt)
-  
-{
+                                      double &alt) {
 
   if (strlen(line) < 60) {
     return -1;
@@ -985,12 +971,10 @@ int Metar2Spdb::_readThompsonLocation(const char* line,
 ////////////////////////////////
 // do put to SPDB
 
-int Metar2Spdb::_doPut(DsSpdb &spdbDecoded, DsSpdb &spdbAscii)
-  
-{
+int Metar2Spdb::_doPut(DsSpdb &spdbDecoded, DsSpdb &spdbAscii) {
 
   int iret = 0;
-  
+
   if (_params.write_decoded_metars) {
     if (spdbDecoded.put(_params.decoded_output_url,
                         SPDB_STATION_REPORT_ID,
@@ -1003,7 +987,7 @@ int Metar2Spdb::_doPut(DsSpdb &spdbDecoded, DsSpdb &spdbAscii)
     }
     spdbDecoded.clearPutChunks();
   }
-  
+
   if (_params.write_ascii_metars) {
     if (spdbAscii.put(_params.ascii_output_url,
                       SPDB_ASCII_ID,

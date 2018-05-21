@@ -42,6 +42,7 @@
 #include "ColorMap.hh"
 #include "Params.hh"
 #include "Reader.hh"
+#include "AllocCheck.hh"
 #include <radar/RadarComplex.hh>
 #include <toolsa/file_io.h>
 
@@ -200,7 +201,8 @@ void BscanManager::_setupWindows()
 
   // configure the BSCAN
 
-  _bscan = new BscanWidget(_bscanFrame, *this, _params, _fields.size());
+  _bscan = new BscanWidget(_bscanFrame, *this, _params,
+                           _fields, _haveFilteredFields);
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _bscan, SLOT(resize(const int, const int)));
   
@@ -217,10 +219,6 @@ void BscanManager::_setupWindows()
   
   _createFieldPanel();
 
-  // color bar to right
-  // _colorBar = new ColorBar(_params.color_scale_width,
-  //                          &_fields[0]->getColorMap(), _main);
-  
   // main window layout
   
   QHBoxLayout *mainLayout = new QHBoxLayout(_main);
@@ -313,13 +311,17 @@ void BscanManager::_createActions()
 
   _rangeAxisAct = new QAction(tr("Range-Config"), this);
   _rangeAxisAct->setStatusTip(tr("Set configuration for range axis"));
-  connect(_rangeAxisAct, SIGNAL(triggered()), this, SLOT(_showRangeAxisDialog()));
+  connect(_rangeAxisAct,
+          SIGNAL(triggered()), this,
+          SLOT(_showRangeAxisDialog()));
 
   // set time axis settings
 
   _timeAxisAct = new QAction(tr("Time-Config"), this);
   _timeAxisAct->setStatusTip(tr("Set configuration for time axis"));
-  connect(_timeAxisAct, SIGNAL(triggered()), this, SLOT(_showTimeAxisDialog()));
+  connect(_timeAxisAct,
+          SIGNAL(triggered()),
+          this, SLOT(_showTimeAxisDialog()));
 
   // unzoom display
 
@@ -473,8 +475,7 @@ void BscanManager::_configureAxes()
                         _maxPlotRangeKm,
                         _minPlotAltitudeKm,
                         _maxPlotAltitudeKm,
-                        _timeSpanSecs,
-                        _archiveMode);
+                        _timeSpanSecs);
 
 }
 
@@ -709,7 +710,7 @@ void BscanManager::_createRangeAxisDialog()
     QLabel *surfaceRangeMarginLabel;
     _surfaceRangeMarginEdit =
       _addInputRow(_censorDataBelowSurfaceBox, censorBelowSurfaceLayout,
-                   "Surafce range margin (km)", text, 0, &surfaceRangeMarginLabel);
+                   "Surface range margin (km)", text, 0, &surfaceRangeMarginLabel);
     
     QFrame *acceptCancel = new QFrame;
     QHBoxLayout *horiz = new QHBoxLayout;
@@ -1187,20 +1188,24 @@ void BscanManager::timerEvent(QTimerEvent *event)
 
   if (_params.images_auto_create) {
 
-    // if we are just creating files in archive mode and then exiting, do that now
+    // if we are just creating files in archive mode and then exiting,
+    // do that now
     
-    if (_params.images_creation_mode == Params::CREATE_IMAGES_THEN_EXIT ||
-        _params.images_creation_mode == Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
-      _createArchiveImageFiles();
+    if ((_params.images_creation_mode ==
+         Params::CREATE_IMAGES_THEN_EXIT) ||
+        (_params.images_creation_mode ==
+         Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE)) {
+      _createImageFilesArchiveMode();
       close();
       return;
     }
     
     // if we are creating files in realtime mode, do that now
     
-    if (_params.images_creation_mode == Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
-      _handleRealtimeData();
-      _createRealtimeImageFiles();
+    if (_params.images_creation_mode ==
+        Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
+      _handleRealtimeDataForImages();
+      _checkCreateImagesRealtimeMode();
       return;
     }
 
@@ -1245,7 +1250,7 @@ void BscanManager::keyPressEvent(QKeyEvent * e)
   // get key pressed
 
   Qt::KeyboardModifiers mods = e->modifiers();
-  char keychar = e->text().toAscii().data()[0];
+  char keychar = e->text().toLatin1().data()[0];
   int key = e->key();
   
   if (_params.debug) {
@@ -1372,13 +1377,14 @@ void BscanManager::_handleRealtimeData()
     
     RadxTime thisRayTime = ray->getRadxTime();
     double timeSincePrev = thisRayTime - _readerRayTime;
-    if (timeSincePrev > 0 &&
-        timeSincePrev < (_params.bscan_min_secs_between_reading_beams)) {
+    if ((timeSincePrev > 0) &&
+        (timeSincePrev < _params.bscan_min_secs_between_reading_beams)) {
       // discard
       if (_params.debug >= Params::DEBUG_EXTRA) {
         cerr << "  Discarding ray, not enough elapsed time" << endl;
       }
       delete ray;
+      AllocCheck::inst().addFree();
       continue;
     } else if (timeSincePrev < 0) {
       // gone back in time, so reset times
@@ -1412,9 +1418,55 @@ void BscanManager::_handleRealtimeData()
 
     // draw the beam
     
-    if (_params.images_creation_mode != Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
-      _handleRay(ray);
+    _handleRay(ray);
+    
+  } // while (true)
+
+}
+
+/////////////////////////////////////////////
+// get data in realtime image generation mode
+
+void BscanManager::_handleRealtimeDataForImages()
+
+{
+
+  // get all available beams
+  
+  while (true) {
+    
+    // get the next ray from the reader queue
+    // responsibility for this ray memory passes to
+    // this (the master) thread
+    
+    RadxRay *ray = _reader->getNextRay(_platform);
+    if (ray == NULL) {
+      return; // no pending rays
     }
+    
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "  Got a ray, time, el, az: "
+           << DateTime::strm(ray->getTimeSecs()) << ", "
+           << ray->getElevationDeg() << ", "
+           << ray->getAzimuthDeg() << endl;
+    }
+    
+    RadxTime thisRayTime = ray->getRadxTime();
+    double timeSincePrev = thisRayTime - _readerRayTime;
+    if (timeSincePrev < 0) {
+      // gone back in time, so reset times
+      _imagesScheduledTime.set(RadxTime::ZERO);
+    }
+    _readerRayTime = thisRayTime;
+    
+    // update the status panel
+    
+    _updateStatusPanel(ray);
+    
+    // delete the ray
+    
+    delete ray;
+    AllocCheck::inst().addFree();
     
   } // while (true)
 
@@ -1502,6 +1554,8 @@ int BscanManager::_getArchiveData()
     return -1;
   }
 
+  _platform = _vol.getPlatform();
+
   return 0;
 
 }
@@ -1539,7 +1593,7 @@ void BscanManager::_plotArchiveData()
   // update the status panel
   
   _updateStatusPanel(rays[0]);
-    
+
 }
 
 //////////////////////////////////////////////////
@@ -1604,7 +1658,7 @@ void BscanManager::_handleRay(const RadxRay *ray)
   _rays.push_back(ray);
 
   // in realtime mode, set up initial plot time window
-  
+
   if (!_archiveMode) {
     if (_plotStart || (rayTime < _plotStartTime)) {
       if (_params.bscan_truncate_start_time) {
@@ -1666,6 +1720,9 @@ void BscanManager::_addRay(const RadxRay *ray)
   RadxTime rayStartTime(rayTime - halfDwellTime);
   RadxTime rayEndTime(rayTime + halfDwellTime);
   _prevRayTime = rayTime;
+  if (halfDwellTime <= 0) {
+    return;
+  }
 
   // create 2D field data vector
 
@@ -1718,7 +1775,8 @@ void BscanManager::_addRay(const RadxRay *ray)
       const Radx::fl32 missingVal = rfld->getMissingFl32();
       double range = ray->getStartRangeKm();
       double drange = ray->getGateSpacingKm();
-      for (size_t igate = 0; igate < ray->getNGates(); igate++, fdata++, range += drange) {
+      for (size_t igate = 0; igate < ray->getNGates();
+           igate++, fdata++, range += drange) {
         Radx::fl32 val = *fdata;
         if (doCensoring &&
             (range < censorMinRange || range > censorMaxRange)) {
@@ -1816,6 +1874,11 @@ void BscanManager::_bscanLocationClicked(double xsecs, double ykm,
 void BscanManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray)
 
 {
+
+
+  if (_params.debug) {
+    cerr << "*** Entering BscanManager::_locationClicked()" << endl;
+  }
 
   // check the ray
 
@@ -2410,10 +2473,6 @@ void BscanManager::_setTimeSpan()
   _setDwellAutoVal();
   _configureAxes();
 
-  // if (_archiveMode) {
-  //   _performArchiveRetrieval();
-  // }
-
 }
 
 void BscanManager::_resetTimeSpanToDefault()
@@ -2938,9 +2997,9 @@ void BscanManager::_saveImageToFile(bool interactive)
 }
 
 /////////////////////////////////////////////////////
-// creating image files in realtime mode
+// check whether to create realtime images
 
-void BscanManager::_createRealtimeImageFiles()
+void BscanManager::_checkCreateImagesRealtimeMode()
 {
 
   int interval = _params.images_schedule_interval_secs;
@@ -2964,11 +3023,21 @@ void BscanManager::_createRealtimeImageFiles()
   
   if (_readerRayTime > _imagesScheduledTime) {
 
+    // temporarily put in archive mode
+    // since data retrieval uses archive mode
+
+    bool prevMode = _archiveMode;
+    _archiveMode = true;
+
     // create images
 
     _archiveEndTime = _imagesScheduledTime - delay;
     _archiveStartTime = _archiveEndTime - _timeSpanSecs;
     _createImageFiles();
+
+    // restore archive mode to previous value
+
+    _archiveMode = prevMode;
 
     // set next scheduled time
     
@@ -2986,7 +3055,7 @@ void BscanManager::_createRealtimeImageFiles()
 /////////////////////////////////////////////////////
 // creating image files in archive mode
 
-void BscanManager::_createArchiveImageFiles()
+void BscanManager::_createImageFilesArchiveMode()
 {
 
   if (_params.images_creation_mode ==
@@ -3020,6 +3089,8 @@ void BscanManager::_createImageFiles()
 
   if (_params.debug) {
     cerr << "BscanManager::_createImageFiles()" << endl;
+    cerr << "  _archiveStartTime: " << RadxTime::strm(_archiveStartTime.utime()) << endl;
+    cerr << "  _archiveEndTime: " << RadxTime::strm(_archiveEndTime.utime()) << endl;
   }
 
   PMU_auto_register("createImageFiles");

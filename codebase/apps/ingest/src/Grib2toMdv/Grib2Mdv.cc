@@ -31,6 +31,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include <cstring>
+#include <limits>
 
 #include <toolsa/str.h>
 #include <toolsa/pmu.h>
@@ -42,6 +43,7 @@
 #include <dsdata/DsLdataTrigger.hh>
 #include <dsdata/DsInputDirTrigger.hh>
 #include <dsdata/TriggerInfo.hh>
+#include <euclid/Pjg.hh>
 #include <euclid/PjgLc1Calc.hh>
 #include <euclid/PjgLc2Calc.hh>
 #include <euclid/PjgPolarStereoCalc.hh>
@@ -106,69 +108,93 @@ Grib2Mdv::~Grib2Mdv()
 int Grib2Mdv::init(int nFiles, char** fileList, bool printVarList, 
 		   bool printsummary , bool printsections)
 {
-   if( nFiles > 0 ) {
-     vector< string > file_list;
-     for (int i = 0; i < nFiles; ++i)
-       file_list.push_back(fileList[i]);
-     
-     DsFileListTrigger *data_trigger = new DsFileListTrigger();
-     if (data_trigger->init(file_list) != 0)
-     {
-       cerr << "ERROR: Error initializing file list trigger" << endl;
-       return RI_FAILURE;
-     }
-     
-     _dataTrigger = data_trigger;
 
-     _inputSuffix = "";
-   }
-   else {
-     if (_paramsPtr->latest_data_info_avail) {
-       DsLdataTrigger *data_trigger = new DsLdataTrigger();
-       if (data_trigger->init(_paramsPtr->input_dir,
-                              _paramsPtr->max_input_data_age,
-                              PMU_auto_register) != 0)
-       {
-         cerr << "ERROR: Error initializing realtime trigger" << endl;
-         return RI_FAILURE;
-       }
-       _dataTrigger = data_trigger;
-       _inputSuffix = _paramsPtr->input_suffix;
-       if (strlen(_paramsPtr->input_substring) > 0)
-       {
-         _inputSubstrings.push_back(_paramsPtr->input_substring);
-       }
-       else
-       {
-         for (int i = 0; i < _paramsPtr->input_substrings_n; ++i)
-           _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
-       }
-     } else {
-       DsInputDirTrigger *data_trigger = new DsInputDirTrigger();
-       if (data_trigger->init(_paramsPtr->input_dir,
-                              _paramsPtr->input_substring,
-                              !_paramsPtr->latest_file_only,
-                              PMU_auto_register,
-                              _paramsPtr->recursive_search,
-                              "",
-                              _paramsPtr->data_check_interval_secs) != 0)
-       {
-         cerr << "ERROR: Error initializing realtime trigger" << endl;
-         return RI_FAILURE;
-       }
-       _dataTrigger = data_trigger;
-       _inputSuffix = _paramsPtr->input_suffix;
-       if (strlen(_paramsPtr->input_substring) > 0)
-       {
-         _inputSubstrings.push_back(_paramsPtr->input_substring);
-       }
-       else
-       {
-         for (int i = 0; i < _paramsPtr->input_substrings_n; ++i)
-           _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
-       }
-     }
-   }
+  if (nFiles > 0) {
+
+    // filelist mode
+    
+    vector< string > file_list;
+    for (int i = 0; i < nFiles; ++i)
+      file_list.push_back(fileList[i]);
+    
+    DsFileListTrigger *data_trigger = new DsFileListTrigger();
+    if (_paramsPtr->debug >= 2) {
+      data_trigger->setVerbose(true);
+    } else if (_paramsPtr->debug) {
+      data_trigger->setDebug(true);
+    }
+    if (data_trigger->init(file_list) != 0) {
+      cerr << "ERROR: Error initializing file list trigger" << endl;
+      return RI_FAILURE;
+    }
+    _dataTrigger = data_trigger;
+    _inputSuffix = "";
+    
+   } else {
+
+    if (_paramsPtr->latest_data_info_avail) {
+
+      // realtime with latest data info available
+
+      DsLdataTrigger *data_trigger = new DsLdataTrigger();
+      if (_paramsPtr->debug >= 2) {
+        data_trigger->setVerbose(true);
+      } else if (_paramsPtr->debug) {
+        data_trigger->setDebug(true);
+      }
+      if (data_trigger->init(_paramsPtr->input_dir,
+                             _paramsPtr->max_input_data_age,
+                             PMU_auto_register) != 0) {
+        cerr << "ERROR: Error initializing realtime trigger" << endl;
+        return RI_FAILURE;
+      }
+      _dataTrigger = data_trigger;
+      _inputSuffix = _paramsPtr->input_suffix;
+      if (strlen(_paramsPtr->input_substring) > 0) {
+        _inputSubstrings.push_back(_paramsPtr->input_substring);
+      } else {
+        for (int i = 0; i < _paramsPtr->input_substrings_n; ++i) {
+          if (strlen(_paramsPtr->_input_substrings[i]) > 0) {
+            _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
+          }
+        }
+      }
+      
+    } else {
+
+      // realtime with no latest data info
+
+      DsInputDirTrigger *data_trigger = new DsInputDirTrigger();
+      if (_paramsPtr->debug >= 2) {
+        data_trigger->setVerbose(true);
+      } else if (_paramsPtr->debug) {
+        data_trigger->setDebug(true);
+      }
+      if (data_trigger->init(_paramsPtr->input_dir,
+                             _paramsPtr->input_substring,
+                             !_paramsPtr->latest_file_only,
+                             PMU_auto_register,
+                             _paramsPtr->recursive_search,
+                             "",
+                             _paramsPtr->data_check_interval_secs) != 0) {
+        cerr << "ERROR: Error initializing realtime trigger" << endl;
+        return RI_FAILURE;
+      }
+      _dataTrigger = data_trigger;
+      _inputSuffix = _paramsPtr->input_suffix;
+      if (strlen(_paramsPtr->input_substring) > 0) {
+        _inputSubstrings.push_back(_paramsPtr->input_substring);
+      } else {
+        for (int i = 0; i < _paramsPtr->input_substrings_n; ++i) {
+          if (strlen(_paramsPtr->_input_substrings[i]) > 0) {
+            _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
+          }
+        }
+      }
+      
+    } // if (_paramsPtr->latest_data_info_avail) {
+   
+   } // if( nFiles > 0 ) {
 
    _Grib2File   = new Grib2::Grib2File ();
    _printVarList = printVarList;
@@ -229,7 +255,7 @@ int Grib2Mdv::getData()
           break;
         }
       }
-      if (!substring_found)
+      if (_inputSubstrings.size() > 0 && !substring_found)
         continue;
       
       if (!_inputSuffix.empty() &&
@@ -313,6 +339,19 @@ int Grib2Mdv::getData()
           continue;
         }
 
+
+        if (_paramsPtr->lead_time_subsampling) {
+	  bool proccess_lead = false;
+	  for(int i = 0; i < _paramsPtr->subsample_lead_times_n; i++) {
+	    if (*leadTime == _paramsPtr->_subsample_lead_times[i]) {
+	      proccess_lead = true;
+	    }
+	  }
+
+	  if (proccess_lead == false)   
+	    continue;
+        }
+
 	if (_paramsPtr->debug)
 	  cout << "Getting fields for forecast time of " << *leadTime << " seconds." << endl;
 
@@ -394,6 +433,7 @@ int Grib2Mdv::getData()
 	      }
 
 	      // Pre Count the number of levels
+	      _fieldHeader.nz = 0;
 	      for(int ln = levelNum; ln <= levelMax; ln+=levelDz)
 		_fieldHeader.nz ++;
 
@@ -451,7 +491,7 @@ int Grib2Mdv::getData()
 
 	    //
 	    // Once we have gotten two vertical levels we can calculate a dz
-	    if(_fieldHeader.nz == 2)
+	    if((levelNum - levelMin)/levelDz == 2)
 	    {
 	      if(_vlevelHeader.level[1] == _vlevelHeader.level[0] )
 		_fieldHeader.grid_dz = 0.0;
@@ -687,6 +727,11 @@ int Grib2Mdv::_createFieldHdr ()
 
   }
 
+  float earth_major_axis, earth_minor_axis;
+  float earth_radius = _GribRecord->gds->getEarthRadius(earth_major_axis, earth_minor_axis) / 1000.0;
+  if(earth_radius != 0.0)
+    Pjg::setEarthRadiusKm(earth_radius);
+
   si32 projID = _GribRecord->gds->getGridID();
   Grib2::GribProj *proj = _GribRecord->gds->getProjection();
   
@@ -791,13 +836,15 @@ int Grib2Mdv::_createFieldHdr ()
     // cuts the earth at 90 degrees north. The projection plane 
     // in Grib2 can be user defined. Therefore, the grid length 
     // (cell size) must be converted to a 90 degree projection plane.
+
     double polarStereoAdjustment = 2.0 / (1.0 + sin(polarProj->_lad * PI / 180.0));
 
     _fieldHeader.grid_dx = polarProj->_dx * polarStereoAdjustment;
     _fieldHeader.grid_dy = polarProj->_dy * polarStereoAdjustment;
     _fieldHeader.proj_param[0] = polarProj->_lov;
     _fieldHeader.proj_param[1] = polarProj->_projCtrFlag;
-
+    //_fieldHeader.proj_param[2] = 1.0;  //Set Central scale?
+    
     if ((polarProj->_scanModeFlag & 64) == 0) {
       _reOrderNS_2_SN = true;
     }
@@ -1142,8 +1189,8 @@ fl32 *Grib2Mdv::_encode(fl32 *dataPtr, Params::encoding_type_t output_encoding)
 {
   if (output_encoding != Params::ENCODING_FLOAT32)
   {
-    fl32 min_val = 1.0e99;
-    fl32 max_val = -1.0e99;
+    fl32 min_val = std::numeric_limits<fl32>::max(); //1.0e99;
+    fl32 max_val = std::numeric_limits<fl32>::min(); //-1.0e99;
     fl32 missing = _fieldHeader.missing_data_value;
     fl32 bad = _fieldHeader.bad_data_value;
     size_t npoints = (size_t)_fieldHeader.nz*(size_t)_fieldHeader.nx*(size_t)_fieldHeader.ny;

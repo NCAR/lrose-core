@@ -37,9 +37,9 @@ TARGET_FILE = Radx2Grid
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lRadx -lradar -lMdv -ldsserver \
+LOC_LIBS = -lradar -lMdv -lRadx -lNcxx -ldsserver \
 	-ldidss -lrapformats -lrapmath -lkd \
-	-ltoolsa -leuclid -ltdrp -ldataport \
+	-leuclid -ltoolsa -ltdrp -ldataport \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

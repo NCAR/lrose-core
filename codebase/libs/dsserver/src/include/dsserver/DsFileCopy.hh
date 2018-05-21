@@ -147,9 +147,9 @@ public:
   
   // member access
 
-  const bool DoPut() const { return _doPut; }
+  bool DoPut() const { return _doPut; }
   const string &getFilePath() { return _filePath; }
-  const int getFileLen() { return _fileLen; }
+  int getFileLen() { return _fileLen; }
   
 protected:
 

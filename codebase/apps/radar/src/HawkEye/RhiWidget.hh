@@ -27,6 +27,8 @@
 #include "PolarWidget.hh"
 #include "RayLoc.hh"
 #include <radar/BeamHeight.hh>
+#include <Radx/RadxTime.hh>
+#include <deque>
 class PolarManager;
 class RhiWindow;
 
@@ -58,7 +60,8 @@ class DLL_EXPORT RhiWidget : public PolarWidget
             const RhiWindow &rhiWindow,
             const Params &params,
             const RadxPlatform &platform,
-            size_t n_fields);
+            const vector<DisplayField *> &fields,
+            bool haveFilteredFields);
 
   /**
    * @brief Destructor.
@@ -194,7 +197,7 @@ protected:
    * @brief Pointers to all of the active beams are saved here.
    */
 
-  std::vector<RhiBeam*> _rhiBeams;
+  std::deque<RhiBeam*> _rhiBeams;
 
   // ray locations
 
@@ -204,6 +207,7 @@ protected:
 
   // computing angle limits of rays
 
+  RadxTime _prevTime;
   double _prevAz;
   double _prevElev;
   double _startElev;

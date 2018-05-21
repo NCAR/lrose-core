@@ -189,7 +189,7 @@ paramdef struct rainrate_field_t {
 
 
 typedef enum {
-  PID, HEIGHT, RANGE, NUM_BLOCKED, NUM_LOW_SNR, NUM_CLUTTER, MASK
+  PID, ELEVATION, HEIGHT, RANGE, NUM_BLOCKED, NUM_LOW_SNR, NUM_CLUTTER, MASK
 } output_data_t;
 
 typedef struct {
@@ -204,6 +204,7 @@ typedef struct {
 paramdef struct output_field_t {
   p_default = {
     {"PID",    "PID", "PID", "none",  OUTPUT_FLOAT, PID},
+    {"ELEVATION", "ELEVATION", "ELEVATION", "deg",  OUTPUT_FLOAT, ELEVATION},
     {"HEIGHT", "HEIGHT", "HEIGHT", "km",  OUTPUT_FLOAT, HEIGHT},
     {"RANGE", "RANGE", "RANGE", "km",  OUTPUT_FLOAT, RANGE},
     {"NBLOCK", "NBLOCK", "NBLOCK", "count", OUTPUT_FLOAT, NUM_BLOCKED},

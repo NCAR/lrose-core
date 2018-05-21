@@ -162,6 +162,12 @@ paramdef double {
 
 paramdef boolean {
   p_default = FALSE;
+  p_descr = "If true, use the secondary georeference packet.";
+  p_help = "By default, we use the primary georeference packet. And most mobile radars only have one georeference. For those radars that have 2 georef devices, set this to true to use the secondary reference.";
+} use_secondary_georeference;
+
+paramdef boolean {
+  p_default = FALSE;
   p_descr = "Option to check the radar ID in the time series data stream.";
   p_help = "If TRUE, we will check that the radar_id in the header packet info is either the specified radar_id, or is 0. This allows us to filter out unwanted data from the time series stream. Mostly this is not applicable. However, in some cases time series data from multiple sources is included in a single stream, in which case we need to filter it accordingly.";
 } check_radar_id;
@@ -699,6 +705,18 @@ paramdef double {
 
 paramdef boolean {
   p_default = false;
+  p_descr = "Option to threshold ZDR using SNR.";
+  p_help = "If true, we will only compute ZDR if the SNR in both the H and V co-polar channels exceeds this value. See 'min_snr_db_for_zdr'.";
+} threshold_zdr_using_snr;
+
+paramdef double {
+  p_default = -7.0;
+  p_descr = "Min SNR for computing ZDR (dB).";
+  p_help = "If the SNR is below this threshold for either the H or V co-polar channels, ZDR will be set to missing. See 'threshold_zdr_using_snr'.";
+} min_snr_db_for_zdr;
+
+paramdef boolean {
+  p_default = false;
   p_descr = "Option to override the LDR corrections in the calibration data.";
   p_help = "If true, the parameters 'ldrh_correction_db' and 'ldrv_correction_db' will override the ldr corrections in the calibration data.";
 } override_cal_ldr_corrections;
@@ -714,6 +732,18 @@ paramdef double {
   p_descr = "LDRV correction to be applied to all calibrations (dB).";
   p_help = "See 'override_cal_ldr_corrections'.";
 } ldr_correction_db_v;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to threshold LDR using SNR.";
+  p_help = "If true, we will only compute LDR if the SNR in both the co- and cross-polar channels exceeds this value. Since the cross-polar channel is generally the weaker channel, it is the SNR on the cross-polar channel that will be limiting. See 'min_snr_db_for_ldr'.";
+} threshold_ldr_using_snr;
+
+paramdef double {
+  p_default = -7.0;
+  p_descr = "Min SNR for computing LDR (dB).";
+  p_help = "For LDR, the cross polar channel is the weaker return. Therefore effectively this threshold will be applied to the cross channel. If the SNR is below this threshold for either the co- or cross-polar channels, LDR will be set to missing. See 'threshold_ldr_using_snr'.";
+} min_snr_db_for_ldr;
 
 paramdef boolean {
   p_default = false;
@@ -1540,6 +1570,35 @@ paramdef double {
   p_default = 0.0;
   p_descr = "Weight for standard deviation of phidp.";
 } phidp_sdev_interest_weight;
+
+commentdef {
+  p_header = "RHOHV TEST to AUGMENT CMD";
+  p_text = "If clutter is present the RHOHV value should increase after application of the clutter filter. We can use a RHOHV test to locate gates at which CMD fails to identify weak clutter. This allows us to improve clutter identification in cases with low CSR.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply the RHOHV test after filtering based on CMD.";
+  p_help = "This allows us to identify areas of weak clutter contamination that CMD missed.";
+} apply_rhohv_test_after_cmd;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Min RHOHV for application of the RHOHV test.";
+  p_help = "If RHOHV is less than this, no weather is likely to be present. Therefore do not apply the test to this gate.";
+} rhohv_test_min_rhohv;
+
+paramdef double {
+  p_default = 0.98;
+  p_descr = "Max RHOHV for application of the RHOHV test.";
+  p_help = "If RHOHV is greater than this, the weather return is highly coherent, so clutter contamination is unlikely.";
+} rhohv_test_max_rhohv;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "The RHOHV improvment factor is a measure of the change in RHOHV towards 1.0.";
+  p_help = "The RHOHV test identifies clutter if the improvement factor exceeds this value.";
+} rhohv_improvement_factor_threshold;
 
 commentdef {
   p_header = "OUTPUT TO DSRADAR FMQ";

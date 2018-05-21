@@ -45,8 +45,8 @@
 #include "Parms.hh"
 #include "VolHandler.hh"
 #include "DigitalElevationHandler.hh"
-#include <BeamBlock/beam_power.h>
-#include <BeamBlock/beam_propagation.h>
+#include "beam_power.h"
+#include "beam_propagation.h"
 
 class GridAlgs;
 class Grid2d;

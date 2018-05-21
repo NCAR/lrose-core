@@ -53,10 +53,10 @@ PjgMercatorMath::PjgMercatorMath(double origin_lat,
   _offset_lat = _origin_lat;
   _offset_lon = _origin_lon;
 
-  _origin_lat_rad = origin_lat * Deg2Rad;
-  _origin_lon_rad = origin_lon * Deg2Rad;
+  _origin_lat_rad = origin_lat * Pjg::Deg2Rad;
+  _origin_lon_rad = origin_lon * Pjg::Deg2Rad;
   
-  _origin_colat_rad = (90.0 - _origin_lat) * Deg2Rad;
+  _origin_colat_rad = (90.0 - _origin_lat) * Pjg::Deg2Rad;
   EG_sincos(_origin_colat_rad, &_sin_origin_colat, &_cos_origin_colat);
 
 }
@@ -115,12 +115,12 @@ void PjgMercatorMath::latlon2xy(double lat, double lon,
     return;
   }
   
-  double lat_rad = lat * Deg2Rad;
-  double lon_rad = lon * Deg2Rad;
+  double lat_rad = lat * Pjg::Deg2Rad;
+  double lon_rad = lon * Pjg::Deg2Rad;
   double dlon = lon_rad - _origin_lon_rad;
 
-  double xx = EradKm * dlon;
-  double yy = EradKm * atanh(sin(lat_rad - _origin_lat_rad));
+  double xx = Pjg::EradKm * dlon;
+  double yy = Pjg::EradKm * atanh(sin(lat_rad - _origin_lat_rad));
 
   x = xx + _false_easting;
   y = yy + _false_northing;
@@ -141,11 +141,11 @@ void PjgMercatorMath::xy2latlon(double x, double y,
   x -= _false_easting;
   y -= _false_northing;
 
-  double d =  pow(M_E,(-y /EradKm)); 
+  double d =  pow(M_E,(-y /Pjg::EradKm)); 
   double lat2 = M_PI_2 - (2 * atan(d));
 
-  lat = (lat2 + _origin_lat_rad) * Rad2Deg;
-  lon = ((x / EradKm) + _origin_lon_rad) * Rad2Deg;
+  lat = (lat2 + _origin_lat_rad) * Pjg::Rad2Deg;
+  lon = ((x / Pjg::EradKm) + _origin_lon_rad) * Pjg::Rad2Deg;
 
 }
      

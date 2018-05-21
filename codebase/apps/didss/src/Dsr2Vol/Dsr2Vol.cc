@@ -445,6 +445,21 @@ int Dsr2Vol::_readMsg(DsRadarQueue &radarQueue,
       }
       _volNum = beam->volNum;
       
+      // decreasing elevation condition
+
+      
+      if (beam->elev >= 0 && beam->elev != _prevEl) {
+        if (_prevEl != -99 && beam->elev < _prevEl &&
+            abs(beam->elev - _prevEl) >= _params.min_elevation_decrease &&
+	    _params.end_of_vol_decision == Params::DECREASE_IN_ELEV) {
+	  if (_params.debug) {
+	    cerr << "DECREASE_IN_ELEV >= " << _params.min_elevation_decrease << " detected. Setting _endOfVol = true.\n";
+          }
+	  _endOfVol = true;
+	}
+        _prevEl = beam->elev;
+      }
+
       if (_endOfVolAutomatic) {
 	if (_antenna->addBeam(beam)) {
 	  _endOfVol = true;

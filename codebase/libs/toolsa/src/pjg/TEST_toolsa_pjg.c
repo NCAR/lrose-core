@@ -85,7 +85,7 @@ TEST_PJGLatLonPlusRTheta(FILE *fp_err)
   double r, theta;
   double lat1, lon1;
   double lat2, lon2;
-  double circum = EARTH_RADIUS * M_PI * 2.0;
+  double circum = PJG_get_earth_radius() * M_PI * 2.0;
   double third_circum = circum / 3.0;
   double quarter_circum = circum / 4.0;
   double sixth_circum = circum / 6.0;
@@ -256,7 +256,7 @@ TEST_PJGLatLon2RTheta(FILE *fp_err)
   double r, theta;
   double lat1, lon1;
   double lat2, lon2;
-  double circum = EARTH_RADIUS * M_PI * 2.0;
+  double circum = PJG_get_earth_radius() * M_PI * 2.0;
   double half_circum = circum / 2.0;
   double third_circum = circum / 3.0;
   double quarter_circum = circum / 4.0;

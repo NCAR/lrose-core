@@ -1034,7 +1034,7 @@ int ffb_read( fin, buf, count )
 	  return(rlen1);
 
     if(LittleEndian) {
-       swack4(&nab, &size_rec);
+      swack4((char *) &nab, (char *) &size_rec);
     }
     else {
        size_rec = nab;
@@ -1074,7 +1074,7 @@ int ffb_write( fout, buf, count )
     size_t size_rec=count, blip;
 
     if(LittleEndian) {
-       swack4(&size_rec, &blip);
+      swack4((char *) &size_rec, (char *) &blip);
     }
     else {
        blip = size_rec;
@@ -1102,7 +1102,7 @@ int fb_write( fout, buf, count )
     long int size_rec=count, rlen1, rlen2=0, blip;
 
     if(LittleEndian) {
-       swack4(&size_rec, &blip);
+      swack4((char *) &size_rec, (char *) &blip);
     }
     else {
        blip = size_rec;

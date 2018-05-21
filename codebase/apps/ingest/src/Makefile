@@ -62,6 +62,7 @@ SUB_DIRS = \
 	superResNexradII2Dsr \
 	superResNexradLdmUnzip \
 	superResNexradRawUnzip \
+	SfcStationStatus2Spdb \
 	Gini2Gif \
 	Gini2Mdv \
 	Grib2Mdv \

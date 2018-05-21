@@ -53,7 +53,13 @@
 // global include file for the Ncxx C++ API
 
 #include <string>
+
+#if __cplusplus >= 201103L
+#include <cstdint>
+#else
 #include <sys/types.h>
+#endif
+
 using namespace std;
 
 extern "C" {
@@ -109,6 +115,18 @@ public:
   
   // portable data types
   
+#if __cplusplus >= 201103L
+  typedef char si08;
+  typedef unsigned char ui08;
+  typedef int16_t si16;
+  typedef uint16_t ui16;
+  typedef int32_t si32;
+  typedef uint32_t ui32;
+  typedef int64_t si64;
+  typedef uint64_t ui64;
+  typedef float fl32;
+  typedef double fl64;
+#else
   typedef char si08;
   typedef unsigned char ui08;
   typedef int16_t si16;
@@ -119,6 +137,7 @@ public:
   typedef u_int64_t ui64;
   typedef float fl32;
   typedef double fl64;
+#endif
 
   // missing field values by portable type
 

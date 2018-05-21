@@ -31,6 +31,7 @@ def main():
     global codebaseDir
     global versionStr
     global debugStr
+    global argsStr
     global releaseName
     global tarName
     global tarDir
@@ -49,9 +50,13 @@ def main():
                       dest='verbose', default=False,
                       action="store_true",
                       help='Set verbose debugging on')
+    parser.add_option('--osx',
+                      dest='osx', default='False',
+                      action="store_true",
+                      help='Configure for MAC OSX')
     parser.add_option('--package',
                       dest='package', default='lrose',
-                      help='Package name. Options are lrose (default), radx, cidd, hcr')
+                      help='Package name. Options are lrose, lrose-blaze, radx, cidd, titan')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
@@ -78,6 +83,10 @@ def main():
         debugStr = " --verbose "
     elif (options.debug):
         debugStr = " --debug "
+    if (options.osx == True):
+        argsStr = debugStr + " --osx "
+    else:
+        argsStr = debugStr
 
     # runtime
 
@@ -89,19 +98,25 @@ def main():
     # set directories
 
     releaseDir = os.path.join(options.releaseTopDir, options.package)
+    if (options.osx == True):
+        releaseDir = os.path.join(releaseDir, "osx")
     tmpDir = os.path.join(releaseDir, "tmp")
     coreDir = os.path.join(tmpDir, "lrose-core")
     codebaseDir = os.path.join(coreDir, "codebase")
 
     # compute release name and dir name
-    
-    releaseName = options.package + "-" + versionStr + ".src"
+
+    if (options.osx == True):
+        releaseName = options.package + "-" + versionStr + ".src.mac_osx"
+    else:
+        releaseName = options.package + "-" + versionStr + ".src"
     tarName = releaseName + ".tgz"
     tarDir = os.path.join(coreDir, releaseName)
 
     if (options.debug == True):
         print >>sys.stderr, "Running %s:" % thisScriptName
         print >>sys.stderr, "  package: ", options.package
+        print >>sys.stderr, "  osx: ", options.osx
         print >>sys.stderr, "  releaseTopDir: ", options.releaseTopDir
         print >>sys.stderr, "  releaseDir: ", releaseDir
         print >>sys.stderr, "  tmpDir: ", tmpDir
@@ -126,8 +141,11 @@ def main():
     # install the distribution-specific makefiles
 
     os.chdir(codebaseDir)
-    shellCmd("./make_bin/install_package_makefiles.py --package " + 
-               options.package + " --codedir .")
+    cmd = "./make_bin/install_package_makefiles.py --package " + \
+          options.package + " --codedir . "
+    if (options.osx == True):
+        cmd = cmd + " --osx "
+    shellCmd(cmd)
 
     # trim libs and apps to those required by distribution makefiles
 
@@ -142,6 +160,15 @@ def main():
     # create the release information file
     
     createReleaseInfoFile()
+
+    # run qmake for QT apps to create moc_ files
+
+    hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
+    createQtMocFiles(hawkEyeDir)
+
+    # prune any empty directories
+
+    prune(codebaseDir)
 
     # create the tar file
 
@@ -233,6 +260,7 @@ def gitCheckout():
     os.chdir(tmpDir)
     shellCmd("git clone https://github.com/NCAR/lrose-core")
     shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
+    shellCmd("git clone https://github.com/NCAR/lrose-displays")
 
 ########################################################################
 # set up autoconf for configure etc
@@ -247,20 +275,33 @@ def setupAutoconf():
 
     if (options.static):
         if (options.package == "cidd"):
-             shutil.copy("../build/configure.base.cidd", "./configure.base")
+             shutil.copy("../build/autoconf/configure.base.cidd", "./configure.base")
         else:
-             shutil.copy("../build/configure.base", "./configure.base")
+             shutil.copy("../build/autoconf/configure.base", "./configure.base")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base" +
-                 " --pkg " + options.package + debugStr)
+                 " --pkg " + options.package + argsStr)
     else:
         if (options.package == "cidd"):
-            shutil.copy("../build/configure.base.shared.cidd", "./configure.base.shared")
+            shutil.copy("../build/autoconf/configure.base.shared.cidd", "./configure.base.shared")
         else:
-            shutil.copy("../build/configure.base.shared", "./configure.base.shared")
+            shutil.copy("../build/autoconf/configure.base.shared", "./configure.base.shared")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
-                 " --pkg " + options.package + debugStr)
+                 " --pkg " + options.package + argsStr)
+
+########################################################################
+# Run qmake for QT apps such as HawkEye to create _moc files
+
+def createQtMocFiles(appDir):
+    
+    if (os.path.isdir(appDir) == False):
+        return
+    
+    os.chdir(appDir)
+    shellCmd("rm -f moc*");
+    shellCmd("qmake-qt5 -o Makefile.qmake");
+    shellCmd("make -f Makefile.qmake mocables");
 
 ########################################################################
 # write release information file
@@ -295,9 +336,10 @@ def createTarFile():
     os.chdir(coreDir)
     os.makedirs(tarDir)
 
-    # copy in script to make binary release
+    # copy some scripts into tar directory
 
-    shellCmd("cp build/create_bin_release.py " + tarDir)
+    shellCmd("rsync -av build/create_bin_release.py " + tarDir)
+    shellCmd("rsync -av build/build_src_release.py " + tarDir)
 
     # move lrose contents into tar dir
 
@@ -312,6 +354,13 @@ def createTarFile():
     netcdfDir = os.path.join(tmpDir, "lrose-netcdf")
     netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
     os.makedirs(netcdfSubDir)
+
+    # Copy the color-scales dir from lrose-displays into tar dir (under share)
+    
+    displaysDir = os.path.join(tmpDir, "lrose-displays/color_scales")
+    displaysSubDir = os.path.join(tarDir, "share/")
+    os.makedirs(displaysSubDir)
+    shellCmd("rsync -av " + displaysDir + " " + displaysSubDir)
     
     if (options.package == "cidd"):
         name = "build_and_install_netcdf.m32"
@@ -321,6 +370,9 @@ def createTarFile():
         name = "build_and_install_netcdf"
         os.rename(os.path.join(netcdfDir, name),
                   os.path.join(netcdfSubDir, name))
+        name = "build_and_install_netcdf.osx"
+        os.rename(os.path.join(netcdfDir, name),
+                  os.path.join(netcdfSubDir, name))
 
     for name in [ "README.md", "tar_files" ]:
         os.rename(os.path.join(netcdfDir, name),
@@ -328,7 +380,7 @@ def createTarFile():
 
     # create the tar file
 
-    shellCmd("tar cvfz " + tarName + " " + releaseName)
+    shellCmd("tar cvfzh " + tarName + " " + releaseName)
     
 ########################################################################
 # create the brew formula for OSX builds
@@ -342,7 +394,7 @@ def createBrewFormula():
     tarUrl = "https://github.com/NCAR/lrose-core/releases/download/" + \
              options.package + "-" + versionStr + "/" + tarName
     formulaName = options.package + ".rb"
-    scriptName = "build_" + options.package + "_formula"
+    scriptName = "formulas/build_" + options.package + "_formula"
     buildDirPath = os.path.join(tarDir, "build")
     scriptPath = os.path.join(buildDirPath, scriptName)
 
@@ -381,7 +433,6 @@ def getValueListForKey(path, key):
     except IOError as e:
         print >>sys.stderr, "ERROR - ", thisScriptName
         print >>sys.stderr, "  Cannot open file:", path
-        print >>sys.stderr, "  dir: ", options.dir
         return valueList
 
     lines = fp.readlines()
@@ -435,7 +486,12 @@ def trimToMakefiles(subDir):
 
     dirPath = os.path.join(codebaseDir, subDir)
     os.chdir(dirPath)
+
+    # need to allow upper and lower case Makefile (makefile or Makefile)
     subNameList = getValueListForKey("makefile", "SUB_DIRS")
+    if not subNameList:
+        print >>sys.stderr, "Trying uppercase Makefile ... "
+        subNameList = getValueListForKey("Makefile", "SUB_DIRS")
     
     for subName in subNameList:
         if (os.path.isdir(subName)):
@@ -445,13 +501,21 @@ def trimToMakefiles(subDir):
 
     entries = os.listdir(dirPath)
     for entry in entries:
-        if (entry == "scripts"):
+        theName = os.path.join(dirPath, entry)
+        print >>sys.stderr, "considering: " + theName
+        if (entry == "scripts") or (entry == "include"):
             # always keep scripts directories
             continue
-        if (os.path.isdir(entry)):
+        if (os.path.isdir(theName)):
             if (entry not in subNameList):
-                print >>sys.stderr, "discarding unneeded dir: " + entry
-                shutil.rmtree(entry)
+                print >>sys.stderr, "discarding it"
+                shutil.rmtree(theName)
+            else:
+                print >>sys.stderr, "keeping it and recurring"
+                # check this child's required subdirectories ( recurse )
+                # nextLevel = os.path.join(dirPath, entry)
+                # print >> sys.stderr, "trim to makefile on subdirectory: "
+                trimToMakefiles(os.path.join(subDir, entry))
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
@@ -476,6 +540,36 @@ def shellCmd(cmd):
     if (options.debug):
         print >>sys.stderr, ".... done"
     
+########################################################################
+# prune empty dirs
+
+def prune(tree):
+
+    # walk the tree
+    if (os.path.isdir(tree)):
+        contents = os.listdir(tree)
+
+        if (len(contents) == 0):
+            print >> sys.stderr, "pruning empty dir: " + tree
+            shutil.rmtree(tree)
+        else:
+            for l in contents:
+                # remove CVS directories
+                if (l == "CVS") or (l == ".git"): 
+                    thepath = os.path.join(tree,l)
+                    print >> sys.stderr, "pruning dir: " + thepath
+                    shutil.rmtree(thepath)
+                else:
+                    thepath = os.path.join(tree,l)
+                    if (os.path.isdir(thepath)):
+                        prune(thepath)
+            # check if this tree is now empty
+            newcontents = os.listdir(tree)
+            if (len(newcontents) == 0):
+                print >> sys.stderr, "pruning empty dir: " + tree
+                shutil.rmtree(tree)
+
+
 ########################################################################
 # Run - entry point
 

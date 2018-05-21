@@ -26,7 +26,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = ../libgrib2.a
 
-LOC_INCLUDES = -I../include $(JASPER_INCLUDES)
+LOC_INCLUDES = -I../include $(JASPER_INCLUDES) $(SYS_X_INCLUDES)
 LOC_CPPC_CFLAGS = -DSIZE_MAX=18446744073709551615UL
 
 MODULE_TYPE=library
@@ -44,11 +44,13 @@ CPPC_SRCS = \
 	LocalUseSec.cc \
 	GribProj.cc \
 	LatLonProj.cc \
+	RotLatLonProj.cc \
 	MercatorProj.cc \
 	PolarStereoProj.cc \
         LambertConfProj.cc \
 	GausLatLonProj.cc \
 	SpaceViewProj.cc \
+	RotLatLonProjArakawaNonE.cc \
         GDS.cc \
 	PDS.cc \
 	ProdDefTemp.cc \

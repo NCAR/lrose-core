@@ -90,7 +90,7 @@ void Handedness::print(void) const
 /*----------------------------------------------------------------*/
 void Handedness::print(FILE *fp) const
 {
-  fprintf(fp, sprint().c_str());
+  fprintf(fp, "%s", sprint().c_str());
 }
 
 /*----------------------------------------------------------------*/

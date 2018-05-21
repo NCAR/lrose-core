@@ -123,6 +123,13 @@
  * If the info is not disabled, every logged message is prepended with
  * 'file[line]::method()::',  
  *
+ * ---------------------- severity keys --------- -------------------------
+ *
+ * By default, logged messages have the severity key as part of the message
+ * only for WARNING, ERROR, FATAL, SEVERE.
+ * To change so all messages have the key (DEBUG, VERBOSE, and custom):
+ *   LOG_STREAM_SET_SHOW_ALL_SEVERITY_KEYS()
+ *
  * --------------------- Initialization macro -----------------------------
  *
  * To initialize commonly configured settings in one call:
@@ -219,6 +226,11 @@
  */
 #define LOG_STREAM_SET_CLASS_AND_METHOD(v) (LogState::getPointer()->setLoggingClassAndMethod((v)))
 
+/**
+ * Set showing all severitys in the messages themselves to flag
+ * @param[in] v  boolean
+ */
+#define LOG_STREAM_SET_SHOW_ALL_SEVERITY_KEYS(v)  (LogState::getPointer()->setLoggingShowAllSeverityKeys((v)))
 
 /**
  * Set custom type to a status
@@ -343,11 +355,12 @@ private:
   std::ostringstream _buf;  /**< String stream storage */
   bool _active;             /**< True if logging will actually happen */
 
-  void _setHeader(const std::string &fname, 
+  void _setHeader(const std::string &severityString, const std::string &fname, 
 		  const int line, const std::string &method,
 		  Log_t level);
-  void _setHeader(const std::string &fname, 
+  void _setHeader(const std::string &severityString, const std::string &fname, 
 		  const int line, const std::string &method);
+  std::string _setSeverityString(Log_t logT);
 };
 
 
@@ -427,6 +440,15 @@ public:
   void setLoggingClassAndMethod(const bool state);
 
   /**
+   * Set state for showing all sererity types in messages or not
+   * If state=true, messages will show all types
+   * If state=false, messages will not show the type in the messages
+   *                 except for the 'bad' ones, ERROR, FATAL, WARNING
+   * @param[in] state 
+   */
+  void setLoggingShowAllSeverityKeys(const bool state);
+
+  /**
    * @return true if input logging type is enabled
    *
    * @param[in] logT  The type
@@ -446,6 +468,11 @@ public:
     return _logRealTime;
   }
 
+  inline bool showAllSeverityKeysIsEnabled(void) const
+  {
+    return _logShowAllSeverityKeys;
+  }
+  
   inline bool classMethodEnabled(void) const 
   {
     return _logClassAndMethod;
@@ -520,9 +547,19 @@ private:
   bool _logClassAndMethod;
 
   /**
+   * True to show all the severity keys as part of message
+   */
+  bool _logShowAllSeverityKeys;
+
+  /**
    * True to use cout, false to use cerr
    */
   bool _logToCout;
+
+  /**
+   * True to put severity key strings into logged messages for all types
+   */
+  // bool _logShowAllKeys;
 
   /**
    * Constructor, no class name (class is the empty string.)
@@ -555,6 +592,13 @@ private:
  * private macro
  */
 #define LOG_STREAM_CLASSMETHOD_ENABLED() (LogState::getPointer()->classMethodEnabled())
+
+/**
+ * private macro
+ */
+#define LOG_STREAM_SHOW_ALL_SEVERITY_KEYS_ENABLED()  (LogState::getPointer()->showAllSeverityKeysIsEnabled())
+#define LOG_STREAM_TIMESTAMP_ENABLED() (LogState::getPointer()->timestampIsEnabled())
+
 
 /**
  * private macro

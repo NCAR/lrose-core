@@ -35,9 +35,9 @@ TARGET_FILE = SstNc2Mdv
 
 LOC_INCLUDES = $(NETCDF3_INCS) $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -lFmq \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -lFmq \
 	-ldsserver -ldidss -lrapformats -lnetcdf \
-	-lnetcdf_c++ -lncf -ltoolsa -leuclid \
+	-lnetcdf_c++ -lncf -leuclid -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread -lm
 

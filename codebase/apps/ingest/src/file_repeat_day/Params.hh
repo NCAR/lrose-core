@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -67,13 +67,42 @@ public:
     XYYYYMMDD_HHMMSS = 7,
     XYYYYMMDD_HHMMSSZ = 8,
     PRE_YYYYMMDDhhmmss_POST = 9,
-    PRE_hh_YYYYMMDDhhmmss_POST = 10,
-    SDIR_PRE_YYYYMMDDHHMMSS = 11,
-    SDIR_PRE_YYYYMMDDhhmmss_POST = 12,
-    SDIR_PRE_YYYYMMDD_HHMM_POST = 13,
-    RENAME_NO_TIME = 14,
-    MOD_TIME = 15
+    PRE_YYYYMMDDhh_POST = 10,
+    PRE_hh_YYYYMMDDhhmmss_POST = 11,
+    SDIR_PRE_YYYYMMDDHHMMSS = 12,
+    SDIR_PRE_YYYYMMDDhhmmss_POST = 13,
+    SDIR_PRE_YYYYMMDD_HHMM_POST = 14,
+    RENAME_NO_TIME = 15,
+    MOD_TIME = 16
   } FilenameType_t;
+
+  typedef enum {
+    ASCII = 0,
+    NETCDF = 1
+  } FileType_t;
+
+  typedef enum {
+    NC_HHmmss = 0,
+    NC_HHmm = 1,
+    NC_HH = 2,
+    NC_mm = 3,
+    NC_ss = 4,
+    NC_YYYYMMDD = 5,
+    NC_YYYYMMDDhh = 6,
+    NC_YYYYMMDDhhmm = 7,
+    NC_YYYYMMDDHHmmss = 8,
+    NC_YYYY = 9,
+    NC_MM = 10,
+    NC_DD = 11,
+    NC_UTIME = 12
+  } TimeDateFormat_t;
+
+  // struct typedefs
+
+  typedef struct {
+    char* name;
+    TimeDateFormat_t format;
+  } NetVar_t;
 
   ///////////////////////////
   // Member functions
@@ -384,6 +413,8 @@ public:
 
   char* FileSuffix;
 
+  FileType_t FileType;
+
   tdrp_bool_t MultipleFilesForOneTime;
 
   int SleepSecsBetweenFilesForOneDataTime;
@@ -396,6 +427,11 @@ public:
 
   tdrp_bool_t WriteLData;
 
+  NetVar_t *_NetVars;
+  int NetVars_n;
+
+  char* ncap2Path;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -403,7 +439,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[24];
+  mutable TDRPtable _table[29];
 
   const char *_className;
 

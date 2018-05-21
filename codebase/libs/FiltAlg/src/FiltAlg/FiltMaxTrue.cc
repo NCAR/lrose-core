@@ -199,6 +199,12 @@ void FiltMaxTrue::set_input_info(Info **info) const
 }
 
 //------------------------------------------------------------------
+void FiltMaxTrue::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+
+//------------------------------------------------------------------
 void FiltMaxTrue::_init(char **strings, const int n)
 {
   for (int i=0; i<n; ++i)

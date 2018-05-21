@@ -107,6 +107,64 @@ int STATS_normal_fit(int nx, double *x,
 
 }
 
+/*********************************************
+ * STATS_normal_skewness()
+ *
+ * Compute the skewness of a normally-distributed
+ * data set, given the mean and standard deviation.
+ *
+ * Returns the skewness.
+ *
+ */
+
+double STATS_normal_skewness(int nx, double *x,
+                             double mean, double sdev)
+
+{
+  
+  int i;
+  double xx;
+  double sum = 0.0;
+  for (i = 0; i < nx; i++, x++) {
+    xx = *x - mean;
+    sum += pow(xx, 3.0);
+  }
+
+  double skewness = (sum / nx) / pow(sdev, 3.0);
+
+  return skewness;
+
+}
+
+/*********************************************
+ * STATS_normal_kurtosis()
+ *
+ * Compute the kurtosis of a normally-distributed
+ * data set, given the mean and standard deviation.
+ *
+ * Returns the kurtosis.
+ *
+ */
+
+double STATS_normal_kurtosis(int nx, double *x,
+                             double mean, double sdev)
+
+{
+  
+  int i;
+  double xx;
+  double sum = 0.0;
+  for (i = 0; i < nx; i++, x++) {
+    xx = *x - mean;
+    sum += pow(xx, 4.0);
+  }
+
+  double kurtosis = ((sum / nx) / pow(sdev, 4.0)) - 3.0;
+
+  return kurtosis;
+
+}
+
 /************************************************************
  * STATS_normal_chisq()
  *

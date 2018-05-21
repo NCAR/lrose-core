@@ -108,9 +108,9 @@ WRFData::WRFData() :
   _clw(0),
   _rnw(0),
   _ice(0),
+  _snow(0),
   _nRain(0),
   _nCloud(0),
-  _snow(0),
   _graupel(0),
   _ww(0),
   _pp(0),
@@ -2630,7 +2630,7 @@ bool  WRFData::_setTimes()
     }
 
     // Set the model gen time
-  genTime = gDateTime.utime();
+  genTime = gDateTime.utime() + _params.gen_time_offset;
 
   forecastLeadTime = forecastTime - genTime;
 
@@ -2932,16 +2932,16 @@ void WRFData::_computeAvailMoist() //  _soil_am_N;
 
   ifstream spt(_params.soilparm_path);
 
-  if (spt == 0)
+  if (spt.is_open())
   {
-    cerr << "Warning SOILPARM.TBL file not found at: " 
-	 << _params.soilparm_path << endl
-	 << "Using default soilparams\n";
-    _loadDefaultSoilParams();
+    _loadSoilParamFile(spt);
   }
   else
   {
-    _loadSoilParamFile(spt);
+    cerr << "Warning SOILPARM.TBL file not found at: "
+         << _params.soilparm_path << endl
+         << "Using default soilparams\n";
+    _loadDefaultSoilParams();
   }
   
   // Compute the fields.  The space for each field is allocated

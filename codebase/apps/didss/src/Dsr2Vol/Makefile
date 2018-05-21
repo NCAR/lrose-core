@@ -38,7 +38,7 @@ TARGET_FILE = Dsr2Vol
 
 LOC_INCLUDES = $(NETCDF4_INCS) -I/usr/local/udunits2/include
 
-LOC_LIBS = -lFmq -lMdv -lRadx -leuclid \
+LOC_LIBS = -lFmq -lMdv -lRadx -lNcxx -leuclid -lrapmath \
 	-ldsserver -lrapformats -ldidss -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread

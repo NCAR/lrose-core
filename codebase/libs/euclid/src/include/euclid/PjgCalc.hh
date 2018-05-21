@@ -21,18 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-/* RCS info
- *   $Author: dixon $
- *   $Locker:  $
- *   $Date: 2016/03/03 18:19:28 $
- *   $Id: PjgCalc.hh,v 1.20 2016/03/03 18:19:28 dixon Exp $
- *   $Revision: 1.20 $
- *   $State: Exp $
- */
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 
 /************************************************************************
  * PjgCalc.hh: class implementing projective geometry transformations.
@@ -112,7 +100,7 @@ public:
    * getProjType() - Retrieve the current PjgTypes projection type.
    */
 
-  virtual const int getProjType(void) const = 0;
+  virtual int getProjType(void) const = 0;
   
   
   /**********************************************************************

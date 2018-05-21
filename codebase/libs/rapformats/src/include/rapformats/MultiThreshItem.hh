@@ -26,7 +26,7 @@
 # ifndef    MultiThreshItem_H
 # define    MultiThreshItem_H
 
-#include <rapformats/FieldThresh.hh>
+#include <rapformats/FieldThresh2.hh>
 #include <rapformats/MultiThresh.hh>
 #include <vector>
 
@@ -39,7 +39,8 @@ public:
    * Empty constructor
    */
   inline MultiThreshItem(void) :
-  _multiThresh(), _genHour(0), _genMin(0), _genSec(0), _leadTime(0)
+  _multiThresh(), _genHour(-1), _genMin(-1), _genSec(-1), _leadTime(0),
+  _tileIndex(0)
   {
   }
 
@@ -52,19 +53,23 @@ public:
    * @param[in] genMin  Forecast generation time
    * @param[in] genSec  Forecast generation time
    * @param[in] leadTime  Forecast lead time
+   * @param[in] tileIndex  Tile index 
+   * @param[in] motherTile  True if came from  mother tile
    * @param[in] bias  bias value
    * @param[in] obsValue  Observations data value
    * @param[in] fcstValue  Forecast data value
    */
-  inline MultiThreshItem(std::vector<FieldThresh> fieldthresh, time_t obsTime,
+  inline MultiThreshItem(std::vector<FieldThresh2> fieldthresh, time_t obsTime,
 			 int genHour, int genMin, int genSec,
-			 int leadTime, double bias=-999.99,
-			 double obsValue=-99.99, double fcstValue=-99.99) :
-    _multiThresh(fieldthresh, bias, obsTime, obsValue, fcstValue),
+			 int leadTime, int tileIndex, bool motherTile,
+			 double bias=-999.99, double obsValue=-99.99,
+			 double fcstValue=-99.99) :
+    _multiThresh(fieldthresh, bias, obsTime, obsValue, fcstValue, motherTile),
     _genHour(genHour),
     _genMin(genMin),
     _genSec(genSec),
-    _leadTime(leadTime)
+    _leadTime(leadTime),
+    _tileIndex(tileIndex)
   {
   }
 
@@ -76,12 +81,14 @@ public:
    * @param[in] genMin  Forecast generation time
    * @param[in] genSec  Forecast generation time
    * @param[in] leadTime  Forecast lead time
+   * @param[in] tileIndex  Tile index
    */
   inline MultiThreshItem(const MultiThresh &mthresh,
 			 int genHour, int genMin, int genSec,
-			 int leadTime) :
+			 int leadTime, int tileIndex) :
     _multiThresh(mthresh), _genHour(genHour),
-    _genMin(genMin), _genSec(genSec), _leadTime(leadTime)
+    _genMin(genMin), _genSec(genSec), _leadTime(leadTime),
+    _tileIndex(tileIndex)
   {
   }
 
@@ -89,6 +96,14 @@ public:
    * Destructor 
    */
   inline ~MultiThreshItem(void) {}
+
+  /**
+   * @return true if the is an empty object
+   */
+  inline bool empty(void) const
+  {
+    return _genHour == -1 && _genMin == -1 && _genSec == -1;
+  }
 
   /**
    * Get the FieldThresh object associated with a field name
@@ -101,12 +116,22 @@ public:
     return _multiThresh.get(fieldName, item);
   }
   
+  /**
+   * Debug print
+   */
+  void print(void) const;
+
+  /**
+   * Debug log message to DEBUG
+   */
+  void logDebug(void) const;
 
   MultiThresh _multiThresh;  /**< thresholds information */
   int _genHour;              /**< Forecast gen time */
   int _genMin;               /**< Forecast gen time */
   int _genSec;               /**< Forecast gen time */
   int _leadTime;             /**< Forecast lead time */
+  int _tileIndex;            /**< Index into tiles */
 
 protected:
 private:  

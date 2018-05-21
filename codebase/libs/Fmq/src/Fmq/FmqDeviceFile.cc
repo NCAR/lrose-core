@@ -447,6 +447,31 @@ int FmqDeviceFile::check_size(ident_t id, size_t expectedSize)
 
 }
 
+////////////////////////////////////////////////////
+//  Get the device buffer size.
+//  Return value:
+//    size of buffer
+
+int FmqDeviceFile::get_size(ident_t id)
+
+{
+
+  clearErrStr();
+  
+  struct stat file_stat;
+
+  if (ta_stat(_path[id].c_str(), &file_stat)) {
+    int errNum = errno;
+    _errStr += "ERROR - FmqDeviceFile::check_size\n";
+    TaStr::AddStr(_errStr, "Cannot stat file: ", _path[id]);
+    _errStr += strerror(errNum);
+    return -1;
+  }
+
+  return (int) file_stat.st_size;
+
+}
+
 ////////////////////////////////////////////////////////////
 //  update_last_id_read()
 //

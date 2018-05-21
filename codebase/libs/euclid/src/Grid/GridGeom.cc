@@ -26,13 +26,11 @@
 // Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 // January 1998
 //
-// $Id: GridGeom.cc,v 1.23 2016/03/03 18:19:27 dixon Exp $
-//
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <cassert>
 #include <math.h>
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 #include <euclid/GridGeom.hh>
 using namespace std;
 

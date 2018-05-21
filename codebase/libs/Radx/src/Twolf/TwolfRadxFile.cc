@@ -200,7 +200,7 @@ int TwolfRadxFile::_getStartTimeFromPath(const string &path)
   const char *firstDigit = fileName.c_str();
   while (!isdigit(*firstDigit)) {
     firstDigit++;
-    if (firstDigit == '\0') {
+    if (*firstDigit == '\0') {
       // got null
       _addErrStr("ERROR - TwolfRadxFile::getStartTimeFromPath");
       _addErrStr("  Cannot get time from path: ", path);
@@ -277,8 +277,10 @@ int TwolfRadxFile::readFromPath(const string &path,
 
   // is this an RHI
 
+  _rhiMode = false;
   if (RadxAngleHist::checkIsRhi(_rays)) {
 
+    _rhiMode = true;
     double startAz = _rays[0]->getAzimuthDeg();
     for (size_t ii = 0; ii < _rays.size(); ii++) {
       RadxRay *ray = _rays[ii];
@@ -695,7 +697,7 @@ int TwolfRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - TwolfRadxFile::writeToDir" << endl;
-  cerr << "  Writing TWOLF raw format files not supported" << endl;
+  cerr << "  Writing TWOLF format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -734,7 +736,7 @@ int TwolfRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - TwolfRadxFile::writeToPath" << endl;
-  cerr << "  Writing Twolf raw format files not supported" << endl;
+  cerr << "  Writing Twolf format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object

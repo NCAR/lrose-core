@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -437,6 +437,8 @@ public:
 
   int radar_id;
 
+  tdrp_bool_t use_secondary_georeference;
+
   int n_samples;
 
   int start_gate;
@@ -466,7 +468,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[58];
+  mutable TDRPtable _table[59];
 
   const char *_className;
 

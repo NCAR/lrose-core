@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -903,6 +903,60 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("OVERRIDING ENCODING ON READ");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'override_encoding_type_on_read'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_encoding_type_on_read");
+    tt->descr = tdrpStrDup("Option to override the encoding on read.");
+    tt->help = tdrpStrDup("Normally, the client sets the desired encoding type and it is included in the read message. If this parameter is set to TRUE, the specified encoding type will be used instead of that requested by the client.");
+    tt->val_offset = (char *) &override_encoding_type_on_read - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'encoding_type_on_read'
+    // ctype is '_encoding_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("encoding_type_on_read");
+    tt->descr = tdrpStrDup("Set encoding type for the read operations.");
+    tt->help = tdrpStrDup("Only applies if override_encoding_on_read is TRUE.");
+    tt->val_offset = (char *) &encoding_type_on_read - &_start_;
+    tt->enum_def.name = tdrpStrDup("encoding_type_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("ENCODING_ASIS");
+      tt->enum_def.fields[0].val = ENCODING_ASIS;
+      tt->enum_def.fields[1].name = tdrpStrDup("ENCODING_INT8");
+      tt->enum_def.fields[1].val = ENCODING_INT8;
+      tt->enum_def.fields[2].name = tdrpStrDup("ENCODING_INT16");
+      tt->enum_def.fields[2].val = ENCODING_INT16;
+      tt->enum_def.fields[3].name = tdrpStrDup("ENCODING_FLOAT32");
+      tt->enum_def.fields[3].val = ENCODING_FLOAT32;
+    tt->single_val.e = ENCODING_ASIS;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("OVERRIDING DATA SET SOURCE, NAME AND INFO - READ OPERATIONS ONLY");
+    tt->comment_text = tdrpStrDup("The following options allow you to override the data set source, name and info when reading. These will be replaced by the specified XML strings, for use by the client.");
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OVERRIDING DATA SET SOURCE, NAME AND INFO - READ OPERATIONS ONLY");
     tt->comment_text = tdrpStrDup("The following options allow you to override the data set source, name and info when reading. These will be replaced by the specified XML strings, for use by the client.");
     tt++;
@@ -979,11 +1033,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("<info></info>");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("REMAP TO LAT-LON - READ OPERATIONS ONLY");
     tt->comment_text = tdrpStrDup("Option to remap the projection to a Lat-lon grid.");
     tt++;
@@ -1000,11 +1054,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("CONSTRAIN THE LEAD TIMES FOR FORECAST DATA - READ OPERATIONS ONLY");
     tt->comment_text = tdrpStrDup("This option allows you to select only certain lead times to be served out. You can also specify that the search time be interpreted as the generate time.");
     tt++;
@@ -1057,11 +1111,11 @@ using namespace std;
       tt->struct_vals[2].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("CREATE COMPOSITE - READ OPERATIONS ONLY");
     tt->comment_text = tdrpStrDup("Option to create a composite - max at any height.");
     tt++;
@@ -1078,11 +1132,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("DECIMATION - READ OPERATIONS ONLY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1111,11 +1165,11 @@ using namespace std;
     tt->single_val.i = 1000000;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("MEASURED RHI DATA OPTION - READ OPERATIONS ONLY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1192,11 +1246,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("VERTICAL UNITS SPECIFICATION - READ OPERATIONS ONLY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1235,11 +1289,11 @@ using namespace std;
     tt->single_val.e = HEIGHT_KM;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("DERIVED FIELDS - READ OPERATIONS ONLY");
     tt->comment_text = tdrpStrDup("Creating derived fields on the fly.");
     tt++;
@@ -1435,11 +1489,11 @@ using namespace std;
       tt->struct_vals[22].d = 0;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("CLIMATOLOGY DATA");
     tt->comment_text = tdrpStrDup("Option to serve out data from a climatology directory if a time-based request is made.");
     tt++;
@@ -1504,11 +1558,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("FILLING IN REGIONS OF MISSING DATA - READ OPERATIONS ONLY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1525,11 +1579,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("SETTING VALID TIME SEARCH WEIGHT - READ OPERATIONS ONLY");
     tt->comment_text = tdrpStrDup("Only applies to forecast data sets stored in the gen_time/forecast_time format.");
     tt++;
@@ -1558,11 +1612,11 @@ using namespace std;
     tt->single_val.d = 2.5;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("FORWARD ON WRITE - WRITE OPERATIONS ONLY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1599,11 +1653,11 @@ using namespace std;
       tt->array_vals[1].s = tdrpStrDup("mdvp:://remotehost::mdv/data/set1");
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("OVERRIDE FORMAT for WRITES");
     tt->comment_text = tdrpStrDup("If set, these override the write format specified in the message from the client.\n\nFORMAT_MDV: normal legacy MDV format\n\nFORMAT_XML: XML format. XML data consists of 2 buffers/files: an XML text buffer for the headers/meta-data, and a data buffer for the data. NOTE: only COMPRESSION_NONE and COMPRESSION_GZIP_VOL are supported in XML. File extensions are .mdv.xml and .xml.buf\n\nFORMAT_NCF: netCDF CF format. File extension is .mdv.nc");
     tt++;
@@ -1642,11 +1696,11 @@ using namespace std;
     tt->single_val.e = FORMAT_MDV;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("WRITE IN FORECAST PATH STYLE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1675,11 +1729,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("WRITE USING EXTENDED PATHS");
     tt->comment_text = tdrpStrDup("This will be overridden if the environment variable MDV_WRITE_USING_EXTENDED_PATHS exists and is set to TRUE.");
     tt++;
@@ -1696,11 +1750,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("NETCDF CF SUPPORT.");
     tt->comment_text = tdrpStrDup("The following parameters control conversion of MDV files to NetCDF CF-compliant files.");
     tt++;
@@ -1912,6 +1966,18 @@ using namespace std;
     tt->help = tdrpStrDup("The CF convention requires that these arrays are present in the netCDF file; however, the information is redundant since the lat and lon arrays could be constructed using the other projection and grid information required with a gridded data field");
     tt->val_offset = (char *) &ncf_output_latlon_arrays - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'ncf_output_start_end_times'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ncf_output_start_end_times");
+    tt->descr = tdrpStrDup("If true Mdv start_time and end_time are output");
+    tt->help = tdrpStrDup("If the information contained in the Mdv start_time and end_time is redundant or irrelevant the user can choose not to output these variables ");
+    tt->val_offset = (char *) &ncf_output_start_end_times - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'ncf_output_mdv_attributes'

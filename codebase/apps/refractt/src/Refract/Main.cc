@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 // RCS info
-//   $Author: dixon $
+//   $Author: dave $
 //   $Locker:  $
-//   $Date: 2016/03/07 18:17:27 $
-//   $Id: Main.cc,v 1.2 2016/03/07 18:17:27 dixon Exp $
-//   $Revision: 1.2 $
+//   $Date: 2017/07/28 22:38:28 $
+//   $Id: Main.cc,v 1.3 2017/07/28 22:38:28 dave Exp $
+//   $Revision: 1.3 $
 //   $State: Exp $
 //
  
@@ -50,8 +50,6 @@
 #include <toolsa/umisc.h>
 
 #include "Refract.hh"
-
-using namespace std;
 
 
 // Prototypes for static functions

@@ -21,17 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/03 18:19:27 $
-//   $Id: PjgLc2Calc.cc,v 1.15 2016/03/03 18:19:27 dixon Exp $
-//   $Revision: 1.15 $
-//   $State: Exp $
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * PjgLc2Calc.cc: Class for calculating transformations using a Lambert
  *                Conformal projection with 2 tangent latitudes.
@@ -48,7 +37,7 @@
 
 #include <euclid/Pjg.hh>
 #include <euclid/PjgLc2Calc.hh>
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 #include <cassert>
 using namespace std;
 
@@ -143,7 +132,7 @@ PjgLc2Calc::PjgLc2Calc(const double origin_lat, const double origin_lon,
   _F = cos(lc2_lat1_rad) * t1n / _n;
     
   t0n = pow( tan(M_PI_4 + origin_lat_rad/2), _n);
-  _rho = EARTH_RADIUS * _F / t0n;
+  _rho = Pjg::EradKm * _F / t0n;
 }
 
 
@@ -178,7 +167,7 @@ void PjgLc2Calc::latlon2xy(const double lat, const double lon,
   theta = _n * (lon_rad - _originLonRad);
 
   tn = pow( tan(M_PI_4 + lat_rad / 2), _n);
-  r = EARTH_RADIUS * _F / tn;
+  r = Pjg::EradKm * _F / tn;
 
   x = r * sin (theta);
   y = _rho - r * cos(theta);
@@ -216,7 +205,7 @@ void PjgLc2Calc::xy2latlon(const double x, const double y,
   }
   else
   {
-    rn = pow( EARTH_RADIUS * _F / r, 1 / _n);
+    rn = pow( Pjg::EradKm * _F / r, 1 / _n);
     lat = (2.0 * atan(rn) - M_PI_2) * RAD_TO_DEG;
   }
 

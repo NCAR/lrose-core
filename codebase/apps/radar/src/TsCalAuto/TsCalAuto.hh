@@ -104,6 +104,8 @@ private:
   double _wavelengthCm, _wavelengthM;
 
   double _prevFreq;
+
+  int _testPulsePid;
   
   // results
 
@@ -185,6 +187,9 @@ private:
   void _openPulseReader(); 
   void _closePulseReader();
   void _conditionGateRange(const IwrfTsPulse &pulse);
+
+  void _suspendTestPulse();
+  void _resumeTestPulse();
 
 };
 

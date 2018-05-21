@@ -321,6 +321,11 @@ int Ltg2Spdb::_processFile(const char *file_path)
         break;
       }
 
+    case Params::ALBLM: {
+       _decode_alblm(line);
+        break;
+    }
+
     
       default: {}
 
@@ -1943,3 +1948,129 @@ int Ltg2Spdb::_checkNearDuplicate(const double lat, const double lon, const time
   return -1;
 
 }
+
+int Ltg2Spdb::_decode_alblm(const char *line)
+{
+  // Decode alaska BLM data-- 15 potential fields
+  // format is:OBJECTID,STROKETYPE,NETWORKCODE,UTCDATETIME,LOCALDATETIME,MILLISECONDS,LATITUDE,LONGITUDE,AMPLITUDE,GDOP,ERRSEMIMAJOR,ERRSEMIMINOR,ERRELIPSEANGLE,STRIKETIME,STRIKESEQNUMBER
+     
+  //
+  // Create space for string field data
+  //
+  char    *outStrs[15];
+ 
+  for (int i = 0; i < 15; i++)
+  {
+    outStrs[i] = new char[64];
+    outStrs[i][0] = '\0';
+  }
+
+  //
+  // Separate the comma delimited fields
+  //
+  STRparse_delim(line, outStrs, 960,",", 15, 64);
+  
+  LTG_extended_t strike;
+ 
+  LTG_init_extended(&strike);
+ 
+ 
+  if( strcmp( outStrs[1],"STROKETYPE") == 0)
+  {
+    // comment line, no data
+    return -1;
+  }
+  else if ( strcmp( outStrs[1],"GROUND_STROKE") == 0)
+  {
+    strike.type = LTG_GROUND_STROKE;
+  }
+  else if ( strcmp( outStrs[1], "CLOUD_STROKE") == 0)
+  {
+    strike.type = LTG_CLOUD_STROKE;
+  }
+  else 
+  {
+    strike.type = LTG_TYPE_UNKNOWN;
+  }
+
+  //
+  // Get the strike time
+  //
+  int year, month, day, hour, min, sec;
+  sscanf(outStrs[3],"%d/%d/%d %d:%d:%d",&month,&day,&year,&hour,&min,&sec);
+
+  double milliSecs;
+  sscanf(outStrs[5],"%lf", &milliSecs);
+
+  DateTime strikeTime(year,month,day, hour,min, sec);
+  strike.time = (si32) strikeTime.utime();
+  strike.nanosecs = milliSecs;
+  
+  //
+  // Get the latitude and longitude
+  //
+  sscanf(outStrs[6],"%f", &strike.latitude);
+  sscanf(outStrs[7],"%f", &strike.longitude);
+  cerr << "strike.latitude " << strike.latitude << endl;
+  cerr << "strike.longitude " << strike.longitude << endl;
+
+  // check bounding box?
+
+  if (_params.checkBoundingBox) 
+  {
+    if (strike.latitude < _params.boundingBox.min_lat ||
+        strike.latitude > _params.boundingBox.max_lat ||
+        strike.longitude < _params.boundingBox.min_lon ||
+        strike.longitude > _params.boundingBox.max_lon) 
+    {
+      if (_params.debug >= Params::DEBUG_VERBOSE) 
+      {
+        cerr << "WARNING - Alaska BLM " << endl;
+        cerr << "  Data outside bounding box" << endl;
+        cerr << "  Data line: " << line << endl;
+      }
+      return -1;
+    }
+  }
+
+  sscanf(outStrs[8],"%f", &strike.amplitude);
+
+  sscanf(outStrs[10], "%f", &strike.semi_major_axis);
+  sscanf(outStrs[11], "%f", &strike.semi_minor_axis);
+  sscanf(outStrs[12], "%f", &strike.ellipse_angle);
+
+
+  //
+  // Mem cleanup
+  // 
+  for (int i = 0; i < 15; i++)
+  {
+    delete(outStrs[i]);
+  }
+
+  // Check for duplicates?
+  if (_params.duplicates.check)
+  {
+    if ( _checkNearDuplicate( strike ) )
+    {
+      if (_params.debug >= Params::DEBUG_VERBOSE) 
+      {
+  	cerr << "Strike for " << strike.latitude << ", ";
+  	cerr << strike.longitude << " at " << utimstr(strike.time);
+  	cerr << " rejected as near duplicate." << endl;
+      }
+      return -1;
+    }
+  }
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) 
+  {
+    LTG_print_extended(stderr, &strike);
+  }
+  
+  _addStrike(strike);
+  
+  return 0;
+}
+ 
+

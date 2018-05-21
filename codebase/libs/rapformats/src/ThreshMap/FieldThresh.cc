@@ -33,11 +33,20 @@ FieldThresh::FieldThresh(const std::string &xml, const std::string &fname) :
 }
 
 //-------------------------------------------------------------------------
-std::string FieldThresh::toXml(void) const
+std::string FieldThresh::toXml(int indent) const
 {
-  std::string ret = TaXml::writeString("F", 0, _fieldName);
-  ret += TaXml::writeDouble("T", 0, _thresh, "%.10lf");
-  return TaXml::writeString(_tag, 0, ret);
+  std::string ret = TaXml::writeStartTag(_tag, indent);
+  ret += toXmlContent(indent+1);
+  ret += TaXml::writeEndTag(_tag, indent);
+  return ret;
+}
+
+//-------------------------------------------------------------------------
+std::string FieldThresh::toXmlContent(int indent) const
+{
+  std::string ret = TaXml::writeString("F", indent, _fieldName);
+  ret += TaXml::writeDouble("T", indent, _thresh, "%.10lf");
+  return ret;
 }
 
 //-------------------------------------------------------------------------
@@ -61,6 +70,7 @@ void FieldThresh::printNoNewline(void) const
   printf("%s[%lf] ", _fieldName.c_str(), _thresh);
 }
 
+#ifdef NOTDEF
 //-------------------------------------------------------------
 std::string FieldThresh::dataFieldName(int nameChars, int precision) const
 {
@@ -93,4 +103,17 @@ std::string FieldThresh::dataFieldName(int nameChars, int precision) const
   std::string ret = buf;
   return ret;
 }
+#endif
 
+//-------------------------------------------------------------
+void FieldThresh::
+update(const std::vector<std::pair<std::string,double> > &nameThresh)
+{
+  for (size_t i=0; i<nameThresh.size(); ++i)
+  {
+    if (nameThresh[i].first == _fieldName)
+    {
+      _thresh = nameThresh[i].second;
+    }
+  }
+}

@@ -38,7 +38,7 @@ TARGET_FILE = WWA2Symprod
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-ltoolsa -leuclid -ldataport -ltdrp \
+	-leuclid -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \
 	-lm
 

@@ -96,6 +96,11 @@ int Args::parse (const int argc, const char **argv)
       sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-check_ray_alloc")) {
+      
+      sprintf(tmp_str, "check_ray_alloc = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-sim_mode")) {
       
       sprintf(tmp_str, "input_mode = SIMULATED_INPUT;");
@@ -105,6 +110,15 @@ int Args::parse (const int argc, const char **argv)
       
       sprintf(tmp_str, "input_mode = DSR_FMQ_INPUT;");
       TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-color_scales")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "color_scale_dir = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
       
     } else if (!strcmp(argv[i], "-fmq_url")) {
       
@@ -188,12 +202,19 @@ int Args::parse (const int argc, const char **argv)
 	iret = -1;
       }
       
-    } else if (!strcmp(argv[i], "-end_time")) {
+    } else if (!strcmp(argv[i], "-images_start_time")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "archive_end_time = \"%s\";", argv[++i]);
+        sprintf(tmp_str, "images_archive_start_time = \"%s\";", argv[++i]);
         TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "begin_in_archive_mode = TRUE;");
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[i], "-images_end_time")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "images_archive_end_time = \"%s\";", argv[++i]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -212,6 +233,8 @@ int Args::parse (const int argc, const char **argv)
       
       if (i < argc - 1) {
         sprintf(tmp_str, "bscan_time_span_secs = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "archive_time_span_secs = %s;", argv[i]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -272,27 +295,33 @@ void Args::_usage(ostream &out)
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -archive_url ?] URL for data in archive mode\n"
       << "       [ -bscan ] run in BSCAN mode\n"
+      << "       [ -check_ray_alloc ]\n"
+      << "         print out checks on number of ray allocation and frees\n"
+      << "       [ -color_scales ? ] specify color scale directory\n"
       << "       [ -debug, -d ] print debug messages\n"
-      << "       [ -end_time \"yyyy mm dd hh mm ss\"]\n"
-      << "            set end time for archive image-generation mode\n"
       << "       [ -f ? ?] list of files to process in archive mode\n"
       << "       [ -fmq_mode] set forces DSR_FMQ_INPUT mode\n"
       << "       [ -fmq_url ?] set input fmq URL\n"
+      << "       [ -images_end_time \"yyyy mm dd hh mm ss\"]\n"
+      << "            set end time for image generation mode\n"
       << "       [ -image_interval ?]\n"
       << "            set image generation interval (secs)\n"
+      << "       [ -images_start_time \"yyyy mm dd hh mm ss\"]\n"
+      << "            set start time for image generation mode\n"
       << "       [ -instance ?] set instance for procmap\n"
       << "       [ -polar ] run in POLAR (PPI/RHI) mode\n"
       << "       [ -sim_mode] SIMULATED_INPUT mode\n"
       << "       [ -start_time \"yyyy mm dd hh mm ss\"]\n"
       << "            set start time for archive mode\n"
-      << "            or archive image generation mode\n"
       << "       [ -start_x ? ] start x location of main window\n"
       << "       [ -start_y ? ] start y location of main window\n"
       << "       [ -tcp_mode] IWRF_TCP_INPUT mode\n"
       << "       [ -tcp_host ?] set TCP server host\n"
       << "       [ -tcp_port ?] set TCP server port\n"
       << "       [ -time_span ?]\n"
-      << "            time span for bscan (secs)\n"
+      << "            set time span (secs)\n"
+      << "            applies to bscan time width\n"
+      << "            or archive mode time span\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"
       << "       [ -vv, -extra ] print extra verbose debug messages\n"
       << endl;

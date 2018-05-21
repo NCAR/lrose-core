@@ -38,7 +38,7 @@ RayFile *RayFileFactory::createRayFile(std::string &file_type,
 				       std::string& platform, int scan_type, float fixed_angle,
                                        int volume_num, int sweep_num) throw (Fault)
 {
-    char basename[50];
+  // char basename[50];
     RayFile *rayfile = NULL;
 
     if (file_type == "dorade"){

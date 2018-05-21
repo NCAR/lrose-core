@@ -49,12 +49,12 @@ commentdef {
 };
 
 paramdef string {
-  p_default = "localhost";
+  p_default = "192.168.84.201";
   p_descr = "Host name on which HSRL raw server is running.";
 } hsrl_tcp_server_host;
 
 paramdef int {
-  p_default = 12000;
+  p_default = 40404;
   p_descr = "TCP/IP port on which HSRL server is running.";
 } hsrl_tcp_server_port;
 

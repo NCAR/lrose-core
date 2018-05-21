@@ -21,18 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-/* RCS info
- *   $Author: dixon $
- *   $Locker:  $
- *   $Date: 2016/03/03 18:19:28 $
- *   $Id: PjgObliqueStereoCalc.hh,v 1.4 2016/03/03 18:19:28 dixon Exp $
- *   $Revision: 1.4 $
- *   $State: Exp $
- */
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 
 /************************************************************************
  * PjgObliqueStereoCalc.hh: class implementing projective geometry 
@@ -90,7 +78,7 @@ public:
    * getProjType() - Retrieve the current projection type.
    */
 
-  const int getProjType(void) const
+  int getProjType(void) const
   {
     return PjgTypes::PROJ_STEREOGRAPHIC;
   }

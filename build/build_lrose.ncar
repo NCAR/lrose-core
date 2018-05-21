@@ -38,7 +38,7 @@ codebaseDir=${runDir}/codebase
 
 # defaults
 
-prefix=${LROSE_INSTALL_DIR}
+prefix=${HOME}/lrose
 package=lrose
 debug=true
 
@@ -54,7 +54,7 @@ function usage() {
     echo "  -p ? :  set package"
     echo "           default is 'lrose'"
     echo "  -x ? :  set prefix"
-    echo "           default is '/usr/local/lrose'"
+    echo "           default is '${LROSE_INSTALL_DIR}'"
     echo
 }
 
@@ -101,15 +101,10 @@ export LROSE_INSTALL_DIR=${prefix}
 # Set up build environment
 # ------------------------
 
-export HOST_OS=LINUX_64
+export HOST_OS=LINUX_LROSE
 if [ "$package" == "cidd" ]
 then
   export HOST_OS=LINUX_64_CIDD32
-fi
-uname -a | grep x86_64
-if [ "$?" = 1 ]
-then
-    export HOST_OS=LINUX
 fi
 
 export RAP_MAKE_INC_DIR=$LROSE_CORE_DIR/codebase/make_include
@@ -157,21 +152,29 @@ cd $codebaseDir/apps
 make -j 8 -k opt
 make -j 8 -k install
 
+cd $codebaseDir/apps/scripts/src
+make install
+
+cd $codebaseDir/apps/procmap/src/scripts
+make install
+
 # Install perl lib modules
 #-------------------------
 
-if [ "$package" == "lrose" -o "$package" == "hcr" ]
+if [ "$package" == "lrose" -o "$package" == "hcr" \
+    -o "$package" == "hsrl" -o "$package" == "titan" ]
 then
   cd $codebaseDir
   cd libs/perl5/src
   mkdir -p ${prefix}/lib/perl5
-  /bin/cp *pm ${prefix}/lib/perl5
+  rsync -av *pm ${prefix}/lib/perl5
 fi
 
 # Install scripts
 #----------------
 
-if [ "$package" == "lrose" -o "$package" == "hcr" ]
+if [ "$package" == "lrose" -o "$package" == "hcr" \
+    -o "$package" == "hsrl" -o "$package" == "titan" ]
 then
 
   cd $codebaseDir/apps/procmap/src/scripts
@@ -182,6 +185,15 @@ then
 
 fi
 
+# Install pkg-config scripts
+#----------------
+
+cd $codebaseDir
+./make_bin/createPkgConfig.py ${prefix}
+rsync -av $codebaseDir/make_bin/lrose-config.template ${prefix}/bin
+chmod u+x ${prefix}/bin/lrose-config
+
+
 # Checking the build
 # ------------------
 
@@ -190,7 +202,7 @@ echo
 echo "============= Checking libs for $package ============="
 
 ./codebase/make_bin/check_libs.py \
-  --listPath ./build/libs_check_list.${package} \
+  --listPath ./build/checklists/libs_check_list.${package} \
   --libDir ${prefix}/lib \
   --label $package --maxAge 3600
 
@@ -200,7 +212,7 @@ echo
 echo "============= checking apps for $package ============="
 
 ./codebase/make_bin/check_apps.py \
-  --listPath ./build/apps_check_list.${package} \
+  --listPath ./build/checklists/apps_check_list.${package} \
   --appDir ${prefix}/bin \
   --label $package --maxAge 3600
 

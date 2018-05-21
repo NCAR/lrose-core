@@ -59,7 +59,7 @@ NcfVlevelInfo::NcfVlevelInfo (Mdvx::vlevel_header_t &vlevHdr, int vlevelType,
   _nz = nz;
 
   MEM_zero(_zData);
-  memcpy(_zData,  vlevHdr.level, _nz* sizeof(fl32));
+  memcpy(_zData,  _vlevHdr.level, _nz* sizeof(fl32));
 
   _vlevelType = vlevelType;
   
@@ -286,8 +286,10 @@ int NcfVlevelInfo::addVlevelVar(int vlevelNum, Nc3File *ncFile, string &errStr)
   // iret |= !_zVar->add_att("long_name",
   //                         "distance from trajectory in vertical dimension");
 
-  iret |= !_zVar->add_att(NcfMdv::units, _units.c_str());
-  
+  if (_units != string("level")){
+    iret |= !_zVar->add_att(NcfMdv::units, _units.c_str());
+  }
+
   if (_positive.size() > 0) {
     iret |= !_zVar->add_att(NcfMdv::positive, _positive.c_str());
   }
@@ -307,7 +309,7 @@ int NcfVlevelInfo::writeDataToFile(Nc3File *ncFile, string &errStr)
   
 {
   
-  if (_zVar != NULL && _zData != NULL) {
+  if (_zVar != NULL) {
     if (!_zVar->put( _zData, _nz)) {
       TaStr::AddStr(errStr, "ERROR - NcfVlevelInfo::writeVlevelDataToFile");
       TaStr::AddStr(errStr, "  Cannot put vlevel data");

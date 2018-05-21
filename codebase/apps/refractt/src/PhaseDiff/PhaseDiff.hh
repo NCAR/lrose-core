@@ -36,19 +36,16 @@
 #ifndef PhaseDiff_HH
 #define PhaseDiff_HH
 
-#include <string>
-#include <sys/time.h>
-#include <vector>
-
+#include "Params.hh"
+#include <Refract/RefractInput.hh>
+#include <Refract/RefParms.hh>
 #include <dsdata/DsTrigger.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxPjg.hh>
 #include <toolsa/DateTime.hh>
-
-#include "Args.hh"
-#include "Params.hh"
-
-using namespace std;
+#include <string>
+#include <vector>
+#include <sys/time.h>
 
 
 /** 
@@ -180,17 +177,14 @@ class PhaseDiff
 
   char *_progName;
 
-  /**
-   * @brief Command line arguments.
-   */
-
-  Args *_args;
 
   /**
    * @brief Parameter file parameters.
    */
 
-  Params *_params;
+  Params _params;
+  RefParms _refparms;
+  
   
   /**
    * @brief Triggering object
@@ -199,13 +193,20 @@ class PhaseDiff
   DsTrigger *_dataTrigger;
   
 
+  /**
+   * @brief Field used to test number of vertical levels
+   */
+  std::string _testField;
 
-  /////////////////////
+  RefractInput *_input;
+
+   /////////////////////
   // Private methods //
   /////////////////////
 
   void _createPhaseColorscale() const;
   void _createNiqColorscale() const;
+  // bool _isDebugPt(int i) const;
   
   /**
    * @brief Constructor
@@ -219,22 +220,22 @@ class PhaseDiff
   PhaseDiff(int argc, char **argv);
   
 
-  /**
-   * @brief Calculate the I/Q fields from the NIQ/AIQ fields given in the
-   *        input file.  Replace the NIQ/AIQ fields with the calculated I/Q
-   *        fields so the file will look the same as it would if the I/Q
-   *        fields were read from disk.
-   *
-   * @param[in,out] niq_field The input NIQ field which is replaced with
-   *                          the I field on return.
-   * @param[in,out] aiq_field The input AIQ field which is replaced with
-   *                          the Q field on return.
-   * @param[in] snr_field The input SNR field.
-   */
+  // /**
+  //  * @brief Calculate the I/Q fields from the NIQ/AIQ fields given in the
+  //  *        input file.  Replace the NIQ/AIQ fields with the calculated I/Q
+  //  *        fields so the file will look the same as it would if the I/Q
+  //  *        fields were read from disk.
+  //  *
+  //  * @param[in,out] niq_field The input NIQ field which is replaced with
+  //  *                          the I field on return.
+  //  * @param[in,out] aiq_field The input AIQ field which is replaced with
+  //  *                          the Q field on return.
+  //  * @param[in] snr_field The input SNR field.
+  //  */
 
-  void _calcIQ(MdvxField &niq_field,
-	       MdvxField &aiq_field,
-	       const MdvxField &snr_field) const;
+  // void _calcIQ(MdvxField &niq_field,
+  // 	       MdvxField &aiq_field,
+  // 	       const MdvxField &snr_field) const;
   
 
   /**
@@ -247,47 +248,7 @@ class PhaseDiff
    * @return Returns true on success, false on failure.
    */
 
-  bool _calcPhaseDiff(const DsMdvx &mdvx1,
-		      DsMdvx &mdvx2) const;
-  
-
-  /**
-   * @brief Calculate the SNR field from the power field given in the input
-   *        file.  Replace the power filed with the calculated SNR field so
-   *        the file will look the same as it would if the SNR field were
-   *        read from disk.
-   *
-   * @param[in,out] power_field The input power field which is replaced with
-   *                            the SNR field on return.
-   */
-
-  void _calcSnr(MdvxField &power_field) const;
-  
-
-  /**
-   * @brief Create a blank MDV field with the given field name.
-   *
-   * @param[in] proj The data projection.
-   * @param[in] field_name The field name.
-   * @param[in] elevation The elevation angle of the tilt we are processing.
-   *
-   * @return Returns a pointer to the new field on success, 0 on failure.
-   *         The calling method takes ownership of the pointer and must
-   *         delete it when no longer needed.
-   */
-
-  MdvxField *_createBlankField(const MdvxPjg &proj,
-			       const string &field_name,
-			       const fl32 elevation) const;
-  
-
-  /**
-   * @brief Initialize the data trigger.
-   *
-   * Returns true on success, false on failure.
-   */
-
-  bool _initTrigger(void);
+  bool _calcPhaseDiff(DsMdvx &mdvx1, DsMdvx &mdvx2) const;
   
 
   /**
@@ -308,16 +269,11 @@ class PhaseDiff
    *
    * @param[out] mdvx The input file.
    * @param[in] data_time Data time to read.
-   * @param[in] search_margin Data time search margin in seconds.
    *
    * @return Returns true on success, false on failure.
    */
 
-  bool _readInputFile(DsMdvx &mdvx,
-		      const DateTime &data_time,
-		      const int search_margin) const;
-  
-
+  bool _readInputFile(DsMdvx &mdvx, const DateTime &data_time);
 };
 
 

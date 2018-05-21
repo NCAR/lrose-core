@@ -80,9 +80,6 @@ private:
   string _progName;
   Params _params;
   Args _args;
-  int _argc;
-  char **_argv;
-  char *_paramsPath;
 
   // reading data in
 
@@ -102,6 +99,7 @@ private:
 
   int _setupDisplayFields();
   int _setupReader();
+  string _getArchiveUrl(const string &filePath);
 
 };
 

@@ -41,8 +41,8 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-lradar -lRadx -lFmq -ldsserver \
-	-lrapformats -ldidss -ltoolsa -ldataport \
-	-leuclid -ltdrp -lbz2 -lz
+	-lrapformats -ldidss -ldataport \
+	-leuclid -ltoolsa -ltdrp -lbz2 -lz
 
 HDRS = \
 	$(PARAMS_HH) \

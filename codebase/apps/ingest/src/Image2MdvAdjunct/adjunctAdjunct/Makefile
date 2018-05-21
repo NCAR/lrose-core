@@ -10,7 +10,7 @@ TARGET_FILE = adjunctAdjunct
 LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
-LOC_LIBS = -lMdv -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver \
            -leuclid -ldidss -lcidd -lrapformats \
            -ltoolsa -ldataport -ltdrp -lrapmath -lm -lpthread
 

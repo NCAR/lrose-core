@@ -10,7 +10,7 @@
 
 commentdef {
   p_header = "HawkEye is the engineering display for the HAWK moments data";
-  p_text = "This is a C++ application using the QT4 GUI toolkit.";
+  p_text = "This is a C++ application using the QT GUI toolkit.";
 }
 
 commentdef {
@@ -26,6 +26,12 @@ paramdef enum debug_t {
   p_descr = "Debug option";
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print out checks on ray memory allocation.";
+  p_help = "If TRUE, the app will keep track of the number of rays allocated and freed, and print out that information every 100 rays.";
+} check_ray_alloc;
 
 paramdef boolean {
   p_default = FALSE;
@@ -47,14 +53,13 @@ typedef enum {
   IWRF_FMQ_INPUT, 
   IWRF_TCP_INPUT, 
   SIMULATED_INPUT, 
-  SIMULATED_RHI_INPUT,
   DSR_FMQ_INPUT // deprecated
 } input_mode_t;
 
 paramdef enum input_mode_t {
   p_default = IWRF_FMQ_INPUT;
   p_descr = "Method for reading the input data";
-  p_help = "\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.\n\tSIMULATED_RHI_INPUT: internally-generated test pattern data for RHIs.\n\tDSR_FMQ_INPUT: deprecated.";
+  p_help = "\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.\n\tDSR_FMQ_INPUT: deprecated.";
 } input_mode;
 
 paramdef string {
@@ -101,29 +106,17 @@ paramdef string {
   p_help = "In archive mode, data retrieval starts at this time.";
 } archive_start_time;
 
-paramdef int {
-  p_default = 300;
-  p_descr = "Time between scans in archive mode (secs).";
-  p_help = "Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.";
-} archive_scan_interval_secs;
-
-paramdef int {
-  p_default = 12;
-  p_descr = "Number of scans in archive mode.";
-  p_help = "Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.";
-} archive_n_scans;
+paramdef double {
+  p_default = 3600;
+  p_descr = "Time span in ARCHIVE mode (secs).";
+  p_help = "Archive end time = archive_start_time + archive_time_span.";
+} archive_time_span_secs;
 
 paramdef string {
-  p_default = "/scr/eldora1/hcr-test/cfradial/moments/wband";
+  p_default = "/data/cfradial/kddc";
   p_descr = "URL for archive data files.";
   p_help = "This should point to a CfRadial moments data set.";
 } archive_data_url;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Time margin for search in archive mode (secs).";
-  p_help = "We search for data within this margin, on either side of the required time.";
-} archive_search_margin_secs;
 
 commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
@@ -168,7 +161,7 @@ paramdef struct show_status_t {
     azimuth = true,
     elevation = true,
     fixed_angle = true,
-    volume_number = true,
+    volume_number = false,
     sweep_number = true,
     n_samples = true,
     n_gates = true,
@@ -179,15 +172,15 @@ paramdef struct show_status_t {
     nyquist = true,
     max_range = true,
     unambiguous_range = true,
-    measured_power_h = true,
-    measured_power_v = true,
-    scan_name = true,
+    measured_power_h = false,
+    measured_power_v = false,
+    scan_name = false,
     scan_mode = true,
     polarization_mode = true,
     latitude = true,
     longitude = true,
     altitude = true,
-    altitude_rate = true,
+    altitude_rate = false,
     sun_elevation = true,
     sun_azimuth = true,
     speed = false,
@@ -206,8 +199,9 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "./colorscales";
+  p_default = "../share/color_scales";
   p_descr = "Directory for color scales";
+  p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
 } color_scale_dir;
 
 typedef struct {
@@ -222,9 +216,77 @@ typedef struct {
 
 paramdef struct field_t {
   p_default = {
-    { "DBZ", "DBZ", "DBZ_F", "dBZ", "dbz.colors", "1" },
-    { "VEL", "VEL", "VEL_F", "m/s", "vel.colors", "2" },
-    { "WIDTH", "WIDTH", "WIDTH_F", "m/s", "width.colors", "3" }
+    {
+      label = "DBZ",
+      raw_name = "DBZ",
+      filtered_name = "",
+      units = "dBZ",
+      color_map = "dbz.colors",
+      shortcut = "1"
+    }
+    ,
+    {
+      label = "REF",
+      raw_name = "REF",
+      filtered_name = "",
+      units = "dBZ",
+      color_map = "dbz.colors",
+      shortcut = "2"
+    }
+    ,
+    {
+      label = "VEL",
+      raw_name = "VEL",
+      filtered_name = "",
+      units = "m/s",
+      color_map = "vel.colors",
+      shortcut = "3"
+    }
+    ,
+    {
+      label = "WIDTH",
+      raw_name = "WIDTH",
+      filtered_name = "",
+      units = "m/s",
+      color_map = "width.colors",
+      shortcut = "4"
+    }
+    ,
+    {
+      label = "SW",
+      raw_name = "SW",
+      filtered_name = "",
+      units = "m/s",
+      color_map = "width.colors",
+      shortcut = "5"
+    }
+    ,
+    {
+      label = "ZDR",
+      raw_name = "ZDR",
+      filtered_name = "",
+      units = "dB",
+      color_map = "zdr.colors",
+      shortcut = "6"
+    }
+    ,
+    {
+      label = "PHIDP",
+      raw_name = "PHIDP",
+      filtered_name = "",
+      units = "deg",
+      color_map = "phidp.colors",
+      shortcut = "7"
+    }
+    ,
+    {
+      label = "RHOHV",
+      raw_name = "RHOHV",
+      filtered_name = "",
+      units = "unitless",
+      color_map = "rhohv.colors",
+      shortcut = "8"
+    }
   };
   p_descr = "Fields to be displayed.";
   p_help = "label: appears on the GUI. "
@@ -256,7 +318,7 @@ commentdef {
 }
 
 paramdef double {
-  p_default = 150.0;
+  p_default = 225.0;
   p_descr = "Max range for the display (km).";
 } max_range_km;
 
@@ -313,12 +375,12 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 1000;
+  p_default = 1050;
   p_descr = "Startup width of main window (pixels).";
 } main_window_width;
 
 paramdef int {
-  p_default = 800;
+  p_default = 635;
   p_descr = "Startup height of main window (pixels).";
 } main_window_height;
 
@@ -333,7 +395,7 @@ paramdef int {
 } main_window_start_y;
 
 paramdef int {
-  p_default = 80;
+  p_default = 40;
   p_descr = "Width of color scale (pixels).";
 } color_scale_width;
 
@@ -431,7 +493,7 @@ paramdef int {
 } rhi_window_height;
 
 paramdef int {
-  p_default = 1000;
+  p_default = 1100;
   p_descr = "Startup X for RHI window (pixels).";
 } rhi_window_start_x;
 
@@ -514,7 +576,7 @@ paramdef boolean {
 } rhi_grids_on_at_startup;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Set RHI range rings overlay on at startup.";
 } rhi_range_rings_on_at_startup;
 
@@ -528,6 +590,12 @@ paramdef enum legend_pos_t {
   p_descr = "Position of main legend in the RHI plot window";
   p_help = "This include time, field name and elevation angle.";
 } rhi_main_legend_pos;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Size of the queue for RHI beams.";
+  p_help = "After the queue reaches this size, older beams are discarded.";
+} rhi_beam_queue_size;
 
 commentdef {
   p_header = "BSCAN TIME LIMITS";
@@ -558,19 +626,19 @@ commentdef {
 }
 
 paramdef double {
-  p_default = 0.75;
+  p_default = 0.5;
   p_descr = "What fraction of the existing data to save when moving the plot to the left.";
   p_help = "When we reach the right-hand side of the display, we need to move the plot to the left. This is the fraction of the plot that is saved after the move has taken place.";
 } bscan_realtime_fraction_saved;
 
 paramdef double {
-  p_default = 0.030;
+  p_default = 0.01;
   p_descr = "Min time between incoming beams (secs).";
   p_help = "If beams arrive too fast, we discard some so that the time between the beams is at least this long.";
 } bscan_min_secs_between_reading_beams;
 
 paramdef double {
-  p_default = 0.030;
+  p_default = 0.0;
   p_descr = "Min time between rendering (secs).";
   p_help = "Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU and/or GPU.";
 } bscan_min_secs_between_rendering_beams;
@@ -580,7 +648,7 @@ commentdef {
 }
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Specify the min and max range when in range mode.";
   p_help = "If false, we will use the start range and max range in the data.";
 } bscan_specify_range_limits;
@@ -598,7 +666,7 @@ paramdef double {
 } bscan_max_range_km;
 
 paramdef double {
-  p_default = 0;
+  p_default = -0.5;
   p_descr = "Min altitude plotted (km).";
 } bscan_min_altitude_km;
 
@@ -652,7 +720,7 @@ paramdef double {
 } bscan_min_range_to_surface_km;
 
 paramdef double {
-  p_default = 0.05;
+  p_default = 0.2;
   p_descr = "Margin of data plotted beyond the surface (km).";
   p_help = "We will censor the data beyond the surface gate, plus this range margin.";
 } bscan_surface_range_margin_km;
@@ -668,36 +736,36 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 20;
+  p_default = 40;
   p_descr = "Height of top margin in BSCAN mode (pixels).";
   p_help = "Titles go in the top margin.";
 } bscan_top_margin;
 
 paramdef int {
-  p_default = 20;
+  p_default = 45;
   p_descr = "Height of bottom margin in BSCAN mode (pixels).";
   p_help = "Time scale goes in the bottom margin.";
 } bscan_bottom_margin;
 
 paramdef int {
-  p_default = 20;
+  p_default = 50;
   p_descr = "Width of left margin in BSCAN mode (pixels).";
   p_help = "Height scale goes in the left margin.";
 } bscan_left_margin;
 
 paramdef int {
-  p_default = 20;
+  p_default = 40;
   p_descr = "Width of right margin in BSCAN mode (pixels).";
   p_help = "Height scale goes in the right margin.";
 } bscan_right_margin;
 
 paramdef int {
-  p_default = 7;
+  p_default = 6;
   p_descr = "Length of ticks on axes (pixels).";
 } bscan_axis_tick_len;
 
 paramdef int {
-  p_default = 7;
+  p_default = 10;
   p_descr = "Ideal number of ticks on axes.";
 } bscan_n_ticks_ideal;
 
@@ -711,17 +779,17 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 14;
+  p_default = 12;
   p_descr = "Font size of center title (pixels).";
 } bscan_title_font_size;
 
 paramdef int {
-  p_default = 12;
+  p_default = 10;
   p_descr = "Font size of axis labels in bscan (pixels).";
 } bscan_axis_label_font_size;
 
 paramdef int {
-  p_default = 10;
+  p_default = 8;
   p_descr = "Font size of axis values (pixels).";
 } bscan_axis_values_font_size;
 
@@ -736,22 +804,22 @@ paramdef string {
 } bscan_grid_color;
 
 paramdef string {
-  p_default = "yellow";
+  p_default = "white";
   p_descr = "Color of labels in bscan.";
 } bscan_labels_color;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to draw grid lines across plot at regular time intervals.";
 } bscan_draw_time_grid_lines;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to draw grid lines across plot at regular range intervals.";
 } bscan_draw_range_grid_lines;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to draw a line for the instrument location.";
   p_descr = "Applies to RANGE_AXIS_SCALE_ALTITUDE option only.";
 } bscan_draw_instrument_height_line;
@@ -766,13 +834,13 @@ commentdef {
 }
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to plot distance as well as time on the time axis.";
   p_help = "If true, extra tick marks will show the distance in km along the time axis, in addition to the time.";
 } bscan_add_distance_to_time_axis;
 
 paramdef int {
-  p_default = 100;
+  p_default = 50;
   p_descr = "Number of segments to be used for computing distance.";
   p_help = "We divide the rays into this number of segments and then compute the distance travelled during each segment using the change in lat/lon position. We keep the number of segments reasonably small to avoid unnecessary CPU usage.";
 } bscan_n_segments_for_computing_distance;
@@ -782,7 +850,7 @@ commentdef {
 }
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to plot the starting lat/lon position as a legend.";
   p_help = "This helps in geolocating the data from a mobile system.";
 } bscan_plot_starting_latlon_as_legend;
@@ -794,7 +862,7 @@ paramdef enum legend_pos_t {
 } bscan_starting_latlon_legend_pos;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to plot the mean track and speed in a legend.";
   p_help = "This helps in geolocating the data from a mobile system.";
 } bscan_plot_mean_track_and_speed_as_legend;
@@ -816,7 +884,7 @@ paramdef boolean {
 } bscan_archive_dwell_auto;
 
 paramdef double {
-  p_default = 0.25;
+  p_default = 0.1;
   p_descr = "Specified dwell time for archive mode (secs).";
 } bscan_archive_dwell_secs;
 
@@ -860,7 +928,7 @@ paramdef string {
 } images_file_name_category;
 
 paramdef string {
-  p_default = "HawkEye";
+  p_default = "NSF_NCAR_GV_HCR";
   p_descr = "Set the platform string.";
   p_help = "If empty, no platform will be included.";
 } images_file_name_platform;
@@ -884,7 +952,7 @@ paramdef boolean {
 } images_include_time_part_in_file_name;
 
 paramdef boolean {
-  p_default = true;
+  p_default = false;
   p_descr = "Normally the time part include the seconds: YYYYMMDDHHMMSS.";
   p_help = "If FALSE, the SS will be excluuded from the time part.";
 } images_include_seconds_in_time_part;
@@ -896,7 +964,7 @@ paramdef boolean {
 } images_include_field_label_in_file_name;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to write latest_data_info files when an image is created.";
   p_descr = "If true, _latest_data_info files will be written to the output directory, and the file write will be registered with the DataMapper.";
 } images_write_latest_data_info;
@@ -948,6 +1016,12 @@ paramdef string {
   p_help = "Only applicable for image generation.";
 } images_archive_end_time;
 
+paramdef int {
+  p_default = 300;
+  p_descr = "Time between scans in archive mode (secs).";
+  p_help = "Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.";
+} images_scan_interval_secs;
+
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to specify the sweep indexes for the image generation.";
@@ -965,7 +1039,7 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 20;
+  p_default = 10;
   p_descr = "Number of milliseconds to sleep between beams in simulated input "
             "mode.";
 } sim_sleep_msecs;

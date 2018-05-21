@@ -2190,7 +2190,10 @@ int Fmq::_read_msg (int slot_num)
       // leave data compressed for server to pass on
       _msgBuf.free();
       int msg_len = slot->stored_len - 2 * sizeof(si32);
-      _msgBuf.add(iptr + 2, msg_len);
+      if (_add_read_msg(iptr + 2, msg_len)) {
+        cerr << "ERROR - _read_msg" << endl;
+        return -1;
+      }
     } else {
       // uncompress the data
       _msgBuf.free();
@@ -2207,14 +2210,20 @@ int Fmq::_read_msg (int slot_num)
 	return -1;
       }
       int msg_len = slot->msg_len;
-      _msgBuf.add(umsg, msg_len);
+      if (_add_read_msg(umsg, msg_len)) {
+        cerr << "ERROR - _read_msg" << endl;
+        return -1;
+      }
       ta_compress_free(umsg);
     }
   } else {
     // data not compressed
     _msgBuf.free();
     int msg_len = slot->msg_len;
-    _msgBuf.add(iptr + 2, msg_len);
+    if (_add_read_msg(iptr + 2, msg_len)) {
+      cerr << "ERROR - _read_msg" << endl;
+      return -1;
+    }
   }
 
   // set len and latest slot read.
@@ -2278,11 +2287,30 @@ int Fmq::_load_read_msg(int msg_type,
     _slot.stored_len = stored_len;
     _msgBuf.free();
     _msgBuf.add(msg, stored_len);
-    
+
   }
   
   return 0;
 
+}
+
+////////////////////////////////////////////////////////////
+//  Add a message to the msg buffer on read
+//  Checks for valid length
+//  Return value:
+//    0 on success, -1 on failure
+
+int Fmq::_add_read_msg(void *msg, int msg_size)
+{
+  if (msg_size < 0 || msg_size > _bufSize) {
+    cerr << "ERROR - Fmq::_add_to_msg" << endl;
+    cerr << "  fmq path: " << _fmqPath << endl;
+    cerr << "  bad message size on read: " << msg_size << endl;
+    cerr << "  max message size: " << _bufSize << endl;
+    return -1;
+  }
+  _msgBuf.add(msg, msg_size);
+  return 0;
 }
 
 ////////////////////////////////////////////////////////////
@@ -2837,6 +2865,8 @@ int Fmq::_open_device(const char *mode)
     _print_error("_open_device", _dev->getErrStr().c_str());
     return -1;
   }
+
+  _bufSize = _dev->get_size(FmqDevice::BUF_IDENT);
 
   return 0;
 

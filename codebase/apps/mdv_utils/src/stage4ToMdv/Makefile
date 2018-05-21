@@ -36,9 +36,9 @@ TARGET_FILE = stage4ToMdv
 
 LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
 
-LOC_LIBS = -lnetcdf -lMdv -lRadx -ldsserver \
-	-ldidss -lrapformats -lphysics -ltoolsa \
-	-ldataport -ltdrp -leuclid $(NETCDF4_LIBS) \
+LOC_LIBS = -lnetcdf -lMdv -lRadx -lNcxx -ldsserver \
+	-ldidss -lrapformats -lphysics \
+	-ldataport -ltdrp -leuclid -ltoolsa $(NETCDF4_LIBS) \
 	-lbz2 -lz -lpthread -lm
 
 LOC_LDFLAGS = $(NETCDF_LDFLAGS) $(NETCDF4_LDFLAGS)

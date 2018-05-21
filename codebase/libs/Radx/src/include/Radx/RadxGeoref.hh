@@ -77,6 +77,8 @@ public:
 
   inline void setTimeSecs(time_t val) { _timeSecs = val; }
   inline void setNanoSecs(double val) { _nanoSecs = val; }
+  inline void setUnitNum(Radx::si64 val) { _unitNum = val; }
+  inline void setUnitId(Radx::si64 val) { _unitId = val; }
   inline void setLongitude(double val) { _longitude = val; }
   inline void setLatitude(double val) { _latitude = val; }
   inline void setAltitudeKmMsl(double val) { _altitudeKmMsl = val; }
@@ -106,6 +108,8 @@ public:
 
   inline time_t getTimeSecs() const { return _timeSecs; }
   inline double getNanoSecs() const { return _nanoSecs; }
+  inline Radx::si64 getUnitNum() const { return _unitNum; }
+  inline Radx::si64 getUnitId() const { return _unitId; }
   inline double getLongitude() const { return _longitude; }
   inline double getLatitude() const { return _latitude; }
   inline double getAltitudeKmMsl() const { return _altitudeKmMsl; }
@@ -171,6 +175,9 @@ private:
   
   time_t _timeSecs;
   double _nanoSecs;
+
+  Radx::si64 _unitNum;
+  Radx::si64 _unitId;
   
   double _longitude;	 /* Antenna longitude (Eastern
                           * Hemisphere is positive, West
@@ -241,8 +248,10 @@ private:
   
   typedef struct {
     
-    Radx::si32 timeSecs;
-    Radx::fl64 nanoSecs;
+    Radx::si64 timeSecs;
+    Radx::si64 nanoSecs;
+    Radx::si64 unitNum;
+    Radx::si64 unitId;
     Radx::fl64 longitude;
     Radx::fl64 latitude;
     Radx::fl64 altitudeKmMsl;

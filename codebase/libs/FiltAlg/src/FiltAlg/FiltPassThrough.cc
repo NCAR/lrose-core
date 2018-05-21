@@ -144,3 +144,10 @@ void FiltPassThrough::set_input_info(Info **info) const
 {
   return;
 }
+
+//------------------------------------------------------------------
+void FiltPassThrough::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+

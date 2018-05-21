@@ -37,9 +37,9 @@ TARGET_FILE = RadxEvad
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lSpdb -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lSpdb -ldsserver \
 	-ldidss -lrapformats -lrapmath -lphysics \
-	-ltoolsa -leuclid -ldataport -ltdrp \
+	-leuclid -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

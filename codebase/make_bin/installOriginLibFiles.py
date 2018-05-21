@@ -16,21 +16,31 @@ import sys
 import subprocess
 from optparse import OptionParser
 import shutil
+from sys import platform
 
 def main():
 
-    global progName
     global options
     global debug
     global ignoreList
 
-    progName = os.path.basename(sys.argv[0])
-    
+    global thisScriptName
+    thisScriptName = os.path.basename(__file__)
+
     # parse the command line
 
     usage = "usage: %prog [options]: prints catalog to stdout"
     #ignoreDefault = 'libc.so,libpthread.so,libdl.so,libX11.so'
-    ignoreDefault = 'libc.so,libpthread.so,libdl.so'
+    if (platform == "darwin"):
+        # OSX
+        ignoreDefault = 'libapple,libc++,libcache,libclosured' + \
+                        ',libcommon,libcompiler,libcopy,libcore' + \
+                        ',libcrypto,libdispatch,libdyld,libkeymgr' + \
+                        ',libobjc,libremovefile,libsystem,libunwind' + \
+                        ',libpthread,libdl,libX,libxpc'
+    else:
+        # LINUX
+        ignoreDefault = 'libc.so,libpthread.so,libdl.so'
 
     parser = OptionParser(usage)
     parser.add_option('--debug',
@@ -50,10 +60,6 @@ def main():
                       'Any lib containing these strings will not be ' +
                       'included in the install. Default is: ' +
                       ignoreDefault)
-    parser.add_option('--osx',
-                      dest='isOsx', default=False,
-                      action="store_true",
-                      help='Set to OSX (default is LINUX)')
     parser.add_option('--verbose',
                       dest='verbose', default=False,
                       action="store_true",
@@ -67,14 +73,15 @@ def main():
         options.debug = True
 
     if (options.debug == True):
-        print >>sys.stderr, "Options:"
-        print >>sys.stderr, "  Debug: ", options.debug
-        print >>sys.stderr, "  Verbose: ", options.verbose
-        print >>sys.stderr, "  binDir: ", options.binDir
-        print >>sys.stderr, "  relDir: ", options.relDir
-        print >>sys.stderr, "  isOsx: ", options.isOsx
-        print >>sys.stderr, "  ignore: ", options.ignore
-        print >>sys.stderr, "  ignoreList: ", ignoreList
+        print >>sys.stderr, "  Running " + thisScriptName
+        print >>sys.stderr, "    platform: ", platform
+        print >>sys.stderr, "  Options:"
+        print >>sys.stderr, "    debug: ", options.debug
+        print >>sys.stderr, "    verbose: ", options.verbose
+        print >>sys.stderr, "    binDir: ", options.binDir
+        print >>sys.stderr, "    relDir: ", options.relDir
+        print >>sys.stderr, "    ignore: ", options.ignore
+        print >>sys.stderr, "    ignoreList: ", ignoreList
 
     # create list of binaries in install dir
     
@@ -172,7 +179,7 @@ def main():
 
     # for LINUX we are done
 
-    if (options.isOsx == False):
+    if (platform != "darwin"):
         sys.exit(0)
 
     # for OSX, modify the binaries so that their
@@ -211,7 +218,7 @@ def findLibsForFile(filePath, validLibs):
 
     # get list of dynamic libs
     
-    if (options.isOsx):
+    if (platform == "darwin"):
         # OSX
         cmd = 'otool -L '
     else:
@@ -233,7 +240,7 @@ def findLibsForFile(filePath, validLibs):
         libName = ''
         libPath = ''
 
-        if (options.isOsx):
+        if (platform == "darwin"):
 
             # OSX
 
@@ -305,7 +312,7 @@ def fileIsBinary(filePath):
     lines = pipe.readlines()
     isExecFile = False
 
-    if (options.isOsx):
+    if (platform == "darwin"):
 
         # MAC OSX
 
@@ -351,12 +358,15 @@ def copyLibToRelDir(libName, libPath):
     if not os.path.exists(destDir):
         os.makedirs(destDir)
 
-    # copy in lib file
+    # copy in lib file, converting links into files
     
-    try:
-        shutil.copy2(libPath, destDir)
-    except (shutil.Error, IOError), err:
-        print >>sys.stderr, "===>>> WARNING: ", err
+    cmd = "rsync -avL " + libPath + " " + destDir
+    runCommand(cmd)
+
+    # try:
+    #     shutil.copy2(libPath, destDir)
+    # except (shutil.Error, IOError), err:
+    #     print >>sys.stderr, "===>>> WARNING: ", err
 
 ########################################################################
 # Modify a library dependency paths in an executable file

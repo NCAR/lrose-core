@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -884,7 +884,7 @@ using namespace std;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 7;
+    tt->array_n = 8;
     tt->struct_def.name = tdrpStrDup("output_field_t");
     tt->struct_def.nfields = 6;
     tt->struct_def.fields = (struct_field_t *)
@@ -930,24 +930,26 @@ using namespace std;
       tt->struct_def.fields[5].rel_offset = 
         (char *) &_output_fields->type - (char *) _output_fields;
         tt->struct_def.fields[5].enum_def.name = tdrpStrDup("output_data_t");
-        tt->struct_def.fields[5].enum_def.nfields = 7;
+        tt->struct_def.fields[5].enum_def.nfields = 8;
         tt->struct_def.fields[5].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[5].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[5].enum_def.fields[0].name = tdrpStrDup("PID");
         tt->struct_def.fields[5].enum_def.fields[0].val = PID;
-        tt->struct_def.fields[5].enum_def.fields[1].name = tdrpStrDup("HEIGHT");
-        tt->struct_def.fields[5].enum_def.fields[1].val = HEIGHT;
-        tt->struct_def.fields[5].enum_def.fields[2].name = tdrpStrDup("RANGE");
-        tt->struct_def.fields[5].enum_def.fields[2].val = RANGE;
-        tt->struct_def.fields[5].enum_def.fields[3].name = tdrpStrDup("NUM_BLOCKED");
-        tt->struct_def.fields[5].enum_def.fields[3].val = NUM_BLOCKED;
-        tt->struct_def.fields[5].enum_def.fields[4].name = tdrpStrDup("NUM_LOW_SNR");
-        tt->struct_def.fields[5].enum_def.fields[4].val = NUM_LOW_SNR;
-        tt->struct_def.fields[5].enum_def.fields[5].name = tdrpStrDup("NUM_CLUTTER");
-        tt->struct_def.fields[5].enum_def.fields[5].val = NUM_CLUTTER;
-        tt->struct_def.fields[5].enum_def.fields[6].name = tdrpStrDup("MASK");
-        tt->struct_def.fields[5].enum_def.fields[6].val = MASK;
-    tt->n_struct_vals = 42;
+        tt->struct_def.fields[5].enum_def.fields[1].name = tdrpStrDup("ELEVATION");
+        tt->struct_def.fields[5].enum_def.fields[1].val = ELEVATION;
+        tt->struct_def.fields[5].enum_def.fields[2].name = tdrpStrDup("HEIGHT");
+        tt->struct_def.fields[5].enum_def.fields[2].val = HEIGHT;
+        tt->struct_def.fields[5].enum_def.fields[3].name = tdrpStrDup("RANGE");
+        tt->struct_def.fields[5].enum_def.fields[3].val = RANGE;
+        tt->struct_def.fields[5].enum_def.fields[4].name = tdrpStrDup("NUM_BLOCKED");
+        tt->struct_def.fields[5].enum_def.fields[4].val = NUM_BLOCKED;
+        tt->struct_def.fields[5].enum_def.fields[5].name = tdrpStrDup("NUM_LOW_SNR");
+        tt->struct_def.fields[5].enum_def.fields[5].val = NUM_LOW_SNR;
+        tt->struct_def.fields[5].enum_def.fields[6].name = tdrpStrDup("NUM_CLUTTER");
+        tt->struct_def.fields[5].enum_def.fields[6].val = NUM_CLUTTER;
+        tt->struct_def.fields[5].enum_def.fields[7].name = tdrpStrDup("MASK");
+        tt->struct_def.fields[5].enum_def.fields[7].val = MASK;
+    tt->n_struct_vals = 48;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("PID");
@@ -956,42 +958,48 @@ using namespace std;
       tt->struct_vals[3].s = tdrpStrDup("none");
       tt->struct_vals[4].e = OUTPUT_FLOAT;
       tt->struct_vals[5].e = PID;
-      tt->struct_vals[6].s = tdrpStrDup("HEIGHT");
-      tt->struct_vals[7].s = tdrpStrDup("HEIGHT");
-      tt->struct_vals[8].s = tdrpStrDup("HEIGHT");
-      tt->struct_vals[9].s = tdrpStrDup("km");
+      tt->struct_vals[6].s = tdrpStrDup("ELEVATION");
+      tt->struct_vals[7].s = tdrpStrDup("ELEVATION");
+      tt->struct_vals[8].s = tdrpStrDup("ELEVATION");
+      tt->struct_vals[9].s = tdrpStrDup("deg");
       tt->struct_vals[10].e = OUTPUT_FLOAT;
-      tt->struct_vals[11].e = HEIGHT;
-      tt->struct_vals[12].s = tdrpStrDup("RANGE");
-      tt->struct_vals[13].s = tdrpStrDup("RANGE");
-      tt->struct_vals[14].s = tdrpStrDup("RANGE");
+      tt->struct_vals[11].e = ELEVATION;
+      tt->struct_vals[12].s = tdrpStrDup("HEIGHT");
+      tt->struct_vals[13].s = tdrpStrDup("HEIGHT");
+      tt->struct_vals[14].s = tdrpStrDup("HEIGHT");
       tt->struct_vals[15].s = tdrpStrDup("km");
       tt->struct_vals[16].e = OUTPUT_FLOAT;
-      tt->struct_vals[17].e = RANGE;
-      tt->struct_vals[18].s = tdrpStrDup("NBLOCK");
-      tt->struct_vals[19].s = tdrpStrDup("NBLOCK");
-      tt->struct_vals[20].s = tdrpStrDup("NBLOCK");
-      tt->struct_vals[21].s = tdrpStrDup("count");
+      tt->struct_vals[17].e = HEIGHT;
+      tt->struct_vals[18].s = tdrpStrDup("RANGE");
+      tt->struct_vals[19].s = tdrpStrDup("RANGE");
+      tt->struct_vals[20].s = tdrpStrDup("RANGE");
+      tt->struct_vals[21].s = tdrpStrDup("km");
       tt->struct_vals[22].e = OUTPUT_FLOAT;
-      tt->struct_vals[23].e = NUM_BLOCKED;
-      tt->struct_vals[24].s = tdrpStrDup("NLOW_SNR");
-      tt->struct_vals[25].s = tdrpStrDup("NLOW_SNR");
-      tt->struct_vals[26].s = tdrpStrDup("NLOW_SNR");
+      tt->struct_vals[23].e = RANGE;
+      tt->struct_vals[24].s = tdrpStrDup("NBLOCK");
+      tt->struct_vals[25].s = tdrpStrDup("NBLOCK");
+      tt->struct_vals[26].s = tdrpStrDup("NBLOCK");
       tt->struct_vals[27].s = tdrpStrDup("count");
       tt->struct_vals[28].e = OUTPUT_FLOAT;
-      tt->struct_vals[29].e = NUM_LOW_SNR;
-      tt->struct_vals[30].s = tdrpStrDup("NCLUT");
-      tt->struct_vals[31].s = tdrpStrDup("NCLUT");
-      tt->struct_vals[32].s = tdrpStrDup("NCLUT");
+      tt->struct_vals[29].e = NUM_BLOCKED;
+      tt->struct_vals[30].s = tdrpStrDup("NLOW_SNR");
+      tt->struct_vals[31].s = tdrpStrDup("NLOW_SNR");
+      tt->struct_vals[32].s = tdrpStrDup("NLOW_SNR");
       tt->struct_vals[33].s = tdrpStrDup("count");
       tt->struct_vals[34].e = OUTPUT_FLOAT;
-      tt->struct_vals[35].e = NUM_CLUTTER;
-      tt->struct_vals[36].s = tdrpStrDup("MASK");
-      tt->struct_vals[37].s = tdrpStrDup("MASK");
-      tt->struct_vals[38].s = tdrpStrDup("MASK");
-      tt->struct_vals[39].s = tdrpStrDup("mask");
+      tt->struct_vals[35].e = NUM_LOW_SNR;
+      tt->struct_vals[36].s = tdrpStrDup("NCLUT");
+      tt->struct_vals[37].s = tdrpStrDup("NCLUT");
+      tt->struct_vals[38].s = tdrpStrDup("NCLUT");
+      tt->struct_vals[39].s = tdrpStrDup("count");
       tt->struct_vals[40].e = OUTPUT_FLOAT;
-      tt->struct_vals[41].e = MASK;
+      tt->struct_vals[41].e = NUM_CLUTTER;
+      tt->struct_vals[42].s = tdrpStrDup("MASK");
+      tt->struct_vals[43].s = tdrpStrDup("MASK");
+      tt->struct_vals[44].s = tdrpStrDup("MASK");
+      tt->struct_vals[45].s = tdrpStrDup("mask");
+      tt->struct_vals[46].e = OUTPUT_FLOAT;
+      tt->struct_vals[47].e = MASK;
     tt++;
     
     // Parameter 'Comment 5'

@@ -2056,7 +2056,7 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
 
    NcxxGroup monGroup = _sweepGroup.getGroup(MONITORING);
    if (!monGroup.isNull()) {
-
+  
      _readRayVar(monGroup, _timeDimSweep, SCAN_RATE, _rayScanRate, false);
      _readRayVar(monGroup, _timeDimSweep, RADAR_ESTIMATED_NOISE_DBM_HC,
                  _rayEstNoiseDbmHc, false);
@@ -2084,6 +2084,8 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
  {
 
    _geoTime.clear();
+   _geoUnitNum.clear();
+   _geoUnitId.clear();
    _geoLatitude.clear();
    _geoLongitude.clear();
    _geoAltitudeMsl.clear();
@@ -2167,6 +2169,9 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
      err.addErrStr("  exception: ", e.what());
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
    }
+
+   _readRayVar(georefGroup, _timeDimSweep, GEOREF_UNIT_NUM, _geoUnitNum, false);
+   _readRayVar(georefGroup, _timeDimSweep, GEOREF_UNIT_ID, _geoUnitId, false);
 
    _readRayVar(georefGroup, _timeDimSweep, ALTITUDE_AGL, _geoAltitudeAgl, false); // meters
 
@@ -2308,6 +2313,12 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
          time_t tSecs = _readVol->getStartTimeSecs() + secs;
          geo.setTimeSecs(tSecs);
          geo.setNanoSecs(nanoSecs);
+       }
+       if (_geoUnitNum.size() > iray) {
+         geo.setUnitNum(_geoUnitNum[iray]);
+       }
+       if (_geoUnitId.size() > iray) {
+         geo.setUnitId(_geoUnitId[iray]);
        }
        if (_geoLatitude.size() > iray) {
          geo.setLatitude(_geoLatitude[iray]);
@@ -2768,6 +2779,70 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
 
    RadxArray<int> data_;
    int *data = data_.alloc(nTimes);
+   try {
+     var.getVal(data);
+     for (size_t ii = 0; ii < nTimes; ii++) {
+       vals.push_back(data[ii]);
+     }
+   } catch (NcxxException& e) {
+     if (!required) {
+       for (size_t ii = 0; ii < nTimes; ii++) {
+         vals.push_back(Radx::missingMetaInt);
+       }
+       clearErrStr();
+     } else {
+       NcxxErrStr err;
+       err.addErrStr("ERROR - Cf2RadxFile::_readRayVar");
+       err.addErrStr("  Cannot read variable: ", name);
+       err.addErrStr("  exception: ", e.what());
+       throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+     }
+   }
+
+   return var;
+
+ }
+
+ ///////////////////////////////////
+ // read a ray variable - long integer
+ // side effect: sets vals
+ // returns var used
+ // throws exception on failure
+
+ NcxxVar Cf2RadxFile::_readRayVar(NcxxGroup &group,
+                                  NcxxDim &dim,
+                                  const string &name,
+                                  vector<Radx::si64> &vals,
+                                  bool required)
+
+ {
+
+   vals.clear();
+   size_t nTimes = dim.getSize();
+
+   // get var
+
+   NcxxVar var = group.getVar(name);
+   if (var.isNull()) {
+     if (!required) {
+       for (size_t ii = 0; ii < nTimes; ii++) {
+         vals.push_back(Radx::missingMetaDouble);
+       }
+       clearErrStr();
+       return var;
+     } else {
+       NcxxErrStr err;
+       err.addErrStr("ERROR - Cf2RadxFile::_readRayVar");
+       err.addErrStr("  Cannot find var, name: ", name);
+       err.addErrStr("  group name: ", group.getName());
+       throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+     }
+   }
+
+   // load up data
+
+   RadxArray<Radx::si64> data_;
+   Radx::si64 *data = data_.alloc(nTimes);
    try {
      var.getVal(data);
      for (size_t ii = 0; ii < nTimes; ii++) {

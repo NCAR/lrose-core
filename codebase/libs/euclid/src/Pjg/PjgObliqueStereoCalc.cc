@@ -21,17 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/03 18:19:28 $
-//   $Id: PjgObliqueStereoCalc.cc,v 1.7 2016/03/03 18:19:28 dixon Exp $
-//   $Revision: 1.7 $
-//   $State: Exp $
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * PjgObliqueStereoCalc.cc: Class for calculating transformations 
  *                          using a oblique stereographic projection.
@@ -46,7 +35,7 @@
 
 #include <euclid/Pjg.hh>
 #include <euclid/PjgObliqueStereoCalc.hh>
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 using namespace std;
 
 

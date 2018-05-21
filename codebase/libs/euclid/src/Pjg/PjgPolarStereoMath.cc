@@ -58,6 +58,42 @@ PjgPolarStereoMath::PjgPolarStereoMath(double tangent_lon,
   setCentralScale(central_scale);
 }
 
+////////////////////////////////////////////////
+/// set methods
+
+void PjgPolarStereoMath::setTangentLon(const double tangent_lon)
+{
+  _origin_lon = tangent_lon; 
+  _tangent_lon = tangent_lon;
+  _tangent_lon_rad = _tangent_lon * Pjg::Deg2Rad;
+  _offset_lon = _origin_lon;
+}
+
+void PjgPolarStereoMath::setPole(const bool pole_is_north)
+{
+  _pole_is_north = pole_is_north;
+  
+  if(_pole_is_north) {
+    _origin_lat = 90.0;
+    _tangent_lat = 90.0;
+    _sin_tangent_lat = 1.0;
+  } else {
+    _origin_lat = -90.0;
+    _tangent_lat = -90.0;
+    _sin_tangent_lat = -1.0;
+  }
+  
+  _offset_lat = _origin_lat;
+}
+
+void PjgPolarStereoMath::setCentralScale(const double central_scale)
+{
+  _central_scale = central_scale;
+  if( _central_scale == 0.0) {
+    _central_scale = 1.0;
+  }
+}
+
 ///////////////
 // print object
 
@@ -109,8 +145,8 @@ void PjgPolarStereoMath::latlon2xy(double lat, double lon,
   
 {
 
-  double lat_rad = lat * Deg2Rad;
-  double lon_rad = lon * Deg2Rad;
+  double lat_rad = lat * Pjg::Deg2Rad;
+  double lon_rad = lon * Pjg::Deg2Rad;
 
   /* degenerate cases - Transform a close point */
   if (fabs(lat_rad + M_PI_2) < TINY_ANGLE) {
@@ -126,7 +162,7 @@ void PjgPolarStereoMath::latlon2xy(double lat, double lon,
   double sin_delta_lon, cos_delta_lon;
   EG_sincos(lon_rad - _tangent_lon_rad, &sin_delta_lon, &cos_delta_lon);
 
-  double mult = 2.0 * EradKm * _central_scale;
+  double mult = 2.0 * Pjg::EradKm * _central_scale;
   double xx, yy;
   if (_pole_is_north) {
     double tanval = tan(M_PI_4 - lat_rad/2.0);
@@ -161,7 +197,7 @@ void PjgPolarStereoMath::xy2latlon(double x, double y,
   y -= _false_northing;
   
   double rho = hypot(x, y);
-  double c = 2.0 * atan2( rho, 2.0 * EradKm * _central_scale);	
+  double c = 2.0 * atan2( rho, 2.0 * Pjg::EradKm * _central_scale);	
   double cosc = cos(c);
   
   double phi;
@@ -175,7 +211,7 @@ void PjgPolarStereoMath::xy2latlon(double x, double y,
     phi = asin(cosc * _sin_tangent_lat );
   }
   
-  lat = phi * Rad2Deg;
+  lat = phi * Pjg::Rad2Deg;
   
   double lamda;
   if ((fabs(x) < TINY_DBL) && (fabs(y) < TINY_DBL)) {
@@ -188,7 +224,7 @@ void PjgPolarStereoMath::xy2latlon(double x, double y,
     }
   }
   
-  lon = conditionRange180(lamda * Rad2Deg);
+  lon = conditionRange180(lamda * Pjg::Rad2Deg);
   conditionLon2Origin(lon);
 
 }
@@ -199,7 +235,7 @@ void PjgPolarStereoMath::xy2latlon(double x, double y,
 double PjgPolarStereoMath::computeCentralScale(double standard_lat)
 
 {
-  return (1.0 + sin(standard_lat * Deg2Rad)) / 2.0;
+  return (1.0 + sin(standard_lat * Pjg::Deg2Rad)) / 2.0;
 }
 
 

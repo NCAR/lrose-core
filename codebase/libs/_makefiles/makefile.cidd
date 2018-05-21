@@ -12,7 +12,6 @@ SUB_DIRS = \
         euclid \
 	physics \
         Radx \
-        Ncxx \
         radar \
 	shapelib \
 	devguide \
@@ -28,6 +27,7 @@ SUB_DIRS = \
 	rapmath \
         titan \
 	Mdv \
+        Ncxx \
 	Fmq \
 	Spdb
 

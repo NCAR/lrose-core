@@ -36,6 +36,7 @@
 #endif
 #endif
 
+#include <cmath>
 #include <string>
 #include <vector>
 #include <QDialog>
@@ -52,6 +53,12 @@
 #include "ScaledLabel.hh"
 #include "DisplayField.hh"
 #include "Params.hh"
+
+//#if defined(OSX_LROSE) && !defined(SINCOS_DEFN)
+//#define SINCOS_DEFN
+//#define sincosf(x, s, c) __sincosf(x, s, c)
+//#define sincos(x, s, c) __sincos(x, s, c)
+//#endif
 
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
@@ -236,6 +243,32 @@ public:
   }
   
 
+  ///////////////////////////////////////////////
+  /// \name Memory management:
+  /// This class uses the notion of clients to decide when it should be deleted.w
+  /// If removeClient() returns 0, the object should be deleted.
+  //@{
+
+  /// add a client - i.e. an object using this ray
+  /// returns the number of clients using the ray
+  
+  int addClient() const; 
+  
+  /// client object no longer needs this ray
+  /// returns the number of clients using the ray
+  
+  int removeClient() const;
+  
+  // set number of clients to zero
+
+  int removeAllClients() const;
+
+  /// delete this ray if no longer used by any client
+
+  static void deleteIfUnused(const Beam *beam);
+  
+  //@}
+
 protected:
 
   ///////////////////////
@@ -279,6 +312,11 @@ protected:
    */
 
   std::vector< std::vector< const QBrush* > > _brushes;
+
+  // keeping track of reference counting clients using this object
+
+  mutable int _nClients;
+  mutable pthread_mutex_t _nClientsMutex;
 
 };
 

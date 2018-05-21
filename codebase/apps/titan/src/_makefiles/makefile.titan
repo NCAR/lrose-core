@@ -9,18 +9,18 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 SUB_DIRS = \
 	AcPosnAscii2Spdb \
 	Alenia2Mom \
-        CIDD_titan \
 	ClutterAuto \
 	ClutterCompute \
 	ClutterTableGenerate \
         EchoTops \
 	EsdAcIngest \
 	FilterStorms \
-	MDV_server \
+        OpticalFlow \
 	PrintTitanFiles \
 	PrintTitanServer \
 	RdasSim \
 	Rview \
+        StratFinder \
 	StormInit2Field \
 	StormInitBdry \
 	StormInitClimatology \
@@ -30,7 +30,6 @@ SUB_DIRS = \
 	StormInitLocation \
 	Storms2Xml \
 	Storms2Xml2 \
-        StratFinder \
 	TimeHist \
 	Titan \
 	TitanLite \
@@ -41,6 +40,7 @@ SUB_DIRS = \
 	Tstorms2Spdb \
 	Tstorms2Xml \
 	UpdateStormFields \
+        UpdateStormSpeeds \
 	ac_ingest \
 	ac_tape_recover \
 	acmg_acpos_filter \
@@ -73,8 +73,7 @@ SUB_DIRS = \
 	uf2gate \
 	ufnexrad2gate \
 	wmi_ac_ingest \
-	wmi_ac_recover \
-	UpdateStormSpeeds
+	wmi_ac_recover
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
 

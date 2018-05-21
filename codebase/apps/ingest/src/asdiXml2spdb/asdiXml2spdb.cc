@@ -383,13 +383,15 @@ void asdiXml2spdb::_processAsdiXml(char *asdiMsg)
 
       _doc.Clear();
       int loadOkay = _doc.LoadFile( tmpFileName.c_str() );
-      remove( tmpFileName.c_str() );
+
 
       if(!loadOkay) {
 	cerr << "Error unable to read XML tmp file " << tmpFileName << endl;
+	remove( tmpFileName.c_str() );
 	delete[] xml;
 	return;  
       }
+      remove( tmpFileName.c_str() );
 
       TiXmlElement* root = _doc.RootElement();
       const char* facility = root->Attribute("sourceFacility");
@@ -1980,6 +1982,9 @@ void asdiXml2spdb::_parseTO(TiXmlElement* TO, date_time_t T)
 
   if(_params->decodeRoute)
   {
+    if(_route == NULL) 
+      _route = new routeDecode(_params);
+
     //
     // Set the first and last points on the route
     // to the Departure and destination airports.

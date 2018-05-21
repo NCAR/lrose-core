@@ -26,7 +26,7 @@
 //
 // SigmetRadxFile object
 //
-// Support for radial data in SIGMET raw format
+// Support for radial data in SIGMET format
 //
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -160,6 +160,8 @@ void SigmetRadxFile::clear()
   _nGates = 0;
   _sigmetIsSwapped = false;
   _nyquist = 0.0;
+  _dualPrt = false;
+  _prtRatio = 1.0;
 
   _sweepStartTime = 0;
   _startTimeSecs = 0;
@@ -205,7 +207,7 @@ int SigmetRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - SigmetRadxFile::writeToDir" << endl;
-  cerr << "  Writing SIGMET raw format files not supported" << endl;
+  cerr << "  Writing SIGMET format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -245,7 +247,7 @@ int SigmetRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - SigmetRadxFile::writeToPath" << endl;
-  cerr << "  Writing SIGMET raw format files not supported" << endl;
+  cerr << "  Writing SIGMET format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -511,7 +513,7 @@ int SigmetRadxFile::printNative(const string &path, ostream &out,
 
   // read in product and ingest headers
   
-  if (_readHeaders(true, cout)) {
+  if (_readHeaders(true, out)) {
     _addErrStr("ERROR - SigmetRadxFile::printNative");
     _addErrStr("  Reading header, file: ", _pathInUse);
     return -1;
@@ -526,8 +528,8 @@ int SigmetRadxFile::printNative(const string &path, ostream &out,
   int iret = 0;
   while (!feof(_file)) {
 
-    if (_readSweepData(true, cout) == 0) {
-      if (_processSweep(true, printData, cout)) {
+    if (_readSweepData(true, out) == 0) {
+      if (_processSweep(true, printData, out)) {
         _addErrStr("ERROR - SigmetRadxFile::printNative");
         _addErrStr("  Processing sweep, file: ", _pathInUse);
         iret = -1;
@@ -637,15 +639,23 @@ int SigmetRadxFile::_readHeaders(bool doPrint, ostream &out)
   _nyquist = _wavelengthM / (4.0 * _prtSec);
   switch (_prodHdr.end.trig_rate_scheme) {
     case PRF_DUAL_4_5:
+      _prtRatio = 5.0 / 4.0;
       _nyquist *= 4.0;
+      _dualPrt = true;
+      _prtRatio = 5.0 / 4.0;
       break;
     case PRF_DUAL_3_4:
       _nyquist *= 3.0;
+      _dualPrt = true;
+      _prtRatio = 4.0 / 3.0;
       break;
     case PRF_DUAL_2_3:
       _nyquist *= 2.0;
+      _dualPrt = true;
+      _prtRatio = 3.0 / 2.0;
       break;
-    default: {}
+    default:
+      _dualPrt = false;
   }
 
   // NOAA HRD radar?
@@ -684,6 +694,7 @@ int SigmetRadxFile::_readHeaders(bool doPrint, ostream &out)
     } else if (_isHrdLfRadar) {
       out << "  HRD LF Radar: true" << endl;
     }
+    out << "  sigmetIsSwapped: " << (_sigmetIsSwapped?"Y":"N") << endl;
     out << "=============================================" << endl;
   }
 
@@ -725,7 +736,7 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
   _nRaysSweep = 0;
   _inDatHdrs.clear();
   _nBytesData = 0;
-  for (int ifield = 0; ifield < 16; ifield++) {
+  while (ptr < (Radx::ui08 *) _record + RAW_RECORD_LEN) {
     ingest_data_header_t inDatHdr;
     memcpy(&inDatHdr, ptr, sizeof(inDatHdr));
     _swap(inDatHdr);
@@ -752,7 +763,7 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
     if (_inDatHdrs.size() == 1) {
       _inDatHdr0 = inDatHdr;
     }
-  }
+  } // while
 
   // compute the number of fields,
   // i.e. those headers with non-zero data_codes
@@ -783,9 +794,6 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
     if (fieldId != FIELD_EXT_HDR) {
       string name = _fieldId2Name(fieldId);
       string units = _fieldId2Units(fieldId);
-      if (name.find("WIDTH") != string::npos && units.size() == 0) {
-        units = "m/s";
-      }
       double scale = 1.0, bias = 0.0;
       _fieldId2ScaleBias(fieldId, scale, bias);
       if (doPrint || (_debug && _sweepIndex == 0) || _verbose) {
@@ -1035,9 +1043,6 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
       int fieldId = inDatHdr.data_code;
       string name = _fieldId2Name(fieldId);
       string units = _fieldId2Units(fieldId);
-      if (name.find("WIDTH") != string::npos && units.size() == 0) {
-        units = "m/s";
-      }
 
       if (doPrint || isFieldRequiredOnRead(name)) {
     
@@ -1050,8 +1055,78 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
         
         RadxField *field = new RadxField(name, units);
         field->copyRangeGeom(*ray);
-        
-        if (byteWidth == 1) {
+
+        if (fieldId == FIELD_KDP) {
+
+          // special case for 1-byte KDP
+          // turn into 2-byte KDP
+
+          scale = 0.01;
+          bias = -327.68;
+          Radx::si16 *sdata = new Radx::si16[nGates];
+          Radx::si16 *sptr = sdata;
+          Radx::ui08 *uptr = (Radx::ui08 *) dataPtr;
+          for (int ii = 0; ii < nGates; ii++, sptr++, uptr++) {
+            double ival = *uptr;
+            double kdpVal = 0.0;
+            int oval = 0;
+            if (ival > 0) {
+              if (ival > 128) {
+                kdpVal = (0.25 * pow(600.0, ((ival - 129.0) / 126.0))) / _wavelengthCm;
+              } else if (ival < 128) {
+                kdpVal = (-0.25 * pow(600.0, ((127.0 - ival) / 126.0))) / _wavelengthCm;
+              }
+              oval = (int) floor((kdpVal - bias) / scale + 0.5);
+              if (oval < 0) {
+                oval = 0;
+              } else if (oval > 65535) {
+                oval = 65535;
+              }
+            }
+            *sptr = (Radx::si16) oval;
+          }
+
+          field->setTypeSi16(-32768, scale, bias);
+          field->addDataSi16(nGates, sdata);
+          delete[] sdata;
+          
+        } else if (fieldId == FIELD_SQI ||
+                   fieldId == FIELD_RHOHV ||
+                   fieldId == FIELD_RHOH ||
+                   fieldId == FIELD_RHOH) {
+          
+          // special case for 1-byte fields that range from 0 to 1
+          //   val = sqrt((n-1)/253)
+          // turn into 2-byte fields from 0 to 1
+
+          scale = 0.001;
+          bias = 0.0;
+          Radx::si16 *sdata = new Radx::si16[nGates];
+          Radx::si16 *sptr = sdata;
+          Radx::ui08 *uptr = (Radx::ui08 *) dataPtr;
+          for (int ii = 0; ii < nGates; ii++, sptr++, uptr++) {
+            double ival = *uptr;
+            int oval = 0;
+            if (ival >= 1.0) {
+              double dval = sqrt((ival - 1.0) / 253.0);
+              oval = (int) floor((dval - bias) / scale + 0.5);
+              if (oval < 0) {
+                oval = 0;
+              } else if (oval > 65535) {
+                oval = 65535;
+              }
+            }
+            *sptr = (Radx::si16) oval;
+          }
+
+          field->setTypeSi16(-32768, scale, bias);
+          field->addDataSi16(nGates, sdata);
+          delete[] sdata;
+
+        } else if (byteWidth == 1) {
+
+          // byte width is 1
+
           field->setTypeSi08(-128, scale, bias);
           Radx::si08 *sdata = new Radx::si08[nGates];
           Radx::si08 *sptr = sdata;
@@ -1062,7 +1137,9 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
           }
           field->addDataSi08(nGates, sdata);
           delete[] sdata;
+
         } else {
+
           // byte width is 2
           if (_sigmetIsSwapped) {
             // swap in place
@@ -1081,7 +1158,7 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
         }
         
         ray->addField(field);
-
+        
         if (doPrint && printData) {
           field->printWithData(out);
         }
@@ -1778,7 +1855,11 @@ void SigmetRadxFile::_setRayMetadata(RadxRay &ray,
     ray.setPolarizationMode(Radx::POL_MODE_VERTICAL);
   }
 
-  ray.setPrtMode(Radx::PRT_MODE_FIXED);
+  if (_dualPrt) {
+    ray.setPrtMode(Radx::PRT_MODE_DUAL);
+  } else {
+    ray.setPrtMode(Radx::PRT_MODE_FIXED);
+  }
 
   double startEl = _binAngleToDouble(rayHdr.start_el);
   double endEl = _binAngleToDouble(rayHdr.end_el);
@@ -1806,7 +1887,7 @@ void SigmetRadxFile::_setRayMetadata(RadxRay &ray,
   ray.setNSamples(_prodHdr.end.nsamples);
   ray.setPulseWidthUsec(_pulseWidthUs);
   ray.setPrtSec(1.0 / _prf);
-  ray.setPrtRatio(1.0);
+  ray.setPrtRatio(_prtRatio);
   ray.setNyquistMps(_nyquist);
   ray.setUnambigRangeKm(_unambigRangeKm);
   ray.setMeasXmitPowerDbmH(Radx::missingMetaDouble);
@@ -1913,50 +1994,135 @@ string SigmetRadxFile::_fieldId2Name(int fieldId)
 
   switch (fieldId) {
     case FIELD_DBZ_TOT:
-    case FIELD_DBZ_TOT_2:
       return "DBZ_TOT";
-    case FIELD_DBZ_TOT_V_2:
-      return "DBZ_TOT_V";
-    case FIELD_DBZ_2:
     case FIELD_DBZ:
       return "DBZ";
-    case FIELD_DBZ_V_2:
-      return "DBZ_V";
-    case FIELD_SNR_2:
-      return "SNR";
     case FIELD_VEL:
-    case FIELD_VEL_2:
       return "VEL";
     case FIELD_WIDTH:
-    case FIELD_WIDTH_2:
       return "WIDTH";
     case FIELD_ZDR:
+      return "ZDR";
+    case FIELD_ORAIN:
+      return "ORAIN";
+    case FIELD_DBZ_CORR:
+      return "DBZ_CORR";
+    case FIELD_DBZ_TOT_2:
+      return "DBZ_TOT";
+    case FIELD_DBZ_2:
+      return "DBZ";
+    case FIELD_VEL_2:
+      return "VEL";
+    case FIELD_WIDTH_2:
+      return "WIDTH";
     case FIELD_ZDR_2:
       return "ZDR";
-    case FIELD_DBZ_CORR:
-    case FIELD_DBZ_CORR_2:
-      return "DBZ_CORR";
+    case FIELD_RAINRATE_2:
+      return "RAINRATE_2";
     case FIELD_KDP:
+      return "KDP";
     case FIELD_KDP_2:
       return "KDP";
     case FIELD_PHIDP:
-    case FIELD_PHIDP_2:
       return "PHIDP";
     case FIELD_VEL_CORR:
-    case FIELD_VEL_CORR_2:
       return "VEL_CORR";
     case FIELD_SQI:
-    case FIELD_SQI_2:
       return "SQI";
     case FIELD_RHOHV:
     case FIELD_RHOHV_2:
       return "RHOHV";
+    case FIELD_DBZ_CORR_2:
+      return "DBZ_CORR";
+    case FIELD_VEL_CORR_2:
+      return "VEL_CORR";
+    case FIELD_SQI_2:
+      return "SQI";
+    case FIELD_PHIDP_2:
+      return "PHIDP";
     case FIELD_LDRH:
     case FIELD_LDRH_2:
       return "LDRH";
     case FIELD_LDRV:
     case FIELD_LDRV_2:
       return "LDRV";
+    case FIELD_FLAGS:
+    case FIELD_FLAGS_2:
+      return "FLAGS";
+    case FIELD_ECHO_TOPS:
+      return "ECHO_TOPS";
+    case FIELD_VIL_2:
+      return "VIL";
+    case FIELD_RAW:
+      return "RAW";
+    case FIELD_SHEAR:
+      return "SHEAR";
+    case FIELD_DIVERGE_2:
+      return "DIVERGE";
+    case FIELD_FLIQUID_2:
+      return "FLIQUID";
+    case FIELD_USER:
+      return "USER";
+    case FIELD_OTHER:
+      return "OTHER";
+    case FIELD_DEFORM_2:
+      return "DEFORM";
+    case FIELD_VVEL_2:
+      return "VVEL";
+    case FIELD_HVEL_2:
+      return "HVEL";
+    case FIELD_HDIR_2:
+      return "HDIR";
+    case FIELD_AXDIL_2:
+      return "AXDIL";
+    case FIELD_TIME_2:
+      return "TIME";
+    case FIELD_RHOH:
+    case FIELD_RHOH_2:
+      return "RHOH";
+    case FIELD_RHOV:
+    case FIELD_RHOV_2:
+      return "RHOV";
+    case FIELD_PHIH:
+    case FIELD_PHIH_2:
+      return "PHIH";
+    case FIELD_PHIV:
+    case FIELD_PHIV_2:
+      return "PHIV";
+    case FIELD_USER_2:
+      return "USER";
+    case FIELD_HCLASS:
+    case FIELD_HCLASS_2:
+      return "HCLASS";
+    case FIELD_ZDRC:
+    case FIELD_ZDRC_2:
+      return "ZDRC";
+    case FIELD_TEMP_2:
+      return "TEMP";
+    case FIELD_VIR_2:
+      return "VIR";
+    case FIELD_DBTV:
+    case FIELD_DBTV_2:
+      return "DBZV";
+    case FIELD_DBZV:
+    case FIELD_DBZV_2:
+      return "DBZV";
+    case FIELD_SNR:
+    case FIELD_SNR_2:
+      return "SNR";
+    case FIELD_ALBEDO:
+    case FIELD_ALBEDO_2:
+      return "ALBEDO";
+    case FIELD_VILD_2:
+      return "VILD";
+    case FIELD_TURB_2:
+      return "TURB";
+    case FIELD_DBTE:
+    case FIELD_DBTE_2:
+      return "DBTE";
+    case FIELD_DBZE:
+    case FIELD_DBZE_2:
+      return "DBZE";
     default: {
       char name[128];
       sprintf(name, "UNKNOWN-ID-%d", fieldId);
@@ -1974,21 +2140,25 @@ string SigmetRadxFile::_fieldId2Units(int fieldId)
 
   switch (fieldId) {
     case FIELD_DBZ_TOT:
-    case FIELD_DBZ_TOT_2:
-    case FIELD_DBZ_TOT_V_2:
-    case FIELD_DBZ_2:
-    case FIELD_DBZ_V_2:
     case FIELD_DBZ:
+    case FIELD_ORAIN:
     case FIELD_DBZ_CORR:
+    case FIELD_DBZ_TOT_2:
+    case FIELD_DBZ_2:
     case FIELD_DBZ_CORR_2:
+    case FIELD_DBZV_2:
+    case FIELD_DBZV:
+    case FIELD_DBZE:
+    case FIELD_DBZE_2:
       return "dBZ";
-    case FIELD_SNR_2:
-      return "dB";
     case FIELD_VEL:
+    case FIELD_WIDTH:
     case FIELD_VEL_2:
+    case FIELD_WIDTH_2:
     case FIELD_VEL_CORR:
     case FIELD_VEL_CORR_2:
-      return "m/s";
+    case FIELD_VVEL_2:
+    case FIELD_HVEL_2:
       return "m/s";
     case FIELD_ZDR:
     case FIELD_ZDR_2:
@@ -1996,21 +2166,73 @@ string SigmetRadxFile::_fieldId2Units(int fieldId)
     case FIELD_LDRH_2:
     case FIELD_LDRV:
     case FIELD_LDRV_2:
+    case FIELD_ZDRC:
+    case FIELD_ZDRC_2:
+    case FIELD_SNR:
+    case FIELD_SNR_2:
       return "dB";
+    case FIELD_DBTV:
+    case FIELD_DBTV_2:
+    case FIELD_DBTE:
+    case FIELD_DBTE_2:
+      return "dBm";
     case FIELD_KDP:
     case FIELD_KDP_2:
       return "deg/km";
     case FIELD_PHIDP:
     case FIELD_PHIDP_2:
+    case FIELD_HDIR_2:
+    case FIELD_AXDIL_2:
+    case FIELD_PHIH:
+    case FIELD_PHIH_2:
+    case FIELD_PHIV:
+    case FIELD_PHIV_2:
       return "deg";
+    case FIELD_ECHO_TOPS:
+      return "km";
+    case FIELD_VIL_2:
+    case FIELD_FLIQUID_2:
+      return "mm";
+    case FIELD_RAINRATE_2:
+      return "mm/hr";
+    case FIELD_SHEAR:
+      return "m/s/m";
+    case FIELD_DIVERGE_2:
+    case FIELD_DEFORM_2:
+      return "10**-4";
+    case FIELD_TIME_2:
+      return "sec";
+    case FIELD_TEMP_2:
+      return "C";
+    case FIELD_VIR_2:
+      return "dBZ.m";
+    case FIELD_ALBEDO:
+    case FIELD_ALBEDO_2:
+      return "%";
     case FIELD_SQI:
-    case FIELD_SQI_2:
     case FIELD_RHOHV:
     case FIELD_RHOHV_2:
+    case FIELD_SQI_2:
+    case FIELD_FLAGS:
+    case FIELD_FLAGS_2:
+    case FIELD_RAW:
+    case FIELD_USER:
+    case FIELD_OTHER:
+    case FIELD_RHOH:
+    case FIELD_RHOH_2:
+    case FIELD_RHOV:
+    case FIELD_RHOV_2:
+    case FIELD_USER_2:
+    case FIELD_HCLASS:
+    case FIELD_HCLASS_2:
+    case FIELD_VILD_2:
+    case FIELD_TURB_2:
     default:
       return "";
   }
+
 }
+
 
 //////////////////////////////////////
 // Get scale, bias from field ID
@@ -2026,88 +2248,136 @@ void SigmetRadxFile::_fieldId2ScaleBias(int fieldId,
   bias = 0.0;
   
   switch (fieldId) {
-    
-  case FIELD_DBZ_TOT:
-  case FIELD_DBZ:
-  case FIELD_DBZ_CORR: {
-    scale = 0.5;
-    bias = -32.0;
-    break;
-  }
-  case FIELD_VEL: {
-    scale = _nyquist / 127.0;
-    bias = (-1.0 * _nyquist) * (128.0 / 127.0);
-    break;
-  }
-  case FIELD_VEL_CORR: {
-    scale = 75.0 / 127.0;
-    bias = (-1.0 * 75.0) * (128.0 / 127.0);
-    break;
-  }
-  case FIELD_WIDTH: {
-    scale = _nyquist / 256.0;
-    bias = 0.0;
-    break;
-  }
-  case FIELD_WIDTH_2: {
-    scale = 0.01;
-    bias = 0.0;
-    break;
-  }
-  case FIELD_ZDR: {
-    scale = 1.0 / 16.0;
-    bias = -8.0;
-    break;
-  }
-  case FIELD_DBZ_TOT_2:
-  case FIELD_DBZ_TOT_V_2:
-  case FIELD_DBZ_2:
-  case FIELD_DBZ_V_2:
-  case FIELD_SNR_2:
-  case FIELD_DBZ_CORR_2:
-  case FIELD_VEL_2:
-  case FIELD_KDP_2:
-  case FIELD_VEL_CORR_2:
-  case FIELD_ZDR_2:
-  case FIELD_LDRH_2: {
-    scale = 0.01;
-    bias = -327.67;
-    break;
-  }
-  case FIELD_KDP: {
-    // 1-byte KDP is a mess
-    break;
-  }
-  case FIELD_PHIDP: {
-    scale = 180.0 / 254.0;
-    bias = scale * -1.0;
-    break;
-  }
-  case FIELD_PHIDP_2: {
-    scale = 360.0 / 65534.0;
-    bias = scale * -1.0;
-    break;
-  }
-  case FIELD_SQI:
-  case FIELD_RHOHV: { // apply sqrt()
-    scale = 1.0 / 253.0;
-    bias = 0.0;
-    break;
-  }
-  case FIELD_SQI_2:
-  case FIELD_RHOHV_2: {
-    scale = 1.0 / 65533.0;
-    bias = scale * -1.0;
-    break;
-  }
-  case FIELD_LDRH:
-  case FIELD_LDRV: {
-    scale = 0.2;
-    bias = -45.2;
-    break;
-  }
-  default: {}
 
+    case FIELD_DBZ_TOT:
+    case FIELD_DBZ:
+    case FIELD_DBZ_CORR:
+    case FIELD_DBZE:
+    case FIELD_DBZV:
+    case FIELD_SNR:
+    case FIELD_DBTV:
+    case FIELD_DBTE:
+      scale = 0.5;
+      bias = -32.0;
+      break;
+    case FIELD_VEL:
+      scale = _nyquist / 127.0;
+      bias = (-1.0 * _nyquist) * (128.0 / 127.0);
+      break;
+    case FIELD_WIDTH:
+      scale = _nyquist / 256.0;
+      bias = 0.0;
+      break;
+    case FIELD_ZDR:
+    case FIELD_ZDRC:
+      scale = 1.0 / 16.0;
+      bias = -8.0;
+      break;
+    case FIELD_WIDTH_2:
+      scale = 0.01;
+      bias = 0.0;
+      break;
+    case FIELD_PHIDP:
+    case FIELD_PHIH:
+    case FIELD_PHIV:
+      scale = 180.0 / 254.0;
+      bias = scale * -1.0;
+      break;
+    case FIELD_VEL_CORR:
+      scale = 75.0 / 127.0;
+      bias = (-1.0 * 75.0) * (128.0 / 127.0);
+      break;
+    case FIELD_RHOHV_2:
+    case FIELD_RHOH_2:
+    case FIELD_RHOV_2:
+    case FIELD_SQI_2:
+      scale = 1.0 / 65533.0;
+      bias = scale * -1.0;
+      break;
+    case FIELD_PHIDP_2:
+    case FIELD_PHIH_2:
+    case FIELD_PHIV_2:
+      scale = 360.0 / 65534.0;
+      bias = scale * -1.0;
+      break;
+    case FIELD_LDRH:
+    case FIELD_LDRV:
+      scale = 0.2;
+      bias = -45.2;
+      break;
+    case FIELD_ECHO_TOPS:
+    case FIELD_HDIR_2:
+      scale = 0.1;
+      bias = 0.0;
+      break;
+      break;
+    case FIELD_AXDIL_2:
+      scale = 0.10;
+      bias = 0.0;
+      break;
+    case FIELD_ALBEDO:
+      scale = 100.0 / 253.0;
+      bias = 0.0;
+      break;
+    case FIELD_VIL_2:
+      scale = 0.001;
+      bias = 0.0;
+      break;
+    case FIELD_DBZ_TOT_2:
+    case FIELD_DBTV_2:
+    case FIELD_DBZ_2:
+    case FIELD_DBZV_2:
+    case FIELD_SNR_2:
+    case FIELD_DBZ_CORR_2:
+    case FIELD_DBZE_2:
+    case FIELD_VEL_2:
+    case FIELD_KDP_2:
+    case FIELD_VEL_CORR_2:
+    case FIELD_ZDR_2:
+    case FIELD_ZDRC_2:
+    case FIELD_LDRH_2:
+    case FIELD_LDRV_2:
+    case FIELD_USER_2:
+    case FIELD_VVEL_2:
+    case FIELD_HVEL_2:
+    case FIELD_ALBEDO_2:
+    case FIELD_VILD_2:
+    case FIELD_DBTE_2:
+    case FIELD_TURB_2:
+    case FIELD_TEMP_2:
+    case FIELD_VIR_2:
+    case FIELD_DEFORM_2:
+      scale = 0.01;
+      bias = -327.68;
+      break;
+    case FIELD_DIVERGE_2:
+      scale = 0.001;
+      bias = -32.768;
+      break;
+    case FIELD_TIME_2:
+      scale = 1.0;
+      bias = -32767;
+      break;
+    case FIELD_FLAGS:
+    case FIELD_FLAGS_2:
+    case FIELD_ORAIN:
+    case FIELD_RAW:
+    case FIELD_USER:
+    case FIELD_OTHER:
+    case FIELD_HCLASS:
+    case FIELD_HCLASS_2:
+    case FIELD_SHEAR:
+      // special cases - dealt with later
+    case FIELD_FLIQUID_2:
+    case FIELD_RAINRATE_2:
+    case FIELD_KDP:
+    case FIELD_SQI:
+    case FIELD_RHOHV:
+    case FIELD_RHOH:
+    case FIELD_RHOV:
+    default:
+      scale = 1.0;
+      bias = 0.0;
   }
 
 }
@@ -2125,38 +2395,52 @@ void SigmetRadxFile::_convertBias2Signed(int fieldId,
 
     // 16-bit
 
-    case FIELD_WIDTH_2:
     case FIELD_DBZ_TOT_2:
-    case FIELD_DBZ_TOT_V_2:
     case FIELD_DBZ_2:
-    case FIELD_DBZ_V_2:
-    case FIELD_SNR_2:
-    case FIELD_DBZ_CORR_2:
     case FIELD_VEL_2:
-    case FIELD_KDP_2:
-    case FIELD_VEL_CORR_2:
+    case FIELD_WIDTH_2:
     case FIELD_ZDR_2:
-    case FIELD_LDRH_2:
-    case FIELD_PHIDP_2:
-    case FIELD_SQI_2:
+    case FIELD_RAINRATE_2:
+    case FIELD_KDP_2:
     case FIELD_RHOHV_2:
+    case FIELD_DBZ_CORR_2:
+    case FIELD_VEL_CORR_2:
+    case FIELD_SQI_2:
+    case FIELD_PHIDP_2:
+    case FIELD_LDRH_2:
+    case FIELD_LDRV_2:
+    case FIELD_FLAGS_2:
+    case FIELD_VIL_2:
+    case FIELD_DIVERGE_2:
+    case FIELD_FLIQUID_2:
+    case FIELD_DEFORM_2:
+    case FIELD_VVEL_2:
+    case FIELD_HVEL_2:
+    case FIELD_HDIR_2:
+    case FIELD_AXDIL_2:
+    case FIELD_TIME_2:
+    case FIELD_RHOH_2:
+    case FIELD_RHOV_2:
+    case FIELD_PHIH_2:
+    case FIELD_PHIV_2:
+    case FIELD_USER_2:
+    case FIELD_HCLASS_2:
+    case FIELD_ZDRC_2:
+    case FIELD_TEMP_2:
+    case FIELD_VIR_2:
+    case FIELD_DBTV_2:
+    case FIELD_DBZV_2:
+    case FIELD_SNR_2:
+    case FIELD_ALBEDO_2:
+    case FIELD_VILD_2:
+    case FIELD_TURB_2:
+    case FIELD_DBTE_2:
+    case FIELD_DBZE_2:
       bias += 32768.0 * scale;
       break;
 
     // 8 bit
-    case FIELD_DBZ_TOT:
-    case FIELD_DBZ:
-    case FIELD_DBZ_CORR:
-    case FIELD_VEL:
-    case FIELD_VEL_CORR:
-    case FIELD_WIDTH:
-    case FIELD_ZDR:
-    case FIELD_PHIDP:
-    case FIELD_KDP:
-    case FIELD_SQI:
-    case FIELD_RHOHV:
-    case FIELD_LDRH:
-    case FIELD_LDRV:
+
     default:
       bias += 128.0 * scale;
       break;
@@ -2175,11 +2459,12 @@ void SigmetRadxFile::_checkDualPol(int fieldId)
   
   switch (fieldId) {
 
-    case FIELD_DBZ_TOT_V_2:
-    case FIELD_DBZ_V_2:
+    case FIELD_DBZ_TOT_2:
+    case FIELD_DBZV_2:
     case FIELD_KDP_2:
     case FIELD_ZDR_2:
     case FIELD_LDRH_2:
+    case FIELD_LDRV_2:
     case FIELD_PHIDP_2:
     case FIELD_RHOHV_2:
     case FIELD_ZDR:
@@ -2188,6 +2473,19 @@ void SigmetRadxFile::_checkDualPol(int fieldId)
     case FIELD_RHOHV:
     case FIELD_LDRH:
     case FIELD_LDRV:
+    case FIELD_RHOH:
+    case FIELD_RHOH_2:
+    case FIELD_RHOV:
+    case FIELD_RHOV_2:
+    case FIELD_PHIH:
+    case FIELD_PHIH_2:
+    case FIELD_PHIV:
+    case FIELD_PHIV_2:
+    case FIELD_ZDRC:
+    case FIELD_ZDRC_2:
+    case FIELD_DBTV:
+    case FIELD_DBTV_2:
+    case FIELD_DBZV:
       _isDualPol = true;
     default: {}
   }

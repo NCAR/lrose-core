@@ -56,6 +56,7 @@
 #include "FieldRenderer.hh"
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
+#include "DisplayField.hh"
 
 class PolarManager;
 
@@ -109,8 +110,9 @@ class DLL_EXPORT PolarWidget : public QWidget
               const PolarManager &manager,
               const Params &params,
               const RadxPlatform &platform,
-              size_t n_fields);
-
+              const vector<DisplayField *> &fields,
+              bool haveFilteredFields);
+  
   /**
    * @brief Destructor.
    */
@@ -323,12 +325,10 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   const RadxPlatform &_platform;
   
-  /**
-   * @brief The number of fields we are representing. A QImage will be
-   *        created for each field.
-   */
+  // data fields
 
-  size_t _nFields;
+  const vector<DisplayField *> &_fields;
+  bool _haveFilteredFields;
 
   /**
    * @brief The renderer for each field.
@@ -534,6 +534,8 @@ class DLL_EXPORT PolarWidget : public QWidget
    *
    * @brief event   The resize event.
    */
+
+  void smartBrush(int xPixel, int yPixel);
 
   virtual void resizeEvent(QResizeEvent * event);
 

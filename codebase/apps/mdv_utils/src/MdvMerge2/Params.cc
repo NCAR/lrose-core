@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -577,6 +577,20 @@ using namespace std;
     tt->help = tdrpStrDup("Used for registration with procmap.");
     tt->val_offset = (char *) &instance - &_start_;
     tt->single_val.s = tdrpStrDup("test");
+    tt++;
+    
+    // Parameter 'procmap_register_interval_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("procmap_register_interval_secs");
+    tt->descr = tdrpStrDup("Interval for procmap registration");
+    tt->help = tdrpStrDup("Set to a high value if processing takes a long time. This will prevent the auto_restarter from killing and restarting the app. If this value is less than or equal to the PROCMAP_REGISTER_INTERVAL (60) then that value will be used.");
+    tt->val_offset = (char *) &procmap_register_interval_secs - &_start_;
+    tt->has_min = TRUE;
+    tt->min_val.i = 60;
+    tt->single_val.i = 60;
     tt++;
     
     // Parameter 'Comment 2'

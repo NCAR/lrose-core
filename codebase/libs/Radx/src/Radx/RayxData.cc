@@ -88,7 +88,8 @@ RayxData::RayxData(const std::string &name, const std::string &units,
   {
     if (_debug) {
       cerr << "WARNING - RayxData::RayxData" << endl;
-      cerr << "  Constructor npt=" << _npt << ", RadxField npt=" << npoints << endl;
+      cerr << "  Constructor npt=" << _npt << ", RadxField npt=" << npoints 
+	   << endl;
     }
     if (npoints > _npt)
     {
@@ -224,7 +225,7 @@ void RayxData::multiply(const RayxData &inp, const bool missing_ok)
     }
     else
     {
-      pPassthrough(inp, i, missing_ok);
+      _passthrough(inp, i, missing_ok);
     }
   }
 }
@@ -349,7 +350,7 @@ void RayxData::inc(const RayxData &inp, const bool missing_ok)
     }
     else
     {
-      pPassthrough(inp, i, missing_ok);
+      _passthrough(inp, i, missing_ok);
     }
   }
 }
@@ -384,7 +385,7 @@ void RayxData::dec(const RayxData &inp, const bool missing_ok)
     }
     else
     {
-      pPassthrough(inp, i, missing_ok);
+      _passthrough(inp, i, missing_ok);
     }
   }
 }
@@ -1182,9 +1183,140 @@ void RayxData::logBase10(void)
   }
 }
 
+//-----------------------------------------------------------------
+void RayxData::FIRfilter(const std::vector<double> coeff, FirFilter_t type,
+			 RayxData &quality)
+{
+  // create a quality ray with value=0 everywhere
+  for (int i=0; i<quality._npt; ++i)
+  {
+    quality._data[i] = 0.0;
+  }
+
+  // find index of first and last valid data
+  int i0 = _firstValidIndex();
+  int i1 = _lastValidIndex();
+  if (i0 < 0 || i1 < 0)
+  {
+    cerr << "FIRfilter  All the data is missing, no filtering" << endl;
+    return;
+  }
+
+  int nCoeff = static_cast<int>(coeff.size());
+  if (i1-i0+1 < nCoeff*2)
+  {
+    cerr << "FIRfilter data mostly missing only " << i1-i0+1
+	 << " good values" << endl;
+    return;
+  }
+  if (_debug)
+  {
+    cerr << "FIRfilter  I0,I1=" << i0 << "," << i1 << endl;
+  }
+
+  // get the center index value
+  int centerCoeff = nCoeff/2;
+  if (nCoeff % 2)
+  {
+    // odd # of coeffs...good
+  }
+  else
+  {
+    cerr << "WARNING FIRfilter even number of coeff, use n/2'th as center"
+	 << endl;
+  }
+
+  // if interpolating at edges, do a linear regression to get coefficients
+  double m0=0, int0=0, m1=0, int1=0;
+  bool allbad0=true, allbad1=true;
+  if (type == FIR_EDGE_INTERP)
+  {
+    allbad0 = !_linearRegression(i0, i1, 20, true, m0, int0);
+    allbad1 = !_linearRegression(i0, i1, 20, false, m1, int1);
+  }
+
+  // create a vector that extends at each end
+  vector<double> tmpData = _extendData(i0, i1, centerCoeff, nCoeff,
+				       type, allbad0,
+				       m0, int0, allbad1, m1, int1);
+
+  // do gap filling on this data
+  vector<double> gapFilledData = tmpData;
+  _fillGaps(gapFilledData);
+
+  // create a vector to store data with gaps filled, compute sum of coefficients
+  double sumCoeff = 0.0;
+  for (int i=0; i<nCoeff; ++i)
+  {
+    sumCoeff += coeff[i];
+  }
+
+
+  for (int j=0; j<_npt; ++j)
+  {
+    quality._data[j] = _applyFIR(j, i0, i1, centerCoeff, type, tmpData,
+				 gapFilledData, coeff, sumCoeff);
+  }
+}
 
 //-----------------------------------------------------------------
-void RayxData::pPassthrough(const RayxData &inp, const int i, const bool missing_ok)
+void RayxData::constrain(int minGateIndex, int maxGateIndex)
+{
+  for (int i=0; i<minGateIndex; ++i)
+  {
+    _data[i] = _missing;
+  }
+  for (int i=maxGateIndex+1; i<_npt; ++i)
+  {
+    _data[i] = _missing;
+  }
+}
+
+//-----------------------------------------------------------------
+double RayxData::_applyFIR(int j, int i0, int i1, int centerCoeff, 
+			   FirFilter_t type,
+			   const std::vector<double> &tmpData,
+			   const std::vector<double> &gapFilledData,
+			   const std::vector<double> &coeff, double sumCoeff)
+{
+  int tIndex = j+centerCoeff-i0;
+  if (tIndex < 0 || tIndex >= (int)tmpData.size())
+  {
+    _data[j] = _missing;
+    return 0.0;
+  }
+  
+  if (j < i0 || j > i1)
+  {
+    _data[j] = _missing;
+    //_data[j] = tmpData[tIndex];
+    return 0.0;
+  }
+  if (_data[j] == _missing)
+  {
+    return 0.0;
+  }
+  if (_debug)
+  {
+    printf("Interpolating data centered at %d\n", j);
+  }
+
+  double quality  = _FIRquality(centerCoeff, tmpData, gapFilledData, tIndex);
+  if (quality > 0)
+  {
+    _data[j] = _sumProduct(coeff, sumCoeff, gapFilledData,
+			   tIndex-centerCoeff);
+  }
+  else
+  {
+    _data[j] = _missing;
+  }
+  return quality;
+}
+
+//-----------------------------------------------------------------
+void RayxData::_passthrough(const RayxData &inp, const int i,
+			    const bool missing_ok)
 {
   if (!missing_ok)
   {
@@ -1211,3 +1343,310 @@ void RayxData::pPassthrough(const RayxData &inp, const int i, const bool missing
   }
 }
 
+//-----------------------------------------------------------------
+double RayxData::_FIRquality(int centerCoeff, const vector<double> &tmpData,
+			     const vector<double> &gapFilledData,
+			     int tIndex)
+{
+  int n = 2*centerCoeff + 1;  // the FIR filter window size
+
+  vector<double> qmeasure;
+  qmeasure.reserve(n);
+  qmeasure[0] = 1.0;
+  qmeasure[1] = 0.95;
+  qmeasure[2] = 0.90;
+  qmeasure[3] = 0.85;
+  qmeasure[4] = 0.80;
+  qmeasure[5] = 0.75;
+  for (int i=6; i<n/2; ++i)
+  {
+    qmeasure[i] = 0.5;
+  }
+  for (int i=n/2; i<n; ++i)
+  {
+    qmeasure[i] = 0.0;
+  }
+
+  int nbad = 0;
+  for (int i=-centerCoeff; i<=centerCoeff; ++i)
+  {
+    int ind = tIndex + i;
+    if (tmpData[ind] == _missing)
+    {
+      ++nbad;
+    }
+    if (gapFilledData[ind] == _missing)
+    {
+      // don't allow any missing data in gap filled data
+      return 0.0;
+    }
+  }
+  return qmeasure[nbad];
+}
+
+//-----------------------------------------------------------------
+void RayxData::_fillGaps(std::vector<double> &data) const
+{
+  int n = static_cast<int>(data.size());
+
+  bool inside = true;
+  int o0 = -1, o1 = -1;
+  for (int i=0; i<n; ++i)
+  {
+    if (data[i] == _missing)
+    {
+      if (inside)
+      {
+	inside = false;
+	o0 = o1 = i;
+	if (_debug)
+	{
+	  printf("First point missing index=%d\n", i);
+	}
+      }
+      else
+      {
+	o1 = i;
+      }
+    }
+    else
+    {
+      if (!inside)
+      {
+	// went from outside to inside, now can interp
+	inside = true;
+	int interp0 = o0 - 1;
+	int interp1 = i;
+	if (_debug)
+	{
+	  printf("First point leaving missing index=%d, i0=%d, i1=%d\n", i,
+		 interp0, interp1);
+	}
+	if (interp0 >= 0)
+	{
+	  _interp(data[interp0], data[interp1], interp0, interp1, data);
+	}
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------
+void RayxData::_interp(double d0, double d1, int i0, int i1,
+		       std::vector<double> &iData) const
+{
+  // i0 is index of first data, i1 of second data
+  // so i0+1, i0+2,... i1-1 are the places to interpolate to
+
+  int nx = i1-i0;
+  for (int i=1; i<nx; ++i)
+  {
+    int index = i0 + i;
+    double pct = (double)i/(double)nx;
+    double v = (1.0-pct)*d0 + pct*d1;
+    iData[index] = v;
+    if (_debug)
+    {
+      printf("interp data[%d] = %lf\n", index, v);
+    }
+  }
+}
+
+//-----------------------------------------------------------------
+std::vector<double> RayxData::_extendData(int i0, int i1, int centerCoeff, 
+					  int nCoeff, FirFilter_t type,
+					  bool allbad0,
+					  double m0, double int0, bool allbad1,
+					  double m1, double int1) const
+{
+  // copy the data, but expand at each end using one of the 4 algs
+  vector<double> tmpData;
+  int nTmp = i1-i0+1 + centerCoeff*2;
+
+  tmpData.reserve(nTmp);
+
+  for (int j=0; j<nTmp; ++j)
+  {
+    int eIndex = -centerCoeff+j;  // extension index
+    int dIndex = eIndex + i0;     // data index,  crosses over to >=0 at i0
+    if (j < centerCoeff)
+    {
+      tmpData.push_back(_extend(eIndex, eIndex, i0, i0+4,
+				type, m0, int0, allbad0));
+    }
+    else if (dIndex <= i1)
+    {
+      tmpData.push_back(_data[dIndex]);
+    }
+    else
+    {
+      int eIndexUp = dIndex - i1 - 2;
+      int eIndP = dIndex - i1;
+      tmpData.push_back(_extend(eIndexUp, eIndP, i1, (i1-4),
+				type, m1, int1, allbad1));
+    }
+  }
+  return tmpData;
+}
+    
+//-----------------------------------------------------------------
+double RayxData::_extend(int mirrorIndex, int interpIndex,
+			 int boundaryDataIndex, int otherAveIndex,
+			 FirFilter_t type, double m,
+			 double intercept, bool allbad) const
+ {
+   double d = _missing;
+   switch (type)
+   {
+   case FIR_EDGE_CLOSEST:
+     d = _data[boundaryDataIndex];
+     break;
+   case FIR_EDGE_MIRROR:
+     d = _data[boundaryDataIndex - mirrorIndex - 1];
+     break;
+   case FIR_EDGE_INTERP:
+     if (!allbad)
+     {
+       d = m*static_cast<double>(interpIndex) + intercept;
+     }
+     break;
+   case FIR_EDGE_MEAN:
+     if (boundaryDataIndex < otherAveIndex)
+     {
+       d = _mean(boundaryDataIndex, otherAveIndex);
+     }
+     else
+     {
+       d = _mean(otherAveIndex, boundaryDataIndex);
+     }
+     break;
+   default:
+     cerr << "ERROR no computation of extension";
+     break;
+   }
+   return d;
+ }
+
+//-----------------------------------------------------------------
+double RayxData::_sumProduct(const std::vector<double> &coeff, double sumCoeff,
+			     const std::vector<double> &data, int i0) const
+{
+  double sumprod = 0.0;
+  for (size_t i=0; i<coeff.size(); ++i)
+  {
+    if (data[i+i0] == _missing)
+    {
+      return _missing;
+    }
+    else
+    {
+      sumprod += coeff[i]*data[i+i0];
+    }
+  }
+  return sumprod/sumCoeff;
+}
+  
+
+//-----------------------------------------------------------------
+int RayxData::_firstValidIndex(void) const
+{
+  for (int i=0; i<_npt; ++i)
+  {
+    if (_data[i] != _missing)
+    {
+      return i;
+    }
+  }
+  return -1;
+}
+
+
+//-----------------------------------------------------------------
+int RayxData::_lastValidIndex(void) const
+{
+  for (int i=_npt-1; i>=0; --i)
+  {
+    if (_data[i] != _missing)
+    {
+      return i;
+    }
+  }
+  return -1;
+}
+
+
+//-----------------------------------------------------------------
+bool RayxData::_linearRegression(int i0, int i1, int npt, bool up,
+				 double &slope, double &intercept) const
+{
+  // build up nptLinearInterp at each end of the data, skipping missing
+  // data
+  double N = 0;
+  double sumxy=0, sumx=0, sumy=0,sumx2=0;
+  int dataOffset=0;
+
+  int for0, for1, delta;
+  if (up)
+  {
+    for0 = 0;
+    for1 = i1-i0+1;
+    delta = 1;
+    dataOffset = i0;
+  }
+  else
+  {
+    for0 = 0;
+    for1 = -(i1-i0+1);
+    delta = -1;
+    dataOffset = i1;
+  }
+
+  for (int i=for0; i!=for1; i += delta)
+  {
+    if (_data[i+dataOffset] != _missing)
+    {
+      N++;
+      double x = static_cast<double>(i);
+      sumx += x;
+      sumy += _data[i+dataOffset];
+      sumxy += x*_data[i+dataOffset];
+      sumx2 += x*x;
+      if (N >= npt)
+      {
+	break;
+      }
+    }
+  }
+  if (N == npt)
+  {
+    slope = (N*sumxy - sumx*sumy)/(N*sumx2 - sumx*sumx);
+    intercept = (sumy - slope*sumx)/N;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+//-----------------------------------------------------------------
+double RayxData::_mean(int i0, int i1) const
+{
+  double N = 0.0, S = 0.0;
+  for (int i=i0; i<=i1; ++i)
+  {
+    if (_data[i] != _missing)
+    {
+      S += _data[i];
+      N ++;
+    }
+  }
+  if (N > 0)
+  {
+    return S/N;
+  }
+  else
+  {
+    return _missing;
+  }
+}

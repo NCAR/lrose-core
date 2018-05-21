@@ -728,11 +728,13 @@ int Dsr2Radx::_processVol()
 
   if (isRhi) {
     if (_params.compute_rhi_fixed_angles_from_measured_azimuth) {
-      _vol.computeSweepFixedAnglesFromRays();
+      _vol.computeFixedAnglesFromRays
+        (true, _params.use_mean_to_compute_fixed_angles);
     }
   } else{
     if (_params.compute_ppi_fixed_angles_from_measured_elevation) {
-      _vol.computeSweepFixedAnglesFromRays();
+      _vol.computeFixedAnglesFromRays
+        (true, _params.use_mean_to_compute_fixed_angles);
     }
   }
 
@@ -791,6 +793,22 @@ int Dsr2Radx::_processVol()
            << _params.elevation_offset << endl;
     }
     _vol.applyElevationOffset(_params.elevation_offset);
+  }
+
+  // if requested, change some of the characteristics
+  
+  if (_params.override_instrument_type) {
+    _vol.setInstrumentType((Radx::InstrumentType_t) _params.instrument_type);
+  }
+  if (_params.override_platform_type) {
+    _vol.setPlatformType((Radx::PlatformType_t) _params.platform_type);
+  }
+  if (_params.override_primary_axis) {
+    _vol.setPrimaryAxis((Radx::PrimaryAxis_t) _params.primary_axis);
+    // if we change the primary axis, we need to reapply the georefs
+    if (_params.apply_georeference_corrections) {
+      _vol.applyGeorefs();
+    }
   }
 
   // write the files
@@ -1351,6 +1369,8 @@ RadxRay *Dsr2Radx::_createInputRay(const DsRadarMsg &radarMsg,
     RadxGeoref georef;
     georef.setTimeSecs(dsGeoref.packet.time_secs_utc);
     georef.setNanoSecs(dsGeoref.packet.time_nano_secs);
+    georef.setUnitNum(dsGeoref.unit_num);
+    georef.setUnitId(dsGeoref.unit_id);
     georef.setLongitude(dsGeoref.longitude);
     georef.setLatitude(dsGeoref.latitude);
     georef.setAltitudeKmMsl(dsGeoref.altitude_msl_km);

@@ -177,3 +177,10 @@ void FiltScalar::set_input_info(Info **info) const
 {
   return;
 }
+
+//------------------------------------------------------------------
+void FiltScalar::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+

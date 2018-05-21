@@ -51,8 +51,9 @@ public:
 	bool right_burn,
 	bool left_burn,
 	double ejectable_interval,
-	int burn_in_place_interval,
+	double burn_in_place_interval,
 	int n_bip_at_a_time,
+        double dry_ice_interval,
 	int n_optional_fields,
 	const Params::field_name_t *optional_field_names);
 
@@ -86,13 +87,15 @@ private:
   time_t _timeLast;
 
   double _ejectableInterval;
-  int _burnInPlaceInterval;
+  double _burnInPlaceInterval;
   int _nBipAtaTime;
+  double _dryIceInterval;
   
   int _errorFlags;
   int _rBurn;
   int _lBurn;
   int _burnInPlace;
+  int _dryIce;
   int _ejectable;
   int _nBurnInPlace;
   int _nEjectable;

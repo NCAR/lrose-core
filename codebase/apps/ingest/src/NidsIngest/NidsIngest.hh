@@ -329,11 +329,15 @@ private:
    * @param[in] filepath  Filepath string, NIDS product identifier  is in 
    *                      the tail of the path
    * @param[in] startOfVolStr  Start of volume indicator for this product
-   * @param[in] tiltNum  Current tilt number of product. Used of end of 
-   *                     volume trigger is a tilt number.
+   *
+   * @param[in] tiltIndex  Current tilt index of product. Used for end of 
+   *                     volume trigger is a tilt number. Note that the 
+   *                     tiltIndex is based on the file suffix. In cases of
+   *                     SAILS or MesoSAILS scan strategies the tiltNum is 
+   *                     not indicative of the elevation angle.
    */  
   void _setEndOfVolFlag(const string filepath, const string endOfVolStr,
-			const int tiltNum);
+			const int tiltIndex);
   
   void _handleGriddedData(NidsFile *nidsFile, string filePath);
 

@@ -28,9 +28,10 @@ SUB_DIRS = \
 	DualDopplerLobes \
 	HawkEye \
 	HcrVelCorrect \
+	Hsrl2Radx \
 	IntfRemove \
 	Iq2Dsr \
-        JamesDealias \
+	JamesDealias \
 	KinGin2Ncf \
 	Mdv2Vad \
 	MdvFold \
@@ -57,7 +58,7 @@ SUB_DIRS = \
 	TsConvert \
 	TsFile2Fmq \
 	TsFmq2Tcp \
-        TsGamic2Iwrf \
+	TsGamic2Iwrf \
 	TsMerge \
 	TsOverlay \
 	TsPrint \

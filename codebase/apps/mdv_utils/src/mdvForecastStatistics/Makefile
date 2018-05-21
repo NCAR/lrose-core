@@ -33,9 +33,9 @@ TARGET_FILE = mdvForecastStatistics
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lFmq -ldsserver \
-	-lrapformats -ldidss -ltdrp -ltoolsa \
-	-leuclid -ldataport $(NETCDF4_LIBS) -lbz2 \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lFmq -ldsserver \
+	-lrapformats -ldidss -ltdrp \
+	-leuclid -ltoolsa -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

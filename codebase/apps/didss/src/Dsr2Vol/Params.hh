@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -62,7 +62,8 @@ public:
     CHANGE_IN_VOL_NUM = 1,
     LAST_TILT_IN_VOL = 2,
     AUTOMATIC = 3,
-    END_OF_VOL_NONE = 4
+    END_OF_VOL_NONE = 4,
+    DECREASE_IN_ELEV = 5
   } end_of_vol_decision_t;
 
   typedef enum {
@@ -433,6 +434,8 @@ public:
 
   int last_tilt_in_vol;
 
+  int min_elevation_decrease;
+
   tdrp_bool_t write_end_of_vol_when_data_stops;
 
   int nsecs_no_data_for_end_of_vol;
@@ -654,7 +657,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[133];
+  mutable TDRPtable _table[134];
 
   const char *_className;
 

@@ -45,12 +45,12 @@ TSCANROOT=/opt/terascan
 
 LOC_INCLUDES = -I$(TSCANROOT)/include $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lrapformats -leuclid \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lrapformats -leuclid \
 	-ldsserver -ldidss -ltoolsa -ldataport \
 	-ltdrp -ltscan $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 
-LOC_LDFLAGS = -L$(TSCANROOT)/lib $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = -L$(TSCANROOT)/lib -L$(NETCDF4_LDFLAGS)
 
 LOC_CFLAGS =
 LOC_CPPC_CFLAGS = 
@@ -65,6 +65,7 @@ HDRS = \
 	FlatLookupTable.hh \
 	FloatDataProcessor.hh \
 	LatlonFieldProcessor.hh \
+	PolarStereoFieldProcessor.hh \
 	ShortDataProcessor.hh \
 	Terascan2Mdv.hh
 
@@ -78,6 +79,7 @@ CPPC_SRCS = \
 	FlatLookupTable.cc \
 	FloatDataProcessor.cc \
 	LatlonFieldProcessor.cc \
+	PolarStereoFieldProcessor.cc \
 	Main.cc \
 	ShortDataProcessor.cc \
 	Terascan2Mdv.cc

@@ -25,9 +25,6 @@ SUB_DIRS = \
 	SpdbMultSim \
 	StationCompare \
 	extractStationLocationList \
-	run_PrintSigAirMet \
-	spdb_merge \
-	spdb_repair \
 	spdbLatencies \
 	spdbIntervalCount \
 	station2ascii

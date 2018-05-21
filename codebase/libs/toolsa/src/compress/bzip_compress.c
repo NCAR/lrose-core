@@ -37,7 +37,7 @@
 #include <toolsa/compress.h>
 #include <toolsa/umisc.h>
 #include <dataport/bigend.h>
-#include "bzlib.h"
+#include <bzlib.h>
 
 /* #define DEBUG_PRINT */
 
@@ -98,7 +98,7 @@ void *bzip_compress(const void *uncompressed_buffer,
    */
   
   out_len = nbytes_alloc - sizeof(compress_buf_hdr_t);
-  iret = bzBuffToBuffCompress(compressed_buffer + sizeof(compress_buf_hdr_t),
+  iret = BZ2_bzBuffToBuffCompress(compressed_buffer + sizeof(compress_buf_hdr_t),
 			      &out_len,
 			      (void *) uncompressed_buffer,
 			      nbytes_uncompressed,
@@ -238,7 +238,7 @@ void *bzip_decompress(const void *compressed_buffer,
 	   hdr.nbytes_coded);
 
     out_len = hdr.nbytes_uncompressed;
-    iret = bzBuffToBuffDecompress(uncompressed_data,
+    iret = BZ2_bzBuffToBuffDecompress(uncompressed_data,
 				  &out_len,
 				  compressed_copy,
 				  hdr.nbytes_compressed,

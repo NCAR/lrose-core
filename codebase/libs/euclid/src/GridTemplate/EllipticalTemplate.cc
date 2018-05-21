@@ -21,17 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/03 18:19:27 $
-//   $Id: EllipticalTemplate.cc,v 1.9 2016/03/03 18:19:27 dixon Exp $
-//   $Revision: 1.9 $
-//   $State: Exp $
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * EllipticalTemplate.cc: class implementing an elliptical template to be
  *                        applied on gridded data.
@@ -52,7 +41,7 @@
 #include <euclid/EllipticalTemplate.hh>
 #include <euclid/GridOffset.hh>
 #include <euclid/GridTemplate.hh>
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 
 using namespace std;
 

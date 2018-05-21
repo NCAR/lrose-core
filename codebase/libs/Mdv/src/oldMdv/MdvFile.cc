@@ -21,13 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Simple wrapper for MDV file management
-//
-//  $Id: 
-//
-////////////////////////////////////////////////////////////////////////////////
 #include <string>
 #include <toolsa/umisc.h>
 #include <toolsa/file_io.h>

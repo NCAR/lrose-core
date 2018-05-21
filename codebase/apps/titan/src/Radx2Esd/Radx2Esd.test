@@ -1,0 +1,383 @@
+/**********************************************************************
+ * TDRP params for Radx2Esd
+ **********************************************************************/
+
+//======================================================================
+//
+// Reads radial radar data in file supported by Radx, writes out file in 
+//   ESD ASCII format.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory.
+//
+//
+// Type: string
+//
+
+input_dir = ".";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+///////////// search_ext //////////////////////////////
+//
+// File name extension.
+//
+// If set, only files with this extension will be processed.
+//
+//
+// Type: string
+//
+
+search_ext = "";
+
+///////////// radar_number ////////////////////////////
+//
+// Set the radar number for the data output.
+//
+// Each ray data starts with the radar number.
+//
+//
+// Type: int
+//
+
+radar_number = 1;
+
+//======================================================================
+//
+// OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS.
+//
+// Fixed angles are elevation in PPI mode and azimuth in RHI mode.
+//
+//======================================================================
+ 
+///////////// set_fixed_angle_limits //////////////////
+//
+// Option to set fixed angle limits.
+//
+// Only use sweeps within the specified fixed angle limits.
+//
+//
+// Type: boolean
+//
+
+set_fixed_angle_limits = TRUE;
+
+///////////// lower_fixed_angle_limit /////////////////
+//
+// Lower fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+lower_fixed_angle_limit = 1.0;
+
+///////////// upper_fixed_angle_limit /////////////////
+//
+// Upper fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+upper_fixed_angle_limit = 2.0;
+
+///////////// set_sweep_num_limits ////////////////////
+//
+// Option to set sweep number limits.
+//
+// If 'apply_strict_angle_limits' is set, only read sweeps within the 
+//   specified limits. If strict checking is false and no data lies within 
+//   the limits, return the closest applicable sweep.
+//
+//
+// Type: boolean
+//
+
+set_sweep_num_limits = FALSE;
+
+///////////// lower_sweep_num /////////////////////////
+//
+// Lower sweep number limit.
+//
+//
+// Type: int
+//
+
+lower_sweep_num = 0;
+
+///////////// upper_sweep_num /////////////////////////
+//
+// Upper sweep number limit.
+//
+//
+// Type: int
+//
+
+upper_sweep_num = 0;
+
+//======================================================================
+//
+// RANGE GEOMETRY.
+//
+//======================================================================
+ 
+///////////// n_gates /////////////////////////////////
+//
+// Set the number of gates to be written out.
+//
+//
+// Type: int
+//
+
+n_gates = 200;
+
+///////////// start_range_km //////////////////////////
+//
+// Specified start range (km).
+//
+// The start range will be converted to this value.
+//
+//
+// Type: double
+//
+
+start_range_km = 0.5;
+
+///////////// gate_spacing_km /////////////////////////
+//
+// Specified gate spacing (km).
+//
+// The gate spacing will be converted to this value.
+//
+//
+// Type: double
+//
+
+gate_spacing_km = 1;
+
+//======================================================================
+//
+// OPTION TO CORRECT TIME.
+//
+//======================================================================
+ 
+///////////// apply_time_offset ///////////////////////
+//
+// Option to apply an offset to the ray times.
+//
+// If TRUE, this offset will be ADDED to the existing ray times. This is 
+//   useful, for example, for correcting time errors, or converting from 
+//   local time to UTC.
+//
+//
+// Type: boolean
+//
+
+apply_time_offset = FALSE;
+
+///////////// time_offset_secs ////////////////////////
+//
+// Time offset (secs).
+//
+// See 'apply_time_offset'. This value will be ADDED to the existing ray 
+//   times.
+//
+//
+// Type: double
+//
+
+time_offset_secs = 0;
+
+//======================================================================
+//
+// OPTION TO CORRECT ANTENNA ANGLES.
+//
+//======================================================================
+ 
+///////////// apply_azimuth_offset ////////////////////
+//
+// Option to apply an offset to the azimuth values.
+//
+// If TRUE, this offset will be ADDED to the measured azimuth angles. 
+//   This is useful, for example, in the case of a mobile platform which 
+//   is not set up oriented to true north. Suppose you have a truck (like 
+//   the DOWs) which is oriented off true north. Then if you add in the 
+//   truck HEADING relative to true north, the measured azimuth angles 
+//   will be adjusted by the heading, to give azimuth relative to TRUE 
+//   north.
+//
+//
+// Type: boolean
+//
+
+apply_azimuth_offset = FALSE;
+
+///////////// azimuth_offset //////////////////////////
+//
+// Azimuth offset (degrees).
+//
+// See 'apply_azimuth_offset'. This value will be ADDED to the measured 
+//   azimuths.
+//
+//
+// Type: double
+//
+
+azimuth_offset = 0;
+
+///////////// apply_elevation_offset //////////////////
+//
+// Option to apply an offset to the elevation values.
+//
+// If TRUE, this offset will be ADDED to the measured elevation angles. 
+//   This is useful to correct for a systematic bias in measured elevation 
+//   angles.
+//
+//
+// Type: boolean
+//
+
+apply_elevation_offset = FALSE;
+
+///////////// elevation_offset ////////////////////////
+//
+// Elevation offset (degrees).
+//
+// See 'apply_elevation_offset'. This value will be ADDED to the 
+//   measured elevations.
+//
+//
+// Type: double
+//
+
+elevation_offset = 0;
+
+//======================================================================
+//
+// SPECIFY DBZ FIELD NAME.
+//
+//======================================================================
+ 
+///////////// dbz_field_name //////////////////////////
+//
+// Name of DBZ field.
+//
+// ESD ASCII only accepts the reflectivity field in the data.
+//
+//
+// Type: string
+//
+
+dbz_field_name = "DBZ_S";
+
+//======================================================================
+//
+// OUTPUT DIRECTORY.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+//
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+//
+//
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+

@@ -1089,32 +1089,32 @@ Spdb::compression_t DsSpdbMsg::dataBufCompression() const
 // print message
 //
 
-void DsSpdbMsg::print(ostream &out) const
+void DsSpdbMsg::print(ostream &out, const char *spacer) const
 
 {
 
-  out << "====== DsSpdbMsg ======" << endl;
-  out << "clientHost: " << getClientHost() << endl;
-  out << "clientIpaddr: " << getClientIpaddr() << endl;
-  out << "clientUser: " << getClientUser() << endl;
-  out << "  Message subType: " << subtype2Str(_subType) << endl;
-  out << "  url: " << _urlStr << endl;
-  out << "  mode: " << mode2Str(_mode) << endl;
+  out << spacer << "====== DsSpdbMsg ======" << endl;
+  out << spacer << "clientHost: " << getClientHost() << endl;
+  out << spacer << "clientIpaddr: " << getClientIpaddr() << endl;
+  out << spacer << "clientUser: " << getClientUser() << endl;
+  out << spacer << "  Message subType: " << subtype2Str(_subType) << endl;
+  out << spacer << "  url: " << _urlStr << endl;
+  out << spacer << "  mode: " << mode2Str(_mode) << endl;
 
   switch (_subType) {
     
     case DS_SPDB_PUT:
       if (_info2.lead_time_storage == Spdb::LEAD_TIME_IN_DATA_TYPE) {
-        out << "  Lead time: set in data_type" << endl;
+        out << spacer << "  Lead time: set in data_type" << endl;
       } else if (_info2.lead_time_storage == Spdb::LEAD_TIME_IN_DATA_TYPE2) {
-        out << "  Lead time: set in data_type2" << endl;
+        out << spacer << "  Lead time: set in data_type2" << endl;
       }
       switch (_mode) {
         case DS_SPDB_PUT_MODE_OVER:
         case DS_SPDB_PUT_MODE_ADD:
         case DS_SPDB_PUT_MODE_ADD_UNIQUE:
         case DS_SPDB_PUT_MODE_ONCE:
-          out << "  nChunks: " << _info.n_chunks << endl;
+          out << spacer << "  nChunks: " << _info.n_chunks << endl;
           break;
         default: {}
       }
@@ -1122,106 +1122,106 @@ void DsSpdbMsg::print(ostream &out) const
       
     case DS_SPDB_PUT_RETURN:
       if (_flags) {
-        out << "  error occurred." << endl;
-        out << _errorStr << endl;
+        out << spacer << "  error occurred." << endl;
+        out << spacer << _errorStr << endl;
       }
       break;
       
     case DS_SPDB_GET:
       switch (_mode) {
         case DS_SPDB_GET_MODE_EXACT:
-          out << "  request_time: " << utimstr(_info.request_time) << endl;
+          out << spacer << "  request_time: " << utimstr(_info.request_time) << endl;
           break;
         case DS_SPDB_GET_MODE_CLOSEST:
-          out << "  request_time: " << utimstr(_info.request_time) << endl;
-          out << "  time_margin: " << _info.time_margin << endl;
+          out << spacer << "  request_time: " << utimstr(_info.request_time) << endl;
+          out << spacer << "  time_margin: " << _info.time_margin << endl;
           break;
         case DS_SPDB_GET_MODE_INTERVAL:
-          out << "  start_time: " << utimstr(_info.start_time) << endl;
-          out << "  end_time: " << utimstr(_info.end_time) << endl;
+          out << spacer << "  start_time: " << utimstr(_info.start_time) << endl;
+          out << spacer << "  end_time: " << utimstr(_info.end_time) << endl;
           break;
         case DS_SPDB_GET_MODE_VALID:
-          out << "  request_time: " << utimstr(_info.request_time) << endl;
+          out << spacer << "  request_time: " << utimstr(_info.request_time) << endl;
           break;
         case DS_SPDB_GET_MODE_LATEST:
-          out << "  time_margin: " << _info.time_margin << endl;
+          out << spacer << "  time_margin: " << _info.time_margin << endl;
           break;
         case DS_SPDB_GET_MODE_FIRST_BEFORE:
-          out << "  request_time: " << utimstr(_info.request_time) << endl;
-          out << "  time_margin: " << _info.time_margin << endl;
+          out << spacer << "  request_time: " << utimstr(_info.request_time) << endl;
+          out << spacer << "  time_margin: " << _info.time_margin << endl;
           break;
         case DS_SPDB_GET_MODE_FIRST_AFTER:
-          out << "  request_time: " << utimstr(_info.request_time) << endl;
-          out << "  time_margin: " << _info.time_margin << endl;
+          out << spacer << "  request_time: " << utimstr(_info.request_time) << endl;
+          out << spacer << "  time_margin: " << _info.time_margin << endl;
           break;
         case DS_SPDB_GET_MODE_TIMES:
           break;
         case DS_SPDB_GET_MODE_TIME_LIST:
-          out << "  start_time: " << utimstr(_info.start_time) << endl;
-          out << "  end_time: " << utimstr(_info.end_time) << endl;
-          out << "  min_interval: " << _info.time_margin << endl;
+          out << spacer << "  start_time: " << utimstr(_info.start_time) << endl;
+          out << spacer << "  end_time: " << utimstr(_info.end_time) << endl;
+          out << spacer << "  min_interval: " << _info.time_margin << endl;
           break;
         default:
           break;
       }
-      out << "  dataType: " << _info.data_type << endl;
-      out << "  dataType2: " << _info.data_type2 << endl;
+      out << spacer << "  dataType: " << _info.data_type << endl;
+      out << spacer << "  dataType2: " << _info.data_type2 << endl;
       if (_info.get_unique == Spdb::UniqueOff) {
-        out << "  Get unique: off" << endl;
+        out << spacer << "  Get unique: off" << endl;
       } else if (_info.get_unique == Spdb::UniqueLatest) {
-        out << "  Get unique: latest" << endl;
+        out << spacer << "  Get unique: latest" << endl;
       } else if (_info.get_unique == Spdb::UniqueEarliest) {
-        out << "  Get unique: earliest" << endl;
+        out << spacer << "  Get unique: earliest" << endl;
       } else {
-        out << "  Get unique: unknown" << endl;
+        out << spacer << "  Get unique: unknown" << endl;
       }
       if (_info.get_refs_only) {
-        out << "  Get refs only: true" << endl;
+        out << spacer << "  Get refs only: true" << endl;
       } else {
-        out << "  Get refs only: false" << endl;
+        out << spacer << "  Get refs only: false" << endl;
       }
       if (_info.respect_zero_types) {
-        out << "  Respect zero types: true" << endl;
+        out << spacer << "  Respect zero types: true" << endl;
       } else {
-        out << "  Respect zero types: false" << endl;
+        out << spacer << "  Respect zero types: false" << endl;
       }
       if (_info2.check_write_time_on_get) {
-        out << "  Check write time: true" << endl;
-        out << "  Latest valid write time: "
+        out << spacer << "  Check write time: true" << endl;
+        out << spacer << "  Latest valid write time: "
             << utimstr(_info2.latest_valid_write_time) << endl;
       }
       if (_info2.check_write_time_on_get) {
-        out << "  Check write time: true" << endl;
-        out << "  Latest valid write time: "
+        out << spacer << "  Check write time: true" << endl;
+        out << spacer << "  Latest valid write time: "
             << utimstr(_info2.latest_valid_write_time) << endl;
       }
       if (_info2.data_buf_compression == Spdb::COMPRESSION_NONE) {
-        out << "  Data buf compression: none" << endl;
+        out << spacer << "  Data buf compression: none" << endl;
       } else if (_info2.data_buf_compression == Spdb::COMPRESSION_GZIP) {
-        out << "  Data buf compression: gzip" << endl;
+        out << spacer << "  Data buf compression: gzip" << endl;
       } else if (_info2.data_buf_compression == Spdb::COMPRESSION_BZIP2) {
-        out << "  Data buf compression: bzip2" << endl;
+        out << spacer << "  Data buf compression: bzip2" << endl;
       }
       if (_horizLimitsSet) {
-        out << "  Horiz limits:" << endl;
-        out << "    Min lat: " << _horizLimits.min_lat << endl;
-        out << "    Min lon: " << _horizLimits.min_lon << endl;
-        out << "    Max lat: " << _horizLimits.max_lat << endl;
-        out << "    Max lon: " << _horizLimits.max_lon << endl;
+        out << spacer << "  Horiz limits:" << endl;
+        out << spacer << "    Min lat: " << _horizLimits.min_lat << endl;
+        out << spacer << "    Min lon: " << _horizLimits.min_lon << endl;
+        out << spacer << "    Max lat: " << _horizLimits.max_lat << endl;
+        out << spacer << "    Max lon: " << _horizLimits.max_lon << endl;
       }
       if (_vertLimitsSet) {
-        out << "  Vert limits:" << endl;
-        out << "    Min ht: " << _vertLimits.min_ht << endl;
-        out << "    Max ht: " << _vertLimits.max_ht << endl;
+        out << spacer << "  Vert limits:" << endl;
+        out << spacer << "    Min ht: " << _vertLimits.min_ht << endl;
+        out << spacer << "    Max ht: " << _vertLimits.max_ht << endl;
       }
       break;
       
     case DS_SPDB_GET_RETURN:
       switch (_mode) {
         case DS_SPDB_GET_MODE_TIMES:
-          out << "  start_time: " << utimstr(_info.start_time) << endl;
-          out << "  end_time: " << utimstr(_info.end_time) << endl;
-          out << "  last_valid_time: " << utimstr(_info.last_valid_time) << endl;
+          out << spacer << "  start_time: " << utimstr(_info.start_time) << endl;
+          out << spacer << "  end_time: " << utimstr(_info.end_time) << endl;
+          out << spacer << "  last_valid_time: " << utimstr(_info.last_valid_time) << endl;
           break;
         case DS_SPDB_GET_MODE_EXACT:
         case DS_SPDB_GET_MODE_CLOSEST:
@@ -1230,21 +1230,21 @@ void DsSpdbMsg::print(ostream &out) const
         case DS_SPDB_GET_MODE_LATEST:
         case DS_SPDB_GET_MODE_FIRST_BEFORE:
         case DS_SPDB_GET_MODE_FIRST_AFTER:
-          out << "  nChunks: " << _info.n_chunks << endl;
+          out << spacer << "  nChunks: " << _info.n_chunks << endl;
           if (_info2.data_buf_compression == Spdb::COMPRESSION_NONE) {
-            out << "  Data buf compression: none" << endl;
+            out << spacer << "  Data buf compression: none" << endl;
           } else if (_info2.data_buf_compression == Spdb::COMPRESSION_GZIP) {
-            out << "  Data buf compression: gzip" << endl;
+            out << spacer << "  Data buf compression: gzip" << endl;
           } else if (_info2.data_buf_compression == Spdb::COMPRESSION_BZIP2) {
-            out << "  Data buf compression: bzip2" << endl;
+            out << spacer << "  Data buf compression: bzip2" << endl;
           }
           break;
         default:
           break;
       }
       if (_flags) {
-        out << "  error occurred." << endl;
-        out << _errorStr << endl;
+        out << spacer << "  error occurred." << endl;
+        out << spacer << _errorStr << endl;
       }
       break;
       
@@ -1254,32 +1254,32 @@ void DsSpdbMsg::print(ostream &out) const
   } // switch (_subType)
 
   if (_auxXml.size() > 0) {
-    out << "  auxXml:" << endl;
-    out << _auxXml << endl;
+    out << spacer << "  auxXml:" << endl;
+    out << spacer << _auxXml << endl;
   }
 
   if (_refBuf.getLen() > 0) {
-    out << "  Chunk ref buf size: " << _refBuf.getLen() << endl;
+    out << spacer << "  Chunk ref buf size: " << _refBuf.getLen() << endl;
   }
 
   if (_auxBuf.getLen() > 0) {
-    out << "  Aux ref buf size: " << _auxBuf.getLen() << endl;
+    out << spacer << "  Aux ref buf size: " << _auxBuf.getLen() << endl;
   }
 
   if (_dataBuf.getLen() > 0) {
-    out << "  Data buf size: " << _dataBuf.getLen() << endl;
+    out << spacer << "  Data buf size: " << _dataBuf.getLen() << endl;
   }
 
   if (lengthAssembled() > 0) {
-    out << "  Assembled message size: " << lengthAssembled() << endl;
+    out << spacer << "  Assembled message size: " << lengthAssembled() << endl;
   }
 
-  out << "=======================" << endl;
+  out << spacer << "=======================" << endl;
 
-  printHeader(out, "");
-  // printPartHeaders(out, "");
+  printHeader(out, spacer);
+  // printPartHeaders(out, spacer);
 
-  out << "=======================" << endl;
+  out << spacer << "=======================" << endl;
 
 }
 
@@ -1355,7 +1355,7 @@ void *DsSpdbMsg::_assembleGet(const mode_enum_t request_mode)
 ////////////////////////////////////////////////
 // Function to return the reference time.
 
-const time_t DsSpdbMsg::getRefTime() const {
+time_t DsSpdbMsg::getRefTime() const {
   //
   // Only relevant for get functions - return 0 otherwise.
   //

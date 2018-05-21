@@ -15,6 +15,7 @@ SUB_DIRS = \
          BomSounding2Spdb \
          Bprp2Dsr \
          CreateStationList \
+         CsuSounding2Spdb \
          Dorade2Dsr \
          Dorade2DsrArchiveDriver \
          GemScan2Dsr \
@@ -26,11 +27,14 @@ SUB_DIRS = \
          LdmDynamic2Static \
          LdmMetars2File \
          Ltg2Spdb \
+         madis2Spdb \
          Metar2Spdb \
          Mrms2Mdv \
+         MrmsGribIngest \
          NWSsoundingIngest \
          NcRadar2Dsr \
          NcRadarSplit \
+         NcarAcPosn2Spdb \
          NewNidsRadial2Mdv \
          NexradBzipDecompress \
          Nids2Mdv \

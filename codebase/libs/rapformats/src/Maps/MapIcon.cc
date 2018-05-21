@@ -43,8 +43,6 @@
  *
  *********************************************************************/
 
-using namespace std;
-
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -55,6 +53,7 @@ using namespace std;
 #include <rapformats/MapObject.hh>
 #include <toolsa/str.h>
 
+using namespace std;
 
 /**********************************************************************
  * Constructors

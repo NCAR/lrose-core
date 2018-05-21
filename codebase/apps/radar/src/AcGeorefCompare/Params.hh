@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -396,17 +396,17 @@ public:
 
   tdrp_bool_t print_primary_custom_variables;
 
-  char* *_primary_custom_labels;
-  int primary_custom_labels_n;
-
   tdrp_bool_t print_secondary_custom_variables;
-
-  char* *_secondary_custom_labels;
-  int secondary_custom_labels_n;
 
   tdrp_bool_t print_surface_velocity_stats;
 
   int surface_velocity_custom_index;
+
+  char* *_primary_custom_labels;
+  int primary_custom_labels_n;
+
+  char* *_secondary_custom_labels;
+  int secondary_custom_labels_n;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -415,7 +415,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[38];
+  mutable TDRPtable _table[39];
 
   const char *_className;
 

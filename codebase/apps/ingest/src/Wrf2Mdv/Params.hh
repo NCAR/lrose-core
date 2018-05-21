@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -557,6 +557,8 @@ public:
 
   tdrp_bool_t get_times_from_filenames;
 
+  int gen_time_offset;
+
   int max_realtime_valid_age;
 
   int min_forecast_dtime;
@@ -648,7 +650,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[63];
+  mutable TDRPtable _table[64];
 
   const char *_className;
 

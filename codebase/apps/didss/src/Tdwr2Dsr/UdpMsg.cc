@@ -31,11 +31,12 @@
 // April 2001
 //
 ///////////////////////////////////////////////////////////////
-#include <stdlib.h>
+#include <cstdlib>
 #include <cstdio>
 #include <cerrno>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <toolsa/pmu.h>
@@ -127,12 +128,7 @@ UdpMsg::readUdp( char* buffer )
   struct sockaddr_in addr;
   int                status;
 
-#if defined(__linux)
   socklen_t          addrLen = sizeof( struct sockaddr_in );
-#else
-  int                addrLen = sizeof( struct sockaddr_in );
-#endif
-
 
   PMU_auto_register( "Reading udp data" );
   /*

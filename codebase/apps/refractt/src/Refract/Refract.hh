@@ -36,22 +36,13 @@
 #ifndef Refract_HH
 #define Refract_HH
 
-#include <string>
-#include <sys/stat.h>
-
-#include <dsdata/DsTrigger.hh>
-#include <Mdv/DsMdvx.hh>
-#include <Mdv/MdvxField.hh>
-#include <toolsa/DateTime.hh>
-
-#include "Args.hh"
-#include "Params.hh"
-
-#include "Input.hh"
 #include "Processor.hh"
+#include "Params.hh"
+#include "CalibDayNight.hh"
+#include <Refract/RefParms.hh>
 
-using namespace std;
-
+class RefractInput;
+class DsMdvx;
 
 /** 
  * @class Refract
@@ -147,16 +138,10 @@ class Refract
   char *_progName;
 
   /**
-   * @brief Command line arguments.
-   */
-
-  Args *_args;
-
-  /**
    * @brief Parameter file paramters.
    */
-
-  Params *_params;
+  Params _params;
+  RefParms _refparms;
   
   /**
    * @brief Triggering object
@@ -165,10 +150,10 @@ class Refract
   DsTrigger *_dataTrigger;
   
   /**
-   * @brief The calibration file.
+   * @brief The calibration files.
    */
 
-  DsMdvx _calibFile;
+  CalibDayNight _calib;
   
   /**
    * @brief Refractivity processor object
@@ -178,7 +163,7 @@ class Refract
   
   // Global objects
 
-  Input _inputHandler;
+  RefractInput *_inputHandler;
   
 
   /////////////////////
@@ -198,24 +183,6 @@ class Refract
   
 
   /**
-   * @brief Initialize the input handler object.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _initInputHandler(void);
-  
-
-  /**
-   * @brief Initialize the data trigger.
-   *
-   * Returns true on success, false on failure.
-   */
-
-  bool _initTrigger(void);
-  
-
-  /**
    * @brief Process data for the given trigger time.
    *
    * @param trigger_time The current trigger time.  Data for this time
@@ -227,23 +194,7 @@ class Refract
   bool _processData(const DateTime &trigger_time);
   
 
-  /**
-   * @brief Process the given input file.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _processFile(const string &input_path,
-		    const int scan_num);
-  
-
-  void _updateMasterHdr(DsMdvx &output_file,
-			const DateTime &scan_time,
-			const double radar_lat,
-			const double radar_lon,
-			const double radar_alt) const;
-  
-
+  bool _readInputFile(DsMdvx &mdvx, const DateTime &data_time);
 };
 
 

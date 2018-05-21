@@ -767,7 +767,7 @@ int OdimHdf5RadxFile::_readFromPath(const string &path,
   
   // set format as read
 
-  _fileFormat = FILE_FORMAT_DOE_NC;
+  _fileFormat = FILE_FORMAT_ODIM_HDF5;
 
   return 0;
 
@@ -3142,7 +3142,7 @@ int OdimHdf5RadxFile::_finalizeReadVolume()
 
   // load the sweep information from the rays
 
-  _readVol->loadSweepInfoFromRays();
+  // _readVol->loadSweepInfoFromRays();
   
   // constrain the sweep data as appropriate
   
@@ -3189,6 +3189,10 @@ int OdimHdf5RadxFile::_finalizeReadVolume()
     rays[iray]->setSweepMode(sweepMode);
   }
 
+  // load the sweep information from the rays
+
+  _readVol->loadSweepInfoFromRays();
+  
   return 0;
 
 }
@@ -3823,7 +3827,7 @@ int OdimHdf5RadxFile::_writeSweep(RadxVol &sweepVol,
   // if it is not already set.
 
   bool force = false;
-  sweepVol.computeFixedAngleFromRays(force);
+  sweepVol.computeFixedAnglesFromRays(force);
 
   // ensure all rays on sweep have a constant number of rays
   

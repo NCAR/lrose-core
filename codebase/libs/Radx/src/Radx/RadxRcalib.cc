@@ -64,6 +64,8 @@
 #include <Radx/RadxXml.hh>
 #include <Radx/RadxStr.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/RadxMsg.hh>
+#include <Radx/ByteOrder.hh>
 #include <cstdio>
 #include <iostream>
 #include <cmath>
@@ -828,3 +830,340 @@ int RadxRcalib::readFromXmlFile(const string &calPath, string &errStr)
 
 }
 
+/////////////////////////////////////////////////////////
+// serialize into a RadxMsg
+
+void RadxRcalib::serialize(RadxMsg &msg)
+  
+{
+
+  // init
+  
+  msg.clearAll();
+  msg.setMsgType(RadxMsg::RadxRcalibMsg);
+
+  // add metadata strings as xml part
+  // include null at string end
+  
+  string xml;
+  _loadMetaStringsToXml(xml);
+  msg.addPart(_metaStringsPartId, xml.c_str(), xml.size() + 1);
+
+  // add metadata numbers
+  
+  _loadMetaNumbersToMsg();
+  msg.addPart(_metaNumbersPartId, &_metaNumbers, sizeof(msgMetaNumbers_t));
+  
+}
+
+/////////////////////////////////////////////////////////
+// deserialize from a RadxMsg
+// return 0 on success, -1 on failure
+
+int RadxRcalib::deserialize(const RadxMsg &msg)
+  
+{
+  
+  // initialize object
+
+  init();
+
+  // check type
+
+  if (msg.getMsgType() != RadxMsg::RadxRcalibMsg) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRcalib::deserialize" << endl;
+    cerr << "  incorrect message type" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata strings
+
+  const RadxMsg::Part *metaStringPart = msg.getPartByType(_metaStringsPartId);
+  if (metaStringPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRcalib::deserialize" << endl;
+    cerr << "  No metadata string part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaStringsFromXml((char *) metaStringPart->getBuf(),
+                             metaStringPart->getLength())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRcalib::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "  Bad string XML for metadata: " << endl;
+    string bufStr((char *) metaStringPart->getBuf(),
+                  metaStringPart->getLength());
+    cerr << "  " << bufStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata numbers
+  
+  const RadxMsg::Part *metaNumsPart = msg.getPartByType(_metaNumbersPartId);
+  if (metaNumsPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRcalib::deserialize" << endl;
+    cerr << "  No metadata numbers part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaNumbersFromMsg((msgMetaNumbers_t *) metaNumsPart->getBuf(),
+                             metaNumsPart->getLength(),
+                             msg.getSwap())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRcalib::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// convert string metadata to XML
+
+void RadxRcalib::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
+  
+{
+  xml.clear();
+  xml += RadxXml::writeStartTag("RadxRcalib", level);
+  xml += RadxXml::writeString("radarName", level + 1, _radarName);
+  xml += RadxXml::writeEndTag("RadxRcalib", level);
+}
+
+/////////////////////////////////////////////////////////
+// set metadata strings from XML
+// returns 0 on success, -1 on failure
+
+int RadxRcalib::_setMetaStringsFromXml(const char *xml,
+                                    size_t bufLen)
+  
+{
+
+  // check for NULL
+  
+  if (xml[bufLen - 1] != '\0') {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRcalib::_setMetaStringsFromXml" << endl;
+    cerr << "  XML string not null terminated" << endl;
+    string xmlStr(xml, bufLen);
+    cerr << "  " << xmlStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;    
+  }
+
+  string xmlStr(xml);
+  string contents;
+
+  if (RadxXml::readString(xmlStr, "RadxRcalib", contents)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRcalib::_setMetaStringsFromXml" << endl;
+    cerr << "  XML not delimited by 'RadxRcalib' tags" << endl;
+    cerr << "  " << xmlStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  if (RadxXml::readString(contents, "radarName", _radarName)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRcalib::_setMetaStringsFromXml" << endl;
+    cerr << "  Cannot find 'radarName' tag" << endl;
+    cerr << "  " << xmlStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// load the meta number to the message struct
+
+void RadxRcalib::_loadMetaNumbersToMsg()
+  
+{
+
+  // clear
+
+  memset(&_metaNumbers, 0, sizeof(_metaNumbers));
+  
+  // set time
+
+  _metaNumbers.timeSecs = getCalibTime();
+
+  // set 64 bit vals
+
+  _metaNumbers.wavelengthCm = _wavelengthCm;
+  _metaNumbers.beamWidthDegH = _beamWidthDegH;
+  _metaNumbers.beamWidthDegV = _beamWidthDegV;
+  _metaNumbers.antennaGainDbH = _antennaGainDbH;
+  _metaNumbers.antennaGainDbV = _antennaGainDbV;
+  _metaNumbers.pulseWidthUsec = _pulseWidthUsec;
+  _metaNumbers.xmitPowerDbmH = _xmitPowerDbmH;
+  _metaNumbers.xmitPowerDbmV = _xmitPowerDbmV;
+  _metaNumbers.twoWayWaveguideLossDbH = _twoWayWaveguideLossDbH;
+  _metaNumbers.twoWayWaveguideLossDbV = _twoWayWaveguideLossDbV;
+  _metaNumbers.twoWayRadomeLossDbH = _twoWayRadomeLossDbH;
+  _metaNumbers.twoWayRadomeLossDbV = _twoWayRadomeLossDbV;
+  _metaNumbers.receiverMismatchLossDb = _receiverMismatchLossDb;
+  _metaNumbers.kSquaredWater = _kSquaredWater;
+  _metaNumbers.radarConstH = _radarConstH;
+  _metaNumbers.radarConstV = _radarConstV;
+  _metaNumbers.noiseDbmHc = _noiseDbmHc;
+  _metaNumbers.noiseDbmHx = _noiseDbmHx;
+  _metaNumbers.noiseDbmVc = _noiseDbmVc;
+  _metaNumbers.noiseDbmVx = _noiseDbmVx;
+  _metaNumbers.i0DbmHc = _i0DbmHc;
+  _metaNumbers.i0DbmHx = _i0DbmHx;
+  _metaNumbers.i0DbmVc = _i0DbmVc;
+  _metaNumbers.i0DbmVx = _i0DbmVx;
+  _metaNumbers.receiverGainDbHc = _receiverGainDbHc;
+  _metaNumbers.receiverGainDbHx = _receiverGainDbHx;
+  _metaNumbers.receiverGainDbVc = _receiverGainDbVc;
+  _metaNumbers.receiverGainDbVx = _receiverGainDbVx;
+  _metaNumbers.receiverSlopeDbHc = _receiverSlopeDbHc;
+  _metaNumbers.receiverSlopeDbHx = _receiverSlopeDbHx;
+  _metaNumbers.receiverSlopeDbVc = _receiverSlopeDbVc;
+  _metaNumbers.receiverSlopeDbVx = _receiverSlopeDbVx;
+  _metaNumbers.dynamicRangeDbHc = _dynamicRangeDbHc;
+  _metaNumbers.dynamicRangeDbHx = _dynamicRangeDbHx;
+  _metaNumbers.dynamicRangeDbVc = _dynamicRangeDbVc;
+  _metaNumbers.dynamicRangeDbVx = _dynamicRangeDbVx;
+  _metaNumbers.baseDbz1kmHc = _baseDbz1kmHc;
+  _metaNumbers.baseDbz1kmHx = _baseDbz1kmHx;
+  _metaNumbers.baseDbz1kmVc = _baseDbz1kmVc;
+  _metaNumbers.baseDbz1kmVx = _baseDbz1kmVx;
+  _metaNumbers.sunPowerDbmHc = _sunPowerDbmHc;
+  _metaNumbers.sunPowerDbmHx = _sunPowerDbmHx;
+  _metaNumbers.sunPowerDbmVc = _sunPowerDbmVc;
+  _metaNumbers.sunPowerDbmVx = _sunPowerDbmVx;
+  _metaNumbers.noiseSourcePowerDbmH = _noiseSourcePowerDbmH;
+  _metaNumbers.noiseSourcePowerDbmV = _noiseSourcePowerDbmV;
+  _metaNumbers.powerMeasLossDbH = _powerMeasLossDbH;
+  _metaNumbers.powerMeasLossDbV = _powerMeasLossDbV;
+  _metaNumbers.couplerForwardLossDbH = _couplerForwardLossDbH;
+  _metaNumbers.couplerForwardLossDbV = _couplerForwardLossDbV;
+  _metaNumbers.dbzCorrection = _dbzCorrection;
+  _metaNumbers.zdrCorrectionDb = _zdrCorrectionDb;
+  _metaNumbers.ldrCorrectionDbH = _ldrCorrectionDbH;
+  _metaNumbers.ldrCorrectionDbV = _ldrCorrectionDbV;
+  _metaNumbers.systemPhidpDeg = _systemPhidpDeg;
+  _metaNumbers.testPowerDbmH = _testPowerDbmH;
+  _metaNumbers.testPowerDbmV = _testPowerDbmV;
+    
+}
+
+/////////////////////////////////////////////////////////
+// set the meta number data from the message struct
+
+int RadxRcalib::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                                       size_t bufLen,
+                                       bool swap)
+  
+{
+
+  // check size
+
+  if (bufLen != sizeof(msgMetaNumbers_t)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRcalib::_setMetaNumbersFromMsg" << endl;
+    cerr << "  Incorrect message size: " << bufLen << endl;
+    cerr << "  Should be: " << sizeof(msgMetaNumbers_t) << endl;
+    return -1;
+  }
+
+  // copy into local struct
+  
+  _metaNumbers = *metaNumbers;
+
+  // swap as needed
+
+  if (swap) {
+    _swapMetaNumbers(_metaNumbers); 
+  }
+  
+  // set time
+
+  setCalibTime(_metaNumbers.timeSecs);
+  
+  // set 64 bit values
+
+  _wavelengthCm = _metaNumbers.wavelengthCm;
+  _beamWidthDegH = _metaNumbers.beamWidthDegH;
+  _beamWidthDegV = _metaNumbers.beamWidthDegV;
+  _antennaGainDbH = _metaNumbers.antennaGainDbH;
+  _antennaGainDbV = _metaNumbers.antennaGainDbV;
+  _pulseWidthUsec = _metaNumbers.pulseWidthUsec;
+  _xmitPowerDbmH = _metaNumbers.xmitPowerDbmH;
+  _xmitPowerDbmV = _metaNumbers.xmitPowerDbmV;
+  _twoWayWaveguideLossDbH = _metaNumbers.twoWayWaveguideLossDbH;
+  _twoWayWaveguideLossDbV = _metaNumbers.twoWayWaveguideLossDbV;
+  _twoWayRadomeLossDbH = _metaNumbers.twoWayRadomeLossDbH;
+  _twoWayRadomeLossDbV = _metaNumbers.twoWayRadomeLossDbV;
+  _receiverMismatchLossDb = _metaNumbers.receiverMismatchLossDb;
+  _kSquaredWater = _metaNumbers.kSquaredWater;
+  _radarConstH = _metaNumbers.radarConstH;
+  _radarConstV = _metaNumbers.radarConstV;
+  _noiseDbmHc = _metaNumbers.noiseDbmHc;
+  _noiseDbmHx = _metaNumbers.noiseDbmHx;
+  _noiseDbmVc = _metaNumbers.noiseDbmVc;
+  _noiseDbmVx = _metaNumbers.noiseDbmVx;
+  _i0DbmHc = _metaNumbers.i0DbmHc;
+  _i0DbmHx = _metaNumbers.i0DbmHx;
+  _i0DbmVc = _metaNumbers.i0DbmVc;
+  _i0DbmVx = _metaNumbers.i0DbmVx;
+  _receiverGainDbHc = _metaNumbers.receiverGainDbHc;
+  _receiverGainDbHx = _metaNumbers.receiverGainDbHx;
+  _receiverGainDbVc = _metaNumbers.receiverGainDbVc;
+  _receiverGainDbVx = _metaNumbers.receiverGainDbVx;
+  _receiverSlopeDbHc = _metaNumbers.receiverSlopeDbHc;
+  _receiverSlopeDbHx = _metaNumbers.receiverSlopeDbHx;
+  _receiverSlopeDbVc = _metaNumbers.receiverSlopeDbVc;
+  _receiverSlopeDbVx = _metaNumbers.receiverSlopeDbVx;
+  _dynamicRangeDbHc = _metaNumbers.dynamicRangeDbHc;
+  _dynamicRangeDbHx = _metaNumbers.dynamicRangeDbHx;
+  _dynamicRangeDbVc = _metaNumbers.dynamicRangeDbVc;
+  _dynamicRangeDbVx = _metaNumbers.dynamicRangeDbVx;
+  _baseDbz1kmHc = _metaNumbers.baseDbz1kmHc;
+  _baseDbz1kmHx = _metaNumbers.baseDbz1kmHx;
+  _baseDbz1kmVc = _metaNumbers.baseDbz1kmVc;
+  _baseDbz1kmVx = _metaNumbers.baseDbz1kmVx;
+  _sunPowerDbmHc = _metaNumbers.sunPowerDbmHc;
+  _sunPowerDbmHx = _metaNumbers.sunPowerDbmHx;
+  _sunPowerDbmVc = _metaNumbers.sunPowerDbmVc;
+  _sunPowerDbmVx = _metaNumbers.sunPowerDbmVx;
+  _noiseSourcePowerDbmH = _metaNumbers.noiseSourcePowerDbmH;
+  _noiseSourcePowerDbmV = _metaNumbers.noiseSourcePowerDbmV;
+  _powerMeasLossDbH = _metaNumbers.powerMeasLossDbH;
+  _powerMeasLossDbV = _metaNumbers.powerMeasLossDbV;
+  _couplerForwardLossDbH = _metaNumbers.couplerForwardLossDbH;
+  _couplerForwardLossDbV = _metaNumbers.couplerForwardLossDbV;
+  _dbzCorrection = _metaNumbers.dbzCorrection;
+  _zdrCorrectionDb = _metaNumbers.zdrCorrectionDb;
+  _ldrCorrectionDbH = _metaNumbers.ldrCorrectionDbH;
+  _ldrCorrectionDbV = _metaNumbers.ldrCorrectionDbV;
+  _systemPhidpDeg = _metaNumbers.systemPhidpDeg;
+  _testPowerDbmH = _metaNumbers.testPowerDbmH;
+  _testPowerDbmV = _metaNumbers.testPowerDbmV;
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// swap meta numbers
+
+void RadxRcalib::_swapMetaNumbers(msgMetaNumbers_t &meta)
+{
+  ByteOrder::swap64(&meta.timeSecs, 72 * sizeof(Radx::si64));
+}

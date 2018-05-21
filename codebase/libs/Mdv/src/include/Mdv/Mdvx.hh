@@ -668,7 +668,7 @@ protected:
 
   // copy
   
-  virtual Mdvx &_copy(const Mdvx &rhs);
+  Mdvx &_copy(const Mdvx &rhs);
 
   // data set info
 

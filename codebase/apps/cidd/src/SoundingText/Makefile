@@ -38,9 +38,9 @@ TARGET_FILE = SoundingText
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -ldidss \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
 	-lrapformats -lphysics -lrapplot -lrapmath \
-	-ltoolsa -leuclid -ldataport -ltdrp \
+	-leuclid -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

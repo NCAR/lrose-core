@@ -121,7 +121,7 @@ int InputUdp::openUdp()
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = htonl(INADDR_ANY);
   
-  if (bind (_udpFd, (struct sockaddr *) &addr, sizeof (addr)) < 0) {
+  if (::bind (_udpFd, (struct sockaddr *) &addr, sizeof (addr)) < 0) {
     int errNum = errno;
     cerr << "ERROR - InputUdp::open" << endl;
     cerr << "  Bind error, udp port: " << port << endl;
@@ -158,7 +158,7 @@ void InputUdp::closeUdp()
 //
 // Returns 0 on success, -1 on failure
 
-int InputUdp::readPacket()
+int InputUdp::readPacket(bool &timedOut)
 
 {
 
@@ -166,10 +166,12 @@ int InputUdp::readPacket()
   
   // check for data, using select
   
+  timedOut = false;
   while (true) {
 
-    int iret = SKU_read_select(_udpFd, 1000);
-
+    int msecsSleep = _params.udp_sleep_secs * 1000;
+    int iret = SKU_read_select(_udpFd, msecsSleep);
+    
     if (iret == 1) {
       break;
     } // success
@@ -184,12 +186,21 @@ int InputUdp::readPacket()
 
     PMU_auto_register("Zzzzz");
 
+    if (_params.store_default_if_no_udp_data) {
+      timedOut = true;
+      return -1;
+    }
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "==>> UDP read timed out ... zzzzzz ..." << endl;
+    }
+
   }
 
   struct sockaddr_in from_name;
-  int fromlen = sizeof(from_name);
+  socklen_t fromlen = sizeof(from_name);
   _len = recvfrom(_udpFd, _buf, maxUdpBytes, 0,
-                  (struct sockaddr *) &from_name, (socklen_t*)&fromlen);
+                  (struct sockaddr *) &from_name, &fromlen);
   if (_len < 0) {
     int errNum = errno;
     cerr << "ERROR - InputUdp::readPacket()" << endl;

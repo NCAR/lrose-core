@@ -19,7 +19,7 @@
 // ** this software without specific prior written permission.               
 // ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
  * @file ProdDefTemp.hh
@@ -176,28 +176,28 @@ public:
   static const _GRIB2SurfTable _surface[106];
 
   /** @brief Meteorological products Temperature category. GRIB2 Code table 4.2 : 0.0 */
-  static const _GRIB2ParmTable _meteoTemp[22];
+  static const _GRIB2ParmTable _meteoTemp[28];
 
   /** @brief Meteorological products Moisture category. GRIB2 Code table 4.2 : 0.1 */
-  static const _GRIB2ParmTable _meteoMoist[108];
+  static const _GRIB2ParmTable _meteoMoist[118];
 
   /** @brief Meteorological products Momentum category. GRIB2 Code table 4.2 : 0.2 */
-  static const _GRIB2ParmTable _meteoMoment[39];
+  static const _GRIB2ParmTable _meteoMoment[45];
 
   /** @brief Meteorological products Mass category. GRIB2 Code table 4.2 : 0.3 */
-  static const _GRIB2ParmTable _meteoMass[27];
+  static const _GRIB2ParmTable _meteoMass[31];
 
   /** @brief Meteorological products Short wave radiation category. GRIB2 Code table 4.2 : 0.4 */
-  static const _GRIB2ParmTable _meteoShortRadiate[52];
+  static const _GRIB2ParmTable _meteoShortRadiate[54];
 
   /** @brief Meteorological products Long wave radiation category. GRIB2 Code table 4.2 : 0.5 */
-  static const _GRIB2ParmTable _meteoLongRadiate[8];
+  static const _GRIB2ParmTable _meteoLongRadiate[9];
 
   /** @brief Meteorological products Cloud category. GRIB2 Code table 4.2 : 0.6 */
-  static const _GRIB2ParmTable _meteoCloud[40];
+  static const _GRIB2ParmTable _meteoCloud[50];
 
   /** @brief Meteorological products Thermodynamic stability indices category. GRIB2 Code table 4.2 : 0.7 */
-  static const _GRIB2ParmTable _meteoStability[16];
+  static const _GRIB2ParmTable _meteoStability[19];
 
   /** @brief Meteorological products Aerosols category. GRIB2 Code table 4.2 : 0.13 */
   static const _GRIB2ParmTable _meteoAerosols[1];
@@ -212,13 +212,13 @@ public:
   static const _GRIB2ParmTable _meteoRadarForecast[6];
 
   /** @brief Meteorological products Electrodynamics category. GRIB2 Code table 4.2 : 0.17 */
-  static const _GRIB2ParmTable _meteoElectro[1];
+  static const _GRIB2ParmTable _meteoElectro[2];
 
   /** @brief Meteorological products Nuclear/radiology category. GRIB2 Code table 4.2 : 0.18 */
-  static const _GRIB2ParmTable _meteoNuclear[14];
+  static const _GRIB2ParmTable _meteoNuclear[17];
 
   /** @brief Meteorological products Physical atmospheric properties category. GRIB2 Code table 4.2 : 0.19 */
-  static const _GRIB2ParmTable _meteoAtmos[29];
+  static const _GRIB2ParmTable _meteoAtmos[32];
 
   /** @brief  Meteorological products Atmospheric Chemical Constituents category. GRIB2 Code table 4.2 : 0.20  */
   static const _GRIB2ParmTable _meteoChem[113];
@@ -230,22 +230,22 @@ public:
   static const _GRIB2ParmTable _meteoMisc[4];
 
   /** @brief Hydrologic products basic products category. GRIB2 Code table 4.2 : 1.0 */
-  static const _GRIB2ParmTable _hydroBasic[8];
+  static const _GRIB2ParmTable _hydroBasic[17];
   
   /** @brief Hydrologic products probabilities category. GRIB2 Code table 4.2 : 1.1 */
   static const _GRIB2ParmTable _hydroProb[3];
 
   /** @brief Hydrologic products probabilities category. GRIB2 Code table 4.2 : 1.2 */
-  static const _GRIB2ParmTable _hydroWaterSediment[13];
+  static const _GRIB2ParmTable _hydroWaterSediment[14];
   
   /** @brief Land Surface products Vegetation/Biomass category. GRIB2 Code table 4.2 : 2.0 */
   static const _GRIB2ParmTable _landVeg[39];
   
   /** @brief Land Surface products Soil products category. GRIB2 Code table 4.2 : 2.3 */
-  static const _GRIB2ParmTable _landSoil[24];
+  static const _GRIB2ParmTable _landSoil[28];
 
   /** @brief Land Surface products Fire Weather products category. GRIB2 Code table 4.2 : 2.4 */
-  static const _GRIB2ParmTable _landFire[5];
+  static const _GRIB2ParmTable _landFire[12];
 
   /** @brief Land Surface products, Glaciers and Inland Ice category. GRIB2 Code table 4.2 : 2.5 */
   static const _GRIB2ParmTable _landIce[2];
@@ -254,7 +254,7 @@ public:
   static const _GRIB2ParmTable _spaceImage[10];
   
   /** @brief Space products Quantitative products category. GRIB2 Code table 4.2 : 3.1 */
-  static const _GRIB2ParmTable _spaceQuantitative[35];
+  static const _GRIB2ParmTable _spaceQuantitative[30];
 
   /** @brief Oceanographic products Waves category. GRIB2 Code table 4.2 : 10.0 */
   static const _GRIB2ParmTable _oceanWaves[46];
@@ -266,7 +266,7 @@ public:
   static const _GRIB2ParmTable _oceanIce[13];
   
   /** @brief Oceanographic products Surface properties category. GRIB2 Code table 4.2 : 10.3 */
-  static const _GRIB2ParmTable _oceanSurface[2];
+  static const _GRIB2ParmTable _oceanSurface[3];
   
   /** @brief Oceanographic products Sub-surface properties category. GRIB2 Code table 4.2 : 10.4 */
   static const _GRIB2ParmTable _oceanSubSurface[16];

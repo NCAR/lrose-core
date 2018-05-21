@@ -133,14 +133,18 @@ private:
   class ZdrStats {
   public:
     void clear() {
-      count = 0.0;
-      sum = 0.0;
+      count = 0;
       mean = NAN;
+      sdev = NAN;
+      skewness = NAN;
+      kurtosis = NAN;
       percentiles.clear();
     }
-    double sum;
-    double count;
+    int count;
     double mean;
+    double sdev;
+    double skewness;
+    double kurtosis;
     vector<double> percentiles;
   };
   ZdrStats _zdrmStatsIce;
@@ -148,6 +152,7 @@ private:
   ZdrStats _zdrStatsIce;
   ZdrStats _zdrStatsBragg;
   
+  vector<double> _zdrInIceElev;
   vector<double> _zdrInIceResults;
   vector<double> _zdrInBraggResults;
   vector<double> _zdrmInIceResults;
@@ -230,13 +235,18 @@ private:
 
   void _computeZdrBias();
 
-  void _loadZdrResults(vector<double> &results,
+  void _loadZdrResults(string label,
+                       vector<double> &results,
                        ZdrStats &stats,
                        int nPercentiles,
                        double *percentiles);
 
+  void _writeHeaderZdrInIce(FILE *out);
+
   double _computeZdrPerc(const vector<double> &zdrmResults,
                          double percent);
+  
+  void _saveZdrInIceToFile();
 
   void _computeSelfConZBias();
 

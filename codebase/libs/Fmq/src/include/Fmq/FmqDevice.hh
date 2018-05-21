@@ -103,6 +103,10 @@ public:
 
   virtual int check_size(ident_t id, size_t expectedSize) = 0;
   
+  // Get size of device buffer
+
+  virtual int get_size(ident_t id) = 0;
+  
   ///////////////////////////////////////////////////////////////////
   // error string is set during open/read/write operations
   // get error string is an error is returned

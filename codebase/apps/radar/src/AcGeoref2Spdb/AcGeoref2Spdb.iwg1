@@ -1,0 +1,695 @@
+/**********************************************************************
+ * TDRP params for ./AcGeoref2Spdb
+ **********************************************************************/
+
+//======================================================================
+//
+// AcGeoref2Spdb reads aircraft georeference data (posn, attitude, 
+//   motion etc) from IWRF time series and netcdf files, and writes the 
+//   data to SPDB.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// reg_with_procmap ////////////////////////
+//
+// Register with procmap.
+//
+//
+// Type: boolean
+//
+
+reg_with_procmap = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "iwg1";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Reading the input data.
+//
+// RADX_FMQ: realtime mode from FMQ in RADX moments format.
+//
+// IWRF_FMQ: read the georeference packets from an FMQ containing IWRF 
+//   time series.
+//
+// RAF_IWG1_UDP: read NCAR RAF IWG1 packets from UDP.
+//
+// CFRADIAL: read CfRadial files.
+//
+// IWRF_FILE: read the georeference packets from files containing IWRF 
+//   time series.
+//
+// RAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.
+//
+//
+// Type: enum
+// Options:
+//     RADX_FMQ
+//     IWRF_FMQ
+//     RAF_IWG1_UDP
+//     CFRADIAL
+//     IWRF_FILE
+//     RAF_NETCDF
+//
+
+input_mode = RAF_IWG1_UDP;
+
+//======================================================================
+//
+// AIRCRAFT CALL SIGN.
+//
+// For IWRF, CFRADIAL and UDP data.
+//
+//======================================================================
+ 
+///////////// aircraft_callsign ///////////////////////
+//
+// Callsign of aircraft.
+//
+// Used for IWRF data. The RAF data includes the callsign in the file.
+//
+//
+// Type: string
+//
+
+aircraft_callsign = "N677F";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_spdb_url /////////////////////////
+//
+// Output SPDB URL for georef data.
+//
+// The format is spdbp::params//host:port:dir. Normally params is an 
+//   empty string, and port is an empty string, so that the default 
+//   behavior will occur.
+//
+//
+// Type: string
+//
+
+output_spdb_url = "spdbp:://localhost::spdb/ac_georef/iwg1";
+
+///////////// spdb_nchunks_per_write //////////////////
+//
+// Number of SPDB chunks per write.
+//
+// We package up the SPDB data chunks, and write them together once the 
+//   number of chunks reaches this threshold.
+//
+//
+// Type: int
+//
+
+spdb_nchunks_per_write = 20;
+
+//======================================================================
+//
+// INPUT MODE - RADX_FMQ and IWRF_FMQ.
+//
+// Read realtime data from FMQ.
+//
+//======================================================================
+ 
+///////////// input_fmq_name //////////////////////////
+//
+// FMQ name. For IWRF_FMQ or RADX_FMQ only.
+//
+// Path to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions.
+//
+//
+// Type: string
+//
+
+input_fmq_name = "/tmp/fmq/ts";
+
+///////////// seek_to_end_of_input ////////////////////
+//
+// Option to seek to the end of the input FMQ.
+//
+// Applies to input_mode = IWRF_FMQ. If TRUE, the program will seek to 
+//   the end of the fmq and only read in new data. If FALSE, it will start 
+//   reading from the beginning of the FMQ.
+//
+//
+// Type: boolean
+//
+
+seek_to_end_of_input = TRUE;
+
+//======================================================================
+//
+// INPUT MODE - RAF_IWG1_UDP.
+//
+//======================================================================
+ 
+///////////// iwg1_udp_port ///////////////////////////
+//
+// Port for reading IWG1 packets via UDP.
+//
+// Applies to input_mode = RAF_IWG1_UDP. On the aircraft, the IWG1 
+//   georeference information is broadcast using UDP. This is the UDP port 
+//   used.
+//
+//
+// Type: int
+//
+
+iwg1_udp_port = 7071;
+
+///////////// udp_is_multicast ////////////////////////
+//
+// Option to read multi-cast udp packets.
+//
+// If true, you must set the multicast group as well.
+//
+//
+// Type: boolean
+//
+
+udp_is_multicast = TRUE;
+
+///////////// udp_multicast_group /////////////////////
+//
+// Group for multicast packets.
+//
+// Multicast packets are sometimes required to get through a firewall.
+//
+//
+// Type: string
+//
+
+udp_multicast_group = "239.0.0.10";
+
+///////////// store_default_if_no_udp_data ////////////
+//
+// Option to store a default location if no UDP data is available.
+//
+// If the system is not on the aircraft, no UDP data will be available. 
+//   This option allows us to store out a known location for fixed 
+//   operations on the ground.
+//
+//
+// Type: boolean
+//
+
+store_default_if_no_udp_data = TRUE;
+
+///////////// default_location ////////////////////////
+//
+// Default location to be used for fixed operations.
+//
+// This is the location to be set if the instrument is not on the 
+//   aircraft.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double latitude_deg;
+//      double longitude_deg;
+//      double altitude_m;
+//   }
+//
+//
+
+default_location = {
+    latitude_deg = 40,
+    longitude_deg = -105,
+    altitude_m = 1750
+};
+
+///////////// udp_sleep_secs //////////////////////////
+//
+// Time to wait for UDP data before writing out default location.
+//
+//
+// Type: int
+//
+
+udp_sleep_secs = 5;
+
+//======================================================================
+//
+// INPUT MODE - RAF_NETCDF.
+//
+// Set the NetCDF variable names for the fields to be read in. If a 
+//   field is not available. set the name to an empty string.
+//
+//======================================================================
+ 
+///////////// nc_varname_altitude_msl /////////////////
+//
+// Netcdf variable name for altitude_msl.
+//
+//
+// Type: string
+//
+
+nc_varname_altitude_msl = "ALT";
+
+///////////// nc_varname_altitude_pres ////////////////
+//
+// Netcdf variable name for pressure altitude.
+//
+//
+// Type: string
+//
+
+nc_varname_altitude_pres = "PALT_A";
+
+///////////// nc_varname_ew_velocity //////////////////
+//
+// Netcdf variable name for ew_velocity.
+//
+//
+// Type: string
+//
+
+nc_varname_ew_velocity = "VEWC";
+
+///////////// nc_varname_ns_velocity //////////////////
+//
+// Netcdf variable name for ns_velocity.
+//
+//
+// Type: string
+//
+
+nc_varname_ns_velocity = "VNSC";
+
+///////////// nc_varname_vert_velocity ////////////////
+//
+// Netcdf variable name for vert_velocity.
+//
+//
+// Type: string
+//
+
+nc_varname_vert_velocity = "VSPD";
+
+///////////// nc_varname_ew_wind //////////////////////
+//
+// Netcdf variable name for ew_wind.
+//
+//
+// Type: string
+//
+
+nc_varname_ew_wind = "UIC";
+
+///////////// nc_varname_ns_wind //////////////////////
+//
+// Netcdf variable name for ns_wind.
+//
+//
+// Type: string
+//
+
+nc_varname_ns_wind = "VIC";
+
+///////////// nc_varname_vert_wind ////////////////////
+//
+// Netcdf variable name for vert_wind.
+//
+//
+// Type: string
+//
+
+nc_varname_vert_wind = "WIC";
+
+///////////// nc_varname_heading //////////////////////
+//
+// Netcdf variable name for heading.
+//
+//
+// Type: string
+//
+
+nc_varname_heading = "THDG";
+
+///////////// nc_varname_drift_angle //////////////////
+//
+// Netcdf variable name for drift_angle.
+//
+//
+// Type: string
+//
+
+nc_varname_drift_angle = "DRFTA";
+
+///////////// nc_varname_track ////////////////////////
+//
+// Netcdf variable name for track_angle.
+//
+//
+// Type: string
+//
+
+nc_varname_track = "TKAT";
+
+///////////// nc_varname_roll /////////////////////////
+//
+// Netcdf variable name for roll.
+//
+//
+// Type: string
+//
+
+nc_varname_roll = "ROLL";
+
+///////////// nc_varname_pitch ////////////////////////
+//
+// Netcdf variable name for pitch.
+//
+//
+// Type: string
+//
+
+nc_varname_pitch = "PITCH";
+
+///////////// nc_varname_temperature //////////////////
+//
+// Netcdf variable name for ambient temperature.
+//
+//
+// Type: string
+//
+
+nc_varname_temperature = "AT_A";
+
+///////////// nc_varname_pressure /////////////////////
+//
+// Netcdf variable name for ambient static pressure.
+//
+//
+// Type: string
+//
+
+nc_varname_pressure = "PSXC";
+
+///////////// nc_varname_rh ///////////////////////////
+//
+// Netcdf variable name for rh.
+//
+//
+// Type: string
+//
+
+nc_varname_rh = "RHUM";
+
+///////////// nc_varname_angle_of_attack //////////////
+//
+// Netcdf variable name for angle_of_attack.
+//
+//
+// Type: string
+//
+
+nc_varname_angle_of_attack = "ATTACK";
+
+///////////// nc_varname_indicated_airspeed ///////////
+//
+// Netcdf variable name for indicated airspeed.
+//
+//
+// Type: string
+//
+
+nc_varname_indicated_airspeed = "CAS_A";
+
+///////////// nc_varname_true_airspeed ////////////////
+//
+// Netcdf variable name for true_airspeed.
+//
+//
+// Type: string
+//
+
+nc_varname_true_airspeed = "TAS_A";
+
+///////////// nc_varname_normal_accel /////////////////
+//
+// Netcdf variable name for normal acceleration.
+//
+//
+// Type: string
+//
+
+nc_varname_normal_accel = "BNORMA";
+
+///////////// nc_varname_lateral_accel ////////////////
+//
+// Netcdf variable name for lateral acceleration.
+//
+//
+// Type: string
+//
+
+nc_varname_lateral_accel = "BLATA";
+
+///////////// nc_varname_longitudinal_accel ///////////
+//
+// Netcdf variable name for longitudinal acceleration.
+//
+//
+// Type: string
+//
+
+nc_varname_longitudinal_accel = "BLONGA";
+
+///////////// nc_specify_custom_fields ////////////////
+//
+// Option to specify custom fields to be read in.
+//
+// If TRUE, the program will read in custom fields from the netcdf file, 
+//   and store them in the custom array in the ac_georef_t struct in SPDB.
+//
+//
+// Type: boolean
+//
+
+nc_specify_custom_fields = FALSE;
+
+///////////// nc_varname_custom_fields ////////////////
+//
+// Netcdf variable names for custom fields.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+nc_varname_custom_fields = {
+ "PITCH_IRS2",
+ "PITCH_IRS3"
+};
+
+//======================================================================
+//
+// HCR TEMPERATURE from CFRADIAL FILES.
+//
+//======================================================================
+ 
+///////////// get_hcr_temps_from_cfradial /////////////
+//
+// Option to get the HCR temperatures from the Cfradial files.
+//
+// If true, we get the Cmigits and Tailcone temperatures for the HCR 
+//   from the status XML block in the CfRadial files.
+//
+//
+// Type: boolean
+//
+
+get_hcr_temps_from_cfradial = FALSE;
+
+//======================================================================
+//
+// DETERMINE THE SURFACE VELOCITY FROM CFRADIAL DATA.
+//
+// This applies to HCR data.
+//
+//======================================================================
+ 
+///////////// compute_surface_vel_in_cfradial /////////
+//
+// Option to compute the surface velocity from the data.
+//
+// We find the range to the peak in reflectivity, and then determine the 
+//   radial velocity at that range.
+//
+//
+// Type: boolean
+//
+
+compute_surface_vel_in_cfradial = FALSE;
+
+///////////// cfradial_vel_field_name /////////////////
+//
+// Field name for VEL in CfRadial file.
+//
+// We need to read in at least 1 field for a valid read operation.
+//
+//
+// Type: string
+//
+
+cfradial_vel_field_name = "VEL";
+
+///////////// min_range_to_surface_km /////////////////
+//
+// Minumum range to the surface (km).
+//
+// We will search for the surface echo in the gates beyound this range.
+//
+//
+// Type: double
+//
+
+min_range_to_surface_km = 0.5;
+
+///////////// min_dbz_for_surface_echo ////////////////
+//
+// Minumum dbz value for a valid surface return.
+//
+// Gates with values below this will not be used.
+//
+//
+// Type: double
+//
+
+min_dbz_for_surface_echo = 20;
+
+///////////// cfradial_dbz_field_name /////////////////
+//
+// Field name for DBZ in CfRadial file.
+//
+// We need to read in at least 1 field for a valid read operation.
+//
+//
+// Type: string
+//
+
+cfradial_dbz_field_name = "DBZ";
+
+///////////// max_nadir_error_for_surface_vel /////////
+//
+// Maximum error from nadir pointing for computing surface velocity 
+//   (deg).
+//
+// We only try to compute the surface velocity if the beam is pointing 
+//   within this margin of nadir (vertically down).
+//
+//
+// Type: double
+//
+
+max_nadir_error_for_surface_vel = 5;
+
+///////////// ngates_for_surface_echo /////////////////
+//
+// Number of gates needed for identifying surface echo.
+//
+// We require this number of gates to exceed min_dbz_for_surface_echo.
+//
+//
+// Type: int
+//
+
+ngates_for_surface_echo = 1;
+
+///////////// print_surface_velocity_data /////////////
+//
+// Option to print surface velocity information to stdout.
+//
+// If true, the surface velocity estimates, as well as estimated antenna 
+//   pointing angles, will be printed to stdout at regular intervals.
+//
+//
+// Type: boolean
+//
+
+print_surface_velocity_data = FALSE;
+
+///////////// surface_velocity_print_period_secs //////
+//
+// Number of seconds between printing information on surface velocity.
+//
+// The data will be averaged over this time period and then printed to 
+//   stdout.
+//
+//
+// Type: double
+//
+
+surface_velocity_print_period_secs = 2;
+
+//======================================================================
+//
+// FIR FILTERING FOR SURFACE VELOCITY ESTIMATES.
+//
+//======================================================================
+ 
+///////////// surface_vel_spike_filter_difference_threshold 
+//
+// Threshold for removing spikes in the original data and resetting the 
+//   value to that form the short filter.
+//
+// We apply both the stage-1 and spike filters to the time series of 
+//   surface velocity. If the absolute difference between the two exceeds 
+//   this threshold, then the conditioned data is set to the output from 
+//   the stage-1 filter. If the absolute difference is below this 
+//   threshold then the original data point is retained. After this step 
+//   the final filter it applied to the conditioned data to compute the 
+//   final filtered value.
+//
+//
+// Type: double
+//
+
+surface_vel_spike_filter_difference_threshold = 0.11;
+

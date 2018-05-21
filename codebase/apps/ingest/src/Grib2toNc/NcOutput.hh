@@ -65,6 +65,8 @@ public:
   const static char* azimuthal_equidistant;
   const static char* bounds;
   const static char* calendar;
+  const static char* central_latitude;
+  const static char* central_longitude;
   const static char* cell_measures;
   const static char* cell_methods;
   const static char* cf_version;
@@ -138,6 +140,8 @@ public:
   const static char* reference_date;
   const static char* region;
   const static char* rotated_latitude_longitude;
+  const static char* lat_rotated_pole;
+  const static char* lon_rotated_pole;
   const static char* scale_factor;
   const static char* scale_factor_at_central_meridian;
   const static char* scale_factor_at_projection_origin;

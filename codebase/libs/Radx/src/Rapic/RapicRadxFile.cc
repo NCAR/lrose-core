@@ -43,6 +43,7 @@
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/RadxRcalib.hh>
 #include <cmath>
 #include "PPIField.hh"
 #include "RapicRay.hh"
@@ -201,7 +202,7 @@ int RapicRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - RapicRadxFile::writeToDir" << endl;
-  cerr << "  Writing RAPIC raw format files not supported" << endl;
+  cerr << "  Writing RAPIC format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -241,7 +242,7 @@ int RapicRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - RapicRadxFile::writeToPath" << endl;
-  cerr << "  Writing RAPIC raw format files not supported" << endl;
+  cerr << "  Writing RAPIC format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -476,7 +477,7 @@ int RapicRadxFile::printNative(const string &path, ostream &out,
 
   // read in product and ingest headers
   
-  if (_printHeaders(cout)) {
+  if (_printHeaders(out)) {
     _addErrStr("ERROR - RapicRadxFile::printNative");
     _addErrStr("  Reading header, file: ", _pathInUse);
     return -1;
@@ -490,9 +491,9 @@ int RapicRadxFile::printNative(const string &path, ostream &out,
   
   while (!feof(_file)) {
 
-    if (_printSweepHeaders(cout) == 0) {
+    if (_printSweepHeaders(out) == 0) {
       if (_nFieldsRead > 0 && printData) {
-        if (_printSweepData(cout)) {
+        if (_printSweepData(out)) {
           _addErrStr("ERROR - RapicRadxFile::printNative");
           _addErrStr("  Processing sweep, file: ", _pathInUse);
           iret = -1;
@@ -561,7 +562,19 @@ void RapicRadxFile::_setVolMetaData()
   // _readVol->setSensorHtAglM(0);
 
   _readVol->setFrequencyHz(_scanParams->freq_mhz * 1.0e6);
+
+  _readVol->setRadarBeamWidthDegH(_scanParams->hbeamwidth);
+  _readVol->setRadarBeamWidthDegV(_scanParams->vbeamwidth);
   
+  RadxRcalib *cal = new RadxRcalib;
+  cal->setXmitPowerDbmH(_scanParams->peakpowerh);
+  cal->setXmitPowerDbmV(_scanParams->peakpowerv);
+  cal->setNoiseDbmHc(_scanParams->rxnoise_h);
+  cal->setNoiseDbmVc(_scanParams->rxnoise_v);
+  cal->setReceiverGainDbHc(_scanParams->rxgain_h);
+  cal->setReceiverGainDbVc(_scanParams->rxgain_v);
+  _readVol->addCalib(cal);
+
 }
 
 //////////////////////////////////////////////////

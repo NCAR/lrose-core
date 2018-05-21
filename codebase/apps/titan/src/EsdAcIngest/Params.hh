@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c) 1992 - 2018
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -86,7 +86,8 @@ public:
     BURN_IN_PLACE = 8,
     EJECTABLE = 9,
     N_BURN_IN_PLACE = 10,
-    N_EJECTABLE = 11
+    N_EJECTABLE = 11,
+    DRY_ICE = 12
   } field_name_t;
 
   typedef enum {
@@ -110,8 +111,9 @@ public:
     tdrp_bool_t right_burn;
     tdrp_bool_t left_burn;
     double ejectable_interval;
-    int burn_in_place_interval;
+    double burn_in_place_interval;
     int n_bip_at_a_time;
+    double dry_ice_interval;
   } test_aircraft_t;
 
   ///////////////////////////

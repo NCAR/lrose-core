@@ -604,7 +604,7 @@ static int _checkHeader(uLong totcmplen,
     return -1;
   }
 
-  if (flags & EXTRA_FIELD) {		/* field has specified len */
+  if ((flags & EXTRA_FIELD) != 0) {		/* field has specified len */
     if (ic >= totcmplen) {
       return -1;
     }
@@ -613,7 +613,7 @@ static int _checkHeader(uLong totcmplen,
       ic += fldlen;
     }
   }
-  if (flags & ORIG_NAME) {		/* null delimited field */
+  if ((flags & ORIG_NAME) != 0) {		/* null delimited field */
     while (TRUE) {
       if (ic >= totcmplen) {
 	return -1;
@@ -624,7 +624,7 @@ static int _checkHeader(uLong totcmplen,
       }
     }
   }
-  if (flags & COMMENT) {			/* null delimited field */
+  if ((flags & COMMENT) != 0) {			/* null delimited field */
     while (TRUE) {
       if (ic >= totcmplen) {
 	return -1;
@@ -635,7 +635,7 @@ static int _checkHeader(uLong totcmplen,
       }
     }
   }
-  if (flags & HEAD_CRC) {			/* field has len = 2 */
+  if ((flags & HEAD_CRC) != 0) {			/* field has len = 2 */
     /* Ignore header CRC.  We check trailer CRC. */
     ic += 2;
   }

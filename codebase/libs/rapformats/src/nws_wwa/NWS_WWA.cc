@@ -30,9 +30,6 @@
 // (C) UCAR 2006. All right reserved.  
 //////////////////////////////////////////////////////////////
 
-using namespace std;
-
-
 #include <dataport/bigend.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/mem.h>
@@ -40,8 +37,9 @@ using namespace std;
 #include <toolsa/TaStr.hh>
 
 #define NWS_WWA_CORE
-
 #include <rapformats/NWS_WWA.hh>
+
+using namespace std;
 
 ////////////////////
 // constructor

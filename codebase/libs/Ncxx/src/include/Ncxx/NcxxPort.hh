@@ -36,7 +36,17 @@
 #ifndef NcxxPort_HH
 #define NcxxPort_HH
 
+#if __cplusplus >= 201103L
+#include <cstdint>
+#include <climits>
+#else
 #include <sys/types.h>
+#endif
+
+#if defined __clang__
+#include <sys/types.h>
+#endif
+
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////
@@ -90,6 +100,18 @@ public:
 
   // portable data types
   
+#if __cplusplus >= 201103L
+  typedef char si08; ///< portable unsigned 8-bit integer
+  typedef unsigned char ui08; ///< portable unsigned 8-bit integer
+  typedef int16_t si16; ///< portable signed 16-bit integer
+  typedef uint16_t ui16; ///< portable unsigned 16-bit integer
+  typedef int32_t si32; ///< portable signed 32-bit integer
+  typedef uint32_t ui32; ///< portable unsigned 32-bit integer
+  typedef int64_t si64; ///< portable signed 32-bit integer
+  typedef uint64_t ui64; ///< portable unsigned 32-bit integer
+  typedef float fl32; ///< portable 32-bit IEEE float
+  typedef double fl64; ///< portable 64-bit IEEE float
+#else
   typedef char si08; ///< portable unsigned 8-bit integer
   typedef unsigned char ui08; ///< portable unsigned 8-bit integer
   typedef int16_t si16; ///< portable signed 16-bit integer
@@ -100,6 +122,7 @@ public:
   typedef u_int64_t ui64; ///< portable unsigned 32-bit integer
   typedef float fl32; ///< portable 32-bit IEEE float
   typedef double fl64; ///< portable 64-bit IEEE float
+#endif
 
   //////////////////////////////////////////////////////////////////////////
   /// Determine whether the host is bigendian or not

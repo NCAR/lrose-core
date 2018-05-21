@@ -21,17 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/03 18:09:41 $
-//   $Id: MdvxPjg.cc,v 1.24 2016/03/03 18:09:41 dixon Exp $
-//   $Revision: 1.24 $
-//   $State: Exp $
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * MdvxPjg.cc: class implementing projective geometry calculations
  *
@@ -767,7 +756,7 @@ void MdvxPjg::setSensorPosn(double sensor_lat,
  * getProjType() - Retrieve the Mdvx projection type.
  */
 
-const int MdvxPjg::getProjType(void) const
+int MdvxPjg::getProjType(void) const
 {
   switch (Pjg::getProjType())
   {

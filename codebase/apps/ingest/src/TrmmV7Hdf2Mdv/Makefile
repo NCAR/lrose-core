@@ -39,7 +39,7 @@ TARGET_FILE = TrmmV7Hdf2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -lSpdb \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -lSpdb \
 	-ldsserver -ldidss -lrapformats -leuclid \
 	-lphysics -ltoolsa -ldataport -ltdrp \
 	$(HDF_LIBS) $(NETCDF4_LIBS) -lbz2 -lz

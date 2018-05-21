@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -1018,6 +1018,18 @@ using namespace std;
     tt->descr = tdrpStrDup("If true latitude and longitude arrays of each grid point are output");
     tt->help = tdrpStrDup("The CF convention requires that these arrays are present in the netCDF file; however, the information is redundant since the lat and lon arrays could be constructed using the other projection and grid information required with a gridded data field");
     tt->val_offset = (char *) &output_latlon_arrays - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'output_start_end_times'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_start_end_times");
+    tt->descr = tdrpStrDup("If true start_time and end_time are are output");
+    tt->help = tdrpStrDup("Start and end times may provide redundant information in the Mdv file or may not be relevant to the output data");
+    tt->val_offset = (char *) &output_start_end_times - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     

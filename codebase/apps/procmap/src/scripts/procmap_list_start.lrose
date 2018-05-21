@@ -1,0 +1,254 @@
+#! /usr/bin/perl
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# Copyright (c) 1990 - 2017, University Corporation for Atmospheric 
+# Research (UCAR), Boulder, Colorado, USA.  All rights reserved.  
+#  
+# Redistribution and use in source and binary forms, with or without 
+# modification, are permitted provided that the following conditions are 
+# met: 
+#  
+# 1) If the software is modified to produce derivative works, such 
+# modified software should be clearly marked, so as not to confuse it 
+# with the version available from UCAR. 
+#  
+# 2) Redistributions of source code must retain the above copyright 
+# notice, this list of conditions and the following disclaimer. 
+#  
+# 3) Redistributions in binary form must reproduce the above copyright 
+# notice, this list of conditions and the following disclaimer in the 
+# documentation and/or other materials provided with the distribution. 
+#  
+# 4) Neither the name of UCAR nor the names of its contributors, if any, 
+# may be used to endorse or promote products derived from this software 
+# without specific prior written permission. 
+#  
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+# HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+#
+# script to start processes listed in the process list file
+#
+# Usage:  procmap_list_start [options]
+# 
+#   -help: Print usage
+#
+#   -debug: Print debug messages
+#
+#   -proc_list: Process list file, i.e. the name of the file 
+#               containing the list of processes to start.  
+#
+#   This file contains lines of the following format:
+#     <name> <instance> <start_script> <kill_script> <default_host>
+#   Comment lines start with #.
+#   Blank lines are ignored.
+#
+# Example process_list entries:
+#
+#  precip_map    fcast        start_precip_map.fcast    kill_precip_map.fcast  kodiak
+#  precip_map    accum        start_precip_map.accum    kill_precip_map.accum  kodiak
+#  storm_ident   test         start_storm_ident.test    snuff_inst             localhost
+#  Dsr2Mdv       radarCart    start_inst(ingest)        snuff_inst             localhost
+#
+# Note 1: start_scripts with args:
+# --------------------------------
+#
+#  If the start_script includes (arg0,arg1,...), then that script is called
+#  as follows:
+#               start_script name instance arg0 arg1 ...
+#
+#  As an example, see the last line in the list above.
+#  It will call the start script as
+#
+#   'start_inst Dsr2Mdv radarCart ingestHome'
+#
+#  Syntax: the arg list is in parens, is comma delimited, with no spaces.
+#
+# Note 2: snuff_inst:
+# -------------------
+#
+#  If the kill_script is the special key-word 'snuff_inst', the program will be
+#  killed using the script 'snuff', using the process name and instance.
+#
+##########################################################################################
+#
+# Jaimi Yee, RAP, NCAR, Boulder, CO, USA June 1997
+# Mike Dixon, April 2001 - start_script with args.
+#
+###########################################################################################
+
+#
+# Make hostname() available
+#
+
+use Sys::Hostname;
+
+# for dirname() and abs_path()
+use File::Basename;
+use Cwd 'abs_path';
+
+# The LROSE installation directory should be one directory up from the location
+# of this script (which should be in <lrose_install_dir>/bin). We must assign
+# $lrose_install_dir in a BEGIN block so that it's available below for "use"
+# directives (which are also executed in BEGIN blocks).
+my $lrose_install_dir;
+BEGIN {
+    $lrose_install_dir = abs_path(dirname($0) . "/..");
+}
+
+# The Procmap module is in <lrose_install_dir>/lib/perl5, and it in turn needs
+# other pieces installed in <lrose_install_dir>/lib, so prepend those
+# directories to our @INC path.
+use lib "$lrose_install_dir/lib";
+use lib "$lrose_install_dir/lib/perl5";
+
+# Now we can load the Procmap module
+use Procmap;
+
+# ------------------------ START OF MAIN ---------------------------
+# main routine
+#
+
+use Getopt::Long;
+
+#
+# Initialize command line arguments
+#
+
+$opt_proc_list = "";
+
+($prog = $0) =~ s%.*/%%;
+
+$usage = "Usage : $prog [options]\n" .
+         "  -help         : Print usage\n" .
+         "  -proc_list ?  : Process list file\n" .
+         "  -sleep ?      : Sleep for x secs between starts\n" .
+         "  -timeout ?    : Timeout secs for remote system calls\n" .
+         "  -debug        : Print debug messages\n\n";
+
+$options_result = &GetOptions('help',
+                              'proc_list=s',
+                              'sleep=s',
+                              'debug');
+
+if ($options_result == 0 || $opt_help || $opt_proc_list eq "")
+{
+    print $usage;
+    exit 0;
+}
+
+if ($opt_debug)
+{
+    #
+    # Print command line arguments for debugging
+    #
+
+    print $usage;
+
+    #
+    # Print time
+    #
+
+    $datetime = `date`;
+    chop($datetime);
+
+    print "\nStarting processes at $datetime.\n";
+}
+
+#
+# get expected procs and put them in an array.  
+#
+
+($is_ok, $nexpected) = &PMP_read_proc_list_file($opt_proc_list, *expected_entries, *started, (null));
+
+if ($is_ok == 0) {
+    if ($opt_debug)
+    {
+	print "Error opening expected process list file $opt_proc_list at $datetime.\n";
+    }
+
+    exit -1;
+}
+
+#
+# start the processes
+#
+
+foreach $i (0..($nexpected - 1))
+{
+
+    if ($opt_debug)
+    {
+	print "Proc list entry: $expected_entries[$i]\n";
+    }
+
+    #
+    # extract the information from the expected process list
+    #
+
+    ($expected_name, $expected_instance, $expected_start_script,
+     $expected_kill_script, $expected_host) =
+	 split(/\s+/, $expected_entries[$i]);
+
+    if ($opt_debug)
+    {
+	print "  expected_name: $expected_name\n";
+	print "  expected_instance: $expected_instance\n";
+	print "  expected_start_script: $expected_start_script\n";
+	print "  expected_kill_script: $expected_kill_script\n";
+	print "  expected_host: $expected_host\n";
+	if (PMP_string_has_args($expected_start_script)) {
+	    print "    Note: start script has args\n";
+	}
+    }
+
+    #
+    # skip over if start script already used
+    #
+
+    if ($started{$expected_start_script} == 1)
+    {
+	next;
+    }
+
+    #
+    # Set the timeout arg for remote system commands
+    #
+    if ( $opt_timeout ) {
+       $timeout = $opt_timeout;
+    }
+    else {
+       $timeout = 10;
+    }
+
+    PMP_start($expected_host, $expected_name, $expected_instance, $expected_start_script, $timeout);
+
+    #
+    # set flag for this start script, if it does not have args
+    #
+    
+    if (!PMP_string_has_args($expected_start_script)) {
+	$started{$expected_start_script} = 1;
+    }
+
+    #
+    # sleep if required
+    #
+
+    if ($opt_sleep) {
+	print "Sleeping for ", $opt_sleep, " secs\n";
+	sleep($opt_sleep);
+    }
+
+} # foreach $i
+
+exit();
+

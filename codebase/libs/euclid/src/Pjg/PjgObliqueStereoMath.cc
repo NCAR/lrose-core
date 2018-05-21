@@ -61,8 +61,8 @@ PjgObliqueStereoMath::PjgObliqueStereoMath(double tangent_lat,
     _central_scale = 1.0;
   }
   
-  _tangent_lat_rad = tangent_lat * Deg2Rad;
-  _tangent_lon_rad = tangent_lon * Deg2Rad;
+  _tangent_lat_rad = tangent_lat * Pjg::Deg2Rad;
+  _tangent_lon_rad = tangent_lon * Pjg::Deg2Rad;
   EG_sincos(_tangent_lat_rad, &_sin_tangent_lat, &_cos_tangent_lat);
   
   _offset_lat = _origin_lat;
@@ -122,8 +122,8 @@ void PjgObliqueStereoMath::latlon2xy(double lat, double lon,
   
 {
 
-  double lat_rad = lat * Deg2Rad;
-  double lon_rad = lon * Deg2Rad;
+  double lat_rad = lat * Pjg::Deg2Rad;
+  double lon_rad = lon * Pjg::Deg2Rad;
 
   double sin_delta_lon, cos_delta_lon;
   EG_sincos(lon_rad - _tangent_lon_rad, &sin_delta_lon, &cos_delta_lon);
@@ -134,12 +134,12 @@ void PjgObliqueStereoMath::latlon2xy(double lat, double lon,
   double k = 2.0 / (1.0 + _sin_tangent_lat * sin_lat1 + 
 		    _cos_tangent_lat * cos_lat1 * cos_delta_lon);
   
-  double xx = EradKm * k * cos_lat1 * sin_delta_lon;
+  double xx = Pjg::EradKm * k * cos_lat1 * sin_delta_lon;
   xx *= _central_scale;
   x = xx + _false_easting;
   
   double yy =
-    EradKm * k * ( _cos_tangent_lat * sin_lat1 - _sin_tangent_lat * 
+    Pjg::EradKm * k * ( _cos_tangent_lat * sin_lat1 - _sin_tangent_lat * 
                    cos_lat1 * cos_delta_lon);
   yy *= _central_scale;
   y = yy + _false_northing;
@@ -163,7 +163,7 @@ void PjgObliqueStereoMath::xy2latlon(double x, double y,
   y -= _false_northing;
   
   double rho = hypot(x, y);
-  double c = 2.0 * atan2( rho, 2.0 * EradKm * _central_scale);	
+  double c = 2.0 * atan2( rho, 2.0 * Pjg::EradKm * _central_scale);	
   double sinc, cosc;
   EG_sincos(c, &sinc, &cosc);
 
@@ -171,13 +171,13 @@ void PjgObliqueStereoMath::xy2latlon(double x, double y,
   phi = asin(cosc * _sin_tangent_lat + y * sinc * 
              _cos_tangent_lat / rho);
   
-  lat = phi * Rad2Deg;
+  lat = phi * Pjg::Rad2Deg;
   
   double lamda = _tangent_lon_rad + 
     atan2(x * sinc,
           rho *_cos_tangent_lat *cosc - y * sinc *_sin_tangent_lat);
 
-  lon = conditionRange180(lamda * Rad2Deg);
+  lon = conditionRange180(lamda * Pjg::Rad2Deg);
   conditionLon2Origin(lon);
 
 }

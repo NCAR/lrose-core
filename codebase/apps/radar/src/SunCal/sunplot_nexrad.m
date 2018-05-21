@@ -168,7 +168,7 @@ function y = linspacedel(d1, del, n)
 %
 %   See also LOGSPACE, :., linspace
 %   Copyright 1984-2001 The MathWorks, Inc. 
-%   $Revision: 1.1 $  $Date: 2002/08/20 19:10:58 $
+%   $Revision: 1.1 $  $Date: 2017/09/09 21:36:50 $
 
 y = [d1:del:((n-1)*del+d1)];
 

@@ -53,8 +53,8 @@ PjgLambertAzimMath::PjgLambertAzimMath(double origin_lat,
   _offset_lat = _origin_lat;
   _offset_lon = _origin_lon;
 
-  _origin_lat_rad = origin_lat * Deg2Rad;
-  _origin_lon_rad = origin_lon * Deg2Rad;
+  _origin_lat_rad = origin_lat * Pjg::Deg2Rad;
+  _origin_lon_rad = origin_lon * Pjg::Deg2Rad;
 
   EG_sincos(_origin_lat_rad, &_sin_origin_lat, &_cos_origin_lat);
   
@@ -116,9 +116,9 @@ void PjgLambertAzimMath::latlon2xy(double lat, double lon,
   // Reference: Map Projections used by the USGS
   
   double sinLat, cosLat;
-  EG_sincos(lat * Deg2Rad, &sinLat, &cosLat);
+  EG_sincos(lat * Pjg::Deg2Rad, &sinLat, &cosLat);
   
-  double deltaLonRad = (lon * Deg2Rad) - _origin_lon_rad;
+  double deltaLonRad = (lon * Pjg::Deg2Rad) - _origin_lon_rad;
   double sinDeltaLon, cosDeltaLon;
   EG_sincos(deltaLonRad, &sinDeltaLon, &cosDeltaLon);
 
@@ -134,7 +134,7 @@ void PjgLambertAzimMath::latlon2xy(double lat, double lon,
   }
 
   double kk = sqrt(2.0 / cc);
-  double rk = EradKm * kk;
+  double rk = Pjg::EradKm * kk;
   
   double xx = rk * cosLat * sinDeltaLon;
   double yy = rk * (_cos_origin_lat * sinLat -
@@ -163,12 +163,12 @@ void PjgLambertAzimMath::xy2latlon(double x, double y,
   
   double dist = sqrt(x * x + y * y);
   if (dist == 0.0) {
-    lat = _origin_lat_rad * Rad2Deg;
-    lon = _origin_lon_rad * Rad2Deg;
+    lat = _origin_lat_rad * Pjg::Rad2Deg;
+    lon = _origin_lon_rad * Pjg::Rad2Deg;
     return;
   }
   
-  double cc = 2.0 * asin(dist / (2.0 * EradKm));
+  double cc = 2.0 * asin(dist / (2.0 * Pjg::EradKm));
   double sinCC, cosCC;
   EG_sincos(cc, &sinCC, &cosCC);
   
@@ -186,8 +186,8 @@ void PjgLambertAzimMath::xy2latlon(double x, double y,
             dist * _cos_origin_lat * cosCC - y * _sin_origin_lat * sinCC);
   }
   
-  lat = latRad * Rad2Deg;
-  lon = lonRad * Rad2Deg;
+  lat = latRad * Pjg::Rad2Deg;
+  lon = lonRad * Pjg::Rad2Deg;
   lon = conditionRange180(lon);
   conditionLon2Origin(lon);
     

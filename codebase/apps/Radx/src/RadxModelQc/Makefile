@@ -60,7 +60,9 @@ CPPC_SRCS = \
 	FiltAzGradient.cc \
 	FiltClutter2dQual.cc \
 	FiltComment.cc \
+	FiltConstrain.cc \
 	FiltCreate.cc \
+	FiltFIR.cc \
 	FiltMask.cc \
 	FiltGriddedMath.cc \
 	FiltMath.cc \

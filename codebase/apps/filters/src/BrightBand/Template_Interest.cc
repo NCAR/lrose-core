@@ -112,7 +112,7 @@ int Template_Interest::_compute_interest(fl32 *max_refl_interest,
 
    // variables used in looping through data
 
-   int iz, start_plane = 0;
+   int iz, start_plane = 1;
    int refl_out_of_range = FALSE;
    int dbz_missing = FALSE;
 
@@ -147,7 +147,7 @@ int Template_Interest::_compute_interest(fl32 *max_refl_interest,
 
    int plane_size = _dbzFieldHdr.nx * _dbzFieldHdr.ny;
    
-   while (((start_plane+_band_base) * _dbzFieldHdr.grid_dz + _dbzFieldHdr.grid_minz) < max_down)
+   while (((start_plane+_band_base) * (_vlevelHdr.level[start_plane] - _vlevelHdr.level[start_plane-1]) + _dbzFieldHdr.grid_minz) < max_down)   
    {
       start_plane++;
    }
@@ -163,7 +163,7 @@ int Template_Interest::_compute_interest(fl32 *max_refl_interest,
 	 {
 	     iz = start_plane;
 	    
-	     while (((iz + _band_top) * _dbzFieldHdr.grid_dz + _dbzFieldHdr.grid_minz) <= max_up)
+	     while (((iz + _band_top) * (_vlevelHdr.level[iz] - _vlevelHdr.level[iz-1]) + _dbzFieldHdr.grid_minz) <= max_up)
 	     {
 		sum_of_prod = 0;
 		sum_of_dp = 0;
@@ -428,12 +428,9 @@ bool Template_Interest::calcInterestFields(MdvxField *dbz_field,
 
     return false;
   }
-
-  // set max_up and max_down
-
-  double max_up = MIN(_maxUpParam,
-		      _dbzFieldHdr.nz * _dbzFieldHdr.grid_dz +
-		      _dbzFieldHdr.grid_minz);
+  
+  // set max_up and max_down  
+  double max_up = MIN(_maxUpParam,_vlevelHdr.level[_dbzFieldHdr.nz-1]);
   double max_down = MAX(_maxDownParam, _dbzFieldHdr.grid_minz);
 
   if (max_up <= max_down)

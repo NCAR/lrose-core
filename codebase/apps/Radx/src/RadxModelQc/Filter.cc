@@ -77,8 +77,14 @@ string Filter::filter_string(const Params::data_filter_t f)
   case Params::CLUTTER_2D_QUAL:
     ret = "CLUTTER_2D_QUAL";
     break;
+  case Params::CONSTRAIN:
+    ret = "CONSTRAIN";
+    break;
   case Params::COMMENT:
     ret = "";
+    break;
+  case Params::FIR:
+    ret = "FIR";
     break;
   case Params::GAUSSIAN_2D_REMAP:
     ret = "GAUSSIAN_2D_REMAP";
@@ -126,6 +132,12 @@ int Filter::max_elem_for_filter(const Params::data_filter_t f,
     break;
   case Params::COMMENT:
     ret = P.parm_comment_n;
+    break;
+  case Params::CONSTRAIN:
+    ret = P.parm_constrain_n;
+    break;
+  case Params::FIR:
+    ret = P.parm_fir_n;
     break;
   case Params::GAUSSIAN_2D_REMAP:
     ret = P.parm_2d_gaussian_mapping_n;

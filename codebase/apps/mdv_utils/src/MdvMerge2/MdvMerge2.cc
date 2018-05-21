@@ -135,10 +135,14 @@ MdvMerge2::MdvMerge2(int argc, char **argv)
   }
   
   // init process mapper registration
+  int pmuRegSec = PROCMAP_REGISTER_INTERVAL;
+
+  if(_params.procmap_register_interval_secs > PROCMAP_REGISTER_INTERVAL) {
+    pmuRegSec = _params.procmap_register_interval_secs;
+  }
 
   if (_params.mode == Params::REALTIME)
-    PMU_auto_init(const_cast<char*>(_progName.c_str()), _params.instance, 
-		  PROCMAP_REGISTER_INTERVAL);
+    PMU_auto_init(const_cast<char*>(_progName.c_str()), _params.instance, pmuRegSec);
   
   return;
 
@@ -605,7 +609,9 @@ int MdvMerge2::_processData(time_t fileTime, int leadTime)
     }
   }
   
-  if (_params.mode == Params::ARCHIVE && _params.write_as_forecast)
+  if ( (_params.mode == Params::ARCHIVE && _params.write_as_forecast) ||
+       (_params.trigger == Params::FCST_FILES_TRIGGER && _params.write_as_forecast)
+     )
   {
     writeTime = fileTime + leadTime;
     startTime = fileTime;

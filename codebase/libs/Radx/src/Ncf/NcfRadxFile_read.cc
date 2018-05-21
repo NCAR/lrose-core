@@ -97,6 +97,10 @@ int NcfRadxFile::readFromPath(const string &path,
 
   for (size_t ii = 0; ii < paths.size(); ii++) {
     if (_readPath(paths[ii], ii)) {
+      if (_verbose) {
+        cerr << "ERROR reading file, path: " << path << endl;
+        cerr << _errStr << endl;
+      }
       return -1;
     }
   }
@@ -162,12 +166,12 @@ int NcfRadxFile::_readPath(const string &path, size_t pathNum)
 
   if (_nTimesInFile < 1) {
     _addErrStr("ERROR - NcfRadxFile::_readPath");
-    _addErrStr("  No times in file");
+    _addErrStr("  ==========>> No times in file <<==========");
     return -1;
   }
   if (_nRangeInFile < 1) {
     _addErrStr("ERROR - NcfRadxFile::_readPath");
-    _addErrStr("  No ranges in file");
+    _addErrStr("  ==========>> No ranges in file <<==========");
     return -1;
   }
 
@@ -1043,7 +1047,9 @@ int NcfRadxFile::_readRangeVariable()
   
   // set the geometry from the range vector
 
-  _remap.computeRangeLookup(_rangeKm);
+  if (_remap.computeRangeLookup(_rangeKm)) {
+    return -1;
+  }
   _gateSpacingIsConstant = _remap.getGateSpacingIsConstant();
   _geom.setRangeGeom(_remap.getStartRangeKm(), _remap.getGateSpacingKm());
   
@@ -1558,6 +1564,8 @@ void NcfRadxFile::_clearGeorefVariables()
 
   _geoTime.clear();
   _geoLatitude.clear();
+  _geoUnitNum.clear();
+  _geoUnitId.clear();
   _geoLongitude.clear();
   _geoAltitudeMsl.clear();
   _geoAltitudeAgl.clear();
@@ -1594,7 +1602,6 @@ int NcfRadxFile::_readGeorefVariables()
   if (_geoTime.size() < _raysFromFile.size()) {
     // iret = -1;
   }
-
   _readRayVar(_latitudeVar, LATITUDE, _geoLatitude);
   if (_geoLatitude.size() < _raysFromFile.size()) {
     iret = -1;
@@ -1611,6 +1618,9 @@ int NcfRadxFile::_readGeorefVariables()
   }
 
   _readRayVar(_altitudeAglVar, ALTITUDE_AGL, _geoAltitudeAgl, false); // meters
+
+  _readRayVar(GEOREF_UNIT_NUM, _geoUnitNum, false);
+  _readRayVar(GEOREF_UNIT_ID, _geoUnitId, false);
 
   _readRayVar(EASTWARD_VELOCITY, _geoEwVelocity, false);
   _readRayVar(NORTHWARD_VELOCITY, _geoNsVelocity, false);
@@ -1890,6 +1900,14 @@ int NcfRadxFile::_createRays(const string &path)
         geo.setTimeSecs(tSecs);
         geo.setNanoSecs(nanoSecs);
       }
+
+      if (_geoUnitNum.size() > rayIndex) {
+        geo.setUnitNum(_geoUnitNum[rayIndex]);
+      }
+      if (_geoUnitId.size() > rayIndex) {
+        geo.setUnitId(_geoUnitId[rayIndex]);
+      }
+
       if (_geoLatitude.size() > rayIndex) {
         geo.setLatitude(_geoLatitude[rayIndex]);
       }

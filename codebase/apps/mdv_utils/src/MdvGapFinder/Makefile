@@ -39,7 +39,7 @@ TARGET_FILE = MdvGapFinder
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lniwot_util -lSpdb -lMdv -lRadx \
+LOC_LIBS = -lniwot_util -lSpdb -lMdv -lRadx -lNcxx \
 	-ldsserver -ldidss -lrapformats -leuclid \
 	-lrapmath -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz

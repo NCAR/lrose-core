@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: cunning $
  *   $Locker:  $
- *   $Date: 2016/03/07 01:23:06 $
- *   $Id: FieldProcessor.hh,v 1.6 2016/03/07 01:23:06 dixon Exp $
- *   $Revision: 1.6 $
+ *   $Date: 2016/11/28 16:54:31 $
+ *   $Id: FieldProcessor.hh,v 1.7 2016/11/28 16:54:31 cunning Exp $
+ *   $Revision: 1.7 $
  *   $State: Exp $
  */
  
@@ -63,6 +63,7 @@ extern "C" {
 #include <gp.h>
 #include <uif.h>
 #include <etx.h>
+#include <cdfnames.h>
 
 #ifdef __cplusplus
 }
@@ -176,6 +177,10 @@ protected:
 
   int _numSamples;
   int _numLines;
+
+  long _projection;
+
+  double _projParam;
   
   double _centerLat;
   double _centerLon;

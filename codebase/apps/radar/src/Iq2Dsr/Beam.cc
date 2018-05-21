@@ -552,6 +552,13 @@ void Beam::_prepareForComputeMoments()
     _mom->setSpectrumWidthMethod(RadarMoments::WIDTH_METHOD_HYBRID);
   }
 
+  if (_params.threshold_zdr_using_snr) {
+    _mom->setMinSnrDbForZdr(_params.min_snr_db_for_zdr);
+  }
+  if (_params.threshold_ldr_using_snr) {
+    _mom->setMinSnrDbForLdr(_params.min_snr_db_for_ldr);
+  }
+
   // compute windows for FFTs
 
   _computeWindows();
@@ -2034,10 +2041,30 @@ void Beam::_filterDpAltHvCoCross()
     MomentsFields &fields = gate->fields;
     MomentsFields &fieldsF = _momFieldsF[igate];
     
-    // check if we have clutter at this gate
+    // initialize rhohv test
+
+    if (_params.apply_rhohv_test_after_cmd) {
+      fields.test2 = 0;
+      fields.test3 = 0;
+    }
+    
+    // check if CMD identified clutter at this gate
     
     if (!fields.cmd_flag) {
-      continue;
+
+      // should we apply the RHOHV improvement test?
+
+      if (!_params.apply_rhohv_test_after_cmd) {
+        continue;
+      }
+
+      // are we within the RHOHV limits for the test?
+
+      if (fields.rhohv < _params.rhohv_test_min_rhohv ||
+          fields.rhohv > _params.rhohv_test_max_rhohv) {
+        continue;
+      }
+
     }
       
     // filter the HC time series, save the filter ratio
@@ -2107,6 +2134,38 @@ void Beam::_filterDpAltHvCoCross()
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
+
+    if (_params.apply_rhohv_test_after_cmd) {
+
+      // compute rhohv improvement
+      double factorUnfilt = 1.0 - fields.rhohv;
+      double factorFilt = 1.0 - fieldsF.rhohv;
+      if (factorFilt < 0.001) {
+        factorFilt = 0.001;
+      }
+      double rhohvImprov = factorUnfilt / factorFilt;
+      fields.test2 = rhohvImprov;
+
+      if (!fields.cmd_flag) {
+        // CMD did not indicate clutter
+        // check if RHOHV improvement indicates clutter
+        if (rhohvImprov >= _params.rhohv_improvement_factor_threshold) {
+          // yes, so use filtered data for dual pol fields
+          fields.test3 = 1;
+          MomentsFields filt = fieldsF;
+          fieldsF = fields;
+          fieldsF.zdrm = filt.zdrm;
+          fieldsF.zdr = filt.zdr;
+          fieldsF.ldr = filt.ldr;
+          fieldsF.rhohv = filt.rhohv;
+          fieldsF.phidp = filt.phidp;
+        } else {
+          // no clutter, so revert to unfiltered data
+          fieldsF = fields;
+        }
+      } // if (!fields.cmd_flag)
+
+    } // if (_params.apply_rhohv_test_after_cmd)
     
   } // igate
   
@@ -5055,7 +5114,11 @@ void Beam::_setNoiseFields()
   const vector<double> &phaseChangeError = _noise->getPhaseChangeError();
   const vector<double> &dbmSdev = _noise->getDbmSdev();
   const vector<double> &ncpMean = _noise->getNcpMean();
-  
+
+  if ((int) noiseFlag.size() < _nGates) {
+    return;
+  }
+
   for (int igate = 0; igate < _nGates; igate++) {
     GateData *gate = _gateData[igate];
     MomentsFields &fields = gate->fields;

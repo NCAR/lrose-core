@@ -37,7 +37,7 @@ TARGET_FILE = UpdateStormFields
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx \
+LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
 	-ldsserver -lrapformats -ldidss -leuclid \
 	-ltdrp -ltoolsa -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz

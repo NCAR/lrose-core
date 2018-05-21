@@ -21,11 +21,7 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-////////////////////////////////////////////////////////////////////////////////
-//
-//  $Id: TimestampChunk.cc,v 1.4 2016/03/03 18:09:41 dixon Exp $
-//
-////////////////////////////////////////////////////////////////////////////////
+
 #include <string>
 #include <toolsa/DateTime.hh>
 #include <Mdv/mdv/MdvChunk.hh>

@@ -37,8 +37,8 @@ TARGET_FILE = RadxPrint
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lRadx -lMdv -ldsserver -ldidss \
-	-lrapformats -ltoolsa -leuclid -ltdrp \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
+	-lrapformats -leuclid -ltoolsa -ltdrp \
 	-ldataport $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

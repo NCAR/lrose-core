@@ -1,26 +1,9 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+// ** Copyright UCAR (c) 1992 - 2016
+// ** University Corporation for Atmospheric Research(UCAR)
+// ** National Center for Atmospheric Research(NCAR)
+// ** Boulder, Colorado, USA
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -471,8 +454,8 @@ using namespace std;
   {
     out << "TDRP args: [options as below]\n"
         << "   [ -params/--params path ] specify params file path\n"
-        << "   [ -check_params] check which params are not set\n"
-        << "   [ -print_params [mode]] print parameters\n"
+        << "   [ -check_params/--check_params] check which params are not set\n"
+        << "   [ -print_params/--print_params [mode]] print parameters\n"
         << "     using following modes, default mode is 'norm'\n"
         << "       short:   main comments only, no help or descr\n"
         << "                structs and arrays on a single line\n"
@@ -559,7 +542,7 @@ using namespace std;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 1");
     tt->comment_hdr = tdrpStrDup("Filters to apply");
-    tt->comment_text = tdrpStrDup("The filters to apply, in order applied. A brief description of each filter is:\n \nAZ_GRADIENT = Compute gradient azimuthally at each point\nCLUTTER_2D_QUAL = Compute quality factor based on clutter\nCOMMENT = Non filter that just prints out 'input field' as a comment followeed by a more extensive message\nGAUSSIAN_2D_REMAP = Map 2 variables to a gaussian result\nGRIDDED_MATH = Do math operations pointwise using 2 grids\nMASK = change data when mask has particular value\nMATH = Do mathematical operations on each data point\nPASSTHROUGH = Set the output equal to the input, with a name change\nQSCALE = Scaling filter r.e. (exp(-.69*(values))\nSW_NORM = Spectrum width normalization\nTHRESH = Threshold filter, do something to data outside a threshold val\nThe parameters for each filter are found in arrays, one array per filter type, later in this file\n");
+    tt->comment_text = tdrpStrDup("The filters to apply, in order applied. A brief description of each filter is:\n \nAZ_GRADIENT = Compute gradient azimuthally at each point\nCLUTTER_2D_QUAL = Compute quality factor based on clutter\nCOMMENT = Non filter that just prints out 'input field' as a comment followeed by a more extensive message\nCONSTRAIN = set missing outside a range\nFIR = 1 dimensional FIR filter along beams\nGAUSSIAN_2D_REMAP = Map 2 variables to a gaussian result\nGRIDDED_MATH = Do math operations pointwise using 2 grids\nMASK = change data when mask has particular value\nMATH = Do mathematical operations on each data point\nPASSTHROUGH = Set the output equal to the input, with a name change\nQSCALE = Scaling filter r.e. (exp(-.69*(values))\nSW_NORM = Spectrum width normalization\nTHRESH = Threshold filter, do something to data outside a threshold val\nThe parameters for each filter are found in arrays, one array per filter type, later in this file\n");
     tt++;
     
     // Parameter 'filter'
@@ -586,7 +569,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_filter->filter - (char *) _filter;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("filter_t");
-        tt->struct_def.fields[0].enum_def.nfields = 11;
+        tt->struct_def.fields[0].enum_def.nfields = 13;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("AZ_GRADIENT");
@@ -595,22 +578,26 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[1].val = CLUTTER_2D_QUAL;
         tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("COMMENT");
         tt->struct_def.fields[0].enum_def.fields[2].val = COMMENT;
-        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("GAUSSIAN_2D_REMAP");
-        tt->struct_def.fields[0].enum_def.fields[3].val = GAUSSIAN_2D_REMAP;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("GRIDDED_MATH");
-        tt->struct_def.fields[0].enum_def.fields[4].val = GRIDDED_MATH;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("MASK");
-        tt->struct_def.fields[0].enum_def.fields[5].val = MASK;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("MATH");
-        tt->struct_def.fields[0].enum_def.fields[6].val = MATH;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("PASSTHROUGH");
-        tt->struct_def.fields[0].enum_def.fields[7].val = PASSTHROUGH;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("QSCALE");
-        tt->struct_def.fields[0].enum_def.fields[8].val = QSCALE;
-        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("SW_NORM");
-        tt->struct_def.fields[0].enum_def.fields[9].val = SW_NORM;
-        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("THRESH");
-        tt->struct_def.fields[0].enum_def.fields[10].val = THRESH;
+        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("CONSTRAIN");
+        tt->struct_def.fields[0].enum_def.fields[3].val = CONSTRAIN;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("FIR");
+        tt->struct_def.fields[0].enum_def.fields[4].val = FIR;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("GAUSSIAN_2D_REMAP");
+        tt->struct_def.fields[0].enum_def.fields[5].val = GAUSSIAN_2D_REMAP;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("GRIDDED_MATH");
+        tt->struct_def.fields[0].enum_def.fields[6].val = GRIDDED_MATH;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("MASK");
+        tt->struct_def.fields[0].enum_def.fields[7].val = MASK;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("MATH");
+        tt->struct_def.fields[0].enum_def.fields[8].val = MATH;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("PASSTHROUGH");
+        tt->struct_def.fields[0].enum_def.fields[9].val = PASSTHROUGH;
+        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("QSCALE");
+        tt->struct_def.fields[0].enum_def.fields[10].val = QSCALE;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("SW_NORM");
+        tt->struct_def.fields[0].enum_def.fields[11].val = SW_NORM;
+        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("THRESH");
+        tt->struct_def.fields[0].enum_def.fields[12].val = THRESH;
       tt->struct_def.fields[1].ftype = tdrpStrDup("int");
       tt->struct_def.fields[1].fname = tdrpStrDup("filter_index");
       tt->struct_def.fields[1].ptype = INT_TYPE;
@@ -1086,6 +1073,143 @@ using namespace std;
     tt->n_struct_vals = 0;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'parm_fir'
+    // ctype is '_fir_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("parm_fir");
+    tt->descr = tdrpStrDup("FIR params");
+    tt->help = tdrpStrDup("FIR filter, 1 dimensional over beam\ncoeff_index = index to coefficients array coeff\nedge_compute = USE_FIRST_DATA, MIRROR, MEAN, or INTERP\nnoise_field_name = name of output field noise (main output is signal)");
+    tt->array_offset = (char *) &_parm_fir - &_start_;
+    tt->array_n_offset = (char *) &parm_fir_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(fir_t);
+    tt->array_n = 0;
+    tt->struct_def.name = tdrpStrDup("fir_t");
+    tt->struct_def.nfields = 3;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[0].fname = tdrpStrDup("coeff_index");
+      tt->struct_def.fields[0].ptype = INT_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_parm_fir->coeff_index - (char *) _parm_fir;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("FIR_edge_e");
+      tt->struct_def.fields[1].fname = tdrpStrDup("edge_compute");
+      tt->struct_def.fields[1].ptype = ENUM_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_parm_fir->edge_compute - (char *) _parm_fir;
+        tt->struct_def.fields[1].enum_def.name = tdrpStrDup("FIR_edge_e");
+        tt->struct_def.fields[1].enum_def.nfields = 4;
+        tt->struct_def.fields[1].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[1].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[1].enum_def.fields[0].name = tdrpStrDup("USE_FIRST_DATA");
+        tt->struct_def.fields[1].enum_def.fields[0].val = USE_FIRST_DATA;
+        tt->struct_def.fields[1].enum_def.fields[1].name = tdrpStrDup("MIRROR");
+        tt->struct_def.fields[1].enum_def.fields[1].val = MIRROR;
+        tt->struct_def.fields[1].enum_def.fields[2].name = tdrpStrDup("MEAN");
+        tt->struct_def.fields[1].enum_def.fields[2].val = MEAN;
+        tt->struct_def.fields[1].enum_def.fields[3].name = tdrpStrDup("INTERP");
+        tt->struct_def.fields[1].enum_def.fields[3].val = INTERP;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("noise_field_name");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_parm_fir->noise_field_name - (char *) _parm_fir;
+    tt->n_struct_vals = 0;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'parm_constrain'
+    // ctype is '_constrain_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("parm_constrain");
+    tt->descr = tdrpStrDup("CONSTRAIN params");
+    tt->help = tdrpStrDup("Constrain values to a range, missing elsewhere\nmin_gate_indexx = index to first valid data\nmax_gate_indexx = index to last valid data");
+    tt->array_offset = (char *) &_parm_constrain - &_start_;
+    tt->array_n_offset = (char *) &parm_constrain_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(constrain_t);
+    tt->array_n = 0;
+    tt->struct_def.name = tdrpStrDup("constrain_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[0].fname = tdrpStrDup("min_gate_index");
+      tt->struct_def.fields[0].ptype = INT_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_parm_constrain->min_gate_index - (char *) _parm_constrain;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[1].fname = tdrpStrDup("max_gate_index");
+      tt->struct_def.fields[1].ptype = INT_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_parm_constrain->max_gate_index - (char *) _parm_constrain;
+    tt->n_struct_vals = 0;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'coeff0'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("coeff0");
+    tt->descr = tdrpStrDup("coeff0");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_coeff0 - &_start_;
+    tt->array_n_offset = (char *) &coeff0_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'coeff1'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("coeff1");
+    tt->descr = tdrpStrDup("coeff1");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_coeff1 - &_start_;
+    tt->array_n_offset = (char *) &coeff1_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'coeff2'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("coeff2");
+    tt->descr = tdrpStrDup("coeff2");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_coeff2 - &_start_;
+    tt->array_n_offset = (char *) &coeff2_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
     tt++;
     
     // trailing entry has param_name set to NULL

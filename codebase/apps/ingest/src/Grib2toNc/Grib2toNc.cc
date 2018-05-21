@@ -33,11 +33,15 @@
 #include <cstdio>
 #include <string.h>
 #include <ctime>
-#include <toolsa/pmu.h>
-#include <toolsa/umisc.h>
 
 #include "Grib2toNc.hh"
 #include "Grib2Nc.hh"
+
+#ifndef NOT_RAL
+#include <toolsa/pmu.h>
+#endif
+#include <toolsa/utim.h> // For unix_to_date
+
 using namespace std;
 
 // Global instance variable
@@ -56,22 +60,10 @@ Grib2toNc::Grib2toNc(int argc, char **argv) {
   okay = true;
 
   // Set the base program name.
-  path_parts_t progname_parts;
-
-  uparse_path(argv[0], &progname_parts);
-  _progName = STRdup(progname_parts.base);
-
-  if(progname_parts.dir != NULL)
-    free(progname_parts.dir);
-  if(progname_parts.name != NULL)
-    free(progname_parts.name);
-  if(progname_parts.base != NULL)
-    free(progname_parts.base);
-  if(progname_parts.ext != NULL)
-    free(progname_parts.ext);
+  strcpy(_progName, "Grib2toNc");
 
   // Display UCAR ucopyright message.
-  ucopyright(_progName);
+  _ucopyright(_progName);
 
   // Get the command line arguments via the Args class
   _args = new Args(argc, argv, _progName);
@@ -96,28 +88,28 @@ Grib2toNc::Grib2toNc(int argc, char **argv) {
 
   _grib2Nc = new Grib2Nc(*_params);
  
+#ifndef NOT_RAL
   // initialize process registration
   PMU_auto_init(_progName, _params->instance,
                 _params->procmap_register_interval_secs);
-  
+  #endif
 }
 
 //
 // Destructor
 Grib2toNc::~Grib2toNc() 
 {
+#ifndef NOT_RAL
    //
    // Unregister with process mapper
    //
    PMU_auto_unregister();
+#endif
 
   if (_params != (Params *)NULL)
     delete _params;
   if (_args != (Args *)NULL)
     delete _args;
-
-  // Free included strings
-  STRfree(_progName);
 
   if (_grib2Nc != (Grib2Nc *)NULL)
     delete _grib2Nc;
@@ -161,4 +153,28 @@ int Grib2toNc::run()
   }
 
   return( RI_SUCCESS );
+}
+
+void Grib2toNc::_ucopyright(const char *prog_name)
+{
+  char whenChar[20];
+  time_t now = time(NULL);
+  UTIMstruct timeStruct;
+  UTIMunix_to_date(now, &timeStruct);  
+  sprintf(whenChar, "%4d/%02d/%02d %02d:%02d:%02d",
+	  timeStruct.year, timeStruct.month, timeStruct.day,
+	  timeStruct.hour, timeStruct.min, timeStruct.sec);
+
+  fprintf(stderr, "\n");
+  fprintf(stderr, "** Program '%s'\n", prog_name);
+  fprintf(stderr, "** Copyright (c) 1992-%.4d UCAR\n",  timeStruct.year);
+  fprintf(stderr,
+	  "** University Corporation for Atmospheric Research - UCAR.\n");
+  fprintf(stderr, "** National Center for Atmospheric Research - NCAR.\n");
+  fprintf(stderr, "** Research Applications Program - RAP.\n");
+  fprintf(stderr, "** P.O.Box 3000, Boulder, Colorado, 80307, USA.\n");
+  fprintf(stderr, "** Run-time %s.\n", whenChar);
+  fprintf(stderr, "\n");
+  fflush(stderr);
+
 }

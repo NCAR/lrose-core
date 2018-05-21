@@ -186,6 +186,7 @@ private:
 
   Nc3Dim *_timeDim;
   Nc3Dim *_rangeDim;
+  Nc3Dim *_sweepDim;
 
   // times
   
@@ -240,6 +241,11 @@ private:
   vector<double> _azimuths;
   vector<double> _elevations;
   
+  // sweep variables
+
+  Nc3Var *_sweepVar;
+  vector<RadxSweep *> _sweeps;
+
   // global attributes
 
   int _ADC_bits_per_sample_attr;
@@ -251,8 +257,12 @@ private:
   int _pulses_per_ray_attr;
   int _samples_per_pulse_attr;
   int _scan_number_attr;
+  int _year_attr;
+  int _month_attr;
+  int _day_attr;
 
-  float  _cable_losses_attr;
+
+  float _cable_losses_attr;
   float _extra_attenuation_attr;
   float _max_angle_attr;
   float _max_range_attr;
@@ -289,18 +299,9 @@ private:
   Radx::PlatformType_t _platformType;
   Radx::PrimaryAxis_t _primaryAxis;
 
-  // storing ray information for reading from file
-  
-  class RayInfo {
-  public:
-    size_t indexInFile;
-    RadxSweep *sweep;
-    RadxRay *ray;
-  };
-  vector<RayInfo> _raysToRead;
-
   // rays to be added to volume
 
+  vector<RadxRay *> _raysToRead;
   vector<RadxRay *> _raysValid;
 
   int _readDimensions();
@@ -308,6 +309,7 @@ private:
   int _readTimes();
   int _readRangeVariable();
   int _readPositionVariables();
+  int _readSweepVariables();
   int _readScalarVariables();
   void _clearRayVariables();
   int _readRayVariables();

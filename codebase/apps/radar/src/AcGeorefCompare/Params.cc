@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -909,6 +909,51 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'print_secondary_custom_variables'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_secondary_custom_variables");
+    tt->descr = tdrpStrDup("If true, write the custom variables for secondary data set.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &print_secondary_custom_variables - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'print_surface_velocity_stats'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_surface_velocity_stats");
+    tt->descr = tdrpStrDup("If true, print the surface velocity stats for HCR.");
+    tt->help = tdrpStrDup("The estimated pitch and roll angle errors will also be printed.");
+    tt->val_offset = (char *) &print_surface_velocity_stats - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'surface_velocity_custom_index'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("surface_velocity_custom_index");
+    tt->descr = tdrpStrDup("Index of surface velocity in the custom variables.");
+    tt->help = tdrpStrDup("The surface velocity will be in the secondary data set.");
+    tt->val_offset = (char *) &surface_velocity_custom_index - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("Specify the custom field labels");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'primary_custom_labels'
     // ctype is 'char*'
     
@@ -937,18 +982,6 @@ using namespace std;
       tt->array_vals[9].s = tdrpStrDup("custom9");
     tt++;
     
-    // Parameter 'print_secondary_custom_variables'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("print_secondary_custom_variables");
-    tt->descr = tdrpStrDup("If true, write the custom variables for secondary data set.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &print_secondary_custom_variables - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'secondary_custom_labels'
     // ctype is 'char*'
     
@@ -965,40 +998,16 @@ using namespace std;
     tt->array_n = 10;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("custom0");
-      tt->array_vals[1].s = tdrpStrDup("custom1");
-      tt->array_vals[2].s = tdrpStrDup("custom2");
-      tt->array_vals[3].s = tdrpStrDup("custom3");
-      tt->array_vals[4].s = tdrpStrDup("custom4");
-      tt->array_vals[5].s = tdrpStrDup("custom5");
-      tt->array_vals[6].s = tdrpStrDup("custom6");
-      tt->array_vals[7].s = tdrpStrDup("custom7");
-      tt->array_vals[8].s = tdrpStrDup("custom8");
-      tt->array_vals[9].s = tdrpStrDup("custom9");
-    tt++;
-    
-    // Parameter 'print_surface_velocity_stats'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("print_surface_velocity_stats");
-    tt->descr = tdrpStrDup("If true, print the surface velocity stats for HCR.");
-    tt->help = tdrpStrDup("The estimated pitch and roll angle errors will also be printed.");
-    tt->val_offset = (char *) &print_surface_velocity_stats - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'surface_velocity_custom_index'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("surface_velocity_custom_index");
-    tt->descr = tdrpStrDup("Index of surface velocity in the custom variables.");
-    tt->help = tdrpStrDup("The surface velocity will be in the secondary data set.");
-    tt->val_offset = (char *) &surface_velocity_custom_index - &_start_;
-    tt->single_val.i = 1;
+      tt->array_vals[0].s = tdrpStrDup("custom0Sec");
+      tt->array_vals[1].s = tdrpStrDup("custom1Sec");
+      tt->array_vals[2].s = tdrpStrDup("custom2Sec");
+      tt->array_vals[3].s = tdrpStrDup("custom3Sec");
+      tt->array_vals[4].s = tdrpStrDup("custom4Sec");
+      tt->array_vals[5].s = tdrpStrDup("custom5Sec");
+      tt->array_vals[6].s = tdrpStrDup("custom6Sec");
+      tt->array_vals[7].s = tdrpStrDup("custom7Sec");
+      tt->array_vals[8].s = tdrpStrDup("custom8Sec");
+      tt->array_vals[9].s = tdrpStrDup("custom9Sec");
     tt++;
     
     // trailing entry has param_name set to NULL

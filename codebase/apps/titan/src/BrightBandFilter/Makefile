@@ -38,8 +38,8 @@ TARGET_FILE = BrightBandFilter
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -ldsserver \
-	-ldidss -lrapformats -ltoolsag -ldataport \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
+	-ldidss -lrapformats -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

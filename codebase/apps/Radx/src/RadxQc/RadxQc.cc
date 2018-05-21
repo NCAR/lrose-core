@@ -373,6 +373,10 @@ int RadxQc::_processFile(const string &filePath)
   _readPaths = inFile.getReadPaths();
   _printRunTime("After file read");
 
+  // set the ray numbers to preserve the ray order
+
+  vol.setRayNumbersInOrder();
+
   // override radar location if requested
 
   if (_params.override_radar_location) {
@@ -455,6 +459,10 @@ int RadxQc::_processFile(const string &filePath)
     return -1;
   }
   _printRunTime("After compute()");
+
+  // ensure rays are in original order
+
+  vol.sortRaysByNumber();
 
   // write results to output file
 

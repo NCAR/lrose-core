@@ -26,7 +26,7 @@
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
 
-#include <qtimer.h>
+#include <QTimer>
 #include <QBrush>
 #include <QPalette>
 #include <QPaintEngine>
@@ -35,6 +35,7 @@
 #include <QStylePainter>
 
 #include "PpiBeam.hh"
+#include <Radx/Radx.hh>
 
 using namespace std;
 
@@ -63,8 +64,8 @@ PpiBeam::PpiBeam(const Params &params,
   double sin1, cos1;
   double sin2, cos2;
   
-  sincos(start_angle * DEG_TO_RAD, &sin1, &cos1);
-  sincos(stop_angle * DEG_TO_RAD, &sin2, &cos2);
+  Radx::sincos(start_angle * DEG_TO_RAD, sin1, cos1);
+  Radx::sincos(stop_angle * DEG_TO_RAD, sin2, cos2);
   
   // Now calculate the vertex values to be used for all fields.  We negate
   // the y values because the display coordinate system has y increasing down.

@@ -188,6 +188,12 @@ void FiltRescale::set_input_info(Info **info) const
 }
 
 //------------------------------------------------------------------
+void FiltRescale::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+
+//------------------------------------------------------------------
 bool FiltRescale::_remap(FiltInfoOutput &o) const
 {
   if (o.isGrid())

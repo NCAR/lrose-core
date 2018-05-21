@@ -58,11 +58,16 @@ if ($opt_t) {
 
 
 if ($opt_L) {
-    open (LOG, ">>$opt_L/parseMetarLog_$year$month$day$hour.log" ) or die "could not open $opt_L/parseMetarLog.$year$month$day$hour.log: $!\n";
-    print LOG "log dir: $opt_L\n";
-    select( LOG ); $| = 1;
-    open (STDERR, ">&LOG" ) or die "could not dup stdout: $!\n";
-    select( STDERR ); $| = 1;
+    if ($opt_L == "/dev/null"){
+	open (LOG, ">/dev/null") or die "Can't open /dev/null: $!";
+	open (STDERR, ">&LOG" ) or die "could not dup stderr: $!\n";
+    }else{
+	open (LOG, ">>$opt_L/parseMetarLog_$year$month$day$hour.log" ) or die "could not open $opt_L/parseMetarLog.$year$month$day$hour.log: $!\n";
+	print LOG "log dir: $opt_L\n";
+	select( LOG ); $| = 1;
+	open (STDERR, ">&LOG" ) or die "could not dup stdout: $!\n";
+	select( STDERR ); $| = 1;
+    }
 }
 select( STDOUT ); $| = 1;
 

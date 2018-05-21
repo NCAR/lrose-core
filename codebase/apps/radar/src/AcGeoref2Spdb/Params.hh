@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -58,13 +58,21 @@ public:
   } debug_t;
 
   typedef enum {
-    CFRADIAL = 0,
-    RADX_FMQ = 1,
-    IWRF_FILE = 2,
-    IWRF_FMQ = 3,
-    RAF_NETCDF = 4,
-    RAF_IWG1_UDP = 5
+    RADX_FMQ = 0,
+    IWRF_FMQ = 1,
+    RAF_IWG1_UDP = 2,
+    CFRADIAL = 3,
+    IWRF_FILE = 4,
+    RAF_NETCDF = 5
   } input_mode_t;
+
+  // struct typedefs
+
+  typedef struct {
+    double latitude_deg;
+    double longitude_deg;
+    double altitude_m;
+  } default_location_t;
 
   ///////////////////////////
   // Member functions
@@ -359,6 +367,12 @@ public:
 
   input_mode_t input_mode;
 
+  char* aircraft_callsign;
+
+  char* output_spdb_url;
+
+  int spdb_nchunks_per_write;
+
   char* input_fmq_name;
 
   tdrp_bool_t seek_to_end_of_input;
@@ -369,27 +383,11 @@ public:
 
   char* udp_multicast_group;
 
-  char* aircraft_callsign;
+  tdrp_bool_t store_default_if_no_udp_data;
 
-  char* cfradial_dbz_field_name;
+  default_location_t default_location;
 
-  char* cfradial_vel_field_name;
-
-  tdrp_bool_t get_hcr_temps_from_cfradial;
-
-  tdrp_bool_t compute_surface_vel_in_cfradial;
-
-  double min_range_to_surface_km;
-
-  double min_dbz_for_surface_echo;
-
-  double max_nadir_error_for_surface_vel;
-
-  int ngates_for_surface_echo;
-
-  tdrp_bool_t print_surface_velocity_data;
-
-  double surface_velocity_print_period_secs;
+  int udp_sleep_secs;
 
   char* nc_varname_altitude_msl;
 
@@ -440,9 +438,25 @@ public:
   char* *_nc_varname_custom_fields;
   int nc_varname_custom_fields_n;
 
-  char* output_spdb_url;
+  tdrp_bool_t get_hcr_temps_from_cfradial;
 
-  int spdb_nchunks_per_write;
+  tdrp_bool_t compute_surface_vel_in_cfradial;
+
+  char* cfradial_vel_field_name;
+
+  double min_range_to_surface_km;
+
+  double min_dbz_for_surface_echo;
+
+  char* cfradial_dbz_field_name;
+
+  double max_nadir_error_for_surface_vel;
+
+  int ngates_for_surface_echo;
+
+  tdrp_bool_t print_surface_velocity_data;
+
+  double surface_velocity_print_period_secs;
 
   double surface_vel_spike_filter_difference_threshold;
 
@@ -462,7 +476,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[61];
+  mutable TDRPtable _table[65];
 
   const char *_className;
 

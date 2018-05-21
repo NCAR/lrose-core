@@ -149,11 +149,22 @@ void SpdbXml2Table::_printComments(FILE *out)
 {
 
   const char *com = _params.comment_character;
+  const char *delim = _params.column_delimiter;
 
   // initial line has column headers
 
-  fprintf(out, "%s count year month day hour min sec unix_time unix_day ", com);
+  fprintf(out, "%scount", com);
+  fprintf(out, "%syear", delim);
+  fprintf(out, "%smonth", delim);
+  fprintf(out, "%sday", delim);
+  fprintf(out, "%shour", delim);
+  fprintf(out, "%smin", delim);
+  fprintf(out, "%ssec", delim);
+  fprintf(out, "%sunix_time", delim);
+  fprintf(out, "%sunix_day", delim);
+
   for (int ii = 0; ii < _params.xml_entries_n; ii++) {
+    fprintf(out, "%s", delim);
     const Params::xml_entry_t &entry = _params._xml_entries[ii];
     if (entry.specify_label) {
       fprintf(out, "%s ", entry.label);
@@ -216,14 +227,13 @@ void SpdbXml2Table::_printLine(FILE *out,
     return;
   }
 
-  char oline[10000];
+  char text[8192];
   string ostr;
-  
 
   // date and time
 
   DateTime vtime(chunk.valid_time);
-  sprintf(oline, "%8d%s%.4d%s%.2d%s%.2d%s%.2d%s%.2d%s%.2d%s%ld%s%12.6f",
+  snprintf(text, 8192, "%8d%s%.4d%s%.2d%s%.2d%s%.2d%s%.2d%s%.2d%s%ld%s%12.6f",
           _lineCount, _params.column_delimiter,
           vtime.getYear(), _params.column_delimiter,
           vtime.getMonth(), _params.column_delimiter,
@@ -233,11 +243,17 @@ void SpdbXml2Table::_printLine(FILE *out,
           vtime.getSec(), _params.column_delimiter,
           (long) vtime.utime(), _params.column_delimiter,
           (double) vtime.utime() / 86400.0);
-  ostr += oline;
+  ostr += text;
 
   // set the xml string from the chunk data
 
   string xml((const char *) chunk.data);
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "===>> time: " << DateTime::strm(vtime.utime()) << endl;
+    cerr << "==================== XML =====================" << endl;
+    cerr << xml;
+    cerr << "==============================================" << endl;
+  }
   
   // loop through XML entries
 
@@ -247,8 +263,8 @@ void SpdbXml2Table::_printLine(FILE *out,
     
     // delimiter
 
-    sprintf(oline, "%s", _params.column_delimiter);
-    ostr += oline;
+    snprintf(text, 8192, "%s", _params.column_delimiter);
+    ostr += text;
 
     const Params::xml_entry_t &entry = _params._xml_entries[ii];
     
@@ -263,26 +279,30 @@ void SpdbXml2Table::_printLine(FILE *out,
         cerr << "  ==>> xml_tag_list: " << entry.xml_tag_list << endl;
         return;
       }
-      sprintf(oline, "nan");
-      ostr += oline;
+      snprintf(text, 8192, "nan");
+      ostr += text;
       continue;
     }
     
     string buf(xml);
     for (size_t jj = 0; jj < tags.size(); jj++) {
+
       string val;
+
       if (TaXml::readString(buf, tags[jj], val)) {
         if (entry.required) {
-          cerr << "NOTE - required entry not found, ignoring" << endl;
+          cerr << "ERROR - required entry not found, ignoring" << endl;
           cerr << "  ==>> label       : " << entry.label << endl;
           cerr << "  ==>> xml_tag_list: " << entry.xml_tag_list << endl;
           return;
         }
-        sprintf(oline, "nan");
-        ostr += oline;
-        continue;
+        snprintf(text, 8192, "nan");
+        ostr += text;
+        break;
       }
+
       if (jj == (tags.size() - 1)) {
+
         if (val.find("nan") != 0) {
           allNans = false;
         }
@@ -297,23 +317,27 @@ void SpdbXml2Table::_printLine(FILE *out,
         } // if (_params.replace_string_in_output) 
         if (_params.convert_boolean_to_integer) {
           if (STRequal(val.c_str(), "TRUE")) {
-            sprintf(oline, "1");
-            ostr += oline;
+            snprintf(text, 8192, "1");
+            ostr += text;
           } else if (STRequal(val.c_str(), "FALSE")) {
-            sprintf(oline, "0");
-            ostr += oline;
+            snprintf(text, 8192, "0");
+            ostr += text;
           } else {
-            sprintf(oline, "%s", val.c_str());
-            ostr += oline;
+            snprintf(text, 8192, "%s", val.c_str());
+            ostr += text;
           }
         } else {
-          sprintf(oline, "%s", val.c_str());
-          ostr += oline;
+          snprintf(text, 8192, "%s", val.c_str());
+          ostr += text;
         }
+
       } else {
+
         buf = val;
-      }
-    }
+
+      } // if (jj == (tags.size() - 1)) 
+
+    } // jj
 
   } // ii
   

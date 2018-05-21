@@ -20,7 +20,9 @@
 ///////////// debug ///////////////////////////////////
 //
 // Debug option.
+//
 // If set, debug messages will be printed appropriately.
+//
 //
 // Type: enum
 // Options:
@@ -34,7 +36,10 @@ debug = DEBUG_OFF;
 ///////////// instance ////////////////////////////////
 //
 // Process instance.
+//
 // Used for registration with procmap.
+//
+//
 // Type: string
 //
 
@@ -43,7 +48,10 @@ instance = "test";
 ///////////// reg_interval ////////////////////////////
 //
 // Registration interval.
+//
 // The number of seconds between expected procmap registrations.
+//
+//
 // Type: int
 //
 
@@ -58,19 +66,27 @@ reg_interval = 60;
 ///////////// mode ////////////////////////////////////
 //
 // Operating mode.
+//
 // In REALTIME mode, the program waits for a new input file.  
 //   LOCAL_FILEPATH_REALTIME is a realtime mode used when data resides on 
 //   the host where the application is running. This was added due to the 
 //   problems that the data server layer had distinguishing data times of 
-//   data written very close together. In ARCHIVE mode, it moves through 
-//   the data between the start and end times set on the command line. In 
-//   SPEC_FCAST_REALTIME mode, the program waits for a new input file that 
-//   is a forecast file with the specified forecast lead time. The 
-//   forecast lead time is specified in the fcast_lead_time parameter. In 
-//   FILELIST mode, it moves through the list of file names specified on 
-//   the command line. Paths (in FILELIST mode, at least) MUST contain a 
-//   day-directory below the data file -- ./data_file.mdv will not work as 
-//   a file path.
+//   data written very close together. NOTE that in this mode the 
+//   input_url parameter should be set to an input directory, not an input 
+//   url. In ARCHIVE mode, it moves through the data between the start and 
+//   end times set on the command line. In SPEC_FCAST_REALTIME mode, the 
+//   program waits for a new input file that is a forecast file with the 
+//   specified forecast lead time. The forecast lead time is specified in 
+//   the fcast_lead_time parameter. In FILELIST mode, it moves through the 
+//   list of file names specified on the command line. Paths (in FILELIST 
+//   mode, at least) MUST contain a day-directory below the data file -- 
+//   ./data_file.mdv will not work as a file path. In ARCHIVE_FCST mode, 
+//   it moves through the data between the start and end times set on the 
+//   comand line, and processes all lead times found in the forecast 
+//   files. In SPEC_FCST_ARCHIVE mode, it moves through the data between 
+//   the start and end times set on the comand line, and processes 
+//   forecast files with the specified forecast lead time.
+//
 //
 // Type: enum
 // Options:
@@ -78,25 +94,70 @@ reg_interval = 60;
 //     REALTIME
 //     FILELIST
 //     SPEC_FCAST_REALTIME
+//     REALTIME_FCST_DATA
 //     LOCAL_FILEPATH_REALTIME
+//     ARCHIVE_FCST
+//     SPEC_FCST_ARCHIVE
 //
 
 mode = ARCHIVE;
 
+///////////// local ///////////////////////////////////
+//
+// Setup for LOCAL_FILEPATH_REALTIME mode ONLY. Max age of input, 
+//   seconds, if we use latest data info to trigger, and if we should only 
+//   process the latest file.
+//
+// Defaults should generally be fine.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int lookback;
+//      boolean use_ldata_info;
+//      boolean latest_file_only;
+//   }
+//
+//
+
+local = {
+    lookback = 1200,
+    use_ldata_info = TRUE,
+    latest_file_only = FALSE
+};
+
 ///////////// input_url ///////////////////////////////
 //
 // URL for input data.
+//
 // This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
-//   the file paths are specified on the command line.
+//   the file paths are specified on the command line. In  
+//   LOCAL_FILEPATH_REALTIME mode, set this to a directory, not a URL.
+//
+//
 // Type: string
 //
 
 input_url = "mdv/input";
 
+///////////// writeLdataInfo //////////////////////////
+//
+// Write _latest_data_info files for output files.
+//
+// If false, will suppress writing of _latest_data_info files.
+//
+//
+// Type: boolean
+//
+
+writeLdataInfo = TRUE;
+
 ///////////// fcast_lead_time /////////////////////////
 //
 // Forecast lead time information for forecast files to be processed.
-// Used only if mode is set to SPEC_FCAST_REALTIME.
+//
+// Used only if mode is set to SPEC_FCAST_REALTIME or SPEC_FCST_ARCHIVE.
+//
 //
 // Type: struct
 //   typedef struct {
@@ -106,11 +167,41 @@ input_url = "mdv/input";
 //
 //
 
-fcast_lead_time = { 0, FALSE };
+fcast_lead_time = {
+    lead_time_secs = 0,
+    use_gen_time = FALSE
+};
+
+///////////// do_lead_time_subsampling ////////////////
+//
+// Lead time subsampling flag.
+//
+// Set to true to enable lead time subsampling.  Used only if mode is 
+//   REALTIME_FCST_DATA or ARCHIVE_FCST.
+//
+//
+// Type: boolean
+//
+
+do_lead_time_subsampling = FALSE;
+
+///////////// subsample_lead_time_hour ////////////////
+//
+// The subsampled lead times to process.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+subsample_lead_time_hour = {
+};
 
 ///////////// set_field_nums //////////////////////////
 //
 // Option to set field numbers.
+//
+//
 // Type: boolean
 //
 
@@ -119,32 +210,44 @@ set_field_nums = FALSE;
 ///////////// field_nums //////////////////////////////
 //
 // Field number list.
+//
+//
 // Type: int
 // 1D array - variable length.
 //
 
-field_nums = { 0 };
+field_nums = {
+ 0
+};
 
 ///////////// set_field_names /////////////////////////
 //
 // Option to set field names.
+//
+//
 // Type: boolean
 //
 
-set_field_names = FALSE;
+set_field_names = TRUE;
 
 ///////////// field_names /////////////////////////////
 //
 // Field name list.
+//
+//
 // Type: string
 // 1D array - variable length.
 //
 
-field_names = { "0" };
+field_names = {
+ "DBZ"
+};
 
 ///////////// rename_fields ///////////////////////////
 //
 // Option to set field names.
+//
+//
 // Type: boolean
 //
 
@@ -152,7 +255,12 @@ rename_fields = FALSE;
 
 ///////////// new_names ///////////////////////////////
 //
-// Provides a map from old field name to new field name.
+// Provides a map from old field name to new field name. Note that 
+//   either the filed name or the long field name must match the 
+//   old_field_name specified for the renaming to take effect, and that if 
+//   the renaming happens then both the field name and the long field name 
+//   are renamed to the new_field_name.
+//
 //
 // Type: struct
 //   typedef struct {
@@ -164,17 +272,23 @@ rename_fields = FALSE;
 //
 
 new_names = {
-  { "", ""}
+  {
+    old_field_name = "",
+    new_field_name = ""
+  }
 };
 
 ///////////// apply_thresholds_to_field_values ////////
 //
 // Option to threshold field values. Points with values outside the 
 //   specified limits will be set to missing.
+//
 // NOTE: this works on the output field names. If rename_fields is 
 //   false, then the input and output field names are the same. If rename 
 //   fields is true, the field name change is performed first, before the 
 //   field values are thresholded.
+//
+//
 // Type: boolean
 //
 
@@ -184,6 +298,7 @@ apply_thresholds_to_field_values = FALSE;
 //
 // Limit the values in specified fields to between min_threshold and 
 //   max_threshold. Values outside this range will be set to missing.
+//
 //
 // Type: struct
 //   typedef struct {
@@ -196,7 +311,11 @@ apply_thresholds_to_field_values = FALSE;
 //
 
 thresholded_fields = {
-  { "DBZ", 0, 100}
+  {
+    output_field_name = "DBZ",
+    threshold_min = 0,
+    threshold_max = 100
+  }
 };
 
 //======================================================================
@@ -208,7 +327,10 @@ thresholded_fields = {
 ///////////// output_url //////////////////////////////
 //
 // Output URL.
+//
 // Output data is written to this URL.
+//
+//
 // Type: string
 //
 
@@ -217,8 +339,11 @@ output_url = "./output";
 ///////////// output_as_forecast //////////////////////
 //
 // Set to output the data as forecast in mdv format.
+//
 // This forces a forecast-style output, whether the data is of forecast 
 //   type or not.
+//
+//
 // Type: boolean
 //
 
@@ -228,9 +353,12 @@ output_as_forecast = FALSE;
 //
 // Set to output the data as forecast, if the data is of a forecast 
 //   type.
+//
 // This only writes out in forecast-style output if the 
 //   data_collection_type in the master header is of type FORECAST or 
 //   EXTRAPOLATED.
+//
+//
 // Type: boolean
 //
 
@@ -239,21 +367,126 @@ if_forecast_output_as_forecast = FALSE;
 ///////////// output_format ///////////////////////////
 //
 // Specify format of file on output.
-// FORMAT_MDV: normal MDV formal. FORMAT_XML: XML format. XML format 
-//   writes out 2 files: *.mdv.xml and *.mdv.buf. The xml file contains 
-//   the meta-data. The buf file contains the binary fields.
+//
+// FORMAT_MDV: normal MDV formal.
+//
+// FORMAT_XML: XML format. XML format writes out 2 files: *.mdv.xml and 
+//   *.mdv.buf. The xml file contains the meta-data. The buf file contains 
+//   the binary fields.
+//
 // NOTE: only COMPRESSION_NONE and COMPRESSION_GZIP_VOL are supported in 
-//   XML. FORMAT_NCF: write file in netCDF CF format. Extension will be 
-//   .nc.
+//   XML.
+//
+// FORMAT_NCF: write file in netCDF CF format. Extension will be .nc.
+//
+// FORMAT_CEDRIC: Write out in Cedric format.
+//
 //
 // Type: enum
 // Options:
 //     OUTPUT_FORMAT_MDV
 //     OUTPUT_FORMAT_XML
 //     OUTPUT_FORMAT_NCF
+//     OUTPUT_FORMAT_CEDRIC
 //
 
 output_format = OUTPUT_FORMAT_MDV;
+
+///////////// write_to_path ///////////////////////////
+//
+// Write the file to a specified path.
+//
+// This overrides output_url.
+//
+//
+// Type: boolean
+//
+
+write_to_path = FALSE;
+
+///////////// output_path /////////////////////////////
+//
+// Output path.
+//
+// See 'write_to_path'.
+//
+//
+// Type: string
+//
+
+output_path = "./output/test.mdv";
+
+//======================================================================
+//
+// OPTION TO OVERRIDE ORIGIN LOCATION.
+//
+//======================================================================
+ 
+///////////// override_origin_location ////////////////
+//
+// Option to override the origin location.
+//
+// If true, the origin location in the file will be overridden with the 
+//   specified values. If this option is used, remap_at_source must be set 
+//   to false.
+//
+//
+// Type: boolean
+//
+
+override_origin_location = FALSE;
+
+///////////// origin_latitude_deg /////////////////////
+//
+// Origin latitude (deg).
+//
+// See override_origin_location.
+//
+//
+// Type: double
+//
+
+origin_latitude_deg = 0;
+
+///////////// origin_longitude_deg ////////////////////
+//
+// Origin longitude (deg).
+//
+// See override_origin_location.
+//
+//
+// Type: double
+//
+
+origin_longitude_deg = 0;
+
+///////////// override_vlevels ////////////////////////
+//
+// Option to override the vlevels in the vlevel header.
+//
+// If true, will replace the vlevels in the header with those specified 
+//   in 'vlevel_array'. This does not affect the actual data in the file.
+//
+//
+// Type: boolean
+//
+
+override_vlevels = FALSE;
+
+///////////// vlevel_array ////////////////////////////
+//
+// vlevel values to override what is already in the file.
+//
+// See 'override_vlevels'.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+vlevel_array = {
+ 0
+};
 
 //======================================================================
 //
@@ -264,6 +497,8 @@ output_format = OUTPUT_FORMAT_MDV;
 ///////////// set_horiz_limits ////////////////////////
 //
 // Option to set horizontal limits.
+//
+//
 // Type: boolean
 //
 
@@ -272,6 +507,7 @@ set_horiz_limits = FALSE;
 ///////////// horiz_limits ////////////////////////////
 //
 // Set horizontal limits.
+//
 //
 // Type: struct
 //   typedef struct {
@@ -283,12 +519,20 @@ set_horiz_limits = FALSE;
 //
 //
 
-horiz_limits = { -90, -180, 90, 180 };
+horiz_limits = {
+    min_lat = -90,
+    min_lon = -180,
+    max_lat = 90,
+    max_lon = 180
+};
 
 ///////////// set_vlevel_limits ///////////////////////
 //
 // Option to set plane vlevel limits.
+//
 // Mutually exclusive with set_plane_num_limits.
+//
+//
 // Type: boolean
 //
 
@@ -297,6 +541,8 @@ set_vlevel_limits = FALSE;
 ///////////// lower_vlevel ////////////////////////////
 //
 // Lower plane vlevel limit.
+//
+//
 // Type: float
 //
 
@@ -305,35 +551,20 @@ lower_vlevel = 0;
 ///////////// upper_vlevel ////////////////////////////
 //
 // Upper plane vlevel limit.
+//
+//
 // Type: float
 //
 
 upper_vlevel = 0;
 
-///////////// override_vlevels ////////////////////////
-//
-// Option to override the vlevels in the vlevel header.
-// If true, will replace the vlevels in the file with those specified in 
-//   'vlevel_array'.
-// Type: boolean
-//
-
-override_vlevels = FALSE;
-
-///////////// vlevel_array ////////////////////////////
-//
-// vlevel values to override what is already in the file.
-// See 'override_vlevels'.
-// Type: double
-// 1D array - variable length.
-//
-
-vlevel_array = { 0 };
-
 ///////////// set_plane_num_limits ////////////////////
 //
 // Option to set plane number limits.
+//
 // Mutually exclusive with set_vlevel_limits.
+//
+//
 // Type: boolean
 //
 
@@ -342,6 +573,8 @@ set_plane_num_limits = FALSE;
 ///////////// lower_plane_num /////////////////////////
 //
 // Lower plane num limit.
+//
+//
 // Type: int
 //
 
@@ -350,6 +583,8 @@ lower_plane_num = 0;
 ///////////// upper_plane_num /////////////////////////
 //
 // Upper plane num limit.
+//
+//
 // Type: int
 //
 
@@ -358,17 +593,58 @@ upper_plane_num = 0;
 ///////////// composite ///////////////////////////////
 //
 // Option for creating composite.
+//
 // Composite is a plane in which each grid location contains the maximum 
 //   value at any height.
+//
+//
 // Type: boolean
 //
 
 composite = FALSE;
 
+///////////// remap_z_to_constant_grid ////////////////
+//
+// Option to remap the Z levels onto a grid with constant dz.
+//
+// Field data will be remapped onto the specified Z levels using the 
+//   nearest neighbor method. See 'remap_z_grid'. Note that this actually 
+//   changes the data. Whereas 'override_vlevels' only changes the vlevels 
+//   in the headers, and does not change the data.
+//
+//
+// Type: boolean
+//
+
+remap_z_to_constant_grid = FALSE;
+
+///////////// remap_z_grid ////////////////////////////
+//
+// Specified Z levels for remapping.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int nz;
+//      double minz;
+//      double dz;
+//   }
+//
+//
+
+remap_z_grid = {
+    nz = 10,
+    minz = 0,
+    dz = 1
+};
+
 ///////////// remap_xy ////////////////////////////////
 //
 // Option to remap grid in x,y.
+//
 // If true, set the remap parameters below.
+//
+//
 // Type: boolean
 //
 
@@ -377,9 +653,12 @@ remap_xy = FALSE;
 ///////////// auto_remap_to_latlon ////////////////////
 //
 // Option to automatically remap the grid to a lat-lon projection.
+//
 // If true, the data in the file will be remapped to a latlon grid which 
 //   matches the existing grid in resolution and extent. Other remap 
 //   parameters will be ignored.
+//
+//
 // Type: boolean
 //
 
@@ -388,11 +667,14 @@ auto_remap_to_latlon = FALSE;
 ///////////// remap_at_source /////////////////////////
 //
 // Flag indicating where to do the remapping.
+//
 // If set to true, the remapping is done on the source machine by 
 //   setting the remapping in the MDV read request. This is the default.If 
 //   set to false, the remapping is done on the destination machine by 
 //   doing a remap command after the read is done. This is useful if you 
 //   are reading the data from a machine that is overloaded.
+//
+//
 // Type: boolean
 //
 
@@ -401,6 +683,7 @@ remap_at_source = TRUE;
 ///////////// remap_projection ////////////////////////
 //
 // Projection for remapping in x,y. See projection param below.
+//
 // 	PROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)
 // 	PROJ_FLAT: Azimuthal Equidistant (Radar)
 // 	PROJ_LAMBERT_CONF: Lambert Conformal Conic
@@ -411,6 +694,7 @@ remap_at_source = TRUE;
 // 	PROJ_OBLIQUE_STEREO: Stereographic - oblique aspect
 // 	PROJ_ALBERS: Albers Equal Area Conic
 // 	PROJ_VERT_PERSP: Vertical Perspective (satellite view).
+//
 //
 // Type: enum
 // Options:
@@ -431,7 +715,9 @@ remap_projection = PROJ_FLAT;
 ///////////// remap_grid //////////////////////////////
 //
 // Grid parameters for remapping in x,y.
+//
 // Units in km, except for LATLON, which is in degrees.
+//
 //
 // Type: struct
 //   typedef struct {
@@ -445,12 +731,22 @@ remap_projection = PROJ_FLAT;
 //
 //
 
-remap_grid = { 1, 1, 0, 0, 1, 1 };
+remap_grid = {
+    nx = 1,
+    ny = 1,
+    minx = 0,
+    miny = 0,
+    dx = 1,
+    dy = 1
+};
 
 ///////////// remap_rotation //////////////////////////
 //
 // Remapped grid rotation.
+//
 // This applies only to PROJ_FLAT projections.
+//
+//
 // Type: double
 //
 
@@ -459,7 +755,10 @@ remap_rotation = 0;
 ///////////// remap_origin_lat ////////////////////////
 //
 // Remapped grid origin latitude.
+//
 // This applies to all projections except LATLON.
+//
+//
 // Type: double
 //
 
@@ -468,7 +767,10 @@ remap_origin_lat = 0;
 ///////////// remap_origin_lon ////////////////////////
 //
 // Remapped grid origin longitude.
+//
 // This applies to all projections except LATLON.
+//
+//
 // Type: double
 //
 
@@ -477,7 +779,10 @@ remap_origin_lon = 0;
 ///////////// remap_lat1 //////////////////////////////
 //
 // Remapped grid reference latitude 1.
+//
 // This applies to LAMBERT_CONF and ALBERS projections.
+//
+//
 // Type: double
 //
 
@@ -486,7 +791,10 @@ remap_lat1 = 0;
 ///////////// remap_lat2 //////////////////////////////
 //
 // Remapped grid reference latitude 2.
+//
 // This applies to LAMBERT_CONF and ALBERS projections.
+//
+//
 // Type: double
 //
 
@@ -495,8 +803,11 @@ remap_lat2 = 0;
 ///////////// remap_central_scale /////////////////////
 //
 // Central scale for remapped projections.
+//
 // This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR 
 //   projections.
+//
+//
 // Type: double
 //
 
@@ -505,7 +816,10 @@ remap_central_scale = 1;
 ///////////// remap_tangent_lat ///////////////////////
 //
 // Remapped tangent latitude (deg).
+//
 // This applies to OBLIQUE_STEREO only.
+//
+//
 // Type: double
 //
 
@@ -514,7 +828,10 @@ remap_tangent_lat = 0;
 ///////////// remap_tangent_lon ///////////////////////
 //
 // Remapped tangent longitude (deg).
+//
 // This applies to OBLIQUE_STEREO and POLAR_STEREO.
+//
+//
 // Type: double
 //
 
@@ -523,8 +840,11 @@ remap_tangent_lon = 0;
 ///////////// remap_pole_is_north /////////////////////
 //
 // Flag indicating stereogtraphic is over the NORTH pole.
+//
 // This applies to POLAR_STEREO. If false, the projection is over the 
 //   south pole.
+//
+//
 // Type: boolean
 //
 
@@ -533,7 +853,10 @@ remap_pole_is_north = TRUE;
 ///////////// remap_persp_radius //////////////////////
 //
 // Radius of perspective point (km).
+//
 // This applies to VERT_PERSP.
+//
+//
 // Type: double
 //
 
@@ -542,8 +865,13 @@ remap_persp_radius = 35786;
 ///////////// remap_false_northing ////////////////////
 //
 // Remapped false northing correction.
+//
 // Occasionally, this is added to the Y coordinate so that all 
-//   coordinates are positive. Normally 0.
+//   coordinates are positive. Normally 0. As an alternative to 
+//   false_northing and false_easting, you can set the offset_latitude and 
+//   offset_longitude.
+//
+//
 // Type: double
 //
 
@@ -552,12 +880,53 @@ remap_false_northing = 0;
 ///////////// remap_false_easting /////////////////////
 //
 // Remapped false easting correction.
+//
 // Occasionally, this is added to the X coordinate so that all 
 //   coordinates are positive. Normally 0.
+//
+//
 // Type: double
 //
 
 remap_false_easting = 0;
+
+///////////// remap_set_offset_origin /////////////////
+//
+// Do you want to specify an offset origin using lat/lon instead of 
+//   false_northing and false_easting?.
+//
+// If true, set remap_offset_origin_latitude and 
+//   remap_offset_origin_longitude.
+//
+//
+// Type: boolean
+//
+
+remap_set_offset_origin = FALSE;
+
+///////////// remap_offset_origin_latitude ////////////
+//
+// Latitude of offset origin.
+//
+// See remap_set_offset_origin.
+//
+//
+// Type: double
+//
+
+remap_offset_origin_latitude = 0;
+
+///////////// remap_offset_origin_longitude ///////////
+//
+// Longitude of offset origin.
+//
+// See remap_set_offset_origin.
+//
+//
+// Type: double
+//
+
+remap_offset_origin_longitude = 0;
 
 //======================================================================
 //
@@ -568,6 +937,7 @@ remap_false_easting = 0;
 ///////////// encoding_type ///////////////////////////
 //
 // Set encoding type.
+//
 //
 // Type: enum
 // Options:
@@ -582,7 +952,9 @@ encoding_type = ENCODING_ASIS;
 ///////////// compression_type ////////////////////////
 //
 // Set compression type.
+//
 // See <toolsa/compress> for details on the compression types.
+//
 //
 // Type: enum
 // Options:
@@ -597,16 +969,19 @@ encoding_type = ENCODING_ASIS;
 //     COMPRESSION_TYPES_N
 //
 
-compression_type = COMPRESSION_ASIS;
+compression_type = COMPRESSION_BZIP;
 
 ///////////// force_scale_change //////////////////////
 //
 // Option to force a scaling change in the data.
+//
 // If this option is chosen, the data is read in as float data and then 
 //   is converted to the chosen output encoding type using the scaling 
 //   options specified below.
 // NOTE: When using this option, if you set the encoding_type option to 
 //   ENCODING_ASIS, the output will use FLOAT32 encoding.
+//
+//
 // Type: boolean
 //
 
@@ -615,8 +990,10 @@ force_scale_change = FALSE;
 ///////////// scaling_type ////////////////////////////
 //
 // Set scaling type.
+//
 // This is only relevant when converting from float32 to int8 or int16 
 //   or if force_scale_change is set.
+//
 //
 // Type: enum
 // Options:
@@ -633,7 +1010,10 @@ scaling_type = SCALING_ROUNDED;
 ///////////// scale ///////////////////////////////////
 //
 // Input scaling scale.
+//
 // For SCALING_SPECIFIED only.
+//
+//
 // Type: float
 //
 
@@ -642,7 +1022,10 @@ scale = 1;
 ///////////// bias ////////////////////////////////////
 //
 // Input scaling bias.
+//
 // For SCALING_SPECIFIED only.
+//
+//
 // Type: float
 //
 
@@ -657,8 +1040,11 @@ bias = 0;
 ///////////// decimate ////////////////////////////////
 //
 // Option to decimate in x,y.
+//
 // If true, each plane is decimated to force the number of grid points 
 //   to be less than 'decimate_max_nxy'.
+//
+//
 // Type: boolean
 //
 
@@ -667,11 +1053,33 @@ decimate = FALSE;
 ///////////// decimate_max_nxy ////////////////////////
 //
 // Max number of xy grid points in decimation.
+//
 // See 'decimate'.
+//
+//
 // Type: int
 //
 
 decimate_max_nxy = 1000000;
+
+//======================================================================
+//
+// INVERT PLANES IN THE VERTICAL SENSE.
+//
+//======================================================================
+ 
+///////////// invert_vertically ///////////////////////
+//
+// Invert the vertical levels in all fields.
+//
+// This inversion is applied after the remap, forced scale change, 
+//   overriding of V levels, and linear transformations.
+//
+//
+// Type: boolean
+//
+
+invert_vertically = FALSE;
 
 //======================================================================
 //
@@ -682,6 +1090,8 @@ decimate_max_nxy = 1000000;
 ///////////// input_be ////////////////////////////////
 //
 // Are input files big-endian.
+//
+//
 // Type: boolean
 //
 
@@ -690,6 +1100,8 @@ input_be = TRUE;
 ///////////// output_be ///////////////////////////////
 //
 // Are output files big-endian.
+//
+//
 // Type: boolean
 //
 
@@ -705,8 +1117,11 @@ output_be = TRUE;
 //
 // Option to apply a linear transform function to the data in selected 
 //   data fields.
+//
 // Field names and transform parameters are given in linear_transforms 
 //   parameter.
+//
+//
 // Type: boolean
 //
 
@@ -716,8 +1131,10 @@ apply_linear_transform = FALSE;
 //
 // Array specifying the transform functions and the field names to which 
 //   they apply.
+//
 // The transform will only be applied to the specified fields. If a 
 //   field which is specified does not exist, a warning will be issued.
+//
 //
 // Type: struct
 //   typedef struct {
@@ -730,7 +1147,11 @@ apply_linear_transform = FALSE;
 //
 
 linear_transforms = {
-  { "DBZ", 1, 0}
+  {
+    field_name = "DBZ",
+    scale = 1,
+    bias = 0
+  }
 };
 
 //======================================================================
@@ -745,17 +1166,20 @@ linear_transforms = {
 ///////////// write_using_extended_paths //////////////
 //
 // Option to write files with extended paths.
+//
 // If specified, this will override that specified by the client. 
 //   Default is FALSE.
-
+//
 // If set, paths will include a separate year subdirectory, and the file 
 //   name will include date and time.
-
+//
 // Non-forecast path:
 //   dir/yyyy/yyyymmdd/yyyymmdd_hhmmss.mdv.
-
+//
 // Forecast path:
 //   dir/yyyy/yyyymmdd/yyyymmdd_g_hhmmss_f_llllllll.mdv.
+//
+//
 // Type: boolean
 //
 
@@ -773,7 +1197,10 @@ write_using_extended_paths = FALSE;
 ///////////// ncf_set_global_attributes ///////////////
 //
 // Option to set specify global attributes in the NCF file.
+//
 // The global attributes are 'institution', 'references' and 'comment'.
+//
+//
 // Type: boolean
 //
 
@@ -782,9 +1209,11 @@ ncf_set_global_attributes = FALSE;
 ///////////// ncf_global_attributes ///////////////////
 //
 // Global attributes for netCDF file.
+//
 // These strings will be included as global attributes in the NetCDF 
 //   file. Other global attributes will be determined from the MDV 
 //   headers.
+//
 //
 // Type: struct
 //   typedef struct {
@@ -795,12 +1224,18 @@ ncf_set_global_attributes = FALSE;
 //
 //
 
-ncf_global_attributes = { "NCAR", "", "Converted by MdvConvert" };
+ncf_global_attributes = {
+    institution = "NCAR",
+    references = "",
+    comment = "Converted by MdvConvert"
+};
 
 ///////////// ncf_transform_fields ////////////////////
 //
 // Option to tranform field names, units and values when converting MDV 
 //   to NCF.
+//
+//
 // Type: boolean
 //
 
@@ -811,7 +1246,9 @@ ncf_transform_fields = FALSE;
 // List of transforms. If mdv_field_name is found in the MDV data, these 
 //   other parameters will be used to set the field variable in the netCDF 
 //   file.
+//
 // See mdv2ncf_transform_fields.
+//
 //
 // Type: struct
 //   typedef struct {
@@ -835,13 +1272,26 @@ ncf_transform_fields = FALSE;
 //
 
 ncf_field_transforms = {
-  { "mdv_field_name", "ncf_field_name", "ncf_standard_name", "ncf_long_name", "ncf_units", FALSE, 1, 0, DATA_PACK_ASIS}
+  {
+    mdv_field_name = "mdv_field_name",
+    ncf_field_name = "ncf_field_name",
+    ncf_standard_name = "ncf_standard_name",
+    ncf_long_name = "ncf_long_name",
+    ncf_units = "ncf_units",
+    do_linear_transform = FALSE,
+    linear_multiplier = 1,
+    linear_const = 0,
+    packed_data_type = DATA_PACK_ASIS
+  }
 };
 
 ///////////// ncf_compress_data ///////////////////////
 //
 // Option to compress field data.
+//
 // Only applies to NETCDF4 and  NETCDF4_CLASSIC files.
+//
+//
 // Type: boolean
 //
 
@@ -851,7 +1301,10 @@ ncf_compress_data = TRUE;
 //
 // Compression level from 1 to 9 with 9 being the greatest compression. 
 //   Default is 9.
+//
 // Only applies to NETCDF4 and  NETCDF4_CLASSIC files.
+//
+//
 // Type: int
 //
 
@@ -860,9 +1313,12 @@ ncf_compression_level = 9;
 ///////////// ncf_filename_suffix /////////////////////
 //
 // Suffix of netCDF files.
+//
 // File extension is always .nc. File name will end with mdv.suffix.nc. 
 //   Set to the empty string for no suffix, in which case file name will 
 //   end with .mdv.nc.
+//
+//
 // Type: string
 //
 
@@ -871,8 +1327,10 @@ ncf_filename_suffix = "";
 ///////////// ncf_file_format /////////////////////////
 //
 // NetCDF file format.
+//
 // netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
 //   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
 //
 // Type: enum
 // Options:
@@ -884,24 +1342,59 @@ ncf_filename_suffix = "";
 
 ncf_file_format = NETCDF4;
 
+///////////// ncf_polar_radar_file_type ///////////////
+//
+// Output format for polar radar data.
+//
+//
+// Type: enum
+// Options:
+//     FILE_TYPE_CF
+//     FILE_TYPE_CF_RADIAL
+//     FILE_TYPE_DORADE
+//     FILE_TYPE_UF
+//
+
+ncf_polar_radar_file_type = FILE_TYPE_CF;
+
 ///////////// ncf_output_latlon_arrays ////////////////
 //
 // If true latitude and longitude arrays of each grid point are output.
+//
 // The CF convention requires that these arrays are present in the 
 //   netCDF file; however, the information is redundant since the lat and 
 //   lon arrays could be constructed using the other projection and grid 
 //   information required with a gridded data field.
+//
+//
 // Type: boolean
 //
 
 ncf_output_latlon_arrays = FALSE;
 
+///////////// ncf_output_start_end_times //////////////
+//
+// If true Mdv start_time and end_time are output.
+//
+// In the case in which the the information contained in the Mdv 
+//   start_time and end_time may be redundant or irrelevant the user can 
+//   choose not to output these variables .
+//
+//
+// Type: boolean
+//
+
+ncf_output_start_end_times = TRUE;
+
 ///////////// ncf_output_mdv_attributes ///////////////
 //
 // Option to output non-CF compliant MDV attributes.
+//
 // If true, MDV attributes which are not CF compliant will be output. 
 //   This will facilitate the translation of the data back into MDV with 
 //   the minimal loss of information.
+//
+//
 // Type: boolean
 //
 
@@ -910,19 +1403,142 @@ ncf_output_mdv_attributes = TRUE;
 ///////////// ncf_output_mdv_chunks ///////////////////
 //
 // Option to output non-CF compliant MDV chunks.
+//
 // If true, MDV chunks will be included as byte binary variables.
+//
+//
 // Type: boolean
 //
 
 ncf_output_mdv_chunks = TRUE;
 
-///////////// invert_vertically ///////////////////////
+//======================================================================
 //
-// Invert the vertical levels in all fields.
-// This inversion is applied after the remap, forced scale change, 
-//   overriding of V levels, and linear transformations.
-// Type: boolean
+// DETAILS FOR CEDRIC OUTPUT CONVERSION.
+//
+// Parameters for writing out CEDRIC files. CEDRIC is an NCAR package 
+//   for performing radar-type analyses such as dual-Doppler wind field 
+//   estimation.
+//
+//======================================================================
+ 
+///////////// cedric_volume_number ////////////////////
+//
+// Volume number for CEDRIC conversion.
+//
+//
+// Type: int
 //
 
-invert_vertically = FALSE;
+cedric_volume_number = 0;
+
+///////////// cedric_volume_name //////////////////////
+//
+// Volume name for CEDRIC conversion.
+//
+//
+// Type: string
+//
+
+cedric_volume_name = "CED-VOL";
+
+///////////// cedric_radar_name ///////////////////////
+//
+// Radar name for CEDRIC conversion.
+//
+//
+// Type: string
+//
+
+cedric_radar_name = "RADAR";
+
+///////////// cedric_project_name /////////////////////
+//
+// Project name for CEDRIC conversion.
+//
+//
+// Type: string
+//
+
+cedric_project_name = "PROJECT";
+
+///////////// cedric_program_name /////////////////////
+//
+// Program name for CEDRIC conversion.
+//
+//
+// Type: string
+//
+
+cedric_program_name = "PROGRAM";
+
+///////////// cedric_nyquist_velocity /////////////////
+//
+// Nyquist velocity for CEDRIC conversion.
+//
+// Included as metadata in CEDRIC files. CEDRIC was written for radar 
+//   data, so we need to supply radar meta-data, even if this is 
+//   simulated.
+//
+//
+// Type: double
+//
+
+cedric_nyquist_velocity = 25;
+
+///////////// cedric_ngates_beam //////////////////////
+//
+// Number of gates CEDRIC conversion.
+//
+// Included as metadata in CEDRIC files. CEDRIC was written for radar 
+//   data, so we need to supply radar meta-data, even if this is 
+//   simulated.
+//
+//
+// Type: int
+//
+
+cedric_ngates_beam = 1000;
+
+///////////// cedric_gate_spacing_km //////////////////
+//
+// Gate spacing CEDRIC conversion (km).
+//
+// Included as metadata in CEDRIC files. CEDRIC was written for radar 
+//   data, so we need to supply radar meta-data, even if this is 
+//   simulated.
+//
+//
+// Type: double
+//
+
+cedric_gate_spacing_km = 0.25;
+
+///////////// cedric_elevation_angles /////////////////
+//
+// Elevation angles for CEDRIC conversion (deg).
+//
+// Included as metadata in CEDRIC files. CEDRIC was written for radar 
+//   data, so we need to supply radar meta-data, even if this is 
+//   simulated.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+cedric_elevation_angles = {
+ 0.5,
+ 1,
+ 1.5,
+ 2,
+ 3,
+ 4,
+ 5,
+ 7.5,
+ 10,
+ 12.5,
+ 15,
+ 20
+};
 

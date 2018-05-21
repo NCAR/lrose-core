@@ -30,6 +30,7 @@
 #include <cerrno>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <toolsa/pmu.h>
@@ -103,7 +104,7 @@ EdgeUdp::init()
    
    POSTMSG( INFO, "Binding address to socket" );
    PMU_auto_register( "Binding address to socket" );
-   if( bind( udpFd, (struct sockaddr *) &udpAddress, 
+   if( ::bind( udpFd, (struct sockaddr *) &udpAddress, 
              sizeof( udpAddress ) ) < 0 ) {
       POSTMSG( ERROR, "Could not bind UDP socket, port %d", port );
       return( FAILURE );
@@ -120,11 +121,7 @@ EdgeUdp::readUdp( char* buffer )
   struct sockaddr_in fromAddress;
   int                status;
 
-#if defined(__linux)
   socklen_t          addrLen = sizeof( struct sockaddr_in );
-#else
-  int                addrLen = sizeof( struct sockaddr_in );
-#endif
 
   //
   // Wait on socket for up to 10 secs at a time

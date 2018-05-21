@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -2865,6 +2865,30 @@ using namespace std;
       tt->array_vals[3].d = 25;
       tt->array_vals[4].d = 27.5;
       tt->array_vals[5].d = 30;
+    tt++;
+    
+    // Parameter 'save_ice_zdr_to_file'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("save_ice_zdr_to_file");
+    tt->descr = tdrpStrDup("Option to save the ZDR values in ice to file.");
+    tt->help = tdrpStrDup("If true, we will write the ZDR values in the ice regions to a file, in ASCII.");
+    tt->val_offset = (char *) &save_ice_zdr_to_file - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'ice_zdr_save_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ice_zdr_save_dir");
+    tt->descr = tdrpStrDup("Directory for saving ZDR in ice data to files.");
+    tt->help = tdrpStrDup("See write_ice_zdr_to_file. Two files will be written for each volume, one for uncorrected ZDRM and one for corrected ZDR. Also, global files will be appended to.");
+    tt->val_offset = (char *) &ice_zdr_save_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/zdr_in_ice");
     tt++;
     
     // Parameter 'Comment 26'

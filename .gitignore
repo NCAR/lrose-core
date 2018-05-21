@@ -64,6 +64,10 @@ codebase/missing
 codebase/stamp-h1
 codebase/autom4te.cache
 
+# qt
+
+.qmake*
+
 # distro makefiles
 
 codebase/apps/Radx/src/makefile
@@ -101,7 +105,9 @@ codebase/libs/makefile
 codebase/apps/awc/src/LtgSpdb2Mdv/LtgSpdb2Mdv
 codebase/apps/awc/src/combine_ltg_radar/combine_ltg_radar
 
+codebase/apps/didss/src/Binet2Dsr/Binet2Dsr
 codebase/apps/didss/src/DsFmq2Tape/DsFmq2Tape
+codebase/apps/didss/src/DsFmq2Tape/DsFmq2Tape  
 codebase/apps/didss/src/Dsr2File/Dsr2File
 codebase/apps/didss/src/Dsr2Mdv/Dsr2Mdv
 codebase/apps/didss/src/Dsr2MdvLookup/Dsr2MdvLookup
@@ -128,10 +134,13 @@ codebase/apps/didss/src/RadMon/RadMon
 codebase/apps/didss/src/Rapic2Dsr/Rapic2Dsr
 codebase/apps/didss/src/Scout/Scout
 codebase/apps/didss/src/Socket2File/Socket2File
+codebase/apps/didss/src/Tdwr2Dsr/Tdwr2Dsr
 codebase/apps/didss/src/Test2Dsr/Test2Dsr
 codebase/apps/didss/src/TimeCalc/TimeCalc
+codebase/apps/didss/src/Udp2Tcp/Udp2Tcp  
 codebase/apps/didss/src/VerifyGrid/VerifyGrid
 codebase/apps/didss/src/edge2dsr/edge2dsr
+codebase/apps/didss/src/edgeRead/edgeRead
 codebase/apps/didss/src/fmq_print/fmq_print
 codebase/apps/didss/src/kavltg2spdb/kavltg2spdb
 codebase/apps/didss/src/ltgSpdb2GenPt/ltgSpdb2GenPt
@@ -249,6 +258,7 @@ codebase/apps/ingest/src/WsiNidsIngest/WsiNidsIngest
 codebase/apps/ingest/src/file_repeat_day/file_repeat_day
 codebase/apps/ingest/src/nexrad2dsr/nexrad2dsr
 codebase/apps/ingest/src/noaaportLtg2Spdb/noaaportLtg2Spdb
+codebase/apps/ingest/src/radar2Dsr/radar2Dsr  
 codebase/apps/ingest/src/sndgIngest/sndgIngest
 codebase/apps/ingest/src/superResNexradII2Dsr/superResNexradII2Dsr
 codebase/apps/ingest/src/superResNexradLdmUnzip/superResNexradLdmUnzip
@@ -256,6 +266,7 @@ codebase/apps/interp/src/SurfInterp/SurfInterp
 codebase/apps/interp/src/surf_interp/surf_interp
 
 codebase/apps/mdv_utils/src/Binary2Mdv/Binary2Mdv
+codebase/apps/mdv_utils/src/CwbRadar2Mdv/CwbRadar2Mdv
 codebase/apps/mdv_utils/src/GribNc2Mdv/GribNc2Mdv
 codebase/apps/mdv_utils/src/MaliSat2Mdv/MaliSat2Mdv
 codebase/apps/mdv_utils/src/McidasNcf2Mdv/McidasNcf2Mdv
@@ -382,6 +393,7 @@ codebase/apps/radar/src/Dsr2CP2Mom/Dsr2CP2Mom
 codebase/apps/radar/src/DsrGrabber/DsrGrabber
 codebase/apps/radar/src/DsrMerge/DsrMerge
 codebase/apps/radar/src/DualDopplerLobes/DualDopplerLobes
+
 codebase/apps/radar/src/HawkEye/HawkEye
 codebase/apps/radar/src/HawkEye/Makefile.qmake
 codebase/apps/radar/src/HawkEye/moc_BscanManager.cpp
@@ -394,7 +406,12 @@ codebase/apps/radar/src/HawkEye/moc_PolarWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_PpiWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_RhiWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_RhiWindow.cpp
+codebase/apps/radar/src/HawkEye/moc_TimeScaleWidget.cpp
+codebase/apps/radar/src/HawkEye/moc_predefs.h
+
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
+codebase/apps/radar/src/HsrlMon/HsrlMon
+codebase/apps/radar/src/Hsrl2Radx/Hsrl2Radx
 codebase/apps/radar/src/HsrlSim/HsrlSim
 codebase/apps/radar/src/HsrlTcp2Fmq/HsrlTcp2Fmq
 codebase/apps/radar/src/IntfRemove/IntfRemove
@@ -444,18 +461,44 @@ codebase/apps/radar/src/ZdrCalSimHv/ZdrCalSimHv
 codebase/apps/radar/src/TerrainHtServer/TerrainHtServer
 codebase/apps/radar/src/TerrainHtServer/TestClientTerrainHt
 
+codebase/apps/refractt/src/CalcMoisture/CalcMoisture
+codebase/apps/refractt/src/CalcNexrad/CalcNexrad
+codebase/apps/refractt/src/Chill2netCDFSweep/Chill2netCDFSweep
+codebase/apps/refractt/src/CleanupRvp8Data/CleanupRvp8Data
+codebase/apps/refractt/src/DsrAddSnr/DsrAddSnr
+codebase/apps/refractt/src/MdvAddSnr/MdvAddSnr
+codebase/apps/refractt/src/PhaseDiff/PhaseDiff
+codebase/apps/refractt/src/RefrMerge/RefrMerge
+codebase/apps/refractt/src/RefractCalib/RefractCalib
+codebase/apps/refractt/src/RefractParams2Tdrp/RefractParams2Tdrp
+codebase/apps/refractt/src/Refract/Refract
+
 codebase/apps/satApps/src/IR2Height/IR2Height
 
+codebase/apps/spdb_utils/src/AcPolygonStats/AcPolygonStats
+codebase/apps/spdb_utils/src/AdvectPolygon/AdvectPolygon
+codebase/apps/spdb_utils/src/AverageSpdbSndg/AverageSpdbSndg
+codebase/apps/spdb_utils/src/FixStationAltitudes/FixStationAltitudes
+codebase/apps/spdb_utils/src/GenPoly2Mdv/GenPoly2Mdv
+codebase/apps/spdb_utils/src/Hash/Hash
 codebase/apps/spdb_utils/src/NetCDF2Spdb/NetCDF2Spdb
 codebase/apps/spdb_utils/src/PrintGenPt1D/PrintGenPt1D
 codebase/apps/spdb_utils/src/PrintHydroStation/PrintHydroStation
 codebase/apps/spdb_utils/src/PrintSigAirMet/PrintSigAirMet
 codebase/apps/spdb_utils/src/PrintSpdbMetar/PrintSpdbMetar
 codebase/apps/spdb_utils/src/Rhi2Spdb/Rhi2Spdb
+codebase/apps/spdb_utils/src/Sigmet2Mdv/Sigmet2Mdv
+codebase/apps/spdb_utils/src/Sndg2Ascii/Sndg2Ascii
+codebase/apps/spdb_utils/src/SpdbBdry2Axf/SpdbBdry2Axf
+codebase/apps/spdb_utils/src/SpdbMultSim/SpdbMultSim
+codebase/apps/spdb_utils/src/StationCompare/StationCompare
 codebase/apps/spdb_utils/src/Taf2Spdb/Taf2Spdb
-codebase/apps/spdb_utils/src/extractStationLocationList/extractStationLocationList
-codebase/apps/spdb_utils/src/spdb_merge/spdb_merge
 codebase/apps/spdb_utils/src/WxStn2Table/WxStn2Table
+codebase/apps/spdb_utils/src/extractStationLocationList/extractStationLocationList
+codebase/apps/spdb_utils/src/spdbIntervalCount/spdbIntervalCount
+codebase/apps/spdb_utils/src/spdbLatencies/spdbLatencies
+codebase/apps/spdb_utils/src/spdb_merge/spdb_merge
+codebase/apps/spdb_utils/src/station2ascii/station2ascii
 
 codebase/apps/spol/src/SpolAngles2Fmq/SpolAngles2Fmq
 codebase/apps/spol/src/SpolCal2Xml/SpolCal2Xml
@@ -504,6 +547,7 @@ codebase/apps/titan/src/forecast_monitor/forecast_monitor
 codebase/apps/titan/src/suncal/suncal
 codebase/apps/titan/src/titan_print/titan_print
 codebase/apps/titan/src/tstorm_refl_fcst/tstorm_refl_fcst
+codebase/apps/titan/src/Radx2Esd/Radx2Esd
 
 codebase/apps/titan_analysis/src/CaseStats/CaseStats
 codebase/apps/titan_analysis/src/DistFit/DistFit
@@ -537,7 +581,6 @@ codebase/apps/Radx/src/Ascii2Radx/Ascii2Radx
 codebase/apps/Radx/src/Dsr2Radx/Dsr2Radx
 codebase/apps/Radx/src/FixCfradialPaths/FixCfradialPaths
 codebase/apps/Radx/src/FixRadxPointing/FixRadxPointing
-codebase/apps/Radx/src/Hsrl2Radx/Hsrl2Radx
 codebase/apps/Radx/src/Radx2Dsr/Radx2Dsr
 codebase/apps/Radx/src/Radx2Grid/Radx2Grid
 codebase/apps/Radx/src/RadxCheck/RadxCheck
@@ -604,6 +647,8 @@ codebase/apps/cidd/src/toneDownColorscale/toneDownColorscale
 codebase/apps/cidd/src/view_colormap/view_colormap
 codebase/apps/radar/src/SpectraPlot/SpectraPlot
 codebase/apps/radar/src/SpectraScope/SpectraScope
+
+codebase/apps/xpol/src/ProSensing2Dsr/ProSensing2Dsr
 
 codebase/Makefile
 codebase/libs/Fmq/src/.libs/

@@ -13,7 +13,7 @@
 
 #include <rapformats/MultiThresholdsBiasMapping.hh>
 class DsSpdb;
-class FieldThresh;
+class FieldThresh2;
 
 //----------------------------------------------------------------
 class MultiThreshBiasMapping : public MultiThresholdsBiasMapping
@@ -36,12 +36,15 @@ public:
    * @param[in] spdb  The URL
    * @param[in] ltHours  The lead times
    * @param[in] fields  The fields
+   * @param[in] doTile  True to break thresholds into tiles
+   * @param[in] tiling  Information about tiles
    *
    * Thresholds not known
    */
   MultiThreshBiasMapping(const std::string &spdb,
 			 const std::vector<double> &ltHours,
-			 const std::vector<std::string> &fields);
+			 const std::vector<std::string> &fields,
+			 const TileInfo &tiling);
 
   /**
    * Destructor
@@ -63,7 +66,7 @@ public:
    */
   bool readFirstBefore(const time_t &t, int maxSecondsBack,
 		       int maxSecondsBeforeColdstart,
-		       const std::vector<FieldThresh> &coldstartThresh);
+		       const std::vector<FieldThresh2> &coldstartThresh);
 
   /**
    * Read the newest data whose time is in the range specified
@@ -90,6 +93,7 @@ public:
   /**
    * Read the newes data that has the same hour/min/second as the input 
    * generation time either an exact match, or back some number of days
+   *
    * @param[in] gt  The generation time
    * @param[in] maxDaysBack
    * @return true if successful and state is filled in
@@ -108,6 +112,7 @@ public:
 
   /**
    * Write state to SPDB at time t
+   *
    * @param[in] t
    * @return true if successful
    */
@@ -115,6 +120,7 @@ public:
 
   /**
    * @return the times that are in the range of inputs 
+   *
    * @param[in] t0 Earliest time
    * @param[in] t1 Latest time
    */
@@ -122,6 +128,7 @@ public:
   
   /**
    * Read from SPDB into state, at a time
+   *
    * @param[in] time
    * @return true if successful
    */
@@ -147,8 +154,7 @@ private:
   time_t _chunkValidTime;
 
 
-  bool _load(DsSpdb &s, bool fieldsAndLeadsSet=true);
-
+  bool _load(DsSpdb &s, bool fieldLeadsTilesSet=true);
 };
 
 # endif

@@ -118,7 +118,8 @@ bool Algorithm::update(const time_t &t, const FiltAlgParms &p)
 {
   DsMdvx dout;
 
-  if (!_update_init(t, p, dout))
+  bool vlevelChange;
+  if (!_update_init(t, p, dout, vlevelChange))
   {
     return false;
   }
@@ -128,7 +129,7 @@ bool Algorithm::update(const time_t &t, const FiltAlgParms &p)
   // start from front and do filters.
   for (int i=0; i<static_cast<int>(_filters.size()); ++i)
   {
-    if (!_filter(t, p.vlevel_tolerance, _filters[i], dout))
+    if (!_filter(t, vlevelChange, p.vlevel_tolerance, _filters[i], dout))
     {
       stat = false;
     }
@@ -186,7 +187,7 @@ bool Algorithm::_create_filter(const FiltCreate *create,
 
 //------------------------------------------------------------------
 bool Algorithm::_update_init(const time_t &t, const FiltAlgParms &p,
-			     DsMdvx &dout)
+			     DsMdvx &dout, bool &vlevelChange)
 {
   Mdvx::master_header_t mhdr;
 
@@ -216,6 +217,18 @@ bool Algorithm::_update_init(const time_t &t, const FiltAlgParms &p,
 
   // prepare to produce output
   _output.clear();
+
+  if (_vlevel  == _last_vlevel)
+  {
+    vlevelChange = false;
+  }
+  else
+  {
+    vlevelChange = true;
+    _last_vlevel = _vlevel;
+    LOG(WARNING) << "Scanning vertical levels have changed, or first scan";
+  }
+    
   return true;
 }
 
@@ -501,8 +514,13 @@ bool Algorithm::_add_input(const char *input_field, const char *name,
 
   // for each vertical level
   int num = _hdr.nz;
+
+  // store the vertical levels per field, NOTE that not checking for
+  // consistency between fields, which could be problematic
+  _vlevel.clear();  
   for (int i=0; i<num; ++i)
   {
+    _vlevel.push_back(_vhdr.level[i]);
     LOG(DEBUG_VERBOSE) << "..Creating elev " << _vhdr.level[i];
 
     GridAlgs g2d = _createGrid(name, _hdr, &data[i*_hdr.nx*_hdr.ny]);
@@ -587,14 +605,20 @@ bool Algorithm::_add_feedback_input(const char *input_field, const char *name,
 }
 
 //------------------------------------------------------------------
-bool Algorithm::_filter(const time_t &t, const double vlevel_tolerance,
+bool Algorithm::_filter(const time_t &t, bool vlevelChange,
+			const double vlevel_tolerance,
 			Filter *f, DsMdvx &dout)
 {
   PMU_auto_register(f->sprintInputOutput().c_str());
 
-  vector<Data> new_output;
+  // let the filter know if vertical levels change
+  if (vlevelChange)
+  {
+    f->vertical_level_change();
+  }
 
   // create a vector of outputs by applying the filter
+  vector<Data> new_output;
   if (!_filter_1(t, vlevel_tolerance, f, new_output))
   {
     return false;
@@ -762,7 +786,7 @@ FiltInfo *Algorithm::_setupInfo(const Data &gin, const int i,
   double vlevel;
   GridProj gp;
   gi->get_grid_info(vlevel, gp);
-  FiltInfoInput inputs(gi, f, gout, i, vlevel, gp);
+  FiltInfoInput inputs(gi, _vlevel, f, gout, i, vlevel, gp);
   info->setInput(inputs);
   return info;
 }

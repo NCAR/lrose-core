@@ -26,8 +26,8 @@
 
 #include "ColorMap.hh"
 
-#include <qwidget.h>
-#include <qlayout.h>
+#include <QWidget>
+#include <QLayout>
 #include <QVBoxLayout>
 #include <vector>
 #include <string>

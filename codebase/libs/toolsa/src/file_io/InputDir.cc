@@ -48,6 +48,7 @@
 #include <toolsa/file_io.h>
 
 #include <toolsa/InputDir.hh>
+#include <toolsa/DateTime.hh>
 
 using namespace std;
 
@@ -64,22 +65,30 @@ const int Forever = 1;
 
 InputDir::InputDir(const string &dir_name,
 		   const string &file_substring,
-		   const bool process_old_files,
-		   const string &exclude_substring) :
-  _dirPtr(0)
+		   bool process_old_files,
+		   const string &exclude_substring,
+                   bool debug,
+                   bool verbose) :
+        _dirPtr(NULL),
+        _debug(debug),
+        _verbose(verbose)
 {
   _init(dir_name, file_substring, exclude_substring, process_old_files);
 }
 
 
-InputDir::InputDir(const char *dir_name,
-		   const char *file_substring,
-		   const int process_old_files,
-		   const string &exclude_substring) :
-  _dirPtr(0)
-{
-  _init(dir_name, file_substring, exclude_substring, process_old_files);
-}
+// InputDir::InputDir(const char *dir_name,
+// 		   const char *file_substring,
+// 		   int process_old_files,
+// 		   const string &exclude_substring,
+//                    bool debug,
+//                    bool verbose) :
+//         _dirPtr(NULL),
+//         _debug(debug),
+//         _verbose(verbose)
+// {
+//   _init(dir_name, file_substring, exclude_substring, process_old_files);
+// }
 
 
 /*********************************************************************
@@ -90,11 +99,36 @@ InputDir::~InputDir(void)
 {
   // Close the directory
 
-  if (_dirPtr != 0)
+  if (_dirPtr != NULL) {
     closedir(_dirPtr);
+  }
 }
 
 
+/*********************************************************************
+ * setDirName() - Set the directory
+ */
+
+void InputDir::setDirName(const string &dir_name)
+{
+  _dirName = dir_name;
+  
+  if (_dirPtr != 0)
+    closedir(_dirPtr);
+  
+  _dirPtr = opendir(_dirName.c_str());
+  if (_dirPtr == NULL) {
+    cerr << "ERROR - InputDir::setDirName" << endl;
+    cerr << "  Cannot open dir: " << _dirName << endl;
+  } else {
+    if (_debug) {
+      cerr << "InputDir::setDirName" << endl;
+      cerr << "  Opened dir: " << _dirName << endl;
+    }
+  }
+
+}
+  
 /*********************************************************************
  * getNextFilename() - Gets the next newly detected input filename.
  *                     When there are no new input files, returns
@@ -108,19 +142,36 @@ InputDir::~InputDir(void)
 char *InputDir::getNextFilename(int check_dir_flag,
 				int max_input_data_age)
 {
+
   static const string method_name = "InputDir::getNextFilename()";
 
   struct stat file_stat;
   struct dirent *dir_entry_ptr;
   char *next_file;
   int stat_return;
+
+  if (_dirPtr == NULL) {
+    cerr << "ERROR - InputDir::getNextFilename" << endl;
+    cerr << "  Input dir does not exist: " << _dirName << endl;
+    return NULL;
+  }
   
+  if (_debug) {
+    cerr << "InputDir::getNextFilename(), dir: " << _dirName << endl;
+    cerr << "  check_dir_flag: " << check_dir_flag << endl;
+    cerr << "  max_input_data_age: " << max_input_data_age << endl;
+    cerr << "  lastDirUpdateTime: " << DateTime::strm(_lastDirUpdateTime) << endl;
+    cerr << "  lastDataFileTime: " << DateTime::strm(_lastDataFileTime) << endl;
+  }
+
   // See if we need to rewind the directory.
 
   if (_rewindDirFlag)
   {
-    if (!_rewindDir(check_dir_flag))
-      return (char *)0;
+
+    if (!_rewindDir(check_dir_flag)) {
+      return NULL;
+    }
     
     _rewindDirFlag = FALSE;
     
@@ -133,13 +184,17 @@ char *InputDir::getNextFilename(int check_dir_flag,
     if ((dir_entry_ptr = readdir(_dirPtr)) == 0)
     {
       // Make sure we rewind the directory before reading it again.
-
+      
       _rewindDirFlag = TRUE;
 
       // Make sure we don't process the old files again
-
+      
       _lastDirUpdateTime = _lastDataFileTime;
     
+      if (_debug) {
+        cerr << "  No more new files" << endl;
+      }
+
       // Tell the calling routine that there are no more new files.
 
       return((char *)0);
@@ -151,15 +206,29 @@ char *InputDir::getNextFilename(int check_dir_flag,
 	STRequal_exact(dir_entry_ptr->d_name, ".."))
       continue;
     
+    if (_verbose) {
+      cerr << "  Checking file: " << dir_entry_ptr->d_name << endl;
+    }
+
     // Make sure the filename contains the appropriate substring
 
-    if ((_fileSubstring.size() > 0) && (strstr(dir_entry_ptr->d_name, _fileSubstring.c_str()) == 0))
+    if ((_fileSubstring.size() > 0) && 
+        (strstr(dir_entry_ptr->d_name, _fileSubstring.c_str()) == 0)) {
+      if (_verbose) {
+        cerr << "  Ignoring file without required string: " << _fileSubstring << endl;
+      }
       continue;
+    }
 
     // Make sure the filename doesn't contains the excluded substring
 
-    if ((_excludeSubstring.size() > 0) && (strstr(dir_entry_ptr->d_name, _excludeSubstring.c_str()) != 0))
+    if ((_excludeSubstring.size() > 0) &&
+        (strstr(dir_entry_ptr->d_name, _excludeSubstring.c_str()) != 0)) {
+      if (_verbose) {
+        cerr << "  Ignoring file with exclude string: " << _excludeSubstring << endl;
+      }
       continue;
+    }
     
     // Determine the full path for the file
 
@@ -176,7 +245,7 @@ char *InputDir::getNextFilename(int check_dir_flag,
     if (stat_return != 0)
     {
       cerr << "ERROR: " << method_name << endl;
-      cerr << "Error stating file" << endl;
+      cerr << "Error statting file" << endl;
       perror(next_file);
       
       delete [] next_file;
@@ -186,21 +255,23 @@ char *InputDir::getNextFilename(int check_dir_flag,
     
     time_t current_time = time((time_t *)0);
     
-    if (_lastDirUpdateTime >= file_stat.st_mtime)
-    {
+    if (_lastDirUpdateTime >= file_stat.st_mtime) {
+      if (_verbose) {
+        cerr << "  ignoring file, _lastDirUpdateTime > file.st_mtime" << endl;
+      }
       delete [] next_file;
       continue;
-    }
-    else if (max_input_data_age > 0 &&
-	     current_time - file_stat.st_mtime > max_input_data_age)
-    {
+    } else if (max_input_data_age > 0 &&
+               current_time - file_stat.st_mtime > max_input_data_age) {
+      if (_verbose) {
+        cerr << "  ignoring file, too old" << endl;
+      }
       delete [] next_file;
       continue;
-    }
-    else
-    {
-      if (file_stat.st_mtime > _lastDataFileTime)
+    } else {
+      if (file_stat.st_mtime > _lastDataFileTime) {
         _lastDataFileTime = file_stat.st_mtime;
+      }
       break;
     }
     
@@ -227,10 +298,15 @@ void InputDir::_init(const string &dir_name,
   
   // Try to open the directory
 
-  if (_dirName != "")
-  {
+  if (_dirName != "") {
     _dirPtr = opendir(_dirName.c_str());
-    assert(_dirPtr != 0);
+    if (_dirPtr == NULL) {
+      cerr << "ERROR - InputDir::_init" << endl;
+      cerr << "  Cannot open dir: " << _dirName << endl;
+    }
+    if (_debug) {
+      cerr << "InputDir::_init(), opened dir: " << _dirName << endl;
+    }
   }
 
   // Save the file substrings
@@ -242,12 +318,14 @@ void InputDir::_init(const string &dir_name,
 
   if (process_old_files)
   {
+    // use all files
     _lastDirUpdateTime = -1;
     _lastDataFileTime = 0;
   }
   else
   {
-    _lastDirUpdateTime = time((time_t *)0);
+    // only use latest file
+    _lastDirUpdateTime = getLatestFileTime() - 1;
     _lastDataFileTime = _lastDirUpdateTime;
   }
   
@@ -302,8 +380,82 @@ bool InputDir::_rewindDir(const int check_dir_flag)
   
   // Rewind the directory to get the new entries
   
-  rewinddir(_dirPtr);
+  if (_dirPtr != NULL) {
+    rewinddir(_dirPtr);
+  }
 
   return true;
 }
+
+/*********************************************************************
+ * getLatestFileTime()
+ *
+ *   returns the time of the latest file in the directory
+ */
+
+time_t InputDir::getLatestFileTime()
+{
+
+  time_t latestTime = 0;
+
+  if (_debug) {
+    cerr << "InputDir::getlatestFileTime(), dir: " << _dirName << endl;
+  }
+
+  if (_dirPtr == NULL) {
+    cerr << "ERROR - InputDir::getLatestFileTime" << endl;
+    cerr << "  Input dir does not exist: " << _dirName << endl;
+    return -1;
+  }
+  
+  struct dirent *dir_entry_ptr = NULL;
+  while ((dir_entry_ptr = readdir(_dirPtr)) != NULL) {
+    
+    // skip dot files
+
+    if (STRequal_exact(dir_entry_ptr->d_name, ".") ||
+	STRequal_exact(dir_entry_ptr->d_name, "..")) {
+      continue;
+    }
+    
+    // Make sure the filename contains the appropriate substring
+
+    if ((_fileSubstring.size() > 0) && 
+        (strstr(dir_entry_ptr->d_name, _fileSubstring.c_str()) == 0)) {
+      if (_verbose) {
+        cerr << "  Ignoring file without required string: " << _fileSubstring << endl;
+      }
+      continue;
+    }
+
+    // Make sure the filename doesn't contains the excluded substring
+
+    if ((_excludeSubstring.size() > 0) &&
+        (strstr(dir_entry_ptr->d_name, _excludeSubstring.c_str()) != 0)) {
+      if (_verbose) {
+        cerr << "  Ignoring file with exclude string: " << _excludeSubstring << endl;
+      }
+      continue;
+    }
+    
+    // Determine the full path for the file
+    
+    string filePath(_dirName);
+    filePath += PATH_DELIM;
+    filePath += dir_entry_ptr->d_name;
+    
+    struct stat file_stat;
+    if (ta_stat(filePath.c_str(), &file_stat) == 0) {
+      if (file_stat.st_mtime > latestTime) {
+        latestTime = file_stat.st_mtime;
+      }
+    }
+
+  } /* endwhile - Forever */
+
+  _rewindDir(false);
+  return latestTime;
+
+}
+
 

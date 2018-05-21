@@ -63,9 +63,6 @@
  *
  */
 
-static char rcsid[] = 
-  "$Id: shpadd.c,v 1.1 2000/06/28 13:37:01 rehak Exp $";
-
 #include "shapefil.h"
 
 int main( int argc, char ** argv )

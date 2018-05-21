@@ -45,9 +45,9 @@ public:
   // we store the Afwa grib table in our own structure
   typedef struct {
     int paramId;
-    char *name;
-    char *long_name;
-    char *units;
+    const char *name;
+    const char *long_name;
+    const char *units;
   } AfwaParmTable;
 
   static const AfwaParmTable _afwaParmTable[];

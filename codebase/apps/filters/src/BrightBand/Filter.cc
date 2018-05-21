@@ -83,6 +83,7 @@ Filter::Filter(const string &output_url,
    _input_data = input_data;
    _dbz_field = dbz_field;
    _dbzFieldHdr = _dbz_field->getFieldHeader();
+   _vlevelHdr = _dbz_field->getVlevelHeader();   
 
    fl32 *dbz_array = (fl32 *)_dbz_field->getVol();
 
@@ -144,11 +145,11 @@ Filter::Filter(const string &output_url,
 		   }
 		   else
 		   {
-
 		       slope = (dbz_array[band_top_index] - 
 				dbz_array[band_base_index])/
 			       ((band_top_ht - band_base_ht + 2) *
-				_dbzFieldHdr.grid_dz);
+				((_vlevelHdr.level[_dbzFieldHdr.nz-1] + \
+				  _vlevelHdr.level[0]) / _dbzFieldHdr.nz));
 
 		       for (int iz = band_base_ht; iz <= band_top_ht; iz++)
 		       {
@@ -156,7 +157,7 @@ Filter::Filter(const string &output_url,
 			
 			 dbz_array[vol_index] = 
 			  (fl32) (dbz_array[band_top_index] + 
-			    slope * (iz*_dbzFieldHdr.grid_dz - (band_top_ht + 1)*_dbzFieldHdr.grid_dz) + 0.5);
+				  slope * ((_vlevelHdr.level[iz] - _vlevelHdr.level[iz-1]) - (band_top_ht + 1)*(_vlevelHdr.level[band_top_ht+1] - _vlevelHdr.level[band_top_ht])) + 0.5);				  
 
 		       }
 		   }

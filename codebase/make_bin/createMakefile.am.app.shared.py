@@ -31,7 +31,7 @@ def main():
     global orderedLibList
     global makefileLibList
     global loadLibList
-    global needQt4
+    global needQt
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
@@ -49,6 +49,10 @@ def main():
                       dest='verbose', default='False',
                       action="store_true",
                       help='Set verbose debugging on')
+    parser.add_option('--osx',
+                      dest='osx', default='False',
+                      action="store_true",
+                      help='Configure for MAC OSX')
     parser.add_option('--dir',
                       dest='dir', default=".",
                       help='Path of app directory')
@@ -69,6 +73,7 @@ def main():
         print >>sys.stderr, "Running %s:" % thisScriptName
         print >>sys.stderr, "  App dir:", options.dir
         print >>sys.stderr, "  Lib list: ", options.libList
+        print >>sys.stderr, "  osx: ", options.osx
 
     # go to the app dir
 
@@ -167,9 +172,9 @@ def main():
             print >>sys.stderr, "  load lib: -l%s" % lib
         print >>sys.stderr, "======================================"
 
-    # check if we need Qt4 support
+    # check if we need Qt support
 
-    needQt4 = checkForQt4()
+    needQt = checkForQt()
 
     # write out makefile.am
             
@@ -283,9 +288,9 @@ def setCompileList():
         handleSrcType(lines, srcType)
     
 ########################################################################
-# check for dependence on QT4
+# check for dependence on QT
 
-def checkForQt4():
+def checkForQt():
                     
     try:
         fp = open(makefileName, 'r')
@@ -298,7 +303,7 @@ def checkForQt4():
     fp.close()
 
     for line in lines:
-        if (line.find("QT4") >= 0):
+        if (line.find("QT") >= 0):
             return True
         if (line.find("-lQtCore") >= 0):
             return True
@@ -581,8 +586,8 @@ def writeMakefileAm():
     fo.write("AM_CFLAGS = -I.\n")
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
-    if (needQt4 == True):
-        fo.write("AM_CFLAGS += $(QT4_CFLAGS)\n")
+    if (needQt == True):
+        fo.write("AM_CFLAGS += $(QT_CFLAGS)\n")
     fo.write("\n")
     fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
     fo.write("\n")
@@ -592,8 +597,8 @@ def writeMakefileAm():
     fo.write("AM_LDFLAGS = -L.\n")
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
-    if (needQt4 == True):
-        fo.write("AM_LDFLAGS += $(QT4_LIBS)\n")
+    if (needQt == True):
+        fo.write("AM_LDFLAGS += $(QT_LIBS)\n")
     fo.write("\n")
 
     if (len(loadLibList) > 0):

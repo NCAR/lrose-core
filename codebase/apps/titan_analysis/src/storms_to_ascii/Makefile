@@ -37,7 +37,7 @@ TARGET_FILE = storms_to_ascii
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ltitan -lrapmath -lMdv -lRadx \
+LOC_LIBS = -ltitan -lrapmath -lMdv -lRadx -lNcxx \
 	-lrapformats -ltoolsa -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm
 

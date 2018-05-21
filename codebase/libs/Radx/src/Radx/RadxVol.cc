@@ -45,6 +45,8 @@
 #include <Radx/RadxAngleHist.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/PseudoRhi.hh>
+#include <Radx/RadxXml.hh>
+#include <Radx/ByteOrder.hh>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -248,12 +250,12 @@ void RadxVol::copyMeta(const RadxVol &rhs)
   _comment = rhs._comment;
   _statusXml = rhs._statusXml;
   
+  _volNum = rhs._volNum;
+
   _scanName = rhs._scanName;
   _scanId = rhs._scanId;
 
   _platform = rhs._platform;
-
-  _volNum = rhs._volNum;
 
   _sweepModeFromAnglesChecked = rhs._sweepModeFromAnglesChecked;
   _predomSweepModeFromAngles = rhs._predomSweepModeFromAngles;
@@ -394,13 +396,13 @@ void RadxVol::clear()
   _statusXml.clear();
   _userGlobAttr.clear();
 
+  _volNum = Radx::missingMetaInt;
+  
   _scanName.clear();
   _scanId = 0;
 
   _platform.clear();
 
-  _volNum = Radx::missingMetaInt;
-  
   _startTimeSecs = 0;
   _endTimeSecs = 0;
   _startNanoSecs = 0;
@@ -1342,22 +1344,16 @@ void RadxVol::loadModesFromSweepsToRays()
   }
 
   for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
-
     const RadxSweep *sweep = _sweeps[isweep];
-
     for (size_t iray = sweep->getStartRayIndex();
          iray <= sweep->getEndRayIndex(); iray++) {
-
       RadxRay &ray = *_rays[iray];
-      
       ray.setSweepNumber(sweep->getSweepNumber());
       ray.setSweepMode(sweep->getSweepMode());
       ray.setPolarizationMode(sweep->getPolarizationMode());
       ray.setPrtMode(sweep->getPrtMode());
       ray.setFollowMode(sweep->getFollowMode());
-
     } // iray
-
   } // isweep
 
 }
@@ -1376,18 +1372,38 @@ void RadxVol::loadFixedAnglesFromSweepsToRays()
   }
 
   for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
-
     const RadxSweep *sweep = _sweeps[isweep];
+    for (size_t iray = sweep->getStartRayIndex();
+         iray <= sweep->getEndRayIndex(); iray++) {
+      RadxRay &ray = *_rays[iray];
+      ray.setFixedAngleDeg(sweep->getFixedAngleDeg());
+    } // iray
+  } // isweep
 
+}
+
+///////////////////////////////////////////////////////////////
+/// Load the ray metadata from sweep information.
+///
+/// This loops through all of the sweeps, setting the
+/// sweep-related info on the rays
+
+void RadxVol::loadMetadataFromSweepsToRays()
+  
+{
+  
+  if (_rays.size() < 1) {
+    return;
+  }
+  
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    const RadxSweep *sweep = _sweeps[isweep];
     for (size_t iray = sweep->getStartRayIndex();
          iray <= sweep->getEndRayIndex(); iray++) {
 
       RadxRay &ray = *_rays[iray];
-      
-      ray.setFixedAngleDeg(sweep->getFixedAngleDeg());
-
+      ray.setMetadataFromSweep(*sweep);
     } // iray
-
   } // isweep
 
 }
@@ -1553,12 +1569,12 @@ void RadxVol::print(ostream &out) const
   out << "  source: " << _source << endl;
   out << "  history: " << _history << endl;
   out << "  comment: " << _comment << endl;
+  out << "  volNum: " << _volNum << endl;
   out << "  scanName: " << _scanName << endl;
   out << "  scanId(VCP): " << _scanId << endl;
 
   _platform.print(out);
 
-  out << "  volNum: " << _volNum << endl;
   if (checkIsRhi()) {
     out << "  rhiMode? Y" << endl;
   } else {
@@ -1608,7 +1624,7 @@ void RadxVol::print(ostream &out) const
 
   if (_fields.size() > 0) {
     for (size_t ii = 0; ii < _fields.size(); ii++) {
-      _fields[ii]->print(cout);
+      _fields[ii]->print(out);
     }
   } else {
     for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
@@ -1648,7 +1664,7 @@ void RadxVol::printWithRayMetaData(ostream &out) const
   // print rays
   
   for (size_t ii = 0; ii < _rays.size(); ii++) {
-    _rays[ii]->print(cout);
+    _rays[ii]->print(out);
   }
 
 }
@@ -1666,7 +1682,7 @@ void RadxVol::printRaySummary(ostream &out) const
 
   out << "================ RAY SUMMARY =================" << endl;
   for (size_t ii = 0; ii < _rays.size(); ii++) {
-    _rays[ii]->printSummary(cout);
+    _rays[ii]->printSummary(out);
   }
 
 }
@@ -1694,11 +1710,11 @@ void RadxVol::printWithFieldData(ostream &out) const
 
   if (raysHaveFields) {
     for (size_t ii = 0; ii < _rays.size(); ii++) {
-      _rays[ii]->printWithFieldData(cout);
+      _rays[ii]->printWithFieldData(out);
     }
   } else {
     for (size_t ii = 0; ii < _rays.size(); ii++) {
-      _rays[ii]->print(cout);
+      _rays[ii]->print(out);
     }
   }
 
@@ -2775,81 +2791,6 @@ void RadxVol::setFixedAngleDeg(int sweepNum, double fixedAngle)
 }
 
 //////////////////////////////////////////////////////////  
-/// Compute the fixed angle from the rays
-/// Also sets the fixed angle on rays and sweeps
-/// Uses the mean pointing angle to estimate the fixed angle
-///
-/// If force is true, the angles will be computed for all sweeps.
-/// If force is false, the angles will only be computed for
-/// sweeps with a missing fixed angle.
-
-void RadxVol::computeFixedAngleFromRays(bool force /* = true */)
-
-{
-
-  // load sweep info if needed
-  
-  if (_sweeps.size() < 1) {
-    loadSweepInfoFromRays();
-  }
-
-  // loop through sweeps
-
-  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
-    
-    RadxSweep *sweep = _sweeps[isweep];
-    Radx::SweepMode_t sweepMode = sweep->getSweepMode();
-
-    // if force false, check to see if we have a fixed angle
-    
-    if (!force) {
-      if (sweep->getFixedAngleDeg() != Radx::missingMetaDouble) {
-        continue;
-      }
-    }
-    
-    // sum up (x,y) coords of measured angles
-
-    double sumx = 0.0;
-    double sumy = 0.0;
-    
-    for (size_t iray = sweep->getStartRayIndex();
-         iray <= sweep->getEndRayIndex(); iray++) {
-      
-      const RadxRay *ray = _rays[iray];
-      double angle;
-      if (sweepMode == Radx::SWEEP_MODE_RHI ||
-          sweepMode == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
-        angle = ray->getAzimuthDeg();
-      } else {
-        angle = ray->getElevationDeg();
-      }
-      
-      double sinVal, cosVal;
-      Radx::sincos(angle * Radx::DegToRad, sinVal, cosVal);
-      sumy += sinVal;
-      sumx += cosVal;
-      
-    } // iray
-
-    // compute mean angle, to use as fixed angle
-
-    double meanAngleDeg = atan2(sumy, sumx) * Radx::RadToDeg;
-    sweep->setFixedAngleDeg(meanAngleDeg);
-
-    // set on rays in this sweep
-
-    for (size_t iray = sweep->getStartRayIndex();
-         iray <= sweep->getEndRayIndex(); iray++) {
-      RadxRay *ray = _rays[iray];
-      ray->setFixedAngleDeg(meanAngleDeg);
-    }
-    
-  } // isweep
-
-}
-
-//////////////////////////////////////////////////////////  
 /// Set the sweep scan modes from ray angles
 ///
 /// Deduce the antenna scan mode from the ray angles in each
@@ -3570,47 +3511,97 @@ void RadxVol::adjustSurSweepLimitsToFixedAzimuth(double azimuth)
 
 }
 
-///////////////////////////////////////////////////////////////
-/// Compute sweep fixed angles from ray data
+//////////////////////////////////////////////////////////  
+/// Compute the fixed angle for each sweep from the rays.
+/// Also sets the fixed angle on rays and sweeps.
 ///
-/// Normally the sweep angles are set using the scan strategy angles -
-/// i.e., the theoretically perfect angles. This option allows you to
-/// recompute the sweep angles using the measured elevation angles (in
-/// PPI mode) or azimuth angles (in RHI mode).
+/// If useMean is true, computes using the mean
+/// If useMean is false, uses the median
+///
+/// If force is true, the angles will be computed for all sweeps.
+/// If force is false, the angles will only be computed for
+/// sweeps with a missing fixed angle.
 
-void RadxVol::computeSweepFixedAnglesFromRays()
-  
+void RadxVol::computeFixedAnglesFromRays(bool force /* = true */,
+                                         bool useMean /* = true */)
+
 {
 
-  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+  // load sweep info if needed
+  
+  if (_sweeps.size() < 1) {
+    loadSweepInfoFromRays();
+  }
 
+  // sweep mode
+  
+  bool isRhi = checkIsRhi();
+
+  // loop through sweeps
+
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    
     RadxSweep *sweep = _sweeps[isweep];
     size_t startIndex = sweep->getStartRayIndex();
     size_t endIndex = sweep->getEndRayIndex();
 
-    // sweep mode
-
-    bool isRhi = checkIsRhi();
-
-    // compute median angle
-
-    vector<double> angles;
-    for (size_t iray = startIndex; iray <= endIndex; iray++) {
-      const RadxRay &ray = *_rays[iray];
-      if (isRhi) {
-        angles.push_back(ray.getAzimuthDeg());
-      } else {
-        angles.push_back(ray.getElevationDeg());
+    // if force false, check to see if we have a fixed angle
+    
+    if (!force) {
+      if (sweep->getFixedAngleDeg() != Radx::missingMetaDouble) {
+        continue;
       }
+    }
+    
+    // sum up (x,y) coords of measured angles
+
+    double sumx = 0.0;
+    double sumy = 0.0;
+    vector<double> angles;
+    double fixedAngle = 0.0;
+
+    for (size_t iray = startIndex; iray <= endIndex; iray++) {
+      
+      const RadxRay *ray = _rays[iray];
+      double angle;
+      if (isRhi) {
+        angle = ray->getAzimuthDeg();
+      } else {
+        angle = ray->getElevationDeg();
+      }
+      
+      angles.push_back(angle);
+      
+      if (useMean) {
+        double sinVal, cosVal;
+        Radx::sincos(angle * Radx::DegToRad, sinVal, cosVal);
+        sumy += sinVal;
+        sumx += cosVal;
+      }
+      
     } // iray
-    if (angles.size() > 2) {
-      sort(angles.begin(), angles.end());
-      double medianAngle = angles[angles.size() / 2];
-      sweep->setFixedAngleDeg(medianAngle);
-      for (size_t iray = startIndex; iray <= endIndex; iray++) {
-        RadxRay &ray = *_rays[iray];
-        ray.setFixedAngleDeg(medianAngle);
-      } // iray
+
+    if (angles.size() > 0) {
+      if (useMean) {
+        // compute mean angle
+        double meanAngleDeg = atan2(sumy, sumx) * Radx::RadToDeg;
+        fixedAngle = meanAngleDeg;
+      } else {
+        // compute median
+        sort(angles.begin(), angles.end());
+        double medianAngleDeg = angles[angles.size() / 2];
+        fixedAngle = medianAngleDeg;
+      }
+    }
+
+    // set fixed angle on sweep
+
+    sweep->setFixedAngleDeg(fixedAngle);
+
+    // set on rays in this sweep
+    
+    for (size_t iray = startIndex; iray <= endIndex; iray++) {
+      _rays[iray]->setFixedAngleDeg(fixedAngle);
     }
     
   } // isweep
@@ -4050,7 +4041,115 @@ void RadxVol::sortRaysByTime()
        ii != sortedRayPtrs.end(); ii++) {
     _rays.push_back(ii->ptr);
   }
+
+  // set sweep info from rays
+
+  loadSweepInfoFromRays();
     
+}
+
+/////////////////////////////////////////////////////////////////
+// Set ray numbers in order in the volume
+
+void RadxVol::setRayNumbersInOrder()
+
+{
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    _rays[iray]->setRayNumber(iray);
+  }
+}
+
+/////////////////////////////////////////////////////////////////
+// Sort rays by number
+
+bool RadxVol::SortByRayNumber::operator()
+  (const RayPtr &lhs, const RayPtr &rhs) const
+{
+  return lhs.ptr->getRayNumber() < rhs.ptr->getRayNumber();
+}
+
+void RadxVol::sortRaysByNumber()
+
+{
+
+  // sanity check
+  
+  if (_rays.size() < 2) {
+    return;
+  }
+
+  // create set with sorted ray pointers
+
+  multiset<RayPtr, SortByRayNumber> sortedRayPtrs;
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RayPtr rptr(_rays[iray]);
+    sortedRayPtrs.insert(rptr);
+  }
+
+  // reload _rays array in time-sorted order
+
+  _rays.clear();
+  for (multiset<RayPtr, SortByRayNumber>::iterator ii = sortedRayPtrs.begin();
+       ii != sortedRayPtrs.end(); ii++) {
+    _rays.push_back(ii->ptr);
+  }
+    
+  // set sweep info from rays
+
+  loadSweepInfoFromRays();
+    
+}
+
+/////////////////////////////////////////////////////////////////
+// Sort sweeps by fixed angle, reordering the rays accordingly
+
+bool RadxVol::SortByFixedAngle::operator()
+  (const SweepPtr &lhs, const SweepPtr &rhs) const
+{
+  return lhs.ptr->getFixedAngleDeg() < rhs.ptr->getFixedAngleDeg();
+}
+
+void RadxVol::sortSweepsByFixedAngle()
+  
+{
+
+  // sanity check
+  
+  if (_sweeps.size() < 2) {
+    return;
+  }
+
+  // create set with sweep pointers sorted by fixed angle
+
+  multiset<SweepPtr, SortByFixedAngle> sortedSweepPtrs;
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    SweepPtr sptr(_sweeps[isweep]);
+    sortedSweepPtrs.insert(sptr);
+  }
+
+  // create ray vector reordered by the sorted sweeps
+
+  vector<RadxSweep *> sortedSweeps;
+  vector<RadxRay *> sortedRays;
+  for (multiset<SweepPtr, SortByFixedAngle>::iterator ii = sortedSweepPtrs.begin();
+       ii != sortedSweepPtrs.end(); ii++) {
+    RadxSweep *sweep = ii->ptr;
+    sortedSweeps.push_back(sweep);
+    for (size_t iray = sweep->getStartRayIndex(); 
+         iray <= sweep->getEndRayIndex(); iray++) {
+      sortedRays.push_back(_rays[iray]);
+    }
+  }
+  
+  // replace original with sorted
+
+  _rays = sortedRays;
+
+  // load sweep info from rays
+
+  checkForIndexedRays();
+  loadSweepInfoFromRays();
+  
 }
 
 /////////////////////////////////////////////////////////////////
@@ -6231,3 +6330,552 @@ int RadxVol::_getTransIndex(const RadxSweep *sweep, double azimuth)
 
 }
 
+/////////////////////////////////////////////////////////
+// serialize into a RadxMsg
+
+void RadxVol::serialize(RadxMsg &msg)
+  
+{
+
+  // init
+  
+  msg.clearAll();
+  msg.setMsgType(RadxMsg::RadxVolMsg);
+
+  // add metadata strings as xml part
+  // include null at string end
+  
+  string xml;
+  _loadMetaStringsToXml(xml);
+  msg.addPart(_metaStringsPartId, xml.c_str(), xml.size() + 1);
+
+  // add metadata numbers
+
+  _loadMetaNumbersToMsg();
+  msg.addPart(_metaNumbersPartId, &_metaNumbers, sizeof(msgMetaNumbers_t));
+
+  // add platform
+  
+  RadxMsg platformMsg;
+  _platform.serialize(platformMsg);
+  platformMsg.assemble();
+  msg.addPart(_platformPartId,
+              platformMsg.assembledMsg(), 
+              platformMsg.lengthAssembled());
+
+  // add calibrations
+  
+  for (size_t icalib = 0; icalib < _rcalibs.size(); icalib++) {
+    RadxRcalib *rcalib = _rcalibs[icalib];
+    RadxMsg rcalibMsg(RadxMsg::RadxRcalibMsg);
+    rcalib->serialize(rcalibMsg);
+    rcalibMsg.assemble();
+    msg.addPart(_rcalibPartId,
+                rcalibMsg.assembledMsg(), 
+                rcalibMsg.lengthAssembled());
+  }
+
+  // add sweeps
+
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    RadxMsg sweepMsg;
+    _sweeps[isweep]->serialize(sweepMsg);
+    sweepMsg.assemble();
+    msg.addPart(_sweepPartId,
+                sweepMsg.assembledMsg(), 
+                sweepMsg.lengthAssembled());
+  }
+  
+  // add sweeps as in file, if they exist
+  
+  for (size_t isweep = 0; isweep < _sweepsAsInFile.size(); isweep++) {
+    RadxMsg sweepMsg;
+    _sweepsAsInFile[isweep]->serialize(sweepMsg, RadxMsg::RadxSweepAsInFileMsg);
+    sweepMsg.assemble();
+    msg.addPart(_sweepAsInFilePartId,
+                sweepMsg.assembledMsg(), 
+                sweepMsg.lengthAssembled());
+  }
+  
+  // add rays
+  
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RadxRay *ray = _rays[iray];
+    RadxMsg rayMsg(RadxMsg::RadxRayMsg);
+    ray->serialize(rayMsg);
+    rayMsg.assemble();
+    msg.addPart(_rayPartId,
+                rayMsg.assembledMsg(), 
+                rayMsg.lengthAssembled());
+  }
+
+  // add correction factors part if needed
+  
+  if (_cfactors != NULL) {
+    RadxMsg cfactorsMsg;
+    _cfactors->serialize(cfactorsMsg);
+    cfactorsMsg.assemble();
+    msg.addPart(_cfactorsPartId,
+                cfactorsMsg.assembledMsg(), 
+                cfactorsMsg.lengthAssembled());
+  }
+
+  // add fields if set
+  // normally the fields will be attached to the rays instead of the volume
+  
+  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+    RadxField *field = _fields[ifield];
+    RadxMsg fieldMsg(RadxMsg::RadxFieldMsg);
+    field->serialize(fieldMsg);
+    fieldMsg.assemble();
+    msg.addPart(_fieldPartId,
+                fieldMsg.assembledMsg(), 
+                fieldMsg.lengthAssembled());
+  }
+
+}
+
+/////////////////////////////////////////////////////////
+// deserialize from a RadxMsg
+// return 0 on success, -1 on failure
+
+int RadxVol::deserialize(const RadxMsg &msg)
+  
+{
+  
+  // initialize object
+
+  _init();
+
+  // check type
+
+  if (msg.getMsgType() != RadxMsg::RadxVolMsg) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::deserialize" << endl;
+    cerr << "  incorrect message type" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata strings
+
+  const RadxMsg::Part *metaStringPart = msg.getPartByType(_metaStringsPartId);
+  if (metaStringPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::deserialize" << endl;
+    cerr << "  No metadata string part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaStringsFromXml((char *) metaStringPart->getBuf(),
+                             metaStringPart->getLength())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "  Bad string XML for metadata: " << endl;
+    string bufStr((char *) metaStringPart->getBuf(),
+                  metaStringPart->getLength());
+    cerr << "  " << bufStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata numbers
+  
+  const RadxMsg::Part *metaNumsPart = msg.getPartByType(_metaNumbersPartId);
+  if (metaNumsPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::deserialize" << endl;
+    cerr << "  No metadata numbers part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaNumbersFromMsg((msgMetaNumbers_t *) metaNumsPart->getBuf(),
+                             metaNumsPart->getLength(),
+                             msg.getSwap())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get platform
+  
+  const RadxMsg::Part *platformPart = msg.getPartByType(_platformPartId);
+  if (platformPart != NULL) {
+    RadxMsg platformMsg;
+    platformMsg.disassemble(platformPart->getBuf(), platformPart->getLength());
+    if (_platform.deserialize(platformMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxVol::deserialize" << endl;
+      cerr << "  Cannot dserialize platform" << endl;
+      platformMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      return -1;
+    }
+  }
+  
+  // get rcalibs if available
+  
+  clearRcalibs();
+  size_t nRcalibs = msg.partExists(_rcalibPartId);
+  for (size_t ircalib = 0; ircalib < nRcalibs; ircalib++) {
+    // get rcalib part
+    const RadxMsg::Part *rcalibPart =
+      msg.getPartByType(_rcalibPartId, ircalib);
+    // create a message from the rcalib part
+    RadxMsg rcalibMsg;
+    rcalibMsg.disassemble(rcalibPart->getBuf(), rcalibPart->getLength());
+    // create a rcalib, dserialize from the message
+    RadxRcalib *rcalib = new RadxRcalib;
+    if (rcalib->deserialize(rcalibMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxRay::deserialize" << endl;
+      cerr << "  Adding rcalib num: " << ircalib << endl;
+      rcalibMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete rcalib;
+      return -1;
+    }
+    // add the rcalib
+    _rcalibs.push_back(rcalib);
+  } // isweep
+  
+  // get sweeps
+  
+  clearSweeps();
+  size_t nSweeps = msg.partExists(_sweepPartId);
+  for (size_t isweep = 0; isweep < nSweeps; isweep++) {
+    // get sweep part
+    const RadxMsg::Part *sweepPart =
+      msg.getPartByType(_sweepPartId, isweep);
+    // create a message from the sweep part
+    RadxMsg sweepMsg;
+    sweepMsg.disassemble(sweepPart->getBuf(), sweepPart->getLength());
+    // create a sweep, dserialize from the message
+    RadxSweep *sweep = new RadxSweep;
+    if (sweep->deserialize(sweepMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxRay::deserialize" << endl;
+      cerr << "  Adding sweep, num: " << isweep << endl;
+      sweepMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete sweep;
+      return -1;
+    }
+    // add the sweep
+    addSweep(sweep);
+  } // isweep
+  
+  // get sweeps as in file
+  
+  clearSweepsAsInFile();
+  size_t nSweepsAsInFile = msg.partExists(_sweepAsInFilePartId);
+  for (size_t isweep = 0; isweep < nSweepsAsInFile; isweep++) {
+    // get sweep part
+    const RadxMsg::Part *sweepPart =
+      msg.getPartByType(_sweepAsInFilePartId, isweep);
+    // create a message from the sweep part
+    RadxMsg sweepMsg;
+    sweepMsg.disassemble(sweepPart->getBuf(), sweepPart->getLength());
+    // create a sweep, dserialize from the message
+    RadxSweep *sweep = new RadxSweep;
+    if (sweep->deserialize(sweepMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxRay::deserialize" << endl;
+      cerr << "  Adding sweep as in file, num: " << isweep << endl;
+      sweepMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete sweep;
+      return -1;
+    }
+    // add the sweep
+    addSweepAsInFile(sweep);
+  } // isweep
+
+  // get cfactors if available
+  
+  const RadxMsg::Part *cfactorsPart = msg.getPartByType(_cfactorsPartId);
+  if (cfactorsPart != NULL) {
+    RadxMsg cfactorsMsg;
+    cfactorsMsg.disassemble(cfactorsPart->getBuf(), cfactorsPart->getLength());
+    if (_cfactors) {
+      delete _cfactors;
+    }
+    _cfactors = new RadxCfactors;
+    if (_cfactors->deserialize(cfactorsMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxVol::deserialize" << endl;
+      cerr << "  Cannot dserialize cfactors" << endl;
+      cfactorsMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete _cfactors;
+      _cfactors = NULL;
+      return -1;
+    }
+  }
+  
+  // get rays
+  
+  clearRays();
+  size_t nRays = msg.partExists(_rayPartId);
+  for (size_t iray = 0; iray < nRays; iray++) {
+    // get ray part
+    const RadxMsg::Part *rayPart =
+      msg.getPartByType(_rayPartId, iray);
+    // create a message from the ray part
+    RadxMsg rayMsg;
+    rayMsg.disassemble(rayPart->getBuf(), rayPart->getLength());
+    // create a ray, dserialize from the message
+    RadxRay *ray = new RadxRay;
+    if (ray->deserialize(rayMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxRay::deserialize" << endl;
+      cerr << "  Adding ray, num: " << iray << endl;
+      rayMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete ray;
+      return -1;
+    }
+    // add the ray
+    addRay(ray);
+  } // iray
+  
+  // get fields
+  // normally this will not be active
+  // since the fields are normally included in the rays
+  
+  clearFields();
+  size_t nFields = msg.partExists(_fieldPartId);
+  for (size_t ifield = 0; ifield < nFields; ifield++) {
+    // get field part
+    const RadxMsg::Part *fieldPart =
+      msg.getPartByType(_fieldPartId, ifield);
+    // create a message from the field part
+    RadxMsg fieldMsg;
+    fieldMsg.disassemble(fieldPart->getBuf(), fieldPart->getLength());
+    // create a field, dserialize from the message
+    RadxField *field = new RadxField;
+    if (field->deserialize(fieldMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxField::deserialize" << endl;
+      cerr << "  Adding field, num: " << ifield << endl;
+      fieldMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete field;
+      return -1;
+    }
+    // add the field
+    addField(field);
+  } // ifield
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// convert string metadata to XML
+
+void RadxVol::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
+  
+{
+  xml.clear();
+  xml += RadxXml::writeStartTag("RadxVol", level);
+  xml += RadxXml::writeString("version", level + 1, _version);
+  xml += RadxXml::writeString("title", level + 1, _title);
+  xml += RadxXml::writeString("institution", level + 1, _institution);
+  xml += RadxXml::writeString("references", level + 1, _references);
+  xml += RadxXml::writeString("source", level + 1, _source);
+  xml += RadxXml::writeString("history", level + 1, _history);
+  xml += RadxXml::writeString("comment", level + 1, _comment);
+  xml += RadxXml::writeString("author", level + 1, _author);
+  xml += RadxXml::writeString("driver", level + 1, _driver);
+  xml += RadxXml::writeString("created", level + 1, _created);
+  xml += RadxXml::writeString("origFormat", level + 1, _origFormat);
+  xml += RadxXml::writeString("statusXml", level + 1, _statusXml);
+  xml += RadxXml::writeString("scanName", level + 1, _scanName);
+  xml += RadxXml::writeString("pathInUse", level + 1, _pathInUse);
+  for (size_t iattr = 0; iattr < _userGlobAttr.size(); iattr++) {
+    xml += RadxXml::writeStartTag("UserGlobAttr", level + 1);
+    xml += RadxXml::writeString("attrName", level + 2, _userGlobAttr[iattr].name);
+    switch (_userGlobAttr[iattr].attrType) {
+      case UserGlobAttr::ATTR_STRING:
+        xml += RadxXml::writeString("attrType", level + 2, "ATTR_STRING");
+        break;
+      case UserGlobAttr::ATTR_INT:
+        xml += RadxXml::writeString("attrType", level + 2, "ATTR_INT");
+        break;
+      case UserGlobAttr::ATTR_DOUBLE:
+        xml += RadxXml::writeString("attrType", level + 2, "ATTR_DOUBLE");
+        break;
+      case UserGlobAttr::ATTR_INT_ARRAY:
+        xml += RadxXml::writeString("attrType", level + 2, "ATTR_INT_ARRAY");
+        break;
+      case UserGlobAttr::ATTR_DOUBLE_ARRAY:
+        xml += RadxXml::writeString("attrType", level + 2, "ATTR_DOUBLE_ARRAY");
+        break;
+    }
+    xml += RadxXml::writeString("attrVal", level + 2, _userGlobAttr[iattr].val);
+    xml += RadxXml::writeEndTag("UserGlobAttr", level + 1);
+  }
+  xml += RadxXml::writeEndTag("RadxVol", level);
+}
+
+/////////////////////////////////////////////////////////
+// set metadata strings from XML
+// returns 0 on success, -1 on failure
+
+int RadxVol::_setMetaStringsFromXml(const char *xml,
+                                    size_t bufLen)
+
+{
+
+  // check for NULL
+  
+  if (xml[bufLen - 1] != '\0') {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::_setMetaStringsFromXml" << endl;
+    cerr << "  XML string not null terminated" << endl;
+    string xmlStr(xml, bufLen);
+    cerr << "  " << xmlStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;    
+  }
+
+  string xmlStr(xml);
+  string contents;
+
+  if (RadxXml::readString(xmlStr, "RadxVol", contents)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::_setMetaStringsFromXml" << endl;
+    cerr << "  XML not delimited by 'RadxVol' tags" << endl;
+    cerr << "  " << xmlStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  RadxXml::readString(contents, "version", _version);
+  RadxXml::readString(contents, "title", _title);
+  RadxXml::readString(contents, "institution", _institution);
+  RadxXml::readString(contents, "references", _references);
+  RadxXml::readString(contents, "source", _source);
+  RadxXml::readString(contents, "history", _history);
+  RadxXml::readString(contents, "comment", _comment);
+  RadxXml::readString(contents, "author", _author);
+  RadxXml::readString(contents, "driver", _driver);
+  RadxXml::readString(contents, "created", _created);
+  RadxXml::readString(contents, "origFormat", _origFormat);
+  RadxXml::readString(contents, "statusXml", _statusXml);
+  RadxXml::readString(contents, "scanName", _scanName);
+  RadxXml::readString(contents, "pathInUse", _pathInUse);
+
+  clearUserGlobAttr();
+  vector<string> userAttrXml;
+  if (RadxXml::readStringArray(contents, "UserGlobAttr", userAttrXml) == 0) {
+    for (size_t iattr = 0; iattr < userAttrXml.size(); iattr++) {
+      string attrName, attrType, attrVal;
+      RadxXml::readString(userAttrXml[iattr], "attrName", attrName);
+      RadxXml::readString(userAttrXml[iattr], "attrType", attrType);
+      RadxXml::readString(userAttrXml[iattr], "attrVal", attrVal);
+      if (attrType == "ATTR_INT") {
+        addUserGlobAttr(attrName, UserGlobAttr::ATTR_INT, attrVal);
+      } else if (attrType == "ATTR_DOUBLE") {
+        addUserGlobAttr(attrName, UserGlobAttr::ATTR_DOUBLE, attrVal);
+      } else if (attrType == "ATTR_INT_ARRAY") {
+        addUserGlobAttr(attrName, UserGlobAttr::ATTR_INT_ARRAY, attrVal);
+      } else if (attrType == "ATTR_DOUBLE_ARRAY") {
+        addUserGlobAttr(attrName, UserGlobAttr::ATTR_DOUBLE_ARRAY, attrVal);
+      } else {
+        addUserGlobAttr(attrName, UserGlobAttr::ATTR_STRING, attrVal);
+      }
+    }
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// load the meta number to the message struct
+
+void RadxVol::_loadMetaNumbersToMsg()
+  
+{
+
+  // clear
+
+  memset(&_metaNumbers, 0, sizeof(_metaNumbers));
+  
+  // set 64 bit values
+
+  _metaNumbers.startTimeSecs = _startTimeSecs;
+  _metaNumbers.endTimeSecs = _endTimeSecs;
+  _metaNumbers.startNanoSecs = _startNanoSecs;
+  _metaNumbers.endNanoSecs = _endNanoSecs;
+
+  // set 32-bit values
+
+  _metaNumbers.volNum = _volNum;
+  _metaNumbers.scanId = _scanId;
+  _metaNumbers.rayTimesIncrease = _rayTimesIncrease;
+
+}
+
+/////////////////////////////////////////////////////////
+// set the meta number data from the message struct
+
+int RadxVol::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                                    size_t bufLen,
+                                    bool swap)
+  
+{
+
+  // check size
+
+  if (bufLen != sizeof(msgMetaNumbers_t)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::_setMetaNumbersFromMsg" << endl;
+    cerr << "  Incorrect message size: " << bufLen << endl;
+    cerr << "  Should be: " << sizeof(msgMetaNumbers_t) << endl;
+    return -1;
+  }
+
+  // copy into local struct
+  
+  _metaNumbers = *metaNumbers;
+
+  // swap as needed
+
+  if (swap) {
+    _swapMetaNumbers(_metaNumbers); 
+  }
+
+  // set 64 bit values
+
+  _startTimeSecs = _metaNumbers.startTimeSecs;
+  _endTimeSecs = _metaNumbers.endTimeSecs;
+  _startNanoSecs = _metaNumbers.startNanoSecs;
+  _endNanoSecs = _metaNumbers.endNanoSecs;
+
+  // set 32-bit values
+
+  _volNum = _metaNumbers.volNum;
+  _scanId = _metaNumbers.scanId;
+  _rayTimesIncrease = _metaNumbers.rayTimesIncrease;
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// swap meta numbers
+
+void RadxVol::_swapMetaNumbers(msgMetaNumbers_t &meta)
+{
+  ByteOrder::swap64(&meta.startTimeSecs, 4 * sizeof(Radx::si64));
+  ByteOrder::swap32(&meta.scanId, 3 * sizeof(Radx::si32));
+}

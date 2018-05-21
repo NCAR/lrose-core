@@ -162,7 +162,7 @@ void GenPtArray::print(FILE *out) const
   fprintf(out, "  prodInfo: %s\n", _prodInfo.c_str());
   fprintf(out, "  Npoints: %d\n", (int) _points.size());
   for (size_t i = 0; i < _points.size(); i++) {
-    fprintf(out, "---> Point: %d\n", i);
+    fprintf(out, "---> Point: %d\n", (int) i);
     _points[i]->print(out);
   }
 }

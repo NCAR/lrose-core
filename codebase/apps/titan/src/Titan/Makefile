@@ -37,7 +37,7 @@ TARGET_FILE = Titan
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lradar -lMdv -lRadx -ldsserver \
+LOC_LIBS = -lradar -lMdv -lRadx -lNcxx -lSpdb -ldsserver \
 	-ldidss -ltitan -lrapmath -leuclid \
 	-lrapformats -lphysics -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \
@@ -62,6 +62,7 @@ HDRS = \
 	InputMdv.hh \
 	OutputMdv.hh \
 	Props.hh \
+	Sounding.hh \
 	StormIdent.hh \
 	StormTrack.hh \
 	TitanDriver.hh \
@@ -89,6 +90,7 @@ CPPC_SRCS = \
 	Main.cc \
 	OutputMdv.cc \
 	Props.cc \
+	Sounding.cc \
 	StormIdent.cc \
 	StormTrack.cc \
 	TitanDriver.cc \

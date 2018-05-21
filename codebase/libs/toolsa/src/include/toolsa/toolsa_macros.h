@@ -69,11 +69,11 @@ extern "C" {
 #endif
 
 #ifndef TWO_PI
-#define TWO_PI 6.283185308
+#define TWO_PI 6.283185307179586
 #endif
 
 #ifndef EARTH_RADIUS
-#define EARTH_RADIUS 6371.204	/* kilometers */
+#define EARTH_RADIUS 6378.137	/* kilometers */
 #endif
 
 /*
@@ -125,11 +125,11 @@ extern "C" {
 #endif
 
 #ifndef KM_PER_DEG_AT_EQ
-#define KM_PER_DEG_AT_EQ 111.198487
+#define KM_PER_DEG_AT_EQ 111.31949079327357
 #endif
 
 #ifndef DEG_PER_KM_AT_EQ
-#define DEG_PER_KM_AT_EQ 0.008992928
+#define DEG_PER_KM_AT_EQ 0.008983152841195214
 #endif
 
 #ifndef KM_PER_MI

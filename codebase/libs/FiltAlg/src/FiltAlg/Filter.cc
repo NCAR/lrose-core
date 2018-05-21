@@ -50,6 +50,12 @@ Filter::~Filter()
 }
 
 //------------------------------------------------------------------
+void Filter::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+
+//------------------------------------------------------------------
 void Filter::printInputOutput(void) const
 {
   LOG(PRINT) << "--- Filter   " 

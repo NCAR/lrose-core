@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -438,7 +438,11 @@ public:
 
   char* output_dir;
 
-  int nrevs_for_global_stats;
+  tdrp_bool_t write_global_stats_to_text_file;
+
+  tdrp_bool_t write_360deg_stats_to_text_file;
+
+  tdrp_bool_t write_zdr_point_values_to_text_file;
 
   tdrp_bool_t write_results_to_spdb;
 
@@ -453,7 +457,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[40];
+  mutable TDRPtable _table[42];
 
   const char *_className;
 

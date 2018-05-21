@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -621,10 +621,10 @@ using namespace std;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("end_of_vol_decision");
     tt->descr = tdrpStrDup("Decision type for end-of-volume.");
-    tt->help = tdrpStrDup("If END_OF_VOL_FLAG, the end-of-volume flag in the data will be used to trigger the end of volume. If CHANGE_IN_VOL_NUM, and end of volume will be assumed when the volume number changes from one beam to the next. If LAST_TILT_IN_VOL, the end of the tilt number given by 'last_tilt_in_vol' will be used  to trigger the end-of-volume. If AUTOMATIC, this program will determine the end-of-volume condition by using the antenna-angle information. If END_OF_VOL_NONE, it will trigger an end of vol when max_beams_in_vol is reached.");
+    tt->help = tdrpStrDup("If END_OF_VOL_FLAG, the end-of-volume flag in the data will be used to trigger the end of volume. If CHANGE_IN_VOL_NUM, and end of volume will be assumed when the volume number changes from one beam to the next. If LAST_TILT_IN_VOL, the end of the tilt number given by 'last_tilt_in_vol' will be used  to trigger the end-of-volume. If AUTOMATIC, this program will determine the end-of-volume condition by using the antenna-angle information. If END_OF_VOL_NONE, it will trigger an end of vol when max_beams_in_vol is reached. If DECREASE_IN_ELEV, it will trigger an end of volume when the elevation angle decreases by 'min_elevation_decrease'.");
     tt->val_offset = (char *) &end_of_vol_decision - &_start_;
     tt->enum_def.name = tdrpStrDup("end_of_vol_decision_t");
-    tt->enum_def.nfields = 5;
+    tt->enum_def.nfields = 6;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("END_OF_VOL_FLAG");
@@ -637,6 +637,8 @@ using namespace std;
       tt->enum_def.fields[3].val = AUTOMATIC;
       tt->enum_def.fields[4].name = tdrpStrDup("END_OF_VOL_NONE");
       tt->enum_def.fields[4].val = END_OF_VOL_NONE;
+      tt->enum_def.fields[5].name = tdrpStrDup("DECREASE_IN_ELEV");
+      tt->enum_def.fields[5].val = DECREASE_IN_ELEV;
     tt->single_val.e = END_OF_VOL_FLAG;
     tt++;
     
@@ -650,6 +652,18 @@ using namespace std;
     tt->help = tdrpStrDup("Only applies if 'end_of_vol_decision' is set to LAST_TILT_IN_VOL.");
     tt->val_offset = (char *) &last_tilt_in_vol - &_start_;
     tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'min_elevation_decrease'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_elevation_decrease");
+    tt->descr = tdrpStrDup("The minimum decrease in the elevation angle that is  used to end the volume.");
+    tt->help = tdrpStrDup("Only applies if 'end_of_vol_decision' is set to DECREASE_IN_ELEV.");
+    tt->val_offset = (char *) &min_elevation_decrease - &_start_;
+    tt->single_val.i = 10;
     tt++;
     
     // Parameter 'write_end_of_vol_when_data_stops'

@@ -38,8 +38,8 @@ TARGET_FILE = NcMdvServer
 LOC_INCLUDES = $(NETCDF4_INCS) $(HDF5_INCLUDES) -I/opt/hdf5/include -I/opt/udunits2/include
 
 LOC_LIBS = -ldsdata -lMdv -lSpdb -ldsserver \
-	-ldidss -lrapformats -ltoolsa -ldataport \
-	-lRadx -leuclid -ltdrp $(NETCDF4_LIBS) \
+	-ldidss -lrapformats -ldataport \
+	-lRadx -lNcxx -leuclid -ltoolsa -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS) $(HDF5_LDFLAGS) -L/opt/hdf5/lib -L/opt/udunits2/lib

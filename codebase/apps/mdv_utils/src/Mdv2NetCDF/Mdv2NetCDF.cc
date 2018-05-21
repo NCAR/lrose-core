@@ -377,7 +377,8 @@ int Mdv2NetCDF::_processData(time_t inputTime, int leadTime,
   
   mdvx.setMdv2NcfOutput(_params.output_latlon_arrays,
                         _params.output_mdv_attributes,
-                        _params.output_mdv_chunks);
+                        _params.output_mdv_chunks,
+                        _params.output_start_end_times);
 
   // perform the translation
 

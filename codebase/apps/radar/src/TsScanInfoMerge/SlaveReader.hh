@@ -66,7 +66,7 @@ public:
 
   // get methods
   
-  const IwrfTsInfo &getOpsInfo() const { return _opsInfo; }
+  IwrfTsInfo &getOpsInfo() { return _opsInfo; }
   
   // get latest pulse packet
 

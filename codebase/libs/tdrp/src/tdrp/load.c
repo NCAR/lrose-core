@@ -466,7 +466,7 @@ int tdrpLoadApplyArgs(const char *params_path,
     }
   }
 
-  if (iret) {
+  if (iret != 0) {
     tdrpUsage(stderr);
     return (-1);
   }
@@ -1386,7 +1386,7 @@ static int expand_for_single_val(tdrpVal_t *val)
      */
     
     *dollar_bracket = '\0';
-    sprintf(combo_str, "%s%s%s", pre_str, env_val, post_str);
+    snprintf(combo_str, TDRP_LINE_MAX, "%s%s%s", pre_str, env_val, post_str);
     strncpy(work_str, combo_str, TDRP_LINE_MAX);
     env_found = TRUE;
     
@@ -1519,7 +1519,7 @@ static int expand_token(tdrpToken_t *token)
      */
     
     *dollar_bracket = '\0';
-    sprintf(combo_str, "%s%s%s", pre_str, env_val, post_str);
+    snprintf(combo_str, TDRP_LINE_MAX, "%s%s%s", pre_str, env_val, post_str);
     strncpy(work_str, combo_str, TDRP_LINE_MAX);
     env_found = TRUE;
     

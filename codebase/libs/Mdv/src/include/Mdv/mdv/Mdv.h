@@ -195,7 +195,17 @@ class MdvGrid
 
     inline int operator==(const MdvGrid *grid)
     {
-      return(*this == *grid);
+      if (this->_minX != grid->_minX) return -1;
+      if (this->_minY != grid->_minY) return -1;
+      if (this->_minZ != grid->_minZ) return -1;
+      if (this->_deltaX != grid->_deltaX) return -1;
+      if (this->_deltaY != grid->_deltaY) return -1;
+      if (this->_deltaZ != grid->_deltaZ) return -1;
+      if (this->_nX != grid->_nX) return -1;
+      if (this->_nY != grid->_nY) return -1;
+      if (this->_nZ != grid->_nZ) return -1;
+      if (this->_projType != grid->_projType) return -1;
+      return 0;
     }
   
     inline int operator!=(const MdvGrid &grid)
@@ -233,7 +243,7 @@ class MdvGrid
   
     double _setTolerance(void);
   
-    virtual const char *const _className(void)
+    virtual const char * _className(void)
     {
       return("MdvGrid");
     }
@@ -241,15 +251,15 @@ class MdvGrid
 };
 
 
-inline int operator==(const MdvGrid &grid1, const MdvGrid &grid2)
-{
-  return((grid1 == grid2));
-}
+// inline int operator==(const MdvGrid &grid1, const MdvGrid &grid2)
+// {
+//   return((grid1 == grid2));
+// }
   
-inline int operator!=(const MdvGrid &grid1, const MdvGrid &grid2)
-{
-  return(!(grid1 == grid2));
-}
+// inline int operator!=(const MdvGrid &grid1, const MdvGrid &grid2)
+// {
+//   return(!(grid1 == grid2));
+// }
   
 /*
  ************************* MdvFieldData **************************************
@@ -418,7 +428,7 @@ class MdvFieldData
   
     char _errorMsg[1024];
   
-    virtual const char *const _className(void)
+    virtual const char * _className(void)
     {
       return("MdvFieldData");
     }
@@ -687,7 +697,7 @@ class Mdv
   
     char _errorMsg[1024];
   
-    virtual const char *const _className(void)
+    virtual const char * _className(void)
     {
       return("Mdv");
     }

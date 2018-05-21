@@ -251,7 +251,7 @@ void BdryPolyline::print(FILE *stream, const bool print_points) const
 {
   fprintf(stream, "\nBoundary Polyline:\n");
   fprintf(stream, "\n");
-  fprintf(stream, "   num_pts = %d\n", _points.size());
+  fprintf(stream, "   num_pts = %d\n", (int) _points.size());
   fprintf(stream, "   num_secs = %d\n", _numSecsExtrap);
   fprintf(stream, "   object_label = <%s>\n", _label.c_str());
 

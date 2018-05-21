@@ -136,8 +136,6 @@ int write_hh_file(const char *class_name, const TDRPtable *t_entries,
   fprintf(hfile, "#ifndef %s_hh\n", class_name);
   fprintf(hfile, "#define %s_hh\n", class_name);
   fprintf(hfile, "\n");
-  fprintf(hfile, "using namespace std;\n");
-  fprintf(hfile, "\n");
   fprintf(hfile, "#include <tdrp/tdrp.h>\n");
   fprintf(hfile, "#include <iostream>\n");
   fprintf(hfile, "#include <cstdio>\n");
@@ -145,6 +143,8 @@ int write_hh_file(const char *class_name, const TDRPtable *t_entries,
   fprintf(hfile, "#include <cstring>\n");
   fprintf(hfile, "#include <climits>\n");
   fprintf(hfile, "#include <cfloat>\n");
+  fprintf(hfile, "\n");
+  fprintf(hfile, "using namespace std;\n");
   fprintf(hfile, "\n");
 
   /*
@@ -538,8 +538,6 @@ int write_cc_file(const char *class_name, const TDRPtable *t_entries,
 	  " * @author Automatically generated\n"
 	  " *\n"
 	  " */\n"
-	  "using namespace std;\n"
-	  "\n"
 	  "#include \"%s.hh\"\n"
 	  "#include <cstring>\n"
 	  "\n",
@@ -1840,19 +1838,30 @@ static void write_copyright(FILE *out)
      
 {
 
-  time_t now = time(NULL);
-  struct tm *utc = gmtime(&now);
-  
   fprintf(out,
-          "// *=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*=" 
-          "*=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*=*\n" 
-          "// ** Copyright UCAR (c) 1992 - %.4d\n"
-          "// ** University Corporation for Atmospheric Research(UCAR)\n"
-          "// ** National Center for Atmospheric Research(NCAR)\n"
-          "// ** Boulder, Colorado, USA\n"
-          "// *=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*="
-          "*=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*" "=*\n",
-          utc->tm_year + 1900);
+          "/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */\n"
+          "/* ** Copyright UCAR                                                         */\n"
+          "/* ** University Corporation for Atmospheric Research (UCAR)                 */\n"
+          "/* ** National Center for Atmospheric Research (NCAR)                        */\n"
+          "/* ** Boulder, Colorado, USA                                                 */\n"
+          "/* ** BSD licence applies - redistribution and use in source and binary      */\n"
+          "/* ** forms, with or without modification, are permitted provided that       */\n"
+          "/* ** the following conditions are met:                                      */\n"
+          "/* ** 1) If the software is modified to produce derivative works,            */\n"
+          "/* ** such modified software should be clearly marked, so as not             */\n"
+          "/* ** to confuse it with the version available from UCAR.                    */\n"
+          "/* ** 2) Redistributions of source code must retain the above copyright      */\n"
+          "/* ** notice, this list of conditions and the following disclaimer.          */\n"
+          "/* ** 3) Redistributions in binary form must reproduce the above copyright   */\n"
+          "/* ** notice, this list of conditions and the following disclaimer in the    */\n"
+          "/* ** documentation and/or other materials provided with the distribution.   */\n"
+          "/* ** 4) Neither the name of UCAR nor the names of its contributors,         */\n"
+          "/* ** if any, may be used to endorse or promote products derived from        */\n"
+          "/* ** this software without specific prior written permission.               */\n"
+          "/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */\n"
+          "/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */\n"
+          "/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */\n"
+          "/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */\n");
 
 }
 

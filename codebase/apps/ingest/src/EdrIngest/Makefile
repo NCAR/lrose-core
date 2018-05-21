@@ -38,8 +38,8 @@ TARGET_FILE = EdrIngest
 LOC_INCLUDES = -I../include -D_LINUX_TYPES_H $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -lrapformats -ldsserver -ldidss \
-	-lmel_bufr -ltoolsa -ltdrp -ldataport \
-	-lInsituTurb -leuclid $(NETCDF4_LIBS) -lbz2 \
+	-lmel_bufr -ltdrp -ldataport \
+	-lInsituTurb -leuclid -ltoolsa $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

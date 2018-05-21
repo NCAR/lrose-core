@@ -177,7 +177,13 @@ bool Data::_readLite(RadxFile &primaryFile, const std::string &path)
   LOGF(LogMsg::DEBUG_VERBOSE, "-------Read file %s ----------", 
        RadxTime::strm(tloc).c_str());
 
+  // convert to floats
   _vol.convertToFl32();
+
+  // sort into ascending sweep order
+  _vol.sortSweepsByFixedAngle();
+
+  // load sweeps
   _sweeps.clear();
   const vector<RadxSweep *> sw = _vol.getSweeps();
   const vector<RadxRay *> rays = _vol.getRays();

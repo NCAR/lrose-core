@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
+// ** Copyright UCAR (c)
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -75,7 +75,8 @@ public:
     NAPLN = 9,
     NLDN_BINARY = 10,
     AOAWS_NETCDF = 11,
-    KSC = 12
+    KSC = 12,
+    ALBLM = 13
   } input_format_t;
 
   typedef enum {

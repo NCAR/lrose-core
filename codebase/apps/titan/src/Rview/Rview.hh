@@ -1135,6 +1135,7 @@ extern char *get_aircraft_label(int index);
 extern GC get_end_burn_gc();
 extern GC get_bip_gc();
 extern GC get_end_burn_and_bip_gc();
+extern GC get_dry_ice_gc();
 extern int get_plot_ac_posn();
 extern int get_plot_flares();
 

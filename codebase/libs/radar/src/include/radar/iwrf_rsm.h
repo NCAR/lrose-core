@@ -21,14 +21,6 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/**
-$Id: iwrf_rsm.h,v 1.2 2016/03/03 19:23:35 dixon Exp $
-\file rsm/rsm.h
-\author Jim George
-\brief Radar Status Monitor protocol
-
-$Revision: 1.2 $
-*/
 
 #ifndef _RSM_H_
 #define _RSM_H_

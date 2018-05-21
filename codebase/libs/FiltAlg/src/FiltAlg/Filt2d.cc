@@ -132,4 +132,10 @@ void Filt2d::set_input_info(Info **info) const
   return;
 }
 
+//------------------------------------------------------------------
+void Filt2d::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+
 
