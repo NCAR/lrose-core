@@ -46,7 +46,7 @@ LOC_LIBS = -lSpdb -lradar -lrapformats -lFmq -lRadx \
 
 LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 
-LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS) #  -DSMART_COLOR_SCALES
+LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 
 HDRS = \
 	$(PARAMS_HH) \
@@ -148,6 +148,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 #
 # in order to build SiiTest_Main, comment any calls to Qt and QBrush, etc. in ColorMap.cc/.hh
 #
+
 SiiTest_Main: ColorMap.o SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o
 	g++ -o SiiTest_Main SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o ColorMap.o -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp  -L/usr/local/Cellar/qt/5.10.1/lib -F/usr/local/Cellar/qt/5.10.1/lib -framework QtWidgets -F/usr/local/Cellar/qt/5.10.1/lib -framework QtGui -F/usr/local/Cellar/qt/5.10.1/lib -framework QtCore -lz -lm -g
 

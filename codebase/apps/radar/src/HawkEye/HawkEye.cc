@@ -111,15 +111,11 @@ HawkEye::HawkEye(int argc, char **argv) :
 
   AllocCheck::inst().setParams(&_params);
 
-#ifdef SMART_COLOR_SCALES
-
   // print color scales if debugging
   if (_params.debug) {
     SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
     sd.PrintColorScales();
   } 
-
-#endif 
 
   // set up display fields
 
@@ -337,8 +333,6 @@ int HawkEye::_setupDisplayFields()
     map.setName(pfld.label);
     map.setUnits(pfld.units);
 
-#ifdef SMART_COLOR_SCALES    
-
     if (map.readMap(colorMapPath)) {
         cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
         cerr << "  Cannot read in color map file: " << colorMapPath << endl;
@@ -349,9 +343,9 @@ int HawkEye::_setupDisplayFields()
           // see if the name is a usual parameter for a known color map
           SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
           ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
+          cerr << "  found default color map for " <<  pfld.label  << endl;
           if (_params.debug) {
-            cerr << "  found default color map for " <<  pfld.label  << endl;
-            if (_params.debug) colorMap.print(cout);
+             if (_params.debug) colorMap.print(cout);
           }
           map = colorMap;
           // HERE: What is missing from the ColorMap object??? 
@@ -360,18 +354,6 @@ int HawkEye::_setupDisplayFields()
           return -1;
         }
     }
-
-#endif 
-
-#ifndef SMART_COLOR_SCALES
-
-      if (map.readMap(colorMapPath)) {
-        cerr << "ERROR - HawkEye::_setupDisplayFields()" << endl;
-        cerr << "  Cannot read in color map file: " << colorMapPath << endl;
-        return -1;
-      }
-
-#endif
 
     // unfiltered field
 
