@@ -79,7 +79,7 @@ or
 
 <a name="verify"/>
 
-### 3. Verify the installation
+### 3. Verify
 
 Look in /usr/local/lrose or /my/install/dir for
 
