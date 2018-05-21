@@ -6,85 +6,95 @@
 
 <a name="prepare"/>
 
-### Choose an install directory (prefix location)
+### 1. Prepare
 
-The default is: `/usr/local/lrose`
-
-### Check out, build and install **netcdf** 
-
-See [README_NETCDF_BUILD.md](./dev/README_NETCDF_BUILD.md)
-
-Install netcdf into the prefix location.
-
+LROSE depends on several packages.  Make sure you have these packages installed or install them using (yum or apt-get).
+```
+yum -y install rsync
+yum -y install gcc 
+yum -y install gcc-gfortran
+yum -y install gcc-c++
+yum -y install make
+yum -y install expat-devel
+yum -y install m4
+yum -y install jasper-devel
+yum -y install flex-devel
+yum -y install zlib-devel
+yum -y install libpng-devel
+yum -y install bzip2-devel
+yum -y install fftw3-devel
+yum -y install qt5-qtbase-devel
+yum install -y xorg-x11-server-Xorg xorg-x11-xauth xorg-x11-apps
+```
 
 <a name="install"/>
 
-### Prepare build directory
+### 2. Install
 
-Create a directory for the distribution:
+Create a working directory for the distribution:
 
 ```
-  cd
   mkdir lrose_build
   cd lrose_build
 ```
 
-### Download source release for Linux
+#### Download the source release for Linux
 
 Download the source tar file from:
 
 ```
-  https://github.com/NCAR/lrose-core/releases
+  https://github.com/NCAR/lrose-core/releases 
 ```
 
 A typical source release would be:
 
 ```
-  lrose-20160823.src.tgz
+  lrose-blaze-20160823.src.tgz
 ```
 
-### Untar it
+#### Untar
 
 ```
-  cd lrose_build
-  tar xvfz lrose-20160823.src.tgz
+  tar xvfz lrose-blaze-20160823.src.tgz
 ```
 
 The distribution will be unpacked into a subdirectory:
 
 ```
-  lrose_build/lrose-20160823.src
+  lrose_build/lrose-blaze-20160823.src
 ```
 
-### Run the build scripts:
+#### Run the build script:
+
+Choose an install directory. The default is: `/usr/local/lrose`
 
 ```
-  cd lrose_build/lrose-20160823.src
-  ./build_lrose.py --prefix installDir
+  ./build_src_release.py
 ```
-
-The default prefix is /usr/local/lrose.
-
-This will install in:
+or
 
 ```
-  installDir/include
-  installDir/lib
-  installDir/bin
+  ./build_src_release.py --prefix /my/install/dir
 ```
+
 <a name="verify"/>
 
-### Verify the installation
+### 3. Verify the installation
 
-The build checks are run automatically at the end of the build script.
-
-However, you also can run the checks independently:
-
-After the build, you can check the build as follows:
+Look in /usr/local/lrose or /my/install/dir for
 
 ```
-  ./installDir/bin/RadxPrint -h
-  ./installDir/bin/RadxConvert -h
+  include
+  lib
+  bin
+```
+
+Try the commands:
+```
+/usr/local/lrose/bin/RadxPrint -h
+/usr/local/lrose/bin/RadxConvert -h
+/usr/local/lrose/bin/Radx2Grid -h
+/usr/local/lrose/bin/HawkEye
 ```
 
 ### Handling build errors
