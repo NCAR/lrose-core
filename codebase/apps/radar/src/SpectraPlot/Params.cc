@@ -1,26 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -50,8 +50,6 @@
  * @author Automatically generated
  *
  */
-using namespace std;
-
 #include "Params.hh"
 #include <cstring>
 
@@ -470,9 +468,9 @@ using namespace std;
   void Params::usage(ostream &out)
   {
     out << "TDRP args: [options as below]\n"
-        << "   [ -params path ] specify params file path\n"
-        << "   [ -check_params] check which params are not set\n"
-        << "   [ -print_params [mode]] print parameters\n"
+        << "   [ -params/--params path ] specify params file path\n"
+        << "   [ -check_params/--check_params] check which params are not set\n"
+        << "   [ -print_params/--print_params [mode]] print parameters\n"
         << "     using following modes, default mode is 'norm'\n"
         << "       short:   main comments only, no help or descr\n"
         << "                structs and arrays on a single line\n"
@@ -1289,6 +1287,18 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'plot_spf'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("plot_spf");
+    tt->descr = tdrpStrDup("Plot SPF - spectral phase fluctuations");
+    tt->help = tdrpStrDup("See Yinguang Li, Guifu Zhang, Lei Lei and Qing Cao: A new approach to detect ground clutter mixed with weather signals. IEEE transactions on Geoscience and Remote Sensing, Vol 51, No. 4, April 2013.");
+    tt->val_offset = (char *) &plot_spf - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'plot_phase_time_series'
     // ctype is 'tdrp_bool_t'
     
@@ -1641,6 +1651,30 @@ using namespace std;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &power_real_spec_color - &_start_;
     tt->single_val.s = tdrpStrDup("cyan");
+    tt++;
+    
+    // Parameter 'spf_power_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("spf_power_color");
+    tt->descr = tdrpStrDup("Color of the plot of SPF power.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spf_power_color - &_start_;
+    tt->single_val.s = tdrpStrDup("cyan");
+    tt++;
+    
+    // Parameter 'spf_phase_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("spf_phase_color");
+    tt->descr = tdrpStrDup("Color of the plot of SPF phase.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spf_phase_color - &_start_;
+    tt->single_val.s = tdrpStrDup("green");
     tt++;
     
     // Parameter 'ts_phase_color'

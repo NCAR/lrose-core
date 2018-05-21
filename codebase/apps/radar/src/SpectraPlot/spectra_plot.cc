@@ -162,6 +162,9 @@ static FieldInfo *_fftPhaseDiff;
 static FieldInfo *_powerSpecReal;
 static FieldInfo *_powerAscope;
 
+static FieldInfo *_spfPower;
+static FieldInfo *_spfPhase;
+
 static FieldInfo *_iTs;
 static FieldInfo *_iTsPolyFit;
 static FieldInfo *_iTsResidual;
@@ -425,6 +428,9 @@ static void init_static_vars()
   _powerSpecReal = NULL;
   _powerAscope = NULL;
 
+  _spfPower = NULL;
+  _spfPhase = NULL;
+
   _fftPhaseDiff = NULL;
 
   _iTs = NULL;
@@ -609,6 +615,17 @@ static void init_data_space()
 				 _params->power_real_spec_color,
 				 _params->ts_power_min_db,
                                  _params->ts_power_max_db);
+
+  // spectral phase fluctuations
+
+  _spfPower = new FieldInfo(_dpy, "SPF power (dBm)",
+                            _params->spf_power_color,
+                            _params->ts_power_min_db,
+                            _params->ts_power_max_db);
+  
+  _spfPhase = new FieldInfo(_dpy, "SPF phase (deg)",
+                            _params->spf_phase_color,
+                            -180, 180);
      
   // time domain phase
 
@@ -708,6 +725,9 @@ void strip_chart_free()
 
   freeField(_powerSpecReal);
   freeField(_powerAscope);
+
+  freeField(_spfPower);
+  freeField(_spfPhase);
 
   freeField(_iTs);
   freeField(_iTsPolyFit);
@@ -1497,6 +1517,10 @@ static int compute_number_of_plots()
     nPlots += 2;
   }
 
+  if (_params->plot_spf) {
+    nPlots += 2;
+  }
+
   return nPlots;
      
 }
@@ -1543,6 +1567,9 @@ static void clear_plot_data()
 
   _powerAscope->clearData();
   _powerSpecReal->clearData();
+
+  _spfPower->clearData();
+  _spfPhase->clearData();
 
   _iTs->clearData();
   _iTsPolyFit->clearData();
@@ -2080,6 +2107,47 @@ static void load_plot_data_single_prt()
     range += _spectra.getGateSpacing();
 
   }
+
+  //////////////////////////////////////////////////
+  // spf
+
+  // get windowed IQ
+
+  int nSpf = _nSamples * 5;
+  int nSpfHalf = nSpf / 2;
+  TaArray<RadarComplex_t> spfIq_;
+  RadarComplex_t *spfIq = spfIq_.alloc(nSpf);
+  for (int ii = 0; ii < _nSamples; ii++) {
+    int jj = nSpf - ii - 1;
+    spfIq[jj].re = iqWindowed[ii].re;
+    spfIq[jj].im = iqWindowed[ii].im;
+  }
+
+  // pad out with zeros
+
+  for (int ii = _nSamples; ii < nSpf; ii++) {
+    int jj = nSpf - ii - 1;
+    spfIq[jj].re = 0.0;
+    spfIq[jj].im = 0.0;
+  }
+
+  // compute FFT
+  
+  RadarFft spfFft(nSpf);
+  TaArray<RadarComplex_t> spfSpec_;
+  RadarComplex_t *spfSpec = spfSpec_.alloc(nSpf);
+  spfFft.fwd(spfIq, spfSpec);
+
+  // load up results
+  
+  for (int ii = 0; ii < nSpf; ii++) {
+    int jj = (2 * nSpf - ii - nSpfHalf) % nSpf;
+    double pwr = RadarComplex::power(spfSpec[jj]);
+    double dbm = 10.0 * log10(pwr);
+    double phase = RadarComplex::argDeg(spfSpec[jj]);
+    _spfPower->addData(ii, dbm);
+    _spfPhase->addData(ii, phase);
+  } // ii
   
 }
 
@@ -3442,6 +3510,30 @@ void draw_plot()
     
   }
 
+  // spf power spectrum
+  
+  if (_params->plot_spf) {
+    
+    compute_world_to_pixel(*_spfPower, NULL, NULL,
+                           x_start, x_end, y_start_fld, y_end_fld, false);
+    
+    plot_field(*_spfPower,
+               x_start, x_end, y_start_fld, y_end_fld, true, true);
+
+    y_start_fld += each_height;
+    y_end_fld += each_height;
+    
+    compute_world_to_pixel(*_spfPhase, NULL, NULL,
+                           x_start, x_end, y_start_fld, y_end_fld, false);
+    
+    plot_field(*_spfPhase,
+               x_start, x_end, y_start_fld, y_end_fld, true, true);
+
+    y_start_fld += each_height;
+    y_end_fld += each_height;
+    
+  }
+  
   // copy backing store to main canvas
   
   XCopyArea(_dpy,_back_xid,_canvas_xid,_def_gc,

@@ -141,19 +141,19 @@ SpectraPlot::~SpectraPlot()
 
   // free up strip chart memory
 
-  strip_chart_free();
+  // strip_chart_free();
 
-  // free up other objects
+  // // free up other objects
 
-  if (_tsReaderPpi) {
-    delete _tsReaderPpi;
-  }
-  if (_tsReaderRhi) {
-    delete _tsReaderRhi;
-  }
-  if (_beamMgr) {
-    delete _beamMgr;
-  }
+  // if (_tsReaderPpi) {
+  //   delete _tsReaderPpi;
+  // }
+  // if (_tsReaderRhi) {
+  //   delete _tsReaderRhi;
+  // }
+  // if (_beamMgr) {
+  //   delete _beamMgr;
+  // }
   
   // unregister process
 
