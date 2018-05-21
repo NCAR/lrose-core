@@ -981,44 +981,39 @@ int SunCal::_addPulseToNexradQueue(const IwrfTsPulse *iwrfPulse)
 
   // load up IQ data along the pulse
   
-  int nn = 0;
-  int ii = _startGateSun;
+  int count = 0;
   int ii2 = _startGateSun * 2;
-  for (int igate = _startGateSun; igate <= _endGateSun; igate++) {
+  for (int igate = _startGateSun; igate <= _endGateSun; igate++, ii2 += 2) {
     
-    iqh[nn].re = iq0[ii2];
-    iqh[nn].im = iq0[ii2 + 1];
+    iqh[count].re = iq0[ii2];
+    iqh[count].im = iq0[ii2 + 1];
     
-    iqv[nn].re = iq1[ii2];
-    iqv[nn].im = iq1[ii2 + 1];
+    iqv[count].re = iq1[ii2];
+    iqv[count].im = iq1[ii2 + 1];
 
     // check power for interference
     
     double power =
-      (RadarComplex::power(iqh[nn]) + RadarComplex::power(iqv[nn])) / 2.0;
+      (RadarComplex::power(iqh[count]) + RadarComplex::power(iqv[count])) / 2.0;
     double dbm = 10.0 * log10(power);
-    if (dbm > _maxValidSunPowerDbm) {
-      // don't use this gate - probably interference
-      continue;
+    if (dbm <= _maxValidSunPowerDbm) {
+      // probably not interference so use this gate
+      // so increment count
+      count++;
     }
-
-    nn++;
-    ii++;
-    ii2 += 2;
 
   } // igate
 
-  if (nn < 3) {
+  if (count < 3) {
     return -1;
   }
 
   // compute moments
   
-  double meanPowerH = RadarComplex::meanPower(iqh, nn - 1);
-  double meanPowerV = RadarComplex::meanPower(iqv, nn - 1);
-  
+  double meanPowerH = RadarComplex::meanPower(iqh, count);
+  double meanPowerV = RadarComplex::meanPower(iqv, count);
   RadarComplex_t Rvvhh0 =
-    RadarComplex::meanConjugateProduct(iqh, iqv, nn - 1);
+    RadarComplex::meanConjugateProduct(iqh, iqv, count);
   
   solar_pulse_t solarPulse;
   solarPulse.time = iwrfPulse->getFTime();
@@ -1028,7 +1023,7 @@ int SunCal::_addPulseToNexradQueue(const IwrfTsPulse *iwrfPulse)
   solarPulse.powerV = meanPowerV;
   solarPulse.rvvhh0.re = Rvvhh0.re;
   solarPulse.rvvhh0.im = Rvvhh0.im;
-  solarPulse.nGatesUsed = nn;
+  solarPulse.nGatesUsed = count;
 
   nexradSolarAddPulseToQueue(&solarPulse);
 

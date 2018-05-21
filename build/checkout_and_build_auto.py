@@ -278,6 +278,9 @@ def setupAutoconf():
 
 def createQtMocFiles(appDir):
     
+    if (os.path.isdir(appDir) == False):
+        return
+
     os.chdir(appDir)
     shellCmd("rm -f moc*");
     shellCmd("qmake-qt5 -o Makefile.qmake");

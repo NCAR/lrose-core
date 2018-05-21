@@ -227,25 +227,6 @@ int HawkEye::_setupReader()
       break;
     }
       
-    case Params::SIMULATED_RHI_INPUT: {
-      
-      SimRhiReader *simReader = new SimRhiReader(_params);
-      _reader = simReader;
-      
-      vector<SimRhiReader::Field> simFields;
-      for (size_t ii = 0; ii < _displayFields.size(); ii++) {
-        SimRhiReader::Field simField;
-        simField.name = _displayFields[ii]->getName();
-        simField.units = _displayFields[ii]->getUnits();
-        simField.minVal = _displayFields[ii]->getColorMap().rangeMin();
-        simField.maxVal = _displayFields[ii]->getColorMap().rangeMax();
-        simFields.push_back(simField);
-      }
-      simReader->setFields(simFields);
-      
-      break;
-    }
-      
     case Params::SIMULATED_INPUT:
     default: {
       

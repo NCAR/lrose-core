@@ -72,7 +72,7 @@ PpiWidget::~PpiWidget()
   // delete all of the dynamically created beams
   
   for (size_t i = 0; i < _ppiBeams.size(); ++i) {
-    delete _ppiBeams[i];
+    Beam::deleteIfUnused(_ppiBeams[i]);
   }
   _ppiBeams.clear();
 
@@ -87,7 +87,7 @@ void PpiWidget::clear()
   // Clear out the beam array
   
   for (size_t i = 0; i < _ppiBeams.size(); i++) {
-    delete _ppiBeams[i];
+    Beam::deleteIfUnused(_ppiBeams[i]);
   }
   _ppiBeams.clear();
   
@@ -212,6 +212,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
     // the beam list.
 
     PpiBeam* b = new PpiBeam(_params, ray, _fields.size(), n_start_angle, n_stop_angle);
+    b->addClient();
     _cullBeams(b);
     _ppiBeams.push_back(b);
     newBeams.push_back(b);
@@ -222,6 +223,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
     // beam to the left of the 0 degree point.
 
     PpiBeam* b1 = new PpiBeam(_params, ray, _fields.size(), n_start_angle, 360.0);
+    b1->addClient();
     _cullBeams(b1);
     _ppiBeams.push_back(b1);
     newBeams.push_back(b1);
@@ -229,6 +231,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
     // Now add the portion of the beam to the right of the 0 degree point.
 
     PpiBeam* b2 = new PpiBeam(_params, ray, _fields.size(), 0.0, n_stop_angle);
+    b2->addClient();
     _cullBeams(b2);
     _ppiBeams.push_back(b2);
     newBeams.push_back(b2);
@@ -1017,7 +1020,7 @@ void PpiWidget::_cullBeams(const PpiBeam *beamAB)
 
       if (_ppiBeams[i]->hidden && !_ppiBeams[i]->isBeingRendered())
       {
-	delete _ppiBeams[i];
+        Beam::deleteIfUnused(_ppiBeams[i]);
 	_ppiBeams.erase(_ppiBeams.begin()+i);
       }
     }

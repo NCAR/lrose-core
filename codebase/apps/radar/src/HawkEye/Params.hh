@@ -78,8 +78,7 @@ public:
     IWRF_FMQ_INPUT = 0,
     IWRF_TCP_INPUT = 1,
     SIMULATED_INPUT = 2,
-    SIMULATED_RHI_INPUT = 3,
-    DSR_FMQ_INPUT = 4
+    DSR_FMQ_INPUT = 3
   } input_mode_t;
 
   typedef enum {

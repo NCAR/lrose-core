@@ -53,14 +53,13 @@ typedef enum {
   IWRF_FMQ_INPUT, 
   IWRF_TCP_INPUT, 
   SIMULATED_INPUT, 
-  SIMULATED_RHI_INPUT,
   DSR_FMQ_INPUT // deprecated
 } input_mode_t;
 
 paramdef enum input_mode_t {
   p_default = IWRF_FMQ_INPUT;
   p_descr = "Method for reading the input data";
-  p_help = "\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.\n\tSIMULATED_RHI_INPUT: internally-generated test pattern data for RHIs.\n\tDSR_FMQ_INPUT: deprecated.";
+  p_help = "\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.\n\tDSR_FMQ_INPUT: deprecated.";
 } input_mode;
 
 paramdef string {
@@ -1040,7 +1039,7 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 50;
+  p_default = 10;
   p_descr = "Number of milliseconds to sleep between beams in simulated input "
             "mode.";
 } sim_sleep_msecs;
