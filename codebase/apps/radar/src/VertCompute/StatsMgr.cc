@@ -406,8 +406,8 @@ void StatsMgr::printResults360(FILE *out)
   fprintf(out, "   ZDR correction (dB)   : %8.3f\n", _meanZdrm * -1.0);
   fprintf(out, " ==========================================================================================\n");
   fprintf(out, " %10s%10s%10s%10s%10s%10s%10s%10s%10s\n",
-          "Ht", "npts", "snr", "dBZ", "vel", "zdr_m",
-          "ldrh", "ldrv", "rhohv");
+          "Ht", "npts", "snr", "dBZ", "vel",
+          "zdrm", "sdevZdr", "ldr", "rhohv");
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     const LayerStats &layer = *(_layers[ii]);
     if (layer.getMean().snr > -9990) {
@@ -419,8 +419,8 @@ void StatsMgr::printResults360(FILE *out)
               layer.getMean().dbz,
               layer.getMean().vel,
               layer.getMean().zdrm,
+              layer.getSdev().zdrm,
               layer.getMean().ldrh,
-              layer.getMean().ldrv,
               layer.getMean().rhohv);
     }
   }
@@ -470,6 +470,7 @@ int StatsMgr::writeResults360ToSpdb()
       xml += TaXml::writeDouble("meanDbz", 2, layer.getMean().dbz);
       xml += TaXml::writeDouble("meanVel", 2, layer.getMean().vel);
       xml += TaXml::writeDouble("meanZdrm", 2, layer.getMean().zdrm);
+      xml += TaXml::writeDouble("sdevZdrm", 2, layer.getSdev().zdrm);
       xml += TaXml::writeDouble("meanLdrh", 2, layer.getMean().ldrh);
       xml += TaXml::writeDouble("meanLdrv", 2, layer.getMean().ldrv);
       xml += TaXml::writeDouble("meanRhohv", 2, layer.getMean().rhohv);
@@ -594,8 +595,8 @@ void StatsMgr::printGlobalResults(FILE *out)
   fprintf(out, "   ZDR correction (dB)   : %8.3f\n", _globalMeanZdrm * -1.0);
   fprintf(out, " ==========================================================================================\n");
   fprintf(out, " %10s%10s%10s%10s%10s%10s%10s%10s%10s\n",
-          "Ht", "npts", "snr", "dBZ", "vel", "zdr_m",
-          "ldrh", "ldrv", "rhohv");
+          "Ht", "npts", "snr", "dBZ", "vel",
+          "zdrm", "sdevZdr", "ldr", "rhohv");
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     const LayerStats &layer = *(_layers[ii]);
     if (layer.getMean().snr > -9990) {
@@ -607,8 +608,8 @@ void StatsMgr::printGlobalResults(FILE *out)
               layer.getGlobalMean().dbz,
               layer.getGlobalMean().vel,
               layer.getGlobalMean().zdrm,
+              layer.getGlobalSdev().zdrm,
               layer.getGlobalMean().ldrh,
-              layer.getGlobalMean().ldrv,
               layer.getGlobalMean().rhohv);
     }
   } // ii
