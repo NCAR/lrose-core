@@ -163,7 +163,7 @@ static FieldInfo *_powerSpecReal;
 static FieldInfo *_powerAscope;
 
 static FieldInfo *_spfPower;
-static FieldInfo *_spfPhase;
+static FieldInfo *_spfPhaseDiff;
 
 static FieldInfo *_iTs;
 static FieldInfo *_iTsPolyFit;
@@ -429,7 +429,7 @@ static void init_static_vars()
   _powerAscope = NULL;
 
   _spfPower = NULL;
-  _spfPhase = NULL;
+  _spfPhaseDiff = NULL;
 
   _fftPhaseDiff = NULL;
 
@@ -623,9 +623,9 @@ static void init_data_space()
                             _params->ts_power_min_db,
                             _params->ts_power_max_db);
   
-  _spfPhase = new FieldInfo(_dpy, "SPF phase (deg)",
-                            _params->spf_phase_color,
-                            -180, 180);
+  _spfPhaseDiff = new FieldInfo(_dpy, "SPF phase diff (deg)",
+                                _params->spf_phase_color,
+                                -180, 180);
      
   // time domain phase
 
@@ -727,7 +727,7 @@ void strip_chart_free()
   freeField(_powerAscope);
 
   freeField(_spfPower);
-  freeField(_spfPhase);
+  freeField(_spfPhaseDiff);
 
   freeField(_iTs);
   freeField(_iTsPolyFit);
@@ -1569,7 +1569,7 @@ static void clear_plot_data()
   _powerSpecReal->clearData();
 
   _spfPower->clearData();
-  _spfPhase->clearData();
+  _spfPhaseDiff->clearData();
 
   _iTs->clearData();
   _iTsPolyFit->clearData();
@@ -2140,13 +2140,23 @@ static void load_plot_data_single_prt()
 
   // load up results
   
-  for (int ii = 0; ii < nSpf; ii++) {
+  for (int ii = nSpfHalf - _nSamplesHalf; 
+       ii <= nSpfHalf + _nSamplesHalf; ii++) {
     int jj = (2 * nSpf - ii - nSpfHalf) % nSpf;
     double pwr = RadarComplex::power(spfSpec[jj]);
     double dbm = 10.0 * log10(pwr);
+    double phasePrev = RadarComplex::argDeg(spfSpec[jj-1]);
     double phase = RadarComplex::argDeg(spfSpec[jj]);
+    double phaseChange = phase - phasePrev;
+    if (phaseChange > 180) {
+      phaseChange -= 360.0;
+    } else if (phaseChange < -180) {
+      phaseChange += 360.0;
+    }
     _spfPower->addData(ii, dbm);
-    _spfPhase->addData(ii, phase);
+    if (ii != nSpfHalf) {
+      _spfPhaseDiff->addData(ii, phaseChange);
+    }
   } // ii
   
 }
@@ -3523,10 +3533,10 @@ void draw_plot()
     y_start_fld += each_height;
     y_end_fld += each_height;
     
-    compute_world_to_pixel(*_spfPhase, NULL, NULL,
+    compute_world_to_pixel(*_spfPhaseDiff, NULL, NULL,
                            x_start, x_end, y_start_fld, y_end_fld, false);
     
-    plot_field(*_spfPhase,
+    plot_field(*_spfPhaseDiff,
                x_start, x_end, y_start_fld, y_end_fld, true, true);
 
     y_start_fld += each_height;
