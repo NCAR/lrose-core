@@ -14,7 +14,7 @@ $ docker-compose down
 
 
 ### Source Install
-- Linux flavors: [Centos](centos_source.md) [Ubuntu](ubuntu_source.md)
+- Linux flavors: [Centos](centos_source.md) [Ubuntu](ubuntu_source.md) [Debian]() [SUSE]()
 - Mac OSX
 ### Package Install
 - brew (lrose-blaze.rb)
