@@ -4,7 +4,6 @@ FROM centos
 ADD . /tmp/bj
 WORKDIR /tmp/bj
 
-# VOLUME ["/tmp/thursday"]
 #
 # is there a way to pull the source release from github?
 #
@@ -29,18 +28,19 @@ RUN yum install -y xorg-x11-server-Xorg xorg-x11-xauth xorg-x11-apps
 
 #RUN  cd /tmp/bj
 #
-# RUN cd lrose-blaze-20180516.src; ./build_src_release.py
+RUN tar xvfz lrose-blaze-20180516.src.tar.gz # ???
+RUN cd lrose-blaze-20180516.src; ./build_src_release.py
 
 # create a user
 # RUN useradd -ms /bin/bash lrose 
 # USER lrose
 # WORKDIR /home/lrose
 
-# RUN cd lrose-20180430.bin.x86_64; ./install_bin_release.py
-
 #
 # this is critical to X11 forwarding
 #
-# CMD dbus-uuidgen > /etc/machine-id 
+CMD dbus-uuidgen > /etc/machine-id 
 
+# use this to test X11 forwarding
+#
 # CMD xclock&
