@@ -132,6 +132,8 @@ void RadarMoments::_init()
   _applyDbForDbCorrection = false;
   _dbForFbRatio = 0.0;
   _dbForDbThreshold = 0.0;
+  _notchStart = 0;
+  _notchEnd = 0;
 
   _minSnrDbForZdr = _missing;
   _minSnrDbForLdr = _missing;
@@ -140,10 +142,8 @@ void RadarMoments::_init()
   _changeAiqSign = false;
   _computeCpaUsingAlt = false;
 
-  _useRegressionFilter = false;
+  _clutterFilterType = CLUTTER_FILTER_ADAPTIVE;
   _regrInterpAcrossNotch = true;
-
-  _useSimpleNotchFilter = false;
   _notchWidthMps = 3.0;
 
   _wavelengthMeters = 10.0;
@@ -3958,6 +3958,7 @@ void RadarMoments::singlePolSz864Filtered(GateData &gateData,
 //
 //  Outputs:
 //    iqFiltered: filtered time series
+//    iqNotched: if non-NULL, notched time series
 //    filterRatio: ratio of raw to unfiltered power, before applying correction
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
@@ -3972,6 +3973,7 @@ void RadarMoments::applyClutterFilter(int nSamples,
                                       const RadarComplex_t *specWindowed,
                                       double calibratedNoise,
                                       RadarComplex_t *iqFiltered,
+                                      RadarComplex_t *iqNotched,
                                       double &filterRatio,
                                       double &spectralNoise,
                                       double &spectralSnr,
@@ -3979,15 +3981,15 @@ void RadarMoments::applyClutterFilter(int nSamples,
   
 {
 
-  if (_useRegressionFilter) {
+  if (_clutterFilterType == CLUTTER_FILTER_REGRESSION) {
     
     applyRegressionFilter(nSamples, fft, regr, window,
                           iqOrig, calibratedNoise,
                           _regrInterpAcrossNotch,
-                          iqFiltered, filterRatio,
+                          iqFiltered, iqNotched, filterRatio,
                           spectralNoise, spectralSnr, specRatio);
     
-  } else if (_useSimpleNotchFilter) {
+  } else if (_clutterFilterType == CLUTTER_FILTER_NOTCH) {
     
     applyNotchFilter(nSamples, fft,
                      iqWindowed, specWindowed,
@@ -4000,7 +4002,7 @@ void RadarMoments::applyClutterFilter(int nSamples,
     applyAdaptiveFilter(nSamples, fft,
                         iqWindowed, specWindowed,
                         calibratedNoise,
-                        iqFiltered, filterRatio,
+                        iqFiltered, iqNotched, filterRatio,
                         spectralNoise, spectralSnr, specRatio);
 
   }
@@ -4019,6 +4021,7 @@ void RadarMoments::applyClutterFilter(int nSamples,
 //
 //  Outputs:
 //    iqFiltered: filtered time series
+//    iqNotched: if non-NULL, notched time series
 //    filterRatio: ratio of raw to unfiltered power, before applying correction
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
@@ -4030,6 +4033,7 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
                                        const RadarComplex_t *specWindowed,
                                        double calibratedNoise,
                                        RadarComplex_t *iqFiltered,
+                                       RadarComplex_t *iqNotched,
                                        double &filterRatio,
                                        double &spectralNoise,
                                        double &spectralSnr,
@@ -4067,15 +4071,17 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
   double maxClutterVel = 1.0;
   double initNotchWidth = 1.5;
   bool clutterFound = false;
-  int notchStart = 0;
-  int notchEnd = 0;
+  _notchStart = 0;
+  _notchEnd = 0;
   
   ClutFilter::performAdaptive(powerSpec, nSamples, maxClutterVel,
                               initNotchWidth, _nyquist, calibratedNoise,
                               false, clutterFound, powerSpecF,
-                              notchStart, notchEnd,
+                              _notchStart, _notchEnd,
                               rawPower, filteredPower,
-                              powerRemoved, spectralNoise);
+                              powerRemoved, _spectralNoise,
+                              _weatherPos, _clutterPos);
+  spectralNoise = _spectralNoise;
   
   spectralSnr = (spectralNoise - calibratedNoise) / calibratedNoise;
   filterRatio = rawPower / filteredPower;
@@ -4113,6 +4119,18 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
   // invert the fft
 
   fft.inv(powerSpecC, iqFiltered);
+
+  // return the notched time series?
+
+  if (iqNotched != NULL) {
+    for (int ii = 0; ii < nSamples; ii++) {
+      if (ii <= _notchEnd || ii >= _notchStart) {
+        powerSpecC[ii].re = 0.0;
+        powerSpecC[ii].im = 0.0;
+      }
+    }
+    fft.inv(powerSpecC, iqNotched);
+  }
  
 }
 
@@ -4173,13 +4191,13 @@ void RadarMoments::applyNotchFilter(int nSamples,
   double filteredPower = 0.0;
   double powerRemoved = 0.0;
 
-  int notchStart = 0;
-  int notchEnd = 0;
+  _notchStart = 0;
+  _notchEnd = 0;
   
   ClutFilter::performNotch(powerSpec, nSamples,
                            _notchWidthMps, _nyquist,
                            calibratedNoise, powerSpecF,
-                           notchStart, notchEnd,
+                           _notchStart, _notchEnd,
                            rawPower, filteredPower, powerRemoved);
   
   spectralNoise = calibratedNoise;
@@ -4237,6 +4255,7 @@ void RadarMoments::applyNotchFilter(int nSamples,
 //
 //  Outputs:
 //    iqFiltered: filtered time series
+//    iqNotched: if non-NULL, notched time series
 //    filterRatio: ratio of raw to unfiltered power
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
@@ -4251,6 +4270,7 @@ void RadarMoments::applyRegressionFilter
    double calibratedNoise,
    bool interpAcrossNotch,
    RadarComplex_t *iqFiltered,
+   RadarComplex_t *iqNotched,
    double &filterRatio,
    double &spectralNoise,
    double &spectralSnr,
@@ -4278,6 +4298,10 @@ void RadarMoments::applyRegressionFilter
   double rawPower = RadarComplex::meanPower(iqOrig, nSamples);
   double filteredPower = RadarComplex::meanPower(iqFiltered, nSamples);
   filterRatio = rawPower / filteredPower;
+
+  if (iqNotched != NULL) {
+    memcpy(iqNotched, iqFiltered, nSamples * sizeof(RadarComplex_t));
+  }
 
 }
 
@@ -4417,16 +4441,15 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
   double rawPower = 0.0;
   double filteredPower = 0.0;
   double powerRemoved = 0.0;
+  _notchStart = 0;
+  _notchEnd = 0;
   
-  if (_useSimpleNotchFilter) {
+  if (_clutterFilterType == CLUTTER_FILTER_NOTCH) {
 
-    int notchStart = 0;
-    int notchEnd = 0;
-    
     ClutFilter::performNotch(powerSpec, nSamplesHalf,
 			     _notchWidthMps, nyquist,
                              calibratedNoise, powerSpecF,
-			     notchStart, notchEnd,
+			     _notchStart, _notchEnd,
 			     rawPower, filteredPower, powerRemoved);
     
     spectralNoise = calibratedNoise;
@@ -4438,15 +4461,15 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
     double maxClutterVel = 1.0;
     double initNotchWidth = 1.5;
     bool clutterFound = false;
-    int notchStart = 0;
-    int notchEnd = 0;
     
     ClutFilter::performAdaptive(powerSpec, nSamplesHalf, maxClutterVel,
 				initNotchWidth, nyquist, calibratedNoise,
                                 true, clutterFound, powerSpecF,
-				notchStart, notchEnd,
+				_notchStart, _notchEnd,
 				rawPower, filteredPower,
-				powerRemoved, spectralNoise);
+				powerRemoved, _spectralNoise,
+                                _weatherPos, _clutterPos);
+    spectralNoise = _spectralNoise;
     
     spectralSnr = spectralNoise / calibratedNoise;
     filterRatio = rawPower / filteredPower;
@@ -5198,12 +5221,23 @@ void RadarMoments::condenseStagIq(int nSamples,
 /////////////////////////////////////////////////////
 // Applies previously computed filter ratios, in the spectral
 // domain, to a time series
+//
+// Inputs:
+//   nSamples
+//   fft: object to be used for FFT computations
+//   iq: input time series to be adjusted for filtering
+//   specRatio: ratio of filtered to unfiltered in spectrum
+//
+//  Outputs:
+//    iqFiltered: filtered time series
+//    iqNotched: if not NULL, notched time series
 
 void RadarMoments::applyFilterRatio(int nSamples,
                                     const RadarFft &fft,
                                     const RadarComplex_t *iq,
                                     const double *specRatio,
-                                    RadarComplex_t *iqFiltered)
+                                    RadarComplex_t *iqFiltered,
+                                    RadarComplex_t *iqNotched)
   
 {
   
@@ -5215,15 +5249,37 @@ void RadarMoments::applyFilterRatio(int nSamples,
 
   // adjust the spectrum by the filter ratio
 
+  TaArray<RadarComplex_t> adjSpec_;
+  RadarComplex_t *adjSpec = adjSpec_.alloc(nSamples);
+  memcpy(adjSpec, spec, nSamples * sizeof(RadarComplex_t));
+
   for (int ii = 0; ii < nSamples; ii++) {
     double ratio = specRatio[ii];
-    spec[ii].re *= ratio;
-    spec[ii].im *= ratio;
+    adjSpec[ii].re *= ratio;
+    adjSpec[ii].im *= ratio;
   }
 
   // invert the fft
 
-  fft.inv(spec, iqFiltered);
+  fft.inv(adjSpec, iqFiltered);
+ 
+  // return the notched time series?
+
+  if (iqNotched != NULL) {
+
+    TaArray<RadarComplex_t> notchedSpec_;
+    RadarComplex_t *notchedSpec = notchedSpec_.alloc(nSamples);
+    memcpy(notchedSpec, spec, nSamples * sizeof(RadarComplex_t));
+
+    for (int ii = 0; ii < nSamples; ii++) {
+      if (ii <= _notchEnd || ii >= _notchStart) {
+        notchedSpec[ii].re = 0.0;
+        notchedSpec[ii].im = 0.0;
+      }
+    }
+    fft.inv(notchedSpec, iqNotched);
+
+  } // if (iqNotched != NULL)
  
 }
 
@@ -5272,7 +5328,7 @@ void RadarMoments::applyClutterFilterSz(int nSamples,
     applyAdaptiveFilter(nSamples, fft,
                         gateData.iqStrong, NULL,
                         calibratedNoise,
-                        gateData.iqStrongF,
+                        gateData.iqStrongF, NULL,
                         filterRatio,
                         spectralNoise,
                         spectralSnr);
@@ -5284,7 +5340,7 @@ void RadarMoments::applyClutterFilterSz(int nSamples,
     applyAdaptiveFilter(nSamples, fft,
                         gateData.iqWeak, NULL,
                         calibratedNoise,
-                        gateData.iqWeakF,
+                        gateData.iqWeakF, NULL,
                         filterRatio,
                         spectralNoise,
                         spectralSnr);

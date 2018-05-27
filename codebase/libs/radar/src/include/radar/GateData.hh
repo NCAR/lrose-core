@@ -110,6 +110,11 @@ public:
   RadarComplex_t *iqhxF;
   RadarComplex_t *iqvxF;
 
+  // notched time series for some dual pol moments
+
+  RadarComplex_t *iqhcNotched;
+  RadarComplex_t *iqvcNotched;
+
   // staggered PRT
   // original time series - unwindowed IQ
   
