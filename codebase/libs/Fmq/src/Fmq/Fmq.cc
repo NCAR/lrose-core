@@ -1181,6 +1181,11 @@ int Fmq::_open_rdonly ()
   if (_check_device_exists()) {
     _print_error("_open_rdonly",
 		 "FMQ does not yet exist: %s\n", _fmqPath.c_str());
+    if (_msecSleep <= 1000) {
+      umsleep(1000);
+    } else {
+      umsleep(_msecSleep);
+    }
     return -1;
   }
 

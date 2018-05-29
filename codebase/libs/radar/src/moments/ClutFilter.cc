@@ -89,6 +89,8 @@ ClutFilter::~ClutFilter()
 //   filteredPower: mean power in filtered spectrum
 //   powerRemoved: mean power removed by the filter (mW)
 //   spectralNoise: noise determined from the spectrum (mW)
+//   weatherPos: spectral location of weather peak
+//   clutterPos: spectral location of clutter peak
 
 void ClutFilter::performAdaptive(const double *rawPowerSpec, 
                                  int nSamples,
@@ -104,7 +106,9 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
 				 double &rawPower,
 				 double &filteredPower,
                                  double &powerRemoved,
-                                 double &spectralNoise)
+                                 double &spectralNoise,
+                                 int &weatherPos,
+                                 int &clutterPos)
   
 {
 
@@ -121,7 +125,6 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
 
   // locate the weather and clutter
   
-  int weatherPos, clutterPos;
   double weatherPeak, clutterPeak;
   int notchWidth;
 
@@ -714,7 +717,7 @@ void ClutFilter::fitGaussian(const double *power,
 // We compute the mean power for 3 regions of the spectrum:
 //   1. 1/8 at lower end plus 1/8 at upper end
 //   2. 1/4 at lower end
-//   3. 1/4 at uppoer end
+//   3. 1/4 at upper end
 // We estimate the noise to be the least of these 3 values
 // because if there is a weather echo it will not affect both ends
 // of the spectrum unless the width is very high, in which case we

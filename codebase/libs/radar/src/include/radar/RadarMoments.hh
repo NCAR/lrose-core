@@ -197,11 +197,16 @@ public:
   // Clutter filtering options
   // normally adaptive filtering is used
 
-  // use the adaptive filter (default)
+  typedef enum {
+    CLUTTER_FILTER_ADAPTIVE,
+    CLUTTER_FILTER_REGRESSION,
+    CLUTTER_FILTER_NOTCH
+  } clutter_filter_type_t;
 
+  // use the adaptive filter (default)
+  
   void setUseAdaptiveFilter() {
-    _useRegressionFilter = false;
-    _useSimpleNotchFilter = false;
+    _clutterFilterType = CLUTTER_FILTER_ADAPTIVE;
   }
 
   // choose whether to apply spectral residue correction
@@ -215,15 +220,15 @@ public:
 
   // use polynomial regression filter
 
-  void setUseRegressionFilter(bool state, bool interpAcrossNotch) {
-    _useRegressionFilter = state;
+  void setUseRegressionFilter(bool interpAcrossNotch) {
+    _clutterFilterType = CLUTTER_FILTER_REGRESSION;
     _regrInterpAcrossNotch = interpAcrossNotch;
   }
   
   // use notch filter
   
-  void setUseSimpleNotchFilter(bool state, double notchWidthMps) {
-    _useSimpleNotchFilter = state;
+  void setUseSimpleNotchFilter(double notchWidthMps) {
+    _clutterFilterType = CLUTTER_FILTER_NOTCH;
     _notchWidthMps = notchWidthMps;
   }
   
@@ -631,6 +636,7 @@ public:
   //
   //  Outputs:
   //    iqFiltered: filtered time series
+  //    iqNotched: if non-NULL, notched time series
   //    filterRatio: ratio of raw to unfiltered power, before applying correction
   //    spectralNoise: spectral noise estimated from the spectrum
   //    clutResidueRatio: ratio of spectral noise to calibrated noise
@@ -645,6 +651,7 @@ public:
                           const RadarComplex_t *specWindowed, // windowed
                           double calibratedNoise,
                           RadarComplex_t *iqFiltered,
+                          RadarComplex_t *iqNotched,
                           double &filterRatio,
                           double &spectralNoise,
                           double &spectralSnr,
@@ -656,6 +663,7 @@ public:
                            const RadarComplex_t *specWindowed,
                            double calibratedNoise,
                            RadarComplex_t *iqFiltered,
+                           RadarComplex_t *iqNotched,
                            double &filterRatio,
                            double &spectralNoise,
                            double &clutResidueRatio,
@@ -686,6 +694,7 @@ public:
   //
   //  Outputs:
   //    iqFiltered: filtered time series
+  //    iqNotched: if non-NULL, notched time series
   //    filterRatio: ratio of raw to unfiltered power,
   //                 before applying correction
   //    spectralNoise: spectral noise estimated from the spectrum
@@ -704,6 +713,7 @@ public:
                              double calibratedNoise,
                              bool interpAcrossNotch,
                              RadarComplex_t *iqFiltered,
+                             RadarComplex_t *iqNotched,
                              double &filterRatio,
                              double &spectralNoise,
                              double &spectralSnr,
@@ -931,17 +941,26 @@ public:
                              const RadarComplex_t *iqExpanded,
                              RadarComplex_t *iqCondensed);
   
-  // apply clutter filter ratio to complex data
-  //
   // Applies previously computed filter ratios, in the spectral
   // domain, to a time series
+  //
+  // Inputs:
+  //   nSamples
+  //   fft: object to be used for FFT computations
+  //   iq: input time series to be adjusted for filtering
+  //   specRatio: ratio of filtered to unfiltered in spectrum
+  //
+  //  Outputs:
+  //    iqFiltered: filtered time series
+  //    iqNotched: if not NULL, notched time series
   
-  static void applyFilterRatio(int nSamples,
-                               const RadarFft &fft,
-                               const RadarComplex_t *iq,
-                               const double *specRatio,
-                               RadarComplex_t *iqFiltered);
-
+  void applyFilterRatio(int nSamples,
+                        const RadarFft &fft,
+                        const RadarComplex_t *iq,
+                        const double *specRatio,
+                        RadarComplex_t *iqFiltered,
+                        RadarComplex_t *iqNotched);
+  
   // apply clutter filter for SZ 864
   
   void applyClutterFilterSz(int nSamples,
@@ -1299,11 +1318,7 @@ private:
 
   // clutter filtering parameters
   
-  bool _useRegressionFilter; // if set, takes preference over notch filter
-  bool _regrInterpAcrossNotch; // interpolate across the notch
-
-  bool _useSimpleNotchFilter;  // option to use simple notch clutter filter
-  double _notchWidthMps;       // notch width in meters per sec
+  clutter_filter_type_t _clutterFilterType;
 
   bool _applySpectralResidueCorrection;
   double _minSnrDbForResidueCorrection; // if SNR is below this, do not correct
@@ -1311,6 +1326,16 @@ private:
   bool _applyDbForDbCorrection;
   double _dbForFbRatio;
   double _dbForDbThreshold;
+
+  int _notchStart;  // start of filter notch in spectral domain
+  int _notchEnd;    // end   of filter notch in spectral domain
+
+  double _spectralNoise;
+  int _weatherPos;
+  int _clutterPos;
+
+  bool _regrInterpAcrossNotch; // interpolate across the notch - regression filter
+  double _notchWidthMps;       // notch width in meters per sec - notch filter
 
   // SNR thresholds for ZDR and LDR
   
