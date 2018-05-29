@@ -127,7 +127,7 @@ BscanWidget::~BscanWidget()
   // delete all of the dynamically created beams
 
   for (size_t i = 0; i < _beams.size(); ++i) {
-    delete _beams[i];
+    Beam::deleteIfUnused(_beams[i]);
   }
   _beams.clear();
 
@@ -233,7 +233,7 @@ void BscanWidget::clear()
   // Clear out the beam array
   
   for (size_t i = 0; i < _beams.size(); i++) {
-    delete _beams[i];
+    Beam::deleteIfUnused(_beams[i]);
   }
   _beams.clear();
   _pointClicked = false;
@@ -454,7 +454,7 @@ void BscanWidget::addBeam(const RadxRay *ray,
                                   plot_start_time,
                                   _timeSpanSecs,
                                   beam_start_time, beam_end_time);
-
+  beam->addClient();
   _beams.push_back(beam);
 
   beam->fillColors(beam_data, fields, &_backgroundBrush);
@@ -1034,7 +1034,7 @@ void BscanWidget::setPlotStartTime(const RadxTime &plot_start_time,
 
   if (clearBeams) {
     for (size_t ii = 0; ii < _beams.size(); ii++) {
-      delete _beams[ii];
+      Beam::deleteIfUnused(_beams[ii]);
     }
     _beams.clear();
   }
@@ -1068,7 +1068,7 @@ void BscanWidget::resetPlotStartTime(const RadxTime &plot_start_time)
   // erase beams
   
   for (size_t ii = 0; ii < toBeErased.size(); ii++) {
-    delete toBeErased[ii];
+    Beam::deleteIfUnused(toBeErased[ii]);
   }
   _beams.clear();
   _beams = toBeKept;
