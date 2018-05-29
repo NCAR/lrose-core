@@ -15,14 +15,23 @@ $ docker-compose down
 
 ### Source Install
 - Linux flavors: [Centos](centos_source/README.md) [Ubuntu](ubuntu_source.md) [Debian]() [SUSE]()
-- Mac OSX
+- Mac OSX (This is difficult to do, since there is no mac osx docker base image; I've tried linuxbrew/linuxbrew, centos + install llvm and clang, darwink/ci-mysql, rsmmr/clang, python, ruby.  Nothing seems to work.  The closest is with installing llvm and clang, but the package installer hangs after cmake ... make; need a docker base image that provides uname -a with a response containing darwin.)
 ### Package Install
-- brew (lrose-blaze.rb)
-- yum
-- apt-get
+- brew (lrose-blaze.rb) 
+```
+using linuxbrew/linuxbrew …
+I tried to brew install lrose-blaze.rb
+It gets stuck on make …
+==> Downloading https://releases.llvm.org/6.0.0/compiler-rt-6.0.0.src.tar.xz
+######################################################################## 100.0%
+==> cmake -G Unix Makefiles /tmp/llvm-20180522-29614-1tkwygc/llvm-6.0.0.src -DCMAKE_C_FLAGS_RELEASE=-DNDEBUG -DCMAKE_CXX_FLAGS_RELE
+==> make
+```
+- yum (TODO: make an RPM of LROSE-blaze)
+- apt-get (TODO: make an RPM of LROSE-blaze)
 ### Via Containers
 - Docker
-### Binary Install
+### Binary Install (no binary versions at this time)
 - Linux flavors
 - Mac OSX
 
@@ -42,4 +51,11 @@ then on Mac ..
 ```
 % mv /h/eol/brenda/test_area/tmp/lrose-blaze-20180516.src.tgz /Users/brenda/CI/test_lrose_blaze/
 ```
+
+### GUI Tests
+For any GUI, I needed to add the ip address of the host computer
+```
+xhost +nnn.nnn.nn.nnn
+```
+
 
