@@ -22,18 +22,18 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// RawFile.cc
+// MattFile.cc
 //
-// UW Raw HSRL NetCDF data
+// HSRL NetCDF data produced by Matt Haymann's python code
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Feb 2017
+// May 2018
 //
 ///////////////////////////////////////////////////////////////
 
-#include "RawFile.hh"
+#include "MattFile.hh"
 #include "Names.hh"
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
@@ -59,7 +59,7 @@ using namespace std;
 //////////////
 // Constructor
 
-RawFile::RawFile(const Params &params) :
+MattFile::MattFile(const Params &params) :
         _params(params)
   
 {
@@ -71,7 +71,7 @@ RawFile::RawFile(const Params &params) :
 /////////////
 // destructor
 
-RawFile::~RawFile()
+MattFile::~MattFile()
 
 {
   clear();
@@ -80,7 +80,7 @@ RawFile::~RawFile()
 /////////////////////////////////////////////////////////
 // clear the data in the object
 
-void RawFile::clear()
+void MattFile::clear()
   
 {
 
@@ -89,62 +89,47 @@ void RawFile::clear()
   _file.close();
 
   _timeDim = NULL;
-  _timeVecDim = NULL;
-  _binCountDim = NULL;
+  _rangeDim = NULL;
 
   _nTimesInFile = 0;
-  _timeVecSize = 0;
-  _nBinsInFile = 0;
+  _nRangeInFile = 0;
 
-  _machType.clear();
-  _hostName.clear();
-  _userName.clear();
-  _gitCommit.clear();
-  _hsrlVersion = -9999;
-  _dataAdded.clear();
-  _sourceSoftware.clear();
+  _history.clear();
 
   _timeVar = NULL;
   _dataTimes.clear();
   _dTimes.clear();
-  
-  _telescopeLockedVar = NULL;
-  _telescopeDirectionVar = NULL;
 
-  _telescopeLocked.clear();
-  _telescopeDirection.clear();
+  _rangeVar = NULL;
+  _rangeM.clear();
+  _startRangeKm = 154.2432;
+  _gateSpacingKm = 0.0075;
+
+  _clearRayVariables();
 
   _instrumentType = Radx::INSTRUMENT_TYPE_LIDAR;
   _platformType = Radx::PLATFORM_TYPE_AIRCRAFT;
   _primaryAxis = Radx::PRIMARY_AXIS_Y_PRIME;
-
-  _rawGateSpacingKm = _params.raw_bin_spacing_km;
-  _gateSpacingKm = _rawGateSpacingKm;
-  _startRangeKm = _params.raw_bin_start_range_km;
-  if (_params.combine_bins_on_read) {
-    _gateSpacingKm *= _params.n_bins_per_gate;
-    _startRangeKm += (_gateSpacingKm - _rawGateSpacingKm) / 2.0;
-  }
 
   _rays.clear();
   
 }
 
 ////////////////////////////////////////////////////////////
-// Check if this is a CfRadial file
+// Check if this is a Matt type file
 // Returns true on success, false on failure
 
-bool RawFile::isRawHsrlFile(const string &path)
+bool MattFile::isMattFile(const string &path)
   
 {
 
   clear();
   
   // open file
-
+  
   if (_file.openRead(path)) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "DEBUG - not Raw HSRL file" << endl;
+      cerr << "DEBUG - not NetCDF file" << endl;
       cerr << _file.getErrStr() << endl;
     }
     return false;
@@ -155,14 +140,14 @@ bool RawFile::isRawHsrlFile(const string &path)
   if (_readDimensions()) {
     _file.close();
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "DEBUG - not Raw HSRL file" << endl;
+      cerr << "DEBUG - not Matt-type HSRL file" << endl;
       cerr << _errStr << endl;
     }
     return false;
   }
 
   // file has the correct dimensions, so it is a CfRadial file
-
+  
   _file.close();
   return true;
 
@@ -172,7 +157,7 @@ bool RawFile::isRawHsrlFile(const string &path)
 // get the date and time from a dorade file path
 // returns 0 on success, -1 on failure
 
-int RawFile::getTimeFromPath(const string &path, RadxTime &rtime)
+int MattFile::getTimeFromPath(const string &path, RadxTime &rtime)
 
 {
 
@@ -194,17 +179,18 @@ int RawFile::getTimeFromPath(const string &path, RadxTime &rtime)
   // iteratively try getting the date and time from the string
   // moving along by one character at a time
   
-  while (start < end - 6) {
-    int year, month, day, hour, min, sec;
-    if (sscanf(start, "%4d%2d%2d_%2d%2d%2d",
-               &year, &month, &day, &hour, &min, &sec) == 6) {
+  while (start < end - 14) {
+    char cc;
+    int year, month, day, hour, min;
+    if (sscanf(start, "%4d%2d%2d%c%2d%2d",
+               &year, &month, &day, &cc, &hour, &min) == 6) {
       if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
         return -1;
       }
-      if (hour < 0 || hour > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
+      if (hour < 0 || hour > 23 || min < 0 || min > 59) {
         return -1;
       }
-      rtime.set(year, month, day, hour, min, sec);
+      rtime.set(year, month, day, hour, min, 0);
       return 0;
     }
     start++;
@@ -221,7 +207,7 @@ int RawFile::getTimeFromPath(const string &path, RadxTime &rtime)
 //
 // Use getErrStr() if error occurs
 
-int RawFile::readFromPath(const string &path,
+int MattFile::readFromPath(const string &path,
                           RadxVol &vol)
   
 {
@@ -230,14 +216,18 @@ int RawFile::readFromPath(const string &path,
     cerr << "Reading file: " << path << endl;
   }
 
-  string errStr("ERROR - RawFile::readFromPath");
+  string errStr("ERROR - MattFile::readFromPath");
 
   _readVol = &vol;
+
+  // get the start time from the file path
+
+  getTimeFromPath(path, _startTime);
 
   // clear tmp rays
   
   _nTimesInFile = 0;
-  _nBinsInFile = 0;
+  _nRangeInFile = 0;
   _rays.clear();
 
   // open file
@@ -310,7 +300,7 @@ int RawFile::readFromPath(const string &path,
 ///////////////////////////////////
 // read in the dimensions
 
-int RawFile::_readDimensions()
+int MattFile::_readDimensions()
 
 {
 
@@ -319,34 +309,21 @@ int RawFile::_readDimensions()
   if (_file.readDim("time", _timeDim) == 0) {
     _nTimesInFile = _timeDim->size();
   } else {
-    _addErrStr("ERROR - RawFile::_readDimensions()");
+    _addErrStr("ERROR - MattFile::_readDimensions()");
     _addErrStr("  Cannot find 'time' dimension");
     return -1;
   }
   
 
-  if (_file.readDim("time_vector", _timeVecDim) == 0) {
-    _timeVecSize = _timeVecDim->size();
+  if (_file.readDim("range", _rangeDim) == 0) {
+    _nRangeInFile = _rangeDim->size();
   } else {
-    _addErrStr("ERROR - RawFile::_readDimensions()");
-    _addErrStr("  Cannot find 'time_vector' dimension");
-    return -1;
-  }
-  
-  if (_file.readDim("bincount", _binCountDim) == 0) {
-    _nBinsInFile = _binCountDim->size();
-  } else {
-    _addErrStr("ERROR - RawFile::_readDimensions()");
-    _addErrStr("  Cannot find 'bincount' dimension");
+    _addErrStr("ERROR - MattFile::_readDimensions()");
+    _addErrStr("  Cannot find 'range' dimension");
     return -1;
   }
 
-  _nPoints = _nTimesInFile * _nBinsInFile;
-  _nBinsPerGate = 1;
-  if (_params.combine_bins_on_read) {
-    _nBinsPerGate = _params.n_bins_per_gate;
-  }
-  _nGates = _nBinsInFile / _nBinsPerGate;
+  _nPoints = _nTimesInFile * _nRangeInFile;
   
   return 0;
 
@@ -355,17 +332,12 @@ int RawFile::_readDimensions()
 ///////////////////////////////////
 // read the global attributes
 
-int RawFile::_readGlobalAttributes()
+int MattFile::_readGlobalAttributes()
 
 {
 
-  _machType.clear();
-  _hostName.clear();
-  _userName.clear();
-  _gitCommit.clear();
-  _hsrlVersion = -9999;
-  _sourceSoftware.clear();
-
+  _history.clear();
+  
   for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
     
     Nc3Att* att = _file.getNc3File()->get_att(ii);
@@ -373,35 +345,11 @@ int RawFile::_readGlobalAttributes()
     if (att == NULL) {
       continue;
     }
-
-    if (!strcmp(att->name(), "NCUTIL_Machtype")) {
-      _machType = Nc3xFile::asString(att);
+    
+    if (!strcmp(att->name(), "history")) {
+      _history = Nc3xFile::asString(att);
     }
-
-    if (!strcmp(att->name(), "NCUTIL_Hostname")) {
-      _hostName = Nc3xFile::asString(att);
-    }
-
-    if (!strcmp(att->name(), "NCUTIL_Username")) {
-      _userName = Nc3xFile::asString(att);
-    }
-
-    if (!strcmp(att->name(), "NCUTIL_HSRL_GIT_COMMIT")) {
-      _gitCommit = Nc3xFile::asString(att);
-    }
-
-    if (!strcmp(att->name(), "DATA_HSRLVersion")) {
-      _hsrlVersion = att->as_int(0);
-    }
-
-    if (!strcmp(att->name(), "DATA_Added")) {
-      _dataAdded = Nc3xFile::asString(att);
-    }
-
-    if (!strcmp(att->name(), "DATA_SourceSoftware")) {
-      _sourceSoftware = Nc3xFile::asString(att);
-    }
-
+    
     // Caller must delete attribute
 
     delete att;
@@ -409,13 +357,8 @@ int RawFile::_readGlobalAttributes()
   } // ii
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-
-    cerr << "Global attr machType: " << _machType << endl;
-    cerr << "Global attr hostName: " << _hostName << endl;
-    cerr << "Global attr userName: " << _userName << endl;
-    cerr << "Global attr gitCommit: " << _gitCommit << endl;
-    cerr << "Global attr hsrlVersion: " << _hsrlVersion << endl;
-    cerr << "Global attr sourceSoftware: " << _sourceSoftware << endl;
+    
+    cerr << "Global attr history: " << _history << endl;
     
   }
 
@@ -426,7 +369,7 @@ int RawFile::_readGlobalAttributes()
 ///////////////////////////////////
 // read the times
 
-int RawFile::_readTimes()
+int MattFile::_readTimes()
 
 {
 
@@ -435,55 +378,42 @@ int RawFile::_readTimes()
 
   // read the time variable
 
-  _timeVar = _file.getNc3File()->get_var("DATA_time");
+  _timeVar = _file.getNc3File()->get_var("time");
   if (_timeVar == NULL) {
-    _addErrStr("ERROR - RawFile::_readTimes");
-    _addErrStr("  Cannot find DATA_time variable");
+    _addErrStr("ERROR - MattFile::_readTimes");
+    _addErrStr("  Cannot find time variable");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
-  if (_timeVar->num_dims() < 2) {
-    _addErrStr("ERROR - RawFile::_readTimes");
+  if (_timeVar->num_dims() != 1) {
+    _addErrStr("ERROR - MattFile::_readTimes");
     _addErrStr("  time variable has no dimensions");
     return -1;
   }
   Nc3Dim *timeDim = _timeVar->get_dim(0);
-  Nc3Dim *timeVecDim = _timeVar->get_dim(1);
-  if (timeDim != _timeDim || timeVecDim != _timeVecDim) {
-    _addErrStr("ERROR - RawFile::_readTimes");
-    _addErrStr("  DATA_time has incorrect dimensions");
-    _addErrStr("  Should be (time, time_vector)");
+  if (timeDim != _timeDim) {
+    _addErrStr("ERROR - MattFile::_readTimes");
+    _addErrStr("  time has incorrect dimensions");
+    _addErrStr("  should be (time)");
     return -1;
   }
-
+  
   // read in time 2D array
 
-  short *timeData = new short[_nTimesInFile * _timeVecSize];
-  if (!_timeVar->get(timeData, _nTimesInFile, _timeVecSize)) {
-    _addErrStr("ERROR - RawFile::_readTimes");
-    _addErrStr("  Cannot read DATA_time 2D array");
+  float *timeData = new float[_nTimesInFile];
+  if (!_timeVar->get(timeData, _nTimesInFile)) {
+    _addErrStr("ERROR - MattFile::_readTimes");
+    _addErrStr("  Cannot read time array");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     delete[] timeData;
     return -1;
   }
 
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    short *tdat = timeData + ii * _timeVecSize;
-    int year = tdat[0];
-    int month = tdat[1];
-    int day = tdat[2];
-    int hour = tdat[3];
-    int min = tdat[4];
-    int sec = tdat[5];
-    int milliSec = tdat[6];
-    int microSec = tdat[7];
-    double fracSec = milliSec / 1.0e3 + microSec / 1.0e6;
-    RadxTime thisTime(year, month, day, hour, min, sec, fracSec);
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "  Ray time: " << thisTime.asString(6) << endl;
-    }
-    _dataTimes.push_back(thisTime);
-    _dTimes.push_back(thisTime.asDouble());
+    double dt = timeData[ii];
+    _dTimes.push_back(dt);
+    RadxTime rayTime = _startTime + dt;
+    _dataTimes.push_back(rayTime);
   }
   
   delete[] timeData;
@@ -494,42 +424,103 @@ int RawFile::_readTimes()
 ///////////////////////////////////
 // clear the ray variables
 
-void RawFile::_clearRayVariables()
+void MattFile::_clearRayVariables()
 
 {
 
-  _telescopeLocked.clear();
+  _polAngle.clear();
   _telescopeDirection.clear();
+
+  _lat.clear();
+  _lon.clear();
+  _alt.clear();
+  _roll.clear();
+  _pitch.clear();
+  _heading.clear();
+  _pressure.clear();
+  _tas.clear();
+  _temp.clear();
 
 }
 
 ///////////////////////////////////
 // read in ray variables
 
-int RawFile::_readRayVariables()
+int MattFile::_readRayVariables()
 
 {
 
   _clearRayVariables();
   int iret = 0;
 
-  _readRayVar(_telescopeLockedVar, "TelescopeLocked", _telescopeLocked);
-  if (_telescopeLocked.size() < _nTimesInFile) {
+  _readRayVar("polarization", _polAngle);
+  if (_polAngle.size() < _nTimesInFile) {
+    _addErrStr("ERROR - polarization variable required");
+    iret = -1;
+  }
+
+  _readRayVar("TelescopeDirection", _telescopeDirection);
+  if (_telescopeDirection.size() < _nTimesInFile) {
     _addErrStr("ERROR - TelescopeLocked variable required");
     iret = -1;
   }
 
-  _readRayVar(_telescopeDirectionVar, "TelescopeDirection", _telescopeDirection);
-  if (_telescopeDirection.size() < _nTimesInFile) {
-    _addErrStr("ERROR - TelescopeDirection variable required");
+  _readRayVar("GGLAT", _lat);
+  if (_lat.size() < _nTimesInFile) {
+    _addErrStr("ERROR - GGLAT variable required");
     iret = -1;
   }
 
-  _readRayVar(_pollAngleVar, "polarization", _polAngle);
-  _readRayVar(_totalEnergyVar, "total_energy", _totalEnergy);
+  _readRayVar("GGLON", _lon);
+  if (_lon.size() < _nTimesInFile) {
+    _addErrStr("ERROR - GGLON variable required");
+    iret = -1;
+  }
+
+  _readRayVar("GGALT", _alt);
+  if (_alt.size() < _nTimesInFile) {
+    _addErrStr("ERROR - GGALT variable required");
+    iret = -1;
+  }
+
+  _readRayVar("ROLL", _roll);
+  if (_roll.size() < _nTimesInFile) {
+    _addErrStr("ERROR - ROLL variable required");
+    iret = -1;
+  }
+
+  _readRayVar("PITCH", _pitch);
+  if (_pitch.size() < _nTimesInFile) {
+    _addErrStr("ERROR - PITCH variable required");
+    iret = -1;
+  }
+
+  _readRayVar("THDG", _heading);
+  if (_heading.size() < _nTimesInFile) {
+    _addErrStr("ERROR - THDG variable required");
+    iret = -1;
+  }
+
+  _readRayVar("PSXC", _pressure);
+  if (_pressure.size() < _nTimesInFile) {
+    _addErrStr("ERROR - PSXC variable required");
+    iret = -1;
+  }
+
+  _readRayVar("TASX", _tas);
+  if (_tas.size() < _nTimesInFile) {
+    _addErrStr("ERROR - TASX variable required");
+    iret = -1;
+  }
+
+  _readRayVar("ATX", _temp);
+  if (_temp.size() < _nTimesInFile) {
+    _addErrStr("ERROR - ATX variable required");
+    iret = -1;
+  }
 
   if (iret) {
-    _addErrStr("ERROR - RawFile::_readRayVariables");
+    _addErrStr("ERROR - MattFile::_readRayVariables");
     return -1;
   }
 
@@ -541,31 +532,22 @@ int RawFile::_readRayVariables()
 // read a ray variable - double
 // side effects: set var, vals
 
-int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<double> &vals, bool required)
+int MattFile::_readRayVar(const string &name, vector<double> &vals)
   
 {
 
   vals.clear();
 
   // get var
-
-  var = _getRayVar(name, required);
+  
+  Nc3Var *var = _getRayVar(name, true);
   if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaDouble);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      return -1;
-    }
+    _addErrStr("ERROR - MattFile::_readRayVar");
+    return -1;
   }
 
   // load up data
-
+  
   double *data = new double[_nTimesInFile];
   double *dd = data;
   int iret = 0;
@@ -574,220 +556,21 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
       vals.push_back(*dd);
     }
   } else {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaDouble);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      iret = -1;
-    }
+    _addErrStr("ERROR - MattFile::_readRayVar");
+    _addErrStr("  Cannot read variable: ", name);
+    _addErrStr(_file.getNc3Error()->get_errmsg());
+    iret = -1;
   }
   delete[] data;
   return iret;
 
-}
-
-///////////////////////////////////
-// read a ray variable - float
-// side effects: set var, vals
-
-int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<float> &vals, bool required)
-  
-{
-
-  vals.clear();
-
-  // get var
-
-  var = _getRayVar(name, required);
-  if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaFloat);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      return -1;
-    }
-  }
-
-  // load up data
-
-  float *data = new float[_nTimesInFile];
-  float *dd = data;
-  int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      vals.push_back(*dd);
-    }
-  } else {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaFloat);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      iret = -1;
-    }
-  }
-  delete[] data;
-  return iret;
-
-}
-
-///////////////////////////////////
-// read a ray variable - double
-// side effects: set vals only
-
-int RawFile::_readRayVar(const string &name,
-                         vector<double> &vals, bool required)
-{
-  Nc3Var *var;
-  return _readRayVar(var, name, vals, required);
-}
-
-///////////////////////////////////
-// read a ray variable - integer
-// side effects: set var, vals
-
-int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<int> &vals, bool required)
-  
-{
-
-  vals.clear();
-
-  // get var
-  
-  var = _getRayVar(name, required);
-  if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      return -1;
-    }
-  }
-
-  // load up data
-
-  int *data = new int[_nTimesInFile];
-  int *dd = data;
-  int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      vals.push_back(*dd);
-    }
-  } else {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      iret = -1;
-    }
-  }
-  delete[] data;
-  return iret;
-
-}
-
-///////////////////////////////////
-// read a ray variable - integer
-// side effects: set vals only
-
-int RawFile::_readRayVar(const string &name,
-                         vector<int> &vals, bool required)
-{
-  Nc3Var *var;
-  return _readRayVar(var, name, vals, required);
-}
-
-///////////////////////////////////////////
-// read a ray variable - boolean
-// side effects: set var, vals
-
-int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<bool> &vals, bool required)
-  
-{
-  
-  vals.clear();
-  
-  // get var
-  
-  var = _getRayVar(name, false);
-  if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(false);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      return -1;
-    }
-  }
-
-  // load up data
-  
-  int *data = new int[_nTimesInFile];
-  int *dd = data;
-  int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      if (*dd == 0) {
-        vals.push_back(false);
-      } else {
-        vals.push_back(true);
-      }
-    }
-  } else {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-      vals.push_back(false);
-    }
-    clearErrStr();
-  }
-  delete[] data;
-  return iret;
-
-}
-
-///////////////////////////////////
-// read a ray variable - boolean
-// side effects: set vals only
-
-int RawFile::_readRayVar(const string &name,
-                         vector<bool> &vals, bool required)
-{
-  Nc3Var *var;
-  return _readRayVar(var, name, vals, required);
 }
 
 ///////////////////////////////////
 // get a ray variable by name
 // returns NULL on failure
 
-Nc3Var* RawFile::_getRayVar(const string &name, bool required)
+Nc3Var* MattFile::_getRayVar(const string &name, bool required)
 
 {
 
@@ -796,7 +579,7 @@ Nc3Var* RawFile::_getRayVar(const string &name, bool required)
   Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
-      _addErrStr("ERROR - RawFile::_getRayVar");
+      _addErrStr("ERROR - MattFile::_getRayVar");
       _addErrStr("  Cannot read variable, name: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
     }
@@ -807,20 +590,20 @@ Nc3Var* RawFile::_getRayVar(const string &name, bool required)
   
   if (var->num_dims() < 1) {
     if (required) {
-      _addErrStr("ERROR - RawFile::_getRayVar");
+      _addErrStr("ERROR - MattFile::_getRayVar");
       _addErrStr("  variable name: ", name);
       _addErrStr("  variable has no dimensions");
     }
     return NULL;
   }
   Nc3Dim *timeDim = var->get_dim(0);
-  if (timeDim != _timeDim) {
+  if (timeDim->size() != _timeDim->size()) {
     if (required) {
-      _addErrStr("ERROR - RawFile::_getRayVar");
+      _addErrStr("ERROR - MattFile::_getRayVar");
       _addErrStr("  variable name: ", name);
-      _addErrStr("  variable has incorrect dimension, dim name: ", 
-                 timeDim->name());
-      _addErrStr("  should be: ", "time");
+      _addErrInt("  variable has incorrect dimension, size: ", 
+                 timeDim->size());
+      _addErrInt("  should be: ", _timeDim->size());
     }
     return NULL;
   }
@@ -833,7 +616,7 @@ Nc3Var* RawFile::_getRayVar(const string &name, bool required)
 // create the rays to be read in
 // and set meta data
 
-int RawFile::_createRays(const string &path)
+int MattFile::_createRays(const string &path)
 
 {
 
@@ -882,7 +665,7 @@ int RawFile::_createRays(const string &path)
     if (_params.read_georef_data_from_aircraft_system) {
 
       RadxGeoref geo;
-      if (RawFile::readGeorefFromSpdb(_params.georef_data_spdb_url,
+      if (MattFile::readGeorefFromSpdb(_params.georef_data_spdb_url,
                                       _dataTimes[ii].utime(),
                                       _params.georef_data_search_margin_secs,
                                       _params.debug >= Params::DEBUG_VERBOSE,
@@ -913,21 +696,12 @@ int RawFile::_createRays(const string &path)
 
         ray->setGeoref(geo);
 
-        // compute az/el from geo
-        
-        // double azimuth, elevation;
-        // RadxCfactors corr;
-        // computeRadarAngles(geo, corr, azimuth, elevation);
-        // ray->setAzimuthDeg(azimuth);
-        // ray->setElevationDeg(elevation);
-    
-      } // if (RawFile::readGeorefFromSpdb ...
+      } // if (MattFile::readGeorefFromSpdb ...
 
     } // if (_params.read_georef_data_from_aircraft_system)
     
     // other metadata - overloading
     
-    ray->setMeasXmitPowerDbmH(_totalEnergy[ii]);
     ray->setEstimatedNoiseDbmHc(_polAngle[ii]);
 
     
@@ -949,7 +723,7 @@ int RawFile::_createRays(const string &path)
 /////////////////////////////////////////////////////////
 // load up the read volume with the data from this object
 
-void RawFile::_loadReadVolume()
+void MattFile::_loadReadVolume()
 {
 
   _readVol->clear();
@@ -973,14 +747,14 @@ void RawFile::_loadReadVolume()
   _readVol->setLidarFieldOfViewMrad(-9999.0);
   _readVol->setLidarBeamDivergenceMrad(-9999.0);
 
-  _readVol->setTitle("NCAR HSRL");
-  _readVol->setSource("HSRL realtime software");
-  _readVol->setHistory("Converted from RAW NetCDF files");
+  _readVol->setTitle("NCAR EOL HSRL");
+  _readVol->setSource("HSRL software");
+  _readVol->setHistory(_history);
   _readVol->setInstitution("NCAR");
-  _readVol->setReferences("University of Wisconsin");
+  _readVol->setReferences("");
   _readVol->setComment("");
   _readVol->setDriver("Hsrl2Radx");
-  _readVol->setCreated(_dataAdded);
+  _readVol->setCreated(_startTime.getW3cStr());
   _readVol->setStatusXml("");
   
   _readVol->setScanName("Vert");
@@ -1019,7 +793,7 @@ void RawFile::_loadReadVolume()
 ////////////////////////////////////////////
 // read the field variables
 
-int RawFile::_readFieldVariables()
+int MattFile::_readFieldVariables()
 
 {
 
@@ -1040,8 +814,8 @@ int RawFile::_readFieldVariables()
 
     // check that we have the correct dimensions
     Nc3Dim* timeDim = var->get_dim(0);
-    Nc3Dim* bincountDim = var->get_dim(1);
-    if (timeDim != _timeDim || bincountDim != _binCountDim) {
+    Nc3Dim* rangeDim = var->get_dim(1);
+    if (timeDim != _timeDim || rangeDim != _rangeDim) {
       continue;
     }
     
@@ -1056,23 +830,21 @@ int RawFile::_readFieldVariables()
 
     string name = var->name();
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "DEBUG - RawFile::_readFieldVariables" << endl;
+      cerr << "DEBUG - MattFile::_readFieldVariables" << endl;
       cerr << "  -->> adding field: " << name << endl;
     }
 
-    string longName;
-    Nc3Att *longNameAtt = var->get_att("long_name");
-    if (longNameAtt != NULL) {
-      longName = Nc3xFile::asString(longNameAtt);
-      delete longNameAtt;
+    string units;
+    Nc3Att *unitsAtt = var->get_att("units");
+    if (unitsAtt != NULL) {
+      units = Nc3xFile::asString(unitsAtt);
+      delete unitsAtt;
     }
-    
-    string units = "counts";
 
     // load in the data
-
-    if (_addCountFieldToRays(var, name, units)) {
-      _addErrStr("ERROR - RawFile::_readFieldVariables");
+    
+    if (_addFieldToRays(var, name, units)) {
+      _addErrStr("ERROR - MattFile::_readFieldVariables");
       _addErrStr("  cannot read field name: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
@@ -1085,29 +857,24 @@ int RawFile::_readFieldVariables()
 }
 
 //////////////////////////////////////////////////////////////
-// Add si32 field to rays
+// Add field to rays
 // The _rays array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int RawFile::_addCountFieldToRays(Nc3Var* var,
-                                  const string &name,
-                                  const string &units)
+int MattFile::_addFieldToRays(Nc3Var* var,
+                              const string &name,
+                              const string &units)
   
 {
 
-  // get int data from array
+  // get data from array
   
-  RadxArray<Radx::si32> idata_;
-  Radx::si32 *idata = idata_.alloc(_nPoints);
-  int iret = !var->get(idata, _nTimesInFile, _nBinsInFile);
+  RadxArray<Radx::fl64> ddata_;
+  Radx::fl64 *ddata = ddata_.alloc(_nPoints);
+  int iret = !var->get(ddata, _nTimesInFile, _nRangeInFile);
   if (iret) {
     return -1;
   }
-
-  // set up float array
-
-  RadxArray<Radx::fl32> fcounts_;
-  Radx::fl32 *fcounts = fcounts_.alloc(_nGates);
 
   // set name
 
@@ -1136,26 +903,15 @@ int RawFile::_addCountFieldToRays(Nc3Var* var,
   
   for (size_t iray = 0; iray < _rays.size(); iray++) {
 
-    // get int counts for ray
+    // get data for ray
     
-    int startIndex = iray * _nBinsInFile;
-    Radx::si32 *icounts = idata + startIndex;
+    int startIndex = iray * _nRangeInFile;
+    Radx::fl64 *dd = ddata + startIndex;
 
-    // sum counts per gate
-
-    size_t ibin = 0;
-    for (size_t igate = 0; igate < _nGates; igate++) {
-      fcounts[igate] = 0.0;
-      for (size_t ii = 0; ii < _nBinsPerGate; ii++, ibin++) {
-        fcounts[igate] += icounts[ibin];
-      }
-      fcounts[igate] /= (double) _nBinsPerGate;
-    }
-    
     RadxField *field =
-      _rays[iray]->addField(outName, units, _nGates,
-                            Radx::missingFl32,
-                            fcounts,
+      _rays[iray]->addField(outName, units, _nRangeInFile,
+                            Radx::missingFl64,
+                            dd,
                             true);
     
     field->setLongName(longName);
@@ -1173,7 +929,7 @@ int RawFile::_addCountFieldToRays(Nc3Var* var,
 // add labelled integer value to error string,
 // with optional following carriage return.
 
-void RawFile::_addErrInt(string label, int iarg, bool cr)
+void MattFile::_addErrInt(string label, int iarg, bool cr)
 {
   Radx::addErrInt(_errStr, label, iarg, cr);
 }
@@ -1183,7 +939,7 @@ void RawFile::_addErrInt(string label, int iarg, bool cr)
 // with optional following carriage return.
 // Default format is %g.
 
-void RawFile::_addErrDbl(string label, double darg,
+void MattFile::_addErrDbl(string label, double darg,
                           string format, bool cr)
   
 {
@@ -1194,13 +950,13 @@ void RawFile::_addErrDbl(string label, double darg,
 // add labelled string to error string
 // with optional following carriage return.
 
-void RawFile::_addErrStr(string label, string strarg, bool cr)
+void MattFile::_addErrStr(string label, string strarg, bool cr)
 
 {
   Radx::addErrStr(_errStr, label, strarg, cr);
 }
 
-void RawFile::_clearRays()
+void MattFile::_clearRays()
 {
   for (int ii = 0; ii < (int) _rays.size(); ii++) {
     delete _rays[ii];
@@ -1216,7 +972,7 @@ void RawFile::_clearRays()
 // see Wen-Chau Lee's paper
 // "Mapping of the Airborne Doppler Radar Data"
 
-void RawFile::computeRadarAngles(RadxGeoref &georef,
+void MattFile::computeRadarAngles(RadxGeoref &georef,
                                  RadxCfactors &corr,
                                  double &azimuthDeg,
                                  double &elevationDeg)
@@ -1270,7 +1026,7 @@ void RawFile::computeRadarAngles(RadxGeoref &georef,
 // Read georeference from SPDB
 // Returns 0 on success, -1 on error
 
-int RawFile::readGeorefFromSpdb(string georefUrl,
+int MattFile::readGeorefFromSpdb(string georefUrl,
                                 time_t searchTime,
                                 int searchMarginSecs,
                                 bool debug,
