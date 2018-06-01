@@ -265,6 +265,7 @@ bool Refract::_processData(const DateTime &trigger_time)
       LOG(ERROR) << data_file.getErrStr();
       return false;
     }
+    LOG(DEBUG) << "Wrote output file: " << data_file.getPathInUse();
     return true;
   }
   else
