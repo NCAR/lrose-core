@@ -681,6 +681,8 @@ bool Calib::_writeCalibrationFile(const DateTime &data_time) const
     return false;
   }
   
+  LOG(DEBUG) << "Wrote calibration file: " << calib_file.getPathInUse();
+
   return true;
 }
 
