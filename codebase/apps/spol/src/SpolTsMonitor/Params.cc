@@ -672,17 +672,19 @@
       tt->struct_def.fields[2].rel_offset = 
         (char *) &_xml_entries->entry_type - (char *) _xml_entries;
         tt->struct_def.fields[2].enum_def.name = tdrpStrDup("xml_entry_type_t");
-        tt->struct_def.fields[2].enum_def.nfields = 4;
+        tt->struct_def.fields[2].enum_def.nfields = 5;
         tt->struct_def.fields[2].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[2].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[2].enum_def.fields[0].name = tdrpStrDup("XML_ENTRY_BOOLEAN");
         tt->struct_def.fields[2].enum_def.fields[0].val = XML_ENTRY_BOOLEAN;
-        tt->struct_def.fields[2].enum_def.fields[1].name = tdrpStrDup("XML_ENTRY_INT");
-        tt->struct_def.fields[2].enum_def.fields[1].val = XML_ENTRY_INT;
-        tt->struct_def.fields[2].enum_def.fields[2].name = tdrpStrDup("XML_ENTRY_DOUBLE");
-        tt->struct_def.fields[2].enum_def.fields[2].val = XML_ENTRY_DOUBLE;
-        tt->struct_def.fields[2].enum_def.fields[3].name = tdrpStrDup("XML_ENTRY_STRING");
-        tt->struct_def.fields[2].enum_def.fields[3].val = XML_ENTRY_STRING;
+        tt->struct_def.fields[2].enum_def.fields[1].name = tdrpStrDup("XML_ENTRY_BOOLEAN_TO_INT");
+        tt->struct_def.fields[2].enum_def.fields[1].val = XML_ENTRY_BOOLEAN_TO_INT;
+        tt->struct_def.fields[2].enum_def.fields[2].name = tdrpStrDup("XML_ENTRY_INT");
+        tt->struct_def.fields[2].enum_def.fields[2].val = XML_ENTRY_INT;
+        tt->struct_def.fields[2].enum_def.fields[3].name = tdrpStrDup("XML_ENTRY_DOUBLE");
+        tt->struct_def.fields[2].enum_def.fields[3].val = XML_ENTRY_DOUBLE;
+        tt->struct_def.fields[2].enum_def.fields[4].name = tdrpStrDup("XML_ENTRY_STRING");
+        tt->struct_def.fields[2].enum_def.fields[4].val = XML_ENTRY_STRING;
       tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[3].fname = tdrpStrDup("ok_boolean");
       tt->struct_def.fields[3].ptype = BOOL_TYPE;

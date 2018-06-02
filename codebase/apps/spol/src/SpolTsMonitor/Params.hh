@@ -76,9 +76,10 @@ public:
 
   typedef enum {
     XML_ENTRY_BOOLEAN = 0,
-    XML_ENTRY_INT = 1,
-    XML_ENTRY_DOUBLE = 2,
-    XML_ENTRY_STRING = 3
+    XML_ENTRY_BOOLEAN_TO_INT = 1,
+    XML_ENTRY_INT = 2,
+    XML_ENTRY_DOUBLE = 3,
+    XML_ENTRY_STRING = 4
   } xml_entry_type_t;
 
   // struct typedefs

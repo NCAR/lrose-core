@@ -672,6 +672,7 @@ bool Calib::_writeCalibrationFile(const DateTime &data_time) const
     LOG(ERROR) << calib_file.getErrStr();
     return false;
   }
+  LOG(DEBUG) << "Wrote reference calibration file: " << calib_file.getPathInUse();
   
   if (calib_file.writeToDir(_refUrl.c_str()) != 0)
   {
@@ -681,6 +682,8 @@ bool Calib::_writeCalibrationFile(const DateTime &data_time) const
     return false;
   }
   
+  LOG(DEBUG) << "Wrote time-stamped calibration file: " << calib_file.getPathInUse();
+
   return true;
 }
 

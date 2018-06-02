@@ -184,6 +184,10 @@ private:
                            const Params::xml_entry_t &entry,
                            FILE *nagiosFile);
 
+  int _handleBooleanToIntNagios(const string &xml,
+                                const Params::xml_entry_t &entry,
+                                FILE *nagiosFile);
+
   int _handleIntNagios(const string &xml,
                        const Params::xml_entry_t &entry,
                        FILE *nagiosFile);
