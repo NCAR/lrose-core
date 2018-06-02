@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// MattFile.cc
+// MattNcFile.cc
 //
 // HSRL NetCDF data produced by Matt Haymann's python code
 //
@@ -33,7 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "MattFile.hh"
+#include "MattNcFile.hh"
 #include "Names.hh"
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
@@ -46,6 +46,8 @@
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxCfactors.hh>
+#include <Radx/RadxRemap.hh>
+#include <Radx/RadxRangeGeom.hh>
 #include <Spdb/DsSpdb.hh>
 #include <rapformats/ac_georef.hh>
 #include <cstring>
@@ -59,7 +61,7 @@ using namespace std;
 //////////////
 // Constructor
 
-MattFile::MattFile(const Params &params) :
+MattNcFile::MattNcFile(const Params &params) :
         _params(params)
   
 {
@@ -71,7 +73,7 @@ MattFile::MattFile(const Params &params) :
 /////////////
 // destructor
 
-MattFile::~MattFile()
+MattNcFile::~MattNcFile()
 
 {
   clear();
@@ -80,7 +82,7 @@ MattFile::~MattFile()
 /////////////////////////////////////////////////////////
 // clear the data in the object
 
-void MattFile::clear()
+void MattNcFile::clear()
   
 {
 
@@ -101,9 +103,8 @@ void MattFile::clear()
   _dTimes.clear();
 
   _rangeVar = NULL;
-  _rangeM.clear();
-  _startRangeKm = 154.2432;
-  _gateSpacingKm = 0.0075;
+  _rangeKm.clear();
+  _geom.setRangeGeom(0.0075, 154.2432);
 
   _clearRayVariables();
 
@@ -119,7 +120,7 @@ void MattFile::clear()
 // Check if this is a Matt type file
 // Returns true on success, false on failure
 
-bool MattFile::isMattFile(const string &path)
+bool MattNcFile::isMattNcFile(const string &path)
   
 {
 
@@ -157,7 +158,7 @@ bool MattFile::isMattFile(const string &path)
 // get the date and time from a dorade file path
 // returns 0 on success, -1 on failure
 
-int MattFile::getTimeFromPath(const string &path, RadxTime &rtime)
+int MattNcFile::getTimeFromPath(const string &path, RadxTime &rtime)
 
 {
 
@@ -207,7 +208,7 @@ int MattFile::getTimeFromPath(const string &path, RadxTime &rtime)
 //
 // Use getErrStr() if error occurs
 
-int MattFile::readFromPath(const string &path,
+int MattNcFile::readFromPath(const string &path,
                           RadxVol &vol)
   
 {
@@ -216,7 +217,7 @@ int MattFile::readFromPath(const string &path,
     cerr << "Reading file: " << path << endl;
   }
 
-  string errStr("ERROR - MattFile::readFromPath");
+  string errStr("ERROR - MattNcFile::readFromPath");
 
   _readVol = &vol;
 
@@ -254,6 +255,13 @@ int MattFile::readFromPath(const string &path,
   // read time variable
   
   if (_readTimes()) {
+    _addErrStr(errStr);
+    return -1;
+  }
+  
+  // read range variable
+  
+  if (_readRange()) {
     _addErrStr(errStr);
     return -1;
   }
@@ -300,7 +308,7 @@ int MattFile::readFromPath(const string &path,
 ///////////////////////////////////
 // read in the dimensions
 
-int MattFile::_readDimensions()
+int MattNcFile::_readDimensions()
 
 {
 
@@ -309,7 +317,7 @@ int MattFile::_readDimensions()
   if (_file.readDim("time", _timeDim) == 0) {
     _nTimesInFile = _timeDim->size();
   } else {
-    _addErrStr("ERROR - MattFile::_readDimensions()");
+    _addErrStr("ERROR - MattNcFile::_readDimensions()");
     _addErrStr("  Cannot find 'time' dimension");
     return -1;
   }
@@ -318,7 +326,7 @@ int MattFile::_readDimensions()
   if (_file.readDim("range", _rangeDim) == 0) {
     _nRangeInFile = _rangeDim->size();
   } else {
-    _addErrStr("ERROR - MattFile::_readDimensions()");
+    _addErrStr("ERROR - MattNcFile::_readDimensions()");
     _addErrStr("  Cannot find 'range' dimension");
     return -1;
   }
@@ -332,7 +340,7 @@ int MattFile::_readDimensions()
 ///////////////////////////////////
 // read the global attributes
 
-int MattFile::_readGlobalAttributes()
+int MattNcFile::_readGlobalAttributes()
 
 {
 
@@ -342,14 +350,19 @@ int MattFile::_readGlobalAttributes()
     
     Nc3Att* att = _file.getNc3File()->get_att(ii);
     
-    if (att == NULL) {
+    if (att == NULL || !att->is_valid()) {
       continue;
     }
-    
+
+    if (att->values() == NULL) {
+      delete att;
+      continue;
+    }
+
     if (!strcmp(att->name(), "history")) {
       _history = Nc3xFile::asString(att);
     }
-    
+
     // Caller must delete attribute
 
     delete att;
@@ -357,9 +370,7 @@ int MattFile::_readGlobalAttributes()
   } // ii
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    
     cerr << "Global attr history: " << _history << endl;
-    
   }
 
   return 0;
@@ -369,7 +380,7 @@ int MattFile::_readGlobalAttributes()
 ///////////////////////////////////
 // read the times
 
-int MattFile::_readTimes()
+int MattNcFile::_readTimes()
 
 {
 
@@ -380,19 +391,19 @@ int MattFile::_readTimes()
 
   _timeVar = _file.getNc3File()->get_var("time");
   if (_timeVar == NULL) {
-    _addErrStr("ERROR - MattFile::_readTimes");
+    _addErrStr("ERROR - MattNcFile::_readTimes");
     _addErrStr("  Cannot find time variable");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   if (_timeVar->num_dims() != 1) {
-    _addErrStr("ERROR - MattFile::_readTimes");
+    _addErrStr("ERROR - MattNcFile::_readTimes");
     _addErrStr("  time variable has no dimensions");
     return -1;
   }
   Nc3Dim *timeDim = _timeVar->get_dim(0);
   if (timeDim != _timeDim) {
-    _addErrStr("ERROR - MattFile::_readTimes");
+    _addErrStr("ERROR - MattNcFile::_readTimes");
     _addErrStr("  time has incorrect dimensions");
     _addErrStr("  should be (time)");
     return -1;
@@ -402,7 +413,7 @@ int MattFile::_readTimes()
 
   float *timeData = new float[_nTimesInFile];
   if (!_timeVar->get(timeData, _nTimesInFile)) {
-    _addErrStr("ERROR - MattFile::_readTimes");
+    _addErrStr("ERROR - MattNcFile::_readTimes");
     _addErrStr("  Cannot read time array");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     delete[] timeData;
@@ -422,9 +433,62 @@ int MattFile::_readTimes()
 }
 
 ///////////////////////////////////
+// read the range variable
+
+int MattNcFile::_readRange()
+
+{
+
+  _rangeVar = _file.getNc3File()->get_var("range");
+  if (_rangeVar == NULL || _rangeVar->num_vals() < 1) {
+    _addErrStr("ERROR - MattNcFile::_readRange");
+    _addErrStr("  Cannot read range");
+    _addErrStr(_file.getNc3Error()->get_errmsg());
+    return -1;
+  }
+  
+  _rangeKm.clear();
+  _nRangeInFile = _rangeDim->size();
+  
+  if (_rangeVar->num_dims() == 1) {
+    
+    // 1-dimensional - range dim
+    
+    Nc3Dim *rangeDim = _rangeVar->get_dim(0);
+    if (rangeDim != _rangeDim) {
+      _addErrStr("ERROR - NcfRadxFilem::_readRange");
+      _addErrStr("  Range has incorrect dimension, name: ", rangeDim->name());
+      return -1;
+    }
+
+    double *rangeMeters = new double[_nRangeInFile];
+    if (_rangeVar->get(rangeMeters, _nRangeInFile)) {
+      double *rr = rangeMeters;
+      for (size_t ii = 0; ii < _nRangeInFile; ii++, rr++) {
+        _rangeKm.push_back(*rr / 1000.0);
+      }
+    }
+    delete[] rangeMeters;
+
+  }
+  
+  // set the geometry from the range vector
+  
+  RadxRemap remap;
+  if (remap.computeRangeLookup(_rangeKm)) {
+    return -1;
+  }
+  _gateSpacingIsConstant = remap.getGateSpacingIsConstant();
+  _geom.setRangeGeom(remap.getStartRangeKm(), remap.getGateSpacingKm());
+  
+  return 0;
+
+}
+
+///////////////////////////////////
 // clear the ray variables
 
-void MattFile::_clearRayVariables()
+void MattNcFile::_clearRayVariables()
 
 {
 
@@ -446,7 +510,7 @@ void MattFile::_clearRayVariables()
 ///////////////////////////////////
 // read in ray variables
 
-int MattFile::_readRayVariables()
+int MattNcFile::_readRayVariables()
 
 {
 
@@ -520,7 +584,7 @@ int MattFile::_readRayVariables()
   }
 
   if (iret) {
-    _addErrStr("ERROR - MattFile::_readRayVariables");
+    _addErrStr("ERROR - MattNcFile::_readRayVariables");
     return -1;
   }
 
@@ -532,7 +596,7 @@ int MattFile::_readRayVariables()
 // read a ray variable - double
 // side effects: set var, vals
 
-int MattFile::_readRayVar(const string &name, vector<double> &vals)
+int MattNcFile::_readRayVar(const string &name, vector<double> &vals)
   
 {
 
@@ -542,7 +606,7 @@ int MattFile::_readRayVar(const string &name, vector<double> &vals)
   
   Nc3Var *var = _getRayVar(name, true);
   if (var == NULL) {
-    _addErrStr("ERROR - MattFile::_readRayVar");
+    _addErrStr("ERROR - MattNcFile::_readRayVar");
     return -1;
   }
 
@@ -556,7 +620,7 @@ int MattFile::_readRayVar(const string &name, vector<double> &vals)
       vals.push_back(*dd);
     }
   } else {
-    _addErrStr("ERROR - MattFile::_readRayVar");
+    _addErrStr("ERROR - MattNcFile::_readRayVar");
     _addErrStr("  Cannot read variable: ", name);
     _addErrStr(_file.getNc3Error()->get_errmsg());
     iret = -1;
@@ -570,7 +634,7 @@ int MattFile::_readRayVar(const string &name, vector<double> &vals)
 // get a ray variable by name
 // returns NULL on failure
 
-Nc3Var* MattFile::_getRayVar(const string &name, bool required)
+Nc3Var* MattNcFile::_getRayVar(const string &name, bool required)
 
 {
 
@@ -579,7 +643,7 @@ Nc3Var* MattFile::_getRayVar(const string &name, bool required)
   Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
-      _addErrStr("ERROR - MattFile::_getRayVar");
+      _addErrStr("ERROR - MattNcFile::_getRayVar");
       _addErrStr("  Cannot read variable, name: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
     }
@@ -590,7 +654,7 @@ Nc3Var* MattFile::_getRayVar(const string &name, bool required)
   
   if (var->num_dims() < 1) {
     if (required) {
-      _addErrStr("ERROR - MattFile::_getRayVar");
+      _addErrStr("ERROR - MattNcFile::_getRayVar");
       _addErrStr("  variable name: ", name);
       _addErrStr("  variable has no dimensions");
     }
@@ -599,7 +663,7 @@ Nc3Var* MattFile::_getRayVar(const string &name, bool required)
   Nc3Dim *timeDim = var->get_dim(0);
   if (timeDim->size() != _timeDim->size()) {
     if (required) {
-      _addErrStr("ERROR - MattFile::_getRayVar");
+      _addErrStr("ERROR - MattNcFile::_getRayVar");
       _addErrStr("  variable name: ", name);
       _addErrInt("  variable has incorrect dimension, size: ", 
                  timeDim->size());
@@ -616,7 +680,7 @@ Nc3Var* MattFile::_getRayVar(const string &name, bool required)
 // create the rays to be read in
 // and set meta data
 
-int MattFile::_createRays(const string &path)
+int MattNcFile::_createRays(const string &path)
 
 {
 
@@ -630,7 +694,7 @@ int MattFile::_createRays(const string &path)
     // new ray
 
     RadxRay *ray = new RadxRay;
-    ray->setRangeGeom(_startRangeKm, _gateSpacingKm);
+    ray->copyRangeGeom(_geom);
     ray->setTime(_dataTimes[ii]);
 
     // sweep info
@@ -665,7 +729,7 @@ int MattFile::_createRays(const string &path)
     if (_params.read_georef_data_from_aircraft_system) {
 
       RadxGeoref geo;
-      if (MattFile::readGeorefFromSpdb(_params.georef_data_spdb_url,
+      if (MattNcFile::readGeorefFromSpdb(_params.georef_data_spdb_url,
                                       _dataTimes[ii].utime(),
                                       _params.georef_data_search_margin_secs,
                                       _params.debug >= Params::DEBUG_VERBOSE,
@@ -696,7 +760,7 @@ int MattFile::_createRays(const string &path)
 
         ray->setGeoref(geo);
 
-      } // if (MattFile::readGeorefFromSpdb ...
+      } // if (MattNcFile::readGeorefFromSpdb ...
 
     } // if (_params.read_georef_data_from_aircraft_system)
     
@@ -723,7 +787,7 @@ int MattFile::_createRays(const string &path)
 /////////////////////////////////////////////////////////
 // load up the read volume with the data from this object
 
-void MattFile::_loadReadVolume()
+void MattNcFile::_loadReadVolume()
 {
 
   _readVol->clear();
@@ -769,7 +833,7 @@ void MattFile::_loadReadVolume()
     }
   }
 
-  _readVol->setRangeGeom(_startRangeKm, _gateSpacingKm);
+  _readVol->copyRangeGeom(_geom);
 
   for (size_t ii = 0; ii < _rays.size(); ii++) {
     _readVol->addRay(_rays[ii]);
@@ -793,7 +857,7 @@ void MattFile::_loadReadVolume()
 ////////////////////////////////////////////
 // read the field variables
 
-int MattFile::_readFieldVariables()
+int MattNcFile::_readFieldVariables()
 
 {
 
@@ -818,10 +882,10 @@ int MattFile::_readFieldVariables()
     if (timeDim != _timeDim || rangeDim != _rangeDim) {
       continue;
     }
-    
+
     // check the type
     Nc3Type ftype = var->type();
-    if (ftype != nc3Int) {
+    if (ftype != nc3Double) {
       // not a valid type for field data
       continue;
     }
@@ -830,7 +894,7 @@ int MattFile::_readFieldVariables()
 
     string name = var->name();
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "DEBUG - MattFile::_readFieldVariables" << endl;
+      cerr << "DEBUG - MattNcFile::_readFieldVariables" << endl;
       cerr << "  -->> adding field: " << name << endl;
     }
 
@@ -844,7 +908,7 @@ int MattFile::_readFieldVariables()
     // load in the data
     
     if (_addFieldToRays(var, name, units)) {
-      _addErrStr("ERROR - MattFile::_readFieldVariables");
+      _addErrStr("ERROR - MattNcFile::_readFieldVariables");
       _addErrStr("  cannot read field name: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
@@ -861,7 +925,7 @@ int MattFile::_readFieldVariables()
 // The _rays array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int MattFile::_addFieldToRays(Nc3Var* var,
+int MattNcFile::_addFieldToRays(Nc3Var* var,
                               const string &name,
                               const string &units)
   
@@ -916,7 +980,7 @@ int MattFile::_addFieldToRays(Nc3Var* var,
     
     field->setLongName(longName);
     field->setStandardName(standardName);
-    field->setRangeGeom(_startRangeKm, _gateSpacingKm);
+    field->copyRangeGeom(_geom);
     
   }
   
@@ -929,7 +993,7 @@ int MattFile::_addFieldToRays(Nc3Var* var,
 // add labelled integer value to error string,
 // with optional following carriage return.
 
-void MattFile::_addErrInt(string label, int iarg, bool cr)
+void MattNcFile::_addErrInt(string label, int iarg, bool cr)
 {
   Radx::addErrInt(_errStr, label, iarg, cr);
 }
@@ -939,7 +1003,7 @@ void MattFile::_addErrInt(string label, int iarg, bool cr)
 // with optional following carriage return.
 // Default format is %g.
 
-void MattFile::_addErrDbl(string label, double darg,
+void MattNcFile::_addErrDbl(string label, double darg,
                           string format, bool cr)
   
 {
@@ -950,13 +1014,13 @@ void MattFile::_addErrDbl(string label, double darg,
 // add labelled string to error string
 // with optional following carriage return.
 
-void MattFile::_addErrStr(string label, string strarg, bool cr)
+void MattNcFile::_addErrStr(string label, string strarg, bool cr)
 
 {
   Radx::addErrStr(_errStr, label, strarg, cr);
 }
 
-void MattFile::_clearRays()
+void MattNcFile::_clearRays()
 {
   for (int ii = 0; ii < (int) _rays.size(); ii++) {
     delete _rays[ii];
@@ -972,7 +1036,7 @@ void MattFile::_clearRays()
 // see Wen-Chau Lee's paper
 // "Mapping of the Airborne Doppler Radar Data"
 
-void MattFile::computeRadarAngles(RadxGeoref &georef,
+void MattNcFile::computeRadarAngles(RadxGeoref &georef,
                                  RadxCfactors &corr,
                                  double &azimuthDeg,
                                  double &elevationDeg)
@@ -1026,7 +1090,7 @@ void MattFile::computeRadarAngles(RadxGeoref &georef,
 // Read georeference from SPDB
 // Returns 0 on success, -1 on error
 
-int MattFile::readGeorefFromSpdb(string georefUrl,
+int MattNcFile::readGeorefFromSpdb(string georefUrl,
                                 time_t searchTime,
                                 int searchMarginSecs,
                                 bool debug,

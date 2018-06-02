@@ -50,7 +50,7 @@ HDRS = \
 	Params.hh \
 	Args.hh \
 	Hsrl2Radx.hh \
-	MattFile.hh \
+	MattNcFile.hh \
 	MslFile.hh \
 	RawFile.hh \
 	CalReader.hh \
@@ -64,7 +64,7 @@ CPPC_SRCS = \
 	Args.cc \
 	Main.cc \
 	Hsrl2Radx.cc \
-	MattFile.cc \
+	MattNcFile.cc \
 	MslFile.cc \
 	RawFile.cc \
 	CalReader.cc \

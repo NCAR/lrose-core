@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// MattFile.hh
+// MattNcFile.hh
 //
 // HSRL NetCDF data produced by Matt Haymann's python code
 //
@@ -33,8 +33,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef MattFile_HH
-#define MattFile_HH
+#ifndef MattNcFile_HH
+#define MattNcFile_HH
 
 #include <string>
 #include <vector>
@@ -44,6 +44,7 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxGeoref.hh>
+#include <Radx/RadxRangeGeom.hh>
 #include <Ncxx/Nc3xFile.hh>
 class RadxField;
 class RadxVol;
@@ -59,7 +60,7 @@ using namespace std;
 ///
 /// This subclass of RadxFile handles I/O for netcdf files.
 
-class MattFile
+class MattNcFile
 
 {
   
@@ -67,11 +68,11 @@ public:
 
   /// Constructor
   
-  MattFile(const Params &params);
+  MattNcFile(const Params &params);
   
   /// Destructor
   
-  virtual ~MattFile();
+  virtual ~MattNcFile();
   
   /// clear all data
   
@@ -80,7 +81,7 @@ public:
   /// Check if specified file is a Matt type file.
   /// Returns true on success, false on failure
   
-  bool isMattFile(const string &path);
+  bool isMattNcFile(const string &path);
     
   //////////////////////////////////////////////////////////////
   /// Perform the read:
@@ -172,9 +173,11 @@ private:
   // range geometry
 
   Nc3Var *_rangeVar;
-  vector<double> _rangeM;
-  double _startRangeKm;
-  double _gateSpacingKm;
+  RadxRangeGeom _geom;
+  bool _gateSpacingIsConstant;
+  vector<double> _rangeKm;
+  // double _startRangeKm;
+  // double _gateSpacingKm;
   
   // polarization
 
@@ -215,6 +218,7 @@ private:
   int _readDimensions();
   int _readGlobalAttributes();
   int _readTimes();
+  int _readRange();
   void _clearRayVariables();
   int _readRayVariables();
 
