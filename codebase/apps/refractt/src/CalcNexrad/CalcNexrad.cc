@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 // RCS info
-//   $Author: dixon $
+//   $Author: jcraig $
 //   $Locker:  $
-//   $Date: 2016/03/07 18:17:26 $
-//   $Id: CalcNexrad.cc,v 1.16 2016/03/07 18:17:26 dixon Exp $
-//   $Revision: 1.16 $
+//   $Date: 2018/01/26 20:33:40 $
+//   $Id: CalcNexrad.cc,v 1.17 2018/01/26 20:33:40 jcraig Exp $
+//   $Revision: 1.17 $
 //   $State: Exp $
 //
  
@@ -48,7 +48,6 @@
 #include <iostream>
 #include <csignal>
 #include <cmath>
-#include <netcdf.hh>
 #include <string>
 #include <cstring>
 
@@ -332,13 +331,13 @@ void CalcNexrad::run()
  * Returns a pointer to the values on success, 0 on failure.
  */
 
-NcValues *CalcNexrad::_extractValues(const string &var_name,
-				     NcFile &input_file,
+Nc3Values *CalcNexrad::_extractValues(const string &var_name,
+				     Nc3File &input_file,
 				     const string &input_file_path) const
 {
   static const string method_name = "CalcNexrad::_extractValues()";
 
-  NcVar *variable = 0;
+  Nc3Var *variable = 0;
 
   if ((variable = input_file.get_var(var_name.c_str())) == 0)
   {
@@ -459,7 +458,7 @@ bool CalcNexrad::_processFile(const string &input_file_path)
 
   // Open the netCDF file
 
-  NcFile input_file(input_file_path.c_str());
+  Nc3File input_file(input_file_path.c_str());
 
   // Check to see if the file is valid
 
@@ -474,7 +473,7 @@ bool CalcNexrad::_processFile(const string &input_file_path)
 
   // Make sure the file has data
 
-  NcDim *time_dim;
+  Nc3Dim *time_dim;
   if ((time_dim = input_file.get_dim(TIME_DIM_NAME.c_str())) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -485,7 +484,7 @@ bool CalcNexrad::_processFile(const string &input_file_path)
     return false;
   }
 
-  NcDim *gates_dim;
+  Nc3Dim *gates_dim;
   if ((gates_dim = input_file.get_dim(GATES_DIM_NAME.c_str())) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -526,19 +525,19 @@ bool CalcNexrad::_processFile(const string &input_file_path)
   
   // Get pointers to all of the needed variables
 
-  NcValues *i_values = _extractValues(I_VAR_NAME,
+  Nc3Values *i_values = _extractValues(I_VAR_NAME,
 				      input_file, input_file_path);
-  NcValues *q_values = _extractValues(Q_VAR_NAME,
+  Nc3Values *q_values = _extractValues(Q_VAR_NAME,
 				      input_file, input_file_path);
-  NcValues *az_values = _extractValues(AZIMUTH_VAR_NAME,
+  Nc3Values *az_values = _extractValues(AZIMUTH_VAR_NAME,
 				       input_file, input_file_path);
-  NcValues *el_values = _extractValues(ELEVATION_VAR_NAME,
+  Nc3Values *el_values = _extractValues(ELEVATION_VAR_NAME,
 				       input_file, input_file_path);
-  NcValues *prt_values = _extractValues(PRT_VAR_NAME,
+  Nc3Values *prt_values = _extractValues(PRT_VAR_NAME,
 					input_file, input_file_path);
-  NcValues *time_values = _extractValues(UNIX_TIME_VAR_NAME,
+  Nc3Values *time_values = _extractValues(UNIX_TIME_VAR_NAME,
 					 input_file, input_file_path);
-  NcValues *nano_values = _extractValues(NANO_SEC_VAR_NAME,
+  Nc3Values *nano_values = _extractValues(NANO_SEC_VAR_NAME,
 					 input_file, input_file_path);
 
   if (i_values == 0 || q_values == 0 || az_values == 0 ||

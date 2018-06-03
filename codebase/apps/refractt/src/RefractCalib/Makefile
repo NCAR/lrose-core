@@ -42,7 +42,7 @@ LOC_INC_DIR = .
 MY_CPPCHECKFLAGS = -E Params.hh -E Params.cc 
 
 LOC_LIBS = -lRefract -ldsdata -lFmq -lSpdb \
-	-lMdv -lRadx -ldsserver -ldidss \
+	-lMdv -lRadx -lNcxx -ldsserver -ldidss \
 	-lrapformats -leuclid -lrapmath -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz

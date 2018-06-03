@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: jcraig $
  *   $Locker:  $
- *   $Date: 2016/03/07 18:17:26 $
- *   $Id: Chill2netCDFSweep.hh,v 1.10 2016/03/07 18:17:26 dixon Exp $
- *   $Revision: 1.10 $
+ *   $Date: 2018/01/26 20:36:36 $
+ *   $Id: Chill2netCDFSweep.hh,v 1.11 2018/01/26 20:36:36 jcraig Exp $
+ *   $Revision: 1.11 $
  *   $State: Exp $
  */
  
@@ -48,7 +48,6 @@
 #ifndef Chill2netCDFSweep_HH
 #define Chill2netCDFSweep_HH
 
-#include <netcdf.hh>
 #include <string>
 #include <sys/time.h>
 #include <vector>

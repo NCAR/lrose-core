@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: jcraig $
  *   $Locker:  $
- *   $Date: 2016/03/07 18:17:26 $
- *   $Id: CalcNexrad.hh,v 1.6 2016/03/07 18:17:26 dixon Exp $
- *   $Revision: 1.6 $
+ *   $Date: 2018/01/26 20:33:40 $
+ *   $Id: CalcNexrad.hh,v 1.7 2018/01/26 20:33:40 jcraig Exp $
+ *   $Revision: 1.7 $
  *   $State: Exp $
  */
  
@@ -48,11 +48,11 @@
 #ifndef CalcNexrad_HH
 #define CalcNexrad_HH
 
-#include <netcdf.hh>
 #include <string>
 #include <sys/time.h>
 #include <vector>
 
+#include <Ncxx/Nc3File.hh>
 #include <dsdata/DsTrigger.hh>
 
 #include "Args.hh"
@@ -236,8 +236,8 @@ class CalcNexrad
    * Returns a pointer to the values on success, 0 on failure.
    */
 
-  NcValues *_extractValues(const string &var_name,
-			   NcFile &input_file,
+  Nc3Values *_extractValues(const string &var_name,
+			   Nc3File &input_file,
 			   const string &input_file_path) const;
 
 

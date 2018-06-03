@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 // RCS info
-//   $Author: dave $
+//   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2017/08/15 21:47:39 $
-//   $Id: Refract.cc,v 1.24 2017/08/15 21:47:39 dave Exp $
-//   $Revision: 1.24 $
+//   $Date: 2018/06/03 19:37:09 $
+//   $Id: Refract.cc,v 1.25 2018/06/03 19:37:09 dixon Exp $
+//   $Revision: 1.25 $
 //   $State: Exp $
 //
  

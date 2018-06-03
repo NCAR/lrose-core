@@ -23,11 +23,11 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: jcraig $
  *   $Locker:  $
- *   $Date: 2016/03/07 18:17:26 $
- *   $Id: SweepFile.hh,v 1.4 2016/03/07 18:17:26 dixon Exp $
- *   $Revision: 1.4 $
+ *   $Date: 2018/01/26 20:36:36 $
+ *   $Id: SweepFile.hh,v 1.5 2018/01/26 20:36:36 jcraig Exp $
+ *   $Revision: 1.5 $
  *   $State: Exp $
  */
  
@@ -49,8 +49,8 @@
 
 #include <string>
 #include <vector>
-#include <netcdf.hh>
 
+#include <Ncxx/Nc3File.hh>
 #include <toolsa/DateTime.hh>
 
 using namespace std;
@@ -153,13 +153,13 @@ private:
    * _putField() - Put the given data field into the netCDF file.
    */
   
-  void _putField(NcFile &out,
+  void _putField(Nc3File &out,
 		 const string &field_name,
 		 const string &field_name_long,
 		 const string &units,
 		 const float *data,
-		 const NcDim *TimeDim,
-		 const NcDim *maxCellsDim,
+		 const Nc3Dim *TimeDim,
+		 const Nc3Dim *maxCellsDim,
 		 const float missing_data_value);
 
 
