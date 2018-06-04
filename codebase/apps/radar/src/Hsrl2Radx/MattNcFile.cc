@@ -409,6 +409,22 @@ int MattNcFile::_readTimes()
     return -1;
   }
   
+  // get units attribute
+  
+  Nc3Att* unitsAtt = _timeVar->get_att("units");
+  if (unitsAtt == NULL) {
+    _addErrStr("ERROR - MattNcFile::_readTimes");
+    _addErrStr("  Time has no units");
+    return -1;
+  }
+  string units = Nc3xFile::asString(unitsAtt);
+  delete unitsAtt;
+
+  // parse the time units reference time
+
+  RadxTime stime(units);
+  time_t refTimeSecs = stime.utime();
+  
   // read in time 2D array
 
   float *timeData = new float[_nTimesInFile];
@@ -423,7 +439,7 @@ int MattNcFile::_readTimes()
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
     double dt = timeData[ii];
     _dTimes.push_back(dt);
-    RadxTime rayTime = _startTime + dt;
+    RadxTime rayTime = refTimeSecs + dt;
     _dataTimes.push_back(rayTime);
   }
   
