@@ -931,7 +931,12 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
   }
 
   if (_scanNameVal) {
-    _scanNameVal->setText(ray->getScanName().c_str());
+    string scanName = ray->getScanName();
+    size_t len = scanName.size();
+    if (len > 8) {
+      scanName = scanName.substr(0, 8);
+    }
+    _scanNameVal->setText(scanName.c_str());
   }
 
   if (_sweepModeVal) {
