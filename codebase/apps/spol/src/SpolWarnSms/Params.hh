@@ -399,13 +399,13 @@ public:
   xml_entry_t *_kband_xml_entries;
   int kband_xml_entries_n;
 
-  tdrp_bool_t send_sms_warnings;
+  tdrp_bool_t write_warnings_to_dir;
 
-  char* warning_dir_message;
+  char* warning_message_dir;
 
-  tdrp_bool_t write_to_spdb;
+  tdrp_bool_t write_warnings_to_spdb;
 
-  char* spdb_url;
+  char* warning_spdb_url;
 
   char _end_; // end of data region
               // needed for zeroing out data

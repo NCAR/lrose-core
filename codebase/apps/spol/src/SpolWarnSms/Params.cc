@@ -861,32 +861,32 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("SMS OUTPUT");
+    tt->comment_hdr = tdrpStrDup("WARNING MESSAGE FILE OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'send_sms_warnings'
+    // Parameter 'write_warnings_to_dir'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("send_sms_warnings");
-    tt->descr = tdrpStrDup("If true, SMS warnings will be sent out when a warning condition occurs.");
+    tt->param_name = tdrpStrDup("write_warnings_to_dir");
+    tt->descr = tdrpStrDup("If true, writes warnings to directory.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &send_sms_warnings - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->val_offset = (char *) &write_warnings_to_dir - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'warning_dir_message'
+    // Parameter 'warning_message_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("warning_dir_message");
-    tt->descr = tdrpStrDup("Dir path for SMS messages.");
-    tt->help = tdrpStrDup("Warning messages are written to this directory. This will be watched by the LdataWatcher, which will then call a script to send the message.");
-    tt->val_offset = (char *) &warning_dir_message - &_start_;
-    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/sms/messages");
+    tt->param_name = tdrpStrDup("warning_message_dir");
+    tt->descr = tdrpStrDup("Dir path for warning messages.");
+    tt->help = tdrpStrDup("Warning messages are written to this directory. This will be watched by the LdataWatcher, which will then call a script to send the SMS messages.");
+    tt->val_offset = (char *) &warning_message_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("$(HOME)/projDir/data/monitoring/messages");
     tt++;
     
     // Parameter 'Comment 5'
@@ -894,32 +894,32 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("SPDB OUTPUT");
+    tt->comment_hdr = tdrpStrDup("WARNING MESSAGE SPDB OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'write_to_spdb'
+    // Parameter 'write_warnings_to_spdb'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_to_spdb");
+    tt->param_name = tdrpStrDup("write_warnings_to_spdb");
     tt->descr = tdrpStrDup("If true, writes warnings to SPDB.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &write_to_spdb - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->val_offset = (char *) &write_warnings_to_spdb - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'spdb_url'
+    // Parameter 'warning_spdb_url'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("spdb_url");
+    tt->param_name = tdrpStrDup("warning_spdb_url");
     tt->descr = tdrpStrDup("URL for SPDB output.");
-    tt->help = tdrpStrDup("SPDB data is written to this location.");
-    tt->val_offset = (char *) &spdb_url - &_start_;
-    tt->single_val.s = tdrpStrDup("spdbp:://localhost::spdb/sms/warning_messages");
+    tt->help = tdrpStrDup("Messages are is written to this location.");
+    tt->val_offset = (char *) &warning_spdb_url - &_start_;
+    tt->single_val.s = tdrpStrDup("spdbp:://localhost::spdb/monitoring/messages");
     tt++;
     
     // trailing entry has param_name set to NULL

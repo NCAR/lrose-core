@@ -84,28 +84,31 @@ private:
   Args _args;
   Params _params;
 
-  // SPDB
-
-  DsSpdb _spdbSband;
-  DsSpdb _spdbKband;
-  DsSpdb _spdbOut;
-  
   // functions
+  
+  int _readStatus(time_t now,
+                  char *spdbUrl,
+                  int marginSecs,
+                  Params::xml_entry_t *entries,
+                  int nEntries,
+                  string &warningMsg);
 
-  void _clearStatus();
-
-  int _updateSpdb(time_t now);
-
-  int _checkStatus(time_t now);
-
-  int _handleBooleanEntry(const string &xml,
+  int _handleBooleanEntry(time_t now,
+                          const string &statusXml,
                           const Params::xml_entry_t &entry,
-                          FILE *outputFile);
-
-  int _handleNumberEntry(const string &xml,
+                          string &warningMsg);
+  
+  int _handleNumberEntry(time_t now,
+                         const string &statusXml,
                          const Params::xml_entry_t &entry,
-                         FILE *outputFile);
+                         string &warningMsg);
 
+  int _writeMessageToDir(time_t now,
+                         const string &warningMsg);
+  
+  int _writeMessageToSpdb(time_t now,
+                          const string &warningMsg);
+  
 };
 
 #endif

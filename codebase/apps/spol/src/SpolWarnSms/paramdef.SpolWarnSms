@@ -176,32 +176,32 @@ paramdef struct xml_entry_t {
 } kband_xml_entries[];
 
 commentdef {
-  p_header = "SMS OUTPUT";
+  p_header = "WARNING MESSAGE FILE OUTPUT";
 };
 
 paramdef boolean {
-  p_default = false;
-  p_descr = "If true, SMS warnings will be sent out when a warning condition occurs.";
-} send_sms_warnings;
+  p_default = true;
+  p_descr = "If true, writes warnings to directory.";
+} write_warnings_to_dir;
 
 paramdef string {
-  p_default = "$(DATA_DIR)/sms/messages";
-  p_descr = "Dir path for SMS messages.";
-  p_help = "Warning messages are written to this directory. This will be watched by the LdataWatcher, which will then call a script to send the message.";
-} warning_dir_message;
+  p_default = "$(HOME)/projDir/data/monitoring/messages";
+  p_descr = "Dir path for warning messages.";
+  p_help = "Warning messages are written to this directory. This will be watched by the LdataWatcher, which will then call a script to send the SMS messages.";
+} warning_message_dir;
 
 commentdef {
-  p_header = "SPDB OUTPUT";
+  p_header = "WARNING MESSAGE SPDB OUTPUT";
 };
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "If true, writes warnings to SPDB.";
-} write_to_spdb;
+} write_warnings_to_spdb;
 
 paramdef string {
-  p_default = "spdbp:://localhost::spdb/sms/warning_messages";
+  p_default = "spdbp:://localhost::spdb/monitoring/messages";
   p_descr = "URL for SPDB output.";
-  p_help = "SPDB data is written to this location.";
-} spdb_url;
+  p_help = "Messages are is written to this location.";
+} warning_spdb_url;
 

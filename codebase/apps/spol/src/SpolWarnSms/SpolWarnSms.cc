@@ -89,16 +89,6 @@ SpolWarnSms::SpolWarnSms(int argc, char **argv)
     return;
   }
   
-  // SPDB if needed
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _spdbSband.setDebug();
-    _spdbKband.setDebug();
-    if (_params.write_to_spdb) {
-      _spdbOut.setDebug();
-    }
-  }
-
   // init process mapper registration
   
   PMU_auto_init((char *) _progName.c_str(),
@@ -132,17 +122,67 @@ int SpolWarnSms::Run ()
     PMU_auto_register("Getting status");
     time_t now = time(NULL);
 
-    // read status
+    // read status, append to the message
 
-    // check for warning conditions
+    string warningMsgSband;
 
-    // write message for SMS
-
-    // update spdb?
-
-    if (_params.write_to_spdb) {
-      _updateSpdb(now);
+    if (_params.monitor_the_sband) {
+      if (_readStatus(now,
+                      _params.sband_monitoring_spdb_url,
+                      _params.sband_spdb_margin_secs,
+                      _params._sband_xml_entries,
+                      _params.sband_xml_entries_n,
+                      warningMsgSband)) {
+        cerr << "ERROR - SpolWarnSms::Run" << endl;
+        cerr << "  Problems monitoring the sband" << endl;
+      }
     }
+
+    string warningMsgKband;
+
+    if (_params.monitor_the_kband) {
+      if (_readStatus(now,
+                      _params.kband_monitoring_spdb_url,
+                      _params.kband_spdb_margin_secs,
+                      _params._kband_xml_entries,
+                      _params.kband_xml_entries_n,
+                      warningMsgKband)) {
+        cerr << "ERROR - SpolWarnSms::Run" << endl;
+        cerr << "  Problems monitoring the kband" << endl;
+      }
+    }
+
+    // combine messages
+
+    string warningMsg;
+    if (warningMsgSband.size() > 0 || warningMsgKband.size() > 0) {
+      warningMsg += "SPOL_WARN: ";
+      warningMsg += warningMsgSband;
+      warningMsg += warningMsgKband;
+    }
+
+    // write message to dir for SMS
+    
+    if (warningMsg.size() > 0) {
+      if (_params.write_warnings_to_dir) {
+        _writeMessageToDir(now, warningMsg);
+      }
+    }
+
+    // write to SPDB?
+
+    if (_params.write_warnings_to_spdb) {
+      if (warningMsg.size() > 0) {
+        _writeMessageToSpdb(now, warningMsg);
+      } else {
+        string msg("No warnings");
+        _writeMessageToSpdb(now, msg);
+      }
+    }
+    
+    // sleep
+    
+    umsleep(_params.monitoring_interval_secs * 1000);
 
   } // while
   
@@ -151,100 +191,87 @@ int SpolWarnSms::Run ()
 }
 
 /////////////////////////////
-// update the SPDB data base
+// read the status
+// update warning msg
 
-int SpolWarnSms::_updateSpdb(time_t now)
+int SpolWarnSms::_readStatus(time_t now,
+                             char *spdbUrl,
+                             int marginSecs,
+                             Params::xml_entry_t *entries,
+                             int nEntries,
+                             string &warningMsg)
 
 {
-
+  
   if (_params.debug) {
-    cerr << "==>> updating SPDB" << endl;
+    cerr << "==>> Checking status, time: " << DateTime::strm(now) << endl;
   }
+
+  // read in status
   
-  // get the concatenated xml string
-  
-  // string xml = _getCombinedXml(now);
-  string xml;
-  
-  if (xml.size() == 0) {
-    return 0;
+  DsSpdb spdb;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    spdb.setDebug();
   }
-  
-  _spdbOut.clearPutChunks();
-  _spdbOut.addPutChunk(0, now, now + _params.monitoring_interval_secs,
-                       xml.size() + 1, xml.c_str());
-  
-  if (_spdbOut.put(_params.spdb_url,
-                   SPDB_XML_ID, SPDB_XML_LABEL)) {
-    cerr << "ERROR - SpolWarnSms::_updateSpdb" << endl;
-    cerr << _spdbOut.getErrStr() << endl;
+
+  if (spdb.getLatest(spdbUrl, marginSecs, 0, 0)) {
+    cerr << "ERROR - SpolWarnSms::_readStatus()" << endl;
+    cerr << "  Calling getLatest for url: " << spdbUrl << endl;
+    cerr << "  margin (secs): " << marginSecs << endl;
+    cerr << spdb.getErrStr() << endl;
     return -1;
   }
   
-  if (_params.debug) {
-    cerr << "Wrote SPDB data to: " << _params.spdb_url << endl;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=======>> Got status" << endl;
+    cerr << "url: " << spdbUrl << endl;
+    cerr << "Prod label: " << spdb.getProdLabel() << endl;
+    cerr << "Prod id:    " << spdb.getProdId() << endl;
+    cerr << "N Chunks:   " << spdb.getNChunks() << endl;
   }
-
-  return 0;
-
-}
-
-/////////////////////////////
-// check status
-
-int SpolWarnSms::_checkStatus(time_t now)
-
-{
-
-  if (_params.debug) {
-    cerr << "==>> Checking status" << endl;
-  }
-
-  // get the concatenated xml string
-
-  // string xml = _getCombinedXml(now);
-  string xml;
   
-  if (_params.debug) {
-    cerr << "statusXml for nagios: " << endl;
-    cerr << xml << endl;
+  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  int nChunks = (int) chunks.size();
+  if (nChunks < 1) {
+    cerr << "ERROR - SpolWarnSms::_readStatus()" << endl;
+    cerr << "  No chunks returned from SPDB" << endl;
+    cerr << "  Calling getLatest for url: " << spdbUrl << endl;
+    cerr << "  margin (secs): " << marginSecs << endl;
+    return -1;
   }
 
+  // set the xml string from the chunk data
+  
+  const Spdb::chunk_t &latest = chunks[chunks.size() - 1];
+  time_t validTime = latest.valid_time;
+  if (validTime - now > marginSecs) {
+    cerr << "ERROR - SpolWarnSms::_readStatus()" << endl;
+    cerr << "  Data too old" << endl;
+    cerr << "  Calling getLatest for url: " << spdbUrl << endl;
+    cerr << "  margin (secs): " << marginSecs << endl;
+    cerr << "  now: " << DateTime::strm(now) << endl;
+    cerr << "  status valid time: " << DateTime::strm(validTime) << endl;
+    return -1;
+  }
+
+  string statusXml((const char *) latest.data);
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "===>> time: " << DateTime::strm(validTime) << endl;
+    cerr << "==================== STATUS XML =====================" << endl;
+    cerr << statusXml;
+    cerr << "=====================================================" << endl;
+  }
+  
+  // check status, append to warning message as needed
+  
+  for (int ii = 0; ii < nEntries; ii++) {
+    
 #ifdef JUNK
 
-  // create directory as needed
-
-  Path path(_params.nagios_file_path);
-  if (ta_makedir_recurse(path.getDirectory().c_str())) {
-    int errNum = errno;
-    cerr << "ERROR - SpolWarnSms::_updateNagios" << endl;
-    cerr << "  Cannot make directory for output file: " << _params.nagios_file_path << endl;
-    cerr << strerror(errNum) << endl;
-    return -1;
-  }
-
-  // write to tmp nagios file
-
-  string tmpPath(_params.nagios_file_path);
-  tmpPath += ".tmp";
-  
-  FILE *tmpFile = fopen(tmpPath.c_str(), "w");
-  if (tmpFile == NULL) {
-    int errNum = errno;
-    cerr << "ERROR - SpolWarnSms::_updateNagios" << endl;
-    cerr << "  Cannot open tmp file for writing: " << tmpPath << endl;
-    cerr << strerror(errNum) << endl;
-    return -1;
-  }
-
-  // write to nagios file
-
-  for (int ii = 0; ii < _params.xml_entries_n; ii++) {
-
-    const Params::xml_entry_t &entry = _params._xml_entries[ii];
+    const Params::xml_entry_t &entry = entries[ii];
     
     string sectionStr;
-    if (TaXml::readString(xml, entry.xml_outer_tag, sectionStr)) {
+    if (TaXml::readString(statusXml, entry.xml_outer_tag, sectionStr)) {
       if (_params.debug >= Params::DEBUG_EXTRA) { 
         cerr << "WARNING - SpolWarnSms::_updateNagios" << endl;
         cerr << " Cannot find main tag: " << entry.xml_outer_tag << endl;
@@ -254,53 +281,114 @@ int SpolWarnSms::_checkStatus(time_t now)
     switch (entry.entry_type) {
       
       case Params::XML_ENTRY_BOOLEAN:
-        _handleBooleanNagios(sectionStr, entry, tmpFile);
+        _handleBooleanEntry(now, sectionStr, entry, warningMsg);
         break;
         
-      case Params::XML_ENTRY_BOOLEAN_TO_INT:
-        _handleBooleanToIntNagios(sectionStr, entry, tmpFile);
-        break;
-        
-      case Params::XML_ENTRY_INT:
-        _handleIntNagios(sectionStr, entry, tmpFile);
-        break;
-        
-      case Params::XML_ENTRY_DOUBLE:
-        _handleDoubleNagios(sectionStr, entry, tmpFile);
-        break;
-        
-      case Params::XML_ENTRY_STRING:
-      default:
-        _handleStringNagios(sectionStr, entry, tmpFile);
+      case Params::XML_ENTRY_NUMBER:
+        _handleNumberEntry(now, sectionStr, entry, warningMsg);
         break;
         
     } // switch (entry.entry_type)
+
+#endif
         
   } // ii
 
-  if (_params.nagios_monitor_antenna_movement) {
-    _addMovementToNagios(tmpFile);
-  }
+  return 0;
 
-  fclose(tmpFile);
+}
+
+/////////////////////////////////
+// write message to dir, for SMS
+
+int SpolWarnSms::_writeMessageToDir(time_t now,
+                                    const string &warningMsg)
   
-  // rename file
+{
 
-  if (rename(tmpPath.c_str(), _params.nagios_file_path)) {
+  if (_params.debug) {
+    cerr << "==>> writing warning message, now: " << DateTime::strm(now) << endl;
+  }
+  
+  // compute dir path
+
+  DateTime ntime(now);
+  char outputDir[MAX_PATH_LEN];
+  sprintf(outputDir, "%s%s%.4d%.2d%.2d",
+          _params.warning_message_dir,
+          PATH_DELIM,
+          ntime.getYear(), ntime.getMonth(), ntime.getDay());
+  
+  // create day directory as needed
+
+  if (ta_makedir_recurse(outputDir)) {
     int errNum = errno;
-    cerr << "ERROR - SpolWarnSms::_updateNagios" << endl;
-    cerr << "  Cannot rename tmp file to final path" << endl;
-    cerr << "  tmp path: " << tmpPath << endl;
-    cerr << "  final path: " << _params.nagios_file_path << endl;
+    cerr << "ERROR - SpolWarnSms::_writeMessageToDir" << endl;
+    cerr << "  Cannot make directory for output files: " << outputDir << endl;
     cerr << strerror(errNum) << endl;
     return -1;
   }
 
-  if (_params.debug) {
-    cerr << "Wrote Nagios data to: " << _params.nagios_file_path << endl;
+  // compute file path
+
+  char outputPath[MAX_PATH_LEN];
+  sprintf(outputPath, "%s%swarning_message_%.2d%.2d%.2d.txt",
+          outputDir,
+          PATH_DELIM,
+          ntime.getHour(), ntime.getMin(), ntime.getSec());
+  
+  // write message to path
+  
+  FILE *out = fopen(outputPath, "w");
+  if (out == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - SpolWarnSms::_writeMessageToDir" << endl;
+    cerr << "  Cannot open file for writing: " << outputPath << endl;
+    cerr << strerror(errNum) << endl;
+    return -1;
   }
 
-#endif
+  fprintf(out, "%s\n", warningMsg.c_str());
+  fclose(out);
+  
+
+  if (_params.debug) {
+    cerr << "Wrote message to file: " << outputPath << endl;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////
+// update the SPDB data base
+
+int SpolWarnSms::_writeMessageToSpdb(time_t now,
+                                     const string &warningMsg)
+
+{
+
+  if (_params.debug) {
+    cerr << "==>> updating SPDB" << endl;
+  }
+  
+  DsSpdb spdb;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    spdb.setDebug();
+  }
+  spdb.addPutChunk(0, now, now + _params.monitoring_interval_secs,
+                   warningMsg.size() + 1, warningMsg.c_str());
+  
+  if (spdb.put(_params.warning_spdb_url,
+               SPDB_ASCII_ID, SPDB_ASCII_LABEL)) {
+    cerr << "ERROR - SpolWarnSms::_writeMessageToSpdb" << endl;
+    cerr << spdb.getErrStr() << endl;
+    return -1;
+  }
+  
+  if (_params.debug) {
+    cerr << "Wrote SPDB data to: " << _params.warning_spdb_url << endl;
+  }
 
   return 0;
 
@@ -309,19 +397,52 @@ int SpolWarnSms::_checkStatus(time_t now)
 ///////////////////////////////////////////
 // handle a boolean entry in the status xml
 
-int SpolWarnSms::_handleBooleanEntry(const string &xml,
+int SpolWarnSms::_handleBooleanEntry(time_t now,
+                                     const string &statusXml,
                                      const Params::xml_entry_t &entry,
                                      FILE *outputFile)
   
 {
   
-  string label = entry.label;
-  if (label.size() == 0) {
-    label = entry.xml_tags;
+  // get tag list
+    
+  vector<string> tags;
+  TaStr::tokenize(entry.xml_tags, "<>", tags);
+  if (tags.size() == 0) {
+    // no tags
+    cerr << "WARNING - SpolWarnSms::_handleBooleanEntry" << endl;
+    cerr << "  No tags found: " << entry.xml_tags << endl;
+    return -1;
+  }
+  
+  // read through the outer tags in status XML
+  
+  string buf(statusXml);
+  for (size_t jj = 0; jj < tags.size(); jj++) {
+    string val;
+    if (TaXml::readString(buf, tags[jj], val)) {
+      cerr << "WARNING - SpolWarnSms::_handleBooleanEntry" << endl;
+      cerr << "  Bad tags found in status xml, expecting: "
+           << entry.xml_tags << endl;
+      return -1;
+    }
+    buf = val;
   }
 
-#ifdef JUNK
+  // get the boolean value
 
+  bool bval;
+  if (TaXml::readBoolean(buf, bval)) {
+    cerr << "ERROR - SpolWarnSms::_handleBooleanEntry" << endl;
+    cerr << "  Cannot read bool value, buf: " << buf << endl;
+    return -1;
+  }
+
+  if (buf == entry.ok_boolean) {
+    // no problem with this entry
+    return 0;
+  }
+  
   // get the substring
 
   string sval;
@@ -388,8 +509,6 @@ int SpolWarnSms::_handleBooleanEntry(const string &xml,
     fprintf(stderr, "Adding nagios entry: ");
     fprintf(stderr, "%s", text);
   }
-
-#endif
 
   return 0;
 
