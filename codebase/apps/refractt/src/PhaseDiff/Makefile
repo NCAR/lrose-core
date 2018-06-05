@@ -39,7 +39,7 @@ TARGET_FILE = PhaseDiff
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lRefract -ldsdata -lSpdb -lMdv -lRadx \
+LOC_LIBS = -lRefract -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
 	-ldsserver -ldidss -lrapformats -leuclid \
 	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz 

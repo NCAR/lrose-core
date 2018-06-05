@@ -1,0 +1,207 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions SpolWarnSms
+//
+// Mike Dixon
+// EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// June 2018
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SpolWarnSms reads status XML monitoring data from SPDB, for the S-band and K-band. It checks the status in the XML, and determines if a warning message should be sent.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT - from SPDB";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Should we monitor the sband status?";
+} monitor_the_sband;
+
+paramdef string {
+  p_default = "spdbp:://pgen1::spdb/monitor/sband";
+  p_descr = "URL for reading in monitoring data from SPDB.";
+  p_help = "This holds the XML status monitoring for the S-band.";
+} sband_monitoring_spdb_url;
+
+paramdef int {
+  p_default = 120;
+  p_descr = "The margin, relative to 'now', for retrieving spdb data (secs).";
+  p_help = "If no data is found within this interval, an error is generated.";
+} sband_spdb_margin_secs;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Should we monitor the kband status?";
+} monitor_the_kband;
+
+paramdef string {
+  p_default = "spdbp:://pgen1::spdb/monitor/kband";
+  p_descr = "URL for reading in monitoring data from SPDB.";
+  p_help = "This holds the XML status monitoring for the S-band.";
+} kband_monitoring_spdb_url;
+
+paramdef int {
+  p_default = 120;
+  p_descr = "The margin, relative to 'now', for retrieving spdb data (secs).";
+  p_help = "If no data is found within this interval, an error is generated.";
+} kband_spdb_margin_secs;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "How often to check for status (secs).";
+} monitoring_interval_secs;
+
+commentdef {
+  p_header = "XML STATUS CHECKING";
+  p_text = "Here we list the items to check for. Any item listed here is considered critical. Failure of an item will generate a warning message.";
+};
+
+typedef enum {
+  XML_ENTRY_BOOLEAN,
+  XML_ENTRY_NUMBER
+} xml_entry_type_t;
+
+typedef struct {
+  string xml_tags;
+  xml_entry_type_t entry_type;
+  string ok_boolean;
+  double value_lower_limit;
+  double value_upper_limit;
+  string label;
+} xml_entry_t;
+
+paramdef struct xml_entry_t {
+  p_default = {
+    {
+      xml_tags = "<SpolStatus><SpolTransmitStatus><Maintenance_Required_Fault>",
+      entry_type = XML_ENTRY_BOOLEAN,
+      ok_boolean = "false",
+      value_lower_limit = 0,
+      value_upper_limit = 0,
+      label = "Sband-Xmit-Maintenance-Fault"
+    }
+    ,
+    {
+      xml_tags = "<SpolStatus><SpolTemperatures><KlystronExhaust>",
+      entry_type = XML_ENTRY_NUMBER,
+      ok_boolean = "",
+      value_lower_limit = 0,
+      value_upper_limit = 38,
+      label = "Sband-Klystron-Exhaust-TempC"
+    }
+    ,
+    {
+      xml_tags = "<SpolStatus><WaveguideStatus><pressPsi>",
+      entry_type = XML_ENTRY_NUMBER,
+      ok_boolean = "",
+      value_lower_limit = 4,
+      value_upper_limit = 7,
+      label = "Sband-WG-Pressure-PSI"
+    }
+  };
+  p_descr = "Details of S-band XML entries for which to check.";
+  p_help =
+    "\txml_tags: list of tags to specify entry in XML\n"
+    "\tentry_type: the type of data stored\n"
+    "\tok_boolean: BOOLEAN only: the string value for an OK state\n"
+    "\tvalue_lower_limit: NUMBER only: the lower limit for an OK state\n"
+    "\tvalue_upper_limit: NUMBER only: the upper limit for an OK state\n"
+    "\tlabel: label to be used for message\n"
+    ".";
+} sband_xml_entries[];
+
+paramdef struct xml_entry_t {
+  p_default = {
+    {
+      xml_tags = "<KaStatus><KaTransmitterStatus><MagnetronCurrentFault>",
+      entry_type = XML_ENTRY_BOOLEAN,
+      ok_boolean = "false",
+      value_lower_limit = 0,
+      value_upper_limit = 0,
+      label = "Kband-Xmit-Magnetron-Current-Fault"
+    }
+    ,
+    {
+      xml_tags = "<KaStatus><KaReceiverStatus><TxEnclosureTemp>",
+      entry_type = XML_ENTRY_NUMBER,
+      ok_boolean = "",
+      value_lower_limit = 0,
+      value_upper_limit = 45,
+      label = "Kband-Tx-Enclosure-TempC"
+    }
+    ,
+    {
+      xml_tags = "<KaStatus><KaBandTestPulse><TestPulsePowerDbHc>",
+      entry_type = XML_ENTRY_NUMBER,
+      ok_boolean = "",
+      value_lower_limit = -40,
+      value_upper_limit = -20,
+      label = "Kband-Test-Pulse-Hc-Dbm"
+    }
+  };
+  p_descr = "Details of K-band XML entries for which to check.";
+  p_help =
+    "\txml_tags: list of tags to specify entry in XML\n"
+    "\tentry_type: the type of data stored\n"
+    "\tok_boolean: BOOLEAN only: the string value for an OK state\n"
+    "\tvalue_lower_limit: NUMBER only: the lower limit for an OK state\n"
+    "\tvalue_upper_limit: NUMBER only: the upper limit for an OK state\n"
+    "\tlabel: label to be used for message\n"
+    ".";
+} kband_xml_entries[];
+
+commentdef {
+  p_header = "SMS OUTPUT";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, SMS warnings will be sent out when a warning condition occurs.";
+} send_sms_warnings;
+
+paramdef string {
+  p_default = "$(DATA_DIR)/sms/messages";
+  p_descr = "Dir path for SMS messages.";
+  p_help = "Warning messages are written to this directory. This will be watched by the LdataWatcher, which will then call a script to send the message.";
+} warning_dir_message;
+
+commentdef {
+  p_header = "SPDB OUTPUT";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, writes warnings to SPDB.";
+} write_to_spdb;
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/sms/warning_messages";
+  p_descr = "URL for SPDB output.";
+  p_help = "SPDB data is written to this location.";
+} spdb_url;
+

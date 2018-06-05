@@ -140,6 +140,7 @@ private:
   int _writeVol(RadxVol &vol);
 
   int _processUwRawFile(const string &filePath);
+  int _processMattNcFile(const string &filePath);
   void _addEnvFields(RadxRay *ray);
   
   double _nonLinCountCor(Radx::fl32 count, double deadtime, 

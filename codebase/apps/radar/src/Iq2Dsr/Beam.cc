@@ -1225,13 +1225,11 @@ void Beam::_computeMomDpAltHvCoCross()
   // override noise for moments computations
   
   double noisePowerHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
-  // double noisePowerVc = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
     _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
     _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
     noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
-    // noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
   }
     
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1320,13 +1318,11 @@ void Beam::_computeMomDpAltHvCoOnly()
   // override noise for moments computations
   
   double noisePowerHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
-  // double noisePowerVc = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
     _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
     _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
     noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
-    // noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
   }
     
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1426,13 +1422,11 @@ void Beam::_computeMomDpSimHv()
   // override noise for moments computations
   
   double noisePowerHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
-  // double noisePowerVc = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
     _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
     _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
     noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
-    // noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
   }
     
   for (int igate = 0; igate < _nGates; igate++) {
@@ -2135,6 +2129,30 @@ void Beam::_filterDpAltHvCoCross()
                                    fieldsF.lag2_vc,
                                    igate, 
                                    fieldsF);
+
+    // compute notched moments for rhohv, phidp and zdr
+
+    MomentsFields fieldsN;
+    _mom->computeCovarDpAltHvCoCross(gate->iqhcF, gate->iqvcF,
+                                     gate->iqhxF, gate->iqvxF, 
+                                     fieldsN);
+    _mom->computeMomDpAltHvCoCross(fieldsN.lag0_hc,
+                                   fieldsN.lag0_hx,
+                                   fieldsN.lag0_vc,
+                                   fieldsN.lag0_vx,
+                                   fieldsN.lag0_vchx,
+                                   fieldsN.lag0_hcvx,
+                                   fieldsN.lag1_vxhx,
+                                   fieldsN.lag1_vchc,
+                                   fieldsN.lag1_hcvc,
+                                   fieldsN.lag2_hc,
+                                   fieldsN.lag2_vc,
+                                   igate, 
+                                   fieldsN);
+
+    fieldsF.test = fieldsN.zdr;
+    fieldsF.test2 = fieldsN.phidp;
+    fieldsF.test3 = fieldsN.rhohv;
     
     // compute clutter power
     
@@ -4829,6 +4847,9 @@ void Beam::_performClutterFiltering()
   // copy the unfiltered fields to the filtered fields
   
   for (int igate = 0; igate < _nGates; igate++) {
+    _gateData[igate]->fields.test = _gateData[igate]->fields.zdr;
+    _gateData[igate]->fields.test2 = _gateData[igate]->fields.phidp;
+    _gateData[igate]->fields.test3 = _gateData[igate]->fields.rhohv;
     _gateData[igate]->fieldsF = _gateData[igate]->fields;
   }
   

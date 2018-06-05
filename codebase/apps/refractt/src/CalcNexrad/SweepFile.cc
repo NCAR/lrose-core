@@ -22,11 +22,11 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 // RCS info
-//   $Author: dixon $
+//   $Author: jcraig $
 //   $Locker:  $
-//   $Date: 2016/03/07 18:17:26 $
-//   $Id: SweepFile.cc,v 1.4 2016/03/07 18:17:26 dixon Exp $
-//   $Revision: 1.4 $
+//   $Date: 2018/01/26 20:33:40 $
+//   $Id: SweepFile.cc,v 1.5 2018/01/26 20:33:40 jcraig Exp $
+//   $Revision: 1.5 $
 //   $State: Exp $
 //
  
@@ -191,17 +191,17 @@ bool SweepFile::write(const double *beam_duration,
  * _putField() - Put the given data field into the netCDF file.
  */
 
-void SweepFile::_putField(NcFile &out,
+void SweepFile::_putField(Nc3File &out,
 			  const string &field_name,
 			  const string &field_name_long,
 			  const string &units,
 			  const float *data,
-			  const NcDim *TimeDim,
-			  const NcDim *maxCellsDim,
+			  const Nc3Dim *TimeDim,
+			  const Nc3Dim *maxCellsDim,
 			  const float missing_data_value)
 {
-//  NcVar *field = out.add_var(field_name.c_str(), ncShort,
-  NcVar *field = out.add_var(field_name.c_str(), ncFloat,
+//  Nc3Var *field = out.add_var(field_name.c_str(), ncShort,
+  Nc3Var *field = out.add_var(field_name.c_str(), nc3Float,
 			     TimeDim, maxCellsDim);
   field->add_att("variable_type", "data");
   field->add_att("long_name", field_name_long.c_str());
@@ -261,11 +261,11 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 			  const float *ncp,
 			  const float *sw)
 {
-  // create NcFile object
+  // create Nc3File object
 
-  NcError err(NcError::verbose_nonfatal);
+  Nc3Error err(Nc3Error::verbose_nonfatal);
 
-  NcFile out(_tmpPath.c_str(), NcFile::Replace);
+  Nc3File out(_tmpPath.c_str(), Nc3File::Replace);
   if (!out.is_valid())
   {
     cerr << "ERROR - SweepFile::write" << endl;
@@ -340,18 +340,18 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // add dimensions
 
-  NcDim *TimeDim = out.add_dim("Time");
-  NcDim *maxCellsDim = out.add_dim("maxCells", _nGates);
-  NcDim *numSystemsDim = out.add_dim("numSystems", 1);
-  NcDim *fieldsDim = out.add_dim("fields", _nFields);
-  NcDim *short_stringDim = out.add_dim("short_string", SHORT_STRING_LEN);
+  Nc3Dim *TimeDim = out.add_dim("Time");
+  Nc3Dim *maxCellsDim = out.add_dim("maxCells", _nGates);
+  Nc3Dim *numSystemsDim = out.add_dim("numSystems", 1);
+  Nc3Dim *fieldsDim = out.add_dim("fields", _nFields);
+  Nc3Dim *short_stringDim = out.add_dim("short_string", SHORT_STRING_LEN);
   out.add_dim("long_string", LONG_STRING_LEN);
 
   // add variables
 
   // volume_start_time
 
-  NcVar *volume_start_time = out.add_var("volume_start_time", ncInt);
+  Nc3Var *volume_start_time = out.add_var("volume_start_time", nc3Int);
   volume_start_time->add_att("long_name",
 			     "Unix Date/Time value for volume start time");
   volume_start_time->add_att("units",
@@ -361,7 +361,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // base_time
 
-  NcVar *base_time = out.add_var("base_time", ncInt);
+  Nc3Var *base_time = out.add_var("base_time", nc3Int);
   base_time->add_att("long_name",
 		     "Unix Date/Time value for first record");
   base_time->add_att("units",
@@ -371,7 +371,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // field names
 
-  NcVar *fields = out.add_var("fields", ncChar, fieldsDim, short_stringDim);
+  Nc3Var *fields = out.add_var("fields", nc3Char, fieldsDim, short_stringDim);
   {
     char fnames[_nFields * SHORT_STRING_LEN];
     memset(fnames, 0, _nFields * SHORT_STRING_LEN);
@@ -394,8 +394,8 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // Fixed_Angle
 
-  NcVar *Fixed_Angle =
-    out.add_var("Fixed_Angle", ncFloat);
+  Nc3Var *Fixed_Angle =
+    out.add_var("Fixed_Angle", nc3Float);
   Fixed_Angle->add_att("long_name",
 		       "Targeted fixed angle for this scan");
   Fixed_Angle->add_att("units", "degrees");
@@ -406,7 +406,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // Range_to_First_Cell
 
-  NcVar *Range_to_First_Cell = out.add_var("Range_to_First_Cell", ncFloat);
+  Nc3Var *Range_to_First_Cell = out.add_var("Range_to_First_Cell", nc3Float);
   Range_to_First_Cell->add_att("long_name",
 			       "Range to the center of the first cell");
   Range_to_First_Cell->add_att("units", "meters");
@@ -417,7 +417,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // Cell_Spacing
 
-  NcVar *Cell_Spacing = out.add_var("Cell_Spacing", ncFloat);
+  Nc3Var *Cell_Spacing = out.add_var("Cell_Spacing", nc3Float);
   Cell_Spacing->add_att("long_name",
 			"Distance between cells");
   Cell_Spacing->add_att("units", "meters");
@@ -428,7 +428,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // Nyquist_Velocity
   
-  NcVar *Nyquist_Velocity = out.add_var("Nyquist_Velocity", ncFloat);
+  Nc3Var *Nyquist_Velocity = out.add_var("Nyquist_Velocity", nc3Float);
   Nyquist_Velocity->add_att("long_name",
 			    "Effective unambiguous velocity");
   Nyquist_Velocity->add_att("units", "meters/second");
@@ -439,7 +439,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // Unambiguous_Range
 
-  NcVar *Unambiguous_Range = out.add_var("Unambiguous_Range", ncFloat);
+  Nc3Var *Unambiguous_Range = out.add_var("Unambiguous_Range", nc3Float);
   Unambiguous_Range->add_att("long_name",
 			     "Effective unambiguous range");
   Unambiguous_Range->add_att("units", "meters");
@@ -450,7 +450,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // Latitude
 
-  NcVar *Latitude = out.add_var("Latitude", ncDouble);
+  Nc3Var *Latitude = out.add_var("Latitude", nc3Double);
   Latitude->add_att("long_name",
 		    "Latitude of the instrument");
   Latitude->add_att("units", "degrees");
@@ -465,7 +465,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // Longitude
 
-  NcVar *Longitude = out.add_var("Longitude", ncDouble);
+  Nc3Var *Longitude = out.add_var("Longitude", nc3Double);
   Longitude->add_att("long_name",
 		    "Longitude of the instrument");
   Longitude->add_att("units", "degrees");
@@ -480,7 +480,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // Altitude
 
-  NcVar *Altitude = out.add_var("Altitude", ncDouble);
+  Nc3Var *Altitude = out.add_var("Altitude", nc3Double);
   Altitude->add_att("long_name",
 		    "Altitude in meters (asl) of the instrument");
   Altitude->add_att("units", "meters");
@@ -495,8 +495,8 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // Radar_Constant
 
-  NcVar *Radar_Constant =
-    out.add_var("Radar_Constant", ncFloat, numSystemsDim);
+  Nc3Var *Radar_Constant =
+    out.add_var("Radar_Constant", nc3Float, numSystemsDim);
   Radar_Constant->add_att("long_name", "Radar constant");
   Radar_Constant->add_att("units", "mm6/(m3.mW.km-2)");
   Radar_Constant->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -509,7 +509,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // rcvr_gain
 
-  NcVar *rcvr_gain = out.add_var("rcvr_gain", ncFloat, numSystemsDim);
+  Nc3Var *rcvr_gain = out.add_var("rcvr_gain", nc3Float, numSystemsDim);
   rcvr_gain->add_att("long_name", "Receiver Gain");
   rcvr_gain->add_att("units", "dB");
   rcvr_gain->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -522,7 +522,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // ant_gain
 
-  NcVar *ant_gain = out.add_var("ant_gain", ncFloat, numSystemsDim);
+  Nc3Var *ant_gain = out.add_var("ant_gain", nc3Float, numSystemsDim);
   ant_gain->add_att("long_name", "Antenna Gain");
   ant_gain->add_att("units", "dB");
   ant_gain->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -535,7 +535,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // sys_gain
 
-  NcVar *sys_gain = out.add_var("sys_gain", ncFloat, numSystemsDim);
+  Nc3Var *sys_gain = out.add_var("sys_gain", nc3Float, numSystemsDim);
   sys_gain->add_att("long_name", "System Gain");
   sys_gain->add_att("units", "dB");
   sys_gain->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -548,7 +548,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // bm_width
 
-  NcVar *bm_width = out.add_var("bm_width", ncFloat, numSystemsDim);
+  Nc3Var *bm_width = out.add_var("bm_width", nc3Float, numSystemsDim);
   bm_width->add_att("long_name", "Beam Width");
   bm_width->add_att("units", "degrees");
   bm_width->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -561,7 +561,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // pulse_width
   
-  NcVar *pulse_width = out.add_var("pulse_width", ncFloat, numSystemsDim);
+  Nc3Var *pulse_width = out.add_var("pulse_width", nc3Float, numSystemsDim);
   pulse_width->add_att("long_name", "Pulse Width");
   pulse_width->add_att("units", "seconds");
   pulse_width->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -574,7 +574,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // band_width
 
-  NcVar *band_width = out.add_var("band_width", ncFloat, numSystemsDim);
+  Nc3Var *band_width = out.add_var("band_width", nc3Float, numSystemsDim);
   band_width->add_att("long_name", "Band Width");
   band_width->add_att("units", "hertz");
   band_width->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -582,7 +582,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // peak_pwr
 
-  NcVar *peak_pwr = out.add_var("peak_pwr", ncFloat, numSystemsDim);
+  Nc3Var *peak_pwr = out.add_var("peak_pwr", nc3Float, numSystemsDim);
   peak_pwr->add_att("long_name", "Peak Power");
   peak_pwr->add_att("units", "watts");
   peak_pwr->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -595,7 +595,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // xmtr_power
 
-  NcVar *xmtr_power = out.add_var("xmtr_power", ncFloat, numSystemsDim);
+  Nc3Var *xmtr_power = out.add_var("xmtr_power", nc3Float, numSystemsDim);
   xmtr_power->add_att("long_name", "Transmitter Power");
   xmtr_power->add_att("units", "dBM");
   xmtr_power->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -603,7 +603,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // noise_pwr
 
-  NcVar *noise_pwr = out.add_var("noise_pwr", ncFloat, numSystemsDim);
+  Nc3Var *noise_pwr = out.add_var("noise_pwr", nc3Float, numSystemsDim);
   noise_pwr->add_att("long_name", "Noise Power");
   noise_pwr->add_att("units", "dBM");
   noise_pwr->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -611,7 +611,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // tst_pls_pwr
 
-  NcVar *tst_pls_pwr = out.add_var("tst_pls_pwr", ncFloat, numSystemsDim);
+  Nc3Var *tst_pls_pwr = out.add_var("tst_pls_pwr", nc3Float, numSystemsDim);
   tst_pls_pwr->add_att("long_name", "Test Pulse Power");
   tst_pls_pwr->add_att("units", "dBM");
   tst_pls_pwr->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -619,7 +619,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // tst_pls_rng0
 
-  NcVar *tst_pls_rng0 = out.add_var("tst_pls_rng0", ncFloat, numSystemsDim);
+  Nc3Var *tst_pls_rng0 = out.add_var("tst_pls_rng0", nc3Float, numSystemsDim);
   tst_pls_rng0->add_att("long_name", "Range to start of test pulse");
   tst_pls_rng0->add_att("units", "meters");
   tst_pls_rng0->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -627,7 +627,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // tst_pls_rng1
 
-  NcVar *tst_pls_rng1 = out.add_var("tst_pls_rng1", ncFloat, numSystemsDim);
+  Nc3Var *tst_pls_rng1 = out.add_var("tst_pls_rng1", nc3Float, numSystemsDim);
   tst_pls_rng1->add_att("long_name", "Range to end of test pulse");
   tst_pls_rng1->add_att("units", "meters");
   tst_pls_rng1->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -635,7 +635,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // Wavelength
 
-  NcVar *Wavelength = out.add_var("Wavelength", ncFloat, numSystemsDim);
+  Nc3Var *Wavelength = out.add_var("Wavelength", nc3Float, numSystemsDim);
   Wavelength->add_att("long_name", "System wavelength");
   Wavelength->add_att("units", "meters");
   Wavelength->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -648,7 +648,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // PRF
 
-  NcVar *PRF = out.add_var("PRF", ncFloat, numSystemsDim);
+  Nc3Var *PRF = out.add_var("PRF", nc3Float, numSystemsDim);
   PRF->add_att("long_name", "System pulse repetition frequency");
   PRF->add_att("units", "/sec");
   PRF->add_att("_FillValue", MISSING_DATA_VALUE);
@@ -661,8 +661,8 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // time_offset
 
-  NcVar *time_offset =
-    out.add_var("time_offset", ncDouble, TimeDim);
+  Nc3Var *time_offset =
+    out.add_var("time_offset", nc3Double, TimeDim);
   time_offset->add_att("long_name",
 		       "time offset of the current record from base_time");
   time_offset->add_att("units", "seconds");
@@ -683,7 +683,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // Azimuth
   
-  NcVar *Azimuth = out.add_var("Azimuth", ncFloat, TimeDim);
+  Nc3Var *Azimuth = out.add_var("Azimuth", nc3Float, TimeDim);
   Azimuth->add_att("long_name",
 		   "Earth relative azimuth of the ray");
   Azimuth->add_att("Comment",
@@ -702,7 +702,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // Elevation
   
-  NcVar *Elevation = out.add_var("Elevation", ncFloat, TimeDim);
+  Nc3Var *Elevation = out.add_var("Elevation", nc3Float, TimeDim);
   Elevation->add_att("long_name",
 		   "Earth relative elevation of the ray");
   Elevation->add_att("Comment",
@@ -721,7 +721,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
 
   // clip_range
   
-  NcVar *clip_range = out.add_var("clip_range", ncFloat, TimeDim);
+  Nc3Var *clip_range = out.add_var("clip_range", nc3Float, TimeDim);
   clip_range->add_att("long_name",
 		      "Range of last usefull cell");
   clip_range->add_att("units", "meters");

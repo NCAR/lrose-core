@@ -211,7 +211,8 @@ void PpiWidget::addBeam(const RadxRay *ray,
     // This beam does not cross the 0 degree angle.  Just add the beam to
     // the beam list.
 
-    PpiBeam* b = new PpiBeam(_params, ray, _fields.size(), n_start_angle, n_stop_angle);
+    PpiBeam* b = new PpiBeam(_params, ray, _fields.size(), 
+                             n_start_angle, n_stop_angle);
     b->addClient();
     _cullBeams(b);
     _ppiBeams.push_back(b);

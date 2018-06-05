@@ -869,6 +869,10 @@ int SpolTsMonitor::_updateNagios(time_t now)
         _handleBooleanNagios(sectionStr, entry, tmpFile);
         break;
         
+      case Params::XML_ENTRY_BOOLEAN_TO_INT:
+        _handleBooleanToIntNagios(sectionStr, entry, tmpFile);
+        break;
+        
       case Params::XML_ENTRY_INT:
         _handleIntNagios(sectionStr, entry, tmpFile);
         break;
@@ -985,6 +989,92 @@ int SpolTsMonitor::_handleBooleanNagios(const string &xml,
           warnStr.c_str(),
           label.c_str(),
           sval.c_str(),
+          comment);
+  
+  fprintf(nagiosFile, "%s", text);
+  if (_params.debug) {
+    fprintf(stderr, "Adding nagios entry: ");
+    fprintf(stderr, "%s", text);
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////
+// handle a boolean entry, convert to int
+// in the status xml
+
+int SpolTsMonitor::_handleBooleanToIntNagios(const string &xml,
+                                             const Params::xml_entry_t &entry,
+                                             FILE *nagiosFile)
+  
+{
+  
+  string label = entry.label;
+  if (label.size() == 0) {
+    label = entry.xml_inner_tag;
+  }
+
+  // get the substring
+
+  string sval;
+  if (TaXml::readString(xml, entry.xml_inner_tag, sval)) {
+    _handleMissingEntry(xml, entry, nagiosFile);
+    return 0;
+  }
+
+  // get the boolean value
+
+  bool bval;
+  if (TaXml::readBoolean(xml, entry.xml_inner_tag, bval)) {
+    cerr << "ERROR - SpolTsMonitor::_handleBooleanNagios" << endl;
+    cerr << " Cannot find sub tag: " << entry.xml_inner_tag << endl;
+    return -1;
+  }
+  
+  int warnLevel = 0;
+  string warnStr = "OK";
+  if (bval == entry.ok_boolean) {
+    warnLevel = 0;
+    warnStr = "OK";
+  } else {
+    if (entry.boolean_failure_is_critical) {
+      warnLevel = 2;
+      warnStr = "CRITICAL";
+    } else {
+      warnLevel = 1;
+      warnStr = "WARN";
+    }
+  }
+  int warnLimit = 1;
+  int critLimit = 1;
+  if (entry.ok_boolean) {
+    critLimit = 0;
+    warnLimit = 0;
+  }
+
+  char comment[1024];
+  if (strlen(entry.comment) > 0) {
+    sprintf(comment, " (%s)", entry.comment);
+  } else {
+    comment[0] = '\0';
+  }
+
+  char text[4096];
+  sprintf(text, "%d %s_%s %s=%d;%d;%d;%g;%g; %s - %s = %d %s\n",
+          warnLevel,
+          entry.xml_outer_tag,
+          entry.xml_inner_tag,
+          label.c_str(),
+          bval,
+          warnLimit,
+          critLimit,
+          entry.graph_min_val,
+          entry.graph_max_val,
+          warnStr.c_str(),
+          label.c_str(),
+          bval,
           comment);
   
   fprintf(nagiosFile, "%s", text);

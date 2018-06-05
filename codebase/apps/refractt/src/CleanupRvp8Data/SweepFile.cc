@@ -23,11 +23,11 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
 // RCS info
-//   $Author: dixon $
+//   $Author: jcraig $
 //   $Locker:  $
-//   $Date: 2016/03/07 18:17:27 $
-//   $Id: SweepFile.cc,v 1.4 2016/03/07 18:17:27 dixon Exp $
-//   $Revision: 1.4 $
+//   $Date: 2018/01/26 20:39:39 $
+//   $Id: SweepFile.cc,v 1.5 2018/01/26 20:39:39 jcraig Exp $
+//   $Revision: 1.5 $
 //   $State: Exp $
 //
  
@@ -109,7 +109,7 @@ bool SweepFile::initialize()
   
   // Initialize the input netCDF file
 
-  _sweepFile = new NcFile(_filePath.c_str());
+  _sweepFile = new Nc3File(_filePath.c_str());
   
   if (!_sweepFile->is_valid())
   {
@@ -169,7 +169,7 @@ bool SweepFile::writeCleanFile(const string &output_dir,
 
   string file_path = output_dir + "/" + file_name;
   
-  NcFile output_file(file_path.c_str(), NcFile::Replace);
+  Nc3File output_file(file_path.c_str(), Nc3File::Replace);
   if (!output_file.is_valid())
   {
     cerr << "ERROR: " << method_name << endl;
@@ -220,7 +220,7 @@ bool SweepFile::writeCleanFile(const string &output_dir,
  * Returns true on success, false on failure.
  */
 
-bool SweepFile::_addDimensions(NcFile &output_file) const
+bool SweepFile::_addDimensions(Nc3File &output_file) const
 {
   static const string method_name = "SweepFile::_addDimensions()";
   
@@ -233,8 +233,8 @@ bool SweepFile::_addDimensions(NcFile &output_file) const
     if (_debug)
       cerr << "   Processing dimension " << i << endl;
     
-    NcDim *input_dim = _sweepFile->get_dim(i);
-    NcDim *output_dim = 0;
+    Nc3Dim *input_dim = _sweepFile->get_dim(i);
+    Nc3Dim *output_dim = 0;
     
     if (_debug)
     {
@@ -286,7 +286,7 @@ bool SweepFile::_addDimensions(NcFile &output_file) const
  * Returns true on success, false on failure.
  */
 
-bool SweepFile::_addGlobalAttributes(NcFile &output_file) const
+bool SweepFile::_addGlobalAttributes(Nc3File &output_file) const
 {
   static const string method_name = "SweepFile::_addGlobalAttributes()";
   
@@ -299,9 +299,9 @@ bool SweepFile::_addGlobalAttributes(NcFile &output_file) const
     if (_debug)
       cerr << "   Processing attribute " << i << endl;
     
-    NcAtt *input_att = _sweepFile->get_att(i);
+    Nc3Att *input_att = _sweepFile->get_att(i);
     int num_vals = input_att->num_vals();
-    NcValues *values = input_att->values();
+    Nc3Values *values = input_att->values();
     
     if (_debug)
     {
@@ -311,10 +311,10 @@ bool SweepFile::_addGlobalAttributes(NcFile &output_file) const
     
     switch (input_att->type())
     {
-    case ncNoType :
+    case nc3NoType :
       break;
       
-    case ncByte :
+    case nc3Byte :
     {
       ncbyte *ncbyte_values = new ncbyte[num_vals];
       
@@ -331,7 +331,7 @@ bool SweepFile::_addGlobalAttributes(NcFile &output_file) const
       break;
     }
     
-    case ncChar :
+    case nc3Char :
     {
       char *char_values = new char[num_vals];
       
@@ -348,7 +348,7 @@ bool SweepFile::_addGlobalAttributes(NcFile &output_file) const
       break;
     }
       
-    case ncShort :
+    case nc3Short :
     {
       short *short_values = new short[num_vals];
       
@@ -365,7 +365,7 @@ bool SweepFile::_addGlobalAttributes(NcFile &output_file) const
       break;
     }
       
-    case ncInt :
+    case nc3Int :
     {
       int *int_values = new int[num_vals];
       
@@ -382,7 +382,7 @@ bool SweepFile::_addGlobalAttributes(NcFile &output_file) const
       break;
     }
       
-    case ncFloat :
+    case nc3Float :
     {
       float *float_values = new float[num_vals];
       
@@ -399,7 +399,7 @@ bool SweepFile::_addGlobalAttributes(NcFile &output_file) const
       break;
     }
       
-    case ncDouble :
+    case nc3Double :
     {
       double *double_values = new double[num_vals];
       
@@ -432,8 +432,8 @@ bool SweepFile::_addGlobalAttributes(NcFile &output_file) const
  * Returns true on success, false on failure.
  */
 
-bool SweepFile::_addVariableAttributes(const NcVar &input_var,
-				       NcVar &output_var) const
+bool SweepFile::_addVariableAttributes(const Nc3Var &input_var,
+				       Nc3Var &output_var) const
 {
   static const string method_name = "SweepFile::_addVariableAttributes()";
   
@@ -446,9 +446,9 @@ bool SweepFile::_addVariableAttributes(const NcVar &input_var,
     if (_debug)
       cerr << "   Processing attribute " << i << endl;
     
-    NcAtt *input_att = input_var.get_att(i);
+    Nc3Att *input_att = input_var.get_att(i);
     int num_vals = input_att->num_vals();
-    NcValues *values = input_att->values();
+    Nc3Values *values = input_att->values();
     
     if (_debug)
     {
@@ -458,10 +458,10 @@ bool SweepFile::_addVariableAttributes(const NcVar &input_var,
     
     switch (input_att->type())
     {
-    case ncNoType :
+    case nc3NoType :
       break;
       
-    case ncByte :
+    case nc3Byte :
     {
       ncbyte *ncbyte_values = new ncbyte[num_vals];
       
@@ -478,7 +478,7 @@ bool SweepFile::_addVariableAttributes(const NcVar &input_var,
       break;
     }
     
-    case ncChar :
+    case nc3Char :
     {
       char *char_values = new char[num_vals];
       
@@ -495,7 +495,7 @@ bool SweepFile::_addVariableAttributes(const NcVar &input_var,
       break;
     }
       
-    case ncShort :
+    case nc3Short :
     {
       short *short_values = new short[num_vals];
       
@@ -512,7 +512,7 @@ bool SweepFile::_addVariableAttributes(const NcVar &input_var,
       break;
     }
       
-    case ncInt :
+    case nc3Int :
     {
       int *int_values = new int[num_vals];
       
@@ -529,7 +529,7 @@ bool SweepFile::_addVariableAttributes(const NcVar &input_var,
       break;
     }
       
-    case ncFloat :
+    case nc3Float :
     {
       float *float_values = new float[num_vals];
       
@@ -546,7 +546,7 @@ bool SweepFile::_addVariableAttributes(const NcVar &input_var,
       break;
     }
       
-    case ncDouble :
+    case nc3Double :
     {
       double *double_values = new double[num_vals];
       
@@ -578,7 +578,7 @@ bool SweepFile::_addVariableAttributes(const NcVar &input_var,
  * Returns true on success, false on failure.
  */
 
-bool SweepFile::_addVariables(NcFile &output_file) const
+bool SweepFile::_addVariables(Nc3File &output_file) const
 {
   static const string method_name = "SweepFile::_addVariables()";
   
@@ -591,12 +591,12 @@ bool SweepFile::_addVariables(NcFile &output_file) const
     if (_debug)
       cerr << endl << "*** Processing variable " << i << endl;
     
-    NcVar *input_var = _sweepFile->get_var(i);
+    Nc3Var *input_var = _sweepFile->get_var(i);
 
     // Set the variable dimensions
 
     int num_dims = input_var->num_dims();
-    const NcDim **dim_list = new const NcDim*[num_dims];
+    const Nc3Dim **dim_list = new const Nc3Dim*[num_dims];
 
     if (_debug)
     {
@@ -610,12 +610,12 @@ bool SweepFile::_addVariables(NcFile &output_file) const
     
     for (int dim = 0; dim < num_dims; ++dim)
     {
-      NcDim *input_dim = input_var->get_dim(dim);
+      Nc3Dim *input_dim = input_var->get_dim(dim);
       if (_debug)
 	cerr << "   " << input_dim->name() << ": "
 	     << input_dim->size() << endl;
 
-      NcDim *output_dim;
+      Nc3Dim *output_dim;
       if ((output_dim = output_file.get_dim(input_dim->name())) == 0)
       {
 	cerr << "ERROR: " << method_name << endl;
@@ -627,7 +627,7 @@ bool SweepFile::_addVariables(NcFile &output_file) const
       dim_list[dim] = output_dim;
     }
     
-    NcVar *output_var = output_file.add_var(input_var->name(),
+    Nc3Var *output_var = output_file.add_var(input_var->name(),
 					    input_var->type(),
 					    num_dims,
 					    dim_list);
@@ -637,7 +637,7 @@ bool SweepFile::_addVariables(NcFile &output_file) const
       cerr << "New dimensions:" << endl;
       for (int dim = 0; dim < output_var->num_dims(); ++dim)
       {
-	NcDim *ncdim = output_var->get_dim(dim);
+	Nc3Dim *ncdim = output_var->get_dim(dim);
 	cerr << "   " << ncdim->name() << ": " << ncdim->size() << endl;
       }
     }
@@ -688,8 +688,8 @@ bool SweepFile::_addVariables(NcFile &output_file) const
  * Returns true on success, false on failure.
  */
 
-bool SweepFile::_copyData(NcVar &input_var,
-			  NcVar &output_var,
+bool SweepFile::_copyData(Nc3Var &input_var,
+			  Nc3Var &output_var,
 			  const int num_dims) const
 {
   static const string method_name = "SweepFile::_copyData()";
@@ -702,11 +702,11 @@ bool SweepFile::_copyData(NcVar &input_var,
   
   for (int dim = 0; dim < num_dims; ++dim)
   {
-    NcDim *output_dim = output_var.get_dim(dim);
+    Nc3Dim *output_dim = output_var.get_dim(dim);
     
     if (output_dim->is_unlimited())
     {
-      NcDim *input_dim = input_var.get_dim(dim);
+      Nc3Dim *input_dim = input_var.get_dim(dim);
       if (input_dim == 0)
       {
 	cerr << "ERROR: " << method_name << endl;
@@ -744,10 +744,10 @@ bool SweepFile::_copyData(NcVar &input_var,
   
   switch (input_var.type())
   {
-  case ncNoType :
+  case nc3NoType :
     break;
       
-  case ncByte :
+  case nc3Byte :
   {
     ncbyte *vals = new ncbyte[data_size];
       
@@ -763,7 +763,7 @@ bool SweepFile::_copyData(NcVar &input_var,
     break;
   }
     
-  case ncChar :
+  case nc3Char :
   {
     char *vals = new char[data_size];
       
@@ -779,7 +779,7 @@ bool SweepFile::_copyData(NcVar &input_var,
     break;
   }
 
-  case ncShort :
+  case nc3Short :
   {
     short *vals = new short[data_size];
       
@@ -795,7 +795,7 @@ bool SweepFile::_copyData(NcVar &input_var,
     break;
   }
 
-  case ncInt :
+  case nc3Int :
   {
     int *vals = new int[data_size];
       
@@ -811,7 +811,7 @@ bool SweepFile::_copyData(NcVar &input_var,
     break;
   }
 
-  case ncFloat :
+  case nc3Float :
   {
     float *vals = new float[data_size];
       
@@ -827,7 +827,7 @@ bool SweepFile::_copyData(NcVar &input_var,
     break;
   }
 
-  case ncDouble :
+  case nc3Double :
   {
     double *vals = new double[data_size];
       
@@ -856,14 +856,14 @@ bool SweepFile::_copyData(NcVar &input_var,
  * _negateVariable() - Negate the data values for this variable.
  */
 
-bool SweepFile::_negateVariable(NcVar &output_var,
+bool SweepFile::_negateVariable(Nc3Var &output_var,
 				const string &negate_fill_attr_name) const
 {
   static const string method_name = "SweepFile::_negateVariable()";
   
   // Get the fill value used for this variable
 
-  NcAtt *fill_attr;
+  Nc3Att *fill_attr;
   if ((fill_attr = output_var.get_att(negate_fill_attr_name.c_str())) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -887,45 +887,45 @@ bool SweepFile::_negateVariable(NcVar &output_var,
 
   switch (output_var.type())
   {
-  case ncNoType :
+  case nc3NoType :
     break;
     
-  case ncByte :
+  case nc3Byte :
   {
     ncbyte fill_value = fill_attr->as_ncbyte(0);
     _negateDataT(output_var, counts, fill_value, num_vals);
     break;
   }
   
-  case ncChar :
+  case nc3Char :
   {
     char fill_value = fill_attr->as_char(0);
     _negateDataT(output_var, counts, fill_value, num_vals);
     break;
   }
   
-  case ncShort :
+  case nc3Short :
   {
     short fill_value = fill_attr->as_short(0);
     _negateDataT(output_var, counts, fill_value, num_vals);
     break;
   }
   
-  case ncInt :
+  case nc3Int :
   {
     int fill_value = fill_attr->as_int(0);
     _negateDataT(output_var, counts, fill_value, num_vals);
     break;
   }
   
-  case ncFloat :
+  case nc3Float :
   {
     float fill_value = fill_attr->as_float(0);
     _negateDataT(output_var, counts, fill_value, num_vals);
     break;
   }
   
-  case ncDouble :
+  case nc3Double :
   {
     double fill_value = fill_attr->as_double(0);
     _negateDataT(output_var, counts, fill_value, num_vals);

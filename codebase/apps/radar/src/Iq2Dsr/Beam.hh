@@ -357,6 +357,8 @@ private:
 
   NoiseLocator *_noise;
 
+  // fields for moments
+
   TaArray<MomentsFields> _momFields_;
   MomentsFields *_momFields;
 
