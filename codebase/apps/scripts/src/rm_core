@@ -1,2 +1,2 @@
-nice find . '(' -name core -o -name 'core.*' ')' \
+nice find . '(' -name core -o -name 'core.*' -o -name 'vgcore.*' ')' \
          -user $USER -type f -print -exec \rm '{}' \;
