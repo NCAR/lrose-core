@@ -84,9 +84,9 @@ public:
   typedef struct {
     char* xml_tags;
     xml_entry_type_t entry_type;
-    char* ok_boolean;
-    double value_lower_limit;
-    double value_upper_limit;
+    tdrp_bool_t ok_boolean;
+    double valid_lower_limit;
+    double valid_upper_limit;
     char* label;
   } xml_entry_t;
 

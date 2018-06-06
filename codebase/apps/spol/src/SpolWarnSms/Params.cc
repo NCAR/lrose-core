@@ -705,7 +705,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("sband_xml_entries");
     tt->descr = tdrpStrDup("Details of S-band XML entries for which to check.");
-    tt->help = tdrpStrDup("\txml_tags: list of tags to specify entry in XML\n\tentry_type: the type of data stored\n\tok_boolean: BOOLEAN only: the string value for an OK state\n\tvalue_lower_limit: NUMBER only: the lower limit for an OK state\n\tvalue_upper_limit: NUMBER only: the upper limit for an OK state\n\tlabel: label to be used for message\n.");
+    tt->help = tdrpStrDup("\txml_tags: list of tags to specify entry in XML\n\tentry_type: the type of data stored\n\tok_boolean: BOOLEAN only: the string value for an OK state\n\tvalid_lower_limit: NUMBER only: the lower limit for an OK state\n\tvalid_upper_limit: NUMBER only: the upper limit for an OK state\n\tlabel: label to be used for message\n.");
     tt->array_offset = (char *) &_sband_xml_entries - &_start_;
     tt->array_n_offset = (char *) &sband_xml_entries_n - &_start_;
     tt->is_array = TRUE;
@@ -734,21 +734,21 @@
         tt->struct_def.fields[1].enum_def.fields[0].val = XML_ENTRY_BOOLEAN;
         tt->struct_def.fields[1].enum_def.fields[1].name = tdrpStrDup("XML_ENTRY_NUMBER");
         tt->struct_def.fields[1].enum_def.fields[1].val = XML_ENTRY_NUMBER;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[2].fname = tdrpStrDup("ok_boolean");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].ptype = BOOL_TYPE;
       tt->struct_def.fields[2].rel_offset = 
         (char *) &_sband_xml_entries->ok_boolean - (char *) _sband_xml_entries;
       tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("value_lower_limit");
+      tt->struct_def.fields[3].fname = tdrpStrDup("valid_lower_limit");
       tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_sband_xml_entries->value_lower_limit - (char *) _sband_xml_entries;
+        (char *) &_sband_xml_entries->valid_lower_limit - (char *) _sband_xml_entries;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("value_upper_limit");
+      tt->struct_def.fields[4].fname = tdrpStrDup("valid_upper_limit");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_sband_xml_entries->value_upper_limit - (char *) _sband_xml_entries;
+        (char *) &_sband_xml_entries->valid_upper_limit - (char *) _sband_xml_entries;
       tt->struct_def.fields[5].ftype = tdrpStrDup("string");
       tt->struct_def.fields[5].fname = tdrpStrDup("label");
       tt->struct_def.fields[5].ptype = STRING_TYPE;
@@ -759,19 +759,19 @@
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("<SpolStatus><SpolTransmitStatus><Maintenance_Required_Fault>");
       tt->struct_vals[1].e = XML_ENTRY_BOOLEAN;
-      tt->struct_vals[2].s = tdrpStrDup("false");
+      tt->struct_vals[2].b = pFALSE;
       tt->struct_vals[3].d = 0;
       tt->struct_vals[4].d = 0;
       tt->struct_vals[5].s = tdrpStrDup("Sband-Xmit-Maintenance-Fault");
       tt->struct_vals[6].s = tdrpStrDup("<SpolStatus><SpolTemperatures><KlystronExhaust>");
       tt->struct_vals[7].e = XML_ENTRY_NUMBER;
-      tt->struct_vals[8].s = tdrpStrDup("");
+      tt->struct_vals[8].b = pFALSE;
       tt->struct_vals[9].d = 0;
       tt->struct_vals[10].d = 38;
       tt->struct_vals[11].s = tdrpStrDup("Sband-Klystron-Exhaust-TempC");
       tt->struct_vals[12].s = tdrpStrDup("<SpolStatus><WaveguideStatus><pressPsi>");
       tt->struct_vals[13].e = XML_ENTRY_NUMBER;
-      tt->struct_vals[14].s = tdrpStrDup("");
+      tt->struct_vals[14].b = pFALSE;
       tt->struct_vals[15].d = 4;
       tt->struct_vals[16].d = 7;
       tt->struct_vals[17].s = tdrpStrDup("Sband-WG-Pressure-PSI");
@@ -784,7 +784,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("kband_xml_entries");
     tt->descr = tdrpStrDup("Details of K-band XML entries for which to check.");
-    tt->help = tdrpStrDup("\txml_tags: list of tags to specify entry in XML\n\tentry_type: the type of data stored\n\tok_boolean: BOOLEAN only: the string value for an OK state\n\tvalue_lower_limit: NUMBER only: the lower limit for an OK state\n\tvalue_upper_limit: NUMBER only: the upper limit for an OK state\n\tlabel: label to be used for message\n.");
+    tt->help = tdrpStrDup("\txml_tags: list of tags to specify entry in XML\n\tentry_type: the type of data stored\n\tok_boolean: BOOLEAN only: the string value for an OK state\n\tvalid_lower_limit: NUMBER only: the lower limit for an OK state\n\tvalid_upper_limit: NUMBER only: the upper limit for an OK state\n\tlabel: label to be used for message\n.");
     tt->array_offset = (char *) &_kband_xml_entries - &_start_;
     tt->array_n_offset = (char *) &kband_xml_entries_n - &_start_;
     tt->is_array = TRUE;
@@ -813,21 +813,21 @@
         tt->struct_def.fields[1].enum_def.fields[0].val = XML_ENTRY_BOOLEAN;
         tt->struct_def.fields[1].enum_def.fields[1].name = tdrpStrDup("XML_ENTRY_NUMBER");
         tt->struct_def.fields[1].enum_def.fields[1].val = XML_ENTRY_NUMBER;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[2].fname = tdrpStrDup("ok_boolean");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].ptype = BOOL_TYPE;
       tt->struct_def.fields[2].rel_offset = 
         (char *) &_kband_xml_entries->ok_boolean - (char *) _kband_xml_entries;
       tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("value_lower_limit");
+      tt->struct_def.fields[3].fname = tdrpStrDup("valid_lower_limit");
       tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_kband_xml_entries->value_lower_limit - (char *) _kband_xml_entries;
+        (char *) &_kband_xml_entries->valid_lower_limit - (char *) _kband_xml_entries;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("value_upper_limit");
+      tt->struct_def.fields[4].fname = tdrpStrDup("valid_upper_limit");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_kband_xml_entries->value_upper_limit - (char *) _kband_xml_entries;
+        (char *) &_kband_xml_entries->valid_upper_limit - (char *) _kband_xml_entries;
       tt->struct_def.fields[5].ftype = tdrpStrDup("string");
       tt->struct_def.fields[5].fname = tdrpStrDup("label");
       tt->struct_def.fields[5].ptype = STRING_TYPE;
@@ -838,19 +838,19 @@
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("<KaStatus><KaTransmitterStatus><MagnetronCurrentFault>");
       tt->struct_vals[1].e = XML_ENTRY_BOOLEAN;
-      tt->struct_vals[2].s = tdrpStrDup("false");
+      tt->struct_vals[2].b = pFALSE;
       tt->struct_vals[3].d = 0;
       tt->struct_vals[4].d = 0;
       tt->struct_vals[5].s = tdrpStrDup("Kband-Xmit-Magnetron-Current-Fault");
       tt->struct_vals[6].s = tdrpStrDup("<KaStatus><KaReceiverStatus><TxEnclosureTemp>");
       tt->struct_vals[7].e = XML_ENTRY_NUMBER;
-      tt->struct_vals[8].s = tdrpStrDup("");
+      tt->struct_vals[8].b = pFALSE;
       tt->struct_vals[9].d = 0;
       tt->struct_vals[10].d = 45;
       tt->struct_vals[11].s = tdrpStrDup("Kband-Tx-Enclosure-TempC");
       tt->struct_vals[12].s = tdrpStrDup("<KaStatus><KaBandTestPulse><TestPulsePowerDbHc>");
       tt->struct_vals[13].e = XML_ENTRY_NUMBER;
-      tt->struct_vals[14].s = tdrpStrDup("");
+      tt->struct_vals[14].b = pFALSE;
       tt->struct_vals[15].d = -40;
       tt->struct_vals[16].d = -20;
       tt->struct_vals[17].s = tdrpStrDup("Kband-Test-Pulse-Hc-Dbm");

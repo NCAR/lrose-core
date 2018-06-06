@@ -89,9 +89,9 @@ typedef enum {
 typedef struct {
   string xml_tags;
   xml_entry_type_t entry_type;
-  string ok_boolean;
-  double value_lower_limit;
-  double value_upper_limit;
+  boolean ok_boolean;
+  double valid_lower_limit;
+  double valid_upper_limit;
   string label;
 } xml_entry_t;
 
@@ -100,27 +100,27 @@ paramdef struct xml_entry_t {
     {
       xml_tags = "<SpolStatus><SpolTransmitStatus><Maintenance_Required_Fault>",
       entry_type = XML_ENTRY_BOOLEAN,
-      ok_boolean = "false",
-      value_lower_limit = 0,
-      value_upper_limit = 0,
+      ok_boolean = false,
+      valid_lower_limit = 0,
+      valid_upper_limit = 0,
       label = "Sband-Xmit-Maintenance-Fault"
     }
     ,
     {
       xml_tags = "<SpolStatus><SpolTemperatures><KlystronExhaust>",
       entry_type = XML_ENTRY_NUMBER,
-      ok_boolean = "",
-      value_lower_limit = 0,
-      value_upper_limit = 38,
+      ok_boolean = false,
+      valid_lower_limit = 0,
+      valid_upper_limit = 38,
       label = "Sband-Klystron-Exhaust-TempC"
     }
     ,
     {
       xml_tags = "<SpolStatus><WaveguideStatus><pressPsi>",
       entry_type = XML_ENTRY_NUMBER,
-      ok_boolean = "",
-      value_lower_limit = 4,
-      value_upper_limit = 7,
+      ok_boolean = false,
+      valid_lower_limit = 4,
+      valid_upper_limit = 7,
       label = "Sband-WG-Pressure-PSI"
     }
   };
@@ -129,8 +129,8 @@ paramdef struct xml_entry_t {
     "\txml_tags: list of tags to specify entry in XML\n"
     "\tentry_type: the type of data stored\n"
     "\tok_boolean: BOOLEAN only: the string value for an OK state\n"
-    "\tvalue_lower_limit: NUMBER only: the lower limit for an OK state\n"
-    "\tvalue_upper_limit: NUMBER only: the upper limit for an OK state\n"
+    "\tvalid_lower_limit: NUMBER only: the lower limit for an OK state\n"
+    "\tvalid_upper_limit: NUMBER only: the upper limit for an OK state\n"
     "\tlabel: label to be used for message\n"
     ".";
 } sband_xml_entries[];
@@ -140,27 +140,27 @@ paramdef struct xml_entry_t {
     {
       xml_tags = "<KaStatus><KaTransmitterStatus><MagnetronCurrentFault>",
       entry_type = XML_ENTRY_BOOLEAN,
-      ok_boolean = "false",
-      value_lower_limit = 0,
-      value_upper_limit = 0,
+      ok_boolean = false,
+      valid_lower_limit = 0,
+      valid_upper_limit = 0,
       label = "Kband-Xmit-Magnetron-Current-Fault"
     }
     ,
     {
       xml_tags = "<KaStatus><KaReceiverStatus><TxEnclosureTemp>",
       entry_type = XML_ENTRY_NUMBER,
-      ok_boolean = "",
-      value_lower_limit = 0,
-      value_upper_limit = 45,
+      ok_boolean = false,
+      valid_lower_limit = 0,
+      valid_upper_limit = 45,
       label = "Kband-Tx-Enclosure-TempC"
     }
     ,
     {
       xml_tags = "<KaStatus><KaBandTestPulse><TestPulsePowerDbHc>",
       entry_type = XML_ENTRY_NUMBER,
-      ok_boolean = "",
-      value_lower_limit = -40,
-      value_upper_limit = -20,
+      ok_boolean = false,
+      valid_lower_limit = -40,
+      valid_upper_limit = -20,
       label = "Kband-Test-Pulse-Hc-Dbm"
     }
   };
@@ -169,8 +169,8 @@ paramdef struct xml_entry_t {
     "\txml_tags: list of tags to specify entry in XML\n"
     "\tentry_type: the type of data stored\n"
     "\tok_boolean: BOOLEAN only: the string value for an OK state\n"
-    "\tvalue_lower_limit: NUMBER only: the lower limit for an OK state\n"
-    "\tvalue_upper_limit: NUMBER only: the upper limit for an OK state\n"
+    "\tvalid_lower_limit: NUMBER only: the lower limit for an OK state\n"
+    "\tvalid_upper_limit: NUMBER only: the upper limit for an OK state\n"
     "\tlabel: label to be used for message\n"
     ".";
 } kband_xml_entries[];

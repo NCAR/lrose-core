@@ -506,6 +506,7 @@ codebase/apps/spol/src/SpolSysconRelay/SpolSysconRelay
 codebase/apps/spol/src/SpolTs2Fmq/SpolTs2Fmq
 codebase/apps/spol/src/SpolTsMonitor/SpolTsMonitor
 codebase/apps/spol/src/SpolDishTemp2Spdb/SpolDishTemp2Spdb
+codebase/apps/spol/src/SpolWarnSms/SpolWarnSms
 
 codebase/apps/titan/src/AcPosnAscii2Spdb/AcPosnAscii2Spdb
 codebase/apps/titan/src/Alenia2Mom/Alenia2Mom

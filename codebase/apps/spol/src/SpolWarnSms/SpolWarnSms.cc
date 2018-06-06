@@ -50,6 +50,7 @@
 #include <toolsa/file_io.h>
 #include <toolsa/pmu.h>
 #include <toolsa/Path.hh>
+#include <toolsa/TaStr.hh>
 #include <toolsa/TaXml.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include "SpolWarnSms.hh"
@@ -266,32 +267,20 @@ int SpolWarnSms::_readStatus(time_t now,
   
   for (int ii = 0; ii < nEntries; ii++) {
     
-#ifdef JUNK
-
     const Params::xml_entry_t &entry = entries[ii];
     
-    string sectionStr;
-    if (TaXml::readString(statusXml, entry.xml_outer_tag, sectionStr)) {
-      if (_params.debug >= Params::DEBUG_EXTRA) { 
-        cerr << "WARNING - SpolWarnSms::_updateNagios" << endl;
-        cerr << " Cannot find main tag: " << entry.xml_outer_tag << endl;
-      }
-    }
-
     switch (entry.entry_type) {
       
       case Params::XML_ENTRY_BOOLEAN:
-        _handleBooleanEntry(now, sectionStr, entry, warningMsg);
+        _handleBooleanEntry(now, statusXml, entry, warningMsg);
         break;
         
       case Params::XML_ENTRY_NUMBER:
-        _handleNumberEntry(now, sectionStr, entry, warningMsg);
+        _handleNumberEntry(now, statusXml, entry, warningMsg);
         break;
         
     } // switch (entry.entry_type)
-
-#endif
-        
+    
   } // ii
 
   return 0;
@@ -400,12 +389,12 @@ int SpolWarnSms::_writeMessageToSpdb(time_t now,
 int SpolWarnSms::_handleBooleanEntry(time_t now,
                                      const string &statusXml,
                                      const Params::xml_entry_t &entry,
-                                     FILE *outputFile)
+                                     string &warningMsg)
   
 {
   
   // get tag list
-    
+  
   vector<string> tags;
   TaStr::tokenize(entry.xml_tags, "<>", tags);
   if (tags.size() == 0) {
@@ -438,175 +427,100 @@ int SpolWarnSms::_handleBooleanEntry(time_t now,
     return -1;
   }
 
-  if (buf == entry.ok_boolean) {
+  // check value
+
+  if (bval == entry.ok_boolean) {
     // no problem with this entry
     return 0;
   }
   
-  // get the substring
+  // create message for this entry
 
-  string sval;
-  if (TaXml::readString(xml, entry.xml_inner_tag, sval)) {
-    _handleMissingEntry(xml, entry, outputFile);
-    return 0;
-  }
-
-  // get the boolean value
-
-  bool bval;
-  if (TaXml::readBoolean(xml, entry.xml_inner_tag, bval)) {
-    cerr << "ERROR - SpolWarnSms::_handleBooleanNagios" << endl;
-    cerr << " Cannot find sub tag: " << entry.xml_inner_tag << endl;
-    return -1;
-  }
-  
-  int warnLevel = 0;
-  string warnStr = "OK";
-  if (bval == entry.ok_boolean) {
-    warnLevel = 0;
-    warnStr = "OK";
-  } else {
-    if (entry.boolean_failure_is_critical) {
-      warnLevel = 2;
-      warnStr = "CRITICAL";
-    } else {
-      warnLevel = 1;
-      warnStr = "WARN";
-    }
-  }
-  int warnLimit = 1;
-  int critLimit = 1;
-  if (entry.ok_boolean) {
-    critLimit = 0;
-    warnLimit = 0;
-  }
-
-  char comment[1024];
-  if (strlen(entry.comment) > 0) {
-    sprintf(comment, " (%s)", entry.comment);
-  } else {
-    comment[0] = '\0';
-  }
-
-  char text[4096];
-  sprintf(text, "%d %s_%s %s=%d;%d;%d;%g;%g; %s - %s = %s %s\n",
-          warnLevel,
-          entry.xml_outer_tag,
-          entry.xml_inner_tag,
-          label.c_str(),
-          bval,
-          warnLimit,
-          critLimit,
-          entry.graph_min_val,
-          entry.graph_max_val,
-          warnStr.c_str(),
-          label.c_str(),
-          sval.c_str(),
-          comment);
-  
-  fprintf(outputFile, "%s", text);
+  string msg(" #");
+  msg += entry.label;
+  msg += ":";
+  msg += buf;
   if (_params.debug) {
-    fprintf(stderr, "Adding nagios entry: ");
-    fprintf(stderr, "%s", text);
+    cerr << "Adding msg: " << msg << endl;
   }
+
+  // add to the warning message
+
+  warningMsg += msg;
 
   return 0;
 
 }
 
 ///////////////////////////////////////////
-// handle a double entry in the status xml
+// handle a number entry in the status xml
 
-int SpolWarnSms::_handleNumberEntry(const string &xml,
+int SpolWarnSms::_handleNumberEntry(time_t now,
+                                    const string &statusXml,
                                     const Params::xml_entry_t &entry,
-                                    FILE *outputFile)
+                                    string &warningMsg)
   
 {
-
-  string label = entry.label;
-  if (label.size() == 0) {
-    label = entry.xml_tags;
-  }
-
-#ifdef JUNK
-
-  // get the substring
   
-  string sval;
-  if (TaXml::readString(xml, entry.xml_inner_tag, sval)) {
-    _handleMissingEntry(xml, entry, outputFile);
-    return 0;
+  // get tag list
+  
+  vector<string> tags;
+  TaStr::tokenize(entry.xml_tags, "<>", tags);
+  if (tags.size() == 0) {
+    // no tags
+    cerr << "WARNING - SpolWarnSms::_handleNumberEntry" << endl;
+    cerr << "  No tags found: " << entry.xml_tags << endl;
+    return -1;
   }
+  
+  // read through the outer tags in status XML
+  
+  string buf(statusXml);
+  for (size_t jj = 0; jj < tags.size(); jj++) {
+    string val;
+    if (TaXml::readString(buf, tags[jj], val)) {
+      cerr << "WARNING - SpolWarnSms::_handleNumberEntry" << endl;
+      cerr << "  Bad tags found in status xml, expecting: "
+           << entry.xml_tags << endl;
+      return -1;
+    }
+    buf = val;
+  }
+
+  // get the numerical value
 
   double dval;
-  if (TaXml::readDouble(xml, entry.xml_inner_tag, dval)) {
+  if (TaXml::readDouble(buf, dval)) {
     if (_params.debug) { 
-      cerr << "WARNING - SpolWarnSms::_handleBooleanNagios" << endl;
-      cerr << " Cannot find sub tag: " << entry.xml_inner_tag << endl;
+      cerr << "WARNING - SpolWarnSms::_handleNumberEntry" << endl;
+      cerr << " Cannot read numerical value from: " << buf << endl;
     }
     return -1;
   }
   
-  int warnLevel = 0;
-  string warnStr = "OK";
-  if (dval >= entry.ok_value_lower_limit &&
-      dval <= entry.ok_value_upper_limit) {
-    warnLevel = 0;
-    warnStr = "OK";
-  } else if (dval >= entry.impaired_value_lower_limit &&
-             dval <= entry.impaired_value_upper_limit) {
-    warnLevel = 1;
-    warnStr = "WARN";
-  } else {
-    warnLevel = 2;
-    warnStr = "CRITICAL";
-  }
+  // check value
 
-  double warnLimit = entry.ok_value_upper_limit;
-  double critLimit = entry.impaired_value_upper_limit;
-  if (entry.impaired_value_lower_limit < entry.ok_value_lower_limit) {
-    warnLimit = entry.ok_value_lower_limit;
-    critLimit = entry.impaired_value_lower_limit;
+  if (dval >= entry.valid_lower_limit &&
+      dval <= entry.valid_lower_limit) {
+    // no problem with this entry
+    return 0;
   }
-
-  string label = entry.label;
-  if (label.size() == 0) {
-    label = entry.xml_inner_tag;
-  }
-
-  char comment[1024];
-  if (strlen(entry.comment) > 0) {
-    sprintf(comment, " (%s)", entry.comment);
-  } else {
-    comment[0] = '\0';
-  }
-
-  char text[4096];
-  sprintf(text, "%d %s_%s %s=%s;%g;%g;%g;%g; %s - %s = %s %s%s\n",
-          warnLevel,
-          entry.xml_outer_tag,
-          entry.xml_inner_tag,
-          label.c_str(),
-          sval.c_str(),
-          warnLimit,
-          critLimit,
-          entry.graph_min_val,
-          entry.graph_max_val,
-          warnStr.c_str(),
-          label.c_str(),
-          sval.c_str(),
-          entry.units,
-          comment);
   
-  fprintf(outputFile, "%s", text);
+  // create message for this entry
+  
+  string msg(" #");
+  msg += entry.label;
+  msg += ":";
+  msg += buf;
   if (_params.debug) {
-    fprintf(stderr, "Adding nagios entry: ");
-    fprintf(stderr, "%s", text);
+    cerr << "Adding msg: " << msg << endl;
   }
 
-#endif
+  // add to the warning message
+
+  warningMsg += msg;
 
   return 0;
-  
+
 }
 
