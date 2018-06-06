@@ -322,11 +322,11 @@ warning_spdb_url = "spdbp:://localhost::spdb/monitoring/messages";
 // Type: boolean
 //
 
-send_warnings_to_sms = FALSE;
+send_warnings_to_sms = TRUE;
 
-///////////// time_between_warnings_secs //////////////
+///////////// time_between_sms_secs ///////////////////
 //
-// Minimum time between warnings (secs).
+// Minimum time between warnings via SMS (secs).
 //
 // If warnings arrive more quickly, an SMS will only be sent out if the 
 //   warnings persist after this time has passed.
@@ -335,7 +335,7 @@ send_warnings_to_sms = FALSE;
 // Type: int
 //
 
-time_between_sms_secs = 3600;
+time_between_sms_secs = 60;
 
 ///////////// phone_book //////////////////////////////
 //

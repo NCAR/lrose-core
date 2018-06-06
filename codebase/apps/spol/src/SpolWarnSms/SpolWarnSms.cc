@@ -387,7 +387,7 @@ int SpolWarnSms::_writeMessageToDir(time_t now,
   }
   
   // write LdataInfo file to trigger SMS
-
+  
   DsLdataInfo ldata(_params.warning_message_dir,
                     _params.debug >= Params::DEBUG_VERBOSE);
   
@@ -398,7 +398,8 @@ int SpolWarnSms::_writeMessageToDir(time_t now,
   ldata.setRelDataPath(relPath);
   ldata.setWriter("SpolWarnSms");
   ldata.setDataType("txt");
-  ldata.setUserInfo1(numberStr);
+  ldata.setUserInfo1(warningMsg.substr(0, 160));
+  ldata.setUserInfo2(numberStr);
   if (ldata.write(now)) {
     cerr << "ERROR - cannot write LdataInfo" << endl;
     cerr << " outputDir: " << _params.warning_message_dir << endl;
@@ -691,18 +692,25 @@ int SpolWarnSms::_setupDailyInterval(const DateTime &endTime,
     cerr << "  Bad start and end time format: " << paramLine << endl;
     return -1;
   };
+  int startSec = 0;
+  int endSec = 0;
+  if (endHour == 24 && endMin == 0) {
+    endHour = 23;
+    endMin = 59;
+    endSec = 59;
+  }
   
   // set daily start and end times
 
   interval.startTime = endTime;
   interval.startTime.setHour(startHour);
   interval.startTime.setMin(startMin);
-  interval.startTime.setSec(0);
+  interval.startTime.setSec(startSec);
   
   interval.endTime = endTime;
   interval.endTime.setHour(endHour);
   interval.endTime.setMin(endMin);
-  interval.endTime.setSec(0);
+  interval.endTime.setSec(endSec);
 
   // set names and numbers
 
@@ -762,7 +770,16 @@ void SpolWarnSms::_getSmsNumbers(time_t now,
     const WarnPeriod &wp = _warnPeriods[ii];
     if (now > wp.endTime.utime()) {
       // period in the past
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "Period in the past, skipping: "
+             << DateTime::strm(wp.endTime.utime()) << endl;
+      }
       continue;
+    }
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Using period ending at: "
+           << DateTime::strm(wp.endTime.utime()) << endl;
     }
 
     for (size_t jj = 0; jj < wp.intervals.size(); jj++) {
@@ -770,12 +787,12 @@ void SpolWarnSms::_getSmsNumbers(time_t now,
       const DailyInterval &interval = wp.intervals[jj];
       
       DateTime startPeriod(now);
-      startPeriod.setHour(interval.startTime.getHour());
-      startPeriod.setMin(interval.startTime.getMin());
-      
+      startPeriod.setTime(interval.startTime.getHour(),
+                          interval.startTime.getMin(), 0);
+
       DateTime endPeriod(now);
-      endPeriod.setHour(interval.endTime.getHour());
-      endPeriod.setMin(interval.endTime.getMin());
+      endPeriod.setTime(interval.endTime.getHour(),
+                        interval.endTime.getMin(), 0);
 
       if (now >= startPeriod.utime() && now <= endPeriod.utime()) {
         names = interval.names;
@@ -786,7 +803,7 @@ void SpolWarnSms::_getSmsNumbers(time_t now,
           for (size_t kk = 0; kk < numbers.size(); kk++) {
             cerr << "  name, number: " << names[kk] << ", "
                  << numbers[kk] << endl;
-          }
+          } // kk
         }
         return;
       }
