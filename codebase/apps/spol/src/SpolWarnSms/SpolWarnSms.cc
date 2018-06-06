@@ -126,7 +126,6 @@ int SpolWarnSms::Run ()
     // read status, append to the message
 
     string warningMsgSband;
-
     if (_params.monitor_the_sband) {
       if (_readStatus(now,
                       _params.sband_monitoring_spdb_url,
@@ -136,11 +135,11 @@ int SpolWarnSms::Run ()
                       warningMsgSband)) {
         cerr << "ERROR - SpolWarnSms::Run" << endl;
         cerr << "  Problems monitoring the sband" << endl;
+        warningMsgSband = "#Sband down#";
       }
     }
 
     string warningMsgKband;
-
     if (_params.monitor_the_kband) {
       if (_readStatus(now,
                       _params.kband_monitoring_spdb_url,
@@ -150,14 +149,15 @@ int SpolWarnSms::Run ()
                       warningMsgKband)) {
         cerr << "ERROR - SpolWarnSms::Run" << endl;
         cerr << "  Problems monitoring the kband" << endl;
+        warningMsgKband = "#Kband down#";
       }
     }
-
+    
     // combine messages
 
     string warningMsg;
     if (warningMsgSband.size() > 0 || warningMsgKband.size() > 0) {
-      warningMsg += "SPOL_WARN: ";
+      warningMsg += "SPOL-WARNING:";
       warningMsg += warningMsgSband;
       warningMsg += warningMsgKband;
     }
@@ -165,6 +165,11 @@ int SpolWarnSms::Run ()
     // write message to dir for SMS
     
     if (warningMsg.size() > 0) {
+      if (_params.debug) {
+        cerr << "===================== warning message ============================" << endl;
+        cerr << warningMsg << endl;
+        cerr << "==================================================================" << endl;
+      }
       if (_params.write_warnings_to_dir) {
         _writeMessageToDir(now, warningMsg);
       }
@@ -245,7 +250,7 @@ int SpolWarnSms::_readStatus(time_t now,
   
   const Spdb::chunk_t &latest = chunks[chunks.size() - 1];
   time_t validTime = latest.valid_time;
-  if (validTime - now > marginSecs) {
+  if (now - validTime > marginSecs) {
     cerr << "ERROR - SpolWarnSms::_readStatus()" << endl;
     cerr << "  Data too old" << endl;
     cerr << "  Calling getLatest for url: " << spdbUrl << endl;
@@ -341,7 +346,7 @@ int SpolWarnSms::_writeMessageToDir(time_t now,
   fclose(out);
   
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Wrote message to file: " << outputPath << endl;
   }
 
@@ -375,7 +380,7 @@ int SpolWarnSms::_writeMessageToSpdb(time_t now,
     return -1;
   }
   
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Wrote SPDB data to: " << _params.warning_spdb_url << endl;
   }
 
@@ -436,11 +441,12 @@ int SpolWarnSms::_handleBooleanEntry(time_t now,
   
   // create message for this entry
 
-  string msg(" #");
+  string msg("#");
   msg += entry.label;
   msg += ":";
   msg += buf;
-  if (_params.debug) {
+  msg += "#";
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Adding msg: " << msg << endl;
   }
 
@@ -491,10 +497,8 @@ int SpolWarnSms::_handleNumberEntry(time_t now,
 
   double dval;
   if (TaXml::readDouble(buf, dval)) {
-    if (_params.debug) { 
-      cerr << "WARNING - SpolWarnSms::_handleNumberEntry" << endl;
-      cerr << " Cannot read numerical value from: " << buf << endl;
-    }
+    cerr << "WARNING - SpolWarnSms::_handleNumberEntry" << endl;
+    cerr << " Cannot read numerical value from: " << buf << endl;
     return -1;
   }
   
@@ -508,11 +512,12 @@ int SpolWarnSms::_handleNumberEntry(time_t now,
   
   // create message for this entry
   
-  string msg(" #");
+  string msg("#");
   msg += entry.label;
   msg += ":";
   msg += buf;
-  if (_params.debug) {
+  msg += "#";
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Adding msg: " << msg << endl;
   }
 

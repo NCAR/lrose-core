@@ -1,0 +1,315 @@
+/**********************************************************************
+ * TDRP params for SpolWarnSms
+ **********************************************************************/
+
+//======================================================================
+//
+// SpolWarnSms reads status XML monitoring data from SPDB, for the 
+//   S-band and K-band. It checks the status in the XML, and determines if 
+//   a warning message should be sent.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT - from SPDB.
+//
+//======================================================================
+ 
+///////////// monitor_the_sband ///////////////////////
+//
+// Should we monitor the sband status?.
+//
+//
+// Type: boolean
+//
+
+monitor_the_sband = TRUE;
+
+///////////// sband_monitoring_spdb_url ///////////////
+//
+// URL for reading in monitoring data from SPDB.
+//
+// This holds the XML status monitoring for the S-band.
+//
+//
+// Type: string
+//
+
+sband_monitoring_spdb_url = "spdbp:://pgen1::spdb/monitor/sband";
+
+///////////// sband_spdb_margin_secs //////////////////
+//
+// The margin, relative to 'now', for retrieving spdb data (secs).
+//
+// If no data is found within this interval, an error is generated.
+//
+//
+// Type: int
+//
+
+sband_spdb_margin_secs = 120;
+
+///////////// monitor_the_kband ///////////////////////
+//
+// Should we monitor the kband status?.
+//
+//
+// Type: boolean
+//
+
+monitor_the_kband = TRUE;
+
+///////////// kband_monitoring_spdb_url ///////////////
+//
+// URL for reading in monitoring data from SPDB.
+//
+// This holds the XML status monitoring for the S-band.
+//
+//
+// Type: string
+//
+
+kband_monitoring_spdb_url = "spdbp:://pgen1::spdb/monitor/kband";
+
+///////////// kband_spdb_margin_secs //////////////////
+//
+// The margin, relative to 'now', for retrieving spdb data (secs).
+//
+// If no data is found within this interval, an error is generated.
+//
+//
+// Type: int
+//
+
+kband_spdb_margin_secs = 120;
+
+///////////// monitoring_interval_secs ////////////////
+//
+// How often to check for status (secs).
+//
+//
+// Type: int
+//
+
+monitoring_interval_secs = 10;
+
+//======================================================================
+//
+// XML STATUS CHECKING.
+//
+// Here we list the items to check for. Any item listed here is 
+//   considered critical. Failure of an item will generate a warning 
+//   message.
+//
+//======================================================================
+ 
+///////////// sband_xml_entries ///////////////////////
+//
+// Details of S-band XML entries for which to check.
+//
+// 	xml_tags: list of tags to specify entry in XML
+// 	entry_type: the type of data stored
+// 	ok_boolean: BOOLEAN only: the string value for an OK state
+// 	valid_lower_limit: NUMBER only: the lower limit for an OK state
+// 	valid_upper_limit: NUMBER only: the upper limit for an OK state
+// 	label: label to be used for message
+// .
+//
+//
+// Type: struct
+//   typedef struct {
+//      string xml_tags;
+//      xml_entry_type_t entry_type;
+//        Options:
+//          XML_ENTRY_BOOLEAN
+//          XML_ENTRY_NUMBER
+//      boolean ok_boolean;
+//      double valid_lower_limit;
+//      double valid_upper_limit;
+//      string label;
+//   }
+//
+// 1D array - variable length.
+//
+
+sband_xml_entries = {
+  {
+    xml_tags = "<SpolStatus><SpolTransmitStatus><HighVoltsOn>",
+    entry_type = XML_ENTRY_BOOLEAN,
+    ok_boolean = TRUE,
+    valid_lower_limit = 0,
+    valid_upper_limit = 0,
+    label = "Sband-HighVoltsOn-Fault"
+  }
+  ,
+  {
+    xml_tags = "<SpolStatus><SpolTemperatures><KlystronExhaust>",
+    entry_type = XML_ENTRY_NUMBER,
+    ok_boolean = FALSE,
+    valid_lower_limit = 0,
+    valid_upper_limit = 38,
+    label = "Sband-Klystron-Exhaust-TempC"
+  }
+  ,
+  {
+    xml_tags = "<SpolStatus><WaveguideStatus><pressPsi>",
+    entry_type = XML_ENTRY_NUMBER,
+    ok_boolean = FALSE,
+    valid_lower_limit = 4,
+    valid_upper_limit = 7,
+    label = "Sband-WG-Pressure-PSI"
+  }
+};
+
+///////////// kband_xml_entries ///////////////////////
+//
+// Details of K-band XML entries for which to check.
+//
+// 	xml_tags: list of tags to specify entry in XML
+// 	entry_type: the type of data stored
+// 	ok_boolean: BOOLEAN only: the string value for an OK state
+// 	valid_lower_limit: NUMBER only: the lower limit for an OK state
+// 	valid_upper_limit: NUMBER only: the upper limit for an OK state
+// 	label: label to be used for message
+// .
+//
+//
+// Type: struct
+//   typedef struct {
+//      string xml_tags;
+//      xml_entry_type_t entry_type;
+//        Options:
+//          XML_ENTRY_BOOLEAN
+//          XML_ENTRY_NUMBER
+//      boolean ok_boolean;
+//      double valid_lower_limit;
+//      double valid_upper_limit;
+//      string label;
+//   }
+//
+// 1D array - variable length.
+//
+
+kband_xml_entries = {
+  {
+    xml_tags = "<KaStatus><KaTransmitterStatus><MagnetronCurrentFault>",
+    entry_type = XML_ENTRY_BOOLEAN,
+    ok_boolean = FALSE,
+    valid_lower_limit = 0,
+    valid_upper_limit = 0,
+    label = "Kband-Xmit-Magnetron-Current-Fault"
+  }
+  ,
+  {
+    xml_tags = "<KaStatus><KaReceiverStatus><TxEnclosureTemp>",
+    entry_type = XML_ENTRY_NUMBER,
+    ok_boolean = FALSE,
+    valid_lower_limit = 0,
+    valid_upper_limit = 45,
+    label = "Kband-Tx-Enclosure-TempC"
+  }
+  ,
+  {
+    xml_tags = "<KaStatus><KaBandTestPulse><TestPulsePowerDbHc>",
+    entry_type = XML_ENTRY_NUMBER,
+    ok_boolean = FALSE,
+    valid_lower_limit = -40,
+    valid_upper_limit = -20,
+    label = "Kband-Test-Pulse-Hc-Dbm"
+  }
+};
+
+//======================================================================
+//
+// WARNING MESSAGE FILE OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_warnings_to_dir ///////////////////
+//
+// If true, writes warnings to directory.
+//
+//
+// Type: boolean
+//
+
+write_warnings_to_dir = TRUE;
+
+///////////// warning_message_dir /////////////////////
+//
+// Dir path for warning messages.
+//
+// Warning messages are written to this directory. This will be watched 
+//   by the LdataWatcher, which will then call a script to send the SMS 
+//   messages.
+//
+//
+// Type: string
+//
+
+warning_message_dir = "$(HOME)/projDir/data/monitoring/messages";
+
+//======================================================================
+//
+// WARNING MESSAGE SPDB OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_warnings_to_spdb //////////////////
+//
+// If true, writes warnings to SPDB.
+//
+//
+// Type: boolean
+//
+
+write_warnings_to_spdb = TRUE;
+
+///////////// warning_spdb_url ////////////////////////
+//
+// URL for SPDB output.
+//
+// Messages are is written to this location.
+//
+//
+// Type: string
+//
+
+warning_spdb_url = "spdbp:://localhost::spdb/monitoring/messages";
+
