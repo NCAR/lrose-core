@@ -90,6 +90,19 @@ public:
     char* label;
   } xml_entry_t;
 
+  typedef struct {
+    char* name;
+    char* number;
+  } phone_book_entry_t;
+
+  typedef struct {
+    char* end_time;
+    char* interval_1;
+    char* interval_2;
+    char* interval_3;
+    char* interval_4;
+  } monitoring_period_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -407,6 +420,16 @@ public:
 
   char* warning_spdb_url;
 
+  tdrp_bool_t send_warnings_to_sms;
+
+  int time_between_warnings_secs;
+
+  phone_book_entry_t *_phone_book;
+  int phone_book_n;
+
+  monitoring_period_t *_monitoring_periods;
+  int monitoring_periods_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -414,7 +437,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[22];
+  mutable TDRPtable _table[27];
 
   const char *_className;
 

@@ -313,3 +313,144 @@ write_warnings_to_spdb = TRUE;
 
 warning_spdb_url = "spdbp:://localhost::spdb/monitoring/messages";
 
+//======================================================================
+//
+// SMS DETAILS.
+//
+// If warnings are to sent out, an LdataInfo file is written to 
+//   warning_message_dir after the message file has been written. An 
+//   LdataWatcher is set up to watch the LdataInfo to update. If it does, 
+//   a script is called to dispatch the SMS.
+//
+//======================================================================
+ 
+///////////// send_warnings_to_sms ////////////////////
+//
+// If true, writes warnings using SMS.
+//
+//
+// Type: boolean
+//
+
+send_warnings_to_sms = FALSE;
+
+///////////// time_between_warnings_secs //////////////
+//
+// Minimum time between warnings (secs).
+//
+// If warnings arrive more quickly, an SMS will only be sent out if the 
+//   warnings persist after this time has passed.
+//
+//
+// Type: int
+//
+
+time_between_warnings_secs = 3600;
+
+///////////// phone_book //////////////////////////////
+//
+// Phone book for SMS.
+//
+// For looking up the phone number from the name.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string number;
+//   }
+//
+// 1D array - variable length.
+//
+
+phone_book = {
+  {
+    name = "mike",
+    number = "+13035013346"
+  }
+  ,
+  {
+    name = "chris",
+    number = "+13035208624"
+  }
+  ,
+  {
+    name = "eric",
+    number = "+17203782812"
+  }
+  ,
+  {
+    name = "pei",
+    number = "+14132105682"
+  }
+  ,
+  {
+    name = "jonathan",
+    number = "+13038072936"
+  }
+  ,
+  {
+    name = "lucas",
+    number = "+17204380946"
+  }
+  ,
+  {
+    name = "rich",
+    number = "+12027098584"
+  }
+};
+
+///////////// monitoring_periods //////////////////////
+//
+// Setting up the monitoring times, and to whom to send the SMS.
+//
+// end_time is be in ISO time format: yyyy-mm-ddThh:mm:ss.
+//
+// Each interval has a time period, followed by a list of names to be 
+//   contacted.
+//
+// The time period is in the form 06:00-12:00, for example for 06:00 UTC 
+//   to 12:00 UTC each day.
+//
+// This is followed by a comma, and then a comma-delimited list of 
+//   names.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string end_time;
+//      string interval_1;
+//      string interval_2;
+//      string interval_3;
+//      string interval_4;
+//   }
+//
+// 1D array - variable length.
+//
+
+monitoring_periods = {
+  {
+    end_time = "2018-06-06T19:00:00",
+    interval_1 = "00:00-06:00, mike",
+    interval_2 = "06:00-12:00, mike",
+    interval_3 = "12:00-18:00, mike",
+    interval_4 = "18:00-24:00, mike"
+  }
+  ,
+  {
+    end_time = "2018-06-07T00:00:00",
+    interval_1 = "00:00-06:00, mike",
+    interval_2 = "06:00-12:00, mike",
+    interval_3 = "12:00-18:00, mike",
+    interval_4 = "18:00-24:00, mike"
+  }
+  ,
+  {
+    end_time = "2018-06-08T00:00:00",
+    interval_1 = "00:00-06:00, mike",
+    interval_2 = "06:00-12:00, mike",
+    interval_3 = "12:00-18:00, mike",
+    interval_4 = "18:00-24:00, mike"
+  }
+};
+

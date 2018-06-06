@@ -922,6 +922,149 @@
     tt->single_val.s = tdrpStrDup("spdbp:://localhost::spdb/monitoring/messages");
     tt++;
     
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("SMS DETAILS");
+    tt->comment_text = tdrpStrDup("If warnings are to sent out, an LdataInfo file is written to warning_message_dir after the message file has been written. An LdataWatcher is set up to watch the LdataInfo to update. If it does, a script is called to dispatch the SMS.");
+    tt++;
+    
+    // Parameter 'send_warnings_to_sms'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("send_warnings_to_sms");
+    tt->descr = tdrpStrDup("If true, writes warnings using SMS.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &send_warnings_to_sms - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'time_between_warnings_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("time_between_warnings_secs");
+    tt->descr = tdrpStrDup("Minimum time between warnings (secs).");
+    tt->help = tdrpStrDup("If warnings arrive more quickly, an SMS will only be sent out if the warnings persist after this time has passed.");
+    tt->val_offset = (char *) &time_between_warnings_secs - &_start_;
+    tt->single_val.i = 3600;
+    tt++;
+    
+    // Parameter 'phone_book'
+    // ctype is '_phone_book_entry_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("phone_book");
+    tt->descr = tdrpStrDup("Phone book for SMS.");
+    tt->help = tdrpStrDup("For looking up the phone number from the name.");
+    tt->array_offset = (char *) &_phone_book - &_start_;
+    tt->array_n_offset = (char *) &phone_book_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(phone_book_entry_t);
+    tt->array_n = 7;
+    tt->struct_def.name = tdrpStrDup("phone_book_entry_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_phone_book->name - (char *) _phone_book;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("number");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_phone_book->number - (char *) _phone_book;
+    tt->n_struct_vals = 14;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("mike");
+      tt->struct_vals[1].s = tdrpStrDup("+13035013346");
+      tt->struct_vals[2].s = tdrpStrDup("chris");
+      tt->struct_vals[3].s = tdrpStrDup("+13035208624");
+      tt->struct_vals[4].s = tdrpStrDup("eric");
+      tt->struct_vals[5].s = tdrpStrDup("+17203782812");
+      tt->struct_vals[6].s = tdrpStrDup("pei");
+      tt->struct_vals[7].s = tdrpStrDup("+14132105682");
+      tt->struct_vals[8].s = tdrpStrDup("jonathan");
+      tt->struct_vals[9].s = tdrpStrDup("+13038072936");
+      tt->struct_vals[10].s = tdrpStrDup("lucas");
+      tt->struct_vals[11].s = tdrpStrDup("+17204380946");
+      tt->struct_vals[12].s = tdrpStrDup("rich");
+      tt->struct_vals[13].s = tdrpStrDup("+12027098584");
+    tt++;
+    
+    // Parameter 'monitoring_periods'
+    // ctype is '_monitoring_period_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("monitoring_periods");
+    tt->descr = tdrpStrDup("Setting up the monitoring times, and to whom to send the SMS.");
+    tt->help = tdrpStrDup("end_time is be in ISO time format: yyyy-mm-ddThh:mm:ss.\n\nEach interval has a time period, followed by a list of names to be contacted.\n\nThe time period is in the form 06:00-12:00, for example for 06:00 UTC to 12:00 UTC each day.\n\nThis is followed by a comma, and then a comma-delimited list of names.");
+    tt->array_offset = (char *) &_monitoring_periods - &_start_;
+    tt->array_n_offset = (char *) &monitoring_periods_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(monitoring_period_t);
+    tt->array_n = 3;
+    tt->struct_def.name = tdrpStrDup("monitoring_period_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("end_time");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_monitoring_periods->end_time - (char *) _monitoring_periods;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interval_1");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_monitoring_periods->interval_1 - (char *) _monitoring_periods;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("interval_2");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_monitoring_periods->interval_2 - (char *) _monitoring_periods;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[3].fname = tdrpStrDup("interval_3");
+      tt->struct_def.fields[3].ptype = STRING_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_monitoring_periods->interval_3 - (char *) _monitoring_periods;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[4].fname = tdrpStrDup("interval_4");
+      tt->struct_def.fields[4].ptype = STRING_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_monitoring_periods->interval_4 - (char *) _monitoring_periods;
+    tt->n_struct_vals = 15;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("2018-06-06T19:00:00");
+      tt->struct_vals[1].s = tdrpStrDup("00:00-06:00, mike");
+      tt->struct_vals[2].s = tdrpStrDup("06:00-12:00, mike");
+      tt->struct_vals[3].s = tdrpStrDup("12:00-18:00, mike");
+      tt->struct_vals[4].s = tdrpStrDup("18:00-24:00, mike");
+      tt->struct_vals[5].s = tdrpStrDup("2018-06-07T00:00:00");
+      tt->struct_vals[6].s = tdrpStrDup("00:00-06:00, mike");
+      tt->struct_vals[7].s = tdrpStrDup("06:00-12:00, mike");
+      tt->struct_vals[8].s = tdrpStrDup("12:00-18:00, mike");
+      tt->struct_vals[9].s = tdrpStrDup("18:00-24:00, mike");
+      tt->struct_vals[10].s = tdrpStrDup("2018-06-08T00:00:00");
+      tt->struct_vals[11].s = tdrpStrDup("00:00-06:00, mike");
+      tt->struct_vals[12].s = tdrpStrDup("06:00-12:00, mike");
+      tt->struct_vals[13].s = tdrpStrDup("12:00-18:00, mike");
+      tt->struct_vals[14].s = tdrpStrDup("18:00-24:00, mike");
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;
