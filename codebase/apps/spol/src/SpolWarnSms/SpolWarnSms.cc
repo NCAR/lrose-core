@@ -45,7 +45,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <ctime>
-#include <toolsa/DateTime.hh>
 #include <toolsa/uusleep.h>
 #include <toolsa/file_io.h>
 #include <toolsa/pmu.h>
@@ -89,7 +88,14 @@ SpolWarnSms::SpolWarnSms(int argc, char **argv)
     isOK = false;
     return;
   }
-  
+
+  // set up the warning periods
+
+  if (_setupWarnPeriods()) {
+    isOK = false;
+    return;
+  }
+
   // init process mapper registration
   
   PMU_auto_init((char *) _progName.c_str(),
@@ -526,6 +532,166 @@ int SpolWarnSms::_handleNumberEntry(time_t now,
   warningMsg += msg;
 
   return 0;
+
+}
+
+///////////////////////////////////////////////////////
+// set up the warning periods from the parameters
+
+int SpolWarnSms::_setupWarnPeriods()
+
+{
+
+  int iret = 0;
+  _warnPeriods.clear();
+
+  for (int ii = 0; ii < _params.monitoring_periods_n; ii++) {
+
+    Params::monitoring_period_t &period = _params._monitoring_periods[ii];
+    DateTime endTime;
+    if (endTime.setFromW3c(period.end_time)) {
+      cerr << "ERROR - SpolWarnSms::_setupWarnPeriods()" << endl;
+      cerr << "  Bad time: " << period.end_time << endl;
+      iret = -1;
+    }
+    WarnPeriod wp;
+    wp.endTime = endTime;
+
+    DailyInterval interval1;
+    if (_setupDailyInterval(endTime, period.interval_1, interval1) == 0) {
+      wp.intervals.push_back(interval1);
+    }
+    DailyInterval interval2;
+    if (_setupDailyInterval(endTime, period.interval_2, interval2) == 0) {
+      wp.intervals.push_back(interval2);
+    }
+    DailyInterval interval3;
+    if (_setupDailyInterval(endTime, period.interval_3, interval3) == 0) {
+      wp.intervals.push_back(interval3);
+    }
+    DailyInterval interval4;
+    if (_setupDailyInterval(endTime, period.interval_4, interval4) == 0) {
+      wp.intervals.push_back(interval4);
+    }
+
+    _warnPeriods.push_back(wp);
+    
+  } // ii
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+
+    for (size_t ii = 0; ii < _warnPeriods.size(); ii++) {
+      
+      const WarnPeriod &wp = _warnPeriods[ii];
+
+      cerr << "===>>> monitoring period: " << ii << " <<<===" << endl;
+      cerr << "  mon period endTime: " << wp.endTime.getStr() << endl;
+
+      for (size_t jj = 0; jj < wp.intervals.size(); jj++) {
+        const DailyInterval &interval = wp.intervals[jj];
+        fprintf(stderr, "    intervalStartTime: %.2d-%.2d\n",
+                interval.startTime.getHour(),
+                interval.startTime.getMin());
+        fprintf(stderr, "    intervalEndTime  : %.2d-%.2d\n",
+                interval.endTime.getHour(),
+                interval.endTime.getMin());
+        for (size_t kk = 0; kk < interval.names.size(); kk++) {
+          cerr << "    name, number     : " 
+               << interval.names[kk] << ", "
+               << interval.numbers[kk] << endl;
+        } // kk
+      } // jj
+
+    } // ii
+
+  } // if (_params.debug >= Params::DEBUG_VERBOSE)
+
+  return iret;
+
+}
+
+///////////////////////////////////////////////////////
+// set up the daily intervals
+
+int SpolWarnSms::_setupDailyInterval(const DateTime &endTime,
+                                     const string &paramLine,
+                                     DailyInterval &interval)
+  
+{
+
+  // tokenize line on commas
+
+  vector<string> tags;
+  TaStr::tokenize(paramLine, ", ", tags);
+  if (tags.size() < 2) {
+    // no names, so no warnings
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - SpolWarnSms::_setupDailyInterval" << endl;
+      cerr << "  No names for interval: " << paramLine << endl;
+      return -1;
+    }
+  }
+  
+  // read times
+
+  int startHour, startMin, endHour, endMin;
+  if (sscanf(tags[0].c_str(), "%2d:%2d-%2d:%2d",
+             &startHour, &startMin, &endHour, &endMin) != 4) {
+    cerr << "WARNING - SpolWarnSms::_setupDailyInterval" << endl;
+    cerr << "  Bad start and end time format: " << paramLine << endl;
+    return -1;
+  };
+  
+  // set daily start and end times
+
+  interval.startTime = endTime;
+  interval.startTime.setHour(startHour);
+  interval.startTime.setMin(startMin);
+  interval.startTime.setSec(0);
+  
+  interval.endTime = endTime;
+  interval.endTime.setHour(endHour);
+  interval.endTime.setMin(endMin);
+  interval.endTime.setSec(0);
+
+  // set names and numbers
+
+  for (size_t ii = 1; ii < tags.size(); ii++) {
+    string name(tags[ii]);
+    string number;
+    if (_lookUpNumber(name, number) == 0) {
+      interval.names.push_back(name);
+      interval.numbers.push_back(number);
+    } else {
+      cerr << "WARNING - SpolWarnSms::_setupDailyInterval" << endl;
+      cerr << "  Bad name, not in phone book: " << name << endl;
+      return -1;
+    }
+  }
+  
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////
+// look up phone number from name
+
+int SpolWarnSms::_lookUpNumber(const string &name,
+                               string &number)
+  
+{
+
+  for (int ii = 0; ii < _params.phone_book_n; ii++) {
+
+    Params::phone_book_entry_t &entry = _params._phone_book[ii];
+    if (entry.name == name) {
+      number = entry.number;
+      return 0;
+    }
+
+  } // ii
+
+  return -1;
 
 }
 

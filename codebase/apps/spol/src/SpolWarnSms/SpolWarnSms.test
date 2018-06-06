@@ -415,6 +415,8 @@ phone_book = {
 // This is followed by a comma, and then a comma-delimited list of 
 //   names.
 //
+// If a period is not to be monitored, no names should be included.
+//
 //
 // Type: struct
 //   typedef struct {
@@ -433,7 +435,7 @@ monitoring_periods = {
     end_time = "2018-06-06T19:00:00",
     interval_1 = "00:00-06:00, mike",
     interval_2 = "06:00-12:00, mike",
-    interval_3 = "12:00-18:00, mike",
+    interval_3 = "12:00-18:00, eric, pei",
     interval_4 = "18:00-24:00, mike"
   }
   ,
@@ -441,13 +443,13 @@ monitoring_periods = {
     end_time = "2018-06-07T00:00:00",
     interval_1 = "00:00-06:00, mike",
     interval_2 = "06:00-12:00, mike",
-    interval_3 = "12:00-18:00, mike",
+    interval_3 = "12:00-18:00, jonathan, rich",
     interval_4 = "18:00-24:00, mike"
   }
   ,
   {
     end_time = "2018-06-08T00:00:00",
-    interval_1 = "00:00-06:00, mike",
+    interval_1 = "00:00-06:00, jack",
     interval_2 = "06:00-12:00, mike",
     interval_3 = "12:00-18:00, mike",
     interval_4 = "18:00-24:00, mike"

@@ -1009,7 +1009,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("monitoring_periods");
     tt->descr = tdrpStrDup("Setting up the monitoring times, and to whom to send the SMS.");
-    tt->help = tdrpStrDup("end_time is be in ISO time format: yyyy-mm-ddThh:mm:ss.\n\nEach interval has a time period, followed by a list of names to be contacted.\n\nThe time period is in the form 06:00-12:00, for example for 06:00 UTC to 12:00 UTC each day.\n\nThis is followed by a comma, and then a comma-delimited list of names.");
+    tt->help = tdrpStrDup("end_time is be in ISO time format: yyyy-mm-ddThh:mm:ss.\n\nEach interval has a time period, followed by a list of names to be contacted.\n\nThe time period is in the form 06:00-12:00, for example for 06:00 UTC to 12:00 UTC each day.\n\nThis is followed by a comma, and then a comma-delimited list of names.\n\nIf a period is not to be monitored, no names should be included.");
     tt->array_offset = (char *) &_monitoring_periods - &_start_;
     tt->array_n_offset = (char *) &monitoring_periods_n - &_start_;
     tt->is_array = TRUE;

@@ -47,7 +47,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include <toolsa/MemBuf.hh>
+#include <toolsa/DateTime.hh>
 #include <Spdb/DsSpdb.hh>
 
 using namespace std;
@@ -83,6 +83,22 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+  
+  class DailyInterval {
+  public:
+    DateTime startTime;
+    DateTime endTime;
+    vector<string> names;
+    vector<string> numbers;
+  };
+
+  class WarnPeriod {
+  public:
+    DateTime endTime;
+    vector<DailyInterval> intervals;
+  };
+
+  vector<WarnPeriod> _warnPeriods;
 
   // functions
   
@@ -109,6 +125,15 @@ private:
   int _writeMessageToSpdb(time_t now,
                           const string &warningMsg);
   
+  int _setupWarnPeriods();
+
+  int _setupDailyInterval(const DateTime &endTime,
+                          const string &paramLine,
+                          DailyInterval &interval);
+
+  int _lookUpNumber(const string &name,
+                    string &number);
+
 };
 
 #endif
