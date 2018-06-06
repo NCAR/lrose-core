@@ -10,7 +10,7 @@
 # to the top dir for installation.
 #
 
-setenv HOST_OS LINUX_CX11
+setenv HOST_OS LINUX_LROSE
 uname -a | grep x86_64
 if ($status == 1) then
     setenv HOST_OS LINUX
