@@ -95,6 +95,7 @@ SpolWarnSms::SpolWarnSms(int argc, char **argv)
     isOK = false;
     return;
   }
+  _timeLastSms = 0;
 
   // init process mapper registration
   
@@ -172,13 +173,11 @@ int SpolWarnSms::Run ()
     
     if (warningMsg.size() > 0) {
       if (_params.debug) {
-        cerr << "===================== warning message ============================" << endl;
+        cerr << "================ warning message =====================" << endl;
         cerr << warningMsg << endl;
-        cerr << "==================================================================" << endl;
+        cerr << "======================================================" << endl;
       }
-      if (_params.write_warnings_to_dir) {
-        _writeMessageToDir(now, warningMsg);
-      }
+      _writeMessageToDir(now, warningMsg);
     }
 
     // write to SPDB?
@@ -356,6 +355,57 @@ int SpolWarnSms::_writeMessageToDir(time_t now,
     cerr << "Wrote message to file: " << outputPath << endl;
   }
 
+  // trigger a write to SMS?
+
+  if (!_params.send_warnings_to_sms) {
+    // no SMSs
+    return 0;
+  }
+
+  // has enough time elapsed?
+
+  int timeSinceLastSms = now - _timeLastSms;
+  if (timeSinceLastSms < _params.time_between_sms_secs) {
+    return 0;
+  }
+
+  // get appropriate sms name and number info
+  // from the warning periods
+  
+  vector<string> names, numbers;
+  _getSmsNumbers(now, names, numbers);
+  if (numbers.size() < 1) {
+    if (_params.debug) {
+      cerr << "No phone numbers, skipping SMS" << endl;
+    }
+    return 0;
+  }
+  string numberStr = numbers[0];
+  for (size_t ii = 1; ii < numbers.size(); ii++) {
+    numberStr += ",";
+    numberStr += numbers[ii];
+  }
+  
+  // write LdataInfo file to trigger SMS
+
+  DsLdataInfo ldata(_params.warning_message_dir,
+                    _params.debug >= Params::DEBUG_VERBOSE);
+  
+  string relPath;
+  Path::stripDir(_params.warning_message_dir, outputPath, relPath);
+
+  ldata.setLatestTime(now);
+  ldata.setRelDataPath(relPath);
+  ldata.setWriter("SpolWarnSms");
+  ldata.setDataType("txt");
+  ldata.setUserInfo1(numberStr);
+  if (ldata.write(now)) {
+    cerr << "ERROR - cannot write LdataInfo" << endl;
+    cerr << " outputDir: " << _params.warning_message_dir << endl;
+    return -1;
+  }
+  
+  _timeLastSms = now;
   return 0;
 
 }
@@ -695,3 +745,57 @@ int SpolWarnSms::_lookUpNumber(const string &name,
 
 }
 
+///////////////////////////////////////////////////////
+// get numbers for SMS
+
+void SpolWarnSms::_getSmsNumbers(time_t now,
+                                 vector<string> &names,
+                                 vector<string> &numbers)
+  
+{
+
+  // get appropriate sms name and number info
+  // from the warning periods
+  
+  for (size_t ii = 0; ii < _warnPeriods.size(); ii++) {
+
+    const WarnPeriod &wp = _warnPeriods[ii];
+    if (now > wp.endTime.utime()) {
+      // period in the past
+      continue;
+    }
+
+    for (size_t jj = 0; jj < wp.intervals.size(); jj++) {
+
+      const DailyInterval &interval = wp.intervals[jj];
+      
+      DateTime startPeriod(now);
+      startPeriod.setHour(interval.startTime.getHour());
+      startPeriod.setMin(interval.startTime.getMin());
+      
+      DateTime endPeriod(now);
+      endPeriod.setHour(interval.endTime.getHour());
+      endPeriod.setMin(interval.endTime.getMin());
+
+      if (now >= startPeriod.utime() && now <= endPeriod.utime()) {
+        names = interval.names;
+        numbers = interval.numbers;
+        if (_params.debug) {
+          cerr << "Getting names & numbers for time: " 
+               << DateTime::strm(now) << endl;
+          for (size_t kk = 0; kk < numbers.size(); kk++) {
+            cerr << "  name, number: " << names[kk] << ", "
+                 << numbers[kk] << endl;
+          }
+        }
+        return;
+      }
+
+    } // jj
+
+  } // ii
+
+}
+
+
+  

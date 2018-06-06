@@ -261,16 +261,6 @@ kband_xml_entries = {
 //
 //======================================================================
  
-///////////// write_warnings_to_dir ///////////////////
-//
-// If true, writes warnings to directory.
-//
-//
-// Type: boolean
-//
-
-write_warnings_to_dir = TRUE;
-
 ///////////// warning_message_dir /////////////////////
 //
 // Dir path for warning messages.
@@ -345,7 +335,7 @@ send_warnings_to_sms = FALSE;
 // Type: int
 //
 
-time_between_warnings_secs = 3600;
+time_between_sms_secs = 3600;
 
 ///////////// phone_book //////////////////////////////
 //

@@ -97,8 +97,9 @@ private:
     DateTime endTime;
     vector<DailyInterval> intervals;
   };
-
+  
   vector<WarnPeriod> _warnPeriods;
+  time_t _timeLastSms;
 
   // functions
   
@@ -133,6 +134,10 @@ private:
 
   int _lookUpNumber(const string &name,
                     string &number);
+
+  void _getSmsNumbers(time_t now,
+                      vector<string> &names,
+                      vector<string> &numbers);
 
 };
 

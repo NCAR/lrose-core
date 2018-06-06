@@ -179,11 +179,6 @@ commentdef {
   p_header = "WARNING MESSAGE FILE OUTPUT";
 };
 
-paramdef boolean {
-  p_default = true;
-  p_descr = "If true, writes warnings to directory.";
-} write_warnings_to_dir;
-
 paramdef string {
   p_default = "$(HOME)/projDir/data/monitoring/messages";
   p_descr = "Dir path for warning messages.";
@@ -217,9 +212,9 @@ paramdef boolean {
 
 paramdef int {
   p_default = 3600;
-  p_descr = "Minimum time between warnings (secs).";
+  p_descr = "Minimum time between warnings via SMS (secs).";
   p_help = "If warnings arrive more quickly, an SMS will only be sent out if the warnings persist after this time has passed.";
-} time_between_warnings_secs;
+} time_between_sms_secs;
 
 typedef struct {
   string name;

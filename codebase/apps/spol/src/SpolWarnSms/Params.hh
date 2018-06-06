@@ -412,8 +412,6 @@ public:
   xml_entry_t *_kband_xml_entries;
   int kband_xml_entries_n;
 
-  tdrp_bool_t write_warnings_to_dir;
-
   char* warning_message_dir;
 
   tdrp_bool_t write_warnings_to_spdb;
@@ -422,7 +420,7 @@ public:
 
   tdrp_bool_t send_warnings_to_sms;
 
-  int time_between_warnings_secs;
+  int time_between_sms_secs;
 
   phone_book_entry_t *_phone_book;
   int phone_book_n;
@@ -437,7 +435,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[27];
+  mutable TDRPtable _table[26];
 
   const char *_className;
 

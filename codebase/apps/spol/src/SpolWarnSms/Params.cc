@@ -865,18 +865,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'write_warnings_to_dir'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_warnings_to_dir");
-    tt->descr = tdrpStrDup("If true, writes warnings to directory.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &write_warnings_to_dir - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'warning_message_dir'
     // ctype is 'char*'
     
@@ -943,15 +931,15 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'time_between_warnings_secs'
+    // Parameter 'time_between_sms_secs'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("time_between_warnings_secs");
-    tt->descr = tdrpStrDup("Minimum time between warnings (secs).");
+    tt->param_name = tdrpStrDup("time_between_sms_secs");
+    tt->descr = tdrpStrDup("Minimum time between warnings via SMS (secs).");
     tt->help = tdrpStrDup("If warnings arrive more quickly, an SMS will only be sent out if the warnings persist after this time has passed.");
-    tt->val_offset = (char *) &time_between_warnings_secs - &_start_;
+    tt->val_offset = (char *) &time_between_sms_secs - &_start_;
     tt->single_val.i = 3600;
     tt++;
     
