@@ -164,7 +164,8 @@ int SpolWarnSms::Run ()
 
     string warningMsg;
     if (warningMsgSband.size() > 0 || warningMsgKband.size() > 0) {
-      warningMsg += "SPOL-WARNING:";
+      warningMsg += "SPOL:";
+      warningMsg += DateTime::strm(now);
       warningMsg += warningMsgSband;
       warningMsg += warningMsgKband;
     }
@@ -366,6 +367,11 @@ int SpolWarnSms::_writeMessageToDir(time_t now,
 
   int timeSinceLastSms = now - _timeLastSms;
   if (timeSinceLastSms < _params.time_between_sms_secs) {
+    if (_params.debug) {
+      cerr << "Time last SMS message: " << DateTime::strm(_timeLastSms) << endl;
+      cerr << "  time to next SMS (secs): "
+           << _params.time_between_sms_secs - timeSinceLastSms << endl;
+    }
     return 0;
   }
 
