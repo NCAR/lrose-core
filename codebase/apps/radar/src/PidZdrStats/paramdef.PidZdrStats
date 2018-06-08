@@ -1,0 +1,339 @@
+/*********************************************************
+ * parameter definitions for PidZdrStats
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * June 1028
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "PidZdrStats reads in Particle ID data from a CfRadial file, and computes the statistics of the ZDR distribution in various PID categories.";
+}
+
+commentdef {
+  p_header = "Process control.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+commentdef {
+  p_header = "INPUT FIELD NAMES";
+}
+
+paramdef string {
+  p_default = "PID";
+  p_descr = "Field name for Particle ID in the input file.";
+} PID_field_name;
+
+paramdef string {
+  p_default = "RHOHV";
+  p_descr = "Field name for RHOHV in the input file.";
+} RHOHV_field_name;
+
+paramdef string {
+  p_default = "TEMP_FOR_PID";
+  p_descr = "Field name for temperature in the input file.";
+} TEMP_field_name;
+
+commentdef {
+  p_header = "MAX RANGE LIMIT";
+  p_help = "Can be useful for removing a test pulse at max range";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+commentdef {
+  p_header = "GLOBAL PARAMETERS";
+}
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Minimum consectutive gates with the correct conditions for analyzing ZDR.";
+  p_help = "We want to ensure that we are solidly in a region suitable for analyzing the ZDR. We eliminate noisy data by requiring that the conditions persist over a certain number of gates.";
+} pid_min_gate_run;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Minimum number of points in a volume for valid zdr stats.";
+  p_help = "For the results to be valid, we need a certain number of valid results for computing the statistics.";
+} pid_min_npoints_valid;
+
+commentdef {
+  p_header = "ZDR ANALYSIS BY PARTICLE TYPE";
+}
+
+typedef struct {
+  string label;
+  int pid;
+  double min_range_km;
+  double max_range_km;
+  double min_rhohv;
+  double max_rhohv;
+  double min_elev_deg;
+  double max_elev_deg;
+  double min_temp_c;
+  double max_temp_c;
+} pid_region_t;
+
+paramdef struct pid_region_t {
+
+  p_default = {
+    {
+      label = "cloud",
+      pid = 1,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "drizzle",
+      pid = 2,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "light_rain",
+      pid = 3,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "mod_rain",
+      pid = 4,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "heavy_rain",
+      pid = 5,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "hail",
+      pid = 6,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "rain_hail",
+      pid = 7,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "graupel",
+      pid = 8,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "rain_graupel",
+      pid = 9,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "dry_snow",
+      pid = 10,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "wet_snow",
+      pid = 11,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "ice_crystals",
+      pid = 12,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "irreg_ice",
+      pid = 13,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+    ,
+    {
+      label = "supercooled_drops",
+      pid = 14,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_rhohv = 0.95,
+      max_rhohv = 1.0,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0
+    }
+  };
+  p_descr = "Set up the PID regions for analysis.";
+  p_help = "These limits are applied to each gate, depending on the PID identified for that gate. If the values read in are outside these limits, the gate is not used for the analysis.";
+
+} pid_regions[];
+
+commentdef {
+  p_header = "WRITE RESULTS OUT TO TEXT FILES";
+}
+
+paramdef string {
+  p_default = "/tmp/PidZdrStats";
+  p_descr = "Output directory path.";
+  p_help = "Text files will be written to this directory. A day directory will be added, so the file path will be output_text_dir/yyyymmdd/filename.txt.";
+} output_dir;
+
