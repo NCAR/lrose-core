@@ -423,6 +423,7 @@ codebase/apps/radar/src/MdvPartRain/MdvPartRain
 codebase/apps/radar/src/MdvRadarShear/MdvRadarShear
 codebase/apps/radar/src/NexradPowerStats/NexradPowerStats
 codebase/apps/radar/src/PartRain/PartRain
+codebase/apps/radar/src/PidZdrStats/PidZdrStats
 codebase/apps/radar/src/PointingCpCompute/PointingCpCompute
 codebase/apps/radar/src/PowerInfo2Spdb/PowerInfo2Spdb
 codebase/apps/radar/src/Qmap2Cidd/Qmap2Cidd

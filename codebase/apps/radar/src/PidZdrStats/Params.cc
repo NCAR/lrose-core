@@ -681,6 +681,18 @@
     tt->single_val.s = tdrpStrDup("PID");
     tt++;
     
+    // Parameter 'ZDR_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ZDR_field_name");
+    tt->descr = tdrpStrDup("Field name for ZDR in the input file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ZDR_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("ZDR");
+    tt++;
+    
     // Parameter 'RHOHV_field_name'
     // ctype is 'char*'
     
@@ -787,7 +799,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("pid_regions");
     tt->descr = tdrpStrDup("Set up the PID regions for analysis.");
-    tt->help = tdrpStrDup("These limits are applied to each gate, depending on the PID identified for that gate. If the values read in are outside these limits, the gate is not used for the analysis.");
+    tt->help = tdrpStrDup("These limits are applied to each gate, depending on the PID identified for that gate. If the values read in are outside these limits, the gate is not used for the analysis. The PID value must be between 1 and 20, inclusive.");
     tt->array_offset = (char *) &_pid_regions - &_start_;
     tt->array_n_offset = (char *) &pid_regions_n - &_start_;
     tt->is_array = TRUE;

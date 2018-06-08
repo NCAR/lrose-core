@@ -40,6 +40,7 @@
 #include <string>
 #include <Radx/Radx.hh>
 #include <Radx/RadxVol.hh>
+#include <radar/NcarParticleId.hh>
 class RadxFile;
 using namespace std;
 
@@ -70,7 +71,10 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  vector<string> _readPaths;
+
+  // lookup table for pid regions
+
+  int _pidIndex[NcarParticleId::MISC + 1];
 
   /////////////////////////////////////////
   // input data
@@ -78,8 +82,8 @@ private:
   RadxVol _readVol;
 
   int _nGates;
-  double _radxStartRange;
-  double _radxGateSpacing;
+  double _startRangeKm;
+  double _gateSpacingKm;
 
   double _radarHtMeters;
 
@@ -93,13 +97,21 @@ private:
   // by the calling class.
 
   const Radx::si32 *_pid;
+  const Radx::fl32 *_zdr;
   const Radx::fl32 *_rhohv;
   const Radx::fl32 *_temp;
 
   Radx::si32 _pidMiss;
+  Radx::fl32 _zdrMiss;
   Radx::fl32 _rhohvMiss;
   Radx::fl32 _tempMiss;
 
+  // output files
+
+  bool _outFilesOpen;
+  vector<string> _outFilePaths;
+  vector<FILE *> _outFilePtrs;
+  
   // methods
   
   int _runFilelist();
@@ -110,7 +122,8 @@ private:
 
   int _processVol();
   int _processRay(RadxRay *ray);
-  int _writeResults();
+  int _openOutputFiles();
+  void _closeOutputFiles();
 
 };
 

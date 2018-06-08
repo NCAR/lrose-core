@@ -392,6 +392,8 @@ public:
 
   char* PID_field_name;
 
+  char* ZDR_field_name;
+
   char* RHOHV_field_name;
 
   char* TEMP_field_name;
@@ -416,7 +418,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[24];
+  mutable TDRPtable _table[25];
 
   const char *_className;
 

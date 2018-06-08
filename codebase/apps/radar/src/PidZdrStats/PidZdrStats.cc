@@ -59,6 +59,7 @@ PidZdrStats::PidZdrStats(int argc, char **argv)
 {
 
   OK = TRUE;
+  _outFilesOpen = false;
 
   // set programe name
 
@@ -68,7 +69,7 @@ PidZdrStats::PidZdrStats(int argc, char **argv)
   
   if (_args.parse(argc, argv, _progName)) {
     cerr << "ERROR: " << _progName << endl;
-    cerr << "Problem with command line args." << endl;
+    cerr << "  Problem with command line args." << endl;
     OK = FALSE;
     return;
   }
@@ -79,7 +80,7 @@ PidZdrStats::PidZdrStats(int argc, char **argv)
   if (_params.loadFromArgs(argc, argv,
 			   _args.override.list, &_paramsPath)) {
     cerr << "ERROR: " << _progName << endl;
-    cerr << "Problem with TDRP parameters." << endl;
+    cerr << "  Problem with TDRP parameters." << endl;
     OK = FALSE;
     return;
   }
@@ -92,6 +93,27 @@ PidZdrStats::PidZdrStats(int argc, char **argv)
                   PROCMAP_REGISTER_INTERVAL);
   }
 
+  // check the params
+
+  for (int ii = 0; ii < _params.pid_regions_n; ii++) {
+    if (_params._pid_regions[ii].pid < NcarParticleId::CLOUD ||
+        _params._pid_regions[ii].pid > NcarParticleId::MISC) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Problem with TDRP parameters." << endl;
+      cerr << "  PID value out of bounds: " << _params._pid_regions[ii].pid << endl;
+      cerr << "    for label: " << _params._pid_regions[ii].label << endl;
+    }
+  }
+
+  // compute lookup table for PID processing
+
+  for (int ii = 0; ii <= NcarParticleId::MISC; ii++) {
+    _pidIndex[ii] = -1;
+  } 
+  for (int ii = 0; ii < _params.pid_regions_n; ii++) {
+    _pidIndex[_params._pid_regions[ii].pid] = ii;
+  }
+  
 }
 
 // destructor
@@ -99,6 +121,8 @@ PidZdrStats::PidZdrStats(int argc, char **argv)
 PidZdrStats::~PidZdrStats()
 
 {
+
+  _closeOutputFiles();
 
   // unregister process
 
@@ -135,7 +159,7 @@ int PidZdrStats::_runFilelist()
 
     string inputPath = _args.inputFileList[ii];
     if (_processFile(inputPath)) {
-      iret = -1;
+      return -1;
     }
 
   }
@@ -226,18 +250,6 @@ int PidZdrStats::_processFile(const string &filePath)
   // check we have not already processed this file
   // in the file aggregation step
 
-  RadxPath thisPath(filePath);
-  for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-    RadxPath rpath(_readPaths[ii]);
-    if (thisPath.getFile() == rpath.getFile()) {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "Skipping file: " << filePath << endl;
-        cerr << "  Previously processed in aggregation step" << endl;
-      }
-      return 0;
-    }
-  }
-  
   if (_params.debug) {
     cerr << "INFO - PidZdrStats::Run" << endl;
     cerr << "  Input path: " << filePath << endl;
@@ -254,19 +266,12 @@ int PidZdrStats::_processFile(const string &filePath)
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
-  _readPaths = inFile.getReadPaths();
 
   // process this data set
   
   if (_processVol()) {
     cerr << "ERROR - PidZdrStats::Run" << endl;
     cerr << "  Cannot process data in file: " << filePath << endl;
-    return -1;
-  }
-
-  // write output
-  
-  if (_writeResults()) {
     return -1;
   }
 
@@ -288,6 +293,7 @@ void PidZdrStats::_setupRead(RadxFile &file)
   }
 
   file.addReadField(_params.PID_field_name);
+  file.addReadField(_params.ZDR_field_name);
   if (strlen(_params.RHOHV_field_name) > 0) {
     file.addReadField(_params.RHOHV_field_name);
   }
@@ -316,11 +322,19 @@ int PidZdrStats::_processVol()
     cerr << "Processing volume ..." << endl;
   }
 
+  // open output files as needed
+
+  if (_openOutputFiles()) {
+    cerr << "ERROR - PidZdrStats::_processVol()" << endl;
+    cerr << "  Cannot open output files" << endl;
+    return -1;
+  }
+
   // set up geom
 
   _nGates = _readVol.getMaxNGates();
-  _radxStartRange = _readVol.getStartRangeKm();
-  _radxGateSpacing = _readVol.getGateSpacingKm();
+  _startRangeKm = _readVol.getStartRangeKm();
+  _gateSpacingKm = _readVol.getGateSpacingKm();
 
   _radarName = _readVol.getInstrumentName();
   _radarLatitude = _readVol.getLatitudeDeg();
@@ -348,6 +362,21 @@ int PidZdrStats::_processVol()
     pidField->convertToSi32();
     _pid = pidField->getDataSi32();
     _pidMiss = pidField->getMissingSi32();
+
+    // ZDR field
+
+    RadxField *zdrField = ray->getField(_params.ZDR_field_name);
+    if (zdrField == NULL) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "WARNING - ray does not have ZDR field: "
+             << _params.ZDR_field_name << endl;
+      }
+      continue;
+    }
+    // convert to ints
+    zdrField->convertToFl32();
+    _zdr = zdrField->getDataFl32();
+    _zdrMiss = zdrField->getMissingFl32();
 
     // RHOHV field
 
@@ -401,19 +430,79 @@ int PidZdrStats::_processVol()
 int PidZdrStats::_processRay(RadxRay *ray)
   
 {
-  
+
+  double elev = ray->getElevationDeg();
+
+  double rangeKm = _startRangeKm;
+  for (size_t igate = 0; igate < ray->getNGates();
+       igate++, rangeKm += _gateSpacingKm) {
+
+    // get PID and region
+    int pid = _pid[igate];
+    if (pid == _pidMiss) {
+      continue;
+    }
+
+    int pidIndex = _pidIndex[pid];
+    const Params::pid_region_t &region =
+      _params._pid_regions[pidIndex];
+    
+    // check for elevation angle
+
+    if (elev < region.min_elev_deg || elev > region.max_elev_deg) {
+      continue;
+    }
+
+    // check RHOHV
+    
+    double rhohv = _rhohvMiss;
+    if (_rhohv != NULL) {
+      rhohv = _rhohv[igate];
+    }
+    if (rhohv != _rhohvMiss &&
+        (rhohv < region.min_rhohv || rhohv > region.max_rhohv)) {
+      continue;
+    }
+    
+    // check TEMP
+    
+    double temp = _tempMiss;
+    if (_temp != NULL) {
+      temp = _temp[igate];
+    }
+    if (temp != _tempMiss &&
+        (temp < region.min_temp_c || temp > region.max_temp_c)) {
+      continue;
+    }
+    
+    double zdr = _zdr[igate];
+    if (zdr == _zdrMiss) {
+      continue;
+    }
+
+    // print out
+
+    fprintf(_outFilePtrs[pidIndex], "%8.2f %8.2f %4d %8.2f %8.2f %8.2f\n",
+            elev, rangeKm, pid, temp, rhohv, zdr);
+
+  } // igate
+
   return 0;
 
 }
 
 //////////////////////////////
-// write out results
+// open the output files
 
-int PidZdrStats::_writeResults()
+int PidZdrStats::_openOutputFiles()
   
 {
 
-  // compute output file name
+  if (_outFilesOpen) {
+    return 0;
+  }
+
+  // compute output dir
   
   RadxTime fileTime(_readVol.getStartTimeSecs());
 
@@ -430,25 +519,61 @@ int PidZdrStats::_writeResults()
     cerr << "  Cannot create output dir: " << outDir << endl;
     return -1;
   }
-  
-  // compute file name
-  
-  char fileName[BUFSIZ];
-  sprintf(fileName,
-          "zdr_stats.%.4d%.2d%.2d_%.2d%.2d%.2d.%s.txt",
-          fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
-          fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
-          _radarName.c_str());
-  
-  char outPath[BUFSIZ];
-  sprintf(outPath, "%s%s%s",
-          outDir.c_str(), PATH_DELIM,  fileName);
 
-  if (_params.debug) {
-    cerr << "Wrote file: " << outPath << endl;
-  }
+  // open files for each pid regiod
+
+  for (int ii = 0; ii < _params.pid_regions_n; ii++) {
+
+    // compute file name
+    
+    char fileName[BUFSIZ];
+    sprintf(fileName,
+            "%s_%.4d%.2d%.2d_%.2d%.2d%.2d.zdr_stats.txt",
+            _params._pid_regions[ii].label,
+            fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
+            fileTime.getHour(), fileTime.getMin(), fileTime.getSec());
+    
+    char outPath[BUFSIZ];
+    sprintf(outPath, "%s%s%s",
+            outDir.c_str(), PATH_DELIM,  fileName);
+
+    // open file
+
+    FILE *out = fopen(outPath, "w");
+    if (out == NULL) {
+      cerr << "ERROR - PidZdrStats::_writeResults" << endl;
+      cerr << "  Cannot open output file: " << outPath << endl;
+      return -1;
+    }
+
+    _outFilePtrs.push_back(out);
+    _outFilePaths.push_back(outPath);
+    
+    if (_params.debug) {
+      cerr << "Opened output file: " << outPath << endl;
+    }
+
+    // write header
+
+    fprintf(out, "# elev range pid temp rhohv zdr\n");
+
+  } // ii
+
+  _outFilesOpen = true;
 
   return 0;
 
 }
   
+//////////////////////////////
+// close the output files
+
+void PidZdrStats::_closeOutputFiles()
+  
+{
+
+  for (size_t ii = 0; ii < _outFilePtrs.size(); ii++) {
+    fclose(_outFilePtrs[ii]);
+  } // ii
+
+}

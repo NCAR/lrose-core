@@ -79,6 +79,11 @@ paramdef string {
 } PID_field_name;
 
 paramdef string {
+  p_default = "ZDR";
+  p_descr = "Field name for ZDR in the input file.";
+} ZDR_field_name;
+
+paramdef string {
   p_default = "RHOHV";
   p_descr = "Field name for RHOHV in the input file.";
 } RHOHV_field_name;
@@ -323,7 +328,7 @@ paramdef struct pid_region_t {
     }
   };
   p_descr = "Set up the PID regions for analysis.";
-  p_help = "These limits are applied to each gate, depending on the PID identified for that gate. If the values read in are outside these limits, the gate is not used for the analysis.";
+  p_help = "These limits are applied to each gate, depending on the PID identified for that gate. If the values read in are outside these limits, the gate is not used for the analysis. The PID value must be between 1 and 20, inclusive.";
 
 } pid_regions[];
 
