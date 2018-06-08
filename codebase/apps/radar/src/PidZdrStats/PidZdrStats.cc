@@ -359,9 +359,9 @@ int PidZdrStats::_processVol()
       continue;
     }
     // convert to ints
-    pidField->convertToSi32();
-    _pid = pidField->getDataSi32();
-    _pidMiss = pidField->getMissingSi32();
+    pidField->convertToFl32();
+    _pid = pidField->getDataFl32();
+    _pidMiss = pidField->getMissingFl32();
 
     // ZDR field
 
@@ -482,7 +482,7 @@ int PidZdrStats::_processRay(RadxRay *ray)
 
     // print out
 
-    fprintf(_outFilePtrs[pidIndex], "%8.2f %8.2f %4d %8.2f %8.2f %8.2f\n",
+    fprintf(_outFilePtrs[pidIndex], "  %8.2f %8.2f %4d %8.2f %8.2f %8.2f\n",
             elev, rangeKm, pid, temp, rhohv, zdr);
 
   } // igate
@@ -528,10 +528,10 @@ int PidZdrStats::_openOutputFiles()
     
     char fileName[BUFSIZ];
     sprintf(fileName,
-            "%s_%.4d%.2d%.2d_%.2d%.2d%.2d.zdr_stats.txt",
-            _params._pid_regions[ii].label,
+            "zdr_stats.%.4d%.2d%.2d_%.2d%.2d%.2d.%s.txt",
             fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
-            fileTime.getHour(), fileTime.getMin(), fileTime.getSec());
+            fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
+            _params._pid_regions[ii].label);
     
     char outPath[BUFSIZ];
     sprintf(outPath, "%s%s%s",
@@ -555,8 +555,10 @@ int PidZdrStats::_openOutputFiles()
 
     // write header
 
-    fprintf(out, "# elev range pid temp rhohv zdr\n");
-
+    
+    fprintf(out, "# %8s %8s %4s %8s %8s %8s\n",
+            "elev", "range", "pid", "temp", "rhohv", "zdr");
+    
   } // ii
 
   _outFilesOpen = true;

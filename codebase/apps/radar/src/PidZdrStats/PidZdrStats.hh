@@ -96,12 +96,12 @@ private:
   // This memory is managed by the Radx class and should not be freed
   // by the calling class.
 
-  const Radx::si32 *_pid;
+  const Radx::fl32 *_pid;
   const Radx::fl32 *_zdr;
   const Radx::fl32 *_rhohv;
   const Radx::fl32 *_temp;
 
-  Radx::si32 _pidMiss;
+  Radx::fl32 _pidMiss;
   Radx::fl32 _zdrMiss;
   Radx::fl32 _rhohvMiss;
   Radx::fl32 _tempMiss;
