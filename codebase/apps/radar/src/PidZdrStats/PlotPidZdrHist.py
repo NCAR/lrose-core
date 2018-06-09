@@ -196,9 +196,13 @@ def doPlot(filePath, colHeaders, colData):
     ax1 = fig1.add_subplot(2,1,1,xmargin=0.0)
     ax2 = fig1.add_subplot(2,1,2,xmargin=0.0)
 
+    ax1.set_xlim([mean -sdev * 3, mean + sdev * 3])
+    xmin, xmax = ax1.get_xlim()
+    xplot = np.linspace(xmin, xmax, 60)
+
     # the histogram of ZDR
 
-    n1, bins1, patches1 = ax1.hist(zdrSorted, 60, normed=True,
+    n1, bins1, patches1 = ax1.hist(zdrSorted, 45, normed=True,
                                    histtype='stepfilled',
                                    facecolor='slateblue',
                                    alpha=0.35)
@@ -208,22 +212,28 @@ def doPlot(filePath, colHeaders, colData):
     ax1.set_title('PDF - Probability Density Function', fontsize=14)
     ax1.grid(True)
 
-    pdf = stats.norm(mean, sdev).pdf
-    yy1 = pdf(bins1)
-    ll1 = ax1.plot(bins1, yy1, 'b', linewidth=2)
+    pdf1 = stats.norm(mean, sdev).pdf
+    yy1 = pdf1(xplot)
+    ll1 = ax1.plot(xplot, yy1, 'b', linewidth=2)
 
-    xmin, xmax = ax1.get_xlim()
-    xplot = np.linspace(xmin, xmax, 60)
+    #pdf2 = stats.norm(mean, sdev / 1.5).pdf
+    #yy2 = pdf2(bins1)
+    #ll2 = ax1.plot(bins1, yy2, 'g', linewidth=2)
 
-    # ax1.set_xlim([mean -sdev * 3, mean + sdev * 3])
 
-    # aLog, locLog, scaleLog = stats.lognorm.fit(zdrSorted)
-    # print >>sys.stderr, "  ==>> aLog: ", aLog
-    # print >>sys.stderr, "  ==>> locLog: ", locLog
-    # print >>sys.stderr, "  ==>> scaleLog: ", scaleLog
+    aLog, locLog, scaleLog = stats.lognorm.fit(zdrSorted)
+    print >>sys.stderr, "  ==>> aLog: ", aLog
+    print >>sys.stderr, "  ==>> locLog: ", locLog
+    print >>sys.stderr, "  ==>> scaleLog: ", scaleLog
+    pdLog = stats.lognorm.pdf(xplot, aLog, locLog, scaleLog)
+    llLog = ax1.plot(xplot, pdLog, 'k', linewidth=2)
 
-    # pdLog = stats.lognorm.pdf(xplot, aLog, locLog, scaleLog)
-    # llLog = ax1.plot(xplot, pdLog, 'k', linewidth=2)
+    aPear3, locPear3, scalePear3 = stats.pearson3.fit(zdrSorted)
+    print >>sys.stderr, "  ==>> aPear3: ", aPear3
+    print >>sys.stderr, "  ==>> locPear3: ", locPear3
+    print >>sys.stderr, "  ==>> scalePear3: ", scalePear3
+    pdPear3 = stats.pearson3.pdf(xplot, aPear3, locPear3, scalePear3)
+    llPear3 = ax1.plot(xplot, pdPear3, 'r', linewidth=2)
 
     # aSkew, locSkew, scaleSkew = stats.skewnorm.fit(zdrSorted)
     # print >>sys.stderr, "  ==>> aSkew: ", aSkew
@@ -233,9 +243,21 @@ def doPlot(filePath, colHeaders, colData):
     # pdSkew = stats.skewnorm.pdf(xplot, aSkew, locSkew, scaleSkew)
     # llSkew = ax1.plot(xplot, pdSkew, 'r', linewidth=2)
 
+    #a5, loc5, scale5 = stats.fisk.fit(zdrLimited)
+    #print >>sys.stderr, "  ==>> loc5: ", loc5
+    #print >>sys.stderr, "  ==>> scale5: ", scale5
+    #pd5 = stats.fisk.pdf(xplot, a5, loc5, scale5)
+    #ll5 = ax1.plot(xplot, pd5, 'o', linewidth=2)
+
+    a6, loc6, scale6 = stats.t.fit(zdrLimited)
+    print >>sys.stderr, "  ==>> loc6: ", loc6
+    print >>sys.stderr, "  ==>> scale6: ", scale6
+    pd6 = stats.t.pdf(xplot, a6, loc6, scale6)
+    ll6 = ax1.plot(xplot, pd6, 'y', linewidth=2)
+
     # CDF of ZDR
 
-    n2, bins2, patches2 = ax2.hist(zdrSorted, 60, normed=True,
+    n2, bins2, patches2 = ax2.hist(zdrSorted, 45, normed=True,
                                    cumulative=True,
                                    histtype='stepfilled',
                                    facecolor='slateblue',
@@ -256,17 +278,20 @@ def doPlot(filePath, colHeaders, colData):
     for label in legend2.get_texts():
         label.set_fontsize('medium')
 
+    cd6 = stats.t.cdf(xplot, a6, loc6, scale6)
+    cl6 = ax2.plot(xplot, cd6, 'y', linewidth=2)
+
     # ax2.set_xlim([mean -sdev * 3, mean + sdev * 3])
 
     # draw line to show mean, annotate
 
-    pmean = pdf(mean)
+    pmean = pdf1(mean)
     plen = pmean * 0.05
     toffx = mean * 0.1
 
     # draw line to show mean, annotate
 
-    annotVal(ax1, ax2,  mean, pdf, cdf, 'mean', plen, toffx,
+    annotVal(ax1, ax2,  mean, pdf1, cdf, 'mean', plen, toffx,
              'black', 'black', 'left', 'center')
 
     # annotate percentiles
