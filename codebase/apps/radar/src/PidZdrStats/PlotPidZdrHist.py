@@ -202,7 +202,7 @@ def doPlot(filePath, colHeaders, colData):
 
     # the histogram of ZDR
 
-    n1, bins1, patches1 = ax1.hist(zdrSorted, 45, normed=True,
+    n1, bins1, patches1 = ax1.hist(zdrSorted, 60, normed=True,
                                    histtype='stepfilled',
                                    facecolor='slateblue',
                                    alpha=0.35)
@@ -212,9 +212,17 @@ def doPlot(filePath, colHeaders, colData):
     ax1.set_title('PDF - Probability Density Function', fontsize=14)
     ax1.grid(True)
 
-    pdf1 = stats.norm(mean, sdev).pdf
+    mean1, sdev1 = stats.norm.fit(zdrSorted)
+    pdf1 = stats.norm(mean1, sdev1).pdf
     yy1 = pdf1(xplot)
     ll1 = ax1.plot(xplot, yy1, 'b', linewidth=2)
+
+    print >>sys.stderr, "  ==>> mean1: ", mean1
+    print >>sys.stderr, "  ==>> sdev1: ", sdev1
+
+    ks1, pvalue1 = stats.kstest(zdrLimited, 'norm')
+    print >>sys.stderr, "  ==>> ks1: ", ks1
+    print >>sys.stderr, "  ==>> pvalue1: ", pvalue1
 
     #pdf2 = stats.norm(mean, sdev / 1.5).pdf
     #yy2 = pdf2(bins1)
@@ -227,6 +235,9 @@ def doPlot(filePath, colHeaders, colData):
     print >>sys.stderr, "  ==>> scaleLog: ", scaleLog
     pdLog = stats.lognorm.pdf(xplot, aLog, locLog, scaleLog)
     llLog = ax1.plot(xplot, pdLog, 'k', linewidth=2)
+    #ksLog, pvalueLog = stats.kstest(zdrLimited, 'lognorm')
+    #print >>sys.stderr, "  ==>> ksLog: ", ksLog
+    #print >>sys.stderr, "  ==>> pvalueLog: ", pvalueLog
 
     aPear3, locPear3, scalePear3 = stats.pearson3.fit(zdrSorted)
     print >>sys.stderr, "  ==>> aPear3: ", aPear3
@@ -249,15 +260,21 @@ def doPlot(filePath, colHeaders, colData):
     #pd5 = stats.fisk.pdf(xplot, a5, loc5, scale5)
     #ll5 = ax1.plot(xplot, pd5, 'o', linewidth=2)
 
-    a6, loc6, scale6 = stats.t.fit(zdrLimited)
-    print >>sys.stderr, "  ==>> loc6: ", loc6
-    print >>sys.stderr, "  ==>> scale6: ", scale6
-    pd6 = stats.t.pdf(xplot, a6, loc6, scale6)
-    ll6 = ax1.plot(xplot, pd6, 'y', linewidth=2)
+    aT, locT, scaleT = stats.t.fit(zdrLimited)
+    print >>sys.stderr, "  ==>> aT: ", aT
+    print >>sys.stderr, "  ==>> locT: ", locT
+    print >>sys.stderr, "  ==>> scaleT: ", scaleT
+
+    pdT = stats.t.pdf(xplot, aT, locT, scaleT)
+    llT = ax1.plot(xplot, pdT, 'y', linewidth=2)
+
+    #ksT, pvalueT = stats.kstest(zdrSorted, 't')
+    #print >>sys.stderr, "  ==>> ksT: ", ksT
+    #print >>sys.stderr, "  ==>> pvalueT: ", pvalueT
 
     # CDF of ZDR
 
-    n2, bins2, patches2 = ax2.hist(zdrSorted, 45, normed=True,
+    n2, bins2, patches2 = ax2.hist(zdrSorted, 60, normed=True,
                                    cumulative=True,
                                    histtype='stepfilled',
                                    facecolor='slateblue',
@@ -278,8 +295,8 @@ def doPlot(filePath, colHeaders, colData):
     for label in legend2.get_texts():
         label.set_fontsize('medium')
 
-    cd6 = stats.t.cdf(xplot, a6, loc6, scale6)
-    cl6 = ax2.plot(xplot, cd6, 'y', linewidth=2)
+    cdT = stats.t.cdf(xplot, aT, locT, scaleT)
+    clT = ax2.plot(xplot, cdT, 'y', linewidth=2)
 
     # ax2.set_xlim([mean -sdev * 3, mean + sdev * 3])
 
