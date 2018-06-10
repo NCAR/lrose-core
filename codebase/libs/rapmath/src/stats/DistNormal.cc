@@ -107,50 +107,68 @@ void DistNormal::computeChiSq(size_t nIntervals)
   if (_hist.size() < 1) {
     computeHistogram();
   }
-  double intervalSum = (double) _values.size() / (double) nIntervals;
-
+  double nValues = _values.size();
+  // double intervalCount = nValues / (double) nIntervals;
+  double intervalProb = 1.0 / (double) nIntervals;
+  
   if (_debug) {
     cerr << "====>> DistNormal::computeChiSq <<====" << endl;
     cerr << "  nIntervals: " << nIntervals << endl;
-    cerr << "  intervalSum: " << intervalSum << endl;
+    // cerr << "  intervalCount: " << intervalCount << endl;
   }
 
   size_t startIndex = 0;
   size_t endIndex = 0;
-  double sumCount = 0.0;
+  // double sumHistCount = 0.0;
+  double sumHistProb = 0.0;
   double sumChisq = 0.0;
   double nChisq = 0.0;
+  // double sumPdfCount = 0.0;
+  double sumPdfProb = 0.0;
   for (size_t jj = 0; jj < _hist.size(); jj++) {
-    sumCount += _hist[jj];
-    if ((sumCount > intervalSum) || (jj == _hist.size() - 1)) {
+    // sumHistCount += _hist[jj];
+    sumHistProb += _hist[jj] / nValues;
+    double xx = _histMin + (jj + 0.5) * _histDelta;
+    double pdfProb = getPdf(xx) * _histDelta;
+    // double pdfCount = pdfProb * nValues;
+    // sumPdfCount += pdfCount;
+    sumPdfProb += pdfProb;
+    if ((sumHistProb > intervalProb) || (jj == _hist.size() - 1)) {
       endIndex = jj;
-      double xStart = _histMin + startIndex * _histDelta;
-      double xEnd = _histMin + (endIndex + 1) * _histDelta;
-      double xDelta = xEnd - xStart;
-      double xMid = (xStart + xEnd) / 2.0;
-      double histMean = intervalSum / xDelta;
-      double histDensity = histMean / (double) _values.size();
-      double pdf = getPdf(xMid);
-      double error = histDensity - pdf;
-      double chiFac = (error * error) / pdf;
+      // double xStart = _histMin + startIndex * _histDelta;
+      // double xEnd = _histMin + (endIndex + 1) * _histDelta;
+      // double xDelta = xEnd - xStart;
+      // double xMid = (xStart + xEnd) / 2.0;
+      // double meanCount = sumHistCount / (double) (endIndex - startIndex + 1);
+      // double histDensity = histMean / (double) _values.size();
+      // double pdf = getPdf(xMid);
+      // double pdfCount = (pdf / (xEnd - xStart)) * _values.size();
+      double error = sumHistProb - sumPdfProb;
+      double chiFac = (error * error) / sumPdfProb;
       sumChisq += chiFac;
       nChisq++;
       if (_verbose) {
         cerr << "============================================" << endl;
         cerr << "-------->> jj: " << jj << endl;
-        cerr << "-------->> sumCount: " << sumCount << endl;
-        cerr << "-------->> xStart: " << xStart << endl;
-        cerr << "-------->> xEnd: " << xEnd << endl;
-        cerr << "-------->> xMid: " << xMid << endl;
-        cerr << "-------->> xDelta: " << xDelta << endl;
-        cerr << "-------->> histMean: " << histMean << endl;
-        cerr << "-------->> histDensity: " << histDensity << endl;
-        cerr << "-------->> pdf: " << pdf << endl;
+        cerr << "-------->> startIndex: " << startIndex<< endl;
+        cerr << "-------->> endIndex: " << endIndex << endl;
+        cerr << "-------->> sumHistProb: " << sumHistProb << endl;
+        cerr << "-------->> sumPdfProb: " << sumPdfProb << endl;
+        // cerr << "-------->> xStart: " << xStart << endl;
+        // cerr << "-------->> xEnd: " << xEnd << endl;
+        // cerr << "-------->> xMid: " << xMid << endl;
+        // cerr << "-------->> xDelta: " << xDelta << endl;
+        // cerr << "-------->> meanCount: " << meanCount << endl;
+        // cerr << "-------->> pdf: " << pdf << endl;
+        // cerr << "-------->> pdfCount: " << pdfCount << endl;
         cerr << "-------->> error: " << error << endl;
         cerr << "-------->> chiFac: " << chiFac << endl;
       }
       startIndex = endIndex + 1;
-      sumCount = 0.0;
+      // sumHistCount = 0.0;
+      sumHistProb = 0.0;
+      // sumPdfCount = 0.0;
+      sumPdfProb = 0.0;
     }
   } // jj
 
