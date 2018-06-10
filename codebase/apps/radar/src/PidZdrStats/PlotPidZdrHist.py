@@ -164,8 +164,8 @@ def doPlot(filePath, colHeaders, colData):
     mean0 = np.mean(zdrValid)
     sdev0 = np.std(zdrValid)
 
-    # zdrLimited = zdrValid[(zdrValid >= mean0 - sdev0 * 3) & (zdrValid <= mean0 + sdev0 * 3)]
-    zdrLimited = zdrValid
+    zdrLimited = zdrValid[(zdrValid >= mean0 - sdev0 * 3) & (zdrValid <= mean0 + sdev0 * 3)]
+    # zdrLimited = zdrValid
 
     mean = np.mean(zdrLimited)
     sdev = np.std(zdrLimited)
@@ -197,7 +197,8 @@ def doPlot(filePath, colHeaders, colData):
     ax1 = fig1.add_subplot(2,1,1,xmargin=0.0)
     ax2 = fig1.add_subplot(2,1,2,xmargin=0.0)
 
-    ax1.set_xlim([mean -sdev * 3, mean + sdev * 3])
+    # ax1.set_xlim([mean -sdev * 3, mean + sdev * 3])
+    ax1.set_xlim([minVal, maxVal])
     xmin, xmax = ax1.get_xlim()
     xplot = np.linspace(xmin, xmax, 60)
 

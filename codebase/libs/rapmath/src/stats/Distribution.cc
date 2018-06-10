@@ -48,6 +48,7 @@ Distribution::Distribution()
 {
 
   _debug = false;
+  _verbose = false;
   _initStats();
 
 }
@@ -67,6 +68,7 @@ Distribution::~Distribution()
 void Distribution::_initStats()
 
 {
+
   _min = NAN;
   _max = NAN;
   _mean = NAN;
@@ -76,6 +78,11 @@ void Distribution::_initStats()
   _variance = NAN;
   _skewness = NAN;
   _kurtosis = NAN;
+
+  _hist.clear();
+  _histMin = NAN;
+  _histDelta = NAN;
+
 }
 
 //////////////////////////////////////////////////////////////////
@@ -117,6 +124,15 @@ void Distribution::setValues(const vector<double> &vals)
       _max = xx;
     }
   }
+}
+
+//////////////////////////////////////////////////////////////////
+// clear the data values
+  
+void Distribution::clearValues()
+{
+  _values.clear();
+  _initStats();
 }
 
 ////////////////////////////////////////////////////
@@ -249,5 +265,99 @@ void Distribution::computeBasicStats()
   _skewness = (sumSkew / nn) / pow(_sdev, 3.0);
   _kurtosis = ((sumKurt / nn) / pow(_sdev, 4.0)) - 3.0;
 
+}
+
+//////////////////////////////////////////////////////////////////
+// compute histogram
+// if n is not specified, the default is used
+// if histMin is not specified, the min in the data is used
+// if histDelta is not specified, it is computed from data range
+// histMin is the value at lower edge of the first histogram bin
+// histDelta is the delta between the center of adjacent bins
+
+void Distribution::computeHistogram(size_t n /* = 60 */,
+                                    double histMin /* = NAN */,
+                                    double histDelta /* = NAN */)
+
+{
+
+  if (std::isnan(histMin)) {
+    _histMin = _min;
+  } else {
+    _histMin = histMin;
+  }
+
+  if (std::isnan(histDelta)) {
+    // compute histDelta to ensure we include
+    // both min and max values
+    _histDelta = ((_max - _min) / (double) n) * 1.0001;
+    _histMin -= _histDelta * 0.0001;
+  } else {
+    _histDelta = histDelta;
+  }
+
+  _hist.clear();
+  for (size_t jj = 0; jj < n; jj++) {
+    _hist.push_back(0.0);
+  } // jj
+  
+  for (size_t ii = 0; ii < _values.size(); ii++) {
+    double val = _values[ii];
+    int index = (int) ((val - _histMin) / _histDelta);
+    if (index >= 0 && index < (int) _hist.size()) {
+      _hist[index]++;
+    }
+  } // ii
+
+  if (_verbose) {
+    printHistogram(stderr);
+  }
+
+}
+
+//////////////////////////////////////////////////////////////////
+// print histogram as text
+
+void Distribution::printHistogram(FILE *out)
+
+{
+
+  if (_hist.size() < 2) {
+    return;
+  }
+
+  fprintf(out, "======================= Histogram ===========================\n");
+  fprintf(out, "  histSize: %d\n", (int) _hist.size());
+  fprintf(out, "  histDelta: %g\n", _histDelta);
+  fprintf(out, "  histMin: %g\n", _histMin);
+  fprintf(out, "  histMax: %g\n", _histMin + _hist.size() * _histDelta);
+  fprintf(out, "\n");
+  fprintf(out, "%8s %8s %8s %8s\n", "bin", "min", "max", "count");
+  
+  double maxCount = 0;
+  for (size_t jj = 0; jj < _hist.size(); jj++) {
+    if (_hist[jj] > maxCount) {
+      maxCount = _hist[jj];
+    }
+  } // jj
+
+  for (size_t jj = 0; jj < _hist.size(); jj++) {
+
+    double binMin = _histMin + jj * _histDelta;
+    double binMax = _histMin + (jj+1) * _histDelta;
+    int binCount = _hist[jj];
+    
+    fprintf(out, "%8d %8.3f %8.3f %8d  ",
+            (int) jj, binMin, binMax, binCount);
+    
+    int nStars = (int) ((binCount / maxCount) * 40.0);
+    for (int ii = 0; ii < nStars; ii++) {
+      fprintf(out, "*");
+    }
+    fprintf(out, "\n");
+
+  }
+  fprintf(out, "===============================================================\n");
+  
 }
 

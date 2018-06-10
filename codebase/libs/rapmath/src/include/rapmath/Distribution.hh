@@ -39,6 +39,7 @@
 #include <vector>
 #include <rapmath/stats.h>
 #include <cmath>
+#include <cstdio>
 using namespace std;
 
 ////////////////////////
@@ -60,7 +61,11 @@ public:
   
   // debugging
   
-  void setDebug(bool debug) { _debug = debug; }
+  void setDebug(bool state) { _debug = state; }
+  void setVerbose(bool state) {
+    _verbose = state;
+    if (state) setDebug(true);
+  }
 
   // add a data value
   
@@ -69,6 +74,10 @@ public:
   // set the data values
   
   void setValues(const vector<double> &vals);
+
+  // clear the data value
+
+  void clearValues();
 
   // compute and return the mean
 
@@ -94,6 +103,17 @@ public:
 
   void computeBasicStats();
   
+  // compute histogram
+  // if n is not specified, the default is used
+  // if histMin is not specified, the min in the data is used
+  // if histDelta is not specified, it is computed from data range
+  // histMin is the value at lower edge of the first histogram bin
+  // histDelta is the delta between the center of adjacent bins
+  
+  void computeHistogram(size_t n = 60,
+                        double histMin = NAN,
+                        double histDelta = NAN);
+  
   // perform a fit - abstract base class
   // must be overridden in derived class
   // values must have been set
@@ -111,6 +131,11 @@ public:
 
   virtual double getCdf(double xx) = 0;
 
+  // compute ChiSq goodness of fit test
+  // kk is number of intervals used in test
+  
+  virtual void computeChiSq(size_t kk) = 0;
+
   // get methods
 
   double getMin() const { return _min; }
@@ -122,12 +147,19 @@ public:
   double getKurtosis() const { return _kurtosis; }
   const vector<double> &getValues() const { return _values; }
 
+  double getChisq() const { return _chiSq; }
+
+  // print histogram as text
+  
+  void printHistogram(FILE *out);
+
   static const double sqrt2;
   static const double sqrt2Pi;
 
 protected:
   
   bool _debug;
+  bool _verbose;
 
   vector<double> _values;
 
@@ -140,6 +172,12 @@ protected:
   double _variance;
   double _skewness;
   double _kurtosis;
+
+  vector<double> _hist;
+  double _histMin;
+  double _histDelta;
+
+  double _chiSq;
 
   void _initStats();
 

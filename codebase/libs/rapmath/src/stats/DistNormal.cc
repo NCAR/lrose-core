@@ -33,6 +33,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <rapmath/DistNormal.hh>
+#include <iostream>
 
 ////////////////////////////////////////////////////
 // constructor
@@ -91,4 +92,73 @@ double DistNormal::getCdf(double xx)
   return cdf;
 }
 
+//////////////////////////////////////////////////////////////////
+// compute ChiSq goodness of fit test
+// kk is number of intervals used in test
+
+void DistNormal::computeChiSq(size_t nIntervals)
+  
+{
+  
+  if (std::isnan(_mean) || std::isnan(_sdev)) {
+    performFit();
+  }
+  
+  if (_hist.size() < 1) {
+    computeHistogram();
+  }
+  double intervalSum = (double) _values.size() / (double) nIntervals;
+
+  if (_debug) {
+    cerr << "====>> DistNormal::computeChiSq <<====" << endl;
+    cerr << "  nIntervals: " << nIntervals << endl;
+    cerr << "  intervalSum: " << intervalSum << endl;
+  }
+
+  size_t startIndex = 0;
+  size_t endIndex = 0;
+  double sumCount = 0.0;
+  double sumChisq = 0.0;
+  double nChisq = 0.0;
+  for (size_t jj = 0; jj < _hist.size(); jj++) {
+    sumCount += _hist[jj];
+    if ((sumCount > intervalSum) || (jj == _hist.size() - 1)) {
+      endIndex = jj;
+      double xStart = _histMin + startIndex * _histDelta;
+      double xEnd = _histMin + (endIndex + 1) * _histDelta;
+      double xDelta = xEnd - xStart;
+      double xMid = (xStart + xEnd) / 2.0;
+      double histMean = intervalSum / xDelta;
+      double histDensity = histMean / (double) _values.size();
+      double pdf = getPdf(xMid);
+      double error = histDensity - pdf;
+      double chiFac = (error * error) / pdf;
+      sumChisq += chiFac;
+      nChisq++;
+      if (_verbose) {
+        cerr << "============================================" << endl;
+        cerr << "-------->> jj: " << jj << endl;
+        cerr << "-------->> sumCount: " << sumCount << endl;
+        cerr << "-------->> xStart: " << xStart << endl;
+        cerr << "-------->> xEnd: " << xEnd << endl;
+        cerr << "-------->> xMid: " << xMid << endl;
+        cerr << "-------->> xDelta: " << xDelta << endl;
+        cerr << "-------->> histMean: " << histMean << endl;
+        cerr << "-------->> histDensity: " << histDensity << endl;
+        cerr << "-------->> pdf: " << pdf << endl;
+        cerr << "-------->> error: " << error << endl;
+        cerr << "-------->> chiFac: " << chiFac << endl;
+      }
+      startIndex = endIndex + 1;
+      sumCount = 0.0;
+    }
+  } // jj
+
+  _chiSq = sumChisq;
+
+  if (_debug) {
+    cerr << "  chiSq: " << _chiSq << endl;
+  }
+
+}
 
