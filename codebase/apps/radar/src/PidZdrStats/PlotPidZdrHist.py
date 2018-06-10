@@ -164,7 +164,8 @@ def doPlot(filePath, colHeaders, colData):
     mean0 = np.mean(zdrValid)
     sdev0 = np.std(zdrValid)
 
-    zdrLimited = zdrValid[(zdrValid >= mean0 - sdev0 * 3) & (zdrValid <= mean0 + sdev0 * 3)]
+    # zdrLimited = zdrValid[(zdrValid >= mean0 - sdev0 * 3) & (zdrValid <= mean0 + sdev0 * 3)]
+    zdrLimited = zdrValid
 
     mean = np.mean(zdrLimited)
     sdev = np.std(zdrLimited)

@@ -48,12 +48,7 @@ Distribution::Distribution()
 {
 
   _debug = false;
-  _mean = NAN;
-  _median = NAN;
-  _mode = NAN;
-  _sdev = NAN;
-  _skewness = NAN;
-  _kurtosis = NAN;
+  _initStats();
 
 }
 
@@ -64,6 +59,64 @@ Distribution::~Distribution()
 
 {
 
+}
+
+//////////////////////////////////////////////////////////////////
+// initialize the stats
+
+void Distribution::_initStats()
+
+{
+  _min = NAN;
+  _max = NAN;
+  _mean = NAN;
+  _median = NAN;
+  _mode = NAN;
+  _sdev = NAN;
+  _variance = NAN;
+  _skewness = NAN;
+  _kurtosis = NAN;
+}
+
+//////////////////////////////////////////////////////////////////
+// add a data value
+
+void Distribution::addValue(double xx) 
+{
+  _values.push_back(xx);
+  if (std::isnan(_min)) {
+    _min = xx;
+  } else if (!std::isnan(xx) && xx < _min) {
+    _min = xx;
+  }
+  if (std::isnan(_max)) {
+    _max = xx;
+  } else if (!std::isnan(xx) && xx > _max) {
+    _max = xx;
+  }
+}
+
+//////////////////////////////////////////////////////////////////
+// set the data values
+  
+void Distribution::setValues(const vector<double> &vals)
+{
+  if (vals.size() < 1) {
+    _initStats();
+    _values.clear();
+    return;
+  }
+  _min = _values[0];
+  _max = _values[0];
+  for (size_t ii = 1; ii < _values.size(); ii++) {
+    double xx = _values[ii];
+    if (!std::isnan(xx) && xx < _min) {
+      _min = xx;
+    }
+    if (!std::isnan(xx) && xx > _max) {
+      _max = xx;
+    }
+  }
 }
 
 ////////////////////////////////////////////////////
@@ -116,7 +169,7 @@ double Distribution::computeSdev()
   }
 
   _mean = sumx / nn;
-  _variance = (sumx2 - (sumx * sumx) / nn) / (nn - 1.0);
+  _variance = (sumx2 - (sumx * sumx) / nn) / nn;
   
   if (_variance >= 0.0) {
     _sdev = sqrt(_variance);

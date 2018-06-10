@@ -64,11 +64,11 @@ public:
 
   // add a data value
   
-  inline void addValue(double xx) { _values.push_back(xx); }
+  void addValue(double xx);
 
   // set the data values
   
-  inline void setValues(const vector<double> &vals) { _values = vals; }
+  void setValues(const vector<double> &vals);
 
   // compute and return the mean
 
@@ -113,6 +113,8 @@ public:
 
   // get methods
 
+  double getMin() const { return _min; }
+  double getMax() const { return _max; }
   double getMean() const { return _mean; }
   double getSdev() const { return _sdev; }
   double getVariance() const { return _variance; }
@@ -129,6 +131,8 @@ protected:
 
   vector<double> _values;
 
+  double _min;
+  double _max;
   double _mean;
   double _median;
   double _mode;
@@ -136,6 +140,8 @@ protected:
   double _variance;
   double _skewness;
   double _kurtosis;
+
+  void _initStats();
 
 private:
   

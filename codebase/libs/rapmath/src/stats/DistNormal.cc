@@ -70,7 +70,7 @@ int DistNormal::performFit()
 // get the pdf value for a given x
 // a fit must have been performed
 
-double Distribution::getPdf(double xx)
+double DistNormal::getPdf(double xx)
   
 {
   double aa  = (xx - _mean) / _sdev;
@@ -82,7 +82,7 @@ double Distribution::getPdf(double xx)
 // get the cdf value for a given x
 // a fit must have been performed
 
-double Distribution::getCdf(double xx)
+double DistNormal::getCdf(double xx)
   
 {
   double aa  = (xx - _mean) / _sdev;

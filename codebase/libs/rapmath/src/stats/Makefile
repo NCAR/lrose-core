@@ -26,7 +26,6 @@ TARGET_FILE = ../librapmath.a
 HDRS = ../include/rapmath/stats.h \
 	../include/rapmath/Distribution.hh
 
-
 SRCS = \
 	beta.c \
 	exponential.c \
