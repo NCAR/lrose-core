@@ -64,6 +64,17 @@ void DistLognorm::setUse3Params(bool state)
   _use3Params = state;
 }
 
+////////////////////////////////////////////////////
+// set lower bound
+// forces use of 3 params
+
+void DistLognorm::setLowerBound(double val)
+  
+{
+  _use3Params = true;
+  _lowerBound = val;
+}
+
 //////////////////////////////////////////////////////////////////
 // initialize the stats
 

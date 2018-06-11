@@ -57,6 +57,7 @@ public:
   // default is to use 2 params
 
   void setUse3Params(bool state);
+  void setLowerBound(double val);
 
   // perform a fit
   // values must have been set
