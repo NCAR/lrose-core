@@ -36,6 +36,7 @@ SRCS = \
 	weibull.c
 
 CPPC_SRCS = \
+	DistLognorm.cc \
 	DistNormal.cc \
 	Distribution.cc
 

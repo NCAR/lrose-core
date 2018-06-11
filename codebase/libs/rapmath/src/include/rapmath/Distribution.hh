@@ -179,7 +179,7 @@ protected:
 
   double _chiSq;
 
-  void _initStats();
+  virtual void _initStats();
 
 private:
   

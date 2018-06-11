@@ -32,52 +32,108 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <rapmath/DistNormal.hh>
+#include <rapmath/DistLognorm.hh>
 #include <iostream>
 
 ////////////////////////////////////////////////////
 // constructor
 
-DistNormal::DistNormal() :
+DistLognorm::DistLognorm() :
         Distribution()
         
 {
-  
+  _use3Params = false;
 }
 
 ////////////////////////////////////////////////////
 // destructor
 
-DistNormal::~DistNormal()
+DistLognorm::~DistLognorm()
         
 {
+
+}
+
+////////////////////////////////////////////////////
+// set to use 3 params
+// default is to use 2 params
+
+void DistLognorm::setUse3Params(bool state)
+  
+{
+  _use3Params = state;
+}
+
+//////////////////////////////////////////////////////////////////
+// initialize the stats
+
+void DistLognorm::_initStats()
+
+{
+
+  Distribution::_initStats();
+
+  _meanLn = NAN;
+  _sdevLn = NAN;
+  _varianceLn = NAN;
+  _lowerBound = 0.0;
 
 }
 
 ////////////////////////////////////////////////////
 // perform a fit
 
-int DistNormal::performFit()
+int DistLognorm::performFit()
   
 {
-  computeSdev();
+
   if (_values.size() < 2) {
+    _meanLn = NAN;
+    _sdevLn = NAN;
+    _varianceLn = NAN;
+    _lowerBound = 0.0;
     return -1;
   }
-  _median = _mean;
-  _mode = _mean;
+
+  double nn = _values.size();
+  double sumx = 0.0;
+  double sumx2 = 0.0;
+  
+  for (size_t ii = 0; ii < _values.size(); ii++) {
+    double xx = log(_values[ii]);
+    sumx += xx;
+    sumx2 += xx * xx;
+  }
+
+  _meanLn = sumx / nn;
+  _varianceLn = (sumx2 - (sumx * sumx) / nn) / nn;
+  
+  if (_varianceLn >= 0.0) {
+    _sdevLn = sqrt(_varianceLn);
+  } else {
+    _sdevLn = 0.0;
+  }
+
+  _mode = exp(_meanLn - _sdevLn * _sdevLn);
+  _median = exp(_meanLn);
+
   return 0;
+
 }
 
 ////////////////////////////////////////////////////
 // get the pdf value for a given x
 // a fit must have been performed
 
-double DistNormal::getPdf(double xx)
+double DistLognorm::getPdf(double xx)
   
 {
-  double aa  = (xx - _mean) / _sdev;
-  double pdf = exp(-0.5 * aa * aa) / (_sdev * sqrt2Pi);
+  xx -= _lowerBound;
+  if (xx <= 0.0) {
+    return 0.0;
+  }
+  double aa  = (log(xx) - _meanLn) / _sdevLn;
+  double pdf = exp(-0.5 * aa * aa) / (xx * _sdevLn * sqrt2Pi);
   return pdf;
 }
 
@@ -85,10 +141,10 @@ double DistNormal::getPdf(double xx)
 // get the cdf value for a given x
 // a fit must have been performed
 
-double DistNormal::getCdf(double xx)
+double DistLognorm::getCdf(double xx)
   
 {
-  double aa  = (xx - _mean) / _sdev;
+  double aa  = (log(xx) - _meanLn) / _sdevLn;
   double bb = erf(aa / sqrt2);
   double cdf = (1.0 + bb) * 0.5;
   return cdf;
@@ -98,7 +154,7 @@ double DistNormal::getCdf(double xx)
 // compute ChiSq goodness of fit test
 // kk is number of intervals used in test
 
-void DistNormal::computeChiSq(size_t nIntervals)
+void DistLognorm::computeChiSq(size_t nIntervals)
   
 {
   
@@ -110,41 +166,26 @@ void DistNormal::computeChiSq(size_t nIntervals)
     computeHistogram();
   }
   double nValues = _values.size();
-  // double intervalCount = nValues / (double) nIntervals;
   double intervalProb = 1.0 / (double) nIntervals;
   
   if (_debug) {
-    cerr << "====>> DistNormal::computeChiSq <<====" << endl;
+    cerr << "====>> DistLognorm::computeChiSq <<====" << endl;
     cerr << "  nIntervals: " << nIntervals << endl;
-    // cerr << "  intervalCount: " << intervalCount << endl;
   }
 
   size_t startIndex = 0;
   size_t endIndex = 0;
-  // double sumHistCount = 0.0;
   double sumHistProb = 0.0;
   double sumChisq = 0.0;
   double nChisq = 0.0;
-  // double sumPdfCount = 0.0;
   double sumPdfProb = 0.0;
   for (size_t jj = 0; jj < _hist.size(); jj++) {
-    // sumHistCount += _hist[jj];
     sumHistProb += _hist[jj] / nValues;
     double xx = _histMin + (jj + 0.5) * _histDelta;
     double pdfProb = getPdf(xx) * _histDelta;
-    // double pdfCount = pdfProb * nValues;
-    // sumPdfCount += pdfCount;
     sumPdfProb += pdfProb;
     if ((sumHistProb > intervalProb) || (jj == _hist.size() - 1)) {
       endIndex = jj;
-      // double xStart = _histMin + startIndex * _histDelta;
-      // double xEnd = _histMin + (endIndex + 1) * _histDelta;
-      // double xDelta = xEnd - xStart;
-      // double xMid = (xStart + xEnd) / 2.0;
-      // double meanCount = sumHistCount / (double) (endIndex - startIndex + 1);
-      // double histDensity = histMean / (double) _values.size();
-      // double pdf = getPdf(xMid);
-      // double pdfCount = (pdf / (xEnd - xStart)) * _values.size();
       double error = sumHistProb - sumPdfProb;
       double chiFac = (error * error) / sumPdfProb;
       sumChisq += chiFac;
@@ -156,20 +197,11 @@ void DistNormal::computeChiSq(size_t nIntervals)
         cerr << "-------->> endIndex: " << endIndex << endl;
         cerr << "-------->> sumHistProb: " << sumHistProb << endl;
         cerr << "-------->> sumPdfProb: " << sumPdfProb << endl;
-        // cerr << "-------->> xStart: " << xStart << endl;
-        // cerr << "-------->> xEnd: " << xEnd << endl;
-        // cerr << "-------->> xMid: " << xMid << endl;
-        // cerr << "-------->> xDelta: " << xDelta << endl;
-        // cerr << "-------->> meanCount: " << meanCount << endl;
-        // cerr << "-------->> pdf: " << pdf << endl;
-        // cerr << "-------->> pdfCount: " << pdfCount << endl;
         cerr << "-------->> error: " << error << endl;
         cerr << "-------->> chiFac: " << chiFac << endl;
       }
       startIndex = endIndex + 1;
-      // sumHistCount = 0.0;
       sumHistProb = 0.0;
-      // sumPdfCount = 0.0;
       sumPdfProb = 0.0;
     }
   } // jj
