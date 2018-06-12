@@ -75,7 +75,7 @@ public:
   } debug_t;
 
   typedef enum {
-    FMQ = 0,
+    REALTIME_FMQ = 0,
     ARCHIVE = 1,
     FILELIST = 2
   } mode_t;

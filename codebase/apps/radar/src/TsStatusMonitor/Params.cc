@@ -601,7 +601,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("DATA INPUT - from file message queue (FMQ)");
+    tt->comment_hdr = tdrpStrDup("DATA INPUT MODES");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -618,13 +618,13 @@
     tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FMQ");
-      tt->enum_def.fields[0].val = FMQ;
+      tt->enum_def.fields[0].name = tdrpStrDup("REALTIME_FMQ");
+      tt->enum_def.fields[0].val = REALTIME_FMQ;
       tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
       tt->enum_def.fields[1].val = ARCHIVE;
       tt->enum_def.fields[2].name = tdrpStrDup("FILELIST");
       tt->enum_def.fields[2].val = FILELIST;
-    tt->single_val.e = FMQ;
+    tt->single_val.e = REALTIME_FMQ;
     tt++;
     
     // Parameter 'fmq_name'
@@ -633,7 +633,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("fmq_name");
-    tt->descr = tdrpStrDup("FMQ name. For FMQ input_mode only.");
+    tt->descr = tdrpStrDup("FMQ name. For REALTIME_FMQ input_mode only.");
     tt->help = tdrpStrDup("Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.");
     tt->val_offset = (char *) &fmq_name - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/fmq/ts");

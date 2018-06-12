@@ -33,22 +33,22 @@ paramdef string {
 } instance;
 
 commentdef {
-  p_header = "DATA INPUT - from file message queue (FMQ)";
+  p_header = "DATA INPUT MODES";
 };
 
 typedef enum {
-  FMQ, ARCHIVE, FILELIST
+  REALTIME_FMQ, ARCHIVE, FILELIST
 } mode_t;
 
 paramdef enum mode_t {
-  p_default = FMQ;
+  p_default = REALTIME_FMQ;
   p_descr = "Operating mode";
   p_help = "In FMQ realtime mode, we open the input_fmq, and read the time series data from the queue. In ARCHIVE mode, we specify a start and end time, and read in the files in this time interval from the input_dir. In FILELIST mode, we move through a list of file names specified on the command line. ";
 } mode;
 
 paramdef string {
   p_default = "/tmp/fmq/ts";
-  p_descr = "FMQ name. For FMQ input_mode only.";
+  p_descr = "FMQ name. For REALTIME_FMQ input_mode only.";
   p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
 } fmq_name;
 
