@@ -36,6 +36,7 @@
 #define ARGS_H
 
 #include <string>
+#include <vector>
 #include <iostream>
 #include <tdrp/tdrp.h>
 using namespace std;
@@ -61,6 +62,7 @@ public:
   // data
   
   tdrp_override_t override;
+  vector<string> inputFileList;
 
 protected:
   

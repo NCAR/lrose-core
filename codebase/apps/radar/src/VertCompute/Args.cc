@@ -155,7 +155,7 @@ void Args::usage(string &prog_name, ostream &out)
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -debug ] print debug messages\n"
-      << "       [ -f files ] specify input tsarchive file list.\n"
+      << "       [ -f files ] specify input time series file list.\n"
       << "         Read files instead of TsApi.\n"
       << "       [ -nrevs_global ?] number of revs for global stats\n"
       << "         Global stats will be printed after this number of revolutions\n"

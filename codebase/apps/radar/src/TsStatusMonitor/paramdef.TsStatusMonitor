@@ -36,6 +36,16 @@ commentdef {
   p_header = "DATA INPUT - from file message queue (FMQ)";
 };
 
+typedef enum {
+  FMQ, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FMQ;
+  p_descr = "Operating mode";
+  p_help = "In FMQ realtime mode, we open the input_fmq, and read the time series data from the queue. In ARCHIVE mode, we specify a start and end time, and read in the files in this time interval from the input_dir. In FILELIST mode, we move through a list of file names specified on the command line. ";
+} mode;
+
 paramdef string {
   p_default = "/tmp/fmq/ts";
   p_descr = "FMQ name. For FMQ input_mode only.";
@@ -47,6 +57,24 @@ paramdef int {
   p_descr = "Maximum interval with no data (secs).";
   p_help = "After this time elapses with no data, the status data is considered invalid until the data restarts.";
 } data_valid_interval_secs;
+
+paramdef string {
+  p_default = "/tmp/time_series";
+  p_descr = "Input directory for time series files.";
+  p_help = "ARCHIVE mode.";
+} archive_data_dir;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Start time for archive mode.";
+  p_help = "In ARCHIVE mode, data retrieval starts at this time.";
+} archive_start_time;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "End time for archive mode.";
+  p_help = "In ARCHIVE mode, data retrieval ends at this time.";
+} archive_end_time;
 
 commentdef {
   p_header = "XML STATUS INPUT";

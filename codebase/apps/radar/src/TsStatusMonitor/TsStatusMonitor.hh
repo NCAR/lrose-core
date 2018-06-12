@@ -92,6 +92,9 @@ private:
   Args _args;
   Params _params;
 
+  time_t _archiveStartTime;
+  time_t _archiveEndTime;
+
   // reading pulses
 
   IwrfTsReader *_pulseReader;

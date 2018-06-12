@@ -75,6 +75,12 @@ public:
   } debug_t;
 
   typedef enum {
+    FMQ = 0,
+    ARCHIVE = 1,
+    FILELIST = 2
+  } mode_t;
+
+  typedef enum {
     XML_ENTRY_BOOLEAN = 0,
     XML_ENTRY_INT = 1,
     XML_ENTRY_DOUBLE = 2,
@@ -392,9 +398,17 @@ public:
 
   char* instance;
 
+  mode_t mode;
+
   char* fmq_name;
 
   int data_valid_interval_secs;
+
+  char* archive_data_dir;
+
+  char* archive_start_time;
+
+  char* archive_end_time;
 
   xml_entry_t *_xml_entries;
   int xml_entries_n;
@@ -486,7 +500,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[56];
+  mutable TDRPtable _table[60];
 
   const char *_className;
 

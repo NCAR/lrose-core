@@ -35,6 +35,7 @@
 #include "Args.hh"
 #include <cstring>
 #include <cstdlib>
+#include <toolsa/DateTime.hh>
 using namespace std;
 
 // constructor
@@ -108,6 +109,55 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
       
+    } else if (!strcmp(argv[i], "-archive_dir")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "archive_data_dir = %s;", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[i], "-start")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "archive_start_time = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+
+    } else if (!strcmp(argv[i], "-end")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "archive_end_time = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+    
+    } else if (!strcmp(argv[i], "-f")) {
+      
+      if (i < argc - 1) {
+	// load up file list vector. Break at next arg which
+	// start with -
+	for (int j = i + 1; j < argc; j++) {
+	  if (argv[j][0] == '-') {
+	    break;
+	  } else {
+	    inputFileList.push_back(argv[j]);
+	  }
+	}
+	sprintf(tmp_str, "mode = FILELIST;");
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
     } // if
     
   } // i
@@ -126,8 +176,16 @@ void Args::usage(string &prog_name, ostream &out)
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
+      << "       [ -archive_dir ?] input data dir in ARCHIVE mode\n"
       << "       [ -debug ] print debug messages\n"
+      << "       [ -end \"yyyy mm dd hh mm ss\"] end time\n"
+      << "          sets ARCHIVE mode\n"
+      << "       [ -f ? ?] input file list\n"
+      << "          Specify list of time series files to process\n"
+      << "          sets FILELIST mode\n"
       << "       [ -instance ?] instance for procmap\n"
+      << "       [ -start \"yyyy mm dd hh mm ss\"] start time\n"
+      << "          sets ARCHIVE mode\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"
       << "       [ -vv, -extra ]  print extra verbose debug messages\n"
       << endl;

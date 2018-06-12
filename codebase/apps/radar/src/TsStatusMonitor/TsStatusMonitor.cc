@@ -52,6 +52,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/Path.hh>
 #include <toolsa/TaXml.hh>
+#include <didss/DsInputPath.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include "TsStatusMonitor.hh"
 
@@ -120,7 +121,27 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
     isOK = false;
     return;
   }
-  
+
+  // check params
+
+  if (_params.mode == Params::ARCHIVE) {
+    _archiveStartTime = DateTime::parseDateTime(_params.archive_start_time);
+    if (_archiveStartTime == DateTime::NEVER) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Bad archive_start_time: " << _params.archive_start_time << endl;
+      isOK = false;
+    }
+    _archiveEndTime = DateTime::parseDateTime(_params.archive_end_time);
+    if (_archiveEndTime == DateTime::NEVER) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Bad archive_end_time: " << _params.archive_end_time << endl;
+      isOK = false;
+    }
+    if (!isOK) {
+      return;
+    }
+  }
+
   // create the reader from FMQ
   
   IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
@@ -129,8 +150,29 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
   } else if (_params.debug >= Params::DEBUG_VERBOSE) {
     iwrfDebug = IWRF_DEBUG_NORM;
   } 
-  _pulseReader = new IwrfTsReaderFmq(_params.fmq_name, iwrfDebug);
-  _pulseReader->setNonBlocking(100);
+
+  if (_params.mode == Params::FMQ) {
+    _pulseReader = new IwrfTsReaderFmq(_params.fmq_name, iwrfDebug);
+    _pulseReader->setNonBlocking(100);
+  } else if (_params.mode == Params::FILELIST) {
+    _pulseReader = new IwrfTsReaderFile(_args.inputFileList, iwrfDebug);
+  } else if (_params.mode == Params::ARCHIVE) {
+    DsInputPath input(_progName,
+                      _params.debug >= Params::DEBUG_VERBOSE,
+                      _params.archive_data_dir,
+                      _archiveStartTime,
+                      _archiveEndTime);
+    vector<string> paths = input.getPathList();
+    if (paths.size() < 1) {
+      cerr << "ERROR: " << _progName << " - ARCHIVE mode" << endl;
+      cerr << "  No paths found, dir: " << _params.archive_data_dir << endl;
+      cerr << "  Start time: " << DateTime::strm(_archiveStartTime) << endl;
+      cerr << "  End time: " << DateTime::strm(_archiveEndTime) << endl;
+      isOK = false;
+      return;
+    }
+    _pulseReader = new IwrfTsReaderFile(paths, iwrfDebug);
+  }
   
   // init process mapper registration
   
