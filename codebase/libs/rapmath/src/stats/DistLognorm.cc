@@ -113,14 +113,14 @@ int DistLognorm::performFit()
   double sumx2 = 0.0;
   
   for (size_t ii = 0; ii < _nVals; ii++) {
-    double xx = log(_values[ii]);
+    double xx = log(_values[ii] - _lowerBound);
     sumx += xx;
     sumx2 += xx * xx;
   }
 
   _meanLn = sumx / nn;
   _varianceLn = (sumx2 - (sumx * sumx) / nn) / nn;
-  
+
   if (_varianceLn >= 0.0) {
     _sdevLn = sqrt(_varianceLn);
   } else {
