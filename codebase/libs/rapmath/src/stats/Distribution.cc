@@ -414,7 +414,7 @@ void Distribution::printHistogram(FILE *out)
       if (ii == ipdf) {
         fprintf(out, "*");
       } else {
-        fprintf(out, "#");
+        fprintf(out, ":");
       }
     }
     if (ipdf >= nStars) {
