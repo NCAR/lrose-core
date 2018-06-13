@@ -32,6 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
+#include <cassert>
 #include <cstdio>
 #include <iostream>
 #include <rapmath/Distribution.hh>
@@ -49,7 +50,7 @@ Distribution::Distribution()
 
   _debug = false;
   _verbose = false;
-  _initStats();
+  _clearStats();
 
 }
 
@@ -63,9 +64,9 @@ Distribution::~Distribution()
 }
 
 //////////////////////////////////////////////////////////////////
-// initialize the stats
+// clear the stats
 
-void Distribution::_initStats()
+void Distribution::_clearStats()
 
 {
 
@@ -79,9 +80,27 @@ void Distribution::_initStats()
   _skewness = NAN;
   _kurtosis = NAN;
 
-  _hist.clear();
+  _clearHist();
+
+  _pdfAvail = false;
+
+}
+
+//////////////////////////////////////////////////////////////////
+// clear histogram
+
+void Distribution::_clearHist()
+
+{
+
   _histMin = NAN;
+  _histMax = NAN;
   _histDelta = NAN;
+  _histCount.clear();
+  _histX.clear();
+  _histDensity.clear();
+  _histPdf.clear();
+  _histSize = 0;
 
 }
 
@@ -90,17 +109,22 @@ void Distribution::_initStats()
 
 void Distribution::addValue(double xx) 
 {
+
   _values.push_back(xx);
+  _nVals = _values.size();
+
   if (std::isnan(_min)) {
     _min = xx;
   } else if (!std::isnan(xx) && xx < _min) {
     _min = xx;
   }
+
   if (std::isnan(_max)) {
     _max = xx;
   } else if (!std::isnan(xx) && xx > _max) {
     _max = xx;
   }
+
 }
 
 //////////////////////////////////////////////////////////////////
@@ -108,14 +132,20 @@ void Distribution::addValue(double xx)
   
 void Distribution::setValues(const vector<double> &vals)
 {
+
   if (vals.size() < 1) {
-    _initStats();
+    _clearStats();
     _values.clear();
+    _nVals = _values.size();
     return;
   }
+
+  _values = vals;
+  _nVals = _values.size();
   _min = _values[0];
   _max = _values[0];
-  for (size_t ii = 1; ii < _values.size(); ii++) {
+
+  for (size_t ii = 1; ii < _nVals; ii++) {
     double xx = _values[ii];
     if (!std::isnan(xx) && xx < _min) {
       _min = xx;
@@ -124,6 +154,7 @@ void Distribution::setValues(const vector<double> &vals)
       _max = xx;
     }
   }
+
 }
 
 //////////////////////////////////////////////////////////////////
@@ -132,7 +163,8 @@ void Distribution::setValues(const vector<double> &vals)
 void Distribution::clearValues()
 {
   _values.clear();
-  _initStats();
+  _nVals = _values.size();
+  _clearStats();
 }
 
 ////////////////////////////////////////////////////
@@ -142,15 +174,15 @@ double Distribution::computeMean()
   
 {
 
-  if (_values.size() < 1) {
+  if (_nVals < 1) {
     _mean = NAN;
     return _mean;
   }
 
-  double nn = _values.size();
+  double nn = _nVals;
   double sumx = 0.0;
   
-  for (size_t ii = 0; ii < _values.size(); ii++) {
+  for (size_t ii = 0; ii < _nVals; ii++) {
     double xx = _values[ii];
     sumx += xx;
   }
@@ -169,16 +201,16 @@ double Distribution::computeSdev()
   
 {
 
-  if (_values.size() < 2) {
+  if (_nVals < 2) {
     _sdev = NAN;
     return _sdev;
   }
 
-  double nn = _values.size();
+  double nn = _nVals;
   double sumx = 0.0;
   double sumx2 = 0.0;
   
-  for (size_t ii = 0; ii < _values.size(); ii++) {
+  for (size_t ii = 0; ii < _nVals; ii++) {
     double xx = _values[ii];
     sumx += xx;
     sumx2 += xx * xx;
@@ -207,9 +239,9 @@ double Distribution::computeSkewness()
 
   computeSdev();
 
-  double nn = _values.size();
+  double nn = _nVals;
   double sum = 0.0;
-  for (size_t ii = 0; ii < _values.size(); ii++) {
+  for (size_t ii = 0; ii < _nVals; ii++) {
     double xx = _values[ii] - _mean;
     sum += pow(xx, 3.0);
   }
@@ -230,9 +262,9 @@ double Distribution::computeKurtosis()
 
   computeSdev();
 
-  double nn = _values.size();
+  double nn = _nVals;
   double sum = 0.0;
-  for (size_t ii = 0; ii < _values.size(); ii++) {
+  for (size_t ii = 0; ii < _nVals; ii++) {
     double xx = _values[ii] - _mean;
     sum += pow(xx, 4.0);
   }
@@ -253,10 +285,10 @@ void Distribution::computeBasicStats()
 
   computeSdev();
 
-  double nn = _values.size();
+  double nn = _nVals;
   double sumSkew = 0.0;
   double sumKurt = 0.0;
-  for (size_t ii = 0; ii < _values.size(); ii++) {
+  for (size_t ii = 0; ii < _nVals; ii++) {
     double xx = _values[ii] - _mean;
     sumSkew += pow(xx, 3.0);
     sumKurt += pow(xx, 4.0);
@@ -270,9 +302,10 @@ void Distribution::computeBasicStats()
 //////////////////////////////////////////////////////////////////
 // compute histogram
 // if n is not specified, the default is used
-// if histMin is not specified, the min in the data is used
+// if histMin is not specified, it is set to the min in the data
+//    plus half the delta
 // if histDelta is not specified, it is computed from data range
-// histMin is the value at lower edge of the first histogram bin
+// histMin is the value in the middle of the first histogram bin
 // histDelta is the delta between the center of adjacent bins
 
 void Distribution::computeHistogram(size_t n /* = 60 */,
@@ -281,34 +314,59 @@ void Distribution::computeHistogram(size_t n /* = 60 */,
 
 {
 
-  if (std::isnan(histMin)) {
-    _histMin = _min;
-  } else {
-    _histMin = histMin;
-  }
+  _clearHist();
+  _histSize = n;
+  
+  // compute delta if needed
 
   if (std::isnan(histDelta)) {
     // compute histDelta to ensure we include
     // both min and max values
     _histDelta = ((_max - _min) / (double) n) * 1.0001;
-    _histMin -= _histDelta * 0.0001;
   } else {
     _histDelta = histDelta;
   }
 
-  _hist.clear();
-  for (size_t jj = 0; jj < n; jj++) {
-    _hist.push_back(0.0);
+  // compute min as middle of lowest bin
+  
+  if (std::isnan(histMin)) {
+    _histMin = _min + _histDelta / 2.0;
+  } else {
+    _histMin = histMin + _histDelta / 2.0;
+  }
+
+  // compute max as middle of highest bin
+
+  _histMax = _histMin + (_histSize - 1) * _histDelta;
+
+  // set counts
+
+  for (size_t jj = 0; jj < _histSize; jj++) {
+    _histCount.push_back(0.0);
+    _histX.push_back(_histMin + jj * _histDelta);
   } // jj
   
-  for (size_t ii = 0; ii < _values.size(); ii++) {
+  for (size_t ii = 0; ii < _nVals; ii++) {
     double val = _values[ii];
-    int index = (int) ((val - _histMin) / _histDelta);
-    if (index >= 0 && index < (int) _hist.size()) {
-      _hist[index]++;
+    int index = (int) ((val - _histMin) / _histDelta + 0.5);
+    if (index >= 0 && index < (int) _histSize) {
+      _histCount[index]++;
     }
   } // ii
 
+  // compute density
+
+  for (size_t jj = 0; jj < _histSize; jj++) {
+    _histDensity.push_back((_histCount[jj] / (double) _nVals) / _histDelta);
+  } // jj
+
+  if (_pdfAvail) {
+    _histPdf.clear();
+    for (size_t jj = 0; jj < _histSize; jj++) {
+      _histPdf.push_back(getPdf(_histX[jj]));
+    } // jj
+  }
+  
   if (_verbose) {
     printHistogram(stderr);
   }
@@ -322,36 +380,47 @@ void Distribution::printHistogram(FILE *out)
 
 {
 
-  if (_hist.size() < 2) {
+  if (_histCount.size() < 2) {
     return;
   }
 
   fprintf(out, "======================= Histogram ===========================\n");
-  fprintf(out, "  histSize: %d\n", (int) _hist.size());
+  fprintf(out, "  histSize: %d\n", (int) _histCount.size());
   fprintf(out, "  histDelta: %g\n", _histDelta);
   fprintf(out, "  histMin: %g\n", _histMin);
-  fprintf(out, "  histMax: %g\n", _histMin + _hist.size() * _histDelta);
+  fprintf(out, "  histMax: %g\n", _histMax);
   fprintf(out, "\n");
-  fprintf(out, "%8s %8s %8s %8s\n", "bin", "min", "max", "count");
+  fprintf(out, "%4s %8s %8s %6s\n", "bin", "xx", "count", "pdf");
   
-  double maxCount = 0;
-  for (size_t jj = 0; jj < _hist.size(); jj++) {
-    if (_hist[jj] > maxCount) {
-      maxCount = _hist[jj];
+  double maxDensity = 0;
+  for (size_t jj = 0; jj < _histDensity.size(); jj++) {
+    if (_histDensity[jj] > maxDensity) {
+      maxDensity = _histDensity[jj];
     }
   } // jj
 
-  for (size_t jj = 0; jj < _hist.size(); jj++) {
+  for (size_t jj = 0; jj < _histCount.size(); jj++) {
 
-    double binMin = _histMin + jj * _histDelta;
-    double binMax = _histMin + (jj+1) * _histDelta;
-    int binCount = _hist[jj];
+    int count = _histCount[jj];
+    double xx = _histX[jj];
+    double pdf = getPdf(xx);
     
-    fprintf(out, "%8d %8.3f %8.3f %8d  ",
-            (int) jj, binMin, binMax, binCount);
+    fprintf(out, "%4d %8.3f %8d %6.3f ",
+            (int) jj, xx, count, pdf);
     
-    int nStars = (int) ((binCount / maxCount) * 40.0);
+    int ipdf = (int) ((_histPdf[jj] / maxDensity) * 60.0);
+    int nStars = (int) ((_histDensity[jj] / maxDensity) * 60.0);
     for (int ii = 0; ii < nStars; ii++) {
+      if (ii == ipdf) {
+        fprintf(out, "*");
+      } else {
+        fprintf(out, "#");
+      }
+    }
+    if (ipdf >= nStars) {
+      for (int ii = nStars; ii < ipdf; ii++) {
+        fprintf(out, " ");
+      }
       fprintf(out, "*");
     }
     fprintf(out, "\n");
@@ -359,5 +428,75 @@ void Distribution::printHistogram(FILE *out)
   }
   fprintf(out, "===============================================================\n");
   
+}
+
+//////////////////////////////////////////////////////////////////
+// compute ChiSq goodness of fit test
+// kk is number of intervals used in test
+// assumes histogram and fit have been computed
+
+void Distribution::computeChiSq(size_t nIntervals)
+  
+{
+  
+  if (_histSize < 1) {
+    cerr << "ERROR - Distribution::computeChiSq()" << endl;
+    cerr << "  Histogram has not been computed" << endl;
+    return;
+  }
+
+  if (_histPdf.size() != _histSize) {
+    cerr << "ERROR - Distribution::computeChiSq()" << endl;
+    cerr << "  PDF fit has not been performed" << endl;
+    return;
+  }
+
+  double nn = _nVals;
+  double intervalProb = 1.0 / (double) nIntervals;
+  
+  if (_debug) {
+    cerr << "====>> DistNormal::computeChiSq <<====" << endl;
+    cerr << "  nIntervals: " << nIntervals << endl;
+  }
+
+  // size_t startIndex = 0;
+  // size_t endIndex = 0;
+  double sumHistProb = 0.0;
+  double sumChisq = 0.0;
+  double nChisq = 0.0;
+  double sumPdfProb = 0.0;
+  for (size_t jj = 0; jj < _histCount.size(); jj++) {
+    sumHistProb += _histCount[jj] / nn;
+    double xx = _histMin + jj * _histDelta;
+    double pdfProb = getPdf(xx) * _histDelta;
+    sumPdfProb += pdfProb;
+    if ((sumHistProb > intervalProb) || (jj == _histCount.size() - 1)) {
+      // endIndex = jj;
+      double error = sumHistProb - sumPdfProb;
+      double chiFac = (error * error) / sumPdfProb;
+      sumChisq += chiFac;
+      nChisq++;
+      // if (_verbose) {
+      //   cerr << "============================================" << endl;
+      //   cerr << "-------->> jj: " << jj << endl;
+      //   cerr << "-------->> startIndex: " << startIndex<< endl;
+      //   cerr << "-------->> endIndex: " << endIndex << endl;
+      //   cerr << "-------->> sumHistProb: " << sumHistProb << endl;
+      //   cerr << "-------->> sumPdfProb: " << sumPdfProb << endl;
+      //   cerr << "-------->> error: " << error << endl;
+      //   cerr << "-------->> chiFac: " << chiFac << endl;
+      // }
+      // startIndex = endIndex + 1;
+      sumHistProb = 0.0;
+      sumPdfProb = 0.0;
+    }
+  } // jj
+
+  _chiSq = sumChisq;
+
+  if (_debug) {
+    cerr << "  chiSq: " << _chiSq << endl;
+  }
+
 }
 

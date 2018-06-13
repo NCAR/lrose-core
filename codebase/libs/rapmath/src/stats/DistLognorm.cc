@@ -78,11 +78,11 @@ void DistLognorm::setLowerBound(double val)
 //////////////////////////////////////////////////////////////////
 // initialize the stats
 
-void DistLognorm::_initStats()
+void DistLognorm::_clearStats()
 
 {
 
-  Distribution::_initStats();
+  Distribution::_clearStats();
 
   _meanLn = NAN;
   _sdevLn = NAN;
@@ -98,7 +98,9 @@ int DistLognorm::performFit()
   
 {
 
-  if (_values.size() < 2) {
+  _histPdf.clear();
+
+  if (_nVals < 2) {
     _meanLn = NAN;
     _sdevLn = NAN;
     _varianceLn = NAN;
@@ -106,11 +108,11 @@ int DistLognorm::performFit()
     return -1;
   }
 
-  double nn = _values.size();
+  double nn = _nVals;
   double sumx = 0.0;
   double sumx2 = 0.0;
   
-  for (size_t ii = 0; ii < _values.size(); ii++) {
+  for (size_t ii = 0; ii < _nVals; ii++) {
     double xx = log(_values[ii]);
     sumx += xx;
     sumx2 += xx * xx;
@@ -127,6 +129,13 @@ int DistLognorm::performFit()
 
   _mode = exp(_meanLn - _sdevLn * _sdevLn);
   _median = exp(_meanLn);
+
+  for (size_t jj = 0; jj < _histSize; jj++) {
+    double xx = _histMin + jj * _histDelta;
+    _histPdf.push_back(getPdf(xx));
+  }
+
+  _pdfAvail = true;
 
   return 0;
 
@@ -159,69 +168,5 @@ double DistLognorm::getCdf(double xx)
   double bb = erf(aa / sqrt2);
   double cdf = (1.0 + bb) * 0.5;
   return cdf;
-}
-
-//////////////////////////////////////////////////////////////////
-// compute ChiSq goodness of fit test
-// kk is number of intervals used in test
-
-void DistLognorm::computeChiSq(size_t nIntervals)
-  
-{
-  
-  if (std::isnan(_mean) || std::isnan(_sdev)) {
-    performFit();
-  }
-  
-  if (_hist.size() < 1) {
-    computeHistogram();
-  }
-  double nValues = _values.size();
-  double intervalProb = 1.0 / (double) nIntervals;
-  
-  if (_debug) {
-    cerr << "====>> DistLognorm::computeChiSq <<====" << endl;
-    cerr << "  nIntervals: " << nIntervals << endl;
-  }
-
-  size_t startIndex = 0;
-  size_t endIndex = 0;
-  double sumHistProb = 0.0;
-  double sumChisq = 0.0;
-  double nChisq = 0.0;
-  double sumPdfProb = 0.0;
-  for (size_t jj = 0; jj < _hist.size(); jj++) {
-    sumHistProb += _hist[jj] / nValues;
-    double xx = _histMin + (jj + 0.5) * _histDelta;
-    double pdfProb = getPdf(xx) * _histDelta;
-    sumPdfProb += pdfProb;
-    if ((sumHistProb > intervalProb) || (jj == _hist.size() - 1)) {
-      endIndex = jj;
-      double error = sumHistProb - sumPdfProb;
-      double chiFac = (error * error) / sumPdfProb;
-      sumChisq += chiFac;
-      nChisq++;
-      if (_verbose) {
-        cerr << "============================================" << endl;
-        cerr << "-------->> jj: " << jj << endl;
-        cerr << "-------->> startIndex: " << startIndex<< endl;
-        cerr << "-------->> endIndex: " << endIndex << endl;
-        cerr << "-------->> sumHistProb: " << sumHistProb << endl;
-        cerr << "-------->> sumPdfProb: " << sumPdfProb << endl;
-        cerr << "-------->> error: " << error << endl;
-        cerr << "-------->> chiFac: " << chiFac << endl;
-      }
-      startIndex = endIndex + 1;
-      sumHistProb = 0.0;
-      sumPdfProb = 0.0;
-    }
-  } // jj
-
-  _chiSq = sumChisq;
-
-  if (_debug) {
-    cerr << "  chiSq: " << _chiSq << endl;
-  }
-
 }
 

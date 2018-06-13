@@ -107,7 +107,7 @@ public:
   // if n is not specified, the default is used
   // if histMin is not specified, the min in the data is used
   // if histDelta is not specified, it is computed from data range
-  // histMin is the value at lower edge of the first histogram bin
+  // histMin is the value in the middle of of the first histogram bin
   // histDelta is the delta between the center of adjacent bins
   
   void computeHistogram(size_t n = 60,
@@ -134,7 +134,7 @@ public:
   // compute ChiSq goodness of fit test
   // kk is number of intervals used in test
   
-  virtual void computeChiSq(size_t kk) = 0;
+  void computeChiSq(size_t kk);
 
   // get methods
 
@@ -162,7 +162,8 @@ protected:
   bool _verbose;
 
   vector<double> _values;
-
+  size_t _nVals;
+  
   double _min;
   double _max;
   double _mean;
@@ -173,13 +174,21 @@ protected:
   double _skewness;
   double _kurtosis;
 
-  vector<double> _hist;
   double _histMin;
+  double _histMax;
   double _histDelta;
+  size_t _histSize;
+  vector<double> _histX;
+  vector<double> _histCount;
+  vector<double> _histDensity;
+  vector<double> _histPdf;
+
+  bool _pdfAvail;
 
   double _chiSq;
 
-  virtual void _initStats();
+  virtual void _clearStats();
+  virtual void _clearHist();
 
 private:
   

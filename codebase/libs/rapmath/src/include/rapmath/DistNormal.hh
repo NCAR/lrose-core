@@ -66,11 +66,6 @@ public:
   
   virtual double getCdf(double xx);
 
-  // compute ChiSq goodness of fit test
-  // kk is number of intervals used in test
-  
-  virtual void computeChiSq(size_t kk);
-
 protected:
   
 private:

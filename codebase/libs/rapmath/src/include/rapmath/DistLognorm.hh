@@ -72,11 +72,6 @@ public:
   
   virtual double getCdf(double xx);
   
-  // compute ChiSq goodness of fit test
-  // kk is number of intervals used in test
-  
-  virtual void computeChiSq(size_t kk);
-
   // get log moments and lower bound
 
   double getMeanLn() const { return _meanLn; }
@@ -94,7 +89,7 @@ private:
   double _varianceLn; // variance of natural logs
   double _lowerBound; // optional 3rd parameters
   
-  virtual void _initStats();
+  virtual void _clearStats();
 
 };
 
