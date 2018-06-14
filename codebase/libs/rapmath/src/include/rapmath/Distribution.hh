@@ -121,6 +121,11 @@ public:
   
   virtual int performFit() = 0;
 
+  // compute the histogram-based CDF
+  // assumes the histogram and fit have been computed
+  
+  void computeHistCdf();
+
   // get the pdf for a given x
   // must be overridden in derived class
 
@@ -146,6 +151,17 @@ public:
   double getSkewness() const { return _skewness; }
   double getKurtosis() const { return _kurtosis; }
   const vector<double> &getValues() const { return _values; }
+
+  size_t getHistSize() const { return _histSize; }
+  double getHistMin() const { return _histMin; }
+  double getHistMax() const { return _histMax; }
+  double getHistDelta() const { return _histDelta; }
+
+  const vector<double> &getHistX() const { return _histX; }
+  const vector<double> &getHistCount() const { return _histCount; }
+  const vector<double> &getHistDensity() const { return _histDensity; }
+  const vector<double> &getHistPdf() const { return _histPdf; }
+  const vector<double> &getHistCdf() const { return _histCdf; }
 
   double getChisq() const { return _chiSq; }
 
@@ -182,6 +198,7 @@ protected:
   vector<double> _histCount;
   vector<double> _histDensity;
   vector<double> _histPdf;
+  vector<double> _histCdf;
 
   bool _pdfAvail;
 

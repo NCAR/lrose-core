@@ -61,6 +61,10 @@ int DistNormal::performFit()
   
 {
 
+  if (_histSize == 0) {
+    computeHistogram();
+  }
+
   _histPdf.clear();
 
   computeSdev();
@@ -78,6 +82,8 @@ int DistNormal::performFit()
   }
 
   _pdfAvail = true;
+
+  computeHistCdf();
 
   return 0;
 

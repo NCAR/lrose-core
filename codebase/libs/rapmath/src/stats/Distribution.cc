@@ -96,11 +96,13 @@ void Distribution::_clearHist()
   _histMin = NAN;
   _histMax = NAN;
   _histDelta = NAN;
+
+  _histSize = 0;
   _histCount.clear();
   _histX.clear();
   _histDensity.clear();
   _histPdf.clear();
-  _histSize = 0;
+  _histCdf.clear();
 
 }
 
@@ -361,16 +363,12 @@ void Distribution::computeHistogram(size_t n /* = 60 */,
   } // jj
 
   if (_pdfAvail) {
-    _histPdf.clear();
     for (size_t jj = 0; jj < _histSize; jj++) {
       _histPdf.push_back(getPdf(_histX[jj]));
     } // jj
+    computeHistCdf();
   }
   
-  if (_verbose) {
-    printHistogram(stderr);
-  }
-
 }
 
 //////////////////////////////////////////////////////////////////
@@ -390,7 +388,7 @@ void Distribution::printHistogram(FILE *out)
   fprintf(out, "  histMin: %g\n", _histMin);
   fprintf(out, "  histMax: %g\n", _histMax);
   fprintf(out, "\n");
-  fprintf(out, "%4s %8s %8s %6s\n", "bin", "xx", "count", "pdf");
+  fprintf(out, "%4s %8s %8s %6s %6s \n", "bin", "xx", "count", "pdf", "cdf");
   
   double maxDensity = 0;
   for (size_t jj = 0; jj < _histDensity.size(); jj++) {
@@ -399,16 +397,20 @@ void Distribution::printHistogram(FILE *out)
     }
   } // jj
 
-  for (size_t jj = 0; jj < _histCount.size(); jj++) {
+  for (size_t jj = 0; jj < _histSize; jj++) {
 
     int count = _histCount[jj];
     double xx = _histX[jj];
     double pdf = getPdf(xx);
+    double cdf = -9999;
+    if (_histCdf.size() == _histSize) {
+      cdf = _histCdf[jj];
+    }
     
-    fprintf(out, "%4d %8.3f %8d %6.3f ",
-            (int) jj, xx, count, pdf);
+    fprintf(out, "%4d %8.3f %8d %6.3f %6.3f ",
+            (int) jj, xx, count, pdf, cdf);
     
-    int ipdf = (int) ((_histPdf[jj] / maxDensity) * 60.0);
+    int ipdf = (int) ((pdf / maxDensity) * 60.0);
     int nStars = (int) ((_histDensity[jj] / maxDensity) * 60.0);
     for (int ii = 0; ii < nStars; ii++) {
       if (ii == ipdf) {
@@ -428,6 +430,29 @@ void Distribution::printHistogram(FILE *out)
   }
   fprintf(out, "===============================================================\n");
   
+}
+
+//////////////////////////////////////////////////////////////////
+// compute the histogram-based CDF
+// assumes the histogram and fit have been computed
+
+void Distribution::computeHistCdf()
+
+{
+
+  _histCdf.clear();
+  double sum = 0.0;
+  for (size_t jj = 0; jj < _histSize; jj++) {
+    double prob = _histPdf[jj] * _histDelta;
+    sum += prob;
+    _histCdf.push_back(sum);
+  }
+
+  double correction = 1.0 / sum;
+  for (size_t jj = 0; jj < _histSize; jj++) {
+    _histCdf[jj] *= correction;
+  }
+
 }
 
 //////////////////////////////////////////////////////////////////
@@ -459,8 +484,6 @@ void Distribution::computeChiSq(size_t nIntervals)
     cerr << "  nIntervals: " << nIntervals << endl;
   }
 
-  // size_t startIndex = 0;
-  // size_t endIndex = 0;
   double sumHistProb = 0.0;
   double sumChisq = 0.0;
   double nChisq = 0.0;
@@ -471,22 +494,10 @@ void Distribution::computeChiSq(size_t nIntervals)
     double pdfProb = getPdf(xx) * _histDelta;
     sumPdfProb += pdfProb;
     if ((sumHistProb > intervalProb) || (jj == _histCount.size() - 1)) {
-      // endIndex = jj;
       double error = sumHistProb - sumPdfProb;
       double chiFac = (error * error) / sumPdfProb;
       sumChisq += chiFac;
       nChisq++;
-      // if (_verbose) {
-      //   cerr << "============================================" << endl;
-      //   cerr << "-------->> jj: " << jj << endl;
-      //   cerr << "-------->> startIndex: " << startIndex<< endl;
-      //   cerr << "-------->> endIndex: " << endIndex << endl;
-      //   cerr << "-------->> sumHistProb: " << sumHistProb << endl;
-      //   cerr << "-------->> sumPdfProb: " << sumPdfProb << endl;
-      //   cerr << "-------->> error: " << error << endl;
-      //   cerr << "-------->> chiFac: " << chiFac << endl;
-      // }
-      // startIndex = endIndex + 1;
       sumHistProb = 0.0;
       sumPdfProb = 0.0;
     }

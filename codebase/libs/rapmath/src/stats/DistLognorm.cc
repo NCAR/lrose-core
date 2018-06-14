@@ -98,6 +98,10 @@ int DistLognorm::performFit()
   
 {
 
+  if (_histSize == 0) {
+    computeHistogram();
+  }
+
   _histPdf.clear();
 
   if (_nVals < 2) {
@@ -136,6 +140,8 @@ int DistLognorm::performFit()
   }
 
   _pdfAvail = true;
+
+  computeHistCdf();
 
   return 0;
 
