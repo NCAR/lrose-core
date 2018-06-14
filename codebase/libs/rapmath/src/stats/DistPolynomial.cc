@@ -95,7 +95,6 @@ int DistPolynomial::performFit()
   if (_histSize == 0) {
     computeHistogram();
   }
-  _histPdf.clear();
 
   // perform polynomial fit
   
@@ -107,6 +106,7 @@ int DistPolynomial::performFit()
 
   // load PDF vector
 
+  _histPdf.clear();
   _matrixVectorMult(_vv, _pp, _histSize, _nPoly1, _yyEst);
   for (size_t jj = 0; jj < _histSize; jj++) {
     _histPdf.push_back(_yyEst[jj]);
