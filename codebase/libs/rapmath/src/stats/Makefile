@@ -38,6 +38,7 @@ SRCS = \
 CPPC_SRCS = \
 	DistLognorm.cc \
 	DistNormal.cc \
+	DistPolynomial.cc \
 	Distribution.cc
 
 #
