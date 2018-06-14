@@ -38,7 +38,7 @@
 #include <iostream>
 using namespace std;
 
-#define DEBUG_PRINT
+// #define DEBUG_PRINT
 
 ////////////////////////////////////////////////////
 // constructor
@@ -93,12 +93,15 @@ int DistPolynomial::performFit()
   computeBasicStats();
   
   if (_histSize == 0) {
-    computeHistogram();
+    computeHistogramSpecifyWidth(60, 3);
   }
 
   // perform polynomial fit
   
   _doPolyFit();
+
+  // save the coefficients
+
   _coeffs.clear();
   for (size_t ii = 0; ii < _nPoly1; ii++) {
     _coeffs.push_back(_pp[ii]);
@@ -107,7 +110,6 @@ int DistPolynomial::performFit()
   // load PDF vector
 
   _histPdf.clear();
-  _matrixVectorMult(_vv, _pp, _histSize, _nPoly1, _yyEst);
   for (size_t jj = 0; jj < _histSize; jj++) {
     _histPdf.push_back(_yyEst[jj]);
   }
@@ -128,9 +130,13 @@ double DistPolynomial::getPdf(double xx)
   
 {
   double pdf = 0.0;
-  for (size_t ii = 0; ii < _nPoly1; ii++) {
+  for (size_t ii = 0; ii < _coeffs.size(); ii++) {
     int jj = _nPoly1 - ii - 1;
-    pdf += _coeffs[jj] * pow(xx, (double) jj);
+    double term = _coeffs[jj] * pow(xx, (double) jj);
+    pdf += term;
+  }
+  if (pdf < 0) {
+    pdf = 0.0;
   }
   return pdf;
 }
@@ -143,9 +149,13 @@ double DistPolynomial::getCdf(double xx)
   
 {
   double cdf = 0.0;
-  for (size_t ii = 0; ii < _nPoly1; ii++) {
+  for (size_t ii = 0; ii < _coeffs.size(); ii++) {
     int jj = _nPoly1 - ii - 1;
-    cdf += (_coeffs[jj] * pow(xx, jj + 1.0)) / (jj + 1.0);
+    double term = (_coeffs[jj] * pow(xx, jj + 1.0)) / (jj + 1.0);
+    cdf += term;
+  }
+  if (cdf < 0) {
+    cdf = 0.0;
   }
   return cdf;
 }
@@ -447,7 +457,6 @@ void DistPolynomial::_computeCc()
   _matrixMult(_multa, _uuT, _nPoly1, _nPoly1, _nPoly1, _multb);
   _matrixMult(_multb, _vvT, _nPoly1, _nPoly1, _histSize, _cc);
 
-  // #define DEBUG_PRINT
 #ifdef DEBUG_PRINT
   _matrixPrint("_vvB", _vvB, _nPoly1, _nPoly1, stderr);
   _matrixPrint("_uu", _uu, _nPoly1, _nPoly1, stderr);

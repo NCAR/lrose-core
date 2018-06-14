@@ -114,6 +114,16 @@ public:
                         double histMin = NAN,
                         double histDelta = NAN);
   
+  // compute histogram specifying the width of the data in
+  // number of standard deviations
+  // 
+  // nBins is the number of bins
+  // the range of x is limited to nsdev (the number of standard
+  // deviations) on each side of the mean.
+  
+  void computeHistogramSpecifyWidth(size_t nBins,
+                                    double nSdev);
+  
   // perform a fit - abstract base class
   // must be overridden in derived class
   // values must have been set

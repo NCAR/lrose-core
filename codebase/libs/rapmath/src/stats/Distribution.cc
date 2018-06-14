@@ -303,28 +303,35 @@ void Distribution::computeBasicStats()
 
 //////////////////////////////////////////////////////////////////
 // compute histogram
-// if n is not specified, the default is used
+// if nBins is not specified, the default of 60 is used
+// if histDelta is not specified, it is computed from data range
 // if histMin is not specified, it is set to the min in the data
 //    plus half the delta
-// if histDelta is not specified, it is computed from data range
 // histMin is the value in the middle of the first histogram bin
 // histDelta is the delta between the center of adjacent bins
 
-void Distribution::computeHistogram(size_t n /* = 60 */,
+void Distribution::computeHistogram(size_t nBins /* = 60 */,
                                     double histMin /* = NAN */,
                                     double histDelta /* = NAN */)
 
 {
 
+  if (_pdfAvail) {
+    for (size_t jj = 0; jj < _histSize; jj++) {
+      _histPdf.push_back(getPdf(_histX[jj]));
+    } // jj
+    computeHistCdf();
+  }
+
   _clearHist();
-  _histSize = n;
+  _histSize = nBins;
   
   // compute delta if needed
 
   if (std::isnan(histDelta)) {
     // compute histDelta to ensure we include
     // both min and max values
-    _histDelta = ((_max - _min) / (double) n) * 1.0001;
+    _histDelta = ((_max - _min) / (double) nBins) * 1.0001;
   } else {
     _histDelta = histDelta;
   }
@@ -348,6 +355,13 @@ void Distribution::computeHistogram(size_t n /* = 60 */,
     _histX.push_back(_histMin + jj * _histDelta);
   } // jj
   
+  if (_pdfAvail) {
+    for (size_t jj = 0; jj < _histSize; jj++) {
+      _histPdf.push_back(getPdf(_histX[jj]));
+    } // jj
+    computeHistCdf();
+  }
+
   for (size_t ii = 0; ii < _nVals; ii++) {
     double val = _values[ii];
     int index = (int) ((val - _histMin) / _histDelta + 0.5);
@@ -361,7 +375,7 @@ void Distribution::computeHistogram(size_t n /* = 60 */,
   for (size_t jj = 0; jj < _histSize; jj++) {
     _histDensity.push_back((_histCount[jj] / (double) _nVals) / _histDelta);
   } // jj
-
+  
   if (_pdfAvail) {
     for (size_t jj = 0; jj < _histSize; jj++) {
       _histPdf.push_back(getPdf(_histX[jj]));
@@ -370,6 +384,30 @@ void Distribution::computeHistogram(size_t n /* = 60 */,
   }
   
 }
+
+//////////////////////////////////////////////////////////////////
+// compute histogram specifying the width of the data in
+// number of standard deviations
+// 
+// n is the number of bins
+// the range of x is limited to nsdev (the number of standard
+// deviations) on each side of the mean.
+
+void Distribution::computeHistogramSpecifyWidth(size_t nBins,
+                                                double nSdev)
+  
+{
+  
+  // compute mean and standard deviation
+
+  computeSdev();
+  
+  // set histogram limits
+  
+  computeHistogram(nBins, _mean - nSdev * _sdev, (2 * nSdev * _sdev) / nBins);
+
+}
+
 
 //////////////////////////////////////////////////////////////////
 // print histogram as text
