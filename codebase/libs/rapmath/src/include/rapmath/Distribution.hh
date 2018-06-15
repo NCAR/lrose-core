@@ -146,10 +146,10 @@ public:
 
   virtual double getCdf(double xx) = 0;
 
-  // compute ChiSq goodness of fit test
+  // compute goodness of fit test
   // kk is number of intervals used in test
   
-  void computeChiSq(size_t kk);
+  void computeGof(size_t kk);
 
   // get methods
 
@@ -173,7 +173,7 @@ public:
   const vector<double> &getHistPdf() const { return _histPdf; }
   const vector<double> &getHistCdf() const { return _histCdf; }
 
-  double getChisq() const { return _chiSq; }
+  double getGof() const { return _gof; }
 
   // print histogram as text
   
@@ -212,7 +212,7 @@ protected:
 
   bool _pdfAvail;
 
-  double _chiSq;
+  double _gof;
 
   virtual void _clearStats();
   virtual void _clearHist();

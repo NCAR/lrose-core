@@ -316,13 +316,6 @@ void Distribution::computeHistogram(size_t nBins /* = 60 */,
 
 {
 
-  if (_pdfAvail) {
-    for (size_t jj = 0; jj < _histSize; jj++) {
-      _histPdf.push_back(getPdf(_histX[jj]));
-    } // jj
-    computeHistCdf();
-  }
-
   _clearHist();
   _histSize = nBins;
   
@@ -355,13 +348,6 @@ void Distribution::computeHistogram(size_t nBins /* = 60 */,
     _histX.push_back(_histMin + jj * _histDelta);
   } // jj
   
-  if (_pdfAvail) {
-    for (size_t jj = 0; jj < _histSize; jj++) {
-      _histPdf.push_back(getPdf(_histX[jj]));
-    } // jj
-    computeHistCdf();
-  }
-
   for (size_t ii = 0; ii < _nVals; ii++) {
     double val = _values[ii];
     int index = (int) ((val - _histMin) / _histDelta + 0.5);
@@ -494,22 +480,22 @@ void Distribution::computeHistCdf()
 }
 
 //////////////////////////////////////////////////////////////////
-// compute ChiSq goodness of fit test
+// compute goodness of fit test
 // kk is number of intervals used in test
 // assumes histogram and fit have been computed
 
-void Distribution::computeChiSq(size_t nIntervals)
+void Distribution::computeGof(size_t nIntervals)
   
 {
   
   if (_histSize < 1) {
-    cerr << "ERROR - Distribution::computeChiSq()" << endl;
+    cerr << "ERROR - Distribution::computeGof()" << endl;
     cerr << "  Histogram has not been computed" << endl;
     return;
   }
 
   if (_histPdf.size() != _histSize) {
-    cerr << "ERROR - Distribution::computeChiSq()" << endl;
+    cerr << "ERROR - Distribution::computeGof()" << endl;
     cerr << "  PDF fit has not been performed" << endl;
     return;
   }
@@ -518,13 +504,13 @@ void Distribution::computeChiSq(size_t nIntervals)
   double intervalProb = 1.0 / (double) nIntervals;
   
   if (_debug) {
-    cerr << "====>> DistNormal::computeChiSq <<====" << endl;
+    cerr << "====>> DistNormal::computeGof <<====" << endl;
     cerr << "  nIntervals: " << nIntervals << endl;
   }
 
   double sumHistProb = 0.0;
-  double sumChisq = 0.0;
-  double nChisq = 0.0;
+  double sumGof = 0.0;
+  double nGof = 0.0;
   double sumPdfProb = 0.0;
   for (size_t jj = 0; jj < _histCount.size(); jj++) {
     sumHistProb += _histCount[jj] / nn;
@@ -533,18 +519,18 @@ void Distribution::computeChiSq(size_t nIntervals)
     sumPdfProb += pdfProb;
     if ((sumHistProb > intervalProb) || (jj == _histCount.size() - 1)) {
       double error = sumHistProb - sumPdfProb;
-      double chiFac = (error * error) / sumPdfProb;
-      sumChisq += chiFac;
-      nChisq++;
+      double gofFac = (error * error) / sumPdfProb;
+      sumGof += gofFac;
+      nGof++;
       sumHistProb = 0.0;
       sumPdfProb = 0.0;
     }
   } // jj
 
-  _chiSq = sumChisq;
+  _gof = sumGof;
 
   if (_debug) {
-    cerr << "  chiSq: " << _chiSq << endl;
+    cerr << "==> goodness of fit: " << _gof << endl;
   }
 
 }

@@ -107,13 +107,81 @@ int DistPolynomial::performFit()
     _coeffs.push_back(_pp[ii]);
   }
 
+  for (size_t jj = 0; jj < _histSize; jj++) {
+    _histPdf.push_back(_yyEst[jj]);
+  }
+
+  // find the peak
+
+  double maxYY = -1.0e99;
+  int index4Max = 0;
+  for (size_t jj = 0; jj < _histSize; jj++) {
+    double yy = _yyEst[jj];
+    if (yy > maxYY) {
+      maxYY = yy;
+      index4Max = jj;
+    }
+  }
+  
+  // find the lower bound where the pdf stops decreasing
+  // set yy to 0 below that point
+
+  _minValidIndex = index4Max;
+  for (int jj = index4Max - 1; jj >= 0; jj--) {
+    double yy = _yyEst[jj];
+    if (yy < 0) {
+      _yyEst[jj] = 0.0;
+      _minValidIndex = jj;
+      break;
+    }
+    _minValidIndex = jj;
+  }
+  _minValidX = _histX[_minValidIndex];
+  for (int jj = _minValidIndex - 1; jj >= 0; jj--) {
+    _yyEst[jj] = 0.0;
+  }
+
+  // find the upper bound where the pdf stops decreasing
+  // set yy to 0 above that point
+
+  _maxValidIndex = index4Max;
+  for (int jj = index4Max + 1; jj < (int) _histSize; jj++) {
+    double yy = _yyEst[jj];
+    if (yy < 0) {
+      _yyEst[jj] = 0.0;
+      _maxValidIndex = jj;
+      break;
+    }
+    _maxValidIndex = jj;
+  }
+  _maxValidX = _histX[_maxValidIndex];
+  for (size_t jj = _maxValidIndex + 1; jj < _histSize; jj++) {
+    _yyEst[jj] = 0.0;
+  }
+
+  // sum the PDF, compute the correction to force CDF to 1.0
+
+  double sumPdf = 0.0;
+  for (size_t jj = _minValidIndex; jj <= _maxValidIndex; jj++) {
+    sumPdf += (_yyEst[jj] * _histDelta);
+  }
+  double correction = 1.0 / sumPdf;
+
+  // correct the coefficients and YY estimates
+
+  for (size_t ii = 0; ii < _coeffs.size(); ii++) {
+    _coeffs[ii] *= correction;
+  }
+  for (size_t jj = 0; jj < _histSize; jj++) {
+    _yyEst[jj] *= correction;
+  }
+
   // load PDF vector
 
   _histPdf.clear();
   for (size_t jj = 0; jj < _histSize; jj++) {
     _histPdf.push_back(_yyEst[jj]);
   }
-
   _pdfAvail = true;
 
   computeHistCdf();
@@ -129,6 +197,11 @@ int DistPolynomial::performFit()
 double DistPolynomial::getPdf(double xx)
   
 {
+
+  if (xx < _minValidX || xx > _maxValidX) {
+    return 0.0;
+  }
+
   double pdf = 0.0;
   for (size_t ii = 0; ii < _coeffs.size(); ii++) {
     int jj = _nPoly1 - ii - 1;

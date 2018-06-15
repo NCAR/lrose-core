@@ -85,6 +85,12 @@ private:
   size_t _nPoly1;   // polynomial order plus 1
 
   vector<double> _coeffs; // coefficients
+
+  size_t _minValidIndex; // below this the PDF is not valid
+  size_t _maxValidIndex; // above this the PDF is not valid
+
+  double _minValidX; // if x is less than this is it set to 0
+  double _maxValidX; // if x is greater than this it is set to 0
   
   double *_xx;    // x vector - observed
   double *_yyEst; // regression estimate of y
