@@ -413,6 +413,16 @@ public:
 
   int zdr_dist_poly_order;
 
+  int min_npts_for_valid_stats;
+
+  tdrp_bool_t read_site_temp_from_spdb;
+
+  char* site_temp_spdb_url;
+
+  char* site_temp_station_name;
+
+  int site_temp_search_margin_secs;
+
   char* output_dir;
 
   tdrp_bool_t write_results_to_spdb;
@@ -426,7 +436,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[30];
+  mutable TDRPtable _table[36];
 
   const char *_className;
 

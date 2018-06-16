@@ -1029,11 +1029,80 @@
     tt->single_val.i = 11;
     tt++;
     
+    // Parameter 'min_npts_for_valid_stats'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_npts_for_valid_stats");
+    tt->descr = tdrpStrDup("Min number of zdr points for valid statistics.");
+    tt->help = tdrpStrDup("With too few points we cannot draw reliable conclusions about the ZDR statistics.");
+    tt->val_offset = (char *) &min_npts_for_valid_stats - &_start_;
+    tt->single_val.i = 1000;
+    tt++;
+    
     // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("RETRIEVING SITE TEMPERATURE FROM SPDB");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'read_site_temp_from_spdb'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("read_site_temp_from_spdb");
+    tt->descr = tdrpStrDup("Option to read site temperature from SPDB.");
+    tt->help = tdrpStrDup("The temperature closest to the radar volume time will be read in.");
+    tt->val_offset = (char *) &read_site_temp_from_spdb - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'site_temp_spdb_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("site_temp_spdb_url");
+    tt->descr = tdrpStrDup("URL for temperatures from SPDB.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &site_temp_spdb_url - &_start_;
+    tt->single_val.s = tdrpStrDup("spdbp:://hail:0:pecan/spdb/spol/temp");
+    tt++;
+    
+    // Parameter 'site_temp_station_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("site_temp_station_name");
+    tt->descr = tdrpStrDup("Station name for site temperature.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &site_temp_station_name - &_start_;
+    tt->single_val.s = tdrpStrDup("SPOL");
+    tt++;
+    
+    // Parameter 'site_temp_search_margin_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("site_temp_search_margin_secs");
+    tt->descr = tdrpStrDup("Search margin when finding site temp data (secs).");
+    tt->help = tdrpStrDup("We search for the temperature closest in time to the radar volume. This is the search margin on either side of the volume time.");
+    tt->val_offset = (char *) &site_temp_search_margin_secs - &_start_;
+    tt->single_val.i = 3600;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("WRITE RESULTS OUT TO TEXT FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1050,11 +1119,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/PidZdrStats");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("WRITING RESULTS TO SPDB");
     tt->comment_text = tdrpStrDup("");
     tt++;

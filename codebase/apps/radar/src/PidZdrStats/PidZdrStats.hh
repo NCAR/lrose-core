@@ -119,6 +119,11 @@ private:
   vector< vector<gate_data_t> >_gateData;
   vector<DistPolynomial> _dists;
 
+  // site temp
+
+  double _siteTempC;
+  time_t _timeForSiteTemp;
+
   // output files
 
   bool _outFilesOpen;
@@ -142,7 +147,14 @@ private:
   void _clearGateData();
 
   void _computeStats();
-  void _writeStatsToSpdb();
+  void _writeStatsToSpdb(const string &filePath);
+  string _getStatsXml(const string &filePath,
+                      string pidLabel,
+                      int pid,
+                      DistPolynomial &poly);
+
+  int _retrieveSiteTempFromSpdb(double &tempC,
+                                time_t &timeForTemp);
 
 };
 

@@ -49,6 +49,7 @@
 #include <rapmath/RapComplex.hh>
 #include <physics/IcaoStdAtmos.hh>
 #include <physics/thermo.h>
+#include <rapformats/WxObs.hh>
 #include <Spdb/SoundingPut.hh>
 #include <algorithm>
 using namespace std;
@@ -285,9 +286,22 @@ int PidZdrStats::_processFile(const string &filePath)
 
   _computeStats();
 
+  // option to get site temperature
+  
+  if (_params.read_site_temp_from_spdb) {
+    if (_retrieveSiteTempFromSpdb(_siteTempC,
+                                  _timeForSiteTemp) == 0) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "==>> site tempC: " 
+             << _siteTempC << " at " 
+             << RadxTime::strm(_timeForSiteTemp) << endl;
+      }
+    }
+  }
+
   // save out the stats to SPDB
 
-  _writeStatsToSpdb();
+  _writeStatsToSpdb(filePath);
 
   return 0;
 
@@ -632,117 +646,67 @@ void PidZdrStats::_computeStats()
 
     const Params::pid_region_t &region = _params._pid_regions[ii];
 
-    DistPolynomial &dist = _dists[ii];
-    dist.clearValues();
+    DistPolynomial &poly = _dists[ii];
+    poly.clearValues();
 
     vector<gate_data_t> &gateData = _gateData[ii];
     for (size_t jj = 0; jj < gateData.size(); jj++) {
-      dist.addValue(gateData[jj].zdr);
+      poly.addValue(gateData[jj].zdr);
     }
 
-    dist.setHistNBins(_params.zdr_hist_n_bins);
-    dist.setHistRange(region.zdr_hist_lower_limit, region.zdr_hist_upper_limit);
-    dist.computeHistogram();
-    dist.setOrder(_params.zdr_dist_poly_order);
-    dist.performFit();
+    poly.setHistNBins(_params.zdr_hist_n_bins);
+    poly.setHistRange(region.zdr_hist_lower_limit, region.zdr_hist_upper_limit);
+    poly.computeHistogram();
+    poly.setOrder(_params.zdr_dist_poly_order);
+    poly.performFit();
 
   }
 
 }
 
-/////////////////////////////////////////////////////////////
-// write stats to SPDB in XML
+//////////////////////////////
+// write the stats to spdb
 
-void PidZdrStats::_writeStatsToSpdb()
-
+void PidZdrStats::_writeStatsToSpdb(const string &filePath)
 {
-
-  // write results to SPDB
-  
-  if (!_params.write_results_to_spdb) {
-    return;
-  }
-  
-  RadxPath path(_readVol.getPathInUse());
-  string xml;
-
-  xml += RadxXml::writeStartTag("ZdrBias", 0);
-
-  xml += RadxXml::writeString("file", 1, path.getFile());
-  xml += RadxXml::writeBoolean("is_rhi", 1, _readVol.checkIsRhi());
-
-#ifdef JUNK
-  
-  xml += RadxXml::writeInt("ZdrInIceNpts", 1, (int) _zdrStatsIce.count);
-  xml += RadxXml::writeDouble("ZdrInIceMean", 1, _zdrStatsIce.mean);
-  xml += RadxXml::writeDouble("ZdrInIceSdev", 1, _zdrStatsIce.sdev);
-  xml += RadxXml::writeDouble("ZdrInIceSkewness", 1, _zdrStatsIce.skewness);
-  xml += RadxXml::writeDouble("ZdrInIceKurtosis", 1, _zdrStatsIce.kurtosis);
-  for (size_t ii = 0; ii < _zdrStatsIce.percentiles.size(); ii++) {
-    double percent = _params._zdr_bias_ice_percentiles[ii];
-    double val = _zdrStatsIce.percentiles[ii];
-    char tag[1024];
-    sprintf(tag, "ZdrInIcePerc%05.2f", percent);
-    xml += RadxXml::writeDouble(tag, 1, val);
-  }
-
-  xml += RadxXml::writeInt("ZdrmInIceNpts", 1, (int) _zdrmStatsIce.count);
-  xml += RadxXml::writeDouble("ZdrmInIceMean", 1, _zdrmStatsIce.mean);
-  xml += RadxXml::writeDouble("ZdrmInIceSdev", 1, _zdrmStatsIce.sdev);
-  xml += RadxXml::writeDouble("ZdrmInIceSkewness", 1, _zdrmStatsIce.skewness);
-  xml += RadxXml::writeDouble("ZdrmInIceKurtosis", 1, _zdrmStatsIce.kurtosis);
-  for (size_t ii = 0; ii < _zdrmStatsIce.percentiles.size(); ii++) {
-    double percent = _params._zdr_bias_ice_percentiles[ii];
-    double val = _zdrmStatsIce.percentiles[ii];
-    char tag[1024];
-    sprintf(tag, "ZdrmInIcePerc%05.2f", percent);
-    xml += RadxXml::writeDouble(tag, 1, val);
-  }
-
-  xml += RadxXml::writeInt("ZdrInBraggNpts", 1, (int) _zdrStatsBragg.count);
-  xml += RadxXml::writeDouble("ZdrInBraggMean", 1, _zdrStatsBragg.mean);
-  xml += RadxXml::writeDouble("ZdrInBraggSdev", 1, _zdrStatsBragg.sdev);
-  xml += RadxXml::writeDouble("ZdrInBraggSkewness", 1, _zdrStatsBragg.skewness);
-  xml += RadxXml::writeDouble("ZdrInBraggKurtosis", 1, _zdrStatsBragg.kurtosis);
-  for (size_t ii = 0; ii < _zdrStatsBragg.percentiles.size(); ii++) {
-    double percent = _params._zdr_bias_bragg_percentiles[ii];
-    double val = _zdrStatsBragg.percentiles[ii];
-    char tag[1024];
-    sprintf(tag, "ZdrInBraggPerc%05.2f", percent);
-    xml += RadxXml::writeDouble(tag, 1, val);
-  }
-
-  xml += RadxXml::writeInt("ZdrmInBraggNpts", 1, (int) _zdrmStatsBragg.count);
-  xml += RadxXml::writeDouble("ZdrmInBraggMean", 1, _zdrmStatsBragg.mean);
-  xml += RadxXml::writeDouble("ZdrmInBraggSdev", 1, _zdrmStatsBragg.sdev);
-  xml += RadxXml::writeDouble("ZdrmInBraggSkewness", 1, _zdrmStatsBragg.skewness);
-  xml += RadxXml::writeDouble("ZdrmInBraggKurtosis", 1, _zdrmStatsBragg.kurtosis);
-  for (size_t ii = 0; ii < _zdrmStatsBragg.percentiles.size(); ii++) {
-    double percent = _params._zdr_bias_bragg_percentiles[ii];
-    double val = _zdrmStatsBragg.percentiles[ii];
-    char tag[1024];
-    sprintf(tag, "ZdrmInBraggPerc%05.2f", percent);
-    xml += RadxXml::writeDouble(tag, 1, val);
-  }
-
-  if (_params.read_site_temp_from_spdb) {
-    xml += RadxXml::writeDouble("TempSite", 1, _siteTempC);
-    RadxTime tempTime(_timeForSiteTemp);
-    xml += RadxXml::writeString("TempTime", 1, tempTime.getW3cStr());
-  }
-  
-  xml += RadxXml::writeEndTag("ZdrBias", 0);
-
-#endif
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Writing ZDR stats to SPDB, url: "
-         << _params.spdb_output_url << endl;
-  }
 
   DsSpdb spdb;
   time_t validTime = _readVol.getStartTimeSecs();
-  spdb.addPutChunk(0, validTime, validTime, xml.size() + 1, xml.c_str());
+
+  // loop through the PID categories
+
+  for (int ii = 0; ii < _params.pid_regions_n; ii++) {
+
+    const Params::pid_region_t &region = _params._pid_regions[ii];
+    DistPolynomial &poly = _dists[ii];
+
+    // check we have enough data for good stats
+
+    if ((int) poly.getNValues() < _params.min_npts_for_valid_stats) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "WARNING - pid: " << region.label << endl;
+        cerr << "  too few points for stats: " << poly.getNValues() << endl;
+      }
+      continue;
+    }
+
+    // get the XML for this PID
+
+    string xml = _getStatsXml(filePath, region.label, region.pid, poly);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "========================= pid: " << region.pid << endl;
+      cerr << xml;
+      cerr << "=====================================" << endl;
+    }
+
+    // add chunk to SPDB
+
+    spdb.addPutChunk(region.pid, validTime, validTime, xml.size() + 1, xml.c_str());
+
+  } // ii
+
+  // write it out
+
   if (spdb.put(_params.spdb_output_url,
                SPDB_XML_ID, SPDB_XML_LABEL)) {
     cerr << "ERROR - PidZdrStats::_writeStatsToSpdb" << endl;
@@ -751,14 +715,156 @@ void PidZdrStats::_writeStatsToSpdb()
   }
   
   if (_params.debug) {
-    cerr << "Wrote ZDR bias results to spdb, url: " 
-         << _params.spdb_output_url << endl;
+    cerr << "Wrote ZDR stats to spdb, url: " << _params.spdb_output_url << endl;
+    cerr << "  time: " << RadxTime::strm(validTime) << endl;
   }
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=====================================" << endl;
-    cerr << xml;
-    cerr << "=====================================" << endl;
+
+}
+
+/////////////////////////////////////////////////////////////
+// get XML stats for specified PID
+
+string PidZdrStats::_getStatsXml(const string &filePath,
+                                 string pidLabel,
+                                 int pid,
+                                 DistPolynomial &poly)
+
+{
+
+  char text[1024];
+  RadxPath path(filePath);
+  string xml;
+
+  xml += RadxXml::writeStartTag("ZdrStats", 0);
+
+  xml += RadxXml::writeString("CfRadialFileName", 1, path.getFile());
+  xml += RadxXml::writeBoolean("IsRhi", 1, _readVol.checkIsRhi());
+  xml += RadxXml::writeString("PidLabel", 1, pidLabel);
+  xml += RadxXml::writeInt("PidVal", 1, pid);
+  
+  xml += RadxXml::writeDouble("Mean", 1, poly.getMean());
+  xml += RadxXml::writeDouble("Sdev", 1, poly.getSdev());
+  xml += RadxXml::writeDouble("Skewness", 1, poly.getSkewness());
+  xml += RadxXml::writeDouble("Kurtosis", 1, poly.getKurtosis());
+
+  // polygon coefficients
+
+  xml += RadxXml::writeDouble("nPoly", 1, poly.getOrder());
+
+  string coeffStr;
+  const vector<double> &coeffs = poly.getCoeffs();
+  for (size_t ii = 0; ii < coeffs.size(); ii++) {
+    snprintf(text, 1024, "%g", coeffs[ii]);
+    if (ii != 0) {
+      coeffStr += ",";
+    }
+    coeffStr += text;
   }
+  xml += RadxXml::writeString("PolyCoeffs", 1, coeffStr);
+
+  // histogram details
+  
+  xml += RadxXml::writeDouble("HistNBins", 1, poly.getHistNBins());
+  xml += RadxXml::writeDouble("HistMin", 1, poly.getHistMin());
+  xml += RadxXml::writeDouble("HistMax", 1, poly.getHistMax());
+  xml += RadxXml::writeDouble("HistDelta", 1, poly.getHistDelta());
+  xml += RadxXml::writeDouble("HistMedian", 1, poly.getHistMedian());
+  xml += RadxXml::writeDouble("HistMode", 1, poly.getHistMode());
+  xml += RadxXml::writeDouble("GoodnessOfFit", 1, poly.getGof());
+  
+  string countStr, densityStr, pdfStr, cdfStr;
+  const vector<double> &counts = poly.getHistCount();
+  const vector<double> &density = poly.getHistDensity();
+  const vector<double> &pdf = poly.getHistPdf();
+  const vector<double> &cdf = poly.getHistCdf();
+  for (size_t ii = 0; ii < poly.getHistNBins(); ii++) {
+    if (ii != 0) {
+      countStr += ",";
+      densityStr += ",";
+      pdfStr += ",";
+      cdfStr += ",";
+    }
+    snprintf(text, 1024, "%g", counts[ii]);
+    countStr += text;
+    snprintf(text, 1024, "%g", density[ii]);
+    densityStr += text;
+    snprintf(text, 1024, "%g", pdf[ii]);
+    pdfStr += text;
+    snprintf(text, 1024, "%g", cdf[ii]);
+    cdfStr += text;
+  }
+  xml += RadxXml::writeString("HistCounts", 1, countStr);
+  xml += RadxXml::writeString("HistDensity", 1, densityStr);
+  xml += RadxXml::writeString("PdfCounts", 1, pdfStr);
+  xml += RadxXml::writeString("CdfCounts", 1, cdfStr);
+  
+  if (_params.read_site_temp_from_spdb) {
+    xml += RadxXml::writeDouble("TempSite", 1, _siteTempC);
+    RadxTime tempTime(_timeForSiteTemp);
+    xml += RadxXml::writeString("TempTime", 1, tempTime.getW3cStr());
+  }
+  
+  xml += RadxXml::writeEndTag("ZdrStats", 0);
+
+  return xml;
+
+}
+
+//////////////////////////////////////////////////
+// retrieve site temp from SPDB for volume time
+
+int PidZdrStats::_retrieveSiteTempFromSpdb(double &tempC,
+                                           time_t &timeForTemp)
+  
+{
+
+  // get surface data from SPDB
+
+  DsSpdb spdb;
+  si32 dataType = 0;
+  if (strlen(_params.site_temp_station_name) > 0) {
+    dataType =  Spdb::hash4CharsToInt32(_params.site_temp_station_name);
+  }
+  time_t searchTime = _readVol.getStartTimeSecs();
+
+  if (spdb.getClosest(_params.site_temp_spdb_url,
+                      searchTime,
+                      _params.site_temp_search_margin_secs,
+                      dataType)) {
+    cerr << "WARNING - PidZdrStats::_retrieveSiteTempFromSpdb" << endl;
+    cerr << "  Cannot get temperature from URL: " << _params.site_temp_spdb_url << endl;
+    cerr << "  Station name: " << _params.site_temp_station_name << endl;
+    cerr << "  Search time: " << RadxTime::strm(searchTime) << endl;
+    cerr << "  Search margin (secs): " << _params.site_temp_search_margin_secs << endl;
+    cerr << spdb.getErrStr() << endl;
+    return -1;
+  }
+  
+  // got chunks
+  
+  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  if (chunks.size() < 1) {
+    cerr << "WARNING - PidZdrStats::_retrieveSiteTempFromSpdb" << endl;
+    cerr << "  No suitable temp data from URL: " << _params.site_temp_spdb_url << endl;
+    cerr << "  Search time: " << RadxTime::strm(searchTime) << endl;
+    cerr << "  Search margin (secs): " << _params.site_temp_search_margin_secs << endl;
+    return -1;
+  }
+
+  const Spdb::chunk_t &chunk = chunks[0];
+  WxObs obs;
+  if (obs.disassemble(chunk.data, chunk.len)) {
+    cerr << "WARNING - PidZdrStats::_retrieveSiteTempFromSpdb" << endl;
+    cerr << "  SPDB data is of incorrect type, prodLabel: " << spdb.getProdLabel() << endl;
+    cerr << "  Should be station data type" << endl;
+    cerr << "  URL: " << _params.site_temp_spdb_url << endl;
+    return -1;
+  }
+
+  tempC = obs.getTempC();
+  timeForTemp = obs.getObservationTime();
+
+  return 0;
 
 }
 
