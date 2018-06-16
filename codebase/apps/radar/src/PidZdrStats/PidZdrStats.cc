@@ -116,6 +116,10 @@ PidZdrStats::PidZdrStats(int argc, char **argv)
     _pidVals.push_back(_params._pid_regions[ii].pid);
   }
   
+  // allocate the vector for accumulating gate data for various PIDs
+  
+  _allocGateDataVec();
+
 }
 
 // destructor
@@ -264,7 +268,7 @@ int PidZdrStats::_processFile(const string &filePath)
   
   _readVol.clear();
   if (inFile.readFromPath(filePath, _readVol)) {
-    cerr << "ERROR - PidZdrStats::Run" << endl;
+    cerr << "ERROR - PidZdrStats::_processFile" << endl;
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
@@ -272,10 +276,18 @@ int PidZdrStats::_processFile(const string &filePath)
   // process this data set
   
   if (_processVol()) {
-    cerr << "ERROR - PidZdrStats::Run" << endl;
+    cerr << "ERROR - PidZdrStats::_processFile" << endl;
     cerr << "  Cannot process data in file: " << filePath << endl;
     return -1;
   }
+
+  // compute the statistics for the file
+
+  _computeStats();
+
+  // save out the stats to SPDB
+
+  _writeStatsToSpdb();
 
   return 0;
 
@@ -344,6 +356,8 @@ int PidZdrStats::_processVol()
   _radarAltitude = _readVol.getAltitudeKm();
 
   // loop through the rays
+
+  _clearGateData();
 
   const vector<RadxRay *> rays = _readVol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
@@ -483,6 +497,15 @@ int PidZdrStats::_processRay(RadxRay *ray)
     fprintf(_outFilePtrs[pidIndex], "  %8.2f %8.2f %4d %8.2f %8.2f %8.2f\n",
             elev, rangeKm, pid, temp, rhohv, zdr);
 
+    // append to gate data
+
+    gate_data_t gdat;
+    gdat.zdr = zdr;
+    gdat.rhohv = rhohv;
+    gdat.temp = temp;
+
+    _gateData[pidIndex].push_back(gdat);
+
   } // igate
 
   return 0;
@@ -513,7 +536,7 @@ int PidZdrStats::_openOutputFiles()
   // make sure output subdir exists
   
   if (ta_makedir_recurse(outDir.c_str())) {
-    cerr << "ERROR - PidZdrStats::_writeResults" << endl;
+    cerr << "ERROR - PidZdrStats::_openOutputFiles" << endl;
     cerr << "  Cannot create output dir: " << outDir << endl;
     return -1;
   }
@@ -539,7 +562,7 @@ int PidZdrStats::_openOutputFiles()
 
     FILE *out = fopen(outPath, "w");
     if (out == NULL) {
-      cerr << "ERROR - PidZdrStats::_writeResults" << endl;
+      cerr << "ERROR - PidZdrStats::_openOutputFiles" << endl;
       cerr << "  Cannot open output file: " << outPath << endl;
       return -1;
     }
@@ -577,10 +600,60 @@ void PidZdrStats::_closeOutputFiles()
   } // ii
 
 }
-/////////////////////////////////////////////////////////////
-// write zdr bias results to SPDB in XML
+//////////////////////////////
+// alloc gate data vector
 
-void PidZdrStats::_writeResultsToSpdb()
+void PidZdrStats::_allocGateDataVec()
+{
+  _gateData.clear();
+  for (int ii = 0; ii < _params.pid_regions_n; ii++) {
+    vector<gate_data_t> gvec;
+    _gateData.push_back(gvec);
+  }
+}
+
+//////////////////////////////
+// clear gate data
+
+void PidZdrStats::_clearGateData()
+{
+  for (size_t ii = 0; ii < _gateData.size(); ii++) {
+    _gateData[ii].clear();
+  }
+}
+
+//////////////////////////////
+// compute the statistics
+
+void PidZdrStats::_computeStats()
+{
+
+  for (int ii = 0; ii < _params.pid_regions_n; ii++) {
+
+    const Params::pid_region_t &region = _params._pid_regions[ii];
+
+    DistPolynomial &dist = _dists[ii];
+    dist.clearValues();
+
+    vector<gate_data_t> &gateData = _gateData[ii];
+    for (size_t jj = 0; jj < gateData.size(); jj++) {
+      dist.addValue(gateData[jj].zdr);
+    }
+
+    dist.setHistNBins(_params.zdr_hist_n_bins);
+    dist.setHistRange(region.zdr_hist_lower_limit, region.zdr_hist_upper_limit);
+    dist.computeHistogram();
+    dist.setOrder(_params.zdr_dist_poly_order);
+    dist.performFit();
+
+  }
+
+}
+
+/////////////////////////////////////////////////////////////
+// write stats to SPDB in XML
+
+void PidZdrStats::_writeStatsToSpdb()
 
 {
 
@@ -663,7 +736,7 @@ void PidZdrStats::_writeResultsToSpdb()
 #endif
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Writing ZDR bias results to SPDB, url: "
+    cerr << "Writing ZDR stats to SPDB, url: "
          << _params.spdb_output_url << endl;
   }
 
@@ -672,7 +745,7 @@ void PidZdrStats::_writeResultsToSpdb()
   spdb.addPutChunk(0, validTime, validTime, xml.size() + 1, xml.c_str());
   if (spdb.put(_params.spdb_output_url,
                SPDB_XML_ID, SPDB_XML_LABEL)) {
-    cerr << "ERROR - RadxPartRain::_computeZdrBias" << endl;
+    cerr << "ERROR - PidZdrStats::_writeStatsToSpdb" << endl;
     cerr << spdb.getErrStr() << endl;
     return;
   }

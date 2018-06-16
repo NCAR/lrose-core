@@ -138,6 +138,8 @@ typedef struct {
   double max_elev_deg;
   double min_temp_c;
   double max_temp_c;
+  double zdr_hist_lower_limit;
+  double zdr_hist_upper_limit;
 } pid_region_t;
 
 paramdef struct pid_region_t {
@@ -151,7 +153,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -162,7 +166,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -173,7 +179,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -184,7 +192,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -195,7 +205,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -206,7 +218,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -217,7 +231,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -228,7 +244,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -239,7 +257,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -250,7 +270,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -261,7 +283,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -272,7 +296,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -283,7 +309,9 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
     ,
     {
@@ -294,13 +322,25 @@ paramdef struct pid_region_t {
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
-      max_temp_c = 50.0
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
     }
   };
   p_descr = "Set up the PID regions for analysis.";
-  p_help = "These limits are applied to each gate, depending on the PID identified for that gate. If the values read in are outside these limits, the gate is not used for the analysis. The PID value must be between 1 and 20, inclusive.";
+  p_help = "The PID value must be between 1 and 20, inclusive, and should match the values produced by the NCAR PID algorithm. The range, elevation and temperature limits are applied at each gate when deciding whether to include that gate in the analysis. If the values read in are outside these limits, the gate is not used for the analysis. The histogram limits are used to govern how the histograms are computed and stored.";
 
 } pid_regions[];
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Number of bins in histograms used to analyze ZDR stats.";
+} zdr_hist_n_bins;
+
+paramdef int {
+  p_default = 11;
+  p_descr = "Order of polygon fit for ZDR distribution.";
+} zdr_dist_poly_order;
 
 commentdef {
   p_header = "WRITE RESULTS OUT TO TEXT FILES";

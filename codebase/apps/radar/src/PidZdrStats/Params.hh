@@ -91,6 +91,8 @@ public:
     double max_elev_deg;
     double min_temp_c;
     double max_temp_c;
+    double zdr_hist_lower_limit;
+    double zdr_hist_upper_limit;
   } pid_region_t;
 
   ///////////////////////////
@@ -407,6 +409,10 @@ public:
   pid_region_t *_pid_regions;
   int pid_regions_n;
 
+  int zdr_hist_n_bins;
+
+  int zdr_dist_poly_order;
+
   char* output_dir;
 
   tdrp_bool_t write_results_to_spdb;
@@ -420,7 +426,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[28];
+  mutable TDRPtable _table[30];
 
   const char *_className;
 

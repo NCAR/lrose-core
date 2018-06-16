@@ -41,6 +41,8 @@
 #include <Radx/Radx.hh>
 #include <Radx/RadxVol.hh>
 #include <radar/NcarParticleId.hh>
+#include <rapmath/DistPolynomial.hh>
+
 class RadxFile;
 using namespace std;
 
@@ -114,8 +116,8 @@ private:
     double rhohv;
     double temp;
   } gate_data_t;
-
-  vector<FILE *> _outFilePtrs1;
+  vector< vector<gate_data_t> >_gateData;
+  vector<DistPolynomial> _dists;
 
   // output files
 
@@ -136,7 +138,11 @@ private:
   int _openOutputFiles();
   void _closeOutputFiles();
 
-  void _writeResultsToSpdb();
+  void _allocGateDataVec();
+  void _clearGateData();
+
+  void _computeStats();
+  void _writeStatsToSpdb();
 
 };
 
