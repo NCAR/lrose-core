@@ -409,6 +409,7 @@ void Distribution::printHistogram(FILE *out)
   }
 
   fprintf(out, "======================= Histogram ===========================\n");
+  fprintf(out, "  nValues: %d\n", (int) getNValues());
   fprintf(out, "  histSize: %d\n", (int) _histCount.size());
   fprintf(out, "  histDelta: %g\n", _histDelta);
   fprintf(out, "  histMin: %g\n", _histMin);

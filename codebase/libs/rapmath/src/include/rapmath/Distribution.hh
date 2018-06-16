@@ -153,6 +153,9 @@ public:
 
   // get methods
 
+  size_t getNValues() const { return _values.size(); }
+  const vector<double> &getValues() const { return _values; }
+
   double getMin() const { return _min; }
   double getMax() const { return _max; }
   double getMean() const { return _mean; }
@@ -160,11 +163,12 @@ public:
   double getVariance() const { return _variance; }
   double getSkewness() const { return _skewness; }
   double getKurtosis() const { return _kurtosis; }
-  const vector<double> &getValues() const { return _values; }
 
-  size_t getHistNbins() const { return _histNBins; }
+  size_t getHistNBins() const { return _histNBins; }
   double getHistMin() const { return _histMin; }
   double getHistMax() const { return _histMax; }
+  double getHistMedian() const { return _histMedian; }
+  double getHistMode() const { return _histMode; }
   double getHistDelta() const { return _histDelta; }
 
   const vector<double> &getHistX() const { return _histX; }
