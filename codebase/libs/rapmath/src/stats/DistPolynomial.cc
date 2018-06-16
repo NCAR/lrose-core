@@ -92,9 +92,11 @@ int DistPolynomial::performFit()
 
   computeBasicStats();
   
-  if (_histSize == 0) {
-    computeHistogramSpecifyWidth(60, 3);
+  if (std::isnan(_histMin)) {
+    setHistNBins(60.0);
+    setHistRangeFromSdev(3.0);
   }
+  computeHistogram();
 
   // perform polynomial fit
   
@@ -107,7 +109,7 @@ int DistPolynomial::performFit()
     _coeffs.push_back(_pp[ii]);
   }
 
-  for (size_t jj = 0; jj < _histSize; jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     _histPdf.push_back(_yyEst[jj]);
   }
 
@@ -115,7 +117,7 @@ int DistPolynomial::performFit()
 
   double maxYY = -1.0e99;
   int index4Max = 0;
-  for (size_t jj = 0; jj < _histSize; jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     double yy = _yyEst[jj];
     if (yy > maxYY) {
       maxYY = yy;
@@ -145,7 +147,7 @@ int DistPolynomial::performFit()
   // set yy to 0 above that point
 
   _maxValidIndex = index4Max;
-  for (int jj = index4Max + 1; jj < (int) _histSize; jj++) {
+  for (int jj = index4Max + 1; jj < (int) _histNBins; jj++) {
     double yy = _yyEst[jj];
     if (yy < 0) {
       _yyEst[jj] = 0.0;
@@ -155,7 +157,7 @@ int DistPolynomial::performFit()
     _maxValidIndex = jj;
   }
   _maxValidX = _histX[_maxValidIndex];
-  for (size_t jj = _maxValidIndex + 1; jj < _histSize; jj++) {
+  for (size_t jj = _maxValidIndex + 1; jj < _histNBins; jj++) {
     _yyEst[jj] = 0.0;
   }
 
@@ -172,14 +174,14 @@ int DistPolynomial::performFit()
   for (size_t ii = 0; ii < _coeffs.size(); ii++) {
     _coeffs[ii] *= correction;
   }
-  for (size_t jj = 0; jj < _histSize; jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     _yyEst[jj] *= correction;
   }
 
   // load PDF vector
 
   _histPdf.clear();
-  for (size_t jj = 0; jj < _histSize; jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     _histPdf.push_back(_yyEst[jj]);
   }
   _pdfAvail = true;
@@ -281,7 +283,7 @@ void DistPolynomial::_doPolyFit()
 
   // load xx vector
   
-  for (size_t jj = 0; jj < _histSize; jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     double xx = _histMin + jj * _histDelta;
     _xx[jj] = xx;
   }
@@ -292,7 +294,7 @@ void DistPolynomial::_doPolyFit()
   
   for (size_t ii = 0; ii < _nPoly1; ii++) {
     double sum = 0;
-    for (size_t jj = 0; jj < _histSize; jj++) {
+    for (size_t jj = 0; jj < _histNBins; jj++) {
       sum += _cc[ii][jj] * _histDensity[jj];
     }
     _pp[ii] = sum;
@@ -300,21 +302,21 @@ void DistPolynomial::_doPolyFit()
 
   // compute the standard error of estimates of y
   
-  _matrixVectorMult(_vv, _pp, _histSize, _nPoly1, _yyEst);
+  _matrixVectorMult(_vv, _pp, _histNBins, _nPoly1, _yyEst);
   
   double sumSq = 0.0;
-  for (size_t ii = 0; ii < _histSize; ii++) {
+  for (size_t ii = 0; ii < _histNBins; ii++) {
     double error = _yyEst[ii] - _histDensity[ii];
     sumSq += error * error;
   }
-  _stdErrEst = sqrt(sumSq / (double) _histSize);
+  _stdErrEst = sqrt(sumSq / (double) _histNBins);
 
 
 #ifdef DEBUG_PRINT
   for (size_t ii = 0; ii < _nPoly1; ii++) {
     cerr << "ii, pp: " << ii << ", " << _pp[ii] << endl;
   }
-  for (size_t ii = 0; ii < _histSize; ii++) {
+  for (size_t ii = 0; ii < _histNBins; ii++) {
     cerr << "ii, yyObserved, yyEst: " << ii
          << ", " << _histDensity[ii] << ", " << _yyEst[ii] << endl;
   }
@@ -332,11 +334,11 @@ void DistPolynomial::_alloc()
   
   _free();
   
-  _xx = (double *) umalloc(_histSize * sizeof(double));
-  _yyEst = (double *) umalloc(_histSize * sizeof(double));
+  _xx = (double *) umalloc(_histNBins * sizeof(double));
+  _yyEst = (double *) umalloc(_histNBins * sizeof(double));
 
-  _vv = (double **) umalloc2(_histSize, _nPoly1, sizeof(double));
-  _vvT = (double **) umalloc2(_nPoly1, _histSize, sizeof(double));
+  _vv = (double **) umalloc2(_histNBins, _nPoly1, sizeof(double));
+  _vvT = (double **) umalloc2(_nPoly1, _histNBins, sizeof(double));
   _vvA = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
   _vvB = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
 
@@ -351,7 +353,7 @@ void DistPolynomial::_alloc()
   _wwT = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
 
   _pp = (double *) umalloc(_nPoly1 * sizeof(double));
-  _cc = (double **) umalloc2(_nPoly1, _histSize, sizeof(double));
+  _cc = (double **) umalloc2(_nPoly1, _histNBins, sizeof(double));
   _multa = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
   _multb = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
 
@@ -455,7 +457,7 @@ void DistPolynomial::_computeCc()
   
   _matrixMult(_ww, _ssInv, _nPoly1, _nPoly1, _nPoly1, _multa);
   _matrixMult(_multa, _uuT, _nPoly1, _nPoly1, _nPoly1, _multb);
-  _matrixMult(_multb, _vvT, _nPoly1, _nPoly1, _histSize, _cc);
+  _matrixMult(_multb, _vvT, _nPoly1, _nPoly1, _histNBins, _cc);
 
 #ifdef DEBUG_PRINT
   _matrixPrint("_vvB", _vvB, _nPoly1, _nPoly1, stderr);
@@ -465,7 +467,7 @@ void DistPolynomial::_computeCc()
   _matrixPrint("_wwT", _wwT, _nPoly1, _nPoly1, stderr);
   _matrixPrint("_ss", _ss, _nPoly1, _nPoly1, stderr);
   _matrixPrint("_ssInv", _ssInv, _nPoly1, _nPoly1, stderr);
-  _matrixPrint("_cc", _cc, _nPoly1, _histSize, stderr);
+  _matrixPrint("_cc", _cc, _nPoly1, _histNBins, stderr);
 #endif
   
 }
@@ -479,7 +481,7 @@ void DistPolynomial::_computeVandermonde()
 
   // compute vandermonde and transpose
 
-  for (size_t ii = 0; ii < _histSize; ii++) {
+  for (size_t ii = 0; ii < _histNBins; ii++) {
     double xx = _xx[ii];
     for (size_t jj = 0; jj < _nPoly1; jj++) {
       double vv = pow(xx, (double) jj);
@@ -490,13 +492,13 @@ void DistPolynomial::_computeVandermonde()
 
   // compute vvA = vvT * vv
 
-  _matrixMult(_vvT, _vv, _nPoly1, _histSize, _nPoly1, _vvA);
+  _matrixMult(_vvT, _vv, _nPoly1, _histNBins, _nPoly1, _vvA);
 
   // debug print
 
 #ifdef DEBUG_PRINT
-  _matrixPrint("_vv", _vv, _histSize, _nPoly1, stderr);
-  _matrixPrint("_vvT", _vvT, _nPoly1, _histSize, stderr);
+  _matrixPrint("_vv", _vv, _histNBins, _nPoly1, stderr);
+  _matrixPrint("_vvT", _vvT, _nPoly1, _histNBins, stderr);
   _matrixPrint("_vvA", _vvA, _nPoly1, _nPoly1, stderr);
 #endif
 

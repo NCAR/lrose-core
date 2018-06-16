@@ -98,7 +98,7 @@ int DistLognorm::performFit()
   
 {
 
-  if (_histSize == 0) {
+  if (std::isnan(_histMin)) {
     computeHistogram();
   }
 
@@ -134,7 +134,7 @@ int DistLognorm::performFit()
   _mode = exp(_meanLn - _sdevLn * _sdevLn);
   _median = exp(_meanLn);
 
-  for (size_t jj = 0; jj < _histSize; jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     double xx = _histMin + jj * _histDelta;
     _histPdf.push_back(getPdf(xx));
   }

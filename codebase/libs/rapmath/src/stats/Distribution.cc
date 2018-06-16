@@ -52,6 +52,13 @@ Distribution::Distribution()
   _verbose = false;
   _clearStats();
 
+  _histMin = NAN;
+  _histMax = NAN;
+  _histDelta = NAN;
+
+  _histNBins = 60;
+  _histNSdev = 3.0;
+
 }
 
 //////////////////////////////////////////////////////////////////
@@ -93,11 +100,6 @@ void Distribution::_clearHist()
 
 {
 
-  _histMin = NAN;
-  _histMax = NAN;
-  _histDelta = NAN;
-
-  _histSize = 0;
   _histCount.clear();
   _histX.clear();
   _histDensity.clear();
@@ -302,48 +304,70 @@ void Distribution::computeBasicStats()
 }
 
 //////////////////////////////////////////////////////////////////
-// compute histogram
-// if nBins is not specified, the default of 60 is used
-// if histDelta is not specified, it is computed from data range
-// if histMin is not specified, it is set to the min in the data
-//    plus half the delta
-// histMin is the value in the middle of the first histogram bin
-// histDelta is the delta between the center of adjacent bins
+// set histogram range
+// the min val is the mid val of the first bin
+// the max val is the mid val of the last bin
+  
+void Distribution::setHistRange(double minVal, double maxVal)
 
-void Distribution::computeHistogram(size_t nBins /* = 60 */,
-                                    double histMin /* = NAN */,
-                                    double histDelta /* = NAN */)
+{
+
+  _histMin = minVal;
+  _histMax = maxVal;
+
+  if (_histNBins < 2) {
+    _histNBins = 60;
+  }
+  _histDelta = (_histMax - _histMin) / (double) _histNBins;
+
+}
+  
+//////////////////////////////////////////////////////////////////
+// set histogram range to some multiple of the
+// standard deviation of the data
+
+void Distribution::setHistRangeFromSdev(double nSdev)
+
+{
+
+  _histNSdev = nSdev;
+
+  // compute mean and standard deviation
+  
+  if (std::isnan(_sdev)) {
+    computeSdev();
+  }
+
+  _histMin = _mean - _histNSdev * _sdev;
+  _histMax = _mean + _histNSdev * _sdev;
+
+  if (_histNBins < 2) {
+    _histNBins = 60;
+  }
+  _histDelta = (_histMax - _histMin) / (double) _histNBins;
+
+}
+  
+//////////////////////////////////////////////////////////////////
+// compute histogram, based on current settings
+// if hist min and max have not been set, they are computed
+// from the data
+
+void Distribution::computeHistogram()
 
 {
 
   _clearHist();
-  _histSize = nBins;
-  
-  // compute delta if needed
 
-  if (std::isnan(histDelta)) {
-    // compute histDelta to ensure we include
-    // both min and max values
-    _histDelta = ((_max - _min) / (double) nBins) * 1.0001;
-  } else {
-    _histDelta = histDelta;
+  // if limits have not been set, compute them from the data limits
+
+  if (std::isnan(_histMin) || std::isnan(_histMax)) {
+    setHistRange(_min, _max);
   }
-
-  // compute min as middle of lowest bin
-  
-  if (std::isnan(histMin)) {
-    _histMin = _min + _histDelta / 2.0;
-  } else {
-    _histMin = histMin + _histDelta / 2.0;
-  }
-
-  // compute max as middle of highest bin
-
-  _histMax = _histMin + (_histSize - 1) * _histDelta;
 
   // set counts
 
-  for (size_t jj = 0; jj < _histSize; jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     _histCount.push_back(0.0);
     _histX.push_back(_histMin + jj * _histDelta);
   } // jj
@@ -351,49 +375,25 @@ void Distribution::computeHistogram(size_t nBins /* = 60 */,
   for (size_t ii = 0; ii < _nVals; ii++) {
     double val = _values[ii];
     int index = (int) ((val - _histMin) / _histDelta + 0.5);
-    if (index >= 0 && index < (int) _histSize) {
+    if (index >= 0 && index < (int) _histNBins) {
       _histCount[index]++;
     }
   } // ii
 
   // compute density
 
-  for (size_t jj = 0; jj < _histSize; jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     _histDensity.push_back((_histCount[jj] / (double) _nVals) / _histDelta);
   } // jj
   
   if (_pdfAvail) {
-    for (size_t jj = 0; jj < _histSize; jj++) {
+    for (size_t jj = 0; jj < _histNBins; jj++) {
       _histPdf.push_back(getPdf(_histX[jj]));
     } // jj
     computeHistCdf();
   }
   
 }
-
-//////////////////////////////////////////////////////////////////
-// compute histogram specifying the width of the data in
-// number of standard deviations
-// 
-// n is the number of bins
-// the range of x is limited to nsdev (the number of standard
-// deviations) on each side of the mean.
-
-void Distribution::computeHistogramSpecifyWidth(size_t nBins,
-                                                double nSdev)
-  
-{
-  
-  // compute mean and standard deviation
-
-  computeSdev();
-  
-  // set histogram limits
-  
-  computeHistogram(nBins, _mean - nSdev * _sdev, (2 * nSdev * _sdev) / nBins);
-
-}
-
 
 //////////////////////////////////////////////////////////////////
 // print histogram as text
@@ -421,13 +421,13 @@ void Distribution::printHistogram(FILE *out)
     }
   } // jj
 
-  for (size_t jj = 0; jj < _histSize; jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
 
     int count = _histCount[jj];
     double xx = _histX[jj];
     double pdf = getPdf(xx);
     double cdf = -9999;
-    if (_histCdf.size() == _histSize) {
+    if (_histCdf.size() == _histNBins) {
       cdf = _histCdf[jj];
     }
     
@@ -466,14 +466,14 @@ void Distribution::computeHistCdf()
 
   _histCdf.clear();
   double sum = 0.0;
-  for (size_t jj = 0; jj < _histSize; jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     double prob = _histPdf[jj] * _histDelta;
     sum += prob;
     _histCdf.push_back(sum);
   }
 
   double correction = 1.0 / sum;
-  for (size_t jj = 0; jj < _histSize; jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     _histCdf[jj] *= correction;
   }
 
@@ -488,13 +488,13 @@ void Distribution::computeGof(size_t nIntervals)
   
 {
   
-  if (_histSize < 1) {
+  if (_histNBins < 1) {
     cerr << "ERROR - Distribution::computeGof()" << endl;
     cerr << "  Histogram has not been computed" << endl;
     return;
   }
 
-  if (_histPdf.size() != _histSize) {
+  if (_histPdf.size() != _histNBins) {
     cerr << "ERROR - Distribution::computeGof()" << endl;
     cerr << "  PDF fit has not been performed" << endl;
     return;

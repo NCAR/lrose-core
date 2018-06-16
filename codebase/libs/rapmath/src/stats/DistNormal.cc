@@ -61,7 +61,7 @@ int DistNormal::performFit()
   
 {
 
-  if (_histSize == 0) {
+  if (std::isnan(_histMin)) {
     computeHistogram();
   }
 
@@ -76,7 +76,7 @@ int DistNormal::performFit()
   _median = _mean;
   _mode = _mean;
   
-  for (size_t jj = 0; jj < _histSize; jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     double xx = _histMin + jj * _histDelta;
     _histPdf.push_back(getPdf(xx));
   }

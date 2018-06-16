@@ -75,6 +75,21 @@ public:
   
   void setValues(const vector<double> &vals);
 
+  // set number of bins in histogram
+  
+  void setHistNBins(size_t val) { _histNBins = val; }
+
+  // set histogram range
+  // the min val is the mid val of the first bin
+  // the max val is the mid val of the last bin
+  
+  void setHistRange(double minVal, double maxVal);
+  
+  // set histogram range to some multiple of the
+  // standard deviation of the data
+  
+  void setHistRangeFromSdev(double nSdev);
+  
   // clear the data value
 
   void clearValues();
@@ -103,26 +118,11 @@ public:
 
   void computeBasicStats();
   
-  // compute histogram
-  // if n is not specified, the default is used
-  // if histMin is not specified, the min in the data is used
-  // if histDelta is not specified, it is computed from data range
-  // histMin is the value in the middle of of the first histogram bin
-  // histDelta is the delta between the center of adjacent bins
+  // compute histogram, based on current settings
+  // if hist min and max have not been set, they are computed
+  // from the data
   
-  void computeHistogram(size_t n = 60,
-                        double histMin = NAN,
-                        double histDelta = NAN);
-  
-  // compute histogram specifying the width of the data in
-  // number of standard deviations
-  // 
-  // nBins is the number of bins
-  // the range of x is limited to nsdev (the number of standard
-  // deviations) on each side of the mean.
-  
-  void computeHistogramSpecifyWidth(size_t nBins,
-                                    double nSdev);
+  void computeHistogram();
   
   // perform a fit - abstract base class
   // must be overridden in derived class
@@ -162,7 +162,7 @@ public:
   double getKurtosis() const { return _kurtosis; }
   const vector<double> &getValues() const { return _values; }
 
-  size_t getHistSize() const { return _histSize; }
+  size_t getHistNbins() const { return _histNBins; }
   double getHistMin() const { return _histMin; }
   double getHistMax() const { return _histMax; }
   double getHistDelta() const { return _histDelta; }
@@ -203,7 +203,8 @@ protected:
   double _histMin;
   double _histMax;
   double _histDelta;
-  size_t _histSize;
+  size_t _histNBins;
+  double _histNSdev;
   vector<double> _histX;
   vector<double> _histCount;
   vector<double> _histDensity;
