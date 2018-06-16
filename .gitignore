@@ -585,6 +585,7 @@ codebase/apps/Radx/src/FixCfradialPaths/FixCfradialPaths
 codebase/apps/Radx/src/FixRadxPointing/FixRadxPointing
 codebase/apps/Radx/src/Radx2Dsr/Radx2Dsr
 codebase/apps/Radx/src/Radx2Grid/Radx2Grid
+codebase/apps/Radx/src/RadxBufr/RadxBufr
 codebase/apps/Radx/src/RadxCheck/RadxCheck
 codebase/apps/Radx/src/RadxClutMon/RadxClutMon
 codebase/apps/Radx/src/RadxConvert/RadxConvert
