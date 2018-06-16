@@ -75,6 +75,7 @@ private:
   // lookup table for pid regions
 
   int _pidIndex[NcarParticleId::MISC + 1];
+  vector<int> _pidVals;
 
   /////////////////////////////////////////
   // input data
@@ -106,6 +107,16 @@ private:
   Radx::fl32 _rhohvMiss;
   Radx::fl32 _tempMiss;
 
+  // storing ZDR data for each PID type
+
+  typedef struct {
+    double zdr;
+    double rhohv;
+    double temp;
+  } gate_data_t;
+
+  vector<FILE *> _outFilePtrs1;
+
   // output files
 
   bool _outFilesOpen;
@@ -124,6 +135,8 @@ private:
   int _processRay(RadxRay *ray);
   int _openOutputFiles();
   void _closeOutputFiles();
+
+  void _writeResultsToSpdb();
 
 };
 

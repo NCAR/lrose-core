@@ -1,9 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2018
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -33,8 +50,6 @@
  * @author Automatically generated
  *
  */
-using namespace std;
-
 #include "Params.hh"
 #include <cstring>
 
@@ -792,7 +807,7 @@ using namespace std;
     tt->array_elem_size = sizeof(pid_region_t);
     tt->array_n = 14;
     tt->struct_def.name = tdrpStrDup("pid_region_t");
-    tt->struct_def.nfields = 10;
+    tt->struct_def.nfields = 8;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -816,178 +831,140 @@ using namespace std;
       tt->struct_def.fields[3].rel_offset = 
         (char *) &_pid_regions->max_range_km - (char *) _pid_regions;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("min_rhohv");
+      tt->struct_def.fields[4].fname = tdrpStrDup("min_elev_deg");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_pid_regions->min_rhohv - (char *) _pid_regions;
+        (char *) &_pid_regions->min_elev_deg - (char *) _pid_regions;
       tt->struct_def.fields[5].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[5].fname = tdrpStrDup("max_rhohv");
+      tt->struct_def.fields[5].fname = tdrpStrDup("max_elev_deg");
       tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[5].rel_offset = 
-        (char *) &_pid_regions->max_rhohv - (char *) _pid_regions;
+        (char *) &_pid_regions->max_elev_deg - (char *) _pid_regions;
       tt->struct_def.fields[6].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[6].fname = tdrpStrDup("min_elev_deg");
+      tt->struct_def.fields[6].fname = tdrpStrDup("min_temp_c");
       tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[6].rel_offset = 
-        (char *) &_pid_regions->min_elev_deg - (char *) _pid_regions;
+        (char *) &_pid_regions->min_temp_c - (char *) _pid_regions;
       tt->struct_def.fields[7].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[7].fname = tdrpStrDup("max_elev_deg");
+      tt->struct_def.fields[7].fname = tdrpStrDup("max_temp_c");
       tt->struct_def.fields[7].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[7].rel_offset = 
-        (char *) &_pid_regions->max_elev_deg - (char *) _pid_regions;
-      tt->struct_def.fields[8].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[8].fname = tdrpStrDup("min_temp_c");
-      tt->struct_def.fields[8].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[8].rel_offset = 
-        (char *) &_pid_regions->min_temp_c - (char *) _pid_regions;
-      tt->struct_def.fields[9].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[9].fname = tdrpStrDup("max_temp_c");
-      tt->struct_def.fields[9].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[9].rel_offset = 
         (char *) &_pid_regions->max_temp_c - (char *) _pid_regions;
-    tt->n_struct_vals = 140;
+    tt->n_struct_vals = 112;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("cloud");
       tt->struct_vals[1].i = 1;
       tt->struct_vals[2].d = 5;
       tt->struct_vals[3].d = 148;
-      tt->struct_vals[4].d = 0.95;
-      tt->struct_vals[5].d = 1;
-      tt->struct_vals[6].d = 0;
-      tt->struct_vals[7].d = 90;
-      tt->struct_vals[8].d = -100;
-      tt->struct_vals[9].d = 50;
-      tt->struct_vals[10].s = tdrpStrDup("drizzle");
-      tt->struct_vals[11].i = 2;
-      tt->struct_vals[12].d = 5;
-      tt->struct_vals[13].d = 148;
-      tt->struct_vals[14].d = 0.95;
-      tt->struct_vals[15].d = 1;
-      tt->struct_vals[16].d = 0;
-      tt->struct_vals[17].d = 90;
-      tt->struct_vals[18].d = -100;
-      tt->struct_vals[19].d = 50;
-      tt->struct_vals[20].s = tdrpStrDup("light_rain");
-      tt->struct_vals[21].i = 3;
-      tt->struct_vals[22].d = 5;
-      tt->struct_vals[23].d = 148;
-      tt->struct_vals[24].d = 0.95;
-      tt->struct_vals[25].d = 1;
-      tt->struct_vals[26].d = 0;
-      tt->struct_vals[27].d = 90;
-      tt->struct_vals[28].d = -100;
-      tt->struct_vals[29].d = 50;
-      tt->struct_vals[30].s = tdrpStrDup("mod_rain");
-      tt->struct_vals[31].i = 4;
-      tt->struct_vals[32].d = 5;
-      tt->struct_vals[33].d = 148;
-      tt->struct_vals[34].d = 0.95;
-      tt->struct_vals[35].d = 1;
+      tt->struct_vals[4].d = 0;
+      tt->struct_vals[5].d = 90;
+      tt->struct_vals[6].d = -100;
+      tt->struct_vals[7].d = 50;
+      tt->struct_vals[8].s = tdrpStrDup("drizzle");
+      tt->struct_vals[9].i = 2;
+      tt->struct_vals[10].d = 5;
+      tt->struct_vals[11].d = 148;
+      tt->struct_vals[12].d = 0;
+      tt->struct_vals[13].d = 90;
+      tt->struct_vals[14].d = -100;
+      tt->struct_vals[15].d = 50;
+      tt->struct_vals[16].s = tdrpStrDup("light_rain");
+      tt->struct_vals[17].i = 3;
+      tt->struct_vals[18].d = 5;
+      tt->struct_vals[19].d = 148;
+      tt->struct_vals[20].d = 0;
+      tt->struct_vals[21].d = 90;
+      tt->struct_vals[22].d = -100;
+      tt->struct_vals[23].d = 50;
+      tt->struct_vals[24].s = tdrpStrDup("mod_rain");
+      tt->struct_vals[25].i = 4;
+      tt->struct_vals[26].d = 5;
+      tt->struct_vals[27].d = 148;
+      tt->struct_vals[28].d = 0;
+      tt->struct_vals[29].d = 90;
+      tt->struct_vals[30].d = -100;
+      tt->struct_vals[31].d = 50;
+      tt->struct_vals[32].s = tdrpStrDup("heavy_rain");
+      tt->struct_vals[33].i = 5;
+      tt->struct_vals[34].d = 5;
+      tt->struct_vals[35].d = 148;
       tt->struct_vals[36].d = 0;
       tt->struct_vals[37].d = 90;
       tt->struct_vals[38].d = -100;
       tt->struct_vals[39].d = 50;
-      tt->struct_vals[40].s = tdrpStrDup("heavy_rain");
-      tt->struct_vals[41].i = 5;
+      tt->struct_vals[40].s = tdrpStrDup("hail");
+      tt->struct_vals[41].i = 6;
       tt->struct_vals[42].d = 5;
       tt->struct_vals[43].d = 148;
-      tt->struct_vals[44].d = 0.95;
-      tt->struct_vals[45].d = 1;
-      tt->struct_vals[46].d = 0;
-      tt->struct_vals[47].d = 90;
-      tt->struct_vals[48].d = -100;
-      tt->struct_vals[49].d = 50;
-      tt->struct_vals[50].s = tdrpStrDup("hail");
-      tt->struct_vals[51].i = 6;
-      tt->struct_vals[52].d = 5;
-      tt->struct_vals[53].d = 148;
-      tt->struct_vals[54].d = 0.95;
-      tt->struct_vals[55].d = 1;
-      tt->struct_vals[56].d = 0;
-      tt->struct_vals[57].d = 90;
-      tt->struct_vals[58].d = -100;
-      tt->struct_vals[59].d = 50;
-      tt->struct_vals[60].s = tdrpStrDup("rain_hail");
-      tt->struct_vals[61].i = 7;
-      tt->struct_vals[62].d = 5;
-      tt->struct_vals[63].d = 148;
-      tt->struct_vals[64].d = 0.95;
-      tt->struct_vals[65].d = 1;
-      tt->struct_vals[66].d = 0;
-      tt->struct_vals[67].d = 90;
-      tt->struct_vals[68].d = -100;
-      tt->struct_vals[69].d = 50;
-      tt->struct_vals[70].s = tdrpStrDup("graupel");
-      tt->struct_vals[71].i = 8;
-      tt->struct_vals[72].d = 5;
-      tt->struct_vals[73].d = 148;
-      tt->struct_vals[74].d = 0.95;
-      tt->struct_vals[75].d = 1;
+      tt->struct_vals[44].d = 0;
+      tt->struct_vals[45].d = 90;
+      tt->struct_vals[46].d = -100;
+      tt->struct_vals[47].d = 50;
+      tt->struct_vals[48].s = tdrpStrDup("rain_hail");
+      tt->struct_vals[49].i = 7;
+      tt->struct_vals[50].d = 5;
+      tt->struct_vals[51].d = 148;
+      tt->struct_vals[52].d = 0;
+      tt->struct_vals[53].d = 90;
+      tt->struct_vals[54].d = -100;
+      tt->struct_vals[55].d = 50;
+      tt->struct_vals[56].s = tdrpStrDup("graupel");
+      tt->struct_vals[57].i = 8;
+      tt->struct_vals[58].d = 5;
+      tt->struct_vals[59].d = 148;
+      tt->struct_vals[60].d = 0;
+      tt->struct_vals[61].d = 90;
+      tt->struct_vals[62].d = -100;
+      tt->struct_vals[63].d = 50;
+      tt->struct_vals[64].s = tdrpStrDup("rain_graupel");
+      tt->struct_vals[65].i = 9;
+      tt->struct_vals[66].d = 5;
+      tt->struct_vals[67].d = 148;
+      tt->struct_vals[68].d = 0;
+      tt->struct_vals[69].d = 90;
+      tt->struct_vals[70].d = -100;
+      tt->struct_vals[71].d = 50;
+      tt->struct_vals[72].s = tdrpStrDup("dry_snow");
+      tt->struct_vals[73].i = 10;
+      tt->struct_vals[74].d = 5;
+      tt->struct_vals[75].d = 148;
       tt->struct_vals[76].d = 0;
       tt->struct_vals[77].d = 90;
       tt->struct_vals[78].d = -100;
       tt->struct_vals[79].d = 50;
-      tt->struct_vals[80].s = tdrpStrDup("rain_graupel");
-      tt->struct_vals[81].i = 9;
+      tt->struct_vals[80].s = tdrpStrDup("wet_snow");
+      tt->struct_vals[81].i = 11;
       tt->struct_vals[82].d = 5;
       tt->struct_vals[83].d = 148;
-      tt->struct_vals[84].d = 0.95;
-      tt->struct_vals[85].d = 1;
-      tt->struct_vals[86].d = 0;
-      tt->struct_vals[87].d = 90;
-      tt->struct_vals[88].d = -100;
-      tt->struct_vals[89].d = 50;
-      tt->struct_vals[90].s = tdrpStrDup("dry_snow");
-      tt->struct_vals[91].i = 10;
-      tt->struct_vals[92].d = 5;
-      tt->struct_vals[93].d = 148;
-      tt->struct_vals[94].d = 0.95;
-      tt->struct_vals[95].d = 1;
-      tt->struct_vals[96].d = 0;
-      tt->struct_vals[97].d = 90;
-      tt->struct_vals[98].d = -100;
-      tt->struct_vals[99].d = 50;
-      tt->struct_vals[100].s = tdrpStrDup("wet_snow");
-      tt->struct_vals[101].i = 11;
-      tt->struct_vals[102].d = 5;
-      tt->struct_vals[103].d = 148;
-      tt->struct_vals[104].d = 0.95;
-      tt->struct_vals[105].d = 1;
-      tt->struct_vals[106].d = 0;
-      tt->struct_vals[107].d = 90;
-      tt->struct_vals[108].d = -100;
-      tt->struct_vals[109].d = 50;
-      tt->struct_vals[110].s = tdrpStrDup("ice_crystals");
-      tt->struct_vals[111].i = 12;
-      tt->struct_vals[112].d = 5;
-      tt->struct_vals[113].d = 148;
-      tt->struct_vals[114].d = 0.95;
-      tt->struct_vals[115].d = 1;
-      tt->struct_vals[116].d = 0;
-      tt->struct_vals[117].d = 90;
-      tt->struct_vals[118].d = -100;
-      tt->struct_vals[119].d = 50;
-      tt->struct_vals[120].s = tdrpStrDup("irreg_ice");
-      tt->struct_vals[121].i = 13;
-      tt->struct_vals[122].d = 5;
-      tt->struct_vals[123].d = 148;
-      tt->struct_vals[124].d = 0.95;
-      tt->struct_vals[125].d = 1;
-      tt->struct_vals[126].d = 0;
-      tt->struct_vals[127].d = 90;
-      tt->struct_vals[128].d = -100;
-      tt->struct_vals[129].d = 50;
-      tt->struct_vals[130].s = tdrpStrDup("supercooled_drops");
-      tt->struct_vals[131].i = 14;
-      tt->struct_vals[132].d = 5;
-      tt->struct_vals[133].d = 148;
-      tt->struct_vals[134].d = 0.95;
-      tt->struct_vals[135].d = 1;
-      tt->struct_vals[136].d = 0;
-      tt->struct_vals[137].d = 90;
-      tt->struct_vals[138].d = -100;
-      tt->struct_vals[139].d = 50;
+      tt->struct_vals[84].d = 0;
+      tt->struct_vals[85].d = 90;
+      tt->struct_vals[86].d = -100;
+      tt->struct_vals[87].d = 50;
+      tt->struct_vals[88].s = tdrpStrDup("ice_crystals");
+      tt->struct_vals[89].i = 12;
+      tt->struct_vals[90].d = 5;
+      tt->struct_vals[91].d = 148;
+      tt->struct_vals[92].d = 0;
+      tt->struct_vals[93].d = 90;
+      tt->struct_vals[94].d = -100;
+      tt->struct_vals[95].d = 50;
+      tt->struct_vals[96].s = tdrpStrDup("irreg_ice");
+      tt->struct_vals[97].i = 13;
+      tt->struct_vals[98].d = 5;
+      tt->struct_vals[99].d = 148;
+      tt->struct_vals[100].d = 0;
+      tt->struct_vals[101].d = 90;
+      tt->struct_vals[102].d = -100;
+      tt->struct_vals[103].d = 50;
+      tt->struct_vals[104].s = tdrpStrDup("supercooled_drops");
+      tt->struct_vals[105].i = 14;
+      tt->struct_vals[106].d = 5;
+      tt->struct_vals[107].d = 148;
+      tt->struct_vals[108].d = 0;
+      tt->struct_vals[109].d = 90;
+      tt->struct_vals[110].d = -100;
+      tt->struct_vals[111].d = 50;
     tt++;
     
     // Parameter 'Comment 8'
@@ -1009,6 +986,39 @@ using namespace std;
     tt->help = tdrpStrDup("Text files will be written to this directory. A day directory will be added, so the file path will be output_text_dir/yyyymmdd/filename.txt.");
     tt->val_offset = (char *) &output_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/PidZdrStats");
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("WRITING RESULTS TO SPDB");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'write_results_to_spdb'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_results_to_spdb");
+    tt->descr = tdrpStrDup("Option to write out ZDR results to SPDB.");
+    tt->help = tdrpStrDup("The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.");
+    tt->val_offset = (char *) &write_results_to_spdb - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'spdb_output_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("spdb_output_url");
+    tt->descr = tdrpStrDup("URL for writing zdr bias results to SPDB XML.");
+    tt->help = tdrpStrDup("For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir");
+    tt->val_offset = (char *) &spdb_output_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/spdb/zdr_bias");
     tt++;
     
     // trailing entry has param_name set to NULL

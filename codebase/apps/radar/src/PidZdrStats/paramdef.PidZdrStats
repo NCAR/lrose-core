@@ -134,8 +134,6 @@ typedef struct {
   int pid;
   double min_range_km;
   double max_range_km;
-  double min_rhohv;
-  double max_rhohv;
   double min_elev_deg;
   double max_elev_deg;
   double min_temp_c;
@@ -150,8 +148,6 @@ paramdef struct pid_region_t {
       pid = 1,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -163,8 +159,6 @@ paramdef struct pid_region_t {
       pid = 2,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -176,8 +170,6 @@ paramdef struct pid_region_t {
       pid = 3,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -189,8 +181,6 @@ paramdef struct pid_region_t {
       pid = 4,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -202,8 +192,6 @@ paramdef struct pid_region_t {
       pid = 5,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -215,8 +203,6 @@ paramdef struct pid_region_t {
       pid = 6,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -228,8 +214,6 @@ paramdef struct pid_region_t {
       pid = 7,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -241,8 +225,6 @@ paramdef struct pid_region_t {
       pid = 8,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -254,8 +236,6 @@ paramdef struct pid_region_t {
       pid = 9,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -267,8 +247,6 @@ paramdef struct pid_region_t {
       pid = 10,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -280,8 +258,6 @@ paramdef struct pid_region_t {
       pid = 11,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -293,8 +269,6 @@ paramdef struct pid_region_t {
       pid = 12,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -306,8 +280,6 @@ paramdef struct pid_region_t {
       pid = 13,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -319,8 +291,6 @@ paramdef struct pid_region_t {
       pid = 14,
       min_range_km = 5,
       max_range_km = 148,
-      min_rhohv = 0.95,
-      max_rhohv = 1.0,
       min_elev_deg = 0.0,
       max_elev_deg = 90.0,
       min_temp_c = -100.0,
@@ -341,4 +311,20 @@ paramdef string {
   p_descr = "Output directory path.";
   p_help = "Text files will be written to this directory. A day directory will be added, so the file path will be output_text_dir/yyyymmdd/filename.txt.";
 } output_dir;
+
+commentdef {
+  p_header = "WRITING RESULTS TO SPDB";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out ZDR results to SPDB.";
+  p_help = "The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
+} write_results_to_spdb;
+
+paramdef string {
+  p_default = "/tmp/spdb/zdr_bias";
+  p_descr = "URL for writing zdr bias results to SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} spdb_output_url;
 

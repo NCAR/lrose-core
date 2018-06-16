@@ -231,22 +231,23 @@ def doPlot(filePath, colHeaders, colData):
     #ll2 = ax1.plot(bins1, yy2, 'g', linewidth=2)
 
 
-    aLog, locLog, scaleLog = stats.lognorm.fit(zdrSorted)
-    print >>sys.stderr, "  ==>> aLog: ", aLog
-    print >>sys.stderr, "  ==>> locLog: ", locLog
-    print >>sys.stderr, "  ==>> scaleLog: ", scaleLog
-    pdLog = stats.lognorm.pdf(xplot, aLog, locLog, scaleLog)
-    llLog = ax1.plot(xplot, pdLog, 'k', linewidth=2)
+    #aLog, locLog, scaleLog = stats.lognorm.fit(zdrSorted)
+    #print >>sys.stderr, "  ==>> aLog: ", aLog
+    #print >>sys.stderr, "  ==>> locLog: ", locLog
+    #print >>sys.stderr, "  ==>> scaleLog: ", scaleLog
+    #pdLog = stats.lognorm.pdf(xplot, aLog, locLog, scaleLog)
+    #llLog = ax1.plot(xplot, pdLog, 'k', linewidth=2)
+
     #ksLog, pvalueLog = stats.kstest(zdrLimited, 'lognorm')
     #print >>sys.stderr, "  ==>> ksLog: ", ksLog
     #print >>sys.stderr, "  ==>> pvalueLog: ", pvalueLog
 
-    aPear3, locPear3, scalePear3 = stats.pearson3.fit(zdrSorted)
-    print >>sys.stderr, "  ==>> aPear3: ", aPear3
-    print >>sys.stderr, "  ==>> locPear3: ", locPear3
-    print >>sys.stderr, "  ==>> scalePear3: ", scalePear3
-    pdPear3 = stats.pearson3.pdf(xplot, aPear3, locPear3, scalePear3)
-    llPear3 = ax1.plot(xplot, pdPear3, 'r', linewidth=2)
+    #aPear3, locPear3, scalePear3 = stats.pearson3.fit(zdrSorted)
+    #print >>sys.stderr, "  ==>> aPear3: ", aPear3
+    #print >>sys.stderr, "  ==>> locPear3: ", locPear3
+    #print >>sys.stderr, "  ==>> scalePear3: ", scalePear3
+    #pdPear3 = stats.pearson3.pdf(xplot, aPear3, locPear3, scalePear3)
+    #llPear3 = ax1.plot(xplot, pdPear3, 'r', linewidth=2)
 
     # aSkew, locSkew, scaleSkew = stats.skewnorm.fit(zdrSorted)
     # print >>sys.stderr, "  ==>> aSkew: ", aSkew
@@ -266,13 +267,31 @@ def doPlot(filePath, colHeaders, colData):
     print >>sys.stderr, "  ==>> aT: ", aT
     print >>sys.stderr, "  ==>> locT: ", locT
     print >>sys.stderr, "  ==>> scaleT: ", scaleT
-
     pdT = stats.t.pdf(xplot, aT, locT, scaleT)
     llT = ax1.plot(xplot, pdT, 'y', linewidth=2)
 
-    #ksT, pvalueT = stats.kstest(zdrSorted, 't')
-    #print >>sys.stderr, "  ==>> ksT: ", ksT
-    #print >>sys.stderr, "  ==>> pvalueT: ", pvalueT
+    #aW, locW, scaleW = stats.tukeylambda.fit(zdrLimited)
+    #print >>sys.stderr, "  ==>> aW: ", aW
+    #print >>sys.stderr, "  ==>> locW: ", locW
+    #print >>sys.stderr, "  ==>> scaleW: ", scaleW
+    #pdW = stats.tukeylambda.pdf(xplot, aW, locW, scaleW)
+    #llW = ax1.plot(xplot, pdW, 'g', linewidth=2)
+
+    #dfZ, ncZ, locZ, scaleZ = stats.nct.fit(zdrLimited)
+    #print >>sys.stderr, "  ==>> dfZ: ", dfZ
+    #print >>sys.stderr, "  ==>> ncZ: ", ncZ
+    #print >>sys.stderr, "  ==>> locZ: ", locZ
+    #print >>sys.stderr, "  ==>> scaleZ: ", scaleZ
+    #pdZ = stats.nct.pdf(xplot, dfZ, ncZ, locZ, scaleZ)
+    #llZ = ax1.plot(xplot, pdZ, 'g', linewidth=2)
+
+    dfK, ncK, locK, scaleK = stats.kappa4.fit(zdrLimited)
+    print >>sys.stderr, "  ==>> dfK: ", dfK
+    print >>sys.stderr, "  ==>> ncK: ", ncK
+    print >>sys.stderr, "  ==>> locK: ", locK
+    print >>sys.stderr, "  ==>> scaleK: ", scaleK
+    pdK = stats.kappa4.pdf(xplot, dfK, ncK, locK, scaleK)
+    llK = ax1.plot(xplot, pdK, 'g', linewidth=2)
 
     # CDF of ZDR
 

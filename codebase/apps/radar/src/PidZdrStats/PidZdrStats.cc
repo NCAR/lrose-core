@@ -37,6 +37,7 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
+#include <Radx/RadxXml.hh>
 #include <Ncxx/Nc3xFile.hh>
 #include <Mdv/GenericRadxFile.hh>
 #include <didss/LdataInfo.hh>
@@ -112,6 +113,7 @@ PidZdrStats::PidZdrStats(int argc, char **argv)
   } 
   for (int ii = 0; ii < _params.pid_regions_n; ii++) {
     _pidIndex[_params._pid_regions[ii].pid] = ii;
+    _pidVals.push_back(_params._pid_regions[ii].pid);
   }
   
 }
@@ -459,11 +461,7 @@ int PidZdrStats::_processRay(RadxRay *ray)
     if (_rhohv != NULL) {
       rhohv = _rhohv[igate];
     }
-    if (rhohv != _rhohvMiss &&
-        (rhohv < region.min_rhohv || rhohv > region.max_rhohv)) {
-      continue;
-    }
-    
+
     // check TEMP
     
     double temp = _tempMiss;
@@ -579,3 +577,115 @@ void PidZdrStats::_closeOutputFiles()
   } // ii
 
 }
+/////////////////////////////////////////////////////////////
+// write zdr bias results to SPDB in XML
+
+void PidZdrStats::_writeResultsToSpdb()
+
+{
+
+  // write results to SPDB
+  
+  if (!_params.write_results_to_spdb) {
+    return;
+  }
+  
+  RadxPath path(_readVol.getPathInUse());
+  string xml;
+
+  xml += RadxXml::writeStartTag("ZdrBias", 0);
+
+  xml += RadxXml::writeString("file", 1, path.getFile());
+  xml += RadxXml::writeBoolean("is_rhi", 1, _readVol.checkIsRhi());
+
+#ifdef JUNK
+  
+  xml += RadxXml::writeInt("ZdrInIceNpts", 1, (int) _zdrStatsIce.count);
+  xml += RadxXml::writeDouble("ZdrInIceMean", 1, _zdrStatsIce.mean);
+  xml += RadxXml::writeDouble("ZdrInIceSdev", 1, _zdrStatsIce.sdev);
+  xml += RadxXml::writeDouble("ZdrInIceSkewness", 1, _zdrStatsIce.skewness);
+  xml += RadxXml::writeDouble("ZdrInIceKurtosis", 1, _zdrStatsIce.kurtosis);
+  for (size_t ii = 0; ii < _zdrStatsIce.percentiles.size(); ii++) {
+    double percent = _params._zdr_bias_ice_percentiles[ii];
+    double val = _zdrStatsIce.percentiles[ii];
+    char tag[1024];
+    sprintf(tag, "ZdrInIcePerc%05.2f", percent);
+    xml += RadxXml::writeDouble(tag, 1, val);
+  }
+
+  xml += RadxXml::writeInt("ZdrmInIceNpts", 1, (int) _zdrmStatsIce.count);
+  xml += RadxXml::writeDouble("ZdrmInIceMean", 1, _zdrmStatsIce.mean);
+  xml += RadxXml::writeDouble("ZdrmInIceSdev", 1, _zdrmStatsIce.sdev);
+  xml += RadxXml::writeDouble("ZdrmInIceSkewness", 1, _zdrmStatsIce.skewness);
+  xml += RadxXml::writeDouble("ZdrmInIceKurtosis", 1, _zdrmStatsIce.kurtosis);
+  for (size_t ii = 0; ii < _zdrmStatsIce.percentiles.size(); ii++) {
+    double percent = _params._zdr_bias_ice_percentiles[ii];
+    double val = _zdrmStatsIce.percentiles[ii];
+    char tag[1024];
+    sprintf(tag, "ZdrmInIcePerc%05.2f", percent);
+    xml += RadxXml::writeDouble(tag, 1, val);
+  }
+
+  xml += RadxXml::writeInt("ZdrInBraggNpts", 1, (int) _zdrStatsBragg.count);
+  xml += RadxXml::writeDouble("ZdrInBraggMean", 1, _zdrStatsBragg.mean);
+  xml += RadxXml::writeDouble("ZdrInBraggSdev", 1, _zdrStatsBragg.sdev);
+  xml += RadxXml::writeDouble("ZdrInBraggSkewness", 1, _zdrStatsBragg.skewness);
+  xml += RadxXml::writeDouble("ZdrInBraggKurtosis", 1, _zdrStatsBragg.kurtosis);
+  for (size_t ii = 0; ii < _zdrStatsBragg.percentiles.size(); ii++) {
+    double percent = _params._zdr_bias_bragg_percentiles[ii];
+    double val = _zdrStatsBragg.percentiles[ii];
+    char tag[1024];
+    sprintf(tag, "ZdrInBraggPerc%05.2f", percent);
+    xml += RadxXml::writeDouble(tag, 1, val);
+  }
+
+  xml += RadxXml::writeInt("ZdrmInBraggNpts", 1, (int) _zdrmStatsBragg.count);
+  xml += RadxXml::writeDouble("ZdrmInBraggMean", 1, _zdrmStatsBragg.mean);
+  xml += RadxXml::writeDouble("ZdrmInBraggSdev", 1, _zdrmStatsBragg.sdev);
+  xml += RadxXml::writeDouble("ZdrmInBraggSkewness", 1, _zdrmStatsBragg.skewness);
+  xml += RadxXml::writeDouble("ZdrmInBraggKurtosis", 1, _zdrmStatsBragg.kurtosis);
+  for (size_t ii = 0; ii < _zdrmStatsBragg.percentiles.size(); ii++) {
+    double percent = _params._zdr_bias_bragg_percentiles[ii];
+    double val = _zdrmStatsBragg.percentiles[ii];
+    char tag[1024];
+    sprintf(tag, "ZdrmInBraggPerc%05.2f", percent);
+    xml += RadxXml::writeDouble(tag, 1, val);
+  }
+
+  if (_params.read_site_temp_from_spdb) {
+    xml += RadxXml::writeDouble("TempSite", 1, _siteTempC);
+    RadxTime tempTime(_timeForSiteTemp);
+    xml += RadxXml::writeString("TempTime", 1, tempTime.getW3cStr());
+  }
+  
+  xml += RadxXml::writeEndTag("ZdrBias", 0);
+
+#endif
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Writing ZDR bias results to SPDB, url: "
+         << _params.spdb_output_url << endl;
+  }
+
+  DsSpdb spdb;
+  time_t validTime = _readVol.getStartTimeSecs();
+  spdb.addPutChunk(0, validTime, validTime, xml.size() + 1, xml.c_str());
+  if (spdb.put(_params.spdb_output_url,
+               SPDB_XML_ID, SPDB_XML_LABEL)) {
+    cerr << "ERROR - RadxPartRain::_computeZdrBias" << endl;
+    cerr << spdb.getErrStr() << endl;
+    return;
+  }
+  
+  if (_params.debug) {
+    cerr << "Wrote ZDR bias results to spdb, url: " 
+         << _params.spdb_output_url << endl;
+  }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=====================================" << endl;
+    cerr << xml;
+    cerr << "=====================================" << endl;
+  }
+
+}
+
