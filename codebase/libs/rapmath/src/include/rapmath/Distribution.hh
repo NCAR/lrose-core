@@ -202,6 +202,8 @@ protected:
 
   double _histMin;
   double _histMax;
+  double _histMedian;
+  double _histMode;
   double _histDelta;
   size_t _histNBins;
   double _histNSdev;

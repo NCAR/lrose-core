@@ -100,6 +100,8 @@ void Distribution::_clearHist()
 
 {
 
+  _histMedian = NAN;
+  _histMode = NAN;
   _histCount.clear();
   _histX.clear();
   _histDensity.clear();
@@ -411,6 +413,8 @@ void Distribution::printHistogram(FILE *out)
   fprintf(out, "  histDelta: %g\n", _histDelta);
   fprintf(out, "  histMin: %g\n", _histMin);
   fprintf(out, "  histMax: %g\n", _histMax);
+  fprintf(out, "  histMedian: %g\n", _histMedian);
+  fprintf(out, "  histMode: %g\n", _histMode);
   fprintf(out, "\n");
   fprintf(out, "%4s %8s %8s %6s %6s \n", "bin", "xx", "count", "pdf", "cdf");
   
@@ -476,6 +480,28 @@ void Distribution::computeHistCdf()
   for (size_t jj = 0; jj < _histNBins; jj++) {
     _histCdf[jj] *= correction;
   }
+
+  // find the median
+
+  for (size_t jj = 1; jj < _histNBins; jj++) {
+    if (_histCdf[jj-1] <= 0.5 && _histCdf[jj] >= 0.5) {
+      double delta = _histCdf[jj] - _histCdf[jj-1];
+      double frac = (0.5 - _histCdf[jj-1]) / delta;
+      _histMedian = _histX[jj-1] + frac * (_histX[jj] - _histX[jj-1]);
+    }
+  }
+
+  // find the mode
+
+  double maxPdf = -1.0e99;
+  int modeIndex = 0;
+  for (size_t jj = 0; jj < _histNBins; jj++) {
+    if (_histPdf[jj] > maxPdf) {
+      maxPdf = _histPdf[jj];
+      modeIndex = jj;
+    }
+  } // jj
+  _histMode = _histX[modeIndex];
 
 }
 
