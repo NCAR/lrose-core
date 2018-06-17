@@ -68,7 +68,7 @@ instance = "pecan";
 // Type: string
 //
 
-input_dir = "/scr/rain1/rsfdata/projects/dynamo/cfradial/spol/partrain/sband/rhi";
+input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/qcv2/partrain/sband/rhi";
 
 ///////////// mode ////////////////////////////////////
 //
@@ -128,7 +128,7 @@ PID_field_name = "PID";
 // Type: string
 //
 
-ZDR_field_name = "ZDRM_S";
+ZDR_field_name = "ZDRM_F";
 
 ///////////// RHOHV_field_name ////////////////////////
 //
@@ -138,7 +138,7 @@ ZDR_field_name = "ZDRM_S";
 // Type: string
 //
 
-RHOHV_field_name = "RHOHV_S";
+RHOHV_field_name = "RHOHV_F";
 
 ///////////// TEMP_field_name /////////////////////////
 //
@@ -491,7 +491,7 @@ read_site_temp_from_spdb = TRUE;
 // Type: string
 //
 
-site_temp_spdb_url = "spdbp:://rain:0:dynamo/spdb/metar";
+site_temp_spdb_url = "spdbp:://rain:0:pecan/spdb/KSMeso";
 
 ///////////// site_temp_station_name //////////////////
 //
@@ -501,7 +501,7 @@ site_temp_spdb_url = "spdbp:://rain:0:dynamo/spdb/metar";
 // Type: string
 //
 
-site_temp_station_name = "VRMM";
+site_temp_station_name = "CRKK";
 
 ///////////// site_temp_search_margin_secs ////////////
 //
@@ -534,7 +534,7 @@ site_temp_search_margin_secs = 3600;
 // Type: string
 //
 
-output_dir = "$(HOME)/data/zdr/dynamo/PidZdrStats/txt";
+output_dir = "$(HOME)/data/zdr/pecan/PidZdrStats/txt";
 
 //======================================================================
 //
@@ -566,5 +566,5 @@ write_results_to_spdb = TRUE;
 // Type: string
 //
 
-spdb_output_url = "$(HOME)/data/zdr/dynamo/PidZdrStats/spdb";
+spdb_output_url = "$(HOME)/data/zdr/pecan/PidZdrStats/spdb";
 

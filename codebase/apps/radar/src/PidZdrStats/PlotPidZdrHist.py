@@ -21,6 +21,7 @@ def main():
 #   globals
 
     global options
+    global histNBins
 
 # parse the command line
 
@@ -54,11 +55,17 @@ def main():
                       dest='maxElev',
                       default='90.0',
                       help='Max elevation for ZDR data')
+    parser.add_option('--nbins',
+                      dest='nbins',
+                      default=60,
+                      help='Number of bins in histograms')
     (options, args) = parser.parse_args()
     
     if (options.debug == True):
         print >>sys.stderr, "Running %prog"
         print >>sys.stderr, "  file: ", options.file
+
+    histNBins = int(options.nbins)
 
     # read in headers
 
@@ -200,11 +207,11 @@ def doPlot(filePath, colHeaders, colData):
     # ax1.set_xlim([mean -sdev * 3, mean + sdev * 3])
     ax1.set_xlim([minVal, maxVal])
     xmin, xmax = ax1.get_xlim()
-    xplot = np.linspace(xmin, xmax, 60)
+    xplot = np.linspace(xmin, xmax, histNBins)
 
     # the histogram of ZDR
 
-    n1, bins1, patches1 = ax1.hist(zdrSorted, 60, normed=True,
+    n1, bins1, patches1 = ax1.hist(zdrSorted, histNBins, normed=True,
                                    histtype='stepfilled',
                                    facecolor='slateblue',
                                    alpha=0.35)
@@ -263,12 +270,12 @@ def doPlot(filePath, colHeaders, colData):
     #pd5 = stats.fisk.pdf(xplot, a5, loc5, scale5)
     #ll5 = ax1.plot(xplot, pd5, 'o', linewidth=2)
 
-    aT, locT, scaleT = stats.t.fit(zdrLimited)
-    print >>sys.stderr, "  ==>> aT: ", aT
-    print >>sys.stderr, "  ==>> locT: ", locT
-    print >>sys.stderr, "  ==>> scaleT: ", scaleT
-    pdT = stats.t.pdf(xplot, aT, locT, scaleT)
-    llT = ax1.plot(xplot, pdT, 'y', linewidth=2)
+    #aT, locT, scaleT = stats.t.fit(zdrLimited)
+    #print >>sys.stderr, "  ==>> aT: ", aT
+    #print >>sys.stderr, "  ==>> locT: ", locT
+    #print >>sys.stderr, "  ==>> scaleT: ", scaleT
+    #pdT = stats.t.pdf(xplot, aT, locT, scaleT)
+    #llT = ax1.plot(xplot, pdT, 'y', linewidth=2)
 
     #aW, locW, scaleW = stats.tukeylambda.fit(zdrLimited)
     #print >>sys.stderr, "  ==>> aW: ", aW
@@ -285,17 +292,17 @@ def doPlot(filePath, colHeaders, colData):
     #pdZ = stats.nct.pdf(xplot, dfZ, ncZ, locZ, scaleZ)
     #llZ = ax1.plot(xplot, pdZ, 'g', linewidth=2)
 
-    dfK, ncK, locK, scaleK = stats.kappa4.fit(zdrLimited)
-    print >>sys.stderr, "  ==>> dfK: ", dfK
-    print >>sys.stderr, "  ==>> ncK: ", ncK
-    print >>sys.stderr, "  ==>> locK: ", locK
-    print >>sys.stderr, "  ==>> scaleK: ", scaleK
-    pdK = stats.kappa4.pdf(xplot, dfK, ncK, locK, scaleK)
-    llK = ax1.plot(xplot, pdK, 'g', linewidth=2)
+    #dfK, ncK, locK, scaleK = stats.kappa4.fit(zdrLimited)
+    #print >>sys.stderr, "  ==>> dfK: ", dfK
+    #print >>sys.stderr, "  ==>> ncK: ", ncK
+    #print >>sys.stderr, "  ==>> locK: ", locK
+    #print >>sys.stderr, "  ==>> scaleK: ", scaleK
+    #pdK = stats.kappa4.pdf(xplot, dfK, ncK, locK, scaleK)
+    #llK = ax1.plot(xplot, pdK, 'g', linewidth=2)
 
     # CDF of ZDR
 
-    n2, bins2, patches2 = ax2.hist(zdrSorted, 60, normed=True,
+    n2, bins2, patches2 = ax2.hist(zdrSorted, histNBins, normed=True,
                                    cumulative=True,
                                    histtype='stepfilled',
                                    facecolor='slateblue',
@@ -316,8 +323,8 @@ def doPlot(filePath, colHeaders, colData):
     for label in legend2.get_texts():
         label.set_fontsize('medium')
 
-    cdT = stats.t.cdf(xplot, aT, locT, scaleT)
-    clT = ax2.plot(xplot, cdT, 'y', linewidth=2)
+    #cdT = stats.t.cdf(xplot, aT, locT, scaleT)
+    #clT = ax2.plot(xplot, cdT, 'y', linewidth=2)
 
     # ax2.set_xlim([mean -sdev * 3, mean + sdev * 3])
 

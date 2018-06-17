@@ -105,128 +105,6 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	TDRP_add_override(&override, tmp_str);
       }
 	
-    } else if (!strcmp(argv[i], "-ag")) {
-      
-      sprintf(tmp_str, "aggregate_sweep_files_on_read = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-ag_all")) {
-      
-      sprintf(tmp_str, "aggregate_all_files_on_read = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-disag")) {
-      
-      sprintf(tmp_str, "write_individual_sweeps = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-native")) {
-      
-      sprintf(tmp_str, "output_native_byte_order = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-cfradial")) {
-      
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_CFRADIAL;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-dorade")) {
-      
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_DORADE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-foray")) {
-      
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_FORAY;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-nexrad")) {
-      
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_NEXRAD;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-uf")) {
-      
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_UF;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-cf_classic")) {
-      
-      sprintf(tmp_str, "netcdf_style = CLASSIC;");
-      TDRP_add_override(&override, tmp_str);
-      
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_CFRADIAL;");
-      TDRP_add_override(&override, tmp_str);
-
-    } else if (!strcmp(argv[i], "-cf_nc64bit")) {
-      
-      sprintf(tmp_str, "netcdf_style = NC64BIT;");
-      TDRP_add_override(&override, tmp_str);
-      
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_CFRADIAL;");
-      TDRP_add_override(&override, tmp_str);
-
-    } else if (!strcmp(argv[i], "-cf_netcdf4")) {
-      
-      sprintf(tmp_str, "netcdf_style = NETCDF4;");
-      TDRP_add_override(&override, tmp_str);
-      
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_CFRADIAL;");
-      TDRP_add_override(&override, tmp_str);
-
-    } else if (!strcmp(argv[i], "-cf_netcdf4_classic")) {
-      
-      sprintf(tmp_str, "netcdf_style = NETCDF4_CLASSIC;");
-      TDRP_add_override(&override, tmp_str);
-      
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_CFRADIAL;");
-      TDRP_add_override(&override, tmp_str);
-
-    } else if (!strcmp(argv[i], "-force_vary")) {
-      
-      sprintf(tmp_str, "output_force_ngates_vary = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-out_start")) {
-      
-      sprintf(tmp_str, "output_filename_mode = START_TIME_ONLY;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-out_end")) {
-      
-      sprintf(tmp_str, "output_filename_mode = END_TIME_ONLY;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-rem_miss")) {
-      
-      sprintf(tmp_str, "remove_rays_with_all_data_missing = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-keep_long")) {
-      
-      sprintf(tmp_str, "remove_long_range_rays = FALSE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-rem_short")) {
-      
-      sprintf(tmp_str, "remove_short_range_rays = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-trim_sur")) {
-      
-      sprintf(tmp_str, "trim_surveillance_sweeps_to_360deg = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-const_ngates")) {
-      
-      sprintf(tmp_str, "set_ngates_constant = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-ldata")) {
-      
-      sprintf(tmp_str, "write_latest_data_info = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
@@ -273,65 +151,6 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
       
-    } else if (!strcmp(argv[i], "-field")) {
-      
-      if (i < argc - 1) {
-	fields.push_back(argv[++i]);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-write_other")) {
-      
-      sprintf(tmp_str, "write_other_fields_unchanged = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-lat")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "radar_latitude_deg = %s;", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "override_radar_location = TRUE;");
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-lon")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "radar_longitude_deg = %s;", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "override_radar_location = TRUE;");
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-alt")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "radar_altitude_meters = %s;", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "override_radar_location = TRUE;");
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-compress")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "output_compressed = TRUE;");
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "compression_level = %s;", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "netcdf_style = NETCDF4;");
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-
     } else if (!strcmp(argv[i], "-indir")) {
       
       if (i < argc - 1) {
@@ -341,100 +160,9 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
-    } else if (!strcmp(argv[i], "-outdir")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "output_dir = \"%s\";", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-fixed_angle")) {
-      
-      if (i < argc - 1) {
-        i++;
-	sprintf(tmp_str, "lower_fixed_angle_limit = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "upper_fixed_angle_limit = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "set_fixed_angle_limits = true;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-fixed_angle_max")) {
-      
-      if (i < argc - 1) {
-        i++;
-	sprintf(tmp_str, "upper_fixed_angle_limit = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "set_fixed_angle_limits = true;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-sweep")) {
-      
-      if (i < argc - 1) {
-        i++;
-	sprintf(tmp_str, "lower_sweep_num = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "upper_sweep_num = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "set_sweep_num_limits = true;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-sweep_max")) {
-      
-      if (i < argc - 1) {
-        i++;
-	sprintf(tmp_str, "read_upper_sweep_num = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "set_sweep_num_limits = true;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
     }
     
   } // i
-
-  // set fields if specified
-
-  if (fields.size() > 0) {
-    
-    sprintf(tmp_str, "set_output_fields = true;");
-    TDRP_add_override(&override, tmp_str);
-    
-    string nameStr = "output_fields = { ";
-    for (size_t ii = 0; ii < fields.size(); ii++) {
-      string fieldStr = "\"";
-      fieldStr += fields[ii];
-      fieldStr += "\", ";
-      nameStr += "{ ";
-      nameStr += fieldStr;
-      nameStr += fieldStr;
-      nameStr += fieldStr;
-      nameStr += fieldStr;
-      nameStr += "\"\", ";
-      nameStr += "OUTPUT_ENCODING_ASIS }";
-      if (ii != fields.size() - 1) {
-        nameStr += ", ";
-      } else {
-        nameStr += " ";
-      }
-    }
-    nameStr += "};";
-    TDRP_add_override(&override, nameStr.c_str());
-    
-  } // if (fields.size() ...
 
   if (!OK) {
     _usage(cerr);
@@ -453,45 +181,7 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -h ] produce this list.\n"
       << "\n"
-      << "  [ -ag ] aggregate sweep files into volume on read.\n"
-      << "          Files with the SAME VOLUME NUMBER in the name are aggregated.\n"
-      << "          Applies to CfRadial and DORADE sweep files.\n"
-      << "\n"
-      << "  [ -ag_all ] aggregate files in input list on read.\n"
-      << "          ALL FILES in the input list are aggregated into a volume.\n"
-      << "          See '-f' option.\n"
-      << "          Applies to CfRadial and DORADE sweep files.\n"
-      << "\n"
-      << "  [ -alt ? ] override radar altitude (m)\n"
-      << "\n"
-      << "  [ -cfradial ] convert to cfradial (the default)\n"
-      << "\n"
-      << "  [ -cf_classic ] output classic-style netcdf (the default)\n"
-      << "  [ -cf_netcdf4 ] output netcdf4 style\n"
-      << "  [ -cf_classic4 ] output classic-style netcdf4\n"
-      << "  [ -cf_nc64bit ] output 64-bit NC netcdf\n"
-      << "                  The above only apply to cfradial output.\n"
-      << "\n"
-      << "  [ -const_ngates ] force number of gates constant for all rays\n"
-      << "                    Added gates will be filled with missing values\n"
-      << "\n"
-      << "  [ -compress ? ] compress output\n"
-      << "                  specifiy compression level [1-9]\n"
-      << "                  For cfradial, forces netcdf4 mode\n"
-      << "\n"
       << "  [ -d, -debug ] print debug messages\n"
-      << "\n"
-      << "  [ -dorade ] convert to dorade\n"
-      << "\n"
-      << "  [ -disag ] dis-aggregate into sweep files on write\n"
-      << "          optional for CfRadial files\n"
-      << "          always applies to DORADE sweep files\n"
-      << "\n"
-      << "  [ -fixed_angle ? ] set single fixed_angle\n"
-      << "              or minimum - see '-fixed_ang_max'\n"
-      << "\n"
-      << "  [ -fixed_angle_max ? ] set max fixed_angle\n"
-      << "                  use '-fixed_ang' for setting minimum\n"
       << "\n"
       << "  [ -end \"yyyy mm dd hh mm ss\"] end time\n"
       << "           Sets mode to ARCHIVE\n"
@@ -499,70 +189,16 @@ void Args::_usage(ostream &out)
       << "  [ -f, -paths ? ] set file paths\n"
       << "           Sets mode to FILELIST\n"
       << "\n"
-      << "  [ -field ? ] Specify particular field\n"
-      << "     Specify name or number\n"
-      << "     Use multiple -field args for multiple fields\n"
-      << "     If not specified, all fields will be used\n"
-      << "\n"
-      << "  [ -foray ] convert to FORAY-1 netcdf\n"
-      << "\n"
-      << "  [ -force_vary ] force use of ragged arrays for CfRadial\n"
-      << "     even if ngates is constant for all rays\n"
-      << "\n"
       << "  [ -indir ? ] set input directory\n"
       << "\n"
       << "  [ -instance ?] specify the instance\n"
       << "\n"
-      << "  [ -keep_long ] keep long range rays\n"
-      << "                 Keep NEXRAD long-range non-Doppler sweeps\n"
-      << "                 Default is to remove them\n"
-      << "\n"
-      << "  [ -lat ? ] override radar latitude (deg)\n"
-      << "\n"
-      << "  [ -lon ? ] override radar longitude (deg)\n"
-      << "\n"
-      << "  [ -ldata ? ] write _latest_data_info files\n"
-      << "\n"
-      << "  [ -native ] output in host-native byte ordering\n"
-      << "              instead of swapping into big-endian\n"
-      << "\n"
-      << "  [ -nexrad ] convert to NEXRAD archive level 2\n"
-      << "\n"
-      << "  [ -outdir ? ] set output directory\n"
-      << "\n"
-      << "  [ -out_end ? ] compute output path using end time\n"
-      << "                 default is to use both start and end times\n"
-      << "\n"
-      << "  [ -out_start ? ] compute output path using start time\n"
-      << "                   default is to use both start and end times\n"
-      << "\n"
-      << "  [ -rem_miss ] remove rays in which data at all gates and\n"
-      << "                for all fields is missing\n"
-      << "\n"
-      << "  [ -rem_short ] remove short range rays\n"
-      << "                 Remove NEXRAD short-range Doppler sweeps\n"
-      << "\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "           Sets mode to ARCHIVE\n"
-      << "\n"
-      << "  [ -sweep ? ] set single sweep number\n"
-      << "               or minimum - see '-sweep_max'\n"
-      << "\n"
-      << "  [ -sweep_max ? ] set max sweep number\n"
-      << "                   use '-sweep' for setting minimum\n"
-      << "\n"
-      << "  [ -trim_sur ] trim surveillance sweeps to 360 degrees\n"
-      << "                Remove extra rays in each surveillance sweep\n"
-      << "\n"
-      << "  [ -uf ] convert to universal format\n"
       << "\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "\n"
       << "  [ -vv, -extra ] print extra verbose debug messages\n"
-      << "\n"
-      << "  [ -write_other ] option to write other fields unchanged.\n"
-      << "    Default is that if -fields is used, only the specified fields\n"
-      << "    will be written in the output files.\n"
       << "\n"
       << endl;
   

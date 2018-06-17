@@ -116,7 +116,14 @@ PidZdrStats::PidZdrStats(int argc, char **argv)
     _pidIndex[_params._pid_regions[ii].pid] = ii;
     _pidVals.push_back(_params._pid_regions[ii].pid);
   }
-  
+
+  // create polynomial distribution objects
+
+  DistPolynomial poly;
+  for (int ii = 0; ii < _params.pid_regions_n; ii++) {
+    _dists.push_back(poly);
+  }
+
   // allocate the vector for accumulating gate data for various PIDs
   
   _allocGateDataVec();
@@ -706,7 +713,7 @@ void PidZdrStats::_writeStatsToSpdb(const string &filePath)
   } // ii
 
   // write it out
-
+  
   if (spdb.put(_params.spdb_output_url,
                SPDB_XML_ID, SPDB_XML_LABEL)) {
     cerr << "ERROR - PidZdrStats::_writeStatsToSpdb" << endl;

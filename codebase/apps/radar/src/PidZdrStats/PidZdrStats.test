@@ -222,10 +222,13 @@ pid_min_npoints_valid = 1000;
 //
 // Set up the PID regions for analysis.
 //
-// These limits are applied to each gate, depending on the PID 
-//   identified for that gate. If the values read in are outside these 
-//   limits, the gate is not used for the analysis. The PID value must be 
-//   between 1 and 20, inclusive.
+// The PID value must be between 1 and 20, inclusive, and should match 
+//   the values produced by the NCAR PID algorithm. The range, elevation 
+//   and temperature limits are applied at each gate when deciding whether 
+//   to include that gate in the analysis. If the values read in are 
+//   outside these limits, the gate is not used for the analysis. The 
+//   histogram limits are used to govern how the histograms are computed 
+//   and stored.
 //
 //
 // Type: struct
@@ -234,12 +237,12 @@ pid_min_npoints_valid = 1000;
 //      int pid;
 //      double min_range_km;
 //      double max_range_km;
-//      double min_rhohv;
-//      double max_rhohv;
 //      double min_elev_deg;
 //      double max_elev_deg;
 //      double min_temp_c;
 //      double max_temp_c;
+//      double zdr_hist_lower_limit;
+//      double zdr_hist_upper_limit;
 //   }
 //
 // 1D array - variable length.
@@ -251,12 +254,12 @@ pid_regions = {
     pid = 1,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -264,12 +267,12 @@ pid_regions = {
     pid = 2,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -277,12 +280,12 @@ pid_regions = {
     pid = 3,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -290,12 +293,12 @@ pid_regions = {
     pid = 4,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -303,12 +306,12 @@ pid_regions = {
     pid = 5,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -316,12 +319,12 @@ pid_regions = {
     pid = 6,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -329,12 +332,12 @@ pid_regions = {
     pid = 7,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -342,12 +345,12 @@ pid_regions = {
     pid = 8,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -355,12 +358,12 @@ pid_regions = {
     pid = 9,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -368,12 +371,12 @@ pid_regions = {
     pid = 10,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -381,12 +384,12 @@ pid_regions = {
     pid = 11,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -394,12 +397,12 @@ pid_regions = {
     pid = 12,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -407,12 +410,12 @@ pid_regions = {
     pid = 13,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
   ,
   {
@@ -420,14 +423,98 @@ pid_regions = {
     pid = 14,
     min_range_km = 5,
     max_range_km = 148,
-    min_rhohv = 0.95,
-    max_rhohv = 1,
     min_elev_deg = 0,
     max_elev_deg = 90,
     min_temp_c = -100,
-    max_temp_c = 50
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
   }
 };
+
+///////////// zdr_hist_n_bins /////////////////////////
+//
+// Number of bins in histograms used to analyze ZDR stats.
+//
+//
+// Type: int
+//
+
+zdr_hist_n_bins = 60;
+
+///////////// zdr_dist_poly_order /////////////////////
+//
+// Order of polygon fit for ZDR distribution.
+//
+//
+// Type: int
+//
+
+zdr_dist_poly_order = 11;
+
+///////////// min_npts_for_valid_stats ////////////////
+//
+// Min number of zdr points for valid statistics.
+//
+// With too few points we cannot draw reliable conclusions about the ZDR 
+//   statistics.
+//
+//
+// Type: int
+//
+
+min_npts_for_valid_stats = 1000;
+
+//======================================================================
+//
+// RETRIEVING SITE TEMPERATURE FROM SPDB.
+//
+//======================================================================
+ 
+///////////// read_site_temp_from_spdb ////////////////
+//
+// Option to read site temperature from SPDB.
+//
+// The temperature closest to the radar volume time will be read in.
+//
+//
+// Type: boolean
+//
+
+read_site_temp_from_spdb = FALSE;
+
+///////////// site_temp_spdb_url //////////////////////
+//
+// URL for temperatures from SPDB.
+//
+//
+// Type: string
+//
+
+site_temp_spdb_url = "spdbp:://hail:0:pecan/spdb/spol/temp";
+
+///////////// site_temp_station_name //////////////////
+//
+// Station name for site temperature.
+//
+//
+// Type: string
+//
+
+site_temp_station_name = "SPOL";
+
+///////////// site_temp_search_margin_secs ////////////
+//
+// Search margin when finding site temp data (secs).
+//
+// We search for the temperature closest in time to the radar volume. 
+//   This is the search margin on either side of the volume time.
+//
+//
+// Type: int
+//
+
+site_temp_search_margin_secs = 3600;
 
 //======================================================================
 //
@@ -448,4 +535,36 @@ pid_regions = {
 //
 
 output_dir = "/tmp/PidZdrStats";
+
+//======================================================================
+//
+// WRITING RESULTS TO SPDB.
+//
+//======================================================================
+ 
+///////////// write_results_to_spdb ///////////////////
+//
+// Option to write out ZDR results to SPDB.
+//
+// The results will be written in XML, stored in SPDB. The data can then 
+//   be retrieved for plotting or other purposes.
+//
+//
+// Type: boolean
+//
+
+write_results_to_spdb = TRUE;
+
+///////////// spdb_output_url /////////////////////////
+//
+// URL for writing zdr bias results to SPDB XML.
+//
+// For local writes, specify the directory. For remote writes, specify 
+//   the full url: spdbp:://host::dir.
+//
+//
+// Type: string
+//
+
+spdb_output_url = "/tmp/spdb/zdr_bias";
 
