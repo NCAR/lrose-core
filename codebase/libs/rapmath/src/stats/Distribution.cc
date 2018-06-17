@@ -87,9 +87,11 @@ void Distribution::_clearStats()
   _skewness = NAN;
   _kurtosis = NAN;
 
-  _clearHist();
-
   _pdfAvail = false;
+  _pdfMedian = NAN;
+  _pdfMode = NAN;
+
+  _clearHist();
 
 }
 
@@ -100,13 +102,19 @@ void Distribution::_clearHist()
 
 {
 
-  _histMedian = NAN;
-  _histMode = NAN;
-  _histCount.clear();
   _histX.clear();
+
+  _histCount.clear();
   _histDensity.clear();
+
+  _histCumCount.clear();
+  _histCumDensity.clear();
+
   _histPdf.clear();
   _histCdf.clear();
+
+  _histMedian = NAN;
+  _histMode = NAN;
 
 }
 
@@ -394,7 +402,42 @@ void Distribution::computeHistogram()
     } // jj
     computeHistCdf();
   }
-  
+
+  // cumulative counts and density
+
+  double sumCount = 0.0;
+  double sumDensity = 0.0;
+  for (size_t jj = 0; jj < _histNBins; jj++) {
+    sumCount += _histCount[jj];
+    sumDensity += _histDensity[jj];
+    _histCumCount.push_back(sumCount);
+    _histCumDensity.push_back(sumDensity);
+  }
+
+  // find the median from the histogram
+
+  double nValsHalf = (double) _nVals / 2.0;
+  for (size_t jj = 1; jj < _histNBins; jj++) {
+    if (_histCumCount[jj-1] <= nValsHalf && _histCumCount[jj] >= nValsHalf) {
+      double delta = _histCumCount[jj] - _histCumCount[jj-1];
+      double frac = (nValsHalf - _histCumCount[jj-1]) / delta;
+      _histMedian = _histX[jj-1] + frac * (_histX[jj] - _histX[jj-1]);
+      break;
+    }
+  }
+
+  // find the mode from the histogram
+
+  double maxCount = -1.0e99;
+  int modeIndex = 0;
+  for (size_t jj = 0; jj < _histNBins; jj++) {
+    if (_histCount[jj] > maxCount) {
+      maxCount = _histCount[jj];
+      modeIndex = jj;
+    }
+  } // jj
+  _histMode = _histX[modeIndex];
+
 }
 
 //////////////////////////////////////////////////////////////////
@@ -416,6 +459,8 @@ void Distribution::printHistogram(FILE *out)
   fprintf(out, "  histMax: %g\n", _histMax);
   fprintf(out, "  histMedian: %g\n", _histMedian);
   fprintf(out, "  histMode: %g\n", _histMode);
+  fprintf(out, "  pdfMedian: %g\n", _pdfMedian);
+  fprintf(out, "  pdfMode: %g\n", _pdfMode);
   fprintf(out, "\n");
   fprintf(out, "%4s %8s %8s %6s %6s \n", "bin", "xx", "count", "pdf", "cdf");
   
@@ -482,17 +527,18 @@ void Distribution::computeHistCdf()
     _histCdf[jj] *= correction;
   }
 
-  // find the median
+  // find the median from the PDF
 
   for (size_t jj = 1; jj < _histNBins; jj++) {
     if (_histCdf[jj-1] <= 0.5 && _histCdf[jj] >= 0.5) {
       double delta = _histCdf[jj] - _histCdf[jj-1];
       double frac = (0.5 - _histCdf[jj-1]) / delta;
-      _histMedian = _histX[jj-1] + frac * (_histX[jj] - _histX[jj-1]);
+      _pdfMedian = _histX[jj-1] + frac * (_histX[jj] - _histX[jj-1]);
+      break;
     }
   }
 
-  // find the mode
+  // find the mode from the PDF
 
   double maxPdf = -1.0e99;
   int modeIndex = 0;
@@ -502,7 +548,7 @@ void Distribution::computeHistCdf()
       modeIndex = jj;
     }
   } // jj
-  _histMode = _histX[modeIndex];
+  _pdfMode = _histX[modeIndex];
 
 }
 

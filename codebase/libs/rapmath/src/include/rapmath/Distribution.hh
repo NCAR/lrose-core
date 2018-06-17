@@ -167,17 +167,22 @@ public:
   size_t getHistNBins() const { return _histNBins; }
   double getHistMin() const { return _histMin; }
   double getHistMax() const { return _histMax; }
-  double getHistMedian() const { return _histMedian; }
-  double getHistMode() const { return _histMode; }
   double getHistDelta() const { return _histDelta; }
 
   const vector<double> &getHistX() const { return _histX; }
   const vector<double> &getHistCount() const { return _histCount; }
   const vector<double> &getHistDensity() const { return _histDensity; }
-  const vector<double> &getHistPdf() const { return _histPdf; }
-  const vector<double> &getHistCdf() const { return _histCdf; }
+
+  double getHistMedian() const { return _histMedian; }
+  double getHistMode() const { return _histMode; }
 
   double getGof() const { return _gof; }
+
+  bool getPdfAvail() const { return _pdfAvail; }
+  const vector<double> &getHistPdf() const { return _histPdf; }
+  const vector<double> &getHistCdf() const { return _histCdf; }
+  double getPdfMedian() const { return _pdfMedian; }
+  double getPdfMode() const { return _pdfMode; }
 
   // print histogram as text
   
@@ -206,18 +211,33 @@ protected:
 
   double _histMin;
   double _histMax;
-  double _histMedian;
-  double _histMode;
   double _histDelta;
   size_t _histNBins;
   double _histNSdev;
+
   vector<double> _histX;
   vector<double> _histCount;
   vector<double> _histDensity;
+  vector<double> _histCumCount;
+  vector<double> _histCumDensity;
+
+  // mode and median from histogram
+
+  double _histMedian;
+  double _histMode;
+
+  // fitting the pdf and cdf
+
+  bool _pdfAvail;
   vector<double> _histPdf;
   vector<double> _histCdf;
 
-  bool _pdfAvail;
+  // mode and median from fitted pdf
+
+  double _pdfMedian;
+  double _pdfMode;
+
+  // goodness of fit
 
   double _gof;
 
