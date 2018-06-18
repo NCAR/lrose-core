@@ -73,14 +73,22 @@ int Args::parse(int argc, char **argv, string &prog_name)
       usage(prog_name, cout);
       exit (0);
       
-    } else if (!strcmp(argv[i], "-debug")) {
+    } else if (!strcmp(argv[i], "-d") ||
+               !strcmp(argv[i], "-debug")) {
 
       sprintf(tmp_str, "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
 
-    } else if (!strcmp(argv[i], "-verbose")) {
-
+    } else if (!strcmp(argv[i], "-v") ||
+               !strcmp(argv[i], "-verbose")) {
+      
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-vv") ||
+               !strcmp(argv[i], "-extra")) {
+      
+      sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-instance")) {
@@ -154,7 +162,7 @@ void Args::usage(string &prog_name, ostream &out)
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
-      << "       [ -debug ] print debug messages\n"
+      << "       [ -d, -debug ] print debug messages\n"
       << "       [ -f files ] specify input time series file list.\n"
       << "         Read files instead of TsApi.\n"
       << "       [ -nrevs_global ?] number of revs for global stats\n"
@@ -162,7 +170,8 @@ void Args::usage(string &prog_name, ostream &out)
       << "       [ -instance ?] instance for procmap\n"
       << "         Forces register with procmap\n"
       << "       [ -nsamples ?] specify number of samples\n"
-      << "       [ -verbose ] print verbose debug messages\n"
+      << "       [ -v, -verbose ] print verbose debug messages\n"
+      << "       [ -vv, -extra ] print extra verbose debug messages\n"
       << endl;
   
 }

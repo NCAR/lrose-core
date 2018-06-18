@@ -100,7 +100,7 @@ StatsMgr::StatsMgr(const string &prog_name,
     double maxHt = minHt + _deltaHt;
     LayerStats *layer = new LayerStats(_params, minHt, maxHt);
     _layers.push_back(layer);
-    _maxHt = maxHt;    
+    _maxHt = maxHt;
   }
 
 }
@@ -223,9 +223,9 @@ void StatsMgr::computeStats360()
   
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     _layers[ii]->computeStats();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      _layers[ii]->print(cerr);
-    }
+    // if (_params.debug >= Params::DEBUG_VERBOSE) {
+    //   _layers[ii]->print(cerr);
+    // }
   }
 
   // compute Zdr for this rotation
@@ -236,7 +236,7 @@ void StatsMgr::computeStats360()
   double sum2Zdrm = 0.0;
 
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
-    const LayerStats &layer = *(_layers[ii]);
+    LayerStats &layer = *(_layers[ii]);
     double ht = layer.getMeanHt();
     double snr = layer.getMean().snr;
     if (ht >= _params.min_ht_for_stats &&
@@ -386,7 +386,9 @@ void StatsMgr::printResults360(FILE *out)
   
   time_t startTime = (time_t) _startTime360;
   
-  fprintf(out, " ==========================================================================================\n");
+  fprintf(out,
+          " ===================================="
+          "============================================\n");
   fprintf(out, " Vertical-pointing ZDR calibration\n");
   fprintf(out, "   Time: %s\n", DateTime::strm(startTime).c_str());
   fprintf(out, "   n samples             : %8d\n", _params.n_samples);
@@ -404,26 +406,38 @@ void StatsMgr::printResults360(FILE *out)
   fprintf(out, "   mean ZDRm (dB)        : %8.3f\n", _meanZdrm);
   fprintf(out, "   sdev ZDRm (dB)        : %8.3f\n", _sdevZdrm);
   fprintf(out, "   ZDR correction (dB)   : %8.3f\n", _meanZdrm * -1.0);
-  fprintf(out, " ==========================================================================================\n");
-  fprintf(out, " %10s%10s%10s%10s%10s%10s%10s%10s%10s\n",
+  fprintf(out,
+          " ===================================="
+          "============================================\n");
+  fprintf(out, " %5s %7s %7s %7s %5s %8s %6s %6s %7s %6s %6s\n",
           "Ht", "npts", "snr", "dBZ", "vel",
-          "zdrm", "sdevZdr", "ldr", "rhohv");
+          "ldr", "rhohv", "zdrm", "sdevZdr", "SMK", "p95");
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     const LayerStats &layer = *(_layers[ii]);
     if (layer.getMean().snr > -9990) {
+      string goodStr;
+      if (layer.getDist().getSmk() < layer.getDist().getSmk95()) {
+        goodStr = " **";
+      }
       fprintf(out,
-              " %10.2f%10d%10.3f%10.3f%10.1f%10.3f%10.3f%10.3f%10.3f\n",
+              " %5.2f %7d %7.3f %7.3f %5.1f %8.3f %6.3f %6.3f %7.3f %6.3f %6.3f%s\n",
               layer.getMeanHt(),
               layer.getNValid(),
               layer.getMean().snr,
               layer.getMean().dbz,
               layer.getMean().vel,
+              layer.getMean().ldrh,
+              layer.getMean().rhohv,
               layer.getMean().zdrm,
               layer.getSdev().zdrm,
-              layer.getMean().ldrh,
-              layer.getMean().rhohv);
+              layer.getDist().getSmk(),
+              layer.getDist().getSmk95(),
+              goodStr.c_str());
     }
   }
+  fprintf(out,
+          " ===================================="
+          "============================================\n");
   
 }
 
@@ -575,7 +589,9 @@ void StatsMgr::printGlobalResults(FILE *out)
   time_t startTime = (time_t) _startTime;
   time_t endTime = (time_t) _endTime;
 
-  fprintf(out, " ==========================================================================================\n");
+  fprintf(out,
+          " ===================================="
+          "============================================\n");
   fprintf(out, " Vertical-pointing ZDR calibration - global\n");
   fprintf(out, " Start time: %s\n", DateTime::strm(startTime).c_str());
   fprintf(out, " End time  : %s\n", DateTime::strm(endTime).c_str());
@@ -593,26 +609,38 @@ void StatsMgr::printGlobalResults(FILE *out)
   fprintf(out, "   mean ZDRm (dB)        : %8.3f\n", _globalMeanZdrm);
   fprintf(out, "   sdev ZDRm (dB)        : %8.3f\n", _globalSdevZdrm);
   fprintf(out, "   ZDR correction (dB)   : %8.3f\n", _globalMeanZdrm * -1.0);
-  fprintf(out, " ==========================================================================================\n");
-  fprintf(out, " %10s%10s%10s%10s%10s%10s%10s%10s%10s\n",
+  fprintf(out,
+          " ===================================="
+          "============================================\n");
+  fprintf(out, " %5s %7s %7s %7s %5s %8s %6s %6s %7s %6s %6s\n",
           "Ht", "npts", "snr", "dBZ", "vel",
-          "zdrm", "sdevZdr", "ldr", "rhohv");
+          "ldr", "rhohv", "zdrm", "sdevZdr", "SMK", "p95");
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     const LayerStats &layer = *(_layers[ii]);
     if (layer.getMean().snr > -9990) {
+      string goodStr;
+      if (layer.getGlobalDist().getSmk() < layer.getGlobalDist().getSmk95()) {
+        goodStr = " **";
+      }
       fprintf(out,
-              " %10.2f%10d%10.3f%10.3f%10.1f%10.3f%10.3f%10.3f%10.3f\n",
+              " %5.2f %7d %7.3f %7.3f %5.1f %8.3f %6.3f %6.3f %7.3f %6.3f %6.3f%s\n",
               layer.getMeanHt(),
               layer.getGlobalNValid(),
               layer.getGlobalMean().snr,
               layer.getGlobalMean().dbz,
               layer.getGlobalMean().vel,
+              layer.getGlobalMean().ldrh,
+              layer.getGlobalMean().rhohv,
               layer.getGlobalMean().zdrm,
               layer.getGlobalSdev().zdrm,
-              layer.getGlobalMean().ldrh,
-              layer.getGlobalMean().rhohv);
+              layer.getGlobalDist().getSmk(),
+              layer.getGlobalDist().getSmk95(),
+              goodStr.c_str());
     }
   } // ii
+  fprintf(out,
+          " ===================================="
+          "============================================\n");
 
 }
 
@@ -676,7 +704,7 @@ int StatsMgr::writeZdrPoints()
       const MomentData &mdata = momentData[jj];
       if (mdata.snr > -9990) {
         fprintf(out,
-                "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
+                "%9.3f %9.3f %9.3f %9.3f %9.3f %9.3f %9.3f\n",
                 mdata.height,
                 mdata.snr,
                 mdata.dbz,

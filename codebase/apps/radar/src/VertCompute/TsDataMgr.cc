@@ -211,7 +211,7 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
   double azDiff = RadarComplex::diffDeg(azStart, azEnd);
   double elDiff = RadarComplex::diffDeg(elStart, elEnd);
   if (fabs(azDiff) > 5 || fabs(elDiff) > 0.2) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "====>> Clearing pulse queue" << endl;
       cerr << "  azStart, azEnd: " << azStart << ", " << azEnd << endl;
       cerr << "  elStart, elEnd: " << elStart << ", " << elEnd << endl;
@@ -278,7 +278,7 @@ void TsDataMgr::_addPulseToQueue(const IwrfTsPulse *pulse)
     double azDiff = RadarComplex::diffDeg(az, prevAz);
     double elDiff = RadarComplex::diffDeg(el, prevEl);
     if (fabs(azDiff) > 0.1 || fabs(elDiff) > 0.1) {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
+      if (_params.debug >= Params::DEBUG_EXTRA) {
         cerr << "====>> Clearing pulse queue" << endl;
         cerr << "  az, prevAz: " << az << ", " << prevAz << endl;
         cerr << "  el, prevEl: " << el << ", " << prevEl << endl;
@@ -297,7 +297,7 @@ void TsDataMgr::_addPulseToQueue(const IwrfTsPulse *pulse)
   // print missing pulses in verbose mode
   
   if ((int) pulse->getSeqNum() != _pulseSeqNum + 1) {
-    if (_params.debug >= Params::DEBUG_VERBOSE && _pulseSeqNum != 0) {
+    if (_params.debug >= Params::DEBUG_EXTRA && _pulseSeqNum != 0) {
       cerr << "**** Missing seq num: " << _pulseSeqNum
 	   << " to " <<  pulse->getSeqNum() << " ****" << endl;
     }
