@@ -51,6 +51,7 @@ Distribution::Distribution()
   _debug = false;
   _verbose = false;
   _clearStats();
+  clearValues();
 
   _histMin = NAN;
   _histMax = NAN;
@@ -409,9 +410,13 @@ void Distribution::computeHistogram()
   double sumDensity = 0.0;
   for (size_t jj = 0; jj < _histNBins; jj++) {
     sumCount += _histCount[jj];
-    sumDensity += _histDensity[jj];
+    sumDensity += _histDensity[jj] * _histDelta;
     _histCumCount.push_back(sumCount);
     _histCumDensity.push_back(sumDensity);
+  }
+  double corr = 1.0 / sumDensity;
+  for (size_t jj = 0; jj < _histNBins; jj++) {
+    _histCumDensity[jj] *= corr;
   }
 
   // find the median from the histogram
@@ -447,9 +452,11 @@ void Distribution::printHistogram(FILE *out)
 
 {
 
-  if (_histCount.size() < 2) {
+  if (_nVals < 2 || _histCount.size() < 2) {
     return;
   }
+
+  computeGof();
 
   fprintf(out, "======================= Histogram ===========================\n");
   fprintf(out, "  nValues: %d\n", (int) getNValues());
@@ -461,8 +468,10 @@ void Distribution::printHistogram(FILE *out)
   fprintf(out, "  histMode: %g\n", _histMode);
   fprintf(out, "  pdfMedian: %g\n", _pdfMedian);
   fprintf(out, "  pdfMode: %g\n", _pdfMode);
+  fprintf(out, "  smk, smk95: %g, %g\n", _smk, _smk95);
   fprintf(out, "\n");
-  fprintf(out, "%4s %8s %8s %6s %6s \n", "bin", "xx", "count", "pdf", "cdf");
+  fprintf(out, "%4s %8s %8s %6s %6s %6s %6s \n",
+          "bin", "xx", "count", "hpdf", "hcdf", "pdf", "cdf");
   
   double maxDensity = 0;
   for (size_t jj = 0; jj < _histDensity.size(); jj++) {
@@ -480,9 +489,11 @@ void Distribution::printHistogram(FILE *out)
     if (_histCdf.size() == _histNBins) {
       cdf = _histCdf[jj];
     }
+    double hpdf = _histDensity[jj];
+    double hcdf = _histCumDensity[jj];
     
-    fprintf(out, "%4d %8.3f %8d %6.3f %6.3f ",
-            (int) jj, xx, count, pdf, cdf);
+    fprintf(out, "%4d %8.3f %8d %6.3f %6.3f %6.3f %6.3f %6.3f ",
+            (int) jj, xx, count, hpdf, hcdf, pdf, cdf, fabs(hcdf - cdf));
     
     int ipdf = (int) ((pdf / maxDensity) * 60.0);
     int nStars = (int) ((_histDensity[jj] / maxDensity) * 60.0);
@@ -560,16 +571,30 @@ void Distribution::computeHistCdf()
 void Distribution::computeGof(size_t nIntervals)
   
 {
-  
+
+  if (_nVals < 1) {
+    if (_verbose) {
+      cerr << "ERROR - Distribution::computeGof()" << endl;
+      cerr << "  No values in histogram" << endl;
+    }
+    return;
+  }
+
   if (_histNBins < 1) {
-    cerr << "ERROR - Distribution::computeGof()" << endl;
-    cerr << "  Histogram has not been computed" << endl;
+    if (_verbose) {
+      cerr << "ERROR - Distribution::computeGof()" << endl;
+      cerr << "  Histogram has not been computed" << endl;
+    }
     return;
   }
 
   if (_histPdf.size() != _histNBins) {
-    cerr << "ERROR - Distribution::computeGof()" << endl;
-    cerr << "  PDF fit has not been performed" << endl;
+    if (_verbose) {
+      cerr << "ERROR - Distribution::computeGof()" << endl;
+      cerr << "  PDF fit has not been performed" << endl;
+      cerr << "  _histPdf.size(): " << _histPdf.size() << endl;
+      cerr << "  _histNBins: " << _histNBins << endl;
+    }
     return;
   }
 
@@ -602,8 +627,23 @@ void Distribution::computeGof(size_t nIntervals)
 
   _gof = sumGof;
 
+  // compute smirnov kolmogorov statistic from the CDFs
+
+  double maxCdfDiff = 0.0;
+  for (size_t jj = 0; jj < _histCount.size(); jj++) {
+    double cdfDiff = fabs(_histCdf[jj] - _histCumDensity[jj]);
+    if (cdfDiff > maxCdfDiff) {
+      maxCdfDiff = cdfDiff;
+    }
+  } // jj
+
+  _smk = maxCdfDiff;
+  _smk95 = 1.36 / sqrt(nn);
+
   if (_debug) {
-    cerr << "==> goodness of fit: " << _gof << endl;
+    cerr << "==> goodness of fit   : " << _gof << endl;
+    cerr << "==> smirnov kolmogorov: " << _smk << endl;
+    cerr << "==> smk 95%: " << _smk95 << endl;
   }
 
 }

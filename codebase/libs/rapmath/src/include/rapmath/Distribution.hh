@@ -149,7 +149,7 @@ public:
   // compute goodness of fit test
   // kk is number of intervals used in test
   
-  void computeGof(size_t kk);
+  void computeGof(size_t kk = 11);
 
   // get methods
 
@@ -177,12 +177,18 @@ public:
   double getHistMode() const { return _histMode; }
 
   double getGof() const { return _gof; }
+  double getSmk() const { return _smk; }
+  double getSmk95() const { return _smk95; }
 
   bool getPdfAvail() const { return _pdfAvail; }
   const vector<double> &getHistPdf() const { return _histPdf; }
   const vector<double> &getHistCdf() const { return _histCdf; }
+
   double getPdfMedian() const { return _pdfMedian; }
   double getPdfMode() const { return _pdfMode; }
+
+  const vector<double> &getHistCumCount() const { return _histCumCount; }
+  const vector<double> &getHistCumDensity() const { return _histCumDensity; }
 
   // print histogram as text
   
@@ -240,6 +246,8 @@ protected:
   // goodness of fit
 
   double _gof;
+  double _smk;
+  double _smk95;
 
   virtual void _clearStats();
   virtual void _clearHist();
