@@ -338,11 +338,6 @@ paramdef int {
 } zdr_hist_n_bins;
 
 paramdef int {
-  p_default = 11;
-  p_descr = "Order of polygon fit for ZDR distribution.";
-} zdr_dist_poly_order;
-
-paramdef int {
   p_default = 1000;
   p_descr = "Min number of zdr points for valid statistics.";
   p_help = "With too few points we cannot draw reliable conclusions about the ZDR statistics.";
@@ -399,4 +394,10 @@ paramdef string {
   p_descr = "URL for writing zdr bias results to SPDB XML.";
   p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
 } spdb_output_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write the full histogram details to SPDB.";
+  p_help = "If true, the counts, density, pdf and cdf arrays will be included in the SPDB output.";
+} write_histogram_to_spdb;
 

@@ -117,11 +117,11 @@ PidZdrStats::PidZdrStats(int argc, char **argv)
     _pidVals.push_back(_params._pid_regions[ii].pid);
   }
 
-  // create polynomial distribution objects
+  // create normal distribution objects
 
-  DistPolynomial poly;
+  DistNormal norm;
   for (int ii = 0; ii < _params.pid_regions_n; ii++) {
-    _dists.push_back(poly);
+    _dists.push_back(norm);
   }
 
   // allocate the vector for accumulating gate data for various PIDs
@@ -653,19 +653,18 @@ void PidZdrStats::_computeStats()
 
     const Params::pid_region_t &region = _params._pid_regions[ii];
 
-    DistPolynomial &poly = _dists[ii];
-    poly.clearValues();
+    DistNormal &norm = _dists[ii];
+    norm.clearValues();
 
     vector<gate_data_t> &gateData = _gateData[ii];
     for (size_t jj = 0; jj < gateData.size(); jj++) {
-      poly.addValue(gateData[jj].zdr);
+      norm.addValue(gateData[jj].zdr);
     }
 
-    poly.setHistNBins(_params.zdr_hist_n_bins);
-    poly.setHistRange(region.zdr_hist_lower_limit, region.zdr_hist_upper_limit);
-    poly.computeHistogram();
-    poly.setOrder(_params.zdr_dist_poly_order);
-    poly.performFit();
+    norm.setHistNBins(_params.zdr_hist_n_bins);
+    norm.setHistRange(region.zdr_hist_lower_limit, region.zdr_hist_upper_limit);
+    norm.computeHistogram();
+    norm.performFit();
 
   }
 
@@ -685,21 +684,21 @@ void PidZdrStats::_writeStatsToSpdb(const string &filePath)
   for (int ii = 0; ii < _params.pid_regions_n; ii++) {
 
     const Params::pid_region_t &region = _params._pid_regions[ii];
-    DistPolynomial &poly = _dists[ii];
+    DistNormal &norm = _dists[ii];
 
     // check we have enough data for good stats
 
-    if ((int) poly.getNValues() < _params.min_npts_for_valid_stats) {
+    if ((int) norm.getNValues() < _params.min_npts_for_valid_stats) {
       if (_params.debug >= Params::DEBUG_VERBOSE) {
         cerr << "WARNING - pid: " << region.label << endl;
-        cerr << "  too few points for stats: " << poly.getNValues() << endl;
+        cerr << "  too few points for stats: " << norm.getNValues() << endl;
       }
       continue;
     }
 
     // get the XML for this PID
 
-    string xml = _getStatsXml(filePath, region.label, region.pid, poly);
+    string xml = _getStatsXml(filePath, region.label, region.pid, norm);
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "========================= pid: " << region.pid << endl;
       cerr << xml;
@@ -734,7 +733,7 @@ void PidZdrStats::_writeStatsToSpdb(const string &filePath)
 string PidZdrStats::_getStatsXml(const string &filePath,
                                  string pidLabel,
                                  int pid,
-                                 DistPolynomial &poly)
+                                 DistNormal &norm)
 
 {
 
@@ -749,66 +748,61 @@ string PidZdrStats::_getStatsXml(const string &filePath,
   xml += RadxXml::writeString("PidLabel", 1, pidLabel);
   xml += RadxXml::writeInt("PidVal", 1, pid);
   
-  xml += RadxXml::writeDouble("Mean", 1, poly.getMean());
-  xml += RadxXml::writeDouble("Sdev", 1, poly.getSdev());
-  xml += RadxXml::writeDouble("Skewness", 1, poly.getSkewness());
-  xml += RadxXml::writeDouble("Kurtosis", 1, poly.getKurtosis());
+  xml += RadxXml::writeDouble("Mean", 1, norm.getMean());
+  xml += RadxXml::writeDouble("Sdev", 1, norm.getSdev());
+  xml += RadxXml::writeDouble("Skewness", 1, norm.getSkewness());
+  xml += RadxXml::writeDouble("Kurtosis", 1, norm.getKurtosis());
 
-  // polygon coefficients
+  xml += RadxXml::writeDouble("GoodnessOfFit", 1, norm.getGof());
+  xml += RadxXml::writeDouble("RmsePdf", 1, norm.getRmsePdf());
 
-  xml += RadxXml::writeDouble("nPoly", 1, poly.getOrder());
+  // site temp
 
-  string coeffStr;
-  const vector<double> &coeffs = poly.getCoeffs();
-  for (size_t ii = 0; ii < coeffs.size(); ii++) {
-    snprintf(text, 1024, "%g", coeffs[ii]);
-    if (ii != 0) {
-      coeffStr += ",";
-    }
-    coeffStr += text;
-  }
-  xml += RadxXml::writeString("PolyCoeffs", 1, coeffStr);
-
-  // histogram details
-  
-  xml += RadxXml::writeDouble("HistNBins", 1, poly.getHistNBins());
-  xml += RadxXml::writeDouble("HistMin", 1, poly.getHistMin());
-  xml += RadxXml::writeDouble("HistMax", 1, poly.getHistMax());
-  xml += RadxXml::writeDouble("HistDelta", 1, poly.getHistDelta());
-  xml += RadxXml::writeDouble("HistMedian", 1, poly.getHistMedian());
-  xml += RadxXml::writeDouble("HistMode", 1, poly.getHistMode());
-  xml += RadxXml::writeDouble("GoodnessOfFit", 1, poly.getGof());
-  
-  string countStr, densityStr, pdfStr, cdfStr;
-  const vector<double> &counts = poly.getHistCount();
-  const vector<double> &density = poly.getHistDensity();
-  const vector<double> &pdf = poly.getHistPdf();
-  const vector<double> &cdf = poly.getHistCdf();
-  for (size_t ii = 0; ii < poly.getHistNBins(); ii++) {
-    if (ii != 0) {
-      countStr += ",";
-      densityStr += ",";
-      pdfStr += ",";
-      cdfStr += ",";
-    }
-    snprintf(text, 1024, "%g", counts[ii]);
-    countStr += text;
-    snprintf(text, 1024, "%g", density[ii]);
-    densityStr += text;
-    snprintf(text, 1024, "%g", pdf[ii]);
-    pdfStr += text;
-    snprintf(text, 1024, "%g", cdf[ii]);
-    cdfStr += text;
-  }
-  xml += RadxXml::writeString("HistCounts", 1, countStr);
-  xml += RadxXml::writeString("HistDensity", 1, densityStr);
-  xml += RadxXml::writeString("PdfCounts", 1, pdfStr);
-  xml += RadxXml::writeString("CdfCounts", 1, cdfStr);
-  
   if (_params.read_site_temp_from_spdb) {
     xml += RadxXml::writeDouble("TempSite", 1, _siteTempC);
     RadxTime tempTime(_timeForSiteTemp);
     xml += RadxXml::writeString("TempTime", 1, tempTime.getW3cStr());
+  }
+
+  // histogram arrays
+
+  if (_params.write_histogram_to_spdb) {
+
+    // histogram details
+    
+    xml += RadxXml::writeDouble("HistNBins", 1, norm.getHistNBins());
+    xml += RadxXml::writeDouble("HistMin", 1, norm.getHistMin());
+    xml += RadxXml::writeDouble("HistMax", 1, norm.getHistMax());
+    xml += RadxXml::writeDouble("HistDelta", 1, norm.getHistDelta());
+    xml += RadxXml::writeDouble("HistMedian", 1, norm.getHistMedian());
+    xml += RadxXml::writeDouble("HistMode", 1, norm.getHistMode());
+
+    string countStr, densityStr, pdfStr, cdfStr;
+    const vector<double> &counts = norm.getHistCount();
+    const vector<double> &density = norm.getHistDensity();
+    const vector<double> &pdf = norm.getHistPdf();
+    const vector<double> &cdf = norm.getHistCdf();
+    for (size_t ii = 0; ii < norm.getHistNBins(); ii++) {
+      if (ii != 0) {
+        countStr += ",";
+        densityStr += ",";
+        pdfStr += ",";
+        cdfStr += ",";
+      }
+      snprintf(text, 1024, "%g", counts[ii]);
+      countStr += text;
+      snprintf(text, 1024, "%g", density[ii]);
+      densityStr += text;
+      snprintf(text, 1024, "%g", pdf[ii]);
+      pdfStr += text;
+      snprintf(text, 1024, "%g", cdf[ii]);
+      cdfStr += text;
+    }
+    xml += RadxXml::writeString("HistCounts", 1, countStr);
+    xml += RadxXml::writeString("HistDensity", 1, densityStr);
+    xml += RadxXml::writeString("PdfCounts", 1, pdfStr);
+    xml += RadxXml::writeString("CdfCounts", 1, cdfStr);
+
   }
   
   xml += RadxXml::writeEndTag("ZdrStats", 0);

@@ -1017,18 +1017,6 @@
     tt->single_val.i = 60;
     tt++;
     
-    // Parameter 'zdr_dist_poly_order'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("zdr_dist_poly_order");
-    tt->descr = tdrpStrDup("Order of polygon fit for ZDR distribution.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_dist_poly_order - &_start_;
-    tt->single_val.i = 11;
-    tt++;
-    
     // Parameter 'min_npts_for_valid_stats'
     // ctype is 'int'
     
@@ -1150,6 +1138,18 @@
     tt->help = tdrpStrDup("For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir");
     tt->val_offset = (char *) &spdb_output_url - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/spdb/zdr_bias");
+    tt++;
+    
+    // Parameter 'write_histogram_to_spdb'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_histogram_to_spdb");
+    tt->descr = tdrpStrDup("Option to write the full histogram details to SPDB.");
+    tt->help = tdrpStrDup("If true, the counts, density, pdf and cdf arrays will be included in the SPDB output.");
+    tt->val_offset = (char *) &write_histogram_to_spdb - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // trailing entry has param_name set to NULL

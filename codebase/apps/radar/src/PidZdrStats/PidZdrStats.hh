@@ -41,7 +41,7 @@
 #include <Radx/Radx.hh>
 #include <Radx/RadxVol.hh>
 #include <radar/NcarParticleId.hh>
-#include <rapmath/DistPolynomial.hh>
+#include <rapmath/DistNormal.hh>
 
 class RadxFile;
 using namespace std;
@@ -117,7 +117,7 @@ private:
     double temp;
   } gate_data_t;
   vector< vector<gate_data_t> >_gateData;
-  vector<DistPolynomial> _dists;
+  vector<DistNormal> _dists;
 
   // site temp
 
@@ -151,7 +151,7 @@ private:
   string _getStatsXml(const string &filePath,
                       string pidLabel,
                       int pid,
-                      DistPolynomial &poly);
+                      DistNormal &norm);
 
   int _retrieveSiteTempFromSpdb(double &tempC,
                                 time_t &timeForTemp);
