@@ -452,7 +452,7 @@ void Distribution::printHistogram(FILE *out)
 
 {
 
-  if (_nVals < 2 || _histCount.size() < 2) {
+  if (_nVals < 2 || _histNBins < 2) {
     return;
   }
 
@@ -460,7 +460,7 @@ void Distribution::printHistogram(FILE *out)
 
   fprintf(out, "======================= Histogram ===========================\n");
   fprintf(out, "  nValues: %d\n", (int) getNValues());
-  fprintf(out, "  histSize: %d\n", (int) _histCount.size());
+  fprintf(out, "  histSize: %d\n", (int) _histNBins);
   fprintf(out, "  histDelta: %g\n", _histDelta);
   fprintf(out, "  histMin: %g\n", _histMin);
   fprintf(out, "  histMax: %g\n", _histMax);
@@ -468,7 +468,8 @@ void Distribution::printHistogram(FILE *out)
   fprintf(out, "  histMode: %g\n", _histMode);
   fprintf(out, "  pdfMedian: %g\n", _pdfMedian);
   fprintf(out, "  pdfMode: %g\n", _pdfMode);
-  fprintf(out, "  smk, smk95: %g, %g\n", _smk, _smk95);
+  fprintf(out, "  rmsePdf, gof: %6.3f, %6.3f\n", _rmsePdf, _gof);
+  fprintf(out, "  smk, smk95: %6.3f, %6.3f\n", _smk, _smk95);
   fprintf(out, "\n");
   fprintf(out, "%4s %8s %8s %6s %6s %6s %6s \n",
           "bin", "xx", "count", "hpdf", "hcdf", "pdf", "cdf");
@@ -608,15 +609,17 @@ void Distribution::computeGof(size_t nIntervals)
 
   double sumHistProb = 0.0;
   double sumGof = 0.0;
+  double sumErrSq = 0.0;
   double nGof = 0.0;
   double sumPdfProb = 0.0;
-  for (size_t jj = 0; jj < _histCount.size(); jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     sumHistProb += _histCount[jj] / nn;
     double xx = _histMin + jj * _histDelta;
     double pdfProb = getPdf(xx) * _histDelta;
     sumPdfProb += pdfProb;
-    if ((sumHistProb > intervalProb) || (jj == _histCount.size() - 1)) {
+    if ((sumHistProb > intervalProb) || (jj == _histNBins - 1)) {
       double error = sumHistProb - sumPdfProb;
+      sumErrSq += (error * error);
       double gofFac = (error * error) / sumPdfProb;
       sumGof += gofFac;
       nGof++;
@@ -624,13 +627,23 @@ void Distribution::computeGof(size_t nIntervals)
       sumPdfProb = 0.0;
     }
   } // jj
-
   _gof = sumGof;
+
+  // compute rmse for pdf
+
+  double sumSqErr = 0.0;
+  for (size_t jj = 0; jj < _histNBins; jj++) {
+    double pdfDens = _histPdf[jj];
+    double histDens = _histDensity[jj];
+    double error = pdfDens - histDens;
+    sumSqErr += error * error;
+  }
+  _rmsePdf = sqrt(sumSqErr / _histNBins);
 
   // compute smirnov kolmogorov statistic from the CDFs
 
   double maxCdfDiff = 0.0;
-  for (size_t jj = 0; jj < _histCount.size(); jj++) {
+  for (size_t jj = 0; jj < _histNBins; jj++) {
     double cdfDiff = fabs(_histCdf[jj] - _histCumDensity[jj]);
     if (cdfDiff > maxCdfDiff) {
       maxCdfDiff = cdfDiff;
@@ -641,9 +654,10 @@ void Distribution::computeGof(size_t nIntervals)
   _smk95 = 1.36 / sqrt(nn);
 
   if (_debug) {
-    cerr << "==> goodness of fit   : " << _gof << endl;
-    cerr << "==> smirnov kolmogorov: " << _smk << endl;
-    cerr << "==> smk 95%: " << _smk95 << endl;
+    cerr << "==> rmsePdf: " << _rmsePdf << endl;
+    cerr << "==> gof: " << _gof << endl;
+    cerr << "==> smk: " << _smk << endl;
+    cerr << "==> smk95: " << _smk95 << endl;
   }
 
 }
