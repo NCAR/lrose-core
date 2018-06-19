@@ -409,18 +409,14 @@ void StatsMgr::printResults360(FILE *out)
   fprintf(out,
           " ===================================="
           "============================================\n");
-  fprintf(out, " %5s %7s %7s %7s %5s %8s %6s %6s %7s %6s %6s\n",
+  fprintf(out, " %5s %7s %7s %7s %5s %8s %6s %7s %7s %6s %6s\n",
           "Ht", "npts", "snr", "dBZ", "vel",
-          "ldr", "rhohv", "zdrm", "sdevZdr", "SMK", "p95");
+          "ldr", "rhohv", "zdrMean", "zdrSdev", "gof", "rmse");
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     const LayerStats &layer = *(_layers[ii]);
     if (layer.getMean().snr > -9990) {
-      string goodStr;
-      if (layer.getDist().getSmk() < layer.getDist().getSmk95()) {
-        goodStr = " **";
-      }
       fprintf(out,
-              " %5.2f %7d %7.3f %7.3f %5.1f %8.3f %6.3f %6.3f %7.3f %6.3f %6.3f%s\n",
+              " %5.2f %7d %7.3f %7.3f %5.1f %8.3f %6.3f %7.3f %7.3f %6.3f %6.3f\n",
               layer.getMeanHt(),
               layer.getNValid(),
               layer.getMean().snr,
@@ -430,9 +426,8 @@ void StatsMgr::printResults360(FILE *out)
               layer.getMean().rhohv,
               layer.getMean().zdrm,
               layer.getSdev().zdrm,
-              layer.getDist().getSmk(),
-              layer.getDist().getSmk95(),
-              goodStr.c_str());
+              layer.getDist().getGof(),
+              layer.getDist().getRmsePdf());
     }
   }
   fprintf(out,
@@ -612,18 +607,14 @@ void StatsMgr::printGlobalResults(FILE *out)
   fprintf(out,
           " ===================================="
           "============================================\n");
-  fprintf(out, " %5s %7s %7s %7s %5s %8s %6s %6s %7s %6s %6s\n",
+  fprintf(out, " %5s %7s %7s %7s %5s %8s %6s %7s %7s %6s %6s\n",
           "Ht", "npts", "snr", "dBZ", "vel",
-          "ldr", "rhohv", "zdrm", "sdevZdr", "SMK", "p95");
+          "ldr", "rhohv", "zdrMean", "zdrSdev", "gof", "rmse");
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     const LayerStats &layer = *(_layers[ii]);
     if (layer.getMean().snr > -9990) {
-      string goodStr;
-      if (layer.getGlobalDist().getSmk() < layer.getGlobalDist().getSmk95()) {
-        goodStr = " **";
-      }
       fprintf(out,
-              " %5.2f %7d %7.3f %7.3f %5.1f %8.3f %6.3f %6.3f %7.3f %6.3f %6.3f%s\n",
+              " %5.2f %7d %7.3f %7.3f %5.1f %8.3f %6.3f %7.3f %7.3f %6.3f %6.3f\n",
               layer.getMeanHt(),
               layer.getGlobalNValid(),
               layer.getGlobalMean().snr,
@@ -633,9 +624,8 @@ void StatsMgr::printGlobalResults(FILE *out)
               layer.getGlobalMean().rhohv,
               layer.getGlobalMean().zdrm,
               layer.getGlobalSdev().zdrm,
-              layer.getGlobalDist().getSmk(),
-              layer.getGlobalDist().getSmk95(),
-              goodStr.c_str());
+              layer.getGlobalDist().getGof(),
+              layer.getGlobalDist().getRmsePdf());
     }
   } // ii
   fprintf(out,

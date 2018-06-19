@@ -184,7 +184,7 @@ void LayerStats::computeGlobalStats()
   _globalDist.computeHistogram();
   _globalDist.performFit();
   _globalDist.computeGof();
-  if (_nValid > 0 && _params.debug >= Params::DEBUG_VERBOSE) {
+  if (_globalNValid > 0 && _params.debug >= Params::DEBUG_VERBOSE) {
     print(cerr);
     _globalDist.printHistogram(stderr);
   }
