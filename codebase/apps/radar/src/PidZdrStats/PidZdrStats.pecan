@@ -68,7 +68,7 @@ instance = "pecan";
 // Type: string
 //
 
-input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/qcv2/partrain/sband/rhi";
+input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/qcv2/partrain/sband/sur";
 
 ///////////// mode ////////////////////////////////////
 //
@@ -442,16 +442,6 @@ pid_regions = {
 
 zdr_hist_n_bins = 60;
 
-///////////// zdr_dist_poly_order /////////////////////
-//
-// Order of polygon fit for ZDR distribution.
-//
-//
-// Type: int
-//
-
-zdr_dist_poly_order = 11;
-
 ///////////// min_npts_for_valid_stats ////////////////
 //
 // Min number of zdr points for valid statistics.
@@ -522,7 +512,19 @@ site_temp_search_margin_secs = 3600;
 //
 //======================================================================
  
-///////////// output_dir //////////////////////////////
+///////////// write_results_to_text_files /////////////
+//
+// Option to write out ZDR results to text files.
+//
+// The results will be written in space-delimited columns.
+//
+//
+// Type: boolean
+//
+
+write_results_to_text_files = TRUE;
+
+///////////// text_output_dir /////////////////////////
 //
 // Output directory path.
 //
@@ -534,7 +536,20 @@ site_temp_search_margin_secs = 3600;
 // Type: string
 //
 
-output_dir = "$(HOME)/data/zdr/pecan/PidZdrStats/txt";
+text_output_dir = "$(HOME)/data/PidZdrStats/pecan_sur/txt";
+
+///////////// write_one_text_file_per_volume //////////
+//
+// Option to write out one text file per volume.
+//
+// If false, a single text file will be written for all of the data 
+//   times.
+//
+//
+// Type: boolean
+//
+
+write_one_text_file_per_volume = TRUE;
 
 //======================================================================
 //
@@ -566,5 +581,18 @@ write_results_to_spdb = TRUE;
 // Type: string
 //
 
-spdb_output_url = "$(HOME)/data/zdr/pecan/PidZdrStats/spdb";
+spdb_output_url = "$(HOME)/data/PidZdrStats/pecan_sur/spdb";
+
+///////////// write_histogram_to_spdb /////////////////
+//
+// Option to write the full histogram details to SPDB.
+//
+// If true, the counts, density, pdf and cdf arrays will be included in 
+//   the SPDB output.
+//
+//
+// Type: boolean
+//
+
+write_histogram_to_spdb = TRUE;
 

@@ -1095,16 +1095,40 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'output_dir'
+    // Parameter 'write_results_to_text_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_results_to_text_files");
+    tt->descr = tdrpStrDup("Option to write out ZDR results to text files.");
+    tt->help = tdrpStrDup("The results will be written in space-delimited columns.");
+    tt->val_offset = (char *) &write_results_to_text_files - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'text_output_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_dir");
+    tt->param_name = tdrpStrDup("text_output_dir");
     tt->descr = tdrpStrDup("Output directory path.");
     tt->help = tdrpStrDup("Text files will be written to this directory. A day directory will be added, so the file path will be output_text_dir/yyyymmdd/filename.txt.");
-    tt->val_offset = (char *) &output_dir - &_start_;
+    tt->val_offset = (char *) &text_output_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/PidZdrStats");
+    tt++;
+    
+    // Parameter 'write_one_text_file_per_volume'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_one_text_file_per_volume");
+    tt->descr = tdrpStrDup("Option to write out one text file per volume.");
+    tt->help = tdrpStrDup("If false, a single text file will be written for all of the data times.");
+    tt->val_offset = (char *) &write_one_text_file_per_volume - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'Comment 10'

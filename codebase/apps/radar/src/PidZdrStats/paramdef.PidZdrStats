@@ -373,11 +373,23 @@ commentdef {
   p_header = "WRITE RESULTS OUT TO TEXT FILES";
 }
 
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out ZDR results to text files.";
+  p_help = "The results will be written in space-delimited columns.";
+} write_results_to_text_files;
+
 paramdef string {
   p_default = "/tmp/PidZdrStats";
   p_descr = "Output directory path.";
   p_help = "Text files will be written to this directory. A day directory will be added, so the file path will be output_text_dir/yyyymmdd/filename.txt.";
-} output_dir;
+} text_output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out one text file per volume.";
+  p_help = "If false, a single text file will be written for all of the data times.";
+} write_one_text_file_per_volume;
 
 commentdef {
   p_header = "WRITING RESULTS TO SPDB";

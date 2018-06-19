@@ -421,7 +421,11 @@ public:
 
   int site_temp_search_margin_secs;
 
-  char* output_dir;
+  tdrp_bool_t write_results_to_text_files;
+
+  char* text_output_dir;
+
+  tdrp_bool_t write_one_text_file_per_volume;
 
   tdrp_bool_t write_results_to_spdb;
 
@@ -436,7 +440,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[36];
+  mutable TDRPtable _table[38];
 
   const char *_className;
 

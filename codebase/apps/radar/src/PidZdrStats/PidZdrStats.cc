@@ -359,10 +359,12 @@ int PidZdrStats::_processVol()
 
   // open output files as needed
 
-  if (_openOutputFiles()) {
-    cerr << "ERROR - PidZdrStats::_processVol()" << endl;
-    cerr << "  Cannot open output files" << endl;
-    return -1;
+  if (_params.write_results_to_text_files) {
+    if (_openOutputFiles()) {
+      cerr << "ERROR - PidZdrStats::_processVol()" << endl;
+      cerr << "  Cannot open output files" << endl;
+      return -1;
+    }
   }
 
   // set up geom
@@ -515,8 +517,10 @@ int PidZdrStats::_processRay(RadxRay *ray)
 
     // print out
 
-    fprintf(_outFilePtrs[pidIndex], "  %8.2f %8.2f %4d %8.2f %8.2f %8.2f\n",
-            elev, rangeKm, pid, temp, rhohv, zdr);
+    if (pidIndex < (int) _outFilePtrs.size()) {
+      fprintf(_outFilePtrs[pidIndex], "  %8.2f %8.2f %4d %8.2f %8.2f %8.2f\n",
+              elev, rangeKm, pid, temp, rhohv, zdr);
+    }
 
     // append to gate data
 
@@ -540,15 +544,19 @@ int PidZdrStats::_openOutputFiles()
   
 {
 
-  if (_outFilesOpen) {
-    return 0;
+  if (_params.write_one_text_file_per_volume) {
+    _closeOutputFiles();
+  } else {
+    if (_outFilesOpen) {
+      return 0;
+    }
   }
 
   // compute output dir
   
   RadxTime fileTime(_readVol.getStartTimeSecs());
 
-  string outDir(_params.output_dir);
+  string outDir(_params.text_output_dir);
   char dayStr[BUFSIZ];
   sprintf(dayStr, "%s%.4d%.2d%.2d", PATH_DELIM,
           fileTime.getYear(), fileTime.getMonth(), fileTime.getDay());
@@ -562,8 +570,12 @@ int PidZdrStats::_openOutputFiles()
     return -1;
   }
 
-  // open files for each pid regiod
+  if (_params.debug) {
+    cerr << "Writing text output files to dir: " << outDir << endl;
+  }
 
+  // open files for each pid regiod
+  
   for (int ii = 0; ii < _params.pid_regions_n; ii++) {
 
     // compute file name
@@ -591,7 +603,7 @@ int PidZdrStats::_openOutputFiles()
     _outFilePtrs.push_back(out);
     _outFilePaths.push_back(outPath);
     
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Opened output file: " << outPath << endl;
     }
 
@@ -619,6 +631,7 @@ void PidZdrStats::_closeOutputFiles()
   for (size_t ii = 0; ii < _outFilePtrs.size(); ii++) {
     fclose(_outFilePtrs[ii]);
   } // ii
+  _outFilePtrs.clear();
 
 }
 //////////////////////////////
@@ -661,6 +674,7 @@ void PidZdrStats::_computeStats()
       norm.addValue(gateData[jj].zdr);
     }
 
+    norm.computeBasicStats();
     norm.setHistNBins(_params.zdr_hist_n_bins);
     norm.setHistRange(region.zdr_hist_lower_limit, region.zdr_hist_upper_limit);
     norm.computeHistogram();
