@@ -409,9 +409,13 @@ public:
   pid_region_t *_pid_regions;
   int pid_regions_n;
 
+  int min_npts_for_valid_stats;
+
   int zdr_hist_n_bins;
 
-  int min_npts_for_valid_stats;
+  tdrp_bool_t set_zdr_hist_limits_from_sdev;
+
+  double n_sdev_for_hist_limits;
 
   tdrp_bool_t read_site_temp_from_spdb;
 
@@ -440,7 +444,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[38];
+  mutable TDRPtable _table[40];
 
   const char *_className;
 

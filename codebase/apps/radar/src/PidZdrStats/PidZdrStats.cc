@@ -676,7 +676,12 @@ void PidZdrStats::_computeStats()
 
     norm.computeBasicStats();
     norm.setHistNBins(_params.zdr_hist_n_bins);
-    norm.setHistRange(region.zdr_hist_lower_limit, region.zdr_hist_upper_limit);
+    if (_params.set_zdr_hist_limits_from_sdev) {
+      norm.setHistRangeFromSdev(_params.n_sdev_for_hist_limits);
+    } else {
+      norm.setHistRange(region.zdr_hist_lower_limit, 
+                        region.zdr_hist_upper_limit);
+    }
     norm.computeHistogram();
     norm.performFit();
 
@@ -791,17 +796,19 @@ string PidZdrStats::_getStatsXml(const string &filePath,
     xml += RadxXml::writeDouble("HistMedian", 1, norm.getHistMedian());
     xml += RadxXml::writeDouble("HistMode", 1, norm.getHistMode());
 
-    string countStr, densityStr, pdfStr, cdfStr;
+    string countStr, densityStr, pdfStr, cdfStr, xxStr;
     const vector<double> &counts = norm.getHistCount();
     const vector<double> &density = norm.getHistDensity();
     const vector<double> &pdf = norm.getHistPdf();
     const vector<double> &cdf = norm.getHistCdf();
+    const vector<double> &xx = norm.getHistX();
     for (size_t ii = 0; ii < norm.getHistNBins(); ii++) {
       if (ii != 0) {
         countStr += ",";
         densityStr += ",";
         pdfStr += ",";
         cdfStr += ",";
+        xxStr += ",";
       }
       snprintf(text, 1024, "%g", counts[ii]);
       countStr += text;
@@ -811,11 +818,14 @@ string PidZdrStats::_getStatsXml(const string &filePath,
       pdfStr += text;
       snprintf(text, 1024, "%g", cdf[ii]);
       cdfStr += text;
+      snprintf(text, 1024, "%g", xx[ii]);
+      xxStr += text;
     }
     xml += RadxXml::writeString("HistCounts", 1, countStr);
     xml += RadxXml::writeString("HistDensity", 1, densityStr);
     xml += RadxXml::writeString("PdfCounts", 1, pdfStr);
     xml += RadxXml::writeString("CdfCounts", 1, cdfStr);
+    xml += RadxXml::writeString("HistX", 1, xxStr);
 
   }
   

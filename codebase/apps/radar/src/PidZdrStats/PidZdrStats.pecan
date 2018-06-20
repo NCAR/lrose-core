@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for PidZdrStats
+ * TDRP params for ./PidZdrStats
  **********************************************************************/
 
 //======================================================================
@@ -432,16 +432,6 @@ pid_regions = {
   }
 };
 
-///////////// zdr_hist_n_bins /////////////////////////
-//
-// Number of bins in histograms used to analyze ZDR stats.
-//
-//
-// Type: int
-//
-
-zdr_hist_n_bins = 60;
-
 ///////////// min_npts_for_valid_stats ////////////////
 //
 // Min number of zdr points for valid statistics.
@@ -454,6 +444,44 @@ zdr_hist_n_bins = 60;
 //
 
 min_npts_for_valid_stats = 1000;
+
+///////////// zdr_hist_n_bins /////////////////////////
+//
+// Number of bins in histograms used to analyze ZDR stats.
+//
+//
+// Type: int
+//
+
+zdr_hist_n_bins = 60;
+
+///////////// set_zdr_hist_limits_from_sdev ///////////
+//
+// Option to set the histogram limits from the standard deviation of the 
+//   data.
+//
+// If true, the limits will be set to the mean, plus/minus some multiple 
+//   of the standard deviation. The zdr_hist_lower_limit and 
+//   zdr_hist_upper_limit in the pid_regions table will not be used..
+//
+//
+// Type: boolean
+//
+
+set_zdr_hist_limits_from_sdev = TRUE;
+
+///////////// n_sdev_for_hist_limits //////////////////
+//
+// The number of standard deviations, relative to the mean, to be used 
+//   to compute the histogram limits.
+//
+// See 'set_zdr_hist_limits_from_sdev'.
+//
+//
+// Type: double
+//
+
+n_sdev_for_hist_limits = 3;
 
 //======================================================================
 //
@@ -581,7 +609,7 @@ write_results_to_spdb = TRUE;
 // Type: string
 //
 
-spdb_output_url = "$(HOME)/data/PidZdrStats/pecan_sur/spdb";
+spdb_output_url = "$(HOME)/data/PidZdrStats/pecan/spdb";
 
 ///////////// write_histogram_to_spdb /////////////////
 //

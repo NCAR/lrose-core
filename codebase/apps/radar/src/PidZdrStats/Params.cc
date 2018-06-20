@@ -1005,6 +1005,18 @@
       tt->struct_vals[139].d = 10;
     tt++;
     
+    // Parameter 'min_npts_for_valid_stats'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_npts_for_valid_stats");
+    tt->descr = tdrpStrDup("Min number of zdr points for valid statistics.");
+    tt->help = tdrpStrDup("With too few points we cannot draw reliable conclusions about the ZDR statistics.");
+    tt->val_offset = (char *) &min_npts_for_valid_stats - &_start_;
+    tt->single_val.i = 1000;
+    tt++;
+    
     // Parameter 'zdr_hist_n_bins'
     // ctype is 'int'
     
@@ -1017,16 +1029,28 @@
     tt->single_val.i = 60;
     tt++;
     
-    // Parameter 'min_npts_for_valid_stats'
-    // ctype is 'int'
+    // Parameter 'set_zdr_hist_limits_from_sdev'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("min_npts_for_valid_stats");
-    tt->descr = tdrpStrDup("Min number of zdr points for valid statistics.");
-    tt->help = tdrpStrDup("With too few points we cannot draw reliable conclusions about the ZDR statistics.");
-    tt->val_offset = (char *) &min_npts_for_valid_stats - &_start_;
-    tt->single_val.i = 1000;
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_zdr_hist_limits_from_sdev");
+    tt->descr = tdrpStrDup("Option to set the histogram limits from the standard deviation of the data.");
+    tt->help = tdrpStrDup("If true, the limits will be set to the mean, plus/minus some multiple of the standard deviation. The zdr_hist_lower_limit and zdr_hist_upper_limit in the pid_regions table will not be used..");
+    tt->val_offset = (char *) &set_zdr_hist_limits_from_sdev - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'n_sdev_for_hist_limits'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("n_sdev_for_hist_limits");
+    tt->descr = tdrpStrDup("The number of standard deviations, relative to the mean, to be used to compute the histogram limits.");
+    tt->help = tdrpStrDup("See 'set_zdr_hist_limits_from_sdev'.");
+    tt->val_offset = (char *) &n_sdev_for_hist_limits - &_start_;
+    tt->single_val.d = 3;
     tt++;
     
     // Parameter 'Comment 8'
