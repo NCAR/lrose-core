@@ -80,6 +80,7 @@ Then run:
 ### Install required packages, using brew
 
 ```
+  brew install pkg_config
   brew install szip
   brew install hdf5 --enable-cxx
   brew install netcdf
