@@ -133,8 +133,12 @@ The distribution will be unpacked into a subdirectory:
 
 ```
   cd lrose_build/lrose-20160823.src
-  ./build_lrose.py --prefix installDir
+  ./build/build_lrose.py --prefix installDir
 ```
+
+where ```installDir``` is the intended install directory.
+
+This will need python 2.7. (An update to Python 3 will be coming soon).
 
 The default prefix is /usr/local/lrose.
 
