@@ -273,11 +273,11 @@ void BufrProduct::addData(unsigned char value) {
     throw "out of space in dataBuffer";
 }
 
-bool BufrProduct::StuffIt(unsigned short, string fieldName, string &value) {
-  Radx::addErrStr(_errString, "", "ERROR - BufrFile::StuffIt", true);
+bool BufrProduct::StuffIt(unsigned short des, string fieldName, string &value) {
+  Radx::addErrStr(_errString, "", "WARNING - BufrFile::StuffIt", true);
   Radx::addErrStr(_errString, "", "  calling base function ", true);
-  throw _errString.c_str();
-  return false;
+  // cerr <<  _errString.c_str() << endl;
+  return true;
 }
 
 // Put the info in the correct storage location

@@ -1696,6 +1696,12 @@ int BufrRadxFile::_createRays(RadxSweep *sweep, int sweepNumber)
     ray->setSweepNumber(sweepNumber);
     ray->setAzimuthDeg(_azimuths[ii]);
     ray->setElevationDeg(_elevations.back());
+
+    /* **** experimental *****
+    ray->setPolarizationMode(Radx::POL_MODE_HORIZONTAL);
+    ray->setPrtMode(Radx::PRT_MODE_FIXED);
+    // **** end experimental ***/
+
     //ray->setPrtSec(1.0/_prfHz);
     //ray->setTargetScanRateDegPerSec(_scan_velocity_attr);
     //ray->setNSamples(_pulses_per_ray_attr);

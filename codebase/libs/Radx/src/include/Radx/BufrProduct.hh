@@ -92,8 +92,8 @@ public:
 
   virtual void addData(unsigned char value);
 
-  virtual bool StuffIt(unsigned short, string fieldName, double value);
-  virtual bool StuffIt(unsigned short, string fieldName, string &value);
+  virtual bool StuffIt(unsigned short des, string fieldName, double value);
+  virtual bool StuffIt(unsigned short des, string fieldName, string &value);
 
   virtual double *decompressData();
   virtual float *decompressDataFl32();
