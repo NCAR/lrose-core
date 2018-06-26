@@ -231,10 +231,14 @@ private:
 
   int _readFieldVariables();
 
-  int _addFieldToRays(Nc3Var* var,
-                      const string &name,
-                      const string &units);
+  int _addFl64FieldToRays(Nc3Var* var,
+                          const string &name,
+                          const string &units);
   
+  int _addSi08FieldToRays(Nc3Var* var,
+                          const string &name,
+                          const string &units);
+
   /// add integer value to error string, with label
 
   void _addErrInt(string label, int iarg,

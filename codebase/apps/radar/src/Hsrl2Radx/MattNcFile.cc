@@ -209,7 +209,7 @@ int MattNcFile::getTimeFromPath(const string &path, RadxTime &rtime)
 // Use getErrStr() if error occurs
 
 int MattNcFile::readFromPath(const string &path,
-                          RadxVol &vol)
+                             RadxVol &vol)
   
 {
   
@@ -424,6 +424,7 @@ int MattNcFile::_readTimes()
 
   RadxTime stime(units);
   time_t refTimeSecs = stime.utime();
+
   
   // read in time 2D array
 
@@ -746,10 +747,10 @@ int MattNcFile::_createRays(const string &path)
 
       RadxGeoref geo;
       if (MattNcFile::readGeorefFromSpdb(_params.georef_data_spdb_url,
-                                      _dataTimes[ii].utime(),
-                                      _params.georef_data_search_margin_secs,
-                                      _params.debug >= Params::DEBUG_VERBOSE,
-                                      geo) == 0) {
+                                         _dataTimes[ii].utime(),
+                                         _params.georef_data_search_margin_secs,
+                                         _params.debug >= Params::DEBUG_VERBOSE,
+                                         geo) == 0) {
         if (_telescopeDirection[ii] == 1) {
           // pointing up
           geo.setRotation(-4.0);
@@ -901,7 +902,7 @@ int MattNcFile::_readFieldVariables()
 
     // check the type
     Nc3Type ftype = var->type();
-    if (ftype != nc3Double) {
+    if (ftype != nc3Double && ftype != nc3Byte) {
       // not a valid type for field data
       continue;
     }
@@ -923,11 +924,20 @@ int MattNcFile::_readFieldVariables()
 
     // load in the data
     
-    if (_addFieldToRays(var, name, units)) {
-      _addErrStr("ERROR - MattNcFile::_readFieldVariables");
-      _addErrStr("  cannot read field name: ", name);
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      return -1;
+    if (ftype == nc3Double) {
+      if (_addFl64FieldToRays(var, name, units)) {
+        _addErrStr("ERROR - MattNcFile::_readFieldVariables");
+        _addErrStr("  cannot read field name: ", name);
+        _addErrStr(_file.getNc3Error()->get_errmsg());
+        return -1;
+      }
+    } else {
+      if (_addSi08FieldToRays(var, name, units)) {
+        _addErrStr("ERROR - MattNcFile::_readFieldVariables");
+        _addErrStr("  cannot read field name: ", name);
+        _addErrStr(_file.getNc3Error()->get_errmsg());
+        return -1;
+      }
     }
 
   } // ivar
@@ -937,13 +947,13 @@ int MattNcFile::_readFieldVariables()
 }
 
 //////////////////////////////////////////////////////////////
-// Add field to rays
+// Add double field to rays
 // The _rays array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int MattNcFile::_addFieldToRays(Nc3Var* var,
-                              const string &name,
-                              const string &units)
+int MattNcFile::_addFl64FieldToRays(Nc3Var* var,
+                                    const string &name,
+                                    const string &units)
   
 {
 
@@ -1004,6 +1014,82 @@ int MattNcFile::_addFieldToRays(Nc3Var* var,
   
 }
 
+//////////////////////////////////////////////////////////////
+// Add int8 field to rays
+// The _rays array has previously been set up by _createRays()
+// Returns 0 on success, -1 on failure
+
+int MattNcFile::_addSi08FieldToRays(Nc3Var* var,
+                                    const string &name,
+                                    const string &units)
+  
+{
+
+  // get data from array as bytes
+
+  RadxArray<ncbyte> ndata_;
+  ncbyte *ndata = ndata_.alloc(_nPoints);
+  int iret = !var->get(ndata, _nTimesInFile, _nRangeInFile);
+  if (iret) {
+    return -1;
+  }
+
+  // convert to si08 
+
+  RadxArray<Radx::si08> sdata_;
+  Radx::si08 *sdata = sdata_.alloc(_nPoints);
+  for (int ii = 0; ii < _nPoints; ii++) {
+    sdata[ii] = (int) ndata[ii];
+  }
+  
+  // set name
+  
+  string outName(name);
+  string standardName;
+  string longName;
+  if (outName.find(_params.combined_hi_field_name) != string::npos) {
+    outName = Names::CombinedHighCounts;
+    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+    longName = "high_channel_combined_backscatter_photon_count";
+  } else if (outName.find(_params.combined_lo_field_name) != string::npos) {
+    outName = Names::CombinedLowCounts;
+    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+    longName = "low_channel_combined_backscatter_photon_count";
+  } else if (outName.find(_params.molecular_field_name) != string::npos) {
+    outName = Names::MolecularCounts;
+    standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
+    longName = Names::lidar_copolar_molecular_backscatter_photon_count;
+  } else if (outName.find(_params.cross_field_name) != string::npos) {
+    outName = Names::CrossPolarCounts;
+    standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
+    longName = Names::lidar_crosspolar_combined_backscatter_photon_count;
+  }
+  
+  // loop through the rays
+  
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+
+    // get data for ray
+    
+    int startIndex = iray * _nRangeInFile;
+    Radx::si08 *sd = sdata + startIndex;
+    
+    RadxField *field =
+      _rays[iray]->addField(outName, units, _nRangeInFile,
+                            Radx::missingSi08,
+                            sd, 1.0, 0.0,
+                            true);
+    
+    field->setLongName(longName);
+    field->setStandardName(standardName);
+    field->copyRangeGeom(_geom);
+    
+  }
+  
+  return 0;
+  
+}
+
 
 ///////////////////////////////////////////////
 // add labelled integer value to error string,
@@ -1020,7 +1106,7 @@ void MattNcFile::_addErrInt(string label, int iarg, bool cr)
 // Default format is %g.
 
 void MattNcFile::_addErrDbl(string label, double darg,
-                          string format, bool cr)
+                            string format, bool cr)
   
 {
   Radx::addErrDbl(_errStr, label, darg, format, cr);
@@ -1053,9 +1139,9 @@ void MattNcFile::_clearRays()
 // "Mapping of the Airborne Doppler Radar Data"
 
 void MattNcFile::computeRadarAngles(RadxGeoref &georef,
-                                 RadxCfactors &corr,
-                                 double &azimuthDeg,
-                                 double &elevationDeg)
+                                    RadxCfactors &corr,
+                                    double &azimuthDeg,
+                                    double &elevationDeg)
   
 {
   
@@ -1107,10 +1193,10 @@ void MattNcFile::computeRadarAngles(RadxGeoref &georef,
 // Returns 0 on success, -1 on error
 
 int MattNcFile::readGeorefFromSpdb(string georefUrl,
-                                time_t searchTime,
-                                int searchMarginSecs,
-                                bool debug,
-                                RadxGeoref &radxGeoref)
+                                   time_t searchTime,
+                                   int searchMarginSecs,
+                                   bool debug,
+                                   RadxGeoref &radxGeoref)
   
 {
 
