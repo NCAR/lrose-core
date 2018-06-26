@@ -24,7 +24,7 @@ class Lrose < Formula
   depends_on 'qt'
   depends_on 'szip'
   depends_on 'pkg-config'
-  depends on :x11
+  depends_on :x11
 
   def install
     ENV["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
