@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for PidZdrStats
+ * TDRP params for ./PidZdrStats
  **********************************************************************/
 
 //======================================================================
@@ -50,7 +50,7 @@ debug = DEBUG_OFF;
 // Type: string
 //
 
-instance = "test";
+instance = "pecan";
 
 //======================================================================
 //
@@ -68,7 +68,7 @@ instance = "test";
 // Type: string
 //
 
-input_dir = ".";
+input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/qcv2/partrain/sband/rhi";
 
 ///////////// mode ////////////////////////////////////
 //
@@ -90,7 +90,7 @@ input_dir = ".";
 //     FILELIST
 //
 
-mode = REALTIME;
+mode = ARCHIVE;
 
 ///////////// max_realtime_data_age_secs //////////////
 //
@@ -128,7 +128,7 @@ PID_field_name = "PID";
 // Type: string
 //
 
-ZDR_field_name = "ZDR";
+ZDR_field_name = "ZDRM_F";
 
 ///////////// RHOHV_field_name ////////////////////////
 //
@@ -138,7 +138,7 @@ ZDR_field_name = "ZDR";
 // Type: string
 //
 
-RHOHV_field_name = "RHOHV";
+RHOHV_field_name = "RHOHV_F";
 
 ///////////// TEMP_field_name /////////////////////////
 //
@@ -164,7 +164,7 @@ TEMP_field_name = "TEMP_FOR_PID";
 // Type: boolean
 //
 
-set_max_range = FALSE;
+set_max_range = TRUE;
 
 ///////////// max_range_km ////////////////////////////
 //
@@ -176,7 +176,7 @@ set_max_range = FALSE;
 // Type: double
 //
 
-max_range_km = 9999;
+max_range_km = 146;
 
 //======================================================================
 //
@@ -430,27 +430,33 @@ pid_regions = {
     zdr_hist_lower_limit = -4,
     zdr_hist_upper_limit = 10
   }
+  ,
+  {
+    label = "insects",
+    pid = 15,
+    min_range_km = 5,
+    max_range_km = 148,
+    min_elev_deg = 0,
+    max_elev_deg = 90,
+    min_temp_c = -100,
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
+  }
+  ,
+  {
+    label = "clutter",
+    pid = 17,
+    min_range_km = 3,
+    max_range_km = 148,
+    min_elev_deg = -1,
+    max_elev_deg = 90,
+    min_temp_c = -100,
+    max_temp_c = 50,
+    zdr_hist_lower_limit = -4,
+    zdr_hist_upper_limit = 10
+  }
 };
-
-///////////// zdr_hist_n_bins /////////////////////////
-//
-// Number of bins in histograms used to analyze ZDR stats.
-//
-//
-// Type: int
-//
-
-zdr_hist_n_bins = 60;
-
-///////////// zdr_dist_poly_order /////////////////////
-//
-// Order of polygon fit for ZDR distribution.
-//
-//
-// Type: int
-//
-
-zdr_dist_poly_order = 11;
 
 ///////////// min_npts_for_valid_stats ////////////////
 //
@@ -464,6 +470,44 @@ zdr_dist_poly_order = 11;
 //
 
 min_npts_for_valid_stats = 1000;
+
+///////////// zdr_hist_n_bins /////////////////////////
+//
+// Number of bins in histograms used to analyze ZDR stats.
+//
+//
+// Type: int
+//
+
+zdr_hist_n_bins = 60;
+
+///////////// set_zdr_hist_limits_from_sdev ///////////
+//
+// Option to set the histogram limits from the standard deviation of the 
+//   data.
+//
+// If true, the limits will be set to the mean, plus/minus some multiple 
+//   of the standard deviation. The zdr_hist_lower_limit and 
+//   zdr_hist_upper_limit in the pid_regions table will not be used..
+//
+//
+// Type: boolean
+//
+
+set_zdr_hist_limits_from_sdev = TRUE;
+
+///////////// n_sdev_for_hist_limits //////////////////
+//
+// The number of standard deviations, relative to the mean, to be used 
+//   to compute the histogram limits.
+//
+// See 'set_zdr_hist_limits_from_sdev'.
+//
+//
+// Type: double
+//
+
+n_sdev_for_hist_limits = 3;
 
 //======================================================================
 //
@@ -481,7 +525,7 @@ min_npts_for_valid_stats = 1000;
 // Type: boolean
 //
 
-read_site_temp_from_spdb = FALSE;
+read_site_temp_from_spdb = TRUE;
 
 ///////////// site_temp_spdb_url //////////////////////
 //
@@ -491,7 +535,7 @@ read_site_temp_from_spdb = FALSE;
 // Type: string
 //
 
-site_temp_spdb_url = "spdbp:://hail:0:pecan/spdb/spol/temp";
+site_temp_spdb_url = "spdbp:://rain:0:pecan/spdb/KSMeso";
 
 ///////////// site_temp_station_name //////////////////
 //
@@ -501,7 +545,7 @@ site_temp_spdb_url = "spdbp:://hail:0:pecan/spdb/spol/temp";
 // Type: string
 //
 
-site_temp_station_name = "SPOL";
+site_temp_station_name = "CRKK";
 
 ///////////// site_temp_search_margin_secs ////////////
 //
@@ -522,7 +566,19 @@ site_temp_search_margin_secs = 3600;
 //
 //======================================================================
  
-///////////// output_dir //////////////////////////////
+///////////// write_results_to_text_files /////////////
+//
+// Option to write out ZDR results to text files.
+//
+// The results will be written in space-delimited columns.
+//
+//
+// Type: boolean
+//
+
+write_results_to_text_files = TRUE;
+
+///////////// text_output_dir /////////////////////////
 //
 // Output directory path.
 //
@@ -534,7 +590,20 @@ site_temp_search_margin_secs = 3600;
 // Type: string
 //
 
-output_dir = "/tmp/PidZdrStats";
+text_output_dir = "$(HOME)/data/PidZdrStats/pecan_rhi/txt";
+
+///////////// write_one_text_file_per_volume //////////
+//
+// Option to write out one text file per volume.
+//
+// If false, a single text file will be written for all of the data 
+//   times.
+//
+//
+// Type: boolean
+//
+
+write_one_text_file_per_volume = TRUE;
 
 //======================================================================
 //
@@ -566,5 +635,18 @@ write_results_to_spdb = TRUE;
 // Type: string
 //
 
-spdb_output_url = "/tmp/spdb/zdr_bias";
+spdb_output_url = "$(HOME)/data/PidZdrStats/pecan/spdb2";
+
+///////////// write_histogram_to_spdb /////////////////
+//
+// Option to write the full histogram details to SPDB.
+//
+// If true, the counts, density, pdf and cdf arrays will be included in 
+//   the SPDB output.
+//
+//
+// Type: boolean
+//
+
+write_histogram_to_spdb = TRUE;
 

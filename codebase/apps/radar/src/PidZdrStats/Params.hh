@@ -409,11 +409,13 @@ public:
   pid_region_t *_pid_regions;
   int pid_regions_n;
 
+  int min_npts_for_valid_stats;
+
   int zdr_hist_n_bins;
 
-  int zdr_dist_poly_order;
+  tdrp_bool_t set_zdr_hist_limits_from_sdev;
 
-  int min_npts_for_valid_stats;
+  double n_sdev_for_hist_limits;
 
   tdrp_bool_t read_site_temp_from_spdb;
 
@@ -423,11 +425,17 @@ public:
 
   int site_temp_search_margin_secs;
 
-  char* output_dir;
+  tdrp_bool_t write_results_to_text_files;
+
+  char* text_output_dir;
+
+  tdrp_bool_t write_one_text_file_per_volume;
 
   tdrp_bool_t write_results_to_spdb;
 
   char* spdb_output_url;
+
+  tdrp_bool_t write_histogram_to_spdb;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -436,7 +444,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[36];
+  mutable TDRPtable _table[40];
 
   const char *_className;
 

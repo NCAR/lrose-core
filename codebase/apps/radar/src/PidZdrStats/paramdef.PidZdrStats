@@ -333,20 +333,27 @@ paramdef struct pid_region_t {
 } pid_regions[];
 
 paramdef int {
-  p_default = 60;
-  p_descr = "Number of bins in histograms used to analyze ZDR stats.";
-} zdr_hist_n_bins;
-
-paramdef int {
-  p_default = 11;
-  p_descr = "Order of polygon fit for ZDR distribution.";
-} zdr_dist_poly_order;
-
-paramdef int {
   p_default = 1000;
   p_descr = "Min number of zdr points for valid statistics.";
   p_help = "With too few points we cannot draw reliable conclusions about the ZDR statistics.";
 } min_npts_for_valid_stats;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Number of bins in histograms used to analyze ZDR stats.";
+} zdr_hist_n_bins;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the histogram limits from the standard deviation of the data.";
+  p_help = "If true, the limits will be set to the mean, plus/minus some multiple of the standard deviation. The zdr_hist_lower_limit and zdr_hist_upper_limit in the pid_regions table will not be used..";
+} set_zdr_hist_limits_from_sdev;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "The number of standard deviations, relative to the mean, to be used to compute the histogram limits.";
+  p_help = "See 'set_zdr_hist_limits_from_sdev'.";
+} n_sdev_for_hist_limits;
 
 commentdef {
   p_header = "RETRIEVING SITE TEMPERATURE FROM SPDB";
@@ -378,11 +385,23 @@ commentdef {
   p_header = "WRITE RESULTS OUT TO TEXT FILES";
 }
 
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out ZDR results to text files.";
+  p_help = "The results will be written in space-delimited columns.";
+} write_results_to_text_files;
+
 paramdef string {
   p_default = "/tmp/PidZdrStats";
   p_descr = "Output directory path.";
   p_help = "Text files will be written to this directory. A day directory will be added, so the file path will be output_text_dir/yyyymmdd/filename.txt.";
-} output_dir;
+} text_output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out one text file per volume.";
+  p_help = "If false, a single text file will be written for all of the data times.";
+} write_one_text_file_per_volume;
 
 commentdef {
   p_header = "WRITING RESULTS TO SPDB";
@@ -399,4 +418,10 @@ paramdef string {
   p_descr = "URL for writing zdr bias results to SPDB XML.";
   p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
 } spdb_output_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write the full histogram details to SPDB.";
+  p_help = "If true, the counts, density, pdf and cdf arrays will be included in the SPDB output.";
+} write_histogram_to_spdb;
 

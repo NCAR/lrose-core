@@ -1005,6 +1005,18 @@
       tt->struct_vals[139].d = 10;
     tt++;
     
+    // Parameter 'min_npts_for_valid_stats'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_npts_for_valid_stats");
+    tt->descr = tdrpStrDup("Min number of zdr points for valid statistics.");
+    tt->help = tdrpStrDup("With too few points we cannot draw reliable conclusions about the ZDR statistics.");
+    tt->val_offset = (char *) &min_npts_for_valid_stats - &_start_;
+    tt->single_val.i = 1000;
+    tt++;
+    
     // Parameter 'zdr_hist_n_bins'
     // ctype is 'int'
     
@@ -1017,28 +1029,28 @@
     tt->single_val.i = 60;
     tt++;
     
-    // Parameter 'zdr_dist_poly_order'
-    // ctype is 'int'
+    // Parameter 'set_zdr_hist_limits_from_sdev'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("zdr_dist_poly_order");
-    tt->descr = tdrpStrDup("Order of polygon fit for ZDR distribution.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zdr_dist_poly_order - &_start_;
-    tt->single_val.i = 11;
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_zdr_hist_limits_from_sdev");
+    tt->descr = tdrpStrDup("Option to set the histogram limits from the standard deviation of the data.");
+    tt->help = tdrpStrDup("If true, the limits will be set to the mean, plus/minus some multiple of the standard deviation. The zdr_hist_lower_limit and zdr_hist_upper_limit in the pid_regions table will not be used..");
+    tt->val_offset = (char *) &set_zdr_hist_limits_from_sdev - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'min_npts_for_valid_stats'
-    // ctype is 'int'
+    // Parameter 'n_sdev_for_hist_limits'
+    // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("min_npts_for_valid_stats");
-    tt->descr = tdrpStrDup("Min number of zdr points for valid statistics.");
-    tt->help = tdrpStrDup("With too few points we cannot draw reliable conclusions about the ZDR statistics.");
-    tt->val_offset = (char *) &min_npts_for_valid_stats - &_start_;
-    tt->single_val.i = 1000;
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("n_sdev_for_hist_limits");
+    tt->descr = tdrpStrDup("The number of standard deviations, relative to the mean, to be used to compute the histogram limits.");
+    tt->help = tdrpStrDup("See 'set_zdr_hist_limits_from_sdev'.");
+    tt->val_offset = (char *) &n_sdev_for_hist_limits - &_start_;
+    tt->single_val.d = 3;
     tt++;
     
     // Parameter 'Comment 8'
@@ -1107,16 +1119,40 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'output_dir'
+    // Parameter 'write_results_to_text_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_results_to_text_files");
+    tt->descr = tdrpStrDup("Option to write out ZDR results to text files.");
+    tt->help = tdrpStrDup("The results will be written in space-delimited columns.");
+    tt->val_offset = (char *) &write_results_to_text_files - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'text_output_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_dir");
+    tt->param_name = tdrpStrDup("text_output_dir");
     tt->descr = tdrpStrDup("Output directory path.");
     tt->help = tdrpStrDup("Text files will be written to this directory. A day directory will be added, so the file path will be output_text_dir/yyyymmdd/filename.txt.");
-    tt->val_offset = (char *) &output_dir - &_start_;
+    tt->val_offset = (char *) &text_output_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/PidZdrStats");
+    tt++;
+    
+    // Parameter 'write_one_text_file_per_volume'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_one_text_file_per_volume");
+    tt->descr = tdrpStrDup("Option to write out one text file per volume.");
+    tt->help = tdrpStrDup("If false, a single text file will be written for all of the data times.");
+    tt->val_offset = (char *) &write_one_text_file_per_volume - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'Comment 10'
@@ -1150,6 +1186,18 @@
     tt->help = tdrpStrDup("For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir");
     tt->val_offset = (char *) &spdb_output_url - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/spdb/zdr_bias");
+    tt++;
+    
+    // Parameter 'write_histogram_to_spdb'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_histogram_to_spdb");
+    tt->descr = tdrpStrDup("Option to write the full histogram details to SPDB.");
+    tt->help = tdrpStrDup("If true, the counts, density, pdf and cdf arrays will be included in the SPDB output.");
+    tt->val_offset = (char *) &write_histogram_to_spdb - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // trailing entry has param_name set to NULL

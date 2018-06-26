@@ -176,6 +176,7 @@ public:
   double getHistMedian() const { return _histMedian; }
   double getHistMode() const { return _histMode; }
 
+  double getRmsePdf() const { return _rmsePdf; }
   double getGof() const { return _gof; }
   double getSmk() const { return _smk; }
   double getSmk95() const { return _smk95; }
@@ -245,6 +246,7 @@ protected:
 
   // goodness of fit
 
+  double _rmsePdf;
   double _gof;
   double _smk;
   double _smk95;
