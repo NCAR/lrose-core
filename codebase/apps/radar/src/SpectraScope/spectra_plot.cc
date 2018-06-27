@@ -1845,6 +1845,7 @@ static void load_plot_data_single_prt()
   moments.applyAdaptiveFilter(_nSamples, fft, iqWindowed, NULL,
                               _spectra.getNoise() / rcvGain,
                               filtWindowed,
+                              nullptr, // *iqNotched
                               filterRatio,
                               spectralNoise,
                               spectralSnr);
@@ -1891,6 +1892,7 @@ static void load_plot_data_single_prt()
                                 _spectra.getNoise() - rcvGainDb,
                                 _params->regression_interp_across_notch,
                                 regrFiltered,
+                                nullptr, // *iqNotched
                                 regrFilterRatio,
                                 regrSpectralNoise,
                                 regrSpectralSnr);
