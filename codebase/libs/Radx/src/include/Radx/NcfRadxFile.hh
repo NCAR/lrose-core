@@ -1061,7 +1061,7 @@ private:
                     vector<int> &vals, bool required = true);
   int _readSweepVar(Nc3Var* &var, const string &name,
                     vector<string> &vals, bool required = true);
-  Nc3Var* _getSweepVar(const string &name);
+  Nc3Var* _getSweepVar(const string &name, bool required);
   int _readCalTime(const string &name, Nc3Var* &var, int index, time_t &val);
   int _readCalVar(const string &name, Nc3Var* &var, int index,
                   double &val, bool required = false);

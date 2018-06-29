@@ -158,7 +158,7 @@ int NcfRadxFile::_readPath(const string &path, size_t pathNum)
   }
   
   // read dimensions
-  
+
   if (_readDimensions()) {
     _addErrStr(errStr);
     return -1;
@@ -1448,19 +1448,28 @@ int NcfRadxFile::_readSweepVariables()
   vector<string> sweepModes, polModes, prtModes, followModes, raysAreIndexed;
 
   int iret = 0;
-  
+
   _readSweepVar(_sweepNumberVar, SWEEP_NUMBER, sweepNums);
   if (sweepNums.size() < nSweepsInFile) {
+    _addErrStr("ERROR - _readSweepVariables - sweepNums size incorrect.");
+    _addErrInt("  sweepNums.size(): ", (int) sweepNums.size());
+    _addErrInt("  nSweepsInFile: ", (int) nSweepsInFile);
     iret = -1;
   }
 
   _readSweepVar(_sweepStartRayIndexVar, SWEEP_START_RAY_INDEX, startRayIndexes);
   if (startRayIndexes.size() < nSweepsInFile) {
+    _addErrStr("ERROR - _readSweepVariables - startRayIndex size incorrect.");
+    _addErrInt("  startRayIndexes.size(): ", (int) startRayIndexes.size());
+    _addErrInt("  nSweepsInFile: ", (int) nSweepsInFile);
     iret = -1;
   }
 
   _readSweepVar(_sweepEndRayIndexVar, SWEEP_END_RAY_INDEX, endRayIndexes);
   if (endRayIndexes.size() < nSweepsInFile) {
+    _addErrStr("ERROR - _readSweepVariables - endRayIndex size incorrect.");
+    _addErrInt("  endRayIndexes.size(): ", (int) endRayIndexes.size());
+    _addErrInt("  nSweepsInFile: ", (int) nSweepsInFile);
     iret = -1;
   }
 
@@ -1480,6 +1489,9 @@ int NcfRadxFile::_readSweepVariables()
 
   _readSweepVar(_sweepModeVar, SWEEP_MODE, sweepModes);
   if (sweepModes.size() < nSweepsInFile) {
+    _addErrStr("ERROR - _readSweepVariables - sweepMode size incorrect.");
+    _addErrInt("  sweepModes.size(): ", (int) sweepModes.size());
+    _addErrInt("  nSweepsInFile: ", (int) nSweepsInFile);
     iret = -1;
   }
 
@@ -2652,7 +2664,6 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
-      clearErrStr();
       return 0;
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readRayVar");
@@ -2674,7 +2685,7 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
-      clearErrStr();
+      // clearErrStr();
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
@@ -2717,7 +2728,7 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(Radx::missingMetaInt);
       }
-      clearErrStr();
+      // clearErrStr();
       return 0;
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readRayVar");
@@ -2739,7 +2750,7 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(Radx::missingMetaInt);
       }
-      clearErrStr();
+      // clearErrStr();
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
@@ -2782,7 +2793,7 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(false);
       }
-      clearErrStr();
+      // clearErrStr();
       return 0;
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readRayVar");
@@ -2807,7 +2818,7 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
     for (size_t ii = 0; ii < _nTimesInFile; ii++) {
       vals.push_back(false);
     }
-    clearErrStr();
+    // clearErrStr();
   }
   delete[] data;
   return iret;
@@ -2884,13 +2895,13 @@ int NcfRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
   // get var
 
   int nSweeps = _sweepDim->size();
-  var = _getSweepVar(name);
+  var = _getSweepVar(name, required);
   if (var == NULL) {
     if (!required) {
       for (int ii = 0; ii < nSweeps; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
-      clearErrStr();
+      // clearErrStr();
       return 0;
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readSweepVar");
@@ -2912,7 +2923,7 @@ int NcfRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
       for (int ii = 0; ii < nSweeps; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
-      clearErrStr();
+      // clearErrStr();
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable: ", name);
@@ -2938,13 +2949,13 @@ int NcfRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
   // get var
 
   int nSweeps = _sweepDim->size();
-  var = _getSweepVar(name);
+  var = _getSweepVar(name, required);
   if (var == NULL) {
     if (!required) {
       for (int ii = 0; ii < nSweeps; ii++) {
         vals.push_back(Radx::missingMetaInt);
       }
-      clearErrStr();
+      // clearErrStr();
       return 0;
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readSweepVar");
@@ -2966,7 +2977,7 @@ int NcfRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
       for (int ii = 0; ii < nSweeps; ii++) {
         vals.push_back(Radx::missingMetaInt);
       }
-      clearErrStr();
+      // clearErrStr();
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable: ", name);
@@ -2996,7 +3007,7 @@ int NcfRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
       for (int ii = 0; ii < nSweeps; ii++) {
         vals.push_back("");
       }
-      clearErrStr();
+      // clearErrStr();
       return 0;
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readSweepVar");
@@ -3078,7 +3089,7 @@ int NcfRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
 // get a sweep variable
 // returns NULL on failure
 
-Nc3Var* NcfRadxFile::_getSweepVar(const string &name)
+Nc3Var* NcfRadxFile::_getSweepVar(const string &name, bool required)
 
 {
   
@@ -3086,27 +3097,33 @@ Nc3Var* NcfRadxFile::_getSweepVar(const string &name)
   
   Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
-    _addErrStr("ERROR - NcfRadxFile::_getSweepVar");
-    _addErrStr("  Cannot read variable, name: ", name);
-    _addErrStr(_file.getNc3Error()->get_errmsg());
+    if (required) {
+      _addErrStr("ERROR - NcfRadxFile::_getSweepVar");
+      _addErrStr("  Cannot read variable, name: ", name);
+      _addErrStr(_file.getNc3Error()->get_errmsg());
+    }
     return NULL;
   }
 
   // check sweep dimension
 
   if (var->num_dims() < 1) {
-    _addErrStr("ERROR - NcfRadxFile::_getSweepVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has no dimensions");
+    if (required) {
+      _addErrStr("ERROR - NcfRadxFile::_getSweepVar");
+      _addErrStr("  variable name: ", name);
+      _addErrStr("  variable has no dimensions");
+    }
     return NULL;
   }
   Nc3Dim *sweepDim = var->get_dim(0);
   if (sweepDim != _sweepDim) {
-    _addErrStr("ERROR - NcfRadxFile::_getSweepVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has incorrect dimension, dim name: ",
-               sweepDim->name());
-    _addErrStr("  should be: ", SWEEP);
+    if (required) {
+      _addErrStr("ERROR - NcfRadxFile::_getSweepVar");
+      _addErrStr("  variable name: ", name);
+      _addErrStr("  variable has incorrect dimension, dim name: ",
+                 sweepDim->name());
+      _addErrStr("  should be: ", SWEEP);
+    }
     return NULL;
   }
 

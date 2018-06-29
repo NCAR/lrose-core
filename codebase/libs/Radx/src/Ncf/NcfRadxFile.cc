@@ -375,7 +375,6 @@ bool NcfRadxFile::isCfRadial(const string &path)
   }
 
   // read dimensions
-  
   if (_readDimensions()) {
     _file.close();
     if (_verbose) {

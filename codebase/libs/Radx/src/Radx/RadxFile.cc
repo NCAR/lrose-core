@@ -1073,6 +1073,8 @@ int RadxFile::readFromPath(const string &path,
   if (isNetCDF(path)) {
     if (_readFromPathNetCDF(path, vol) == 0) {
       return 0;
+    } else {
+      return -1;
     }
   }
 
@@ -1081,6 +1083,8 @@ int RadxFile::readFromPath(const string &path,
   if (isHdf5(path)) {
     if (_readFromPathHdf5(path, vol) == 0) {
       return 0;
+    } else {
+      return -1;
     }
   }
 
@@ -1109,8 +1113,6 @@ int RadxFile::_readFromPathNetCDF(const string &path,
   
 {
 
-  clearErrStr();
-
   // try CF radial first
 
   {
@@ -1129,8 +1131,17 @@ int RadxFile::_readFromPathNetCDF(const string &path,
           cerr << "INFO: RadxFile::readFromPath" << endl;
           cerr << "  Read CfRadial file, path: " << _pathInUse << endl;
         }
+      } else if (_verbose) {
+        cerr << "===>> ERROR in CfRadial file <<===" << endl;
+        cerr << file.getErrStr() << endl;
+        cerr << "===>> ERROR in CfRadial file <<===" << endl;
       }
       return iret;
+    } else {
+      if (_verbose) {
+        cerr << "Not CfRadial format" << endl;
+        cerr << file.getErrStr() << endl;
+      }
     }
   }
 
@@ -1380,8 +1391,6 @@ int RadxFile::_readFromPathHdf5(const string &path,
                                 RadxVol &vol)
   
 {
-
-  clearErrStr();
 
   // try ODIM HDF5 next
 
