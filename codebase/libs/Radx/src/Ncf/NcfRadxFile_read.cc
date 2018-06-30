@@ -1473,6 +1473,28 @@ int NcfRadxFile::_readSweepVariables()
     iret = -1;
   }
 
+  for (size_t ii = 0; ii < startRayIndexes.size(); ii++) {
+    int startIndex = startRayIndexes[ii];
+    int endIndex = endRayIndexes[ii];
+    if (startIndex < 0) {
+      _addErrInt("ERROR - _readSweepVariables - sweep_start_ray_index negative: ", startIndex);
+      _addErrStr("  This should be >= 0");
+      iret = -1;
+    }  
+    if (endIndex < 0) {
+      _addErrInt("ERROR - _readSweepVariables - sweep_end_ray_index negative: ", endIndex);
+      _addErrStr("  This should be >= 0");
+      iret = -1;
+    }  
+    if (startIndex > endIndex) {
+      _addErrStr("ERROR - _readSweepVariables - sweep_start_ray_index > sweep_end_ray_index");
+      _addErrStr("  The start index should always be <= end index");
+      _addErrInt("  sweep_start_ray_index: ", startIndex);
+      _addErrInt("  sweep_end_ray_index: ", endIndex);
+      iret = -1;
+    }  
+  }
+
   _sweepFixedAngleVar = NULL;
   _readSweepVar(_sweepFixedAngleVar, FIXED_ANGLE, fixedAngles, false);
   if (!_sweepFixedAngleVar) {
