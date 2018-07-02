@@ -265,8 +265,9 @@ void BscanManager::_createMenus()
   _fileMenu->addAction(_saveImageAct);
   _fileMenu->addAction(_exitAct);
 
-  menuBar()->addAction(_rangeAxisAct);
-  menuBar()->addAction(_timeAxisAct);
+  _configMenu = menuBar()->addMenu(tr("&Config"));
+  _configMenu->addAction(_rangeAxisAct);
+  _configMenu->addAction(_timeAxisAct);
 
   _overlaysMenu = menuBar()->addMenu(tr("Overlays"));
   _overlaysMenu->addAction(_rangeGridAct);
@@ -276,12 +277,13 @@ void BscanManager::_createMenus()
   _overlaysMenu->addAction(_speedTrackLegendAct);
   _overlaysMenu->addAction(_distScaleAct);
 
-  menuBar()->addAction(_showClickAct);
-  
-  menuBar()->addAction(_freezeAct);
-  menuBar()->addAction(_clearAct);
-  menuBar()->addAction(_unzoomAct);
-  menuBar()->addAction(_refreshAct);
+
+  _actionsMenu = menuBar()->addMenu(tr("&Actions"));
+  _actionsMenu->addAction(_showClickAct);
+  _actionsMenu->addAction(_freezeAct);
+  _actionsMenu->addAction(_clearAct);
+  _actionsMenu->addAction(_unzoomAct);
+  _actionsMenu->addAction(_refreshAct);
 
   _helpMenu = menuBar()->addMenu(tr("&Help"));
   _helpMenu->addSeparator();
@@ -1764,6 +1766,12 @@ void BscanManager::_addRay(const RadxRay *ray)
     vector<double> &data = fieldData[ifield];
 
     RadxField *rfld = (RadxField *) ray->getField(_fields[ifield]->getName());
+
+    // at this point, we know the data values for the field AND the color map
+    bool colorMapUnbound = _fields[ifield]->isColorMapUnbounded();
+    Radx::fl32 min = FLT_MAX;;
+    Radx::fl32 max = FLT_MIN;
+
     if (rfld == NULL) {
       // fill with missing
       for (size_t igate = 0; igate < ray->getNGates(); igate++) {
@@ -1784,10 +1792,22 @@ void BscanManager::_addRay(const RadxRay *ray)
         } else if (fabs(val - missingVal) < 0.0001) {
           data.push_back(-9999);
         } else {
-          data.push_back(*fdata);
+          data.push_back(*fdata);  // ==> We know the data value here; determine min and max of values?
+	  if (colorMapUnbound) {
+	    //TODO:  keep track of min and max data values
+            if (*fdata < min) min = *fdata;
+            if (*fdata > max) max = *fdata;	 
+	  }
         }
       }
+      /*      if (colorMapUnbound) {
+	_fields[ifield]->setColorMapUnbounded(false);
+	Radx::fl32 niceMin, niceMax;
+	makeNice(min, max, _fields[ifield]->getColorMap.nSteps, &niceMin, &niceMax);
+	_fields[ifield]->colorMap = new ColorMap(niceMin, niceMax); 
+	}*/
     }
+    // ==> set the colorMap min and max?  Each time we plot the data? or only once, the first time we read it?
 
   } // ifield
 
