@@ -521,6 +521,7 @@ void RadxTimeList::_searchForValid(const string &topDir,
 
   // compute file end times from start time of next file
 
+  cerr << "before compute file end times\n";
   vector<RadxTime> fileEndTimes;
   RadxTime fStartTime;
   RadxTime fEndTime;
@@ -543,6 +544,8 @@ void RadxTimeList::_searchForValid(const string &topDir,
     prevStart = fStartTime;
     prevEnd = fEndTime;
 
+    cerr << "working on " << fStartTime << endl;
+
     if (firstIter) {
       firstIter = false;
     }
@@ -556,6 +559,9 @@ void RadxTimeList::_searchForValid(const string &topDir,
       fileEndTimes.push_back(prevStart + timeSpan);
     }
   }
+
+  cerr << "after compute file end times\n";
+  cerr << " there are " << fileEndTimes.size() << " end times in list\n";
   /* original code 
   vector<RadxTime> fileEndTimes;
   RadxTime nextStartTime;
