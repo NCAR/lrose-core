@@ -50,9 +50,8 @@ DisplayField::DisplayField(const string &label,
         _isFilt(isFilt),
         _selectValue(0),
         _dialog(NULL)
-
 {
-
+  _isColorMapUnbounded = false;
 }
 
 // destructor

@@ -63,6 +63,8 @@ public:
 
   int getButtonRow() const { return _buttonRow; }
   bool getIsFilt() const { return _isFilt; }
+  bool isColorMapUnbounded() const { return _isColorMapUnbounded; }
+  void setColorMapUnbounded(bool value) { _isColorMapUnbounded = value; }
 
   void setSelectValue(double value) { _selectValue = value; }
   double getSelectValue() const { return _selectValue; }
@@ -86,7 +88,7 @@ private:
 
   int _buttonRow;
   bool _isFilt;
-
+  bool _isColorMapUnbounded;
   double _selectValue;
   QLabel *_dialog;
 

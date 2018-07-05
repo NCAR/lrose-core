@@ -313,6 +313,9 @@ int HawkEye::_setupDisplayFields()
     ColorMap map;
     map.setName(pfld.label);
     map.setUnits(pfld.units);
+    // TODO: the logic here is a little weird ... the label and units have been set, but are we throwing them away?
+
+    bool noColorMap = false;
 
     if (map.readMap(colorMapPath)) {
         cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
@@ -331,8 +334,12 @@ int HawkEye::_setupDisplayFields()
           map = colorMap;
           // HERE: What is missing from the ColorMap object??? 
         } catch (std::out_of_range ex) {
-          cerr << "ERROR - did not find default color map for field" << endl;
-          return -1;
+          cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
+	  // Just set the colormap to a generic color map
+	  // use range to indicate it needs update, until we have access to the data values
+          map = ColorMap(0.0, 1.0);
+	  noColorMap = true; 
+          // return -1
         }
     }
 
@@ -341,7 +348,9 @@ int HawkEye::_setupDisplayFields()
     DisplayField *field =
       new DisplayField(pfld.label, pfld.raw_name, pfld.units, 
                        pfld.shortcut, map, ifield, false);
-    
+    if (noColorMap)
+      field->setColorMapUnbounded(true);
+
     _displayFields.push_back(field);
 
     // filtered field
