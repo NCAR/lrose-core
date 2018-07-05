@@ -1768,7 +1768,7 @@ void BscanManager::_addRay(const RadxRay *ray)
     RadxField *rfld = (RadxField *) ray->getField(_fields[ifield]->getName());
 
     // at this point, we know the data values for the field AND the color map
-    bool colorMapUnbound = _fields[ifield]->isColorMapUnbounded();
+    // bool colorMapUnbound = _fields[ifield]->isColorMapUnbounded();
     Radx::fl32 min = FLT_MAX;;
     Radx::fl32 max = FLT_MIN;
 
