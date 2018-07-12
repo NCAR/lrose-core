@@ -146,7 +146,7 @@ Build using automake:
 
 ```
   cd lrose-core
-  ./build/build_auto -p cidd -x /tmp/cidd_m32
+  ./build/build_lrose.py --package cidd --prefix /tmp/cidd_m32
 ```
 
 ### Copy the binaries to the final install location
