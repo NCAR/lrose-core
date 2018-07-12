@@ -1236,8 +1236,16 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   // fill data vector
 
   for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+
     vector<double> &data = fieldData[ifield];
+
     RadxField *rfld = ray->getField(_fields[ifield]->getName());
+
+    // at this point, we know the data values for the field AND the color map                                                                        
+    bool haveColorMap = _fields[ifield]->haveColorMap();
+    Radx::fl32 min = FLT_MAX;;
+    Radx::fl32 max = FLT_MIN;
+
     if (rfld == NULL) {
       // fill with missing
       for (int igate = 0; igate < _nGates; igate++) {
@@ -1247,16 +1255,46 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
       rfld->convertToFl32();
       const Radx::fl32 *fdata = rfld->getDataFl32();
       const Radx::fl32 missingVal = rfld->getMissingFl32();
-      for (int igate = 0; igate < _nGates; igate++, fdata++) {
+      // we can only look at the data available, so only go to nGates
+      for (int igate = 0; igate < nGates; igate++, fdata++) {  // was _nGates
         Radx::fl32 val = *fdata;
         if (fabs(val - missingVal) < 0.0001) {
           data.push_back(-9999);
         } else {
-          data.push_back(*fdata);
-        }
+          data.push_back(*fdata);  // ==> We know the data value here; determine min and max of values
+          if (!haveColorMap) {
+            // keep track of min and max data values
+	    // just display something.  The color scale can be edited as needed, later.
+	    bool newMinOrMax = false;
+            if (val < min) {
+              min = *fdata;
+	      newMinOrMax = true;
+	    }
+            if (val > max) {
+	      max = *fdata;
+	      newMinOrMax = true;
+	    }
+	    if ((newMinOrMax) && (_params.debug >= Params::DEBUG_VERBOSE)) { 
+	      printf("field index %zu, gate %d \t", ifield, igate);
+	      printf("new min, max of data %g, %g\t", min,  max);
+	      printf("missing value %g\t", missingVal);
+	      printf("current value %g\n", val);
+	    }
+          }
+        } // end else not missing value
+      } // end for each gate
+      // fill the remainder with missing 
+      for (int igate = nGates; igate < _nGates; igate++) {
+        data.push_back(-9999);
       }
-    }
-  }
+
+      if (!haveColorMap) {                              
+        _fields[ifield]->setColorMapRange(min, max);
+        _fields[ifield]->changeColorMap(); // just change bounds on existing map
+      } // end do not have color map
+
+    } // end else vector not NULL
+  } // end for each field
 
   // Store the ray location (which also sets _startAz and _endAz), then
   // draw beam on the PPI or RHI, as appropriate

@@ -336,7 +336,7 @@ int HawkEye::_setupDisplayFields()
         } catch (std::out_of_range ex) {
           cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
 	  // Just set the colormap to a generic color map
-	  // use range to indicate it needs update, until we have access to the data values
+	  // use range to indicate it needs update; update when we have access to the actual data values
           map = ColorMap(0.0, 1.0);
 	  noColorMap = true; 
           // return -1
@@ -349,7 +349,7 @@ int HawkEye::_setupDisplayFields()
       new DisplayField(pfld.label, pfld.raw_name, pfld.units, 
                        pfld.shortcut, map, ifield, false);
     if (noColorMap)
-      field->setColorMapUnbounded(true);
+      field->setNoColorMap();
 
     _displayFields.push_back(field);
 

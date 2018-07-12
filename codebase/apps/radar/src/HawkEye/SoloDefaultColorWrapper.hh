@@ -91,6 +91,9 @@ public:
 
   void PrintColorScales();
 
+  void FindNiceMinMax(double min, double max, int tickCount,
+    double *newMin, double *newMax);
+
   //private:
   void ImportSoloPalettes();
 

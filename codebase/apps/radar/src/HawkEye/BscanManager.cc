@@ -43,6 +43,7 @@
 #include "Params.hh"
 #include "Reader.hh"
 #include "AllocCheck.hh"
+#include "SoloDefaultColorWrapper.hh"
 #include <radar/RadarComplex.hh>
 #include <toolsa/file_io.h>
 
@@ -1768,7 +1769,8 @@ void BscanManager::_addRay(const RadxRay *ray)
     RadxField *rfld = (RadxField *) ray->getField(_fields[ifield]->getName());
 
     // at this point, we know the data values for the field AND the color map
-    bool colorMapUnbound = _fields[ifield]->isColorMapUnbounded();
+
+    bool haveColorMap = _fields[ifield]->haveColorMap();
     Radx::fl32 min = FLT_MAX;;
     Radx::fl32 max = FLT_MIN;
 
@@ -1792,22 +1794,20 @@ void BscanManager::_addRay(const RadxRay *ray)
         } else if (fabs(val - missingVal) < 0.0001) {
           data.push_back(-9999);
         } else {
-          data.push_back(*fdata);  // ==> We know the data value here; determine min and max of values?
-	  if (colorMapUnbound) {
-	    //TODO:  keep track of min and max data values
+          data.push_back(*fdata);  // ==> We know the data value here; determine min and max of values
+	  if (!haveColorMap) {
+	    // keep track of min and max data values
             if (*fdata < min) min = *fdata;
             if (*fdata > max) max = *fdata;	 
 	  }
-        }
-      }
-      /*      if (colorMapUnbound) {
-	_fields[ifield]->setColorMapUnbounded(false);
-	Radx::fl32 niceMin, niceMax;
-	makeNice(min, max, _fields[ifield]->getColorMap.nSteps, &niceMin, &niceMax);
-	_fields[ifield]->colorMap = new ColorMap(niceMin, niceMax); 
-	}*/
-    }
-    // ==> set the colorMap min and max?  Each time we plot the data? or only once, the first time we read it?
+        } 
+      } // end for each gate
+      if (!haveColorMap) {
+	_fields[ifield]->setColorMapRange(min, max); 
+	_fields[ifield]->changeColorMap(); // just change bounds on existing map
+	// ==> set the colorMap min and max,  only once, the first time we read it
+      } // end do not have color map
+    } // end else vector not NULL
 
   } // ifield
 

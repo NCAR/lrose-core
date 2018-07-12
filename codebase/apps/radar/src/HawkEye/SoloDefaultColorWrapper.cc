@@ -430,6 +430,34 @@ vector<float> SoloDefaultColorWrapper::ToRGB(string colorStr) {
   return colors;
 }
 
+// Pulled this code from stackoverflow site 
+void SoloDefaultColorWrapper::FindNiceMinMax(double min, double max, int tickCount,
+					     double *newMin, double *newMax) {
+  
+  if (min > max) {
+    cerr << "WARNING - min is greater than max when computing colorscale boundaries\n";
+    cerr << "   attempting recovery by switching min and max\n";
+    double save;
+    save = min;
+    min = max;
+    max = save;
+  }
+  double range = max - min;
+  double unroundedTickSize = range/tickCount;
+  if (unroundedTickSize > 0) {
+    double x = ceil(log10(unroundedTickSize)-1);
+    double pow10x = pow(10, x);
+    double roundedTickRange = ceil(unroundedTickSize / pow10x) * pow10x;
+    *newMin = roundedTickRange * floor(min/roundedTickRange);
+    *newMax = roundedTickRange * ceil(max/roundedTickRange);
+  } else {
+    cerr << "WARNING - min and max are almost equal when computing colorscale boundaries\n";
+    cerr << "   attempting recovery by using (min -1, max) for the colorscale boundaries\n";
+    *newMin = min - 1.0;
+    *newMax = max;
+  } 
+}
+
 
 void SoloDefaultColorWrapper::PrintColorScales() {
 
