@@ -107,6 +107,8 @@ PolarManager::PolarManager(const Params &params,
   // initialize
 
   _firstTime = true;
+
+  // setWindowIcon(QIcon("HawkEyePolarIcon.icns"));
   
   _prevAz = -9999.0;
   _prevEl = -9999.0;

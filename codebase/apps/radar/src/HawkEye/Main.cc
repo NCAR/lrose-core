@@ -34,6 +34,7 @@
 #include "HawkEye.hh"
 #include <QApplication>
 #include <toolsa/uusleep.h>
+#include <QIcon>
 
 // file scope
 
@@ -65,6 +66,9 @@ int main(int argc, char **argv)
   try {
     
     app = new QApplication(argc, argv);
+    //app->setWindowIcon(QIcon("HawkEyePolarIcon.icns"));
+    app->setWindowIcon(QIcon(":/radar.HawkEye.png"));
+    cerr << "After setting Window Icon\n";
     HawkEye *Prog;
     Prog = new HawkEye(argc, argv);
     if (!Prog->OK) {

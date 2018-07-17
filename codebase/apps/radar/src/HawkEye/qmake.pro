@@ -5,9 +5,12 @@
 
 TEMPLATE = app
 TARGET = HawkEye
+# ICON = HawkEyePolarIcon.icns 
 
 CONFIG += qt
 CONFIG += debug
+
+RESOURCES = resources.qrc 
 
 HEADERS += AllocCheck.hh
 HEADERS += Args.hh
