@@ -23,9 +23,9 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ////////////////////////////////////////////////
 //
-// Mdvx_typedefs.hh
+// Mdvx_typedefs64.hh
 //
-// Typedefs for Mdvx class
+// Typedefs for Mdvx class - 64-bit upgrade
 //
 ////////////////////////////////////////////////
 
@@ -35,27 +35,21 @@
 // Defines for header string and array sizes.
 // These should not be changed since that would alter the file format.
 
-#define     MDV_CHUNK_INFO_LEN      480
-#define     MDV_INFO_LEN            512
-#define     MDV_LONG_FIELD_LEN       64
-#define     MDV_MAX_PROJ_PARAMS       8
-#define     MDV_MAX_VLEVELS         122 
-#define     MDV_NAME_LEN            128
-#define     MDV_SHORT_FIELD_LEN      16
-#define     MDV_TRANSFORM_LEN        16
-#define     MDV_UNITS_LEN            16
-#define     MDV_N_COORD_LABELS        3
-#define     MDV_COORD_UNITS_LEN      32
-
-
-/////////////////////
-// heartbeat function
-
-typedef void (*heartbeat_t)(const char *label);
+#define     MDV64_CHUNK_INFO_LEN      1024
+#define     MDV64_INFO_LEN            2048
+#define     MDV64_LONG_FIELD_LEN       256
+#define     MDV64_MAX_PROJ_PARAMS       16
+#define     MDV64_MAX_VLEVELS         2048 
+#define     MDV64_NAME_LEN             512
+#define     MDV64_SHORT_FIELD_LEN       64
+#define     MDV64_TRANSFORM_LEN         64
+#define     MDV64_UNITS_LEN             64
+#define     MDV64_N_COORD_LABELS         3
+#define     MDV64_COORD_UNITS_LEN       64
 
 
 //////////////////
-// master_header_t
+// MDV64_master_header_t
 
 typedef struct {
 
@@ -66,26 +60,26 @@ typedef struct {
                                    // Major revisions are documented by
                                    // the Magic cookie ID
   
-  si32  time_gen;                  // 3 Time data generated.
+  si64  time_gen;                  // 3 Time data generated.
                                    //   For model data, this is the init time.
 
-  si32  user_time;                 // 4 Time value specific to the dataset.
+  si64  user_time;                 // 4 Time value specific to the dataset.
                                    //   This time value is not used by any
                                    //   of the general MDV code, but can be
                                    //   used by users of specific datasets.
 
-  si32  time_begin;                // 5 Begin time of dataset.  For forecast
+  si64  time_begin;                // 5 Begin time of dataset.  For forecast
                                    //   datasets, this is the begin time of
                                    //   the data used to generate the
                                    //   forecast.
                                    //   Seconds since 1970
 
-  si32  time_end;                  // 6 End time of dataset.  For forecast
+  si64  time_end;                  // 6 End time of dataset.  For forecast
                                    //   datasets, this is the end time of the
                                    //   data used to generate the forecast.
                                    //   Seconds since 1970
 
-  mutable si32  time_centroid;     // 7 Midpoint time of dataset.  This time
+  mutable si64  time_centroid;     // 7 Midpoint time of dataset.  This time
                                    //   is not necessarily directly in the
                                    //   middle of time_begin and time_end
                                    //   since some datasets have data skewed
@@ -94,7 +88,7 @@ typedef struct {
                                    //   this is the forecast valid time,
                                    //   forecast_time, of the first field.
 
-  si32  time_expire;               // 8 Time dataset is no longer valid.
+  si64  time_expire;               // 8 Time dataset is no longer valid.
                                    //   Seconds since 1970
 
   si32  num_data_times;            // 9 Number of data times in 
@@ -108,7 +102,7 @@ typedef struct {
 
   mutable si32  data_collection_type;      // 12 Data type (e.g. DATA_MEASURED)
 
-  si32  user_data;                 // 13 Data specific to the dataset.  This
+  si64  user_data;                 // 13 Data specific to the dataset.  This
                                    //    value is not used by any of the
                                    //    general MDV code, but can be used by
                                    //    users of specific datasets.  This
@@ -164,24 +158,24 @@ typedef struct {
   si32  data_ordering;             // 18 Ordering of cells in array 
                                    //    NOTE: only ORDER_XYZ supported
   
-  mutable si32  n_fields;          // 19 Number of fields in this data set
+  mutable si64  n_fields;          // 19 Number of fields in this data set
 
-  mutable si32  max_nx;            // 20 Max number of array elements in 
+  mutable si64  max_nx;            // 20 Max number of array elements in 
                                    //    x direction
 
-  mutable si32  max_ny;            // 21 Max number of array elements in 
+  mutable si64  max_ny;            // 21 Max number of array elements in 
                                    //    y direction
   
-  mutable si32  max_nz;            // 22 Max number of array elements in 
+  mutable si64  max_nz;            // 22 Max number of array elements in 
                                    //    z direction
 
-  mutable si32  n_chunks;          // 23 Number of chunks in this file
+  mutable si64  n_chunks;          // 23 Number of chunks in this file
     
   // The following offsets are all in bytes from beginning of file
 
-  mutable si32 field_hdr_offset;   // 24 offset to first field header
-  mutable si32 vlevel_hdr_offset;  // 25 offset to first vlevel header
-  mutable si32 chunk_hdr_offset;   // 26 offset to first chunk header
+  mutable si64 field_hdr_offset;   // 24 offset to first field header
+  mutable si64 vlevel_hdr_offset;  // 25 offset to first vlevel header
+  mutable si64 chunk_hdr_offset;   // 26 offset to first chunk header
 
   mutable si32 field_grids_differ; // 27 Flag indicating if the data grids for
                                    //    all of the fields differ in any way.
@@ -190,27 +184,27 @@ typedef struct {
                                    //    same, so some processing may be
                                    //    simplified
 
-  si32  user_data_si32[8];         // 28-35 User defined data particular to a
+  si64  user_data_si64[8];         // 28-35 User defined data particular to a
                                    //   dataset.  These values are not used
                                    //   by any general MDV processing but
                                    //   are guaranteed to be available to
                                    //   users for their own purposes.
 
-  mutable si32 time_written;       // 36 time file was written to disk
+  mutable si64 time_written;       // 36 time file was written to disk
 
-  si32  epoch;                     // 37 Time epoch relative to Jan 1 1970
+  si64  epoch;                     // 37 Time epoch relative to Jan 1 1970
                                    //    Original epoch is 0
                                    //    time = time in file +
                                    //             epoch * 2**32
 
-  mutable si32 forecast_time;      // 38 Time of forecast the data in this
+  mutable si64 forecast_time;      // 38 Time of forecast the data in this
                                    //    field represents.  For forecst data,
                                    //    this is the same as time_centroid
                                    //    in the master header.
                                    //    For non-forecast data, set to 0.
                                    //    Copy of value in first field.
 
-  mutable si32 forecast_delta;     // 39 Time interval, in seconds, of
+  mutable si64 forecast_delta;     // 39 Time interval, in seconds, of
                                    //    forecast.  This is the number of
                                    //    seconds since the data midpoint
                                    //    (time_centroid in the master header)
@@ -221,32 +215,32 @@ typedef struct {
                                    //    value should be 0.
                                    //    Copy of value in first field.
 
-  si32  unused_si32[2];            // 40-41 To fill out record to 42 si32's
+  si64  unused_si64[2];            // 40-41 To fill out record to 42 si32's
                                    //   (including record_len1)
 
-  fl32  user_data_fl32[6];         // 1-6 User defined data particular to a
+  fl64  user_data_fl64[6];         // 1-6 User defined data particular to a
                                    //   dataset.  These values are not used
                                    //   by any general MDV processing but
                                    //   are guaranteed to be available to
                                    //   users for their own purposes.
 
-  fl32  sensor_lon;                // 7 origin of sensor (degrees)
-  fl32  sensor_lat;                // 8 origin of sensor (degrees)
-  fl32  sensor_alt;                // 9 height of sensor (Km)
+  fl64  sensor_lon;                // 7 origin of sensor (degrees)
+  fl64  sensor_lat;                // 8 origin of sensor (degrees)
+  fl64  sensor_alt;                // 9 height of sensor (Km)
     
-  fl32  unused_fl32[12];           // 10-21 to fill out to 21 fl32's
+  fl64  unused_fl64[12];           // 10-21 to fill out to 21 fl64's
 
-  char  data_set_info[MDV_INFO_LEN]; // (512 bytes)
-  char  data_set_name[MDV_NAME_LEN]; // (128 bytes)
+  char  data_set_info[MDV64_INFO_LEN]; // (512 bytes)
+  char  data_set_name[MDV64_NAME_LEN]; // (128 bytes)
 
-  char  data_set_source[MDV_NAME_LEN]; // Where the data came from
+  char  data_set_source[MDV64_NAME_LEN]; // Where the data came from
   
   mutable si32  record_len2;           // Fortran record length (in bytes)
 
-}  master_header_t;
+}  MDV64_master_header_t;
 
 ///////////////////////////////////////////////////////////////////////////
-// field_header_t
+// MDV64_field_header_t
 //
 // Each field has its own header, 416 bytes in length.
 // If you want to add items, replace a spare. Do not change the length.
@@ -255,7 +249,7 @@ typedef struct {
 // have an associated vlevel header as well.
 //
 // Supported encoding types are:
-//  INT8
+//   INT8
 //   INT16
 //   FLOAT32
 //
@@ -301,7 +295,7 @@ typedef struct {
   si32 field_code;             // 2 MDV Field Code (taken from GRIB,
                                //  defined in <mdv/mdv_field_codes.h>)
 
-  si32 user_time1;             // 3 Time value specific to the field.
+  si64 user_time1;             // 3 Time value specific to the field.
                                //   This time value is not used by any
                                //   of the general MDV code, but can be
                                //   used by users of specific datasets.
@@ -309,7 +303,7 @@ typedef struct {
                                //   holder after removing an obsolete
                                //   field from the header.
 
-  si32 forecast_delta;         // 4 Time interval, in seconds, of
+  si64 forecast_delta;         // 4 Time interval, in seconds, of
                                //   forecast.  This is the number of
                                //   seconds since the data midpoint
                                //   (time_centroid in the master header)
@@ -319,7 +313,7 @@ typedef struct {
                                //   field is not a forecast field, this
                                //   value should be 0.
 
-  si32 user_time2;             // 5 Time value specific to the field.
+  si64 user_time2;             // 5 Time value specific to the field.
                                //   This time value is not used by any
                                //   of the general MDV code, but can be
                                //   used by users of specific datasets.
@@ -327,7 +321,7 @@ typedef struct {
                                //   holder after removing an obsolete
                                //   field from the header.
 
-  si32 user_time3;             // 6 Time value specific to the field.
+  si64 user_time3;             // 6 Time value specific to the field.
                                //   This time value is not used by any
                                //   of the general MDV code, but can be
                                //   used by users of specific datasets.
@@ -335,13 +329,13 @@ typedef struct {
                                //   holder after removing an obsolete
                                //   field from the header.
 
-  si32 forecast_time;          // 7 Time of forecast the data in this
+  si64 forecast_time;          // 7 Time of forecast the data in this
                                //   field represents.  For forecst data,
                                //   this is the same as time_centroid
                                //   in the master header.
                                //   For non-forecast data, set to 0.
 
-  si32 user_time4;             // 8 Time value specific to the field.
+  si64 user_time4;             // 8 Time value specific to the field.
                                //   This time value is not used by any
                                //   of the general MDV code, but can be
                                //   used by users of specific datasets.
@@ -349,9 +343,9 @@ typedef struct {
                                //   holder after removing an obsolete
                                //   field from the header.
 
-  si32 nx;                     // 9 Number of points in X direction
-  si32 ny;                     // 10 Number of points in Y direction
-  si32 nz;                     // 11 Number of points in Z direction
+  si64 nx;                     // 9 Number of points in X direction
+  si64 ny;                     // 10 Number of points in Y direction
+  si64 nz;                     // 11 Number of points in Z direction
  
   si32 proj_type;              // 12 Projection Type (e.g. PROJ_LATLON)
   
@@ -361,23 +355,23 @@ typedef struct {
   si32 data_element_nbytes;    // 14 Size of each data element
                                //   (in bytes)
 
-  mutable si32 field_data_offset;
+  mutable si64 field_data_offset;
                                // 15 fseek offset to start of field data
                                //   Field data may be encoded and
                                //   stored in the MDV compression format.
                                //   In this case the offset is to the 
                                //   beginning of nplane offset's and 
                                //   nplanes length's.  Each offset and 
-                               //   plane element is a ui32
+                               //   plane element is a ui64
  
-  mutable si32 volume_size;    // 16 Size of data volume in bytes.  Does
+  mutable si64 volume_size;    // 16 Size of data volume in bytes.  Does
                                //   not include Fortran record length
                                //   values that surround the field data.
                                //   If the data is compressed the volume size
                                //   includes the length and offset arrays
                                //   included before the encoded data.
   
-  si32 user_data_si32[10];     // 17-26 User defined data particular to a
+  si64 user_data_si64[10];     // 17-26 User defined data particular to a
                                //   field.  These values are not used
                                //   by any general MDV processing but
                                //   are guaranteed to be available to
@@ -418,17 +412,17 @@ typedef struct {
                                //       file data and requested zoom
                                //     1 if no overlap
 
-  si32 unused_si32[4];         // 36-39 Spare, set to 0
+  si64 unused_si64[4];         // 36-39 Spare, set to 0
 
-  // 32-bit floats
+  // 64-bit floats
     
-  fl32 proj_origin_lat;        // 1 Projection origin 
+  fl64 proj_origin_lat;        // 1 Projection origin 
                                //   (deg, south lat is negative)
 
-  fl32 proj_origin_lon;        // 2 Projection origin 
+  fl64 proj_origin_lon;        // 2 Projection origin 
                                //   (deg, west lon is negative)
 
-  fl32 proj_param[MDV_MAX_PROJ_PARAMS];
+  fl64 proj_param[MDV64_MAX_PROJ_PARAMS];
                            // 3-10 Projection information, these
                            //   values are specific to the
                            //   proj_type specified above.
@@ -457,32 +451,32 @@ typedef struct {
                            // proj_param[6] = false_northing
                            // proj_param[7] = false_easting
   
-  fl32 vert_reference;         // 11 Vertical coordinate reference value
+  fl64 vert_reference;         // 11 Vertical coordinate reference value
 
-  fl32 grid_dx;                // 12 X dimension grid spacing 
+  fl64 grid_dx;                // 12 X dimension grid spacing 
                                //    units determined by proj_type
 
-  fl32 grid_dy;                // 13 Y dimension grid spacing 
+  fl64 grid_dy;                // 13 Y dimension grid spacing 
                                //    units determined by proj_type
 
-  fl32 grid_dz;                // 14 Z dimension grid spacing 
+  fl64 grid_dz;                // 14 Z dimension grid spacing 
                                //    units determined by vlevel_type
                                // If dz is 0.0, then you must use the
                                // vlevel header.
 
-  fl32 grid_minx;              // 15 Starting point of grid 
+  fl64 grid_minx;              // 15 Starting point of grid 
                                //    units determined by proj_type
 
-  fl32 grid_miny;              // 16 Starting point of grid 
+  fl64 grid_miny;              // 16 Starting point of grid 
                                //    units determined by proj_type
 
-  fl32 grid_minz;              // 17 Starting point of grid 
+  fl64 grid_minz;              // 17 Starting point of grid 
                                //    units determined by vlevel_type
 
-  fl32 scale;                  // 18 Scale factor for data values
+  fl64 scale;                  // 18 Scale factor for data values
                                //    Applies to INT8 and INT16 only 
    
-  fl32 bias;                   // 19 Bias applied to data values  
+  fl64 bias;                   // 19 Bias applied to data values  
                                //    Applies to INT8 and INT16 only
 
                                // NOTE: To get float data from INT8 and INT16,
@@ -494,10 +488,10 @@ typedef struct {
   fl32 missing_data_value;     // 21 Data with this value (BEFORE applying
                                //    scale and bias) not measured
 
-  fl32 proj_rotation;          // 22 Projection rotation in degrees
+  fl64 proj_rotation;          // 22 Projection rotation in degrees
                                // Applies to PROJ_FLAT only
 
-  fl32 user_data_fl32[4];      // 23-26 User defined data particular to a
+  fl64 user_data_fl64[4];      // 23-26 User defined data particular to a
                                //   field.  These values are not used
                                //   by any general MDV processing but
                                //   are guaranteed to be available to
@@ -509,28 +503,28 @@ typedef struct {
                                //      clipping to get data set
   fl32 max_value_orig_vol;     // 30 - max val in original vol before 
                                //      clipping to get data set
-  fl32 unused_fl32;            // 31   Spare, to fill out array 
-                               //      to 31 fl32's
+  fl64 unused_fl64;            // 31   Spare, to fill out array 
+                               //      to 31 fl64's
 
   // chars
 
-  char field_name_long[MDV_LONG_FIELD_LEN]; // Long field name (64 bytes)
+  char field_name_long[MDV64_LONG_FIELD_LEN]; // Long field name (64 bytes)
 
-  char field_name[MDV_SHORT_FIELD_LEN];     // Short field name (16 bytes)
+  char field_name[MDV64_SHORT_FIELD_LEN];     // Short field name (16 bytes)
 
-  char units[MDV_UNITS_LEN];                // Units label (16 bytes)
+  char units[MDV64_UNITS_LEN];                // Units label (16 bytes)
 
-  char transform[MDV_TRANSFORM_LEN];        // Data transformation type 
+  char transform[MDV64_TRANSFORM_LEN];        // Data transformation type 
                                             // (16 bytes)
 
-  char unused_char[MDV_UNITS_LEN];          // Spare 16 bytes
+  char unused_char[MDV64_UNITS_LEN];          // Spare 16 bytes
 
   mutable si32 record_len2;                 // Fortran record length field
 
-} field_header_t;
+} MDV64_field_header_t;
 
 ///////////////////////////////////////////////////////////////////////
-// MDV_vlevel_header
+// MDV64_vlevel_header
 //
 // A vlevel_header exists when more information about vertical levels 
 // are needed.  If it is used, the master header's vlevel_included 
@@ -543,16 +537,16 @@ typedef struct {
   
   mutable si32 record_len1;     // Fortran record length field 
   mutable si32 struct_id;       // 1 Magic cookie ID for this struct
-  si32 type[MDV_MAX_VLEVELS];   // 2-123 (was vlevel_type)
+  si32 type[MDV64_MAX_VLEVELS];   // 2-123 (was vlevel_type)
   si32 unused_si32[4];          // 124-127
-  fl32 level[MDV_MAX_VLEVELS];  // 1-122 (was vlevel_params)
-  fl32 unused_fl32[5];          // 123-127
+  fl32 level[MDV64_MAX_VLEVELS];  // 1-122 (was vlevel_params)
+  fl64 unused_fl64[5];          // 123-127
   mutable si32 record_len2;     // Fortran record length field
 
-} vlevel_header_t;
+} MDV64_vlevel_header_t;
 
 //////////////////////////////////////////////////////////////////////////////
-// MDV_chunk_header
+// MDV64_chunk_header
 //
 // A chunk header provides information about a "chunk" of data.  Chunk
 // data is not designed to conform to any standard so the writer of
@@ -577,79 +571,57 @@ typedef struct {
                                       //   in this chunk.  Chunk data that
                                       //   we know about are defined in
                                       //   <mdv/mdv_macros.h as
-                                      //   MDV_CHUNK_xxx
+                                      //   MDV64_CHUNK_xxx
   
-  mutable si32 chunk_data_offset;     // 3 fseek offset to start of 
+  mutable si64 chunk_data_offset;     // 3 fseek offset to start of 
                                       //   chunk data 
 
-  si32 size;                          // 4 Chunk size (in bytes)
+  si64 size;                          // 4 Chunk size (in bytes)
   
-  si32 unused_si32[2];                // 5-6 Unused ints
+  si64 unused_si64[2];                // 5-6 Unused ints
   
-  char info[MDV_CHUNK_INFO_LEN];      // ascii info about chunk data
+  char info[MDV64_CHUNK_INFO_LEN];      // ascii info about chunk data
 
   mutable si32 record_len2;           // Fortran record length field
 
-} chunk_header_t;
-
-///////////////////////////////
-// Vertical sections
-
-// structures used in Mdvx class vectors for storing vertical section
-// information
-
-typedef struct {
-  double lat;
-  double lon;
-} vsect_waypt_t;
-
-typedef struct {
-  double lat;
-  double lon;
-  int segNum;
-} vsect_samplept_t;
-
-typedef struct {
-  double length;
-  double azimuth;
-} vsect_segment_t;
+} MDV64_chunk_header_t;
 
 // structures used in Mdvx chunks and DsMdvMsg for storing vertical section
 // information 
 
 typedef struct {
-  si32 npts;
-  si32 spare[3];
-} chunkVsectWayPtHdr_t;
+  si64 npts;
+  si64 spare[3];
+} MDV64_chunkVsectWayPtHdr_t;
 
 typedef struct {
-  fl32 lat;
-  fl32 lon;
-} chunkVsectWayPt_t;
+  fl64 lat;
+  fl64 lon;
+} MDV64_chunkVsectWayPt_t;
 
 typedef struct {
-  si32 npts;
-  fl32 dx_km;
-  si32 spare[2];
-} chunkVsectSamplePtHdr_t;
+  si64 npts;
+  fl64 dx_km;
+  si64 spare[2];
+} MDV64_chunkVsectSamplePtHdr_t;
 
 typedef struct {
-  fl32 lat;
-  fl32 lon;
-  si32 segNum;
-  si32 spare;
-} chunkVsectSamplePt_t;
+  fl64 lat;
+  fl64 lon;
+  si64 segNum;
+  si64 spare;
+} MDV64_chunkVsectSamplePt_t;
 
 typedef struct {
-  si32 nsegments;
-  fl32 total_length;
-  si32 spare[2];
-} chunkVsectSegmentHdr_t;
+  si64 nsegments;
+  fl64 total_length;
+  si64 spare[2];
+} MDV64_chunkVsectSegmentHdr_t;
 
 typedef struct {
-  fl32 length;
-  fl32 azimuth;
-} chunkVsectSegment_t;
+  fl64 length;
+  fl64 azimuth;
+} MDV64_chunkVsectSegment_t;
 
 //////////////////////////////////////////////////////////////////
 // projection and coordinates struct
@@ -670,68 +642,68 @@ typedef struct {
   
 typedef struct {
   
-  fl32 rotation;
-  fl32 spare[7];
+  fl64 rotation;
+  fl64 spare[7];
   
-} flat_params_t;
+} MDV64_flat_params_t;
 
 // albers conic equal area
   
 typedef struct {
   
-  fl32 lat1;
-  fl32 lat2;
-  fl32 spare[6];
+  fl64 lat1;
+  fl64 lat2;
+  fl64 spare[6];
   
-} albers_params_t;
+} MDV64_albers_params_t;
 
 // lambert conformal
   
 typedef struct {
   
-  fl32 lat1;
-  fl32 lat2;
-  fl32 spare[6];
+  fl64 lat1;
+  fl64 lat2;
+  fl64 spare[6];
   
-} lc2_params_t;
+} MDV64_lc2_params_t;
 
 // oblique stereographic
   
 typedef struct {
   
-  fl32 tan_lat;
-  fl32 tan_lon;
-  fl32 central_scale;
-  fl32 spare[5];
+  fl64 tan_lat;
+  fl64 tan_lon;
+  fl64 central_scale;
+  fl64 spare[5];
   
-} os_params_t;
+} MDV64_os_params_t;
 
 // polar stereographic
   
 typedef struct {
   
-  fl32 tan_lon;
-  fl32 central_scale;
+  fl64 tan_lon;
+  fl64 central_scale;
   si32 pole_type; // 0 - POLE_NORTH, 1 - POLE_SOUTH
-  fl32 spare[5];
+  fl64 spare[5];
   
-} ps_params_t;
+} MDV64_ps_params_t;
   
 // transverse mercator
   
 typedef struct {
   
-  fl32 central_scale;
-  fl32 spare[7];
+  fl64 central_scale;
+  fl64 spare[7];
   
-} trans_merc_params_t;
+} MDV64_trans_merc_params_t;
 
 typedef struct {
   
-  fl32 persp_radius; // perspective point radius (km)
-  fl32 spare[7];
+  fl64 persp_radius; // perspective point radius (km)
+  fl64 spare[7];
   
-} vert_persp_params_t;
+} MDV64_vert_persp_params_t;
 
 // coordinate structure
     
@@ -739,8 +711,8 @@ typedef struct {
 
   // posn of origin
 
-  fl32 proj_origin_lat;
-  fl32 proj_origin_lon;
+  fl64 proj_origin_lat;
+  fl64 proj_origin_lon;
     
   union {
     flat_params_t flat;
@@ -755,29 +727,29 @@ typedef struct {
   // false easting and northing
   // false_easting is added to X to keep it positive
 
-  fl32 false_easting;
-  fl32 false_northing;
+  fl64 false_easting;
+  fl64 false_northing;
 
   // start value, SW corner,
   // bottom plane (* scale)
   // minz set to -1 if dz_constant is FALSE
 
-  fl32 minx, miny, minz;
+  fl64 minx, miny, minz;
     
   // cartesian spacing in each dirn (* scale)
   // dz set to -1 if dz_constant is FALSE
 
-  fl32 dx, dy, dz;
+  fl64 dx, dy, dz;
 
   // sensor coords    
 
-  fl32 sensor_x;
-  fl32 sensor_y;
-  fl32 sensor_z;
-  fl32 sensor_lat;
-  fl32 sensor_lon;
+  fl64 sensor_x;
+  fl64 sensor_y;
+  fl64 sensor_z;
+  fl64 sensor_lat;
+  fl64 sensor_lon;
     
-  si32 spare[11];
+  si64 spare[11];
     
   // type of projection used for grid
   // MDV_PROJ_FLAT, MDV_PROJ_LATLON etc.
@@ -792,17 +764,17 @@ typedef struct {
     
   // number of points in each dirn    
 
-  si32 nx, ny, nz;
+  si64 nx, ny, nz;
     
   // number of bytes of character data
   // at end of this struct
 
-  si32 nbytes_char;
+  si64 nbytes_char;
   
-  char unitsx[MDV_COORD_UNITS_LEN]; // units in x dirn
-  char unitsy[MDV_COORD_UNITS_LEN]; // units in y dirn
-  char unitsz[MDV_COORD_UNITS_LEN]; // units in z dirn
+  char unitsx[MDV64_COORD_UNITS_LEN]; // units in x dirn
+  char unitsy[MDV64_COORD_UNITS_LEN]; // units in y dirn
+  char unitsz[MDV64_COORD_UNITS_LEN]; // units in z dirn
     
-} coord_t;
+} MDV64_coord_t;
   
 #endif
