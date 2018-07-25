@@ -23,9 +23,9 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ////////////////////////////////////////////////
 //
-// Mdvx_typedefs32.hh
+// Mdvx_typedefs_32.hh
 //
-// Legacy 32-bit typedefs for Mdvx class
+// Typedefs for legacy 32-bit Mdvx class
 //
 ////////////////////////////////////////////////
 
@@ -248,7 +248,7 @@ typedef struct {
 // have an associated vlevel header as well.
 //
 // Supported encoding types are:
-//  INT8
+//   INT8
 //   INT16
 //   FLOAT32
 //
@@ -360,8 +360,7 @@ typedef struct {
                                //   stored in the MDV compression format.
                                //   In this case the offset is to the 
                                //   beginning of nplane offset's and 
-                               //   nplanes length's.  Each offset and 
-                               //   plane element is a ui32
+                               //   nplanes length's.
  
   mutable si32 volume_size;    // 16 Size of data volume in bytes.  Does
                                //   not include Fortran record length
@@ -523,7 +522,7 @@ typedef struct {
 } field_header_32_t;
 
 ///////////////////////////////////////////////////////////////////////
-// MDV_vlevel_header
+// vlevel_header
 //
 // A vlevel_header exists when more information about vertical levels 
 // are needed.  If it is used, the master header's vlevel_included 
@@ -545,7 +544,7 @@ typedef struct {
 } vlevel_header_32_t;
 
 //////////////////////////////////////////////////////////////////////////////
-// MDV_chunk_header
+// chunk_header
 //
 // A chunk header provides information about a "chunk" of data.  Chunk
 // data is not designed to conform to any standard so the writer of
@@ -686,7 +685,7 @@ typedef struct {
   
   fl32 tan_lon;
   fl32 central_scale;
-  si32 pole_32_type; // 0 - POLE_NORTH, 1 - POLE_SOUTH
+  si32 pole_type; // 0 - POLE_NORTH, 1 - POLE_SOUTH
   fl32 spare[5];
   
 } ps_params_32_t;

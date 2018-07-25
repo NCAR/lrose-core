@@ -76,7 +76,6 @@ public:
 
 #include <Mdv/Mdvx_enums.hh>
 #include <Mdv/Mdvx_typedefs.hh>
-#include <Mdv/Mdvx_typedefs64.hh>
 #include <Mdv/Mdvx_constants.hh>
 
   ///////////////////////
