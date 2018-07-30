@@ -1706,7 +1706,7 @@ void Ncf2MdvTrans::_setSi64FromAttr(Nc3Att *att, const string &requiredName, si6
 
 {
   if (requiredName.compare(att->name()) == 0) {
-    val = att->as_int(0);
+    val = att->as_int64(0);
   }
 }
 
