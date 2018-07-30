@@ -160,5 +160,32 @@ SiiTest_MainNoQt:
 
 #	g++ -o SiiTest_Main SiiPalette.cc SiiTest_Main.cc SoloDefaultColorWrapper.cc PaletteManager.cc ColorTableManager.cc ColorMap.cc -I/Users/brenda/lrose/include -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp -lz -lm -g
 
+
+#
+# build Mac OSX application
+#
+hawkeye_app:
+	# Make HawkEye and the Makefile.qmake
+	make 
+	# Make the bundle (HawkEye.app tree structure)
+	make from_qmake
+	# copy the system libraries to the .app tree structure
+	cp /usr/lib/libexpat.1.dylib  HawkEye.app/Contents/Frameworks/.
+	cp /usr/lib/libbz2.1.0.dylib  HawkEye.app/Contents/Frameworks/.
+	cp /usr/lib/libz.1.dylib      HawkEye.app/Contents/Frameworks/.
+	cp /usr/lib/libSystem.B.dylib HawkEye.app/Contents/Frameworks/.
+	mkdir HawkEye.app/Contents/MacOS/../share
+	cp -r ~/git/lrose-displays/color_scales HawkEye.app/Contents/MacOS/../share/.
+	# make the dmg  
+	macdeployqt HawkEye.app -always-overwrite
+	# now build the folder for the dmg installer
+	mkdir HawkEye_bkg_test
+	cp ~/Desktop/arrow.pdf .background
+	cp -R ../HawkEye.app .
+	hdiutil create -volname HawkEye_Installer4 -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye_bkg_test -ov -format UDZO HawkEye_test4.dmg
+
+
+
+
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

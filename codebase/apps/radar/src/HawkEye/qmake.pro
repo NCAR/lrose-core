@@ -5,7 +5,7 @@
 
 TEMPLATE = app
 TARGET = HawkEye
-# ICON = HawkEyePolarIcon.icns 
+ICON = HawkEyePolarIcon.icns 
 
 CONFIG += qt
 CONFIG += debug
@@ -118,8 +118,6 @@ LIBS += -ludunits2
 LIBS += -lbz2 
 LIBS += -lexpat 
 # LIBS += -lfftw3 
-LIBS += -lbz2 
-LIBS += -lz 
 LIBS += -lpthread 
 LIBS += -lm  
 LIBS += -framework QtWidgets
