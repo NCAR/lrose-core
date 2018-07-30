@@ -38,17 +38,17 @@
 // Defines for header string and array sizes.
 // These should not be changed since that would alter the file format.
 
-#define     MDV_CHUNK_INFO_LEN      MDV32_CHUNK_INFO_LEN
-#define     MDV_INFO_LEN            MDV32_INFO_LEN
-#define     MDV_LONG_FIELD_LEN      MDV32_LONG_FIELD_LEN
-#define     MDV_MAX_PROJ_PARAMS     MDV32_MAX_PROJ_PARAMS
-#define     MDV_MAX_VLEVELS         MDV32_MAX_VLEVELS
-#define     MDV_NAME_LEN            MDV32_NAME_LEN
-#define     MDV_SHORT_FIELD_LEN     MDV32_SHORT_FIELD_LEN
-#define     MDV_TRANSFORM_LEN       MDV32_TRANSFORM_LEN
-#define     MDV_UNITS_LEN           MDV32_UNITS_LEN
-#define     MDV_N_COORD_LABELS      MDV32_N_COORD_LABELS
-#define     MDV_COORD_UNITS_LEN     MDV32_COORD_UNITS_LEN
+#define     MDV_CHUNK_INFO_LEN      MDV64_CHUNK_INFO_LEN
+#define     MDV_INFO_LEN            MDV64_INFO_LEN
+#define     MDV_LONG_FIELD_LEN      MDV64_LONG_FIELD_LEN
+#define     MDV_MAX_PROJ_PARAMS     MDV64_MAX_PROJ_PARAMS
+#define     MDV_MAX_VLEVELS         MDV64_MAX_VLEVELS
+#define     MDV_NAME_LEN            MDV64_NAME_LEN
+#define     MDV_SHORT_FIELD_LEN     MDV64_SHORT_FIELD_LEN
+#define     MDV_TRANSFORM_LEN       MDV64_TRANSFORM_LEN
+#define     MDV_UNITS_LEN           MDV64_UNITS_LEN
+#define     MDV_N_COORD_LABELS      MDV64_N_COORD_LABELS
+#define     MDV_COORD_UNITS_LEN     MDV64_COORD_UNITS_LEN
 
 
 /////////////////////
@@ -60,7 +60,7 @@ typedef void (*heartbeat_t)(const char *label);
 //////////////////
 // master_header_t
 
-typedef master_header_32_t master_header_t;
+typedef master_header_64_t master_header_t;
 
 ///////////////////////////////////////////////////////////////////////////
 // field_header_t
@@ -108,7 +108,7 @@ typedef master_header_32_t master_header_t;
 // for SCALING_DYNAMIC and SCALING_INTEGRAL.
 //
 
-typedef field_header_32_t field_header_t;
+typedef field_header_64_t field_header_t;
 
 ///////////////////////////////////////////////////////////////////////
 // MDV_vlevel_header
@@ -120,7 +120,7 @@ typedef field_header_32_t field_header_t;
 // headers should follow the field headers.
 //
 
-typedef vlevel_header_32_t vlevel_header_t;
+typedef vlevel_header_64_t vlevel_header_t;
 
 //////////////////////////////////////////////////////////////////////////////
 // MDV_chunk_header
@@ -137,7 +137,7 @@ typedef vlevel_header_32_t vlevel_header_t;
 // chunk data, identified through the chunk ID.
 //
 
-typedef chunk_header_32_t chunk_header_t;
+typedef chunk_header_64_t chunk_header_t;
 
 ///////////////////////////////
 // Vertical sections
@@ -164,12 +164,12 @@ typedef struct {
 // structures used in Mdvx chunks and DsMdvMsg for storing vertical section
 // information 
 
-typedef chunkVsectWayPtHdr_32_t chunkVsectWayPtHdr_t;
-typedef chunkVsectWayPt_32_t chunkVsectWayPt_t;
-typedef chunkVsectSamplePtHdr_32_t chunkVsectSamplePtHdr_t;
-typedef chunkVsectSamplePt_32_t chunkVsectSamplePt_t;
-typedef chunkVsectSegmentHdr_32_t chunkVsectSegmentHdr_t;
-typedef chunkVsectSegment_32_t chunkVsectSegment_t;
+typedef chunkVsectWayPtHdr_64_t chunkVsectWayPtHdr_t;
+typedef chunkVsectWayPt_64_t chunkVsectWayPt_t;
+typedef chunkVsectSamplePtHdr_64_t chunkVsectSamplePtHdr_t;
+typedef chunkVsectSamplePt_64_t chunkVsectSamplePt_t;
+typedef chunkVsectSegmentHdr_64_t chunkVsectSegmentHdr_t;
+typedef chunkVsectSegment_64_t chunkVsectSegment_t;
 
 //////////////////////////////////////////////////////////////////
 // projection and coordinates struct
@@ -186,16 +186,16 @@ typedef chunkVsectSegment_32_t chunkVsectSegment_t;
 // between the DsMdvServer and clients. Its size should be kept
 // constant for backwards compatibility.
 
-typedef flat_params_32_t flat_params_t;
-typedef albers_params_32_t albers_params_t;
-typedef lc2_params_32_t lc2_params_t;
-typedef os_params_32_t os_params_t;
-typedef ps_params_32_t ps_params_t;
-typedef trans_merc_params_32_t trans_merc_params_t;
-typedef vert_persp_params_32_t vert_persp_params_t;
+typedef flat_params_64_t flat_params_t;
+typedef albers_params_64_t albers_params_t;
+typedef lc2_params_64_t lc2_params_t;
+typedef os_params_64_t os_params_t;
+typedef ps_params_64_t ps_params_t;
+typedef trans_merc_params_64_t trans_merc_params_t;
+typedef vert_persp_params_64_t vert_persp_params_t;
 
 // coordinate structure
     
-typedef coord_32_t coord_t;
+typedef coord_64_t coord_t;
   
 #endif

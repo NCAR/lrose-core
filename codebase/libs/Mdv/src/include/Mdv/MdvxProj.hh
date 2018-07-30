@@ -503,10 +503,10 @@ protected:
   
   static void _coord2ProjParams(Mdvx::projection_type_t proj_type,
 				const Mdvx::coord_t &coord,
-				fl32 *proj_params);
+				fl64 *proj_params);
 
   static void _projParams2Coord(Mdvx::projection_type_t proj_type,
-				const fl32 *proj_params,
+				const fl64 *proj_params,
 				Mdvx::coord_t &coord);
   
   void _loadCoordFromFieldHdr(const Mdvx::field_header_t &fhdr);

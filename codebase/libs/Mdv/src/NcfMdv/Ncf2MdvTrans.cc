@@ -548,17 +548,17 @@ int Ncf2MdvTrans::_setMasterHeader()
       // ints
       
       _setSi32FromAttr(att, NcfMdv::mdv_revision_number, _mhdr.revision_number);
-      _setSi32FromAttr(att, NcfMdv::mdv_epoch, _mhdr.epoch);
+      _setSi64FromAttr(att, NcfMdv::mdv_epoch, _mhdr.epoch);
       
-      _setSi32FromAttr(att, NcfMdv::mdv_time_centroid, _mhdr.time_centroid);
-      _setSi32FromAttr(att, NcfMdv::mdv_time_gen, _mhdr.time_gen);
-      _setSi32FromAttr(att, NcfMdv::mdv_time_begin, _mhdr.time_begin);
-      _setSi32FromAttr(att, NcfMdv::mdv_time_end, _mhdr.time_end);
-      _setSi32FromAttr(att, NcfMdv::mdv_user_time, _mhdr.user_time);
-      _setSi32FromAttr(att, NcfMdv::mdv_time_expire, _mhdr.time_expire);
-      _setSi32FromAttr(att, NcfMdv::mdv_time_written, _mhdr.time_written);
-      _setSi32FromAttr(att, NcfMdv::mdv_forecast_time, _mhdr.forecast_time);
-      _setSi32FromAttr(att, NcfMdv::mdv_forecast_delta, _mhdr.forecast_delta);
+      _setSi64FromAttr(att, NcfMdv::mdv_time_centroid, _mhdr.time_centroid);
+      _setSi64FromAttr(att, NcfMdv::mdv_time_gen, _mhdr.time_gen);
+      _setSi64FromAttr(att, NcfMdv::mdv_time_begin, _mhdr.time_begin);
+      _setSi64FromAttr(att, NcfMdv::mdv_time_end, _mhdr.time_end);
+      _setSi64FromAttr(att, NcfMdv::mdv_user_time, _mhdr.user_time);
+      _setSi64FromAttr(att, NcfMdv::mdv_time_expire, _mhdr.time_expire);
+      _setSi64FromAttr(att, NcfMdv::mdv_time_written, _mhdr.time_written);
+      _setSi64FromAttr(att, NcfMdv::mdv_forecast_time, _mhdr.forecast_time);
+      _setSi64FromAttr(att, NcfMdv::mdv_forecast_delta, _mhdr.forecast_delta);
       
       _setSi32FromAttr(att, NcfMdv::mdv_data_collection_type,
                        _mhdr.data_collection_type);
@@ -599,9 +599,9 @@ int Ncf2MdvTrans::_setMasterHeader()
       _setFl32FromAttr(att, NcfMdv::mdv_user_data_fl32_5,
                        _mhdr.user_data_fl32[5]);
       
-      _setFl32FromAttr(att, NcfMdv::mdv_sensor_lon, _mhdr.sensor_lon);
-      _setFl32FromAttr(att, NcfMdv::mdv_sensor_lat, _mhdr.sensor_lat);
-      _setFl32FromAttr(att, NcfMdv::mdv_sensor_alt, _mhdr.sensor_alt);
+      _setFl64FromAttr(att, NcfMdv::mdv_sensor_lon, _mhdr.sensor_lon);
+      _setFl64FromAttr(att, NcfMdv::mdv_sensor_lat, _mhdr.sensor_lat);
+      _setFl64FromAttr(att, NcfMdv::mdv_sensor_alt, _mhdr.sensor_alt);
       
       // Caller must delete attribute
       
@@ -1695,6 +1695,29 @@ void Ncf2MdvTrans::_setFl32FromAttr(Nc3Att *att, const string &requiredName, fl3
 {
   if (requiredName.compare(att->name()) == 0) {
     val = att->as_float(0);
+  }
+}
+
+    
+////////////////////////////////////////
+// set si64 from attribute
+
+void Ncf2MdvTrans::_setSi64FromAttr(Nc3Att *att, const string &requiredName, si64 &val)
+
+{
+  if (requiredName.compare(att->name()) == 0) {
+    val = att->as_int(0);
+  }
+}
+
+////////////////////////////////////////
+// set fl64 from attribute
+
+void Ncf2MdvTrans::_setFl64FromAttr(Nc3Att *att, const string &requiredName, fl64 &val)
+
+{
+  if (requiredName.compare(att->name()) == 0) {
+    val = att->as_double(0);
   }
 }
 

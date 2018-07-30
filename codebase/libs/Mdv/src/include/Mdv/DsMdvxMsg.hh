@@ -206,8 +206,19 @@ public:
     si32 forecast_lead_secs;
     fl32 valid_time_search_wt;
     si32 spare;
-  } file_search_t;
+  } file_search_32_t;
    
+  typedef struct {
+    si64 search_time;
+    si32 file_search_mode;
+    si32 search_margin_secs;
+    si32 forecast_lead_secs;
+    fl32 valid_time_search_wt;
+    si32 spare[2];
+  } file_search_64_t;
+
+  typedef file_search_64_t file_search_t;
+  
   typedef struct {
     si32 min_lead_time;
     si32 max_lead_time;
@@ -269,10 +280,27 @@ public:
     fl32 dy;
     fl32 origin_lat;
     fl32 origin_lon;
-    fl32 proj_params[8];
+    fl32 proj_params[MDV_MAX_PROJ_PARAMS];
     fl32 spare_fl32[6];
-  } read_remap_t;
+  } read_remap_32_t;
 
+  typedef struct {
+    si32 proj_type;
+    si32 nx;
+    si32 ny;
+    si32 spare_si32[3];
+    fl64 minx;
+    fl64 miny;
+    fl64 dx;
+    fl64 dy;
+    fl64 origin_lat;
+    fl64 origin_lon;
+    fl64 proj_params[8];
+    fl64 spare_fl64[6];
+  } read_remap_64_t;
+
+  typedef read_remap_64_t read_remap_t;
+  
   typedef struct {
     si32 write_as_forecast; // forces forecast write
     si32 write_ldata_info;
@@ -289,7 +317,18 @@ public:
     si32 gen_time;
     si32 search_time;
     si32 time_margin;
-  } time_list_options_t;
+  } time_list_options_32_t;
+  
+  typedef struct {
+    si64 mode;
+    si64 start_time;
+    si64 end_time;
+    si64 gen_time;
+    si64 search_time;
+    si64 time_margin;
+  } time_list_options_64_t;
+
+  typedef time_list_options_64_t time_list_options_t;
   
   typedef struct {
     si32 ntimes;
@@ -349,7 +388,15 @@ public:
     ti32 start_time;     // Start time for climo request
     ti32 end_time;       // End time for climo request
     si32 spare[2];
-  } climoDataRange_t;
+  } climoDataRange_32_t;
+  
+  typedef struct {
+    si64 start_time;     // Start time for climo request
+    si64 end_time;       // End time for climo request
+    si64 spare[2];
+  } climoDataRange_64_t;
+
+  typedef climoDataRange_64_t climoDataRange_t;
   
   typedef struct {
     si32 start_hour;     // Start TOD for climo request

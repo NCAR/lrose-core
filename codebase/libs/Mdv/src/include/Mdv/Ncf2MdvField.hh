@@ -216,6 +216,8 @@ protected:
 
   // set vals from attribute
 
+  void _setSi64FromAttr(Nc3Att *att, const string &requiredName, si64 &val);
+  void _setFl64FromAttr(Nc3Att *att, const string &requiredName, fl64 &val);
   void _setSi32FromAttr(Nc3Att *att, const string &requiredName, si32 &val);
   void _setFl32FromAttr(Nc3Att *att, const string &requiredName, fl32 &val);
   void _setStrFromAttr(Nc3Att *att, const string &requiredName, string &val);

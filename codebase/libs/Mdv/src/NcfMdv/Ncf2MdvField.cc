@@ -1578,10 +1578,10 @@ int Ncf2MdvField::_setMdvSpecific()
     // ints
     
     _setSi32FromAttr(att, NcfMdv::mdv_field_code, _fhdr.field_code);
-    _setSi32FromAttr(att, NcfMdv::mdv_user_time_1, _fhdr.user_time1);
-    _setSi32FromAttr(att, NcfMdv::mdv_user_time_2, _fhdr.user_time2);
-    _setSi32FromAttr(att, NcfMdv::mdv_user_time_3, _fhdr.user_time3);
-    _setSi32FromAttr(att, NcfMdv::mdv_user_time_4, _fhdr.user_time4);
+    _setSi64FromAttr(att, NcfMdv::mdv_user_time_1, _fhdr.user_time1);
+    _setSi64FromAttr(att, NcfMdv::mdv_user_time_2, _fhdr.user_time2);
+    _setSi64FromAttr(att, NcfMdv::mdv_user_time_3, _fhdr.user_time3);
+    _setSi64FromAttr(att, NcfMdv::mdv_user_time_4, _fhdr.user_time4);
     _setSi32FromAttr(att, NcfMdv::mdv_user_data_si32_0, _fhdr.user_data_si32[0]);
     _setSi32FromAttr(att, NcfMdv::mdv_user_data_si32_1, _fhdr.user_data_si32[1]);
     _setSi32FromAttr(att, NcfMdv::mdv_user_data_si32_2, _fhdr.user_data_si32[2]);
@@ -1601,8 +1601,8 @@ int Ncf2MdvField::_setMdvSpecific()
     _setSi32FromAttr(att, NcfMdv::mdv_vlevel_type, _fhdr.vlevel_type);
 
     if (_projType == Mdvx::PROJ_VSECTION) {
-      _setFl32FromAttr(att, NcfMdv::mdv_proj_origin_lat, _fhdr.proj_origin_lat);
-      _setFl32FromAttr(att, NcfMdv::mdv_proj_origin_lon, _fhdr.proj_origin_lon);
+      _setFl64FromAttr(att, NcfMdv::mdv_proj_origin_lat, _fhdr.proj_origin_lat);
+      _setFl64FromAttr(att, NcfMdv::mdv_proj_origin_lon, _fhdr.proj_origin_lon);
     }
       
     string transform;
@@ -1644,6 +1644,20 @@ void Ncf2MdvField::_setSi32FromAttr(Nc3Att *att, const string &requiredName, si3
 }
 
 ////////////////////////////////////////
+// set si64 from attribute
+
+void Ncf2MdvField::_setSi64FromAttr(Nc3Att *att, const string &requiredName, si64 &val)
+
+{
+  if (att == NULL) {
+    return;
+  }
+  if (requiredName.compare(att->name()) == 0) {
+    val = att->as_int(0);
+  }
+}
+
+////////////////////////////////////////
 // set fl32 from attribute
 
 void Ncf2MdvField::_setFl32FromAttr(Nc3Att *att, const string &requiredName, fl32 &val)
@@ -1654,6 +1668,20 @@ void Ncf2MdvField::_setFl32FromAttr(Nc3Att *att, const string &requiredName, fl3
   }
   if (requiredName.compare(att->name()) == 0) {
     val = att->as_float(0);
+  }
+}
+    
+////////////////////////////////////////
+// set fl64 from attribute
+
+void Ncf2MdvField::_setFl64FromAttr(Nc3Att *att, const string &requiredName, fl64 &val)
+
+{
+  if (att == NULL) {
+    return;
+  }
+  if (requiredName.compare(att->name()) == 0) {
+   val = att->as_double(0);
   }
 }
     

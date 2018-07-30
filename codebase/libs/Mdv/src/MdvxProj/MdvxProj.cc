@@ -1753,15 +1753,15 @@ void MdvxProj::_initFromCoords()
 
 ////////////////////////////////////////////////////////
 // copy coord information to proj_param array
-// Proj params array should be at least length 8 = MDV_MAX_PROJ_PARAMS
+// Proj params array should be at least length MDV_MAX_PROJ_PARAMS
 
 void MdvxProj::_coord2ProjParams(Mdvx::projection_type_t proj_type,
 				 const Mdvx::coord_t &coord,
-				 fl32 *proj_params)
+				 fl64 *proj_params)
   
 {
 
-  memset(proj_params, 0, 8 * sizeof(fl32));
+  memset(proj_params, 0, MDV_MAX_PROJ_PARAMS * sizeof(fl32));
 
   switch (proj_type) {
     
@@ -1821,7 +1821,7 @@ void MdvxProj::_coord2ProjParams(Mdvx::projection_type_t proj_type,
 // Proj params array should be at least length 8 = MDV_MAX_PROJ_PARAMS
 
 void MdvxProj::_projParams2Coord(Mdvx::projection_type_t proj_type,
-				 const fl32 *proj_params,
+				 const fl64 *proj_params,
 				 Mdvx::coord_t &coord)
 				  
 {

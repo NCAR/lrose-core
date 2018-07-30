@@ -1012,8 +1012,8 @@ int Mdv2NcfTrans::_addMdvMasterHeaderVariable()
     }
 
     const Mdvx::master_header_t &mhdr = _mdv->getMasterHeader();
-    iret |= !mhdrVar->add_att(NcfMdv::mdv_revision_number, mhdr.revision_number);
-    iret |= !mhdrVar->add_att(NcfMdv::mdv_epoch, mhdr.epoch);
+    iret |= !mhdrVar->add_att(NcfMdv::mdv_revision_number, (int) mhdr.revision_number);
+    iret |= !mhdrVar->add_att(NcfMdv::mdv_epoch, (int) mhdr.epoch);
     iret |= !mhdrVar->add_att(NcfMdv::mdv_time_centroid, (double) mhdr.time_centroid);
     iret |= !mhdrVar->add_att(NcfMdv::mdv_time_gen, (double) mhdr.time_gen);
     iret |= !mhdrVar->add_att(NcfMdv::mdv_time_begin, (double) mhdr.time_begin);
@@ -1025,10 +1025,10 @@ int Mdv2NcfTrans::_addMdvMasterHeaderVariable()
     iret |= !mhdrVar->add_att(NcfMdv::mdv_forecast_delta, (double) mhdr.forecast_delta);
 
     iret |= !mhdrVar->add_att(NcfMdv::mdv_data_collection_type,
-                              mhdr.data_collection_type);
-    iret |= !mhdrVar->add_att(NcfMdv::mdv_user_data, mhdr.user_data);
-    iret |= !mhdrVar->add_att(NcfMdv::mdv_vlevel_type, mhdr.vlevel_type);
-    iret |= !mhdrVar->add_att(NcfMdv::mdv_native_vlevel_type, mhdr.native_vlevel_type);
+                              (int) mhdr.data_collection_type);
+    iret |= !mhdrVar->add_att(NcfMdv::mdv_user_data, (int) mhdr.user_data);
+    iret |= !mhdrVar->add_att(NcfMdv::mdv_vlevel_type, (int) mhdr.vlevel_type);
+    iret |= !mhdrVar->add_att(NcfMdv::mdv_native_vlevel_type, (int) mhdr.native_vlevel_type);
 
     iret |= !mhdrVar->add_att(NcfMdv::mdv_user_data_si32_0, mhdr.user_data_si32[0]);
     iret |= !mhdrVar->add_att(NcfMdv::mdv_user_data_si32_1, mhdr.user_data_si32[1]);
