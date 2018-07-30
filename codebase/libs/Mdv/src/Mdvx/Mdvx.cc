@@ -50,22 +50,6 @@ using namespace std;
 // initialize constants
 
 const string Mdvx::FILE_LABEL = "NCAR RAP MDV FILE";
-const int Mdvx::REVISION_NUMBER = 1;
-const int Mdvx::MASTER_HEAD_MAGIC_COOKIE = 14142;
-const int Mdvx::FIELD_HEAD_MAGIC_COOKIE = 14143;
-const int Mdvx::VLEVEL_HEAD_MAGIC_COOKIE = 14144;
-const int Mdvx::CHUNK_HEAD_MAGIC_COOKIE = 14145;
-const int Mdvx::NUM_MASTER_HEADER_SI32 = 41;
-const int Mdvx::NUM_MASTER_HEADER_FL32 = 21;
-const int Mdvx::NUM_MASTER_HEADER_32 = 63;
-const int Mdvx::NUM_FIELD_HEADER_SI32 = 39;
-const int Mdvx::NUM_FIELD_HEADER_FL32 = 31;
-const int Mdvx::NUM_FIELD_HEADER_32 = 71;
-const int Mdvx::NUM_VLEVEL_HEADER_SI32 = 127;
-const int Mdvx::NUM_VLEVEL_HEADER_FL32 = 127;
-const int Mdvx::NUM_VLEVEL_HEADER_32 = 255;
-const int Mdvx::NUM_CHUNK_HEADER_SI32 = 6;
-const int Mdvx::NUM_CHUNK_HEADER_32 = 7;
 
 char Mdvx::_printStr[_printStrLen];
 

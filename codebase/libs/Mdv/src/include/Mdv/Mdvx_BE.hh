@@ -46,6 +46,18 @@ static void vlevel_header_to_BE(vlevel_header_t &v_hdr);
 static void chunk_header_from_BE(chunk_header_t &c_hdr);
 static void chunk_header_to_BE(chunk_header_t &c_hdr);
 
+static void master_header_from_BE_32(master_header_32_t &m_hdr);
+static void master_header_to_BE_32(master_header_32_t &m_hdr);
+
+static void field_header_from_BE_32(field_header_32_t &f_hdr);
+static void field_header_to_BE_32(field_header_32_t &f_hdr);
+
+static void vlevel_header_from_BE_32(vlevel_header_32_t &v_hdr);
+static void vlevel_header_to_BE_32(vlevel_header_32_t &v_hdr);
+
+static void chunk_header_from_BE_32(chunk_header_32_t &c_hdr);
+static void chunk_header_to_BE_32(chunk_header_32_t &c_hdr);
+
 #endif
 
     

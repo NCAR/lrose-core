@@ -235,8 +235,8 @@ typedef struct {
     
   fl32  unused_fl32[12];           // 10-21 to fill out to 21 fl32's
 
-  char  data_set_info[MDV64_INFO_LEN]; // (512 bytes)
-  char  data_set_name[MDV64_NAME_LEN]; // (128 bytes)
+  char  data_set_info[MDV64_INFO_LEN]; // (2048 bytes)
+  char  data_set_name[MDV64_NAME_LEN]; // (512 bytes)
 
   char  data_set_source[MDV64_NAME_LEN]; // Where the data came from
   
@@ -512,19 +512,19 @@ typedef struct {
 
   // chars
 
-  char field_name_long[MDV64_LONG_FIELD_LEN]; // Long field name (64 bytes)
+  char field_name_long[MDV64_LONG_FIELD_LEN]; // Long field name (256 bytes)
 
-  char field_name[MDV64_SHORT_FIELD_LEN];     // Short field name (16 bytes)
+  char field_name[MDV64_SHORT_FIELD_LEN];     // Short field name (128 bytes)
 
-  char units[MDV64_UNITS_LEN];                // Units label (16 bytes)
+  char units[MDV64_UNITS_LEN];                // Units label (64 bytes)
 
   char transform[MDV64_TRANSFORM_LEN];        // Data transformation type 
-                                            // (16 bytes)
+                                            // (64 bytes)
 
-  char proj4_str[MDV64_PROJ4_STR_LEN];      // Data transformation type 
-                                            // (16 bytes)
+  char proj4_str[MDV64_PROJ4_STR_LEN];      // Projection type string 
+                                            // (256 bytes)
 
-  char unused_char[MDV64_UNITS_LEN];          // Spare 16 bytes
+  char unused_char[MDV64_UNITS_LEN];        // Spare 64 bytes
 
   mutable si32 record_len2;                 // Fortran record length field
 
@@ -543,11 +543,11 @@ typedef struct {
 typedef struct {
   
   mutable si32 record_len1;       // Fortran record length field 
-  mutable si32 struct_id;         // 1 Magic cookie ID for this struct
+  mutable si32 struct_id;         // Magic cookie ID for this struct
   si32 type[MDV64_MAX_VLEVELS];   //
-  si32 unused_si32[4];            //
+  si32 unused_si32[128];          //
   fl32 level[MDV64_MAX_VLEVELS];  //
-  fl32 unused_fl32[5];            //
+  fl32 unused_fl32[127];          //
   mutable si32 record_len2;       // Fortran record length field
 
 } vlevel_header_64_t;
@@ -572,22 +572,24 @@ typedef struct {
   mutable si32 record_len1;           // Fortran record length field 
                                       //   (in bytes)
 
-  mutable si32 struct_id;             // 1 Magic cookie ID for this struct
+  mutable si32 struct_id;             // Magic cookie ID for this struct
   
-  si32 chunk_id;                      // 2 A value identifying the data
+  si32 chunk_id;                      // A value identifying the data
                                       //   in this chunk.  Chunk data that
                                       //   we know about are defined in
                                       //   <mdv/mdv_macros.h as
                                       //   MDV64_CHUNK_xxx
   
-  mutable si64 chunk_data_offset;     // 3 fseek offset to start of 
+  si32 pad_si32_1;                    // for alignment on 64-bit word boundary
+  
+  mutable si64 chunk_data_offset;     // fseek offset to start of 
                                       //   chunk data 
 
-  si64 size;                          // 4 Chunk size (in bytes)
+  si64 size;                          // Chunk size (in bytes)
   
-  si32 unused_si32[2];                // 5-6 Unused ints
+  si32 unused_si32[4];                // Unused ints
   
-  char info[MDV64_CHUNK_INFO_LEN];      // ascii info about chunk data
+  char info[MDV64_CHUNK_INFO_LEN];    // ascii info about chunk data
 
   mutable si32 record_len2;           // Fortran record length field
 
