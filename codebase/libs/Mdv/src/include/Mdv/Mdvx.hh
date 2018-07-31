@@ -832,6 +832,17 @@ protected:
   void _copyFieldHeader64to32(const field_header_64_t &fhdr64,
                               field_header_32_t &fhdr32);
   
+  void _copyVlevelHeader32to64(const vlevel_header_32_t &vhdr32,
+                               vlevel_header_64_t &vhdr64);
+
+  void _copyVlevelHeader64to32(const vlevel_header_64_t &vhdr64,
+                               vlevel_header_32_t &vhdr32);
+
+  void _copyChunkHeader32to64(const chunk_header_32_t &chdr32,
+                               chunk_header_64_t &chdr64);
+
+  void _copyChunkHeader64to32(const chunk_header_64_t &chdr64,
+                               chunk_header_32_t &chdr32);
 
   private:
 

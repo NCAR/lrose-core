@@ -911,6 +911,7 @@ Mdvx::projection_type_t Mdvx::getProjection() const
 /////////////////////////////////////////////////////////////////////
 // Copy 32-bit structs to 64-bit structs, and vice versa
 
+/////////////////////////////////////////////////////////////////////
 // master header 32-bit to 64-bit
 
 void Mdvx::_copyMasterHeader32to64(const master_header_32_t &mhdr32,
@@ -972,6 +973,7 @@ void Mdvx::_copyMasterHeader32to64(const master_header_32_t &mhdr32,
 
 }
 
+/////////////////////////////////////////////////////////////////////
 // master header 64-bit to 32-bit
 
 void Mdvx::_copyMasterHeader64to32(const master_header_64_t &mhdr64,
@@ -1033,6 +1035,7 @@ void Mdvx::_copyMasterHeader64to32(const master_header_64_t &mhdr64,
 
 }
 
+/////////////////////////////////////////////////////////////////////
 // field header 32-bit to 64-bit
 
 void Mdvx::_copyFieldHeader32to64(const field_header_32_t &fhdr32,
@@ -1111,6 +1114,7 @@ void Mdvx::_copyFieldHeader32to64(const field_header_32_t &fhdr32,
 
 }
 
+/////////////////////////////////////////////////////////////////////
 // field header 64-bit to 32-bit
 
 void Mdvx::_copyFieldHeader64to32(const field_header_64_t &fhdr64,
@@ -1186,6 +1190,100 @@ void Mdvx::_copyFieldHeader64to32(const field_header_64_t &fhdr64,
          sizeof(fhdr32.transform));
   memcpy(fhdr32.unused_char, fhdr64.unused_char,
          sizeof(fhdr32.unused_char));
+
+}
+
+/////////////////////////////////////////////////////////////////////
+// vlevel header 32-bit to 64-bit
+
+void Mdvx::_copyVlevelHeader32to64(const vlevel_header_32_t &vhdr32,
+                                  vlevel_header_64_t &vhdr64) 
+
+{
+
+  memset(&vhdr64, 0, sizeof(vhdr64));
+  
+  vhdr64.record_len1 = sizeof(vhdr64) - (2 * sizeof(si32));
+  vhdr64.record_len2 = sizeof(vhdr64) - (2 * sizeof(si32));
+  vhdr64.struct_id = VLEVEL_HEAD_MAGIC_COOKIE_64;
+
+  memcpy(vhdr64.type, vhdr32.type, sizeof(vhdr32.type));
+  memcpy(vhdr64.unused_si32, vhdr32.unused_si32,
+         sizeof(vhdr32.unused_si32));
+  memcpy(vhdr64.unused_fl32, vhdr32.unused_fl32,
+         sizeof(vhdr32.unused_fl32));
+
+}
+
+/////////////////////////////////////////////////////////////////////
+// vlevel header 64-bit to 32-bit
+
+void Mdvx::_copyVlevelHeader64to32(const vlevel_header_64_t &vhdr64,
+                                   vlevel_header_32_t &vhdr32) 
+
+{
+
+  memset(&vhdr32, 0, sizeof(vhdr32));
+  
+  vhdr32.record_len1 = sizeof(vhdr32) - (2 * sizeof(si32));
+  vhdr32.record_len2 = sizeof(vhdr32) - (2 * sizeof(si32));
+  vhdr32.struct_id = VLEVEL_HEAD_MAGIC_COOKIE_32;
+
+  memcpy(vhdr32.type, vhdr64.type, sizeof(vhdr32.type));
+  memcpy(vhdr32.unused_si32, vhdr64.unused_si32,
+         sizeof(vhdr32.unused_si32));
+  memcpy(vhdr32.unused_fl32, vhdr64.unused_fl32,
+         sizeof(vhdr32.unused_fl32));
+
+}
+
+/////////////////////////////////////////////////////////////////////
+// chunk header 32-bit to 64-bit
+
+void Mdvx::_copyChunkHeader32to64(const chunk_header_32_t &chdr32,
+                                  chunk_header_64_t &chdr64) 
+
+{
+
+  memset(&chdr64, 0, sizeof(chdr64));
+  
+  chdr64.record_len1 = sizeof(chdr64) - (2 * sizeof(si32));
+  chdr64.record_len2 = sizeof(chdr64) - (2 * sizeof(si32));
+  chdr64.struct_id = CHUNK_HEAD_MAGIC_COOKIE_64;
+
+  chdr64.chunk_id = chdr32.chunk_id;
+  chdr64.chunk_data_offset = chdr32.chunk_data_offset;
+  chdr64.size = chdr32.size;
+
+  memcpy(chdr64.unused_si32, chdr32.unused_si32,
+         sizeof(chdr32.unused_si32));
+
+  memcpy(chdr64.info, chdr32.info, sizeof(chdr32.info));
+
+}
+
+/////////////////////////////////////////////////////////////////////
+// chunk header 64-bit to 32-bit
+
+void Mdvx::_copyChunkHeader64to32(const chunk_header_64_t &chdr64,
+                                   chunk_header_32_t &chdr32) 
+
+{
+
+  memset(&chdr32, 0, sizeof(chdr32));
+  
+  chdr32.record_len1 = sizeof(chdr32) - (2 * sizeof(si32));
+  chdr32.record_len2 = sizeof(chdr32) - (2 * sizeof(si32));
+  chdr32.struct_id = CHUNK_HEAD_MAGIC_COOKIE_32;
+
+  chdr32.chunk_id = chdr64.chunk_id;
+  chdr32.chunk_data_offset = chdr64.chunk_data_offset;
+  chdr32.size = chdr64.size;
+
+  memcpy(chdr32.unused_si32, chdr64.unused_si32,
+         sizeof(chdr32.unused_si32));
+
+  memcpy(chdr32.info, chdr64.info, sizeof(chdr32.info));
 
 }
 
