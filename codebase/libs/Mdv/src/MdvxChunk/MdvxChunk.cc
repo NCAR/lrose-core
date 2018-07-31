@@ -53,7 +53,7 @@ MdvxChunk::MdvxChunk()
 {
   MEM_zero(_chdr);
   _chdr.record_len1 = sizeof(Mdvx::chunk_header_t) - (2 * sizeof(si32));
-  _chdr.struct_id = Mdvx::CHUNK_HEAD_MAGIC_COOKIE;
+  _chdr.struct_id = Mdvx::CHUNK_HEAD_MAGIC_COOKIE_64;
   _chdr.record_len2 = _chdr.record_len1;
 }
 
@@ -242,7 +242,7 @@ int MdvxChunk::_write_data(TaFile &outfile,
   // Set the constant values in the header.
 
   _chdr.record_len1 = sizeof(Mdvx::chunk_header_t) - (2 * sizeof(si32));
-  _chdr.struct_id = Mdvx::CHUNK_HEAD_MAGIC_COOKIE;
+  _chdr.struct_id = Mdvx::CHUNK_HEAD_MAGIC_COOKIE_64;
   _chdr.record_len2 = _chdr.record_len1;
   
   // set data offset in header, and next offset

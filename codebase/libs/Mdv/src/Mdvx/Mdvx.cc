@@ -908,3 +908,284 @@ Mdvx::projection_type_t Mdvx::getProjection() const
   return (projection_type_t) fhdr.proj_type;
 }
 
+/////////////////////////////////////////////////////////////////////
+// Copy 32-bit structs to 64-bit structs, and vice versa
+
+// master header 32-bit to 64-bit
+
+void Mdvx::_copyMasterHeader32to64(const master_header_32_t &mhdr32,
+                                   master_header_64_t &mhdr64) 
+
+{
+
+  memset(&mhdr64, 0, sizeof(mhdr64));
+  
+  mhdr64.record_len1 = sizeof(mhdr64) - (2 * sizeof(si32));
+  mhdr64.record_len2 = sizeof(mhdr64) - (2 * sizeof(si32));
+  mhdr64.struct_id = MASTER_HEAD_MAGIC_COOKIE_64;
+  mhdr64.revision_number = REVISION_NUMBER;
+
+  mhdr64.time_gen = mhdr32.time_gen;
+  mhdr64.user_time = mhdr32.user_time;
+  mhdr64.time_begin = mhdr32.time_begin;
+  mhdr64.time_end = mhdr32.time_end;
+  mhdr64.time_centroid = mhdr32.time_centroid;
+  mhdr64.time_expire = mhdr32.time_expire;
+  mhdr64.num_data_times = mhdr32.num_data_times;
+  mhdr64.index_number = mhdr32.index_number;
+  mhdr64.data_dimension = mhdr32.data_dimension;
+  mhdr64.data_collection_type = mhdr32.data_collection_type;
+  mhdr64.user_data = mhdr32.user_data;
+  mhdr64.native_vlevel_type = mhdr32.native_vlevel_type;
+  mhdr64.vlevel_type = mhdr32.vlevel_type;
+  mhdr64.vlevel_included = mhdr32.vlevel_included;
+  mhdr64.grid_orientation = mhdr32.grid_orientation;
+  mhdr64.data_ordering = mhdr32.data_ordering;
+  mhdr64.n_fields = mhdr32.n_fields;
+  mhdr64.max_nx = mhdr32.max_nx;
+  mhdr64.max_ny = mhdr32.max_ny;
+  mhdr64.max_nz = mhdr32.max_nz;
+  mhdr64.n_chunks = mhdr32.n_chunks;
+  mhdr64.field_hdr_offset = mhdr32.field_hdr_offset;
+  mhdr64.vlevel_hdr_offset = mhdr32.vlevel_hdr_offset;
+  mhdr64.chunk_hdr_offset = mhdr32.chunk_hdr_offset;
+  mhdr64.field_grids_differ = mhdr32.field_grids_differ;
+  for (int ii = 0; ii < 8; ii++) {
+    mhdr64.user_data_si32[ii] = mhdr32.user_data_si32[ii];
+  }
+  mhdr64.time_written = mhdr32.time_written;
+  mhdr64.epoch = mhdr32.epoch;
+  mhdr64.forecast_time = mhdr32.forecast_time;
+  mhdr64.forecast_delta = mhdr32.forecast_delta;
+  for (int ii = 0; ii < 6; ii++) {
+    mhdr64.user_data_fl32[ii] = mhdr32.user_data_fl32[ii];
+  }
+  mhdr64.sensor_lon = mhdr32.sensor_lon;
+  mhdr64.sensor_lat = mhdr32.sensor_lat;
+  mhdr64.sensor_alt = mhdr32.sensor_alt;
+  STRncopy(mhdr64.data_set_info, mhdr32.data_set_info,
+           sizeof(mhdr32.data_set_info));
+  STRncopy(mhdr64.data_set_name, mhdr32.data_set_name,
+           sizeof(mhdr32.data_set_name));
+  STRncopy(mhdr64.data_set_source, mhdr32.data_set_source,
+           sizeof(mhdr32.data_set_source));
+
+}
+
+// master header 64-bit to 32-bit
+
+void Mdvx::_copyMasterHeader64to32(const master_header_64_t &mhdr64,
+                                   master_header_32_t &mhdr32) 
+
+{
+
+  memset(&mhdr32, 0, sizeof(mhdr32));
+  
+  mhdr32.record_len1 = sizeof(mhdr32) - (2 * sizeof(si32));
+  mhdr32.record_len2 = sizeof(mhdr32) - (2 * sizeof(si32));
+  mhdr32.struct_id = MASTER_HEAD_MAGIC_COOKIE_32;
+  mhdr32.revision_number = 1;
+
+  mhdr32.time_gen = mhdr64.time_gen;
+  mhdr32.user_time = mhdr64.user_time;
+  mhdr32.time_begin = mhdr64.time_begin;
+  mhdr32.time_end = mhdr64.time_end;
+  mhdr32.time_centroid = mhdr64.time_centroid;
+  mhdr32.time_expire = mhdr64.time_expire;
+  mhdr32.num_data_times = mhdr64.num_data_times;
+  mhdr32.index_number = mhdr64.index_number;
+  mhdr32.data_dimension = mhdr64.data_dimension;
+  mhdr32.data_collection_type = mhdr64.data_collection_type;
+  mhdr32.user_data = mhdr64.user_data;
+  mhdr32.native_vlevel_type = mhdr64.native_vlevel_type;
+  mhdr32.vlevel_type = mhdr64.vlevel_type;
+  mhdr32.vlevel_included = mhdr64.vlevel_included;
+  mhdr32.grid_orientation = mhdr64.grid_orientation;
+  mhdr32.data_ordering = mhdr64.data_ordering;
+  mhdr32.n_fields = mhdr64.n_fields;
+  mhdr32.max_nx = mhdr64.max_nx;
+  mhdr32.max_ny = mhdr64.max_ny;
+  mhdr32.max_nz = mhdr64.max_nz;
+  mhdr32.n_chunks = mhdr64.n_chunks;
+  mhdr32.field_hdr_offset = mhdr64.field_hdr_offset;
+  mhdr32.vlevel_hdr_offset = mhdr64.vlevel_hdr_offset;
+  mhdr32.chunk_hdr_offset = mhdr64.chunk_hdr_offset;
+  mhdr32.field_grids_differ = mhdr64.field_grids_differ;
+  for (int ii = 0; ii < 8; ii++) {
+    mhdr32.user_data_si32[ii] = mhdr64.user_data_si32[ii];
+  }
+  mhdr32.time_written = mhdr64.time_written;
+  mhdr32.epoch = mhdr64.epoch;
+  mhdr32.forecast_time = mhdr64.forecast_time;
+  mhdr32.forecast_delta = mhdr64.forecast_delta;
+  for (int ii = 0; ii < 6; ii++) {
+    mhdr32.user_data_fl32[ii] = mhdr64.user_data_fl32[ii];
+  }
+  mhdr32.sensor_lon = mhdr64.sensor_lon;
+  mhdr32.sensor_lat = mhdr64.sensor_lat;
+  mhdr32.sensor_alt = mhdr64.sensor_alt;
+  STRncopy(mhdr32.data_set_info, mhdr64.data_set_info,
+           sizeof(mhdr32.data_set_info));
+  STRncopy(mhdr32.data_set_name, mhdr64.data_set_name,
+           sizeof(mhdr32.data_set_name));
+  STRncopy(mhdr32.data_set_source, mhdr64.data_set_source,
+           sizeof(mhdr32.data_set_source));
+
+}
+
+// field header 32-bit to 64-bit
+
+void Mdvx::_copyFieldHeader32to64(const field_header_32_t &fhdr32,
+                                  field_header_64_t &fhdr64) 
+
+{
+
+  memset(&fhdr64, 0, sizeof(fhdr64));
+  
+  fhdr64.record_len1 = sizeof(fhdr64) - (2 * sizeof(si32));
+  fhdr64.record_len2 = sizeof(fhdr64) - (2 * sizeof(si32));
+  fhdr64.struct_id = FIELD_HEAD_MAGIC_COOKIE_64;
+
+  fhdr64.field_code = fhdr32.field_code;
+  fhdr64.user_time1 = fhdr32.user_time1;
+  fhdr64.forecast_delta = fhdr32.forecast_delta;
+  fhdr64.user_time2 = fhdr32.user_time2;
+  fhdr64.user_time3 = fhdr32.user_time3;
+  fhdr64.forecast_time = fhdr32.forecast_time;
+  fhdr64.user_time4 = fhdr32.user_time4;
+  fhdr64.nx = fhdr32.nx;
+  fhdr64.ny = fhdr32.ny;
+  fhdr64.nz = fhdr32.nz;
+  fhdr64.proj_type = fhdr32.proj_type;
+  fhdr64.encoding_type = fhdr32.encoding_type;
+  fhdr64.data_element_nbytes = fhdr32.data_element_nbytes;
+  fhdr64.field_data_offset = fhdr32.field_data_offset;
+  fhdr64.volume_size = fhdr32.volume_size;
+  memcpy(fhdr64.user_data_si32, fhdr32.user_data_si32,
+         sizeof(fhdr32.user_data_si32));
+  fhdr64.compression_type = fhdr32.compression_type;
+  fhdr64.transform_type = fhdr32.transform_type;
+  fhdr64.scaling_type = fhdr32.scaling_type;
+  fhdr64.native_vlevel_type = fhdr32.native_vlevel_type;
+  fhdr64.vlevel_type = fhdr32.vlevel_type;
+  fhdr64.dz_constant = fhdr32.dz_constant;
+  fhdr64.data_dimension = fhdr32.data_dimension;
+  fhdr64.zoom_clipped = fhdr32.zoom_clipped;
+  fhdr64.zoom_no_overlap = fhdr32.zoom_no_overlap;
+  memcpy(fhdr64.unused_si32, fhdr32.unused_si32,
+         sizeof(fhdr32.unused_si32));
+  fhdr64.proj_origin_lat = fhdr32.proj_origin_lat;
+  fhdr64.proj_origin_lon = fhdr32.proj_origin_lon;
+  memcpy(fhdr64.proj_param, fhdr32.proj_param,
+         sizeof(fhdr32.proj_param));
+  fhdr64.vert_reference = fhdr32.vert_reference;
+  fhdr64.grid_dx = fhdr32.grid_dx;
+  fhdr64.grid_dy = fhdr32.grid_dy;
+  fhdr64.grid_dz = fhdr32.grid_dz;
+  fhdr64.grid_minx = fhdr32.grid_minx;
+  fhdr64.grid_miny = fhdr32.grid_miny;
+  fhdr64.grid_minz = fhdr32.grid_minz;
+  fhdr64.scale = fhdr32.scale;
+  fhdr64.bias = fhdr32.bias;
+  fhdr64.bad_data_value = fhdr32.bad_data_value;
+  fhdr64.missing_data_value = fhdr32.missing_data_value;
+  fhdr64.proj_rotation = fhdr32.proj_rotation;
+  memcpy(fhdr64.user_data_fl32, fhdr32.user_data_fl32,
+         sizeof(fhdr32.user_data_fl32));
+  fhdr64.min_value = fhdr32.min_value;
+  fhdr64.max_value = fhdr32.max_value;
+  fhdr64.min_value_orig_vol = fhdr32.min_value_orig_vol;
+  fhdr64.max_value_orig_vol = fhdr32.max_value_orig_vol;
+  fhdr64.unused_fl32 = fhdr32.unused_fl32;
+
+  memcpy(fhdr64.field_name_long, fhdr32.field_name_long,
+         sizeof(fhdr32.field_name_long));
+  memcpy(fhdr64.field_name, fhdr32.field_name,
+         sizeof(fhdr32.field_name));
+  memcpy(fhdr64.units, fhdr32.units,
+         sizeof(fhdr32.units));
+  memcpy(fhdr64.transform, fhdr32.transform,
+         sizeof(fhdr32.transform));
+  memcpy(fhdr64.unused_char, fhdr32.unused_char,
+         sizeof(fhdr32.unused_char));
+
+}
+
+// field header 64-bit to 32-bit
+
+void Mdvx::_copyFieldHeader64to32(const field_header_64_t &fhdr64,
+                                  field_header_32_t &fhdr32) 
+
+{
+
+  memset(&fhdr32, 0, sizeof(fhdr32));
+  
+  fhdr32.record_len1 = sizeof(fhdr32) - (2 * sizeof(si32));
+  fhdr32.record_len2 = sizeof(fhdr32) - (2 * sizeof(si32));
+  fhdr32.struct_id = FIELD_HEAD_MAGIC_COOKIE_32;
+
+  fhdr32.field_code = fhdr64.field_code;
+  fhdr32.user_time1 = fhdr64.user_time1;
+  fhdr32.forecast_delta = fhdr64.forecast_delta;
+  fhdr32.user_time2 = fhdr64.user_time2;
+  fhdr32.user_time3 = fhdr64.user_time3;
+  fhdr32.forecast_time = fhdr64.forecast_time;
+  fhdr32.user_time4 = fhdr64.user_time4;
+  fhdr32.nx = fhdr64.nx;
+  fhdr32.ny = fhdr64.ny;
+  fhdr32.nz = fhdr64.nz;
+  fhdr32.proj_type = fhdr64.proj_type;
+  fhdr32.encoding_type = fhdr64.encoding_type;
+  fhdr32.data_element_nbytes = fhdr64.data_element_nbytes;
+  fhdr32.field_data_offset = fhdr64.field_data_offset;
+  fhdr32.volume_size = fhdr64.volume_size;
+  memcpy(fhdr32.user_data_si32, fhdr64.user_data_si32,
+         sizeof(fhdr32.user_data_si32));
+  fhdr32.compression_type = fhdr64.compression_type;
+  fhdr32.transform_type = fhdr64.transform_type;
+  fhdr32.scaling_type = fhdr64.scaling_type;
+  fhdr32.native_vlevel_type = fhdr64.native_vlevel_type;
+  fhdr32.vlevel_type = fhdr64.vlevel_type;
+  fhdr32.dz_constant = fhdr64.dz_constant;
+  fhdr32.data_dimension = fhdr64.data_dimension;
+  fhdr32.zoom_clipped = fhdr64.zoom_clipped;
+  fhdr32.zoom_no_overlap = fhdr64.zoom_no_overlap;
+  memcpy(fhdr32.unused_si32, fhdr64.unused_si32,
+         sizeof(fhdr32.unused_si32));
+  fhdr32.proj_origin_lat = fhdr64.proj_origin_lat;
+  fhdr32.proj_origin_lon = fhdr64.proj_origin_lon;
+  memcpy(fhdr32.proj_param, fhdr64.proj_param,
+         sizeof(fhdr32.proj_param));
+  fhdr32.vert_reference = fhdr64.vert_reference;
+  fhdr32.grid_dx = fhdr64.grid_dx;
+  fhdr32.grid_dy = fhdr64.grid_dy;
+  fhdr32.grid_dz = fhdr64.grid_dz;
+  fhdr32.grid_minx = fhdr64.grid_minx;
+  fhdr32.grid_miny = fhdr64.grid_miny;
+  fhdr32.grid_minz = fhdr64.grid_minz;
+  fhdr32.scale = fhdr64.scale;
+  fhdr32.bias = fhdr64.bias;
+  fhdr32.bad_data_value = fhdr64.bad_data_value;
+  fhdr32.missing_data_value = fhdr64.missing_data_value;
+  fhdr32.proj_rotation = fhdr64.proj_rotation;
+  memcpy(fhdr32.user_data_fl32, fhdr64.user_data_fl32,
+         sizeof(fhdr32.user_data_fl32));
+  fhdr32.min_value = fhdr64.min_value;
+  fhdr32.max_value = fhdr64.max_value;
+  fhdr32.min_value_orig_vol = fhdr64.min_value_orig_vol;
+  fhdr32.max_value_orig_vol = fhdr64.max_value_orig_vol;
+  fhdr32.unused_fl32 = fhdr32.unused_fl32;
+
+  memcpy(fhdr32.field_name_long, fhdr64.field_name_long,
+         sizeof(fhdr32.field_name_long));
+  memcpy(fhdr32.field_name, fhdr64.field_name,
+         sizeof(fhdr32.field_name));
+  memcpy(fhdr32.units, fhdr64.units,
+         sizeof(fhdr32.units));
+  memcpy(fhdr32.transform, fhdr64.transform,
+         sizeof(fhdr32.transform));
+  memcpy(fhdr32.unused_char, fhdr64.unused_char,
+         sizeof(fhdr32.unused_char));
+
+}
+

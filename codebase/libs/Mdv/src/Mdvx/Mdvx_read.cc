@@ -1411,7 +1411,8 @@ bool Mdvx::verify(const string &file_path)
 
   si32 magic_cookie = BE_to_si32(header.struct_id);
 
-  if (magic_cookie == MASTER_HEAD_MAGIC_COOKIE) {
+  if (magic_cookie == MASTER_HEAD_MAGIC_COOKIE_32 ||
+      magic_cookie == MASTER_HEAD_MAGIC_COOKIE_64) {
     return true;
   } else {
     _errStr += "File is not in MDV format: ";

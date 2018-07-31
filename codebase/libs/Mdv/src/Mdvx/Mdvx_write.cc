@@ -349,7 +349,7 @@ int Mdvx::writeToPath(const string &output_path)
   // set the constant values in the master header
 
   _mhdr.record_len1 = sizeof(Mdvx::master_header_t) - (2 * sizeof(si32));
-  _mhdr.struct_id = Mdvx::MASTER_HEAD_MAGIC_COOKIE;
+  _mhdr.struct_id = Mdvx::MASTER_HEAD_MAGIC_COOKIE_64;
   _mhdr.revision_number = 1;
   _mhdr.record_len2 = _mhdr.record_len1;
   

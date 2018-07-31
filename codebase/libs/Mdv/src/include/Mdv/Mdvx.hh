@@ -818,7 +818,22 @@ protected:
   void _addVsectChunks();
   int _loadVsectInfoFromChunks();
 
-private:
+  // copy between 32-bit and 64-bit versions, and vice versa
+  
+  void _copyMasterHeader32to64(const master_header_32_t &mhdr32,
+                               master_header_64_t &mhdr64);
+
+  void _copyMasterHeader64to32(const master_header_64_t &mhdr64,
+                               master_header_32_t &mhdr32);
+
+  void _copyFieldHeader32to64(const field_header_32_t &fhdr32,
+                              field_header_64_t &fhdr64);
+  
+  void _copyFieldHeader64to32(const field_header_64_t &fhdr64,
+                              field_header_32_t &fhdr32);
+  
+
+  private:
 
 };
 

@@ -39,38 +39,15 @@ static const int REVISION_NUMBER = 2;
 
 // magic cookies
 
-static const int MASTER_HEAD_MAGIC_COOKIE = 14142;
-static const int FIELD_HEAD_MAGIC_COOKIE = 14143;
-static const int VLEVEL_HEAD_MAGIC_COOKIE = 14144;
-static const int CHUNK_HEAD_MAGIC_COOKIE = 14145;
+static const int MASTER_HEAD_MAGIC_COOKIE_32 = 14142;
+static const int FIELD_HEAD_MAGIC_COOKIE_32 = 14143;
+static const int VLEVEL_HEAD_MAGIC_COOKIE_32 = 14144;
+static const int CHUNK_HEAD_MAGIC_COOKIE_32 = 14145;
 
-// Number of 32 bit elements in headers (before the
-// first character).  The _32 values are used for
-// swapping the header fields and the _SI32 and_FL32
-// values are used for for copying the fields in FORTRAN
-// read and write routines.
-// Note that the _32 values should equal the corresponding
-// _SI32 value + the corresponding _FL32 value + 1. The
-// extra 1 in this formula is the FORTRAN record length
-// field at the beginning of each header.  This field is
-// swapped in an array with the rest of the header fields,
-// but is not copied into the FORTRAN arrays on reads and
-// writes.
-
-static const int NUM_MASTER_HEADER_SI32 = 41;
-static const int NUM_MASTER_HEADER_FL32 = 21;
-static const int NUM_MASTER_HEADER_32 = 63;
-
-static const int NUM_FIELD_HEADER_SI32 = 39;
-static const int NUM_FIELD_HEADER_FL32 = 31;
-static const int NUM_FIELD_HEADER_32 = 71;
-
-static const int NUM_VLEVEL_HEADER_SI32 = 127;
-static const int NUM_VLEVEL_HEADER_FL32 = 127;
-static const int NUM_VLEVEL_HEADER_32 = 255;
-
-static const int NUM_CHUNK_HEADER_SI32 = 6;
-static const int NUM_CHUNK_HEADER_32 = 7;
+static const int MASTER_HEAD_MAGIC_COOKIE_64 = 14152;
+static const int FIELD_HEAD_MAGIC_COOKIE_64 = 14153;
+static const int VLEVEL_HEAD_MAGIC_COOKIE_64 = 14154;
+static const int CHUNK_HEAD_MAGIC_COOKIE_64 = 14155;
 
 #endif
 

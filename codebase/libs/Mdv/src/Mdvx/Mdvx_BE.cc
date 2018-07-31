@@ -72,11 +72,14 @@ void Mdvx::master_header_to_BE(master_header_t &m_hdr)
 
   // set magic cookie and fortran record lengths
 
-  m_hdr.struct_id = MASTER_HEAD_MAGIC_COOKIE;
+  m_hdr.struct_id = MASTER_HEAD_MAGIC_COOKIE_64;
   m_hdr.revision_number = REVISION_NUMBER;
   m_hdr.record_len1 = sizeof(master_header_t) - (2 * sizeof(si32));
+  m_hdr.record_len2 = sizeof(master_header_t) - (2 * sizeof(si32));
 
-  BE_from_array_32(&m_hdr.struct_id, 3 * sizeof(si32));
+  // swap
+  
+  BE_from_array_32(&m_hdr.record_len1, 4 * sizeof(si32));
   BE_from_array_64(&m_hdr.time_gen, 6 * sizeof(si64));
   BE_from_array_32(&m_hdr.data_dimension, 13 * sizeof(si32));
   BE_from_array_64(&m_hdr.field_hdr_offset, 3 * sizeof(si64));
@@ -85,8 +88,7 @@ void Mdvx::master_header_to_BE(master_header_t &m_hdr)
   BE_from_array_32(m_hdr.unused_si32, sizeof(m_hdr.unused_si32));
   BE_from_array_64(&m_hdr.sensor_lon, 3 * sizeof(si64));
   BE_from_array_32(m_hdr.unused_fl32, sizeof(m_hdr.unused_fl32));
-
-  m_hdr.record_len2 = sizeof(master_header_t) - (2 * sizeof(si32));
+  BE_from_array_32(&m_hdr.record_len2, 1 * sizeof(si32));
 
 }
 
@@ -143,7 +145,7 @@ void Mdvx::field_header_to_BE(field_header_t &f_hdr)
 
   // set magic cookie and fortran record lengths
 
-  f_hdr.struct_id = FIELD_HEAD_MAGIC_COOKIE;
+  f_hdr.struct_id = FIELD_HEAD_MAGIC_COOKIE_64;
   f_hdr.record_len1 = sizeof(field_header_t) - (2 * sizeof(si32));
   f_hdr.record_len2 = sizeof(field_header_t) - (2 * sizeof(si32));
 
@@ -154,6 +156,7 @@ void Mdvx::field_header_to_BE(field_header_t &f_hdr)
     f_hdr.compression_type = COMPRESSION_RLE;
   }
  
+  BE_from_array_32(&f_hdr.record_len1, 3 * sizeof(si64));
   BE_from_array_64(&f_hdr.user_time1, 6 * sizeof(si64));
   
   BE_from_array_32(&f_hdr.nx, 6 * sizeof(si32));
@@ -169,6 +172,7 @@ void Mdvx::field_header_to_BE(field_header_t &f_hdr)
   BE_from_array_64(&f_hdr.vert_reference, 7 * sizeof(si64));
   
   BE_from_array_32(&f_hdr.scale, 14 * sizeof(si32));
+  BE_from_array_32(&f_hdr.record_len2, 1 * sizeof(si64));
 
 }
 
@@ -181,6 +185,8 @@ void Mdvx::vlevel_header_from_BE(vlevel_header_t &v_hdr)
 
 {
 
+  // swap entire struct, it is all 32-bit
+  
   BE_to_array_32(&v_hdr, sizeof(vlevel_header_t));
  
 }
@@ -196,11 +202,13 @@ void Mdvx::vlevel_header_to_BE(vlevel_header_t &v_hdr)
 
   // set magic cookie and fortran record lengths
 
-  BE_from_array_32(&v_hdr, sizeof(vlevel_header_t));
-
-  v_hdr.struct_id = VLEVEL_HEAD_MAGIC_COOKIE;
+  v_hdr.struct_id = VLEVEL_HEAD_MAGIC_COOKIE_64;
   v_hdr.record_len1 = sizeof(vlevel_header_t) - (2 * sizeof(si32));
   v_hdr.record_len2 = sizeof(vlevel_header_t) - (2 * sizeof(si32));
+
+  // swap entire struct, it is all 32-bit
+  
+  BE_from_array_32(&v_hdr, sizeof(vlevel_header_t));
 
 }
 
@@ -231,15 +239,17 @@ void Mdvx::chunk_header_to_BE(chunk_header_t &c_hdr)
 
   // set magic cookie and fortran record lengths
 
+  c_hdr.struct_id = CHUNK_HEAD_MAGIC_COOKIE_64;
+  c_hdr.record_len1 = sizeof(chunk_header_t) - (2 * sizeof(si32));
+  c_hdr.record_len2 = sizeof(chunk_header_t) - (2 * sizeof(si32));
+
+  // swap
+  
   BE_from_array_32(&c_hdr.record_len1, 4 * sizeof(si32));
   BE_from_array_64(&c_hdr.chunk_data_offset, 2 * sizeof(si64));
   BE_from_array_32(c_hdr.unused_si32, sizeof(c_hdr.unused_si32));
   BE_from_array_32(&c_hdr.record_len2, 1 * sizeof(si32));
  
-  c_hdr.struct_id = CHUNK_HEAD_MAGIC_COOKIE;
-  c_hdr.record_len1 = sizeof(chunk_header_t) - (2 * sizeof(si32));
-  c_hdr.record_len2 = sizeof(chunk_header_t) - (2 * sizeof(si32));
-
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -251,10 +261,8 @@ void Mdvx::master_header_from_BE_32(master_header_32_t &m_hdr)
 
 {
 
-  BE_to_array_32(&m_hdr.record_len1,
-		 NUM_MASTER_HEADER_32 * sizeof(si32));
-
-  m_hdr.record_len2 = BE_to_si32(m_hdr.record_len2);
+  BE_to_array_32(&m_hdr.record_len1, 63 * sizeof(si32));
+  BE_to_array_32(&m_hdr.record_len2, 1 * sizeof(si32));
 
 }
 
@@ -269,15 +277,13 @@ void Mdvx::master_header_to_BE_32(master_header_32_t &m_hdr)
 
   // set magic cookie and fortran record lengths
 
-  m_hdr.struct_id = MASTER_HEAD_MAGIC_COOKIE;
+  m_hdr.struct_id = MASTER_HEAD_MAGIC_COOKIE_32;
   m_hdr.revision_number = REVISION_NUMBER;
   m_hdr.record_len1 = sizeof(master_header_t) - (2 * sizeof(si32));
   m_hdr.record_len2 = sizeof(master_header_t) - (2 * sizeof(si32));
 
-  BE_from_array_32(&m_hdr.record_len1,
-		   NUM_MASTER_HEADER_32 * sizeof(si32));
-
-  m_hdr.record_len2 = BE_from_si32(m_hdr.record_len2);
+  BE_from_array_32(&m_hdr.record_len1, 63 * sizeof(si32));
+  BE_from_array_32(&m_hdr.record_len2, 1 * sizeof(si32));
 
 }
 
@@ -290,12 +296,10 @@ void Mdvx::field_header_from_BE_32(field_header_32_t &f_hdr)
 
 {
 
-  BE_to_array_32(&f_hdr.record_len1,
-		 NUM_FIELD_HEADER_32 * sizeof(si32));
+  BE_to_array_32(&f_hdr.record_len1, 71 * sizeof(si32));
+  BE_to_array_32(&f_hdr.record_len2, 1 * sizeof(si32));
   
-  f_hdr.record_len2 = BE_to_si32(f_hdr.record_len2);
-  
-  // make consistent with new encoding and compression types
+  // make consistent with encoding and compression types
 
   if (f_hdr.encoding_type == PLANE_RLE8) {
     f_hdr.encoding_type = ENCODING_INT8;
@@ -320,7 +324,7 @@ void Mdvx::field_header_to_BE_32(field_header_32_t &f_hdr)
 
   // set magic cookie and fortran record lengths
 
-  f_hdr.struct_id = FIELD_HEAD_MAGIC_COOKIE;
+  f_hdr.struct_id = FIELD_HEAD_MAGIC_COOKIE_32;
   f_hdr.record_len1 = sizeof(field_header_t) - (2 * sizeof(si32));
   f_hdr.record_len2 = sizeof(field_header_t) - (2 * sizeof(si32));
 
@@ -331,10 +335,8 @@ void Mdvx::field_header_to_BE_32(field_header_32_t &f_hdr)
     f_hdr.compression_type = COMPRESSION_RLE;
   }
  
-  BE_from_array_32(&f_hdr.record_len1,
-		   NUM_FIELD_HEADER_32 * sizeof(si32));
- 
-  f_hdr.record_len2 = BE_from_si32(f_hdr.record_len2);
+  BE_from_array_32(&f_hdr.record_len1, 71 * sizeof(si32));
+  BE_from_array_32(&f_hdr.record_len2, 1 * sizeof(si32));
 
 }
 
@@ -347,11 +349,10 @@ void Mdvx::vlevel_header_from_BE_32(vlevel_header_32_t &v_hdr)
 
 {
 
-  BE_to_array_32(&v_hdr.record_len1,
-		 NUM_VLEVEL_HEADER_32 * sizeof(si32));
- 
-  v_hdr.record_len2 = BE_to_si32(v_hdr.record_len2);
- 
+  // swap entire struct, it is all 32-bit vals
+
+  BE_to_array_32(&v_hdr, sizeof(v_hdr));
+  
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -365,14 +366,13 @@ void Mdvx::vlevel_header_to_BE_32(vlevel_header_32_t &v_hdr)
 
   // set magic cookie and fortran record lengths
 
-  v_hdr.struct_id = VLEVEL_HEAD_MAGIC_COOKIE;
+  v_hdr.struct_id = VLEVEL_HEAD_MAGIC_COOKIE_32;
   v_hdr.record_len1 = sizeof(vlevel_header_t) - (2 * sizeof(si32));
   v_hdr.record_len2 = sizeof(vlevel_header_t) - (2 * sizeof(si32));
 
-  BE_from_array_32(&v_hdr.record_len1,
-		   NUM_VLEVEL_HEADER_32 * sizeof(si32));
- 
-  v_hdr.record_len2 = BE_from_si32(v_hdr.record_len2);
+  // swap entire struct, it is all 32-bit vals
+
+  BE_from_array_32(&v_hdr, sizeof(v_hdr));
  
 }
 
@@ -385,10 +385,8 @@ void Mdvx::chunk_header_from_BE_32(chunk_header_32_t &c_hdr)
 
 {
 
-  BE_to_array_32(&c_hdr.record_len1,
-		 NUM_CHUNK_HEADER_32 * sizeof(si32));
- 
-  c_hdr.record_len2 = BE_to_si32(c_hdr.record_len2);
+  BE_to_array_32(&c_hdr.record_len1, 7 * sizeof(si32));
+  BE_to_array_32(&c_hdr.record_len2, 1 * sizeof(si32));
  
 }
 
@@ -403,14 +401,12 @@ void Mdvx::chunk_header_to_BE_32(chunk_header_32_t &c_hdr)
 
   // set magic cookie and fortran record lengths
 
-  c_hdr.struct_id = CHUNK_HEAD_MAGIC_COOKIE;
+  c_hdr.struct_id = CHUNK_HEAD_MAGIC_COOKIE_32;
   c_hdr.record_len1 = sizeof(chunk_header_t) - (2 * sizeof(si32));
   c_hdr.record_len2 = sizeof(chunk_header_t) - (2 * sizeof(si32));
 
-  BE_from_array_32(&c_hdr.record_len1,
-		   NUM_CHUNK_HEADER_32 * sizeof(si32));
- 
-  c_hdr.record_len2 = BE_from_si32(c_hdr.record_len2);
- 
+  BE_from_array_32(&c_hdr.record_len1, 7 * sizeof(si32));
+  BE_from_array_32(&c_hdr.record_len2, 1 * sizeof(si32));
+
 }
 

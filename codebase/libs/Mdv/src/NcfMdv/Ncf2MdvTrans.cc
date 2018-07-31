@@ -618,7 +618,7 @@ int Ncf2MdvTrans::_setMasterHeader()
   _mhdr.index_number = 0;
   _mhdr.grid_orientation = Mdvx::ORIENT_SN_WE;
   _mhdr.data_ordering = Mdvx::ORDER_XYZ;
-  _mhdr.struct_id = Mdvx::MASTER_HEAD_MAGIC_COOKIE;
+  _mhdr.struct_id = Mdvx::MASTER_HEAD_MAGIC_COOKIE_64;
   _mhdr.revision_number = 1;
   _mhdr.record_len1 = sizeof(Mdvx::master_header_t) - (2 * sizeof(si32));
   _mhdr.record_len2 = _mhdr.record_len1;

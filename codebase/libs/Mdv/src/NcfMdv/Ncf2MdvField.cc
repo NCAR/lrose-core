@@ -1617,11 +1617,11 @@ int Ncf2MdvField::_setMdvSpecific()
   
   // set standard items
 
-  _fhdr.struct_id = Mdvx::FIELD_HEAD_MAGIC_COOKIE;
+  _fhdr.struct_id = Mdvx::FIELD_HEAD_MAGIC_COOKIE_64;
   _fhdr.record_len1 = sizeof(Mdvx::field_header_t) - (2 * sizeof(si32));
   _fhdr.record_len2 = _fhdr.record_len1;
 
-  _vhdr.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE;
+  _vhdr.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE_64;
   _vhdr.record_len1 = sizeof(Mdvx::vlevel_header_t) - (2 * sizeof(si32));
   _vhdr.record_len2 = _vhdr.record_len1;
 
