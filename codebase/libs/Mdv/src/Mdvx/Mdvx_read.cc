@@ -1364,6 +1364,29 @@ bool Mdvx::verify(const string &file_path)
 
 {
 
+  // check for 64-bit version
+
+  if (checkIs64Bit(file_path) == 0) {
+    return true;
+  } else {
+    return false;
+  }
+
+}
+
+////////////////////////////////////////////////////////////////////
+// checkIs64bit()
+//
+// Check if an MDV file is a 64-bit version
+//
+// Returns 0 on success, -1 on failure
+// Sets the _is64Bit flag appropriately.
+// Use getIs64Bit() after this call.
+ 
+int Mdvx::checkIs64Bit(const string &file_path)
+
+{
+
   // open file - will be closed when it goes out of scope
 
   TaFile file;
@@ -1374,10 +1397,10 @@ bool Mdvx::verify(const string &file_path)
     _errStr += ": ";
     _errStr += strerror(errNum);
     _errStr += "\n";
-    return (false);
+    return -1;
   }
   
-  // make sure there is enough file for the header
+  // make sure there is enough space for magic cookie
 
   if (file.fstat()) {
     int errNum = errno;
@@ -1386,23 +1409,24 @@ bool Mdvx::verify(const string &file_path)
     _errStr += ": ";
     _errStr += strerror(errNum);
     _errStr += "\n";
-    return (false);
+    return -1;
   }
-  
-  if (file.getStat().st_size < (int) sizeof(master_header_t)) {
-    _errStr += "File is not in MDV format: ";
+
+  size_t fileSize = file.getStat().st_size;
+  if (fileSize < (int) (2 * sizeof(si32))) {
+    _errStr += "File too small for MDV format: ";
     _errStr += file_path;
-    return (false);
+    return -1;
   }
   
-  // Read in the header
-  
+  // Read in the fortran size and magic cookie
+
   master_header_t header;
-  if (file.fread(&header, sizeof(master_header_t), 1) != 1) {
+  if (file.fread(&header, sizeof(si32), 2) != 2) {
     _errStr += "File is not in MDV format: ";
     _errStr += file_path;
     _errStr += "\n";
-    return (false);
+    return -1;
   }
   
   file.fclose();
@@ -1411,14 +1435,25 @@ bool Mdvx::verify(const string &file_path)
 
   si32 magic_cookie = BE_to_si32(header.struct_id);
 
-  if (magic_cookie == MASTER_HEAD_MAGIC_COOKIE_32 ||
-      magic_cookie == MASTER_HEAD_MAGIC_COOKIE_64) {
-    return true;
+  if (magic_cookie == MASTER_HEAD_MAGIC_COOKIE_32) {
+    _is64Bit = false;
+    if (fileSize < sizeof(master_header_32_t)) {
+      return -1;
+    } else {
+      return 0;
+    }
+  } else if (magic_cookie == MASTER_HEAD_MAGIC_COOKIE_64) {
+    _is64Bit = true;
+    if (fileSize < sizeof(master_header_64_t)) {
+      return -1;
+    } else {
+      return 0;
+    }
   } else {
     _errStr += "File is not in MDV format: ";
     _errStr += file_path;
     _errStr += "\n";
-    return false;
+    return -1;
   }
   
 }
@@ -2114,18 +2149,34 @@ int Mdvx::_read_master_header(master_header_t &mhdr,
     _errStr += "Cannot seek to start to read master header\n";
     return -1;
   }
-  
-  if((infile.fread(&mhdr, sizeof(master_header_t), 1)) != 1) {
-    _errStr += "Cannot read master header\n";
-    return -1;
-  }
-  
-  master_header_from_BE(mhdr);
 
-  if (mhdr.struct_id != MASTER_HEAD_MAGIC_COOKIE) {
-    _errStr += "Cannot read master header\n";
-    TaStr::AddInt(_errStr, " Bad magic cookie: ", mhdr.struct_id);
-    return -1;
+  if (_is64Bit) {
+    if((infile.fread(&mhdr, sizeof(master_header_t), 1)) != 1) {
+      _errStr += "Cannot read master header\n";
+      return -1;
+    }
+    master_header_from_BE(mhdr);
+    if (mhdr.struct_id != MASTER_HEAD_MAGIC_COOKIE_64) {
+      _errStr += "Cannot read 64-bit master header\n";
+      TaStr::AddInt(_errStr, " Bad magic cookie: ", mhdr.struct_id);
+      return -1;
+    }
+  } else {
+    // 32-bit header
+    master_header_32_t mhdr32;
+    if((infile.fread(&mhdr32, sizeof(master_header_32_t), 1)) != 1) {
+      _errStr += "Cannot read master header 32\n";
+      return -1;
+    }
+    master_header_from_BE_32(mhdr32);
+    // print 32-bit header in debug mode
+    if (_debug) {
+      cerr << "========== Reading 32-bit master header ==========" << endl;
+      Mdvx::printMasterHeader(mhdr32, cerr);
+      cerr << "==================================================" << endl;
+    }
+    // copy 32 to 64 bit version
+    _copyMasterHeader32to64(mhdr32, mhdr);
   }
   
   return 0;
@@ -2146,28 +2197,47 @@ int Mdvx::_read_field_header(const int field_num,
 {
   
   char errstr[128];
-  
-  int hdr_offset =
-    sizeof(master_header_t) + (field_num * sizeof(field_header_t));
 
-  if (infile.fseek(hdr_offset, SEEK_SET)) {
-    _errStr += "ERROR - Mdvx::_read_field_header\n";
-    sprintf(errstr, "Cannot seek to field header, field %d\n", field_num);
-    _errStr += errstr;
-    return -1;
+  if (_is64Bit) {
+    int hdr_offset =
+      sizeof(master_header_t) + (field_num * sizeof(field_header_t));
+    if (infile.fseek(hdr_offset, SEEK_SET)) {
+      _errStr += "ERROR - Mdvx::_read_field_header\n";
+      sprintf(errstr, "Cannot seek to field header, field %d\n", field_num);
+      _errStr += errstr;
+      return -1;
+    }
+    if((infile.fread(&fhdr, sizeof(field_header_t), 1)) != 1) {
+      _errStr += "ERROR - Mdvx::_read_field_header\n";
+      sprintf(errstr, "Cannot read field header, field %d\n", field_num);
+      _errStr += errstr;
+      return -1;
+    }
+    // swap bytes
+    field_header_from_BE(fhdr);
+  } else {
+    // 32-bit header
+    int hdr_offset =
+      sizeof(master_header_32_t) + (field_num * sizeof(field_header_32_t));
+    if (infile.fseek(hdr_offset, SEEK_SET)) {
+      _errStr += "ERROR - Mdvx::_read_field_header\n";
+      sprintf(errstr, "Cannot seek to field header 32, field %d\n", field_num);
+      _errStr += errstr;
+      return -1;
+    }
+    field_header_32_t fhdr32;
+    if((infile.fread(&fhdr32, sizeof(field_header_32_t), 1)) != 1) {
+      _errStr += "ERROR - Mdvx::_read_field_header\n";
+      sprintf(errstr, "Cannot read field header 32, field %d\n", field_num);
+      _errStr += errstr;
+      return -1;
+    }
+    // swap bytes
+    field_header_from_BE_32(fhdr32);
+    // copy 32 to 64 bit version
+    _copyFieldHeader32to64(fhdr32, fhdr);
   }
   
-  if((infile.fread(&fhdr, sizeof(field_header_t), 1)) != 1) {
-    _errStr += "ERROR - Mdvx::_read_field_header\n";
-    sprintf(errstr, "Cannot read field header, field %d\n", field_num);
-    _errStr += errstr;
-    return -1;
-  }
-
-  // swap bytes
-  
-  field_header_from_BE(fhdr);
-
   // make sure data dimension is set correctly
 
   if (fhdr.nz == 1) {
@@ -2228,23 +2298,40 @@ int Mdvx::_read_vlevel_header(const int field_num,
   
   char errstr[128];
 
-  int offset = first_vlevel_offset + (field_num * sizeof(vlevel_header_t));
- 
-  if (infile.fseek(offset, SEEK_SET)) {
-    _errStr += "ERROR - Mdvx::_read_vlevel_header\n";
-    sprintf(errstr, "Cannot seek to vlevel header, field %d\n", field_num);
-    _errStr += errstr;
-    return -1;
+  if (_is64Bit) {
+    int offset = first_vlevel_offset + (field_num * sizeof(vlevel_header_t));
+    if (infile.fseek(offset, SEEK_SET)) {
+      _errStr += "ERROR - Mdvx::_read_vlevel_header\n";
+      sprintf(errstr, "Cannot seek to vlevel header, field %d\n", field_num);
+      _errStr += errstr;
+      return -1;
+    }
+    if((infile.fread(&vhdr, sizeof(vlevel_header_t), 1)) != 1) {
+      _errStr += "ERROR - Mdvx::_read_vlevel_header\n";
+      sprintf(errstr, "Cannot read vlevel header, field %d\n", field_num);
+      _errStr += errstr;
+      return -1;
+    }
+    vlevel_header_from_BE(vhdr);
+  } else {
+    // 32 bit headers
+    int offset = first_vlevel_offset + (field_num * sizeof(vlevel_header_32_t));
+    if (infile.fseek(offset, SEEK_SET)) {
+      _errStr += "ERROR - Mdvx::_read_vlevel_header\n";
+      sprintf(errstr, "Cannot seek to vlevel header 32, field %d\n", field_num);
+      _errStr += errstr;
+      return -1;
+    }
+    vlevel_header_32_t vhdr32;
+    if((infile.fread(&vhdr32, sizeof(vlevel_header_32_t), 1)) != 1) {
+      _errStr += "ERROR - Mdvx::_read_vlevel_header\n";
+      sprintf(errstr, "Cannot read vlevel header 32, field %d\n", field_num);
+      _errStr += errstr;
+      return -1;
+    }
+    vlevel_header_from_BE_32(vhdr32);
+    _copyVlevelHeader32to64(vhdr32, vhdr);
   }
-
-  if((infile.fread(&vhdr, sizeof(vlevel_header_t), 1)) != 1) {
-    _errStr += "ERROR - Mdvx::_read_vlevel_header\n";
-    sprintf(errstr, "Cannot read vlevel header, field %d\n", field_num);
-    _errStr += errstr;
-    return -1;
-  }
-  
-  vlevel_header_from_BE(vhdr);
   
   return 0;
 
@@ -2268,22 +2355,40 @@ int Mdvx::_read_chunk_header(const int chunk_num,
 
   char errstr[128];
 
-  int offset = first_chunk_offset + chunk_num * sizeof(chunk_header_t);
-  if(infile.fseek(offset, SEEK_SET)) {
-    _errStr += "ERROR - Mdvx::_read_chunk_header\n";
-    sprintf(errstr, "Cannot seek to chunk header, field %d\n", chunk_num);
-    _errStr += errstr;
-    return -1;
+  if (_is64Bit) {
+    int offset = first_chunk_offset + chunk_num * sizeof(chunk_header_t);
+    if(infile.fseek(offset, SEEK_SET)) {
+      _errStr += "ERROR - Mdvx::_read_chunk_header\n";
+      sprintf(errstr, "Cannot seek to chunk header, field %d\n", chunk_num);
+      _errStr += errstr;
+      return -1;
+    }
+    if((infile.fread(&chdr, sizeof(chunk_header_t), 1)) != 1) {
+      _errStr += "ERROR - Mdvx::_read_chunk_header\n";
+      sprintf(errstr, "Cannot read chunk header, field %d\n", chunk_num);
+      _errStr += errstr;
+      return -1;
+    }
+    chunk_header_from_BE(chdr);
+  } else {
+    // 32 bit headers
+    int offset = first_chunk_offset + chunk_num * sizeof(chunk_header_32_t);
+    if(infile.fseek(offset, SEEK_SET)) {
+      _errStr += "ERROR - Mdvx::_read_chunk_header\n";
+      sprintf(errstr, "Cannot seek to chunk header 32, field %d\n", chunk_num);
+      _errStr += errstr;
+      return -1;
+    }
+    chunk_header_32_t chdr32;
+    if((infile.fread(&chdr32, sizeof(chunk_header_32_t), 1)) != 1) {
+      _errStr += "ERROR - Mdvx::_read_chunk_header\n";
+      sprintf(errstr, "Cannot read chunk header 32, field %d\n", chunk_num);
+      _errStr += errstr;
+      return -1;
+    }
+    chunk_header_from_BE_32(chdr32);
+    _copyChunkHeader32to64(chdr32, chdr);
   }
- 
-  if((infile.fread(&chdr, sizeof(chunk_header_t), 1)) != 1) {
-    _errStr += "ERROR - Mdvx::_read_chunk_header\n";
-    sprintf(errstr, "Cannot read chunk header, field %d\n", chunk_num);
-    _errStr += errstr;
-    return -1;
-  }
-
-  chunk_header_from_BE(chdr);
   
   return 0;
 
@@ -2298,6 +2403,12 @@ int Mdvx::_read_chunk_header(const int chunk_num,
 int Mdvx::_read_all_headers()
 {
 
+  // check for 64 bit
+
+  if (checkIs64Bit(_pathInUse)) {
+    return -1;
+  }
+  
   // open file - will be closed when it goes out of scope
 
   TaFile infile;

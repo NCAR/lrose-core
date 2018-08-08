@@ -104,6 +104,7 @@ void Mdvx::clear()
 
 {
   _appName = "unknown";
+  _is64Bit = false;
   clearMasterHeader();
   clearRead();
   clearWrite();

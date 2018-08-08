@@ -213,6 +213,11 @@ public:
                    const string &message2 = "",
                    const string &message3 = "") const;
 
+  // Is the file a 64-bit version?
+  // only valid after a call to checkIs64Bit()
+
+  bool getIs64Bit() const { return _is64Bit; }
+  
   ////////////////////////
   // get the formats
 
@@ -496,6 +501,10 @@ protected:
 
   // debug state
   bool _debug;
+
+  // is the file a 64-bit version?
+
+  bool _is64Bit;
 
   // heartbeat
   heartbeat_t _heartbeatFunc;

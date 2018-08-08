@@ -448,6 +448,17 @@ virtual void printReadRequest(ostream &out);
  
 bool verify(const string &file_path);
 
+////////////////////////////////////////////////////////////////////
+// checkIs64bit()
+//
+// Check if an MDV file is a 64-bit version
+//
+// Returns 0 on success, -1 on failure
+// Sets the _is64Bit flag appropriately.
+// Use getIs64Bit() after this call.
+ 
+int checkIs64Bit(const string &file_path);
+
 //////////////////////////////////////////////////////////////////////
 // Read all of the headers in a file. The headers are read in exaclty
 // as they exist in the file.
