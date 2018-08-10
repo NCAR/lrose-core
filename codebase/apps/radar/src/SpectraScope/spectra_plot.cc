@@ -1844,7 +1844,7 @@ static void load_plot_data_single_prt()
   _gateMoments.pratio = moments.computePowerRatio(iqWindowed, _nSamples);
   moments.applyAdaptiveFilter(_nSamples, fft, iqWindowed, NULL,
                               _spectra.getNoise() / rcvGain,
-                              filtWindowed,
+                              filtWindowed, NULL,
                               filterRatio,
                               spectralNoise,
                               spectralSnr);
@@ -1890,7 +1890,7 @@ static void load_plot_data_single_prt()
   moments.applyRegressionFilter(_nSamples, fft, regrF, windowCoeff, iq,
                                 _spectra.getNoise() - rcvGainDb,
                                 _params->regression_interp_across_notch,
-                                regrFiltered,
+                                regrFiltered, NULL,
                                 regrFilterRatio,
                                 regrSpectralNoise,
                                 regrSpectralSnr);
