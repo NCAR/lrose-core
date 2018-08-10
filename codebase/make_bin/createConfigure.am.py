@@ -243,15 +243,13 @@ def searchDir(dir):
         # create makefile.am for app
         # use package version if available
         createScript = "createMakefile.am.app." + options.pkg + ".py"
-        if (options.debug):
-            print >>sys.stderr, "  111111111 createScript:", createScript
         scriptPath = os.path.join(thisScriptDir, createScript)
         if (os.path.exists(scriptPath) == False):
             # no package version, use default
             createScript = "createMakefile.am.app.lrose.py"
             scriptPath = os.path.join(thisScriptDir, createScript)
         if (options.debug):
-            print >>sys.stderr, "  222222222 createScript:", createScript
+            print >>sys.stderr, "  createScript:", createScript
         cmd = scriptPath
         cmd += " --dir " + absDir + debugStr
         cmd += " --libList " + libList
