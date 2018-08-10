@@ -1421,8 +1421,8 @@ int Mdvx::checkIs64Bit(const string &file_path)
   
   // Read in the fortran size and magic cookie
 
-  master_header_t header;
-  if (file.fread(&header, sizeof(si32), 2) != 2) {
+  master_header_t mhdr;
+  if (file.fread(&mhdr, sizeof(si32), 2) != 2) {
     _errStr += "File is not in MDV format: ";
     _errStr += file_path;
     _errStr += "\n";
@@ -1433,7 +1433,7 @@ int Mdvx::checkIs64Bit(const string &file_path)
 
   // check the magic cookie
 
-  si32 magic_cookie = BE_to_si32(header.struct_id);
+  si32 magic_cookie = BE_to_si32(mhdr.struct_id);
 
   if (magic_cookie == MASTER_HEAD_MAGIC_COOKIE_32) {
     _is64Bit = false;
@@ -1720,72 +1720,154 @@ int Mdvx::readFromBuffer(const MemBuf &buf)
   if (_debug) {
     cerr << "Mdvx - reading object from buffer." << endl;
   }
-  
-  // master header
 
-  if (buf.getLen() < (int) sizeof(master_header_t)) {
+  // check for 64 bit
+  
+  if (buf.getLen() < (int) (2 * sizeof(si32))) {
     _errStr += "ERROR - Mdvx::readFromBuffer.\n";
-    _errStr += "  Buffer too short for master_header_t.\n";
+    _errStr += "  Buffer too short for master header.\n";
     TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
     return -1;
+  } else {
+    master_header_t mhdr;
+    memcpy(&mhdr, buf.getPtr(), 2 * sizeof(si32));
+    si32 magic_cookie = BE_to_si32(mhdr.struct_id);
+    if (magic_cookie == MASTER_HEAD_MAGIC_COOKIE_32) {
+      _is64Bit = false;
+    } else if (magic_cookie == MASTER_HEAD_MAGIC_COOKIE_64) {
+      _is64Bit = true;
+    } else {
+      _errStr += "ERROR - Mdvx::readFromBuffer.\n";
+      _errStr += "  Bad magic cookie in master header.\n";
+      TaStr::AddInt(_errStr, "  cookie: ", magic_cookie);
+      return -1;
+    }
   }
 
-  master_header_t mhdr = *((master_header_t *) buf.getPtr());
-  master_header_from_BE(mhdr);
-  setMasterHeader(mhdr);
+  // master header
 
+  master_header_t mhdr;
+  if (_is64Bit) {
+    if (buf.getLen() < (int) sizeof(master_header_t)) {
+      _errStr += "ERROR - Mdvx::readFromBuffer.\n";
+      _errStr += "  Buffer too short for master_header_t.\n";
+      TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
+      return -1;
+    }
+    memcpy(&mhdr, buf.getPtr(), sizeof(mhdr));
+    master_header_from_BE(mhdr);
+    setMasterHeader(mhdr);
+  } else {
+    // 32 bit
+    if (buf.getLen() < (int) sizeof(master_header_32_t)) {
+      _errStr += "ERROR - Mdvx::readFromBuffer.\n";
+      _errStr += "  Buffer too short for master_header_32_t.\n";
+      TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
+      return -1;
+    }
+    master_header_32_t mhdr32;
+    memcpy(&mhdr32, buf.getPtr(), sizeof(mhdr32));
+    master_header_from_BE_32(mhdr32);
+    _copyMasterHeader32to64(mhdr32, mhdr);
+    setMasterHeader(mhdr);
+  }
+  
   // fields
   
   if (mhdr.n_fields > 0) {
-    int min_len =
-      mhdr.vlevel_hdr_offset + mhdr.n_fields * sizeof(vlevel_header_t);
-    if ((int) buf.getLen() < min_len) {
-      _errStr += "ERROR - Mdvx::readFromBuffer.\n";
-      _errStr += "  Buffer too short for field and vlevel headers.\n";
-      TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
-      return -1;
+
+    field_header_t fhdr;
+    vlevel_header_t vhdr;
+    
+    if (_is64Bit) {
+
+      int min_len =
+        mhdr.vlevel_hdr_offset + mhdr.n_fields * sizeof(vlevel_header_t);
+      if ((int) buf.getLen() < min_len) {
+        _errStr += "ERROR - Mdvx::readFromBuffer.\n";
+        _errStr += "  Buffer too short for field and vlevel headers.\n";
+        TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
+        return -1;
+      }
+    
+      for (int ifield = 0; ifield < mhdr.n_fields; ifield++) {
+        
+        memcpy(&fhdr, ((char *) buf.getPtr() + mhdr.field_hdr_offset +
+                       ifield * sizeof(field_header_t)), sizeof(fhdr));
+        field_header_from_BE(fhdr);
+        
+        memcpy(&vhdr, ((char *) buf.getPtr() + mhdr.vlevel_hdr_offset +
+                       ifield * sizeof(vlevel_header_t)), sizeof(vhdr));
+        vlevel_header_from_BE(vhdr);
+        
+        int min_len = fhdr.field_data_offset + fhdr.volume_size;
+        if ((int) buf.getLen() < min_len) {
+          _errStr += "ERROR - Mdvx::readFromBuffer.\n";
+          _errStr += "  Buffer too short for field volume data.\n";
+          TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
+          return -1;
+        }
+        
+      } // ifield
+      
+    } else {
+      
+      // 32-bit
+      
+      int min_len =
+        mhdr.vlevel_hdr_offset + mhdr.n_fields * sizeof(vlevel_header_32_t);
+      if ((int) buf.getLen() < min_len) {
+        _errStr += "ERROR - Mdvx::readFromBuffer.\n";
+        _errStr += "  Buffer too short for 32-bit field and vlevel headers.\n";
+        TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
+        return -1;
+      }
+    
+      for (int ifield = 0; ifield < mhdr.n_fields; ifield++) {
+        
+        field_header_32_t fhdr32;
+        memcpy(&fhdr32, ((char *) buf.getPtr() + mhdr.field_hdr_offset +
+                         ifield * sizeof(field_header_t)), sizeof(fhdr32));
+        field_header_from_BE_32(fhdr32);
+        _copyFieldHeader32to64(fhdr32, fhdr);
+        
+        vlevel_header_32_t vhdr32;
+        memcpy(&vhdr32, ((char *) buf.getPtr() + mhdr.vlevel_hdr_offset +
+                         ifield * sizeof(vlevel_header_t)), sizeof(vhdr32));
+        vlevel_header_from_BE_32(vhdr32);
+        _copyVlevelHeader32to64(vhdr32, vhdr);
+        
+        int min_len = fhdr.field_data_offset + fhdr.volume_size;
+        if ((int) buf.getLen() < min_len) {
+          _errStr += "ERROR - Mdvx::readFromBuffer.\n";
+          _errStr += "  Buffer too short for field volume data.\n";
+          TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
+          return -1;
+        }
+        
+      } // ifield
+
     }
-  }
-
-  for (int i = 0; i < mhdr.n_fields; i++) {
-
-    field_header_t fhdr =
-      *((field_header_t *) ((char *) buf.getPtr() + mhdr.field_hdr_offset +
-                            i * sizeof(field_header_t)));
-    field_header_from_BE(fhdr);
-
-    vlevel_header_t vhdr =
-      *((vlevel_header_t *) ((char *) buf.getPtr() + mhdr.vlevel_hdr_offset +
-                             i * sizeof(vlevel_header_t)));
-    vlevel_header_from_BE(vhdr);
-
-    int min_len = fhdr.field_data_offset + fhdr.volume_size;
-    if ((int) buf.getLen() < min_len) {
-      _errStr += "ERROR - Mdvx::readFromBuffer.\n";
-      _errStr += "  Buffer too short for field volume data.\n";
-      TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
-      return -1;
-    }
-
+    
     // create a tmp buffer for the data, byte-swap if not compressed
-
+    
     void *volData = ((char *) buf.getPtr() + fhdr.field_data_offset);
     MemBuf tmpbuf;
     tmpbuf.add(volData, fhdr.volume_size);
     MdvxField::_data_from_BE(fhdr, tmpbuf.getPtr(), tmpbuf.getLen());
-
+    
     // create new field
-
+    
     MdvxField *field = new MdvxField(fhdr, vhdr, tmpbuf.getPtr());
-
+    
     // add field to object
-
+    
     addField(field);
-
+    
   }
-
+  
   // chunks
-
+  
   if (mhdr.n_chunks > 0) {
     int min_len =
       mhdr.chunk_hdr_offset + mhdr.n_chunks * sizeof(chunk_header_t);
