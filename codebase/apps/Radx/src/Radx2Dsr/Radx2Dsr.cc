@@ -287,7 +287,8 @@ int Radx2Dsr::_processFile(const string filePath)
   
   // read in file
 
-  if (file.readFromPath(filePath, _vol)) {
+  RadxVol vol;
+  if (file.readFromPath(filePath, vol)) {
     cerr << "ERROR - Radx2Dsr::Run" << endl;
     cerr << file.getErrStr() << endl;
     return -1;
@@ -301,41 +302,41 @@ int Radx2Dsr::_processFile(const string filePath)
   }
   
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    _vol.printWithRayMetaData(cerr);
-    // _vol.printWithFieldData(cerr);
+    vol.printWithRayMetaData(cerr);
+    // vol.printWithFieldData(cerr);
   } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _vol.print(cerr);
+    vol.print(cerr);
   }
   
   // load fields onto volume, forcing all rays to
   // have all fields
 
-  _vol.loadFieldsFromRays(true);
+  vol.loadFieldsFromRays(true);
   
   // convert all fields to same encoding
 
-  _convertFieldsToUniformType();
+  _convertFieldsToUniformType(vol);
 
   // put start of volume
 
-  _rQueue.putStartOfVolume(_vol.getVolumeNumber());
+  _rQueue.putStartOfVolume(vol.getVolumeNumber());
 
   // put status XML is appropriate
 
-  _writeStatusXml();
+  _writeStatusXml(vol);
 
   // loop through the sweeps
 
   int iret = 0;
-  for (int ii = 0; ii < (int) _vol.getSweeps().size(); ii++) {
-    if (_processSweep(ii)) {
+  for (int ii = 0; ii < (int) vol.getSweeps().size(); ii++) {
+    if (_processSweep(vol, ii)) {
       iret = -1;
     }
   }
 
   // put end of volume
 
-  _rQueue.putEndOfVolume(_vol.getVolumeNumber());
+  _rQueue.putEndOfVolume(vol.getVolumeNumber());
 
   return iret;
 
@@ -344,18 +345,19 @@ int Radx2Dsr::_processFile(const string filePath)
 //////////////////////////////////////////////////
 // process a sweep
 
-int Radx2Dsr::_processSweep(int sweepIndex)
+int Radx2Dsr::_processSweep(const RadxVol &vol,
+                            int sweepIndex)
 
 {
 
-  const RadxSweep &sweep = *_vol.getSweeps()[sweepIndex];
+  const RadxSweep &sweep = *vol.getSweeps()[sweepIndex];
 
   // put start of tilt
 
   _rQueue.putStartOfTilt(sweep.getSweepNumber());
 
   if (sweepIndex == 0) {
-    if (_writeCalibration()) {
+    if (_writeCalibration(vol)) {
       cerr << "ERROR - Radx2Dsr::_processSweep" << endl;
       cerr << "  Cannot write calibration" << endl;
       return -1;
@@ -366,7 +368,7 @@ int Radx2Dsr::_processSweep(int sweepIndex)
 
   for (size_t ii = sweep.getStartRayIndex();
        ii <= sweep.getEndRayIndex(); ii++) {
-    if (_writeBeam(sweep, ii, *_vol.getRays()[ii])) {
+    if (_writeBeam(vol, sweep, ii, *vol.getRays()[ii])) {
       return -1;
     }
   }
@@ -444,7 +446,7 @@ void Radx2Dsr::_setupRead(RadxFile &file)
 // convert all fields to same data type
 // widening as required
 
-void Radx2Dsr::_convertFieldsToUniformType()
+void Radx2Dsr::_convertFieldsToUniformType(RadxVol &vol)
 
 {
 
@@ -452,8 +454,8 @@ void Radx2Dsr::_convertFieldsToUniformType()
   // fields
   
   _dataByteWidth = 1;
-  for (int ii = 0; ii < (int) _vol.getFields().size(); ii++) {
-    const RadxField &fld = *_vol.getFields()[ii];
+  for (int ii = 0; ii < (int) vol.getFields().size(); ii++) {
+    const RadxField &fld = *vol.getFields()[ii];
     if (fld.getByteWidth() > _dataByteWidth) {
       _dataByteWidth = fld.getByteWidth();
     }
@@ -467,14 +469,16 @@ void Radx2Dsr::_convertFieldsToUniformType()
     _dataType = Radx::FL32;
   }
   
-  _vol.setFieldsToUniformType(_dataType);
+  vol.setFieldsToUniformType(_dataType);
 
 }
 
 //////////////////////////////////////////////////
 // write radar and field parameters
 
-int Radx2Dsr::_writeParams(const RadxSweep &sweep, const RadxRay &ray)
+int Radx2Dsr::_writeParams(const RadxVol &vol,
+                           const RadxSweep &sweep,
+                           const RadxRay &ray)
 
 {
 
@@ -484,7 +488,7 @@ int Radx2Dsr::_writeParams(const RadxSweep &sweep, const RadxRay &ray)
   DsRadarParams &rparams = msg.getRadarParams();
   
   rparams.radarId = 0;
-  rparams.radarType = _getDsRadarType(_vol.getPlatformType());
+  rparams.radarType = _getDsRadarType(vol.getPlatformType());
   rparams.numFields = ray.getNFields();
   rparams.numGates = ray.getNGates();
   rparams.samplesPerBeam = ray.getNSamples();
@@ -497,19 +501,19 @@ int Radx2Dsr::_writeParams(const RadxSweep &sweep, const RadxRay &ray)
     Radx::sweepModeToStr(sweep.getSweepMode());
   rparams.prfMode = _getDsPrfMode(sweep.getPrtMode(), ray.getPrtRatio());
   
-  if (_vol.getRcalibs().size() > 0) {
-    rparams.radarConstant = _vol.getRcalibs()[0]->getRadarConstantH();
+  if (vol.getRcalibs().size() > 0) {
+    rparams.radarConstant = vol.getRcalibs()[0]->getRadarConstantH();
   }
 
-  rparams.altitude = _vol.getAltitudeKm();
-  rparams.latitude = _vol.getLatitudeDeg();
-  rparams.longitude = _vol.getLongitudeDeg();
-  rparams.gateSpacing = _vol.getGateSpacingKm();
-  rparams.startRange = _vol.getStartRangeKm();
-  rparams.horizBeamWidth = _vol.getRadarBeamWidthDegH();
-  rparams.vertBeamWidth = _vol.getRadarBeamWidthDegV();
-  rparams.antennaGain = _vol.getRadarAntennaGainDbH();
-  rparams.wavelength = _vol.getWavelengthM() * 100.0;
+  rparams.altitude = vol.getAltitudeKm();
+  rparams.latitude = vol.getLatitudeDeg();
+  rparams.longitude = vol.getLongitudeDeg();
+  rparams.gateSpacing = vol.getGateSpacingKm();
+  rparams.startRange = vol.getStartRangeKm();
+  rparams.horizBeamWidth = vol.getRadarBeamWidthDegH();
+  rparams.vertBeamWidth = vol.getRadarBeamWidthDegV();
+  rparams.antennaGain = vol.getRadarAntennaGainDbH();
+  rparams.wavelength = vol.getWavelengthM() * 100.0;
 
   rparams.pulseWidth = ray.getPulseWidthUsec();
   rparams.pulseRepFreq = 1.0 / ray.getPrtSec();
@@ -518,8 +522,8 @@ int Radx2Dsr::_writeParams(const RadxSweep &sweep, const RadxRay &ray)
   rparams.unambigRange = ray.getUnambigRangeKm();
   rparams.unambigVelocity = ray.getNyquistMps();
 
-  if (_vol.getRcalibs().size() > 0) {
-    const RadxRcalib &cal = *_vol.getRcalibs()[0];
+  if (vol.getRcalibs().size() > 0) {
+    const RadxRcalib &cal = *vol.getRcalibs()[0];
     rparams.xmitPeakPower = pow(10.0, cal.getXmitPowerDbmH() / 10.0) / 1000.0;
     rparams.receiverGain = cal.getReceiverGainDbHc();
     rparams.receiverMds = cal.getNoiseDbmHc() - rparams.receiverGain;
@@ -528,8 +532,8 @@ int Radx2Dsr::_writeParams(const RadxSweep &sweep, const RadxRay &ray)
     rparams.measXmitPowerDbmV = cal.getXmitPowerDbmV();
   }
 
-  rparams.radarName = _vol.getInstrumentName() + "/" + _vol.getSiteName();
-  rparams.scanTypeName = _vol.getScanName();
+  rparams.radarName = vol.getInstrumentName() + "/" + vol.getSiteName();
+  rparams.scanTypeName = vol.getScanName();
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     rparams.print(cerr);
@@ -539,9 +543,9 @@ int Radx2Dsr::_writeParams(const RadxSweep &sweep, const RadxRay &ray)
 
   vector<DsFieldParams* > &fieldParams = msg.getFieldParams();
   
-  for (int ifield = 0; ifield < (int) _vol.getFields().size(); ifield++) {
+  for (int ifield = 0; ifield < (int) vol.getFields().size(); ifield++) {
 
-    const RadxField &fld = *_vol.getFields()[ifield];
+    const RadxField &fld = *vol.getFields()[ifield];
     double dsScale = 1.0, dsBias = 0.0;
     int dsMissing = 0;
     if (_dataType == Radx::SI08) {
@@ -585,11 +589,11 @@ int Radx2Dsr::_writeParams(const RadxSweep &sweep, const RadxRay &ray)
 //////////////////////////////////////////////////
 // write status xml
 
-int Radx2Dsr::_writeStatusXml()
+int Radx2Dsr::_writeStatusXml(const RadxVol &vol)
   
 {
 
-  string statusXml = _vol.getStatusXml();
+  string statusXml = vol.getStatusXml();
   if (statusXml.size() == 0) {
     return 0;
   }
@@ -614,11 +618,11 @@ int Radx2Dsr::_writeStatusXml()
 //////////////////////////////////////////////////
 // write calibration
 
-int Radx2Dsr::_writeCalibration()
+int Radx2Dsr::_writeCalibration(const RadxVol &vol)
   
 {
 
-  if (_vol.getRcalibs().size() < 1) {
+  if (vol.getRcalibs().size() < 1) {
     // no cal data
     return 0;
   }
@@ -627,15 +631,15 @@ int Radx2Dsr::_writeCalibration()
 
   DsRadarMsg msg;
   DsRadarCalib &calOut = msg.getRadarCalib();
-  const RadxRcalib &calIn = *_vol.getRcalibs()[0];
+  const RadxRcalib &calIn = *vol.getRcalibs()[0];
 
   calOut.setCalibTime(calIn.getCalibTime());
 
-  calOut.setWavelengthCm(_vol.getWavelengthCm());
-  calOut.setBeamWidthDegH(_vol.getRadarBeamWidthDegH());
-  calOut.setBeamWidthDegV(_vol.getRadarBeamWidthDegV());
-  calOut.setAntGainDbH(_vol.getRadarAntennaGainDbH());
-  calOut.setAntGainDbV(_vol.getRadarAntennaGainDbV());
+  calOut.setWavelengthCm(vol.getWavelengthCm());
+  calOut.setBeamWidthDegH(vol.getRadarBeamWidthDegH());
+  calOut.setBeamWidthDegV(vol.getRadarBeamWidthDegV());
+  calOut.setAntGainDbH(vol.getRadarAntennaGainDbH());
+  calOut.setAntGainDbV(vol.getRadarAntennaGainDbV());
 
   calOut.setPulseWidthUs(calIn.getPulseWidthUsec());
   calOut.setXmitPowerDbmH(calIn.getXmitPowerDbmH());
@@ -713,7 +717,8 @@ int Radx2Dsr::_writeCalibration()
 //////////////////////////////////////////////////
 // write beam
 
-int Radx2Dsr::_writeBeam(const RadxSweep &sweep,
+int Radx2Dsr::_writeBeam(const RadxVol &vol,
+                         const RadxSweep &sweep,
                          int rayNumInSweep,
                          const RadxRay &ray)
   
@@ -722,8 +727,8 @@ int Radx2Dsr::_writeBeam(const RadxSweep &sweep,
   // write params if needed
 
   int nGates = ray.getNGates();
-  const vector<RadxField *> &fields = _vol.getFields();
-  int nFields = _vol.getNFields();
+  const vector<RadxField *> &fields = vol.getFields();
+  int nFields = vol.getNFields();
   int nPoints = nGates * nFields;
 
   bool needWriteParams = false;
@@ -755,7 +760,7 @@ int Radx2Dsr::_writeBeam(const RadxSweep &sweep,
       _prevFieldNames.push_back(fields[ii]->getName());
     }
   
-    if (_writeParams(sweep, ray)) {
+    if (_writeParams(vol, sweep, ray)) {
       cerr << "ERROR - Radx2Dsr::_writeBeam" << endl;
       cerr << "  Cannot write params" << endl;
       return -1;
