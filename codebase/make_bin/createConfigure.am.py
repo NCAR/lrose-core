@@ -245,12 +245,14 @@ def searchDir(dir):
         createScript = "createMakefile.am.app." + options.pkg + ".py"
         if (options.debug):
             print >>sys.stderr, "  111111111 createScript:", createScript
-        if (os.path.exists(createScript) == False):
+        scriptPath = os.path.join(thisScriptDir, createScript)
+        if (os.path.exists(scriptPath) == False):
             # no package version, use default
             createScript = "createMakefile.am.app.lrose.py"
+            scriptPath = os.path.join(thisScriptDir, createScript)
         if (options.debug):
             print >>sys.stderr, "  222222222 createScript:", createScript
-        cmd = os.path.join(thisScriptDir, createScript)
+        cmd = scriptPath
         cmd += " --dir " + absDir + debugStr
         cmd += " --libList " + libList
         if (options.osx == True):
