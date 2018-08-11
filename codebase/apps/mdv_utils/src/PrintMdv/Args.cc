@@ -79,12 +79,14 @@ int Args::parse (int argc, char **argv, string &prog_name)
       _usage(cout);
       exit (0);
       
-    } else if (!strcmp(argv[i], "-debug")) {
+    } else if (!strcmp(argv[i], "-d") ||
+               !strcmp(argv[i], "-debug")) {
       
       sprintf(tmp_str, "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-verbose")) {
+    } else if (!strcmp(argv[i], "-v") ||
+               !strcmp(argv[i], "-verbose")) {
       
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
@@ -641,7 +643,7 @@ void Args::_usage(ostream &out)
       << "  [ -comp ] composite on read\n"
       << "     This takes the maximum at any height.\n"
       << "\n"
-      << "  [ -debug ] print debug messages\n"
+      << "  [ -d, -debug ] print debug messages\n"
       << "\n"
       << "  [ -data ] print field data\n"
       << "\n"
@@ -763,6 +765,8 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -url ? ] specify url\n"       
       << "     Format is \"mdvp:://host:port:dir\"\n"
+      << "\n"
+      << "  [ -v, -verbose ] print verbose debug messages\n"
       << "\n"
       << "  [ -vlevel ? ] set single vlevel\n"
       << "\n"
