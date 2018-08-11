@@ -201,7 +201,9 @@ def main():
     shellCmd("rsync -av " + buildDir + "/include " + tarDir)
 
     if (package == "cidd"):
-        shellCmd("rsync -av ./codebase/apps/cidd/src/CIDD/example_scripts " + tarDir)
+        scriptDir = "./codebase/apps/cidd/src/CIDD/example_scripts"
+        if (os.path.isdir(scriptDir)):
+            shellCmd("rsync -av ./codebase/apps/cidd/src/CIDD/example_scripts " + tarDir)
 
     # make the tar file, copy into run dir
 
