@@ -327,6 +327,7 @@ void Mdvx::printFieldHeader(const field_header_t &fhdr,
     out << "proj_param[" << i << "]:          "
 	<< fhdr.proj_param[i] << endl;
   }
+  out << "proj4_str:              " << fhdr.proj4_str << endl;
   out << "vert_reference:         " << fhdr.vert_reference << endl;
   out << endl;
   out << "grid_dx:                " << fhdr.grid_dx << endl;
@@ -393,6 +394,8 @@ void Mdvx::printFieldHeaderSummary(const field_header_t &fhdr,
   out << "  Projection:              " 
       << projType2Str(fhdr.proj_type) << endl;
   
+  out << "  proj4_str:              " << fhdr.proj4_str << endl;
+
   out << "  Scale, bias:             "
       << fhdr.scale << ", " << fhdr.bias << endl;
 

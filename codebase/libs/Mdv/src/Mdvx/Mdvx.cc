@@ -1198,8 +1198,8 @@ void Mdvx::_copyFieldHeader64to32(const field_header_64_t &fhdr64,
 // vlevel header 32-bit to 64-bit
 
 void Mdvx::_copyVlevelHeader32to64(const vlevel_header_32_t &vhdr32,
-                                  vlevel_header_64_t &vhdr64) 
-
+                                   vlevel_header_64_t &vhdr64) 
+  
 {
 
   memset(&vhdr64, 0, sizeof(vhdr64));
@@ -1209,6 +1209,7 @@ void Mdvx::_copyVlevelHeader32to64(const vlevel_header_32_t &vhdr32,
   vhdr64.struct_id = VLEVEL_HEAD_MAGIC_COOKIE_64;
 
   memcpy(vhdr64.type, vhdr32.type, sizeof(vhdr32.type));
+  memcpy(vhdr64.level, vhdr32.level, sizeof(vhdr32.level));
   memcpy(vhdr64.unused_si32, vhdr32.unused_si32,
          sizeof(vhdr32.unused_si32));
   memcpy(vhdr64.unused_fl32, vhdr32.unused_fl32,
@@ -1231,6 +1232,7 @@ void Mdvx::_copyVlevelHeader64to32(const vlevel_header_64_t &vhdr64,
   vhdr32.struct_id = VLEVEL_HEAD_MAGIC_COOKIE_32;
 
   memcpy(vhdr32.type, vhdr64.type, sizeof(vhdr32.type));
+  memcpy(vhdr32.level, vhdr64.level, sizeof(vhdr32.level));
   memcpy(vhdr32.unused_si32, vhdr64.unused_si32,
          sizeof(vhdr32.unused_si32));
   memcpy(vhdr32.unused_fl32, vhdr64.unused_fl32,
@@ -1267,7 +1269,7 @@ void Mdvx::_copyChunkHeader32to64(const chunk_header_32_t &chdr32,
 // chunk header 64-bit to 32-bit
 
 void Mdvx::_copyChunkHeader64to32(const chunk_header_64_t &chdr64,
-                                   chunk_header_32_t &chdr32) 
+                                  chunk_header_32_t &chdr32) 
 
 {
 
