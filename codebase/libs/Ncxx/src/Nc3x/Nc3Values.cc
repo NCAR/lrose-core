@@ -289,6 +289,11 @@ inline int64_t Nc3Values_long::as_int64( long n ) const
     return the_values[n];
 }
 
+inline int64_t Nc3Values_long::as_int64( long n ) const
+{
+    return the_values[n];
+}
+
 inline int64_t Nc3Values_int64_t::as_int64( long n ) const
 {
     return the_values[n];
