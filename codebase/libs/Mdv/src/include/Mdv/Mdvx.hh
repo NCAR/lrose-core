@@ -696,6 +696,7 @@ protected:
   
   int _read_vlevel_header(const int field_num,
                           const int first_vlevel_offset,
+                          const field_header_t &fhdr,
                           vlevel_header_t &vhdr,
                           TaFile &infile);
   

@@ -52,6 +52,10 @@ static void printMasterHeader(const master_header_t &mhdr,
                               ostream &out,
                               const string dataSetInfo = "");
 
+static void printMasterHeader(const master_header_32_t &mhdr32,
+                              ostream &out,
+                              const string dataSetInfo = "");
+
 // print master header in summary
 
 static void printMasterHeaderSummary(const master_header_t &mhdr,
@@ -60,6 +64,8 @@ static void printMasterHeaderSummary(const master_header_t &mhdr,
 // print field header in full
 
 static void printFieldHeader(const field_header_t &fhdr,
+                             ostream &out);
+static void printFieldHeader(const field_header_32_t &fhdr32,
                              ostream &out);
 
 // print field header summary
@@ -73,13 +79,19 @@ static void printVlevelHeader(const vlevel_header_t &vhdr,
                               const int nz,
                               const char *field_name,
                               ostream &out);
+static void printVlevelHeader(const vlevel_header_32_t &vhdr32,
+                              const int nz,
+                              const char *field_name,
+                              ostream &out);
 
 // print chunk header
 
 static void printChunkHeader(const chunk_header_t &chdr,
                              ostream &out);
+static void printChunkHeader(const chunk_header_32_t &chdr32,
+                             ostream &out);
 
-// print the chunks which Mdvx recognizes
+// print the chunks which Mdvx recognizesw
 
 void printChunks(ostream &out) const;
 

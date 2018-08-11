@@ -157,8 +157,8 @@ void Mdvx::printMasterHeader(const master_header_t &mhdr,
 {
 
   out << endl;
-  out << "Master header" << endl;
-  out << "-------------" << endl;
+  out << "Master header - 64-bit" << endl;
+  out << "----------------------" << endl;
   out << endl;
 
   out << "record_len1:          " << mhdr.record_len1 << endl;
@@ -234,6 +234,90 @@ void Mdvx::printMasterHeader(const master_header_t &mhdr,
   
 }  
  
+void Mdvx::printMasterHeader(const master_header_32_t &mhdr32,
+			     ostream &out,
+                             const string dataSetInfo /* = "" */)
+
+{
+
+  out << endl;
+  out << "Master header - 32-bit" << endl;
+  out << "----------------------" << endl;
+  out << endl;
+
+  out << "record_len1:          " << mhdr32.record_len1 << endl;
+  out << "struct_id:            " << mhdr32.struct_id << endl;
+  out << "revision_number:      " << mhdr32.revision_number << endl;
+  out << endl;
+
+  out << "time_gen:             " << _timeStr(mhdr32.time_gen) << endl;
+  out << "user_time:            " << _timeStr(mhdr32.user_time) << endl;
+  out << "time_begin:           " << _timeStr(mhdr32.time_begin) << endl;
+  out << "time_end:             " << _timeStr(mhdr32.time_end) << endl;
+  out << "time_centroid:        " << _timeStr(mhdr32.time_centroid) << endl;
+  if (mhdr32.time_expire == 0) {
+    out << "time_expire:          " << mhdr32.time_expire << endl;
+  } else {
+    out << "time_expire:          " << _timeStr(mhdr32.time_expire) << endl;
+  }
+  out << "time_written:         " << _timeStr(mhdr32.time_written) << endl;
+
+  out << "epoch:                " << mhdr32.epoch << endl;
+  out << "forecast_time:        " << _timeStr(mhdr32.forecast_time) << endl;
+  out << "forecast_delta:       " << mhdr32.forecast_delta << endl;
+
+  out << "num_data_times:       " << mhdr32.num_data_times << endl;
+  out << "index_number:         " << mhdr32.index_number << endl;
+  out << "data_dimension:       " << mhdr32.data_dimension << endl;
+  out << "data_collection_type: "
+      << collectionType2Str(mhdr32.data_collection_type) << endl;
+  out << "user_data:            " << mhdr32.user_data << endl;
+  out << "native_vlevel_type:   "
+      << vertType2Str(mhdr32.native_vlevel_type) << endl;
+  out << "vlevel_type:          "
+      << vertType2Str(mhdr32.vlevel_type) << endl;
+  out << "vlevel_included:      "
+      << BOOL_STR(mhdr32.vlevel_included) << endl;
+  out << "grid_orientation:     "
+      << orientType2Str(mhdr32.grid_orientation) << endl;
+  out << "data_ordering:        "
+      << orderType2Str(mhdr32.data_ordering) << endl;
+  out << "n_fields:             " << mhdr32.n_fields << endl;
+  out << "max_nx:               " << mhdr32.max_nx << endl;
+  out << "max_ny:               " << mhdr32.max_ny << endl;
+  out << "max_nz:               " << mhdr32.max_nz << endl;
+  out << "n_chunks:             " << mhdr32.n_chunks << endl;
+  out << "field_hdr_offset:     " << mhdr32.field_hdr_offset << endl;
+  out << "vlevel_hdr_offset:    " << mhdr32.vlevel_hdr_offset << endl;
+  out << "chunk_hdr_offset:     " << mhdr32.chunk_hdr_offset << endl;
+  out << "field_grids_differ:   "
+      << BOOL_STR(mhdr32.field_grids_differ) << endl;
+  for (int i = 0; i < 8; i++) {
+    out << "user_data_si32[" << i << "]:    "
+	<< mhdr32.user_data_si32[i] << endl;
+  }
+  out << endl;
+  for (int i = 0; i < 6; i++)
+    out << "user_data_fl32[" << i << "]:    "
+	<< mhdr32.user_data_fl32[i] << endl;
+  out << "sensor_lon:           " << mhdr32.sensor_lon << endl;
+  out << "sensor_lat:           " << mhdr32.sensor_lat << endl;
+  out << "sensor_alt:           " << mhdr32.sensor_alt << endl;
+  out << endl;
+  out << "data_set_info:" << endl;
+  if (dataSetInfo.size() > 0) {
+    out << dataSetInfo << endl << endl;
+  } else {
+    out << mhdr32.data_set_info << endl << endl;
+  }
+  out << "data_set_name:        " << mhdr32.data_set_name << endl;
+  out << "data_set_source:      " << mhdr32.data_set_source << endl;
+  out << endl;
+  out << "record_len2:          " << mhdr32.record_len2 << endl;
+  out << endl << endl;
+  
+}  
+ 
 ///////////////////////////////////////////////////////
 // print master header in summary
 
@@ -263,8 +347,8 @@ void Mdvx::printFieldHeader(const field_header_t &fhdr,
 {
   
   out << endl;
-  out << "Field header" << endl;
-  out << "------------" << endl;
+  out << "Field header - 64 bit" << endl;
+  out << "---------------------" << endl;
   out << endl;
   out << "field_name_long:        " << fhdr.field_name_long << endl;
   out << "field_name:             " << fhdr.field_name << endl;
@@ -356,6 +440,104 @@ void Mdvx::printFieldHeader(const field_header_t &fhdr,
    
 }
 
+void Mdvx::printFieldHeader(const field_header_32_t &fhdr32,
+			    ostream &out)
+
+{
+  
+  out << endl;
+  out << "Field header - 32 bit" << endl;
+  out << "---------------------" << endl;
+  out << endl;
+  out << "field_name_long:        " << fhdr32.field_name_long << endl;
+  out << "field_name:             " << fhdr32.field_name << endl;
+  out << "units:                  " << fhdr32.units << endl;
+  out << "transform:              " << fhdr32.transform << endl;
+  out << endl;
+  out << "record_len1:            " << fhdr32.record_len1 << endl;
+  out << "struct_id:              " << fhdr32.struct_id << endl;
+  out << endl;
+  out << "field_code:             " << fhdr32.field_code << endl;
+  out << "user_time1:             " << _timeStr(fhdr32.user_time1) << endl;
+  out << "forecast_delta:         " << fhdr32.forecast_delta << endl;
+  out << "user_time2:             " << _timeStr(fhdr32.user_time2) << endl;
+  out << "user_time3:             " << _timeStr(fhdr32.user_time3) << endl;
+  out << "forecast_time:          " << _timeStr(fhdr32.forecast_time) << endl;
+  out << "user_time4:             " << _timeStr(fhdr32.user_time4) << endl;
+  out << "nx:                     " << fhdr32.nx << endl;
+  out << "ny:                     " << fhdr32.ny << endl;
+  out << "nz:                     " << fhdr32.nz << endl;
+  out << "proj_type:              "
+      << projType2Str(fhdr32.proj_type) << endl;
+  out << "encoding_type:          "
+      << encodingType2Str(fhdr32.encoding_type) << endl;
+  out << "data_element_nbytes:    " << fhdr32.data_element_nbytes << endl;
+  out << "field_data_offset:      " << fhdr32.field_data_offset << endl;
+  out << "volume_size:            " << fhdr32.volume_size << endl;
+  for (int i = 0; i < 10; i++) {
+    out << "user_data_si32[" << i << "]:      "
+	<< fhdr32.user_data_si32[i] << endl;
+  }
+  out << "compression_type:       "
+      << compressionType2Str(fhdr32.compression_type) << endl;
+  out << "transform_type:         "
+      << transformType2Str(fhdr32.transform_type) << endl;
+  if (fhdr32.encoding_type == ENCODING_FLOAT32 ||
+      fhdr32.encoding_type == ENCODING_RGBA32) {
+    out << "scaling_type:           not applicable" << endl;
+  } else {
+    out << "scaling_type:           "
+	<< scalingType2Str(fhdr32.scaling_type) << endl;
+  }
+  out << endl;
+
+  out << "native_vlevel_type:     "
+      << vertType2Str(fhdr32.native_vlevel_type) << endl;
+  out << "vlevel_type:            "
+      << vertType2Str(fhdr32.vlevel_type) << endl;
+  out << "dz_constant:            " << fhdr32.dz_constant << endl;
+  out << "data_dimension:         " << fhdr32.data_dimension << endl;
+  out << endl;
+
+  out << "zoom_clipped:           " << fhdr32.zoom_clipped << endl;
+  out << "zoom_no_overlap:        " << fhdr32.zoom_no_overlap << endl;
+  out << endl;
+
+  out << "proj_origin_lon:        " << fhdr32.proj_origin_lon << endl;
+  out << "proj_origin_lat:        " << fhdr32.proj_origin_lat << endl;
+  out << "proj_rotation:          " << fhdr32.proj_rotation << endl;
+  for (int i = 0; i < MDV_MAX_PROJ_PARAMS; i++) {
+    out << "proj_param[" << i << "]:          "
+	<< fhdr32.proj_param[i] << endl;
+  }
+  out << "vert_reference:         " << fhdr32.vert_reference << endl;
+  out << endl;
+  out << "grid_dx:                " << fhdr32.grid_dx << endl;
+  out << "grid_dy:                " << fhdr32.grid_dy << endl;
+  out << "grid_dz:                " << fhdr32.grid_dz << endl;
+  out << "grid_minx:              " << fhdr32.grid_minx << endl;
+  out << "grid_miny:              " << fhdr32.grid_miny << endl;
+  out << "grid_minz:              " << fhdr32.grid_minz << endl;
+  out << "scale:                  " << fhdr32.scale << endl;
+  out << "bias:                   " << fhdr32.bias << endl;
+  out << "bad_data_value:         " << fhdr32.bad_data_value << endl;
+  out << "missing_data_value:     "
+      << fhdr32.missing_data_value << endl;
+  out << "proj_rotation:          " << fhdr32.proj_rotation << endl;
+  for (int i = 0; i < 4; i++) {
+    out << "user_data_fl32[" << i << "]:      "
+	<< fhdr32.user_data_fl32[i] << endl;
+  }
+  out << "min_value:              " << fhdr32.min_value << endl;
+  out << "max_value:              " << fhdr32.max_value << endl;
+  out << "min_value_orig_vol:     " << fhdr32.min_value_orig_vol << endl;
+  out << "max_value_orig_vol:     " << fhdr32.max_value_orig_vol << endl;
+  out << "record_len2:            " << fhdr32.record_len2 << endl;
+
+  out << endl << endl;
+   
+}
+
 //////////////////////////////
 // print field header summary
 
@@ -415,6 +597,7 @@ void Mdvx::printVlevelHeader(const vlevel_header_t &vhdr,
 
   out << "Vlevel_header for field: " << field_name << endl;
   out << "------------------------" << endl;
+  out << "64-bit version" << endl;
   out << "record_len1:             " << vhdr.record_len1 << endl;
   out << "struct_id:               " << vhdr.struct_id << endl;
   out << "vlevel type              "
@@ -431,6 +614,32 @@ void Mdvx::printVlevelHeader(const vlevel_header_t &vhdr,
 
 }
  
+void Mdvx::printVlevelHeader(const vlevel_header_32_t &vhdr32,
+			     const int nz,
+			     const char *field_name,
+			     ostream &out)
+
+{ 
+
+  out << "Vlevel_header for field: " << field_name << endl;
+  out << "------------------------" << endl;
+  out << "32-bit version" << endl;
+  out << "record_len1:             " << vhdr32.record_len1 << endl;
+  out << "struct_id:               " << vhdr32.struct_id << endl;
+  out << "vlevel type              "
+      << vertType2Str(vhdr32.type[0]) << endl;
+
+  for (int i = 0; i < nz; i++) {
+    out << "vlevel[" << setw(3) << i << "]:             "
+	<< vhdr32.level[i] << endl;
+  } // i
+
+  out << "record_len2:             " << vhdr32.record_len2;
+  out << endl;
+  out << endl;
+
+}
+ 
 //////////////////////////////////////////////////////////
 // print chunk header
 
@@ -440,8 +649,8 @@ void Mdvx::printChunkHeader(const chunk_header_t &chdr,
 {
 
   out << endl;
-  out << "Chunk header" << endl;
-  out << "------------" << endl;
+  out << "Chunk header - 64-bit" << endl;
+  out << "---------------------" << endl;
   out << "record_len1:           " << chdr.record_len1 << endl;
   out << "struct_id:             " << chdr.struct_id << endl;
   out << "chunk_id:              " << chdr.chunk_id << endl;
@@ -450,6 +659,26 @@ void Mdvx::printChunkHeader(const chunk_header_t &chdr,
   out << "size:                  " << chdr.size << endl;
   out << "info:                  " << chdr.info << endl;
   out << "record_len2:           " << chdr.record_len2 << endl;
+  out << endl;
+
+}
+
+void Mdvx::printChunkHeader(const chunk_header_32_t &chdr32,
+			    ostream &out)
+
+{
+
+  out << endl;
+  out << "Chunk header - 64-bit" << endl;
+  out << "---------------------" << endl;
+  out << "record_len1:           " << chdr32.record_len1 << endl;
+  out << "struct_id:             " << chdr32.struct_id << endl;
+  out << "chunk_id:              " << chdr32.chunk_id << endl;
+  out << "                       " << chunkId2Str(chdr32.chunk_id) << endl;
+  out << "chunk_data_offset:     " << chdr32.chunk_data_offset << endl;
+  out << "size:                  " << chdr32.size << endl;
+  out << "info:                  " << chdr32.info << endl;
+  out << "record_len2:           " << chdr32.record_len2 << endl;
   out << endl;
 
 }

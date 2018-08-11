@@ -2259,6 +2259,12 @@ int Mdvx::_read_master_header(master_header_t &mhdr,
     }
     // copy 32 to 64 bit version
     _copyMasterHeader32to64(mhdr32, mhdr);
+    // print 32-bit header in debug mode
+    if (_debug) {
+      cerr << "========== Reading 32-bit master header ==========" << endl;
+      Mdvx::printMasterHeader(mhdr32, cerr);
+      cerr << "==================================================" << endl;
+    }
   }
   
   return 0;
@@ -2318,6 +2324,12 @@ int Mdvx::_read_field_header(const int field_num,
     field_header_from_BE_32(fhdr32);
     // copy 32 to 64 bit version
     _copyFieldHeader32to64(fhdr32, fhdr);
+    // print 32-bit header in debug mode
+    if (_debug) {
+      cerr << "========== Reading 32-bit field header ==========" << endl;
+      Mdvx::printFieldHeader(fhdr32, cerr);
+      cerr << "=================================================" << endl;
+    }
   }
   
   // make sure data dimension is set correctly
@@ -2373,6 +2385,7 @@ int Mdvx::_read_field_header(const int field_num,
 
 int Mdvx::_read_vlevel_header(const int field_num,
                               const int first_vlevel_offset,
+                              const field_header_t &fhdr,
                               vlevel_header_t &vhdr,
                               TaFile &infile)
 
@@ -2413,6 +2426,12 @@ int Mdvx::_read_vlevel_header(const int field_num,
     }
     vlevel_header_from_BE_32(vhdr32);
     _copyVlevelHeader32to64(vhdr32, vhdr);
+    // print 32-bit header in debug mode
+    if (_debug) {
+      cerr << "========== Reading 32-bit field header ==========" << endl;
+      Mdvx::printVlevelHeader(vhdr32, fhdr.nz, fhdr.field_name, cerr);
+      cerr << "=================================================" << endl;
+    }
   }
   
   return 0;
@@ -2470,6 +2489,12 @@ int Mdvx::_read_chunk_header(const int chunk_num,
     }
     chunk_header_from_BE_32(chdr32);
     _copyChunkHeader32to64(chdr32, chdr);
+    // print 32-bit header in debug mode
+    if (_debug) {
+      cerr << "========== Reading 32-bit chunk header ==========" << endl;
+      Mdvx::printChunkHeader(chdr32, cerr);
+      cerr << "=================================================" << endl;
+    }
   }
   
   return 0;
@@ -2560,7 +2585,7 @@ int Mdvx::_read_all_headers()
       // read vlevel header from file
       
       if (_read_vlevel_header(i, _mhdrFile.vlevel_hdr_offset,
-                              vhdr, infile)) {
+                              fhdr, vhdr, infile)) {
         _errStr += "ERROR - Mdvx::readAllHeaders\n";
         _errStr += "File: ";
         _errStr += _pathInUse;
