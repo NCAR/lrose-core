@@ -57,6 +57,7 @@ void Mdvx::clearWrite()
   clearWriteAddYearSubdir();
   clearIfForecastWriteAsForecast();
   clearWriteFormat();
+  clearWrite32BitHeaders();
   setWriteLdataInfo();
 }
 
@@ -147,6 +148,20 @@ void Mdvx::setWriteFormat(mdv_format_t format)
 void Mdvx::clearWriteFormat()
 {
   _writeFormat = FORMAT_MDV;
+}
+
+////////////////////////////////////////////////////////////////////////
+// write using old 32-bit headers
+// If true, old 32-bit headers are used
+// If false, new 64-bit headers are used
+
+void Mdvx::setWrite32BitHeaders()
+{
+  _write32BitHeaders = true;
+}
+void Mdvx::clearWrite32BitHeaders()
+{
+  _write32BitHeaders = false;
 }
 
 ////////////////////////////////////////////////////////
@@ -280,6 +295,21 @@ int Mdvx::writeToPath(const string &output_path)
   
   ta_remove_compressed(fullOutPath.c_str());
 
+  // check write 32-bit headers
+  
+  char *write32BitHeaders = getenv("MDV_WRITE_32_BIT_HEADERS");
+  if (write32BitHeaders != NULL) {
+    if (!strcasecmp(write32BitHeaders, "TRUE")) {
+      if (_debug) {
+        cerr << "Mdvx::writeToPath() - env var MDV_WRITE_32_BIT_HEADERS set to true" << endl;
+      }
+      _write32BitHeaders = true;
+    }
+  }
+  if (_debug && _write32BitHeaders) {
+    cerr << "Mdvx::writeToPath() - writing 32-bit headers" << endl;
+  }
+  
   // open tmp file
 
   Path outPath(fullOutPath);
@@ -306,6 +336,12 @@ int Mdvx::writeToPath(const string &output_path)
     sizeof(master_header_t) +
     _mhdr.n_fields * (sizeof(field_header_t) + sizeof(vlevel_header_t)) +
     _mhdr.n_chunks * sizeof(chunk_header_t);
+  if (_write32BitHeaders) {
+    writeOffset =
+      sizeof(master_header_32_t) +
+      _mhdr.n_fields * (sizeof(field_header_32_t) + sizeof(vlevel_header_32_t)) +
+      _mhdr.n_chunks * sizeof(chunk_header_32_t);
+  }
 
   long nextOffset;
 
@@ -345,21 +381,6 @@ int Mdvx::writeToPath(const string &output_path)
     }
     writeOffset = nextOffset;
   }
-
-  // set the constant values in the master header
-
-  _mhdr.record_len1 = sizeof(Mdvx::master_header_t) - (2 * sizeof(si32));
-  _mhdr.struct_id = Mdvx::MASTER_HEAD_MAGIC_COOKIE_64;
-  _mhdr.revision_number = 1;
-  _mhdr.record_len2 = _mhdr.record_len1;
-  
-  // set the offsets in the master header
-
-  _mhdr.field_hdr_offset = sizeof(master_header_t);
-  _mhdr.vlevel_hdr_offset =
-    _mhdr.field_hdr_offset + _mhdr.n_fields * sizeof(field_header_t);
-  _mhdr.chunk_hdr_offset =
-    _mhdr.vlevel_hdr_offset + _mhdr.n_fields * sizeof(vlevel_header_t);
 
   // write the master header
 
@@ -664,6 +685,7 @@ void Mdvx::printWriteOptions(ostream &out)
   out << "  writeAsForecast: " << (_writeAsForecast?"T":"F") << endl;
   out << "  ifForecastWriteAsForecast: " << (_ifForecastWriteAsForecast?"T":"F") << endl;
   out << "  writeFormat: " << format2Str(_writeFormat) << endl;
+  out << "  write32BitHeaders: " << (_write32BitHeaders?"T":"F") << endl;
   out << "  writeUsingExtendedPath: " << (_writeAsForecast?"T":"F") << endl;
   out << "  writeAddYearSubdir: " << (_writeAddYearSubdir?"T":"F") << endl;
   
@@ -689,22 +711,73 @@ int Mdvx::_write_master_header(TaFile &outfile) const
     return -1;
   }
   
-  // Convert local copy to BE
+  if (_write32BitHeaders) {
 
-  master_header_t mhdr_be = _mhdr;
-  Mdvx::master_header_to_BE(mhdr_be);
-  
-  // Write the header
+    // set the offsets in the master header
+    
+    _mhdr.field_hdr_offset = sizeof(master_header_32_t);
+    _mhdr.vlevel_hdr_offset =
+      _mhdr.field_hdr_offset + _mhdr.n_fields * sizeof(field_header_32_t);
+    _mhdr.chunk_hdr_offset =
+      _mhdr.vlevel_hdr_offset + _mhdr.n_fields * sizeof(vlevel_header_32_t);
+    
+    // create and fill 32-bit header
 
-  if (outfile.fwrite(&mhdr_be, sizeof(master_header_t), 1) != 1) {
-    int errNum = errno;
-    _errStr += "ERROR - Mdvx::_write_master_header\n";
-    _errStr += "Cannot write master header\n";
-    _errStr += strerror(errNum);
-    _errStr += "\n";
-    return -1;
+    master_header_32_t mhdr32;
+    _copyMasterHeader64to32(_mhdr, mhdr32);
+    
+    // Convert to BE
+    
+    Mdvx::master_header_to_BE_32(mhdr32);
+    
+    // Write the header
+    
+    if (outfile.fwrite(&mhdr32, sizeof(mhdr32), 1) != 1) {
+      int errNum = errno;
+      _errStr += "ERROR - Mdvx::_write_master_header 32-bit\n";
+      _errStr += "Cannot write master header\n";
+      _errStr += strerror(errNum);
+      _errStr += "\n";
+      return -1;
+    }
+
+  } else {
+
+    // 64-bit headers
+
+    // set the offsets in the master header
+    
+    _mhdr.field_hdr_offset = sizeof(master_header_t);
+    _mhdr.vlevel_hdr_offset =
+      _mhdr.field_hdr_offset + _mhdr.n_fields * sizeof(field_header_t);
+    _mhdr.chunk_hdr_offset =
+      _mhdr.vlevel_hdr_offset + _mhdr.n_fields * sizeof(vlevel_header_t);
+    
+    // set the constant values in the master header
+    
+    _mhdr.record_len1 = sizeof(Mdvx::master_header_t) - (2 * sizeof(si32));
+    _mhdr.struct_id = Mdvx::MASTER_HEAD_MAGIC_COOKIE_64;
+    _mhdr.revision_number = 2;
+    _mhdr.record_len2 = _mhdr.record_len1;
+    
+    // Make local copy, convert to BE
+    
+    master_header_t mhdr = _mhdr;
+    Mdvx::master_header_to_BE(mhdr);
+    
+    // Write the header
+    
+    if (outfile.fwrite(&mhdr, sizeof(mhdr), 1) != 1) {
+      int errNum = errno;
+      _errStr += "ERROR - Mdvx::_write_master_header\n";
+      _errStr += "Cannot write master header\n";
+      _errStr += strerror(errNum);
+      _errStr += "\n";
+      return -1;
+    }
+
   }
-
+  
   return 0;
 
 }
@@ -720,50 +793,81 @@ int Mdvx::_write_field_header(const int field_num,
 {
 
   // Move to the appropriate offset
-
-  int offset = _mhdr.field_hdr_offset +
-    field_num * sizeof(field_header_t);
-
+  
+  long offset = _mhdr.field_hdr_offset + field_num * sizeof(field_header_t);
+  if (_write32BitHeaders) {
+    offset = _mhdr.field_hdr_offset + field_num * sizeof(field_header_32_t);
+  }  
   if (outfile.fseek(offset, SEEK_SET)) {
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_write_field_header\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to field header offset: %d\n", offset);
+    sprintf(tmpstr, "Cannot seek to field header offset: %ld\n", offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
     return -1;
   }
+  
+  // make local copy of field header
 
-  // make sure data dimension is set correctly
-
-  field_header_t fhdr_be = _fields[field_num]->_fhdr;
-  if (fhdr_be.nz == 1) {
-    fhdr_be.data_dimension = 2;
+  field_header_t fhdr = _fields[field_num]->_fhdr;
+  if (fhdr.nz == 1) {
+    fhdr.data_dimension = 2;
   } else {
-    fhdr_be.data_dimension = 3;
+    fhdr.data_dimension = 3;
   }
 
   // set file-based properties
-
-  fhdr_be.zoom_clipped = false;
-  fhdr_be.zoom_no_overlap = false;
-
-  // convert to BE
-
-  Mdvx::field_header_to_BE(fhdr_be);
   
-  // Write the header to the output file.
-  
-  if (outfile.fwrite(&fhdr_be, sizeof(field_header_t), 1) != 1) {
-    int errNum = errno;
-    _errStr += "ERROR - Mdvx::_write_field_header\n";
-    char tmpstr[128];
-    sprintf(tmpstr, "Cannot write field header for field: %d\n", field_num);
-    _errStr += tmpstr;
-    _errStr += strerror(errNum);
-    _errStr += "\n";
-    return -1;
+  fhdr.zoom_clipped = false;
+  fhdr.zoom_no_overlap = false;
+
+  if (_write32BitHeaders) {
+
+    // 32-bit header
+
+    field_header_32_t fhdr32;
+    _copyFieldHeader64to32(fhdr, fhdr32);
+
+    // convert to BE
+    
+    Mdvx::field_header_to_BE_32(fhdr32);
+    
+    // Write the header to the output file.
+    
+    if (outfile.fwrite(&fhdr32, sizeof(fhdr32), 1) != 1) {
+      int errNum = errno;
+      _errStr += "ERROR - Mdvx::_write_field_header 32-bit\n";
+      char tmpstr[128];
+      sprintf(tmpstr, "Cannot write field header for field: %d\n", field_num);
+      _errStr += tmpstr;
+      _errStr += strerror(errNum);
+      _errStr += "\n";
+      return -1;
+    }
+
+  } else {
+
+    // 64-bit headers
+
+    // convert to BE
+    
+    Mdvx::field_header_to_BE(fhdr);
+    
+    // Write the header to the output file.
+    
+    if (outfile.fwrite(&fhdr, sizeof(fhdr), 1) != 1) {
+      int errNum = errno;
+      _errStr += "ERROR - Mdvx::_write_field_header\n";
+      char tmpstr[128];
+      sprintf(tmpstr, "Cannot write field header for field: %d\n", field_num);
+      _errStr += tmpstr;
+      _errStr += strerror(errNum);
+      _errStr += "\n";
+      return -1;
+    }
+
   }
 
   return 0;
@@ -782,36 +886,71 @@ int Mdvx::_write_vlevel_header(const int field_num,
 
   // Move to the appropriate offset
 
-  int offset = _mhdr.vlevel_hdr_offset +
-    field_num * sizeof(vlevel_header_t);
+  long offset = _mhdr.vlevel_hdr_offset + field_num * sizeof(vlevel_header_t);
+  if (_write32BitHeaders) {
+    offset = _mhdr.vlevel_hdr_offset + field_num * sizeof(vlevel_header_32_t);
+  }  
   
   if (outfile.fseek(offset, SEEK_SET)) {
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_write_vlevel_header\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to vlevel header offset: %d\n", offset);
+    sprintf(tmpstr, "Cannot seek to vlevel header offset: %ld\n", offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
     return -1;
   }
 
-  // Convert local copy to BE
+  // make local copy
+  
+  vlevel_header_t vhdr = _fields[field_num]->_vhdr;
 
-  vlevel_header_t vhdr_be = _fields[field_num]->_vhdr;
-  Mdvx::vlevel_header_to_BE(vhdr_be);
-  
-  // Write the header to the output file.
-  
-  if (outfile.fwrite(&vhdr_be, sizeof(vlevel_header_t), 1) != 1) {
-    int errNum = errno;
-    _errStr += "ERROR - Mdvx::_write_vlevel_header\n";
-    char tmpstr[128];
-    sprintf(tmpstr, "Cannot write vlevel header for field: %d\n", field_num);
-    _errStr += tmpstr;
-    _errStr += strerror(errNum);
-    _errStr += "\n";
-    return -1;
+  if (_write32BitHeaders) {
+
+    // 32-bit header
+
+    vlevel_header_32_t vhdr32;
+    _copyVlevelHeader64to32(vhdr, vhdr32);
+
+    // convert to BE
+    
+    Mdvx::vlevel_header_to_BE_32(vhdr32);
+
+    // Write the header to the output file.
+    
+    if (outfile.fwrite(&vhdr32, sizeof(vhdr32), 1) != 1) {
+      int errNum = errno;
+      _errStr += "ERROR - Mdvx::_write_vlevel_header 32-bit\n";
+      char tmpstr[128];
+      sprintf(tmpstr, "Cannot write vlevel header for field: %d\n", field_num);
+      _errStr += tmpstr;
+      _errStr += strerror(errNum);
+      _errStr += "\n";
+      return -1;
+    }
+
+  } else {
+
+    // 64-bit
+    
+    // Convert local copy to BE
+    
+    Mdvx::vlevel_header_to_BE(vhdr);
+    
+    // Write the header to the output file.
+    
+    if (outfile.fwrite(&vhdr, sizeof(vhdr), 1) != 1) {
+      int errNum = errno;
+      _errStr += "ERROR - Mdvx::_write_vlevel_header\n";
+      char tmpstr[128];
+      sprintf(tmpstr, "Cannot write vlevel header for field: %d\n", field_num);
+      _errStr += tmpstr;
+      _errStr += strerror(errNum);
+      _errStr += "\n";
+      return -1;
+    }
+
   }
 
   return 0;
@@ -830,36 +969,71 @@ int Mdvx::_write_chunk_header(const int chunk_num,
 
   // Move to the appropriate offset
   
-  int offset = _mhdr.chunk_hdr_offset +
-    chunk_num * sizeof(chunk_header_t);
+  long offset = _mhdr.chunk_hdr_offset + chunk_num * sizeof(chunk_header_t);
+  if (_write32BitHeaders) {
+    offset = _mhdr.vlevel_hdr_offset + chunk_num * sizeof(chunk_header_32_t);
+  }  
   
   if (outfile.fseek(offset, SEEK_SET)) {
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_write_chunk_header\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to chunk header offset: %d\n", offset);
+    sprintf(tmpstr, "Cannot seek to chunk header offset: %ld\n", offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
     return -1;
   }
 
-  // Convert local copy to BE
+  // make local copy
+  
+  chunk_header_t chdr = _chunks[chunk_num]->_chdr;
 
-  chunk_header_t chdr_be = _chunks[chunk_num]->_chdr;
-  Mdvx::chunk_header_to_BE(chdr_be);
-  
-  // Write the header to the output file.
-  
-  if (outfile.fwrite(&chdr_be, sizeof(chunk_header_t), 1) != 1) {
-    int errNum = errno;
-    _errStr += "ERROR - Mdvx::_write_chunk_header\n";
-    char tmpstr[128];
-    sprintf(tmpstr, "Cannot write chunk header for chunk: %d\n", chunk_num);
-    _errStr += tmpstr;
-    _errStr += strerror(errNum);
-    _errStr += "\n";
-    return -1;
+  if (_write32BitHeaders) {
+
+    // 32-bit header
+
+    chunk_header_32_t chdr32;
+    _copyChunkHeader64to32(chdr, chdr32);
+
+    // convert to BE
+    
+    Mdvx::chunk_header_to_BE_32(chdr32);
+    
+    // Write the header to the output file.
+    
+    if (outfile.fwrite(&chdr32, sizeof(chdr32), 1) != 1) {
+      int errNum = errno;
+      _errStr += "ERROR - Mdvx::_write_chunk_header 32-bit\n";
+      char tmpstr[128];
+      sprintf(tmpstr, "Cannot write chunk header for chunk: %d\n", chunk_num);
+      _errStr += tmpstr;
+      _errStr += strerror(errNum);
+      _errStr += "\n";
+      return -1;
+    }
+
+  } else {
+
+    // 64-bit headers
+
+    // convert to BE
+    
+    Mdvx::chunk_header_to_BE(chdr);
+    
+    // Write the header to the output file.
+    
+    if (outfile.fwrite(&chdr, sizeof(chdr), 1) != 1) {
+      int errNum = errno;
+      _errStr += "ERROR - Mdvx::_write_chunk_header\n";
+      char tmpstr[128];
+      sprintf(tmpstr, "Cannot write chunk header for chunk: %d\n", chunk_num);
+      _errStr += tmpstr;
+      _errStr += strerror(errNum);
+      _errStr += "\n";
+      return -1;
+    }
+
   }
 
   return 0;
@@ -898,7 +1072,7 @@ void Mdvx::_checkEnvBeforeWrite() const
       _writeAddYearSubdir = true;
     }
   }
-
+  
 }
 
 

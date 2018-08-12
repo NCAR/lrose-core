@@ -416,6 +416,9 @@ public:
     return(_ifForecastWriteAsForecast);
   }
 
+  // get write32BitHeaders flag
+  bool getWrite32BitHeaders() const { return(_write32BitHeaders); }
+
   // path actually  used for the read or write
   const string &getPathInUse() const { return(_pathInUse); }
 
@@ -613,6 +616,7 @@ protected:
   bool _ifForecastWriteAsForecast; /* writes as forecast only if
                                     * data_collection_type is
                                     * EXTRAPOLATED or FORECAST */
+  mutable bool _write32BitHeaders; // write old version 32-bit headers
 
   // write path or dir - used if the arg in the write call is NULL
 
@@ -830,29 +834,29 @@ protected:
 
   // copy between 32-bit and 64-bit versions, and vice versa
   
-  void _copyMasterHeader32to64(const master_header_32_t &mhdr32,
-                               master_header_64_t &mhdr64);
-
-  void _copyMasterHeader64to32(const master_header_64_t &mhdr64,
-                               master_header_32_t &mhdr32);
-
-  void _copyFieldHeader32to64(const field_header_32_t &fhdr32,
-                              field_header_64_t &fhdr64);
+  static void _copyMasterHeader32to64(const master_header_32_t &mhdr32,
+                                      master_header_64_t &mhdr64);
   
-  void _copyFieldHeader64to32(const field_header_64_t &fhdr64,
-                              field_header_32_t &fhdr32);
+  static void _copyMasterHeader64to32(const master_header_64_t &mhdr64,
+                                      master_header_32_t &mhdr32);
   
-  void _copyVlevelHeader32to64(const vlevel_header_32_t &vhdr32,
-                               vlevel_header_64_t &vhdr64);
-
-  void _copyVlevelHeader64to32(const vlevel_header_64_t &vhdr64,
-                               vlevel_header_32_t &vhdr32);
-
-  void _copyChunkHeader32to64(const chunk_header_32_t &chdr32,
-                               chunk_header_64_t &chdr64);
-
-  void _copyChunkHeader64to32(const chunk_header_64_t &chdr64,
-                               chunk_header_32_t &chdr32);
+  static void _copyFieldHeader32to64(const field_header_32_t &fhdr32,
+                                     field_header_64_t &fhdr64);
+  
+  static void _copyFieldHeader64to32(const field_header_64_t &fhdr64,
+                                     field_header_32_t &fhdr32);
+  
+  static void _copyVlevelHeader32to64(const vlevel_header_32_t &vhdr32,
+                                      vlevel_header_64_t &vhdr64);
+  
+  static void _copyVlevelHeader64to32(const vlevel_header_64_t &vhdr64,
+                                      vlevel_header_32_t &vhdr32);
+  
+  static void _copyChunkHeader32to64(const chunk_header_32_t &chdr32,
+                                     chunk_header_64_t &chdr64);
+  
+  static void _copyChunkHeader64to32(const chunk_header_64_t &chdr64,
+                                     chunk_header_32_t &chdr32);
 
   private:
 

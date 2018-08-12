@@ -374,6 +374,10 @@ int MdvConvert:: _processData(time_t inputTime, int leadTime,
            << "if data is of forecast type" << endl;
     }    
   }
+
+  if (_params.output_32_bit_headers) {
+    mdvx.setWrite32BitHeaders();
+  }
   
   // write using extended paths?
   
