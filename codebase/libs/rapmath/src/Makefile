@@ -24,6 +24,7 @@ SUB_DIRS = \
 	functions \
 	lists \
 	malloc \
+	mathparse \
 	misc \
 	round \
 	stats \
