@@ -192,6 +192,20 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
       _spdb.setChunkCompressOnPut(Spdb::COMPRESSION_GZIP);
     }
   }
+  switch (_params.spdb_put_mode) {
+    case Params::PUT_OVER:
+      _spdb.setPutMode(Spdb::putModeOver);
+      break;
+    case Params::PUT_ADD:
+      _spdb.setPutMode(Spdb::putModeAdd);
+      break;
+    case Params::PUT_ADD_UNIQUE:
+      _spdb.setPutMode(Spdb::putModeAddUnique);
+      break;
+    case Params::PUT_ONCE:
+      _spdb.setPutMode(Spdb::putModeOnce);
+      break;
+  }
 
   // allocate arrays for test pulse if needed
 
