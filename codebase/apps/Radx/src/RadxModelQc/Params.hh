@@ -1,9 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2016
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.hh
 //
@@ -32,8 +49,6 @@
 #ifndef Params_hh
 #define Params_hh
 
-using namespace std;
-
 #include <tdrp/tdrp.h>
 #include <iostream>
 #include <cstdio>
@@ -42,136 +57,20 @@ using namespace std;
 #include <climits>
 #include <cfloat>
 
+using namespace std;
+
 // Class definition
 
 class Params {
 
 public:
 
-  // enum typedefs
-
-  typedef enum {
-    AZ_GRADIENT = 0,
-    CLUTTER_2D_QUAL = 1,
-    COMMENT = 2,
-    CONSTRAIN = 3,
-    FIR = 4,
-    GAUSSIAN_2D_REMAP = 5,
-    GRIDDED_MATH = 6,
-    MASK = 7,
-    MATH = 8,
-    PASSTHROUGH = 9,
-    QSCALE = 10,
-    SW_NORM = 11,
-    THRESH = 12
-  } filter_t;
-
-  typedef enum {
-    MULT = 0,
-    ADD = 1,
-    SUBTRACT = 2,
-    NOOP = 3
-  } math_e;
-
-  typedef enum {
-    LESS = 0,
-    LESS_OR_EQUAL = 1,
-    GREATER = 2,
-    GREATER_OR_EQUAL = 3,
-    MISSING = 4
-  } thresh_e;
-
-  typedef enum {
-    USE_FIRST_DATA = 0,
-    MIRROR = 1,
-    MEAN = 2,
-    INTERP = 3
-  } FIR_edge_e;
-
   // struct typedefs
 
   typedef struct {
-    filter_t filter;
-    int filter_index;
-    char* input_field;
-    char* output_field;
-    char* output_units;
-    double output_missing;
-    tdrp_bool_t write_output_field;
-  } data_filter_t;
-
-  typedef struct {
-    int dummy;
-  } dummy_t;
-
-  typedef struct {
-    math_e type;
-    double value;
-  } math_t;
-
-  typedef struct {
-    char* vel_field_name;
-    char* width_field_name;
-    char* cmdflag_field_name;
-    double sw_shape_factor;
-    double vr_shape_factor;
-  } clutter_2d_qual_t;
-
-  typedef struct {
-    char* comment;
-  } comment_t;
-
-  typedef struct {
-    char* y_field_name;
-    double x_factor;
-    double y_factor;
-    tdrp_bool_t x_is_absolute;
-    tdrp_bool_t y_is_absolute;
-    double scale;
-  } gaussian_2d_mapping_t;
-
-  typedef struct {
-    math_e type;
-    char* input;
-  } gridded_math_t;
-
-  typedef struct {
-    char* mask_field_name;
-    thresh_e type;
-    double mask_threshold;
-    double data_replacement_value;
-    tdrp_bool_t replace_with_missing;
-  } mask_t;
-
-  typedef struct {
-    double scale;
-    double topv;
-    double lowv;
-    tdrp_bool_t invert;
-  } qscale_t;
-
-  typedef struct {
-    tdrp_bool_t dbz;
-    double lambda;
-  } sw_norm_t;
-
-  typedef struct {
-    thresh_e type;
-    double threshold;
-    double replacement;
-    tdrp_bool_t replace_with_missing;
-  } thresh_t;
-
-  typedef struct {
-    int coeff_index;
-    FIR_edge_e edge_compute;
-    char* noise_field_name;
-  } fir_t;
-
-  typedef struct {
-    int min_gate_index;
-    int max_gate_index;
-  } constrain_t;
+    char* interface;
+    char* description;
+  } Filter_t;
 
   ///////////////////////////
   // Member functions
@@ -458,53 +357,33 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  data_filter_t *_filter;
+  tdrp_bool_t output_all_fields;
+
+  char* *_output_fields;
+  int output_fields_n;
+
+  char* *_fixed_const;
+  int fixed_const_n;
+
+  Filter_t *_userUnaryFilters;
+  int userUnaryFilters_n;
+
+  Filter_t *_userVolumeFilters;
+  int userVolumeFilters_n;
+
+  char* *_vol_filter;
+  int vol_filter_n;
+
+  char* *_sweep_filter;
+  int sweep_filter_n;
+
+  char* *_filter;
   int filter_n;
 
-  math_t *_parm_math;
-  int parm_math_n;
+  char* *_vol_filter_after;
+  int vol_filter_after_n;
 
-  clutter_2d_qual_t *_parm_clutter_2d_qual;
-  int parm_clutter_2d_qual_n;
-
-  comment_t *_parm_comment;
-  int parm_comment_n;
-
-  gaussian_2d_mapping_t *_parm_2d_gaussian_mapping;
-  int parm_2d_gaussian_mapping_n;
-
-  gridded_math_t *_parm_gridded_math;
-  int parm_gridded_math_n;
-
-  mask_t *_parm_mask;
-  int parm_mask_n;
-
-  dummy_t *_parm_dummy;
-  int parm_dummy_n;
-
-  qscale_t *_parm_qscale;
-  int parm_qscale_n;
-
-  sw_norm_t *_parm_sw_norm;
-  int parm_sw_norm_n;
-
-  thresh_t *_parm_thresh;
-  int parm_thresh_n;
-
-  fir_t *_parm_fir;
-  int parm_fir_n;
-
-  constrain_t *_parm_constrain;
-  int parm_constrain_n;
-
-  double *_coeff0;
-  int coeff0_n;
-
-  double *_coeff1;
-  int coeff1_n;
-
-  double *_coeff2;
-  int coeff2_n;
+  double variance_radius_km;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -513,7 +392,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[19];
+  mutable TDRPtable _table[13];
 
   const char *_className;
 
