@@ -614,10 +614,19 @@ def writeMakefileAm():
     if (needQt == True):
         fo.write("# qt libs\n")
         fo.write("\n")
-        fo.write("LDADD += $(shell pkg-config --libs Qt5Core)\n")
-        fo.write("LDADD += $(shell pkg-config --libs Qt5Gui)\n")
-        fo.write("LDADD += $(shell pkg-config --libs Qt5Widgets)\n")
-        fo.write("LDADD += $(shell pkg-config --libs Qt5Network)\n")
+        result = os.system('pkg-config --libs Qt5Core')
+        fo.write("LDADD += %s\n" % result)
+        result = os.system('pkg-config --libs Qt5Gui')
+        fo.write("LDADD += %s\n" % result)
+        result = os.system('pkg-config --libs Qt5Widgets')
+        fo.write("LDADD += %s\n" % result)
+        result = os.system('pkg-config --libs Qt5Network')
+        fo.write("LDADD += %s\n" % result)
+
+        # fo.write("LDADD += $(shell pkg-config --libs Qt5Core)\n")
+        # fo.write("LDADD += $(shell pkg-config --libs Qt5Gui)\n")
+        # fo.write("LDADD += $(shell pkg-config --libs Qt5Widgets)\n")
+        # fo.write("LDADD += $(shell pkg-config --libs Qt5Network)\n")
 
     fo.write("# set app name\n")
     fo.write("\n")
