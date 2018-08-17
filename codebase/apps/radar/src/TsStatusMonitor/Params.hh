@@ -87,6 +87,13 @@ public:
     XML_ENTRY_STRING = 3
   } xml_entry_type_t;
 
+  typedef enum {
+    PUT_OVER = 0,
+    PUT_ADD = 1,
+    PUT_ADD_UNIQUE = 2,
+    PUT_ONCE = 3
+  } spdb_put_mode_t;
+
   // struct typedefs
 
   typedef struct {
@@ -467,6 +474,8 @@ public:
 
   tdrp_bool_t compress_spdb;
 
+  spdb_put_mode_t spdb_put_mode;
+
   tdrp_bool_t write_stats_files_to_catalog;
 
   int stats_interval_secs;
@@ -500,7 +509,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[60];
+  mutable TDRPtable _table[61];
 
   const char *_className;
 

@@ -34,6 +34,7 @@
 #define AZ_GRADIENT_STATE_H
 
 #include <cstdio>
+#include <Radx/RadxRay.hh>
 
 //------------------------------------------------------------------
 class AzGradientState
@@ -52,8 +53,8 @@ public:
    */
   inline AzGradientState(double f, int s, int r0, int r1, const RadxRay *ray0,
 			 const RadxRay *ray1) :
-    _fixedAngle(f), _sweepNumber(s), _is360(true), _r0(r0), _r1(r1), _ray0(ray0),
-    _ray1(ray1) {}
+    _fixedAngle(f), _sweepNumber(s), _is360(true), _r0(r0), _r1(r1),
+    _ray0(ray0), _ray1(ray1) {}
 
   /**
    * Constructor for case of not a full 360

@@ -1236,6 +1236,30 @@
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'spdb_put_mode'
+    // ctype is '_spdb_put_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("spdb_put_mode");
+    tt->descr = tdrpStrDup("Put mode for SPDB data base.");
+    tt->help = tdrpStrDup("PUT_OVER - new data will overwrite a previously-stored data for the same time. PUT_ADD: a chunk will be added to the list of chunks stored at a given valid_time. PUT_ADD_UNIQUE: a chunk will be added to the list of data stored at a given valid_time, provided identical data has not already been added. PUT_ONCE: you can only put data for a given time once. Trying to put at the same valid_time again will generate an error. ");
+    tt->val_offset = (char *) &spdb_put_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("spdb_put_mode_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("PUT_OVER");
+      tt->enum_def.fields[0].val = PUT_OVER;
+      tt->enum_def.fields[1].name = tdrpStrDup("PUT_ADD");
+      tt->enum_def.fields[1].val = PUT_ADD;
+      tt->enum_def.fields[2].name = tdrpStrDup("PUT_ADD_UNIQUE");
+      tt->enum_def.fields[2].val = PUT_ADD_UNIQUE;
+      tt->enum_def.fields[3].name = tdrpStrDup("PUT_ONCE");
+      tt->enum_def.fields[3].val = PUT_ONCE;
+    tt->single_val.e = PUT_OVER;
+    tt++;
+    
     // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
