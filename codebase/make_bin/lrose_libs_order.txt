@@ -3,6 +3,8 @@
  -lRefract
  -ladvect
  -lcontour
+ -lfreezing_level
+ -lniwot_basic
  -ldsdata 
  -lradar
  -lSpdb
@@ -44,4 +46,6 @@
  -lbz2
  -lz
  -lpthread
+ -lm
+
 
