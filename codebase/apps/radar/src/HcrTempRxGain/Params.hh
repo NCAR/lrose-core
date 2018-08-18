@@ -382,6 +382,8 @@ public:
 
   char* output_spdb_url;
 
+  char* receiver_status_tag;
+
   char* lna_temperature_tag;
 
   char* *_pod_temperature_tags;
@@ -408,7 +410,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[25];
+  mutable TDRPtable _table[26];
 
   const char *_className;
 

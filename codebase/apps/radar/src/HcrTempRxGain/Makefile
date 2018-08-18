@@ -48,13 +48,15 @@ LOC_CFLAGS =
 HDRS = \
 	Params.hh \
 	Args.hh \
-	HcrTempRxGain.hh
+	HcrTempRxGain.hh \
+	TimeSample.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
 	Main.cc \
-	HcrTempRxGain.cc
+	HcrTempRxGain.cc \
+	TimeSample.cc
 
 #
 # tdrp macros

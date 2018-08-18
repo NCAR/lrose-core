@@ -724,6 +724,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'receiver_status_tag'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("receiver_status_tag");
+    tt->descr = tdrpStrDup("Tag for receiver status block in XML.");
+    tt->help = tdrpStrDup("The status XML is formatted with multiple blocks, one of which is for the receiver.");
+    tt->val_offset = (char *) &receiver_status_tag - &_start_;
+    tt->single_val.s = tdrpStrDup("HcrReceiverStatus");
+    tt++;
+    
     // Parameter 'lna_temperature_tag'
     // ctype is 'char*'
     

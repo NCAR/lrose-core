@@ -96,6 +96,12 @@ commentdef {
 }
 
 paramdef string {
+  p_default = "HcrReceiverStatus";
+  p_descr = "Tag for receiver status block in XML.";
+  p_help = "The status XML is formatted with multiple blocks, one of which is for the receiver.";
+} receiver_status_tag;
+
+paramdef string {
   p_default = "VLnaTemp";
   p_descr = "Tag for LNA temp in XML.";
   p_help = "The LNA is temperature controlled, but the temperature oscillates as the heater cycles on and off.";

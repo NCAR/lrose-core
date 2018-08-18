@@ -39,8 +39,10 @@
 ////////////////////////////////////////////////////////////////
 
 #include "HcrTempRxGain.hh"
+#include "TimeSample.hh"
 #include <toolsa/pmu.h>
 #include <toolsa/uusleep.h>
+#include <toolsa/TaXml.hh>
 #include <Spdb/DsSpdb.hh>
 using namespace std;
 
@@ -244,7 +246,9 @@ int HcrTempRxGain::_processArchive(time_t archiveTime)
 int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
   
 {
-  
+
+  int iret = 0;
+
   // read XML status from spdb
 
   DsSpdb spdb;
@@ -266,6 +270,15 @@ int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
     }
     return -1;
   }
+
+  // create vector of samples
+
+  vector<TimeSample> samples;
+  for (time_t time = retrieveStart; time <= retrieveEnd; time++) {
+    TimeSample sample;
+    sample.setTime(time);
+    samples.push_back(sample);
+  }
   
   // got chunks
   
@@ -282,10 +295,10 @@ int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
 
   // loop through chunks
   
-  for (size_t ii = 0; ii < chunks.size(); ii++) {
+  for (size_t ichunk = 0; ichunk < chunks.size(); ichunk++) {
 
     // create string from chunk, ensure null termination
-    const Spdb::chunk_t &chunk = chunks[ii];
+    const Spdb::chunk_t &chunk = chunks[ichunk];
     string xml((char *) chunk.data, chunk.len - 1);
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "================ XML STATUS =================" << endl;
@@ -294,9 +307,73 @@ int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
       cerr << "=============================================" << endl;
     }
 
-  } // ii
+    // create sample
 
-  return 0;
+    if (chunk.valid_time >= retrieveStart &&
+        chunk.valid_time <= retrieveEnd) {
+
+      size_t isample = chunk.valid_time - retrieveStart;
+      TimeSample &sample = samples[isample]; 
+
+      // get receiver status block
+      
+      string rxStatus;
+      if (TaXml::readString(xml, _params.receiver_status_tag, rxStatus)) {
+        cerr << "ERROR - RadxPartRain::_retrieveSiteTempFromSpdb" << endl;
+        cerr << "  No receiver status tag found: "
+             << _params.receiver_status_tag << endl;
+        cerr << "  xml: " << xml << endl;
+        iret = -1;
+      }
+      
+      // read in temps
+      
+      double lnaTemp;
+      if (TaXml::readDouble(rxStatus, _params.lna_temperature_tag, lnaTemp)) {
+        cerr << "ERROR - RadxPartRain::_retrieveSiteTempFromSpdb" << endl;
+        cerr << "  No LNA temp tag found: "
+             << _params.lna_temperature_tag << endl;
+        cerr << "  rxStatus: " << rxStatus << endl;
+        iret = -1;
+      }
+      
+      sample.addLnaTempObs(lnaTemp);
+      
+      for (int ii = 0; ii < _params.pod_temperature_tags_n; ii++) {
+        string podTempTag = _params._pod_temperature_tags[ii];
+        double podTemp;
+        if (TaXml::readDouble(rxStatus, podTempTag, podTemp)) {
+          cerr << "ERROR - RadxPartRain::_retrieveSiteTempFromSpdb" << endl;
+          cerr << "  No POD temp tag found: "
+               << podTempTag << endl;
+          cerr << "  rxStatus: " << rxStatus << endl;
+          iret = -1;
+        }
+        sample.addPodTempObs(podTemp);
+      } // ii
+
+    } // if (chunk.valid_time >= retrieveStart ...
+    
+  } // ichunk
+
+  // compute mean temps for each time
+  
+  for (size_t isample = 0; isample < samples.size(); isample++) {
+    
+    TimeSample &sample = samples[isample]; 
+    sample.computeMeanObs();
+    
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "==>> temps for time: " << DateTime::strm(sample.getTime()) << endl;
+      cerr << "     mean LNA temp: " << sample.getLnaTempMean() << endl;
+      cerr << "     N    LNA temp: " << sample.getLnaTempN() << endl;
+      cerr << "     mean POD temp: " << sample.getPodTempMean() << endl;
+      cerr << "     N    POD temp: " << sample.getPodTempN() << endl;
+    }
+
+  }
+
+  return iret;
 
 }
 
