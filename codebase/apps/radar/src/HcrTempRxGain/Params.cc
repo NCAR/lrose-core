@@ -655,7 +655,7 @@
     tt->descr = tdrpStrDup("REALTIME mode - interval between processing (secs)");
     tt->help = tdrpStrDup("The app wakes up at this interval and processes the latest data.");
     tt->val_offset = (char *) &realtime_wait_interval_secs - &_start_;
-    tt->single_val.i = 5;
+    tt->single_val.i = 1;
     tt++;
     
     // Parameter 'archive_start_time'
@@ -782,18 +782,6 @@
     tt->single_val.d = 29.739;
     tt++;
     
-    // Parameter 'lna_temperature_time_lag_secs'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("lna_temperature_time_lag_secs");
-    tt->descr = tdrpStrDup("Time lag between the LNA power curve and the LNA temperature curve (secs).");
-    tt->help = tdrpStrDup("A positive number means that the measured temperature lags the measured power in a noise source calibration. A negative number means that the power lags the temperature.");
-    tt->val_offset = (char *) &lna_temperature_time_lag_secs - &_start_;
-    tt->single_val.d = -7.1;
-    tt++;
-    
     // Parameter 'rx_gain_per_temp_slope'
     // ctype is 'double'
     
@@ -816,6 +804,30 @@
     tt->help = tdrpStrDup("This is the estimated POD temperature during the calibration in the lab. The receiver gain change is dependent on the difference between this reference temperature and the measured temperature during operations.");
     tt->val_offset = (char *) &pod_reference_temperature_C - &_start_;
     tt->single_val.d = 19.39;
+    tt++;
+    
+    // Parameter 'lna_temperature_time_lag_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("lna_temperature_time_lag_secs");
+    tt->descr = tdrpStrDup("Time lag between the LNA power curve and the LNA temperature curve (secs).");
+    tt->help = tdrpStrDup("A positive number means that the measured temperature lags the measured power in a noise source calibration. A negative number means that the power lags the temperature.");
+    tt->val_offset = (char *) &lna_temperature_time_lag_secs - &_start_;
+    tt->single_val.i = -7;
+    tt++;
+    
+    // Parameter 'temperature_smoothing_interval_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("temperature_smoothing_interval_secs");
+    tt->descr = tdrpStrDup("Interval over which temperatures are smoothed before use (secs).");
+    tt->help = tdrpStrDup("We compute the mean for each temperature, over this interval, centered on the time of interest.");
+    tt->val_offset = (char *) &temperature_smoothing_interval_secs - &_start_;
+    tt->single_val.i = 10;
     tt++;
     
     // Parameter 'ocean_scan_reflectivity_bias'

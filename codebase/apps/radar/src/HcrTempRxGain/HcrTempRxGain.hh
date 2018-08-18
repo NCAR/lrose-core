@@ -45,7 +45,6 @@
 #include "Params.hh"
 #include <string>
 #include <vector>
-#include <Spdb/DsSpdb.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/DateTime.hh>
 using namespace std;
@@ -81,12 +80,15 @@ private:
   // archive mode
 
   time_t _archiveStartTime, _archiveEndTime;
-  
+
   // methods
 
   int _runArchive();
   int _runRealtime();
-  int _retrieveData(time_t startTime, time_t endTime);
+  int _processRealtime(time_t now);
+  int _processArchive(time_t archiveTime);
+  int _retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd);
+  int _processTime(time_t procTime);
 
 };
 

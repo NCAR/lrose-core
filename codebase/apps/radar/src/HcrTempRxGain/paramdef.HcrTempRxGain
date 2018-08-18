@@ -58,7 +58,7 @@ paramdef string {
 } input_spdb_url;
 
 paramdef int {
-  p_default = 5;
+  p_default = 1;
   p_descr = "REALTIME mode - interval between processing (secs)";
   p_help =  "The app wakes up at this interval and processes the latest data.";
 } realtime_wait_interval_secs;
@@ -125,12 +125,6 @@ paramdef double {
 } lna_reference_temperature_C;
 
 paramdef double {
-  p_default = -7.1;
-  p_descr = "Time lag between the LNA power curve and the LNA temperature curve (secs).";
-  p_help = "A positive number means that the measured temperature lags the measured power in a noise source calibration. A negative number means that the power lags the temperature.";
-} lna_temperature_time_lag_secs;
-
-paramdef double {
   p_default = -0.10850;
   p_descr = "Slope of receiver gain against POD temperature (dB/degC).";
   p_help = "We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the receiver gain change from the temperature.";
@@ -141,6 +135,18 @@ paramdef double {
   p_descr = "Reference temperature for the POD (degC).";
   p_help = "This is the estimated POD temperature during the calibration in the lab. The receiver gain change is dependent on the difference between this reference temperature and the measured temperature during operations.";
 } pod_reference_temperature_C;
+
+paramdef int {
+  p_default = -7;
+  p_descr = "Time lag between the LNA power curve and the LNA temperature curve (secs).";
+  p_help = "A positive number means that the measured temperature lags the measured power in a noise source calibration. A negative number means that the power lags the temperature.";
+} lna_temperature_time_lag_secs;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Interval over which temperatures are smoothed before use (secs).";
+  p_help = "We compute the mean for each temperature, over this interval, centered on the time of interest.";
+} temperature_smoothing_interval_secs;
 
 paramdef double {
   p_default = 2.386;

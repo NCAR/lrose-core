@@ -391,11 +391,13 @@ public:
 
   double lna_reference_temperature_C;
 
-  double lna_temperature_time_lag_secs;
-
   double rx_gain_per_temp_slope;
 
   double pod_reference_temperature_C;
+
+  int lna_temperature_time_lag_secs;
+
+  int temperature_smoothing_interval_secs;
 
   double ocean_scan_reflectivity_bias;
 
@@ -406,7 +408,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[24];
+  mutable TDRPtable _table[25];
 
   const char *_className;
 

@@ -35,14 +35,13 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = HcrTempRxGain
 
-LOC_INCLUDES = $(NETCDF4_INCS)
+LOC_INCLUDES =
 
-LOC_LIBS = -lMdv -lRadx -lradar -lFmq \
-	-lMdv -ldsserver -ldidss -lrapformats \
-	-leuclid -ltoolsa -ltdrp -ldataport \
-	$(NETCDF4_LIBS) -lbz2 -lz
+LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
+	-ltoolsa -ltdrp -ldataport \
+	-lbz2 -lz
 
-LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS =
 
 LOC_CFLAGS =
 

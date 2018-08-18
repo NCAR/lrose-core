@@ -40,6 +40,8 @@
 
 #include "HcrTempRxGain.hh"
 #include <toolsa/pmu.h>
+#include <toolsa/uusleep.h>
+#include <Spdb/DsSpdb.hh>
 using namespace std;
 
 // Constructor
@@ -117,6 +119,23 @@ int HcrTempRxGain::_runRealtime()
 {
 
   int iret = 0;
+  time_t prevTime = 0;
+
+  while (true) {
+
+    PMU_auto_register("reading realtime data");
+
+    time_t now = time(NULL);
+    int secsSincePrev = now - prevTime;
+    if (secsSincePrev >= _params.realtime_wait_interval_secs) {
+      if (_processRealtime(now)) {
+        iret = -1;
+      }
+      prevTime = now;
+    }
+    umsleep(100);
+
+  } // while
 
   return iret;
 
@@ -130,7 +149,166 @@ int HcrTempRxGain::_runArchive()
 
   int iret = 0;
 
+  time_t archiveStartTime = DateTime::parseDateTime(_params.archive_start_time);
+  if (archiveStartTime == DateTime::NEVER) {
+    cerr << "ERROR - HcrTempRxGain::_runArchive()" << endl;
+    cerr << "  Bad start time: " << _params.archive_start_time << endl;
+    return -1;
+  }
+
+  time_t archiveEndTime = DateTime::parseDateTime(_params.archive_end_time);
+  if (archiveEndTime == DateTime::NEVER) {
+    cerr << "ERROR - HcrTempRxGain::_runArchive()" << endl;
+    cerr << "  Bad end time: " << _params.archive_end_time << endl;
+    return -1;
+  }
+
+  time_t archiveTime = archiveStartTime;
+  while (archiveTime <= archiveEndTime) {
+    if (_processArchive(archiveTime)) {
+      iret = -1;
+    }
+    archiveTime += _params.archive_processing_interval_secs;
+  }
+
   return iret;
 
 }
+
+//////////////////////////////////////////////////
+// Process realtime mode
+
+int HcrTempRxGain::_processRealtime(time_t now)
+{
+  
+  time_t retrieveStart = 
+    now - _params.lna_temperature_time_lag_secs - _params.temperature_smoothing_interval_secs;
+  time_t retrieveEnd = 
+    now + _params.lna_temperature_time_lag_secs + _params.temperature_smoothing_interval_secs;
+
+  if (_retrieveFromSpdb(retrieveStart, retrieveEnd)) {
+    cerr << "ERROR - HcrTempRxGain::_processRealtime()" << endl;
+    return -1;
+  }
+
+  if (_processTime(now)) {
+    cerr << "ERROR - HcrTempRxGain::_processRealtime()" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Process archive mode
+
+int HcrTempRxGain::_processArchive(time_t archiveTime)
+{
+  
+  time_t retrieveStart = 
+    archiveTime -
+    _params.lna_temperature_time_lag_secs -
+    _params.temperature_smoothing_interval_secs;
+
+  time_t retrieveEnd = 
+    archiveTime +
+    _params.archive_processing_interval_secs +
+    _params.lna_temperature_time_lag_secs +
+    _params.temperature_smoothing_interval_secs;
+  
+  if (_retrieveFromSpdb(retrieveStart, retrieveEnd)) {
+    cerr << "ERROR - HcrTempRxGain::_processArchive()" << endl;
+    return -1;
+  }
+
+  int iret = 0;
+  for (time_t procTime = archiveTime; 
+       procTime < archiveTime + _params.archive_processing_interval_secs;
+       procTime++) {
+
+    if (_processTime(procTime)) {
+      cerr << "ERROR - HcrTempRxGain::_processRealtime()" << endl;
+      iret = -1;
+    }
+
+  }
+
+  return iret;
+
+}
+
+//////////////////////////////////////////////////
+// Retrieve temp data from SPDB
+
+int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
+  
+{
+  
+  // read XML status from spdb
+
+  DsSpdb spdb;
+
+  if (_params.debug) {
+    cerr << "Retrieving XML status from spdb, url: " << _params.input_spdb_url << endl;
+    cerr << "  retrieveStart: " << DateTime::strm(retrieveStart) << endl;
+    cerr << "  retrieveEnd: " << DateTime::strm(retrieveEnd) << endl;
+  }
+  
+  if (spdb.getInterval(_params.input_spdb_url,
+                       retrieveStart, retrieveEnd)) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - HcrTempRxGain::_retrieveFromSpdb" << endl;
+      cerr << "  Cannot read data from URL: " << _params.input_spdb_url << endl;
+      cerr << "  startTime: " << DateTime::strm(retrieveStart) << endl;
+      cerr << "  endTime: " << DateTime::strm(retrieveEnd) << endl;
+      cerr << spdb.getErrStr() << endl;
+    }
+    return -1;
+  }
+  
+  // got chunks
+  
+  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  if (chunks.size() < 1) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - RadxPartRain::_retrieveSiteTempFromSpdb" << endl;
+      cerr << "  No temp data from URL: " << _params.input_spdb_url << endl;
+      cerr << "  startTime: " << DateTime::strm(retrieveStart) << endl;
+      cerr << "  endTime: " << DateTime::strm(retrieveEnd) << endl;
+    }
+    return -1;
+  }
+
+  // loop through chunks
+  
+  for (size_t ii = 0; ii < chunks.size(); ii++) {
+
+    // create string from chunk, ensure null termination
+    const Spdb::chunk_t &chunk = chunks[ii];
+    string xml((char *) chunk.data, chunk.len - 1);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "================ XML STATUS =================" << endl;
+      cerr << "Valid time: " << DateTime::strm(chunk.valid_time) << endl;
+      cerr << xml << endl;
+      cerr << "=============================================" << endl;
+    }
+
+  } // ii
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Process the data for the specified time
+
+int HcrTempRxGain::_processTime(time_t procTime)
+
+{
+
+  return 0;
+
+}
+
 
