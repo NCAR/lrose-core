@@ -16,6 +16,7 @@ SUB_DIRS = \
 	DualDopplerLobes \
 	HawkEye \
 	HcrVelCorrect \
+	HcrTempRxGain \
 	IntfRemove \
 	Iq2Dsr \
 	PowerInfo2Spdb \
