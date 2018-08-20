@@ -402,6 +402,8 @@ public:
 
   tdrp_bool_t ignore_if_all_nans;
 
+  tdrp_bool_t ignore_if_any_nans;
+
   tdrp_bool_t replace_string_in_output;
 
   char* old_string;
@@ -415,7 +417,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[21];
+  mutable TDRPtable _table[22];
 
   const char *_className;
 

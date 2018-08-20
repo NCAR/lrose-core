@@ -167,9 +167,9 @@ void SpdbXml2Table::_printComments(FILE *out)
     fprintf(out, "%s", delim);
     const Params::xml_entry_t &entry = _params._xml_entries[ii];
     if (entry.specify_label) {
-      fprintf(out, "%s ", entry.label);
+      fprintf(out, "%s", entry.label);
     } else {
-      fprintf(out, "%s ", entry.xml_tag_list);
+      fprintf(out, "%s", entry.xml_tag_list);
     }
   } // ii
   fprintf(out, "\n");
@@ -258,6 +258,7 @@ void SpdbXml2Table::_printLine(FILE *out,
   // loop through XML entries
 
   bool allNans = true;
+  bool anyNans = false;
   
   for (int ii = 0; ii < _params.xml_entries_n; ii++) {
     
@@ -305,6 +306,8 @@ void SpdbXml2Table::_printLine(FILE *out,
 
         if (val.find("nan") != 0) {
           allNans = false;
+        } else {
+          anyNans = true;
         }
         if (_params.replace_string_in_output) {
           size_t pos = 0;
@@ -342,6 +345,10 @@ void SpdbXml2Table::_printLine(FILE *out,
   } // ii
   
   if (_params.ignore_if_all_nans && allNans) {
+    return;
+  }
+
+  if (_params.ignore_if_any_nans && anyNans) {
     return;
   }
 

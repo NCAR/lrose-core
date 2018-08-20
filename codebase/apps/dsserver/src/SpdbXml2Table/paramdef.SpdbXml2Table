@@ -154,8 +154,13 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Do not print a line if all string values are 'nan'.";
+  p_descr = "Do not print a line if all values are 'nan'.";
 } ignore_if_all_nans;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Do not print a line if any values are 'nan'.";
+} ignore_if_any_nans;
 
 paramdef boolean {
   p_default = false;
