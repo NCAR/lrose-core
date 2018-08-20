@@ -389,13 +389,13 @@ public:
   char* *_pod_temperature_tags;
   int pod_temperature_tags_n;
 
-  double lna_gain_per_temp_slope;
+  double lna_reference_temperature_c;
 
-  double lna_reference_temperature_C;
+  double lna_gain_change_per_c;
 
-  double rx_gain_per_temp_slope;
+  double pod_reference_temperature_c;
 
-  double pod_reference_temperature_C;
+  double rx_gain_change_per_c;
 
   int lna_temperature_time_lag_secs;
 

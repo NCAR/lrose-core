@@ -770,52 +770,52 @@
       tt->array_vals[3].s = tdrpStrDup("NoiseSourceTemp");
     tt++;
     
-    // Parameter 'lna_gain_per_temp_slope'
+    // Parameter 'lna_reference_temperature_c'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("lna_gain_per_temp_slope");
-    tt->descr = tdrpStrDup("Slope of LNA gain against LNA temperature (dB/degC).");
-    tt->help = tdrpStrDup("We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the LNA gain change from the temperature.");
-    tt->val_offset = (char *) &lna_gain_per_temp_slope - &_start_;
-    tt->single_val.d = 0.16436;
-    tt++;
-    
-    // Parameter 'lna_reference_temperature_C'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("lna_reference_temperature_C");
+    tt->param_name = tdrpStrDup("lna_reference_temperature_c");
     tt->descr = tdrpStrDup("Reference temperature for the LNA (degC).");
     tt->help = tdrpStrDup("This is the estimated LNA temperature during the calibration in the lab. The LNA gain change is dependent on the difference between this reference temperature and the measured temperature during operations.");
-    tt->val_offset = (char *) &lna_reference_temperature_C - &_start_;
+    tt->val_offset = (char *) &lna_reference_temperature_c - &_start_;
     tt->single_val.d = 29.739;
     tt++;
     
-    // Parameter 'rx_gain_per_temp_slope'
+    // Parameter 'lna_gain_change_per_c'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rx_gain_per_temp_slope");
-    tt->descr = tdrpStrDup("Slope of receiver gain against POD temperature (dB/degC).");
-    tt->help = tdrpStrDup("We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the receiver gain change from the temperature.");
-    tt->val_offset = (char *) &rx_gain_per_temp_slope - &_start_;
-    tt->single_val.d = -0.1085;
+    tt->param_name = tdrpStrDup("lna_gain_change_per_c");
+    tt->descr = tdrpStrDup("Slope of LNA gain against LNA temperature (dB/degC).");
+    tt->help = tdrpStrDup("We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the LNA gain change from the temperature.");
+    tt->val_offset = (char *) &lna_gain_change_per_c - &_start_;
+    tt->single_val.d = 0.16436;
     tt++;
     
-    // Parameter 'pod_reference_temperature_C'
+    // Parameter 'pod_reference_temperature_c'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("pod_reference_temperature_C");
+    tt->param_name = tdrpStrDup("pod_reference_temperature_c");
     tt->descr = tdrpStrDup("Reference temperature for the POD (degC).");
     tt->help = tdrpStrDup("This is the estimated POD temperature during the calibration in the lab. The receiver gain change is dependent on the difference between this reference temperature and the measured temperature during operations.");
-    tt->val_offset = (char *) &pod_reference_temperature_C - &_start_;
+    tt->val_offset = (char *) &pod_reference_temperature_c - &_start_;
     tt->single_val.d = 19.39;
+    tt++;
+    
+    // Parameter 'rx_gain_change_per_c'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("rx_gain_change_per_c");
+    tt->descr = tdrpStrDup("Slope of receiver gain against POD temperature (dB/degC).");
+    tt->help = tdrpStrDup("We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the receiver gain change from the temperature.");
+    tt->val_offset = (char *) &rx_gain_change_per_c - &_start_;
+    tt->single_val.d = -0.1085;
     tt++;
     
     // Parameter 'lna_temperature_time_lag_secs'

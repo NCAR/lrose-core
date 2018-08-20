@@ -119,28 +119,28 @@ paramdef string {
 } pod_temperature_tags[];
 
 paramdef double {
-  p_default = 0.16436;
-  p_descr = "Slope of LNA gain against LNA temperature (dB/degC).";
-  p_help = "We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the LNA gain change from the temperature.";
-} lna_gain_per_temp_slope;
-
-paramdef double {
   p_default = 29.739;
   p_descr = "Reference temperature for the LNA (degC).";
   p_help = "This is the estimated LNA temperature during the calibration in the lab. The LNA gain change is dependent on the difference between this reference temperature and the measured temperature during operations.";
-} lna_reference_temperature_C;
+} lna_reference_temperature_c;
 
 paramdef double {
-  p_default = -0.10850;
-  p_descr = "Slope of receiver gain against POD temperature (dB/degC).";
-  p_help = "We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the receiver gain change from the temperature.";
-} rx_gain_per_temp_slope;
+  p_default = 0.16436;
+  p_descr = "Slope of LNA gain against LNA temperature (dB/degC).";
+  p_help = "We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the LNA gain change from the temperature.";
+} lna_gain_change_per_c;
 
 paramdef double {
   p_default = 19.390;
   p_descr = "Reference temperature for the POD (degC).";
   p_help = "This is the estimated POD temperature during the calibration in the lab. The receiver gain change is dependent on the difference between this reference temperature and the measured temperature during operations.";
-} pod_reference_temperature_C;
+} pod_reference_temperature_c;
+
+paramdef double {
+  p_default = -0.10850;
+  p_descr = "Slope of receiver gain against POD temperature (dB/degC).";
+  p_help = "We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the receiver gain change from the temperature.";
+} rx_gain_change_per_c;
 
 paramdef int {
   p_default = -7;

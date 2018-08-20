@@ -39,7 +39,6 @@
 ////////////////////////////////////////////////////////////////
 
 #include "HcrTempRxGain.hh"
-#include "TimeSample.hh"
 #include <toolsa/pmu.h>
 #include <toolsa/uusleep.h>
 #include <toolsa/TaXml.hh>
@@ -151,22 +150,22 @@ int HcrTempRxGain::_runArchive()
 
   int iret = 0;
 
-  time_t archiveStartTime = DateTime::parseDateTime(_params.archive_start_time);
-  if (archiveStartTime == DateTime::NEVER) {
+  _archiveStartTime = DateTime::parseDateTime(_params.archive_start_time);
+  if (_archiveStartTime == DateTime::NEVER) {
     cerr << "ERROR - HcrTempRxGain::_runArchive()" << endl;
     cerr << "  Bad start time: " << _params.archive_start_time << endl;
     return -1;
   }
 
-  time_t archiveEndTime = DateTime::parseDateTime(_params.archive_end_time);
-  if (archiveEndTime == DateTime::NEVER) {
+  _archiveEndTime = DateTime::parseDateTime(_params.archive_end_time);
+  if (_archiveEndTime == DateTime::NEVER) {
     cerr << "ERROR - HcrTempRxGain::_runArchive()" << endl;
     cerr << "  Bad end time: " << _params.archive_end_time << endl;
     return -1;
   }
 
-  time_t archiveTime = archiveStartTime;
-  while (archiveTime <= archiveEndTime) {
+  time_t archiveTime = _archiveStartTime;
+  while (archiveTime <= _archiveEndTime) {
     if (_processArchive(archiveTime)) {
       iret = -1;
     }
@@ -182,16 +181,25 @@ int HcrTempRxGain::_runArchive()
 
 int HcrTempRxGain::_processRealtime(time_t now)
 {
-  
-  time_t retrieveStart = 
-    now - _params.lna_temperature_time_lag_secs - _params.temperature_smoothing_interval_secs;
-  time_t retrieveEnd = 
-    now + _params.lna_temperature_time_lag_secs + _params.temperature_smoothing_interval_secs;
 
-  if (_retrieveFromSpdb(retrieveStart, retrieveEnd)) {
+  // get retrieval limits relative to now
+
+  _retrieveStartTime = (now -
+                        _params.lna_temperature_time_lag_secs -
+                        _params.temperature_smoothing_interval_secs);
+
+  _retrieveEndTime = (now + 
+                      _params.lna_temperature_time_lag_secs +
+                      _params.temperature_smoothing_interval_secs);
+
+  // retrieve data
+
+  if (_retrieveFromSpdb()) {
     cerr << "ERROR - HcrTempRxGain::_processRealtime()" << endl;
     return -1;
   }
+
+  // process for this time
 
   if (_processTime(now)) {
     cerr << "ERROR - HcrTempRxGain::_processRealtime()" << endl;
@@ -208,33 +216,41 @@ int HcrTempRxGain::_processRealtime(time_t now)
 int HcrTempRxGain::_processArchive(time_t archiveTime)
 {
   
-  time_t retrieveStart = 
+  // get retrieval limits relative to archive time of interest
+
+  _retrieveStartTime = 
     archiveTime -
     _params.lna_temperature_time_lag_secs -
     _params.temperature_smoothing_interval_secs;
 
-  time_t retrieveEnd = 
+  _retrieveEndTime = 
     archiveTime +
     _params.archive_processing_interval_secs +
     _params.lna_temperature_time_lag_secs +
     _params.temperature_smoothing_interval_secs;
   
-  if (_retrieveFromSpdb(retrieveStart, retrieveEnd)) {
+  // retrieve data
+
+  if (_retrieveFromSpdb()) {
     cerr << "ERROR - HcrTempRxGain::_processArchive()" << endl;
     return -1;
   }
 
+  // loop through the processing interval, one second at a time
+  
   int iret = 0;
   for (time_t procTime = archiveTime; 
        procTime < archiveTime + _params.archive_processing_interval_secs;
        procTime++) {
-
+  
+    // process this second
+    
     if (_processTime(procTime)) {
       cerr << "ERROR - HcrTempRxGain::_processRealtime()" << endl;
       iret = -1;
     }
 
-  }
+  } // procTime
 
   return iret;
 
@@ -242,8 +258,9 @@ int HcrTempRxGain::_processArchive(time_t archiveTime)
 
 //////////////////////////////////////////////////
 // Retrieve temp data from SPDB
+// from _retrieveStartTime to _retrieveEndTime
 
-int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
+int HcrTempRxGain::_retrieveFromSpdb()
   
 {
 
@@ -255,29 +272,29 @@ int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
 
   if (_params.debug) {
     cerr << "Retrieving XML status from spdb, url: " << _params.input_spdb_url << endl;
-    cerr << "  retrieveStart: " << DateTime::strm(retrieveStart) << endl;
-    cerr << "  retrieveEnd: " << DateTime::strm(retrieveEnd) << endl;
+    cerr << "  _retrieveStartTime: " << DateTime::strm(_retrieveStartTime) << endl;
+    cerr << "  _retrieveEndTime: " << DateTime::strm(_retrieveEndTime) << endl;
   }
   
   if (spdb.getInterval(_params.input_spdb_url,
-                       retrieveStart, retrieveEnd)) {
+                       _retrieveStartTime, _retrieveEndTime)) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "WARNING - HcrTempRxGain::_retrieveFromSpdb" << endl;
       cerr << "  Cannot read data from URL: " << _params.input_spdb_url << endl;
-      cerr << "  startTime: " << DateTime::strm(retrieveStart) << endl;
-      cerr << "  endTime: " << DateTime::strm(retrieveEnd) << endl;
+      cerr << "  startTime: " << DateTime::strm(_retrieveStartTime) << endl;
+      cerr << "  endTime: " << DateTime::strm(_retrieveEndTime) << endl;
       cerr << spdb.getErrStr() << endl;
     }
     return -1;
   }
 
-  // create vector of samples
+  // initialize vector for samples
 
-  vector<TimeSample> samples;
-  for (time_t time = retrieveStart; time <= retrieveEnd; time++) {
-    TimeSample sample;
+  _samples.clear();
+  for (time_t time = _retrieveStartTime; time <= _retrieveEndTime; time++) {
+    TimeSample sample(_params);
     sample.setTime(time);
-    samples.push_back(sample);
+    _samples.push_back(sample);
   }
   
   // got chunks
@@ -287,8 +304,8 @@ int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "WARNING - RadxPartRain::_retrieveSiteTempFromSpdb" << endl;
       cerr << "  No temp data from URL: " << _params.input_spdb_url << endl;
-      cerr << "  startTime: " << DateTime::strm(retrieveStart) << endl;
-      cerr << "  endTime: " << DateTime::strm(retrieveEnd) << endl;
+      cerr << "  startTime: " << DateTime::strm(_retrieveStartTime) << endl;
+      cerr << "  endTime: " << DateTime::strm(_retrieveEndTime) << endl;
     }
     return -1;
   }
@@ -300,7 +317,7 @@ int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
     // create string from chunk, ensure null termination
     const Spdb::chunk_t &chunk = chunks[ichunk];
     string xml((char *) chunk.data, chunk.len - 1);
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "================ XML STATUS =================" << endl;
       cerr << "Valid time: " << DateTime::strm(chunk.valid_time) << endl;
       cerr << xml << endl;
@@ -309,11 +326,11 @@ int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
 
     // create sample
 
-    if (chunk.valid_time >= retrieveStart &&
-        chunk.valid_time <= retrieveEnd) {
+    if (chunk.valid_time >= _retrieveStartTime &&
+        chunk.valid_time <= _retrieveEndTime) {
 
-      size_t isample = chunk.valid_time - retrieveStart;
-      TimeSample &sample = samples[isample]; 
+      size_t isample = chunk.valid_time - _retrieveStartTime;
+      TimeSample &sample = _samples[isample]; 
 
       // get receiver status block
       
@@ -341,7 +358,7 @@ int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
       
       for (int ii = 0; ii < _params.pod_temperature_tags_n; ii++) {
         string podTempTag = _params._pod_temperature_tags[ii];
-        double podTemp;
+       double podTemp;
         if (TaXml::readDouble(rxStatus, podTempTag, podTemp)) {
           cerr << "ERROR - RadxPartRain::_retrieveSiteTempFromSpdb" << endl;
           cerr << "  No POD temp tag found: "
@@ -352,25 +369,15 @@ int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
         sample.addPodTempObs(podTemp);
       } // ii
 
-    } // if (chunk.valid_time >= retrieveStart ...
+    } // if (chunk.valid_time >= _retrieveStartTime ...
     
   } // ichunk
 
   // compute mean temps for each time
   
-  for (size_t isample = 0; isample < samples.size(); isample++) {
-    
-    TimeSample &sample = samples[isample]; 
+  for (size_t isample = 0; isample < _samples.size(); isample++) {
+    TimeSample &sample = _samples[isample]; 
     sample.computeMeanObs();
-    
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "==>> temps for time: " << DateTime::strm(sample.getTime()) << endl;
-      cerr << "     mean LNA temp: " << sample.getLnaTempMean() << endl;
-      cerr << "     N    LNA temp: " << sample.getLnaTempN() << endl;
-      cerr << "     mean POD temp: " << sample.getPodTempMean() << endl;
-      cerr << "     N    POD temp: " << sample.getPodTempN() << endl;
-    }
-
   }
 
   return iret;
@@ -383,6 +390,189 @@ int HcrTempRxGain::_retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd)
 int HcrTempRxGain::_processTime(time_t procTime)
 
 {
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> Processing retrieved data for time: " 
+         << DateTime::strm(procTime) << endl;
+  }
+
+  // get time indices for sample vector
+
+  int procIndex = procTime - _retrieveStartTime;
+  TimeSample &procSample = _samples[procIndex]; 
+
+  // get start and end of smoothing period for pod temps
+  
+  int smoothingIntervalHalf = _params.temperature_smoothing_interval_secs / 2;
+
+  int smoothingStartIndex = procIndex - smoothingIntervalHalf;
+  if (smoothingStartIndex < 0) {
+    smoothingStartIndex = 0;
+  }
+
+  int smoothingEndIndex = procIndex + smoothingIntervalHalf;
+  if (smoothingEndIndex > (int) _samples.size() - 1) {
+    smoothingEndIndex = _samples.size() - 1;
+  }
+
+  // get start and end of lagged smoothing period for lna temps
+
+  int lnaLagSecs = _params.lna_temperature_time_lag_secs;
+
+  int laggedStartIndex = procIndex - smoothingIntervalHalf - lnaLagSecs;
+  if (laggedStartIndex < 0) {
+    laggedStartIndex = 0;
+  }
+
+  int laggedEndIndex = procIndex + smoothingIntervalHalf - lnaLagSecs;
+  if (laggedEndIndex > (int) _samples.size() - 1) {
+    laggedEndIndex = _samples.size() - 1;
+  }
+
+  // compute smoothed pod temp
+
+  {
+    double sum = 0.0;
+    double nn = 0.0;
+    for (int isample = smoothingStartIndex; isample <= smoothingEndIndex; isample++) {
+      TimeSample &sample = _samples[isample];
+      nn += sample.getPodTempN();
+      sum += sample.getPodTempSum();
+    }
+    if (nn > 0) {
+      double smoothedTemp = sum / nn;
+      procSample.setPodSmoothedN(nn);
+      procSample.setPodTempSmoothed(smoothedTemp);
+    }
+  }
+
+  // compute smoothed lna temp, taking lag into account
+
+  {
+    double sum = 0.0;
+    double nn = 0.0;
+    for (int isample = laggedStartIndex; isample <= laggedEndIndex; isample++) {
+      TimeSample &sample = _samples[isample];
+      nn += sample.getLnaTempN();
+      sum += sample.getLnaTempSum();
+    }
+    if (nn > 0) {
+      double smoothedTemp = sum / nn;
+      procSample.setLnaSmoothedN(nn);
+      procSample.setLnaTempSmoothed(smoothedTemp);
+    }
+  }
+
+  // compute delta gain
+
+  procSample.computeDeltaGain();
+  
+  // debug print
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    
+    cerr << "==>> temps for time    : "
+         << DateTime::strm(procSample.getTime()) << endl ;
+    cerr << "     N obs LNA         : " << procSample.getLnaTempN() << endl;
+    cerr << "     N obs POD         : " << procSample.getPodTempN() << endl;
+    cerr << "     mean temp LNA     : " << procSample.getLnaTempMean() << endl;
+    cerr << "     mean temp POD     : " << procSample.getPodTempMean() << endl;
+    cerr << "     smoothed N LNA    : " << procSample.getLnaSmoothedN() << endl;
+    cerr << "     smoothed N POD    : " << procSample.getPodSmoothedN() << endl;
+    cerr << "     smoothed temp LNA : " << procSample.getLnaTempSmoothed() << endl;
+    cerr << "     smoothed temp POD : " << procSample.getPodTempSmoothed() << endl;
+    cerr << "     delta gain LNA    : " << procSample.getLnaDeltaGain() << endl;
+    cerr << "     delta gain RX     : " << procSample.getRxDeltaGain() << endl;
+    cerr << "     delta gain SUM    : " << procSample.getSumDeltaGain() << endl;
+
+  }
+
+  // write the gain results to SPBD
+
+  _writeToSpdb(procTime, procSample);
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Write gain results to SPDB
+
+int HcrTempRxGain::_writeToSpdb(time_t procTime,
+                                const TimeSample &procSample)
+
+{
+
+  // create XML string with results
+
+  string xml;
+
+  xml += TaXml::writeStartTag("HcrTempGainCorrection", 0);
+  
+  xml += TaXml::writeString("time", 1, DateTime::strm(procTime));
+  
+  xml += TaXml::writeDouble("lna_ref_temp_c", 1,
+                            _params.lna_reference_temperature_c);
+  xml += TaXml::writeDouble("pod_ref_temp_c", 1,
+                            _params.pod_reference_temperature_c);
+  
+  xml += TaXml::writeDouble("lna_gain_change_per_c", 1,
+                            _params.lna_gain_change_per_c);
+  xml += TaXml::writeDouble("rx_gain_change_per_c", 1,
+                            _params.rx_gain_change_per_c);
+  
+  xml += TaXml::writeDouble("lna_temp_time_lag_secs", 1,
+                            _params.lna_temperature_time_lag_secs);
+  
+  xml += TaXml::writeDouble("temp_smoothing_secs", 1,
+                            _params.temperature_smoothing_interval_secs);
+  
+  xml += TaXml::writeDouble("lna_temp", 1, procSample.getLnaTempMean());
+  xml += TaXml::writeDouble("pod_temp", 1, procSample.getPodTempMean());
+  
+  xml += TaXml::writeDouble("lna_smoothed_temp", 1, 
+                            procSample.getLnaTempSmoothed());
+  xml += TaXml::writeDouble("pod_smoothed_temp", 1, 
+                            procSample.getPodTempSmoothed());
+  
+  xml += TaXml::writeDouble("lna_smoothed_n", 1, 
+                            procSample.getLnaSmoothedN());
+  xml += TaXml::writeDouble("pod_smoothed_n", 1, 
+                            procSample.getPodSmoothedN());
+  
+  xml += TaXml::writeDouble("lna_delta_gain", 1, 
+                            procSample.getLnaDeltaGain());
+  xml += TaXml::writeDouble("rx_delta_gain", 1, 
+                            procSample.getRxDeltaGain());
+  xml += TaXml::writeDouble("delta_gain", 1, 
+                            procSample.getSumDeltaGain());
+  
+  xml += TaXml::writeEndTag("HcrTempGainCorrection", 0);
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Writing gain results to SPDB, url: "
+         << _params.output_spdb_url << endl;
+  }
+  
+  DsSpdb spdb;
+  time_t validTime = procTime;
+  spdb.addPutChunk(0, validTime, validTime, xml.size() + 1, xml.c_str());
+  if (spdb.put(_params.output_spdb_url,
+               SPDB_XML_ID, SPDB_XML_LABEL)) {
+    cerr << "ERROR - HcrTempRxGain::_writeToSpdb" << endl;
+    cerr << spdb.getErrStr() << endl;
+    return -1;
+  }
+  
+  if (_params.debug) {
+    cerr << "Wrote gain results to spdb, url: " 
+         << _params.output_spdb_url << endl;
+  }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=====================================" << endl;
+    cerr << xml;
+    cerr << "=====================================" << endl;
+  }
 
   return 0;
 

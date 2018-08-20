@@ -164,6 +164,19 @@ output_spdb_url = "spdbp:://localhost:0:/tmp/hcr/spdb/gain_correction";
 //
 //======================================================================
  
+///////////// receiver_status_tag /////////////////////
+//
+// Tag for receiver status block in XML.
+//
+// The status XML is formatted with multiple blocks, one of which is for 
+//   the receiver.
+//
+//
+// Type: string
+//
+
+receiver_status_tag = "HcrReceiverStatus";
+
 ///////////// lna_temperature_tag /////////////////////
 //
 // Tag for LNA temp in XML.
@@ -195,21 +208,7 @@ pod_temperature_tags = {
  "NoiseSourceTemp"
 };
 
-///////////// lna_gain_per_temp_slope /////////////////
-//
-// Slope of LNA gain against LNA temperature (dB/degC).
-//
-// We use this slope, and the difference between the measured 
-//   temperature and calibrated temperature, to estimate the LNA gain 
-//   change from the temperature.
-//
-//
-// Type: double
-//
-
-lna_gain_per_temp_slope = 0.16436;
-
-///////////// lna_reference_temperature_C /////////////
+///////////// lna_reference_temperature_c /////////////
 //
 // Reference temperature for the LNA (degC).
 //
@@ -221,23 +220,23 @@ lna_gain_per_temp_slope = 0.16436;
 // Type: double
 //
 
-lna_reference_temperature_C = 29.739;
+lna_reference_temperature_c = 29.739;
 
-///////////// rx_gain_per_temp_slope //////////////////
+///////////// lna_gain_change_per_c ///////////////////
 //
-// Slope of receiver gain against POD temperature (dB/degC).
+// Slope of LNA gain against LNA temperature (dB/degC).
 //
 // We use this slope, and the difference between the measured 
-//   temperature and calibrated temperature, to estimate the receiver gain 
+//   temperature and calibrated temperature, to estimate the LNA gain 
 //   change from the temperature.
 //
 //
 // Type: double
 //
 
-rx_gain_per_temp_slope = -0.1085;
+lna_gain_change_per_c = 0.16436;
 
-///////////// pod_reference_temperature_C /////////////
+///////////// pod_reference_temperature_c /////////////
 //
 // Reference temperature for the POD (degC).
 //
@@ -250,7 +249,21 @@ rx_gain_per_temp_slope = -0.1085;
 // Type: double
 //
 
-pod_reference_temperature_C = 19.39;
+pod_reference_temperature_c = 19.39;
+
+///////////// rx_gain_change_per_c ////////////////////
+//
+// Slope of receiver gain against POD temperature (dB/degC).
+//
+// We use this slope, and the difference between the measured 
+//   temperature and calibrated temperature, to estimate the receiver gain 
+//   change from the temperature.
+//
+//
+// Type: double
+//
+
+rx_gain_change_per_c = -0.1085;
 
 ///////////// lna_temperature_time_lag_secs ///////////
 //

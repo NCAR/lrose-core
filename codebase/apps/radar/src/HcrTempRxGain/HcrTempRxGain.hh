@@ -43,6 +43,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include "TimeSample.hh"
 #include <string>
 #include <vector>
 #include <toolsa/TaXml.hh>
@@ -78,8 +79,13 @@ private:
   Params _params;
 
   // archive mode
-
+  
   time_t _archiveStartTime, _archiveEndTime;
+
+  // data retrieval
+
+  time_t _retrieveStartTime, _retrieveEndTime;
+  vector<TimeSample> _samples;
 
   // methods
 
@@ -87,8 +93,10 @@ private:
   int _runRealtime();
   int _processRealtime(time_t now);
   int _processArchive(time_t archiveTime);
-  int _retrieveFromSpdb(time_t retrieveStart, time_t retrieveEnd);
+  int _retrieveFromSpdb();
   int _processTime(time_t procTime);
+  int _writeToSpdb(time_t procTime,
+                   const TimeSample &procSample);
 
 };
 
