@@ -623,7 +623,8 @@ def writeMakefileAm():
         # result = os.system('pkg-config --libs Qt5Network')
         # fo.write("LDADD += -lQt5Network\n")
 
-        fo.write("LDADD += QT_LIBS\n")
+        # trying to get the syntax right for this variable
+        fo.write("LDADD += $(QT_LIBS)\n")
         # fo.write("LDADD += $(shell pkg-config --libs Qt5Gui)\n")
         # fo.write("LDADD += $(shell pkg-config --libs Qt5Widgets)\n")
         # fo.write("LDADD += $(shell pkg-config --libs Qt5Network)\n")
