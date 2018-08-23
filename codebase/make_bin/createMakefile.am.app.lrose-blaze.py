@@ -503,11 +503,11 @@ def decodeLibLine(line):
             libs.append("netcdff")
         elif (thisTok.find("TDRP_LIBS") >= 0):
             libs.append("tdrp")
-        elif (thisTok.find("QT_LIBS") >= 0):
-            libs.append("Qt5Core")
-            libs.append("Qt5Gui")
-            libs.append("Qt5Widgets")
-            libs.append("Qt5Network")
+        # elif (thisTok.find("QT_LIBS") >= 0):
+        #    libs.append("Qt5Core")
+        #    libs.append("Qt5Gui")
+        #    libs.append("Qt5Widgets")
+        #    libs.append("Qt5Network")
 
     return libs
 
