@@ -623,10 +623,10 @@ def writeMakefileAm():
         # result = os.system('pkg-config --libs Qt5Network')
         # fo.write("LDADD += -lQt5Network\n")
 
-        fo.write("LDADD += `pkg-config --libs Qt5Core`\n")
-        fo.write("LDADD += `pkg-config --libs Qt5Gui`\n")
-        fo.write("LDADD += `pkg-config --libs Qt5Widgets`\n")
-        fo.write("LDADD += `pkg-config --libs Qt5Network`\n")
+        fo.write("LDADD += @QT_LIB@\n")
+        # fo.write("LDADD += $(shell pkg-config --libs Qt5Gui)\n")
+        # fo.write("LDADD += $(shell pkg-config --libs Qt5Widgets)\n")
+        # fo.write("LDADD += $(shell pkg-config --libs Qt5Network)\n")
 
     fo.write("# set app name\n")
     fo.write("\n")
