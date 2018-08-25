@@ -568,8 +568,8 @@ int HcrTempRxGain::_writeToSpdb(time_t procTime,
   }
   
   if (_params.debug) {
-    cerr << "Wrote gain results to spdb, url: " 
-         << _params.output_spdb_url << endl;
+    cerr << "Wrote gain results to spdb, time: " << DateTime::strm(validTime) << endl;
+    cerr << "  url: " << _params.output_spdb_url << endl;
   }
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "=====================================" << endl;
