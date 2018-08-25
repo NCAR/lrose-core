@@ -395,7 +395,8 @@ public:
     rx_channel_t rx_channel;
     double slope;
     double intercept;
-  } rx_gain_correction_t;
+    char* temp_tag_list_in_status_xml;
+  } rx_temp_gain_correction_t;
 
   typedef struct {
     double value;
@@ -879,12 +880,18 @@ public:
 
   tdrp_bool_t change_phidp_sign;
 
-  tdrp_bool_t correct_receiver_gains_for_temperature;
+  tdrp_bool_t correct_rx_gains_for_temperature;
 
-  rx_gain_correction_t *_rx_gain_correction;
-  int rx_gain_correction_n;
+  rx_temp_gain_correction_t *_rx_temp_gain_corrections;
+  int rx_temp_gain_corrections_n;
 
-  char* temperature_tags_in_status_xml;
+  tdrp_bool_t correct_hcr_v_rx_gain_for_temperature;
+
+  char* hcr_delta_gain_spdb_url;
+
+  int hcr_delta_gain_search_margin_secs;
+
+  char* hcr_v_rx_delta_gain_tag_list;
 
   tdrp_bool_t apply_precip_attenuation_correction;
 
@@ -1195,7 +1202,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[259];
+  mutable TDRPtable _table[263];
 
   const char *_className;
 

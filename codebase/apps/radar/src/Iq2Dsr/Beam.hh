@@ -463,9 +463,17 @@ private:
   void _loadGateIqStagPrt(const fl32 **iqChan0, const fl32 **iqChan1);
   void _initStagPrt(int nGatesPrtShort, int nGatesPrtLong,
                     double prtShort, double prtLong);
+
   void _copyDataToOutputFields();
   int _checkCalib();
+
   int _correctCalibGainsForTemp();
+  int _correctHcrVRxGainForTemp();
+
+  double _getTempFromTagList(const string &tagList) const;
+  double _getDeltaGainFromXml(const string &xml,
+                              const string &tagList) const;
+  
   void _applyTimeDomainFilter(const RadarComplex_t *iq,
                               RadarComplex_t *filtered) const;
   void _applyMedianFilterToCPA(int nGates);

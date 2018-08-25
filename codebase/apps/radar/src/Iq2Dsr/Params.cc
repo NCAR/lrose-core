@@ -2033,45 +2033,45 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("CORRECT RECEIVER GAINS BASED ON MEASURED TEMPERATURE");
+    tt->comment_hdr = tdrpStrDup("CORRECT RECEIVER GAINS BASED ON MEASURED TEMPERATURE IN STATUS XML");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'correct_receiver_gains_for_temperature'
+    // Parameter 'correct_rx_gains_for_temperature'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("correct_receiver_gains_for_temperature");
+    tt->param_name = tdrpStrDup("correct_rx_gains_for_temperature");
     tt->descr = tdrpStrDup("Option to correct the calibration receiver gains based on temperature.");
     tt->help = tdrpStrDup("Receiver channel gains can change with temperature and may require correction. If this parameter is TRUE, the gains will be adjusted, using temperature values stored in the status_xml in the time series. IMPORTANT NOTE: this computes the CORRECTION. The correction is then applied to the calibration values read in by Iq2Dsr.");
-    tt->val_offset = (char *) &correct_receiver_gains_for_temperature - &_start_;
+    tt->val_offset = (char *) &correct_rx_gains_for_temperature - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'rx_gain_correction'
-    // ctype is '_rx_gain_correction_t'
+    // Parameter 'rx_temp_gain_corrections'
+    // ctype is '_rx_temp_gain_correction_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("rx_gain_correction");
+    tt->param_name = tdrpStrDup("rx_temp_gain_corrections");
     tt->descr = tdrpStrDup("Correction to be applied to the gain in each receiver channel.");
-    tt->help = tdrpStrDup("The correction is computed as:\n\n    correction = intercept + temperature * slope.");
-    tt->array_offset = (char *) &_rx_gain_correction - &_start_;
-    tt->array_n_offset = (char *) &rx_gain_correction_n - &_start_;
+    tt->help = tdrpStrDup("\n\nThe correction is computed as:\n\n    correction = intercept + temperature * slope. \n\n The tag list allows us to find the temperature in the status xml block in the time series. These should be delimited in xml format, using '<' and '>'. \n\nThe temperature will be searched for in the status_xml section of the time series data. These tags specify how to find the temperature value.\n\nThe status_xml could look something like this:\n\n  <HcrStatus>\n    ....\n    <HcrReceiverStatus>\n      ....\n      <EikTemp>27.4626</EikTemp>\n      ....\n    </HcrReceiverStatus>\n    ....\n  </HcrStatus>\n\nin which case this parameter would be set to:\n\n  <HcrStatus><HcrReceiverStatus><EikTemp>");
+    tt->array_offset = (char *) &_rx_temp_gain_corrections - &_start_;
+    tt->array_n_offset = (char *) &rx_temp_gain_corrections_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(rx_gain_correction_t);
+    tt->array_elem_size = sizeof(rx_temp_gain_correction_t);
     tt->array_n = 4;
-    tt->struct_def.name = tdrpStrDup("rx_gain_correction_t");
-    tt->struct_def.nfields = 3;
+    tt->struct_def.name = tdrpStrDup("rx_temp_gain_correction_t");
+    tt->struct_def.nfields = 4;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("rx_channel_t");
       tt->struct_def.fields[0].fname = tdrpStrDup("rx_channel");
       tt->struct_def.fields[0].ptype = ENUM_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_rx_gain_correction->rx_channel - (char *) _rx_gain_correction;
+        (char *) &_rx_temp_gain_corrections->rx_channel - (char *) _rx_temp_gain_corrections;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("rx_channel_t");
         tt->struct_def.fields[0].enum_def.nfields = 4;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
@@ -2088,39 +2088,36 @@
       tt->struct_def.fields[1].fname = tdrpStrDup("slope");
       tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_rx_gain_correction->slope - (char *) _rx_gain_correction;
+        (char *) &_rx_temp_gain_corrections->slope - (char *) _rx_temp_gain_corrections;
       tt->struct_def.fields[2].ftype = tdrpStrDup("double");
       tt->struct_def.fields[2].fname = tdrpStrDup("intercept");
       tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_rx_gain_correction->intercept - (char *) _rx_gain_correction;
-    tt->n_struct_vals = 12;
+        (char *) &_rx_temp_gain_corrections->intercept - (char *) _rx_temp_gain_corrections;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[3].fname = tdrpStrDup("temp_tag_list_in_status_xml");
+      tt->struct_def.fields[3].ptype = STRING_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_rx_temp_gain_corrections->temp_tag_list_in_status_xml - (char *) _rx_temp_gain_corrections;
+    tt->n_struct_vals = 16;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = RX_CHANNEL_HC;
       tt->struct_vals[1].d = -0.0776;
       tt->struct_vals[2].d = 1.5564;
-      tt->struct_vals[3].e = RX_CHANNEL_VC;
-      tt->struct_vals[4].d = -0.0776;
-      tt->struct_vals[5].d = 1.5564;
-      tt->struct_vals[6].e = RX_CHANNEL_HX;
-      tt->struct_vals[7].d = -0.0776;
-      tt->struct_vals[8].d = 1.5564;
-      tt->struct_vals[9].e = RX_CHANNEL_VX;
-      tt->struct_vals[10].d = -0.0776;
-      tt->struct_vals[11].d = 1.5564;
-    tt++;
-    
-    // Parameter 'temperature_tags_in_status_xml'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("temperature_tags_in_status_xml");
-    tt->descr = tdrpStrDup("Specify the tag list for locating the temperature. These should be delimited in xml format, using '<' and '>'");
-    tt->help = tdrpStrDup("The temperature will be searched for in the status_xml section of the time series data. These tags specify how to find the temperature value.\n\nThe status_xml could look something like this:\n\n  <HcrStatus>\n    ....\n    <HcrReceiverStatus>\n      ....\n      <EikTemp>27.4626</EikTemp>\n      ....\n    </HcrReceiverStatus>\n    ....\n  </HcrStatus>\n\nin which case this parameter would be set to:\n\n  <HcrStatus><HcrReceiverStatus><EikTemp>");
-    tt->val_offset = (char *) &temperature_tags_in_status_xml - &_start_;
-    tt->single_val.s = tdrpStrDup("<HcrStatus><HcrReceiverStatus><EikTemp>");
+      tt->struct_vals[3].s = tdrpStrDup("<HcrStatus><HcrReceiverStatus><EikTemp>");
+      tt->struct_vals[4].e = RX_CHANNEL_VC;
+      tt->struct_vals[5].d = -0.0776;
+      tt->struct_vals[6].d = 1.5564;
+      tt->struct_vals[7].s = tdrpStrDup("<HcrStatus><HcrReceiverStatus><EikTemp>");
+      tt->struct_vals[8].e = RX_CHANNEL_HX;
+      tt->struct_vals[9].d = -0.0776;
+      tt->struct_vals[10].d = 1.5564;
+      tt->struct_vals[11].s = tdrpStrDup("<HcrStatus><HcrReceiverStatus><EikTemp>");
+      tt->struct_vals[12].e = RX_CHANNEL_VX;
+      tt->struct_vals[13].d = -0.0776;
+      tt->struct_vals[14].d = 1.5564;
+      tt->struct_vals[15].s = tdrpStrDup("<HcrStatus><HcrReceiverStatus><EikTemp>");
     tt++;
     
     // Parameter 'Comment 10'
@@ -2128,6 +2125,63 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("FOR HCR, CORRECT RECEIVER GAIN FOR TEMPERATURE USING VALUES FROM SPDB");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'correct_hcr_v_rx_gain_for_temperature'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("correct_hcr_v_rx_gain_for_temperature");
+    tt->descr = tdrpStrDup("Option to correct the HCR V-channel receiver gain for temperature.");
+    tt->help = tdrpStrDup("Computing the HCR receiver gain correction is complicated. Therefore this is done offline, and the results are stored as XML in SPDB. Here we retrieve the values from SPDB and apply them to correct the receiver gain.");
+    tt->val_offset = (char *) &correct_hcr_v_rx_gain_for_temperature - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'hcr_delta_gain_spdb_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("hcr_delta_gain_spdb_url");
+    tt->descr = tdrpStrDup("URL for HCR gain correction from SPDB.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &hcr_delta_gain_spdb_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/scr/rain1/rsfdata/projects/socrates/hcr/qc/data/socrates/spdb/tempVsGain");
+    tt++;
+    
+    // Parameter 'hcr_delta_gain_search_margin_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("hcr_delta_gain_search_margin_secs");
+    tt->descr = tdrpStrDup("Search margin when finding gain correction data (secs).");
+    tt->help = tdrpStrDup("We search for the value closest in time to the beam time. This is the search margin on either side of the search time.");
+    tt->val_offset = (char *) &hcr_delta_gain_search_margin_secs - &_start_;
+    tt->single_val.i = 3600;
+    tt++;
+    
+    // Parameter 'hcr_v_rx_delta_gain_tag_list'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("hcr_v_rx_delta_gain_tag_list");
+    tt->descr = tdrpStrDup("URL for HCR gain correction from SPDB.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &hcr_v_rx_delta_gain_tag_list - &_start_;
+    tt->single_val.s = tdrpStrDup("<HcrTempGainCorrection><v_delta_gain>");
+    tt++;
+    
+    // Parameter 'Comment 11'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2204,11 +2258,11 @@
     tt->single_val.d = 0.84;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("ATMOSPHERIC ATTENUATION CORRECTION METHOD");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2247,11 +2301,11 @@
     tt->single_val.d = 0.012;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("CLUTTER FILTERING");
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
@@ -2352,11 +2406,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP USING ADAPTIVE FILTER METHOD");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
     tt++;
@@ -2593,11 +2647,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/kdp_ray_files");
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP using Bringi method");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
     tt++;
@@ -2690,11 +2744,11 @@
     tt->single_val.d = 0.75;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("NOISE DETECTION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2779,11 +2833,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("INTEREST MAPS and WEIGHTS for NOISE LOCATION");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.");
     tt++;
@@ -3057,11 +3111,11 @@
     tt->single_val.d = 0.51;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("CENSORING OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("You have the option of censoring the output data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression. This leads to smaller data files.");
     tt++;
@@ -3112,11 +3166,11 @@
     tt->single_val.d = 0.15;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("REFRACTIVITY FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3133,11 +3187,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("PHASE DECODING PROCESSING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3278,11 +3332,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("CMD - CLUTTER MITIGATION DECISION system");
     tt->comment_text = tdrpStrDup("Option to compute and use CMD fields.");
     tt++;
@@ -3626,11 +3680,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("CMD INTEREST MAPS and WEIGHTS");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.");
     tt++;
@@ -3892,11 +3946,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("RHOHV TEST to AUGMENT CMD");
     tt->comment_text = tdrpStrDup("If clutter is present the RHOHV value should increase after application of the clutter filter. We can use a RHOHV test to locate gates at which CMD fails to identify weak clutter. This allows us to improve clutter identification in cases with low CSR.");
     tt++;
@@ -3949,11 +4003,11 @@
     tt->single_val.d = 4;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("OUTPUT TO DSRADAR FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -5021,11 +5075,11 @@
       tt->struct_vals[566].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("SWEEP TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-sweep and start-of-sweep conditions found in the time series.");
     tt++;
@@ -5102,11 +5156,11 @@
     tt->single_val.i = 32;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("VOLUME TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-volume conditions found in the time series. This section only applies if 'use_volume_info_from_time_series' is set to FALSE.");
     tt++;
@@ -5197,11 +5251,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("TRANSITION FLAG");
     tt->comment_text = tdrpStrDup("");
     tt++;

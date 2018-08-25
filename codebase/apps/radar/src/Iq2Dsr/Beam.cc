@@ -47,6 +47,7 @@
 #include <toolsa/sincos.h>
 #include <rapformats/ds_radar.h>
 #include <radar/FilterUtils.hh>
+#include <Spdb/DsSpdb.hh>
 #include "Beam.hh"
 using namespace std;
 
@@ -4435,8 +4436,12 @@ int Beam::_checkCalib()
 {
   
   int iret = 0;
-  
-  if (_params.correct_receiver_gains_for_temperature) {
+
+  if (_params.correct_hcr_v_rx_gain_for_temperature) {
+    if (_correctHcrVRxGainForTemp()) {
+      iret = -1;
+    }
+  } else if (_params.correct_rx_gains_for_temperature) {
     if (_correctCalibGainsForTemp()) {
       iret = -1;
     }
@@ -4490,65 +4495,86 @@ int Beam::_checkCalib()
 
 /////////////////////////////////////////////////
 // Correct calibration gains for temperature
+// reads the temperature from the XML status block,
+// and then computes the temperature correction.
 
 int Beam::_correctCalibGainsForTemp()
   
 {
 
-  // get tag list
-    
-  vector<string> tags;
-  TaStr::tokenize(_params.temperature_tags_in_status_xml, "<>", tags);
-  if (tags.size() == 0) {
-    // no tags
-    cerr << "WARNING - no tags found in params.temperature_tags_in_status_xml: "
-         << _params.temperature_tags_in_status_xml << endl;
-    return -1;
-  }
-  
-  // read through the outer tags in status XML
-  
-  string buf(_statusXml);
-  for (size_t jj = 0; jj < tags.size(); jj++) {
-    string val;
-    if (TaXml::readString(buf, tags[jj], val)) {
-      cerr << "WARNING - bad tags found in status xml, expecting: "
-           << _params.temperature_tags_in_status_xml << endl;
-      return -1;
-    }
-    buf = val;
-  }
-
-  // read temperature
-  
-  double temp = -9999.0;
-  if (TaXml::readDouble(buf, temp)) {
-    cerr << "WARNING - bad temp found in status xml, buf: " << buf << endl;
-    return -1;
-  }
+  // get temps for each channel, and gain correction
   
   double gainCorrectionHc = 0.0;
   double gainCorrectionVc = 0.0;
   double gainCorrectionHx = 0.0;
   double gainCorrectionVx = 0.0;
 
-  for (int ii = 0; ii < _params.rx_gain_correction_n; ii++) {
-    const Params::rx_gain_correction_t &corr = 
-      _params._rx_gain_correction[ii];
+  double tempHc = NAN;
+  double tempVc = NAN;
+  double tempHx = NAN;
+  double tempVx = NAN;
+  
+  for (int ii = 0; ii < _params.rx_temp_gain_corrections_n; ii++) {
+
+    const Params::rx_temp_gain_correction_t &corr = 
+      _params._rx_temp_gain_corrections[ii];
+
     switch (corr.rx_channel) {
-      case Params::RX_CHANNEL_HC:
-        gainCorrectionHc = corr.intercept + temp * corr.slope;
+      
+      case Params::RX_CHANNEL_HC: {
+        tempHc = _getTempFromTagList(corr.temp_tag_list_in_status_xml);
+        if (!std::isnan(tempHc)) {
+          gainCorrectionHc = corr.intercept + tempHc * corr.slope;
+          if (_params.debug >= Params::DEBUG_VERBOSE) {
+            cerr << "DEBUG: _correctCalibGainsForTemp()" << endl;
+            cerr << "  Got tempHc from status XML: " << tempHc << endl;
+            cerr << "  computed gainCorrectionHc: " << gainCorrectionHc << endl;
+          }
+        }
         break;
-      case Params::RX_CHANNEL_VC:
-        gainCorrectionVc = corr.intercept + temp * corr.slope;
+      }
+        
+      case Params::RX_CHANNEL_VC: {
+        tempVc = _getTempFromTagList(corr.temp_tag_list_in_status_xml);
+        if (!std::isnan(tempVc)) {
+          gainCorrectionVc = corr.intercept + tempVc * corr.slope;
+          if (_params.debug >= Params::DEBUG_VERBOSE) {
+            cerr << "DEBUG: _correctCalibGainsForTemp()" << endl;
+            cerr << "  Got tempVc from status XML: " << tempVc << endl;
+            cerr << "  computed gainCorrectionVc: " << gainCorrectionVc << endl;
+          }
+        }
         break;
-      case Params::RX_CHANNEL_HX:
-        gainCorrectionHx = corr.intercept + temp * corr.slope;
+      }
+
+      case Params::RX_CHANNEL_HX: {
+        tempHx = _getTempFromTagList(corr.temp_tag_list_in_status_xml);
+        if (!std::isnan(tempHx)) {
+          gainCorrectionHx = corr.intercept + tempHx * corr.slope;
+          if (_params.debug >= Params::DEBUG_VERBOSE) {
+            cerr << "DEBUG: _correctCalibGainsForTemp()" << endl;
+            cerr << "  Got tempHx from status XML: " << tempHx << endl;
+            cerr << "  computed gainCorrectionHx: " << gainCorrectionHx << endl;
+          }
+        }
         break;
-      case Params::RX_CHANNEL_VX:
-        gainCorrectionVx = corr.intercept + temp * corr.slope;
+      }
+
+      case Params::RX_CHANNEL_VX: {
+        tempVx = _getTempFromTagList(corr.temp_tag_list_in_status_xml);
+        if (!std::isnan(tempVx)) {
+          gainCorrectionVx = corr.intercept + tempVx * corr.slope;
+          if (_params.debug >= Params::DEBUG_VERBOSE) {
+            cerr << "DEBUG: _correctCalibGainsForTemp()" << endl;
+            cerr << "  Got tempVx from status XML: " << tempVx << endl;
+            cerr << "  computed gainCorrectionVx: " << gainCorrectionVx << endl;
+          }
+        }
         break;
+      }
+
     } // switch
+
   } // ii
 
   if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
@@ -4557,23 +4583,17 @@ int Beam::_correctCalibGainsForTemp()
     cerr << "======= END CALIBRATION BEFORE TEMP CORRECTION =========" << endl;
   }
     
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "correctCalibGainsForTemp(): got temp from status XML" << endl;
-    cerr << "  temp: " << temp << endl;
-    cerr << "  gainCorrectionHc: " << gainCorrectionHc << endl;
-    cerr << "  gainCorrectionVc: " << gainCorrectionVc << endl;
-    cerr << "  gainCorrectionHx: " << gainCorrectionHx << endl;
-    cerr << "  gainCorrectionVx: " << gainCorrectionVx << endl;
-  }
-
   // augment status xml in ops info
 
   string tempCorrXml;
   tempCorrXml += TaXml::writeStartTag("TempBasedRxGainCorrection", 0);
-  tempCorrXml += TaXml::writeDouble("temp", 1, temp);
+  tempCorrXml += TaXml::writeDouble("tempHc", 1, tempHc);
   tempCorrXml += TaXml::writeDouble("gainCorrectionHc", 1, gainCorrectionHc);
+  tempCorrXml += TaXml::writeDouble("tempVc", 1, tempVc);
   tempCorrXml += TaXml::writeDouble("gainCorrectionVc", 1, gainCorrectionVc);
+  tempCorrXml += TaXml::writeDouble("tempHx", 1, tempHx);
   tempCorrXml += TaXml::writeDouble("gainCorrectionHx", 1, gainCorrectionHx);
+  tempCorrXml += TaXml::writeDouble("tempVx", 1, tempVx);
   tempCorrXml += TaXml::writeDouble("gainCorrectionVx", 1, gainCorrectionVx);
   tempCorrXml += TaXml::writeEndTag("TempBasedRxGainCorrection", 0);
   _statusXml += tempCorrXml;
@@ -4641,11 +4661,197 @@ int Beam::_correctCalibGainsForTemp()
     _calib.print(cerr);
     cerr << "####### END CALIBRATION AFTER TEMP CORRECTION #########" << endl;
   }
+  
+  return 0;
+  
+}
+
+////////////////////////////////////////////////////////
+// Correct HCR V RX calibration gains for temperature
+// the reads in the correction from SPDB
+
+int Beam::_correctHcrVRxGainForTemp()
+  
+{
+  
+  // get gain correction data from SPDB
+
+  DsSpdb spdb;
+  if (spdb.getClosest(_params.hcr_delta_gain_spdb_url,
+                      _timeSecs,
+                      _params.hcr_delta_gain_search_margin_secs)) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - Beam::_correctHcrVRxGainForTemp()" << endl;
+      cerr << "  Cannot get delta gain from URL: "
+           << _params.hcr_delta_gain_spdb_url << endl;
+      cerr << "  Search time: " << DateTime::strm(_timeSecs) << endl;
+      cerr << "  Search margin (secs): "
+           << _params.hcr_delta_gain_search_margin_secs << endl;
+      cerr << spdb.getErrStr() << endl;
+    }
+    return -1;
+  }
+  
+  // got chunks
+  
+  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  if (chunks.size() < 1) {
+    cerr << "ERROR - Beam::_correctHcrVRxGainForTemp()" << endl;
+    cerr << "  No suitable gain data from URL: "
+         << _params.hcr_delta_gain_spdb_url << endl;
+    cerr << "  Search time: " << DateTime::strm(_timeSecs) << endl;
+    cerr << "  Search margin (secs): "
+         << _params.hcr_delta_gain_search_margin_secs << endl;
+    return -1;
+  }
+  const Spdb::chunk_t &chunk = chunks[0];
+
+  // get xml string with gain results
+  
+  string deltaGainXml((char *) chunk.data, chunk.len - 1);
+
+  // find delta gain in xml
+  
+  double deltaGainVc =
+    _getDeltaGainFromXml(deltaGainXml, _params.hcr_v_rx_delta_gain_tag_list);
+  
+  if (std::isnan(deltaGainVc)) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - Beam::_correctHcrVRxGainForTemp()" << endl;
+      cerr << "  Cannot find deltaGain in XML: " << deltaGainXml << endl;
+    }
+    return -1;
+  }
+  
+  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
+    cerr << "==== CALIBRATION BEFORE HCR GAIN CORRECTION =============" << endl;
+    _calib.print(cerr);
+    cerr << "==== END CALIBRATION BEFORE HCR GAIN TEMP CORRECTION ====" << endl;
+  }
+  
+  // augment status xml in ops info
+
+  _statusXml += deltaGainXml;
+  
+  // compute base dbz if needed
+  
+  if (!_calib.isMissing(_calib.getReceiverGainDbVc())) {
+    double rconst = _calib.getRadarConstV();
+    double noise = _calib.getNoiseDbmVc();
+    double noiseFixed = noise + deltaGainVc;
+    double gain = _calib.getReceiverGainDbVc();
+    double gainFixed = gain + deltaGainVc;
+    double baseDbz1km = noiseFixed - gainFixed + rconst;
+    if (!_calib.isMissing(noise) && !_calib.isMissing(rconst)) {
+      _calib.setBaseDbz1kmVc(baseDbz1km);
+    }
+    _calib.setReceiverGainDbVc(gainFixed);
+    _calib.setNoiseDbmVc(noiseFixed);
+  }
+  
+  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
+    cerr << "==== CALIBRATION AFTER HCR GAIN CORRECTION =============" << endl;
+    _calib.print(cerr);
+    cerr << "==== END CALIBRATION AFTER HCR GAIN TEMP CORRECTION ====" << endl;
+  }
     
   return 0;
   
 }
 
+/////////////////////////////////////////////////////////////////
+// get temperature from status xml, given the tag list
+// returns temp on success, NAN on failure
+
+double Beam::_getTempFromTagList(const string &tagList) const
+  
+{
+
+  // get tags in list
+    
+  vector<string> tags;
+  TaStr::tokenize(tagList, "<>", tags);
+  if (tags.size() == 0) {
+    // no tags
+    cerr << "WARNING - Beam::_getTempFromTagList()" << endl;
+    cerr << "  Temp tag not found: " << tagList << endl;
+    return NAN;
+  }
+  
+  // read through the outer tags in status XML
+  
+  string buf(_statusXml);
+  for (size_t jj = 0; jj < tags.size(); jj++) {
+    string val;
+    if (TaXml::readString(buf, tags[jj], val)) {
+      cerr << "WARNING - Beam::_getTempFromTagList()" << endl;
+      cerr << "  Bad tags found in status xml, expecting: "
+           << tagList << endl;
+      return NAN;
+    }
+    buf = val;
+  }
+
+  // read temperature
+  
+  double temp = NAN;
+  if (TaXml::readDouble(buf, temp)) {
+    cerr << "WARNING - Beam::_getTempFromTagList()" << endl;
+    cerr << "  Bad temp found in status xml, buf: " << buf << endl;
+    return NAN;
+  }
+  
+  return temp;
+
+}
+  
+/////////////////////////////////////////////////////////////////
+// get delta gain from XML string, given the tag list
+// returns delta gain, NAN on failure
+
+double Beam::_getDeltaGainFromXml(const string &xml,
+                                  const string &tagList) const
+  
+{
+  
+  // get tags in list
+  
+  vector<string> tags;
+  TaStr::tokenize(tagList, "<>", tags);
+  if (tags.size() == 0) {
+    // no tags
+    cerr << "WARNING - Beam::_getDeltaGainFromXml()" << endl;
+    cerr << "  deltaGain tag not found: " << tagList << endl;
+    return NAN;
+  }
+  
+  // read through the outer tags in status XML
+  
+  string buf(xml);
+  for (size_t jj = 0; jj < tags.size(); jj++) {
+    string val;
+    if (TaXml::readString(buf, tags[jj], val)) {
+      cerr << "WARNING - Beam::_getDeltaGainFromXml()" << endl;
+      cerr << "  Bad tags found in status xml, expecting: "
+           << tagList << endl;
+      return NAN;
+    }
+    buf = val;
+  }
+
+  // read delta gain
+  
+  double deltaGain = NAN;
+  if (TaXml::readDouble(buf, deltaGain)) {
+    cerr << "WARNING - Beam::_getDeltaGainFromXml()" << endl;
+    cerr << "  Bad deltaGain found in status xml, buf: " << buf << endl;
+    return NAN;
+  }
+  
+  return deltaGain;
+
+}
+  
 /////////////////////////////////////////////////////////////////
 // Apply time-domain filter to IQ data
 
