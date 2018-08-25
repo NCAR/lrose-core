@@ -65,7 +65,7 @@ static void tidy_and_exit (int sig);
 Args * _args = NULL;
 Params *_params = NULL;
 char * _progName = "mdv_le2be";
-char * _paramsPath = "unknown";
+char * _paramsPath = (char *) "unknown";
 
 int main(int argc, char **argv)
 {

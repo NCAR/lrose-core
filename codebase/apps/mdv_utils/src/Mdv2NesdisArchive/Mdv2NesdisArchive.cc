@@ -114,7 +114,7 @@ Mdv2NesdisArchive::Mdv2NesdisArchive(int argc, char **argv)
 
   // get TDRP params
   _params = new Params();
-  char *paramsPath = "unknown";
+  char *paramsPath = (char *) "unknown";
   if(_params->loadFromArgs(argc, argv, _args->override.list,
 			  &paramsPath)) {
     cerr << "ERROR: " << _progName << endl;

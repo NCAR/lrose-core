@@ -66,7 +66,7 @@ TrecGauge2Spdb::TrecGauge2Spdb(int argc, char **argv)
 
   // get TDRP params
   
-  char *_paramsPath = "unknown";
+  char *_paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv,
 			   _args.override.list,
 			   &_paramsPath)) {
