@@ -736,15 +736,15 @@
     tt->single_val.s = tdrpStrDup("HcrReceiverStatus");
     tt++;
     
-    // Parameter 'lna_temperature_tag'
+    // Parameter 'v_lna_temperature_tag'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("lna_temperature_tag");
+    tt->param_name = tdrpStrDup("v_lna_temperature_tag");
     tt->descr = tdrpStrDup("Tag for LNA temp in XML.");
     tt->help = tdrpStrDup("The LNA is temperature controlled, but the temperature oscillates as the heater cycles on and off.");
-    tt->val_offset = (char *) &lna_temperature_tag - &_start_;
+    tt->val_offset = (char *) &v_lna_temperature_tag - &_start_;
     tt->single_val.s = tdrpStrDup("VLnaTemp");
     tt++;
     
@@ -770,27 +770,27 @@
       tt->array_vals[3].s = tdrpStrDup("NoiseSourceTemp");
     tt++;
     
-    // Parameter 'lna_reference_temperature_c'
+    // Parameter 'v_lna_reference_temperature_c'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("lna_reference_temperature_c");
+    tt->param_name = tdrpStrDup("v_lna_reference_temperature_c");
     tt->descr = tdrpStrDup("Reference temperature for the LNA (degC).");
     tt->help = tdrpStrDup("This is the estimated LNA temperature during the calibration in the lab. The LNA gain change is dependent on the difference between this reference temperature and the measured temperature during operations.");
-    tt->val_offset = (char *) &lna_reference_temperature_c - &_start_;
+    tt->val_offset = (char *) &v_lna_reference_temperature_c - &_start_;
     tt->single_val.d = 29.739;
     tt++;
     
-    // Parameter 'lna_gain_change_per_c'
+    // Parameter 'v_lna_gain_change_per_c'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("lna_gain_change_per_c");
+    tt->param_name = tdrpStrDup("v_lna_gain_change_per_c");
     tt->descr = tdrpStrDup("Slope of LNA gain against LNA temperature (dB/degC).");
     tt->help = tdrpStrDup("We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the LNA gain change from the temperature.");
-    tt->val_offset = (char *) &lna_gain_change_per_c - &_start_;
+    tt->val_offset = (char *) &v_lna_gain_change_per_c - &_start_;
     tt->single_val.d = 0.16436;
     tt++;
     
@@ -806,27 +806,27 @@
     tt->single_val.d = 19.39;
     tt++;
     
-    // Parameter 'rx_gain_change_per_c'
+    // Parameter 'v_rx_gain_change_per_c'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rx_gain_change_per_c");
+    tt->param_name = tdrpStrDup("v_rx_gain_change_per_c");
     tt->descr = tdrpStrDup("Slope of receiver gain against POD temperature (dB/degC).");
     tt->help = tdrpStrDup("We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the receiver gain change from the temperature.");
-    tt->val_offset = (char *) &rx_gain_change_per_c - &_start_;
+    tt->val_offset = (char *) &v_rx_gain_change_per_c - &_start_;
     tt->single_val.d = -0.1085;
     tt++;
     
-    // Parameter 'lna_temperature_time_lag_secs'
+    // Parameter 'v_lna_temperature_time_lag_secs'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("lna_temperature_time_lag_secs");
+    tt->param_name = tdrpStrDup("v_lna_temperature_time_lag_secs");
     tt->descr = tdrpStrDup("Time lag between the LNA power curve and the LNA temperature curve (secs).");
     tt->help = tdrpStrDup("A positive number means that the measured temperature lags the measured power in a noise source calibration. A negative number means that the power lags the temperature.");
-    tt->val_offset = (char *) &lna_temperature_time_lag_secs - &_start_;
+    tt->val_offset = (char *) &v_lna_temperature_time_lag_secs - &_start_;
     tt->single_val.i = -7;
     tt++;
     
@@ -840,18 +840,6 @@
     tt->help = tdrpStrDup("We compute the mean for each temperature, over this interval, centered on the time of interest.");
     tt->val_offset = (char *) &temperature_smoothing_interval_secs - &_start_;
     tt->single_val.i = 10;
-    tt++;
-    
-    // Parameter 'ocean_scan_reflectivity_bias'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("ocean_scan_reflectivity_bias");
-    tt->descr = tdrpStrDup("Reflectivity bias as estimated from the ocean scans (dB).");
-    tt->help = tdrpStrDup("This is bias in reflectivity, as estimated from the ocean-surface scans. The reflectivity must be reduced by this amount.");
-    tt->val_offset = (char *) &ocean_scan_reflectivity_bias - &_start_;
-    tt->single_val.d = 2.386;
     tt++;
     
     // trailing entry has param_name set to NULL

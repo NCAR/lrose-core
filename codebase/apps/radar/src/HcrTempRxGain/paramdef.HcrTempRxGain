@@ -105,7 +105,7 @@ paramdef string {
   p_default = "VLnaTemp";
   p_descr = "Tag for LNA temp in XML.";
   p_help = "The LNA is temperature controlled, but the temperature oscillates as the heater cycles on and off.";
-} lna_temperature_tag;
+} v_lna_temperature_tag;
 
 paramdef string {
   p_default = {
@@ -122,13 +122,13 @@ paramdef double {
   p_default = 29.739;
   p_descr = "Reference temperature for the LNA (degC).";
   p_help = "This is the estimated LNA temperature during the calibration in the lab. The LNA gain change is dependent on the difference between this reference temperature and the measured temperature during operations.";
-} lna_reference_temperature_c;
+} v_lna_reference_temperature_c;
 
 paramdef double {
   p_default = 0.16436;
   p_descr = "Slope of LNA gain against LNA temperature (dB/degC).";
   p_help = "We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the LNA gain change from the temperature.";
-} lna_gain_change_per_c;
+} v_lna_gain_change_per_c;
 
 paramdef double {
   p_default = 19.390;
@@ -140,23 +140,17 @@ paramdef double {
   p_default = -0.10850;
   p_descr = "Slope of receiver gain against POD temperature (dB/degC).";
   p_help = "We use this slope, and the difference between the measured temperature and calibrated temperature, to estimate the receiver gain change from the temperature.";
-} rx_gain_change_per_c;
+} v_rx_gain_change_per_c;
 
 paramdef int {
   p_default = -7;
   p_descr = "Time lag between the LNA power curve and the LNA temperature curve (secs).";
   p_help = "A positive number means that the measured temperature lags the measured power in a noise source calibration. A negative number means that the power lags the temperature.";
-} lna_temperature_time_lag_secs;
+} v_lna_temperature_time_lag_secs;
 
 paramdef int {
   p_default = 10;
   p_descr = "Interval over which temperatures are smoothed before use (secs).";
   p_help = "We compute the mean for each temperature, over this interval, centered on the time of interest.";
 } temperature_smoothing_interval_secs;
-
-paramdef double {
-  p_default = 2.386;
-  p_descr = "Reflectivity bias as estimated from the ocean scans (dB).";
-  p_help = "This is bias in reflectivity, as estimated from the ocean-surface scans. The reflectivity must be reduced by this amount.";
-} ocean_scan_reflectivity_bias;
 

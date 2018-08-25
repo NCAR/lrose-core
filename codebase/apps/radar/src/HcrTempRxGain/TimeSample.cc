@@ -70,11 +70,11 @@ void TimeSample::clear()
   _lnaSmoothedN = 0;
   _lnaTempSmoothed = NAN;
   
-  _podTempSum = 0.0;
-  _podTempN = 0.0;
-  _podTempMean = NAN;
-  _podSmoothedN = 0;
-  _podTempSmoothed = NAN;
+  _rxTempSum = 0.0;
+  _rxTempN = 0.0;
+  _rxTempMean = NAN;
+  _rxSmoothedN = 0;
+  _rxTempSmoothed = NAN;
 
   _lnaDeltaGain = NAN;
   _rxDeltaGain = NAN;
@@ -91,10 +91,10 @@ void TimeSample::addLnaTempObs(double temp)
   _lnaTempN++;
 }
 
-void TimeSample::addPodTempObs(double temp)
+void TimeSample::addRxTempObs(double temp)
 {
-  _podTempSum += temp;
-  _podTempN++;
+  _rxTempSum += temp;
+  _rxTempN++;
 }
 
 /////////////////////////////////////////////////////
@@ -108,8 +108,8 @@ void TimeSample::computeMeanObs()
     _lnaTempMean = _lnaTempSum / _lnaTempN;
   }
 
-  if (_podTempN > 0) {
-    _podTempMean = _podTempSum / _podTempN;
+  if (_rxTempN > 0) {
+    _rxTempMean = _rxTempSum / _rxTempN;
   }
 
 }
@@ -118,21 +118,24 @@ void TimeSample::computeMeanObs()
 // compute the delta gain
 // assumes smoothed temperatures have been set
 
-void TimeSample::computeDeltaGain()
+void TimeSample::computeDeltaGain(double lnaRefTempC,
+                                  double lnaGainChangePerC,
+                                  double rxRefTempC,
+                                  double rxGainChangePerC)
 
 {
 
   if (!std::isnan(_lnaTempSmoothed)) {
     double deltaTemp =
-      _lnaTempSmoothed - _params.lna_reference_temperature_c;
-    double deltaGain = deltaTemp * _params.lna_gain_change_per_c;
+      _lnaTempSmoothed - lnaRefTempC;
+    double deltaGain = deltaTemp * lnaGainChangePerC;
     _lnaDeltaGain = deltaGain;
   }
 
-  if (!std::isnan(_podTempSmoothed)) {
+  if (!std::isnan(_rxTempSmoothed)) {
     double deltaTemp =
-      _podTempSmoothed - _params.pod_reference_temperature_c;
-    double deltaGain = deltaTemp * _params.rx_gain_change_per_c;
+      _rxTempSmoothed - rxRefTempC;
+    double deltaGain = deltaTemp * rxGainChangePerC;
     _rxDeltaGain = deltaGain;
   }
 

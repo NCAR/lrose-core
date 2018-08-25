@@ -384,24 +384,22 @@ public:
 
   char* receiver_status_tag;
 
-  char* lna_temperature_tag;
+  char* v_lna_temperature_tag;
 
   char* *_pod_temperature_tags;
   int pod_temperature_tags_n;
 
-  double lna_reference_temperature_c;
+  double v_lna_reference_temperature_c;
 
-  double lna_gain_change_per_c;
+  double v_lna_gain_change_per_c;
 
   double pod_reference_temperature_c;
 
-  double rx_gain_change_per_c;
+  double v_rx_gain_change_per_c;
 
-  int lna_temperature_time_lag_secs;
+  int v_lna_temperature_time_lag_secs;
 
   int temperature_smoothing_interval_secs;
-
-  double ocean_scan_reflectivity_bias;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -410,7 +408,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[26];
+  mutable TDRPtable _table[25];
 
   const char *_className;
 

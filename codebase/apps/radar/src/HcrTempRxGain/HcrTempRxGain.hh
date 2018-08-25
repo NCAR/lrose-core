@@ -85,7 +85,7 @@ private:
   // data retrieval
 
   time_t _retrieveStartTime, _retrieveEndTime;
-  vector<TimeSample> _samples;
+  vector<TimeSample> _samplesV;
 
   // methods
 
@@ -96,7 +96,7 @@ private:
   int _retrieveFromSpdb();
   int _processTime(time_t procTime);
   int _writeToSpdb(time_t procTime,
-                   const TimeSample &procSample);
+                   const TimeSample &procSampleV);
 
 };
 

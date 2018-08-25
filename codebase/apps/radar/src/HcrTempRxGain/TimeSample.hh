@@ -57,13 +57,13 @@ public:
   void setTime(time_t timeVal) { _time = timeVal; }
 
   void addLnaTempObs(double temp);
-  void addPodTempObs(double temp);
+  void addRxTempObs(double temp);
 
   void setLnaSmoothedN(double val) { _lnaSmoothedN = val; }
-  void setPodSmoothedN(double val) { _podSmoothedN = val; }
+  void setRxSmoothedN(double val) { _rxSmoothedN = val; }
 
   void setLnaTempSmoothed(double val) { _lnaTempSmoothed = val; }
-  void setPodTempSmoothed(double val) { _podTempSmoothed = val; }
+  void setRxTempSmoothed(double val) { _rxTempSmoothed = val; }
 
   // compute means
 
@@ -71,26 +71,29 @@ public:
 
   // compute delta gain
 
-  void computeDeltaGain();
+  void computeDeltaGain(double lnaRefTempC,
+                        double lnaGainChangePerC,
+                        double rxRefTempC,
+                        double rxGainChangePerC);
 
   // get methods
 
   time_t getTime() const { return _time; }
 
   double getLnaTempSum() const { return _lnaTempSum; }
-  double getPodTempSum() const { return _podTempSum; }
+  double getRxTempSum() const { return _rxTempSum; }
 
   double getLnaTempN() const { return _lnaTempN; }
-  double getPodTempN() const { return _podTempN; }
+  double getRxTempN() const { return _rxTempN; }
 
   double getLnaTempMean() const { return _lnaTempMean; }
-  double getPodTempMean() const { return _podTempMean; }
+  double getRxTempMean() const { return _rxTempMean; }
 
   double getLnaSmoothedN() const { return _lnaSmoothedN; }
-  double getPodSmoothedN() const { return _podSmoothedN; }
+  double getRxSmoothedN() const { return _rxSmoothedN; }
 
   double getLnaTempSmoothed() const { return _lnaTempSmoothed; }
-  double getPodTempSmoothed() const { return _podTempSmoothed; }
+  double getRxTempSmoothed() const { return _rxTempSmoothed; }
   
   double getLnaDeltaGain() const { return _lnaDeltaGain; }
   double getRxDeltaGain() const { return _rxDeltaGain; }
@@ -110,11 +113,11 @@ private:
   double _lnaTempSmoothed;
   double _lnaSmoothedN;
   
-  double _podTempSum;
-  double _podTempN;
-  double _podTempMean;
-  double _podTempSmoothed;
-  double _podSmoothedN;
+  double _rxTempSum;
+  double _rxTempN;
+  double _rxTempMean;
+  double _rxTempSmoothed;
+  double _rxSmoothedN;
 
   double _lnaDeltaGain;
   double _rxDeltaGain;

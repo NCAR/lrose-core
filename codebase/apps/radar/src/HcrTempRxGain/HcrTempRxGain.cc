@@ -185,11 +185,11 @@ int HcrTempRxGain::_processRealtime(time_t now)
   // get retrieval limits relative to now
 
   _retrieveStartTime = (now -
-                        _params.lna_temperature_time_lag_secs -
+                        _params.v_lna_temperature_time_lag_secs -
                         _params.temperature_smoothing_interval_secs);
 
   _retrieveEndTime = (now + 
-                      _params.lna_temperature_time_lag_secs +
+                      _params.v_lna_temperature_time_lag_secs +
                       _params.temperature_smoothing_interval_secs);
 
   // retrieve data
@@ -220,13 +220,13 @@ int HcrTempRxGain::_processArchive(time_t archiveTime)
 
   _retrieveStartTime = 
     archiveTime -
-    _params.lna_temperature_time_lag_secs -
+    _params.v_lna_temperature_time_lag_secs -
     _params.temperature_smoothing_interval_secs;
 
   _retrieveEndTime = 
     archiveTime +
     _params.archive_processing_interval_secs +
-    _params.lna_temperature_time_lag_secs +
+    _params.v_lna_temperature_time_lag_secs +
     _params.temperature_smoothing_interval_secs;
   
   // retrieve data
@@ -290,11 +290,11 @@ int HcrTempRxGain::_retrieveFromSpdb()
 
   // initialize vector for samples
 
-  _samples.clear();
+  _samplesV.clear();
   for (time_t time = _retrieveStartTime; time <= _retrieveEndTime; time++) {
     TimeSample sample(_params);
     sample.setTime(time);
-    _samples.push_back(sample);
+    _samplesV.push_back(sample);
   }
   
   // got chunks
@@ -330,7 +330,7 @@ int HcrTempRxGain::_retrieveFromSpdb()
         chunk.valid_time <= _retrieveEndTime) {
 
       size_t isample = chunk.valid_time - _retrieveStartTime;
-      TimeSample &sample = _samples[isample]; 
+      TimeSample &sample = _samplesV[isample]; 
 
       // get receiver status block
       
@@ -346,10 +346,10 @@ int HcrTempRxGain::_retrieveFromSpdb()
       // read in temps
       
       double lnaTemp;
-      if (TaXml::readDouble(rxStatus, _params.lna_temperature_tag, lnaTemp)) {
+      if (TaXml::readDouble(rxStatus, _params.v_lna_temperature_tag, lnaTemp)) {
         cerr << "ERROR - RadxPartRain::_retrieveSiteTempFromSpdb" << endl;
         cerr << "  No LNA temp tag found: "
-             << _params.lna_temperature_tag << endl;
+             << _params.v_lna_temperature_tag << endl;
         cerr << "  rxStatus: " << rxStatus << endl;
         iret = -1;
       }
@@ -366,7 +366,7 @@ int HcrTempRxGain::_retrieveFromSpdb()
           cerr << "  rxStatus: " << rxStatus << endl;
           iret = -1;
         }
-        sample.addPodTempObs(podTemp);
+        sample.addRxTempObs(podTemp);
       } // ii
 
     } // if (chunk.valid_time >= _retrieveStartTime ...
@@ -375,8 +375,8 @@ int HcrTempRxGain::_retrieveFromSpdb()
 
   // compute mean temps for each time
   
-  for (size_t isample = 0; isample < _samples.size(); isample++) {
-    TimeSample &sample = _samples[isample]; 
+  for (size_t isample = 0; isample < _samplesV.size(); isample++) {
+    TimeSample &sample = _samplesV[isample]; 
     sample.computeMeanObs();
   }
 
@@ -399,7 +399,7 @@ int HcrTempRxGain::_processTime(time_t procTime)
   // get time indices for sample vector
 
   int procIndex = procTime - _retrieveStartTime;
-  TimeSample &procSample = _samples[procIndex]; 
+  TimeSample &procSampleV = _samplesV[procIndex]; 
 
   // get start and end of smoothing period for pod temps
   
@@ -411,13 +411,13 @@ int HcrTempRxGain::_processTime(time_t procTime)
   }
 
   int smoothingEndIndex = procIndex + smoothingIntervalHalf;
-  if (smoothingEndIndex > (int) _samples.size() - 1) {
-    smoothingEndIndex = _samples.size() - 1;
+  if (smoothingEndIndex > (int) _samplesV.size() - 1) {
+    smoothingEndIndex = _samplesV.size() - 1;
   }
 
   // get start and end of lagged smoothing period for lna temps
 
-  int lnaLagSecs = _params.lna_temperature_time_lag_secs;
+  int lnaLagSecs = _params.v_lna_temperature_time_lag_secs;
 
   int laggedStartIndex = procIndex - smoothingIntervalHalf - lnaLagSecs;
   if (laggedStartIndex < 0) {
@@ -425,8 +425,8 @@ int HcrTempRxGain::_processTime(time_t procTime)
   }
 
   int laggedEndIndex = procIndex + smoothingIntervalHalf - lnaLagSecs;
-  if (laggedEndIndex > (int) _samples.size() - 1) {
-    laggedEndIndex = _samples.size() - 1;
+  if (laggedEndIndex > (int) _samplesV.size() - 1) {
+    laggedEndIndex = _samplesV.size() - 1;
   }
 
   // compute smoothed pod temp
@@ -435,14 +435,14 @@ int HcrTempRxGain::_processTime(time_t procTime)
     double sum = 0.0;
     double nn = 0.0;
     for (int isample = smoothingStartIndex; isample <= smoothingEndIndex; isample++) {
-      TimeSample &sample = _samples[isample];
-      nn += sample.getPodTempN();
-      sum += sample.getPodTempSum();
+      TimeSample &sample = _samplesV[isample];
+      nn += sample.getRxTempN();
+      sum += sample.getRxTempSum();
     }
     if (nn > 0) {
       double smoothedTemp = sum / nn;
-      procSample.setPodSmoothedN(nn);
-      procSample.setPodTempSmoothed(smoothedTemp);
+      procSampleV.setRxSmoothedN(nn);
+      procSampleV.setRxTempSmoothed(smoothedTemp);
     }
   }
 
@@ -452,44 +452,47 @@ int HcrTempRxGain::_processTime(time_t procTime)
     double sum = 0.0;
     double nn = 0.0;
     for (int isample = laggedStartIndex; isample <= laggedEndIndex; isample++) {
-      TimeSample &sample = _samples[isample];
+      TimeSample &sample = _samplesV[isample];
       nn += sample.getLnaTempN();
       sum += sample.getLnaTempSum();
     }
     if (nn > 0) {
       double smoothedTemp = sum / nn;
-      procSample.setLnaSmoothedN(nn);
-      procSample.setLnaTempSmoothed(smoothedTemp);
+      procSampleV.setLnaSmoothedN(nn);
+      procSampleV.setLnaTempSmoothed(smoothedTemp);
     }
   }
 
   // compute delta gain
 
-  procSample.computeDeltaGain();
+  procSampleV.computeDeltaGain(_params.v_lna_reference_temperature_c,
+                              _params.v_lna_gain_change_per_c,
+                              _params.pod_reference_temperature_c,
+                              _params.v_rx_gain_change_per_c);
   
   // debug print
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     
     cerr << "==>> temps for time    : "
-         << DateTime::strm(procSample.getTime()) << endl ;
-    cerr << "     N obs LNA         : " << procSample.getLnaTempN() << endl;
-    cerr << "     N obs POD         : " << procSample.getPodTempN() << endl;
-    cerr << "     mean temp LNA     : " << procSample.getLnaTempMean() << endl;
-    cerr << "     mean temp POD     : " << procSample.getPodTempMean() << endl;
-    cerr << "     smoothed N LNA    : " << procSample.getLnaSmoothedN() << endl;
-    cerr << "     smoothed N POD    : " << procSample.getPodSmoothedN() << endl;
-    cerr << "     smoothed temp LNA : " << procSample.getLnaTempSmoothed() << endl;
-    cerr << "     smoothed temp POD : " << procSample.getPodTempSmoothed() << endl;
-    cerr << "     delta gain LNA    : " << procSample.getLnaDeltaGain() << endl;
-    cerr << "     delta gain RX     : " << procSample.getRxDeltaGain() << endl;
-    cerr << "     delta gain SUM    : " << procSample.getSumDeltaGain() << endl;
+         << DateTime::strm(procSampleV.getTime()) << endl ;
+    cerr << "     N obs LNA         : " << procSampleV.getLnaTempN() << endl;
+    cerr << "     N obs POD         : " << procSampleV.getRxTempN() << endl;
+    cerr << "     mean temp LNA     : " << procSampleV.getLnaTempMean() << endl;
+    cerr << "     mean temp POD     : " << procSampleV.getRxTempMean() << endl;
+    cerr << "     smoothed N LNA    : " << procSampleV.getLnaSmoothedN() << endl;
+    cerr << "     smoothed N POD    : " << procSampleV.getRxSmoothedN() << endl;
+    cerr << "     smoothed temp LNA : " << procSampleV.getLnaTempSmoothed() << endl;
+    cerr << "     smoothed temp POD : " << procSampleV.getRxTempSmoothed() << endl;
+    cerr << "     delta gain LNA    : " << procSampleV.getLnaDeltaGain() << endl;
+    cerr << "     delta gain RX     : " << procSampleV.getRxDeltaGain() << endl;
+    cerr << "     delta gain SUM    : " << procSampleV.getSumDeltaGain() << endl;
 
   }
 
   // write the gain results to SPBD
 
-  _writeToSpdb(procTime, procSample);
+  _writeToSpdb(procTime, procSampleV);
 
   return 0;
 
@@ -499,7 +502,7 @@ int HcrTempRxGain::_processTime(time_t procTime)
 // Write gain results to SPDB
 
 int HcrTempRxGain::_writeToSpdb(time_t procTime,
-                                const TimeSample &procSample)
+                                const TimeSample &procSampleV)
 
 {
 
@@ -511,41 +514,41 @@ int HcrTempRxGain::_writeToSpdb(time_t procTime,
   
   xml += TaXml::writeString("time", 1, DateTime::strm(procTime));
   
-  xml += TaXml::writeDouble("lna_ref_temp_c", 1,
-                            _params.lna_reference_temperature_c);
+  xml += TaXml::writeDouble("v_lna_ref_temp_c", 1,
+                            _params.v_lna_reference_temperature_c);
   xml += TaXml::writeDouble("pod_ref_temp_c", 1,
                             _params.pod_reference_temperature_c);
   
-  xml += TaXml::writeDouble("lna_gain_change_per_c", 1,
-                            _params.lna_gain_change_per_c);
+  xml += TaXml::writeDouble("v_lna_gain_change_per_c", 1,
+                            _params.v_lna_gain_change_per_c);
   xml += TaXml::writeDouble("rx_gain_change_per_c", 1,
-                            _params.rx_gain_change_per_c);
+                            _params.v_rx_gain_change_per_c);
   
-  xml += TaXml::writeDouble("lna_temp_time_lag_secs", 1,
-                            _params.lna_temperature_time_lag_secs);
+  xml += TaXml::writeDouble("v_lna_temp_time_lag_secs", 1,
+                            _params.v_lna_temperature_time_lag_secs);
   
   xml += TaXml::writeDouble("temp_smoothing_secs", 1,
                             _params.temperature_smoothing_interval_secs);
   
-  xml += TaXml::writeDouble("lna_temp", 1, procSample.getLnaTempMean());
-  xml += TaXml::writeDouble("pod_temp", 1, procSample.getPodTempMean());
+  xml += TaXml::writeDouble("v_lna_temp", 1, procSampleV.getLnaTempMean());
+  xml += TaXml::writeDouble("pod_temp", 1, procSampleV.getRxTempMean());
   
-  xml += TaXml::writeDouble("lna_smoothed_temp", 1, 
-                            procSample.getLnaTempSmoothed());
+  xml += TaXml::writeDouble("v_lna_smoothed_temp", 1, 
+                            procSampleV.getLnaTempSmoothed());
   xml += TaXml::writeDouble("pod_smoothed_temp", 1, 
-                            procSample.getPodTempSmoothed());
+                            procSampleV.getRxTempSmoothed());
   
-  xml += TaXml::writeDouble("lna_smoothed_n", 1, 
-                            procSample.getLnaSmoothedN());
+  xml += TaXml::writeDouble("v_lna_smoothed_n", 1, 
+                            procSampleV.getLnaSmoothedN());
   xml += TaXml::writeDouble("pod_smoothed_n", 1, 
-                            procSample.getPodSmoothedN());
+                            procSampleV.getRxSmoothedN());
   
-  xml += TaXml::writeDouble("lna_delta_gain", 1, 
-                            procSample.getLnaDeltaGain());
+  xml += TaXml::writeDouble("v_lna_delta_gain", 1, 
+                            procSampleV.getLnaDeltaGain());
   xml += TaXml::writeDouble("rx_delta_gain", 1, 
-                            procSample.getRxDeltaGain());
-  xml += TaXml::writeDouble("delta_gain", 1, 
-                            procSample.getSumDeltaGain());
+                            procSampleV.getRxDeltaGain());
+  xml += TaXml::writeDouble("v_delta_gain", 1, 
+                            procSampleV.getSumDeltaGain());
   
   xml += TaXml::writeEndTag("HcrTempGainCorrection", 0);
   
