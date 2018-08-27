@@ -66,6 +66,15 @@ class Beam {
   
 public:
 
+  // scan mode for determining PPI vs RHI operations
+  
+  typedef enum {
+    SCAN_TYPE_UNKNOWN,
+    SCAN_TYPE_PPI,
+    SCAN_TYPE_RHI,
+    SCAN_TYPE_VERT
+  } scan_type_t;
+  
   // Constructor
   
   Beam(const string &progName,
@@ -81,7 +90,7 @@ public:
             bool beamIsIndexed,
             double angularResolution,
             double meanPointingAngle,
-            bool isPpi,
+            scan_type_t scanType,
             bool isAlternating,
             bool isStagPrt,
             double prt,
@@ -227,7 +236,7 @@ private:
   bool _endOfSweepFlag;
   bool _endOfVolFlag;
   
-  bool _isPpi;
+  scan_type_t _scanType;
   bool _antennaTransition;
 
   // range geometry

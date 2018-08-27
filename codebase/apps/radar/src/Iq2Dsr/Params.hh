@@ -804,6 +804,10 @@ public:
 
   double elevation_offset;
 
+  tdrp_bool_t override_scan_mode;
+
+  scan_mode_t scan_mode_for_override;
+
   moments_params_t *_moments_params;
   int moments_params_n;
 
@@ -1202,7 +1206,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[263];
+  mutable TDRPtable _table[265];
 
   const char *_className;
 

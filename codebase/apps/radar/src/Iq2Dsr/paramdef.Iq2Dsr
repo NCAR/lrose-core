@@ -324,10 +324,6 @@ paramdef double {
   p_help = "See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.";
 } elevation_offset;
 
-commentdef {
-  p_header = "MOMENTS COMPUTATIONS";
-};
-
 typedef enum {
 
   SCAN_MODE_UNKNOWN = 0,
@@ -343,6 +339,22 @@ typedef enum {
   SCAN_MODE_MANUAL_RHI = 16
 
 } scan_mode_t;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the scan mode in the time series data.";
+  p_help = "Set this to TRUE if the scan_mode is incorrect in the time series, and you can override to a constant scan mode.";
+} override_scan_mode;
+
+paramdef enum scan_mode_t {
+  p_default = SCAN_MODE_UNKNOWN;
+  p_descr = "Select the scan mode for override";
+  p_help = "See 'override_scan_mode'";
+} scan_mode_for_override;
+
+commentdef {
+  p_header = "MOMENTS COMPUTATIONS";
+};
 
 typedef enum {
 

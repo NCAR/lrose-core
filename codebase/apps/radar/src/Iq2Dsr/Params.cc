@@ -1185,6 +1185,56 @@
     tt->single_val.d = 0;
     tt++;
     
+    // Parameter 'override_scan_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_scan_mode");
+    tt->descr = tdrpStrDup("Option to override the scan mode in the time series data.");
+    tt->help = tdrpStrDup("Set this to TRUE if the scan_mode is incorrect in the time series, and you can override to a constant scan mode.");
+    tt->val_offset = (char *) &override_scan_mode - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'scan_mode_for_override'
+    // ctype is '_scan_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("scan_mode_for_override");
+    tt->descr = tdrpStrDup("Select the scan mode for override");
+    tt->help = tdrpStrDup("See 'override_scan_mode'");
+    tt->val_offset = (char *) &scan_mode_for_override - &_start_;
+    tt->enum_def.name = tdrpStrDup("scan_mode_t");
+    tt->enum_def.nfields = 11;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("SCAN_MODE_UNKNOWN");
+      tt->enum_def.fields[0].val = SCAN_MODE_UNKNOWN;
+      tt->enum_def.fields[1].name = tdrpStrDup("SCAN_MODE_SECTOR");
+      tt->enum_def.fields[1].val = SCAN_MODE_SECTOR;
+      tt->enum_def.fields[2].name = tdrpStrDup("SCAN_MODE_COPLANE");
+      tt->enum_def.fields[2].val = SCAN_MODE_COPLANE;
+      tt->enum_def.fields[3].name = tdrpStrDup("SCAN_MODE_RHI");
+      tt->enum_def.fields[3].val = SCAN_MODE_RHI;
+      tt->enum_def.fields[4].name = tdrpStrDup("SCAN_MODE_VERTICAL_POINTING");
+      tt->enum_def.fields[4].val = SCAN_MODE_VERTICAL_POINTING;
+      tt->enum_def.fields[5].name = tdrpStrDup("SCAN_MODE_IDLE");
+      tt->enum_def.fields[5].val = SCAN_MODE_IDLE;
+      tt->enum_def.fields[6].name = tdrpStrDup("SCAN_MODE_SURVEILLANCE");
+      tt->enum_def.fields[6].val = SCAN_MODE_SURVEILLANCE;
+      tt->enum_def.fields[7].name = tdrpStrDup("SCAN_MODE_SUNSCAN");
+      tt->enum_def.fields[7].val = SCAN_MODE_SUNSCAN;
+      tt->enum_def.fields[8].name = tdrpStrDup("SCAN_MODE_POINTING");
+      tt->enum_def.fields[8].val = SCAN_MODE_POINTING;
+      tt->enum_def.fields[9].name = tdrpStrDup("SCAN_MODE_MANUAL_PPI");
+      tt->enum_def.fields[9].val = SCAN_MODE_MANUAL_PPI;
+      tt->enum_def.fields[10].name = tdrpStrDup("SCAN_MODE_MANUAL_RHI");
+      tt->enum_def.fields[10].val = SCAN_MODE_MANUAL_RHI;
+    tt->single_val.e = SCAN_MODE_UNKNOWN;
+    tt++;
+    
     // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));

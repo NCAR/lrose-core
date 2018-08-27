@@ -86,7 +86,7 @@ BeamReader::BeamReader(const string &prog_name,
   _midIndex = 0;
   _prevBeamPulseSeqNum = 0;
 
-  _scanType = SCAN_TYPE_UNKNOWN;
+  _scanType = Beam::SCAN_TYPE_UNKNOWN;
   _nGates = 0;
   _nSamples = _params.min_n_samples;
 
@@ -386,10 +386,9 @@ Beam *BeamReader::getNextBeam()
   
   // set pointing angle
   
-  bool isPpi = true;
   double pointingAngle = _az;
-  if (_scanType == SCAN_TYPE_RHI) {
-    isPpi = false;
+  if (_scanType == Beam::SCAN_TYPE_RHI ||
+      _scanType == Beam::SCAN_TYPE_VERT) {
     pointingAngle = _el;
   }
   
@@ -428,7 +427,7 @@ Beam *BeamReader::getNextBeam()
              _indexTheBeams,
              _indexedResolution,
              pointingAngle,
-             isPpi,
+             _scanType,
              _isAlternating,
              _isStaggeredPrt,
              _prt,
@@ -449,7 +448,7 @@ Beam *BeamReader::getNextBeam()
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     fprintf(stderr, 
-            "==>> New beam, el, start, end, rate, az, start, end, az, nPulss, nEff: "
+            "==>> New beam, el, start, end, rate, az, start, end, az, nSamp, nEff: "
             "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %6.2f %6.2f %4d %4d\n",
             _el, startEl, endEl, _beamElRate,
             _az, startAz, endAz, _beamAzRate,
@@ -757,7 +756,7 @@ int BeamReader::_findNextIndexedBeam()
       return -1;
     }
     
-    if (_scanType == SCAN_TYPE_PPI) {
+    if (_scanType == Beam::SCAN_TYPE_PPI) {
       if (_findBeamCenterPpi() == 0) {
 	break;
       }
@@ -919,7 +918,7 @@ void BeamReader::_constrainPulsesToWithinDwell()
 
   // adjust start and end indexes to fall within dwell
 
-  if (_scanType == SCAN_TYPE_PPI) {
+  if (_scanType == Beam::SCAN_TYPE_PPI) {
     
     // SURVEILLANCE or SECTOR
     
@@ -1069,22 +1068,39 @@ IwrfTsPulse *BeamReader::_getNextPulse()
       continue;
     }
 
+    // override scan mode if appropriate
+
+    if (_params.override_scan_mode) {
+      pulse->set_scan_mode(_params.scan_mode_for_override);
+      IwrfTsInfo &info = _pulseReader->getOpsInfo();
+      info.set_scan_mode(_params.scan_mode_for_override);
+    }
+
     // get scan name
     
     string scanName = _pulseReader->getOpsInfo().get_scan_segment_name();
     
     // check scan mode and type
     
-    scan_type_t scanType = SCAN_TYPE_PPI;
+    Beam::scan_type_t scanType = Beam::SCAN_TYPE_UNKNOWN;
     int scanMode = pulse->getScanMode();
-    if (scanMode == IWRF_SCAN_MODE_RHI) {
-      scanType = SCAN_TYPE_RHI;
+    if (scanMode == IWRF_SCAN_MODE_RHI || 
+        scanMode == IWRF_SCAN_MODE_VERTICAL_POINTING ||
+        scanMode == IWRF_SCAN_MODE_MANRHI) {
+      scanType = Beam::SCAN_TYPE_RHI;
+    } else if (scanMode == IWRF_SCAN_MODE_VERTICAL_POINTING) {
+      scanType = Beam::SCAN_TYPE_VERT;
+    } else {
+      scanType = Beam::SCAN_TYPE_PPI;
     }
+    
     if (scanType != _scanType) {
-      if (scanType == SCAN_TYPE_PPI) {
+      if (scanType == Beam::SCAN_TYPE_PPI) {
         _initPpiMode();
-      } else {
+      } else if (scanType == Beam::SCAN_TYPE_RHI) {
         _initRhiMode();
+      } else if (scanType == Beam::SCAN_TYPE_VERT) {
+        _initVertMode();
       }
       _prevTimeForElRate = 0;
       _prevTimeForAzRate = 0;
@@ -1093,7 +1109,7 @@ IwrfTsPulse *BeamReader::_getNextPulse()
     // compute the antenna rate
     
     double antennaRate = 0.0;
-    if (_scanType == SCAN_TYPE_PPI) {
+    if (_scanType == Beam::SCAN_TYPE_PPI) {
       _computeProgressiveAzRate(pulse);
       antennaRate = _progressiveAzRate;
     } else {
@@ -1767,7 +1783,7 @@ void BeamReader::_initPpiMode()
 
   _azIndex = 0;
   _prevAzIndex = -999;
-  _scanType = SCAN_TYPE_PPI;
+  _scanType = Beam::SCAN_TYPE_PPI;
 
 }
 
@@ -1780,7 +1796,20 @@ void BeamReader::_initRhiMode()
 
   _elIndex = 0;
   _prevElIndex = -999;
-  _scanType = SCAN_TYPE_RHI;
+  _scanType = Beam::SCAN_TYPE_RHI;
+
+}
+
+//////////////////////
+// initialize vertical pointing mode
+
+void BeamReader::_initVertMode()
+
+{
+
+  _elIndex = 0;
+  _prevElIndex = -999;
+  _scanType = Beam::SCAN_TYPE_VERT;
 
 }
 
@@ -2067,7 +2096,7 @@ int BeamReader::_computeNSamplesIndexed()
   // compute antenna rate, force non-zero condition
 
   double antennaRate;
-  if (_scanType == SCAN_TYPE_RHI) {
+  if (_scanType == Beam::SCAN_TYPE_RHI) {
     antennaRate = fabs(_beamElRate);
   } else {
     antennaRate = fabs(_beamAzRate);

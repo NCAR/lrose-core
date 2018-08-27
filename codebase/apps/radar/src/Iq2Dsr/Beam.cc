@@ -94,7 +94,7 @@ Beam::Beam(const string &progName,
   _endOfSweepFlag = false;
   _endOfVolFlag = false;
 
-  _isPpi = true;
+  _scanType = SCAN_TYPE_PPI;
   _antennaTransition = false;
 
   _startRangeKm = 0.0;
@@ -177,7 +177,7 @@ void Beam::init(const MomentsMgr &mmgr,
                 bool beamIsIndexed,
                 double angularResolution,
                 double meanPointingAngle,
-                bool isPpi,
+                scan_type_t scanType,
                 bool isAlternating,
                 bool isStagPrt,
                 double prt,
@@ -201,7 +201,7 @@ void Beam::init(const MomentsMgr &mmgr,
   _beamIsIndexed = beamIsIndexed;
   _angularResolution = angularResolution;
   _meanPointingAngle = meanPointingAngle;
-  _isPpi = isPpi;
+  _scanType = scanType;
   _isAlternating = isAlternating;
   _isStagPrt = isStagPrt;
   _prt = prt;
@@ -418,15 +418,27 @@ void Beam::_prepareForComputeMoments()
 
   // set elevation / azimuth
 
-  if (_isPpi) {
-    _az = _getCorrectedAz(_meanPointingAngle);
-    _el = _getCorrectedEl(midPulse->getEl());
-  } else {
+  if (_scanType == SCAN_TYPE_VERT) {
     _el = _getCorrectedEl(_meanPointingAngle);
     _az = _getCorrectedAz(midPulse->getAz());
+  } else if (_scanType == SCAN_TYPE_RHI) {
+    _el = _getCorrectedEl(_meanPointingAngle);
+    _az = _getCorrectedAz(midPulse->getAz());
+  } else {
+    _az = _getCorrectedAz(_meanPointingAngle);
+    _el = _getCorrectedEl(midPulse->getEl());
   }
-  _targetEl = _getCorrectedEl(midPulse->getFixedEl());
-  _targetAz = _getCorrectedAz(midPulse->getFixedAz());
+  if (midPulse->getFixedEl() > -990) {
+    _targetEl = _getCorrectedEl(midPulse->getFixedEl());
+  } else {
+    _targetEl = _meanPointingAngle;
+  }
+  if (midPulse->getFixedAz() > -990) {
+    _targetAz = _getCorrectedAz(midPulse->getFixedAz());
+  } else {
+    _targetAz = _meanPointingAngle;
+  }
+
   if (std::isnan(_targetEl) || _targetEl < -990) {
     _targetEl = _el;
   }
@@ -445,9 +457,6 @@ void Beam::_prepareForComputeMoments()
   _followMode = midPulse->get_follow_mode();
   _sweepNum = _getSweepNum();
   _volNum = _getVolNum();
-  if (_volNum < 0) {
-    _volNum = _volNum + 65536;
-  }
 
   // set antenna transition flag
 
@@ -642,7 +651,9 @@ int Beam::_getVolNum()
     volNums.push_back(_pulses[ii]->get_volume_num());
   }
   sort(volNums.begin(), volNums.end());
-
+  if (volNums[_nSamplesHalf] < 0) {
+    return 0;
+  }
   return volNums[_nSamplesHalf];
 
 }
@@ -661,6 +672,9 @@ int Beam::_getSweepNum()
   }
   sort(sweepNums.begin(), sweepNums.end());
 
+  if (sweepNums[_nSamplesHalf] < 0) {
+    return -1;
+  }
   return sweepNums[_nSamplesHalf];
 
 }
@@ -3588,6 +3602,7 @@ void Beam::_checkAntennaTransition(const vector<const IwrfTsPulse *> &pulses)
   if (_params.check_transition_from_fixed_angle_error) {
 
     if (_scanMode == IWRF_SCAN_MODE_RHI ||
+        _scanMode == IWRF_SCAN_MODE_VERTICAL_POINTING ||
         _scanMode == IWRF_SCAN_MODE_EL_SURV ||
         _scanMode == IWRF_SCAN_MODE_MANRHI ||
         _scanMode == IWRF_SCAN_MODE_SUNSCAN_RHI) {
@@ -4577,10 +4592,10 @@ int Beam::_correctCalibGainsForTemp()
 
   } // ii
 
-  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
-    cerr << "======= CALIBRATION BEFORE TEMP CORRECTION =============" << endl;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "+++++++ CALIBRATION BEFORE TEMP CORRECTION +++++++++++++" << endl;
     _calib.print(cerr);
-    cerr << "======= END CALIBRATION BEFORE TEMP CORRECTION =========" << endl;
+    cerr << "+++++++ END CALIBRATION BEFORE TEMP CORRECTION +++++++++" << endl;
   }
     
   // augment status xml in ops info
@@ -4656,10 +4671,10 @@ int Beam::_correctCalibGainsForTemp()
     _calib.setNoiseDbmVx(noiseFixed);
   }
   
-  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
-    cerr << "####### CALIBRATION AFTER TEMP CORRECTION #############" << endl;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "+++++++ CALIBRATION AFTER TEMP CORRECTION +++++++++++++" << endl;
     _calib.print(cerr);
-    cerr << "####### END CALIBRATION AFTER TEMP CORRECTION #########" << endl;
+    cerr << "+++++++ END CALIBRATION AFTER TEMP CORRECTION +++++++++" << endl;
   }
   
   return 0;
@@ -4723,10 +4738,13 @@ int Beam::_correctHcrVRxGainForTemp()
     return -1;
   }
   
-  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
-    cerr << "==== CALIBRATION BEFORE HCR GAIN CORRECTION =============" << endl;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "++++ CALIBRATION BEFORE HCR GAIN CORRECTION +++++++++++++" << endl;
     _calib.print(cerr);
-    cerr << "==== END CALIBRATION BEFORE HCR GAIN TEMP CORRECTION ====" << endl;
+    cerr << "++++ END CALIBRATION BEFORE HCR GAIN TEMP CORRECTION ++++" << endl;
+    cerr << "Delta gain XML - created by HcrTempRxGain app" << endl;
+    cerr << deltaGainXml << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   }
   
   // augment status xml in ops info
@@ -4749,10 +4767,10 @@ int Beam::_correctHcrVRxGainForTemp()
     _calib.setNoiseDbmVc(noiseFixed);
   }
   
-  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
-    cerr << "==== CALIBRATION AFTER HCR GAIN CORRECTION =============" << endl;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "++++ CALIBRATION AFTER HCR GAIN CORRECTION +++++++++++++" << endl;
     _calib.print(cerr);
-    cerr << "==== END CALIBRATION AFTER HCR GAIN TEMP CORRECTION ====" << endl;
+    cerr << "++++ END CALIBRATION AFTER HCR GAIN TEMP CORRECTION ++++" << endl;
   }
     
   return 0;
