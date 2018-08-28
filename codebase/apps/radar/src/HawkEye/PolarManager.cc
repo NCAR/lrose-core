@@ -1215,11 +1215,10 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
   // do we need to reconfigure the PPI?
 
-  int nGates = ray->getNGates();
-  double maxRange = ray->getStartRangeKm() + nGates * ray->getGateSpacingKm();
+  _nGates = ray->getNGates();
+  double maxRange = ray->getStartRangeKm() + _nGates * ray->getGateSpacingKm();
   
   if ((maxRange - _maxRangeKm) > 0.001) {
-    _nGates = nGates;
     _maxRangeKm = maxRange;
     _ppi->configureRange(_maxRangeKm);
     _rhi->configureRange(_maxRangeKm);
@@ -1228,20 +1227,18 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   // create 2D field data vector
 
   vector< vector<double> > fieldData;
-  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-    vector<double> field;
-    fieldData.push_back(field);
-  }
-
+  fieldData.resize(_fields.size());
+  
   // fill data vector
 
   for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
     vector<double> &data = fieldData[ifield];
+    data.resize(_nGates);
     RadxField *rfld = ray->getField(_fields[ifield]->getName());
     if (rfld == NULL) {
       // fill with missing
       for (int igate = 0; igate < _nGates; igate++) {
-        data.push_back(-9999);
+        data[igate] = -9999.0;
       }
     } else {
       rfld->convertToFl32();
@@ -1250,9 +1247,9 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
       for (int igate = 0; igate < _nGates; igate++, fdata++) {
         Radx::fl32 val = *fdata;
         if (fabs(val - missingVal) < 0.0001) {
-          data.push_back(-9999);
+          data[igate] = -9999.0;
         } else {
-          data.push_back(*fdata);
+          data[igate] = val;
         }
       }
     }
@@ -1676,7 +1673,7 @@ void PolarManager::_locationClicked(double xkm, double ykm,
   _rangeClicked->setText(text);
   
   for (size_t ii = 0; ii < _fields.size(); ii++) {
-    _fields[ii]->setSelectValue(-9999);
+    _fields[ii]->setSelectValue(-9999.0);
     _fields[ii]->setDialogText("----");
   }
   

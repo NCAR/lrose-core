@@ -341,9 +341,9 @@ void SimReader::_simulateRhiBeam(double elev, double az,
   ray->setMeasXmitPowerDbmH(84.0);
   ray->setMeasXmitPowerDbmV(84.1);
 
-  int nGates = 1000;
-  double startRange = 0.075;
-  double gateSpacing = 0.150;
+  int nGates = _params.sim_n_gates;
+  double startRange = _params.sim_start_range_km;
+  double gateSpacing = _params.sim_gate_spacing_km;
 
   ray->setNGates(nGates);
   ray->setRangeGeom(startRange, gateSpacing);
