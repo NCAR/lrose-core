@@ -500,6 +500,14 @@ int Dsr2Radx::_readMsg(DsRadarQueue &radarQueue,
     if (_params.end_of_vol_decision == Params::ELAPSED_TIME) {
 
       if (_endOfVolTime < 0) {
+        // initialize
+        _computeEndOfVolTime(ray->getTimeSecs());
+      } else if ((_endOfVolTime - ray->getTimeSecs()) > _params.nsecs_per_volume) {
+        // we have gone back in time
+        // maybe reprocessing old data
+        if (_params.debug) {
+          cerr << "Going back in time - reprocessing old data?" << endl;
+        }
         _computeEndOfVolTime(ray->getTimeSecs());
       }
       if (ray->getTimeSecs() >= _endOfVolTime) {
@@ -2299,6 +2307,11 @@ void Dsr2Radx::_computeEndOfVolTime(time_t beamTime)
     endOfVolSec = secsPerDay;
   }
   _endOfVolTime = jDay * secsPerDay + endOfVolSec;
+  
+  if (_params.debug) {
+    cerr << "==>> end_of_vol_decision : ELAPSED_TIME <<==" << endl;
+    cerr << "==>> Next end of vol time: " << RadxTime::strm(_endOfVolTime) << endl;
+  }
 
 }
 
