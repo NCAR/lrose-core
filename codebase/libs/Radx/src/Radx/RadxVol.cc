@@ -288,8 +288,8 @@ void RadxVol::copyMeta(const RadxVol &rhs)
   // correction factors
 
   clearCfactors();
-  if (_cfactors != NULL) {
-    _cfactors = new RadxCfactors(*_cfactors);
+  if (rhs._cfactors != NULL) {
+    _cfactors = new RadxCfactors(*rhs._cfactors);
   } else {
     _cfactors = NULL;
   }

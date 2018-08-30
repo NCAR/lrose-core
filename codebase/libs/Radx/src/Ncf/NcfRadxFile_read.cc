@@ -2633,7 +2633,8 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
         if (_addSi16FieldToRays(var, name, units, standardName, longName,
                                 scale, offset,
                                 isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper)) {
+                                foldLimitLower, foldLimitUpper,
+                                samplingRatio)) {
           iret = -1;
         }
         break;
@@ -3614,7 +3615,8 @@ int NcfRadxFile::_addSi16FieldToRays(Nc3Var* var,
                                      bool isDiscrete,
                                      bool fieldFolds,
                                      float foldLimitLower,
-                                     float foldLimitUpper)
+                                     float foldLimitUpper,
+				     float samplingRatio)
   
 {
 
@@ -3679,6 +3681,7 @@ int NcfRadxFile::_addSi16FieldToRays(Nc3Var* var,
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
+    field->setSamplingRatio(samplingRatio);
 
     if (fieldFolds &&
         foldLimitLower != Radx::missingMetaFloat &&

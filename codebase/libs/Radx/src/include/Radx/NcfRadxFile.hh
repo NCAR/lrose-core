@@ -1087,7 +1087,8 @@ private:
                           const string &standardName, const string &longName,
                           double scale, double offset,
                           bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
+                          float foldLimitLower, float foldLimitUpper,
+			  float samplingRatio = 1.0);
   int _addSi08FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
