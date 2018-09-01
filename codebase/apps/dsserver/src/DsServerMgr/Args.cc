@@ -33,6 +33,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <string>
 
 #include <toolsa/os_config.h>
 #include <toolsa/umisc.h>
@@ -54,19 +55,8 @@ Args::Args(int argc, char **argv)
     _okay = true;
     _showUsage = false;
     _paramsFilePath = (char *)NULL;
-
-    // Process the first arg to get the app name.
-    char * slashPos = strrchr(argv[0], '/');
-    if (slashPos == NULL) {
-        // No path included -- use the original arg.
-        slashPos = argv[0];
-    }
-    else {
-        // There was some path info, move forward one char.
-        slashPos++;
-    }
-    _appName = strdup(slashPos);
-
+    _appName = (char*) "DsServerMgr";
+    
     TDRP_init_override(&_override);
 
     //
@@ -191,7 +181,6 @@ Args::Args(int argc, char **argv)
         _showUsage = true;
     }
 }
-
 
 /**************************************************************
 * protected methods

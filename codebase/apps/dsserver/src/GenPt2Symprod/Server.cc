@@ -541,7 +541,7 @@ int Server::_handleDailyGet(const void *localParams,
 
   DsSpdbMsg new_msg = inMsg;
   
-  DsSpdbMsg::info_t msg_info = new_msg.getInfo();
+  // DsSpdbMsg::info_t msg_info = new_msg.getInfo();
   DateTime new_end_time(new_msg.getRefTime());
   DateTime new_start_time = new_end_time;
   new_start_time.setHour(0);

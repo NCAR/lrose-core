@@ -1303,6 +1303,7 @@ int DsMdvServer::_doCompileDerivedTimeHeight(DsMdvx &mdvx,
 			      mdvx._readScale,
 			      mdvx._readBias)) {
       mdvx.addToErrStr("ERROR - _compileTimeHeight\n");
+      delete thtField;
       return -1;
     }
     

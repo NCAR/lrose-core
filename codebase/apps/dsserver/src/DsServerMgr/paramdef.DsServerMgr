@@ -71,7 +71,7 @@ paramdef int {
 } maxQuiescentSecs;
 
 paramdef int {
-  p_default = 128;
+  p_default = 1024;
   p_min = 1;
   p_descr = "Maximum number of clients to be handled at the same time.";
   p_help = "This value is limited by the OS.";

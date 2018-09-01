@@ -52,9 +52,10 @@ Driver::Driver(int argc, char **argv)
   OK = TRUE;
   _server = NULL;
   
-  // set programe name
+  // set programe name and default params path
   
   _progName = "DsLdataServer";
+  _paramsPath = (char *) "unknown";
 
   // parse command line args
   

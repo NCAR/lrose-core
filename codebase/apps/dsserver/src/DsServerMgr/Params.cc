@@ -636,7 +636,7 @@
     tt->val_offset = (char *) &maxClients - &_start_;
     tt->has_min = TRUE;
     tt->min_val.i = 1;
-    tt->single_val.i = 128;
+    tt->single_val.i = 1024;
     tt++;
     
     // Parameter 'runSecure'

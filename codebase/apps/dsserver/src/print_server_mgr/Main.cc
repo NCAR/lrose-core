@@ -283,6 +283,7 @@ int sendServerCommand(int port, string host, int command, int & replyInt, string
       cerr << "Error: Server replied to server status command with a generic message." << endl;
       return -1;
     }
+    cout << "isServerCommand: " << isServerCommand << endl;
 
     replyInt = reply.getFirstInt();
     replyString = reply.getFirstString();

@@ -53,7 +53,6 @@ protected:
 public:
 
     Args (int argc, char **argv);
-
     inline bool isOkay() const;
     inline bool isShowUsage() const;
     inline char * getAppName() const;
