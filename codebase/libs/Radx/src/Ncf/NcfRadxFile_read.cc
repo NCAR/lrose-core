@@ -767,6 +767,7 @@ int NcfRadxFile::_readGlobalAttributes()
 
 {
 
+  int iret = 0;
   Nc3Att *att;
   
   // check for conventions
@@ -775,15 +776,16 @@ int NcfRadxFile::_readGlobalAttributes()
   if (att == NULL) {
     _addErrStr("ERROR - NcfRadxFile::_readGlobalAttributes");
     _addErrStr("  Cannot find conventions attribute");
-    return -1;
-  }
-  _conventions = Nc3xFile::asString(att);
-  if (_conventions.find(BaseConvention) == string::npos) {
-    if (_conventions.find("CF") == string::npos &&
-        _conventions.find("Radial") == string::npos) {
-      _addErrStr("ERROR - NcfRadxFile::_readGlobalAttributes");
-      _addErrStr("  Invalid Conventions attribute: ", _conventions);
-      return -1;
+    iret = -1;
+  } else {
+    _conventions = Nc3xFile::asString(att);
+    if (_conventions.find(BaseConvention) == string::npos) {
+      if (_conventions.find("CF") == string::npos &&
+          _conventions.find("Radial") == string::npos) {
+        _addErrStr("ERROR - NcfRadxFile::_readGlobalAttributes");
+        _addErrStr("  Invalid Conventions attribute: ", _conventions);
+        iret = -1;
+      }
     }
   }
 
@@ -793,11 +795,12 @@ int NcfRadxFile::_readGlobalAttributes()
   if (att == NULL) {
     _addErrStr("ERROR - NcfRadxFile::_readGlobalAttributes");
     _addErrStr("  Cannot find instrument_name attribute");
-    return -1;
-  }
-  _instrumentName = Nc3xFile::asString(att);
-  if (_instrumentName.size() < 1) {
-    _instrumentName = "unknown";
+    iret = -1;
+  } else {
+    _instrumentName = Nc3xFile::asString(att);
+    if (_instrumentName.size() < 1) {
+      _instrumentName = "unknown";
+    }
   }
 
   // Loop through the global attributes, use the ones which make sense
@@ -869,7 +872,7 @@ int NcfRadxFile::_readGlobalAttributes()
     
   } // ii
 
-  return 0;
+  return iret;
 
 }
 
