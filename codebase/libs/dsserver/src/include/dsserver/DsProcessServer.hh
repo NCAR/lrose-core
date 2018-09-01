@@ -137,7 +137,7 @@ public:
 		  const string & instanceName,
 		  int port,
 		  int maxQuiescentSecs = -1,
-		  int maxClients = 128,
+		  int maxClients = 1024,
 		  bool isDebug = false,
 		  bool isVerbose = false,
 		  bool isSecure = false,
