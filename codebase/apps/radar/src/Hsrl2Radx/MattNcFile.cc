@@ -325,6 +325,11 @@ int MattNcFile::_readDimensions()
     return -1;
   }
   
+  if (_nTimesInFile < 10) {
+    _addErrStr("ERROR - MattNcFile::_readDimensions()");
+    _addErrInt("  Too few times in file: ", _nTimesInFile);
+    return -1;
+  }
 
   if (_file.readDim("range", _rangeDim) == 0) {
     _nRangeInFile = _rangeDim->size();
@@ -939,9 +944,9 @@ int MattNcFile::_readFieldVariables()
 
     string description;
     Nc3Att *descAtt = var->get_att("description");
-    if (unitsAtt != NULL) {
+    if (descAtt != NULL) {
       description = Nc3xFile::asString(descAtt);
-      delete unitsAtt;
+      delete descAtt;
     }
 
     string procStatus;
