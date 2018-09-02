@@ -48,6 +48,7 @@
 #include <Radx/RadxCfactors.hh>
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxRangeGeom.hh>
+#include <Radx/RadxXml.hh>
 #include <Spdb/DsSpdb.hh>
 #include <rapformats/ac_georef.hh>
 #include <cstring>
@@ -76,6 +77,7 @@ MattNcFile::MattNcFile(const Params &params) :
 MattNcFile::~MattNcFile()
 
 {
+  _file.close();
   clear();
 }
 
@@ -88,8 +90,6 @@ void MattNcFile::clear()
 
   clearErrStr();
   
-  _file.close();
-
   _timeDim = NULL;
   _rangeDim = NULL;
 
@@ -97,6 +97,8 @@ void MattNcFile::clear()
   _nRangeInFile = 0;
 
   _history.clear();
+  _project.clear();
+  _statusXml.clear();
 
   _timeVar = NULL;
   _dataTimes.clear();
@@ -225,8 +227,9 @@ int MattNcFile::readFromPath(const string &path,
 
   getTimeFromPath(path, _startTime);
 
-  // clear tmp rays
+  // init
   
+  clear();
   _nTimesInFile = 0;
   _nRangeInFile = 0;
   _rays.clear();
@@ -345,7 +348,8 @@ int MattNcFile::_readGlobalAttributes()
 {
 
   _history.clear();
-  
+  _project.clear();
+
   for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
     
     Nc3Att* att = _file.getNc3File()->get_att(ii);
@@ -354,7 +358,7 @@ int MattNcFile::_readGlobalAttributes()
       continue;
     }
 
-    if (att->values() == NULL) {
+    if (att->values() == NULL || att->num_vals() == 0) {
       delete att;
       continue;
     }
@@ -363,14 +367,19 @@ int MattNcFile::_readGlobalAttributes()
       _history = Nc3xFile::asString(att);
     }
 
+    if (!strcmp(att->name(), "project")) {
+      _project = Nc3xFile::asString(att);
+    }
+
     // Caller must delete attribute
 
     delete att;
     
   } // ii
-
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Global attr history: " << _history << endl;
+    cerr << "Global attr project: " << _project << endl;
   }
 
   return 0;
@@ -836,7 +845,7 @@ void MattNcFile::_loadReadVolume()
   _readVol->setComment("");
   _readVol->setDriver("Hsrl2Radx");
   _readVol->setCreated(_startTime.getW3cStr());
-  _readVol->setStatusXml("");
+  _readVol->setStatusXml(_statusXml);
   
   _readVol->setScanName("Vert");
   _readVol->setScanId(0);
@@ -877,6 +886,12 @@ void MattNcFile::_loadReadVolume()
 int MattNcFile::_readFieldVariables()
 
 {
+
+  // initialize status xml
+
+  _statusXml.clear();
+  _statusXml += RadxXml::writeStartTag("FieldStatus", 0);
+  bool gotStatus = false;
 
   // loop through the variables, adding data fields as appropriate
   
@@ -922,17 +937,31 @@ int MattNcFile::_readFieldVariables()
       delete unitsAtt;
     }
 
+    string description;
+    Nc3Att *descAtt = var->get_att("description");
+    if (unitsAtt != NULL) {
+      description = Nc3xFile::asString(descAtt);
+      delete unitsAtt;
+    }
+
+    string procStatus;
+    Nc3Att *statusAtt = var->get_att("ProcessingStatus");
+    if (statusAtt != NULL) {
+      procStatus = Nc3xFile::asString(statusAtt);
+      delete statusAtt;
+    }
+
     // load in the data
     
     if (ftype == nc3Double) {
-      if (_addFl64FieldToRays(var, name, units)) {
+      if (_addFl64FieldToRays(var, name, units, description)) {
         _addErrStr("ERROR - MattNcFile::_readFieldVariables");
         _addErrStr("  cannot read field name: ", name);
         _addErrStr(_file.getNc3Error()->get_errmsg());
         return -1;
       }
     } else {
-      if (_addSi08FieldToRays(var, name, units)) {
+      if (_addSi08FieldToRays(var, name, units, description)) {
         _addErrStr("ERROR - MattNcFile::_readFieldVariables");
         _addErrStr("  cannot read field name: ", name);
         _addErrStr(_file.getNc3Error()->get_errmsg());
@@ -940,7 +969,24 @@ int MattNcFile::_readFieldVariables()
       }
     }
 
+    // add processing status to statusXml, if appropriate
+
+    if (procStatus.size() > 0) {
+      _statusXml += RadxXml::writeStartTag("Field", 1);
+      _statusXml += RadxXml::writeString("Name", 2, name);
+      _statusXml += RadxXml::writeString("Description", 2, description);
+      _statusXml += RadxXml::writeString("Status", 2, procStatus);
+      _statusXml += RadxXml::writeEndTag("Field", 1);
+      gotStatus = true;
+    }
+
   } // ivar
+
+  if (gotStatus) {
+    _statusXml += RadxXml::writeEndTag("FieldStatus", 0);
+  } else {
+    _statusXml.clear();
+  }
 
   return 0;
 
@@ -953,7 +999,8 @@ int MattNcFile::_readFieldVariables()
 
 int MattNcFile::_addFl64FieldToRays(Nc3Var* var,
                                     const string &name,
-                                    const string &units)
+                                    const string &units,
+                                    const string &description)
   
 {
 
@@ -970,23 +1017,23 @@ int MattNcFile::_addFl64FieldToRays(Nc3Var* var,
 
   string outName(name);
   string standardName;
-  string longName;
+  // string longName;
   if (outName.find(_params.combined_hi_field_name) != string::npos) {
     outName = Names::CombinedHighCounts;
     standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-    longName = "high_channel_combined_backscatter_photon_count";
+    // longName = "high_channel_combined_backscatter_photon_count";
   } else if (outName.find(_params.combined_lo_field_name) != string::npos) {
     outName = Names::CombinedLowCounts;
     standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-    longName = "low_channel_combined_backscatter_photon_count";
+    // longName = "low_channel_combined_backscatter_photon_count";
   } else if (outName.find(_params.molecular_field_name) != string::npos) {
     outName = Names::MolecularCounts;
     standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
-    longName = Names::lidar_copolar_molecular_backscatter_photon_count;
+    // longName = Names::lidar_copolar_molecular_backscatter_photon_count;
   } else if (outName.find(_params.cross_field_name) != string::npos) {
     outName = Names::CrossPolarCounts;
     standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
-    longName = Names::lidar_crosspolar_combined_backscatter_photon_count;
+    // longName = Names::lidar_crosspolar_combined_backscatter_photon_count;
   }
   
   // loop through the rays
@@ -1004,8 +1051,9 @@ int MattNcFile::_addFl64FieldToRays(Nc3Var* var,
                             dd,
                             true);
     
-    field->setLongName(longName);
+    // field->setLongName(longName);
     field->setStandardName(standardName);
+    field->setLongName(description);
     field->copyRangeGeom(_geom);
     
   }
@@ -1021,7 +1069,8 @@ int MattNcFile::_addFl64FieldToRays(Nc3Var* var,
 
 int MattNcFile::_addSi08FieldToRays(Nc3Var* var,
                                     const string &name,
-                                    const string &units)
+                                    const string &units,
+                                    const string &description)
   
 {
 
@@ -1082,6 +1131,7 @@ int MattNcFile::_addSi08FieldToRays(Nc3Var* var,
     
     field->setLongName(longName);
     field->setStandardName(standardName);
+    field->setComment(description);
     field->copyRangeGeom(_geom);
     
   }

@@ -162,6 +162,7 @@ private:
   // global attributes
 
   string _history;
+  string _project;
   
   // times
 
@@ -206,7 +207,9 @@ private:
 
   vector<RadxRay *> _rays;
 
-  // field variables
+  // extra attributes in XML
+
+  string _statusXml;
   
   // private methods for NcfRadial.cc
   
@@ -233,11 +236,13 @@ private:
 
   int _addFl64FieldToRays(Nc3Var* var,
                           const string &name,
-                          const string &units);
+                          const string &units,
+                          const string &description);
   
   int _addSi08FieldToRays(Nc3Var* var,
                           const string &name,
-                          const string &units);
+                          const string &units,
+                          const string &description);
 
   /// add integer value to error string, with label
 
