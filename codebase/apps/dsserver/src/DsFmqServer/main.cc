@@ -28,7 +28,7 @@
 //  Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 //  March 1999
 //
-// $Id: main.cc,v 1.7 2016/03/04 02:29:41 dixon Exp $
+// $Id: main.cc,v 1.8 2018/09/01 23:55:14 dixon Exp $
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +44,7 @@ static void dieGracefully( int sig );
 
 int main( int argc, char **argv )
 {
-  int status;
+  int status = 0;
    //        
    // Trap signals for a clean exit
    //                                                                        

@@ -379,7 +379,7 @@ int Server::convertToSymprod(const void *params,
     while (centLon >= _minLon + 360.0)
       centLon -= 360.0;
 
-    double lonOffset = centLon - sam.getCentroidLon();
+    lonOffset = centLon - sam.getCentroidLon();
   }
 
   // override the icon name if southern hemisphere
@@ -1223,12 +1223,12 @@ void Server::_drawForecasts(const vector <sigairmet_forecast_t> &forecasts,
 
     vector<double> lats, lons;
     time_t ftime = *jj;
-    int id;
+    // int id;
     for (size_t ii = 0; ii < forecasts.size(); ii++) {
       if (forecasts[ii].time == ftime) {
         lats.push_back(forecasts[ii].lat);
         lons.push_back(forecasts[ii].lon);
-        id = forecasts[ii].id;
+        // id = forecasts[ii].id;
       }
     } // ii
     
@@ -1404,12 +1404,12 @@ void Server::_drawOutlooks(const vector <sigairmet_forecast_t> &outlooks,
     
     vector<double> lats, lons;
     time_t ftime = *jj;
-    int id;
+    // int id;
     for (size_t ii = 0; ii < outlooks.size(); ii++) {
       if (outlooks[ii].time == ftime) {
         lats.push_back(outlooks[ii].lat);
         lons.push_back(outlooks[ii].lon);
-        id = outlooks[ii].id;
+        // id = outlooks[ii].id;
       }
     } // ii
     

@@ -31,6 +31,7 @@ SUB_DIRS = \
 	GenPoly2Symprod \
 	GenPolyStats2Symprod \
 	GenPt2Symprod \
+	GenPtCircle2Symprod \
 	GenPtField2Symprod \
 	GetPortNumber \
 	HydroStation2Symprod \

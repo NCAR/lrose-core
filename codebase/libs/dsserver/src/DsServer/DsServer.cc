@@ -55,7 +55,7 @@ DsServer::DsServer(const string & executableName,
                    const string & instanceName,
                    int port,
                    int maxQuiescentSecs /* = -1*/,
-                   int maxClients /* = 128*/,
+                   int maxClients /* = 1024 */,
                    bool forkClientHandlers /* = false*/,
                    bool isDebug /* = false*/,
                    bool isVerbose /* = false*/,
@@ -146,6 +146,16 @@ DsServer::DsServer(const string & executableName,
     PMU_force_register((char *) pmuStr.c_str());
 #endif
 
+    // override max clients from environment?
+    
+    char *DS_SERVER_MAX_CLIENTS = getenv("DS_SERVER_MAX_CLIENTS");
+    if (DS_SERVER_MAX_CLIENTS != NULL) {
+      int max_clients;
+      if (sscanf(DS_SERVER_MAX_CLIENTS, "%d", &max_clients) == 1) {
+        _maxClients = max_clients;
+      }
+    }
+    
     // Open socket on the port.
     _serverSocket = new ServerSocket();
     if (_serverSocket->openServer(_port) < 0) {
@@ -160,8 +170,8 @@ DsServer::DsServer(const string & executableName,
     }
 
     if (_isVerbose) {
-        cerr << "Server has opened ServerSocket at port "
-             << _port << "." << endl;
+      cerr << "DsServer has opened ServerSocket at port " << _port << endl;
+      cerr << "  _maxClients: " << _maxClients << endl;
     }
 
     // Set status.

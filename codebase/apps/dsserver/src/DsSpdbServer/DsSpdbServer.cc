@@ -196,10 +196,10 @@ int DsSpdbServer::handleDataCommand(Socket * socket,
   }
   
   if (_isDebug) {
-    cerr << "-->> DsSpdbServer::handleDataCommand - exit" << endl;
+    cerr << "-->> DsSpdbServer::handleDataCommand - exit, iret: " << iret << endl;
   }
   
-  return 0;
+  return iret;
 
 }
     

@@ -170,9 +170,9 @@ int Server::convertToSymprod(const void *params,
       acars.lon -= 360.0;
 
     // Is latitude/longitude OK?
-
-    if (acars.lat <= _minLat || acars.lat >= _maxLat &&
-	acars.lon <= _minLon || acars.lon >= _maxLon) {
+    
+    if ((acars.lat < _minLat || acars.lat > _maxLat) &&
+	(acars.lon < _minLon || acars.lon > _maxLon)) {
       return -1;
     }
   }

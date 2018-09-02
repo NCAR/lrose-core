@@ -64,7 +64,7 @@ DsLOCATOR::DsLOCATOR()
   if ( overrideEnv != NULL ) {
     int overridePort;
     if ( (sscanf( overrideEnv, "%d", &overridePort ) == 1 ) &&
-         overridePort > 5000 ) {
+         overridePort > 1023 ) {
       basePort = overridePort;
     } 
     else {
@@ -612,7 +612,7 @@ DsLOCATOR::_checkServerStatus(const DsURL &url,
   char *DS_PING_TIMEOUT_MSECS = getenv("DS_PING_TIMEOUT_MSECS");
   if (DS_PING_TIMEOUT_MSECS != NULL) {
     int timeout;
-    if (sscanf(DS_PING_TIMEOUT_MSECS, "%d", &timeout)) {
+    if (sscanf(DS_PING_TIMEOUT_MSECS, "%d", &timeout) == 1) {
       pingTimeoutMsecs = timeout;
     }
   }
