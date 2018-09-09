@@ -319,7 +319,6 @@ private:
 
   // scalar variables
 
-  int _volume_start_time;
   int _base_time;
 
   int _Cell_Spacing_Method;
@@ -434,6 +433,7 @@ private:
   void _readGlobalAttributes();
   int _createRays();
   int _readScalarVariables();
+  int _readCellDistance();
   int _readRayVariables();
   int _readRayVar(const string &name, vector<double> &vals);
   int _readRayVar(const string &name, vector<int> &vals);
