@@ -141,7 +141,7 @@ void Mdvx::clearFields()
   for (unsigned int i = 0; i < _fields.size(); i++) {
     delete _fields[i];
   }
-  _fields.erase(_fields.begin(), _fields.end());
+  _fields.clear();
   _mhdr.n_fields = 0;
 }
 
@@ -151,7 +151,7 @@ void Mdvx::clearChunks()
   for (unsigned int i = 0; i < _chunks.size(); i++) {
     delete _chunks[i];
   }
-  _chunks.erase(_chunks.begin(), _chunks.end());
+  _chunks.clear();
   _mhdr.n_chunks = 0;
 }
 
@@ -186,7 +186,7 @@ Mdvx &Mdvx::_copy(const Mdvx &rhs)
   for (size_t i = 0; i < _fields.size(); i++) {
     delete _fields[i];
   }
-  _fields.erase(_fields.begin(), _fields.end());
+  _fields.clear();
   for (size_t i = 0; i < rhs._fields.size(); i++) {
     MdvxField *fldp = new MdvxField(*rhs._fields[i]);
     _fields.push_back(fldp);
@@ -197,7 +197,7 @@ Mdvx &Mdvx::_copy(const Mdvx &rhs)
   for (size_t i = 0; i < _chunks.size(); i++) {
     delete _chunks[i];
   }
-  _chunks.erase(_chunks.begin(), _chunks.end());
+  _chunks.clear();
   for (size_t i = 0; i < rhs._chunks.size(); i++) {
     MdvxChunk *chunkp = new MdvxChunk(*rhs._chunks[i]);
     _chunks.push_back(chunkp);
@@ -599,13 +599,13 @@ void Mdvx::setDataSetInfo(const char *info)
     MdvxChunk *chunk = getChunkById(CHUNK_DATA_SET_INFO);
     if (chunk == NULL) {
       // no data set info chunk yet
-      chunk = new MdvxChunk();
+      chunk = new MdvxChunk;
+      addChunk(chunk);
     }
     chunk->setId(CHUNK_DATA_SET_INFO);
     chunk->setInfo("data-set-info");
     chunk->setData(_dataSetInfo.c_str(),
                    _dataSetInfo.size() + 1);
-    addChunk(chunk);
   }
 }
 
