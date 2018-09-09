@@ -223,8 +223,8 @@ void Mdvx::addReadField(const string &field_name)
 void Mdvx::clearReadFields()
 
 {
-  _readFieldNums.erase(_readFieldNums.begin(), _readFieldNums.end());
-  _readFieldNames.erase(_readFieldNames.begin(), _readFieldNames.end());
+  _readFieldNums.clear();
+  _readFieldNames.clear();
 }
 
 
@@ -250,7 +250,7 @@ void Mdvx::setReadNoChunks()
 
 void Mdvx::clearReadChunks()
 {
-  _readChunkNums.erase(_readChunkNums.begin(), _readChunkNums.end());
+  _readChunkNums.clear();
 }
 
 
@@ -2310,7 +2310,7 @@ int Mdvx::_read_all_headers()
 
   // field headers
 
-  _fhdrsFile.erase(_fhdrsFile.begin(), _fhdrsFile.end());
+  _fhdrsFile.clear();
   for (int i = 0; i < _mhdrFile.n_fields; i++) {
     field_header_t fhdr;
     if (_read_field_header(i, fhdr, infile)) {
@@ -2335,7 +2335,7 @@ int Mdvx::_read_all_headers()
 
   // vlevel headers
 
-  _vhdrsFile.erase(_vhdrsFile.begin(), _vhdrsFile.end());
+  _vhdrsFile.clear();
   for (int i = 0; i < _mhdrFile.n_fields; i++) {
 
     field_header_t &fhdr = _fhdrsFile[i];
@@ -2390,7 +2390,7 @@ int Mdvx::_read_all_headers()
 
   // chunk headers
 
-  _chdrsFile.erase(_chdrsFile.begin(), _chdrsFile.end());
+  _chdrsFile.clear();
   for (int i = 0; i < _mhdrFile.n_chunks; i++) {
 
     chunk_header_t chdr;
@@ -2520,7 +2520,7 @@ int Mdvx::_read_volume(bool fill_missing,
 
   if (_readFieldNames.size() > 0) {
     bool error = false;
-    _readFieldNums.erase(_readFieldNums.begin(), _readFieldNums.end());
+    _readFieldNums.clear();
     for (size_t i = 0; i < _readFieldNames.size(); i++) {
       bool fieldFound = false;
       for (int j = 0; j < _mhdr.n_fields; j++) {
