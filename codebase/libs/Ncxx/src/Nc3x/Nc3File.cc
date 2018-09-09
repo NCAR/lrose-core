@@ -1460,6 +1460,7 @@ if (cur_rec) {
 delete [] cur_rec;
 }
 char nam[NC_MAX_NAME];
+memset(nam, 0, NC_MAX_NAME);
 if (the_file 
   && Nc3Error::set_err(
     nc_inq_varname(the_file->id(), the_id, nam)
@@ -1479,6 +1480,7 @@ Nc3Var::Nc3Var(Nc3File* nc, int id)
         : Nc3TypedComponent(nc), the_id(id)
 {
 char nam[NC_MAX_NAME];
+memset(nam, 0, NC_MAX_NAME);
 if (the_file 
   && Nc3Error::set_err(
     nc_inq_varname(the_file->id(), the_id, nam)
@@ -1496,6 +1498,7 @@ init_cur();
 int num;
 for(num=0; num < num_atts(); num++) {
 char aname[NC_MAX_NAME];
+memset(aname, 0, NC_MAX_NAME);
 Nc3Error::set_err(
   nc_inq_attname(the_file->id(), the_id, num, aname)
     );
@@ -1510,6 +1513,7 @@ return num;			// num_atts() if no such attribute
 if (attnum < 0 || attnum >= num_atts())
   return 0;
 char aname[NC_MAX_NAME];
+memset(aname, 0, NC_MAX_NAME);
 if (Nc3Error::set_err(
   nc_inq_attname(the_file->id(), the_id, attnum, aname)
     ) != NC_NOERR)
