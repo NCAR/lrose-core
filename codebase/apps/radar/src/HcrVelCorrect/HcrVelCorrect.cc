@@ -1457,7 +1457,7 @@ void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *ray)
   }
   
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Wrote ZDR bias results to spdb, url: " 
+    cerr << "Wrote HCR vel correction results to spdb, url: " 
          << _params.surface_vel_results_spdb_output_url << endl;
     cerr << "=====================================" << endl;
     cerr << xml;
