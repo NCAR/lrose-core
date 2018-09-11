@@ -144,6 +144,8 @@ private:
   void _correctVelForRay(RadxRay *ray, double surfVel);
   void _copyVelForRay(RadxRay *ray);
 
+  void _writeResultsToSpdb(const RadxRay *ray);
+
 };
 
 #endif

@@ -1137,6 +1137,39 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("WRITING SURFACE VEL RESULTS TO SPDB IN XML");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'write_surface_vel_results_to_spdb'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_surface_vel_results_to_spdb");
+    tt->descr = tdrpStrDup("Option to write out surface velocity results to SPDB.");
+    tt->help = tdrpStrDup("The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.");
+    tt->val_offset = (char *) &write_surface_vel_results_to_spdb - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'surface_vel_results_spdb_output_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("surface_vel_results_spdb_output_url");
+    tt->descr = tdrpStrDup("URL for writing surface vel results to SPDB XML.");
+    tt->help = tdrpStrDup("For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir");
+    tt->val_offset = (char *) &surface_vel_results_spdb_output_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/spdb/hcr_surface_vel");
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("FIR FILTERING FOR VELOCITY ESTIMATES");
     tt->comment_text = tdrpStrDup("");
     tt++;

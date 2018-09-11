@@ -302,6 +302,22 @@ paramdef int {
 } output_fmq_data_mapper_report_interval;
 
 commentdef {
+  p_header = "WRITING SURFACE VEL RESULTS TO SPDB IN XML";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out surface velocity results to SPDB.";
+  p_help = "The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
+} write_surface_vel_results_to_spdb;
+
+paramdef string {
+  p_default = "/tmp/spdb/hcr_surface_vel";
+  p_descr = "URL for writing surface vel results to SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} surface_vel_results_spdb_output_url;
+
+commentdef {
   p_header = "FIR FILTERING FOR VELOCITY ESTIMATES";
 }
 

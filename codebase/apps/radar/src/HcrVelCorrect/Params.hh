@@ -463,6 +463,10 @@ public:
 
   int output_fmq_data_mapper_report_interval;
 
+  tdrp_bool_t write_surface_vel_results_to_spdb;
+
+  char* surface_vel_results_spdb_output_url;
+
   double spike_filter_difference_threshold;
 
   double *_stage1_filter;
@@ -481,7 +485,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[52];
+  mutable TDRPtable _table[55];
 
   const char *_className;
 
