@@ -445,10 +445,11 @@ def buildPackage():
     # copy the dynamic libraries into runtime area:
     #     $prefix/bin/${package}_runtime_libs
 
-    os.chdir(coreDir)
-    shellCmd("./codebase/make_bin/installOriginLibFiles.py " + \
-             " --binDir " + tmpBinDir +
-             " --relDir " + package + "_runtime_libs --debug")
+    if (platform != "darwin"):
+        os.chdir(coreDir)
+        shellCmd("./codebase/make_bin/installOriginLibFiles.py " + \
+                 " --binDir " + tmpBinDir +
+                 " --relDir " + package + "_runtime_libs --debug")
 
 ########################################################################
 # perform install
