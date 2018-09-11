@@ -43,9 +43,10 @@
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
+#include <Radx/RadxXml.hh>
 #include <dsserver/DsLdataInfo.hh>
+#include <Spdb/DsSpdb.hh>
 #include <didss/DsInputPath.hh>
-#include <toolsa/TaXml.hh>
 #include <toolsa/pmu.h>
 using namespace std;
 
@@ -381,6 +382,12 @@ int HcrVelCorrect::_processFile(const string &readPath)
       
       _filtVol.addRay(outRay);
 
+      // write results to SPDB in XML if requested
+
+      if (_params.write_surface_vel_results_to_spdb) {
+        _writeResultsToSpdb(outRay);
+      }
+
     }
 
   } // iray
@@ -686,6 +693,12 @@ int HcrVelCorrect::_runFmq()
       // write out ray
       
       _writeRay(ray);
+
+      // write results to SPDB in XML if requested
+
+      if (_params.write_surface_vel_results_to_spdb) {
+        _writeResultsToSpdb(ray);
+      }
 
     } // if (_surfVel.processRay(ray) == 0)
 
@@ -1407,3 +1420,48 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
 
 }
 
+
+//////////////////////////////////////////////////
+// write results to SPDB in XML
+
+void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *ray)
+  
+{
+
+  // check if we have a good velocity
+  
+  if (!_surfVel.velocityIsValid()) {
+    return;
+  }
+
+  // form XML string
+
+  string xml;
+  xml += RadxXml::writeStartTag("HcrVelCorr", 0);
+  xml += RadxXml::writeDouble("MeasVel", 1, _surfVel.getVelMeasured());
+  xml += RadxXml::writeDouble("CorrVel", 1, _surfVel.getSurfaceVelocity());
+  xml += RadxXml::writeDouble("Range", 1, _surfVel.getRangeToSurface());
+  xml += RadxXml::writeDouble("DbzMax", 1, _surfVel.getDbzMax());
+  xml += RadxXml::writeEndTag("HcrVelCorr", 0);
+
+  // write to SPDB
+
+  DsSpdb spdb;
+  time_t validTime = ray->getTimeSecs();
+  spdb.addPutChunk(0, validTime, validTime, xml.size() + 1, xml.c_str());
+  if (spdb.put(_params.surface_vel_results_spdb_output_url,
+               SPDB_XML_ID, SPDB_XML_LABEL)) {
+    cerr << "ERROR - HcrVelCorrect::_writeResultsToSpdb" << endl;
+    cerr << spdb.getErrStr() << endl;
+    return;
+  }
+  
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "Wrote ZDR bias results to spdb, url: " 
+         << _params.surface_vel_results_spdb_output_url << endl;
+    cerr << "=====================================" << endl;
+    cerr << xml;
+    cerr << "=====================================" << endl;
+  }
+ 
+}

@@ -209,12 +209,14 @@ int ForayNcRadxFile::_readPath(const string &path)
   _readGlobalAttributes();
 
   // read in scalar variables
-  
+
   if (_readScalarVariables()) {
     _addErrStr("ERROR - ForayNcRadxFile::_readPath");
     _addErrStr("  Cannot read scalar variables");
     _addErrStr("  The following variables are required:");
-    _addErrStr("    base_time, Fixed_Angle, Range_to_First_Cell, Cell_Spacing");
+    _addErrStr("    base_time or volume_start_time");
+    _addErrStr("    Fixed_Angle");
+    _addErrStr("    Range_to_First_Cell, Cell_Spacing");
     _addErrStr("    Latitude, Longitude, Altitude");
     return -1;
   }
@@ -762,17 +764,28 @@ int ForayNcRadxFile::_readScalarVariables()
   
   int iret = 0;
 
-  _file.readIntVal("volume_start_time", _volume_start_time, 0, false);
-  iret |= _file.readIntVal("base_time", _base_time, 0, true);
+  if (_file.readIntVal("base_time", _base_time, 0, true)) {
+    iret |= _file.readIntVal("volume_start_time", _base_time, 0, true);
+  }
+
   _file.readIntVal("Cell_Spacing_Method", _Cell_Spacing_Method, 0, false);
   _file.readIntVal("calibration_data_present", _calibration_data_present, 0, false);
-  
-  iret |= _file.readDoubleVal("Fixed_Angle",
-                              _Fixed_Angle, Radx::missingMetaDouble, true);
+
+  _Fixed_Angle = -9999.0;
+  _file.readDoubleVal("Fixed_Angle",
+                      _Fixed_Angle, Radx::missingMetaDouble, true);
+  if (_Fixed_Angle < -9990) {
+    cerr << "WARNING - ForayNcRadxFile::_readScalarVariables()" << endl;
+    cerr << "  Variable 'Fixed_Angle' not found'" << endl;
+    cerr << "  Fixed angle will be computed from the data" << endl;
+  }
+
   iret |= _file.readDoubleVal("Range_to_First_Cell",
                               _Range_to_First_Cell, Radx::missingMetaDouble, true);
-  iret |= _file.readDoubleVal("Cell_Spacing",
-                              _Cell_Spacing, Radx::missingMetaDouble, true);
+  if (_file.readDoubleVal("Cell_Spacing",
+                          _Cell_Spacing, Radx::missingMetaDouble, true)) {
+    iret |= _readCellDistance();
+  }
   
   _file.readDoubleVal("Nyquist_Velocity",
                       _Nyquist_Velocity, Radx::missingMetaDouble, false);
@@ -933,6 +946,49 @@ int ForayNcRadxFile::_readScalarVariables()
   _geom.setRangeGeom(_startRangeKm, _gateSpacingKm);
 
   return 0;
+
+}
+
+//////////////////////////////////////////////////
+// read the Cell_Distance_Vector variable
+// This is used if Cell_Spacing is missing
+
+int ForayNcRadxFile::_readCellDistance()
+
+{
+
+  Nc3Var *distVar = _file.getNc3File()->get_var("Cell_Distance_Vector");
+  if (distVar == NULL) {
+    _addErrStr("ERROR - ForayNcRadxFile::_readCellDistanceVar");
+    _addErrStr("  Cannot find Cell_Distance_Vector variable");
+    _addErrStr("          nor Cell_Spacing variable");
+    return -1;
+  }
+
+  // check time dimension
+  
+  if (distVar->num_dims() < 1) {
+    _addErrStr("ERROR - ForayNcRadxFile::_readCellDistanceVar");
+    _addErrStr("  variable Cell_Distance_Vector has no dimensions");
+    return -1;
+  }
+  Nc3Dim *dim = distVar->get_dim(0);
+  if (dim != _maxCellsDim) {
+    _addErrStr("ERROR - ForayNcRadxFile::_readCellDistanceVar");
+    _addErrStr("  variable Cell_Distance_Vector");
+    _addErrStr("  has incorrect dimension, dim name: ", dim->name());
+    _addErrStr("  should be maxCells");
+    return -1;
+  }
+
+  if (distVar->get(&_Cell_Spacing, 1)) {
+    return 0;
+  } else {
+    _addErrStr("ERROR - ForayNcRadxFile::_readCellDistanceVar");
+    _addErrStr("  Cannot read variable Cell_Distance_Vector");
+    _addErrStr(_file.getNc3Error()->get_errmsg());
+    return -1;
+  }
 
 }
 
@@ -1586,6 +1642,10 @@ int ForayNcRadxFile::_finalizeReadVolume()
   
   RadxRcalib *cal = new RadxRcalib(_rCal);
   _readVol->addCalib(cal);
+
+  if (_Fixed_Angle < -9990) {
+    _readVol->computeFixedAnglesFromRays();
+  }
 
   // set max range
 

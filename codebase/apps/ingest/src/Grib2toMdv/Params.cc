@@ -1312,7 +1312,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("out_projection_info");
     tt->descr = tdrpStrDup("This is the user defined projection");
-    tt->help = tdrpStrDup("If remap_output is true this defines the projection to remap too.The choice of projections are PROJ_LATLON, PROJ_LAMBERT_CONF and PROJ_FLAT. PROJ_LATLON is a latitude/longitude projection, and if it is chosen the remaining parameters can be ignored. PROJ_FLAT is a flat projection, and if it is chosen the parameters rotation, origin_lat, origin_lon must be set. PROJ_LAMBERT_CONF is a Lambert conformal projection, and if it is chosen the parameters origin_lat, origin_lon, ref_lat_1 and ref_lat_2 must be set.");
+    tt->help = tdrpStrDup("If remap_output is true this defines the projection to remap to.\n\nThe choice of projections are PROJ_LATLON, PROJ_LAMBERT_CONF and PROJ_FLAT.\n\nPROJ_LATLON is a latitude/longitude projection, and if it is chosen the remaining parameters can be ignored.\n\nPROJ_FLAT is a flat projection, and if it is chosen the parameters rotation, origin_lat, origin_lon must be set.\n\nPROJ_LAMBERT_CONF is a Lambert conformal projection, and if it is chosen the parameters origin_lat, origin_lon, ref_lat_1 and ref_lat_2 must be set.");
     tt->val_offset = (char *) &out_projection_info - &_start_;
     tt->struct_def.name = tdrpStrDup("projection_info_t");
     tt->struct_def.nfields = 6;
@@ -1375,8 +1375,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("out_grid_info");
-    tt->descr = tdrpStrDup("This is the user defined grid");
-    tt->help = tdrpStrDup("if remap_output is true this defines the grid info for the remap.");
+    tt->descr = tdrpStrDup("This is the user defined grid.");
+    tt->help = tdrpStrDup("If remap_output is true this defines the grid info for the remap.\n\nFor a LATLON projection:\n  minx = minLon\n  miny = minLat\n  dx = deltaLon\n  dy = deltaLat.");
     tt->val_offset = (char *) &out_grid_info - &_start_;
     tt->struct_def.name = tdrpStrDup("grid_info_t");
     tt->struct_def.nfields = 6;
