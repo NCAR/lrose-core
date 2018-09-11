@@ -104,6 +104,16 @@ public:
   bool velocityIsValid() const { return _velIsValid; }
   double getSurfaceVelocity() const { return _surfaceVel; }
   RadxRay *getFiltRay() { return _filtRay; }
+  
+  // the following return NAN if not available
+
+  double getRangeToSurface() const;
+  double getDbzMax() const;
+  double getVelMeasured() const;
+  double getVelStage1() const;
+  double getVelSpike() const;
+  double getVelCond() const;
+  double getVelFinal() const; // should be same as getSurfaceVelocity()
 
 protected:
 private:
