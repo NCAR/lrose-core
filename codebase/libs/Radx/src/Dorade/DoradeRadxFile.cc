@@ -3489,6 +3489,15 @@ int DoradeRadxFile::_writeSuperSwib(int fileSize)
   
 {
 
+  // check environment for extended paths
+  bool write32Bit = false;
+  char *dorade32BitWriteStr = getenv("DORADE_WRITE_32BIT_SWIB");
+  if (dorade32BitWriteStr != NULL) {
+    if (!strcasecmp(dorade32BitWriteStr, "TRUE")) {
+      write32Bit = true;
+    }
+  }
+
   // fill
 
   DoradeData::init(_ddSwib);
@@ -3501,9 +3510,17 @@ int DoradeRadxFile::_writeSuperSwib(int fileSize)
   _ddSwib.num_params = _writeVol->getFields().size();
 
   strncpy(_ddSwib.radar_name, _writeVol->getInstrumentName().c_str(), 8);
-  _ddSwib.d_start_time = _ddSwib.start_time + _writeVol->getStartNanoSecs() / 1.0e9;
-  _ddSwib.d_stop_time = _ddSwib.stop_time + _writeVol->getEndNanoSecs() / 1.0e9;
-  
+  double delta_start = _writeVol->getStartNanoSecs() / 1.0e9;
+  double delta_stop = _writeVol->getEndNanoSecs() / 1.0e9;
+
+  // if the start or stop time is less than the precision we can report, 
+  // set the time to zero.  
+  if ((delta_start > 1.0) || (delta_start < 0.0)) delta_start = 0.0;
+  if ((delta_stop  > 1.0) || (delta_stop  < 0.0)) delta_stop  = 0.0;
+
+  _ddSwib.d_start_time = _ddSwib.start_time + delta_start;
+  _ddSwib.d_stop_time = _ddSwib.stop_time + delta_stop;;
+
   int numKeys = 0;
   if (_rotationTableSize > 0) {
     _ddSwib.key_table[numKeys].offset = _rotationTableOffset;
@@ -3520,22 +3537,45 @@ int DoradeRadxFile::_writeSuperSwib(int fileSize)
   _ddSwib.num_key_tables = numKeys;
 
   // byte swap as needed
+  
+  if (write32Bit) {
+    DoradeData::super_SWIB_t copy64 = _ddSwib;
+    DoradeData::super_SWIB_32bit_t copy;
+    //  Ah, but we need to convert 64 bit to 32 bit structure
+    // and change the number of bytes as well.
+    int byteAdjustment = sizeof(_ddSwib.pad);
+    copy64.sizeof_file -= byteAdjustment; // 4;
+    copy64.nbytes -= byteAdjustment; // 4;
+    DoradeData::copy(copy64, copy);
+    if (!_writeNativeByteOrder) {
+      DoradeData::swap(copy);
+    }
 
-  DoradeData::super_SWIB_t copy = _ddSwib;
-  if (!_writeNativeByteOrder) {
-    DoradeData::swap(copy);
+    // write                                                                                                                   
+    if (fwrite(&copy, sizeof(copy), 1, _file) != 1) {
+      _addErrStr("ERROR - DoradeRadxFile::_writeSuperSwib()");
+      _addErrStr("  Cannot write super sweep block 32");
+      _addErrStr("  file path: ", _pathInUse);
+      _addErrStr(strerror(errno));
+      return -1;
+    }
+  } else {
+    DoradeData::super_SWIB_t copy = _ddSwib;
+ 
+    if (!_writeNativeByteOrder) {
+      DoradeData::swap(copy);
+    }
+
+    // write
+
+    if (fwrite(&copy, sizeof(copy), 1, _file) != 1) {
+      _addErrStr("ERROR - DoradeRadxFile::_writeSuperSwib()");
+      _addErrStr("  Cannot write super sweep block");
+      _addErrStr("  file path: ", _pathInUse);
+      _addErrStr(strerror(errno));
+      return -1;
+    }
   }
-
-  // write
-
-  if (fwrite(&copy, sizeof(copy), 1, _file) != 1) {
-    _addErrStr("ERROR - DoradeRadxFile::_writeSuperSwib()");
-    _addErrStr("  Cannot write super sweep block");
-    _addErrStr("  file path: ", _pathInUse);
-    _addErrStr(strerror(errno));
-    return -1;
-  }
-
   return 0;
 
 }
