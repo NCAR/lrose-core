@@ -178,7 +178,7 @@ FindSurfaceVel::~FindSurfaceVel()
 
 double FindSurfaceVel::getRangeToSurface() const
 {
-  if (_rangeToSurface) {
+  if (!_rangeToSurface) {
     return NAN;
   } else {
     return _rangeToSurface[_finalIndex];
@@ -187,7 +187,7 @@ double FindSurfaceVel::getRangeToSurface() const
 
 double FindSurfaceVel::getDbzMax() const
 {
-  if (_dbzMax) {
+  if (!_dbzMax) {
     return NAN;
   } else {
     return _dbzMax[_finalIndex];
@@ -196,7 +196,7 @@ double FindSurfaceVel::getDbzMax() const
 
 double FindSurfaceVel::getVelMeasured() const
 {
-  if (_surfaceVelArray) {
+  if (!_surfaceVelArray) {
     return NAN;
   } else {
     return _surfaceVelArray[_finalIndex];
@@ -205,7 +205,7 @@ double FindSurfaceVel::getVelMeasured() const
 
 double FindSurfaceVel::getVelStage1() const
 {
-  if (_filteredStage1) {
+  if (!_filteredStage1) {
     return NAN;
   } else {
     return _filteredStage1[_finalIndex];
@@ -214,7 +214,7 @@ double FindSurfaceVel::getVelStage1() const
 
 double FindSurfaceVel::getVelSpike() const
 {
-  if (_filteredSpike) {
+  if (!_filteredSpike) {
     return NAN;
   } else {
     return _filteredSpike[_finalIndex];
@@ -223,7 +223,7 @@ double FindSurfaceVel::getVelSpike() const
 
 double FindSurfaceVel::getVelCond() const
 {
-  if (_filteredCond) {
+  if (!_filteredCond) {
     return NAN;
   } else {
     return _filteredCond[_finalIndex];
@@ -232,7 +232,7 @@ double FindSurfaceVel::getVelCond() const
 
 double FindSurfaceVel::getVelFinal() const
 {
-  if (_filteredFinal) {
+  if (!_filteredFinal) {
     return NAN;
   } else {
     return _filteredFinal[_finalIndex];
