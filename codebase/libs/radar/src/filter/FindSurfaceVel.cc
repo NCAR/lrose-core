@@ -176,15 +176,6 @@ FindSurfaceVel::~FindSurfaceVel()
 // get results
 // the following return NAN if results not available
 
-RadxRay *FindSurfaceVel::getFiltRay() 
-{
-  if (_velIsValid) {
-    return _filtRay; 
-  } else {
-    return NULL;
-  }
-}
-
 double FindSurfaceVel::getVelMeasured() const
 {
   if (!_velSurfaceArray || !_velIsValid) {

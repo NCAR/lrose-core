@@ -102,7 +102,7 @@ public:
   // get results, on condition that processRay() returns success, i.e. 0
   
   bool velocityIsValid() const { return _velIsValid; }
-  RadxRay *getFiltRay();
+  RadxRay *getFiltRay() { return _filtRay; }
   
   // the following return NAN if not available
 
