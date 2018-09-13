@@ -106,11 +106,11 @@ public:
   
   // the following return NAN if not available
 
-  double getVelSurface() const;
+  double getVelMeasured() const;
   double getVelStage1() const;
   double getVelSpike() const;
   double getVelCond() const;
-  double getVelFinal() const; // should be same as getSurfaceVelocity()
+  double getVelFilt() const;
   double getRangeToSurface() const;
   double getDbzMax() const;
 

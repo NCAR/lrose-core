@@ -185,7 +185,7 @@ RadxRay *FindSurfaceVel::getFiltRay()
   }
 }
 
-double FindSurfaceVel::getVelSurface() const
+double FindSurfaceVel::getVelMeasured() const
 {
   if (!_velSurfaceArray || !_velIsValid) {
     return NAN;
@@ -239,7 +239,7 @@ double FindSurfaceVel::getVelCond() const
   }
 }
 
-double FindSurfaceVel::getVelFinal() const
+double FindSurfaceVel::getVelFilt() const
 {
   if (!_filteredFinal || !_velIsValid) {
     return NAN;
