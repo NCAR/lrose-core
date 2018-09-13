@@ -141,7 +141,7 @@ private:
 
   int _getDsScanMode(Radx::SweepMode_t mode);
 
-  void _correctVelForRay(RadxRay *ray, double surfVel);
+  void _correctVelForRay(RadxRay *ray, double surfFilt);
   void _copyVelForRay(RadxRay *ray);
 
   void _writeResultsToSpdb(const RadxRay *ray);
