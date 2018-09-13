@@ -1181,7 +1181,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("spike_filter_difference_threshold");
     tt->descr = tdrpStrDup("Threshold for removing spikes in the original data and resetting the value to that form the short filter.");
-    tt->help = tdrpStrDup("We apply both the stage-1 and spike filters to the time series of surface velocity. If the absolute difference between the two exceeds this threshold, then the conditioned data is set to the output from the stage-1 filter. If the absolute difference is below this threshold then the original data point is retained. After this step the final filter it applied to the conditioned data to compute the final filtered value.");
+    tt->help = tdrpStrDup("We apply both the stage-1 and spike filters to the time series of surface velocity. If the absolute difference between the two exceeds this threshold, then the conditioned data is set to the output from the stage-1 filter. If the absolute difference is below this threshold then the original data point is retained. After this step the final filter is applied to the conditioned data to compute the final filtered value.");
     tt->val_offset = (char *) &spike_filter_difference_threshold - &_start_;
     tt->single_val.d = 0.11;
     tt++;

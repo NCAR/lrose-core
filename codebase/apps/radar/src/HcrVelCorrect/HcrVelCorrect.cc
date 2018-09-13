@@ -1438,8 +1438,8 @@ void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *ray)
 
   string xml;
   xml += RadxXml::writeStartTag("HcrVelCorr", 0);
-  xml += RadxXml::writeDouble("MeasVel", 1, _surfVel.getVelMeasured());
-  xml += RadxXml::writeDouble("CorrVel", 1, _surfVel.getSurfaceVelocity());
+  xml += RadxXml::writeDouble("VelMeas", 1, _surfVel.getVelMeasured());
+  xml += RadxXml::writeDouble("VelFilt", 1, _surfVel.getSurfaceVelocity());
   xml += RadxXml::writeDouble("Range", 1, _surfVel.getRangeToSurface());
   xml += RadxXml::writeDouble("DbzMax", 1, _surfVel.getDbzMax());
   xml += RadxXml::writeEndTag("HcrVelCorr", 0);
@@ -1447,7 +1447,7 @@ void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *ray)
   // write to SPDB
 
   DsSpdb spdb;
-  time_t validTime = ray->getTimeSecs();
+  time_t validTime = _surfVel.getFiltRay()->getTimeSecs();
   spdb.addPutChunk(0, validTime, validTime, xml.size() + 1, xml.c_str());
   if (spdb.put(_params.surface_vel_results_spdb_output_url,
                SPDB_XML_ID, SPDB_XML_LABEL)) {
