@@ -358,40 +358,36 @@ int HcrVelCorrect::_processFile(const string &readPath)
     
     // process each ray in the volume
     
-    if (_surfVel.processRay(ray) != 0) {
-      continue;
-    }
+    if (_surfVel.processRay(ray) == 0) {
       
-    RadxRay *filtRay = _surfVel.getFiltRay();
-    if (filtRay == NULL) {
-      continue;
-    }
+      RadxRay *filtRay = _surfVel.getFiltRay();
+      RadxTime filtRayTime = filtRay->getRadxTime();
+      
+      if (_surfVel.velocityIsValid()) {
+        double velFilt = _surfVel.getVelFilt();
+        _correctVelForRay(filtRay, velFilt);
+      } else {
+        _copyVelForRay(filtRay);
+      }
+      
+      // write vol when done
+      
+      if (filtRayTime > _inEndTime) {
+        _writeFiltVol();
+        _inEndTime.set(_inVol.getEndTimeSecs(), _inVol.getEndNanoSecs() / 1.0e9);
+      }
+      
+      // add to output vol
+      
+      _filtVol.addRay(filtRay);
+      
+      // write results to SPDB in XML if requested
+      
+      if (_params.write_surface_vel_results_to_spdb) {
+        _writeResultsToSpdb(filtRay);
+      }
 
-    RadxTime filtRayTime = filtRay->getRadxTime();
-    
-    if (_surfVel.velocityIsValid()) {
-      double velFilt = _surfVel.getVelFilt();
-      _correctVelForRay(ray, velFilt);
-    } else {
-      _copyVelForRay(ray);
-    }
-    
-    // write vol when done
-    
-    if (filtRayTime > _inEndTime) {
-      _writeFiltVol();
-      _inEndTime.set(_inVol.getEndTimeSecs(), _inVol.getEndNanoSecs() / 1.0e9);
-    }
-    
-    // add to output vol
-    
-    _filtVol.addRay(filtRay);
-    
-    // write results to SPDB in XML if requested
-    
-    if (_params.write_surface_vel_results_to_spdb) {
-      _writeResultsToSpdb(filtRay);
-    }
+    } // if (_surfVel.processRay(ray) == 0)
     
   } // iray
   
@@ -684,23 +680,33 @@ int HcrVelCorrect::_runFmq()
 
     if (_surfVel.processRay(ray) == 0) {
     
+      RadxRay *filtRay = _surfVel.getFiltRay();
+      RadxTime filtRayTime = filtRay->getRadxTime();
+      
       // write params if needed
       
       if (_needWriteParams) {
-        if (_writeParams(ray)) {
+        if (_writeParams(filtRay)) {
           return -1; 
         }
         _needWriteParams = false;
       }
       
+      if (_surfVel.velocityIsValid()) {
+        double velFilt = _surfVel.getVelFilt();
+        _correctVelForRay(filtRay, velFilt);
+      } else {
+        _copyVelForRay(filtRay);
+      }
+      
       // write out ray
       
-      _writeRay(ray);
+      _writeRay(filtRay);
 
       // write results to SPDB in XML if requested
 
       if (_params.write_surface_vel_results_to_spdb) {
-        _writeResultsToSpdb(ray);
+        _writeResultsToSpdb(filtRay);
       }
 
     } // if (_surfVel.processRay(ray) == 0)
@@ -1427,7 +1433,7 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
 //////////////////////////////////////////////////
 // write results to SPDB in XML
 
-void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *ray)
+void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *filtRay)
   
 {
 
@@ -1454,7 +1460,7 @@ void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *ray)
   // write to SPDB
 
   DsSpdb spdb;
-  time_t validTime = _surfVel.getFiltRay()->getTimeSecs();
+  time_t validTime = filtRay->getTimeSecs();
   spdb.addPutChunk(0, validTime, validTime, xml.size() + 1, xml.c_str());
   if (spdb.put(_params.surface_vel_results_spdb_output_url,
                SPDB_XML_ID, SPDB_XML_LABEL)) {

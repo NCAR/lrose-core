@@ -144,7 +144,7 @@ private:
   void _correctVelForRay(RadxRay *ray, double surfFilt);
   void _copyVelForRay(RadxRay *ray);
 
-  void _writeResultsToSpdb(const RadxRay *ray);
+  void _writeResultsToSpdb(const RadxRay *filtRay);
 
 };
 
