@@ -178,7 +178,7 @@ FindSurfaceVel::~FindSurfaceVel()
 
 double FindSurfaceVel::getRangeToSurface() const
 {
-  if (!_rangeToSurface) {
+  if (!_rangeToSurface || !_velIsValid) {
     return NAN;
   } else {
     return _rangeToSurface[_finalIndex];
@@ -187,7 +187,7 @@ double FindSurfaceVel::getRangeToSurface() const
 
 double FindSurfaceVel::getDbzMax() const
 {
-  if (!_dbzMax) {
+  if (!_dbzMax || !_velIsValid) {
     return NAN;
   } else {
     return _dbzMax[_finalIndex];
@@ -196,7 +196,7 @@ double FindSurfaceVel::getDbzMax() const
 
 double FindSurfaceVel::getVelMeasured() const
 {
-  if (!_surfaceVelArray) {
+  if (!_surfaceVelArray || !_velIsValid) {
     return NAN;
   } else {
     return _surfaceVelArray[_finalIndex];
@@ -205,7 +205,7 @@ double FindSurfaceVel::getVelMeasured() const
 
 double FindSurfaceVel::getVelStage1() const
 {
-  if (!_filteredStage1) {
+  if (!_filteredStage1 || !_velIsValid) {
     return NAN;
   } else {
     return _filteredStage1[_finalIndex];
@@ -214,7 +214,7 @@ double FindSurfaceVel::getVelStage1() const
 
 double FindSurfaceVel::getVelSpike() const
 {
-  if (!_filteredSpike) {
+  if (!_filteredSpike || !_velIsValid) {
     return NAN;
   } else {
     return _filteredSpike[_finalIndex];
@@ -223,7 +223,7 @@ double FindSurfaceVel::getVelSpike() const
 
 double FindSurfaceVel::getVelCond() const
 {
-  if (!_filteredCond) {
+  if (!_filteredCond || !_velIsValid) {
     return NAN;
   } else {
     return _filteredCond[_finalIndex];
@@ -232,7 +232,7 @@ double FindSurfaceVel::getVelCond() const
 
 double FindSurfaceVel::getVelFinal() const
 {
-  if (!_filteredFinal) {
+  if (!_filteredFinal || !_velIsValid) {
     return NAN;
   } else {
     return _filteredFinal[_finalIndex];
@@ -445,7 +445,7 @@ int FindSurfaceVel::processRay(RadxRay *ray)
   // check for success
   
   _velIsValid = false;
-  _surfaceVel = -9999.0;
+  _surfaceVel = NAN;
   _filtRay = _filtRays[_filtRays.size()-1];
   
   if (_filtRays.size() > _finalIndex) {
@@ -472,8 +472,8 @@ void FindSurfaceVel::_computeSurfaceVel(RadxRay *ray)
 
   // init
   
-  _dbzMax[0] = -9999.0;
-  _rangeToSurface[0] = -9999.0;
+  _dbzMax[0] = NAN;
+  _rangeToSurface[0] = NAN;
   _surfaceVelArray[0] = 0.0;
 
   // check elevation
@@ -515,7 +515,7 @@ void FindSurfaceVel::_computeSurfaceVel(RadxRay *ray)
 
   double range = dbzField->getStartRangeKm();
   double drange = dbzField->getGateSpacingKm();
-  double dbzMax = -9999.0;
+  double dbzMax = NAN;
   int gateForMax = -1;
   double rangeToSurface = 0;
   double foundSurface = false;
