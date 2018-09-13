@@ -114,7 +114,7 @@ FindSurfaceVel::FindSurfaceVel()
   
   _dbzMax = NULL;
   _rangeToSurface = NULL;
-  _surfaceVelArray = NULL;
+  _velSurfaceArray = NULL;
   _filteredStage1 = NULL;
   _filteredSpike = NULL;
   _filteredCond = NULL;
@@ -154,8 +154,8 @@ FindSurfaceVel::~FindSurfaceVel()
   if (_rangeToSurface) {
     delete[] _rangeToSurface;
   }
-  if (_surfaceVelArray) {
-    delete[] _surfaceVelArray;
+  if (_velSurfaceArray) {
+    delete[] _velSurfaceArray;
   }
   if (_filteredStage1) {
     delete[] _filteredStage1;
@@ -176,6 +176,24 @@ FindSurfaceVel::~FindSurfaceVel()
 // get results
 // the following return NAN if results not available
 
+RadxRay *FindSurfaceVel::getFiltRay() 
+{
+  if (_velIsValid) {
+    return _filtRay; 
+  } else {
+    return NULL;
+  }
+}
+
+double FindSurfaceVel::getVelSurface() const
+{
+  if (!_velSurfaceArray || !_velIsValid) {
+    return NAN;
+  } else {
+    return _velSurfaceArray[_finalIndex];
+  }
+}
+
 double FindSurfaceVel::getRangeToSurface() const
 {
   if (!_rangeToSurface || !_velIsValid) {
@@ -191,15 +209,6 @@ double FindSurfaceVel::getDbzMax() const
     return NAN;
   } else {
     return _dbzMax[_finalIndex];
-  }
-}
-
-double FindSurfaceVel::getVelMeasured() const
-{
-  if (!_surfaceVelArray || !_velIsValid) {
-    return NAN;
-  } else {
-    return _surfaceVelArray[_finalIndex];
   }
 }
 
@@ -335,7 +344,7 @@ void FindSurfaceVel::_initFromFilters()
   
   _dbzMax = new double[_filtBufLen];
   _rangeToSurface = new double[_filtBufLen];
-  _surfaceVelArray = new double[_filtBufLen];
+  _velSurfaceArray = new double[_filtBufLen];
   _filteredSpike = new double[_filtBufLen];
   _filteredStage1 = new double[_filtBufLen];
   _filteredCond = new double[_filtBufLen];
@@ -343,7 +352,7 @@ void FindSurfaceVel::_initFromFilters()
 
   memset(_dbzMax, 0, nbytes);
   memset(_rangeToSurface, 0, nbytes);
-  memset(_surfaceVelArray, 0, nbytes);
+  memset(_velSurfaceArray, 0, nbytes);
   memset(_filteredSpike, 0, nbytes);
   memset(_filteredStage1, 0, nbytes);
   memset(_filteredCond, 0, nbytes);
@@ -426,11 +435,11 @@ int FindSurfaceVel::processRay(RadxRay *ray)
     if (_filtRays.size() > _finalIndex) {
       RadxRay *ray = _filtRays[_finalIndex];
       if (_rangeToSurface[_finalIndex] > 0) {
-        cerr << "Time gndRange dbzMax surfVel filtStage1 filtSpike filtCond filtFinal: "
+        cerr << "Surface data: time range dbzMax vel filtStage1 filtSpike filtCond filtFinal: "
              << ray->getRadxTime().asString() << " "
              << _rangeToSurface[_finalIndex] << " "
              << _dbzMax[_finalIndex] << " "
-             << _surfaceVelArray[_finalIndex] << " "
+             << _velSurfaceArray[_finalIndex] << " "
              << _filteredStage1[_finalIndex] <<  ""
              << _filteredSpike[_finalIndex] << " "
              << _filteredCond[_finalIndex] << " "
@@ -445,14 +454,12 @@ int FindSurfaceVel::processRay(RadxRay *ray)
   // check for success
   
   _velIsValid = false;
-  _surfaceVel = NAN;
   _filtRay = _filtRays[_filtRays.size()-1];
   
   if (_filtRays.size() > _finalIndex) {
     _filtRay = _filtRays[_finalIndex];
     if (_nValid > _finalIndex) {
       _velIsValid = true;
-      _surfaceVel = _filteredFinal[_finalIndex];
     }
     return 0;
   }
@@ -474,7 +481,7 @@ void FindSurfaceVel::_computeSurfaceVel(RadxRay *ray)
   
   _dbzMax[0] = NAN;
   _rangeToSurface[0] = NAN;
-  _surfaceVelArray[0] = 0.0;
+  _velSurfaceArray[0] = 0.0;
 
   // check elevation
   // cannot compute gnd vel if not pointing down
@@ -574,7 +581,7 @@ void FindSurfaceVel::_computeSurfaceVel(RadxRay *ray)
       sum += vel;
       count++;
     }
-    _surfaceVelArray[0] = sum / count;
+    _velSurfaceArray[0] = sum / count;
     _dbzMax[0] = dbzMax;
     _rangeToSurface[0] = rangeToSurface;
   }
@@ -592,13 +599,13 @@ void FindSurfaceVel::_applyStage1Filter()
   double sum = 0.0;
   double sumWts = 0.0;
   for (size_t ii = 0; ii < _lenStage1; ii++) {
-    double vel = _surfaceVelArray[ii];
+    double vel = _velSurfaceArray[ii];
     double wt = _filtCoeffStage1[ii];
     sum += wt * vel;
     sumWts += wt;
   }
 
-  double filtVal = _surfaceVelArray[_lenStage1Half];
+  double filtVal = _velSurfaceArray[_lenStage1Half];
   if (sumWts > 0) {
     filtVal = sum / sumWts;
   }
@@ -617,13 +624,13 @@ void FindSurfaceVel::_applySpikeFilter()
   double sum = 0.0;
   double sumWts = 0.0;
   for (size_t ii = 0; ii < _lenSpike; ii++) {
-    double vel = _surfaceVelArray[ii];
+    double vel = _velSurfaceArray[ii];
     double wt = _filtCoeffSpike[ii];
     sum += wt * vel;
     sumWts += wt;
   }
 
-  double filtVal = _surfaceVelArray[_lenSpikeHalf];
+  double filtVal = _velSurfaceArray[_lenSpikeHalf];
   if (sumWts > 0) {
     filtVal = sum / sumWts;
   }
@@ -670,7 +677,7 @@ void FindSurfaceVel::_computeConditionedValue()
 
   double filtStage1 = _filteredStage1[_condIndex];
   double filtSpike = _filteredSpike[_condIndex];
-  double surfaceVel = _surfaceVelArray[_condIndex];
+  double surfaceVel = _velSurfaceArray[_condIndex];
   double conditionedVel = surfaceVel;
 
   double absDiff = fabs(surfaceVel - filtStage1);
@@ -692,7 +699,7 @@ void FindSurfaceVel::_shiftArraysBy1()
   
   memmove(_dbzMax + 1, _dbzMax, nbytesMove);
   memmove(_rangeToSurface + 1, _rangeToSurface, nbytesMove);
-  memmove(_surfaceVelArray + 1, _surfaceVelArray, nbytesMove);
+  memmove(_velSurfaceArray + 1, _velSurfaceArray, nbytesMove);
   memmove(_filteredSpike + 1, _filteredSpike, nbytesMove);
   memmove(_filteredStage1 + 1, _filteredStage1, nbytesMove);
   memmove(_filteredCond + 1, _filteredCond, nbytesMove);

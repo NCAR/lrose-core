@@ -102,18 +102,17 @@ public:
   // get results, on condition that processRay() returns success, i.e. 0
   
   bool velocityIsValid() const { return _velIsValid; }
-  double getSurfaceVelocity() const { return _surfaceVel; }
-  RadxRay *getFiltRay() { return _filtRay; }
+  RadxRay *getFiltRay();
   
   // the following return NAN if not available
 
-  double getRangeToSurface() const;
-  double getDbzMax() const;
-  double getVelMeasured() const;
+  double getVelSurface() const;
   double getVelStage1() const;
   double getVelSpike() const;
   double getVelCond() const;
   double getVelFinal() const; // should be same as getSurfaceVelocity()
+  double getRangeToSurface() const;
+  double getDbzMax() const;
 
 protected:
 private:
@@ -168,7 +167,7 @@ private:
 
   double *_dbzMax;
   double *_rangeToSurface;
-  double *_surfaceVelArray;
+  double *_velSurfaceArray;
 
   double *_filteredStage1;
   double *_filteredSpike;
@@ -178,7 +177,6 @@ private:
   // results
   
   bool _velIsValid;
-  double _surfaceVel;
   RadxRay *_filtRay;
 
   // methods
