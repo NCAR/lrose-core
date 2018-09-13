@@ -522,7 +522,7 @@ void FindSurfaceVel::_computeSurfaceVel(RadxRay *ray)
 
   double range = dbzField->getStartRangeKm();
   double drange = dbzField->getGateSpacingKm();
-  double dbzMax = NAN;
+  double dbzMax = -9999;
   int gateForMax = -1;
   double rangeToSurface = 0;
   double foundSurface = false;
@@ -567,7 +567,7 @@ void FindSurfaceVel::_computeSurfaceVel(RadxRay *ray)
       }
     }
   }
-  
+
   // compute surface vel
   
   if (foundSurface) {
