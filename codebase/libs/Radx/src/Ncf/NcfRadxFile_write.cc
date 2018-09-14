@@ -1221,8 +1221,7 @@ int NcfRadxFile::_addProjectionVariables()
     return -1;
   }
   
-  iret |= _file.addAttr(_projVar, GRID_MAPPING_NAME, "azimuthal_equidistant");
-  // iret |= _file.addAttr(_projVar, GRID_MAPPING_NAME, "radar_lidar_radial_scan");
+  iret |= _file.addAttr(_projVar, GRID_MAPPING_NAME, "radar_lidar_radial_scan");
 
   if (_writeVol->getPlatformType() == Radx::PLATFORM_TYPE_FIXED) {
     iret |= _file.addAttr(_projVar, LONGITUDE_OF_PROJECTION_ORIGIN,

@@ -1243,8 +1243,7 @@ int NcxxRadxFile::_addProjectionVariables()
     // projection variable
     
     _projVar = _file.addVar(GRID_MAPPING, ncxxInt);
-    _projVar.putAtt(GRID_MAPPING_NAME, "azimuthal_equidistant");
-    // _projVar.putAtt(GRID_MAPPING_NAME, "radar_lidar_radial_scan");
+    _projVar.putAtt(GRID_MAPPING_NAME, "radar_lidar_radial_scan");
 
     if (_writeVol->getPlatformType() == Radx::PLATFORM_TYPE_FIXED) {
       _projVar.addScalarAttr(LONGITUDE_OF_PROJECTION_ORIGIN,
