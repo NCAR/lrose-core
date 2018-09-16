@@ -1327,7 +1327,7 @@ double AcGeoref2Spdb::_computeSurfaceVel(const RadxRay &ray)
   
   if (_surfVel.processRay(tmpRay) == 0) {
     if (_surfVel.velocityIsValid()) {
-      surfVel = _surfVel.getSurfaceVelocity();
+      surfVel = _surfVel.getVelMeasured();
     }
   }
 
