@@ -4844,10 +4844,14 @@ void RadxVol::convertField(const string &name,
 ///
 /// If the geometry is not constant, remap to the predominant geom.
 ///
+/// maxFractionMissing indicates the maximum fraction of the input data field
+/// that can be missing for valid statistics. Should be between 0 and 1.
+/// 
 /// Returns NULL if no rays are present in the volume.
 /// Otherwise, returns ray containing results.
 
-RadxRay *RadxVol::computeFieldStats(RadxField::StatsMethod_t method)
+RadxRay *RadxVol::computeFieldStats(RadxField::StatsMethod_t method,
+                                    double maxFractionMissing /* = 0.25 */)
 
 {
 
@@ -4893,7 +4897,8 @@ RadxRay *RadxVol::computeFieldStats(RadxField::StatsMethod_t method)
     // compute the stats for this field
     // add field to ray
 
-    RadxField *statsField = RadxField::computeStats(method, rayFields);
+    RadxField *statsField = 
+      RadxField::computeStats(method, rayFields, maxFractionMissing);
     if (statsField != NULL) {
       result->addField(statsField);
     }

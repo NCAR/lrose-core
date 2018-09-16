@@ -484,6 +484,8 @@ public:
 
   dwell_stats_method_t dwell_stats_method;
 
+  double dwell_stats_max_fraction_missing;
+
   char* radar_name_override;
 
   char* site_name_override;
@@ -587,7 +589,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[83];
+  mutable TDRPtable _table[84];
 
   const char *_className;
 

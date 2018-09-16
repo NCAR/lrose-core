@@ -879,6 +879,22 @@
     tt->single_val.e = DWELL_STATS_MEAN;
     tt++;
     
+    // Parameter 'dwell_stats_max_fraction_missing'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("dwell_stats_max_fraction_missing");
+    tt->descr = tdrpStrDup("Specify the max fraction of the dwell that can have missing data.");
+    tt->help = tdrpStrDup("We compute how much of the dwell is missing for each field. If the fraction exceeds this parameter, the combined value will be set to missing.");
+    tt->val_offset = (char *) &dwell_stats_max_fraction_missing - &_start_;
+    tt->has_min = TRUE;
+    tt->has_max = TRUE;
+    tt->min_val.d = 0;
+    tt->max_val.d = 1;
+    tt->single_val.d = 0.25;
+    tt++;
+    
     // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));

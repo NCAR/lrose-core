@@ -1144,10 +1144,14 @@ public:
   ///
   /// If the geometry is not constant, remap to the predominant geom.
   ///
+  /// maxFractionMissing indicates the maximum fraction of the input data field
+  /// that can be missing for valid statistics. Should be between 0 and 1.
+  /// 
   /// Returns NULL if no rays are present in the volume.
   /// Otherwise, returns ray containing results.
   
-  RadxRay *computeFieldStats(RadxField::StatsMethod_t method);
+  RadxRay *computeFieldStats(RadxField::StatsMethod_t method,
+                             double maxFractionMissing = 0.25);
 
   //@}
 

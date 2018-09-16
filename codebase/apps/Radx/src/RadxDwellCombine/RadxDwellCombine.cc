@@ -773,7 +773,9 @@ int RadxDwellCombine::_combineDwells(RadxVol &vol)
       if (_params.debug >= Params::DEBUG_VERBOSE) {
         cerr << "INFO: _combineDwells, using nrays: " << nRaysDwell << endl;
       }
-      RadxRay *dwellRay = _statsVol.computeFieldStats(_dwellStatsMethod);
+      RadxRay *dwellRay =
+        _statsVol.computeFieldStats(_dwellStatsMethod,
+                                    _params.dwell_stats_max_fraction_missing);
       combRays.push_back(dwellRay);
       // clear out stats vol
       _statsVol.clearRays();

@@ -180,6 +180,14 @@ paramdef enum dwell_stats_method_t {
   p_help = "MIDDLE refers to the middle ray in the dwell sequence.";
 } dwell_stats_method;
 
+paramdef double {
+  p_default = 0.25;
+  p_min = 0.0;
+  p_max = 1.0;
+  p_descr = "Specify the max fraction of the dwell that can have missing data.";
+  p_help = "We compute how much of the dwell is missing for each field. If the fraction exceeds this parameter, the combined value will be set to missing.";
+} dwell_stats_max_fraction_missing;
+
 commentdef {
   p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
 }

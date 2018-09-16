@@ -2918,11 +2918,15 @@ double RadxField::_getFoldValue(double angle,
 /// If the number of points in the field is not constant, use the minumum number
 /// of points in the supplied fields.
 ///
+/// maxFractionMissing indicates the maximum fraction of the input data field
+/// that can be missing for valid statistics. Should be between 0 and 1.
+///
 /// Returns NULL if fieldIn.size() == 0.
 /// Otherwise, returns field containing results.
 
 RadxField *RadxField::computeStats(RadxField::StatsMethod_t method,
-                                   const vector<const RadxField *> &fieldsIn)
+                                   const vector<const RadxField *> &fieldsIn,
+                                   double maxFractionMissing /* = 0.25 */)
 
 {
 
@@ -2969,37 +2973,53 @@ RadxField *RadxField::computeStats(RadxField::StatsMethod_t method,
 
     case STATS_METHOD_MEAN:
       if (stats->getIsDiscrete()) {
-        _computeMedian(nPoints, fieldsIn, data);
+        _computeMedian(nPoints,
+                       fieldsIn, 
+                       data,
+                       maxFractionMissing);
       } else if (stats->getFieldFolds()) {
         _computeMeanFolded(nPoints,
                            stats->getFoldLimitLower(),
                            stats->getFoldRange(),
                            fieldsIn,
-                           data);
+                           data,
+                           maxFractionMissing);
       } else {
-        _computeMean(nPoints, fieldsIn, data);
+        _computeMean(nPoints,
+                     fieldsIn,
+                     data,
+                     maxFractionMissing);
       }
       break;
-
+      
     case STATS_METHOD_MEDIAN:
-      _computeMedian(nPoints, fieldsIn, data);
+      _computeMedian(nPoints,
+                     fieldsIn,
+                     data,
+                     maxFractionMissing);
       break;
 
     case STATS_METHOD_MAXIMUM:
-      _computeMaximum(nPoints, fieldsIn, data);
+      _computeMaximum(nPoints,
+                      fieldsIn,
+                      data,
+                      maxFractionMissing);
       break;
 
     case STATS_METHOD_MINIMUM:
-      _computeMinimum(nPoints, fieldsIn, data);
+      _computeMinimum(nPoints, 
+                      fieldsIn,
+                      data,
+                      maxFractionMissing);
       break;
       
     case STATS_METHOD_MIDDLE:
     default:
-      RadxField copy(*fieldMid);
-      copy.convertToFl64();
-      memcpy(data, copy._data, nPoints * sizeof(Radx::fl64));
-      break;
-      
+      _computeMiddle(nPoints, 
+                     fieldsIn,
+                     data,
+                     maxFractionMissing);
+
   } // switch
 
   // add data to stats field
@@ -3021,7 +3041,8 @@ RadxField *RadxField::computeStats(RadxField::StatsMethod_t method,
 
 void RadxField::_computeMean(size_t nPoints,
                              const vector<const RadxField *> &fieldsIn,
-                             Radx::fl64 *data)
+                             Radx::fl64 *data,
+                             double maxFractionMissing)
 
 {
                              
@@ -3049,9 +3070,10 @@ void RadxField::_computeMean(size_t nPoints,
     }
     
   } // ifield
-      
+
+  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (count[ipt] > 0) {
+    if (count[ipt] >= minValid) {
       data[ipt] = sum[ipt] / count[ipt];
     }
   }
@@ -3065,7 +3087,8 @@ void RadxField::_computeMeanFolded(size_t nPoints,
                                    double foldLimitLower,
                                    double foldRange,
                                    const vector<const RadxField *> &fieldsIn,
-                                   Radx::fl64 *data)
+                                   Radx::fl64 *data,
+                                   double maxFractionMissing)
 
 {
                              
@@ -3103,8 +3126,9 @@ void RadxField::_computeMeanFolded(size_t nPoints,
     
   } // ifield
       
+  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (count[ipt] > 0) {
+    if (count[ipt] >= minValid) {
       double angleMean = atan2(sumy[ipt], sumx[ipt]);
       data[ipt] = _getFoldValue(angleMean, foldLimitLower, foldRange);
     }
@@ -3117,7 +3141,8 @@ void RadxField::_computeMeanFolded(size_t nPoints,
 
 void RadxField::_computeMedian(size_t nPoints,
                                const vector<const RadxField *> &fieldsIn,
-                               Radx::fl64 *data)
+                               Radx::fl64 *data,
+                               double maxFractionMissing)
 
 {
 
@@ -3140,9 +3165,10 @@ void RadxField::_computeMedian(size_t nPoints,
     
   } // ifield
   
+  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     vector<double> &series = seriesArray[ipt];
-    if (series.size() > 0) {
+    if ((int) series.size() >= minValid) {
       sort(series.begin(), series.end());
       double median = series[series.size()/2];
       data[ipt] = median;
@@ -3157,7 +3183,8 @@ void RadxField::_computeMedian(size_t nPoints,
 
 void RadxField::_computeMaximum(size_t nPoints,
                                 const vector<const RadxField *> &fieldsIn,
-                                Radx::fl64 *data)
+                                Radx::fl64 *data,
+                                double maxFractionMissing)
 
 {
   
@@ -3166,7 +3193,11 @@ void RadxField::_computeMaximum(size_t nPoints,
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     max[ipt] = -1.0e99;
   }
-      
+
+  RadxArray<Radx::fl64> count_;
+  Radx::fl64 *count = count_.alloc(nPoints);
+  memset(count, 0, nPoints * sizeof(Radx::fl64));
+  
   for (size_t ifield = 0; ifield < fieldsIn.size(); ifield++) {
     
     RadxField copy(*fieldsIn[ifield]);
@@ -3180,13 +3211,15 @@ void RadxField::_computeMaximum(size_t nPoints,
         if (val > max[ipt]) {
           max[ipt] = val;
         }
+        count[ipt]++;
       }
     }
     
   } // ifield
       
+  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (max[ipt] > -1.0e98) {
+    if (max[ipt] > -1.0e98 && count[ipt] >= minValid) {
       data[ipt] = max[ipt];
     }
   }
@@ -3199,7 +3232,8 @@ void RadxField::_computeMaximum(size_t nPoints,
 
 void RadxField::_computeMinimum(size_t nPoints,
                                 const vector<const RadxField *> &fieldsIn,
-                                Radx::fl64 *data)
+                                Radx::fl64 *data,
+                                double maxFractionMissing)
 
 {
                              
@@ -3209,6 +3243,10 @@ void RadxField::_computeMinimum(size_t nPoints,
     min[ipt] = 1.0e99;
   }
       
+  RadxArray<Radx::fl64> count_;
+  Radx::fl64 *count = count_.alloc(nPoints);
+  memset(count, 0, nPoints * sizeof(Radx::fl64));
+  
   for (size_t ifield = 0; ifield < fieldsIn.size(); ifield++) {
     
     RadxField copy(*fieldsIn[ifield]);
@@ -3222,16 +3260,86 @@ void RadxField::_computeMinimum(size_t nPoints,
         if (val < min[ipt]) {
           min[ipt] = val;
         }
+        count[ipt]++;
       }
     }
     
   } // ifield
       
+  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (min[ipt] < 1.0e98) {
+    if (min[ipt] < 1.0e98 && count[ipt] >= minValid) {
       data[ipt] = min[ipt];
     }
   }
+
+}
+
+//////////////////////////////////////////////////////////
+// compute middle value
+
+void RadxField::_computeMiddle(size_t nPoints,
+                               const vector<const RadxField *> &fieldsIn,
+                               Radx::fl64 *data,
+                               double maxFractionMissing)
+
+{
+                             
+  RadxArray<Radx::fl64> mid_;
+  Radx::fl64 *mid = mid_.alloc(nPoints);
+  for (size_t ipt = 0; ipt < nPoints; ipt++) {
+    mid[ipt] = NAN;
+  }
+      
+  RadxArray<Radx::fl64> count_;
+  Radx::fl64 *count = count_.alloc(nPoints);
+  memset(count, 0, nPoints * sizeof(Radx::fl64));
+  
+  int midIndex = (int) fieldsIn.size() / 2;
+  for (int ifield = 0; ifield < (int) fieldsIn.size(); ifield++) {
+    
+    RadxField copy(*fieldsIn[ifield]);
+    copy.convertToFl64();
+    const Radx::fl64 *vals = copy.getDataFl64();
+    Radx::fl64 miss = copy.getMissingFl64();
+        
+    for (size_t ipt = 0; ipt < nPoints; ipt++, vals++) {
+      Radx::fl64 val = *vals;
+      if (val != miss) {
+        count[ipt]++;
+      }
+      if (ifield == midIndex) {
+        mid[ipt] = val;
+      }
+    }
+    
+  } // ifield
+      
+  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  for (size_t ipt = 0; ipt < nPoints; ipt++) {
+    if (!std::isnan(mid[ipt]) && count[ipt] >= minValid) {
+      data[ipt] = mid[ipt];
+    }
+  }
+
+}
+
+/////////////////////////////////////////////////////////
+// compute the minimum number of valid points, given
+// the n and the max missing fraction
+
+int RadxField::_computeMinValid(int nn,
+                                double maxFractionMissing)
+
+{
+
+  int minValid = (int) ((1.0 - maxFractionMissing) * nn + 0.5);
+  if (minValid < 1) {
+    minValid = 1;
+  } else if (minValid > nn) {
+    minValid = nn;
+  }
+  return minValid;
 
 }
 
