@@ -2377,6 +2377,26 @@ int DoradeRadxFile::_loadReadVolume()
   _readVol->setHistory(_sedsStr);
   if (_radarName.find("ELDR") != string::npos) {
     _readVol->setPrimaryAxis(Radx::PRIMARY_AXIS_Y_PRIME);
+  } 
+  // if the extension_num contains a value
+  // override the primary axis. 
+  // the primary axis enum type starts at zero, but a zero
+  // value for primary axis could also just be an unset parameter,
+  // so we a base value of 1 for the enumeration. A zero indicates no
+  // value and 1,2,3,4,5,6 indicate a valid primary axis value. 
+  // Finally, for internal work, convert the Dorade axis type
+  // to the Radx axis type.
+  try {
+    if (_ddRadar.extension_num > 0) {
+      DoradeData::primary_axis_t axisType = DoradeData::primaryAxisFromInt(_ddRadar.extension_num);
+      Radx::PrimaryAxis_t radxAxisType = DoradeData::convertToRadxType(axisType);
+      _readVol->setPrimaryAxis(radxAxisType);
+    }
+  }  catch (const char*  ex) {
+    // we cannot set the primary axis
+    // report warning
+    cerr << "WARNING - DoradeRadxFile::_loadReadVolume()" << endl;
+    cerr << ex << endl;
   }
 
   _readVol->setLatitudeDeg(_ddRadar.radar_latitude);
@@ -3798,7 +3818,18 @@ int DoradeRadxFile::_writeRadar()
     double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
     _ddRadar.pulse_width = pulseWidthMeters;
   }
-  
+
+  try {
+    Radx::PrimaryAxis_t axis_t = _writeVol->getPrimaryAxis();
+    DoradeData::primary_axis_t doradeAxis = DoradeData::convertToDoradeType(axis_t);
+    _ddRadar.extension_num = DoradeData::primaryAxisToInt(doradeAxis);
+  } catch (const char*  ex) {
+    // report warning
+    cerr << "WARNING - DoradeRadxFile::_writeRadar()" << endl;
+    cerr << ex << endl;
+    cerr << "setting extension_num to zero indicating primary axis not set" << endl;
+    _ddRadar.extension_num = 0;
+  }
   _ddRadar.aperture_size = _writeVol->getLidarApertureDiamCm();
   _ddRadar.field_of_view = _writeVol->getLidarFieldOfViewMrad();
   _ddRadar.aperture_eff = _writeVol->getLidarApertureEfficiency();
