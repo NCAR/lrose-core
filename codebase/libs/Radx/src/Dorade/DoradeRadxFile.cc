@@ -1838,15 +1838,17 @@ int DoradeRadxFile::_handleRay(int nBytes, const char *block)
         prtShort = temp;
       }
     }
-    
-    if (_ddRadar.num_ipps_trans < 2) {
-      ray->setPrtMode(Radx::PRT_MODE_FIXED);
-      ray->setPrtSec(prtShort);
-    } else {
-      double prtRatio = prtShort / prtLong;
-      ray->setPrtSec(prtShort);
-      ray->setPrtRatio(prtRatio);
-      ray->setPrtMode(Radx::PRT_MODE_STAGGERED);
+
+    if ((prtShort != Radx::missingMetaDouble) && (prtShort != Radx::missingMetaDouble)) {
+      if (_ddRadar.num_ipps_trans < 2) {
+        ray->setPrtMode(Radx::PRT_MODE_FIXED);
+        ray->setPrtSec(prtShort);
+      } else {
+        double prtRatio = prtShort / prtLong;
+        ray->setPrtSec(prtShort);
+        ray->setPrtRatio(prtRatio);
+        ray->setPrtMode(Radx::PRT_MODE_STAGGERED);
+      }
     }
 
   } else if (DoradeData::isValid(_ddLidar)) {
@@ -3809,10 +3811,16 @@ int DoradeRadxFile::_writeRadar()
     const RadxRay &ray = *_writeVol->getRays()[0];
     _ddRadar.eff_unamb_vel = ray.getNyquistMps();
     _ddRadar.eff_unamb_range = ray.getUnambigRangeKm();
-    _ddRadar.prt1 = ray.getPrtSec() * 1000.0; // msecs
+    // check for missing data values
+    _ddRadar.prt1 = ray.getPrtSec();
+    if (_ddRadar.prt1 != Radx::missingMetaDouble) 
+       _ddRadar.prt1 = _ddRadar.prt1 * 1000.0; // msecs
     if (ray.getPrtMode() != Radx::PRT_MODE_FIXED) {
       _ddRadar.num_ipps_trans = 2;
-      _ddRadar.prt2 = ray.getPrtSec() * 1000.0 / ray.getPrtRatio(); // msecs
+      // check for missing data values
+      _ddRadar.prt2 = ray.getPrtSec();
+      if (_ddRadar.prt2 != Radx::missingMetaDouble) 
+        _ddRadar.prt2 = _ddRadar.prt2 * 1000.0 / ray.getPrtRatio(); // msecs
     }
     double pulseWidthUsec = ray.getPulseWidthUsec();
     double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
