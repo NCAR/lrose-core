@@ -168,6 +168,12 @@ paramdef string {
   p_descr = "This is the main output field from this app. It will be added to the input data as an extra field.";
 } corrected_vel_field_name;
 
+paramdef double {
+  p_default = 5;
+  p_descr = "Maximum error from nadir pointing for computing surface velocity (deg).";
+  p_help = "We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).";
+} max_nadir_error_for_surface_vel;
+
 commentdef {
   p_header = "OUTPUT FIELD DETAILS";
 }

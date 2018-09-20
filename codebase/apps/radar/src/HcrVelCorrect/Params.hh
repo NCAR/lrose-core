@@ -429,6 +429,8 @@ public:
 
   char* corrected_vel_field_name;
 
+  double max_nadir_error_for_surface_vel;
+
   output_encoding_t output_encoding;
 
   netcdf_style_t netcdf_style;
@@ -485,7 +487,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[55];
+  mutable TDRPtable _table[56];
 
   const char *_className;
 

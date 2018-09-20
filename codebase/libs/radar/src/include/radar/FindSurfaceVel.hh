@@ -66,44 +66,67 @@ public:
   void setDebug(bool val) { _debug = val; }
   void setVerbose(bool val) { _verbose = val; }
 
+  // name of dbz and vel fields in data
+
   void setDbzFieldName(const string &name) { _dbzFieldName = name; };
   void setVelFieldName(const string &name) { _velFieldName = name; };
 
+  // max pointing error off nadir for valid measurement
+
+  void setMaxNadirErrorDeg(double val) { _maxNadirErrorDeg = val; }
+
+  // finding the surface
+  
   void setMinRangeToSurfaceKm(double val) { _minRangeToSurfaceKm = val; }
   void setMinDbzForSurfaceEcho(double val) { _minDbzForSurfaceEcho = val; }
   void setNGatesForSurfaceEcho(int val) { _nGatesForSurfaceEcho = val; }
 
+  // compute surface velocity - no filtering
+  //
+  // Sets vel to 0.0 if cannot determine velocity.
+  // Also sets dbzSurf and rangeToSurf.
+  // Returns 0 on success, -1 on failure.
+  
+  int computeSurfaceVel(const RadxRay *ray,
+                        double &velSurf,
+                        double &dbzSurf,
+                        double &rangeToSurf) const;
+  
+  // initialize polynomial filter
+  
+  void initPolynomialFilter(int filterLen,
+                            int polyOrder = 3);
+
+  // initialzie the FIR filters
+  // also sets filterType to FIR
+  
+  void initFirFilters(int stage1FilterLen,
+                      const double *filtCoeffStage1,
+                      int spikeFilterLen,
+                      const double *filtCoeffSpike,
+                      int finalFilterLen,
+                      const double *filtCoeffFinal);
+
+  void initFirFilters(const vector<double> &filtCoeffStage1,
+                      const vector<double> &filtCoeffSpike,
+                      const vector<double> &filtCoeffFinal);
+  
   void setSpikeFilterDifferenceThreshold(double val) {
     _spikeFilterDifferenceThreshold = val; 
   }
-
-  // initialzie the filters from arrays
-  
-  void initFilters(int stage1FilterLen,
-                   const double *filtCoeffStage1,
-                   int spikeFilterLen,
-                   const double *filtCoeffSpike,
-                   int finalFilterLen,
-                   const double *filtCoeffFinal);
-
-  // initialize the filters from vectors
-  
-  void initFilters(const vector<double> &filtCoeffStage1,
-                   const vector<double> &filtCoeffSpike,
-                   const vector<double> &filtCoeffFinal);
-
                                  
-  // Process an incoming ray
+  // Process an incoming ray, filtering the surface vel.
   // Returns 0 on success, -1 on failure.
   // On success, call getSurfaceVelocity() to get computed surface velocity
   
-  int processRay(RadxRay *ray);
+  int filterRay(RadxRay *ray);
 
   // get results, on condition that processRay() returns success, i.e. 0
   
   bool velocityIsValid() const { return _velIsValid; }
   RadxRay *getFiltRay() { return _filtRay; }
-  
+
+  // get intermediate fields from filtering step
   // the following return NAN if not available
 
   double getVelMeasured() const;
@@ -117,7 +140,20 @@ public:
 protected:
 private:
 
-  // default filters
+  // filter type
+
+  typedef enum {
+    FILTER_NONE,
+    FILTER_FIR,
+    FILTER_POLYNOMIAL
+  } filter_type_t;
+
+  // polynomial filter
+
+  int _polyFiltLen;
+  int _polyFiltOrder;
+
+  // default FIR filters
 
   static const int Stage1FilterDefaultLen = 21;
   static const double stage1FilterDefault[Stage1FilterDefaultLen];
@@ -133,6 +169,10 @@ private:
   bool _debug;
   bool _verbose;
 
+  // filter type
+
+  filter_type_t _filterType;
+
   // field names
 
   string _dbzFieldName;
@@ -140,6 +180,7 @@ private:
 
   // parameters
 
+  double _maxNadirErrorDeg;
   double _minRangeToSurfaceKm;
   double _minDbzForSurfaceEcho;
   int _nGatesForSurfaceEcho;
@@ -166,8 +207,8 @@ private:
   size_t _nValid;
 
   double *_dbzMax;
-  double *_rangeToSurface;
-  double *_velSurfaceArray;
+  double *_rangeToSurf;
+  double *_velSurfArray;
 
   double *_filteredStage1;
   double *_filteredSpike;
@@ -181,10 +222,7 @@ private:
 
   // methods
 
-  void _initFromFilters();
-
-  void _computeSurfaceVel(RadxRay *ray);
-
+  void _initFromFirFilters();
   void _applyStage1Filter();
   void _applySpikeFilter();
   void _applyFinalFilter();

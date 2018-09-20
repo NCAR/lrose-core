@@ -475,17 +475,6 @@ public:
 
   double surface_velocity_print_period_secs;
 
-  double surface_vel_spike_filter_difference_threshold;
-
-  double *_surface_vel_stage1_filter;
-  int surface_vel_stage1_filter_n;
-
-  double *_surface_vel_spike_filter;
-  int surface_vel_spike_filter_n;
-
-  double *_surface_vel_final_filter;
-  int surface_vel_final_filter_n;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -493,7 +482,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[65];
+  mutable TDRPtable _table[60];
 
   const char *_className;
 

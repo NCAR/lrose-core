@@ -85,13 +85,6 @@ HcrVelCorrect::HcrVelCorrect(int argc, char **argv)
   
   // set up the surface velocity filtering
 
-  _surfVel.initFilters(_params.stage1_filter_n,
-                       _params._stage1_filter,
-                       _params.spike_filter_n,
-                       _params._spike_filter,
-                       _params.final_filter_n,
-                       _params._final_filter);
-
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _surfVel.setDebug(true);
   } else if (_params.debug >= Params::DEBUG_EXTRA) {
@@ -104,8 +97,18 @@ HcrVelCorrect::HcrVelCorrect(int argc, char **argv)
   _surfVel.setMinRangeToSurfaceKm(_params.min_range_to_surface_km);
   _surfVel.setMinDbzForSurfaceEcho(_params.min_dbz_for_surface_echo);
   _surfVel.setNGatesForSurfaceEcho(_params.ngates_for_surface_echo);
-  _surfVel.setSpikeFilterDifferenceThreshold(_params.spike_filter_difference_threshold);
+  _surfVel.setMaxNadirErrorDeg(_params.max_nadir_error_for_surface_vel);
+
+  _surfVel.setSpikeFilterDifferenceThreshold
+    (_params.spike_filter_difference_threshold);
   
+  _surfVel.initFirFilters(_params.stage1_filter_n,
+                          _params._stage1_filter,
+                          _params.spike_filter_n,
+                          _params._spike_filter,
+                          _params.final_filter_n,
+                          _params._final_filter);
+
   // init process mapper registration
 
   if (_params.register_with_procmap) {
@@ -358,7 +361,7 @@ int HcrVelCorrect::_processFile(const string &readPath)
     
     // process each ray in the volume
     
-    if (_surfVel.processRay(ray) == 0) {
+    if (_surfVel.filterRay(ray) == 0) {
       
       RadxRay *filtRay = _surfVel.getFiltRay();
       RadxTime filtRayTime = filtRay->getRadxTime();
@@ -678,7 +681,7 @@ int HcrVelCorrect::_runFmq()
 
     // process this ray
 
-    if (_surfVel.processRay(ray) == 0) {
+    if (_surfVel.filterRay(ray) == 0) {
     
       RadxRay *filtRay = _surfVel.getFiltRay();
       RadxTime filtRayTime = filtRay->getRadxTime();

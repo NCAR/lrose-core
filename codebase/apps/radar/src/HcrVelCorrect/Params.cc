@@ -856,6 +856,18 @@
     tt->single_val.s = tdrpStrDup("VEL_CORR");
     tt++;
     
+    // Parameter 'max_nadir_error_for_surface_vel'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_nadir_error_for_surface_vel");
+    tt->descr = tdrpStrDup("Maximum error from nadir pointing for computing surface velocity (deg).");
+    tt->help = tdrpStrDup("We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).");
+    tt->val_offset = (char *) &max_nadir_error_for_surface_vel - &_start_;
+    tt->single_val.d = 5;
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
