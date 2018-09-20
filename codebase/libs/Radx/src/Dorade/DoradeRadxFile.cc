@@ -2469,7 +2469,8 @@ int DoradeRadxFile::_loadReadVolume()
   RadxRcalib *cal = new RadxRcalib;
 
   cal->setCalibTime(_readVol->getStartTimeSecs());
-  cal->setPulseWidthUsec(pulseWidthUs);
+  //  cal->setPulseWidthUsec(pulseWidthUs);
+  cal->setPulseWidthUsec(_ddRadar.pulse_width);
   double xmitPowerDbm = Radx::missingMetaDouble;
   if (_ddRadar.peak_power > 0) {
     xmitPowerDbm = 10.0 * log10(_ddRadar.peak_power * 1.0e6);
@@ -3822,9 +3823,12 @@ int DoradeRadxFile::_writeRadar()
       if (_ddRadar.prt2 != Radx::missingMetaDouble) 
         _ddRadar.prt2 = _ddRadar.prt2 * 1000.0 / ray.getPrtRatio(); // msecs
     }
-    double pulseWidthUsec = ray.getPulseWidthUsec();
-    double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
-    _ddRadar.pulse_width = pulseWidthMeters;
+    //    double pulseWidthUsec = ray.getPulseWidthUsec();
+    //double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
+    //_ddRadar.pulse_width = pulseWidthMeters;
+    //double pulseWidthUsec = ray.getPulseWidthUsec();
+    //double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
+    _ddRadar.pulse_width = cal.getPulseWidthUsec(); // pulseWidthMeters;
   }
 
   try {
@@ -4080,13 +4084,19 @@ int DoradeRadxFile::_writeParameter(int fieldNum)
 
     const RadxRay &ray = *_writeVol->getRays()[0];
     double pulseWidthUsec = ray.getPulseWidthUsec();
-    double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
-    parm.pulse_width = (short) (pulseWidthMeters + 0.5);
-    parm.recvr_bandwidth = 1.0 / pulseWidthUsec;
+    if (pulseWidthUsec != Radx::missingMetaDouble) {
+      double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
+      parm.pulse_width = (short) (pulseWidthMeters + 0.5);
+      parm.recvr_bandwidth = 1.0 / pulseWidthUsec;
+    } else {
+      parm.pulse_width = Radx::missingSi16; 
+      parm.recvr_bandwidth = Radx::missingMetaDouble;
+    }
     double rxBandwidthMhz = _writeVol->getRadarReceiverBandwidthMhz();
     if (rxBandwidthMhz > 0) {
       parm.recvr_bandwidth = rxBandwidthMhz;
     }
+
     parm.num_samples = (int) (ray.getNSamples() * field.getSamplingRatio() + 0.5);
 
     switch (ray.getPolarizationMode()) {
