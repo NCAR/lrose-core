@@ -100,7 +100,11 @@ HcrVelCorrect::HcrVelCorrect(int argc, char **argv)
   _surfVel.setNGatesForSurfaceEcho(_params.ngates_for_surface_echo);
   _surfVel.setMaxNadirErrorDeg(_params.max_nadir_error_for_surface_vel);
 
-  // set up the surface velocity filtering
+  // initialize the wave filtering
+
+  _initWaveFilt();
+
+  // initialize the FIR filtering
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _firFilt.setDebug(true);
@@ -430,27 +434,67 @@ int HcrVelCorrect::_processRay(RadxRay *ray)
     rangeToSurf = 0.0;
     dbzSurf = -9999.0;
   }
-  
-  if (_firFilt.filterRay(ray, velSurf, dbzSurf, rangeToSurf) == 0) {
-    
-    RadxRay *filtRay = _firFilt.getFiltRay();
-    if (_firFilt.velocityIsValid()) {
-      double velFilt = _firFilt.getVelFilt();
-      _correctVelForRay(filtRay, velFilt);
+
+  if (_params.filter_type == Params::WAVE_FILTER) {
+
+    if (_applyWaveFilt(ray, velSurf, dbzSurf, rangeToSurf) == 0) {
+      if (_velIsValid) {
+        _correctVelForRay(_filtRay, _velFilt);
+      } else {
+        _copyVelForRay(_filtRay);
+      }
+      return 0;
     } else {
-      _copyVelForRay(filtRay);
+      return -1;
     }
 
-    return 0;
-
   } else {
-    
-    return -1;
 
-  }
+    if (_firFilt.filterRay(ray, velSurf, dbzSurf, rangeToSurf) == 0) {
+      RadxRay *filtRay = _firFilt.getFiltRay();
+      if (_firFilt.velocityIsValid()) {
+        double velFilt = _firFilt.getVelFilt();
+        _correctVelForRay(filtRay, velFilt);
+      } else {
+        _copyVelForRay(filtRay);
+      }
+      return 0;
+    } else {
+      return -1;
+    }
+
+  } // if (_params.filter_type == Params::WAVE_FILTER)
     
 }
   
+///////////////////////////////////////////////////////////////////
+// Initialize the wave filter
+
+void HcrVelCorrect::_initWaveFilt()
+
+{
+
+  _velIsValid = false;
+  _velFilt = 0.0;
+  _filtRay = NULL;
+
+}
+
+///////////////////////////////////////////////////////////////////
+// Apply the wave filter an incoming ray, filtering the surface vel.
+// Returns 0 on success, -1 on failure.
+
+int HcrVelCorrect::_applyWaveFilt(RadxRay *ray, 
+                                  double velSurf,
+                                  double dbzSurf,
+                                  double rangeToSurf)
+
+{
+
+  return -1;
+
+}
+
 //////////////////////////////////////////////////
 // set up read
 

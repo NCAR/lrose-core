@@ -110,6 +110,12 @@ private:
   RadxTime _inEndTime;
   bool _firstInputFile;
 
+  // filtered results
+  
+  bool _velIsValid;
+  double _velFilt;
+  RadxRay *_filtRay;
+  
   // filtered volume - output
 
   RadxVol _filtVol;
@@ -124,6 +130,13 @@ private:
 
   int _processFile(const string &filePath);
   int _processRay(RadxRay *ray);
+
+  void _initWaveFilt();
+  int _applyWaveFilt(RadxRay *ray, 
+                     double velSurf,
+                     double dbzSurf,
+                     double rangeToSurf);
+
 
   void _setupRead(RadxFile &file);
 
