@@ -330,7 +330,52 @@ paramdef string {
 } surface_vel_results_spdb_output_url;
 
 commentdef {
-  p_header = "FIR FILTERING FOR VELOCITY ESTIMATES";
+  p_header = "FILTERING";
+}
+
+typedef enum {
+  WAVE_FILTER, FIR_FILTER
+} filter_type_t;
+
+paramdef enum filter_type_t {
+  p_default = FIR_FILTER;
+  p_descr = "Filtering option";
+  p_help = "The FIR filter approach was developed for the data from NOREASTER and CSET. For SOCRATES is was found that this filter does not work with the large waves in the southern ocean. The WAVE_FILTER approach was developed for SOCRATES.";
+} filter_type;
+
+commentdef {
+  p_header = "WAVE FILTERING";
+}
+
+paramdef double {
+  p_default = 3;
+  p_descr = "Length of the noise filter (secs).";
+  p_help = "The noise filter is a simple running mean to smooth out the measurement noise in the velocity measurements.";
+} noise_filter_length_secs;
+
+paramdef double {
+  p_default = 60;
+  p_descr = "Length of the wave filter (secs).";
+  p_help = "The same length is used for mean, median and polynomial filtering. All are computed but only the selected method is applied for the velocity correction.";
+} wave_filter_length_secs;
+
+typedef enum {
+  WAVE_MEAN, WAVE_MEDIAN, WAVE_POLYNOMIAL
+} wave_filter_type_t;
+
+paramdef enum wave_filter_type_t {
+  p_default = WAVE_MEDIAN;
+  p_descr = "Wave filtering type";
+  p_help = "All filter types use the same length in secs.\n\nWAVE_MEAN: running mean in time.\n\nWAVE_MEDIAN: running median in time.\n\nWAVE_POLYNOMIAL: polynomial fit.";
+} wave_filter_type;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Order of the polynomial fit for the wave filter.";
+} wave_polynomial_order;
+
+commentdef {
+  p_header = "FIR FILTERING";
 }
 
 paramdef double {

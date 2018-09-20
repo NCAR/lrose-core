@@ -103,15 +103,15 @@ HcrVelCorrect::HcrVelCorrect(int argc, char **argv)
   // set up the surface velocity filtering
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _filt.setDebug(true);
+    _firFilt.setDebug(true);
   } else if (_params.debug >= Params::DEBUG_EXTRA) {
-    _filt.setVerbose(true);
+    _firFilt.setVerbose(true);
   }
 
-  _filt.setSpikeFilterDifferenceThreshold
+  _firFilt.setSpikeFilterDifferenceThreshold
     (_params.spike_filter_difference_threshold);
   
-  _filt.initFirFilters(_params.stage1_filter_n,
+  _firFilt.initFirFilters(_params.stage1_filter_n,
                           _params._stage1_filter,
                           _params.spike_filter_n,
                           _params._spike_filter,
@@ -367,38 +367,29 @@ int HcrVelCorrect::_processFile(const string &readPath)
 
   vector<RadxRay *> rays = _inVol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
-    
-    RadxRay *ray = new RadxRay(*rays[iray]);
-    
-    // get surface vel
 
-    double velSurf, dbzSurf, rangeToSurf;
-    if (_surfVel.computeSurfaceVel(ray,
-                                   velSurf,
-                                   dbzSurf,
-                                   rangeToSurf)) {
-      velSurf = 0.0;
-      rangeToSurf = 0.0;
-      dbzSurf = -9999.0;
-    }
+    // create a copy of the ray
+    // add a client to the copy to keep track of usage
+    // the filter and the write volume will both try to delete
+    // the ray if no longer used
     
-    if (_filt.filterRay(ray, velSurf, dbzSurf, rangeToSurf) == 0) {
-      
-      RadxRay *filtRay = _filt.getFiltRay();
+    RadxRay *rayCopy = new RadxRay(*rays[iray]);
+    rayCopy->addClient();
+
+    // process the ray
+    // computing vel and filtering
+    
+    if (_processRay(rayCopy) == 0) {
+
+      RadxRay *filtRay = _firFilt.getFiltRay();
       RadxTime filtRayTime = filtRay->getRadxTime();
-      
-      if (_filt.velocityIsValid()) {
-        double velFilt = _filt.getVelFilt();
-        _correctVelForRay(filtRay, velFilt);
-      } else {
-        _copyVelForRay(filtRay);
-      }
       
       // write vol when done
       
       if (filtRayTime > _inEndTime) {
         _writeFiltVol();
-        _inEndTime.set(_inVol.getEndTimeSecs(), _inVol.getEndNanoSecs() / 1.0e9);
+        _inEndTime.set(_inVol.getEndTimeSecs(),
+                       _inVol.getEndNanoSecs() / 1.0e9);
       }
       
       // add to output vol
@@ -411,14 +402,55 @@ int HcrVelCorrect::_processFile(const string &readPath)
         _writeResultsToSpdb(filtRay);
       }
 
-    } // if (_filt.filterRay(ray, velSurf, dbzSurf, rangeToSurf) == 0)
-    
+    } // if (_processRay(rayCopy) == 0)
+
+    RadxRay::deleteIfUnused(rayCopy);
+
   } // iray
   
   return 0;
 
 }
 
+//////////////////////////////////////////////////
+// Process a ray
+
+int HcrVelCorrect::_processRay(RadxRay *ray)
+  
+{
+
+  // get surface vel
+  
+  double velSurf, dbzSurf, rangeToSurf;
+  if (_surfVel.computeSurfaceVel(ray,
+                                 velSurf,
+                                 dbzSurf,
+                                 rangeToSurf)) {
+    velSurf = 0.0;
+    rangeToSurf = 0.0;
+    dbzSurf = -9999.0;
+  }
+  
+  if (_firFilt.filterRay(ray, velSurf, dbzSurf, rangeToSurf) == 0) {
+    
+    RadxRay *filtRay = _firFilt.getFiltRay();
+    if (_firFilt.velocityIsValid()) {
+      double velFilt = _firFilt.getVelFilt();
+      _correctVelForRay(filtRay, velFilt);
+    } else {
+      _copyVelForRay(filtRay);
+    }
+
+    return 0;
+
+  } else {
+    
+    return -1;
+
+  }
+    
+}
+  
 //////////////////////////////////////////////////
 // set up read
 
@@ -694,6 +726,8 @@ int HcrVelCorrect::_runFmq()
 
     PMU_auto_register("Reading FMQ");
 
+    // get a ray - this is created
+    
     RadxRay *ray = _readFmqRay();
     if (ray == NULL) {
       umsleep(100);
@@ -702,20 +736,9 @@ int HcrVelCorrect::_runFmq()
 
     // process this ray
 
-    double velSurf, dbzSurf, rangeToSurf;
-    if (_surfVel.computeSurfaceVel(ray,
-                                   velSurf,
-                                   dbzSurf,
-                                   rangeToSurf)) {
-      velSurf = 0.0;
-      rangeToSurf = 0.0;
-      dbzSurf = -9999.0;
-    }
-    
-    if (_filt.filterRay(ray, velSurf, dbzSurf, rangeToSurf) == 0) {
-    
-      RadxRay *filtRay = _filt.getFiltRay();
-      RadxTime filtRayTime = filtRay->getRadxTime();
+    if (_processRay(ray) == 0) {
+
+      RadxRay *filtRay = _firFilt.getFiltRay();
       
       // write params if needed
       
@@ -724,13 +747,6 @@ int HcrVelCorrect::_runFmq()
           return -1; 
         }
         _needWriteParams = false;
-      }
-      
-      if (_filt.velocityIsValid()) {
-        double velFilt = _filt.getVelFilt();
-        _correctVelForRay(filtRay, velFilt);
-      } else {
-        _copyVelForRay(filtRay);
       }
       
       // write out ray
@@ -743,7 +759,9 @@ int HcrVelCorrect::_runFmq()
         _writeResultsToSpdb(filtRay);
       }
 
-    } // if (_filt.processRay(ray) == 0)
+    } // if (processRay(ray) == 0)
+
+    RadxRay::deleteIfUnused(ray);
 
   } // while (true)
   
@@ -803,10 +821,11 @@ RadxRay *HcrVelCorrect::_readFmqRay()
         
       _nRaysRead++;
       
-      // crete ray from ray message
+      // create ray from ray message
       
       RadxRay *ray = _createInputRay();
-      
+      ray->addClient();
+
       // debug print
       
       if (_params.debug) {
@@ -1473,7 +1492,7 @@ void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *filtRay)
 
   // check if we have a good velocity
   
-  if (!_filt.velocityIsValid()) {
+  if (!_firFilt.velocityIsValid()) {
     return;
   }
 
@@ -1481,14 +1500,14 @@ void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *filtRay)
 
   string xml;
   xml += RadxXml::writeStartTag("HcrVelCorr", 0);
-  xml += RadxXml::writeDouble("VelMeas", 1, _filt.getVelMeasured());
-  xml += RadxXml::writeDouble("VelStage1", 1, _filt.getVelStage1());
-  xml += RadxXml::writeDouble("VelSpike", 1, _filt.getVelSpike());
-  xml += RadxXml::writeDouble("VelCond", 1, _filt.getVelCond());
-  xml += RadxXml::writeDouble("VelFilt", 1, _filt.getVelFilt());
-  xml += RadxXml::writeDouble("VelCorr", 1, _filt.getVelMeasured() - _filt.getVelFilt());
-  xml += RadxXml::writeDouble("Range", 1, _filt.getRangeToSurface());
-  xml += RadxXml::writeDouble("DbzMax", 1, _filt.getDbzSurf());
+  xml += RadxXml::writeDouble("VelMeas", 1, _firFilt.getVelMeasured());
+  xml += RadxXml::writeDouble("VelStage1", 1, _firFilt.getVelStage1());
+  xml += RadxXml::writeDouble("VelSpike", 1, _firFilt.getVelSpike());
+  xml += RadxXml::writeDouble("VelCond", 1, _firFilt.getVelCond());
+  xml += RadxXml::writeDouble("VelFilt", 1, _firFilt.getVelFilt());
+  xml += RadxXml::writeDouble("VelCorr", 1, _firFilt.getVelMeasured() - _firFilt.getVelFilt());
+  xml += RadxXml::writeDouble("Range", 1, _firFilt.getRangeToSurface());
+  xml += RadxXml::writeDouble("DbzMax", 1, _firFilt.getDbzSurf());
   xml += RadxXml::writeEndTag("HcrVelCorr", 0);
 
   // write to SPDB
@@ -1512,3 +1531,4 @@ void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *filtRay)
   }
  
 }
+

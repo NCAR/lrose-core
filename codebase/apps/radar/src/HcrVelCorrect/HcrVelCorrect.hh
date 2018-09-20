@@ -102,7 +102,7 @@ private:
 
   RadxTime _timeFirstRay;
   HcrSurfaceVel _surfVel;
-  HcrVelFirFilt _filt;
+  HcrVelFirFilt _firFilt;
 
   // input volume
   
@@ -123,6 +123,8 @@ private:
   int _runFmq();
 
   int _processFile(const string &filePath);
+  int _processRay(RadxRay *ray);
+
   void _setupRead(RadxFile &file);
 
   void _convertFieldsForOutput(RadxVol &vol);
@@ -147,6 +149,7 @@ private:
   void _copyVelForRay(RadxRay *ray);
 
   void _writeResultsToSpdb(const RadxRay *filtRay);
+
 
 };
 

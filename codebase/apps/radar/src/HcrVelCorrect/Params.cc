@@ -1194,7 +1194,103 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("FIR FILTERING FOR VELOCITY ESTIMATES");
+    tt->comment_hdr = tdrpStrDup("FILTERING");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'filter_type'
+    // ctype is '_filter_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("filter_type");
+    tt->descr = tdrpStrDup("Filtering option");
+    tt->help = tdrpStrDup("The FIR filter approach was developed for the data from NOREASTER and CSET. For SOCRATES is was found that this filter does not work with the large waves in the southern ocean. The WAVE_FILTER approach was developed for SOCRATES.");
+    tt->val_offset = (char *) &filter_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("filter_type_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("WAVE_FILTER");
+      tt->enum_def.fields[0].val = WAVE_FILTER;
+      tt->enum_def.fields[1].name = tdrpStrDup("FIR_FILTER");
+      tt->enum_def.fields[1].val = FIR_FILTER;
+    tt->single_val.e = FIR_FILTER;
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("WAVE FILTERING");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'noise_filter_length_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("noise_filter_length_secs");
+    tt->descr = tdrpStrDup("Length of the noise filter (secs).");
+    tt->help = tdrpStrDup("The noise filter is a simple running mean to smooth out the measurement noise in the velocity measurements.");
+    tt->val_offset = (char *) &noise_filter_length_secs - &_start_;
+    tt->single_val.d = 3;
+    tt++;
+    
+    // Parameter 'wave_filter_length_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("wave_filter_length_secs");
+    tt->descr = tdrpStrDup("Length of the wave filter (secs).");
+    tt->help = tdrpStrDup("The same length is used for mean, median and polynomial filtering. All are computed but only the selected method is applied for the velocity correction.");
+    tt->val_offset = (char *) &wave_filter_length_secs - &_start_;
+    tt->single_val.d = 60;
+    tt++;
+    
+    // Parameter 'wave_filter_type'
+    // ctype is '_wave_filter_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("wave_filter_type");
+    tt->descr = tdrpStrDup("Wave filtering type");
+    tt->help = tdrpStrDup("All filter types use the same length in secs.\n\nWAVE_MEAN: running mean in time.\n\nWAVE_MEDIAN: running median in time.\n\nWAVE_POLYNOMIAL: polynomial fit.");
+    tt->val_offset = (char *) &wave_filter_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("wave_filter_type_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("WAVE_MEAN");
+      tt->enum_def.fields[0].val = WAVE_MEAN;
+      tt->enum_def.fields[1].name = tdrpStrDup("WAVE_MEDIAN");
+      tt->enum_def.fields[1].val = WAVE_MEDIAN;
+      tt->enum_def.fields[2].name = tdrpStrDup("WAVE_POLYNOMIAL");
+      tt->enum_def.fields[2].val = WAVE_POLYNOMIAL;
+    tt->single_val.e = WAVE_MEDIAN;
+    tt++;
+    
+    // Parameter 'wave_polynomial_order'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("wave_polynomial_order");
+    tt->descr = tdrpStrDup("Order of the polynomial fit for the wave filter.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wave_polynomial_order - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'Comment 11'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 11");
+    tt->comment_hdr = tdrpStrDup("FIR FILTERING");
     tt->comment_text = tdrpStrDup("");
     tt++;
     

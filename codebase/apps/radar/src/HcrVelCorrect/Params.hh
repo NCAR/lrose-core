@@ -102,6 +102,17 @@ public:
     SPECIFY_FILE_NAME = 3
   } filename_mode_t;
 
+  typedef enum {
+    WAVE_FILTER = 0,
+    FIR_FILTER = 1
+  } filter_type_t;
+
+  typedef enum {
+    WAVE_MEAN = 0,
+    WAVE_MEDIAN = 1,
+    WAVE_POLYNOMIAL = 2
+  } wave_filter_type_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -471,6 +482,16 @@ public:
 
   char* surface_vel_results_spdb_output_url;
 
+  filter_type_t filter_type;
+
+  double noise_filter_length_secs;
+
+  double wave_filter_length_secs;
+
+  wave_filter_type_t wave_filter_type;
+
+  int wave_polynomial_order;
+
   double spike_filter_difference_threshold;
 
   double *_stage1_filter;
@@ -489,7 +510,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[57];
+  mutable TDRPtable _table[64];
 
   const char *_className;
 
