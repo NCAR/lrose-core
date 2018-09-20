@@ -47,7 +47,8 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
-#include <radar/FindSurfaceVel.hh>
+#include <radar/HcrSurfaceVel.hh>
+#include <radar/HcrVelFirFilt.hh>
 #include <rapformats/DsRadarMsg.hh>
 #include <Fmq/DsRadarQueue.hh>
 class RadxFile;
@@ -100,7 +101,8 @@ private:
   // write out filtered results
 
   RadxTime _timeFirstRay;
-  FindSurfaceVel _surfVel;
+  HcrSurfaceVel _surfVel;
+  HcrVelFirFilt _filt;
 
   // input volume
   

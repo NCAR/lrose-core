@@ -22,7 +22,6 @@ HDRS =
 CPPC_SRCS = \
 	DpolFilter.cc \
 	FilterUtils.cc \
-	FindSurfaceVel.cc \
 	PhidpFilt.cc
 
 #
