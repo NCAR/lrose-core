@@ -20,7 +20,9 @@
 ///////////// debug ///////////////////////////////////
 //
 // Debug option.
+//
 // If set, debug messages will be printed appropriately.
+//
 //
 // Type: enum
 // Options:
@@ -35,8 +37,11 @@ debug = DEBUG_OFF;
 ///////////// write_results_to_stdout /////////////////
 //
 // Option to write filtered data to stdout.
+//
 // If TRUE, the filtered data will be written to stdout in a manner 
 //   suitable for plotting via gnuplot and python.
+//
+//
 // Type: boolean
 //
 
@@ -45,9 +50,12 @@ write_results_to_stdout = FALSE;
 ///////////// register_with_procmap ///////////////////
 //
 // Option to register this process with the process mapper (procmap).
+//
 // If TRUE, every minute this process will register a heartbeat with 
 //   procmap. If the process hangs, it will be restared by the 
 //   auto_restarter.
+//
+//
 // Type: boolean
 //
 
@@ -56,12 +64,15 @@ register_with_procmap = FALSE;
 ///////////// instance ////////////////////////////////
 //
 // Program instance for process registration.
+//
 // This application registers with procmap. This is the instance used 
 //   for registration.
+//
+//
 // Type: string
 //
 
-instance = "test";
+instance = "qc.10hz";
 
 //======================================================================
 //
@@ -72,20 +83,22 @@ instance = "test";
 ///////////// mode ////////////////////////////////////
 //
 // Operating mode.
+//
 
 // REALTIME: wait for a new input file.  
-
+//
 // ARCHIVE: move through the data between the start and end times set on 
 //   the command line. 
-
+//
 // FILELIST: move through the list of file names specified on the 
 //   command line. 
 // Paths (in ARCHIVE mode, at least) MUST contain a day-directory above 
 //   the data file -- ./data_file.ext will not work as a file path, but 
 //   ./yyyymmdd/data_file.ext will.
-
+//
 // FMQ: read data from one moments FMQ, combine the dwells and write to 
 //   an output queue.
+//
 //
 // Type: enum
 // Options:
@@ -95,22 +108,28 @@ instance = "test";
 //     FMQ
 //
 
-mode = REALTIME;
+mode = ARCHIVE;
 
 ///////////// input_dir ///////////////////////////////
 //
 // Input directory for searching for files.
+//
 // Files will be searched for in this directory. REALTIME, ARCHIVE and 
 //   FILELIST modes .
+//
+//
 // Type: string
 //
 
-input_dir = "/scr/eldora1/hcr-test/cfradial/moments/10hz";
+input_dir = "/scr/rain1/rsfdata/projects/socrates/hcr/qc/cfradial/moments/10hz";
 
 ///////////// max_realtime_data_age_secs //////////////
 //
 // Maximum age of realtime data (secs).
+//
 // Only data less old than this will be used.
+//
+//
 // Type: int
 //
 
@@ -119,8 +138,11 @@ max_realtime_data_age_secs = 300;
 ///////////// latest_data_info_avail //////////////////
 //
 // Is _latest_data_info file available?.
+//
 // If TRUE, will watch the latest_data_info file. If FALSE, will scan 
 //   the input directory for new files.
+//
+//
 // Type: boolean
 //
 
@@ -129,9 +151,12 @@ latest_data_info_avail = TRUE;
 ///////////// search_recursively //////////////////////
 //
 // Option to recurse to subdirectories while looking for new files.
+//
 // If TRUE, all subdirectories with ages less than max_dir_age will be 
 //   searched. This may take considerable CPU, so be careful in its use. 
 //   Only applies if latest_data_info_avail is FALSE.
+//
+//
 // Type: boolean
 //
 
@@ -140,10 +165,13 @@ search_recursively = TRUE;
 ///////////// max_recursion_depth /////////////////////
 //
 // Maximum depth for recursive directory scan.
+//
 // Only applies search_recursively is TRUE. This is the max depth, below 
 //   input_dir, to which the recursive directory search will be carried 
 //   out. A depth of 0 will search the top-level directory only. A depth 
 //   of 1 will search the level below the top directory, etc.
+//
+//
 // Type: int
 //
 
@@ -152,10 +180,13 @@ max_recursion_depth = 5;
 ///////////// wait_between_checks /////////////////////
 //
 // Sleep time between checking directory for input - secs.
+//
 // If a directory is large and files do not arrive frequently, set this 
 //   to a higher value to reduce the CPU load from checking the directory. 
 //   Only applies if latest_data_info_avail is FALSE.
+//
 // Minimum val: 1
+//
 // Type: int
 //
 
@@ -164,9 +195,12 @@ wait_between_checks = 2;
 ///////////// file_quiescence /////////////////////////
 //
 // File quiescence when checking for files - secs.
+//
 // This allows you to make sure that a file coming from a remote machine 
 //   is complete before reading it. Only applies if latest_data_info_avail 
 //   is FALSE.
+//
+//
 // Type: int
 //
 
@@ -175,7 +209,10 @@ file_quiescence = 5;
 ///////////// search_ext //////////////////////////////
 //
 // File name extension.
+//
 // If set, only files with this extension will be processed.
+//
+//
 // Type: string
 //
 
@@ -184,7 +221,10 @@ search_ext = "";
 ///////////// input_fmq_url ///////////////////////////
 //
 // FMQ from which to read the moments stream.
+//
 // FMQ mode only.
+//
+//
 // Type: string
 //
 
@@ -193,9 +233,12 @@ input_fmq_url = "fmqp:://localhost::/tmp/fmq/input";
 ///////////// seek_to_end_of_input_fmq ////////////////
 //
 // Option to seek to the end of the input FMQ.
+//
 // If TRUE, the program will seek to the end of the fmq and only read in 
 //   new data. If FALSE, it will start reading from the beginning of the 
 //   FMQ.
+//
+//
 // Type: boolean
 //
 
@@ -210,8 +253,11 @@ seek_to_end_of_input_fmq = TRUE;
 ///////////// dbz_field_name //////////////////////////
 //
 // Name of field used to identify the surface from the data.
+//
 // The surface will be identified at the gate with the maximum value in 
 //   this field.
+//
+//
 // Type: string
 //
 
@@ -220,7 +266,10 @@ dbz_field_name = "DBZ";
 ///////////// min_range_to_surface_km /////////////////
 //
 // Minumum range to the surface (km).
+//
 // We will search for the surface echo in the gates beyound this range.
+//
+//
 // Type: double
 //
 
@@ -229,16 +278,22 @@ min_range_to_surface_km = 0.5;
 ///////////// min_dbz_for_surface_echo ////////////////
 //
 // Minumum dbz value for a valid surface return.
+//
 // Gates with values below this will not be used.
+//
+//
 // Type: double
 //
 
-min_dbz_for_surface_echo = 20;
+min_dbz_for_surface_echo = 8;
 
 ///////////// ngates_for_surface_echo /////////////////
 //
 // Number of gates needed for identifying surface echo.
+//
 // We require this number of gates to exceed min_dbz_for_surface_echo.
+//
+//
 // Type: int
 //
 
@@ -248,6 +303,8 @@ ngates_for_surface_echo = 1;
 //
 // Name of field used to compute the apparent velocity of the surface 
 //   echo.
+//
+//
 // Type: string
 //
 
@@ -256,6 +313,8 @@ vel_field_name = "VEL";
 ///////////// corrected_vel_field_name ////////////////
 //
 // Name of field for corrected velocity.
+//
+//
 // Type: string
 //
 
@@ -270,6 +329,7 @@ corrected_vel_field_name = "VEL_CORR";
 ///////////// output_encoding /////////////////////////
 //
 // Output encoding for all fields, if requested.
+//
 //
 // Type: enum
 // Options:
@@ -290,8 +350,10 @@ output_encoding = OUTPUT_ENCODING_FLOAT32;
 ///////////// netcdf_style ////////////////////////////
 //
 // NetCDF style - if output_format is CFRADIAL.
+//
 // netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
 //   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
 //
 // Type: enum
 // Options:
@@ -306,8 +368,11 @@ netcdf_style = NETCDF4;
 ///////////// compression_level ///////////////////////
 //
 // Compression level for output, if compressed.
+//
 // Applies to netCDF only. Dorade compression is run-length encoding, 
 //   and has not options..
+//
+//
 // Type: int
 //
 
@@ -322,19 +387,24 @@ compression_level = 4;
 ///////////// output_dir //////////////////////////////
 //
 // Output directory path.
+//
 // Files will be written to this directory.
+//
+//
 // Type: string
 //
 
-output_dir = "/tmp/hcr/cfradial/filt";
+output_dir = "/tmp/cfradial/velcorr/10hz";
 
 ///////////// output_filename_mode ////////////////////
 //
 // Mode for computing output file name.
+//
 // START_AND_END_TIMES: include both start and end times in file name. 
 //   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
 //   include only end time in file name. SPECIFY_FILE_NAME: file of this 
 //   name will be written to output_dir.
+//
 //
 // Type: enum
 // Options:
@@ -349,7 +419,10 @@ output_filename_mode = START_AND_END_TIMES;
 ///////////// output_filename_prefix //////////////////
 //
 // Optional prefix for output filename.
+//
 // If empty, the standard prefix will be used.
+//
+//
 // Type: string
 //
 
@@ -358,8 +431,11 @@ output_filename_prefix = "";
 ///////////// include_instrument_name_in_file_name ////
 //
 // Option to include the instrument name in the file name.
+//
 // Only applies to CfRadial files. If true, the instrument name will be 
 //   included just before the volume number in the output file name.
+//
+//
 // Type: boolean
 //
 
@@ -368,8 +444,11 @@ include_instrument_name_in_file_name = TRUE;
 ///////////// output_filename /////////////////////////
 //
 // Name of output file.
+//
 // Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
 //   this name will be written to output_dir.
+//
+//
 // Type: string
 //
 
@@ -378,7 +457,10 @@ output_filename = "cfradial.test.nc";
 ///////////// append_day_dir_to_output_dir ////////////
 //
 // Add the day directory to the output directory.
+//
 // Path will be output_dir/yyyymmdd/filename.
+//
+//
 // Type: boolean
 //
 
@@ -387,7 +469,10 @@ append_day_dir_to_output_dir = TRUE;
 ///////////// append_year_dir_to_output_dir ///////////
 //
 // Add the year directory to the output directory.
+//
 // Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
 // Type: boolean
 //
 
@@ -396,8 +481,11 @@ append_year_dir_to_output_dir = FALSE;
 ///////////// write_latest_data_info //////////////////
 //
 // Option to write out _latest_data_info files.
+//
 // If true, the _latest_data_info files will be written after the 
 //   converted file is written.
+//
+//
 // Type: boolean
 //
 
@@ -412,7 +500,10 @@ write_latest_data_info = FALSE;
 ///////////// output_fmq_url //////////////////////////
 //
 // FMQ to which the combined dwells are written.
+//
 // FMQ mode only.
+//
+//
 // Type: string
 //
 
@@ -421,7 +512,10 @@ output_fmq_url = "fmqp:://localhost::/tmp/fmq/output";
 ///////////// output_fmq_compress /////////////////////
 //
 // Option to compress the output fmq.
+//
 // The default is for no compression.
+//
+//
 // Type: boolean
 //
 
@@ -430,6 +524,8 @@ output_fmq_compress = FALSE;
 ///////////// output_fmq_n_slots //////////////////////
 //
 // Number of slots in output FMQ.
+//
+//
 // Type: int
 //
 
@@ -438,6 +534,8 @@ output_fmq_n_slots = 5000;
 ///////////// output_fmq_buf_size /////////////////////
 //
 // Size of buffer in output FMQ.
+//
+//
 // Type: int
 //
 
@@ -446,6 +544,7 @@ output_fmq_buf_size = 100000000;
 ///////////// output_fmq_write_blocking ///////////////
 //
 // Option to block on write when the radar queue fills up.
+//
 // If false, the program writes data to the output queue without regard 
 //   to whether the reader is keeping up. This mode should usually be used 
 //   in realtime, to avoid holding things up if a client becomes slow. If 
@@ -454,6 +553,8 @@ output_fmq_buf_size = 100000000;
 //   mode. In this mode there should be only one reader. If you need to 
 //   service more than one reader, use Fmq2Fmq in write blocking mode with 
 //   multiple output urls to multiplex the queue.
+//
+//
 // Type: boolean
 //
 
@@ -462,8 +563,11 @@ output_fmq_write_blocking = FALSE;
 ///////////// output_fmq_data_mapper_report_interval //
 //
 // Number of seconds between reports to DataMapper.
+//
 // If > 0, the program will register with the DataMapper when the output 
 //   FMQs are written to. If <= 0, registration will not be performed.
+//
+//
 // Type: int
 //
 
@@ -471,7 +575,39 @@ output_fmq_data_mapper_report_interval = 5;
 
 //======================================================================
 //
-// FIR FILTERING.
+// WRITING SURFACE VEL RESULTS TO SPDB IN XML.
+//
+//======================================================================
+ 
+///////////// write_surface_vel_results_to_spdb ///////
+//
+// Option to write out surface velocity results to SPDB.
+//
+// The results will be written in XML, stored in SPDB. The data can then 
+//   be retrieved for plotting or other purposes.
+//
+//
+// Type: boolean
+//
+
+write_surface_vel_results_to_spdb = TRUE;
+
+///////////// surface_vel_results_spdb_output_url /////
+//
+// URL for writing surface vel results to SPDB XML.
+//
+// For local writes, specify the directory. For remote writes, specify 
+//   the full url: spdbp:://host::dir.
+//
+//
+// Type: string
+//
+
+surface_vel_results_spdb_output_url = "/tmp/spdb/HcrVelCorrect";
+
+//======================================================================
+//
+// FIR FILTERING FOR VELOCITY ESTIMATES.
 //
 //======================================================================
  
@@ -479,6 +615,7 @@ output_fmq_data_mapper_report_interval = 5;
 //
 // Threshold for removing spikes in the original data and resetting the 
 //   value to that form the short filter.
+//
 // We apply both the stage-1 and spike filters to the time series of 
 //   surface velocity. If the absolute difference between the two exceeds 
 //   this threshold, then the conditioned data is set to the output from 
@@ -486,8 +623,11 @@ output_fmq_data_mapper_report_interval = 5;
 //   threshold then the original data point is retained. After this step 
 //   the final filter it applied to the conditioned data to compute the 
 //   final filtered value.
+//
+//
 // Type: double
 //
 
-spike_filter_difference_threshold = 0.11;
+// spike_filter_difference_threshold = 0.11;
+spike_filter_difference_threshold = 0.25;
 
