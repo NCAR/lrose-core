@@ -78,6 +78,7 @@ public:
   // finding the surface
   
   void setMinRangeToSurfaceKm(double val) { _minRangeToSurfaceKm = val; }
+  void setMaxSurfaceHeightKm(double val) { _maxSurfaceHeightKm = val; }
   void setMinDbzForSurfaceEcho(double val) { _minDbzForSurfaceEcho = val; }
   void setNGatesForSurfaceEcho(int val) { _nGatesForSurfaceEcho = val; }
 
@@ -180,17 +181,19 @@ private:
 
   // parameters
 
-  double _maxNadirErrorDeg;
   double _minRangeToSurfaceKm;
+  double _maxSurfaceHeightKm;
   double _minDbzForSurfaceEcho;
   int _nGatesForSurfaceEcho;
-  double _spikeFilterDifferenceThreshold;
+  double _maxNadirErrorDeg;
 
   // storing incoming rays long enough to compute filtered results
 
   deque<RadxRay *> _filtRays;
   
-  // filtering
+  // FIR filtering
+
+  double _spikeFilterDifferenceThreshold;
 
   vector<double> _filtCoeffStage1;
   vector<double> _filtCoeffSpike;

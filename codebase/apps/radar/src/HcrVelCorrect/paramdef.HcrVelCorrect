@@ -146,6 +146,12 @@ paramdef double {
 } min_range_to_surface_km;
 
 paramdef double {
+  p_default = 9.0;
+  p_descr = "Max expected height of the terrain (km).";
+  p_help = "We ignore gates above this maximum, since they cannot be at the surface.";
+} max_surface_height_km;
+
+paramdef double {
   p_default = 20.0;
   p_descr = "Minumum dbz value for a valid surface return.";
   p_help = "Gates with values below this will not be used.";

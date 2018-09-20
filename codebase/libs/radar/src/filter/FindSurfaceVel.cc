@@ -128,6 +128,7 @@ FindSurfaceVel::FindSurfaceVel()
 
   _maxNadirErrorDeg = 5.0;
   _minRangeToSurfaceKm = 0.5;
+  _maxSurfaceHeightKm = 9.0;
   _minDbzForSurfaceEcho = 20.0;
   _nGatesForSurfaceEcho = 1;
   _spikeFilterDifferenceThreshold = 0.11;
@@ -241,6 +242,144 @@ double FindSurfaceVel::getVelFilt() const
   } else {
     return _filteredFinal[_finalIndex];
   }
+}
+
+/////////////////////////////////////////////////////////////////////////
+// compute surface velocity
+//
+// Sets vel to 0.0 if cannot determine velocity.
+// Also sets dbzSurf and rangeToSurf.
+// Returns 0 on success, -1 on failure.
+
+int FindSurfaceVel::computeSurfaceVel(const RadxRay *ray,
+                                      double &velSurf,
+                                      double &dbzSurf,
+                                      double &rangeToSurf) const
+  
+{
+
+  // init
+  
+  velSurf = 0.0;
+  dbzSurf = NAN;
+  rangeToSurf = NAN;
+  
+  // check elevation
+  // cannot compute gnd vel if not pointing down
+  
+  double elev = ray->getElevationDeg();
+  if ((elev > -90 + _maxNadirErrorDeg) ||
+      (elev < -90 - _maxNadirErrorDeg)) {
+    if (_debug) {
+      cerr << "Bad elevation for finding surface, time, elev(deg): "
+           << ray->getRadxTime().asString() << ", "
+           << elev << endl;
+    }
+    return -1;
+  }
+
+  // get dbz field
+  
+  const RadxField *dbzField = ray->getField(_dbzFieldName);
+  if (dbzField == NULL) {
+    cerr << "ERROR - FindSurfaceVel::_computeSurfaceVel" << endl;
+    cerr << "  No dbz field found, field name: " << _dbzFieldName << endl;
+    return -1;
+  }
+  const Radx::fl32 *dbzArray = dbzField->getDataFl32();
+  Radx::fl32 dbzMiss = dbzField->getMissingFl32();
+  
+  // get vel field
+  
+  const RadxField *velField = ray->getField(_velFieldName);
+  if (velField == NULL) {
+    cerr << "ERROR - FindSurfaceVel::_computeSurfaceVel" << endl;
+    cerr << "  No vel field found, field name: " << _velFieldName << endl;
+    return -1;
+  }
+  const Radx::fl32 *velArray = velField->getDataFl32();
+  Radx::fl32 velMiss = velField->getMissingFl32();
+  
+  // get gate at which max dbz occurs
+
+  const RadxGeoref *georef = ray->getGeoreference();
+  double range = dbzField->getStartRangeKm();
+  double drange = dbzField->getGateSpacingKm();
+  double dbzMax = -9999;
+  int gateForMax = -1;
+  double rangeSurf = 0;
+  double foundSurface = false;
+  for (size_t igate = 0; igate < dbzField->getNPoints(); igate++, range += drange) {
+    if (range < _minRangeToSurfaceKm) {
+      continue;
+    }
+    if (georef != NULL) {
+      double altitudeKm = georef->getAltitudeKmMsl();
+      double gateAlt = altitudeKm - range;
+      if (gateAlt > _maxSurfaceHeightKm) {
+        continue;
+      }
+    }
+    Radx::fl32 dbz = dbzArray[igate];
+    if (dbz != dbzMiss) {
+      if (dbz > dbzMax) {
+        dbzMax = dbz;
+        gateForMax = igate;
+        rangeSurf = range;
+        foundSurface = true;
+      }
+    }
+  }
+
+  dbzSurf = dbzMax;
+  rangeToSurf = rangeSurf;
+  
+  // check for sufficient power
+
+  if (foundSurface) {
+    if (dbzMax < _minDbzForSurfaceEcho) {
+      foundSurface = false;
+      if (_debug) {
+        cerr << "WARNING - FindSurfaceVel::_computeSurfaceVel" << endl;
+        cerr << "  Ray at time: " << ray->getRadxTime().asString() << endl;
+        cerr << "  Dbz max not high enough for surface detection: " << dbzMax << endl;
+        cerr << "  Range to max dbz: " << rangeToSurf << endl;
+      }
+    }
+  }
+
+  size_t nEachSide = _nGatesForSurfaceEcho / 2;
+  if (foundSurface) {
+    for (size_t igate = gateForMax - nEachSide; igate <= gateForMax + nEachSide; igate++) {
+      Radx::fl32 dbz = dbzArray[igate];
+      if (dbz == dbzMiss) {
+        foundSurface = false;
+      }
+      if (dbz < _minDbzForSurfaceEcho) {
+        foundSurface = false;
+      }
+    }
+  }
+
+  // compute surface vel
+  
+  if (foundSurface) {
+    double sum = 0.0;
+    double count = 0.0;
+    for (size_t igate = gateForMax - nEachSide;
+         igate <= gateForMax + nEachSide; igate++) {
+      Radx::fl32 vel = velArray[igate];
+      if (vel == velMiss) {
+        foundSurface = false;
+      }
+      sum += vel;
+      count++;
+    }
+    velSurf = sum / count;
+  }
+
+  return 0;
+
 }
 
 //////////////////////////////////////////////////
@@ -384,136 +523,6 @@ void FindSurfaceVel::_initFromFirFilters()
     cerr << "  Final index: " << _finalIndex << endl;
     cerr << "  Filter buffer len: " << _filtBufLen << endl;
   }
-
-}
-
-/////////////////////////////////////////////////////////////////////////
-// compute surface velocity
-//
-// Sets vel to 0.0 if cannot determine velocity.
-// Also sets dbzSurf and rangeToSurf.
-// Returns 0 on success, -1 on failure.
-
-int FindSurfaceVel::computeSurfaceVel(const RadxRay *ray,
-                                      double &velSurf,
-                                      double &dbzSurf,
-                                      double &rangeToSurf) const
-  
-{
-
-  // init
-  
-  velSurf = 0.0;
-  dbzSurf = NAN;
-  rangeToSurf = NAN;
-  
-  // check elevation
-  // cannot compute gnd vel if not pointing down
-  
-  double elev = ray->getElevationDeg();
-  if ((elev > -90 + _maxNadirErrorDeg) ||
-      (elev < -90 - _maxNadirErrorDeg)) {
-    if (_debug) {
-      cerr << "Bad elevation for finding surface, time, elev(deg): "
-           << ray->getRadxTime().asString() << ", "
-           << elev << endl;
-    }
-    return -1;
-  }
-
-  // get dbz field
-  
-  const RadxField *dbzField = ray->getField(_dbzFieldName);
-  if (dbzField == NULL) {
-    cerr << "ERROR - FindSurfaceVel::_computeSurfaceVel" << endl;
-    cerr << "  No dbz field found, field name: " << _dbzFieldName << endl;
-    return -1;
-  }
-  const Radx::fl32 *dbzArray = dbzField->getDataFl32();
-  Radx::fl32 dbzMiss = dbzField->getMissingFl32();
-  
-  // get vel field
-  
-  const RadxField *velField = ray->getField(_velFieldName);
-  if (velField == NULL) {
-    cerr << "ERROR - FindSurfaceVel::_computeSurfaceVel" << endl;
-    cerr << "  No vel field found, field name: " << _velFieldName << endl;
-    return -1;
-  }
-  const Radx::fl32 *velArray = velField->getDataFl32();
-  Radx::fl32 velMiss = velField->getMissingFl32();
-  
-  // get gate at which max dbz occurs
-
-  double range = dbzField->getStartRangeKm();
-  double drange = dbzField->getGateSpacingKm();
-  double dbzMax = -9999;
-  int gateForMax = -1;
-  double rangeSurf = 0;
-  double foundSurface = false;
-  for (size_t igate = 0; igate < dbzField->getNPoints(); igate++, range += drange) {
-    if (range < _minRangeToSurfaceKm) {
-      continue;
-    }
-    Radx::fl32 dbz = dbzArray[igate];
-    if (dbz != dbzMiss) {
-      if (dbz > dbzMax) {
-        dbzMax = dbz;
-        gateForMax = igate;
-        rangeSurf = range;
-        foundSurface = true;
-      }
-    }
-  }
-
-  dbzSurf = dbzMax;
-  rangeToSurf = rangeSurf;
-  
-  // check for sufficient power
-
-  if (foundSurface) {
-    if (dbzMax < _minDbzForSurfaceEcho) {
-      foundSurface = false;
-      if (_debug) {
-        cerr << "WARNING - FindSurfaceVel::_computeSurfaceVel" << endl;
-        cerr << "  Ray at time: " << ray->getRadxTime().asString() << endl;
-        cerr << "  Dbz max not high enough for surface detection: " << dbzMax << endl;
-        cerr << "  Range to max dbz: " << rangeToSurf << endl;
-      }
-    }
-  }
-
-  size_t nEachSide = _nGatesForSurfaceEcho / 2;
-  if (foundSurface) {
-    for (size_t igate = gateForMax - nEachSide; igate <= gateForMax + nEachSide; igate++) {
-      Radx::fl32 dbz = dbzArray[igate];
-      if (dbz == dbzMiss) {
-        foundSurface = false;
-      }
-      if (dbz < _minDbzForSurfaceEcho) {
-        foundSurface = false;
-      }
-    }
-  }
-
-  // compute surface vel
-  
-  if (foundSurface) {
-    double sum = 0.0;
-    double count = 0.0;
-    for (size_t igate = gateForMax - nEachSide;
-         igate <= gateForMax + nEachSide; igate++) {
-      Radx::fl32 vel = velArray[igate];
-      if (vel == velMiss) {
-        foundSurface = false;
-      }
-      sum += vel;
-      count++;
-    }
-    velSurf = sum / count;
-  }
-
-  return 0;
 
 }
 

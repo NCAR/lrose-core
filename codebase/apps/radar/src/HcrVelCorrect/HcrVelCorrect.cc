@@ -95,6 +95,7 @@ HcrVelCorrect::HcrVelCorrect(int argc, char **argv)
   _surfVel.setVelFieldName(_params.vel_field_name);
 
   _surfVel.setMinRangeToSurfaceKm(_params.min_range_to_surface_km);
+  _surfVel.setMaxSurfaceHeightKm(_params.max_surface_height_km);
   _surfVel.setMinDbzForSurfaceEcho(_params.min_dbz_for_surface_echo);
   _surfVel.setNGatesForSurfaceEcho(_params.ngates_for_surface_echo);
   _surfVel.setMaxNadirErrorDeg(_params.max_nadir_error_for_surface_vel);

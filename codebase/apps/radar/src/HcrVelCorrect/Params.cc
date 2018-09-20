@@ -808,6 +808,18 @@
     tt->single_val.d = 0.5;
     tt++;
     
+    // Parameter 'max_surface_height_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_surface_height_km");
+    tt->descr = tdrpStrDup("Max expected height of the terrain (km).");
+    tt->help = tdrpStrDup("We ignore gates above this maximum, since they cannot be at the surface.");
+    tt->val_offset = (char *) &max_surface_height_km - &_start_;
+    tt->single_val.d = 9;
+    tt++;
+    
     // Parameter 'min_dbz_for_surface_echo'
     // ctype is 'double'
     

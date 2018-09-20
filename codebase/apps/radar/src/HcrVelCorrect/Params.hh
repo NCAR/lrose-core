@@ -421,6 +421,8 @@ public:
 
   double min_range_to_surface_km;
 
+  double max_surface_height_km;
+
   double min_dbz_for_surface_echo;
 
   int ngates_for_surface_echo;
@@ -487,7 +489,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[56];
+  mutable TDRPtable _table[57];
 
   const char *_className;
 
