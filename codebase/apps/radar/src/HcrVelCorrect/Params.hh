@@ -486,7 +486,11 @@ public:
 
   double noise_filter_length_secs;
 
+  int noise_filter_min_n_rays;
+
   double wave_filter_length_secs;
+
+  int wave_filter_min_n_rays;
 
   wave_filter_type_t wave_filter_type;
 
@@ -510,7 +514,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[64];
+  mutable TDRPtable _table[66];
 
   const char *_className;
 

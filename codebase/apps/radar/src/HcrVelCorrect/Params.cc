@@ -1234,9 +1234,21 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("noise_filter_length_secs");
     tt->descr = tdrpStrDup("Length of the noise filter (secs).");
-    tt->help = tdrpStrDup("The noise filter is a simple running mean to smooth out the measurement noise in the velocity measurements.");
+    tt->help = tdrpStrDup("The noise filter is a simple running mean to smooth out the measurement noise in the velocity measurements. The filter has the same center as the wave filter.");
     tt->val_offset = (char *) &noise_filter_length_secs - &_start_;
     tt->single_val.d = 3;
+    tt++;
+    
+    // Parameter 'noise_filter_min_n_rays'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("noise_filter_min_n_rays");
+    tt->descr = tdrpStrDup("Min number of rays for valid noise filter.");
+    tt->help = tdrpStrDup("If fewer than this number of rays are available within the time period for the noise filter, the filter is not run and no corrected velocity is computed.");
+    tt->val_offset = (char *) &noise_filter_min_n_rays - &_start_;
+    tt->single_val.i = 15;
     tt++;
     
     // Parameter 'wave_filter_length_secs'
@@ -1246,9 +1258,21 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("wave_filter_length_secs");
     tt->descr = tdrpStrDup("Length of the wave filter (secs).");
-    tt->help = tdrpStrDup("The same length is used for mean, median and polynomial filtering. All are computed but only the selected method is applied for the velocity correction.");
+    tt->help = tdrpStrDup("The same length is used for mean, median and polynomial filtering. All are computed but only the selected method is applied for the velocity correction. We compute the filtered values at the center of the filtered length.");
     tt->val_offset = (char *) &wave_filter_length_secs - &_start_;
-    tt->single_val.d = 60;
+    tt->single_val.d = 30;
+    tt++;
+    
+    // Parameter 'wave_filter_min_n_rays'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("wave_filter_min_n_rays");
+    tt->descr = tdrpStrDup("Min number of rays for valid wave filter.");
+    tt->help = tdrpStrDup("If fewer than this number of rays are available within the time period for the wave filter, the filter is not run and no corrected velocity is computed.");
+    tt->val_offset = (char *) &wave_filter_min_n_rays - &_start_;
+    tt->single_val.i = 150;
     tt++;
     
     // Parameter 'wave_filter_type'

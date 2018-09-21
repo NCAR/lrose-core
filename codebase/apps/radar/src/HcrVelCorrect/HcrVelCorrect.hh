@@ -125,7 +125,9 @@ private:
     double velWaveFiltMean;
     double velWaveFiltMedian;
     double velWaveFiltPoly;
+    bool velIsValid;
     bool written;
+    bool corrected;
     FiltNode() {
       ray = NULL;
       velSurf = NAN;
@@ -136,20 +138,31 @@ private:
       velWaveFiltMean = NAN;
       velWaveFiltMedian = NAN;
       velWaveFiltPoly = NAN;
+      velIsValid = false;
       written = false;
+      corrected = false;
     }
     RadxTime getTime() { return ray->getRadxTime(); }
   };
 
   deque<FiltNode> _filtNodes;
-  RadxTime _filtStartTime;
-  RadxTime _filtMidTime;
-  RadxTime _filtEndTime;
-  RadxTime _nodesEndTime;
+  size_t _nFiltNodes;
+  RadxTime _filtTimeStart;
+  RadxTime _filtTimeMid;
+  RadxTime _filtTimeEnd;
+  RadxTime _filtPeriodEnd;
   RadxTime _filtRetrieveTime;
   
+
+  size_t _nNoiseNodes;
+  RadxTime _noiseTimeStart;
+  RadxTime _noiseTimeEnd;
+  size_t _noiseIndexStart;
+  size_t _noiseIndexEnd;
+
   bool _velIsValid;
   double _velFilt;
+  FiltNode *_filtNodeMid;
   RadxRay *_filtRay;
   
   double _noiseFiltSecs;
@@ -178,7 +191,11 @@ private:
                      double rangeToSurf);
 
   void _updateNodeStats();
-  void _addRayToFiltVol(RadxRay *ray);
+
+  void _runNoiseFilter();
+  void _runWaveFilter();
+
+  void _addRayToFiltVol(FiltNode &node);
 
   void _setupRead(RadxFile &file);
 
