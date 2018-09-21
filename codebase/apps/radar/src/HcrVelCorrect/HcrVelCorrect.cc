@@ -38,7 +38,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "HcrVelCorrect.hh"
-#include <Radx/RadxRay.hh>
 #include <Mdv/GenericRadxFile.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxTimeList.hh>
@@ -478,6 +477,12 @@ void HcrVelCorrect::_initWaveFilt()
   _velFilt = 0.0;
   _filtRay = NULL;
 
+  // filter length
+  
+  _noiseFiltSecs = _params.noise_filter_length_secs;
+  _waveFiltSecs = _params.wave_filter_length_secs;
+  _filtSecs = max(_noiseFiltSecs, _waveFiltSecs);
+
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -491,7 +496,80 @@ int HcrVelCorrect::_applyWaveFilt(RadxRay *ray,
 
 {
 
+  // add node to queue
+
+  FiltNode node;
+  node.velSurf = velSurf;
+  node.dbzSurf = dbzSurf;
+  node.rangeToSurf = rangeToSurf;
+  node.ray = ray;
+  _filtNodes.push_front(node);
+
+  // update the node stats
+  // this will also write out any rays that are discarded
+  // without having been written
+
+  _updateNodeStats();
+
   return -1;
+
+}
+
+//////////////////////////////////////////////////
+// update the node stats
+// Side effects:
+//   compute times
+//   write out rays to be discarded that have not been written
+//   determine if we have enough data for valid stats
+
+void HcrVelCorrect::_updateNodeStats()
+{
+
+  // compute time span for filter
+  
+  FiltNode &youngest = _filtNodes[0];
+  _filtStartTime = youngest.getTime();
+  _filtEndTime = _filtStartTime + _filtSecs;
+
+  // discard old nodes, writing out rays as appropriate
+
+  while (_filtNodes.size() > 1) {
+    size_t nNodes = _filtNodes.size();
+    FiltNode &oldest = _filtNodes[nNodes - 1];
+    if (oldest.getTime() > _filtEndTime) {
+      if (!oldest.written) {
+        // not yet written out, do so now
+        _addRayToFiltVol(oldest.ray);
+      }
+      _filtNodes.pop_back();
+    } else {
+      break;
+    }
+  } // while
+
+  size_t nNodes = _filtNodes.size();
+  FiltNode &oldest = _filtNodes[nNodes - 1];
+  _nodesEndTime = oldest.getTime();
+  
+
+}
+
+//////////////////////////////////////////////////
+// add a ray to the filtered volume
+// write out the vol as needed
+
+void HcrVelCorrect::_addRayToFiltVol(RadxRay *ray)
+{
+  
+  if (ray->getRadxTime() > _inEndTime) {
+    _writeFiltVol();
+    _inEndTime.set(_inVol.getEndTimeSecs(),
+                   _inVol.getEndNanoSecs() / 1.0e9);
+  }
+      
+  // add to output vol
+  
+  _filtVol.addRay(ray);
 
 }
 
@@ -1495,7 +1573,8 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
   if (velField == NULL) {
     // no vel field, nothing to do
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "WARNING - no vel field found: " << _params.vel_field_name << endl;
+      cerr << "WARNING - no vel field found: "
+           << _params.vel_field_name << endl;
     }
     return;
   }

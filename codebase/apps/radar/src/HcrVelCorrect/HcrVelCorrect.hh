@@ -44,7 +44,9 @@
 #include "Params.hh"
 #include <string>
 #include <deque>
+#include <cmath>
 #include <Radx/RadxVol.hh>
+#include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
 #include <radar/HcrSurfaceVel.hh>
@@ -110,12 +112,50 @@ private:
   RadxTime _inEndTime;
   bool _firstInputFile;
 
-  // filtered results
+  // wave filtering
+
+  class FiltNode {
+  public:
+    RadxRay *ray;
+    double velSurf;
+    double dbzSurf;
+    double rangeToSurf;
+    double velNoiseFiltMean;
+    double velNoiseFiltMedian;
+    double velWaveFiltMean;
+    double velWaveFiltMedian;
+    double velWaveFiltPoly;
+    bool written;
+    FiltNode() {
+      ray = NULL;
+      velSurf = NAN;
+      dbzSurf = NAN;
+      rangeToSurf = NAN;
+      velNoiseFiltMean = NAN;
+      velNoiseFiltMedian = NAN;
+      velWaveFiltMean = NAN;
+      velWaveFiltMedian = NAN;
+      velWaveFiltPoly = NAN;
+      written = false;
+    }
+    RadxTime getTime() { return ray->getRadxTime(); }
+  };
+
+  deque<FiltNode> _filtNodes;
+  RadxTime _filtStartTime;
+  RadxTime _filtMidTime;
+  RadxTime _filtEndTime;
+  RadxTime _nodesEndTime;
+  RadxTime _filtRetrieveTime;
   
   bool _velIsValid;
   double _velFilt;
   RadxRay *_filtRay;
   
+  double _noiseFiltSecs;
+  double _waveFiltSecs;
+  double _filtSecs;
+
   // filtered volume - output
 
   RadxVol _filtVol;
@@ -137,6 +177,8 @@ private:
                      double dbzSurf,
                      double rangeToSurf);
 
+  void _updateNodeStats();
+  void _addRayToFiltVol(RadxRay *ray);
 
   void _setupRead(RadxFile &file);
 
