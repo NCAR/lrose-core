@@ -100,18 +100,32 @@ private:
   int _nRaysRead;
   int _nRaysWritten;
 
+  // input volume files
+  
+  RadxVol _inVol;
+  deque<RadxTime> _inputFileEndTimes;
+  bool _firstInputFile;
+
+  // filtered volume - output
+
+  RadxVol _filtVol;
+
   // storing incoming rays long enough to 
   // write out filtered results
 
   RadxTime _timeFirstRay;
   HcrSurfaceVel _surfVel;
-  HcrVelFirFilt _firFilt;
 
-  // input volume
-  
-  RadxVol _inVol;
-  RadxTime _inEndTime;
-  bool _firstInputFile;
+  // vel filtering results from either the FIR
+  // or wave filter
+
+  bool _velIsValid;
+  RadxRay *_filtRay;
+  double _velFilt;
+
+  // FIR filtering
+
+  HcrVelFirFilt _firFilt;
 
   // wave filtering
 
@@ -150,6 +164,9 @@ private:
 
   deque<FiltNode> _filtNodes;
   size_t _nFiltNodes;
+  FiltNode *_filtNodeMid;
+  size_t _filtMidIndex;
+
   RadxTime _filtTimeStart;
   RadxTime _filtTimeMid;
   RadxTime _filtTimeEnd;
@@ -162,19 +179,9 @@ private:
   size_t _noiseIndexStart;
   size_t _noiseIndexEnd;
 
-  bool _velIsValid;
-  double _velFilt;
-  size_t _filtMidIndex;
-  FiltNode *_filtNodeMid;
-  RadxRay *_filtRay;
-  
   double _noiseFiltSecs;
   double _waveFiltSecs;
   double _filtSecs;
-
-  // filtered volume - output
-
-  RadxVol _filtVol;
 
   // methods
 
