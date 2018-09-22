@@ -22,78 +22,87 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// DistPolynomial.hh
+// PolyFit.hh
 //
-// Polynomial-based distribution
+// Normal distribution
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// June 2018
+// Sept 2018
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef DistPolynomial_hh
-#define DistPolynomial_hh
+#ifndef PolyFit_hh
+#define PolyFit_hh
 
 #include <rapmath/Distribution.hh>
 
-/////////////////////////////////////
-// Normal distribution
-// Derived class.
-
-class DistPolynomial : public Distribution {
+class PolyFit {
   
 public:
   
   // constructor
 
-  DistPolynomial();
+  PolyFit();
   
   // destructor
   
-  virtual ~DistPolynomial();
+  virtual ~PolyFit();
 
   // set polynomial order
 
   void setOrder(size_t order);
+
+  // clear the data values
+
+  void clear();
+
+  // add a data value
+  
+  void addValue(double xx, double yy);
+
+  // set the data values
+  
+  void setValues(const vector<double> &xVals,
+                 const vector<double> &yVals);
 
   // perform a fit
   // values must have been set
   
   virtual int performFit();
   
-  // get the pdf for a given x
-
-  virtual double getPdf(double xx);
-  
-  // get the cdf for a given x
-  
-  virtual double getCdf(double xx);
-  
   // get order
   
-  int getOrder() const { return _nPoly; }
-  
-  // get coefficients
+  int getOrder() const { return _order; }
 
+  // get number of values
+
+  size_t getNVals() const { return _nObs; }
+  
+  // get coefficients after fit
+  
   const vector<double> &getCoeffs() const { return _coeffs; }
+  
+  // get single y value, given the index
+
+  double getYEst(size_t index);
+
+  // get vector of estimated y values
+
+  vector<double> getYEst() const;
 
 protected:
 private:
 
-  size_t _nPoly;    // polynomial order
-  size_t _nPoly1;   // polynomial order plus 1
+  size_t _order;        // polynomial order
+  size_t _orderPlus1;   // polynomial order plus 1
 
   vector<double> _coeffs; // coefficients
-
-  size_t _minValidIndex; // below this the PDF is not valid
-  size_t _maxValidIndex; // above this the PDF is not valid
-
-  double _minValidX; // if x is less than this is it set to 0
-  double _maxValidX; // if x is greater than this it is set to 0
   
-  double *_xx;    // x vector - observed
-  double *_yyEst; // regression estimate of y
+  vector<double> _xObs, _yObs; // observations
+  size_t _nObs;
+
+  double *_yEst; // regression estimate of y
 
   double **_vv;   // Vandermonde matrix
   double **_vvT;  // vv transpose
@@ -116,19 +125,20 @@ private:
   
   // private methods
 
-  virtual void _clearStats();
-
+  void _doFit();
+  
   void _init();
-  void _alloc();
-  void _free();
-  void _doPolyFit();
+
+  void _allocDataArrays();
+  void _allocPolyArrays();
+
+  void _freeDataArrays();
+  void _freePolyArrays();
 
   void _freeVec(double* &vec);
-
   void _freeMatrix(double** &array);
 
   void _computeCc();
-
   void _computeVandermonde();
 
   void _matrixMult(double **aa,
@@ -149,7 +159,7 @@ private:
                     size_t nRowsAa,
                     size_t nColsAa,
                     FILE *out) const;
-
+  
   void _vectorPrint(string name,
                     double *aa,
                     size_t sizeAa,
