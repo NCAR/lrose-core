@@ -52,6 +52,7 @@
 #include <radar/HcrSurfaceVel.hh>
 #include <radar/HcrVelFirFilt.hh>
 #include <rapformats/DsRadarMsg.hh>
+#include <rapmath/PolyFit.hh>
 #include <Fmq/DsRadarQueue.hh>
 class RadxFile;
 class RadxRay;
@@ -114,6 +115,8 @@ private:
 
   // wave filtering
 
+  PolyFit _poly;
+
   class FiltNode {
   public:
     RadxRay *ray;
@@ -153,7 +156,6 @@ private:
   RadxTime _filtPeriodEnd;
   RadxTime _filtRetrieveTime;
   
-
   size_t _nNoiseNodes;
   RadxTime _noiseTimeStart;
   RadxTime _noiseTimeEnd;
@@ -162,6 +164,7 @@ private:
 
   bool _velIsValid;
   double _velFilt;
+  size_t _filtMidIndex;
   FiltNode *_filtNodeMid;
   RadxRay *_filtRay;
   

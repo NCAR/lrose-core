@@ -99,7 +99,7 @@ HcrVelCorrect::HcrVelCorrect(int argc, char **argv)
   _surfVel.setMinDbzForSurfaceEcho(_params.min_dbz_for_surface_echo);
   _surfVel.setNGatesForSurfaceEcho(_params.ngates_for_surface_echo);
   _surfVel.setMaxNadirErrorDeg(_params.max_nadir_error_for_surface_vel);
-
+  
   // initialize the wave filtering
 
   _initWaveFilt();
@@ -481,6 +481,7 @@ void HcrVelCorrect::_initWaveFilt()
 
   _velIsValid = false;
   _velFilt = 0.0;
+  _filtMidIndex = 0;
   _filtNodeMid = NULL;
   _filtRay = NULL;
 
@@ -489,6 +490,8 @@ void HcrVelCorrect::_initWaveFilt()
   _noiseFiltSecs = _params.noise_filter_length_secs;
   _waveFiltSecs = _params.wave_filter_length_secs;
   _filtSecs = max(_noiseFiltSecs, _waveFiltSecs);
+
+  _poly.setOrder(_params.wave_polynomial_order);
 
 }
 
@@ -583,7 +586,8 @@ void HcrVelCorrect::_updateNodeStats()
     RadxTime nodeTime = _filtNodes[ii].getTime();
     double timeDiff = fabs(_filtNodes[ii].getTime() - meanTime);
     if (timeDiff < minTimeDiff) {
-      _filtNodeMid = &_filtNodes[ii];
+      _filtMidIndex = ii;
+      _filtNodeMid = &_filtNodes[_filtMidIndex];
       minTimeDiff = timeDiff;
     }
   }
@@ -682,6 +686,14 @@ void HcrVelCorrect::_runWaveFilter()
 
   double mean = sum / count;
   _filtNodeMid->velWaveFiltMean = mean;
+
+  // perform the polynomial fit
+
+  _poly.clear();
+  _poly.setValues(dtime, velSurf);
+  if (_poly.performFit() == 0) {
+    _filtNodeMid->velWaveFiltPoly = _poly.getYEst(_filtMidIndex);
+  }
 
   // compute the median
 
