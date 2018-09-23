@@ -2469,8 +2469,11 @@ int DoradeRadxFile::_loadReadVolume()
   RadxRcalib *cal = new RadxRcalib;
 
   cal->setCalibTime(_readVol->getStartTimeSecs());
-  //  cal->setPulseWidthUsec(pulseWidthUs);
-  cal->setPulseWidthUsec(_ddRadar.pulse_width);
+  if (_ddRadar.pulse_width <= 0) {
+    cal->setPulseWidthUsec(pulseWidthUs);
+  } else {
+    cal->setPulseWidthUsec(_ddRadar.pulse_width);
+  }
   double xmitPowerDbm = Radx::missingMetaDouble;
   if (_ddRadar.peak_power > 0) {
     xmitPowerDbm = 10.0 * log10(_ddRadar.peak_power * 1.0e6);
