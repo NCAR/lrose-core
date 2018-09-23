@@ -182,7 +182,8 @@ int HcrSurfaceVel::computeSurfaceVel(const RadxRay *ray,
 
   size_t nEachSide = _nGatesForSurfaceEcho / 2;
   if (foundSurface) {
-    for (size_t igate = gateForMax - nEachSide; igate <= gateForMax + nEachSide; igate++) {
+    for (size_t igate = gateForMax - nEachSide;
+         igate <= gateForMax + nEachSide; igate++) {
       Radx::fl32 dbz = dbzArray[igate];
       if (dbz == dbzMiss) {
         foundSurface = false;
@@ -196,21 +197,36 @@ int HcrSurfaceVel::computeSurfaceVel(const RadxRay *ray,
   // compute surface vel
   
   if (foundSurface) {
-    double sum = 0.0;
-    double count = 0.0;
+    double sumVelPwr = 0.0;
+    double sumPwr = 0.0;
+    int count = 0;
     for (size_t igate = gateForMax - nEachSide;
          igate <= gateForMax + nEachSide; igate++) {
+      Radx::fl32 dbz = dbzArray[igate];
+      if (dbz == velMiss) {
+        continue;
+      }
+      double power = pow(10.0, dbz / 10.0);
       Radx::fl32 vel = velArray[igate];
       if (vel == velMiss) {
-        foundSurface = false;
+        continue;
       }
-      sum += vel;
+      sumVelPwr += vel * power;
+      sumPwr += power;
       count++;
     }
-    velSurf = sum / count;
+    if (count < 1) {
+      foundSurface = false;
+    } else {
+      velSurf = sumVelPwr / sumPwr;
+    }
   }
 
-  return 0;
+  if (foundSurface) {
+    return 0;
+  } else {
+    return -1;
+  }
 
 }
 
