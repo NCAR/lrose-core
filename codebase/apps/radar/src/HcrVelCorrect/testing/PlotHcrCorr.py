@@ -318,8 +318,8 @@ def doPlotOverview():
     ax1.plot(ctimes, VelNoiseFiltMedian, \
              label='VelNoiseFiltMedian(m/s)', color='black', linewidth=1)
     
-    ax2.plot(ctimes, VelNoiseFiltMedian, \
-             label='VelNoiseFiltMedian(m/s)', color='red', linewidth=1)
+    #ax2.plot(ctimes, VelNoiseFiltMedian, \
+    #         label='VelNoiseFiltMedian(m/s)', color='red', linewidth=1)
     
     ax2.plot(ctimes, VelWaveFiltMedian, \
              label='VelWaveFiltMedian(m/s)', color='blue', linewidth=1)
@@ -328,7 +328,7 @@ def doPlotOverview():
              label='VelWaveFiltMean(m/s)', color='green', linewidth=1)
     
     ax2.plot(ctimes, VelWaveFiltPoly, \
-             label='VelWaveFiltPoly(m/s)', color='magenta', linewidth=2)
+             label='VelWaveFiltPoly(m/s)', color='black', linewidth=1)
     
     # ax3.plot(ctimes, ias, \
     #          label='Indicated Airspeed', color='green', linewidth=1)
@@ -340,8 +340,8 @@ def doPlotOverview():
     # ax4.plot(ctimes, accelNormSm, \
     #          label='accelNorm', color='orange', linewidth=1)
 
-    configTimeAxis(ax1, -9999, -9999, "Velocity (m/s)", 'upper center')
-    configTimeAxis(ax2, -9999, -9999, "Velocity (m/s)", 'upper center')
+    configTimeAxis(ax1, -2, 2, "Velocity (m/s)", 'upper center')
+    configTimeAxis(ax2, -2, 2, "Velocity (m/s)", 'upper center')
 
     # configTimeAxis(ax2, -50, 50, "Temp (C)", 'lower center')
     # configTimeAxis(ax3, 50, 200, "Airspeed (m/s)", 'upper center')

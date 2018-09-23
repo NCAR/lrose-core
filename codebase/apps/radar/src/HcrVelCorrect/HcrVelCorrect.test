@@ -310,7 +310,7 @@ min_dbz_for_surface_echo = 8;
 // Type: int
 //
 
-ngates_for_surface_echo = 1;
+ngates_for_surface_echo = 3;
 
 ///////////// vel_field_name //////////////////////////
 //
