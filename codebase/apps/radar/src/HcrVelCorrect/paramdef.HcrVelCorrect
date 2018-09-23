@@ -49,23 +49,21 @@ commentdef {
 }
 
 typedef enum {
-  REALTIME, ARCHIVE, FILELIST, FMQ
+  REALTIME, ARCHIVE, FILELIST
 } mode_t;
 
 paramdef enum mode_t {
   p_default = REALTIME;
   p_descr = "Operating mode";
-  p_help = "\nREALTIME: wait for a new input file.  "
-           "\n\nARCHIVE: move through the data between the start "
-           "and end times set on the command line. "
-           "\n\nFILELIST: move through the list of file names "
-           "specified on the command line. "
-           "\nPaths (in ARCHIVE mode, at least) MUST contain a "
-           "day-directory above the data file -- ./data_file.ext will not "
-           "work as a file path, but ./yyyymmdd/data_file.ext will."
-           "\n\nFMQ: read data from one moments FMQ, combine the dwells "
-           "and write to an output queue.";
-
+  p_help =
+  "\nREALTIME: wait for a new input file. Expects latest_data_info to be available. "
+  "\n\nARCHIVE: move through the data between the start "
+  "and end times set on the command line. "
+  "\n\nFILELIST: move through the list of file names "
+  "specified on the command line. "
+  "\nPaths (in ARCHIVE mode, at least) MUST contain a "
+  "day-directory above the data file -- ./data_file.ext will not "
+  "work as a file path, but ./yyyymmdd/data_file.ext will.";
 } mode;
 
 paramdef string {
@@ -80,36 +78,12 @@ paramdef int {
   p_help =  "Only data less old than this will be used.";
 } max_realtime_data_age_secs;
 
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Is _latest_data_info file available?";
-  p_help = "If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.";
-} latest_data_info_avail;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to recurse to subdirectories while looking for new files.";
-  p_help = "If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE."; 
-} search_recursively;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Maximum depth for recursive directory scan.";
-  p_help = "Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.";
-} max_recursion_depth;
-
 paramdef int {
   p_default = 2;
   p_min = 1;
-  p_descr = "Sleep time between checking directory for input - secs.";
-  p_help = "If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.";
+  p_descr = "Sleep time between checking for input data (secs).";
+  p_help = "REALTIME mode only";
 } wait_between_checks;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "File quiescence when checking for files - secs.";
-  p_help = "This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.";
-} file_quiescence;
 
 paramdef string {
   p_default = "";

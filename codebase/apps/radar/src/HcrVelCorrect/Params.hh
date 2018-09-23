@@ -77,8 +77,7 @@ public:
   typedef enum {
     REALTIME = 0,
     ARCHIVE = 1,
-    FILELIST = 2,
-    FMQ = 3
+    FILELIST = 2
   } mode_t;
 
   typedef enum {
@@ -412,15 +411,7 @@ public:
 
   int max_realtime_data_age_secs;
 
-  tdrp_bool_t latest_data_info_avail;
-
-  tdrp_bool_t search_recursively;
-
-  int max_recursion_depth;
-
   int wait_between_checks;
-
-  int file_quiescence;
 
   char* search_ext;
 
@@ -514,7 +505,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[66];
+  mutable TDRPtable _table[62];
 
   const char *_className;
 
