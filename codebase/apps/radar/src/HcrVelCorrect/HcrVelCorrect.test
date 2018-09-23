@@ -286,7 +286,7 @@ min_range_to_surface_km = 0.5;
 // Type: double
 //
 
-max_surface_height_km = 9;
+max_surface_height_km = 1.0;
 
 ///////////// min_dbz_for_surface_echo ////////////////
 //
