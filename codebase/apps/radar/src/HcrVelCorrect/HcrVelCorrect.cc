@@ -393,7 +393,8 @@ int HcrVelCorrect::_processFile(const string &readPath)
       if (filtRayTime > _inputFileEndTimes[0]) {
         _writeFiltVol();
         _inputFileEndTimes.pop_front();
-        RadxTime endTime(_inVol.getEndTimeSecs(), _inVol.getEndNanoSecs() / 1.0e9);
+        RadxTime endTime(_inVol.getEndTimeSecs(),
+                         _inVol.getEndNanoSecs() / 1.0e9);
         _inputFileEndTimes.push_back(endTime);
       }
       
@@ -408,8 +409,6 @@ int HcrVelCorrect::_processFile(const string &readPath)
       }
 
     } // if (_processRay(rayCopy) == 0)
-
-    RadxRay::deleteIfUnused(rayCopy);
 
   } // iray
   
@@ -457,8 +456,12 @@ int HcrVelCorrect::_processRay(RadxRay *ray)
     if (_velIsValid) {
       _velFilt = _filtNodeMid->velWaveFiltMedian;
       _correctVelForRay(_filtRay, _velFilt);
+      _filtNodeMid->velIsValid = true;
+      _filtNodeMid->corrected = true;
     } else {
       _copyVelForRay(_filtRay);
+      _filtNodeMid->velIsValid = false;
+      _filtNodeMid->corrected = false;
     }
     
   } else {
@@ -495,7 +498,6 @@ void HcrVelCorrect::_initWaveFilt()
 
   // init
 
-  _nFiltNodes = 0;
   _nNoiseNodes = 0;
 
   _velIsValid = false;
@@ -527,21 +529,25 @@ int HcrVelCorrect::_applyWaveFilt(RadxRay *ray,
 {
 
   // add node to queue
+  // oldest nodes are at the front, youngest nodes are at the back
+  // so time increases from front to back
 
   FiltNode node;
   node.velSurf = velSurf;
   node.dbzSurf = dbzSurf;
   node.rangeToSurf = rangeToSurf;
   node.ray = ray;
-  _filtNodes.push_front(node);
+  _filtQueue.push_back(node);
 
   // update the node stats
   // this will also write out any rays that are discarded
   // without having been written
 
-  _updateNodeStats();
+  if (_updateNodeStats()) {
+    return -1;
+  }
 
-  if ((int) _nFiltNodes < _params.wave_filter_min_n_rays ||
+  if ((int) _filtQueue.size() < _params.wave_filter_min_n_rays ||
       (int) _nNoiseNodes < _params.noise_filter_min_n_rays) {
     _velIsValid = false;
     return 0;
@@ -566,52 +572,51 @@ int HcrVelCorrect::_applyWaveFilt(RadxRay *ray,
 //   write out rays to be discarded that have not been written
 //   determine if we have enough data for valid stats
 
-void HcrVelCorrect::_updateNodeStats()
+int HcrVelCorrect::_updateNodeStats()
 {
 
   // compute time span for filter
   
-  FiltNode &youngest = _filtNodes[0];
-  _filtTimeStart = youngest.getTime();
-  _filtPeriodEnd = _filtTimeStart + _filtSecs;
-
+  _filtTimeEnd = _filtQueue[_filtQueue.size()-1].getTime();
+  _filtPeriodStart = _filtTimeEnd - _filtSecs;
+  
   // discard old nodes, writing out rays as appropriate
 
-  while (_filtNodes.size() > 1) {
-    size_t nNodes = _filtNodes.size();
-    FiltNode &oldest = _filtNodes[nNodes - 1];
-    if (oldest.getTime() > _filtPeriodEnd) {
+  while (_filtQueue.size() > 1) {
+    FiltNode &oldest = _filtQueue[0];
+    if (oldest.getTime() < _filtPeriodStart) {
       if (!oldest.written) {
         // not yet written out, do so now
         _addRayToFiltVol(oldest);
       }
-      _filtNodes.pop_back();
+      RadxRay::deleteIfUnused(oldest.ray);
+      _filtQueue.pop_front();
     } else {
       break;
     }
   } // while
 
   // compute time limits
-
+  
   _nNoiseNodes = 0;
-  _nFiltNodes = _filtNodes.size();
-  if ((int) _nFiltNodes < _params.wave_filter_min_n_rays) {
-    return;
+  if ((int) _filtQueue.size() < _params.wave_filter_min_n_rays) {
+    return -1;
   }
 
-  FiltNode &oldest = _filtNodes[_nFiltNodes - 1];
+  FiltNode &oldest = _filtQueue[_filtQueue.size() - 1];
   _filtTimeEnd = oldest.getTime();
 
   // find the mid node closest to the mid time
 
-  RadxTime meanTime = _filtTimeStart + (_filtTimeEnd - _filtTimeStart) / 2.0;
+  double periodSecs = _filtTimeEnd - _filtPeriodStart;
+  _filtTimeMean = _filtTimeEnd - periodSecs / 2.0;
   double minTimeDiff = 1.0e99;
-  for (size_t ii = 0; ii < _nFiltNodes; ii++) {
-    RadxTime nodeTime = _filtNodes[ii].getTime();
-    double timeDiff = fabs(_filtNodes[ii].getTime() - meanTime);
+  for (size_t ii = 0; ii < _filtQueue.size(); ii++) {
+    RadxTime nodeTime = _filtQueue[ii].getTime();
+    double timeDiff = fabs(_filtQueue[ii].getTime() - _filtTimeMean);
     if (timeDiff < minTimeDiff) {
       _filtMidIndex = ii;
-      _filtNodeMid = &_filtNodes[_filtMidIndex];
+      _filtNodeMid = &_filtQueue[_filtMidIndex];
       minTimeDiff = timeDiff;
     }
   }
@@ -625,9 +630,9 @@ void HcrVelCorrect::_updateNodeStats()
   _noiseIndexStart = 0;
   _noiseIndexEnd = 0;
   bool noiseFound = false;
-
-  for (size_t ii = 0; ii < _nFiltNodes; ii++) {
-    RadxTime nodeTime = _filtNodes[ii].getTime();
+  
+  for (size_t ii = 0; ii < _filtQueue.size(); ii++) {
+    RadxTime nodeTime = _filtQueue[ii].getTime();
     if (nodeTime >= _noiseTimeStart && nodeTime <= _noiseTimeEnd) {
       _nNoiseNodes++;
       if (!noiseFound) {
@@ -637,6 +642,8 @@ void HcrVelCorrect::_updateNodeStats()
       _noiseIndexEnd = ii;
     }
   }
+
+  return 0;
   
 }
 
@@ -647,10 +654,10 @@ void HcrVelCorrect::_runNoiseFilter()
 {
 
   // get vector of surface velocities
-
+  
   vector<double> velSurf;
   for (size_t ii = _noiseIndexStart; ii <= _noiseIndexEnd; ii++) {
-    velSurf.push_back(_filtNodes[ii].velSurf);
+    velSurf.push_back(_filtQueue[ii].velSurf);
   }
 
   // compute the mean
@@ -674,7 +681,8 @@ void HcrVelCorrect::_runNoiseFilter()
 
   sort(velSurf.begin(), velSurf.end());
   int indexHalf = velSurf.size() / 2;
-  _filtNodeMid->velNoiseFiltMedian = velSurf[indexHalf];
+  double median = velSurf[indexHalf];
+  _filtNodeMid->velNoiseFiltMedian = median;
 
 }
 
@@ -688,9 +696,13 @@ void HcrVelCorrect::_runWaveFilter()
 
   vector<double> velSurf;
   vector<double> dtime;
-  for (size_t ii = 0; ii < _filtNodes.size(); ii++) {
-    velSurf.push_back(_filtNodes[ii].velSurf);
-    dtime.push_back(_filtNodes[ii].getTime() - _filtNodes[0].getTime());
+  RadxTime startTime = _filtQueue[0].getTime();
+  for (size_t ii = 0; ii < _filtQueue.size(); ii++) {
+    velSurf.push_back(_filtQueue[ii].velSurf);
+    double deltaTime = _filtQueue[ii].getTime() - startTime;
+    dtime.push_back(deltaTime);
+    string nodeTimeStr = _filtQueue[ii].getTime().asString(3);
+    string startTimeStr = startTime.asString(3);
   }
   
   // compute the mean
@@ -751,6 +763,7 @@ void HcrVelCorrect::_addRayToFiltVol(FiltNode &node)
   // add to output vol
   
   _filtVol.addRay(node.ray);
+  node.written = true;
 
 }
 
@@ -1063,8 +1076,6 @@ int HcrVelCorrect::_runFmq()
       }
 
     } // if (processRay(ray) == 0)
-
-    RadxRay::deleteIfUnused(ray);
 
   } // while (true)
   
@@ -1813,26 +1824,45 @@ void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *filtRay)
 
   if (_params.filter_type == Params::WAVE_FILTER) {
 
-    xml += RadxXml::writeDouble("VelSurf", 1, _filtNodeMid->velSurf);
-    xml += RadxXml::writeDouble("DbzSurf", 1, _filtNodeMid->dbzSurf);
-    xml += RadxXml::writeDouble("RangeToSurf", 1, _filtNodeMid->rangeToSurf);
+    xml += RadxXml::writeDouble("VelSurf", 1,
+                                _filtNodeMid->velSurf);
+    xml += RadxXml::writeDouble("DbzSurf", 1,
+                                _filtNodeMid->dbzSurf);
+    xml += RadxXml::writeDouble("RangeToSurf",
+                                1, _filtNodeMid->rangeToSurf);
 
-    xml += RadxXml::writeDouble("velNoiseFiltMean", 1, _filtNodeMid->velNoiseFiltMean);
-    xml += RadxXml::writeDouble("velNoiseFiltMedian", 1, _filtNodeMid->velNoiseFiltMedian);
-    xml += RadxXml::writeDouble("velWaveFiltMean", 1, _filtNodeMid->velWaveFiltMean);
-    xml += RadxXml::writeDouble("velWaveFiltMedian", 1, _filtNodeMid->velWaveFiltMedian);
-    xml += RadxXml::writeDouble("velWaveFiltPoly", 1, _filtNodeMid->velWaveFiltPoly);
+    xml += RadxXml::writeDouble("velNoiseFiltMean", 1,
+                                _filtNodeMid->velNoiseFiltMean);
+    xml += RadxXml::writeDouble("velNoiseFiltMedian", 1,
+                                _filtNodeMid->velNoiseFiltMedian);
+    xml += RadxXml::writeDouble("velWaveFiltMean", 1,
+                                _filtNodeMid->velWaveFiltMean);
+    xml += RadxXml::writeDouble("velWaveFiltMedian", 1,
+                                _filtNodeMid->velWaveFiltMedian);
+    xml += RadxXml::writeDouble("velWaveFiltPoly", 1,
+                                _filtNodeMid->velWaveFiltPoly);
+
+    double velCorr = _filtNodeMid->velSurf - _velFilt;
+    xml += RadxXml::writeDouble("VelCorr", 1, velCorr);
 
   } else {
 
-    xml += RadxXml::writeDouble("VelMeas", 1, _firFilt.getVelMeasured());
-    xml += RadxXml::writeDouble("DbzSurf", 1, _firFilt.getDbzSurf());
-    xml += RadxXml::writeDouble("RangeToSurf", 1, _firFilt.getRangeToSurface());
-    xml += RadxXml::writeDouble("VelStage1", 1, _firFilt.getVelStage1());
-    xml += RadxXml::writeDouble("VelSpike", 1, _firFilt.getVelSpike());
-    xml += RadxXml::writeDouble("VelCond", 1, _firFilt.getVelCond());
-    xml += RadxXml::writeDouble("VelFilt", 1, _firFilt.getVelFilt());
-    xml += RadxXml::writeDouble("VelCorr", 1, _firFilt.getVelMeasured() - _firFilt.getVelFilt());
+    xml += RadxXml::writeDouble("VelSurf", 1,
+                                _firFilt.getVelMeasured());
+    xml += RadxXml::writeDouble("DbzSurf", 1,
+                                _firFilt.getDbzSurf());
+    xml += RadxXml::writeDouble("RangeToSurf", 1,
+                                _firFilt.getRangeToSurface());
+    xml += RadxXml::writeDouble("VelStage1", 1,
+                                _firFilt.getVelStage1());
+    xml += RadxXml::writeDouble("VelSpike", 1,
+                                _firFilt.getVelSpike());
+    xml += RadxXml::writeDouble("VelCond", 1,
+                                _firFilt.getVelCond());
+    xml += RadxXml::writeDouble("VelFilt", 1,
+                                _firFilt.getVelFilt());
+    double velCorr = _firFilt.getVelMeasured() - _velFilt;
+    xml += RadxXml::writeDouble("VelCorr", 1, velCorr);
 
   }
 
@@ -1844,8 +1874,6 @@ void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *filtRay)
     xml += RadxXml::writeDouble("Pitch", 1, georef->getPitch());
     xml += RadxXml::writeDouble("Rotation", 1, georef->getRotation());
     xml += RadxXml::writeDouble("Tilt", 1, georef->getTilt());
-    xml += RadxXml::writeDouble("PitchRate", 1, georef->getPitchRate());
-    xml += RadxXml::writeDouble("RollRate", 1, georef->getRollRate());
     xml += RadxXml::writeDouble("DriveAngle1", 1, georef->getDriveAngle1());
     xml += RadxXml::writeDouble("DriveAngle2", 1, georef->getDriveAngle2());
   }

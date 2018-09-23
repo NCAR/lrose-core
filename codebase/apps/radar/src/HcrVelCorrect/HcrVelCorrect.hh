@@ -162,15 +162,15 @@ private:
     RadxTime getTime() { return ray->getRadxTime(); }
   };
 
-  deque<FiltNode> _filtNodes;
-  size_t _nFiltNodes;
+  deque<FiltNode> _filtQueue;
   FiltNode *_filtNodeMid;
   size_t _filtMidIndex;
 
   RadxTime _filtTimeStart;
   RadxTime _filtTimeMid;
+  RadxTime _filtTimeMean;
   RadxTime _filtTimeEnd;
-  RadxTime _filtPeriodEnd;
+  RadxTime _filtPeriodStart;
   RadxTime _filtRetrieveTime;
   
   size_t _nNoiseNodes;
@@ -200,7 +200,7 @@ private:
                      double dbzSurf,
                      double rangeToSurf);
 
-  void _updateNodeStats();
+  int _updateNodeStats();
 
   void _runNoiseFilter();
   void _runWaveFilter();

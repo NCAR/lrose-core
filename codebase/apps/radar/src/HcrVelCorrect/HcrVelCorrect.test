@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for HcrVelCorrect
+ * TDRP params for ./HcrVelCorrect
  **********************************************************************/
 
 //======================================================================
@@ -275,6 +275,19 @@ dbz_field_name = "DBZ";
 
 min_range_to_surface_km = 0.5;
 
+///////////// max_surface_height_km ///////////////////
+//
+// Max expected height of the terrain (km).
+//
+// We ignore gates above this maximum, since they cannot be at the 
+//   surface.
+//
+//
+// Type: double
+//
+
+max_surface_height_km = 9;
+
 ///////////// min_dbz_for_surface_echo ////////////////
 //
 // Minumum dbz value for a valid surface return.
@@ -319,6 +332,20 @@ vel_field_name = "VEL";
 //
 
 corrected_vel_field_name = "VEL_CORR";
+
+///////////// max_nadir_error_for_surface_vel /////////
+//
+// Maximum error from nadir pointing for computing surface velocity 
+//   (deg).
+//
+// We only try to compute the surface velocity if the beam is pointing 
+//   within this margin of nadir (vertically down).
+//
+//
+// Type: double
+//
+
+max_nadir_error_for_surface_vel = 5;
 
 //======================================================================
 //
@@ -607,7 +634,126 @@ surface_vel_results_spdb_output_url = "/tmp/spdb/HcrVelCorrect";
 
 //======================================================================
 //
-// FIR FILTERING FOR VELOCITY ESTIMATES.
+// FILTERING.
+//
+//======================================================================
+ 
+///////////// filter_type /////////////////////////////
+//
+// Filtering option.
+//
+// The FIR filter approach was developed for the data from NOREASTER and 
+//   CSET. For SOCRATES is was found that this filter does not work with 
+//   the large waves in the southern ocean. The WAVE_FILTER approach was 
+//   developed for SOCRATES.
+//
+//
+// Type: enum
+// Options:
+//     WAVE_FILTER
+//     FIR_FILTER
+//
+
+filter_type = WAVE_FILTER;
+
+//======================================================================
+//
+// WAVE FILTERING.
+//
+//======================================================================
+ 
+///////////// noise_filter_length_secs ////////////////
+//
+// Length of the noise filter (secs).
+//
+// The noise filter is a simple running mean to smooth out the 
+//   measurement noise in the velocity measurements. The filter has the 
+//   same center as the wave filter.
+//
+//
+// Type: double
+//
+
+noise_filter_length_secs = 3;
+
+///////////// noise_filter_min_n_rays /////////////////
+//
+// Min number of rays for valid noise filter.
+//
+// If fewer than this number of rays are available within the time 
+//   period for the noise filter, the filter is not run and no corrected 
+//   velocity is computed.
+//
+//
+// Type: int
+//
+
+noise_filter_min_n_rays = 15;
+
+///////////// wave_filter_length_secs /////////////////
+//
+// Length of the wave filter (secs).
+//
+// The same length is used for mean, median and polynomial filtering. 
+//   All are computed but only the selected method is applied for the 
+//   velocity correction. We compute the filtered values at the center of 
+//   the filtered length.
+//
+//
+// Type: double
+//
+
+wave_filter_length_secs = 30;
+
+///////////// wave_filter_min_n_rays //////////////////
+//
+// Min number of rays for valid wave filter.
+//
+// If fewer than this number of rays are available within the time 
+//   period for the wave filter, the filter is not run and no corrected 
+//   velocity is computed.
+//
+//
+// Type: int
+//
+
+wave_filter_min_n_rays = 150;
+
+///////////// wave_filter_type ////////////////////////
+//
+// Wave filtering type.
+//
+// All filter types use the same length in secs.
+//
+// WAVE_MEAN: running mean in time.
+//
+// WAVE_MEDIAN: running median in time.
+//
+// WAVE_POLYNOMIAL: polynomial fit.
+//
+//
+// Type: enum
+// Options:
+//     WAVE_MEAN
+//     WAVE_MEDIAN
+//     WAVE_POLYNOMIAL
+//
+
+wave_filter_type = WAVE_MEDIAN;
+
+///////////// wave_polynomial_order ///////////////////
+//
+// Order of the polynomial fit for the wave filter.
+//
+//
+// Type: int
+//
+
+wave_polynomial_order = 3;
+
+//======================================================================
+//
+// FIR FILTERING.
 //
 //======================================================================
  
@@ -621,13 +767,12 @@ surface_vel_results_spdb_output_url = "/tmp/spdb/HcrVelCorrect";
 //   this threshold, then the conditioned data is set to the output from 
 //   the stage-1 filter. If the absolute difference is below this 
 //   threshold then the original data point is retained. After this step 
-//   the final filter it applied to the conditioned data to compute the 
+//   the final filter is applied to the conditioned data to compute the 
 //   final filtered value.
 //
 //
 // Type: double
 //
 
-// spike_filter_difference_threshold = 0.11;
 spike_filter_difference_threshold = 0.25;
 
