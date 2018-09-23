@@ -1831,15 +1831,15 @@ void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *filtRay)
     xml += RadxXml::writeDouble("RangeToSurf",
                                 1, _filtNodeMid->rangeToSurf);
 
-    xml += RadxXml::writeDouble("velNoiseFiltMean", 1,
+    xml += RadxXml::writeDouble("VelNoiseFiltMean", 1,
                                 _filtNodeMid->velNoiseFiltMean);
-    xml += RadxXml::writeDouble("velNoiseFiltMedian", 1,
+    xml += RadxXml::writeDouble("VelNoiseFiltMedian", 1,
                                 _filtNodeMid->velNoiseFiltMedian);
-    xml += RadxXml::writeDouble("velWaveFiltMean", 1,
+    xml += RadxXml::writeDouble("VelWaveFiltMean", 1,
                                 _filtNodeMid->velWaveFiltMean);
-    xml += RadxXml::writeDouble("velWaveFiltMedian", 1,
+    xml += RadxXml::writeDouble("VelWaveFiltMedian", 1,
                                 _filtNodeMid->velWaveFiltMedian);
-    xml += RadxXml::writeDouble("velWaveFiltPoly", 1,
+    xml += RadxXml::writeDouble("VelWaveFiltPoly", 1,
                                 _filtNodeMid->velWaveFiltPoly);
 
     double velCorr = _filtNodeMid->velSurf - _velFilt;
