@@ -437,7 +437,11 @@ void RadxField::setTypeSi32(Radx::si32 missingValue,
   _dataType = Radx::SI32;
   _byteWidth = sizeof(Radx::si32);
   _scale = scale;
-  _offset = offset;
+  if (fabs(offset) == 0.0) {
+    _offset = 0.0;
+  } else {
+    _offset = offset;
+  }
   _setMissingToDefaults();
   _missingSi32 = missingValue;
 }
@@ -454,7 +458,11 @@ void RadxField::setTypeSi16(Radx::si16 missingValue,
   _dataType = Radx::SI16;
   _byteWidth = sizeof(Radx::si16);
   _scale = scale;
-  _offset = offset;
+  if (fabs(offset) == 0.0) {
+    _offset = 0.0;
+  } else {
+    _offset = offset;
+  }
   _setMissingToDefaults();
   _missingSi16 = missingValue;
 }
@@ -471,7 +479,11 @@ void RadxField::setTypeSi08(Radx::si08 missingValue,
   _dataType = Radx::SI08;
   _byteWidth = sizeof(Radx::si08);
   _scale = scale;
-  _offset = offset;
+  if (fabs(offset) == 0.0) {
+    _offset = 0.0;
+  } else {
+    _offset = offset;
+  }
   _setMissingToDefaults();
   _missingSi08 = missingValue;
 }

@@ -1822,12 +1822,13 @@ int DoradeRadxFile::_handleRay(int nBytes, const char *block)
 
   if (DoradeData::isValid(_ddRadar)) {
     
+    ray->setPrtMode(Radx::PRT_MODE_FIXED);
     double prtLong = Radx::missingMetaDouble;
     double prtShort = Radx::missingMetaDouble;
     if (_ddRadar.prt1 > 0 && _ddRadar.prt2 < 0) {
-      prtShort = _ddRadar.prt1;
+      prtShort = _ddRadar.prt1 / 1000.0;
     } else if (_ddRadar.prt2 > 0 && _ddRadar.prt1 < 0) {
-      prtShort = _ddRadar.prt2;
+      prtShort = _ddRadar.prt2 / 1000.0;
     } else if (_ddRadar.prt1 > 0 && _ddRadar.prt2 > 0) {
       prtLong = _ddRadar.prt2 / 1000.0;
       prtShort = _ddRadar.prt1 / 1000.0;
@@ -1837,9 +1838,11 @@ int DoradeRadxFile::_handleRay(int nBytes, const char *block)
         prtLong = prtShort;
         prtShort = temp;
       }
+    } else if (_ddRadar.prt1 > 0) {
+      prtShort = _ddRadar.prt1 / 1000.0;
     }
 
-    if ((prtShort != Radx::missingMetaDouble) && (prtShort != Radx::missingMetaDouble)) {
+    if ((prtShort != Radx::missingMetaDouble) && (prtLong != Radx::missingMetaDouble)) {
       if (_ddRadar.num_ipps_trans < 2) {
         ray->setPrtMode(Radx::PRT_MODE_FIXED);
         ray->setPrtSec(prtShort);
@@ -1849,6 +1852,10 @@ int DoradeRadxFile::_handleRay(int nBytes, const char *block)
         ray->setPrtRatio(prtRatio);
         ray->setPrtMode(Radx::PRT_MODE_STAGGERED);
       }
+    } else if (prtShort != Radx::missingMetaDouble) {
+      ray->setPrtMode(Radx::PRT_MODE_FIXED);
+      ray->setPrtSec(prtShort);
+      ray->setPrtRatio(1.0);
     }
 
   } else if (DoradeData::isValid(_ddLidar)) {
@@ -1863,9 +1870,6 @@ int DoradeRadxFile::_handleRay(int nBytes, const char *block)
   switch (scanMode) {
     case DoradeData::SCAN_MODE_TAR:
       ray->setFollowMode(Radx::FOLLOW_MODE_TARGET);
-      break;
-    case DoradeData::SCAN_MODE_AIR:
-      ray->setFollowMode(Radx::FOLLOW_MODE_AIRCRAFT);
       break;
     default:
       ray->setFollowMode(Radx::FOLLOW_MODE_NONE);
@@ -1953,6 +1957,8 @@ void DoradeRadxFile::_addGeorefToLatestRay()
   ref.setVertWind(_ddPlat.vert_wind);
   ref.setHeadingRate(_ddPlat.heading_change);
   ref.setPitchRate(_ddPlat.pitch_change);
+
+  ref.setRadxTime(_latestRay->getRadxTime());
 
   _latestRay->setGeoref(ref);
 
@@ -2390,8 +2396,10 @@ int DoradeRadxFile::_loadReadVolume()
   // to the Radx axis type.
   try {
     if (_ddRadar.extension_num > 0) {
-      DoradeData::primary_axis_t axisType = DoradeData::primaryAxisFromInt(_ddRadar.extension_num);
-      Radx::PrimaryAxis_t radxAxisType = DoradeData::convertToRadxType(axisType);
+      DoradeData::primary_axis_t axisType =
+        DoradeData::primaryAxisFromInt(_ddRadar.extension_num);
+      Radx::PrimaryAxis_t radxAxisType =
+        DoradeData::convertToRadxType(axisType);
       _readVol->setPrimaryAxis(radxAxisType);
     }
   }  catch (const char*  ex) {
@@ -2420,9 +2428,11 @@ int DoradeRadxFile::_loadReadVolume()
   
   // for each ray, find the maximum number of samples in any field
   // from the sampling ratio
+  // also set calib index
 
   for (size_t ii = 0; ii < _rays.size(); ii++) {
     RadxRay *ray = _rays[ii];
+    ray->setCalibIndex(0);
     int maxNSamples = 0;
     vector<RadxField *> fields = ray->getFields();
     for (size_t jj = 0; jj < fields.size(); jj++) {
@@ -3726,6 +3736,7 @@ int DoradeRadxFile::_writeRadar()
       _ddRadar.radar_type = DoradeData::RADAR_AIR_AFT;
       break;
     case Radx::PLATFORM_TYPE_AIRCRAFT_TAIL:
+    case Radx::PLATFORM_TYPE_AIRCRAFT:
       _ddRadar.radar_type = DoradeData::RADAR_AIR_TAIL;
       break;
     case Radx::PLATFORM_TYPE_AIRCRAFT_BELLY:
@@ -3815,16 +3826,23 @@ int DoradeRadxFile::_writeRadar()
     const RadxRay &ray = *_writeVol->getRays()[0];
     _ddRadar.eff_unamb_vel = ray.getNyquistMps();
     _ddRadar.eff_unamb_range = ray.getUnambigRangeKm();
+    _ddRadar.prt1 = 0;
+    _ddRadar.prt2 = 0;
+    _ddRadar.prt3 = 0;
+    _ddRadar.prt4 = 0;
+    _ddRadar.prt5 = 0;
     // check for missing data values
-    _ddRadar.prt1 = ray.getPrtSec();
-    if (_ddRadar.prt1 != Radx::missingMetaDouble) 
-       _ddRadar.prt1 = _ddRadar.prt1 * 1000.0; // msecs
+    double prt1 = ray.getPrtSec();
+    if (prt1 != Radx::missingMetaDouble) {
+      _ddRadar.prt1 = prt1 * 1000.0; // msecs
+    }
     if (ray.getPrtMode() != Radx::PRT_MODE_FIXED) {
       _ddRadar.num_ipps_trans = 2;
       // check for missing data values
-      _ddRadar.prt2 = ray.getPrtSec();
-      if (_ddRadar.prt2 != Radx::missingMetaDouble) 
-        _ddRadar.prt2 = _ddRadar.prt2 * 1000.0 / ray.getPrtRatio(); // msecs
+      double prt2 = ray.getPrtSec();
+      if (prt2 != Radx::missingMetaDouble) {
+        _ddRadar.prt2 = prt2 * 1000.0 / ray.getPrtRatio(); // msecs
+      }
     }
     //    double pulseWidthUsec = ray.getPulseWidthUsec();
     //double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;

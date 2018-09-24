@@ -1357,9 +1357,11 @@ void SigmetRadxFile::_setGeoref(const ray_header_t &rayHdr,
   if (_isHrdTailRadar) {
     // tail radar for NOAA aircraft
     _readVol->setPrimaryAxis(Radx::PRIMARY_AXIS_Y_PRIME);
+    _readVol->setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_TAIL);
   } else if (_isHrdLfRadar) {
     // lower fuselage radar for NOAA aircraft
     _readVol->setPrimaryAxis(Radx::PRIMARY_AXIS_Z_PRIME);
+    _readVol->setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_BELLY);
   }
   
 }
@@ -1531,6 +1533,7 @@ void SigmetRadxFile::_setGeoref(const ray_header_t &rayHdr,
   if (_isHrdTailRadar) {
     // tail radar for NOAA aircraft
     _readVol->setPrimaryAxis(Radx::PRIMARY_AXIS_Y_PRIME);
+    _readVol->setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_TAIL);
     // compute AZ and EL from georefs, set on ray
     if (_readApplyGeorefs) {
       _computeAzElTail(ray, georef);
@@ -1538,6 +1541,7 @@ void SigmetRadxFile::_setGeoref(const ray_header_t &rayHdr,
   } else if (_isHrdLfRadar) {
     // lower fuselage radar for NOAA aircraft
     _readVol->setPrimaryAxis(Radx::PRIMARY_AXIS_Z_PRIME);
+    _readVol->setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_BELLY);
     // compute AZ and EL from georefs, set on ray
     if (_readApplyGeorefs) {
       _computeAzElLf(ray, georef);
@@ -1788,6 +1792,7 @@ void SigmetRadxFile::_setVolMetaData()
   if (_isDualPol) {
     calib->setRadarConstantV(radarConstant);
   }
+  calib->setPulseWidthUsec(_pulseWidthUs);
   double xmitPeakPowerWatts = _inHdr.task_conf.misc_info.xmit_power_watts;
   double xmitPeakPowerDbm = 10.0 * log10(xmitPeakPowerWatts * 1.0e3);
   calib->setXmitPowerDbmH(xmitPeakPowerDbm);
@@ -1800,12 +1805,6 @@ void SigmetRadxFile::_setVolMetaData()
   if (_isDualPol) {
     calib->setNoiseDbmVc(noiseDb);
   }
-
-  double zdrOffset = _prodHdr.end.zdr_offset_db_100 / 100.0;
-  double ldrOffset = _prodHdr.end.ldr_offset_db_100 / 100.0;
-  
-  calib->setZdrCorrectionDb(zdrOffset);
-  calib->setLdrCorrectionDbH(ldrOffset);
 
   _readVol->addCalib(calib);
 
