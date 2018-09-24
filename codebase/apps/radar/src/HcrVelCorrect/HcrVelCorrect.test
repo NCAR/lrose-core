@@ -157,32 +157,6 @@ wait_between_checks = 2;
 
 search_ext = "";
 
-///////////// input_fmq_url ///////////////////////////
-//
-// FMQ from which to read the moments stream.
-//
-// FMQ mode only.
-//
-//
-// Type: string
-//
-
-input_fmq_url = "fmqp:://localhost::/tmp/fmq/input";
-
-///////////// seek_to_end_of_input_fmq ////////////////
-//
-// Option to seek to the end of the input FMQ.
-//
-// If TRUE, the program will seek to the end of the fmq and only read in 
-//   new data. If FALSE, it will start reading from the beginning of the 
-//   FMQ.
-//
-//
-// Type: boolean
-//
-
-seek_to_end_of_input_fmq = TRUE;
-
 //======================================================================
 //
 // COMPUTING THE SURFACE ECHO VELOCITY.
@@ -360,7 +334,7 @@ compression_level = 4;
 // Type: string
 //
 
-output_dir = "/tmp/cfradial/velcorr/10hz";
+output_dir = "/home/mdtest/data/hcr/cfradial/velcorr/10hz";
 
 ///////////// output_filename_mode ////////////////////
 //
@@ -455,89 +429,7 @@ append_year_dir_to_output_dir = FALSE;
 // Type: boolean
 //
 
-write_latest_data_info = FALSE;
-
-//======================================================================
-//
-// OUTPUT IN FMQ MODE.
-//
-//======================================================================
- 
-///////////// output_fmq_url //////////////////////////
-//
-// FMQ to which the combined dwells are written.
-//
-// FMQ mode only.
-//
-//
-// Type: string
-//
-
-output_fmq_url = "fmqp:://localhost::/tmp/fmq/output";
-
-///////////// output_fmq_compress /////////////////////
-//
-// Option to compress the output fmq.
-//
-// The default is for no compression.
-//
-//
-// Type: boolean
-//
-
-output_fmq_compress = FALSE;
-
-///////////// output_fmq_n_slots //////////////////////
-//
-// Number of slots in output FMQ.
-//
-//
-// Type: int
-//
-
-output_fmq_n_slots = 5000;
-
-///////////// output_fmq_buf_size /////////////////////
-//
-// Size of buffer in output FMQ.
-//
-//
-// Type: int
-//
-
-output_fmq_buf_size = 100000000;
-
-///////////// output_fmq_write_blocking ///////////////
-//
-// Option to block on write when the radar queue fills up.
-//
-// If false, the program writes data to the output queue without regard 
-//   to whether the reader is keeping up. This mode should usually be used 
-//   in realtime, to avoid holding things up if a client becomes slow. If 
-//   true, the program will not overwrite data in the queue which has not 
-//   been read by the reader. This is recommended for ARCHIVE and FILELIST 
-//   mode. In this mode there should be only one reader. If you need to 
-//   service more than one reader, use Fmq2Fmq in write blocking mode with 
-//   multiple output urls to multiplex the queue.
-//
-//
-// Type: boolean
-//
-
-output_fmq_write_blocking = FALSE;
-
-///////////// output_fmq_data_mapper_report_interval //
-//
-// Number of seconds between reports to DataMapper.
-//
-// If > 0, the program will register with the DataMapper when the output 
-//   FMQs are written to. If <= 0, registration will not be performed.
-//
-//
-// Type: int
-//
-
-output_fmq_data_mapper_report_interval = 5;
+write_latest_data_info = TRUE;
 
 //======================================================================
 //
@@ -569,7 +461,7 @@ write_surface_vel_results_to_spdb = TRUE;
 // Type: string
 //
 
-surface_vel_results_spdb_output_url = "/tmp/spdb/HcrVelCorrect";
+surface_vel_results_spdb_output_url = "/home/mdtest/data/hcr/spdb/HcrVelCorrect";
 
 //======================================================================
 //
@@ -628,7 +520,7 @@ noise_filter_length_secs = 5;
 // Type: double
 //
 
-wave_filter_length_secs = 30;
+wave_filter_length_secs = 45;
 
 ///////////// wave_filter_min_n_rays //////////////////
 //
@@ -664,7 +556,7 @@ wave_filter_min_n_rays = 150;
 //     WAVE_POLYNOMIAL
 //
 
-wave_filter_type = WAVE_MEDIAN;
+wave_filter_type = WAVE_POLYNOMIAL;
 
 ///////////// wave_polynomial_order ///////////////////
 //

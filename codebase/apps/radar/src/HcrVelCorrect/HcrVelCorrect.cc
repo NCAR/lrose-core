@@ -458,7 +458,13 @@ int HcrVelCorrect::_processRayWaveFilt(RadxRay *ray)
   
   _filtRay = _waveNodeMid->ray;
   if (_velIsValid) {
-    _velFilt = _waveNodeMid->velWaveFiltMedian;
+    if (_params.wave_filter_type == Params::WAVE_MEAN) {
+      _velFilt = _waveNodeMid->velWaveFiltMean;
+    } else if (_params.wave_filter_type == Params::WAVE_MEDIAN) {
+      _velFilt = _waveNodeMid->velWaveFiltMedian;
+    } else {
+      _velFilt = _waveNodeMid->velWaveFiltPoly;
+    }
     _correctVelForRay(_filtRay, _velFilt);
     _waveNodeMid->velIsValid = true;
     _waveNodeMid->corrected = true;

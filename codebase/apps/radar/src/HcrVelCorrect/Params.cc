@@ -701,30 +701,6 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'input_fmq_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_fmq_url");
-    tt->descr = tdrpStrDup("FMQ from which to read the moments stream.");
-    tt->help = tdrpStrDup("FMQ mode only.");
-    tt->val_offset = (char *) &input_fmq_url - &_start_;
-    tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/input");
-    tt++;
-    
-    // Parameter 'seek_to_end_of_input_fmq'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("seek_to_end_of_input_fmq");
-    tt->descr = tdrpStrDup("Option to seek to the end of the input FMQ.");
-    tt->help = tdrpStrDup("If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.");
-    tt->val_offset = (char *) &seek_to_end_of_input_fmq - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1030,87 +1006,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OUTPUT IN FMQ MODE");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_fmq_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_url");
-    tt->descr = tdrpStrDup("FMQ to which the combined dwells are written.");
-    tt->help = tdrpStrDup("FMQ mode only.");
-    tt->val_offset = (char *) &output_fmq_url - &_start_;
-    tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/output");
-    tt++;
-    
-    // Parameter 'output_fmq_compress'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_compress");
-    tt->descr = tdrpStrDup("Option to compress the output fmq.");
-    tt->help = tdrpStrDup("The default is for no compression.");
-    tt->val_offset = (char *) &output_fmq_compress - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_fmq_n_slots'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_n_slots");
-    tt->descr = tdrpStrDup("Number of slots in output FMQ.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_fmq_n_slots - &_start_;
-    tt->single_val.i = 5000;
-    tt++;
-    
-    // Parameter 'output_fmq_buf_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_buf_size");
-    tt->descr = tdrpStrDup("Size of buffer in output FMQ.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_fmq_buf_size - &_start_;
-    tt->single_val.i = 100000000;
-    tt++;
-    
-    // Parameter 'output_fmq_write_blocking'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_write_blocking");
-    tt->descr = tdrpStrDup("Option to block on write when the radar queue fills up.");
-    tt->help = tdrpStrDup("If false, the program writes data to the output queue without regard to whether the reader is keeping up. This mode should usually be used in realtime, to avoid holding things up if a client becomes slow. If true, the program will not overwrite data in the queue which has not been read by the reader. This is recommended for ARCHIVE and FILELIST mode. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.");
-    tt->val_offset = (char *) &output_fmq_write_blocking - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_fmq_data_mapper_report_interval'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_data_mapper_report_interval");
-    tt->descr = tdrpStrDup("Number of seconds between reports to DataMapper.");
-    tt->help = tdrpStrDup("If > 0, the program will register with the DataMapper when the output FMQs are written to. If <= 0, registration will not be performed.");
-    tt->val_offset = (char *) &output_fmq_data_mapper_report_interval - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("WRITING SURFACE VEL RESULTS TO SPDB IN XML");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1139,11 +1034,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/spdb/hcr_surface_vel");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("FILTERING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1168,11 +1063,11 @@
     tt->single_val.e = FIR_FILTER;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("WAVE FILTERING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1247,11 +1142,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("FIR FILTERING");
     tt->comment_text = tdrpStrDup("");
     tt++;

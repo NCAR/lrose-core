@@ -415,10 +415,6 @@ public:
 
   char* search_ext;
 
-  char* input_fmq_url;
-
-  tdrp_bool_t seek_to_end_of_input_fmq;
-
   char* dbz_field_name;
 
   double min_range_to_surface_km;
@@ -457,18 +453,6 @@ public:
 
   tdrp_bool_t write_latest_data_info;
 
-  char* output_fmq_url;
-
-  tdrp_bool_t output_fmq_compress;
-
-  int output_fmq_n_slots;
-
-  int output_fmq_buf_size;
-
-  tdrp_bool_t output_fmq_write_blocking;
-
-  int output_fmq_data_mapper_report_interval;
-
   tdrp_bool_t write_surface_vel_results_to_spdb;
 
   char* surface_vel_results_spdb_output_url;
@@ -503,7 +487,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[61];
+  mutable TDRPtable _table[52];
 
   const char *_className;
 
