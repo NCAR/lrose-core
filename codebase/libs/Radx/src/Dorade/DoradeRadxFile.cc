@@ -3730,39 +3730,8 @@ int DoradeRadxFile::_writeRadar()
     _ddRadar.data_compress = DoradeData::COMPRESSION_NONE;
   }
 
-  switch (_writeVol->getPlatformType()) {
-    case Radx::PLATFORM_TYPE_FIXED:
-    case Radx::PLATFORM_TYPE_VEHICLE:
-      _ddRadar.radar_type = DoradeData::RADAR_GROUND;
-      break;
-    case Radx::PLATFORM_TYPE_SHIP:
-      _ddRadar.radar_type = DoradeData::RADAR_SHIP;
-      break;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_FORE:
-      _ddRadar.radar_type = DoradeData::RADAR_AIR_FORE;
-      break;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_AFT:
-      _ddRadar.radar_type = DoradeData::RADAR_AIR_AFT;
-      break;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_TAIL:
-    case Radx::PLATFORM_TYPE_AIRCRAFT:
-      _ddRadar.radar_type = DoradeData::RADAR_AIR_TAIL;
-      break;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_BELLY:
-    case Radx::PLATFORM_TYPE_AIRCRAFT_ROOF:
-      _ddRadar.radar_type = DoradeData::RADAR_AIR_LF;
-      break;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_NOSE:
-      _ddRadar.radar_type = DoradeData::RADAR_AIR_NOSE;
-      break;
-    case Radx::PLATFORM_TYPE_SATELLITE_ORBIT:
-    case Radx::PLATFORM_TYPE_SATELLITE_GEOSTAT:
-      _ddRadar.radar_type = DoradeData::RADAR_SATELLITE;
-      break;
-    default:
-      _ddRadar.radar_type = DoradeData::RADAR_GROUND;
-  }
-  
+  // set scan mode
+
   _ddRadar.scan_mode = DoradeData::SCAN_MODE_SUR;
   if (_writeVol->getSweeps().size() > 0) {
     const RadxSweep &sweep = *_writeVol->getSweeps()[0];
@@ -3807,6 +3776,48 @@ int DoradeRadxFile::_writeRadar()
     _ddRadar.req_rotat_vel = sweep.getTargetScanRateDegPerSec();
   }
 
+  // set radar type
+  // for aircraft radars override scan mode
+
+  switch (_writeVol->getPlatformType()) {
+    case Radx::PLATFORM_TYPE_FIXED:
+    case Radx::PLATFORM_TYPE_VEHICLE:
+      _ddRadar.radar_type = DoradeData::RADAR_GROUND;
+      break;
+    case Radx::PLATFORM_TYPE_SHIP:
+      _ddRadar.radar_type = DoradeData::RADAR_SHIP;
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_FORE:
+      _ddRadar.radar_type = DoradeData::RADAR_AIR_FORE;
+      _ddRadar.scan_mode = DoradeData::SCAN_MODE_AIR;
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_AFT:
+      _ddRadar.radar_type = DoradeData::RADAR_AIR_AFT;
+      _ddRadar.scan_mode = DoradeData::SCAN_MODE_AIR;
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_TAIL:
+      _ddRadar.radar_type = DoradeData::RADAR_AIR_TAIL;
+      _ddRadar.scan_mode = DoradeData::SCAN_MODE_AIR;
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT:
+      _ddRadar.radar_type = DoradeData::RADAR_AIR_TAIL;
+      _ddRadar.scan_mode = DoradeData::SCAN_MODE_AIR;
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_BELLY:
+    case Radx::PLATFORM_TYPE_AIRCRAFT_ROOF:
+      _ddRadar.radar_type = DoradeData::RADAR_AIR_LF;
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_NOSE:
+      _ddRadar.radar_type = DoradeData::RADAR_AIR_NOSE;
+      break;
+    case Radx::PLATFORM_TYPE_SATELLITE_ORBIT:
+    case Radx::PLATFORM_TYPE_SATELLITE_GEOSTAT:
+      _ddRadar.radar_type = DoradeData::RADAR_SATELLITE;
+      break;
+    default:
+      _ddRadar.radar_type = DoradeData::RADAR_GROUND;
+  }
+  
   _ddRadar.radar_longitude = _writeVol->getLongitudeDeg();
   _ddRadar.radar_latitude = _writeVol->getLatitudeDeg();
   _ddRadar.radar_altitude = _writeVol->getAltitudeKm();
