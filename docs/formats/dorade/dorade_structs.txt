@@ -1,0 +1,1202 @@
+///////////////////////////////////////////////////////////////////////
+/// DORADE DATA FORMAT
+///
+/// Defines the header structures used in DORADE format radar
+/// files.
+///
+/// Dorade data files are made up of a sequence of data structures,
+/// each of which has at the start a 4-character ID, followed by a
+/// length in bytes.
+///
+/// For 2 of the structure types, id RDAT and QDAT, the structure is
+/// followed by field data. The length in bytes is therefore longer
+/// than the structure itself, since it includes the bytes in the
+/// following data fields.
+///
+/// - SSWB, struct super_SWIB_t,
+///   super sweep indenitifcation block
+///
+/// - VOLD, struct volume_t,
+///   volume description block
+///
+/// - RADD, struct radar_t,
+///   radar description block
+///
+/// - CFAC, struct correction_t,
+///   correction factors block
+///
+/// - PARM, struct parameter_t,
+///   parameter (data field) description block
+///
+/// - CELV, struct cell_t,
+///   cell (gate) spacing array block
+///
+/// - CSFD, struct cell_spacing_fp_t,
+///   cell spacing table block
+///
+/// - SWIB, struct sweepinfo_t,
+///   sweep information description block
+///
+/// - ASIB, struct platform_t,
+///   platform description block
+///
+/// - RYIB, struct ray_t,
+///   ray information block
+///
+/// - RDAT, struct paramdata_t,
+///   field parameter data block
+///
+/// - QDAT, struct qparamdata_t,
+///   field parameter data block, extended version
+///
+/// - XSTF, struct extra_stuff_t,
+///   miscellaneous block
+///
+/// - NULL, struct null_block_t,
+///   null block, end of main data
+///
+/// - RKTB, struct rot_ang_table_t,
+///   rotation angle table, after null block
+///
+/// - SEDS, ASCII
+///   Edit history block
+///
+/// - FRAD, struct radar_test_status_t,
+///   RADAR test pulse and status block
+///
+/// - FRIB, struct field_radar_t,
+///   field RADAR information block
+///
+/// - LIDR, struct lidar_t,
+///   LIDAR description
+///
+/// - FLIB, struct field_lidar_t,
+///   field LIDAR information block
+///
+/// - SITU, struct insitu_descript_t,
+///   in-situ description block
+///
+/// - ISIT, struct insitu_data_t,
+///   in-situ parameters block
+///
+/// - INDF, struct indep_freq_t,
+///   independent frequency block
+///
+/// - MINI, struct minirims_data_t,
+///   minirims data block
+///
+/// - NDDS, struct nav_descript_t,
+///   navigation block
+///
+/// - TIME, struct time_series_t,
+///   time series block
+///
+/// - WAVE, struct waveform_t,
+///   Waveform descriptor block
+///
+/// The most tricky part of a DORADE file is the rotation angle table
+/// (RKTB). This table is stored in a block after the NULL block, and
+/// is pointed to by the key_table in the SWIB block. The rotation
+/// angle table comprises 3 sections:
+///
+/// -# The rot_angle_table_t structure at the start of the block.
+/// -# An array of integers: Radx::si32[ndx_que_size], which is a
+///    lookup table for locating the ray for a given angle.
+/// -# An array of table entries: rot_table_entry_t[num_rays], which
+///    stores the rotation_angle for each ray, as well as the offset
+///    and length of the ray data in the file.
+
+///////////////////////////////////////////////////
+// enumarated types
+
+/// binary format
+
+typedef enum {
+  BINARY_FORMAT_INT8 = 1, /**< signed 8-bit integer */
+  BINARY_FORMAT_INT16 = 2, /**< signed 16-bit integer */
+  BINARY_FORMAT_INT32 = 3, /**< signed32-bit integer */
+  BINARY_FORMAT_FLOAT32 = 4 /**< IEEE 32-bit float */
+} binary_format_t;
+
+/// code word bits
+
+typedef enum {
+  REFLECTIVITY_BIT  = 0x8000, /**< bit 15 */
+  VELOCITY_BIT  = 0x4000, /**< bit 14 */
+  WIDTH_BIT  = 0x2000, /**< bit 13 */
+  TA_DATA_BIT  = 0x1000, /**< bit 12 */
+  LF_DATA_BIT  = 0x0800, /**< bit 11 */
+  TIME_SERIES_BIT  = 0x0400 /**< bit 10 */
+} code_word_bits_t;
+
+/// radar types
+
+typedef enum {
+  RADAR_GROUND = 0, /**< ground-based radar */
+  RADAR_AIR_FORE = 1, /**< aircraft forward-looking radar (Eldora) */
+  RADAR_AIR_AFT = 2, /**< aircraft aft-looking radar (Eldora) */
+  RADAR_AIR_TAIL = 3, /**< aircraft tail radar */
+  RADAR_AIR_LF = 4, /**< aircraft lower fuselage radar */
+  RADAR_SHIP = 5, /**< ship-borne radar */
+  RADAR_AIR_NOSE = 6, /**< aircraft nose radar */
+  RADAR_SATELLITE = 7, /**< satellite-based radar */
+  LIDAR_MOVING = 8, /**< mobile lidar - deprecated */
+  LIDAR_FIXED = 9 /**< fixed lidar - deprecated */
+} radar_type_t;
+
+/// lidar types
+
+typedef enum {
+  LIDAR_GROUND = 0, /**< ground-based lidar */
+  LIDAR_AIR_FORE = 1, /**< aircraft forward-looking lidar */
+  LIDAR_AIR_AFT = 2, /**< aircraft aft-looking lidar */
+  LIDAR_AIR_TAIL = 3, /**< aircraft tail lidar */
+  LIDAR_AIR_LF = 4, /**< aircraft lower fuselage lidar */
+  LIDAR_SHIP = 5, /**< ship-borne lidar */
+  LIDAR_AIR_FIXED = 6, /**< fixed lidar */
+  LIDAR_SATELLITE = 7 /**< satellite-based lidar */
+} lidar_type_t;
+
+/// field IDs
+
+typedef enum {
+  SW_ID_NUM = 1, /**< ID for spectrum width */
+  VR_ID_NUM = 2, /**< ID for radial velocity */
+  NCP_ID_NUM = 3, /**< ID for normalized coherent power */
+  DBZ_ID_NUM = 4, /**< ID for dbz */
+  DZ_ID_NUM = 5, /**< ID for ZDR */
+  VE_ID_NUM = 6, /**< ID for radial velocity */
+  VG_ID_NUM = 7, /**< ID for combined radial velocity */
+  VU_ID_NUM = 8, /**< ID for radial velocity */
+  VD_ID_NUM = 9, /**< ID for radial velocity */
+  DBM_ID_NUM = 10 /**< ID for dbm - power */
+} field_id_t;
+
+/// polarization types
+
+typedef enum {
+  POLARIZATION_HORIZONTAL = 0, /**< horizontal polarization */
+  POLARIZATION_VERTICAL = 1, /**< vertical polarization */
+  POLARIZATION_CIRCULAR_RIGHT = 2, /**< right circular polarization */
+  POLARIZATION_ELLIPTICAL = 3, /**< elliptical polarization */
+  POLARIZATION_HV_ALT = 4, /**< dual-pol alternating polarization */
+  POLARIZATION_HV_SIM = 5 /**< dual-pol simultaneous polarization */
+} polarization_t;
+
+/// scan modes
+
+typedef enum {
+  SCAN_MODE_CAL = 0, /**< calibration scan */ 
+  SCAN_MODE_PPI = 1, /**< PPI sector scan */
+  SCAN_MODE_COP = 2, /**< coplane scan */
+  SCAN_MODE_RHI = 3, /**< RHI scan */
+  SCAN_MODE_VER = 4, /**< vertically pointing scan */
+  SCAN_MODE_TAR = 5, /**< follow target scan */
+  SCAN_MODE_MAN = 6, /**< manual scan */
+  SCAN_MODE_IDL = 7, /**< idle scan */
+  SCAN_MODE_SUR = 8, /**< 360-deg surveillance scan */
+  SCAN_MODE_AIR = 9, /**< airborne scan (e.g. eldora) */
+  SCAN_MODE_HOR = 10 /**< horizontal scan */
+} scan_mode_t;
+
+/// compression types
+
+typedef enum {
+  COMPRESSION_NONE = 0, /**< no compression */
+  COMPRESSION_HRD = 1, /**< run-length encoding compression */
+  COMPRESSION_RDP_8_BIT = 8 /**< deprecated */
+} compression_t;
+
+///////////////////////////////////////////////////
+// structure definitions
+
+////////////////////////////////////////////////////
+/// Comment block - COMM
+
+typedef struct comment {
+
+  char id[4];  /**< Comment descriptor identifier: ASCII
+                * characters "COMM" stand for Comment
+                * Descriptor. */
+  si32 nbytes;    /**< Comment descriptor length in bytes. */
+  char  comment[500];	  /**< comment*/
+    
+} comment_t;
+
+////////////////////////////////////
+// key tables - in super sweep block
+//
+// These point to special blocks at the end of the file
+  
+const static int MAX_KEYS = 8; /**< dimension for key table in SSIB */
+
+/// type of entry in key table in SWIB
+
+typedef enum {
+  KEYED_BY_TIME = 1, /**< time series block */
+  KEYED_BY_ROT_ANG = 2, /**< rotation angle table */
+  SOLO_EDIT_SUMMARY = 3 /**< block containing ASCII editing details */
+} key_table_type_t;
+
+/// indexes for key table in SWIB
+
+typedef enum {
+  NDX_ROT_ANG = 0, /**< rotation angle table */
+  NDX_SEDS  = 1 /**< editing block */
+} key_table_index_t;
+
+/// key table entries in SWIB
+
+typedef struct key_table_info {
+  si32 offset; /**< offset from start of file, in bytes */
+  si32 size; /**< size of block, in bytes */
+  si32 type; /**< see key_table_index_t */
+} key_table_info_t;
+  
+/////////////////////////////////////
+/// super sweep ident block - SSWB
+  
+typedef struct super_SWIB {
+
+  char id[4];	/**< "SSWB" */
+  si32 nbytes; /**< number of bytes in this struct block */
+
+  /**< parameters from the first version */
+
+  si32 last_used; /**< Last time used - Unix time */
+  si32 start_time; /**< start time of volume - Unix time */
+  si32 stop_time; /**< end time of volume - Unix time */
+  si32 sizeof_file; /**< Length of file in bytes */
+  si32 compression_flag; /**< See compression_t */
+  si32 volume_time_stamp; /**< to reference current volume */
+  si32 num_params; /**< number of parameters (fields) */
+    
+  /**< end of first version parameters */
+
+  char radar_name[8]; /**< radar name */
+
+  fl64 d_start_time; /**< Volume start time, high precision */
+  fl64 d_stop_time; /**< Volume end time, high precision */
+
+  /**<
+   * "last_used" is an age off indicator where > 0 implies Unix time
+   * of the last access and
+   * 0 implies this sweep should not be aged off
+   */
+
+  si32 version_num; /**< version number of this format */
+  si32 num_key_tables; /**< number of key tables in this file */
+  si32 status; /**< status */
+  si32 place_holder[7]; /**< unused */
+  key_table_info_t key_table[MAX_KEYS]; /**< key table */
+
+  /**<
+   * offset and key info to a table containing key value such as
+   * the rot. angle and the offset to the corresponding ray
+   * in the disk file
+   */
+
+} super_SWIB_t;
+
+/// Some older files have an alternate length for the SWIB block,
+/// with only the first part of the struct filled in.
+
+static const int super_SWIB_alt_len = 200;
+
+////////////////////////////////
+/// volume description - VOLD
+
+typedef struct volume {
+
+  char id[4];	/**< Volume descriptor identifier: ASCII
+                 * characters "VOLD" stand for Volume Descriptor. */
+  si32 nbytes;	/**< Volume descriptor length in bytes. */
+  si16 format_version;	/**< ELDORA/ASTRAEA field tape format
+                         * revision number. */
+  si16 volume_num;	/**< Volume Number into current tape. */
+  si32 maximum_bytes;	/**< Maximum number of bytes in any.
+                         * physical record in this volume. */
+  char proj_name[20];	        /**< Project number or name. */
+  si16 year;		/**< Year data taken in years. */
+  si16 month;		/**< Month data taken in months. */
+  si16 day;		/**< Day data taken in days. */
+  si16 data_set_hour;	/**< hour data taken in hours. */
+  si16 data_set_minute;	/**< minute data taken in minutes. */
+  si16 data_set_second;	/**< second data taken in seconds. */
+  char flight_num[8];	        /**< Flight number. */
+  char gen_facility[8];	/**< identifier of facility that
+                         * generated this recording. */
+  si16 gen_year;	/**< year this recording was generated
+                         * in years. */
+  si16 gen_month;	/**< month this recording was generated
+                         * in months. */
+  si16 gen_day;		/**< day this recording was generated in days. */
+  si16 number_sensor_des; /**< Total Number of sensor descriptors
+                           * that follow. */
+} volume_t;
+
+////////////////////////////
+/// radar description - RADD
+
+typedef struct radar {
+    
+  char id[4];		/**< Identifier for a radar descriptor
+                         * block (ascii characters "RADD"). */
+  si32 nbytes;	/**< Length of a radar descriptor block in bytes. */
+  char radar_name[8];	/**< Eight character radar name. */
+  fl32 radar_const;	/**< Radar/lidar constant in ?? */
+  fl32 peak_power;	/**< Typical peak power of the sensor in kw.
+                         * Pulse energy is really the
+                         * peak_power * pulse_width */
+  fl32 noise_power;	/**< Typical noise power of the sensor in dBm. */
+  fl32 receiver_gain;	/**< Gain of the receiver in db. */
+  fl32 antenna_gain;	/**< Gain of the antenna in db. */
+  fl32 system_gain;	/**< System Gain in db.
+                         * (Ant G - WG loss) */
+  fl32 horz_beam_width;	/**< Horizontal beam width in degrees.
+                         * beam divergence in milliradians
+                         * is equivalent to beamwidth */
+  fl32 vert_beam_width;	/**< Vertical beam width in degrees. */
+  si16 radar_type;	/**< Radar Type (0)Ground, 1)Airborne
+                         * Fore, 2)Airborne Aft, 3)airborne
+                         * Tail, 4)Airborne Lower Fuselage,
+                         * 5)Shipborne. */
+  si16 scan_mode;	/**< Scan Mode (0)Calibration, 1)PPI
+                         * (constant Elevation) 2)Coplane,
+                         * 3)RHI (Constant Azimuth), 4)
+                         * Vertical Pointing, 5)Target
+                         * (Stationary), 6)Manual, 7)Idle (Out
+                         * of Control). */
+  fl32 req_rotat_vel;	/**< Requested rotational velocity of
+                         * the antenna in degrees/sec. */
+  fl32 scan_mode_pram0;	/**< Scan mode specific parameter #0
+                         * (Has different meaning for
+                         * different scan modes). */
+  fl32 scan_mode_pram1;	/**< Scan mode specific parameter #1. */
+  si16 num_parameter_des;/**< Total number of parameter
+                          * descriptor blocks for this radar. */
+  si16 total_num_des;	/**< Total number of additional
+                         * descriptor block for this radar. */
+  si16 data_compress;	/**< Data compression. 0 = none, 1 = HRD
+                         * scheme. */
+  si16 data_reduction;	/**< Data Reduction algorithm: 1 = none,
+                         * 2 = between 2 angles, 3 = Between
+                         * concentric circles, 4 = Above/below
+                         * certain altitudes.*/
+  fl32 data_red_parm0;	/**< 1 = smallest positive angle in
+                         * degrees, 2 = inner circle diameter,
+                         * km, 4 = minimum altitude, km. */
+  fl32 data_red_parm1;	/**< 1 = largest positve angle, degress,
+                         * 2 = outer cicle diameter, km, 4 =
+                         * maximum altitude, km. */
+  fl32 radar_longitude;	/**< longitude of radar in degrees. */
+  fl32 radar_latitude;	/**< Latitude of radar in degrees. */
+  fl32 radar_altitude;	/**<  Altitude of radar above msl in km. */
+  fl32 eff_unamb_vel;	/**< Effective unambiguous velocity, m/s. */
+  fl32 eff_unamb_range;	/**< Effective unambiguous range, km. */
+  si16 num_freq_trans;	/**< Number of frequencies transmitted. */
+  si16 num_ipps_trans;	/**< Number of different inter-pulse
+                         * periods transmitted. */
+  fl32 freq1;		/**< Frequency 1. */
+  fl32 freq2;		/**< Frequency 2. */
+  fl32 freq3;		/**< Frequency 3. */
+  fl32 freq4;		/**< Frequency 4. */
+  fl32 freq5;		/**< Frequency 5. */
+  fl32 prt1;      	/**< Interpulse period 1. */
+  fl32 prt2;            /**< Interpulse period 2. */
+  fl32 prt3;            /**< Interpulse period 3. */
+  fl32 prt4;            /**< Interpulse period 4. */
+  fl32 prt5;            /**< Interpulse period 5. */
+
+  /**< 1995 extension #1 */
+  si32  extension_num;  /**< not sure */
+  char config_name[8];	/**< used to identify this set of
+                         * unique radar characteristics */
+  si32  config_num;	/**< facilitates a quick lookup of radar
+                         * characteristics for each ray */
+  /**
+   * extend the radar descriptor to include unique lidar parameters
+   */
+  fl32 aperture_size;  /**< Diameter of the lidar aperature in cm. */
+  fl32 field_of_view;  /**< Field of view of the receiver. mra; */
+  fl32 aperture_eff;   /**< Aperature efficiency in %. */
+  fl32 aux_freq[11];   /**< make space for a total of 16 freqs */
+  fl32 aux_prt[11];    /**< and ipps */
+
+  /**
+   * other extensions to the radar descriptor
+   */
+  fl32 pulse_width;  /**< Typical pulse width in microseconds.
+                      * pulse width is inverse of the
+                      * band width */
+  fl32 primary_cop_baseln; /**< coplane baselines */
+  fl32 secondary_cop_baseln; /**< not sure */
+  fl32 pc_xmtr_bandwidth;  /**< pulse compression
+                            * transmitter bandwidth */
+  si32  pc_waveform_type;  /**< pulse compression waveform type */
+  char site_name[20]; /**< instrument site name */
+    
+} radar_t;
+
+/// some files have an older structure, with only the
+/// first part filled in
+
+static const int radar_alt_len = 144;
+
+/////////////////////////////
+/// correction factors - CFAC
+
+typedef struct correction {
+
+  char id[4];	/**< Correction descriptor identifier: ASCII
+                 * characters "CFAC" stand for Volume
+                 * Descriptor. */
+  si32 nbytes; /**<Correction  descriptor length in bytes. */
+  fl32 azimuth_corr;     /**< Correction added to azimuth[deg] */
+  fl32 elevation_corr;   /**< Correction added to elevation[deg] */
+  fl32 range_delay_corr; /**< Correction used for range delay[m] */
+  fl32 longitude_corr;   /**< Correction added to radar longitude */
+  fl32 latitude_corr;    /**< Correction added to radar latitude */
+  fl32 pressure_alt_corr;/**< Correction added to pressure altitude
+                          * (msl)[km] */
+  fl32 radar_alt_corr;   /**< Correction added to radar altitude above
+                          * ground level(agl) [km] */
+  fl32 ew_gndspd_corr;   /**< Correction added to radar platform
+                          * ground speed(E-W)[m/s] */
+  fl32 ns_gndspd_corr;   /**< Correction added to radar platform
+                          * ground speed(N-S)[m/s] */
+  fl32 vert_vel_corr;    /**< Correction added to radar platform
+                          * vertical velocity[m/s] */
+  fl32 heading_corr;     /**< Correction added to radar platform
+                          * heading [deg]) */
+  fl32 roll_corr;        /**< Correction added to radar platform
+                          * roll[deg] */
+  fl32 pitch_corr;       /**< Correction added to radar platform
+                          * pitch[deg] */
+  fl32 drift_corr;       /**< Correction added to radar platform
+                          * drift[deg] */
+  fl32 rot_angle_corr;   /**< Corrrection add to radar rotation angle
+                          *[deg] */
+  fl32 tilt_corr;        /**< Correction added to radar tilt angle */
+    
+} correction_t;
+
+/////////////////////////////////////////////
+/// parameter (data field) description - PARM
+
+typedef struct parameter {
+
+  char id[4];	/**< Parameter Descriptor identifier
+                 * (ascii characters "PARM"). */
+  si32 nbytes;	/**< Parameter Descriptor length in bytes.*/
+  char parameter_name[8]; /**< Name of parameter being described. */
+  char param_description[40]; /**< Detailed description of this parameter. */
+  char param_units[8];	/**< Units parameter is written in. */
+  si16 interpulse_time;	/**< Inter-pulse periods used. bits 0-1
+                         * = frequencies 1-2. */
+  si16 xmitted_freq;	/**< Frequencies used for this 
+                         * parameter. */
+  fl32 recvr_bandwidth;	/**< Effective receiver bandwidth for
+                         * this parameter in MHz.*/
+  si16 pulse_width;	/**< Effective pulse width of parameter
+                         * in m. */
+  si16 polarization;	/**< Polarization of the radar beam for
+                         * this parameter (0 Horizontal,1
+                         * Vertical,2 Circular,3 Elliptical) in na. */
+  si16 num_samples;	/**< Number of samples used in estimate
+                         * for this parameter. */
+  si16 binary_format;	/**< Binary format of radar data. */
+  char  threshold_field[8];	/**< Name of parameter upon which this
+                                 * parameter is thresholded (ascii
+                                 * characters NONE if not
+                                 * thresholded). */
+  fl32 threshold_value;	/**< Value of threshold in ? */
+  fl32 parameter_scale;	/**< Scale factor for parameter. */
+  fl32 parameter_bias;	/**< Bias factor for parameter. */
+  si32  bad_data;	/**< Bad data flag. */
+    
+  /**< 1995 extension #1 */
+
+  si32 extension_num;   /**< not sure */
+  char config_name[8];	/**< used to identify this set of
+                         * unique radar characteristics */
+  si32 config_num;      /**< not sure */
+  si32 offset_to_data;	/**< bytes added to the data struct pointer
+                         * to point to the first datum whether it's
+                         * an RDAT or a QDAT
+                         */
+  fl32 mks_conversion;  /**< not sure */
+  si32 num_qnames;	/**< not sure */	
+  char qdata_names[32];	/**< each of 4 names occupies 8 characters
+                         * of this space
+                         * and is blank filled. Each name identifies
+                         * some interesting segment of data in a
+                         * particular ray for this parameter.
+                         */
+  si32 num_criteria;    /**< not sure */
+  char criteria_names[32];	/**< each of 4 names occupies 8 characters
+				 * and is blank filled. These names identify
+				 * a single interesting fl32ing point value
+				 * that is associated with a particular ray
+				 * for a this parameter. Examples might
+				 * be a brightness temperature or
+				 * the percentage of cells above or
+				 * below a certain value */
+  si32 number_cells;    /**< number of gates */
+  fl32 meters_to_first_cell; /**< distance to center - meters */
+  fl32 meters_between_cells; /**< gate spacing - meters */
+  fl32 eff_unamb_vel;	/**< Effective unambiguous velocity, m/s. */
+
+} parameter_t;
+
+/// some files have an older structure, with only the
+/// first part filled in
+
+static const int parameter_alt_len = 104;
+
+/// dimension of dist_cells in cell_vector_t
+
+static const int MAXCVGATES = 1500;
+  
+//////////////////////////////
+/// cell (gate) spacing - CELV
+  
+typedef struct cell {
+
+  char id[4]; /**< Cell descriptor identifier: ASCII
+               * characters "CELV" stand for cell vector. */
+  si32 nbytes;	     /**< Comment descriptor length in bytes */
+  si32 number_cells; /**< Number of sample volumes */
+  fl32 dist_cells[MAXCVGATES]; /**< Distance from the radar to cell
+                                * n in meters */
+    
+} cell_vector_t;
+  
+//////////////////////////////
+/// cell spacing table - CSFD
+
+typedef struct cell_spacing_fp {
+
+  char id[4];   /**< Identifier for a cell spacing descriptor
+                 * (ascii characters CSFD). */
+  si32 nbytes;  /**< Cell Spacing descriptor length in bytes. */
+  si32 num_segments;  /**< Number of segments that contain cells of */
+  fl32 dist_to_first; /**< Distance to first gate in meters. */
+  fl32 spacing[8];    /**< Width of cells in each segment in m. */
+  si16 num_cells[8] ; /**< Number of cells in each segment.
+                       * equal widths. */
+
+} cell_spacing_fp_t;
+
+////////////////////////////////////////
+/// sweep information description - SWIB
+
+typedef struct sweepinfo {
+  char id[4];            /**< Comment descriptor identifier: ASCII
+                          * characters "SWIB" stand for sweep info
+                          * block Descriptor. */
+  si32 nbytes;     /**< Sweep  descriptor length in bytes. */
+  char radar_name[8];    /**< comment*/
+  si32 sweep_num;  /**< Sweep number from the beginning of the volume*/
+  si32 num_rays;   /**<number of rays recorded in this sweep*/
+  fl32 start_angle;/**<true start angle [deg]*/
+  fl32 stop_angle; /**<true stop angle  [deg]*/
+  fl32 fixed_angle; /**< not sure */
+  si32 filter_flag; /**< not sure */
+
+} sweepinfo_t;
+
+///////////////////////////////
+/// platform description - ASIB
+
+typedef struct platform {
+
+  char id[4];	/**< Identifier for the aircraft/ship
+                 * parameters block (ascii characters ASIB) */
+  si32 nbytes;/**< Length in Bytes of the
+               * aircraft/ship arameters block */
+  fl32 longitude;	/**< Antenna longitude (Eastern
+                         * Hemisphere is positive, West
+                         * negative) in degrees */
+  fl32 latitude;	/**< Antenna Latitude (Northern
+                         * Hemisphere is positive, South
+                         * Negative) in degrees */
+  fl32 altitude_msl;	/**< Antenna Altitude above mean sea
+                         * level (MSL) in km */
+  fl32 altitude_agl;	/**< Antenna Altitude above ground level
+                         * (AGL) in km */
+  fl32 ew_velocity;	/**< Antenna east-west ground speed
+                         * (towards East is positive) in m/sec */
+  fl32 ns_velocity;	/**< Antenna north-south ground speed
+                         * (towards North is positive) in m/sec */
+  fl32 vert_velocity;	/**< Antenna vertical velocity (Up is
+                         * positive) in m/sec */
+  fl32 heading;		/**< Antenna heading (angle between
+                         * rotodome rotational axis and true
+                         * North, clockwise (looking down)
+                         * positive) in degrees */
+  fl32 roll;		/**< Roll angle of aircraft tail section
+                         * (Horizontal zero, Positive left wing up)
+                         * in degrees */
+  fl32 pitch;		/**< Pitch angle of rotodome (Horizontal
+                         * is zero positive front up) in degrees*/
+  fl32 drift_angle;	/**< Antenna drift Angle. (angle between
+                         * platform true velocity and heading,
+                         * positive is drift more clockwise
+                         * looking down) in degrees */
+  fl32 rotation_angle;	/**< Angle of the radar beam with
+                         * respect to the airframe (zero is
+                         * along vertical stabilizer, positive
+                         * is clockwise) in deg */
+  fl32 tilt;		/**< Angle of radar beam and line normal
+                         * to longitudinal axis of aircraft,
+                         * positive is towards nose of
+                         * aircraft) in degrees */
+  fl32 ew_horiz_wind;	/**< east - west wind velocity at the
+                         * platform (towards East is positive)
+                         * in m/sec */
+  fl32 ns_horiz_wind;	/**< North - South wind velocity at the
+                         * platform (towards North is 
+                         * positive) in m/sec */
+  fl32 vert_wind;	/**< Vertical wind velocity at the
+                         * platform (up is positive) in m/sec */
+  fl32 heading_change;	/**< Heading change rate in degrees/second. */
+  fl32 pitch_change;	/**< Pitch change rate in degrees/second. */
+
+} platform_t;
+
+/////////////////////////////////////////////////////////////////////
+/// ray information - RYIB
+
+typedef struct ray {
+
+  char id[4];		/**< Identifier for a data ray info.
+                         * block (ascii characters "RYIB"). */
+  si32 nbytes;	/**< length of a data ray info block in bytes. */
+  si32 sweep_num;	/**< sweep number for this radar. */
+  si32 julian_day;      /**< Guess. */
+  si16 hour;		/**< Hour in hours. */
+  si16 minute;		/**< Minute in minutes. */
+  si16 second;		/**< Second in seconds. */
+  si16 millisecond;	/**< Millisecond in milliseconds. */
+  fl32 azimuth;		/**< Azimuth in degrees. */
+  fl32 elevation;	/**< Elevation in degrees. */
+  fl32 peak_power;	/**< Last measured peak transmitted
+                         * power in kw. */
+  fl32 true_scan_rate;	/**< Actual scan rate in degrees/second. */
+  si32 ray_status;	/**< 0 = normal, 1 = transition, 2 = bad. */
+
+} ray_t;
+
+////////////////////////////////////////
+/// field parameter data - RDAT
+
+typedef struct paramdata {
+
+  char id[4];	         /**< parameter data descriptor identifier: ASCII
+                          * characters "RDAT" stand for parameter data
+                          * block Descriptor. */
+  si32 nbytes;   /**< parameter data descriptor length in bytes. */
+  char pdata_name[8];  /**< name of parameter */
+
+} paramdata_t;
+  
+///////////////////////////////////////////
+/// field parameter data - extended - QDAT
+
+typedef struct qparamdata {
+    
+  char id[4]; /**< parameter data descriptor identifier: ASCII
+               * characters "QDAT" for a block that contains
+               * the data plus some supplemental and
+               * identifying information */
+    
+  si32 nbytes; /**< parameter data descriptor length in bytes.
+                * this represents the size of this header
+                * information plus the data
+                *
+                * for this data block the start of the data
+                * is determined by using "offset_to_data"
+                * in the corresponding parameter descriptor
+                * "struct parameter_d"
+                * the offset is from the beginning of
+                * this descriptor/block
+                */
+    
+  char pdata_name[8];	/**< name of parameter */
+
+  si32 extension_num; /**< not sure */
+  si32 config_num; /**< facilitates indexing into an array
+                    * of radar descriptors where the radar
+                    * characteristics of each ray and each
+                    * parameter might be unique such as phased
+                    * array antennas */
+
+  si16 first_cell[4]; /**< see num_cells */
+  si16 num_cells[4]; /**< first cell and num cells demark
+                      * some feature in the data and it's
+                      * relation to the cell vector
+                      * first_cell[n] = 0 implies the first datum
+                      * present corresponds to "dist_cells[0]
+                      * in "struct cell_d"
+                      * for TRMM data this would be the
+                      * nominal sample where the cell vector is
+                      * at 125 meter resolution instead of 250 meters
+                      * and identified segments might be the
+                      * rain echo oversample "RAIN_ECH" and the
+                      * surface oversample "SURFACE" */
+
+  fl32 criteria_value[4]; /**< criteria value associated
+                           * with a criteria name
+                           * in "struct parameter_d" */
+} qparamdata_t;
+
+
+//////////////////////////
+/// extra stuff - XSTF
+
+typedef struct extra_stuff {
+
+  char id[4];	/**< "XSTF" */
+  si32 nbytes; /**< number of bytesin this struct */
+    
+  si32 one;		/**< always set to one (endian flag) */
+  si32 source_format;	/**< as per ../include/dd_defines.h */
+    
+  si32 offset_to_first_item; /**< bytes from start of struct */
+  si32 transition_flag; /**< beam in transition? */
+
+} extra_stuff_t;
+
+////////////////////////////
+/// null block - NULL
+
+typedef struct null_block {
+
+  char id[4];	/**< "NULL" */
+  si32 nbytes; /**< number of bytesin this struct */
+    
+} null_block_t;
+
+/// entry for rotation angle table
+
+typedef struct rot_table_entry {
+  fl32 rotation_angle; /**< azimuth or elevation angle, depending
+                        * on scan mode */
+  si32 offset; /**< offset of ray from start of file, in bytes */
+  si32 size; /**< ray data length, in bytes */
+} rot_table_entry_t;
+  
+/// rotation angle table - RKTB block
+
+typedef struct rot_ang_table {
+  char id[4];	/**< "RKTB" */
+  si32 nbytes; /**< number of bytesin this struct */
+  fl32 angle2ndx; /**< ratio 360.0 / ndx_que_size */
+  si32 ndx_que_size; /**< lookup table size */
+  si32 first_key_offset; /**< offset of start of lookup table,
+                          * from start of file, in bytes */
+  si32 angle_table_offset; /**< offset of start of angle table,
+                            * from start of file, in bytes */
+  si32 num_rays; /**< number of rays in file */
+} rot_angle_table_t;
+
+/// radar angles for
+/// on-the-fly utility structure, not for file storage
+
+typedef struct radar_angles {
+  double azimuth; /**< azimuth in degrees */
+  double elevation; /**< azimuth in degrees */
+  double x; /**< Cartesian X */
+  double y; /**< Cartesian Y */
+  double z; /**< Cartesian Z */
+  double psi; /**< not sure */
+  double rotation_angle; /**< rotation in degrees */
+  double tilt; /**< tilt in degrees */
+} radar_angles_t;
+
+////////////////////////////////////////////
+/// Radar test pulse and status block - FRAD
+
+typedef struct radar_test_status {
+
+  char id[4]; /**< Field parameter data identifier
+               * (ascii characters FRAD) */
+  si32 nbytes; /**< Length of the field parameter
+                * data block in bytes */
+  si32 data_sys_status;	/**< Status word, bits will be assigned
+                         *  particular status when needed */
+  char radar_name[8];	/**< Name of radar from which this data ray 
+                         * came from */
+  fl32 test_pulse_level; /**< Test pulse power level as measured by the
+                          *  power meter in dbm */
+  fl32 test_pulse_dist; /**< Distance from antenna to middle of
+                         * test pulse in km */
+  fl32 test_pulse_width; /**< Test pulse width in m  */
+  fl32 test_pulse_freq; /**< Test pulse frequency in Ghz */
+  si16 test_pulse_atten; /**< Test pulse attenuation in db */
+  si16 test_pulse_fnum; /**< Frequency number being calibrated
+                         * with the test pulse (what mux on 
+                         * timing module is set to) */
+  fl32 noise_power; /**< Total estimated noise power in dbm */
+  si32 ray_count; /**< Data Ray counter For this
+                   * particular type of data ray */
+  si16 first_rec_gate; /**< First recorded gate number (N) */
+  si16 last_rec_gate; /**< Last recorded gate number (M) */
+
+} radar_test_status_t;
+
+////////////////////////////////////////
+/// Field radar information block - FRIB
+
+typedef struct field_radar {
+
+  char id[4];	/**< Identifier for a field written
+                 * radar information block
+                 * (ascii characters FRIB). */
+  si32 nbytes;	/**< Length of this field written radar
+                 * information block in bytes. */
+  si32 data_sys_id; /**< Data system identification. */
+  fl32 loss_out; /**< Waveguide Losses between Transmitter and
+                  * antenna in db. */
+  fl32 loss_in;	/**< Waveguide Losses between antenna and Low
+                 * noise amplifier in db. */
+  fl32 loss_rjoint; /**< Losses in the rotary joint in db. */
+  fl32 ant_v_dim; /**< Antenna Vertical Dimension in m. */
+  fl32 ant_h_dim; /**< Antenna Horizontal Dimension in m. */
+  fl32 ant_noise_temp; /**< Antenna Noise Temperature in degrees K. */
+  fl32 r_noise_figure; /**< Receiver noise figure in dB*/
+  fl32 xmit_power[5]; /**< Nominal Peak transmitted power in dBm
+                       * by channel */
+  fl32 x_band_gain; /**< X band gain in dB */
+  fl32 receiver_gain[5]; /**< Measured receiver gain in dB (by channel) */
+  fl32 if_gain[5]; /**< Measured IF gain in dB (by channel) */
+  fl32 conversion_gain; /**< A to D conversion gain in dB */
+  fl32 scale_factor[5]; /**< Scale factor to account for differences in
+                         * the individual channels, and the inherent
+                         * gain due to summing over the dwell time */
+  fl32 processor_const; /**< Constant used to scale dBz to
+                         * units the display processors understand */
+  si32 dly_tube_antenna; /**< Time delay from RF being applied to
+                          * tube and energy leaving antenna in ns. */
+  si32 dly_rndtrip_chip_atod; /**< Time delay from a chip generated in
+                               * the yiming module and the RF pulse
+                               * entering the A to D converters.
+                               * Need to take the RF input to the HPA 
+                               * and inject it into the waveguide back
+                               * at the LNA to make this measurement
+                               * in ns */
+  si32 dly_timmod_testpulse; /**< Time delay from timing Module test
+                              * pulse edge and test pulse arriving at
+                              * the A/D converter in ns. */
+  si32 dly_modulator_on; /**< Modulator rise time (Time between
+                          * video on into HPA and modulator full up in
+                          * the high power amplifier) in ns. */
+  si32 dly_modulator_off; /**< Modulator fall time (Time between
+                           * video off into the HPA
+                           * and modulator full off) in ns. */
+  fl32 peak_power_offset; /**< Added to the power meter reading of the
+                           * peak output power this yields actual
+                           * peak output power (in dB) */ 
+  fl32 test_pulse_offset; /**< Added to the power meter reading of the
+                           * test pulse this yields actual injected
+                           * test pulse power (dB) */
+  fl32 E_plane_angle; /**< E-plane angle (tilt) this is the angle in
+                       * the horizontal plane (when antennas are
+                       * vertical) between a line normal to the
+                       * aircraft's longitudinal axis and the radar
+                       * beam in degrees.  Positive is in direction
+                       * of motion (fore) */
+  fl32 H_plane_angle; /**< H plane angle in degrees - this follows
+                       * the sign convention described in the
+                       * DORADE documentation for ROLL angle */
+  fl32 encoder_antenna_up; /**< Encoder reading minus IRU roll angle
+                            * when antenna is up and horizontal */
+  fl32 pitch_antenna_up; /**< Antenna pitch angle (measured with
+                          * transit) minus IRU pitch angle when
+                          * antenna is pointing up */
+  si16 indepf_times_flg; /**< 0 = neither recorded, 1 = independent
+                          * frequency data only, 3 = independent 
+                          * frequency and time series data recorded */
+  si16 indep_freq_gate; /**< gate number where the independent frequency
+                         * data comes from */
+  si16 time_series_gate; /**< gate number where the time series data come
+                          * from */
+  si16 num_base_params; /**< Number of base parameters. */
+  char  file_name[80]; /**< Name of this header file. */
+
+} field_radar_t;
+
+////////////////////////////////////////
+/// Lidar description - LIDR
+
+typedef struct lidar {    
+
+  char id[4]; /**< Identifier  a lidar descriptor
+               * block (four ASCII characters
+               * "LIDR"). */
+  si32 nbytes; /**< Length of a lidar descriptor block. */
+  char lidar_name[8]; /**< Eight character lidar
+                       * name. (Characters SABL) */
+  fl32 lidar_const; /**< Lidar constant. */
+  fl32 pulse_energy; /**< Typical pulse energy of the lidar. */
+  fl32 peak_power; /**< Typical peak power of the lidar. */
+  fl32 pulse_width; /**< Typical pulse width. */
+  fl32 aperture_size; /**< Diameter of the lidar aperture. */
+  fl32 field_of_view; /**< Field of view of the receiver. mra; */
+  fl32 aperture_eff; /**< Aperture efficiency. */
+  fl32 beam_divergence; /**< Beam divergence. */
+  si16 lidar_type; /**< Lidar type: 0) Ground,  1) Airborne
+                    * fore,  2) Airborne aft,  3)
+                    * Airborne tail,  4) Airborne lower
+                    * fuselage,  5) Shipborne. 6)
+                    * Airborne Fixed */
+  si16 scan_mode; /**< Scan mode:  0) Calibration,  1) PPI
+                   * (constant elevation),  2) Co-plane,
+                   * 3) RHI (Constant azimuth),  4)
+                   * Vertical pointing up,  5) Target
+                   * (stationary),  6) Manual,  7) Idle
+                   * (out of control), 8) Surveillance,
+                   * 9) Vertical sweep, 10) Vertical
+                   * scan. 11) Vertical pointing down,
+                   * 12 Horizontal pointing right, 13)
+                   * Horizontal pointing left */
+  fl32 req_rotat_vel; /**< Requested rotational velocity of
+                       * the scan mirror. */
+  fl32 scan_mode_pram0; /**< Scan mode specific parameter #0
+                         * (Has different meanings for
+                         * different scan modes) (Start angle
+                         * for vertical scanning). */
+  fl32 scan_mode_pram1; /**< Scan mode specific parameter #1
+                         * (Has different meaning for
+                         * different scan modes) (Stop angle
+                         * for vertical scanning). */
+  si16 num_parameter_des; /**< Total number of parameter
+                           * descriptor blocks for this lidar. */
+  si16 total_num_des; /**< Total number of all descriptor
+                       * blocks for this lidar. */
+  si16 data_compress; /**< Data compression scheme in use:  0)
+                       * no data compression, 1) using HRD
+                       * compression scheme. */
+  si16 data_reduction; /**< Data reduction algorithm in use:
+                        * 0) None, 1) Between two angles, 2)
+                        * Between concentric circles. 3)
+                        * Above and below certain altitudes. */
+  fl32 data_red_parm0; /**< Data reduction algorithm specific/
+                        * parameter  #0:  0) Unused, 1)
+                        * Smallest positive angle in degrees,
+                        * 2) Inner circle diameter in km,  3)
+                        * Minimum altitude in km. */
+  fl32 data_red_parm1; /**< Data reduction algorithm specific
+                        * parameter  #1 0) unused, 1) Largest
+                        * positive angle in degrees, 2) Outer
+                        * circle diameter in km,  3) Maximum
+                        * altitude in km. */
+  fl32 lidar_longitude; /**< Longitude of airport from which
+                         * aircraft took off  northern
+                         * hemisphere is positive, southern
+                         * negative. */
+  fl32 lidar_latitude; /**< Latitude of airport from which
+                        * aircraft took off eastern
+                        * hemisphere is positive, western
+                        * negative. */
+  fl32 lidar_altitude; /**< Altitude of airport from which
+                        * aircraft took off up is positive,
+                        * above mean sea level. */
+  fl32 eff_unamb_vel; /**< Effective unambiguous velocity. */
+  fl32 eff_unamb_range; /**< Effective unambiguous range. */
+  si32 num_wvlen_trans; /**< Number of different wave lengths
+                         * transmitted. */
+  fl32 prf; /**< Pulse repetition frequency. */
+  fl32 wavelength[10]; /**< Wavelengths of all the different
+                        * transmitted light. */
+} lidar_t;
+
+////////////////////////////////////////
+/// Field lidar information block - FLIB
+
+typedef struct field_lidar {
+
+  char id[4];	/**< Identifier for a field written
+                 * lidar information block
+                 * (ascii characters FLIB). */
+  si32 nbytes;	/**< Length of this field written lidar
+                 * information block in bytes. */
+  si32 data_sys_id; /**< Data system identification number. */
+  fl32 transmit_beam_div[10]; /**< Transmitter beam divergence. Entry
+                               * [0] is for wavelength #1 etc. */
+  fl32 xmit_power[10]; /**< Nominal peak transmitted power (by
+                        * channel). Entry [0] is for
+                        * wavelength #1 etc. */
+  fl32 receiver_fov[10]; /**< Receiver field of view. */
+  si32 receiver_type[10]; /**< 0=direct detection,no
+                           * polarization,1=direct detection
+                           * polarized parallel to transmitted 
+                           * beam,2 = direct detection, 
+                           * polarized perpendicular to 
+                           * transmitted beam,3= photon counting 
+                           * no polarization, 4= photon counting 
+                           * polarized parallel to transmitted 
+                           * beam,5 = photon counting, polarized 
+                           * perpendicular to transmitted beam. */
+  fl32 r_noise_floor[10];    /**< Receiver noise floor. */
+  fl32 receiver_spec_bw[10]; /**< Receiver spectral bandwidth */
+  fl32 receiver_elec_bw[10]; /**< Receiver electronic bandwidth */
+  fl32 calibration[10];      /**< 0 = linear receiver,  non zero log
+                              * reciever */
+  si32 range_delay; /**< Delay between indication of
+                     * transmitted pulse in the data 
+                     * system and the pulse actually 
+                     * leaving the telescope (can be 
+                     * negative). */
+  fl32 peak_power_multi[10]; /**< When the measured peak transmit
+                              * power is multiplied by this number 
+                              * it yields the actual peak transmit 
+                              * power. */
+  fl32 encoder_mirror_up; /**< Encoder reading minus IRU roll 
+                           * angle when scan mirror is pointing 
+                           * directly vertically up in the roll 
+                           * axes. */
+  fl32 pitch_mirror_up; /**< Scan mirror pointing angle in pitch 
+                         * axes, minus IRU pitch angle, when 
+                         * mirror is pointing directly 
+                         * vertically up in the roll axes. */
+  si32 max_digitizer_count; /**< Maximum value (count) out of the 
+                             * digitizer  */
+  fl32 max_digitizer_volt; /**< Voltage that causes the maximum 
+                            * count out of the digitizer. */
+  fl32 digitizer_rate; /**< Sample rate of the digitizer. */
+  si32 total_num_samples; /**< Total number of A/D samples to
+                           * take. */
+  si32 samples_per_cell; /**< Number of samples average in range
+                            per data cell. */
+  si32 cells_per_ray; /**< Number of data cells averaged
+                         per data ray. */
+  fl32 pmt_temp; /**< PMT temperature */
+  fl32 pmt_gain; /**< D/A setting for PMT power supply */
+  fl32 apd_temp; /**< APD temperature */
+  fl32 apd_gain; /**< D/A setting for APD power supply */
+  si32 transect; /**< transect number */
+  char derived_names[10][12]; /**< Derived parameter names */
+  char derived_units[10][8]; /**< Derived parameter units */
+  char temp_names[10][12]; /**< Names of the logged temperatures */
+
+} field_lidar_t;
+
+///////////////////////////////////////////////
+/// entry for params list in insitu_descript_t
+
+typedef struct insitu_parameter {
+  char name[8]; /**< parameter name */
+  char units[8]; /**< parameter units */
+} insitu_parameter_t;
+  
+//////////////////////////////
+/// in-situ parameters - SITU
+
+typedef struct insitu_descript {
+  char id[4]; /**< Identifier = SITU. */
+  si32 nbytes; /**< Block size in bytes. */
+  si32 number_params;	/**< Number of paramters. */
+  insitu_parameter_t params[256]; /**< Is this enough? */
+} insitu_descript_t;
+  
+//////////////////////////////
+/// in-situ parameters - ISIT
+
+typedef struct insitu_data {
+  char id[4];	/**< Identifier = ISIT. */
+  si32 nbytes;	/**< Block size in bytes. */
+  si16 julian_day; /**< day in year */
+  si16 hours; /**< time - hours */
+  si16 minutes; /**< time - minutes */
+  si16 seconds; /**< time - seconds */
+} insitu_data_t;
+
+/////////////////////////////////
+/// independent frequency - INDF
+
+typedef struct indep_freq {
+  char id[4];	/**< Identifier = INDF. */
+  si32 nbytes;	/**< Block size in bytes. */
+} indep_freq_t;
+
+/////////////////////////////////
+/// MiniRims data - MINI
+
+typedef struct minirims_data {
+  char id[4]; /**< Identifier = MINI. */
+  si32 nbytes; /**< Block size in bytes. */
+  si16 command; /**< Current command latch setting. */
+  si16 status; /**< Current status. */
+  fl32 temperature; /**< Degrees C. */
+  fl32 x_axis_gyro[128]; /**< Roll axis gyro position. */
+  fl32 y_axis_gyro[128]; /**< Pitch axis gyro position. */
+  fl32 z_axis_gyro[128]; /**< Yaw axis gyro position. */
+  fl32 xr_axis_gyro[128]; /**< Roll axis redundate gyro position. */
+  fl32 x_axis_vel[128]; /**< Longitudinal axis velocity. */
+  fl32 y_axis_vel[128]; /**< Lateral axis velocity. */
+  fl32 z_axis_vel[128]; /**< Vertical axis velocity. */
+  fl32 x_axis_pos[128]; /**< Roll axis gimbal. */
+} minirims_data_t;
+
+/////////////////////////////////
+/// Nav description - NDDS
+
+typedef struct nav_descript {
+  char id[4]; /**< Identifier = NDDS. */
+  si32 nbytes; /**< Block size in bytes. */
+  si16 ins_flag; /**< 0 = no INS data, 1 = data recorded. */
+  si16 gps_flag; /**< 0 = no GPS data, 1 = data recorded. */
+  si16 minirims_flag; /**< 0 = no MiniRIMS data, 1 = data recorded. */
+  si16 kalman_flag; /**< 0 = no kalman data, 1 = data recorded. */
+} nav_descript_t;
+
+/////////////////////////////////
+/// Time series data header - TIME
+
+typedef struct time_series {
+  char id[4];	/**< Identifier = TIME. */
+  si32 nbytes; /**< Block size in bytes. */
+} time_series_t;
+
+/////////////////////////////////
+/// Waveform descriptor - WAVE
+
+typedef struct waveform {
+
+  char id[4];	/**< Identifier for the waveform
+                 * descriptor (ascii characters "WAVE"). */
+  si32 nbytes; /**< Length of the waveform descriptor
+                * in bytes. */
+  char ps_file_name[16]; /**< Pulsing scheme file name.*/
+  si16 num_chips[6]; /**< Number of chips in a repeat.
+                      * sequence for each frequency. */
+  char blank_chip[256]; /**< Blanking RAM sequence. */
+  fl32 repeat_seq; /**< Number of milliseconds in a repeat
+                    * sequence in ms. */
+  si16 repeat_seq_dwel;	/**< Number of repeat sequences in a
+                         * dwell time. */
+  si16 total_pcp; /**< Total Number of PCP in a repeat sequence. */
+  si16 chip_offset[6]; /**< Number of 60 Mhz clock cycles to
+                        * wait before starting a particular
+                        * chip in 60 MHz counts. */
+  si16 chip_width[6]; /**< Number of 60 Mhz clock cycles in
+                       * each chip in 60 MHz counts. */
+  fl32 ur_pcp; /**< Number of PCP that set the
+                * unambiguous range, after real time
+                * unfolding. */
+  fl32 uv_pcp; /**< Number of PCP that set the
+                * unambiguous velocity, after real
+                * time unfolding. */
+  si16 num_gates[6]; /**< Total number of gates sampled. */
+  si16 gate_dist1[2]; /**< Distance from radar to data cell #1 
+                       * in 60 MHz counts in 0, subsequent
+                       * spacing in 1 for freq 1. */
+  si16 gate_dist2[2]; /**< Ditto for freq 2. */
+  si16 gate_dist3[2]; /**< Ditto for freq 3. */
+  si16 gate_dist4[2]; /**< Ditto for freq 4. */
+  si16 gate_dist5[2]; /**< Ditto for freq 5. */
+
+} waveform_t;
+

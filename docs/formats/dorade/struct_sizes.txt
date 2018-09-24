@@ -1,0 +1,63 @@
+ sizeof(DoradeData::comment_t): 508
+ sizeof(DoradeData::super_SWIB_t): 196
+ sizeof(DoradeData::volume_t): 72
+ sizeof(DoradeData::radar_t): 300
+ sizeof(DoradeData::correction_t): 72
+ sizeof(DoradeData::parameter_t): 216
+ sizeof(DoradeData::cell_vector_t): 6012
+ sizeof(DoradeData::cell_spacing_fp_t): 64
+ sizeof(DoradeData::sweepinfo_t): 40
+ sizeof(DoradeData::platform_t): 80
+ sizeof(DoradeData::ray_t): 44
+ sizeof(DoradeData::paramdata_t): 16
+ sizeof(DoradeData::qparamdata_t): 56
+ sizeof(DoradeData::extra_stuff_t): 24
+ sizeof(DoradeData::rot_angle_table_t): 28
+ sizeof(DoradeData::rot_table_entry_t): 12
+ sizeof(DoradeData::radar_parameter_t): 52
+ sizeof(DoradeData::field_radar_t): 264
+ sizeof(DoradeData::lidar_t): 148
+ sizeof(DoradeData::field_lidar_t): 748
+ sizeof(DoradeData::insitu_descript_t): 4108
+ sizeof(DoradeData::insitu_data_t): 16
+ sizeof(DoradeData::indep_freq_t): 8
+ sizeof(DoradeData::minirims_data_t): 4112
+ sizeof(DoradeData::nav_descript_t): 16
+ sizeof(DoradeData::time_series_t): 8
+ sizeof(DoradeData::waveform_t): 364
+
+native dorade:
+---------------
+
+
+sizeof(struct cell_spacing_d): 36
+sizeof(struct cell_spacing_fp_d): 64
+sizeof(struct cell_d): 32780
+sizeof(struct comment_d): 508
+sizeof(struct correction_d): 72
+sizeof(struct rot_ang_table): 28
+sizeof(struct rot_table_entry): 12
+sizeof(struct platform_i): 80
+sizeof(struct field_parameter_data): 52
+sizeof(struct parameter_d): 216
+sizeof(struct paramdata_d): 16
+sizeof(struct radar_angles): 32
+sizeof(struct radar_d): 300
+sizeof(struct field_radar_i): 264
+sizeof(struct waveform_d): 364
+sizeof(struct ray_i): 44
+sizeof(struct sweepinfo_d): 40
+sizeof(struct super_SWIB): 196
+sizeof(struct volume_d): 72
+sizeof(struct null_d): 8
+sizeof(struct lidar_d): 148
+sizeof(struct lidar_parameter_data): 164
+sizeof(struct qparamdata_d): 56
+sizeof(struct cfac_wrap): 364
+sizeof(struct dd_extra_stuff): 24
+sizeof(struct indep_freq): 8
+sizeof(struct insitu_parameter): 16
+sizeof(struct insitu_descript): 4108
+sizeof(struct minirims_data): 4112
+sizeof(struct nav_descript): 16
+sizeof(struct time_series): 8
