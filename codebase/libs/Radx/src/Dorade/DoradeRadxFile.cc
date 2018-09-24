@@ -2316,20 +2316,29 @@ int DoradeRadxFile::_loadReadVolume()
       _readVol->setPlatformType(Radx::PLATFORM_TYPE_FIXED);
   }
 
-  _readVol->addFrequencyHz(_ddRadar.freq1 * 1.0e9);
-
   int nFreq = _ddRadar.num_freq_trans;
+  if (_ddRadar.freq1 > 0) {
+    _readVol->addFrequencyHz(_ddRadar.freq1 * 1.0e9);
+  }
   if (nFreq > 1) {
-    _readVol->addFrequencyHz(_ddRadar.freq2 * 1.0e9);
+    if (_ddRadar.freq2 > 0) {
+      _readVol->addFrequencyHz(_ddRadar.freq2 * 1.0e9);
+    }
   }
   if (nFreq > 2) {
-    _readVol->addFrequencyHz(_ddRadar.freq3 * 1.0e9);
+    if (_ddRadar.freq2 > 0) {
+      _readVol->addFrequencyHz(_ddRadar.freq3 * 1.0e9);
+    }
   }
   if (nFreq > 3) {
-    _readVol->addFrequencyHz(_ddRadar.freq4 * 1.0e9);
+    if (_ddRadar.freq2 > 0) {
+      _readVol->addFrequencyHz(_ddRadar.freq4 * 1.0e9);
+    }
   }
   if (nFreq > 4) {
-    _readVol->addFrequencyHz(_ddRadar.freq5 * 1.0e9);
+    if (_ddRadar.freq2 > 0) {
+      _readVol->addFrequencyHz(_ddRadar.freq5 * 1.0e9);
+    }
   }
 
   if (_ddRadar.antenna_gain > 0) {
@@ -3805,18 +3814,28 @@ int DoradeRadxFile::_writeRadar()
   int nFreq = _writeVol->getFrequencyHz().size();
   _ddRadar.num_freq_trans = nFreq;
   if (nFreq > 0) {
-    _ddRadar.freq1 = _writeVol->getFrequencyHz()[0] / 1.0e9;
+    if (_writeVol->getFrequencyHz()[0] > 0) {
+      _ddRadar.freq1 = _writeVol->getFrequencyHz()[0] / 1.0e9;
+    }
     if (nFreq > 1) {
-      _ddRadar.freq2 = _writeVol->getFrequencyHz()[1] / 1.0e9;
+      if (_writeVol->getFrequencyHz()[1] > 0) {
+        _ddRadar.freq2 = _writeVol->getFrequencyHz()[1] / 1.0e9;
+      }
     }
     if (nFreq > 2) {
-      _ddRadar.freq3 = _writeVol->getFrequencyHz()[2] / 1.0e9;
+      if (_writeVol->getFrequencyHz()[2] > 0) {
+        _ddRadar.freq3 = _writeVol->getFrequencyHz()[2] / 1.0e9;
+      }
     }
     if (nFreq > 3) {
-      _ddRadar.freq4 = _writeVol->getFrequencyHz()[3] / 1.0e9;
+      if (_writeVol->getFrequencyHz()[3] > 0) {
+        _ddRadar.freq4 = _writeVol->getFrequencyHz()[3] / 1.0e9;
+      }
     }
     if (nFreq > 4) {
-      _ddRadar.freq5 = _writeVol->getFrequencyHz()[4] / 1.0e9;
+      if (_writeVol->getFrequencyHz()[4] > 0) {
+        _ddRadar.freq5 = _writeVol->getFrequencyHz()[4] / 1.0e9;
+      }
     }
   }
 
