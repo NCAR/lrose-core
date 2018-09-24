@@ -57,7 +57,6 @@ HcrVelCorrect::HcrVelCorrect(int argc, char **argv)
 {
 
   OK = TRUE;
-  _firstInputFile = true;
 
   // set programe name
 
@@ -138,6 +137,26 @@ HcrVelCorrect::~HcrVelCorrect()
 
 {
 
+  // write out rays which have not yet been written
+  // this only applies to the wave filter option
+  
+  if (_params.filter_type == Params::WAVE_FILTER) {
+    while (_filtQueue.size() > 1) {
+      FiltNode &oldest = _filtQueue[0];
+      // not yet written out, do so now
+      _addNodeRayToFiltVol(oldest);
+      if (_params.write_surface_vel_results_to_spdb) {
+        _writeFirFiltResultsToSpdb(oldest.ray);
+      }
+      RadxRay::deleteIfUnused(oldest.ray);
+      _filtQueue.pop_front();
+    }
+  }
+
+  // write out any pending data
+
+  _writeFiltVol();
+
   // unregister process
 
   PMU_auto_unregister();
@@ -159,6 +178,7 @@ int HcrVelCorrect::Run()
     default:
       return _runFilelist();
   } // switch
+
 }
 
 //////////////////////////////////////////////////
@@ -170,16 +190,12 @@ int HcrVelCorrect::_runFilelist()
   // loop through the input file list
 
   int iret = 0;
-
   for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
-
     string inputPath = _args.inputFileList[ii];
     if (_processFile(inputPath)) {
       iret = -1;
     }
-
   }
-
   return iret;
 
 }
@@ -297,15 +313,21 @@ int HcrVelCorrect::_processFile(const string &readPath)
       cerr << "  ==>> read in file: " << _readPaths[ii] << endl;
     }
   }
-  if (_firstInputFile) {
-    RadxTime endTime(_inVol.getEndTimeSecs(), _inVol.getEndNanoSecs() / 1.0e9);
-    _inputFileEndTimes.push_back(endTime);
-    _filtVol.copyMeta(_inVol);
-    _firstInputFile = false;
-  }
+
+  // copy the meta data to the filtered vol
+
+  _filtVol.copyMeta(_inVol);
+  
+  // save the end time, so we know when to write out file
+  // associated with this data
+  
+  RadxTime fileEndTime(_inVol.getEndTimeSecs(), 
+                       _inVol.getEndNanoSecs() / 1.0e9);
+  _inputFileEndTime.push_back(fileEndTime);
   
   // process each ray in the volume
-
+  
+  int iret = 0;
   vector<RadxRay *> rays = _inVol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
 
@@ -316,46 +338,30 @@ int HcrVelCorrect::_processFile(const string &readPath)
     
     RadxRay *rayCopy = new RadxRay(*rays[iray]);
     rayCopy->addClient();
-
+    
     // process the ray
     // computing vel and filtering
+
+    if (_params.filter_type == Params::WAVE_FILTER) {
+      if (_processRayWaveFilt(rayCopy)) {
+        iret = -1;
+      }
+    } else {
+      if (_processRayFirFilt(rayCopy)) {
+        iret = -1;
+      }
+    } // if (_params.filter_type == Params::WAVE_FILTER) 
     
-    if (_processRay(rayCopy) == 0) {
-
-      RadxTime filtRayTime = _filtRay->getRadxTime();
-      
-      // write vol when done
-      
-      if (filtRayTime > _inputFileEndTimes[0]) {
-        _writeFiltVol();
-        _inputFileEndTimes.pop_front();
-        RadxTime endTime(_inVol.getEndTimeSecs(),
-                         _inVol.getEndNanoSecs() / 1.0e9);
-        _inputFileEndTimes.push_back(endTime);
-      }
-      
-      // add to output vol
-      
-      _filtVol.addRay(_filtRay);
-      
-      // write results to SPDB in XML if requested
-      
-      if (_params.write_surface_vel_results_to_spdb) {
-        _writeResultsToSpdb(_filtRay);
-      }
-
-    } // if (_processRay(rayCopy) == 0)
-
   } // iray
   
-  return 0;
+  return iret;
 
 }
 
 //////////////////////////////////////////////////
-// Process a ray
+// Process a ray, filtering with FIR filter
 
-int HcrVelCorrect::_processRay(RadxRay *ray)
+int HcrVelCorrect::_processRayFirFilt(RadxRay *ray)
   
 {
 
@@ -376,50 +382,111 @@ int HcrVelCorrect::_processRay(RadxRay *ray)
     _velIsValid = false;
   }
 
-  // apply filter to get filtered velocity
+  // apply FIR filter to get filtered velocity
+
+  _velFilt = 0.0;
+  if (_firFilt.filterRay(ray, velSurf, dbzSurf, rangeToSurf)) {
+    return -1;
+  }
+  
+  _filtRay = _firFilt.getFiltRay();
+  if (_velIsValid) {
+    _velIsValid = _firFilt.velocityIsValid();
+  }
+  if (_velIsValid) {
+    _velFilt = _firFilt.getVelFilt();
+    _correctVelForRay(_filtRay, _velFilt);
+  } else {
+    _copyVelForRay(_filtRay);
+  }
+  
+  RadxTime filtRayTime = _filtRay->getRadxTime();
+  
+  // write vol when done
+  
+  if ((_inputFileEndTime.size() > 0) &&
+      (filtRayTime > _inputFileEndTime[0])) {
+    _writeFiltVol();
+    _inputFileEndTime.pop_front();
+  }
+  
+  // add to output vol
+  
+  _filtVol.addRay(_filtRay);
+  
+  // write results to SPDB in XML if requested
+  
+  if (_params.write_surface_vel_results_to_spdb) {
+    _writeFirFiltResultsToSpdb(_filtRay);
+  }
+
+  return 0;
+
+}
+  
+//////////////////////////////////////////////////
+// Process a ray, filtering with wave filter
+
+int HcrVelCorrect::_processRayWaveFilt(RadxRay *ray)
+  
+{
+
+  // init
+  
+  _velIsValid = true;
+
+  // get surface vel
+  
+  double velSurf, dbzSurf, rangeToSurf;
+  if (_surfVel.computeSurfaceVel(ray,
+                                 velSurf,
+                                 dbzSurf,
+                                 rangeToSurf)) {
+    velSurf = 0.0;
+    rangeToSurf = 0.0;
+    dbzSurf = -9999.0;
+    _velIsValid = false;
+  }
+
+  // apply wave filter to get filtered velocity
 
   _velFilt = 0.0;
 
-  if (_params.filter_type == Params::WAVE_FILTER) {
-
-    // wave filter
-
-    if (_applyWaveFilt(ray, velSurf, dbzSurf, rangeToSurf)) {
-      return -1;
-    }
-
-    _filtRay = _filtNodeMid->ray;
-    if (_velIsValid) {
-      _velFilt = _filtNodeMid->velWaveFiltMedian;
-      _correctVelForRay(_filtRay, _velFilt);
-      _filtNodeMid->velIsValid = true;
-      _filtNodeMid->corrected = true;
-    } else {
-      _copyVelForRay(_filtRay);
-      _filtNodeMid->velIsValid = false;
-      _filtNodeMid->corrected = false;
-    }
-    
+  if (_applyWaveFilt(ray, velSurf, dbzSurf, rangeToSurf)) {
+    return -1;
+  }
+  
+  _filtRay = _waveNodeMid->ray;
+  if (_velIsValid) {
+    _velFilt = _waveNodeMid->velWaveFiltMedian;
+    _correctVelForRay(_filtRay, _velFilt);
+    _waveNodeMid->velIsValid = true;
+    _waveNodeMid->corrected = true;
   } else {
-
-    // FIR filter
-    
-    if (_firFilt.filterRay(ray, velSurf, dbzSurf, rangeToSurf)) {
-      return -1;
-    }
-
-    _filtRay = _firFilt.getFiltRay();
-    if (_velIsValid) {
-      _velIsValid = _firFilt.velocityIsValid();
-    }
-    if (_velIsValid) {
-      _velFilt = _firFilt.getVelFilt();
-      _correctVelForRay(_filtRay, _velFilt);
-    } else {
-      _copyVelForRay(_filtRay);
-    }
-
-  } // if (_params.filter_type == Params::WAVE_FILTER)
+    _copyVelForRay(_filtRay);
+    _waveNodeMid->velIsValid = false;
+    _waveNodeMid->corrected = false;
+  }
+  
+  RadxTime filtRayTime = _filtRay->getRadxTime();
+  
+  // write vol when done
+  
+  if ((_inputFileEndTime.size() > 0) &&
+      (filtRayTime > _inputFileEndTime[0])) {
+    _writeFiltVol();
+    _inputFileEndTime.pop_front();
+  }
+  
+  // add to output vol
+  
+  _filtVol.addRay(_filtRay);
+  
+  // write results to SPDB in XML if requested
+  
+  if (_params.write_surface_vel_results_to_spdb) {
+    _writeWaveFiltResultsToSpdb(_filtRay);
+  }
   
   return 0;
 
@@ -440,14 +507,21 @@ void HcrVelCorrect::_initWaveFilt()
   _filtRay = NULL;
   _velFilt = 0.0;
 
-  _filtMidIndex = 0;
-  _filtNodeMid = NULL;
+  _waveIndexStart = 0;
+  _waveIndexMid = 0;
+  _waveIndexEnd = 0;
+  _waveNodeMid = NULL;
+
+  _noiseIndexStart = 0;
+  _noiseIndexMid = 0;
+  _noiseIndexEnd = 0;
+  _noiseNodeMid = NULL;
 
   // filter length
   
   _noiseFiltSecs = _params.noise_filter_length_secs;
   _waveFiltSecs = _params.wave_filter_length_secs;
-  _filtSecs = max(_noiseFiltSecs, _waveFiltSecs);
+  _totalFiltSecs = _noiseFiltSecs + _waveFiltSecs;
 
   _poly.setOrder(_params.wave_polynomial_order);
 
@@ -464,27 +538,33 @@ int HcrVelCorrect::_applyWaveFilt(RadxRay *ray,
 
 {
 
-  // add node to queue
+  // add new node to queue
   // oldest nodes are at the front, youngest nodes are at the back
   // so time increases from front to back
+  // initialize all velocities with surface vel
 
   FiltNode node;
-  node.velSurf = velSurf;
   node.dbzSurf = dbzSurf;
   node.rangeToSurf = rangeToSurf;
   node.ray = ray;
+  node.velSurf = velSurf;
+  node.velNoiseFilt = velSurf;
+  node.velNoiseFiltMean = velSurf;
+  node.velNoiseFiltMedian = velSurf;
+  node.velWaveFiltMean = velSurf;
+  node.velWaveFiltMedian = velSurf;
+  node.velWaveFiltPoly = velSurf;
   _filtQueue.push_back(node);
 
-  // update the node stats
+  // Set the time limits for the filters
   // this will also write out any rays that are discarded
   // without having been written
 
-  if (_updateNodeStats()) {
+  if (_setFilterLimits()) {
     return -1;
   }
 
-  if ((int) _filtQueue.size() < _params.wave_filter_min_n_rays ||
-      (int) _nNoiseNodes < _params.noise_filter_min_n_rays) {
+  if ((int) _filtQueue.size() < _params.wave_filter_min_n_rays) {
     _velIsValid = false;
     return 0;
   }
@@ -502,29 +582,37 @@ int HcrVelCorrect::_applyWaveFilt(RadxRay *ray,
 }
 
 //////////////////////////////////////////////////
-// update the node stats
+// Set the time limits for the filters
 // Side effects:
 //   compute times
 //   write out rays to be discarded that have not been written
 //   determine if we have enough data for valid stats
 
-int HcrVelCorrect::_updateNodeStats()
+int HcrVelCorrect::_setFilterLimits()
 {
 
-  // compute time span for filter
-  
-  _filtTimeEnd = _filtQueue[_filtQueue.size()-1].getTime();
-  _filtPeriodStart = _filtTimeEnd - _filtSecs;
-  
-  // discard old nodes, writing out rays as appropriate
+  if (_filtQueue.size() < 1) {
+    return -1;
+  }
 
+  // set up noise filter time limits
+  
+  _noiseTimeEnd = _filtQueue[_filtQueue.size()-1].getTime();
+  _noiseTimeStart = _noiseTimeEnd - _noiseFiltSecs;
+  
+  // compute start time for wave filter
+  
+  _waveTimeEnd = _noiseTimeStart;
+  _wavePeriodStart = _waveTimeEnd - _waveFiltSecs;
+  
+  // discard nodes older than _wavePeriodStart,
+  // writing out rays from discarded nodes
+  
   while (_filtQueue.size() > 1) {
     FiltNode &oldest = _filtQueue[0];
-    if (oldest.getTime() < _filtPeriodStart) {
-      if (!oldest.written) {
-        // not yet written out, do so now
-        _addRayToFiltVol(oldest);
-      }
+    if (oldest.getTime() < _wavePeriodStart) {
+      // not yet written out, do so now
+      _addNodeRayToFiltVol(oldest);
       RadxRay::deleteIfUnused(oldest.ray);
       _filtQueue.pop_front();
     } else {
@@ -532,41 +620,12 @@ int HcrVelCorrect::_updateNodeStats()
     }
   } // while
 
-  // compute time limits
+  // set up noise filter index limits
   
+  _noiseIndexStart = _filtQueue.size() - 1;
+  _noiseIndexEnd = _filtQueue.size() - 1;
   _nNoiseNodes = 0;
-  if ((int) _filtQueue.size() < _params.wave_filter_min_n_rays) {
-    return -1;
-  }
-
-  FiltNode &oldest = _filtQueue[_filtQueue.size() - 1];
-  _filtTimeEnd = oldest.getTime();
-
-  // find the mid node closest to the mid time
-
-  double periodSecs = _filtTimeEnd - _filtPeriodStart;
-  _filtTimeMean = _filtTimeEnd - periodSecs / 2.0;
-  double minTimeDiff = 1.0e99;
-  for (size_t ii = 0; ii < _filtQueue.size(); ii++) {
-    RadxTime nodeTime = _filtQueue[ii].getTime();
-    double timeDiff = fabs(_filtQueue[ii].getTime() - _filtTimeMean);
-    if (timeDiff < minTimeDiff) {
-      _filtMidIndex = ii;
-      _filtNodeMid = &_filtQueue[_filtMidIndex];
-      minTimeDiff = timeDiff;
-    }
-  }
-  _filtTimeMid = _filtNodeMid->getTime();
-  
-  // determine how many samples we have for smoothing the noise
-  
-  _noiseTimeStart = _filtTimeMid - _noiseFiltSecs / 2.0;
-  _noiseTimeEnd = _filtTimeMid + _noiseFiltSecs / 2.0;
-
-  _noiseIndexStart = 0;
-  _noiseIndexEnd = 0;
   bool noiseFound = false;
-  
   for (size_t ii = 0; ii < _filtQueue.size(); ii++) {
     RadxTime nodeTime = _filtQueue[ii].getTime();
     if (nodeTime >= _noiseTimeStart && nodeTime <= _noiseTimeEnd) {
@@ -578,7 +637,37 @@ int HcrVelCorrect::_updateNodeStats()
       _noiseIndexEnd = ii;
     }
   }
+  _noiseIndexMid = (_noiseIndexStart + _noiseIndexEnd) / 2;
+  _noiseNodeMid = &_filtQueue[_noiseIndexMid];
+  
+  if (_noiseIndexStart < 2) {
+    return -1;
+  }
 
+  // compute wave filter index limits
+
+  FiltNode &oldest = _filtQueue[0];
+  _waveTimeStart = oldest.getTime();
+  _waveIndexStart = 0;
+  _waveIndexEnd = _noiseIndexStart - 1;
+  _waveTimeEnd = _filtQueue[_waveIndexEnd].getTime();
+  
+  // find the mid node closest to the mean time
+
+  double waveSecs = _waveTimeEnd - _waveTimeStart;
+  _waveTimeMean = _waveTimeEnd - waveSecs / 2.0;
+  double minTimeDiff = 1.0e99;
+  for (size_t ii = 0; ii < _filtQueue.size(); ii++) {
+    RadxTime nodeTime = _filtQueue[ii].getTime();
+    double timeDiff = fabs(_filtQueue[ii].getTime() - _waveTimeMean);
+    if (timeDiff < minTimeDiff) {
+      _waveIndexMid = ii;
+      _waveNodeMid = &_filtQueue[_waveIndexMid];
+      minTimeDiff = timeDiff;
+    }
+  }
+  _waveTimeMid = _waveNodeMid->getTime();
+  
   return 0;
   
 }
@@ -595,7 +684,7 @@ void HcrVelCorrect::_runNoiseFilter()
   for (size_t ii = _noiseIndexStart; ii <= _noiseIndexEnd; ii++) {
     velSurf.push_back(_filtQueue[ii].velSurf);
   }
-
+  
   // compute the mean
 
   double sum = 0.0;
@@ -611,14 +700,20 @@ void HcrVelCorrect::_runNoiseFilter()
   }
 
   double mean = sum / count;
-  _filtNodeMid->velNoiseFiltMean = mean;
 
   // compute the median
-
+  
   sort(velSurf.begin(), velSurf.end());
   int indexHalf = velSurf.size() / 2;
   double median = velSurf[indexHalf];
-  _filtNodeMid->velNoiseFiltMedian = median;
+
+  // set the filtered value on all younger nodes
+
+  for (size_t ii = _noiseIndexMid; ii <= _noiseIndexEnd; ii++) {
+    _filtQueue[ii].velNoiseFiltMean = mean;
+    _filtQueue[ii].velNoiseFiltMedian = median;
+    _filtQueue[ii].velNoiseFilt = median;
+  }
 
 }
 
@@ -630,23 +725,21 @@ void HcrVelCorrect::_runWaveFilter()
 
   // get vector of surface velocities
 
-  vector<double> velSurf;
+  vector<double> velNoiseFilt;
   vector<double> dtime;
   RadxTime startTime = _filtQueue[0].getTime();
-  for (size_t ii = 0; ii < _filtQueue.size(); ii++) {
-    velSurf.push_back(_filtQueue[ii].velSurf);
+  for (size_t ii = _waveIndexStart; ii <= _waveIndexEnd; ii++) {
+    velNoiseFilt.push_back(_filtQueue[ii].velNoiseFilt);
     double deltaTime = _filtQueue[ii].getTime() - startTime;
     dtime.push_back(deltaTime);
-    string nodeTimeStr = _filtQueue[ii].getTime().asString(3);
-    string startTimeStr = startTime.asString(3);
   }
   
   // compute the mean
-
+  
   double sum = 0.0;
   double count = 0.0;
-  for (size_t ii = 0; ii < velSurf.size(); ii++) {
-    sum += velSurf[ii];
+  for (size_t ii = 0; ii < velNoiseFilt.size(); ii++) {
+    sum += velNoiseFilt[ii];
     count++;
   }
 
@@ -656,21 +749,29 @@ void HcrVelCorrect::_runWaveFilter()
   }
 
   double mean = sum / count;
-  _filtNodeMid->velWaveFiltMean = mean;
+  _waveNodeMid->velWaveFiltMean = mean;
+  for (size_t ii = _waveIndexMid; ii <= _waveIndexEnd; ii++) {
+    _filtQueue[ii].velWaveFiltMean = mean;
+  }
 
   // perform the polynomial fit
 
   _poly.clear();
-  _poly.setValues(dtime, velSurf);
+  _poly.setValues(dtime, velNoiseFilt);
   if (_poly.performFit() == 0) {
-    _filtNodeMid->velWaveFiltPoly = _poly.getYEst(_filtMidIndex);
+    for (size_t ii = _waveIndexMid; ii <= _waveIndexEnd; ii++) {
+      _filtQueue[ii].velWaveFiltPoly = _poly.getYEst(ii);
+    }
   }
 
   // compute the median
 
-  sort(velSurf.begin(), velSurf.end());
-  int indexHalf = velSurf.size() / 2;
-  _filtNodeMid->velWaveFiltMedian = velSurf[indexHalf];
+  sort(velNoiseFilt.begin(), velNoiseFilt.end());
+  int indexHalf = velNoiseFilt.size() / 2;
+  double median = velNoiseFilt[indexHalf];
+  for (size_t ii = _waveIndexMid; ii <= _waveIndexEnd; ii++) {
+    _filtQueue[ii].velWaveFiltMedian = median;
+  }
 
 }
 
@@ -678,29 +779,28 @@ void HcrVelCorrect::_runWaveFilter()
 // add a ray to the filtered volume
 // write out the vol as needed
 
-void HcrVelCorrect::_addRayToFiltVol(FiltNode &node)
+void HcrVelCorrect::_addNodeRayToFiltVol(FiltNode &node)
 {
-
+  
   // write out if latest time is past input file time
   
-  if (node.ray->getRadxTime() > _inputFileEndTimes[0]) {
+  RadxTime rayTime = node.ray->getRadxTime();
+  if ((_inputFileEndTime.size() > 0) &&
+      (rayTime > _inputFileEndTime[0])) {
     _writeFiltVol();
-    _inputFileEndTimes.pop_front();
-    RadxTime endTime(_inVol.getEndTimeSecs(), _inVol.getEndNanoSecs() / 1.0e9);
-    _inputFileEndTimes.push_back(endTime);
+    _inputFileEndTime.pop_front();
   }
 
-  // if not yet corrected, copy velocity
-
+  // if not yet corrected, copy velocity in ray fields
+  
   if (!node.corrected) {
     _copyVelForRay(node.ray);
   }
-      
+  
   // add to output vol
   
   _filtVol.addRay(node.ray);
-  node.written = true;
-
+  
 }
 
 //////////////////////////////////////////////////
@@ -996,73 +1096,118 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
 
 
 //////////////////////////////////////////////////
-// write results to SPDB in XML
+// write wave filter results to SPDB in XML
 
-void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *filtRay)
+void HcrVelCorrect::_writeWaveFiltResultsToSpdb(const RadxRay *filtRay)
   
 {
 
   // check if we have a good velocity
   
-  if (_params.filter_type == Params::WAVE_FILTER) {
-    if (_filtNodeMid == NULL || !_filtNodeMid->velIsValid) {
-      return;
-    }
-  } else {
-    if (!_firFilt.velocityIsValid()) {
-      return;
-    }
+  if (_waveNodeMid == NULL || !_waveNodeMid->velIsValid) {
+    return;
   }
-
+  
   // form XML string
 
   string xml;
   xml += RadxXml::writeStartTag("HcrVelCorr", 0);
 
-  if (_params.filter_type == Params::WAVE_FILTER) {
-
-    xml += RadxXml::writeDouble("VelSurf", 1,
-                                _filtNodeMid->velSurf);
-    xml += RadxXml::writeDouble("DbzSurf", 1,
-                                _filtNodeMid->dbzSurf);
-    xml += RadxXml::writeDouble("RangeToSurf",
-                                1, _filtNodeMid->rangeToSurf);
-
-    xml += RadxXml::writeDouble("VelNoiseFiltMean", 1,
-                                _filtNodeMid->velNoiseFiltMean);
-    xml += RadxXml::writeDouble("VelNoiseFiltMedian", 1,
-                                _filtNodeMid->velNoiseFiltMedian);
-    xml += RadxXml::writeDouble("VelWaveFiltMean", 1,
-                                _filtNodeMid->velWaveFiltMean);
-    xml += RadxXml::writeDouble("VelWaveFiltMedian", 1,
-                                _filtNodeMid->velWaveFiltMedian);
-    xml += RadxXml::writeDouble("VelWaveFiltPoly", 1,
-                                _filtNodeMid->velWaveFiltPoly);
-
-    double velCorr = _filtNodeMid->velSurf - _velFilt;
-    xml += RadxXml::writeDouble("VelCorr", 1, velCorr);
-
-  } else {
-
-    xml += RadxXml::writeDouble("VelSurf", 1,
-                                _firFilt.getVelMeasured());
-    xml += RadxXml::writeDouble("DbzSurf", 1,
-                                _firFilt.getDbzSurf());
-    xml += RadxXml::writeDouble("RangeToSurf", 1,
-                                _firFilt.getRangeToSurface());
-    xml += RadxXml::writeDouble("VelStage1", 1,
-                                _firFilt.getVelStage1());
-    xml += RadxXml::writeDouble("VelSpike", 1,
-                                _firFilt.getVelSpike());
-    xml += RadxXml::writeDouble("VelCond", 1,
-                                _firFilt.getVelCond());
-    xml += RadxXml::writeDouble("VelFilt", 1,
-                                _firFilt.getVelFilt());
-    double velCorr = _firFilt.getVelMeasured() - _velFilt;
-    xml += RadxXml::writeDouble("VelCorr", 1, velCorr);
-
+  xml += RadxXml::writeDouble("VelSurf", 1,
+                              _waveNodeMid->velSurf);
+  xml += RadxXml::writeDouble("DbzSurf", 1,
+                              _waveNodeMid->dbzSurf);
+  xml += RadxXml::writeDouble("RangeToSurf",
+                              1, _waveNodeMid->rangeToSurf);
+  
+  xml += RadxXml::writeDouble("VelNoiseFilt", 1,
+                              _waveNodeMid->velNoiseFilt);
+  xml += RadxXml::writeDouble("VelNoiseFiltMean", 1,
+                              _waveNodeMid->velNoiseFiltMean);
+  xml += RadxXml::writeDouble("VelNoiseFiltMedian", 1,
+                              _waveNodeMid->velNoiseFiltMedian);
+  xml += RadxXml::writeDouble("VelWaveFiltMean", 1,
+                              _waveNodeMid->velWaveFiltMean);
+  xml += RadxXml::writeDouble("VelWaveFiltMedian", 1,
+                              _waveNodeMid->velWaveFiltMedian);
+  xml += RadxXml::writeDouble("VelWaveFiltPoly", 1,
+                              _waveNodeMid->velWaveFiltPoly);
+  
+  double velCorr = _waveNodeMid->velSurf - _velFilt;
+  xml += RadxXml::writeDouble("VelCorr", 1, velCorr);
+  
+  const RadxGeoref *georef = filtRay->getGeoreference();
+  if (georef != NULL) {
+    xml += RadxXml::writeDouble("Altitude", 1, georef->getAltitudeKmMsl());
+    xml += RadxXml::writeDouble("VertVel", 1, georef->getVertVelocity());
+    xml += RadxXml::writeDouble("Roll", 1, georef->getRoll());
+    xml += RadxXml::writeDouble("Pitch", 1, georef->getPitch());
+    xml += RadxXml::writeDouble("Rotation", 1, georef->getRotation());
+    xml += RadxXml::writeDouble("Tilt", 1, georef->getTilt());
+    xml += RadxXml::writeDouble("Elevation", 1, filtRay->getElevationDeg());
+    xml += RadxXml::writeDouble("DriveAngle1", 1, georef->getDriveAngle1());
+    xml += RadxXml::writeDouble("DriveAngle2", 1, georef->getDriveAngle2());
   }
+  
+  xml += RadxXml::writeEndTag("HcrVelCorr", 0);
+  
+  // write to SPDB
 
+  DsSpdb spdb;
+  time_t validTime = filtRay->getTimeSecs();
+  spdb.addPutChunk(0, validTime, validTime, xml.size() + 1, xml.c_str());
+  if (spdb.put(_params.surface_vel_results_spdb_output_url,
+               SPDB_XML_ID, SPDB_XML_LABEL)) {
+    cerr << "ERROR - HcrVelCorrect::_writeWaveFiltResultsToSpdb" << endl;
+    cerr << spdb.getErrStr() << endl;
+    return;
+  }
+  
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "Wrote HCR wave filt vel correction results to spdb, url: " 
+         << _params.surface_vel_results_spdb_output_url << endl;
+    cerr << "=====================================" << endl;
+    cerr << xml;
+    cerr << "=====================================" << endl;
+  }
+ 
+}
+
+//////////////////////////////////////////////////
+// write FIR filt results to SPDB in XML
+
+void HcrVelCorrect::_writeFirFiltResultsToSpdb(const RadxRay *filtRay)
+  
+{
+
+  // check if we have a good velocity
+  
+  if (!_firFilt.velocityIsValid()) {
+    return;
+  }
+  
+  // form XML string
+
+  string xml;
+  xml += RadxXml::writeStartTag("HcrVelCorr", 0);
+
+  xml += RadxXml::writeDouble("VelSurf", 1,
+                              _firFilt.getVelMeasured());
+  xml += RadxXml::writeDouble("DbzSurf", 1,
+                              _firFilt.getDbzSurf());
+  xml += RadxXml::writeDouble("RangeToSurf", 1,
+                              _firFilt.getRangeToSurface());
+  xml += RadxXml::writeDouble("VelStage1", 1,
+                              _firFilt.getVelStage1());
+  xml += RadxXml::writeDouble("VelSpike", 1,
+                              _firFilt.getVelSpike());
+  xml += RadxXml::writeDouble("VelCond", 1,
+                              _firFilt.getVelCond());
+  xml += RadxXml::writeDouble("VelFilt", 1,
+                              _firFilt.getVelFilt());
+  double velCorr = _firFilt.getVelMeasured() - _velFilt;
+  xml += RadxXml::writeDouble("VelCorr", 1, velCorr);
+  
   const RadxGeoref *georef = filtRay->getGeoreference();
   if (georef != NULL) {
     xml += RadxXml::writeDouble("Altitude", 1, georef->getAltitudeKmMsl());
@@ -1078,19 +1223,19 @@ void HcrVelCorrect::_writeResultsToSpdb(const RadxRay *filtRay)
   xml += RadxXml::writeEndTag("HcrVelCorr", 0);
 
   // write to SPDB
-
+  
   DsSpdb spdb;
   time_t validTime = filtRay->getTimeSecs();
   spdb.addPutChunk(0, validTime, validTime, xml.size() + 1, xml.c_str());
   if (spdb.put(_params.surface_vel_results_spdb_output_url,
                SPDB_XML_ID, SPDB_XML_LABEL)) {
-    cerr << "ERROR - HcrVelCorrect::_writeResultsToSpdb" << endl;
+    cerr << "ERROR - HcrVelCorrect::_writeFirFiltResultsToSpdb" << endl;
     cerr << spdb.getErrStr() << endl;
     return;
   }
   
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Wrote HCR vel correction results to spdb, url: " 
+    cerr << "Wrote HCR FIR filtering vel correction results to spdb, url: " 
          << _params.surface_vel_results_spdb_output_url << endl;
     cerr << "=====================================" << endl;
     cerr << xml;

@@ -134,7 +134,8 @@ def main():
 
     # render the plots
     
-    doPlotOverview()
+    doPlotRawAndFilt()
+    doPlotFiltAndGeoref()
     #doPlotPitchRoll(outFile)
     #doPlotDiffs(outFile)
     #doPlotEstPitchDiff(outFile)
@@ -257,6 +258,7 @@ def loadDataArrays(corrData, corrTimes):
     global VelSurf
     global DbzSurf
     global RangeToSurf
+    global VelNoiseFilt
     global VelNoiseFiltMean
     global VelNoiseFiltMedian
     global VelWaveFiltMean
@@ -269,12 +271,14 @@ def loadDataArrays(corrData, corrTimes):
     global Pitch
     global Rotation
     global Tilt
+    global Elevation
     global DriveAngle1
     global DriveAngle2
 
     VelSurf = np.array(corrData["VelSurf"]).astype(np.double)
     DbzSurf = np.array(corrData["DbzSurf"]).astype(np.double)
     RangeToSurf = np.array(corrData["RangeToSurf"]).astype(np.double)
+    VelNoiseFilt = np.array(corrData["VelNoiseFilt"]).astype(np.double)
     VelNoiseFiltMean = np.array(corrData["VelNoiseFiltMean"]).astype(np.double)
     VelNoiseFiltMedian = np.array(corrData["VelNoiseFiltMedian"]).astype(np.double)
     VelWaveFiltMean = np.array(corrData["VelWaveFiltMean"]).astype(np.double)
@@ -287,13 +291,14 @@ def loadDataArrays(corrData, corrTimes):
     Pitch = np.array(corrData["Pitch"]).astype(np.double)
     Rotation = np.array(corrData["Rotation"]).astype(np.double)
     Tilt = np.array(corrData["Tilt"]).astype(np.double)
+    Elevation = np.array(corrData["Elevation"]).astype(np.double)
     DriveAngle1 = np.array(corrData["DriveAngle1"]).astype(np.double)
     DriveAngle2 = np.array(corrData["DriveAngle2"]).astype(np.double)
 
 ########################################################################
-# Plot aircraft variables
+# Plot raw data plus filtered
 
-def doPlotOverview():
+def doPlotRawAndFilt():
 
     # set up plots
 
@@ -306,52 +311,98 @@ def doPlotOverview():
     
     ax1 = fig.add_subplot(2,1,1,xmargin=0.0)
     ax2 = fig.add_subplot(2,1,2,xmargin=0.0)
-    #ax3 = fig.add_subplot(4,1,3,xmargin=0.0)
-    #ax4 = fig.add_subplot(4,1,4,xmargin=0.0)
     
     ax1.plot(ctimes, VelSurf, \
-             label='VelSurf(m/s)', color='red', linewidth=1)
+             label='VelSurf', color='gray', linewidth=1)
     
     ax1.plot(ctimes, VelNoiseFiltMean, \
-             label='VelNoiseFiltMean(m/s)', color='blue', linewidth=1)
+             label='VelNoiseFiltMean', color='blue', linewidth=2)
     
     ax1.plot(ctimes, VelNoiseFiltMedian, \
-             label='VelNoiseFiltMedian(m/s)', color='black', linewidth=1)
+             label='VelNoiseFiltMedian', color='green', linewidth=2)
     
     #ax2.plot(ctimes, VelNoiseFiltMedian, \
-    #         label='VelNoiseFiltMedian(m/s)', color='red', linewidth=1)
+    #         label='VelNoiseFiltMedian', color='red', linewidth=1)
+    
+    ax2.plot(ctimes, VelNoiseFilt, \
+             label='VelNoiseFilt', color='gray', linewidth=1)
     
     ax2.plot(ctimes, VelWaveFiltMedian, \
-             label='VelWaveFiltMedian(m/s)', color='blue', linewidth=1)
+             label='VelWaveFiltMedian', color='blue', linewidth=1)
     
     ax2.plot(ctimes, VelWaveFiltMean, \
-             label='VelWaveFiltMean(m/s)', color='green', linewidth=1)
+             label='VelWaveFiltMean', color='green', linewidth=1)
     
     ax2.plot(ctimes, VelWaveFiltPoly, \
-             label='VelWaveFiltPoly(m/s)', color='black', linewidth=1)
+             label='VelWaveFiltPoly', color='red', linewidth=2)
     
-    # ax3.plot(ctimes, ias, \
-    #          label='Indicated Airspeed', color='green', linewidth=1)
+    ax2.plot(ctimes, VertVel, \
+             label='VertVel', color='cyan', linewidth=1)
 
-    # ax4.plot(ctimes, gvMass10000Kg, \
-    #          label='GV mass (*10T)', color='green', linewidth=2)
-    # ax4.plot(ctimes, aoaSm, \
-    #          label='Angle of attack', color='red', linewidth=1)
-    # ax4.plot(ctimes, accelNormSm, \
-    #          label='accelNorm', color='orange', linewidth=1)
-
-    configTimeAxis(ax1, -2, 2, "Velocity (m/s)", 'upper center')
-    configTimeAxis(ax2, -2, 2, "Velocity (m/s)", 'upper center')
-
-    # configTimeAxis(ax2, -50, 50, "Temp (C)", 'lower center')
-    # configTimeAxis(ax3, 50, 200, "Airspeed (m/s)", 'upper center')
-    # configTimeAxis(ax4, 0, 6, "AOA, G-Accel, Mass", 'upper right')
+    configTimeAxis(ax1, -2, 2, "Surf velocity raw (m/s)", 'upper center')
+    configTimeAxis(ax2, -2, 2, "Surf velocity filtered (m/s)", 'upper center')
 
     fig.autofmt_xdate()
     fig.tight_layout()
     fig.subplots_adjust(bottom=0.08, left=0.06, right=0.97, top=0.96)
 
-    fig.suptitle("VELOCITY WITH SMOOTHING - file " + os.path.basename(options.filePath))
+    fig.suptitle("RAW VELOCITY WITH FILTERING - file " + os.path.basename(options.filePath))
+
+    return
+
+########################################################################
+# Plot filtered data plus georef data
+
+def doPlotFiltAndGeoref():
+
+    # set up plots
+
+    widthIn = float(options.mainWidthMm) / 25.4
+    htIn = float(options.mainHeightMm) / 25.4
+
+    global figNum
+    fig = plt.figure(figNum, (widthIn, htIn))
+    figNum = figNum + 1
+    
+    ax1 = fig.add_subplot(4,1,1,xmargin=0.0)
+    ax2 = fig.add_subplot(4,1,2,xmargin=0.0)
+    ax3 = fig.add_subplot(4,1,3,xmargin=0.0)
+    ax4 = fig.add_subplot(4,1,4,xmargin=0.0)
+    
+    ax1.plot(ctimes, VelNoiseFilt, \
+             label='VelNoiseFilt', color='gray', linewidth=1)
+    
+    ax1.plot(ctimes, VelWaveFiltMedian, \
+             label='VelWaveFiltMedian', color='blue', linewidth=1)
+    
+    ax1.plot(ctimes, VelWaveFiltMean, \
+             label='VelWaveFiltMean', color='green', linewidth=1)
+    
+    ax1.plot(ctimes, VelWaveFiltPoly, \
+             label='VelWaveFiltPoly', color='red', linewidth=2)
+    
+    ax1.plot(ctimes, VertVel, \
+             label='VertVel', color='cyan', linewidth=2)
+    
+    ax2.plot(ctimes, Pitch, label='Pitch', color='red', linewidth=1)
+    ax2.plot(ctimes, Elevation + 90.0, label='Elev+90', color='blue', linewidth=1)
+    ax2.plot(ctimes, Tilt * -1, label='Tilt*-1', color='green', linewidth=1)
+
+    ax3.plot(ctimes, Roll, label='Roll', color='red', linewidth=1)
+    ax3.plot(ctimes, Rotation * -1.0 + 180.0, label='-Rotation+180', color='blue', linewidth=1)
+    
+    ax4.plot(ctimes, Altitude, label='Altitude', color='blue', linewidth=1)
+
+    configTimeAxis(ax1, -2, 2, "Surface velocity (m/s)", 'upper center')
+    configTimeAxis(ax2, -3, 3, "Pitch and Radar Elevation (deg)", 'upper center')
+    configTimeAxis(ax3, -9999, -9999, "Roll and Radar Rotation (deg)", 'upper center')
+    configTimeAxis(ax4, -9999, -9999, "Altitude (km)", 'upper center')
+
+    fig.autofmt_xdate()
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.08, left=0.06, right=0.97, top=0.96)
+
+    fig.suptitle("FILTERING with GEOREF - file " + os.path.basename(options.filePath))
 
     return
 

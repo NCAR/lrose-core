@@ -89,8 +89,7 @@ private:
   // input volume files
   
   RadxVol _inVol;
-  deque<RadxTime> _inputFileEndTimes;
-  bool _firstInputFile;
+  deque<RadxTime> _inputFileEndTime;
 
   // filtered volume - output
   
@@ -123,51 +122,55 @@ private:
     double velSurf;
     double dbzSurf;
     double rangeToSurf;
+    double velNoiseFilt;
     double velNoiseFiltMean;
     double velNoiseFiltMedian;
     double velWaveFiltMean;
     double velWaveFiltMedian;
     double velWaveFiltPoly;
     bool velIsValid;
-    bool written;
     bool corrected;
     FiltNode() {
       ray = NULL;
       velSurf = NAN;
       dbzSurf = NAN;
       rangeToSurf = NAN;
+      velNoiseFilt = NAN;
       velNoiseFiltMean = NAN;
       velNoiseFiltMedian = NAN;
       velWaveFiltMean = NAN;
       velWaveFiltMedian = NAN;
       velWaveFiltPoly = NAN;
       velIsValid = false;
-      written = false;
       corrected = false;
     }
     RadxTime getTime() { return ray->getRadxTime(); }
   };
 
   deque<FiltNode> _filtQueue;
-  FiltNode *_filtNodeMid;
-  size_t _filtMidIndex;
 
-  RadxTime _filtTimeStart;
-  RadxTime _filtTimeMid;
-  RadxTime _filtTimeMean;
-  RadxTime _filtTimeEnd;
-  RadxTime _filtPeriodStart;
-  RadxTime _filtRetrieveTime;
+  double _noiseFiltSecs;
+  double _waveFiltSecs;
+  double _totalFiltSecs;
+
+  FiltNode *_waveNodeMid;
+  size_t _waveIndexStart;
+  size_t _waveIndexMid;
+  size_t _waveIndexEnd;
+
+  RadxTime _waveTimeStart;
+  RadxTime _waveTimeMid;
+  RadxTime _waveTimeMean;
+  RadxTime _waveTimeEnd;
+  RadxTime _wavePeriodStart;
   
   size_t _nNoiseNodes;
   RadxTime _noiseTimeStart;
   RadxTime _noiseTimeEnd;
   size_t _noiseIndexStart;
+  size_t _noiseIndexMid;
   size_t _noiseIndexEnd;
-
-  double _noiseFiltSecs;
-  double _waveFiltSecs;
-  double _filtSecs;
+  FiltNode *_noiseNodeMid;
 
   // methods
 
@@ -176,7 +179,9 @@ private:
   int _runRealtime();
 
   int _processFile(const string &filePath);
-  int _processRay(RadxRay *ray);
+
+  int _processRayFirFilt(RadxRay *ray);
+  int _processRayWaveFilt(RadxRay *ray);
 
   void _initWaveFilt();
   int _applyWaveFilt(RadxRay *ray, 
@@ -184,12 +189,12 @@ private:
                      double dbzSurf,
                      double rangeToSurf);
 
-  int _updateNodeStats();
+  int _setFilterLimits();
 
   void _runNoiseFilter();
   void _runWaveFilter();
 
-  void _addRayToFiltVol(FiltNode &node);
+  void _addNodeRayToFiltVol(FiltNode &node);
 
   void _setupRead(RadxFile &file);
 
@@ -201,8 +206,9 @@ private:
   void _correctVelForRay(RadxRay *ray, double surfFilt);
   void _copyVelForRay(RadxRay *ray);
 
-  void _writeResultsToSpdb(const RadxRay *filtRay);
-
+  void _writeWaveFiltResultsToSpdb(const RadxRay *filtRay);
+  void _writeFirFiltResultsToSpdb(const RadxRay *filtRay);
+  
 
 };
 

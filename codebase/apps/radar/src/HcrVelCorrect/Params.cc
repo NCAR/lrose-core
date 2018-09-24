@@ -1189,18 +1189,6 @@
     tt->single_val.d = 3;
     tt++;
     
-    // Parameter 'noise_filter_min_n_rays'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("noise_filter_min_n_rays");
-    tt->descr = tdrpStrDup("Min number of rays for valid noise filter.");
-    tt->help = tdrpStrDup("If fewer than this number of rays are available within the time period for the noise filter, the filter is not run and no corrected velocity is computed.");
-    tt->val_offset = (char *) &noise_filter_min_n_rays - &_start_;
-    tt->single_val.i = 15;
-    tt++;
-    
     // Parameter 'wave_filter_length_secs'
     // ctype is 'double'
     

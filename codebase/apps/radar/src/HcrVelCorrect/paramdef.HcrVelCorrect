@@ -327,12 +327,6 @@ paramdef double {
   p_help = "The noise filter is a simple running mean to smooth out the measurement noise in the velocity measurements. The filter has the same center as the wave filter.";
 } noise_filter_length_secs;
 
-paramdef int {
-  p_default = 15;
-  p_descr = "Min number of rays for valid noise filter.";
-  p_help = "If fewer than this number of rays are available within the time period for the noise filter, the filter is not run and no corrected velocity is computed.";
-} noise_filter_min_n_rays;
-
 paramdef double {
   p_default = 30;
   p_descr = "Length of the wave filter (secs).";

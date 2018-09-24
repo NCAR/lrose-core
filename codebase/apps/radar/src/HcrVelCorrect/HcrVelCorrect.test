@@ -613,21 +613,7 @@ filter_type = WAVE_FILTER;
 // Type: double
 //
 
-noise_filter_length_secs = 3;
-
-///////////// noise_filter_min_n_rays /////////////////
-//
-// Min number of rays for valid noise filter.
-//
-// If fewer than this number of rays are available within the time 
-//   period for the noise filter, the filter is not run and no corrected 
-//   velocity is computed.
-//
-//
-// Type: int
-//
-
-noise_filter_min_n_rays = 15;
+noise_filter_length_secs = 5;
 
 ///////////// wave_filter_length_secs /////////////////
 //

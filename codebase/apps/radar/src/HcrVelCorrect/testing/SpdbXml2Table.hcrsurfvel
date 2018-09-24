@@ -187,6 +187,13 @@ xml_entries = {
   }
   ,
   {
+    xml_tag_list = "<HcrVelCorr><VelNoiseFilt>",
+    specify_label = TRUE,
+    label = "VelNoiseFilt",
+    required = TRUE
+  }
+  ,
+  {
     xml_tag_list = "<HcrVelCorr><VelNoiseFiltMean>",
     specify_label = TRUE,
     label = "VelNoiseFiltMean",
@@ -267,6 +274,13 @@ xml_entries = {
     xml_tag_list = "<HcrVelCorr><Tilt>",
     specify_label = TRUE,
     label = "Tilt",
+    required = TRUE
+  }
+  ,
+  {
+    xml_tag_list = "<HcrVelCorr><Elevation>",
+    specify_label = TRUE,
+    label = "Elevation",
     required = TRUE
   }
   ,
