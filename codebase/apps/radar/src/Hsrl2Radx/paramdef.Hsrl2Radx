@@ -392,6 +392,169 @@ paramdef int {
 } speckle_filter_len;
 
 commentdef {
+  p_header = "READING NetCDF Files produced by Matt Haymann";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to combine range gates on read.";
+  p_help = "If true, the specified number of range gates will be combined on read to create mean values with lower noisiness.";
+} mhayman_combine_bins_on_read;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Number of bins to combine into a single gate.";
+  p_help = "In range, we will combine this number of gates to produce a data set with lower spatial resolution but less noiry data.";
+} mhayman_n_bins_per_gate;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the fields to be handled.";
+  p_help = "If false, the app will try to identify the field in the data and read them all in as best it can.";
+} mhayman_specify_fields;
+
+typedef struct {
+  string field_name;
+  boolean apply_mask;
+  string mask_name;
+  int mask_valid_value;
+  string output_name;
+  string cf_standard_name;
+} mhayman_field_t;
+
+paramdef struct mhayman_field_t {
+  p_default = {
+    {
+      field_name = "Aerosol_Backscatter_Coefficient",
+      apply_mask = TRUE,
+      mask_name = "Aerosol_Backscatter_Coefficient_mask",
+      mask_valid_value = 0,
+      output_name = "",
+      cf_standard_name = "lidar_backscatter_coefficient"
+    }
+    ,
+    {
+      field_name = "Backscatter_Ratio",
+      apply_mask = TRUE,
+      mask_name = "Backscatter_Ratio_mask",
+      mask_valid_value = 0,
+      output_name = "",
+      cf_standard_name = "lidar_backscatter_ratio"
+    }
+    ,
+    {
+      field_name = "Particle_Depolarization",
+      apply_mask = TRUE,
+      mask_name = "Particle_Depolarization_mask",
+      mask_valid_value = 0,
+      output_name = "",
+      cf_standard_name = "lidar_particle_depolarization_ratio"
+    }
+    ,
+    {
+      field_name = "Volume_Depolarization",
+      apply_mask = TRUE,
+      mask_name = "Volume_Depolarization_mask",
+      mask_valid_value = 0,
+      output_name = "",
+      cf_standard_name = "lidar_volume_depolarization_ratio"
+    }
+    ,
+    {
+      field_name = "Molecular_Backscatter_Coefficient",
+      apply_mask = FALSE,
+      mask_name = "",
+      mask_valid_value = 0,
+      output_name = "",
+      cf_standard_name = "lidar_molecular_backscatter_coefficient"
+    }
+    ,
+    {
+      field_name = "Merged_Combined_Channel",
+      apply_mask = TRUE,
+      mask_name = "Merged_Combined_Channel_mask",
+      mask_valid_value = 0,
+      output_name = "Combined_Counts",
+      cf_standard_name = "lidar_copolar_combined_backscatter_photon_count"
+    }
+    ,
+    {
+      field_name = "Raw_High_Gain_Total_Backscatter_Channel",
+      apply_mask = FALSE,
+      mask_name = "",
+      mask_valid_value = 0,
+      output_name = "High_Counts",
+      cf_standard_name = ""
+    }
+    ,
+    {
+      field_name = "Raw_Low_Gain_Total_Backscatter_Channel",
+      apply_mask = FALSE,
+      mask_name = "",
+      mask_valid_value = 0,
+      output_name = "Low_Counts",
+      cf_standard_name = ""
+    }
+    ,
+    {
+      field_name = "Raw_Molecular_Backscatter_Channel",
+      apply_mask = FALSE,
+      mask_name = "",
+      mask_valid_value = 0,
+      output_name = "Molecular_Counts",
+      cf_standard_name = ""
+    }
+    ,
+    {
+      field_name = "Raw_Cross_Polarization_Channel",
+      apply_mask = FALSE,
+      mask_name = "",
+      mask_valid_value = 0,
+      output_name = "Cross_Polar_Counts",
+      cf_standard_name = ""
+    }
+    ,
+    {
+      field_name = "Optical_Depth",
+      apply_mask = FALSE,
+      mask_name = "",
+      mask_valid_value = 0,
+      output_name = "",
+      cf_standard_name = "lidar_optical_depth"
+    }
+    ,
+    {
+      field_name = "Aerosol_Extinction_Coefficient",
+      apply_mask = TRUE,
+      mask_name = "Aerosol_Extinction_Coefficient_mask",
+      mask_valid_value = 0,
+      output_name = "",
+      cf_standard_name = "lidar_aerosol_extinction_coefficient"
+    }
+    ,
+    {
+      field_name = "Temperature",
+      apply_mask = FALSE,
+      mask_name = "",
+      mask_valid_value = 0,
+      output_name = "",
+      cf_standard_name = "air_temperature"
+    }
+    ,
+    {
+      field_name = "Pressure",
+      apply_mask = FALSE,
+      mask_name = "",
+      mask_valid_value = 0,
+      output_name = "",
+      cf_standard_name = "air_pressure"
+    }
+  };
+  p_descr = "Details of fields to be included in output data set.";
+  p_help = "If the output_name is not specified, the input name is used unchanged. If the standard_name is not specified, the standard name attribute will be omitted.";
+} mhayman_fields[];
+
+commentdef {
   p_header = "COMPUTING DERIVED FIELDS";
 }
 
@@ -456,106 +619,6 @@ paramdef int {
   p_descr = "The search margin when looking for suitable model data (secs).";
   p_help = "If a data file has previously been read, within this search margin, then that file is used again.";
 } model_profile_search_margin_secs;
-
-commentdef {
-  p_header = "OUTPUT FMQ DETAILS";
-  p_text = "REALTIME_FMQ mode only";
-};
-
-paramdef string {
-  p_default = "fmqp:://localhost::/tmp/fmq/hsrl_moments";
-  p_descr = "URL for output FMQ.";
-  p_help = "The FMQ consists of 2 files, ??.buf and ??.stat.";
-} output_fmq_url;
-
-paramdef int {
-  p_default = 10000000;
-  p_descr = "Size of output FMQ, in bytes.";
-  p_help = "This is the total size of the output FMQ buffer.";
-} output_fmq_size;
-
-paramdef int {
-  p_default = 500;
-  p_descr = "Number of slots in the output FMQ.";
-  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
-} output_fmq_nslots;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to compress the FMQ data on write.";
-  p_help = "This helps to keep the size of the queue entries small. Should only be used for remote FMQs over slow networks.";
-} output_fmq_compress;
-
-paramdef int {
-  p_default = 10;
-  p_descr = "Number of rays between sending params.";
-  p_help = "The params will be sent when this number of rays have been written.";
-} nrays_for_params;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to set up the FMQ as blocking.";
-  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
-} write_blocking;
-
-paramdef int {
-  p_private = TRUE;
-  p_default = 5;
-  p_descr = "Number of seconds between reports to DataMapper.";
-  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
-} data_mapper_report_interval;
-
-commentdef {
-  p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
-}
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the version global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the version attribute.";
-} version_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the title global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the title attribute.";
-} title_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the institution global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the institution attribute.";
-} institution_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the references global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the references attribute.";
-} references_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the source global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the source attribute.";
-} source_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the history global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the history attribute.";
-} history_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the comment global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the comment attribute.";
-} comment_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the author global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the author attribute.";
-} author_override;
 
 commentdef {
   p_header = "OUTPUT OPTIONS FOR CfRadial FILES";
@@ -661,4 +724,105 @@ paramdef boolean {
   p_descr = "Option to write out _latest_data_info files.";
   p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
 } write_latest_data_info;
+
+commentdef {
+  p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
+  p_text = "Applies to CfRadial output files only.";
+}
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the version global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the version attribute.";
+} version_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the title global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the title attribute.";
+} title_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the institution global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the institution attribute.";
+} institution_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the references global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the references attribute.";
+} references_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the source global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the source attribute.";
+} source_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the history global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the history attribute.";
+} history_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the comment global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the comment attribute.";
+} comment_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the author global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the author attribute.";
+} author_override;
+
+commentdef {
+  p_header = "OUTPUT FMQ DETAILS";
+  p_text = "REALTIME_FMQ mode only";
+};
+
+paramdef string {
+  p_default = "fmqp:://localhost::/tmp/fmq/hsrl_moments";
+  p_descr = "URL for output FMQ.";
+  p_help = "The FMQ consists of 2 files, ??.buf and ??.stat.";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 10000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of slots in the output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compress the FMQ data on write.";
+  p_help = "This helps to keep the size of the queue entries small. Should only be used for remote FMQs over slow networks.";
+} output_fmq_compress;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Number of rays between sending params.";
+  p_help = "The params will be sent when this number of rays have been written.";
+} nrays_for_params;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+
+paramdef int {
+  p_private = TRUE;
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
 

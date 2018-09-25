@@ -98,6 +98,17 @@ public:
     SPECIFY_FILE_NAME = 3
   } filename_mode_t;
 
+  // struct typedefs
+
+  typedef struct {
+    char* field_name;
+    tdrp_bool_t apply_mask;
+    char* mask_name;
+    int mask_valid_value;
+    char* output_name;
+    char* cf_standard_name;
+  } mhayman_field_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -493,6 +504,15 @@ public:
 
   int speckle_filter_len;
 
+  tdrp_bool_t mhayman_combine_bins_on_read;
+
+  int mhayman_n_bins_per_gate;
+
+  tdrp_bool_t mhayman_specify_fields;
+
+  mhayman_field_t *_mhayman_fields;
+  int mhayman_fields_n;
+
   int combined_high_count_threshold_for_backscat_coeff;
 
   int combined_high_count_threshold_for_vol_depol_ratio;
@@ -510,36 +530,6 @@ public:
   char* model_profile_mdv_data_url;
 
   int model_profile_search_margin_secs;
-
-  char* output_fmq_url;
-
-  int output_fmq_size;
-
-  int output_fmq_nslots;
-
-  tdrp_bool_t output_fmq_compress;
-
-  int nrays_for_params;
-
-  tdrp_bool_t write_blocking;
-
-  int data_mapper_report_interval;
-
-  char* version_override;
-
-  char* title_override;
-
-  char* institution_override;
-
-  char* references_override;
-
-  char* source_override;
-
-  char* history_override;
-
-  char* comment_override;
-
-  char* author_override;
 
   int compression_level;
 
@@ -571,6 +561,36 @@ public:
 
   tdrp_bool_t write_latest_data_info;
 
+  char* version_override;
+
+  char* title_override;
+
+  char* institution_override;
+
+  char* references_override;
+
+  char* source_override;
+
+  char* history_override;
+
+  char* comment_override;
+
+  char* author_override;
+
+  char* output_fmq_url;
+
+  int output_fmq_size;
+
+  int output_fmq_nslots;
+
+  tdrp_bool_t output_fmq_compress;
+
+  int nrays_for_params;
+
+  tdrp_bool_t write_blocking;
+
+  int data_mapper_report_interval;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -578,7 +598,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[109];
+  mutable TDRPtable _table[114];
 
   const char *_className;
 

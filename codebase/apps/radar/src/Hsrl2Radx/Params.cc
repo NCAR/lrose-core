@@ -1305,6 +1305,188 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("READING NetCDF Files produced by Matt Haymann");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'mhayman_combine_bins_on_read'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("mhayman_combine_bins_on_read");
+    tt->descr = tdrpStrDup("Option to combine range gates on read.");
+    tt->help = tdrpStrDup("If true, the specified number of range gates will be combined on read to create mean values with lower noisiness.");
+    tt->val_offset = (char *) &mhayman_combine_bins_on_read - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'mhayman_n_bins_per_gate'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("mhayman_n_bins_per_gate");
+    tt->descr = tdrpStrDup("Number of bins to combine into a single gate.");
+    tt->help = tdrpStrDup("In range, we will combine this number of gates to produce a data set with lower spatial resolution but less noiry data.");
+    tt->val_offset = (char *) &mhayman_n_bins_per_gate - &_start_;
+    tt->single_val.i = 4;
+    tt++;
+    
+    // Parameter 'mhayman_specify_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("mhayman_specify_fields");
+    tt->descr = tdrpStrDup("Option to specify the fields to be handled.");
+    tt->help = tdrpStrDup("If false, the app will try to identify the field in the data and read them all in as best it can.");
+    tt->val_offset = (char *) &mhayman_specify_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'mhayman_fields'
+    // ctype is '_mhayman_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("mhayman_fields");
+    tt->descr = tdrpStrDup("Details of fields to be included in output data set.");
+    tt->help = tdrpStrDup("If the output_name is not specified, the input name is used unchanged. If the standard_name is not specified, the standard name attribute will be omitted.");
+    tt->array_offset = (char *) &_mhayman_fields - &_start_;
+    tt->array_n_offset = (char *) &mhayman_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(mhayman_field_t);
+    tt->array_n = 14;
+    tt->struct_def.name = tdrpStrDup("mhayman_field_t");
+    tt->struct_def.nfields = 6;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("field_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_mhayman_fields->field_name - (char *) _mhayman_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[1].fname = tdrpStrDup("apply_mask");
+      tt->struct_def.fields[1].ptype = BOOL_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_mhayman_fields->apply_mask - (char *) _mhayman_fields;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("mask_name");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_mhayman_fields->mask_name - (char *) _mhayman_fields;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[3].fname = tdrpStrDup("mask_valid_value");
+      tt->struct_def.fields[3].ptype = INT_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_mhayman_fields->mask_valid_value - (char *) _mhayman_fields;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[4].fname = tdrpStrDup("output_name");
+      tt->struct_def.fields[4].ptype = STRING_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_mhayman_fields->output_name - (char *) _mhayman_fields;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[5].fname = tdrpStrDup("cf_standard_name");
+      tt->struct_def.fields[5].ptype = STRING_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_mhayman_fields->cf_standard_name - (char *) _mhayman_fields;
+    tt->n_struct_vals = 84;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Aerosol_Backscatter_Coefficient");
+      tt->struct_vals[1].b = pTRUE;
+      tt->struct_vals[2].s = tdrpStrDup("Aerosol_Backscatter_Coefficient_mask");
+      tt->struct_vals[3].i = 0;
+      tt->struct_vals[4].s = tdrpStrDup("");
+      tt->struct_vals[5].s = tdrpStrDup("lidar_backscatter_coefficient");
+      tt->struct_vals[6].s = tdrpStrDup("Backscatter_Ratio");
+      tt->struct_vals[7].b = pTRUE;
+      tt->struct_vals[8].s = tdrpStrDup("Backscatter_Ratio_mask");
+      tt->struct_vals[9].i = 0;
+      tt->struct_vals[10].s = tdrpStrDup("");
+      tt->struct_vals[11].s = tdrpStrDup("lidar_backscatter_ratio");
+      tt->struct_vals[12].s = tdrpStrDup("Particle_Depolarization");
+      tt->struct_vals[13].b = pTRUE;
+      tt->struct_vals[14].s = tdrpStrDup("Particle_Depolarization_mask");
+      tt->struct_vals[15].i = 0;
+      tt->struct_vals[16].s = tdrpStrDup("");
+      tt->struct_vals[17].s = tdrpStrDup("lidar_particle_depolarization_ratio");
+      tt->struct_vals[18].s = tdrpStrDup("Volume_Depolarization");
+      tt->struct_vals[19].b = pTRUE;
+      tt->struct_vals[20].s = tdrpStrDup("Volume_Depolarization_mask");
+      tt->struct_vals[21].i = 0;
+      tt->struct_vals[22].s = tdrpStrDup("");
+      tt->struct_vals[23].s = tdrpStrDup("lidar_volume_depolarization_ratio");
+      tt->struct_vals[24].s = tdrpStrDup("Molecular_Backscatter_Coefficient");
+      tt->struct_vals[25].b = pFALSE;
+      tt->struct_vals[26].s = tdrpStrDup("");
+      tt->struct_vals[27].i = 0;
+      tt->struct_vals[28].s = tdrpStrDup("");
+      tt->struct_vals[29].s = tdrpStrDup("lidar_molecular_backscatter_coefficient");
+      tt->struct_vals[30].s = tdrpStrDup("Merged_Combined_Channel");
+      tt->struct_vals[31].b = pTRUE;
+      tt->struct_vals[32].s = tdrpStrDup("Merged_Combined_Channel_mask");
+      tt->struct_vals[33].i = 0;
+      tt->struct_vals[34].s = tdrpStrDup("Combined_Counts");
+      tt->struct_vals[35].s = tdrpStrDup("lidar_copolar_combined_backscatter_photon_count");
+      tt->struct_vals[36].s = tdrpStrDup("Raw_High_Gain_Total_Backscatter_Channel");
+      tt->struct_vals[37].b = pFALSE;
+      tt->struct_vals[38].s = tdrpStrDup("");
+      tt->struct_vals[39].i = 0;
+      tt->struct_vals[40].s = tdrpStrDup("High_Counts");
+      tt->struct_vals[41].s = tdrpStrDup("");
+      tt->struct_vals[42].s = tdrpStrDup("Raw_Low_Gain_Total_Backscatter_Channel");
+      tt->struct_vals[43].b = pFALSE;
+      tt->struct_vals[44].s = tdrpStrDup("");
+      tt->struct_vals[45].i = 0;
+      tt->struct_vals[46].s = tdrpStrDup("Low_Counts");
+      tt->struct_vals[47].s = tdrpStrDup("");
+      tt->struct_vals[48].s = tdrpStrDup("Raw_Molecular_Backscatter_Channel");
+      tt->struct_vals[49].b = pFALSE;
+      tt->struct_vals[50].s = tdrpStrDup("");
+      tt->struct_vals[51].i = 0;
+      tt->struct_vals[52].s = tdrpStrDup("Molecular_Counts");
+      tt->struct_vals[53].s = tdrpStrDup("");
+      tt->struct_vals[54].s = tdrpStrDup("Raw_Cross_Polarization_Channel");
+      tt->struct_vals[55].b = pFALSE;
+      tt->struct_vals[56].s = tdrpStrDup("");
+      tt->struct_vals[57].i = 0;
+      tt->struct_vals[58].s = tdrpStrDup("Cross_Polar_Counts");
+      tt->struct_vals[59].s = tdrpStrDup("");
+      tt->struct_vals[60].s = tdrpStrDup("Optical_Depth");
+      tt->struct_vals[61].b = pFALSE;
+      tt->struct_vals[62].s = tdrpStrDup("");
+      tt->struct_vals[63].i = 0;
+      tt->struct_vals[64].s = tdrpStrDup("");
+      tt->struct_vals[65].s = tdrpStrDup("lidar_optical_depth");
+      tt->struct_vals[66].s = tdrpStrDup("Aerosol_Extinction_Coefficient");
+      tt->struct_vals[67].b = pTRUE;
+      tt->struct_vals[68].s = tdrpStrDup("Aerosol_Extinction_Coefficient_mask");
+      tt->struct_vals[69].i = 0;
+      tt->struct_vals[70].s = tdrpStrDup("");
+      tt->struct_vals[71].s = tdrpStrDup("lidar_aerosol_extinction_coefficient");
+      tt->struct_vals[72].s = tdrpStrDup("Temperature");
+      tt->struct_vals[73].b = pFALSE;
+      tt->struct_vals[74].s = tdrpStrDup("");
+      tt->struct_vals[75].i = 0;
+      tt->struct_vals[76].s = tdrpStrDup("");
+      tt->struct_vals[77].s = tdrpStrDup("air_temperature");
+      tt->struct_vals[78].s = tdrpStrDup("Pressure");
+      tt->struct_vals[79].b = pFALSE;
+      tt->struct_vals[80].s = tdrpStrDup("");
+      tt->struct_vals[81].i = 0;
+      tt->struct_vals[82].s = tdrpStrDup("");
+      tt->struct_vals[83].s = tdrpStrDup("air_pressure");
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("COMPUTING DERIVED FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1333,11 +1515,11 @@
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("READING TEMPERATURE AND PRESSURE PROFILE FROM MODEL FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1442,210 +1624,11 @@
     tt->single_val.i = 7200;
     tt++;
     
-    // Parameter 'Comment 10'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("OUTPUT FMQ DETAILS");
-    tt->comment_text = tdrpStrDup("REALTIME_FMQ mode only");
-    tt++;
-    
-    // Parameter 'output_fmq_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_url");
-    tt->descr = tdrpStrDup("URL for output FMQ.");
-    tt->help = tdrpStrDup("The FMQ consists of 2 files, ??.buf and ??.stat.");
-    tt->val_offset = (char *) &output_fmq_url - &_start_;
-    tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/hsrl_moments");
-    tt++;
-    
-    // Parameter 'output_fmq_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_size");
-    tt->descr = tdrpStrDup("Size of output FMQ, in bytes.");
-    tt->help = tdrpStrDup("This is the total size of the output FMQ buffer.");
-    tt->val_offset = (char *) &output_fmq_size - &_start_;
-    tt->single_val.i = 10000000;
-    tt++;
-    
-    // Parameter 'output_fmq_nslots'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_nslots");
-    tt->descr = tdrpStrDup("Number of slots in the output FMQ.");
-    tt->help = tdrpStrDup("The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.");
-    tt->val_offset = (char *) &output_fmq_nslots - &_start_;
-    tt->single_val.i = 500;
-    tt++;
-    
-    // Parameter 'output_fmq_compress'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_compress");
-    tt->descr = tdrpStrDup("Option to compress the FMQ data on write.");
-    tt->help = tdrpStrDup("This helps to keep the size of the queue entries small. Should only be used for remote FMQs over slow networks.");
-    tt->val_offset = (char *) &output_fmq_compress - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'nrays_for_params'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("nrays_for_params");
-    tt->descr = tdrpStrDup("Number of rays between sending params.");
-    tt->help = tdrpStrDup("The params will be sent when this number of rays have been written.");
-    tt->val_offset = (char *) &nrays_for_params - &_start_;
-    tt->single_val.i = 10;
-    tt++;
-    
-    // Parameter 'write_blocking'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_blocking");
-    tt->descr = tdrpStrDup("Option to set up the FMQ as blocking.");
-    tt->help = tdrpStrDup("If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.");
-    tt->val_offset = (char *) &write_blocking - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'data_mapper_report_interval'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("data_mapper_report_interval");
-    tt->descr = tdrpStrDup("Number of seconds between reports to DataMapper.");
-    tt->help = tdrpStrDup("If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.");
-    tt->val_offset = (char *) &data_mapper_report_interval - &_start_;
-    tt->is_private = TRUE;
-    tt->single_val.i = 5;
-    tt++;
-    
     // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'version_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("version_override");
-    tt->descr = tdrpStrDup("Option to override the version global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the version attribute.");
-    tt->val_offset = (char *) &version_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'title_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("title_override");
-    tt->descr = tdrpStrDup("Option to override the title global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the title attribute.");
-    tt->val_offset = (char *) &title_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'institution_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("institution_override");
-    tt->descr = tdrpStrDup("Option to override the institution global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the institution attribute.");
-    tt->val_offset = (char *) &institution_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'references_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("references_override");
-    tt->descr = tdrpStrDup("Option to override the references global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the references attribute.");
-    tt->val_offset = (char *) &references_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'source_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("source_override");
-    tt->descr = tdrpStrDup("Option to override the source global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the source attribute.");
-    tt->val_offset = (char *) &source_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'history_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("history_override");
-    tt->descr = tdrpStrDup("Option to override the history global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the history attribute.");
-    tt->val_offset = (char *) &history_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'comment_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("comment_override");
-    tt->descr = tdrpStrDup("Option to override the comment global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the comment attribute.");
-    tt->val_offset = (char *) &comment_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'author_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("author_override");
-    tt->descr = tdrpStrDup("Option to override the author global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the author attribute.");
-    tt->val_offset = (char *) &author_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 12'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1710,11 +1693,11 @@
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1849,6 +1832,205 @@
     tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
     tt->val_offset = (char *) &write_latest_data_info - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 13'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 13");
+    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
+    tt->comment_text = tdrpStrDup("Applies to CfRadial output files only.");
+    tt++;
+    
+    // Parameter 'version_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("version_override");
+    tt->descr = tdrpStrDup("Option to override the version global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the version attribute.");
+    tt->val_offset = (char *) &version_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'title_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("title_override");
+    tt->descr = tdrpStrDup("Option to override the title global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the title attribute.");
+    tt->val_offset = (char *) &title_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'institution_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("institution_override");
+    tt->descr = tdrpStrDup("Option to override the institution global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the institution attribute.");
+    tt->val_offset = (char *) &institution_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'references_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("references_override");
+    tt->descr = tdrpStrDup("Option to override the references global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the references attribute.");
+    tt->val_offset = (char *) &references_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'source_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("source_override");
+    tt->descr = tdrpStrDup("Option to override the source global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the source attribute.");
+    tt->val_offset = (char *) &source_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'history_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("history_override");
+    tt->descr = tdrpStrDup("Option to override the history global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the history attribute.");
+    tt->val_offset = (char *) &history_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'comment_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("comment_override");
+    tt->descr = tdrpStrDup("Option to override the comment global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the comment attribute.");
+    tt->val_offset = (char *) &comment_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'author_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("author_override");
+    tt->descr = tdrpStrDup("Option to override the author global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the author attribute.");
+    tt->val_offset = (char *) &author_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 14'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 14");
+    tt->comment_hdr = tdrpStrDup("OUTPUT FMQ DETAILS");
+    tt->comment_text = tdrpStrDup("REALTIME_FMQ mode only");
+    tt++;
+    
+    // Parameter 'output_fmq_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_url");
+    tt->descr = tdrpStrDup("URL for output FMQ.");
+    tt->help = tdrpStrDup("The FMQ consists of 2 files, ??.buf and ??.stat.");
+    tt->val_offset = (char *) &output_fmq_url - &_start_;
+    tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/hsrl_moments");
+    tt++;
+    
+    // Parameter 'output_fmq_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_size");
+    tt->descr = tdrpStrDup("Size of output FMQ, in bytes.");
+    tt->help = tdrpStrDup("This is the total size of the output FMQ buffer.");
+    tt->val_offset = (char *) &output_fmq_size - &_start_;
+    tt->single_val.i = 10000000;
+    tt++;
+    
+    // Parameter 'output_fmq_nslots'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_nslots");
+    tt->descr = tdrpStrDup("Number of slots in the output FMQ.");
+    tt->help = tdrpStrDup("The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.");
+    tt->val_offset = (char *) &output_fmq_nslots - &_start_;
+    tt->single_val.i = 500;
+    tt++;
+    
+    // Parameter 'output_fmq_compress'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_compress");
+    tt->descr = tdrpStrDup("Option to compress the FMQ data on write.");
+    tt->help = tdrpStrDup("This helps to keep the size of the queue entries small. Should only be used for remote FMQs over slow networks.");
+    tt->val_offset = (char *) &output_fmq_compress - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'nrays_for_params'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("nrays_for_params");
+    tt->descr = tdrpStrDup("Number of rays between sending params.");
+    tt->help = tdrpStrDup("The params will be sent when this number of rays have been written.");
+    tt->val_offset = (char *) &nrays_for_params - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'write_blocking'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_blocking");
+    tt->descr = tdrpStrDup("Option to set up the FMQ as blocking.");
+    tt->help = tdrpStrDup("If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.");
+    tt->val_offset = (char *) &write_blocking - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'data_mapper_report_interval'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("data_mapper_report_interval");
+    tt->descr = tdrpStrDup("Number of seconds between reports to DataMapper.");
+    tt->help = tdrpStrDup("If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.");
+    tt->val_offset = (char *) &data_mapper_report_interval - &_start_;
+    tt->is_private = TRUE;
+    tt->single_val.i = 5;
     tt++;
     
     // trailing entry has param_name set to NULL

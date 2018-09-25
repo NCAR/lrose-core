@@ -232,7 +232,8 @@ private:
 
   void _loadReadVolume();
 
-  int _readFieldVariables();
+  int _readFieldVariablesAuto();
+  int _readFieldVariablesSpecified();
 
   int _addFl64FieldToRays(Nc3Var* var,
                           const string &name,
