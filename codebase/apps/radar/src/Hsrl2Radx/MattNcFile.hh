@@ -231,6 +231,7 @@ private:
   int _createRays(const string &path);
 
   void _loadReadVolume();
+  void _convertPressureToHpa();
 
   int _readFieldVariablesAuto();
   int _readFieldVariablesSpecified();

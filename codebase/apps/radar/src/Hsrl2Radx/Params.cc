@@ -1330,7 +1330,7 @@
     tt->descr = tdrpStrDup("Number of bins to combine into a single gate.");
     tt->help = tdrpStrDup("In range, we will combine this number of gates to produce a data set with lower spatial resolution but less noiry data.");
     tt->val_offset = (char *) &mhayman_n_bins_per_gate - &_start_;
-    tt->single_val.i = 4;
+    tt->single_val.i = 2;
     tt++;
     
     // Parameter 'mhayman_specify_fields'

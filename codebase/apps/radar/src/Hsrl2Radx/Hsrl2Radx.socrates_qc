@@ -877,7 +877,7 @@ mhayman_fields = {
     apply_mask = TRUE,
     mask_name = "Merged_Combined_Channel_mask",
     mask_valid_value = 0,
-    output_name = "Combined_Counts",
+    output_name = "",
     cf_standard_name = "lidar_copolar_combined_backscatter_photon_count"
   }
   ,
@@ -886,7 +886,7 @@ mhayman_fields = {
     apply_mask = FALSE,
     mask_name = "",
     mask_valid_value = 0,
-    output_name = "High_Counts",
+    output_name = "",
     cf_standard_name = ""
   }
   ,
@@ -895,7 +895,7 @@ mhayman_fields = {
     apply_mask = FALSE,
     mask_name = "",
     mask_valid_value = 0,
-    output_name = "Low_Counts",
+    output_name = "",
     cf_standard_name = ""
   }
   ,
@@ -904,7 +904,7 @@ mhayman_fields = {
     apply_mask = FALSE,
     mask_name = "",
     mask_valid_value = 0,
-    output_name = "Molecular_Counts",
+    output_name = "",
     cf_standard_name = ""
   }
   ,
@@ -913,7 +913,7 @@ mhayman_fields = {
     apply_mask = FALSE,
     mask_name = "",
     mask_valid_value = 0,
-    output_name = "Cross_Polar_Counts",
+    output_name = "",
     cf_standard_name = ""
   }
   ,

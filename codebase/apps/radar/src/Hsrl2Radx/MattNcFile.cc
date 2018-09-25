@@ -297,6 +297,10 @@ int MattNcFile::readFromPath(const string &path,
     }
   }
 
+  // Convert any pressure fields to hPa
+
+  _convertPressureToHpa();
+
   // load the data into the read volume
 
   _loadReadVolume();
@@ -891,6 +895,29 @@ void MattNcFile::_loadReadVolume()
   
 }
 
+/////////////////////////////////////////////////////////
+// Convert any pressure fields to HPa
+
+void MattNcFile::_convertPressureToHpa()
+{
+
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RadxRay *ray = _rays[iray];
+    for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
+      RadxField *field = ray->getField(ifield);
+      if (field->getUnits() == "$Pa$") {
+        field->convertToFl64(); 
+        Radx::fl64 *data = field->getDataFl64();
+        for (size_t ii = 0; ii < field->getNPoints(); ii++) {
+          data[ii] = data[ii] / 100.0;
+        }
+        field->setUnits("hPa");
+      }
+    }
+  } // iray
+
+}
+
 ////////////////////////////////////////////
 // read the field variables automatically
 
@@ -1096,9 +1123,14 @@ int MattNcFile::_readFieldVariablesSpecified()
     }
     
     // load in the data
+
+    string outputName(name);
+    if (strlen(fld.output_name) > 0) {
+      outputName = fld.output_name;
+    }
     
     if (ftype == nc3Double) {
-      if (_addFl64FieldToRays(var, name, units, description)) {
+      if (_addFl64FieldToRays(var, outputName, units, description)) {
         _addErrStr("ERROR - MattNcFile::_readFieldVariables");
         _addErrStr("  cannot read field name: ", name);
         _addErrStr(_file.getNc3Error()->get_errmsg());
