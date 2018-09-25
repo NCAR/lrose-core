@@ -448,12 +448,10 @@ int MattNcFile::_readTimes()
   // parse the time units reference time
 
   RadxTime stime(units);
-  time_t refTimeSecs = stime.utime();
 
-  
   // read in time 2D array
 
-  float *timeData = new float[_nTimesInFile];
+  double *timeData = new double[_nTimesInFile];
   if (!_timeVar->get(timeData, _nTimesInFile)) {
     _addErrStr("ERROR - MattNcFile::_readTimes");
     _addErrStr("  Cannot read time array");
@@ -465,7 +463,7 @@ int MattNcFile::_readTimes()
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
     double dt = timeData[ii];
     _dTimes.push_back(dt);
-    RadxTime rayTime = refTimeSecs + dt;
+    RadxTime rayTime(stime + dt);
     _dataTimes.push_back(rayTime);
   }
   
@@ -964,7 +962,7 @@ int MattNcFile::_readFieldVariablesAuto()
 
     string name = var->name();
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "DEBUG - MattNcFile::_readFieldVariables" << endl;
+      cerr << "DEBUG - MattNcFile::_readFieldAuto" << endl;
       cerr << "  -->> adding field: " << name << endl;
     }
 
@@ -993,14 +991,14 @@ int MattNcFile::_readFieldVariablesAuto()
     
     if (ftype == nc3Double) {
       if (_addFl64FieldToRays(var, name, units, description)) {
-        _addErrStr("ERROR - MattNcFile::_readFieldVariables");
+        _addErrStr("ERROR - MattNcFile::_readFieldAuto");
         _addErrStr("  cannot read field name: ", name);
         _addErrStr(_file.getNc3Error()->get_errmsg());
         return -1;
       }
     } else {
       if (_addSi08FieldToRays(var, name, units, description)) {
-        _addErrStr("ERROR - MattNcFile::_readFieldVariables");
+        _addErrStr("ERROR - MattNcFile::_readFieldAuto");
         _addErrStr("  cannot read field name: ", name);
         _addErrStr(_file.getNc3Error()->get_errmsg());
         return -1;
@@ -1051,15 +1049,22 @@ int MattNcFile::_readFieldVariablesSpecified()
   int nFields = _params.mhayman_fields_n;
   for (int ifield = 0; ifield < nFields; ifield++) {
   
-    Params::mhayman_field_t &fld = _params._mhayman_fields[ifield];
-    Nc3Var* var = _file.getNc3File()->get_var(fld.field_name);
+    Params::mhayman_field_t &mfld = _params._mhayman_fields[ifield];
+    Nc3Var* var = _file.getNc3File()->get_var(mfld.field_name);
     if (var == NULL) {
       cerr << "ERROR - MattNcFile::_readFieldVariablesSpecified()" << endl;
-      cerr << "  Cannot find specified field, name: " << fld.field_name << endl;
+      cerr << "  Cannot find specified field, name: " << mfld.field_name << endl;
       iret = -1;
       continue;
     }
     
+    // check the type
+    Nc3Type ftype = var->type();
+    if (ftype != nc3Double && ftype != nc3Byte) {
+      // not a valid type for field data
+      continue;
+    }
+
     int numDims = var->num_dims();
     // we need fields with 2 dimensions
     if (numDims != 2) {
@@ -1071,33 +1076,34 @@ int MattNcFile::_readFieldVariablesSpecified()
     Nc3Dim* timeDim = var->get_dim(0);
     if (timeDim != _timeDim) {
       cerr << "ERROR - MattNcFile::_readFieldVariablesSpecified()" << endl;
-      cerr << "  Variable does not have time dimension: " << fld.field_name << endl;
+      cerr << "  Variable does not have time dimension: " << mfld.field_name << endl;
       cerr << "  First dim is: " << timeDim->name() << endl;
       iret = -1;
       continue;
     }
 
-    // check that we have the range dimension
-    // if not, it is probably a waw field with a longer dimension
+    // check whether this variable uses the range dimension
+    // if not, it is a raw field with a longer dimension
     
-    Nc3Dim* rangeDim = var->get_dim(1);
-    bool usesRangeDim = true;
-    if (rangeDim != _rangeDim) {
-      usesRangeDim = false;
-    }
-
-    // check the type
-    Nc3Type ftype = var->type();
-    if (ftype != nc3Double && ftype != nc3Byte) {
-      // not a valid type for field data
-      continue;
+    Nc3Dim* dim1 = var->get_dim(1);
+    bool isRawField = false;
+    if (dim1 != _rangeDim) {
+      isRawField = true;
+      // must be a double field
+      if (ftype != nc3Double) {
+        cerr << "ERROR - MattNcFile::_readFieldVariablesSpecified()" << endl;
+        cerr << "  Variable does not have range dimension: " << mfld.field_name << endl;
+        cerr << "  and is not a double variable - ignoring" << endl;
+        iret = -1;
+        continue;
+      }
     }
 
     // set names, units, etc
 
     string name = var->name();
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "DEBUG - MattNcFile::_readFieldVariables" << endl;
+      cerr << "DEBUG - MattNcFile::_readFieldVariablesSpecified" << endl;
       cerr << "  -->> adding field: " << name << endl;
     }
 
@@ -1121,30 +1127,67 @@ int MattNcFile::_readFieldVariablesSpecified()
       procStatus = Nc3xFile::asString(statusAtt);
       delete statusAtt;
     }
-    
-    // load in the data
+
+    // set output name
 
     string outputName(name);
-    if (strlen(fld.output_name) > 0) {
-      outputName = fld.output_name;
+    if (strlen(mfld.output_name) > 0) {
+      outputName = mfld.output_name;
     }
-    
-    if (ftype == nc3Double) {
-      if (_addFl64FieldToRays(var, outputName, units, description)) {
-        _addErrStr("ERROR - MattNcFile::_readFieldVariables");
-        _addErrStr("  cannot read field name: ", name);
-        _addErrStr(_file.getNc3Error()->get_errmsg());
-        return -1;
-      }
-    } else {
-      if (_addSi08FieldToRays(var, name, units, description)) {
-        _addErrStr("ERROR - MattNcFile::_readFieldVariables");
-        _addErrStr("  cannot read field name: ", name);
-        _addErrStr(_file.getNc3Error()->get_errmsg());
-        return -1;
+
+    // check if we need to apply mask
+
+    bool applyMask = false;
+    vector<int> maskVals;
+    if ((strlen(mfld.mask_name) > 0) && (ftype == nc3Double)) {
+      if (_readMaskVar(mfld.mask_name, maskVals) == 0) {
+        applyMask = true;
       }
     }
 
+    if (applyMask) {
+
+      // use mask
+      
+      if (_addMaskedFieldToRays(var, outputName, units, description,
+                                maskVals, mfld.mask_valid_value)) {
+        _addErrStr("ERROR - MattNcFile::_readFieldVariablesSpecified");
+        _addErrStr("  cannot read field name: ", name);
+        _addErrStr(_file.getNc3Error()->get_errmsg());
+        return -1;
+      }
+
+    } else if (isRawField) {
+
+      if (_addRawFieldToRays(var, outputName, units, description)) {
+        _addErrStr("ERROR - MattNcFile::_readFieldVariablesSpecified");
+        _addErrStr("  cannot read raw field name: ", name);
+        _addErrStr(_file.getNc3Error()->get_errmsg());
+        return -1;
+      }
+
+    } else {
+
+      // no mask
+      
+      if (ftype == nc3Double) {
+        if (_addFl64FieldToRays(var, outputName, units, description)) {
+          _addErrStr("ERROR - MattNcFile::_readFieldVariablesSpecified");
+          _addErrStr("  cannot read field name: ", name);
+          _addErrStr(_file.getNc3Error()->get_errmsg());
+          return -1;
+        }
+      } else {
+        if (_addSi08FieldToRays(var, name, units, description)) {
+          _addErrStr("ERROR - MattNcFile::_readFieldVariablesSpecified");
+          _addErrStr("  cannot read field name: ", name);
+          _addErrStr(_file.getNc3Error()->get_errmsg());
+          return -1;
+        }
+      }
+
+    }
+      
     // add processing status to statusXml, if appropriate
 
     if (procStatus.size() > 0) {
@@ -1168,6 +1211,91 @@ int MattNcFile::_readFieldVariablesSpecified()
 
 }
 
+////////////////////////////////////////////
+// get a mask field
+// returns 0 on success, -1 on failure
+
+int MattNcFile::_readMaskVar(const string &maskFieldName,
+                             vector<int> &maskVals)
+
+{
+
+  // init
+
+  maskVals.clear();
+
+  // get var
+
+  Nc3Var* var = _file.getNc3File()->get_var(maskFieldName.c_str());
+  if (var == NULL) {
+    cerr << "ERROR - MattNcFile::_getMaskVar()" << endl;
+    cerr << "  Cannot find mask field, name: " << maskFieldName << endl;
+    return -1;
+  }
+    
+  // we need fields with 2 dimensions
+
+  int numDims = var->num_dims();
+  if (numDims != 2) {
+    cerr << "ERROR - MattNcFile::_getMaskVar()" << endl;
+    cerr << "  Bad mask field: " << maskFieldName << endl;
+    cerr << "  ndims != 1" << endl;
+    return -1;
+  }
+  
+  // check that we have the correct time dimension
+  
+  Nc3Dim* timeDim = var->get_dim(0);
+  if (timeDim != _timeDim) {
+    cerr << "ERROR - MattNcFile::_getMaskVar()" << endl;
+    cerr << "  Bad mask field: " << maskFieldName << endl;
+    cerr << "  first dim is not time" << endl;
+    return -1;
+  }
+
+  // check that we have the range dimension
+  
+  Nc3Dim* rangeDim = var->get_dim(1);
+  if (rangeDim != _rangeDim) {
+    cerr << "ERROR - MattNcFile::_getMaskVar()" << endl;
+    cerr << "  Bad mask field: " << maskFieldName << endl;
+    cerr << "  second dim is not range" << endl;
+    return -1;
+  }
+
+  // check the type
+
+  Nc3Type ftype = var->type();
+  if (ftype != nc3Byte) {
+    // not a valid type for field data
+    cerr << "ERROR - MattNcFile::_getMaskVar()" << endl;
+    cerr << "  Bad mask field: " << maskFieldName << endl;
+    cerr << "  Not an 8-bit byte field" << endl;
+    return -1;
+  }
+
+  // get data from array as bytes
+  
+  RadxArray<ncbyte> ndata_;
+  ncbyte *ndata = ndata_.alloc(_nPoints);
+  int iret = !var->get(ndata, _nTimesInFile, _nRangeInFile);
+  if (iret) {
+    cerr << "ERROR - MattNcFile::_getMaskVar()" << endl;
+    cerr << "  Bad mask field: " << maskFieldName << endl;
+    cerr << "  Cannot read data" << endl;
+    return -1;
+  }
+
+  // load up vals
+
+  for (int ii = 0; ii < _nPoints; ii++) {
+    maskVals.push_back((int) ndata[ii]);
+  }
+
+  return 0;
+
+}
+
 //////////////////////////////////////////////////////////////
 // Add double field to rays
 // The _rays array has previously been set up by _createRays()
@@ -1179,6 +1307,33 @@ int MattNcFile::_addFl64FieldToRays(Nc3Var* var,
                                     const string &description)
   
 {
+
+  // check whether this variable uses the range dimension
+  // if not, it is probably a raw field with a longer dimension
+  
+  Nc3Dim* dim1 = var->get_dim(1);
+  bool usesRangeDim = true;
+  if (dim1 != _rangeDim) {
+    usesRangeDim = false;
+  }
+  if (!usesRangeDim) {
+    // read in range variable with this dimension
+    for (int ivar = 0; ivar < _file.getNc3File()->num_vars(); ivar++) {
+      Nc3Var* rvar = _file.getNc3File()->get_var(ivar);
+      if (rvar == NULL) {
+        continue;
+      }
+      if (rvar->num_dims() != 1) {
+        continue;
+      }
+      // check that we have the correct dimensions
+      if (rvar->get_dim(0) != dim1) {
+        continue;
+      }
+      if (!usesRangeDim) {
+      }
+    }
+  } // 
 
   // get data from array
   
@@ -1193,7 +1348,7 @@ int MattNcFile::_addFl64FieldToRays(Nc3Var* var,
 
   string outName(name);
   string standardName;
-  // string longName;
+
   if (outName.find(_params.combined_hi_field_name) != string::npos) {
     outName = Names::CombinedHighCounts;
     standardName = Names::lidar_copolar_combined_backscatter_photon_count;
@@ -1223,12 +1378,250 @@ int MattNcFile::_addFl64FieldToRays(Nc3Var* var,
                             dd,
                             true);
     
-    // field->setLongName(longName);
     field->setStandardName(standardName);
     field->setLongName(description);
     field->copyRangeGeom(_geom);
     
+  } // iray
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////////////////
+// Add raw field to rays
+// raw fields have a different dimension
+// Returns 0 on success, -1 on failure
+
+int MattNcFile::_addRawFieldToRays(Nc3Var* var,
+                                   const string &name,
+                                   const string &units,
+                                   const string &description)
+  
+{
+
+  // get the range dimension for this variable
+  // this will differ from the main range dimension
+  
+  Nc3Dim* rawRangeDim = var->get_dim(1);
+  int nRawRange = rawRangeDim->size();
+
+  // read in range variable with this dimension
+  Nc3Var *rvar = NULL;
+  bool gotRvar = false;
+  for (int ivar = 0; ivar < _file.getNc3File()->num_vars(); ivar++) {
+    rvar = _file.getNc3File()->get_var(ivar);
+    if (rvar == NULL) {
+      continue;
+    }
+    if (rvar->num_dims() != 1) {
+      continue;
+    }
+    // check that we have the correct dimensions
+    if (rvar->get_dim(0) != rawRangeDim) {
+      continue;
+    }
+    gotRvar = true;
+    break;
   }
+  if (!gotRvar) {
+    _addErrStr("ERROR - MattNcFile::_addRawFieldToRays");
+    _addErrStr("  Cannot read range var for raw variable: ", name);
+    return -1;
+  }
+
+  // load up range data
+
+  vector<double> rawRange;
+  Nc3Type rtype = rvar->type();
+  if (rtype == nc3Float) {
+    
+    RadxArray<Radx::fl32> range_;
+    Radx::fl32 *range = range_.alloc(nRawRange);
+    if (rvar->get(range, nRawRange) == 0) {
+      _addErrStr("ERROR - MattNcFile::_addRawFieldToRays");
+      _addErrStr("  Cannot read float range variable: ", rvar->name());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
+      return -1;
+    }
+    for (int ii = 0; ii < nRawRange; ii++) {
+      rawRange.push_back(range[ii]);
+    }
+  
+  } else if (rtype == nc3Double) {
+
+    RadxArray<Radx::fl64> range_;
+    Radx::fl64 *range = range_.alloc(nRawRange);
+    if (rvar->get(range, nRawRange) != 0) {
+      _addErrStr("ERROR - MattNcFile::_addRawFieldToRays");
+      _addErrStr("  Cannot read double range variable: ", rvar->name());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
+      return -1;
+    }
+    for (int ii = 0; ii < nRawRange; ii++) {
+      rawRange.push_back(range[ii]);
+    }
+  
+  } else {
+
+    _addErrStr("ERROR - MattNcFile::_addRawFieldToRays");
+    _addErrStr("  Bad type for range variable: ", rvar->name());
+    _addErrStr("  Should be float or double");
+    return -1;
+
+  }
+
+  // get field data from array
+  
+  int nPoints = _nTimesInFile * nRawRange;
+  RadxArray<Radx::fl64> ddata_;
+  Radx::fl64 *ddata = ddata_.alloc(nPoints);
+  int iret = !var->get(ddata, _nTimesInFile, nRawRange);
+  if (iret) {
+    _addErrStr("ERROR - MattNcFile::_addRawFieldToRays");
+    _addErrStr("  Cannot read variable: ", name);
+    _addErrStr(_file.getNc3Error()->get_errmsg());
+    return -1;
+  }
+
+  // compute the indices of the range array relative to the main range array
+
+  double startRangeInFile = _rangeKm[0] * 1000.0;
+  int rawRangeStartIndex = -1;
+  for (int ii = 0; ii < nRawRange; ii++) {
+    if (fabs(startRangeInFile - rawRange[ii]) < 0.1) {
+      rawRangeStartIndex = ii;
+      break;
+    }
+  }
+  if (rawRangeStartIndex < 0) {
+    _addErrStr("ERROR - MattNcFile::_addRawFieldToRays");
+    _addErrStr("  Cannot match raw range to file range array");
+    return -1;
+  }
+  int rawRangeEndIndex = rawRangeStartIndex + _nRangeInFile;
+  if (rawRangeEndIndex > nRawRange) {
+    rawRangeEndIndex = nRawRange;
+  }
+  int nCopy = rawRangeEndIndex - rawRangeStartIndex;
+
+  // set output name
+
+  string outName(name);
+  string standardName;
+
+  if (outName.find(_params.combined_hi_field_name) != string::npos) {
+    outName = Names::CombinedHighCounts;
+    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+  } else if (outName.find(_params.combined_lo_field_name) != string::npos) {
+    outName = Names::CombinedLowCounts;
+    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+  } else if (outName.find(_params.molecular_field_name) != string::npos) {
+    outName = Names::MolecularCounts;
+    standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
+  } else if (outName.find(_params.cross_field_name) != string::npos) {
+    outName = Names::CrossPolarCounts;
+    standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
+  }
+  
+  // loop through the rays, copying in the raw data fields
+  
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+
+    // get data for ray
+    
+    int startIndex = iray * nRawRange + rawRangeStartIndex;
+    Radx::fl64 *dd = ddata + startIndex;
+
+    RadxField *field =
+      _rays[iray]->addField(outName, units, nCopy,
+                            Radx::missingFl64,
+                            dd,
+                            true);
+    
+    field->setStandardName(standardName);
+    field->setLongName(description);
+    field->copyRangeGeom(_geom);
+    
+  } // iray
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////////////////
+// Add masked field to rays
+// The _rays array has previously been set up by _createRays()
+// Returns 0 on success, -1 on failure
+
+int MattNcFile::_addMaskedFieldToRays(Nc3Var* var,
+                                      const string &name,
+                                      const string &units,
+                                      const string &description,
+                                      vector<int> &maskVals,
+                                      int maskValidValue)
+  
+{
+
+  // get data from array
+  
+  RadxArray<Radx::fl64> ddata_;
+  Radx::fl64 *ddata = ddata_.alloc(_nPoints);
+  int iret = !var->get(ddata, _nTimesInFile, _nRangeInFile);
+  if (iret) {
+    return -1;
+  }
+
+  // apply mask
+  
+  for (int ii = 0; ii < _nPoints; ii++) {
+    if (ii > (int) maskVals.size() - 1) {
+      break;
+    }
+    if (maskVals[ii] != maskValidValue) {
+      ddata[ii] = Radx::missingFl64;
+    }
+  }
+
+  // set name
+
+  string outName(name);
+  string standardName;
+
+  if (outName.find(_params.combined_hi_field_name) != string::npos) {
+    outName = Names::CombinedHighCounts;
+    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+  } else if (outName.find(_params.combined_lo_field_name) != string::npos) {
+    outName = Names::CombinedLowCounts;
+    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+  } else if (outName.find(_params.molecular_field_name) != string::npos) {
+    outName = Names::MolecularCounts;
+    standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
+  } else if (outName.find(_params.cross_field_name) != string::npos) {
+    outName = Names::CrossPolarCounts;
+    standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
+  }
+  
+  // loop through the rays
+  
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+
+    // get data for ray
+    
+    int startIndex = iray * _nRangeInFile;
+    Radx::fl64 *dd = ddata + startIndex;
+
+    RadxField *field =
+      _rays[iray]->addField(outName, units, _nRangeInFile,
+                            Radx::missingFl64,
+                            dd,
+                            true);
+    
+    field->setStandardName(standardName);
+    field->setLongName(description);
+    field->copyRangeGeom(_geom);
+    
+  } // iray
   
   return 0;
   

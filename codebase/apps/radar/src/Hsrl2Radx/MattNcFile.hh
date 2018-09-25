@@ -235,12 +235,26 @@ private:
 
   int _readFieldVariablesAuto();
   int _readFieldVariablesSpecified();
+  int _readMaskVar(const string &maskFieldName,
+                   vector<int> &maskVals);
 
   int _addFl64FieldToRays(Nc3Var* var,
                           const string &name,
                           const string &units,
                           const string &description);
   
+  int _addMaskedFieldToRays(Nc3Var* var,
+                            const string &name,
+                            const string &units,
+                            const string &description,
+                            vector<int> &maskVals,
+                            int maskValidValue);
+    
+  int _addRawFieldToRays(Nc3Var* var,
+                         const string &name,
+                         const string &units,
+                         const string &description);
+
   int _addSi08FieldToRays(Nc3Var* var,
                           const string &name,
                           const string &units,
