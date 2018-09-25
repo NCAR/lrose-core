@@ -595,7 +595,7 @@ Radx::fl32 NcfRadxFile::_checkMissingFloat(float val)
 
 const string NcfRadxFile::CfConvention = "CF-1.6";
 const string NcfRadxFile::BaseConvention = "CF-Radial";
-const string NcfRadxFile::CurrentVersion = "CF-Radial-1.3";
+const string NcfRadxFile::CurrentVersion = "CF-Radial-1.4";
 
 const char* NcfRadxFile::ADD_OFFSET = "add_offset";
 const char* NcfRadxFile::AIRBORNE = "airborne";
