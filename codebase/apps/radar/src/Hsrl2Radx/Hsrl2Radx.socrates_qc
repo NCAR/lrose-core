@@ -855,12 +855,30 @@ mhayman_fields = {
   }
   ,
   {
+    field_name = "Particle_Linear_Depolarization_Ratio",
+    apply_mask = FALSE,
+    mask_name = "",
+    mask_valid_value = 0,
+    output_name = "",
+    cf_standard_name = "lidar_particle_linear_depolarization_ratio"
+  }
+  ,
+  {
     field_name = "Volume_Depolarization",
     apply_mask = TRUE,
     mask_name = "Volume_Depolarization_mask",
     mask_valid_value = 0,
     output_name = "",
     cf_standard_name = "lidar_volume_depolarization_ratio"
+  }
+  ,
+  {
+    field_name = "Volume_Linear_Depolarization_Ratio",
+    apply_mask = FALSE,
+    mask_name = "",
+    mask_valid_value = 0,
+    output_name = "",
+    cf_standard_name = "lidar_volume_linear_depolarization_ratio"
   }
   ,
   {
