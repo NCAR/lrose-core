@@ -473,26 +473,26 @@ int HcrVelCorrect::_processRayWaveFilt(RadxRay *ray)
     _waveNodeMid->velIsValid = false;
     _waveNodeMid->corrected = false;
   }
+
+  // RadxTime filtRayTime = _filtRay->getRadxTime();
   
-  RadxTime filtRayTime = _filtRay->getRadxTime();
+  // // write vol when done
   
-  // write vol when done
+  // if ((_inputFileEndTime.size() > 0) &&
+  //     (filtRayTime > _inputFileEndTime[0])) {
+  //   _writeFiltVol();
+  //   _inputFileEndTime.pop_front();
+  // }
   
-  if ((_inputFileEndTime.size() > 0) &&
-      (filtRayTime > _inputFileEndTime[0])) {
-    _writeFiltVol();
-    _inputFileEndTime.pop_front();
-  }
+  // // add to output vol
   
-  // add to output vol
+  // _filtVol.addRay(_filtRay);
   
-  _filtVol.addRay(_filtRay);
+  // // write results to SPDB in XML if requested
   
-  // write results to SPDB in XML if requested
-  
-  if (_params.write_surface_vel_results_to_spdb) {
-    _writeWaveFiltResultsToSpdb(_filtRay);
-  }
+  // if (_params.write_surface_vel_results_to_spdb) {
+  //   _writeWaveFiltResultsToSpdb(_filtRay);
+  // }
   
   return 0;
 
@@ -807,6 +807,12 @@ void HcrVelCorrect::_addNodeRayToFiltVol(FiltNode &node)
   
   _filtVol.addRay(node.ray);
   
+  // write vel filtering results to spdb
+
+  if (_params.write_surface_vel_results_to_spdb) {
+    _writeWaveFiltResultsToSpdb(_filtRay);
+  }
+
 }
 
 //////////////////////////////////////////////////
