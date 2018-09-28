@@ -853,6 +853,18 @@
     tt->single_val.d = 1;
     tt++;
     
+    // Parameter 'center_dwell_on_time'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("center_dwell_on_time");
+    tt->descr = tdrpStrDup("Option to center the dwell on a multiple of the dwell_time.");
+    tt->help = tdrpStrDup("The dwell will be chosen so that the center time of the dwell will be close to an even multiple of the dwell_time_secs. So if for example dwell_time_secs is set to 0.5, the dwell centers would be at 0.25, 0.75, 1.25 secs etc.");
+    tt->val_offset = (char *) &center_dwell_on_time - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'dwell_stats_method'
     // ctype is '_dwell_stats_method_t'
     

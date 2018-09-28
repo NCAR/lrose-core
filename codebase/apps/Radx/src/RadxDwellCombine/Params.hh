@@ -482,6 +482,8 @@ public:
 
   double dwell_time_secs;
 
+  tdrp_bool_t center_dwell_on_time;
+
   dwell_stats_method_t dwell_stats_method;
 
   double dwell_stats_max_fraction_missing;
@@ -589,7 +591,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[84];
+  mutable TDRPtable _table[85];
 
   const char *_className;
 

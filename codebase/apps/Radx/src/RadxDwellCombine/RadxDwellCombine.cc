@@ -363,7 +363,11 @@ int RadxDwellCombine::_processFile(const string &readPath)
 
   // combine the dwells
 
-  _combineDwells(vol);
+  if (_params.center_dwell_on_time) {
+    _combineDwellsCentered(vol);
+  } else {
+    _combineDwells(vol);
+  }
 
   // censor as needed
 
@@ -743,7 +747,7 @@ int RadxDwellCombine::_combineDwells(RadxVol &vol)
   
   if (_params.debug) {
     cerr << "INFO: nrays left from previous file: "
-         << _statsVol.getNRays() << endl;
+         << _dwellVol.getNRays() << endl;
   }
 
   // create a volume for stats
@@ -756,11 +760,11 @@ int RadxDwellCombine::_combineDwells(RadxVol &vol)
     // add rays to stats vol
     
     RadxRay *ray = new RadxRay(*fileRays[iray]);
-    if (_statsVol.getNRays() == 0) {
+    if (_dwellVol.getNRays() == 0) {
       _dwellStartTime = ray->getRadxTime();
     }
-    _statsVol.addRay(ray);
-    int nRaysDwell = _statsVol.getNRays();
+    _dwellVol.addRay(ray);
+    int nRaysDwell = _dwellVol.getNRays();
     _dwellEndTime = ray->getRadxTime();
     double dwellSecs = (_dwellEndTime - _dwellStartTime);
     if (nRaysDwell > 1) {
@@ -774,11 +778,11 @@ int RadxDwellCombine::_combineDwells(RadxVol &vol)
         cerr << "INFO: _combineDwells, using nrays: " << nRaysDwell << endl;
       }
       RadxRay *dwellRay =
-        _statsVol.computeFieldStats(_dwellStatsMethod,
+        _dwellVol.computeFieldStats(_dwellStatsMethod,
                                     _params.dwell_stats_max_fraction_missing);
       combRays.push_back(dwellRay);
       // clear out stats vol
-      _statsVol.clearRays();
+      _dwellVol.clearRays();
     }
       
   } // iray
@@ -793,7 +797,118 @@ int RadxDwellCombine::_combineDwells(RadxVol &vol)
   // compute volume metadata
 
   vol.loadSweepInfoFromRays();
-  // vol.loadVolumeInfoFromRays();
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Combine the dwells centered on time
+
+int RadxDwellCombine::_combineDwellsCentered(RadxVol &vol)
+
+{
+  
+  if (_params.debug) {
+    cerr << "INFO: nrays left from previous file: "
+         << _dwellVol.getNRays() << endl;
+  }
+
+  // create a volume for combined dwells
+  
+  vector<RadxRay *> combRays;
+  
+  const vector<RadxRay *> &fileRays = vol.getRays();
+  for (size_t iray = 0; iray < fileRays.size(); iray++) {
+
+    RadxRay *ray = new RadxRay(*fileRays[iray]);
+    _latestRayTime = ray->getRadxTime();
+    
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "==>> got new ray, latestRayTime: " << _latestRayTime.asString(3) << endl;
+    }
+
+    // at the start of reading a volume, we always need 
+    // at least 1 ray in the dwell
+
+    if (_dwellVol.getNRays() == 0) {
+      _dwellVol.addRay(ray);
+      continue;
+    }
+    
+    // set dwell time limits if we have just 1 ray in the dwell so far
+    
+    if (_dwellVol.getNRays() == 1) {
+
+      _dwellStartTime = _dwellVol.getRays()[0]->getRadxTime();
+
+      RadxTime volStartTime(vol.getStartTimeSecs());
+      double dsecs = _latestRayTime - volStartTime;
+      double roundedSecs =
+        ((int) (dsecs / _params.dwell_time_secs) + 1.0) * _params.dwell_time_secs;
+      _dwellMidTime = volStartTime + roundedSecs;
+      _dwellEndTime = _dwellMidTime + _params.dwell_time_secs / 2.0;
+
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "==>> starting new dwell <<==" << endl;
+        cerr << "  _dwellStartTime: " << _dwellStartTime.asString(3) << endl;
+        cerr << "  _dwellMidTime: " << _dwellMidTime.asString(3) << endl;
+        cerr << "  _dwellEndTime: " << _dwellEndTime.asString(3) << endl;
+      }
+        
+    }
+    
+    // dwell time exceeded, so compute dwell ray stats
+    // and add results to volume
+    
+    if (_latestRayTime > _dwellEndTime) {
+
+      // beyond end of dwell, process this one
+      
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "INFO: _combineDwellsCentered, using nrays: "
+             << _dwellVol.getNRays() << endl;
+        const vector<RadxRay *> &dwellRays = _dwellVol.getRays();
+        for (size_t jray = 0; jray < dwellRays.size(); jray++) {
+          const RadxRay *dray = dwellRays[jray];
+          cerr << "INFO: using ray at time: "
+               << dray->getRadxTime().asString(3) << endl;
+        }
+      } // debug
+
+      // compute ray for dwell
+      
+      RadxRay *dwellRay =
+        _dwellVol.computeFieldStats(_dwellStatsMethod,
+                                    _params.dwell_stats_max_fraction_missing);
+      dwellRay->setTime(_dwellMidTime);
+
+      // add it to the combination
+
+      combRays.push_back(dwellRay);
+
+      // clear out stats vol
+
+      _dwellVol.clearRays();
+
+    } // if (_latestRayTime > _dwellEndTime) {
+      
+    // add the latest ray to the next dwell vol
+    
+    _dwellVol.addRay(ray);
+    
+  } // iray
+
+  // move combination rays into volume
+  
+  vol.clearRays();
+  for (size_t ii = 0; ii < combRays.size(); ii++) {
+    vol.addRay(combRays[ii]);
+  }
+  
+  // compute volume metadata
+
+  vol.loadSweepInfoFromRays();
 
   return 0;
 
@@ -924,7 +1039,7 @@ int RadxDwellCombine::_runFmq()
 
     // combine rays if combined time exceeds specified dwell
 
-    const vector<RadxRay *> &raysDwell = _statsVol.getRays();
+    const vector<RadxRay *> &raysDwell = _dwellVol.getRays();
     size_t nRaysDwell = raysDwell.size();
     if (nRaysDwell > 1) {
       
@@ -940,7 +1055,7 @@ int RadxDwellCombine::_runFmq()
         if (_params.debug >= Params::DEBUG_VERBOSE) {
           cerr << "INFO: _runFmq, using nrays: " << nRaysDwell << endl;
         }
-        RadxRay *dwellRay = _statsVol.computeFieldStats(_dwellStatsMethod);
+        RadxRay *dwellRay = _dwellVol.computeFieldStats(_dwellStatsMethod);
 
         RadxTime dwellRayTime(dwellRay->getRadxTime());
         double deltaSecs = dwellRayTime - prevDwellRayTime;
@@ -972,7 +1087,7 @@ int RadxDwellCombine::_runFmq()
         // clean up
 
         delete dwellRay;
-        _statsVol.clearRays();
+        _dwellVol.clearRays();
         _georefs.clear();
 
       }
@@ -1041,7 +1156,7 @@ int RadxDwellCombine::_readFmqMsg(bool &gotMsg)
       
       // add the ray to the volume as appropriate
       
-      _statsVol.addRay(ray);
+      _dwellVol.addRay(ray);
       
     }
     
@@ -1064,51 +1179,51 @@ void RadxDwellCombine::_loadRadarParams()
 
   _rparams = _inputMsg.getRadarParams();
   
-  _statsVol.setInstrumentName(_rparams.radarName);
-  _statsVol.setScanName(_rparams.scanTypeName);
+  _dwellVol.setInstrumentName(_rparams.radarName);
+  _dwellVol.setScanName(_rparams.scanTypeName);
   
   switch (_rparams.radarType) {
     case DS_RADAR_AIRBORNE_FORE_TYPE: {
-      _statsVol.setPlatformType(Radx::PLATFORM_TYPE_FIXED);
+      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_FIXED);
       break;
     }
     case DS_RADAR_AIRBORNE_AFT_TYPE: {
-      _statsVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_FORE);
+      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_FORE);
       break;
     }
     case DS_RADAR_AIRBORNE_TAIL_TYPE: {
-      _statsVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_TAIL);
+      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_TAIL);
       break;
     }
     case DS_RADAR_AIRBORNE_LOWER_TYPE: {
-      _statsVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_BELLY);
+      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_BELLY);
       break;
     }
     case DS_RADAR_AIRBORNE_UPPER_TYPE: {
-      _statsVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_ROOF);
+      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_ROOF);
       break;
     }
     case DS_RADAR_SHIPBORNE_TYPE: {
-      _statsVol.setPlatformType(Radx::PLATFORM_TYPE_SHIP);
+      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_SHIP);
       break;
     }
     case DS_RADAR_VEHICLE_TYPE: {
-      _statsVol.setPlatformType(Radx::PLATFORM_TYPE_VEHICLE);
+      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_VEHICLE);
       break;
     }
     case DS_RADAR_GROUND_TYPE:
     default:{
-      _statsVol.setPlatformType(Radx::PLATFORM_TYPE_FIXED);
+      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_FIXED);
     }
   }
   
-  _statsVol.setLocation(_rparams.latitude,
+  _dwellVol.setLocation(_rparams.latitude,
                         _rparams.longitude,
                         _rparams.altitude);
 
-  _statsVol.addWavelengthCm(_rparams.wavelength);
-  _statsVol.setRadarBeamWidthDegH(_rparams.horizBeamWidth);
-  _statsVol.setRadarBeamWidthDegV(_rparams.vertBeamWidth);
+  _dwellVol.addWavelengthCm(_rparams.wavelength);
+  _dwellVol.setRadarBeamWidthDegH(_rparams.horizBeamWidth);
+  _dwellVol.setRadarBeamWidthDegV(_rparams.vertBeamWidth);
 
 }
 

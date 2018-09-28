@@ -98,9 +98,10 @@ private:
 
   // combining
 
-  RadxVol _statsVol;
+  RadxVol _dwellVol;
   RadxField::StatsMethod_t _dwellStatsMethod;
   RadxTime _dwellStartTime, _dwellEndTime;
+  RadxTime _latestRayTime, _dwellMidTime;
 
   // censoring
 
@@ -123,6 +124,7 @@ private:
   void _setGlobalAttr(RadxVol &vol);
   int _writeVol(RadxVol &vol);
   int _combineDwells(RadxVol &vol);
+  int _combineDwellsCentered(RadxVol &vol);
   void _setDwellStatsMethod();
 
   int _readFmqMsg(bool &gotMsg);
