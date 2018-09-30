@@ -1064,6 +1064,14 @@ void Hsrl2Radx::_setGlobalAttr(RadxVol &vol)
 int Hsrl2Radx::_writeVol(RadxVol &vol)
 {
 
+  // censor data below surface level
+
+  if (_params.censor_gates_below_surface) {
+    _censorGatesBelowSurface(vol);
+  }
+
+  // are we writing split volumes?
+
   if (_params.split_output_files_on_time) {
     return _writeSplitOnTime(vol);
   }
@@ -1225,6 +1233,54 @@ void Hsrl2Radx::_setNextEndOfVolTime(RadxTime &refTime)
   if (_params.debug) {
     cerr << "==>> Next end of vol time: " << _nextEndOfVolTime.asString(3) << endl;
   }
+}
+
+//////////////////////////////////////////////////
+// Censor gates below the surface
+// when telescope is pointing down
+
+void Hsrl2Radx::_censorGatesBelowSurface(RadxVol &vol)
+{
+
+  vector<RadxRay *> &rays = vol.getRays();
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+
+    RadxRay *ray = rays[iray];
+    
+    // cannot do this if we have no georef data
+    
+    RadxGeoref *georef = ray->getGeoreference();
+    if (georef == NULL) {
+      continue;
+    }
+
+    // check elevation
+
+    double elev = ray->getElevationDeg();
+    if (elev > 0) {
+      continue;
+    }
+    double sinEl = sin(elev * DEG_TO_RAD);
+    
+    // compute range gate beyond which we censor the data
+
+    double startRangeKm = ray->getStartRangeKm();
+    double gateSpacingKm = ray->getGateSpacingKm();
+    double altKm = georef->getAltitudeKmMsl();
+    double maxRangeKm = (_params.surface_height_for_censoring - altKm) / sinEl;
+    int maxValidGateNum = (int) ((maxRangeKm - startRangeKm) / gateSpacingKm + 0.5);
+    if (maxValidGateNum > (int) ray->getNGates()) {
+      continue;
+    }
+    
+    vector<RadxField *> fields = ray->getFields();
+    for (size_t ifield = 0; ifield < fields.size(); ifield++) {
+      RadxField *field = fields[ifield];
+      field->setGatesToMissing(maxValidGateNum + 1, field->getNPoints() - 1);
+    }
+
+  } // iray
+  
 }
 
 //////////////////////////////////////////////////

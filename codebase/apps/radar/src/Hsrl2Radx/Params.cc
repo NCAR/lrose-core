@@ -1858,6 +1858,30 @@
     tt->single_val.i = 600;
     tt++;
     
+    // Parameter 'censor_gates_below_surface'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("censor_gates_below_surface");
+    tt->descr = tdrpStrDup("Option to censor the field gates below the surface.");
+    tt->help = tdrpStrDup("Only applies when antenna is pointing down.");
+    tt->val_offset = (char *) &censor_gates_below_surface - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'surface_height_for_censoring'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("surface_height_for_censoring");
+    tt->descr = tdrpStrDup("Height for censoring field below surface (km).");
+    tt->help = tdrpStrDup("See 'censor_gates_below_surface'.");
+    tt->val_offset = (char *) &surface_height_for_censoring - &_start_;
+    tt->single_val.d = -0.3;
+    tt++;
+    
     // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));

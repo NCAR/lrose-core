@@ -737,6 +737,18 @@ paramdef int {
   p_help = "See 'split_output_files_on_time'. To make sense, this interval should divide evenly into an hour - i.e. 3600.";
 } output_file_time_interval_secs;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to censor the field gates below the surface.";
+  p_help = "Only applies when antenna is pointing down.";
+} censor_gates_below_surface;
+
+paramdef double {
+  p_default = -0.3;
+  p_descr = "Height for censoring field below surface (km).";
+  p_help = "See 'censor_gates_below_surface'.";
+} surface_height_for_censoring;
+
 commentdef {
   p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
   p_text = "Applies to CfRadial output files only.";

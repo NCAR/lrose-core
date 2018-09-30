@@ -148,6 +148,7 @@ private:
   int _writeSplitOnTime(RadxVol &vol);
   int _writeSplitVol();
   void _setNextEndOfVolTime(RadxTime &refTime);
+  void _censorGatesBelowSurface(RadxVol &vol);
 
   int _processUwRawFile(const string &filePath);
   int _processMattNcFile(const string &filePath);

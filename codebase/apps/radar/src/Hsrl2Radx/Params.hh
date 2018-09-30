@@ -565,6 +565,10 @@ public:
 
   int output_file_time_interval_secs;
 
+  tdrp_bool_t censor_gates_below_surface;
+
+  double surface_height_for_censoring;
+
   char* version_override;
 
   char* title_override;
@@ -602,7 +606,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[116];
+  mutable TDRPtable _table[118];
 
   const char *_className;
 
