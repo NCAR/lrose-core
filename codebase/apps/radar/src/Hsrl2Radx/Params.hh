@@ -561,6 +561,10 @@ public:
 
   tdrp_bool_t write_latest_data_info;
 
+  tdrp_bool_t split_output_files_on_time;
+
+  int output_file_time_interval_secs;
+
   char* version_override;
 
   char* title_override;
@@ -598,7 +602,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[114];
+  mutable TDRPtable _table[116];
 
   const char *_className;
 

@@ -655,7 +655,7 @@ paramdef string {
 } site_name;
 
 commentdef {
-  p_header = "OUTPUT DIRECTORY AND FILE NAME";
+  p_header = "WRITING DATA TO OUTPUT DIRECTORY";
 }
 
 paramdef string {
@@ -724,6 +724,18 @@ paramdef boolean {
   p_descr = "Option to write out _latest_data_info files.";
   p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
 } write_latest_data_info;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to split the output files, based on time.";
+  p_help = "If true, the output volumes will be split up to be written out on time boundaries. See 'output_file_time_interval_secs'.";
+} split_output_files_on_time;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Time interval at which files will be written out (secs).";
+  p_help = "See 'split_output_files_on_time'. To make sense, this interval should divide evenly into an hour - i.e. 3600.";
+} output_file_time_interval_secs;
 
 commentdef {
   p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";

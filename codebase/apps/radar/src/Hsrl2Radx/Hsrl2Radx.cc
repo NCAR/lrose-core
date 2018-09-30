@@ -35,7 +35,6 @@
 #include "Hsrl2Radx.hh"
 #include "Names.hh"
 #include <Radx/Radx.hh>
-#include <Radx/RadxVol.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
@@ -87,6 +86,8 @@ Hsrl2Radx::Hsrl2Radx(int argc, char **argv)
   _nBinsInRay = 0;
   _nBinsPerGate = 0;
   _nGates = 0;
+
+  _nextEndOfVolTime.set(-1);
 
   // set programe name
 
@@ -1063,6 +1064,10 @@ void Hsrl2Radx::_setGlobalAttr(RadxVol &vol)
 int Hsrl2Radx::_writeVol(RadxVol &vol)
 {
 
+  if (_params.split_output_files_on_time) {
+    return _writeSplitOnTime(vol);
+  }
+
   // output file
 
   NcfRadxFile outFile;
@@ -1119,6 +1124,107 @@ int Hsrl2Radx::_writeVol(RadxVol &vol)
 
   return 0;
 
+}
+
+//////////////////////////////////////////////////
+// write out the data splitting on time
+
+int Hsrl2Radx::_writeSplitOnTime(RadxVol &vol)
+{
+  
+  // on first call, calculate the initial end of vol time
+  
+  RadxTime volStart = vol.getStartRadxTime();
+  // _setNextEndOfVolTime(volStart);
+  
+  // check for time gap
+
+  RadxTime splitVolEnd = _splitVol.getEndRadxTime();
+  double gapSecs = volStart - splitVolEnd;
+  if (gapSecs > _params.output_file_time_interval_secs * 2) {
+    _writeSplitVol();
+    _setNextEndOfVolTime(volStart);
+  }
+
+  // add rays to the output vol
+
+  _splitVol.copyMeta(vol);
+  vector<RadxRay *> &volRays = vol.getRays();
+  for (size_t ii = 0; ii < volRays.size(); ii++) {
+    RadxRay *ray = volRays[ii];
+    if (ray->getRadxTime() > _nextEndOfVolTime) {
+      if (_writeSplitVol()) {
+        return -1;
+      }
+    }
+    RadxRay *splitRay = new RadxRay(*ray);
+    _splitVol.addRay(splitRay);
+  } // ii
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// write out the split volume
+
+int Hsrl2Radx::_writeSplitVol()
+{
+
+  // sanity check
+
+  if (_splitVol.getNRays() < 1) {
+    return 0;
+  }
+
+  // load the sweep information from the rays
+  
+  _splitVol.loadSweepInfoFromRays();
+
+  // load the volume information from the rays
+  
+  _splitVol.loadVolumeInfoFromRays();
+  
+  // output file
+
+  NcfRadxFile outFile;
+  _setupWrite(outFile);
+  
+  // write out
+
+  if (outFile.writeToDir(_splitVol, _params.output_dir,
+                         _params.append_day_dir_to_output_dir,
+                         _params.append_year_dir_to_output_dir)) {
+    cerr << "ERROR - Hsrl2Radx::_writeSplitVol" << endl;
+    cerr << "  Cannot write file to dir: " << _params.output_dir << endl;
+    cerr << outFile.getErrStr() << endl;
+    return -1;
+  }
+
+  // update next end of vol time
+
+  RadxTime nextVolStart(_splitVol.getEndTimeSecs() + 1);
+  _setNextEndOfVolTime(nextVolStart);
+
+  // clear
+
+  _splitVol.clearRays();
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Compute next end of vol time
+
+void Hsrl2Radx::_setNextEndOfVolTime(RadxTime &refTime)
+{
+  _nextEndOfVolTime.set
+    (((refTime.utime() / _params.output_file_time_interval_secs) + 1) *
+     _params.output_file_time_interval_secs);
+  if (_params.debug) {
+    cerr << "==>> Next end of vol time: " << _nextEndOfVolTime.asString(3) << endl;
+  }
 }
 
 //////////////////////////////////////////////////

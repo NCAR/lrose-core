@@ -1698,7 +1698,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 12");
-    tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
+    tt->comment_hdr = tdrpStrDup("WRITING DATA TO OUTPUT DIRECTORY");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1832,6 +1832,30 @@
     tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
     tt->val_offset = (char *) &write_latest_data_info - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'split_output_files_on_time'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("split_output_files_on_time");
+    tt->descr = tdrpStrDup("Option to split the output files, based on time.");
+    tt->help = tdrpStrDup("If true, the output volumes will be split up to be written out on time boundaries. See 'output_file_time_interval_secs'.");
+    tt->val_offset = (char *) &split_output_files_on_time - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'output_file_time_interval_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("output_file_time_interval_secs");
+    tt->descr = tdrpStrDup("Time interval at which files will be written out (secs).");
+    tt->help = tdrpStrDup("See 'split_output_files_on_time'. To make sense, this interval should divide evenly into an hour - i.e. 3600.");
+    tt->val_offset = (char *) &output_file_time_interval_secs - &_start_;
+    tt->single_val.i = 600;
     tt++;
     
     // Parameter 'Comment 13'

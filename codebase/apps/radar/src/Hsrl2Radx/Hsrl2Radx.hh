@@ -42,9 +42,10 @@
 #include <string>
 #include "CalReader.hh"
 #include "FullCals.hh"
+#include <Radx/Radx.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxGeoref.hh>
-#include <Radx/Radx.hh>
+#include <Radx/RadxVol.hh>
 #include <physics/IcaoStdAtmos.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
@@ -52,7 +53,6 @@
 
 class DerFieldCalcs;
 
-class RadxVol;
 class RadxRay;
 class RadxFile;
 class HsrlRawRay;
@@ -111,6 +111,13 @@ private:
   DerFieldCalcs *_calcs;
   DerFieldCalcs *_calcsFilt;
 
+  // output data if split on time
+
+  RadxTime _nextEndOfVolTime;
+  RadxVol _splitVol;
+
+  // methods
+
   int _readCals();
   int _runFilelist();
   int _runArchive();
@@ -138,6 +145,9 @@ private:
   void _setupWrite(RadxFile &file);
   void _setGlobalAttr(RadxVol &vol);
   int _writeVol(RadxVol &vol);
+  int _writeSplitOnTime(RadxVol &vol);
+  int _writeSplitVol();
+  void _setNextEndOfVolTime(RadxTime &refTime);
 
   int _processUwRawFile(const string &filePath);
   int _processMattNcFile(const string &filePath);
