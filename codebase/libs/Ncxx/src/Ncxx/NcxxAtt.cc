@@ -197,40 +197,70 @@ void NcxxAtt::getValues(string& dataValues) const {
   NcxxType::ncxxType typeClass(getType().getTypeClass());
 
   size_t att_len=getAttLength();
-  char* tmpValues = new char[att_len + 1];  /* + 1 for trailing null */
 
   if(typeClass == NcxxType::nc_VLEN ||
      typeClass == NcxxType::nc_OPAQUE ||
      typeClass == NcxxType::nc_ENUM ||
      typeClass == NcxxType::nc_COMPOUND) {
+
+    // allocate
+    char* tmpValues = new char[att_len + 1];  /* + 1 for trailing null */
+    // get att value
     ncxxCheck(nc_get_att(groupId, varId, 
                          myName.c_str(), tmpValues),
               __FILE__, __LINE__,
               "NcxxAtt::getValues()", "string", myName);
+    // find length to null
+    size_t finalLen = 0;
+    for (size_t ii = 0; ii < att_len; ii++) {
+      if ((int) tmpValues[ii] == 0) {
+        break;
+      }
+      finalLen = ii + 1;
+    }
+    // set return value
+    dataValues = string(tmpValues,finalLen);
+    // clean up
+    delete[] tmpValues;
+
+  } else if(typeClass == NcxxType::nc_STRING) {
+
+    // allocate
+    char **tmpStr = (char **) malloc(sizeof(char *) * att_len);
+    // get value
+    ncxxCheck(nc_get_att_string(groupId, varId, 
+                                myName.c_str(), tmpStr),
+              __FILE__, __LINE__,
+              "NcxxAtt::getValues()", "string", myName);
+    // set return value
+    dataValues = *tmpStr;
+    // clean up
+    nc_free_string(att_len, tmpStr);
+    free(tmpStr);
+
   } else {
+
+    // allocate
+    char* tmpValues = new char[att_len + 1];  /* + 1 for trailing null */
+    // get att value
     ncxxCheck(nc_get_att_text(groupId, varId, 
                               myName.c_str(), tmpValues),
               __FILE__, __LINE__,
               "NcxxAtt::getValues()", "string", myName);
-  }
-
-  // find length to null
-
-  size_t finalLen = 0;
-  for (size_t ii = 0; ii < att_len; ii++) {
-    if ((int) tmpValues[ii] == 0) {
-      break;
+    // find length to null
+    size_t finalLen = 0;
+    for (size_t ii = 0; ii < att_len; ii++) {
+      if ((int) tmpValues[ii] == 0) {
+        break;
+      }
+      finalLen = ii + 1;
     }
-    finalLen = ii + 1;
+    // set return value
+    dataValues = string(tmpValues,finalLen);
+    // clean up
+    delete[] tmpValues;
+
   }
-
-  // set return value
-
-  dataValues = string(tmpValues,finalLen);
-
-  // clean up
-
-  delete[] tmpValues;
 
 }
 
