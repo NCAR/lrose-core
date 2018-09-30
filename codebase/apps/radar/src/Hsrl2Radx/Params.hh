@@ -561,7 +561,7 @@ public:
 
   tdrp_bool_t write_latest_data_info;
 
-  tdrp_bool_t split_output_files_on_time;
+  tdrp_bool_t write_output_files_on_time_boundaries;
 
   int output_file_time_interval_secs;
 

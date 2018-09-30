@@ -1072,7 +1072,7 @@ int Hsrl2Radx::_writeVol(RadxVol &vol)
 
   // are we writing split volumes?
 
-  if (_params.split_output_files_on_time) {
+  if (_params.write_output_files_on_time_boundaries) {
     return _writeSplitOnTime(vol);
   }
 

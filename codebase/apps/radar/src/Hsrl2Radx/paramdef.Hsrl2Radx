@@ -729,7 +729,7 @@ paramdef boolean {
   p_default = false;
   p_descr = "Option to split the output files, based on time.";
   p_help = "If true, the output volumes will be split up to be written out on time boundaries. See 'output_file_time_interval_secs'.";
-} split_output_files_on_time;
+} write_output_files_on_time_boundaries;
 
 paramdef int {
   p_default = 600;
