@@ -1,0 +1,10 @@
+
+To run, navigate to folder using Finder,
+then double click on spreadsheet.app
+
+Makefile.in came from soloii (original code)
+
+$make clean_all; make ExamineEdit
+
+$ ./ExamineEdit
+[eol-albireo:radar/src/ExamineEdit] brenda% ./ExamineEdit ~/Downloads/output/20010101/cfrad.20010101_010000.756_to_20010101_010001.494_APAR_sim_AIR.nc
