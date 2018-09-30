@@ -44,6 +44,7 @@
 #include <Radx/RadxPlatform.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/RadxTime.hh>
 class RadxSweep;
 class RadxRay;
 class RadxRcalib;
@@ -1223,6 +1224,15 @@ public:
 
   inline int getVolumeNumber() const { return _volNum; }
 
+  /// get start end end time as RadxTime
+
+  inline RadxTime getStartRadxTime() const {
+    return RadxTime(_startTimeSecs, _startNanoSecs / 1.0e9);
+  }
+  inline RadxTime getEndRadxTime() const {
+    return RadxTime(_endTimeSecs, _endNanoSecs / 1.0e9);
+  }
+
   /// Get start time in seconds.
   /// Combine with getNanoSecs() for high-precision time.
   ///
@@ -1605,7 +1615,7 @@ public:
   
   void clear();
   
-  /// Remove all ray on object.
+  /// Remove all rays on object.
 
   void clearRays();
 
