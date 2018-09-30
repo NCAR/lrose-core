@@ -460,7 +460,7 @@ paramdef int {
 } compression_level;
 
 commentdef {
-  p_header = "OUTPUT DIRECTORY AND FILE NAME";
+  p_header = "WRITE CFRADIAL FILES";
 }
 
 paramdef string {
@@ -487,6 +487,18 @@ paramdef string {
   p_descr = "Optional prefix for output filename.";
   p_help = "If empty, the standard prefix will be used.";
 } output_filename_prefix;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write the output files on time boundaries.";
+  p_help = "See 'output_file_time_interval_secs'.";
+} write_output_files_on_time_boundaries;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Time interval at which files will be written out (secs).";
+  p_help = "See 'split_output_files_on_time'. To make sense, this interval should divide evenly into an hour - i.e. 3600.";
+} output_file_time_interval_secs;
 
 paramdef boolean {
   p_default = true;

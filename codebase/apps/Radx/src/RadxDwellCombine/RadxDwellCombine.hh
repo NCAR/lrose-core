@@ -103,6 +103,11 @@ private:
   RadxTime _dwellStartTime, _dwellEndTime;
   RadxTime _latestRayTime, _dwellMidTime;
 
+  // output data on time boundaries
+
+  RadxTime _nextEndOfVolTime;
+  RadxVol _splitVol;
+
   // censoring
 
   int _nWarnCensorPrint;
@@ -122,7 +127,12 @@ private:
   void _convertAllFields(RadxVol &vol);
   void _setupWrite(RadxFile &file);
   void _setGlobalAttr(RadxVol &vol);
+
   int _writeVol(RadxVol &vol);
+  int _writeVolOnTimeBoundary(RadxVol &vol);
+  int _writeSplitVol();
+  void _setNextEndOfVolTime(RadxTime &refTime);
+
   int _combineDwells(RadxVol &vol);
   int _combineDwellsCentered(RadxVol &vol);
   void _setDwellStatsMethod();

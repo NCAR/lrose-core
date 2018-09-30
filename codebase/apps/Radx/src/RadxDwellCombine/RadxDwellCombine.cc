@@ -679,6 +679,12 @@ void RadxDwellCombine::_setGlobalAttr(RadxVol &vol)
 int RadxDwellCombine::_writeVol(RadxVol &vol)
 {
 
+  // are we writing files on time boundaries
+
+  if (_params.write_output_files_on_time_boundaries) {
+    return _writeVolOnTimeBoundary(vol);
+  }
+
   // output file
 
   GenericRadxFile outFile;
@@ -736,6 +742,122 @@ int RadxDwellCombine::_writeVol(RadxVol &vol)
 
   return 0;
 
+}
+
+//////////////////////////////////////////////////
+// write out the data splitting on time
+
+int RadxDwellCombine::_writeVolOnTimeBoundary(RadxVol &vol)
+{
+  
+  // check for time gap
+
+  RadxTime volStart = vol.getStartRadxTime();
+  RadxTime splitVolEnd = _splitVol.getEndRadxTime();
+  double gapSecs = volStart - splitVolEnd;
+  if (gapSecs > _params.output_file_time_interval_secs * 2) {
+    _writeSplitVol();
+    _setNextEndOfVolTime(volStart);
+  }
+
+  // add rays to the output vol
+
+  _splitVol.copyMeta(vol);
+  vector<RadxRay *> &volRays = vol.getRays();
+  for (size_t ii = 0; ii < volRays.size(); ii++) {
+    RadxRay *ray = volRays[ii];
+    if (ray->getRadxTime() > _nextEndOfVolTime) {
+      if (_writeSplitVol()) {
+        return -1;
+      }
+    }
+    RadxRay *splitRay = new RadxRay(*ray);
+    _splitVol.addRay(splitRay);
+  } // ii
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// write out the split volume
+
+int RadxDwellCombine::_writeSplitVol()
+{
+
+  // sanity check
+
+  if (_splitVol.getNRays() < 1) {
+    return 0;
+  }
+
+  // load the sweep information from the rays
+  
+  _splitVol.loadSweepInfoFromRays();
+
+  // load the volume information from the rays
+  
+  _splitVol.loadVolumeInfoFromRays();
+  
+  // output file
+
+  GenericRadxFile outFile;
+  _setupWrite(outFile);
+  
+  // write out
+
+  if (outFile.writeToDir(_splitVol, _params.output_dir,
+                         _params.append_day_dir_to_output_dir,
+                         _params.append_year_dir_to_output_dir)) {
+    cerr << "ERROR - RadxDwellCombine::_writeSplitVol" << endl;
+    cerr << "  Cannot write file to dir: " << _params.output_dir << endl;
+    cerr << outFile.getErrStr() << endl;
+    return -1;
+  }
+
+  // write latest data info file if requested 
+  
+  if (_params.write_latest_data_info) {
+    string outputPath = outFile.getPathInUse();
+    DsLdataInfo ldata(_params.output_dir);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      ldata.setDebug(true);
+    }
+    string relPath;
+    RadxPath::stripDir(_params.output_dir, outputPath, relPath);
+    ldata.setRelDataPath(relPath);
+    ldata.setWriter(_progName);
+    if (ldata.write(_splitVol.getEndTimeSecs())) {
+      cerr << "WARNING - RadxDwellCombine::_writeVol" << endl;
+      cerr << "  Cannot write latest data info file to dir: "
+           << _params.output_dir << endl;
+    }
+  }
+
+  // update next end of vol time
+
+  RadxTime nextVolStart(_splitVol.getEndTimeSecs() + 1);
+  _setNextEndOfVolTime(nextVolStart);
+
+  // clear
+
+  _splitVol.clearRays();
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Compute next end of vol time
+
+void RadxDwellCombine::_setNextEndOfVolTime(RadxTime &refTime)
+{
+  _nextEndOfVolTime.set
+    (((refTime.utime() / _params.output_file_time_interval_secs) + 1) *
+     _params.output_file_time_interval_secs);
+  if (_params.debug) {
+    cerr << "==>> Next end of vol time: " << _nextEndOfVolTime.asString(3) << endl;
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////

@@ -1521,7 +1521,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 13");
-    tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
+    tt->comment_hdr = tdrpStrDup("WRITE CFRADIAL FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1571,6 +1571,30 @@
     tt->help = tdrpStrDup("If empty, the standard prefix will be used.");
     tt->val_offset = (char *) &output_filename_prefix - &_start_;
     tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'write_output_files_on_time_boundaries'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_output_files_on_time_boundaries");
+    tt->descr = tdrpStrDup("Option to write the output files on time boundaries.");
+    tt->help = tdrpStrDup("See 'output_file_time_interval_secs'.");
+    tt->val_offset = (char *) &write_output_files_on_time_boundaries - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'output_file_time_interval_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("output_file_time_interval_secs");
+    tt->descr = tdrpStrDup("Time interval at which files will be written out (secs).");
+    tt->help = tdrpStrDup("See 'split_output_files_on_time'. To make sense, this interval should divide evenly into an hour - i.e. 3600.");
+    tt->val_offset = (char *) &output_file_time_interval_secs - &_start_;
+    tt->single_val.i = 600;
     tt++;
     
     // Parameter 'include_instrument_name_in_file_name'
