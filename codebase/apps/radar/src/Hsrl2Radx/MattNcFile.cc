@@ -1179,10 +1179,7 @@ int MattNcFile::_readFieldVariable(string inputName,
   try {
     NcxxVarAtt unitsAtt = var.getAtt("units");
     NcxxType utype = unitsAtt.getType();
-    cerr << "2222222222 field name: " << inputName << endl;
-    cerr << "2222222222 units att type: " << Ncxx::ncxxTypeToStr(utype) << endl;
     unitsAtt.getValues(units);
-    cerr << "2222222222 units: " << units << endl;
   } catch (NcxxException& e) {
     _addErrStr("ERROR - MattNcFile::_readFieldVariable");
     _addErrStr("  Var has no units: ", inputName);
