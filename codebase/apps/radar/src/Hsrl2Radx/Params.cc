@@ -1834,15 +1834,15 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'split_output_files_on_time'
+    // Parameter 'write_output_files_on_time_boundaries'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("split_output_files_on_time");
+    tt->param_name = tdrpStrDup("write_output_files_on_time_boundaries");
     tt->descr = tdrpStrDup("Option to split the output files, based on time.");
     tt->help = tdrpStrDup("If true, the output volumes will be split up to be written out on time boundaries. See 'output_file_time_interval_secs'.");
-    tt->val_offset = (char *) &split_output_files_on_time - &_start_;
+    tt->val_offset = (char *) &write_output_files_on_time_boundaries - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
