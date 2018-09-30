@@ -45,7 +45,8 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxRangeGeom.hh>
-#include <Ncxx/Nc3xFile.hh>
+#include <Ncxx/Ncxx.hh>
+#include <Ncxx/NcxxFile.hh>
 class RadxField;
 class RadxVol;
 class RadxRay;
@@ -106,15 +107,6 @@ public:
                                  double &azimuthDeg,
                                  double &elevationDeg);
   
-  // Read georeference from SPDB
-  // Returns 0 on success, -1 on error
-  
-  static int readGeorefFromSpdb(string georefUrl,
-                                time_t searchTime,
-                                int searchMarginSecs,
-                                bool debug,
-                                RadxGeoref &radxGeoref);
-
   ////////////////////////
   /// \name Error string:
   //@{
@@ -144,7 +136,7 @@ private:
   
   // netcdf file
   
-  Nc3xFile _file;
+  NcxxFile _file;
 
   // output volume
 
@@ -152,8 +144,8 @@ private:
   
   // dimensions
 
-  Nc3Dim *_timeDim;
-  Nc3Dim *_rangeDim;
+  NcxxDim _timeDim;
+  NcxxDim _rangeDim;
 
   size_t _nTimesInFile;
   size_t _nRangeInFile;
@@ -167,18 +159,16 @@ private:
   // times
 
   RadxTime _startTime;
-  Nc3Var *_timeVar;
+  NcxxVar _timeVar;
   vector<RadxTime> _dataTimes;
   vector<double> _dTimes;
 
   // range geometry
 
-  Nc3Var *_rangeVar;
+  NcxxVar _rangeVar;
   RadxRangeGeom _geom;
   bool _gateSpacingIsConstant;
   vector<double> _rangeKm;
-  // double _startRangeKm;
-  // double _gateSpacingKm;
   
   // polarization
 
@@ -226,7 +216,8 @@ private:
   int _readRayVariables();
 
   int _readRayVar(const string &name, vector<double> &vals);
-  Nc3Var* _getRayVar(const string &name, bool required);
+  int _readRayVar(const string &name, vector<float> &vals);
+  int _getRayVar(NcxxVar &var, const string &name, bool required);
 
   int _createRays(const string &path);
 
@@ -235,27 +226,42 @@ private:
 
   int _readFieldVariablesAuto();
   int _readFieldVariablesSpecified();
+
+  int _readFieldVariable(string inputName,
+                         string outputName,
+                         NcxxVar &var,
+                         bool &gotStatus,
+                         bool required = false,
+                         bool applyMask = false,
+                         const string maskName = "",
+                         int maskValidValue = 0);
+  
   int _readMaskVar(const string &maskFieldName,
                    vector<int> &maskVals);
 
-  int _addFl64FieldToRays(Nc3Var* var,
+  int _addFl64FieldToRays(NcxxVar &var,
                           const string &name,
                           const string &units,
                           const string &description);
   
-  int _addMaskedFieldToRays(Nc3Var* var,
+  int _addFl32FieldToRays(NcxxVar &var,
+                          const string &name,
+                          const string &units,
+                          const string &description);
+  
+  int _addMaskedFieldToRays(NcxxVar &var,
                             const string &name,
                             const string &units,
                             const string &description,
                             vector<int> &maskVals,
                             int maskValidValue);
     
-  int _addRawFieldToRays(Nc3Var* var,
+  int _addRawFieldToRays(NcxxVar &var,
                          const string &name,
                          const string &units,
                          const string &description);
 
-  int _addSi08FieldToRays(Nc3Var* var,
+  int _addSi08FieldToRays(NcxxVar &var,
                           const string &name,
                           const string &units,
                           const string &description);

@@ -144,9 +144,9 @@ private:
   void _addEnvFields(RadxRay *ray);
   
   double _nonLinCountCor(Radx::fl32 count, double deadtime, 
-			     double binWid, double shotCount);
+                         double binWid, double shotCount);
   double _baselineSubtract(double arrivalRate, double profile, 
-			       double polarization);
+                           double polarization);
   double _backgroundSub(double arrivalRate, double backgroundBins);
   double _energyNorm(double arrivalRate, double totalEnergy);
   vector<double> _diffOverlapCor(vector<double> arrivalRate, vector<double> diffOverlap);
