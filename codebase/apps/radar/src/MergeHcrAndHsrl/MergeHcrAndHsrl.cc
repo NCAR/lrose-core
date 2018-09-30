@@ -31,12 +31,13 @@
 ///////////////////////////////////////////////////////////////
 //
 // Merges field data from HCR and HSRL instruments.
+// Writes combined data into CfRadial files.
 //
 ////////////////////////////////////////////////////////////////
 
 #include "MergeHcrAndHsrl.hh"
+#include <Radx/NcfRadxFile.hh>
 #include <Radx/RadxVol.hh>
-#include <Mdv/GenericRadxFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
@@ -85,22 +86,6 @@ MergeHcrAndHsrl::MergeHcrAndHsrl(int argc, char **argv)
     return;
   }
 
-  // override missing values
-
-  if (_params.override_missing_metadata_values) {
-    Radx::setMissingMetaDouble(_params.missing_metadata_double);
-    Radx::setMissingMetaFloat(_params.missing_metadata_float);
-    Radx::setMissingMetaInt(_params.missing_metadata_int);
-    Radx::setMissingMetaChar(_params.missing_metadata_char);
-  }
-  if (_params.override_missing_field_values) {
-    Radx::setMissingFl64(_params.missing_field_fl64);
-    Radx::setMissingFl32(_params.missing_field_fl32);
-    Radx::setMissingSi32(_params.missing_field_si32);
-    Radx::setMissingSi16(_params.missing_field_si16);
-    Radx::setMissingSi08(_params.missing_field_si08);
-  }
-
 }
 
 // destructor
@@ -137,72 +122,6 @@ int MergeHcrAndHsrl::_checkParams()
 {
 
   int iret = 0;
-
-  // get min and max index for source dirs
-  
-  int minIndex = 999999;
-  int maxIndex = -999999;
-
-  for (int ii = 0; ii < _params.input_datasets_n; ii++) {
-    if (_params._input_datasets[ii].index < minIndex) {
-      minIndex = _params._input_datasets[ii].index;
-    }
-    if (_params._input_datasets[ii].index > maxIndex) {
-      maxIndex = _params._input_datasets[ii].index;
-    }
-  }
-  
-  // set the directory lists
-  // check that the indices are consecutive
-  
-  for (int index = minIndex; index <= maxIndex; index++) {
-    
-    OutputGroup group;
-
-    bool found = false;
-    for (int ii = 0; ii < _params.input_datasets_n; ii++) {
-      if (_params._input_datasets[ii].index == index) {
-        const Params::input_dataset_t &dataset = _params._input_datasets[ii];
-        group.dir = dataset.dir;
-        group.fileTimeOffset = dataset.file_match_time_offset_sec;
-        group.fileTimeTolerance = dataset.file_match_time_tolerance_sec;
-        group.rayElevTolerance = dataset.ray_match_elevation_tolerance_deg;
-        group.rayAzTolerance = dataset.ray_match_azimuth_tolerance_deg;
-        group.rayTimeTolerance = dataset.ray_match_time_tolerance_sec;
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
-      cerr << "ERROR - MergeHcrAndHsrl::_checkParams()" << endl;
-      cerr << "  Source index missing: " << index << endl;
-      cerr << "  Indices must be consecutive" << endl;
-      cerr << "  See input_datasets parameter" << endl;
-      iret = -1;
-    }
-    
-    for (int ii = 0; ii < _params.output_fields_n; ii++) {
-      if (_params._output_fields[ii].input_index == index) {
-        group.fields.push_back(_params._output_fields[ii]);
-      }
-    }
-
-    if (index == minIndex) {
-      _primaryGroup = group;
-    } else {
-      _secondaryGroups.push_back(group);
-    }
-
-  } // index
-
-  if (_primaryGroup.fields.size() < 1) {
-    cerr << "ERROR - MergeHcrAndHsrl::_checkParams()" << endl;
-    cerr << "  No fields specified for primary (lowest) index" << endl;
-    cerr << "  At least 1 field must be specified for primary index" << endl;
-    iret = -1;
-  }
-  
   return iret;
 
 }
@@ -218,7 +137,7 @@ int MergeHcrAndHsrl::_runFilelist()
   int iret = 0;
 
   for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
-
+    
     string inputPath = _args.inputFileList[ii];
     if (_processFile(inputPath)) {
       iret = -1;
@@ -237,28 +156,25 @@ int MergeHcrAndHsrl::_runArchive()
 {
 
   // get the files to be processed
-
+  
   RadxTimeList tlist;
-  tlist.setDir(_primaryGroup.dir);
+  tlist.setDir(_params.hcr_data_dir);
   tlist.setModeInterval(_args.startTime, _args.endTime);
-  if (_params.aggregate_sweep_files_on_read) {
-    tlist.setReadAggregateSweeps(true);
-  }
   if (tlist.compile()) {
     cerr << "ERROR - MergeHcrAndHsrl::_runFilelist()" << endl;
-    cerr << "  Cannot compile time list, dir: "
-         << _primaryGroup.dir << endl;
+    cerr << "  Cannot compile time list, HCR dir: "
+         << _params.hcr_data_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(_args.startTime) << endl;
     cerr << "  End time: " << RadxTime::strm(_args.endTime) << endl;
     cerr << tlist.getErrStr() << endl;
     return -1;
   }
-
+  
   const vector<string> &paths = tlist.getPathList();
   if (paths.size() < 1) {
     cerr << "ERROR - MergeHcrAndHsrl::_runFilelist()" << endl;
-    cerr << "  No files found, dir: "
-         << _primaryGroup.dir << endl;
+    cerr << "  No files found, HCR dir: "
+         << _params.hcr_data_dir << endl;
     return -1;
   }
   
@@ -287,12 +203,12 @@ int MergeHcrAndHsrl::_runRealtime()
                 PROCMAP_REGISTER_INTERVAL);
 
   // watch for new data to arrive
-
-  LdataInfo ldata(_primaryGroup.dir,
+  
+  LdataInfo ldata(_params.hcr_data_dir,
                   _params.debug >= Params::DEBUG_VERBOSE);
   
   int iret = 0;
-
+  
   while (true) {
     ldata.readBlocking(_params.max_realtime_data_age_secs,
                        1000, PMU_auto_register);
@@ -311,112 +227,99 @@ int MergeHcrAndHsrl::_runRealtime()
 // Process a file
 // Returns 0 on success, -1 on failure
 
-int MergeHcrAndHsrl::_processFile(const string &primaryPath)
+int MergeHcrAndHsrl::_processFile(const string &hcrPath)
 {
-
+  
   if (_params.debug) {
     cerr << "INFO - MergeHcrAndHsrl::_processFile" << endl;
-    cerr << "  Input path primary file: " << primaryPath << endl;
+    cerr << "  HCR input path: " << hcrPath << endl;
   }
   
-  // read in primary file
+  // read in hcr file
   
-  GenericRadxFile primaryFile;
-  _setupPrimaryRead(primaryFile);
-  RadxVol primaryVol;
-  if (primaryFile.readFromPath(primaryPath, primaryVol)) {
+  NcfRadxFile hcrFile;
+  _setupHcrRead(hcrFile);
+  RadxVol hcrVol;
+  if (hcrFile.readFromPath(hcrPath, hcrVol)) {
     cerr << "ERROR - MergeHcrAndHsrl::_processFile" << endl;
-    cerr << "  Cannot read in primary file: " << primaryPath << endl;
-    cerr << primaryFile.getErrStr() << endl;
+    cerr << "  Cannot read in hcr file: " << hcrPath << endl;
+    cerr << hcrFile.getErrStr() << endl;
     return -1;
   }
 
-  time_t primaryTime = primaryVol.getEndTimeSecs();
+  time_t hcrTime = hcrVol.getEndTimeSecs();
   bool dateOnly;
-  if (DataFileNames::getDataTime(primaryPath, primaryTime, dateOnly)) {
+  if (DataFileNames::getDataTime(hcrPath, hcrTime, dateOnly)) {
     cerr << "ERROR - MergeHcrAndHsrl::_processFile" << endl;
-    cerr << "  Cannot get time from file path: " << primaryPath << endl;
+    cerr << "  Cannot get time from file path: " << hcrPath << endl;
     return -1;
   }
 
   if (_params.debug) {
-    cerr << "Time for primary file: " << RadxTime::strm(primaryTime) << endl;
+    cerr << "Time for hcr file: " << RadxTime::strm(hcrTime) << endl;
   }
 
-  // Search for secondary files
+  // Search for hsrl files
 
-  for (size_t igroup = 0; igroup < _secondaryGroups.size(); igroup++) {
+  time_t searchTime = hcrTime;
+  RadxTimeList tlist;
+  tlist.setDir(_params.hsrl_data_dir);
+  tlist.setModeClosest(searchTime, _params.file_match_time_tolerance_sec);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    tlist.printRequest(cerr);
+  }
     
-    _activeGroup = _secondaryGroups[igroup];
-    time_t searchTime = primaryTime + _activeGroup.fileTimeOffset;
-
-    RadxTimeList tlist;
-    tlist.setDir(_activeGroup.dir);
-    tlist.setModeClosest(searchTime, _activeGroup.fileTimeTolerance);
-
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      tlist.printRequest(cerr);
-    }
-    
-    if (tlist.compile()) {
-      cerr << "ERROR - MergeHcrAndHsrl::_processFile()" << endl;
-      cerr << "  Cannot compile secondary file time list" << endl;
-      cerr << tlist.getErrStr() << endl;
-      return -1;
-    }
-    const vector<string> &pathList = tlist.getPathList();
-    if (pathList.size() < 1) {
-      cerr << "WARNING - MergeHcrAndHsrl::_processFile()" << endl;
-      cerr << "  No suitable secondary file found" << endl;
-      cerr << "  Primary file: " << primaryPath << endl;
-      return -1;
-    }
-    
-    // read in secondary file, using first path in list
-    
-    string secondaryPath = pathList[0];
-    if (_params.debug) {
-      cerr << "Found secondary file: " << secondaryPath << endl;
-    }
-    GenericRadxFile secondaryFile;
-    _setupSecondaryRead(secondaryFile, _activeGroup);
-    RadxVol secondaryVol;
-    if (secondaryFile.readFromPath(secondaryPath, secondaryVol)) {
-      cerr << "ERROR - MergeHcrAndHsrl::_processFile" << endl;
-      cerr << "  Cannot read in secondary file: " << secondaryPath << endl;
-      cerr << secondaryFile.getErrStr() << endl;
-      return -1;
-    }
-
-    // merge the primary and seconday volumes, using the primary
-    // volume to hold the merged data
-    
-    if (_mergeVol(primaryVol, secondaryVol, _activeGroup)) {
-      cerr << "ERROR - MergeHcrAndHsrl::_processFile" << endl;
-      cerr << "  Merge failed" << endl;
-      cerr << "  Primary file: " << primaryPath << endl;
-      cerr << "  Secondary file: " << secondaryPath << endl;
-      return -1;
-    }
-
-  } // igroup
-
-  // add combined fields if required
-
-  if (_params.add_combined_fields) {
-    _addCombinedFields(primaryVol);
+  if (tlist.compile()) {
+    cerr << "ERROR - MergeHcrAndHsrl::_processFile()" << endl;
+    cerr << "  Cannot compile hsrl file time list" << endl;
+    cerr << tlist.getErrStr() << endl;
+    return -1;
+  }
+  const vector<string> &pathList = tlist.getPathList();
+  if (pathList.size() < 1) {
+    cerr << "WARNING - MergeHcrAndHsrl::_processFile()" << endl;
+    cerr << "  No suitable hsrl file found" << endl;
+    cerr << "  Hcr file: " << hcrPath << endl;
+    return -1;
   }
   
+  // read in hsrl file, using first path in list
+  
+  string hsrlPath = pathList[0];
+  if (_params.debug) {
+    cerr << "Found hsrl file: " << hsrlPath << endl;
+  }
+  NcfRadxFile hsrlFile;
+  _setupHsrlRead(hsrlFile);
+  RadxVol hsrlVol;
+  if (hsrlFile.readFromPath(hsrlPath, hsrlVol)) {
+    cerr << "ERROR - MergeHcrAndHsrl::_processFile" << endl;
+    cerr << "  Cannot read in hsrl file: " << hsrlPath << endl;
+    cerr << hsrlFile.getErrStr() << endl;
+    return -1;
+  }
+  
+  // merge the hcr and seconday volumes, using the hcr
+  // volume to hold the merged data
+  
+  if (_mergeVol(hcrVol, hsrlVol)) {
+    cerr << "ERROR - MergeHcrAndHsrl::_processFile" << endl;
+    cerr << "  Merge failed" << endl;
+    cerr << "  Hcr file: " << hcrPath << endl;
+    cerr << "  Hsrl file: " << hsrlPath << endl;
+    return -1;
+  }
+
   // finalize the volume
 
-  primaryVol.setPackingFromRays();
-  primaryVol.loadVolumeInfoFromRays();
-  primaryVol.loadSweepInfoFromRays();
-  primaryVol.remapToPredomGeom();
+  hcrVol.setPackingFromRays();
+  hcrVol.loadVolumeInfoFromRays();
+  hcrVol.loadSweepInfoFromRays();
+  hcrVol.remapToPredomGeom();
   
   // write out file
 
-  if (_writeVol(primaryVol)) {
+  if (_writeVol(hcrVol)) {
     return -1;
   }
 
@@ -425,38 +328,24 @@ int MergeHcrAndHsrl::_processFile(const string &primaryPath)
 }
 
 //////////////////////////////////////////////////
-// set up read for primary data
+// set up read for hcr data
 
-void MergeHcrAndHsrl::_setupPrimaryRead(RadxFile &file)
+void MergeHcrAndHsrl::_setupHcrRead(RadxFile &file)
 {
-
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     file.setDebug(true);
   }
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.setVerbose(true);
   }
-
-  if (_params.set_fixed_angle_limits) {
-    file.setReadFixedAngleLimits(_params.lower_fixed_angle_limit,
-                                 _params.upper_fixed_angle_limit);
-  } else if (_params.set_sweep_num_limits) {
-    file.setReadSweepNumLimits(_params.lower_sweep_num,
-                               _params.upper_sweep_num);
-  }
-
-  for (size_t ii = 0; ii < _primaryGroup.fields.size(); ii++) {
-    file.addReadField(_primaryGroup.fields[ii].input_field_name);
-  }
-
-  if (_params.aggregate_sweep_files_on_read) {
-    file.setReadAggregateSweeps(true);
-  } else {
-    file.setReadAggregateSweeps(false);
+  
+  for (int ii = 0; ii < _params.hcr_fields_n; ii++) {
+    file.addReadField(_params._hcr_fields[ii].input_field_name);
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "===== SETTING UP READ FOR PRIMARY FILES =====" << endl;
+    cerr << "===== SETTING UP READ FOR HCR FILES =====" << endl;
     file.printReadRequest(cerr);
     cerr << "=============================================" << endl;
   }
@@ -464,10 +353,9 @@ void MergeHcrAndHsrl::_setupPrimaryRead(RadxFile &file)
 }
 
 //////////////////////////////////////////////////
-// set up read for secondary data
+// set up read for hsrl data
 
-void MergeHcrAndHsrl::_setupSecondaryRead(RadxFile &file,
-                                          const OutputGroup &group)
+void MergeHcrAndHsrl::_setupHsrlRead(RadxFile &file)
 {
   
   if (_params.debug) {
@@ -477,26 +365,12 @@ void MergeHcrAndHsrl::_setupSecondaryRead(RadxFile &file,
     file.setVerbose(true);
   }
 
-  if (_params.set_fixed_angle_limits) {
-    file.setReadFixedAngleLimits(_params.lower_fixed_angle_limit,
-                                 _params.upper_fixed_angle_limit);
-  } else if (_params.set_sweep_num_limits) {
-    file.setReadSweepNumLimits(_params.lower_sweep_num,
-                               _params.upper_sweep_num);
-  }
-
-  for (size_t ii = 0; ii < group.fields.size(); ii++) {
-    file.addReadField(group.fields[ii].input_field_name);
-  }
-
-  if (_params.aggregate_sweep_files_on_read) {
-    file.setReadAggregateSweeps(true);
-  } else {
-    file.setReadAggregateSweeps(false);
+  for (int ii = 0; ii < _params.hsrl_fields_n; ii++) {
+    file.addReadField(_params._hsrl_fields[ii].input_field_name);
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "===== SETTING UP READ FOR SECONDARY FILES =====" << endl;
+    cerr << "===== SETTING UP READ FOR HSRL FILES =====" << endl;
     file.printReadRequest(cerr);
     cerr << "===============================================" << endl;
   }
@@ -516,70 +390,12 @@ void MergeHcrAndHsrl::_setupWrite(RadxFile &file)
     file.setVerbose(true);
   }
 
-  if (_params.output_filename_mode == Params::START_TIME_ONLY) {
-    file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_TIME_ONLY);
-  } else if (_params.output_filename_mode == Params::END_TIME_ONLY) {
-    file.setWriteFileNameMode(RadxFile::FILENAME_WITH_END_TIME_ONLY);
-  } else {
-    file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);
-  }
-
-  if (_params.output_compressed) {
-    file.setWriteCompressed(true);
-    file.setCompressionLevel(_params.compression_level);
-  } else {
-    file.setWriteCompressed(false);
-  }
-
-  if (_params.output_native_byte_order) {
-    file.setWriteNativeByteOrder(true);
-  } else {
-    file.setWriteNativeByteOrder(false);
-  }
-
-  // set output format
-
-  switch (_params.output_format) {
-    case Params::OUTPUT_FORMAT_UF:
-      file.setFileFormat(RadxFile::FILE_FORMAT_UF);
-      break;
-    case Params::OUTPUT_FORMAT_DORADE:
-      file.setFileFormat(RadxFile::FILE_FORMAT_DORADE);
-      break;
-    case Params::OUTPUT_FORMAT_FORAY:
-      file.setFileFormat(RadxFile::FILE_FORMAT_FORAY_NC);
-      break;
-    case Params::OUTPUT_FORMAT_NEXRAD:
-      file.setFileFormat(RadxFile::FILE_FORMAT_NEXRAD_AR2);
-      break;
-    case Params::OUTPUT_FORMAT_MDV_RADIAL:
-      file.setFileFormat(RadxFile::FILE_FORMAT_MDV_RADIAL);
-      break;
-    default:
-    case Params::OUTPUT_FORMAT_CFRADIAL:
-      file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
-  }
-
-  // set netcdf format - used for CfRadial
-
-  switch (_params.netcdf_style) {
-    case Params::NETCDF4_CLASSIC:
-      file.setNcFormat(RadxFile::NETCDF4_CLASSIC);
-      break;
-    case Params::NC64BIT:
-      file.setNcFormat(RadxFile::NETCDF_OFFSET_64BIT);
-      break;
-    case Params::NETCDF4:
-      file.setNcFormat(RadxFile::NETCDF4);
-      break;
-    default:
-      file.setNcFormat(RadxFile::NETCDF_CLASSIC);
-  }
-
-  if (_params.output_force_ngates_vary) {
-    file.setWriteForceNgatesVary(true);
-  }
-
+  file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);
+  file.setWriteCompressed(true);
+  file.setCompressionLevel(_params.compression_level);
+  file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
+  file.setNcFormat(RadxFile::NETCDF4);
+  
 }
 
 //////////////////////////////////////////////////
@@ -589,45 +405,25 @@ int MergeHcrAndHsrl::_writeVol(RadxVol &vol)
 {
 
   // output file
-
-  GenericRadxFile outFile;
+  
+  NcfRadxFile outFile;
   _setupWrite(outFile);
   
-  if (_params.output_filename_mode == Params::SPECIFY_FILE_NAME) {
-
-    string outPath = _params.output_dir;
-    outPath += PATH_DELIM;
-    outPath += _params.output_filename;
-
-    // write to path
+  // write to dir
   
-    if (outFile.writeToPath(vol, outPath)) {
-      cerr << "ERROR - MergeHcrAndHsrl::_writeVol" << endl;
-      cerr << "  Cannot write file to path: " << outPath << endl;
-      cerr << outFile.getErrStr() << endl;
-      return -1;
-    }
-      
-  } else {
-
-    // write to dir
-  
-    if (outFile.writeToDir(vol, _params.output_dir,
-                           _params.append_day_dir_to_output_dir,
-                           _params.append_year_dir_to_output_dir)) {
-      cerr << "ERROR - MergeHcrAndHsrl::_writeVol" << endl;
-      cerr << "  Cannot write file to dir: " << _params.output_dir << endl;
-      cerr << outFile.getErrStr() << endl;
-      return -1;
-    }
-
+  if (outFile.writeToDir(vol, _params.output_dir,
+                         _params.append_day_dir_to_output_dir,
+                         _params.append_year_dir_to_output_dir)) {
+    cerr << "ERROR - MergeHcrAndHsrl::_writeVol" << endl;
+    cerr << "  Cannot write file to dir: " << _params.output_dir << endl;
+    cerr << outFile.getErrStr() << endl;
+    return -1;
   }
-
-  string outputPath = outFile.getPathInUse();
 
   // write latest data info file if requested 
   
   if (_params.mode == Params::REALTIME) {
+    string outputPath = outFile.getPathInUse();
     DsLdataInfo ldata(_params.output_dir);
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       ldata.setDebug(true);
@@ -647,126 +443,55 @@ int MergeHcrAndHsrl::_writeVol(RadxVol &vol)
 
 }
 
-//////////////////////////////////////////////////
-// check geometry between 2 volumes
-// Returns 0 on success, -1 on failure
-
-int MergeHcrAndHsrl::_checkGeom(const RadxVol &primaryVol,
-                                const RadxVol &secondaryVol)
-  
-{
-
-  // check that geometry matches
-
-  double diff = primaryVol.getStartRangeKm() - secondaryVol.getStartRangeKm();
-  if (fabs(diff) > 0.001) {
-    if (_params.debug) {
-      cerr << "ERROR - MergeHcrAndHsrl::_checkGeom" << endl;
-      cerr << "  Volumes have different start range" << endl;
-      cerr << "  start range primary: "
-           << primaryVol.getStartRangeKm() << endl;
-      cerr << "  start range secondary: "
-           << secondaryVol.getStartRangeKm() << endl;
-    }
-    return -1;
-  }
-
-  diff = primaryVol.getGateSpacingKm() - secondaryVol.getGateSpacingKm();
-  if (fabs(diff) > 0.001) {
-    if (_params.debug) {
-      cerr << "ERROR - MergeHcrAndHsrl::_checkGeom" << endl;
-      cerr << "  Volumes have different gate spacing" << endl;
-      cerr << "  gate spacing primary: "
-           << primaryVol.getGateSpacingKm() << endl;
-      cerr << "  gate spacing secondary: "
-           << secondaryVol.getGateSpacingKm() << endl;
-    }
-    return -1;
-  }
-
-  return 0;
-
-}
-
 //////////////////////////////////////////////////////////////
-// merge the primary and seconday volumes, using the primary
+// merge the hcr and hsrl volumes, using the hcr
 // volume to hold the merged data
 //
 // Returns 0 on success, -1 on failure
 
-int MergeHcrAndHsrl::_mergeVol(RadxVol &primaryVol,
-                               const RadxVol &secondaryVol,
-                               const OutputGroup &group)
+int MergeHcrAndHsrl::_mergeVol(RadxVol &hcrVol,
+                               const RadxVol &hsrlVol)
 
 {
 
-  // check that geometry matches
+  // loop through all rays in hcr vol
 
-  if (_params.check_constant_geometry) {
-    if (_checkGeom(primaryVol, secondaryVol)) {
-      cerr << "ERROR - MergeHcrAndHsrl::_mergeVols" << endl;
-      cerr << "  Volume geometries differ" << endl;
-      return -1;
-    }
-  }
-
-  // loop through all rays in primary vol
-
-  const vector<RadxRay *> &pRays = primaryVol.getRays();
+  const vector<RadxRay *> &pRays = hcrVol.getRays();
   int searchStart = 0;
   vector<RadxRay *> mergedRays;
   vector<RadxRay *> unusedRays;
 
   for (size_t ii = 0; ii < pRays.size(); ii++) {
-
+    
     RadxRay *pRay = pRays[ii];
-    double pTime = (double) pRay->getTimeSecs() + pRay->getNanoSecs() / 1.0e9;
-    double pAz = pRay->getAzimuthDeg();   
+    RadxTime pTime = pRay->getRadxTime();
     double pEl = pRay->getElevationDeg();
 
-    int pMilli = pRay->getNanoSecs() / 1.0e6;
-    char pMStr[16];
-    sprintf(pMStr, "%.3d", pMilli);
-
-    // find matching ray in secondary volume
-
-    const vector<RadxRay *> &sRays = secondaryVol.getRays();
+    // find matching ray in hsrl volume
+    
+    const vector<RadxRay *> &sRays = hsrlVol.getRays();
     bool found = false;
     for (size_t jj = searchStart; jj < sRays.size(); jj++) {
       
       RadxRay *sRay = sRays[jj];
-      double sTime = (double) sRay->getTimeSecs() + sRay->getNanoSecs() / 1.0e9;
-      double sAz = sRay->getAzimuthDeg();   
+      RadxTime sTime = sRay->getRadxTime();
       double sEl = sRay->getElevationDeg();
       
-      int sMilli = sRay->getNanoSecs() / 1.0e6;
-      char sMStr[16];
-      sprintf(sMStr, "%.3d", sMilli);
-
       double diffTime = fabs(pTime - sTime);
-      double dAz = pAz - sAz;
-      if (dAz < -180) {
-        dAz += 360.0;
-      } else if (dAz > 180) {
-        dAz -= 360.0;
-      }
-      double diffAz = fabs(dAz);
       double diffEl = fabs(pEl - sEl);
 
-      if (diffTime <= _activeGroup.rayTimeTolerance &&
-          diffAz <= _activeGroup.rayAzTolerance &&
-          diffEl <= _activeGroup.rayElevTolerance) {
-        // same ray, merge the rays
-        _mergeRay(*pRay, *sRay, group);
+      if (diffTime <= _params.ray_match_time_tolerance_sec &&
+          diffEl <= _params.ray_match_elevation_tolerance_deg) {
+        // rays match, merge the rays
+        _mergeRay(*pRay, *sRay);
         mergedRays.push_back(pRay);
         found = true;
         if (_params.debug >= Params::DEBUG_EXTRA) {
-          cerr << "Matched ray - time az el az2 el2 dEl dAz dTime: "
-               << RadxTime::strm((time_t) pTime) << "." << pMStr << ", "
-               << pAz << ", " << pEl << ", "
-               << sAz << ", " << sEl << ", "
+          cerr << "Matched ray - time el el2 dEl dTime: "
+               << pTime.asString(3) << ", "
+               << pEl << ", "
+               << sEl << ", "
                << diffEl << ", "
-               << diffAz << ", "
                << diffTime << endl;
         }
         break;
@@ -777,9 +502,9 @@ int MergeHcrAndHsrl::_mergeVol(RadxVol &primaryVol,
     if (!found) {
       unusedRays.push_back(pRay);
       if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "====>>> missed merge, time az el: "
-             << RadxTime::strm((time_t) pTime) << "." << pMStr << ", "
-             << pAz << ", " << pEl << endl;
+        cerr << "====>>> missed merge, time el: "
+             << pTime.asString(3) << ", "
+             << pEl << endl;
       }
     }
 
@@ -787,73 +512,72 @@ int MergeHcrAndHsrl::_mergeVol(RadxVol &primaryVol,
 
   // clean up unused rays
 
-  primaryVol.removeBadRays(mergedRays, unusedRays);
+  hcrVol.removeBadRays(mergedRays, unusedRays);
 
   return 0;
 
 }
 
 //////////////////////////////////////////////////////////////
-// merge primary and seconday rays
+// merge hcr and seconday rays
 //
 // Returns 0 on success, -1 on failure
 
-void MergeHcrAndHsrl::_mergeRay(RadxRay &primaryRay,
-                                const RadxRay &secondaryRay,
-                                const OutputGroup &group)
+void MergeHcrAndHsrl::_mergeRay(RadxRay &hcrRay,
+                                const RadxRay &hsrlRay)
   
 {
 
-  // rename fields on primary ray
-
-  for (size_t ifld = 0; ifld < primaryRay.getNFields(); ifld++) {
-    RadxField *pField = primaryRay.getField(ifld);
-    for (size_t ii = 0; ii < _primaryGroup.fields.size(); ii++) {
-      string inputName = _primaryGroup.fields[ii].input_field_name;
+  // rename fields on hcr ray
+  
+  for (size_t ifld = 0; ifld < hcrRay.getNFields(); ifld++) {
+    RadxField *pField = hcrRay.getField(ifld);
+    for (int ii = 0; ii < _params.hcr_fields_n; ii++) {
+      string inputName = _params._hcr_fields[ii].input_field_name;
       if (inputName == pField->getName()) {
-        pField->setName(_primaryGroup.fields[ii].output_field_name);
+        pField->setName(_params._hcr_fields[ii].output_field_name);
         break;
       }
     } // ii
   } // ifld
-  primaryRay.loadFieldNameMap();
+  hcrRay.loadFieldNameMap();
 
   // compute lookup in case geometry differs
-
+  
   RadxRemap remap;
   bool geomDiffers =
-    remap.checkGeometryIsDifferent(secondaryRay.getStartRangeKm(),
-                                   secondaryRay.getGateSpacingKm(),
-                                   primaryRay.getStartRangeKm(),
-                                   primaryRay.getGateSpacingKm());
+    remap.checkGeometryIsDifferent(hsrlRay.getStartRangeKm(),
+                                   hsrlRay.getGateSpacingKm(),
+                                   hcrRay.getStartRangeKm(),
+                                   hcrRay.getGateSpacingKm());
   if (geomDiffers) {
-    remap.prepareForInterp(secondaryRay.getNGates(),
-                           secondaryRay.getStartRangeKm(),
-                           secondaryRay.getGateSpacingKm(),
-                           primaryRay.getStartRangeKm(),
-                           primaryRay.getGateSpacingKm());
+    remap.prepareForInterp(hsrlRay.getNGates(),
+                           hsrlRay.getStartRangeKm(),
+                           hsrlRay.getGateSpacingKm(),
+                           hcrRay.getStartRangeKm(),
+                           hcrRay.getGateSpacingKm());
   }
   
-  const vector<RadxField *> &sFields = secondaryRay.getFields();
-  int nGatesPrimary = primaryRay.getNGates();
+  const vector<RadxField *> &sFields = hsrlRay.getFields();
+  int nGatesHcr = hcrRay.getNGates();
 
   for (size_t ifield = 0; ifield < sFields.size(); ifield++) {
     
     const RadxField *sField = sFields[ifield];
 
     // get output field name
-
+    
     string outputName = sField->getName();
     Params::output_encoding_t outputEncoding = Params::ENCODING_INT16;
-    for (size_t ii = 0; ii < group.fields.size(); ii++) {
-      string inputName = group.fields[ii].input_field_name;
+    for (int ii = 0; ii < _params.hsrl_fields_n; ii++) {
+      string inputName = _params._hsrl_fields[ii].input_field_name;
       if (inputName == outputName) {
-        outputName = group.fields[ii].output_field_name;
-        outputEncoding = group.fields[ii].output_encoding;
+        outputName = _params._hsrl_fields[ii].output_field_name;
+        outputEncoding = _params._hsrl_fields[ii].output_encoding;
         break;
       }
     }
-
+    
     // make a copy of the field
 
     RadxField *sCopy = new RadxField(*sField);
@@ -861,13 +585,13 @@ void MergeHcrAndHsrl::_mergeRay(RadxRay &primaryRay,
     // rename to output name
     
     sCopy->setName(outputName);
-
+    
     // ensure geometry is correct, remap if needed
     
     if (geomDiffers) {
       sCopy->remapRayGeom(remap, true);
     }
-    sCopy->setNGates(nGatesPrimary);
+    sCopy->setNGates(nGatesHcr);
       
     // convert type
 
@@ -889,231 +613,9 @@ void MergeHcrAndHsrl::_mergeRay(RadxRay &primaryRay,
 
     // add to ray
 
-    primaryRay.addField(sCopy);
+    hcrRay.addField(sCopy);
 
   } // ifield
-
-}
-
-//////////////////////////////////////////////////////////////
-// Add combined fields
-//
-// Returns 0 on success, -1 on failure
-
-int MergeHcrAndHsrl::_addCombinedFields(RadxVol &vol)
-  
-{
-
-  int iret = 0;
-
-  for (int ii = 0; ii < _params.combined_fields_n; ii++) {
-
-    const Params::combined_field_t &comb = _params._combined_fields[ii];
-    if (_addCombinedField(vol, comb)) {
-      iret = -1;
-    }
-
-  } // ii
-
-  return iret;
-
-}
-
-//////////////////////////////////////////////////////////////
-// Add combined fields
-//
-// Returns 0 on success, -1 on failure
-
-int MergeHcrAndHsrl::_addCombinedField(RadxVol &vol,
-                                       const Params::combined_field_t &comb)
-  
-{
-
-  int iret = 0;
-  double sum = 0.0;
-  double count = 0.0;
-
-  // loop through rays
-
-  const vector<RadxRay *> &rays = vol.getRays();
-  for (size_t iray = 0; iray < rays.size(); iray++) {
-
-    // get the fields to be combined
-
-    RadxRay *ray = rays[iray];
-    RadxField *fld1 = ray->getField(comb.field_name_1);
-    RadxField *fld2 = ray->getField(comb.field_name_2);
-    if (fld1 == NULL || fld2 == NULL) {
-      iret = -1;
-      continue;
-    }
-
-    // copy the fields so we can convert to floats
-    
-    RadxField *copy1 = new RadxField(*fld1);
-    RadxField *copy2 = new RadxField(*fld2);
-    copy1->convertToFl32();
-    copy2->convertToFl32();
-    Radx::fl32 miss1 = copy1->getMissingFl32();
-    Radx::fl32 miss2 = copy2->getMissingFl32();
-
-    // create new field to hold combined data
-    // base it on field 1
-
-    RadxField *combf = new RadxField(*copy1);
-    combf->setName(comb.combined_name);
-    combf->setLongName(comb.long_name);
-    Radx::fl32 missComb = combf->getMissingFl32();
-    
-    // compute bias if needed
-
-    double meanBias = 0.0;
-    double sumBias = 0.0;
-    double nBias = 0.0;
-    if(comb.combine_method == Params::COMBINE_UNBIASED_MEAN) {
-      Radx::fl32 *vals1 = (Radx::fl32 *) copy1->getData();
-      Radx::fl32 *vals2 = (Radx::fl32 *) copy2->getData();
-      for (size_t ipt = 0; ipt < copy1->getNPoints();
-           ipt++, vals1++, vals2++) {
-        if (*vals1 != miss1 && *vals2 != miss2) {
-          double bias = *vals1 - *vals2;
-          sumBias += bias;
-          nBias++;
-        }
-      }
-      if (nBias > 0) {
-        meanBias = sumBias / nBias;
-      }
-    }
-
-    // compute combined values
-    
-    Radx::fl32 *vals1 = (Radx::fl32 *) copy1->getData();
-    Radx::fl32 *vals2 = (Radx::fl32 *) copy2->getData();
-    Radx::fl32 *valsComb = (Radx::fl32 *) combf->getData();
-    
-    bool requireBoth = comb.require_both;
-    for (size_t ipt = 0; ipt < copy1->getNPoints();
-         ipt++, vals1++, vals2++, valsComb++) {
-
-      // check if we need both fields present
-
-      *valsComb = missComb;
-      if (requireBoth) {
-        if (*vals1 == miss1 || *vals2 == miss2) {
-          continue;
-        }
-      }
-        
-      // field 1 missing?
-
-      if (*vals1 == miss1) {
-        // only use field 2
-        if (comb.combine_method == Params::COMBINE_UNBIASED_MEAN) {
-          // adjust for bias
-          *valsComb = *vals2 + meanBias;
-        } else {
-          *valsComb = *vals2;
-        }
-        continue;
-      }
-      
-      // field 2 missing?
-
-      if (*vals2 == miss2) {
-        // only use field1
-        *valsComb = *vals1;
-        continue;
-      }
-
-      // combine fields
-      
-      if (comb.combine_method == Params::COMBINE_MEAN) {
-        
-        *valsComb = (*vals1 + *vals2) / 2.0;
-        
-      } else if (comb.combine_method == Params::COMBINE_UNBIASED_MEAN) {
-
-        *valsComb = (*vals1 + *vals2 + meanBias) / 2.0;
-        
-      } else if (comb.combine_method == Params::COMBINE_GEOM_MEAN) {
-
-        *valsComb = sqrt(*vals1 * *vals2);
-
-      } else if (comb.combine_method == Params::COMBINE_MAX) {
-
-        if (*vals1 > *vals2) {
-          *valsComb = *vals1;
-        } else {
-          *valsComb = *vals2;
-        }
-
-      } else if (comb.combine_method == Params::COMBINE_MIN) {
-
-        if (*vals1 < *vals2) {
-          *valsComb = *vals1;
-        } else {
-          *valsComb = *vals2;
-        }
-
-      } else if (comb.combine_method == Params::COMBINE_SUM) {
-
-        *valsComb = *vals1 + *vals2;
-        
-      } else if (comb.combine_method == Params::COMBINE_DIFF) {
-
-        *valsComb = *vals1 - *vals2;
-        
-      } // if (comb.combine_method == Params::COMBINE_MEAN)
-
-      sum += *valsComb;
-      count += 1.0;
-
-    } // ipt
-    
-    // convert type
-
-    switch (comb.output_encoding) {
-      case Params::ENCODING_FLOAT32:
-        combf->convertToFl32();
-        break;
-      case Params::ENCODING_INT32:
-        combf->convertToSi32();
-        break;
-      case Params::ENCODING_INT08:
-        combf->convertToSi08();
-        break;
-      case Params::ENCODING_INT16:
-      default:
-        combf->convertToSi16();
-        break;
-    } // switch
-
-    // add combined field to ray
-
-    combf->computeMinAndMax();
-    ray->addField(combf);
-
-    // free up
-
-    delete copy1;
-    delete copy2;
-
-  } // iray
-
-  // print mean combined value if requested
-  
-  if (_params.print_mean_of_combined_fields) {
-    if (count > 0) {
-      double meanComb = sum / count;
-      cout << "==========================================================" << endl;
-      cout << "===>> Field " << comb.combined_name << ", mean value: " << meanComb << endl;
-      cout << "==========================================================" << endl;
-      cout << flush;
-    }
-  }
-
-  return iret;
 
 }
 

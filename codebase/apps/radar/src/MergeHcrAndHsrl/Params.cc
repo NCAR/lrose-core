@@ -547,7 +547,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Merges fields from multiple CfRadial files into a single file");
+    tt->comment_hdr = tdrpStrDup("Merges field data from HCR and HSRL instruments. HCR is the primary instrument, we merge the HSRL onto the HCR data.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -645,93 +645,67 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("DATA LOCATIONS");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("HCR is the primary data set, and the HCR data files are read in first. Then the associate HSRL data is found, and merged into the HCR data set.");
     tt++;
     
-    // Parameter 'input_datasets'
-    // ctype is '_input_dataset_t'
+    // Parameter 'hcr_data_dir'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("input_datasets");
-    tt->descr = tdrpStrDup("Index of directories containing the data files.");
-    tt->help = tdrpStrDup("The indices are used by output_fields to indicate where each field is located. The lowest index is used as the primary input. The geometry of non-primary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The offset is ignored for the primary field (index 1). The ray tolerances are used to match rays in the secondary file with those in the primary file.");
-    tt->array_offset = (char *) &_input_datasets - &_start_;
-    tt->array_n_offset = (char *) &input_datasets_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(input_dataset_t);
-    tt->array_n = 4;
-    tt->struct_def.name = tdrpStrDup("input_dataset_t");
-    tt->struct_def.nfields = 7;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[0].fname = tdrpStrDup("index");
-      tt->struct_def.fields[0].ptype = INT_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_input_datasets->index - (char *) _input_datasets;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("dir");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_input_datasets->dir - (char *) _input_datasets;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("file_match_time_offset_sec");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_input_datasets->file_match_time_offset_sec - (char *) _input_datasets;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("file_match_time_tolerance_sec");
-      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_input_datasets->file_match_time_tolerance_sec - (char *) _input_datasets;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("ray_match_elevation_tolerance_deg");
-      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &_input_datasets->ray_match_elevation_tolerance_deg - (char *) _input_datasets;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[5].fname = tdrpStrDup("ray_match_azimuth_tolerance_deg");
-      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &_input_datasets->ray_match_azimuth_tolerance_deg - (char *) _input_datasets;
-      tt->struct_def.fields[6].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[6].fname = tdrpStrDup("ray_match_time_tolerance_sec");
-      tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[6].rel_offset = 
-        (char *) &_input_datasets->ray_match_time_tolerance_sec - (char *) _input_datasets;
-    tt->n_struct_vals = 28;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].i = 1;
-      tt->struct_vals[1].s = tdrpStrDup("cfradial/sband");
-      tt->struct_vals[2].d = 0;
-      tt->struct_vals[3].d = 60;
-      tt->struct_vals[4].d = 0.25;
-      tt->struct_vals[5].d = 0.1;
-      tt->struct_vals[6].d = 60;
-      tt->struct_vals[7].i = 2;
-      tt->struct_vals[8].s = tdrpStrDup("cfradial/kband");
-      tt->struct_vals[9].d = 0;
-      tt->struct_vals[10].d = 60;
-      tt->struct_vals[11].d = 0.25;
-      tt->struct_vals[12].d = 0.1;
-      tt->struct_vals[13].d = 60;
-      tt->struct_vals[14].i = 3;
-      tt->struct_vals[15].s = tdrpStrDup("cfradial/partrain");
-      tt->struct_vals[16].d = 0;
-      tt->struct_vals[17].d = 60;
-      tt->struct_vals[18].d = 0.25;
-      tt->struct_vals[19].d = 0.1;
-      tt->struct_vals[20].d = 60;
-      tt->struct_vals[21].i = 4;
-      tt->struct_vals[22].s = tdrpStrDup("cfradial/clut");
-      tt->struct_vals[23].d = 0;
-      tt->struct_vals[24].d = 60;
-      tt->struct_vals[25].d = 0.25;
-      tt->struct_vals[26].d = 0.1;
-      tt->struct_vals[27].d = 60;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("hcr_data_dir");
+    tt->descr = tdrpStrDup("Directory for HCR data files.");
+    tt->help = tdrpStrDup("These are in CfRadial format.");
+    tt->val_offset = (char *) &hcr_data_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/scr/rain1/rsfdata/projects/socrates/hcr/qc/cfradial/velcorr/2hz");
+    tt++;
+    
+    // Parameter 'hsrl_data_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("hsrl_data_dir");
+    tt->descr = tdrpStrDup("Directory for HSRL data files.");
+    tt->help = tdrpStrDup("These are in CfRadial format.");
+    tt->val_offset = (char *) &hsrl_data_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/scr/rain1/rsfdata/projects/socrates/hsrl/qc/cfradial/qc_moments");
+    tt++;
+    
+    // Parameter 'file_match_time_tolerance_sec'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("file_match_time_tolerance_sec");
+    tt->descr = tdrpStrDup("Time tolerance for matching the HSRL files to the HCR files (secs).");
+    tt->help = tdrpStrDup("Only files within this tolerance will be matched.");
+    tt->val_offset = (char *) &file_match_time_tolerance_sec - &_start_;
+    tt->single_val.d = 900;
+    tt++;
+    
+    // Parameter 'ray_match_time_tolerance_sec'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("ray_match_time_tolerance_sec");
+    tt->descr = tdrpStrDup("Time tolerance for matching the HSRL rays to the HCR rays (secs).");
+    tt->help = tdrpStrDup("Only rays within this tolerance are used.");
+    tt->val_offset = (char *) &ray_match_time_tolerance_sec - &_start_;
+    tt->single_val.d = 0.25;
+    tt++;
+    
+    // Parameter 'ray_match_elevation_tolerance_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("ray_match_elevation_tolerance_deg");
+    tt->descr = tdrpStrDup("Angular elevation tolerance for matching the HSRL rays to the HCR rays (deg).");
+    tt->help = tdrpStrDup("Only rays within this tolerance are used. The HSRL points 4 degrees off vertical, so this values should always be > 4. Also, when the aircraft banks, the HSRL elevation changes, whereas the HCR antenna control should keep the beam vertical.");
+    tt->val_offset = (char *) &ray_match_elevation_tolerance_deg - &_start_;
+    tt->single_val.d = 7.5;
     tt++;
     
     // Parameter 'Comment 4'
@@ -743,91 +717,140 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'output_fields'
-    // ctype is '_output_field_t'
+    // Parameter 'hcr_fields'
+    // ctype is '_field_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("output_fields");
-    tt->descr = tdrpStrDup("Specs of fields to be copied from input to output.");
-    tt->help = tdrpStrDup("input_index: indicates which input_dir to use.\ninput_field_name: name of field in input file.\noutput_field_name: name of field in output file.\nencoding: output encoding for the field.");
-    tt->array_offset = (char *) &_output_fields - &_start_;
-    tt->array_n_offset = (char *) &output_fields_n - &_start_;
+    tt->param_name = tdrpStrDup("hcr_fields");
+    tt->descr = tdrpStrDup("Specs of HCR fields to be included.");
+    tt->help = tdrpStrDup("\n\ninput_field_name: name of field in input file.\n\noutput_field_name: name of field in output file.\n\nencoding: output encoding for the field.");
+    tt->array_offset = (char *) &_hcr_fields - &_start_;
+    tt->array_n_offset = (char *) &hcr_fields_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 8;
-    tt->struct_def.name = tdrpStrDup("output_field_t");
-    tt->struct_def.nfields = 4;
+    tt->array_elem_size = sizeof(field_t);
+    tt->array_n = 7;
+    tt->struct_def.name = tdrpStrDup("field_t");
+    tt->struct_def.nfields = 3;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[0].fname = tdrpStrDup("input_index");
-      tt->struct_def.fields[0].ptype = INT_TYPE;
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("input_field_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_output_fields->input_index - (char *) _output_fields;
+        (char *) &_hcr_fields->input_field_name - (char *) _hcr_fields;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("input_field_name");
+      tt->struct_def.fields[1].fname = tdrpStrDup("output_field_name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_output_fields->input_field_name - (char *) _output_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("output_field_name");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
+        (char *) &_hcr_fields->output_field_name - (char *) _hcr_fields;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("output_encoding_t");
+      tt->struct_def.fields[2].fname = tdrpStrDup("output_encoding");
+      tt->struct_def.fields[2].ptype = ENUM_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_output_fields->output_field_name - (char *) _output_fields;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("output_encoding_t");
-      tt->struct_def.fields[3].fname = tdrpStrDup("output_encoding");
-      tt->struct_def.fields[3].ptype = ENUM_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_output_fields->output_encoding - (char *) _output_fields;
-        tt->struct_def.fields[3].enum_def.name = tdrpStrDup("output_encoding_t");
-        tt->struct_def.fields[3].enum_def.nfields = 4;
-        tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("ENCODING_FLOAT32");
-        tt->struct_def.fields[3].enum_def.fields[0].val = ENCODING_FLOAT32;
-        tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("ENCODING_INT32");
-        tt->struct_def.fields[3].enum_def.fields[1].val = ENCODING_INT32;
-        tt->struct_def.fields[3].enum_def.fields[2].name = tdrpStrDup("ENCODING_INT16");
-        tt->struct_def.fields[3].enum_def.fields[2].val = ENCODING_INT16;
-        tt->struct_def.fields[3].enum_def.fields[3].name = tdrpStrDup("ENCODING_INT08");
-        tt->struct_def.fields[3].enum_def.fields[3].val = ENCODING_INT08;
-    tt->n_struct_vals = 32;
+        (char *) &_hcr_fields->output_encoding - (char *) _hcr_fields;
+        tt->struct_def.fields[2].enum_def.name = tdrpStrDup("output_encoding_t");
+        tt->struct_def.fields[2].enum_def.nfields = 4;
+        tt->struct_def.fields[2].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[2].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[2].enum_def.fields[0].name = tdrpStrDup("ENCODING_FLOAT32");
+        tt->struct_def.fields[2].enum_def.fields[0].val = ENCODING_FLOAT32;
+        tt->struct_def.fields[2].enum_def.fields[1].name = tdrpStrDup("ENCODING_INT32");
+        tt->struct_def.fields[2].enum_def.fields[1].val = ENCODING_INT32;
+        tt->struct_def.fields[2].enum_def.fields[2].name = tdrpStrDup("ENCODING_INT16");
+        tt->struct_def.fields[2].enum_def.fields[2].val = ENCODING_INT16;
+        tt->struct_def.fields[2].enum_def.fields[3].name = tdrpStrDup("ENCODING_INT08");
+        tt->struct_def.fields[2].enum_def.fields[3].val = ENCODING_INT08;
+    tt->n_struct_vals = 21;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].i = 1;
-      tt->struct_vals[1].s = tdrpStrDup("DBZ");
-      tt->struct_vals[2].s = tdrpStrDup("DBZ_S");
-      tt->struct_vals[3].e = ENCODING_INT16;
-      tt->struct_vals[4].i = 1;
-      tt->struct_vals[5].s = tdrpStrDup("VEL");
-      tt->struct_vals[6].s = tdrpStrDup("VEL_S");
-      tt->struct_vals[7].e = ENCODING_INT16;
-      tt->struct_vals[8].i = 1;
-      tt->struct_vals[9].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[10].s = tdrpStrDup("WIDTH_S");
+      tt->struct_vals[0].s = tdrpStrDup("DBZ");
+      tt->struct_vals[1].s = tdrpStrDup("HCR_DBZ");
+      tt->struct_vals[2].e = ENCODING_INT16;
+      tt->struct_vals[3].s = tdrpStrDup("VEL_CORR");
+      tt->struct_vals[4].s = tdrpStrDup("HCR_VEL");
+      tt->struct_vals[5].e = ENCODING_INT16;
+      tt->struct_vals[6].s = tdrpStrDup("WIDTH");
+      tt->struct_vals[7].s = tdrpStrDup("HCR_WIDTH");
+      tt->struct_vals[8].e = ENCODING_INT16;
+      tt->struct_vals[9].s = tdrpStrDup("LDR");
+      tt->struct_vals[10].s = tdrpStrDup("HCR_LDR");
       tt->struct_vals[11].e = ENCODING_INT16;
-      tt->struct_vals[12].i = 2;
-      tt->struct_vals[13].s = tdrpStrDup("DBZ");
-      tt->struct_vals[14].s = tdrpStrDup("DBZ_K");
-      tt->struct_vals[15].e = ENCODING_INT16;
-      tt->struct_vals[16].i = 2;
-      tt->struct_vals[17].s = tdrpStrDup("VEL");
-      tt->struct_vals[18].s = tdrpStrDup("VEL_K");
-      tt->struct_vals[19].e = ENCODING_INT16;
-      tt->struct_vals[20].i = 2;
-      tt->struct_vals[21].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[22].s = tdrpStrDup("WIDTH_K");
-      tt->struct_vals[23].e = ENCODING_INT16;
-      tt->struct_vals[24].i = 3;
-      tt->struct_vals[25].s = tdrpStrDup("PID");
-      tt->struct_vals[26].s = tdrpStrDup("PID");
-      tt->struct_vals[27].e = ENCODING_INT16;
-      tt->struct_vals[28].i = 3;
-      tt->struct_vals[29].s = tdrpStrDup("PRECIP_RATE");
-      tt->struct_vals[30].s = tdrpStrDup("PRECIP_RATE");
-      tt->struct_vals[31].e = ENCODING_INT16;
+      tt->struct_vals[12].s = tdrpStrDup("NCP");
+      tt->struct_vals[13].s = tdrpStrDup("HCR_NCP");
+      tt->struct_vals[14].e = ENCODING_INT16;
+      tt->struct_vals[15].s = tdrpStrDup("SNR");
+      tt->struct_vals[16].s = tdrpStrDup("HCR_SNR");
+      tt->struct_vals[17].e = ENCODING_INT16;
+      tt->struct_vals[18].s = tdrpStrDup("DBMVC");
+      tt->struct_vals[19].s = tdrpStrDup("HCR_DBM");
+      tt->struct_vals[20].e = ENCODING_INT16;
+    tt++;
+    
+    // Parameter 'hsrl_fields'
+    // ctype is '_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("hsrl_fields");
+    tt->descr = tdrpStrDup("Specs of HSRL fields to be included.");
+    tt->help = tdrpStrDup("\n\ninput_field_name: name of field in input file.\n\noutput_field_name: name of field in output file.\n\nencoding: output encoding for the field.");
+    tt->array_offset = (char *) &_hsrl_fields - &_start_;
+    tt->array_n_offset = (char *) &hsrl_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(field_t);
+    tt->array_n = 5;
+    tt->struct_def.name = tdrpStrDup("field_t");
+    tt->struct_def.nfields = 3;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("input_field_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_hsrl_fields->input_field_name - (char *) _hsrl_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("output_field_name");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_hsrl_fields->output_field_name - (char *) _hsrl_fields;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("output_encoding_t");
+      tt->struct_def.fields[2].fname = tdrpStrDup("output_encoding");
+      tt->struct_def.fields[2].ptype = ENUM_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_hsrl_fields->output_encoding - (char *) _hsrl_fields;
+        tt->struct_def.fields[2].enum_def.name = tdrpStrDup("output_encoding_t");
+        tt->struct_def.fields[2].enum_def.nfields = 4;
+        tt->struct_def.fields[2].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[2].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[2].enum_def.fields[0].name = tdrpStrDup("ENCODING_FLOAT32");
+        tt->struct_def.fields[2].enum_def.fields[0].val = ENCODING_FLOAT32;
+        tt->struct_def.fields[2].enum_def.fields[1].name = tdrpStrDup("ENCODING_INT32");
+        tt->struct_def.fields[2].enum_def.fields[1].val = ENCODING_INT32;
+        tt->struct_def.fields[2].enum_def.fields[2].name = tdrpStrDup("ENCODING_INT16");
+        tt->struct_def.fields[2].enum_def.fields[2].val = ENCODING_INT16;
+        tt->struct_def.fields[2].enum_def.fields[3].name = tdrpStrDup("ENCODING_INT08");
+        tt->struct_def.fields[2].enum_def.fields[3].val = ENCODING_INT08;
+    tt->n_struct_vals = 15;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Aerosol_Backscatter_Coefficient");
+      tt->struct_vals[1].s = tdrpStrDup("Backscat_Coeff");
+      tt->struct_vals[2].e = ENCODING_INT16;
+      tt->struct_vals[3].s = tdrpStrDup("Particle_Linear_Depolarization_Ratio");
+      tt->struct_vals[4].s = tdrpStrDup("Particle_LDR");
+      tt->struct_vals[5].e = ENCODING_INT16;
+      tt->struct_vals[6].s = tdrpStrDup("Volume_Linear_Depolarization_Ratio");
+      tt->struct_vals[7].s = tdrpStrDup("Volume_LDR");
+      tt->struct_vals[8].e = ENCODING_INT16;
+      tt->struct_vals[9].s = tdrpStrDup("Optical_Depth");
+      tt->struct_vals[10].s = tdrpStrDup("Optical_Depth");
+      tt->struct_vals[11].e = ENCODING_INT16;
+      tt->struct_vals[12].s = tdrpStrDup("Aerosol_Extinction_Coefficient");
+      tt->struct_vals[13].s = tdrpStrDup("Extinction_Coeff");
+      tt->struct_vals[14].e = ENCODING_INT16;
     tt++;
     
     // Parameter 'Comment 5'
@@ -835,379 +858,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("SPECIFYING FIELDS TO BE COMBINED");
+    tt->comment_hdr = tdrpStrDup("OUTPUT DETAILS");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'add_combined_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("add_combined_fields");
-    tt->descr = tdrpStrDup("Option to combine some fields to produce derived fields");
-    tt->help = tdrpStrDup("We can combine pairs of fields using simple algorithms. This created derived fields. The fields to be combined must already have been specified as 'output_fields' above.");
-    tt->val_offset = (char *) &add_combined_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'combined_fields'
-    // ctype is '_combined_field_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("combined_fields");
-    tt->descr = tdrpStrDup("Specs of fields to be combined.");
-    tt->help = tdrpStrDup("field_name_1 and field_name_2 must be in the output_fields list. If 'require_both' is TRUE, both fields needs to be non-missing to produce an output field. output_encoding - see 'output_fields' above. MEAN: arimthmetic mean. UNBIASED_MEAN: first remove any consistent bias between field1 and field2, by adjusting field2 to field 1. Then compute the arithmetic mean. This reduces noise in the fields without changing the value of field1. GEOM_MEAN: geometric mean. MAX: maximum of the two fields. MIN: minimum of the two fields.");
-    tt->array_offset = (char *) &_combined_fields - &_start_;
-    tt->array_n_offset = (char *) &combined_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(combined_field_t);
-    tt->array_n = 3;
-    tt->struct_def.name = tdrpStrDup("combined_field_t");
-    tt->struct_def.nfields = 7;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("field_name_1");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_combined_fields->field_name_1 - (char *) _combined_fields;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("field_name_2");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_combined_fields->field_name_2 - (char *) _combined_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("combined_name");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_combined_fields->combined_name - (char *) _combined_fields;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[3].fname = tdrpStrDup("long_name");
-      tt->struct_def.fields[3].ptype = STRING_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_combined_fields->long_name - (char *) _combined_fields;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("combine_method_t");
-      tt->struct_def.fields[4].fname = tdrpStrDup("combine_method");
-      tt->struct_def.fields[4].ptype = ENUM_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &_combined_fields->combine_method - (char *) _combined_fields;
-        tt->struct_def.fields[4].enum_def.name = tdrpStrDup("combine_method_t");
-        tt->struct_def.fields[4].enum_def.nfields = 7;
-        tt->struct_def.fields[4].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[4].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[4].enum_def.fields[0].name = tdrpStrDup("COMBINE_MEAN");
-        tt->struct_def.fields[4].enum_def.fields[0].val = COMBINE_MEAN;
-        tt->struct_def.fields[4].enum_def.fields[1].name = tdrpStrDup("COMBINE_UNBIASED_MEAN");
-        tt->struct_def.fields[4].enum_def.fields[1].val = COMBINE_UNBIASED_MEAN;
-        tt->struct_def.fields[4].enum_def.fields[2].name = tdrpStrDup("COMBINE_GEOM_MEAN");
-        tt->struct_def.fields[4].enum_def.fields[2].val = COMBINE_GEOM_MEAN;
-        tt->struct_def.fields[4].enum_def.fields[3].name = tdrpStrDup("COMBINE_MAX");
-        tt->struct_def.fields[4].enum_def.fields[3].val = COMBINE_MAX;
-        tt->struct_def.fields[4].enum_def.fields[4].name = tdrpStrDup("COMBINE_MIN");
-        tt->struct_def.fields[4].enum_def.fields[4].val = COMBINE_MIN;
-        tt->struct_def.fields[4].enum_def.fields[5].name = tdrpStrDup("COMBINE_SUM");
-        tt->struct_def.fields[4].enum_def.fields[5].val = COMBINE_SUM;
-        tt->struct_def.fields[4].enum_def.fields[6].name = tdrpStrDup("COMBINE_DIFF");
-        tt->struct_def.fields[4].enum_def.fields[6].val = COMBINE_DIFF;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[5].fname = tdrpStrDup("require_both");
-      tt->struct_def.fields[5].ptype = BOOL_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &_combined_fields->require_both - (char *) _combined_fields;
-      tt->struct_def.fields[6].ftype = tdrpStrDup("output_encoding_t");
-      tt->struct_def.fields[6].fname = tdrpStrDup("output_encoding");
-      tt->struct_def.fields[6].ptype = ENUM_TYPE;
-      tt->struct_def.fields[6].rel_offset = 
-        (char *) &_combined_fields->output_encoding - (char *) _combined_fields;
-        tt->struct_def.fields[6].enum_def.name = tdrpStrDup("output_encoding_t");
-        tt->struct_def.fields[6].enum_def.nfields = 4;
-        tt->struct_def.fields[6].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[6].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[6].enum_def.fields[0].name = tdrpStrDup("ENCODING_FLOAT32");
-        tt->struct_def.fields[6].enum_def.fields[0].val = ENCODING_FLOAT32;
-        tt->struct_def.fields[6].enum_def.fields[1].name = tdrpStrDup("ENCODING_INT32");
-        tt->struct_def.fields[6].enum_def.fields[1].val = ENCODING_INT32;
-        tt->struct_def.fields[6].enum_def.fields[2].name = tdrpStrDup("ENCODING_INT16");
-        tt->struct_def.fields[6].enum_def.fields[2].val = ENCODING_INT16;
-        tt->struct_def.fields[6].enum_def.fields[3].name = tdrpStrDup("ENCODING_INT08");
-        tt->struct_def.fields[6].enum_def.fields[3].val = ENCODING_INT08;
-    tt->n_struct_vals = 21;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("DBZ1");
-      tt->struct_vals[1].s = tdrpStrDup("DBZ2");
-      tt->struct_vals[2].s = tdrpStrDup("DBZ_MEAN");
-      tt->struct_vals[3].s = tdrpStrDup("mean_of_DBZ1_and_DBZ2");
-      tt->struct_vals[4].e = COMBINE_MEAN;
-      tt->struct_vals[5].b = pTRUE;
-      tt->struct_vals[6].e = ENCODING_INT16;
-      tt->struct_vals[7].s = tdrpStrDup("DBZ1");
-      tt->struct_vals[8].s = tdrpStrDup("DBZ2");
-      tt->struct_vals[9].s = tdrpStrDup("DBZ_MAX");
-      tt->struct_vals[10].s = tdrpStrDup("max_of_DBZ1_and_DBZ2");
-      tt->struct_vals[11].e = COMBINE_MAX;
-      tt->struct_vals[12].b = pFALSE;
-      tt->struct_vals[13].e = ENCODING_INT16;
-      tt->struct_vals[14].s = tdrpStrDup("DBZ1");
-      tt->struct_vals[15].s = tdrpStrDup("DBZ2");
-      tt->struct_vals[16].s = tdrpStrDup("DBZ_MIN");
-      tt->struct_vals[17].s = tdrpStrDup("min_of_DBZ1_and_DBZ2");
-      tt->struct_vals[18].e = COMBINE_MIN;
-      tt->struct_vals[19].b = pFALSE;
-      tt->struct_vals[20].e = ENCODING_INT16;
-    tt++;
-    
-    // Parameter 'print_mean_of_combined_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("print_mean_of_combined_fields");
-    tt->descr = tdrpStrDup("Option to print mean value for each combined field in each volume");
-    tt->help = tdrpStrDup("If true, we compute the mean value of each combined field, and write it to stdout.");
-    tt->val_offset = (char *) &print_mean_of_combined_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS");
-    tt->comment_text = tdrpStrDup("Fixed angles are elevation in PPI mode and azimuth in RHI mode.");
-    tt++;
-    
-    // Parameter 'set_fixed_angle_limits'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_fixed_angle_limits");
-    tt->descr = tdrpStrDup("Option to set fixed angle limits");
-    tt->help = tdrpStrDup("Only use sweeps within the specified fixed angle limits.");
-    tt->val_offset = (char *) &set_fixed_angle_limits - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'lower_fixed_angle_limit'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("lower_fixed_angle_limit");
-    tt->descr = tdrpStrDup("Lower fixed angle limit - degrees.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &lower_fixed_angle_limit - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'upper_fixed_angle_limit'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("upper_fixed_angle_limit");
-    tt->descr = tdrpStrDup("Upper fixed angle limit - degrees.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &upper_fixed_angle_limit - &_start_;
-    tt->single_val.d = 90;
-    tt++;
-    
-    // Parameter 'set_sweep_num_limits'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_sweep_num_limits");
-    tt->descr = tdrpStrDup("Option to set sweep number limits");
-    tt->help = tdrpStrDup("Only read sweeps within the specified sweep number limits.");
-    tt->val_offset = (char *) &set_sweep_num_limits - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'lower_sweep_num'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("lower_sweep_num");
-    tt->descr = tdrpStrDup("Lower sweep number limit.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &lower_sweep_num - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'upper_sweep_num'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("upper_sweep_num");
-    tt->descr = tdrpStrDup("Upper sweep number limit.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &upper_sweep_num - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OPTION TO CHECK FOR CONSTANT GEOMETRY");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'check_constant_geometry'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("check_constant_geometry");
-    tt->descr = tdrpStrDup("Option to check that the ray geometry does not change.");
-    tt->help = tdrpStrDup("If true, will only merge rays with the same geometry as the primary volume. If false, secondary rays will be remapped to the primary ray geometry.");
-    tt->val_offset = (char *) &check_constant_geometry - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("SWEEP FILE AGGREGATION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'aggregate_sweep_files_on_read'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("aggregate_sweep_files_on_read");
-    tt->descr = tdrpStrDup("Option to aggregate sweep files into a volume on read.");
-    tt->help = tdrpStrDup("If false, and the input data is in sweeps rather than volumes (e.g. DORADE), the sweep files from a volume will be aggregated into a volume.");
-    tt->val_offset = (char *) &aggregate_sweep_files_on_read - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'Comment 9'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_format'
-    // ctype is '_output_format_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_format");
-    tt->descr = tdrpStrDup("Format for the output files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_format - &_start_;
-    tt->enum_def.name = tdrpStrDup("output_format_t");
-    tt->enum_def.nfields = 6;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_FORMAT_CFRADIAL");
-      tt->enum_def.fields[0].val = OUTPUT_FORMAT_CFRADIAL;
-      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_FORMAT_DORADE");
-      tt->enum_def.fields[1].val = OUTPUT_FORMAT_DORADE;
-      tt->enum_def.fields[2].name = tdrpStrDup("OUTPUT_FORMAT_FORAY");
-      tt->enum_def.fields[2].val = OUTPUT_FORMAT_FORAY;
-      tt->enum_def.fields[3].name = tdrpStrDup("OUTPUT_FORMAT_NEXRAD");
-      tt->enum_def.fields[3].val = OUTPUT_FORMAT_NEXRAD;
-      tt->enum_def.fields[4].name = tdrpStrDup("OUTPUT_FORMAT_UF");
-      tt->enum_def.fields[4].val = OUTPUT_FORMAT_UF;
-      tt->enum_def.fields[5].name = tdrpStrDup("OUTPUT_FORMAT_MDV_RADIAL");
-      tt->enum_def.fields[5].val = OUTPUT_FORMAT_MDV_RADIAL;
-    tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
-    tt++;
-    
-    // Parameter 'netcdf_style'
-    // ctype is '_netcdf_style_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_style");
-    tt->descr = tdrpStrDup("NetCDF style - if output_format is CFRADIAL");
-    tt->help = tdrpStrDup("netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls");
-    tt->val_offset = (char *) &netcdf_style - &_start_;
-    tt->enum_def.name = tdrpStrDup("netcdf_style_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("CLASSIC");
-      tt->enum_def.fields[0].val = CLASSIC;
-      tt->enum_def.fields[1].name = tdrpStrDup("NC64BIT");
-      tt->enum_def.fields[1].val = NC64BIT;
-      tt->enum_def.fields[2].name = tdrpStrDup("NETCDF4");
-      tt->enum_def.fields[2].val = NETCDF4;
-      tt->enum_def.fields[3].name = tdrpStrDup("NETCDF4_CLASSIC");
-      tt->enum_def.fields[3].val = NETCDF4_CLASSIC;
-    tt->single_val.e = CLASSIC;
-    tt++;
-    
-    // Parameter 'Comment 10'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_native_byte_order'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_native_byte_order");
-    tt->descr = tdrpStrDup("Option to leave data in native byte order.");
-    tt->help = tdrpStrDup("If false, data will be byte-swapped as appropriate on output.");
-    tt->val_offset = (char *) &output_native_byte_order - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_compressed'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_compressed");
-    tt->descr = tdrpStrDup("Option to compress data fields on output.");
-    tt->help = tdrpStrDup("Applies to netCDF and Dorade. UF does not support compression.");
-    tt->val_offset = (char *) &output_compressed - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'Comment 11'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_force_ngates_vary'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_force_ngates_vary");
-    tt->descr = tdrpStrDup("Option to force the use of ragged arrays for CfRadial files.");
-    tt->help = tdrpStrDup("Only applies to CfRadial. If true, forces the use of ragged arrays even if the number of gates for all rays is constant.");
-    tt->val_offset = (char *) &output_force_ngates_vary - &_start_;
-    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'compression_level'
@@ -1222,11 +874,11 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1240,43 +892,7 @@
     tt->descr = tdrpStrDup("Output directory path.");
     tt->help = tdrpStrDup("Files will be written to this directory.");
     tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("./output");
-    tt++;
-    
-    // Parameter 'output_filename_mode'
-    // ctype is '_filename_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_filename_mode");
-    tt->descr = tdrpStrDup("Mode for computing output file name.");
-    tt->help = tdrpStrDup("START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.");
-    tt->val_offset = (char *) &output_filename_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("filename_mode_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("START_AND_END_TIMES");
-      tt->enum_def.fields[0].val = START_AND_END_TIMES;
-      tt->enum_def.fields[1].name = tdrpStrDup("START_TIME_ONLY");
-      tt->enum_def.fields[1].val = START_TIME_ONLY;
-      tt->enum_def.fields[2].name = tdrpStrDup("END_TIME_ONLY");
-      tt->enum_def.fields[2].val = END_TIME_ONLY;
-      tt->enum_def.fields[3].name = tdrpStrDup("SPECIFY_FILE_NAME");
-      tt->enum_def.fields[3].val = SPECIFY_FILE_NAME;
-    tt->single_val.e = START_AND_END_TIMES;
-    tt++;
-    
-    // Parameter 'output_filename'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_filename");
-    tt->descr = tdrpStrDup("Name of output file.");
-    tt->help = tdrpStrDup("Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.");
-    tt->val_offset = (char *) &output_filename - &_start_;
-    tt->single_val.s = tdrpStrDup("cfradial.test.nc");
+    tt->single_val.s = tdrpStrDup("/tmp/cfradial/HcrAndHsrl");
     tt++;
     
     // Parameter 'append_day_dir_to_output_dir'
@@ -1301,147 +917,6 @@
     tt->help = tdrpStrDup("Path will be output_dir/yyyy/yyyymmdd/filename.");
     tt->val_offset = (char *) &append_year_dir_to_output_dir - &_start_;
     tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 13'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE MISSING VALUES");
-    tt->comment_text = tdrpStrDup("Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n");
-    tt++;
-    
-    // Parameter 'override_missing_metadata_values'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_missing_metadata_values");
-    tt->descr = tdrpStrDup("Option to override the missing values for meta-data");
-    tt->help = tdrpStrDup("See following parameter options.");
-    tt->val_offset = (char *) &override_missing_metadata_values - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'missing_metadata_double'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("missing_metadata_double");
-    tt->descr = tdrpStrDup("Missing value for metadata of type double.");
-    tt->help = tdrpStrDup("Only applies if override_missing_metadata_values is TRUE");
-    tt->val_offset = (char *) &missing_metadata_double - &_start_;
-    tt->single_val.d = -9999;
-    tt++;
-    
-    // Parameter 'missing_metadata_float'
-    // ctype is 'float'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = FLOAT_TYPE;
-    tt->param_name = tdrpStrDup("missing_metadata_float");
-    tt->descr = tdrpStrDup("Missing value for metadata of type float.");
-    tt->help = tdrpStrDup("Only applies if override_missing_metadata_values is TRUE");
-    tt->val_offset = (char *) &missing_metadata_float - &_start_;
-    tt->single_val.f = -9999;
-    tt++;
-    
-    // Parameter 'missing_metadata_int'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("missing_metadata_int");
-    tt->descr = tdrpStrDup("Missing value for metadata of type int.");
-    tt->help = tdrpStrDup("Only applies if override_missing_metadata_values is TRUE");
-    tt->val_offset = (char *) &missing_metadata_int - &_start_;
-    tt->single_val.i = -9999;
-    tt++;
-    
-    // Parameter 'missing_metadata_char'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("missing_metadata_char");
-    tt->descr = tdrpStrDup("Missing value for metadata of type char.");
-    tt->help = tdrpStrDup("Only applies if override_missing_metadata_values is TRUE");
-    tt->val_offset = (char *) &missing_metadata_char - &_start_;
-    tt->single_val.i = -128;
-    tt++;
-    
-    // Parameter 'override_missing_field_values'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_missing_field_values");
-    tt->descr = tdrpStrDup("Option to override the missing values for field data");
-    tt->help = tdrpStrDup("See following parameter options.");
-    tt->val_offset = (char *) &override_missing_field_values - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'missing_field_fl64'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("missing_field_fl64");
-    tt->descr = tdrpStrDup("Missing value for field data of type 64-bit float.");
-    tt->help = tdrpStrDup("Only applies if override_missing_field_values is TRUE");
-    tt->val_offset = (char *) &missing_field_fl64 - &_start_;
-    tt->single_val.d = -9e+33;
-    tt++;
-    
-    // Parameter 'missing_field_fl32'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("missing_field_fl32");
-    tt->descr = tdrpStrDup("Missing value for field data of type 32-bit float.");
-    tt->help = tdrpStrDup("Only applies if override_missing_field_values is TRUE");
-    tt->val_offset = (char *) &missing_field_fl32 - &_start_;
-    tt->single_val.d = -9e+33;
-    tt++;
-    
-    // Parameter 'missing_field_si32'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("missing_field_si32");
-    tt->descr = tdrpStrDup("Missing value for field data of type 32-bit integer.");
-    tt->help = tdrpStrDup("Only applies if override_missing_field_values is TRUE");
-    tt->val_offset = (char *) &missing_field_si32 - &_start_;
-    tt->single_val.i = -2147483647;
-    tt++;
-    
-    // Parameter 'missing_field_si16'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("missing_field_si16");
-    tt->descr = tdrpStrDup("Missing value for field data of type 16-bit integer.");
-    tt->help = tdrpStrDup("Only applies if override_missing_field_values is TRUE");
-    tt->val_offset = (char *) &missing_field_si16 - &_start_;
-    tt->single_val.i = -232768;
-    tt++;
-    
-    // Parameter 'missing_field_si08'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("missing_field_si08");
-    tt->descr = tdrpStrDup("Missing value for field data of type 8-bit integer.");
-    tt->help = tdrpStrDup("Only applies if override_missing_field_values is TRUE");
-    tt->val_offset = (char *) &missing_field_si08 - &_start_;
-    tt->single_val.i = -128;
     tt++;
     
     // trailing entry has param_name set to NULL

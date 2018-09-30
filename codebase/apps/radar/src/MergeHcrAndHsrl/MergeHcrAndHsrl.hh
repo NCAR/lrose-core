@@ -31,6 +31,7 @@
 ///////////////////////////////////////////////////////////////
 //
 // Merges field data from HCR and HSRL instruments.
+// Writes combined data into CfRadial files.
 //
 ////////////////////////////////////////////////////////////////
 
@@ -43,7 +44,6 @@
 class RadxVol;
 class RadxFile;
 class RadxRay;
-class DoradeRadxFile;
 using namespace std;
 
 class MergeHcrAndHsrl {
@@ -74,46 +74,27 @@ private:
   Args _args;
   Params _params;
 
-  string _primaryDir;
-  vector<string> _secondaryDirs;
-
-  class OutputGroup {
-  public:
-    string dir;
-    double fileTimeOffset;
-    double fileTimeTolerance;
-    double rayElevTolerance;
-    double rayAzTolerance;
-    double rayTimeTolerance;
-    vector<Params::output_field_t> fields;
-  };
-  
-  OutputGroup _primaryGroup;
-  vector<OutputGroup> _secondaryGroups;
-  OutputGroup _activeGroup;
-
   int _checkParams();
   int _runFilelist();
   int _runArchive();
   int _runRealtime();
-  void _setupPrimaryRead(RadxFile &file);
-  void _setupSecondaryRead(RadxFile &file,
-                           const OutputGroup &group);
+  int _processFile(const string &hcrPath);
+  void _setupHcrRead(RadxFile &file);
+  void _setupHsrlRead(RadxFile &file);
   void _setupWrite(RadxFile &file);
   int _writeVol(RadxVol &vol);
-  int _processFile(const string &primaryPath);
-  int _checkGeom(const RadxVol &primaryVol,
-                 const RadxVol &secondaryVol);
-  int _mergeVol(RadxVol &primaryVol,
-                const RadxVol &secondaryVol,
-                const OutputGroup &group);
-  void _mergeRay(RadxRay &primaryRay,
-                 const RadxRay &secondaryRay,
-                 const OutputGroup &group);
+  int _processHcrFile(const string &hcrPath);
 
-  int _addCombinedFields(RadxVol &vol);
-  int _addCombinedField(RadxVol &vol,
-                        const Params::combined_field_t &comb);
+  int _mergeVol(RadxVol &hcrVol,
+                const RadxVol &hsrlVol);
+
+  void _mergeRay(RadxRay &hcrRay,
+                 const RadxRay &hsrlRay);
+
+  int _addFields(RadxVol &vol);
+
+  int _addField(RadxVol &vol,
+                const Params::field_t &fld);
 
 };
 

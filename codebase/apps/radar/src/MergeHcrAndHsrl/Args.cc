@@ -105,41 +105,6 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	TDRP_add_override(&override, tmp_str);
       }
 	
-    } else if (!strcmp(argv[i], "-ag")) {
-      
-      sprintf(tmp_str, "aggregate_sweep_files_on_read = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-native")) {
-      
-      sprintf(tmp_str, "output_native_byte_order = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-cfradial")) {
-      
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_CFRADIAL;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-dorade")) {
-      
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_DORADE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-uf")) {
-      
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_UF;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-out_start")) {
-      
-      sprintf(tmp_str, "output_filename_mode = START_TIME_ONLY;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-out_end")) {
-      
-      sprintf(tmp_str, "output_filename_mode = END_TIME_ONLY;");
-      TDRP_add_override(&override, tmp_str);
-      
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
@@ -186,32 +151,6 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
       
-    } else if (!strcmp(argv[i], "-field")) {
-      
-      if (i < argc - 1) {
-	fields.push_back(argv[++i]);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-primary_dir")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "primary_input_dir = \"%s\";", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-secondary_dir")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "secondary_input_dir = \"%s\";", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
     } else if (!strcmp(argv[i], "-outdir")) {
       
       if (i < argc - 1) {
@@ -220,96 +159,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
       } else {
 	OK = false;
       }
-	
-    } else if (!strcmp(argv[i], "-outname")) {
       
-      if (i < argc - 1) {
-	sprintf(tmp_str, "output_filename = \"%s\";", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "output_filename_mode = SPECIFY_FILE_NAME;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-elev")) {
-      
-      if (i < argc - 1) {
-        i++;
-	sprintf(tmp_str, "lower_elevation_limit = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "upper_elevation_limit = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "set_elevation_limits = true;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-elev_max")) {
-      
-      if (i < argc - 1) {
-        i++;
-	sprintf(tmp_str, "upper_elevation_limit = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "set_elevation_limits = true;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-sweep")) {
-      
-      if (i < argc - 1) {
-        i++;
-	sprintf(tmp_str, "lower_sweep_num = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "upper_sweep_num = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "set_sweep_num_limits = true;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-sweep_max")) {
-      
-      if (i < argc - 1) {
-        i++;
-	sprintf(tmp_str, "read_upper_sweep_num = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "set_sweep_num_limits = true;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
     }
     
   } // i
-
-  // set fields if specified
-
-  if (fields.size() > 0) {
-    
-    sprintf(tmp_str, "set_output_fields = true;");
-    TDRP_add_override(&override, tmp_str);
-    
-    string nameStr = "output_fields = { ";
-    for (size_t ii = 0; ii < fields.size(); ii++) {
-      nameStr += "{ \"";
-      nameStr += fields[ii];
-      nameStr += "\", OUTPUT_ENCODING_ASIS }";
-      if (ii != fields.size() - 1) {
-        nameStr += ", ";
-      } else {
-        nameStr += " ";
-      }
-    }
-    nameStr += "};";
-    TDRP_add_override(&override, nameStr.c_str());
-    
-  } // if (fields.size() ...
 
   if (!OK) {
     _usage(cerr);
@@ -328,20 +181,7 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -h ] produce this list.\n"
       << "\n"
-      << "  [ -ag ] aggregate sweep files into volume on read/n"
-      << "          applies to DORADE sweep files\n"
-      << "\n"
-      << "  [ -cfradial ] convert to cfradial (the default)\n"
-      << "\n"
       << "  [ -d, -debug ] print debug messages\n"
-      << "\n"
-      << "  [ -dorade ] convert to dorade\n"
-      << "\n"
-      << "  [ -elev ? ] set single elevation\n"
-      << "              or minimum - see '-elev_max'\n"
-      << "\n"
-      << "  [ -elev_max ? ] set max elevation\n"
-      << "                  use '-elev' for setting minimum\n"
       << "\n"
       << "  [ -end \"yyyy mm dd hh mm ss\"] end time\n"
       << "           Sets mode to ARCHIVE\n"
@@ -349,41 +189,12 @@ void Args::_usage(ostream &out)
       << "  [ -f, -paths ? ] set file paths\n"
       << "           Sets mode to FILELIST\n"
       << "\n"
-      << "  [ -field ? ] Specify particular field\n"
-      << "     Specify name or number\n"
-      << "     Use multiple -field args for multiple fields\n"
-      << "     If not specified, all fields will be used\n"
-      << "\n"
       << "  [ -instance ?] specify the instance\n"
-      << "\n"
-      << "  [ -native ] output in host-native byte ordering\n"
-      << "              instead of swapping into big-endian\n"
       << "\n"
       << "  [ -outdir ? ] set output directory\n"
       << "\n"
-      << "  [ -outname ? ] specify output file name\n"
-      << "                 file of this name will be written to outdir\n"
-      << "\n"
-      << "  [ -out_end ? ] compute output path using end time\n"
-      << "                 default is to use both start and end times\n"
-      << "\n"
-      << "  [ -out_start ? ] compute output path using start time\n"
-      << "                  default is to use both start and end times\n"
-      << "\n"
-      << "  [ -primary_dir ? ] set primary input directory\n"
-      << "\n"
-      << "  [ -secondary_dir ? ] set secondary input directory\n"
-      << "\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "           Sets mode to ARCHIVE\n"
-      << "\n"
-      << "  [ -sweep ? ] set single sweep number\n"
-      << "               or minimum - see '-sweep_max'\n"
-      << "\n"
-      << "  [ -sweep_max ? ] set max sweep number\n"
-      << "                   use '-sweep' for setting minimum\n"
-      << "\n"
-      << "  [ -uf ] convert to universal format\n"
       << "\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "  [ -vv, -extra ] print extra verbose debug messages\n"

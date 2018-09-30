@@ -87,67 +87,13 @@ public:
     ENCODING_INT08 = 3
   } output_encoding_t;
 
-  typedef enum {
-    COMBINE_MEAN = 0,
-    COMBINE_UNBIASED_MEAN = 1,
-    COMBINE_GEOM_MEAN = 2,
-    COMBINE_MAX = 3,
-    COMBINE_MIN = 4,
-    COMBINE_SUM = 5,
-    COMBINE_DIFF = 6
-  } combine_method_t;
-
-  typedef enum {
-    OUTPUT_FORMAT_CFRADIAL = 0,
-    OUTPUT_FORMAT_DORADE = 1,
-    OUTPUT_FORMAT_FORAY = 2,
-    OUTPUT_FORMAT_NEXRAD = 3,
-    OUTPUT_FORMAT_UF = 4,
-    OUTPUT_FORMAT_MDV_RADIAL = 5
-  } output_format_t;
-
-  typedef enum {
-    CLASSIC = 0,
-    NC64BIT = 1,
-    NETCDF4 = 2,
-    NETCDF4_CLASSIC = 3
-  } netcdf_style_t;
-
-  typedef enum {
-    START_AND_END_TIMES = 0,
-    START_TIME_ONLY = 1,
-    END_TIME_ONLY = 2,
-    SPECIFY_FILE_NAME = 3
-  } filename_mode_t;
-
   // struct typedefs
 
   typedef struct {
-    int index;
-    char* dir;
-    double file_match_time_offset_sec;
-    double file_match_time_tolerance_sec;
-    double ray_match_elevation_tolerance_deg;
-    double ray_match_azimuth_tolerance_deg;
-    double ray_match_time_tolerance_sec;
-  } input_dataset_t;
-
-  typedef struct {
-    int input_index;
     char* input_field_name;
     char* output_field_name;
     output_encoding_t output_encoding;
-  } output_field_t;
-
-  typedef struct {
-    char* field_name_1;
-    char* field_name_2;
-    char* combined_name;
-    char* long_name;
-    combine_method_t combine_method;
-    tdrp_bool_t require_both;
-    output_encoding_t output_encoding;
-  } combined_field_t;
+  } field_t;
 
   ///////////////////////////
   // Member functions
@@ -442,78 +388,29 @@ public:
 
   int max_realtime_data_age_secs;
 
-  input_dataset_t *_input_datasets;
-  int input_datasets_n;
+  char* hcr_data_dir;
 
-  output_field_t *_output_fields;
-  int output_fields_n;
+  char* hsrl_data_dir;
 
-  tdrp_bool_t add_combined_fields;
+  double file_match_time_tolerance_sec;
 
-  combined_field_t *_combined_fields;
-  int combined_fields_n;
+  double ray_match_time_tolerance_sec;
 
-  tdrp_bool_t print_mean_of_combined_fields;
+  double ray_match_elevation_tolerance_deg;
 
-  tdrp_bool_t set_fixed_angle_limits;
+  field_t *_hcr_fields;
+  int hcr_fields_n;
 
-  double lower_fixed_angle_limit;
-
-  double upper_fixed_angle_limit;
-
-  tdrp_bool_t set_sweep_num_limits;
-
-  int lower_sweep_num;
-
-  int upper_sweep_num;
-
-  tdrp_bool_t check_constant_geometry;
-
-  tdrp_bool_t aggregate_sweep_files_on_read;
-
-  output_format_t output_format;
-
-  netcdf_style_t netcdf_style;
-
-  tdrp_bool_t output_native_byte_order;
-
-  tdrp_bool_t output_compressed;
-
-  tdrp_bool_t output_force_ngates_vary;
+  field_t *_hsrl_fields;
+  int hsrl_fields_n;
 
   int compression_level;
 
   char* output_dir;
 
-  filename_mode_t output_filename_mode;
-
-  char* output_filename;
-
   tdrp_bool_t append_day_dir_to_output_dir;
 
   tdrp_bool_t append_year_dir_to_output_dir;
-
-  tdrp_bool_t override_missing_metadata_values;
-
-  double missing_metadata_double;
-
-  float missing_metadata_float;
-
-  int missing_metadata_int;
-
-  int missing_metadata_char;
-
-  tdrp_bool_t override_missing_field_values;
-
-  double missing_field_fl64;
-
-  double missing_field_fl32;
-
-  int missing_field_si32;
-
-  int missing_field_si16;
-
-  int missing_field_si08;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -522,7 +419,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[54];
+  mutable TDRPtable _table[23];
 
   const char *_className;
 
