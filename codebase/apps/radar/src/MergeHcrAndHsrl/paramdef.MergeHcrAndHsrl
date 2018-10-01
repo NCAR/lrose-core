@@ -98,28 +98,20 @@ commentdef {
   p_header = "SPECIFYING FIELDS TO COPY FROM EACH SOURCE";
 }
 
-typedef enum {
-  ENCODING_FLOAT32,
-  ENCODING_INT32,
-  ENCODING_INT16,
-  ENCODING_INT08
-} output_encoding_t;
-
 typedef struct {
   string input_field_name;
   string output_field_name;
-  output_encoding_t output_encoding;
 } field_t;
 
 paramdef struct field_t {
   p_default = {
-    { "DBZ", "HCR_DBZ", ENCODING_INT16 },
-    { "VEL_CORR", "HCR_VEL", ENCODING_INT16 },
-    { "WIDTH", "HCR_WIDTH", ENCODING_INT16 },
-    { "LDR", "HCR_LDR", ENCODING_INT16 },
-    { "NCP", "HCR_NCP", ENCODING_INT16 },
-    { "SNR", "HCR_SNR", ENCODING_INT16 },
-    { "DBMVC", "HCR_DBM", ENCODING_INT16 }
+    { "DBZ", "HCR_DBZ" },
+    { "VEL_CORR", "HCR_VEL" },
+    { "WIDTH", "HCR_WIDTH" },
+    { "LDR", "HCR_LDR" },
+    { "NCP", "HCR_NCP" },
+    { "SNR", "HCR_SNR" },
+    { "DBMVC", "HCR_DBM" }
   };
   p_descr = "Specs of HCR fields to be included.";
   p_help = "\n\ninput_field_name: name of field in input file.\n\noutput_field_name: name of field in output file.\n\nencoding: output encoding for the field.";
@@ -127,11 +119,11 @@ paramdef struct field_t {
 
 paramdef struct field_t {
   p_default = {
-    { "Aerosol_Backscatter_Coefficient", "Backscat_Coeff", ENCODING_INT16 },
-    { "Particle_Linear_Depolarization_Ratio", "Particle_LDR", ENCODING_INT16 },
-    { "Volume_Linear_Depolarization_Ratio", "Volume_LDR", ENCODING_INT16 },
-    { "Optical_Depth", "Optical_Depth", ENCODING_INT16 },
-    { "Aerosol_Extinction_Coefficient", "Extinction_Coeff", ENCODING_INT16 }
+    { "Aerosol_Backscatter_Coefficient", "Backscat_Coeff" },
+    { "Particle_Linear_Depolarization_Ratio", "Particle_LDR" },
+    { "Volume_Linear_Depolarization_Ratio", "Volume_LDR" },
+    { "Optical_Depth", "Optical_Depth" },
+    { "Aerosol_Extinction_Coefficient", "Extinction_Coeff" }
   };
   p_descr = "Specs of HSRL fields to be included.";
   p_help = "\n\ninput_field_name: name of field in input file.\n\noutput_field_name: name of field in output file.\n\nencoding: output encoding for the field.";
@@ -146,6 +138,17 @@ paramdef int {
   p_descr = "Compression level for output, if compressed.";
   p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
 } compression_level;
+
+typedef enum {
+  ENCODING_FLOAT32,
+  ENCODING_INT16
+} encoding_t;
+
+paramdef enum encoding_t {
+  p_default = ENCODING_INT16;
+  p_descr = "Encoding for output fields.";
+  p_help = "Encoding with smaller types improves compression.";
+} output_encoding;
 
 commentdef {
   p_header = "OUTPUT DIRECTORY AND FILE NAME";

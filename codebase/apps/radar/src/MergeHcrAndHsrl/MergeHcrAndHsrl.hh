@@ -41,7 +41,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
-class RadxVol;
+#include <Radx/RadxVol.hh>
 class RadxFile;
 class RadxRay;
 using namespace std;
@@ -74,27 +74,41 @@ private:
   Args _args;
   Params _params;
 
+  string _hsrlPath;
+  RadxVol _hsrlVol;
+  RadxTime _hsrlVolStartTime;
+  RadxTime _hsrlVolEndTime;
+  size_t _hsrlRayIndex;
+
+  typedef enum {
+    FIND_CLOSEST,
+    FIND_FIRST_BEFORE,
+    FIND_FIRST_AFTER
+  } hsrl_search_t;
+
   int _checkParams();
   int _runFilelist();
   int _runArchive();
   int _runRealtime();
+
   int _processFile(const string &hcrPath);
+
   void _setupHcrRead(RadxFile &file);
+
+  RadxRay *_findHsrlRay(RadxRay *hcrRay);
   void _setupHsrlRead(RadxFile &file);
-  void _setupWrite(RadxFile &file);
-  int _writeVol(RadxVol &vol);
-  int _processHcrFile(const string &hcrPath);
+  int _readHsrlVol(RadxTime &searchTime);
 
-  int _mergeVol(RadxVol &hcrVol,
-                const RadxVol &hsrlVol);
-
-  void _mergeRay(RadxRay &hcrRay,
-                 const RadxRay &hsrlRay);
-
+  void _mergeRay(RadxRay *hcrRay,
+                 const RadxRay *hsrlRay);
+  
   int _addFields(RadxVol &vol);
-
+  
   int _addField(RadxVol &vol,
                 const Params::field_t &fld);
+
+  void _setupWrite(RadxFile &file);
+  int _writeVol(RadxVol &vol);
 
 };
 

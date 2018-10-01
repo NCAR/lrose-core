@@ -732,7 +732,7 @@
     tt->array_elem_size = sizeof(field_t);
     tt->array_n = 7;
     tt->struct_def.name = tdrpStrDup("field_t");
-    tt->struct_def.nfields = 3;
+    tt->struct_def.nfields = 2;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -745,47 +745,23 @@
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
         (char *) &_hcr_fields->output_field_name - (char *) _hcr_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("output_encoding_t");
-      tt->struct_def.fields[2].fname = tdrpStrDup("output_encoding");
-      tt->struct_def.fields[2].ptype = ENUM_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_hcr_fields->output_encoding - (char *) _hcr_fields;
-        tt->struct_def.fields[2].enum_def.name = tdrpStrDup("output_encoding_t");
-        tt->struct_def.fields[2].enum_def.nfields = 4;
-        tt->struct_def.fields[2].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[2].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[2].enum_def.fields[0].name = tdrpStrDup("ENCODING_FLOAT32");
-        tt->struct_def.fields[2].enum_def.fields[0].val = ENCODING_FLOAT32;
-        tt->struct_def.fields[2].enum_def.fields[1].name = tdrpStrDup("ENCODING_INT32");
-        tt->struct_def.fields[2].enum_def.fields[1].val = ENCODING_INT32;
-        tt->struct_def.fields[2].enum_def.fields[2].name = tdrpStrDup("ENCODING_INT16");
-        tt->struct_def.fields[2].enum_def.fields[2].val = ENCODING_INT16;
-        tt->struct_def.fields[2].enum_def.fields[3].name = tdrpStrDup("ENCODING_INT08");
-        tt->struct_def.fields[2].enum_def.fields[3].val = ENCODING_INT08;
-    tt->n_struct_vals = 21;
+    tt->n_struct_vals = 14;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("DBZ");
       tt->struct_vals[1].s = tdrpStrDup("HCR_DBZ");
-      tt->struct_vals[2].e = ENCODING_INT16;
-      tt->struct_vals[3].s = tdrpStrDup("VEL_CORR");
-      tt->struct_vals[4].s = tdrpStrDup("HCR_VEL");
-      tt->struct_vals[5].e = ENCODING_INT16;
-      tt->struct_vals[6].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[7].s = tdrpStrDup("HCR_WIDTH");
-      tt->struct_vals[8].e = ENCODING_INT16;
-      tt->struct_vals[9].s = tdrpStrDup("LDR");
-      tt->struct_vals[10].s = tdrpStrDup("HCR_LDR");
-      tt->struct_vals[11].e = ENCODING_INT16;
-      tt->struct_vals[12].s = tdrpStrDup("NCP");
-      tt->struct_vals[13].s = tdrpStrDup("HCR_NCP");
-      tt->struct_vals[14].e = ENCODING_INT16;
-      tt->struct_vals[15].s = tdrpStrDup("SNR");
-      tt->struct_vals[16].s = tdrpStrDup("HCR_SNR");
-      tt->struct_vals[17].e = ENCODING_INT16;
-      tt->struct_vals[18].s = tdrpStrDup("DBMVC");
-      tt->struct_vals[19].s = tdrpStrDup("HCR_DBM");
-      tt->struct_vals[20].e = ENCODING_INT16;
+      tt->struct_vals[2].s = tdrpStrDup("VEL_CORR");
+      tt->struct_vals[3].s = tdrpStrDup("HCR_VEL");
+      tt->struct_vals[4].s = tdrpStrDup("WIDTH");
+      tt->struct_vals[5].s = tdrpStrDup("HCR_WIDTH");
+      tt->struct_vals[6].s = tdrpStrDup("LDR");
+      tt->struct_vals[7].s = tdrpStrDup("HCR_LDR");
+      tt->struct_vals[8].s = tdrpStrDup("NCP");
+      tt->struct_vals[9].s = tdrpStrDup("HCR_NCP");
+      tt->struct_vals[10].s = tdrpStrDup("SNR");
+      tt->struct_vals[11].s = tdrpStrDup("HCR_SNR");
+      tt->struct_vals[12].s = tdrpStrDup("DBMVC");
+      tt->struct_vals[13].s = tdrpStrDup("HCR_DBM");
     tt++;
     
     // Parameter 'hsrl_fields'
@@ -803,7 +779,7 @@
     tt->array_elem_size = sizeof(field_t);
     tt->array_n = 5;
     tt->struct_def.name = tdrpStrDup("field_t");
-    tt->struct_def.nfields = 3;
+    tt->struct_def.nfields = 2;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -816,41 +792,19 @@
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
         (char *) &_hsrl_fields->output_field_name - (char *) _hsrl_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("output_encoding_t");
-      tt->struct_def.fields[2].fname = tdrpStrDup("output_encoding");
-      tt->struct_def.fields[2].ptype = ENUM_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_hsrl_fields->output_encoding - (char *) _hsrl_fields;
-        tt->struct_def.fields[2].enum_def.name = tdrpStrDup("output_encoding_t");
-        tt->struct_def.fields[2].enum_def.nfields = 4;
-        tt->struct_def.fields[2].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[2].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[2].enum_def.fields[0].name = tdrpStrDup("ENCODING_FLOAT32");
-        tt->struct_def.fields[2].enum_def.fields[0].val = ENCODING_FLOAT32;
-        tt->struct_def.fields[2].enum_def.fields[1].name = tdrpStrDup("ENCODING_INT32");
-        tt->struct_def.fields[2].enum_def.fields[1].val = ENCODING_INT32;
-        tt->struct_def.fields[2].enum_def.fields[2].name = tdrpStrDup("ENCODING_INT16");
-        tt->struct_def.fields[2].enum_def.fields[2].val = ENCODING_INT16;
-        tt->struct_def.fields[2].enum_def.fields[3].name = tdrpStrDup("ENCODING_INT08");
-        tt->struct_def.fields[2].enum_def.fields[3].val = ENCODING_INT08;
-    tt->n_struct_vals = 15;
+    tt->n_struct_vals = 10;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("Aerosol_Backscatter_Coefficient");
       tt->struct_vals[1].s = tdrpStrDup("Backscat_Coeff");
-      tt->struct_vals[2].e = ENCODING_INT16;
-      tt->struct_vals[3].s = tdrpStrDup("Particle_Linear_Depolarization_Ratio");
-      tt->struct_vals[4].s = tdrpStrDup("Particle_LDR");
-      tt->struct_vals[5].e = ENCODING_INT16;
-      tt->struct_vals[6].s = tdrpStrDup("Volume_Linear_Depolarization_Ratio");
-      tt->struct_vals[7].s = tdrpStrDup("Volume_LDR");
-      tt->struct_vals[8].e = ENCODING_INT16;
-      tt->struct_vals[9].s = tdrpStrDup("Optical_Depth");
-      tt->struct_vals[10].s = tdrpStrDup("Optical_Depth");
-      tt->struct_vals[11].e = ENCODING_INT16;
-      tt->struct_vals[12].s = tdrpStrDup("Aerosol_Extinction_Coefficient");
-      tt->struct_vals[13].s = tdrpStrDup("Extinction_Coeff");
-      tt->struct_vals[14].e = ENCODING_INT16;
+      tt->struct_vals[2].s = tdrpStrDup("Particle_Linear_Depolarization_Ratio");
+      tt->struct_vals[3].s = tdrpStrDup("Particle_LDR");
+      tt->struct_vals[4].s = tdrpStrDup("Volume_Linear_Depolarization_Ratio");
+      tt->struct_vals[5].s = tdrpStrDup("Volume_LDR");
+      tt->struct_vals[6].s = tdrpStrDup("Optical_Depth");
+      tt->struct_vals[7].s = tdrpStrDup("Optical_Depth");
+      tt->struct_vals[8].s = tdrpStrDup("Aerosol_Extinction_Coefficient");
+      tt->struct_vals[9].s = tdrpStrDup("Extinction_Coeff");
     tt++;
     
     // Parameter 'Comment 5'
@@ -872,6 +826,26 @@
     tt->help = tdrpStrDup("Applies to netCDF only. Dorade compression is run-length encoding, and has not options..");
     tt->val_offset = (char *) &compression_level - &_start_;
     tt->single_val.i = 4;
+    tt++;
+    
+    // Parameter 'output_encoding'
+    // ctype is '_encoding_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("output_encoding");
+    tt->descr = tdrpStrDup("Encoding for output fields.");
+    tt->help = tdrpStrDup("Encoding with smaller types improves compression.");
+    tt->val_offset = (char *) &output_encoding - &_start_;
+    tt->enum_def.name = tdrpStrDup("encoding_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("ENCODING_FLOAT32");
+      tt->enum_def.fields[0].val = ENCODING_FLOAT32;
+      tt->enum_def.fields[1].name = tdrpStrDup("ENCODING_INT16");
+      tt->enum_def.fields[1].val = ENCODING_INT16;
+    tt->single_val.e = ENCODING_INT16;
     tt++;
     
     // Parameter 'Comment 6'

@@ -151,15 +151,6 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
       
-    } else if (!strcmp(argv[i], "-outdir")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "output_dir = \"%s\";", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-      
     }
     
   } // i
@@ -190,8 +181,6 @@ void Args::_usage(ostream &out)
       << "           Sets mode to FILELIST\n"
       << "\n"
       << "  [ -instance ?] specify the instance\n"
-      << "\n"
-      << "  [ -outdir ? ] set output directory\n"
       << "\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "           Sets mode to ARCHIVE\n"

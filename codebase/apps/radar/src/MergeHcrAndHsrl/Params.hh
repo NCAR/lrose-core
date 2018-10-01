@@ -82,17 +82,14 @@ public:
 
   typedef enum {
     ENCODING_FLOAT32 = 0,
-    ENCODING_INT32 = 1,
-    ENCODING_INT16 = 2,
-    ENCODING_INT08 = 3
-  } output_encoding_t;
+    ENCODING_INT16 = 1
+  } encoding_t;
 
   // struct typedefs
 
   typedef struct {
     char* input_field_name;
     char* output_field_name;
-    output_encoding_t output_encoding;
   } field_t;
 
   ///////////////////////////
@@ -406,6 +403,8 @@ public:
 
   int compression_level;
 
+  encoding_t output_encoding;
+
   char* output_dir;
 
   tdrp_bool_t append_day_dir_to_output_dir;
@@ -419,7 +418,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[23];
+  mutable TDRPtable _table[24];
 
   const char *_className;
 
