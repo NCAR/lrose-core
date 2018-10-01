@@ -44,6 +44,7 @@
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/DataFileNames.hh>
 #include <toolsa/pmu.h>
+#include <toolsa/toolsa_macros.h>
 using namespace std;
 
 // Constructor
@@ -267,11 +268,31 @@ int MergeHcrAndHsrl::_processFile(const string &hcrPath)
   const vector<RadxRay *> &hcrRays = hcrVol.getRays();
   for (size_t ii = 0; ii < hcrRays.size(); ii++) {
     RadxRay *hcrRay = hcrRays[ii];
+    // rename fields on hcr ray
+    for (size_t ifld = 0; ifld < hcrRay->getNFields(); ifld++) {
+      RadxField *pField = hcrRay->getField(ifld);
+      for (int ii = 0; ii < _params.hcr_fields_n; ii++) {
+        string inputName = _params._hcr_fields[ii].input_field_name;
+        if (inputName == pField->getName()) {
+          pField->setName(_params._hcr_fields[ii].output_field_name);
+          break;
+        }
+      } // ii
+    } // ifld
+    hcrRay->loadFieldNameMap();
     // find the matching HSRL ray
     RadxRay *hsrlRay = _findHsrlRay(hcrRay);
-    if (hsrlRay != NULL) {
+    if (hsrlRay == NULL) {
+      _addEmptyHsrlFieldsToRay(hcrRay);
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "-";
+      }
+    } else {
       // merge
       _mergeRay(hcrRay, hsrlRay);
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "+";
+      }
     }
   } // ii
 
@@ -301,11 +322,8 @@ int MergeHcrAndHsrl::_processFile(const string &hcrPath)
 void MergeHcrAndHsrl::_setupHcrRead(RadxFile &file)
 {
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    file.setDebug(true);
-  }
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    file.setVerbose(true);
+    file.setDebug(true);
   }
   
   for (int ii = 0; ii < _params.hcr_fields_n; ii++) {
@@ -378,11 +396,8 @@ RadxRay *MergeHcrAndHsrl::_findHsrlRay(RadxRay *hcrRay)
 void MergeHcrAndHsrl::_setupHsrlRead(RadxFile &file)
 {
   
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     file.setDebug(true);
-  }
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    file.setVerbose(true);
   }
 
   for (int ii = 0; ii < _params.hsrl_fields_n; ii++) {
@@ -413,14 +428,26 @@ int MergeHcrAndHsrl::_readHsrlVol(RadxTime &searchTime)
     return 0;
   }
 
+  // have we already searched this period
+
+  if (_searchFailureLowerLimit.utime() > 0 &&
+      _searchFailureUpperLimit.utime() > 0) {
+    if (searchTime >= _searchFailureLowerLimit &&
+        searchTime <= _searchFailureUpperLimit) {
+      return -1;
+    }
+  }
+
   // search around the search time
   
   RadxTimeList tlist;
   tlist.setDir(_params.hsrl_data_dir);
-  RadxTime searchStartTime(searchTime.utime() - _params.file_match_time_tolerance_sec * 2);
-  RadxTime searchEndTime(searchTime.utime() + _params.file_match_time_tolerance_sec * 2);
+  RadxTime searchStartTime(searchTime.utime() -
+                           _params.file_match_time_tolerance_sec * 2);
+  RadxTime searchEndTime(searchTime.utime() +
+                         _params.file_match_time_tolerance_sec * 2);
   tlist.setModeInterval(searchStartTime.utime(), searchEndTime.utime());
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     tlist.printRequest(cerr);
   }
   if (tlist.compile()) {
@@ -432,10 +459,17 @@ int MergeHcrAndHsrl::_readHsrlVol(RadxTime &searchTime)
 
   const vector<string> &pathList = tlist.getPathList();
   if (pathList.size() < 1) {
-    cerr << "WARNING - MergeHcrAndHsrl::_readHsrlVol()" << endl;
-    cerr << "  No suitable hsrl file found" << endl;
-    cerr << "  Search start time: " << searchStartTime.asString(3) << endl;
-    cerr << "  Search end time: " << searchEndTime.asString(3) << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - MergeHcrAndHsrl::_readHsrlVol()" << endl;
+      cerr << "  No suitable hsrl file found" << endl;
+      cerr << "  Search start time: " << searchStartTime.asString(3) << endl;
+      cerr << "  Search end time: " << searchEndTime.asString(3) << endl;
+    }
+    // set search failure limits so we don't search this period again
+    _searchFailureLowerLimit.set(searchTime.utime() -
+                                 _params.file_match_time_tolerance_sec);
+    _searchFailureUpperLimit.set(searchTime.utime() +
+                                 _params.file_match_time_tolerance_sec);
     return -1;
   }
 
@@ -448,11 +482,8 @@ int MergeHcrAndHsrl::_readHsrlVol(RadxTime &searchTime)
   for (size_t ipath = 0; ipath < pathList.size(); ipath++) {
 
     NcfRadxFile file;
-    if (_params.debug) {
-      file.setDebug(true);
-    }
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      file.setVerbose(true);
+      file.setDebug(true);
     }
     file.setReadTimesOnly(true);
 
@@ -474,8 +505,18 @@ int MergeHcrAndHsrl::_readHsrlVol(RadxTime &searchTime)
   
   if (_hsrlPath.size() < 1) {
     // no suitable file found
+    // set search failure limits so we don't search this period again
+    _searchFailureLowerLimit.set(searchTime.utime() -
+                                 _params.file_match_time_tolerance_sec);
+    _searchFailureUpperLimit.set(searchTime.utime() +
+                                 _params.file_match_time_tolerance_sec);
     return -1;
   }
+
+  // clear the search faiure limits
+
+  _searchFailureLowerLimit.set(-1);
+  _searchFailureUpperLimit.set(-1);
 
   // read in hsrl file
   
@@ -491,39 +532,56 @@ int MergeHcrAndHsrl::_readHsrlVol(RadxTime &searchTime)
     return -1;
   }
   _hsrlVol.convertToFl32();
-
+  
   _hsrlVolStartTime = _hsrlVol.getStartRadxTime();
   _hsrlVolEndTime = _hsrlVol.getEndRadxTime();
 
-  return 0;
+  // save the names and units of the HSRL fields
+  // so that we can use them for missing rays
 
+  _hsrlFieldNames.clear();
+  _hsrlFieldLongNames.clear();
+  _hsrlFieldUnits.clear();
+
+  _hsrlFieldNames.resize(_params.hsrl_fields_n);
+  _hsrlFieldLongNames.resize(_params.hsrl_fields_n);
+  _hsrlFieldUnits.resize(_params.hsrl_fields_n);
+  
+  if (_hsrlVol.getNRays() > 0) {
+    const RadxRay *ray1 = _hsrlVol.getRays()[0];
+    for (size_t ifld = 0; ifld < ray1->getNFields(); ifld++) {
+      const RadxField *hField = ray1->getField(ifld);
+      for (int ii = 0; ii < _params.hsrl_fields_n; ii++) {
+        string inputName = _params._hsrl_fields[ii].input_field_name;
+        if (inputName == hField->getName()) {
+          _hsrlFieldNames[ii] = _params._hsrl_fields[ii].output_field_name;
+          _hsrlFieldLongNames[ii] = hField->getLongName();
+          _hsrlFieldUnits[ii] = hField->getUnits();
+        }
+      } // ii
+    } // ifld
+  } // if (_hsrlVol.getNRays() > 0)
+
+  return 0;
+  
 }
   
 //////////////////////////////////////////////////////////////
 // merge hcr and seconday rays
-//
 // Returns 0 on success, -1 on failure
 
 void MergeHcrAndHsrl::_mergeRay(RadxRay *hcrRay,
-                                const RadxRay *hsrlRay)
+                                RadxRay *hsrlRay)
   
 {
   
-  // rename fields on hcr ray
-  
-  for (size_t ifld = 0; ifld < hcrRay->getNFields(); ifld++) {
-    RadxField *pField = hcrRay->getField(ifld);
-    for (int ii = 0; ii < _params.hcr_fields_n; ii++) {
-      string inputName = _params._hcr_fields[ii].input_field_name;
-      if (inputName == pField->getName()) {
-        pField->setName(_params._hcr_fields[ii].output_field_name);
-        break;
-      }
-    } // ii
-  } // ifld
-  hcrRay->loadFieldNameMap();
+  // adjust HSRL ray geom to account for elevation being non-vertical
 
-  // compute lookup in case geometry differs
+  double elCorr = fabs(sin(hsrlRay->getElevationDeg() * DEG_TO_RAD));
+  hsrlRay->setRangeGeom(hsrlRay->getStartRangeKm() * elCorr,
+                        hsrlRay->getGateSpacingKm() * elCorr);
+  
+  // compute lookup for matching in range
   
   RadxRemap remap;
   bool geomDiffers =
@@ -578,6 +636,29 @@ void MergeHcrAndHsrl::_mergeRay(RadxRay *hcrRay,
 
   } // ifield
 
+}
+
+//////////////////////////////////////////////////////////////
+// Add empty hsrl fields to hcr ray
+
+void MergeHcrAndHsrl::_addEmptyHsrlFieldsToRay(RadxRay *hcrRay)
+  
+{
+
+  // loop through specified HSRL fields
+  
+  for (size_t ifield = 0; ifield < _hsrlFieldNames.size(); ifield++) {
+    
+    RadxField *empty = new RadxField(_hsrlFieldNames[ifield],
+                                     _hsrlFieldUnits[ifield]);
+    empty->setLongName(_hsrlFieldLongNames[ifield]);
+    empty->setTypeFl32(Radx::missingFl32);
+    empty->addDataMissing(hcrRay->getNGates());
+
+    hcrRay->addField(empty);
+    
+  } // ifield
+  
 }
 
 //////////////////////////////////////////////////

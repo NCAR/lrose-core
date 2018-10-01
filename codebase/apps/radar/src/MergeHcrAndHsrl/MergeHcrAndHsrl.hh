@@ -78,13 +78,19 @@ private:
   RadxVol _hsrlVol;
   RadxTime _hsrlVolStartTime;
   RadxTime _hsrlVolEndTime;
+  RadxTime _searchFailureLowerLimit;
+  RadxTime _searchFailureUpperLimit;
   size_t _hsrlRayIndex;
-
+  
   typedef enum {
     FIND_CLOSEST,
     FIND_FIRST_BEFORE,
     FIND_FIRST_AFTER
   } hsrl_search_t;
+  
+  vector<string> _hsrlFieldNames;
+  vector<string> _hsrlFieldLongNames;
+  vector<string> _hsrlFieldUnits;
 
   int _checkParams();
   int _runFilelist();
@@ -100,7 +106,9 @@ private:
   int _readHsrlVol(RadxTime &searchTime);
 
   void _mergeRay(RadxRay *hcrRay,
-                 const RadxRay *hsrlRay);
+                 RadxRay *hsrlRay);
+  
+  void _addEmptyHsrlFieldsToRay(RadxRay *hcrRay);
   
   int _addFields(RadxVol &vol);
   
