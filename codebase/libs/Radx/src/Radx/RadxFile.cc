@@ -2492,6 +2492,36 @@ void RadxFile::printReadRequest(ostream &out) const
   out << "  readRemoveShortRange: "
       << (_readRemoveShortRange?"Y":"N") << endl;
 
+  if (_readTimeList.getMode() != RadxTimeList::MODE_UNDEFINED) {
+    out << "-------------------------------------" << endl;
+    out << _readTimeList.getRequestString();
+    out << "-------------------------------------" << endl;
+    if (_readRaysInInterval) {
+      out << "==>> ReadingRaysInInterval <<==" << endl;
+      out << "  readRaysStartTime: " << _readRaysStartTime.asString(3) << endl;
+      out << "  readRaysEndTime: " << _readRaysEndTime.asString(3) << endl;
+      out << "  readDwellSecs: " << _readDwellSecs << endl;
+      out << "  readDwellStatsMethod: "
+          << RadxField::statsMethodToStr(_readDwellStatsMethod) << endl;
+      out << "-------------------------------------" << endl;
+    }
+  }
+
+  out << "=====================================" << endl;
+
+}
+
+/////////////////////////////////////////////////////////
+// print write request details
+
+void RadxFile::printWriteRequest(ostream &out) const
+  
+{
+  
+  out << "======= RadxFile write request =======" << endl;
+  out << "  debug: " << (_debug?"Y":"N") << endl;
+  out << "  verbose: " << (_verbose?"Y":"N") << endl;
+
   out << "  writeNativeByteOrder: "
       << (_writeNativeByteOrder?"Y":"N") << endl;
   out << "  writeForceNgatesVary: "
@@ -2521,21 +2551,6 @@ void RadxFile::printReadRequest(ostream &out) const
   out << "  compressionLevel: " << _compressionLevel << endl;
   out << "  writeLdataInfo: "
       << (_writeLdataInfo?"Y":"N") << endl;
-
-  if (_readTimeList.getMode() != RadxTimeList::MODE_UNDEFINED) {
-    out << "-------------------------------------" << endl;
-    out << _readTimeList.getRequestString();
-    out << "-------------------------------------" << endl;
-    if (_readRaysInInterval) {
-      out << "==>> ReadingRaysInInterval <<==" << endl;
-      out << "  readRaysStartTime: " << _readRaysStartTime.asString(3) << endl;
-      out << "  readRaysEndTime: " << _readRaysEndTime.asString(3) << endl;
-      out << "  readDwellSecs: " << _readDwellSecs << endl;
-      out << "  readDwellStatsMethod: "
-          << RadxField::statsMethodToStr(_readDwellStatsMethod) << endl;
-      out << "-------------------------------------" << endl;
-    }
-  }
 
   out << "=====================================" << endl;
 

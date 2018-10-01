@@ -840,6 +840,10 @@ public:
 
   virtual void printReadRequest(ostream &out) const;
 
+  /// Print write settings on this object
+
+  virtual void printWriteRequest(ostream &out) const;
+
   /// Print data in file, in native format.
   ///
   /// Only applicable to DORADE and UF.
