@@ -259,7 +259,10 @@ private:
   int _addRawFieldToRays(NcxxVar &var,
                          const string &name,
                          const string &units,
-                         const string &description);
+                         const string &description,
+                         bool applyMask,
+                         const vector<int> &maskVals,
+                         int maskValidValue);
 
   int _addSi08FieldToRays(NcxxVar &var,
                           const string &name,

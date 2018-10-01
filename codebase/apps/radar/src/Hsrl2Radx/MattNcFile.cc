@@ -334,8 +334,6 @@ int MattNcFile::_readDimensions()
 {
 
   // read required dimensions
-  
-  // read required dimensions
 
   _nTimesInFile = 0;
   _nRangeInFile = 0;
@@ -357,7 +355,7 @@ int MattNcFile::_readDimensions()
   }
 
   _nPoints = _nTimesInFile * _nRangeInFile;
-  
+
   return 0;
 
 }
@@ -1059,7 +1057,7 @@ int MattNcFile::_readFieldVariablesSpecified()
     // check if we need to apply mask
     
     bool applyMask = false;
-    if ((strlen(mfld.mask_name) > 0) && (ftype == ncxxFloat)) {
+    if (mfld.apply_mask && (strlen(mfld.mask_name) > 0) && (ftype == ncxxFloat)) {
       applyMask = true;
     }
 
@@ -1201,8 +1199,29 @@ int MattNcFile::_readFieldVariable(string inputName,
     }
   }
 
-  if (applyMask) {
+  if (isRawField) {
+    
+    vector<int> maskVals;
+    if (applyMask) {
+      // read in mask vals
+      if (_readMaskVar(maskName, maskVals)) {
+        _addErrStr("ERROR - MattNcFile::_readFieldVariable");
+        _addErrStr("  cannot read mask for field: ", inputName);
+        _addErrStr("  mask field name: ", maskName);
+        return -1;
+      }
+    }
 
+    if (_addRawFieldToRays(var, outputName, units, description,
+                           applyMask, maskVals, maskValidValue)) {
+      _addErrStr("ERROR - MattNcFile::_readFieldVariable");
+      _addErrStr("  cannot read raw field name: ", inputName);
+      _addErrStr(_file.getErrStr());
+      return -1;
+    }
+    
+  } else if (applyMask) {
+    
     // read in mask vals
     
     vector<int> maskVals;
@@ -1223,15 +1242,6 @@ int MattNcFile::_readFieldVariable(string inputName,
       return -1;
     }
 
-  } else if (isRawField) {
-    
-    if (_addRawFieldToRays(var, outputName, units, description)) {
-      _addErrStr("ERROR - MattNcFile::_readFieldVariable");
-      _addErrStr("  cannot read raw field name: ", inputName);
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-    
   } else {
     
     // no mask
@@ -1557,7 +1567,10 @@ int MattNcFile::_addFl32FieldToRays(NcxxVar &var,
 int MattNcFile::_addRawFieldToRays(NcxxVar &var,
                                    const string &name,
                                    const string &units,
-                                   const string &description)
+                                   const string &description,
+                                   bool applyMask,
+                                   const vector<int> &maskVals,
+                                   int maskValidValue)
   
 {
   
@@ -1712,6 +1725,20 @@ int MattNcFile::_addRawFieldToRays(NcxxVar &var,
   }
   int nCopy = rawRangeEndIndex - rawRangeStartIndex;
 
+  // apply mask?
+  
+  if (applyMask && ((int) maskVals.size() == _nPoints)) {
+    for (size_t iray = 0; iray < _rays.size(); iray++) {
+      int dataStartIndex = iray * nRawRange + rawRangeStartIndex;
+      int maskStartIndex = iray * _nRangeInFile;
+      for (int ii = 0; ii < nCopy; ii++) {
+        if (maskVals[maskStartIndex + ii] != maskValidValue) {
+          ddata[dataStartIndex + ii] = Radx::missingFl64;
+        }
+      } // ii
+    } // iray
+  } // if (applyMask && (maskValues.size() == _nPoints))
+
   // loop through the rays, copying in the raw data fields
   
   for (size_t iray = 0; iray < _rays.size(); iray++) {
@@ -1765,7 +1792,7 @@ int MattNcFile::_addMaskedFieldToRays(NcxxVar &var,
     try {
       var.getVal(fdata);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - MattNcFile::_addRawFieldToRays");
+      _addErrStr("ERROR - MattNcFile::_addMaskedFieldToRays");
       _addErrStr("  Cannot read float data for var: ", name);
       _addErrStr(_file.getErrStr());
       return -1;
@@ -1782,7 +1809,7 @@ int MattNcFile::_addMaskedFieldToRays(NcxxVar &var,
     try {
       var.getVal(ddata);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - MattNcFile::_addRawFieldToRays");
+      _addErrStr("ERROR - MattNcFile::_addMaskedFieldToRays");
       _addErrStr("  Cannot read double data for var: ", name);
       _addErrStr(_file.getErrStr());
       return -1;
