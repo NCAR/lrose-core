@@ -431,6 +431,14 @@ public:
 
   double max_nadir_error_for_surface_vel;
 
+  tdrp_bool_t add_corrected_spectrum_width_field;
+
+  char* width_field_name;
+
+  char* corrected_width_field_name;
+
+  double width_correction_beamwidth_deg;
+
   output_encoding_t output_encoding;
 
   netcdf_style_t netcdf_style;
@@ -487,7 +495,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[52];
+  mutable TDRPtable _table[57];
 
   const char *_className;
 

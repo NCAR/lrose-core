@@ -206,6 +206,8 @@ private:
   void _correctVelForRay(RadxRay *ray, double surfFilt);
   void _copyVelForRay(RadxRay *ray);
 
+  int _addCorrectedSpectrumWidth(RadxRay *ray);
+
   void _writeWaveFiltResultsToSpdb(const RadxRay *filtRay);
   void _writeFirFiltResultsToSpdb(const RadxRay *filtRay);
   

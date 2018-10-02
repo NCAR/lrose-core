@@ -338,6 +338,12 @@ int HcrVelCorrect::_processFile(const string &readPath)
     
     RadxRay *rayCopy = new RadxRay(*rays[iray]);
     rayCopy->addClient();
+
+    // compute corrected spectrum width
+
+    if (_params.add_corrected_spectrum_width_field) {
+      _addCorrectedSpectrumWidth(rayCopy);
+    }
     
     // process the ray
     // computing vel and filtering
@@ -1106,6 +1112,64 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
 
 }
 
+
+//////////////////////////////////////////////////
+// compute and add in the corrected spectrum
+// width field
+
+int HcrVelCorrect::_addCorrectedSpectrumWidth(RadxRay *ray)
+
+{
+  
+  // get the spectrum width field
+
+  const RadxField *widthField = ray->getField(_params.width_field_name);
+
+  // get the aircraft speed
+
+  const RadxGeoref *georef = ray->getGeoreference();
+  if (georef == NULL) {
+    return -1;
+  }
+  double ewVel = georef->getEwVelocity();
+  double nsVel = georef->getNsVelocity();
+  double speed = sqrt(ewVel * ewVel + nsVel * nsVel);
+
+  // compute the delta correction
+
+  double elev = ray->getElevationDeg();
+  double sinElev = sin(elev * DEG_TO_RAD);
+  double delta =
+    (0.3 * speed * sinElev *
+     (_params.width_correction_beamwidth_deg * DEG_TO_RAD));
+  
+  // create a copy of this field
+
+  RadxField *corrWidth = new RadxField(*widthField);
+  
+  // compute the corrected width for each gate
+
+  corrWidth->convertToFl32();
+  Radx::fl32 *ww = corrWidth->getDataFl32();
+  for (size_t ii = 0; ii < corrWidth->getNPoints(); ii++) {
+    double corr = ww[ii] - delta;
+    if (corr < 0.05) {
+      corr = 0.05;
+    }
+  }
+
+  // set the name
+
+  corrWidth->setName(_params.corrected_width_field_name);
+
+  // add to the ray
+
+  ray->addField(corrWidth);
+  
+  return 0;
+
+}
+  
 
 //////////////////////////////////////////////////
 // write wave filter results to SPDB in XML

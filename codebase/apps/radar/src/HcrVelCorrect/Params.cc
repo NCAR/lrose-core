@@ -789,7 +789,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("corrected_vel_field_name");
     tt->descr = tdrpStrDup("Name of field for corrected velocity.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("This is the main output field from this app. It will be added to the input data as an extra field.");
     tt->val_offset = (char *) &corrected_vel_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("VEL_CORR");
     tt++;
@@ -811,6 +811,63 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("COMPUTING THE CORRECTED SPECTRUM WIDTH");
+    tt->comment_text = tdrpStrDup("Spectrum width may be corrected for spectral broadening, cause by the aircraft motion and the beam width.");
+    tt++;
+    
+    // Parameter 'add_corrected_spectrum_width_field'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_corrected_spectrum_width_field");
+    tt->descr = tdrpStrDup("Option to compute the corrected spectrum width, and add the corrected field to the output volume.");
+    tt->help = tdrpStrDup("Spectrum width may be corrected for spectral broadening, cause by the aircraft motion and the beam width.");
+    tt->val_offset = (char *) &add_corrected_spectrum_width_field - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'width_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("width_field_name");
+    tt->descr = tdrpStrDup("Name of uncorrected spectrum width field.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &width_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("WIDTH");
+    tt++;
+    
+    // Parameter 'corrected_width_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("corrected_width_field_name");
+    tt->descr = tdrpStrDup("Name of corrected spectrum width field.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &corrected_width_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("WIDTH_CORR");
+    tt++;
+    
+    // Parameter 'width_correction_beamwidth_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("width_correction_beamwidth_deg");
+    tt->descr = tdrpStrDup("Maximum error from nadir pointing for computing surface velocity (deg).");
+    tt->help = tdrpStrDup("We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).");
+    tt->val_offset = (char *) &width_correction_beamwidth_deg - &_start_;
+    tt->single_val.d = 0.69;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OUTPUT FIELD DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -839,11 +896,11 @@
     tt->single_val.e = OUTPUT_ENCODING_FLOAT32;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -884,11 +941,11 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1001,11 +1058,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("WRITING SURFACE VEL RESULTS TO SPDB IN XML");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1034,11 +1091,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/spdb/hcr_surface_vel");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("FILTERING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1063,11 +1120,11 @@
     tt->single_val.e = FIR_FILTER;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("WAVE FILTERING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1142,11 +1199,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("FIR FILTERING");
     tt->comment_text = tdrpStrDup("");
     tt++;

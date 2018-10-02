@@ -133,7 +133,7 @@ paramdef string {
 paramdef string {
   p_default = "VEL_CORR";
   p_descr = "Name of field for corrected velocity.";
-  p_descr = "This is the main output field from this app. It will be added to the input data as an extra field.";
+  p_help = "This is the main output field from this app. It will be added to the input data as an extra field.";
 } corrected_vel_field_name;
 
 paramdef double {
@@ -141,6 +141,33 @@ paramdef double {
   p_descr = "Maximum error from nadir pointing for computing surface velocity (deg).";
   p_help = "We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).";
 } max_nadir_error_for_surface_vel;
+
+commentdef {
+  p_header = "COMPUTING THE CORRECTED SPECTRUM WIDTH";
+  p_text = "Spectrum width may be corrected for spectral broadening, cause by the aircraft motion and the beam width.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compute the corrected spectrum width, and add the corrected field to the output volume.";
+  p_help = "Spectrum width may be corrected for spectral broadening, cause by the aircraft motion and the beam width.";
+} add_corrected_spectrum_width_field;
+
+paramdef string {
+  p_default = "WIDTH";
+  p_descr = "Name of uncorrected spectrum width field.";
+} width_field_name;
+
+paramdef string {
+  p_default = "WIDTH_CORR";
+  p_descr = "Name of corrected spectrum width field.";
+} corrected_width_field_name;
+
+paramdef double {
+  p_default = 0.69;
+  p_descr = "Maximum error from nadir pointing for computing surface velocity (deg).";
+  p_help = "We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).";
+} width_correction_beamwidth_deg;
 
 commentdef {
   p_header = "OUTPUT FIELD DETAILS";
