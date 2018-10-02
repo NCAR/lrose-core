@@ -1140,21 +1140,25 @@ int HcrVelCorrect::_addCorrectedSpectrumWidth(RadxRay *ray)
   double elev = ray->getElevationDeg();
   double sinElev = sin(elev * DEG_TO_RAD);
   double delta =
-    (0.3 * speed * sinElev *
-     (_params.width_correction_beamwidth_deg * DEG_TO_RAD));
+    fabs(0.3 * speed * sinElev * 0.5 *
+         (_params.width_correction_beamwidth_deg * DEG_TO_RAD));
   
   // create a copy of this field
 
   RadxField *corrWidth = new RadxField(*widthField);
   
   // compute the corrected width for each gate
-
+  
   corrWidth->convertToFl32();
+  Radx::fl32 miss = corrWidth->getMissingFl32();
   Radx::fl32 *ww = corrWidth->getDataFl32();
   for (size_t ii = 0; ii < corrWidth->getNPoints(); ii++) {
-    double corr = ww[ii] - delta;
-    if (corr < 0.05) {
-      corr = 0.05;
+    if (ww[ii] != miss) {
+      double corr = ww[ii] - delta;
+      if (corr < 0.05) {
+        corr = 0.05;
+      }
+      ww[ii] = corr;
     }
   }
 
