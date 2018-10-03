@@ -140,7 +140,7 @@ int HcrSurfaceVel::computeSurfaceVel(const RadxRay *ray,
   double dbzMax = -9999;
   int gateForMax = -1;
   double rangeSurf = 0;
-  double foundSurface = false;
+  bool foundSurface = false;
   for (size_t igate = 0; igate < dbzField->getNPoints(); igate++, range += drange) {
     if (range < _minRangeToSurfaceKm) {
       continue;
