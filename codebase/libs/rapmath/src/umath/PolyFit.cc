@@ -122,6 +122,21 @@ void PolyFit::setValues(const vector<double> &xVals,
 }
 
 ////////////////////////////////////////////////////
+// get single y value, given the x value
+
+double PolyFit::getYEst(double xx)
+{
+  if (_coeffs.size() < 1) {
+    return 0.0;
+  }
+  double yy = _coeffs[0];
+  for (size_t ii = 1; ii < _coeffs.size(); ii++) {
+    yy += _coeffs[ii] * pow(xx, (double) ii);
+  }
+  return yy;
+}
+
+////////////////////////////////////////////////////
 // get single y value, given the index
 
 double PolyFit::getYEst(size_t index)

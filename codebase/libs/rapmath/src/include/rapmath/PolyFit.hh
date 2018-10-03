@@ -83,6 +83,10 @@ public:
   
   const vector<double> &getCoeffs() const { return _coeffs; }
   
+  // get single y value, given the x value
+
+  double getYEst(double xx);
+
   // get single y value, given the index
 
   double getYEst(size_t index);
