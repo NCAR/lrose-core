@@ -129,6 +129,7 @@ double PolyFit::getYEst(size_t index)
   if (index > _nObs - 1) {
     cerr << "ERROR - PolyFit::getYEst()" << endl;
     cerr << "  Index out of range: " << index << endl;
+    cerr << "  Max index: " << _nObs - 1 << endl;
     return NAN;
   }
   return _yEst[index];
