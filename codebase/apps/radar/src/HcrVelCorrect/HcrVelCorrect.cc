@@ -35,6 +35,8 @@
 // spurious spikes, and then corrects the weather echo velocity using
 // the filtered ground velocity as the correction to be applied.
 //
+// Also computes spectrum width corrected for aircraft motion.
+//
 //////////////////////////////////////////////////////////////////////////
 
 #include "HcrVelCorrect.hh"
@@ -462,44 +464,33 @@ int HcrVelCorrect::_processRayWaveFilt(RadxRay *ray)
     return -1;
   }
   
-  _filtRay = _waveNodeMid->ray;
-  if (_velIsValid) {
-    if (_params.wave_filter_type == Params::WAVE_MEAN) {
-      _velFilt = _waveNodeMid->velWaveFiltMean;
-    } else if (_params.wave_filter_type == Params::WAVE_MEDIAN) {
-      _velFilt = _waveNodeMid->velWaveFiltMedian;
-    } else {
-      _velFilt = _waveNodeMid->velWaveFiltPoly;
-    }
-    _correctVelForRay(_filtRay, _velFilt);
-    _waveNodeMid->velIsValid = true;
-    _waveNodeMid->corrected = true;
-  } else {
-    _copyVelForRay(_filtRay);
-    _waveNodeMid->velIsValid = false;
-    _waveNodeMid->corrected = false;
+  if (_waveNodeMid->added) {
+    // already processed
+    return 0;
   }
 
-  // RadxTime filtRayTime = _filtRay->getRadxTime();
-  
-  // // write vol when done
-  
-  // if ((_inputFileEndTime.size() > 0) &&
-  //     (filtRayTime > _inputFileEndTime[0])) {
-  //   _writeFiltVol();
-  //   _inputFileEndTime.pop_front();
-  // }
-  
-  // // add to output vol
-  
-  // _filtVol.addRay(_filtRay);
-  
-  // // write results to SPDB in XML if requested
-  
-  // if (_params.write_surface_vel_results_to_spdb) {
-  //   _writeWaveFiltResultsToSpdb(_filtRay);
-  // }
-  
+  for (size_t ii = 0; ii < _nodesPending.size(); ii++) {
+    FiltNode *node = _nodesPending[ii];
+    _filtRay = node->ray;
+    if (_velIsValid) {
+      if (_params.wave_filter_type == Params::WAVE_MEAN) {
+        _velFilt = node->velWaveFiltMean;
+      } else if (_params.wave_filter_type == Params::WAVE_MEDIAN) {
+        _velFilt = node->velWaveFiltMedian;
+      } else {
+        _velFilt = node->velWaveFiltPoly;
+      }
+      _correctVelForRay(_filtRay, _velFilt);
+      node->velIsValid = true;
+      node->corrected = true;
+    } else {
+      _copyVelForRay(_filtRay);
+      node->velIsValid = false;
+      node->corrected = false;
+    }
+    node->added = true;
+  }
+
   return 0;
 
 }
@@ -679,6 +670,15 @@ int HcrVelCorrect::_setFilterLimits()
     }
   }
   _waveTimeMid = _waveNodeMid->getTime();
+
+  // load up the pending nodes
+
+  _nodesPending.clear();
+  for (ssize_t ii = _waveIndexMid; ii >= 0; ii--) {
+    if (!_filtQueue[ii].added) {
+      _nodesPending.push_front(&_filtQueue[ii]);
+    }
+  } // ii
   
   return 0;
   
@@ -805,9 +805,9 @@ void HcrVelCorrect::_addNodeRayToFiltVol(FiltNode &node)
 
   // if not yet corrected, copy velocity in ray fields
   
-  if (!node.corrected) {
-    _copyVelForRay(node.ray);
-  }
+  // if (!node.corrected) {
+  //   _copyVelForRay(node.ray);
+  // }
   
   // add to output vol
   
@@ -1070,7 +1070,7 @@ void HcrVelCorrect::_correctVelForRay(RadxRay *ray, double surfFilt)
 }
 
 //////////////////////////////////////////////////
-// copy velocity across for yay
+// copy velocity across for ray
 
 void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
   

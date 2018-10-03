@@ -35,6 +35,8 @@
 // spurious spikes, and then corrects the weather echo velocity using
 // the filtered ground velocity as the correction to be applied.
 //
+// Also computes spectrum width corrected for aircraft motion.
+//
 //////////////////////////////////////////////////////////////////////////
 
 #ifndef HcrVelCorrect_HH
@@ -130,6 +132,7 @@ private:
     double velWaveFiltPoly;
     bool velIsValid;
     bool corrected;
+    bool added;
     FiltNode() {
       ray = NULL;
       velSurf = NAN;
@@ -143,6 +146,7 @@ private:
       velWaveFiltPoly = NAN;
       velIsValid = false;
       corrected = false;
+      added = false;
     }
     RadxTime getTime() { return ray->getRadxTime(); }
   };
@@ -154,6 +158,8 @@ private:
   double _totalFiltSecs;
 
   FiltNode *_waveNodeMid;
+  deque<FiltNode *> _nodesPending;
+
   size_t _waveIndexStart;
   size_t _waveIndexMid;
   size_t _waveIndexEnd;
