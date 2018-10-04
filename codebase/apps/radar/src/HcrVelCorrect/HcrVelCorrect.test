@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./HcrVelCorrect
+ * Tdrp params for HcrVelCorrect
  **********************************************************************/
 
 //======================================================================
@@ -240,6 +240,9 @@ vel_field_name = "VEL";
 //
 // Name of field for corrected velocity.
 //
+// This is the main output field from this app. It will be added to the 
+//   input data as an extra field.
+//
 //
 // Type: string
 //
@@ -262,6 +265,63 @@ max_nadir_error_for_surface_vel = 5;
 
 //======================================================================
 //
+// COMPUTING THE CORRECTED SPECTRUM WIDTH.
+//
+// Spectrum width may be corrected for spectral broadening, cause by the 
+//   aircraft motion and the beam width.
+//
+//======================================================================
+ 
+///////////// add_corrected_spectrum_width_field //////
+//
+// Option to compute the corrected spectrum width, and add the corrected 
+//   field to the output volume.
+//
+// Spectrum width may be corrected for spectral broadening, cause by the 
+//   aircraft motion and the beam width.
+//
+//
+// Type: boolean
+//
+
+add_corrected_spectrum_width_field = TRUE;
+
+///////////// width_field_name ////////////////////////
+//
+// Name of uncorrected spectrum width field.
+//
+//
+// Type: string
+//
+
+width_field_name = "WIDTH";
+
+///////////// corrected_width_field_name //////////////
+//
+// Name of corrected spectrum width field.
+//
+//
+// Type: string
+//
+
+corrected_width_field_name = "WIDTH_CORR";
+
+///////////// width_correction_beamwidth_deg //////////
+//
+// Maximum error from nadir pointing for computing surface velocity 
+//   (deg).
+//
+// We only try to compute the surface velocity if the beam is pointing 
+//   within this margin of nadir (vertically down).
+//
+//
+// Type: double
+//
+
+width_correction_beamwidth_deg = 0.69;
+
+//======================================================================
+//
 // OUTPUT FIELD DETAILS.
 //
 //======================================================================
@@ -279,7 +339,7 @@ max_nadir_error_for_surface_vel = 5;
 //     OUTPUT_ENCODING_INT08
 //
 
-output_encoding = OUTPUT_ENCODING_FLOAT32;
+output_encoding = OUTPUT_ENCODING_INT16;
 
 //======================================================================
 //
@@ -334,7 +394,7 @@ compression_level = 4;
 // Type: string
 //
 
-output_dir = "/home/mdtest/data/hcr/cfradial/velcorr/10hz";
+output_dir = "/tmp/qc/cfradial/velcorr/10hz";
 
 ///////////// output_filename_mode ////////////////////
 //
@@ -429,7 +489,7 @@ append_year_dir_to_output_dir = FALSE;
 // Type: boolean
 //
 
-write_latest_data_info = TRUE;
+write_latest_data_info = FALSE;
 
 //======================================================================
 //
@@ -461,7 +521,7 @@ write_surface_vel_results_to_spdb = TRUE;
 // Type: string
 //
 
-surface_vel_results_spdb_output_url = "/home/mdtest/data/hcr/spdb/HcrVelCorrect";
+surface_vel_results_spdb_output_url = "/tmp/qc/spdb/HcrVelCorrect";
 
 //======================================================================
 //
@@ -505,7 +565,7 @@ filter_type = WAVE_FILTER;
 // Type: double
 //
 
-noise_filter_length_secs = 5;
+noise_filter_length_secs = 3;
 
 ///////////// wave_filter_length_secs /////////////////
 //
@@ -520,7 +580,7 @@ noise_filter_length_secs = 5;
 // Type: double
 //
 
-wave_filter_length_secs = 45;
+wave_filter_length_secs = 20;
 
 ///////////// wave_filter_min_n_rays //////////////////
 //
@@ -534,7 +594,7 @@ wave_filter_length_secs = 45;
 // Type: int
 //
 
-wave_filter_min_n_rays = 150;
+wave_filter_min_n_rays = 100;
 
 ///////////// wave_filter_type ////////////////////////
 //

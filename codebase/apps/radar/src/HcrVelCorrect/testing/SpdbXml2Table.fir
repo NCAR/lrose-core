@@ -77,9 +77,9 @@ input_url = "/tmp/qc/spdb/HcrVelCorrect";
 start_time = {
     year = 2018,
     month = 1,
-    day = 24,
+    day = 16,
     hour = 0,
-    min = 25,
+    min = 0,
     sec = 0
 };
 
@@ -105,9 +105,9 @@ start_time = {
 end_time = {
     year = 2018,
     month = 1,
-    day = 24,
-    hour = 0,
-    min = 40,
+    day = 16,
+    hour = 1,
+    min = 0,
     sec = 0
 };
 
@@ -187,44 +187,30 @@ xml_entries = {
   }
   ,
   {
-    xml_tag_list = "<HcrVelCorr><VelNoiseFilt>",
+    xml_tag_list = "<HcrVelCorr><VelStage1>",
     specify_label = TRUE,
-    label = "VelNoiseFilt",
+    label = "VelStage1",
     required = TRUE
   }
   ,
   {
-    xml_tag_list = "<HcrVelCorr><VelNoiseFiltMean>",
+    xml_tag_list = "<HcrVelCorr><VelSpike>",
     specify_label = TRUE,
-    label = "VelNoiseFiltMean",
+    label = "VelSpike",
     required = TRUE
   }
   ,
   {
-    xml_tag_list = "<HcrVelCorr><VelNoiseFiltMedian>",
+    xml_tag_list = "<HcrVelCorr><VelCond>",
     specify_label = TRUE,
-    label = "VelNoiseFiltMedian",
+    label = "VelCond",
     required = TRUE
   }
   ,
   {
-    xml_tag_list = "<HcrVelCorr><VelWaveFiltMean>",
+    xml_tag_list = "<HcrVelCorr><VelFilt>",
     specify_label = TRUE,
-    label = "VelWaveFiltMean",
-    required = TRUE
-  }
-  ,
-  {
-    xml_tag_list = "<HcrVelCorr><VelWaveFiltMedian>",
-    specify_label = TRUE,
-    label = "VelWaveFiltMedian",
-    required = TRUE
-  }
-  ,
-  {
-    xml_tag_list = "<HcrVelCorr><VelWaveFiltPoly>",
-    specify_label = TRUE,
-    label = "VelWaveFiltPoly",
+    label = "VelFilt",
     required = TRUE
   }
   ,

@@ -97,18 +97,14 @@ private:
   
   RadxVol _filtVol;
 
-  // storing incoming rays long enough to 
-  // write out filtered results
-
-  RadxTime _timeFirstRay;
+  // Object for computing surface velocity
+  
   HcrSurfaceVel _surfVel;
 
   // vel filtering results from either the FIR
   // or wave filter
-
-  bool _velIsValid;
+  
   RadxRay *_filtRay;
-  double _velFilt;
 
   // FIR filtering
 
@@ -122,6 +118,7 @@ private:
   public:
     RadxRay *ray;
     double velSurf;
+    double velSurfFilt;
     double dbzSurf;
     double rangeToSurf;
     double velNoiseFilt;
@@ -132,10 +129,11 @@ private:
     double velWaveFiltPoly;
     bool velIsValid;
     bool corrected;
-    bool added;
+    bool processed;
     FiltNode() {
       ray = NULL;
       velSurf = NAN;
+      velSurfFilt = NAN;
       dbzSurf = NAN;
       rangeToSurf = NAN;
       velNoiseFilt = NAN;
@@ -146,7 +144,7 @@ private:
       velWaveFiltPoly = NAN;
       velIsValid = false;
       corrected = false;
-      added = false;
+      processed = false;
     }
     RadxTime getTime() { return ray->getRadxTime(); }
   };
@@ -155,28 +153,17 @@ private:
 
   double _noiseFiltSecs;
   double _waveFiltSecs;
-  double _totalFiltSecs;
 
   FiltNode *_waveNodeMid;
   deque<FiltNode *> _nodesPending;
 
-  size_t _waveIndexStart;
-  size_t _waveIndexMid;
-  size_t _waveIndexEnd;
-
-  RadxTime _waveTimeStart;
-  RadxTime _waveTimeMid;
-  RadxTime _waveTimeMean;
-  RadxTime _waveTimeEnd;
-  RadxTime _wavePeriodStart;
-  
-  size_t _nNoiseNodes;
-  RadxTime _noiseTimeStart;
-  RadxTime _noiseTimeEnd;
   size_t _noiseIndexStart;
   size_t _noiseIndexMid;
   size_t _noiseIndexEnd;
-  FiltNode *_noiseNodeMid;
+
+  size_t _waveIndexStart;
+  size_t _waveIndexMid;
+  size_t _waveIndexEnd;
 
   // methods
 
@@ -193,12 +180,13 @@ private:
   int _applyWaveFilt(RadxRay *ray, 
                      double velSurf,
                      double dbzSurf,
-                     double rangeToSurf);
+                     double rangeToSurf,
+                     bool velIsValid);
 
   int _setFilterLimits();
 
-  void _runNoiseFilter();
-  void _runWaveFilter();
+  int _runNoiseFilter();
+  int _runWaveFilter();
 
   void _addNodeRayToFiltVol(FiltNode &node);
 

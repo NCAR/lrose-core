@@ -68,7 +68,7 @@ def main():
                       help='Start time for XY plot')
     parser.add_option('--end',
                       dest='endTime',
-                      default='2018 01 16 00 30 00',
+                      default='2018 01 16 0 30 00',
                       help='End time for XY plot')
     parser.add_option('--figDir',
                       dest='figureDir',
@@ -135,12 +135,7 @@ def main():
     # render the plots
     
     doPlotRawAndFilt()
-    doPlotFiltAndGeoref()
-    #doPlotPitchRoll(outFile)
-    #doPlotDiffs(outFile)
-    #doPlotEstPitchDiff(outFile)
-    #doPlotRadarAngles()
-    #doPlot2DHist()
+    #doPlotFiltAndGeoref()
 
     # If you want to show the plots, uncomment the following line
     # Showing the plots will stop the script so it does not work when run as script
@@ -258,12 +253,10 @@ def loadDataArrays(corrData, corrTimes):
     global VelSurf
     global DbzSurf
     global RangeToSurf
-    global VelNoiseFilt
-    global VelNoiseFiltMean
-    global VelNoiseFiltMedian
-    global VelWaveFiltMean
-    global VelWaveFiltMedian
-    global VelWaveFiltPoly
+    global VelStage1
+    global VelSpike
+    global VelCond
+    global VelFilt
     global VelCorr
     global Altitude
     global VertVel
@@ -278,12 +271,10 @@ def loadDataArrays(corrData, corrTimes):
     VelSurf = np.array(corrData["VelSurf"]).astype(np.double)
     DbzSurf = np.array(corrData["DbzSurf"]).astype(np.double)
     RangeToSurf = np.array(corrData["RangeToSurf"]).astype(np.double)
-    VelNoiseFilt = np.array(corrData["VelNoiseFilt"]).astype(np.double)
-    VelNoiseFiltMean = np.array(corrData["VelNoiseFiltMean"]).astype(np.double)
-    VelNoiseFiltMedian = np.array(corrData["VelNoiseFiltMedian"]).astype(np.double)
-    VelWaveFiltMean = np.array(corrData["VelWaveFiltMean"]).astype(np.double)
-    VelWaveFiltMedian = np.array(corrData["VelWaveFiltMedian"]).astype(np.double)
-    VelWaveFiltPoly = np.array(corrData["VelWaveFiltPoly"]).astype(np.double)
+    VelStage1 = np.array(corrData["VelStage1"]).astype(np.double)
+    VelSpike = np.array(corrData["VelSpike"]).astype(np.double)
+    VelCond = np.array(corrData["VelCond"]).astype(np.double)
+    VelFilt = np.array(corrData["VelFilt"]).astype(np.double)
     VelCorr = np.array(corrData["VelCorr"]).astype(np.double)
     Altitude = np.array(corrData["Altitude"]).astype(np.double)
     VertVel = np.array(corrData["VertVel"]).astype(np.double)
@@ -315,26 +306,17 @@ def doPlotRawAndFilt():
     ax1.plot(ctimes, VelSurf, \
              label='VelSurf', color='gray', linewidth=1)
     
-    ax1.plot(ctimes, VelNoiseFiltMean, \
-             label='VelNoiseFiltMean', color='blue', linewidth=2)
+    ax1.plot(ctimes, VelStage1, \
+             label='VelStage1', color='red', linewidth=1)
     
-    ax1.plot(ctimes, VelNoiseFiltMedian, \
-             label='VelNoiseFiltMedian', color='green', linewidth=2)
+    ax1.plot(ctimes, VelSpike, \
+             label='VelSpike', color='orange', linewidth=1)
     
-    #ax2.plot(ctimes, VelNoiseFiltMedian, \
-    #         label='VelNoiseFiltMedian', color='red', linewidth=1)
+    ax1.plot(ctimes, VelCond, \
+             label='VelCond', color='blue', linewidth=2)
     
-    ax2.plot(ctimes, VelNoiseFilt, \
-             label='VelNoiseFilt', color='gray', linewidth=1)
-    
-    ax2.plot(ctimes, VelWaveFiltMedian, \
-             label='VelWaveFiltMedian', color='blue', linewidth=1)
-    
-    ax2.plot(ctimes, VelWaveFiltMean, \
-             label='VelWaveFiltMean', color='green', linewidth=1)
-    
-    ax2.plot(ctimes, VelWaveFiltPoly, \
-             label='VelWaveFiltPoly', color='red', linewidth=2)
+    ax2.plot(ctimes, VelCorr, \
+             label='VelCorr', color='blue', linewidth=1)
     
     ax2.plot(ctimes, VertVel, \
              label='VertVel', color='cyan', linewidth=1)
@@ -404,289 +386,6 @@ def doPlotFiltAndGeoref():
 
     fig.suptitle("FILTERING with GEOREF - file " + os.path.basename(options.filePath))
 
-    return
-
-########################################################################
-# Plot INS and diffs
-
-def doPlotPitchRoll(outFile):
-
-    # set up plots
-
-    widthIn = float(options.mainWidthMm) / 25.4
-    htIn = float(options.mainHeightMm) / 25.4
-    
-    global figNum
-    fig = plt.figure(figNum, (widthIn, htIn))
-    figNum = figNum + 1
-    
-    ax1 = fig.add_subplot(4,1,1,xmargin=0.0)
-    ax2 = fig.add_subplot(4,1,2,xmargin=0.0, sharex=ax1)
-    ax3 = fig.add_subplot(4,1,3,xmargin=0.0, sharex=ax1)
-    ax4 = fig.add_subplot(4,1,4,xmargin=0.0, sharex=ax1)
-    
-    ax1.plot(ctimes, pitch3Sm, label='PitchIns3', color='orange', linewidth=1)
-    ax1.plot(ctimes, pitch2Sm, label='PitchIns2', color='blue', linewidth=1)
-    ax1.plot(ctimes, pitchSm, label='PitchIns1', color='green', linewidth=1)
-    ax1.plot(ctimes, pitchCmSm, label='PitchCmigits', color='red', linewidth=1)
-    
-    ax2.plot(ctimes, roll3Sm, label='RollIns3', color='orange', linewidth=1)
-    ax2.plot(ctimes, roll2Sm, label='RollIns2', color='green', linewidth=1)
-    ax2.plot(ctimes, rollSm, label='RollIns1', color='blue', linewidth=1)
-    ax2.plot(ctimes, rollCmSm, label='RollCmigits', color='red', linewidth=1)
-    
-    ax3.plot(ctimes, pitchDiffCm2Sm, \
-             label='pitchDiffCm2Sm', color='magenta', linewidth=1)
-    ax3.plot(ctimes, estPitchDiffSm, \
-             label='estPitchDiff', color='blue', linewidth=1)
-    ax3.plot(ctimes, pitchDiffSm, \
-             label='pitchDiffCmigits', color='green', linewidth=1)
-    ax3.plot(ctimes, pitchDiff2Sm, \
-             label='pitchDiffIns2', color='red', linewidth=1)
-    ax3.plot(ctimes, pitchDiff3Sm, \
-             label='pitchDiffIns3', color='black', linewidth=1)
-
-
-    ax4.plot(ctimes, rollDiffSm, \
-             label='rollDiffCmigits', color='blue', linewidth=1)
-    ax4.plot(ctimes, rollDiff2Sm, \
-             label='rollDiffIns2', color='red', linewidth=1)
-    ax4.plot(ctimes, rollDiff3Sm, \
-             label='rollDiffIns3', color='black', linewidth=1)
-
-    configTimeAxis(ax1, -3, 10, "Pitch", 'upper right')
-    configTimeAxis(ax2, -10, 10, "Roll", 'upper right')
-    configTimeAxis(ax3, -0.5, 1, "PitchDiffs", 'upper right')
-    configTimeAxis(ax4, -1, 1, "RollDiffs", 'upper right')
-
-    fig.autofmt_xdate()
-    fig.tight_layout()
-    fig.subplots_adjust(bottom=0.08, left=0.06, right=0.97, top=0.96)
-
-    # title name
-
-    fig.suptitle("ROLL and PITCH - file " + os.path.basename(options.filePath))
-    
-    plt.savefig(outFile + '.rollPitch.png')
-
-    return
-
-########################################################################
-# Plot the diffs
-
-def doPlotDiffs(outFile):
-
-    # set up plots
-
-    widthIn = float(options.mainWidthMm) / 25.4
-    htIn = float(options.mainHeightMm) / 25.4
-    
-    global figNum
-    fig = plt.figure(figNum, (widthIn, htIn))
-    figNum = figNum + 1
-    
-    ax1 = fig.add_subplot(4,1,1,xmargin=0.0)
-    ax2 = fig.add_subplot(4,1,2,xmargin=0.0, sharex=ax1)
-    ax3 = fig.add_subplot(4,1,3,xmargin=0.0, sharex=ax1)
-    ax4 = fig.add_subplot(4,1,4,xmargin=0.0, sharex=ax1)
-    
-    ax1.plot(ctimes, driftDiffSm, \
-             label='driftDiff', color='black', linewidth=1)
-    ax1.plot(ctimes, hdgDiffSm, \
-             label='hdgDiff', color='blue', linewidth=1)
-    ax1.plot(ctimes, vVelDiffSm, \
-             label='vVelDiff', color='green', linewidth=1)
-    ax1.plot(ctimes, altDiff, \
-             label='altDiff', color='red', linewidth=2)
-
-    ax2.plot(ctimes, estPitchDiffSm, \
-             label='estPitchDiff', color='black', linewidth=1)
-    ax2.plot(ctimes, altGps / 1000.0, \
-             label='Alt(km)', color='gray', linewidth=2)
-    #ax2.plot(ctimes, gvMass10000Kg, \
-    #         label='Mass (10T)', color='brown', linewidth=1)
-    ax2.plot(ctimes, accelNormSm, \
-             label='accelNorm', color='orange', linewidth=1)
-    ax2.plot(ctimes, aoa2, \
-             label='aoa/2', color='red', linewidth=1)
-    ax2.plot(ctimes, pitchDiffSm, \
-             label='pitchDiff', color='green', linewidth=1)
-    ax2.plot(ctimes, rollDiffSm, \
-             label='rollDiff', color='blue', linewidth=1)
-    ax2.plot(ctimes, temp30OffsetBy10, label='TempOffsetBy10', color='magenta', linewidth=1)
-    
-
-    ax3.plot(ctimes, surfaceVelSm, \
-             label='surfaceVel', color='blue', linewidth=1)
-
-    ax4.plot(ctimes, elevErrSm, label='ElevErr', color='red', linewidth=1)
-    ax4.plot(ctimes, tiltErrSm, label='TiltErr', color='blue', linewidth=1)
-
-
-    configTimeAxis(ax1, -3, 3.0, "diffs", 'upper right')
-    # configTimeAxis(ax2, -0.5, 3, "diffs", 'upper right')
-    configTimeAxis(ax2, -3, 8, "diffs", 'upper right')
-    configTimeAxis(ax3, -9999, -9999, "SurfaceVel", 'upper right')
-    configTimeAxis(ax4, -0.25, 0.25, "Err", 'upper right')
-    
-    fig.autofmt_xdate()
-    fig.tight_layout()
-    fig.subplots_adjust(bottom=0.08, left=0.06, right=0.97, top=0.96)
-
-    fig.suptitle("DIFFS GV minus CMIGITS - file " + os.path.basename(options.filePath))
-    
-    plt.savefig(outFile + '.diffs.png')
-
-    return
-
-########################################################################
-# Produce the 2-D histograms
-
-def doPlot2DHist():
-
-    # set up plots
-
-    widthIn = float(options.mainWidthMm) / 25.4
-    htIn = float(options.mainHeightMm) / 25.4
-    
-    global figNum
-    fig = plt.figure(figNum, (widthIn, htIn))
-    figNum = figNum + 1
-    
-    ax1 = fig.add_subplot(2,2,1,xmargin=0.0)
-    ax2 = fig.add_subplot(2,2,2,xmargin=0.0)
-    ax3 = fig.add_subplot(2,2,3,xmargin=0.0)
-    ax4 = fig.add_subplot(2,2,4,xmargin=0.0)
-
-    # pitch offset vs G force
-
-    validAccelNorm = accelNormSm[np.isfinite(accelNormSm)]
-    validPitchDiff = pitchDiffSm[np.isfinite(pitchDiffSm)]
-    validRollDiff = rollDiffSm[np.isfinite(rollDiffSm)]
-    validAoa = aoaSm[np.isfinite(aoaSm)]
-    validTemp30Offset = temp30OffsetSm[np.isfinite(temp30OffsetSm)]
-
-    (counts1, xedges1, yedges1, Image1) = ax1.hist2d(validAccelNorm, validPitchDiff, 
-                                                     bins=100, norm=mpl.colors.LogNorm())
-    cbar1 = fig.colorbar(mappable=Image1, ax=ax1)
-    cbar1.set_label("count")
-    ax1.set_xlabel('G-acceleration normal')
-    ax1.set_ylabel('Pitch offset')
-
-    # roll offset vs G force
-
-    (counts2, xedges2, yedges2, Image2) = ax2.hist2d(validAccelNorm, validRollDiff,
-                                                     bins=100, norm=mpl.colors.LogNorm())
-    cbar2 = fig.colorbar(mappable=Image2, ax=ax2)
-    cbar2.set_label("count")
-    ax2.set_xlabel('G-acceleration normal')
-    ax2.set_ylabel('Roll offset')
-
-    # pitch offset vs temp diff
-
-    (counts3, xedges3, yedges3, Image3) = ax3.hist2d(validTemp30Offset, validPitchDiff, 
-                                                     bins=100, norm=mpl.colors.LogNorm())
-    cbar3 = fig.colorbar(mappable=Image3, ax=ax3)
-    cbar3.set_label("count")
-    ax3.set_xlabel('30 - cmigits temp')
-    ax3.set_ylabel('Pitch offset')
-
-    # roll offset vs Angle of attack
-
-    (counts4, xedges4, yedges4, Image4) = ax4.hist2d(validAoa, validRollDiff, 
-                                                     bins=100, norm=mpl.colors.LogNorm())
-    cbar4 = fig.colorbar(mappable=Image4, ax=ax4)
-    cbar4.set_label("count")
-    ax4.set_xlabel('AOA')
-    ax4.set_ylabel('Roll offset')
-
-    fig.tight_layout()
-    fig.subplots_adjust(bottom=0.08, left=0.06, right=0.97, top=0.96)
-
-    fig.suptitle("2D histograms - file " + os.path.basename(options.filePath))
-
-    return
-
-########################################################################
-# Plot angles
-
-def doPlotRadarAngles():
-
-    # set up plots
-
-    widthIn = float(options.mainWidthMm) / 25.4
-    htIn = float(options.mainHeightMm) / 25.4
-    
-    global figNum
-    fig = plt.figure(figNum, (widthIn, htIn))
-    figNum = figNum + 1
-    
-    ax1 = fig.add_subplot(4,1,1,xmargin=0.0)
-    ax2 = fig.add_subplot(4,1,2,xmargin=0.0)
-    ax3 = fig.add_subplot(4,1,3,xmargin=0.0)
-    ax4 = fig.add_subplot(4,1,4,xmargin=0.0)
-    
-    ax1.plot(ctimes, azimuth, label='Azimuth', color='red', linewidth=1)
-
-    ax2.plot(ctimes, elevErrSm, label='ElevErr', color='blue', linewidth=1)
-
-    ax3.plot(ctimes, rotation, label='Rotation', color='green', linewidth=1)
-
-    ax4.plot(ctimes, tilt, label='Tilt', color='black', linewidth=1)
-
-    configTimeAxis(ax1, -9999, -9999, "Azimuth", 'upper right')
-    configTimeAxis(ax2, -0.25, 0.25, "Elevation error", 'upper right')
-    configTimeAxis(ax3, -9999, -9999, "Rotation", 'upper right')
-    configTimeAxis(ax4, -9999, -9999, "Tilt", 'upper right')
-
-    fig.autofmt_xdate()
-    fig.tight_layout()
-    fig.subplots_adjust(bottom=0.08, left=0.06, right=0.97, top=0.96)
-
-    # title name
-
-    fig.suptitle("RADAR ANGLES - file " + os.path.basename(options.filePath))
-
-    return
-
-########################################################################
-# Plot the estimated pitch difference, using surface vel to estimate it
-
-def doPlotEstPitchDiff(outFile):
-
-    # set up plots
-
-    widthIn = float(options.mainWidthMm) / 25.4
-    htIn = float(options.mainHeightMm) / 25.4
-    
-    global figNum
-    fig = plt.figure(figNum, (widthIn, htIn))
-    figNum = figNum + 1
-    
-    ax1 = fig.add_subplot(2,1,1,xmargin=0.0)
-    ax2 = fig.add_subplot(2,1,2,xmargin=0.0, sharex=ax1)
-    
-    ax1.plot(ctimes, estPitchDiffSm, \
-             label='estPitchDiff', color='red', linewidth=1)
-    ax1.plot(ctimes, pitchDiffSm, \
-             label='pitchDiff', color='green', linewidth=1)
-    ax1.plot(ctimes, rollDiffSm, \
-             label='rollDiff', color='blue', linewidth=1)
-    
-    ax2.plot(ctimes, surfaceVelSm, \
-             label='surfaceVel', color='blue', linewidth=1)
-
-    configTimeAxis(ax1, -1, 1, "diffs", 'upper right')
-    configTimeAxis(ax2, -1.5, 1, "SurfaceVel", 'upper right')
-    
-    fig.autofmt_xdate()
-    fig.tight_layout()
-    fig.subplots_adjust(bottom=0.08, left=0.06, right=0.97, top=0.96)
-
-    fig.suptitle("ESTIMATED PITCH DIFF: GV-CMIGITS - file " + os.path.basename(options.filePath))
-    
-    plt.savefig(outFile + '.estPitchDiff.png')
-    
     return
 
 ########################################################################
