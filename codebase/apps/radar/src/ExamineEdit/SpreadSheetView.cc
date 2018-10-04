@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <QtWidgets>
+#include <QModelIndex>
 #include <vector>
 #include <iostream>
 
@@ -91,7 +92,7 @@ SpreadSheetView::SpreadSheetView(std::string fileName, QWidget *parent)
 
 void SpreadSheetView::createActions()
 {
-    cell_sumAction = new QAction(tr("- Fold"), this);
+    cell_sumAction = new QAction(tr("+ Sum"), this);
     connect(cell_sumAction, &QAction::triggered, this, &SpreadSheetView::actionSum);
 
     cell_addAction = new QAction(tr("&+ Fold"), this);
@@ -136,9 +137,7 @@ void SpreadSheetView::createActions()
     display_editHistAction = new QAction(tr("&Edit Hist"), this);
     //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
     connect(display_editHistAction, &QAction::triggered, this, &SpreadSheetView::actionDisplayEditHist);
-    
-    
-      
+     
     fontAction = new QAction(tr("Font ..."), this);
     fontAction->setShortcut(Qt::CTRL | Qt::Key_F);
     connect(fontAction, &QAction::triggered, this, &SpreadSheetView::selectFont);
@@ -462,11 +461,19 @@ void SpreadSheetView::actionDivide()
 {
   //    actionMath_helper(tr("Division"), "/");
     // TODO: get the selected cells
-  //  QItemSelectionModel *select = table->selectionModel();
-
+  QItemSelectionModel *select = table->selectionModel();
+  
   //  select->hasSelection() //check if has selection
   //  select->selectedRows() // return selected row(s)
   //  select->selectedColumns() // return selected column(s)
+
+  QList<QModelIndex> indexes = select->selectedIndexes();
+  // returns rows and columns from the table, zero-based
+  cout << "selected (row,column):" << endl;
+  for (QModelIndex index : indexes) {
+    cout << "(" << index.row() << ", " << index.column() << ")" << endl;
+  }    
+
 }
 
 void SpreadSheetView::notImplementedMessage() {
