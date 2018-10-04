@@ -465,20 +465,12 @@ int HcrVelCorrect::_processRayWaveFilt(RadxRay *ray)
     FiltNode *node = _nodesPending[ii];
     _filtRay = node->ray;
     if (filtIsValid) {
-      double velSurfFilt = 0.0;
-      if (_params.wave_filter_type == Params::WAVE_MEAN) {
-        velSurfFilt = node->velWaveFiltMean;
-      } else if (_params.wave_filter_type == Params::WAVE_MEDIAN) {
-        velSurfFilt = node->velWaveFiltMedian;
-      } else {
-        velSurfFilt = node->velWaveFiltPoly;
-      }
-      _correctVelForRay(_filtRay, velSurfFilt);
-      node->velIsValid = true;
+      _correctVelForRay(_filtRay, node->velWaveFilt);
+      // node->velIsValid = true;
       node->corrected = true;
     } else {
       _copyVelForRay(_filtRay);
-      node->velIsValid = false;
+      // node->velIsValid = false;
       node->corrected = false;
     }
     node->processed = true;
@@ -515,7 +507,7 @@ void HcrVelCorrect::_initWaveFilt()
 
   // polynomial filter order
 
-  _poly.setOrder(_params.wave_polynomial_order);
+  _poly.setOrder(_params.wave_filter_polynomial_order);
 
 }
 
@@ -542,12 +534,8 @@ int HcrVelCorrect::_applyWaveFilt(RadxRay *ray,
   node.ray = ray;
   node.velSurf = velSurf;
   node.velNoiseFilt = velSurf;
-  node.velNoiseFiltMean = velSurf;
-  node.velNoiseFiltMedian = velSurf;
-  node.velWaveFiltMean = velSurf;
-  node.velWaveFiltMedian = velSurf;
-  node.velWaveFiltPoly = velSurf;
-  node.velIsValid = velIsValid;
+  node.velWaveFilt = velSurf;
+  // node.velIsValid = velIsValid;
   _filtQueue.push_back(node);
 
   // Set the time limits for the filters
@@ -558,22 +546,18 @@ int HcrVelCorrect::_applyWaveFilt(RadxRay *ray,
     return -1;
   }
 
-  if ((int) _filtQueue.size() < _params.wave_filter_min_n_rays) {
+  if ((int) _filtQueue.size() < 3) {
     return -1;
   }
 
   // run the noise filter first
 
-  if (_runNoiseFilter()) {
-    return -1;
-  }
-
+  _runNoiseFilter();
+  
   // then run the wave filter
-
-  if (_runWaveFilter()) {
-    return -1;
-  }
-
+  
+  _runWaveFilter();
+  
   return 0;
 
 }
@@ -621,33 +605,28 @@ int HcrVelCorrect::_setFilterLimits()
   
   _noiseIndexStart = _filtQueue.size() - 1;
   _noiseIndexEnd = _filtQueue.size() - 1;
-  bool noiseFound = false;
-  for (size_t ii = 0; ii < _filtQueue.size(); ii++) {
+  for (ssize_t ii = _filtQueue.size() - 1; ii >= 0; ii--) {
     RadxTime nodeTime = _filtQueue[ii].getTime();
-    if (nodeTime >= noiseTimeStart && nodeTime <= noiseTimeEnd) {
-      if (!noiseFound) {
-        _noiseIndexStart = ii;
-        noiseFound = true;
-      }
-      _noiseIndexEnd = ii;
+    if (nodeTime < noiseTimeStart) {
+      break;
     }
+    _noiseIndexStart = ii;
   }
   _noiseIndexMid = (_noiseIndexStart + _noiseIndexEnd) / 2;
   
-  if (_noiseIndexStart < 2) {
+  if (_noiseIndexStart < 1) {
     return -1;
   }
-
+  
   // compute wave filter index limits
-
-  FiltNode &oldest = _filtQueue[0];
-  RadxTime waveTimeStart = oldest.getTime();
+  
+  RadxTime waveTimeStart = _filtQueue[0].getTime();
   _waveIndexStart = 0;
-  _waveIndexEnd = _noiseIndexStart - 1;
+  _waveIndexEnd = _noiseIndexStart;
   waveTimeEnd = _filtQueue[_waveIndexEnd].getTime();
   
   // find the mid node closest to the mean time
-
+  
   double waveSecs = waveTimeEnd - waveTimeStart;
   RadxTime waveTimeMean = waveTimeEnd - waveSecs / 2.0;
   double minTimeDiff = 1.0e99;
@@ -685,38 +664,32 @@ int HcrVelCorrect::_runNoiseFilter()
   
   vector<double> velSurf;
   for (size_t ii = _noiseIndexStart; ii <= _noiseIndexEnd; ii++) {
-    if (_filtQueue[ii].velIsValid) {
+    if (!std::isnan(_filtQueue[ii].velSurf)) {
       velSurf.push_back(_filtQueue[ii].velSurf);
     }
   }
-  
-  // compute the mean
-
-  double sum = 0.0;
-  double count = 0.0;
-  for (size_t ii = 0; ii < velSurf.size(); ii++) {
-    sum += velSurf[ii];
-    count++;
-  }
-
-  if (count < 1) {
+  if (velSurf.size() < 1) {
     return -1;
   }
-
-  double mean = sum / count;
-
+  
   // compute the median
   
   sort(velSurf.begin(), velSurf.end());
   int indexHalf = velSurf.size() / 2;
   double median = velSurf[indexHalf];
-
+  
   // set the filtered value on all younger nodes
-
+  
   for (size_t ii = _noiseIndexMid; ii <= _noiseIndexEnd; ii++) {
-    _filtQueue[ii].velNoiseFiltMean = mean;
-    _filtQueue[ii].velNoiseFiltMedian = median;
     _filtQueue[ii].velNoiseFilt = median;
+  }
+
+  // set the filtered value on older nodes that have not been set
+  
+  for (size_t ii = _noiseIndexMid; ii <= _noiseIndexEnd; ii++) {
+    if (std::isnan(_filtQueue[ii].velNoiseFilt)) {
+      _filtQueue[ii].velNoiseFilt = median;
+    }
   }
 
   return 0;
@@ -732,63 +705,39 @@ int HcrVelCorrect::_runWaveFilter()
   // get vector of surface velocities
 
   vector<double> velNoiseFilt;
-  vector<double> dtimeValid, dtimeAll;
+  vector<double> dtimeValid, dtimeFull;
   RadxTime startTime = _filtQueue[0].getTime();
   for (size_t ii = _waveIndexStart; ii <= _waveIndexEnd; ii++) {
     double deltaTime = _filtQueue[ii].getTime() - startTime;
-    dtimeAll.push_back(deltaTime);
-    if (_filtQueue[ii].velIsValid) {
+    dtimeFull.push_back(deltaTime);
+    if (!std::isnan(_filtQueue[ii].velSurf)) {
       velNoiseFilt.push_back(_filtQueue[ii].velNoiseFilt);
       dtimeValid.push_back(deltaTime);
     }
   }
   
-  // compute the mean
-  
-  double sum = 0.0;
-  double count = 0.0;
-  for (size_t ii = 0; ii < velNoiseFilt.size(); ii++) {
-    sum += velNoiseFilt[ii];
-    count++;
-  }
-
-  if (count < 1) {
+  if (velNoiseFilt.size() < 1) {
     return -1;
   }
-
-  double mean = sum / count;
-  _waveNodeMid->velWaveFiltMean = mean;
-  for (size_t ii = _waveIndexMid; ii <= _waveIndexEnd; ii++) {
-    _filtQueue[ii].velWaveFiltMean = mean;
-  }
-
+  
   // perform the polynomial fit
-
+  
   _poly.clear();
   _poly.setValues(dtimeValid, velNoiseFilt);
   if (_poly.performFit() == 0) {
+    // success
+    // set the polynomial values on all younger nodes
     for (size_t ii = _waveIndexMid; ii <= _waveIndexEnd; ii++) {
-      _filtQueue[ii].velWaveFiltPoly = _poly.getYEst(dtimeAll[ii]);
+      _filtQueue[ii].velWaveFilt = _poly.getYEst(dtimeFull[ii]);
     }
-  }
-  
-  // compute the median
-
-  sort(velNoiseFilt.begin(), velNoiseFilt.end());
-  int indexHalf = velNoiseFilt.size() / 2;
-  double median = velNoiseFilt[indexHalf];
-  for (size_t ii = _waveIndexMid; ii <= _waveIndexEnd; ii++) {
-    _filtQueue[ii].velWaveFiltMedian = median;
-  }
-
-  for (size_t ii = _waveIndexMid; ii <= _waveIndexEnd; ii++) {
-    if (_params.wave_filter_type == Params::WAVE_MEAN) {
-      _filtQueue[ii].velSurfFilt = _filtQueue[ii].velWaveFiltMean;
-    } else if (_params.wave_filter_type == Params::WAVE_MEDIAN) {
-      _filtQueue[ii].velSurfFilt = _filtQueue[ii].velWaveFiltMedian;
-    } else {
-      _filtQueue[ii].velSurfFilt = _filtQueue[ii].velWaveFiltPoly;
+    // set the polynomial values on all older nodes that 
+    // have not yet been processed
+    for (size_t ii = 0; ii < _waveIndexMid; ii++) {
+      if (!_filtQueue[ii].processed) {
+        _filtQueue[ii].velWaveFilt = _poly.getYEst(dtimeFull[ii]);
+      }
     }
+
   }
 
   return 0;
@@ -1056,7 +1005,8 @@ void HcrVelCorrect::_correctVelForRay(RadxRay *ray, double surfFilt)
   
   const Radx::fl32 *vel = velField->getDataFl32();
   Radx::fl32 miss = velField->getMissingFl32();
-  Radx::fl32 *corrected = new Radx::fl32[velField->getNPoints()];
+  RadxArray<Radx::fl32> corrected_;
+  Radx::fl32 *corrected = corrected_.alloc(velField->getNPoints());
   for (size_t ii = 0; ii < velField->getNPoints(); ii++) {
     if (vel[ii] != miss) {
       corrected[ii] = vel[ii] - surfFilt;
@@ -1066,13 +1016,18 @@ void HcrVelCorrect::_correctVelForRay(RadxRay *ray, double surfFilt)
   }
 
   // set data for field
-
+  
   correctedField->setDataFl32(velField->getNPoints(), corrected, true);
-  delete[] corrected;
-
+  
   // add field to ray
 
   ray->addField(correctedField);
+
+  // optionally add in the delta velocity field
+  
+  if (_params.add_delta_vel_field) {
+    _addDeltaField(ray, -surfFilt);
+  }
 
 }
 
@@ -1117,8 +1072,57 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
 
   ray->addField(copyField);
 
+  // optionally add in the delta velocity field
+  
+  if (_params.add_delta_vel_field) {
+    _addDeltaField(ray, 0.0);
+  }
+
 }
 
+
+//////////////////////////////////////////////////
+// add delta field to ray
+
+void HcrVelCorrect::_addDeltaField(RadxRay *ray, double deltaVel)
+
+{
+
+  RadxField *velField = ray->getField(_params.vel_field_name);
+  if (velField == NULL) {
+    // no vel field, nothing to do
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - no vel field found: " << _params.vel_field_name << endl;
+    }
+    return;
+  }
+
+  RadxField *deltaField = new RadxField(_params.delta_vel_field_name,
+                                        velField->getUnits());
+  deltaField->copyMetaData(*velField);
+  deltaField->setName(_params.delta_vel_field_name);
+  
+  const Radx::fl32 *vel = velField->getDataFl32();
+  Radx::fl32 miss = velField->getMissingFl32();
+  RadxArray<Radx::fl32> delta_;
+  Radx::fl32 *delta = delta_.alloc(velField->getNPoints());
+  for (size_t ii = 0; ii < velField->getNPoints(); ii++) {
+    if (vel[ii] != miss) {
+      delta[ii] = deltaVel;
+    } else {
+      delta[ii] = miss;
+    }
+  }
+  
+  // set data for field
+  
+  deltaField->setDataFl32(velField->getNPoints(), delta, true);
+  
+  // add field to ray
+  
+  ray->addField(deltaField);
+  
+}
 
 //////////////////////////////////////////////////
 // compute and add in the corrected spectrum
@@ -1191,7 +1195,7 @@ void HcrVelCorrect::_writeWaveFiltResultsToSpdb(const RadxRay *filtRay)
 
   // check if we have a good velocity
   
-  if (_waveNodeMid == NULL || !_waveNodeMid->velIsValid) {
+  if (_waveNodeMid == NULL || std::isnan(_waveNodeMid->velSurf)) {
     return;
   }
   
@@ -1209,18 +1213,10 @@ void HcrVelCorrect::_writeWaveFiltResultsToSpdb(const RadxRay *filtRay)
   
   xml += RadxXml::writeDouble("VelNoiseFilt", 1,
                               _waveNodeMid->velNoiseFilt);
-  xml += RadxXml::writeDouble("VelNoiseFiltMean", 1,
-                              _waveNodeMid->velNoiseFiltMean);
-  xml += RadxXml::writeDouble("VelNoiseFiltMedian", 1,
-                              _waveNodeMid->velNoiseFiltMedian);
-  xml += RadxXml::writeDouble("VelWaveFiltMean", 1,
-                              _waveNodeMid->velWaveFiltMean);
-  xml += RadxXml::writeDouble("VelWaveFiltMedian", 1,
-                              _waveNodeMid->velWaveFiltMedian);
-  xml += RadxXml::writeDouble("VelWaveFiltPoly", 1,
-                              _waveNodeMid->velWaveFiltPoly);
+  xml += RadxXml::writeDouble("VelWaveFilt", 1,
+                              _waveNodeMid->velWaveFilt);
   
-  double velCorr = _waveNodeMid->velSurf - _waveNodeMid->velSurfFilt;
+  double velCorr = _waveNodeMid->velSurf - _waveNodeMid->velWaveFilt;
   xml += RadxXml::writeDouble("VelCorr", 1, velCorr);
   
   const RadxGeoref *georef = filtRay->getGeoreference();

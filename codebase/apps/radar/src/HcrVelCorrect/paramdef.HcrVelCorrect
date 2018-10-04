@@ -136,6 +136,18 @@ paramdef string {
   p_help = "This is the main output field from this app. It will be added to the input data as an extra field.";
 } corrected_vel_field_name;
 
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to add in the delta velocity as a separate field.";
+  p_help = "This allows the users to see how the velocity was corrected, or if no correction was applied.";
+} add_delta_vel_field;
+
+paramdef string {
+  p_default = "VEL_DELTA";
+  p_descr = "Name of field for delta between uncorrected and corrected velocity.";
+  p_help = "This documents how the velocity was corrected.";
+} delta_vel_field_name;
+
 paramdef double {
   p_default = 5;
   p_descr = "Maximum error from nadir pointing for computing surface velocity (deg).";
@@ -296,12 +308,13 @@ paramdef enum filter_type_t {
 
 commentdef {
   p_header = "WAVE FILTERING";
+  p_text = "We want to fiter out the effects of the ocean surface waves, but preserve the variability induced by the aircraft motion and antenna control. We first run a simple median noise filter, and the run a polynomial filter on the results of the noise filter.";
 }
 
 paramdef double {
   p_default = 3;
   p_descr = "Length of the noise filter (secs).";
-  p_help = "The noise filter is a simple running mean to smooth out the measurement noise in the velocity measurements. The filter has the same center as the wave filter.";
+  p_help = "The noise filter is a running median to smooth out the measurement noise in the velocity measurements. The noise filter precedes the wave filter - i.e. is computed ahead of the wave filter.";
 } noise_filter_length_secs;
 
 paramdef double {
@@ -311,25 +324,9 @@ paramdef double {
 } wave_filter_length_secs;
 
 paramdef int {
-  p_default = 150;
-  p_descr = "Min number of rays for valid wave filter.";
-  p_help = "If fewer than this number of rays are available within the time period for the wave filter, the filter is not run and no corrected velocity is computed.";
-} wave_filter_min_n_rays;
-
-typedef enum {
-  WAVE_MEAN, WAVE_MEDIAN, WAVE_POLYNOMIAL
-} wave_filter_type_t;
-
-paramdef enum wave_filter_type_t {
-  p_default = WAVE_MEDIAN;
-  p_descr = "Wave filtering type";
-  p_help = "All filter types use the same length in secs.\n\nWAVE_MEAN: running mean in time.\n\nWAVE_MEDIAN: running median in time.\n\nWAVE_POLYNOMIAL: polynomial fit.";
-} wave_filter_type;
-
-paramdef int {
   p_default = 3;
   p_descr = "Order of the polynomial fit for the wave filter.";
-} wave_polynomial_order;
+} wave_filter_polynomial_order;
 
 commentdef {
   p_header = "FIR FILTERING";

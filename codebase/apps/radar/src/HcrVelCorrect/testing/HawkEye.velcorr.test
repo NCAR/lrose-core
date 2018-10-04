@@ -190,7 +190,7 @@ begin_in_archive_mode = TRUE;
 // Type: string
 //
 
-archive_start_time = "2018 01 16 00 00 00";
+archive_start_time = "2018 01 16 00 20 00";
 
 ///////////// archive_time_span_secs //////////////////
 //
@@ -215,7 +215,7 @@ archive_time_span_secs = 600;
 //
 
 // archive_data_url = "$(DATA_DIR)/qc/cfradial/moments/10hz";
-archive_data_url = "/tmp/velcorr/10hz";
+archive_data_url = "/tmp/qc/cfradial/velcorr/10hz";
 
 //======================================================================
 //
@@ -368,6 +368,15 @@ fields = {
     filtered_name = "",
     units = "m/s",
     color_map = "vel_w_8.colors",
+    shortcut = "1"
+  }
+  ,
+  {
+    label = "VEL_DELTA",
+    raw_name = "VEL_DELTA",
+    filtered_name = "",
+    units = "m/s",
+    color_map = "vel_delta.colors",
     shortcut = "1"
   }
   ,

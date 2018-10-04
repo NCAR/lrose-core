@@ -1,5 +1,5 @@
 /**********************************************************************
- * Tdrp params for HcrVelCorrect
+ * TDRP params for ./HcrVelCorrect
  **********************************************************************/
 
 //======================================================================
@@ -248,6 +248,31 @@ vel_field_name = "VEL";
 //
 
 corrected_vel_field_name = "VEL_CORR";
+
+///////////// add_delta_vel_field /////////////////////
+//
+// Option to add in the delta velocity as a separate field.
+//
+// This allows the users to see how the velocity was corrected, or if no 
+//   correction was applied.
+//
+//
+// Type: boolean
+//
+
+add_delta_vel_field = TRUE;
+
+///////////// delta_vel_field_name ////////////////////
+//
+// Name of field for delta between uncorrected and corrected velocity.
+//
+// This documents how the velocity was corrected.
+//
+//
+// Type: string
+//
+
+delta_vel_field_name = "VEL_DELTA";
 
 ///////////// max_nadir_error_for_surface_vel /////////
 //
@@ -551,15 +576,20 @@ filter_type = WAVE_FILTER;
 //
 // WAVE FILTERING.
 //
+// We want to fiter out the effects of the ocean surface waves, but 
+//   preserve the variability induced by the aircraft motion and antenna 
+//   control. We first run a simple median noise filter, and the run a 
+//   polynomial filter on the results of the noise filter.
+//
 //======================================================================
  
 ///////////// noise_filter_length_secs ////////////////
 //
 // Length of the noise filter (secs).
 //
-// The noise filter is a simple running mean to smooth out the 
-//   measurement noise in the velocity measurements. The filter has the 
-//   same center as the wave filter.
+// The noise filter is a running median to smooth out the measurement 
+//   noise in the velocity measurements. The noise filter precedes the 
+//   wave filter - i.e. is computed ahead of the wave filter.
 //
 //
 // Type: double
@@ -582,43 +612,7 @@ noise_filter_length_secs = 3;
 
 wave_filter_length_secs = 20;
 
-///////////// wave_filter_min_n_rays //////////////////
-//
-// Min number of rays for valid wave filter.
-//
-// If fewer than this number of rays are available within the time 
-//   period for the wave filter, the filter is not run and no corrected 
-//   velocity is computed.
-//
-//
-// Type: int
-//
-
-wave_filter_min_n_rays = 100;
-
-///////////// wave_filter_type ////////////////////////
-//
-// Wave filtering type.
-//
-// All filter types use the same length in secs.
-//
-// WAVE_MEAN: running mean in time.
-//
-// WAVE_MEDIAN: running median in time.
-//
-// WAVE_POLYNOMIAL: polynomial fit.
-//
-//
-// Type: enum
-// Options:
-//     WAVE_MEAN
-//     WAVE_MEDIAN
-//     WAVE_POLYNOMIAL
-//
-
-wave_filter_type = WAVE_POLYNOMIAL;
-
-///////////// wave_polynomial_order ///////////////////
+///////////// wave_filter_polynomial_order ////////////
 //
 // Order of the polynomial fit for the wave filter.
 //
@@ -626,7 +620,7 @@ wave_filter_type = WAVE_POLYNOMIAL;
 // Type: int
 //
 
-wave_polynomial_order = 3;
+wave_filter_polynomial_order = 3;
 
 //======================================================================
 //

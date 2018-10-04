@@ -106,12 +106,6 @@ public:
     FIR_FILTER = 1
   } filter_type_t;
 
-  typedef enum {
-    WAVE_MEAN = 0,
-    WAVE_MEDIAN = 1,
-    WAVE_POLYNOMIAL = 2
-  } wave_filter_type_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -429,6 +423,10 @@ public:
 
   char* corrected_vel_field_name;
 
+  tdrp_bool_t add_delta_vel_field;
+
+  char* delta_vel_field_name;
+
   double max_nadir_error_for_surface_vel;
 
   tdrp_bool_t add_corrected_spectrum_width_field;
@@ -471,11 +469,7 @@ public:
 
   double wave_filter_length_secs;
 
-  int wave_filter_min_n_rays;
-
-  wave_filter_type_t wave_filter_type;
-
-  int wave_polynomial_order;
+  int wave_filter_polynomial_order;
 
   double spike_filter_difference_threshold;
 

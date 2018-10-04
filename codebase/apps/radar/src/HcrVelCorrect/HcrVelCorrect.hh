@@ -118,31 +118,19 @@ private:
   public:
     RadxRay *ray;
     double velSurf;
-    double velSurfFilt;
     double dbzSurf;
     double rangeToSurf;
     double velNoiseFilt;
-    double velNoiseFiltMean;
-    double velNoiseFiltMedian;
-    double velWaveFiltMean;
-    double velWaveFiltMedian;
-    double velWaveFiltPoly;
-    bool velIsValid;
+    double velWaveFilt;
     bool corrected;
     bool processed;
     FiltNode() {
       ray = NULL;
       velSurf = NAN;
-      velSurfFilt = NAN;
       dbzSurf = NAN;
       rangeToSurf = NAN;
       velNoiseFilt = NAN;
-      velNoiseFiltMean = NAN;
-      velNoiseFiltMedian = NAN;
-      velWaveFiltMean = NAN;
-      velWaveFiltMedian = NAN;
-      velWaveFiltPoly = NAN;
-      velIsValid = false;
+      velWaveFilt = NAN;
       corrected = false;
       processed = false;
     }
@@ -200,6 +188,7 @@ private:
   void _correctVelForRay(RadxRay *ray, double surfFilt);
   void _copyVelForRay(RadxRay *ray);
 
+  void _addDeltaField(RadxRay *ray, double deltaVel);
   int _addCorrectedSpectrumWidth(RadxRay *ray);
 
   void _writeWaveFiltResultsToSpdb(const RadxRay *filtRay);

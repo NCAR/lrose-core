@@ -794,6 +794,30 @@
     tt->single_val.s = tdrpStrDup("VEL_CORR");
     tt++;
     
+    // Parameter 'add_delta_vel_field'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_delta_vel_field");
+    tt->descr = tdrpStrDup("Option to add in the delta velocity as a separate field.");
+    tt->help = tdrpStrDup("This allows the users to see how the velocity was corrected, or if no correction was applied.");
+    tt->val_offset = (char *) &add_delta_vel_field - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'delta_vel_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("delta_vel_field_name");
+    tt->descr = tdrpStrDup("Name of field for delta between uncorrected and corrected velocity.");
+    tt->help = tdrpStrDup("This documents how the velocity was corrected.");
+    tt->val_offset = (char *) &delta_vel_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_DELTA");
+    tt++;
+    
     // Parameter 'max_nadir_error_for_surface_vel'
     // ctype is 'double'
     
@@ -1126,7 +1150,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("WAVE FILTERING");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("We want to fiter out the effects of the ocean surface waves, but preserve the variability induced by the aircraft motion and antenna control. We first run a simple median noise filter, and the run a polynomial filter on the results of the noise filter.");
     tt++;
     
     // Parameter 'noise_filter_length_secs'
@@ -1136,7 +1160,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("noise_filter_length_secs");
     tt->descr = tdrpStrDup("Length of the noise filter (secs).");
-    tt->help = tdrpStrDup("The noise filter is a simple running mean to smooth out the measurement noise in the velocity measurements. The filter has the same center as the wave filter.");
+    tt->help = tdrpStrDup("The noise filter is a running median to smooth out the measurement noise in the velocity measurements. The noise filter precedes the wave filter - i.e. is computed ahead of the wave filter.");
     tt->val_offset = (char *) &noise_filter_length_secs - &_start_;
     tt->single_val.d = 3;
     tt++;
@@ -1153,49 +1177,15 @@
     tt->single_val.d = 30;
     tt++;
     
-    // Parameter 'wave_filter_min_n_rays'
+    // Parameter 'wave_filter_polynomial_order'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("wave_filter_min_n_rays");
-    tt->descr = tdrpStrDup("Min number of rays for valid wave filter.");
-    tt->help = tdrpStrDup("If fewer than this number of rays are available within the time period for the wave filter, the filter is not run and no corrected velocity is computed.");
-    tt->val_offset = (char *) &wave_filter_min_n_rays - &_start_;
-    tt->single_val.i = 150;
-    tt++;
-    
-    // Parameter 'wave_filter_type'
-    // ctype is '_wave_filter_type_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("wave_filter_type");
-    tt->descr = tdrpStrDup("Wave filtering type");
-    tt->help = tdrpStrDup("All filter types use the same length in secs.\n\nWAVE_MEAN: running mean in time.\n\nWAVE_MEDIAN: running median in time.\n\nWAVE_POLYNOMIAL: polynomial fit.");
-    tt->val_offset = (char *) &wave_filter_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("wave_filter_type_t");
-    tt->enum_def.nfields = 3;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("WAVE_MEAN");
-      tt->enum_def.fields[0].val = WAVE_MEAN;
-      tt->enum_def.fields[1].name = tdrpStrDup("WAVE_MEDIAN");
-      tt->enum_def.fields[1].val = WAVE_MEDIAN;
-      tt->enum_def.fields[2].name = tdrpStrDup("WAVE_POLYNOMIAL");
-      tt->enum_def.fields[2].val = WAVE_POLYNOMIAL;
-    tt->single_val.e = WAVE_MEDIAN;
-    tt++;
-    
-    // Parameter 'wave_polynomial_order'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("wave_polynomial_order");
+    tt->param_name = tdrpStrDup("wave_filter_polynomial_order");
     tt->descr = tdrpStrDup("Order of the polynomial fit for the wave filter.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wave_polynomial_order - &_start_;
+    tt->val_offset = (char *) &wave_filter_polynomial_order - &_start_;
     tt->single_val.i = 3;
     tt++;
     
