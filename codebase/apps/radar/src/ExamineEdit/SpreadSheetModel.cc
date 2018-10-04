@@ -77,13 +77,13 @@ int SpreadSheetModel::_getArchiveData(string inputPath)
   //  }
 
 
+  // set number of gates constant if requested 
+   _vol.setNGatesConstant();
+   _vol.loadFieldsFromRays();
   // compute the fixed angles from the rays   
 
-  // so that we reflect reality                                                                                
+  //_vol.computeFixedAnglesFromRays();
 
-  _vol.computeFixedAnglesFromRays();
-
-  // load the sweep manager                                                                                    
 
   //  if (_params.debug) {
   cerr << "----------------------------------------------------" << endl;
@@ -109,68 +109,51 @@ void SpreadSheetModel::initData(string fileName)
 
 vector<string> SpreadSheetModel::getFields()
 {
-  vector<string> names = {"alpha", "beta", "gamma"};
-  return names;
+  // vector<string> names = {"alpha", "beta", "gamma"};
+  vector<string> fieldNames = _vol.getUniqueFieldNameList();
+
+  return fieldNames;
 }
 
 // return a list of data values
 vector<float> SpreadSheetModel::getSampleData()
 {
 
-  vector<float> data = {1.0, 3.0, 5.0, 10.0};
+  vector<float> data;
+  data.push_back(1.0);
+  data.push_back(3.0);
+  data.push_back(5.0);
+  data.push_back(10.0);
   return data;
 }
 
 
 // return a list of data values for the given
 // field name
-vector<float> SpreadSheetModel::getData(string fieldName)
+vector<double> SpreadSheetModel::getData(string fieldName)
 {
   int cols;
   int rows;
 
-  vector <float> data;
-  /*
-
-  //cols = displayInfo.getNumFields();
-  vector<string> fieldNames = vol.getUniqueFieldNameList();
-  cols = (int)  fieldNames.size();
-  rows = 20;
-
-  //_volumeData = vol;
-    addToolBar(toolBar = new QToolBar());
-    formulaInput = new QLineEdit();
-
-    cellLabel = new QLabel(toolBar);
-    cellLabel->setMinimumSize(80, 0);
-
-    toolBar->addWidget(cellLabel);
-    toolBar->addWidget(formulaInput);
-
-    table = new QTableWidget(rows, cols, this);
-    table->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
-    // set the column headers to the data fields
-    
-    
-    int c = 0;
-    vector<string>::iterator it; 
-    for(it = fieldNames.begin(); it != fieldNames.end(); it++, c++) {
-      QString the_name(QString::fromStdString(*it));
-      cerr << *it << endl;
-      table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
-    }
-    
-    table->setItemPrototype(table->item(rows - 1, cols - 1));
-    table->setItemDelegate(new SpreadSheetDelegate());
-
-    createActions();
-    updateColor(0);
-    setupMenuBar();
-    setupContents(vol);
-    setupContextMenu();
-    setCentralWidget(table);
-  */
-  return data;
+  vector <double> dataVector;
+  const RadxField *field;
+  field = _vol.getFieldFromRay(fieldName);  // <--- Why is this returning NULL
+  // because the type is 
+  // from debugger:  *((vol.getFieldFromRay("VEL"))->getDataSi16()+1)
+  if (field == NULL) {
+    cerr << "no RadxField found " <<  endl;
+    return dataVector;
+  } 
+  // Radx::fl32 *data = field->getDataFl32();
+  // TODO: how may gates?
+  for (int i=0; i<20; i++) { 
+    double value = field->getDoubleValue(i);
+    cout << value << " ";
+    dataVector.push_back(value); // data[i]);
+  }
+  cout << endl;
+  // convert data to vector
+  return dataVector;
 }
 
 /*

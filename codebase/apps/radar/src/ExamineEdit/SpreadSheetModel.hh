@@ -16,7 +16,7 @@ public:
   void initData(string fileName);
 
   // return lists of data
-  vector<float> getData(string fieldName);
+  vector<double> getData(string fieldName);
   vector<float> getSampleData();
   vector<string> getFields();
 

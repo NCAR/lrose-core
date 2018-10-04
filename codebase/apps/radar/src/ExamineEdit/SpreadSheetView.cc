@@ -11,11 +11,12 @@
 
 using namespace std;
 
+
 SpreadSheetView::SpreadSheetView(QWidget *parent)
         : QMainWindow(parent)
 {
-  //  SpreadSheetController *_controller = new SpreadSheetController(this);
   cerr << "in SpreadSheetView constructor" << endl;
+  //  initSpreadSheet();
 }
 
 
@@ -25,9 +26,12 @@ SpreadSheetView::SpreadSheetView(std::string fileName, QWidget *parent)
   int rows;
   int cols;
 
+  _controller = new SpreadSheetController(this);
+  _controller->open(fileName);
+  vector<std::string> fieldNames = _controller->getFieldNames();
   //cols = displayInfo.getNumFields();
   // vector<std::string> fieldNames = vol.getUniqueFieldNameList();
-  cols = 3; // (int)  fieldNames.size();
+  cols = (int) fieldNames.size();
   rows = 20;
 
   //_volumeData = vol;
@@ -46,22 +50,28 @@ SpreadSheetView::SpreadSheetView(std::string fileName, QWidget *parent)
     
     
     int c = 0;
-    //vector<std::string>::iterator it; 
-    //for(it = fieldNames.begin(); it != fieldNames.end(); it++, c++) {
-      //QString the_name(QString::fromStdString(*it));
+    vector<std::string>::iterator it; 
+    for(it = fieldNames.begin(); it != fieldNames.end(); it++, c++) {
+      QString the_name(QString::fromStdString(*it));
       //cerr << *it << endl;
-      //table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
-    //}
+      table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
+    }
     
     table->setItemPrototype(table->item(rows - 1, cols - 1));
     table->setItemDelegate(new SpreadSheetDelegate());
 
     createActions();
+    cout << "Action created\n";
     updateColor(0);
+    cout << "update Color\n";
     setupMenuBar();
+    cout << "setupMenuBar\n";
     setupContents();
+    cout << "setupContents\n";
     setupContextMenu();
+    cout << "setupContextMenu\n";
     setCentralWidget(table);
+    cout << "setCentralWidgets\n";
 
     statusBar();
     connect(table, &QTableWidget::currentItemChanged,
@@ -103,25 +113,39 @@ void SpreadSheetView::createActions()
     cell_MinusFoldRayAction = new QAction(tr("&- Fold Ray"), this);
     //cell_MinusFoldRayAction->setShortcut(Qt::CTRL | Qt::Key_division);
     connect(cell_MinusFoldRayAction, &QAction::triggered, this, &SpreadSheetView::actionMinusFoldRay);
- 
-    cell_divAction = new QAction(tr("&+ Fold Ray >"), this);
-    cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
-    connect(cell_divAction, &QAction::triggered, this, &SpreadSheetView::actionDivide);
+    
 
-    cell_divAction = new QAction(tr("&- Fold Ray >"), this);
-    cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
-    connect(cell_divAction, &QAction::triggered, this, &SpreadSheetView::actionDivide);
+    cell_removeAircraftMotionAction = new QAction(tr("&- Aircraft Motion >"), this);
+    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
+    connect(cell_removeAircraftMotionAction, &QAction::triggered, this, &SpreadSheetView::actionRemoveAircraftMotion);
+    */   
+        
+    
+    display_cellValuesAction = new QAction(tr("&Cell Values"), this);
+    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
+    connect(display_cellValuesAction, &QAction::triggered, this, &SpreadSheetView::actionDisplayCellValues);
 
-    cell_divAction = new QAction(tr("&Zap Gnd Spd"), this);
-    cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
-    connect(cell_divAction, &QAction::triggered, this, &SpreadSheetView::actionDivide);
-    */
+    display_rayInfoAction = new QAction(tr("&Ray Info"), this);
+    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
+    connect(display_rayInfoAction, &QAction::triggered, this, &SpreadSheetView::actionDisplayRayInfo);
+
+    display_metadataAction = new QAction(tr("&Metadata"), this);
+    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
+    connect(display_metadataAction, &QAction::triggered, this, &SpreadSheetView::actionDisplayMetadata);
+
+    display_editHistAction = new QAction(tr("&Edit Hist"), this);
+    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
+    connect(display_editHistAction, &QAction::triggered, this, &SpreadSheetView::actionDisplayEditHist);
+    
+    
+      
     fontAction = new QAction(tr("Font ..."), this);
     fontAction->setShortcut(Qt::CTRL | Qt::Key_F);
     connect(fontAction, &QAction::triggered, this, &SpreadSheetView::selectFont);
-
+    
     colorAction = new QAction(QPixmap(16, 16), tr("Background &Color..."), this);
     connect(colorAction, &QAction::triggered, this, &SpreadSheetView::selectColor);
+    
 
     clearAction = new QAction(tr("Delete"), this);
     clearAction->setShortcut(Qt::Key_Delete);
@@ -153,7 +177,15 @@ void SpreadSheetView::setupMenuBar()
     fileMenu->addAction(printAction);
     fileMenu->addAction(exitAction);
 
-    QMenu *cellMenu = menuBar()->addMenu(tr("&Cell/Edit"));
+    
+    QMenu *displayMenu = menuBar()->addMenu(tr("&Display"));
+    displayMenu->addAction(display_cellValuesAction);
+    displayMenu->addAction(display_rayInfoAction);
+    displayMenu->addAction(display_metadataAction);
+    displayMenu->addAction(display_editHistAction);
+    
+
+    QMenu *cellMenu = menuBar()->addMenu(tr("&Edit"));
     cellMenu->addAction(cell_addAction);
     cellMenu->addAction(cell_subAction);
     cellMenu->addAction(cell_mulAction);
@@ -426,6 +458,38 @@ void SpreadSheetView::actionSum()
     }
 }
 
+void SpreadSheetView::actionDivide()
+{
+  //    actionMath_helper(tr("Division"), "/");
+    // TODO: get the selected cells
+  //  QItemSelectionModel *select = table->selectionModel();
+
+  //  select->hasSelection() //check if has selection
+  //  select->selectedRows() // return selected row(s)
+  //  select->selectedColumns() // return selected column(s)
+}
+
+void SpreadSheetView::notImplementedMessage() {
+      QMessageBox::information(this, "Not Implemented", "Not Implemented");
+}
+
+void SpreadSheetView::actionDisplayCellValues()
+{
+  notImplementedMessage();
+}
+void SpreadSheetView::actionDisplayRayInfo()
+{
+  notImplementedMessage();
+}
+void SpreadSheetView::actionDisplayMetadata()
+{
+  notImplementedMessage();
+}
+void SpreadSheetView::actionDisplayEditHist()
+{
+  notImplementedMessage();
+}
+
 void SpreadSheetView::actionMath_helper(const QString &title, const QString &op)
 {
     QString cell1 = "C1";
@@ -457,10 +521,6 @@ void SpreadSheetView::actionSubtract()
 void SpreadSheetView::actionMultiply()
 {
     actionMath_helper(tr("Multiplication"), "*");
-}
-void SpreadSheetView::actionDivide()
-{
-    actionMath_helper(tr("Division"), "/");
 }
 
 void SpreadSheetView::clear()
@@ -494,7 +554,8 @@ void SpreadSheetView::setupContents()
     int index;
     index = 0;
 
-    vector<string> fieldNames = {"one", "two"}; //  _controller->getFieldNames();
+    // vector<string> fieldNames = {"one", "two"}; //  
+    vector<string> fieldNames = _controller->getFieldNames();
 
     int c = 0;
     int r = 0;
@@ -503,18 +564,19 @@ void SpreadSheetView::setupContents()
       QString the_name(QString::fromStdString(*it));
       cerr << *it << endl;
       table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
+       
+      vector<double> data = _controller->getData(*it);
+
+      cerr << "number of data values = " << data.size() << endl;
+
+      for (r=0; r<20; r++) {
+        string format = "%g";
+        char formattedData[250];
+        //    sprintf(formattedData, format, data[0]);
+        sprintf(formattedData, "%g", data[r]); 
+        table->setItem(r, c, new SpreadSheetItem(formattedData));
+      }
     }
-
-
-    /*
-    string fieldName = radxField->getName();
-    Radx::fl32 *data = radxField->getDataFl32();
-    string format = "%g";
-    char formattedData[250];
-    //    sprintf(formattedData, format, data[0]);
-    sprintf(formattedData, "%d", 32); 
-   table->setItem(0, 0, new SpreadSheetItem(formattedData));
-    */
 
     /* TODO: each of these columns and data must come from RadxVol
     // column 0
@@ -658,9 +720,12 @@ QString SpreadSheetView::open()
 
   // signal the controller to read new data file
 
-  //_controller.openFile(fileName);
+  _controller->open(fileName.toStdString());
 
-  //  return fileName;
+  // load new data
+  newDataReady();
+
+  return fileName;
 
 }
 

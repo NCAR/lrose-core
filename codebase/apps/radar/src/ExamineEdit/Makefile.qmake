@@ -749,6 +749,21 @@ moc_SpreadSheetView.cpp: /usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Hea
 		SpreadSheetUtils.hh \
 		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/QString \
 		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/qstring.h \
+		SpreadSheetController.hh \
+		SpreadSheetModel.hh \
+		/Users/brenda/lrose/include/Radx/RadxFile.hh \
+		/Users/brenda/lrose/include/Radx/Radx.hh \
+		/Users/brenda/lrose/include/Radx/RadxTimeList.hh \
+		/Users/brenda/lrose/include/Radx/RadxTime.hh \
+		/Users/brenda/lrose/include/Radx/RadxField.hh \
+		/Users/brenda/lrose/include/Radx/RadxRangeGeom.hh \
+		/Users/brenda/lrose/include/Radx/RadxPacking.hh \
+		/Users/brenda/lrose/include/Radx/RadxBuf.hh \
+		/Users/brenda/lrose/include/Radx/RadxMsg.hh \
+		/Users/brenda/lrose/include/Radx/RadxRemap.hh \
+		/Users/brenda/lrose/include/Radx/RadxVol.hh \
+		/Users/brenda/lrose/include/Radx/RadxPlatform.hh \
+		/Users/brenda/lrose/include/Radx/RadxArray.hh \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QWidget \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwidget.h \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QAction \
@@ -791,19 +806,6 @@ main.o: main.cc SpreadSheetView.hh \
 		SpreadSheetUtils.hh \
 		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/QString \
 		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/qstring.h \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QWidget \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwidget.h \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QAction \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qaction.h \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QLabel \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlabel.h \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QLineEdit \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlineedit.h \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QToolBar \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtoolbar.h \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QTableWidgetItem \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtablewidget.h \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QTableWidget \
 		SpreadSheetController.hh \
 		SpreadSheetModel.hh \
 		/Users/brenda/lrose/include/Radx/RadxFile.hh \
@@ -819,6 +821,19 @@ main.o: main.cc SpreadSheetView.hh \
 		/Users/brenda/lrose/include/Radx/RadxVol.hh \
 		/Users/brenda/lrose/include/Radx/RadxPlatform.hh \
 		/Users/brenda/lrose/include/Radx/RadxArray.hh \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QWidget \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QAction \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qaction.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QLabel \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlabel.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QLineEdit \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlineedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QToolBar \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtoolbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QTableWidgetItem \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtablewidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QTableWidget \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QApplication \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qapplication.h \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QLayout \
@@ -1097,6 +1112,21 @@ SpreadSheetView.o: SpreadSheetView.cc /usr/local/Cellar/qt/5.10.1/lib/QtWidgets.
 		SpreadSheetUtils.hh \
 		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/QString \
 		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/qstring.h \
+		SpreadSheetController.hh \
+		SpreadSheetModel.hh \
+		/Users/brenda/lrose/include/Radx/RadxFile.hh \
+		/Users/brenda/lrose/include/Radx/Radx.hh \
+		/Users/brenda/lrose/include/Radx/RadxTimeList.hh \
+		/Users/brenda/lrose/include/Radx/RadxTime.hh \
+		/Users/brenda/lrose/include/Radx/RadxField.hh \
+		/Users/brenda/lrose/include/Radx/RadxRangeGeom.hh \
+		/Users/brenda/lrose/include/Radx/RadxPacking.hh \
+		/Users/brenda/lrose/include/Radx/RadxBuf.hh \
+		/Users/brenda/lrose/include/Radx/RadxMsg.hh \
+		/Users/brenda/lrose/include/Radx/RadxRemap.hh \
+		/Users/brenda/lrose/include/Radx/RadxVol.hh \
+		/Users/brenda/lrose/include/Radx/RadxPlatform.hh \
+		/Users/brenda/lrose/include/Radx/RadxArray.hh \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QWidget \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QAction \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QLabel \
@@ -1269,21 +1299,13 @@ SpreadSheetController.o: SpreadSheetController.cc /usr/local/Cellar/qt/5.10.1/li
 		/Users/brenda/lrose/include/Radx/RadxVol.hh \
 		/Users/brenda/lrose/include/Radx/RadxPlatform.hh \
 		/Users/brenda/lrose/include/Radx/RadxArray.hh \
-		SpreadSheetView.hh \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QMainWindow \
+		spreadsheetdelegate.hh \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QItemDelegate \
+		spreadsheetitem.hh \
 		SpreadSheetUtils.hh \
 		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/QString \
 		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/qstring.h \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QWidget \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QAction \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QLabel \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QLineEdit \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QToolBar \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QTableWidgetItem \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QTableWidget \
-		spreadsheetdelegate.hh \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QItemDelegate \
-		spreadsheetitem.hh
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QTableWidgetItem
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o SpreadSheetController.o SpreadSheetController.cc
 
 spreadsheetitem.o: spreadsheetitem.cc spreadsheetitem.hh \

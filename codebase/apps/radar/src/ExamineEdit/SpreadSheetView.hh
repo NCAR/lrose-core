@@ -5,7 +5,7 @@
 
 #include <QMainWindow>
 #include "SpreadSheetUtils.hh"
-//#include "SpreadSheetController.hh"
+#include "SpreadSheetController.hh"
 
 #include <QWidget>
 #include <QAction>
@@ -46,6 +46,12 @@ public slots:
     void actionMultiply();
     void actionDivide();
 
+  void actionDisplayCellValues();
+  void actionDisplayRayInfo();
+  void actionDisplayMetadata();
+  void actionDisplayEditHist();
+
+  void notImplementedMessage();
 protected:
     void setupContextMenu();
     void setupContents();
@@ -62,8 +68,7 @@ protected:
                         QString *cell1, QString *cell2, QString *outCell);
 private:
 
-
-  //  SpreadSheetController _controller;
+    SpreadSheetController *_controller;
 
 
     QToolBar *toolBar;
@@ -80,6 +85,11 @@ private:
     QAction *aboutSpreadSheet;
     QAction *exitAction;
     QAction *openAction;
+
+  QAction *display_cellValuesAction;
+  QAction *display_rayInfoAction;
+  QAction *display_metadataAction;
+  QAction *display_editHistAction;
 
     QAction *printAction;
 

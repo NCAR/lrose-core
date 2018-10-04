@@ -4,9 +4,11 @@
 #define SPREADSHEETCONTROLLER_HH
 
 #include "SpreadSheetModel.hh"
-#include "SpreadSheetView.hh"
+// #include "SpreadSheetView.hh"
 
 #include <vector>
+
+class SpreadSheetView;
 
 using namespace std;
 
@@ -18,7 +20,7 @@ public:
   SpreadSheetController(SpreadSheetView *view);
 
   vector<string> getFieldNames();
-  vector<float> getData(string fieldName);
+  vector<double> getData(string fieldName);
 
   void open(string fileName);
 

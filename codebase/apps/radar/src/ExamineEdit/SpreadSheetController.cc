@@ -49,9 +49,16 @@ vector<string>  SpreadSheetController::getFieldNames()
   return names;
 }
 
-vector<float>  SpreadSheetController::getData(string fieldName)
+vector<double>  SpreadSheetController::getData(string fieldName)
 {
-  vector<float> data = _currentModel->getData(fieldName);
+
+  cerr << "getting values for " << fieldName << endl;
+
+  //  vector<float> SpreadSheetModel::getData(string fieldName)
+  vector<double> data = _currentModel->getData(fieldName);
+
+  cerr << " found " << data.size() << " data values " << endl;
+
   return data;
 }
 
@@ -62,7 +69,7 @@ void SpreadSheetController::open(string fileName)
 
   // signal the view to pull the data
   // for each fieldName ...
-  _currentView->newDataReady();
+  // _currentView->newDataReady();
   //  while (_currentModel->moreData()) {  
   //  vector <float> data = _currentModel->getData(fieldName);
   // update display
