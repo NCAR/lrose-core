@@ -1254,7 +1254,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
       const Radx::fl32 *fdata = rfld->getDataFl32();
       const Radx::fl32 missingVal = rfld->getMissingFl32();
       // we can only look at the data available, so only go to nGates
-      for (int igate = 0; igate < nGates; igate++, fdata++) {  // was _nGates
+      for (int igate = 0; igate < _nGates; igate++, fdata++) {  // was _nGates
         Radx::fl32 val = *fdata;
         if (fabs(val - missingVal) < 0.0001) {
           data[igate] = -9999.0;
@@ -1286,10 +1286,10 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
         } // end else not missing value
       } // end for each gate
       // fill the remainder with missing 
-      for (int igate = nGates; igate < _nGates; igate++) {
-        data.push_back(-9999);
+      //for (int igate = nGates; igate < _nGates; igate++) {
+      //  data.push_back(-9999);
 	//>>>>>>> forVivek
-      }
+      //}
 
       if (!haveColorMap) {                              
         _fields[ifield]->setColorMapRange(min, max);
