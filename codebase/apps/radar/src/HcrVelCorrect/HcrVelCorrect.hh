@@ -122,8 +122,7 @@ private:
     double rangeToSurf;
     double velNoiseFilt;
     double velWaveFilt;
-    bool corrected;
-    bool processed;
+    bool corrFieldAdded;
     FiltNode() {
       ray = NULL;
       velSurf = NAN;
@@ -131,8 +130,7 @@ private:
       rangeToSurf = NAN;
       velNoiseFilt = NAN;
       velWaveFilt = NAN;
-      corrected = false;
-      processed = false;
+      corrFieldAdded = false;
     }
     RadxTime getTime() { return ray->getRadxTime(); }
   };
@@ -191,7 +189,7 @@ private:
   void _addDeltaField(RadxRay *ray, double deltaVel);
   int _addCorrectedSpectrumWidth(RadxRay *ray);
 
-  void _writeWaveFiltResultsToSpdb(const RadxRay *filtRay);
+  void _writeWaveFiltResultsToSpdb(FiltNode &node);
   void _writeFirFiltResultsToSpdb(const RadxRay *filtRay);
   
 
