@@ -987,13 +987,19 @@ void HcrVelCorrect::_correctVelForRay(RadxRay *ray, double surfFilt)
     }
     return;
   }
+  velField->setLongName("doppler_velocity_corrected_for_vertical_motion");
+  velField->setComment("This field is computed by correcting the raw measured "
+                       "velocity for the vertical motion of the aircraft.");
 
   // create the corrected field
   
-  RadxField *correctedField = new RadxField(_params.corrected_vel_field_name,
-                                            velField->getUnits());
-  correctedField->copyMetaData(*velField);
-  correctedField->setName(_params.corrected_vel_field_name);
+  RadxField *corrField = new RadxField(_params.corrected_vel_field_name,
+                                       velField->getUnits());
+  corrField->copyMetaData(*velField);
+  corrField->setName(_params.corrected_vel_field_name);
+  corrField->setLongName("doppler_velocity_corrected_using_surface_measurement");
+  corrField->setComment("This field is computed by correcting the velocity "
+                        "using the measured velocity of the surface echo.");
 
   // correct the values
   
@@ -1011,11 +1017,11 @@ void HcrVelCorrect::_correctVelForRay(RadxRay *ray, double surfFilt)
 
   // set data for field
   
-  correctedField->setDataFl32(velField->getNPoints(), corrected, true);
+  corrField->setDataFl32(velField->getNPoints(), corrected, true);
   
   // add field to ray
 
-  ray->addField(correctedField);
+  ray->addField(corrField);
 
   // optionally add in the delta velocity field
   
@@ -1041,6 +1047,9 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
     }
     return;
   }
+  velField->setLongName("doppler_velocity_corrected_for_vertical_motion");
+  velField->setComment("This field is computed by correcting the raw measured "
+                       "velocity for the vertical motion of the aircraft.");
 
   // create the field to be copied
   
@@ -1048,6 +1057,9 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
                                        velField->getUnits());
   copyField->copyMetaData(*velField);
   copyField->setName(_params.corrected_vel_field_name);
+  copyField->setLongName("doppler_velocity_corrected_using_surface_measurement");
+  copyField->setComment("This field is computed by correcting the velocity "
+                        "using the measured velocity of the surface echo.");
   
   // copy the values
   
@@ -1095,6 +1107,12 @@ void HcrVelCorrect::_addDeltaField(RadxRay *ray, double deltaVel)
                                         velField->getUnits());
   deltaField->copyMetaData(*velField);
   deltaField->setName(_params.delta_vel_field_name);
+  deltaField->setLongName("velocity_delta_from_surface_measurement");
+  char comment[2048];
+  snprintf(comment, 2048,
+           "This is the correction applied to the %s field to produce the %s field",
+           _params.vel_field_name, _params.corrected_vel_field_name);
+  deltaField->setComment(comment);
   
   const Radx::fl32 *vel = velField->getDataFl32();
   Radx::fl32 miss = velField->getMissingFl32();
@@ -1168,8 +1186,11 @@ int HcrVelCorrect::_addCorrectedSpectrumWidth(RadxRay *ray)
   }
 
   // set the name
-
+  
   corrWidth->setName(_params.corrected_width_field_name);
+  corrWidth->setLongName("doppler_spectrum_width_corrected_for_aircraft_motion");
+  corrWidth->setComment("This field is computed by correcting the raw measured "
+                        "spectrum width for the horizontal motion of the aircraft.");
 
   // add to the ray
 
