@@ -31,6 +31,8 @@
 ///////////////////////////////////////////////////////////////
 
 #include "DisplayField.hh"
+#include "SoloDefaultColorWrapper.hh"
+#include "ColorMap.hh"
 
 // constructor
 
@@ -50,9 +52,8 @@ DisplayField::DisplayField(const string &label,
         _isFilt(isFilt),
         _selectValue(0),
         _dialog(NULL)
-
 {
-
+  _haveColorMap = true;
 }
 
 // destructor
@@ -112,5 +113,22 @@ void DisplayField::print(ostream &out)
   out << "  selectValue: " << _selectValue << endl;
   out << "===============================" << endl;
 
+}
+
+void DisplayField::setColorMapRange(double min, double max)
+
+{
+
+  double  niceMin, niceMax;
+  SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
+  int nSteps;
+
+  std::vector<ColorMap::CmapEntry> entries = _colorMap.getEntries();
+  nSteps = entries.size();
+  sd.FindNiceMinMax(min, max, nSteps, &niceMin, &niceMax);
+  _colorMap.setRange(niceMin, niceMax);
+
+  cerr << "INFO - changing color map range: min, max, nSteps = " << min << "," << max << "," << nSteps << 
+    " => nice min, max = " << niceMin << "," << niceMax << endl;
 }
 

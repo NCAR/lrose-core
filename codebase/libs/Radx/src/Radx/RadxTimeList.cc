@@ -521,6 +521,48 @@ void RadxTimeList::_searchForValid(const string &topDir,
 
   // compute file end times from start time of next file
 
+  cerr << "before compute file end times\n";
+  vector<RadxTime> fileEndTimes;
+  RadxTime fStartTime;
+  RadxTime fEndTime;
+  RadxTime prevStart;
+  RadxTime prevEnd;
+  double timeSpan = 1.0;
+  bool firstIter = true;
+  for (TimePathSet::iterator ii = all.begin(); ii != all.end(); ++ii) {
+    fStartTime = ii->fileStartTime;
+    fEndTime =   ii->fileEndTime;
+    if (!firstIter) {
+      if (prevStart != prevEnd) {
+	fileEndTimes.push_back(prevEnd);
+      } else {
+	fileEndTimes.push_back(fStartTime);
+      }
+      timeSpan = fStartTime - prevStart;
+    }
+    
+    prevStart = fStartTime;
+    prevEnd = fEndTime;
+
+    cerr << "working on " << fStartTime << endl;
+
+    if (firstIter) {
+      firstIter = false;
+    }
+  }
+  
+  if (!all.empty()) {
+    // catch last time
+    if (prevStart != prevEnd) {
+      fileEndTimes.push_back(prevEnd);
+    } else {
+      fileEndTimes.push_back(prevStart + timeSpan);
+    }
+  }
+
+  cerr << "after compute file end times\n";
+  cerr << " there are " << fileEndTimes.size() << " end times in list\n";
+  /* original code 
   vector<RadxTime> fileEndTimes;
   RadxTime nextStartTime;
   double prevTimeSpan = 1.0;
@@ -540,7 +582,8 @@ void RadxTimeList::_searchForValid(const string &topDir,
       prevTimeSpan = nextStartTime - ii->fileStartTime;
     }
   }
-  
+  */
+
   // check file times overlap desired range
 
   TimePathSet::iterator mm = all.begin();
