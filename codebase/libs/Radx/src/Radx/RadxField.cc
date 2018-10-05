@@ -1312,15 +1312,9 @@ void RadxField::convert(Radx::DataType_t dtype,
   if (name.length() > 0) {
     _name = name;
   }
-  // if (units.length() > 0) {
-    _units = units;
-  // }
-  // if (standardName.length() > 0) {
-    _standardName = standardName;
-  // }
-  // if (longName.length() > 0) {
-    _longName = longName;
-  // }
+  _units = units;
+  _standardName = standardName;
+  _longName = longName;
 }
 
 //////////////////////////////////////////////////////
@@ -2704,6 +2698,9 @@ void RadxField::print(ostream &out) const
   }
   if (_standardName.size() > 0) {
     out << "  standardName: " << _standardName << endl;
+  }
+  if (_comment.size() > 0) {
+    out << "  comment: " << _comment << endl;
   }
   out << "  units: " << _units << endl;
   out << "  nRays: " << getNRays() << endl;

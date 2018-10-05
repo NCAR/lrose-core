@@ -148,7 +148,7 @@ HcrVelCorrect::~HcrVelCorrect()
       // not yet written out, do so now
       _addNodeRayToFiltVol(oldest);
       if (_params.write_surface_vel_results_to_spdb) {
-        _writeFirFiltResultsToSpdb(oldest.ray);
+        _writeWaveFiltResultsToSpdb(oldest);
       }
       RadxRay::deleteIfUnused(oldest.ray);
       _filtQueue.pop_front();
@@ -466,14 +466,11 @@ int HcrVelCorrect::_processRayWaveFilt(RadxRay *ray)
     _filtRay = node->ray;
     if (filtIsValid) {
       _correctVelForRay(_filtRay, node->velWaveFilt);
-      // node->velIsValid = true;
-      node->corrected = true;
     } else {
       _copyVelForRay(_filtRay);
-      // node->velIsValid = false;
-      node->corrected = false;
     }
-    node->processed = true;
+    // indicate that the corrected field has been added
+    node->corrFieldAdded = true;
   }
 
   return 0;
@@ -614,10 +611,6 @@ int HcrVelCorrect::_setFilterLimits()
   }
   _noiseIndexMid = (_noiseIndexStart + _noiseIndexEnd) / 2;
   
-  if (_noiseIndexStart < 1) {
-    return -1;
-  }
-  
   // compute wave filter index limits
   
   RadxTime waveTimeStart = _filtQueue[0].getTime();
@@ -641,11 +634,12 @@ int HcrVelCorrect::_setFilterLimits()
   }
 
   // load up queue of the pending nodes
-  // i.e. those which have not yet been processed
+  // i.e. those for which the corrected field
+  // has not yet been added
 
   _nodesPending.clear();
   for (ssize_t ii = _waveIndexMid; ii >= 0; ii--) {
-    if (!_filtQueue[ii].processed) {
+    if (!_filtQueue[ii].corrFieldAdded) {
       _nodesPending.push_front(&_filtQueue[ii]);
     }
   } // ii
@@ -731,9 +725,9 @@ int HcrVelCorrect::_runWaveFilter()
       _filtQueue[ii].velWaveFilt = _poly.getYEst(dtimeFull[ii]);
     }
     // set the polynomial values on all older nodes that 
-    // have not yet been processed
+    // have not yet had the correction field added
     for (size_t ii = 0; ii < _waveIndexMid; ii++) {
-      if (!_filtQueue[ii].processed) {
+      if (!_filtQueue[ii].corrFieldAdded) {
         _filtQueue[ii].velWaveFilt = _poly.getYEst(dtimeFull[ii]);
       }
     }
@@ -772,7 +766,7 @@ void HcrVelCorrect::_addNodeRayToFiltVol(FiltNode &node)
   // write vel filtering results to spdb
 
   if (_params.write_surface_vel_results_to_spdb) {
-    _writeWaveFiltResultsToSpdb(_filtRay);
+    _writeWaveFiltResultsToSpdb(node);
   }
 
 }
@@ -993,13 +987,19 @@ void HcrVelCorrect::_correctVelForRay(RadxRay *ray, double surfFilt)
     }
     return;
   }
+  velField->setLongName("doppler_velocity_corrected_for_vertical_motion");
+  velField->setComment("This field is computed by correcting the raw measured "
+                       "velocity for the vertical motion of the aircraft.");
 
   // create the corrected field
   
-  RadxField *correctedField = new RadxField(_params.corrected_vel_field_name,
-                                            velField->getUnits());
-  correctedField->copyMetaData(*velField);
-  correctedField->setName(_params.corrected_vel_field_name);
+  RadxField *corrField = new RadxField(_params.corrected_vel_field_name,
+                                       velField->getUnits());
+  corrField->copyMetaData(*velField);
+  corrField->setName(_params.corrected_vel_field_name);
+  corrField->setLongName("doppler_velocity_corrected_using_surface_measurement");
+  corrField->setComment("This field is computed by correcting the velocity "
+                        "using the measured velocity of the surface echo.");
 
   // correct the values
   
@@ -1017,11 +1017,11 @@ void HcrVelCorrect::_correctVelForRay(RadxRay *ray, double surfFilt)
 
   // set data for field
   
-  correctedField->setDataFl32(velField->getNPoints(), corrected, true);
+  corrField->setDataFl32(velField->getNPoints(), corrected, true);
   
   // add field to ray
 
-  ray->addField(correctedField);
+  ray->addField(corrField);
 
   // optionally add in the delta velocity field
   
@@ -1047,6 +1047,9 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
     }
     return;
   }
+  velField->setLongName("doppler_velocity_corrected_for_vertical_motion");
+  velField->setComment("This field is computed by correcting the raw measured "
+                       "velocity for the vertical motion of the aircraft.");
 
   // create the field to be copied
   
@@ -1054,11 +1057,15 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
                                        velField->getUnits());
   copyField->copyMetaData(*velField);
   copyField->setName(_params.corrected_vel_field_name);
+  copyField->setLongName("doppler_velocity_corrected_using_surface_measurement");
+  copyField->setComment("This field is computed by correcting the velocity "
+                        "using the measured velocity of the surface echo.");
   
   // copy the values
   
   const Radx::fl32 *vel = velField->getDataFl32();
-  Radx::fl32 *copy = new Radx::fl32[velField->getNPoints()];
+  RadxArray<Radx::fl32> copy_;
+  Radx::fl32 *copy = copy_.alloc(velField->getNPoints());
   for (size_t ii = 0; ii < velField->getNPoints(); ii++) {
     copy[ii] = vel[ii];
   }
@@ -1066,7 +1073,6 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
   // set data for field
 
   copyField->setDataFl32(velField->getNPoints(), copy, true);
-  delete[] copy;
 
   // add field to ray
 
@@ -1101,6 +1107,12 @@ void HcrVelCorrect::_addDeltaField(RadxRay *ray, double deltaVel)
                                         velField->getUnits());
   deltaField->copyMetaData(*velField);
   deltaField->setName(_params.delta_vel_field_name);
+  deltaField->setLongName("velocity_delta_from_surface_measurement");
+  char comment[2048];
+  snprintf(comment, 2048,
+           "This is the correction applied to the %s field to produce the %s field",
+           _params.vel_field_name, _params.corrected_vel_field_name);
+  deltaField->setComment(comment);
   
   const Radx::fl32 *vel = velField->getDataFl32();
   Radx::fl32 miss = velField->getMissingFl32();
@@ -1174,8 +1186,11 @@ int HcrVelCorrect::_addCorrectedSpectrumWidth(RadxRay *ray)
   }
 
   // set the name
-
+  
   corrWidth->setName(_params.corrected_width_field_name);
+  corrWidth->setLongName("doppler_spectrum_width_corrected_for_aircraft_motion");
+  corrWidth->setComment("This field is computed by correcting the raw measured "
+                        "spectrum width for the horizontal motion of the aircraft.");
 
   // add to the ray
 
@@ -1189,37 +1204,41 @@ int HcrVelCorrect::_addCorrectedSpectrumWidth(RadxRay *ray)
 //////////////////////////////////////////////////
 // write wave filter results to SPDB in XML
 
-void HcrVelCorrect::_writeWaveFiltResultsToSpdb(const RadxRay *filtRay)
+void HcrVelCorrect::_writeWaveFiltResultsToSpdb(FiltNode &node)
   
 {
 
   // check if we have a good velocity
   
-  if (_waveNodeMid == NULL || std::isnan(_waveNodeMid->velSurf)) {
+  if (std::isnan(node.velSurf)) {
     return;
   }
   
+  // get the node for this ray
+
+  const RadxRay *ray = node.ray;
+
   // form XML string
 
   string xml;
   xml += RadxXml::writeStartTag("HcrVelCorr", 0);
 
   xml += RadxXml::writeDouble("VelSurf", 1,
-                              _waveNodeMid->velSurf);
+                              node.velSurf);
   xml += RadxXml::writeDouble("DbzSurf", 1,
-                              _waveNodeMid->dbzSurf);
+                              node.dbzSurf);
   xml += RadxXml::writeDouble("RangeToSurf",
-                              1, _waveNodeMid->rangeToSurf);
+                              1, node.rangeToSurf);
   
   xml += RadxXml::writeDouble("VelNoiseFilt", 1,
-                              _waveNodeMid->velNoiseFilt);
+                              node.velNoiseFilt);
   xml += RadxXml::writeDouble("VelWaveFilt", 1,
-                              _waveNodeMid->velWaveFilt);
+                              node.velWaveFilt);
   
-  double velCorr = _waveNodeMid->velSurf - _waveNodeMid->velWaveFilt;
+  double velCorr = node.velSurf - node.velWaveFilt;
   xml += RadxXml::writeDouble("VelCorr", 1, velCorr);
   
-  const RadxGeoref *georef = filtRay->getGeoreference();
+  const RadxGeoref *georef = ray->getGeoreference();
   if (georef != NULL) {
     xml += RadxXml::writeDouble("Altitude", 1, georef->getAltitudeKmMsl());
     xml += RadxXml::writeDouble("VertVel", 1, georef->getVertVelocity());
@@ -1227,7 +1246,7 @@ void HcrVelCorrect::_writeWaveFiltResultsToSpdb(const RadxRay *filtRay)
     xml += RadxXml::writeDouble("Pitch", 1, georef->getPitch());
     xml += RadxXml::writeDouble("Rotation", 1, georef->getRotation());
     xml += RadxXml::writeDouble("Tilt", 1, georef->getTilt());
-    xml += RadxXml::writeDouble("Elevation", 1, filtRay->getElevationDeg());
+    xml += RadxXml::writeDouble("Elevation", 1, ray->getElevationDeg());
     xml += RadxXml::writeDouble("DriveAngle1", 1, georef->getDriveAngle1());
     xml += RadxXml::writeDouble("DriveAngle2", 1, georef->getDriveAngle2());
   }
@@ -1237,7 +1256,7 @@ void HcrVelCorrect::_writeWaveFiltResultsToSpdb(const RadxRay *filtRay)
   // write to SPDB
 
   DsSpdb spdb;
-  time_t validTime = filtRay->getTimeSecs();
+  time_t validTime = ray->getTimeSecs();
   spdb.addPutChunk(0, validTime, validTime, xml.size() + 1, xml.c_str());
   if (spdb.put(_params.surface_vel_results_spdb_output_url,
                SPDB_XML_ID, SPDB_XML_LABEL)) {

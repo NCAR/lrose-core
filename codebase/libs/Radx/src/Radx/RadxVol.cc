@@ -1065,6 +1065,7 @@ void RadxVol::setRayFieldPointers()
       const string &name = field->getName();
       const string &standardName = field->getStandardName();
       const string &longName = field->getLongName();
+      const string &comment = field->getComment();
       const string &units = field->getUnits();
       const string &thresholdFieldName = field->getThresholdFieldName();
       double thresholdValue = field->getThresholdValue();
@@ -1079,6 +1080,7 @@ void RadxVol::setRayFieldPointers()
                                           dptr + index, false);
           rfld->setStandardName(standardName);
           rfld->setLongName(longName);
+          rfld->setComment(comment);
           rfld->setThresholdFieldName(thresholdFieldName);
           rfld->setThresholdValue(thresholdValue);
           break;
@@ -1090,6 +1092,7 @@ void RadxVol::setRayFieldPointers()
                                           dptr + index, false);
           rfld->setStandardName(standardName);
           rfld->setLongName(longName);
+          rfld->setComment(comment);
           rfld->setThresholdFieldName(thresholdFieldName);
           rfld->setThresholdValue(thresholdValue);
           break;
@@ -1104,6 +1107,7 @@ void RadxVol::setRayFieldPointers()
                                           false);
           rfld->setStandardName(standardName);
           rfld->setLongName(longName);
+          rfld->setComment(comment);
           rfld->setThresholdFieldName(thresholdFieldName);
           rfld->setThresholdValue(thresholdValue);
           break;
@@ -1118,6 +1122,7 @@ void RadxVol::setRayFieldPointers()
                                           false);
           rfld->setStandardName(standardName);
           rfld->setLongName(longName);
+          rfld->setComment(comment);
           rfld->setThresholdFieldName(thresholdFieldName);
           rfld->setThresholdValue(thresholdValue);
           break;
@@ -1132,6 +1137,7 @@ void RadxVol::setRayFieldPointers()
                                           false);
           rfld->setStandardName(standardName);
           rfld->setLongName(longName);
+          rfld->setComment(comment);
           rfld->setThresholdFieldName(thresholdFieldName);
           rfld->setThresholdValue(thresholdValue);
           break;
