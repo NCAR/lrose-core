@@ -388,7 +388,7 @@ int Nc3File::id( void ) const
 Nc3File::Nc3File( const char* path, FileMode fmode, 
                   size_t* bufrsizeptr, size_t initialsize, FileFormat fformat  )
 {
-  Nc3Error err(Nc3Error::verbose_nonfatal); // constructor must not fail
+  Nc3Error err(Nc3Error::silent_nonfatal); // constructor must not fail
 
   int mode = NC_NOWRITE;
   the_fill_mode = Fill;
