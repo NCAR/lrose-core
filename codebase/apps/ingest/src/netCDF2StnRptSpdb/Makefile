@@ -36,14 +36,14 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = netCDF2StnRptSpdb
 
-LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
+LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lnetcdf_c++ -lnetcdf -lSpdb -ldsserver \
+LOC_LIBS = -lSpdb -ldsserver \
 	-ldidss -lrapformats -leuclid -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 
-LOC_LDFLAGS = $(NETCDF_LDFLAGS) $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_CFLAGS =
 

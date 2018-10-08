@@ -21,19 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-/* RCS info
- *   $Author: dixon $
- *   $Locker:  $
- *   $Date: 2016/03/07 01:23:10 $
- *   $Id: InputVariable.hh,v 1.3 2016/03/07 01:23:10 dixon Exp $
- *   $Revision: 1.3 $
- *   $State: Exp $
- */
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-
 /************************************************************************
  * InputVariable.hh: class implementing InputVariables used with netCDF files
  *
@@ -50,9 +37,7 @@
 
 #include <string>
 
-//#include <netcdf/netcdf.hh>
-
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include "Converter.hh"
 
 using namespace std;
@@ -111,7 +96,7 @@ class InputVariable
 
 public:
 
-  bool init(const NcFile &fileObject);
+  bool init(const Nc3File &fileObject);
   double getValue(const int recordNumber);
 
 protected:
@@ -122,7 +107,7 @@ protected:
   double _totalNumValues;
   string _variableName;
   string _missingValueAttName;
-  NcVar *_ncVarPtr;
+  Nc3Var *_ncVarPtr;
   Converter *_converter;
 
 private:

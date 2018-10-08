@@ -21,17 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/07 01:23:10 $
-//   $Id: InputVariable.cc,v 1.2 2016/03/07 01:23:10 dixon Exp $
-//   $Revision: 1.2 $
-//   $State: Exp $
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * InputVariable.cc: class implementing InputVariables used with netCDF files
  *
@@ -82,7 +71,7 @@ InputVariable::~InputVariable(void)
  * init() - initialize the InputVariable object
  */
 
-bool InputVariable::init(const NcFile &fileObject)
+bool InputVariable::init(const Nc3File &fileObject)
 {
   if(_debug)
     cerr << "InputVariable::init(): Initializing variable: " 
@@ -106,7 +95,7 @@ bool InputVariable::init(const NcFile &fileObject)
       _checkForMissing = true;
     }
 
-  //initialize the value of _totalNumValues, using the NcVar pointer's num_vals() method
+  //initialize the value of _totalNumValues, using the Nc3Var pointer's num_vals() method
   _totalNumValues = _ncVarPtr->num_vals();
 
   _isInitialized = true;
