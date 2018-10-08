@@ -24,16 +24,13 @@
 //////////////////////////////////////////////////////////
 // InputFile - base class which handles processing of
 //             various types of input files
-//
-// $Id: InputFile.hh,v 1.5 2016/03/07 01:23:11 dixon Exp $
-//
 ///////////////////////////////////////////////////////
 #ifndef _INPUT_FILE_INC_
 #define _INPUT_FILE_INC_
 
 #include <string>
-#include <netcdf.hh>
-
+#include <Ncxx/Nc3File.hh>
+using namespace std;
 //
 // Forward class declarations
 //
@@ -100,7 +97,7 @@ protected:
    //   This class owns the memory associated with this
    //   object
    //
-   NcFile *ncInput;
+   Nc3File *ncInput;
 
    //
    // Information about this file

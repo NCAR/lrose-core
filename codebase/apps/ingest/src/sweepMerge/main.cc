@@ -22,8 +22,6 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //
-// $Id: main.cc,v 1.3 2016/03/07 01:23:11 dixon Exp $
-//
 // Main entry point for sweepMerge application
 //
 

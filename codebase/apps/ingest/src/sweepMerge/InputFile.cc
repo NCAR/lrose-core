@@ -24,9 +24,6 @@
 //////////////////////////////////////////////////////////
 // InputFile - base class which handles processing of
 //             various types of input files
-//
-// $Id: InputFile.cc,v 1.5 2016/03/07 01:23:11 dixon Exp $
-//
 /////////////////////////////////////////////////////////
 #include "InputFile.hh"
 #include "SweepMerge.hh"
@@ -84,7 +81,7 @@ int InputFile::processFile( string* azimuthName, string* elevationName,
    //
    // Get the azimuth data
    //
-   NcVar *azimuthPtr = ncInput->get_var( azimuthName->c_str() );
+   Nc3Var *azimuthPtr = ncInput->get_var( azimuthName->c_str() );
    if( !azimuthPtr ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s",
                azimuthName->c_str(), currentPath->c_str() );
@@ -115,7 +112,7 @@ int InputFile::processFile( string* azimuthName, string* elevationName,
    //
    // Get the elevation data
    //
-   NcVar *elevationPtr = ncInput->get_var( elevationName->c_str() );
+   Nc3Var *elevationPtr = ncInput->get_var( elevationName->c_str() );
    if( !elevationPtr ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s",
                elevationName->c_str(), currentPath->c_str() );
@@ -146,7 +143,7 @@ int InputFile::processFile( string* azimuthName, string* elevationName,
    //
    // Get time data
    //
-   NcVar *timePtr = ncInput->get_var( timeName->c_str() );
+   Nc3Var *timePtr = ncInput->get_var( timeName->c_str() );
    if( !timePtr ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s",
                timeName->c_str(), currentPath->c_str() );
@@ -177,7 +174,7 @@ int InputFile::processFile( string* azimuthName, string* elevationName,
    //
    // Get dbz data
    //
-   NcVar *dbzPtr = ncInput->get_var( dbzName->c_str() );
+   Nc3Var *dbzPtr = ncInput->get_var( dbzName->c_str() );
    if( !dbzPtr || !dbzPtr->is_valid() ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s",
                dbzName->c_str(), currentPath->c_str() );
@@ -206,7 +203,7 @@ int InputFile::processFile( string* azimuthName, string* elevationName,
 
    delete [] dimArray;
 
-   NcAtt *dbzAtt = dbzPtr->get_att( MISSING_VAL_NAME.c_str() );
+   Nc3Att *dbzAtt = dbzPtr->get_att( MISSING_VAL_NAME.c_str() );
    if( !dbzAtt ) {
       POSTMSG( ERROR, "Could not get attribute %s from variable %s from "
                "file %s", MISSING_VAL_NAME.c_str(), dbzName->c_str(),

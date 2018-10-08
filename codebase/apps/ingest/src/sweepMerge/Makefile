@@ -36,13 +36,13 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGET_FILE = sweepMerge
 
 
-LOC_INCLUDES =
+LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_CPPC_CFLAGS =
-LOC_LDFLAGS =
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_LIBS = \
-	-lnetcdf_c++ -lnetcdf -ltoolsa -ldataport \
-	-ltdrp -lrapmath -lbz2 -lz \
+	-ltoolsa -ldataport \
+	-ltdrp -lrapmath $(NETCDF4_LIBS) -lbz2 -lz \
 	-lpthread -lm
 
 HDRS = \

@@ -24,9 +24,6 @@
 //////////////////////////////////////////////////////////
 // DbzFile - handles processing of a long range scan
 //           sweep file
-//
-// $Id: DbzFile.hh,v 1.6 2016/03/07 01:23:11 dixon Exp $
-//
 /////////////////////////////////////////////////////////
 #ifndef _DBZ_FILE_INC_
 #define _DBZ_FILE_INC_
