@@ -23,11 +23,11 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: AccessA2Mdv.cc,v 1.18 2017/07/02 20:51:23 cunning Exp $
+ *  $Id: AccessA2Mdv.cc,v 1.19 2017/11/08 03:02:20 cunning Exp $
  */
 
 # ifndef    lint
-static char RCSid[] = "$Id: AccessA2Mdv.cc,v 1.18 2017/07/02 20:51:23 cunning Exp $";
+static char RCSid[] = "$Id: AccessA2Mdv.cc,v 1.19 2017/11/08 03:02:20 cunning Exp $";
 # endif     /* not lint */
 
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -80,6 +80,8 @@ AccessA2Mdv *AccessA2Mdv::_instance = 0;
 
 // define any constants
 const string AccessA2Mdv::_className = "AccessA2Mdv";
+const float AccessA2Mdv::MISSING_DATA_VALUE = -9999.0;
+const float AccessA2Mdv::TINY_VALUE = 1.0e-5; 
 
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////

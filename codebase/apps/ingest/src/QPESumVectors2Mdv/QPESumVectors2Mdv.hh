@@ -45,8 +45,7 @@
 #include <didss/LdataInfo.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
-#include <netcdfcpp.h>
-#include <udunits2.h>
+#include <Ncxx/Nc3File.hh>
 #include <set>
 #include "Args.hh"
 #include "Params.hh"
@@ -76,7 +75,7 @@ public:
   bool isOK;
 
 protected:
-  NcFile *_ncFile;
+  Nc3File *_ncFile;
   
 private:
 

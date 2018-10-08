@@ -27,7 +27,7 @@
 // Jason Craig, RAP, NCAR, Boulder, CO, 80307, USA
 // March 2012
 //
-// $Id: NcOutput.hh,v 1.4 2016/03/07 01:23:00 dixon Exp $
+// $Id: NcOutput.hh,v 1.5 2018/01/09 22:25:05 jcraig Exp $
 //
 ////////////////////////////////////////////////////////////////
 #ifndef _NC_OUTPUT_INC_
@@ -35,7 +35,7 @@
 
 #include <string>
 #include <dirent.h>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include <toolsa/Path.hh>
 
 #include "Params.hh"
@@ -162,7 +162,7 @@ private:
    //
    string  outputPath;
    Path    filePath;
-   NcFile *ncFile;
+   Nc3File *ncFile;
 
    //
    // Used to name the file
@@ -300,8 +300,8 @@ private:
    // Overloaded addNewVar functions
    //
    //   varName  = name of variable
-   //   dim1     = netcdf NcDim pointer for first dimension
-   //   dim2     = netcdf NcDim pointer for second dimension
+   //   dim1     = netcdf Nc3Dim pointer for first dimension
+   //   dim2     = netcdf Nc3Dim pointer for second dimension
    //   longName = long name for variable
    //   units    = string containing units for variable
    //   scale    = scale value for variable
@@ -310,29 +310,29 @@ private:
    //   values   = array of values to add to the variable
    //   c0       = number of values in the first dimension
    //   c1       = number of values in the second dimension
-   int addNewVar( const char* varName, NcDim* dim1,
-                             NcDim* dim2, char* values, 
+   int addNewVar( const char* varName, Nc3Dim* dim1,
+                             Nc3Dim* dim2, char* values, 
                              long c0, long c1 );
-   int addNewVar( const char* varName, NcDim* dim1,
-                             NcDim* dim2, const char* longName,
+   int addNewVar( const char* varName, Nc3Dim* dim1,
+                             Nc3Dim* dim2, const char* longName,
                              const char* units, double scale,
                              double bias, unsigned char badValue,
 		             float rangeToFirst, float cellSpacing, 
                              unsigned char* values, long c0, long c1 );
-   int addNewVar( const char* varName, NcDim* dim1,
-                             NcDim* dim2, const char* longName,
+   int addNewVar( const char* varName, Nc3Dim* dim1,
+                             Nc3Dim* dim2, const char* longName,
                              const char* units, double scale,
                              double bias, short badValue,
 		             float rangeToFirst, float cellSpacing, 
                              short* values, long c0, long c1 );
-   int addNewVar( const char* varName, NcDim* dim1,
-		             NcDim* dim2, unsigned char* values, 
+   int addNewVar( const char* varName, Nc3Dim* dim1,
+		             Nc3Dim* dim2, unsigned char* values, 
 			     long c0, long c1 );
-   int addBypassVar( const char* varName, NcDim* dim1,
-		             NcDim* dim2, short* values, 
+   int addBypassVar( const char* varName, Nc3Dim* dim1,
+		             Nc3Dim* dim2, short* values, 
 		             long c0, long c1 ); 
-   int addClutterVar( const char* varName, NcDim* dim1,
-		             NcDim* dim2, NcDim* dim3, short* values, 
+   int addClutterVar( const char* varName, Nc3Dim* dim1,
+		             Nc3Dim* dim2, Nc3Dim* dim3, short* values, 
 		             long c0, long c1, long c2 ); 
   //
   // Assemble the beams from the current sweep into one

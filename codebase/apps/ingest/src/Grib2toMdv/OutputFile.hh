@@ -47,13 +47,19 @@ public:
 
   inline void setVerticalType( const int& vt  ){_verticalType = vt;}
 
-  void addField(MdvxField* inputField);
+  void addField(MdvxField* inputField, Mdvx::encoding_type_t encoding);
 
   int  writeVol(time_t gen_time, long int lead_secs );
 
   void clear();
 
   int numFields();
+
+  static Mdvx::encoding_type_t 
+    mdvEncoding(Params::encoding_type_t paramEncoding);
+  
+  static Mdvx::compression_type_t 
+    mdvCompression(Params::compression_type_t paramCompression);
 
 protected:
   
@@ -85,14 +91,6 @@ private:
 
   float _interp2(Mdvx::field_header_t *fieldHdr, 
                  double x, double y, int z, float *field);
-
-  void _compressField(MdvxField *field);
-
-  Mdvx::encoding_type_t 
-    _mdvEncoding(Params::encoding_type_t paramEncoding);
-  
-  Mdvx::compression_type_t 
-    _mdvCompression(Params::compression_type_t paramCompression);
 
 };
 

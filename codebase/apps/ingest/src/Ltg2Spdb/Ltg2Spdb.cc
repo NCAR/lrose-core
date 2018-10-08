@@ -36,8 +36,8 @@
 ////////////////////////////////////////////////////////////////
 
 #include <cerrno>
-#include <netcdf.hh>
 #include <string>
+#include <Ncxx/Nc3File.hh>
 #include <toolsa/umisc.h>
 #include <toolsa/file_io.h>
 #include <toolsa/pmu.h>
@@ -365,7 +365,7 @@ int Ltg2Spdb::_processAOAWSNetCDFFile(const char *file_path)
 	const string methodName = "Ltg2Spdb::_processAOAWSNetCDFFile";
 
 	int iret = 0;
-	NcFile ncfFile(file_path);
+	Nc3File ncfFile(file_path);
 
 	if(!ncfFile.is_valid()) {
 		cerr << "ERROR - " << methodName << endl;
@@ -375,7 +375,7 @@ int Ltg2Spdb::_processAOAWSNetCDFFile(const char *file_path)
 
 	// declare an error object
 
-	NcError err(NcError::silent_nonfatal);
+	Nc3Error err(Nc3Error::silent_nonfatal);
 
 
 	// check that this is a valid file
@@ -394,9 +394,9 @@ int Ltg2Spdb::_processAOAWSNetCDFFile(const char *file_path)
 		cerr << "\t" << nRecords << " records to read\n";
 	}
 
-  NcVar *latVar = ncfFile.get_var(_params.netcdf_lat_var);
-  NcVar *lonVar = ncfFile.get_var(_params.netcdf_lon_var);
-  NcVar *timeVar = ncfFile.get_var(_params.netcdf_time_var);
+  Nc3Var *latVar = ncfFile.get_var(_params.netcdf_lat_var);
+  Nc3Var *lonVar = ncfFile.get_var(_params.netcdf_lon_var);
+  Nc3Var *timeVar = ncfFile.get_var(_params.netcdf_time_var);
 
   vector<float> latVector;
   vector<float> lonVector;
@@ -482,7 +482,7 @@ int Ltg2Spdb::_processAOAWSNetCDFFile(const char *file_path)
   return iret;
 }
 
-int Ltg2Spdb::_checkAOAWSNetCDFFile(const NcFile &ncf)
+int Ltg2Spdb::_checkAOAWSNetCDFFile(const Nc3File &ncf)
 {
 
   const string methodName = "Ltg2Spdb::_checkAOAWSNetCDFFIle";

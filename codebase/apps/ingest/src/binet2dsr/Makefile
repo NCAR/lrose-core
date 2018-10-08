@@ -33,12 +33,12 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = binet2dsr
 
-LOC_INCLUDES =
+LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_CFLAGS =
-LOC_LDFLAGS = -L/usr/local/lib
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_LIBS = \
 	-lFmq -ldsserver -ldidss -lrapformats \
-	-lnetcdf_c++ -lnetcdf -ltoolsa -ldataport \
+	$(NETCDF4_LIBS) -ltoolsa -ldataport \
 	-ltdrp -lbz2 -lz -lpthread \
 	-lm
 

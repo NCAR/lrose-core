@@ -51,8 +51,6 @@ April 2006
 #include <Mdv/MdvxPjg.hh>
 #include <Mdv/MdvxField.hh>
 
-#include "netcdf.hh"
-
 //
 // PROJECT INCLUDES
 //

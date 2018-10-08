@@ -25,7 +25,7 @@
 // SweepData - class that contains and manages data
 //            specific to a single tilt or sweep
 //
-// $Id: SweepData.hh,v 1.15 2016/03/07 01:23:03 dixon Exp $
+// $Id: SweepData.hh,v 1.18 2018/04/26 21:37:48 jcraig Exp $
 //
 /////////////////////////////////////////////////////////
 #ifndef _SWEEP_DATA_
@@ -33,7 +33,7 @@
 
 #include <vector>
 #include <deque>
-#include <netcdf.hh>
+
 #include <rapformats/ridds.h>
 #include "Nexrad2Netcdf.hh"
 #include "Params.hh"
@@ -163,18 +163,18 @@ public:
   vector<Beam*>& getBeams(){ return beams; }
   scan_t         getScanType(){ return scanType; }
 
-  //  int            getNumGates(){ return numGates; }
+  //int            getNumGates(){ return numGates; }
   int            getVCP(){ return vcp; }
   int            getElevIndex(){ return elevIndex; }
   
   float          getFixedAngle(){ return fixedAngle; }
   float          getVelScaleBiasFactor(){ return velScaleBiasFactor; }
-  float          getNyquistVelocity(){ return nyquistVelocity; }
-  float          getUnambiguousRange(){ return unambiguousRange; }
-  float          getPrf(){ return prf; }
+  float          getNyquistVelocity();
+  float          getUnambiguousRange();
+  float          getPrf();
   float          getDbz0() { return dbz0; };
-  float          getHorizNoise() { return horiz_noise; };
-  float          getVertNoise() { return vert_noise; };
+  float          getHorizNoise();
+  float          getVertNoise();
   float          getPulseCount() { return pulseCount; };
 
   bool           getCalcSnr(){ return calcSnr; }
@@ -285,15 +285,15 @@ private:
   int   vcp;
   float rangeToFirstVelGate;
   float rangeToFirstReflGate;
-  float unambiguousRange;
+  //float unambiguousRange;
   float fixedAngle;
   float nyquistVelocity;
-  float prf;
+  //float prf;
   float cellSpacingVel;
   float cellSpacingRefl;
   float dbz0;
-  float horiz_noise;
-  float vert_noise;
+  //float horiz_noise;
+  //float vert_noise;
   float pulseCount;
   int   numGatesRefl;
   int   numGatesVel;

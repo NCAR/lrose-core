@@ -38,8 +38,7 @@
 
 #include <string>
 
-#include <netcdf.hh>
-
+#include <Ncxx/Nc3File.hh>
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxProj.hh>
 #include <toolsa/DateTime.hh>
@@ -112,7 +111,7 @@ class NetcdfField
    * @return Returns a pointer to the MDV field on success, 0 on failure.
    */
 
-  MdvxField *createMdvField(const NcFile &nc_file,
+  MdvxField *createMdvField(const Nc3File &nc_file,
 			    const MdvxProj &input_proj,
 			    const int forecast_index,
 			    const int forecast_secs,
@@ -277,9 +276,9 @@ protected:
    * @return Returns the attribute value on success, "" on failure.
    */
 
-  string _getVarAttAsString(const NcVar &var, const string &att_name) const
+  string _getVarAttAsString(const Nc3Var &var, const string &att_name) const
   {
-    NcAtt *att;
+    Nc3Att *att;
   
     if ((att = var.get_att(att_name.c_str())) == 0)
     {

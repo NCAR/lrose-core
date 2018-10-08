@@ -372,7 +372,7 @@ int DoeSounding2Spdb::_openNc(const string &path)
 {
 
   _closeNc();
-  _ncFile = new NcFile(path.c_str(), NcFile::ReadOnly);
+  _ncFile = new Nc3File(path.c_str(), Nc3File::ReadOnly);
   
   // Check that constructor succeeded
   
@@ -389,7 +389,7 @@ int DoeSounding2Spdb::_openNc(const string &path)
   // calling program.
 
   if (_ncErr == NULL) {
-    _ncErr = new NcError(NcError::silent_nonfatal);
+    _ncErr = new Nc3Error(Nc3Error::silent_nonfatal);
   }
 
   return 0;
@@ -447,7 +447,7 @@ int DoeSounding2Spdb::_readGlobalAttributes()
 
 {
 
-  NcAtt *att;
+  Nc3Att *att;
   
   att = _ncFile->get_att("site_id");
   if (att != NULL) {
@@ -502,7 +502,7 @@ int DoeSounding2Spdb::_readTime()
 
   // get time offset variable
 
-  NcVar *timeOffsetVar = _ncFile->get_var("time_offset");
+  Nc3Var *timeOffsetVar = _ncFile->get_var("time_offset");
   if (timeOffsetVar == NULL) {
     cerr << "ERROR - DoeSounding2Spdb::_readTime" << endl;
     cerr << "  Cannot read 'time_offset' variable" << endl;
@@ -558,7 +558,7 @@ int DoeSounding2Spdb::_readIntScalar(const string &name,
   
 {
   
-  NcVar* var = _ncFile->get_var(name.c_str());
+  Nc3Var* var = _ncFile->get_var(name.c_str());
   if (var == NULL) {
     if (!required) {
       val = _missingInt;
@@ -594,7 +594,7 @@ int DoeSounding2Spdb::_readFloatScalar(const string &name,
   
 {
   
-  NcVar *var = _ncFile->get_var(name.c_str());
+  Nc3Var *var = _ncFile->get_var(name.c_str());
   if (var == NULL) {
     if (!required) {
       val = _missingFloat;
@@ -630,7 +630,7 @@ int DoeSounding2Spdb::_readDoubleScalar(const string &name,
   
 {
   
-  NcVar *var = _ncFile->get_var(name.c_str());
+  Nc3Var *var = _ncFile->get_var(name.c_str());
   if (var == NULL) {
     if (!required) {
       val = _missingDouble;
@@ -685,12 +685,12 @@ int DoeSounding2Spdb::_readField(const string &name,
 // read data and fill vector
 
 int DoeSounding2Spdb::_readVector(const string &name,
-                                  NcDim *dim,
+                                  Nc3Dim *dim,
                                   vector<double> &val)
   
 {
 
-  NcVar *var = _ncFile->get_var(name.c_str());
+  Nc3Var *var = _ncFile->get_var(name.c_str());
   if (var == NULL) {
     cerr << "ERROR - DoeSounding2Spdb::_readFloatVector" << endl;
     cerr << "  Cannot read variable: " << name << endl;
@@ -763,7 +763,7 @@ int DoeSounding2Spdb::_readVector(const string &name,
 /////////////////////////////////////////////////////
 // fill float vector with missing
 
-void DoeSounding2Spdb::_fillVectorMissing(NcDim *dim,
+void DoeSounding2Spdb::_fillVectorMissing(Nc3Dim *dim,
                                           vector<double> &val)
 
 {
@@ -778,7 +778,7 @@ void DoeSounding2Spdb::_fillVectorMissing(NcDim *dim,
 ///////////////////////////////////////////
 // get string representation of component
 
-string DoeSounding2Spdb::_asString(const NcTypedComponent *component,
+string DoeSounding2Spdb::_asString(const Nc3TypedComponent *component,
                                    int index /* = 0 */)
   
 {

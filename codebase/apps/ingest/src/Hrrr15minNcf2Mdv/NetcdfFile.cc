@@ -113,7 +113,7 @@ bool NetcdfFile::init()
   // error is encountered.  This object is not explicitly used in the below
   // code, but is used implicitly by the netCDF library.
 
-  NcError nc_error(NcError::silent_nonfatal);
+  Nc3Error nc_error(Nc3Error::silent_nonfatal);
 
   // Check the input file
   

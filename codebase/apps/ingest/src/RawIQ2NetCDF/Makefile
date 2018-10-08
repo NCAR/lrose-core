@@ -36,12 +36,12 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = RawIQ2NetCDF
 
-LOC_INCLUDES =
+LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_CFLAGS =
-LOC_LDFLAGS =
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_LIBS = \
 	-ldsserver -ldidss -ltoolsa -ldataport \
-	-ltdrp -lnetcdf_c++ -lnetcdf -lbz2 \
+	-ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz
 
 HDRS = \

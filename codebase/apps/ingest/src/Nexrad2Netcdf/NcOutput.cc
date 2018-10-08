@@ -27,7 +27,7 @@
 // Jaimi Yee, RAP, NCAR, Boulder, CO, 80307, USA
 // August 2004
 //
-// $Id: NcOutput.cc,v 1.25 2016/03/07 01:23:03 dixon Exp $
+// $Id: NcOutput.cc,v 1.29 2018/02/16 20:45:38 jcraig Exp $
 //
 ////////////////////////////////////////////////////////////////
 #include <stdio.h>
@@ -316,7 +316,7 @@ void NcOutput::setBaseTime( int startTime, int msPastMidnight )
 
 status_t NcOutput::writeFile( SweepData* currentSweep ) 
 {
-  NcError ncError( NcError::silent_nonfatal );
+  Nc3Error ncError( Nc3Error::silent_nonfatal );
 
    //
    // Don't do anything if we are skipping this sweep
@@ -403,10 +403,26 @@ status_t NcOutput::writeFile( SweepData* currentSweep )
      return( FAILURE );
    }
 
+   if( addVar( "horiz_noise", _hNoise,
+               _numRays ) != ALL_OK ) {
+     delete ncFile;
+     ncFile = NULL;
+     deleteCurrentFileName();
+     return( FAILURE );
+   }
+
+   if( addVar( "vert_noise", _vNoise,
+               _numRays ) != ALL_OK ) {
+     delete ncFile;
+     ncFile = NULL;
+     deleteCurrentFileName();
+     return( FAILURE );
+   }
+
    //
    // Get the "Time" dimension
    //
-   NcDim *timeDim = ncFile->get_dim( "Time" );
+   Nc3Dim *timeDim = ncFile->get_dim( "Time" );
    if( !timeDim || !timeDim->is_valid() ) {
       POSTMSG( ERROR, "Could not get Time dimension from file %s\n",
                fileName.c_str() );
@@ -419,7 +435,7 @@ status_t NcOutput::writeFile( SweepData* currentSweep )
    //
    // Set the maxCellsVel dimension in the file
    //
-   NcDim *maxCellsVelDim = NULL;
+   Nc3Dim *maxCellsVelDim = NULL;
    if(_numCellsVel != 0) {
      maxCellsVelDim = ncFile->add_dim( "maxCells_Dop", _numCellsVel );
      if( !maxCellsVelDim || !maxCellsVelDim->is_valid() ) {
@@ -434,7 +450,7 @@ status_t NcOutput::writeFile( SweepData* currentSweep )
    //
    // Set the maxCellsRefl dimension in the file
    //
-   NcDim *maxCellsReflDim = NULL;
+   Nc3Dim *maxCellsReflDim = NULL;
    if(_numCellsRefl != 0) {
      maxCellsReflDim = ncFile->add_dim( "maxCells_Surv", _numCellsRefl );
      if( !maxCellsReflDim || !maxCellsReflDim->is_valid() ) {
@@ -449,7 +465,7 @@ status_t NcOutput::writeFile( SweepData* currentSweep )
    //
    // Set the radials dimension in the file
    //
-   NcDim *radialDim = ncFile->add_dim( "radials", 360 );
+   Nc3Dim *radialDim = ncFile->add_dim( "radials", 360 );
    if( !radialDim || !radialDim->is_valid() ) {
       POSTMSG( ERROR, "Could not add dimension radials to file %s",
                fileName.c_str() );
@@ -462,7 +478,7 @@ status_t NcOutput::writeFile( SweepData* currentSweep )
    //
    // Set the maxZones dimension in the file
    //
-   NcDim *twentyDim = ncFile->add_dim( "maxZones", 20 );
+   Nc3Dim *twentyDim = ncFile->add_dim( "maxZones", 20 );
    if( !twentyDim || !twentyDim->is_valid() ) {
       POSTMSG( ERROR, "Could not add dimension twenty to file %s",
                fileName.c_str() );
@@ -475,7 +491,7 @@ status_t NcOutput::writeFile( SweepData* currentSweep )
    //
    // Set the zoneAttributes dimension in the file
    //
-   NcDim *twoDim = ncFile->add_dim( "zoneAttributes", 2 );
+   Nc3Dim *twoDim = ncFile->add_dim( "zoneAttributes", 2 );
    if( !twoDim || !twoDim->is_valid() ) {
       POSTMSG( ERROR, "Could not add dimension two to file %s",
                fileName.c_str() );
@@ -488,7 +504,7 @@ status_t NcOutput::writeFile( SweepData* currentSweep )
    //
    // Set the rangeBitMap dimension in the file
    //
-   NcDim *thirtytwoDim = ncFile->add_dim( "rangeBitMap", 32 );
+   Nc3Dim *thirtytwoDim = ncFile->add_dim( "rangeBitMap", 32 );
    if( !thirtytwoDim || !thirtytwoDim->is_valid() ) {
       POSTMSG( ERROR, "Could not add dimension thirtytwo to file %s",
                fileName.c_str() );
@@ -613,7 +629,7 @@ status_t NcOutput::writeFile( SweepData* currentSweep )
                                  PHI_UNITS.c_str(), 
                                  currentSweep->getPhiScale(), 
                                  currentSweep->getPhiBias(),
-                                 currentSweep->getPhiBad(), 
+                                 -999.99, 
 				 currentSweep->getRangeToFirstVelGate(),
 				 currentSweep->getCellSpacingVel(),
                                  _phi, 
@@ -843,7 +859,7 @@ status_t NcOutput::createFile( float fixedAngle )
    //
    // Set up the new file
    //
-   ncFile = new NcFile( filePath.getPath().c_str(), NcFile::Write );
+   ncFile = new Nc3File( filePath.getPath().c_str(), Nc3File::Write );
    if( !ncFile || !ncFile->is_valid() ) {
       POSTMSG( ERROR, "Could not open file %s", fileName.c_str() );
       return( FAILURE );
@@ -901,7 +917,7 @@ status_t NcOutput::setFileVals( SweepData* currentSweep )
    // Add the fields dimension to the file
    //
    int numFields = params->momentFieldDefs_n + params->derivedFieldDefs_n;
-   NcDim *fieldsDim = ncFile->add_dim( "fields", numFields );
+   Nc3Dim *fieldsDim = ncFile->add_dim( "fields", numFields );
 
    if( !fieldsDim || !fieldsDim->is_valid() ) {
       POSTMSG( ERROR, "Could not add fields dimension to file %s",
@@ -912,7 +928,7 @@ status_t NcOutput::setFileVals( SweepData* currentSweep )
    //
    // Add the short string dimension to the file
    //
-   NcDim *shortStrDim = ncFile->add_dim( "short_string", SHORT_STR_LEN );
+   Nc3Dim *shortStrDim = ncFile->add_dim( "short_string", SHORT_STR_LEN );
    if( !shortStrDim || !shortStrDim->is_valid() ) {
       POSTMSG( ERROR, "Could not add short_string dimension to file %s",
                fileName.c_str() );
@@ -1005,13 +1021,13 @@ status_t NcOutput::setFileVals( SweepData* currentSweep )
        return( FAILURE );
      }
 
-     if( addVar( "horiz_noise", currentSweep->getHorizNoise() ) != 0 ) {
-       return( FAILURE );
-     }
+     //if( addVar( "horiz_noise", currentSweep->getHorizNoise(), _numRays) != 0 ) {
+     //  return( FAILURE );
+     //}
 
-     if( addVar( "vert_noise", currentSweep->getVertNoise() ) != 0 ) {
-       return( FAILURE );
-     }
+     //if( addVar( "vert_noise", currentSweep->getVertNoise(), _numRays) != 0 ) {
+     //  return( FAILURE );
+     //}
    }
 
    RIDDS_VCP_hdr *vcpHdr = currentSweep->getVcpHdr();
@@ -1147,7 +1163,7 @@ status_t NcOutput::addVar( const char* varName, int value )
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->get_var( varName );
+   Nc3Var *ncVar = ncFile->get_var( varName );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s", 
                varName, fileName.c_str() );
@@ -1173,7 +1189,7 @@ status_t NcOutput::addVar( const char* varName, float value )
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->get_var( varName );
+   Nc3Var *ncVar = ncFile->get_var( varName );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s", 
                varName, fileName.c_str() );
@@ -1199,7 +1215,7 @@ status_t NcOutput::addVar( const char* varName, double value )
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->get_var( varName );
+   Nc3Var *ncVar = ncFile->get_var( varName );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s", 
                varName, fileName.c_str() );
@@ -1225,7 +1241,7 @@ status_t NcOutput::addVar( const char* varName, float* values, long c0 )
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->get_var( varName );
+   Nc3Var *ncVar = ncFile->get_var( varName );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s", 
                varName, fileName.c_str() );
@@ -1254,7 +1270,7 @@ status_t NcOutput::addVar( const char* varName, double* values,
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->get_var( varName );
+   Nc3Var *ncVar = ncFile->get_var( varName );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s", 
                varName, fileName.c_str() );
@@ -1277,14 +1293,14 @@ status_t NcOutput::addVar( const char* varName, double* values,
 }
 
 
-status_t NcOutput::addNewVar( const char* varName, NcDim* dim1,
-                                    NcDim* dim2, char* values, 
+status_t NcOutput::addNewVar( const char* varName, Nc3Dim* dim1,
+                                    Nc3Dim* dim2, char* values, 
                                     long c0, long c1 ) 
 {
    //
    // Create the variable
    //
-   NcVar *newVar = ncFile->add_var( varName, ncChar, dim1, dim2 );
+   Nc3Var *newVar = ncFile->add_var( varName, nc3Char, dim1, dim2 );
    if( !newVar || !newVar->is_valid() ) {
       POSTMSG( ERROR, "Could not create %s variable in %s",
                varName, fileName.c_str() );
@@ -1311,11 +1327,11 @@ status_t NcOutput::addNewVar( const char* varName, NcDim* dim1,
    return( ALL_OK );
 }
 
-status_t NcOutput::addNewVar( const char* varName, NcDim* dim1,
-                                    NcDim* dim2, ui08* values, 
+status_t NcOutput::addNewVar( const char* varName, Nc3Dim* dim1,
+                                    Nc3Dim* dim2, ui08* values, 
                                     long c0, long c1 ) 
 {
-   NcVar *newVar = ncFile->add_var( varName, ncByte, dim1, dim2 );
+   Nc3Var *newVar = ncFile->add_var( varName, nc3Byte, dim1, dim2 );
    if( !newVar || !newVar->is_valid() ) {
       POSTMSG( ERROR, "Could not create %s variable in %s",
                varName, fileName.c_str() );
@@ -1332,11 +1348,11 @@ status_t NcOutput::addNewVar( const char* varName, NcDim* dim1,
    return( ALL_OK );
 }
 
-status_t NcOutput::addBypassVar( const char* varName, NcDim* dim1,
-                                    NcDim* dim2, short* values, 
+status_t NcOutput::addBypassVar( const char* varName, Nc3Dim* dim1,
+                                    Nc3Dim* dim2, short* values, 
                                     long c0, long c1 ) 
 {
-   NcVar *newVar = ncFile->add_var( varName, ncShort, dim1, dim2 );
+   Nc3Var *newVar = ncFile->add_var( varName, nc3Short, dim1, dim2 );
    if( !newVar || !newVar->is_valid() ) {
       POSTMSG( ERROR, "Could not create %s variable in %s",
                varName, fileName.c_str() );
@@ -1359,11 +1375,11 @@ status_t NcOutput::addBypassVar( const char* varName, NcDim* dim1,
    return( ALL_OK );
 }
 
-status_t NcOutput::addClutterVar( const char* varName, NcDim* dim1,
-                                    NcDim* dim2, NcDim* dim3, short* values, 
+status_t NcOutput::addClutterVar( const char* varName, Nc3Dim* dim1,
+                                    Nc3Dim* dim2, Nc3Dim* dim3, short* values, 
                                     long c0, long c1, long c2 ) 
 {
-   NcVar *newVar = ncFile->add_var( varName, ncShort, dim1, dim2, dim3 );
+   Nc3Var *newVar = ncFile->add_var( varName, nc3Short, dim1, dim2, dim3 );
    if( !newVar || !newVar->is_valid() ) {
       POSTMSG( ERROR, "Could not create %s variable in %s",
                varName, fileName.c_str() );
@@ -1383,8 +1399,8 @@ status_t NcOutput::addClutterVar( const char* varName, NcDim* dim1,
    return( ALL_OK );
 }
 
-status_t NcOutput::addNewVar( const char* varName, NcDim* dim1,
-			      NcDim* dim2, const char* longName,
+status_t NcOutput::addNewVar( const char* varName, Nc3Dim* dim1,
+			      Nc3Dim* dim2, const char* longName,
 			      const char* units, double scale,
 			      double bias, ui08 badValue,
 			      float rangeToFirst, float cellSpacing, 
@@ -1393,7 +1409,7 @@ status_t NcOutput::addNewVar( const char* varName, NcDim* dim1,
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->add_var( varName, ncByte, dim1, dim2 );
+   Nc3Var *ncVar = ncFile->add_var( varName, nc3Byte, dim1, dim2 );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not add variable %s to file %s", 
                varName, fileName.c_str() );
@@ -1432,17 +1448,17 @@ status_t NcOutput::addNewVar( const char* varName, NcDim* dim1,
    return( ALL_OK );
 }
 
-status_t NcOutput::addNewVar( const char* varName, NcDim* dim1,
-			      NcDim* dim2, const char* longName,
+status_t NcOutput::addNewVar( const char* varName, Nc3Dim* dim1,
+			      Nc3Dim* dim2, const char* longName,
 			      const char* units, double scale,
-			      double bias, short badValue,
+			      double bias, si16 badValue,
 			      float rangeToFirst, float cellSpacing, 
-			      short* values, long c0, long c1 ) 
+			      si16* values, long c0, long c1 ) 
 {
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->add_var( varName, ncShort, dim1, dim2 );
+   Nc3Var *ncVar = ncFile->add_var( varName, nc3Short, dim1, dim2 );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not add variable %s to file %s", 
                varName, fileName.c_str() );
@@ -1457,7 +1473,7 @@ status_t NcOutput::addNewVar( const char* varName, NcDim* dim1,
    ncVar->add_att( "scale_factor", scale );
    ncVar->add_att( "add_offset", bias );
    ncVar->add_att( "missing_value", badValue );
-   ncVar->add_att( "_FillValue", badValue );
+   ncVar->add_att( "_FillValue", (short) badValue );
    ncVar->add_att( "Range_to_First_Cell",  rangeToFirst);
    ncVar->add_att( "Cell_Spacing", cellSpacing);
    
@@ -1471,7 +1487,7 @@ status_t NcOutput::addNewVar( const char* varName, NcDim* dim1,
    // and the one dimensional array to put things in the
    // right place in the file.
    //
-   int status = ncVar->put( values, c0, c1 );
+   int status = ncVar->put( (short*)values, c0, c1 );
    if( status == 0 ) {
       POSTMSG( ERROR, "Could not write value to variable %s of file %s",
                varName, fileName.c_str() );
@@ -1547,6 +1563,9 @@ void NcOutput::assemble( SweepData& currentSweep)
   _elevation = new float[_numRays];
   _dataTime  = new double[_numRays];
 
+  _hNoise    = new float[_numRays];
+  _vNoise    = new float[_numRays];
+
   for( int ii = 0; ii < params->momentFieldDefs_n; ii++ ) {
     
     if(params->_momentFieldDefs[ii].outputField == Params::DZ && _numCellsRefl != 0)
@@ -1564,7 +1583,7 @@ void NcOutput::assemble( SweepData& currentSweep)
 	_zdr   = new ui08[_numRays*_numCellsVel];
 	break;
       case Params::PHI :
-	_phi   = new ui08[_numRays*_numCellsVel];
+	_phi   = new si16[_numRays*_numCellsVel];
 	break;
       case Params::RHO :
 	_rho   = new ui08[_numRays*_numCellsVel];
@@ -1595,7 +1614,7 @@ void NcOutput::assemble( SweepData& currentSweep)
   ui08 *vePtr    = _ve;
   ui08 *swPtr    = _sw;
   ui08 *zdrPtr   = _zdr;
-  ui08 *phiPtr   = _phi;
+  si16 *phiPtr   = _phi;
   ui08 *rhoPtr   = _rho;
   ui08 *snrPtr   = _snr;
   ui08 *prPtr    = _pr;
@@ -1626,6 +1645,9 @@ void NcOutput::assemble( SweepData& currentSweep)
     _azimuth[i]   = beams[index[i]]->getAzimuth();
     _elevation[i] = beams[index[i]]->getElevation();
     _dataTime[i]  = beams[index[i]]->getTime() - baseTime;
+
+    _hNoise[i] = beams[index[i]]->getHorizNoise();
+    _vNoise[i] = beams[index[i]]->getVertNoise();
 
     if(dzPtr) {
       dataPtr = beams[index[i]]->getDbz();
@@ -1672,12 +1694,12 @@ void NcOutput::assemble( SweepData& currentSweep)
     }
 
     if(phiPtr) {
-      dataPtr = beams[index[i]]->getPhi();
+      const si16 *dataPtr = beams[index[i]]->getPhi();
       if(dataPtr) {
-	memcpy((void *) phiPtr, (void *) dataPtr, sizeof(ui08) * _numCellsVel );
+	memcpy((void *) phiPtr, (void *) dataPtr, sizeof(si16) * _numCellsVel );
 	_havePhi = true;
       } else {
-	memset((void *) phiPtr, Beam::PHI_BAD, _numCellsVel);
+	memset((void *) phiPtr, Beam::PHI_BAD, _numCellsVel*2);
       }
       phiPtr    += _numCellsVel;
     }

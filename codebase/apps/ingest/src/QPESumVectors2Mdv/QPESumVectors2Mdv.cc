@@ -266,7 +266,7 @@ int QPESumVectors2Mdv::_processData(char *inputPath)
   // open the Nc File
   //
 
-  _ncFile = new NcFile(inputPath, NcFile::ReadOnly);
+  _ncFile = new Nc3File(inputPath, Nc3File::ReadOnly);
 
   //
   // Check that constructor succeeded
@@ -287,7 +287,7 @@ int QPESumVectors2Mdv::_processData(char *inputPath)
   // calling program. In the case of this example, we just exit with
   // an NC_ERR error code.
 
-  NcError err(NcError::silent_nonfatal);
+  Nc3Error err(Nc3Error::silent_nonfatal);
   
   //
   // Get the number of variables
@@ -304,7 +304,7 @@ int QPESumVectors2Mdv::_processData(char *inputPath)
   //
   int numAtts = _ncFile->num_atts();
 
-  NcAtt* globalAtt = NULL;
+  Nc3Att* globalAtt = NULL;
 
   //
   // Loop through the attributes and grab the ones we are expecting.
@@ -407,7 +407,7 @@ int QPESumVectors2Mdv::_processData(char *inputPath)
   mdv.setMasterHeader(master_hdr);
   
 
-  NcVar* var;
+  Nc3Var* var;
 
   int _nx;
   int _ny;
@@ -419,7 +419,7 @@ int QPESumVectors2Mdv::_processData(char *inputPath)
 
     for (int i = 0; i < _numDims; i++)
     {
-      NcDim* dim = var->get_dim(i);
+      Nc3Dim* dim = var->get_dim(i);
       if (strcmp( dim->name(), "Lat") == 0 )
 	_ny = dim->size();
 

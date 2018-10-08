@@ -218,9 +218,9 @@ private:
   void _convertGribLevel2CFLevel(const string &GribLevel, const string &GribLevelUnits, const string &GribLevelLong);
 
   fl32 *_calcMinMax(fl32 *dataPtr);
-  fl32 *_encode(fl32 *dataPtr, Params::data_pack_t output_encoding);
-  void *_float32_to_int8(fl32 *inDataPtr, fl32 scaleFactor = 0.0);
-  void *_float32_to_int16(fl32 *inDataPtr, fl32 scaleFactor = 0.0); 
+  fl32 *_encode(fl32 *dataPtr, Params::data_pack_t output_encoding, float scale_factor = 0.0, float add_offset = 0.0);
+  void *_float32_to_int8(fl32 *inDataPtr, fl32 scaleFactor = 0.0, fl32 addOffset = 0.0);
+  void *_float32_to_int16(fl32 *inDataPtr, fl32 scaleFactor = 0.0, fl32 addOffset = 0.0);
 
 };
 

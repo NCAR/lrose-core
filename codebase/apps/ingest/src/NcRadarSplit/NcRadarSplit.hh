@@ -41,7 +41,8 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <didss/DsInputPath.hh>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
+
 using namespace std;
 
 typedef struct {
@@ -90,15 +91,15 @@ private:
   vector<ppi_t> _ppis;
 
   int _processFile(const char *input_path);
-  int _checkFile(NcFile &ncf);
+  int _checkFile(Nc3File &ncf);
 
-  void _findPpis(NcFile &ncf);
-  void _printFile(NcFile &ncf);
-  void _printAtt(NcAtt *att);
-  void _printVarVals(NcVar *var);
+  void _findPpis(Nc3File &ncf);
+  void _printFile(Nc3File &ncf);
+  void _printAtt(Nc3Att *att);
+  void _printVarVals(Nc3Var *var);
 
   int _getTiltNum(double elevation);
-  int _doSplit(NcFile &ncf);
+  int _doSplit(Nc3File &ncf);
 
 };
 

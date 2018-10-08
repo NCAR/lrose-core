@@ -24,12 +24,12 @@
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: SeviriData.cc,v 1.11 2016/03/07 01:23:05 dixon Exp $
+ *  $Id: SeviriData.cc,v 1.12 2018/01/26 18:43:35 jcraig Exp $
  *
  */
 
 # ifndef    lint
-static char RCSid[] = "$Id: SeviriData.cc,v 1.11 2016/03/07 01:23:05 dixon Exp $";
+static char RCSid[] = "$Id: SeviriData.cc,v 1.12 2018/01/26 18:43:35 jcraig Exp $";
 # endif     /* not lint */
 
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -50,10 +50,11 @@ static char RCSid[] = "$Id: SeviriData.cc,v 1.11 2016/03/07 01:23:05 dixon Exp $
 
 // C++ include files
 #include <cassert>
-#include <netcdf.hh>
 #include <cstring>
+#include <cmath>
 
 // System/RAP include files
+#include <Ncxx/Nc3File.hh>
 #include <toolsa/pmu.h>
 #include <euclid/PjgCalc.hh>
 #include <euclid/PjgLatlonCalc.hh>
@@ -202,11 +203,11 @@ SeviriData::readFile(const string& file_path)
   const string methodName = _className + "::readFile";
 
   // silence the NcFile object
-  NcError err(NcError::silent_nonfatal);
+  Nc3Error err(Nc3Error::silent_nonfatal);
 
   _pathName = file_path;
 
-  _ncFile = new NcFile(file_path.c_str(), NcFile::ReadOnly);
+  _ncFile = new Nc3File(file_path.c_str(), Nc3File::ReadOnly);
   
   if(!_ncFile->is_valid()) {
     cerr << file_path << " is not a valid netcdf file." << endl;
@@ -220,27 +221,27 @@ SeviriData::readFile(const string& file_path)
   // get acces to the dimensions
   //
   bool getDimSuccess = true;
-  NcDim *linesDim;
+  Nc3Dim *linesDim;
   if (!_getDimension(&linesDim, LINES_DIM)) {
     getDimSuccess = false;
   }
 
-  NcDim *elemsDim;
+  Nc3Dim *elemsDim;
   if (!_getDimension(&elemsDim, ELEMS_DIM)) {
     getDimSuccess = false;
   }
 
-  NcDim *bandsDim;
+  Nc3Dim *bandsDim;
   if (!_getDimension(&bandsDim, BANDS_DIM)) {
     getDimSuccess = false;
   }
 
-  NcDim *auditCountDim;
+  Nc3Dim *auditCountDim;
   if (!_getDimension(&auditCountDim, AUDIT_COUNT_DIM)) {
     getDimSuccess = false;
   }
 
-  NcDim *auditSizeDim;
+  Nc3Dim *auditSizeDim;
   if (!_getDimension(&auditSizeDim, AUDIT_SIZE_DIM)) {
     getDimSuccess = false;
   }
@@ -250,87 +251,87 @@ SeviriData::readFile(const string& file_path)
   // get access to the variables
   //
   bool getVarSuccess = true;
-  NcVar* imageDateNc;
+  Nc3Var* imageDateNc;
   if (!_getVariable(&imageDateNc, IMAGE_DATE_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* imageTimeNc;
+  Nc3Var* imageTimeNc;
   if (!_getVariable(&imageTimeNc, IMAGE_TIME_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* startLineNc;
+  Nc3Var* startLineNc;
   if (!_getVariable(&startLineNc, START_LINE_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* startElemNc;
+  Nc3Var* startElemNc;
   if (!_getVariable(&startElemNc, START_ELEM_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* numLinesNc;
+  Nc3Var* numLinesNc;
   if (!_getVariable(&numLinesNc, NUM_LINES_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* numElemsNc;
+  Nc3Var* numElemsNc;
   if (!_getVariable(&numElemsNc, NUM_ELEMS_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* dataWidthNc;
+  Nc3Var* dataWidthNc;
   if (!_getVariable(&dataWidthNc, DATA_WIDTH_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* lineResNc;
+  Nc3Var* lineResNc;
   if (!_getVariable(&lineResNc, LINE_RES_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* elemResNc;
+  Nc3Var* elemResNc;
   if (!_getVariable(&elemResNc, ELEM_RES_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* prefixSizeNc;
+  Nc3Var* prefixSizeNc;
   if (!_getVariable(&prefixSizeNc, PREFIX_SIZE_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* crDateNc;
+  Nc3Var* crDateNc;
   if (!_getVariable(&crDateNc ,CR_DATE_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* crTimeNc;
+  Nc3Var* crTimeNc;
   if (!_getVariable(&crTimeNc, CR_TIME_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* auditTrailNc;
+  Nc3Var* auditTrailNc;
   if (!_getVariable(&auditTrailNc, AUDIT_TRAIL_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* bandsNc;
+  Nc3Var* bandsNc;
   if (!_getVariable(&bandsNc, BANDS_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* dataNc;
+  Nc3Var* dataNc;
   if (!_getVariable(&dataNc, DATA_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* latitudeNc;
+  Nc3Var* latitudeNc;
   if (!_getVariable(&latitudeNc, LATITUDE_VAR)) {
     getVarSuccess = false;
   }
 
-  NcVar* longitudeNc;
+  Nc3Var* longitudeNc;
   if (!_getVariable(& longitudeNc, LONGITUDE_VAR)) {
     getVarSuccess = false;
   }
@@ -604,7 +605,7 @@ SeviriData::_copy(const SeviriData& from)
 //
 
 bool 
-SeviriData::_getDimension(NcDim **dim, const char* id)
+SeviriData::_getDimension(Nc3Dim **dim, const char* id)
 {
   const string methodName = _className + "::_getDimension";
 
@@ -623,7 +624,7 @@ SeviriData::_getDimension(NcDim **dim, const char* id)
 //
 // Method Name:	SeviriData::_getDimension
 //
-// Description:	wrapper around nNcFile::get_var
+// Description:	wrapper around nNc3File::get_var
 //
 // Returns:	
 //
@@ -632,7 +633,7 @@ SeviriData::_getDimension(NcDim **dim, const char* id)
 //
 
 bool 
-SeviriData::_getVariable(NcVar **var, const char* id)
+SeviriData::_getVariable(Nc3Var **var, const char* id)
 {
   const string methodName = _className + "::_getVariable";
 
@@ -693,7 +694,7 @@ SeviriData::_setTime(int the_date, int the_time,
 //
 
 void 
-SeviriData::_setProjection(const NcVar* latitude, const NcVar* longitude)
+SeviriData::_setProjection(const Nc3Var* latitude, const Nc3Var* longitude)
 {
 
   float startLon = longitude->as_float(0); 

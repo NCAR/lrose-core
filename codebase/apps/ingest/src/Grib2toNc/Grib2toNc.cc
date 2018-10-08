@@ -76,9 +76,7 @@ Grib2toNc::Grib2toNc(int argc, char **argv) {
 
   // Get TDRP parameters.
   _params = new Params();
-  char *params_path = new char[300];
-  strcpy(params_path, "unknown");
-
+  char *params_path = (char*)"unknown";
   if (_params->loadFromArgs(argc, argv, _args->override.list, &params_path))
   {
     fprintf(stderr, "ERROR: Problem reading TDRP parameters in file <%s>\n", params_path);
@@ -166,7 +164,7 @@ void Grib2toNc::_ucopyright(const char *prog_name)
 	  timeStruct.hour, timeStruct.min, timeStruct.sec);
 
   fprintf(stderr, "\n");
-  fprintf(stderr, "** Program '%s'\n", prog_name);
+  fprintf(stderr, "** Program '%s'  Version '%1.2f'\n", prog_name, Grib2toNc_VERSION);
   fprintf(stderr, "** Copyright (c) 1992-%.4d UCAR\n",  timeStruct.year);
   fprintf(stderr,
 	  "** University Corporation for Atmospheric Research - UCAR.\n");

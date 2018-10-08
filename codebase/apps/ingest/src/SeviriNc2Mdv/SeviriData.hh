@@ -24,7 +24,7 @@
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: SeviriData.hh,v 1.11 2016/03/07 01:23:05 dixon Exp $
+ *  $Id: SeviriData.hh,v 1.12 2018/01/26 18:43:35 jcraig Exp $
  *
  */
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -126,9 +126,9 @@
 using namespace std;
 
 // forward declarations
-class NcFile;
-class NcDim;
-class NcVar;
+class Nc3File;
+class Nc3Dim;
+class Nc3Var;
 class Pjg;
 class SeviriConverter;
 
@@ -232,7 +232,7 @@ private:
 
   const Params* _params;
 
-  NcFile* _ncFile;
+  Nc3File* _ncFile;
 
   Pjg* _pjg;
 
@@ -298,11 +298,11 @@ private:
   /////////////////////
 
   void _copy(const SeviriData &from);
-  bool _getDimension(NcDim **dim, const char* id);
-  bool _getVariable(NcVar **var, const char* id);
+  bool _getDimension(Nc3Dim **dim, const char* id);
+  bool _getVariable(Nc3Var **var, const char* id);
   void _setTime(int the_date, int the_time, 
 		DateTime& datetime);
-  void _setProjection(const NcVar* latitude, const NcVar* longitude);
+  void _setProjection(const Nc3Var* latitude, const Nc3Var* longitude);
   bool _processBand(int num);
   int _getBandInfoIndex(int band_num);
 

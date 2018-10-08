@@ -730,19 +730,22 @@ int MetarCsv2Spdb::run()
 
 void MetarCsv2Spdb::verifyMetar(const WxObs& m, const string& line){
 
-  
+  if (_params.debug == Params::DEBUG_OFF) {
+    return;
+  }
   
   //test 1:
   // precip type is RA, -RA, +RA, DZ, -DZ, +DZ and T <= -10C.
   // NOTE that -DZ and +DZ are not supported weather types, so we don't check for them.
   if (m.getTempC() <= -10){
     for (int ix = 0; ix < m.getWeatherTypeSize(); ix++){
-      if ( (m.getWeatherType(ix) == WxT_RA) ||
-	   (m.getWeatherType(ix) == WxT_MRA) ||
-	   (m.getWeatherType(ix) == WxT_PRA) ||
-	   (m.getWeatherType(ix) == WxT_DZ) ) {
-	cerr << "ERROR: Decoded metar has Temp < -10 (" << m.getTempC() << ") and invalid weather (" << m.wxType2Str(m.getWeatherType(ix)) << ")" << endl;
-	cerr << "ERROR:         input line: " << line << endl;	  	     
+      string metar_str = m.getMetarWx();
+      if( (metar_str.find("RA") != string::npos &&
+           metar_str.find("FZRA") == string::npos) ||
+          (metar_str.find("DZ") != string::npos &&
+	   metar_str.find("FZDZ") == string::npos) ) {
+	cerr << "WARNING: Decoded metar has Temp < -10 (" << m.getTempC() << ") but FZ not found in weather string (" << metar_str << ")" << endl;
+	cerr << "WARNING:         input line: " << line << endl;	  	     
       }
       
     }
@@ -750,16 +753,16 @@ void MetarCsv2Spdb::verifyMetar(const WxObs& m, const string& line){
   }
   //test 2:
   // precip type is UNKNOWN
+  /*
       for (int ix = 0; ix < m.getWeatherTypeSize(); ix++){
 	if ( (m.getWeatherType(ix) == WxT_UNKNOWN) &&
 	     ( m.getMetarWx().length() > 0 )){
-	  cerr << "ERROR: Decoded metar has Wx Type UNKNOWN.  Weather String was: " << m.getMetarWx() << endl;
-          cerr << "ERROR: input line: " << line << endl;
+	  cerr << "WARNING: Decoded metar has Wx Type UNKNOWN.  Weather String was: " << m.getMetarWx() << endl;
+          cerr << "WARNING: input line: " << line << endl;
 
 	}
       }
-
-  
+  */
 }
 
 /////////////////////////////////////////////////////////////////////////

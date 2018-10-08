@@ -27,7 +27,7 @@
 //  Once parsed and/or converted to a format we need the data
 //  is then passed off to the 
 //
-//  $Id: ReadNexrad.cc,v 1.16 2016/03/07 01:23:03 dixon Exp $
+//  $Id: ReadNexrad.cc,v 1.18 2018/02/07 23:41:12 jcraig Exp $
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -209,38 +209,42 @@ status_t ReadNexrad::readMsg(ui08 *buffer, size_t numberOfBytes)
       return(BAD_DATA);
     }
 
-    if(nexradData->ref_ptr != 0) {
-      RIDDS_data_31 *reflData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->ref_ptr);
-      BE_to_RIDDS_data_31(reflData);
+    ui32 blockPtrs[6];
+    blockPtrs[0] = nexradData->ref_ptr;
+    blockPtrs[1] = nexradData->vel_ptr;
+    blockPtrs[2] = nexradData->sw_ptr;
+    blockPtrs[3] = nexradData->zdr_ptr;
+    blockPtrs[4] = nexradData->phi_ptr;
+    blockPtrs[5] = nexradData->rho_ptr;
+    nexradData->ref_ptr = 0;
+    nexradData->vel_ptr = 0;
+    nexradData->sw_ptr = 0;
+    nexradData->zdr_ptr = 0;
+    nexradData->phi_ptr = 0;
+    nexradData->rho_ptr = 0;
+    for(int block = 0; block < nexradData->data_blocks-3; block++) 
+    {
+      RIDDS_data_31 *blockPtr = (RIDDS_data_31 *)((ui08*)nexradData + blockPtrs[block]);
+      BE_to_RIDDS_data_31(blockPtr);
+      if(blockPtr->block_name[0] == 'R' && blockPtr->block_name[1] == 'E')
+	nexradData->ref_ptr = blockPtrs[block];
+      if(blockPtr->block_name[0] == 'V' && blockPtr->block_name[1] == 'E')
+	nexradData->vel_ptr = blockPtrs[block];
+      if(blockPtr->block_name[0] == 'S' && blockPtr->block_name[1] == 'W')
+	nexradData->sw_ptr = blockPtrs[block];
+      if(blockPtr->block_name[0] == 'Z' && blockPtr->block_name[1] == 'D')
+	nexradData->zdr_ptr = blockPtrs[block];
+      if(blockPtr->block_name[0] == 'P' && blockPtr->block_name[1] == 'H')
+	nexradData->phi_ptr = blockPtrs[block];
+      if(blockPtr->block_name[0] == 'R' && blockPtr->block_name[1] == 'H')
+	nexradData->rho_ptr = blockPtrs[block];
     }
 
-    if(nexradData->vel_ptr != 0) {
-      RIDDS_data_31 *velData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->vel_ptr);
-      BE_to_RIDDS_data_31(velData);
+    if(params->verbose) {
+      POSTMSG( DEBUG, "Msg 31, elevation: %f, azimuth %f, reflData: %d, velData: %d, swData: %d, zdrData: %d, phiData: %d, rhoData: %d" ,
+	       nexradData->elevation, nexradData->azimuth, nexradData->ref_ptr, nexradData->vel_ptr, 
+	       nexradData->sw_ptr, nexradData->zdr_ptr, nexradData->phi_ptr, nexradData->rho_ptr);
     }
-
-    if(nexradData->sw_ptr != 0) {
-      RIDDS_data_31 *swData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->sw_ptr);
-      BE_to_RIDDS_data_31(swData);
-    }
-
-    if(nexradData->zdr_ptr != 0) {
-      RIDDS_data_31 *zdrData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->zdr_ptr);
-      BE_to_RIDDS_data_31(zdrData);
-    }
-
-    if(nexradData->phi_ptr != 0) {
-      RIDDS_data_31 *phiData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->phi_ptr);
-      BE_to_RIDDS_data_31(phiData);
-    }
-
-    if(nexradData->rho_ptr != 0) {
-      RIDDS_data_31 *rhoData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->rho_ptr);
-      BE_to_RIDDS_data_31(rhoData);
-    }
-
-    if(params->verbose)
-      POSTMSG( DEBUG, "Msg 31, elevation: %f, azimuth %f" , nexradData->elevation, nexradData->azimuth);
     stat = ingester->addMsg31Beam(nexradData, volumeTitleSeen);
 
     return( stat );

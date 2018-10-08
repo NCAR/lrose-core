@@ -39,7 +39,6 @@
 #include <string>
 #include <vector>
 #include <didss/DsInputPath.hh>
-#include <netcdf.hh>
 #include "Args.hh"
 #include "Params.hh"
 using namespace std;

@@ -42,11 +42,9 @@
 
 #include <string>
 #include <map>
+#include <Ncxx/Nc3File.hh>
 #include <Spdb/SoundingPut.hh>
 #include <physics/IcaoStdAtmos.hh>
-#include <ncvalues.h>
-#include <netcdf.hh>
-#include <udunits2.h>
 #include "Args.hh"
 #include "Params.hh"
 using namespace std;
@@ -90,8 +88,8 @@ private:
 
   // netcdf handles
   
-  NcFile *_ncFile;
-  NcError *_ncErr;
+  Nc3File *_ncFile;
+  Nc3Error *_ncErr;
   
   // header info
 
@@ -101,7 +99,7 @@ private:
 
   // dimensions
 
-  NcDim *_timeDim;
+  Nc3Dim *_timeDim;
   int _nTimesInFile;
 
   // global attributes
@@ -150,16 +148,16 @@ private:
                         double &val, bool required = true);
   
   int _readVector(const string &name,
-                  NcDim *dim,
+                  Nc3Dim *dim,
                   vector<double> &val);
 
   int _readField(const string &name,
                  vector<double> &val);
 
-  void _fillVectorMissing(NcDim *dim,
+  void _fillVectorMissing(Nc3Dim *dim,
                           vector<double> &val);
 
-  string _asString(const NcTypedComponent *component,
+  string _asString(const Nc3TypedComponent *component,
                    int index = 0);
   
 };

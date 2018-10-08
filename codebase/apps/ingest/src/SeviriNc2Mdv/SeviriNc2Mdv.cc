@@ -24,11 +24,11 @@
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: SeviriNc2Mdv.cc,v 1.10 2016/03/07 01:23:05 dixon Exp $
+ *  $Id: SeviriNc2Mdv.cc,v 1.12 2018/10/08 20:37:10 dixon Exp $
  */
 
 # ifndef    lint
-static char RCSid[] = "$Id: SeviriNc2Mdv.cc,v 1.10 2016/03/07 01:23:05 dixon Exp $";
+static char RCSid[] = "$Id: SeviriNc2Mdv.cc,v 1.12 2018/10/08 20:37:10 dixon Exp $";
 # endif     /* not lint */
 
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -76,6 +76,8 @@ SeviriNc2Mdv *SeviriNc2Mdv::_instance = 0;
  
 // define any constants
 const string SeviriNc2Mdv::_className = "SeviriNc2Mdv";
+
+const float SeviriNc2Mdv::TINY_VALUE = 1.0e-5; 
 
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
@@ -279,9 +281,13 @@ SeviriNc2Mdv::_initialize(int argc, char **argv)
   // get TDRP params
   _params = new Params();
 
+<<<<<<< SeviriNc2Mdv.cc
   char *paramsPath = (char *) "unknown";
   if (_params->loadFromArgs(argc, argv, _args->override.list,
 			  &paramsPath)) {
+=======
+  if (_params->loadFromArgs(argc, argv, _args->override.list, NULL)) {
+>>>>>>> 1.11
     cerr << "ERROR: " << _progName << endl;
     cerr << "Problem with TDRP parameters" << endl;
     _isOK = false;

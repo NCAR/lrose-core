@@ -41,7 +41,7 @@
 #include "Params.hh"
 #include "Field.hh"
 #include <Fmq/DsRadarQueue.hh>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 using namespace std;
 
 ////////////////////////
@@ -54,7 +54,7 @@ public:
   // constructor
 
   File2Fmq(const Params &params,
-	   const NcFile &ncf,
+	   const Nc3File &ncf,
 	   DsRadarQueue &r_queue);
   
   // destructor
@@ -75,7 +75,7 @@ protected:
 private:
 
   const Params &_params;
-  const NcFile &_ncf;
+  const Nc3File &_ncf;
   DsRadarQueue &_rQueue;
 
   int _timeDimId;
@@ -86,14 +86,14 @@ private:
   time_t _baseTime;
   double _fixedAngle;
 
-  NcVar *_baseTimeVar;
-  NcVar *_timeOffsetVar;
-  NcVar *_azimuthVar;
-  NcVar *_elevationVar;
+  Nc3Var *_baseTimeVar;
+  Nc3Var *_timeOffsetVar;
+  Nc3Var *_azimuthVar;
+  Nc3Var *_elevationVar;
   
-  NcValues *_timeOffsetVals;
-  NcValues *_elevationVals;
-  NcValues *_azimuthVals;
+  Nc3Values *_timeOffsetVals;
+  Nc3Values *_elevationVals;
+  Nc3Values *_azimuthVals;
 
   double *_timeOffsetData;
   float *_elevationData;

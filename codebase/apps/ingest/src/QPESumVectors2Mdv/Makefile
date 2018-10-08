@@ -35,14 +35,14 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = QPESumVectors2Mdv
 
-LOC_INCLUDES = $(NETCDF4_INCS) $(HDF5_INCLUDES)
+LOC_INCLUDES = $(NETCDF4_INCS) 
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -lrapformats -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lrapformats -ldsserver \
 	-ldidss -ltdrp -ldataport \
-	-leuclid -ltoolsa -lRadx $(NETCDF4_LIBS) -lbz2 \
+	-leuclid -ltoolsa  $(NETCDF4_LIBS) -lbz2 \
 	-lz
 
-LOC_LDFLAGS = $(NETCDF4_LDFLAGS) $(HDF5_LDFLAGS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS) 
 
 LOC_CPPC_CFLAGS =
 

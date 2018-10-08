@@ -141,10 +141,6 @@ private:
   void _convertVerticalUnits(int paramsIndex);
   void _convertUnits(int paramsIndex,fl32 *dataPtr); 
 
-  fl32 *_encode(fl32 *dataPtr, Params::encoding_type_t output_encoding);
-  void *_float32_to_int8(fl32 *inDataPtr);
-  void *_float32_to_int16(fl32 *inDataPtr); 
-
 };
 
 #endif

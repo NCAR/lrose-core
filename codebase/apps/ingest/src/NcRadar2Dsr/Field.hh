@@ -35,7 +35,7 @@
 #define Field_hh
 
 #include <string>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include <dataport/port_types.h>
 using namespace std;
 
@@ -54,8 +54,8 @@ public:
 	float nc_missing,
 	double out_scale,
 	double out_bias,
-	NcVar *fld_var /* = NULL */,
-	NcValues *fld_values /* = NULL*/);
+	Nc3Var *fld_var /* = NULL */,
+	Nc3Values *fld_values /* = NULL*/);
 
   ~Field();
 
@@ -67,8 +67,8 @@ public:
   float ncMissing;
   double outScale;
   double outBias;
-  NcVar *var;
-  NcValues *values;
+  Nc3Var *var;
+  Nc3Values *values;
 
 protected:
 private:

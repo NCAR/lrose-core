@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 // RCS info
-//   $Author: dixon $
+//   $Author: jcraig $
 //   $Locker:  $
-//   $Date: 2016/03/07 01:23:04 $
-//   $Id: NrlTpw2Mdv.cc,v 1.7 2016/03/07 01:23:04 dixon Exp $
-//   $Revision: 1.7 $
+//   $Date: 2018/01/22 19:54:16 $
+//   $Id: NrlTpw2Mdv.cc,v 1.8 2018/01/22 19:54:16 jcraig Exp $
+//   $Revision: 1.8 $
 //   $State: Exp $
 //
  
@@ -247,14 +247,14 @@ void NrlTpw2Mdv::run()
  */
 
 bool NrlTpw2Mdv::_getTpwField(Mdvx &mdvx,
-			      const NcFile &nc_file,
+			      const Nc3File &nc_file,
 			      const string &input_file_path) const
 {
   static const string method_name = "NrlTpw2Mdv::_getTpwField()";
 
   // Get the TPW variable and its attributes from the netCDF file
 
-  NcVar *tpw_var;
+  Nc3Var *tpw_var;
   
   if ((tpw_var = nc_file.get_var(TPW_VAR_NAME.c_str())) == 0)
   {
@@ -265,7 +265,7 @@ bool NrlTpw2Mdv::_getTpwField(Mdvx &mdvx,
     return false;
   }
   
-  NcAtt *units_att;
+  Nc3Att *units_att;
   
   if ((units_att = tpw_var->get_att(TPW_UNITS_ATT_NAME.c_str())) == 0)
   {
@@ -279,7 +279,7 @@ bool NrlTpw2Mdv::_getTpwField(Mdvx &mdvx,
   string units = units_att->as_string(0);
   delete units_att;
   
-  NcAtt *missing_value_att;
+  Nc3Att *missing_value_att;
   
   if ((missing_value_att =
        tpw_var->get_att(TPW_MISSING_VALUE_ATT_NAME.c_str())) == 0)
@@ -477,11 +477,11 @@ bool NrlTpw2Mdv::_processFile(const string &input_file_path)
   // error is encountered.  This object is not explicitly used in the below
   // code, but is used implicitly by the netCDF library.
 
-  NcError nc_error(NcError::silent_nonfatal);
+  Nc3Error nc_error(Nc3Error::silent_nonfatal);
 
   // Open the input file
   
-  NcFile nc_file(input_file_path.c_str());
+  Nc3File nc_file(input_file_path.c_str());
   
   if (!nc_file.is_valid())
   {
@@ -529,7 +529,7 @@ bool NrlTpw2Mdv::_processFile(const string &input_file_path)
  */
 
 bool NrlTpw2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
-				    const NcFile &nc_file,
+				    const Nc3File &nc_file,
 				    const string &input_file_path,
 				    const string &tpw_units) const
 {
@@ -537,7 +537,7 @@ bool NrlTpw2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
 
   // Get the needed information from the netCDF file
 
-  NcDim *x_dim;
+  Nc3Dim *x_dim;
 
   if ((x_dim = nc_file.get_dim(_params->x_dim_name)) == 0)
   {
@@ -548,7 +548,7 @@ bool NrlTpw2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
     return false;
   }
   
-  NcDim *y_dim;
+  Nc3Dim *y_dim;
 
   if ((y_dim = nc_file.get_dim(_params->y_dim_name)) == 0)
   {
@@ -562,7 +562,7 @@ bool NrlTpw2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
   if (_params->debug)
     cerr << "   nx = " << x_dim->size() << ", ny = " << y_dim->size() << endl;
   
-  NcAtt *lat_att;
+  Nc3Att *lat_att;
   
   if ((lat_att = nc_file.get_att(LAT_ATT_NAME.c_str())) == 0)
   {
@@ -576,7 +576,7 @@ bool NrlTpw2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
   double lat = lat_att->as_double(0);
   delete lat_att;
   
-  NcAtt *lon_att;
+  Nc3Att *lon_att;
   
   if ((lon_att = nc_file.get_att(LON_ATT_NAME.c_str())) == 0)
   {
@@ -638,7 +638,7 @@ bool NrlTpw2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
  */
 
 bool NrlTpw2Mdv::_updateMasterHeader(Mdvx &mdvx,
-				     const NcFile &nc_file,
+				     const Nc3File &nc_file,
 				     const string &input_file_path) const
 {
   static const string method_name = "NrlTpw2Mdv::_updateMasterHeader()";
@@ -739,7 +739,7 @@ bool NrlTpw2Mdv::_updateMasterHeader(Mdvx &mdvx,
   
   // Get the attributes needed for the master header
 
-  NcAtt *lat_att;
+  Nc3Att *lat_att;
   
   if ((lat_att = nc_file.get_att(LAT_ATT_NAME.c_str())) == 0)
   {
@@ -753,7 +753,7 @@ bool NrlTpw2Mdv::_updateMasterHeader(Mdvx &mdvx,
   double lat = lat_att->as_double(0);
   delete lat_att;
   
-  NcAtt *lon_att;
+  Nc3Att *lon_att;
   
   if ((lon_att = nc_file.get_att(LON_ATT_NAME.c_str())) == 0)
   {

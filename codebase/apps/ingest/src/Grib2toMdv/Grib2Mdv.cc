@@ -506,11 +506,12 @@ int Grib2Mdv::getData()
 	      " not found in grib file." << endl;
 	  } else {
 
+	    Mdvx::encoding_type_t encoding;
 	    if(_paramsPtr->process_everything) {
 	      _setFieldNames(-1);
 	      _convertUnits(-1,fieldDataPtr);
 	      _convertVerticalUnits(-1);
-	      fieldDataPtr = _encode(fieldDataPtr, _paramsPtr->encoding_type);
+	      encoding = OutputFile::mdvEncoding(_paramsPtr->encoding_type);
 	    } else {
 	      for (int i = 0; i < _paramsPtr->output_fields_n; i++) {
 		if (STRequal_exact(_paramsPtr->_output_fields[i].param,
@@ -521,7 +522,7 @@ int Grib2Mdv::getData()
 		  _limitDataRange(i,fieldDataPtr);
 		  _convertUnits(i,fieldDataPtr);
 		  _convertVerticalUnits(i);
-		  fieldDataPtr = _encode(fieldDataPtr, _paramsPtr->_output_fields[i].encoding_type);
+		  encoding = OutputFile::mdvEncoding(_paramsPtr->_output_fields[i].encoding_type);
 		}
 	      }
 	    }
@@ -539,7 +540,7 @@ int Grib2Mdv::getData()
 	    MdvxField *fieldPtr = new MdvxField(_fieldHeader, _vlevelHeader, fieldDataPtr );
 	    //fieldData.free();
 	    delete [] fieldDataPtr;
-	    _outputFile->addField(fieldPtr);
+	    _outputFile->addField(fieldPtr, encoding);
 
 	  }
 
@@ -1181,244 +1182,6 @@ void Grib2Mdv::_convertUnits(int paramsIndex, fl32 *dataPtr)
     
   }
 
-}
-
-// Performs simple unit conversions, which are prescribed in the parameter file
-//
-fl32 *Grib2Mdv::_encode(fl32 *dataPtr, Params::encoding_type_t output_encoding)
-{
-  if (output_encoding != Params::ENCODING_FLOAT32)
-  {
-    fl32 min_val = std::numeric_limits<fl32>::max(); //1.0e99;
-    fl32 max_val = std::numeric_limits<fl32>::min(); //-1.0e99;
-    fl32 missing = _fieldHeader.missing_data_value;
-    fl32 bad = _fieldHeader.bad_data_value;
-    size_t npoints = (size_t)_fieldHeader.nz*(size_t)_fieldHeader.nx*(size_t)_fieldHeader.ny;
-    fl32 *val = dataPtr;
-    
-    for (size_t i = 0; i < npoints; i++, val++) {
-      fl32 this_val = *val;
-      if (this_val != missing && this_val != bad) {
-	min_val = MIN(min_val, this_val);
-	max_val = MAX(max_val, this_val);
-      }
-    }
-    _fieldHeader.min_value = min_val;
-    _fieldHeader.max_value = max_val;
-    
-    if (output_encoding == Params::ENCODING_INT8) {
-      dataPtr = (fl32*) _float32_to_int8(dataPtr);
-    } else if (output_encoding == Params::ENCODING_INT16) {
-      dataPtr = (fl32*)  _float32_to_int16(dataPtr);
-    }
-  }
-  return dataPtr;
-}
-
-
-// 
-// Encode FLOAT32 to INT8
-void *Grib2Mdv::_float32_to_int8(fl32 *inDataPtr)
-{
-
-  // set missing and bad
-
-  fl32 in_missing = _fieldHeader.missing_data_value;
-  fl32 in_bad =  _fieldHeader.bad_data_value;
-  ui08 out_missing = 0;
-  ui08 out_bad;
-  if (in_missing == in_bad) {
-    out_bad = out_missing;
-  } else {
-    out_bad = 1;
-  }
-
-  // compute scale and bias
-  
-  double scale, bias;
-
-  if (_paramsPtr->output_scaling_info.SpecifyScaling) {
-    scale = _paramsPtr->output_scaling_info.scale;
-    bias = _paramsPtr->output_scaling_info.bias;
-  }
-  else {
-    if (_fieldHeader.max_value == _fieldHeader.min_value) {
-      // scale = 1.0;
-      // bias = _fieldHeader.min_value - 4.0;
-      if (_fieldHeader.max_value == 0.0) {
-	scale = 1.0;
-      } else {
-	scale = fabs(_fieldHeader.max_value);
-      }
-      bias = _fieldHeader.min_value - 4.0 * scale;
-    } else {
-      double range = _fieldHeader.max_value - _fieldHeader.min_value;
-      scale = range / 250.0;
-      bias = _fieldHeader.min_value - scale * 4.0;
-    }
-  }
-
-  // allocate the output buffer
-
-  size_t npoints = _fieldHeader.nx * _fieldHeader.ny * _fieldHeader.nz;
-  size_t output_size = npoints * sizeof(ui08);
-  void *outDataPtr = new ui08[output_size];
-
-  // convert data
-  
-  fl32 *in = inDataPtr;
-  ui08 *out = (ui08 *) outDataPtr;
-  size_t nBad = 0;
-
-  for (size_t i = 0; i < npoints; i++, in++, out++) {
-    fl32 in_val = *in;
-    if (in_val == in_missing) {
-      *out = out_missing;
-    } else if (in_val == in_bad) {
-      *out = out_bad;
-    } else {
-      int out_val = (int) ((in_val - bias) / scale + 0.49999);
-      if (out_val > 255) {
-        nBad++;
- 	*out = 255;
-      } else if (out_val < 3) {
-        nBad++;
- 	*out = 3;
-      } else {
-	*out = (ui08) out_val;
-      }
-    }
-  } // i */
-
-  if (nBad > 0) {
-    cerr << "ERROR - float32_to_int8" << endl;
-    cerr << "  Out of range data found, field: " << _fieldHeader.field_name << endl;
-    cerr << "  n points: " << nBad << endl;
-    cerr << "  Replaced with min or max values as appropriate" << endl;
-  }
-
-  // adjust header
-  
-  _fieldHeader.volume_size = output_size;
-  _fieldHeader.encoding_type = Mdvx::ENCODING_INT8;
-
-  if (_paramsPtr->output_scaling_info.SpecifyScaling) {
-    _fieldHeader.scaling_type = Mdvx::SCALING_SPECIFIED;
-  }
-  else {
-    _fieldHeader.scaling_type = Mdvx::SCALING_DYNAMIC;
-  }
-
-  _fieldHeader.data_element_nbytes = 1;
-  _fieldHeader.missing_data_value = out_missing;
-  _fieldHeader.bad_data_value = out_bad;
-  _fieldHeader.scale = (fl32) scale;
-  _fieldHeader.bias = (fl32) bias;
-  
-  delete [] inDataPtr;
-  return outDataPtr;
-}
-
-
-//
-// encode FLOAT32 to INT16
-//
-void *Grib2Mdv::_float32_to_int16(fl32 *inDataPtr)  
-{
-
-  // set missing and bad
-
-  fl32 in_missing = _fieldHeader.missing_data_value;
-  fl32 in_bad =  _fieldHeader.bad_data_value;
-  ui16 out_missing = 0;
-  ui16 out_bad;
-  if (in_missing == in_bad) {
-    out_bad = out_missing;
-  } else {
-    out_bad = 1;
-  }
-
-  // compute scale and bias
-
-  double scale, bias;
-  if (_paramsPtr->output_scaling_info.SpecifyScaling) {
-    scale = _paramsPtr->output_scaling_info.scale;
-    bias = _paramsPtr->output_scaling_info.bias;
-  }
-  else {
-    if (_fieldHeader.max_value == _fieldHeader.min_value) {
-    
-      scale = 1.0;
-      bias = _fieldHeader.min_value - 20.0;
-    
-    } else {
-    
-      double range = _fieldHeader.max_value - _fieldHeader.min_value;
-      scale = range / 65500.0;
-      bias = _fieldHeader.min_value - scale * 20.0;
-
-    }
-  }
-
-  // allocate the output buffer
-  
-  size_t npoints = _fieldHeader.nx * _fieldHeader.ny * _fieldHeader.nz;
-  size_t output_size = npoints * sizeof(ui16);
-  void *outDataPtr = new ui16[npoints];
-
-  // convert data
-  
-  fl32 *in = (fl32 *) inDataPtr;
-  ui16 *out = (ui16 *) outDataPtr;
-  size_t nBad = 0;
-
-  for (size_t i = 0; i < npoints; i++, in++, out++) {
-    fl32 in_val = *in;
-    if (in_val == in_missing) {
-      *out = out_missing;
-    } else if (in_val == in_bad) {
-      *out = out_bad;
-    } else {
-      int out_val = (int) ((in_val - bias) / scale + 0.49999);
-      if (out_val > 65535) {
-        nBad++;
- 	*out = 65535;
-      } else if (out_val < 20) {
-        nBad++;
- 	*out = 20;
-      } else {
-	*out = (ui16) out_val;
-      }
-    }
-  } // i */
-
-  if (nBad > 0) {
-    cerr << "ERROR - MdvxField::_float32_to_int16" << endl;
-    cerr << "  Out of range data found, field: " << _fieldHeader.field_name << endl;
-    cerr << "  n points: " << nBad << endl;
-    cerr << "  Replaced with min or max values as appropriate" << endl;
-  }
-
-  // adjust header
-  
-  _fieldHeader.volume_size = output_size;
-  _fieldHeader.encoding_type = Mdvx::ENCODING_INT16;
-
-  if (_paramsPtr->output_scaling_info.SpecifyScaling) {
-    _fieldHeader.scaling_type = Mdvx::SCALING_SPECIFIED;
-  }
-  else {
-    _fieldHeader.scaling_type = Mdvx::SCALING_DYNAMIC;
-  }
-  
-  _fieldHeader.data_element_nbytes = 2;
-  _fieldHeader.missing_data_value = out_missing;
-  _fieldHeader.bad_data_value = out_bad;
-  _fieldHeader.scale = (fl32) scale;
-  _fieldHeader.bias = (fl32) bias;
-  
-  delete [] inDataPtr;
-  return outDataPtr;
 }
 
 

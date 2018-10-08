@@ -33,14 +33,14 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = Gemtronik2Netcdf
 
-LOC_INCLUDES = $(NETCDF_INCS)
+LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_CPPC_CFLAGS =
-LOC_LDFLAGS = $(NETCDF_LDFLAGS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_LIBS = \
 	-ltinyxml -ldsdata -lFmq -ldsserver \
 	-ldidss -lrapformats -leuclid -ltoolsa \
-	-ldataport -ltdrp $(NETCDF_LIB_LIST) -lsz \
+	-ldataport -ltdrp $(NETCDF4_LIBS) -lsz \
 	-lbz2 -lpthread -lm
 
 

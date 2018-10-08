@@ -6,7 +6,6 @@
 /ChannelFiles.hh/1.4/Thu Dec 29 22:57:33 2016//
 /ChannelSet.cc/1.12/Thu Dec 29 22:57:33 2016//
 /ChannelSet.hh/1.10/Thu Dec 29 22:57:33 2016//
-/EuMetSat2Mdv.cc/1.14/Thu Dec 29 22:57:33 2016//
 /EuMetSat2Mdv.hh/1.7/Thu Dec 29 22:57:33 2016//
 /EuMetSat2Mdv.test/1.7/Thu Dec 29 22:57:33 2016//
 /Field.cc/1.4/Thu Dec 29 22:57:33 2016//
@@ -24,4 +23,5 @@
 /SunAngle.hh/1.5/Thu Dec 29 22:57:33 2016//
 /paramdef.EuMetSat2Mdv/1.10/Thu Dec 29 22:57:33 2016//
 /Makefile/1.19/Fri Nov  3 21:10:26 2017//
+/EuMetSat2Mdv.cc/1.15/Thu Aug 30 22:53:12 2018//
 D
