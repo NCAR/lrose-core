@@ -3262,7 +3262,7 @@ void SigAirMet2Spdb::_handleSfcWindAndVis(int start_pos, string &wx_type)
   // search for end of weather component by looking forward to a 'OBS' token
   // offset start_pos by two token, because it points to 'SFC' in _msgToks
   for (int i = start_pos+2; i < _msgToks.size(); i++) {
-    if ( _msgToks[i] == "OBS") {
+    if ((_msgToks[i] == "OBS") || (_msgToks[i] == "FCST")) {
       break;
     }
     wx_type += " " + _msgToks[i];

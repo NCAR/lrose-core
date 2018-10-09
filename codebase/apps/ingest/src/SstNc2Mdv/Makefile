@@ -33,15 +33,14 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = SstNc2Mdv
 
-LOC_INCLUDES = $(NETCDF3_INCS) $(NETCDF4_INCS)
+LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -lFmq \
-	-ldsserver -ldidss -lrapformats -lnetcdf \
-	-lnetcdf_c++ -lncf -leuclid -ltoolsa \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lFmq \
+	-ldsserver -ldidss -lrapformats -leuclid -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread -lm
 
-LOC_LDFLAGS = $(NETCDF3_LIBS) $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_CFLAGS      =
 

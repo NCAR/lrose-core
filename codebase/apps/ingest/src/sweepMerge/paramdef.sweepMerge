@@ -24,8 +24,6 @@
 /*
  * Parameter definitions for sweepMerge application
  *
- * $Id: paramdef.sweepMerge,v 1.3 2016/03/07 01:25:08 dixon Exp $
- *
  */
 
 commentdef {

@@ -60,9 +60,9 @@ int main( int argc, char **argv )
    PORTsignal( SIGQUIT, dieGracefully );
    PORTsignal( SIGKILL, dieGracefully );
 
-   Prog->run();
+   int ret = Prog->run();
 
-   return (0);
+   return (ret);
 }
 
 

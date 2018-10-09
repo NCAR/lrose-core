@@ -1,9 +1,3 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -453,9 +447,9 @@ using namespace std;
   void Params::usage(ostream &out)
   {
     out << "TDRP args: [options as below]\n"
-        << "   [ -params/--params path ] specify params file path\n"
-        << "   [ -check_params/--check_params] check which params are not set\n"
-        << "   [ -print_params/--print_params [mode]] print parameters\n"
+        << "   [ -params path ] specify params file path\n"
+        << "   [ -check_params] check which params are not set\n"
+        << "   [ -print_params [mode]] print parameters\n"
         << "     using following modes, default mode is 'norm'\n"
         << "       short:   main comments only, no help or descr\n"
         << "                structs and arrays on a single line\n"
@@ -955,8 +949,8 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("output_fields");
-    tt->descr = tdrpStrDup("List of output fields, which are descibed by the field parameter and vertical level type\n");
-    tt->help = tdrpStrDup("To determine the available params and levels, use the command line argument -printSummary -file [filename]\n  No Nc output will be created, only a list of params and associated levels contained in the GRIB file.\nNote: process_everything must be set to FALSE to use this list.\n                                 \nout_field_t structure definition:\n  param:string GRIB2 product ID.\n  level:string GRIB2 level ID.\n  field_name:string Short field name. Overrides default name.\n                  Use empty string to keep default (param) name.\n  standard_name:string CF compliant standard name.\n                see: http://cfconventions.org/Data/cf-standard-names\n                     /28/build/cf-standard-name-table.html\n  out_units:out_units_t simple unit conversion utility. Options are:\n    NO_CHANGE            -- no change to units\n    MPS_TO_KNOTS         -- convert m/s to knots\n    M_TO_KM              -- convert meters to kilometers\n    M_TO_FT              -- convert meters to feet, \n    M_TO_MI              -- convert meters to miles, \n    M_TO_100FT           -- convert meters to 100's of feet, \n                            flight levels\n    PASCALS_TO_MBAR      -- convert pascals to millibars\n    KELVIN_TO_CELCIUS    -- convert degrees kelvin to to degrees\n                            celcius\n    KGPKG_TO_GPKG        -- convert kilogram per kilogram to gram\n                            per kilogram\n    PERCENT_TO_FRACTION  -- convert percentage to fraction, values\n                            between 0 and 1\n    FRACTION_TO_PERCENT  -- convert fraction to percentage, values\n                            between 0 and 100\n                                           \n   upper_range_limit:double upper limit threshold for field.\n   lower_range_limit:double lower limit threshold for field. \n                            When both upper and lower limits are set\n                            to zero no thresholds are applied.\n  packing_type:data_pack_t  Output variable packing type\n  qc_default_type:qc_default_t Replacement value for inputs outside\n                               of the range_limit\n  qc_default_value:double User defined replacement value.\n  vert_level_min: minimum integer level that will be processed\n                  (If set to -1, no restrictions will be set.)\n  vert_level_max: maximum integer level that will be processed\n                  (If set to -1, no restrictions will be set.)\n  vert_level_dz:  index (not value) change in vertical levels to\n                  process.   1 = every level, 2 = every other.\n     \nDefault behavior is to process everything with no changes");
+    tt->descr = tdrpStrDup("List of output fields to process, descibed by the field parameter and vertical level type\n");
+    tt->help = tdrpStrDup("To determine the available params and levels, use the command line argument -printSummary -file [filename]\n  No Nc output will be created, only a list of params and associated levels contained in the GRIB file.\n                                 \nNOTE: process_everything must be set to FALSE to use this list.\n                                 \nout_field_t structure definition:\n  param:string GRIB2 product ID.\n  level:string GRIB2 level ID.\n  field_name:string Short field name. Overrides default name.\n                  Use empty string to keep default (param) name.\n  standard_name:string CF compliant standard name.\n                see: http://cfconventions.org/Data/cf-standard-names\n                     /28/build/cf-standard-name-table.html\n  out_units:out_units_t simple unit conversion utility. Options are:\n    NO_CHANGE            -- no change to units\n    MPS_TO_KNOTS         -- convert m/s to knots\n    M_TO_KM              -- convert meters to kilometers\n    M_TO_FT              -- convert meters to feet, \n    M_TO_MI              -- convert meters to miles, \n    M_TO_100FT           -- convert meters to 100's of feet, \n                            flight levels\n    PASCALS_TO_MBAR      -- convert pascals to millibars\n    KELVIN_TO_CELCIUS    -- convert degrees kelvin to to degrees\n                            celcius\n    KGPKG_TO_GPKG        -- convert kilogram per kilogram to gram\n                            per kilogram\n    PERCENT_TO_FRACTION  -- convert percentage to fraction, values\n                            between 0 and 1\n    FRACTION_TO_PERCENT  -- convert fraction to percentage, values\n                            between 0 and 100\n                                           \n   upper_range_limit:double upper limit threshold for field.\n   lower_range_limit:double lower limit threshold for field. \n                            When both upper and lower limits are set\n                            to zero no thresholds are applied.\n \n  packing_type:data_pack_t  Output variable packing type\n    DATA_PACK_GRIB       -- Pack using the Grib2 information\n    DATA_PACK_NONE       -- Do not pack, keep data as floats\n    DATA_PACK_BYTE       -- Pack data as 8bit bytes\n    DATA_PACK_SHORT      -- Pack data as 16bit shorts\n \n  qc_default_type:qc_default_t Replacement value for inputs outside\n                               of the range_limit\n  qc_default_value:double User defined replacement value.\n \n  vert_level_min:int minimum integer level that will be processed\n                     (If set to -1, no restrictions will be set.)\n  vert_level_max:int maximum integer level that will be processed\n                     (If set to -1, no restrictions will be set.)\n  vert_level_dz: index (not value) change in vertical levels to\n                 process.   1 = every level, 2 = every other.\n \n  scale_factor:double Force a particular scale factor value\n                 (Only used when DATA_PACK_BYTE or DATA_PACK_SHORT)\n                 (0.0 to calculate this value dynamically)\n  add_offset:double Force a particular add offset value\n                    (Only used when scale_factor != 0.0 and \n                    DATA_PACK_BYTE or DATA_PACK_SHORT)\n     \nDefault behavior is to process everything with no changes");
     tt->array_offset = (char *) &_output_fields - &_start_;
     tt->array_n_offset = (char *) &output_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -964,7 +958,7 @@ using namespace std;
     tt->array_elem_size = sizeof(out_field_t);
     tt->array_n = 1;
     tt->struct_def.name = tdrpStrDup("out_field_t");
-    tt->struct_def.nfields = 13;
+    tt->struct_def.nfields = 15;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -1039,8 +1033,8 @@ using namespace std;
         tt->struct_def.fields[7].enum_def.nfields = 4;
         tt->struct_def.fields[7].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[7].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[7].enum_def.fields[0].name = tdrpStrDup("DATA_PACK_AUTO");
-        tt->struct_def.fields[7].enum_def.fields[0].val = DATA_PACK_AUTO;
+        tt->struct_def.fields[7].enum_def.fields[0].name = tdrpStrDup("DATA_PACK_GRIB");
+        tt->struct_def.fields[7].enum_def.fields[0].val = DATA_PACK_GRIB;
         tt->struct_def.fields[7].enum_def.fields[1].name = tdrpStrDup("DATA_PACK_NONE");
         tt->struct_def.fields[7].enum_def.fields[1].val = DATA_PACK_NONE;
         tt->struct_def.fields[7].enum_def.fields[2].name = tdrpStrDup("DATA_PACK_BYTE");
@@ -1082,7 +1076,17 @@ using namespace std;
       tt->struct_def.fields[12].ptype = INT_TYPE;
       tt->struct_def.fields[12].rel_offset = 
         (char *) &_output_fields->vert_level_dz - (char *) _output_fields;
-    tt->n_struct_vals = 13;
+      tt->struct_def.fields[13].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[13].fname = tdrpStrDup("scale_factor");
+      tt->struct_def.fields[13].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[13].rel_offset = 
+        (char *) &_output_fields->scale_factor - (char *) _output_fields;
+      tt->struct_def.fields[14].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[14].fname = tdrpStrDup("add_offset");
+      tt->struct_def.fields[14].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[14].rel_offset = 
+        (char *) &_output_fields->add_offset - (char *) _output_fields;
+    tt->n_struct_vals = 15;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("PRES");
@@ -1098,6 +1102,8 @@ using namespace std;
       tt->struct_vals[10].i = -1;
       tt->struct_vals[11].i = -1;
       tt->struct_vals[12].i = 1;
+      tt->struct_vals[13].d = 0;
+      tt->struct_vals[14].d = 0;
     tt++;
     
     // Parameter 'packing_type'
@@ -1113,8 +1119,8 @@ using namespace std;
     tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("DATA_PACK_AUTO");
-      tt->enum_def.fields[0].val = DATA_PACK_AUTO;
+      tt->enum_def.fields[0].name = tdrpStrDup("DATA_PACK_GRIB");
+      tt->enum_def.fields[0].val = DATA_PACK_GRIB;
       tt->enum_def.fields[1].name = tdrpStrDup("DATA_PACK_NONE");
       tt->enum_def.fields[1].val = DATA_PACK_NONE;
       tt->enum_def.fields[2].name = tdrpStrDup("DATA_PACK_BYTE");
@@ -1172,6 +1178,30 @@ using namespace std;
     tt->single_val.i = 5;
     tt++;
     
+    // Parameter 'force_zchunk_size'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("force_zchunk_size");
+    tt->descr = tdrpStrDup("Option to force vertical dimension chunk size to be 1.");
+    tt->help = tdrpStrDup("Dynamically scales other dimensions chunk sizes to keep under max_chunk_size.\nOnly applies to NETCDF4 and NETCDF4_CLASSIC files.");
+    tt->val_offset = (char *) &force_zchunk_size - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'max_chunk_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("max_chunk_size");
+    tt->descr = tdrpStrDup("Maximum requested chunk size, in bytes.");
+    tt->help = tdrpStrDup("Only applies with force_zchunk_size and NETCDF4 and NETCDF4_CLASSIC files.");
+    tt->val_offset = (char *) &max_chunk_size - &_start_;
+    tt->single_val.i = 1048576;
+    tt++;
+    
     // Parameter 'include_lat_lon'
     // ctype is 'tdrp_bool_t'
     
@@ -1203,7 +1233,7 @@ using namespace std;
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("out_projection_info");
     tt->descr = tdrpStrDup("This is the user defined projection");
-    tt->help = tdrpStrDup("If remap_output is true this defines the projection to remap too.The choice of projections are PROJ_LATLON, PROJ_LAMBERT_CONF and PROJ_FLAT. PROJ_LATLON is a latitude/longitude projection, and if it is chosen the remaining parameters can be ignored. PROJ_LAMBERT_CONF is a Lambert conformal projection, and if it is chosen the parameters origin_lat, origin_lon, ref_lat_1 and ref_lat_2 must be set.");
+    tt->help = tdrpStrDup("If remap_output is true this defines the projection to remap too.The choice of projections are PROJ_LATLON and PROJ_LAMBERT_CONF PROJ_LATLON is a latitude/longitude projection, and if it is chosen the remaining parameters can be ignored. PROJ_LAMBERT_CONF is a Lambert conformal projection, and if it is chosen the parameters origin_lat, origin_lon, ref_lat_1 and ref_lat_2 must be set.");
     tt->val_offset = (char *) &out_projection_info - &_start_;
     tt->struct_def.name = tdrpStrDup("projection_info_t");
     tt->struct_def.nfields = 6;

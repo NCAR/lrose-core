@@ -24,7 +24,7 @@
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: SeviriConverter.hh,v 1.5 2016/03/07 01:23:05 dixon Exp $
+ *  $Id: SeviriConverter.hh,v 1.6 2018/01/26 18:43:35 jcraig Exp $
  *
  */
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -63,11 +63,11 @@ public:
   // public members //
   ////////////////////
 
-  static const int NUM_BANDS = 12; // total number ofbands on SEVIRI 
-  static const int START_IR_BANDS = 4;
-  static const int END_IR_BANDS = 11;
-  static const int MIN_COUNT_VALUE = 0;
-  static const int MAX_COUNT_VALUE = 1023;
+  static const int NUM_BANDS; // total number ofbands on SEVIRI 
+  static const int START_IR_BANDS;
+  static const int END_IR_BANDS;
+  static const int MIN_COUNT_VALUE;
+  static const int MAX_COUNT_VALUE;
 
   ////////////////////
   // public methods //
@@ -106,26 +106,26 @@ private:
   string _errStr;
   static const string _className;
 
-  static const float EPSILON = 0.000001;
+  static const float EPSILON;
 
   //
   // radaince calibration scale and bias
   //
-  static const float _radainceCalScale[NUM_BANDS];
-  static const float _radainceCalBias[NUM_BANDS];
+  static const float _radainceCalScale[];
+  static const float _radainceCalBias[];
 
 
   //
   // brightness temperature LUT coefficients
   //
-  static const float _nuC[NUM_BANDS];
-  static const float _alpha[NUM_BANDS];
-  static const float _beta[NUM_BANDS];
+  static const float _nuC[];
+  static const float _alpha[];
+  static const float _beta[];
 
   //
   // convert radiance to albedo (%)
   //
-  static const float _toARad[NUM_BANDS];
+  static const float _toARad[];
 
 
   //
@@ -138,8 +138,8 @@ private:
   // k is Boltzman constant
   //
 
-  static const float _coeff1 = 1.19104e-5; // !mWm^-2sr^-1(cm^-1)^-4
-  static const float _coeff2 = 1.43877;   // K(cm^-1)^-1
+  static const float _coeff1; // !mWm^-2sr^-1(cm^-1)^-4
+  static const float _coeff2;   // K(cm^-1)^-1
 
 
   float _missing;

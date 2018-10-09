@@ -24,9 +24,6 @@
 /////////////////////////////////////////////////////////////
 // VelFile - handles processing of short range scan sweep
 //           file without matching dbz data
-//
-// $Id: 
-//
 /////////////////////////////////////////////////////////////
 #include "VelFile.hh"
 #include "DbzFile.hh"
@@ -50,7 +47,7 @@ VelFile::~VelFile()
 int VelFile::init( string* azimuthName, string* elevationName, 
                    string* timeName, string* dbzName ) 
 {
-   ncInput = new NcFile( currentPath->c_str(), NcFile::Write );
+   ncInput = new Nc3File( currentPath->c_str(), Nc3File::Write );
    
    if( !ncInput || !ncInput->is_valid() ) {
       POSTMSG( ERROR, "Could not open %s", currentPath->c_str() );
@@ -176,7 +173,7 @@ int VelFile::write()
    edges[0] = (long) numRays;
    edges[1] = (long) numCells;
 
-   NcVar *dbzPtr = ncInput->get_var( dbzName->c_str() );
+   Nc3Var *dbzPtr = ncInput->get_var( dbzName->c_str() );
    if( !dbzPtr || !dbzPtr->is_valid() ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s",
                dbzName->c_str(), currentPath->c_str() );

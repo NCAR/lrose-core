@@ -24,11 +24,10 @@
 //////////////////////////////////////////////////////////
 // DbzFile - handles processing of a long range scan
 //           sweep file
-//
-// $Id: DbzFile.cc,v 1.7 2016/03/07 01:23:11 dixon Exp $
-//
 /////////////////////////////////////////////////////////
 #include <math.h>
+#include <unistd.h>
+
 #include "DbzFile.hh"
 #include "SweepMerge.hh"
 
@@ -60,7 +59,7 @@ DbzFile::~DbzFile()
 int DbzFile::init( string* azimuthName, string* elevationName, 
                    string* timeName, string* dbzName ) 
 {
-   ncInput = new NcFile( currentPath->c_str(), NcFile::ReadOnly );
+   ncInput = new Nc3File( currentPath->c_str(), Nc3File::ReadOnly );
    
    if( !ncInput || !ncInput->is_valid() ) {
       POSTMSG( ERROR, "Could not open %s", currentPath->c_str() );

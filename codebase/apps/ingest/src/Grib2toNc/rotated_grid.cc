@@ -113,7 +113,7 @@ int rotated_grid_get_lat_lons(Grib2Nc::GridInfo gridInfo, float *rlon, float *rl
 	clat = sqrt(1-pow(slat,2));
 	clon = (clat0*clatr*clonr-slat0*slatr)/clat;
 	clon = min(max((double)clon,(double)-1.0), (double)1.0);
-	rlon[n-1] = fmod(rlon0+hs*DPR*acos(clon)+3600,(float)360.0);
+	rlon[n-1] = fmod((float)(rlon0+hs*DPR*acos(clon)+3600),(float)360.0);
 	rlat[n-1] = DPR*asin(slat);
 	if(rlon[n-1] > 180.0)
 	  rlon[n-1] -= 360.0;

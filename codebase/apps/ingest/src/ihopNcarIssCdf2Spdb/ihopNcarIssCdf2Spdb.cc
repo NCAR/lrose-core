@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 // RCS info
-//   $Author: dixon $
+//   $Author: jcraig $
 //   $Locker:  $
-//   $Date: 2016/03/07 01:23:09 $
-//   $Id: ihopNcarIssCdf2Spdb.cc,v 1.3 2016/03/07 01:23:09 dixon Exp $
-//   $Revision: 1.3 $
+//   $Date: 2018/01/26 20:17:22 $
+//   $Id: ihopNcarIssCdf2Spdb.cc,v 1.4 2018/01/26 20:17:22 jcraig Exp $
+//   $Revision: 1.4 $
 //   $State: Exp $
 //
  
@@ -46,11 +46,10 @@
 
 #include <iostream>
 #include <string>
+#include <cassert>
 
 #include <toolsa/os_config.h>
-
-//#include <netcdf/netcdfcpp.h>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3File.hh>
 #include <rapformats/station_reports.h>
 #include <rapmath/math_macros.h>
 #include <Spdb/DsSpdb.hh>
@@ -254,7 +253,7 @@ bool ihopNcarIssCdf2Spdb::_processData(const string& file_name)
 
   //create a netCDF file object
 
-  NcFile netCDFfile(file_name.c_str());
+  Nc3File netCDFfile(file_name.c_str());
 
   //check to ensure the file is valid
   
@@ -318,7 +317,7 @@ bool ihopNcarIssCdf2Spdb::_processData(const string& file_name)
 
   // will use the number of time offsets as the number of data readings in the file
 
-  NcVar *offsetVar = netCDFfile.get_var(_params->timeOffset);
+  Nc3Var *offsetVar = netCDFfile.get_var(_params->timeOffset);
   int numRecs = offsetVar->num_vals();
 
   for (int i = 0; i < numRecs; ++i)

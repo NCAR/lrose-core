@@ -37,15 +37,15 @@ MODULE_TYPE=progcpp
 
 TARGET_FILE = NrlTpw2Mdv
 
-LOC_INCLUDES = $(NETCDF3_INCS) $(NETCDF4_INCS)
+LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -lSpdb \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lSpdb \
 	-ldsserver -ldidss -lrapformats -leuclid \
 	-lphysics -ltoolsa -ldataport -ltdrp \
-	-lnetcdf_c++ -lnetcdf $(NETCDF4_LIBS) -lbz2 \
+	$(NETCDF4_LIBS) -lbz2 \
 	-lz
 
-LOC_LDFLAGS = $(NETCDF3_LIBS) $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_CFLAGS = 
 LOC_CPPC_CFLAGS = 

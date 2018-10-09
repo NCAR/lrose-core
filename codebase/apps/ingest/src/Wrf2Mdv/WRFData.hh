@@ -37,7 +37,7 @@
 #define WRFData_H
 
 #include "Params.hh"
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include <dataport/bigend.h>
 #include <physics/IcaoStdAtmos.hh>
 #include <cstdio>
@@ -1131,8 +1131,8 @@ protected:
   Params _params;
   IcaoStdAtmos _isa;
   heartbeat_t _heartbeatFunc;
-  NcFile *_ncf;
-  NcError *_ncfError;
+  Nc3File *_ncf;
+  Nc3Error *_ncfError;
 
   mutable int _dataDimension;
   
@@ -1313,8 +1313,8 @@ protected:
   void _setAttKeys();
 
   //helper functions for _printFile
-  void _printAtt(NcAtt *att);
-  void _printVarVals(NcVar *var);
+  void _printAtt(Nc3Att *att);
+  void _printVarVals(Nc3Var *var);
 
   // determine if we are looking at a normal WRF file or a 
   // file created by the WRF preprocessing system (WPS) program,

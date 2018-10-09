@@ -26,8 +26,8 @@
 #include <cstring>
 #include <cstdlib>
 #include <ctype.h>
-#include <netcdf.hh>
 
+#include <Ncxx/Nc3File.hh>
 #include <toolsa/umisc.h>
 #include <toolsa/pjg_flat.h>
 #include <toolsa/pmu.h>
@@ -1379,46 +1379,46 @@ void asdi2netcdf::_dumpNetCDF()
   //
   // Create and Set up the new file
   //
-  NcFile *ncFile = new NcFile( outfilename, NcFile::Replace );
+  Nc3File *ncFile = new Nc3File( outfilename, Nc3File::Replace );
   if( !ncFile || !ncFile->is_valid() ) {
     fprintf(stderr, "ERROR: Could not create file '%s' for writing\n", outfilename);
     exit(-1);
   }
 
 
-  NcDim *recDim = ncFile->add_dim("records");
+  Nc3Dim *recDim = ncFile->add_dim("records");
     
-  NcDim *fltDim = ncFile->add_dim("callsign_len", AC_DATA_CALLSIGN_LEN);
+  Nc3Dim *fltDim = ncFile->add_dim("callsign_len", AC_DATA_CALLSIGN_LEN);
 
-  NcDim *aptDim = ncFile->add_dim("airport_len", AC_DATA_AIRPORT_LEN);
+  Nc3Dim *aptDim = ncFile->add_dim("airport_len", AC_DATA_AIRPORT_LEN);
 
-  ncFile->set_fill(NcFile::Fill);
+  ncFile->set_fill(Nc3File::Fill);
 
-  NcVar *startVar = ncFile->add_var("start_time", ncDouble);
+  Nc3Var *startVar = ncFile->add_var("start_time", nc3Double);
 
-  NcVar *endVar = ncFile->add_var("end_time", ncDouble);
+  Nc3Var *endVar = ncFile->add_var("end_time", nc3Double);
 
-  NcVar *fltVar = ncFile->add_var("callsign", ncChar, recDim, fltDim);
+  Nc3Var *fltVar = ncFile->add_var("callsign", nc3Char, recDim, fltDim);
 
-  NcVar *typeVar = ncFile->add_var("msg_type", ncShort, recDim);
+  Nc3Var *typeVar = ncFile->add_var("msg_type", nc3Short, recDim);
 
-  NcVar *timeVar = ncFile->add_var("msg_time", ncDouble, recDim);
+  Nc3Var *timeVar = ncFile->add_var("msg_time", nc3Double, recDim);
 
-  NcVar *latVar = ncFile->add_var("latitude", ncFloat, recDim);
+  Nc3Var *latVar = ncFile->add_var("latitude", nc3Float, recDim);
 
-  NcVar *lonVar  = ncFile->add_var("longitude", ncFloat, recDim);
+  Nc3Var *lonVar  = ncFile->add_var("longitude", nc3Float, recDim);
 
-  NcVar *altVar  = ncFile->add_var("altitude", ncFloat, recDim);
+  Nc3Var *altVar  = ncFile->add_var("altitude", nc3Float, recDim);
 
-  NcVar *altTypeVar  = ncFile->add_var("alt_type", ncShort, recDim);
+  Nc3Var *altTypeVar  = ncFile->add_var("alt_type", nc3Short, recDim);
 
-  NcVar *speedVar  = ncFile->add_var("ground_speed", ncFloat, recDim);
+  Nc3Var *speedVar  = ncFile->add_var("ground_speed", nc3Float, recDim);
 
-  NcVar *deptVar = ncFile->add_var("origin", ncChar, recDim, aptDim);  
+  Nc3Var *deptVar = ncFile->add_var("origin", nc3Char, recDim, aptDim);  
 
-  NcVar *destVar = ncFile->add_var("destination", ncChar, recDim, aptDim);  
+  Nc3Var *destVar = ncFile->add_var("destination", nc3Char, recDim, aptDim);  
 
-  NcVar *arrTimeVar = ncFile->add_var("arrival_time", ncChar, recDim, fltDim);  
+  Nc3Var *arrTimeVar = ncFile->add_var("arrival_time", nc3Char, recDim, fltDim);  
 
   ncFile->add_att("Conventions", "CF-1.5");
   ncFile->add_att("title", "Aircraft Position Data");

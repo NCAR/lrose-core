@@ -24,7 +24,7 @@
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: Navigation.hh,v 1.7 2016/03/07 01:22:59 dixon Exp $
+ *  $Id: Navigation.hh,v 1.8 2017/11/08 03:02:20 cunning Exp $
  *
  */
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -128,7 +128,7 @@ private:
   // private members //
   /////////////////////
   static const string _className;
-  static const fl32 _missingFloat = -9999.0;
+  static const fl32 _missingFloat;
 
   const Params* _params;
 

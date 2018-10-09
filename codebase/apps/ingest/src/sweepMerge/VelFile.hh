@@ -24,9 +24,6 @@
 /////////////////////////////////////////////////////////////
 // VelFile - handles processing of short range scan sweep
 //           file without matching dbz data
-//
-// $Id: VelFile.hh,v 1.5 2016/03/07 01:23:11 dixon Exp $
-//
 /////////////////////////////////////////////////////////////
 #ifndef _VEL_FILE_INC_
 #define _VEL_FILE_INC_

@@ -39,7 +39,7 @@
 #include <string>
 #include <vector>
 #include "Params.hh"
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 using namespace std;
 
 ////////////////////////
@@ -52,7 +52,7 @@ public:
   // constructor
 
   PpiFile (const Params &params,
-	   const NcFile &ncf,
+	   const Nc3File &ncf,
 	   int start_beam,
 	   int end_beam,
 	   int tilt_num,
@@ -79,7 +79,7 @@ protected:
 private:
 
   const Params &_params;
-  const NcFile &_ncfIn;
+  const Nc3File &_ncfIn;
 
   int _startBeam;
   int _endBeam;
@@ -93,15 +93,15 @@ private:
   int _maxCells;
   time_t _baseTime;
 
-  NcVar *_baseTimeVar;
-  NcVar *_fixedAngleVar;
-  NcVar *_timeOffsetVar;
-  NcVar *_azimuthVar;
-  NcVar *_elevationVar;
+  Nc3Var *_baseTimeVar;
+  Nc3Var *_fixedAngleVar;
+  Nc3Var *_timeOffsetVar;
+  Nc3Var *_azimuthVar;
+  Nc3Var *_elevationVar;
   
-  NcValues *_timeOffsetVals;
-  NcValues *_elevationVals;
-  NcValues *_azimuthVals;
+  Nc3Values *_timeOffsetVals;
+  Nc3Values *_elevationVals;
+  Nc3Values *_azimuthVals;
 
   double *_timeOffsetData;
   float *_elevationData;

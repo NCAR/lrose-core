@@ -33,6 +33,7 @@ D/GemVolXml2Dsr////
 D/Gemtronik2Netcdf////
 D/Gini2Gif////
 D/Gini2Mdv////
+D/GoesRnetCDF2Mdv////
 D/Grib2Mdv////
 D/Grib2toMdv////
 D/Grib2toNc////
@@ -217,3 +218,48 @@ D/timrexSat2mdv////
 /Makefile.uae_titan/1.1/Thu Dec 29 22:57:33 2016//
 /Makefile.wsddm/1.9/Thu Dec 29 22:57:33 2016//
 /Makefile.wsddm_all/1.2/Thu Dec 29 22:57:33 2016//
+D/ASAP2Mdv////
+D/ASAPWinds2Mdv////
+D/AbleAws2Spdb////
+D/AsapGdcp2Mdv////
+D/AwcEdrIngest////
+D/BeijingSat2Mdv////
+D/BufrStrpNwstgHdr////
+D/CinradSA2Dsr////
+D/Cmorph2Mdv////
+D/CoAgMet2Spdb////
+D/DCsurf2prf////
+D/EFMGenPt2Spdb////
+D/FGGEsoundingIngest////
+D/GEOTrackIngest////
+D/GoesRGLM2Spdb////
+D/GoesRNoaaPort2Mdv////
+D/GpmL3Hdf2Mdv////
+D/HRRR2Dbz////
+D/Hpcn2Spdb////
+D/JeppReformat////
+D/JmaHimawari8toMdv////
+D/KMAMesonet2Spdb////
+D/MSG3Sat2Mdv////
+D/NdbcBuoy2Spdb////
+D/ObsPair2NetCDF////
+D/SST2Mdv////
+D/SfcStationStatus2Spdb////
+D/Visst2Mdv////
+D/atecLtg2Spdb////
+D/avnIngest////
+D/aws2Spdb////
+D/ccfp2spdb////
+D/chinese2Spdb////
+D/codsus2Spdb////
+D/dataFeedMonitor////
+D/dugwayFileOrganizer////
+D/dugwaySoundingIngest////
+D/dugwaySurfaceIngest////
+D/getREAL////
+D/mysqlWash2Spdb////
+D/nexrad2netcdf////
+D/pentagonSurfaceIngest////
+D/printRealLidarTime////
+D/renameLassenFiles////
+D/saoIngest////

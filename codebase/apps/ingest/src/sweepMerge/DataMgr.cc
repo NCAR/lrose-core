@@ -23,12 +23,10 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //////////////////////////////////////////////////////
 // DataMgr - handles data i/o and processing
-//
-// $Id: DataMgr.cc,v 1.5 2016/03/07 01:23:11 dixon Exp $
-//
 /////////////////////////////////////////////////////
 #include <sys/stat.h>
-#include <netcdf.hh>
+#include <dirent.h>
+
 #include "DataMgr.hh"
 #include "SweepMerge.hh"
 #include "DbzFile.hh"

@@ -24,7 +24,7 @@
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: Navigation.cc,v 1.10 2016/03/07 01:22:59 dixon Exp $
+ *  $Id: Navigation.cc,v 1.11 2017/11/08 03:02:20 cunning Exp $
  *
  */
 
@@ -57,6 +57,7 @@ using namespace std;
 
 // define any constants
 const string Navigation::_className = "Navigation";
+const fl32 Navigation::_missingFloat = -9999.0;
 
 
 /////////////////////////////////////////////////////////////////////////

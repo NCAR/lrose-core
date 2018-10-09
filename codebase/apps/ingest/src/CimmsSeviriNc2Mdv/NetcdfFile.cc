@@ -104,7 +104,7 @@ bool NetcdfFile::init()
   // error is encountered.  This object is not explicitly used in the below
   // code, but is used implicitly by the netCDF library.
 
-  NcError nc_error(NcError::silent_nonfatal);
+  Nc3Error nc_error(Nc3Error::silent_nonfatal);
 
   // Check the input file
   
@@ -143,7 +143,7 @@ bool NetcdfFile::getBandsAsMdv(vector< MdvxField* > &fields,
 
   // Get the band variable from the netCDF file
 
-  NcVar *bands_var;
+  Nc3Var *bands_var;
   
   if ((bands_var = _ncFile.get_var(DATA_VAR_NAME.c_str())) == 0)
   {
@@ -154,7 +154,7 @@ bool NetcdfFile::getBandsAsMdv(vector< MdvxField* > &fields,
     return false;
   }
   
-  NcAtt *units_att;
+  Nc3Att *units_att;
   
   if ((units_att = bands_var->get_att(BANDS_UNITS_ATT_NAME.c_str())) == 0)
   {
@@ -263,7 +263,7 @@ DateTime NetcdfFile::getImageTime() const
   
   // Get the image date variable from the file
 
-  NcVar *date_var;
+  Nc3Var *date_var;
   
   if ((date_var = _ncFile.get_var(IMAGE_DATE_VAR_NAME.c_str())) == 0)
   {
@@ -286,7 +286,7 @@ DateTime NetcdfFile::getImageTime() const
   
   // Get the image time variable from the file
 
-  NcVar *time_var;
+  Nc3Var *time_var;
   
   if ((time_var = _ncFile.get_var(IMAGE_TIME_VAR_NAME.c_str())) == 0)
   {
@@ -355,7 +355,7 @@ bool NetcdfFile::_getDimensions()
   
   // Get the X/Y dimensions
 
-  NcDim *x_dim;
+  Nc3Dim *x_dim;
 
   if ((x_dim = _ncFile.get_dim(X_DIM_NAME.c_str())) == 0)
   {
@@ -368,7 +368,7 @@ bool NetcdfFile::_getDimensions()
   
   _nx = x_dim->size();
   
-  NcDim *y_dim;
+  Nc3Dim *y_dim;
 
   if ((y_dim = _ncFile.get_dim(Y_DIM_NAME.c_str())) == 0)
   {
@@ -386,7 +386,7 @@ bool NetcdfFile::_getDimensions()
   
   // Get the number of bands from the file
 
-  NcDim *bands_dim;
+  Nc3Dim *bands_dim;
 
   if ((bands_dim = _ncFile.get_dim(BANDS_DIM_NAME.c_str())) == 0)
   {
@@ -416,7 +416,7 @@ bool NetcdfFile::_getLatLon()
   
   // Get the latitude values
 
-  NcVar *lat_var;
+  Nc3Var *lat_var;
   
   if ((lat_var = _ncFile.get_var(LAT_VAR_NAME.c_str())) == 0)
   {
@@ -442,7 +442,7 @@ bool NetcdfFile::_getLatLon()
   
   // Get the longitude values
 
-  NcVar *lon_var;
+  Nc3Var *lon_var;
   
   if ((lon_var = _ncFile.get_var(LON_VAR_NAME.c_str())) == 0)
   {
@@ -484,7 +484,7 @@ bool NetcdfFile::_updateFieldHeader(const int band_index,
 
   // Get the band number from the netCDF file
 
-  NcVar *band_nums_var;
+  Nc3Var *band_nums_var;
   
   if ((band_nums_var = _ncFile.get_var(BAND_NUMS_VAR_NAME.c_str())) == 0)
   {

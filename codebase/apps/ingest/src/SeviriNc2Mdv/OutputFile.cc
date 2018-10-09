@@ -24,12 +24,12 @@
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: OutputFile.cc,v 1.9 2016/03/07 01:23:05 dixon Exp $
+ *  $Id: OutputFile.cc,v 1.10 2018/01/26 18:43:35 jcraig Exp $
  *
  */
 
 # ifndef    lint
-static char RCSid[] = "$Id: OutputFile.cc,v 1.9 2016/03/07 01:23:05 dixon Exp $";
+static char RCSid[] = "$Id: OutputFile.cc,v 1.10 2018/01/26 18:43:35 jcraig Exp $";
 # endif     /* not lint */
 
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -70,6 +70,7 @@ using namespace std;
 // define any constants
 const string OutputFile::_className    = "OutputFile";
 
+const double OutputFile::MISSING_DATA_VALUE = -9999.0;
 
 template <class T> string toString( T value );
 

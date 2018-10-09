@@ -28,10 +28,11 @@
 //  Terri Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 //  September 2001
 //
-//  $Id: Driver.cc,v 1.5 2016/03/07 01:23:07 dixon Exp $
+//  $Id: Driver.cc,v 1.6 2018/01/26 20:15:07 jcraig Exp $
 //
 ////////////////////////////////////////////////////////////////////////////////
 #include <string>
+#include <cassert>
 
 #include <didss/DsInputPath.hh>
 #include <dsserver/DsLocator.hh>

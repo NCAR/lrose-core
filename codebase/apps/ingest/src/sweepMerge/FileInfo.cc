@@ -24,9 +24,6 @@
 ///////////////////////////////////////////////////////////
 // FileInfo - container class for information retrieved
 //            from file name
-//
-// $Id: FileInfo.cc,v 1.4 2016/03/07 01:23:11 dixon Exp $
-//
 //////////////////////////////////////////////////////////
 #include "FileInfo.hh"
 #include "SweepMerge.hh"

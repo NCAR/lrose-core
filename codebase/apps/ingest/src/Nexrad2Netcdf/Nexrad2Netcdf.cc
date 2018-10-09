@@ -32,7 +32,7 @@
 //  Adapted from nexrad2dsr application by Terri Betancourt 
 //  RAP, NCAR, Boulder, CO, 80307, USA
 //
-//  $Id: Nexrad2Netcdf.cc,v 1.18 2016/03/07 01:23:03 dixon Exp $
+//  $Id: Nexrad2Netcdf.cc,v 1.19 2017/12/28 18:17:28 jcraig Exp $
 //
 /////////////////////////////////////////////////////////////
 #include <string>
@@ -186,7 +186,8 @@ int Nexrad2Netcdf::run(vector<string> inputFileList, time_t startTime, time_t en
      if( params->oneFilePerVolume || params->mode == Params::FILE_LIST) {
 
        processFile(filePath, uncompress);
-       readNexrad->endOfData();
+       if(params->oneFilePerVolume)
+	 readNexrad->endOfData();
        processedFile = true;
 
      //

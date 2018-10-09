@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: AccessA2Mdv.hh,v 1.6 2016/03/07 01:22:59 dixon Exp $
+ *  $Id: AccessA2Mdv.hh,v 1.7 2017/11/08 03:02:20 cunning Exp $
  */
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 
@@ -112,8 +112,8 @@ private:
   static AccessA2Mdv *_instance;
 
   static const string _className;
-  static const float MISSING_DATA_VALUE = -9999.0;
-  static const float TINY_VALUE = 1.0e-5; 
+  static const float MISSING_DATA_VALUE;
+  static const float TINY_VALUE; 
 
   /////////////////////
   // private methods //

@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 // RCS info
-//   $Author: dixon $
+//   $Author: jcraig $
 //   $Locker:  $
-//   $Date: 2016/03/07 01:23:06 $
-//   $Id: TamdarNcSndg2Spdb.cc,v 1.4 2016/03/07 01:23:06 dixon Exp $
-//   $Revision: 1.4 $
+//   $Date: 2018/01/26 20:06:07 $
+//   $Id: TamdarNcSndg2Spdb.cc,v 1.5 2018/01/26 20:06:07 jcraig Exp $
+//   $Revision: 1.5 $
 //   $State: Exp $
 //
  
@@ -48,7 +48,6 @@
 #include <iostream>
 #include <signal.h>
 #include <math.h>
-#include <netcdf.hh>
 #include <string>
 #include <unistd.h>
 #include <sys/stat.h>

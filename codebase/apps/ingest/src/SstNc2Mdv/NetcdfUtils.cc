@@ -58,25 +58,25 @@ NcTypeName( ArgType aNcType )
 
 switch( aNcType )
    {
-   case ncByte:
+   case nc3Byte:
       return "ncByte";
       break;
-   case ncChar:
+   case nc3Char:
       return "ncChar";
       break;
-   case ncShort:
+   case nc3Short:
       return "ncShort";
       break;
-   case ncInt:
+   case nc3Int:
       return "ncInt";
       break;
-   case ncFloat:
+   case nc3Float:
       return "ncFloat";
       break;
-   case ncDouble:
+   case nc3Double:
       return "ncDouble";
       break;
-   case ncNoType:
+   case nc3NoType:
       return "";
       break;
    default:
@@ -99,25 +99,25 @@ ElementSize( ArgType aNcType )
 
 switch( aNcType )
    {
-   case ncByte:
+   case nc3Byte:
       return sizeof( ncbyte );
       break;
-   case ncChar:
+   case nc3Char:
       return sizeof( char );
       break;
-   case ncShort:
+   case nc3Short:
       return sizeof( short int );
       break;
-   case ncInt:
+   case nc3Int:
       return sizeof( int );
       break;
-   case ncFloat:
+   case nc3Float:
       return sizeof( float );
       break;
-   case ncDouble:
+   case nc3Double:
       return sizeof( double );
       break;
-   case ncNoType:
+   case nc3NoType:
       return 0;
       break;
    default:
@@ -135,14 +135,14 @@ and handle error conditions
 -------------------------------------------------------------------------------
 */
 
-template< typename NcVarType >
+template< typename Nc3VarType >
 int
 ReadNcVar
    (
    const NcuPrtArgs_t  &arPrtArgs,   // const ref to print args
-   const NcFile        &arNcFile,    // const ref to netcdf file
+   const Nc3File        &arNcFile,    // const ref to netcdf file
    const string        &arNcVarName, // const ref to variable name
-   NcVarType           *apNcVarData  // pointer to variable receiving data
+   Nc3VarType           *apNcVarData  // pointer to variable receiving data
    )
 
 { // begin ReadNcVar
@@ -170,9 +170,9 @@ string
 // Get pointer to netcdf variable object
 //
 
-NcVar *ncv = arNcFile.get_var( arNcVarName.c_str() );
+Nc3Var *ncv = arNcFile.get_var( arNcVarName.c_str() );
 
-NcError nc_err = NcError(NcError::verbose_nonfatal);
+Nc3Error nc_err = Nc3Error(Nc3Error::verbose_nonfatal);
 
 //--- Check to see if pointer to netcdf variable object is NULL
 if( ncv != NULL )
@@ -183,7 +183,7 @@ if( ncv != NULL )
       {
 
       //--- get data for variable and check for success
-      NcBool  get_ok = true;
+      Nc3Bool  get_ok = true;
       long    *edges;
 
       int
@@ -298,7 +298,7 @@ int
 LoadNcVar
    (
    const NcuPrtArgs_t  &arPrtArgs,     // const ref to print args
-   const NcFile        &arNcFile,      // const ref to netcdf file
+   const Nc3File        &arNcFile,      // const ref to netcdf file
    const string        &arNcVarName,   // const ref to variable name
    NcVarElemType       **apNcVarData   // pointer to pointer to data
    )
@@ -332,7 +332,7 @@ NcuPrtArgs_t
 // Get pointer to netcdf variable object
 //
 
-NcVar *ncv = arNcFile.get_var( arNcVarName.c_str() );
+Nc3Var *ncv = arNcFile.get_var( arNcVarName.c_str() );
 
 //
 // Get dimensions of netcdf variable
@@ -404,8 +404,8 @@ CopyVarAtt
    (
    const NcuPrtArgs_t  &arPrtArgs,  // const ref to print args
    CharPtr             *aAttName,
-   NcVar               *apInputNcVar,
-   NcVar               *apOutputNcVar
+   Nc3Var               *apInputNcVar,
+   Nc3Var               *apOutputNcVar
    )
 
 { // begin CopyVarAtt
@@ -428,12 +428,12 @@ string
 // Turn off Netcdf error messages so we can see if the requested
 // attribute exists in the input variable.
 
-NcError
-   *nc_err = new NcError( NcError::silent_nonfatal );
+Nc3Error
+   *nc_err = new Nc3Error( Nc3Error::silent_nonfatal );
 
 // Get the attribute, if it exists
 
-NcAtt
+Nc3Att
    *att = apInputNcVar->get_att( aAttName );
 
 // restore previous error behavior of Netcdf library
@@ -455,40 +455,40 @@ if( att == NULL )
 
 // Attribute exists, so get its value(s).
 
-NcValues
+Nc3Values
    *att_vals = att->values();
 
 long int
    att_num_vals = att->num_vals();
 
-NcType
+Nc3Type
    att_type = att->type();
 
 // Add this attribute to the output variable
 
-if( (att_type == ncChar) || (att_num_vals == 1) ) // att is scalar
+if( (att_type == nc3Char) || (att_num_vals == 1) ) // att is scalar
    {
    switch( att_type )
       {
-      case ncByte:
+      case nc3Byte:
          apOutputNcVar->add_att( aAttName, att_vals->as_ncbyte(0) );
          break;
-      case ncChar:
+      case nc3Char:
          apOutputNcVar->add_att( aAttName, att_vals->as_char(0) );
          break;
-      case ncShort:
+      case nc3Short:
          apOutputNcVar->add_att( aAttName, att_vals->as_short(0) );
          break;
-      case ncInt:
+      case nc3Int:
          apOutputNcVar->add_att( aAttName, att_vals->as_int(0) );
          break;
-      case ncFloat:
+      case nc3Float:
          apOutputNcVar->add_att( aAttName, att_vals->as_float(0) );
          break;
-      case ncDouble:
+      case nc3Double:
          apOutputNcVar->add_att( aAttName, att_vals->as_double(0) );
          break;
-      case ncNoType:
+      case nc3NoType:
          break;
       }
    }
@@ -496,31 +496,31 @@ else // att is vector
    {
    switch( att_type )
       {
-      case ncByte:
+      case nc3Byte:
          apOutputNcVar->add_att(
             aAttName, att_num_vals, (ncbyte *) att_vals->base() );
          break;
-      case ncChar:
+      case nc3Char:
          apOutputNcVar->add_att(
             aAttName, att_num_vals, (char *) att_vals->base() );
          break;
-      case ncShort:
+      case nc3Short:
          apOutputNcVar->add_att(
             aAttName, att_num_vals, (short *) att_vals->base() );
          break;
-      case ncInt:
+      case nc3Int:
          apOutputNcVar->add_att(
             aAttName, att_num_vals, (int *) att_vals->base() );
          break;
-      case ncFloat:
+      case nc3Float:
          apOutputNcVar->add_att(
             aAttName, att_num_vals, (float *) att_vals->base() );
          break;
-      case ncDouble:
+      case nc3Double:
          apOutputNcVar->add_att(
             aAttName, att_num_vals, (double *) att_vals->base() );
          break;
-      case ncNoType:
+      case nc3NoType:
          break;
       }
    }
@@ -544,7 +544,7 @@ GetScalarAttValue
    (
    const NcuPrtArgs_t  &arPrtArgs,  // const ref to print args
    const char          *aAttName,
-   NcVar               *apInputNcVar,
+   Nc3Var               *apInputNcVar,
    AttType             *apAttValue
    )
 
@@ -568,10 +568,10 @@ string
 // Turn off Netcdf error messages so we can see if the requested
 // attribute exists in the input variable.
 
-NcError
-   *nc_err = new NcError( NcError::silent_nonfatal );
+Nc3Error
+   *nc_err = new Nc3Error( Nc3Error::silent_nonfatal );
 
-NcAtt
+Nc3Att
    *att = apInputNcVar->get_att( aAttName );
 
 // restore previous error behavior of Netcdf library
@@ -589,33 +589,33 @@ if( att == NULL )
    return;
    }
 
-NcValues
+Nc3Values
    *att_vals = att->values();
 
-NcType
+Nc3Type
    att_type = att->type();
 
 switch( att_type )
    {
-   case ncByte:
+   case nc3Byte:
       *apAttValue = (AttType) att_vals->as_ncbyte(0);
       break;
-   case ncChar:
+   case nc3Char:
       *apAttValue = (AttType) att_vals->as_char(0);
       break;
-   case ncShort:
+   case nc3Short:
       *apAttValue = (AttType) att_vals->as_short(0);
       break;
-   case ncInt:
+   case nc3Int:
       *apAttValue = (AttType) att_vals->as_int(0);
       break;
-   case ncFloat:
+   case nc3Float:
       *apAttValue = (AttType) att_vals->as_float(0);
       break;
-   case ncDouble:
+   case nc3Double:
       *apAttValue = (AttType) att_vals->as_double(0);
       break;
-   case ncNoType:
+   case nc3NoType:
       *apAttValue = (AttType) NULL;
       break;
    }
@@ -636,9 +636,9 @@ int
 AddVarAtt
    (
    const NcuPrtArgs_t  &arPrtArgs,  // const ref to print args
-   NcVar               *apNcVar,    // const pointer to netcdf variable
-   NcToken             aAttName,    // attribute name
-   NcType              aAttType,    // attribute type
+   Nc3Var               *apNcVar,    // const pointer to netcdf variable
+   Nc3Token             aAttName,    // attribute name
+   Nc3Type              aAttType,    // attribute type
    int                 aNumVals,    // number of attribute values
    VoidPtr             *aAttVals    // pointer to block of values
    )
@@ -663,10 +663,10 @@ string
 // Turn off Netcdf error messages so we can see if the requested
 // attribute exists in the variable.
 
-NcError
-   *nc_err = new NcError( NcError::silent_nonfatal );
+Nc3Error
+   *nc_err = new Nc3Error( Nc3Error::silent_nonfatal );
 
-NcAtt
+Nc3Att
    *nc_att = apNcVar->get_att( aAttName );
 
 // restore previous error behavior of Netcdf library
@@ -693,25 +693,25 @@ if( aNumVals <= 1 ) // scalar attribute
    {
    switch( aAttType )
       {
-      case ncByte:
+      case nc3Byte:
          apNcVar->add_att(aAttName, *((ncbyte *) aAttVals) );
          break;
-      case ncChar:
+      case nc3Char:
          apNcVar->add_att(aAttName, *((char *)   aAttVals) );
          break;
-      case ncShort:
+      case nc3Short:
          apNcVar->add_att(aAttName, *((short *)  aAttVals) );
          break;
-      case ncInt:
+      case nc3Int:
          apNcVar->add_att(aAttName, *((int *)    aAttVals) );
          break;
-      case ncFloat:
+      case nc3Float:
          apNcVar->add_att(aAttName, *((float *)  aAttVals) );
          break;
-      case ncDouble:
+      case nc3Double:
          apNcVar->add_att(aAttName, *((double *) aAttVals) );
          break;
-      case ncNoType:
+      case nc3NoType:
          break;
       } // end switch( att_type )
    }
@@ -719,25 +719,25 @@ else // vector attribute
    {
    switch( aAttType )
       {
-      case ncByte:
+      case nc3Byte:
          apNcVar->add_att(aAttName, aNumVals, (ncbyte *) aAttVals);
          break;
-      case ncChar:
+      case nc3Char:
          apNcVar->add_att(aAttName, aNumVals, (char *) aAttVals);
          break;
-      case ncShort:
+      case nc3Short:
          apNcVar->add_att(aAttName, aNumVals, (short *) aAttVals);
          break;
-      case ncInt:
+      case nc3Int:
          apNcVar->add_att(aAttName, aNumVals, (int *) aAttVals);
          break;
-      case ncFloat:
+      case nc3Float:
          apNcVar->add_att(aAttName, aNumVals, (float *) aAttVals);
          break;
-      case ncDouble:
+      case nc3Double:
          apNcVar->add_att(aAttName, aNumVals, (double *) aAttVals);
          break;
-      case ncNoType:
+      case nc3NoType:
          break;
       } // end switch( att_type )
 
@@ -758,9 +758,9 @@ int
 AddGlobalAtt
    (
    const NcuPrtArgs_t  &arPrtArgs,  // const ref to print args
-   NcFile              *apNcFile,   // const pointer to netcdf variable
+   Nc3File              *apNcFile,   // const pointer to netcdf variable
    const string        &arAttName,  // const ref to attribute name
-   NcType              aAttType,    // attribute type
+   Nc3Type              aAttType,    // attribute type
    long int            aNumVals,    // number of attribute values
    VoidPtr             *apAttVals    // pointer to block of values
    )
@@ -803,7 +803,7 @@ if( !apNcFile->is_valid() )
    return FAILURE;
    }
 
-if( aAttType == ncChar )
+if( aAttType == nc3Char )
    {
    //
    // Make sure string values in attributes are zero-terminated
@@ -824,24 +824,24 @@ if( n_vals == 1 ) // scalar attribute
    {
    switch( aAttType )
       {
-      case ncByte:
+      case nc3Byte:
          ok = apNcFile->add_att(att_name, *((ncbyte *) apAttVals));
          break;
-      case ncShort:
+      case nc3Short:
          ok = apNcFile->add_att(att_name, *((short int *) apAttVals));
          break;
-      case ncInt:
+      case nc3Int:
          ok = apNcFile->add_att(att_name, *((int *) apAttVals));
          break;
-      case ncFloat:
+      case nc3Float:
          ok = apNcFile->add_att(att_name, *((float *) apAttVals));
          break;
-      case ncDouble:
+      case nc3Double:
          ok = apNcFile->add_att(att_name, *((double *) apAttVals));
          break;
-      case ncNoType:
+      case nc3NoType:
          break;
-      case ncChar:
+      case nc3Char:
          break;
       }
    }
@@ -849,24 +849,24 @@ else // vector (1D array) attribute
    {
    switch( aAttType )
       {
-      case ncByte:
+      case nc3Byte:
          ok = apNcFile->add_att(att_name, n_vals, (ncbyte *) apAttVals);
          break;
-      case ncShort:
+      case nc3Short:
          ok = apNcFile->add_att(att_name, n_vals, (short int *) apAttVals);
          break;
-      case ncInt:
+      case nc3Int:
          ok = apNcFile->add_att(att_name, n_vals, (int *) apAttVals);
          break;
-      case ncFloat:
+      case nc3Float:
          ok = apNcFile->add_att(att_name, n_vals, (float *) apAttVals);
          break;
-      case ncDouble:
+      case nc3Double:
          ok = apNcFile->add_att(att_name, n_vals, (double *) apAttVals);
          break;
-      case ncNoType:
+      case nc3NoType:
          break;
-      case ncChar:
+      case nc3Char:
          break;
       }
    } // end if( n_vals == (long int) 1 )
@@ -905,7 +905,7 @@ int
 WriteVarData
    (
    const NcuPrtArgs_t  &arPrtArgs,  // const ref to print args
-   NcFile              &arNcFile,   // ref to netcdf file
+   Nc3File              &arNcFile,   // ref to netcdf file
    const char          *aVarName,   // const ptr to variable name
    const long int      *aEdges,     // edges array
    VoidPtr             *aDataPtr    // ptr to data block
@@ -916,10 +916,10 @@ WriteVarData
 const string
    FUNCTION_NAME = "WriteVarData";
 
-NcVar
+Nc3Var
    *nc_var = NULL;
 
-NcType
+Nc3Type
    nc_var_type;
 
 int
@@ -951,25 +951,25 @@ if( n_dims > 0 ) // array variable
    {
    switch( nc_var_type )
       {
-      case ncByte:
+      case nc3Byte:
          put_ok = nc_var->put( (ncbyte *)    aDataPtr, aEdges );
          break;
-      case ncChar:
+      case nc3Char:
          put_ok = nc_var->put( (char *)      aDataPtr, aEdges );
          break;
-      case ncShort:
+      case nc3Short:
          put_ok = nc_var->put( (short int *) aDataPtr, aEdges );
          break;
-      case ncInt:
+      case nc3Int:
          put_ok = nc_var->put( (int *)       aDataPtr, aEdges );
          break;
-      case ncFloat:
+      case nc3Float:
          put_ok = nc_var->put( (float *)     aDataPtr, aEdges );
          break;
-      case ncDouble:
+      case nc3Double:
          put_ok = nc_var->put( (double *)    aDataPtr, aEdges );
          break;
-      case ncNoType:
+      case nc3NoType:
          break;
       } // end switch var_type
 
@@ -979,25 +979,25 @@ else // scalar variable
 
    switch( nc_var_type )
       {
-      case ncByte:
+      case nc3Byte:
          put_ok = nc_var->put( (ncbyte *)    aDataPtr );
          break;
-      case ncChar:
+      case nc3Char:
          put_ok = nc_var->put( (char *)      aDataPtr );
          break;
-      case ncShort:
+      case nc3Short:
          put_ok = nc_var->put( (short int *) aDataPtr );
          break;
-      case ncInt:
+      case nc3Int:
          put_ok = nc_var->put( (int *)       aDataPtr );
          break;
-      case ncFloat:
+      case nc3Float:
          put_ok = nc_var->put( (float *)     aDataPtr );
          break;
-      case ncDouble:
+      case nc3Double:
          put_ok = nc_var->put( (double *)    aDataPtr );
          break;
-      case ncNoType:
+      case nc3NoType:
          break;
       } // end switch var_type
 

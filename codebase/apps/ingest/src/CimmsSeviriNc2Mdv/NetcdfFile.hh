@@ -39,8 +39,7 @@
 #include <string>
 #include <vector>
 
-#include <netcdf.hh>
-
+#include <Ncxx/Nc3File.hh>
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxPjg.hh>
 #include <toolsa/DateTime.hh>
@@ -220,7 +219,7 @@ protected:
    * @brief The netCDF file object.
    */
 
-  NcFile _ncFile;
+  Nc3File _ncFile;
   
 
   /**

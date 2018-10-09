@@ -37,13 +37,12 @@ December 2004
 // SYSTEM INCLUDES
 //
 
-#include <netcdf.hh>
-#include <netcdfcpp.h>
 
 //
 // LIBRARY INCLUDES
 //
 
+#include <Ncxx/Nc3File.hh>
 #include <toolsa/MsgLog.hh>
 
 //
@@ -112,7 +111,7 @@ int
 LoadNcVar
    (
    const NcuPrtArgs_t  &arPrtArgs,    // const ref to print args
-   const NcFile        &arNcFile,     // const ref to netcdf file
+   const Nc3File       &arNcFile,     // const ref to netcdf file
    const string        &arVarName,    // const ref to variable name
    NcVarElemType       **arpNcVarData // pointer to pointer to data
    );
@@ -128,7 +127,7 @@ int
 ReadNcVar
    (
    const NcuPrtArgs_t  &arPrtArgs,  // const ref to print args
-   const NcFile        &arNcFile,   // const ref to netcdf file
+   const Nc3File       &arNcFile,   // const ref to netcdf file
    const string        &arVarName,  // const ref to variable name
    NcVarElemType       *apNcVarData // pointer to variable receiving data
    );
@@ -146,9 +145,9 @@ int
 AddVarAtt
    (
    const NcuPrtArgs_t  &arPrtArgs,  // const ref to print args
-   NcVar               *apNcVar,    // const pointer to netcdf variable
-   NcToken             aAttName,    // attribute name
-   NcType              aAttType,    // attribute type
+   Nc3Var              *apNcVar,    // const pointer to netcdf variable
+   Nc3Token            aAttName,    // attribute name
+   Nc3Type             aAttType,    // attribute type
    int                 aNumVals,    // number of attribute values
    VoidPtr             *aAttVals    // pointer to block of values
    );
@@ -166,9 +165,9 @@ int
 AddGlobalAtt
    (
    const NcuPrtArgs_t  &arPrtArgs,  // const ref to print args
-   NcFile              *apNcFile,   // const pointer to netcdf variable
+   Nc3File             *apNcFile,   // const pointer to netcdf variable
    const string        &arAttName,  // const ref to attribute name
-   NcType              aAttType,    // attribute type
+   Nc3Type             aAttType,    // attribute type
    long int            aNumVals,    // number of attribute values
    VoidPtr             *aAttVals    // pointer to block of values
    );
@@ -189,8 +188,8 @@ CopyVarAtt
    (
    const NcuPrtArgs_t  &arPrtArgs,  // const ref to print args
    CharPtr             *aAttName,
-   NcVar               *apInputNcVar,
-   NcVar               *apOutputNcVar
+   Nc3Var              *apInputNcVar,
+   Nc3Var              *apOutputNcVar
    );
 
 //
@@ -203,7 +202,7 @@ GetScalarAttValue
    (
    const NcuPrtArgs_t  &arPrtArgs,  // const ref to print args
    const char          *aAttName,
-   NcVar               *apInputNcVar,
+   Nc3Var              *apInputNcVar,
    AttType             *apAttValue
    );
 
@@ -219,7 +218,7 @@ int
 WriteVarData
    (
    const NcuPrtArgs_t  &arPrtArgs,  // const ref to print args
-   NcFile              &arNcFile,   // ref to netcdf file
+   Nc3File             &arNcFile,   // ref to netcdf file
    const char          *aVarName,   // const ptr to variable name
    long int            *aEdges,     // edges array
    VoidPtr             *aDataPtr    // ptr to data block

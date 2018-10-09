@@ -52,7 +52,7 @@ using namespace std;
 // Constructor
 
 PpiFile::PpiFile(const Params &params,
-		 const NcFile &ncf_in,
+		 const Nc3File &ncf_in,
 		 int start_beam,
 		 int end_beam,
 		 int tilt_num,
@@ -213,13 +213,13 @@ int PpiFile::write()
   DateTime dtime(startTime);
 
   string instName;
-  NcAtt *instNameAtt = _ncfIn.get_att("Instrument_Name");
+  Nc3Att *instNameAtt = _ncfIn.get_att("Instrument_Name");
   if (instNameAtt != NULL) {
     instName = instNameAtt->as_string(0);
   }
 
   string scanMode;
-  NcAtt *scanModeAtt = _ncfIn.get_att("Scan_Mode");
+  Nc3Att *scanModeAtt = _ncfIn.get_att("Scan_Mode");
   if (scanModeAtt != NULL) {
     scanMode = scanModeAtt->as_string(0);
   }
@@ -331,9 +331,9 @@ int PpiFile::_createTmp(const char *tmp_path,
 
   // create NcFile object
 
-  NcError err(NcError::verbose_nonfatal);
+  Nc3Error err(Nc3Error::verbose_nonfatal);
 
-  NcFile out(tmp_path, NcFile::Replace);
+  Nc3File out(tmp_path, Nc3File::Replace);
   if (!out.is_valid()) {
     cerr << "ERROR - PpiFile::write" << endl;
     cerr << "  Cannot create file: " << tmp_path << endl;
@@ -346,12 +346,12 @@ int PpiFile::_createTmp(const char *tmp_path,
   int timeId = -1;
   int maxCellsId = -1;
   for (int idim = 0; idim < _ncfIn.num_dims(); idim++) {
-    NcDim *dim = _ncfIn.get_dim(idim);
+    Nc3Dim *dim = _ncfIn.get_dim(idim);
     if (dim == _ncfIn.rec_dim()) {
-      NcDim *timeDim = out.add_dim("Time");
+      Nc3Dim *timeDim = out.add_dim("Time");
       timeId = timeDim->id();
     } else {
-      NcDim *outDim = out.add_dim(dim->name(), dim->size());
+      Nc3Dim *outDim = out.add_dim(dim->name(), dim->size());
       if (!strcmp(outDim->name(), "maxCells")) {
 	maxCellsId = outDim->id();
       }
@@ -361,35 +361,35 @@ int PpiFile::_createTmp(const char *tmp_path,
   // add global attributes
 
   for (int iatt = 0; iatt < _ncfIn.num_atts(); iatt++) {
-     NcAtt *att = _ncfIn.get_att(iatt);
+     Nc3Att *att = _ncfIn.get_att(iatt);
     if (!strcmp(att->name(), "Volume_Number")) {
       out.add_att(att->name(), _volNum);
     } else if (!strcmp(att->name(), "Scan_Number")) {
       out.add_att(att->name(), _tiltNum);
     } else {
-      NcValues *vals = att->values();
+      Nc3Values *vals = att->values();
       switch (att->type()) {
-      case ncByte:
-	out.add_att(att->name(), att->num_vals(),
-		    (ncbyte *) vals->base());
-	break;
-      case ncChar:
+      case nc3Byte:
 	out.add_att(att->name(), att->num_vals(),
 		    (char *) vals->base());
 	break;
-      case ncShort:
+      case nc3Char:
+	out.add_att(att->name(), att->num_vals(),
+		    (char *) vals->base());
+	break;
+      case nc3Short:
 	out.add_att(att->name(), att->num_vals(),
 		    (short *) vals->base());
 	break;
-      case ncInt:
+      case nc3Int:
 	out.add_att(att->name(), att->num_vals(),
 		    (int *) vals->base());
 	break;
-      case ncFloat:
+      case nc3Float:
 	out.add_att(att->name(), att->num_vals(),
 		    (float *) vals->base());
 	break;
-      case ncDouble:
+      case nc3Double:
 	out.add_att(att->name(), att->num_vals(),
 		    (double *) vals->base());
 	break;
@@ -404,43 +404,43 @@ int PpiFile::_createTmp(const char *tmp_path,
 
   for (int ivar = 0; ivar < _ncfIn.num_vars(); ivar++) {
     
-    NcVar *varIn = _ncfIn.get_var(ivar);
+    Nc3Var *varIn = _ncfIn.get_var(ivar);
     int nDims = varIn->num_dims();
-    const NcDim *dims[nDims];
+    const Nc3Dim *dims[nDims];
     for (int ii = 0; ii < nDims; ii++) {
       dims[ii] = out.get_dim(varIn->get_dim(ii)->id());
     }
 
-    NcVar *varOut =
+    Nc3Var *varOut =
       out.add_var(varIn->name(), varIn->type(), nDims, dims);
 
     // add attributes for this variable
 
     for (int iatt = 0; iatt < varIn->num_atts(); iatt++) {
-      NcAtt *att = varIn->get_att(iatt);
-      NcValues *vals = att->values();
+      Nc3Att *att = varIn->get_att(iatt);
+      Nc3Values *vals = att->values();
       switch (att->type()) {
-      case ncByte:
-	varOut->add_att(att->name(), att->num_vals(),
-			(ncbyte *) vals->base());
-	break;
-      case ncChar:
+      case nc3Byte:
 	varOut->add_att(att->name(), att->num_vals(),
 			(char *) vals->base());
 	break;
-      case ncShort:
+      case nc3Char:
+	varOut->add_att(att->name(), att->num_vals(),
+			(char *) vals->base());
+	break;
+      case nc3Short:
 	varOut->add_att(att->name(), att->num_vals(),
 			(short *) vals->base());
 	break;
-      case ncInt:
+      case nc3Int:
 	varOut->add_att(att->name(), att->num_vals(),
 			(int *) vals->base());
 	break;
-      case ncFloat:
+      case nc3Float:
 	varOut->add_att(att->name(), att->num_vals(),
 			(float *) vals->base());
 	break;
-      case ncDouble:
+      case nc3Double:
 	varOut->add_att(att->name(), att->num_vals(),
 			(double *) vals->base());
 	break;
@@ -458,10 +458,10 @@ int PpiFile::_createTmp(const char *tmp_path,
 
     // first get the dimensions
 
-    NcVar *varIn = _ncfIn.get_var(ivar);
-    NcVar *var = out.get_var(ivar);
+    Nc3Var *varIn = _ncfIn.get_var(ivar);
+    Nc3Var *var = out.get_var(ivar);
     int nDims = var->num_dims();
-    const NcDim *dims[nDims];
+    const Nc3Dim *dims[nDims];
     long dimSizes[nDims];
     for (int ii = 0; ii < nDims; ii++) {
       dims[ii] = var->get_dim(ii);
@@ -534,7 +534,7 @@ int PpiFile::_createTmp(const char *tmp_path,
 
       // field data - shorts
 
-      NcValues *vals = varIn->values();
+      Nc3Values *vals = varIn->values();
       long sizes[2];
       sizes[0] = n_beams;
       sizes[1] = _maxCells;
@@ -551,25 +551,25 @@ int PpiFile::_createTmp(const char *tmp_path,
       
       // the rest
 
-      NcValues *vals = varIn->values();
+      Nc3Values *vals = varIn->values();
       bool success;
       switch (varIn->type()) {
-      case ncByte:
-	success = var->put((ncbyte *) vals->base(), dimSizes);
-	break;
-      case ncChar:
+      case nc3Byte:
 	success = var->put((char *) vals->base(), dimSizes);
 	break;
-      case ncShort:
+      case nc3Char:
+	success = var->put((char *) vals->base(), dimSizes);
+	break;
+      case nc3Short:
 	success = var->put((short *) vals->base(), dimSizes);
 	break;
-      case ncInt:
+      case nc3Int:
 	success = var->put((int *) vals->base(), dimSizes);
 	break;
-      case ncFloat:
+      case nc3Float:
 	success = var->put((float *) vals->base(), dimSizes);
 	break;
-      case ncDouble:
+      case nc3Double:
 	success = var->put((double *) vals->base(), dimSizes);
 	break;
       default: {}

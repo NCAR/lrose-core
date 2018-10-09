@@ -45,8 +45,7 @@ April 2005
 
 #include <string>
 #include <vector>
-#include <netcdf.hh>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3File.hh>
 
 //
 // PROJECT INCLUDES
@@ -378,7 +377,7 @@ private:
    string
       mNetcdfFilename;
 
-   NcFile
+   Nc3File
       *mNetcdfFile;
 
    //
@@ -448,7 +447,7 @@ private:
    OpenNetcdfFile
       (
       const string      &arNcInFileName,
-      NcFile::FileMode  aFileMode = NcFile::ReadOnly
+      Nc3File::FileMode  aFileMode = Nc3File::ReadOnly
       );
 
    int
@@ -487,8 +486,6 @@ private:
 // Class NcdAtt
 //-----------------------------------------------------------------------------
 
-#include "netcdf.hh"
-
 class NcdAtt
 {
 
@@ -499,7 +496,7 @@ public:
    NcdAtt
       (
       const string  &aName,
-      NcType        aType,
+      Nc3Type        aType,
       long int      aNumVals,
       void          *aValues
       );
@@ -524,7 +521,7 @@ public:
    const string &
       name( void ) const { return mName; }
 
-   NcType
+   Nc3Type
       type( void ) const { return mType; }
    
    long int
@@ -539,7 +536,7 @@ private:
 
    bool      mIsValid;
    string    mName;
-   NcType    mType;
+   Nc3Type    mType;
    long int  mNumVals;
    void      *mValues;
 
@@ -615,7 +612,7 @@ public:
    NcdVar
       (
       const string     &aName,       // name
-      NcType           aType,        // type
+      Nc3Type           aType,        // type
       NcdDimsByNum_t   &aDimsByNum,  // map<int, NcdDim*>
       void             *aData        // pointer to data
       );
@@ -655,7 +652,7 @@ public:
    int
       num_atts( void ) { return mNumAtts; }
 
-   NcType
+   Nc3Type
       type( void ) { return mType; }
 
    NcdAtt*
@@ -693,21 +690,21 @@ public:
 
    int add_att( NcdAtt *aNcdAtt );
 
-   int add_att( NcToken aName, ncbyte     aValue );
-   int add_att( NcToken aName, char       aValue );
-   int add_att( NcToken aName, short      aValue );
-   int add_att( NcToken aName, int        aValue );
-   int add_att( NcToken aName, float      aValue );
-   int add_att( NcToken aName, double     aValue );
+   int add_att( Nc3Token aName, ncbyte     aValue );
+   int add_att( Nc3Token aName, char       aValue );
+   int add_att( Nc3Token aName, short      aValue );
+   int add_att( Nc3Token aName, int        aValue );
+   int add_att( Nc3Token aName, float      aValue );
+   int add_att( Nc3Token aName, double     aValue );
 
-   int add_att( NcToken aName, const char *aValue );
+   int add_att( Nc3Token aName, const char *aValue );
 
-   int add_att( NcToken aName, int aSize, const ncbyte  *aValue );
-   int add_att( NcToken aName, int aSize, const short   *aValue );
-   int add_att( NcToken aName, int aSize, const int     *aValue );
-   int add_att( NcToken aName, int aSize, const long    *aValue );
-   int add_att( NcToken aName, int aSize, const float   *aValue );
-   int add_att( NcToken aName, int aSize, const double  *aValue );
+   int add_att( Nc3Token aName, int aSize, const ncbyte  *aValue );
+   int add_att( Nc3Token aName, int aSize, const short   *aValue );
+   int add_att( Nc3Token aName, int aSize, const int     *aValue );
+   int add_att( Nc3Token aName, int aSize, const long    *aValue );
+   int add_att( Nc3Token aName, int aSize, const float   *aValue );
+   int add_att( Nc3Token aName, int aSize, const double  *aValue );
 
    int
    replace_att // replaces attribute even if it already exists
@@ -728,7 +725,7 @@ private:
 
    bool            mIsValid;
    string          mName;
-   NcType          mType;
+   Nc3Type          mType;
    long int        *mEdges;
    void            *mData;
 

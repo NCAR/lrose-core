@@ -31,7 +31,7 @@
 //
 // July 2005
 //
-// $Id: Beam.hh,v 1.14 2017/06/07 22:34:17 jcraig Exp $
+// $Id: Beam.hh,v 1.18 2018/04/26 21:37:49 jcraig Exp $
 //
 ///////////////////////////////////////////////////////////////
 
@@ -110,11 +110,17 @@ public:
   float   getElevation() const { return _el; }
   double  getTime() const { return _time; }
   
+  float   getUnambiguousRange() { return _unambRange; };
+  float   getPrf() { return _prf; };
+  float   getNyquistVelocity() { return _nVelocity; };
+  float   getHorizNoise() { return _horizNoise; };
+  float   getVertNoise() { return _vertNoise; };
+
   const ui08*  getDbz() const { return _dbz; }
   const ui08*  getVel() const{ return _vel; };
   const ui08*  getWidth() const{ return _width; }
   const ui08*  getZdr() const { return _zdr; }
-  const ui08*  getPhi() const{ return _phi; };
+  const si16*  getPhi() const{ return _phi; };
   const ui08*  getRho() const{ return _rho; }
   const ui08*  getSnr() const{ return _snr; }
   const ui08*  getPr() const{ return _pr; }
@@ -148,6 +154,7 @@ public:
   float  getRecScale() const { return _recScale; }
   float  getRecBias() const { return _recBias; }
   short  getRecBad() const { return REC_BAD; }
+
    //
    // Constants
    //   DBZ_DIFF_SQ_MAX = maximum allowable value of reflectivity
@@ -174,6 +181,7 @@ public:
    static const double DBZ_DIFF_SQ_MAX;
    static const double MISSING_DBL;
    static const double M_TO_KM;
+   static const double SPEED_OF_LIGHT;
    static const double DBZ_SCALE;
    static const double DBZ_BIAS;
    static const double VEL_SCALE;
@@ -225,16 +233,16 @@ private:
 
   //
   // Information about this beam
-  //   _nVelGates       = number of gates in the Velocity data
-  //   _nReflGates      = number of gates in the Reflectivity data
-  //   _time            = time associated with the current beam
-  //   _el              = elevation associated with the current beam
-  //   _az              = azimuth associated with the current beam
-  //   _unambRange      = unambiguous range used for snr and pr
-  //                      computations for this beam. Note that 
-  //                      this value is valid for an entire sweep
-  //                      of data, but it is used here for the
-  //                      above listed computations.
+  //  _nVelGates       = number of gates in the Velocity data
+  //  _nReflGates      = number of gates in the Reflectivity data
+  //  _time            = time associated with the current beam
+  //  _el              = elevation associated with the current beam
+  //  _az              = azimuth associated with the current beam
+  //  _unambRange      = unambiguous range 
+  //  _prf              = 
+  //  _nVelocty         = Nyquist velocity
+  //  _horizNoise       = Noise level horizontal channel
+  //  _vertNoise        = Noise level vertical channel
   //  _rangeToFirstReflGate = range to the first gate in meters
   //                      for the Reflectivity data.
   //                      Note that this too is valid for
@@ -253,6 +261,10 @@ private:
   float  _el;
   float  _az;
   float  _unambRange;
+  float  _prf;
+  float  _nVelocity;
+  float  _horizNoise;
+  float  _vertNoise;
   float  _rangeToFirstReflGate;
   float  _rangeToFirstVelGate;
   float  _reflGateWidth;
@@ -269,7 +281,7 @@ private:
   ui08 *_vel;
   ui08 *_width;
   ui08 *_zdr;
-  ui08 *_phi;
+  si16 *_phi;
   ui08 *_rho;
   
   //
@@ -335,16 +347,16 @@ private:
   
   //
   // Store the data
-  //   nexradData = ridds data header and byte data that follows
+  //   nexradData   = ridds data header and byte data that follows
   //   shortData    = short data array used to store this data
-  //   unscaledData = double data array used to store the unscaled
-  //                  version of this data
-  //   scale        = scale to be applied
-  //   bias         = bias to be applied
+  //   data         = byte output data
   //
-  void _storeData( ui08* nexradData, int numGatesIn, ui08** shortData);
-  void _storeData(ui08* nexradData, int numGatesOut, int numGatesIn, ui08** data);
-  void _storeData(RIDDS_data_31* nexradData, int compression, int length, ui08** data);
+  void _storeData(const ui08* nexradData, int numGatesIn, ui08** data);
+  void _storeData(const ui16* nexradData, int numGatesIn, si16** data);
+  void _storeData(const ui08* nexradData, int numGatesOut, int numGatesIn, ui08** data);
+  void _storeData(const ui16* nexradData, int numGatesOut, int numGatesIn, si16** data);
+  void _storeData(const si16* nexradData, int numGatesOut, int numGatesIn, si16** data);
+
 
   //
   // Calculate snr

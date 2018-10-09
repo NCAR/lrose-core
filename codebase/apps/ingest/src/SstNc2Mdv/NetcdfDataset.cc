@@ -142,7 +142,7 @@ int
 // Open the netcdf input file (sets mNetcdfFile)
 //
 
-status = OpenNetcdfFile(arNcInputFilePath, NcFile::ReadOnly);
+status = OpenNetcdfFile(arNcInputFilePath, Nc3File::ReadOnly);
 
 //
 // If Netcdf file was not opened successfully, return FAILURE
@@ -273,7 +273,7 @@ NetcdfDataset::
 OpenNetcdfFile
    (
    const string      &arNcFileName,
-   NcFile::FileMode  aFileMode       // Default: NcFile::ReadOnly
+   Nc3File::FileMode  aFileMode       // Default: Nc3File::ReadOnly
    )                                 // (see NetcdfDataset.hh)
 
 { // begin NetcdfDataset::OpenNetcdfFile
@@ -285,7 +285,7 @@ const string
 // Try opening the Netcdf input file
 //
 
-mNetcdfFile = new NcFile(arNcFileName.c_str(), aFileMode);
+mNetcdfFile = new Nc3File(arNcFileName.c_str(), aFileMode);
 
 //
 // See if the Netcdf file was opened successfully
@@ -459,10 +459,10 @@ if( !NcFileIsValid() )
 for( int i_att = 0; i_att < mNetcdfFile->num_atts(); ++i_att )
    {
    //
-   // Get an NcAtt object from the input file
+   // Get an Nc3Att object from the input file
    //
 
-   NcAtt *att = mNetcdfFile->get_att(i_att);
+   Nc3Att *att = mNetcdfFile->get_att(i_att);
 
    //
    // Get attribute name as a C++ string
@@ -474,7 +474,7 @@ for( int i_att = 0; i_att < mNetcdfFile->num_atts(); ++i_att )
    // Create an NcdAtt object
    //
 
-   NcValues
+   Nc3Values
       *att_values = att->values();
 
    NcdAtt
@@ -509,7 +509,7 @@ for( int i_att = 0; i_att < mNetcdfFile->num_atts(); ++i_att )
       }
 
    //
-   // Delete the NcAtt object since we own it
+   // Delete the Nc3Att object since we own it
    //
 
    delete att;
@@ -535,23 +535,23 @@ if( (mDiagOut != NULL) && (mDiagOutLevel >= 2) )
       {
       ncd_att = mAttsByNum[ i_att ];
 
-      NcType        att_type = ncd_att->type();
+      Nc3Type        att_type = ncd_att->type();
       long int  att_num_vals = ncd_att->num_vals();
       void          *att_val = ncd_att->values();
       const char   *att_name = ncd_att->name().c_str();
 
-      if( (att_type == ncChar) || (att_num_vals == 1) ) // att is scalar
+      if( (att_type == nc3Char) || (att_num_vals == 1) ) // att is scalar
          {
 
          //char *att_str = new char[att_num_vals+1];
 
          switch( att_type )
             {
-            case ncByte:
+            case nc3Byte:
                fprintf(mDiagOut, "   Att# %3d:'%32s' = %d\n",
                   i_att, att_name, *((ncbyte *) att_val) );
                break;
-            case ncChar:
+            case nc3Char:
 
                //strncpy(att_str, (char *) att_val, att_num_vals);
                //att_str[att_num_vals] = '\0';
@@ -559,23 +559,23 @@ if( (mDiagOut != NULL) && (mDiagOutLevel >= 2) )
                fprintf(mDiagOut, "   Att# %3d:'%32s' = '%s'\n",
                   i_att, att_name, (char *) att_val );
                break;
-            case ncShort:
+            case nc3Short:
                fprintf(mDiagOut, "   Att# %3d:'%32s' = %d\n",
                   i_att, att_name, *((short int *) att_val) );
                break;
-            case ncInt:
+            case nc3Int:
                fprintf(mDiagOut, "   Att# %3d:'%32s' = %d\n",
                   i_att, att_name, *((int *) att_val) );
                break;
-            case ncFloat:
+            case nc3Float:
                fprintf(mDiagOut, "   Att# %3d:'%32s' = %g\n",
                   i_att, att_name, *((float *) att_val) );
                break;
-            case ncDouble:
+            case nc3Double:
                fprintf(mDiagOut, "   Att# %3d:'%32s' = %g\n",
                   i_att, att_name, *((double *) att_val) );
                break;
-            case ncNoType:
+            case nc3NoType:
                break;
             } // end switch att_type
 
@@ -595,28 +595,28 @@ if( (mDiagOut != NULL) && (mDiagOutLevel >= 2) )
 
             switch( att_type )
                {
-               case ncByte:
+               case nc3Byte:
                   fprintf(mDiagOut, "      %d\n", ((ncbyte *) att_val)[j] );
                   break;
-               case ncChar:
+               case nc3Char:
 
                   //strncpy(att_str, &(((char *) att_val)[j]), att_num_vals);
                   //att_str[att_num_vals] = '\0';
 
                   fprintf(mDiagOut, "      '%s'\n", (char *) att_val );
                   break;
-               case ncShort:
+               case nc3Short:
                   fprintf(mDiagOut, "      %d\n", ((short int *) att_val)[j] );
                   break;
-               case ncInt:
+               case nc3Int:
                   fprintf(mDiagOut, "      %d\n", ((int *) att_val)[j] );
                   break;
-               case ncFloat:
+               case nc3Float:
                   fprintf(mDiagOut, "      %g\n", ((float *) att_val)[j] );
                   break;
-               case ncDouble:
+               case nc3Double:
                   fprintf(mDiagOut, "      %g\n", ((double *) att_val)[j] );
-               case ncNoType:
+               case nc3NoType:
                   break;
                } // end switch att_type
 
@@ -652,7 +652,7 @@ string
 NcdDim
    *ncd_dim;
 
-NcDim
+Nc3Dim
    *nc_dim;
 
 int
@@ -871,7 +871,7 @@ for(int i_var = 0; i_var < (int) nc_var_names.size(); ++i_var)
 
    // Get NcVar pointer for variable nc_var_names[ i_var ]
 
-   NcVar *nc_var = mNetcdfFile->get_var( var_name.c_str() );
+   Nc3Var *nc_var = mNetcdfFile->get_var( var_name.c_str() );
 
    // Load the data from this variable using the appropriate type
    // pointer. Then assign the typed pointer to a void pointer
@@ -883,31 +883,31 @@ for(int i_var = 0; i_var < (int) nc_var_names.size(); ++i_var)
 
       switch( nc_var->type() )
          {
-         case ncByte:
+         case nc3Byte:
             NCU::LoadNcVar(mNcuPrtArgs, *mNetcdfFile, var_name, &ptr_byte);
             ptr_void = ptr_byte;
             break;
-         case ncChar:
+         case nc3Char:
             NCU::LoadNcVar(mNcuPrtArgs, *mNetcdfFile, var_name, &ptr_char);
             ptr_void = ptr_char;
             break;
-         case ncShort:
+         case nc3Short:
             NCU::LoadNcVar(mNcuPrtArgs, *mNetcdfFile, var_name, &ptr_short);
             ptr_void = ptr_short;
             break;
-         case ncInt:
+         case nc3Int:
             NCU::LoadNcVar(mNcuPrtArgs, *mNetcdfFile, var_name, &ptr_int);
             ptr_void = ptr_int;
             break;
-         case ncFloat:
+         case nc3Float:
             NCU::LoadNcVar(mNcuPrtArgs, *mNetcdfFile, var_name, &ptr_float);
             ptr_void = ptr_float;
             break;
-         case ncDouble:
+         case nc3Double:
             NCU::LoadNcVar(mNcuPrtArgs, *mNetcdfFile, var_name, &ptr_double);
             ptr_void = ptr_double;
             break;
-         case ncNoType:
+         case nc3NoType:
             break;
          }
 
@@ -976,13 +976,13 @@ for(int i_var = 0; i_var < (int) nc_var_names.size(); ++i_var)
 
       for(int i_att = 0; i_att < n_atts; ++i_att)
          {
-         NcAtt
+         Nc3Att
             *nc_att = nc_var->get_att(i_att);
 
          string
             nc_att_name_str = nc_att->name();
 
-         NcValues
+         Nc3Values
             *nc_values = nc_att->values();
 
          NcdAtt
@@ -1366,9 +1366,9 @@ int
 // Open the netcdf output file (sets mNetcdfFile)
 //
 
-status = OpenNetcdfFile(arNcOutputFilePath.c_str(), NcFile::Replace);
+status = OpenNetcdfFile(arNcOutputFilePath.c_str(), Nc3File::Replace);
 
-mNetcdfFile->set_fill(NcFile::NoFill);
+mNetcdfFile->set_fill(Nc3File::NoFill);
 
 //
 // If Netcdf output file was not opened successfully return FAILURE.
@@ -1492,7 +1492,7 @@ const string
 NcdAtt
    *ncd_att;
 
-NcType
+Nc3Type
    att_type;
 
 void
@@ -1789,14 +1789,14 @@ NcdDim
 NcdAtt
    *ncd_att;
 
-NcVar
+Nc3Var
    *nc_var,
    *nc_tmp;
 
-NcType
+Nc3Type
    var_type;
 
-NcDim
+Nc3Dim
    **nc_dims;
 
 int
@@ -1844,13 +1844,13 @@ for(int i_var = 0; i_var < (int) nc_var_names.size(); ++i_var)
       natts    = ncd_var->num_atts();
       var_type = ncd_var->type();
 
-      // Get array of NcDim pointers for this variable
+      // Get array of Nc3Dim pointers for this variable
 
       if( ndims > 0 )
          {
-         nc_dims = new NcDim*[ ndims ];
+         nc_dims = new Nc3Dim*[ ndims ];
 
-         // Get NcDim pointers for this variable from the Netcdf output file
+         // Get Nc3Dim pointers for this variable from the Netcdf output file
          // (Assumes "WriteDimensions" has already been called)
 
          for(int i_dim = 0; i_dim < ndims; ++i_dim)
@@ -1870,7 +1870,7 @@ for(int i_var = 0; i_var < (int) nc_var_names.size(); ++i_var)
       //    ncvarid: ncid 5: Variable not found
       // and excution would terminate.
 
-      NcError *nc_err = new NcError( NcError::silent_nonfatal );
+      Nc3Error *nc_err = new Nc3Error( Nc3Error::silent_nonfatal );
       nc_tmp = mNetcdfFile->get_var( var_name );
       delete nc_err;
 
@@ -1884,7 +1884,7 @@ for(int i_var = 0; i_var < (int) nc_var_names.size(); ++i_var)
             {
             nc_var =
             mNetcdfFile->add_var(
-               var_name, var_type, ndims, (const NcDim **) nc_dims);
+               var_name, var_type, ndims, (const Nc3Dim **) nc_dims);
             }
          else
             {
@@ -1909,8 +1909,8 @@ for(int i_var = 0; i_var < (int) nc_var_names.size(); ++i_var)
             ncd_att = ncd_var->get_att( i_att );
 
             int      att_size  = ncd_att->num_vals();
-            NcToken  att_name  = ncd_att->name().c_str();
-            NcType   att_type  = ncd_att->type();
+            Nc3Token  att_name  = ncd_att->name().c_str();
+            Nc3Type   att_type  = ncd_att->type();
             void     *att_vals = ncd_att->values();
 
             NCU::AddVarAtt
@@ -2374,7 +2374,7 @@ NcdAtt::
 NcdAtt
    (
    const string  &aName,
-   NcType        aType,
+   Nc3Type        aType,
    long int      aNumVals,
    void          *aValues
    )
@@ -2407,25 +2407,25 @@ if(aNumVals >= 1)
    {
    switch( mType )
       {
-      case ncByte:
+      case nc3Byte:
          mValues = (void *) new ncbyte    [ mNumVals ];
          break;
-      case ncChar:
+      case nc3Char:
          mValues = (void *) new char      [ mNumVals + 1 ];
          break;
-      case ncShort:
+      case nc3Short:
          mValues = (void *) new short int [ mNumVals ];
          break;
-      case ncInt:
+      case nc3Int:
          mValues = (void *) new int       [ mNumVals ];
          break;
-      case ncFloat:
+      case nc3Float:
          mValues = (void *) new float     [ mNumVals ];
          break;
-      case ncDouble:
+      case nc3Double:
          mValues = (void *) new double    [ mNumVals ];
          break;
-      case ncNoType:
+      case nc3NoType:
          return;
          break;
       default:
@@ -2455,7 +2455,7 @@ memcpy( (char *) mValues, (char *) aValues, n_bytes_to_copy );
 // Note that for an ncChar attribute, we allocated (mNumVals+1) bytes
 //
 
-if( mType == ncChar )
+if( mType == nc3Char )
    {
    ((char *) mValues)[ mNumVals ] = '\0';
    }
@@ -2499,25 +2499,25 @@ if(mNumVals >= 1)
    {
    switch( mType )
       {
-      case ncByte:
+      case nc3Byte:
          mValues = (void *) new ncbyte    [ mNumVals ];
          break;
-      case ncChar:
+      case nc3Char:
          mValues = (void *) new char      [ mNumVals + 1 ];
          break;
-      case ncShort:
+      case nc3Short:
          mValues = (void *) new short int [ mNumVals ];
          break;
-      case ncInt:
+      case nc3Int:
          mValues = (void *) new int       [ mNumVals ];
          break;
-      case ncFloat:
+      case nc3Float:
          mValues = (void *) new float     [ mNumVals ];
          break;
-      case ncDouble:
+      case nc3Double:
          mValues = (void *) new double    [ mNumVals ];
          break;
-      case ncNoType:
+      case nc3NoType:
          return;
          break;
       default:
@@ -2547,7 +2547,7 @@ memcpy( (char *) mValues, (char *) aNcdAtt.values(), n_bytes_to_copy );
 // Note that for an ncChar attribute, we allocated (mNumVals+1) bytes
 //
 
-if( mType == ncChar )
+if( mType == nc3Char )
    {
    ((char *) mValues)[ mNumVals ] = '\0';
    }
@@ -2583,25 +2583,25 @@ if( &att_rhs != this )
 
    switch( mType )
       {
-      case ncByte:
+      case nc3Byte:
          delete [] (ncbyte *) mValues;
          break;
-      case ncChar:
+      case nc3Char:
          delete [] (char *) mValues;
          break;
-      case ncShort:
+      case nc3Short:
          delete [] (short int *) mValues;
          break;
-      case ncInt:
+      case nc3Int:
          delete [] (int *) mValues;
          break;
-      case ncFloat:
+      case nc3Float:
          delete [] (float *) mValues;
          break;
-      case ncDouble:
+      case nc3Double:
          delete [] (double *) mValues;
          break;
-      case ncNoType:
+      case nc3NoType:
          break;
       default:
          break;
@@ -2622,25 +2622,25 @@ if( &att_rhs != this )
       {
       switch( mType )
          {
-         case ncByte:
+         case nc3Byte:
             mValues = (void *) new ncbyte    [ mNumVals ];
             break;
-         case ncChar:
+         case nc3Char:
             mValues = (void *) new char      [ mNumVals + 1 ];
             break;
-         case ncShort:
+         case nc3Short:
             mValues = (void *) new short int [ mNumVals ];
             break;
-         case ncInt:
+         case nc3Int:
             mValues = (void *) new int       [ mNumVals ];
             break;
-         case ncFloat:
+         case nc3Float:
             mValues = (void *) new float     [ mNumVals ];
             break;
-         case ncDouble:
+         case nc3Double:
             mValues = (void *) new double    [ mNumVals ];
             break;
-         case ncNoType:
+         case nc3NoType:
             break;
          default:
             break;
@@ -2667,7 +2667,7 @@ if( &att_rhs != this )
    // Note that for an ncChar attribute, we allocated (mNumVals+1) bytes
    //
 
-   if( mType == ncChar )
+   if( mType == nc3Char )
       {
       ((char *) mValues)[ mNumVals ] = '\0';
       }
@@ -2691,25 +2691,25 @@ NcdAtt::~NcdAtt()
 
 switch( mType )
    {
-   case ncByte:
+   case nc3Byte:
       delete [] (ncbyte *) mValues;
       break;
-   case ncChar:
+   case nc3Char:
       delete [] (char *) mValues;
       break;
-   case ncShort:
+   case nc3Short:
       delete [] (short int *) mValues;
       break;
-   case ncInt:
+   case nc3Int:
       delete [] (int *) mValues;
       break;
-   case ncFloat:
+   case nc3Float:
       delete [] (float *) mValues;
       break;
-   case ncDouble:
+   case nc3Double:
       delete [] (double *) mValues;
       break;
-   case ncNoType:
+   case nc3NoType:
       break;
    default:
       break;
@@ -2809,7 +2809,7 @@ NcdVar::
 NcdVar
    (
    const string    &arName,      // ref: name
-   NcType          aType,        // type
+   Nc3Type          aType,        // type
    NcdDimsByNum_t  &arDimsByNum, // ref: map<int, NcdDim*>
    void            *apData       // ptr: to data
    )
@@ -2911,25 +2911,25 @@ if(mNumDims > 0)
 //   {
    switch( mType )
       {
-      case ncByte:
+      case nc3Byte:
          delete [] (ncbyte *) mData;
          break;
-      case ncChar:
+      case nc3Char:
          delete [] (char *) mData;
          break;
-      case ncShort:
+      case nc3Short:
          delete [] (short int *) mData;
          break;
-      case ncInt:
+      case nc3Int:
          delete [] (int *) mData;
          break;
-      case ncFloat:
+      case nc3Float:
          delete [] (float *) mData;
          break;
-      case ncDouble:
+      case nc3Double:
          delete [] (double *) mData;
          break;
-      case ncNoType:
+      case nc3NoType:
          break;
       default:
          break;
@@ -2998,82 +2998,82 @@ return prod_of_dims * NCU::ElementSize( mType );
 //--- scalar attributes
 
 // ncbyte
-int NcdVar::add_att(NcToken aName, ncbyte aValue)
+int NcdVar::add_att(Nc3Token aName, ncbyte aValue)
 {
-return add_att( new NcdAtt(aName, ncByte, (long) 1, (void *) &aValue) );
+return add_att( new NcdAtt(aName, nc3Byte, (long) 1, (void *) &aValue) );
 }
 
 // char
-int NcdVar::add_att(NcToken aName, char aValue)
+int NcdVar::add_att(Nc3Token aName, char aValue)
 {
-return add_att( new NcdAtt(aName, ncChar, (long) 1, (void *) &aValue) );
+return add_att( new NcdAtt(aName, nc3Char, (long) 1, (void *) &aValue) );
 }
 
 // short
-int NcdVar::add_att(NcToken aName, short aValue)
+int NcdVar::add_att(Nc3Token aName, short aValue)
 {
-return add_att( new NcdAtt(aName, ncShort, (long) 1, (void *) &aValue) );
+return add_att( new NcdAtt(aName, nc3Short, (long) 1, (void *) &aValue) );
 }
 
 // int
-int NcdVar::add_att(NcToken aName, int aValue)
+int NcdVar::add_att(Nc3Token aName, int aValue)
 {
-return add_att( new NcdAtt(aName, ncInt, (long) 1, (void *) &aValue) );
+return add_att( new NcdAtt(aName, nc3Int, (long) 1, (void *) &aValue) );
 }
 
 // float
-int NcdVar::add_att(NcToken aName, float aValue)
+int NcdVar::add_att(Nc3Token aName, float aValue)
 {
-return add_att( new NcdAtt(aName, ncFloat, (long) 1, (void *) &aValue) );
+return add_att( new NcdAtt(aName, nc3Float, (long) 1, (void *) &aValue) );
 }
 
 // double
-int NcdVar::add_att(NcToken aName, double aValue)
+int NcdVar::add_att(Nc3Token aName, double aValue)
 {
-return add_att( new NcdAtt(aName, ncDouble, (long) 1, (void *) &aValue) );
+return add_att( new NcdAtt(aName, nc3Double, (long) 1, (void *) &aValue) );
 }
 
 
 //--- C-string (char *) attribute
 
 // const char *
-int NcdVar::add_att(NcToken aName, const char *aValue)
+int NcdVar::add_att(Nc3Token aName, const char *aValue)
 {
 return
-add_att( new NcdAtt(aName, ncChar, (long) strlen(aValue), (void *) aValue));
+add_att( new NcdAtt(aName, nc3Char, (long) strlen(aValue), (void *) aValue));
 }
 
 
 //--- vector attributes
 
 // ncbyte
-int NcdVar::add_att(NcToken aName, int aSize, const ncbyte *aValue)
+int NcdVar::add_att(Nc3Token aName, int aSize, const ncbyte *aValue)
 {
-return add_att( new NcdAtt(aName, ncByte, (long) aSize, (void *) aValue) );
+return add_att( new NcdAtt(aName, nc3Byte, (long) aSize, (void *) aValue) );
 }
 
 // short
-int NcdVar::add_att(NcToken aName, int aSize, const short *aValue)
+int NcdVar::add_att(Nc3Token aName, int aSize, const short *aValue)
 {
-return add_att( new NcdAtt(aName, ncShort, (long) aSize, (void *) aValue) );
+return add_att( new NcdAtt(aName, nc3Short, (long) aSize, (void *) aValue) );
 }
 
 // int
-int NcdVar::add_att(NcToken aName, int aSize, const int *aValue)
+int NcdVar::add_att(Nc3Token aName, int aSize, const int *aValue)
 {
-return add_att( new NcdAtt(aName, ncInt, (long) aSize, (void *) aValue) );
+return add_att( new NcdAtt(aName, nc3Int, (long) aSize, (void *) aValue) );
 }
 
 // float
-int NcdVar::add_att(NcToken aName, int aSize, const float *aValue)
+int NcdVar::add_att(Nc3Token aName, int aSize, const float *aValue)
 {
-return add_att( new NcdAtt(aName, ncFloat, (long) aSize, (void *) aValue) );
+return add_att( new NcdAtt(aName, nc3Float, (long) aSize, (void *) aValue) );
 }
 
 // double
-int NcdVar::add_att(NcToken aName, int aSize, const double *aValue)
+int NcdVar::add_att(Nc3Token aName, int aSize, const double *aValue)
 {
-return add_att( new NcdAtt(aName, ncDouble, (long) aSize, (void *) aValue) );
+return add_att( new NcdAtt(aName, nc3Double, (long) aSize, (void *) aValue) );
 }
 
 

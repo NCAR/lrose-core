@@ -27,7 +27,7 @@
 // Jaimi Yee, RAP, NCAR, Boulder, CO, 80307, USA
 // August 2004
 //
-// $Id: NcOutput.cc,v 1.8 2016/03/07 01:23:00 dixon Exp $
+// $Id: NcOutput.cc,v 1.9 2018/01/09 22:25:05 jcraig Exp $
 //
 ////////////////////////////////////////////////////////////////
 //#include <stdio.h>
@@ -326,7 +326,7 @@ void NcOutput::setBaseTime( int startTime, int msPastMidnight )
 
 int NcOutput::writeFile( SweepData* currentSweep ) 
 {
-  NcError ncError( NcError::silent_nonfatal );
+  Nc3Error ncError( Nc3Error::silent_nonfatal );
 
    clear();
    
@@ -411,7 +411,7 @@ int NcOutput::writeFile( SweepData* currentSweep )
    //
    // Get the "Time" dimension
    //
-   NcDim *timeDim = ncFile->get_dim( "Time" );
+   Nc3Dim *timeDim = ncFile->get_dim( "Time" );
    if( !timeDim || !timeDim->is_valid() ) {
       POSTMSG( ERROR, "Could not get Time dimension from file %s\n",
                fileName.c_str() );
@@ -424,7 +424,7 @@ int NcOutput::writeFile( SweepData* currentSweep )
    //
    // Set the maxCellsVel dimension in the file
    //
-   NcDim *maxCellsVelDim = NULL;
+   Nc3Dim *maxCellsVelDim = NULL;
    if(_numCellsVel != 0) {
      maxCellsVelDim = ncFile->add_dim( "maxCells_Dop", _numCellsVel );
      if( !maxCellsVelDim || !maxCellsVelDim->is_valid() ) {
@@ -439,7 +439,7 @@ int NcOutput::writeFile( SweepData* currentSweep )
    //
    // Set the maxCellsRefl dimension in the file
    //
-   NcDim *maxCellsReflDim = NULL;
+   Nc3Dim *maxCellsReflDim = NULL;
    if(_numCellsRefl != 0) {
      maxCellsReflDim = ncFile->add_dim( "maxCells_Surv", _numCellsRefl );
      if( !maxCellsReflDim || !maxCellsReflDim->is_valid() ) {
@@ -454,7 +454,7 @@ int NcOutput::writeFile( SweepData* currentSweep )
    //
    // Set the radials dimension in the file
    //
-   NcDim *radialDim = ncFile->add_dim( "radials", 360 );
+   Nc3Dim *radialDim = ncFile->add_dim( "radials", 360 );
    if( !radialDim || !radialDim->is_valid() ) {
       POSTMSG( ERROR, "Could not add dimension radials to file %s",
                fileName.c_str() );
@@ -467,7 +467,7 @@ int NcOutput::writeFile( SweepData* currentSweep )
    //
    // Set the rangeBitMap dimension in the file
    //
-   NcDim *thirtytwoDim = ncFile->add_dim( "rangeBitMap", 32 );
+   Nc3Dim *thirtytwoDim = ncFile->add_dim( "rangeBitMap", 32 );
    if( !thirtytwoDim || !thirtytwoDim->is_valid() ) {
       POSTMSG( ERROR, "Could not add dimension thirtytwo to file %s",
                fileName.c_str() );
@@ -799,7 +799,7 @@ int NcOutput::createFile( float fixedAngle )
    //
    // Set up the new file
    //
-   ncFile = new NcFile( filePath.getPath().c_str(), NcFile::Write );
+   ncFile = new Nc3File( filePath.getPath().c_str(), Nc3File::Write );
    if( !ncFile || !ncFile->is_valid() ) {
       POSTMSG( ERROR, "Could not open file %s", fileName.c_str() );
       return( -1 );
@@ -857,7 +857,7 @@ int NcOutput::setFileVals( SweepData* currentSweep )
    // Add the fields dimension to the file
    //
    int numFields = params->momentFieldDefs_n + params->derivedFieldDefs_n;
-   NcDim *fieldsDim = ncFile->add_dim( "fields", numFields );
+   Nc3Dim *fieldsDim = ncFile->add_dim( "fields", numFields );
 
    if( !fieldsDim || !fieldsDim->is_valid() ) {
       POSTMSG( ERROR, "Could not add fields dimension to file %s",
@@ -868,7 +868,7 @@ int NcOutput::setFileVals( SweepData* currentSweep )
    //
    // Add the short string dimension to the file
    //
-   NcDim *shortStrDim = ncFile->add_dim( "short_string", SHORT_STR_LEN );
+   Nc3Dim *shortStrDim = ncFile->add_dim( "short_string", SHORT_STR_LEN );
    if( !shortStrDim || !shortStrDim->is_valid() ) {
       POSTMSG( ERROR, "Could not add short_string dimension to file %s",
                fileName.c_str() );
@@ -1079,7 +1079,7 @@ int NcOutput::addVar( const char* varName, int value )
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->get_var( varName );
+   Nc3Var *ncVar = ncFile->get_var( varName );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s", 
                varName, fileName.c_str() );
@@ -1105,7 +1105,7 @@ int NcOutput::addVar( const char* varName, float value )
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->get_var( varName );
+   Nc3Var *ncVar = ncFile->get_var( varName );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s", 
                varName, fileName.c_str() );
@@ -1131,7 +1131,7 @@ int NcOutput::addVar( const char* varName, double value )
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->get_var( varName );
+   Nc3Var *ncVar = ncFile->get_var( varName );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s", 
                varName, fileName.c_str() );
@@ -1157,7 +1157,7 @@ int NcOutput::addVar( const char* varName, float* values, long c0 )
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->get_var( varName );
+   Nc3Var *ncVar = ncFile->get_var( varName );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s", 
                varName, fileName.c_str() );
@@ -1186,7 +1186,7 @@ int NcOutput::addVar( const char* varName, double* values,
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->get_var( varName );
+   Nc3Var *ncVar = ncFile->get_var( varName );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not get variable %s from file %s", 
                varName, fileName.c_str() );
@@ -1209,14 +1209,14 @@ int NcOutput::addVar( const char* varName, double* values,
 }
 
 
-int NcOutput::addNewVar( const char* varName, NcDim* dim1,
-                                    NcDim* dim2, char* values, 
+int NcOutput::addNewVar( const char* varName, Nc3Dim* dim1,
+                                    Nc3Dim* dim2, char* values, 
                                     long c0, long c1 ) 
 {
    //
    // Create the variable
    //
-   NcVar *newVar = ncFile->add_var( varName, ncChar, dim1, dim2 );
+   Nc3Var *newVar = ncFile->add_var( varName, nc3Char, dim1, dim2 );
    if( !newVar || !newVar->is_valid() ) {
       POSTMSG( ERROR, "Could not create %s variable in %s",
                varName, fileName.c_str() );
@@ -1243,18 +1243,18 @@ int NcOutput::addNewVar( const char* varName, NcDim* dim1,
    return( 0 );
 }
 
-int NcOutput::addNewVar( const char* varName, NcDim* dim1,
-                                    NcDim* dim2, ui08* values, 
+int NcOutput::addNewVar( const char* varName, Nc3Dim* dim1,
+                                    Nc3Dim* dim2, ui08* values, 
                                     long c0, long c1 ) 
 {
-   NcVar *newVar = ncFile->add_var( varName, ncByte, dim1, dim2 );
+   Nc3Var *newVar = ncFile->add_var( varName, nc3Byte, dim1, dim2 );
    if( !newVar || !newVar->is_valid() ) {
       POSTMSG( ERROR, "Could not create %s variable in %s",
                varName, fileName.c_str() );
       return( -1 );
    }
 
-   int status = newVar->put( (ncbyte*)values, c0, c1 );
+   int status = newVar->put( (char*)values, c0, c1 );
    if( status == 0 ) {
       POSTMSG( ERROR, "Could not write value to variable %s to file %s",
                varName, fileName.c_str() );
@@ -1264,11 +1264,11 @@ int NcOutput::addNewVar( const char* varName, NcDim* dim1,
    return( 0 );
 }
 
-int NcOutput::addBypassVar( const char* varName, NcDim* dim1,
-                                    NcDim* dim2, short* values, 
+int NcOutput::addBypassVar( const char* varName, Nc3Dim* dim1,
+                                    Nc3Dim* dim2, short* values, 
                                     long c0, long c1 ) 
 {
-   NcVar *newVar = ncFile->add_var( varName, ncShort, dim1, dim2 );
+   Nc3Var *newVar = ncFile->add_var( varName, nc3Short, dim1, dim2 );
    if( !newVar || !newVar->is_valid() ) {
       POSTMSG( ERROR, "Could not create %s variable in %s",
                varName, fileName.c_str() );
@@ -1291,11 +1291,11 @@ int NcOutput::addBypassVar( const char* varName, NcDim* dim1,
    return( 0 );
 }
 
-int NcOutput::addClutterVar( const char* varName, NcDim* dim1,
-                                    NcDim* dim2, NcDim* dim3, short* values, 
+int NcOutput::addClutterVar( const char* varName, Nc3Dim* dim1,
+                                    Nc3Dim* dim2, Nc3Dim* dim3, short* values, 
                                     long c0, long c1, long c2 ) 
 {
-   NcVar *newVar = ncFile->add_var( varName, ncShort, dim1, dim2, dim3 );
+   Nc3Var *newVar = ncFile->add_var( varName, nc3Short, dim1, dim2, dim3 );
    if( !newVar || !newVar->is_valid() ) {
       POSTMSG( ERROR, "Could not create %s variable in %s",
                varName, fileName.c_str() );
@@ -1315,8 +1315,8 @@ int NcOutput::addClutterVar( const char* varName, NcDim* dim1,
    return( 0 );
 }
 
-int NcOutput::addNewVar( const char* varName, NcDim* dim1,
-			      NcDim* dim2, const char* longName,
+int NcOutput::addNewVar( const char* varName, Nc3Dim* dim1,
+			      Nc3Dim* dim2, const char* longName,
 			      const char* units, double scale,
 			      double bias, ui08 badValue,
 			      float rangeToFirst, float cellSpacing, 
@@ -1325,7 +1325,7 @@ int NcOutput::addNewVar( const char* varName, NcDim* dim1,
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->add_var( varName, ncByte, dim1, dim2 );
+   Nc3Var *ncVar = ncFile->add_var( varName, nc3Byte, dim1, dim2 );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not add variable %s to file %s", 
                varName, fileName.c_str() );
@@ -1340,7 +1340,7 @@ int NcOutput::addNewVar( const char* varName, NcDim* dim1,
    ncVar->add_att( "scale_factor", scale );
    ncVar->add_att( "add_offset", bias );
    ncVar->add_att( "missing_value", badValue );
-   ncVar->add_att( "_FillValue", (ncbyte) badValue );
+   ncVar->add_att( "_FillValue", (char) badValue );
    ncVar->add_att( "Range_to_First_Cell",  rangeToFirst);
    ncVar->add_att( "Cell_Spacing", cellSpacing);
    
@@ -1354,7 +1354,7 @@ int NcOutput::addNewVar( const char* varName, NcDim* dim1,
    // and the one dimensional array to put things in the
    // right place in the file.
    //
-   int status = ncVar->put( (ncbyte*)values, c0, c1 );
+   int status = ncVar->put( (char*)values, c0, c1 );
    if( status == 0 ) {
       POSTMSG( ERROR, "Could not write value to variable %s of file %s",
                varName, fileName.c_str() );
@@ -1364,8 +1364,8 @@ int NcOutput::addNewVar( const char* varName, NcDim* dim1,
    return( 0 );
 }
 
-int NcOutput::addNewVar( const char* varName, NcDim* dim1,
-			      NcDim* dim2, const char* longName,
+int NcOutput::addNewVar( const char* varName, Nc3Dim* dim1,
+			      Nc3Dim* dim2, const char* longName,
 			      const char* units, double scale,
 			      double bias, short badValue,
 			      float rangeToFirst, float cellSpacing, 
@@ -1374,7 +1374,7 @@ int NcOutput::addNewVar( const char* varName, NcDim* dim1,
    //
    // Get a pointer to the variable and check it
    //
-   NcVar *ncVar = ncFile->add_var( varName, ncShort, dim1, dim2 );
+   Nc3Var *ncVar = ncFile->add_var( varName, nc3Short, dim1, dim2 );
    if( !ncVar || !ncVar->is_valid() ) {
       POSTMSG( ERROR, "Could not add variable %s to file %s", 
                varName, fileName.c_str() );
