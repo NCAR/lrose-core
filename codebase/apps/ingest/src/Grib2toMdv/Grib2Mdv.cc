@@ -243,6 +243,8 @@ int Grib2Mdv::getData()
       filePath = trigger_info.getFilePath();
       Path file_path_obj(filePath);
       
+      PMU_auto_register(filePath.c_str());
+
       // Check for appropriate substring and extension
 
       bool substring_found = false;
@@ -264,8 +266,8 @@ int Grib2Mdv::getData()
       
       //
       // Inventory the file
-      PMU_auto_register( "Processing grib2 file" );
-      cout << "Processing file " << filePath << endl << flush;
+      PMU_auto_register( "Reading grib2 file" );
+      cout << "Reading file " << filePath << endl << flush;
       if(_Grib2File->read(filePath) != Grib2::GRIB_SUCCESS)
 	continue;
 
@@ -293,6 +295,7 @@ int Grib2Mdv::getData()
 	list <string>::const_iterator field;
 
 	for (field = fieldList.begin(); field != fieldList.end(); ++field) {
+          PMU_auto_register(filePath.c_str());
 	  list <string> fieldLevelList = _Grib2File->getFieldLevels(*(field));
 	  list <string>::const_iterator level;
 
@@ -332,6 +335,8 @@ int Grib2Mdv::getData()
       // Loop over the lead times, each time will become a mdv file
       for (leadTime = forecastList.begin(); leadTime != forecastList.end(); ++leadTime) {
         
+        PMU_auto_register(filePath.c_str());
+
         // check the lead time if required
 
         if (_paramsPtr->check_lead_time &&
@@ -362,10 +367,15 @@ int Grib2Mdv::getData()
 	PMU_auto_register( "Reading grib2 file" );
 	_field = _gribFields.begin();
 	while (_field != _gribFields.end()) {
+
+          PMU_auto_register(filePath.c_str());
+
 	  if (_paramsPtr->debug)
-	    cout << "Looking for field " <<  _field->param << " level  " << _field->level << endl;
+	    cout << "Looking for field " <<  _field->param
+                 << " level  " << _field->level << endl;
 	  
-	  vector<Grib2::Grib2Record::Grib2Sections_t> GribRecords = _Grib2File->getRecords(_field->param, _field->level, *leadTime);
+	  vector<Grib2::Grib2Record::Grib2Sections_t>
+            GribRecords = _Grib2File->getRecords(_field->param, _field->level, *leadTime);
 	  
 	  if(GribRecords.size() > 1)
 	    _sortByLevel(GribRecords.begin(), GribRecords.end());
@@ -377,10 +387,11 @@ int Grib2Mdv::getData()
 	  if (_paramsPtr->debug)
 	    cout << "Found " << GribRecords.size() << " records." << endl;
 	  if(GribRecords.size() >= MDV_MAX_VLEVELS) {
-	    cerr << "ERROR: Too many fields for one record! " << GribRecords.size() << " > Max Mdv Vlevels" << endl;
+	    cerr << "ERROR: Too many fields for one record! "
+                 << GribRecords.size() << " > Max Mdv Vlevels" << endl;
 	    return( RI_FAILURE );
 	  }
-
+          
 	  //
 	  // Set requested vertical level bounds
 	  int levelMin = 0;
