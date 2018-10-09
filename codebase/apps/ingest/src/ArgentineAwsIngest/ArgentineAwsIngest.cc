@@ -176,8 +176,13 @@ int ArgentineAwsIngest::_processFile(const char *file_path)
   
   // Read each line
   
-  vector<WxObs *> observations;
   char line[BUFSIZ];
+
+  // read first line - labels
+  fgets(line, BUFSIZ, fp);
+
+  // read data lines
+  vector<WxObs *> observations;
   while(fgets(line, BUFSIZ, fp) != NULL) {
     
     // tokenize the line
@@ -213,7 +218,7 @@ int ArgentineAwsIngest::_processFile(const char *file_path)
           obs->setElevationM(_decodeFloatField(tok));
           break;
         case Params::FIELD_STATION_CODE:
-          obs->setStationId(tok);
+          obs->setStationId(_decodeStationCode(tok));
           break;
         case Params::FIELD_TIME_UTC:
           obs->setObservationTime(_decodeTimeField(tok));
@@ -255,6 +260,11 @@ int ArgentineAwsIngest::_processFile(const char *file_path)
     } // ifield
 
     observations.push_back(obs);
+
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "===>> Adding observation <<===" << endl;
+      obs->print(cerr);
+    }
 
   } // while (fgets ...
   
@@ -310,6 +320,24 @@ time_t ArgentineAwsIngest::_decodeTimeField(const string &str)
   return dtime.utime();
 }
 
+///////////////////////////////////////////////////////////
+// decode station code
+// strip off quotes
+
+string ArgentineAwsIngest::_decodeStationCode(const string &str)
+
+{
+  
+  string code;
+  for (size_t ii = 0; ii < str.size(); ii++) {
+    if (isalnum(str[ii])) {
+      code.append(1, str[ii]);
+    }
+  }
+  return code;
+
+}
+
 ////////////////////////////////////////////////////////////
 // write observations
 
@@ -327,7 +355,13 @@ int ArgentineAwsIngest::_writeObs(vector<WxObs *> &observations)
   for (size_t ii = 0; ii < observations.size(); ii++) {
     WxObs *obs = observations[ii];
     obs->assembleAsXml();
-    int stationId = Spdb::hash4CharsToInt32(obs->getStationId().c_str());
+    string idStr = obs->getStationId();
+    int idLen = idStr.size();
+    int startIndex = idLen - 4;
+    if (startIndex < 0) {
+      startIndex = 0;
+    }
+    int stationId = Spdb::hash4CharsToInt32(idStr.c_str() + startIndex);
     time_t validTime = obs->getObservationTime();
     spdb.addPutChunk(stationId,
                      validTime,

@@ -77,6 +77,7 @@ private:
   int _processFile(const char *file_path);
   double _decodeFloatField(const string &str);
   time_t _decodeTimeField(const string &str);
+  string _decodeStationCode(const string &str);
   int _writeObs(vector<WxObs *> &observations);
 
 };
