@@ -23,3 +23,16 @@ SpreadSheetModel.cc:136:7: warning: unused variable 'rows' [-Wunused-variable]
 [eol-albireo:radar/src/ExamineEdit] brenda% g++ -Wall -DOSX_LROSE -D_BSD_TYPES -DF_UNDERSCORE2 -g -c -I/usr/local/netcdf4/include -I/Users/brenda/lrose/include -I/Users/brenda/lrose/include testing_SpreadSheetModel.cc
 [eol-albireo:radar/src/ExamineEdit] brenda% g++ -g testing_SpreadSheetModel.o SpreadSheetModel.o -o testing_SpreadSheetModel  -L/Users/brenda/lrose/lib -L/Users/brenda/lrose/lib -L/usr/local/netcdf4/lib -lMdv -lRadx -lNcxx -ldsserver -ldidss -lrapformats -leuclid -ltoolsa -ltdrp -ldataport -lNcxx -lnetcdf_c++ -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat -lbz2 -lz
 ld: warning: directory not found for option '-L/usr/local/netcdf4/lib'
+
+#
+# Here are the steps to build for dev testing ...
+#
+   456	15:08	make clean_all
+   457	15:08	make from_qmake    # this creates the *.app directory with all the bundled info
+   458	15:08	make ExamineEdit
+   459	15:08	./ExamineEdit /Users/brenda/Wen-chau/solo_velocity_threshold/swp.1010101010550.APAR_sim.256.-30.0_AIR_v234
+
+#
+# Here are the steps to build for release/deployment ...
+#
+make examine_edit_app

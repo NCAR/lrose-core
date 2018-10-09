@@ -10,16 +10,30 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-  cerr << "Hello There, Brenda" << endl;
+  /*
+  FILE *log;
+
+  log = fopen("~/ExamineEditLog.txt", "w");
+
+  if (log != NULL)
+    fprintf(log, "Hello There, Brenda\n");
+  fclose(log);
+  */
 
   // Q_INIT_RESOURCE(spreadsheet);
-    QApplication app(argc, argv);
+  QApplication app(argc, argv);
 
 
     // read in the data file 
-    // get data                                                                                                                
-    SpreadSheetView *sheetView = new SpreadSheetView(argv[1]); 
-    //    SpreadSheetModel sheetModel(argv[1]);
+    // get data                                        
+                                                                        
+    SpreadSheetView *sheetView;
+    
+    //if (argc > 1) {
+    //  sheetView = new SpreadSheetView(argv[1]); 
+    //} else {
+    sheetView = new SpreadSheetView(); 
+      //}
     SpreadSheetController sheetControl(sheetView);  
     //try {
       //_getArchiveData(argv[1]);
@@ -30,8 +44,11 @@ int main(int argc, char** argv) {
       //}
 
       // SpreadSheetView sheet(_vol); // , _displayInfo);
-      sheetView->setWindowIcon(QPixmap(":/images/interview.png"));
+      //sheetView->setWindowIcon(QPixmap(":/images/interview.png"));
       sheetView->show();
       sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
       return app.exec();
+    
+      //cout << "Hello World!" << endl;
+      //return 0;
 }

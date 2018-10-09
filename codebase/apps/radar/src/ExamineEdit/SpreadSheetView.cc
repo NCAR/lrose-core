@@ -18,6 +18,69 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
 {
   cerr << "in SpreadSheetView constructor" << endl;
   //  initSpreadSheet();
+  int rows;
+  int cols;
+
+  _controller = new SpreadSheetController(this);
+  //_controller->open(fileName);
+  //vector<std::string> fieldNames = _controller->getFieldNames();
+  //cols = displayInfo.getNumFields();
+  // vector<std::string> fieldNames = vol.getUniqueFieldNameList();
+  cols = 3; // (int) fieldNames.size();
+  rows = 20;
+
+  //_volumeData = vol;
+    addToolBar(toolBar = new QToolBar());
+    formulaInput = new QLineEdit();
+
+    cellLabel = new QLabel(toolBar);
+    cellLabel->setMinimumSize(80, 0);
+
+    toolBar->addWidget(cellLabel);
+    toolBar->addWidget(formulaInput);
+
+    table = new QTableWidget(rows, cols, this);
+    table->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
+    // set the column headers to the data fields
+    
+    
+   
+    for (int c=0; c<cols; c++) {
+      QString the_name(" ");
+      table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
+    }
+    
+    table->setItemPrototype(table->item(rows - 1, cols - 1));
+    table->setItemDelegate(new SpreadSheetDelegate());
+
+    createActions();
+    cout << "Action created\n";
+    updateColor(0);
+    cout << "update Color\n";
+    setupMenuBar();
+    cout << "setupMenuBar\n";
+    //setupContentsBlank();
+    //cout << "setupContentsBlank\n";
+    setupContextMenu();
+    cout << "setupContextMenu\n";
+    setCentralWidget(table);
+    cout << "setCentralWidgets\n";
+
+    statusBar();
+    connect(table, &QTableWidget::currentItemChanged,
+            this, &SpreadSheetView::updateStatus);
+    connect(table, &QTableWidget::currentItemChanged,
+            this, &SpreadSheetView::updateColor);
+    connect(table, &QTableWidget::currentItemChanged,
+            this, &SpreadSheetView::updateLineEdit);
+    connect(table, &QTableWidget::itemChanged,
+            this, &SpreadSheetView::updateStatus);
+    connect(formulaInput, &QLineEdit::returnPressed, this, &SpreadSheetView::returnPressed);
+    connect(table, &QTableWidget::itemChanged,
+            this, &SpreadSheetView::updateLineEdit);
+
+    setWindowTitle(tr("Spreadsheet"));
+
 }
 
 
@@ -550,6 +613,43 @@ void SpreadSheetView::setupContextMenu()
     addAction(clearAction);
     setContextMenuPolicy(Qt::ActionsContextMenu);
 }
+
+/*
+void SpreadSheetView::setupContentsBlank()
+{
+    QColor titleBackground(Qt::lightGray);
+    QFont titleFont = table->font();
+    titleFont.setBold(true);
+
+
+    int index;
+    index = 0;
+
+    // vector<string> fieldNames = {"one", "two"}; //  
+    vector<string> fieldNames = _controller->getFieldNames();
+
+    int c = 0;
+    int r = 0;
+    vector<string>::iterator it; 
+    for(it = fieldNames.begin(); it != fieldNames.end(); it++, c++) {
+      QString the_name(QString::fromStdString(*it));
+      cerr << *it << endl;
+      table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
+       
+      vector<double> data = _controller->getData(*it);
+
+      cerr << "number of data values = " << data.size() << endl;
+
+      for (r=0; r<20; r++) {
+        string format = "%g";
+        char formattedData[250];
+        //    sprintf(formattedData, format, data[0]);
+        sprintf(formattedData, "%g", data[r]); 
+        table->setItem(r, c, new SpreadSheetItem(formattedData));
+      }
+    }
+}
+*/
 
 void SpreadSheetView::setupContents()
 {
