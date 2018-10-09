@@ -206,6 +206,7 @@ codebase/apps/hydro/src/Shape2Map/Shape2Map
 codebase/apps/ingest/src/AcData2Spdb/AcData2Spdb
 codebase/apps/ingest/src/AcTrack2Polygon/AcTrack2Polygon
 codebase/apps/ingest/src/AcarsNc2GenPt/AcarsNc2GenPt
+codebase/apps/ingest/src/ArgentineAwsIngest/ArgentineAwsIngest
 codebase/apps/ingest/src/Awos2Spdb/Awos2Spdb
 codebase/apps/ingest/src/Aws2Spdb/Aws2Spdb
 codebase/apps/ingest/src/BomAws2Spdb/BomAws2Spdb

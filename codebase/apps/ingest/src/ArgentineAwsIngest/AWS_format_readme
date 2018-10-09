@@ -1,0 +1,10 @@
+The Argentine AWS data is written in comma-separated variables in a text file.
+
+The first line contains the variable names in Spanish:
+
+"latitud_grados","longitud_grados","altura_mts","estacion_codigo","muestra_UTC","temperatura_centigrados","humedad_porcentaje","puntoRocio_centigrados","velocidadViento_km_hora","direccionViento_grados","presion_hPa","precipitacion24horas_mm","precipitacion6horas_mm","precipitacion1hora_mm","precipitacion10minutos_mm"
+
+The English translation is:
+
+"latitude_degrees", "length_degrees", "height_mts", "station_code", "sample_UTC", "temperature_centigrade", "humidity_percent", "DewPoint_centigrade", "WindVelocity_km_hour", "direction_wind_degrees", "pressure_hPa", "rainfall_4hours_mm", "rainfall_6hours_mm "," precipitation_1hours_mm "," precipitation_10min_mm "
+
