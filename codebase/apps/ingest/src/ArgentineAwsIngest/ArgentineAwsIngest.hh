@@ -33,18 +33,14 @@
 // Stores in SPDB and NetCDF
 ////////////////////////////////////////////////////////////
 
-#ifndef ArgentineAwsIngest_H
-#define ArgentineAwsIngest_H
+#ifndef ArgentineAwsIngest_HH
+#define ArgentineAwsIngest_HH
 
 #include <string>
-#include <map>
-#include <utility>
-#include <Spdb/DsSpdb.hh>
-#include <rapformats/metar.h>
-#include <rapformats/station_reports.h>
 #include "Args.hh"
 #include "Params.hh"
 using namespace std;
+class WxObs;
 
 ////////////////////////
 // This class
@@ -52,9 +48,9 @@ using namespace std;
 class ArgentineAwsIngest {
   
 public:
-
+  
   // constructor
-
+  
   ArgentineAwsIngest (int argc, char **argv);
 
   // destructor
@@ -77,8 +73,11 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-
-  int _processFile(const char *file_path, time_t file_time);
+  
+  int _processFile(const char *file_path);
+  double _decodeFloatField(const string &str);
+  time_t _decodeTimeField(const string &str);
+  int _writeObs(vector<WxObs *> &observations);
 
 };
 

@@ -78,6 +78,24 @@ public:
     FILELIST = 1
   } mode_t;
 
+  typedef enum {
+    FIELD_LATITUDE = 0,
+    FIELD_LONGITUDE = 1,
+    FIELD_ALTITUDE = 2,
+    FIELD_STATION_CODE = 3,
+    FIELD_TIME_UTC = 4,
+    FIELD_TEMPERATURE_C = 5,
+    FIELD_RH_PERCENT = 6,
+    FIELD_DEWPOINT_C = 7,
+    FIELD_WIND_VEL_KMPH = 8,
+    FIELD_WIND_DIRN_DEGT = 9,
+    FIELD_PRESSURE_HPA = 10,
+    FIELD_RAIN_4HR_MM = 11,
+    FIELD_RAIN_6HR_MM = 12,
+    FIELD_PRECIP_1HR_MM = 13,
+    FIELD_PRECIP_10MIN_MM = 14
+  } csv_field_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -375,6 +393,9 @@ public:
 
   int max_realtime_valid_age;
 
+  csv_field_t *_input_fields;
+  int input_fields_n;
+
   tdrp_bool_t write_to_spdb;
 
   char* spdb_output_url;
@@ -392,7 +413,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[17];
+  mutable TDRPtable _table[18];
 
   const char *_className;
 

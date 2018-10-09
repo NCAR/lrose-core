@@ -670,6 +670,73 @@
     tt->single_val.i = 7200;
     tt++;
     
+    // Parameter 'input_fields'
+    // ctype is '_csv_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("input_fields");
+    tt->descr = tdrpStrDup("List of input fields, by column");
+    tt->help = tdrpStrDup("This is the column-ordered list of fields in the CSV file.");
+    tt->array_offset = (char *) &_input_fields - &_start_;
+    tt->array_n_offset = (char *) &input_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(csv_field_t);
+    tt->array_n = 15;
+    tt->enum_def.name = tdrpStrDup("csv_field_t");
+    tt->enum_def.nfields = 15;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("FIELD_LATITUDE");
+      tt->enum_def.fields[0].val = FIELD_LATITUDE;
+      tt->enum_def.fields[1].name = tdrpStrDup("FIELD_LONGITUDE");
+      tt->enum_def.fields[1].val = FIELD_LONGITUDE;
+      tt->enum_def.fields[2].name = tdrpStrDup("FIELD_ALTITUDE");
+      tt->enum_def.fields[2].val = FIELD_ALTITUDE;
+      tt->enum_def.fields[3].name = tdrpStrDup("FIELD_STATION_CODE");
+      tt->enum_def.fields[3].val = FIELD_STATION_CODE;
+      tt->enum_def.fields[4].name = tdrpStrDup("FIELD_TIME_UTC");
+      tt->enum_def.fields[4].val = FIELD_TIME_UTC;
+      tt->enum_def.fields[5].name = tdrpStrDup("FIELD_TEMPERATURE_C");
+      tt->enum_def.fields[5].val = FIELD_TEMPERATURE_C;
+      tt->enum_def.fields[6].name = tdrpStrDup("FIELD_RH_PERCENT");
+      tt->enum_def.fields[6].val = FIELD_RH_PERCENT;
+      tt->enum_def.fields[7].name = tdrpStrDup("FIELD_DEWPOINT_C");
+      tt->enum_def.fields[7].val = FIELD_DEWPOINT_C;
+      tt->enum_def.fields[8].name = tdrpStrDup("FIELD_WIND_VEL_KMPH");
+      tt->enum_def.fields[8].val = FIELD_WIND_VEL_KMPH;
+      tt->enum_def.fields[9].name = tdrpStrDup("FIELD_WIND_DIRN_DEGT");
+      tt->enum_def.fields[9].val = FIELD_WIND_DIRN_DEGT;
+      tt->enum_def.fields[10].name = tdrpStrDup("FIELD_PRESSURE_HPA");
+      tt->enum_def.fields[10].val = FIELD_PRESSURE_HPA;
+      tt->enum_def.fields[11].name = tdrpStrDup("FIELD_RAIN_4HR_MM");
+      tt->enum_def.fields[11].val = FIELD_RAIN_4HR_MM;
+      tt->enum_def.fields[12].name = tdrpStrDup("FIELD_RAIN_6HR_MM");
+      tt->enum_def.fields[12].val = FIELD_RAIN_6HR_MM;
+      tt->enum_def.fields[13].name = tdrpStrDup("FIELD_PRECIP_1HR_MM");
+      tt->enum_def.fields[13].val = FIELD_PRECIP_1HR_MM;
+      tt->enum_def.fields[14].name = tdrpStrDup("FIELD_PRECIP_10MIN_MM");
+      tt->enum_def.fields[14].val = FIELD_PRECIP_10MIN_MM;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].e = FIELD_LATITUDE;
+      tt->array_vals[1].e = FIELD_LONGITUDE;
+      tt->array_vals[2].e = FIELD_ALTITUDE;
+      tt->array_vals[3].e = FIELD_STATION_CODE;
+      tt->array_vals[4].e = FIELD_TIME_UTC;
+      tt->array_vals[5].e = FIELD_TEMPERATURE_C;
+      tt->array_vals[6].e = FIELD_RH_PERCENT;
+      tt->array_vals[7].e = FIELD_DEWPOINT_C;
+      tt->array_vals[8].e = FIELD_WIND_VEL_KMPH;
+      tt->array_vals[9].e = FIELD_WIND_DIRN_DEGT;
+      tt->array_vals[10].e = FIELD_PRESSURE_HPA;
+      tt->array_vals[11].e = FIELD_RAIN_4HR_MM;
+      tt->array_vals[12].e = FIELD_RAIN_6HR_MM;
+      tt->array_vals[13].e = FIELD_PRECIP_1HR_MM;
+      tt->array_vals[14].e = FIELD_PRECIP_10MIN_MM;
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));

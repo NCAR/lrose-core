@@ -31,8 +31,8 @@
 //
 /////////////////////////////////////////////////////////////
 
-#ifndef ARGS_H
-#define ARGS_H
+#ifndef ARGS_HH
+#define ARGS_HH
 
 #include <tdrp/tdrp.h>
 #include <iostream>
