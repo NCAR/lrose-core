@@ -264,6 +264,8 @@ int ArgentineAwsIngest::_processFile(const char *file_path)
 
   int iret = _writeObs(observations);
 
+  // clean up
+
   for (size_t ii = 0; ii < observations.size(); ii++) {
     delete observations[ii];
   }
@@ -316,71 +318,44 @@ int ArgentineAwsIngest::_writeObs(vector<WxObs *> &observations)
 
 {
 
-#ifdef JUNK
-
-  // Print report for debugging
-  if ( _params.debug >= Params::DEBUG_VERBOSE) {
+  DsSpdb spdb;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    spdb.setDebug();
   }
+  spdb.setPutMode(Spdb::putModeOver);
 
-  // Create unix time of report
-  DateTime dateTime(year, month, day, hour, minute);
-  time_t repTime = dateTime.utime();
-  station_report_t report;
-  report.msg_id = stationID;
-  report.time = repTime;
-  report.accum_start_time = 0;
-  report.weather_type = 0;
-  // report.lat = (*iloc).second.lat;
-  // report.lon  = (*iloc).second.lon;
-  // report.alt = (*iloc).second.alt;
-  report.temp = mTempHour;
-  report.relhum = rh;
-  report.windspd = mWsp2;
-  report.winddir = mWdir2;
-  report.windgust =  maxWsp;
-  report.pres = pressure;
-  report.liquid_accum = precipHour;
-  report.liquid_accum = precipHour;
-  report.visibility = STATION_NAN;
-  report.rvr = STATION_NAN;
-  report.ceiling = STATION_NAN;
-  
-  // Convert report to big endian;
-  station_report_to_be(&report);
+  for (size_t ii = 0; ii < observations.size(); ii++) {
+    WxObs *obs = observations[ii];
+    obs->assembleAsXml();
+    int stationId = Spdb::hash4CharsToInt32(obs->getStationId().c_str());
+    time_t validTime = obs->getObservationTime();
+    spdb.addPutChunk(stationId,
+                     validTime,
+                     validTime + _params.spdb_expire_seconds,
+                     obs->getBufLen(), obs->getBufPtr());
+  } // ii
   
   // Write report to database
-  spdb.setPutMode(Spdb::putModeAdd);
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "\nWriting report to " << _params. spdb_output_url << endl;
-    cerr << "-----------------------------------------------------------\n\n";
+    cerr << "\nWriting obs to " << _params.spdb_output_url << endl;
+    cerr << "--------------------------------------------------\n\n";
     
   }
   
   if (spdb.put(_params.spdb_output_url,
                SPDB_STATION_REPORT_ID,
-               SPDB_STATION_REPORT_LABEL,
-               report.msg_id,
-               repTime,
-               repTime + _params.spdb_expire_seconds,
-               sizeof(station_report_t),
-               &report) != 0) {
+               SPDB_STATION_REPORT_LABEL) != 0) {
     cerr << "ERROR - ArgentineAwsIngest::_processFile" << endl;
     cerr << "  Cannot put aws report to: "
          << _params.spdb_output_url << endl;
     cerr << "  " << spdb.getErrStr() << endl;
-      return(1);
+    return(1);
   }
   
-  // Swapping back from big-endian
-  station_report_from_be(&report);
-
-#endif
-
   return 0;
   
-} // while (fgets ...
-
+}
 
 
 
