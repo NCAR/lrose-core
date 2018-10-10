@@ -184,7 +184,11 @@ int ArgentineAwsIngest::_processFile(const char *file_path)
   // read data lines
   vector<WxObs *> observations;
   while(fgets(line, BUFSIZ, fp) != NULL) {
-    
+  
+    // trim end of line
+
+    line[strlen(line)-1] = '\0';
+
     // tokenize the line
     
     vector<string> toks;
@@ -201,6 +205,8 @@ int ArgentineAwsIngest::_processFile(const char *file_path)
     // fill out obs
 
     WxObs *obs = new WxObs;
+    obs->setMetarRemarks(line);
+    double windSpeedKph = NAN, windDirnTrue = NAN;
 
     for (int ifield = 0; ifield < _params.input_fields_n; ifield++) {
 
@@ -208,64 +214,122 @@ int ArgentineAwsIngest::_processFile(const char *file_path)
       string tok = toks[ifield];
       
       switch (ftype) {
-        case Params::FIELD_LATITUDE:
-          obs->setLatitude(_decodeFloatField(tok));
+        case Params::FIELD_LATITUDE: {
+          double val = _decodeFloatField(tok);
+          if (!isnan(val)) {
+            obs->setLatitude(val);
+          }
           break;
-        case Params::FIELD_LONGITUDE:
-          obs->setLongitude(_decodeFloatField(tok));
+        }
+        case Params::FIELD_LONGITUDE: {
+          double val = _decodeFloatField(tok);
+          if (!isnan(val)) {
+            obs->setLongitude(val);
+          }
           break;
-        case Params::FIELD_ALTITUDE:
+        }
+        case Params::FIELD_ALTITUDE: {
+          double val = _decodeFloatField(tok);
+          if (!isnan(val)) {
+            obs->setElevationM(val);
+          }
           obs->setElevationM(_decodeFloatField(tok));
           break;
-        case Params::FIELD_STATION_CODE:
+        }
+        case Params::FIELD_STATION_CODE: {
           obs->setStationId(_decodeStationCode(tok));
           break;
-        case Params::FIELD_TIME_UTC:
+        }
+        case Params::FIELD_TIME_UTC: {
           obs->setObservationTime(_decodeTimeField(tok));
           break;
-        case Params::FIELD_TEMPERATURE_C:
-          obs->setTempC(_decodeFloatField(tok));
+        }
+        case Params::FIELD_TEMPERATURE_C: {
+          double val = _decodeFloatField(tok);
+          if (!isnan(val)) {
+            obs->setTempC(val);
+          }
           break;
-        case Params::FIELD_RH_PERCENT:
-          obs->setRhPercent(_decodeFloatField(tok));
+        }
+        case Params::FIELD_RH_PERCENT: {
+          double val = _decodeFloatField(tok);
+          if (!isnan(val)) {
+            obs->setRhPercent(val);
+          }
           break;
-        case Params::FIELD_DEWPOINT_C:
-          obs->setDewpointC(_decodeFloatField(tok));
+        }
+        case Params::FIELD_DEWPOINT_C: {
+          double val = _decodeFloatField(tok);
+          if (!isnan(val)) {
+            obs->setDewpointC(val);
+          }
           break;
-        case Params::FIELD_WIND_VEL_KMPH:
-          obs->setWindSpeedMps(_decodeFloatField(tok) / MPERSEC_TO_KMPERHOUR);
+        }
+        case Params::FIELD_WIND_VEL_KMPH: {
+          windSpeedKph = _decodeFloatField(tok);
           break;
-        case Params::FIELD_WIND_DIRN_DEGT:
-          obs->setWindDirnDegT(_decodeFloatField(tok));
+        }
+        case Params::FIELD_WIND_DIRN_DEGT: {
+          windDirnTrue = _decodeFloatField(tok);
           break;
-        case Params::FIELD_PRESSURE_HPA:
-          obs->setPressureMb(_decodeFloatField(tok));
+        }
+        case Params::FIELD_PRESSURE_HPA: {
+          double val = _decodeFloatField(tok);
+          if (!isnan(val)) {
+            obs->setPressureMb(val);
+          }
           break;
-        case Params::FIELD_PRECIP_10MIN_MM:
-          obs->addPrecipLiquidMm(_decodeFloatField(tok), 600);
+        }
+        case Params::FIELD_PRECIP_10MIN_MM: {
+          double val = _decodeFloatField(tok);
+          if (!isnan(val)) {
+            obs->addPrecipLiquidMm(val, 600);
+          }
           break;
-        case Params::FIELD_PRECIP_1HR_MM:
-          obs->addPrecipLiquidMm(_decodeFloatField(tok), 3600);
+        }
+        case Params::FIELD_PRECIP_1HR_MM: {
+          double val = _decodeFloatField(tok);
+          if (!isnan(val)) {
+            obs->addPrecipLiquidMm(val, 3600);
+          }
           break;
-        case Params::FIELD_RAIN_4HR_MM:
-          obs->addPrecipLiquidMm(_decodeFloatField(tok), 4 * 3600);
+        }
+        case Params::FIELD_RAIN_4HR_MM: {
+          double val = _decodeFloatField(tok);
+          if (!isnan(val)) {
+            obs->addPrecipLiquidMm(val, 4 * 3600);
+          }
           break;
-        case Params::FIELD_RAIN_6HR_MM:
-          obs->addPrecipLiquidMm(_decodeFloatField(tok), 6 * 3600);
+        }
+        case Params::FIELD_RAIN_6HR_MM: {
+          double val = _decodeFloatField(tok);
+          if (!isnan(val)) {
+            obs->addPrecipLiquidMm(val, 6 * 3600);
+          }
           break;
+        }
         default:
           {};
       } // switch
       
     } // ifield
 
-    observations.push_back(obs);
+    // set wind fields
+
+    if (!isnan(windSpeedKph) && !isnan(windDirnTrue)) {
+      obs->setWindSpeedMps(windSpeedKph / MPERSEC_TO_KMPERHOUR);
+      obs->setWindDirnDegT(windDirnTrue);
+    }
 
     if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "===>> Adding observation <<===" << endl;
       obs->print(cerr);
     }
 
+    // save out obs
+
+    observations.push_back(obs);
+    
   } // while (fgets ...
   
   fclose(fp);       
