@@ -753,7 +753,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("apply_azimuth_offset");
     tt->descr = tdrpStrDup("Option to apply an offset to the azimuth values.");
-    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.");
+    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north. The offset is applied as the rays are read in - i.e. all other operations use the updated azimuths.");
     tt->val_offset = (char *) &apply_azimuth_offset - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -777,7 +777,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("apply_elevation_offset");
     tt->descr = tdrpStrDup("Option to apply an offset to the elevation values.");
-    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.");
+    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles. The offset is applied as the rays are read in - i.e. all other operations use the updated elevations.");
     tt->val_offset = (char *) &apply_elevation_offset - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -1662,7 +1662,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("sur_sweep_transitions_azimuth_deg");
     tt->descr = tdrpStrDup("Azimuth to be used for forcing surveillance sweep transitions (deg).");
-    tt->help = tdrpStrDup("See 'adjust_sur_sweep_limits_to_fixed_azimuth'.");
+    tt->help = tdrpStrDup("See 'adjust_sur_sweep_limits_to_fixed_azimuth'. Any azimuth_offset will be applied before this check.");
     tt->val_offset = (char *) &sur_sweep_transitions_azimuth_deg - &_start_;
     tt->single_val.d = 0;
     tt++;

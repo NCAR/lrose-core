@@ -78,7 +78,9 @@ Dsr2Radx::Dsr2Radx(int argc, char **argv)
   _lutRadarAltitudeKm = -9999;
 
   _prevVolNum = -99999;
+  _prevTiltNum = -1;
   _prevSweepNum = -1;
+  _sweepNumOverride = 1;
   _endOfVol = false;
   _endOfVolTime = -1;
   _antenna = NULL;
@@ -714,10 +716,7 @@ int Dsr2Radx::_processVol()
     }
   } else if (isSurveillance) {
     // SUR
-    if (_params.force_sur_sweep_transitions_at_fixed_azimuth) {
-      _vol.adjustSurSweepLimitsToFixedAzimuth
-        (_params. sur_sweep_transitions_azimuth_deg);
-    } else if (_params.adjust_sur_sweep_limits_using_angles) {
+    if (_params.adjust_sur_sweep_limits_using_angles) {
       _vol.adjustSweepLimitsUsingAngles();
     } else {
       _vol.loadSweepInfoFromRays();
@@ -779,28 +778,14 @@ int Dsr2Radx::_processVol()
     _vol.removeSweepsWithTooFewRays(_params.min_rays_in_sweep);
     if (nraysVolBefore != _vol.getNRays()) {
       if (_params.debug) {
-        cerr << "NOTE: removed sweeps with nrays < " << _params.min_rays_in_sweep << endl;
-        cerr << "  nrays in vol before removal: " << nraysVolBefore << endl;
-        cerr << "  nrays in vol after  removal: " << _vol.getNRays() << endl;
+        cerr << "NOTE: removed sweeps with nrays < "
+             << _params.min_rays_in_sweep << endl;
+        cerr << "  nrays in vol before removal: "
+             << nraysVolBefore << endl;
+        cerr << "  nrays in vol after  removal: "
+             << _vol.getNRays() << endl;
       }
     }
-  }
-
-  // apply angle offsets
-
-  if (_params.apply_azimuth_offset) {
-    if (_params.debug) {
-      cerr << "NOTE: applying azimuth offset (deg): " 
-           << _params.azimuth_offset << endl;
-    }
-    _vol.applyAzimuthOffset(_params.azimuth_offset);
-  }
-  if (_params.apply_elevation_offset) {
-    if (_params.debug) {
-      cerr << "NOTE: applying elevation offset (deg): " 
-           << _params.elevation_offset << endl;
-    }
-    _vol.applyElevationOffset(_params.elevation_offset);
   }
 
   // if requested, change some of the characteristics
@@ -1290,6 +1275,11 @@ RadxRay *Dsr2Radx::_createInputRay(const DsRadarMsg &radarMsg,
 
   ray->setTime(rbeam.dataTime, rbeam.nanoSecs);
   ray->setVolumeNumber(rbeam.volumeNum);
+  if (rbeam.tiltNum < _prevTiltNum) {
+    // tilt number decreased, so reset sweepNum
+    _sweepNumOverride = 1;
+  }
+  _prevTiltNum = rbeam.tiltNum;
   ray->setSweepNumber(rbeam.tiltNum);
   if (rbeam.tiltNum < 0) {
     _sweepNumbersMissing = true;
@@ -1308,16 +1298,38 @@ RadxRay *Dsr2Radx::_createInputRay(const DsRadarMsg &radarMsg,
   ray->setFollowMode(_getRadxFollowMode(rparams.followMode));
 
   double elev = rbeam.elevation;
-  if (elev > 180) {
-    elev -= 360.0;
+  if (_params.apply_elevation_offset) {
+    elev += _params.elevation_offset;
   }
-  ray->setElevationDeg(elev);
+  ray->setElevationDeg(Radx::conditionEl(elev));
 
   double az = rbeam.azimuth;
-  if (az < 0) {
-    az += 360.0;
+  if (_params.apply_azimuth_offset) {
+    az += _params.azimuth_offset;
   }
-  ray->setAzimuthDeg(az);
+  ray->setAzimuthDeg(Radx::conditionAz(az));
+
+  // force sweep number change on azimuth transition?
+  if (_params.force_sur_sweep_transitions_at_fixed_azimuth) {
+    if ((_prevRay != NULL) &&
+        (ray->getSweepMode() == Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE)) {
+      double thisAz = ray->getAzimuthDeg();
+      double prevAz = _prevRay->getAzimuthDeg();
+      // check for end of sweep transition
+      // this occurs at the same azimuth every time
+      double transDeg = _params.sur_sweep_transitions_azimuth_deg;
+      double deltaPrev = _computeDeltaAngle(transDeg, prevAz);
+      double deltaThis = _computeDeltaAngle(transDeg, thisAz);
+      if (deltaPrev > 0 && deltaThis <= 0) {
+        _sweepNumOverride++;
+        if (_params.debug) {
+          cerr << "====>> Forcing sweep number change, az: " << thisAz << " <<====" << endl;
+          cerr << "====>> New sweep number: " << _sweepNumOverride << " <<====" << endl;
+        }
+      }
+    } // if (_prevRay != NULL ...
+    ray->setSweepNumber(_sweepNumOverride);
+  } // if (_params.force_sur_sweep_transitions_at_fixed_azimuth
 
   // range geometry
 
@@ -1347,9 +1359,17 @@ RadxRay *Dsr2Radx::_createInputRay(const DsRadarMsg &radarMsg,
   
   if (scanMode == DS_RADAR_RHI_MODE ||
       scanMode == DS_RADAR_EL_SURV_MODE) {
-    ray->setFixedAngleDeg(rbeam.targetAz);
+    double targetAz = rbeam.targetAz;
+    if (_params.apply_azimuth_offset) {
+      targetAz += _params.azimuth_offset;
+    }
+    ray->setFixedAngleDeg(Radx::conditionAz(targetAz));
   } else {
-    ray->setFixedAngleDeg(rbeam.targetElev);
+    double targetEl = rbeam.targetElev;
+    if (_params.apply_elevation_offset) {
+      targetEl += _params.elevation_offset;
+    }
+    ray->setFixedAngleDeg(Radx::conditionEl(targetEl));
   }
 
   ray->setIsIndexed(rbeam.beamIsIndexed);
@@ -1490,6 +1510,20 @@ RadxRay *Dsr2Radx::_createInputRay(const DsRadarMsg &radarMsg,
 
   return ray;
 
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// compute difference between 2 angles: (a1 - a2)
+
+double Dsr2Radx::_computeDeltaAngle(double a1, double a2)
+{
+  double diff = a1 - a2;
+  if (diff < -180.0) {
+    diff += 360.0;
+  } else if (diff > 180.0) {
+    diff -= 360.0;
+  }
+  return diff;
 }
 
 ////////////////////////////////////////////////////////////////////

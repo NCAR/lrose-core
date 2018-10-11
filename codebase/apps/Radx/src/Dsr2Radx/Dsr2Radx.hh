@@ -103,7 +103,7 @@ private:
 
   vector<DsRadarCalib *> _calibs;
 
-  // sweep manager for elevation histogram
+  // sweep manager
 
   SweepMgr *_sweepMgr;
   bool _sweepNumbersMissing;
@@ -145,7 +145,9 @@ private:
   RadxRay *_cachedRay;
   time_t _endOfVolTime;
   int _prevVolNum;
+  int _prevTiltNum;
   int _prevSweepNum;
+  int _sweepNumOverride;
   bool _endOfVol;
 
   // is this a solar scan?
@@ -177,6 +179,8 @@ private:
   void _loadRadxRcalib();
   
   RadxRay *_createInputRay(const DsRadarMsg &radarMsg, int msgContents);
+  double _computeDeltaAngle(double a1, double a2);
+
   void _censorInputRay(RadxRay *ray);
 
   void _prepareRayForOutput(RadxRay *ray);

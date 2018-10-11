@@ -102,7 +102,7 @@ paramdef struct radar_location_t {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to apply an offset to the azimuth values.";
-  p_help = "If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.";
+  p_help = "If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north. The offset is applied as the rays are read in - i.e. all other operations use the updated azimuths.";
 } apply_azimuth_offset;
 
 paramdef double {
@@ -114,7 +114,7 @@ paramdef double {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to apply an offset to the elevation values.";
-  p_help = "If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.";
+  p_help = "If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles. The offset is applied as the rays are read in - i.e. all other operations use the updated elevations.";
 } apply_elevation_offset;
 
 paramdef double {
@@ -562,7 +562,7 @@ paramdef boolean {
 paramdef double {
   p_default = 0.0;
   p_descr = "Azimuth to be used for forcing surveillance sweep transitions (deg).";
-  p_help = "See 'adjust_sur_sweep_limits_to_fixed_azimuth'.";
+  p_help = "See 'adjust_sur_sweep_limits_to_fixed_azimuth'. Any azimuth_offset will be applied before this check.";
 } sur_sweep_transitions_azimuth_deg;
 
 commentdef {
