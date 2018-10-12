@@ -198,7 +198,7 @@ public:
 
   inline int getSweepNumber() const { return _sweepNum; }
 
-  /// Get the event causecalibration index for this event. See setCalibIndex().
+  /// Get the event cause for this event.
 
   inline Radx::EventCause_t getCause() const { return _cause; }
   
