@@ -671,7 +671,7 @@
     tt->descr = tdrpStrDup("Name of radar site");
     tt->help = tdrpStrDup("Stored in netCDF file.");
     tt->val_offset = (char *) &site_name - &_start_;
-    tt->single_val.s = tdrpStrDup("Unknown");
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'override_radar_name'
@@ -2465,6 +2465,18 @@
     tt->descr = tdrpStrDup("Option to write latest_data_info for each data set.");
     tt->help = tdrpStrDup("Writes a latest_data_info file for each data set written, including the separate directories for surveillance, sector, rhi etc. as appropriate. If write_master_ldata_info is true, you may consider turning this off.");
     tt->val_offset = (char *) &write_individual_ldata_info - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'register_with_data_mapper'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("register_with_data_mapper");
+    tt->descr = tdrpStrDup("Option to register the latest_data_info with the data mapper.");
+    tt->help = tdrpStrDup("If true, contacts the DataMapper using TCP, to update the latest time for this data set.");
+    tt->val_offset = (char *) &register_with_data_mapper - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     

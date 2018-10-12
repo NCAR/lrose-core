@@ -697,6 +697,8 @@ public:
 
   tdrp_bool_t write_individual_ldata_info;
 
+  tdrp_bool_t register_with_data_mapper;
+
   netcdf_style_t netcdf_style;
 
   tdrp_bool_t output_native_byte_order;
@@ -746,7 +748,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[170];
+  mutable TDRPtable _table[171];
 
   const char *_className;
 
