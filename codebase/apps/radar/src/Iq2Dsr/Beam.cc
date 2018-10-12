@@ -1244,6 +1244,8 @@ void Beam::_computeMomDpAltHvCoCross()
   if (_params.use_estimated_noise_for_noise_subtraction) {
     _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
     _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
+    _mom->setEstimatedNoiseDbmHx(_noise->getMedianNoiseDbmHx());
+    _mom->setEstimatedNoiseDbmVx(_noise->getMedianNoiseDbmVx());
     noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
   }
     
@@ -1609,6 +1611,7 @@ void Beam::_computeMomDpHOnly()
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
     _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
+    _mom->setEstimatedNoiseDbmVx(_noise->getMedianNoiseDbmVx());
     noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
   }
     
@@ -1706,6 +1709,7 @@ void Beam::_computeMomDpVOnly()
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
     _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
+    _mom->setEstimatedNoiseDbmHx(_noise->getMedianNoiseDbmHx());
     noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
   }
     
