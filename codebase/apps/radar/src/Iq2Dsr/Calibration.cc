@@ -78,44 +78,18 @@ Calibration::~Calibration()
 int Calibration::readCal(const string &filePath)
 
 {
-  
+
+  // read from file
+
   if (_readCalFromFile(filePath)) {
     return -1;
   }
-  
-  if (_params.override_cal_dbz_correction) {
-    _calib.setDbzCorrection(_params.dbz_correction);
-    if (_params.debug) {
-      cerr << "Calibration::readCal()" << endl;
-      cerr << "  setting dbz_correction: " << _params.dbz_correction << endl;
-    }
-  }
-  
-  if (_params.override_cal_zdr_correction) {
-    _calib.setZdrCorrectionDb(_params.zdr_correction_db);
-    if (_params.debug) {
-      cerr << "Calibration::readCal()" << endl;
-      cerr << "  setting zdr_correction_db: " << _params.zdr_correction_db << endl;
-    }
-  }
-  
-  if (_params.override_cal_ldr_corrections) {
-    _calib.setLdrCorrectionDbH(_params.ldr_correction_db_h);
-    _calib.setLdrCorrectionDbV(_params.ldr_correction_db_v);
-    if (_params.debug) {
-      cerr << "Calibration::readCal()" << endl;
-      cerr << "  setting ldr_correction_db_h: " << _params.ldr_correction_db_h << endl;
-      cerr << "  setting ldr_correction_db_v: " << _params.ldr_correction_db_v << endl;
-    }
-  }
 
-  if (_params.override_cal_system_phidp) {
-    _calib.setSystemPhidpDeg(_params.system_phidp_deg);
-    if (_params.debug) {
-      cerr << "Calibration::readCal()" << endl;
-      cerr << "  setting system_phidp_deg: " << _params.system_phidp_deg << endl;
-    }
-  }
+  // apply corrections as appropriate
+
+  _applyCorrections();
+
+  // debug print
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _calib.print(cerr);
@@ -158,6 +132,10 @@ int Calibration::loadCal(const Beam *beam)
     
   }
   
+  // apply corrections as appropriate
+
+  _applyCorrections();
+
   return 0;
 
 }
@@ -592,4 +570,47 @@ iwrf_xmit_rcv_mode_t Calibration::_getXmitRcvMode(Params::xmit_rcv_mode_t mode)
 
 }
 
+////////////////////////////////////////////////////////////////
+// apply corrections
+
+void Calibration::_applyCorrections()
+  
+{
+
+  
+  if (_params.override_cal_dbz_correction) {
+    _calib.setDbzCorrection(_params.dbz_correction);
+    if (_params.debug) {
+      cerr << "Calibration::_applyCorrections()" << endl;
+      cerr << "  setting dbz_correction: " << _params.dbz_correction << endl;
+    }
+  }
+  
+  if (_params.override_cal_zdr_correction) {
+    _calib.setZdrCorrectionDb(_params.zdr_correction_db);
+    if (_params.debug) {
+      cerr << "Calibration::_applyCorrections()" << endl;
+      cerr << "  setting zdr_correction_db: " << _params.zdr_correction_db << endl;
+    }
+  }
+  
+  if (_params.override_cal_ldr_corrections) {
+    _calib.setLdrCorrectionDbH(_params.ldr_correction_db_h);
+    _calib.setLdrCorrectionDbV(_params.ldr_correction_db_v);
+    if (_params.debug) {
+      cerr << "Calibration::_applyCorrections()" << endl;
+      cerr << "  setting ldr_correction_db_h: " << _params.ldr_correction_db_h << endl;
+      cerr << "  setting ldr_correction_db_v: " << _params.ldr_correction_db_v << endl;
+    }
+  }
+  
+  if (_params.override_cal_system_phidp) {
+    _calib.setSystemPhidpDeg(_params.system_phidp_deg);
+    if (_params.debug) {
+      cerr << "Calibration::_applyCorrections()" << endl;
+      cerr << "  setting system_phidp_deg: " << _params.system_phidp_deg << endl;
+    }
+  }
+
+}
 
