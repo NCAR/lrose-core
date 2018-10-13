@@ -1,0 +1,4 @@
+__makefile.template
+makefile
+makefile.am
+makefile.in

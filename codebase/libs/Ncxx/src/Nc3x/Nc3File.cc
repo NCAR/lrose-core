@@ -879,8 +879,18 @@ Nc3Values* Nc3Var::get_rec(Nc3Dim* rdim, long slice)
       break;
     case nc3NoType:
     default:
+    {
+      delete [] start;
+      delete [] startl;
+      delete [] edge;
+      delete [] edgel;
+      if (valp) {
+         delete valp;
+      }
       return 0;
+     }
   }
+
   delete [] start;
   delete [] startl;
   delete [] edge;

@@ -1,6 +1,4 @@
 /Makefile/1.1/Sat Sep  2 22:55:02 2017//
-/Ncxx.cc/1.1/Sat Sep  2 22:55:02 2017//
-/NcxxAtt.cc/1.1/Sat Sep  2 22:55:02 2017//
 /NcxxByte.cc/1.1/Sat Sep  2 22:55:02 2017//
 /NcxxChar.cc/1.1/Sat Sep  2 22:55:02 2017//
 /NcxxCheck.cc/1.1/Sat Sep  2 22:55:02 2017//
@@ -12,7 +10,6 @@
 /NcxxException.cc/1.1/Sat Sep  2 22:55:02 2017//
 /NcxxFile.cc/1.1/Sat Sep  2 22:55:02 2017//
 /NcxxFloat.cc/1.1/Sat Sep  2 22:55:02 2017//
-/NcxxGroup.cc/1.1/Sat Sep  2 22:55:02 2017//
 /NcxxGroupAtt.cc/1.1/Sat Sep  2 22:55:02 2017//
 /NcxxInt.cc/1.1/Sat Sep  2 22:55:02 2017//
 /NcxxInt64.cc/1.1/Sat Sep  2 22:55:02 2017//
@@ -27,4 +24,7 @@
 /NcxxVarAtt.cc/1.1/Sat Sep  2 22:55:02 2017//
 /NcxxVlenType.cc/1.1/Sat Sep  2 22:55:02 2017//
 /NcxxVar.cc/1.2/Wed Oct 18 22:56:28 2017//
+/Ncxx.cc/1.2/Wed Oct 10 21:50:22 2018//
+/NcxxAtt.cc/1.2/Wed Oct 10 21:50:22 2018//
+/NcxxGroup.cc/1.2/Tue Jan 30 06:23:59 2018//
 D

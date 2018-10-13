@@ -360,6 +360,7 @@ int Hdf5xx::loadCompVar(CompType compType,
     memcpy(str, buf + offset, strLen);
     str[strLen] = '\0';
     stringVal = str;
+    delete [] str;
 
   } else if (mclass == H5T_COMPOUND) {
 
@@ -1183,8 +1184,8 @@ void Hdf5xx::printDataSet(DataSet &ds, const string dsname,
         }
         delete[] ivals;
 
-      } else if (tsize == 8) {
-
+      } else { 
+       //tsize == 8) 
         NcxxPort::si64 *ivals = new NcxxPort::si64[npoints];
         ds.read(ivals, dtype);
         if (NcxxPort::hostIsBigEndian()) {
@@ -1242,8 +1243,8 @@ void Hdf5xx::printDataSet(DataSet &ds, const string dsname,
       }
       delete[] fvals;
 
-    } else if (tsize == 8) {
-
+    } else { 
+      // tsize == 8
       NcxxPort::fl64 *fvals = new NcxxPort::fl64[npoints];
       ds.read(fvals, dtype);
       if (NcxxPort::hostIsBigEndian()) {
@@ -1533,7 +1534,7 @@ void Hdf5xx::printCompoundType(CompType &compType,
       str[strLen] = '\0';
       H5std_string sval(str);
       out << "      sval: " << sval << endl;
-      
+      delete [] str;    
     } else if (mclass == H5T_COMPOUND) {
       
       out << "    Member type: COMPOUND" << endl;
