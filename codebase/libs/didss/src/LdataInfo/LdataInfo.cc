@@ -1773,7 +1773,7 @@ int LdataInfo::_doReadXml(const char *file_path, int file_len)
   TaArray<char> bufArray;
   char *xmlBuf = bufArray.alloc(file_len + 1);
   memset(xmlBuf, 0, file_len + 1);
-
+  
   // read in buffer
   
   if (ta_fread(xmlBuf, 1, file_len, xml_file) != file_len) {
@@ -1782,8 +1782,11 @@ int LdataInfo::_doReadXml(const char *file_path, int file_len)
   }
   fclose(xml_file);
 
-  // disassemble from XML
+  // null terminate xmlBuf
+  xmlBuf[file_len] = '\0';
 
+  // disassemble from XML
+	
   if (_disassembleFromXml(xmlBuf, file_len)) {
     return -1;
   }
