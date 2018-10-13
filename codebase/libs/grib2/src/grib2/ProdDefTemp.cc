@@ -27,7 +27,7 @@
 //                  objects to represent various product 
 //                  definition templates
 //       
-// $Id: ProdDefTemp.cc,v 1.45 2017/08/07 15:55:58 jcraig Exp $    
+// $Id: ProdDefTemp.cc,v 1.46 2018/10/13 22:29:11 dixon Exp $    
 //
 ///////////////////////////////////////////////////////////
 

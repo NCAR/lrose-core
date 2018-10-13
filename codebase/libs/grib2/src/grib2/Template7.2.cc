@@ -510,14 +510,14 @@ int Template7_pt_2::unpack (ui08 *dataPtr)
 //                         to verify that group widths and lengths are
 //                         consistent with section length.
 
-  si32 nbitsd, iofst, j, k, l, n, non;
+  si32 nbitsd, iofst, j, k, l, n, non = 0;
   si32 isign, ival1, ival2, minsd, totBit, totLen;
   si32 nbitsgref, misType, nbitsgwidth, nbitsglen;
   si32 gwidths, spatialOrder, itemp;
   si32 lengthIncrement;
   si32 ngroups, glength, lengthLast;
   fl32 msng1, msng2;
-  fl32 bscale, dscale, reference, rmiss1, rmiss2;
+  fl32 bscale, dscale, reference, rmiss1 = 0.0, rmiss2 = 0.0;
   
   bscale = pow(2.0, drsConstants.binaryScaleFactor);
   dscale = pow(10.0, -drsConstants.decimalScaleFactor);
@@ -586,7 +586,7 @@ int Template7_pt_2::unpack (ui08 *dataPtr)
   si32 *ifld = new si32 [gridSz];
   si32 *gref = new si32 [ngroups];
   si32 *gwidth = new si32 [ngroups];
-  si32 *ifldmiss;
+  si32 *ifldmiss = NULL;
 
   iofst=0;      
   

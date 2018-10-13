@@ -160,7 +160,7 @@ int DS::unpack(ui08 *dsPtr)
 
 fl32 *DS::getData()
 {
-  ui08 *dataPtr;
+  ui08 *dataPtr = NULL;
   if(_data_status == READ) {
     dataPtr = _readDataPtr;
   } else if(_data_status == ENCODE || 
