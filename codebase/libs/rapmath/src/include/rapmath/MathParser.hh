@@ -27,9 +27,11 @@ public:
    * LOOP2D_USER = looping within a volume, 2d slices, returns user defined data
    * LOOP1D = looping within a volume, 1d rays
    * VOLUME_BEFORE = processing the entire volume, before LOOP2d and LOOP1D
+   * VOLUME_BEFORE_USER = processing the entire volume, before LOOP2d and 
+   *                      LOOP1D, returns user defined data
    * VOLUME_AFTER = processing the entire volume, after LOOP2d and LOOP1D
    */
-  typedef enum {LOOP2D, LOOP2D_USER, LOOP1D, VOLUME_BEFORE,
+  typedef enum {LOOP2D, LOOP2D_USER, LOOP1D, VOLUME_BEFORE, VOLUME_BEFORE_USER,
 		VOLUME_AFTER} Filter_t;
 
   /**
@@ -43,11 +45,23 @@ public:
   ~MathParser(void);
 
   /**
+   * Set to output more filtering steps
+   */
+  inline void setOutputDebugAll(void) { _outputDebugAll = true;}
+
+  /**
+   * Set to output less filtering steps
+   */
+  inline void clearOutputDebugAll(void) {_outputDebugAll = false;}
+  
+  /**
    * Evaluate the input string, and add a Filter object based on the
    * parsed results to the local state.
    *
    * @param[in] s  String to parse
    * @param[in] filterType  Indicator as to where to put result in state
+   * @param[in] fixedConstants   List of fixed constants possibly in s
+   * @param[in] userDataNames   List of user defined data possibly in s
    *
    * @return true if successful
    */
@@ -116,7 +130,8 @@ public:
 
   /**
    * Process an entire volume of input data, before doing loop stuff, by
-   * going through the VOLUME_BEFORE filters in sequential order
+   * going through the VOLUME_BEFORE/VOLUME_BEFORE_USER filters in sequential
+   * order
    *
    * @param[in,out]  data  Pointer to the volume, added to by this method
    */
@@ -131,6 +146,18 @@ public:
    * @param[in] ii  Index into the 2d data
    */
   void processOneItem2d(VolumeData *rdata, int ii) const;
+
+  /**
+   * Threaded 
+   * Process 2 dimensional input data, as defined by the input data itself
+   * by going through the LOOP2D/LOOP2D_USER filters in sequential order.
+   *
+   * @param[in,out] rdata Pointer to the volume, assumed to have 2d subsets,
+   *                      added to by this method
+   * @param[in] ii  Index into the 2d data
+   *
+   * @param[in] thread  Threading pointer
+   */
   void processOneItem2d(VolumeData *rdata, int ii, TaThreadQue *thread) const;
 
   /**
@@ -185,10 +212,18 @@ public:
    */
   static bool isFalse(const std::string &s);
 
+  /**
+   * @return string with a description of all unary operators
+   */
   std::string sprintUnaryOperators(void) const;
+  /**
+   * @return string with a description of all binary operators
+   */
   std::string sprintBinaryOperators(void) const;
 
 private:
+
+  bool _outputDebugAll;  /**< True to see more logged output */
 
   /**
    * library defined binary operator strings, such as "+"
@@ -244,7 +279,7 @@ private:
   std::vector<ProcessingNode *>
   _commaSeparatedArgNodes(std::string &part2, bool &bad);
   ProcessingNode *_val(const std::string &s);
-  void _processLoop(const Filter &filter, MathData *rdata) const;
+  void _processLoop(const Filter &filter, MathData *rdata, bool debug) const;
   void _processV(const Filter &filter, VolumeData *rdata) const;
 };
   
@@ -257,7 +292,14 @@ private:
 class Filter
   {
   public:
+    /**
+     * Simple constructor, empty
+     */
     inline Filter(void) : _filter(NULL) {}
+
+    /**
+     * Destructor
+     */
     inline ~Filter(void) {}
 
     ProcessingNode *_filter;                 /**< Pointer to top node */

@@ -115,8 +115,10 @@ public:
 			bool &compareMissing) const;
 
 
+  /**
+   * @return the LogicalArg representation of this object
+   */
   LogicalArg getLogicalArg(void) const;
-
 
 protected:
 private:

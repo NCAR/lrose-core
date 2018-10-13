@@ -160,6 +160,11 @@ public:
   bool getSimpleCompare(std::string &compareName, FindSimple::Compare_t &c,
 			double &compareV, bool &compareMissing) const;
 
+  /**
+   * Construct and return the LogicalArgs representation of the object.
+   * @param[out] args  Set if possible
+   * @return true if able to set the args output
+   */
   bool getMultiCompare(LogicalArgs &args) const;
 
 protected:

@@ -141,11 +141,24 @@ public:
   void cleanup(void);
   
   /**
-   * Simple debug printing
+   * Simple debug printing of the string for this node
+   * @return string representation
    */
   std::string sprint(void) const;
+
+  /**
+   * Simple debug printing to stdout of the string for this node
+   */
   void print(void) const;
+
+  /**
+   * Simple debug printing of the parsed node
+   */
   void printParsed(void) const;
+
+  /**
+   * Simple debug printing of the parsed node, with a \n
+   */
   void printParsedCr(void) const;
 
   /**
@@ -173,12 +186,14 @@ public:
   static std::string sprintUOpDescr(const UnaryOperator_t &op);
 
   /**
-   * Binary operator at an index
+   * @return Binary operator associated with an index
+   * @param[in] index  Index
    */
   static Operator_t binaryOperatorValue(int index);
 
   /**
-   * Unary operator at an index
+   * @return Unary operator associated with an index
+   * @param[in] index  Index
    */
   static UnaryOperator_t unaryOperatorValue(int index);
 

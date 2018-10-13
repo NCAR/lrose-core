@@ -66,10 +66,33 @@ public:
 			std::string &assignToName,
 			std::string &assignFromName) const;
 
+  /**
+   * @return true if this is a sequence of simple comparisons to make up a 
+   * logical expression to a number that if true 
+   * causes a simple assignmentment of a number to a variable.
+   * and if so set the args
+   *
+   * @param[out]  args  The list of arguments/operations of the logical
+   * @param[out]  assignName  Variable being assigned to when true
+   * @param[out]  assignV Value being assigned to variable
+   * @param[out]  assignMissing  TRue if missing value is being assigned to 
+   *                             variable
+   */
   bool getMultiCompare(LogicalArgs &args,
 		       std::string &assignName,
 		       double &assignV,
 		       bool &assignMissing) const;
+
+  /**
+   * @return true if this is a sequence of simple comparisons to make up a 
+   * logical expression to a number that if true 
+   * causes a simple assignment of one variable to another
+   * and if so set the args
+   *
+   * @param[out]  args  The list of arguments/operations of the logical
+   * @param[out]  assignToName  Variable being assigned to when true
+   * @param[out]  assignFromName Value being assigned from when true
+   */
   bool getMultiCompare(LogicalArgs &args,
 		       std::string &assignToName,
 		       std::string &assignFromName) const;
