@@ -961,7 +961,7 @@ public:
    * Use input speed and dir, to set local Line motion vector perpendicular
    * to the line
    *
-   * @param[in] best_dir  Motion vector whose direction is used to decide
+   * @param[in] bestDir  Motion vector whose direction is used to decide
    *                      which of two directions perpendicular to the line
    *                      to use
    * @param[in] speed  Speed to use

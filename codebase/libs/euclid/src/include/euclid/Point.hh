@@ -36,6 +36,8 @@
 #include <cmath>
 #include <string>
 
+class Grid2d;
+
 class Point : public AttributesEuclid
 {
  public:
@@ -217,6 +219,17 @@ class Point : public AttributesEuclid
     _y = (o2._y + _y);
   }
 
+  /**
+   * modify local point, add to x and y
+   * @param[in] dx  Value to add to x
+   * @param[in] dy  Value to add to y
+   */
+  inline void add(double dx, double dy)
+  {
+    _x += dx;
+    _y += dy;
+  }
+
   /*
    * Set x,y values for local point to inputs
    * @param[in] x
@@ -232,6 +245,8 @@ class Point : public AttributesEuclid
    * @return the orientation difference between the local point
    * and the input point,where each points orientation is relative to 0,0
    *
+   * @param[in] xy  Input point
+   *
    * Value returned is between [-180, 180]
    */
   double angleBetween(const Point &xy) const;
@@ -239,12 +254,14 @@ class Point : public AttributesEuclid
   /**
    * Rotate the local point by an angle, where the rotation is relative to
    * 0,0
+   *
+   * @param[in] angle  Degrees
    */
   void rotate(double angle);
 
   /**
    * Divide local object by input number, x and y
-   * @param[in] d, better not be 0.0
+   * @param[in] d  Better not be 0.0
    */
   inline void divide(const double d)
   {
@@ -286,6 +303,30 @@ class Point : public AttributesEuclid
 	      Point &min, Point &max) const;
 
   /**
+   * @return true if data is missing at the the point, assuming _x and _y
+   *         are grid indices
+   *
+   * @param[in] grid  Where to look for missing at the point
+   */
+  bool isMissing(const Grid2d &grid) const;
+
+  /**
+   * @return true if point is in range in a grid,
+   * assuming _x and _y are grid indices
+   *
+   * @param[in] nx  Number of x in grid
+   * @param[in] ny  Number of y in grid
+   */
+  bool inGridRange(int nx, int ny) const;
+
+  /**
+   * Write value to grid at Point, assuming _x and _y are grid indices
+   * @param[in,out] grid
+   * @param[in] value
+   */
+  void toGrid(Grid2d &grid, double value) const;
+
+  /**
    * @return a Point based in input x and y, but scaled so length() = 1
    * @param[in] x
    * @param[in] y
@@ -304,6 +345,8 @@ class Point : public AttributesEuclid
    * @param[in] v  The point
    */
   static Point perpendicular(const Point &v);
+
+
 
  private:
 

@@ -24,6 +24,8 @@
 /**
  * @file Grid2dLoopAlg.hh 
  * @brief Algorithms to apply at each step of Grid2dLoopA.
+ * @class Grid2dLoopAlg
+ * @brief Algorithms to apply at each step of Grid2dLoopA.
  */
 
 #ifndef GRID2DLOOPALG_H
@@ -137,7 +139,7 @@ private:
 
 //------------------------------------------------------------------
 /**
- * @class Grid2dLoopMeanNoMissing
+ * @class Grid2dLoopAlgMeanNoMissing
  * @brief mean at each point, with result set to missing if any values are
  *        missing.
  */

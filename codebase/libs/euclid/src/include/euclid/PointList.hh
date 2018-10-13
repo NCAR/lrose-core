@@ -199,6 +199,23 @@ public:
   void centerpoint(double &x, double &y) const;
 
   /**
+   * @return average x value
+   */
+  double xAverage(void) const;
+
+  /**
+   * @return true if at every point in the PointList, the value in the grid is
+   * within tolerance of one of the input values
+   *
+   * @param[in] num  Number of values
+   * @param[in] values
+   * @param[in] tolerance
+   * @param[in] grid
+   */
+  bool onIntList(int num, const int *values, double tolerance,
+		 const Grid2d &grid) const;
+
+  /**
    * @return minimum X value from the PointList points
    */
   double minX(void) const;
@@ -277,10 +294,24 @@ public:
   void keepX(double x);
 
   /**
+   * Create object of all points with a certain x value
+   * @param[in] x
+   * @return new pointlist
+   */
+  PointList commonX(double x) const;
+
+  /**
    * Remove all points whos y value is not equal to input
    * @param[in] y
    */
   void keepY(double y);
+
+  /**
+   * Create object of all points with a certain y value
+   * @param[in] y
+   * @return new pointlist
+   */
+  PointList commonY(double y) const;
 
   /**
    * Remove all points that are missing in a mask grid
@@ -350,6 +381,31 @@ public:
    * @param[in] percentile
    */
   double percentileDataValue(const Grid2d &data, double percentile) const;
+
+  /**
+   * @return correlation at Pointlist points from two grids
+   * @param[in] x  One grid
+   * @param[in] y  The other grid
+   */
+  double correlation(const Grid2d &x, const Grid2d &y) const;
+  
+  /**
+   * return the maximum grid value at pointlist points
+   *
+   * @param[in] g  Grid
+   * @param[out] maxV
+   * @return true if at least one pointlist point had non-missing value
+   */
+  bool max(const Grid2d &g, double &maxV) const;
+
+  /**
+   * return the minimum grid value at pointlist points
+   *
+   * @param[in] g  Grid
+   * @param[out] minV
+   * @return true if at least one pointlist point had non-missing value
+   */
+  bool min(const Grid2d &g, double &minV) const;
 
   /**
    * Keep PointList points that are >= a threshold in a grid, remove all
@@ -449,6 +505,30 @@ public:
 			double dangle1, double value1,
 			Grid2d &mask);
 
+  /**
+   * Filter the local data so that all values are in the range 0 to nx-1, 0 to ny-1
+   * Set the grid dimensions to these inputs as well
+   * @param[in] nx
+   * @param[in] ny
+   */
+  void filter(int nx, int ny);
+
+  /**
+   * Erase the index'th point from the point list
+   */
+  void erase(int index);
+
+  /**
+   * Remove points with biggest data outlier values from a PointList one by one
+   * until all data values along pointlist are within a tolerance of each other
+   * or until a minimum number of points is reached.
+   * @param[in] data  Data grid
+   * @param[in] maxDataRange  threshold for the max-min data value spread 
+   * @param[in] minPts  Minimum number of points
+   */
+  void removeOutlierValuedPoints(const Grid2d &data, double maxDataRange,
+				 int minPts);
+
  protected:
  private:
 
@@ -479,6 +559,60 @@ public:
    */
   void _printAsciiLandscape(void) const;
 
+  /**
+   * @class PointListDataDiff
+   * @brief A private class to evaluate data differences in a grid
+   *        for points in a PointList
+   */
+  class PointListDataDiff
+  {
+  public:
+    /**
+     * Constructor
+     */
+    PointListDataDiff(void);
+
+    /**
+     * Destructor
+     */
+    ~PointListDataDiff(void);
+
+    /**
+     * Add a value
+     * @param[in] v  Value
+     * @param[in] index  Index into pointlist where value occured
+     */
+    void inc(double v, int index);
+
+    /**
+     * Finish up setting state after calling 'inc' for all pointlist points
+     * @return true if pointlist data does not have outlier values, i.e.
+     *         all values are within a tolerance
+     *
+     * @param[in] maxDiff Maximum allowed different between max an min values
+     */
+    bool finish(double maxDiff);
+
+    /**
+     * @return pointlist index that is the biggest outlier
+     *
+     * @note a little weak because it compares to the mean, which can be
+     * overly influenced by one big value. Should switch to median and do
+     * it a different way
+     */
+    int biggestOutlierIndex(void) const;
+
+  protected:
+  private:
+    int _iMin;    /**< index to minimum data value. */
+    int _iMax;    /**< index to maximum data value. */
+    double _min;  /**< The min data value */
+    double _max;  /**< The max data value */
+    double _mean; /**< mean data value */
+    double _num;  /**< Number of values */
+    bool _first;  /**< True for nothing yet added */
+    bool _debug;  /**< Flag */
+  };    
 };
 
 # endif   

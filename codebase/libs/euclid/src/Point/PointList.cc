@@ -243,11 +243,16 @@ void PointList::fromGrid(const Grid2d &img)
 void PointList::toGrid(Grid2d &img, double value) const
 {
   int x, y;
+  int nx = img.getNx();
+  int ny = img.getNy();
   for (size_t i=0; i<_points.size(); ++i)
   {
     x = _points[i].getIntX();
     y = _points[i].getIntY();
-    img.setValue(x, y, value);
+    if (x >= 0 && x < nx && y >= 0 && y < ny)
+    {
+      img.setValue(x, y, value);
+    }
   }
 }
 
@@ -341,6 +346,51 @@ void PointList::centerpoint(double &x, double &y) const
     x /= n;
     y /= n;
   }
+}
+
+/*----------------------------------------------------------------*/
+double PointList::xAverage(void) const
+{
+  if (_points.size()== 0)
+    return 0.0;
+
+  double xave = 0;
+
+  for (size_t i=0; i<_points.size(); ++i)
+  {
+    xave += _points[i].getX();
+  }
+  xave /= (double)_points.size();
+  return xave;
+}
+
+/*----------------------------------------------------------------*/
+bool PointList::onIntList(int num, const int *values, double tolerance,
+			  const Grid2d &grid) const
+{
+  for (size_t i=0; i<_points.size(); ++i)
+  {
+    double v;
+    int ix = (int)_points[i].getX();
+    int iy = (int)_points[i].getY();
+    if (grid.getValue(ix, iy, v))
+    {
+      bool ok = false;
+      for (int j=0; j<num; ++j)
+      {
+	if (fabs(v -(double)values[j]) < tolerance)
+	{
+	  ok = true;
+	  break;
+	}
+      }
+      if (!ok)
+      {
+	return false;
+      }
+    }
+  }
+  return true;
 }
 
 /*----------------------------------------------------------------*/
@@ -608,6 +658,40 @@ void PointList::keepY(double y)
 }
 
 /*----------------------------------------------------------------*/
+PointList PointList::commonX(double x) const
+{
+  PointList ret;
+  ret._nx = _nx;
+  ret._ny = _ny;
+  ret._points.clear();
+  for (size_t i=0; i<_points.size(); ++i)
+  {
+    if (_points[i].getX() == x)
+    {
+      ret._points.push_back(_points[i]);
+    }
+  }
+  return ret;
+}
+
+/*----------------------------------------------------------------*/
+PointList PointList::commonY(double y) const
+{
+  PointList ret;
+  ret._nx = _nx;
+  ret._ny = _ny;
+  ret._points.clear();
+  for (size_t i=0; i<_points.size(); ++i)
+  {
+    if (_points[i].getY() == y)
+    {
+      ret._points.push_back(_points[i]);
+    }
+  }
+  return ret;
+}
+
+/*----------------------------------------------------------------*/
 void PointList::clearNonMasked(const Grid2d &img)
 {
   int x, y;
@@ -729,6 +813,104 @@ double PointList::percentileDataValue(const Grid2d &data,
   }
   return d;
 }
+
+/*----------------------------------------------------------------*/
+double PointList::correlation(const Grid2d &x, const Grid2d &y) const
+{
+  double xbar=0, ybar=0, n=0;
+  for (size_t i=0; i<_points.size(); ++i)
+  {
+    int ix = _points[i].getIntX();
+    int iy = _points[i].getIntY();
+    double xi, yi;
+    if (x.getValue(ix, iy, xi) && y.getValue(ix, iy, yi))
+    {
+      xbar += xi;
+      ybar += yi;
+      ++n;
+    }
+  }
+  if (n == 0)
+    return 0.0;
+  
+  xbar /= n;
+  ybar /= n;
+
+  double num=0, denomx=0, denomy=0;
+  for (size_t i=0; i<_points.size(); ++i)
+  {
+    int ix = _points[i].getIntX();
+    int iy = _points[i].getIntY();
+    double xi, yi;
+    if (x.getValue(ix, iy, xi) && y.getValue(ix, iy, yi))
+    {
+      num += (xi-xbar)*(yi-ybar);
+      denomx += (xi-xbar)*(xi-xbar);
+      denomy += (yi-ybar)*(yi-ybar);
+    }
+  }
+  if (denomx == 0 || denomy == 0)
+    return 0.0;
+  else
+    return (num/sqrt(denomx*denomy));
+}
+
+/*----------------------------------------------------------------*/
+bool PointList::max(const Grid2d &g, double &maxV) const
+{
+  maxV=0;
+  bool first = true;
+
+  for (size_t i=0; i<_points.size(); ++i)
+  {
+    double v;
+    int ix = _points[i].getIntX();
+    int iy = _points[i].getIntY();
+    if (g.getValue(ix, iy, v))
+    {
+      if (first)
+      {
+	first = false;
+	maxV = v;
+      }
+      else
+      {
+	if (v > maxV)
+	  maxV = v;
+      }
+    }
+  }
+  return !first;
+}
+
+/*----------------------------------------------------------------*/
+bool PointList::min(const Grid2d &g, double &minV) const
+{
+  minV=0;
+  bool first = true;
+
+  for (size_t i=0; i<_points.size(); ++i)
+  {
+    double v;
+    int ix = _points[i].getIntX();
+    int iy = _points[i].getIntY();
+    if (g.getValue(ix, iy, v))
+    {
+      if (first)
+      {
+	first = false;
+	minV = v;
+      }
+      else
+      {
+	if (v < minV)
+	  minV = v;
+      }
+    }
+  }
+  return !first;
+}
+
 
 /*----------------------------------------------------------------*/
 void PointList::geThreshold(const Grid2d &img, double threshold)
@@ -882,6 +1064,69 @@ void PointList::filterLookahead(double x, double y, double angle,
   }
 }
 
+void PointList::filter(int nx, int ny)
+{
+  _nx = nx;
+  _ny = ny;
+  std::vector<Point>::iterator i;
+  for (i=_points.begin(); i!= _points.end(); )
+  {
+    int ix = i->getIntX();
+    int iy = i->getIntY();
+    if (ix < 0 || ix >= nx || iy < 0 || iy >= ny)
+    {
+      i = _points.erase(i);
+    }
+    else
+    {
+      i++;
+    }
+  }
+}  
+
+/*----------------------------------------------------------------*/
+void PointList::removeOutlierValuedPoints(const Grid2d &data,
+					  double maxDataRange,
+					  int minPts)
+{
+  int n = 0;
+  int bigNumber = data.getNdata();
+  
+  while (true)
+  {
+    PointListDataDiff diffs;
+    for (size_t ii=0; ii<_points.size(); ++ii)
+    {
+      double v;
+      int ix = _points[ii].getIntX();
+      int iy = _points[ii].getIntY();
+      if (data.getValue(ix, iy, v))
+      {
+	diffs.inc(v, ii);
+      }
+    }
+
+    if (diffs.finish(maxDataRange))
+    {
+      break;
+    }
+
+    // get the index to remove and remove it.
+    int index = diffs.biggestOutlierIndex();
+    erase(index);
+      
+    if ((int)(_points.size()) < minPts)
+    {
+      break;
+    }
+    if (++n > bigNumber)
+    {
+      LOG(ERROR) << "Logic error could be infinite loop";
+      break;
+    }
+  }
+}
+
 /*----------------------------------------------------------------*/
 bool PointList::_partiallyContained(const Grid2d &inmask, int ninmask,
 				     double percent) const
@@ -910,6 +1155,17 @@ bool PointList::_partiallyContained(const Grid2d &inmask, int ninmask,
 	
   // see how this is compared to percent.
   return (nintersect/ni > percent || nintersect/nm > percent);
+}
+
+/*----------------------------------------------------------------*/
+void PointList::erase(int index)
+{
+  if (index < 0 || index >= (int)_points.size())
+  {
+    LOG(ERROR) << "Erasing out of range index " << index << " ignore";
+    return;
+  }
+  _points.erase(_points.begin() + index);
 }
 
 /*----------------------------------------------------------------*/
@@ -1140,3 +1396,95 @@ void PointList::_printAsciiLandscape(void) const
     printf("%1c%s%1c\n", xlabel[ix], grid[ix], xlabel[ix]);
 }
 
+
+/*----------------------------------------------------------------*/
+PointList::PointListDataDiff::
+PointListDataDiff(void): _iMin(0), _iMax(0), _min(0),
+			 _max(0), _mean(0), _num(0),
+			 _first(true), _debug(false)
+{
+}
+
+/*----------------------------------------------------------------*/
+PointList::PointListDataDiff::~PointListDataDiff(void)
+{
+}
+
+/*----------------------------------------------------------------*/
+void PointList::PointListDataDiff::inc(double v, int index)
+{
+  _mean += v;
+  _num ++;
+  if (_first)
+  {
+    _first = false;
+    _iMin = _iMax = index;
+    _min = _max = v;
+  }
+  else
+  {
+    if (v < _min)
+    {
+      _iMin = index;
+      _min = v;
+    }
+    if (v > _max)
+    {
+      _iMax = index;
+      _max = v;
+    }
+  }
+}
+
+/*----------------------------------------------------------------*/
+bool PointList::PointListDataDiff::finish(double maxDiff)
+{
+  if (_first)
+  {
+    // no data
+    if (_debug)
+    {
+      LOG(WARNING) << "No Points at all to filter";
+      return true;
+    }
+  }
+  if (_max - _min <= maxDiff)
+  {
+    // data is all within the tolerated differences range
+    if (_debug)
+    {
+      LOG(DEBUG) << "difference within tolerence max=" << _max
+		 << " min=" << _min;
+    }
+    return true;
+  }
+
+  // compute the mean from what was accumulated for later
+  _mean /= _num;
+  return false;
+}
+
+/*----------------------------------------------------------------*/
+int PointList::PointListDataDiff::biggestOutlierIndex(void) const
+{
+  if (_max - _mean > _mean - _min)
+  {
+    // remove max
+    if (_debug)
+    {
+      LOG(DEBUG) <<  "Removing MAX range:" << _max-_min
+		 << " min:" << _min << " max" << _max << " mean:" << _mean;
+    }
+    return _iMax;
+  }
+  else
+  {
+    // remove max
+    if (_debug)
+    {
+      LOG(DEBUG) <<  "Removing MIN range:" << _max-_min
+		 << " min:" << _min << " max" << _max << " mean:" << _mean;
+    }
+    return _iMin;
+  }
+}
