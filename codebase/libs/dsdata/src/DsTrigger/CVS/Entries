@@ -1,6 +1,5 @@
 /.cvsignore/1.1/Thu Dec 29 22:57:37 2016//
 /DsDirListTrigger.cc/1.5/Thu Dec 29 22:57:37 2016//
-/DsEnsembleAnyTrigger.cc/1.10/Mon Sep  4 22:15:38 2017//
 /DsEnsembleDataTrigger.cc/1.4/Thu Dec 29 22:57:37 2016//
 /DsEnsembleGenTrigger.cc/1.5/Thu Dec 29 22:57:37 2016//
 /DsEnsembleLeadTrigger.cc/1.5/Thu Dec 29 22:57:37 2016//
@@ -29,8 +28,9 @@
 /SpdbTimeListHandler.cc/1.4/Thu Dec 29 22:57:37 2016//
 /TimeListHandler.cc/1.4/Thu Dec 29 22:57:37 2016//
 /TriggerInfo.cc/1.11/Thu Dec 29 22:57:37 2016//
-/DsInputDirTrigger.cc/1.11/Thu Dec 14 15:47:01 2017//
 /DsIntervalTrigger.cc/1.12/Thu Dec 14 15:47:01 2017//
 /DsMultipleTrigger.cc/1.18/Thu Dec 14 15:47:01 2017//
 /DsTrigger.cc/1.13/Thu Dec 14 15:47:01 2017//
+/DsInputDirTrigger.cc/1.12/Sat Oct 13 22:08:37 2018//
+/DsEnsembleAnyTrigger.cc/1.11/Sat Oct 13 22:11:26 2018//
 D

@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 // RCS info
-//   $Author: dixon $
+//   $Author: nowcast $
 //   $Locker:  $
-//   $Date: 2017/12/14 15:47:01 $
-//   $Id: DsInputDirTrigger.cc,v 1.11 2017/12/14 15:47:01 dixon Exp $
-//   $Revision: 1.11 $
+//   $Date: 2018/07/30 22:02:12 $
+//   $Id: DsInputDirTrigger.cc,v 1.12 2018/07/30 22:02:12 nowcast Exp $
+//   $Revision: 1.12 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -208,6 +208,9 @@ int DsInputDirTrigger::next()
   if (ta_stat(next_filename, &file_stat) != 0) {
     _errStr = "ERROR - " + method_name + "\n";
     _errStr += string("Unable to stat new data file: ") + next_filename + "\n";
+    if (next_filename){
+       delete [] next_filename; 
+    }    
     return -1;
   }
   
@@ -218,6 +221,8 @@ int DsInputDirTrigger::next()
     cerr << "DsInputDirTrigger, dir: " << _inputDir->getDirName() << endl;
     cerr << "  found file: " << next_filename << endl;
   }
+  
+  delete[] next_filename;
 
   return 0;
 }
