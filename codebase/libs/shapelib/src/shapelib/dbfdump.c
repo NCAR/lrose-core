@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dbfdump.c,v 1.1 2000/06/28 13:36:59 rehak Exp $
+ * $Id: dbfdump.c,v 1.2 2018/10/13 23:24:07 dixon Exp $
  *
  * Project:  Shapelib
  * Purpose:  Sample application for dumping .dbf files to the terminal.
@@ -34,6 +34,9 @@
  ******************************************************************************
  *
  * $Log: dbfdump.c,v $
+ * Revision 1.2  2018/10/13 23:24:07  dixon
+ * Sync with EOL/github/lrose-core
+ *
  * Revision 1.1  2000/06/28 13:36:59  rehak
  * Initial version of library from http://gdal.velocet.ca/projects/shapelib/
  *
