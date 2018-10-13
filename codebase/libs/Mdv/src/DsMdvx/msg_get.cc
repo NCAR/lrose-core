@@ -2114,23 +2114,42 @@ int DsMdvxMsg::_getNcfHeaderParts(DsMdvx &mdvx)
     cerr << xml << endl;
   }
 
-  double validTime = 0, genTime = 0, forecastTime = 0;
-  TaXml::readDouble(xml, "valid_time", validTime);
-  TaXml::readDouble(xml, "gen_time", genTime);
-  TaXml::readDouble(xml, "forecast_time", forecastTime);
+  double validTime = 0;
+  if (TaXml::readDouble(xml, "valid_time", validTime)) {
+    validTime = 0;
+  }
+  double genTime = 0;
+  if (TaXml::readDouble(xml, "gen_time", genTime)) {
+    genTime = 0;
+  }
+  double forecastTime = 0;
+  if (TaXml::readDouble(xml, "forecast_time", forecastTime)) {
+    forecastTime = 0;
+  }
 
-  int forecastLeadSecs = 0, epoch = 0;
-  TaXml::readInt(xml, "forecast_lead_secs", forecastLeadSecs);
-  TaXml::readInt(xml, "epoch", epoch);
+  int forecastLeadSecs = 0;
+  if (TaXml::readInt(xml, "forecast_lead_secs", forecastLeadSecs)) {
+    forecastLeadSecs = 0;
+  }
+  int epoch = 0;
+  if (TaXml::readInt(xml, "epoch", epoch)) {
+    epoch = 0;
+  }
 
   bool isForecast = false;
-  TaXml::readBoolean(xml, "is_forecast", isForecast);
+  if (TaXml::readBoolean(xml, "is_forecast", isForecast)) {
+    isForecast = false;
+  }
 
   string suffix;
-  TaXml::readString(xml, "suffix", suffix);
+  if (TaXml::readString(xml, "suffix", suffix)) {
+    suffix.clear();
+  }
 
   bool constrained = false;
-  TaXml::readBoolean(xml, "constrained", constrained);
+  if (TaXml::readBoolean(xml, "constrained", constrained)) {
+    constrained = false;
+  }
   
   // set ncf details
   
