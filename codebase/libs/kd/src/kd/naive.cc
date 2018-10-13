@@ -125,9 +125,7 @@ void KD_naive::selection(KD_real *a, int *perm, int N, int k)
 // The first element of the array contains the number of points asked for, NumNN.
 void KD_naive::nnquery(KD_real *NNQPoint, int NumNN, int Metric, int MinkP, int *found, KD_real *dist_array)
 {
-  int count, j; 
-
-  count = 0;
+  int j; 
 
   switch(Metric)
     {
