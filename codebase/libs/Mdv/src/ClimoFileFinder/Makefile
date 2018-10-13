@@ -34,6 +34,9 @@ HDRS = \
 	../include/Mdv/climo/HourlyFileFinder.hh \
 	../include/Mdv/climo/MonthlyByYearFileFinder.hh \
 	../include/Mdv/climo/MonthlyFileFinder.hh \
+	../include/Mdv/climo/TwoHourlyByMonthFileFinder.hh \
+	../include/Mdv/climo/TwoHourlyByYearFileFinder.hh \
+	../include/Mdv/climo/TwoHourlyDiurnalFileFinder.hh \
 	../include/Mdv/climo/ThreeHourlyByMonthFileFinder.hh \
 	../include/Mdv/climo/ThreeHourlyDiurnalFileFinder.hh
 
@@ -48,6 +51,9 @@ CPPC_SRCS = \
 	HourlyFileFinder.cc \
 	MonthlyByYearFileFinder.cc \
 	MonthlyFileFinder.cc \
+	TwoHourlyByMonthFileFinder.cc \
+	TwoHourlyByYearFileFinder.cc \
+	TwoHourlyDiurnalFileFinder.cc \
 	ThreeHourlyByMonthFileFinder.cc \
 	ThreeHourlyDiurnalFileFinder.cc
 

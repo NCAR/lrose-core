@@ -1298,6 +1298,13 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
     return 0;
   }
 
+  if (_fhdr.nz < 1)
+  {
+    fprintf(stderr, "ERROR - MdvxField::convert2Composite\n");
+    fprintf(stderr, "  _fhdr.nz < 1\n");
+    return -1;
+  }
+
   int lowerPlaneNum = lower_plane_num;
   int upperPlaneNum = upper_plane_num;
 
@@ -3224,13 +3231,20 @@ void MdvxField::computePlaneLimits(double vlevel1,
 
   // reorder as necessary
 
-  if (p1 < p2) {
+  if (p1 < p2 ) {
     lower_plane = p1;
     upper_plane = p2;
   } else {
     lower_plane = p2;
     upper_plane = p1;
   }
+
+  // sanity check on upper_plane and lower_plane values insures no out-of-bounds array access 
+  if (lower_plane < 0)
+    lower_plane = 0;
+  if (upper_plane < 0)
+    upper_plane = 0;
+ 
   
   // check for data order
   
@@ -3360,7 +3374,7 @@ void MdvxField::printHeaders(ostream &out,
       Mdvx::printFieldHeader(*_fhdrFile, out);
     }
     
-    if (_vhdrFile != NULL) {
+    if (_vhdrFile != NULL && _fhdrFile != NULL) {
       out << "======================================================" << endl;
       out << "   Vlevel header as in file" << endl;
       out << "======================================================" << endl;
@@ -4217,6 +4231,10 @@ void MdvxField::constrainVertical(const Mdvx &mdvx)
     minPlane = maxPlane;
     maxPlane = tmpPlane;
   }
+
+  // Sanity check on _fhdr.nz value insures no out-of-bounds array access
+  if (_fhdr.nz < 1)
+     _fhdr.nz = 1;
 
   if (minPlane < 0) {
     minPlane = 0;
@@ -5861,7 +5879,13 @@ int MdvxField::_read_volume(TaFile &infile,
 {
 
   clearErrStr();
-  infile.fseek(_fhdr.field_data_offset, SEEK_SET);
+  if (infile.fseek(_fhdr.field_data_offset, SEEK_SET)) {
+    _errStr += "ERROR - MdvxField::_read_volume\n";
+    _errStr += "  Cannot read field: ";
+    _errStr += _fhdr.field_name;
+    _errStr += "\n";
+    return -1;
+  }
 
   int volume_size = _fhdr.volume_size;
   void *buf = _volBuf.prepare(volume_size);
@@ -6768,6 +6792,7 @@ void MdvxField::_plane_fill_missing(int encoding_type,
       } // iy
       nloop++;
       if (nloop > maxloops) {
+        delete [] aa;
 	return;
       }
     } // while (!done)
@@ -6841,6 +6866,7 @@ void MdvxField::_plane_fill_missing(int encoding_type,
       } // iy
       nloop++;
       if (nloop > maxloops) {
+        delete [] aa;
 	return;
       }
     } // while (!done)
@@ -6914,6 +6940,7 @@ void MdvxField::_plane_fill_missing(int encoding_type,
       } // iy
       nloop++;
       if (nloop > maxloops) {
+        delete [] aa;
 	return;
       }
     } // while (!done)
@@ -7010,6 +7037,7 @@ void MdvxField::_vsection_fill_missing(int encoding_type,
       } // iz
       nloop++;
       if (nloop > maxloops) {
+        delete [] aa;
 	return;
       }
     } // while (!done)
@@ -7086,6 +7114,7 @@ void MdvxField::_vsection_fill_missing(int encoding_type,
       } // iz
       nloop++;
       if (nloop > maxloops) {
+        delete [] aa;
 	return;
       }
     } // while (!done)
@@ -7162,6 +7191,7 @@ void MdvxField::_vsection_fill_missing(int encoding_type,
       } // iz
       nloop++;
       if (nloop > maxloops) {
+        delete [] aa;
 	return;
       }
     } // while (!done)

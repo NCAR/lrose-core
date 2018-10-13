@@ -2619,6 +2619,8 @@ int Mdvx::_read_volume(bool fill_missing,
       sprintf(errstr, "  Reading field %d\n", (int) i);
       _errStr += errstr;
       _errStr += field->getErrStr();
+      if (field)
+         delete field;
       return -1;
     }
 
@@ -2642,6 +2644,8 @@ int Mdvx::_read_volume(bool fill_missing,
       sprintf(errstr, "  Reading chunk %d\n", (int) i);
       _errStr += errstr;
       _errStr += chunk->getErrStr();
+      if(chunk)
+         delete chunk;
       return -1;
     }
 
