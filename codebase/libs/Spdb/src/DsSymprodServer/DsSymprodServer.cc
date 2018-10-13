@@ -141,12 +141,11 @@ int DsSymprodServer::handleDataCommand(Socket * socket,
   // Override initial params if params file exists in the datatype directory
   //
   void *localParams = (void *) _initialParams;
-  bool paramsAreLocal = false;
 
   // NOTE: the DsLocator will resolve the parameter file name 
   //       and modify the url
   
-  bool  paramsExist;
+  bool paramsExist = false;
   
   if (DsLocator.resolveParam(url, _executableName,
                              &paramsExist) != 0) {
@@ -169,9 +168,6 @@ int DsSymprodServer::handleDataCommand(Socket * socket,
            << url.getParamFile()
            << endl;
       return(-1);
-    }
-    else {
-      paramsAreLocal = true;
     }
   }
 
