@@ -5918,50 +5918,6 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
   
 {
 
-  // check whether we need to do anything
-  // and return if not
-
-  bool doSomething = false;
-  if (_fhdr.min_value == 0.0 && _fhdr.max_value == 0.0) {
-    // need to compute min and max
-    doSomething = true;
-  }
-  if (do_decimate || fill_missing || is_vsection) {
-    doSomething = true;
-  }
-  if (mdvx._readSpecifyVlevelType) {
-    if (mdvx._readVlevelType != _fhdr.vlevel_type) {
-      doSomething = true;
-    }
-  }
-  if (mdvx._readRemapSet) {
-    doSomething = true;
-  }
-  if (mdvx._readComposite || mdvx._readVlevelLimitsSet) {
-    doSomething = true;
-  }
-  if (mdvx._readHorizLimitsSet && !is_vsection) {
-    doSomething = true;
-  }
-  if (mdvx._readAutoRemap2LatLon) {
-    doSomething = true;
-  }
-  if (do_final_convert) {
-    if (mdvx._readEncodingType != Mdvx::ENCODING_ASIS) {
-      if (mdvx._readEncodingType != _fhdr.encoding_type) {
-        doSomething = true;
-      }
-    }
-  }
-
-  // temporarily force doSomething to TRUE, to circumvent bug
-  // TODO - DIXON - FIX this properly
-  doSomething = true;
-
-  if (!doSomething) {
-    return 0;
-  }
-                   
   // set output compression type
 
   Mdvx::compression_type_t output_compression = mdvx._readCompressionType;
