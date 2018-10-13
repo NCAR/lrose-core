@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/03 18:45:39 $
-//   $Id: MapIcon.cc,v 1.7 2016/03/03 18:45:39 dixon Exp $
-//   $Revision: 1.7 $
+//   $Date: 2018/10/13 23:22:11 $
+//   $Id: MapIcon.cc,v 1.8 2018/10/13 23:22:11 dixon Exp $
+//   $Revision: 1.8 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/

@@ -1505,11 +1505,11 @@ ubool static isLTGfreq( char **string, Decoded_METAR *Mptr, int *NDEX )
    /* DECLARE LOCAL VARIABLES */
    /***************************/
  
-   ubool LTG_FREQ_FLAG,
-        LTG_TYPE_FLAG,
-        LTG_LOC_FLAG,
-        LTG_DIR_FLAG,
-        SkipFlag;
+  /* ubool LTG_FREQ_FLAG; */
+  ubool LTG_TYPE_FLAG,
+    LTG_LOC_FLAG,
+    LTG_DIR_FLAG,
+    SkipFlag;
  
    /*************************/
    /* START BODY OF ROUTINE */
@@ -1534,19 +1534,19 @@ ubool static isLTGfreq( char **string, Decoded_METAR *Mptr, int *NDEX )
       (--string);
  
  
-      LTG_FREQ_FLAG = FALSE;
+      /* LTG_FREQ_FLAG = FALSE; */
                         /*-- CHECK FOR LIGHTNING FREQUENCY -----------*/
       if( strcmp( *string, "OCNL" ) == 0 ) {
          Mptr->OCNL_LTG = TRUE;
-         LTG_FREQ_FLAG = TRUE;
+         /* LTG_FREQ_FLAG = TRUE; */
       }
       else if( strcmp( *string, "FRQ" ) == 0 ) {
          Mptr->FRQ_LTG = TRUE;
-         LTG_FREQ_FLAG = TRUE;
+         /* LTG_FREQ_FLAG = TRUE; */
       }
       else if( strcmp( *string, "CNS" ) == 0 ) {
          Mptr->CNS_LTG = TRUE;
-         LTG_FREQ_FLAG = TRUE;
+         /* LTG_FREQ_FLAG = TRUE; */
       }
  
  

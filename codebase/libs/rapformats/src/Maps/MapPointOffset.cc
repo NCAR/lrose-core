@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/03 18:45:39 $
-//   $Id: MapPointOffset.cc,v 1.3 2016/03/03 18:45:39 dixon Exp $
-//   $Revision: 1.3 $
+//   $Date: 2018/10/13 23:22:11 $
+//   $Id: MapPointOffset.cc,v 1.4 2018/10/13 23:22:11 dixon Exp $
+//   $Revision: 1.4 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/

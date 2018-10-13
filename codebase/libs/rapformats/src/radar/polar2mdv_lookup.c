@@ -236,7 +236,7 @@ int ReadP2mdvLookup(P2mdv_lookup_file_index_t *index,
   si32 ielev, iaz;
   si32 nelevations;
   si32 nazimuths;
-  si32 nplanes;
+  /* si32 nplanes; */
   si32 nlist;
   
   P2mdv_lookup_params_t *lparams;
@@ -338,7 +338,7 @@ int ReadP2mdvLookup(P2mdv_lookup_file_index_t *index,
   
   nelevations = lparams->nelevations;
   nazimuths = lparams->nazimuths;
-  nplanes = lparams->grid.nz;
+  /* nplanes = lparams->grid.nz; */
   nlist = lparams->nlist;
   
   RadarInitScanTable(stable);

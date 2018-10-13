@@ -193,7 +193,7 @@ void tstorm_growth_hull_smooth(const tstorm_spdb_header_t *header,
 
   int iret;
   int i, j;
-  int hit_outer = FALSE;
+  /* int hit_outer = FALSE; */
 
   double interior_ang;
   double extreme_ang;
@@ -408,7 +408,7 @@ void tstorm_growth_hull_smooth(const tstorm_spdb_header_t *header,
         else
         {
           /* We found an outer boundary intersection */
-          hit_outer = TRUE;
+          /* hit_outer = TRUE; */
 
           /* Mark point as having been visited */
           ray_list[extreme_idx].visited = 1;
@@ -811,11 +811,11 @@ static int ts_hull_mark_duplicate_zeros(ts_hull_ray_t *rlist,
   int i;
   int index;
   int prev_zero;
-  double oldraylen;
+  /* double oldraylen; */
 
   index = 0;
   prev_zero = FALSE;
-  oldraylen = rlist[0].radius_ori;
+  /* oldraylen = rlist[0].radius_ori; */
 
   for (i = 1; i < rpts+3; i++, index++)
   {
@@ -837,7 +837,7 @@ static int ts_hull_mark_duplicate_zeros(ts_hull_ray_t *rlist,
     if (rlist[index].radius_ori == 0)
       prev_zero = TRUE;
 
-    oldraylen = rlist[index].radius_ori;
+    /* oldraylen = rlist[index].radius_ori; */
 
   } /* endfor - i */
 
@@ -881,7 +881,6 @@ void ts_hull_print_ray_coords(ts_hull_ray_t *rlist,
 
 {
   int i;
-  int iret;
   double x, y;
 
   for (i = 0; i < rpts; i++)
@@ -900,14 +899,18 @@ void ts_hull_print_ray_coords(ts_hull_ray_t *rlist,
            rlist[i].on_outer,
            rlist[i].next_ray);
 
-    iret = ts_hull_rt2xy(rlist[i].radius_shr, rlist[i].angle, &x, &y);
-    printf("%8.3f %8.3f", x, y);
-    iret = ts_hull_rt2xy(rlist[i].radius_ori, rlist[i].angle, &x, &y);
-    printf("%8.3f %8.3f", x, y);
-    iret = ts_hull_rt2xy(rlist[i].radius_gro, rlist[i].angle, &x, &y);
-    printf("%8.3f %8.3f", x, y);
-    iret = ts_hull_rt2xy(rlist[i].radius_fin, rlist[i].angle, &x, &y);
-    printf("%8.3f %8.3f\n", x, y);
+    if (ts_hull_rt2xy(rlist[i].radius_shr, rlist[i].angle, &x, &y)) {
+      printf("%8.3f %8.3f", x, y);
+    }
+    if (ts_hull_rt2xy(rlist[i].radius_ori, rlist[i].angle, &x, &y)) {
+      printf("%8.3f %8.3f", x, y);
+    }
+    if (ts_hull_rt2xy(rlist[i].radius_gro, rlist[i].angle, &x, &y)) {
+      printf("%8.3f %8.3f", x, y);
+    }
+    if (ts_hull_rt2xy(rlist[i].radius_fin, rlist[i].angle, &x, &y)) {
+      printf("%8.3f %8.3f\n", x, y);
+    }
 
   }
 
@@ -1058,7 +1061,6 @@ int ts_hull_write_storm(char *outname,
 {
   FILE *outfile;
   int i, j;
-  int iret;
   double x, y;
 
   outfile = fopen (outname, "w");
@@ -1083,13 +1085,13 @@ int ts_hull_write_storm(char *outname,
 
     if (rlist[j].hide == 0)
     {
-      iret = ts_hull_rt2xy(rlist[j].radius_fin,
-			   rlist[j].angle,
-			   &x,
-			   &y);
-
-      fprintf(outfile, "%2d %9.3f %9.3f",
-              j, x, y);
+      if(ts_hull_rt2xy(rlist[j].radius_fin,
+                       rlist[j].angle,
+                       &x,
+                       &y)) {
+        fprintf(outfile, "%2d %9.3f %9.3f",
+                j, x, y);
+      }
 
       if (rlist[j].on_outer == 1)
       {
@@ -1133,7 +1135,6 @@ int ts_hull_write_bounds(char *outname,
 {
   FILE *outfile;
   int i, j;
-  int iret;
   double x, y;
 
   outfile = fopen (outname, "w");
@@ -1153,29 +1154,17 @@ int ts_hull_write_bounds(char *outname,
     if (j > npts - 1)
       j = 0;
 
-    iret = ts_hull_rt2xy(rlist[j].radius_shr,
-			 rlist[j].angle,
-			 &x,
-			 &y);
+    if (ts_hull_rt2xy(rlist[j].radius_shr, rlist[j].angle, &x, &y)) {
+      fprintf(outfile, "%2d %9.3f %9.3f", j, x, y);
+    }
 
-    fprintf(outfile, "%2d %9.3f %9.3f",
-            j, x, y);
+    if (ts_hull_rt2xy(rlist[j].radius_ori, rlist[j].angle, &x, &y)) {
+      fprintf(outfile, "%9.3f %9.3f", x, y);
+    }
 
-    iret = ts_hull_rt2xy(rlist[j].radius_ori,
-			 rlist[j].angle,
-			 &x,
-			 &y);
-
-    fprintf(outfile, "%9.3f %9.3f",
-            x, y);
-
-    iret = ts_hull_rt2xy(rlist[j].radius_gro,
-			 rlist[j].angle,
-			 &x,
-			 &y);
-
-    fprintf(outfile, "%11.5f %11.5f",
-            x, y);
+    if (ts_hull_rt2xy(rlist[j].radius_gro, rlist[j].angle, &x, &y)) {
+      fprintf(outfile, "%11.5f %11.5f", x, y);
+    }
 
     fprintf(outfile, "%11.5f %11.5f",
             rlist[j].lon_shr, rlist[j].lat_shr);
@@ -1247,7 +1236,7 @@ static void ts_hull_find_bnd_intersect(ts_hull_ray_t *rlist,
   double a1      = 0;
   double a2      = 0;
   double interior_ang = 0;
-  double tmp_concave  = 0;
+  /* double tmp_concave  = 0; */
 
   Point_d LP1, LP2, LP3, LP4, intersect;
   double pos;
@@ -1372,12 +1361,13 @@ static void ts_hull_find_bnd_intersect(ts_hull_ray_t *rlist,
       a2 = ts_hull_get_angle_between_rays(rlist[r0_ray_idx].angle,
 					  rlist[j].angle);
 
-      tmp_concave = ts_hull_is_concave(test_r0,
-				       a1,
-				       test_r0,
-				       a2,
-				       test_r2,
-				       &interior_ang);
+      /* tmp_concave = */
+      ts_hull_is_concave(test_r0,
+                         a1,
+                         test_r0,
+                         a2,
+                         test_r2,
+                         &interior_ang);
 
       if (bnd_type == BND_OUTER)
       {
