@@ -21,7 +21,7 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/* 	$Id: spol_C_utils.c,v 1.5 2016/03/03 18:45:06 dixon Exp $	 */
+/* 	$Id: spol_C_utils.c,v 1.6 2018/10/13 22:42:50 dixon Exp $	 */
 
 # include <stdio.h>
 # include <stdlib.h>

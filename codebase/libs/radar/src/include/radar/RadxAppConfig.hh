@@ -22,18 +22,18 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
- * @file RadxAppParms.hh 
- * @brief base class params shared by all Filter objects, some virtual methods
- * @class RadxAppParms
- * @brief base class params shared by all Filter objects, some virtual methods
+ * @file RadxAppConfig.hh 
+ * @brief Handling of multiple inputs
+ * @class RadxAppConfig
+ * @brief Handling of multiple inputs
  *
  * Each input is a 'Group', with one primary input and any number of secondary
  * inputs.
  * 
  */
 
-#ifndef FILT_ALG_PARMS_H
-#define FILT_ALG_PARMS_H
+#ifndef RADX_APP_CONFIG_H
+#define RADX_APP_CONFIG_H
 #include <radar/RadxAppParams.hh>
 #include <vector>
 #include <string>
