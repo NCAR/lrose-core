@@ -973,6 +973,8 @@ int Socket::_openClient(const char *hostname,
 { 
   
   struct sockaddr_in rem_soc;
+  memset((void*)&rem_soc, 0, sizeof(rem_soc)); 
+
   struct hostent *hostport; // host port info
 
   hostport = gethostbyname(hostname); // get the remote host info

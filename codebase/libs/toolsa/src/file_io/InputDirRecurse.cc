@@ -222,7 +222,8 @@ void InputDirRecurse::_generateFileList(const string &dir_name,
       _generateFileList(next_file, subdir_ptr, max_input_data_age);
 
       closedir(subdir_ptr);
-      
+    
+      delete [] next_file;  
       continue;
     }
     

@@ -106,6 +106,7 @@ TaThread::~TaThread()
 
   if (_thread != 0) {
     pthread_cancel(_thread);
+    pthread_join(_thread, NULL);
   }
   
   // free up mutexes

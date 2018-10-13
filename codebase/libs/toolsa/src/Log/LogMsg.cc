@@ -110,8 +110,8 @@ LogMsg::~LogMsg()
 
 //----------------------------------------------------------------
 void LogMsg::log(const std::string &fname, const int line,
-		  const string &method, const Severity_t severity,
-		  const string &msg)
+                 const string &method, const Severity_t severity,
+                 const string &msg)
 {
   if (!pSeverityEnabled[static_cast<int>(severity)])
   {
@@ -136,8 +136,8 @@ void LogMsg::log(const std::string &fname, const int line,
 
 //----------------------------------------------------------------
 void LogMsg::logf(const std::string &fname, const int line,
-		   const string &method,const  Severity_t severity, 
-		   string format, ...)
+                  const string &method,const  Severity_t severity, 
+                  string format, ...)
 {
   if (!pSeverityEnabled[static_cast<int>(severity)])
   {

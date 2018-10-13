@@ -772,6 +772,7 @@ FILE *ta_create_lock_file(const char *lock_file_path)
   if (fcntl(fileno(fd), F_GETLK, &lock) < 0) {
     fprintf(stderr, "ERROR - cannot check lock file '%s'.\n",
 	    lock_file_path);
+    fclose(fd);
     return (NULL);
   }
   

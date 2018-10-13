@@ -353,10 +353,11 @@ time_t UTIMstring_US_to_time(const char *string)
             tim_s.hour = (int)(field[0]) % 60;
             tim_s.min = 0;
             tim_s.sec = 0;             
-
+            
+            tim_s.day = (int) field[2];
+	    tim_s.month = (int) field[1];
             now = time(0);    /* Now is used to fill in missing values */
             tm = gmtime(&now);
-	    tim_s.month = tm->tm_mon + 1;
 	    tim_s.year = tm->tm_year + 1900;
 
         break;
@@ -368,6 +369,7 @@ time_t UTIMstring_US_to_time(const char *string)
 	     
             now = time(0);    /* Now is used to fill in missing values */
             tm = gmtime(&now);
+            tim_s.day = tm->tm_mday;
 	    tim_s.month = tm->tm_mon + 1;
 	    tim_s.year = tm->tm_year + 1900;
 
@@ -375,6 +377,7 @@ time_t UTIMstring_US_to_time(const char *string)
 
         case 1:     /* hr */
             tim_s.hour = (int)(field[0]) % 60;
+            tim_s.min = 0;
             tim_s.sec = 0;             
             tm = gmtime(&now);
 	    tim_s.day = tm->tm_mday;

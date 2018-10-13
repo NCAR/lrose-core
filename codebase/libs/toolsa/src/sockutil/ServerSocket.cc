@@ -106,6 +106,8 @@ int ServerSocket::openServer(const int port)
   // local sock info
 
   struct sockaddr_in loc_soc;
+  memset((void*) &loc_soc, 0, sizeof(loc_soc));
+
 #ifdef AIX
   // AIX has different sockaddr_in structure
   // see /usr/include/netinet/in.h
