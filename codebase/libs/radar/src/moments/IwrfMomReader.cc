@@ -340,15 +340,15 @@ void IwrfMomReader::_decodeDsRadarCalib()
 
   RadxRcalib rcal;
   
-  DateTime ctime(dsCalib.getCalibTime());
-  
-  rcal.setCalibTime(ctime.getYear(),
-                    ctime.getMonth(),
-                    ctime.getDay(),
-                    ctime.getHour(),
-                    ctime.getMin(),
-                    ctime.getSec());
-  
+  rcal.setRadarName(dsCalib.getRadarName());
+  rcal.setCalibTime(dsCalib.getCalibTime());
+
+  rcal.setWavelengthCm(dsCalib.getWavelengthCm());
+  rcal.setBeamWidthDegH(dsCalib.getBeamWidthDegH());
+  rcal.setBeamWidthDegV(dsCalib.getBeamWidthDegV());
+  rcal.setAntennaGainDbH(dsCalib.getAntGainDbH());
+  rcal.setAntennaGainDbV(dsCalib.getAntGainDbV());
+
   rcal.setPulseWidthUsec(dsCalib.getPulseWidthUs());
   rcal.setXmitPowerDbmH(dsCalib.getXmitPowerDbmH());
   rcal.setXmitPowerDbmV(dsCalib.getXmitPowerDbmV());
@@ -359,16 +359,19 @@ void IwrfMomReader::_decodeDsRadarCalib()
   rcal.setTwoWayRadomeLossDbV(dsCalib.getTwoWayRadomeLossDbV());
   rcal.setReceiverMismatchLossDb(dsCalib.getReceiverMismatchLossDb());
   
+  rcal.setKSquaredWater(dsCalib.getKSquaredWater());
   rcal.setRadarConstantH(dsCalib.getRadarConstH());
   rcal.setRadarConstantV(dsCalib.getRadarConstV());
   
-  rcal.setAntennaGainDbH(dsCalib.getAntGainDbH());
-  rcal.setAntennaGainDbV(dsCalib.getAntGainDbV());
-
   rcal.setNoiseDbmHc(dsCalib.getNoiseDbmHc());
   rcal.setNoiseDbmHx(dsCalib.getNoiseDbmHx());
   rcal.setNoiseDbmVc(dsCalib.getNoiseDbmVc());
   rcal.setNoiseDbmVx(dsCalib.getNoiseDbmVx());
+  
+  rcal.setI0DbmHc(dsCalib.getI0DbmHc());
+  rcal.setI0DbmHx(dsCalib.getI0DbmHx());
+  rcal.setI0DbmVc(dsCalib.getI0DbmVc());
+  rcal.setI0DbmVx(dsCalib.getI0DbmVx());
   
   rcal.setReceiverGainDbHc(dsCalib.getReceiverGainDbHc());
   rcal.setReceiverGainDbHx(dsCalib.getReceiverGainDbHx());
@@ -379,6 +382,11 @@ void IwrfMomReader::_decodeDsRadarCalib()
   rcal.setReceiverSlopeDbHx(dsCalib.getReceiverSlopeDbHx());
   rcal.setReceiverSlopeDbVc(dsCalib.getReceiverSlopeDbVc());
   rcal.setReceiverSlopeDbVx(dsCalib.getReceiverSlopeDbVx());
+  
+  rcal.setDynamicRangeDbHc(dsCalib.getDynamicRangeDbHc());
+  rcal.setDynamicRangeDbHx(dsCalib.getDynamicRangeDbHx());
+  rcal.setDynamicRangeDbVc(dsCalib.getDynamicRangeDbVc());
+  rcal.setDynamicRangeDbVx(dsCalib.getDynamicRangeDbVx());
   
   rcal.setBaseDbz1kmHc(dsCalib.getBaseDbz1kmHc());
   rcal.setBaseDbz1kmHx(dsCalib.getBaseDbz1kmHx());
@@ -399,6 +407,7 @@ void IwrfMomReader::_decodeDsRadarCalib()
   rcal.setCouplerForwardLossDbH(dsCalib.getCouplerForwardLossDbH());
   rcal.setCouplerForwardLossDbV(dsCalib.getCouplerForwardLossDbV());
   
+  rcal.setDbzCorrection(dsCalib.getDbzCorrection());
   rcal.setZdrCorrectionDb(dsCalib.getZdrCorrectionDb());
   rcal.setLdrCorrectionDbH(dsCalib.getLdrCorrectionDbH());
   rcal.setLdrCorrectionDbV(dsCalib.getLdrCorrectionDbV());
@@ -570,6 +579,8 @@ void IwrfMomReader::_decodeDsRadarBeam()
     georef.setHeadingRate(dsGeoref.heading_rate_dps);
     georef.setPitchRate(dsGeoref.pitch_rate_dps);
     georef.setRollRate(dsGeoref.roll_rate_dps);
+    georef.setDriveAngle1(dsGeoref.drive_angle_1_deg);
+    georef.setDriveAngle2(dsGeoref.drive_angle_2_deg);
     _latestRay->clearGeoref();
     _latestRay->setGeoref(georef);
   }
