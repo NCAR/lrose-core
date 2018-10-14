@@ -55,7 +55,8 @@ IwrfMomReader::IwrfMomReader()
 {
   _opsInfo.setDebug(IWRF_DEBUG_OFF);
   _nonBlocking = false;
-  _msecsWait = 0;
+  _msecsNonblockingWait = 0;
+  _msecsBlockingTimeout = -1;
   _timedOut = false;
   _endOfFile = false;
   _latestRay = NULL;
@@ -1015,12 +1016,15 @@ int IwrfMomReaderFmq::_getNextMsg()
                                "IwrfMomReader",
                                _debug >= IWRF_DEBUG_NORM,
                                initPos, 
-                               _msecsWait);
+                               _msecsNonblockingWait);
     } else {
       iret = _fmq.initReadBlocking(_inputFmq.c_str(),
                                    "IwrfMomReader",
                                    _debug >= IWRF_DEBUG_NORM,
                                    initPos);
+      if (_msecsBlockingTimeout > 0) {
+        _fmq.setBlockingReadTimeout(_msecsBlockingTimeout);
+      }
     }
     
     if (iret) {
@@ -1041,7 +1045,7 @@ int IwrfMomReaderFmq::_getNextMsg()
   if (_nonBlocking) {
     bool gotOne = false;
     _timedOut = false;
-    if (_fmq.readMsg(&gotOne, -1, _msecsWait)) {
+    if (_fmq.readMsg(&gotOne, -1, _msecsNonblockingWait)) {
       cerr << "ERROR - IwrfMomReaderFmq::_getNextMsg" << endl;
       cerr << _fmq.getErrStr() << endl;
       _fmq.closeMsgQueue();
@@ -1183,7 +1187,8 @@ int IwrfMomReaderTcp::_getNextMsg()
 
     if (_nonBlocking) {
       _timedOut = false;
-      if (_sock.readBuffer(packetTop, sizeof(packetTop), _msecsWait)) {
+      if (_sock.readBuffer(packetTop, sizeof(packetTop),
+                           _msecsNonblockingWait)) {
         if (_sock.getErrNum() == SockUtil::TIMED_OUT) {
           _timedOut = true;
           return -1;
