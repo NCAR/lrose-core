@@ -22,19 +22,18 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// Dsr2Radx.cc
+// Legacy.cc
 //
-// Dsr2Radx object
+// Legacy processing object
 //
-// Mike Dixon, RAP, NCAR
+// Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Feb 2011
 //
 ///////////////////////////////////////////////////////////////
 //
-// Dsr2Radx reads an input radar FMQ, and saves out data files
-// in formats supported by Radx.
+// Legacy processing for Dsr2Radx.
 //
 ///////////////////////////////////////////////////////////////
 
@@ -53,26 +52,27 @@
 #include <Radx/UfRadxFile.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxGeoref.hh>
-#include <radar/IwrfMomReader.hh>
 
-#include "Dsr2Radx.hh"
+#include "Legacy.hh"
 
 using namespace std;
 
-const double Dsr2Radx::_smallVal = 0.0001;
-const double Dsr2Radx::_pseudoDiam = 17066.0;
+const double Legacy::_smallVal = 0.0001;
+const double Legacy::_pseudoDiam = 17066.0;
 
 // Constructor
 
-Dsr2Radx::Dsr2Radx(int argc, char **argv)
+Legacy::Legacy(const string &prog_name,
+               const Params &params) :
+        _progName(prog_name),
+        _params(params)
 
 {
 
-  isOK = true;
   _clearData();
   _nCheckPrint = 0;
   _nWarnCensorPrint = 0;
-
+  
   _prevAzMoving = -999;
   _prevElevMoving = -999;
 
@@ -90,36 +90,10 @@ Dsr2Radx::Dsr2Radx(int argc, char **argv)
   _cachedRay = NULL;
   _prevRay = NULL;
 
-  _sweepMode = Radx::SWEEP_MODE_NOT_SET;
   _scanMode = SCAN_MODE_UNKNOWN;
   _scanInfoFromHeaders = false;
 
   _isSolarScan = false;
-  _reader = NULL;
-
-  // set programe name
-
-  _progName = "Dsr2Radx";
-  ucopyright((char *) _progName.c_str());
-  
-  // get command line args
-
-  if (_args.parse(argc, argv, _progName)) {
-    cerr << "ERROR: " << _progName << endl;
-    cerr << "Problem with command line args" << endl;
-    isOK = false;
-    return;
-  }
-
-  // get TDRP params
-  
-  _paramsPath = (char *) "unknown";
-  if (_params.loadFromArgs(argc, argv, _args.override.list,
-			   &_paramsPath)) {
-    cerr << "ERROR: " << _progName << endl;
-    cerr << "Problem with TDRP parameters" << endl;
-    isOK = false;
-  }
 
   // create antenna angle manager
   
@@ -160,73 +134,17 @@ Dsr2Radx::Dsr2Radx(int argc, char **argv)
     Radx::setMissingSi08(_params.missing_field_si08);
   }
 
-  // check params
-
-  int nGeomOptions = 0;
-  if (_params.convert_to_specified_output_gate_geometry) {
-    nGeomOptions++;
-  }
-  if (_params.convert_to_predominant_gate_geometry) {
-    nGeomOptions++;
-  }
-  if (_params.convert_to_finest_gate_geometry) {
-    nGeomOptions++;
-  }
-  if (nGeomOptions > 1) {
-    cerr << "ERROR: " << _progName << endl;
-    cerr << "  Problem with TDRP parameters" << endl;
-    cerr << "  You can only set one of the following to true:" << endl;
-    cerr << "    convert_to_specified_output_gate_geometry" << endl;
-    cerr << "    convert_to_predominant_gate_geometry" << endl;
-    cerr << "    convert_to_finest_gate_geometry" << endl;
-    isOK = false;
-  }
-
-  int nSweepFilterOptions = 0;
-  if (_params.filter_using_sweep_number) {
-    nSweepFilterOptions++;
-  }
-  if (_params.filter_using_sweep_number_list) {
-    nSweepFilterOptions++;
-  }
-  if (nSweepFilterOptions > 1) {
-    cerr << "ERROR: " << _progName << endl;
-    cerr << "  Problem with TDRP parameters" << endl;
-    cerr << "  You can only set one of the following to true:" << endl;
-    cerr << "    filter_using_sweep_number" << endl;
-    cerr << "    filter_using_sweep_number_list" << endl;
-    isOK = false;
-  }
-  
-  // create reader
-
-  _reader = new IwrfMomReaderFmq(_params.input_fmq_url);
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _reader->setDebug(IWRF_DEBUG_NORM);
-  }
-  if (_params.seek_to_end_of_input) {
-    _reader->seekToEnd();
-  } else {
-    _reader->seekToStart();
-  }
-
   // set up output file object
 
   _outFile = new RadxFile();
   _setupWrite();
-
-  // init process mapper registration
-  
-  PMU_auto_init((char *) _progName.c_str(),
-		_params.instance,
-		_params.procmap_register_interval);
 
 }
 
 /////////////////////////////////////////////////////////
 // destructor
 
-Dsr2Radx::~Dsr2Radx()
+Legacy::~Legacy()
 
 {
 
@@ -249,32 +167,76 @@ Dsr2Radx::~Dsr2Radx()
   }
   _calibs.clear();
 
-  if (_reader) {
-    delete _reader;
+}
+
+//////////////////////////////////////////////////
+// set up write
+
+void Legacy::_setupWrite()
+{
+
+  if (_params.debug) {
+    _outFile->setDebug(true);
+  }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _outFile->setVerbose(true);
   }
 
-  // unregister process
+  if (_params.output_compressed) {
+    _outFile->setWriteCompressed(true);
+    _outFile->setCompressionLevel(_params.output_compression_level);
+  } else {
+    _outFile->setWriteCompressed(false);
+  }
+  if (_params.output_native_byte_order) {
+    _outFile->setWriteNativeByteOrder(true);
+  } else {
+    _outFile->setWriteNativeByteOrder(false);
+  }
 
-  PMU_auto_unregister();
+  switch (_params.netcdf_style) {
+    case Params::NETCDF4:
+      _outFile->setNcFormat(RadxFile::NETCDF4);
+      break;
+    case Params::OFFSET_64BIT:
+      _outFile->setNcFormat(RadxFile::NETCDF_OFFSET_64BIT);
+      break;
+    case Params::NETCDF4_CLASSIC:
+      _outFile->setNcFormat(RadxFile::NETCDF4_CLASSIC);
+      break;
+    case Params::CLASSIC:
+    default:
+      _outFile->setNcFormat(RadxFile::NETCDF_CLASSIC);
+  }
+
+  if (strlen(_params.output_filename_prefix) > 0) {
+    _outFile->setWriteFileNamePrefix(_params.output_filename_prefix);
+  }
+  _outFile->setWriteInstrNameInFileName(_params.include_instrument_name_in_file_name);
+  _outFile->setWriteSiteNameInFileName(_params.include_site_name_in_file_name);
+  _outFile->setWriteSubsecsInFileName(_params.include_subsecs_in_file_name);
+  _outFile->setWriteScanTypeInFileName(_params.include_scan_type_in_file_name);
+  _outFile->setWriteVolNumInFileName(_params.include_vol_num_in_file_name);
+  _outFile->setWriteHyphenInDateTime(_params.use_hyphen_in_file_name_datetime_part);
 
 }
 
 //////////////////////////////////////////////////
 // Run
 
-int Dsr2Radx::Run ()
+int Legacy::Run ()
 {
 
   // register with procmap
   
-  PMU_auto_register("Run");
+  PMU_auto_register("Legacy::Run");
 
   int iret = 0;
   while (true) {
     iret = _run();
     return iret;
     if (_params.debug) {
-      cerr << "Dsr2Radx::Run:" << endl;
+      cerr << "Legacy::Run:" << endl;
       cerr << "  Trying to contact input server at url: "
 	   << _params.input_fmq_url << endl;
     }
@@ -288,55 +250,86 @@ int Dsr2Radx::Run ()
 //////////////////////////////////////////////////
 // _run
 
-int Dsr2Radx::_run ()
+int Legacy::_run ()
 {
 
   // register with procmap
   
-  PMU_auto_register("Run");
+  PMU_auto_register("Legacy::_run");
 
   // clear all data from previously
 
   _clearData();
 
+  // Instantiate and initialize the DsRadar queue and message
+
+  DsRadarQueue radarQueue;
+  DsRadarMsg radarMsg;
+
+  if (_params.seek_to_end_of_input) {
+    if (radarQueue.init(_params.input_fmq_url, _progName.c_str(),
+			_params.debug >= Params::DEBUG_VERBOSE,
+			DsFmq::BLOCKING_READ_WRITE, DsFmq::END )) {
+      fprintf(stderr, "ERROR - %s:Legacy::_run\n", _progName.c_str());
+      fprintf(stderr, "Could not initialize radar queue '%s'\n",
+	      _params.input_fmq_url);
+      return -1;
+    }
+  } else {
+    if (radarQueue.init(_params.input_fmq_url, _progName.c_str(),
+			_params.debug >= Params::DEBUG_VERBOSE,
+			DsFmq::BLOCKING_READ_WRITE, DsFmq::START )) {
+      fprintf(stderr, "ERROR - %s:Legacy::_run\n", _progName.c_str());
+      fprintf(stderr, "Could not initialize radar queue '%s'\n",
+	      _params.input_fmq_url);
+      return -1;
+    }
+  }
+
+  // set to timeout if we want to write out volume
+  // when data stops flowing
+
+  if (_params.write_end_of_vol_when_data_stops) {
+    radarQueue.setBlockingReadTimeout
+      (_params.nsecs_no_data_for_end_of_vol * 1000);
+  }
+
   // read beams from the queue and process them
   
-  time_t timeLastRay = time(NULL);
   int iret = 0;
 
   while (true) {
 
     PMU_auto_register("Reading radar FMQ");
-    
-    // get the next ray
-    
-    RadxRay *ray = _reader->readNextRay();
-    if (ray == NULL) {
-      // read error - no data
-      umsleep(100);
+
+    if (_readMsg(radarQueue, radarMsg)) {
+      // timed out
       if (_nRaysRead > _params.min_rays_in_vol &&
 	  _params.write_end_of_vol_when_data_stops) {
-        time_t now = time(NULL);
-        int timeSinceLastMsg = now - timeLastRay;
-        if (timeSinceLastMsg > _params.nsecs_no_data_for_end_of_vol) {
-	  _processEndOfVol();
-          timeLastRay = now;
-	}
+        _endOfVol = true;
       }
-      continue;
-    } // if (ray == NULL) 
-
-    _nRaysRead++;
-    timeLastRay = time(NULL);
-
-    // process this ray
-
-    _processRay(ray);
-
+      if (!_endOfVol) {
+	continue;
+      }
+    }
+    
     // at the end of a volume, process volume, then reset
     
     if (_endOfVol) {
-      _processEndOfVol();
+      if (_vol.getNRays() > 0) {
+        if (_params.debug) {
+          if (_params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
+            cerr << "=========== End of sweep ===============" << endl;
+          } else {
+            cerr << "=========== End of volume ==============" << endl;
+          }
+          cerr << "  nrays available:" << _vol.getNRays() << endl;
+        }
+        if (_processVol()) {
+          iret = -1;
+        }
+        _clearData();
+      }
     }
     
   } // while (true)
@@ -346,300 +339,14 @@ int Dsr2Radx::_run ()
 }
 
 ////////////////////////////////////////////////////////////////////
-// Process a ray
-// Returns -1 on error
-
-int Dsr2Radx::_processRay(RadxRay *ray) 
-  
-{
-  
-   
-  PMU_auto_register("Processing ray");
-  _endOfVol = false;
-  
-  // set platform parameters if avaliable
-
-  if (_reader->getPlatformUpdated()) {
-    _updatePlatform(ray);
-  }
-
-  // set calibration parameters if avaliable
-
-  if (_reader->getRcalibUpdated()) {
-    _updateRcalib();
-  }
-  
-  // set status XML if available
-  
-  if (_reader->getStatusXmlUpdated()) {
-    _vol.setStatusXml(_reader->getStatusXml());
-  }
-
-  // sweep numbers
-  
-  if (ray->getSweepNumber() < 0) {
-    _sweepNumbersMissing = true;
-  } else if (ray->getSweepNumber() < _prevTiltNum) {
-    // tilt number decreased, so reset sweepNum
-    _sweepNumOverride = 1;
-  }
-  _prevTiltNum = ray->getSweepNumber();
-
-  // adjust azimuth and elevation if required
-  
-  double elev = ray->getElevationDeg();
-  if (_params.apply_elevation_offset) {
-    elev += _params.elevation_offset;
-    ray->setElevationDeg(Radx::conditionEl(elev));
-  }
-
-  double az = ray->getAzimuthDeg();
-  if (_params.apply_azimuth_offset) {
-    az += _params.azimuth_offset;
-    ray->setAzimuthDeg(Radx::conditionAz(az));
-  }
-
-  // force sweep number change on azimuth transition?
-
-  if (_params.force_sur_sweep_transitions_at_fixed_azimuth) {
-    if ((_prevRay != NULL) &&
-        (ray->getSweepMode() == Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE)) {
-      double thisAz = ray->getAzimuthDeg();
-      double prevAz = _prevRay->getAzimuthDeg();
-      // check for end of sweep transition
-      // this occurs at the same azimuth every time
-      double transDeg = _params.sur_sweep_transitions_azimuth_deg;
-      double deltaPrev = _computeDeltaAngle(transDeg, prevAz);
-      double deltaThis = _computeDeltaAngle(transDeg, thisAz);
-      if (deltaPrev > 0 && deltaThis <= 0) {
-        _sweepNumOverride++;
-        if (_params.debug) {
-          cerr << "====>> Forcing sweep number change, az: " << thisAz << " <<====" << endl;
-          cerr << "====>> New sweep number: " << _sweepNumOverride << " <<====" << endl;
-        }
-      }
-    } // if (_prevRay != NULL ...
-    ray->setSweepNumber(_sweepNumOverride);
-  } // if (_params.force_sur_sweep_transitions_at_fixed_azimuth
-
-  // range geometry
-
-  int nGates = ray->getNGates();
-  if (_params.remove_test_pulse) {
-    nGates -= _params.ngates_test_pulse;
-  }
-  
-  // optionally limit number of gates based on height
-  // don't do this for solars
-  
-  if (_params.crop_above_max_height && !_isSolarScan) {
-    double nGatesForMaxHt =
-      _computeNgatesForMaxHt(elev,
-                             _vol.getAltitudeKm(),
-                             ray->getStartRangeKm(),
-                             ray->getGateSpacingKm());
-    if (nGatesForMaxHt < nGates) {
-      nGates = (int) (nGatesForMaxHt + 0.5);
-    }
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "Computing nGates based on max ht, elev, nGates: "
-           << elev << ", " << nGates << endl;
-    }
-  }
-  
-  if (ray->getSweepMode() == Radx::SWEEP_MODE_RHI ||
-      ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
-    double targetAz = ray->getFixedAngleDeg();
-    if (_params.apply_azimuth_offset) {
-      targetAz += _params.azimuth_offset;
-    }
-    ray->setFixedAngleDeg(Radx::conditionAz(targetAz));
-  } else {
-    double targetEl = ray->getFixedAngleDeg();
-    if (_params.apply_elevation_offset) {
-      targetEl += _params.elevation_offset;
-    }
-    ray->setFixedAngleDeg(Radx::conditionEl(targetEl));
-  }
-
-  // censor the fields in the ray if requested
-  
-  _censorInputRay(ray);
-    
-  // prepare the ray for output, by trimming out any unnecessary fields
-  // and setting the names etc
-  
-  _prepareRayForOutput(ray);
-    
-  // debug print
-  
-  if (_params.debug) {
-    int nPrintFreq = 90;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      nPrintFreq = 1;
-    }
-    if ((_nRaysRead > 0) && (_nRaysRead % nPrintFreq == 0) &&
-        (int) _vol.getNRays() != _nCheckPrint) {
-      _nCheckPrint = (int) _vol.getNRays();
-      cerr << "  nRays, latest time, el, az: "
-           << _nRaysRead << ", "
-           << utimstr(ray->getTimeSecs()) << ", "
-           << ray->getElevationDeg() << ", "
-           << ray->getAzimuthDeg() << endl;
-    }
-  }
-    
-  // end of vol condition
-  
-  if (_params.end_of_vol_decision == Params::ELAPSED_TIME) {
-    
-    if (_endOfVolTime < 0) {
-      // initialize
-      _computeEndOfVolTime(ray->getTimeSecs());
-    } else if ((_endOfVolTime - ray->getTimeSecs()) > _params.nsecs_per_volume) {
-      // we have gone back in time
-      // maybe reprocessing old data
-      if (_params.debug) {
-        cerr << "Going back in time - reprocessing old data?" << endl;
-      }
-      _computeEndOfVolTime(ray->getTimeSecs());
-    }
-    if (ray->getTimeSecs() >= _endOfVolTime) {
-      _endOfVol = true;
-      _computeEndOfVolTime(ray->getTimeSecs() + 1);
-    }
-    
-  } else if (_params.end_of_vol_decision == Params::EVERY_360_DEG) {
-    
-    if (_checkEndOfVol360(ray)) {
-      _endOfVol = true;
-    }
-    
-  } else {
-    
-    int volNum = ray->getVolumeNumber();
-    if (volNum != -1 && volNum != _prevVolNum) {
-      if (_prevVolNum != -99999 &&
-          _params.end_of_vol_decision == Params::CHANGE_IN_VOL_NUM) {
-        _endOfVol = true;
-      }
-      if (_prevVolNum != -99999 &&
-          _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
-        _endOfVol = true;
-      }
-      _prevVolNum = volNum;
-    }
-    
-    int sweepNum = ray->getSweepNumber();
-    if (sweepNum >= 0 && sweepNum != _prevSweepNum) {
-      if (_prevSweepNum >= 0 &&
-          _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
-        _endOfVol = true;
-      }
-      _prevSweepNum = sweepNum;
-    }
-    
-    if (_endOfVolAutomatic) {
-      if (_antenna->addRay(ray)) {
-        _endOfVol = true;
-      }
-    }
-    
-  } // if (_params.end_of_vol_decision == Params::ELAPSED_TIME
-    
-  if ((int) _vol.getNRays() > _params.max_rays_in_vol) {
-    _endOfVol = true;
-  }
-
-  // check in sweep mode?
-
-  if (ray->getSweepMode() != _sweepMode &&
-      _sweepMode != Radx::SWEEP_MODE_NOT_SET) {
-    _endOfVol = true;
-  }
-  _sweepMode = ray->getSweepMode();
-
-  // check for end-of-sweep or end-of-volume events
-  
-  const vector<RadxEvent> &events = _reader->getEvents();
-  if (!_endOfVolAutomatic &&
-      _params.end_of_vol_decision != Params::CHANGE_IN_VOL_NUM &&
-      events.size() > 0) {
-    
-    for (size_t ievent = 0; ievent < events.size(); ievent++) {
-      const RadxEvent &event = events[ievent];
-      if (_params.end_of_vol_decision == Params::END_OF_VOL_FLAG &&
-          event.getEndOfVolume()) {
-        _endOfVol = true;
-      } else if (_params.end_of_vol_decision == Params::LAST_SWEEP_IN_VOL &&
-                 event.getEndOfSweep() &&
-                 event.getSweepNumber() == _params.last_sweep_in_vol) {
-        _endOfVol = true;
-      }
-    } // ievent
-    
-  } // if (!_endOfVolAutomatic
-  
-  // add the ray to the volume as appropriate
-  // check for transitions
-
-  if (ray != NULL) {
-
-    bool ignoreRay = false;
-
-    if (_params.clear_transition_flag_on_all_rays) {
-      ray->setAntennaTransition(false);
-    } else {
-      if (_antenna->getInTransition()) {
-        ray->setAntennaTransition(true);
-        if (_params.filter_antenna_transitions) {
-          ignoreRay = true;
-        }
-      }
-    }
-
-    if (ignoreRay) {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "Transition, ignoring, el, az: "
-             << ray->getElevationDeg() << ", "
-             << ray->getAzimuthDeg() << endl;
-      }
-      delete ray;
-    } else {
-      if (_cachedRay) {
-        _addRayToVol(_cachedRay);
-        _cachedRay = NULL;
-      }
-      if (_endOfVol) {
-        if (_endOfVolAutomatic ||
-            _params.end_of_vol_decision == Params::CHANGE_IN_VOL_NUM ||
-            _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
-          _cachedRay = ray;
-        } else {
-          _addRayToVol(ray);
-        }
-      } else {
-        _addRayToVol(ray);
-      }
-    }
-  }
-
-  return 0;
-
-}
-
-////////////////////////////////////////////////////////////////////
 // _readMsg()
 //
 // Read a message from the queue, setting the flags about ray_data
 // and _endOfVolume appropriately.
 //
-// Sets gotMsg to true if message was read
-//
 
-int Dsr2Radx::_readMsg(DsRadarQueue &radarQueue,
-                       DsRadarMsg &radarMsg,
-                       bool &gotMsg) 
+int Legacy::_readMsg(DsRadarQueue &radarQueue,
+                       DsRadarMsg &radarMsg) 
   
 {
   
@@ -647,14 +354,13 @@ int Dsr2Radx::_readMsg(DsRadarQueue &radarQueue,
   PMU_auto_register("Reading radar queue");
   _endOfVol = false;
   
+  // blocking read with timeout
+
   int msgContents = 0;
-  if (radarQueue.getDsMsg(radarMsg, &msgContents, &gotMsg)) {
+  if (radarQueue.getDsMsg(radarMsg, &msgContents)) {
     return -1;
   }
-  if (!gotMsg) {
-    return -1;
-  }
-    
+  
   // set radar parameters if avaliable
   
   if (msgContents & DsRadarMsg::RADAR_PARAMS) {
@@ -851,36 +557,10 @@ int Dsr2Radx::_readMsg(DsRadarQueue &radarQueue,
 
 }
 
-////////////////////////////////////////////////////////////////////
-// Process an end-of-volume status
-
-int Dsr2Radx::_processEndOfVol()
-  
-{
-  
-  if (_params.debug) {
-    if (_params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
-      cerr << "=========== End of sweep ===============" << endl;
-    } else {
-      cerr << "=========== End of volume ==============" << endl;
-    }
-    cerr << "  nrays available:" << _vol.getNRays() << endl;
-  }
-  
-  if (_processVol()) {
-    _clearData();
-    return -1;
-  }
-  
-  _clearData();
-  return 0;
-
-}
-
 ////////////////////////////////////////////////////////////////
 // process the volume
 
-int Dsr2Radx::_processVol()
+int Legacy::_processVol()
   
 {
 
@@ -889,7 +569,7 @@ int Dsr2Radx::_processVol()
   PMU_force_register("Processing volume");
   
   if (_params.debug) {
-    cerr << "**** Start Dsr2Radx::_processVol() ****" << endl;
+    cerr << "**** Start Legacy::_processVol() ****" << endl;
   }
 
   // load the current scan mode - PPI or RHI
@@ -921,7 +601,7 @@ int Dsr2Radx::_processVol()
     }
   }
   if (notEnoughRays) {
-    cerr << "WARNING - Dsr2Radx::_processVol()" << endl;
+    cerr << "WARNING - Legacy::_processVol()" << endl;
     cerr << "  Too few rays: " << _vol.getNRays() << endl;
     cerr << "  skipping volume" << endl;
     _clearData();
@@ -1053,69 +733,17 @@ int Dsr2Radx::_processVol()
   PMU_force_register("done writing");
 
   if (_params.debug) {
-    cerr << "**** End Dsr2Radx::_processVol() ****" << endl;
+    cerr << "**** End Legacy::_processVol() ****" << endl;
   }
 
   return iret;
 
 }
 
-//////////////////////////////////////////////////
-// set up write
-
-void Dsr2Radx::_setupWrite()
-{
-
-  if (_params.debug) {
-    _outFile->setDebug(true);
-  }
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _outFile->setVerbose(true);
-  }
-
-  if (_params.output_compressed) {
-    _outFile->setWriteCompressed(true);
-    _outFile->setCompressionLevel(_params.output_compression_level);
-  } else {
-    _outFile->setWriteCompressed(false);
-  }
-  if (_params.output_native_byte_order) {
-    _outFile->setWriteNativeByteOrder(true);
-  } else {
-    _outFile->setWriteNativeByteOrder(false);
-  }
-
-  switch (_params.netcdf_style) {
-    case Params::NETCDF4:
-      _outFile->setNcFormat(RadxFile::NETCDF4);
-      break;
-    case Params::OFFSET_64BIT:
-      _outFile->setNcFormat(RadxFile::NETCDF_OFFSET_64BIT);
-      break;
-    case Params::NETCDF4_CLASSIC:
-      _outFile->setNcFormat(RadxFile::NETCDF4_CLASSIC);
-      break;
-    case Params::CLASSIC:
-    default:
-      _outFile->setNcFormat(RadxFile::NETCDF_CLASSIC);
-  }
-
-  if (strlen(_params.output_filename_prefix) > 0) {
-    _outFile->setWriteFileNamePrefix(_params.output_filename_prefix);
-  }
-  _outFile->setWriteInstrNameInFileName(_params.include_instrument_name_in_file_name);
-  _outFile->setWriteSiteNameInFileName(_params.include_site_name_in_file_name);
-  _outFile->setWriteSubsecsInFileName(_params.include_subsecs_in_file_name);
-  _outFile->setWriteScanTypeInFileName(_params.include_scan_type_in_file_name);
-  _outFile->setWriteVolNumInFileName(_params.include_vol_num_in_file_name);
-  _outFile->setWriteHyphenInDateTime(_params.use_hyphen_in_file_name_datetime_part);
-
-}
-
 ////////////////////////////////////////////////////////////////
 // perform the write
 
-int Dsr2Radx::_doWrite()
+int Legacy::_doWrite()
   
 {
 
@@ -1195,7 +823,7 @@ int Dsr2Radx::_doWrite()
     }
     if (!doWrite) {
       if (_params.debug) {
-        cerr << "NOTE - Dsr2Radx::_doWrite(), nrays: " << _vol.getNRays() << endl;
+        cerr << "NOTE - Legacy::_doWrite(), nrays: " << _vol.getNRays() << endl;
         cerr << "  Skipping writing file for outputDir: " << outputDir << endl;
         switch (_scanMode) {
           case SCAN_MODE_RHI:
@@ -1225,7 +853,7 @@ int Dsr2Radx::_doWrite()
         dset.format == Params::OUTPUT_FORMAT_CFRADIAL) {
       if ((int) _vol.getNRays() < _params.min_rays_in_vol) {
         if (_params.debug) {
-          cerr << "NOTE - Dsr2Radx::_doWrite(), nrays: " << _vol.getNRays() << endl;
+          cerr << "NOTE - Legacy::_doWrite(), nrays: " << _vol.getNRays() << endl;
           cerr << "  dataType: " << dataType << endl;
           cerr << "  outputDir: " << outputDir << endl;
           cerr << "  too few rays, will not be saved" << endl;
@@ -1235,19 +863,17 @@ int Dsr2Radx::_doWrite()
     }
 
     // write out
-    
+
     if (_outFile->writeToDir(_vol,
                              outputDir,
                              _params.append_day_dir_to_output_dir,
                              _params.append_year_dir_to_output_dir)) {
 
-      cerr << "ERROR - Dsr2Radx::_doWrite()" << endl;
+      cerr << "ERROR - Legacy::_doWrite()" << endl;
       cerr << _outFile->getErrStr() << endl;
       iret = -1;
       
     } else {
-
-#ifdef JUNK
 
       // register the write with the DataMapper
       
@@ -1271,7 +897,6 @@ int Dsr2Radx::_doWrite()
                           dataType);
         }
       }
-#endif
       
     }
 
@@ -1286,7 +911,7 @@ int Dsr2Radx::_doWrite()
 // must call writeVol() successfully first
 // Returns 0 on success, -1 on failure
 
-int Dsr2Radx::_writeLdataInfo(const string &outputDir,
+int Legacy::_writeLdataInfo(const string &outputDir,
                               const string &outputPath,
                               time_t dataTime,
                               const string &dataType)
@@ -1294,95 +919,46 @@ int Dsr2Radx::_writeLdataInfo(const string &outputDir,
 
 {
 
-  DsLdataInfo ldata;
-  ldata.setDir(outputDir);
-  ldata.setDataType(dataType);
+  LdataInfo *ldata = NULL;
+  if (_params.register_with_data_mapper) {
+    ldata = new DsLdataInfo;
+  } else {
+    ldata = new LdataInfo;
+  }
+
+  ldata->setDir(outputDir);
+  ldata->setDataType(dataType);
         
   // compute relative data path
   
   string relPath;
-  RadxPath::stripDir(ldata.getDataDirPath(), outputPath, relPath);
-  ldata.setRelDataPath(relPath);
+  RadxPath::stripDir(ldata->getDataDirPath(), outputPath, relPath);
+  ldata->setRelDataPath(relPath);
 
   RadxPath writePath(outputPath);
-  ldata.setDataFileExt(writePath.getExt());
-  ldata.setWriter("Dsr2Radx");
+  ldata->setDataFileExt(writePath.getExt());
+  ldata->setWriter("Legacy");
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    ldata.setDebug(true);
+    ldata->setDebug(true);
   }
 
-  if (ldata.write(dataTime)) {
-    cerr << "WARNING - Dsr2Radx::_writeLdataInfo" << endl;
+  if (ldata->write(dataTime)) {
+    cerr << "WARNING - Legacy::_writeLdataInfo" << endl;
     cerr << "  Cannot write LdataInfo to dir: "
          << outputDir << endl;
+    delete ldata;
     return -1;
   }
 
+  delete ldata;
   return 0;
 
 }
 
 ////////////////////////////////////////////////////////////////
-// update platform params
-
-void Dsr2Radx::_updatePlatform(RadxRay *ray)
-
-{
-
-  const RadxPlatform &platform = _reader->getPlatform();
-  _vol.setPlatform(platform);
-
-  // set scan name
-  // is this a solar?
-
-  string solarScanName(_params.solar_scan_name);
-  string scanName(ray->getScanName());
-  if (scanName == solarScanName) {
-    _isSolarScan = true;
-  } else {
-    _isSolarScan = false;
-  }
-  _vol.setScanName(scanName);
-
-  if (_params.override_radar_name) {
-    _vol.setInstrumentName(_params.radar_name);
-  }
-
-  if(strlen(_params.site_name) > 0) {
-    _vol.setSiteName(_params.site_name);
-  }
-
-  // radar location
-  
-  if (_params.override_radar_location) {
-    _vol.overrideLocation(_params.radar_location.latitudeDeg,
-                          _params.radar_location.longitudeDeg,
-                          _params.radar_location.altitudeKm);
-  }
-
-}
-
-////////////////////////////////////////////////////////////////
-// update calibrations
-
-void Dsr2Radx::_updateRcalib()
-
-{
-
-  const vector<RadxRcalib> &rcalibs = _reader->getRcalibs();
-  _vol.clearRcalibs();
-  for (size_t ii = 0; ii < rcalibs.size(); ii++) {
-    RadxRcalib *calib = new RadxRcalib(rcalibs[ii]);
-    _vol.addCalib(calib);
-  }
-
-}
-
-
-////////////////////////////////////////////////////////////////
 // load radar params
 
-void Dsr2Radx::_loadRadarParams(const DsRadarMsg &radarMsg)
+void Legacy::_loadRadarParams(const DsRadarMsg &radarMsg)
 
 {
 
@@ -1474,7 +1050,7 @@ void Dsr2Radx::_loadRadarParams(const DsRadarMsg &radarMsg)
 ////////////////////////////////////////////////////////////////
 // load input radar calibrations
 
-void Dsr2Radx::_loadInputCalib(const DsRadarMsg &radarMsg)
+void Legacy::_loadInputCalib(const DsRadarMsg &radarMsg)
 
 {
 
@@ -1527,7 +1103,7 @@ void Dsr2Radx::_loadInputCalib(const DsRadarMsg &radarMsg)
 ////////////////////////////////////////////////////////////////////
 // load up calib in Radx object
 
-void Dsr2Radx::_loadRadxRcalib()
+void Legacy::_loadRadxRcalib()
 
 {
 
@@ -1536,15 +1112,15 @@ void Dsr2Radx::_loadRadxRcalib()
     const DsRadarCalib &calIn = *_calibs[icalib];
     RadxRcalib *calOut = new RadxRcalib();
 
-    DateTime ctime(calIn.getCalibTime());
-
-    calOut->setCalibTime(ctime.getYear(),
-                         ctime.getMonth(),
-                         ctime.getDay(),
-                         ctime.getHour(),
-                         ctime.getMin(),
-                         ctime.getSec());
-
+    calOut->setRadarName(calIn.getRadarName());
+    calOut->setCalibTime(calIn.getCalibTime());
+    
+    calOut->setWavelengthCm(calIn.getWavelengthCm());
+    calOut->setBeamWidthDegH(calIn.getBeamWidthDegH());
+    calOut->setBeamWidthDegV(calIn.getBeamWidthDegV());
+    calOut->setAntennaGainDbH(calIn.getAntGainDbH());
+    calOut->setAntennaGainDbV(calIn.getAntGainDbV());
+    
     calOut->setPulseWidthUsec(calIn.getPulseWidthUs());
     calOut->setXmitPowerDbmH(calIn.getXmitPowerDbmH());
     calOut->setXmitPowerDbmV(calIn.getXmitPowerDbmV());
@@ -1555,6 +1131,7 @@ void Dsr2Radx::_loadRadxRcalib()
     calOut->setTwoWayRadomeLossDbV(calIn.getTwoWayRadomeLossDbV());
     calOut->setReceiverMismatchLossDb(calIn.getReceiverMismatchLossDb());
     
+    calOut->setKSquaredWater(calIn.getKSquaredWater());
     calOut->setRadarConstantH(calIn.getRadarConstH());
     calOut->setRadarConstantV(calIn.getRadarConstV());
     
@@ -1562,6 +1139,11 @@ void Dsr2Radx::_loadRadxRcalib()
     calOut->setNoiseDbmHx(calIn.getNoiseDbmHx());
     calOut->setNoiseDbmVc(calIn.getNoiseDbmVc());
     calOut->setNoiseDbmVx(calIn.getNoiseDbmVx());
+    
+    calOut->setI0DbmHc(calIn.getI0DbmHc());
+    calOut->setI0DbmHx(calIn.getI0DbmHx());
+    calOut->setI0DbmVc(calIn.getI0DbmVc());
+    calOut->setI0DbmVx(calIn.getI0DbmVx());
     
     calOut->setReceiverGainDbHc(calIn.getReceiverGainDbHc());
     calOut->setReceiverGainDbHx(calIn.getReceiverGainDbHx());
@@ -1572,6 +1154,11 @@ void Dsr2Radx::_loadRadxRcalib()
     calOut->setReceiverSlopeDbHx(calIn.getReceiverSlopeDbHx());
     calOut->setReceiverSlopeDbVc(calIn.getReceiverSlopeDbVc());
     calOut->setReceiverSlopeDbVx(calIn.getReceiverSlopeDbVx());
+    
+    calOut->setDynamicRangeDbHc(calIn.getDynamicRangeDbHc());
+    calOut->setDynamicRangeDbHx(calIn.getDynamicRangeDbHx());
+    calOut->setDynamicRangeDbVc(calIn.getDynamicRangeDbVc());
+    calOut->setDynamicRangeDbVx(calIn.getDynamicRangeDbVx());
     
     calOut->setBaseDbz1kmHc(calIn.getBaseDbz1kmHc());
     calOut->setBaseDbz1kmHx(calIn.getBaseDbz1kmHx());
@@ -1592,6 +1179,7 @@ void Dsr2Radx::_loadRadxRcalib()
     calOut->setCouplerForwardLossDbH(calIn.getCouplerForwardLossDbH());
     calOut->setCouplerForwardLossDbV(calIn.getCouplerForwardLossDbV());
     
+    calOut->setDbzCorrection(calIn.getDbzCorrection());
     calOut->setZdrCorrectionDb(calIn.getZdrCorrectionDb());
     calOut->setLdrCorrectionDbH(calIn.getLdrCorrectionDbH());
     calOut->setLdrCorrectionDbV(calIn.getLdrCorrectionDbV());
@@ -1599,7 +1187,7 @@ void Dsr2Radx::_loadRadxRcalib()
     
     calOut->setTestPowerDbmH(calIn.getTestPowerDbmH());
     calOut->setTestPowerDbmV(calIn.getTestPowerDbmV());
-
+    
     _vol.addCalib(calOut);
 
   } // icalib
@@ -1609,7 +1197,7 @@ void Dsr2Radx::_loadRadxRcalib()
 ////////////////////////////////////////////////////////////////////
 // add an input ray from an incoming message
 
-RadxRay *Dsr2Radx::_createInputRay(const DsRadarMsg &radarMsg, 
+RadxRay *Legacy::_createInputRay(const DsRadarMsg &radarMsg, 
                                    int msgContents)
 
 {
@@ -1676,8 +1264,10 @@ RadxRay *Dsr2Radx::_createInputRay(const DsRadarMsg &radarMsg,
       if (deltaPrev > 0 && deltaThis <= 0) {
         _sweepNumOverride++;
         if (_params.debug) {
-          cerr << "====>> Forcing sweep number change, az: " << thisAz << " <<====" << endl;
-          cerr << "====>> New sweep number: " << _sweepNumOverride << " <<====" << endl;
+          cerr << "====>> Forcing sweep number change, az: "
+               << thisAz << " <<====" << endl;
+          cerr << "====>> New sweep number: "
+               << _sweepNumOverride << " <<====" << endl;
         }
       }
     } // if (_prevRay != NULL ...
@@ -1868,7 +1458,7 @@ RadxRay *Dsr2Radx::_createInputRay(const DsRadarMsg &radarMsg,
 /////////////////////////////////////////////////////////////////////////////
 // compute difference between 2 angles: (a1 - a2)
 
-double Dsr2Radx::_computeDeltaAngle(double a1, double a2)
+double Legacy::_computeDeltaAngle(double a1, double a2)
 {
   double diff = a1 - a2;
   if (diff < -180.0) {
@@ -1882,7 +1472,7 @@ double Dsr2Radx::_computeDeltaAngle(double a1, double a2)
 ////////////////////////////////////////////////////////////////////
 // censor an input ray
 
-void Dsr2Radx::_censorInputRay(RadxRay *ray)
+void Legacy::_censorInputRay(RadxRay *ray)
 
 {
 
@@ -2027,7 +1617,7 @@ void Dsr2Radx::_censorInputRay(RadxRay *ray)
 //  (b) set standard name etc
 //  (c) convert to output type
 
-void Dsr2Radx::_prepareRayForOutput(RadxRay *ray)
+void Legacy::_prepareRayForOutput(RadxRay *ray)
   
 {
 
@@ -2083,7 +1673,7 @@ void Dsr2Radx::_prepareRayForOutput(RadxRay *ray)
 ////////////////////////////////////////////////////////////////////
 // Do we need this field?
 
-bool Dsr2Radx::_isCensoringField(const string &name)
+bool Legacy::_isCensoringField(const string &name)
 
 {
 
@@ -2102,7 +1692,7 @@ bool Dsr2Radx::_isCensoringField(const string &name)
 
 }
 
-bool Dsr2Radx::_isOutputField(const string &name)
+bool Legacy::_isOutputField(const string &name)
 
 {
 
@@ -2122,7 +1712,7 @@ bool Dsr2Radx::_isOutputField(const string &name)
 //
 // Otherwise delete it
 
-void Dsr2Radx::_addRayToVol(RadxRay *ray)
+void Legacy::_addRayToVol(RadxRay *ray)
 
 {
   if (_acceptRay(ray)) {
@@ -2136,7 +1726,7 @@ void Dsr2Radx::_addRayToVol(RadxRay *ray)
 ////////////////////////////////////////////////////////////////////
 // Check whether to accept ray
 
-bool Dsr2Radx::_acceptRay(const RadxRay *ray)
+bool Legacy::_acceptRay(const RadxRay *ray)
 
 {
 
@@ -2234,7 +1824,7 @@ bool Dsr2Radx::_acceptRay(const RadxRay *ray)
 ////////////////////////////////////////////////////////////////
 // is antenna moving
 
-bool Dsr2Radx::_isAntennaMoving(const RadxRay *ray)
+bool Legacy::_isAntennaMoving(const RadxRay *ray)
 
 {
 
@@ -2262,7 +1852,7 @@ bool Dsr2Radx::_isAntennaMoving(const RadxRay *ray)
 //
 // returns 0 on success, -1 on failure
 
-int Dsr2Radx::_loadCurrentScanMode()
+int Legacy::_loadCurrentScanMode()
   
 {
   
@@ -2327,7 +1917,7 @@ int Dsr2Radx::_loadCurrentScanMode()
 //
 // returns 0 on success, -1 on failure
 
-int Dsr2Radx::_findScanModeFromHeaders()
+int Legacy::_findScanModeFromHeaders()
   
 {
   
@@ -2391,7 +1981,7 @@ int Dsr2Radx::_findScanModeFromHeaders()
 ////////////////////////////////////////////////////////////////
 // find the current scan mode from antenna angles
 
-void Dsr2Radx::_findScanModeFromAntenna()
+void Legacy::_findScanModeFromAntenna()
   
 {
   
@@ -2453,7 +2043,7 @@ void Dsr2Radx::_findScanModeFromAntenna()
 ////////////////////////////////////////////////////////////////
 // check if this is a vertically-pointing scan
 
-bool Dsr2Radx::_isVertScan()
+bool Legacy::_isVertScan()
   
 {
 
@@ -2491,7 +2081,7 @@ bool Dsr2Radx::_isVertScan()
 /////////////////////////////////////////////////////////////////
 // clear methods
 
-void Dsr2Radx::_clearData()
+void Legacy::_clearData()
 
 {
   _vol.clear();
@@ -2503,7 +2093,7 @@ void Dsr2Radx::_clearData()
 /////////////////////////////////////////////
 // convert from DsrRadar enums to Radx enums
 
-Radx::SweepMode_t Dsr2Radx::_getRadxSweepMode(int dsrScanMode)
+Radx::SweepMode_t Legacy::_getRadxSweepMode(int dsrScanMode)
 
 {
 
@@ -2534,7 +2124,7 @@ Radx::SweepMode_t Dsr2Radx::_getRadxSweepMode(int dsrScanMode)
   }
 }
 
-Radx::PolarizationMode_t Dsr2Radx::_getRadxPolarizationMode(int dsrPolMode)
+Radx::PolarizationMode_t Legacy::_getRadxPolarizationMode(int dsrPolMode)
 
 {
   switch (dsrPolMode) {
@@ -2561,7 +2151,7 @@ Radx::PolarizationMode_t Dsr2Radx::_getRadxPolarizationMode(int dsrPolMode)
   }
 }
 
-Radx::FollowMode_t Dsr2Radx::_getRadxFollowMode(int dsrMode)
+Radx::FollowMode_t Legacy::_getRadxFollowMode(int dsrMode)
 
 {
   switch (dsrMode) {
@@ -2580,7 +2170,7 @@ Radx::FollowMode_t Dsr2Radx::_getRadxFollowMode(int dsrMode)
   }
 }
 
-Radx::PrtMode_t Dsr2Radx::_getRadxPrtMode(int dsrMode)
+Radx::PrtMode_t Legacy::_getRadxPrtMode(int dsrMode)
 
 {
   switch (dsrMode) {
@@ -2598,7 +2188,7 @@ Radx::PrtMode_t Dsr2Radx::_getRadxPrtMode(int dsrMode)
 ////////////////////////////////////////////////////
 // compute the number of gates given the max height
 
-int Dsr2Radx::_computeNgatesForMaxHt(double elev,
+int Legacy::_computeNgatesForMaxHt(double elev,
                                      double radarAltitudeKm,
                                      double startRangeKm,
                                      double gateSpacingKm)
@@ -2644,7 +2234,7 @@ int Dsr2Radx::_computeNgatesForMaxHt(double elev,
 /////////////////////////////////////////////////////////////////
 // compute lookup table for max range at various elevation angles
 	
-void Dsr2Radx::_computeMaxRangeLut(double radarAltitudeKm)
+void Legacy::_computeMaxRangeLut(double radarAltitudeKm)
 
 {
 
@@ -2681,7 +2271,7 @@ void Dsr2Radx::_computeMaxRangeLut(double radarAltitudeKm)
 /////////////////////////////////////////////////////////////////
 // compute time for end of volume
 	
-void Dsr2Radx::_computeEndOfVolTime(time_t beamTime)
+void Legacy::_computeEndOfVolTime(time_t beamTime)
 
 {
 
@@ -2706,7 +2296,7 @@ void Dsr2Radx::_computeEndOfVolTime(time_t beamTime)
 // check for end of vol in 360_deg mode
 // we check for az passing az_for_end_of_vol_360
 	
-bool Dsr2Radx::_checkEndOfVol360(RadxRay *ray)
+bool Legacy::_checkEndOfVol360(RadxRay *ray)
 
 {
   

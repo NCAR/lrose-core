@@ -25,11 +25,12 @@
 // Dsr2Radx.hh
 //
 // Dsr2Radx object
+// Updated processing
 //
-// Mike Dixon, RAP, NCAR
+// Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Feb 2011
+// Oct 2018
 //
 ///////////////////////////////////////////////////////////////
 //
@@ -54,6 +55,7 @@
 #include <Radx/RadxFile.hh>
 #include <rapformats/DsRadarMsg.hh>
 #include <Fmq/DsRadarQueue.hh>
+class IwrfMomReader;
 class RadxRay;
 
 using namespace std;
@@ -94,7 +96,11 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  
+
+  // reading the incoming FMQ
+
+  IwrfMomReader *_reader;
+ 
   int _nRaysRead;
   int _nCheckPrint;
   int _nWarnCensorPrint;
@@ -107,7 +113,8 @@ private:
 
   SweepMgr *_sweepMgr;
   bool _sweepNumbersMissing;
-
+  Radx::SweepMode_t _sweepMode;
+  
   // current scan mode
   
   typedef enum {
@@ -161,24 +168,23 @@ private:
 
   // functions
   
-  void _setupWrite();
-  int _doWrite();
   int _run();
 
-  int _readMsg(DsRadarQueue &radarQueue, DsRadarMsg &radarMsg, bool &gotMsg);
-  
+  int _processRay(RadxRay *ray);
+  int _processEndOfVol();
   int _processVol();
+
+  void _setupWrite();
+  int _doWrite();
 
   int _writeLdataInfo(const string &outputDir,
                       const string &outputPath,
                       time_t dataTime,
                       const string &dataType);
 
-  void _loadRadarParams(const DsRadarMsg &radarMsg);
-  void _loadInputCalib(const DsRadarMsg &radarMsg);
-  void _loadRadxRcalib();
-  
-  RadxRay *_createInputRay(const DsRadarMsg &radarMsg, int msgContents);
+  void _updatePlatform(RadxRay *ray);
+  void _updateRcalib();
+
   double _computeDeltaAngle(double a1, double a2);
 
   void _censorInputRay(RadxRay *ray);

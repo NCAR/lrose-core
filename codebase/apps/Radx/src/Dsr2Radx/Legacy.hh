@@ -22,24 +22,23 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// Dsr2Radx.hh
+// Legacy.hh
 //
-// Dsr2Radx object
+// Legacy processing object
 //
-// Mike Dixon, RAP, NCAR
+// Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Feb 2011
 //
 ///////////////////////////////////////////////////////////////
 //
-// Dsr2Radx reads an input radar FMQ, and saves out data files
-// in formats supported by Radx.
+// Legacy processing for Dsr2Radx.
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef Dsr2Radx_HH
-#define Dsr2Radx_HH
+#ifndef Legacy_HH
+#define Legacy_HH
 
 #include <string>
 #include <vector>
@@ -54,7 +53,6 @@
 #include <Radx/RadxFile.hh>
 #include <rapformats/DsRadarMsg.hh>
 #include <Fmq/DsRadarQueue.hh>
-class IwrfMomReader;
 class RadxRay;
 
 using namespace std;
@@ -62,25 +60,22 @@ using namespace std;
 ////////////////////////
 // This class
 
-class Dsr2Radx {
+class Legacy {
   
 public:
 
   // constructor
-
-  Dsr2Radx (int argc, char **argv);
+  
+  Legacy (const string &prog_name,
+          const Params &params);
 
   // destructor
   
-  ~Dsr2Radx();
+  ~Legacy();
 
   // run 
 
   int Run();
-
-  // data members
-
-  bool isOK;
 
 protected:
   
@@ -90,16 +85,10 @@ private:
 
   static const double _smallVal;
   static const double _pseudoDiam;
-
+  
   string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
-
-  // reading the incoming FMQ
-
-  IwrfMomReader *_reader;
- 
+  const Params &_params;
+  
   int _nRaysRead;
   int _nCheckPrint;
   int _nWarnCensorPrint;
@@ -112,8 +101,7 @@ private:
 
   SweepMgr *_sweepMgr;
   bool _sweepNumbersMissing;
-  Radx::SweepMode_t _sweepMode;
-  
+
   // current scan mode
   
   typedef enum {
@@ -167,24 +155,18 @@ private:
 
   // functions
   
-  int _run();
-
-  int _processRay(RadxRay *ray);
-  int _readMsg(DsRadarQueue &radarQueue, DsRadarMsg &radarMsg, bool &gotMsg);
-  
-  int _processEndOfVol();
-  int _processVol();
-
   void _setupWrite();
   int _doWrite();
+  int _run();
+
+  int _readMsg(DsRadarQueue &radarQueue, DsRadarMsg &radarMsg);
+  
+  int _processVol();
 
   int _writeLdataInfo(const string &outputDir,
                       const string &outputPath,
                       time_t dataTime,
                       const string &dataType);
-
-  void _updatePlatform(RadxRay *ray);
-  void _updateRcalib();
 
   void _loadRadarParams(const DsRadarMsg &radarMsg);
   void _loadInputCalib(const DsRadarMsg &radarMsg);

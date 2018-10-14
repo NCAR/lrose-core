@@ -39,6 +39,12 @@ paramdef int {
   p_help = "The auto_restart script expects registration at this interval. If registration does not occur in twice this time, the process is killed and restarted. Therefore, if writing the output files takes longer than 60 seconds because the files are large and compressed, then increase this interval, to say 120 secs.";
 } procmap_register_interval;
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use legacy processing - reading the DsRadarQueue directly.";
+  p_help = "This will be the default until the new IwrfMomReader code is fully tested and debugger. Set to FALSE to use the new IwrfMomReader code.";
+} use_legacy_processing;
+
 commentdef {
   p_header = "DATA INPUT";
 }

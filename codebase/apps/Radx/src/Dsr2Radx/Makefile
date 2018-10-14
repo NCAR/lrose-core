@@ -52,6 +52,7 @@ HDRS = \
 	Args.hh \
 	Antenna.hh \
 	Dsr2Radx.hh \
+	Legacy.hh \
 	SweepMgr.hh
 
 CPPC_SRCS = \
@@ -59,6 +60,7 @@ CPPC_SRCS = \
 	Args.cc \
 	Antenna.cc \
 	Dsr2Radx.cc \
+	Legacy.cc \
 	Main.cc \
 	SweepMgr.cc
 

@@ -608,6 +608,18 @@
     tt->single_val.i = 60;
     tt++;
     
+    // Parameter 'use_legacy_processing'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_legacy_processing");
+    tt->descr = tdrpStrDup("Option to use legacy processing - reading the DsRadarQueue directly.");
+    tt->help = tdrpStrDup("This will be the default until the new IwrfMomReader code is fully tested and debugger. Set to FALSE to use the new IwrfMomReader code.");
+    tt->val_offset = (char *) &use_legacy_processing - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
