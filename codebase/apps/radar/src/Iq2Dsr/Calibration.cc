@@ -85,10 +85,6 @@ int Calibration::readCal(const string &filePath)
     return -1;
   }
 
-  // apply corrections as appropriate
-
-  _applyCorrections();
-
   // debug print
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -132,10 +128,6 @@ int Calibration::loadCal(const Beam *beam)
     
   }
   
-  // apply corrections as appropriate
-
-  _applyCorrections();
-
   return 0;
 
 }
@@ -180,18 +172,10 @@ void Calibration::_setCalFromTimeSeries(const Beam *beam)
     tsInfo.setIwrfCalib(_calib);
     
   } // if (tsInfo.isDerivedFromRvp8())
-  
-  if (_params.override_cal_dbz_correction) {
-    _calib.setDbzCorrection(_params.dbz_correction);
-  }
-  
-  if (_params.override_cal_zdr_correction) {
-    _calib.setZdrCorrectionDb(_params.zdr_correction_db);
-  }
-  
-  if (_params.override_cal_system_phidp) {
-    _calib.setSystemPhidpDeg(_params.system_phidp_deg);
-  }
+
+  // apply corrections as appropriate
+
+  _applyCorrections();
 
 }
 
@@ -248,7 +232,7 @@ int Calibration::_checkPulseWidthAndRead(const Beam *beam)
     
   } // ii
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
     cerr << "Reading new cal, pulse width (us): " << beamPulseWidthUs << endl;
     cerr << "  Cal dir: " << _calDirForPulseWidth << endl;
   }
@@ -263,29 +247,21 @@ int Calibration::_checkPulseWidthAndRead(const Beam *beam)
     return -1;
   }
   
-  // override as required
+  // override from entry as required
   
   if (_params.override_cal_dbz_correction) {
     _calib.setDbzCorrection(_params.dbz_correction);
   }
-  
+
   if (_params.override_cal_zdr_correction) {
     if (entry.zdr_correction_db > -9990) {
       _calib.setZdrCorrectionDb(entry.zdr_correction_db);
-      if (_params.debug) {
-        cerr << "Calibration::_checkPulseWidthAndRead()" << endl;
-        cerr << "  setting zdr_correction_db: " << entry.zdr_correction_db << endl;
-      }
     }
   }
   
   if (_params.override_cal_system_phidp) {
     if (entry.system_phidp_deg > -9990) {
       _calib.setSystemPhidpDeg(entry.system_phidp_deg);
-      if (_params.debug) {
-        cerr << "Calibration::_checkPulseWidthAndRead()" << endl;
-        cerr << "  setting system_phidp_deg: " << entry.system_phidp_deg << endl;
-      }
     }
   }
     
@@ -444,6 +420,10 @@ int Calibration::_readCalFromFile(const string &calPath)
   _calFilePath = calPath;
   _calAvailable = true;
 
+  // apply corrections as appropriate
+
+  _applyCorrections();
+
   if (_params.debug) {
     cerr << "Done reading calibration file: " << calPath << endl;
   }
@@ -580,7 +560,7 @@ void Calibration::_applyCorrections()
   
   if (_params.override_cal_dbz_correction) {
     _calib.setDbzCorrection(_params.dbz_correction);
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
       cerr << "Calibration::_applyCorrections()" << endl;
       cerr << "  setting dbz_correction: " << _params.dbz_correction << endl;
     }
@@ -588,7 +568,7 @@ void Calibration::_applyCorrections()
   
   if (_params.override_cal_zdr_correction) {
     _calib.setZdrCorrectionDb(_params.zdr_correction_db);
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
       cerr << "Calibration::_applyCorrections()" << endl;
       cerr << "  setting zdr_correction_db: " << _params.zdr_correction_db << endl;
     }
@@ -597,7 +577,7 @@ void Calibration::_applyCorrections()
   if (_params.override_cal_ldr_corrections) {
     _calib.setLdrCorrectionDbH(_params.ldr_correction_db_h);
     _calib.setLdrCorrectionDbV(_params.ldr_correction_db_v);
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
       cerr << "Calibration::_applyCorrections()" << endl;
       cerr << "  setting ldr_correction_db_h: " << _params.ldr_correction_db_h << endl;
       cerr << "  setting ldr_correction_db_v: " << _params.ldr_correction_db_v << endl;
@@ -606,7 +586,7 @@ void Calibration::_applyCorrections()
   
   if (_params.override_cal_system_phidp) {
     _calib.setSystemPhidpDeg(_params.system_phidp_deg);
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
       cerr << "Calibration::_applyCorrections()" << endl;
       cerr << "  setting system_phidp_deg: " << _params.system_phidp_deg << endl;
     }
