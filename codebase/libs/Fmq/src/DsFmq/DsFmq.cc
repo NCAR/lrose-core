@@ -636,6 +636,8 @@ int DsFmq::readMsgBlocking(int type)
     return Fmq::readMsgBlocking(type);
   }
 
+  int sleepTotalMsecs = 0;
+
   while(true) {
 
     // perform a read
@@ -653,8 +655,14 @@ int DsFmq::readMsgBlocking(int type)
     
     if (_msecSleep < 0) {
       umsleep(500);
+      sleepTotalMsecs += 500;
     } else if (_msecSleep > 0) {
       umsleep( _msecSleep );
+      sleepTotalMsecs += _msecSleep;
+    }
+    if (_msecBlockingReadTimeout > 0 && 
+        sleepTotalMsecs > _msecBlockingReadTimeout) {
+      return -1;
     }
     if (_heartbeatFunc != NULL ) {
       _heartbeatFunc("Blocking on read");
