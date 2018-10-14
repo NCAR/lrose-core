@@ -156,10 +156,10 @@ public:
   inline void setNoiseDbmVc(double val) { _noiseDbmVc = val; }
   inline void setNoiseDbmVx(double val) { _noiseDbmVx = val; }
 
-  inline void seti0DbmHc(double val) { _i0DbmHc = val; }
-  inline void seti0DbmHx(double val) { _i0DbmHx = val; }
-  inline void seti0DbmVc(double val) { _i0DbmVc = val; }
-  inline void seti0DbmVx(double val) { _i0DbmVx = val; }
+  inline void setI0DbmHc(double val) { _i0DbmHc = val; }
+  inline void setI0DbmHx(double val) { _i0DbmHx = val; }
+  inline void setI0DbmVc(double val) { _i0DbmVc = val; }
+  inline void setI0DbmVx(double val) { _i0DbmVx = val; }
 
   inline void setReceiverGainDbHc(double val) { _receiverGainDbHc = val; }
   inline void setReceiverGainDbHx(double val) { _receiverGainDbHx = val; }
