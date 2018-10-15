@@ -1576,7 +1576,7 @@ void DsMdvx::setMdv2NcfCommentAttr(const string &comment)
 // set compression - uses HDF5
 
 void DsMdvx::setMdv2NcfCompression(bool compress,
-                             int compressionLevel)
+                                   int compressionLevel)
   
 {
   
