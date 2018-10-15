@@ -2191,13 +2191,19 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   double val;
   time_t ctime;
 
+  // time
+
   iret |= _readCalTime(R_CALIB_TIME, 
                        _rCalTimeVar, index, ctime);
   cal.setCalibTime(ctime);
 
+  // pulse width
+
   iret |= _readCalVar(R_CALIB_PULSE_WIDTH, 
                       _rCalPulseWidthVar, index, val, true);
   cal.setPulseWidthUsec(val * 1.0e6);
+
+  // xmit power
 
   iret |= _readCalVar(R_CALIB_XMIT_POWER_H, 
                       _rCalXmitPowerHVar, index, val);
@@ -2207,6 +2213,8 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
                       _rCalXmitPowerVVar, index, val);
   cal.setXmitPowerDbmV(val);
 
+  // waveguide loss
+
   iret |= _readCalVar(R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_H,
                       _rCalTwoWayWaveguideLossHVar, index, val);
   cal.setTwoWayWaveguideLossDbH(val);
@@ -2214,6 +2222,8 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   iret |= _readCalVar(R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_V,
                       _rCalTwoWayWaveguideLossVVar, index, val);
   cal.setTwoWayWaveguideLossDbV(val);
+
+  // radome loss
 
   iret |= _readCalVar(R_CALIB_TWO_WAY_RADOME_LOSS_H,
                       _rCalTwoWayRadomeLossHVar, index, val);
@@ -2223,9 +2233,19 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
                       _rCalTwoWayRadomeLossVVar, index, val);
   cal.setTwoWayRadomeLossDbV(val);
 
+  // rx mismatch loss
+
   iret |= _readCalVar(R_CALIB_RECEIVER_MISMATCH_LOSS,
                       _rCalReceiverMismatchLossVar, index, val);
   cal.setReceiverMismatchLossDb(val);
+
+  // k squared water
+
+  iret |= _readCalVar(R_CALIB_K_SQUARED_WATER,
+                      _rCalKSquaredWaterVar, index, val);
+  cal.setKSquaredWater(val);
+
+  // radar constant
 
   iret |= _readCalVar(R_CALIB_RADAR_CONSTANT_H, 
                       _rCalRadarConstHVar, index, val);
@@ -2235,6 +2255,8 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
                       _rCalRadarConstVVar, index, val);
   cal.setRadarConstantV(val);
 
+  // antenna gain
+
   iret |= _readCalVar(R_CALIB_ANTENNA_GAIN_H, 
                       _rCalAntennaGainHVar, index, val);
   cal.setAntennaGainDbH(val);
@@ -2242,6 +2264,8 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   iret |= _readCalVar(R_CALIB_ANTENNA_GAIN_V, 
                       _rCalAntennaGainVVar, index, val);
   cal.setAntennaGainDbV(val);
+
+  // noise dbm
 
   iret |= _readCalVar(R_CALIB_NOISE_HC, 
                       _rCalNoiseHcVar, index, val, true);
@@ -2259,6 +2283,26 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
                       _rCalNoiseVxVar, index, val);
   cal.setNoiseDbmVx(val);
 
+  // i0 dbm
+
+  iret |= _readCalVar(R_CALIB_I0_DBM_HC, 
+                      _rCalI0HcVar, index, val, true);
+  cal.setI0DbmHc(val);
+
+  iret |= _readCalVar(R_CALIB_I0_DBM_HX, 
+                      _rCalI0HxVar, index, val);
+  cal.setI0DbmHx(val);
+
+  iret |= _readCalVar(R_CALIB_I0_DBM_VC, 
+                      _rCalI0VcVar, index, val);
+  cal.setI0DbmVc(val);
+
+  iret |= _readCalVar(R_CALIB_I0_DBM_VX, 
+                      _rCalI0VxVar, index, val);
+  cal.setI0DbmVx(val);
+
+  // receiver gain
+
   iret |= _readCalVar(R_CALIB_RECEIVER_GAIN_HC, 
                       _rCalReceiverGainHcVar, index, val, true);
   cal.setReceiverGainDbHc(val);
@@ -2274,7 +2318,45 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   iret |= _readCalVar(R_CALIB_RECEIVER_GAIN_VX, 
                       _rCalReceiverGainVxVar, index, val);
   cal.setReceiverGainDbVx(val);
+  
+  // receiver slope
 
+  iret |= _readCalVar(R_CALIB_RECEIVER_SLOPE_HC, 
+                      _rCalReceiverSlopeHcVar, index, val);
+  cal.setReceiverSlopeDbHc(val);
+
+  iret |= _readCalVar(R_CALIB_RECEIVER_SLOPE_HX, 
+                      _rCalReceiverSlopeHxVar, index, val);
+  cal.setReceiverSlopeDbHx(val);
+
+  iret |= _readCalVar(R_CALIB_RECEIVER_SLOPE_VC, 
+                      _rCalReceiverSlopeVcVar, index, val);
+  cal.setReceiverSlopeDbVc(val);
+
+  iret |= _readCalVar(R_CALIB_RECEIVER_SLOPE_VX, 
+                      _rCalReceiverSlopeVxVar, index, val);
+  cal.setReceiverSlopeDbVx(val);
+
+  // dynamic range
+
+  iret |= _readCalVar(R_CALIB_DYNAMIC_RANGE_DB_HC, 
+                      _rCalI0HcVar, index, val, true);
+  cal.setDynamicRangeDbHc(val);
+
+  iret |= _readCalVar(R_CALIB_DYNAMIC_RANGE_DB_HX, 
+                      _rCalI0HxVar, index, val);
+  cal.setDynamicRangeDbHx(val);
+
+  iret |= _readCalVar(R_CALIB_DYNAMIC_RANGE_DB_VC, 
+                      _rCalI0VcVar, index, val);
+  cal.setDynamicRangeDbVc(val);
+
+  iret |= _readCalVar(R_CALIB_DYNAMIC_RANGE_DB_VX, 
+                      _rCalI0VxVar, index, val);
+  cal.setDynamicRangeDbVx(val);
+
+  // base dbz 1km
+  
   iret |= _readCalVar(R_CALIB_BASE_DBZ_1KM_HC, 
                       _rCalBaseDbz1kmHcVar, index, val);
   cal.setBaseDbz1kmHc(val);
@@ -2282,7 +2364,7 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   iret |= _readCalVar(R_CALIB_BASE_DBZ_1KM_HX, 
                       _rCalBaseDbz1kmHxVar, index, val);
   cal.setBaseDbz1kmHx(val);
-
+  
   iret |= _readCalVar(R_CALIB_BASE_DBZ_1KM_VC, 
                       _rCalBaseDbz1kmVcVar, index, val);
   cal.setBaseDbz1kmVc(val);
@@ -2290,6 +2372,8 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   iret |= _readCalVar(R_CALIB_BASE_DBZ_1KM_VX, 
                       _rCalBaseDbz1kmVxVar, index, val);
   cal.setBaseDbz1kmVx(val);
+
+  // sun power
 
   iret |= _readCalVar(R_CALIB_SUN_POWER_HC, 
                       _rCalSunPowerHcVar, index, val);
@@ -2307,6 +2391,8 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
                       _rCalSunPowerVxVar, index, val);
   cal.setSunPowerDbmVx(val);
 
+  // noise source power
+
   iret |= _readCalVar(R_CALIB_NOISE_SOURCE_POWER_H, 
                       _rCalNoiseSourcePowerHVar, index, val);
   cal.setNoiseSourcePowerDbmH(val);
@@ -2315,13 +2401,17 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
                       _rCalNoiseSourcePowerVVar, index, val);
   cal.setNoiseSourcePowerDbmV(val);
 
+  // power measurement loss
+
   iret |= _readCalVar(R_CALIB_POWER_MEASURE_LOSS_H, 
                       _rCalPowerMeasLossHVar, index, val);
   cal.setPowerMeasLossDbH(val);
-
+  
   iret |= _readCalVar(R_CALIB_POWER_MEASURE_LOSS_V, 
                       _rCalPowerMeasLossVVar, index, val);
   cal.setPowerMeasLossDbV(val);
+
+  // coupler loss
 
   iret |= _readCalVar(R_CALIB_COUPLER_FORWARD_LOSS_H, 
                       _rCalCouplerForwardLossHVar, index, val);
@@ -2330,6 +2420,8 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   iret |= _readCalVar(R_CALIB_COUPLER_FORWARD_LOSS_V, 
                       _rCalCouplerForwardLossVVar, index, val);
   cal.setCouplerForwardLossDbV(val);
+
+  // corrections
 
   iret |= _readCalVar(R_CALIB_DBZ_CORRECTION, 
                       _rCalDbzCorrectionVar, index, val);
@@ -2351,6 +2443,8 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
                       _rCalSystemPhidpVar, index, val);
   cal.setSystemPhidpDeg(val);
 
+  // test power
+
   iret |= _readCalVar(R_CALIB_TEST_POWER_H, 
                       _rCalTestPowerHVar, index, val);
   cal.setTestPowerDbmH(val);
@@ -2358,22 +2452,6 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   iret |= _readCalVar(R_CALIB_TEST_POWER_V, 
                       _rCalTestPowerVVar, index, val);
   cal.setTestPowerDbmV(val);
-
-  iret |= _readCalVar(R_CALIB_RECEIVER_SLOPE_HC, 
-                      _rCalReceiverSlopeHcVar, index, val);
-  cal.setReceiverSlopeDbHc(val);
-
-  iret |= _readCalVar(R_CALIB_RECEIVER_SLOPE_HX, 
-                      _rCalReceiverSlopeHxVar, index, val);
-  cal.setReceiverSlopeDbHx(val);
-
-  iret |= _readCalVar(R_CALIB_RECEIVER_SLOPE_VC, 
-                      _rCalReceiverSlopeVcVar, index, val);
-  cal.setReceiverSlopeDbVc(val);
-
-  iret |= _readCalVar(R_CALIB_RECEIVER_SLOPE_VX, 
-                      _rCalReceiverSlopeVxVar, index, val);
-  cal.setReceiverSlopeDbVx(val);
 
   return iret;
 

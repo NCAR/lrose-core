@@ -419,9 +419,6 @@ int IwrfCalib::setFromXml(const string &xmlBuf, string &errStr)
 
   if (TaXml::readDouble(xbuf, "radarConstH", val) == 0) {
     _calib.radar_constant_h = val;
-  // } else {
-  //   errStr += "ERROR - radarConstH missing\n";
-  //   iret = -1;
   }
 
   if (TaXml::readDouble(xbuf, "radarConstV", val) == 0) {
@@ -430,9 +427,6 @@ int IwrfCalib::setFromXml(const string &xmlBuf, string &errStr)
 
   if (TaXml::readDouble(xbuf, "noiseDbmHc", val) == 0) {
     _calib.noise_dbm_hc = val;
-  // } else {
-  //   errStr += "ERROR - noiseDbmHc missing\n";
-  //   iret = -1;
   }
 
   if (TaXml::readDouble(xbuf, "noiseDbmHx", val) == 0) {
@@ -445,25 +439,6 @@ int IwrfCalib::setFromXml(const string &xmlBuf, string &errStr)
 
   if (TaXml::readDouble(xbuf, "noiseDbmVx", val) == 0) {
     _calib.noise_dbm_vx = val;
-  }
-
-  if (TaXml::readDouble(xbuf, "receiverGainDbHc", val) == 0) {
-    _calib.receiver_gain_db_hc = val;
-  // } else {
-  //   errStr += "ERROR - receiverGainDbHc missing\n";
-  //   iret = -1;
-  }
-
-  if (TaXml::readDouble(xbuf, "receiverGainDbHx", val) == 0) {
-    _calib.receiver_gain_db_hx = val;
-  }
-
-  if (TaXml::readDouble(xbuf, "receiverGainDbVc", val) == 0) {
-    _calib.receiver_gain_db_vc = val;
-  }
-
-  if (TaXml::readDouble(xbuf, "receiverGainDbVx", val) == 0) {
-    _calib.receiver_gain_db_vx = val;
   }
 
   if (TaXml::readDouble(xbuf, "i0DbmHc", val) == 0) {
@@ -488,6 +463,22 @@ int IwrfCalib::setFromXml(const string &xmlBuf, string &errStr)
     _calib.i0_dbm_vx = val;
   } else {
     _calib.i0_dbm_vx = _calib.noise_dbm_vx - _calib.receiver_gain_db_vx;
+  }
+
+  if (TaXml::readDouble(xbuf, "receiverGainDbHc", val) == 0) {
+    _calib.receiver_gain_db_hc = val;
+  }
+
+  if (TaXml::readDouble(xbuf, "receiverGainDbHx", val) == 0) {
+    _calib.receiver_gain_db_hx = val;
+  }
+
+  if (TaXml::readDouble(xbuf, "receiverGainDbVc", val) == 0) {
+    _calib.receiver_gain_db_vc = val;
+  }
+
+  if (TaXml::readDouble(xbuf, "receiverGainDbVx", val) == 0) {
+    _calib.receiver_gain_db_vx = val;
   }
 
   if (TaXml::readDouble(xbuf, "receiverSlopeDbHc", val) == 0) {
@@ -524,9 +515,6 @@ int IwrfCalib::setFromXml(const string &xmlBuf, string &errStr)
 
   if (TaXml::readDouble(xbuf, "baseDbz1kmHc", val) == 0) {
     _calib.base_dbz_1km_hc = val;
-  // } else {
-  //   errStr += "ERROR - baseDbz1kmHc missing\n";
-  //   iret = -1;
   }
 
   if (TaXml::readDouble(xbuf, "baseDbz1kmHx", val) == 0) {
@@ -970,16 +958,29 @@ void IwrfCalib::setFromRadxRcalib(const RadxRcalib &rcalib)
   _calib.two_way_radome_loss_db_h = rcalib.getTwoWayRadomeLossDbH(); 
   _calib.two_way_radome_loss_db_v = rcalib.getTwoWayRadomeLossDbV();
   _calib.receiver_mismatch_loss_db = rcalib.getReceiverMismatchLossDb();
+  _calib.k_squared_water = rcalib.getKSquaredWater();
   _calib.radar_constant_h = rcalib.getRadarConstantH();
   _calib.radar_constant_v = rcalib.getRadarConstantV();
   _calib.noise_dbm_hc = rcalib.getNoiseDbmHc();
   _calib.noise_dbm_hx = rcalib.getNoiseDbmHx();
   _calib.noise_dbm_vc = rcalib.getNoiseDbmVc();
   _calib.noise_dbm_vx = rcalib.getNoiseDbmVx();
+  _calib.i0_dbm_hc = rcalib.getI0DbmHc();
+  _calib.i0_dbm_hx = rcalib.getI0DbmHx();
+  _calib.i0_dbm_vc = rcalib.getI0DbmVc();
+  _calib.i0_dbm_vx = rcalib.getI0DbmVx();
   _calib.receiver_gain_db_hc = rcalib.getReceiverGainDbHc();
   _calib.receiver_gain_db_hx = rcalib.getReceiverGainDbHx();
   _calib.receiver_gain_db_vc = rcalib.getReceiverGainDbVc();
   _calib.receiver_gain_db_vx = rcalib.getReceiverGainDbVx();
+  _calib.receiver_slope_hc = rcalib.getReceiverSlopeDbHc();
+  _calib.receiver_slope_hx = rcalib.getReceiverSlopeDbHx();
+  _calib.receiver_slope_vc = rcalib.getReceiverSlopeDbVc();
+  _calib.receiver_slope_vx = rcalib.getReceiverSlopeDbVx();
+  _calib.dynamic_range_db_hc = rcalib.getDynamicRangeDbHc();
+  _calib.dynamic_range_db_hx = rcalib.getDynamicRangeDbHx();
+  _calib.dynamic_range_db_vc = rcalib.getDynamicRangeDbVc();
+  _calib.dynamic_range_db_vx = rcalib.getDynamicRangeDbVx();
   _calib.base_dbz_1km_hc = rcalib.getBaseDbz1kmHc();
   _calib.base_dbz_1km_hx = rcalib.getBaseDbz1kmHx();
   _calib.base_dbz_1km_vc = rcalib.getBaseDbz1kmVc();
@@ -1026,16 +1027,29 @@ void IwrfCalib::copyToRadxRcalib(RadxRcalib &rcalib) const
   rcalib.setTwoWayRadomeLossDbH(_calib.two_way_radome_loss_db_h);
   rcalib.setTwoWayRadomeLossDbV(_calib.two_way_radome_loss_db_v);
   rcalib.setReceiverMismatchLossDb(_calib.receiver_mismatch_loss_db);
+  rcalib.setKSquaredWater(_calib.k_squared_water);
   rcalib.setRadarConstantH(_calib.radar_constant_h);
   rcalib.setRadarConstantV(_calib.radar_constant_v);
   rcalib.setNoiseDbmHc(_calib.noise_dbm_hc);
   rcalib.setNoiseDbmHx(_calib.noise_dbm_hx);
   rcalib.setNoiseDbmVc(_calib.noise_dbm_vc);
   rcalib.setNoiseDbmVx(_calib.noise_dbm_vx);
+  rcalib.setI0DbmHc(_calib.i0_dbm_hc);
+  rcalib.setI0DbmHx(_calib.i0_dbm_hx);
+  rcalib.setI0DbmVc(_calib.i0_dbm_vc);
+  rcalib.setI0DbmVx(_calib.i0_dbm_vx);
   rcalib.setReceiverGainDbHc(_calib.receiver_gain_db_hc);
   rcalib.setReceiverGainDbHx(_calib.receiver_gain_db_hx);
   rcalib.setReceiverGainDbVc(_calib.receiver_gain_db_vc);
   rcalib.setReceiverGainDbVx(_calib.receiver_gain_db_vx);
+  rcalib.setReceiverSlopeDbHc(_calib.receiver_slope_hc);
+  rcalib.setReceiverSlopeDbHx(_calib.receiver_slope_hx);
+  rcalib.setReceiverSlopeDbVc(_calib.receiver_slope_vc);
+  rcalib.setReceiverSlopeDbVx(_calib.receiver_slope_vx);
+  rcalib.setDynamicRangeDbHc(_calib.dynamic_range_db_hc);
+  rcalib.setDynamicRangeDbHx(_calib.dynamic_range_db_hx);
+  rcalib.setDynamicRangeDbVc(_calib.dynamic_range_db_vc);
+  rcalib.setDynamicRangeDbVx(_calib.dynamic_range_db_vx);
   rcalib.setBaseDbz1kmHc(_calib.base_dbz_1km_hc);
   rcalib.setBaseDbz1kmHx(_calib.base_dbz_1km_hx);
   rcalib.setBaseDbz1kmVc(_calib.base_dbz_1km_vc);
@@ -1085,16 +1099,29 @@ void IwrfCalib::setFromDsRadarCalib(const DsRadarCalib &dsCalib)
   _calib.two_way_radome_loss_db_h = dsCalib.getTwoWayRadomeLossDbH(); 
   _calib.two_way_radome_loss_db_v = dsCalib.getTwoWayRadomeLossDbV();
   _calib.receiver_mismatch_loss_db = dsCalib.getReceiverMismatchLossDb();
+  _calib.k_squared_water = dsCalib.getKSquaredWater();
   _calib.radar_constant_h = dsCalib.getRadarConstH();
   _calib.radar_constant_v = dsCalib.getRadarConstV();
   _calib.noise_dbm_hc = dsCalib.getNoiseDbmHc();
   _calib.noise_dbm_hx = dsCalib.getNoiseDbmHx();
   _calib.noise_dbm_vc = dsCalib.getNoiseDbmVc();
   _calib.noise_dbm_vx = dsCalib.getNoiseDbmVx();
+  _calib.i0_dbm_hc = dsCalib.getI0DbmHc();
+  _calib.i0_dbm_hx = dsCalib.getI0DbmHx();
+  _calib.i0_dbm_vc = dsCalib.getI0DbmVc();
+  _calib.i0_dbm_vx = dsCalib.getI0DbmVx();
   _calib.receiver_gain_db_hc = dsCalib.getReceiverGainDbHc();
   _calib.receiver_gain_db_hx = dsCalib.getReceiverGainDbHx();
   _calib.receiver_gain_db_vc = dsCalib.getReceiverGainDbVc();
   _calib.receiver_gain_db_vx = dsCalib.getReceiverGainDbVx();
+  _calib.receiver_slope_hc = dsCalib.getReceiverSlopeDbHc();
+  _calib.receiver_slope_hx = dsCalib.getReceiverSlopeDbHx();
+  _calib.receiver_slope_vc = dsCalib.getReceiverSlopeDbVc();
+  _calib.receiver_slope_vx = dsCalib.getReceiverSlopeDbVx();
+  _calib.dynamic_range_db_hc = dsCalib.getDynamicRangeDbHc();
+  _calib.dynamic_range_db_hx = dsCalib.getDynamicRangeDbHx();
+  _calib.dynamic_range_db_vc = dsCalib.getDynamicRangeDbVc();
+  _calib.dynamic_range_db_vx = dsCalib.getDynamicRangeDbVx();
   _calib.base_dbz_1km_hc = dsCalib.getBaseDbz1kmHc();
   _calib.base_dbz_1km_hx = dsCalib.getBaseDbz1kmHx();
   _calib.base_dbz_1km_vc = dsCalib.getBaseDbz1kmVc();
@@ -1141,16 +1168,29 @@ void IwrfCalib::copyToDsRadarCalib(DsRadarCalib &dsCalib) const
   dsCalib.setTwoWayRadomeLossDbH(_calib.two_way_radome_loss_db_h);
   dsCalib.setTwoWayRadomeLossDbV(_calib.two_way_radome_loss_db_v);
   dsCalib.setReceiverMismatchLossDb(_calib.receiver_mismatch_loss_db);
+  dsCalib.setKSquaredWater(_calib.k_squared_water);
   dsCalib.setRadarConstH(_calib.radar_constant_h);
   dsCalib.setRadarConstV(_calib.radar_constant_v);
   dsCalib.setNoiseDbmHc(_calib.noise_dbm_hc);
   dsCalib.setNoiseDbmHx(_calib.noise_dbm_hx);
   dsCalib.setNoiseDbmVc(_calib.noise_dbm_vc);
   dsCalib.setNoiseDbmVx(_calib.noise_dbm_vx);
+  dsCalib.setI0DbmHc(_calib.i0_dbm_hc);
+  dsCalib.setI0DbmHx(_calib.i0_dbm_hx);
+  dsCalib.setI0DbmVc(_calib.i0_dbm_vc);
+  dsCalib.setI0DbmVx(_calib.i0_dbm_vx);
   dsCalib.setReceiverGainDbHc(_calib.receiver_gain_db_hc);
   dsCalib.setReceiverGainDbHx(_calib.receiver_gain_db_hx);
   dsCalib.setReceiverGainDbVc(_calib.receiver_gain_db_vc);
   dsCalib.setReceiverGainDbVx(_calib.receiver_gain_db_vx);
+  dsCalib.setReceiverSlopeDbHc(_calib.receiver_slope_hc);
+  dsCalib.setReceiverSlopeDbHx(_calib.receiver_slope_hx);
+  dsCalib.setReceiverSlopeDbVc(_calib.receiver_slope_vc);
+  dsCalib.setReceiverSlopeDbVx(_calib.receiver_slope_vx);
+  dsCalib.setDynamicRangeDbHc(_calib.dynamic_range_db_hc);
+  dsCalib.setDynamicRangeDbHx(_calib.dynamic_range_db_hx);
+  dsCalib.setDynamicRangeDbVc(_calib.dynamic_range_db_vc);
+  dsCalib.setDynamicRangeDbVx(_calib.dynamic_range_db_vx);
   dsCalib.setBaseDbz1kmHc(_calib.base_dbz_1km_hc);
   dsCalib.setBaseDbz1kmHx(_calib.base_dbz_1km_hx);
   dsCalib.setBaseDbz1kmVc(_calib.base_dbz_1km_vc);
@@ -1174,5 +1214,6 @@ void IwrfCalib::copyToDsRadarCalib(DsRadarCalib &dsCalib) const
   dsCalib.setSystemPhidpDeg(_calib.phidp_rot_deg);
 
 }
+
 
 

@@ -274,7 +274,8 @@ int OutputFmq::writeCalib(const Beam &beam)
   // set calib in message to the beam calibration
   
   DsRadarCalib &calib = msg.getRadarCalib();
-  beam.getCalib().copyToDsRadarCalib(calib);
+  IwrfCalib icalib = beam.getCalib();
+  icalib.copyToDsRadarCalib(calib);
 
   // write the message
   

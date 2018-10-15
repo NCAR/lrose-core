@@ -272,6 +272,11 @@ public:
   inline double getReceiverSlopeDbVc() const { return _receiverSlopeDbVc; }
   inline double getReceiverSlopeDbVx() const { return _receiverSlopeDbVx; }
 
+  inline double getDynamicRangeDbHc() const { return _dynamicRangeDbHc; }
+  inline double getDynamicRangeDbHx() const { return _dynamicRangeDbHx; }
+  inline double getDynamicRangeDbVc() const { return _dynamicRangeDbVc; }
+  inline double getDynamicRangeDbVx() const { return _dynamicRangeDbVx; }
+
   inline double getBaseDbz1kmHc() const { return _baseDbz1kmHc; }
   inline double getBaseDbz1kmHx() const { return _baseDbz1kmHx; }
   inline double getBaseDbz1kmVc() const { return _baseDbz1kmVc; }

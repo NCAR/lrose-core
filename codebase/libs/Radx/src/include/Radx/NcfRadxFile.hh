@@ -323,6 +323,7 @@ private:
   Nc3Var *_rCalTwoWayRadomeLossHVar;
   Nc3Var *_rCalTwoWayRadomeLossVVar;
   Nc3Var *_rCalReceiverMismatchLossVar;
+  Nc3Var *_rCalKSquaredWaterVar;
   Nc3Var *_rCalRadarConstHVar;
   Nc3Var *_rCalRadarConstVVar;
   Nc3Var *_rCalAntennaGainHVar;
@@ -331,10 +332,22 @@ private:
   Nc3Var *_rCalNoiseHxVar;
   Nc3Var *_rCalNoiseVcVar;
   Nc3Var *_rCalNoiseVxVar;
+  Nc3Var *_rCalI0HcVar;
+  Nc3Var *_rCalI0HxVar;
+  Nc3Var *_rCalI0VcVar;
+  Nc3Var *_rCalI0VxVar;
   Nc3Var *_rCalReceiverGainHcVar;
   Nc3Var *_rCalReceiverGainHxVar;
   Nc3Var *_rCalReceiverGainVcVar;
   Nc3Var *_rCalReceiverGainVxVar;
+  Nc3Var *_rCalReceiverSlopeHcVar;
+  Nc3Var *_rCalReceiverSlopeHxVar;
+  Nc3Var *_rCalReceiverSlopeVcVar;
+  Nc3Var *_rCalReceiverSlopeVxVar;
+  Nc3Var *_rCalDynamicRangeHcVar;
+  Nc3Var *_rCalDynamicRangeHxVar;
+  Nc3Var *_rCalDynamicRangeVcVar;
+  Nc3Var *_rCalDynamicRangeVxVar;
   Nc3Var *_rCalBaseDbz1kmHcVar;
   Nc3Var *_rCalBaseDbz1kmHxVar;
   Nc3Var *_rCalBaseDbz1kmVcVar;
@@ -356,10 +369,6 @@ private:
   Nc3Var *_rCalSystemPhidpVar;
   Nc3Var *_rCalTestPowerHVar;
   Nc3Var *_rCalTestPowerVVar;
-  Nc3Var *_rCalReceiverSlopeHcVar;
-  Nc3Var *_rCalReceiverSlopeHxVar;
-  Nc3Var *_rCalReceiverSlopeVcVar;
-  Nc3Var *_rCalReceiverSlopeVxVar;
 
   // ray variables
 
@@ -741,7 +750,16 @@ private:
   const static char* R_CALIB_COUPLER_FORWARD_LOSS_V;
   const static char* R_CALIB_DBZ_CORRECTION;
   const static char* R_CALIB_DIELECTRIC_FACTOR_USED;
+  const static char* R_CALIB_DYNAMIC_RANGE_DB_HC;
+  const static char* R_CALIB_DYNAMIC_RANGE_DB_HX;
+  const static char* R_CALIB_DYNAMIC_RANGE_DB_VC;
+  const static char* R_CALIB_DYNAMIC_RANGE_DB_VX;
   const static char* R_CALIB_INDEX;
+  const static char* R_CALIB_I0_DBM_HC;
+  const static char* R_CALIB_I0_DBM_HX;
+  const static char* R_CALIB_I0_DBM_VC;
+  const static char* R_CALIB_I0_DBM_VX;
+  const static char* R_CALIB_K_SQUARED_WATER;
   const static char* R_CALIB_LDR_CORRECTION_H;
   const static char* R_CALIB_LDR_CORRECTION_V;
   const static char* R_CALIB_NOISE_HC;

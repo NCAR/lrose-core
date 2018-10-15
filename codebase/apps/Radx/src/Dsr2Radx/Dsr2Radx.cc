@@ -347,7 +347,7 @@ int Dsr2Radx::_run ()
     _processRay(ray);
 
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      if (_nRaysRead % 10000 == 0) {
+      if (_nRaysRead % 2000 == 0) {
         const vector<RadxRcalib> &calibs = _reader->getRcalibs();
         if (calibs.size() > 0) {
           calibs[0].print(cerr);
@@ -500,6 +500,8 @@ int Dsr2Radx::_processRay(RadxRay *ray)
   if (_params.debug) {
     int nPrintFreq = 90;
     if (_params.debug >= Params::DEBUG_VERBOSE) {
+      nPrintFreq = 10;
+    } else if (_params.debug >= Params::DEBUG_EXTRA) {
       nPrintFreq = 1;
     }
     if ((_nRaysRead > 0) && (_nRaysRead % nPrintFreq == 0) &&
@@ -1045,8 +1047,6 @@ int Dsr2Radx::_doWrite()
       
     } else {
 
-#ifdef JUNK
-
       // register the write with the DataMapper
       
       if (_params.write_individual_ldata_info) {
@@ -1069,7 +1069,6 @@ int Dsr2Radx::_doWrite()
                           dataType);
         }
       }
-#endif
       
     }
 
@@ -1092,30 +1091,38 @@ int Dsr2Radx::_writeLdataInfo(const string &outputDir,
 
 {
 
-  DsLdataInfo ldata;
-  ldata.setDir(outputDir);
-  ldata.setDataType(dataType);
+  LdataInfo *ldata = NULL;
+  if (_params.register_with_data_mapper) {
+    ldata = new DsLdataInfo;
+  } else {
+    ldata = new LdataInfo;
+  }
+
+  ldata->setDir(outputDir);
+  ldata->setDataType(dataType);
         
   // compute relative data path
   
   string relPath;
-  RadxPath::stripDir(ldata.getDataDirPath(), outputPath, relPath);
-  ldata.setRelDataPath(relPath);
+  RadxPath::stripDir(ldata->getDataDirPath(), outputPath, relPath);
+  ldata->setRelDataPath(relPath);
 
   RadxPath writePath(outputPath);
-  ldata.setDataFileExt(writePath.getExt());
-  ldata.setWriter("Dsr2Radx");
+  ldata->setDataFileExt(writePath.getExt());
+  ldata->setWriter("Legacy");
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    ldata.setDebug(true);
+    ldata->setDebug(true);
   }
 
-  if (ldata.write(dataTime)) {
+  if (ldata->write(dataTime)) {
     cerr << "WARNING - Dsr2Radx::_writeLdataInfo" << endl;
     cerr << "  Cannot write LdataInfo to dir: "
          << outputDir << endl;
+    delete ldata;
     return -1;
   }
 
+  delete ldata;
   return 0;
 
 }
