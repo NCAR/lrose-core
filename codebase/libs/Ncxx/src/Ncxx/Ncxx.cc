@@ -101,9 +101,9 @@ int Ncxx::getByteWidth(nc_type nctype)
     case NC_UINT:
       return sizeof(unsigned int);
     case NC_INT64:
-      return sizeof(int64_t);
+      return sizeof(si64);
     case NC_UINT64:
-      return sizeof(uint64_t);
+      return sizeof(ui64);
     case NC_STRING:
       return sizeof(char);
     case NC_VLEN:
