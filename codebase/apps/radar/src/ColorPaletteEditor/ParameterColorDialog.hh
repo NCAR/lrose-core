@@ -6,6 +6,7 @@
 
 #include "FlowLayout.hh"
 #include "ParameterColorDialog.hh"
+#include "ColorMapTemplates.hh"
 //#include "../HawkEye/ColorMap.hh"
 //#include "../HawkEye/ColorBar.hh"
 
@@ -39,6 +40,7 @@ private slots:
     void cancelColorScale();
     void saveColorScale();
     void replotColorScale();
+    void pickColorPalette();
 
 private:
     QLabel *centerColorLabel;

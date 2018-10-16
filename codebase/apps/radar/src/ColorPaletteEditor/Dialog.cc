@@ -297,7 +297,7 @@ Dialog::Dialog(QWidget *parent)
     layout->addWidget(emphasisColorLabel, base+6, 0);
     layout->addWidget(saveButton, base+7, 0);
     toolbox->addItem(page, tr("Color Dialog"));
-    
+   /* 
     // make the color map chooser
 
     page = new QWidget;
@@ -361,7 +361,7 @@ Dialog::Dialog(QWidget *parent)
     cmapLabel->clear();
     cmapLabel->setPixmap(*pixmap);
     flowLayout->addWidget(cmapLabel);
-
+*/
 
     // colorDialogOptionsWidget = new DialogOptionsWidget;
     // colorDialogOptionsWidget->addCheckBox(doNotUseNativeDialog, QColorDialog::DontUseNativeDialog);
