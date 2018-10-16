@@ -37,11 +37,10 @@
 using std::string;
 
 /*----------------------------------------------------------------*/
-AsciiOutput::AsciiOutput(const string &dir, const time_t &t)
+AsciiOutput::AsciiOutput(const std::string &name,
+			 const string &dir, const time_t &t)
 {
-  _has_output = !dir.empty();
-  if (!_has_output)
-    return;
+  _name = name;
 
   _time = t;
   DateTime dt(_time);
@@ -75,22 +74,17 @@ AsciiOutput::~AsciiOutput()
 /*----------------------------------------------------------------*/
 void AsciiOutput::clear(void) const
 {
-  if (_has_output)
+  Path P(_path);
+  if (P.pathExists())
   {
-    Path P(_path);
-    if (P.pathExists())
-    {
-      string cmd = "\\rm " + _path;
-      system(cmd.c_str());
-    }
+    string cmd = "\\rm " + _path;
+    system(cmd.c_str());
   }
 }
 
 /*----------------------------------------------------------------*/
 void AsciiOutput::append(const string &s) const
 {
-  if (!_has_output)
-    return;
   FILE *fp = fopen(_path.c_str(), "a");
   if (fp == NULL)
   {
@@ -102,10 +96,8 @@ void AsciiOutput::append(const string &s) const
 }
 
 /*----------------------------------------------------------------*/
-void AsciiOutput::append_nocr(const string &s) const
+void AsciiOutput::appendNoCr(const string &s) const
 {
-  if (!_has_output)
-    return;
   FILE *fp = fopen(_path.c_str(), "a");
   if (fp == NULL)
   {
@@ -117,13 +109,7 @@ void AsciiOutput::append_nocr(const string &s) const
 }
 
 /*----------------------------------------------------------------*/
-bool AsciiOutput::no_output(void) const
-{
-  return !_has_output;
-}
-
-/*----------------------------------------------------------------*/
-void AsciiOutput::write_ldata_info()
+void AsciiOutput::writeLdataInfo()
 {
 
   if (!Path::exists(_path.c_str())) {

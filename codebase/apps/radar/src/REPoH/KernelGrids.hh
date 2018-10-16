@@ -31,23 +31,27 @@
 #ifndef KERNELGRIDS_H
 #define KERNELGRIDS_H
 #include <euclid/Grid2d.hh>
+#include <rapmath/MathUserData.hh>
 class Grid2d;
 
 //------------------------------------------------------------------
-class KernelGrids
+class KernelGrids : MathUserData
 {
 public:
   KernelGrids(void);
-  KernelGrids(const Grid2d **sdbz, const Grid2d **kdbz, const Grid2d **szdr,
-	      const Grid2d **pid, const Grid2d **snoise, const Grid2d **knoise,
-	      const Grid2d **srhohv);
+  KernelGrids(const Grid2d **sdbz, const Grid2d **kdbz,
+	      const Grid2d **szdr, const Grid2d **pid,
+	      const Grid2d **snoise, const Grid2d **knoise,
+	      const Grid2d **srhohv, const Grid2d **kdbzAdjusted,
+	      const Grid2d **dbzDiff);
   ~KernelGrids(void);
+  #include <rapmath/MathUserDataVirtualMethods.hh>
+
 
   const Grid2d *_sdbz, *_kdbzUnadjusted;
   const Grid2d *_szdr, *_pid, *_snoise, *_knoise, *_srhohv;
   const Grid2d *_dbz_diff;
-
-  Grid2d _kdbzAdjusted;
+  const Grid2d *_kdbzAdjusted;
 
 protected:
 private:

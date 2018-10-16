@@ -28,7 +28,7 @@
 #include "KernelGrids.hh"
 
 /*----------------------------------------------------------------*/
-KernelGrids::KernelGrids()
+KernelGrids::KernelGrids() : MathUserData()
 {
   _sdbz = NULL;
   _kdbzUnadjusted = NULL;
@@ -37,6 +37,7 @@ KernelGrids::KernelGrids()
   _snoise = NULL;
   _knoise = NULL;
   _srhohv = NULL;
+  _kdbzAdjusted = NULL;
   _dbz_diff = NULL;
 }
 
@@ -44,7 +45,9 @@ KernelGrids::KernelGrids()
 KernelGrids::KernelGrids(const Grid2d **sdbz, const Grid2d **kdbz,
 			 const Grid2d **szdr, const Grid2d **pid,
 			 const Grid2d **snoise, const Grid2d **knoise,
-			 const Grid2d **srhohv)
+			 const Grid2d **srhohv, const Grid2d **kdbzAdjusted,
+			 const Grid2d **dbzDiff)
+  : MathUserData()
 {
   _sdbz = *sdbz;
   _kdbzUnadjusted = *kdbz;
@@ -53,10 +56,17 @@ KernelGrids::KernelGrids(const Grid2d **sdbz, const Grid2d **kdbz,
   _snoise = *snoise;
   _knoise = *knoise;
   _srhohv = *srhohv;
-  _dbz_diff = NULL;
+  _kdbzAdjusted = *kdbzAdjusted;
+  _dbz_diff = *dbzDiff;
 }
 
 /*----------------------------------------------------------------*/
 KernelGrids::~KernelGrids()
 {
+}
+
+/*----------------------------------------------------------------*/
+bool KernelGrids::getFloat(double &f) const
+{
+  return false;
 }

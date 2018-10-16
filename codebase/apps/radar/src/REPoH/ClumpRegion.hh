@@ -22,50 +22,58 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
- * @file KernelDbzDiffFilter.hh 
- * @brief information used to filter out dbz differences 
- * @class KernelDbzDiffFilter
- * @brief information used to filter out dbz differences 
- * 
+ * @file ClumpRegion.hh
+ * @brief 
+ * @class ClumpRegion
+ * @brief 
  */
 
-#ifndef KernelDbzDiffFilter_H
-#define KernelDbzDiffFilter_H
+# ifndef    ClumpRegion_HH
+# define    ClumpRegion_HH
 
-/*----------------------------------------------------------------*/
-class KernelDbzDiffFilter
+#include <euclid/Grid2dClump.hh> // needed for region_t definition below
+#include <vector>
+
+class ClumpRegion
 {
 public:
 
-  KernelDbzDiffFilter(const bool debug);
+  /**
+   * Constructor
+   * @param[in] r  Region points
+   */
+  inline ClumpRegion(const clump::Region_t &r)
+  {
+    for (size_t i=0; i<r.size(); ++i)
+    {
+      _pt.push_back(r[i]);
+    }
+  }
 
-  ~KernelDbzDiffFilter();
-
-  void inc(const double v, const int i);
+  inline ~ClumpRegion(void) {}
+  inline size_t size(void) const {return _pt.size();}
+  inline int x(int i) const {return _pt[i].first;}
+  inline int y(int i) const {return _pt[i].second;}
 
   /**
-   * @return true if filtering should stop now
+   * Set all points in input grid for this clumpregion to missing
+   * @param[in,out] data
    */
-  bool finish(const double diff_threshold);
+  void setMissing(Grid2d &data) const;
 
   /**
-   * @return index to remove
+   * Set all points in input grid for this clumpregion to a value
+   * @param[in] value
+   * @param[in,out] data
    */
-  int choose_remove_index(void) const;
-
-protected:
+  void setToValue(double value, Grid2d &data) const;
+  
 private:
 
-  int _i_min; // index to minimum data value.
-  int _i_max; // index to maximum data value.
-  double _min; // min daata value
-  double _max; // max data value
-  double _mean; // mean data value
-  double _num; // counter
-  bool _first;
-
-  bool _debug;
+  /**
+   * Some points
+   */
+  std::vector<std::pair<int,int> > _pt;
 };
 
 #endif
- 

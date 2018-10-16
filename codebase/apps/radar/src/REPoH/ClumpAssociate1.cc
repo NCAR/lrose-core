@@ -30,9 +30,9 @@
 #include <algorithm>
 
 /*----------------------------------------------------------------*/
-ClumpAssociate1::ClumpAssociate1(const int c1_color)
+ClumpAssociate1::ClumpAssociate1(const int c1Color)
 {
-  _c1_color = c1_color;
+  _c1Color = c1Color;
 }
 
 /*----------------------------------------------------------------*/
@@ -43,15 +43,17 @@ ClumpAssociate1::~ClumpAssociate1()
 /*----------------------------------------------------------------*/
 void ClumpAssociate1::print(void) const
 {
-  printf("Clump[%d] = [ ", _c1_color);
-  for (int i=0; i<(int)_c2_color.size(); ++i)
-    printf("%d ", _c2_color[i]);
+  printf("Clump[%d] = [ ", _c1Color);
+  for (size_t i=0; i<_c2Color.size(); ++i)
+  {
+    printf("%d ", _c2Color[i]);
+  }
   printf("]\n");
 }
 
 /*----------------------------------------------------------------*/
-void ClumpAssociate1::add_color(const int c2_color)
+void ClumpAssociate1::addColor(const int c2Color)
 {
-  if (find(_c2_color.begin(), _c2_color.end(), c2_color) == _c2_color.end())
-    _c2_color.push_back(c2_color);
+  if (find(_c2Color.begin(), _c2Color.end(), c2Color) == _c2Color.end())
+    _c2Color.push_back(c2Color);
 }

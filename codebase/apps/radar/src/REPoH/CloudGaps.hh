@@ -24,48 +24,66 @@
 /**
  * @file CloudGaps.hh 
  * @brief CloudGaps gaps between clouds (where humidity can be estimated)
+ *                  for an entire scan
  * @class CloudGaps
  * @brief CloudGaps gaps between clouds (where humidity can be estimated)
+ *                  for an entire scan
  * 
  */
 
 #ifndef CloudGaps_H
 #define CloudGaps_H
 
-#include <euclid/Grid2d.hh>
+#include "CloudGap.hh"
+#include <rapmath/MathUserData.hh>
 #include <vector>
 
-class CloudGap;
 class ClumpAssociate;
+class Grid2d;
 
 /*----------------------------------------------------------------*/
-class CloudGaps
+class CloudGaps : public MathUserData
 {
 public:
+
   CloudGaps();
   ~CloudGaps();
 
-  void print(void) const;
-
-  /**
-   * Return a grid with cloud edge points in it
-   */
-  Grid2d edge(const int nx, const int ny) const;
-
-  /**
-   * Return a grid with 'just outside a cloud' points in it
-   */
-  Grid2d outside(const int nx, const int ny) const;
+  #include <rapmath/MathUserDataVirtualMethods.hh>
 
   /**
    * Add all gaps for a beam
-   * y=index to beam
+   *
+   * @param[in] y  index to beam
+   * @param[in] nx  Number of gates
+   * @param[in] clumps  Clump data
+   * @param[in] depth  Maximum number of gates to penetrate the cloud
    */
-  void add_gaps(const int y, const int nx, const Grid2d &clumps,
-		const int depth);
+  void addGaps(int y, int nx, const Grid2d &clumps, int depth);
 
   /**
-   * Return # of CloudGap objects
+   * Debug print
+   */
+  void print(void) const;
+
+  /**
+   * @return a grid with cloud edge points in it
+   *
+   * @param[in] nx  Grid dimension
+   * @param[in] ny  Grid dimension
+   */
+  Grid2d edge(int nx, int ny) const;
+
+  /**
+   * @return a grid with 'just outside a cloud' points in it
+   *
+   * @param[in] nx  Grid dimension
+   * @param[in] ny  Grid dimension
+   */
+  Grid2d outside(int nx, int ny) const;
+
+  /**
+   * @return Number of CloudGap objects
    */
   inline int num(void) const
   {
@@ -73,32 +91,34 @@ public:
   }
 
   /**
-   * Return ref. to the 'ith' CloudGap object
+   * @return reference to the 'ith' CloudGap object
    */
-  inline const CloudGap &ith_cloudgap(const int i) const
+  inline const CloudGap &ith_cloudgap(int i) const
   {
     return _gap[i];
   }
 
   /**
    * Filter out all CloudGaps that are too close together
-   * min_gridpt = minimum # of points seperation
+   *
+   * @param[in] minGridpt  Minimum number of points seperation
    */
-  void filter(const int min_gridpt);
+  void filter(int minGridpt);
 
   /**
    * Filter out all CloudGaps that penetrate too far into a storm
-   * max_gridpt = maximum # of points penetration
+   *
+   * @param[in] maxGridpt  Maximum number of points penetration
    */
-  void filter(const Grid2d &pid_clumps, ClumpAssociate &ca,
-	      const int max_gridpt);
+  void filter(const Grid2d &pid_clumps, ClumpAssociate &ca, int maxGridpt);
 
 protected:
 private:
 
+  /**
+   * All the gaps
+   */
   std::vector<CloudGap> _gap;
-
-  void _filter(std::vector<CloudGap> &pts, const int min_gridpt);
 };
 
 #endif

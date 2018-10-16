@@ -22,23 +22,78 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
- * @file MyFiltCreate.cc
+ * @file ClumpRegions.hh
+ * @brief 
+ * @class ClumpRegions
+ * @brief 
+ *
+ * ClumpRegions produces connected subsets of points called 'regions'.
  */
-#include "MyFiltCreate.hh"
-#include "Parms.hh"
-#include "FiltHumidity.hh"
-#include <FiltAlg/FiltAlgParms.hh>
 
-/*----------------------------------------------------------------*/
-Filter *MyFiltCreate::appFiltCreate(const FiltAlgParams::data_filter_t f,
-				    const FiltAlgParms &P) const
+# ifndef    ClumpRegions_HH
+# define    ClumpRegions_HH
+
+#include "ClumpRegion.hh"
+#include <rapmath/MathUserData.hh>
+#include <euclid/PointList.hh>
+#include <vector>
+
+class ClumpRegions : public MathUserData
 {
-  string s = f.app_filter_name;
-  if (Parms::name_is_humidity(s))
-    return new FiltHumidity(f, P);
- else
- {
-    printf("ERROR unkown app filter parm name %s\n", s.c_str());
-    return NULL;
- }
-}  
+public:
+
+  /**
+   * Build the clumps from the input data and store results as local
+   * ClumpRegion vector
+   *
+   * @param[in] data
+   */
+  ClumpRegions(const Grid2d &data);
+
+  virtual ~ClumpRegions(void);
+
+  #include <rapmath/MathUserDataVirtualMethods.hh>
+
+  /**
+   * @return number of regions
+   */
+  inline size_t size(void) const {return _regions.size();}
+
+  /**
+   * @return reference to a region
+   * @param[in] i  Index
+   */
+  inline const PointList & operator[](size_t i) const {return _regions[i];}
+
+  /**
+   * @return reference to a region
+   * @param[in] i  Index
+   */
+  inline PointList & operator[](size_t i) {return _regions[i];}
+
+
+  /**
+   * Set values for index'th region to a particular color in a grid
+   * @param[in] index  ClumpRegion index
+   * @param[in] color  Value to set
+   * @param[in,out] out  Grid to modify
+   */
+  void setValues(int index, double color, Grid2d &out) const;
+
+  
+  /**
+   * Set values for index'th region to missing in a grid if the region
+   * is too small
+   * @param[in] index  ClumpRegion index
+   * @param[in] minPt  Minimum number of points to keep it
+   * @param[in,out] out  Grid to modify
+   */
+  void removeSmallClump(int index, int minPt, Grid2d &out) const;
+
+
+private:
+  
+  std::vector<PointList> _regions;
+};  
+
+#endif

@@ -25,17 +25,17 @@
  * @file KernelPair.cc
  */
 #include "KernelPair.hh"
-#include <FiltAlg/GridProj.hh>
+#include <Mdv/MdvxProj.hh>
 #include <euclid/Grid2d.hh>
 #include <toolsa/LogStream.hh>
 
 /*----------------------------------------------------------------*/
-KernelPair::KernelPair(const double vlevel, const Grid2d &mask_far,
+KernelPair::KernelPair(double vlevel, const Grid2d &mask_far,
 		       const Grid2d &mask_near, const Grid2d &omask,
-		       const CloudGap &g, const Grid2d &clumps,
-		       const Params &params, const GridProj &gp) :
-  _near(vlevel, false, mask_near, omask, g, clumps, params, gp),
-  _far(vlevel, true, mask_far, omask, g, clumps, params, gp)
+		       const CloudGap &g,  const RepohParams &params,
+		       const MdvxProj &gp) :
+  _near(vlevel, false, mask_near, omask, g, params, gp),
+  _far(vlevel, true, mask_far, omask, g, params, gp)
 {
 }
 
@@ -47,82 +47,117 @@ KernelPair::~KernelPair()
 /*----------------------------------------------------------------*/
 void KernelPair::print(void) const
 {
-  _near.print_status();
-  _far.print_status();
+  _near.printStatus();
+  _far.printStatus();
 }
 
 /*----------------------------------------------------------------*/
-void KernelPair::cp_to_grid(Grid2d &kcp) const
+void KernelPair::centerpointToGrid(Grid2d &kcp) const
 {
-  _near.cp_to_grid(kcp);
-  _far.cp_to_grid(kcp);
+  _near.centerpointToGrid(kcp);
+  _far.centerpointToGrid(kcp);
 }
 
 /*----------------------------------------------------------------*/
-void KernelPair::finish_processing(const time_t &time, const double vlevel,
-				   const KernelGrids &grids, const Params &P,
-				   const double km_per_gate, const int &id,
-				   Grid2d &kcp)
+void KernelPair::finishProcessing(const time_t &time, double vlevel,
+				  const KernelGrids &grids,
+				  const RepohParams &P, double kmPerGate,
+				  int nearId, int farId)
 {
-  _near.finish_processing(time, id, vlevel, grids, P, km_per_gate);
-  _far.finish_processing(time, id+1, vlevel, grids, P, km_per_gate);
-  cp_to_grid(kcp);
+  _near.finishProcessing(time, nearId, vlevel, grids, P, kmPerGate);
+  _far.finishProcessing(time, farId, vlevel, grids, P, kmPerGate);
 }
 
 /*----------------------------------------------------------------*/
-string KernelPair::humidity_estimate(const double vlevel, const GridProj &gp,
-				     Grid2d &att, Grid2d &hum) const
+void KernelPair::computeAttenuation(double dx, Grid2d &att) const
 {
-  int x0, x1, y0, y1;
-  double a0, a1;
+  // compute the attenuation, y, and range of x
+  double x0, x1, y;
+  double a = attenuation(dx, x0, x1, y);
 
-  // Get attenuation (and center x,y) for near and far kernels
-  _near.get_attenuation(x0, y0, a0);
-  _far.get_attenuation(x1, y1, a1);
-  if (y0 != y1)
+  // Store to output grid for that sub beam
+  for (int i=(int)x0; i<=(int)x1; ++i)
   {
-    LOG(ERROR) << "Logic error";
-    return "";
+    att.setValue(i, (int)y, a);
   }
+}
 
-  // Derive the attenuation along the path (one way, so divide by 2)
-  double path_length = (double)(x1 - x0)*gp._dx;
-  double attenuation_along_path = (a1 - a0)/(path_length*2.0);
+/*----------------------------------------------------------------*/
+void KernelPair::computeHumidity(double dx, Grid2d &hum) const
+{
+  // compute the attenuation, y, and range of x
+  double x0, x1, y;
+  double a = attenuation(dx, x0, x1, y);
 
   // Derive humidity from that
-  double h = Kernel::humidity_from_attenuation(attenuation_along_path);
+  double h = Kernel::humidityFromAttenuation(a);
 
-  // Store to grids
-  for (int i=x0; i<=x1; ++i)
+  // Store to output grid for that sub beam
+  for (int i=(int)x0; i<=(int)x1; ++i)
   {
-    hum.setValue(i, y0, h);
-    att.setValue(i, y0, attenuation_along_path);
+    hum.setValue(i, (int)y, h);
   }
+}
 
-  // convert the azimuth into a number between 0 and 359
-  double az = (double)y0*gp._dy + gp._y0;
+/*----------------------------------------------------------------*/
+string KernelPair::asciiOutput(double vlevel, const MdvxProj &gp) const
+{
+  Mdvx::coord_t coord = gp.getCoord();
+
+  // compute attenuation, y, and range of x
+  double x0, x1, y;
+
+  double att = attenuation(coord.dx, x0, x1, y);
+
+  // derive humidity from that
+  double h = Kernel::humidityFromAttenuation(att);
+
+  // convert the azimuth associated with y into a number between 0 and 359
+  double az = y*coord.dy + coord.miny;
   while (az >=360.0)
     az -= 360.0;
   while (az < 0.0)
     az += 360.0;
 
-  // build the string 
+  // build the string, which does have \n
   char buf[1000];
   sprintf(buf, "%10.6lf %7.2lf %8.5lf %8.5lf %10.6lf %10.6lf\n",
-	  vlevel, az, (double)x1*gp._dx + gp._x0,
-	  (double)x0*gp._dx + gp._x0, attenuation_along_path, h);
+	  vlevel, az, x1*coord.dx + coord.minx, x0*coord.dx + coord.minx,
+	  att, h);
   string ret = buf;
   return ret;
 }
 
 /*----------------------------------------------------------------*/
-bool KernelPair::write_genpoly(const time_t &t, const int nx, const int ny,
-			       const bool outside, DsSpdb &D) const
+double KernelPair::attenuation(double dx, double &x0, double &x1,
+			       double &y) const
+{
+  double y1;
+  double a0, a1;
+
+  // Get attenuation (and center x,y) for near and far kernels
+  _near.getAttenuation(x0, y, a0);
+  _far.getAttenuation(x1, y1, a1);
+  if (y != y1)
+  {
+    LOG(ERROR) << "Logic error";
+    return 0.0;
+  }
+
+  // Derive the attenuation along the path (one way, so divide by 2)
+  double path_length = (x1 - x0)*dx;
+  double attenuation_along_path = (a1 - a0)/(path_length*2.0);
+  return attenuation_along_path;
+}
+
+/*----------------------------------------------------------------*/
+bool KernelPair::writeGenpoly(const time_t &t, bool outside,
+			      const MdvxProj &proj, DsSpdb &D) const
 {
   bool stat = true;
-  if (!_near.write_genpoly(t, nx, ny, outside, D))
+  if (!_near.writeGenpoly(t, outside, proj, D))
     stat = false;
-  if (!_far.write_genpoly(t, nx, ny, outside, D))
+  if (!_far.writeGenpoly(t, outside, proj, D))
     stat = false;
   return stat;
 }

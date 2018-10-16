@@ -45,7 +45,7 @@
  * where X is the kernel starting point, and the order to add points
  * is as shown above 
  *
- * Arrays _x_off and _y_off are written to show this order of evaluation
+ * Array _off shows this order of evaluation
  *
  * _prev_needed is an index into previous points in kernel yes or no.
  * must be yes for at least one of those not equal to -1 
@@ -66,7 +66,7 @@
  *    20 16     17 21
  *    28 24     25 29
  *
- * Arrays _x_off_out and _y_off_out are written to show this order of evaluation
+ * Array _offOut shows this order of evaluation
  *
  * _prev_needed is same for 'out', as it is symmetric, only inverted.
  * (neighbors are the same index).
@@ -76,38 +76,43 @@
 #ifndef KernelTemplate_H
 #define KernelTemplate_H
 
+#include <euclid/Point.hh>
+
 class Grid2d;
-class Kernel;
+class KernelPoints;
+
 /*----------------------------------------------------------------*/
 class KernelTemplate
 {
 public:
-  KernelTemplate(const int nx, const int ny, const int x, const int y,
-		 const bool moving_in);
+  KernelTemplate(int nx, int ny, const Point &center, bool moving_in);
   ~KernelTemplate();
 
-  void add_kernel_points(const Grid2d &mask, const int maxpt, Kernel &k);
+  void add_kernel_points(const Grid2d &mask, const int maxpt, KernelPoints &k);
   void add_kernel_outside_points(const Grid2d &mask, 
-				 const int maxpt, Kernel &k);
+				 const int maxpt, KernelPoints &k);
 
 protected:
 private:
   bool _added[30];
   int _nx, _ny;
-  int _x, _y;
+  Point _center;
   bool _moving_in;
 
-  static const int _x_off[30];
-  static const int _y_off[30];
-  static const int _x_off_out[30];
-  static const int _y_off_out[30];
+  static const Point _off[30];
+  static const Point _offOut[30];
+
+  // static const int _x_off[30];
+  // static const int _y_off[30];
+  // static const int _x_off_out[30];
+  // static const int _y_off_out[30];
   static const int _prev_needed[30][3];
 
   void _add_kernel_points(const Grid2d &mask, const int maxpt,
-			  const int *x_off, const int *y_off, Kernel &k);
+			  const Point *off, KernelPoints &k);
   void _add_kernel_outside_points(const Grid2d &mask,const int maxpt,
-				  const int x0, const int *x_off, 
-				  const int *y_off, Kernel &k);
+				  const int x0, const Point *off,
+				  KernelPoints &k);
   bool _previous_ok(const int i) const;
 };
 

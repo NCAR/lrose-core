@@ -22,94 +22,69 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
- * @file KernelDbzDiffFilter.cc
+ * @file RayCloudEdge.cc
  */
-#include "KernelDbzDiffFilter.hh"
+#include "RayCloudEdge.hh"
+#include <toolsa/LogStream.hh>
 #include <cstdio>
 
-/*----------------------------------------------------------------*/
-KernelDbzDiffFilter::KernelDbzDiffFilter(const bool debug)
-{
-  _i_min = 0;
-  _i_max = 0;
-  _min = 0;
-  _max = 0;
-  _mean = 0;
-  _num = 0;
-  _first = true;
+using std::string;
 
-  _debug = debug;
-}
+// /*----------------------------------------------------------------*/
+// RayCloudEdge::RayCloudEdge(int y, const RaySubset &cloud,
+// 		     const RaySubset &outside,
+// 		     // int x0, int x1, int xout0, int xout1,
+// 		     double v, bool moving_in) :
+//   _y(y), _edge(cloud, outside, v),
+//   // cloud(x0, x1, y), _outside(xout0, xout1, y), _v(v),
+//   _movingIn(moving_in)
+// {
+//   // _y = y;
+  // _x0 = x0;
+  // _x1 = x1;
+  // _xout0 = xout0;
+  // _xout1 = xout1;
+  // _v = v;
+  // _movingIn = moving_in;
+// }
+
+// /*----------------------------------------------------------------*/
+// RayCloudEdge::~RayCloudEdge()
+// {
+// }
 
 /*----------------------------------------------------------------*/
-KernelDbzDiffFilter::~KernelDbzDiffFilter()
+string RayCloudEdge::sprint(void) const
 {
-}
-
-/*----------------------------------------------------------------*/
-void KernelDbzDiffFilter::inc(const double v, const int i)
-{
-  _mean += v;
-  _num ++;
-  if (_first)
-  {
-    _first = false;
-    _i_min = _i_max = i;
-    _min = _max = v;
-  }
+  string s0;
+  if (_movingIn)
+    s0 = "Out->In";
   else
-  {
-    if (v < _min)
-    {
-      _i_min = i;
-      _min = v;
-    }
-    if (v > _max)
-    {
-      _i_max = i;
-      _max = v;
-    }
-  }
+    s0 = "In->Out";
+
+  char buf[1000];
+  sprintf(buf, "%s  %s  %.2lf %s", _cloud.sprint("Cloud").c_str(),
+	  _outside.sprint("Outside").c_str(), _value, s0.c_str());
+    
+  std::string s = buf;
+  return s;
+
+  // sprintf(buf, "%s  %s",  _edge.sprint().c_str(), s0.c_str());
+  // string s = buf;
+  // return s;
 }
 
 /*----------------------------------------------------------------*/
-bool KernelDbzDiffFilter::finish(const double diff_threshold)
+void RayCloudEdge::print(void) const
 {
-  if (_first)
-  {
-    // no data
-    if (_debug)
-      printf("No Points at all to filter\n");
-    return true;
-  }
-  if (_max - _min < diff_threshold)
-  {
-    // data is all within the tolerated differences range
-    if (_debug)
-      printf("difference within tolerence max=%lf min=%lf\n", _max, _min);
-    return true;
-  }
-
-  // compute the mean from what was accumulated for later
-  _mean /= _num;
-  return false;
-}  
+  string s = sprint();
+  printf("%s\n", s.c_str());
+}
 
 /*----------------------------------------------------------------*/
-int KernelDbzDiffFilter::choose_remove_index(void) const
+void RayCloudEdge::log(const string &message) const
 {
-  if (_max - _mean > _mean - _min)
-  {
-    // remove max
-    if (_debug) printf("Removing MAX range:%lf min:%lf max:%lf mean:%lf\n",
-		      _max - _min, _min, _max, _mean);
-    return _i_max;
-  }
-  else
-  {
-    // remove min
-    if (_debug) printf("Removing MIN range:%lf min:%lf max:%lf mean:%lf\n",
-		      _max - _min, _min, _max, _mean);
-    return _i_min;
-  }
+  string sp = sprint();
+  LOG(DEBUG_VERBOSE) << message << " - " << sp;
 }
+

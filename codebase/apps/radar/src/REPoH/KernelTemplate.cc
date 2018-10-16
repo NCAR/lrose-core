@@ -22,36 +22,103 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //   File: $RCSfile: KernelTemplate.cc,v $
-//   Version: $Revision: 1.11 $  Dated: $Date: 2016/03/04 02:39:07 $
+//   Version: $Revision: 1.13 $  Dated: $Date: 2018/05/29 22:08:48 $
 
 /**
  * @file KernelTemplate.cc
  * @brief KernelTemplate main class
  */
 #include "KernelTemplate.hh"
+#include "KernelPoints.hh"
 #include <euclid/Grid2d.hh>
 #include <toolsa/LogStream.hh>
-#include "Kernel.hh"
 
-const int
-KernelTemplate::_x_off[30] = {1, 2,  0, 0,  1,  1,  2, 2,  0, 0,  1, 1,  2,  2,
-			      -1, -1, 3, 3, -1, -1, 3, 3, -2, -2, 4, 4, -2, -2,
-			      4, 4};
+const Point KernelTemplate::_off[30] = {
+                        Point(1, 0),
+			Point(2, 0),
+			Point(0, -1),
+			Point(0, 1),
+			Point(1, -1),
+			Point(1, 1),
+			Point(2, -1),
+			Point(2, 1),
+			Point(0, -2),
+			Point(0, 2),
+			Point(1, -2),
+			Point(1, 2),
+			Point(2, -2),
+			Point(2, 2),
+			Point(-1, -1),
+			Point(-1, 1),
+			Point(3, -1),
+			Point(3, 1),
+			Point(-1, -2),
+			Point(-1, 2),
+			Point(3, -2),
+			Point(3, 2),
+			Point(-2, -1),
+			Point(-2, 1),
+			Point(4, -1),
+			Point(4, 1),
+			Point(-2, -2),
+			Point(-2, 2),
+			Point(4, -2),
+			Point(4, 2)};
 
-const int
-KernelTemplate::_y_off[30] = {0, 0, -1, 1, -1, 1, -1, 1, -2, 2, -2, 2, -2, 2, 
-			      -1, 1, -1, 1, -2, 2, -2, 2, -1, 1, -1, 1, -2, 2,
-			      -2, 2};
+const Point KernelTemplate::_offOut[30] = {Point(-1, 0),
+			   Point(-2, 0),
+			   Point(0, -1),
+			   Point(0, 1),
+			   Point(-1, -1),
+			   Point(-1,1),
+			   Point(-2,-1),
+			   Point(-2,1),
+			   Point(0,-2),
+			   Point(0,2),
+			   Point(-1,-2),
+			   Point(-1,2),
+			   Point(-2, -2),
+			   Point(-2, 2),
+			   Point(1, -1),
+			   Point(1, 1),
+			   Point(-3, -1),
+			   Point(-3, 1),
+			   Point(1, -2),
+			   Point(1,2),
+			   Point(-3, -2),
+			   Point(-3, 2),
+			   Point(2, -1),
+			   Point(2, 1),
+			   Point(-4, -1),
+			   Point(-4, 1),
+			   Point(2, -2),
+			   Point(2, 2),
+			   Point(-4, -2),
+			   Point(-4, 2)};
 
-const int
-KernelTemplate::_x_off_out[30] = {-1, -2,  0, 0, -1, -1, -2, -2, 0, 0, -1, -1,
-				  -2, -2, 1, 1, -3, -3, 1, 1, -3, -3, 2, 2,
-				  -4, -4, 2, 2, -4, -4};
+// #ifdef NOT
+// const int
+// KernelTemplate::_x_off[30] = {1, 2,  0, 0,  1,  1,
+// 			      2, 2,  0, 0,  1, 1,  2,  2,
+// 			      -1, -1, 3, 3, -1, -1, 3, 3,
+// 			      -2, -2, 4, 4, -2, -2,  4, 4};
 
-const int
-KernelTemplate::_y_off_out[30] = {0, 0, -1, 1, -1, 1, -1, 1, -2, 2, -2, 2,
-				  -2, 2, -1, 1, -1, 1, -2, 2, -2, 2, -1, 1, 
-				  -1, 1, -2, 2, -2, 2};
+// const int
+// KernelTemplate::_y_off[30] = {0, 0, -1, 1, -1, 1, -1, 1,
+// 			      -2, 2, -2, 2, -2, 2, 
+// 			      -1, 1, -1, 1, -2, 2, -2, 2,
+// 			      -1, 1, -1, 1, -2, 2, -2, 2};
+// const int
+// KernelTemplate::_x_off_out[30] = {-1, -2,  0, 0, -1, -1, -2, -2, 0, 0, -1, -1,
+// 				  -2, -2, 1, 1, -3, -3, 1, 1, -3, -3, 2, 2,
+// 				  -4, -4, 2, 2, -4, -4};
+
+// const int
+// KernelTemplate::_y_off_out[30] = {0, 0, -1, 1, -1, 1, -1, 1, -2, 2, -2, 2,
+// 				  -2, 2, -1, 1, -1, 1, -2, 2, -2, 2, -1, 1, 
+// 				  -1, 1, -2, 2, -2, 2};
+
+// #endif
 
 
 const int KernelTemplate::_prev_needed[30][3] = 
@@ -89,13 +156,12 @@ const int KernelTemplate::_prev_needed[30][3] =
 };
 
 /*----------------------------------------------------------------*/
-KernelTemplate::KernelTemplate(const int nx, const int ny, const int x,
-			       const int y, const bool moving_in)
+KernelTemplate::KernelTemplate(int nx, int ny, const Point &center,
+			       const bool moving_in)
 {
   _nx = nx; 
   _ny = ny;
-  _x = x;
-  _y = y;
+  _center = center;
   _moving_in = moving_in;
 }
 
@@ -106,62 +172,80 @@ KernelTemplate::~KernelTemplate()
 
 /*----------------------------------------------------------------*/
 void KernelTemplate::add_kernel_points(const Grid2d &mask, const int maxpt,
-				       Kernel &k)
+				       KernelPoints &k)
 {
   if (_moving_in)
-    _add_kernel_points(mask, maxpt, _x_off, _y_off, k);
+    _add_kernel_points(mask, maxpt, _off, k);
   else
-    _add_kernel_points(mask, maxpt, _x_off_out, _y_off_out, k);
+    _add_kernel_points(mask, maxpt, _offOut, k);
 }
 
 /*----------------------------------------------------------------*/
 void KernelTemplate::add_kernel_outside_points(const Grid2d &mask,
 					       const int maxpt,
-					       Kernel &k)
+					       KernelPoints &k)
 {
   // now add the outside points. The starting point should be one point in
   // x closer to (or farther from if moving_in=false) the _x0,_y0 point
   // (the starting point)
-  int x0;
+
+  Point newP(_center);
   if (_moving_in)
-    x0 = _x-1;
+  {
+    newP.add(-1, 0);
+  }
   else
-    x0 = _x+1;
-  if (mask.isMissing(x0, _y))
+  {
+    newP.add(1, 0);
+  }
+  // int x0, y;
+  // if (_moving_in)
+    
+  //   x0 = _center.getX()-1;
+  // else
+  //   x0 = _center.getX()+1;
+  // y = _center.getY();
+  if (newP.isMissing(mask))
   {
     LOG(ERROR) << "unexpected missing value";
     return;
   }
   else
-    k.add_outside(x0, _y);
+    k.addOutside(newP);
 
   // the inside points are an 'upside down' kernel using same offsets,
   // but offset in x by 1
   if (_moving_in)
-    _add_kernel_outside_points(mask, maxpt, x0, _x_off_out, _y_off_out, k);
+    _add_kernel_outside_points(mask, maxpt, newP.getX(), _offOut, k);
   else
-    _add_kernel_outside_points(mask, maxpt, x0, _x_off, _y_off, k);
+    _add_kernel_outside_points(mask, maxpt, newP.getY(), _offOut, k);
 }
 
 /*----------------------------------------------------------------*/
 void KernelTemplate::_add_kernel_points(const Grid2d &mask, const int maxpt,
-					const int *x_off, const int *y_off,
-					Kernel &k)
+					const Point *off, KernelPoints &k)
 {
   for (int i=0; i<30; ++i)
   {
     _added[i] = false;
-    int xi = _x + x_off[i];
-    if (xi<0 || xi >= _nx)
+    Point newP(_center);
+    newP.add(off[i]);
+    // int xi = _center.getX() + x_off[i];
+    // if (xi<0 || xi >= _nx)
+    //   continue;
+    // int yi = _center.getY() + y_off[i];
+    // if (yi<0 || yi >= _ny)
+    //   continue;
+    if (!newP.inGridRange(_nx, _ny))
+    {
       continue;
-    int yi = _y + y_off[i];
-    if (yi<0 || yi >= _ny)
-      continue;
-    if (!mask.isMissing(xi, yi))
+    }
+
+    if (!newP.isMissing(mask))
     {
       if (_previous_ok(i))
       {
-	k.add(xi, yi);
+	k.add(newP);
 	_added[i] = true;
 	if (k.npt() >= maxpt)
 	  return;
@@ -174,27 +258,37 @@ void KernelTemplate::_add_kernel_points(const Grid2d &mask, const int maxpt,
 void KernelTemplate::_add_kernel_outside_points(const Grid2d &mask,
 						const int maxpt,
 						const int x0, 
-						const int *x_off, 
-						const int *y_off,
-						Kernel &k)
+						const Point *off,
+						KernelPoints &k)
 {
   for (int i=0; i<30; ++i)
   {
     _added[i] = false;
-    int xi = x0 + x_off[i];
-    if (xi<0 || xi >= _nx)
-      continue;
-    int yi = _y + y_off[i];
-    if (yi<0 || yi >= _ny)
-      continue;
 
-    if (mask.isMissing(xi, yi))
+    Point newP(x0, _center.getY());
+    newP.add(off[i]);
+    if (!newP.inGridRange(_nx, _ny))
+    {
       continue;
+    }
+    if (newP.isMissing(mask))
+    {
+      continue;
+    }
+    // int xi = x0 + x_off[i];
+    // if (xi<0 || xi >= _nx)
+    //   continue;
+    // int yi = _center.getY() + y_off[i];
+    // if (yi<0 || yi >= _ny)
+    //   continue;
+
+    // if (mask.isMissing(xi, yi))
+    //   continue;
     if (_previous_ok(i))
     {
-      k.add_outside(xi, yi);
+      k.addOutside(newP);
       _added[i] = true;
-      if (k.npt_outside() >= maxpt)
+      if (k.nptOutside() >= maxpt)
 	return;
     }
   }

@@ -26,7 +26,9 @@
  * @brief ClumpAssociate1 Associate a clump with a another set of clumps
  * @class ClumpAssociate1
  * @brief ClumpAssociate1 Associate a clump with a another set of clumps
- * 
+ *
+ * The first clump has color  _c1Color
+ * The other clumps is the colors vector _c2Color
  */
 
 #ifndef ClumpAssociate1_H
@@ -37,21 +39,21 @@
 class ClumpAssociate1
 {
 public:
-  ClumpAssociate1(const int c1_color);
+  ClumpAssociate1(const int c1Color);
   ~ClumpAssociate1();
 
   void print(void) const;
 
-  void add_color(const int c2_color);
-  inline int num_color(void) const {return (int)_c2_color.size();}
-  inline int ith_color(const int i) const {return _c2_color[i];}
-  inline int get_color(void) const {return _c1_color;}
+  void addColor(const int c2Color);
+  inline int numColor(void) const {return (int)_c2Color.size();}
+  inline int ithColor(const int i) const {return _c2Color[i];}
+  inline int getColor(void) const {return _c1Color;}
 
 protected:
 private:
 
-  int _c1_color;
-  std::vector<int> _c2_color;
+  int _c1Color;
+  std::vector<int> _c2Color;
   
 };
 
