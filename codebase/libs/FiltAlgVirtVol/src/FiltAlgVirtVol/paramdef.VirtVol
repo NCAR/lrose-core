@@ -1,0 +1,74 @@
+/**********************************************************
+ * paramdef.VirtVol
+ *
+ * This file contains the TDRP parameter definitions for data handling of
+ * for virtual volumes
+ * 
+ */
+
+commentdef
+{
+  p_header = "VirtVol Parameters";
+  p_text = "Triggering new data, reading in new data, writing data";
+};
+
+paramdef boolean
+{
+  p_descr = "triggering debug";
+  p_help = "set to TRUE to debug triggering";
+  p_default = FALSE;
+} debug_triggering;
+
+paramdef string
+{
+  p_descr = "trigger url";
+  p_help = "URL to trigger off";
+  p_default = "";
+} trigger_url;
+
+paramdef boolean
+{
+  p_descr = "Set TRUE to restrict vertical levels to a range of values, FALSE to use all the vertical levels";
+  p_default = FALSE;
+} restrict_vertical_levels;
+
+paramdef double
+{
+  p_descr = "If restrict_vertical_levels = TRUE, this is the range of vlevels";
+  p_help = "If set to -1, -1 it is not used, and there is no restriction";
+  p_default = {-1, -1};
+} vertical_level_range[2];
+
+typedef enum {VIRTUAL_VOLUME, DATABASE, ASCII} Url_t;
+typedef enum {GRID, VALUE, NOT_SET} Data_t;
+typedef struct 
+{
+  string internal_name;
+  string external_name;
+  string url;
+  Url_t url_type;
+  Data_t data_type;
+} External_data_t;
+
+paramdef struct External_data_t
+{
+  p_descr = "inputs";
+  p_help =
+    "The fields read in externally\n"
+    "internal_name = name used in filtering\n"
+    "external_name = external field name";
+    "url = where the data is\n"
+    "url_type = VIRTUAL_VOLUME (grids, values)\n"
+    "           DATABASE  (values)\n"
+    "           ASCII (values)\n"
+    "data_type = GRID, VALUE";
+   p_default = {};
+} virtvol_input[];    
+
+paramdef struct External_data_t
+{
+  p_descr = "Fields/values to write out";
+  p_help = "";
+  p_default = {};
+} virtvol_output[];
+
