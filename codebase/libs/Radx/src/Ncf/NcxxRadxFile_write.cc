@@ -2078,13 +2078,10 @@ int NcxxRadxFile::_writeScalarVariables()
 
   // instrument type
 
-  String32_t strn;
-  memset(strn, 0, sizeof(String32_t));
-  strncpy(strn,
-          Radx::instrumentTypeToStr(_writeVol->getInstrumentType()).c_str(),
-          sizeof(String32_t) - 1);
+  string instrumentType =
+    Radx::instrumentTypeToStr(_writeVol->getInstrumentType());
   try {
-    _instrumentTypeVar.putVal(strn);
+    _instrumentTypeVar.putStringScalar(instrumentType);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write instrumentType");
@@ -2095,12 +2092,9 @@ int NcxxRadxFile::_writeScalarVariables()
 
   // platform type
 
-  memset(strn, 0, sizeof(String32_t));
-  strncpy(strn,
-          Radx::platformTypeToStr(_writeVol->getPlatformType()).c_str(),
-          sizeof(String32_t) - 1);
+  string platformType = Radx::platformTypeToStr(_writeVol->getPlatformType());
   try {
-    _platformTypeVar.putVal(strn);
+    _platformTypeVar.putStringScalar(platformType);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write platformType");
@@ -2111,12 +2105,9 @@ int NcxxRadxFile::_writeScalarVariables()
 
   // primary axis
   
-  memset(strn, 0, sizeof(String32_t));
-  strncpy(strn,
-          Radx::primaryAxisToStr(_writeVol->getPrimaryAxis()).c_str(),
-          sizeof(String32_t) - 1);
+  string primaryAxis = Radx::primaryAxisToStr(_writeVol->getPrimaryAxis());
   try {
-    _primaryAxisVar.putVal(strn);
+    _primaryAxisVar.putStringScalar(primaryAxis);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write primaryAxis");
@@ -2127,14 +2118,9 @@ int NcxxRadxFile::_writeScalarVariables()
 
   // status xml
   
-  size_t xmlLen =
-    _writeVol->getStatusXml().size() + 1; // includes trailing NULL
-  RadxArray<char> xmlStr_;
-  char *xmlStr = xmlStr_.alloc(xmlLen);
-  memset(xmlStr, 0, xmlLen);
-  strncpy(xmlStr, _writeVol->getStatusXml().c_str(), xmlLen);
+  string statusXml = _writeVol->getStatusXml();
   try {
-    _statusXmlVar.putVal(xmlStr);
+    _statusXmlVar.putStringScalar(statusXml);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write statusXml");
@@ -2146,11 +2132,9 @@ int NcxxRadxFile::_writeScalarVariables()
   // start time
   
   RadxTime startTime(_writeVol->getStartTimeSecs());
-  memset(strn, 0, sizeof(String32_t));
-  strncpy(strn, startTime.getW3cStr().c_str(),
-          sizeof(String32_t) - 1);
+  string startTimeStr = startTime.getW3cStr();
   try {
-    _startTimeVar.putVal(strn);
+    _startTimeVar.putStringScalar(startTimeStr);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write statusTime");
@@ -2162,11 +2146,9 @@ int NcxxRadxFile::_writeScalarVariables()
   // end time
   
   RadxTime endTime(_writeVol->getEndTimeSecs());
-  memset(strn, 0, sizeof(String32_t));
-  strncpy(strn, endTime.getW3cStr().c_str(),
-          sizeof(String32_t) - 1);
+  string endTimeStr = endTime.getW3cStr();
   try {
-    _endTimeVar.putVal(strn);
+    _endTimeVar.putStringScalar(endTimeStr);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write endTime");

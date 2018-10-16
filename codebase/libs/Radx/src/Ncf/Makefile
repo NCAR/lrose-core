@@ -33,7 +33,8 @@ CPPC_SRCS = \
 	NcfRadxFile_write.cc \
 	NcxxRadxFile.cc \
 	NcxxRadxFile_read.cc \
-	NcxxRadxFile_write.cc
+	NcxxRadxFile_write.cc \
+	RadxNcfStr.cc
 
 #
 # general targets
