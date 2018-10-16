@@ -32,7 +32,7 @@
 //  Adapted from nexrad2dsr application by Terri Betancourt 
 //  RAP, NCAR, Boulder, CO, 80307, USA
 //
-//  $Id: Nexrad2Netcdf.cc,v 1.19 2017/12/28 18:17:28 jcraig Exp $
+//  $Id: Nexrad2Netcdf.cc,v 1.20 2018/10/16 20:43:22 jcraig Exp $
 //
 /////////////////////////////////////////////////////////////
 #include <string>
@@ -60,6 +60,7 @@ using namespace std;
 //
 const string Nexrad2Netcdf::version = "3.1";
 
+void OutCopyrightNotice();
 
 Nexrad2Netcdf::Nexrad2Netcdf(Params *P, const char *programName)
 {
@@ -77,7 +78,7 @@ Nexrad2Netcdf::Nexrad2Netcdf(Params *P, const char *programName)
   //
   msgLog.setApplication( progName );
 
-  ucopyright( progName );
+  OutCopyrightNotice();
 
   //
   // Set debug level messaging
@@ -427,7 +428,8 @@ int Nexrad2Netcdf::run(vector<string> inputFileList, time_t startTime, time_t en
      return (-1);
    }
 
-   POSTMSG( DEBUG, "End of file list" );
+   if(params->verbose)
+     POSTMSG( DEBUG, "End of file list" );
 
    return (0);
 }
@@ -713,4 +715,21 @@ char *Nexrad2Netcdf::replaceSequenceNum( char *fileName, int newNumber, bool set
    }
 
    return newfileName;
+}
+
+
+void OutCopyrightNotice()
+{
+  fprintf(stdout," *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* \n");
+  fprintf(stdout," ** Copyright UCAR (c) 2005 - 2007                         \n");
+  fprintf(stdout," ** University Corporation for Atmospheric Research (UCAR) \n");
+  fprintf(stdout," ** National Center for Atmospheric Research (NCAR)        \n");
+  fprintf(stdout," ** Research Applications Laboratory (RAL)                 \n");
+  fprintf(stdout," ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA       \n");
+  fprintf(stdout," ** The United States government has a license to use      \n");
+  fprintf(stdout," ** this material solely for government purposes.          \n");
+  fprintf(stdout," ** 2007/2/26 18:16:6                                      \n");
+  fprintf(stdout," *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* \n");
+  fprintf(stdout,"\n");
+  fflush(stdout);
 }

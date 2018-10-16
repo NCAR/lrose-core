@@ -27,7 +27,7 @@
 //  Once parsed and/or converted to a format we need the data
 //  is then passed off to the 
 //
-//  $Id: ReadNexrad.cc,v 1.18 2018/02/07 23:41:12 jcraig Exp $
+//  $Id: ReadNexrad.cc,v 1.19 2018/10/16 20:43:22 jcraig Exp $
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -91,7 +91,8 @@ int ReadNexrad::readBuffer(ui08 *buffer, size_t physicalBytes, bool volTitleSeen
     //
     // Check for message of all 0's.  Skip these empty messages.
     if(msgHdr->seq_num == 0 && msgHdr->message_len == 0 && msgHdr->message_type == 0) {
-      POSTMSG( DEBUG, "Skipping over empty message.");
+      if(params->verbose)
+	POSTMSG( DEBUG, "Skipping over empty message.");
     } else {
 
       //
@@ -306,8 +307,8 @@ status_t ReadNexrad::readMsg(ui08 *buffer, size_t numberOfBytes)
     
     return( stat );
   } 
-
-  POSTMSG( DEBUG, "Skipping over message type: %d", msgHdr->message_type );
+  if(params->verbose)
+    POSTMSG( DEBUG, "Skipping over message type: %d", msgHdr->message_type );
   return( BAD_DATA );
   
 }

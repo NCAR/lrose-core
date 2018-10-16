@@ -232,18 +232,13 @@ D/DCsurf2prf////
 D/EFMGenPt2Spdb////
 D/FGGEsoundingIngest////
 D/GEOTrackIngest////
-D/GoesRGLM2Spdb////
-D/GoesRNoaaPort2Mdv////
-D/GpmL3Hdf2Mdv////
 D/HRRR2Dbz////
 D/Hpcn2Spdb////
 D/JeppReformat////
 D/JmaHimawari8toMdv////
 D/KMAMesonet2Spdb////
-D/MSG3Sat2Mdv////
 D/NdbcBuoy2Spdb////
 D/ObsPair2NetCDF////
-D/SST2Mdv////
 D/SfcStationStatus2Spdb////
 D/Visst2Mdv////
 D/atecLtg2Spdb////
@@ -263,3 +258,8 @@ D/pentagonSurfaceIngest////
 D/printRealLidarTime////
 D/renameLassenFiles////
 D/saoIngest////
+D/SST2Mdv////
+D/GpmL3Hdf2Mdv////
+D/GoesRNoaaPort2Mdv////
+D/GoesRGLM2Spdb////
+D/MSG3Sat2Mdv////

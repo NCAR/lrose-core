@@ -28,7 +28,7 @@
 // Jaimi Yee, RAP, NCAR, P.O.Box 3000, Boulder, CO, 
 //   80307-3000, USA
 //
-// $Id: SweepData.cc,v 1.22 2018/04/26 21:37:49 jcraig Exp $
+// $Id: SweepData.cc,v 1.23 2018/10/16 20:43:22 jcraig Exp $
 //
 /////////////////////////////////////////////////////////
 #include <math.h>
@@ -174,21 +174,25 @@ status_t SweepData::setInfo(RIDDS_data_31_hdr* nexradData,
   // Decide what data we have in this sweep
   if( nexradData->ref_ptr > 0 && nexradData->vel_ptr <= 0) {
     scanType         = REFL_ONLY;
-    POSTMSG( DEBUG, "Sweep has Reflectivity only data");
+    if(params->verbose)
+      POSTMSG( DEBUG, "Sweep has Reflectivity only data");
    }
    else if( nexradData->ref_ptr <= 0 && nexradData->vel_ptr > 0 ) {
       scanType         = VEL_ONLY;
-      POSTMSG( DEBUG, "Sweep has Velocity only data");
+      if(params->verbose)
+	POSTMSG( DEBUG, "Sweep has Velocity only data");
    }
    else if( params->combineSweeps && vcpElev && vcpElev->waveform_type == 1 && 
 	    nexradData->ref_ptr > 0 && nexradData->vel_ptr > 0) {
     scanType         = REFL_ONLY;
-    POSTMSG( DEBUG, "Sweep has both Reflectivity and Velocity but is a Contiguous Surveillance Cut");
+    if(params->verbose)
+      POSTMSG( DEBUG, "Sweep has both Reflectivity and Velocity but is a Contiguous Surveillance Cut");
    }
    else if( params->combineSweeps && vcpElev && vcpElev->waveform_type == 2 && 
 	    nexradData->ref_ptr > 0 && nexradData->vel_ptr > 0) {
     scanType         = VEL_ONLY;
-    POSTMSG( DEBUG, "Sweep has both Reflectivity and Velocity but is a Contiguous Doppler Cut");
+    if(params->verbose)
+      POSTMSG( DEBUG, "Sweep has both Reflectivity and Velocity but is a Contiguous Doppler Cut");
    }
    else if( nexradData->ref_ptr > 0 && nexradData->vel_ptr > 0 ) {
       scanType         = BOTH;
@@ -200,9 +204,11 @@ status_t SweepData::setInfo(RIDDS_data_31_hdr* nexradData,
 	nexradData->sw_ptr = nexradData->vel_ptr;
 	nexradData->vel_ptr = nexradData->ref_ptr;
 	nexradData->ref_ptr = 0;
-	POSTMSG( DEBUG, "Sweep has Velocity only data");
+	if(params->verbose)
+	  POSTMSG( DEBUG, "Sweep has Velocity only data");
       } else {
-	POSTMSG( DEBUG, "Sweep has both Reflectivity and Velocity data");
+	if(params->verbose)
+	  POSTMSG( DEBUG, "Sweep has both Reflectivity and Velocity data");
       }
    }
    else {

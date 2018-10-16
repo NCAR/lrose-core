@@ -27,7 +27,7 @@
 // Jaimi Yee, RAP, NCAR, Boulder, CO, 80307, USA
 // August 2004
 //
-// $Id: NcOutput.cc,v 1.29 2018/02/16 20:45:38 jcraig Exp $
+// $Id: NcOutput.cc,v 1.30 2018/10/16 20:43:22 jcraig Exp $
 //
 ////////////////////////////////////////////////////////////////
 #include <stdio.h>
@@ -114,6 +114,8 @@ NcOutput::NcOutput( Params *tdrpParams )
   _snr                  = NULL;
   _pr                   = NULL;
   _rec                  = NULL;
+  _hNoise               = NULL;
+  _vNoise               = NULL;
 
   init();
 }
@@ -154,7 +156,11 @@ void NcOutput::clear()
      delete [] _pr;
    if(_rec)
      delete [] _rec;
-   
+   if(_hNoise)
+     delete [] _hNoise;
+   if(_vNoise)
+     delete [] _vNoise;
+
    _azimuth   = NULL;
    _elevation = NULL;
    _dataTime  = NULL;
@@ -167,6 +173,8 @@ void NcOutput::clear()
    _snr       = NULL;
    _pr        = NULL;
    _rec       = NULL;
+   _hNoise    = NULL;
+   _vNoise    = NULL;
 }
 
 
@@ -841,7 +849,7 @@ status_t NcOutput::createFile( float fixedAngle )
    // Use the cdl file to create a new file
    //
    char *command_string = new char[1000];
-   sprintf(command_string, "ncgen -b -o %s %s", filePath.getPath().c_str(), params->cdlPath);
+   sprintf(command_string, "/d1/jcraig/nc_build/bin/ncgen -b -o %s %s", filePath.getPath().c_str(), params->cdlPath);
    int ret = system(command_string);
    delete [] command_string;
    if( ret != 0 ) {

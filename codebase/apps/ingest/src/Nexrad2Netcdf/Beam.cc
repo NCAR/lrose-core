@@ -31,7 +31,7 @@
 //
 // July 2005
 //
-// $Id: Beam.cc,v 1.32 2018/02/16 20:45:38 jcraig Exp $
+// $Id: Beam.cc,v 1.33 2018/10/16 20:43:22 jcraig Exp $
 //
 ///////////////////////////////////////////////////////////////
 
@@ -641,7 +641,8 @@ int Beam::createInterestMaps(Params *params)
       _dbzTextureInterestMap =
          new InterestMap( "DbzTexture", pts,
 		          params->dbzTextureInterestWeight );
-      POSTMSG( DEBUG, "Creating reflectivity texture interest map" );
+      if(params->verbose)
+	POSTMSG( DEBUG, "Creating reflectivity texture interest map" );
    }
 
    //
@@ -657,8 +658,8 @@ int Beam::createInterestMaps(Params *params)
       _dbzSpinInterestMap =
          new InterestMap("DbzSpin", pts,
 		         params->dbzSpinInterestWeight);
-
-      POSTMSG( DEBUG, "Creating reflectivity spin interest map" );
+      if(params->verbose)
+	POSTMSG( DEBUG, "Creating reflectivity spin interest map" );
    }
 
    //
@@ -674,8 +675,8 @@ int Beam::createInterestMaps(Params *params)
 
       _velInterestMap =
          new InterestMap("velocity", pts, params->velInterestWeight);
-      
-      POSTMSG( DEBUG, "Creating velocity interest map" );
+      if(params->verbose)
+	POSTMSG( DEBUG, "Creating velocity interest map" );
    }
 
    //
@@ -691,8 +692,8 @@ int Beam::createInterestMaps(Params *params)
 
       _widthInterestMap =
          new InterestMap("spectrum width", pts, params->widthInterestWeight);
-      
-      POSTMSG( DEBUG, "Creating spectrum width interest map" );
+      if(params->verbose)
+	POSTMSG( DEBUG, "Creating spectrum width interest map" );
    }
 
    //
@@ -709,8 +710,8 @@ int Beam::createInterestMaps(Params *params)
       _velSdevInterestMap =
          new InterestMap("velocity sdev", pts, 
                          params->velSdevInterestWeight);
-      
-      POSTMSG( DEBUG, "Creating standard devation of velocity interest map" );
+      if(params->verbose)
+	POSTMSG( DEBUG, "Creating standard devation of velocity interest map" );
    }
 
    return 0;
