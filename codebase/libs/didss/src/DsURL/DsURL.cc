@@ -525,7 +525,7 @@ int DsURL::prepareForwarding(const string &calling_info,
 
     // POST line
 
-    sprintf(str, "POST %s HTTP/1.0\r\n", tunnelUrl.c_str());
+    snprintf(str,1024, "POST %s HTTP/1.0\r\n", tunnelUrl.c_str());
     _httpHeader += str;
 
     // referer
@@ -534,7 +534,11 @@ int DsURL::prepareForwarding(const string &calling_info,
     if (user == NULL) {
       user = "unknown";
     }
-    sprintf(str, "Referer: user %s on host %s, info %s\r\n",
+
+    // Limit the characters copied from user to str to avoid 
+    // unbounded array copy
+    
+    snprintf(str,1024, "Referer: user %s on host %s, info %s\r\n",
 	    user, PORThostname(), calling_info.c_str());
     _httpHeader += str;
 
@@ -644,7 +648,11 @@ int DsURL::prepareForwarding(const string &calling_info,
     if (user == NULL) {
       user = "unknown";
     }
-    sprintf(str, "Referer: user %s on host %s, info %s\r\n",
+
+    // Limit the characters copied from user to str to avoid 
+    // unbounded array copy
+
+    snprintf(str,1024, "Referer: user %s on host %s, info %s\r\n",
 	    user, PORThostname(), calling_info.c_str());
     _httpHeader += str;
     
@@ -866,7 +874,11 @@ void DsURL::_loadHttpHeader(const string &userInfo,
   if (user == NULL) {
     user = "unknown";
   }
-  sprintf(str, "Referer: user %s on host %s, info %s\r\n",
+
+  // Limit the characters copied from user to str to avoid 
+  // unbounded array copy
+
+  snprintf(str,1024, "Referer: user %s on host %s, info %s\r\n",
           user, PORThostname(), userInfo.c_str());
   _httpHeader += str;
   

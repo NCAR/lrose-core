@@ -39,6 +39,12 @@ paramdef int {
   p_help = "The auto_restart script expects registration at this interval. If registration does not occur in twice this time, the process is killed and restarted. Therefore, if writing the output files takes longer than 60 seconds because the files are large and compressed, then increase this interval, to say 120 secs.";
 } procmap_register_interval;
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use legacy processing - reading the DsRadarQueue directly.";
+  p_help = "This will be the default until the new IwrfMomReader code is fully tested and debugger. Set to FALSE to use the new IwrfMomReader code.";
+} use_legacy_processing;
+
 commentdef {
   p_header = "DATA INPUT";
 }
@@ -65,7 +71,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "Unknown";
+  p_default = "";
   p_descr = "Name of radar site";
   p_help = "Stored in netCDF file.";
 } site_name;
@@ -102,7 +108,7 @@ paramdef struct radar_location_t {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to apply an offset to the azimuth values.";
-  p_help = "If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.";
+  p_help = "If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north. The offset is applied as the rays are read in - i.e. all other operations use the updated azimuths.";
 } apply_azimuth_offset;
 
 paramdef double {
@@ -114,7 +120,7 @@ paramdef double {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to apply an offset to the elevation values.";
-  p_help = "If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.";
+  p_help = "If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles. The offset is applied as the rays are read in - i.e. all other operations use the updated elevations.";
 } apply_elevation_offset;
 
 paramdef double {
@@ -562,7 +568,7 @@ paramdef boolean {
 paramdef double {
   p_default = 0.0;
   p_descr = "Azimuth to be used for forcing surveillance sweep transitions (deg).";
-  p_help = "See 'adjust_sur_sweep_limits_to_fixed_azimuth'.";
+  p_help = "See 'adjust_sur_sweep_limits_to_fixed_azimuth'. Any azimuth_offset will be applied before this check.";
 } sur_sweep_transitions_azimuth_deg;
 
 commentdef {
@@ -955,6 +961,12 @@ paramdef boolean {
   p_descr = "Option to write latest_data_info for each data set.";
   p_help = "Writes a latest_data_info file for each data set written, including the separate directories for surveillance, sector, rhi etc. as appropriate. If write_master_ldata_info is true, you may consider turning this off.";
 } write_individual_ldata_info;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to register the latest_data_info with the data mapper.";
+  p_help = "If true, contacts the DataMapper using TCP, to update the latest time for this data set.";
+} register_with_data_mapper;
 
 commentdef {
   p_header = "NETCDF STYLE";

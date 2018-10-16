@@ -10,6 +10,7 @@
 #include <rapmath/LogicalArgs.hh>
 #include <toolsa/TaThreadQue.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/pmu.h>
 #include <cstdio>
 #include <cmath>
 #include <string>
@@ -535,7 +536,8 @@ static int _num(const std::string &s, const std::string &pattern)
  * If no occurances of op, return string::npos
  * If all occurances of op are within a paren pair, return string::npos
  */
-std::size_t _lastOutsideOfParens(const std::string &s, const std::string &op)
+static std::size_t
+_lastOutsideOfParens(const std::string &s, const std::string &op)
 {
   std::size_t p;
   string s2 = s;
@@ -604,7 +606,7 @@ static std::vector<string> _commaSeparatedArgs(const std::string &s)
 }
 
 //-------------------------------------------------------------------
-MathParser::MathParser(void)
+MathParser::MathParser(void) : _outputDebugAll(true)
 {
   _unaryOperators = ProcessingNode::unaryOperators();
   _binaryOperators = ProcessingNode::binaryOperators();
@@ -725,6 +727,11 @@ bool MathParser::parse(const std::string &s, Filter_t filterType,
   switch (filterType)
   {
   case VOLUME_BEFORE:
+    if (find(userDataNames.begin(), userDataNames.end(), f._output) !=
+	userDataNames.end())
+    {
+      f._dataType = VOLUME_BEFORE_USER;
+    }
     _volFilters.push_back(f);
     break;
   case LOOP2D:
@@ -742,6 +749,7 @@ bool MathParser::parse(const std::string &s, Filter_t filterType,
     _volFiltersAfter.push_back(f);
     break;
   case LOOP2D_USER:
+  case VOLUME_BEFORE_USER:
   default:
     LOG(ERROR) << "Bad input";
     return false;
@@ -796,7 +804,7 @@ void MathParser::processOneItem2d(VolumeData *rdata, int ii) const
   MathData *local = rdata->initializeProcessingNode(ii, true);
   for (size_t f = 0; f< _filters2d.size(); ++f)
   {
-    _processLoop(_filters2d[f], local);
+    _processLoop(_filters2d[f], local, ii==0 || _outputDebugAll);
   }
   local->finishProcessingNode(ii, rdata);
   delete local;
@@ -816,7 +824,7 @@ void MathParser::processOneItem2d(VolumeData *rdata, int ii,
   // local thing doesn't need thread locking.
   for (size_t f = 0; f< _filters2d.size(); ++f)
   {
-    _processLoop(_filters2d[f], local);
+    _processLoop(_filters2d[f], local, ii==0 || _outputDebugAll);
   }
 
   thread->lockForIO();
@@ -836,7 +844,7 @@ void MathParser::processOneItem1d(VolumeData *rdata, int ii) const
   MathData *local = rdata->initializeProcessingNode(ii, false);
   for (size_t f = 0; f< _filters1d.size(); ++f)
   {
-    _processLoop(_filters1d[f], local);
+    _processLoop(_filters1d[f], local, ii==0 || _outputDebugAll);
   }
   local->finishProcessingNode(ii, rdata);
   delete local;
@@ -1271,10 +1279,14 @@ ProcessingNode *MathParser::_val(const std::string &s)
 }
 
 //-----------------------------------------------------------------------
-void MathParser::_processLoop(const Filter &filter, MathData *rdata) const
+void MathParser::_processLoop(const Filter &filter, MathData *rdata,
+			      bool debug) const
 {
-  LOG(DEBUG) << filter._filter->sprint();
-
+  PMU_auto_register(filter._filter->sprint().c_str());
+  if (debug)
+  {
+    LOG(DEBUG) << filter._filter->sprint();
+  }
 
   if (!rdata->synchInputsAndOutputs(filter._output, filter._inputs))
   {
@@ -1338,6 +1350,7 @@ void MathParser::_processLoop(const Filter &filter, MathData *rdata) const
 //-----------------------------------------------------------------------
 void MathParser::_processV(const Filter &filter, VolumeData *rdata) const
 {
+  PMU_auto_register(filter._filter->sprint().c_str());
   LOG(DEBUG) << filter._filter->sprint();
   string keyword;
   if (filter._filter->isUserAssignmentWithUnaryOp(keyword))

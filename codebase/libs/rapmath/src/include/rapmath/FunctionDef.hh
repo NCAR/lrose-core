@@ -14,7 +14,7 @@ class FunctionDef
 public:
   /**
    * @param[in] name  The function name
-   * @param[in] descrs Description
+   * @param[in] descr Description
    */
   inline FunctionDef(const std::string &name, const std::string &descr) :
     _name(name), _description(descr)  {  }
@@ -24,8 +24,8 @@ public:
    */
   inline virtual ~FunctionDef(void) {}
 
-  std::string _name;
-  std::string _description;
+  std::string _name;            /**< Name of the function */
+  std::string _description;     /**< Description of the function */
 
 private:
 

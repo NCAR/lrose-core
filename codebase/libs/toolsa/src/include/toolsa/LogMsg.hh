@@ -267,7 +267,7 @@ public:
    */
   void logf(const std::string &fname, const int line,
 	    const std::string &method, const Severity_t severity,
-	    const std::string format, ... );
+	    std::string format, ... );
 
   /**
    * Set severity status for the debugging states, and set other state variables

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dbfopen.c,v 1.2 2001/11/17 21:36:43 dixon Exp $
+ * $Id: dbfopen.c,v 1.3 2018/10/13 23:24:07 dixon Exp $
  *
  * Project:  Shapelib
  * Purpose:  Implementation of .dbf access API documented in dbf_api.html.
@@ -34,6 +34,9 @@
  ******************************************************************************
  *
  * $Log: dbfopen.c,v $
+ * Revision 1.3  2018/10/13 23:24:07  dixon
+ * Sync with EOL/github/lrose-core
+ *
  * Revision 1.2  2001/11/17 21:36:43  dixon
  * Adding includes for string and malloc, to suppress compiler warnings
  *

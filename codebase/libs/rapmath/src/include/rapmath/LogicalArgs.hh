@@ -20,9 +20,20 @@ class MathData;
 class LogicalArg
 {
 public:
+  /**
+   * Constructor, arguments map directly to the members
+   */
   LogicalArg(const std::string &name, double value, bool missingValue,
 	     const FindSimple::Compare_t &test);
+
+  /**
+   * Empty constructor
+   */
   inline LogicalArg(void) {}
+
+  /**
+   * Destructor
+   */
   inline ~LogicalArg(void) {}
 
   /**
@@ -32,6 +43,12 @@ public:
    */
   bool satisfiesCondition(int index) const;
 
+
+  /**
+   * Set the _data (and _value members when _valueIsMissing) using inputs
+   * @param[in] rdata  The data from which to get what is needed
+   * @return true if succcessful
+   */
   bool synch(MathData *rdata);
 
 protected:
@@ -56,7 +73,14 @@ class LogicalArgs
 {
 public:
 
+  /**
+   * Empty constructor
+   */
   inline LogicalArgs(void) {}
+
+  /**
+   * Destructor
+   */
   inline ~LogicalArgs(void) {}
 
   inline void appendArg(const LogicalArg &a) { _args.push_back(a); }
@@ -65,6 +89,12 @@ public:
   inline LogicalArg & operator[](size_t i) {return _args[i];}
   inline const LogicalArg & operator[](size_t i) const {return _args[i];}
 
+  /**
+   * Update status at opIndex'th position 
+   * @param[in] bi  Status up to the previous position true or false
+   * @param[in] opIndex  Index to the operators
+   * @param[out] ret the result of combining bi with opIndex and next arg
+   */
   void updateStatus(bool bi, int opIndex, bool &ret) const;
 
 protected:

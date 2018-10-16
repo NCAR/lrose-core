@@ -27,7 +27,7 @@
 // Used wgrib by Wesley Ebisuzaki at NOAA as
 // reference (http://wesley.wwb.noaa.gov/wgrib.html)
 // 
-// $Id: GDS.cc,v 1.20 2017/08/18 16:13:23 jcraig Exp $
+// $Id: GDS.cc,v 1.23 2018/01/31 16:26:56 jcraig Exp $
 //
 //////////////////////////////////////////////////
 #include <iostream>
@@ -463,7 +463,7 @@ fl32 GDS::getEarthRadius(fl32 &major_axis, fl32 &minor_axis)
      if(earth_factor == 0)
        return (fl32)earth_value;
      else
-       return (fl32)earth_value / (fl32)pow(10, earth_factor);
+       return (fl32)earth_value / (float)pow((float)10.0, (float)earth_factor);
    case 2:
      major_axis = 6378160.0;
      minor_axis = 6356775.0;
@@ -472,11 +472,11 @@ fl32 GDS::getEarthRadius(fl32 &major_axis, fl32 &minor_axis)
      if(major_factor == 0)
        major_axis = (fl32)major_value * 1000.0;
      else
-       major_axis = (fl32)major_value / ((fl32)pow(10, major_factor) / 1000.0);
+       major_axis = (fl32)major_value / ((float)pow((float)10.0, (float)major_factor) / 1000.0);
      if(minor_factor == 0)
        minor_axis = (fl32)minor_value * 1000.0;
      else
-       minor_axis = (fl32)minor_value / ((fl32)pow(10, minor_factor) / 1000.0);
+       minor_axis = (fl32)minor_value / ((float)pow((float)10.0, (float)minor_factor) / 1000.0);
      return 0;
    case 4:
      major_axis = 6378137.0;
@@ -492,11 +492,11 @@ fl32 GDS::getEarthRadius(fl32 &major_axis, fl32 &minor_axis)
      if(major_factor == 0)
        major_axis = (fl32)major_value;
      else
-       major_axis = (fl32)major_value / (fl32)pow(10, major_factor);
+       major_axis = (fl32)major_value / (float)pow((float)10.0, (float)major_factor);
      if(minor_factor == 0)
        minor_axis = (fl32)minor_value;
      else
-       minor_axis = (fl32)minor_value / (fl32)pow(10, minor_factor);
+       minor_axis = (fl32)minor_value / (float)pow((float)10.0, (float)minor_factor);
      return 0;
    case 8:
      return 6371200.0;

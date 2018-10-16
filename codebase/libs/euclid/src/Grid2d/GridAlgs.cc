@@ -31,6 +31,8 @@
 #include <euclid/Grid2dLoop.hh>
 #include <euclid/Grid2dLoopA.hh>
 #include <euclid/Grid2dMedian.hh>
+#include <euclid/Line.hh>
+#include <euclid/PointList.hh>
 #include <rapmath/AngleCombiner.hh>
 #include <rapmath/FuzzyF.hh>
 #include <toolsa/LogStream.hh>
@@ -43,6 +45,64 @@
 using std::vector;
 using std::pair;
 using std::stringstream;
+
+//-----------------------------------------------------------------
+static void _interp(double d0, double d1, int i0, int i1,
+		    std::vector<double> &iData)
+{
+  // i0 is index of first data, i1 of second data
+  // so i0+1, i0+2,... i1-1 are the places to interpolate to
+  int nx = i1-i0;
+  for (int i=1; i<nx; ++i)
+  {
+    int index = i0 + i;
+    double pct = (double)i/(double)nx;
+    double v = (1.0-pct)*d0 + pct*d1;
+    iData[index] = v;
+    LOG(DEBUG_VERBOSE) << "interp data[" << index << "] = " << v;
+  }
+}
+
+//-----------------------------------------------------------------
+static void _fillGaps(std::vector<double> &data, double missing)
+{
+  int n = static_cast<int>(data.size());
+
+  bool inside = true;
+  int o0 = -1, o1 = -1;
+  for (int i=0; i<n; ++i)
+  {
+    if (data[i] == missing)
+    {
+      if (inside)
+      {
+	inside = false;
+	o0 = o1 = i;
+	LOG(DEBUG_VERBOSE) << "First point missing index=" << i;
+      }
+      else
+      {
+	o1 = i;
+      }
+    }
+    else
+    {
+      if (!inside)
+      {
+	// went from outside to inside, now can interp
+	inside = true;
+	int interp0 = o0 - 1;
+	int interp1 = i;
+	LOG(DEBUG_VERBOSE) << "First point leaving missing index="
+			   << i << ", i0=" << interp0 << " i1=" << interp1;
+	if (interp0 >= 0)
+	{
+	  _interp(data[interp0], data[interp1], interp0, interp1, data);
+	}
+      }
+    }
+  }
+}
 
 /*----------------------------------------------------------------*/
 static double _round(double v, double r0, double r1, double res)
@@ -850,6 +910,16 @@ void GridAlgs::increment(int x, int y, double value)
 }
 
 //---------------------------------------------------------------------------
+void GridAlgs::increment(int ipt, double value)
+{
+  double v;
+  if (getValue(ipt, v))
+  {
+    _data[ipt] = v +  value;
+  }
+}
+
+//---------------------------------------------------------------------------
 void GridAlgs::add(double value)
 {
   for (int i=0; i<_nx*_ny; ++i)
@@ -1469,6 +1539,18 @@ void GridAlgs::fillInMask(const Grid2d &mask, double value)
 }
 
 /*----------------------------------------------------------------*/
+void GridAlgs::incrementInMask(const Grid2d &mask, double inc)
+{
+  for (int i=0; i<_npt; ++i)
+  {
+    if (!mask.isMissing(i))
+    {
+      increment(i, inc);
+    }
+  }
+}
+
+/*----------------------------------------------------------------*/
 void GridAlgs::maskMissingToMissing(const Grid2d &mask)
 {
   for (int i=0; i<_npt; ++i)
@@ -1666,7 +1748,8 @@ double GridAlgs::localCenteredAverage(int ix, int iy, int sx, int sy,
   double maxbad;
   if (needHalf)
   {
-    maxbad = static_cast<double>(sx*sy)/2.0;
+    // slightly relaxed
+    maxbad = static_cast<double>((sx-1)*(sy-1))/2.0;
   }
   else
   {
@@ -1982,7 +2065,8 @@ double GridAlgs::localBoxSdev(int x0, int y0, int nx, int ny,
   double maxbad;
   if (needHalf)
   {
-    maxbad = static_cast<double>(nx*ny)/2.0;
+    // did this to agree with other approaches, slightly forgiving
+    maxbad = static_cast<double>((nx-1)*(ny-1))/2.0;
   }
   else
   {
@@ -2356,6 +2440,82 @@ void GridAlgs::medianNoOverlap(int xw, int yw, double bin_min, double bin_max,
 }
 
 //----------------------------------------------------------------
+void GridAlgs::medianEntireDomain(double binMin, double binMax, double binDelta,
+				  bool mask)
+{
+  // make a copy of the local object
+  GridAlgs tmp(*this);
+
+  std::vector<double> bin;
+  std::vector<double> counts;
+  int nc = 0;
+  int nbin = static_cast<int>((binMax-binMin)/binDelta) + 1;
+  for (int i=0; i<nbin; ++i)
+  {
+    double v = binMin + binDelta*i;
+    bin.push_back(v);
+    counts.push_back(0.0);
+  }
+  
+  for (int y=0; y<_ny; y ++)
+  {
+    for (int x=0; x<_nx; x ++)
+    {
+      double v;
+      if (getValue(x, y, v))
+      {
+	int index = static_cast<int>((v-binMin)/binDelta);
+	if (index < 0)
+	{
+	  index = 0;
+	}
+	if (index >= nbin)
+	{
+	  index = nbin-1;
+	}
+	counts[index] ++;
+	++nc;
+      }
+    }
+  }
+
+  if (nc == 0)
+  {
+    setAllMissing();
+  }
+  else
+  {
+    bool isSet = false;
+    double median;
+    double fpt = 0.50*static_cast<double>(nc);
+    int ipt = static_cast<int>(fpt);
+    int count = 0;
+    for (int i=0; i<nbin; ++i)
+    {
+      count += static_cast<int>(counts[i]);
+      if (count >= ipt)
+      {
+	isSet = true;
+	median = bin[i];
+	break;
+      }
+    }
+    if (!isSet)
+    {
+      setAllMissing();
+    }
+    else
+    {
+      setAllToValue(median);
+      if (mask)
+      {
+	maskMissingToMissing(tmp);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------
 void GridAlgs::speckle(int xw, int yw, double bin_min, double bin_max,
 		       double bin_delta)
 {
@@ -2421,7 +2581,8 @@ double GridAlgs::localCenteredTexture(int x, int y, int xw, int yw, bool isX,
   int maxbad;
   if (needHalf)
   {
-    maxbad = xw*yw/2;
+    // slightly relaxed
+    maxbad = (xw-1)*(yw-1)/2;
   }
   else
   {
@@ -3116,6 +3277,468 @@ void GridAlgs::maskExcept(double v)
 }
 
 //---------------------------------------------------------------------------
+void GridAlgs::fuzzyRemap(const FuzzyF &fuzzy)
+{
+  for (int i=0; i<_npt; ++i)
+  {
+    double vi;
+    if (getValue(i, vi))
+    {
+      vi = fuzzy.apply(vi);
+      setValue(i, vi);
+    }
+  }
+}
+
+//-----------------------------------------------------------------
+void GridAlgs::FIRfilter(const std::vector<double> &coeff)
+{
+  for (int y=0; y<_ny; ++y)
+  {
+    _FIRfilterY(y, coeff);
+  }
+}
+
+//-----------------------------------------------------------------
+void GridAlgs::nptBetweenGoodDataPointsX(const Grid2d &clumps,
+					 const Grid2d &data,
+					 int minPt)
+{
+  // set this missing everywhere
+  setAllMissing();
+  
+  for (int y=0; y<_ny; ++y)
+  {
+    _nptBetweenGoodDataPointsAlongY(y, clumps, data, minPt);
+  }
+}
+
+//-----------------------------------------------------------------
+void GridAlgs::totalAttenuation(const Grid2d &clumps, const Grid2d &dwr,
+				double minKm, double kmPerX)
+{
+  // set this missing everywhere
+  setAllMissing();
+  for (int y=0; y<_ny; ++y)
+  {
+    _totalAttenuationAlongY(y, clumps, dwr, minKm, kmPerX);
+  }
+}
+
+//-----------------------------------------------------------------
+void GridAlgs::averageAttenuation(const Grid2d &extent, const Grid2d &atotal)
+{
+  GridAlgs counts(extent);
+
+  setAllMissing();
+  counts.setAllToValue(0.0);
+  for (int y=0; y<_ny; ++y)
+  {
+    for (int x=0; x<_nx; ++x)
+    {
+      double v, e;
+      if (atotal.getValue(x, y, v) && extent.getValue(x, y, e))
+      {
+	for (int xi=x; xi<=x+(int)e; ++xi)
+	{
+	  if (isMissing(xi, y))
+	  {
+	    setValue(xi, y, v);
+	  }
+	  else
+	  {
+	    increment(xi, y, v);
+	  }
+	  counts.increment(xi, y, 1.0);
+	}
+      }
+    }
+    // 2nd pass to normalize
+    for (int x=0; x<_nx; ++x)
+    {
+      double v, c;
+      if (getValue(x, y, v) && counts.getValue(x, y, c))
+      {
+	if (c == 0.0)
+	{
+	  LOG(WARNING) << "value but no count";
+	}
+	else
+	{
+	  setValue(x, y, v/c);
+	}
+      }
+    }
+  }
+}
+
+
+//-----------------------------------------------------------------
+void GridAlgs::sumZ(const Grid2d &Z, const Grid2d &extent, double p)
+{
+  setAllMissing();
+  for (int y=0; y<_ny; ++y)
+  {
+    for (int x=0; x<_nx; ++x)
+    {
+      double v;
+      if (extent.getValue(x, y, v))
+      {
+	// sum up Z along this x out to extent
+	int e = (int)v;
+	double sum = 0.0;
+	for (int xi = x; xi<=x+e; ++xi)
+	{
+	  if (Z.getValue(xi,y,v))
+	  {
+	    sum += pow(v, p);
+	  }
+	}
+	setValue(x, y, sum);
+      }
+    }
+  }
+}  
+
+//-----------------------------------------------------------------
+void GridAlgs::weightedAverage(const std::vector<Grid2d> &inputs,
+			       const std::vector<double> &weights,
+			       bool normalize)
+{
+  *this = inputs[0];
+  setAllMissing();
+
+  // create a sum of weights grid
+  GridAlgs sumWeights(inputs[0]);
+  sumWeights.setAllToValue(0.0);
+
+  for (size_t i=0; i<inputs.size(); ++i)
+  {
+    double w = weights[i];
+
+    // multiply this grid by the weight
+    GridAlgs gi(inputs[i]);
+    gi.multiply(w);
+
+    // add w to sumWeights at all points where inputs[i] not missing
+    sumWeights.incrementInMask(inputs[i], w);
+    
+    // now add gi to the overall final grid
+    add(gi);
+  }
+
+  if (normalize)
+  {
+    divide(sumWeights);
+  }
+}
+
+//-----------------------------------------------------------------
+void GridAlgs::weightedAngleAverage(const std::vector<Grid2d> &inputs,
+				   const std::vector<double> &weights,
+				   bool is360)
+{
+  AngleCombiner angles(weights, is360);
+  
+  *this = inputs[0];
+  setAllMissing();
+
+  for (int ipt=0; ipt<inputs[0].getNdata(); ++ipt)
+  {
+    angles.clearValues();
+    for (int i=0; i<(int)inputs.size(); ++i)
+    {
+      double v;
+      if (inputs[i].getValue(ipt, v))
+      {
+	angles.setGood(i, v, 1.0);
+      }
+      else
+      {
+	angles.setBad(i);
+      }
+    }
+    double a;
+    if (angles.getCombineAngle(a))
+    {
+      setValue(ipt, a);
+    }
+  }
+}
+
+//-----------------------------------------------------------------
+void GridAlgs::maxExpand(int nx, int ny)
+{
+  dilate(nx, ny);
+}
+
+//-----------------------------------------------------------------
+void GridAlgs::expandLaterally(double npt)
+{
+  Grid2d tmp(*this);
+
+  for (int y=0; y<_ny; ++y)
+  {
+    for (int x=0; x<_ny; ++x)
+    {
+      double a;
+      if (getValue(x, y, a))
+      {
+	Line line(a, 2*npt+1);
+	// move the line to x,y
+	line.move(x, y);
+        PointList points = line.xyValues();
+	points.toGrid(tmp, a);
+      }
+    }
+  }
+  dataCopy(tmp);
+}
+
+//-----------------------------------------------------------------
+void GridAlgs::_nptBetweenGoodDataPointsAlongY(int y, const Grid2d &clumps,
+					       const Grid2d &data,
+					       int minPt)
+{
+  // find all the contiguous clumps along this y
+  bool outside = true;
+  int x0, x1;
+  double value;
+  vector< pair<int,int> >  runs;
+  for (int x=0; x<_nx; ++x)
+  {
+    double v;
+    if (clumps.getValue(x,y,v))
+    {
+      if (outside)
+      {
+	outside = false;
+	x0 = x1 = x;
+	value = v;
+      }
+      else
+      {
+	if (v == value)
+	{
+	  x1 = x;
+	}
+	else
+	{
+	  // end of that run, store
+	  pair<int,int> x0x1(x0,x1);
+	  runs.push_back(x0x1);
+
+	  // start new run
+	  x0 = x1 = x;
+	  value = v;
+	}
+      }
+    }
+    else
+    {
+      if (!outside)
+      {
+	outside = true;
+	pair<int,int> x0x1(x0,x1);
+	runs.push_back(x0x1);
+      }
+    }
+  }
+
+  // for each run:
+  for (size_t i=0; i<runs.size(); ++i)
+  {
+    _nptBetweenGoodDataPointsAlongYSubset(runs[i].first, runs[i].second, y,
+					  data, minPt);
+  }    
+}
+
+//-----------------------------------------------------------------
+void GridAlgs::_totalAttenuationAlongY(int y, const Grid2d &clumps,
+				       const Grid2d &dwr, double minKm,
+				       double kmPerX)
+{
+  // find all the contiguous clumps along this y
+  bool outside = true;
+  int x0, x1;
+  double value;
+  vector< pair<int,int> >  runs;
+  for (int x=0; x<_nx; ++x)
+  {
+    double v;
+    if (clumps.getValue(x,y,v))
+    {
+      if (outside)
+      {
+	outside = false;
+	x0 = x1 = x;
+	value = v;
+      }
+      else
+      {
+	if (v == value)
+	{
+	  x1 = x;
+	}
+	else
+	{
+	  // end of that run, store
+	  pair<int,int> x0x1(x0,x1);
+	  runs.push_back(x0x1);
+
+	  // start new run
+	  x0 = x1 = x;
+	  value = v;
+	}
+      }
+    }
+    else
+    {
+      if (!outside)
+      {
+	outside = true;
+	pair<int,int> x0x1(x0,x1);
+	runs.push_back(x0x1);
+      }
+    }
+  }
+
+  // for each run:
+  for (size_t i=0; i<runs.size(); ++i)
+  {
+    _totalAttenuationAlongYSubset(runs[i].first, runs[i].second, y,
+				  dwr, minKm, kmPerX);
+  }    
+}
+
+//-----------------------------------------------------------------
+void GridAlgs::_nptBetweenGoodDataPointsAlongYSubset(int x0, int x1, int y,
+						     const Grid2d &data,
+						     int minPt)
+{
+  for (int x=x0; x<=x1; ++x)
+  {
+    double v;
+    if (!data.getValue(x, y, v))
+    {
+      continue;
+    }
+
+    for (int xi=x+1; xi<=x1; ++xi)
+    {
+      double vi;
+      if (data.getValue(xi, y, vi))
+      {
+	int extent = (xi - x);
+	if (extent >= minPt)
+	{
+	  // ok, good at this point so can set value into local Grid2d
+	  setValue(x, y, (double)extent);
+	  break;
+	}
+      }
+    }
+    // break to here after setting value, or never setting a value,
+    // ready to increment by one and try again
+  }
+}
+
+//-----------------------------------------------------------------
+void GridAlgs::_totalAttenuationAlongYSubset(int x0, int x1, int y,
+					     const Grid2d &dwr, double minKm,
+					     double kmPerX)
+{
+  double vStart;
+  for (int x=x0; x<=x1; ++x)
+  {
+    double v;
+    if (!dwr.getValue(x, y, v))
+    {
+      continue;
+    }
+
+    // go ahead and compute an attenuation if you can and store to x,y
+    vStart = v;
+    for (int xi=x+1; xi<=x1; ++xi)
+    {
+      double vi;
+      if (dwr.getValue(xi, y, vi))
+      {
+	double extent = (xi - x)*kmPerX;
+	if (extent >= minKm)
+	{
+	  // ok, good at this point so can set value into local Grid2d
+	  setValue(x, y, (vi - vStart));
+	  break;
+	}
+      }
+    }
+    // break to here after setting value, or never set the attenuation at x, y
+    // ready to increment by one and try again
+  }
+}
+
+//-----------------------------------------------------------------
+void GridAlgs::_FIRfilterY(int y, const std::vector<double> &coeff)
+{
+  // find index of first and last valid data
+  int i0 = _firstValidIndex(y);
+  int i1 = _lastValidIndex(y);
+  if (i0 < 0 || i1 < 0)
+  {
+    LOG(WARNING) << "FIRfilter All the data is missing, no filtering y=" << y;
+    return;
+  }
+
+  int nCoeff = static_cast<int>(coeff.size());
+  if (i1-i0+1 < nCoeff*2)
+  {
+    LOG(WARNING) << "FIRfilter data mostly missing only " << i1-i0+1
+	       << " good values";
+    return;
+  }
+  LOG(DEBUG_VERBOSE) << "FIRfilter  I0,I1=" << i0 << "," << i1;
+
+  // get the center index value
+  int centerCoeff = nCoeff/2;
+  if (nCoeff % 2)
+  {
+    // odd # of coeffs...good
+  }
+  else
+  {
+    LOG(WARNING) << "FIRfilter even number of coeff, use n/2'th as center";
+  }
+
+  // if interpolating at edges, do a linear regression to get coefficients
+  double m0=0, int0=0, m1=0, int1=0;
+  bool allbad0=true, allbad1=true;
+  allbad0 = !_linearRegression(y, i0, i1, 20, true, m0, int0);
+  allbad1 = !_linearRegression(y, i0, i1, 20, false, m1, int1);
+
+  // create a vector that extends at each end
+  vector<double> tmpData = _extendData(y, i0, i1, centerCoeff, nCoeff,
+				       allbad0, m0, int0, allbad1, m1, int1);
+
+  // do gap filling on this data
+  vector<double> gapFilledData = tmpData;
+  _fillGaps(gapFilledData, _missing);
+
+  // create a vector to store data with gaps filled, compute sum of coefficients
+  double sumCoeff = 0.0;
+  for (int i=0; i<nCoeff; ++i)
+  {
+    sumCoeff += coeff[i];
+  }
+
+  for (int j=0; j<_nx; ++j)
+  {
+    _applyFIR(j, y, i0, i1, centerCoeff, tmpData,
+	      gapFilledData, coeff, sumCoeff);
+  }
+}
+
+//---------------------------------------------------------------------------
 void GridAlgs::compute(void *ti)
 {
   GridAlgsInfo *info = static_cast<GridAlgsInfo *>(ti);
@@ -3524,3 +4147,208 @@ void GridAlgs::_fillBox(const int x0, const int y0, const int nx,
     }
   }
 }
+
+//-----------------------------------------------------------------
+bool GridAlgs::_linearRegression(int y, int i0, int i1, int npt, bool up,
+				 double &slope, double &intercept) const
+{
+  // build up nptLinearInterp at each end of the data, skipping missing
+  // data
+  double N = 0;
+  double sumxy=0, sumx=0, sumy=0,sumx2=0;
+  int dataOffset=0;
+
+  int for0, for1, delta;
+  if (up)
+  {
+    for0 = 0;
+    for1 = i1-i0+1;
+    delta = 1;
+    dataOffset = i0;
+  }
+  else
+  {
+    for0 = 0;
+    for1 = -(i1-i0+1);
+    delta = -1;
+    dataOffset = i1;
+  }
+
+  for (int x=for0; x!=for1; x += delta)
+  {
+    double v;
+    if (getValue(x+dataOffset, y, v))
+    // if (_data[i+dataOffset] != _missing)
+    {
+      N++;
+      double d_x = static_cast<double>(x);
+      sumx += d_x;
+      sumy += v; //_data[i+dataOffset];
+      sumxy += d_x*v; //_data[i+dataOffset];
+      sumx2 += d_x*d_x;
+      if (N >= npt)
+      {
+	break;
+      }
+    }
+  }
+  if (N == npt)
+  {
+    slope = (N*sumxy - sumx*sumy)/(N*sumx2 - sumx*sumx);
+    intercept = (sumy - slope*sumx)/N;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+
+//-----------------------------------------------------------------
+std::vector<double> GridAlgs::_extendData(int y, int i0, int i1,
+					  int centerCoeff, 
+					  int nCoeff, bool allbad0,
+					  double m0, double int0,
+					  bool allbad1,
+					  double m1, double int1) const
+{
+  // copy the data, but expand at each end 
+  vector<double> tmpData;
+  int nTmp = i1-i0+1 + centerCoeff*2;
+
+  tmpData.reserve(nTmp);
+
+  for (int j=0; j<nTmp; ++j)
+  {
+    int eIndex = -centerCoeff+j;  // extension index
+    int dIndex = eIndex + i0;     // data index,  crosses over to >=0 at i0
+    if (j < centerCoeff)
+    {
+      tmpData.push_back(_extend(y, eIndex, m0, int0, allbad0));
+    }
+    else if (dIndex <= i1)
+    {
+      tmpData.push_back(_data[_ipt(dIndex, y)]);
+    }
+    else
+    {
+      int eIndP = dIndex - i1;
+      tmpData.push_back(_extend(y, eIndP, m1, int1, allbad1));
+    }
+  }
+  return tmpData;
+}
+    
+//-----------------------------------------------------------------
+double GridAlgs::_extend(int y, int interpIndex, double m, double intercept,
+			 bool allbad) const
+{
+   double d = _missing;
+   if (!allbad)
+   {
+     d = m*static_cast<double>(interpIndex) + intercept;
+   }
+   return d;
+ }
+
+
+
+//-----------------------------------------------------------------
+void GridAlgs::_applyFIR(int x, int y, int i0, int i1, int centerCoeff, 
+			 const std::vector<double> &tmpData,
+			 const std::vector<double> &gapFilledData,
+			 const std::vector<double> &coeff, double sumCoeff)
+{
+  int j = _ipt(x,y);
+
+  int tIndex = x+centerCoeff-i0;
+  if (tIndex < 0 || tIndex >= (int)tmpData.size())
+  {
+    _data[j] = _missing;
+    return;
+  }
+  
+  if (x < i0 || x > i1)
+  {
+    _data[j] = _missing;
+    return;
+  }
+  if (_data[j] == _missing)
+  {
+    return;
+  }
+  LOG(DEBUG_VERBOSE) << "Interpolating data centered at " << j;
+
+  double quality  = _FIRquality(centerCoeff, tmpData, gapFilledData, tIndex);
+  if (quality > 0)
+  {
+    _data[j] = _sumProduct(coeff, sumCoeff, gapFilledData, tIndex-centerCoeff);
+  }
+  else
+  {
+    _data[j] = _missing;
+  }
+}
+
+
+//-----------------------------------------------------------------
+double GridAlgs::_FIRquality(int centerCoeff, const vector<double> &tmpData,
+			     const vector<double> &gapFilledData,
+			     int tIndex) const
+{
+  int n = 2*centerCoeff + 1;  // the FIR filter window size
+
+  vector<double> qmeasure;
+  qmeasure.reserve(n);
+  qmeasure[0] = 1.0;
+  qmeasure[1] = 0.95;
+  qmeasure[2] = 0.90;
+  qmeasure[3] = 0.85;
+  qmeasure[4] = 0.80;
+  qmeasure[5] = 0.75;
+  for (int i=6; i<n/2; ++i)
+  {
+    qmeasure[i] = 0.5;
+  }
+  for (int i=n/2; i<n; ++i)
+  {
+    qmeasure[i] = 0.0;
+  }
+
+  int nbad = 0;
+  for (int i=-centerCoeff; i<=centerCoeff; ++i)
+  {
+    int ind = tIndex + i;
+    if (tmpData[ind] == _missing)
+    {
+      ++nbad;
+    }
+    if (gapFilledData[ind] == _missing)
+    {
+      // don't allow any missing data in gap filled data
+      return 0.0;
+    }
+  }
+  return qmeasure[nbad];
+}
+
+//-----------------------------------------------------------------
+double GridAlgs::_sumProduct(const std::vector<double> &coeff, double sumCoeff,
+			     const std::vector<double> &data, int i0) const
+{
+  double sumprod = 0.0;
+  for (size_t i=0; i<coeff.size(); ++i)
+  {
+    if (data[i+i0] == _missing)
+    {
+      return _missing;
+    }
+    else
+    {
+      sumprod += coeff[i]*data[i+i0];
+    }
+  }
+  return sumprod/sumCoeff;
+}
+  

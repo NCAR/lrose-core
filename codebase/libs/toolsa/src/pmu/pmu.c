@@ -340,9 +340,11 @@ void PMU_register_pid(const char *prog_name, const char *instance,
 
     /*
      * write file
+     * Limit the characters copied from proc_dir to proc_path to 
+     * avoid unbounded array copy
      */
-
-    sprintf(proc_path, "%s/%s.%s", proc_dir, prog_name, instance);
+    
+    snprintf(proc_path, 512,"%s/%s.%s", proc_dir, prog_name, instance);
 
     if ((proc_file = fopen(proc_path, "w")) != NULL) {
       fprintf(proc_file, "%d\n", pid);

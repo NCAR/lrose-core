@@ -129,7 +129,7 @@ void kd_rect_interp
 {
   KD_real **A;
   const int dim = 2;
-  KD_real querpoint[dim];
+  // KD_real querpoint[dim];
   vector<int> ptsFound;
   vector<KD_real> values;
 
@@ -158,8 +158,8 @@ void kd_rect_interp
     {
       for (int i=0; i<xdim; i++)
 	{
-	  querpoint[0] = xgrid[i];
-	  querpoint[1] = ygrid[j];
+	  // querpoint[0] = xgrid[i];
+	  // querpoint[1] = ygrid[j];
 
           rectquery[0][0] = xgrid[i] - dist_crit;		// x bounds
           rectquery[0][1] = xgrid[i] + dist_crit;

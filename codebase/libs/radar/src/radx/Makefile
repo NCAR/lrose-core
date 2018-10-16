@@ -13,6 +13,9 @@ LOC_CFLAGS =
 
 TARGET_FILE = ../libradar.a
 
+LOC_INC_DIR = ../include
+MY_CPPCHECKFLAGS = -E RadxAppParams.cc -E RadxAppParams.hh -E ../include/radar/RadxAppParams.hh 
+
 #
 # file lists
 #
@@ -26,9 +29,11 @@ HDRS = \
 
 CPPC_SRCS = \
 	RadxAppParams.cc \
+	RadxAppParms.cc \
 	RadxApp.cc \
 	RadxAppArgs.cc \
-	RadxAppConfig.cc
+	RadxAppConfig.cc \
+	RadxAppVolume.cc 
 
 #
 # general targets
@@ -47,5 +52,6 @@ RadxAppParams.hh: RadxAppParams.cc
 
 RadxAppParams.cc: paramdef.RadxApp
 	tdrp_gen -f paramdef.RadxApp -c++ -class RadxAppParams
+	$(CP) RadxAppParams.hh ../include/radar
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

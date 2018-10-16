@@ -196,7 +196,7 @@ int ReadClutterTable(clut_table_file_index_t *clutter_index,
   si32 i, ielev, iaz;
   si32 nelevations;
   si32 nazimuths;
-  si32 nplanes;
+  /* si32 nplanes; */
   si32 nlist;
   
   clut_table_params_t *tparams;
@@ -290,7 +290,7 @@ int ReadClutterTable(clut_table_file_index_t *clutter_index,
   
   nelevations = clutter_index->table_params->lookup_params.nelevations;
   nazimuths = clutter_index->table_params->lookup_params.nazimuths;
-  nplanes = clutter_index->table_params->lookup_params.grid.nz;
+  /* nplanes = clutter_index->table_params->lookup_params.grid.nz; */
   nlist = clutter_index->table_params->nlist;
   
   /*

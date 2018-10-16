@@ -1370,28 +1370,38 @@ int NcfRadxFile::_addCalibVariables()
 
   iret |= _addCalVar(_rCalPulseWidthVar, R_CALIB_PULSE_WIDTH,
                      R_CALIB_PULSE_WIDTH_LONG, SECONDS);
+
   iret |= _addCalVar(_rCalXmitPowerHVar, R_CALIB_XMIT_POWER_H,
                      R_CALIB_XMIT_POWER_H_LONG, DBM);
   iret |= _addCalVar(_rCalXmitPowerVVar, R_CALIB_XMIT_POWER_V,
                      R_CALIB_XMIT_POWER_V_LONG, DBM);
+
   iret |= _addCalVar(_rCalTwoWayWaveguideLossHVar, R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_H,
                      R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_H_LONG, DB);
   iret |= _addCalVar(_rCalTwoWayWaveguideLossVVar, R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_V,
                      R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_V_LONG, DB);
+
   iret |= _addCalVar(_rCalTwoWayRadomeLossHVar, R_CALIB_TWO_WAY_RADOME_LOSS_H,
                      R_CALIB_TWO_WAY_RADOME_LOSS_H_LONG, DB);
   iret |= _addCalVar(_rCalTwoWayRadomeLossVVar, R_CALIB_TWO_WAY_RADOME_LOSS_V,
                      R_CALIB_TWO_WAY_RADOME_LOSS_V_LONG, DB);
+
   iret |= _addCalVar(_rCalReceiverMismatchLossVar, R_CALIB_RECEIVER_MISMATCH_LOSS,
                      R_CALIB_RECEIVER_MISMATCH_LOSS_LONG, DB);
+
+  iret |= _addCalVar(_rCalKSquaredWaterVar, R_CALIB_K_SQUARED_WATER,
+                     R_CALIB_K_SQUARED_WATER);
+
   iret |= _addCalVar(_rCalRadarConstHVar, R_CALIB_RADAR_CONSTANT_H,
                      R_CALIB_RADAR_CONSTANT_H_LONG, DB);
   iret |= _addCalVar(_rCalRadarConstVVar, R_CALIB_RADAR_CONSTANT_V,
                      R_CALIB_RADAR_CONSTANT_V_LONG, DB);
+
   iret |= _addCalVar(_rCalAntennaGainHVar, R_CALIB_ANTENNA_GAIN_H,
                      R_CALIB_ANTENNA_GAIN_H_LONG, DB);
   iret |= _addCalVar(_rCalAntennaGainVVar, R_CALIB_ANTENNA_GAIN_V,
                      R_CALIB_ANTENNA_GAIN_V_LONG, DB);
+
   iret |= _addCalVar(_rCalNoiseHcVar, R_CALIB_NOISE_HC,
                      R_CALIB_NOISE_HC_LONG, DBM);
   iret |= _addCalVar(_rCalNoiseVcVar, R_CALIB_NOISE_VC,
@@ -1400,6 +1410,16 @@ int NcfRadxFile::_addCalibVariables()
                      R_CALIB_NOISE_HX_LONG, DBM);
   iret |= _addCalVar(_rCalNoiseVxVar, R_CALIB_NOISE_VX,
                      R_CALIB_NOISE_VX_LONG, DBM);
+
+  iret |= _addCalVar(_rCalI0HcVar, R_CALIB_I0_DBM_HC,
+                     R_CALIB_I0_DBM_HC, DBM);
+  iret |= _addCalVar(_rCalI0VcVar, R_CALIB_I0_DBM_VC,
+                     R_CALIB_I0_DBM_VC, DBM);
+  iret |= _addCalVar(_rCalI0HxVar, R_CALIB_I0_DBM_HX,
+                     R_CALIB_I0_DBM_HX, DBM);
+  iret |= _addCalVar(_rCalI0VxVar, R_CALIB_I0_DBM_VX,
+                     R_CALIB_I0_DBM_VX, DBM);
+
   iret |= _addCalVar(_rCalReceiverGainHcVar, R_CALIB_RECEIVER_GAIN_HC,
                      R_CALIB_RECEIVER_GAIN_HC_LONG, DB);
   iret |= _addCalVar(_rCalReceiverGainVcVar, R_CALIB_RECEIVER_GAIN_VC,
@@ -1408,48 +1428,7 @@ int NcfRadxFile::_addCalibVariables()
                      R_CALIB_RECEIVER_GAIN_HX_LONG, DB);
   iret |= _addCalVar(_rCalReceiverGainVxVar, R_CALIB_RECEIVER_GAIN_VX,
                      R_CALIB_RECEIVER_GAIN_VX_LONG, DB);
-  iret |= _addCalVar(_rCalBaseDbz1kmHcVar, R_CALIB_BASE_DBZ_1KM_HC,
-                     R_CALIB_BASE_DBZ_1KM_HC_LONG, DBZ);
-  iret |= _addCalVar(_rCalBaseDbz1kmVcVar, R_CALIB_BASE_DBZ_1KM_VC,
-                     R_CALIB_BASE_DBZ_1KM_VC_LONG, DBZ);
-  iret |= _addCalVar(_rCalBaseDbz1kmHxVar, R_CALIB_BASE_DBZ_1KM_HX,
-                     R_CALIB_BASE_DBZ_1KM_HX_LONG, DBZ);
-  iret |= _addCalVar(_rCalBaseDbz1kmVxVar, R_CALIB_BASE_DBZ_1KM_VX,
-                     R_CALIB_BASE_DBZ_1KM_VX_LONG, DBZ);
-  iret |= _addCalVar(_rCalSunPowerHcVar, R_CALIB_SUN_POWER_HC,
-                     R_CALIB_SUN_POWER_HC_LONG, DBM);
-  iret |= _addCalVar(_rCalSunPowerVcVar, R_CALIB_SUN_POWER_VC,
-                     R_CALIB_SUN_POWER_VC_LONG, DBM);
-  iret |= _addCalVar(_rCalSunPowerHxVar, R_CALIB_SUN_POWER_HX,
-                     R_CALIB_SUN_POWER_HX_LONG, DBM);
-  iret |= _addCalVar(_rCalSunPowerVxVar, R_CALIB_SUN_POWER_VX,
-                     R_CALIB_SUN_POWER_VX_LONG, DBM);
-  iret |= _addCalVar(_rCalNoiseSourcePowerHVar, R_CALIB_NOISE_SOURCE_POWER_H,
-                     R_CALIB_NOISE_SOURCE_POWER_H_LONG, DBM);
-  iret |= _addCalVar(_rCalNoiseSourcePowerVVar, R_CALIB_NOISE_SOURCE_POWER_V,
-                     R_CALIB_NOISE_SOURCE_POWER_V_LONG, DBM);
-  iret |= _addCalVar(_rCalPowerMeasLossHVar, R_CALIB_POWER_MEASURE_LOSS_H,
-                     R_CALIB_POWER_MEASURE_LOSS_H_LONG, DB);
-  iret |= _addCalVar(_rCalPowerMeasLossVVar, R_CALIB_POWER_MEASURE_LOSS_V,
-                     R_CALIB_POWER_MEASURE_LOSS_V_LONG, DB);
-  iret |= _addCalVar(_rCalCouplerForwardLossHVar, R_CALIB_COUPLER_FORWARD_LOSS_H,
-                     R_CALIB_COUPLER_FORWARD_LOSS_H_LONG, DB);
-  iret |= _addCalVar(_rCalCouplerForwardLossVVar, R_CALIB_COUPLER_FORWARD_LOSS_V,
-                     R_CALIB_COUPLER_FORWARD_LOSS_V_LONG, DB);
-  iret |= _addCalVar(_rCalDbzCorrectionVar, R_CALIB_DBZ_CORRECTION,
-                     R_CALIB_DBZ_CORRECTION_LONG, DB);
-  iret |= _addCalVar(_rCalZdrCorrectionVar, R_CALIB_ZDR_CORRECTION,
-                     R_CALIB_ZDR_CORRECTION_LONG, DB);
-  iret |= _addCalVar(_rCalLdrCorrectionHVar, R_CALIB_LDR_CORRECTION_H,
-                     R_CALIB_LDR_CORRECTION_H_LONG, DB);
-  iret |= _addCalVar(_rCalLdrCorrectionVVar, R_CALIB_LDR_CORRECTION_V,
-                     R_CALIB_LDR_CORRECTION_V_LONG, DB);
-  iret |= _addCalVar(_rCalSystemPhidpVar, R_CALIB_SYSTEM_PHIDP,
-                     R_CALIB_SYSTEM_PHIDP_LONG, DEGREES);
-  iret |= _addCalVar(_rCalTestPowerHVar, R_CALIB_TEST_POWER_H,
-                     R_CALIB_TEST_POWER_H_LONG, DBM);
-  iret |= _addCalVar(_rCalTestPowerVVar, R_CALIB_TEST_POWER_V,
-                     R_CALIB_TEST_POWER_V_LONG, DBM);
+
   iret |= _addCalVar(_rCalReceiverSlopeHcVar, R_CALIB_RECEIVER_SLOPE_HC,
                      R_CALIB_RECEIVER_SLOPE_HC_LONG);
   iret |= _addCalVar(_rCalReceiverSlopeVcVar, R_CALIB_RECEIVER_SLOPE_VC,
@@ -1458,6 +1437,65 @@ int NcfRadxFile::_addCalibVariables()
                      R_CALIB_RECEIVER_SLOPE_HX_LONG);
   iret |= _addCalVar(_rCalReceiverSlopeVxVar, R_CALIB_RECEIVER_SLOPE_VX,
                      R_CALIB_RECEIVER_SLOPE_VX_LONG);
+
+  iret |= _addCalVar(_rCalDynamicRangeHcVar, R_CALIB_DYNAMIC_RANGE_DB_HC,
+                     R_CALIB_DYNAMIC_RANGE_DB_HC, DB);
+  iret |= _addCalVar(_rCalDynamicRangeVcVar, R_CALIB_DYNAMIC_RANGE_DB_VC,
+                     R_CALIB_DYNAMIC_RANGE_DB_VC, DB);
+  iret |= _addCalVar(_rCalDynamicRangeHxVar, R_CALIB_DYNAMIC_RANGE_DB_HX,
+                     R_CALIB_DYNAMIC_RANGE_DB_HX, DB);
+  iret |= _addCalVar(_rCalDynamicRangeVxVar, R_CALIB_DYNAMIC_RANGE_DB_VX,
+                     R_CALIB_DYNAMIC_RANGE_DB_VX, DB);
+
+  iret |= _addCalVar(_rCalBaseDbz1kmHcVar, R_CALIB_BASE_DBZ_1KM_HC,
+                     R_CALIB_BASE_DBZ_1KM_HC_LONG, DBZ);
+  iret |= _addCalVar(_rCalBaseDbz1kmVcVar, R_CALIB_BASE_DBZ_1KM_VC,
+                     R_CALIB_BASE_DBZ_1KM_VC_LONG, DBZ);
+  iret |= _addCalVar(_rCalBaseDbz1kmHxVar, R_CALIB_BASE_DBZ_1KM_HX,
+                     R_CALIB_BASE_DBZ_1KM_HX_LONG, DBZ);
+  iret |= _addCalVar(_rCalBaseDbz1kmVxVar, R_CALIB_BASE_DBZ_1KM_VX,
+                     R_CALIB_BASE_DBZ_1KM_VX_LONG, DBZ);
+
+  iret |= _addCalVar(_rCalSunPowerHcVar, R_CALIB_SUN_POWER_HC,
+                     R_CALIB_SUN_POWER_HC_LONG, DBM);
+  iret |= _addCalVar(_rCalSunPowerVcVar, R_CALIB_SUN_POWER_VC,
+                     R_CALIB_SUN_POWER_VC_LONG, DBM);
+  iret |= _addCalVar(_rCalSunPowerHxVar, R_CALIB_SUN_POWER_HX,
+                     R_CALIB_SUN_POWER_HX_LONG, DBM);
+  iret |= _addCalVar(_rCalSunPowerVxVar, R_CALIB_SUN_POWER_VX,
+                     R_CALIB_SUN_POWER_VX_LONG, DBM);
+
+  iret |= _addCalVar(_rCalNoiseSourcePowerHVar, R_CALIB_NOISE_SOURCE_POWER_H,
+                     R_CALIB_NOISE_SOURCE_POWER_H_LONG, DBM);
+  iret |= _addCalVar(_rCalNoiseSourcePowerVVar, R_CALIB_NOISE_SOURCE_POWER_V,
+                     R_CALIB_NOISE_SOURCE_POWER_V_LONG, DBM);
+
+  iret |= _addCalVar(_rCalPowerMeasLossHVar, R_CALIB_POWER_MEASURE_LOSS_H,
+                     R_CALIB_POWER_MEASURE_LOSS_H_LONG, DB);
+  iret |= _addCalVar(_rCalPowerMeasLossVVar, R_CALIB_POWER_MEASURE_LOSS_V,
+                     R_CALIB_POWER_MEASURE_LOSS_V_LONG, DB);
+
+  iret |= _addCalVar(_rCalCouplerForwardLossHVar, R_CALIB_COUPLER_FORWARD_LOSS_H,
+                     R_CALIB_COUPLER_FORWARD_LOSS_H_LONG, DB);
+  iret |= _addCalVar(_rCalCouplerForwardLossVVar, R_CALIB_COUPLER_FORWARD_LOSS_V,
+                     R_CALIB_COUPLER_FORWARD_LOSS_V_LONG, DB);
+
+  iret |= _addCalVar(_rCalDbzCorrectionVar, R_CALIB_DBZ_CORRECTION,
+                     R_CALIB_DBZ_CORRECTION_LONG, DB);
+  iret |= _addCalVar(_rCalZdrCorrectionVar, R_CALIB_ZDR_CORRECTION,
+                     R_CALIB_ZDR_CORRECTION_LONG, DB);
+  iret |= _addCalVar(_rCalLdrCorrectionHVar, R_CALIB_LDR_CORRECTION_H,
+                     R_CALIB_LDR_CORRECTION_H_LONG, DB);
+  iret |= _addCalVar(_rCalLdrCorrectionVVar, R_CALIB_LDR_CORRECTION_V,
+                     R_CALIB_LDR_CORRECTION_V_LONG, DB);
+
+  iret |= _addCalVar(_rCalSystemPhidpVar, R_CALIB_SYSTEM_PHIDP,
+                     R_CALIB_SYSTEM_PHIDP_LONG, DEGREES);
+
+  iret |= _addCalVar(_rCalTestPowerHVar, R_CALIB_TEST_POWER_H,
+                     R_CALIB_TEST_POWER_H_LONG, DBM);
+  iret |= _addCalVar(_rCalTestPowerVVar, R_CALIB_TEST_POWER_V,
+                     R_CALIB_TEST_POWER_V_LONG, DBM);
 
   if (iret) {
     _addErrStr("ERROR - NcfRadxFile::_addCalibVariables");
@@ -2956,10 +2994,14 @@ int NcfRadxFile::_writeCalibVariables()
 
   int iret = 0;
 
+  // pulse width
+
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getPulseWidthUsec() * 1.0e-6;
   }
   iret |= _file.writeVar(_rCalPulseWidthVar, _calDim, fvals);
+
+  // xmit power
 
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getXmitPowerDbmH();
@@ -2971,6 +3013,8 @@ int NcfRadxFile::_writeCalibVariables()
   }
   iret |= _file.writeVar(_rCalXmitPowerVVar, _calDim, fvals);
 
+  // waveguide loss
+
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getTwoWayWaveguideLossDbH();
   }
@@ -2980,6 +3024,8 @@ int NcfRadxFile::_writeCalibVariables()
     fvals[ii] = calibs[ii]->getTwoWayWaveguideLossDbV();
   }
   iret |= _file.writeVar(_rCalTwoWayWaveguideLossVVar, _calDim, fvals);
+
+  // radome loss
 
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getTwoWayRadomeLossDbH();
@@ -2991,10 +3037,21 @@ int NcfRadxFile::_writeCalibVariables()
   }
   iret |= _file.writeVar(_rCalTwoWayRadomeLossVVar, _calDim, fvals);
 
+  // rx mismatch loss
+
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getReceiverMismatchLossDb();
   }
   iret |= _file.writeVar(_rCalReceiverMismatchLossVar, _calDim, fvals);
+
+  // k squared water
+
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getKSquaredWater();
+  }
+  iret |= _file.writeVar(_rCalKSquaredWaterVar, _calDim, fvals);
+
+  // radar constant
 
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getRadarConstantH();
@@ -3006,6 +3063,8 @@ int NcfRadxFile::_writeCalibVariables()
   }
   iret |= _file.writeVar(_rCalRadarConstVVar, _calDim, fvals);
 
+  // antenna gain
+
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getAntennaGainDbH();
   }
@@ -3016,6 +3075,8 @@ int NcfRadxFile::_writeCalibVariables()
   }
   iret |= _file.writeVar(_rCalAntennaGainVVar, _calDim, fvals);
 
+  // noise dbm
+  
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getNoiseDbmHc();
   }
@@ -3035,6 +3096,30 @@ int NcfRadxFile::_writeCalibVariables()
     fvals[ii] = calibs[ii]->getNoiseDbmVx();
   }
   iret |= _file.writeVar(_rCalNoiseVxVar, _calDim, fvals);
+
+  // i0 dbm
+  
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getI0DbmHc();
+  }
+  iret |= _file.writeVar(_rCalI0HcVar, _calDim, fvals);
+
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getI0DbmHx();
+  }
+  iret |= _file.writeVar(_rCalI0HxVar, _calDim, fvals);
+
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getI0DbmVc();
+  }
+  iret |= _file.writeVar(_rCalI0VcVar, _calDim, fvals);
+
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getI0DbmVx();
+  }
+  iret |= _file.writeVar(_rCalI0VxVar, _calDim, fvals);
+
+  // receiver gain
 
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getReceiverGainDbHc();
@@ -3056,6 +3141,52 @@ int NcfRadxFile::_writeCalibVariables()
   }
   iret |= _file.writeVar(_rCalReceiverGainVxVar, _calDim, fvals);
 
+  // receiver slope
+
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getReceiverSlopeDbHc();
+  }
+  iret |= _file.writeVar(_rCalReceiverSlopeHcVar, _calDim, fvals);
+
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getReceiverSlopeDbHx();
+  }
+  iret |= _file.writeVar(_rCalReceiverSlopeHxVar, _calDim, fvals);
+
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getReceiverSlopeDbVc();
+  }
+  iret |= _file.writeVar(_rCalReceiverSlopeVcVar, _calDim, fvals);
+
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getReceiverSlopeDbVx();
+  }
+  iret |= _file.writeVar(_rCalReceiverSlopeVxVar, _calDim, fvals);
+
+  // dynamic range
+  
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getDynamicRangeDbHc();
+  }
+  iret |= _file.writeVar(_rCalDynamicRangeHcVar, _calDim, fvals);
+
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getDynamicRangeDbHx();
+  }
+  iret |= _file.writeVar(_rCalDynamicRangeHxVar, _calDim, fvals);
+
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getDynamicRangeDbVc();
+  }
+  iret |= _file.writeVar(_rCalDynamicRangeVcVar, _calDim, fvals);
+
+  for (int ii = 0; ii < nCalib; ii++) {
+    fvals[ii] = calibs[ii]->getDynamicRangeDbVx();
+  }
+  iret |= _file.writeVar(_rCalDynamicRangeVxVar, _calDim, fvals);
+
+  // base dbz 1km
+
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getBaseDbz1kmHc();
   }
@@ -3075,6 +3206,8 @@ int NcfRadxFile::_writeCalibVariables()
     fvals[ii] = calibs[ii]->getBaseDbz1kmVx();
   }
   iret |= _file.writeVar(_rCalBaseDbz1kmVxVar, _calDim, fvals);
+
+  // sun power
 
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getSunPowerDbmHc();
@@ -3096,6 +3229,8 @@ int NcfRadxFile::_writeCalibVariables()
   }
   iret |= _file.writeVar(_rCalSunPowerVxVar, _calDim, fvals);
 
+  // noise source power
+
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getNoiseSourcePowerDbmH();
   }
@@ -3105,6 +3240,8 @@ int NcfRadxFile::_writeCalibVariables()
     fvals[ii] = calibs[ii]->getNoiseSourcePowerDbmV();
   }
   iret |= _file.writeVar(_rCalNoiseSourcePowerVVar, _calDim, fvals);
+
+  // power measurement loss
 
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getPowerMeasLossDbH();
@@ -3116,6 +3253,8 @@ int NcfRadxFile::_writeCalibVariables()
   }
   iret |= _file.writeVar(_rCalPowerMeasLossVVar, _calDim, fvals);
 
+  // coupler loss
+
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getCouplerForwardLossDbH();
   }
@@ -3125,6 +3264,8 @@ int NcfRadxFile::_writeCalibVariables()
     fvals[ii] = calibs[ii]->getCouplerForwardLossDbV();
   }
   iret |= _file.writeVar(_rCalCouplerForwardLossVVar, _calDim, fvals);
+
+  // corrections
 
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getDbzCorrection();
@@ -3151,6 +3292,8 @@ int NcfRadxFile::_writeCalibVariables()
   }
   iret |= _file.writeVar(_rCalSystemPhidpVar, _calDim, fvals);
 
+  // test power
+
   for (int ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getTestPowerDbmH();
   }
@@ -3160,26 +3303,6 @@ int NcfRadxFile::_writeCalibVariables()
     fvals[ii] = calibs[ii]->getTestPowerDbmV();
   }
   iret |= _file.writeVar(_rCalTestPowerVVar, _calDim, fvals);
-
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverSlopeDbHc();
-  }
-  iret |= _file.writeVar(_rCalReceiverSlopeHcVar, _calDim, fvals);
-
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverSlopeDbHx();
-  }
-  iret |= _file.writeVar(_rCalReceiverSlopeHxVar, _calDim, fvals);
-
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverSlopeDbVc();
-  }
-  iret |= _file.writeVar(_rCalReceiverSlopeVcVar, _calDim, fvals);
-
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverSlopeDbVx();
-  }
-  iret |= _file.writeVar(_rCalReceiverSlopeVxVar, _calDim, fvals);
 
   if (iret) {
     _addErrStr("ERROR - NcfRadxFile::_writeCalibVariables");

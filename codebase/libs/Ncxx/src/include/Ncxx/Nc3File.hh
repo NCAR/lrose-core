@@ -43,6 +43,7 @@
 #define Nc3File_HH
 
 #include <Ncxx/Nc3Values.hh>    // arrays that know their element type
+#include <sys/types.h>
 
 typedef const char* Nc3Token;    // names for netCDF objects
 typedef unsigned int Nc3Bool;    // many members return 0 on failure
@@ -116,6 +117,7 @@ public:
   Nc3Bool add_att( Nc3Token attname, short );
   Nc3Bool add_att( Nc3Token attname, long );
   Nc3Bool add_att( Nc3Token attname, int );
+  Nc3Bool add_att( Nc3Token attname, long long );
   Nc3Bool add_att( Nc3Token attname, float );
   Nc3Bool add_att( Nc3Token attname, double );
   Nc3Bool add_att( Nc3Token attname, const char*);       // string attribute
@@ -124,6 +126,7 @@ public:
   Nc3Bool add_att( Nc3Token attname, int, const short* );
   Nc3Bool add_att( Nc3Token attname, int, const long* );
   Nc3Bool add_att( Nc3Token attname, int, const int* );
+  Nc3Bool add_att( Nc3Token attname, int, const long long* );
   Nc3Bool add_att( Nc3Token attname, int, const float* );
   Nc3Bool add_att( Nc3Token attname, int, const double* );
 
@@ -190,7 +193,7 @@ private:
   Nc3Dim(Nc3File*, int num);	// existing dimension
   Nc3Dim(Nc3File*, Nc3Token name, long sz); // defines a new dim
   virtual ~Nc3Dim( void );
-    
+
   // to construct dimensions, since constructor is private
   friend class Nc3File;
 };
@@ -221,7 +224,8 @@ public:
   virtual ncbyte as_ncbyte( long n ) const;    // nth value as an unsgnd char
   virtual char as_char( long n ) const;        // nth value as char
   virtual short as_short( long n ) const;      // nth value as short
-  virtual int as_int( long n ) const;	         // nth value as int
+  virtual int as_int( long n ) const;	       // nth value as int
+  virtual int64_t as_int64( long n ) const;    // nth value as int64
   virtual int as_nclong( long n ) const;       // nth value as nclong (deprecated)
   virtual long as_long( long n ) const;        // nth value as long
   virtual float as_float( long n ) const;      // nth value as floating-point
@@ -326,6 +330,7 @@ public:
   Nc3Bool add_att( Nc3Token, short );
   Nc3Bool add_att( Nc3Token, int );
   Nc3Bool add_att( Nc3Token, long );
+  Nc3Bool add_att( Nc3Token, long long);
   Nc3Bool add_att( Nc3Token, float );
   Nc3Bool add_att( Nc3Token, double );
   Nc3Bool add_att( Nc3Token, const char* );      // string attribute
@@ -333,6 +338,7 @@ public:
   Nc3Bool add_att( Nc3Token, int, const ncbyte* );
   Nc3Bool add_att( Nc3Token, int, const short* );
   Nc3Bool add_att( Nc3Token, int, const int* );
+  Nc3Bool add_att( Nc3Token, int, const long long* );
   Nc3Bool add_att( Nc3Token, int, const long* );
   Nc3Bool add_att( Nc3Token, int, const float* );
   Nc3Bool add_att( Nc3Token, int, const double* );

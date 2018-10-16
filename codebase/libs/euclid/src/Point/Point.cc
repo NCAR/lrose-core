@@ -22,6 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include <euclid/Point.hh>
+#include <euclid/Grid2d.hh>
 #include <rapmath/Math.hh>
 #include <toolsa/LogStream.hh>
 #include <toolsa/TaXml.hh>
@@ -254,6 +255,28 @@ bool Point::minMax(const Point &pt1, Point &dmin, Point &dmax,
   // miny may be -1.
   int n_pts = max._x - min._x + max._y - min._y + 2;
   return (n_pts > 0);
+}
+
+/*-----------------------------------------------------------------------*/
+bool Point::isMissing(const Grid2d &grid) const
+{
+  return grid.isMissing((int)_x, (int)_y);
+}
+
+/*----------------------------------------------------------------*/
+bool Point::inGridRange(int nx, int ny) const
+{
+  int ix = (int)_x;
+  int iy = (int)_y;
+  return ix >= 0 && ix < nx && iy >=0 && iy < ny;
+}    
+
+/*----------------------------------------------------------------*/
+void Point::toGrid(Grid2d &grid, double value) const
+{
+  int ix = (int)_x;
+  int iy = (int)_y;
+  grid.setValue(ix, iy, value);
 }
 
 /*----------------------------------------------------------------*/

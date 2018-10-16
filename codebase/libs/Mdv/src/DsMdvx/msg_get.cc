@@ -2114,23 +2114,42 @@ int DsMdvxMsg::_getNcfHeaderParts(DsMdvx &mdvx)
     cerr << xml << endl;
   }
 
-  double validTime = 0, genTime = 0, forecastTime = 0;
-  TaXml::readDouble(xml, "valid_time", validTime);
-  TaXml::readDouble(xml, "gen_time", genTime);
-  TaXml::readDouble(xml, "forecast_time", forecastTime);
+  double validTime = 0;
+  if (TaXml::readDouble(xml, "valid_time", validTime)) {
+    validTime = 0;
+  }
+  double genTime = 0;
+  if (TaXml::readDouble(xml, "gen_time", genTime)) {
+    genTime = 0;
+  }
+  double forecastTime = 0;
+  if (TaXml::readDouble(xml, "forecast_time", forecastTime)) {
+    forecastTime = 0;
+  }
 
-  int forecastLeadSecs = 0, epoch = 0;
-  TaXml::readInt(xml, "forecast_lead_secs", forecastLeadSecs);
-  TaXml::readInt(xml, "epoch", epoch);
+  int forecastLeadSecs = 0;
+  if (TaXml::readInt(xml, "forecast_lead_secs", forecastLeadSecs)) {
+    forecastLeadSecs = 0;
+  }
+  int epoch = 0;
+  if (TaXml::readInt(xml, "epoch", epoch)) {
+    epoch = 0;
+  }
 
   bool isForecast = false;
-  TaXml::readBoolean(xml, "is_forecast", isForecast);
+  if (TaXml::readBoolean(xml, "is_forecast", isForecast)) {
+    isForecast = false;
+  }
 
   string suffix;
-  TaXml::readString(xml, "suffix", suffix);
+  if (TaXml::readString(xml, "suffix", suffix)) {
+    suffix.clear();
+  }
 
   bool constrained = false;
-  TaXml::readBoolean(xml, "constrained", constrained);
+  if (TaXml::readBoolean(xml, "constrained", constrained)) {
+    constrained = false;
+  }
   
   // set ncf details
   
@@ -2202,44 +2221,67 @@ int DsMdvxMsg::_getConvertMdv2Ncf(DsMdvx &mdvx)
   // global attributes
 
   string institution, references, comment;
-  TaXml::readString(xml, "institution", institution);
-  TaXml::readString(xml, "references", references);
-  TaXml::readString(xml, "comment", comment);
+  if (TaXml::readString(xml, "institution", institution)) {
+    institution.clear();
+  }
+  if (TaXml::readString(xml, "references", references)) {
+    references.clear();
+  }
+  if (TaXml::readString(xml, "comment", comment)) {
+    comment.clear();
+  }
   mdvx.setMdv2NcfAttr(institution, references, comment);
 
   // output compression
 
-  bool compress;
-  TaXml::readBoolean(xml, "compress", compress);
-  int compressionLevel;
-  TaXml::readInt(xml, "compressionLevel", compressionLevel);
+  bool compress = false;
+  if (TaXml::readBoolean(xml, "compress", compress)) {
+    compress = false;
+  }
+  int compressionLevel = 4;
+  if (TaXml::readInt(xml, "compressionLevel", compressionLevel)) {
+    compressionLevel = 4;
+  }
   mdvx.setMdv2NcfCompression(compress, compressionLevel);
-
+  
   // output format
 
   string formatStr;
-  TaXml::readString(xml, "fileFormat", formatStr);
+  if (TaXml::readString(xml, "fileFormat", formatStr)) {
+    formatStr.clear();
+  }
   DsMdvx::nc_file_format_t fileFormat = DsMdvx::ncFormat2Enum(formatStr);
   mdvx.setMdv2NcfFormat(fileFormat);
 
   // polar radar file type
 
   string ftypeStr;
-  TaXml::readString(xml, "radialFileType", ftypeStr);
+  if (TaXml::readString(xml, "radialFileType", ftypeStr)) {
+    ftypeStr.clear();
+  }
   DsMdvx::radial_file_type_t fileType = DsMdvx::radialFileType2Enum(ftypeStr);
   mdvx.setRadialFileType(fileType);
 
   // output content
 
-  bool outputLatlonArrays;
-  bool outputMdvAttr;
-  bool outputMdvChunks;
-  bool outputStartEndTimes;
-  TaXml::readBoolean(xml, "outputLatlonArrays", outputLatlonArrays);
-  TaXml::readBoolean(xml, "outputMdvAttr", outputMdvAttr);
-  TaXml::readBoolean(xml, "outputMdvChunks", outputMdvChunks);
-  TaXml::readBoolean(xml, "outputStartEndTimes", outputStartEndTimes); 
-  mdvx.setMdv2NcfOutput(outputLatlonArrays, outputMdvAttr, outputMdvChunks,outputStartEndTimes);
+  bool outputLatlonArrays = false;
+  bool outputMdvAttr = false;
+  bool outputMdvChunks = false;
+  bool outputStartEndTimes = false;
+  if (TaXml::readBoolean(xml, "outputLatlonArrays", outputLatlonArrays)) {
+    outputLatlonArrays = false;
+  }
+  if (TaXml::readBoolean(xml, "outputMdvAttr", outputMdvAttr)) {
+    outputMdvAttr = false;
+  }
+  if (TaXml::readBoolean(xml, "outputMdvChunks", outputMdvChunks)) {
+    outputMdvChunks = false;
+  }
+  if (TaXml::readBoolean(xml, "outputStartEndTimes", outputStartEndTimes)) {
+    outputStartEndTimes = false;
+  }
+  mdvx.setMdv2NcfOutput(outputLatlonArrays, outputMdvAttr,
+                        outputMdvChunks,outputStartEndTimes);
 
   // field translation
 
@@ -2250,35 +2292,53 @@ int DsMdvxMsg::_getConvertMdv2Ncf(DsMdvx &mdvx)
   }
 
   for (int ii = 0; ii < (int) transVec.size(); ii++) {
-
+    
     const string &trans = transVec[ii];
     
     string mdvFieldName;
-    TaXml::readString(trans, "mdv_field_name", mdvFieldName);
+    if (TaXml::readString(trans, "mdv_field_name", mdvFieldName)) {
+      mdvFieldName.clear();
+    }
 
     string ncfFieldName;
-    TaXml::readString(trans, "ncf_field_name", ncfFieldName);
+    if (TaXml::readString(trans, "ncf_field_name", ncfFieldName)) {
+      ncfFieldName.clear();
+    }
 
     string ncfStandardName;
-    TaXml::readString(trans, "ncf_standard_name", ncfStandardName);
+    if (TaXml::readString(trans, "ncf_standard_name", ncfStandardName)) {
+      ncfStandardName.clear();
+    }
 
     string ncfLongName;
-    TaXml::readString(trans, "ncf_long_name", ncfLongName);
+    if (TaXml::readString(trans, "ncf_long_name", ncfLongName)) {
+      ncfLongName.clear();
+    }
 
     string ncfUnits;
-    TaXml::readString(trans, "ncf_units", ncfUnits);
+    if (TaXml::readString(trans, "ncf_units", ncfUnits)) {
+      ncfUnits.clear();
+    }
     
     bool doLinearTransform = false;
-    TaXml::readBoolean(trans, "do_linear_transform", doLinearTransform);
+    if (TaXml::readBoolean(trans, "do_linear_transform", doLinearTransform)) {
+      doLinearTransform = false;
+    }
 
     double linearMult = 1.0;
-    TaXml::readDouble(trans, "linear_mult", linearMult);
+    if (TaXml::readDouble(trans, "linear_mult", linearMult)) {
+      linearMult = 1.0;
+    }
 
     double linearOffset = 0.0;
-    TaXml::readDouble(trans, "linear_offset", linearOffset);
+    if (TaXml::readDouble(trans, "linear_offset", linearOffset)) {
+      linearOffset = 0.0;
+    }
 
     string packStr;
-    TaXml::readString(trans, "packing", packStr);
+    if (TaXml::readString(trans, "packing", packStr)) {
+      packStr.clear();
+    }
     DsMdvx::ncf_pack_t packing = DsMdvx::ncfPack2Enum(packStr);
     
     mdvx.addMdv2NcfTrans(mdvFieldName,

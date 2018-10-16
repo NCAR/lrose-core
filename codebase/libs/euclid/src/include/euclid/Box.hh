@@ -122,8 +122,8 @@ public:
    * @param[in] maxdist
    * @param[in] no_truncate If true, no trunctaion, 
    *                        if false, truncate to keep inside grid
-   * @praam[in] nx  Grid upper limit
-   * @praam[in] ny  Grid upper limit
+   * @param[in] nx  Grid upper limit
+   * @param[in] ny  Grid upper limit
    */
   void expand(double maxdist, bool no_truncate, int nx, int ny);
 

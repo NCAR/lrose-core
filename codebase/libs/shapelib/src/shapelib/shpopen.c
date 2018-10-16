@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: shpopen.c,v 1.2 2003/01/26 01:18:39 dixon Exp $
+ * $Id: shpopen.c,v 1.3 2018/10/13 23:24:07 dixon Exp $
  *
  * Project:  Shapelib
  * Purpose:  Implementation of core Shapefile read/write functions.
@@ -34,6 +34,9 @@
  ******************************************************************************
  *
  * $Log: shpopen.c,v $
+ * Revision 1.3  2018/10/13 23:24:07  dixon
+ * Sync with EOL/github/lrose-core
+ *
  * Revision 1.2  2003/01/26 01:18:39  dixon
  * g++3.2 port
  *

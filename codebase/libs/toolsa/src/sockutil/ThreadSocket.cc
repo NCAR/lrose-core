@@ -191,6 +191,7 @@ int ThreadSocket::_openClient(const char *hostname,
   // resolve host
 
   struct sockaddr_in rem_soc;
+  memset((void*)&rem_soc, 0, sizeof(rem_soc));
 
   if (useCache) {
     

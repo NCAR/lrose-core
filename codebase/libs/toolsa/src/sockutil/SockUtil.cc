@@ -43,6 +43,7 @@
 #include <netinet/tcp.h>
 #include <sys/socket.h>
 #include <cerrno>
+#include <iostream>
 using namespace std;
 
 ///////////////
@@ -74,42 +75,61 @@ void SockUtil::_setSocketOptions(const int sd)
 
   int val;
   int valen = sizeof(val);
-  //  struct linger sl;
   
   // reuse the socket
 
   val = 1;
   errno = 0;
-  setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *) &val, valen);
+  if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *) &val, valen)) {
+    cerr << strerror(errno) << endl;
+    cerr << "WARNING - setsockopt(SO_REUSEADDR) failed" << endl;
+  }
 
   // Set up keep-alive so that if the server side reboots. we will
   // get an error once it is back up and running
 
   // number of retries for keepalive
   val = 1;
-  setsockopt(sd, SOL_SOCKET, SO_KEEPALIVE, (char *) &val, valen);
+  if (setsockopt(sd, SOL_SOCKET, SO_KEEPALIVE, (char *) &val, valen)) {
+    cerr << strerror(errno) << endl;
+    cerr << "WARNING - setsockopt(SO_KEEPALIVE) failed" << endl;
+  }
   
 #ifdef __APPLE__
 
   // count for keepalive
   val = 3;
-  setsockopt(sd, SOL_SOCKET, TCP_KEEPCNT, (char *) &val, valen);
+  if (setsockopt(sd, SOL_SOCKET, TCP_KEEPCNT, (char *) &val, valen)) {
+    cerr << strerror(errno) << endl;
+    cerr << "WARNING - setsockopt(TCP_KEEPCNT) failed" << endl;
+  }
 
   // interval for keepalive
   val = 10;
-  // setsockopt(sd, SOL_SOCKET, TCP_KEEPIDLE, (char *) &val, valen);
-  setsockopt(sd, SOL_SOCKET, TCP_KEEPINTVL, (char *) &val, valen);
+  if (setsockopt(sd, SOL_SOCKET, TCP_KEEPINTVL, (char *) &val, valen)) {
+    cerr << strerror(errno) << endl;
+    cerr << "WARNING - setsockopt(SO_KEEPINTVL) failed" << endl;
+  }
 
 #else
 
   // count for keepalive
   val = 3;
-  setsockopt(sd, SOL_TCP, TCP_KEEPCNT, (char *) &val, valen);
+  if (setsockopt(sd, SOL_TCP, TCP_KEEPCNT, (char *) &val, valen)) {
+    cerr << strerror(errno) << endl;
+    cerr << "WARNING - setsockopt(SO_KEEPCNT) failed" << endl;
+  }
 
   // interval for keepalive
   val = 10;
-  setsockopt(sd, SOL_TCP, TCP_KEEPIDLE, (char *) &val, valen);
-  setsockopt(sd, SOL_TCP, TCP_KEEPINTVL, (char *) &val, valen);
+  if (setsockopt(sd, SOL_TCP, TCP_KEEPIDLE, (char *) &val, valen)) {
+    cerr << strerror(errno) << endl;
+    cerr << "WARNING - setsockopt(SO_KEEPIDLE) failed" << endl;
+  }
+  if (setsockopt(sd, SOL_TCP, TCP_KEEPINTVL, (char *) &val, valen)) {
+    cerr << strerror(errno) << endl;
+    cerr << "WARNING - setsockopt(SO_KEEPINTVL) failed" << endl;
+  }
 
 #endif
   

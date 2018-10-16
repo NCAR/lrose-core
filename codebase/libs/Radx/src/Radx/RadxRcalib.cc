@@ -614,22 +614,6 @@ void RadxRcalib::setFromXml(const string &xmlBuf,
     _noiseDbmVx = val;
   }
 
-  if (RadxXml::readDouble(xbuf, "receiverGainDbHc", val) == 0) {
-    _receiverGainDbHc = val;
-  }
-
-  if (RadxXml::readDouble(xbuf, "receiverGainDbHx", val) == 0) {
-    _receiverGainDbHx = val;
-  }
-
-  if (RadxXml::readDouble(xbuf, "receiverGainDbVc", val) == 0) {
-    _receiverGainDbVc = val;
-  }
-
-  if (RadxXml::readDouble(xbuf, "receiverGainDbVx", val) == 0) {
-    _receiverGainDbVx = val;
-  }
-
   if (RadxXml::readDouble(xbuf, "i0DbmHc", val) == 0) {
     _i0DbmHc = val;
   } else {
@@ -652,6 +636,22 @@ void RadxRcalib::setFromXml(const string &xmlBuf,
     _i0DbmVx = val;
   } else {
     _i0DbmVx = _noiseDbmVx - _receiverGainDbVx;
+  }
+
+  if (RadxXml::readDouble(xbuf, "receiverGainDbHc", val) == 0) {
+    _receiverGainDbHc = val;
+  }
+
+  if (RadxXml::readDouble(xbuf, "receiverGainDbHx", val) == 0) {
+    _receiverGainDbHx = val;
+  }
+
+  if (RadxXml::readDouble(xbuf, "receiverGainDbVc", val) == 0) {
+    _receiverGainDbVc = val;
+  }
+
+  if (RadxXml::readDouble(xbuf, "receiverGainDbVx", val) == 0) {
+    _receiverGainDbVx = val;
   }
 
   if (RadxXml::readDouble(xbuf, "receiverSlopeDbHc", val) == 0) {

@@ -174,7 +174,7 @@ void Mdvx::clearWriteLdataInfo()
 // Returns 0 on success, -1 on error.
 // getErrStr() retrieves the error string.
 
-int Mdvx::writeToDir(const string &output_dir) const
+int Mdvx::writeToDir(const string &output_dir)
 {
 
   clearErrStr();
@@ -251,7 +251,7 @@ int Mdvx::writeToDir(const string &output_dir) const
 // Returns 0 on success, -1 on error.
 // getErrStr() retrieves the error string.
 
-int Mdvx::writeToPath(const string &output_path) const
+int Mdvx::writeToPath(const string &output_path)
 
 {
 

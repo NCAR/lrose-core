@@ -1,7 +1,7 @@
 /**
  * @file FloatUserData.hh 
  * @brief Simple derived class, base class is MathUserData, a single double
- * @file FloatUserData
+ * @class FloatUserData
  * @brief Simple derived class, base class is MathUserData, a single double
  */
 
@@ -30,7 +30,7 @@ public:
 protected:
 private:
 
-  double _value;
+  double _value;   /**< The single value */
 };
 
 #endif

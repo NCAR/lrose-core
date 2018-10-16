@@ -35,8 +35,10 @@ LeafContent.cc \
 LeafNode.cc \
 LogicalArgs.cc \
 LogicalNode.cc \
+MathData.cc \
 MathParser.cc \
 ProcessingNode.cc \
+SpecialUserData.cc \
 UnaryNode.cc
 
 #

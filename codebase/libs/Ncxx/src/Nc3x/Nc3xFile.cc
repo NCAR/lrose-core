@@ -313,6 +313,7 @@ int Nc3xFile::readGlobAttr(const string &name, string &val)
     return -1;
   }
   val = asString(att);
+  delete att;
   return 0;
 }
 
@@ -333,9 +334,11 @@ int Nc3xFile::readGlobAttr(const string &name, int &val)
     _addErrStr("  name: ", name);
     _addErrStr("  val: ", sval);
     _addErrStr("  file: ", _pathInUse);
+    delete att;
     return -1;
   }
   val = ival;
+  delete att;
   return 0;
 }
 
@@ -356,9 +359,11 @@ int Nc3xFile::readGlobAttr(const string &name, float &val)
     _addErrStr("  name: ", name);
     _addErrStr("  val: ", sval);
     _addErrStr("  file: ", _pathInUse);
+    delete att;
     return -1;
   }
   val = fval;
+  delete att;
   return 0;
 }
 
@@ -379,8 +384,10 @@ int Nc3xFile::readGlobAttr(const string &name, double &val)
     _addErrStr("  name: ", name);
     _addErrStr("  val: ", sval);
     _addErrStr("  file: ", _pathInUse);
+    delete att;
     return -1;
   }
+  delete att;
   val = dval;
   return 0;
 }

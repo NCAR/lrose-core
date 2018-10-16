@@ -117,8 +117,15 @@ int EG_convex_intersect(Point_d *poly1, int poly1_size, Point_d *poly2, int poly
   ind2 = (int *)malloc((size1 + size2 + 1) * sizeof(int));
   position = (double *)malloc((size1 + size2 + 1) * sizeof(double));
   if (ind1 == NULL || ind2 == NULL || position == NULL)
+  {
+    if (ind1)
+       free(ind1);
+    if (ind2)
+       free(ind2);
+    if (position)
+       free(position);
     return(-1);
-
+  }
   /* find all intersections */
   k = 0;
   for (i=0; i<size1; i++)
@@ -169,7 +176,12 @@ int EG_convex_intersect(Point_d *poly1, int poly1_size, Point_d *poly2, int poly
               v2.y = poly2[j+1].y - poly2[j].y;
 
               if (DOT(&v1, &v2) < 0)
+	      {
+                free (ind1);
+                free (ind2);
+                free (position);
                 return(0);
+              }
                 
 #ifdef NOTNOW
               /* the segments are collinear and overlap in a point or line segment */

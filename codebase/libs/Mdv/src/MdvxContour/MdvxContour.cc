@@ -434,7 +434,7 @@ int MdvxContour::_computeLines(const MdvxField &in_field,
 	}
 	
 	first_contour = 0;
-	while (square_thresh[first_contour] == 15 && first_contour <= nVals) {
+	while (square_thresh[first_contour] == 15 && first_contour < nVals-1) {
 	  first_contour++;
 	}
 	last_contour = nVals - 1;

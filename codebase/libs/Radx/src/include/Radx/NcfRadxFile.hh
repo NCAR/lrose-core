@@ -43,13 +43,13 @@
 
 #include <Radx/Radx.hh>
 #include <Radx/RadxFile.hh>
+#include <Radx/RadxNcfStr.hh>
 #include <Radx/RadxRangeGeom.hh>
 #include <Radx/RadxCfactors.hh>
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Ncxx/Nc3xFile.hh>
-// #include <Radx/Udunits2.hh>
 
 class RadxField;
 class RadxVol;
@@ -63,7 +63,7 @@ using namespace std;
 ///
 /// This subclass of RadxFile handles I/O for netcdf files.
 
-class NcfRadxFile : public RadxFile
+class NcfRadxFile : public RadxFile, public RadxNcfStr
 
 {
   
@@ -193,17 +193,6 @@ private:
   typedef char String8_t[NCF_STRING_LEN_8];
   typedef char String32_t[NCF_STRING_LEN_32];
 
-#ifdef NOTYET
-  static const int NCF_STRING_LEN_64 = 64;
-  static const int NCF_STRING_LEN_256 = 256;
-  typedef char String64_t[NCF_STRING_LEN_64];
-  typedef char String256_t[NCF_STRING_LEN_256];
-#endif
-
-  static const string CfConvention; // base convention
-  static const string BaseConvention; // base convention
-  static const string CurrentVersion; // current version
-
   // volume for writing
   
   const RadxVol *_writeVol; ///< volume from which data is written
@@ -219,10 +208,6 @@ private:
   Nc3xFile _file;
   string _tmpPath;
 
-  // udunits
-
-  // Udunits2 _udunits;
-  
   // dimensions
 
   Nc3Dim *_timeDim;
@@ -232,10 +217,6 @@ private:
   Nc3Dim *_calDim;
   Nc3Dim *_stringLen8Dim;
   Nc3Dim *_stringLen32Dim;
-#ifdef NOTYET
-  Nc3Dim *_stringLen64Dim;
-  Nc3Dim *_stringLen256Dim;
-#endif
   Nc3Dim *_statusXmlDim;
   Nc3Dim *_frequencyDim;
 
@@ -323,6 +304,7 @@ private:
   Nc3Var *_rCalTwoWayRadomeLossHVar;
   Nc3Var *_rCalTwoWayRadomeLossVVar;
   Nc3Var *_rCalReceiverMismatchLossVar;
+  Nc3Var *_rCalKSquaredWaterVar;
   Nc3Var *_rCalRadarConstHVar;
   Nc3Var *_rCalRadarConstVVar;
   Nc3Var *_rCalAntennaGainHVar;
@@ -331,10 +313,22 @@ private:
   Nc3Var *_rCalNoiseHxVar;
   Nc3Var *_rCalNoiseVcVar;
   Nc3Var *_rCalNoiseVxVar;
+  Nc3Var *_rCalI0HcVar;
+  Nc3Var *_rCalI0HxVar;
+  Nc3Var *_rCalI0VcVar;
+  Nc3Var *_rCalI0VxVar;
   Nc3Var *_rCalReceiverGainHcVar;
   Nc3Var *_rCalReceiverGainHxVar;
   Nc3Var *_rCalReceiverGainVcVar;
   Nc3Var *_rCalReceiverGainVxVar;
+  Nc3Var *_rCalReceiverSlopeHcVar;
+  Nc3Var *_rCalReceiverSlopeHxVar;
+  Nc3Var *_rCalReceiverSlopeVcVar;
+  Nc3Var *_rCalReceiverSlopeVxVar;
+  Nc3Var *_rCalDynamicRangeHcVar;
+  Nc3Var *_rCalDynamicRangeHxVar;
+  Nc3Var *_rCalDynamicRangeVcVar;
+  Nc3Var *_rCalDynamicRangeVxVar;
   Nc3Var *_rCalBaseDbz1kmHcVar;
   Nc3Var *_rCalBaseDbz1kmHxVar;
   Nc3Var *_rCalBaseDbz1kmVcVar;
@@ -356,10 +350,6 @@ private:
   Nc3Var *_rCalSystemPhidpVar;
   Nc3Var *_rCalTestPowerHVar;
   Nc3Var *_rCalTestPowerVVar;
-  Nc3Var *_rCalReceiverSlopeHcVar;
-  Nc3Var *_rCalReceiverSlopeHxVar;
-  Nc3Var *_rCalReceiverSlopeVcVar;
-  Nc3Var *_rCalReceiverSlopeVxVar;
 
   // ray variables
 
@@ -561,436 +551,6 @@ private:
   vector<double> _geoRollRate;
   vector<double> _geoDriveAngle1;
   vector<double> _geoDriveAngle2;
-
-  // string constants
-
-  const static char* ADD_OFFSET;
-  const static char* AIRBORNE;
-  const static char* ALTITUDE;
-  const static char* ALTITUDE_AGL;
-  const static char* ALTITUDE_CORRECTION;
-  const static char* ALTITUDE_OF_PROJECTION_ORIGIN;
-  const static char* ANCILLARY_VARIABLES;
-  const static char* ANTENNA_TRANSITION;
-  const static char* AXIS;
-  const static char* AUTHOR;
-  const static char* AZIMUTH;
-  const static char* AZIMUTH_CORRECTION;
-  const static char* BLOCK_AVG_LENGTH;
-  const static char* CALENDAR;
-  const static char* CFRADIAL;
-  const static char* CM;
-  const static char* COMMENT;
-  const static char* COMPRESS;
-  const static char* CONVENTIONS;
-  const static char* COORDINATES;
-  const static char* CREATED;
-  const static char* DB;
-  const static char* DBM;
-  const static char* DBZ;
-  const static char* DEGREES;
-  const static char* DEGREES_EAST;
-  const static char* DEGREES_NORTH;
-  const static char* DEGREES_PER_SECOND;
-  const static char* DORADE;
-  const static char* DOWN;
-  const static char* DRIFT;
-  const static char* DRIFT_CORRECTION;
-  const static char* DRIVER;
-  const static char* DRIVE_ANGLE_1;
-  const static char* DRIVE_ANGLE_2;
-  const static char* EASTWARD_VELOCITY;
-  const static char* EASTWARD_VELOCITY_CORRECTION;
-  const static char* EASTWARD_WIND;
-  const static char* ELEVATION;
-  const static char* ELEVATION_CORRECTION;
-  const static char* END_DATETIME;
-  const static char* FALSE_NORTHING;
-  const static char* FALSE_EASTING;
-  const static char* FFT_LENGTH;
-  const static char* FIELD_FOLDS;
-  const static char* FILL_VALUE;
-  const static char* FIXED_ANGLE;
-  const static char* FLAG_MASKS;
-  const static char* FLAG_MEANINGS;
-  const static char* FLAG_VALUES;
-  const static char* FOLD_LIMIT_LOWER;
-  const static char* FOLD_LIMIT_UPPER;
-  const static char* FOLLOW_MODE;
-  const static char* FREQUENCY;
-  const static char* GEOMETRY_CORRECTION;
-  const static char* GEOREFS_APPLIED;
-  const static char* GEOREF_TIME;
-  const static char* GEOREF_UNIT_ID;
-  const static char* GEOREF_UNIT_NUM;
-  const static char* GREGORIAN;
-  const static char* GRID_MAPPING;
-  const static char* GRID_MAPPING_NAME;
-  const static char* HEADING;
-  const static char* HEADING_CHANGE_RATE;
-  const static char* HEADING_CORRECTION;
-  const static char* HISTORY;
-  const static char* HZ;
-  const static char* INDEX_VAR_NAME;
-  const static char* INSTITUTION;
-  const static char* INSTRUMENT_NAME;
-  const static char* INSTRUMENT_PARAMETERS;
-  const static char* INSTRUMENT_TYPE;
-  const static char* IS_DISCRETE;
-  const static char* IS_QUALITY;
-  const static char* IS_SPECTRUM;
-  const static char* INTERMED_FREQ_HZ;
-  const static char* JOULES;
-  const static char* JULIAN;
-  const static char* LATITUDE;
-  const static char* LATITUDE_CORRECTION;
-  const static char* LATITUDE_OF_PROJECTION_ORIGIN;
-  const static char* LEGEND_XML;
-  const static char* LIDAR_APERTURE_DIAMETER;
-  const static char* LIDAR_APERTURE_EFFICIENCY;
-  const static char* LIDAR_BEAM_DIVERGENCE;
-  const static char* LIDAR_CALIBRATION;
-  const static char* LIDAR_CONSTANT;
-  const static char* LIDAR_FIELD_OF_VIEW;
-  const static char* LIDAR_PARAMETERS;
-  const static char* LIDAR_PEAK_POWER;
-  const static char* LIDAR_PULSE_ENERGY;
-  const static char* LONGITUDE;
-  const static char* LONGITUDE_CORRECTION;
-  const static char* LONG_NAME;
-  const static char* LONGITUDE_OF_PROJECTION_ORIGIN;
-  const static char* META_GROUP;
-  const static char* METERS;
-  const static char* METERS_BETWEEN_GATES;
-  const static char* METERS_PER_SECOND;
-  const static char* METERS_TO_CENTER_OF_FIRST_GATE;
-  const static char* MISSING_VALUE;
-  const static char* MOVING;
-  const static char* MRAD;
-  const static char* NORTHWARD_VELOCITY;
-  const static char* NORTHWARD_VELOCITY_CORRECTION;
-  const static char* NORTHWARD_WIND;
-  const static char* NYQUIST_VELOCITY;
-  const static char* N_GATES_VARY;
-  const static char* N_POINTS;
-  const static char* N_PRTS;
-  const static char* N_SAMPLES;
-  const static char* N_SPECTRA;
-  const static char* OPTIONS;
-  const static char* ORIGINAL_FORMAT;
-  const static char* PERCENT;
-  const static char* PITCH;
-  const static char* PITCH_CHANGE_RATE;
-  const static char* PITCH_CORRECTION;
-  const static char* PLATFORM_IS_MOBILE;
-  const static char* PLATFORM_TYPE;
-  const static char* PLATFORM_VELOCITY;
-  const static char* POLARIZATION_MODE;
-  const static char* POLARIZATION_SEQUENCE;
-  const static char* POSITIVE;
-  const static char* PRESSURE_ALTITUDE_CORRECTION;
-  const static char* PRIMARY_AXIS;
-  const static char* PROPOSED_STANDARD_NAME;
-  const static char* PRT;
-  const static char* PRT_MODE;
-  const static char* PRT_RATIO;
-  const static char* PRT_SEQUENCE;
-  const static char* PULSE_WIDTH;
-  const static char* QUALIFIED_VARIABLES;
-  const static char* QC_PROCEDURES;
-  const static char* RADAR_ANTENNA_GAIN_H;
-  const static char* RADAR_ANTENNA_GAIN_V;
-  const static char* RADAR_BEAM_WIDTH_H;
-  const static char* RADAR_BEAM_WIDTH_V;
-  const static char* RADAR_CALIBRATION;
-  const static char* RADAR_ESTIMATED_NOISE_DBM_HC;
-  const static char* RADAR_ESTIMATED_NOISE_DBM_HX;
-  const static char* RADAR_ESTIMATED_NOISE_DBM_VC;
-  const static char* RADAR_ESTIMATED_NOISE_DBM_VX;
-  const static char* RADAR_MEASURED_COLD_NOISE;
-  const static char* RADAR_MEASURED_HOT_NOISE;
-  const static char* RADAR_MEASURED_SKY_NOISE;
-  const static char* RADAR_MEASURED_TRANSMIT_POWER_H;
-  const static char* RADAR_MEASURED_TRANSMIT_POWER_V;
-  const static char* RADAR_PARAMETERS;
-  const static char* RADAR_RX_BANDWIDTH;
-  const static char* RANGE;
-  const static char* RANGE_CORRECTION;
-  const static char* RAYS_ARE_INDEXED;
-  const static char* RAY_ANGLE_RES;
-  const static char* RAY_GATE_SPACING;
-  const static char* RAY_N_GATES;
-  const static char* RAY_START_INDEX;
-  const static char* RAY_START_RANGE;
-  const static char* RAY_TIMES_INCREASE;
-  const static char* REFERENCES;
-  const static char* ROLL;
-  const static char* ROLL_CHANGE_RATE;
-  const static char* ROLL_CORRECTION;
-  const static char* ROTATION;
-  const static char* ROTATION_CORRECTION;
-  const static char* RX_RANGE_RESOLUTION;
-  const static char* R_CALIB;
-  const static char* R_CALIB_ANTENNA_GAIN_H;
-  const static char* R_CALIB_ANTENNA_GAIN_V;
-  const static char* R_CALIB_BASE_DBZ_1KM_HC;
-  const static char* R_CALIB_BASE_DBZ_1KM_HX;
-  const static char* R_CALIB_BASE_DBZ_1KM_VC;
-  const static char* R_CALIB_BASE_DBZ_1KM_VX;
-  const static char* R_CALIB_COUPLER_FORWARD_LOSS_H;
-  const static char* R_CALIB_COUPLER_FORWARD_LOSS_V;
-  const static char* R_CALIB_DBZ_CORRECTION;
-  const static char* R_CALIB_DIELECTRIC_FACTOR_USED;
-  const static char* R_CALIB_INDEX;
-  const static char* R_CALIB_LDR_CORRECTION_H;
-  const static char* R_CALIB_LDR_CORRECTION_V;
-  const static char* R_CALIB_NOISE_HC;
-  const static char* R_CALIB_NOISE_HX;
-  const static char* R_CALIB_NOISE_SOURCE_POWER_H;
-  const static char* R_CALIB_NOISE_SOURCE_POWER_V;
-  const static char* R_CALIB_NOISE_VC;
-  const static char* R_CALIB_NOISE_VX;
-  const static char* R_CALIB_POWER_MEASURE_LOSS_H;
-  const static char* R_CALIB_POWER_MEASURE_LOSS_V;
-  const static char* R_CALIB_PROBERT_JONES_CORRECTION;
-  const static char* R_CALIB_PULSE_WIDTH;
-  const static char* R_CALIB_RADAR_CONSTANT_H;
-  const static char* R_CALIB_RADAR_CONSTANT_V;
-  const static char* R_CALIB_RECEIVER_GAIN_HC;
-  const static char* R_CALIB_RECEIVER_GAIN_HX;
-  const static char* R_CALIB_RECEIVER_GAIN_VC;
-  const static char* R_CALIB_RECEIVER_GAIN_VX;
-  const static char* R_CALIB_RECEIVER_MISMATCH_LOSS;
-  const static char* R_CALIB_RECEIVER_MISMATCH_LOSS_H;
-  const static char* R_CALIB_RECEIVER_MISMATCH_LOSS_V;
-  const static char* R_CALIB_RECEIVER_SLOPE_HC;
-  const static char* R_CALIB_RECEIVER_SLOPE_HX;
-  const static char* R_CALIB_RECEIVER_SLOPE_VC;
-  const static char* R_CALIB_RECEIVER_SLOPE_VX;
-  const static char* R_CALIB_SUN_POWER_HC;
-  const static char* R_CALIB_SUN_POWER_HX;
-  const static char* R_CALIB_SUN_POWER_VC;
-  const static char* R_CALIB_SUN_POWER_VX;
-  const static char* R_CALIB_SYSTEM_PHIDP;
-  const static char* R_CALIB_TEST_POWER_H;
-  const static char* R_CALIB_TEST_POWER_V;
-  const static char* R_CALIB_TIME;
-  const static char* R_CALIB_TIME_W3C_STR;
-  const static char* R_CALIB_TWO_WAY_RADOME_LOSS_H;
-  const static char* R_CALIB_TWO_WAY_RADOME_LOSS_V;
-  const static char* R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_H;
-  const static char* R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_V;
-  const static char* R_CALIB_XMIT_POWER_H;
-  const static char* R_CALIB_XMIT_POWER_V;
-  const static char* R_CALIB_ZDR_CORRECTION;
-  const static char* SAMPLING_RATIO;
-  const static char* SCALE_FACTOR;
-  const static char* SCANNING;
-  const static char* SCANNING_RADIAL;
-  const static char* SCAN_ID;
-  const static char* SCAN_NAME;
-  const static char* SCAN_RATE;
-  const static char* SECONDS;
-  const static char* SECS_SINCE_JAN1_1970;
-  const static char* SITE_NAME;
-  const static char* SOURCE;
-  const static char* SPACING_IS_CONSTANT;
-  const static char* SPECTRUM_N_SAMPLES;
-  const static char* STANDARD;
-  const static char* STANDARD_NAME;
-  const static char* STARING;
-  const static char* START_DATETIME;
-  const static char* STATIONARY;
-  const static char* STATUS_XML;
-  const static char* STATUS_XML_LENGTH;
-  const static char* STRING_LENGTH_256;
-  const static char* STRING_LENGTH_32;
-  const static char* STRING_LENGTH_64;
-  const static char* STRING_LENGTH_8;
-  const static char* SUB_CONVENTIONS;
-  const static char* SWEEP;
-  const static char* SWEEP_END_RAY_INDEX;
-  const static char* SWEEP_MODE;
-  const static char* SWEEP_NUMBER;
-  const static char* SWEEP_START_RAY_INDEX;
-  const static char* TARGET_SCAN_RATE;
-  const static char* THRESHOLDING_XML;
-  const static char* TILT;
-  const static char* TILT_CORRECTION;
-  const static char* TIME;
-  const static char* TIME_COVERAGE_END;
-  const static char* TIME_COVERAGE_START;
-  const static char* TITLE;
-  const static char* TRACK;
-  const static char* UNAMBIGUOUS_RANGE;
-  const static char* UNITS;
-  const static char* UP;
-  const static char* VALID_MAX;
-  const static char* VALID_MIN;
-  const static char* VALID_RANGE;
-  const static char* VERSION;
-  const static char* VERTICAL_VELOCITY;
-  const static char* VERTICAL_VELOCITY_CORRECTION;
-  const static char* VERTICAL_WIND;
-  const static char* VOLUME;
-  const static char* VOLUME_NUMBER;
-  const static char* W3C_STR;
-  const static char* WATTS;
-
-  // long names for metadata
-
-  const static char* ALTITUDE_AGL_LONG;
-  const static char* ALTITUDE_CORRECTION_LONG;
-  const static char* ALTITUDE_LONG;
-  const static char* ANTENNA_TRANSITION_LONG;
-  const static char* AZIMUTH_CORRECTION_LONG;
-  const static char* AZIMUTH_LONG;
-  const static char* CO_TO_CROSS_POLAR_CORRELATION_RATIO_H;
-  const static char* CO_TO_CROSS_POLAR_CORRELATION_RATIO_V;
-  const static char* CROSS_POLAR_DIFFERENTIAL_PHASE;
-  const static char* DRIFT_CORRECTION_LONG;
-  const static char* DRIFT_LONG;
-  const static char* EASTWARD_VELOCITY_CORRECTION_LONG;
-  const static char* EASTWARD_VELOCITY_LONG;
-  const static char* EASTWARD_WIND_LONG;
-  const static char* ELEVATION_CORRECTION_LONG;
-  const static char* ELEVATION_LONG;
-  const static char* FIXED_ANGLE_LONG;
-  const static char* FOLLOW_MODE_LONG;
-  const static char* FREQUENCY_LONG;
-  const static char* GEOREF_TIME_LONG;
-  const static char* GEOREF_UNIT_NUM_LONG;
-  const static char* GEOREF_UNIT_ID_LONG;
-  const static char* HEADING_CHANGE_RATE_LONG;
-  const static char* HEADING_CORRECTION_LONG;
-  const static char* HEADING_LONG;
-  const static char* INSTRUMENT_NAME_LONG;
-  const static char* INSTRUMENT_TYPE_LONG;
-  const static char* INTERMED_FREQ_HZ_LONG;
-  const static char* LATITUDE_CORRECTION_LONG;
-  const static char* LATITUDE_LONG;
-  const static char* LIDAR_APERTURE_DIAMETER_LONG;
-  const static char* LIDAR_APERTURE_EFFICIENCY_LONG;
-  const static char* LIDAR_BEAM_DIVERGENCE_LONG;
-  const static char* LIDAR_CONSTANT_LONG;
-  const static char* LIDAR_FIELD_OF_VIEW_LONG;
-  const static char* LIDAR_PEAK_POWER_LONG;
-  const static char* LIDAR_PULSE_ENERGY_LONG;
-  const static char* LONGITUDE_CORRECTION_LONG;
-  const static char* LONGITUDE_LONG;
-  const static char* NORTHWARD_VELOCITY_CORRECTION_LONG;
-  const static char* NORTHWARD_VELOCITY_LONG;
-  const static char* NORTHWARD_WIND_LONG;
-  const static char* NYQUIST_VELOCITY_LONG;
-  const static char* N_SAMPLES_LONG;
-  const static char* PITCH_CHANGE_RATE_LONG;
-  const static char* PITCH_CORRECTION_LONG;
-  const static char* PITCH_LONG;
-  const static char* PLATFORM_IS_MOBILE_LONG;
-  const static char* PLATFORM_TYPE_LONG;
-  const static char* POLARIZATION_MODE_LONG;
-  const static char* PRESSURE_ALTITUDE_CORRECTION_LONG;
-  const static char* PRIMARY_AXIS_LONG;
-  const static char* PRT_MODE_LONG;
-  const static char* PRT_RATIO_LONG;
-  const static char* PRT_LONG;
-  const static char* PULSE_WIDTH_LONG;
-  const static char* RADAR_ANTENNA_GAIN_H_LONG;
-  const static char* RADAR_ANTENNA_GAIN_V_LONG;
-  const static char* RADAR_BEAM_WIDTH_H_LONG;
-  const static char* RADAR_BEAM_WIDTH_V_LONG;
-  const static char* RADAR_ESTIMATED_NOISE_DBM_HC_LONG;
-  const static char* RADAR_ESTIMATED_NOISE_DBM_HX_LONG;
-  const static char* RADAR_ESTIMATED_NOISE_DBM_VC_LONG;
-  const static char* RADAR_ESTIMATED_NOISE_DBM_VX_LONG;
-  const static char* RADAR_MEASURED_TRANSMIT_POWER_H_LONG;
-  const static char* RADAR_MEASURED_TRANSMIT_POWER_V_LONG;
-  const static char* RADAR_RX_BANDWIDTH_LONG;
-  const static char* RANGE_CORRECTION_LONG;
-  const static char* RANGE_LONG;
-  const static char* RAYS_ARE_INDEXED_LONG;
-  const static char* RAY_ANGLE_RES_LONG;
-  const static char* ROLL_CHANGE_RATE_LONG;
-  const static char* ROLL_CORRECTION_LONG;
-  const static char* ROLL_LONG;
-  const static char* ROTATION_CORRECTION_LONG;
-  const static char* ROTATION_LONG;
-  const static char* R_CALIB_ANTENNA_GAIN_H_LONG;
-  const static char* R_CALIB_ANTENNA_GAIN_V_LONG;
-  const static char* R_CALIB_BASE_DBZ_1KM_HC_LONG;
-  const static char* R_CALIB_BASE_DBZ_1KM_HX_LONG;
-  const static char* R_CALIB_BASE_DBZ_1KM_VC_LONG;
-  const static char* R_CALIB_BASE_DBZ_1KM_VX_LONG;
-  const static char* R_CALIB_COUPLER_FORWARD_LOSS_H_LONG;
-  const static char* R_CALIB_COUPLER_FORWARD_LOSS_V_LONG;
-  const static char* R_CALIB_DBZ_CORRECTION_LONG;
-  const static char* R_CALIB_INDEX_LONG;
-  const static char* R_CALIB_LDR_CORRECTION_H_LONG;
-  const static char* R_CALIB_LDR_CORRECTION_V_LONG;
-  const static char* R_CALIB_NOISE_HC_LONG;
-  const static char* R_CALIB_NOISE_HX_LONG;
-  const static char* R_CALIB_NOISE_SOURCE_POWER_H_LONG;
-  const static char* R_CALIB_NOISE_SOURCE_POWER_V_LONG;
-  const static char* R_CALIB_NOISE_VC_LONG;
-  const static char* R_CALIB_NOISE_VX_LONG;
-  const static char* R_CALIB_POWER_MEASURE_LOSS_H_LONG;
-  const static char* R_CALIB_POWER_MEASURE_LOSS_V_LONG;
-  const static char* R_CALIB_PULSE_WIDTH_LONG;
-  const static char* R_CALIB_RADAR_CONSTANT_H_LONG;
-  const static char* R_CALIB_RADAR_CONSTANT_V_LONG;
-  const static char* R_CALIB_RECEIVER_GAIN_HC_LONG;
-  const static char* R_CALIB_RECEIVER_GAIN_HX_LONG;
-  const static char* R_CALIB_RECEIVER_GAIN_VC_LONG;
-  const static char* R_CALIB_RECEIVER_GAIN_VX_LONG;
-  const static char* R_CALIB_RECEIVER_MISMATCH_LOSS_LONG;
-  const static char* R_CALIB_RECEIVER_SLOPE_HC_LONG;
-  const static char* R_CALIB_RECEIVER_SLOPE_HX_LONG;
-  const static char* R_CALIB_RECEIVER_SLOPE_VC_LONG;
-  const static char* R_CALIB_RECEIVER_SLOPE_VX_LONG;
-  const static char* R_CALIB_SUN_POWER_HC_LONG;
-  const static char* R_CALIB_SUN_POWER_HX_LONG;
-  const static char* R_CALIB_SUN_POWER_VC_LONG;
-  const static char* R_CALIB_SUN_POWER_VX_LONG;
-  const static char* R_CALIB_SYSTEM_PHIDP_LONG;
-  const static char* R_CALIB_TEST_POWER_H_LONG;
-  const static char* R_CALIB_TEST_POWER_V_LONG;
-  const static char* R_CALIB_TIME_LONG;
-  const static char* R_CALIB_TWO_WAY_RADOME_LOSS_H_LONG;
-  const static char* R_CALIB_TWO_WAY_RADOME_LOSS_V_LONG;
-  const static char* R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_H_LONG;
-  const static char* R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_V_LONG;
-  const static char* R_CALIB_XMIT_POWER_H_LONG;
-  const static char* R_CALIB_XMIT_POWER_V_LONG;
-  const static char* R_CALIB_ZDR_CORRECTION_LONG;
-  const static char* SCAN_ID_LONG;
-  const static char* SCAN_NAME_LONG;
-  const static char* SCAN_RATE_LONG;
-  const static char* SITE_NAME_LONG;
-  const static char* SPACING_IS_CONSTANT_LONG;
-  const static char* SPECTRUM_COPOLAR_HORIZONTAL;
-  const static char* SPECTRUM_COPOLAR_VERTICAL;
-  const static char* SPECTRUM_CROSSPOLAR_HORIZONTAL;
-  const static char* SPECTRUM_CROSSPOLAR_VERTICAL;
-  const static char* CROSS_SPECTRUM_OF_COPOLAR_HORIZONTAL;
-  const static char* CROSS_SPECTRUM_OF_COPOLAR_VERTICAL;
-  const static char* CROSS_SPECTRUM_OF_CROSSPOLAR_HORIZONTAL;
-  const static char* CROSS_SPECTRUM_OF_CROSSPOLAR_VERTICAL;
-  const static char* SWEEP_END_RAY_INDEX_LONG;
-  const static char* SWEEP_MODE_LONG;
-  const static char* SWEEP_NUMBER_LONG;
-  const static char* SWEEP_START_RAY_INDEX_LONG;
-  const static char* TARGET_SCAN_RATE_LONG;
-  const static char* TILT_CORRECTION_LONG;
-  const static char* TILT_LONG;
-  const static char* TIME_COVERAGE_END_LONG;
-  const static char* TIME_COVERAGE_START_LONG;
-  const static char* TIME_LONG;
-  const static char* TRACK_LONG;
-  const static char* UNAMBIGUOUS_RANGE_LONG;
-  const static char* VERTICAL_VELOCITY_CORRECTION_LONG;
-  const static char* VERTICAL_VELOCITY_LONG;
-  const static char* VERTICAL_WIND_LONG;
-  const static char* VOLUME_NUMBER_LONG;
 
   // private methods for NcfRadial.cc
   

@@ -108,7 +108,7 @@ public:
    * @return true if still moving, false if all done
    *
    * @param[in] G  Grid2d with data
-   * @param[in,out] alg  The algorithm state, updated
+   * @param[in,out] data The algorithm state, updated
    */
   bool increment(const Grid2d &G, Grid2dLoopAlg &data);
 

@@ -507,15 +507,33 @@ int DsLdataMsg::disassemble(const void *inMsg, int msgLen)
 
   if (partExists(DS_LDATA_ARGS_XML)) {
     _argsXml = (char *) getPartByType(DS_LDATA_ARGS_XML)->getBuf();
-    TaXml::readString(_argsXml, "displacedDirPath", _displacedDirPath);
-    TaXml::readString(_argsXml, "ldataFileName", _ldataFileName);
-    TaXml::readBoolean(_argsXml, "useXml", _useXml);
-    TaXml::readBoolean(_argsXml, "useAscii", _useAscii);
-    TaXml::readBoolean(_argsXml, "saveLatestReadInfo", _saveLatestReadInfo);
-    TaXml::readString(_argsXml, "latestReadInfoLabel", _latestReadInfoLabel);
-    TaXml::readBoolean(_argsXml, "useFmq", _useFmq);
-    TaXml::readInt(_argsXml, "fmqNSlots", _fmqNSlots);
-    TaXml::readBoolean(_argsXml, "readFmqFromStart", _readFmqFromStart);
+    if (TaXml::readString(_argsXml, "displacedDirPath", _displacedDirPath)) {
+      _displacedDirPath.clear();
+    }
+    if (TaXml::readString(_argsXml, "ldataFileName", _ldataFileName)) {
+      _ldataFileName = LDATA_INFO_FILE_NAME;
+    }
+    if (TaXml::readBoolean(_argsXml, "useXml", _useXml)) {
+      _useXml = true;
+    }
+    if (TaXml::readBoolean(_argsXml, "useAscii", _useAscii)) {
+      _useAscii = true;
+    }
+    if (TaXml::readBoolean(_argsXml, "saveLatestReadInfo", _saveLatestReadInfo)) {
+      _saveLatestReadInfo = false;
+    }
+    if (TaXml::readString(_argsXml, "latestReadInfoLabel", _latestReadInfoLabel)) {
+      _latestReadInfoLabel.clear();
+    }
+    if (TaXml::readBoolean(_argsXml, "useFmq", _useFmq)) {
+      _useFmq = true;
+    }
+    if (TaXml::readInt(_argsXml, "fmqNSlots", _fmqNSlots)) {
+      _fmqNSlots = LDATA_NSLOTS_DEFAULT;
+    }
+    if (TaXml::readBoolean(_argsXml, "readFmqFromStart", _readFmqFromStart)) {
+      _readFmqFromStart = false;
+    }
   }
 
   return 0;

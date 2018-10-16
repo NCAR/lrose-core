@@ -385,6 +385,11 @@ bool RadxFile::_isSupportedOther(const string &path)
 bool RadxFile::isNetCDF(const string &path)
 {
 
+  RadxPath rpath(path);
+  if (rpath.getExt() == "h5") {
+    return false;
+  }
+
   Nc3xFile ncf;
   if (ncf.openRead(path) == 0) {
     // open succeeded, so must be netcdf
@@ -404,6 +409,11 @@ bool RadxFile::isNetCDF(const string &path)
 
 bool RadxFile::isHdf5(const string &path)
 {
+
+  RadxPath rpath(path);
+  if (rpath.getExt() == "nc") {
+    return false;
+  }
 
   if (H5File::isHdf5(path)) {
     return true;

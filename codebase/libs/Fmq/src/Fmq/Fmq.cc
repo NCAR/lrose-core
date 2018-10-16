@@ -59,6 +59,7 @@ Fmq::Fmq()
   _numSlots = 0;
   _bufSize = 0;
   _msecSleep = -1;
+  _msecBlockingReadTimeout = -1;
 
   _dev = NULL;
   _msgLog = NULL;
@@ -304,7 +305,8 @@ Fmq::init(const char* fmqPath,
   // Niles Oien working with Mike Dixon, June 2011.
   //
   if (bufSize > LONG_MAX-1){
-    cerr << "WARNING : Upper limit of FMQ buffer size exceeded, using " << LONG_MAX-1 << " instead of " << bufSize << endl;
+    cerr << "WARNING : Upper limit of FMQ buffer size exceeded, using "
+         << LONG_MAX-1 << " instead of " << bufSize << endl;
     bufSize = LONG_MAX-1;
   }
 
@@ -1604,6 +1606,10 @@ int Fmq::_read_blocking (int msecs_sleep, int type)
 {
 
   int msg_read;
+  int sleepTotalMsecs = 0;
+  if (msecs_sleep < 0) {
+    msecs_sleep = 10;
+  }
 
   while (true) {
 
@@ -1614,27 +1620,25 @@ int Fmq::_read_blocking (int msecs_sleep, int type)
     if (msg_read) {
 
       // message read
-
       if (type < 0) {
-
 	// accept all types
-
 	return 0;
-
       } else if (type == _slot.type) {
-
 	// type is as requested
-	
 	return 0;
-	
       }
+
+      sleepTotalMsecs = 0;
 
     } else {
 
-      if (msecs_sleep < 0) {
-	umsleep(10);
-      } else if (msecs_sleep > 0) {
-	umsleep(msecs_sleep);
+      umsleep(msecs_sleep);
+      sleepTotalMsecs += msecs_sleep;
+
+      if (_msecBlockingReadTimeout > 0 && 
+          sleepTotalMsecs > _msecBlockingReadTimeout) {
+        _errStr += "Fmq _read_blocking timed out\n";
+        return -1;
       }
     
     } // if (msg_read)

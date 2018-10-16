@@ -79,7 +79,7 @@ int calloc_hf_struct(hf_file_t *hff, int nsta, int npts)
 int hf_chunk_bigend(hf_chunk_t **hfc) 
 
 {
-   int swapped;
+  /* int swapped; */
    int nsta,npts,ista;
    hf_chunk_t *lhfc;
    sta_chunk_t *sc_ptr;
@@ -91,7 +91,8 @@ int hf_chunk_bigend(hf_chunk_t **hfc)
    nsta = lhfc->n_stations;
 
 /* swap hf_file struct */
-   swapped = BE_from_array_32(lhfc,NUM_HFF_32*sizeof(ui32));
+   /* swapped = */
+   BE_from_array_32(lhfc,NUM_HFF_32*sizeof(ui32));
 
    sc_ptr = lhfc->sta_chunk;
 
@@ -102,13 +103,15 @@ int hf_chunk_bigend(hf_chunk_t **hfc)
                    sizeof(hf_data_t)+npts*sizeof(hf_data_t));
       sc_ptr = (sta_chunk_t *)((char *)lhfc->sta_chunk + skip_bytes);
 
-      swapped = BE_from_array_32(sc_ptr,NUM_STA_32*sizeof(ui32));
+      /* swapped = */
+      BE_from_array_32(sc_ptr,NUM_STA_32*sizeof(ui32));
 
       hf_ptr = (hf_data_t *)((char *)sc_ptr+sizeof(sta_chunk_t) - 
                              sizeof(hf_data_t));
        
       /* swap data info */
-      swapped = BE_from_array_32(hf_ptr,npts*NUM_HFD_32*sizeof(ui32));
+      /* swapped = */
+      BE_from_array_32(hf_ptr,npts*NUM_HFD_32*sizeof(ui32));
 
    }
 
@@ -123,7 +126,7 @@ int hf_chunk_bigend(hf_chunk_t **hfc)
 int hf_chunk_native(hf_chunk_t **hfc) 
 
 {
-   int swapped;
+   /* int swapped; */
    int nsta,npts,ista;
    hf_chunk_t *lhfc;
    sta_chunk_t *sc_ptr;
@@ -133,7 +136,8 @@ int hf_chunk_native(hf_chunk_t **hfc)
    lhfc = *hfc;
 
 /* swap hf_chunk_t */
-   swapped = BE_to_array_32(lhfc,NUM_HFF_32*sizeof(ui32));
+   /* swapped = */
+   BE_to_array_32(lhfc,NUM_HFF_32*sizeof(ui32));
 
    npts = lhfc->n_history + lhfc->n_forecast;
    nsta = lhfc->n_stations;
@@ -147,13 +151,15 @@ int hf_chunk_native(hf_chunk_t **hfc)
       sc_ptr = (sta_chunk_t *)((char *)lhfc->sta_chunk + skip_bytes);
 
       /* swap each station's info */
-      swapped = BE_to_array_32(sc_ptr,NUM_STA_32*sizeof(ui32));
+      /* swapped = */
+      BE_to_array_32(sc_ptr,NUM_STA_32*sizeof(ui32));
 
       hf_ptr = (hf_data_t *)((char *)sc_ptr + sizeof(sta_chunk_t) - 
                              sizeof(hf_data_t));
        
       /* swap each station's data */
-      swapped = BE_to_array_32(hf_ptr,npts*NUM_HFD_32*sizeof(ui32));
+      /* swapped = */
+      BE_to_array_32(hf_ptr,npts*NUM_HFD_32*sizeof(ui32));
 
    }
 

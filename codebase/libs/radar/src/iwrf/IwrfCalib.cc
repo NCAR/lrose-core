@@ -68,6 +68,7 @@
 #include <toolsa/file_io.h>
 #include <toolsa/ugetenv.hh>
 #include <radar/IwrfCalib.hh>
+#include <radar/RadarCalib.hh>
 #include <radar/iwrf_functions.hh>
 #include <rapformats/DsRadarCalib.hh>
 #include <Radx/RadxRcalib.hh>
@@ -419,9 +420,6 @@ int IwrfCalib::setFromXml(const string &xmlBuf, string &errStr)
 
   if (TaXml::readDouble(xbuf, "radarConstH", val) == 0) {
     _calib.radar_constant_h = val;
-  // } else {
-  //   errStr += "ERROR - radarConstH missing\n";
-  //   iret = -1;
   }
 
   if (TaXml::readDouble(xbuf, "radarConstV", val) == 0) {
@@ -430,9 +428,6 @@ int IwrfCalib::setFromXml(const string &xmlBuf, string &errStr)
 
   if (TaXml::readDouble(xbuf, "noiseDbmHc", val) == 0) {
     _calib.noise_dbm_hc = val;
-  // } else {
-  //   errStr += "ERROR - noiseDbmHc missing\n";
-  //   iret = -1;
   }
 
   if (TaXml::readDouble(xbuf, "noiseDbmHx", val) == 0) {
@@ -445,25 +440,6 @@ int IwrfCalib::setFromXml(const string &xmlBuf, string &errStr)
 
   if (TaXml::readDouble(xbuf, "noiseDbmVx", val) == 0) {
     _calib.noise_dbm_vx = val;
-  }
-
-  if (TaXml::readDouble(xbuf, "receiverGainDbHc", val) == 0) {
-    _calib.receiver_gain_db_hc = val;
-  // } else {
-  //   errStr += "ERROR - receiverGainDbHc missing\n";
-  //   iret = -1;
-  }
-
-  if (TaXml::readDouble(xbuf, "receiverGainDbHx", val) == 0) {
-    _calib.receiver_gain_db_hx = val;
-  }
-
-  if (TaXml::readDouble(xbuf, "receiverGainDbVc", val) == 0) {
-    _calib.receiver_gain_db_vc = val;
-  }
-
-  if (TaXml::readDouble(xbuf, "receiverGainDbVx", val) == 0) {
-    _calib.receiver_gain_db_vx = val;
   }
 
   if (TaXml::readDouble(xbuf, "i0DbmHc", val) == 0) {
@@ -488,6 +464,22 @@ int IwrfCalib::setFromXml(const string &xmlBuf, string &errStr)
     _calib.i0_dbm_vx = val;
   } else {
     _calib.i0_dbm_vx = _calib.noise_dbm_vx - _calib.receiver_gain_db_vx;
+  }
+
+  if (TaXml::readDouble(xbuf, "receiverGainDbHc", val) == 0) {
+    _calib.receiver_gain_db_hc = val;
+  }
+
+  if (TaXml::readDouble(xbuf, "receiverGainDbHx", val) == 0) {
+    _calib.receiver_gain_db_hx = val;
+  }
+
+  if (TaXml::readDouble(xbuf, "receiverGainDbVc", val) == 0) {
+    _calib.receiver_gain_db_vc = val;
+  }
+
+  if (TaXml::readDouble(xbuf, "receiverGainDbVx", val) == 0) {
+    _calib.receiver_gain_db_vx = val;
   }
 
   if (TaXml::readDouble(xbuf, "receiverSlopeDbHc", val) == 0) {
@@ -524,9 +516,6 @@ int IwrfCalib::setFromXml(const string &xmlBuf, string &errStr)
 
   if (TaXml::readDouble(xbuf, "baseDbz1kmHc", val) == 0) {
     _calib.base_dbz_1km_hc = val;
-  // } else {
-  //   errStr += "ERROR - baseDbz1kmHc missing\n";
-  //   iret = -1;
   }
 
   if (TaXml::readDouble(xbuf, "baseDbz1kmHx", val) == 0) {
@@ -952,56 +941,7 @@ IwrfCalib::print(ostream &out)  const
 void IwrfCalib::setFromRadxRcalib(const RadxRcalib &rcalib)
   
 {
-
-  _calib.packet.time_secs_utc = rcalib.getCalibTime();
-  memcpy(_calib.radar_name,
-         rcalib.getRadarName().c_str(),
-         DS_RADAR_CALIB_NAME_LEN);
-  _calib.wavelength_cm = rcalib.getWavelengthCm();
-  _calib.beamwidth_deg_h = rcalib.getBeamWidthDegH();
-  _calib.beamwidth_deg_v = rcalib.getBeamWidthDegV();
-  _calib.gain_ant_db_h = rcalib.getAntennaGainDbH();
-  _calib.gain_ant_db_v = rcalib.getAntennaGainDbV();
-  _calib.pulse_width_us = rcalib.getPulseWidthUsec();
-  _calib.xmit_power_dbm_h = rcalib.getXmitPowerDbmH();
-  _calib.xmit_power_dbm_v = rcalib.getXmitPowerDbmV();
-  _calib.two_way_waveguide_loss_db_h = rcalib.getTwoWayWaveguideLossDbH();
-  _calib.two_way_waveguide_loss_db_v = rcalib.getTwoWayWaveguideLossDbV();
-  _calib.two_way_radome_loss_db_h = rcalib.getTwoWayRadomeLossDbH(); 
-  _calib.two_way_radome_loss_db_v = rcalib.getTwoWayRadomeLossDbV();
-  _calib.receiver_mismatch_loss_db = rcalib.getReceiverMismatchLossDb();
-  _calib.radar_constant_h = rcalib.getRadarConstantH();
-  _calib.radar_constant_v = rcalib.getRadarConstantV();
-  _calib.noise_dbm_hc = rcalib.getNoiseDbmHc();
-  _calib.noise_dbm_hx = rcalib.getNoiseDbmHx();
-  _calib.noise_dbm_vc = rcalib.getNoiseDbmVc();
-  _calib.noise_dbm_vx = rcalib.getNoiseDbmVx();
-  _calib.receiver_gain_db_hc = rcalib.getReceiverGainDbHc();
-  _calib.receiver_gain_db_hx = rcalib.getReceiverGainDbHx();
-  _calib.receiver_gain_db_vc = rcalib.getReceiverGainDbVc();
-  _calib.receiver_gain_db_vx = rcalib.getReceiverGainDbVx();
-  _calib.base_dbz_1km_hc = rcalib.getBaseDbz1kmHc();
-  _calib.base_dbz_1km_hx = rcalib.getBaseDbz1kmHx();
-  _calib.base_dbz_1km_vc = rcalib.getBaseDbz1kmVc();
-  _calib.base_dbz_1km_vx = rcalib.getBaseDbz1kmVx();
-  _calib.sun_power_dbm_hc = rcalib.getSunPowerDbmHc();
-  _calib.sun_power_dbm_hx = rcalib.getSunPowerDbmHx();
-  _calib.sun_power_dbm_vc = rcalib.getSunPowerDbmVc();
-  _calib.sun_power_dbm_vx = rcalib.getSunPowerDbmVx();
-  _calib.noise_source_power_dbm_h = rcalib.getNoiseSourcePowerDbmH();
-  _calib.noise_source_power_dbm_v = rcalib.getNoiseSourcePowerDbmV();
-  _calib.power_meas_loss_db_h = rcalib.getPowerMeasLossDbH();
-  _calib.power_meas_loss_db_v = rcalib.getPowerMeasLossDbV();
-  _calib.coupler_forward_loss_db_h = rcalib.getCouplerForwardLossDbH();
-  _calib.coupler_forward_loss_db_v = rcalib.getCouplerForwardLossDbV();
-  _calib.test_power_dbm_h = rcalib.getTestPowerDbmH();
-  _calib.test_power_dbm_v = rcalib.getTestPowerDbmV();
-  _calib.dbz_correction = rcalib.getDbzCorrection();
-  _calib.zdr_correction_db = rcalib.getZdrCorrectionDb();
-  _calib.ldr_correction_db_h = rcalib.getLdrCorrectionDbH();
-  _calib.ldr_correction_db_v = rcalib.getLdrCorrectionDbV();
-  _calib.phidp_rot_deg = rcalib.getSystemPhidpDeg();
-
+  RadarCalib::copyRadxToIwrf(rcalib, *this);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1010,56 +950,8 @@ void IwrfCalib::setFromRadxRcalib(const RadxRcalib &rcalib)
 void IwrfCalib::copyToRadxRcalib(RadxRcalib &rcalib) const
 
 {
-
-  rcalib.setCalibTime(_calib.packet.time_secs_utc);
-  rcalib.setRadarName(_calib.radar_name);
-  rcalib.setWavelengthCm(_calib.wavelength_cm);
-  rcalib.setBeamWidthDegH(_calib.beamwidth_deg_h);
-  rcalib.setBeamWidthDegV(_calib.beamwidth_deg_v);
-  rcalib.setAntennaGainDbH(_calib.gain_ant_db_h);
-  rcalib.setAntennaGainDbV(_calib.gain_ant_db_v);
-  rcalib.setPulseWidthUsec(_calib.pulse_width_us);
-  rcalib.setXmitPowerDbmH(_calib.xmit_power_dbm_h);
-  rcalib.setXmitPowerDbmV(_calib.xmit_power_dbm_v);
-  rcalib.setTwoWayWaveguideLossDbH(_calib.two_way_waveguide_loss_db_h);
-  rcalib.setTwoWayWaveguideLossDbV(_calib.two_way_waveguide_loss_db_v);
-  rcalib.setTwoWayRadomeLossDbH(_calib.two_way_radome_loss_db_h);
-  rcalib.setTwoWayRadomeLossDbV(_calib.two_way_radome_loss_db_v);
-  rcalib.setReceiverMismatchLossDb(_calib.receiver_mismatch_loss_db);
-  rcalib.setRadarConstantH(_calib.radar_constant_h);
-  rcalib.setRadarConstantV(_calib.radar_constant_v);
-  rcalib.setNoiseDbmHc(_calib.noise_dbm_hc);
-  rcalib.setNoiseDbmHx(_calib.noise_dbm_hx);
-  rcalib.setNoiseDbmVc(_calib.noise_dbm_vc);
-  rcalib.setNoiseDbmVx(_calib.noise_dbm_vx);
-  rcalib.setReceiverGainDbHc(_calib.receiver_gain_db_hc);
-  rcalib.setReceiverGainDbHx(_calib.receiver_gain_db_hx);
-  rcalib.setReceiverGainDbVc(_calib.receiver_gain_db_vc);
-  rcalib.setReceiverGainDbVx(_calib.receiver_gain_db_vx);
-  rcalib.setBaseDbz1kmHc(_calib.base_dbz_1km_hc);
-  rcalib.setBaseDbz1kmHx(_calib.base_dbz_1km_hx);
-  rcalib.setBaseDbz1kmVc(_calib.base_dbz_1km_vc);
-  rcalib.setBaseDbz1kmVx(_calib.base_dbz_1km_vx);
-  rcalib.setSunPowerDbmHc(_calib.sun_power_dbm_hc);
-  rcalib.setSunPowerDbmHx(_calib.sun_power_dbm_hx);
-  rcalib.setSunPowerDbmVc(_calib.sun_power_dbm_vc);
-  rcalib.setSunPowerDbmVx(_calib.sun_power_dbm_vx);
-  rcalib.setNoiseSourcePowerDbmH(_calib.noise_source_power_dbm_h);
-  rcalib.setNoiseSourcePowerDbmV(_calib.noise_source_power_dbm_v);
-  rcalib.setPowerMeasLossDbH(_calib.power_meas_loss_db_h);
-  rcalib.setPowerMeasLossDbV(_calib.power_meas_loss_db_v);
-  rcalib.setCouplerForwardLossDbH(_calib.coupler_forward_loss_db_h);
-  rcalib.setCouplerForwardLossDbV(_calib.coupler_forward_loss_db_v);
-  rcalib.setTestPowerDbmH(_calib.test_power_dbm_h);
-  rcalib.setTestPowerDbmV(_calib.test_power_dbm_v);
-  rcalib.setDbzCorrection(_calib.dbz_correction);
-  rcalib.setZdrCorrectionDb(_calib.zdr_correction_db);
-  rcalib.setLdrCorrectionDbH(_calib.ldr_correction_db_h);
-  rcalib.setLdrCorrectionDbV(_calib.ldr_correction_db_v);
-  rcalib.setSystemPhidpDeg(_calib.phidp_rot_deg);
-
+  RadarCalib::copyIwrfToRadx(*this, rcalib);
 }
-
 
 ////////////////////////////////////////////////////////////////////////
 // set this object from DsRadarCalib
@@ -1067,56 +959,7 @@ void IwrfCalib::copyToRadxRcalib(RadxRcalib &rcalib) const
 void IwrfCalib::setFromDsRadarCalib(const DsRadarCalib &dsCalib)
   
 {
-
-  _calib.packet.time_secs_utc = dsCalib.getCalibTime();
-  memcpy(_calib.radar_name,
-         dsCalib.getRadarName().c_str(),
-         DS_RADAR_CALIB_NAME_LEN);
-  _calib.wavelength_cm = dsCalib.getWavelengthCm();
-  _calib.beamwidth_deg_h = dsCalib.getBeamWidthDegH();
-  _calib.beamwidth_deg_v = dsCalib.getBeamWidthDegV();
-  _calib.gain_ant_db_h = dsCalib.getAntGainDbH();
-  _calib.gain_ant_db_v = dsCalib.getAntGainDbV();
-  _calib.pulse_width_us = dsCalib.getPulseWidthUs();
-  _calib.xmit_power_dbm_h = dsCalib.getXmitPowerDbmH();
-  _calib.xmit_power_dbm_v = dsCalib.getXmitPowerDbmV();
-  _calib.two_way_waveguide_loss_db_h = dsCalib.getTwoWayWaveguideLossDbH();
-  _calib.two_way_waveguide_loss_db_v = dsCalib.getTwoWayWaveguideLossDbV();
-  _calib.two_way_radome_loss_db_h = dsCalib.getTwoWayRadomeLossDbH(); 
-  _calib.two_way_radome_loss_db_v = dsCalib.getTwoWayRadomeLossDbV();
-  _calib.receiver_mismatch_loss_db = dsCalib.getReceiverMismatchLossDb();
-  _calib.radar_constant_h = dsCalib.getRadarConstH();
-  _calib.radar_constant_v = dsCalib.getRadarConstV();
-  _calib.noise_dbm_hc = dsCalib.getNoiseDbmHc();
-  _calib.noise_dbm_hx = dsCalib.getNoiseDbmHx();
-  _calib.noise_dbm_vc = dsCalib.getNoiseDbmVc();
-  _calib.noise_dbm_vx = dsCalib.getNoiseDbmVx();
-  _calib.receiver_gain_db_hc = dsCalib.getReceiverGainDbHc();
-  _calib.receiver_gain_db_hx = dsCalib.getReceiverGainDbHx();
-  _calib.receiver_gain_db_vc = dsCalib.getReceiverGainDbVc();
-  _calib.receiver_gain_db_vx = dsCalib.getReceiverGainDbVx();
-  _calib.base_dbz_1km_hc = dsCalib.getBaseDbz1kmHc();
-  _calib.base_dbz_1km_hx = dsCalib.getBaseDbz1kmHx();
-  _calib.base_dbz_1km_vc = dsCalib.getBaseDbz1kmVc();
-  _calib.base_dbz_1km_vx = dsCalib.getBaseDbz1kmVx();
-  _calib.sun_power_dbm_hc = dsCalib.getSunPowerDbmHc();
-  _calib.sun_power_dbm_hx = dsCalib.getSunPowerDbmHx();
-  _calib.sun_power_dbm_vc = dsCalib.getSunPowerDbmVc();
-  _calib.sun_power_dbm_vx = dsCalib.getSunPowerDbmVx();
-  _calib.noise_source_power_dbm_h = dsCalib.getNoiseSourcePowerDbmH();
-  _calib.noise_source_power_dbm_v = dsCalib.getNoiseSourcePowerDbmV();
-  _calib.power_meas_loss_db_h = dsCalib.getPowerMeasLossDbH();
-  _calib.power_meas_loss_db_v = dsCalib.getPowerMeasLossDbV();
-  _calib.coupler_forward_loss_db_h = dsCalib.getCouplerForwardLossDbH();
-  _calib.coupler_forward_loss_db_v = dsCalib.getCouplerForwardLossDbV();
-  _calib.test_power_dbm_h = dsCalib.getTestPowerDbmH();
-  _calib.test_power_dbm_v = dsCalib.getTestPowerDbmV();
-  _calib.dbz_correction = dsCalib.getDbzCorrection();
-  _calib.zdr_correction_db = dsCalib.getZdrCorrectionDb();
-  _calib.ldr_correction_db_h = dsCalib.getLdrCorrectionDbH();
-  _calib.ldr_correction_db_v = dsCalib.getLdrCorrectionDbV();
-  _calib.phidp_rot_deg = dsCalib.getSystemPhidpDeg();
-
+  RadarCalib::copyDsRadarToIwrf(dsCalib, *this);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1125,54 +968,5 @@ void IwrfCalib::setFromDsRadarCalib(const DsRadarCalib &dsCalib)
 void IwrfCalib::copyToDsRadarCalib(DsRadarCalib &dsCalib) const
 
 {
-
-  dsCalib.setCalibTime(_calib.packet.time_secs_utc);
-  dsCalib.setRadarName(_calib.radar_name);
-  dsCalib.setWavelengthCm(_calib.wavelength_cm);
-  dsCalib.setBeamWidthDegH(_calib.beamwidth_deg_h);
-  dsCalib.setBeamWidthDegV(_calib.beamwidth_deg_v);
-  dsCalib.setAntGainDbH(_calib.gain_ant_db_h);
-  dsCalib.setAntGainDbV(_calib.gain_ant_db_v);
-  dsCalib.setPulseWidthUs(_calib.pulse_width_us);
-  dsCalib.setXmitPowerDbmH(_calib.xmit_power_dbm_h);
-  dsCalib.setXmitPowerDbmV(_calib.xmit_power_dbm_v);
-  dsCalib.setTwoWayWaveguideLossDbH(_calib.two_way_waveguide_loss_db_h);
-  dsCalib.setTwoWayWaveguideLossDbV(_calib.two_way_waveguide_loss_db_v);
-  dsCalib.setTwoWayRadomeLossDbH(_calib.two_way_radome_loss_db_h);
-  dsCalib.setTwoWayRadomeLossDbV(_calib.two_way_radome_loss_db_v);
-  dsCalib.setReceiverMismatchLossDb(_calib.receiver_mismatch_loss_db);
-  dsCalib.setRadarConstH(_calib.radar_constant_h);
-  dsCalib.setRadarConstV(_calib.radar_constant_v);
-  dsCalib.setNoiseDbmHc(_calib.noise_dbm_hc);
-  dsCalib.setNoiseDbmHx(_calib.noise_dbm_hx);
-  dsCalib.setNoiseDbmVc(_calib.noise_dbm_vc);
-  dsCalib.setNoiseDbmVx(_calib.noise_dbm_vx);
-  dsCalib.setReceiverGainDbHc(_calib.receiver_gain_db_hc);
-  dsCalib.setReceiverGainDbHx(_calib.receiver_gain_db_hx);
-  dsCalib.setReceiverGainDbVc(_calib.receiver_gain_db_vc);
-  dsCalib.setReceiverGainDbVx(_calib.receiver_gain_db_vx);
-  dsCalib.setBaseDbz1kmHc(_calib.base_dbz_1km_hc);
-  dsCalib.setBaseDbz1kmHx(_calib.base_dbz_1km_hx);
-  dsCalib.setBaseDbz1kmVc(_calib.base_dbz_1km_vc);
-  dsCalib.setBaseDbz1kmVx(_calib.base_dbz_1km_vx);
-  dsCalib.setSunPowerDbmHc(_calib.sun_power_dbm_hc);
-  dsCalib.setSunPowerDbmHx(_calib.sun_power_dbm_hx);
-  dsCalib.setSunPowerDbmVc(_calib.sun_power_dbm_vc);
-  dsCalib.setSunPowerDbmVx(_calib.sun_power_dbm_vx);
-  dsCalib.setNoiseSourcePowerDbmH(_calib.noise_source_power_dbm_h);
-  dsCalib.setNoiseSourcePowerDbmV(_calib.noise_source_power_dbm_v);
-  dsCalib.setPowerMeasLossDbH(_calib.power_meas_loss_db_h);
-  dsCalib.setPowerMeasLossDbV(_calib.power_meas_loss_db_v);
-  dsCalib.setCouplerForwardLossDbH(_calib.coupler_forward_loss_db_h);
-  dsCalib.setCouplerForwardLossDbV(_calib.coupler_forward_loss_db_v);
-  dsCalib.setTestPowerDbmH(_calib.test_power_dbm_h);
-  dsCalib.setTestPowerDbmV(_calib.test_power_dbm_v);
-  dsCalib.setDbzCorrection(_calib.dbz_correction);
-  dsCalib.setZdrCorrectionDb(_calib.zdr_correction_db);
-  dsCalib.setLdrCorrectionDbH(_calib.ldr_correction_db_h);
-  dsCalib.setLdrCorrectionDbV(_calib.ldr_correction_db_v);
-  dsCalib.setSystemPhidpDeg(_calib.phidp_rot_deg);
-
+  RadarCalib::copyIwrfToDsRadar(*this, dsCalib);
 }
-
-

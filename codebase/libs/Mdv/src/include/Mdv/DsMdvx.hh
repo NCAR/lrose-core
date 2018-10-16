@@ -260,7 +260,7 @@ public:
   // Returns 0 on success, -1 on error.
   // getErrStr() retrieves the error string.
   
-  int writeToDir(const string &output_url);
+  virtual int writeToDir(const string &output_url);
   
   // Write to path
   //
@@ -270,7 +270,7 @@ public:
   // Returns 0 on success, -1 on error.
   // getErrStr() retrieves the error string.
   
-  int writeToPath(const string &output_path);
+  virtual int writeToPath(const string &output_path);
   
   // write files for an object which contains data for multiple times
   //

@@ -54,6 +54,13 @@ paramdef enum mode_t
            "work as a file path, but ./yyyymmdd/data_file.ext will.";
 } mode;
 
+paramdef boolean
+{
+  p_descr = "Are yyyymmdd directories expected?";
+  p_help = "If TRUE, expect data at trigger_url and all input urls to have data organized into yyyymmdd subdirectories.";
+  p_default = TRUE;
+} ymd_subdirectories;
+
 paramdef string
 {
   p_descr = "trigger url";
@@ -67,8 +74,6 @@ paramdef string
   p_default = "";
 } output_url;
   
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 commentdef {
@@ -215,6 +220,20 @@ commentdef {
   p_text =
     " Parameters that control the writing of output data ";
 }
+
+
+paramdef boolean
+{
+  p_descr = "True to output all fields, false to use list";
+  p_default = true;
+} output_all_fields;
+
+paramdef string
+{
+  p_descr = "fields to output";
+  p_default = {};
+} output_fields[];
+
 
 typedef enum {
   CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC

@@ -21,14 +21,20 @@ public:
 
   /**
    * Constructor for a named variable
+   * @param[in] name
    */
   BinaryArg(const std::string &name);
 
   /*
    * Constructor for value or missing value
+   * @param[in] value   the value
+   * @param[in] missing  true if the argument is the missing data value
    */
   BinaryArg(double value, bool missing);
 
+  /**
+   * Destructor
+   */
   inline ~BinaryArg(void) {}
 
   /**
@@ -59,10 +65,25 @@ class BinaryArgs
 {
 public:
 
+  /**
+   * Constructor
+   */
   inline BinaryArgs(void) {}
+  /**
+   * Destructor
+   */
   inline ~BinaryArgs(void) {}
 
+  /**
+   * Push the input onto the _args stack
+   * @param[in] b
+   */
   inline void appendArg(const BinaryArg &b) {_args.push_back(b);}
+
+  /**
+   * Push the input onto the _ops stack
+   * @param[in] o
+   */
   inline void appendOp(const ProcessingNode::Operator_t &o) {_ops.push_back(o);}
 
 protected:

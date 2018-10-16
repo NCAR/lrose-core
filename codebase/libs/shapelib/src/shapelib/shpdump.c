@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: shpdump.c,v 1.1 2000/06/28 13:37:01 rehak Exp $
+ * $Id: shpdump.c,v 1.2 2018/10/13 23:24:07 dixon Exp $
  *
  * Project:  Shapelib
  * Purpose:  Sample application for dumping contents of a shapefile to 
@@ -35,6 +35,9 @@
  ******************************************************************************
  *
  * $Log: shpdump.c,v $
+ * Revision 1.2  2018/10/13 23:24:07  dixon
+ * Sync with EOL/github/lrose-core
+ *
  * Revision 1.1  2000/06/28 13:37:01  rehak
  * Initial version of library from http://gdal.velocet.ca/projects/shapelib/
  *
