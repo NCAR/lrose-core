@@ -3,6 +3,8 @@
 
 #include "FlowLayout.hh"
 #include "Dialog.hh"
+#include "ParameterColorDialog.hh"
+#include "DialogOptionsWidget.hh"
 #include "../HawkEye/ColorMap.hh"
 #include "../HawkEye/ColorBar.hh"
 
@@ -14,7 +16,7 @@
 #define MESSAGE_DETAILS \
     Dialog::tr("If a message box has detailed text, the user can reveal it " \
                "by pressing the Show Details... button.")
-
+/*
 class DialogOptionsWidget : public QGroupBox
 {
 public:
@@ -57,6 +59,7 @@ int DialogOptionsWidget::value() const
             result |= checkboxEntry.second;
     return result;
 }
+*/
 
 Dialog::Dialog(QWidget *parent)
     : QWidget(parent)
@@ -70,6 +73,25 @@ Dialog::Dialog(QWidget *parent)
     } else {
         verticalLayout = new QVBoxLayout(this);
     }
+
+    // make a big label with the soloii just for prototyping
+    QPixmap soloiiPixmap("/Users/brenda/Desktop/soloii_screenshot.png");
+    QLabel *giantLabel = new QLabel();
+    giantLabel->clear();
+    giantLabel->setPixmap(soloiiPixmap);
+    verticalLayout->addWidget(giantLabel);
+    // TODO: also try this ...
+    // palette->setBrush(QPalette::Background,(new QBrush((new QPixmap(":/1.jpg")))));
+    // end big label of soloii image
+    // setStyleSheet( "background-image:url(/Users/brenda/Desktop/soloii_screenshot.png);" );
+
+
+    // add a right-click context menu to the image label
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+            this, SLOT(ShowContextMenu(const QPoint &)));
+
+    // end right-click context menu
 
     QToolBox *toolbox = new QToolBox;
     verticalLayout->addWidget(toolbox);
@@ -100,6 +122,7 @@ Dialog::Dialog(QWidget *parent)
     multiLineTextLabel->setFrameStyle(frameStyle);
     QPushButton *multiLineTextButton = new QPushButton(tr("QInputDialog::get&MultiLineText()"));
 
+    // Color Palette Editor ...
     QPushButton *saveButton = new QPushButton(tr("Save")); 
 
     centerColorLabel = new QLabel;
@@ -144,6 +167,8 @@ Dialog::Dialog(QWidget *parent)
     emphasisColorLabel->setText(tr("Emphasis"));
     emphasisColorButton = new QPushButton(tr(""));
     emphasisColorButton->setFlat(true);
+
+    // end Color Palette Editor
 
     fontLabel = new QLabel;
     fontLabel->setFrameStyle(frameStyle);
@@ -200,6 +225,7 @@ Dialog::Dialog(QWidget *parent)
     connect(multiLineTextButton, &QAbstractButton::clicked, this, &Dialog::setMultiLineText);
     //connect(centerColorLineEdit, &QLineEdit::textEdited, this, &Dialog::setCenterPoint);
 
+    // connections for Parameters + Color Editor
     connect(saveButton, &QAbstractButton::clicked, this, &Dialog::saveColorScale);
 
     connect(gridColorButton, &QAbstractButton::clicked, this, &Dialog::setGridColor);
@@ -210,6 +236,8 @@ Dialog::Dialog(QWidget *parent)
     connect(backgroundColorButton, &QAbstractButton::clicked, this, &Dialog::setBackgroundColor);
     connect(emphasisColorButton, &QAbstractButton::clicked, this, &Dialog::setEmphasisColor);
     //connect(colorSample, &QAbstractLabel::clicked, this, &Dialog::setColor);
+
+
     connect(fontButton, &QAbstractButton::clicked, this, &Dialog::setFont);
     connect(directoryButton, &QAbstractButton::clicked,
             this, &Dialog::setExistingDirectory);
@@ -405,6 +433,43 @@ Dialog::Dialog(QWidget *parent)
     setWindowTitle(QGuiApplication::applicationDisplayName());
 }
 
+
+void Dialog::ShowContextMenu(const QPoint &pos) 
+{
+   QMenu contextMenu(tr("Context menu"), this);
+
+   QAction action1("Cancel", this);
+   connect(&action1, SIGNAL(triggered()), this, SLOT(contextMenuCancel()));
+   contextMenu.addAction(&action1);
+
+   QAction action2("Sweepfiles", this);
+   connect(&action2, SIGNAL(triggered()), this, SLOT(contextMenuSweepfiles()));
+   contextMenu.addAction(&action2);
+
+   QAction action3("Parameters + Colors", this);
+   connect(&action3, SIGNAL(triggered()), this, SLOT(contextMenuParameterColors()));
+   contextMenu.addAction(&action3);
+
+   QAction action4("View", this);
+   connect(&action4, SIGNAL(triggered()), this, SLOT(contextMenuView()));
+   contextMenu.addAction(&action4);
+
+   QAction action5("Editor", this);
+   connect(&action5, SIGNAL(triggered()), this, SLOT(contextMenuEditor()));
+   contextMenu.addAction(&action5);
+
+   QAction action6("Examine", this);
+   connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine()));
+   contextMenu.addAction(&action6);
+
+   QAction action7("Data Widget", this);
+   connect(&action7, SIGNAL(triggered()), this, SLOT(contextMenuDataWidget()));
+   contextMenu.addAction(&action7);
+
+
+   contextMenu.exec(mapToGlobal(pos));
+}
+
 void Dialog::setInteger()
 {
     bool ok;
@@ -453,9 +518,10 @@ void Dialog::setMultiLineText()
     if (ok && !text.isEmpty())
         multiLineTextLabel->setText(text);
 }
-/*
+
 void Dialog::setColor()
 {
+/*
     const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
     const QColor color = QColorDialog::getColor(Qt::green, this, "Select Color", options);
 
@@ -466,8 +532,12 @@ void Dialog::setColor()
         colorButton->setPalette(QPalette(color));
         colorButton->setAutoFillBackground(true);
     }
-}
 */
+    ParameterColorDialog parameterColorDialog(this); //  = new ParameterColorDialog(this);
+    parameterColorDialog.exec();
+    bool changed = parameterColorDialog.getChanges();    
+}
+
 
 void Dialog::setCenterPoint()
 {
@@ -525,8 +595,8 @@ void Dialog::setBoundaryColor()
 
 void Dialog::setExceededColor()
 {
-    const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
-    const QColor color = QColorDialog::getColor(Qt::green, this, "Select Color", options);
+    //const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
+    const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
     if (color.isValid()) {
         boundaryColorButton->setPalette(QPalette(color));
@@ -536,8 +606,8 @@ void Dialog::setExceededColor()
 
 void Dialog::setMissingColor()
 {
-    const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
-    const QColor color = QColorDialog::getColor(Qt::green, this, "Select Color", options);
+    // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
+    const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
     if (color.isValid()) {
         missingColorButton->setPalette(QPalette(color));
@@ -547,8 +617,8 @@ void Dialog::setMissingColor()
 
 void Dialog::setAnnotationColor()
 {
-    const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
-    const QColor color = QColorDialog::getColor(Qt::green, this, "Select Color", options);
+    // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
+    const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
     if (color.isValid()) {
         annotationColorButton->setPalette(QPalette(color));
@@ -558,8 +628,8 @@ void Dialog::setAnnotationColor()
 
 void Dialog::setBackgroundColor()
 {
-    const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
-    const QColor color = QColorDialog::getColor(Qt::green, this, "Select Color", options);
+    // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
+    const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
     if (color.isValid()) {
         backgroundColorButton->setPalette(QPalette(color));
@@ -569,8 +639,8 @@ void Dialog::setBackgroundColor()
 
 void Dialog::setEmphasisColor()
 {
-    const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
-    const QColor color = QColorDialog::getColor(Qt::green, this, "Select Color", options);
+    // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
+    const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
     if (color.isValid()) {
         emphasisColorButton->setPalette(QPalette(color));
@@ -578,6 +648,40 @@ void Dialog::setEmphasisColor()
     }
 }
 
+void Dialog::contextMenuCancel() 
+{
+    notImplemented();
+}
+
+void Dialog::contextMenuSweepfiles()
+{
+    notImplemented();
+}
+
+void Dialog::contextMenuParameterColors()
+{
+    setColor();
+}
+
+void Dialog::contextMenuView()
+{
+    notImplemented();
+}
+
+void Dialog::contextMenuEditor()
+{
+    notImplemented();
+}
+
+void Dialog::contextMenuExamine()
+{
+    notImplemented();
+}
+
+void Dialog::contextMenuDataWidget()
+{
+    notImplemented();
+}
 
 void Dialog::setFont()
 {
@@ -645,6 +749,16 @@ void Dialog::setSaveFileName()
     if (!fileName.isEmpty())
         saveFileNameLabel->setText(fileName);
 }
+
+void Dialog::notImplemented()
+{
+    errorMessageDialog->showMessage(
+            tr("This option is not implemented yet."));
+
+    errorLabel->setText(tr("If the box is unchecked, the message "
+                           "won't appear again."));
+}
+
 
 void Dialog::criticalMessage()
 {

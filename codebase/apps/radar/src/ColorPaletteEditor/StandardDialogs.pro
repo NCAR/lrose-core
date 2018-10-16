@@ -10,11 +10,15 @@ HEADERS       = Dialog.hh
 HEADERS      += ../HawkEye/ColorMap.hh
 HEADERS      += ../HawkEye/ColorBar.hh
 HEADERS      += FlowLayout.hh
+HEADERS      += ParameterColorDialog.hh
+HEADERS      += DialogOptionsWidget.hh
 
 SOURCES       = Dialog.cc 
 SOURCES      += ../HawkEye/ColorMap.cc 
 SOURCES      += ../HawkEye/ColorBar.cc 
 SOURCES      += FlowLayout.cc 
+SOURCES      += ParameterColorDialog.cc 
+SOURCES      += DialogOptionsWidget.cc 
 SOURCES      += Main.cc
 
 INCLUDEPATH += $(HOME)/rap/include

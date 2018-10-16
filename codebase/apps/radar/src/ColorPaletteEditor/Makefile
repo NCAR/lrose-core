@@ -54,15 +54,21 @@ SOURCES       = Dialog.cc \
 		../HawkEye/ColorMap.cc \
 		../HawkEye/ColorBar.cc \
 		FlowLayout.cc \
+		ParameterColorDialog.cc \
+		DialogOptionsWidget.cc \
 		Main.cc moc_Dialog.cpp \
-		moc_ColorBar.cpp
+		moc_ColorBar.cpp \
+		moc_ParameterColorDialog.cpp
 OBJECTS       = Dialog.o \
 		ColorMap.o \
 		ColorBar.o \
 		FlowLayout.o \
+		ParameterColorDialog.o \
+		DialogOptionsWidget.o \
 		Main.o \
 		moc_Dialog.o \
-		moc_ColorBar.o
+		moc_ColorBar.o \
+		moc_ParameterColorDialog.o
 DIST          = /usr/local/Cellar/qt/5.10.1/mkspecs/features/spec_pre.prf \
 		/usr/local/Cellar/qt/5.10.1/mkspecs/qdevice.pri \
 		/usr/local/Cellar/qt/5.10.1/mkspecs/features/device_config.prf \
@@ -251,10 +257,14 @@ DIST          = /usr/local/Cellar/qt/5.10.1/mkspecs/features/spec_pre.prf \
 		StandardDialogs.pro Dialog.hh \
 		../HawkEye/ColorMap.hh \
 		../HawkEye/ColorBar.hh \
-		FlowLayout.hh Dialog.cc \
+		FlowLayout.hh \
+		ParameterColorDialog.hh \
+		DialogOptionsWidget.hh Dialog.cc \
 		../HawkEye/ColorMap.cc \
 		../HawkEye/ColorBar.cc \
 		FlowLayout.cc \
+		ParameterColorDialog.cc \
+		DialogOptionsWidget.cc \
 		Main.cc
 QMAKE_TARGET  = StandardDialogs
 DESTDIR       = 
@@ -682,8 +692,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/local/Cellar/qt/5.10.1/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents Dialog.hh ../HawkEye/ColorMap.hh ../HawkEye/ColorBar.hh FlowLayout.hh $(DISTDIR)/
-	$(COPY_FILE) --parents Dialog.cc ../HawkEye/ColorMap.cc ../HawkEye/ColorBar.cc FlowLayout.cc Main.cc $(DISTDIR)/
+	$(COPY_FILE) --parents Dialog.hh ../HawkEye/ColorMap.hh ../HawkEye/ColorBar.hh FlowLayout.hh ParameterColorDialog.hh DialogOptionsWidget.hh $(DISTDIR)/
+	$(COPY_FILE) --parents Dialog.cc ../HawkEye/ColorMap.cc ../HawkEye/ColorBar.cc FlowLayout.cc ParameterColorDialog.cc DialogOptionsWidget.cc Main.cc $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -715,9 +725,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/local/Cellar/qt/5.10.1/mkspecs/features/data/dummy.cpp
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ -pipe -stdlib=libc++ -g -std=gnu++11 $(EXPORT_ARCH_ARGS) -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk -mmacosx-version-min=10.13 -dM -E -o moc_predefs.h /usr/local/Cellar/qt/5.10.1/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_Dialog.cpp moc_ColorBar.cpp
+compiler_moc_header_make_all: moc_Dialog.cpp moc_ColorBar.cpp moc_ParameterColorDialog.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_Dialog.cpp moc_ColorBar.cpp
+	-$(DEL_FILE) moc_Dialog.cpp moc_ColorBar.cpp moc_ParameterColorDialog.cpp
 moc_Dialog.cpp: /usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QWidget \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwidget.h \
 		Dialog.hh \
@@ -740,6 +750,147 @@ moc_ColorBar.cpp: ../HawkEye/ColorMap.hh \
 		moc_predefs.h \
 		/usr/local/Cellar/qt/5.10.1/bin/moc
 	/usr/local/Cellar/qt/5.10.1/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/local/Cellar/qt/5.10.1/mkspecs/macx-clang -I/Users/brenda/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/brenda/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/brenda/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.10.1/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/include -F/usr/local/Cellar/qt/5.10.1/lib ../HawkEye/ColorBar.hh -o moc_ColorBar.cpp
+
+moc_ParameterColorDialog.cpp: /usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QtWidgets \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtwidgetsglobal.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractbutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractitemdelegate.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractitemview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractscrollarea.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractslider.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractspinbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qaccessiblewidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qaction.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qactiongroup.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qapplication.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qboxlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qbuttongroup.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcalendarwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcheckbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcolordialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcolormap.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcolumnview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcombobox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcommandlinkbutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcommonstyle.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcompleter.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdatawidgetmapper.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdatetimeedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdesktopwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdial.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdialogbuttonbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdirmodel.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdockwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdrawutil.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qerrormessage.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfiledialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfileiconprovider.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfilesystemmodel.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfocusframe.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfontcombobox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfontdialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qformlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qframe.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgesture.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgesturerecognizer.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsanchorlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicseffect.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsgridlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsitem.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsitemanimation.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicslayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicslayoutitem.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicslinearlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsproxywidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsscene.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicssceneevent.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicstransform.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicswidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgridlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgroupbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qheaderview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qinputdialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qitemdelegate.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qitemeditorfactory.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qkeyeventtransition.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qkeysequenceedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlabel.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlayoutitem.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlcdnumber.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlineedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlistview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlistwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmainwindow.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmdiarea.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmdisubwindow.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmenu.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmenubar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmessagebox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmouseeventtransition.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qopenglwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qplaintextedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qprogressbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qprogressdialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qproxystyle.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qpushbutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qradiobutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qrubberband.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qscrollarea.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qscrollbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qscroller.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qscrollerproperties.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qshortcut.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsizegrip.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsizepolicy.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qslider.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qspinbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsplashscreen.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsplitter.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstackedlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstackedwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstatusbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstyle.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstyleditemdelegate.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstylefactory.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstyleoption.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstylepainter.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstyleplugin.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsystemtrayicon.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtabbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtableview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtablewidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtabwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtextbrowser.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtextedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtoolbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtoolbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtoolbutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtooltip.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtreeview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtreewidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtreewidgetitemiterator.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qundogroup.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qundostack.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qundoview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwhatsthis.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwidgetaction.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwizard.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtwidgetsversion.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtGui.framework/Headers/QPixmap \
+		/usr/local/Cellar/qt/5.10.1/lib/QtGui.framework/Headers/qpixmap.h \
+		FlowLayout.hh \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QLayout \
+		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/QRect \
+		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/qrect.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QStyle \
+		ParameterColorDialog.hh \
+		moc_predefs.h \
+		/usr/local/Cellar/qt/5.10.1/bin/moc
+	/usr/local/Cellar/qt/5.10.1/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/local/Cellar/qt/5.10.1/mkspecs/macx-clang -I/Users/brenda/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/brenda/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/brenda/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.10.1/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/include -F/usr/local/Cellar/qt/5.10.1/lib ParameterColorDialog.hh -o moc_ParameterColorDialog.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -897,6 +1048,7 @@ Dialog.o: Dialog.cc /usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QStyle \
 		Dialog.hh \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QWidget \
+		ParameterColorDialog.hh \
 		../HawkEye/ColorMap.hh \
 		../HawkEye/ColorBar.hh \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QVBoxLayout \
@@ -1063,8 +1215,294 @@ FlowLayout.o: FlowLayout.cc /usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwidget.h \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwidgetaction.h \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwizard.h \
-		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtwidgetsversion.h
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtwidgetsversion.h \
+		FlowLayout.hh \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QLayout \
+		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/QRect \
+		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/qrect.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QStyle
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o FlowLayout.o FlowLayout.cc
+
+ParameterColorDialog.o: ParameterColorDialog.cc /usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QtWidgets \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtwidgetsglobal.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractbutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractitemdelegate.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractitemview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractscrollarea.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractslider.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractspinbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qaccessiblewidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qaction.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qactiongroup.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qapplication.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qboxlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qbuttongroup.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcalendarwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcheckbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcolordialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcolormap.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcolumnview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcombobox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcommandlinkbutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcommonstyle.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcompleter.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdatawidgetmapper.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdatetimeedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdesktopwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdial.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdialogbuttonbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdirmodel.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdockwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdrawutil.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qerrormessage.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfiledialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfileiconprovider.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfilesystemmodel.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfocusframe.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfontcombobox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfontdialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qformlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qframe.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgesture.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgesturerecognizer.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsanchorlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicseffect.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsgridlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsitem.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsitemanimation.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicslayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicslayoutitem.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicslinearlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsproxywidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsscene.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicssceneevent.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicstransform.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicswidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgridlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgroupbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qheaderview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qinputdialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qitemdelegate.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qitemeditorfactory.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qkeyeventtransition.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qkeysequenceedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlabel.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlayoutitem.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlcdnumber.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlineedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlistview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlistwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmainwindow.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmdiarea.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmdisubwindow.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmenu.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmenubar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmessagebox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmouseeventtransition.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qopenglwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qplaintextedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qprogressbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qprogressdialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qproxystyle.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qpushbutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qradiobutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qrubberband.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qscrollarea.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qscrollbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qscroller.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qscrollerproperties.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qshortcut.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsizegrip.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsizepolicy.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qslider.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qspinbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsplashscreen.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsplitter.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstackedlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstackedwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstatusbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstyle.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstyleditemdelegate.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstylefactory.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstyleoption.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstylepainter.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstyleplugin.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsystemtrayicon.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtabbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtableview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtablewidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtabwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtextbrowser.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtextedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtoolbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtoolbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtoolbutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtooltip.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtreeview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtreewidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtreewidgetitemiterator.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qundogroup.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qundostack.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qundoview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwhatsthis.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwidgetaction.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwizard.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtwidgetsversion.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtGui.framework/Headers/QPixmap \
+		/usr/local/Cellar/qt/5.10.1/lib/QtGui.framework/Headers/qpixmap.h \
+		FlowLayout.hh \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QLayout \
+		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/QRect \
+		/usr/local/Cellar/qt/5.10.1/lib/QtCore.framework/Headers/qrect.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QStyle \
+		ParameterColorDialog.hh \
+		../HawkEye/ColorMap.hh \
+		../HawkEye/ColorBar.hh \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QWidget \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QVBoxLayout \
+		/usr/local/Cellar/qt/5.10.1/lib/QtGui.framework/Headers/QImage \
+		/usr/local/Cellar/qt/5.10.1/lib/QtGui.framework/Headers/qimage.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ParameterColorDialog.o ParameterColorDialog.cc
+
+DialogOptionsWidget.o: DialogOptionsWidget.cc /usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QtWidgets \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtwidgetsglobal.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractbutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractitemdelegate.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractitemview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractscrollarea.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractslider.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qabstractspinbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qaccessiblewidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qaction.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qactiongroup.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qapplication.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qboxlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qbuttongroup.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcalendarwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcheckbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcolordialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcolormap.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcolumnview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcombobox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcommandlinkbutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcommonstyle.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qcompleter.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdatawidgetmapper.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdatetimeedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdesktopwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdial.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdialogbuttonbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdirmodel.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdockwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qdrawutil.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qerrormessage.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfiledialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfileiconprovider.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfilesystemmodel.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfocusframe.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfontcombobox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qfontdialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qformlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qframe.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgesture.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgesturerecognizer.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsanchorlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicseffect.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsgridlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsitem.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsitemanimation.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicslayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicslayoutitem.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicslinearlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsproxywidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsscene.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicssceneevent.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicstransform.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicsview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgraphicswidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgridlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qgroupbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qheaderview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qinputdialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qitemdelegate.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qitemeditorfactory.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qkeyeventtransition.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qkeysequenceedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlabel.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlayoutitem.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlcdnumber.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlineedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlistview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qlistwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmainwindow.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmdiarea.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmdisubwindow.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmenu.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmenubar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmessagebox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qmouseeventtransition.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qopenglwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qplaintextedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qprogressbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qprogressdialog.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qproxystyle.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qpushbutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qradiobutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qrubberband.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qscrollarea.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qscrollbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qscroller.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qscrollerproperties.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qshortcut.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsizegrip.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsizepolicy.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qslider.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qspinbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsplashscreen.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsplitter.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstackedlayout.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstackedwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstatusbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstyle.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstyleditemdelegate.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstylefactory.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstyleoption.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstylepainter.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qstyleplugin.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qsystemtrayicon.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtabbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtableview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtablewidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtabwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtextbrowser.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtextedit.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtoolbar.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtoolbox.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtoolbutton.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtooltip.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtreeview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtreewidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtreewidgetitemiterator.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qundogroup.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qundostack.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qundoview.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwhatsthis.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwidget.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwidgetaction.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qwizard.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qtwidgetsversion.h \
+		/usr/local/Cellar/qt/5.10.1/lib/QtGui.framework/Headers/QPixmap \
+		/usr/local/Cellar/qt/5.10.1/lib/QtGui.framework/Headers/qpixmap.h \
+		DialogOptionsWidget.hh \
+		Dialog.hh \
+		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QWidget
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o DialogOptionsWidget.o DialogOptionsWidget.cc
 
 Main.o: Main.cc /usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/QApplication \
 		/usr/local/Cellar/qt/5.10.1/lib/QtWidgets.framework/Headers/qapplication.h \
@@ -1088,6 +1526,9 @@ moc_Dialog.o: moc_Dialog.cpp
 
 moc_ColorBar.o: moc_ColorBar.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_ColorBar.o moc_ColorBar.cpp
+
+moc_ParameterColorDialog.o: moc_ParameterColorDialog.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_ParameterColorDialog.o moc_ParameterColorDialog.cpp
 
 ####### Install
 

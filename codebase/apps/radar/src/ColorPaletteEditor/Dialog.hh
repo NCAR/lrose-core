@@ -3,12 +3,13 @@
 #define DIALOG_H
 
 #include <QWidget>
+#include "DialogOptionsWidget.hh"
+
 class QCheckBox;
 class QLabel;
 class QLineEdit;
 class QErrorMessage;
 class QPushButton;
-class DialogOptionsWidget;
 
 class Dialog : public QWidget
 {
@@ -42,6 +43,16 @@ private slots:
     void questionMessage();
     void warningMessage();
     void errorMessage();
+    void ShowContextMenu(const QPoint &pos);
+    void contextMenuCancel();
+    void contextMenuSweepfiles();
+    void contextMenuParameterColors();
+    void contextMenuView();
+    void contextMenuEditor();
+    void contextMenuExamine();
+    void contextMenuDataWidget();
+    void notImplemented();
+    void setColor();
 
 private:
 
