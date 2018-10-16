@@ -43,6 +43,7 @@
 #include <dataport/swap.h>
 #include <radar/IwrfMoments.hh>
 #include <radar/IwrfMomReader.hh>
+#include <radar/RadarCalib.hh>
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxGeoref.hh>
 using namespace std;
@@ -340,82 +341,7 @@ void IwrfMomReader::_decodeDsRadarCalib()
   // create RadxRcalib
 
   RadxRcalib rcal;
-  
-  rcal.setRadarName(dsCalib.getRadarName());
-  rcal.setCalibTime(dsCalib.getCalibTime());
-
-  rcal.setWavelengthCm(dsCalib.getWavelengthCm());
-  rcal.setBeamWidthDegH(dsCalib.getBeamWidthDegH());
-  rcal.setBeamWidthDegV(dsCalib.getBeamWidthDegV());
-  rcal.setAntennaGainDbH(dsCalib.getAntGainDbH());
-  rcal.setAntennaGainDbV(dsCalib.getAntGainDbV());
-
-  rcal.setPulseWidthUsec(dsCalib.getPulseWidthUs());
-  rcal.setXmitPowerDbmH(dsCalib.getXmitPowerDbmH());
-  rcal.setXmitPowerDbmV(dsCalib.getXmitPowerDbmV());
-  
-  rcal.setTwoWayWaveguideLossDbH(dsCalib.getTwoWayWaveguideLossDbH());
-  rcal.setTwoWayWaveguideLossDbV(dsCalib.getTwoWayWaveguideLossDbV());
-  rcal.setTwoWayRadomeLossDbH(dsCalib.getTwoWayRadomeLossDbH());
-  rcal.setTwoWayRadomeLossDbV(dsCalib.getTwoWayRadomeLossDbV());
-  rcal.setReceiverMismatchLossDb(dsCalib.getReceiverMismatchLossDb());
-  
-  rcal.setKSquaredWater(dsCalib.getKSquaredWater());
-  rcal.setRadarConstantH(dsCalib.getRadarConstH());
-  rcal.setRadarConstantV(dsCalib.getRadarConstV());
-  
-  rcal.setNoiseDbmHc(dsCalib.getNoiseDbmHc());
-  rcal.setNoiseDbmHx(dsCalib.getNoiseDbmHx());
-  rcal.setNoiseDbmVc(dsCalib.getNoiseDbmVc());
-  rcal.setNoiseDbmVx(dsCalib.getNoiseDbmVx());
-  
-  rcal.setI0DbmHc(dsCalib.getI0DbmHc());
-  rcal.setI0DbmHx(dsCalib.getI0DbmHx());
-  rcal.setI0DbmVc(dsCalib.getI0DbmVc());
-  rcal.setI0DbmVx(dsCalib.getI0DbmVx());
-  
-  rcal.setReceiverGainDbHc(dsCalib.getReceiverGainDbHc());
-  rcal.setReceiverGainDbHx(dsCalib.getReceiverGainDbHx());
-  rcal.setReceiverGainDbVc(dsCalib.getReceiverGainDbVc());
-  rcal.setReceiverGainDbVx(dsCalib.getReceiverGainDbVx());
-  
-  rcal.setReceiverSlopeDbHc(dsCalib.getReceiverSlopeDbHc());
-  rcal.setReceiverSlopeDbHx(dsCalib.getReceiverSlopeDbHx());
-  rcal.setReceiverSlopeDbVc(dsCalib.getReceiverSlopeDbVc());
-  rcal.setReceiverSlopeDbVx(dsCalib.getReceiverSlopeDbVx());
-  
-  rcal.setDynamicRangeDbHc(dsCalib.getDynamicRangeDbHc());
-  rcal.setDynamicRangeDbHx(dsCalib.getDynamicRangeDbHx());
-  rcal.setDynamicRangeDbVc(dsCalib.getDynamicRangeDbVc());
-  rcal.setDynamicRangeDbVx(dsCalib.getDynamicRangeDbVx());
-  
-  rcal.setBaseDbz1kmHc(dsCalib.getBaseDbz1kmHc());
-  rcal.setBaseDbz1kmHx(dsCalib.getBaseDbz1kmHx());
-  rcal.setBaseDbz1kmVc(dsCalib.getBaseDbz1kmVc());
-  rcal.setBaseDbz1kmVx(dsCalib.getBaseDbz1kmVx());
-  
-  rcal.setSunPowerDbmHc(dsCalib.getSunPowerDbmHc());
-  rcal.setSunPowerDbmHx(dsCalib.getSunPowerDbmHx());
-  rcal.setSunPowerDbmVc(dsCalib.getSunPowerDbmVc());
-  rcal.setSunPowerDbmVx(dsCalib.getSunPowerDbmVx());
-  
-  rcal.setNoiseSourcePowerDbmH(dsCalib.getNoiseSourcePowerDbmH());
-  rcal.setNoiseSourcePowerDbmV(dsCalib.getNoiseSourcePowerDbmV());
-  
-  rcal.setPowerMeasLossDbH(dsCalib.getPowerMeasLossDbH());
-  rcal.setPowerMeasLossDbV(dsCalib.getPowerMeasLossDbV());
-  
-  rcal.setCouplerForwardLossDbH(dsCalib.getCouplerForwardLossDbH());
-  rcal.setCouplerForwardLossDbV(dsCalib.getCouplerForwardLossDbV());
-  
-  rcal.setDbzCorrection(dsCalib.getDbzCorrection());
-  rcal.setZdrCorrectionDb(dsCalib.getZdrCorrectionDb());
-  rcal.setLdrCorrectionDbH(dsCalib.getLdrCorrectionDbH());
-  rcal.setLdrCorrectionDbV(dsCalib.getLdrCorrectionDbV());
-  rcal.setSystemPhidpDeg(dsCalib.getSystemPhidpDeg());
-  
-  rcal.setTestPowerDbmH(dsCalib.getTestPowerDbmH());
-  rcal.setTestPowerDbmV(dsCalib.getTestPowerDbmV());
+  RadarCalib::copyDsRadarToRadx(dsCalib, rcal);
 
   // remove cal with the same pulse width
   // if one already exists
