@@ -101,7 +101,7 @@ void clearWriteLdataInfo();
 // Returns 0 on success, -1 on error.
 // getErrStr() retrieves the error string.
 
-virtual int writeToDir(const string &output_dir) const;
+virtual int writeToDir(const string &output_dir);
 
 /////////////////////////////////////////////////////////
 // Write to path
@@ -112,7 +112,7 @@ virtual int writeToDir(const string &output_dir) const;
 // Returns 0 on success, -1 on error.
 // getErrStr() retrieves the error string.
 
-virtual int writeToPath(const string &output_path) const;
+virtual int writeToPath(const string &output_path);
 
 /////////////////////////////////////////////////////////
 // Write to buffer
