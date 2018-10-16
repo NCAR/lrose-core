@@ -12,6 +12,7 @@ MODULE_NAME = radar
 LIBNAME = lib$(MODULE_NAME).a
 
 SUB_DIRS = \
+	calib \
 	complex \
 	convstrat \
 	dorade \
