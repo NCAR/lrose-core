@@ -365,6 +365,22 @@ paramdef struct genpt_fields_t
 } genptFields[];
 
 commentdef {
+  p_header = "QC check"
+}
+
+paramdef float {
+  p_default = -35;
+  p_descr = "Minimum valid temperature (C).";
+  p_help = "Stations with temperature below this are discsarded.";
+} MinValidTempC;
+
+paramdef float {
+  p_default = 55;
+  p_descr = "Maximum valid temperature (C).";
+  p_help = "Stations with temperature above this are discsarded.";
+} MaxValidTempC;
+
+commentdef {
   p_header = "INTERPOLATION";
 }
 

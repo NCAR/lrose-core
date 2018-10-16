@@ -1248,6 +1248,39 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'MinValidTempC'
+    // ctype is 'float'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = FLOAT_TYPE;
+    tt->param_name = tdrpStrDup("MinValidTempC");
+    tt->descr = tdrpStrDup("Minimum valid temperature (C).");
+    tt->help = tdrpStrDup("Stations with temperature below this are discsarded.");
+    tt->val_offset = (char *) &MinValidTempC - &_start_;
+    tt->single_val.f = -35;
+    tt++;
+    
+    // Parameter 'MaxValidTempC'
+    // ctype is 'float'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = FLOAT_TYPE;
+    tt->param_name = tdrpStrDup("MaxValidTempC");
+    tt->descr = tdrpStrDup("Maximum valid temperature (C).");
+    tt->help = tdrpStrDup("Stations with temperature above this are discsarded.");
+    tt->val_offset = (char *) &MaxValidTempC - &_start_;
+    tt->single_val.f = 55;
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("INTERPOLATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1368,11 +1401,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("FLIGHT CATEGORY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1488,11 +1521,11 @@
     tt->single_val.f = 30000;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("CONVERGENCE");
     tt->comment_text = tdrpStrDup("");
     tt++;

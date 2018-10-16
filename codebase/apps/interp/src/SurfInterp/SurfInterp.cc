@@ -67,8 +67,9 @@ const float   SurfInterp::BARNES_RMAX           = -1.0;
  */
 
 SurfInterp::SurfInterp(int argc, char **argv) :
-  _trigger(0),
-  _terrain(0),
+  _trigger(NULL),
+  _dataMgr(NULL),
+  _terrain(NULL),
   _stationGridExpandKm(0)
 {
   static const string method_name = "SurfInterp::SurfInterp()";
@@ -150,6 +151,9 @@ SurfInterp::~SurfInterp()
   if (_terrain) {
     delete _terrain;
   }
+  if (_dataMgr) {
+    delete _dataMgr;
+  }
   if (_trigger) {
     delete _trigger;
   }
@@ -194,17 +198,18 @@ bool SurfInterp::init()
   
   // Initialize the data manager which handles sounding and surface data
 
-  _dataMgr.setDebug(_params.debug);
-  _dataMgr.setProgName(_progName);
+  _dataMgr = new DataMgr(_progName, _params);
+  _dataMgr->setDebug(_params.debug);
+  _dataMgr->setProgName(_progName);
   
   for (int i = 0; i < _params.surface_data_urls_n; ++i)
-    _dataMgr.addStationUrl(_params._surface_data_urls[i]);
+    _dataMgr->addStationUrl(_params._surface_data_urls[i]);
   
   for (int i = 0; i < _params.sounding_urls_n; ++i)
-    _dataMgr.addSoundingUrl(_params._sounding_urls[i]);
+    _dataMgr->addSoundingUrl(_params._sounding_urls[i]);
   
   for (int i = 0; i < _params.genpt_data_urls_n; ++i)
-    _dataMgr.addGenptUrl(_params._genpt_data_urls[i]);
+    _dataMgr->addGenptUrl(_params._genpt_data_urls[i]);
   
   // Initialize the data trigger
 
@@ -216,7 +221,7 @@ bool SurfInterp::init()
   if (!_initOutputProj())
     return false;
 
-  _dataMgr.setProjection(_outputProj);
+  _dataMgr->setProjection(_outputProj);
   
   // Initialize the terrain object
 
@@ -370,13 +375,13 @@ bool SurfInterp::_getData(const DateTime &data_time)
 
     // Get sounding data
 
-    _dataMgr.getSoundingData(end_time - _params.sounding_look_back * 60,
+    _dataMgr->getSoundingData(end_time - _params.sounding_look_back * 60,
 			     end_time, _params.sounding_max_dist);
 
     if (_params.debug >= Params::DEBUG_VERBOSE)
     {
       cerr << "The following soundings will be used: " << endl;
-      _dataMgr.printSoundingData();
+      _dataMgr->printSoundingData();
     }
   }
   
@@ -387,7 +392,7 @@ bool SurfInterp::_getData(const DateTime &data_time)
     PMU_auto_register("getting GenPt data.");
 
     _numCapecinReps =
-      _dataMgr.getGenptData(begin_time, end_time, _stationGridExpandKm);
+      _dataMgr->getGenptData(begin_time, end_time, _stationGridExpandKm);
   }
   
   return true;
@@ -926,10 +931,10 @@ bool SurfInterp::_getSurfaceData(const DateTime &begin_time,
   
   // Get surface data that fall between the begin and end times
 
-  _numSurfaceReps = _dataMgr.getSurfaceData(begin_time, end_time,
-					    _stationGridExpandKm,
-					    _params.MaxVis,
-					    _params.MaxCeiling);
+  _numSurfaceReps = _dataMgr->getSurfaceData(begin_time, end_time,
+                                             _stationGridExpandKm,
+                                             _params.MaxVis,
+                                             _params.MaxCeiling);
     
   if (_params.debug >= Params::DEBUG_NORM)
     cerr << _progName << ": " << method_name << ": "
@@ -946,10 +951,10 @@ bool SurfInterp::_getSurfaceData(const DateTime &begin_time,
   } 
   
   // Replace values of ceiling that indicate clear sky if required
-
+  
   if (_params.ReplaceCeiling)
-    _dataMgr.replaceSurfaceDataCeiling(_params.ReplaceCeilingThreshold,
-				       _params.ReplaceCeilingValue);
+    _dataMgr->replaceSurfaceDataCeiling(_params.ReplaceCeilingThreshold,
+                                        _params.ReplaceCeilingValue);
   
   return true;
 }
@@ -981,7 +986,7 @@ bool SurfInterp::_interpolate()
   
   for (int i = 0; i < _numSurfaceReps; ++i)
   {
-    station_report_t report = *_dataMgr.getSurfaceRep(i);
+    station_report_t report = *_dataMgr->getSurfaceRep(i);
     
     _calcInterpDistances(report.lat, report.lon, interp_dist);
     
@@ -1013,7 +1018,7 @@ bool SurfInterp::_interpolate()
   
   for (int i = 0; i < _numCapecinReps; ++i)
   {
-    GenPt obs = *_dataMgr.getGenptRep(i);
+    GenPt obs = *_dataMgr->getGenptRep(i);
     
     _calcInterpDistances(obs.getLat(), obs.getLon(), interp_dist);
     
@@ -1553,7 +1558,7 @@ void SurfInterp::_createLiftedIndexField(const bool output_flag,
     
     StnInterpField *field =
       new LiftedIndexInterpField(interpolater,
-				 &_dataMgr,
+				 _dataMgr,
 				 _params.sounding_max_dist,
 				 _params.PresLi,
 				 output_flag,
