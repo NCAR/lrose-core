@@ -14,6 +14,12 @@ HEADERS      += ParameterColorDialog.hh
 HEADERS      += DialogOptionsWidget.hh
 HEADERS      += ColorMapTemplates.hh
 HEADERS      += ClickableLabel.hh
+HEADERS      += ../ExamineEdit/SpreadSheetController.hh
+HEADERS      += ../ExamineEdit/SpreadSheetView.hh
+HEADERS      += ../ExamineEdit/SpreadSheetModel.hh
+HEADERS      += ../ExamineEdit/SpreadSheetItem.hh
+HEADERS      += ../ExamineEdit/SpreadSheetUtils.hh
+HEADERS      += ../ExamineEdit/SpreadSheetDelegate.hh
 
 SOURCES       = Dialog.cc 
 SOURCES      += ../HawkEye/ColorMap.cc 
@@ -23,6 +29,12 @@ SOURCES      += ParameterColorDialog.cc
 SOURCES      += DialogOptionsWidget.cc 
 SOURCES      += ColorMapTemplates.cc 
 SOURCES      += ClickableLabel.cc 
+SOURCES      += ../ExamineEdit/SpreadSheetController.cc
+SOURCES      += ../ExamineEdit/SpreadSheetView.cc
+SOURCES      += ../ExamineEdit/SpreadSheetModel.cc
+SOURCES      += ../ExamineEdit/SpreadSheetItem.cc
+SOURCES      += ../ExamineEdit/SpreadSheetUtils.cc
+SOURCES      += ../ExamineEdit/SpreadSheetDelegate.cc
 SOURCES      += Main.cc
 
 INCLUDEPATH += $(HOME)/rap/include

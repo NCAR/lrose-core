@@ -53,6 +53,7 @@ private slots:
     void contextMenuDataWidget();
     void notImplemented();
     void setColor();
+    void ExamineEdit();
 
 private:
 

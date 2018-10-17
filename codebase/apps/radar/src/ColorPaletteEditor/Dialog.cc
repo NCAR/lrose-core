@@ -1,5 +1,8 @@
 #include <QtWidgets>
 #include <QPixmap>
+#include <iostream>
+// #include <QApplication>
+#include <QLayout>
 
 #include "FlowLayout.hh"
 #include "Dialog.hh"
@@ -7,6 +10,9 @@
 #include "DialogOptionsWidget.hh"
 #include "../HawkEye/ColorMap.hh"
 #include "../HawkEye/ColorBar.hh"
+
+#include "../ExamineEdit/SpreadSheetView.hh"
+#include "../ExamineEdit/SpreadSheetController.hh"
 
 #define MESSAGE \
     Dialog::tr("<p>Message boxes have a caption, a text, " \
@@ -538,6 +544,15 @@ void Dialog::setColor()
     bool changed = parameterColorDialog.getChanges();    
 }
 
+void Dialog::ExamineEdit() {
+    SpreadSheetView *sheetView;
+
+    sheetView = new SpreadSheetView();
+    SpreadSheetController sheetControl(sheetView);
+    sheetView->show();
+    sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
+
+}
 
 void Dialog::setCenterPoint()
 {
@@ -675,7 +690,8 @@ void Dialog::contextMenuEditor()
 
 void Dialog::contextMenuExamine()
 {
-    notImplemented();
+    // notImplemented();
+    ExamineEdit();
 }
 
 void Dialog::contextMenuDataWidget()
