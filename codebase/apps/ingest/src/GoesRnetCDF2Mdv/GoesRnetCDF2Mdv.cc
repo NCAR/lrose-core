@@ -216,6 +216,8 @@ void GoesRnetCDF2Mdv::run()
 
     cerr << INFO_STR << methodName << endl;
     cerr << "    Begin waiting for new file" << endl;
+    cerr << "    input_dir: " << _params->input_dir << endl;
+    cerr << "    max_valid_secs: " << _params->max_valid_secs << endl;
     
     if (_dataTrigger->next(triggerInfo) != 0) {
       cerr << ERROR_STR << methodName << endl;
