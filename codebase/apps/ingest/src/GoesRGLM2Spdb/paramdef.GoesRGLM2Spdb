@@ -191,6 +191,30 @@ paramdef enum data_type_t
 } data_type;
 
 
+commentdef
+{
+  p_header = "BOUNDING BOX";
+  p_text = "Optionally limit the data to within a bounding box";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to check that location is within a bounding box.";
+} limit_location_to_bounding_box;
+
+typedef struct {
+  double min_lat;
+  double max_lat;
+  double min_lon;
+  double max_lon;
+} bbox_t;
+
+paramdef struct bbox_t {
+  p_default = { -90.0, 90.0, -180.0, 180.0 };
+  p_descr = "Bounding box to check.";
+  p_help = "See limit_location_to_bounding_box.";
+} bounding_box;
+
 /***********************************************************************
  * Output parameters
  */

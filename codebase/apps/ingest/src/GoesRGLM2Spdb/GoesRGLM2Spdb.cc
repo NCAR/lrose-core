@@ -449,26 +449,65 @@ bool GoesRGLM2Spdb::_processData() {
       continue;
 
     }
-    // TODO: Add bounding box to limit area
 
-    time_t utime = _productTime[i];
-    LTG_extended_t strike;
-    LTG_init_extended(&strike);
-    strike.time = (si32) utime;
-    strike.latitude = (fl32) _productLat[i];
-    strike.longitude = (fl32) _productLon[i];
-    strike.altitude = 0.0;
-    strike.amplitude = 0.0;
+    // check location
 
-    if (_params->debug >= Params::DEBUG_VERBOSE) {
-      LTG_print_extended(stderr, &strike);
+    double latitude = _productLat[i];
+    double longitude = _productLon[i];
+
+    bool validLocation = true;
+    
+    // check bounding box
+    
+    if (_params->limit_location_to_bounding_box) {
+      if (latitude < _params->bounding_box.min_lat ||
+          latitude > _params->bounding_box.max_lat) {
+        validLocation = false;
+      }
+      if (longitude < _params->bounding_box.min_lon ||
+          longitude > _params->bounding_box.max_lon) {
+        validLocation = false;
+      }
     }
 
-    LTG_extended_t copy = strike;
-    LTG_extended_to_BE(&copy);
+    // also check for reasonable values
 
-    strikeBuffer.add(&copy, sizeof(copy));
-    numAdded++;
+    if (fabs(latitude) > 90.0) {
+      validLocation = false;
+    }
+    if (fabs(longitude) > 90.0) {
+      validLocation = false;
+    }
+    if (latitude != 0 && fabs(latitude) < 1.0e-6) {
+      validLocation = false;
+    }
+    if (longitude != 0 && fabs(longitude) < 1.0e-6) {
+      validLocation = false;
+    }
+
+    if (validLocation) {
+
+      time_t utime = _productTime[i];
+      LTG_extended_t strike;
+      LTG_init_extended(&strike);
+      strike.time = (si32) utime;
+      strike.latitude = (fl32) _productLat[i];
+      strike.longitude = (fl32) _productLon[i];
+      strike.altitude = 0.0;
+      strike.amplitude = 0.0;
+      
+      if (_params->debug >= Params::DEBUG_VERBOSE) {
+        LTG_print_extended(stderr, &strike);
+      }
+      
+      LTG_extended_t copy = strike;
+      LTG_extended_to_BE(&copy);
+      
+      strikeBuffer.add(&copy, sizeof(copy));
+      numAdded++;
+
+    }
+    
   }
 
   if (_params->debug >= Params::DEBUG_NORM){
