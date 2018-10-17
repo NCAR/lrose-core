@@ -38,8 +38,10 @@
 #include "OutputFmq.hh"
 #undef _in_OutputFmq_cc
 
-#include <radar/IwrfTsInfo.hh>
 #include "Calibration.hh"
+
+#include <radar/IwrfTsInfo.hh>
+#include <radar/RadarCalib.hh>
 #include <cmath>
 #include <toolsa/uusleep.h>
 #include <dsserver/DmapAccess.hh>
@@ -275,7 +277,7 @@ int OutputFmq::writeCalib(const Beam &beam)
   
   DsRadarCalib &calib = msg.getRadarCalib();
   IwrfCalib icalib = beam.getCalib();
-  icalib.copyToDsRadarCalib(calib);
+  RadarCalib::copyIwrfToDsRadar(icalib, calib);
 
   // write the message
   

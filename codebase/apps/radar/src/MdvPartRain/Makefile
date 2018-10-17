@@ -38,7 +38,7 @@ TARGET_FILE = MdvPartRain
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lradar \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lradar \
 	-lSpdb -leuclid -ldsserver -ldidss -lrapmath \
 	-lrapformats -lphysics -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
