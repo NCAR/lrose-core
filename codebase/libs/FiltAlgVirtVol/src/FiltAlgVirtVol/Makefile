@@ -22,6 +22,7 @@ CPPC_SRCS = \
 	AlgorithmParms.cc \
 	FiltAlgParms.cc \
 	GriddedData.cc \
+	GridUserData.cc \
 	InterfaceAlgorithm.cc \
 	SweepMdv.cc \
 	UrlSpec.cc \
