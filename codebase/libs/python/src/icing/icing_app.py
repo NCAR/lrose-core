@@ -26,15 +26,19 @@ import icing_input
 #		
 #
 
-
 def run_app(app_name, instance, check_outdir=True, start_time='',
-            stop_time='', in_file='', opt_in_file='', out_dir='', diag_dir='', rt=''):
+            stop_time='', in_file='', opt_in_file='', out_dir='', diag_dir='', rt='', additional_args='', time_center='', time_radius=''):
 
   startTime = datetime.now()
   icing_message.debug('\tStarting ' + app_name + ' : ' + instance + " at time " + startTime.strftime("%Y-%m-%d %H:%M"))
 
   # build command line
-  if len(start_time) > 0 and len(stop_time) > 0 and  len(out_dir) > 0:
+  if len(time_center) > 0 and len(time_radius) > 0 and len(out_dir) > 0:
+      icing_message.debug('time_center = ' + time_center)
+      icing_message.debug('time_radius = ' + time_radius)
+      icing_message.debug('out_dir = ' + out_dir)
+      cmd = 'run_' + app_name + '.%s.sh %s %s %s' % (instance, time_center, time_radius, out_dir)
+  elif len(start_time) > 0 and len(stop_time) > 0 and  len(out_dir) > 0:
     icing_message.debug('start_time = ' + start_time)
     icing_message.debug('stop_time = ' + stop_time)
     icing_message.debug('out_dir = ' + out_dir)
@@ -79,11 +83,14 @@ def run_app(app_name, instance, check_outdir=True, start_time='',
   elif len(in_file) == 0 and len(opt_in_file) == 0 and len(out_dir) > 0 and \
        len(start_time) == 0 and len(stop_time) == 0:
     icing_message.debug('out_dir = ' + out_dir)
-    command = 'run_' + app_name + '.%s.sh %s' % (instance, instance) 
+    command = 'run_' + app_name + '.%s.sh %s' % (instance, instance)
   else:
     icing_message.error('command not set ... exiting.')
     return ''
-    
+
+  if additional_args != '':
+    command += " "+str(additional_args)
+    icing_message.debug('additional_args = ' + str(additional_args))
   ret = system(command)
   if ret:
     icing_message.error(app_name + ' failed for instance: ' + instance)
@@ -91,7 +98,8 @@ def run_app(app_name, instance, check_outdir=True, start_time='',
   endTime = datetime.now()
   icing_message.debug('\t'+app_name + ' finished run at ' + endTime.strftime("%Y-%m-%d %H:%M"))
 
-  if check_outdir:
+
+  if check_outdir and len(out_dir) > 0:        
     return icing_input.check_for_file(out_dir)
 
   return ''
@@ -111,7 +119,8 @@ if __name__ == "__main__":
   the_dir = '/dev/null'
   the_file = 'junk'
   ruc_file = 'junk.grb'
-  
+
+  '''
   print 'test for run_app'
   run_app_test('app', 'cip', start_time=start_str, stop_time=end_str, out_dir=the_dir)
   print 'test for run_app2, run_app4'
@@ -122,3 +131,4 @@ if __name__ == "__main__":
   run_app_test('app', 'cip3', start_time=start_str, out_dir=the_dir)
   print 'test for run_app5'
   run_app_test('app', 'cip5', in_file=the_file, opt_in_file=ruc_file, out_dir=the_dir)
+'''
