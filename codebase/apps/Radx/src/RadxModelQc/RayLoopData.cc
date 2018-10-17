@@ -1,5 +1,9 @@
 #include <RayLoopData.hh>
 
+RayLoopData::RayLoopData(void) : RayxData()
+{
+}
+
 RayLoopData::RayLoopData(const RayxData &r) : RayxData(r)
 {
 }

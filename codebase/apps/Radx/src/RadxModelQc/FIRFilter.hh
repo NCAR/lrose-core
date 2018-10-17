@@ -12,6 +12,7 @@
 #include <vector>
 
 class RayLoopData;
+class RayxData;
 class RadxRay;
 
 class FIRFilter
@@ -36,8 +37,7 @@ public:
    * @param[in] output
    * @return true for success
    */
-  bool filter(const std::string &name, const std::string &firType,
-	      const RadxRay *ray, const std::vector<RayLoopData> &data,
+  bool filter(const RayxData &data, const std::string &firType,
 	      RayLoopData *output);
     
 private:

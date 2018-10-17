@@ -37,7 +37,7 @@ TARGET_FILE = RadxTest
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lRadx -ldidss -ltoolsa -ltdrp \
+LOC_LIBS = -lRadx -lNcxx -ldidss -ltoolsa -ltdrp \
 	-ldataport $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

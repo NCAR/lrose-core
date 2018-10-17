@@ -2,6 +2,7 @@
 #include <CircularLookupHandler.hh>
 #include <radar/RadxApp.hh>
 #include <toolsa/LogStream.hh>
+#include <cmath>
 
 //------------------------------------------------------------------
 static double _variance(const std::vector<double> &vals, double num)

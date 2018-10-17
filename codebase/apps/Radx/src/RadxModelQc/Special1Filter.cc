@@ -33,29 +33,16 @@
 #include <cmath>
 
 //------------------------------------------------------------------
-bool Special1Filter::filter(const std::string &widthName, double meanPrt, double meanNsamples,
-			    const RadxRay *_ray,
-			    const std::vector<RayLoopData> &_data, RayLoopData *output)
+bool Special1Filter::filter(const RayxData &width, double meanPrt,
+			    double meanNsamples,  RayLoopData *output)
 {
-  RayxData width;
-  if (!RayData::retrieveRay(widthName, *_ray, _data, width))
-  {
-    return false;
-  }
 
-  // copy contents of vel into output
-  RayLoopData *rl = (RayLoopData *)output;
-  rl->transferData(width);
+  output->transferData(width);
 
   // "SD_VR = 0.107/(8*MeanPrt*MeanNSamples*sqrt(PI))*WIDTH0",
 
   double PI = 3.14159;
   double arg = 0.07/(8*meanPrt*meanNsamples*sqrt(PI));
-  rl->multiply(arg);
-  // rl->invert();
-  // rl->sqrt();
-  // rl->inc(1.0);
-  // rl->logBase10();
-  // rl->multiply(10.0);
+  output->multiply(arg);
   return true;
 }

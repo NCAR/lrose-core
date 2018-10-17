@@ -23,6 +23,7 @@ SUB_DIRS = \
 	RadxMergeFields \
 	RadxMergeVols \
 	RadxMon \
+	RadxModelQc \
 	RadxPartRain \
 	RadxPrint \
 	RadxSunMon \

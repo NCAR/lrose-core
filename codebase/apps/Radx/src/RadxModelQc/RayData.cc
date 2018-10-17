@@ -1,8 +1,6 @@
 #include "RayData.hh"
 #include "RayData1.hh"
 #include "RayData2.hh"
-#include "RayUnaryFilter.hh"
-#include "AzGradientFilter.hh"
 #include "AzGradientStateSpecialData.hh"
 #include "CircularLookupHandler.hh"
 #include "RayLoopData.hh"
@@ -18,26 +16,44 @@
 #include <algorithm>
 
 //------------------------------------------------------------------
-RayData::RayData(const RadxVol *vol, const CircularLookupHandler *lookup) :
-
-  VolumeData(),_lookup(lookup), _vol(vol), _rays(vol->getRays()),
-  _sweeps(vol->getSweeps()), _ray(NULL)
+RayData::RayData(void) :
+  RadxAppVolume(),
+  _lookup(NULL)
 {
-  if (!_rays.empty())
-  {
-    // just to have something around
-    _ray = _rays[0];
-  }
-}  
+}
+
+//------------------------------------------------------------------
+RayData::RayData(const RadxAppParms *parms, int argc, char **argv):
+  RadxAppVolume(parms, argc, argv),
+  _lookup(NULL)
+{
+}
 
 //------------------------------------------------------------------
 RayData::~RayData(void)
 {
-  for (size_t i=0; i<_specialValue.size(); ++i)
-  {
-    delete _specialValue[i];
-  }
-  _specialValue.clear();
+  _rayDataNames.clear();
+}
+
+//------------------------------------------------------------------
+std::vector<std::pair<std::string, std::string> >
+RayData::userUnaryOperators(void) const
+{
+  std::vector<std::pair<std::string, std::string> > ret;
+
+  string s;
+  s = "v=VolAverage(Prt, Nsamples) = average over volume";
+  ret.push_back(pair<string,string>("VolAverage", s));
+  s = "v=VolAzGradientState() = state used in AzGradient filter";
+  ret.push_back(pair<string,string>("VolAzGradientState", s));
+  return ret;
+}
+
+//------------------------------------------------------------------
+void RayData::initialize(const CircularLookupHandler *lookup)
+{
+  _lookup = lookup;
+  _special = SpecialUserData();
   _rayDataNames.clear();
 }
 
@@ -114,78 +130,17 @@ MathUserData *RayData::processUserVolumeFunction(const UnaryNode &p) //const
 }
 
 //------------------------------------------------------------------
+void RayData::addNew(int zIndex, const MathData *s)
+{
+  // this does nothing in radx format
+}
+
+//------------------------------------------------------------------
 // virtual
 bool RayData::storeMathUserData(const std::string &name, MathUserData *s)
 {
-  if (find(_specialName.begin(), _specialName.end(), name) !=
-      _specialName.end())
-  {
-    printf("ERROR double storing of %s\n", name.c_str());
-    return false;
-  }
-  else
-  {
-    _specialName.push_back(name);
-    _specialValue.push_back(s);
-    return true;
-  }
+  return _special.store(name, s);
 }
-
-
-//------------------------------------------------------------------
-int RayData::numProcessingNodes(bool twoD) const
-{
-  if (twoD)
-  {
-    return (int)_sweeps.size();
-  }
-  else
-  {
-    return (int)_rays.size();
-  }
-}
-
-
-//------------------------------------------------------------------
-int RayData::numRays(void) const
-{
-  return (int)_rays.size();
-}
-
-//------------------------------------------------------------------
-int RayData::numSweeps(void) const
-{
-  return (int)_sweeps.size();
-}
-
-//------------------------------------------------------------------
-bool RayData::retrieveRay(const std::string &name, const RadxRay &ray,
-                          const std::vector<RayLoopData> &data, RayxData &r,
-			  bool showError)
-{
-  // try to find the field in the ray first
-  if (RadxApp::retrieveRay(name, ray, r, false))
-  {
-    return true;
-  }
-
-  // try to find the field in the data vector
-  for (size_t i=0; i<data.size(); ++i)
-  {
-    if (data[i].getName() == name)
-    {
-      // return a copy of that ray (base class)
-      r = data[i];
-      return true;
-    }
-  }
-    
-  if (showError)
-  {
-    LOG(ERROR) << "Field " << name << " never found";
-  }
-  return false;
-}  
 
 //------------------------------------------------------------------
 void RayData::trim(const std::vector<std::string> &outputKeep, bool outputAll)
@@ -194,9 +149,9 @@ void RayData::trim(const std::vector<std::string> &outputKeep, bool outputAll)
   {
     return;
   }
-  for (size_t i=0; i<_rays.size(); ++i)
+  for (size_t i=0; i<_rays->size(); ++i)
   {
-    _rays[i]->trimToWantedFields(outputKeep);
+    (*_rays)[i]->trimToWantedFields(outputKeep);
   }
 }
 
@@ -248,16 +203,16 @@ MathUserData *RayData::_volumeAverage(const std::string &name) const
   double mean = 0.0;
   if (name == "Prt")
   {
-    for (size_t i=0; i<_rays.size(); ++i)
+    for (size_t i=0; i<_rays->size(); ++i)
     {
-      mean += _rays[i]->getPrtSec();
+      mean += (*_rays)[i]->getPrtSec();
     }
   }
   else if (name == "NSamples")
   {
-    for (size_t i=0; i<_rays.size(); ++i)
+    for (size_t i=0; i<_rays->size(); ++i)
     {
-      mean += _rays[i]->getNSamples();
+      mean += (*_rays)[i]->getNSamples();
     }
   }
   else
@@ -266,9 +221,9 @@ MathUserData *RayData::_volumeAverage(const std::string &name) const
 	   name.c_str());
     return NULL;
   }
-  if (!_rays.empty())
+  if (!_rays->empty())
   {
-    double v = mean/static_cast<double>(_rays.size());
+    double v = mean/static_cast<double>(_rays->size());
     FloatUserData *ret = new FloatUserData(v);
     return (MathUserData *)ret;
   }
@@ -282,7 +237,7 @@ MathUserData *RayData::_volumeAverage(const std::string &name) const
 //------------------------------------------------------------------
 MathUserData *RayData::_volumeAzGradientState(void) const
 {
-  AzGradientStateSpecialData *a = new AzGradientStateSpecialData(*_vol);
+  AzGradientStateSpecialData *a = new AzGradientStateSpecialData(_vol);
   return (MathUserData *)a;
 }
 

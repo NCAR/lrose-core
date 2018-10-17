@@ -9,9 +9,10 @@
 #ifndef RAY_DATA_H
 #define RAY_DATA_H
 #include "RayLoopData.hh"
-#include <rapmath/VolumeData.hh>
+#include <radar/RadxAppVolume.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RayxData.hh>
+#include <rapmath/SpecialUserData.hh>
 #include <vector>
 #include <string>
 
@@ -20,23 +21,15 @@ class CircularLookupHandler;
 class RadxSweep;
 
 //------------------------------------------------------------------
-class RayData : public VolumeData
+class RayData : public RadxAppVolume
 {
   friend class RayData1;
   friend class RayData2;
 
 public:
 
-  /**
-   * Constructor, store inputs into local state
-   *
-   * @param[in] vol Pointer to a volume, pointer is stored internally,
-   *            remains owned by caller
-   *
-   * @param[in] lookup  Lookup pointer, also owned by caller
-   */
-  RayData(const RadxVol *vol, const CircularLookupHandler *lookup);
-
+  RayData(void);
+  RayData(const RadxAppParms *parms, int argc, char **argv);
 
   /**
    * Destructor
@@ -46,24 +39,14 @@ public:
   /**
    * Virtual methods from base class
    */
+  #define FILTALG_DERIVED
   #include <rapmath/VolumeDataVirtualMethods.hh>
-
-
-  /**
-   * @return number of 2d looping items within the volume
-   */
-  int numSweeps(void) const;
+  #undef FILTALG_DERIVED
 
   /**
-   * @return number of 2d looping items within the volume
+   *
    */
-  int numRays(void) const;
-
-
-  static bool retrieveRay(const std::string &name, const RadxRay &ray,
-                          const std::vector<RayLoopData> &data, RayxData &r,
-			  bool showError=false);
-  
+  void initialize(const CircularLookupHandler *lookup);
 
   void trim(const std::vector<std::string> &outputKeep, bool outputAll);
 
@@ -71,10 +54,6 @@ protected:
 private:
 
   const CircularLookupHandler *_lookup; /**< Lookup thing for 2dvar */
-  const RadxVol *_vol;                  /**< Pointer to the radx volume */
-  const std::vector<RadxRay *> &_rays;  /**< Pointer to each ray in vol */
-  const vector<RadxSweep *> &_sweeps;   /**< Pointer to each sweep */
-  RadxRay *_ray;                       /**< Pointer to current ray */
 
   /**
    * Names of derived fields
@@ -85,12 +64,12 @@ private:
    * The names/pointers to special data fields, these are not in same
    * format as the RayData itself.
    */
-  std::vector<std::string> _specialName;
+  SpecialUserData _special;
 
-  /**
-   * Pointers to special data to go with each such field
-   */
-  std::vector<MathUserData *> _specialValue;
+  // /**
+  //  * Pointers to special data to go with each such field
+  //  */
+  // std::vector<MathUserData *> _specialValue;
 
   bool _needToSynch(const std::string &userKey) const;
   MathUserData *_volumeAverage(const std::string &name) const;

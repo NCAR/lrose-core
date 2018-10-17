@@ -25,6 +25,8 @@ class RayData2 : public MathData
 {
 public:
 
+  RayData2(void);
+
   /**
    * Set up for index'th sweep in the RadxVol
    *
@@ -44,7 +46,7 @@ protected:
 private:
 
 
-  const std::vector<RadxRay *> &_rays; /**< Pointer to each ray in vol*/
+  const std::vector<RadxRay *> *_rays; /**< Pointer to each ray in vol*/
   int _i0; /**< Index to first ray in sweep */
   int _i1; /**< Index to last ray in sweep */
   

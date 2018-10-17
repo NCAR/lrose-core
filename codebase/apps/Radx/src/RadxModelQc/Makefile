@@ -19,7 +19,9 @@ LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 CPPC_SRCS = \
 	Params.cc \
+	Parms.cc \
 	Main.cc \
+	RadxModelQc.cc \
 	CircularLookupHandler.cc \
 	CircularLookup.cc \
 	AzGradientStateSpecialData.cc \
@@ -32,11 +34,11 @@ CPPC_SRCS = \
 	RayData2.cc \
 	RayLoopData.cc \
 	RayLoopSweepData.cc \
-	RayUnaryFilter.cc \
 	Special0Filter.cc \
 	Special1Filter.cc \
 	Variance1dFilter.cc
 
+# RayUnaryFilter.cc \
 
 include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
 

@@ -1,6 +1,7 @@
 #include "AzGradientFilter.hh"
 #include "AzGradientStateSpecialData.hh"
 #include "RayData.hh"
+#include "RayData1.hh"
 #include <Radx/RadxRay.hh>
 #include <Radx/RayxData.hh>
 #include <radar/RadxApp.hh>
@@ -16,35 +17,51 @@ AzGradientFilter::~AzGradientFilter(void) {}
 
 //----------------------------------------------------------------------
 bool AzGradientFilter::filter(const AzGradientStateSpecialData &state, double v,
-			      const std::string &name, const RadxRay *ray0,
-			      const RadxRay *ray1, const RadxRay *ray,
-			      const std::vector<RayLoopData> &_data,
+			      const RayxData &rdata,
+			      const std::string &name, 
+			      const RayData1 &rdata1,
 			      RayLoopData *output)
 {
   _state = &state;
 
   // get the field from the center ray
-  RayxData r, r0, r1;
-  if (!RayData::retrieveRay(name, *ray, _data, r, true))
-  {
-    return false;
-  }
+  //RayxData r, r0, r1;
+  RayxData r0, r1;
+  RayxData r(rdata);
+  // if (!RayData::retrieveRay(name, *ray, _data, r, true))
+  // {
+  //   return false;
+  // }
 
   const RadxRay *lray0 = NULL;
   const RadxRay *lray1 = NULL;
 
   // see if can proceed or not
-  bool ok = _set2Rays(ray0, ray1, *ray, &lray0, &lray1);
+  bool ok = _setAdjacentRays(rdata1, &lray0, &lray1);
   if (ok)
   {
-    if (!RayData::retrieveRay(name, *lray0, _data, r0))
+    if (!RadxApp::retrieveRay(name, *lray0, r0))
     {
       return false;
     }
-    if (!RayData::retrieveRay(name, *lray1, _data, r1))
+    if (!RadxApp::retrieveRay(name, *lray1, r1))
     {
       return false;
     }
+    
+    // // this is wrong for 0th ray because rdata1 will be used, but
+    // // it is not set for the previous ray
+    // if (!RayData::retrieveRay(name, *lray0, rdata1.dataRef(), r0))
+    // {
+    //   return false;
+    // }
+
+    // // this is wrong for all rays because rdata1 wil be used, but it
+    // // is not set for the next ray
+    // if (!RayData::retrieveRay(name, *lray1, rdata1.dataRef(), r1))
+    // {
+    //   return false;
+    // }
     int n = r.getNpoints();
     int n0 = r0.getNpoints();
     int n1 = r1.getNpoints();
@@ -86,32 +103,32 @@ bool AzGradientFilter::filter(const AzGradientStateSpecialData &state, double v,
 }
 
 //------------------------------------------------------------------
-bool AzGradientFilter::_set2Rays(const RadxRay *ray0, const RadxRay *ray1,
-				 const RadxRay &ray, const RadxRay **lray0,
-				 const RadxRay **lray1) const
+bool AzGradientFilter::
+_setAdjacentRays(const RayData1 &rdata1, const RadxRay **lray0,
+		 const RadxRay **lray1) const
 {
-  if (ray0 == NULL && ray1 == NULL)
+  if (rdata1.prevMissing() && rdata1.nextMissing())
   {
     // don't know what this is
     LOG(ERROR) << "Missing two of 3 inputs, not expected";
     return false;
   }
-  else if (ray0 == NULL && ray1 != NULL)
+  else if (rdata1.prevMissing() && !rdata1.nextMissing())
   {
-    return _veryFirstRay(ray, ray1, lray0, lray1);
+    return _veryFirstRay(rdata1, lray0, lray1);
   }
-  else if (ray0 != NULL && ray1 == NULL)
+  else if ((!rdata1.prevMissing()) && rdata1.nextMissing())
   {
-    return _veryLastRay(ray0, ray, lray0, lray1);
+    return _veryLastRay(rdata1, lray0, lray1);
   }
   else 
   {
-    *lray0 = ray0;
-    *lray1 = ray1;
+    *lray0 = rdata1.r0Ptr();
+    *lray1 = rdata1.r1Ptr();
     // check for sweep boundary 
     int s0 = (*lray0)->getSweepNumber();
     int s1 = (*lray1)->getSweepNumber();
-    int s = ray.getSweepNumber();
+    int s = rdata1.rPtr()->getSweepNumber();
     if (s0 != s && s1 == s)
     {
       // current starts a new sweep
@@ -188,19 +205,19 @@ bool AzGradientFilter::_setNextRayWhenEndSweep(int sweep, int nextSweep,
 
 
 //------------------------------------------------------------------
-bool AzGradientFilter::_veryFirstRay(const RadxRay &ray, const RadxRay *ray1,
+bool AzGradientFilter::_veryFirstRay(const RayData1 &rdata1,
 				   const RadxRay **lray0,
 				   const RadxRay **lray1) const
 {
   // case of no previous ray, should be the 0th ray in the 0th sweep.  
   // if so, if 360, can use the last ray in the 0th sweep as ray0
-  int s = ray.getSweepNumber();
+  int s = rdata1.rPtr()->getSweepNumber();
   if (s == (*_state)[0]._sweepNumber && (*_state)[0]._is360)
   {
     LOG(DEBUG_VERBOSE) << 
       "First ray in vol, 360, set previous to last in sweep";
     *lray0 = (*_state)[0]._ray1;
-    *lray1 = ray1;
+    *lray1 = rdata1.r1Ptr();
     return true;
   }
   else
@@ -211,18 +228,18 @@ bool AzGradientFilter::_veryFirstRay(const RadxRay &ray, const RadxRay *ray1,
 }
 
 //------------------------------------------------------------------
-bool AzGradientFilter::_veryLastRay(const RadxRay *ray0, const RadxRay &ray,
+bool AzGradientFilter::_veryLastRay(const RayData1 &rdata1,
 				  const RadxRay **lray0,
 				  const RadxRay **lray1) const
 {
   // case of no next ray, should be last ray in last sweep.  If so, if 360,
   // can use first ray in last weep as ray1
-  int s = ray.getSweepNumber();
+  int s = rdata1.rPtr()->getSweepNumber();
   int nState = static_cast<int>(_state->size());
   if (s == (*_state)[nState-1]._sweepNumber && (*_state)[nState-1]._is360)
   {
     LOG(DEBUG_VERBOSE) << "Last ray in vol, 360, set next to 0th in sweep";
-    *lray0 = ray0;
+    *lray0 = rdata1.r0Ptr();
     *lray1 = (*_state)[nState-1]._ray0;
     return true;
   }

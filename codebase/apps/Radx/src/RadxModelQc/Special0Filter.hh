@@ -14,9 +14,8 @@ public:
   inline Special0Filter() {}
   inline ~Special0Filter() {}
   
-  bool filter(const std::string &widthName, double meanPrt, double meanNsamples,
-	      const RadxRay *_ray,
-	      const std::vector<RayLoopData> &_data, RayLoopData *output);
+  bool filter(const RayxData &width, double meanPrt, double meanNsamples,
+	      RayLoopData *output);
     
 private:
 };

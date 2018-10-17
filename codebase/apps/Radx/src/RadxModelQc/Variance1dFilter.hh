@@ -16,8 +16,7 @@ public:
     _npt(npt), _maxPctMissing(maxPctMissing) {}
   inline ~Variance1dFilter() {}
   
-  bool filter(const std::string &name, const RadxRay *_ray,
-	      const std::vector<RayLoopData> &_data, RayLoopData *output);
+  bool filter(const RayxData &data, RayLoopData *output);
     
 private:
   double _npt;

@@ -8,11 +8,17 @@
 #include <algorithm>
 
 //------------------------------------------------------------------
+RayData2::RayData2(void) :
+  MathData(), _rays(NULL), _lookup(NULL)
+{
+}
+
+//------------------------------------------------------------------
 RayData2::RayData2(const RayData &r, int index,
 		   const CircularLookupHandler *lookup) :
   MathData(), _rays(r._rays), _lookup(lookup)
 {
-  const vector<RadxSweep *> sweeps = r._vol->getSweeps();
+  const vector<RadxSweep *> sweeps = r._vol.getSweeps();
   _i0 = sweeps[index]->getStartRayIndex();
   _i1 = sweeps[index]->getEndRayIndex();
 }  
@@ -21,6 +27,20 @@ RayData2::RayData2(const RayData &r, int index,
 RayData2::~RayData2(void)
 {
   // nothing owned by this class
+}
+
+//------------------------------------------------------------------
+std::vector<std::pair<std::string, std::string> >
+RayData2::userUnaryOperators(void) const
+{
+  std::vector<std::pair<std::string, std::string> > ret;
+
+  string s;
+  s = "v=Variance2d(field) 2d Variance of input field\n"
+    "  uses variance_radius_km parameter";
+  ret.push_back(pair<string,string>("Variance2d", s));
+    
+  return ret;
 }
 
 //------------------------------------------------------------------
@@ -105,6 +125,18 @@ MathLoopData * RayData2::dataPtr(const std::string &name)
 const MathLoopData * RayData2::dataPtrConst(const std::string &name) const
 {
   return (const MathLoopData *)_matchConst(name);
+}
+
+//------------------------------------------------------------------
+const MathUserData *RayData2::userDataPtrConst(const std::string &name) const
+{
+  return NULL;
+}
+
+//------------------------------------------------------------------
+MathUserData *RayData2::userDataPtr(const std::string &name)
+{
+  return NULL;
 }
 
 //------------------------------------------------------------------
@@ -215,6 +247,15 @@ bool RayData2::average(MathLoopData *l,
 
 //------------------------------------------------------------------
 // virtual
+bool RayData2::max_expand(MathLoopData *l,
+			 std::vector<ProcessingNode *> &args) const
+{
+  LOG(ERROR) << "Not implemented";
+  return false;
+}
+
+//------------------------------------------------------------------
+// virtual
 bool RayData2::weighted_average(MathLoopData *l,
 				std::vector<ProcessingNode *> &args) const
 {
@@ -229,21 +270,59 @@ bool RayData2::mask(MathLoopData *l,
   return false;
 }
 
+bool RayData2::median(MathLoopData *l,
+		     std::vector<ProcessingNode *> &args) const
+{
+  LOG(ERROR) << "Not implemented";
+  return false;
+}
+
+bool RayData2::weighted_angle_average(MathLoopData *l,
+		     std::vector<ProcessingNode *> &args) const
+{
+  LOG(ERROR) << "Not implemented";
+  return false;
+}
+
+bool RayData2::expand_angles_laterally(MathLoopData *l,
+		     std::vector<ProcessingNode *> &args) const
+{
+  LOG(ERROR) << "Not implemented";
+  return false;
+}
+
+bool RayData2::clump(MathLoopData *l,
+		     std::vector<ProcessingNode *> &args) const
+{
+  LOG(ERROR) << "Not implemented";
+  return false;
+}
+
 bool RayData2::mask_missing_to_missing(MathLoopData *out,
 				       std::vector<ProcessingNode *> &args) const
 {
+  LOG(ERROR) << "Not implemented";
   return false;
 }
 
 bool RayData2::trapezoid(MathLoopData *out,
 			 std::vector<ProcessingNode *> &args) const
 {
+  LOG(ERROR) << "Not implemented";
   return false;
 }
 
 bool RayData2::s_remap(MathLoopData *out,
 		       std::vector<ProcessingNode *> &args) const
 {
+  LOG(ERROR) << "Not implemented";
+  return false;
+}
+
+bool RayData2::max(MathLoopData *out,
+		   std::vector<ProcessingNode *> &args) const
+{
+  LOG(ERROR) << "Not implemented";
   return false;
 }
 
@@ -305,43 +384,40 @@ RayLoopSweepData *RayData2::_exampleData(const std::string &name)
 //------------------------------------------------------------------
 bool RayData2::_processVariance2d(std::vector<ProcessingNode *> &args)
 {
-  if (args.size() != 1)
-  {
-    LOG(ERROR) << "Wrong interface";
-    return false;
-  }
-
-  string dataName = args[0]->leafName();
-  if (dataName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
   if (_lookup == NULL)
   {
     LOG(ERROR) << "No lookup";
     return false;
   }  
 
-  // look for the one input in the _inps
-  RayLoopSweepData *inp = NULL;
-  for (size_t i=0; i<_inps.size(); ++i)
+  const MathLoopData  *data = loadData(args, 0);
+  if (data == NULL)
   {
-    if (_inps[i]->getName() == dataName)
-    {
-      inp = _inps[i];
-      break;
-    }
-  }
-
-  if (inp == NULL)
-  {
-    LOG(ERROR) << "Data misaligned";
+    LOG(ERROR) << "Wrong interface";
     return false;
   }
 
+  const RayLoopSweepData *rdata = dynamic_cast<const RayLoopSweepData *>(data);
+
+  // // look for the one input in the _inps
+  // RayLoopSweepData *inp = NULL;
+  // for (size_t i=0; i<_inps.size(); ++i)
+  // {
+  //   if (_inps[i]->getName() == dataName)
+  //   {
+  //     inp = _inps[i];
+  //     break;
+  //   }
+  // }
+
+  // if (inp == NULL)
+  // {
+  //   LOG(ERROR) << "Data misaligned";
+  //   return false;
+  // }
+
   // the output should already be in place, so just go for it
-  return _outputSweep->variance2d(*inp, *_lookup);
+  return _outputSweep->variance2d(*rdata, *_lookup);
 }
 
 //------------------------------------------------------------------
@@ -412,8 +488,8 @@ void RayData2::_updateSweepOneDataset(int k)
   for (int i=_i0; i<=_i1; ++i)
   {
     _data[k].retrieveRayData(j, data, nGatesPrimary);
-    _rays[i]->addField(name, _data[k].getUnits(), _data[k].getNpoints(j),
-		      _data[k].getMissing(), data, true);
+    (*_rays)[i]->addField(name, _data[k].getUnits(), _data[k].getNpoints(j),
+			  _data[k].getMissing(), data, true);
     j++;
   }
   delete [] data;
@@ -428,7 +504,7 @@ bool RayData2::_newLoopData(const std::string &name,
   for (int i=_i0; i<=_i1; ++i)
   {
     RayxData r;
-    if (RadxApp::retrieveRay(name, *_rays[i], r, false))
+    if (RadxApp::retrieveRay(name, *(*_rays)[i], r, false))
     {
       rays.push_back(r);
     }
@@ -447,7 +523,7 @@ bool RayData2::_anyLoopData(RayLoopSweepData &ret) const
 {
   RayxData r;
   string name;
-  if (RadxApp::retrieveAnyRay(*_rays[_i0], r))
+  if (RadxApp::retrieveAnyRay(*(*_rays)[_i0], r))
   {
     name = r.getName();
     return _newLoopData(name, ret, true);

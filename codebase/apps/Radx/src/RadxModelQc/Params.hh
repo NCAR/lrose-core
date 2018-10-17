@@ -65,13 +65,6 @@ class Params {
 
 public:
 
-  // struct typedefs
-
-  typedef struct {
-    char* interface;
-    char* description;
-  } Filter_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -357,31 +350,23 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  tdrp_bool_t output_all_fields;
-
-  char* *_output_fields;
-  int output_fields_n;
-
   char* *_fixed_const;
   int fixed_const_n;
 
-  Filter_t *_userUnaryFilters;
-  int userUnaryFilters_n;
+  char* *_user_data;
+  int user_data_n;
 
-  Filter_t *_userVolumeFilters;
-  int userVolumeFilters_n;
-
-  char* *_vol_filter;
-  int vol_filter_n;
+  char* *_volume_before_filter;
+  int volume_before_filter_n;
 
   char* *_sweep_filter;
   int sweep_filter_n;
 
-  char* *_filter;
-  int filter_n;
+  char* *_ray_filter;
+  int ray_filter_n;
 
-  char* *_vol_filter_after;
-  int vol_filter_after_n;
+  char* *_volume_after_filter;
+  int volume_after_filter_n;
 
   double variance_radius_km;
 
@@ -392,7 +377,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[13];
+  mutable TDRPtable _table[10];
 
   const char *_className;
 

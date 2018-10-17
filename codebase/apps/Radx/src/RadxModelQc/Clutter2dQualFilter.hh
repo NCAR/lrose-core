@@ -12,6 +12,7 @@
 
 class RayLoopData;
 class RadxRay;
+class RayxData;
 
 class Clutter2dQualFilter
 {
@@ -43,10 +44,9 @@ public:
    * @return true if successful
    *
    */
-  bool filter(const std::string &scrName, const std::string &velName,
-	      const std::string &widthName, double scale, double vr_shape,
-	      double sw_shape, const RadxRay *ray,
-	      const std::vector<RayLoopData> &data, RayLoopData *output);
+  bool filter(const RayxData &scr, const RayxData &vel, const RayxData &width,
+	      double scale, double vr_shape, double sw_shape,
+	      RayLoopData *output);
     
 private:
 };

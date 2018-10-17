@@ -19,36 +19,41 @@
 #include <algorithm>
 
 //------------------------------------------------------------------
+RayData1::RayData1(void) : MathData(), _ray(NULL), _ray0(NULL), _ray1(NULL)
+{
+}
+
+//------------------------------------------------------------------
 RayData1::RayData1(const RayData &r, int index) :
   MathData(), _ray(NULL), _ray0(NULL), _ray1(NULL)
 {
-  _ray = r._rays[index];
+  _ray = (*r._rays)[index];
   _ray0 = NULL;
   _ray1 = NULL;
-  int nr = (int)r._rays.size();
+  int nr = (int)r._rays->size();
   if (index == 0)
   {
     if (nr > 1)
     {
-      _ray1 = r._rays[1];
+      _ray1 = (*r._rays)[1];
     }
   }
   else if (index == nr-1)
   {
-    _ray0 = r._rays[nr-2];
+    _ray0 = (*r._rays)[nr-2];
   }
   else
   {
     if (nr > 2)
     {
-      _ray0 = r._rays[index-1];
-      _ray1 = r._rays[index+1];
+      _ray0 = (*r._rays)[index-1];
+      _ray1 = (*r._rays)[index+1];
     }
   }
 
   // transfer values from volume object to here
-  _specialName = r._specialName;
-  _specialValue = r._specialValue;
+  _special = r._special;
+  _special.setOwnership(false);
 }  
 
 //------------------------------------------------------------------
@@ -56,6 +61,72 @@ RayData1::~RayData1(void)
 {
   // nothing owned by this class
 }
+
+//------------------------------------------------------------------
+std::vector<std::pair<std::string, std::string> >
+RayData1::userUnaryOperators(void) const
+{
+  std::vector<std::pair<std::string, std::string> > ret;
+
+  string s;
+  s = "v=AzGradient(field, azgradstate, bias) = Azimuthal Gradient\n"
+    "  azgradstate = 2d state object,  bias = added to results\n"
+    "  NOTE this only works for input radar fields, not derived fields";
+  ret.push_back(pair<string,string>("AzGradient", s));
+
+  s = "v=Qscale(field, scale, top, low) = exp(-scale*(field/topv-lowv/topv)^2)";
+  ret.push_back(pair<string,string>("Qscale", s));
+
+  s = "v=OneMinusQscale(field, scale, top, low)= 1-Qscale(field,scale,top,low)";
+  ret.push_back(pair<string,string>("OneMinusQscale", s));
+
+  s = "v=CLUTTER_2D_QUAL(scr, vel, width, scale, vr_shape, sw_shape)\n"
+    "  1 - exp(-scale*(|vel|*vr_shape + width*sw_shape))";
+  ret.push_back(pair<string,string>("CLUTTER_2D_QUAL", s));
+
+  s = "v=Special0(width, meanPrt, meanNSamples) = \n"
+    "  10*log10(1 + sqrt(1/(width*(4*sqrt(PI)*meanPrt*meanNsamples/0.1))))";
+  ret.push_back(pair<string,string>("Special0", s));
+
+  s = "v=Special1(width, meanPrt, meanNSamples) =\n"
+    "  0.107/(8*meanPrt*meanNsamples*sqrt(PI)*width)";
+  ret.push_back(pair<string,string>("Special1", s));
+
+  s = "v=FIR(field) = FIR filter with hardwired coefficients, interpolation";
+  ret.push_back(pair<string,string>("FIR", s));
+
+  s = "v=Variance1d(field, npt, maxPercentMissing) 1d Variance of input field\n"
+    "  variance over npt points, with output set missing if too many missing";
+  ret.push_back(pair<string,string>("Variance1d", s));
+  return ret;
+}
+
+// //------------------------------------------------------------------
+// const MathUserData *RayData1::specialDataPtrConst(const std::string &name) const
+// {
+//   for (size_t i=0; i<_specialInpNames.size(); ++i)
+//   {
+//     if (_specialInpNames[i] == name)
+//     {
+//       return _specialInps[i];
+//     }
+//   }
+//   return NULL;
+// }
+
+// //------------------------------------------------------------------
+// MathUserData *RayData1::specialDataPtr(const std::string &name)
+// {
+//   for (size_t i=0; i<_specialInpNames.size(); ++i)
+//   {
+//     if (_specialInpNames[i] == name)
+//     {
+//       return _specialInps[i];
+//     }
+//   }
+//   return NULL;
+// }
+
 
 //------------------------------------------------------------------
 // virtual
@@ -73,7 +144,8 @@ int RayData1::numData(void) const
 // virtual
 void RayData1::finishProcessingNode(int index, VolumeData *vol)
 {
-  // add all the derived data to this ray
+  // add all the derived data to the main ray (input vol not needed because
+  // the local object points to the same data)
   _updateRay();
 
   // clear out derived data
@@ -87,14 +159,13 @@ bool RayData1::synchInputsAndOutputs(const std::string &output,
 {
   _inps.clear();
   _outputRay = NULL;
-  _specialInpNames.clear();
-  _specialInps.clear();
+  _specialInp = SpecialUserData(false);
 
   // look for input data and return false if one or more missing
   bool ok = true;
   for (size_t i=0; i<inputs.size(); ++i)
   {
-    if (!_isInput(inputs[i]))
+    if (!_synchInput(inputs[i]))
     {
       LOG(ERROR) << "Cannot synch input " << inputs[i];
       ok = false;
@@ -114,12 +185,11 @@ bool RayData1::synchInputsAndOutputs(const std::string &output,
   }
 
   // now set all the local values:  _inps, _specialInps, _specialInpNames
-
   for (size_t i=0; i<inputs.size(); ++i)
   {
     _setLocalInput(inputs[i]);
   }
-  if ((_inps.size() + _specialInps.size()) != inputs.size())
+  if ((_inps.size() + _specialInp.size()) != inputs.size())
   {
     LOG(ERROR) << "Difficulty synching data";
     return false;
@@ -142,6 +212,34 @@ MathLoopData * RayData1::dataPtr(const std::string &name)
 const MathLoopData * RayData1::dataPtrConst(const std::string &name) const
 {
   return (const MathLoopData *)_matchConst(name);
+}
+
+//------------------------------------------------------------------
+const MathUserData *RayData1::userDataPtrConst(const std::string &name) const
+{
+  if (_special.hasName(name))
+  {
+    return _special.matchingDataPtrConst(name);
+  }
+  if (_specialInp.hasName(name))
+  {
+    return _specialInp.matchingDataPtrConst(name);
+  }
+  return NULL;
+}
+
+//------------------------------------------------------------------
+MathUserData *RayData1::userDataPtr(const std::string &name)
+{
+  if (_special.hasName(name))
+  {
+    return _special.matchingDataPtr(name);
+  }
+  if (_specialInp.hasName(name))
+  {
+    return _specialInp.matchingDataPtr(name);
+  }
+  return NULL;
 }
 
 //------------------------------------------------------------------
@@ -207,8 +305,7 @@ bool RayData1::synchUserDefinedInputs(const std::string &userKey,
 {
   _inps.clear();
   _outputRay = NULL;
-  _specialInpNames.clear();
-  _specialInps.clear();
+  _specialInp = SpecialUserData(false);
   
   if (!_needToSynch(userKey))
   {
@@ -234,18 +331,7 @@ bool RayData1::synchUserDefinedInputs(const std::string &userKey,
 // virtual
 bool RayData1::storeMathUserData(const std::string &name, MathUserData *s)
 {
-  if (find(_specialName.begin(), _specialName.end(), name) !=
-      _specialName.end())
-  {
-    printf("ERROR double storing of %s\n", name.c_str());
-    return false;
-  }
-  else
-  {
-    _specialName.push_back(name);
-    _specialValue.push_back(s);
-    return true;
-  }
+  return _special.store(name, s);
 }
 
 //------------------------------------------------------------------
@@ -302,6 +388,56 @@ bool RayData1::weighted_average(MathLoopData *l,
 
 //------------------------------------------------------------------
 // virtual
+bool RayData1::weighted_angle_average(MathLoopData *l,
+				      std::vector<ProcessingNode *> &args) const
+{
+  LOG(ERROR) << "Not implemented";
+  return false;
+}
+
+//------------------------------------------------------------------
+// virtual
+bool RayData1::median(MathLoopData *l,
+		      std::vector<ProcessingNode *> &args) const
+{
+  LOG(ERROR) << "Not implemented";
+  return false;
+}
+
+//------------------------------------------------------------------
+// virtual
+bool RayData1::max(MathLoopData *l,
+		      std::vector<ProcessingNode *> &args) const
+{
+  LOG(ERROR) << "Not implemented";
+  return false;
+}
+
+//------------------------------------------------------------------
+// virtual
+bool RayData1::max_expand(MathLoopData *l,
+			 std::vector<ProcessingNode *> &args) const
+{
+  LOG(ERROR) << "Not implemented";
+  return false;
+}
+
+bool RayData1::expand_angles_laterally(MathLoopData *l,
+		     std::vector<ProcessingNode *> &args) const
+{
+  LOG(ERROR) << "Not implemented";
+  return false;
+}
+
+bool RayData1::clump(MathLoopData *l,
+		     std::vector<ProcessingNode *> &args) const
+{
+  LOG(ERROR) << "Not implemented";
+  return false;
+}
+
+//------------------------------------------------------------------
+// virtual
 bool RayData1::mask(MathLoopData *l,
 		     std::vector<ProcessingNode *> &args) const
 {
@@ -340,11 +476,12 @@ RayLoopData *RayData1::_refToData(const std::string &name, bool suppressWarn)
   }
       
   // try to pull out of input ray
-  RayxData r;
-  if (RadxApp::retrieveRay(name, *_ray, r, false))
+  RayxData *r = RadxApp::retrieveRayPtr(name, *_ray, false);
+  if (r != NULL)
   {
     // add this ray to the data state and return that
-    _data.push_back(RayLoopData(r));
+    _data.push_back(RayLoopData(*r));
+    delete r;
     size_t k = _data.size();
     return &(_data[k-1]);
   }
@@ -360,15 +497,20 @@ RayLoopData *RayData1::_refToData(const std::string &name, bool suppressWarn)
 //------------------------------------------------------------------
 RayLoopData *RayData1::_exampleData(const std::string &name)
 {
+  // see if it is already sitting there:
   RayLoopData *s = (RayLoopData *)_refToData(name, true);
   if (s == NULL)
   {
-    RayxData r;
-    if (RadxApp::retrieveAnyRay(*_ray, r))
+    // not already in place, so we create a new one
+    const RayxData *r = RadxApp::retrieveAnyRayPtr(*_ray);
+    if (r != NULL)
     {
-      RadxApp::modifyRayForOutput(r, name, "units", r.getMissing());
-      RayLoopData store(r);
+      // set it to the correct values
+      RayLoopData store(*r);
+      delete r;
+      RadxApp::modifyRayForOutput(store, name, "units", store.getMissing());
       _data.push_back(store);
+      // point to it for return
       s = (RayLoopData *)_refToData(name, true);
     }
   }
@@ -384,38 +526,21 @@ RayLoopData *RayData1::_exampleData(const std::string &name)
 }
 
 //------------------------------------------------------------------
-bool RayData1::_processAzGradient(std::vector<ProcessingNode *> &args) const
+bool RayData1::_processAzGradient(std::vector<ProcessingNode *> &args)
 {
-  if (args.size() != 3)
+  string name = getDataName(args, 0);
+  const MathLoopData *data;
+  MathUserData *udata;
+  double v;
+  if (!loadDataAndUserDataAndValue(args, &data, &udata, v))
   {
-    printf("bad args\n");
     return false;
   }
+  
 
-  // get the state (arg[1])
-  string name = args[1]->leafName();
-  if (name.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  const MathUserData *s=NULL;
-  for (size_t i=0; i<_specialInpNames.size(); ++i)
-  {
-    if (_specialInpNames[i] == name)
-    {
-      s = _specialInps[i];
-      break;
-    }
-  }
-  if (s == NULL)
-  {
-    printf("No state data\n");
-    return false;
-  }
-
-  // interpret as what it should be
-  const AzGradientStateSpecialData *state = (AzGradientStateSpecialData *)s;
+  
+  AzGradientStateSpecialData *state = (AzGradientStateSpecialData *)udata;
+  
   int nState = state->nstate();
   if (nState < 1)
   {
@@ -423,70 +548,23 @@ bool RayData1::_processAzGradient(std::vector<ProcessingNode *> &args) const
     return false;
   }
 
-  double v;
-  if (!args[2]->getValue(v))
-  {
-    LOG(ERROR) << "No value";
-    return false;
-  }
-
-  name = args[0]->leafName();
-  if (name.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
 
   AzGradientFilter filter;
-  return filter.filter(*state, v, name, _ray0, _ray1, _ray, _data,
+  const RayxData *r = dynamic_cast<const RayxData *>(data);
+
+  return filter.filter(*state, v, *r, name,
+		       *this,
 		       _outputRay);
 }
 
 //------------------------------------------------------------------
-bool RayData1::_processSpecial0(std::vector<ProcessingNode *> &args) const
+bool RayData1::_processSpecial0(std::vector<ProcessingNode *> &args)
 {
-  if (args.size() != 3)
-  {
-    printf("bad args\n");
-    return false;
-  }
+  const MathLoopData *ldata;
+  MathUserData *meanPrt, *meanNsamples;
 
-  // get the state (arg[1])
-  string widthName = args[0]->leafName();
-  if (widthName.empty())
+  if (!loadDataAndTwoUserDatas(args, &ldata, &meanPrt, &meanNsamples))
   {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  string meanPrtName = args[1]->leafName();
-  if (meanPrtName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  string meanNsamplesName = args[2]->leafName();
-  if (meanNsamplesName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-
-  const MathUserData *meanPrt=NULL;
-  const MathUserData *meanNsamples=NULL;
-  for (size_t i=0; i<_specialInpNames.size(); ++i)
-  {
-    if (_specialInpNames[i] == meanPrtName)
-    {
-      meanPrt = _specialInps[i];
-    }
-    if (_specialInpNames[i] == meanNsamplesName)
-    {
-      meanNsamples = _specialInps[i];
-    }
-  }
-  if (meanPrt == NULL || meanNsamples == NULL)
-  {
-    printf("No state data\n");
     return false;
   }
 
@@ -498,55 +576,20 @@ bool RayData1::_processSpecial0(std::vector<ProcessingNode *> &args) const
   }
   
   Special0Filter filter;
-  return filter.filter(widthName, meanPrtV, meanNsamplesV, _ray, _data,
-		       _outputRay);
+  
+  const RayxData *width = dynamic_cast<const RayxData *>(ldata);
+
+  return filter.filter(*width, meanPrtV, meanNsamplesV, _outputRay);
 }
 
 //------------------------------------------------------------------
-bool RayData1::_processSpecial1(std::vector<ProcessingNode *> &args) const
+bool RayData1::_processSpecial1(std::vector<ProcessingNode *> &args)
 {
-  if (args.size() != 3)
-  {
-    printf("bad args\n");
-    return false;
-  }
+  const MathLoopData *ldata;
+  MathUserData *meanPrt, *meanNsamples;
 
-  // get the state (arg[1])
-  string widthName = args[0]->leafName();
-  if (widthName.empty())
+  if (!loadDataAndTwoUserDatas(args, &ldata, &meanPrt, &meanNsamples))
   {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  string meanPrtName = args[1]->leafName();
-  if (meanPrtName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  string meanNsamplesName = args[2]->leafName();
-  if (meanNsamplesName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-
-  const MathUserData *meanPrt=NULL;
-  const MathUserData *meanNsamples=NULL;
-  for (size_t i=0; i<_specialInpNames.size(); ++i)
-  {
-    if (_specialInpNames[i] == meanPrtName)
-    {
-      meanPrt = _specialInps[i];
-    }
-    if (_specialInpNames[i] == meanNsamplesName)
-    {
-      meanNsamples = _specialInps[i];
-    }
-  }
-  if (meanPrt == NULL || meanNsamples == NULL)
-  {
-    printf("No state data\n");
     return false;
   }
 
@@ -558,152 +601,147 @@ bool RayData1::_processSpecial1(std::vector<ProcessingNode *> &args) const
   }
   
   Special1Filter filter;
-  return filter.filter(widthName, meanPrtV, meanNsamplesV, _ray, _data,
-		       _outputRay);
+  
+  const RayxData *width = dynamic_cast<const RayxData *>(ldata);
+  return filter.filter(*width, meanPrtV, meanNsamplesV, _outputRay);
 }
 
 //------------------------------------------------------------------
 bool RayData1::_processFIR(std::vector<ProcessingNode *> &args) const
 {
-  if (args.size() != 1)
-  {
-    printf("bad args\n");
-    return false;
-  }
+  const MathLoopData *d = loadData(args, 0);
+  const RayxData *rd = dynamic_cast<const RayxData *>(d);
 
-  string dataName = args[0]->leafName();
-  if (dataName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
   
   FIRFilter filter;
-  return filter.filter(dataName, "INTERP", _ray, _data,
-		       _outputRay);
+  return filter.filter(*rd, "INTERP", _outputRay);
 }
 
 //------------------------------------------------------------------
 bool RayData1::_processVariance1d(std::vector<ProcessingNode *> &args) const
 {
-  if (args.size() != 3)
+  const MathLoopData *data;
+  double npt, maxPctMissing;
+  if (!loadDataValueValue(args, &data, npt, maxPctMissing))
   {
-    printf("bad args\n");
     return false;
   }
 
-  string dataName = args[0]->leafName();
-  if (dataName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  
-  double npt;
-  if (!args[1]->getValue(npt))
-  {
-    LOG(ERROR) << "No value";
-    return false;
-  }
-
-  double maxPctMissing;
-  if (!args[2]->getValue(maxPctMissing))
-  {
-    LOG(ERROR) << "No value";
-    return false;
-  }
-  
   Variance1dFilter filter(npt, maxPctMissing);
-  return filter.filter(dataName, _ray, _data, _outputRay);
+  const RayxData *rd = dynamic_cast<const RayxData *>(data);
+
+  
+  return filter.filter(*rd, _outputRay);
 }
 
 //------------------------------------------------------------------
 bool RayData1::_processQscale(std::vector<ProcessingNode *> &args,
 			     bool subtractFromOne) const
 {
-  if (args.size() != 4)
-  {
-    printf("bad args\n");
-    return false;
-  }
-
-  // get the variable to work on
-  string name = args[0]->leafName();
-  if (name.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-
+  const MathLoopData *data;
   double scale, topv, lowv;
-  if (args[1]->getValue(scale) &&
-      args[2]->getValue(topv) &&
-      args[3]->getValue(lowv))
+  if (!loadDataAndThreeNumbers(args, &data, scale, topv, lowv))
   {
-    // printf("Qscale %s %lf %lf %lf\n",
-    // 	   name.c_str(), scale, topv, lowv);
-  }
-  else
-  {
-    LOG(ERROR) << "Getting qscale args";
     return false;
   }
+  // if (args.size() != 4)
+  // {
+  //   printf("bad args\n");
+  //   return false;
+  // }
+
+  // // get the variable to work on
+  // string name = args[0]->leafName();
+  // if (name.empty())
+  // {
+  //   LOG(ERROR) << " NO name";
+  //   return false;
+  // }
+
+  // double scale, topv, lowv;
+  // if (args[1]->getValue(scale) &&
+  //     args[2]->getValue(topv) &&
+  //     args[3]->getValue(lowv))
+  // {
+  //   // printf("Qscale %s %lf %lf %lf\n",
+  //   // 	   name.c_str(), scale, topv, lowv);
+  // }
+  // else
+  // {
+  //   LOG(ERROR) << "Getting qscale args";
+  //   return false;
+  // }
   
+  const RayxData *rd = dynamic_cast<const RayxData *>(data);
   QscaleFilter filter;
-  return filter.filter(name, scale, topv, lowv, subtractFromOne,
-		       _ray, _data, _outputRay);
+  return filter.filter(*rd, scale, topv, lowv, subtractFromOne,
+		       _outputRay);
 }
 
 //------------------------------------------------------------------
-// clutter2dqual(scr, 0.69, vel, 1.5, width, 0.5)
-// clutter2dqual(scr, scale, vel, vr_shape, width, sw_shape)
+// clutter2dqual(scr, vel, width, 0.69, 1.5, 0.5)
+// clutter2dqual(scr, vel, width, scale, vr_shape, sw_shape)
 
 bool RayData1::_processClutter2dQual(std::vector<ProcessingNode *> &args) const
 {
-  if (args.size() != 6)
-  {
-    printf("bad args\n");
-    return false;
-  }
+  vector<const MathLoopData *> data;
+  vector<double> values;
 
-  // get the variables to work on
-  string scrName = args[0]->leafName();
-  if (scrName.empty())
+  if (!loadMultiDataAndMultiValues(args, 3, data, 3, values))
   {
-    LOG(ERROR) << " NO name";
     return false;
   }
-  string velName = args[2]->leafName();
-  if (velName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-
-  string widthName = args[4]->leafName();
-  if (widthName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-
   double scale, vr_shape, sw_shape;
-  if (args[1]->getValue(scale) &&
-      args[3]->getValue(vr_shape) &&
-      args[5]->getValue(sw_shape))
-  {
-    // printf("Qscale %s %lf %lf %lf\n",
-    // 	   name.c_str(), scale, topv, lowv);
-  }
-  else
-  {
-    LOG(ERROR) << "Getting qscale args";
-    return false;
-  }
+  scale = values[0];
+  vr_shape = values[1];
+  sw_shape = values[2];
+  const RayxData *scr = dynamic_cast<const RayxData *>(data[0]);
+  const RayxData *vel = dynamic_cast<const RayxData *>(data[1]);
+  const RayxData *width = dynamic_cast<const RayxData *>(data[2]);
+  
+  // if (args.size() != 6)
+  // {
+  //   printf("bad args\n");
+  //   return false;
+  // }
+
+  // // get the variables to work on
+  // string scrName = args[0]->leafName();
+  // if (scrName.empty())
+  // {
+  //   LOG(ERROR) << " NO name";
+  //   return false;
+  // }
+  // string velName = args[2]->leafName();
+  // if (velName.empty())
+  // {
+  //   LOG(ERROR) << " NO name";
+  //   return false;
+  // }
+
+  // string widthName = args[4]->leafName();
+  // if (widthName.empty())
+  // {
+  //   LOG(ERROR) << " NO name";
+  //   return false;
+  // }
+
+  // if (args[1]->getValue(scale) &&
+  //     args[3]->getValue(vr_shape) &&
+  //     args[5]->getValue(sw_shape))
+  // {
+  //   // printf("Qscale %s %lf %lf %lf\n",
+  //   // 	   name.c_str(), scale, topv, lowv);
+  // }
+  // else
+  // {
+  //   LOG(ERROR) << "Getting qscale args";
+  //   return false;
+  // }
   
   Clutter2dQualFilter filter;
-  return filter.filter(scrName, velName, widthName, scale, vr_shape, sw_shape,
-		       _ray, _data, _outputRay);
+  return filter.filter(*scr, *vel, *width, scale, vr_shape, sw_shape,
+		       _outputRay);
 }
 
 
@@ -809,17 +847,14 @@ bool RayData1::_needToSynch(const std::string &userKey) const
 
 
 //---------------------------------------------------------------
-bool RayData1::_isInput(const std::string &name)
+bool RayData1::_synchInput(const std::string &name)
 {
   if (_refToData(name, true) == NULL)
   {
     // try special data instead
-    for (size_t j=0; j<_specialName.size(); ++j)
+    if (_special.hasName(name))
     {
-      if (_specialName[j] == name)
-      {
-	return true;
-      }
+      return true;
     }
     return false;
   }
@@ -840,13 +875,9 @@ void RayData1::_setLocalInput(const std::string &input)
   else
   {
     // try special
-    for (size_t j=0; j<_specialName.size(); ++j)
+    if (_special.hasName(input))
     {
-      if (_specialName[j] == input)
-      {
-	_specialInpNames.push_back(_specialName[j]);
-	_specialInps.push_back(_specialValue[j]);
-      }
+      _specialInp.store(input, _special.matchingDataPtr(input));
     }
   }
 }

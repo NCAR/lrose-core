@@ -10,6 +10,7 @@
 #include "RayLoopData.hh"
 #include <rapmath/VolumeData.hh>
 #include <rapmath/MathData.hh>
+#include <rapmath/SpecialUserData.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RayxData.hh>
 #include <vector>
@@ -23,6 +24,8 @@ class RayData;
 class RayData1 : public MathData
 {
 public:
+
+  RayData1(void);
 
   /**
    * Set up for index'th ray in the RadxVol
@@ -39,6 +42,13 @@ public:
 
   #include <rapmath/MathDataVirtualMethods.hh>
   
+  inline bool prevMissing(void) const {return _ray0 == NULL;}
+  inline bool nextMissing(void) const {return _ray1 == NULL;}
+  inline const RadxRay *rPtr(void) const {return _ray;}
+  inline const RadxRay *r0Ptr(void) const {return _ray0;}
+  inline const RadxRay *r1Ptr(void) const {return _ray1;}
+  inline const std::vector<RayLoopData> & dataRef(void) const {return _data;}
+
 protected:
 private:
 
@@ -47,15 +57,17 @@ private:
   RadxRay *_ray0;       /**< Pointer to previous ray or NULL */
   RadxRay *_ray1;       /**< Pointer to next ray or NULL */
 
-  /**
-   * The names of special data fields, coming from RayData creator
-   */
-  std::vector<std::string> _specialName;
+  SpecialUserData _special;
 
-  /**
-   * Pointers to special data to go with each such field
-   */
-  std::vector<MathUserData *> _specialValue;
+  // /**
+  //  * The names of special data fields, coming from RayData creator
+  //  */
+  // std::vector<std::string> _specialName;
+
+  // /**
+  //  * Pointers to special data to go with each such field
+  //  */
+  // std::vector<MathUserData *> _specialValue;
 
   /**
    * Derived data as filters are processed gets put here
@@ -75,33 +87,35 @@ private:
   /**
    * Names of user derived inputs to a filter
    */
-  std::vector<std::string> _specialInpNames;
+  SpecialUserData _specialInp;
+  // std::vector<std::string> _specialInpNames;
 
-  /**
-   * Pointers to user derived inputs to a filter
-   */
-  std::vector<MathUserData *> _specialInps;
-  
+  // /**
+  //  * Pointers to user derived inputs to a filter
+  //  */
+  // std::vector<MathUserData *> _specialInps;
+
+  RayLoopData *_retrieveRay(const std::string &name, bool showError) const;
+
   RayLoopData *_refToData(const std::string &name, bool suppressWarn=false);
   RayLoopData *_exampleData(const std::string &name);
   void _updateRay(void);
   bool _needToSynch(const std::string &userKey) const;
   RayLoopData *_match(const std::string &n);
   const RayLoopData *_matchConst(const std::string &n) const;
-  bool _processAzGradient(std::vector<ProcessingNode *> &args) const;
+  bool _processAzGradient(std::vector<ProcessingNode *> &args);
   bool _processQscale(std::vector<ProcessingNode *> &args,
 		     bool subtractFromOne) const;
   bool _processClutter2dQual(std::vector<ProcessingNode *> &args) const;
-  bool _processSpecial0(std::vector<ProcessingNode *> &args) const;
-  bool _processSpecial1(std::vector<ProcessingNode *> &args) const;
+  bool _processSpecial0(std::vector<ProcessingNode *> &args);
+  bool _processSpecial1(std::vector<ProcessingNode *> &args);
   bool _processFIR(std::vector<ProcessingNode *> &args) const;
   bool _processVariance1d(std::vector<ProcessingNode *> &args) const;
 
-  /**
-   * Can write to _data
-   */
-  bool _isInput(const std::string &name);
+  bool _synchInput(const std::string &name);
   void _setLocalInput(const std::string &input);
+
+
 };
 
 #endif

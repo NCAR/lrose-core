@@ -43,16 +43,9 @@ FIRFilter::~FIRFilter()
 }
 
 //------------------------------------------------------------------
-bool FIRFilter::filter(const std::string &name, const std::string &firType,
-		       const RadxRay *ray, const std::vector<RayLoopData> &data,
+bool FIRFilter::filter(const RayxData &data, const std::string &firType,
 		       RayLoopData *output)
 {
-  RayxData locdata;
-  if (!RayData::retrieveRay(name, *ray, data, locdata))
-  {
-    return false;
-  }
-
   RayxData::FirFilter_t _edge;
   if (firType == "USE_FIRST_DATA")
     _edge = RayxData::FIR_EDGE_CLOSEST;
@@ -70,13 +63,12 @@ bool FIRFilter::filter(const std::string &name, const std::string &firType,
   
 
   // copy contents of vel into output
-  RayLoopData *rl = (RayLoopData *)output;
-  rl->transferData(locdata);
+  output->transferData(data);
 
   // make another object for quality (not used for anything so far)
-  RayxData quality = *rl;
+  RayxData quality = *output;
 
-  rl->FIRfilter(_coeff, _edge, quality);
+  output->FIRfilter(_coeff, _edge, quality);
   return true;
 
 }

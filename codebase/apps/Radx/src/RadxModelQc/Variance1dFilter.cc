@@ -31,24 +31,15 @@
 #include <cmath>
 
 //------------------------------------------------------------------
-bool Variance1dFilter::filter(const std::string &name, 
-		       const RadxRay *_ray,
-		       const std::vector<RayLoopData> &_data,
-		       RayLoopData *output)
+bool Variance1dFilter::filter(const RayxData &data,
+			      RayLoopData *output)
 {
-  RayxData data;
-  if (!RayData::retrieveRay(name, *_ray, _data, data))
-  {
-    return false;
-  }
-
   // copy contents of vel into output
-  RayLoopData *rl = (RayLoopData *)output;
-  rl->transferData(data);
-  RayxData quality = *rl;
+  output->transferData(data);
+  RayxData quality = *output;
 
   // no quality output just yet..note
-  rl->variance(_npt, _maxPctMissing);
+  output->variance(_npt, _maxPctMissing);
   return true;
 
   // // "SD_VR = 0.107/(8*MeanPrt*MeanNSamples*sqrt(PI))*WIDTH0",

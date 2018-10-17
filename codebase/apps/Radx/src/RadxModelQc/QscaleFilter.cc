@@ -15,22 +15,13 @@ QscaleFilter::QscaleFilter(void) {}
 QscaleFilter::~QscaleFilter(void) {}
 
 //------------------------------------------
-bool QscaleFilter::filter(const std::string &name, double scale, double topv,
-			  double lowv, bool subtractFromOne, const RadxRay *ray,
-			  const std::vector<RayLoopData> &data,
+bool QscaleFilter::filter(const RayxData &data, double scale, double topv,
+			  double lowv, bool subtractFromOne, 
 			  RayLoopData *output)
 {
-  RayxData r;
-  if (!RayData::retrieveRay(name, *ray, data, r))
-  {
-    return false;
-  }
-
-  // copy contents of r into output
-  RayLoopData *rl = (RayLoopData *)output;
-  rl->transferData(r);
+  output->transferData(data);
 
   // do the filter
-  rl->qscale(scale, topv, lowv, subtractFromOne);
+  output->qscale(scale, topv, lowv, subtractFromOne);
   return true;
 }

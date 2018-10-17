@@ -13,6 +13,7 @@
 #include <vector>
 
 class RayLoopData;
+class RayxData;
 class RadxRay;
 
 
@@ -41,9 +42,8 @@ public:
    * @param[out] output
    * @return true for success
    */
-  bool filter(const std::string &name, double scale, double topv,
-	      double lowv, bool subtractFromOne, const RadxRay *ray,
-	      const std::vector<RayLoopData> &data, RayLoopData *output);
+  bool filter(const RayxData &data, double scale, double topv,
+	      double lowv, bool subtractFromOne, RayLoopData *output);
     
 private:
 };

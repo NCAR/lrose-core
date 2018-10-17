@@ -28,37 +28,26 @@
 #include "RayData.hh"
 #include <toolsa/LogStream.hh>
 #include <Radx/RayxData.hh>
-// #include <toolsa/globals.h>
-// #include <Radx/RadxVol.hh>
 #include <cmath>
 
 //------------------------------------------------------------------
-bool Special0Filter::filter(const std::string &widthName, double meanPrt,
+bool Special0Filter::filter(const RayxData &width, double meanPrt,
 			    double meanNsamples,
-			    const RadxRay *_ray,
-			    const std::vector<RayLoopData> &_data,
 			    RayLoopData *output)
 {
-  RayxData width;
-  if (!RayData::retrieveRay(widthName, *_ray, _data, width))
-  {
-    return false;
-  }
-
-  // copy contents of vel into output
-  RayLoopData *rl = (RayLoopData *)output;
-  rl->transferData(width);
+  // copy contents into output
+  output->transferData(width);
 
   
   //"SD_DBZ = 10*log10(1 + sqrt(1.0/(WIDTH0*(4.0*sqrt(PI)*MeanPrt*MeanNSamples/0.10))))",
   double PI = 3.14159;
   double arg = 4.0*sqrt(PI)*meanPrt*meanNsamples/0.10;
 
-  rl->multiply(arg);
-  rl->invert();
-  rl->squareRoot();
-  rl->inc(1.0);
-  rl->logBase10();
-  rl->multiply(10.0);
+  output->multiply(arg);
+  output->invert();
+  output->squareRoot();
+  output->inc(1.0);
+  output->logBase10();
+  output->multiply(10.0);
   return true;
 }

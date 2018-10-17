@@ -19,6 +19,8 @@ class RayLoopData : public MathLoopData, public RayxData
 {
 public:
 
+  RayLoopData(void);
+
   RayLoopData(const RayxData &r);
 
   /**
