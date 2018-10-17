@@ -34,7 +34,6 @@ public:
    */
   virtual ~GriddedData(void);
 
-
   #include <rapmath/MathLoopDataVirtualMethods.hh>
 
 protected:

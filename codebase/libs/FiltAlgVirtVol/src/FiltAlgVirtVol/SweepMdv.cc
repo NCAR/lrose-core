@@ -6,6 +6,7 @@
 #include <FiltAlgVirtVol/SweepMdv.hh>
 #include <FiltAlgVirtVol/VolumeMdv.hh>
 #include <euclid/GridAlgs.hh>
+#include <euclid/Grid2dClump.hh>
 #include <rapmath/MathParser.hh>
 #include <rapmath/ProcessingNode.hh>
 #include <rapmath/TrapFuzzyF.hh>
@@ -29,6 +30,7 @@ SweepMdv::SweepMdv(const VolumeMdv &volume, int index, double vlevel)
 {
   _time = volume._time;
   _proj = volume._proj;
+  _clockwise = volume.clockwise();
   _vlevel = vlevel;
   _vlevelIndex = index;
   _grid2d = volume.get2d(index);
@@ -452,6 +454,36 @@ SweepMdv::expand_angles_laterally(MathLoopData *out,
   g.expandLaterally(npt);
   //g.sdevThreaded(nx, ny, 8);
   
+  _outputSweep->dataCopy(g);
+  return true;
+}
+
+//------------------------------------------------------------------
+bool
+SweepMdv::clump(MathLoopData *out,
+		std::vector<ProcessingNode *> &args) const
+{
+  // expect field, npt
+  double npt;
+  const MathLoopData *lfield;
+  if (!loadDataValue(args, &lfield, npt))
+  {
+    return false;
+  }
+  const GriddedData *gd = (const GriddedData *)lfield;
+
+  Grid2d g(*gd);
+  g.setAllMissing();
+  Grid2dClump c(*gd);
+  std::vector<clump::Region_t> clumps = c.buildRegions();
+  for (size_t i=0; i<clumps.size(); ++i)
+  {
+    clump::Region_citer_t c;
+    for (c=clumps[i].begin(); c!=clumps[i].end(); ++c)
+    {
+      g.setValue(c->first, c->second, gd->getValue(c->first, c->second));
+    }
+  }
   _outputSweep->dataCopy(g);
   return true;
 }

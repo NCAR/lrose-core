@@ -74,11 +74,26 @@ public:
   const std::vector<GriddedData> *get2d(int index) const;
 
   /**
+   * @return pointer to vector of grids (one field) at all height, in
+   * ascending height order, by creating new grids and copying into return
+   *
+   * @param[in] name The name of the field
+   */
+  std::vector<GriddedData> getField3d(const std::string &name) const;
+
+  /**
    * Take the new data grids out of the input sweep and store into the volume
    * @param[in] zIndex  Index to height for this Sweep
    * @param[in] s  The sweep
    */
   void addNewMdv(int zIndex, const SweepMdv &s);
+
+  /**
+   * Take the input gridded data and add it to a height as a new field
+   * @param[in] zIndex  Index to height
+   * @param[in] g  The grid
+   */
+  void addNewGrid(int zIndex, const GriddedData &g);
 
   /**
    * Store input math user data into the volume
@@ -122,6 +137,11 @@ public:
    */
   int nz(void) const;
   
+  /**
+   * @return true if positive azimuithal increment
+   */
+  inline bool clockwise(void) const {return _positiveDy;}
+  
 protected:
 
   /**
@@ -141,6 +161,9 @@ protected:
      */
     inline ~GridFields(void) {}
 
+    inline int num(void) const {return (int)_grid2d.size();}
+    inline const GriddedData *ithGrid(int i) const {return &_grid2d[i];}
+    
     int _z;                            /**< The height index */
     std::vector<GriddedData> _grid2d;  /**< The grids, one per field */
   private:
@@ -160,6 +183,7 @@ protected:
   MdvxProj _proj;                    /**< Projection */
   std::vector<double> _vlevel;       /**< The vertical levels degrees */
   int _nz, _nx, _ny;                 /**< Grid dimensions */
+  bool _positiveDy;                  /**< positive or negative azimuthal increment */
   bool _hasWavelength;               /**< True if input data has wavelength */
   bool _hasAltitude;                 /**< True if input data has altitude */
   double _altitude;                  /**< Altitude if _hasAltitude */
@@ -175,6 +199,7 @@ protected:
   void _outputFieldToUrl(const std::string &internalName,
 			 const std::string &externalName,
 			 const time_t &t, DsMdvx &out);
+
 private:
 };
 

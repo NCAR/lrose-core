@@ -72,6 +72,11 @@ public:
    */
   bool isSynchedInput(const std::string &name) const;
 
+  /**
+   * @return true for clockwise azimuthal increments
+   */
+  bool clockwise(void) const {return _clockwise;}
+
   #define FILTALG_BASE
   #include <rapmath/MathDataVirtualMethods.hh>
   #undef FILTALG_BASE
@@ -93,8 +98,10 @@ public:
    */
   MathUserData *specialDataPtr(const std::string &name);
 
+
 protected:
-  MdvxProj _proj;   /**< Grid projectsion */
+  MdvxProj _proj;   /**< Grid projection */
+  bool _clockwise;  /**< True for clockwise azimuthal increments */
   double _vlevel;   /**< Vertical level */
   int _vlevelIndex; /**< Vertical level index */
   time_t _time;     /**< Time of volume */

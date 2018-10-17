@@ -165,6 +165,34 @@ const std::vector<GriddedData> *VolumeMdv::get2d(int index) const
 }
 
 //------------------------------------------------------------------
+std::vector<GriddedData> VolumeMdv::getField3d(const std::string &name) const
+{
+  std::vector<GriddedData> ret;
+  
+  for (size_t i=0; i<_data.size(); ++i)
+  {
+    bool got = false;
+    for (int j=0; j<_data[i].num(); ++j)
+    {
+      if (_data[i].ithGrid(j)->nameEquals(name))
+      {
+	got = true;
+	ret.push_back(*(_data[i].ithGrid(j)));
+	break;
+      }
+    }
+    if (!got)
+    {
+      LOG(ERROR) << "No " << name << " at height = " << i;
+      ret.clear();
+      return ret;
+    }
+  }
+
+  return ret;
+}
+
+//------------------------------------------------------------------
 void VolumeMdv::addNewMdv(int zIndex, const SweepMdv &s)
 {
   const std::vector<GriddedData> &newD = s.newDataRef();
@@ -193,6 +221,35 @@ void VolumeMdv::addNewMdv(int zIndex, const SweepMdv &s)
 }
 
 //------------------------------------------------------------------
+void VolumeMdv::addNewGrid(int zIndex, const GriddedData &g)
+{
+  string name = g.getName();
+  string ename;
+  if (_parms->outputInternal2ExternalName(name, ename))
+  {
+    bool exists = false;
+    for (size_t j=0; j<_data[zIndex]._grid2d.size(); ++j)
+    {
+      if (name == _data[zIndex]._grid2d[j].getName())
+      {
+	exists = true;
+	break;
+      }
+    }
+    if (!exists)
+    {
+      LOG(DEBUG) << "Adding field " << name << " to state, z=" << zIndex;
+      _data[zIndex]._grid2d.push_back(g);
+    }
+    else
+    {
+      LOG(ERROR) << "Can't duplicate field " << name
+		 << " to state z=" << zIndex;
+    }
+  }
+}
+
+//------------------------------------------------------------------
 bool VolumeMdv::storeMathUserDataMdv(const std::string &name, MathUserData *v)
 {
   if (_special == NULL)
@@ -209,7 +266,6 @@ bool VolumeMdv::storeMathUserDataMdv(const std::string &name, MathUserData *v)
 //------------------------------------------------------------------
 void VolumeMdv::output(const time_t &t)
 {
-
   // for each output url
   for (size_t i=0; i<_parms->_virtvol_outputs.size(); ++i)
   {
@@ -310,6 +366,8 @@ bool VolumeMdv::_initialInitializeInput(const time_t &t, const UrlSpec &u)
   _fieldHdr = hdr;
   _vlevelHdr = f->getVlevelHeader();
   _proj = MdvxProj(_masterHdr, hdr);
+  Mdvx::coord_t coord = _proj.getCoord();
+  _positiveDy = coord.dy > 0.0;
   MdvxRadar mdvRadar;
   if (mdvRadar.loadFromMdvx(mdv) && mdvRadar.radarParamsAvail())
   {

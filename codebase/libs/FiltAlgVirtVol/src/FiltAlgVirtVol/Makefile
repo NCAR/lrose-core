@@ -17,18 +17,18 @@ TARGET_FILE= ../libFiltAlgVirtVol.a
 HDRS = 
 
 CPPC_SRCS = \
+	Algorithm.cc  \
 	AlgorithmParams.cc \
 	AlgorithmParms.cc \
-	Algorithm.cc  \
 	FiltAlgParms.cc \
 	GriddedData.cc \
 	InterfaceAlgorithm.cc \
 	SweepMdv.cc \
-	VolumeMdv.cc \
+	UrlSpec.cc \
 	VirtVolParams.cc \
 	VirtVolParms.cc \
-	UrlSpec.cc \
-	VolumeInfo.cc
+	VolumeInfo.cc \
+	VolumeMdv.cc
 
 #
 # general targets
