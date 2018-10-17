@@ -42,6 +42,7 @@
 #include <toolsa/mem.h>
 #include <toolsa/TaArray.hh>
 #include <radar/IwrfTsInfo.hh>
+#include <radar/RadarCalib.hh>
 #include <rapformats/DsRadarCalib.hh>
 using namespace std;
 
@@ -882,7 +883,7 @@ void IwrfTsInfo::setDsRadarCalib(DsRadarCalib &dsCalib) const
 {
   IwrfCalib iwrfCalib;
   iwrfCalib.set(_calib);
-  iwrfCalib.copyToDsRadarCalib(dsCalib);
+  RadarCalib::copyIwrfToDsRadar(iwrfCalib, dsCalib);
   dsCalib.setRadarName(_radar_info.radar_name);
 }
 
@@ -894,7 +895,7 @@ void IwrfTsInfo::setFromDsRadarCalib(const DsRadarCalib &dsCalib)
 {
   set_radar_name(dsCalib.getRadarName());
   IwrfCalib iwrfCalib;
-  iwrfCalib.setFromDsRadarCalib(dsCalib);
+  RadarCalib::copyDsRadarToIwrf(dsCalib, iwrfCalib);
   _calib = iwrfCalib.getStruct();
 }
 

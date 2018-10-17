@@ -935,38 +935,3 @@ IwrfCalib::print(ostream &out)  const
 
 }
 
-////////////////////////////////////////////////////////////////////////
-// set this object from RadxRcalib
-
-void IwrfCalib::setFromRadxRcalib(const RadxRcalib &rcalib)
-  
-{
-  RadarCalib::copyRadxToIwrf(rcalib, *this);
-}
-
-////////////////////////////////////////////////////////////////////////
-// set RadxRcalib from this object
-
-void IwrfCalib::copyToRadxRcalib(RadxRcalib &rcalib) const
-
-{
-  RadarCalib::copyIwrfToRadx(*this, rcalib);
-}
-
-////////////////////////////////////////////////////////////////////////
-// set this object from DsRadarCalib
-
-void IwrfCalib::setFromDsRadarCalib(const DsRadarCalib &dsCalib)
-  
-{
-  RadarCalib::copyDsRadarToIwrf(dsCalib, *this);
-}
-
-////////////////////////////////////////////////////////////////////////
-// set DsRadarCalib from this object
-
-void IwrfCalib::copyToDsRadarCalib(DsRadarCalib &dsCalib) const
-
-{
-  RadarCalib::copyIwrfToDsRadar(*this, dsCalib);
-}

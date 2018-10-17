@@ -295,22 +295,6 @@ public:
   
   void overrideFromStruct(const iwrf_calibration_t &calib);
 
-  // set this object from RadxRcalib
-  
-  void setFromRadxRcalib(const RadxRcalib &rcalib);
-  
-  // set RadxRcalib from this object
-  
-  void copyToRadxRcalib(RadxRcalib &rcalib) const;
-
-  // set this object from DsRadarCalib
-
-  void setFromDsRadarCalib(const DsRadarCalib &dsCalib);
-
-  // set DsRadarCalib from this object
-
-  void copyToDsRadarCalib(DsRadarCalib &dsCalib) const;
-
   // print
 
   void print(ostream &out) const;
