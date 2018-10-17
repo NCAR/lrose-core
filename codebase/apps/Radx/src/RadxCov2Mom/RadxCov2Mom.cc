@@ -55,6 +55,7 @@
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxXml.hh>
+#include <radar/RadarCalib.hh>
 using namespace std;
 
 ///////////////////////////////////////////////////////////////
@@ -827,7 +828,7 @@ int RadxCov2Mom::_readCalFiles()
     calib.pulseWidthUs = pulseWidthUs;
     calib.referenceCal = iwrfCal;
     calib.workingCal = iwrfCal;
-    iwrfCal.copyToRadxRcalib(calib.radxCal);
+    RadarCalib::copyIwrfToRadx(iwrfCal, calib.radxCal);
     calib.used = false;
 
     _calibs.push_back(calib);
@@ -907,7 +908,7 @@ void RadxCov2Mom::_initCals(const RadxVol &vol)
     // save working cal and radx cal
 
     calib.workingCal = workingCal;
-    workingCal.copyToRadxRcalib(calib.radxCal);
+    RadarCalib::copyIwrfToRadx(workingCal, calib.radxCal);
     
     // initialize used flag to false
 
