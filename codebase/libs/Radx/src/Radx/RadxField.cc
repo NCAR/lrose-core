@@ -3054,7 +3054,21 @@ void RadxField::_computeMean(size_t nPoints,
                              double maxFractionMissing)
 
 {
-                             
+
+  // for fields in dB space, convert to linear, compute the
+  // mean, and convert back
+
+  string lowCaseName(_name);
+  for (size_t ii = 0; ii < lowCaseName.size(); ii++) {
+    lowCaseName[ii] = std::tolower(lowCaseName[ii]);
+  }
+  bool convertToLinear = false;
+  if (lowCaseName == "db" ||
+      lowCaseName == "dbm" ||
+      lowCaseName == "dbz") {
+    convertToLinear = true;
+  }
+
   RadxArray<Radx::fl64> sum_;
   Radx::fl64 *sum = sum_.alloc(nPoints);
   memset(sum, 0, nPoints * sizeof(Radx::fl64));
@@ -3072,6 +3086,9 @@ void RadxField::_computeMean(size_t nPoints,
         
     for (size_t ipt = 0; ipt < nPoints; ipt++, vals++) {
       Radx::fl64 val = *vals;
+      if (convertToLinear) {
+        val = pow(10.0, val / 10.0);
+      }
       if (val != miss) {
         sum[ipt] += val;
         count[ipt]++;
@@ -3083,7 +3100,11 @@ void RadxField::_computeMean(size_t nPoints,
   int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     if (count[ipt] >= minValid) {
-      data[ipt] = sum[ipt] / count[ipt];
+      double mean = sum[ipt] / count[ipt];
+      if (convertToLinear) {
+        mean = 10.0 * log10(mean);
+      }
+      data[ipt] = mean;
     }
   }
 
