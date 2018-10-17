@@ -21,7 +21,7 @@ public:
   /**
    * Constructor
    * @param[in] ownsPointers True to take ownership of local pointers and
-   * delete them in the destructor, false to not delete them in the desctructor
+   * delete them in the destructor, false to not delete them in the destructor
    */
   SpecialUserData(bool ownsPointers=true);
 

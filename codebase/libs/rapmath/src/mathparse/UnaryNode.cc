@@ -199,6 +199,7 @@ bool UnaryNode::isMultiArgFunction(void) const
   case ProcessingNode::MAX:
   case ProcessingNode::MAX_EXPAND:
   case ProcessingNode::EXPAND_ANGLES_LATERALLY:
+  case ProcessingNode::CLUMP:
   case ProcessingNode::MEDIAN:
   case ProcessingNode::WEIGHTED_AVERAGE:
   case ProcessingNode::WEIGHTED_ANGLE_AVERAGE:

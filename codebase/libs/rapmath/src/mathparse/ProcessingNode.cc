@@ -167,6 +167,7 @@ std::vector<FunctionDef> ProcessingNode::unaryOperators(void)
   ret.push_back(FunctionDef(sprintUOp(MAX_EXPAND), sprintUOpDescr(MAX_EXPAND)));
   ret.push_back(FunctionDef(sprintUOp(EXPAND_ANGLES_LATERALLY),
 			    sprintUOpDescr(EXPAND_ANGLES_LATERALLY)));
+  ret.push_back(FunctionDef(sprintUOp(CLUMP), sprintUOpDescr(CLUMP)));
   return ret;
 }
 
@@ -213,6 +214,8 @@ ProcessingNode::UnaryOperator_t ProcessingNode::unaryOperatorValue(int index)
     return MAX_EXPAND;
   case 18:
     return EXPAND_ANGLES_LATERALLY;
+  case 19:
+    return CLUMP;
   default:
     return UBAD;
   }
@@ -355,6 +358,9 @@ std::string ProcessingNode::sprintUOp(const UnaryOperator_t &op)
   case EXPAND_ANGLES_LATERALLY:
     s = "expand_angles_laterally";
     break;
+  case CLUMP:
+    s = "clump";
+    break;
   case MEDIAN:
     s = "median";
     break;
@@ -429,6 +435,9 @@ std::string ProcessingNode::sprintUOpDescr(const UnaryOperator_t &op)
     break;
   case EXPAND_ANGLES_LATERALLY:
     s = "expand_angles_laterally(field, npt) = assumes field contains angle data (degrees).  Expands along the orientation into areas of missing data by npt at each point";
+    break;
+  case CLUMP:
+    s = "clump(field, npt) = clumps non-missing data, removing clumps that are smaller than npt in size";
     break;
   case MEDIAN:
     s = "median(field0, nx, ny, binMin, binMax, binDelta) = median of field data over an nx by ny region, with histogram bins as indicated";

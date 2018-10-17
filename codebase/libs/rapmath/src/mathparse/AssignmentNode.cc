@@ -265,6 +265,8 @@ _processMultiArgUnaryFunction(MathLoopData *ptr, MathData *data) const
     return data->max_expand(ptr, *args);
   case ProcessingNode::EXPAND_ANGLES_LATERALLY:
     return data->expand_angles_laterally(ptr, *args);
+  case ProcessingNode::CLUMP:
+    return data->clump(ptr, *args);
   case ProcessingNode::MEDIAN:
     return data->median(ptr, *args);
   case ProcessingNode::WEIGHTED_AVERAGE:

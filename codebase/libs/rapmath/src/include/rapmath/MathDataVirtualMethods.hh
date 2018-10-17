@@ -127,7 +127,9 @@
   virtual bool expand_angles_laterally(MathLoopData *out, 
 		      std::vector<ProcessingNode *> &args) const = 0;
 
-  /**
+  virtual bool clump(MathLoopData *out, 
+		     std::vector<ProcessingNode *> &args) const = 0;
+/**
    * 
    * Process at a node assumed to be a user defined operation
    *
@@ -298,6 +300,9 @@
 
   virtual bool expand_angles_laterally(MathLoopData *out, 
 		      std::vector<ProcessingNode *> &args) const;
+
+  virtual bool clump(MathLoopData *out, 
+		     std::vector<ProcessingNode *> &args) const;
 
   /**
    * 
@@ -524,6 +529,8 @@
   virtual bool expand_angles_laterally(MathLoopData *out, 
 		      std::vector<ProcessingNode *> &args) const;
 
+  virtual bool clump(MathLoopData *out, 
+		     std::vector<ProcessingNode *> &args) const;
   /**
    * 
    * Process at a node assumed to be a user defined operation

@@ -40,7 +40,6 @@
 /LogicalArgs.hh/1.2/Sat Oct 13 22:38:37 2018//
 /LogicalNode.hh/1.5/Sat Oct 13 22:38:37 2018//
 /MathData.hh/1.6/Sat Oct 13 22:38:37 2018//
-/MathDataVirtualMethods.hh/1.12/Sat Oct 13 22:38:37 2018//
 /MathLoopData.hh/1.4/Wed Oct 10 21:50:23 2018//
 /MathLoopDataVirtualMethods.hh/1.2/Wed Oct 10 21:50:23 2018//
 /MathParser.hh/1.11/Sat Oct 13 22:38:37 2018//
@@ -48,11 +47,12 @@
 /MathUserDataVirtualMethods.hh/1.2/Wed Oct 10 21:50:23 2018//
 /Node.hh/1.5/Wed Oct 10 21:50:23 2018//
 /NodeVirtualMethods.hh/1.6/Wed Oct 10 21:50:23 2018//
-/ProcessingNode.hh/1.12/Sat Oct 13 22:38:37 2018//
-/SpecialUserData.hh/1.2/Wed Sep  5 15:13:30 2018//
 /UnaryNode.hh/1.5/Wed Oct 10 21:50:23 2018//
 /VolumeData.hh/1.1/Wed Oct 10 21:50:23 2018//
 /VolumeDataVirtualMethods.hh/1.4/Sat Oct 13 22:38:37 2018//
 /DistPolynomial.hh/1.2/Wed Oct 10 21:50:23 2018//
 /PolyFit.hh/1.1/Wed Oct 10 21:50:23 2018//
+/MathDataVirtualMethods.hh/1.13/Wed Oct 17 16:22:44 2018//
+/ProcessingNode.hh/1.13/Wed Oct 17 16:22:44 2018//
+/SpecialUserData.hh/1.3/Wed Oct 17 16:22:44 2018//
 D
