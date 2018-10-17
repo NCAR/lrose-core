@@ -4892,6 +4892,8 @@ RadxRay *RadxVol::computeFieldStats(RadxField::StatsMethod_t method,
 
     // assemble vector of this field on the ray
 
+    RadxField *field = _rays[0]->getField(fieldNames[ifield]);
+
     vector<const RadxField *> rayFields;
     for (size_t iray = 0; iray < _rays.size(); iray++) {
       RadxField *rayField = _rays[iray]->getField(fieldNames[ifield]);
@@ -4904,7 +4906,7 @@ RadxRay *RadxVol::computeFieldStats(RadxField::StatsMethod_t method,
     // add field to ray
 
     RadxField *statsField = 
-      RadxField::computeStats(method, rayFields, maxFractionMissing);
+      field->computeStats(method, rayFields, maxFractionMissing);
     if (statsField != NULL) {
       result->addField(statsField);
     }
