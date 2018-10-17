@@ -9,7 +9,7 @@
 #define ASCII_OUTPUTS_HH
 
 #include "AsciiOutput.hh"
-#include "RepohParams.hh"
+#include "Parms.hh"
 #include <vector>
 
 class VirtVolParms;
@@ -31,8 +31,7 @@ public:
   void clear(void);
 
 
-  bool initialize(const RepohParams &parms,
-		  const VirtVolParms &vparms,
+  bool initialize(const Parms &parms,
 		  const time_t &t);
 
   AsciiOutput *refToAsciiOutput(const std::string &name, bool suppressWarn);

@@ -1,17 +1,30 @@
 #include "Repoh.hh"
+#include "Sweep.hh"
+#include "Volume.hh"
 #include <FiltAlgVirtVol/InterfaceAlgorithm.hh>
 #include <toolsa/LogStream.hh>
 
 //------------------------------------------------------------------
-Repoh::Repoh(const std::string &parmFileName, void cleanExit(int)) : _ok(true)
+Repoh::Repoh(void) : _ok(false)
 {
-  _parms = RepohParms(parmFileName);
+  Sweep s;
+  Volume v;
+  _alg = new Algorithm(s, v);
+}
+
+//------------------------------------------------------------------
+Repoh::Repoh(const Parms &parms, void cleanExit(int)) : _ok(true),
+							_parms(parms)
+{
+  // _parms = RepohParms(parmFileName);
   _parms.printInputOutputs();
 
   InterfaceAlgorithm::algInit("Repoh", _parms, cleanExit);
 
   // initiate the algorithm
-  _alg = new Algorithm(_parms);
+  Sweep s;
+  Volume v;
+  _alg = new Algorithm(_parms, s, v);
   if (!_alg->ok())
   {
     printf("ERROR building algorithm object\n");

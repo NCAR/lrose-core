@@ -48,9 +48,9 @@ void RepohParms::printInputOutputs(void) const
   }
 }
 
-//------------------------------------------------------------------
-const void *RepohParms::appParms(void) const
-{
-  return (void *)&_main;
-}
+// //------------------------------------------------------------------
+// const void *RepohParms::appParms(void) const
+// {
+//   return (void *)&_main;
+// }
 

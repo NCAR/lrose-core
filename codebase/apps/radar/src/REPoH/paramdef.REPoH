@@ -11,6 +11,40 @@ commentdef
 }
 
 
+paramdef string
+{
+  p_descr = "Fixed constant strings that are interpreted by user functions";
+  p_default = {};
+} fixed_const[];
+
+paramdef string
+{
+  p_descr = "Non gridded data names";
+  p_default = {};
+} user_data[];
+
+paramdef string
+{
+  p_descr = "Volume Filters to apply before the sweep filters";
+  p_default = {};
+} volume_before_filter[];  
+
+paramdef string
+{
+  p_descr = "Filters (sweep) to apply";
+  p_default = {
+   "Meso1 = MesoTemplate(VEL, 20, 20, 10, 20)",
+   "Meso2 = MesoTemplate(VEL, 20, 20, 10, -20)"};
+} filter[];  
+
+
+paramdef string
+{
+  p_descr = "Volume Filters to apply after the sweep filters";
+  p_default = {};
+} volume_after_filter[];  
+
+
 
 // paramdef string
 // {

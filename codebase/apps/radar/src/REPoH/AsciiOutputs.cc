@@ -18,15 +18,13 @@ void AsciiOutputs::clear(void)
   _clear();
 }
 
-bool AsciiOutputs::initialize(const RepohParams &parms,
-			      const VirtVolParms &vparms,
-			      const time_t &t)
+bool AsciiOutputs::initialize(const Parms &parms, const time_t &t)
 {	
   _clear();
 
   for (int i=0; i<parms.ascii_output_n; ++i)
   {
-    if (!_setupAsciiOutput(parms._ascii_output[i], vparms, t))
+    if (!_setupAsciiOutput(parms._ascii_output[i], parms, t))
     {
       return false;
     }
@@ -72,11 +70,11 @@ bool AsciiOutputs::_setupAsciiOutput(const RepohParams::Ascii_output_t &p,
 				     const VirtVolParms &vparms,
 				     const time_t &t)
 {
-  for (size_t j=0; j<vparms._outputs.size(); ++j)
+  for (size_t j=0; j<vparms._virtvol_outputs.size(); ++j)
   {
-    if (vparms._outputs[j].internalNameMatch(p.name))
+    if (vparms._virtvol_outputs[j].internalNameMatch(p.name))
     {
-      if (vparms._outputs[j]._type != VirtVolParams::ASCII)
+      if (vparms._virtvol_outputs[j]._type != VirtVolParams::ASCII)
       {
 	LOG(ERROR) << "Inconsistent use of kernel ascii output data";
 	return false;

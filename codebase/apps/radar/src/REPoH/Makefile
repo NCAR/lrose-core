@@ -48,7 +48,7 @@ CPPC_SRCS = \
 	Main.cc \
 	RayCloudEdge.cc \
 	Repoh.cc \
-	RepohParms.cc  \
+	Parms.cc  \
 	Volume.cc  \
 	VolumeMdvInfo.cc \
 	VolumeTrigger.cc \

@@ -6,7 +6,7 @@
 #ifndef REPOH_H
 #define REPOH_H
 
-#include "RepohParms.hh"
+#include "Parms.hh"
 #include <FiltAlgVirtVol/Algorithm.hh>
 
 class VolumeData;
@@ -14,12 +14,14 @@ class VolumeData;
 class Repoh
 {
 public:
+  Repoh(void);
+
   /**
    * Constructor
    * @param[in] parmFileName  Name of file with parameters
    * @param[in] cleanExit  Method to call for exiting program
    */
-  Repoh(const std::string &parmFileName, void cleanExit(int));
+  Repoh(const Parms &parms, void cleanExit(int));
 
   /**
    * Destructor
@@ -34,7 +36,7 @@ public:
   /**
    * @return reference to the parameters
    */
-  inline const RepohParms &getParms(void) const {return _parms;}
+  inline const Parms &getParms(void) const {return _parms;}
 
   /**
    * @return a pointer to the Algorithm object
@@ -54,7 +56,7 @@ protected:
 private:
 
   bool _ok;            /**< True if object well formed */
-  RepohParms _parms;   /**< Parameters */
+  Parms _parms;   /**< Parameters */
   Algorithm *_alg;     /**< Algorithm pointer, pointer due to threading */
 };
 

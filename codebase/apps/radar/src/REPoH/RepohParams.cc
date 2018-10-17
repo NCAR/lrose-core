@@ -1,9 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2018
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // RepohParams.cc
 //
@@ -31,8 +48,6 @@
  * @author Automatically generated
  *
  */
-using namespace std;
-
 #include "RepohParams.hh"
 #include <cstring>
 
@@ -532,6 +547,98 @@ using namespace std;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("REPoH");
     tt->comment_text = tdrpStrDup("Radar Estimated Profiles of Humidity. Input is PID and radar data, output is humidity and attenutation grids, and ascii data");
+    tt++;
+    
+    // Parameter 'fixed_const'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("fixed_const");
+    tt->descr = tdrpStrDup("Fixed constant strings that are interpreted by user functions");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_fixed_const - &_start_;
+    tt->array_n_offset = (char *) &fixed_const_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'user_data'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("user_data");
+    tt->descr = tdrpStrDup("Non gridded data names");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_user_data - &_start_;
+    tt->array_n_offset = (char *) &user_data_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'volume_before_filter'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("volume_before_filter");
+    tt->descr = tdrpStrDup("Volume Filters to apply before the sweep filters");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_volume_before_filter - &_start_;
+    tt->array_n_offset = (char *) &volume_before_filter_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'filter'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("filter");
+    tt->descr = tdrpStrDup("Filters (sweep) to apply");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_filter - &_start_;
+    tt->array_n_offset = (char *) &filter_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 2;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("Meso1 = MesoTemplate(VEL, 20, 20, 10, 20)");
+      tt->array_vals[1].s = tdrpStrDup("Meso2 = MesoTemplate(VEL, 20, 20, 10, -20)");
+    tt++;
+    
+    // Parameter 'volume_after_filter'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("volume_after_filter");
+    tt->descr = tdrpStrDup("Volume Filters to apply after the sweep filters");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_volume_after_filter - &_start_;
+    tt->array_n_offset = (char *) &volume_after_filter_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
     tt++;
     
     // Parameter 'pid_weather'

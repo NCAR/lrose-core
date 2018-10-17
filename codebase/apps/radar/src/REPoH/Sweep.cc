@@ -4,10 +4,10 @@
 
 //------------------------------------------------------------------
 #include "Sweep.hh"
+#include "Volume.hh"
 #include "AsciiOutput.hh"
 #include "KernelGrids.hh"
 #include "Kernels.hh"
-#include "Volume.hh"
 #include "ClumpAssociate.hh"
 #include "ClumpRegions.hh"
 #include "CloudGaps.hh"
@@ -16,26 +16,26 @@
 #include <euclid/Grid2dClump.hh>
 #include <rapmath/MathParser.hh>
 #include <rapmath/ProcessingNode.hh>
-#include <rapmath/TrapFuzzyF.hh>
-#include <rapmath/SFuzzyF.hh>
-#include <rapmath/FuzzyF.hh>
 #include <rapmath/UnaryNode.hh>
 #include <toolsa/LogStream.hh>
 #include <cmath>
 #include <algorithm>
 
 //------------------------------------------------------------------
+Sweep::Sweep(void)  : SweepMdv()
+{
+}
+
+//------------------------------------------------------------------
 Sweep::Sweep(const Volume &volume, int index, double vlevel) :
-  _mdvInfo(volume._mdvInfo),
+  SweepMdv(volume, index, vlevel),
   _kernelOutputs(volume._kernelOutputs),
   _asciiOutputs(volume._asciiOutputs),
-  _time(volume._time),
-  _repohParms(volume._repohParms),
-  _vlevel(vlevel),
-  _vlevelIndex(index),
-  _inputGrids(volume._data.get2d(index)),
-  _derivedData(index)
+  _parms(volume._parms)
 {
+
+  Mdvx::coord_t coord = _proj.getCoord();
+  _dx = coord.dx;
 }
 
 //------------------------------------------------------------------
@@ -44,30 +44,44 @@ Sweep::~Sweep(void)
 }
 
 //------------------------------------------------------------------
-int Sweep::numData(void) const
+std::vector<std::pair<std::string, std::string> >
+Sweep::userUnaryOperators(void) const
 {
-  return _mdvInfo.numData();
-}
+  std::vector<std::pair<std::string, std::string> > ret;
 
-//------------------------------------------------------------------
-void Sweep::finishProcessingNode(int index, VolumeData *v)
-{
-  Volume *vol = (Volume *)v;
-  vol->addNew(index, *this);
+  ret.push_back(pair<string,string>("create_clumps_and_map_to_colors","clumped = clumped"));
+  ret.push_back(pair<string,string>("create_clumps", "clump_regions = create_clumps(clumps)"));
+  ret.push_back(pair<string,string>("clumps_to_grid", "clumps_to_grid(clump_regions)"));
+  ret.push_back(pair<string,string>("remove_small_clumps", "clumpFilt = remove_small_clumps(clumps, minPt)"));
+  ret.push_back(pair<string,string>("associate_clumps","associate_clumps(clumps, pclumps)"));
+  ret.push_back(pair<string,string>("build_gaps", "build_gaps"));
+  ret.push_back(pair<string,string>("get_edge", "get_edge"));
+  ret.push_back(pair<string,string>("get_outside","get_outside"));
+  ret.push_back(pair<string,string>("remove_small_gaps", "remove_small_gaps"));
+  ret.push_back(pair<string,string>("filter_so_not_too_far_inside","filter_so_not_too_far_inside"));
+  ret.push_back(pair<string,string>("inverse_mask","inverse_mask(clump_regions)"));
+  ret.push_back(pair<string,string>("kernel_build", "kernel_build(time, outside_mask, gaps)"));
+  ret.push_back(pair<string,string>("centerpoints","centerpoints(kernels)"));
+  ret.push_back(pair<string,string>("compute_attenuation", "compute_attenuation(kernels)"));
+  ret.push_back(pair<string,string>("compute_humidity", "compute_humidity(kernels)"));
+  ret.push_back(pair<string,string>("set_ascii_output","set_ascii_output(kernels)"));
+  ret.push_back(pair<string,string>("filter_kernels", "filter_kernels(kernels)"));
+  ret.push_back(pair<string,string>("organize_grids",
+				    "organize_grids(pid,snoise,knoise,sdbz,kdbz,szdr,srhohv,kdbzAdjusted)"));
+  ret.push_back(pair<string,string>("kernels_to_genpoly", "kernels_to_genpoly(filtered_kernels, outside)"));
+  return ret;
 }
 
 //------------------------------------------------------------------
 bool Sweep::synchInputsAndOutputs(const std::string &output,
 				  const std::vector<std::string> &inputs)
 {
-  bool ret = true;
-
-  // look for input data and return false if one or more missing
-  // this step can copy from _inputData to _data, if needed at this step
-  if (!_stageInputs(inputs))
+  bool haveAll;
+  if (!synchGriddedInputsAndOutputs(output, inputs, haveAll))
   {
-    ret = false;
+    return false;
   }
+  bool ret = true;
 
   // set pointer to output which is one of several data types
   if (!_stageOutput(output))
@@ -78,18 +92,6 @@ bool Sweep::synchInputsAndOutputs(const std::string &output,
 }
 
 //------------------------------------------------------------------
-MathLoopData *Sweep::dataPtr(const std::string &name)
-{
-  return (MathLoopData *)_derivedData.refToData(name);
-}
-
-//------------------------------------------------------------------
-const MathLoopData *Sweep::dataPtrConst(const std::string &name) const
-{
-  return (const MathLoopData *)_derivedData.refToData(name);
-}
-
-//------------------------------------------------------------------
 bool Sweep::processUserLoopFunction(ProcessingNode &p)
 {
   string keyword;
@@ -97,23 +99,6 @@ bool Sweep::processUserLoopFunction(ProcessingNode &p)
   {
     return false;
   }
-
-  // if (keyword == "TextureX")
-  // {
-  //   return _processTextureX(*(p.unaryOpArgs()));
-  // }
-  // else if (keyword == "stddev_no_overlap")
-  // {
-  //   return _processStdDevNoOverlap(*(p.unaryOpArgs()));
-  // }
-  // else if (keyword == "median_no_overlap")
-  // {
-  //   return _processMedianNoOverlap(*(p.unaryOpArgs()));
-  // }
-  // else if (keyword == "snr_from_dbz")
-  // {
-  //   return _processSnrFromDbz(*(p.unaryOpArgs()));
-  // }
   if (keyword == "clumps_to_grid")
   {
     return _clumpsToGrid(*(p.unaryOpArgs()));
@@ -284,6 +269,7 @@ MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
 bool Sweep::synchUserDefinedInputs(const std::string &userKey,
 				   const std::vector<std::string> &names)
 {
+  _inps.clear();
   _outputSweep = NULL;
   if (!_needToSynch(userKey))
   {
@@ -584,586 +570,12 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
 }
 
 //------------------------------------------------------------------
-bool Sweep::storeMathUserData(const std::string &name, MathUserData *v)
-{
-  return _special.store(name, v);
-}
-
-//------------------------------------------------------------------
-bool Sweep::smooth(MathLoopData *out,
-		   std::vector<ProcessingNode *> &args) const
-{
-  // expect field, nx, ny as args
-  if (args.size() != 3)
-  {
-    LOG(ERROR) << "Bad interface";
-    return false;
-  }
-  string dataName = args[0]->leafName();
-  if (dataName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  double nx, ny;
-  if (!args[1]->getValue(nx))
-  {
-    LOG(ERROR) << "No value";
-    return false;
-  }
-  if (!args[2]->getValue(ny))
-  {
-    LOG(ERROR) << "No value";
-    return false;
-  }
-
-  // pull a grid2d out of the inputs
-  const GriddedData *input = _derivedData.refToData(dataName);
-
-  // this does not smooth at edges
-  GridAlgs g(*input);
-  g.smoothThreaded(nx, ny, 8);
-
-  // I think out should be same thing as _outputSweep?
-  GriddedData *output = (GriddedData *)out;
-  
-  output->dataCopy(g);
-  return true;
-}
-
-//------------------------------------------------------------------
-bool Sweep::smoothDBZ(MathLoopData *out,
-		      std::vector<ProcessingNode *> &args) const
-{
-  // expect field, nx, ny as args
-  if (args.size() != 3)
-  {
-    LOG(ERROR) << "Bad interface";
-    return false;
-  }
-  string dataName = args[0]->leafName();
-  if (dataName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  double nx, ny;
-  if (!args[1]->getValue(nx))
-  {
-    LOG(ERROR) << "No value";
-    return false;
-  }
-  if (!args[2]->getValue(ny))
-  {
-    LOG(ERROR) << "No value";
-    return false;
-  }
-
-  // pull a grid2d out of the inputs
-  const GriddedData *input = _derivedData.refToData(dataName);
-
-  GridAlgs g(*input);
-  g.db2linear();
-  // this does not smooth at edges
-  g.smooth(nx, ny);
-  g.linear2db();
-  
-  // I think out should be same thing as _outputSweep?
-  GriddedData *output = (GriddedData *)out;
-  
-  output->dataCopy(g);
-  return true;
-}
-
-//------------------------------------------------------------------
-bool Sweep::stddev(MathLoopData *out,
-		   std::vector<ProcessingNode *> &args) const
-{
-  // expect field, nx, ny as args
-  if (args.size() != 3)
-  {
-    LOG(ERROR) << "Bad interface";
-    return false;
-  }
-  string dataName = args[0]->leafName();
-  if (dataName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  double nx, ny;
-  if (!args[1]->getValue(nx))
-  {
-    LOG(ERROR) << "No value";
-    return false;
-  }
-  if (!args[2]->getValue(ny))
-  {
-    LOG(ERROR) << "No value";
-    return false;
-  }
-
-  // pull a grid2d out of the inputs
-  const GriddedData *input = _derivedData.refToData(dataName);
-
-  GridAlgs g(*input);
-  g.sdev(nx, ny);
-  //g.sdevThreaded(nx, ny, 8);
-  
-  _outputSweep->dataCopy(g);
-  return true;
-}
-
-//------------------------------------------------------------------
-bool Sweep::fuzzy(MathLoopData *out,
-		  std::vector<ProcessingNode *> &args) const
-{
-  // expect an odd # of args  field x,y,x,y,..x,y
-  int n = (int)args.size();
-  if (n%2 == 0)
-  {
-    LOG(ERROR) << "Expect odd number of args";
-    return false;
-  }
-  string dataName = args[0]->leafName();
-  if (dataName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-
-  vector<pair<double,double> > xy;
-  for (int i=1; i<n; i+=2)
-  {
-    double x, y;
-    if (!args[i]->getValue(x))
-    {
-      LOG(ERROR) << "No value";
-      return false;
-    }
-    if (!args[i+1]->getValue(y))
-    {
-      LOG(ERROR) << "No value";
-      return false;
-    }
-    xy.push_back(pair<double,double>(x,y));
-  }
-
-  // create a fuzzy function from that and apply it
-  FuzzyF fuzzy(xy);
-  
-
-  // pull a grid2d out of the inputs
-  const GriddedData *input = _derivedData.refToData(dataName);
-
-  GridAlgs g(*input);
-  g.fuzzyRemap(fuzzy);
-  
-  _outputSweep->dataCopy(g);
-  return true;
-}
-
-//------------------------------------------------------------------
-bool Sweep::average(MathLoopData *out,
-		    std::vector<ProcessingNode *> &args) const
-{
-  // expect 0th arg to be number of x to skip, rest of args are
-  // fields, so better be at least 3 args
-  if (args.size() < 3)
-  {
-    LOG(ERROR) << "Expect at least 3 args";
-    return false;
-  }
-
-  double nx;
-  if (!args[0]->getValue(nx))
-  {
-    LOG(ERROR) << "No value";
-    return false;
-  }
-
-  vector<GridAlgs> inps;
-  for (size_t i=1; i<args.size(); ++i)
-  {
-    string dataName = args[i]->leafName();
-    if (dataName.empty())
-    {
-      LOG(ERROR) << " NO name";
-      return false;
-    }
-    // pull a grid2d out of the inputs
-    GridAlgs d(*(_derivedData.refToData(dataName)));
-    if (nx > 0)
-    {
-      d.adjust(nx, -1);
-    }
-    inps.push_back(d);
-  }
-
-  GridAlgs g(inps[0]);
-  g.setAllMissing();
-  GridAlgs counts(inps[0]);
-  counts.setAllToValue(0.0);
-
-  for (size_t i=0; i<inps.size(); ++i)
-  {
-    g.add(inps[i], counts);
-  }
-  g.divide(counts);
-  
-  _outputSweep->dataCopy(g);
-  return true;
-}
-
-//------------------------------------------------------------------
-bool Sweep::max(MathLoopData *out,
-		std::vector<ProcessingNode *> &args) const
-{
-  // expect args are fields, so better have at least 2
-  // fields, so better be at least 3 args
-  if (args.size() < 2)
-  {
-    LOG(ERROR) << "Expect at least 2 args";
-    return false;
-  }
-
-  vector<GridAlgs> inps;
-  for (size_t i=0; i<args.size(); ++i)
-  {
-    string dataName = args[i]->leafName();
-    if (dataName.empty())
-    {
-      LOG(ERROR) << " NO name";
-      return false;
-    }
-    // pull a grid2d out of the inputs
-    GridAlgs d(*(_derivedData.refToData(dataName)));
-    inps.push_back(d);
-  }
-
-  GridAlgs g(inps[0]);
-  for (size_t i=1; i<inps.size(); ++i)
-  {
-    g.max(inps[i]);
-  }
-  
-  _outputSweep->dataCopy(g);
-  return true;
-}
-
-//------------------------------------------------------------------
-bool Sweep::weighted_average(MathLoopData *out,
-			     std::vector<ProcessingNode *> &args) const
-{
-  // expect 0th arg to be number of x to skip, then pairs of field/weight
-  // so need odd args, at least 3
-  if (args.size() < 3)
-  {
-    LOG(ERROR) << "Expect at least 3 args";
-    return false;
-  }
-  if ((int)(args.size() %2) == 0)
-  {
-    LOG(ERROR) << "Expect odd # of args";
-    return false;
-  }
-
-  double nx;
-  if (!args[0]->getValue(nx))
-  {
-    LOG(ERROR) << "No value";
-    return false;
-  }
-
-  vector<GridAlgs> inps;
-  vector<double> weights;
-  for (size_t i=1; i<args.size(); i+=2)
-  {
-    string dataName = args[i]->leafName();
-    if (dataName.empty())
-    {
-      LOG(ERROR) << " NO name";
-      return false;
-    }
-    // pull a grid2d out of the inputs
-    GridAlgs d(*(_derivedData.refToData(dataName)));
-    if (nx > 0)
-    {
-      d.adjust(nx, -1);
-    }
-    inps.push_back(d);
-
-    double w;
-    if (!args[i+1]->getValue(w))
-    {
-      LOG(ERROR) << "No value";
-      return false;
-    }
-    weights.push_back(w);
-  }
-
-  GridAlgs g(inps[0]);
-  g.setAllMissing();
-
-  double sum_wt = 0.0;
-  for (size_t i=0; i<inps.size(); ++i)
-  {
-    double w = weights[i];
-    sum_wt += w;
-    GridAlgs gi(inps[i]);
-    gi.multiply(w);
-    g.add(gi);
-  }
-  g.multiply(1.0/sum_wt);
-  
-  _outputSweep->dataCopy(g);
-  return true;
-}
-
-//------------------------------------------------------------------
-bool Sweep::mask(MathLoopData *out,
-		 std::vector<ProcessingNode *> &args) const
-{
-  // expect 0th arg to be input field name, rest of args are pairs of ranges
-  // so better be at least 3 args, and better be an odd #
-  if (args.size() < 3)
-  {
-    LOG(ERROR) << "Expect at least 3 args";
-    return false;
-  }
-
-  int n = (int)(args.size());
-  if (n%2 == 0)
-  {
-    LOG(ERROR) << "Expect odd # of args";
-    return false;
-  }
-  string dataName = args[0]->leafName();
-  if (dataName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-
-  vector<pair<double,double> > ranges;
-  for (int i=1; i<n; i+=2)
-  {
-    double x0, x1;
-    if (!args[i]->getValue(x0))
-    {
-      LOG(ERROR) << "No value";
-      return false;
-    }
-    if (!args[i+1]->getValue(x1))
-    {
-      LOG(ERROR) << "No value";
-      return false;
-    }
-    ranges.push_back(pair<double,double>(x0,x1));
-  }
-
-  // pull a grid2d out of the inputs
-  const GriddedData *data = _derivedData.refToData(dataName);
-  if (data == NULL)
-  {
-    LOG(ERROR) << "No data";
-    return false;
-  }
-  GridAlgs g(*data);
-  for (size_t i=0; i<ranges.size(); ++i)
-  {
-    g.maskRange(*data,  ranges[i].first, ranges[i].second);
-  }
-  
-  _outputSweep->dataCopy(g);
-  return true;
-}
-
-//------------------------------------------------------------------
-bool Sweep::mask_missing_to_missing(MathLoopData *out,
-				    std::vector<ProcessingNode *> &args) const
-{
-  // expect 2 args, 1st is input data, 2nd is input mask
-  if (args.size() != 2)
-  {
-    LOG(ERROR) << "Need 2 inputs";
-    return false;
-  }
-  string dataName = args[0]->leafName();
-  if (dataName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  const GriddedData *data = _derivedData.refToData(dataName);
-  if (data == NULL)
-  {
-    LOG(ERROR) << "No data";
-    return false;
-  }
-  string maskName = args[1]->leafName();
-  if (maskName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  const GriddedData *mask = _derivedData.refToData(maskName);
-  if (mask == NULL)
-  {
-    LOG(ERROR) << "No data";
-    return false;
-  }
-  GridAlgs g(*data);
-  g.maskMissingToMissing(*mask);
-  _outputSweep->dataCopy(g);
-  return true;
-}
-
-//------------------------------------------------------------------
-bool Sweep::trapezoid(MathLoopData *out,
-		      std::vector<ProcessingNode *> &args) const
-{
-  // expect 5 args, input data, and 4 parameters a,b,c,d
-  if (args.size() != 5)
-  {
-    LOG(ERROR) << "Need 5 inputs";
-    return false;
-  }
-  string dataName = args[0]->leafName();
-  if (dataName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  const GriddedData *data = _derivedData.refToData(dataName);
-  if (data == NULL)
-  {
-    LOG(ERROR) << "No data";
-    return false;
-  }
-
-  double a, b, c, d;
-  if (!args[1]->getValue(a))
-  {
-    LOG(ERROR) << "No number";
-    return false;
-  }
-  if (!args[2]->getValue(b))
-  {
-    LOG(ERROR) << "No number";
-    return false;
-  }
-  if (!args[3]->getValue(c))
-  {
-    LOG(ERROR) << "No number";
-    return false;
-  }
-  if (!args[4]->getValue(d))
-  {
-    LOG(ERROR) << "No number";
-    return false;
-  }
-
-  TrapFuzzyF fz(a, b, c, d);
-  Grid2d g(*data);
-  for (int i=0; i<g.getNdata(); ++i)
-  {
-    double v;
-    if (g.getValue(i, v))
-    {
-      v = fz.apply(v);
-      g.setValue(i, v);
-    }
-  }
-  _outputSweep->dataCopy(g);
-  return true;
-}
-
-//------------------------------------------------------------------
-bool Sweep::s_remap(MathLoopData *out,
-		    std::vector<ProcessingNode *> &args) const
-{
-  // expect 3 args, input data, and 2 parameters a,b
-  if (args.size() != 3)
-  {
-    LOG(ERROR) << "Need 4 inputs";
-    return false;
-  }
-  string dataName = args[0]->leafName();
-  if (dataName.empty())
-  {
-    LOG(ERROR) << " NO name";
-    return false;
-  }
-  const GriddedData *data = _derivedData.refToData(dataName);
-  if (data == NULL)
-  {
-    LOG(ERROR) << "No data";
-    return false;
-  }
-
-  double a, b;
-  if (!args[1]->getValue(a))
-  {
-    LOG(ERROR) << "No number";
-    return false;
-  }
-  if (!args[2]->getValue(b))
-  {
-    LOG(ERROR) << "No number";
-    return false;
-  }
-
-  SFuzzyF fz(a, b);
-  Grid2d g(*data);
-  for (int i=0; i<g.getNdata(); ++i)
-  {
-    double v;
-    if (g.getValue(i, v))
-    {
-      v = fz.apply(v);
-      g.setValue(i, v);
-    }
-  }
-  _outputSweep->dataCopy(g);
-  return true;
-}
-
-//------------------------------------------------------------------
-bool Sweep::_stageInputs(const std::vector<std::string> &inputs)
-{
-  bool ret = true;
-  GriddedData *m=NULL;
-  for (size_t i=0; i<inputs.size(); ++i)
-  {
-    m = _refToData(inputs[i], false);
-    if (m == NULL)
-    {
-      LOG(ERROR) << "Cannot synch input " << inputs[i];
-      ret = false;
-    }
-  }
-
-  // double check:
-  for (size_t i=0; i<inputs.size(); ++i)
-  {
-    m = _derivedData.refToData(inputs[i]);
-    if (m == NULL)
-    {
-      LOG(ERROR) << " No synch for input " << inputs[i];
-      ret = false;
-    }
-  }
-  return ret;
-}
-  
-//------------------------------------------------------------------
 bool Sweep::_stageOutput(const std::string &output)
 {
   // point to output
   _outputKernels = NULL;
   _outputAscii = NULL;
-  _outputSweep = NULL;
+  // _outputSweep = NULL;
 
   // is the output spdb kernel output or ascii output?
   _outputKernels = _kernelOutputs.refToKernelOutput(output, true);
@@ -1178,71 +590,7 @@ bool Sweep::_stageOutput(const std::string &output)
     return true;
   }
   
-  // the output should be a grid
-  // try to create an output data pointer, anything will do as template.
-  if (_exampleData(output) == NULL)
-  {
-    LOG(ERROR) << "Cannot synch for output " << output;
-    return false;
-  }
-  _outputSweep = _derivedData.refToData(output);
-  if (_outputSweep == NULL)
-  {
-    LOG(ERROR) << "Difficulty synching data";
-    return false;
-  }
   return true;
-}
-
-//------------------------------------------------------------------
-GriddedData *Sweep::_refToData(const std::string &name,  bool suppressWarn)
-{
-  // try to pull out of existing derived _derivedData
-  GriddedData *ret = NULL;
-  ret = _derivedData.refToData(name);
-  if (ret != NULL)
-  {
-    return ret;
-  }
-  
-  // try to pull out of input data, and if so copy to output data
-  ret = _inputGrids.refToData(name);
-  if (ret != NULL)
-  {
-    _derivedData.addField(*ret);
-    ret = _derivedData.refToData(name);
-    if (ret != NULL)
-    {
-      return ret;
-    }
-  }
-  
-  // can't pull out of state, not in input data and not in _derivedData
-  if (!suppressWarn)
-  {
-    printf("ERROR retrieving data for %s\n", name.c_str());
-  }
-  return NULL;
-}    
-
-//------------------------------------------------------------------
-GriddedData *Sweep::_exampleData(const std::string &name)
-{
-  // see if already there
-  GriddedData *s = _refToData(name, true);
-  if (s == NULL)
-  {
-    // not already there
-    GriddedData r(_inputGrids[0]);
-    r.setName(name);
-    _derivedData.addField(r);
-    s = _derivedData.refToData(name);
-  }
-  if (s == NULL)
-  {
-    LOG(ERROR) << "No data created for " << name;
-  }
-  return s;
 }
 
 //------------------------------------------------------------------
@@ -1252,228 +600,7 @@ bool Sweep::_needToSynch(const std::string &userKey) const
   return true;
 }
 
-// //------------------------------------------------------------------
-// bool Sweep::_processTextureX(std::vector<ProcessingNode *> &args)
-// {
-//   // expect field, nx, ny as args
-//   if (args.size() != 3)
-//   {
-//     LOG(ERROR) << "Bad interface";
-//     return false;
-//   }
-
-//   double nx, ny;
-//   string dataName = args[0]->leafName();
-//   if (dataName.empty())
-//   {
-//     LOG(ERROR) << " NO name";
-//     return false;
-//   }
-//   if (!args[1]->getValue(nx))
-//   {
-//     LOG(ERROR) << "No value";
-//     return false;
-//   }
-//   if (!args[2]->getValue(ny))
-//   {
-//     LOG(ERROR) << "No value";
-//     return false;
-//   }
-
-//   // pull a grid2d out of the inputs
-//   const GriddedData *input = _derivedData.refToData(dataName);
-
-//   GridAlgs g(*input);
-//   g.textureThreaded(nx, ny, 8, true);
-  
-//   _outputSweep->dataCopy(g);
-//   return true;
-// }
-// //------------------------------------------------------------------
-// bool Sweep::_processStdDevNoOverlap(std::vector<ProcessingNode *> &args)
-// {
-//   // expect field, nx, ny as args
-//   if (args.size() != 3)
-//   {
-//     LOG(ERROR) << "Bad interface";
-//     return false;
-//   }
-
-//   double nx, ny;
-//   string dataName = args[0]->leafName();
-//   if (dataName.empty())
-//   {
-//     LOG(ERROR) << " NO name";
-//     return false;
-//   }
-//   if (!args[1]->getValue(nx))
-//   {
-//     LOG(ERROR) << "No value";
-//     return false;
-//   }
-//   if (!args[2]->getValue(ny))
-//   {
-//     LOG(ERROR) << "No value";
-//     return false;
-//   }
-
-//   // pull a grid2d out of the inputs
-//   const GriddedData *input = _derivedData.refToData(dataName);
-
-//   GridAlgs g(*input);
-//   g.sdevNoOverlap(nx, ny);
-  
-//   _outputSweep->dataCopy(g);
-//   return true;
-// }
-
-// //------------------------------------------------------------------
-// bool Sweep::_processMedianNoOverlap(std::vector<ProcessingNode *> &args)
-// {
-//   // expect field, nx, ny , bin0, bin1, bindelta as args
-//   if (args.size() != 6)
-//   {
-//     LOG(ERROR) << "Bad interface";
-//     return false;
-//   }
-
-//   double nx, ny, bin_min, bin_max, bin_delta;
-//   string dataName = args[0]->leafName();
-//   if (dataName.empty())
-//   {
-//     LOG(ERROR) << " NO name";
-//     return false;
-//   }
-//   if (!args[1]->getValue(nx))
-//   {
-//     LOG(ERROR) << "No value";
-//     return false;
-//   }
-//   if (!args[2]->getValue(ny))
-//   {
-//     LOG(ERROR) << "No value";
-//     return false;
-//   }
-//   if (!args[3]->getValue(bin_min))
-//   {
-//     LOG(ERROR) << "No value";
-//     return false;
-//   }
-//   if (!args[4]->getValue(bin_max))
-//   {
-//     LOG(ERROR) << "No value";
-//     return false;
-//   }
-//   if (!args[5]->getValue(bin_delta))
-//   {
-//     LOG(ERROR) << "No value";
-//     return false;
-//   }
-
-//   // pull a grid2d out of the inputs
-//   const GriddedData *input = _derivedData.refToData(dataName);
-
-//   GridAlgs g(*input);
-//   g.medianNoOverlap(nx, ny, bin_min, bin_max, bin_delta, true);
-//   _outputSweep->dataCopy(g);
-//   return true;
-// }
-
-// //------------------------------------------------------------------
-// bool Sweep::_processSnrFromDbz(std::vector<ProcessingNode *> &args)
-// {
-//   // expect field, noiseDbzAt100km
-//   if (args.size() != 2)
-//   {
-//     LOG(ERROR) << "Bad interface";
-//     return false;
-//   }
-
-//   double noiseAt100Km;
-//   string dataName = args[0]->leafName();
-//   if (dataName.empty())
-//   {
-//     LOG(ERROR) << " NO name";
-//     return false;
-//   }
-//   if (!args[1]->getValue(noiseAt100Km))
-//   {
-//     LOG(ERROR) << "No value";
-//     return false;
-//   }
-
-//   // pull a grid2d out of the inputs
-//   const GriddedData *input = _derivedData.refToData(dataName);
-
-//   vector<double> noiseDbz = _mdvInfo.noisePerRange(noiseAt100Km);
-
-//   Grid2d snr(*input);
-//   for (int y=0; y<_mdvInfo.ny(); ++y)
-//   {
-//     for (int x=0; x<_mdvInfo.nx(); ++x)
-//     {
-//       double v;
-//       if (input->getValue(x, y, v))
-//       {
-// 	snr.setValue(x, y, v - noiseDbz[x]);
-//       }
-//       else
-//       {
-// 	snr.setMissing(x, y);
-//       }
-//     }
-//   }
-//   _outputSweep->dataCopy(snr);
-//   return true;
-// }
-
-// #ifdef NOTDEF
-// bool Sweep::_processClumping(std::vector<ProcessingNode *> &args)
-// {
-  
-//   // expect two args, create_clumps_and_map_to_colors(clumps, clumped)"
-//   if (args.size() != 2)
-//   {
-//     LOG(ERROR) << "Bad interface";
-//     return false;
-//   }
-
-//   string dataName = args[0]->leafName();
-//   if (dataName.empty())
-//   {
-//     LOG(ERROR) << " NO name";
-//     return false;
-//   }
-
-//   // pull a grid2d out of the inputs
-//   const GriddedData *input = _matchConst(dataName);
-
-//   // see if it is either PID clumping or regular clumping
-//   string typeName = args[1]->leafName();
-//   if (typeName.empty())
-//   {
-//     LOG(ERROR) << "No Name";
-//     return false;
-//   }
-//   bool pid_clumping = (typeName == "pid_clumping");
-
-//   // copy it for processing into a clumping object
-//   Grid2dClump clumped(*input);
-
-//   // go for it
-//   if (pid_clumping)
-//   {
-//     _doClump(clumped, _r);
-//   }
-//   else
-//   {
-//     _doClump(clumped, _r);
-//   }
-//   _outputSweep->dataCopy(clumped);
-//   return true;
-// }
-// #endif
-
+//------------------------------------------------------------------
 bool Sweep::_processRemoveSmallClumps(std::vector<ProcessingNode *> &args)
 {
    if (args.size() != 3)
@@ -1489,7 +616,8 @@ bool Sweep::_processRemoveSmallClumps(std::vector<ProcessingNode *> &args)
      LOG(ERROR) << " NO name";
      return false;
    }
-  const GriddedData *input = _derivedData.refToData(dataName);
+   //  const GriddedData *input = _derivedData.refToData(dataName);
+  const GriddedData *input = _matchConst(dataName);
    if (input == NULL)
    {
      LOG(ERROR) << "No data";
@@ -1531,6 +659,7 @@ bool Sweep::_processRemoveSmallClumps(std::vector<ProcessingNode *> &args)
    return true;
 }
     
+//------------------------------------------------------------------
 bool Sweep::_getEdge(std::vector<ProcessingNode *> &args)
 {
   // one arg which is gaps
@@ -1559,6 +688,7 @@ bool Sweep::_getEdge(std::vector<ProcessingNode *> &args)
 }
 
 
+//------------------------------------------------------------------
 bool Sweep::_getOutside(std::vector<ProcessingNode *> &args)
 {
   // one arg which is gaps
@@ -1586,18 +716,18 @@ bool Sweep::_getOutside(std::vector<ProcessingNode *> &args)
   return true;
 }
 
-
+//------------------------------------------------------------------
 MathUserData *Sweep::_processAssociateClumps(const std::string &reg,
 					     const std::string &clump0,
 					     const std::string &clump1)
 {
-  const GriddedData *data0 = _derivedData.refToData(clump0);
+  const GriddedData *data0 = _matchConst(clump0);
   if (data0 == NULL)
   {
     LOG(ERROR) << "No input";
     return NULL;
   }
-  const GriddedData *data1 = _derivedData.refToData(clump1);
+  const GriddedData *data1 = _matchConst(clump1);
   if (data1 == NULL)
   {
     LOG(ERROR) << "No input";
@@ -1616,10 +746,11 @@ MathUserData *Sweep::_processAssociateClumps(const std::string &reg,
   return (MathUserData *)ca;
 }
 
+//------------------------------------------------------------------
 MathUserData *Sweep::_processBuildGaps(const std::string &input,
 				       const std::string &depth) 
 {
-  const GriddedData *data = _derivedData.refToData(input);
+  const GriddedData *data = _matchConst(input);
   if (data == NULL)
   {
     LOG(ERROR) << "No input";
@@ -1651,7 +782,7 @@ MathUserData *Sweep::_processBuildGaps(const std::string &input,
 MathUserData *Sweep::_createClumps(const std::string &dataName)
 {
   // pull a grid2d out of the inputs
-  const GriddedData *input = _derivedData.refToData(dataName);
+  const GriddedData *input = _matchConst(dataName);
   if (input == NULL)
   {
     LOG(ERROR) << "No input";
@@ -1686,8 +817,8 @@ MathUserData *Sweep::_removeSmallGaps(const std::string &gaps,
     return NULL;
   }
 
-  Mdvx::coord_t coord = _mdvInfo.proj().getCoord();
-  int min_gridpt = (int)(min/coord.dx);
+
+  int min_gridpt = (int)(min/_dx);
 
   CloudGaps *ret = new CloudGaps(*cgaps);
   ret->filter(min_gridpt);
@@ -1709,7 +840,7 @@ MathUserData *Sweep::_filterGapsInside(const std::string &gaps,
   }
   CloudGaps *cgaps = (CloudGaps *)u;
 
-  const GriddedData *clumps = _derivedData.refToData(pidClumps);
+  const GriddedData *clumps = _matchConst(pidClumps);
   if (clumps == NULL)
   {
     LOG(ERROR) << "No input";
@@ -1735,8 +866,8 @@ MathUserData *Sweep::_filterGapsInside(const std::string &gaps,
     LOG(ERROR) << "Not float " << maxPenetration;
     return NULL;
   }
-  Mdvx::coord_t coord = _mdvInfo.proj().getCoord();
-  int maxP = (int)(max/coord.dx);
+  // Mdvx::coord_t coord = _proj.getCoord();
+  int maxP = (int)(max/_dx);
   
   CloudGaps *ret = new CloudGaps(*cgaps);
   ret->filter(*clumps, *ca, maxP);
@@ -1821,15 +952,15 @@ MathUserData *Sweep::_organize(const std::string &pid,
   const Grid2d *pidG, *snoiseG, *knoiseG, *sdbzG, *kdbzG;
   const Grid2d *szdrG, *srhohvG, *kdbzAdjustedG, *dbzDiffG;
     
-  pidG = _derivedData.refToData(pid);
-  snoiseG = _derivedData.refToData(snoise);
-  knoiseG = _derivedData.refToData(knoise);
-  sdbzG = _derivedData.refToData(sdbz);
-  kdbzG = _derivedData.refToData(kdbz);
-  szdrG = _derivedData.refToData(szdr);
-  srhohvG = _derivedData.refToData(srhohv);
-  kdbzAdjustedG = _derivedData.refToData(kdbzAdjusted);
-  dbzDiffG = _derivedData.refToData(dbzDiff);
+  pidG = _matchConst(pid);
+  snoiseG = _matchConst(snoise);
+  knoiseG = _matchConst(knoise);
+  sdbzG = _matchConst(sdbz);
+  kdbzG = _matchConst(kdbz);
+  szdrG = _matchConst(szdr);
+  srhohvG = _matchConst(srhohv);
+  kdbzAdjustedG = _matchConst(kdbzAdjusted);
+  dbzDiffG = _matchConst(dbzDiff);
   
   if (pidG == NULL || snoiseG == NULL || knoiseG == NULL ||
       sdbzG == NULL || kdbzG == NULL || szdrG == NULL ||
@@ -1845,6 +976,7 @@ MathUserData *Sweep::_organize(const std::string &pid,
 }
 
 			       
+//------------------------------------------------------------------
 MathUserData *Sweep::_kernelFilter(const std::string &kernels)
 {
   MathUserData *u = _special.matchingDataPtr(kernels);
@@ -1859,12 +991,13 @@ MathUserData *Sweep::_kernelFilter(const std::string &kernels)
   return (MathUserData *)kfilt;
 }
 
+//------------------------------------------------------------------
 MathUserData *Sweep::_kernelBuild(const std::string &outsideMask,
 				  const std::string &gaps,
 				  const std::string &clumpReg,
 				  const std::string &kgrids)
 {
-  const GriddedData *mask = _derivedData.refToData(outsideMask);
+  const GriddedData *mask = _matchConst(outsideMask);
   if (mask == NULL)
   {
     LOG(ERROR) << "No data";
@@ -1913,14 +1046,11 @@ MathUserData *Sweep::_kernelBuild(const std::string &outsideMask,
     }
 
     // build kernel pair for this gap
-    KernelPair kp(_vlevel, mask_far, mask_near, *mask, g,
-		  _repohParms._main, _mdvInfo.proj());
+    KernelPair kp(_vlevel, mask_far, mask_near, *mask, g, _parms, _proj);
     if (kp.isBigEnough())
     {
       int id = ret->nextAvailableId();
-      Mdvx::coord_t coord = _mdvInfo.proj().getCoord();
-      kp.finishProcessing(_time, _vlevel, *kg, _repohParms._main, coord.dx,
-			  id, id+1);
+      kp.finishProcessing(_time, _vlevel, *kg, _parms, _dx, id, id+1);
       ret->append(kp);
       ret->incrementNextAvailableId(2);
     }
@@ -1928,6 +1058,7 @@ MathUserData *Sweep::_kernelBuild(const std::string &outsideMask,
   return (MathUserData *)ret;
 }
 
+//------------------------------------------------------------------
 bool Sweep::_centerPoints(std::vector<ProcessingNode *> &args)
 {
    if (args.size() != 1)
@@ -1987,7 +1118,7 @@ bool Sweep::_attenuation(std::vector<ProcessingNode *> &args)
   }
   Kernels *k = (Kernels *)u;
 
-  k->computeAttenuation(_mdvInfo.dx(), *_outputSweep);
+  k->computeAttenuation(_dx, *_outputSweep);
   return (MathUserData *)k;
 }
 
@@ -2027,7 +1158,7 @@ bool Sweep::_totalAttenuation(std::vector<ProcessingNode *> &args)
   }
 
   GridAlgs a(*_outputSweep);
-  a.totalAttenuation(*clumps, *DWR, 2.0, _mdvInfo.dx());
+  a.totalAttenuation(*clumps, *DWR, 2.0, _dx);
   _outputSweep->dataCopy(a);
   return true;
 }
@@ -2109,7 +1240,7 @@ bool Sweep::_nptBetweenGood(std::vector<ProcessingNode *> &args)
   }
 
   GridAlgs a(*_outputSweep);
-  int minPt = (int)(2.0/_mdvInfo.dx());
+  int minPt = (int)(2.0/_dx);
   a.nptBetweenGoodDataPointsX(*clumps, *DWR, minPt);
   _outputSweep->dataCopy(a);
   return true;
@@ -2188,7 +1319,7 @@ bool Sweep::_humidity(std::vector<ProcessingNode *> &args)
   }
   Kernels *k = (Kernels *)u;
 
-  k->computeHumidity(_mdvInfo.dx(), *_outputSweep);
+  k->computeHumidity(_dx, *_outputSweep);
   return true;
 }
 
@@ -2207,7 +1338,7 @@ bool Sweep::_fir(std::vector<ProcessingNode *> &args)
      LOG(ERROR) << " NO name";
      return false;
    }
-   const GriddedData *inp = _derivedData.refToData(name);
+   const GriddedData *inp = _matchConst(name);
    if (inp == NULL)
    {
      LOG(ERROR) << "No data";
@@ -2253,7 +1384,7 @@ MathUserData *Sweep::_processAsciiOutput(const std::string &kernels)
   }
   Kernels *k = (Kernels *)u;
 
-  string s = k->asciiOutput(_vlevel, _mdvInfo.proj());
+  string s = k->asciiOutput(_vlevel, _proj);
   _outputAscii->appendNoCr(s);
 
   // make a new object, because the returned 'special value' is stored
@@ -2270,7 +1401,7 @@ bool Sweep::_kernel_mask(const CloudGap &gap,
 			 const bool is_far, Grid2d &mask) const
 {
   // initialize the mask to all missing
-  mask = Grid2d(_inputGrids[0]);  
+  mask = Grid2d((*_grid2d)[0]);  
   mask.setAllMissing();
 
   if (gap.isClosest() && !is_far)
@@ -2294,15 +1425,6 @@ bool Sweep::_kernel_mask(const CloudGap &gap,
   // make a mask with the appropriate region points
   regions[index].toGrid(mask, 1.0);
 
-  // const clump::Region_t *ri = &_r[index];
-
-  // for (int i=0; i<(int)ri->size(); ++i)
-  // {
-  //   int xi, yi;
-  //   xi = (*ri)[i].first;
-  //   yi = (*ri)[i].second;
-  //   mask.setValue(xi, yi, 1.0);
-  // }
   return true;
 }
 

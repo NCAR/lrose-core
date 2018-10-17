@@ -12,7 +12,7 @@
 // #include "KernelOutputsMdvInfo.hh"
 // #include "RepohParms.hh"
 #include "KernelOutput.hh"
-#include "RepohParams.hh"
+#include "Parms.hh"
 // #include "AsciiOutput.hh"
 // #include "GridFieldsAll.hh"
 // #include <FiltAlgVirtVol/GriddedData.hh>
@@ -48,7 +48,7 @@ public:
   virtual ~KernelOutputs(void);
   void clear(void);
 
-  bool initialize(const RepohParams &parms, const VirtVolParms &vparms, int nz);
+  bool initialize(const Parms &parms, int nz);
   void output(const time_t &t, const MdvxProj &proj) const;
   KernelOutput *refToKernelOutput(const std::string &name, bool suppressWarn);
   

@@ -8,13 +8,10 @@
 #ifndef SWEEP_HH
 #define SWEEP_HH
 
-#include "RepohParms.hh"
+#include "Parms.hh"
 #include "KernelOutputs.hh"
 #include "AsciiOutputs.hh"
-#include "VolumeMdvInfo.hh"
-#include "GridFields.hh"
-#include <FiltAlgVirtVol/SpecialUserData.hh>
-#include <rapmath/MathData.hh>
+#include <FiltAlgVirtVol/SweepMdv.hh>
 #include <vector>
 #include <map>
 
@@ -24,13 +21,14 @@ class ClumpRegions;
 class GriddedData;
 
 //------------------------------------------------------------------
-class Sweep : public MathData
+class Sweep : public SweepMdv
 {
 public:
 
+  Sweep(void);
+  
   /**
    * Constructor
-
    */
   Sweep(const Volume &volume, int index, double vlevel);
 
@@ -39,10 +37,11 @@ public:
    */
   virtual ~Sweep(void);
 
-
+  #define FILTALG_DERIVED
   #include <rapmath/MathDataVirtualMethods.hh>
+  #undef FILTALG_DERIVED
 
-  const GridFields &derivedDataRef(void) const {return _derivedData;}
+  // const GridFields &derivedDataRef(void) const {return _derivedData;}
 
   /**
    * Clump index 0,1,2,...   maps to colors 1,2,3,...
@@ -63,49 +62,23 @@ public:
 protected:
 private:
 
-  VolumeMdvInfo _mdvInfo;       /**< Input from volume */
+  // VolumeMdvInfo _mdvInfo;       /**< Input from volume */
   KernelOutputs _kernelOutputs; /**< Input from volume, shared by volume */
   AsciiOutputs _asciiOutputs;   /**< Input from volume, shared by volume */
-  time_t _time;
-  RepohParms _repohParms;
-
-  double _vlevel;          
-  int _vlevelIndex;
-
-  /**
-   * One per field, copied in from volume
-   */
-  GridFields _inputGrids;
-
-  /**
-   * Map from names of special data fields to pointer to special values
-   * This gets filled in by the filtering
-   */
-  SpecialUserData _special;
-
-  /**
-   * Derived values, filled in by filters as the filters get executed
-   */
-  GridFields _derivedData;
+  // time_t _time;
+  Parms _parms;
+  double _dx;
 
   /**
    * Each filter modifies to produce pointer to its output. The output is
    * either gridded data, kernel outputs (SPDB), or ascii outputs
    */
-  GriddedData *_outputSweep;
   KernelOutput *_outputKernels;
   AsciiOutput *_outputAscii;
 
 
-  bool _stageInputs(const std::vector<std::string> &inputs);
   bool _stageOutput(const std::string &output);
-  GriddedData *_refToData(const std::string &name, bool suppressWarn=false);
-  GriddedData *_exampleData(const std::string &name);
   bool _needToSynch(const std::string &userKey) const;
-  // bool _processTextureX(std::vector<ProcessingNode *> &args);
-  // bool _processStdDevNoOverlap(std::vector<ProcessingNode *> &args);
-  // bool _processMedianNoOverlap(std::vector<ProcessingNode *> &args);
-  // bool _processSnrFromDbz(std::vector<ProcessingNode *> &args);
   bool _clumpsToGrid(std::vector<ProcessingNode *> &args);
   bool _processRemoveSmallClumps(std::vector<ProcessingNode *> &args);
   MathUserData *_processAssociateClumps(const std::string &reg,
@@ -120,10 +93,8 @@ private:
 				  const std::string &pidClumps,
 				  const std::string &associatedClumps,
 				  const std::string &maxPenetration);
-
   bool _getEdge(std::vector<ProcessingNode *> &args);
   bool _getOutside(std::vector<ProcessingNode *> &args);
-
   bool _inverseMask(std::vector<ProcessingNode *> &args);
   MathUserData *_kernelBuild(const std::string &outsideMask,
 			     const std::string &gaps,
