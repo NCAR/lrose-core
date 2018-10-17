@@ -435,6 +435,7 @@ codebase/apps/radar/src/RadarCal/RadarCal
 codebase/apps/radar/src/RadarConst/RadarConst
 codebase/apps/radar/src/RadarMdvCompare/RadarMdvCompare
 codebase/apps/radar/src/RapMap2Chill/RapMap2Chill
+codebase/apps/radar/src/REPoH/REPoH
 codebase/apps/radar/src/SimCpCompute/SimCpCompute
 codebase/apps/radar/src/SpectraPrint/SpectraPrint
 codebase/apps/radar/src/StaggeredLimits/StaggeredLimits
@@ -601,6 +602,7 @@ codebase/apps/Radx/src/RadxHca/RadxHca
 codebase/apps/Radx/src/RadxMergeFields/RadxMergeFields
 codebase/apps/Radx/src/RadxMergeVols/RadxMergeVols
 codebase/apps/Radx/src/RadxMon/RadxMon
+codebase/apps/Radx/src/RadxModelQc/RadxModelQc
 codebase/apps/Radx/src/RadxPartRain/RadxPartRain
 codebase/apps/Radx/src/RadxPrint/RadxPrint
 codebase/apps/Radx/src/RadxQpe/RadxQpe
