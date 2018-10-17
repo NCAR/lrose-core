@@ -346,12 +346,19 @@ int InputWatcher::_copyFile(const char *inputPath, time_t modTime)
 	    mtime.getYear(), mtime.getMonth(), mtime.getDay());
   }
 
+  // prefix if needed
+
+  string prefixStr(_params.copy_prefix);
+  if (prefixStr.size() > 0) {
+    prefixStr += "_";
+  }
+  
   // ext if needed
   
-  char extStr[128];
-  MEM_zero(extStr);
+  string extStr;
   if (strlen(_params.copy_ext) > 0) {
-    sprintf(extStr, ".%s", _params.copy_ext);
+    extStr += ".";
+    extStr += _params.copy_ext;
   }
 
   // copy file name
@@ -360,15 +367,17 @@ int InputWatcher::_copyFile(const char *inputPath, time_t modTime)
   if (_params.copy_to_time_stamped_file) {
     if (_params.add_day_to_filename) {
       // YYYYMMDD_HHMMSS
-      sprintf(copyName, "%.4d%.2d%.2d_%.2d%.2d%.2d%s",
+      sprintf(copyName, "%s%.4d%.2d%.2d_%.2d%.2d%.2d%s",
+              prefixStr.c_str(),
 	      mtime.getYear(), mtime.getMonth(), mtime.getDay(),
 	      mtime.getHour(), mtime.getMin(), mtime.getSec(),
-              extStr);
+              extStr.c_str());
     } else {
       // HHMMSS
-      sprintf(copyName, "%.2d%.2d%.2d%s",
-	      mtime.getHour(), mtime.getMin(), mtime.getSec(),
-              extStr);
+      sprintf(copyName, "%s%.2d%.2d%.2d%s",
+	      prefixStr.c_str(),
+              mtime.getHour(), mtime.getMin(), mtime.getSec(),
+              extStr.c_str());
     }
   } else {
     // use original name

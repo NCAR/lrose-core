@@ -1052,6 +1052,18 @@
     tt->single_val.s = tdrpStrDup("./output");
     tt++;
     
+    // Parameter 'copy_prefix'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("copy_prefix");
+    tt->descr = tdrpStrDup("Prefix for file name of copy.");
+    tt->help = tdrpStrDup("If empty, no prefix will be added.");
+    tt->val_offset = (char *) &copy_prefix - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'copy_ext'
     // ctype is 'char*'
     

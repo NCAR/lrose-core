@@ -274,6 +274,12 @@ paramdef string {
 } copy_dir;
 
 paramdef string {
+  p_default = "";
+  p_descr = "Prefix for file name of copy.";
+  p_help = "If empty, no prefix will be added.";
+} copy_prefix;
+
+paramdef string {
   p_default = "copy";
   p_descr = "File extension of file copy.";
   p_help = "If empty, no extension will be added.";

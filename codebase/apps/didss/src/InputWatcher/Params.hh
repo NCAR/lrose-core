@@ -437,6 +437,8 @@ public:
 
   char* copy_dir;
 
+  char* copy_prefix;
+
   char* copy_ext;
 
   tdrp_bool_t add_day_to_filename;
@@ -462,7 +464,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[53];
+  mutable TDRPtable _table[54];
 
   const char *_className;
 
