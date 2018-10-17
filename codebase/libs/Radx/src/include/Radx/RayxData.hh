@@ -94,6 +94,12 @@ public:
   virtual ~RayxData(void);
   
   /**
+   * Copy data contents from input into local, including missing data value
+   */
+  bool transferData(const RayxData &r);
+  
+
+  /**
    * Change name to input value
    * @param[in] name  Name to change to
    */
@@ -122,6 +128,18 @@ public:
    * @return false if npt not equal to local _npt
    */
   bool retrieveData(Radx::fl32 *data, const int npt) const;
+
+  /**
+   * Retrieve the data values into an array, where the array can be bigger
+   * than the local ray.
+   * @param[in] data The array to fill
+   * @param[in] npt  The length of the array passed in
+   *
+   * If npt is larger than local ray, the data array is padded with missing
+   *
+   * @return false if npt is smaller than local ray
+   */
+  bool retrieveSubsetData(Radx::fl32 *data, const int npt) const;
 
   /**
    * Store the local data values from an array into local state
@@ -261,6 +279,12 @@ public:
    * @return the name 
    */
   inline const std::string &getName() const {return _name;}
+
+  /**
+   * @return true if name matches input
+   * @param[in] n
+   */
+  inline bool namesMatch(const std::string &n) const {return _name == n;}
 
   /**
    * @return the units
@@ -613,6 +637,8 @@ public:
    * @param[in] maxGateIndex  Maximum gate index with valid data
    */
   void constrain(int minGateIndex, int maxGateIndex);
+
+  void variance(double npt, double maxPctMissing);
 
   /**
    * Set debugging on

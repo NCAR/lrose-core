@@ -24,7 +24,6 @@
 /BufrProduct.hh/1.5/Sat Oct 13 21:45:44 2018//
 /NoaaFslRadxFile.hh/1.1/Sun Apr 29 02:55:26 2018//
 /RadxPath.hh/1.5/Thu Apr  5 00:15:09 2018//
-/RayxData.hh/1.9/Sat Oct 13 21:45:44 2018//
 /TableMap.hh/1.5/Sat Oct 13 21:45:44 2018//
 /TableMapKey.hh/1.4/Sat Oct 13 21:41:57 2018//
 /BufrRadxFile.hh/1.4/Mon Oct 15 22:45:06 2018//
@@ -75,4 +74,5 @@
 /RadxField.hh/1.59/Wed Oct 17 14:54:26 2018//
 /RadxNcfStr.hh/1.1/Tue Oct 16 00:51:54 2018//
 /RadxRcalib.hh/1.11/Mon Oct 15 15:40:29 2018//
+/RayxData.hh/1.10/Wed Oct 17 18:02:09 2018//
 D
