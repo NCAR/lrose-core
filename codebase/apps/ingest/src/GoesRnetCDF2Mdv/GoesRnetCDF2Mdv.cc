@@ -43,9 +43,6 @@
 #include <dsdata/DsLdataTrigger.hh>
 #include <dsdata/TriggerInfo.hh>
 #include <Mdv/MdvxPjg.hh>
-#include <euclid/Pjg.hh>
-#include <euclid/PjgMath.hh>
-#include <euclid/PjgVertPerspMath.hh>
 #include <rapmath/math_macros.h>
 #include <toolsa/os_config.h>
 #include <toolsa/Path.hh>
@@ -2225,27 +2222,8 @@ bool GoesRnetCDF2Mdv::_latLon2XY(float lat, float lon,
   
   x_idx = round((xx - _xImageBounds[0])/_dxRad);
   y_idx = round((_yImageBounds[0] - yy)/_dyRad);
-  
-  cerr << "lat: " << lat << "  lon: " << lon << "  ximage: " << xx << "  yimage: " << yy << endl;
-  cerr << "xx: " << xx << "  yy: " << yy << "  rl: " << rl << endl;
 
-  PjgVertPerspMath math(_projectionOriginLatitude,
-                        _projectionOriginLongitude,
-                        _perspectivePointHeight / 1000.0);
-
-  double xxx, yyy;
-  math.latlon2xy(lat, lon, xxx, yyy);
-  cerr << "222222222 xxx: " << xxx << "  yyy: " << yyy << endl;
-
-  // imgProjAtts[GRID_MAPPING_NAME].getValues(_gridMappingName);
-  // imgProjAtts[PERSPECTIVE_POINT_HEIGHT].getValues(&_perspectivePointHeight);
-  // imgProjAtts[SEMI_MAJOR_AXIS].getValues(&_semiMajorAxis);
-  // imgProjAtts[SEMI_MINOR_AXIS].getValues(&_semiMinorAxis);
-  // imgProjAtts[INVERSE_FLATTENING].getValues(&_inverseFlattening);
-  // imgProjAtts[LATITUDE_OF_PROJECTION_ORIGIN].getValues(&_projectionOriginLatitude);
-  // imgProjAtts[LONGITUDE_OF_PROJECTION_ORIGIN].getValues(&_projectionOriginLongitude);
-
-
+  //  cerr << "lat: " << lat << "  lon: " << lon << "  ximage: " << xx << "  yimage: " << yy << endl;
   return true;
 }
 
