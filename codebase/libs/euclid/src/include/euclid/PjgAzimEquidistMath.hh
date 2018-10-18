@@ -41,6 +41,8 @@
 #ifndef PjgAzimEquidistMath_hh
 #define PjgAzimEquidistMath_hh
 
+#include <euclid/PjgMath.hh>
+
 class PjgAzimEquidistMath : public PjgMath
 {
 

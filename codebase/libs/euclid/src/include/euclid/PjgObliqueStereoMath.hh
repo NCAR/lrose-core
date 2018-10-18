@@ -40,6 +40,8 @@
 #ifndef PjgObliqueStereoMath_hh
 #define PjgObliqueStereoMath_hh
 
+#include <euclid/PjgMath.hh>
+
 class PjgObliqueStereoMath : public PjgMath
 {
 

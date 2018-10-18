@@ -39,6 +39,8 @@
 #ifndef PjgAlbersMath_hh
 #define PjgAlbersMath_hh
 
+#include <euclid/PjgMath.hh>
+
 class PjgAlbersMath : public PjgMath
 {
 

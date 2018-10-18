@@ -39,6 +39,8 @@
 #ifndef PjgVertPerspMath_hh
 #define PjgVertPerspMath_hh
 
+#include <euclid/PjgMath.hh>
+
 class PjgVertPerspMath : public PjgMath
 {
 
