@@ -117,21 +117,35 @@ RadxDwellCombine::~RadxDwellCombine()
 int RadxDwellCombine::Run()
 {
 
+  int iret = 0;
+
   switch (_params.mode) {
     case Params::FMQ:
-      return _runFmq();
+      iret = _runFmq();
     case Params::ARCHIVE:
-      return _runArchive();
+      iret = _runArchive();
     case Params::REALTIME:
       if (_params.latest_data_info_avail) {
-        return _runRealtimeWithLdata();
+        iret = _runRealtimeWithLdata();
       } else {
-        return _runRealtimeNoLdata();
+        iret = _runRealtimeNoLdata();
       }
     case Params::FILELIST:
     default:
-      return _runFilelist();
+      iret = _runFilelist();
   } // switch
+
+  // if we are writing out on time boundaries, there
+  // may be unwritten data, so write it now
+
+  if (_params.write_output_files_on_time_boundaries) {
+    if (_writeSplitVol()) {
+      iret = -1;
+    }
+  }
+
+  return iret;
+
 }
 
 //////////////////////////////////////////////////
