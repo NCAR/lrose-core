@@ -357,7 +357,7 @@ int RadxDwellCombine::_processFile(const string &readPath)
       cerr << "  ==>> read in file: " << _readPaths[ii] << endl;
     }
   }
-  
+
   // remove unwanted fields
   
   if (_params.exclude_specified_fields) {
@@ -766,12 +766,21 @@ int RadxDwellCombine::_writeVolOnTimeBoundary(RadxVol &vol)
   
   // check for time gap
 
-  RadxTime volStart = vol.getStartRadxTime();
+  RadxTime newVolStart = vol.getStartRadxTime();
   RadxTime splitVolEnd = _splitVol.getEndRadxTime();
-  double gapSecs = volStart - splitVolEnd;
+  double gapSecs = newVolStart - splitVolEnd;
   if (gapSecs > _params.output_file_time_interval_secs * 2) {
+    if (_params.debug) {
+      cerr << "==>> Found time gap between volumes" << endl;
+      cerr << "  splitVolEnd: " << splitVolEnd.asString(3) << endl;
+      cerr << "  newVolStart: " << newVolStart.asString(3) << endl;
+    }
     _writeSplitVol();
-    _setNextEndOfVolTime(volStart);
+    _setNextEndOfVolTime(newVolStart);
+    // clear out rays from previous file
+    _dwellVol.clearRays();
+    // clear any rays before the new vol start
+    // these could have been introduced during the merge
   }
 
   // add rays to the output vol
@@ -829,6 +838,12 @@ int RadxDwellCombine::_writeSplitVol()
     return -1;
   }
 
+  if (_params.debug) {
+    cerr << "Wrote file: " << outFile.getPathInUse() << endl;
+    cerr << "  StartTime: " << _splitVol.getStartRadxTime().asString(3) << endl;
+    cerr << "  EndTime  : " << _splitVol.getEndRadxTime().asString(3) << endl;
+  }
+
   // write latest data info file if requested 
   
   if (_params.write_latest_data_info) {
@@ -842,7 +857,7 @@ int RadxDwellCombine::_writeSplitVol()
     ldata.setRelDataPath(relPath);
     ldata.setWriter(_progName);
     if (ldata.write(_splitVol.getEndTimeSecs())) {
-      cerr << "WARNING - RadxDwellCombine::_writeVol" << endl;
+      cerr << "WARNING - RadxDwellCombine::_writeSplitVol" << endl;
       cerr << "  Cannot write latest data info file to dir: "
            << _params.output_dir << endl;
     }
@@ -882,7 +897,7 @@ int RadxDwellCombine::_combineDwells(RadxVol &vol)
 {
   
   if (_params.debug) {
-    cerr << "INFO: nrays left from previous file: "
+    cerr << "INFO - combineDwells: nrays left from previous file: "
          << _dwellVol.getNRays() << endl;
   }
 
@@ -916,7 +931,11 @@ int RadxDwellCombine::_combineDwells(RadxVol &vol)
       RadxRay *dwellRay =
         _dwellVol.computeFieldStats(_dwellStatsMethod,
                                     _params.dwell_stats_max_fraction_missing);
-      combRays.push_back(dwellRay);
+      if (dwellRay->getRadxTime() >= vol.getStartRadxTime() - 60) {
+        combRays.push_back(dwellRay);
+      } else {
+        RadxRay::deleteIfUnused(dwellRay);
+      }
       // clear out stats vol
       _dwellVol.clearRays();
     }
@@ -946,7 +965,7 @@ int RadxDwellCombine::_combineDwellsCentered(RadxVol &vol)
 {
   
   if (_params.debug) {
-    cerr << "INFO: nrays left from previous file: "
+    cerr << "INFO - combineDwellsCentered: nrays left from previous file: "
          << _dwellVol.getNRays() << endl;
   }
 
@@ -1021,7 +1040,11 @@ int RadxDwellCombine::_combineDwellsCentered(RadxVol &vol)
 
       // add it to the combination
 
-      combRays.push_back(dwellRay);
+      if (dwellRay->getRadxTime() >= vol.getStartRadxTime() - 60) {
+        combRays.push_back(dwellRay);
+      } else {
+        RadxRay::deleteIfUnused(dwellRay);
+      }
 
       // clear out stats vol
 
@@ -1222,7 +1245,7 @@ int RadxDwellCombine::_runFmq()
 
         // clean up
 
-        delete dwellRay;
+        RadxRay::deleteIfUnused(dwellRay);
         _dwellVol.clearRays();
         _georefs.clear();
 
