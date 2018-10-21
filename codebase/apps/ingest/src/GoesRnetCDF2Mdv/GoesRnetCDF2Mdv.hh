@@ -783,46 +783,46 @@ class GoesRnetCDF2Mdv
   std::time_t _endTime;
   
   //  GoesImagerProjection _goesImagerProjection;
-  float _nominalSatSubpointLat; 
-  float _nominalSatSubpointLon;
-  float _nominalSatHeight;
-  float _westLongitude;
-  float _northLatitude;
-  float _eastLongitude;
-  float _southLatitude;
-  float _centerLongitude;
-  float _centerLatitude;
-  float _nadirLongitude;
-  float _nadirLatitude;
-  float _xImageCenter;
-  float _yImageCenter;
-  std::vector< float > _xImageBounds;
-  std::vector< float > _yImageBounds;
+  double _nominalSatSubpointLat; 
+  double _nominalSatSubpointLon;
+  double _nominalSatHeight;
+  double _westLongitude;
+  double _northLatitude;
+  double _eastLongitude;
+  double _southLatitude;
+  double _centerLongitude;
+  double _centerLatitude;
+  double _nadirLongitude;
+  double _nadirLatitude;
+  double _xImageCenter;
+  double _yImageCenter;
+  std::vector< double > _xImageBounds;
+  std::vector< double > _yImageBounds;
 
   std::string _gridMappingName;
-  float _perspectivePointHeight;
-  float _semiMajorAxis;
-  float _semiMinorAxis;
-  float _inverseFlattening;
-  float _projectionOriginLongitude;
-  float _projectionOriginLatitude;
-  float _ecc;
-  float _radiusRatio2;
-  float _invRadiusRatio2;
-  float _H;
+  double _perspectivePointHeight;
+  double _semiMajorAxis;
+  double _semiMinorAxis;
+  double _inverseFlattening;
+  double _projectionOriginLongitude;
+  double _projectionOriginLatitude;
+  double _ecc;
+  double _radiusRatio2;
+  double _invRadiusRatio2;
+  double _H;
   int _xSubSatIdx;
   int _ySubSatIdx;
 
   
   // variables for converting radiances to relfectances and
-  // brigthness temperatures
+  // brightness temperatures
 
-  float _eSun; 
-  float _kappa0; 
-  float _planckFk1; 
-  float _planckFk2; 
-  float _planckBc1; 
-  float _planckBc2; 
+  double _eSun; 
+  double _kappa0; 
+  double _planckFk1; 
+  double _planckFk2; 
+  double _planckBc1; 
+  double _planckBc2; 
 
   // quality control variables
   
@@ -835,7 +835,7 @@ class GoesRnetCDF2Mdv
   float _meanRadValueValidPixels;
   float _stdDevRadValueValidPixels;
   float _percentUncorrectableL0Errors;
-  float _earthDunDistAnomalyAU;
+  double _earthSunDistAnomalyAU;
   std::string _inputAbiL0Data;
   std::string _l1bProcessingParamVersion;
   std::string _algorithmVersion;
@@ -946,7 +946,7 @@ class GoesRnetCDF2Mdv
   
   float _radianceToBrightTemp(float rad);
   float _radianceToAlbedo(float rad);
-  bool _latLon2XY(float lat, float lon, int& col_num,  int& line_num);  
+  bool _latLon2XY(double lat, double lon, int& col_num,  int& line_num);  
   void _addData(float *out_data, float *qc_data, float *rad_data);
   MdvxField* _createField(const std::string &field_name,
 			  const std::string &long_field_name,

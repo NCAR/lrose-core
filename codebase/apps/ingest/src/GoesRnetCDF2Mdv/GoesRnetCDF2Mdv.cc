@@ -261,7 +261,6 @@ void GoesRnetCDF2Mdv::_addData(float *out_data, float *qc_data, float *rad_data)
 
   float min_val = 999999999.0;
   float max_val = -999999999.0;
-    
    
   for (int yOutIdx = 0; yOutIdx < coords.ny; ++yOutIdx) {
     for (int xOutIdx = 0; xOutIdx < coords.nx; ++xOutIdx) {
@@ -326,7 +325,12 @@ void GoesRnetCDF2Mdv::_addData(float *out_data, float *qc_data, float *rad_data)
     } /* endfor - x_index */
 
   } /* endfor - y_index */
-     
+
+  if (_params->debug) {
+    cerr << "==>> min_val: " << min_val << endl;
+    cerr << "==>> max_val: " << max_val << endl;
+  }
+
 }
 
 /*********************************************************************
@@ -374,10 +378,11 @@ void GoesRnetCDF2Mdv::_convertUnits(MdvxField *field) const
  */
 
 MdvxField *GoesRnetCDF2Mdv::_createField(const string &field_name,
-					   const string &long_field_name,
-					   const string &units)
+                                         const string &long_field_name,
+                                         const string &units)
+
 {
-  static const string method_name = "JmaHimawari8toMdv::_createField()";
+  static const string method_name = "GoesRnetCDF2Mdv::_createField()";
   
   // Create the field header
 
@@ -769,6 +774,10 @@ bool GoesRnetCDF2Mdv::_processData()
       
       return false;
     }
+
+  if (_params->debug) {
+    cerr << "Wrote file: " << mdvx.getPathInUse() << endl;
+  }
     
   return true;
 }
@@ -1766,7 +1775,7 @@ void GoesRnetCDF2Mdv::_readQualityControlVars()
     err.addErrStr(info.str());
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
-  varE.getVal(&_earthDunDistAnomalyAU);
+  varE.getVal(&_earthSunDistAnomalyAU);
 
   NcxxVar varD = _file.getVar(ALGORITHM_DYNAMIC_INPUT_DATA_CONTAINER);
   if(varD.isNull() == true) {
@@ -2190,21 +2199,21 @@ void GoesRnetCDF2Mdv::_setScanType(const string &scan_id)
  * _latLon2XY()
  */
 
-bool GoesRnetCDF2Mdv::_latLon2XY(float lat, float lon,
+bool GoesRnetCDF2Mdv::_latLon2XY(double lat, double lon,
 				 int& x_idx,  int& y_idx)
 {
   static const string methodName = "GoesRnetCDF2Mdv::_latLon2XY()";
   // 0.0174533
-  float c_lat = atan(_invRadiusRatio2*tan(lat*DEG_TO_RAD));
-  float cos_clat = cos(c_lat);
+  double c_lat = atan(_invRadiusRatio2*tan(lat*DEG_TO_RAD));
+  double cos_clat = cos(c_lat);
 
-  float rc = _semiMinorAxis/sqrt(1.0 - pow(_ecc*cos_clat, 2.0));
+  double rc = _semiMinorAxis/sqrt(1.0 - pow(_ecc*cos_clat, 2.0));
       
-  float del_lon_angle = (lon - _projectionOriginLongitude)*DEG_TO_RAD;
+  double del_lon_angle = (lon - _projectionOriginLongitude)*DEG_TO_RAD;
 
-  float sx =  _H - (rc*cos_clat*cos(del_lon_angle));
-  float sy = -rc*cos_clat*sin(del_lon_angle);
-  float sz = rc*sin(c_lat);
+  double sx =  _H - (rc*cos_clat*cos(del_lon_angle));
+  double sy = -rc*cos_clat*sin(del_lon_angle);
+  double sz = rc*sin(c_lat);
       
   // // check that point is on disk of the earth
   if((_H*(_H - sx)) < (sy*sy + _radiusRatio2*sz*sz)) {
@@ -2215,9 +2224,9 @@ bool GoesRnetCDF2Mdv::_latLon2XY(float lat, float lon,
     return false;
   }
 
-  float rl = sqrt((sx*sx + sy*sy + sz*sz));
-  float xx = asin((-sy/rl));
-  float yy = atan((sz/sx));
+  double rl = sqrt((sx*sx + sy*sy + sz*sz));
+  double xx = asin((-sy/rl));
+  double yy = atan((sz/sx));
 
   
   x_idx = round((xx - _xImageBounds[0])/_dxRad);
