@@ -5153,65 +5153,66 @@ void WRFData::_printAtt(Nc3Att *att)
 
   switch(att->type()) {
     
-  case nc3NoType: {
-    cout << "No type: ";
-  }
-  break;
-  
-  case nc3Byte: {
-    cout << "BYTE: ";
-    unsigned char *vals = (unsigned char *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
+    case nc3Byte: {
+      cout << "BYTE: ";
+      unsigned char *vals = (unsigned char *) values->base();
+      for (long ii = 0; ii < att->num_vals(); ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
-  case nc3Char: {
-    cout << "CHAR: ";
-    char vals[att->num_vals() + 1];
-    MEM_zero(vals);
-    memcpy(vals, values->base(), att->num_vals());
-    cout << vals;
-  }
-  break;
-  
-  case nc3Short: {
-    cout << "SHORT: ";
-    short *vals = (short *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
+    case nc3Char: {
+      cout << "CHAR: ";
+      char vals[att->num_vals() + 1];
+      MEM_zero(vals);
+      memcpy(vals, values->base(), att->num_vals());
+      cout << vals;
+      break;
     }
-  }
-  break;
   
-  case nc3Int: {
-    cout << "INT: ";
-    int *vals = (int *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
+    case nc3Short: {
+      cout << "SHORT: ";
+      short *vals = (short *) values->base();
+      for (long ii = 0; ii < att->num_vals(); ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
-  case nc3Float: {
-    cout << "FLOAT: ";
-    float *vals = (float *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
+    case nc3Int: {
+      cout << "INT: ";
+      int *vals = (int *) values->base();
+      for (long ii = 0; ii < att->num_vals(); ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
-  case nc3Double: {
-    cout << "DOUBLE: ";
-    double *vals = (double *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
+    case nc3Float: {
+      cout << "FLOAT: ";
+      float *vals = (float *) values->base();
+      for (long ii = 0; ii < att->num_vals(); ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
+    case nc3Double: {
+      cout << "DOUBLE: ";
+      double *vals = (double *) values->base();
+      for (long ii = 0; ii < att->num_vals(); ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
+    }
+  
+    case nc3NoType:
+    default: {
+      cout << "No type: ";
+      break;
+    }
+      
   }
   
   cout << endl;
@@ -5236,63 +5237,64 @@ void WRFData::_printVarVals(Nc3Var *var)
   
   switch(var->type()) {
     
-  case nc3NoType: {
-  }
-  break;
-  
-  case nc3Byte: {
-    cout << "(byte)";
-    unsigned char *vals = (unsigned char *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
+    case nc3Byte: {
+      cout << "(byte)";
+      unsigned char *vals = (unsigned char *) values->base();
+      for (long ii = 0; ii < nprint; ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
-  case nc3Char: {
-    cout << "(char)";
-    char str[nprint + 1];
-    MEM_zero(str);
-    memcpy(str, values->base(), nprint);
-    cout << " " << str;
-  }
-  break;
-  
-  case nc3Short: {
-    cout << "(short)";
-    short *vals = (short *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
+    case nc3Char: {
+      cout << "(char)";
+      char str[nprint + 1];
+      MEM_zero(str);
+      memcpy(str, values->base(), nprint);
+      cout << " " << str;
+      break;
     }
-  }
-  break;
   
-  case nc3Int: {
-    cout << "(int)";
-    int *vals = (int *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
+    case nc3Short: {
+      cout << "(short)";
+      short *vals = (short *) values->base();
+      for (long ii = 0; ii < nprint; ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
-  case nc3Float: {
-    cout << "(float)";
-    float *vals = (float *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
+    case nc3Int: {
+      cout << "(int)";
+      int *vals = (int *) values->base();
+      for (long ii = 0; ii < nprint; ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
-  case nc3Double: {
-    cout << "(double)";
-    double *vals = (double *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
+    case nc3Float: {
+      cout << "(float)";
+      float *vals = (float *) values->base();
+      for (long ii = 0; ii < nprint; ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
+  
+    case nc3Double: {
+      cout << "(double)";
+      double *vals = (double *) values->base();
+      for (long ii = 0; ii < nprint; ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
+    }
+  
+    case nc3NoType:
+    default: {
+      break;
+    }
   
   }
   
