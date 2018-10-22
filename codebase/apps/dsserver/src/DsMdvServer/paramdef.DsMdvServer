@@ -494,7 +494,7 @@ paramdef struct derived_field_t {
 
   "FUNC_DIFF_FIELDS_SAME_FILE:\n  compute difference between two fields from the same file. Data for both fields must be present in the file at the requested URL. First field name is in field_name_1, and second field name is in field_name_2. Difference is computed as (field_1 - field_2). Apply a multiplier of -1 to change the sign.\n\n"
 
-  "FUNC_DIFF_FIELDS:\n  compute difference between two fields. Field data not necessarily in same file. First field name is in field_name_1, and second field name is in field_name_2. First field is in the current file. Second field URL is url_2. Difference is computed as (field_1 - field_2). Apply a multiplier of -1 to change the sign. If i_arg_1 is not 0, the second field search time will be the first field time plus i_arg_1 in secs.\n\n"
+  "FUNC_DIFF_FIELDS:\n  compute difference between two fields. Field data not necessarily in same file. First field name is in field_name_1, and second field name is in field_name_2. First field is in the current file. Second field URL is url_2. Difference is computed as (field_1 - field_2). Apply a multiplier of -1 to change the sign. If i_arg_1 is not 0, the second field search time will be the first field time plus i_arg_1 in secs. i_arg_2 specifies the search margin for the second fields, in seconds.\n\n"
 
   "FUNC_DIFF_IN_TIME:\n  compute difference between data now and at a different time. Field name is given in field_name_1. Time difference in seconds is given in i_arg_1. So time for second file is time for first file plus i_arg_1. Data difference is computed as value now minus the value at the different time. Apply a multiplier of -1 to change the sign.\n\n"
 
