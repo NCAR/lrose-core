@@ -440,58 +440,61 @@ void BufrRadxFile::setTablePath(char *path) {
 
 void BufrRadxFile::lookupFieldName(string fieldName, string &units, 
 string &standardName, string &longName) {
-    if (fieldName.find("TH") != string::npos) {
-      units = "dBz";
-      standardName = "horizontal_reflectivity";
-      longName = "horizontal_reflectivity";
-    } else if (fieldName.find("CM") != string::npos) {
-      units = "m/s";
-      standardName = "standard_deviation_of_velocity";
-      longName = "standard_deviation_of_velocity";
-    } else if (fieldName.find("KDP") != string::npos) {
-      units = "deg/km";
-      standardName = "specific_differential_phase";
-      longName = "specific_differential_phase";
-    } else if (fieldName.find("PHIDP") != string::npos) {
-      units = "degrees";
-      standardName = "differential_phase_hv";
-      longName = "differential_phase_shift";
-    } else if (fieldName.find("RHOHV") != string::npos) {
-      units = "";
-      standardName = "cross_correlation_hv";
-      longName = "cross_correlation_coefficient";
-    } else if (fieldName.find("TDR") != string::npos) {
-      units = "db";
-      standardName = "log_differential_reflecivity_hv";
-      longName = "differential_reflectivity";
-    } else if (fieldName.find("TV") != string::npos) {
-      units = "dBz";
-      standardName = "vertical reflectivity";
-      longName = "vertical reflectivity";
-    } else if (fieldName.find("VRAD") != string::npos) {
-      units = "m/s";
-      standardName = "radial_velocity";
-      longName = "radial_velocity";
-    } else if (fieldName.find("WRAD") != string::npos) {
-      units = "m/s";
-      standardName = "width";
-      longName = "width";
-    } else {
-      // check for "[A|B|C|D]9[0|1]" pattern
-      bool matches = false;
-      if (fieldName.size() == 3) {
-	if ( (fieldName[0] >= 'A') && (fieldName[1] <= 'D') &&
-	     (fieldName[1] == '9') && 
-	     ((fieldName[2] == '0') || (fieldName[2] == '1')) ) {
-	      matches = true;
-	      units = "1";
-	      standardName = fieldName;
-	      longName = fieldName;
-	    }
+  if ((fieldName.find("TH") != string::npos) ||
+      (fieldName.find("DBZH") != string::npos)) {
+    units = "dBz";
+    standardName = "radar_equivalent_reflectivity_factor_h";
+    longName = "horizontal_reflectivity";
+  } else if ((fieldName.find("TV") != string::npos) ||
+             (fieldName.find("DBZV") != string::npos)) {
+    units = "dBz";
+    standardName = "radar_equivalent_reflectivity_factor_v";
+    longName = "vertical_reflectivity";
+  } else if (fieldName.find("CM") != string::npos) {
+    units = "m/s";
+    standardName = "standard_deviation_of_velocity";
+    longName = "standard_deviation_of_velocity";
+  } else if (fieldName.find("KDP") != string::npos) {
+    units = "deg/km";
+    standardName = "radar_specific_differential_phase_hv";
+    longName = "specific_differential_phase";
+  } else if (fieldName.find("PHIDP") != string::npos) {
+    units = "degrees";
+    standardName = "radar_differential_phase_hv";
+    longName = "differential_phase_shift";
+  } else if (fieldName.find("RHOHV") != string::npos) {
+    units = "";
+    standardName = "radar_cross_correlation_hv";
+    longName = "cross_correlation_coefficient";
+  } else if ((fieldName.find("TDR") != string::npos) || 
+             (fieldName.find("ZDR") != string::npos)) {
+    units = "db";
+    standardName = "radar_differential_reflecivity_hv";
+    longName = "differential_reflectivity";
+  } else if (fieldName.find("VRAD") != string::npos) {
+    units = "m/s";
+    standardName = "radial_velocity_of_scatterers_away_from_instrument";
+    longName = "radial_velocity";
+  } else if (fieldName.find("WRAD") != string::npos) {
+    units = "m/s";
+    standardName = "radar_doppler_spectrum_width";
+    longName = "width";
+  } else {
+    // check for "[A|B|C|D]9[0|1]" pattern
+    bool matches = false;
+    if (fieldName.size() == 3) {
+      if ( (fieldName[0] >= 'A') && (fieldName[1] <= 'D') &&
+           (fieldName[1] == '9') && 
+           ((fieldName[2] == '0') || (fieldName[2] == '1')) ) {
+        matches = true;
+        units = "1";
+        standardName = fieldName;
+        longName = fieldName;
       }
-      if (!matches) {
-	_addErrStr("WARNING - BufrRadxFile::lookupFieldName");
-	_addErrStr("  Unrecognized field: ", fieldName);
+    }
+    if (!matches) {
+      _addErrStr("WARNING - BufrRadxFile::lookupFieldName");
+      _addErrStr("  Unrecognized field: ", fieldName);
       //      _addErrStr("  Attempting to continue using default values");
       // cout >> _errStr >> endl;
       //units = "1";
@@ -499,9 +502,9 @@ string &standardName, string &longName) {
       //longName = "unknown";
       //_addErrStr("ERROR - BufrRadxFile::lookupFieldName");
       //_addErrStr("  Unrecognized field: ", fieldName);
-	throw _errStr.c_str();
-      }
+      throw _errStr.c_str();
     }
+  }
 }
 
 ////////////////////////////////////////////////////////////
