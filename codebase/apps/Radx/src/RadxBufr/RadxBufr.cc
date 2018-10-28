@@ -1249,6 +1249,37 @@ int RadxBufr::_writeVol(RadxVol &vol)
       default:
         outputDir += _params.surveillance_subdir;
     }
+  } else if (_params.separate_output_dirs_by_range_geometry &&
+             vol.getNRays() > 0) {
+    RadxRay *ray0 = vol.getRays()[0];
+    double minGateSpacingKm = ray0->getGateSpacingKm();
+    double maxGateSpacingKm = ray0->getGateSpacingKm();
+    for (size_t ii = 1; ii < vol.getNRays(); ii++) {
+      RadxRay *ray = vol.getRays()[ii];
+      double gateSpacingKm = ray->getGateSpacingKm();
+      if (gateSpacingKm < minGateSpacingKm) {
+        minGateSpacingKm = gateSpacingKm;
+      }
+      if (gateSpacingKm > maxGateSpacingKm) {
+        maxGateSpacingKm = gateSpacingKm;
+      }
+    }
+    for (int jj = 0; jj < _params.dir_from_range_geometry_n; jj++) {
+      const Params::dir_from_range_geometry_t &geom =
+        _params._dir_from_range_geometry[jj];
+      if (minGateSpacingKm >= geom.min_range_gate_spacing_km &&
+          maxGateSpacingKm <= geom.max_range_gate_spacing_km) {
+        outputDir += PATH_DELIM;
+        outputDir += geom.output_subdir;
+        if (_params.debug) {
+          cerr << "DEBUG - changing output_dir based on range geometry" << endl;
+          cerr << "  minGateSpacingKm: " << minGateSpacingKm << endl;
+          cerr << "  maxGateSpacingKm: " << maxGateSpacingKm << endl;
+          cerr << "  sub_dir: " << geom.output_subdir << endl;
+          cerr << "  outputDir: " << outputDir << endl;
+        }
+      }
+    } // jj
   }
     
   if (_params.output_filename_mode == Params::SPECIFY_FILE_NAME) {

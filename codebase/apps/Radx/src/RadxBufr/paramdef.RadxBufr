@@ -1080,6 +1080,31 @@ paramdef string {
 } sun_subdir;
 
 commentdef {
+  p_header = "SEPARATING OUTPUT VOLUMES BASED ON RANGE GEOMETRY";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to separate the files based on range geometry.";
+  p_help = "In some scan strategies, the operational mode alternates between long and short range scans. For example there may be a long range scan without doppler moments, followed by a short range scan. The range gate length varies for each of these scans. This option allows you to write the volumes into separate directories based on the range geometry.";
+} separate_output_dirs_by_range_geometry;
+
+typedef struct {
+  double min_range_gate_spacing_km; 
+  double max_range_gate_spacing_km; 
+  string output_subdir;
+} dir_from_range_geometry_t;
+
+paramdef struct dir_from_range_geometry_t {
+  p_default = {
+    { 0.0, 0.20, "short_range" },
+    { 0.20, 0.50, "long_range" }
+  };
+  p_descr = "Sub-directories to be used for different range geometry.";
+  p_help = "If the gate spacing is within the specified limits, the specified sub-directory is used (appended to 'output_dir'). If the gate spacing is not within any of the specified limits, then 'output_dir' is used as-is."; 
+} dir_from_range_geometry[];
+  
+commentdef {
   p_header = "OPTION TO OVERRIDE MISSING VALUES";
   p_text = "Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n";
 }

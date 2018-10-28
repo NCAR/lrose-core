@@ -179,6 +179,12 @@ public:
     char* lookup_table;
   } variable_transform_field_t;
 
+  typedef struct {
+    double min_range_gate_spacing_km;
+    double max_range_gate_spacing_km;
+    char* output_subdir;
+  } dir_from_range_geometry_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -710,6 +716,11 @@ public:
 
   char* sun_subdir;
 
+  tdrp_bool_t separate_output_dirs_by_range_geometry;
+
+  dir_from_range_geometry_t *_dir_from_range_geometry;
+  int dir_from_range_geometry_n;
+
   tdrp_bool_t override_missing_metadata_values;
 
   double missing_metadata_double;
@@ -739,7 +750,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[159];
+  mutable TDRPtable _table[162];
 
   const char *_className;
 
