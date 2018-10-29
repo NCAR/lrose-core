@@ -93,7 +93,8 @@ public:
     NLDN_BINARY = 10,
     AOAWS_NETCDF = 11,
     KSC = 12,
-    ALBLM = 13
+    ALBLM = 13,
+    STARNET = 14
   } input_format_t;
 
   typedef enum {
