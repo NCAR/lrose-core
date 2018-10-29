@@ -746,28 +746,28 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'gematronik_realtime_mode'
+    // Parameter 'incremental_realtime_mode'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("gematronik_realtime_mode");
-    tt->descr = tdrpStrDup("Set to TRUE if we are watching for Gematronik XML volumes.");
-    tt->help = tdrpStrDup("Gematronik volumes (for a given time) are stored in multiple files, one for each field. Therefore, after the time on a volume changes and a new field file is detected, we need to wait a while to ensure that all of the files have had a chance to be writted to disk. You need to set gematronik_realtime_wait_secs to a value in excess of the time it takes for all of the files to be written.");
-    tt->val_offset = (char *) &gematronik_realtime_mode - &_start_;
+    tt->param_name = tdrpStrDup("incremental_realtime_mode");
+    tt->descr = tdrpStrDup("Set to TRUE if fields come in incrementally.");
+    tt->help = tdrpStrDup("Some systems write fields from the same volume to separate files, so they come in incrementally. In this case, we need to wait some time for all of the fields to arrive before processing.");
+    tt->val_offset = (char *) &incremental_realtime_mode - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'gematronik_realtime_wait_secs'
+    // Parameter 'incremental_realtime_wait_secs'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("gematronik_realtime_wait_secs");
+    tt->param_name = tdrpStrDup("incremental_realtime_wait_secs");
     tt->descr = tdrpStrDup("Number of seconds to wait, so that all field files can be written to disk before we start to read.");
-    tt->help = tdrpStrDup("See 'gematronik_realtime_mode'.");
-    tt->val_offset = (char *) &gematronik_realtime_wait_secs - &_start_;
-    tt->single_val.i = 5;
+    tt->help = tdrpStrDup("See 'incremental_realtime_mode'.");
+    tt->val_offset = (char *) &incremental_realtime_wait_secs - &_start_;
+    tt->single_val.i = 90;
     tt++;
     
     // Parameter 'Comment 4'

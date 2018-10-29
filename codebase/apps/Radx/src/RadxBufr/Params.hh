@@ -494,9 +494,9 @@ public:
 
   char* search_ext;
 
-  tdrp_bool_t gematronik_realtime_mode;
+  tdrp_bool_t incremental_realtime_mode;
 
-  int gematronik_realtime_wait_secs;
+  int incremental_realtime_wait_secs;
 
   tdrp_bool_t set_fixed_angle_limits;
 
