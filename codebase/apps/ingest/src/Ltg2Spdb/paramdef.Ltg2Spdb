@@ -239,7 +239,7 @@ paramdef enum input_format_t {
   "ALBLM: Alaska BLM\n"
   " 15 comma delimited fields:\n"
   " OBJECTID,STROKETYPE,NETWORKCODE,UTCDATETIME,LOCALDATETIME,MILLISECONDS,LATITUDE,LONGITUDE,AMPLITUDE,GDOP,ERRSEMIMAJOR,ERRSEMIMINOR,ERRELIPSEANGLE,STRIKETIME,STRIKESEQNUMBER\n"
-  "\n";  
+  "\n"  
   "STARNET: South American Lightning Network\n"
   "  http://data.eol.ucar.edu/datafile/nph-get/486.002/STARNET_README_Reprocessed_Data.txt\n"
   "  13+ space delimited fields:\n"

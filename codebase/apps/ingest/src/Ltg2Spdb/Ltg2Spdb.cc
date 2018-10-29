@@ -1680,6 +1680,7 @@ int Ltg2Spdb::_decode_starnet(const char *line)
   int year, month, day, hour, min, sec, microsec;
   double lat, lon;
   double ellipse_error_m, atd_error_microsec;
+  double float1, float2;
   int quality, polarity;
   int n_rx, n_atd;
 
@@ -1687,19 +1688,22 @@ int Ltg2Spdb::_decode_starnet(const char *line)
              "%d %d %d %d %d %d %d "
              "%lg %lg "
              "%lg %lg "
+             "%lg %lg "
              "%d %d "
              "%d %d",
              &year, &month, &day, &hour, &min, &sec, &microsec,
              &lat, &lon,
              &ellipse_error_m, &atd_error_microsec,
+             &float1, &float2,
              &quality, &polarity,
-             &n_rx, &n_atd) != 15) {
+             &n_rx, &n_atd) != 17) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "ERROR - _decode_starnet" << endl;
       cerr << "  Cannot decode line: " << line << endl;
       cerr << "  Expecting 15+ fields: " << endl;
       cerr << "    year month day hour min sec microsecsec" << endl;
       cerr << "    lat lon ellipse_error_m atd_error_microsec" << endl;
+      cerr << "    float1 float2" << endl;
       cerr << "    quality polarity n_rx n_atd" << endl;
     }
     return -1;
@@ -1731,7 +1735,7 @@ int Ltg2Spdb::_decode_starnet(const char *line)
   strike.latitude = (fl32) lat;
   strike.longitude = (fl32) lon;
   strike.nanosecs = microsec * 1000;
-  strike.n_sensors = n_rx;
+  strike.n_sensors = n_atd;
   
   // Check for duplicates?
   if (_params.duplicates.check){
