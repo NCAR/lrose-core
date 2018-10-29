@@ -48,6 +48,8 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxXml.hh>
+#include <Radx/RadxStr.hh>
+#include <cerrno>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -613,7 +615,8 @@ void BufrRadxFile::_getFieldPaths(const string &primaryPath,
     string start = fileName.substr(0,3);
     // TODO: convert string to lowercase
     if (start.compare("RMA") == 0) 
-      _getFieldPathsRMA(primaryPath, fileNames, filePaths, fieldNames);
+      // _getFieldPathsRMA(primaryPath, fileNames, filePaths, fieldNames);
+      _getFieldPathsRMA2(primaryPath, fileNames, filePaths, fieldNames);
     else if (start.compare("PAG") == 0)
        _getFieldPathsPAG(primaryPath, fileNames, filePaths, fieldNames);
     else {
@@ -717,9 +720,9 @@ void BufrRadxFile::_getFieldPaths(const string &primaryPath,
 // send primaryPath 
 // returns fileNames, filePaths, and fieldNames
 void BufrRadxFile::_getFieldPathsRMA(const string &primaryPath,
-                                 vector<string> &fileNames,
-                                 vector<string> &filePaths,
-                                 vector<string> &fieldNames)
+                                     vector<string> &fileNames,
+                                     vector<string> &filePaths,
+                                     vector<string> &fieldNames)
   
 {
   
@@ -817,6 +820,115 @@ void BufrRadxFile::_getFieldPathsRMA(const string &primaryPath,
   } catch (const std::out_of_range& e) {
     cerr << "file name does not match pattern for Argentina data" << endl;
   }
+}
+
+/////////////////////////////////////////////////////////////////
+// get list of field paths for the volume for the specified path
+// send primaryPath 
+// returns fileNames, filePaths, and fieldNames
+
+int BufrRadxFile::_getFieldPathsRMA2(const string &primaryPath,
+                                     vector<string> &fileNames,
+                                     vector<string> &filePaths,
+                                     vector<string> &fieldNames)
+  
+{
+  
+  // init
+
+  fileNames.clear();
+  filePaths.clear();
+  fieldNames.clear();
+  
+  // decompose the path to get the date/time prefix for the primary path
+  // example fileName:  RMA1_0117_02_TH_20170430T070516Z.BUFR
+  
+  RadxPath ppath(primaryPath);
+  string dir(ppath.getDirectory());
+  string fileName(ppath.getFile());
+  string base(ppath.getBase());
+  string ext(ppath.getExt());
+    
+  // tokenize base on underscores
+  
+  vector<string> primToks;
+  RadxStr::tokenize(base, "_", primToks);
+  if (primToks.size() < 5) {
+    if (_debug) {
+      cerr << "WARNING - BufrRadxFile::_getFieldPathsRMA2" << endl;
+      cerr << "  file name does not match pattern for Argentina data" << endl;
+      cerr << "  path: " << primaryPath << endl;
+    }
+    return -1;
+  }
+    
+  RadxTime primaryTime;
+  if (primaryTime.parseDateTime(primToks[4]) == RadxTime::NEVER) {
+    if (_debug) {
+      cerr << "WARNING - BufrRadxFile::_getFieldPathsRMA2" << endl;
+      cerr << "  Cannot read time from file name" << endl;
+      cerr << "  path: " << primaryPath << endl;
+    }
+    return -1;
+  }
+  
+  // save field name
+  string primFieldName(primToks[3]);
+
+  // open the directory
+  
+  RadxReadDir rdir;
+  if (rdir.open(dir.c_str())) {
+    int errNum = errno;
+    cerr << "ERROR - BufrRadxFile::_getFieldPathsRMA2" << endl;
+    cerr << "  Cannot open dir for reading: " << dir << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  // loop through the directory
+  
+  struct dirent *dp;
+  for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
+    
+    string dName(dp->d_name);
+    if (dName[0] == '.') {
+      continue;
+    }
+    
+    RadxPath dPath(dName);
+    string dBase(dPath.getBase());
+    string dExt(dPath.getExt());
+    // make sure we have same extension
+    if (dExt != ext) {
+      continue;
+    }
+    
+    // tokenize
+    vector<string> dToks;
+    RadxStr::tokenize(dBase, "_", dToks);
+    if (dToks.size() < 5) {
+      continue;
+    }
+    if (dToks[4] != primToks[4]) {
+      continue;
+    }
+    string dFieldName = dToks[3];
+    
+    fileNames.push_back(dName);
+    fieldNames.push_back(dFieldName);
+    
+    string fpath(dir);
+    fpath += RadxPath::RADX_PATH_DELIM;
+    fpath += dName;
+    filePaths.push_back(fpath);
+    
+  } // dp
+  
+  rdir.close();
+
+  return 0;
+
 }
 
 /////////////////////////////////////////////////////////////////
