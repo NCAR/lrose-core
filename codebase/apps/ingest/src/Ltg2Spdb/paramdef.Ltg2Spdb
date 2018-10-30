@@ -146,7 +146,8 @@ typedef enum {
   NLDN_BINARY,
   AOAWS_NETCDF,
   KSC,
-  ALBLM
+  ALBLM,
+  STARNET
 } input_format_t;
 
 paramdef enum input_format_t {
@@ -238,7 +239,16 @@ paramdef enum input_format_t {
   "ALBLM: Alaska BLM\n"
   " 15 comma delimited fields:\n"
   " OBJECTID,STROKETYPE,NETWORKCODE,UTCDATETIME,LOCALDATETIME,MILLISECONDS,LATITUDE,LONGITUDE,AMPLITUDE,GDOP,ERRSEMIMAJOR,ERRSEMIMINOR,ERRELIPSEANGLE,STRIKETIME,STRIKESEQNUMBER\n"
-  "\n";  
+  "\n"  
+  "STARNET: South American Lightning Network\n"
+  "  http://data.eol.ucar.edu/datafile/nph-get/486.002/STARNET_README_Reprocessed_Data.txt\n"
+  "  13+ space delimited fields:\n"
+  "  year month day hour minute second microsecond latitude longitude ellipse_error_m atd_error_microsec quality_control polarity n_rx n_atd ...\n"
+  "  quality: 0=good, 1=questionable, 2=bad\n"
+  "  polarity: 1=low, 2=median, 3=high\n"
+  "  n_rx: number of receivers used in solution\n"
+  "  n_atd: number of receivers used in solution\n"
+  "\n";
 } input_format;
 
 commentdef {

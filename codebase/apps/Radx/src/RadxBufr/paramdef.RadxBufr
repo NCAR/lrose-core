@@ -114,15 +114,15 @@ paramdef string {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Set to TRUE if we are watching for Gematronik XML volumes.";
-  p_help = "Gematronik volumes (for a given time) are stored in multiple files, one for each field. Therefore, after the time on a volume changes and a new field file is detected, we need to wait a while to ensure that all of the files have had a chance to be writted to disk. You need to set gematronik_realtime_wait_secs to a value in excess of the time it takes for all of the files to be written.";
-} gematronik_realtime_mode;
+  p_descr = "Set to TRUE if fields come in incrementally.";
+  p_help = "Some systems write fields from the same volume to separate files, so they come in incrementally. In this case, we need to wait some time for all of the fields to arrive before processing.";
+} incremental_realtime_mode;
 
 paramdef int {
-  p_default = 5;
+  p_default = 90;
   p_descr = "Number of seconds to wait, so that all field files can be written to disk before we start to read.";
-  p_help = "See 'gematronik_realtime_mode'.";
-} gematronik_realtime_wait_secs;
+  p_help = "See 'incremental_realtime_mode'.";
+} incremental_realtime_wait_secs;
 
 commentdef {
   p_header = "OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS";

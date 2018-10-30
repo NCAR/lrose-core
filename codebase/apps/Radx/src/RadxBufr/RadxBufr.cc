@@ -467,11 +467,11 @@ int RadxBufr::_runRealtimeNoLdata()
 //         -1 on failure
 
 int RadxBufr::_readFile(const string &readPath,
-                           RadxVol &vol)
+                        RadxVol &vol)
 {
-
+  
   PMU_auto_register("Processing file");
-
+  
   // clear all data on volume object
 
   vol.clear();
@@ -496,22 +496,20 @@ int RadxBufr::_readFile(const string &readPath,
     cerr << "  Input path: " << readPath << endl;
   }
   
-  // if we are reading gematronik files in realtime mode, we need to wait
+  // if we are reading incremental files in realtime mode, we need to wait
   // for all fields to be written before proceeding
-  /*
-  if (_params.mode == Params::REALTIME && _params.gematronik_realtime_mode) {
+  if (_params.mode == Params::REALTIME && _params.incremental_realtime_mode) {
     if (_params.debug) {
-      cerr << "Waiting for all Gematronik fields, sleeping for secs: "
-           << _params.gematronik_realtime_wait_secs << endl;
+      cerr << "Waiting for incremental fields, sleeping for secs: "
+           << _params.incremental_realtime_wait_secs << endl;
     }
-    for (int ii = 0; ii < _params.gematronik_realtime_wait_secs; ii++) {
-      PMU_auto_register("Waiting for Gematronik files");
+    for (int ii = 0; ii < _params.incremental_realtime_wait_secs; ii++) {
+      PMU_auto_register("Waiting for Incremental files");
       umsleep(1000);
     }
-    PMU_force_register("Got Gematronik files");
+    PMU_force_register("Got Incremental files");
   }
-  */
-  //GenericRadxFile inFile;
+
   BufrRadxFile inFile;
   _setupRead(inFile);
   if (strlen(_params.tables) > 0) {

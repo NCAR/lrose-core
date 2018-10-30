@@ -321,12 +321,16 @@ int Ltg2Spdb::_processFile(const char *file_path)
         break;
       }
 
-    case Params::ALBLM: {
-       _decode_alblm(line);
+      case Params::ALBLM: {
+        _decode_alblm(line);
         break;
-    }
-
-    
+      }
+        
+      case Params::STARNET: {
+        _decode_starnet(line);
+        break;
+      }
+        
       default: {}
 
     } // switch
@@ -1577,8 +1581,8 @@ int Ltg2Spdb::_decode_ksc(char const* line, char const *file_path)
     cerr << "Decoding line: " << line;
   }
 
-  const double ksc_lat = 28.538486;
-  const double ksc_lon = -80.639578; 
+  // const double ksc_lat = 28.538486;
+  // const double ksc_lon = -80.639578; 
 
   int jday, hour, min, sec, usec;
   int xCoord, yCoord, zCoord;
@@ -1659,6 +1663,101 @@ int Ltg2Spdb::_decode_ksc(char const* line, char const *file_path)
     
   }
   return 0;
+}
+
+///////////////////////////////////////////
+// decode STARNET line
+// NOTE: this fills out LTG_extended_t
+
+int Ltg2Spdb::_decode_starnet(const char *line)
+  
+{
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Decoding line: " << line;
+  }
+
+  int year, month, day, hour, min, sec, microsec;
+  double lat, lon;
+  double ellipse_error_m, atd_error_microsec;
+  double float1, float2;
+  int quality, polarity;
+  int n_rx, n_atd;
+
+  if (sscanf(line,
+             "%d %d %d %d %d %d %d "
+             "%lg %lg "
+             "%lg %lg "
+             "%lg %lg "
+             "%d %d "
+             "%d %d",
+             &year, &month, &day, &hour, &min, &sec, &microsec,
+             &lat, &lon,
+             &ellipse_error_m, &atd_error_microsec,
+             &float1, &float2,
+             &quality, &polarity,
+             &n_rx, &n_atd) != 17) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - _decode_starnet" << endl;
+      cerr << "  Cannot decode line: " << line << endl;
+      cerr << "  Expecting 15+ fields: " << endl;
+      cerr << "    year month day hour min sec microsecsec" << endl;
+      cerr << "    lat lon ellipse_error_m atd_error_microsec" << endl;
+      cerr << "    float1 float2" << endl;
+      cerr << "    quality polarity n_rx n_atd" << endl;
+    }
+    return -1;
+  }
+  
+  // check bounding box?
+  
+  if (_params.checkBoundingBox) {
+    if (lat < _params.boundingBox.min_lat ||
+        lat > _params.boundingBox.max_lat ||
+        lon < _params.boundingBox.min_lon ||
+        lon > _params.boundingBox.max_lon) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "WARNING - _decode_ualf_lf_1" << endl;
+        cerr << "  Data outside bounding box" << endl;
+        cerr << "  Data line: " << line << endl;
+      }
+      return -1;
+    }
+  }
+
+  // load up strike
+
+  DateTime stime(year, month, day, hour, min, sec);
+  time_t utime = stime.utime();
+  LTG_extended_t strike;
+  LTG_init_extended(&strike);
+  strike.time = (si32) utime;
+  strike.latitude = (fl32) lat;
+  strike.longitude = (fl32) lon;
+  strike.nanosecs = microsec * 1000;
+  strike.n_sensors = n_atd;
+  
+  // Check for duplicates?
+  if (_params.duplicates.check){
+    if ( _checkNearDuplicate( strike ) ){
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+	cerr << "Strike for " << strike.latitude << ", ";
+	cerr << strike.longitude << " at " << utimstr(strike.time);
+	cerr << " rejected as near duplicate." << endl;
+      }
+      return -1;
+    }
+  }
+
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    LTG_print_extended(stderr, &strike);
+  }
+
+  _addStrike(strike);
+
+  return 0;
+
 }
 
 /*********************************************************************
