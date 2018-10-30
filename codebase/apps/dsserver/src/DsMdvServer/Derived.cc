@@ -744,15 +744,16 @@ MdvxField *DsMdvServer::_createDiffFields(Params::derived_field_t *derived,
   // get the second field from another file based on url_2
 
   DsMdvx other(base);
+  time_t searchTime = base.getMasterHeader().time_centroid;
   int searchMarginSecs = 0;
   if (derived->i_arg_2 > 0) {
     searchMarginSecs = derived->i_arg_2;
   }
   if (base._readTimeSet) {
-    other.setReadTime(base._readSearchMode,
+    other.setReadTime(Mdvx::READ_CLOSEST,
 		      derived->url_2,
                       searchMarginSecs,
-		      base._readSearchTime + derived->i_arg_1,
+		      searchTime + derived->i_arg_1,
 		      base._readForecastLeadTime);
   } else {
     other.setReadPath(derived->url_2);
