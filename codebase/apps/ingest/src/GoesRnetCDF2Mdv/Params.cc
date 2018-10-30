@@ -1076,6 +1076,27 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("CHECK QUALITY FIELD");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'check_quality_field'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_quality_field");
+    tt->descr = tdrpStrDup("Option to check quality field when filling output data field.");
+    tt->help = tdrpStrDup("If true, the output data field will only be filled if the quality field value is 0. If false, the quality field will not be checked.");
+    tt->val_offset = (char *) &check_quality_field - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("ENCODING AND COMPRESSION CONVERSION");
     tt->comment_text = tdrpStrDup("");
     tt++;

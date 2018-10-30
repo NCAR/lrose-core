@@ -303,7 +303,7 @@ void GoesRnetCDF2Mdv::_addData(float *out_data, float *qc_data, float *rad_data)
       }
       
      
-      if(_dataQuality[satIndex] == 0) {
+      if(_dataQuality[satIndex] == 0 || !_params->check_quality_field) {
 
 	if(rad_data != NULL) {
 	  rad_data[outDataIndex] = _radiance[satIndex];
@@ -327,7 +327,9 @@ void GoesRnetCDF2Mdv::_addData(float *out_data, float *qc_data, float *rad_data)
 	}
 	max_val = fmax(out_data[outDataIndex], max_val);
 	min_val = fmin(out_data[outDataIndex], min_val);
-      }
+
+      } // if(_dataQuality[satIndex] == 0)
+
     } /* endfor - x_index */
 
   } /* endfor - y_index */

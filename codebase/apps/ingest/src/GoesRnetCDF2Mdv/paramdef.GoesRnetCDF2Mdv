@@ -374,6 +374,22 @@ paramdef boolean
 } correct_albedo_for_sun_angle;
 
 /***********************************************************************
+ * Check quality field
+ */
+
+commentdef
+{
+  p_header = "CHECK QUALITY FIELD";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to check quality field when filling output data field.";
+  p_help = "If true, the output data field will only be filled if the quality field value is 0. If false, the quality field will not be checked.";
+  p_default = true;
+} check_quality_field;
+
+/***********************************************************************
  * Encoding and compression parameters
  */
 
