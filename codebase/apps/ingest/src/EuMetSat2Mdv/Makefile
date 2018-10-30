@@ -58,8 +58,7 @@ HDRS = \
 	Field.hh \
 	FieldSet.hh \
 	Hrit.hh \
-	OutputFile.hh \
-	SunAngle.hh
+	OutputFile.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
@@ -72,8 +71,7 @@ CPPC_SRCS = \
 	FieldSet.cc \
 	Hrit.cc \
 	Main.cc \
-	OutputFile.cc \
-	SunAngle.cc
+	OutputFile.cc
 
 #
 # tdrp macros
