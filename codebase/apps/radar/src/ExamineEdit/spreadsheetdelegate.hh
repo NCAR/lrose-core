@@ -4,6 +4,7 @@
 #define SPREADSHEETDELEGATE_H
 
 //#include "spreadsheet.h"
+#include "FunctionEditor.hh"
 
 #include <QItemDelegate>
 

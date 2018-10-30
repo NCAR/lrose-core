@@ -4,6 +4,7 @@
 
 #include <QWidget>
 #include "DialogOptionsWidget.hh"
+#include "../ExamineEdit/TextEdit.hh"
 
 class QCheckBox;
 class QLabel;

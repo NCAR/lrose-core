@@ -355,20 +355,21 @@ void Dialog::createOptionsGroupBox()
 
     // add menu to button
   QMenu *menu = new QMenu(this);
-  menu->addAction("Testaaaaaaaaaaaaaaaaaaaaa");
-  menu->addAction("Test1");
-  menu->addAction("Test2");
+  menu->addAction("Add Row");
+  menu->addAction("Add Column");
+  menu->addAction("Delete Row");
+  menu->addAction("Delete Column");
  
   // hiddenContextPushButton = new HiddenContextMenu();
   //hiddenContextPushButton->installEventFilter(this);
-  theButton = new QPushButton(QString("here"));
+  theButton = new QPushButton(QString(""));
   theButton->installEventFilter(this);
   //YourButton *yourButton = new YourButton();
   //connect(yourButton, &YourButton::focusInEvent(QFocusEvent *), this, &Dialog::revealButton());
   //connect(yourButton, &YourButton::focusOutEvent(QFocusEvent *), this, &Dialog::coverButton());
 
-  // hiddenContextPushButton->setFlat(true);
-  //hiddenContextPushButton->setMenu(menu);
+  //theButton->setFlat(true);
+  theButton->setMenu(menu);
   // connect(hiddenContextPushButton, &HiddenContextMenu::hoverOverEvent(), // &cQPushButton::focusInEvent(QFocusEvent *),
 	  // this, &Dialog::revealButton());
   // connect(hiddenContextPushButton, &HiddenContextMenu::hoverOffEvent(),  // &QPushButton::focusOutEvent(QFocusEvent *),
@@ -432,10 +433,18 @@ bool Dialog::eventFilter(QObject *obj, QEvent *event)
        if (event->type() == QEvent::Enter) {
             cerr << " Enter " << endl;;
             //theButton->setVisible(true);
+            // signal event to pop up context menu
+
             return true;
        } 
        if (event->type() == QEvent::Leave) {
             cerr << " Leave " << endl;;
+            //theButton->setVisible(false);
+            return true;
+       } 
+       if (event->type() == QEvent::MouseButtonRelease) {
+            // catch this event for selecting the row or column
+            cerr << " MouseButtonRelease " << endl;;
             //theButton->setVisible(false);
             return true;
        } 

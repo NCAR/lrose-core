@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 
+//#include "TextEdit.hh"
 #include "SpreadSheetView.hh"
 #include "spreadsheetdelegate.hh"
 #include "spreadsheetitem.hh"
@@ -31,13 +32,14 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
 
   //_volumeData = vol;
     addToolBar(toolBar = new QToolBar());
-    formulaInput = new QLineEdit();
+    formulaInput = new TextEdit(this);
+    // formulaInput = new QTextEdit();
 
     cellLabel = new QLabel(toolBar);
     cellLabel->setMinimumSize(80, 0);
 
     toolBar->addWidget(cellLabel);
-    toolBar->addWidget(formulaInput);
+    //toolBar->addWidget(formulaInput);
 
     table = new QTableWidget(rows, cols, this);
     table->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
@@ -72,12 +74,13 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
     connect(table, &QTableWidget::currentItemChanged,
             this, &SpreadSheetView::updateColor);
     connect(table, &QTableWidget::currentItemChanged,
-            this, &SpreadSheetView::updateLineEdit);
+            this, &SpreadSheetView::updateTextEdit);
     connect(table, &QTableWidget::itemChanged,
             this, &SpreadSheetView::updateStatus);
-    connect(formulaInput, &QLineEdit::returnPressed, this, &SpreadSheetView::returnPressed);
+    //    connect(formulaInput, &QTextEdit::returnPressed, this, &SpreadSheetView::returnPressed);
+    // connect(formulaInput, &TextEdit::Pressed, this, &SpreadSheetView::returnPressed);
     connect(table, &QTableWidget::itemChanged,
-            this, &SpreadSheetView::updateLineEdit);
+            this, &SpreadSheetView::updateTextEdit);
 
     setWindowTitle(tr("Spreadsheet"));
 
@@ -100,13 +103,15 @@ SpreadSheetView::SpreadSheetView(std::string fileName, QWidget *parent)
 
   //_volumeData = vol;
     addToolBar(toolBar = new QToolBar());
-    formulaInput = new QLineEdit();
+    //formulaInput = new TextEdit(this); // parent);
+    //SpreadSheetDelegate *formulaEditor = new SpreadSheetDelegate(this); // new QTextEdit();
+    //formulaInput = formulaEditor->createEditor(this, ); // new QTextEdit();
 
     cellLabel = new QLabel(toolBar);
     cellLabel->setMinimumSize(80, 0);
 
     toolBar->addWidget(cellLabel);
-    toolBar->addWidget(formulaInput);
+    //toolBar->addWidget(formulaInput);
 
     table = new QTableWidget(rows, cols, this);
     table->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
@@ -143,12 +148,12 @@ SpreadSheetView::SpreadSheetView(std::string fileName, QWidget *parent)
     connect(table, &QTableWidget::currentItemChanged,
             this, &SpreadSheetView::updateColor);
     connect(table, &QTableWidget::currentItemChanged,
-            this, &SpreadSheetView::updateLineEdit);
+            this, &SpreadSheetView::updateTextEdit);
     connect(table, &QTableWidget::itemChanged,
             this, &SpreadSheetView::updateStatus);
-    connect(formulaInput, &QLineEdit::returnPressed, this, &SpreadSheetView::returnPressed);
+    // connect(formulaInput, &QTextEdit::returnPressed, this, &SpreadSheetView::returnPressed);
     connect(table, &QTableWidget::itemChanged,
-            this, &SpreadSheetView::updateLineEdit);
+            this, &SpreadSheetView::updateTextEdit);
 
     setWindowTitle(tr("Spreadsheet"));
 }
@@ -305,7 +310,7 @@ void SpreadSheetView::updateColor(QTableWidgetItem *item)
     colorAction->setIcon(pix);
 }
 
-void SpreadSheetView::updateLineEdit(QTableWidgetItem *item)
+void SpreadSheetView::updateTextEdit(QTableWidgetItem *item)
 {
     if (item != table->currentItem())
         return;
@@ -317,7 +322,9 @@ void SpreadSheetView::updateLineEdit(QTableWidgetItem *item)
 
 void SpreadSheetView::returnPressed()
 {
-    QString text = formulaInput->text();
+    QString text = formulaInput->getText();
+    cerr << "text entered: " << text.toStdString() << endl;
+
     int row = table->currentRow();
     int col = table->currentColumn();
     QTableWidgetItem *item = table->item(row, col);
@@ -364,6 +371,51 @@ void SpreadSheetView::selectFont()
             i->setFont(fnt);
     }
 }
+/*
+bool SpreadSheetView::runFunctionDialog(const QString &title,
+                                 const QString &c1Text,
+                                 const QString &c2Text,
+                                 const QString &opText,
+                                 const QString &outText,
+                                 QString *cell1, QString *cell2, QString *outCell)
+{
+    QStringList rows, cols;
+    for (int c = 0; c < table->columnCount(); ++c)
+        cols << QChar('A' + c);
+    for (int r = 0; r < table->rowCount(); ++r)
+        rows << QString::number(1 + r);
+
+    QDialog functionDialog(this);
+    //functionDialog.setWindowTitle(title);
+
+    TextEdit textEditArea();
+
+    QPushButton cancelButton(tr("Cancel"), &functionDialog);
+    connect(&cancelButton, &QAbstractButton::clicked, &functionDialog, &QDialog::reject);
+
+    QPushButton okButton(tr("OK"), &functionDialog);
+    okButton.setDefault(true);
+    connect(&okButton, &QAbstractButton::clicked, &functionDialog, &QDialog::accept);
+
+    QHBoxLayout *buttonsLayout = new QHBoxLayout;
+    buttonsLayout->addStretch(1);
+    buttonsLayout->addWidget(&okButton);
+    buttonsLayout->addSpacing(10);
+    buttonsLayout->addWidget(&cancelButton);
+
+    QHBoxLayout *dialogLayout = new QHBoxLayout(&functionDialog);
+    dialogLayout->addWidget(&textEditArea);
+    dialogLayout->addStretch(1);
+    dialogLayout->addItem(buttonsLayout);
+
+    if (addDialog.exec()) {
+        QString formula = textEditArea.getText();
+        return true;
+    }
+
+    return false;
+}
+*/
 
 bool SpreadSheetView::runInputDialog(const QString &title,
                                  const QString &c1Text,

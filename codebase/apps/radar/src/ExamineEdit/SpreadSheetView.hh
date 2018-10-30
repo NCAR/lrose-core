@@ -4,13 +4,15 @@
 #define SPREADSHEETVIEW_HH
 
 #include <QMainWindow>
+#include "TextEdit.hh"
 #include "SpreadSheetUtils.hh"
 #include "SpreadSheetController.hh"
+#include "SpreadSheetDelegate.hh"
 
 #include <QWidget>
 #include <QAction>
 #include <QLabel>
-#include <QLineEdit>
+#include <QTextEdit>
 #include <QToolBar>
 #include <QTableWidgetItem>
 #include <QTableWidget>
@@ -30,7 +32,7 @@ public:
 public slots:
     void updateStatus(QTableWidgetItem *item);
     void updateColor(QTableWidgetItem *item);
-    void updateLineEdit(QTableWidgetItem *item);
+    void updateTextEdit(QTableWidgetItem *item);
     void returnPressed();
     void selectColor();
     void selectFont();
@@ -60,6 +62,8 @@ protected:
     void createActions();
 
     void actionMath_helper(const QString &title, const QString &op);
+    bool runFunctionDialog();
+
     bool runInputDialog(const QString &title,
                         const QString &c1Text,
                         const QString &c2Text,
@@ -95,7 +99,9 @@ private:
 
     QLabel *cellLabel;
     QTableWidget *table;
-    QLineEdit *formulaInput;
+    TextEdit *formulaInput;
+    //QTextEdit *formulaInput;
+  // SpreadSheetDelegate *formulaInput;
 
 
 const char *htmlText =
