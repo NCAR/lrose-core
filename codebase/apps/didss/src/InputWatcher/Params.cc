@@ -1011,7 +1011,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("copy_to_time_stamped_file");
     tt->descr = tdrpStrDup("Option to copy to a file with name based on the time.");
-    tt->help = tdrpStrDup("If TRUE, the file will be copied to a file, in the directory 'output_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'.");
+    tt->help = tdrpStrDup("If TRUE, the file will be copied to a file, in the directory 'output_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'. This option takes precedence over copy_using_original_name.");
     tt->val_offset = (char *) &copy_to_time_stamped_file - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -1025,6 +1025,18 @@
     tt->descr = tdrpStrDup("Option to make a copy of the file using its original name.");
     tt->help = tdrpStrDup("If TRUE, the file will be copied to a directory 'copy_dir/yyyymmdd/original_file_name', i.e. preserving the original file name. 'copy_to_time_stamped_file' takes precedence, and overrides this option.");
     tt->val_offset = (char *) &copy_using_original_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'append_date_time_to_original_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("append_date_time_to_original_name");
+    tt->descr = tdrpStrDup("Option to append the date and time to the original name.");
+    tt->help = tdrpStrDup("If TRUE, yyyymmdd_hhmmss will be appended to the original file name. This helps to keep forecast data unique, if applicable.");
+    tt->val_offset = (char *) &append_date_time_to_original_name - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

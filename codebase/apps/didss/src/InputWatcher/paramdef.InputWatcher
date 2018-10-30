@@ -253,7 +253,7 @@ commentdef {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to copy to a file with name based on the time.";
-  p_help = "If TRUE, the file will be copied to a file, in the directory 'output_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'.";
+  p_help = "If TRUE, the file will be copied to a file, in the directory 'output_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'. This option takes precedence over copy_using_original_name.";
 } copy_to_time_stamped_file;
 
 paramdef boolean {
@@ -261,6 +261,12 @@ paramdef boolean {
   p_descr = "Option to make a copy of the file using its original name.";
   p_help = "If TRUE, the file will be copied to a directory 'copy_dir/yyyymmdd/original_file_name', i.e. preserving the original file name. 'copy_to_time_stamped_file' takes precedence, and overrides this option.";
 } copy_using_original_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to append the date and time to the original name.";
+  p_help = "If TRUE, yyyymmdd_hhmmss will be appended to the original file name. This helps to keep forecast data unique, if applicable.";
+} append_date_time_to_original_name;
 
 paramdef boolean {
   p_default = FALSE;

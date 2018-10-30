@@ -367,21 +367,33 @@ int InputWatcher::_copyFile(const char *inputPath, time_t modTime)
   if (_params.copy_to_time_stamped_file) {
     if (_params.add_day_to_filename) {
       // YYYYMMDD_HHMMSS
-      sprintf(copyName, "%s%.4d%.2d%.2d_%.2d%.2d%.2d%s",
-              prefixStr.c_str(),
-	      mtime.getYear(), mtime.getMonth(), mtime.getDay(),
-	      mtime.getHour(), mtime.getMin(), mtime.getSec(),
-              extStr.c_str());
+      snprintf(copyName, MAX_PATH_LEN,
+               "%s%.4d%.2d%.2d_%.2d%.2d%.2d%s",
+               prefixStr.c_str(),
+               mtime.getYear(), mtime.getMonth(), mtime.getDay(),
+               mtime.getHour(), mtime.getMin(), mtime.getSec(),
+               extStr.c_str());
     } else {
       // HHMMSS
-      sprintf(copyName, "%s%.2d%.2d%.2d%s",
-	      prefixStr.c_str(),
-              mtime.getHour(), mtime.getMin(), mtime.getSec(),
-              extStr.c_str());
+      snprintf(copyName, MAX_PATH_LEN,
+               "%s%.2d%.2d%.2d%s",
+               prefixStr.c_str(),
+               mtime.getHour(), mtime.getMin(), mtime.getSec(),
+               extStr.c_str());
     }
   } else {
-    // use original name
-    sprintf(copyName, "%s", ppath.getFile().c_str());
+    if (_params.append_date_time_to_original_name) {
+      // append date_time to original name
+      snprintf(copyName, MAX_PATH_LEN,
+               "%s_%.4d%.2d%.2d_%.2d%.2d%.2d",
+               ppath.getFile().c_str(),
+               mtime.getYear(), mtime.getMonth(), mtime.getDay(),
+               mtime.getHour(), mtime.getMin(), mtime.getSec());
+    } else {
+      // use original name unchanged
+      snprintf(copyName, MAX_PATH_LEN,
+               "%s", ppath.getFile().c_str());
+    }
   }
 
   // compression extensions
