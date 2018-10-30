@@ -27,6 +27,7 @@ MODULE_TYPE = library
 HDRS =
 
 CPPC_SRCS = \
+	SunAngle.cc \
 	SunPosn.cc
 
 C_SRCS = \
