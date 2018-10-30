@@ -358,6 +358,22 @@ paramdef enum units_convert_type_t
 } units_convert_type;
 
 /***********************************************************************
+ * Correct albedo for sun angle
+ */
+
+commentdef
+{
+  p_header = "CORRECT ALBEDO FOR SUN ANGLE";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to correct albedo fields for sun angle.";
+  p_help = "If true, the albedo fields are corrected for sun incidence angle. This brigtens the scene at low sun angles.";
+  p_default = false;
+} correct_albedo_for_sun_angle;
+
+/***********************************************************************
  * Encoding and compression parameters
  */
 

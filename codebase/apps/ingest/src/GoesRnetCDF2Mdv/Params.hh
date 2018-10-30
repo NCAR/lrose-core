@@ -497,6 +497,8 @@ public:
 
   units_convert_type_t units_convert_type;
 
+  tdrp_bool_t correct_albedo_for_sun_angle;
+
   data_out_t out_data_prep;
 
   tdrp_bool_t include_qc_field;
@@ -514,7 +516,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[44];
 
   const char *_className;
 

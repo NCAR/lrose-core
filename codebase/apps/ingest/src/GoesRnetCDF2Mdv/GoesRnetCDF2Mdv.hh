@@ -36,12 +36,9 @@
 #ifndef GoesRnetCDF2Mdv_HH
 #define GoesRnetCDF2Mdv_HH
 
-//#include <cstdio>
-//#include <string>
-//#include <vector>
-
 #include <dsdata/DsTrigger.hh>
 #include <toolsa/DateTime.hh>
+#include <euclid/SunAngle.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxProj.hh>
@@ -843,6 +840,10 @@ class GoesRnetCDF2Mdv
   std::vector< std::time_t > _timeStarLook;
   std::vector< float > _bandWavelengthStarLook;
   std::vector< int > _starID;
+
+  // sun angle computations for albedo correction
+
+  SunAngle _sunAngle;
   
   /////////////////////
   // Private methods //
@@ -945,7 +946,9 @@ class GoesRnetCDF2Mdv
 
   
   float _radianceToBrightTemp(float rad);
-  float _radianceToAlbedo(float rad);
+  float _radianceToAlbedo(float rad, 
+                          double lat = -9999.0,
+                          double lon = -9999.0);
   bool _latLon2XY(double lat, double lon, int& col_num,  int& line_num);  
   void _addData(float *out_data, float *qc_data, float *rad_data);
   MdvxField* _createField(const std::string &field_name,

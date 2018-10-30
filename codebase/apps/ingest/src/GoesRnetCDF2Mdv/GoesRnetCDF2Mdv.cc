@@ -270,26 +270,30 @@ void GoesRnetCDF2Mdv::_addData(float *out_data, float *qc_data, float *rad_data)
       double lat, lon;
       int xSatIdx, ySatIdx;
             
-       _outputDomain.xyIndex2latlon(xOutIdx, yOutIdx, lat, lon);
+      _outputDomain.xyIndex2latlon(xOutIdx, yOutIdx, lat, lon);
+      
+      // cerr << "yOutIdx: " << yOutIdx << "  xOutIdx: "
+      //      << xOutIdx << "  lat: " << lat << "  lon: " << lon << endl;
 
-       //	cerr << "yOutIdx: " << yOutIdx << "  xOutIdx: " << xOutIdx << "  lat: " << lat << "  lon: " << lon << endl;
-
-	// Convert lat/lon to satellite space x/y
-	  
+      // Convert lat/lon to satellite space x/y
+      
       if(!_latLon2XY(lat, lon, xSatIdx, ySatIdx)) {
 	//	cerr << "in a bad place" << endl;
 	continue;
       }
 
-      //      cerr << "in a good place   " << xSatIdx << "  " << ySatIdx << "   " << _numX << "   "  << (ySatIdx*static_cast<int>(_numX) + xSatIdx) << endl;
+      // cerr << "in a good place   " << xSatIdx << "  "
+      //      << ySatIdx << "   " << _numX << "   "
+      //      << (ySatIdx*static_cast<int>(_numX) + xSatIdx) << endl;
 
       int satIndex =  ySatIdx*static_cast<int>(_numX) + xSatIdx;
 
       //      cerr << "made it a little farther  " <<  satIndex << endl;
 
-      
       if(satIndex < 0) {
-	//	cerr << "satIndex: " << satIndex << " for (lat,lon) of (" << lat << "," << lon << ")" << endl;
+        // cerr << "satIndex: " << satIndex
+        //      << " for (lat,lon) of (" << lat << ","
+        //      << lon << ")" << endl;
 	continue;
       }
       size_t outDataIndex = yOutIdx*coords.nx + xOutIdx;
@@ -308,16 +312,18 @@ void GoesRnetCDF2Mdv::_addData(float *out_data, float *qc_data, float *rad_data)
 	if(_bandID < EMISSIVE_BAND_START) {
 	  // reflective bands 1 - 6
 
-	  if((_radiance[satIndex] < 0.0) && (_params->debug == Params::DEBUG_VERBOSE)) {
+	  if((_radiance[satIndex] < 0.0) &&
+             (_params->debug == Params::DEBUG_VERBOSE)) {
 	    cerr << "radiance < 0" << endl;
 	  }
 	  
-	  out_data[outDataIndex] = _radianceToAlbedo(_radiance[satIndex]);
-
+	  out_data[outDataIndex] = 
+            _radianceToAlbedo(_radiance[satIndex], lat, lon);
+          
 	}
 	else {
 	  // emissive bands 7 - 16
-	 out_data[outDataIndex] = _radianceToBrightTemp(_radiance[satIndex]);
+          out_data[outDataIndex] = _radianceToBrightTemp(_radiance[satIndex]);
 	}
 	max_val = fmax(out_data[outDataIndex], max_val);
 	min_val = fmin(out_data[outDataIndex], min_val);
@@ -1353,6 +1359,9 @@ void GoesRnetCDF2Mdv::_readTimeVars()
   double val;
   varT.getVal(&val);
   _midpointTime = J2000_EPOCH_START + static_cast< time_t >(round(val));
+  if (_params->correct_albedo_for_sun_angle) {
+    _sunAngle.initForTime(_midpointTime);
+  }
 
   NcxxDim dim = _file.getDim(NUMBER_OF_TIME_BOUNDS);
   if(dim.isNull() == true) {
@@ -1568,7 +1577,7 @@ void GoesRnetCDF2Mdv::_readProjectionVars()
 
   
   // initialize coeffiecients for the projective geometry 
-  float flatten = 1.0/_inverseFlattening;
+  double flatten = 1.0/_inverseFlattening;
   _ecc = sqrt(2.0*flatten - flatten*flatten);
   _radiusRatio2 = pow((_semiMajorAxis/_semiMinorAxis), 2.0);
   _invRadiusRatio2 = 1.0/_radiusRatio2;
@@ -1987,33 +1996,38 @@ void GoesRnetCDF2Mdv::_readRadianceVars()
 
   for (size_t i = 0; i < nPts; i++) {
     if (svals[i] != _ncRadMissingVal) {
+
       _radiance[i] = static_cast<float>(svals[i])*scaleFactor + offset;
 
-      // somehow small negative radiances values can be computed for svals that are
-      // less than offset/scaleFactor. 
+      // somehow small negative radiances values can be computed
+      // for svals that are less than offset/scaleFactor. 
       if(_radiance[i] < 0.0) {
 	_radiance[i] = 0.0;
       }
-      
-      // if(_radiance[i] < 0.0) {
-      // 	cerr << "radiance < 0" << endl;
-      // }
 
-      // if(i < 100) {
-	  
-      // 	  if(_bandID < EMISSIVE_BAND_START) {
-      // 	    cerr << "  i: " << i << "  svals: " << svals[i] << "  rad data:"
-      // 		 << _radiance[i] << "   albedo: " <<  _radianceToAlbedo(_radiance[i]) << endl;
-      // 	  }
-      // 	  else {
-      // 	    cerr << "  i: " << i << "  svals: " << svals[i] << "  rad data:"
-      // 		 << _radiance[i] << "   btemp: " <<  _radianceToBrightTemp(_radiance[i]) << endl;
-      // 	  }
+#ifdef DEBUG_PRINT
+      if(_radiance[i] < 0.0) {
+      	cerr << "radiance < 0" << endl;
+      }
+      if(i < 100) {
+        if(_bandID < EMISSIVE_BAND_START) {
+          cerr << "  i: " << i << "  svals: "
+               << svals[i] << "  rad data:"
+               << _radiance[i] << "   albedo: "
+               <<  _radianceToAlbedo(_radiance[i]) << endl;
+        } else {
+          cerr << "  i: " << i << "  svals: "
+               << svals[i] << "  rad data:"
+               << _radiance[i] << "   btemp: "
+               <<  _radianceToBrightTemp(_radiance[i]) << endl;
+        }
+      }
+#endif
 
-      // 	}
-    }
-    else {
-      //      cerr << "got a missing value here" << endl;
+    } else {
+#ifdef DEBUG_PRINT
+      cerr << "got a missing value here" << endl;
+#endif
     }
   }
   delete [] svals;
@@ -2262,14 +2276,29 @@ float GoesRnetCDF2Mdv::_radianceToBrightTemp(float rad)
  * _radianceToAlbedo()
  */
 
-float GoesRnetCDF2Mdv::_radianceToAlbedo(float rad)
+float GoesRnetCDF2Mdv::_radianceToAlbedo(float rad,
+                                         double lat, double lon)
 {
   static const string methodName = "GoesRnetCDF2Mdv::_radianceToAlbedo()";
-
+  
   float albedo = rad;
 
   if(rad != MISSING_DATA_VALUE) {
+
     albedo = 100.0 * rad * _kappa0; // the 100 is to convert to percent [0,100]
+
+    // optionally correct for sun angle
+    if (_params->correct_albedo_for_sun_angle && lat > -90 && lon > -360) {
+      double sinAlt = _sunAngle.computeSinAlt(lat, lon);
+      if (sinAlt < 0.1) {
+        sinAlt = 0.1;
+      }
+      albedo = albedo / sinAlt;
+      if (albedo > 100.0) {
+        albedo = (float) 100.0;
+      }
+    }
+
   }
   
   return albedo;

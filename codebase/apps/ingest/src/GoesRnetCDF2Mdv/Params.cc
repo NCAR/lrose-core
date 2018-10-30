@@ -1055,6 +1055,27 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("CORRECT ALBEDO FOR SUN ANGLE");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'correct_albedo_for_sun_angle'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("correct_albedo_for_sun_angle");
+    tt->descr = tdrpStrDup("Option to correct albedo fields for sun angle.");
+    tt->help = tdrpStrDup("If true, the albedo fields are corrected for sun incidence angle. This brigtens the scene at low sun angles.");
+    tt->val_offset = (char *) &correct_albedo_for_sun_angle - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("ENCODING AND COMPRESSION CONVERSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
