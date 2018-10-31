@@ -210,6 +210,11 @@ private:
                                   DsMdvServer::read_action_t action,
                                   string &errStr);
   
+  MdvxField *_createPseudoColorImage(Params::derived_field_t *derived,
+                                     const DsMdvx &base,
+                                     DsMdvServer::read_action_t action,
+                                     string &errStr);
+  
   bool _checkFieldGeometry(const Mdvx::field_header_t &fhdr1,
 			   const Mdvx::field_header_t &fhdr2);
   

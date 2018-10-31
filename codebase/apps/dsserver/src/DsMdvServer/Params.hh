@@ -93,7 +93,8 @@ public:
     FUNC_DIFF_FIELDS_SAME_FILE = 3,
     FUNC_DIFF_FIELDS = 4,
     FUNC_DIFF_IN_TIME = 5,
-    FUNC_VERT_COMPOSITE = 6
+    FUNC_VERT_COMPOSITE = 6,
+    FUNC_PSEUDO_COLOR_IMAGE = 7
   } function_t;
 
   typedef enum {

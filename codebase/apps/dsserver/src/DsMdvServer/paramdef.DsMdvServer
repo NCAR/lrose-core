@@ -419,7 +419,8 @@ typedef enum {
   FUNC_DIFF_FIELDS_SAME_FILE,
   FUNC_DIFF_FIELDS,
   FUNC_DIFF_IN_TIME,
-  FUNC_VERT_COMPOSITE
+  FUNC_VERT_COMPOSITE,
+  FUNC_PSEUDO_COLOR_IMAGE
 } function_t;
 
 typedef struct {
@@ -499,8 +500,8 @@ paramdef struct derived_field_t {
   "FUNC_DIFF_IN_TIME:\n  compute difference between data now and at a different time. Field name is given in field_name_1. Time difference in seconds is given in i_arg_1. So time for second file is time for first file plus i_arg_1. Data difference is computed as value now minus the value at the different time. Apply a multiplier of -1 to change the sign.\n\n"
 
   "FUNC_VERT_COMPOSITE:\n  compute a vertical composite, which is the maximum value at any level. Optionally you can specify vertical level limits. Field name to be composited is given in field_name_1. If i_arg_1 is 0, the composite is computed from all vertical levels. If i_arg_1 is 1, the minimum vertical level is given in d_arg_1 and the maximum level in d_arg_2.\n\n"
-
-  "  \n\n";
+    
+    "FUNC_PSEUDO_COLOR_IMAGE:\n  combine 3 fields to form a color image layer. The fields are in separate files. The primary url is the red channel, url_2 is the green channel, and url_3 is the blue channel. field_name_1 is for the red channel. field_name_2 is for the green channel. s_arg_1 is the field name for the blue channel. i_arg_1 is the transparency of the RGB - normally set to 255. d_arg_1 is the saturation value for the red channel - the red values are scaled using this saturation value. d_arg_2 is the saturation value for the green channel - the green values are scaled using this saturation value. d_arg_3 is the saturation value for the blue channel - the blue values are scaled using this saturation value.\n\n";
 
 } derived_fields[];
 
