@@ -88,8 +88,39 @@ OutputFile::writeVol( time_t genTime, long int leadSecs )
   }
   
   // convert field encoding and compression
-  
-  for (int ii = 0; ii < _mdvObj->getNFields(); ii++) {
+
+  if (_paramsPtr->process_everything) {
+
+    // loop through fields, converting and compressing
+
+    Mdvx::encoding_type_t encoding = mdvEncoding(_paramsPtr->encoding_type);
+    Mdvx::compression_type_t compression = mdvCompression(_paramsPtr->compression_type);
+
+    for (int ii = 0; ii < _mdvObj->getNFields(); ii++) {
+      MdvxField *field = _mdvObj->getField(ii);
+      field->convertType(encoding, compression);
+    } // ii
+
+  } else {
+
+    // loop through fields, converting and compressing
+
+    Mdvx::compression_type_t compression = mdvCompression(_paramsPtr->compression_type);
+    
+    for (int ii = 0; ii < _mdvObj->getNFields(); ii++) {
+      MdvxField *field = _mdvObj->getField(ii);
+      string fieldName(field->getFieldHeader().field_name);
+      // find encoding for this particular fields
+      Mdvx::encoding_type_t encoding = mdvEncoding(_paramsPtr->encoding_type);
+      for (int jj = 0; jj < _paramsPtr->output_fields_n; jj++) {
+        Params::out_field_t ofld = _paramsPtr->_output_fields[jj];
+        string mdvName(ofld.mdv_name);
+        if (mdvName == fieldName) {
+          encoding = mdvEncoding(ofld.encoding_type);
+        }
+      }
+      field->convertType(encoding, compression);
+    } // ii
 
   }
 
@@ -102,7 +133,7 @@ OutputFile::writeVol( time_t genTime, long int leadSecs )
   }
 
   if(_paramsPtr->writeLdataInfo && _paramsPtr->debug) {
-    cout << "Writing LdataInfo..." << endl << flush;
+    cerr << "Writing LdataInfo..." << endl << flush;
   }
 
   // Write non forecast style file
@@ -118,6 +149,10 @@ OutputFile::writeVol( time_t genTime, long int leadSecs )
 	_setMasterHdr( genTime, 0, false );
       }
     }
+    if(_paramsPtr->debug) {
+      cerr << "Writing non-forecast style to dir: "
+           << _paramsPtr->non_forecast_mdv_url << endl;
+    }
     if( _mdvObj->writeToDir( _paramsPtr->non_forecast_mdv_url ) ) {
       cerr << "ERROR: Could not write file: "
            << _mdvObj->getErrStr() << endl << flush;
@@ -130,6 +165,10 @@ OutputFile::writeVol( time_t genTime, long int leadSecs )
   if( _paramsPtr->write_forecast ) {
     _setMasterHdr( genTime, leadSecs, false );
     _mdvObj->setWriteAsForecast();
+    if(_paramsPtr->debug) {
+      cerr << "Writing forecast style to dir: "
+           << _paramsPtr->forecast_mdv_url << endl;
+    }
     if( _mdvObj->writeToDir( _paramsPtr->forecast_mdv_url ) ) {
       cerr << "ERROR: Could not write file: "
            << _mdvObj->getErrStr() << endl << flush;
@@ -137,7 +176,7 @@ OutputFile::writeVol( time_t genTime, long int leadSecs )
     }
   }
 
-  cout << "File written: " << _mdvObj->getPathInUse() << endl;
+  cerr << "File written: " << _mdvObj->getPathInUse() << endl;
 
   // Clean up
 
@@ -205,13 +244,10 @@ OutputFile::addField( MdvxField *field, Mdvx::encoding_type_t encoding)
      _remap(field);
    }
 
-  Mdvx::compression_type_t compression = mdvCompression(_paramsPtr->compression_type);
-
-  field->convertType(encoding, compression);
-
    // Add field to volume
-
+  
    _mdvObj->addField( field );
+
 }
 
 void 

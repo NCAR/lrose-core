@@ -267,7 +267,7 @@ int Grib2Mdv::getData()
       //
       // Inventory the file
       PMU_auto_register( "Reading grib2 file" );
-      cout << "Reading file " << filePath << endl << flush;
+      cerr << "Reading file " << filePath << endl;
       if(_Grib2File->read(filePath) != Grib2::GRIB_SUCCESS)
 	continue;
 
@@ -358,7 +358,8 @@ int Grib2Mdv::getData()
         }
 
 	if (_paramsPtr->debug)
-	  cout << "Getting fields for forecast time of " << *leadTime << " seconds." << endl;
+	  cerr << "Getting fields for forecast time of "
+               << *leadTime << " seconds." << endl;
 
 	// Loop over the list of fields to process
 	// Keep track of the generate and forecast times
@@ -371,7 +372,7 @@ int Grib2Mdv::getData()
           PMU_auto_register(filePath.c_str());
 
 	  if (_paramsPtr->debug)
-	    cout << "Looking for field " <<  _field->param
+	    cerr << "Looking for field " <<  _field->param
                  << " level  " << _field->level << endl;
 	  
 	  vector<Grib2::Grib2Record::Grib2Sections_t>
@@ -385,7 +386,7 @@ int Grib2Mdv::getData()
 	  fl32 *currDataPtr = NULL;
 
 	  if (_paramsPtr->debug)
-	    cout << "Found " << GribRecords.size() << " records." << endl;
+	    cerr << "Found " << GribRecords.size() << " records." << endl;
 	  if(GribRecords.size() >= MDV_MAX_VLEVELS) {
 	    cerr << "ERROR: Too many fields for one record! "
                  << GribRecords.size() << " > Max Mdv Vlevels" << endl;
@@ -418,14 +419,14 @@ int Grib2Mdv::getData()
 	    _GribRecord = &(GribRecords[levelNum]);
 
 	    if (_paramsPtr->debug) {
-	      cout <<  _GribRecord->summary->name.c_str() << " ";
-	      cout <<  _GribRecord->summary->longName.c_str() << " ";
-	      cout <<  _GribRecord->summary->units.c_str() << " ";
-	      cout <<  _GribRecord->summary->category << " ";
-	      cout <<  _GribRecord->summary->paramNumber << " ";
-	      cout <<  _GribRecord->summary->levelType.c_str() << " ";
-	      cout <<  _GribRecord->summary->levelVal;
-	      cout <<  endl;
+	      cerr <<  _GribRecord->summary->name.c_str() << " ";
+	      cerr <<  _GribRecord->summary->longName.c_str() << " ";
+	      cerr <<  _GribRecord->summary->units.c_str() << " ";
+	      cerr <<  _GribRecord->summary->category << " ";
+	      cerr <<  _GribRecord->summary->paramNumber << " ";
+	      cerr <<  _GribRecord->summary->levelType.c_str() << " ";
+	      cerr <<  _GribRecord->summary->levelVal;
+	      cerr <<  endl;
 	    }
 
 	    //
@@ -437,7 +438,8 @@ int Grib2Mdv::getData()
 	      _vlevelHeader.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE;
 	      
 	      if ( _createFieldHdr() != RI_SUCCESS ) {
-		cerr << "WARNING: File " << filePath << " not processed." << endl << flush;
+		cerr << "WARNING: File " << filePath
+                     << " not processed." << endl;
 		_outputFile->clear();
 		_Grib2File->clearInventory();
 		return( RI_FAILURE );
@@ -449,7 +451,7 @@ int Grib2Mdv::getData()
 		_fieldHeader.nz ++;
 
 	      if (_paramsPtr->debug) {
-		cout << "Processing  " << _fieldHeader.nz << " records." << endl;
+		cerr << "Processing  " << _fieldHeader.nz << " records." << endl;
 	      }
 	  
 	      fieldDataPtr = new fl32[(size_t)_fieldHeader.nz*(size_t)_fieldHeader.nx*(size_t)_fieldHeader.ny];
@@ -460,7 +462,8 @@ int Grib2Mdv::getData()
 	    // Generation time changed. This shouldn't happen and we can't handle it correctly.
 	    if (currDataPtr != fieldDataPtr && _GribRecord->ids->getGenerateTime() != lastGenerateTime) {
 	      
-	      cerr << "ERROR: File containes multiple generation times, currently unsupported." << endl << flush;
+	      cerr << "ERROR: File containes multiple gen times." << endl;
+	      cerr << "       currently unsupported." << endl;
 	      _outputFile->clear();
 	      _Grib2File->clearInventory();
 	      return( RI_FAILURE );
@@ -470,7 +473,8 @@ int Grib2Mdv::getData()
 	    // Get and save the data, reordering and remaping if needed.
 	    fl32 *data = _GribRecord->ds->getData();
 	    if(data == NULL) {
-	      cerr << "ERROR: Failed to get field " <<  _field->param << " level " << _field->level << endl << flush;
+	      cerr << "ERROR: Failed to get field "
+                   <<  _field->param << " level " << _field->level << endl;
 	      return( RI_FAILURE );
 	    }
 
@@ -513,11 +517,12 @@ int Grib2Mdv::getData()
 	  }
 	  
 	  if(GribRecords.size() == 0) {
-	    cerr << "WARNING: Field " <<  _field->param << " level  " << _field->level <<
-	      " not found in grib file." << endl;
+	    cerr << "WARNING: Field " <<  _field->param
+                 << " level  " << _field->level
+                 << " not found in grib file." << endl;
 	  } else {
-
-	    Mdvx::encoding_type_t encoding;
+            
+	    Mdvx::encoding_type_t encoding = Mdvx::ENCODING_FLOAT32;    
 	    if(_paramsPtr->process_everything) {
 	      _setFieldNames(-1);
 	      _convertUnits(-1,fieldDataPtr);
@@ -542,14 +547,14 @@ int Grib2Mdv::getData()
 	      (si32)_fieldHeader.nz * (si32)_fieldHeader.data_element_nbytes;
 
 	    if(_fieldHeader.volume_size < 0) {
-	      cerr << "ERROR: Field " <<  _field->param << " with " << _fieldHeader.nz << " levels is larger than Mdv can handle." << endl;
+	      cerr << "ERROR: Field " <<  _field->param << " with " 
+                   << _fieldHeader.nz << " levels is larger than Mdv can handle." << endl;
 	      cerr << "Use encoding_type of INT8 or INT16 to reduce output size to under 2.156 GB" << endl;
 	      delete [] fieldDataPtr;
 	      return( RI_FAILURE );
 	    }
 
 	    MdvxField *fieldPtr = new MdvxField(_fieldHeader, _vlevelHeader, fieldDataPtr );
-	    //fieldData.free();
 	    delete [] fieldDataPtr;
 	    _outputFile->addField(fieldPtr, encoding);
 
@@ -601,12 +606,13 @@ int Grib2Mdv::_writeMdvFile(time_t generateTime, long int forecastTime)
   if( (generateTime < 0) || (forecastTime < 0)) {
     cerr << " WARNING: File times don't make sense" << endl;
     cerr << "    Generate time = " << generateTime << endl;
-    cerr << "    Forecast time = " << forecastTime << endl << flush;
+    cerr << "    Forecast time = " << forecastTime << endl;
     return( RI_SUCCESS );
   }
 
   DateTime genTime( generateTime );
-  cout << "Writing grid output file at " << genTime.dtime() << " for a forecast time of " \
+  cerr << "Writing grid output file at "
+       << genTime.dtime() << " for a forecast time of "
        << (forecastTime/3600) << " hours" << endl << flush;
 
   if ( _outputFile->writeVol( generateTime, forecastTime ) != 0 )
@@ -699,7 +705,7 @@ int Grib2Mdv::_createFieldHdr ()
   _fieldHeader.data_element_nbytes = sizeof(fl32);
   _fieldHeader.encoding_type       = Mdvx::ENCODING_FLOAT32;    
   _fieldHeader.field_data_offset   = 0;
-  _fieldHeader.compression_type    = Mdvx::COMPRESSION_ASIS;
+  _fieldHeader.compression_type    = Mdvx::COMPRESSION_NONE;
   _fieldHeader.transform_type      = Mdvx::DATA_TRANSFORM_NONE;
   _fieldHeader.scaling_type        = Mdvx::SCALING_NONE;
   _fieldHeader.native_vlevel_type  = _convertGribLevel2MDVLevel( _GribRecord->summary->levelType );
@@ -897,7 +903,7 @@ int Grib2Mdv::_createFieldHdr ()
     }
 
   } else {
-    cerr << "ERROR: Unimplemented projection type " << projID << endl << flush;
+    cerr << "ERROR: Unimplemented projection type " << projID << endl;
     return( RI_FAILURE );
   }
   
@@ -1242,7 +1248,7 @@ fl32 *Grib2Mdv::_reMapReducedOrGaussian(fl32 *data, Mdvx::field_header_t fhdr)
     Grib2::GausLatLonProj *latlonProj = (Grib2::GausLatLonProj *)_GribRecord->gds->getProjection();
     latlonProj->getGaussianLats(&lats);
     if(lats == NULL) {
-      cerr << "ERROR: Calculation of Gaussian Latitude failure." << endl << flush;
+      cerr << "ERROR: Calculation of Gaussian Latitude failure." << endl;
       return NULL;
     }
     nx = latlonProj->_maxNi;
@@ -1270,7 +1276,8 @@ fl32 *Grib2Mdv::_reMapReducedOrGaussian(fl32 *data, Mdvx::field_header_t fhdr)
     }
 
   }  else {
-    cerr << "ERROR: Unsupported Reduced grid type, cannot remap to regular lat/lon grid." << endl << flush;
+    cerr << "ERROR: Unsupported Reduced grid type." << endl;
+    cerr << "  Cannot remap to regular lat/lon grid." << endl;
     return NULL;
   }
 
