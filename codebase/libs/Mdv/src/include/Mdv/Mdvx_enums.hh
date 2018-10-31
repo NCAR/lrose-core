@@ -56,9 +56,9 @@ typedef enum {
   DATA_EXTRAPOLATED = 1,  // based on measured data
   DATA_FORECAST =     2,  // Numerically modeled
   DATA_SYNTHESIS =    3,  // A synthesis of modeled, measured data
-  DATA_MIXED =        4,   // Different types of data in dataset
-  DATA_IMAGE =        5,   // A Photograph - RGB Image
-  DATA_GRAPHIC =      6,   // A Syntheticly Rendered RGB Image
+  DATA_MIXED =        4,  // Different types of data in dataset
+  DATA_IMAGE =        5,  // A Photograph - RGB Image
+  DATA_GRAPHIC =      6,  // A Syntheticly Rendered RGB Image
   DATA_CLIMO_ANA =    7,  // A Climotology (aggregation of data) from Model Analyses.
   DATA_CLIMO_OBS =    8   // A Climotology (aggregation of data) from Observational Data.
 } data_collection_type_t;
