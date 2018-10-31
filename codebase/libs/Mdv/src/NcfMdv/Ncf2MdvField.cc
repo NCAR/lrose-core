@@ -1055,6 +1055,13 @@ int Ncf2MdvField::_setGridData()
         delete maxAtt;
         hasValidMax = true;
       }
+
+      // if the min and max are equal, it is unlikely that
+      // these are correct
+      if (validMin == validMax) {
+        hasValidMin = false;
+        hasValidMax = false;
+      }
       
       if(!hasFillValue) {
         if (hasValidMin && validMin > -128) {
@@ -1162,6 +1169,13 @@ int Ncf2MdvField::_setGridData()
         hasValidMax = true;
       }
 
+      // if the min and max are equal, it is unlikely that
+      // these are correct
+      if (validMin == validMax) {
+        hasValidMin = false;
+        hasValidMax = false;
+      }
+
       if(!hasFillValue) {
         if (hasValidMin && validMin > -32768) {
           fillValue = -32768;
@@ -1263,6 +1277,13 @@ int Ncf2MdvField::_setGridData()
         hasValidMax = true;
       }
 
+      // if the min and max are equal, it is unlikely that
+      // these are correct
+      if (validMin == validMax) {
+        hasValidMin = false;
+        hasValidMax = false;
+      }
+
       if(!hasFillValue) {
         if (hasValidMin && validMin > -2147483648) {
           fillValue = -2147483648;
@@ -1360,6 +1381,13 @@ int Ncf2MdvField::_setGridData()
         hasValidMax = true;
       }
 
+      // if the min and max are equal, it is unlikely that
+      // these are correct
+      if (validMin == validMax) {
+        hasValidMin = false;
+        hasValidMax = false;
+      }
+
       if(!hasFillValue) {
         if (hasValidMin && validMin > -9.0e33) {
           fillValue = -9.0e33;
@@ -1454,6 +1482,13 @@ int Ncf2MdvField::_setGridData()
         validMax = maxAtt->as_double(0);
         delete maxAtt;
         hasValidMax = true;
+      }
+
+      // if the min and max are equal, it is unlikely that
+      // these are correct
+      if (validMin == validMax) {
+        hasValidMin = false;
+        hasValidMax = false;
       }
 
       if(!hasFillValue) {
