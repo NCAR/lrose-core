@@ -24,6 +24,16 @@
 /**
  * @file Main.cc
  */
+
+//////////////////////////////////////////////////////////////////////////
+// Based on following paper:
+// Lakshmanan V., J. Zhang, K. Hondl and C. Langston.
+// A Statistical Approach to Mitigating Persistent Clutter in
+// Radar Reflectivity Data.
+// IEEE Journal of Selected Topics in Applied Earth Observations
+// and Remote Sensing, Vol. 5, No. 2, April 2012.
+///////////////////////////////////////////////////////////////////////////
+
 #include "RadxPersistentClutterFirstPass.hh"
 #include "RadxPersistentClutterSecondPass.hh"
 #include <csignal>
