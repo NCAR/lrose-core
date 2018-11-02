@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <QtWidgets>
 #include <QModelIndex>
+#include <QtScript/QScriptEngine>
+#include <QtScript/QScriptValue>
 #include <vector>
 #include <iostream>
 
@@ -9,10 +11,10 @@
 #include "SpreadSheetView.hh"
 #include "spreadsheetdelegate.hh"
 #include "spreadsheetitem.hh"
+#include "SoloFunctions.hh"
 
 
 using namespace std;
-
 
 SpreadSheetView::SpreadSheetView(QWidget *parent)
         : QMainWindow(parent)
@@ -39,8 +41,41 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
     cellLabel->setMinimumSize(80, 0);
 
     toolBar->addWidget(cellLabel);
-    //toolBar->addWidget(formulaInput);
+    toolBar->addWidget(formulaInput);
+    // =======
 
+    //QPushButton cancelButton(tr("Cancel"), this);
+    //connect(&cancelButton, &QAbstractButton::clicked, &functionDialog, &QDialog::reject);
+
+    //QPushButton okButton(tr("OK"), this);
+    //okButton.setDefault(true);
+    //connect(&okButton, &QAbstractButton::clicked, &functionDialog, &QDialog::accept);
+    //    addWidget(&cancelButton);
+    //addWidget(&okButton);
+    QAction *cancelAct = new QAction(tr("&Cancel"), this);
+    cancelAct->setStatusTip(tr("Cancel changes"));
+    connect(cancelAct, &QAction::triggered, this, &SpreadSheetView::cancelFormulaInput);
+    toolBar->addAction(cancelAct);
+
+    QAction *okAct = new QAction(tr("&Ok"), this);
+    cancelAct->setStatusTip(tr("Accept changes"));
+    connect(okAct, &QAction::triggered, this, &SpreadSheetView::acceptFormulaInput);
+    toolBar->addAction(okAct);
+
+    /*
+    QHBoxLayout *buttonsLayout = new QHBoxLayout;
+    buttonsLayout->addStretch(1);
+    buttonsLayout->addWidget(&okButton);
+    buttonsLayout->addSpacing(10);
+    buttonsLayout->addWidget(&cancelButton);
+
+    QHBoxLayout *dialogLayout = new QHBoxLayout(&functionDialog);
+    dialogLayout->addWidget(&textEditArea);
+    dialogLayout->addStretch(1);
+    dialogLayout->addItem(buttonsLayout);
+    */
+
+    // ============
     table = new QTableWidget(rows, cols, this);
     table->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
     // set the column headers to the data fields
@@ -333,6 +368,53 @@ void SpreadSheetView::returnPressed()
     else
         item->setData(Qt::EditRole, text);
     table->viewport()->update();
+}
+
+float  SpreadSheetView::myPow()
+{
+  return(999.9);
+}
+
+void SpreadSheetView::acceptFormulaInput()
+{
+    QString text = formulaInput->getText();
+    cerr << "text entered: " << text.toStdString() << endl;
+    
+    QScriptEngine engine;
+    // ********
+    QObject *soloFunctions = new SoloFunctions;;
+    QScriptValue objectValue = engine.newQObject(soloFunctions);
+    //var fun = function() { print("999.9"); };
+    engine.globalObject().setProperty("solo", objectValue);
+    // *******
+    QScriptValue result = engine.evaluate(text);
+    cerr << " the result is " << result.toString().toStdString() << endl;
+
+    int row = table->currentRow();
+    int col = table->currentColumn();
+    QTableWidgetItem *item = table->item(row, col);
+    if (!item)
+      table->setItem(row, col, new SpreadSheetItem(result.toString())); // text));
+    else
+      item->setData(Qt::EditRole, result.toString()); // text);
+    table->viewport()->update();
+}
+
+void SpreadSheetView::cancelFormulaInput()
+{
+  
+  //QString text = formulaInput->getText();
+  cerr << "cancelling formula changes" << endl;
+    /*
+    int row = table->currentRow();
+    int col = table->currentColumn();
+    QTableWidgetItem *item = table->item(row, col);
+    if (!item)
+        table->setItem(row, col, new SpreadSheetItem(text));
+    else
+        item->setData(Qt::EditRole, text);
+    table->viewport()->update();
+    */
 }
 
 void SpreadSheetView::selectColor()

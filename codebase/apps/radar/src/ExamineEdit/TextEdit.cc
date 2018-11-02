@@ -115,19 +115,25 @@ void TextEdit::focusInEvent(QFocusEvent *e)
     QTextEdit::focusInEvent(e);
 }
 
+/*
+void TextEdit::focusOutEvent(QFocusEvent *e)
+{
+  //if (c)
+  //      c->setWidget(this);
+  std::cerr << "formula is " << getText().toStdString() << std::endl;
+    QTextEdit::focusOutEvent(e);
+}
+*/
+
 void TextEdit::keyPressEvent(QKeyEvent *e)
 {
     if (c && c->popup()->isVisible()) {
 
-       if (e->key() == Qt::Key_Escape) {
-            // signal done editing;  grab the text?
-            QString theText = toPlainText();
-            std::cerr << "content of TextEdit: " << theText.toStdString() << std::endl;
-       }
 
        // The following keys are forwarded by the completer to the widget
        switch (e->key()) {
        case Qt::Key_Enter:
+       case Qt::Key_Escape:
        case Qt::Key_Return:
        case Qt::Key_Tab:
        case Qt::Key_Backtab:
@@ -166,3 +172,12 @@ void TextEdit::keyPressEvent(QKeyEvent *e)
                 + c->popup()->verticalScrollBar()->sizeHint().width());
     c->complete(cr); // popup it up!
 }
+
+
+/* 
+       if (e->key() == Qt::Key_Escape) {
+            // signal done editing;  grab the text?
+            QString theText = toPlainText();
+            std::cerr << "content of TextEdit: " << theText.toStdString() << std::endl;
+       }
+*/

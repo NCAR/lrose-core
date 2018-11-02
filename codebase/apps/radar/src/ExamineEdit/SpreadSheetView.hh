@@ -1,5 +1,4 @@
 
-
 #ifndef SPREADSHEETVIEW_HH
 #define SPREADSHEETVIEW_HH
 
@@ -29,11 +28,16 @@ public:
 
   void newDataReady();
 
+
+  float myPow();
+
 public slots:
     void updateStatus(QTableWidgetItem *item);
     void updateColor(QTableWidgetItem *item);
     void updateTextEdit(QTableWidgetItem *item);
     void returnPressed();
+    void acceptFormulaInput();
+    void cancelFormulaInput();
     void selectColor();
     void selectFont();
     void clear();

@@ -22,6 +22,7 @@ HEADERS      += ../ExamineEdit/SpreadSheetItem.hh
 HEADERS      += ../ExamineEdit/SpreadSheetUtils.hh
 HEADERS      += ../ExamineEdit/spreadsheetdelegate.hh
 HEADERS      += ../ExamineEdit/FunctionEditor.hh
+HEADERS      += ../ExamineEdit/SoloFunctions.hh
 
 SOURCES       = Dialog.cc 
 SOURCES      += ../HawkEye/ColorMap.cc 
@@ -39,6 +40,7 @@ SOURCES      += ../ExamineEdit/SpreadSheetItem.cc
 SOURCES      += ../ExamineEdit/SpreadSheetUtils.cc
 SOURCES      += ../ExamineEdit/spreadsheetdelegate.cc
 SOURCES      += ../ExamineEdit/FunctionEditor.cc
+SOURCES      += ../ExamineEdit/SoloFunctions.cc
 SOURCES      += Main.cc
 
 RESOURCES = customcompleter.qrc
@@ -72,6 +74,7 @@ LIBS += -lexpat
 LIBS += -lpthread
 LIBS += -lm
 LIBS += -framework QtWidgets
+LIBS += -framework QtScript
 
 QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.13
 
