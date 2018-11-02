@@ -660,6 +660,16 @@ public:
   variable_transform_field_t *_variable_transform_fields;
   int variable_transform_fields_n;
 
+  tdrp_bool_t zdr_compute_from_input_fields;
+
+  char* zdr_compute_input_field_1;
+
+  char* zdr_compute_input_field_2;
+
+  double zdr_compute_correction_db;
+
+  char* zdr_compute_output_field_name;
+
   output_format_t output_format;
 
   netcdf_style_t netcdf_style;
@@ -750,7 +760,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[162];
+  mutable TDRPtable _table[168];
 
   const char *_className;
 

@@ -869,6 +869,41 @@ paramdef struct variable_transform_field_t {
 } variable_transform_fields[];
 
 commentdef {
+  p_header = "OPTION TO COMPUTE ZDR FROM OTHER FIELDS.";
+  p_text = "Normally ZDR = DBZH - DBZV.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Compute ZDR from 2 other fields.";
+  p_help = "Normally ZDR = DBZH - DBZV.";
+} zdr_compute_from_input_fields;
+
+paramdef string {
+  p_default = "TH";
+  p_descr = "First field for computing ZDR.";
+  p_help = "ZDR will be (field_1 - field_2) + correction.";
+} zdr_compute_input_field_1;
+
+paramdef string {
+  p_default = "TV";
+  p_descr = "Second field for computing ZDR.";
+  p_help = "ZDR will be (field_1 - field_2) + correction.";
+} zdr_compute_input_field_2;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction applied when computing ZDR.";
+  p_help = "ZDR will be (field_1 - field_2) + correction.";
+} zdr_compute_correction_db;
+
+paramdef string {
+  p_default = "ZDR";
+  p_descr = "Name for computed ZDR fields.";
+  p_help = "Units will be dB.";
+} zdr_compute_output_field_name;
+
+commentdef {
   p_header = "OUTPUT FORMAT";
 }
 

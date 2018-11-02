@@ -2241,6 +2241,75 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 21");
+    tt->comment_hdr = tdrpStrDup("OPTION TO COMPUTE ZDR FROM OTHER FIELDS.");
+    tt->comment_text = tdrpStrDup("Normally ZDR = DBZH - DBZV.");
+    tt++;
+    
+    // Parameter 'zdr_compute_from_input_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("zdr_compute_from_input_fields");
+    tt->descr = tdrpStrDup("Compute ZDR from 2 other fields.");
+    tt->help = tdrpStrDup("Normally ZDR = DBZH - DBZV.");
+    tt->val_offset = (char *) &zdr_compute_from_input_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'zdr_compute_input_field_1'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("zdr_compute_input_field_1");
+    tt->descr = tdrpStrDup("First field for computing ZDR.");
+    tt->help = tdrpStrDup("ZDR will be (field_1 - field_2) + correction.");
+    tt->val_offset = (char *) &zdr_compute_input_field_1 - &_start_;
+    tt->single_val.s = tdrpStrDup("TH");
+    tt++;
+    
+    // Parameter 'zdr_compute_input_field_2'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("zdr_compute_input_field_2");
+    tt->descr = tdrpStrDup("Second field for computing ZDR.");
+    tt->help = tdrpStrDup("ZDR will be (field_1 - field_2) + correction.");
+    tt->val_offset = (char *) &zdr_compute_input_field_2 - &_start_;
+    tt->single_val.s = tdrpStrDup("TV");
+    tt++;
+    
+    // Parameter 'zdr_compute_correction_db'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("zdr_compute_correction_db");
+    tt->descr = tdrpStrDup("Correction applied when computing ZDR.");
+    tt->help = tdrpStrDup("ZDR will be (field_1 - field_2) + correction.");
+    tt->val_offset = (char *) &zdr_compute_correction_db - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'zdr_compute_output_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("zdr_compute_output_field_name");
+    tt->descr = tdrpStrDup("Name for computed ZDR fields.");
+    tt->help = tdrpStrDup("Units will be dB.");
+    tt->val_offset = (char *) &zdr_compute_output_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("ZDR");
+    tt++;
+    
+    // Parameter 'Comment 22'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2305,11 +2374,11 @@
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2338,11 +2407,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2371,11 +2440,11 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2584,11 +2653,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("SEPARATING VOLUMES BY TYPE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2665,11 +2734,11 @@
     tt->single_val.s = tdrpStrDup("sun");
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("SEPARATING OUTPUT VOLUMES BASED ON RANGE GEOMETRY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2730,11 +2799,11 @@
       tt->struct_vals[5].s = tdrpStrDup("long_range");
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE MISSING VALUES");
     tt->comment_text = tdrpStrDup("Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n");
     tt++;

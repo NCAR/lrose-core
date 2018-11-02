@@ -545,6 +545,12 @@ void RadxBufr::_finalizeVol(RadxVol &vol)
   
 {
 
+  // compute zdr if requested
+
+  if (_params.zdr_compute_from_input_fields) {
+    _computeZdrFromInputFields(vol);
+  }
+
   // remove unwanted fields
   
   if (_params.exclude_specified_fields) {
@@ -1508,3 +1514,92 @@ void RadxBufr::_censorRay(RadxRay *ray)
 }
 
 
+//////////////////////////////////////////////////
+// Compute ZDR from input fields
+
+void RadxBufr::_computeZdrFromInputFields(RadxVol &vol)
+{
+  // do this one ray at a time
+  for (size_t ii = 1; ii < vol.getNRays(); ii++) {
+    RadxRay *ray = vol.getRays()[ii];
+    _computeZdr(ray);
+  }
+} 
+
+void RadxBufr::_computeZdr(RadxRay *ray)
+{
+  // get the input fields
+
+  RadxField *fld1 = ray->getField(_params.zdr_compute_input_field_1);
+  RadxField *fld2 = ray->getField(_params.zdr_compute_input_field_2);
+  if (fld1 == NULL || fld2 == NULL) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      if (fld1 == NULL) {
+        cerr << "WARNING - _computeZDR - cannot find field 1: "
+             << _params.zdr_compute_input_field_1 << endl;
+      }
+      if (fld2 == NULL) {
+        cerr << "WARNING - _computeZDR - cannot find field2 : "
+             << _params.zdr_compute_input_field_2 << endl;
+      }
+    }
+    return;
+  }
+
+  // remap the range geometry to the finest resolution
+
+  ray->remapRangeGeomToFinest();
+  
+  // create ZDR field
+
+  RadxField *zdr =
+    new RadxField(_params.zdr_compute_output_field_name, "dB");
+  zdr->copyMetaData(*fld1);
+  zdr->setStandardName("radar_differential_reflectivity_hv");
+  zdr->setLongName("differential_reflectivity");
+  Radx::fl32 fmiss = -9999.0;
+  zdr->setMissingFl32(fmiss);
+
+  // create data array, fill with missing
+  
+  size_t nGates = ray->getNGates();
+  RadxArray<Radx::fl32> data_;
+  Radx::fl32 *data = data_.alloc(nGates);
+  for (size_t ii = 0; ii < nGates; ii++) {
+    data[ii] = fmiss;
+  }
+
+  // compute ZDR and load into array
+
+  fld1->convertToFl32();
+  fld2->convertToFl32();
+
+  const Radx::fl32 *vals1 = fld1->getDataFl32();
+  const Radx::fl32 *vals2 = fld2->getDataFl32();
+
+  Radx::fl32 miss1 = fld1->getMissingFl32();
+  Radx::fl32 miss2 = fld2->getMissingFl32();
+
+  Radx::fl32 corr = _params.zdr_compute_correction_db;
+
+  for (size_t ii = 0; ii < nGates; ii++) {
+    Radx::fl32 val1 = vals1[ii];
+    Radx::fl32 val2 = vals2[ii];
+    if (val1 == miss1 || val2 == miss2) {
+      data[ii] = fmiss;
+    } else {
+      data[ii] = (val1 - val2) + corr;
+    }
+  }
+
+  // add the data array to the field
+
+  zdr->addDataFl32(nGates, data);
+  
+  // add field to ray
+  
+  ray->addField(zdr);
+
+}
+
+  
