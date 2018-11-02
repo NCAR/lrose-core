@@ -382,7 +382,7 @@ void SpreadSheetView::acceptFormulaInput()
     
     QScriptEngine engine;
     // ********
-    QObject *soloFunctions = new SoloFunctions;;
+    QObject *soloFunctions = new SoloFunctions(_controller);
     QScriptValue objectValue = engine.newQObject(soloFunctions);
     //var fun = function() { print("999.9"); };
     engine.globalObject().setProperty("solo", objectValue);
@@ -795,13 +795,12 @@ void SpreadSheetView::setupContents()
     int index;
     index = 0;
 
-    // vector<string> fieldNames = {"one", "two"}; //  
     vector<string> fieldNames = _controller->getFieldNames();
+    table->setColumnCount(fieldNames.size());
 
     int c = 0;
-    int r = 0;
     vector<string>::iterator it; 
-    for(it = fieldNames.begin(); it != fieldNames.end(); it++, c++) {
+    for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
       QString the_name(QString::fromStdString(*it));
       cerr << *it << endl;
       table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
@@ -810,13 +809,16 @@ void SpreadSheetView::setupContents()
 
       cerr << "number of data values = " << data.size() << endl;
 
-      for (r=0; r<20; r++) {
-        string format = "%g";
-        char formattedData[250];
+      string format = "%g";
+      char formattedData[250];
+
+      for (int r=0; r<20; r++) {
         //    sprintf(formattedData, format, data[0]);
-        sprintf(formattedData, "%g", data[r]); 
+        sprintf(formattedData, "%g", data.at(r));
+        cerr << "setting " << r << "," << c << "= " << formattedData << endl; 
         table->setItem(r, c, new SpreadSheetItem(formattedData));
       }
+      c += 1;
     }
 
     /* TODO: each of these columns and data must come from RadxVol
