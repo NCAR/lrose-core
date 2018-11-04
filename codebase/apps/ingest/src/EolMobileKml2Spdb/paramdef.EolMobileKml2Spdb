@@ -90,12 +90,6 @@ paramdef int {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "When set, only checks input_dir for subdirs of the form YYYYMMDD";
-  p_help = "Only in REALTIME mode with latest_data_info_avail FALSE.";
-} strict_subdir_check;
-
-paramdef boolean {
-  p_default = FALSE;
   p_descr = "When set, check file name contains specified sub-string.";
   p_help = "See file_match_string.";
 } file_name_check;
@@ -106,7 +100,92 @@ paramdef string {
   p_help = "Files must contain this string to be processed";
 } file_match_string;
 
-ommentdef {
+typedef enum {
+  MOBILE_ASSETS, FLIGHT_TRACK
+} input_format_t;
+
+paramdef enum input_format_t {
+  p_default = MOBILE_ASSETS;
+  p_descr = "Format of the file contents";
+  p_help = "\n\nMOBILE_ASSETS: single coordinates for land-based mobile assets.\n\nFLIGHT_TRACK: flight track with multiple coordinates.";
+} input_format;
+
+commentdef {
+  p_header = "NAME IDENTIFICATION.";
+}
+
+typedef struct {
+  string imei_str;
+  string id_str;
+} id_lookup_t;
+
+paramdef struct id_lookup_t {
+  p_default = {
+    {
+      imei_str = "300434030143260",
+      id_str = "UI1"
+    }
+    ,
+    {
+      imei_str = "300434030147110",
+      id_str = "UI2"
+    }
+    ,
+    {
+      imei_str = "300434030632490",
+      id_str = "CBND"
+    }
+    ,
+    {
+      imei_str = "300434060085080",
+      id_str = "DOW6"
+    }
+    ,
+    {
+      imei_str = "300434060875300",
+      id_str = "DOW7"
+    }
+    ,
+    {
+      imei_str = "300434060080720",
+      id_str = "DOW8"
+    }
+    ,
+    {
+      imei_str = "300434060088750",
+      id_str = "MM2"
+    }
+    ,
+    {
+      imei_str = "300434060089800",
+      id_str = "MM1"
+    }
+    ,
+    {
+      imei_str = "300434060189190",
+      id_str = "MM3"
+    }
+    ,
+    {
+      imei_str = "300434060366740",
+      id_str = "CSU"
+    }
+    ,
+    {
+      imei_str = "300434060979110",
+      id_str = "SC0"
+    }
+    ,
+    {
+      imei_str = "300434062248670",
+      id_str = "SC1"
+    }
+  };
+  p_descr = "Conversion of IMEI IDs to unique short IDs.";
+  p_help = "The shorter IDs should preferably be less than 4 chars long.";
+} id_lookups[];
+
+commentdef {
   p_header = "DATA OUTPUT.";
 }
 

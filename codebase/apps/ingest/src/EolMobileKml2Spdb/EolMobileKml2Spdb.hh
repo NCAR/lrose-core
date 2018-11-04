@@ -82,7 +82,8 @@ private:
   Params _params;
 
   int _processFile(const char *file_path);
-
+  int _decodeMobileAssets(const char *kml, DsSpdb &spdb);
+  int _decodeFlightTrack(const char *kml, DsSpdb &spdb);
   int _doPut(DsSpdb &spdb);
 
 };

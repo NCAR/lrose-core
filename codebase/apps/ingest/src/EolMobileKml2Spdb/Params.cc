@@ -672,18 +672,6 @@
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'strict_subdir_check'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("strict_subdir_check");
-    tt->descr = tdrpStrDup("When set, only checks input_dir for subdirs of the form YYYYMMDD");
-    tt->help = tdrpStrDup("Only in REALTIME mode with latest_data_info_avail FALSE.");
-    tt->val_offset = (char *) &strict_subdir_check - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'file_name_check'
     // ctype is 'tdrp_bool_t'
     
@@ -706,6 +694,101 @@
     tt->help = tdrpStrDup("Files must contain this string to be processed");
     tt->val_offset = (char *) &file_match_string - &_start_;
     tt->single_val.s = tdrpStrDup("kml");
+    tt++;
+    
+    // Parameter 'input_format'
+    // ctype is '_input_format_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("input_format");
+    tt->descr = tdrpStrDup("Format of the file contents");
+    tt->help = tdrpStrDup("\n\nMOBILE_ASSETS: single coordinates for land-based mobile assets.\n\nFLIGHT_TRACK: flight track with multiple coordinates.");
+    tt->val_offset = (char *) &input_format - &_start_;
+    tt->enum_def.name = tdrpStrDup("input_format_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("MOBILE_ASSETS");
+      tt->enum_def.fields[0].val = MOBILE_ASSETS;
+      tt->enum_def.fields[1].name = tdrpStrDup("FLIGHT_TRACK");
+      tt->enum_def.fields[1].val = FLIGHT_TRACK;
+    tt->single_val.e = MOBILE_ASSETS;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("NAME IDENTIFICATION.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'id_lookups'
+    // ctype is '_id_lookup_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("id_lookups");
+    tt->descr = tdrpStrDup("Conversion of IMEI IDs to unique short IDs.");
+    tt->help = tdrpStrDup("The shorter IDs should preferably be less than 4 chars long.");
+    tt->array_offset = (char *) &_id_lookups - &_start_;
+    tt->array_n_offset = (char *) &id_lookups_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(id_lookup_t);
+    tt->array_n = 12;
+    tt->struct_def.name = tdrpStrDup("id_lookup_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("imei_str");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_id_lookups->imei_str - (char *) _id_lookups;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("id_str");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_id_lookups->id_str - (char *) _id_lookups;
+    tt->n_struct_vals = 24;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("300434030143260");
+      tt->struct_vals[1].s = tdrpStrDup("UI1");
+      tt->struct_vals[2].s = tdrpStrDup("300434030147110");
+      tt->struct_vals[3].s = tdrpStrDup("UI2");
+      tt->struct_vals[4].s = tdrpStrDup("300434030632490");
+      tt->struct_vals[5].s = tdrpStrDup("CBND");
+      tt->struct_vals[6].s = tdrpStrDup("300434060085080");
+      tt->struct_vals[7].s = tdrpStrDup("DOW6");
+      tt->struct_vals[8].s = tdrpStrDup("300434060875300");
+      tt->struct_vals[9].s = tdrpStrDup("DOW7");
+      tt->struct_vals[10].s = tdrpStrDup("300434060080720");
+      tt->struct_vals[11].s = tdrpStrDup("DOW8");
+      tt->struct_vals[12].s = tdrpStrDup("300434060088750");
+      tt->struct_vals[13].s = tdrpStrDup("MM2");
+      tt->struct_vals[14].s = tdrpStrDup("300434060089800");
+      tt->struct_vals[15].s = tdrpStrDup("MM1");
+      tt->struct_vals[16].s = tdrpStrDup("300434060189190");
+      tt->struct_vals[17].s = tdrpStrDup("MM3");
+      tt->struct_vals[18].s = tdrpStrDup("300434060366740");
+      tt->struct_vals[19].s = tdrpStrDup("CSU");
+      tt->struct_vals[20].s = tdrpStrDup("300434060979110");
+      tt->struct_vals[21].s = tdrpStrDup("SC0");
+      tt->struct_vals[22].s = tdrpStrDup("300434062248670");
+      tt->struct_vals[23].s = tdrpStrDup("SC1");
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("DATA OUTPUT.");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'output_spdb_url'

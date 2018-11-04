@@ -82,12 +82,14 @@ int Args::parse (int argc, char **argv,
       _usage(cout, prog_name);
       exit (0);
       
-    } else if (!strcmp(argv[i], "-debug")) {
+    } else if (!strcmp(argv[i], "-d") ||
+               !strcmp(argv[i], "-debug")) {
       
       sprintf(tmp_str, "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-verbose")) {
+    } else if (!strcmp(argv[i], "-v") ||
+               !strcmp(argv[i], "-verbose")) {
       
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
@@ -176,7 +178,7 @@ void Args::_usage(ostream &out,
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
-      << "       [ -debug ] print debug messages\n"
+      << "       [ -d, -debug ] print debug messages\n"
       << "       [ -end \"yyyy mm dd hh mm ss\"] end time\n"
       << "          forces ARCHIVE mode only\n"
       << "       [ -f files ] specify input file list.\n"
@@ -184,7 +186,7 @@ void Args::_usage(ostream &out,
       << "       [ -mode ?] ARCHIVE, REALTIME or FILELIST\n"
       << "       [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "          forces ARCHIVE mode\n"
-      << "       [ -verbose ] print verbose debug messages\n"
+      << "       [ -v, -verbose ] print verbose debug messages\n"
       << endl;
 
   Params::usage(out);

@@ -79,6 +79,18 @@ public:
     FILELIST = 2
   } mode_t;
 
+  typedef enum {
+    MOBILE_ASSETS = 0,
+    FLIGHT_TRACK = 1
+  } input_format_t;
+
+  // struct typedefs
+
+  typedef struct {
+    char* imei_str;
+    char* id_str;
+  } id_lookup_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -376,11 +388,14 @@ public:
 
   int max_realtime_valid_age;
 
-  tdrp_bool_t strict_subdir_check;
-
   tdrp_bool_t file_name_check;
 
   char* file_match_string;
+
+  input_format_t input_format;
+
+  id_lookup_t *_id_lookups;
+  int id_lookups_n;
 
   char* output_spdb_url;
 
@@ -393,7 +408,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[16];
+  mutable TDRPtable _table[19];
 
   const char *_className;
 
