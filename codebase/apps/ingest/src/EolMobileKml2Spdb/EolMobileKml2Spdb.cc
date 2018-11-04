@@ -47,6 +47,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/str.h>
 #include <toolsa/Path.hh>
+#include <toolsa/TaFile.hh>
 #include <toolsa/TaArray.hh>
 #include <didss/DsInputPath.hh>
 #include "EolMobileKml2Spdb.hh"
@@ -149,7 +150,7 @@ int EolMobileKml2Spdb::Run() {
     if (_params.strict_subdir_check) {
       input->setStrictDirScan(true);
     }
-
+    
     if (_params.file_name_check) {
       input->setSubString(_params.file_match_string);
     }
@@ -161,10 +162,7 @@ int EolMobileKml2Spdb::Run() {
   char *inputPath;
   while ((inputPath = input->next()) != NULL) {
 
-    time_t inputTime;
-    input->getDataTime(inputPath, inputTime);
-
-    if (_processFile(inputPath, inputTime)) {
+    if (_processFile(inputPath)) {
       cerr << "WARNING - EolMobileKml2Spdb::Run" << endl;
       cerr << "  Errors in processing file: " << inputPath << endl;
     }
@@ -180,69 +178,74 @@ int EolMobileKml2Spdb::Run() {
 ////////////////////
 // process the file
 
-int EolMobileKml2Spdb::_processFile(const char *file_path,
-                                  time_t file_time) {
-  
+int EolMobileKml2Spdb::_processFile(const char *inputPath) 
+{
+
+  int iret = 0;
+
   if (_params.debug) {
-    cerr << "Processing file: " << file_path << endl;
-    cerr << "  File time: " << utimstr(file_time) << endl;
+    cerr << "Processing file: " << inputPath << endl;
   }
-
-  // registration
-
+  
+  // procmap registration
+  
   char procmapString[BUFSIZ];
-  Path path(file_path);
-  sprintf(procmapString, "Processing file <%s>", path.getFile().c_str());
+  Path path(inputPath);
+  snprintf(procmapString, BUFSIZ,
+           "Processing file <%s>", path.getFile().c_str());
   PMU_force_register(procmapString);
 
-  // create output objects
+  // Open the file
+  
+  TaFile inFile;
+  if (inFile.fopen(inputPath, "r") == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - cannot open input file: " << inputPath << endl;
+    cerr << strerror(errNum) << endl;
+    return -1;
+  }
+
+  // get file size
+
+  if (inFile.fstat()) {
+    int errNum = errno;
+    cerr << "ERROR - cannot stat input file: " << inputPath << endl;
+    cerr << strerror(errNum) << endl;
+    return -1;
+  }
+  struct stat fileStat = inFile.getStat(); 
+  
+  // read contents into buffer
+  
+  TaArray<char> kml_;
+  char *kml = kml_.alloc(fileStat.st_size + 1);
+  if (inFile.fread(kml, 1, fileStat.st_size) != fileStat.st_size) {
+    int errNum = errno;
+    cerr << "ERROR - cannot read input file: " << inputPath << endl;
+    cerr << strerror(errNum) << endl;
+    return -1;
+  }
+  inFile.fclose();
+  
+  if (_params.debug) {
+    cerr << "Read in file: " << inputPath << endl;
+    cerr << "===========================================" << endl;
+    cerr << kml << endl;
+    cerr << "===========================================" << endl;
+  }
+  
+  // create output object
   
   DsSpdb spdb;
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     spdb.setDebug();
   }
-
-  // Open the file
-
-  ifstream fp(file_path);
   
-  if(!fp.is_open() ){
-    cerr << "ERROR - EolMobileKml2Spdb::_processFile\n";
-    cerr << "  Cannot open input file: " << file_path << endl;
-    return -1;
-  }
-
-  //
-  // Concatenate the lines in the file until we reach a blank line,
-  // or until the line added contains an '='.
-  // This means that we have reached the end of a metar message, so
-  // create a metar object and store this information.  Then add this
-  // metar object to our list of metars.
-  //
-
-  // we have to handle METAR's in two forms
-  // (a) A lines starts with METAR and is followed by the data record
-  // (b) A line with only the word METAR in it signifies the beginning of a 
-  //     block of metars, which is terminated by a blank line or ^C.
-  // We also have to deal with SPECIs, in the same way as METARs.
-
-  char line[BUFSIZ];
-  int iret = 0;
-
-  while(!fp.eof()){
-    
-    fp.getline(line,BUFSIZ);
-
-    
-  } // while !feof(
-  
-  fp.close();
-
   // write the output
 
-  if (_doPut(spdb)) {
-    iret = -1;
-  }
+  // if (_doPut(spdb)) {
+  //   iret = -1;
+  // }
 
   return iret;
 

@@ -81,7 +81,7 @@ private:
   Args _args;
   Params _params;
 
-  int _processFile(const char *file_path, time_t file_time);
+  int _processFile(const char *file_path);
 
   int _doPut(DsSpdb &spdb);
 
