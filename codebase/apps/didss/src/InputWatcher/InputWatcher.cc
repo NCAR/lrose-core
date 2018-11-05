@@ -280,6 +280,9 @@ int InputWatcher::_writeLdataInfoFile(const char *inputPath, time_t modTime)
 {
 
   DsLdataInfo ldata;
+  if (_params.debug) {
+    ldata.setDebug(true);
+  }
   if (_params.write_latest_data_info_to_proxy_dir) {
     ldata.setDir(_params.latest_data_info_proxy_dir);
     ldata.setDisplacedDirPath(_params.input_dir);
