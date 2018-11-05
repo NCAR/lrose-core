@@ -608,6 +608,7 @@ private:
   void _load_timelist_realtime(const string &input_dir, int depth);
 
   bool _hasExt(const string &path);
+  bool _hasExt(const string &path, string ext);
 
   bool _hasSubStr(const string &path);
 

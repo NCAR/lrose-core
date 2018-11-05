@@ -48,6 +48,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/Path.hh>
 #include <toolsa/TaArray.hh>
+#include <toolsa/TaStr.hh>
 #include <didss/DsInputPath.hh>
 #include <didss/RapDataDir.hh>
 #include <didss/DataFileNames.hh>
@@ -1778,18 +1779,61 @@ bool DsInputPath::_hasExt(const string &path)
 
 {
 
+  // extension set?
+
   if (_search_ext.size() == 0) {
     return true;
   }
 
-  size_t extLen = _search_ext.size();
+  // comma-delimited list? or single value?
+
+  if (_search_ext.find(",") == string::npos) {
+    return _hasExt(path, _search_ext);
+  }
+
+  // extension is a comma-delimited list
+  // tokenize it
+
+  vector<string> extensions;
+  TaStr::tokenize(_search_ext, ",", extensions);
+  if (extensions.size() < 1) {
+    return true;
+  }
+
+  // check eack of the extensions
+
+  for (size_t ii = 0; ii < extensions.size(); ii++) {
+    if (_hasExt(path, extensions[ii])) {
+      return true;
+    }
+  }
+
+  // did not find it
+
+  return false;
+
+}
+
+////////////////////////////////////
+// test for file extension, if set
+//
+
+bool DsInputPath::_hasExt(const string &path, string ext)
+
+{
+
+  if (ext.size() == 0) {
+    return true;
+  }
+
+  size_t extLen = ext.size();
 
   try {
 
     // uncompressed file
     
     string thisExt = path.substr(path.size() - extLen, extLen);
-    if (thisExt == _search_ext) {
+    if (thisExt == ext) {
       return true;
     }
     
@@ -1797,7 +1841,7 @@ bool DsInputPath::_hasExt(const string &path)
     
     string gzipExt = path.substr(path.size() - 3, 3);
     thisExt = path.substr(path.size() - extLen - 3, extLen);
-    if (gzipExt == ".gz" && thisExt == _search_ext) {
+    if (gzipExt == ".gz" && thisExt == ext) {
       return true;
     }
     
@@ -1805,7 +1849,7 @@ bool DsInputPath::_hasExt(const string &path)
     
     string zExt = path.substr(path.size() - 2, 2);
     thisExt = path.substr(path.size() - extLen - 2, extLen);
-    if (zExt == ".Z" && thisExt == _search_ext) {
+    if (zExt == ".Z" && thisExt == ext) {
       return true;
     }
 
@@ -1817,7 +1861,7 @@ bool DsInputPath::_hasExt(const string &path)
     
   if (_debug) {
     cerr << "DEBUG - DsInputPath::_hasExt" << endl;
-    cerr << "  Does not have extension: " << _search_ext << endl;
+    cerr << "  Does not have extension: " << ext << endl;
     cerr << "  Path: " << path << endl;
   }
 
