@@ -308,6 +308,11 @@ int InputWatcher::_writeLdataInfoFile(const char *inputPath, time_t modTime)
     return -1;
   }
 
+  if (_params.debug) {
+    cerr << "===== wrote ldata info ====" << endl;
+    ldata.printAsXml(cerr);
+  }
+
   return 0;
 
 }
