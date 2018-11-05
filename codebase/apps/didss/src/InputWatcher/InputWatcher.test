@@ -221,7 +221,8 @@ use_inotify = FALSE;
 //
 // File name extension.
 //
-// If set, only files with this extension will be processed.
+// If set, only files with this extension will be processed. This can be 
+//   a comma-delimited list of extensions.
 //
 //
 // Type: string
@@ -240,7 +241,7 @@ search_ext = "";
 // Type: string
 //
 
-search_substr = "png";
+search_substr = "";
 
 ///////////// save_latest_read_time ///////////////////
 //

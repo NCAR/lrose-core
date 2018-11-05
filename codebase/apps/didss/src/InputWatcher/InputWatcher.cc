@@ -144,6 +144,18 @@ int InputWatcher::Run ()
   }
   // input.setDirScanSleep(_params.wait_between_checks);
   time_t timeLastAction = time(NULL);
+
+  if (_params.debug) {
+    cerr << "InputWatcher - watching dir: " << _params.input_dir << endl;
+    cerr << "  FileQuiescence: " << _params.file_quiescence << endl;
+    cerr << "  SearchExt: " << _params.search_ext << endl;
+    cerr << "  SubString: " << _params.search_substr << endl;
+    cerr << "  Recursion: " << _params.search_recursively << endl;
+    cerr << "  MaxRecursionDepth: " << _params.max_recursion_depth << endl;
+    cerr << "  MaxDirAge: " << _params.max_dir_age << endl;
+    cerr << "  FollowLinks: " << _params.follow_links << endl;
+    cerr << "  UseInotify: " << _params.use_inotify << endl;
+  }
   
   while(true) {
     // check for new data

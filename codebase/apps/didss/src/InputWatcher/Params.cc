@@ -758,7 +758,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("search_ext");
     tt->descr = tdrpStrDup("File name extension.");
-    tt->help = tdrpStrDup("If set, only files with this extension will be processed.");
+    tt->help = tdrpStrDup("If set, only files with this extension will be processed. This can be a comma-delimited list of extensions.");
     tt->val_offset = (char *) &search_ext - &_start_;
     tt->single_val.s = tdrpStrDup("");
     tt++;
