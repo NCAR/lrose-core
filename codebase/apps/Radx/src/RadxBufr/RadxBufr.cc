@@ -1522,28 +1522,30 @@ void RadxBufr::_computeZdrFromInputFields(RadxVol &vol)
   // do this one ray at a time
   for (size_t ii = 1; ii < vol.getNRays(); ii++) {
     RadxRay *ray = vol.getRays()[ii];
-    _computeZdr(ray);
+    if (_computeZdr(ray)) {
+      return;
+    }
   }
 } 
 
-void RadxBufr::_computeZdr(RadxRay *ray)
+int RadxBufr::_computeZdr(RadxRay *ray)
 {
   // get the input fields
 
   RadxField *fld1 = ray->getField(_params.zdr_compute_input_field_1);
   RadxField *fld2 = ray->getField(_params.zdr_compute_input_field_2);
   if (fld1 == NULL || fld2 == NULL) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_params.debug) {
       if (fld1 == NULL) {
         cerr << "WARNING - _computeZDR - cannot find field 1: "
              << _params.zdr_compute_input_field_1 << endl;
       }
       if (fld2 == NULL) {
-        cerr << "WARNING - _computeZDR - cannot find field2 : "
+        cerr << "WARNING - _computeZDR - cannot find field 2: "
              << _params.zdr_compute_input_field_2 << endl;
       }
     }
-    return;
+    return -1;
   }
 
   // remap the range geometry to the finest resolution
@@ -1555,6 +1557,8 @@ void RadxBufr::_computeZdr(RadxRay *ray)
   RadxField *zdr =
     new RadxField(_params.zdr_compute_output_field_name, "dB");
   zdr->copyMetaData(*fld1);
+  zdr->setName(_params.zdr_compute_output_field_name);
+  zdr->setUnits("dB");
   zdr->setStandardName("radar_differential_reflectivity_hv");
   zdr->setLongName("differential_reflectivity");
   Radx::fl32 fmiss = -9999.0;
@@ -1599,6 +1603,8 @@ void RadxBufr::_computeZdr(RadxRay *ray)
   // add field to ray
   
   ray->addField(zdr);
+
+  return 0;
 
 }
 
