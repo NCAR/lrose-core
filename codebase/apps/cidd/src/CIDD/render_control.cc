@@ -99,7 +99,8 @@ int render_horiz_display( Drawable xid, int page, time_t start_time, time_t end_
 	}
 	if(gd.layers.earth.terrain_active && 
 	   ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
-	   (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1)) {
+	   (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1) &&
+           mr->ds_fhdr.vlevel_type != Mdvx::VERT_TYPE_ELEV) {
            render_h_terrain(xid, page);
 	}
     }
