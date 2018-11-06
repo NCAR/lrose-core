@@ -62,8 +62,9 @@ RadxRay::RadxRay()
   // initialize client counting
 
   _nClients = 0;
-  pthread_mutex_init(&_nClientsMutex, NULL);
-
+  _nClientsMutex = PTHREAD_MUTEX_INITIALIZER;
+  // pthread_mutex_init(&_nClientsMutex, NULL);
+  
 }
 
 /////////////////////////////
@@ -80,7 +81,8 @@ RadxRay::RadxRay(const RadxRay &rhs)
   // initialize client counting
 
   _nClients = 0;
-  pthread_mutex_init(&_nClientsMutex, NULL);
+  _nClientsMutex = PTHREAD_MUTEX_INITIALIZER;
+  // pthread_mutex_init(&_nClientsMutex, NULL);
 
   // copy
   
