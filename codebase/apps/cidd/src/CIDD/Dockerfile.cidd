@@ -61,4 +61,5 @@ RUN cd /tmp/cidd/lrose-core/codebase/apps; make -j 8 install
 
 
 # ENTRYPOINT [ "/usr/sbin/httpd" ]
-# CMD [ "-D", "FOREGROUND" ]
+CMD [ "/tmp/cidd/bin/CIDD", "-v 1" ]
+#CMD [ "/tmp/cidd/bin/CIDD", "-p http://front.eol.ucar.edu/displayParams/CIDD.relampago" ]
