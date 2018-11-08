@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+
+#
+# version number for cidd-docker script
+#
+lrose_cidd_docker_version='0.2.1'
+
+#
+# cidd-docker
+#
+# helper / wrapper script for invoking ncareol/cidd Docker image,
+# setting up X11 and running cidd in specified directory
+#
+
+#
+# CHANGELOG
+#
+# - 0.0.0: initial working functionality for macOS and Linux
+# - 0.0.1: -v / --version: echo version and exit
+# - 0.0.2: verify that input is a directory
+# - 0.1.0: Darwin: handle case where XQuartz isn't bound to :0
+# - 0.2.0:
+#     optional second argument as cidd version
+#     use as tag for Docker image
+# - 0.2.1: add, improve help output
+#
+
+_echo_version () {
+  echo `basename $0` version $lrose_cidd_docker_version
+}
+
+_echo_help () {
+  _echo_version
+  echo "  first input, required: directory path from which to invoke cidd"
+  echo "  second input, optional: version of cidd to run"
+  echo "  e.g."
+  echo "    "`basename $0` .
+  echo "    "`basename $0` . 1.18
+  echo
+  echo "  For further details on running cidd w/ Docker:"
+  echo "  https://github.com/NCAR/lrose-cidd/wiki/Docker"
+  echo
+}
+
+if [[ "$1" == '-v' ]] || [[ "$1" == '--version' ]]; then
+  _echo_version
+  exit
+fi
+
+if [[ "$1" == '-h' ]] || [[ "$1" == '--help' ]]; then
+  _echo_help
+  exit
+fi
+
+docker -v > /dev/null
+docker_exit_code=$?
+
+if [[ $docker_exit_code != 0 ]]; then
+  echo 'It appears that docker is not installed or in PATH'
+  echo 'Please install docker or add it to PATH'
+  exit $docker_exit_code
+fi
+
+if [[ "$@" = '' ]] ; then
+  echo 'Please specify a data directory for cidd'
+  echo 'Run w/ -h or --help to see help information'
+  exit 1
+fi
+
+lrose_host_data_dir=$1
+
+if [[ $lrose_host_data_dir == ~* ]]; then
+  #
+  # replace tilde w/ $HOME
+  #
+  lrose_host_data_dir=$(echo $lrose_host_data_dir | sed s/./$HOME/1)
+elif [[ $lrose_host_data_dir != /* ]]; then
+  #
+  # prefix relative path w/ pwd
+  #
+  lrose_host_data_dir=`pwd`/$lrose_host_data_dir
+fi
+
+#
+# verify that lrose_host_data_dir exists, else exit 1
+#
+
+if [[ ! -d $lrose_host_data_dir ]]; then
+  echo "ERROR: $lrose_host_data_dir is not a directory"
+  echo "Please specify a valid directory"
+  exit 1
+fi
+
+lrose_docker_image='ncareol/cidd'
+
+#
+# use second argument as cidd version, set as Docker tag
+#
+if [ ! -z "$2" ]; then
+  lrose_docker_image=$lrose_docker_image:$2
+  echo "cidd version: $2"
+else
+  echo "cidd version: 1.20"
+fi
+
+#
+# architecture-specific method to set `docker run` options
+#
+lrose_docker_run_options () {
+  lrose_uname=$(uname)
+  if [[ $lrose_uname = 'Darwin' ]]; then
+    lrose_host_ip=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}' |head -1)
+
+    #
+    # handle case where XQuartz is not running on :0
+    #
+    lrose_display_number=`ps -e | grep 'Xquartz :\d' | grep -v bin\/xinit | awk '{ print substr($5,2); }'`
+    #
+    # if not set or empty, default to 0
+    #
+    [ -z "$lrose_display_number" ] && lrose_display_number='0'
+
+    #
+    # set DISPLAY to host-ip:display-number
+    #
+    echo "-e DISPLAY=$lrose_host_ip:$lrose_display_number"
+  elif [[ $lrose_uname = 'Linux' ]]; then
+    #
+    # pass through DISPLAY, but specify X11 socket as shared volume
+    #
+    echo "-e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix"
+  else
+    echo "This platform is not supported by `basename $0`"
+    exit 1
+  fi
+}
+
+_echo_version
+
+docker run \
+  -v $HOME/.Xauthority:/root/.Xauthority \
+  $(lrose_docker_run_options) \
+  -v $lrose_host_data_dir:/data \
+  $lrose_docker_image /data
