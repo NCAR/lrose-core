@@ -20,17 +20,23 @@ elif [[ "$@" != '' ]] ; then
   #
   # verify that $@ is a directory
   #
-  if [[ -d "$@" ]]; then
-    cd $@
+  if [[ -e "$@" ]]; then
+    echo "using params file: $@"
   else
-    echo "$@ is not a directory"
-    echo 'please specify a valid directory'
+    echo "$@ is not a valid params file"
+    echo 'please specify a valid file'
     exit 1
   fi
 fi
 
-echo "Starting cidd..."
-echo "Run w/ -h or --help to see help information"
+# start CIDD
 
-CIDD
+echo "Starting cidd..."
+echo "Run w/ -help to see help information"
+
+PROJ_DIR=${HOME}/projDir
+
+CIDD -v 2 -p $@
+
+
 

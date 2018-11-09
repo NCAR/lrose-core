@@ -74,13 +74,19 @@ RUN \
   cd /usr/local/src/lrose-core/codebase/apps; make -j 8 opt; \ 
   cd /usr/local/src/lrose-core/codebase/apps; make -j 8 install
 
-# copy in the entry point
-
-RUN cp /usr/local/src/lrose-core/codebase/apps/cidd/src/CIDD/docker/run_CIDD.relampago /usr/local/bin/cidd-entrypoint
-
 # checkout the relampago project
 
 RUN mkdir -p /usr/local/git
 RUN cd /usr/local/git; git clone https://github.com/NCAR/lrose-projects-relampago
 
+#
+# this is critical to X11 forwarding
+#
+#CMD mkdir /etc; dbus-uuidgen > /etc/machine-id 
+
+# set the entrypoint
+
+#RUN cp /usr/local/src/lrose-core/codebase/apps/cidd/src/CIDD/docker/start_CIDD.relampago /usr/local/bin/cidd-entrypoint
+
+COPY entrypoint.sh /usr/local/bin/cidd-entrypoint
 ENTRYPOINT ["/usr/local/bin/cidd-entrypoint"]

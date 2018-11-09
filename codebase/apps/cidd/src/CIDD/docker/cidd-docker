@@ -3,12 +3,13 @@
 #
 # version number for cidd-docker script
 #
-lrose_cidd_docker_version='0.2.1'
+
+lrose_cidd_docker_version='0.0.1'
 
 #
 # cidd-docker
 #
-# helper / wrapper script for invoking ncareol/cidd Docker image,
+# helper / wrapper script for invoking cidd Docker image,
 # setting up X11 and running cidd in specified directory
 #
 
@@ -16,14 +17,6 @@ lrose_cidd_docker_version='0.2.1'
 # CHANGELOG
 #
 # - 0.0.0: initial working functionality for macOS and Linux
-# - 0.0.1: -v / --version: echo version and exit
-# - 0.0.2: verify that input is a directory
-# - 0.1.0: Darwin: handle case where XQuartz isn't bound to :0
-# - 0.2.0:
-#     optional second argument as cidd version
-#     use as tag for Docker image
-# - 0.2.1: add, improve help output
-#
 
 _echo_version () {
   echo `basename $0` version $lrose_cidd_docker_version
@@ -38,7 +31,7 @@ _echo_help () {
   echo "    "`basename $0` . 1.18
   echo
   echo "  For further details on running cidd w/ Docker:"
-  echo "  https://github.com/NCAR/lrose-cidd/wiki/Docker"
+  echo "  https://github.com/NCAR/lrose-core/wiki/Docker"
   echo
 }
 
@@ -62,42 +55,42 @@ if [[ $docker_exit_code != 0 ]]; then
 fi
 
 if [[ "$@" = '' ]] ; then
-  echo 'Please specify a data directory for cidd'
+  echo 'Please specify a params file for cidd'
   echo 'Run w/ -h or --help to see help information'
   exit 1
 fi
 
-lrose_host_data_dir=$1
+cidd_params_file=$1
 
-if [[ $lrose_host_data_dir == ~* ]]; then
+if [[ $cidd_params_file == ~* ]]; then
   #
   # replace tilde w/ $HOME
   #
-  lrose_host_data_dir=$(echo $lrose_host_data_dir | sed s/./$HOME/1)
-elif [[ $lrose_host_data_dir != /* ]]; then
+  cidd_params_file=$(echo $cidd_params_file | sed s/./$HOME/1)
+elif [[ $cidd_params_file != /* ]]; then
   #
   # prefix relative path w/ pwd
   #
-  lrose_host_data_dir=`pwd`/$lrose_host_data_dir
+  cidd_params_file=`pwd`/$cidd_params_file
 fi
 
 #
-# verify that lrose_host_data_dir exists, else exit 1
+# verify that cidd_params_file exists, else exit 1
 #
 
-if [[ ! -d $lrose_host_data_dir ]]; then
-  echo "ERROR: $lrose_host_data_dir is not a directory"
-  echo "Please specify a valid directory"
+if [[ ! -e $cidd_params_file ]]; then
+  echo "ERROR: $cidd_params_file does not exist"
+  echo "Please specify a valid file"
   exit 1
 fi
 
-lrose_docker_image='ncareol/cidd'
+cidd_docker_image='cidd'
 
 #
 # use second argument as cidd version, set as Docker tag
 #
 if [ ! -z "$2" ]; then
-  lrose_docker_image=$lrose_docker_image:$2
+  cidd_docker_image=$cidd_docker_image:$2
   echo "cidd version: $2"
 else
   echo "cidd version: 1.20"
@@ -106,7 +99,7 @@ fi
 #
 # architecture-specific method to set `docker run` options
 #
-lrose_docker_run_options () {
+run_options () {
   lrose_uname=$(uname)
   if [[ $lrose_uname = 'Darwin' ]]; then
     lrose_host_ip=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}' |head -1)
@@ -137,8 +130,42 @@ lrose_docker_run_options () {
 
 _echo_version
 
+# set X resources
+
+timestr=`date -u +%Y%m%d%H%M%S`
+XResourcesFile=/tmp/XResources4CIDD.${timestr}
+touch $XResourcesFile
+echo "OpenWindows.MonospaceFont: 7x13" >> $XResourcesFile
+echo "OpenWindows.RegularFont: 6x13" >> $XResourcesFile  
+echo "OpenWindows.BoldFont: 6x13bold" >> $XResourcesFile
+xrdb -nocpp -override $XResourcesFile
+/bin/rm -f $XResourcesFile
+
+if [ -e ~/.Xdefaults ]; then
+  xrdb -nocpp -override ~/.Xdefaults
+fi
+
+# set the font path
+# try various options because fonts are not always in the same place
+
+xset fp= /usr/share/X11/fonts/misc/,/usr/share/X11/fonts/75dpi/,/usr/share/X11/fonts/100dpi/ >& /dev/null
+xset fp= /usr/share/fonts/X11/misc/,/usr/share/fonts/X11/75dpi/,/usr/share/fonts/X11/100dpi/ >& /dev/null
+xset fp= /usr/share/fonts/misc/,/usr/share/fonts/75dpi/,/usr/share/fonts/100dpi/ >& /dev/null
+xset fp= /usr/X11R6/lib/X11/fonts/misc/,/usr/X11R6/lib/X11/fonts/75dpi/,/usr/X11R6/lib/X11/fonts/100dpi/ >& /dev/null
+
+# run image
+
+echo 1111111111111111111
+
+echo docker run \
+  -v $HOME/.Xauthority:/root/.Xauthority \
+  $(run_options) \
+  -p $cidd_params_file:/data \
+  $cidd_docker_image /data
+
 docker run \
   -v $HOME/.Xauthority:/root/.Xauthority \
-  $(lrose_docker_run_options) \
-  -v $lrose_host_data_dir:/data \
-  $lrose_docker_image /data
+  $(run_options) \
+  -p $cidd_params_file:/data \
+  $cidd_docker_image /data
+
