@@ -798,7 +798,14 @@ int MdvxField::convertType
     return -1;
   }
   
-  // for ASIS encoding, set output_encoding accordingly
+  // for floats ensure the scale and bias are neutral
+
+  if (_fhdr.encoding_type == Mdvx::ENCODING_FLOAT32) {
+    _fhdr.scale = 1.0;
+    _fhdr.bias = 0.0;
+  }
+
+ // for ASIS encoding, set output_encoding accordingly
   
   if (output_encoding == Mdvx::ENCODING_ASIS) {
     output_encoding =
@@ -3689,7 +3696,7 @@ void MdvxField::_int8_to_float32()
   _fhdr.data_element_nbytes = 4;
   _fhdr.missing_data_value = float_missing_val;
   _fhdr.bad_data_value = float_bad_val;
-  _fhdr.scale = 0.0;
+  _fhdr.scale = 1.0;
   _fhdr.bias = 0.0;
   
 }
@@ -3756,7 +3763,7 @@ void MdvxField::_int16_to_float32()
     _fhdr.missing_data_value * scale + bias;
   _fhdr.bad_data_value =
     _fhdr.bad_data_value * scale + bias;
-  _fhdr.scale = 0.0;
+  _fhdr.scale = 1.0;
   _fhdr.bias = 0.0;
   
 }
