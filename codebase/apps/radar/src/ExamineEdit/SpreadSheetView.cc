@@ -16,6 +16,25 @@
 
 using namespace std;
 
+Q_DECLARE_METATYPE(QVector<int>)
+
+static QScriptValue getSetFoo(QScriptContext *context, QScriptEngine *engine)
+{
+  QScriptValue callee = context->callee();
+  if (context->argumentCount() == 1) { // writing?
+    callee.setProperty("value", context->argument(0));
+  }
+  return callee.property("value");
+
+  /*
+  QVector<int> v = qscriptvalue_cast<QVector<int> >(engine->evaluate("[5, 1, 3, 2]"));
+qSort(v.begin(), v.end());
+QScriptValue a = engine->toScriptValue(v);
+qDebug() << a.toString(); // outputs "[1, 2, 3, 5]"     
+  */
+}
+
+
 SpreadSheetView::SpreadSheetView(QWidget *parent)
         : QMainWindow(parent)
 {
@@ -382,10 +401,54 @@ void SpreadSheetView::acceptFormulaInput()
     
     QScriptEngine engine;
     // ********
-    QObject *soloFunctions = new SoloFunctions(_controller);
-    QScriptValue objectValue = engine.newQObject(soloFunctions);
+
+    // how to use vectors ...
+    //    Q_DECLARE_METATYPE(QVector<int>)
+    qScriptRegisterSequenceMetaType<QVector<int> >(&engine);
+    //qScriptRegisterSequenceMetaType<QVector<int> >(&engine);
+
+    /* maybe this part goes into function??
+QVector<int> v = qscriptvalue_cast<QVector<int> >(engine->evaluate("[5, 1, 3, 2]"));
+qSort(v.begin(), v.end());
+QScriptValue a = engine->toScriptValue(v);
+qDebug() << a.toString(); // outputs "[1, 2, 3, 5]"
+    */
+    // end how to use vectors
+
+
+    //QObject *soloFunctions = new SoloFunctions(_controller);
+    //QScriptValue objectValue = engine.newQObject(soloFunctions);
     //var fun = function() { print("999.9"); };
-    engine.globalObject().setProperty("solo", objectValue);
+    //engine.globalObject().setProperty("solo", objectValue);
+    
+    // try to set a global function  ...
+    //QScriptValue object = engine.newObject();
+    engine.globalObject().setProperty("foo", engine.newFunction(getSetFoo),
+		       QScriptValue::PropertyGetter | QScriptValue::PropertySetter);
+    engine.globalObject().setProperty("bar", engine.newFunction(getSetFoo),
+		       QScriptValue::PropertyGetter | QScriptValue::PropertySetter);
+    /* use like this ...
+       foo=4
+       foo=foo+2
+       foo
+       -----
+       the result is 6 ... pretty nice!
+    */
+    //    engine.globalObject().setProperty("REMOVE_AIRCRAFT_MOTION", engine.newFunction(REMOVE_AIRCRAFT_MOTION),
+    //		       QScriptValue::PropertyGetter | QScriptValue::PropertySetter);
+
+    //QScriptValue fun = engine.newFunction(REMOVE_AIRCRAFT_MOTION, 1);
+    engine.globalObject().setProperty("REMOVE_AIRCRAFT_MOTION", 
+				      engine.newFunction(REMOVE_AIRCRAFT_MOTION, 1),
+				      QScriptValue::ReadOnly | QScriptValue::Undeletable);
+
+
+    engine.globalObject().setProperty("vectorop", 
+				      engine.newFunction(VectorOp, 1),
+				      QScriptValue::ReadOnly | QScriptValue::Undeletable);
+
+    // end of ... try to set a global function
+
     // *******
     QScriptValue result = engine.evaluate(text);
     cerr << " the result is " << result.toString().toStdString() << endl;

@@ -5,10 +5,10 @@
 #include "SoloFunctions.hh"
 
 using namespace std;
-
-SoloFunctions::SoloFunctions(SpreadSheetController *controller) 
+/*
+SoloFunctions::SoloFunctions() // SpreadSheetController *controller) 
 {
-  _controller = controller;
+  //_controller = controller;
 
 }
 
@@ -18,9 +18,16 @@ QString SoloFunctions::cat(QString animal)
   return animal.append(" instead of cat");
 }
 
+
+// TODO: make functions static, and pass in all values; DO NOT associate any
+// data with the functions.
+// - or - 
+// wrap the function with the context which contains all the extraneous data needed
+// 
 QString SoloFunctions::REMOVE_AIRCRAFT_MOTION(QString field) 
 {
   QString result(tr("|"));
+  
   // find the field in the data?
   // return the first value of the field
   vector<string> fieldNames = _controller->getFieldNames();
@@ -46,5 +53,7 @@ QString SoloFunctions::REMOVE_AIRCRAFT_MOTION(QString field)
       }
     }
   }
+  
   return result;
 }
+*/
