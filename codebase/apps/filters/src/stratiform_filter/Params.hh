@@ -377,6 +377,10 @@ public:
 
   char* input_url;
 
+  char* dbz_field_name;
+
+  long field_num;
+
   long max_valid_age;
 
   char* output_url;
@@ -390,8 +394,6 @@ public:
   tdrp_bool_t include_input_field;
 
   tdrp_bool_t include_debug_fields;
-
-  long field_num;
 
   tdrp_bool_t do_composite;
 
@@ -422,7 +424,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[29];
+  mutable TDRPtable _table[30];
 
   const char *_className;
 

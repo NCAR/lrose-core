@@ -120,6 +120,21 @@ paramdef string
   p_default = "mdvp:://host:port:directory_path";
 } input_url;
 
+paramdef string
+{
+  p_descr = "Field name for DBZ input data";
+  p_help = "If empty, the field_num will be used instead";
+  p_default = "DBZ";
+} dbz_field_name;
+
+paramdef long
+{
+  p_descr = "field number to use for algorithm";
+  p_help = "The algorithm will only be run on this field.";
+  p_min = 0;
+  p_default = 0;
+} field_num;
+
 paramdef long
 {
   p_descr = "maximum valid age for a realtime file";
@@ -150,26 +165,23 @@ paramdef string
 
 paramdef string
 {
-  p_descr = "Field name for input data in convective regions.";
-  p_help = "The input data is filtered to only include the convective parts.";
-  p_default = "conv partitioned data";
-  // p_default = "dbz_convective";
+  p_descr = "Output field name for convective DBZ.";
+  p_help = "The input DBZ field is filtered to only include the convective parts.";
+  p_default = "DbzConv";
 } field_name_for_convective_input_data;
 
 paramdef string
 {
   p_descr = "Field name for the partition flag.";
   p_help = "0: missing; 1: stratiform; 2: convective.";
-  p_default = "conv partition";
-  // p_default = "partition_flag";
+  p_default = "ConvStrat";
 } field_name_for_partition_flag;
 
 paramdef string
 {
   p_descr = "Field name for the background mean.";
   p_help = "This is the mean reflectivity in the background template.";
-  p_default = "conv means";
-  // p_default = "dbz_background";
+  p_default = "DbzBackground";
 } field_name_for_background_mean;
 
 paramdef boolean
@@ -204,14 +216,6 @@ commentdef
            "the Journal of Applied Meteorology, Sept. 1995, vol. 34, "
            "pp. 1983-1990.";
 };
-
-paramdef long
-{
-  p_descr = "field number to use for algorithm";
-  p_help = "The algorithm will only be run on this field.";
-  p_min = 0;
-  p_default = 0;
-} field_num;
 
 paramdef boolean
 {
