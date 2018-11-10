@@ -380,6 +380,21 @@ void OutputMdv::addConvStratFields(const ConvStrat &convStrat,
   
 {
 
+  Mdvx::coord_t projCoord = proj.getCoord();
+  if (convStrat.getGridNx() != projCoord.nx ||
+      convStrat.getGridNy() != projCoord.ny) {
+    cerr << "ERROR - OutputMdv::addConvStratFields" << endl;
+    cerr << "  ConvStrat grid size does not match Proj grid size" << endl;
+    cerr << "  ConvStrat nx, ny: " 
+         << convStrat.getGridNx() << ", "
+         << convStrat.getGridNy() << endl;
+    MdvxProj::printCoord(projCoord, cerr);
+    return;
+  }
+
+  vector<double> vlevel2D;
+  vlevel2D.push_back(vol.getAltitudeKm());
+  
   if (_params.conv_strat_write_partition) {
     addConvStratBool(vol, proj,
                      "ConvStrat",
@@ -389,7 +404,7 @@ void OutputMdv::addConvStratFields(const ConvStrat &convStrat,
   }
 
   if (_params.conv_strat_write_mean_texture) {
-    addField(vol, proj, vlevels,
+    addField(vol, proj, vlevel2D,
              "DbzTextureMean",
              "mean_of_dbz_texture_over_height",
              "dBZ",
@@ -421,9 +436,6 @@ void OutputMdv::addConvStratFields(const ConvStrat &convStrat,
                      "convective_flag_from_mean_dbz_texture",
                      ConvStrat::CATEGORY_MISSING,
                      convStrat.getConvFromTexture());
-
-    vector<double> vlevel2D;
-    vlevel2D.push_back(vol.getAltitudeKm());
 
     addField(vol, proj, vlevel2D,
              "DbzColMax",

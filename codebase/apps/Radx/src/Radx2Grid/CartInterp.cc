@@ -135,6 +135,7 @@ CartInterp::CartInterp(const string &progName,
     _convStrat.setMinTextureForConvection
       (_params.conv_strat_min_texture_for_convection);
   }
+  _gotConvStrat = false;
 
 }
 
@@ -244,10 +245,13 @@ int CartInterp::interpVol()
 
   // compute convective stratiform split
 
+  _gotConvStrat = false;
   if (_params.identify_convective_stratiform_split) {
     // convective / stratiform split
     _printRunTime("Cart interp - before strat/conv");
-    _convStratCompute();
+    if (_convStratCompute() == 0) {
+      _gotConvStrat = true;
+    }
     _printRunTime("Cart interp - after strat/conv");
   }
   
@@ -2463,8 +2467,8 @@ int CartInterp::_writeOutputFile()
   }
 
   // convective stratiform split
-  
-  if (_params.identify_convective_stratiform_split) {
+
+  if (_params.identify_convective_stratiform_split && _gotConvStrat) {
     out.addConvStratFields(_convStrat, _readVol,
                            _proj, _gridZLevels);
   }

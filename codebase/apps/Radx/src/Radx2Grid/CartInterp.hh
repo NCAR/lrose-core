@@ -186,6 +186,7 @@ private:
   // convective / stratiform split
 
   ConvStrat _convStrat;
+  bool _gotConvStrat;
 
 #ifdef JUNK
   typedef enum {
