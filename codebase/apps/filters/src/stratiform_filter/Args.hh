@@ -40,8 +40,10 @@
  */
 
 #include <stdio.h>
-
 #include <tdrp/tdrp.h>
+#include <string>
+#include <vector>
+using namespace std;
 
 /*
  ******************************* defines ********************************
@@ -86,17 +88,16 @@ class Args
   
   // Access methods
 
-  time_t getStartTime()
-  {
-    return _startTime;
-  }
+  time_t getStartTime() const { return _startTime; }
   
-  time_t getEndTime()
-  {
-    return _endTime;
-  }
+  time_t getEndTime() const { return _endTime; }
   
+  const vector<string> &getInputFileList() const { return _inputFileList; }
+
  private:
+
+  // file list
+  vector<string> _inputFileList;
 
   // Start and end times for archive mode
 

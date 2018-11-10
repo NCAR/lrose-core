@@ -69,7 +69,8 @@ public:
 
   typedef enum {
     REALTIME_MODE = 0,
-    ARCHIVE_MODE = 1
+    ARCHIVE_MODE = 1,
+    FILELIST_MODE = 2
   } mode_t;
 
   // struct typedefs

@@ -612,13 +612,15 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
-    tt->enum_def.nfields = 2;
+    tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("REALTIME_MODE");
       tt->enum_def.fields[0].val = REALTIME_MODE;
       tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE_MODE");
       tt->enum_def.fields[1].val = ARCHIVE_MODE;
+      tt->enum_def.fields[2].name = tdrpStrDup("FILELIST_MODE");
+      tt->enum_def.fields[2].val = FILELIST_MODE;
     tt->single_val.e = REALTIME_MODE;
     tt++;
     

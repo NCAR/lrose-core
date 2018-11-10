@@ -84,7 +84,8 @@ commentdef
 typedef enum
 {
   REALTIME_MODE,
-  ARCHIVE_MODE
+  ARCHIVE_MODE,
+  FILELIST_MODE
 } mode_t;
 
 paramdef enum mode_t
