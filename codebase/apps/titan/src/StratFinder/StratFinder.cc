@@ -326,7 +326,7 @@ void StratFinder::_addFields()
                              Mdvx::ENCODING_FLOAT32);
     textureField->convertType(Mdvx::ENCODING_FLOAT32,
                               Mdvx::COMPRESSION_GZIP);
-    textureField->setFieldName("DbzTexture");
+    textureField->setFieldName("DbzTextureMean");
     textureField->setFieldNameLong("Mean texture of dbz");
     textureField->setUnits("dBZ");
     _outMdvx.addField(textureField);
@@ -340,7 +340,7 @@ void StratFinder::_addFields()
                          Mdvx::ENCODING_FLOAT32);
     maxField->convertType(Mdvx::ENCODING_FLOAT32,
                           Mdvx::COMPRESSION_GZIP);
-    maxField->setFieldName("ColMaxDbz");
+    maxField->setFieldName("DbzColMax");
     maxField->setFieldNameLong("Column max dbz");
     maxField->setUnits("dBZ");
     _outMdvx.addField(maxField);
