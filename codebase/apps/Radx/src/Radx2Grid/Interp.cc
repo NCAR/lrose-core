@@ -1071,11 +1071,13 @@ void Interp::_transformForOutput()
     
     for (int jfield = 0; jfield < _params.transform_fields_n; jfield++) {
 
-      const Params::transform_field_t &transform = _params._transform_fields[jfield];
+      const Params::transform_field_t &transform =
+        _params._transform_fields[jfield];
       string transName = transform.output_name;
       if (radxName == transName) {
         
-        if (transform.transform == Params::TRANSFORM_DB_TO_LINEAR_AND_BACK) {
+        if (transform.transform ==
+            Params::TRANSFORM_DB_TO_LINEAR_AND_BACK) {
           
           fl32 *data = _outputFields[ifield];
           for (int ipt = 0; ipt < _nPointsVol; ipt++) {
@@ -1089,7 +1091,8 @@ void Interp::_transformForOutput()
             }
           } // ipt
           
-        } else if (transform.transform == Params::TRANSFORM_LINEAR_TO_DB_AND_BACK) {
+        } else if (transform.transform ==
+                   Params::TRANSFORM_LINEAR_TO_DB_AND_BACK) {
           
           fl32 *data = _outputFields[ifield];
           for (int ipt = 0; ipt < _nPointsVol; ipt++) {
@@ -1099,7 +1102,7 @@ void Interp::_transformForOutput()
             }
           } // ipt
         
-        } // if (transform.transform == Params::TRANSFORM_DB_TO_LINEAR_AND_BACK)
+        } // if (transform.transform ...
 
       } // if (outputName == transName)
 

@@ -42,6 +42,7 @@
 #include <Radx/RadxRcalib.hh>
 #include <rapformats/DsRadarParams.hh>
 #include <rapformats/DsRadarCalib.hh>
+#include <radar/ConvStrat.hh>
 #include "Params.hh"
 using namespace std;
 
@@ -75,6 +76,18 @@ public:
                 double inputOffset,
                 fl32 missingVal,
 		const fl32 *data);
+
+  void addConvStratBool(const RadxVol &vol,
+                        MdvxProj &proj,
+                        const string &field_name,
+                        const string &field_name_long,
+                        ui08 missingVal,
+                        const ui08 *data);
+  
+  void addConvStratFields(const ConvStrat &convStrat,
+                          const RadxVol &vol,
+                          MdvxProj &proj,
+                          const vector<double> &vlevels);
   
   // add the radarParams as a chunk
 

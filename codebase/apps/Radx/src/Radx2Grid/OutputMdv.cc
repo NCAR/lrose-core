@@ -267,6 +267,185 @@ void OutputMdv::addField(const RadxVol &vol,
 
 }
 
+void OutputMdv::addConvStratBool(const RadxVol &vol,
+                                 MdvxProj &proj,
+                                 const string &field_name,
+                                 const string &field_name_long,
+                                 ui08 missingVal,
+                                 const ui08 *data)
+  
+{
+  
+  Mdvx::coord_t coord = proj.getCoord();
+
+  if (_params.debug) {
+    cerr << "  Adding field: " << field_name << endl;
+  }
+
+  if (coord.nx == 0 || coord.ny == 0) {
+    cerr << "WARNING - OutputMdv::addField" << endl;
+    cerr << "  Zero length field, not adding, name: " << field_name << endl;
+    cerr << "  nx, ny: "
+         << coord.nx << ", " << coord.ny << endl;
+    return;
+  }
+
+  // field header
+  
+  Mdvx::field_header_t fhdr;
+  MEM_zero(fhdr);
+
+  fhdr.nx = coord.nx;
+  fhdr.ny = coord.ny;
+  fhdr.nz = 1;
+
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_ELEV;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  
+  fhdr.proj_type = proj.getProjType();
+  fhdr.dz_constant = true;
+  
+  int volSize08 = fhdr.nx * fhdr.ny * sizeof(ui08);
+  fhdr.volume_size = volSize08;
+  fhdr.encoding_type = Mdvx::ENCODING_INT8;
+  fhdr.data_element_nbytes = 1;
+
+  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
+  fhdr.scaling_type = Mdvx::SCALING_SPECIFIED;
+  
+  fhdr.proj_origin_lat = vol.getLatitudeDeg();
+  fhdr.proj_origin_lon = vol.getLongitudeDeg();
+  fhdr.user_data_fl32[0] = vol.getAltitudeKm();
+  
+  fhdr.grid_dx = coord.dx;
+  fhdr.grid_dy = coord.dy;
+  fhdr.grid_dz = 1.0;
+  
+  fhdr.grid_minx = coord.minx;
+  fhdr.grid_miny = coord.miny;
+  fhdr.grid_minz = vol.getAltitudeKm();
+
+  fhdr.scale = 1.0;
+  fhdr.bias = 0.0;
+  fhdr.missing_data_value = missingVal;
+  fhdr.bad_data_value = missingVal;
+  
+  fhdr.min_value = 0;
+  fhdr.max_value = 0;
+  fhdr.min_value_orig_vol = 0;
+  fhdr.max_value_orig_vol = 0;
+
+  proj.syncXyToFieldHdr(fhdr);
+  
+  // vlevel header
+  
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  vhdr.level[0] = fhdr.grid_minz;
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  
+  // create field
+
+  MdvxField *fld = new MdvxField(fhdr, vhdr, data);
+  if (_params.output_format == Params::MDV) {
+    fld->compress(Mdvx::COMPRESSION_GZIP);
+  }
+
+  if (_params.auto_remap_flat_to_latlon &&
+      _params.grid_projection == Params::PROJ_FLAT) {
+    fld->autoRemap2Latlon(_remapLut);
+  }
+
+  // set strings
+  
+  fld->setFieldName(field_name.c_str());
+  fld->setFieldNameLong(field_name_long.c_str());
+  fld->setUnits("");
+  fld->setTransform("");
+  
+  // add to object
+  
+  _mdvx.addField(fld);
+
+}
+
+////////////////////////////////////////
+// add convective stratiform fields
+
+void OutputMdv::addConvStratFields(const ConvStrat &convStrat,
+                                   const RadxVol &vol,
+                                   MdvxProj &proj,
+                                   const vector<double> &vlevels)
+  
+{
+
+  if (_params.conv_strat_write_partition) {
+    addConvStratBool(vol, proj,
+                     "ConvStrat",
+                     "1 = stratiform, 2 = convective",
+                     ConvStrat::CATEGORY_MISSING,
+                     convStrat.getPartition());
+  }
+
+  if (_params.conv_strat_write_mean_texture) {
+    addField(vol, proj, vlevels,
+             "DbzTextureMean",
+             "mean_of_dbz_texture_over_height",
+             "dBZ",
+             Radx::FL32, 1.0, 0.0,
+             convStrat.getMissingVal(),
+             convStrat.getMeanTexture());
+  }
+  
+  if (_params.conv_strat_write_convective_dbz) {
+    addField(vol, proj, vlevels,
+             "DbzConv",
+             "dbz_in_convection",
+             "dBZ",
+             Radx::FL32, 1.0, 0.0,
+             convStrat.getMissingVal(),
+             convStrat.getConvectiveDbz());
+  }
+
+  if (_params.conv_strat_write_debug_fields) {
+
+    addConvStratBool(vol, proj,
+                     "ConvFromColMax",
+                     "convective_flag_from_column_max_dbz",
+                     ConvStrat::CATEGORY_MISSING,
+                     convStrat.getConvFromColMax());
+    
+    addConvStratBool(vol, proj,
+                     "ConvFromTexture",
+                     "convective_flag_from_mean_dbz_texture",
+                     ConvStrat::CATEGORY_MISSING,
+                     convStrat.getConvFromTexture());
+
+    vector<double> vlevel2D;
+    vlevel2D.push_back(vol.getAltitudeKm());
+
+    addField(vol, proj, vlevel2D,
+             "DbzColMax",
+             "dbz_column_maximum",
+             "dBZ",
+             Radx::FL32, 1.0, 0.0,
+             convStrat.getMissingVal(),
+             convStrat.getColMaxDbz());
+    
+    addField(vol, proj, vlevel2D,
+             "FractionActive",
+             "fraction_of_texture_kernel_with_active_dbz",
+             "",
+             Radx::FL32, 1.0, 0.0,
+             convStrat.getMissingVal(),
+             convStrat.getFractionActive());
+
+
+  }
+
+}
+  
 ////////////////////////////////////////
 // addChunks()
 //
