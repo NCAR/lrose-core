@@ -4,6 +4,7 @@
 #include <QModelIndex>
 #include <QJSEngine>
 #include <QJSValue>
+#include <QJSValueIterator>
 #include <vector>
 #include <iostream>
 
@@ -515,6 +516,20 @@ qDebug() << a.toString(); // outputs "[1, 2, 3, 5]"
       //myvector = engine.fromScriptValue(result);
     }
     cerr << " the result is " << result.toString().toStdString() << endl;
+
+    // ======
+    // TODO: YES! This works.  The new global variables are listed here;
+    // just find them and add them to the spreadsheet and to the Model??
+    // HERE!!!
+    // try iterating over the properties of the globalObject to find new variables
+    QJSValue theGlobalObject = engine.globalObject();
+
+      QJSValueIterator it(theGlobalObject);
+      while (it.hasNext()) {
+	it.next();
+	qDebug() << it.name() << ": " << it.value().toString();
+      }
+      // ======
 
     int row = table->currentRow();
     int col = table->currentColumn();
