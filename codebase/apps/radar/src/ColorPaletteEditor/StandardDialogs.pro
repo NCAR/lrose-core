@@ -1,4 +1,5 @@
 QT += widgets
+QT += qml
 requires(qtConfig(filedialog))
 
 CONFIG += qt debug

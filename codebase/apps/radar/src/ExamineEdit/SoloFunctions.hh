@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <QtWidgets>
 #include <QModelIndex>
-#include <QtScript/QScriptEngine>
-#include <QtScript/QScriptValue>
+#include <QJSEngine>
+#include <QJSValue>
 
 #include <vector>
 #include <iostream>
@@ -14,53 +14,59 @@
 
 using namespace std;
 
-
-static QScriptValue REMOVE_AIRCRAFT_MOTION(QScriptContext *context, QScriptEngine *engine)
+/*
+static QJSValue REMOVE_AIRCRAFT_MOTION(QJSContext *context, QJSEngine *engine)
 {
-  QScriptValue callee = context->callee();
+  QJSValue callee = context->callee();
   if (context->argumentCount() == 1) { // writing?                                                                             
     callee.setProperty("value", context->argument(0));
   }
   return callee.property("value");
 }
 
-static QScriptValue VectorOp(QScriptContext *context, QScriptEngine *engine)
+static QJSValue VectorOp(QJSContext *context, QJSEngine *engine)
 {
-  QScriptValue callee = context->callee();
+  QJSValue callee = context->callee();
   if (context->argumentCount() == 1) { // writing?                                                                             
-    QScriptValue arg = context->argument(0);
+    QJSValue arg = context->argument(0);
     if (arg.isArray()) {
       cerr << "it is an Array" << endl;
       QVector<int> v = qscriptvalue_cast<QVector<int> >(context->argument(0)); 
       cerr << "inside VectorOp ";
-      cerr << " VectorOp size = " << v.size();
+      cerr << " VectorOp size = " << v.size() << endl;
       for (QVector<int>::iterator i=v.begin(); i != v.end(); i++)                                                                                     
 	cerr << *i << endl; // outputs "[1, 2, 3, 5]"                                                                            
 
       qSort(v.begin(), v.end());                                                                                                    
-      QScriptValue a = engine->toScriptValue(v);
-      callee.setProperty("value", a); // context->argument(0));
+      QJSValue jsArray = engine->newArray(v.size()); // toScriptValue(v);
+      for (int i = 0; i < v.size(); ++i) {
+	jsArray.setProperty(i, v.at(i));
+      } 
+      callee.setProperty("value", jsArray); // context->argument(0));
   }
 }
   return callee.property("value");
 }
+*/
 
 
-/*
 class SoloFunctions : public QObject
 {
 
   Q_OBJECT
 public:
-  SoloFunctions(SpreadSheetController *controller);
+  //  SoloFunctions(SpreadSheetController *controller);
+  SoloFunctions(QObject *parent = nullptr) : QObject(parent) {}
 
-  Q_INVOKABLE QString cat(QString animal);
-  Q_INVOKABLE QString REMOVE_AIRCRAFT_MOTION(QString field);
+  Q_INVOKABLE QString cat(QString animal) {return animal+"_cat"; }
+  Q_INVOKABLE QString  REMOVE_AIRCRAFT_MOTION(QString field) { return field+"_trump"; }
+  Q_INVOKABLE double sqrt(double value) { return qSqrt(value); }
+  Q_INVOKABLE QVector<int> add(QVector<int> v, QVector<int> v2) { QVector<int> v3(3); for (int i=0; i<3; i++) v3[i]=v[i]+v2[i]; return v3; }
 
 private:
 
-  SpreadSheetController *_controller;
+  //  SpreadSheetController *_controller;
 };
-*/
+
 
 #endif
