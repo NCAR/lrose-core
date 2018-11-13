@@ -12,11 +12,13 @@
 #include "spreadsheetdelegate.hh"
 #include "spreadsheetitem.hh"
 #include "SoloFunctions.hh"
+#include "DataField.hh"
 
 
 using namespace std;
 
 Q_DECLARE_METATYPE(QVector<int>)
+Q_DECLARE_METATYPE(QVector<double>)
 
 /*
 static QScriptValue getSetFoo(QScriptContext *context, QScriptEngine *engine)
@@ -140,6 +142,7 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
 
     setWindowTitle(tr("Spreadsheet"));
 
+    setupSoloFunctions();
 }
 
 
@@ -212,6 +215,8 @@ SpreadSheetView::SpreadSheetView(std::string fileName, QWidget *parent)
             this, &SpreadSheetView::updateTextEdit);
 
     setWindowTitle(tr("Spreadsheet"));
+
+    setupSoloFunctions();
 }
 
 void SpreadSheetView::createActions()
@@ -396,12 +401,23 @@ float  SpreadSheetView::myPow()
   return(999.9);
 }
 
+
+void SpreadSheetView::setupSoloFunctions() {
+  
+    QJSValue myExt = engine.newQObject(new SoloFunctions());
+    engine.globalObject().setProperty("cat", myExt.property("cat"));
+    engine.globalObject().setProperty("sqrt", myExt.property("sqrt"));
+    engine.globalObject().setProperty("REMOVE_AIRCRAFT_MOTION", myExt.property("REMOVE_AIRCRAFT_MOTION"));
+    engine.globalObject().setProperty("add", myExt.property("add"));
+
+}
+
 void SpreadSheetView::acceptFormulaInput()
 {
     QString text = formulaInput->getText();
     cerr << "text entered: " << text.toStdString() << endl;
     
-    QJSEngine engine;
+    //QJSEngine engine;  // moved to class header; member variable
     // ********
 
     // engine->checkSyntax(text);
@@ -454,15 +470,44 @@ qDebug() << a.toString(); // outputs "[1, 2, 3, 5]"
 				      QScriptValue::ReadOnly | QScriptValue::Undeletable);
     */
 
+    /* moved to separate method
     QJSValue myExt = engine.newQObject(new SoloFunctions());
     engine.globalObject().setProperty("cat", myExt.property("cat"));
     engine.globalObject().setProperty("sqrt", myExt.property("sqrt"));
     engine.globalObject().setProperty("REMOVE_AIRCRAFT_MOTION", myExt.property("REMOVE_AIRCRAFT_MOTION"));
     engine.globalObject().setProperty("add", myExt.property("add"));
-
+    */
     // end of ... try to set a global function
 
+    // try to set global field values
+
+    /*
+    QVector<int> threes(3);
+    threes[0]=3;     threes[1]=3;     threes[2]=3;
+    QJSValue objectValue = engine.newQObject(new DataField(threes));
+    engine.globalObject().setProperty("VEL1", objectValue.property("values"));
+    */
+    /* moved to open File
+    // for each field in model (RadxVol)
+    
+    //=======
+    if (_controller != NULL) {
+    vector<string> fieldNames = _controller->getFieldNames();
+
+    int c = 0;
+    vector<string>::iterator it;
+    for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
+      QString fieldName(QString::fromStdString(*it));
+      vector<double> data = _controller->getData(*it);
+      QVector<double> qData = QVector<double>::fromStdVector(data);
+      QJSValue objectValue = engine.newQObject(new DataField(qData));
+      engine.globalObject().setProperty(fieldName, objectValue.property("values"));
+    }
+    }
+    // end set global field values
+    */
     // *******
+
     QJSValue result = engine.evaluate(text);
     if (result.isArray()) {
       cerr << " the result is an array\n"; 
@@ -901,6 +946,28 @@ void SpreadSheetView::setupContents()
       }
       c += 1;
     }
+
+
+    //======
+    
+    // for each field in model (RadxVol)
+    
+    if (_controller != NULL) {
+    vector<string> fieldNames = _controller->getFieldNames();
+
+    int c = 0;
+    vector<string>::iterator it;
+    for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
+      QString fieldName(QString::fromStdString(*it));
+      vector<double> data = _controller->getData(*it);
+      QVector<double> qData = QVector<double>::fromStdVector(data);
+      QJSValue objectValue = engine.newQObject(new DataField(qData));
+      engine.globalObject().setProperty(fieldName, objectValue.property("values"));
+    }
+    }
+    // end set global field values
+
+    //==========
 
     /* TODO: each of these columns and data must come from RadxVol
     // column 0

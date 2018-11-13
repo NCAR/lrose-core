@@ -16,6 +16,7 @@
 #include <QTableWidgetItem>
 #include <QTableWidget>
 #include <QString>
+#include <QJSEngine>
 
 class SpreadSheetView : public QMainWindow
 {
@@ -61,7 +62,7 @@ public slots:
 protected:
     void setupContextMenu();
     void setupContents();
-
+    void setupSoloFunctions();
     void setupMenuBar();
     void createActions();
 
@@ -107,6 +108,7 @@ private:
     //QTextEdit *formulaInput;
   // SpreadSheetDelegate *formulaInput;
 
+  QJSEngine engine;
 
 const char *htmlText =
 "<HTML>"

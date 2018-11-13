@@ -1,5 +1,5 @@
-#ifndef SOLOFUNCTIONS_H
-#define SOLOFUNCTIONS_H
+#ifndef DATAFIELD_H
+#define DATAFIELD_H
 
 #include <stdio.h>
 #include <QtWidgets>
@@ -50,25 +50,21 @@ static QJSValue VectorOp(QJSContext *context, QJSEngine *engine)
 */
 
 
-class SoloFunctions : public QObject
+class DataField : public QObject
 {
 
   Q_OBJECT
 public:
-  //  SoloFunctions(SpreadSheetController *controller);
-  SoloFunctions(QObject *parent = nullptr) : QObject(parent) {}
+  DataField(QObject *parent = nullptr) : QObject(parent) {}
+  DataField(QVector<double> someData, QObject *parent = nullptr) : QObject(parent) {_values = someData; }
 
-  Q_INVOKABLE QString cat(QString animal) {return animal+"_cat"; }
-  Q_INVOKABLE QString  REMOVE_AIRCRAFT_MOTION(QString field) { return field+"_trump"; }
-  Q_INVOKABLE double sqrt(double value) { return qSqrt(value); }
-  Q_INVOKABLE QVector<double> add(QVector<double> v, QVector<double> v2) { 
-    // int size = v.size(); if (size == v2.size()) {
-    QVector<double> v3(3); for (int i=0; i<3; i++) v3[i]=v[i]+v2[i]; return v3; }
-  Q_INVOKABLE QVector<int> addI(QVector<int> v, QVector<int> v2) { QVector<int> v3(3); for (int i=0; i<3; i++) v3[i]=v[i]+v2[i]; return v3; }
+  //  Q_PROPERTY(QVector<int> values MEMBER _values)
+  Q_PROPERTY(QVector<double> values MEMBER _values)
+
+ //add(QVector<int> v, QVector<int> v2) { QVector<int> v3(3); for (int i=0; i<3; i++) v3[i]=v[i]+v2[i]; return v3; }
 
 private:
-
-  //  SpreadSheetController *_controller;
+  QVector<double> _values;
 };
 
 

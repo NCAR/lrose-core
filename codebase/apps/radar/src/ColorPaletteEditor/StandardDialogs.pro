@@ -24,6 +24,7 @@ HEADERS      += ../ExamineEdit/SpreadSheetUtils.hh
 HEADERS      += ../ExamineEdit/spreadsheetdelegate.hh
 HEADERS      += ../ExamineEdit/FunctionEditor.hh
 HEADERS      += ../ExamineEdit/SoloFunctions.hh
+HEADERS      += ../ExamineEdit/DataField.hh
 
 SOURCES       = Dialog.cc 
 SOURCES      += ../HawkEye/ColorMap.cc 
