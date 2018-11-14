@@ -163,7 +163,7 @@ paramdef enum input_format_t {
   "FORMAT_3:\n"
   "  10 fields:\n"
   "    month/day/year hour:min:sec lat lon Ka C/G, where\n"
-  "    sec is a float (not an int) and C/G is either 0 or 1.\n\n"
+  "    sec is a float (not an int), Ka is amplitude, and C/G is either 0 or 1.\n\n"
   "FORMAT_4:\n"
   "  6 fields : unixTime,lat,lon,amp,dummy,cg (cg=0 => cloud-ground 1 => could-cloud)\n\n"
   "  UALF_LF_1: Universal ASCII Ltg Format, Low Freq (LF), version 1:\n"

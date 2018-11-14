@@ -258,6 +258,10 @@ int Ltg2Spdb::_processFile(const char *file_path)
       continue;
     }
 
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Decoding line: " << line;
+    }
+
     // NAPLN data has lines that start with
     // LIGHTNING-NAPLN1EX
     if (line[0] == 'L') {
@@ -850,24 +854,51 @@ int Ltg2Spdb::_decode_format_2(const char *line)
 // NOTE: this fills out LTG_extended_t
 
 int Ltg2Spdb::_decode_format_3(const char *line)
-  {
+{
 
-  int year, month, day, hour, min, sec, cg;
+  int year, month, day, hour, min, sec;
+  char cc;
   double dSec;
-  double lat, lon, amplitude;
+  double lat, lon;
+  double amplitude = 0.0;
+  int cg = 0;
+  
+  // try full line
 
-  if (sscanf(line, "%d/%d/%d %d:%d:%lf %lg %lg %lg %d",
-             &year, &month, &day, &hour, &min, &dSec,
-             &lat, &lon, &amplitude, &cg) != 10) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "ERROR - _decode_format_3" << endl;
-      cerr << "  Cannot decode line: " << line << endl;
-      cerr << "  month/day/year hour:min:sec lat lon Ka C/G, where "
-           << "sec is a float (not an int) and C/G is either 0 or 1"
-           << "lat lon alt amplitude type(G or C)" << endl;
-    }
-    return -1;
-  }
+  if (sscanf(line, "%d/%d/%d%1c%d:%d:%lf %lg %lg %lg %d",
+             &month, &day, &year, 
+             &cc, 
+             &hour, &min, &dSec,
+             &lat, &lon, &amplitude, &cg) != 11) {
+
+    // try without cg
+    
+    if (sscanf(line, "%d/%d/%d%1c%d:%d:%lf %lg %lg %lg",
+               &month, &day, &year, 
+               &cc, 
+               &hour, &min, &dSec,
+               &lat, &lon, &amplitude) != 10) {
+
+      // try without amplitude or cg
+      
+      if (sscanf(line, "%d/%d/%d%1c%d:%d:%lf %lg %lg",
+                 &month, &day, &year, 
+                 &cc, 
+                 &hour, &min, &dSec,
+                 &lat, &lon) != 9) {
+        
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          cerr << "ERROR - _decode_format_3" << endl;
+          cerr << "  Cannot decode line: " << line << endl;
+          cerr << "  month/day/year hour:min:sec lat lon Ka C/G, where "
+               << "sec is a float (not an int) and C/G is either 0 or 1"
+               << "lat lon alt amplitude type(G or C)" << endl;
+        }
+        return -1;
+        
+      } // scanf == 9
+    } // scanf == 10
+  } // sscanf == 11
   
   // check bounding box?
   
