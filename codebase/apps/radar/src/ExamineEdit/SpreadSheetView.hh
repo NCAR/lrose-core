@@ -65,6 +65,9 @@ protected:
     void setupSoloFunctions();
     void setupMenuBar();
     void createActions();
+    void addVariableToSpreadSheet(QString name, QJSValue value);
+
+
 
     void actionMath_helper(const QString &title, const QString &op);
     bool runFunctionDialog();
@@ -122,5 +125,8 @@ const char *htmlText =
 "<li>Summing the contents of an arbitrary number of cells.</li>"
   "</HTML>";
 };
+
+
+
 
 #endif // SPREADSHEETVIEW_H

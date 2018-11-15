@@ -509,6 +509,23 @@ qDebug() << a.toString(); // outputs "[1, 2, 3, 5]"
     */
     // *******
 
+    // Grab the context before evaluating the formula
+    // ======
+    // TODO: YES! This works.  The new global variables are listed here;
+    // just find them and add them to the spreadsheet and to the Model??
+    // HERE!!!
+    // try iterating over the properties of the globalObject to find new variables
+    std::map<QString, QString> currentVariableContext;
+    QJSValue theGlobalObject = engine.globalObject();
+
+      QJSValueIterator it(theGlobalObject);
+      while (it.hasNext()) {
+	it.next();
+	qDebug() << it.name() << ": " << it.value().toString();
+        currentVariableContext[it.name()] = it.value().toString();
+      }
+      // ======
+
     QJSValue result = engine.evaluate(text);
     if (result.isArray()) {
       cerr << " the result is an array\n"; 
@@ -522,12 +539,17 @@ qDebug() << a.toString(); // outputs "[1, 2, 3, 5]"
     // just find them and add them to the spreadsheet and to the Model??
     // HERE!!!
     // try iterating over the properties of the globalObject to find new variables
-    QJSValue theGlobalObject = engine.globalObject();
+    QJSValue newGlobalObject = engine.globalObject();
 
-      QJSValueIterator it(theGlobalObject);
-      while (it.hasNext()) {
-	it.next();
-	qDebug() << it.name() << ": " << it.value().toString();
+      QJSValueIterator it2(newGlobalObject);
+      while (it2.hasNext()) {
+	it2.next();
+	qDebug() << it2.name() << ": " << it2.value().toString();
+        if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
+	  // we have a newly defined variable
+	  qDebug() << "NEW VARIABLE " << it2.name() <<  ": " << it2.value().toString();
+	  addVariableToSpreadSheet(it2.name(), it2.value());
+	}
       }
       // ======
 
@@ -1095,6 +1117,99 @@ void SpreadSheetView::setupContents()
     table->item(9,5)->setBackgroundColor(Qt::lightGray);
     */
 }
+
+void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
+
+
+    string format = "%g";
+    char formattedData[250];
+
+
+  if (value.isArray()) {
+    qDebug() << "variable isArray " << name << endl;
+    /*
+  for(it = value.begin(); it != value.end(); it++) {
+    QString the_name(QString::fromStdString(*it));
+    cerr << *it << endl;
+    table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
+
+    vector<double> data = _controller->getData(*it);
+
+    cerr << "number of data values = " << data.size() << endl;
+
+
+    for (int r=0; r<20; r++) {
+      //    sprintf(formattedData, format, data[0]);                                                                                             
+      sprintf(formattedData, "%g", data.at(r));
+      cerr << "setting " << r << "," << c << "= " << formattedData << endl;
+      table->setItem(r, c, new SpreadSheetItem(formattedData));
+    }
+    c += 1;
+    } */
+  }
+  if (value.isBool()) {
+    qDebug() << "variable isBool " << name << endl;
+  }
+  if (value.isCallable()) {
+    qDebug() << "variable isCallable " << name << endl;
+  }
+  if (value.isDate()) {
+    qDebug() << "variable isDate " << name << endl;
+  }
+  if (value.isError()) {
+    qDebug() << "variable isError " << name << endl;
+  }
+  if (value.isNull()) {
+    qDebug() << "variable isNull " << name << endl;
+  }
+  if (value.isNumber()) {
+    qDebug() << "variable isNumber " << name << endl;
+  }
+  if (value.isObject()) {
+    qDebug() << "variable isObject " << name << endl;
+    //    QVector<double> myv = value.property("values");
+    //qDebug() << myv.at(0) << ";" << myv.at(1) << endl;
+    table->setColumnCount(table->columnCount() + 1);
+
+    int c = table->columnCount() - 1;
+    table->setHorizontalHeaderItem(c, new QTableWidgetItem(name));
+
+    QJSValueIterator it(value);
+    while (it.hasNext()) {
+      it.next();
+      qDebug() << it.name() << ": " << it.value().toString();
+    }
+
+    for (int r=0; r<value.property("length").toInt(); r++) {
+      //qDebug() << it.name() << ": " << it.value().toString();
+      QString valueAsString = value.property(r).toString();
+      //      sprintf(formattedData, "%g", value.property(r).toInt());
+      //table->setItem(r, c, new SpreadSheetItem(formattedData));
+      table->setItem(r,c, new QTableWidgetItem(valueAsString));
+    }
+
+  }
+  if (value.isQMetaObject()) {
+    qDebug() << "variable isQMetaObject " << name << endl;
+  }
+  if (value.isQObject()) {
+    qDebug() << "variable isQObject " << name << endl;
+  }
+  if (value.isRegExp()) {
+    qDebug() << "variable isRegExp " << name << endl;
+  }
+  if (value.isString()) {
+    qDebug() << "variable isString " << name << endl;
+  }
+  if (value.isUndefined()) {
+    qDebug() << "variable isUndefined " << name << endl;
+  }
+  if (value.isVariant()) {
+    qDebug() << "variable isVariant " << name << endl;
+  }
+
+}
+
 
 void SpreadSheetView::showAbout()
 {
