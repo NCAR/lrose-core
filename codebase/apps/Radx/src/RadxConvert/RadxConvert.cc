@@ -478,15 +478,18 @@ int RadxConvert::_readFile(const string &readPath,
   // check we have not already processed this file
   // in the file aggregation step
   
-  RadxPath thisPath(readPath);
-  for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-    RadxPath listPath(_readPaths[ii]);
-    if (thisPath.getFile() == listPath.getFile()) {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "Skipping file: " << readPath << endl;
-        cerr << "  Previously processed in aggregation step" << endl;
+  if (_params.aggregate_sweep_files_on_read ||
+      _params.aggregate_all_files_on_read) {
+    RadxPath thisPath(readPath);
+    for (size_t ii = 0; ii < _readPaths.size(); ii++) {
+      RadxPath listPath(_readPaths[ii]);
+      if (thisPath.getFile() == listPath.getFile()) {
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          cerr << "Skipping file: " << readPath << endl;
+          cerr << "  Previously processed in aggregation step" << endl;
+        }
+        return 1;
       }
-      return 1;
     }
   }
   
