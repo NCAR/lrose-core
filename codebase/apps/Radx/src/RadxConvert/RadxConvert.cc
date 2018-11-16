@@ -1317,7 +1317,7 @@ int RadxConvert::_writeVol(RadxVol &vol)
     RadxPath::stripDir(outputDir, outputPath, relPath);
     ldata.setRelDataPath(relPath);
     ldata.setWriter(_progName);
-    if (ldata.write(vol.getEndTimeSecs())) {
+    if (ldata.write(vol.getStartTimeSecs())) {
       cerr << "WARNING - RadxConvert::_writeVol" << endl;
       cerr << "  Cannot write latest data info file to dir: "
            << outputDir << endl;
