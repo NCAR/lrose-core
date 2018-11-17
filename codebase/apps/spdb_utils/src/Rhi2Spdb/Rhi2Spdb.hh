@@ -44,7 +44,7 @@
 #include <string>
 #include "Args.hh"
 #include "Params.hh"
-#include <Mdv/DsMdvxInput.hh>
+#include <didss/DsInputPath.hh>
 using namespace std;
 
 ////////////////////////
@@ -78,7 +78,10 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  DsMdvxInput _input;
+  DsInputPath *_input;
+
+  int _processRadxFile(const char *inputPath);
+  int _processMdvFile(const char *inputPath);
 
 };
 

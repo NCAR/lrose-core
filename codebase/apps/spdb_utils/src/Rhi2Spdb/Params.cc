@@ -548,7 +548,16 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("Program name: Rhi2Spdb");
-    tt->comment_text = tdrpStrDup("Rhi2Spdb reads mdv files containing measured RHI data, creates a GenPt to describe the rhi details and stores it in SPDB.");
+    tt->comment_text = tdrpStrDup("Rhi2Spdb reads Radx or MDV files containing RHI radar data, creates a GenPt to describe the rhi details and stores it in SPDB.");
+    tt++;
+    
+    // Parameter 'Comment 1'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 1");
+    tt->comment_hdr = tdrpStrDup("PROGRAM CONTROL");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'debug'
@@ -592,7 +601,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file - and this requires that the latest_data_info files are available. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in FILELIST mode, at least) MUST contain a day-directory below the data file -- ./data_file.mdv will not work as a file path");
+    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file - and this requires that the latest_data_info files are available. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
     tt->enum_def.nfields = 3;
@@ -607,6 +616,27 @@
     tt->single_val.e = ARCHIVE;
     tt++;
     
+    // Parameter 'Comment 2'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 2");
+    tt->comment_hdr = tdrpStrDup("DATA INPUT");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'input_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_url");
+    tt->descr = tdrpStrDup("Input DIR for RHI data.");
+    tt->help = tdrpStrDup("This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.");
+    tt->val_offset = (char *) &input_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/rhi/input");
+    tt++;
+    
     // Parameter 'max_realtime_data_age_secs'
     // ctype is 'int'
     
@@ -619,40 +649,13 @@
     tt->single_val.i = 600;
     tt++;
     
-    // Parameter 'time_between_checks_secs'
-    // ctype is 'int'
+    // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("time_between_checks_secs");
-    tt->descr = tdrpStrDup("Time between checking for new data (secs)");
-    tt->help = tdrpStrDup("The app checks for new data at this interval.");
-    tt->val_offset = (char *) &time_between_checks_secs - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'mdv_search_margin_secs'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("mdv_search_margin_secs");
-    tt->descr = tdrpStrDup("Search margin for finding the closest MDV data (secs)");
-    tt->help = tdrpStrDup("Normally 0 will work, but it is good to widen the search a bit so as not to miss data with a non-standard time stamp.");
-    tt->val_offset = (char *) &mdv_search_margin_secs - &_start_;
-    tt->single_val.i = 180;
-    tt++;
-    
-    // Parameter 'input_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_url");
-    tt->descr = tdrpStrDup("Input URL for MDV data.");
-    tt->help = tdrpStrDup("This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.");
-    tt->val_offset = (char *) &input_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdv/input");
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
+    tt->comment_text = tdrpStrDup("Spdb output");
     tt++;
     
     // Parameter 'output_url'
