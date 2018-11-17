@@ -216,7 +216,6 @@ int Rhi2Spdb::_processRadxFile(const char *inputPath)
     cerr << radx.getErrStr() << endl;
     return -1;
   }
-  vol.print(cerr);
   size_t nSweeps = vol.getNSweeps();
   if (nSweeps < 1) {
     cerr << "ERROR - RadxConvert::_processRadxFile" << endl;
