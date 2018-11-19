@@ -299,6 +299,15 @@ void
 }
 
 void
+  DateTime::setToNow()
+{
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  _uTime = tv.tv_sec;
+  _subSec = tv.tv_usec / 1.0e6;
+}
+
+void
   DateTime::set(time_t when)
 {
   _uTime = when; 
