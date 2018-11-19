@@ -521,6 +521,8 @@ void iwrf_event_notice_init(iwrf_event_notice_t &val)
   val.cause = IWRF_EVENT_CAUSE_NOT_SET;
   val.current_fixed_angle = IWRF_MISSING_FLOAT;
 
+  val.antenna_transition = 0;
+
 }
 
 //////////////////////////////////////////////////////
@@ -2192,7 +2194,7 @@ void iwrf_sync_print(FILE *out,
 // print version packet
 
 void iwrf_version_print(FILE *out,
-		     const iwrf_version_t &version)
+                        const iwrf_version_t &version)
 
 {
 
@@ -2211,7 +2213,7 @@ void iwrf_version_print(FILE *out,
 // print scan_segment
 
 void iwrf_scan_segment_print(FILE *out,
-			   const iwrf_scan_segment_t &seg)
+                             const iwrf_scan_segment_t &seg)
 
 {
 
@@ -2463,7 +2465,7 @@ void iwrf_xmit_info_print(FILE *out,
 // print burst_iq
 
 void iwrf_burst_header_print(FILE *out,
-                         const iwrf_burst_header_t &val)
+                             const iwrf_burst_header_t &val)
   
 {
 
@@ -2657,6 +2659,7 @@ void iwrf_event_notice_print(FILE *out,
   fprintf(out, "  sweep_num: %d\n", copy.sweep_num);
   fprintf(out, "  cause: %s\n", iwrf_event_cause_to_str(copy.cause).c_str());
   fprintf(out, "  current_fixed_angle: %g\n", copy.current_fixed_angle);
+  fprintf(out, "  antenna_transition: %d\n", copy.antenna_transition);
   fprintf(out, "=================================================================\n");
 
 }
@@ -3912,7 +3915,8 @@ void iwrf_event_notice_print_format(FILE *out, const iwrf_event_notice_t &val)
   fprintf(out, _dform, "si32", "sweep_num", sizeof(val.sweep_num), (char *) &val.sweep_num - id);
   fprintf(out, _dform, "si32", "cause", sizeof(val.cause), (char *) &val.cause - id);
   fprintf(out, _dform, "fl32", "current_fixed_angle", sizeof(val.current_fixed_angle), (char *) &val.current_fixed_angle - id);
-  fprintf(out, _dform, "si32", "unused[8]", sizeof(val.unused), (char *) val.unused - id);
+  fprintf(out, _dform, "si32", "antenna_transition", sizeof(val.antenna_transition), (char *) &val.antenna_transition - id);
+  fprintf(out, _dform, "si32", "unused[7]", sizeof(val.unused), (char *) val.unused - id);
 
   _print_format_divider('-', out);
 

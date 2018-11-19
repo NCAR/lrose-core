@@ -1195,7 +1195,10 @@ typedef struct iwrf_event_notice {
   fl32 current_fixed_angle; /**< Current fixed angle
                              *   (az in RHI, el in PPI) */
 
-  si32 unused[8]; /**< not used - for later expansion */
+  si32 antenna_transition; /**< antenna is in transition
+                            * 1 = true, 0 = false */
+
+  si32 unused[7]; /**< not used - for later expansion */
 
 } iwrf_event_notice_t;
 
