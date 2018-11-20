@@ -58,6 +58,7 @@ public:
   // public data
 
   bool debug;
+  bool verbose;
   string dataType;
   string dir;
   string url;
@@ -72,8 +73,10 @@ public:
   bool refresh;
   string displacedDataDir;
   bool maxDataTime;
-   
-   
+
+  time_t startTime, endTime;
+  vector<string> inputFileList;
+  int msecsSleep;
    
 protected:
   
