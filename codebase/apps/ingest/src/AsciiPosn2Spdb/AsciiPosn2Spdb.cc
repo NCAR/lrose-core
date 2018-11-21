@@ -217,6 +217,7 @@ int AsciiPosn2Spdb::_processFile(const char *inputPath)
   
   if (_params.debug && nGood > 0) {
     cerr << "Successful read for gps logger file: " << inputPath << endl;
+    cerr << "  n good positions: " << nGood << endl;
   }
 
   // write the output if good
@@ -237,6 +238,10 @@ int AsciiPosn2Spdb::_processFile(const char *inputPath)
 int AsciiPosn2Spdb::_decodeGpsLoggerLine(const char *line,
                                          DsSpdb &spdb)
 {
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "decoding line: " << line;
+  }
 
   // is this the header line?
 
@@ -264,7 +269,7 @@ int AsciiPosn2Spdb::_decodeGpsLoggerLine(const char *line,
     return -1;
   }
 
-  // get the lat/lon
+  // get the lat/lon - these are required
   
   double lat = 0;
   if (sscanf(toks[1].c_str(), "%lg", &lat) != 1) {
@@ -278,13 +283,13 @@ int AsciiPosn2Spdb::_decodeGpsLoggerLine(const char *line,
     cerr << "  Cannot decode longitude:" << toks[2] << endl;
     return -1;
   }
+
+  // get alt, heading and speed - optional
+
   double altM = 0;
   if (sscanf(toks[3].c_str(), "%lg", &altM) != 1) {
-    cerr << "WARNING - AsciiPosn2Spdb::decodeMobileAssets" << endl;
-    cerr << "  Cannot decode altitude:" << toks[3] << endl;
-    return -1;
+    altM = AC_POSN_MISSING_FLOAT;
   }
-
   double heading = 0;
   if (sscanf(toks[5].c_str(), "%lg", &heading) != 1) {
     heading = AC_POSN_MISSING_FLOAT;
@@ -359,12 +364,12 @@ int AsciiPosn2Spdb::_doPut(DsSpdb &spdb) {
     cerr << "  " << spdb.getErrStr() << endl;
     iret = -1;
   }
-  spdb.clearPutChunks();
 
   if (_params.debug) {
     cerr << "SUCCESS - put data to: " << _params.output_spdb_url << endl;
-    cerr << "  n obs: " << spdb.getNChunks() << endl;
   }
+
+  spdb.clearPutChunks();
 
   return iret;
 
