@@ -277,6 +277,8 @@ void DataSet::_callScript(bool run_in_background,
     
     while (true) {
       
+      PMU_auto_register(pmuStr);
+
       int status;
       if (waitpid(childPid, &status,
 		  (int) (WNOHANG | WUNTRACED)) == childPid) {
@@ -302,16 +304,17 @@ void DataSet::_callScript(bool run_in_background,
 
       _killAsRequired(childPid, terminate_time);
 
-      if (_params.sleep_after_script)
-	{
-	  if(_params.debug)
-	    {
-	      cerr << "Sleeping for " << _params.script_sleep_time 
-		   << " microseconds" << endl;
-	    }
-	  // sleep for a sec
-	  umsleep(_params.script_sleep_time);
-	}
+      if (_params.sleep_after_script) {
+        if(_params.debug) {
+          cerr << "Sleeping for " << _params.script_sleep_time 
+               << " microseconds" << endl;
+        }
+        // sleep for a sec
+        umsleep(_params.script_sleep_time);
+      }
+
+      umsleep(100);
+
     } // while
     
   } // if (run_script_in_background)
