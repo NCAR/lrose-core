@@ -12,6 +12,8 @@ SUB_DIRS = \
 	FixRadxPointing \
 	Radx2Dsr \
 	Radx2Grid \
+	RadxBeamBlock \
+	RadxBufr \
 	RadxCheck \
 	RadxClutMon \
 	RadxConvert \
