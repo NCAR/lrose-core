@@ -250,6 +250,12 @@ int RadxPartRain::_runArchive()
     PMU_auto_register("Init archive mode");
   }
 
+  if (_params.debug) {
+    cerr << "RadxPartRain::_runArchive" << endl;
+    cerr << "  startTime: " << RadxTime::strm(_args.startTime) << endl;
+    cerr << "  endTime: " << RadxTime::strm(_args.endTime) << endl;
+  }
+
   // get the files to be processed
 
   RadxTimeList tlist;
@@ -274,6 +280,13 @@ int RadxPartRain::_runArchive()
     return -1;
   }
   
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "n files found: " << paths.size() << endl;
+    for (size_t ipath = 0; ipath < paths.size(); ipath++) {
+      cerr << "    " << paths[ipath] << endl;
+    }
+  }
+
   // loop through the input file list
   
   int iret = 0;
