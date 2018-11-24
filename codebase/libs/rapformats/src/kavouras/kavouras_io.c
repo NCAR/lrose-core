@@ -52,7 +52,9 @@ double  Elev_angles_vcp32[] = {0.5, 0.5, 1.5, 1.5, 2.5, 3.5, 4.5};
  */
 
 #define KAV_HEADER_OFFSET -128   /* Distance from the end of the file */
-extern void swab(void*, void*, int);
+#if defined(__linux)
+extern void swab(const void *from, void *to, ssize_t n);
+#endif
 
 dcmp6h_header_t *dcmp6h_get_header( FILE *infile)
 {
