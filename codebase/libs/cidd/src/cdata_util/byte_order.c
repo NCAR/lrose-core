@@ -37,14 +37,12 @@
  * TO_NETL Convert a sequence of longs to network byte order
  */
 
-void to_netl(lptr,nelem)
-    long    *lptr;
-    long    nelem;
+void to_netl(long *lptr, long nelem)
 {
 #ifdef NEED_SWAP
     while(nelem--) {
         *lptr = htonl(*lptr);
-        *lptr++;
+        lptr++;
     };
 #endif
 }
@@ -53,14 +51,12 @@ void to_netl(lptr,nelem)
  * TO_HOSTL Convert a sequence of longs to host byte order
  */
 
-void to_hostl(lptr,nelem)
-    long    *lptr;
-    long    nelem;
+void to_hostl(long *lptr, long nelem)
 {
 #ifdef NEED_SWAP
     while(nelem--) {
         *lptr = ntohl(*lptr);
-        *lptr++;
+        lptr++;
     };
 #endif
 }
