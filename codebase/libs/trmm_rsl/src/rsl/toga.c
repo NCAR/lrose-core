@@ -72,7 +72,7 @@
 #endif
 
 #if defined(__linux)
-void swab(const void *from, void *to, size_t n);
+extern void swab(const void *from, void *to, ssize_t n);
 #endif
 int tg_open(char *,tg_file_str *);
 int tg_read_map_head(tg_file_str *);
