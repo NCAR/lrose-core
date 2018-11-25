@@ -543,8 +543,7 @@ int write_cc_file(const char *class_name,
 	  " *\n"
 	  " * @author Automatically generated\n"
 	  " *\n"
-	  " */\n"
-	  "#include <cstring>\n");
+	  " */\n");
   if (lib_name == NULL) {
     fprintf(cfile,
             "#include \"%s.hh\"\n",
@@ -555,6 +554,7 @@ int write_cc_file(const char *class_name,
             lib_name,
             class_name);
   }
+  fprintf(cfile, "#include <cstring>\n");
   fprintf(cfile, "\n");
   
   /*
