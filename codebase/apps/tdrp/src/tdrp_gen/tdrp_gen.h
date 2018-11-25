@@ -155,17 +155,29 @@ extern int set_private(token_handle_t *tok_handle,
  *  write code-generation files
  */
 
-extern int write_h_file(const char *module, const TDRPtable *t_entries,
-			int n_defs, const char *prog_name);
+extern int write_h_file(const char *module,
+                        const TDRPtable *t_entries,
+			int n_defs, 
+                        const char *prog_name,
+                        const char *lib_name);
 
-extern int write_c_file(const char *module, const TDRPtable *t_entries,
-			int n_defs, const char *prog_name);
+extern int write_c_file(const char *module,
+                        const TDRPtable *t_entries,
+			int n_defs, 
+                        const char *prog_name,
+                        const char *lib_name);
    
-extern int write_hh_file(const char *module, const TDRPtable *t_entries,
-			 int n_defs, const char *prog_name);
+extern int write_hh_file(const char *module,
+                         const TDRPtable *t_entries,
+			 int n_defs,
+                         const char *prog_name,
+                         const char *lib_name);
 
-extern int write_cc_file(const char *module, const TDRPtable *t_entries,
-			 int n_defs, const char *prog_name);
+extern int write_cc_file(const char *module,
+                         const TDRPtable *t_entries,
+			 int n_defs,
+                         const char *prog_name,
+                         const char *lib_name);
 
 #ifdef __cplusplus
 }
