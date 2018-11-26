@@ -25,6 +25,7 @@ CPPC_SRCS = \
 	KdpBringi.cc \
 	KdpCompute.cc \
 	KdpFilt.cc \
+	KdpFiltParams.cc \
 	PhidpProc.cc
 
 #
@@ -36,6 +37,10 @@ include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
 #
 # local targets
 #
+
+KdpFiltParams.cc: paramdef.KdpFilt
+	tdrp_gen -f paramdef.KdpFilt -c++ -class KdpFiltParams -lib radar
+	/bin/mv -f KdpFiltParams.hh ../include/radar
 
 depend: depend_generic
 
