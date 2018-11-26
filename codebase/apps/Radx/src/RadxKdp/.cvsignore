@@ -1,0 +1,6 @@
+.deps
+RadxPartRain
+__makefile.template
+makefile
+makefile.am
+makefile.in
