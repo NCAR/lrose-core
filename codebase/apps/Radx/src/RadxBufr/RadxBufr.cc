@@ -47,6 +47,8 @@
 #include <toolsa/TaXml.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
+#include <toolsa/file_io.h>
+#include <sys/stat.h>
 using namespace std;
 
 // Constructor
@@ -311,6 +313,13 @@ int RadxBufr::_runArchive()
     cerr << "  No files found, dir: " << _params.input_dir << endl;
     return -1;
   }
+
+  if (_params.debug) {
+    cerr << "Archive file list to be processed:" << endl;
+    for (size_t ii = 0; ii < paths.size(); ii++) {
+      cerr << "  " << paths[ii] << endl;
+    }
+  }
   
   // loop through the input file list
 
@@ -483,7 +492,7 @@ int RadxBufr::_readFile(const string &readPath,
   for (size_t ii = 0; ii < _readPaths.size(); ii++) {
     RadxPath listPath(_readPaths[ii]);
     if (thisPath.getFile() == listPath.getFile()) {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
+      if (_params.debug) {
         cerr << "Skipping file: " << readPath << endl;
         cerr << "  Previously processed in aggregation step" << endl;
       }
@@ -499,15 +508,35 @@ int RadxBufr::_readFile(const string &readPath,
   // if we are reading incremental files in realtime mode, we need to wait
   // for all fields to be written before proceeding
   if (_params.mode == Params::REALTIME && _params.incremental_realtime_mode) {
-    if (_params.debug) {
-      cerr << "Waiting for incremental fields, sleeping for secs: "
-           << _params.incremental_realtime_wait_secs << endl;
+
+    // get the modify time on the file
+
+    struct stat fstat;
+    if (ta_stat(readPath.c_str(), &fstat)) {
+      int errnum = errno;
+      cerr << "ERROR - RadxBufr::_readFile" << endl;
+      cerr << "  Cannot stat file: " << readPath << endl;
+      cerr << "  " << strerror(errnum) << endl;
+      return -1;
     }
-    for (int ii = 0; ii < _params.incremental_realtime_wait_secs; ii++) {
-      PMU_auto_register("Waiting for Incremental files");
-      umsleep(1000);
+    
+    time_t now = time(NULL);
+    double ageSecs = (double) now - (double) fstat.st_mtime;
+    double waitSecs = _params.incremental_realtime_wait_secs - ageSecs;
+    int nsecsWait = (int) (waitSecs + 0.5);
+    if (nsecsWait > 0) {
+      if (_params.debug) {
+        cerr << "Waiting for incremental fields, sleeping for secs: "
+             << nsecsWait << endl;
+      }
+      for (int ii = 0; ii < nsecsWait; ii++) {
+        PMU_auto_register("Waiting for Incremental files");
+        umsleep(1000);
+      }
     }
+
     PMU_force_register("Got Incremental files");
+
   }
 
   BufrRadxFile inFile;
@@ -526,9 +555,10 @@ int RadxBufr::_readFile(const string &readPath,
   }
   inFile.print(cout);
   _readPaths = inFile.getReadPaths();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+
+  if (_params.debug) {
     for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-      cerr << "  ==>> read in file: " << _readPaths[ii] << endl;
+      cerr << "  ==>> processed input file: " << _readPaths[ii] << endl;
     }
   }
 
