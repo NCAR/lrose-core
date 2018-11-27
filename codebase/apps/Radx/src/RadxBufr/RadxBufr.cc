@@ -298,6 +298,10 @@ int RadxBufr::_runArchive()
   if (_params.aggregate_sweep_files_on_read) {
     tlist.setReadAggregateSweeps(true);
   }
+  if (strlen(_params.search_ext) > 0) {
+    tlist.setFileExt(_params.search_ext);
+  }
+
   if (tlist.compile()) {
     cerr << "ERROR - RadxBufr::_runFilelist()" << endl;
     cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
