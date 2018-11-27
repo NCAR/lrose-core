@@ -1015,6 +1015,14 @@ bool RadxTimeList::_isValidFile(const string &path)
 
   RadxPath P(path);
 
+  // check extension
+
+  if (_fileExt.size() > 0) {
+    if (P.getExt() != _fileExt) {
+      return false;
+    }
+  }
+
 #ifdef NOTNOW
   string filename = P.getFile();
   if (filename.find(".nc") == string::npos &&
