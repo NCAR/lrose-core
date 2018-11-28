@@ -10,6 +10,13 @@
 # to the top dir for installation.
 #
 
+# Complain and bail out if LROSE_CORE_DIR and LROSE_INSTALL_DIR are not both set
+if ( ! $?LROSE_CORE_DIR || ! $?LROSE_INSTALL_DIR ) then
+	echo "Environment variables LROSE_CORE_DIR and LROSE_INSTALL_DIR must be"
+	echo "set before using this script!"
+	exit
+endif
+
 setenv HOST_OS LINUX_LROSE
 uname -a | grep x86_64
 if ($status == 1) then
