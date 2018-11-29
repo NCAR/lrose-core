@@ -2224,7 +2224,7 @@ int RadxEvad::_writeNetcdfOutput()
   // open file for writing
 
   Nc3xFile file;
-  if (file.openRead(outPath)) {
+  if (file.openWrite(outPath, Nc3File::Netcdf4)) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << "  Cannot open netCDF file: " << outPath << endl;
     return -1;
