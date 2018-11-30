@@ -10,7 +10,7 @@
 #include <vector>
 #include <iostream>
 
-//#include "SpreadSheetController.hh"
+#include "SpreadSheetController.hh"
 
 using namespace std;
 
@@ -56,19 +56,26 @@ class SoloFunctions : public QObject
   Q_OBJECT
 public:
   //  SoloFunctions(SpreadSheetController *controller);
-  SoloFunctions(QObject *parent = nullptr) : QObject(parent) {}
+  SoloFunctions(SpreadSheetController *controller, QObject *parent = nullptr) : QObject(parent) { _controller = controller;}
 
   Q_INVOKABLE QString cat(QString animal) {return animal+"_cat"; }
-  Q_INVOKABLE QString  REMOVE_AIRCRAFT_MOTION(QString field) { return field+"_trump"; }
+  Q_INVOKABLE QString REMOVE_AIRCRAFT_MOTION(QString field); // return the name of the new field that contains the result
+  //  Q_INVOKABLE QString  REMOVE_AIRCRAFT_MOTION(QString field); //  { return field+"_trump"; }
   Q_INVOKABLE double sqrt(double value) { return qSqrt(value); }
   Q_INVOKABLE QVector<double> add(QVector<double> v, QVector<double> v2) { 
     // int size = v.size(); if (size == v2.size()) {
     QVector<double> v3(3); for (int i=0; i<3; i++) v3[i]=v[i]+v2[i]; return v3; }
   Q_INVOKABLE QVector<int> addI(QVector<int> v, QVector<int> v2) { QVector<int> v3(3); for (int i=0; i<3; i++) v3[i]=v[i]+v2[i]; return v3; }
-
+ 
 private:
 
-  //  SpreadSheetController *_controller;
+  SpreadSheetController *_controller;
+
+  template<typename Out>
+  void split(const string &s, char delim, Out result);
+  vector<string> split(const string &s, char delim);
+  vector<double> splitDouble(const string &s, char delim);
+
 };
 
 

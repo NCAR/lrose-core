@@ -4,6 +4,7 @@
 #define SPREADSHEETCONTROLLER_HH
 
 #include "SpreadSheetModel.hh"
+#include "SoloFunctionsModel.hh"
 // #include "SpreadSheetView.hh"
 
 #include <vector>
@@ -24,10 +25,13 @@ public:
 
   void open(string fileName);
 
+  SpreadSheetModel *getDataModel() {return _currentModel;};
+
 private:
 
   SpreadSheetModel *_currentModel;
   SpreadSheetView *_currentView;
+
 
 };
 

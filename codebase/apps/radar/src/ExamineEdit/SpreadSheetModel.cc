@@ -156,6 +156,7 @@ vector<double> SpreadSheetModel::getData(string fieldName)
   return dataVector;
 }
 
+
 /*
 void SpreadSheetModel::actionSum()
 {

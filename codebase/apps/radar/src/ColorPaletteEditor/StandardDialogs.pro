@@ -24,6 +24,7 @@ HEADERS      += ../ExamineEdit/SpreadSheetUtils.hh
 HEADERS      += ../ExamineEdit/spreadsheetdelegate.hh
 HEADERS      += ../ExamineEdit/FunctionEditor.hh
 HEADERS      += ../ExamineEdit/SoloFunctions.hh
+HEADERS      += ../ExamineEdit/SoloFunctionsModel.hh
 HEADERS      += ../ExamineEdit/DataField.hh
 
 SOURCES       = Dialog.cc 
@@ -43,6 +44,7 @@ SOURCES      += ../ExamineEdit/SpreadSheetUtils.cc
 SOURCES      += ../ExamineEdit/spreadsheetdelegate.cc
 SOURCES      += ../ExamineEdit/FunctionEditor.cc
 SOURCES      += ../ExamineEdit/SoloFunctions.cc
+SOURCES      += ../ExamineEdit/SoloFunctionsModel.cc
 SOURCES      += Main.cc
 
 RESOURCES = customcompleter.qrc

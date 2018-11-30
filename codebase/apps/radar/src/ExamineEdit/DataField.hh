@@ -50,6 +50,7 @@ static QJSValue VectorOp(QJSContext *context, QJSEngine *engine)
 */
 
 
+
 class DataField : public QObject
 {
 
@@ -65,6 +66,7 @@ public:
 
 private:
   QVector<double> _values;
+  //  persisted to underlying model (RadxVol)
 };
 
 

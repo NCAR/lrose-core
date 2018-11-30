@@ -21,6 +21,9 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view)
 
   _currentView = view;
   _currentModel = new SpreadSheetModel();
+
+
+  //  functionsModel = new SoloFunctionsModel(_currentModel);
   
 
     // connect controller slots to model signals 
@@ -76,7 +79,72 @@ void SpreadSheetController::open(string fileName)
   //  _currentView->setupContents(data, fieldName);  
   //}
 }
+/*
+void SpreadSheetController::setupSoloFunctions()
+{
+  
+  QJSValue myExt = engine.newQObject(new SoloFunctions());
+  engine.globalObject().setProperty("cat", myExt.property("cat"));
+  engine.globalObject().setProperty("sqrt", myExt.property("sqrt"));
+  engine.globalObject().setProperty("REMOVE_AIRCRAFT_MOTION", myExt.property("REMOVE_AIRCRAFT_MOTION"));
+  engine.globalObject().setProperty("add", myExt.property("add"));
+  
+}
+*/
 
+ /*
+void SpreadSheetController::processFormula(QString formula)
+{
+
+  // Grab the context before evaluating the formula  
+  // ======
+  // TODO: YES! This works.  The new global variables are listed here;
+  // just find them and add them to the spreadsheet and to the Model??
+  // HERE!!!
+  // try iterating over the properties of the globalObject to find new variables
+
+  std::map<QString, QString> currentVariableContext;
+  QJSValue theGlobalObject = engine.globalObject();
+
+  QJSValueIterator it(theGlobalObject);
+  while (it.hasNext()) {
+    it.next();
+    qDebug() << it.name() << ": " << it.value().toString();
+    currentVariableContext[it.name()] = it.value().toString();
+  }
+  // ======                                                                                                                                    
+
+  QJSValue result = engine.evaluate(text);
+  if (result.isArray()) {
+    cerr << " the result is an array\n";
+    //vector<int> myvector;                                                                                                                      
+    //myvector = engine.fromScriptValue(result);                                                                                                 
+  }
+  cerr << " the result is " << result.toString().toStdString() << endl;
+
+  // ====== 
+  // TODO: YES! This works.  The new global variables are listed here;
+  // just find them and add them to the spreadsheet and to the Model?? 
+  // HERE!!!
+  // try iterating over the properties of the globalObject to find new variables                                                                 
+  QJSValue newGlobalObject = engine.globalObject();
+
+  QJSValueIterator it2(newGlobalObject);
+  while (it2.hasNext()) {
+    it2.next();
+    qDebug() << it2.name() << ": " << it2.value().toString();
+    if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
+      // we have a newly defined variable                                                                                                      
+      qDebug() << "NEW VARIABLE " << it2.name() <<  ": " << it2.value().toString();
+      addVariableToSpreadSheet(it2.name(), it2.value());
+    }
+  }
+  // ======    
+
+
+
+}
+ */
 
 /*
 void SpreadSheetController::createActions()
@@ -519,7 +587,7 @@ void SpreadSheetController::setupContents()
    table->setItem(0, 0, new SpreadSheetControllerItem(formattedData));
 
 
-    /* TODO: each of these columns and data must come from RadxVol
+   // TODO: each of these columns and data must come from RadxVol
     // column 0
     table->setItem(0, 0, new SpreadSheetControllerItem("Item"));
     table->item(0, 0)->setBackgroundColor(titleBackground);

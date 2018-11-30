@@ -2,9 +2,84 @@
 #include <vector>
 #include <iostream>
 
+#include <string>
+#include <sstream>
+#include <iterator>
+
 #include "SoloFunctions.hh"
+#include "SoloFunctionsModel.hh"
+// #include "SpreadSheetModel.hh"
 
 using namespace std;
+
+template<typename Out>
+void SoloFunctions::split(const string &s, char delim, Out result) {
+  stringstream ss(s);
+  string item;
+  double value;
+  while (getline(ss, item, delim)) {
+    value = stod(item);
+    *(result++) = value;
+  }
+}
+
+/*
+vector<string> SoloFunctions::split(const string &s, char delim) {
+  vector<string> elems;
+  split(s, delim, back_inserter(elems));
+  return elems;
+}
+*/
+
+vector<double> SoloFunctions::splitDouble(const string &s, char delim) {
+  vector<double> elems;
+  split(s, delim, back_inserter(elems));
+  return elems;
+}
+
+
+// TODO:  parameters should be DataField ??
+QString  SoloFunctions::REMOVE_AIRCRAFT_MOTION(QString field) { 
+
+  SoloFunctionsModel soloFunctionsModel;
+  SpreadSheetModel *dataModel = _controller->getDataModel(); 
+
+  // the value of the field has been substituted; If the field is a vector,
+  // then the QString contains all the values as a comma separated list in a string
+  // parse the field data into a vector 
+  //vector<string> x = split(field.toStdString(), ',');
+  vector<double> x = splitDouble(field.toStdString(), ',');
+
+  cerr << "list of field values: " << endl;
+  for (vector<double>::iterator it = x.begin(); it != x.end(); ++it) 
+    cerr << ' ' << *it;
+  cerr << endl;
+
+  vector<double> result = soloFunctionsModel.RemoveAircraftMotion(x, dataModel);
+
+  // TODO: what is being returned? the name of the new field in the model that
+  // contains the results.
+  // since the std::vector<double> data has to be copied to QVector anyway, 
+  // go ahead and format it as a string?
+  // maybe return a pointer to std::vector<double> ?? then when presenting the data, we can convert it to string,
+  // but maintain the precision in the model (RadxVol)??
+  //QString newFieldName = field + "2";
+  // TODO: dataModel->addField(newFieldName.toStdString(), result);
+
+  QString newData;
+  cerr << "list of result values: " << endl;
+  for (vector<double>::iterator it = result.begin(); it != result.end(); ++it) {
+    cerr << ' ' << *it;
+    newData.append(QString::number(*it));
+    newData.append(',');
+  }
+  cerr << endl;
+
+  return newData;
+}
+
+
+
 /*
 SoloFunctions::SoloFunctions() // SpreadSheetController *controller) 
 {

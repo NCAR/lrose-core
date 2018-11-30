@@ -404,13 +404,13 @@ float  SpreadSheetView::myPow()
 
 
 void SpreadSheetView::setupSoloFunctions() {
-  
-    QJSValue myExt = engine.newQObject(new SoloFunctions());
+
+    QJSValue myExt = engine.newQObject(new SoloFunctions(_controller));
     engine.globalObject().setProperty("cat", myExt.property("cat"));
     engine.globalObject().setProperty("sqrt", myExt.property("sqrt"));
     engine.globalObject().setProperty("REMOVE_AIRCRAFT_MOTION", myExt.property("REMOVE_AIRCRAFT_MOTION"));
     engine.globalObject().setProperty("add", myExt.property("add"));
-
+  
 }
 
 void SpreadSheetView::acceptFormulaInput()
