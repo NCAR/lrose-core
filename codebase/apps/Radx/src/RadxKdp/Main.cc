@@ -27,12 +27,12 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// March 2012
+// Dec 2018
 //
 ///////////////////////////////////////////////////////////////
 //
 // RadxKdp reads moments from Radx-supported format files, 
-// computes the PID and PRECIP rates and writes out the results 
+// computes the KDP and attenuation and writes out the results 
 // to Radx-supported format files
 //
 ///////////////////////////////////////////////////////////////

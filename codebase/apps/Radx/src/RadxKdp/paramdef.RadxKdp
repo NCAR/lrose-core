@@ -1,15 +1,15 @@
 /*********************************************************
- * parameter definitions for RadxKdp
+ * Parameter definitions for RadxKdp
  *
  * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
  *
- * Nov 2018
+ * Dec 2018
  */
 
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "RadxKdp reads moments from Radx-supported format files, computes KDP and optionally attenuation, andwrites out the results to Radx-supported format files.";
+  p_header = "RadxKdp reads moments from Radx-type files, computes KDP and optionally attenuation, and writes out the results to CfRadial files.";
 }
 
 commentdef {
@@ -32,16 +32,10 @@ paramdef string {
   p_help = "This application registers with procmap. This is the instance used for registration.";
 } instance;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to register this process with the process mapper (procmap).";
-  p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
-} register_with_procmap;
-
 paramdef int {
   p_default = 60;
   p_descr = "Interval for registering with procmap (secs).";
-  p_help = "The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.";
+  p_help = "REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.";
 } procmap_register_interval;
 
 commentdef {
@@ -105,6 +99,18 @@ paramdef string {
   p_descr = "File name sub-string.";
   p_help = "If set, only files with names containing this sub-string will be processed.";
 } input_file_search_substr;
+
+paramdef string {
+  p_default = "2015 06 26 00 00 00";
+  p_descr = "Set the start time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} start_time;
+
+paramdef string {
+  p_default = "2015 06 26 12 00 00";
+  p_descr = "Set the end time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} end_time;
 
 commentdef {
   p_header = "READ OPTIONS";
@@ -181,11 +187,6 @@ paramdef string {
   p_descr = "Field name for RHOHV.";
 } RHOHV_field_name;
 
-paramdef string {
-  p_default = "KDP";
-  p_descr = "Field name for KDP.";
-} KDP_field_name;
-
 commentdef {
   p_header = "COMPUTING KDP";
   p_text = "Parameters for computing KDP. KDP will be computed if KDP_available is FALSE.";
@@ -193,54 +194,9 @@ commentdef {
 
 paramdef string {
   p_default = "use-defaults";
-  p_descr = "Path for parameters for KDP computations.";
+  p_descr = "Path for parameters for KdpFilt computations.";
   p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
-} KDP_parameter_file_path;
-
-commentdef {
-  p_header = "PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to apply precip attenuation correction for DBZ and ZDR.";
-  p_help =
-    "The following extra fields will be computed:\n"
-    "\tDBZ_ATTEN_CORRECTION - correction in dB\n"
-    "\tZDR_ATTEN_CORRECTION - correction in dB\n"
-    "\tDBZ_ATTEN_CORRECTED - DBZHC corrected\n"
-    "\tZDR_ATTEN_CORRECTED - ZDR corrected\n";
-} apply_precip_attenuation_correction;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to specify the coefficients and exponents - see below.";
-  p_help = "If false, the default coefficients will be determined for the radar wavelength.";
-} specify_coefficients_for_attenuation_correction;
-
-paramdef double {
-  p_default = 0.017;
-  p_descr = "Coefficient for computing DBZ attenuation correction.";
-  p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
-} dbz_attenuation_coefficient;
-
-paramdef double {
-  p_default = 0.84;
-  p_descr = "Exponent for computing DBZ attenuation correction.";
-  p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
-} dbz_attenuation_exponent;
-
-paramdef double {
-  p_default = 0.003;
-  p_descr = "Coefficient for computing ZDR attenuation correction.";
-  p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
-} zdr_attenuation_coefficient;
-
-paramdef double {
-  p_default = 1.05;
-  p_descr = "Exponent for computing ZDR attenuation correction.";
-  p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
-} zdr_attenuation_exponent;
+} KdpFilt_parameter_file_path;
 
 commentdef {
   p_header = "SPECIFYING FIELD NAMES AND OUTPUT ENCODING";
@@ -251,39 +207,32 @@ typedef enum {
   KDP,
   KDP_ZZDR,
   KDP_COND,
-  KDP_BRINGI,
   PSOB,
-  ZDP,
 
   DBZ_ATTEN_CORRECTION,
   ZDR_ATTEN_CORRECTION,
   DBZ_ATTEN_CORRECTED,
-  ZDR_ATTEN_CORRECTED,
+  ZDR_ATTEN_CORRECTED
 
-  DBZ_FOR_KDP,
-  ZDR_FOR_KDP,
-  RHOHV_FOR_KDP,
-  SNR_FOR_KDP,
-  ZDR_SDEV_FOR_KDP,
-  VALID_FLAG_FOR_KDP,
+  // ZDP,
+  // DBZ_FOR_KDP,
+  // ZDR_FOR_KDP,
+  // RHOHV_FOR_KDP,
+  // SNR_FOR_KDP,
+  // ZDR_SDEV_FOR_KDP,
+  // VALID_FLAG_FOR_KDP,
 
-  PHIDP_FOR_KDP,
-  PHIDP_MEAN_FOR_KDP,
-  PHIDP_MEAN_UNFOLD_FOR_KDP,
-  PHIDP_SDEV_FOR_KDP,
-  PHIDP_JITTER_FOR_KDP,
-  PHIDP_UNFOLD_FOR_KDP,
-  PHIDP_FILT_FOR_KDP,
-  PHIDP_COND_FOR_KDP,
-  PHIDP_COND_FILT_FOR_KDP
-
+  // PHIDP_FOR_KDP,
+  // PHIDP_MEAN_FOR_KDP,
+  // PHIDP_MEAN_UNFOLD_FOR_KDP,
+  // PHIDP_SDEV_FOR_KDP,
+  // PHIDP_JITTER_FOR_KDP,
+  // PHIDP_UNFOLD_FOR_KDP,
+  // PHIDP_FILT_FOR_KDP,
+  // PHIDP_COND_FOR_KDP,
+  // PHIDP_COND_FILT_FOR_KDP
+  
 } output_field_id_t;
-
-typedef enum {
-  OUTPUT_ENCODING_FL32,
-  OUTPUT_ENCODING_INT16,
-  OUTPUT_ENCODING_INT08
-} output_encoding_t;
 
 typedef struct {
   output_field_id_t id;
@@ -291,72 +240,36 @@ typedef struct {
   string long_name; 
   string standard_name; 
   string units;
-  output_encoding_t encoding;
+  boolean do_write;
 } output_field_t;
 
 paramdef struct output_field_t {
   p_default = {
-    {
-      id = SNR,
-      name = "SNR",
-      long_name = "signal_to_noise_ratio_db",
-      standard_name = "signal_to_noise_ratio",
-      units = "dB",
-      encoding = OUTPUT_ENCODING_INT16
-    }
-    ,
-    {
-      id = DBZ,
-      name = "DBZ",
-      long_name = "radar_reflectivity",
-      standard_name = "equivalent_reflectivity_factor",
-      units = "dBZ",
-      encoding = OUTPUT_ENCODING_INT16
-    }
-    ,
-    {
-      id = ZDR,
-      name = "ZDR",
-      long_name = "calibrated_log_differential_reflectivity",
-      standard_name = "log_differential_reflectivity",
-      units = "dB",
-      encoding = OUTPUT_ENCODING_INT16
-    }
-    ,
-    {
-      id = LDR,
-      name = "LDR",
-      long_name = "linear_depolarization_ratio_h_channel",
-      standard_name = "log_linear_depolarization_ratio_h",
-      units = "dB",
-      encoding = OUTPUT_ENCODING_INT16
-    }
-    ,
-    {
-      id = RHOHV,
-      name = "RHOHV",
-      long_name = "cross_correlation_ratio",
-      standard_name = "cross_correlation_ratio_hv",
-      units = "",
-      encoding = OUTPUT_ENCODING_INT16
-    }
-    ,
-    {
-      id = PHIDP,
-      name = "PHIDP",
-      long_name = "differential_phase",
-      standard_name = "differential_phase_hv",
-      units = "deg",
-      encoding = OUTPUT_ENCODING_INT16
-    }
-    ,
     {
       id = KDP,
       name = "KDP",
       long_name = "specific_differential_phase",
       standard_name = "specific_differential_phase_hv",
       units = "deg/km",
-      encoding = OUTPUT_ENCODING_INT16
+      do_write = TRUE
+    }
+    ,
+    {
+      id = KDP_ZZDR,
+      name = "KDP_ZZDR",
+      long_name = "specific_differential_phase_modified_using_z_and_zdr",
+      standard_name = "specific_differential_phase_hv",
+      units = "deg/km",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = KDP_COND,
+      name = "KDP_COND",
+      long_name = "conditional_kdp_from_estimated_kdp_and_kdpZZdr",
+      standard_name = "specific_differential_phase_hv",
+      units = "deg/km",
+      do_write = FALSE
     }
     ,
     {
@@ -365,35 +278,101 @@ paramdef struct output_field_t {
       long_name = "phase_shift_on_backscatter",
       standard_name = "phase_shift_on_backscatter",
       units = "deg",
-      encoding = OUTPUT_ENCODING_INT16
+      do_write = FALSE
+    }
+    ,
+    {
+      id = DBZ_ATTEN_CORRECTION,
+      name = "DBZ_ATTEN_CORRECTION",
+      long_name = "correction_to_dbz_for_attenuation",
+      standard_name = "dbz_attenuation_correction",
+      units = "dB",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = ZDR_ATTEN_CORRECTION,
+      name = "ZDR_ATTEN_CORRECTION",
+      long_name = "correction_to_zdr_for_attenuation",
+      standard_name = "zdr_attenuation_correction",
+      units = "dB",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = DBZ_ATTEN_CORRECTED,
+      name = "DBZ_ATTEN_CORRECTED",
+      long_name = "dbz_corrected_for_attenuation",
+      standard_name = "dbz_corrected_for_attenuation",
+      units = "dBZ",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = ZDR_ATTEN_CORRECTED,
+      name = "ZDR_ATTEN_CORRECTED",
+      long_name = "zdr_corrected_for_attenuation",
+      standard_name = "zdr_corrected_for_attenuation",
+      units = "dB",
+      do_write = FALSE
     }
   };
   p_descr = "Indicate which fields should be written to the output file.";
-  p_help = "Choose the ID from the list. The name and units can be set however the user prefers. The output_encoding apply to CfRadial output only.";
+  p_help = "Choose the ID from the list.\n"
+    "\nThe name and units can be set however the user prefers.\n"
+    "\nThe output_encoding apply to CfRadial output only. \n\n"
+    "\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n"
+    "\tKDP_ZZDR: KDP modified by Z-ZDR self-consistency (deg/km)\n"
+    "\tKDP_COND: KDP conditioned - debug field (deg/km)\n"
+    "\tPSOB: phase shift on backscatter as deduced from the filtering (deg)\n"
+    "\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n"
+    "\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n"
+    "\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n"
+    "\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n";
 } output_fields[];
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write extra fields to assist with debugging.";
+  p_help = "These are the intermediate fields used in computing KDP and attenuation.";
+} write_debug_fields;
+
+typedef enum {
+  OUTPUT_ENCODING_FL32,
+  OUTPUT_ENCODING_INT16
+} output_encoding_t;
+
+paramdef enum output_encoding_t {
+  p_default = OUTPUT_ENCODING_INT16;
+  p_descr = "Set the encoding for fields in the output files.";
+  p_help = "INT16 provides better compression. FL32 writes 32-bit floats.";
+} output_encoding;
+
 commentdef {
-  p_header = "SPECIFYING COPY-THROUGH FIELDS";
+  p_header = "SPECIFY COPY-THROUGH FIELDS";
   p_text = "These fields are copied unchanged from the input file to the output file. This is a way of consolidating the output data set.";
 }
 
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to copy input fields unchanged to the output file.";
-} copy_input_fields_to_output;
+} copy_selected_input_fields_to_output;
 
 typedef struct {
   string input_name; 
   string output_name;
-  boolean censor_non_precip;
 } copy_field_t;
 
 paramdef struct copy_field_t {
   p_default = {
     {
+      input_name = "DBZ",
+      output_name = "DBZ"
+    }
+    ,
+    {
       input_name = "VEL",
-      output_name = "VEL",
-      censor_non_precip = FALSE
+      output_name = "VEL"
     }
   };
   p_descr = "These fields are copied through unchanged to the output file.";
@@ -407,8 +386,7 @@ commentdef {
 typedef enum {
   OUTPUT_FORMAT_CFRADIAL,
   OUTPUT_FORMAT_DORADE,
-  OUTPUT_FORMAT_UF,
-  OUTPUT_FORMAT_MDV_RADIAL
+  OUTPUT_FORMAT_UF
 } output_format_t;
 
 paramdef enum output_format_t {
@@ -416,38 +394,12 @@ paramdef enum output_format_t {
   p_descr = "Format for the output files.";
 } output_format;
 
-typedef enum {
-  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
-} netcdf_style_t;
-
-paramdef enum netcdf_style_t {
-  p_default = NETCDF4;
-  p_descr = "NetCDF style - if output_format is CFRADIAL";
-  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
-} netcdf_style;
-
 commentdef {
-  p_header = "OUTPUT BYTE-SWAPPING and COMPRESSION";
-}
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to compress data fields on output.";
-  p_help = "Applies to netCDF and Dorade. UF does not support compression.";
-} output_compressed;
-
-paramdef int {
-  p_default = 4;
-  p_descr = "Compression level for output, if compressed.";
-  p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
-} compression_level;
-
-commentdef {
-  p_header = "VOLUME OUTPUT";
+  p_header = "WRITING THE OUTPUT FILES";
 }
 
 paramdef string {
-  p_default = "./output";
+  p_default = "/tmp/kdp";
   p_descr = "Output directory path.";
   p_help = "Files will be written to this directory.";
 } output_dir;
@@ -455,8 +407,7 @@ paramdef string {
 typedef enum {
   START_AND_END_TIMES,
   START_TIME_ONLY,
-  END_TIME_ONLY,
-  SPECIFY_FILE_NAME
+  END_TIME_ONLY
 } filename_mode_t;
 
 paramdef enum filename_mode_t {
@@ -464,12 +415,6 @@ paramdef enum filename_mode_t {
   p_descr = "Mode for computing output file name.";
   p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.";
 } output_filename_mode;
-
-paramdef string {
-  p_default = "cfradial.test.nc";
-  p_descr = "Name of output file.";
-  p_help = "Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.";
-} output_filename;
 
 paramdef boolean {
   p_default = true;
@@ -482,10 +427,4 @@ paramdef boolean {
   p_descr = "Add the year directory to the output directory.";
   p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
 } append_year_dir_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out individual sweeps if appropriate.";
-  p_help = "If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.";
-} write_individual_sweeps;
 

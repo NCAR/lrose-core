@@ -26,7 +26,7 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// March 2012
+// Dec 2018
 //
 /////////////////////////////////////////////////////////////
 
@@ -59,7 +59,7 @@ public:
   // public data
   
   tdrp_override_t override;
-  time_t startTime, endTime;
+  bool startTimeSet, endTimeSet;
   vector<string> inputFileList;
 
 protected:

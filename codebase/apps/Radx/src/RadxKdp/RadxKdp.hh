@@ -28,12 +28,12 @@
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// March 2012
+// Dec 2018
 //
 ///////////////////////////////////////////////////////////////
 //
 // RadxKdp reads moments from Radx-supported format files, 
-// computes the PID and PRECIP rates and writes out the results 
+// computes the KDP and attenuation and writes out the results 
 // to Radx-supported format files
 //
 ///////////////////////////////////////////////////////////////
@@ -48,13 +48,9 @@
 #include <deque>
 #include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
-#include <radar/NoiseLocator.hh>
-#include <radar/KdpBringi.hh>
-#include <radar/TempProfile.hh>
 #include <radar/KdpFiltParams.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxArray.hh>
-#include <Radx/PseudoRhi.hh>
 class RadxVol;
 class RadxFile;
 class RadxRay;
@@ -84,21 +80,8 @@ public:
   // get methods for threading
 
   const Params &getParams() const { return _params; }
+  const KdpFiltParams &getKdpFiltParams() const { return _kdpFiltParams; }
 
-  // names for extra fields
-
-  static string smoothedDbzFieldName;
-  static string smoothedRhohvFieldName;
-  static string elevationFieldName;
-  static string rangeFieldName;
-  static string beamHtFieldName;
-  static string tempFieldName;
-  static string pidFieldName;
-  static string pidInterestFieldName;
-  static string mlFieldName;
-  static string mlExtendedFieldName;
-  static string convFlagFieldName;
-  
 protected:
 private:
 
@@ -110,7 +93,7 @@ private:
   vector<string> _readPaths;
 
   // radar volume container
-
+  
   RadxVol _vol;
 
   // computations object for single threading
@@ -123,55 +106,7 @@ private:
 
   // radar properties
 
-  double _radarHtKm;
   double _wavelengthM;
-
-  // temperature profile from sounding, if appropriate
-
-  TempProfile _tempProfile;
-
-  // stats for ZDR bias
-
-  class ZdrStats {
-  public:
-    void clear() {
-      count = 0;
-      mean = NAN;
-      sdev = NAN;
-      skewness = NAN;
-      kurtosis = NAN;
-      percentiles.clear();
-    }
-    int count;
-    double mean;
-    double sdev;
-    double skewness;
-    double kurtosis;
-    vector<double> percentiles;
-  };
-  ZdrStats _zdrmStatsIce;
-  ZdrStats _zdrmStatsBragg;
-  ZdrStats _zdrStatsIce;
-  ZdrStats _zdrStatsBragg;
-  
-  vector<double> _zdrInIceElev;
-  vector<double> _zdrInIceResults;
-  vector<double> _zdrInBraggResults;
-  vector<double> _zdrmInIceResults;
-  vector<double> _zdrmInBraggResults;
-
-  // site temp
-
-  double _siteTempC;
-  time_t _timeForSiteTemp;
-
-  // self consistency
-
-  vector<ComputeEngine::self_con_t> _selfConResults;
-
-  // pseudo RHIs
-
-  vector<PseudoRhi *> _pseudoRhis;
 
   //////////////////////////////////////////////////////////////
   // inner thread class for calling Moments computations
@@ -182,7 +117,10 @@ private:
   {  
   public:
     // constructor
-    ComputeThread(RadxKdp *obj, const Params &params, int threadNum);
+    ComputeThread(RadxKdp *obj, 
+                  const Params &params,
+                  const KdpFiltParams &kdpFiltParams,
+                  int threadNum);
     // destructor
     virtual ~ComputeThread();
     // compute engine object
@@ -200,6 +138,7 @@ private:
     RadxKdp *_this;
     // params
     const Params &_params;
+    const KdpFiltParams &_kdpFiltParams;
     // thread number
     int _threadNum;
     // computation engine
@@ -223,47 +162,11 @@ private:
   int _processFile(const string &filePath);
   void _encodeFieldsForOutput();
   
-  void _addExtraFieldsToInput();
-  void _addExtraFieldsToOutput();
-
   int _compute();
   int _computeSingleThreaded();
   int _computeMultiThreaded();
   int _storeDerivedRay(ComputeThread *thread);
 
-  int _retrieveTempProfile();
-  int _retrieveSiteTempFromSpdb(double &tempC,
-                                time_t &timeForTemp);
-
-  void _computeZdrBias();
-
-  void _loadZdrResults(string label,
-                       vector<double> &results,
-                       ZdrStats &stats,
-                       int nPercentiles,
-                       double *percentiles);
-
-  void _writeHeaderZdrInIce(FILE *out);
-
-  double _computeZdrPerc(const vector<double> &zdrmResults,
-                         double percent);
-  
-  void _saveZdrInIceToFile();
-
-  void _computeSelfConZBias();
-
-  void _locateMeltingLayer();
-  void _checkForConvection(double htMlTop);
-  void _expandMlRhi(double htMlTop, double dbzThreshold);
-  void _expandMlPpi(double htMlTop, double dbzThreshold);
-  
-  void _applyInfillFilter(int nGates,
-                          Radx::si32 *flag);
-  
-  void _applyInfillFilter(int nGates,
-                          Radx::si32 *flag,
-                          bool removeShortRuns);
-  
 };
 
 #endif

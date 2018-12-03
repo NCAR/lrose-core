@@ -26,7 +26,7 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// March 2012
+// Dec 2018
 //
 //////////////////////////////////////////////////////////
 
@@ -42,8 +42,8 @@ using namespace std;
 Args::Args ()
 {
   TDRP_init_override(&override);
-  startTime = 0;
-  endTime = 0;
+  startTimeSet = false;
+  endTimeSet = false;
 }
 
 // Destructor
@@ -54,8 +54,8 @@ Args::~Args ()
   TDRP_free_override(&override);
 }
 
+//////////////////////////////////////////////////////////
 // parse the command line
-//
 // returns 0 on success, -1 on failure  
 
 int Args::parse (int argc, char **argv, string &prog_name)
@@ -106,13 +106,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
-	startTime = RadxTime::parseDateTime(argv[++i]);
-	if (startTime == RadxTime::NEVER) {
-	  OK = false;
-	} else {
-	  sprintf(tmp_str, "mode = ARCHIVE;");
-	  TDRP_add_override(&override, tmp_str);
-	}
+        sprintf(tmp_str, "start_time = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);
+        startTimeSet = true;
       } else {
 	OK = false;
       }
@@ -120,18 +118,16 @@ int Args::parse (int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-end")) {
       
       if (i < argc - 1) {
-	endTime = RadxTime::parseDateTime(argv[++i]);
-	if (endTime == RadxTime::NEVER) {
-	  OK = false;
-	} else {
-	  sprintf(tmp_str, "mode = ARCHIVE;");
-	  TDRP_add_override(&override, tmp_str);
-	}
+        sprintf(tmp_str, "end_time = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);
+        endTimeSet = true;
       } else {
 	OK = false;
       }
 	
-    } else if (!strcmp(argv[i], "-path") || !strcmp(argv[i], "-f")) {
+    } else if (!strcmp(argv[i], "-paths") || !strcmp(argv[i], "-f")) {
       
       if (i < argc - 1) {
 	// load up file list vector. Break at next arg which
@@ -154,17 +150,6 @@ int Args::parse (int argc, char **argv, string &prog_name)
       if (i < argc - 1) {
 	sprintf(tmp_str, "output_dir = \"%s\";", argv[++i]);
 	TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-outname")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "output_filename = \"%s\";", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "output_filename_mode = SPECIFY_FILE_NAME;");
-        TDRP_add_override(&override, tmp_str);
       } else {
 	OK = false;
       }
@@ -201,11 +186,9 @@ void Args::_usage(ostream &out)
       << "           Sets mode to FILELIST\n"
       << "\n"
       << "  [ -instance ?] specify the instance\n"
+      << "    app will register with procmap\n"
       << "\n"
       << "  [ -outdir ? ] set output directory\n"
-      << "\n"
-      << "  [ -outname ? ] specify output file name\n"
-      << "                 file of this name will be written to outdir\n"
       << "\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "           Sets mode to ARCHIVE\n"
