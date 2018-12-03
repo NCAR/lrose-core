@@ -66,13 +66,13 @@ public:
   // enum typedefs
 
   typedef enum {
-    FIR_LEN_125 = 0,
-    FIR_LEN_60 = 1,
-    FIR_LEN_40 = 2,
-    FIR_LEN_30 = 3,
-    FIR_LEN_20 = 4,
-    FIR_LEN_10 = 5
-  } fir_filter_len_t;
+    KDP_FIR_LEN_125 = 0,
+    KDP_FIR_LEN_60 = 1,
+    KDP_FIR_LEN_40 = 2,
+    KDP_FIR_LEN_30 = 3,
+    KDP_FIR_LEN_20 = 4,
+    KDP_FIR_LEN_10 = 5
+  } KDP_fir_filter_len_t;
 
   ///////////////////////////
   // Member functions
@@ -359,55 +359,55 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  fir_filter_len_t fir_filter_len;
+  KDP_fir_filter_len_t KDP_fir_filter_len;
 
-  int n_filt_iterations_unfolded;
+  int KDP_n_filt_iterations_unfolded;
 
-  int n_filt_iterations_conditioned;
+  int KDP_n_filt_iterations_conditioned;
 
-  tdrp_bool_t use_iterative_filtering;
+  tdrp_bool_t KDP_use_iterative_filtering;
 
-  double phidp_difference_threshold;
+  double KDP_phidp_difference_threshold;
 
-  int ngates_for_stats;
+  int KDP_ngates_for_stats;
 
-  double phidp_sdev_max;
+  double KDP_phidp_sdev_max;
 
-  double phidp_jitter_max;
+  double KDP_phidp_jitter_max;
 
-  double min_valid_abs_kdp;
+  double KDP_min_valid_abs_kdp;
 
-  tdrp_bool_t check_snr;
+  tdrp_bool_t KDP_check_snr;
 
-  double snr_threshold;
+  double KDP_snr_threshold;
 
-  tdrp_bool_t check_rhohv;
+  tdrp_bool_t KDP_check_rhohv;
 
-  double rhohv_threshold;
+  double KDP_rhohv_threshold;
 
-  tdrp_bool_t check_zdr_sdev;
+  tdrp_bool_t KDP_check_zdr_sdev;
 
-  double zdr_sdev_max;
+  double KDP_zdr_sdev_max;
 
-  double threshold_for_ZZDR;
+  double KDP_threshold_for_ZZDR;
 
-  int median_filter_len_for_ZZDR;
+  int KDP_median_filter_len_for_ZZDR;
 
-  tdrp_bool_t debug;
+  tdrp_bool_t KDP_debug;
 
-  tdrp_bool_t write_ray_files;
+  tdrp_bool_t KDP_write_ray_files;
 
-  char* ray_files_dir;
+  char* KDP_ray_files_dir;
 
-  tdrp_bool_t specify_coefficients_for_attenuation_correction;
+  tdrp_bool_t KDP_specify_coefficients_for_attenuation_correction;
 
-  double dbz_attenuation_coefficient;
+  double KDP_dbz_attenuation_coefficient;
 
-  double dbz_attenuation_exponent;
+  double KDP_dbz_attenuation_exponent;
 
-  double zdr_attenuation_coefficient;
+  double KDP_zdr_attenuation_coefficient;
 
-  double zdr_attenuation_exponent;
+  double KDP_zdr_attenuation_exponent;
 
   char _end_; // end of data region
               // needed for zeroing out data

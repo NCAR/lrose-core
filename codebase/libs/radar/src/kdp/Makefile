@@ -22,10 +22,10 @@ TARGET_FILE = ../libradar.a
 HDRS =
 
 CPPC_SRCS = \
+	KdpFiltParams.cc \
 	KdpBringi.cc \
 	KdpCompute.cc \
 	KdpFilt.cc \
-	KdpFiltParams.cc \
 	PhidpProc.cc
 
 #
@@ -43,7 +43,7 @@ KdpFiltParams.cc: paramdef.KdpFilt
 	/bin/mv -f KdpFiltParams.hh ../include/radar
 
 clean_tdrp:
-	$(RM) KdpFiltParams.cc KdpFiltParams.hh
+	$(RM) KdpFiltParams.cc ../include/radar/KdpFiltParams.hh
 
 depend: depend_generic
 

@@ -48,7 +48,7 @@
  * @author Automatically generated
  *
  */
-#include <radar/KdpFiltParams.hh>
+#include "KdpFiltParams.hh"
 #include <cstring>
 
   ////////////////////////////////////////////
@@ -549,259 +549,259 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'fir_filter_len'
-    // ctype is '_fir_filter_len_t'
+    // Parameter 'KDP_fir_filter_len'
+    // ctype is '_KDP_fir_filter_len_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("fir_filter_len");
+    tt->param_name = tdrpStrDup("KDP_fir_filter_len");
     tt->descr = tdrpStrDup("Filter length for the FIR filter for PHIDP (gates)");
     tt->help = tdrpStrDup("When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.");
-    tt->val_offset = (char *) &fir_filter_len - &_start_;
-    tt->enum_def.name = tdrpStrDup("fir_filter_len_t");
+    tt->val_offset = (char *) &KDP_fir_filter_len - &_start_;
+    tt->enum_def.name = tdrpStrDup("KDP_fir_filter_len_t");
     tt->enum_def.nfields = 6;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FIR_LEN_125");
-      tt->enum_def.fields[0].val = FIR_LEN_125;
-      tt->enum_def.fields[1].name = tdrpStrDup("FIR_LEN_60");
-      tt->enum_def.fields[1].val = FIR_LEN_60;
-      tt->enum_def.fields[2].name = tdrpStrDup("FIR_LEN_40");
-      tt->enum_def.fields[2].val = FIR_LEN_40;
-      tt->enum_def.fields[3].name = tdrpStrDup("FIR_LEN_30");
-      tt->enum_def.fields[3].val = FIR_LEN_30;
-      tt->enum_def.fields[4].name = tdrpStrDup("FIR_LEN_20");
-      tt->enum_def.fields[4].val = FIR_LEN_20;
-      tt->enum_def.fields[5].name = tdrpStrDup("FIR_LEN_10");
-      tt->enum_def.fields[5].val = FIR_LEN_10;
-    tt->single_val.e = FIR_LEN_10;
+      tt->enum_def.fields[0].name = tdrpStrDup("KDP_FIR_LEN_125");
+      tt->enum_def.fields[0].val = KDP_FIR_LEN_125;
+      tt->enum_def.fields[1].name = tdrpStrDup("KDP_FIR_LEN_60");
+      tt->enum_def.fields[1].val = KDP_FIR_LEN_60;
+      tt->enum_def.fields[2].name = tdrpStrDup("KDP_FIR_LEN_40");
+      tt->enum_def.fields[2].val = KDP_FIR_LEN_40;
+      tt->enum_def.fields[3].name = tdrpStrDup("KDP_FIR_LEN_30");
+      tt->enum_def.fields[3].val = KDP_FIR_LEN_30;
+      tt->enum_def.fields[4].name = tdrpStrDup("KDP_FIR_LEN_20");
+      tt->enum_def.fields[4].val = KDP_FIR_LEN_20;
+      tt->enum_def.fields[5].name = tdrpStrDup("KDP_FIR_LEN_10");
+      tt->enum_def.fields[5].val = KDP_FIR_LEN_10;
+    tt->single_val.e = KDP_FIR_LEN_10;
     tt++;
     
-    // Parameter 'n_filt_iterations_unfolded'
+    // Parameter 'KDP_n_filt_iterations_unfolded'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_filt_iterations_unfolded");
+    tt->param_name = tdrpStrDup("KDP_n_filt_iterations_unfolded");
     tt->descr = tdrpStrDup("Sets the number of iterations for the initial FIR filter for unfolded PHIDP.");
     tt->help = tdrpStrDup("After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
-    tt->val_offset = (char *) &n_filt_iterations_unfolded - &_start_;
+    tt->val_offset = (char *) &KDP_n_filt_iterations_unfolded - &_start_;
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'n_filt_iterations_conditioned'
+    // Parameter 'KDP_n_filt_iterations_conditioned'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_filt_iterations_conditioned");
+    tt->param_name = tdrpStrDup("KDP_n_filt_iterations_conditioned");
     tt->descr = tdrpStrDup("Sets the number of iterations for the final FIR filter for conditioned PHIDP.");
     tt->help = tdrpStrDup("In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
-    tt->val_offset = (char *) &n_filt_iterations_conditioned - &_start_;
+    tt->val_offset = (char *) &KDP_n_filt_iterations_conditioned - &_start_;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'use_iterative_filtering'
+    // Parameter 'KDP_use_iterative_filtering'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_iterative_filtering");
+    tt->param_name = tdrpStrDup("KDP_use_iterative_filtering");
     tt->descr = tdrpStrDup("Perform iterative filtering to locate backscatter phase shift.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &use_iterative_filtering - &_start_;
+    tt->val_offset = (char *) &KDP_use_iterative_filtering - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'phidp_difference_threshold'
+    // Parameter 'KDP_phidp_difference_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("phidp_difference_threshold");
+    tt->param_name = tdrpStrDup("KDP_phidp_difference_threshold");
     tt->descr = tdrpStrDup("Difference threshold for the iterative filtering method.");
     tt->help = tdrpStrDup("The FIR filter is applied successively, n_filt_iterations_conditioned times. After each iteration the result is checked against the original. If the difference is less than this parameter, the original value at that gate is retained. If the difference exceeds this parameter, the new filtered value is retained.");
-    tt->val_offset = (char *) &phidp_difference_threshold - &_start_;
+    tt->val_offset = (char *) &KDP_phidp_difference_threshold - &_start_;
     tt->single_val.d = 4;
     tt++;
     
-    // Parameter 'ngates_for_stats'
+    // Parameter 'KDP_ngates_for_stats'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ngates_for_stats");
+    tt->param_name = tdrpStrDup("KDP_ngates_for_stats");
     tt->descr = tdrpStrDup("Number of gates over which the phidp mean, sdev and jitter are computed.");
     tt->help = tdrpStrDup("The mean, sdev and jitter of phidp are computed over a consecutive number of gates in range, centered on the current gate of interest. This parameter is the number of gates over which these statistics are computed.");
-    tt->val_offset = (char *) &ngates_for_stats - &_start_;
+    tt->val_offset = (char *) &KDP_ngates_for_stats - &_start_;
     tt->single_val.i = 9;
     tt++;
     
-    // Parameter 'phidp_sdev_max'
+    // Parameter 'KDP_phidp_sdev_max'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("phidp_sdev_max");
+    tt->param_name = tdrpStrDup("KDP_phidp_sdev_max");
     tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of phidp in range.");
     tt->help = tdrpStrDup("The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &phidp_sdev_max - &_start_;
+    tt->val_offset = (char *) &KDP_phidp_sdev_max - &_start_;
     tt->single_val.d = 20;
     tt++;
     
-    // Parameter 'phidp_jitter_max'
+    // Parameter 'KDP_phidp_jitter_max'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("phidp_jitter_max");
+    tt->param_name = tdrpStrDup("KDP_phidp_jitter_max");
     tt->descr = tdrpStrDup("Sets the threshold for the jitter of phidp in range.");
     tt->help = tdrpStrDup("The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &phidp_jitter_max - &_start_;
+    tt->val_offset = (char *) &KDP_phidp_jitter_max - &_start_;
     tt->single_val.d = 25;
     tt++;
     
-    // Parameter 'min_valid_abs_kdp'
+    // Parameter 'KDP_min_valid_abs_kdp'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_valid_abs_kdp");
+    tt->param_name = tdrpStrDup("KDP_min_valid_abs_kdp");
     tt->descr = tdrpStrDup("Sets the min valid KDP value.");
     tt->help = tdrpStrDup("Values less than this are set to 0.");
-    tt->val_offset = (char *) &min_valid_abs_kdp - &_start_;
+    tt->val_offset = (char *) &KDP_min_valid_abs_kdp - &_start_;
     tt->single_val.d = 0.01;
     tt++;
     
-    // Parameter 'check_snr'
+    // Parameter 'KDP_check_snr'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("check_snr");
+    tt->param_name = tdrpStrDup("KDP_check_snr");
     tt->descr = tdrpStrDup("Check the SNR.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &check_snr - &_start_;
+    tt->val_offset = (char *) &KDP_check_snr - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'snr_threshold'
+    // Parameter 'KDP_snr_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("snr_threshold");
+    tt->param_name = tdrpStrDup("KDP_snr_threshold");
     tt->descr = tdrpStrDup("Sets the threshold for checking SNR (dB).");
     tt->help = tdrpStrDup("If the SNR drops below this value, KDP will not be computed at this gate.");
-    tt->val_offset = (char *) &snr_threshold - &_start_;
+    tt->val_offset = (char *) &KDP_snr_threshold - &_start_;
     tt->single_val.d = -6;
     tt++;
     
-    // Parameter 'check_rhohv'
+    // Parameter 'KDP_check_rhohv'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("check_rhohv");
+    tt->param_name = tdrpStrDup("KDP_check_rhohv");
     tt->descr = tdrpStrDup("Check the RHOHV.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &check_rhohv - &_start_;
+    tt->val_offset = (char *) &KDP_check_rhohv - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'rhohv_threshold'
+    // Parameter 'KDP_rhohv_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rhohv_threshold");
+    tt->param_name = tdrpStrDup("KDP_rhohv_threshold");
     tt->descr = tdrpStrDup("Sets the threshold for checking RHOHV.");
     tt->help = tdrpStrDup("If the RHOHV drops below this value, KDP will not be computed at this gate.");
-    tt->val_offset = (char *) &rhohv_threshold - &_start_;
+    tt->val_offset = (char *) &KDP_rhohv_threshold - &_start_;
     tt->single_val.d = 0.95;
     tt++;
     
-    // Parameter 'check_zdr_sdev'
+    // Parameter 'KDP_check_zdr_sdev'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("check_zdr_sdev");
+    tt->param_name = tdrpStrDup("KDP_check_zdr_sdev");
     tt->descr = tdrpStrDup("Check the standard deviation of ZDR in range?");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &check_zdr_sdev - &_start_;
+    tt->val_offset = (char *) &KDP_check_zdr_sdev - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'zdr_sdev_max'
+    // Parameter 'KDP_zdr_sdev_max'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_sdev_max");
+    tt->param_name = tdrpStrDup("KDP_zdr_sdev_max");
     tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of zdr in range.");
     tt->help = tdrpStrDup("The sdev of zdr is a good test for clutter. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &zdr_sdev_max - &_start_;
+    tt->val_offset = (char *) &KDP_zdr_sdev_max - &_start_;
     tt->single_val.d = 2;
     tt++;
     
-    // Parameter 'threshold_for_ZZDR'
+    // Parameter 'KDP_threshold_for_ZZDR'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("threshold_for_ZZDR");
+    tt->param_name = tdrpStrDup("KDP_threshold_for_ZZDR");
     tt->descr = tdrpStrDup("Sets the threshold for computing conditional KDP from Z and ZDR.");
     tt->help = tdrpStrDup("We can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute the conditioned KDP - we call this KDP_COND. To compute KDP_COND, we first find the gates over which regular KDP exceeds this threshold. Over this run of gates we compute the PHIDP change from the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, we can compute KDP_COND such that the PHIDP change is the same for both KDP and KDP_COND.");
-    tt->val_offset = (char *) &threshold_for_ZZDR - &_start_;
+    tt->val_offset = (char *) &KDP_threshold_for_ZZDR - &_start_;
     tt->single_val.d = 0.25;
     tt++;
     
-    // Parameter 'median_filter_len_for_ZZDR'
+    // Parameter 'KDP_median_filter_len_for_ZZDR'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("median_filter_len_for_ZZDR");
+    tt->param_name = tdrpStrDup("KDP_median_filter_len_for_ZZDR");
     tt->descr = tdrpStrDup("Sets the length of the median filter when computing KDP_ZZDR.");
     tt->help = tdrpStrDup("The Z and ZDR fields are smoothed with a median filter of this length prior to estimating KDP_ZZDR.");
-    tt->val_offset = (char *) &median_filter_len_for_ZZDR - &_start_;
+    tt->val_offset = (char *) &KDP_median_filter_len_for_ZZDR - &_start_;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'debug'
+    // Parameter 'KDP_debug'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("debug");
+    tt->param_name = tdrpStrDup("KDP_debug");
     tt->descr = tdrpStrDup("Option to print debug messages in KDP computation.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &debug - &_start_;
+    tt->val_offset = (char *) &KDP_debug - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'write_ray_files'
+    // Parameter 'KDP_write_ray_files'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_ray_files");
+    tt->param_name = tdrpStrDup("KDP_write_ray_files");
     tt->descr = tdrpStrDup("Option to write ray files to debug KDP computation.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &write_ray_files - &_start_;
+    tt->val_offset = (char *) &KDP_write_ray_files - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'ray_files_dir'
+    // Parameter 'KDP_ray_files_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ray_files_dir");
+    tt->param_name = tdrpStrDup("KDP_ray_files_dir");
     tt->descr = tdrpStrDup("Directory for KDP ray files.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ray_files_dir - &_start_;
+    tt->val_offset = (char *) &KDP_ray_files_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/kdp_ray_files");
     tt++;
     
@@ -814,63 +814,63 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'specify_coefficients_for_attenuation_correction'
+    // Parameter 'KDP_specify_coefficients_for_attenuation_correction'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_coefficients_for_attenuation_correction");
+    tt->param_name = tdrpStrDup("KDP_specify_coefficients_for_attenuation_correction");
     tt->descr = tdrpStrDup("Option to specify the coefficients and exponents - see below.");
     tt->help = tdrpStrDup("If false, the default coefficients will be determined for the radar wavelength.");
-    tt->val_offset = (char *) &specify_coefficients_for_attenuation_correction - &_start_;
+    tt->val_offset = (char *) &KDP_specify_coefficients_for_attenuation_correction - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'dbz_attenuation_coefficient'
+    // Parameter 'KDP_dbz_attenuation_coefficient'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("dbz_attenuation_coefficient");
+    tt->param_name = tdrpStrDup("KDP_dbz_attenuation_coefficient");
     tt->descr = tdrpStrDup("Coefficient for computing DBZ attenuation correction.");
     tt->help = tdrpStrDup("Default is 0.017. See Bringi and Chandrasekar, Table 7.1, page 494.");
-    tt->val_offset = (char *) &dbz_attenuation_coefficient - &_start_;
+    tt->val_offset = (char *) &KDP_dbz_attenuation_coefficient - &_start_;
     tt->single_val.d = 0.017;
     tt++;
     
-    // Parameter 'dbz_attenuation_exponent'
+    // Parameter 'KDP_dbz_attenuation_exponent'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("dbz_attenuation_exponent");
+    tt->param_name = tdrpStrDup("KDP_dbz_attenuation_exponent");
     tt->descr = tdrpStrDup("Exponent for computing DBZ attenuation correction.");
     tt->help = tdrpStrDup("Default is 0.84. See Bringi and Chandrasekar, Table 7.1, page 494.");
-    tt->val_offset = (char *) &dbz_attenuation_exponent - &_start_;
+    tt->val_offset = (char *) &KDP_dbz_attenuation_exponent - &_start_;
     tt->single_val.d = 0.84;
     tt++;
     
-    // Parameter 'zdr_attenuation_coefficient'
+    // Parameter 'KDP_zdr_attenuation_coefficient'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_attenuation_coefficient");
+    tt->param_name = tdrpStrDup("KDP_zdr_attenuation_coefficient");
     tt->descr = tdrpStrDup("Coefficient for computing ZDR attenuation correction.");
     tt->help = tdrpStrDup("Default is 0.003. See Bringi and Chandrasekar, Table 7.1, page 494.");
-    tt->val_offset = (char *) &zdr_attenuation_coefficient - &_start_;
+    tt->val_offset = (char *) &KDP_zdr_attenuation_coefficient - &_start_;
     tt->single_val.d = 0.003;
     tt++;
     
-    // Parameter 'zdr_attenuation_exponent'
+    // Parameter 'KDP_zdr_attenuation_exponent'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("zdr_attenuation_exponent");
+    tt->param_name = tdrpStrDup("KDP_zdr_attenuation_exponent");
     tt->descr = tdrpStrDup("Exponent for computing ZDR attenuation correction.");
     tt->help = tdrpStrDup("Default is 1.05. See Bringi and Chandrasekar, Table 7.1, page 494.");
-    tt->val_offset = (char *) &zdr_attenuation_exponent - &_start_;
+    tt->val_offset = (char *) &KDP_zdr_attenuation_exponent - &_start_;
     tt->single_val.d = 1.05;
     tt++;
     

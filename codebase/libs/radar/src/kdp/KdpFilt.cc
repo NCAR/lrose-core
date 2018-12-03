@@ -310,53 +310,53 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
 
   // initialize KDP object
 
-  if (params.fir_filter_len == KdpFiltParams::FIR_LEN_125) {
+  if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_125) {
     setFIRFilterLen(KdpFilt::FIR_LENGTH_125);
-  } else if (params.fir_filter_len == KdpFiltParams::FIR_LEN_60) {
+  } else if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_60) {
     setFIRFilterLen(KdpFilt::FIR_LENGTH_60);
-  } else if (params.fir_filter_len == KdpFiltParams::FIR_LEN_40) {
+  } else if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_40) {
     setFIRFilterLen(KdpFilt::FIR_LENGTH_40);
-  } else if (params.fir_filter_len == KdpFiltParams::FIR_LEN_30) {
+  } else if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_30) {
     setFIRFilterLen(KdpFilt::FIR_LENGTH_30);
-  } else if (params.fir_filter_len == KdpFiltParams::FIR_LEN_20) {
+  } else if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_20) {
     setFIRFilterLen(KdpFilt::FIR_LENGTH_20);
   } else {
     setFIRFilterLen(KdpFilt::FIR_LENGTH_10);
   }
-  setNGatesStats(params.ngates_for_stats);
-  setMinValidAbsKdp(params.min_valid_abs_kdp);
-  setNFiltIterUnfolded(params.n_filt_iterations_unfolded);
-  setNFiltIterCond(params.n_filt_iterations_conditioned);
-  if (params.use_iterative_filtering) {
+  setNGatesStats(params.KDP_ngates_for_stats);
+  setMinValidAbsKdp(params.KDP_min_valid_abs_kdp);
+  setNFiltIterUnfolded(params.KDP_n_filt_iterations_unfolded);
+  setNFiltIterCond(params.KDP_n_filt_iterations_conditioned);
+  if (params.KDP_use_iterative_filtering) {
     setUseIterativeFiltering(true);
-    setPhidpDiffThreshold(params.phidp_difference_threshold);
+    setPhidpDiffThreshold(params.KDP_phidp_difference_threshold);
   }
-  setPhidpSdevMax(params.phidp_sdev_max);
-  setPhidpJitterMax(params.phidp_jitter_max);
-  setMinValidAbsKdp(params.min_valid_abs_kdp);
-  checkSnr(params.check_snr);
-  setSnrThreshold(params.snr_threshold);
-  checkRhohv(params.check_rhohv);
-  setRhohvThreshold(params.rhohv_threshold);
-  if (params.check_zdr_sdev) {
+  setPhidpSdevMax(params.KDP_phidp_sdev_max);
+  setPhidpJitterMax(params.KDP_phidp_jitter_max);
+  setMinValidAbsKdp(params.KDP_min_valid_abs_kdp);
+  checkSnr(params.KDP_check_snr);
+  setSnrThreshold(params.KDP_snr_threshold);
+  checkRhohv(params.KDP_check_rhohv);
+  setRhohvThreshold(params.KDP_rhohv_threshold);
+  if (params.KDP_check_zdr_sdev) {
     checkZdrSdev(true);
   }
-  setZdrSdevMax(params.zdr_sdev_max);
-  setThresholdForKdpZZdr(params.threshold_for_ZZDR);
-  setMedianFilterLenForKdpZZdr(params.median_filter_len_for_ZZDR);
+  setZdrSdevMax(params.KDP_zdr_sdev_max);
+  setThresholdForKdpZZdr(params.KDP_threshold_for_ZZDR);
+  setMedianFilterLenForKdpZZdr(params.KDP_median_filter_len_for_ZZDR);
 
-  if (params.debug) {
+  if (params.KDP_debug) {
     setDebug(true);
   }
-  if (params.write_ray_files) {
-    setWriteRayFile(true, params.ray_files_dir);
+  if (params.KDP_write_ray_files) {
+    setWriteRayFile(true, params.KDP_ray_files_dir);
   }
 
-  if (params.specify_coefficients_for_attenuation_correction) {
-    setAttenCoeffs(params.dbz_attenuation_coefficient,
-                   params.dbz_attenuation_exponent,
-                   params.zdr_attenuation_coefficient,
-                   params.zdr_attenuation_exponent);
+  if (params.KDP_specify_coefficients_for_attenuation_correction) {
+    setAttenCoeffs(params.KDP_dbz_attenuation_coefficient,
+                   params.KDP_dbz_attenuation_exponent,
+                   params.KDP_zdr_attenuation_coefficient,
+                   params.KDP_zdr_attenuation_exponent);
   }
 
 }

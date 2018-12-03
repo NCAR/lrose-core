@@ -9,7 +9,7 @@
 //
 //======================================================================
  
-///////////// fir_filter_len //////////////////////////
+///////////// KDP_fir_filter_len //////////////////////
 //
 // Filter length for the FIR filter for PHIDP (gates).
 //
@@ -19,17 +19,17 @@
 //
 // Type: enum
 // Options:
-//     FIR_LEN_125
-//     FIR_LEN_60
-//     FIR_LEN_40
-//     FIR_LEN_30
-//     FIR_LEN_20
-//     FIR_LEN_10
+//     KDP_FIR_LEN_125
+//     KDP_FIR_LEN_60
+//     KDP_FIR_LEN_40
+//     KDP_FIR_LEN_30
+//     KDP_FIR_LEN_20
+//     KDP_FIR_LEN_10
 //
 
-fir_filter_len = FIR_LEN_10;
+KDP_fir_filter_len = KDP_FIR_LEN_10;
 
-///////////// n_filt_iterations_unfolded //////////////
+///////////// KDP_n_filt_iterations_unfolded //////////
 //
 // Sets the number of iterations for the initial FIR filter for unfolded 
 //   PHIDP.
@@ -42,9 +42,9 @@ fir_filter_len = FIR_LEN_10;
 // Type: int
 //
 
-n_filt_iterations_unfolded = 2;
+KDP_n_filt_iterations_unfolded = 2;
 
-///////////// n_filt_iterations_conditioned ///////////
+///////////// KDP_n_filt_iterations_conditioned ///////
 //
 // Sets the number of iterations for the final FIR filter for 
 //   conditioned PHIDP.
@@ -59,9 +59,9 @@ n_filt_iterations_unfolded = 2;
 // Type: int
 //
 
-n_filt_iterations_conditioned = 4;
+KDP_n_filt_iterations_conditioned = 4;
 
-///////////// use_iterative_filtering /////////////////
+///////////// KDP_use_iterative_filtering /////////////
 //
 // Perform iterative filtering to locate backscatter phase shift.
 //
@@ -69,9 +69,9 @@ n_filt_iterations_conditioned = 4;
 // Type: boolean
 //
 
-use_iterative_filtering = FALSE;
+KDP_use_iterative_filtering = FALSE;
 
-///////////// phidp_difference_threshold //////////////
+///////////// KDP_phidp_difference_threshold //////////
 //
 // Difference threshold for the iterative filtering method.
 //
@@ -85,9 +85,9 @@ use_iterative_filtering = FALSE;
 // Type: double
 //
 
-phidp_difference_threshold = 4;
+KDP_phidp_difference_threshold = 4;
 
-///////////// ngates_for_stats ////////////////////////
+///////////// KDP_ngates_for_stats ////////////////////
 //
 // Number of gates over which the phidp mean, sdev and jitter are 
 //   computed.
@@ -101,9 +101,9 @@ phidp_difference_threshold = 4;
 // Type: int
 //
 
-ngates_for_stats = 9;
+KDP_ngates_for_stats = 9;
 
-///////////// phidp_sdev_max //////////////////////////
+///////////// KDP_phidp_sdev_max //////////////////////
 //
 // Sets the threshold for the standard deviation of phidp in range.
 //
@@ -116,9 +116,9 @@ ngates_for_stats = 9;
 // Type: double
 //
 
-phidp_sdev_max = 20;
+KDP_phidp_sdev_max = 20;
 
-///////////// phidp_jitter_max ////////////////////////
+///////////// KDP_phidp_jitter_max ////////////////////
 //
 // Sets the threshold for the jitter of phidp in range.
 //
@@ -132,9 +132,9 @@ phidp_sdev_max = 20;
 // Type: double
 //
 
-phidp_jitter_max = 25;
+KDP_phidp_jitter_max = 25;
 
-///////////// min_valid_abs_kdp ///////////////////////
+///////////// KDP_min_valid_abs_kdp ///////////////////
 //
 // Sets the min valid KDP value.
 //
@@ -144,9 +144,9 @@ phidp_jitter_max = 25;
 // Type: double
 //
 
-min_valid_abs_kdp = 0.01;
+KDP_min_valid_abs_kdp = 0.01;
 
-///////////// check_snr ///////////////////////////////
+///////////// KDP_check_snr ///////////////////////////
 //
 // Check the SNR.
 //
@@ -154,9 +154,9 @@ min_valid_abs_kdp = 0.01;
 // Type: boolean
 //
 
-check_snr = FALSE;
+KDP_check_snr = FALSE;
 
-///////////// snr_threshold ///////////////////////////
+///////////// KDP_snr_threshold ///////////////////////
 //
 // Sets the threshold for checking SNR (dB).
 //
@@ -167,9 +167,9 @@ check_snr = FALSE;
 // Type: double
 //
 
-snr_threshold = -6;
+KDP_snr_threshold = -6;
 
-///////////// check_rhohv /////////////////////////////
+///////////// KDP_check_rhohv /////////////////////////
 //
 // Check the RHOHV.
 //
@@ -177,9 +177,9 @@ snr_threshold = -6;
 // Type: boolean
 //
 
-check_rhohv = TRUE;
+KDP_check_rhohv = TRUE;
 
-///////////// rhohv_threshold /////////////////////////
+///////////// KDP_rhohv_threshold /////////////////////
 //
 // Sets the threshold for checking RHOHV.
 //
@@ -190,9 +190,9 @@ check_rhohv = TRUE;
 // Type: double
 //
 
-rhohv_threshold = 0.95;
+KDP_rhohv_threshold = 0.95;
 
-///////////// check_zdr_sdev //////////////////////////
+///////////// KDP_check_zdr_sdev //////////////////////
 //
 // Check the standard deviation of ZDR in range?.
 //
@@ -200,9 +200,9 @@ rhohv_threshold = 0.95;
 // Type: boolean
 //
 
-check_zdr_sdev = FALSE;
+KDP_check_zdr_sdev = FALSE;
 
-///////////// zdr_sdev_max ////////////////////////////
+///////////// KDP_zdr_sdev_max ////////////////////////
 //
 // Sets the threshold for the standard deviation of zdr in range.
 //
@@ -214,9 +214,9 @@ check_zdr_sdev = FALSE;
 // Type: double
 //
 
-zdr_sdev_max = 2;
+KDP_zdr_sdev_max = 2;
 
-///////////// threshold_for_ZZDR //////////////////////
+///////////// KDP_threshold_for_ZZDR //////////////////
 //
 // Sets the threshold for computing conditional KDP from Z and ZDR.
 //
@@ -233,9 +233,9 @@ zdr_sdev_max = 2;
 // Type: double
 //
 
-threshold_for_ZZDR = 0.25;
+KDP_threshold_for_ZZDR = 0.25;
 
-///////////// median_filter_len_for_ZZDR //////////////
+///////////// KDP_median_filter_len_for_ZZDR //////////
 //
 // Sets the length of the median filter when computing KDP_ZZDR.
 //
@@ -246,9 +246,9 @@ threshold_for_ZZDR = 0.25;
 // Type: int
 //
 
-median_filter_len_for_ZZDR = 5;
+KDP_median_filter_len_for_ZZDR = 5;
 
-///////////// debug ///////////////////////////////////
+///////////// KDP_debug ///////////////////////////////
 //
 // Option to print debug messages in KDP computation.
 //
@@ -256,9 +256,9 @@ median_filter_len_for_ZZDR = 5;
 // Type: boolean
 //
 
-debug = FALSE;
+KDP_debug = FALSE;
 
-///////////// write_ray_files /////////////////////////
+///////////// KDP_write_ray_files /////////////////////
 //
 // Option to write ray files to debug KDP computation.
 //
@@ -266,9 +266,9 @@ debug = FALSE;
 // Type: boolean
 //
 
-write_ray_files = FALSE;
+KDP_write_ray_files = FALSE;
 
-///////////// ray_files_dir ///////////////////////////
+///////////// KDP_ray_files_dir ///////////////////////
 //
 // Directory for KDP ray files.
 //
@@ -276,7 +276,7 @@ write_ray_files = FALSE;
 // Type: string
 //
 
-ray_files_dir = "$(DATA_DIR)/kdp_ray_files";
+KDP_ray_files_dir = "/tmp/kdp_ray_files";
 
 //======================================================================
 //
@@ -284,7 +284,7 @@ ray_files_dir = "$(DATA_DIR)/kdp_ray_files";
 //
 //======================================================================
  
-///////////// specify_coefficients_for_attenuation_correction 
+///////////// KDP_specify_coefficients_for_attenuation_correction 
 //
 // Option to specify the coefficients and exponents - see below.
 //
@@ -295,9 +295,9 @@ ray_files_dir = "$(DATA_DIR)/kdp_ray_files";
 // Type: boolean
 //
 
-specify_coefficients_for_attenuation_correction = FALSE;
+KDP_specify_coefficients_for_attenuation_correction = FALSE;
 
-///////////// dbz_attenuation_coefficient /////////////
+///////////// KDP_dbz_attenuation_coefficient /////////
 //
 // Coefficient for computing DBZ attenuation correction.
 //
@@ -307,9 +307,9 @@ specify_coefficients_for_attenuation_correction = FALSE;
 // Type: double
 //
 
-dbz_attenuation_coefficient = 0.017;
+KDP_dbz_attenuation_coefficient = 0.017;
 
-///////////// dbz_attenuation_exponent ////////////////
+///////////// KDP_dbz_attenuation_exponent ////////////
 //
 // Exponent for computing DBZ attenuation correction.
 //
@@ -319,9 +319,9 @@ dbz_attenuation_coefficient = 0.017;
 // Type: double
 //
 
-dbz_attenuation_exponent = 0.84;
+KDP_dbz_attenuation_exponent = 0.84;
 
-///////////// zdr_attenuation_coefficient /////////////
+///////////// KDP_zdr_attenuation_coefficient /////////
 //
 // Coefficient for computing ZDR attenuation correction.
 //
@@ -331,9 +331,9 @@ dbz_attenuation_exponent = 0.84;
 // Type: double
 //
 
-zdr_attenuation_coefficient = 0.003;
+KDP_zdr_attenuation_coefficient = 0.003;
 
-///////////// zdr_attenuation_exponent ////////////////
+///////////// KDP_zdr_attenuation_exponent ////////////
 //
 // Exponent for computing ZDR attenuation correction.
 //
@@ -343,5 +343,5 @@ zdr_attenuation_coefficient = 0.003;
 // Type: double
 //
 
-zdr_attenuation_exponent = 1.05;
+KDP_zdr_attenuation_exponent = 1.05;
 

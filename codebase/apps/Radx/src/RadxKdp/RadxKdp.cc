@@ -78,7 +78,7 @@ RadxKdp::RadxKdp(int argc, char **argv)
   }
   
   // read TDRP params for this app
-  
+
   _paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv,
 			   _args.override.list, &_paramsPath)) {
@@ -100,7 +100,7 @@ RadxKdp::RadxKdp(int argc, char **argv)
   if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
     // not using defaults
     if (_kdpFiltParams.load(_params.KDP_params_file_path,
-                            _args.override.list, true, _args.tdrpDebug)) {
+                            NULL, true, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for KdpFilt: "
            << _params.KDP_params_file_path << endl;
@@ -108,6 +108,7 @@ RadxKdp::RadxKdp(int argc, char **argv)
       return;
     }
   }
+
 
   // initialize compute object
 
@@ -168,6 +169,10 @@ RadxKdp::~RadxKdp()
 void RadxKdp::_printParamsKdp()
 {
 
+  if (_params.debug) {
+    cerr << "Reading KDP params from file: " << _params.KDP_params_file_path << endl;
+  }
+
   // do we need to expand environment variables?
 
   bool expandEnvVars = false;
@@ -180,7 +185,7 @@ void RadxKdp::_printParamsKdp()
   if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
     // not using defaults
     if (_kdpFiltParams.load(_params.KDP_params_file_path,
-                            _args.override.list, expandEnvVars, _args.tdrpDebug)) {
+                            NULL, expandEnvVars, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for KdpFilt: "
            << _params.KDP_params_file_path << endl;
