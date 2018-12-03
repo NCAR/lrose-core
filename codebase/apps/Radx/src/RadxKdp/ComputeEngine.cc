@@ -125,12 +125,6 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
   
   _loadOutputFields(inputRay, derivedRay);
 
-  // set max range
-  
-  if (_params.set_max_range) {
-    derivedRay->setMaxRangeKm(_params.max_range_km);
-  }
-
   return derivedRay;
 
 }
@@ -145,9 +139,6 @@ void ComputeEngine::_kdpInit()
   // initialize KDP object
 
   _kdp.setFromParams(_kdpFiltParams);
-  if (_params.set_max_range) {
-    _kdp.setMaxRangeKm(true, _params.max_range_km);
-  }
   
 }
 

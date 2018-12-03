@@ -97,16 +97,16 @@ public:
   } output_encoding_t;
 
   typedef enum {
-    OUTPUT_FORMAT_CFRADIAL = 0,
-    OUTPUT_FORMAT_DORADE = 1,
-    OUTPUT_FORMAT_UF = 2
-  } output_format_t;
-
-  typedef enum {
     START_AND_END_TIMES = 0,
     START_TIME_ONLY = 1,
     END_TIME_ONLY = 2
   } filename_mode_t;
+
+  typedef enum {
+    OUTPUT_FORMAT_CFRADIAL = 0,
+    OUTPUT_FORMAT_DORADE = 1,
+    OUTPUT_FORMAT_UF = 2
+  } output_format_t;
 
   // struct typedefs
 
@@ -433,14 +433,6 @@ public:
 
   char* end_time;
 
-  tdrp_bool_t set_max_range;
-
-  double max_range_km;
-
-  tdrp_bool_t override_standard_pseudo_earth_radius;
-
-  double pseudo_earth_radius_ratio;
-
   tdrp_bool_t SNR_available;
 
   char* SNR_field_name;
@@ -469,8 +461,6 @@ public:
   copy_field_t *_copy_fields;
   int copy_fields_n;
 
-  output_format_t output_format;
-
   char* output_dir;
 
   filename_mode_t output_filename_mode;
@@ -479,6 +469,8 @@ public:
 
   tdrp_bool_t append_year_dir_to_output_dir;
 
+  output_format_t output_format;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -486,7 +478,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[47];
+  mutable TDRPtable _table[40];
 
   const char *_className;
 

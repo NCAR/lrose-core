@@ -113,39 +113,8 @@ paramdef string {
 } end_time;
 
 commentdef {
-  p_header = "READ OPTIONS";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set the max range for any ray.";
-} set_max_range;
-
-paramdef double {
-  p_default = 9999;
-  p_descr = "Specified maximim range - km.";
-  p_help = "Gates beyond this range are removed.";
-} max_range_km;
-
-commentdef {
-  p_header = "SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the standard 4/3 earth radius model for refraction.";
-  p_help = "If true, the standard 4/3 earth radius will be overridden. The US NWS NEXRAD system uses 1.21 instead of 1.333.";
-} override_standard_pseudo_earth_radius;
-
-paramdef double {
-  p_default = 1.33333333;
-  p_descr = "Ratio for computing the pseudo earth radius for beam height computations.";
-  p_help = "For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.";
-} pseudo_earth_radius_ratio;
-
-commentdef {
   p_header = "INPUT FIELD INFORMATION";
-  p_text = "Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. KDP is also required internally, but if KDP is not available it will be computed from PHIDP. LDR is optional, and is used for PID only.";
+  p_text = "Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. If SNR is not available, it is computed from DBZ.";
 }
 
 paramdef boolean {
@@ -189,7 +158,7 @@ paramdef string {
 
 commentdef {
   p_header = "COMPUTING KDP";
-  p_text = "Parameters for computing KDP. KDP will be computed if KDP_available is FALSE.";
+  p_text = "The parameters for KDP computations are contained in a separate file. An example default file can be generated using the -print_params_kdp command line argument.";
 }
 
 paramdef string {
@@ -199,7 +168,7 @@ paramdef string {
 } KDP_params_file_path;
 
 commentdef {
-  p_header = "SPECIFYING FIELD NAMES AND OUTPUT ENCODING";
+  p_header = "SPECIFYING OUTPUT FIELDS";
 }
 
 typedef enum {
@@ -214,24 +183,6 @@ typedef enum {
   DBZ_ATTEN_CORRECTED,
   ZDR_ATTEN_CORRECTED
 
-  // ZDP,
-  // DBZ_FOR_KDP,
-  // ZDR_FOR_KDP,
-  // RHOHV_FOR_KDP,
-  // SNR_FOR_KDP,
-  // ZDR_SDEV_FOR_KDP,
-  // VALID_FLAG_FOR_KDP,
-
-  // PHIDP_FOR_KDP,
-  // PHIDP_MEAN_FOR_KDP,
-  // PHIDP_MEAN_UNFOLD_FOR_KDP,
-  // PHIDP_SDEV_FOR_KDP,
-  // PHIDP_JITTER_FOR_KDP,
-  // PHIDP_UNFOLD_FOR_KDP,
-  // PHIDP_FILT_FOR_KDP,
-  // PHIDP_COND_FOR_KDP,
-  // PHIDP_COND_FILT_FOR_KDP
-  
 } output_field_id_t;
 
 typedef struct {
@@ -350,7 +301,7 @@ paramdef enum output_encoding_t {
 
 commentdef {
   p_header = "SPECIFY COPY-THROUGH FIELDS";
-  p_text = "These fields are copied unchanged from the input file to the output file. This is a way of consolidating the output data set.";
+  p_text = "These fields are copied unchanged from the input file to the output file. This allows the user to consolidate the input and output data set in a single file.";
 }
 
 paramdef boolean {
@@ -378,21 +329,6 @@ paramdef struct copy_field_t {
   p_descr = "These fields are copied through unchanged to the output file.";
   p_help = "You can change the name of the field on output.";
 } copy_fields[];
-
-commentdef {
-  p_header = "OUTPUT FILE FORMAT";
-}
-
-typedef enum {
-  OUTPUT_FORMAT_CFRADIAL,
-  OUTPUT_FORMAT_DORADE,
-  OUTPUT_FORMAT_UF
-} output_format_t;
-
-paramdef enum output_format_t {
-  p_default = OUTPUT_FORMAT_CFRADIAL;
-  p_descr = "Format for the output files.";
-} output_format;
 
 commentdef {
   p_header = "WRITING THE OUTPUT FILES";
@@ -427,4 +363,15 @@ paramdef boolean {
   p_descr = "Add the year directory to the output directory.";
   p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
 } append_year_dir_to_output_dir;
+
+typedef enum {
+  OUTPUT_FORMAT_CFRADIAL,
+  OUTPUT_FORMAT_DORADE,
+  OUTPUT_FORMAT_UF
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = OUTPUT_FORMAT_CFRADIAL;
+  p_descr = "Format for the output files.";
+} output_format;
 

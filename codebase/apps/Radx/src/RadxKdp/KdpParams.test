@@ -1,0 +1,347 @@
+/**********************************************************************
+ * TDRP params for KdpFiltParams
+ **********************************************************************/
+
+//======================================================================
+//
+// KdpFilt computes KDP using a filtering technique, and modifies the 
+//   KDP location using the Z-ZDR self consistency principle.
+//
+//======================================================================
+ 
+///////////// fir_filter_len //////////////////////////
+//
+// Filter length for the FIR filter for PHIDP (gates).
+//
+// When computing KDP, an FIR filter is first applied to PHIDP to smooth 
+//   it. This is the length of that filter, in gates.
+//
+//
+// Type: enum
+// Options:
+//     FIR_LEN_125
+//     FIR_LEN_60
+//     FIR_LEN_40
+//     FIR_LEN_30
+//     FIR_LEN_20
+//     FIR_LEN_10
+//
+
+fir_filter_len = FIR_LEN_10;
+
+///////////// n_filt_iterations_unfolded //////////////
+//
+// Sets the number of iterations for the initial FIR filter for unfolded 
+//   PHIDP.
+//
+// After unfolding PHIDP, the FIR filter is applied to the unfolded 
+//   phidp, a number of times, to smooth it. The effect of the filter is a 
+//   combination of the filter length and the number of iterations.
+//
+//
+// Type: int
+//
+
+n_filt_iterations_unfolded = 2;
+
+///////////// n_filt_iterations_conditioned ///////////
+//
+// Sets the number of iterations for the final FIR filter for 
+//   conditioned PHIDP.
+//
+// In order to identify phase shift on backscatter (PSOB), we condition 
+//   the PHIDP to keep it generally increasing with range. The FIR filter 
+//   is applied to the conditioned phidp a number of times, to smooth it. 
+//   The effect of the filter is a combination of the filter length and 
+//   the number of iterations.
+//
+//
+// Type: int
+//
+
+n_filt_iterations_conditioned = 4;
+
+///////////// use_iterative_filtering /////////////////
+//
+// Perform iterative filtering to locate backscatter phase shift.
+//
+//
+// Type: boolean
+//
+
+use_iterative_filtering = FALSE;
+
+///////////// phidp_difference_threshold //////////////
+//
+// Difference threshold for the iterative filtering method.
+//
+// The FIR filter is applied successively, n_filt_iterations_conditioned 
+//   times. After each iteration the result is checked against the 
+//   original. If the difference is less than this parameter, the original 
+//   value at that gate is retained. If the difference exceeds this 
+//   parameter, the new filtered value is retained.
+//
+//
+// Type: double
+//
+
+phidp_difference_threshold = 4;
+
+///////////// ngates_for_stats ////////////////////////
+//
+// Number of gates over which the phidp mean, sdev and jitter are 
+//   computed.
+//
+// The mean, sdev and jitter of phidp are computed over a consecutive 
+//   number of gates in range, centered on the current gate of interest. 
+//   This parameter is the number of gates over which these statistics are 
+//   computed.
+//
+//
+// Type: int
+//
+
+ngates_for_stats = 9;
+
+///////////// phidp_sdev_max //////////////////////////
+//
+// Sets the threshold for the standard deviation of phidp in range.
+//
+// The sdev of phidp is a good test for valid phidp. The sdev is 
+//   computed in the circle, so that it takes account of folding if 
+//   present. If the sdev is less than this value, it is assumed we are in 
+//   weather. Applies to computation of KDP only.
+//
+//
+// Type: double
+//
+
+phidp_sdev_max = 20;
+
+///////////// phidp_jitter_max ////////////////////////
+//
+// Sets the threshold for the jitter of phidp in range.
+//
+// The jitter of phidp is defined as the mean absolute change in angle 
+//   between successive phidp measurements in range. It is computed on the 
+//   circle to take account of folding. If the jitter is less than this 
+//   value, it is assumed we are in weather. Applies to computation of KDP 
+//   only.
+//
+//
+// Type: double
+//
+
+phidp_jitter_max = 25;
+
+///////////// min_valid_abs_kdp ///////////////////////
+//
+// Sets the min valid KDP value.
+//
+// Values less than this are set to 0.
+//
+//
+// Type: double
+//
+
+min_valid_abs_kdp = 0.01;
+
+///////////// check_snr ///////////////////////////////
+//
+// Check the SNR.
+//
+//
+// Type: boolean
+//
+
+check_snr = FALSE;
+
+///////////// snr_threshold ///////////////////////////
+//
+// Sets the threshold for checking SNR (dB).
+//
+// If the SNR drops below this value, KDP will not be computed at this 
+//   gate.
+//
+//
+// Type: double
+//
+
+snr_threshold = -6;
+
+///////////// check_rhohv /////////////////////////////
+//
+// Check the RHOHV.
+//
+//
+// Type: boolean
+//
+
+check_rhohv = TRUE;
+
+///////////// rhohv_threshold /////////////////////////
+//
+// Sets the threshold for checking RHOHV.
+//
+// If the RHOHV drops below this value, KDP will not be computed at this 
+//   gate.
+//
+//
+// Type: double
+//
+
+rhohv_threshold = 0.95;
+
+///////////// check_zdr_sdev //////////////////////////
+//
+// Check the standard deviation of ZDR in range?.
+//
+//
+// Type: boolean
+//
+
+check_zdr_sdev = FALSE;
+
+///////////// zdr_sdev_max ////////////////////////////
+//
+// Sets the threshold for the standard deviation of zdr in range.
+//
+// The sdev of zdr is a good test for clutter. If the sdev is less than 
+//   this value, it is assumed we are in weather. Applies to computation 
+//   of KDP only.
+//
+//
+// Type: double
+//
+
+zdr_sdev_max = 2;
+
+///////////// threshold_for_ZZDR //////////////////////
+//
+// Sets the threshold for computing conditional KDP from Z and ZDR.
+//
+// We can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can 
+//   then compute the conditioned KDP - we call this KDP_COND. To compute 
+//   KDP_COND, we first find the gates over which regular KDP exceeds this 
+//   threshold. Over this run of gates we compute the PHIDP change from 
+//   the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / 
+//   sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, 
+//   we can compute KDP_COND such that the PHIDP change is the same for 
+//   both KDP and KDP_COND.
+//
+//
+// Type: double
+//
+
+threshold_for_ZZDR = 0.25;
+
+///////////// median_filter_len_for_ZZDR //////////////
+//
+// Sets the length of the median filter when computing KDP_ZZDR.
+//
+// The Z and ZDR fields are smoothed with a median filter of this length 
+//   prior to estimating KDP_ZZDR.
+//
+//
+// Type: int
+//
+
+median_filter_len_for_ZZDR = 5;
+
+///////////// debug ///////////////////////////////////
+//
+// Option to print debug messages in KDP computation.
+//
+//
+// Type: boolean
+//
+
+debug = FALSE;
+
+///////////// write_ray_files /////////////////////////
+//
+// Option to write ray files to debug KDP computation.
+//
+//
+// Type: boolean
+//
+
+write_ray_files = FALSE;
+
+///////////// ray_files_dir ///////////////////////////
+//
+// Directory for KDP ray files.
+//
+//
+// Type: string
+//
+
+ray_files_dir = "$(DATA_DIR)/kdp_ray_files";
+
+//======================================================================
+//
+// PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR.
+//
+//======================================================================
+ 
+///////////// specify_coefficients_for_attenuation_correction 
+//
+// Option to specify the coefficients and exponents - see below.
+//
+// If false, the default coefficients will be determined for the radar 
+//   wavelength.
+//
+//
+// Type: boolean
+//
+
+specify_coefficients_for_attenuation_correction = FALSE;
+
+///////////// dbz_attenuation_coefficient /////////////
+//
+// Coefficient for computing DBZ attenuation correction.
+//
+// Default is 0.017. See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+dbz_attenuation_coefficient = 0.017;
+
+///////////// dbz_attenuation_exponent ////////////////
+//
+// Exponent for computing DBZ attenuation correction.
+//
+// Default is 0.84. See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+dbz_attenuation_exponent = 0.84;
+
+///////////// zdr_attenuation_coefficient /////////////
+//
+// Coefficient for computing ZDR attenuation correction.
+//
+// Default is 0.003. See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+zdr_attenuation_coefficient = 0.003;
+
+///////////// zdr_attenuation_exponent ////////////////
+//
+// Exponent for computing ZDR attenuation correction.
+//
+// Default is 1.05. See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+zdr_attenuation_exponent = 1.05;
+
