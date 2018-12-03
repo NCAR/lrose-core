@@ -226,8 +226,9 @@ void Args::_usage(ostream &out)
   out << endl;
   out << "KDP-specific parameters:" << endl;
   out << "   [ -params_kdp ] specify KDP params file path" << endl;
+  out << "     otherwise it is set in the main params file" << endl;
   out << "   [ -print_params_kdp [mode]] print KDP params" << endl;
-  out << "     NOTE - see modes from -print_params above" << endl;
+  out << "     see modes from -print_params above" << endl;
   out << endl;
   
 }
