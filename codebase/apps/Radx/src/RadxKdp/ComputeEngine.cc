@@ -106,12 +106,16 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
   
   RadxRay *derivedRay = new RadxRay;
   derivedRay->copyMetaData(*inputRay);
-
-  // allocate moments arrays for computing derived fields,
+  
+  // allocate input arrays for computing derived fields,
   // and load them up
   
-  _allocMomentsArrays();
-  _loadMomentsArrays(inputRay);
+  _allocInputArrays();
+  _loadInputArrays(inputRay);
+
+  // alloc the derived field arrays
+
+  _allocDerivedArrays();
   
   // compute kdp
   
@@ -131,6 +135,224 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
 
 }
 
+//////////////////////////////////////
+// initialize KDP
+  
+void ComputeEngine::_kdpInit()
+  
+{
+
+  // initialize KDP object
+
+  _kdp.setFromParams(_kdpFiltParams);
+  if (_params.set_max_range) {
+    _kdp.setMaxRangeKm(true, _params.max_range_km);
+  }
+  
+}
+
+////////////////////////////////////////////////
+// compute kdp from phidp, using Bringi's method
+
+void ComputeEngine::_kdpCompute()
+  
+{
+
+  // set up array for range
+  
+  TaArray<double> rangeKm_;
+  double *rangeKm = rangeKm_.alloc(_nGates);
+  double range = _startRangeKm;
+  for (size_t ii = 0; ii < _nGates; ii++, range += _gateSpacingKm) {
+    rangeKm[ii] = range;
+  }
+
+  // compute KDP
+  
+  _kdp.compute(_timeSecs,
+               _nanoSecs / 1.0e9,
+               _elevation,
+               _azimuth,
+               _wavelengthM * 100.0,
+               _nGates, 
+               _startRangeKm,
+               _gateSpacingKm,
+               _snrArray,
+               _dbzArray,
+               _zdrArray,
+               _rhohvArray,
+               _phidpArray,
+               missingDbl);
+
+  const double *kdp = _kdp.getKdp();
+  const double *kdpZZdr = _kdp.getKdpZZdr();
+  const double *kdpCond = _kdp.getKdpCond();
+  
+  // put KDP into fields objects
+  
+  for (size_t ii = 0; ii < _nGates; ii++) {
+    if (kdp[ii] == NAN) {
+      _kdpArray[ii] = missingDbl;
+    } else {
+      _kdpArray[ii] = kdp[ii];
+    }
+    _kdpZZdrArray[ii] = kdpZZdr[ii];
+    _kdpCondArray[ii] = kdpCond[ii];
+  }
+
+}
+
+//////////////////////////////////////
+// alloc input arrays
+  
+void ComputeEngine::_allocInputArrays()
+  
+{
+
+  _snrArray = _snrArray_.alloc(_nGates);
+  _dbzArray = _dbzArray_.alloc(_nGates);
+  _zdrArray = _zdrArray_.alloc(_nGates);
+  _rhohvArray = _rhohvArray_.alloc(_nGates);
+  _phidpArray = _phidpArray_.alloc(_nGates);
+
+}
+
+//////////////////////////////////////
+// alloc derived arrays
+  
+void ComputeEngine::_allocDerivedArrays()
+  
+{
+  
+  _kdpArray = _kdpArray_.alloc(_nGates);
+  _kdpZZdrArray = _kdpZZdrArray_.alloc(_nGates);
+  _kdpCondArray = _kdpCondArray_.alloc(_nGates);
+
+}
+
+/////////////////////////////////////////////////////
+// load input arrays ready for KDP
+  
+int ComputeEngine::_loadInputArrays(RadxRay *inputRay)
+  
+{
+  
+  if (_loadFieldArray(inputRay, _params.DBZ_field_name,
+                      true, _dbzArray)) {
+    return -1;
+  }
+
+  if (_params.SNR_available) {
+    if (_loadFieldArray(inputRay, _params.SNR_field_name,
+                        true, _snrArray)) {
+      return -1;
+    }
+  } else {
+    _computeSnrFromDbz();
+  }
+  
+  if (_loadFieldArray(inputRay, _params.ZDR_field_name,
+                      true, _zdrArray)) {
+    return -1;
+  }
+
+  if (_loadFieldArray(inputRay, _params.PHIDP_field_name,
+                      true, _phidpArray)) {
+    return -1;
+  }
+  
+  if (_loadFieldArray(inputRay, _params.RHOHV_field_name,
+                      true, _rhohvArray)) {
+    return -1;
+  }
+  
+  return 0;
+  
+}
+
+////////////////////////////////////////
+// load a field array based on the name
+
+int ComputeEngine::_loadFieldArray(RadxRay *inputRay,
+                                   const string &fieldName,
+                                   bool required,
+                                   double *array)
+
+{
+  
+  RadxField *field = inputRay->getField(fieldName);
+  if (field == NULL) {
+
+    if (!required) {
+      for (size_t igate = 0; igate < _nGates; igate++) {
+        array[igate] = missingDbl;
+      }
+      return -1;
+    }
+
+    pthread_mutex_lock(&_debugPrintMutex);
+    cerr << "ERROR - ComputeEngine::_getField" << endl;
+    cerr << "  Cannot find field in ray: " << fieldName<< endl;
+    cerr << "  El, az: "
+         << inputRay->getElevationDeg() << ", "
+         << inputRay->getAzimuthDeg() << endl;
+    cerr << "  N fields in ray: " << inputRay->getNFields() << endl;
+    pthread_mutex_unlock(&_debugPrintMutex);
+    return -1;
+  }
+
+  // Set array values
+  // fields are already fl32
+
+  const Radx::fl32 *vals = field->getDataFl32();
+  double missingFl32 = field->getMissingFl32();
+  for (size_t igate = 0; igate < _nGates; igate++, vals++) {
+    Radx::fl32 val = *vals;
+    if (val == missingFl32) {
+      array[igate] = missingDbl;
+    } else {
+      array[igate] = val;
+    }
+  }
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////////////////
+// Compute the SNR field from the DBZ field
+
+void ComputeEngine::_computeSnrFromDbz()
+
+{
+
+  // compute noise at each gate
+
+  TaArray<double> noiseDbz_;
+  double *noiseDbz = noiseDbz_.alloc(_nGates);
+  double range = _startRangeKm;
+  if (range == 0) {
+    range = _gateSpacingKm / 10.0;
+  }
+  for (size_t igate = 0; igate < _nGates; igate++, range += _gateSpacingKm) {
+    noiseDbz[igate] = _params.noise_dbz_at_100km +
+      20.0 * (log10(range) - log10(100.0));
+  }
+
+  // compute snr from dbz
+  
+  double *snr = _snrArray;
+  const double *dbz = _dbzArray;
+  for (size_t igate = 0; igate < _nGates; igate++, snr++, dbz++) {
+    if (*dbz != missingDbl) {
+      *snr = *dbz - noiseDbz[igate];
+    } else {
+      *snr = -20;
+    }
+  }
+
+}
+
 ///////////////////////////////
 // load up fields in output ray
 
@@ -141,24 +363,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   // initialize array pointers
 
-  const double *dbzForKdp = _kdp.getDbz();
-  const double *zdrForKdp = _kdp.getZdr();
-  const double *rhohvForKdp = _kdp.getRhohv();
-  const double *snrForKdp = _kdp.getSnr();
-  const double *zdrSdevForKdp = _kdp.getZdrSdev();
-  const bool *validFlagForKdp = _kdp.getValidForKdp();
-
-  const double *phidpForKdp = _kdp.getPhidp();
-  const double *phidpMeanForKdp = _kdp.getPhidpMean();
-  const double *phidpMeanUnfoldForKdp = _kdp.getPhidpMeanUnfold();
-  const double *phidpSdevForKdp = _kdp.getPhidpSdev();
-  const double *phidpJitterForKdp = _kdp.getPhidpJitter();
-  const double *phidpUnfoldForKdp = _kdp.getPhidpUnfold();
-  const double *phidpFiltForKdp = _kdp.getPhidpFilt();
-  const double *phidpCondForKdp = _kdp.getPhidpCond();
-  const double *phidpCondFiltForKdp = _kdp.getPhidpCondFilt();
   const double *psob = _kdp.getPsob();
-  
   const double *dbzAtten = _kdp.getDbzAttenCorr();
   const double *zdrAtten = _kdp.getZdrAttenCorr();
   
@@ -258,10 +463,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           }
           break;
 
-        case Params::ZDP:
-          *datp = _zdpArray[igate];
-          break;
-          
         case Params::PHIDP_FOR_KDP:
           *datp = phidpForKdp[igate];
           break;
@@ -342,716 +543,173 @@ void ComputeEngine::_addDebugFields(RadxRay *derivedRay)
 
 {
 
-
+  _addField(derivedRay,
+            "DBZ_FOR_KDP", "dBZ",
+            "dbz_filtered_for_kdp_computations",
+            "equivalent_reflectivity_factor",
+            _kdp.getDbz());
+  
+  _addField(derivedRay,
+            "ZNR_FOR_KDP", "dB",
+            "znr_filtered_for_kdp_computations",
+            "signal_to_noise_ratio",
+            _kdp.getSnr());
+  
+  _addField(derivedRay,
+            "ZDR_FOR_KDP", "dB",
+            "zdr_filtered_for_kdp_computations",
+            "differential_reflectivity_hv",
+            _kdp.getZdr());
+  
+  _addField(derivedRay,
+            "ZDR_SDEV_FOR_KDP", "dB",
+            "standard_deviation_of_zdr_for_kdp_computations",
+            "differential_reflectivity_hv",
+            _kdp.getZdrSdev());
+  
+  _addField(derivedRay,
+            "RHOHV_FOR_KDP", "",
+            "rhohv_filtered_for_kdp_computations",
+            "cross_correlation_hv",
+            _kdp.getRhohv());
+  
+  _addField(derivedRay,
+            "VALID_FLAG_FOR_KDP", "",
+            "valid_flag_after_kdp_computations",
+            "valid_flag_for_kdp",
+            _kdp.getValidForKdp());
+  
+  _addField(derivedRay,
+            "PHIDP_FOR_KDP", "deg",
+            "phidp_for_kdp_computations",
+            "differential_phase_hv",
+            _kdp.getPhidp());
+  
+  _addField(derivedRay,
+            "PHIDP_MEAN", "deg",
+            "phidp_mean_for_kdp_computations",
+            "differential_phase_hv",
+            _kdp.getPhidpMean());
+  
+  _addField(derivedRay,
+            "PHIDP_MEAN_UNFOLD", "deg",
+            "phidp_mean_unfold_for_kdp_computations",
+            "differential_phase_hv",
+            _kdp.getPhidpMeanUnfold());
+  
+  _addField(derivedRay,
+            "PHIDP_SDEV", "deg",
+            "phidp_sdev_for_kdp_computations",
+            "differential_phase_hv",
+            _kdp.getPhidpSdev());
+  
+  _addField(derivedRay,
+            "PHIDP_JITTER", "deg",
+            "phidp_jitter_for_kdp_computations",
+            "differential_phase_hv",
+            _kdp.getPhidpJitter());
+  
+  _addField(derivedRay,
+            "PHIDP_UNFOLD", "deg",
+            "phidp_unfold_for_kdp_computations",
+            "differential_phase_hv",
+            _kdp.getPhidpUnfold());
+  
+  _addField(derivedRay,
+            "PHIDP_FILT", "deg",
+            "phidp_filtered_for_kdp_computations",
+            "differential_phase_hv",
+            _kdp.getPhidpFilt());
+  
+  _addField(derivedRay,
+            "PHIDP_COND", "deg",
+            "phidp_cond_for_kdp_computations",
+            "differential_phase_hv",
+            _kdp.getPhidpCond());
+  
+  _addField(derivedRay,
+            "PHIDP_FOR_KDP", "deg",
+            "phidp_filtered_for_kdp_computations",
+            "differential_phase_hv",
+            _kdp.getPhidpCondFilt());
+  
 }
   
 //////////////////////////////////////
-// initialize KDP
+// add a field to the derived ray
   
-void ComputeEngine::_kdpInit()
-  
+void ComputeEngine::_addField(RadxRay *derivedRay,
+                              const string &name,
+                              const string &units,
+                              const string &longName,
+                              const string standardName,
+                              const double *array64)
+
 {
 
-  // initialize KDP object
-
-  _kdp.setFromParams(_kdpFiltParams);
-  if (_params.set_max_range) {
-    _kdp.setMaxRangeKm(true, _params.max_range_km);
-  }
+  // load up data as fl32
   
-}
-
-////////////////////////////////////////////////
-// compute kdp from phidp, using Bringi's method
-
-void ComputeEngine::_kdpCompute()
-  
-{
-
-  // set up array for range
-  
-  TaArray<double> rangeKm_;
-  double *rangeKm = rangeKm_.alloc(_nGates);
-  double range = _startRangeKm;
-  for (size_t ii = 0; ii < _nGates; ii++, range += _gateSpacingKm) {
-    rangeKm[ii] = range;
-  }
-
-  // compute KDP
-  
-  _kdp.compute(_timeSecs,
-               _nanoSecs / 1.0e9,
-               _elevation,
-               _azimuth,
-               _wavelengthM * 100.0,
-               _nGates, 
-               _startRangeKm,
-               _gateSpacingKm,
-               _snrArray,
-               _dbzArray,
-               _zdrArray,
-               _rhohvArray,
-               _phidpArray,
-               missingDbl);
-
-  const double *kdp = _kdp.getKdp();
-  const double *kdpZZdr = _kdp.getKdpZZdr();
-  const double *kdpCond = _kdp.getKdpCond();
-  
-  // put KDP into fields objects
-  
-  for (size_t ii = 0; ii < _nGates; ii++) {
-    if (kdp[ii] == NAN) {
-      _kdpArray[ii] = missingDbl;
-    } else {
-      _kdpArray[ii] = kdp[ii];
-    }
-    _kdpZZdrArray[ii] = kdpZZdr[ii];
-    _kdpCondArray[ii] = kdpCond[ii];
-  }
-
-}
-
-//////////////////////////////////////
-// alloc moments arrays
-  
-void ComputeEngine::_allocMomentsArrays()
-  
-{
-
-  _snrArray = _snrArray_.alloc(_nGates);
-  _dbzArray = _dbzArray_.alloc(_nGates);
-  _velArray = _velArray_.alloc(_nGates);
-  _zdrArray = _zdrArray_.alloc(_nGates);
-  _zdrmArray = _zdrmArray_.alloc(_nGates);
-  _zdpArray = _zdpArray_.alloc(_nGates);
-  _kdpArray = _kdpArray_.alloc(_nGates);
-  _kdpBringiArray = _kdpBringiArray_.alloc(_nGates);
-  _kdpZZdrArray = _kdpZZdrArray_.alloc(_nGates);
-  _kdpCondArray = _kdpCondArray_.alloc(_nGates);
-  _ldrArray = _ldrArray_.alloc(_nGates);
-  _rhohvArray = _rhohvArray_.alloc(_nGates);
-  _rhohvNncArray = _rhohvNncArray_.alloc(_nGates);
-  _phidpArray = _phidpArray_.alloc(_nGates);
-  _rhoVxHxArray = _rhoVxHxArray_.alloc(_nGates);
-  _tempForPid = _tempForPid_.alloc(_nGates);
-}
-
-//////////////////////////////////////
-// alloc arrays for PID
-  
-void ComputeEngine::_allocPidArrays()
-  
-{
-
-  _pidArray = _pidArray_.alloc(_nGates);
-  _pidArray2 = _pidArray2_.alloc(_nGates);
-  _pidInterest = _pidInterest_.alloc(_nGates);
-  _pidInterest2 = _pidInterest2_.alloc(_nGates);
-
-}
-
-//////////////////////////////////////
-// alloc arrays for PRECIP
-  
-void ComputeEngine::_allocPrecipArrays()
-  
-{
-
-  _rateZ = _rateZ_.alloc(_nGates);
-  _rateZSnow = _rateZSnow_.alloc(_nGates);
-  _rateZZdr = _rateZZdr_.alloc(_nGates);
-  _rateKdp = _rateKdp_.alloc(_nGates);
-  _rateKdpZdr = _rateKdpZdr_.alloc(_nGates);
-  _rateHybrid = _rateHybrid_.alloc(_nGates);
-  _ratePid = _ratePid_.alloc(_nGates);
-  _rateHidro = _rateHidro_.alloc(_nGates);
-  _rateBringi = _rateBringi_.alloc(_nGates);
-
-}
-
-//////////////////////////////////////
-// alloc zdr bias arrays
-  
-void ComputeEngine::_allocZdrBiasArrays()
-  
-{
-
-  _zdrmInIce = _zdrmInIce_.alloc(_nGates);
-  _zdrmInBragg = _zdrmInBragg_.alloc(_nGates);
-
-  _zdrInIce = _zdrInIce_.alloc(_nGates);
-  _zdrInBragg = _zdrInBragg_.alloc(_nGates);
-
-  _zdrFlagInIce = _zdrFlagInIce_.alloc(_nGates);
-  _zdrFlagInBragg = _zdrFlagInBragg_.alloc(_nGates);
-
-  memset(_zdrFlagInIce, 0, _nGates * sizeof(int));
-  memset(_zdrFlagInBragg, 0, _nGates * sizeof(int));
-
-}
-
-//////////////////////////////////////
-// alloc self consistency arrays
-  
-void ComputeEngine::_allocSelfConArrays()
-  
-{
-
-  _kdpFromFilt = _kdpFromFilt_.alloc(_nGates);
-  memset(_kdpFromFilt, 0, _nGates * sizeof(int));
-
-  _kdpEst = _kdpEst_.alloc(_nGates);
-  memset(_kdpEst, 0, _nGates * sizeof(int));
-
-}
-
-/////////////////////////////////////////////////////
-// load momemts arrays ready for KDP, PID and PRECIP
-  
-int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
-  
-{
-  
-  if (_loadFieldArray(inputRay, _params.DBZ_field_name,
-                      true, _dbzArray)) {
-    return -1;
-  }
-
-  if (_params.SNR_available) {
-    if (_loadFieldArray(inputRay, _params.SNR_field_name,
-                        true, _snrArray)) {
-      return -1;
-    }
-  } else {
-    _computeSnrFromDbz();
-  }
-  
-  if (_loadFieldArray(inputRay, _params.ZDR_field_name,
-                      true, _zdrArray)) {
-    return -1;
-  }
-
-  if (_params.estimate_zdr_bias_in_ice ||
-      _params.estimate_zdr_bias_in_bragg ||
-      _params.estimate_z_bias_using_self_consistency) {
-    if (_loadFieldArray(inputRay, _params.VEL_field_name,
-                        true, _velArray)) {
-      return -1;
-    }
-    if (_loadFieldArray(inputRay, _params.ZDRM_field_name,
-                        true, _zdrmArray)) {
-      return -1;
-    }
-    if (_loadFieldArray(inputRay, _params.RHOHV_NNC_field_name,
-                        true, _rhohvNncArray)) {
-      return -1;
-    }
-  }
-
-  if (_loadFieldArray(inputRay, _params.PHIDP_field_name,
-                      true, _phidpArray)) {
-    return -1;
-  }
-  
-  if (_loadFieldArray(inputRay, _params.RHOHV_field_name,
-                      true, _rhohvArray)) {
-    return -1;
-  }
-  
-  if (_params.LDR_available) {
-    if (_loadFieldArray(inputRay, _params.LDR_field_name,
-                        true, _ldrArray)) {
-      return -1;
-    }
-  } else {
-    for (size_t igate = 0; igate < _nGates; igate++) {
-      _ldrArray[igate] = missingDbl;
-    }
-  }
-  
-  if (_params.RHO_VXHX_available) {
-    if (_loadFieldArray(inputRay, _params.RHO_VXHX_field_name,
-                        true, _rhoVxHxArray)) {
-      return -1;
-    }
-  } else {
-    for (size_t igate = 0; igate < _nGates; igate++) {
-      _rhoVxHxArray[igate] = missingDbl;
-    }
-  }
-  
-  if (_params.KDP_available) {
-    if (_loadFieldArray(inputRay, _params.KDP_field_name,
-                        true, _kdpArray)) {
-      return -1;
-    }
-  } else {
-    for (size_t igate = 0; igate < _nGates; igate++) {
-      _kdpArray[igate] = missingDbl;
-    }
-  }
-
-  _loadFieldArray(inputRay, "temperature", true, _tempForPid);
-
-  return 0;
-  
-}
-
-/////////////////////////////////////////////////////
-// compute zdp from dbz and zdr
-//
-// See Bringi and Chandrasekar, p438.
-  
-void ComputeEngine::_computeZdpArray()
-  
-{
+  TaArray<Radx::fl32> data32_;
+  Radx::fl32 *data32 = data32_.alloc(_nGates);
   
   for (size_t igate = 0; igate < _nGates; igate++) {
-
-    double dbz = _dbzArray[igate];
-    double zh = pow(10.0, dbz / 10.0);
-    double zdr = _zdrArray[igate];
-    double zdrLinear = pow(10.0, zdr / 10.0);
-    double zv = zh / zdrLinear;
-    double zdp = missingDbl;
-    if (zh > zv) {
-      zdp = 10.0 * log10(zh - zv);
-    }
-    _zdpArray[igate] = zdp;
-
-  } // igate
-
-}
-
-////////////////////////////////////////
-// load a field array based on the name
-
-int ComputeEngine::_loadFieldArray(RadxRay *inputRay,
-                                   const string &fieldName,
-                                   bool required,
-                                   double *array)
-
-{
-  
-  RadxField *field = inputRay->getField(fieldName);
-  if (field == NULL) {
-
-    if (!required) {
-      for (size_t igate = 0; igate < _nGates; igate++) {
-        array[igate] = missingDbl;
-      }
-      return -1;
-    }
-
-    pthread_mutex_lock(&_debugPrintMutex);
-    cerr << "ERROR - ComputeEngine::_getField" << endl;
-    cerr << "  Cannot find field in ray: " << fieldName<< endl;
-    cerr << "  El, az: "
-         << inputRay->getElevationDeg() << ", "
-         << inputRay->getAzimuthDeg() << endl;
-    cerr << "  N fields in ray: " << inputRay->getNFields() << endl;
-    pthread_mutex_unlock(&_debugPrintMutex);
-    return -1;
-  }
-
-  // Set array values
-  // fields are already fl32
-
-  const Radx::fl32 *vals = field->getDataFl32();
-  double missingFl32 = field->getMissingFl32();
-  for (size_t igate = 0; igate < _nGates; igate++, vals++) {
-    Radx::fl32 val = *vals;
-    if (val == missingFl32) {
-      array[igate] = missingDbl;
+    if (array64[igate] == missingDbl) {
+      data32[igate] = Radx::missingFl32;
     } else {
-      array[igate] = val;
+      data32[igate] = array64[igate];
     }
   }
+    
+  // create field
   
-  return 0;
+  RadxField *field = new RadxField(name, units);
+  field->setLongName(longName);
+  field->setStandardName(standardName);
+  field->setTypeFl32(Radx::missingFl32);
+  field->addDataFl32(_nGates, data32);
+  field->copyRangeGeom(*derivedRay);
   
+  // add to ray
+  
+  derivedRay->addField(field);
+
 }
 
-//////////////////////////////////////////////////////////////
-// Compute the SNR field from the DBZ field
-
-void ComputeEngine::_computeSnrFromDbz()
+void ComputeEngine::_addField(RadxRay *derivedRay,
+                              const string &name,
+                              const string &units,
+                              const string &longName,
+                              const string standardName,
+                              const bool *arrayBool)
 
 {
 
-  // compute noise at each gate
-
-  TaArray<double> noiseDbz_;
-  double *noiseDbz = noiseDbz_.alloc(_nGates);
-  double range = _startRangeKm;
-  if (range == 0) {
-    range = _gateSpacingKm / 10.0;
-  }
-  for (size_t igate = 0; igate < _nGates; igate++, range += _gateSpacingKm) {
-    noiseDbz[igate] = _params.noise_dbz_at_100km +
-      20.0 * (log10(range) - log10(100.0));
-  }
-
-  // compute snr from dbz
+  // load up data as fl32
   
-  double *snr = _snrArray;
-  const double *dbz = _dbzArray;
-  for (size_t igate = 0; igate < _nGates; igate++, snr++, dbz++) {
-    if (*dbz != missingDbl) {
-      *snr = *dbz - noiseDbz[igate];
+  TaArray<Radx::fl32> data32_;
+  Radx::fl32 *data32 = data32_.alloc(_nGates);
+  
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    if (arrayBool[igate]) {
+      data32[igate] = 1.0;
     } else {
-      *snr = -20;
+      data32[igate] = 0.0;
     }
   }
+    
+  // create field
+  
+  RadxField *field = new RadxField(name, units);
+  field->setLongName(longName);
+  field->setStandardName(standardName);
+  field->setTypeFl32(Radx::missingFl32);
+  field->addDataFl32(_nGates, data32);
+  field->copyRangeGeom(*derivedRay);
+  
+  // add to ray
+  
+  derivedRay->addField(field);
 
 }
 
-//////////////////////////////////////////////////////////////
-// Censor gates with non-precip particle types
-
-void ComputeEngine::_censorNonPrecip(RadxField &field)
-
-{
-
-  const int *pid = _pid.getPid();
-  for (size_t ii = 0; ii < _nGates; ii++) {
-    int ptype = pid[ii];
-    if (ptype == NcarParticleId::FLYING_INSECTS ||
-        ptype == NcarParticleId::SECOND_TRIP ||
-        ptype == NcarParticleId::GROUND_CLUTTER ||
-        ptype < NcarParticleId::CLOUD ||
-        ptype > NcarParticleId::SATURATED_SNR) {
-      field.setGateToMissing(ii);
-    }
-  } // ii
-
-}
-
-//////////////////////////////////////////////////////////
-// Accumulate stats for ZDR bias from irregular ice phase
-  
-void ComputeEngine::_accumForZdrBiasInIce()
-  
-{
-
-  // initialize
-
-  for (size_t igate = 0; igate < _nGates; igate++) {
-    _zdrFlagInIce[igate] = 0;
-    _zdrInIce[igate] = missingDbl;
-    _zdrmInIce[igate] = missingDbl;
-  }
-
-  // check elevation angle
-
-  if (_elevation < _params.zdr_bias_ice_min_elevation_deg ||
-      _elevation > _params.zdr_bias_ice_max_elevation_deg) {
-    return;
-  }
-
-  // load up valid flag field along the ray
-
-  const double *phidpAccumArray = _kdp.getPhidpAccumFilt();
-
-  double rangeKm = _startRangeKm;
-  for (size_t igate = 0; igate < _nGates; igate++, rangeKm += _gateSpacingKm) {
-
-    // initially clear flag
-    
-    _zdrFlagInIce[igate] = 0;
-    
-    // check conditions
-
-    if (rangeKm < _params.zdr_bias_ice_min_range_km ||
-        rangeKm > _params.zdr_bias_ice_max_range_km) {
-      continue;
-    }
-    
-    double zdr = _zdrArray[igate];
-    if (zdr == missingDbl ||
-        fabs(zdr) > _params.zdr_bias_max_abs_zdr) {
-      continue;
-    }
-
-    double zdrm = _zdrmArray[igate];
-    if (zdrm == missingDbl ||
-        fabs(zdrm) > _params.zdr_bias_max_abs_zdrm) {
-      continue;
-    }
-
-    double rhohvNnc = _rhohvNncArray[igate];
-    if (rhohvNnc == missingDbl ||
-        rhohvNnc < _params.zdr_bias_min_rhohv_nnc) {
-      continue;
-    }
-    
-    double vel = _velArray[igate];
-    if (vel == missingDbl ||
-        fabs(vel) < _params.zdr_bias_min_abs_vel) {
-      continue;
-    }
-
-    double phidpAccum = phidpAccumArray[igate];
-    if (phidpAccum == missingDbl ||
-        phidpAccum > _params.zdr_bias_max_phidp_accum) {
-      continue;
-    }
-
-    double kdp = _kdpArray[igate];
-    if (kdp == missingDbl ||
-        fabs(kdp) > _params.zdr_bias_max_abs_kdp) {
-      continue;
-    }
-
-    double dbz = _dbzArray[igate];
-    if (dbz == missingDbl ||
-        dbz < _params.zdr_bias_ice_min_dbz ||
-        dbz > _params.zdr_bias_ice_max_dbz) {
-      continue;
-    }
-    
-    double snr = _snrArray[igate];
-    if (snr == missingDbl ||
-        snr < _params.zdr_bias_ice_min_snr ||
-        snr > _params.zdr_bias_ice_max_snr) {
-      continue;
-    }
-
-    double rhoVxHx = _rhoVxHxArray[igate];
-    if (rhoVxHx != missingDbl) {
-      if (rhoVxHx < _params.zdr_bias_ice_min_rho_vxhx ||
-          rhoVxHx > _params.zdr_bias_ice_max_rho_vxhx) {
-        continue;
-      }
-    }
-
-    double tempForPid = _tempForPid[igate];
-    if (tempForPid == missingDbl ||
-        tempForPid < _params.zdr_bias_ice_min_temp_c ||
-        tempForPid > _params.zdr_bias_ice_max_temp_c) {
-      continue;
-    }
-
-    int pid = _pidArray[igate];
-    bool pidGood = false;
-    for (int ii = 0; ii < _params.zdr_bias_ice_pid_types_n; ii++) {
-      if (pid == _params._zdr_bias_ice_pid_types[ii]) {
-        pidGood = true;
-        break;
-      }
-    }
-    if (!pidGood) {
-      continue;
-    }
-
-    // passed all tests, so set flag
-
-    _zdrFlagInIce[igate] = 1;
-
-  } // igate
-  
-  // now ensure we have runs that meet or exceed the min length
-
-  int count = 0;
-  int start = 0;
-  for (int igate = 0; igate < (int) _nGates; igate++) {
-    if (_zdrFlagInIce[igate] == 1) {
-      // accumulate run
-      count++;
-    } else {
-      if (count < _params.zdr_bias_ice_min_gate_run) {
-        // run too short, clear flag
-        for (int jgate = start; jgate < start + count; jgate++) {
-          _zdrFlagInIce[jgate] = 0;
-        } // jgate
-      }
-      count = 0;
-      start = igate + 1;
-    }
-  } // igate
-
-  // sum up for ZDR bias
-
-  for (size_t igate = 0; igate < _nGates; igate++) {
-    if (_zdrFlagInIce[igate] == 1) {
-      double zdr = _zdrArray[igate];
-      double zdrm = _zdrmArray[igate];
-      _zdrInIce[igate] = zdr;
-      _zdrInIceResults.push_back(zdr);
-      _zdrmInIce[igate] = zdrm;
-      _zdrmInIceResults.push_back(zdrm);
-      _zdrInIceElev.push_back(_elevation);
-      // cerr << "IIII ice el, az, range, zdrm: "
-      //      << _elevation << ", "
-      //      << _azimuth << ", "
-      //      << igate * _gateSpacingKm + _startRangeKm << ", "
-      //      << zdrm << endl;
-    } else {
-      _zdrInIce[igate] = missingDbl;
-      _zdrmInIce[igate] = missingDbl;
-    }
-  }
-
-}
-
-//////////////////////////////////////////////////////////////
-// Accumulate stats for ZDR bias from Bragg regions
-  
-void ComputeEngine::_accumForZdrBiasInBragg()
-  
-{
-
-  // initialize
-
-  for (size_t igate = 0; igate < _nGates; igate++) {
-    _zdrFlagInBragg[igate] = 0;
-    _zdrInBragg[igate] = missingDbl;
-    _zdrmInBragg[igate] = missingDbl;
-  }
-
-  // check elevation angle
-
-  if (_elevation < _params.zdr_bias_bragg_min_elevation_deg || 
-      _elevation > _params.zdr_bias_bragg_max_elevation_deg) {
-    return;
-  }
-
-  // load up valid flag field along the ray
-
-  const double *phidpAccumArray = _kdp.getPhidpAccumFilt();
-
-  double rangeKm = _startRangeKm;
-
-  for (size_t igate = 0; igate < _nGates; igate++, rangeKm += _gateSpacingKm) {
-    
-    _zdrFlagInBragg[igate] = 0;
-
-    if (rangeKm < _params.zdr_bias_bragg_min_range_km ||
-        rangeKm > _params.zdr_bias_bragg_max_range_km) {
-      continue;
-    }
-    
-    double zdr = _zdrArray[igate];
-    if (zdr == missingDbl ||
-        fabs(zdr) > _params.zdr_bias_max_abs_zdr) {
-      continue;
-    }
-
-    double zdrm = _zdrmArray[igate];
-    if (zdrm == missingDbl ||
-        fabs(zdrm) > _params.zdr_bias_max_abs_zdrm) {
-      continue;
-    }
-
-    double rhohvNnc = _rhohvNncArray[igate];
-    if (rhohvNnc == missingDbl ||
-        rhohvNnc < _params.zdr_bias_min_rhohv_nnc) {
-      continue;
-    }
-    
-    double vel = _velArray[igate];
-    if (vel == missingDbl ||
-        fabs(vel) < _params.zdr_bias_min_abs_vel) {
-      continue;
-    }
-
-    double kdp = _kdpArray[igate];
-    if (kdp == missingDbl ||
-        fabs(kdp) > _params.zdr_bias_max_abs_kdp) {
-      continue;
-    }
-
-    double phidpAccum = phidpAccumArray[igate];
-    if (phidpAccum == missingDbl ||
-        phidpAccum > _params.zdr_bias_max_phidp_accum) {
-      continue;
-    }
-
-    double dbz = _dbzArray[igate];
-    if (dbz == missingDbl ||
-        dbz < _params.zdr_bias_bragg_min_dbz ||
-        dbz > _params.zdr_bias_bragg_max_dbz) {
-      continue;
-    }
-    
-    double snr = _snrArray[igate];
-    if (snr == missingDbl ||
-        snr < _params.zdr_bias_bragg_min_snr ||
-        snr > _params.zdr_bias_bragg_max_snr) {
-      continue;
-    }
-
-    double rhoVxHx = _rhoVxHxArray[igate];
-    if (rhoVxHx != missingDbl) {
-      if (rhoVxHx < _params.zdr_bias_bragg_min_rho_vxhx ||
-          rhoVxHx > _params.zdr_bias_bragg_max_rho_vxhx) {
-        continue;
-      }
-    }
-
-    double tempForPid = _tempForPid[igate];
-    if (tempForPid == missingDbl ||
-        tempForPid < _params.zdr_bias_bragg_min_temp_c ||
-        tempForPid > _params.zdr_bias_bragg_max_temp_c) {
-      continue;
-    }
-
-    if (_params.zdr_bias_bragg_check_pid) {
-      int pid = _pidArray[igate];
-      bool pidGood = false;
-      for (int ii = 0; ii < _params.zdr_bias_bragg_pid_types_n; ii++) {
-        if (pid == _params._zdr_bias_bragg_pid_types[ii]) {
-          pidGood = true;
-          break;
-        }
-      }
-      if (!pidGood) {
-        continue;
-      }
-    }
-
-    // passed all tests, set flag
-
-    _zdrFlagInBragg[igate] = 1;
-
-  } // igate
-  
-  // now ensure we have runs that meet or exceed the min length
-  
-  int count = 0;
-  int start = 0;
-  for (size_t igate = 0; igate < _nGates; igate++) {
-    if (_zdrFlagInBragg[igate] == 1) {
-      // accumulate run
-      count++;
-    } else {
-      if (count < _params.zdr_bias_bragg_min_gate_run) {
-        // run too short, clear flag
-        for (int jgate = start; jgate < start + count; jgate++) {
-          _zdrFlagInBragg[jgate] = 0;
-        } // jgate
-      }
-      count = 0;
-      start = igate + 1;
-    }
-  } // igate
-
-  // sum up for ZDR bias
-
-  for (size_t igate = 0; igate < _nGates; igate++) {
-    if (_zdrFlagInBragg[igate] == 1) {
-      double zdr = _zdrArray[igate];
-      double zdrm = _zdrmArray[igate];
-      _zdrInBragg[igate] = zdr;
-      _zdrmInBragg[igate] = zdrm;
-      _zdrInBraggResults.push_back(zdr);
-      _zdrmInBraggResults.push_back(zdrm);
-    } else {
-      _zdrInBragg[igate] = missingDbl;
-      _zdrmInBragg[igate] = missingDbl;
-    }
-  }
-
-}
 

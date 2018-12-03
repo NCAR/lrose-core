@@ -77,56 +77,57 @@ protected:
 private:
 
   static const double missingDbl;
+  
+  // parameters
+
   const Params &_params;
   const KdpFiltParams &_kdpFiltParams;
-  int _id;
 
+  int _id; // thread ID
+  
   // current ray properties
   
   time_t _timeSecs;
   double _nanoSecs;
   double _azimuth;
   double _elevation;
-
+  
   // radar properties
 
   double _wavelengthM;
 
-  // moments field data
+  // geometry
   
   size_t _nGates;
   double _startRangeKm, _gateSpacingKm;
   
-  // input arrays for moments
+  // input arrays
 
   RadxArray<double> _snrArray_;
   RadxArray<double> _dbzArray_;
   RadxArray<double> _zdrArray_;
-  RadxArray<double> _zdpArray_;
-  RadxArray<double> _kdpArray_;
-  RadxArray<double> _kdpZZdrArray_;
-  RadxArray<double> _kdpCondArray_;
-  RadxArray<double> _kdpConstrainedArray_;
-  RadxArray<double> _kdpWithPsobArray_;
   RadxArray<double> _rhohvArray_;
   RadxArray<double> _phidpArray_;
   
   double *_snrArray;
   double *_dbzArray;
   double *_zdrArray;
-  double *_zdpArray;
-  double *_kdpArray;
-  double *_kdpZZdrArray;
-  double *_kdpCondArray;
   double *_rhohvArray;
   double *_phidpArray;
 
-  // kdp
+  // derived arrays
 
+  RadxArray<double> _kdpArray_;
+  RadxArray<double> _kdpZZdrArray_;
+  RadxArray<double> _kdpCondArray_;
+
+  double *_kdpArray;
+  double *_kdpZZdrArray;
+  double *_kdpCondArray;
+
+  // computing kdp
+  
   KdpFilt _kdp;
-
-  RadxArray<double> _kdpFromFilt_;
-  double *_kdpFromFilt;
 
   // debug printing
 
@@ -134,26 +135,41 @@ private:
 
   // private methods
   
-  const RadxField *_getField(const RadxRay *inputRay,
-                             const string &fieldName);
-  
-  void _loadOutputFields(RadxRay *inputRay,
-                         RadxRay *derivedRay);
-    
-  void _addDebugFields(RadxRay *derivedRay);
-
   void _kdpInit();
   void _kdpCompute();
 
-  void _allocMomentsArrays();
+  void _allocInputArrays();
+  void _allocDerivedArrays();
+  
+  int _loadInputArrays(RadxRay *inputRay);
 
-  int _loadMomentsArrays(RadxRay *inputRay);
   int _loadFieldArray(RadxRay *inputRay,
                       const string &fieldName,
                       bool required,
                       double *array);
 
   void _computeSnrFromDbz();
+
+  void _loadOutputFields(RadxRay *inputRay,
+                         RadxRay *derivedRay);
+  
+  void _addDebugFields(RadxRay *derivedRay);
+
+  void _addField(RadxRay *derivedRay,
+                 const string &name,
+                 const string &units,
+                 const string &longName,
+                 const string standardName,
+                 const double *array64);
+
+
+  void _addField(RadxRay *derivedRay,
+                 const string &name,
+                 const string &units,
+                 const string &longName,
+                 const string standardName,
+                 const bool *arrayBool);
+
 
 };
 
