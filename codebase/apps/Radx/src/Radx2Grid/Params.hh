@@ -741,8 +741,6 @@ public:
 
   char* instance;
 
-  tdrp_bool_t register_with_procmap;
-
   int procmap_register_interval;
 
   tdrp_bool_t free_memory_between_files;
@@ -821,7 +819,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[204];
+  mutable TDRPtable _table[203];
 
   const char *_className;
 

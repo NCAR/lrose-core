@@ -2783,21 +2783,9 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("instance");
     tt->descr = tdrpStrDup("Program instance for process registration.");
-    tt->help = tdrpStrDup("This application registers with procmap. This is the instance used for registration.");
+    tt->help = tdrpStrDup("REALTIME mode only. This application registers with procmap. This is the instance used for registration.");
     tt->val_offset = (char *) &instance - &_start_;
     tt->single_val.s = tdrpStrDup("test");
-    tt++;
-    
-    // Parameter 'register_with_procmap'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("register_with_procmap");
-    tt->descr = tdrpStrDup("Option to register this process with the process mapper (procmap).");
-    tt->help = tdrpStrDup("If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.");
-    tt->val_offset = (char *) &register_with_procmap - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'procmap_register_interval'
@@ -2807,7 +2795,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("procmap_register_interval");
     tt->descr = tdrpStrDup("Interval for registering with procmap (secs).");
-    tt->help = tdrpStrDup("The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.");
+    tt->help = tdrpStrDup("REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.");
     tt->val_offset = (char *) &procmap_register_interval - &_start_;
     tt->single_val.i = 60;
     tt++;

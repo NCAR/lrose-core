@@ -1086,19 +1086,13 @@ commentdef {
 paramdef string {
   p_default = "test";
   p_descr = "Program instance for process registration.";
-  p_help = "This application registers with procmap. This is the instance used for registration.";
+  p_help = "REALTIME mode only. This application registers with procmap. This is the instance used for registration.";
 } instance;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to register this process with the process mapper (procmap).";
-  p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
-} register_with_procmap;
 
 paramdef int {
   p_default = 60;
   p_descr = "Interval for registering with procmap (secs).";
-  p_help = "The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.";
+  p_help = "REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.";
 } procmap_register_interval;
 
 commentdef {
