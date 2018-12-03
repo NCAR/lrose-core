@@ -40,6 +40,7 @@
 #define KdpFilt_hh
 
 #include <toolsa/TaArray.hh>
+#include <radar/KdpFiltParams.hh>
 #include <string>
 #include <vector>
 #include <iostream>

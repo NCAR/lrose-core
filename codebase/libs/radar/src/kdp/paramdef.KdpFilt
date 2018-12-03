@@ -137,6 +137,12 @@ commentdef {
   p_header = "PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR";
 }
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the coefficients and exponents - see below.";
+  p_help = "If false, the default coefficients will be determined for the radar wavelength.";
+} specify_coefficients_for_attenuation_correction;
+
 paramdef double {
   p_default = 0.017;
   p_descr = "Coefficient for computing DBZ attenuation correction.";

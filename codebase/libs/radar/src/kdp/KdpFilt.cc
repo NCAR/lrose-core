@@ -352,10 +352,12 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
     setWriteRayFile(true, params.ray_files_dir);
   }
 
-  setAttenCoeffs(params.dbz_attenuation_coefficient,
-                 params.dbz_attenuation_exponent,
-                 params.zdr_attenuation_coefficient,
-                 params.zdr_attenuation_exponent);
+  if (params.specify_coefficients_for_attenuation_correction) {
+    setAttenCoeffs(params.dbz_attenuation_coefficient,
+                   params.dbz_attenuation_exponent,
+                   params.zdr_attenuation_coefficient,
+                   params.zdr_attenuation_exponent);
+  }
 
 }
 

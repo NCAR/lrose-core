@@ -399,6 +399,8 @@ public:
 
   char* ray_files_dir;
 
+  tdrp_bool_t specify_coefficients_for_attenuation_correction;
+
   double dbz_attenuation_coefficient;
 
   double dbz_attenuation_exponent;
@@ -414,7 +416,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[27];
+  mutable TDRPtable _table[28];
 
   const char *_className;
 

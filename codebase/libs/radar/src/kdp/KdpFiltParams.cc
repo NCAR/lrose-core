@@ -814,6 +814,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'specify_coefficients_for_attenuation_correction'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("specify_coefficients_for_attenuation_correction");
+    tt->descr = tdrpStrDup("Option to specify the coefficients and exponents - see below.");
+    tt->help = tdrpStrDup("If false, the default coefficients will be determined for the radar wavelength.");
+    tt->val_offset = (char *) &specify_coefficients_for_attenuation_correction - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'dbz_attenuation_coefficient'
     // ctype is 'double'
     
