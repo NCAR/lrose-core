@@ -42,6 +42,8 @@ using namespace std;
 Args::Args ()
 {
   TDRP_init_override(&override);
+  tdrpDebug = false;
+  printParamsKdp = false;
   startTimeSet = false;
   endTimeSet = false;
 }
@@ -95,6 +97,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
       
       sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-trdp_debug")) {
+      
+      tdrpDebug = true;
       
     } else if (!strcmp(argv[i], "-instance")) {
       
@@ -154,6 +160,22 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-params_kdp")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "KDP_params_file_path = \"%s\";", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
+    } else if (!strcmp(argv[i], "-print_params_kdp")) {
+
+      printParamsKdp = true;
+      if (i < argc - 1) {
+	printParamsKdpMode = argv[++i];
+      }
+	
     }
     
   } // i
@@ -200,5 +222,12 @@ void Args::_usage(ostream &out)
       << endl;
   
   Params::usage(out);
+
+  out << endl;
+  out << "KDP-specific parameters:" << endl;
+  out << "   [ -params_kdp ] specify KDP params file path" << endl;
+  out << "   [ -print_params_kdp [mode]] print KDP params" << endl;
+  out << "     NOTE - see modes from -print_params above" << endl;
+  out << endl;
   
 }

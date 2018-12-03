@@ -77,7 +77,7 @@ RadxKdp::RadxKdp(int argc, char **argv)
     return;
   }
   
-  // get TDRP params
+  // read TDRP params for this app
   
   _paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv,
@@ -86,6 +86,27 @@ RadxKdp::RadxKdp(int argc, char **argv)
     cerr << "Problem with TDRP parameters." << endl;
     OK = FALSE;
     return;
+  }
+
+  // print params for KDP then exit
+
+  if (_args.printParamsKdp) {
+    _printParamsKdp();
+    exit(0);
+  }
+
+  // read params for KdpFilt
+
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpFiltParams.load(_params.KDP_params_file_path,
+                            _args.override.list, true, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
   }
 
   // initialize compute object
@@ -138,6 +159,50 @@ RadxKdp::~RadxKdp()
   // unregister process
 
   PMU_auto_unregister();
+
+}
+
+//////////////////////////////////////////////////
+// Print params for KDP
+
+void RadxKdp::_printParamsKdp()
+{
+
+  // do we need to expand environment variables?
+
+  bool expandEnvVars = false;
+  if (_args.printParamsKdpMode.find("expand") != string::npos) {
+    expandEnvVars = true;
+  }
+
+  // read in KDP params if applicable
+
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpFiltParams.load(_params.KDP_params_file_path,
+                            _args.override.list, expandEnvVars, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // set print mode
+
+  tdrp_print_mode_t printMode = PRINT_LONG;
+  if (_args.printParamsKdpMode.find("short") == 0) {
+    printMode = PRINT_SHORT;
+  } else if (_args.printParamsKdpMode.find("norm") == 0) {
+    printMode = PRINT_NORM;
+  } else if (_args.printParamsKdpMode.find("verbose") == 0) {
+    printMode = PRINT_VERBOSE;
+  }
+
+  // do the print to stdout
+
+  _kdpFiltParams.print(stdout, printMode);
 
 }
 

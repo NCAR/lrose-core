@@ -455,7 +455,7 @@ public:
 
   char* RHOHV_field_name;
 
-  char* KdpFilt_parameter_file_path;
+  char* KDP_params_file_path;
 
   output_field_t *_output_fields;
   int output_fields_n;

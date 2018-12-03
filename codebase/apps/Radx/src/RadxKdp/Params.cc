@@ -914,15 +914,15 @@
     tt->comment_text = tdrpStrDup("Parameters for computing KDP. KDP will be computed if KDP_available is FALSE.");
     tt++;
     
-    // Parameter 'KdpFilt_parameter_file_path'
+    // Parameter 'KDP_params_file_path'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("KdpFilt_parameter_file_path");
-    tt->descr = tdrpStrDup("Path for parameters for KdpFilt computations.");
+    tt->param_name = tdrpStrDup("KDP_params_file_path");
+    tt->descr = tdrpStrDup("Path for parameters for KDP computations.");
     tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
-    tt->val_offset = (char *) &KdpFilt_parameter_file_path - &_start_;
+    tt->val_offset = (char *) &KDP_params_file_path - &_start_;
     tt->single_val.s = tdrpStrDup("use-defaults");
     tt++;
     

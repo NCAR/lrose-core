@@ -194,9 +194,9 @@ commentdef {
 
 paramdef string {
   p_default = "use-defaults";
-  p_descr = "Path for parameters for KdpFilt computations.";
+  p_descr = "Path for parameters for KDP computations.";
   p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
-} KdpFilt_parameter_file_path;
+} KDP_params_file_path;
 
 commentdef {
   p_header = "SPECIFYING FIELD NAMES AND OUTPUT ENCODING";
