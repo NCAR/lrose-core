@@ -42,6 +42,9 @@ KdpFiltParams.cc: paramdef.KdpFilt
 	tdrp_gen -f paramdef.KdpFilt -c++ -class KdpFiltParams -lib radar
 	/bin/mv -f KdpFiltParams.hh ../include/radar
 
+clean_tdrp:
+	$(RM) KdpFiltParams.cc KdpFiltParams.hh
+
 depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

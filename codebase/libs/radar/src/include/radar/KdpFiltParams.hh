@@ -359,45 +359,53 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  fir_filter_len_t KDP_fir_filter_len;
+  fir_filter_len_t fir_filter_len;
 
-  int KDP_n_filt_iterations_unfolded;
+  int n_filt_iterations_unfolded;
 
-  int KDP_n_filt_iterations_conditioned;
+  int n_filt_iterations_conditioned;
 
-  tdrp_bool_t KDP_use_iterative_filtering;
+  tdrp_bool_t use_iterative_filtering;
 
-  double KDP_phidp_difference_threshold;
+  double phidp_difference_threshold;
 
-  int KDP_ngates_for_stats;
+  int ngates_for_stats;
 
-  double KDP_phidp_sdev_max;
+  double phidp_sdev_max;
 
-  double KDP_phidp_jitter_max;
+  double phidp_jitter_max;
 
-  double KDP_min_valid_abs_kdp;
+  double min_valid_abs_kdp;
 
-  tdrp_bool_t KDP_check_snr;
+  tdrp_bool_t check_snr;
 
-  double KDP_snr_threshold;
+  double snr_threshold;
 
-  tdrp_bool_t KDP_check_rhohv;
+  tdrp_bool_t check_rhohv;
 
-  double KDP_rhohv_threshold;
+  double rhohv_threshold;
 
-  tdrp_bool_t KDP_check_zdr_sdev;
+  tdrp_bool_t check_zdr_sdev;
 
-  double KDP_zdr_sdev_max;
+  double zdr_sdev_max;
 
-  double KDP_threshold_for_ZZDR;
+  double threshold_for_ZZDR;
 
-  int KDP_median_filter_len_for_ZZDR;
+  int median_filter_len_for_ZZDR;
 
-  tdrp_bool_t KDP_debug;
+  tdrp_bool_t debug;
 
-  tdrp_bool_t KDP_write_ray_files;
+  tdrp_bool_t write_ray_files;
 
-  char* KDP_ray_files_dir;
+  char* ray_files_dir;
+
+  double dbz_attenuation_coefficient;
+
+  double dbz_attenuation_exponent;
+
+  double zdr_attenuation_coefficient;
+
+  double zdr_attenuation_exponent;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -406,7 +414,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[22];
+  mutable TDRPtable _table[27];
 
   const char *_className;
 

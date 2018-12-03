@@ -46,6 +46,7 @@
 #include <radar/KdpFilt.hh>
 #include <radar/FilterUtils.hh>
 #include <radar/DpolFilter.hh>
+#include <radar/KdpFiltParams.hh>
 using namespace std;
 
 const double KdpFilt::firCoeff_125[FIR_LEN_125+1] = {
@@ -301,6 +302,63 @@ void KdpFilt::setAttenCoeffs(double dbzCoeff, double dbzExpon,
 
 }
   
+////////////////////////////////////////////
+// Set processing options from params object
+
+void KdpFilt::setFromParams(const KdpFiltParams &params)
+{
+
+  // initialize KDP object
+
+  if (params.fir_filter_len == KdpFiltParams::FIR_LEN_125) {
+    setFIRFilterLen(KdpFilt::FIR_LENGTH_125);
+  } else if (params.fir_filter_len == KdpFiltParams::FIR_LEN_60) {
+    setFIRFilterLen(KdpFilt::FIR_LENGTH_60);
+  } else if (params.fir_filter_len == KdpFiltParams::FIR_LEN_40) {
+    setFIRFilterLen(KdpFilt::FIR_LENGTH_40);
+  } else if (params.fir_filter_len == KdpFiltParams::FIR_LEN_30) {
+    setFIRFilterLen(KdpFilt::FIR_LENGTH_30);
+  } else if (params.fir_filter_len == KdpFiltParams::FIR_LEN_20) {
+    setFIRFilterLen(KdpFilt::FIR_LENGTH_20);
+  } else {
+    setFIRFilterLen(KdpFilt::FIR_LENGTH_10);
+  }
+  setNGatesStats(params.ngates_for_stats);
+  setMinValidAbsKdp(params.min_valid_abs_kdp);
+  setNFiltIterUnfolded(params.n_filt_iterations_unfolded);
+  setNFiltIterCond(params.n_filt_iterations_conditioned);
+  if (params.use_iterative_filtering) {
+    setUseIterativeFiltering(true);
+    setPhidpDiffThreshold(params.phidp_difference_threshold);
+  }
+  setPhidpSdevMax(params.phidp_sdev_max);
+  setPhidpJitterMax(params.phidp_jitter_max);
+  setMinValidAbsKdp(params.min_valid_abs_kdp);
+  checkSnr(params.check_snr);
+  setSnrThreshold(params.snr_threshold);
+  checkRhohv(params.check_rhohv);
+  setRhohvThreshold(params.rhohv_threshold);
+  if (params.check_zdr_sdev) {
+    checkZdrSdev(true);
+  }
+  setZdrSdevMax(params.zdr_sdev_max);
+  setThresholdForKdpZZdr(params.threshold_for_ZZDR);
+  setMedianFilterLenForKdpZZdr(params.median_filter_len_for_ZZDR);
+
+  if (params.debug) {
+    setDebug(true);
+  }
+  if (params.write_ray_files) {
+    setWriteRayFile(true, params.ray_files_dir);
+  }
+
+  setAttenCoeffs(params.dbz_attenuation_coefficient,
+                 params.dbz_attenuation_exponent,
+                 params.zdr_attenuation_coefficient,
+                 params.zdr_attenuation_exponent);
+
+}
+
 ////////////////////////////////////////////////////////////////////////
 // Initialize the object arrays for later use.
 // Do this if you need access to the arrays, but have not yet called

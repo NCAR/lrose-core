@@ -44,6 +44,7 @@
 #include <vector>
 #include <iostream>
 using namespace std;
+class KdpFiltParams;
 
 ////////////////////////
 // This class
@@ -258,6 +259,12 @@ public:
 
   void setMedianFilterLenForKdpZZdr(int val) { _kdpZZdrMedianLen = val; }
   
+  /**
+   * Set parameters from KdpFiltParams object
+   */
+
+  void setFromParams(const KdpFiltParams &params);
+
   /**
    * Initialize the object arrays for later use.
    * Do this if you need access to the arrays, but have not yet called
