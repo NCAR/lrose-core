@@ -504,8 +504,18 @@ copy_fields = {
   }
   ,
   {
-    input_name = "DBZHC_F",
+    input_name = "DBZ_F",
     output_name = "DBZ"
+  }
+  ,
+  {
+    input_name = "VEL_F",
+    output_name = "VEL"
+  }
+  ,
+  {
+    input_name = "WIDTH_F",
+    output_name = "WIDTH"
   }
   ,
   {

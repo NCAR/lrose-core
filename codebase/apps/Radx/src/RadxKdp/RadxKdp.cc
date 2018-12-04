@@ -109,7 +109,6 @@ RadxKdp::RadxKdp(int argc, char **argv)
     }
   }
 
-
   // initialize compute object
 
   pthread_mutex_init(&_debugPrintMutex, NULL);

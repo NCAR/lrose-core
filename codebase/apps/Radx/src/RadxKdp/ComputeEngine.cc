@@ -541,8 +541,8 @@ void ComputeEngine::_addDebugFields(RadxRay *derivedRay)
             _kdp.getDbz());
   
   _addField(derivedRay,
-            "ZNR_FOR_KDP", "dB",
-            "znr_filtered_for_kdp_computations",
+            "SNR_FOR_KDP", "dB",
+            "snr_filtered_for_kdp_computations",
             "signal_to_noise_ratio",
             _kdp.getSnr());
   
@@ -617,12 +617,6 @@ void ComputeEngine::_addDebugFields(RadxRay *derivedRay)
             "phidp_cond_for_kdp_computations",
             "differential_phase_hv",
             _kdp.getPhidpCond());
-  
-  _addField(derivedRay,
-            "PHIDP_FOR_KDP", "deg",
-            "phidp_filtered_for_kdp_computations",
-            "differential_phase_hv",
-            _kdp.getPhidpCondFilt());
   
 }
   
