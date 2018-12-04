@@ -358,6 +358,7 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
                    params.KDP_zdr_attenuation_coefficient,
                    params.KDP_zdr_attenuation_exponent);
   }
+  setComputeAttenCorr(true);
 
 }
 
