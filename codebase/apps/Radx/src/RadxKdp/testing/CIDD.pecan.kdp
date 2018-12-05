@@ -23,7 +23,7 @@
 #
 #####################################################################################
 
-<GUI_CONFIG>
+// <GUI_CONFIG>
 
 ///////////// field_list //////////////////////////////
 //
@@ -46,7 +46,7 @@
 //field_list = {
 //};
 
-</GUI_CONFIG>
+// </GUI_CONFIG>
 
 <GRIDS>
 # Legend Label: used for all on-screen labels and for movie/html file naming.
@@ -97,6 +97,11 @@
 # PECAN
 #
 
+KDP         KDP        /tmp/cfradial/kdp&KDP       kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+KDP_COND         KDP_COND        /tmp/cfradial/kdp&KDP_COND       kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+PSOB         PSOB        /tmp/cfradial/kdp&PSOB       fraction.colors   deg -5 80 5 radial 1 0     
+KDP_ZZDR         KDP_ZZDR        /tmp/cfradial/kdp&KDP_ZZDR       kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+
 DBZ       DBZ        /tmp/cfradial/kdp&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
 SNR       SNR        /tmp/cfradial/kdp&SNR        snr.colors   dB  -5 80 5 radial 1 0
 VEL       VEL        /tmp/cfradial/kdp&VEL        vel.colors   m/s -5 80 5 radial 1 0
@@ -105,16 +110,11 @@ WIDTH     WIDTH      /tmp/cfradial/kdp&WIDTH     width.colors m/s -5 80 5 radial
 PHIDP     PHIDP      /tmp/cfradial/kdp&PHIDP     phidp_alt.colors deg -5 80 5 radial 1 0
 ZDR       ZDR        /tmp/cfradial/kdp&ZDR       zdr.colors   dB  -5 80 5 radial 1 0
 RHOHV     RHOHV      /tmp/cfradial/kdp&RHOHV     rhohv.colors deg -5 80 5 radial 1 0
-======== ========  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
+=======   ======     /tmp/cfradial/kdp&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
 
-KDP         KDP        /tmp/cfradial/kdp&KDP       kdp_sband.colors   deg/km -5 80 5 radial 1 0     
-KDP_ZZDR         KDP_ZZDR        /tmp/cfradial/kdp&KDP_ZZDR       kdp_sband.colors   deg/km -5 80 5 radial 1 0     
-KDP_COND         KDP_COND        /tmp/cfradial/kdp&KDP_COND       kdp_sband.colors   deg/km -5 80 5 radial 1 0     
-PSOB         PSOB        /tmp/cfradial/kdp&PSOB       fraction.colors   deg -5 80 5 radial 1 0     
-
-DBZ_ATTEN_CORRECTION       DBZ_ATTEN_CORRECTION        /tmp/cfradial/kdp&DBZ_ATTEN_CORRECTION  snr.colors   dB  -5 80 5 radial 1 0
+DBZ_ATTEN_CORRECTION       DBZ_ATTEN_CORRECTION        /tmp/cfradial/kdp&DBZ_ATTEN_CORRECTION  fraction.colors   dB  -5 80 5 radial 1 0
 DBZ_ATTEN_CORRECTED       DBZ_ATTEN_CORRECTED        /tmp/cfradial/kdp&DBZ_ATTEN_CORRECTED     dbz.colors   dBZ -5 80 5 radial 1 0
-ZDR_ATTEN_CORRECTION       ZDR_ATTEN_CORRECTION        /tmp/cfradial/kdp&ZDR_ATTEN_CORRECTION  snr.colors   dB  -5 80 5 radial 1 0
+ZDR_ATTEN_CORRECTION       ZDR_ATTEN_CORRECTION        /tmp/cfradial/kdp&ZDR_ATTEN_CORRECTION  fraction.colors   dB  -5 80 5 radial 1 0
 ZDR_ATTEN_CORRECTED       ZDR_ATTEN_CORRECTED        /tmp/cfradial/kdp&ZDR_ATTEN_CORRECTED     zdr.colors   dB  -5 80 5 radial 1 0
 
 DBZ_FOR_KDP       DBZ_FOR_KDP        /tmp/cfradial/kdp&DBZ_FOR_KDP        dbz.colors   dBZ -5 80 5 radial 1 0
@@ -124,8 +124,8 @@ ZDR_SDEV_FOR_KDP       ZDR_SDEV_FOR_KDP        /tmp/cfradial/kdp&ZDR_SDEV_FOR_KD
 
 RHOHV_FOR_KDP       RHOHV_FOR_KDP        /tmp/cfradial/kdp&RHOHV_FOR_KDP       rhohv.colors   -  -5 80 5 radial 1 0
 VALID_FLAG_FOR_KDP       VALID_FLAG_FOR_KDP        /tmp/cfradial/kdp&VALID_FLAG_FOR_KDP  cmd_flag.colors   - -5 80 5 radial 1 0
-======== ========  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-======== ========  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
+=======   ======     /tmp/cfradial/kdp&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
+=======   ======     /tmp/cfradial/kdp&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
 
 PHIDP_FOR_KDP     PHIDP_FOR_KDP      /tmp/cfradial/kdp&PHIDP_FOR_KDP     phidp_alt.colors deg -5 80 5 radial 1 0
 PHIDP_MEAN     PHIDP_MEAN      /tmp/cfradial/kdp&PHIDP_MEAN     phidp_alt.colors deg -5 80 5 radial 1 0
@@ -137,10 +137,10 @@ PHIDP_UNFOLD     PHIDP_UNFOLD      /tmp/cfradial/kdp&PHIDP_UNFOLD     phidp_alt.
 PHIDP_FILT     PHIDP_FILT      /tmp/cfradial/kdp&PHIDP_FILT     phidp_alt.colors deg -5 80 5 radial 1 0
 PHIDP_COND     PHIDP_COND      /tmp/cfradial/kdp&PHIDP_COND     phidp_alt.colors deg -5 80 5 radial 1 0
 
-======== ========  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-======== ========  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-======== ========  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-======== ========  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
+=======   ======     /tmp/cfradial/kdp&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
+=======   ======     /tmp/cfradial/kdp&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
+=======   ======     /tmp/cfradial/kdp&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
+=======   ======     /tmp/cfradial/kdp&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
 
 </GRIDS>
 
@@ -239,7 +239,7 @@ cidd.debug2_flag:           0
 #  System will startup using field 0, requesting data closest to the
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
-cidd.demo_time:  00:00 06/26/2015
+cidd.demo_time:  00:10 06/26/2015
 
 # Set times to the nearest value divisible by the number of seconds
 cidd.temporal_rounding:    1

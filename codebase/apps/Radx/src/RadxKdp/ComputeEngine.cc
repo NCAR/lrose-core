@@ -354,9 +354,10 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   // initialize array pointers
 
-  const double *psob = _kdp.getPsob();
   const double *dbzAtten = _kdp.getDbzAttenCorr();
   const double *zdrAtten = _kdp.getZdrAttenCorr();
+  const double *dbzCorrected = _kdp.getDbzCorrected();
+  const double *zdrCorrected = _kdp.getZdrCorrected();
   
   // load up output data
   
@@ -380,14 +381,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         default:
           *datp = _kdpArray[igate];
           break;
-        case Params::KDP_ZZDR:
-          *datp = _kdpZZdrArray[igate];
-          break;
         case Params::KDP_COND:
           *datp = _kdpCondArray[igate];
-          break;
-        case Params::PSOB:
-          *datp = psob[igate];
           break;
           
           // attenuation
@@ -399,89 +394,11 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           *datp = zdrAtten[igate];
           break;
         case Params::DBZ_ATTEN_CORRECTED:
-          if (dbzAtten[igate] != missingDbl &&
-              _dbzArray[igate] != missingDbl) {
-            *datp = dbzAtten[igate] + _dbzArray[igate];
-          }
+          *datp = dbzCorrected[igate];
           break;
         case Params::ZDR_ATTEN_CORRECTED:
-          if (zdrAtten[igate] != missingDbl &&
-              _zdrArray[igate] != missingDbl) {
-            *datp = zdrAtten[igate] + _zdrArray[igate];
-          }
+          *datp = zdrCorrected[igate];
           break;
-
-#ifdef JUNK
-
-        case Params::SNR:
-          *datp = _snrArray[igate];
-          break;
-        case Params::DBZ:
-          *datp = _dbzArray[igate];
-          break;
-        case Params::ZDR:
-          *datp = _zdrArray[igate];
-          break;
-        case Params::RHOHV:
-          *datp = _rhohvArray[igate];
-          break;
-        case Params::PHIDP:
-          *datp = _phidpArray[igate];
-          break;
-          
-          // kdp
-          
-        case Params::DBZ_FOR_KDP:
-          *datp = dbzForKdp[igate];
-          break;
-        case Params::ZDR_FOR_KDP:
-          *datp = zdrForKdp[igate];
-          break;
-        case Params::RHOHV_FOR_KDP:
-          *datp = rhohvForKdp[igate];
-          break;
-        case Params::SNR_FOR_KDP:
-          *datp = snrForKdp[igate];
-          break;
-        case Params::ZDR_SDEV_FOR_KDP:
-          *datp = zdrSdevForKdp[igate];
-          break;
-        case Params::VALID_FLAG_FOR_KDP:
-          if (validFlagForKdp[igate]) {
-            *datp = 1.0;
-          } else {
-            *datp = 0.0;
-          }
-          break;
-
-        case Params::PHIDP_FOR_KDP:
-          *datp = phidpForKdp[igate];
-          break;
-        case Params::PHIDP_MEAN_FOR_KDP:
-          *datp = phidpMeanForKdp[igate];
-          break;
-        case Params::PHIDP_MEAN_UNFOLD_FOR_KDP:
-          *datp = phidpMeanUnfoldForKdp[igate];
-          break;
-        case Params::PHIDP_SDEV_FOR_KDP:
-          *datp = phidpSdevForKdp[igate];
-          break;
-        case Params::PHIDP_JITTER_FOR_KDP:
-          *datp = phidpJitterForKdp[igate];
-          break;
-        case Params::PHIDP_UNFOLD_FOR_KDP:
-          *datp = phidpUnfoldForKdp[igate];
-          break;
-        case Params::PHIDP_FILT_FOR_KDP:
-          *datp = phidpFiltForKdp[igate];
-          break;
-        case Params::PHIDP_COND_FOR_KDP:
-          *datp = phidpCondForKdp[igate];
-          break;
-        case Params::PHIDP_COND_FILT_FOR_KDP:
-          *datp = phidpCondFiltForKdp[igate];
-          break;
-#endif
 
       } // switch
 
@@ -534,6 +451,18 @@ void ComputeEngine::_addDebugFields(RadxRay *derivedRay)
 
 {
 
+  _addField(derivedRay,
+            "KDP_ZZDR", "deg/km",
+            "specific_differential_phase_theoretical_from_z_and_zdr",
+            "specific_differential_phase_hv",
+            _kdp.getKdpZZdr());
+  
+  _addField(derivedRay,
+            "PSOB", "deg",
+            "phase_shift_on_backscatter",
+            "phase_shift_on_backscatter",
+            _kdp.getPsob());
+  
   _addField(derivedRay,
             "DBZ_FOR_KDP", "dBZ",
             "dbz_filtered_for_kdp_computations",

@@ -4,8 +4,25 @@
 
 //======================================================================
 //
-// KdpFilt computes KDP using a filtering technique, and modifies the 
-//   KDP location using the Z-ZDR self consistency principle.
+// KdpFilt computes KDP from PHIDP - as the slope of PHIDP in range. 
+//   Regions with valid PHIDP are determined from SNR and RHOHV. Filtering 
+//   is applied to smooth PHIDP in range and to identify regions with 
+//   phase shift on backscatter. The filtering tends to smeer out the KDP 
+//   in range. Furthermore, the self-consistency approach allows us to 
+//   theoretically determine KDP from Z and ZDR - which we can call 
+//   KDP(Z-ZDR). KDP(Z-ZDR) may then be used to constrain the higher KDP 
+//   values to those regions with high theoretical KDP.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// UNFOLDING AND INITIAL FILTERING.
+//
+// The first step is to unfold the PHIDP data. PHIDP folds at -180/180 
+//   for simultaneous mode radars, and at -90/90 for alternating mode 
+//   radars. In order to compute the gradient of PHIDP, we need to first 
+//   unfold it so that it varies smoothly rather than folding.
 //
 //======================================================================
  
@@ -35,8 +52,8 @@ KDP_fir_filter_len = KDP_FIR_LEN_10;
 //   PHIDP.
 //
 // After unfolding PHIDP, the FIR filter is applied to the unfolded 
-//   phidp, a number of times, to smooth it. The effect of the filter is a 
-//   combination of the filter length and the number of iterations.
+//   phidp, a set number of times, to smooth it. The effect of the filter 
+//   is a combination of the filter length and the number of iterations.
 //
 //
 // Type: int
@@ -44,39 +61,55 @@ KDP_fir_filter_len = KDP_FIR_LEN_10;
 
 KDP_n_filt_iterations_unfolded = 2;
 
-///////////// KDP_n_filt_iterations_conditioned ///////
+//======================================================================
 //
-// Sets the number of iterations for the final FIR filter for 
-//   conditioned PHIDP.
+// HANDLING PHASE SHIFT ON BACKSCATTER.
 //
-// In order to identify phase shift on backscatter (PSOB), we condition 
-//   the PHIDP to keep it generally increasing with range. The FIR filter 
-//   is applied to the conditioned phidp a number of times, to smooth it. 
-//   The effect of the filter is a combination of the filter length and 
-//   the number of iterations.
+// As the beam passes through liquid precip, PHIDP generally increases. 
+//   In some regions this increase is augmented by phase shift on 
+//   backscatter (PSOB) leading to localized peaks in PHIDP. After a PSOB 
+//   region, PHIDP will decrease to some intermediate level. KdpFilt 
+//   offers 2 methods for handling PSOB: (a) The HUBBERT/BRINGI method, 
+//   which uses an iterative filtering approach (Hubbert. J, and 
+//   V.N.Bringi, 1995: An Iterative Filtering technique for the Analysis 
+//   of Copolar Differential Phase and Dual-Frequency Radar Measurements. 
+//   Journal of Atmospheric and Oceanic Technology, Vol 12, No 3, June 
+//   1995). (b) The Peak Removal method, which works backwards from longer 
+//   to shorter ranges, finding the peaks caused by backscatter and 
+//   trimming them off.
+//
+//======================================================================
+ 
+///////////// KDP_psob_method /////////////////////////
+//
+// Method for handling pbase shift on backscatter.
+//
+//
+// Type: enum
+// Options:
+//     HUBBERT_BRINGI_METHOD
+//     PEAK_REMOVAL_METHOD
+//
+
+KDP_psob_method = PEAK_REMOVAL_METHOD;
+
+///////////// KDP_n_filt_iterations_hubbert_bringi ////
+//
+// Sets the number of iterations for the Hubbert Bringi method.
+//
+// See above.
 //
 //
 // Type: int
 //
 
-KDP_n_filt_iterations_conditioned = 4;
+KDP_n_filt_iterations_hubbert_bringi = 4;
 
-///////////// KDP_use_iterative_filtering /////////////
+///////////// KDP_phidp_difference_threshold_hubbert_bringi 
 //
-// Perform iterative filtering to locate backscatter phase shift.
+// Difference threshold for the Hubbert Bringi method.
 //
-//
-// Type: boolean
-//
-
-KDP_use_iterative_filtering = FALSE;
-
-///////////// KDP_phidp_difference_threshold //////////
-//
-// Difference threshold for the iterative filtering method.
-//
-// The FIR filter is applied successively, n_filt_iterations_conditioned 
-//   times. After each iteration the result is checked against the 
+// After each iteration of the filter, the result is checked against the 
 //   original. If the difference is less than this parameter, the original 
 //   value at that gate is retained. If the difference exceeds this 
 //   parameter, the new filtered value is retained.
@@ -85,8 +118,18 @@ KDP_use_iterative_filtering = FALSE;
 // Type: double
 //
 
-KDP_phidp_difference_threshold = 4;
+KDP_phidp_difference_threshold_hubbert_bringi = 4;
 
+//======================================================================
+//
+// IDENTIFYING VALID KDP REGIONS.
+//
+// In weak signal, the PHIDP is very noisy and contains no useful 
+//   information. We compute various statistics to help to identify those 
+//   gates containing valid PHIDP, and those with just noise.
+//
+//======================================================================
+ 
 ///////////// KDP_ngates_for_stats ////////////////////
 //
 // Number of gates over which the phidp mean, sdev and jitter are 
@@ -134,17 +177,28 @@ KDP_phidp_sdev_max = 20;
 
 KDP_phidp_jitter_max = 25;
 
-///////////// KDP_min_valid_abs_kdp ///////////////////
+///////////// KDP_check_rhohv /////////////////////////
 //
-// Sets the min valid KDP value.
+// Check the RHOHV.
 //
-// Values less than this are set to 0.
+//
+// Type: boolean
+//
+
+KDP_check_rhohv = TRUE;
+
+///////////// KDP_rhohv_threshold /////////////////////
+//
+// Sets the threshold for checking RHOHV.
+//
+// If the RHOHV drops below this value, KDP will not be computed at this 
+//   gate.
 //
 //
 // Type: double
 //
 
-KDP_min_valid_abs_kdp = 0.01;
+KDP_rhohv_threshold = 0.95;
 
 ///////////// KDP_check_snr ///////////////////////////
 //
@@ -168,29 +222,6 @@ KDP_check_snr = FALSE;
 //
 
 KDP_snr_threshold = -6;
-
-///////////// KDP_check_rhohv /////////////////////////
-//
-// Check the RHOHV.
-//
-//
-// Type: boolean
-//
-
-KDP_check_rhohv = TRUE;
-
-///////////// KDP_rhohv_threshold /////////////////////
-//
-// Sets the threshold for checking RHOHV.
-//
-// If the RHOHV drops below this value, KDP will not be computed at this 
-//   gate.
-//
-//
-// Type: double
-//
-
-KDP_rhohv_threshold = 0.95;
 
 ///////////// KDP_check_zdr_sdev //////////////////////
 //
@@ -216,6 +247,12 @@ KDP_check_zdr_sdev = FALSE;
 
 KDP_zdr_sdev_max = 2;
 
+//======================================================================
+//
+// COMPUTING KDP FROM Z and ZDR.
+//
+//======================================================================
+ 
 ///////////// KDP_threshold_for_ZZDR //////////////////
 //
 // Sets the threshold for computing conditional KDP from Z and ZDR.
@@ -248,45 +285,43 @@ KDP_threshold_for_ZZDR = 0.25;
 
 KDP_median_filter_len_for_ZZDR = 5;
 
-///////////// KDP_debug ///////////////////////////////
+//======================================================================
 //
-// Option to print debug messages in KDP computation.
+// SANITY CHECK ON KDP RESULTS.
 //
+// Ignore small KDP values, which are likely just noise.
 //
-// Type: boolean
+//======================================================================
+ 
+///////////// KDP_min_valid_abs_kdp ///////////////////
 //
-
-KDP_debug = FALSE;
-
-///////////// KDP_write_ray_files /////////////////////
+// Sets the min valid KDP value.
 //
-// Option to write ray files to debug KDP computation.
-//
-//
-// Type: boolean
-//
-
-KDP_write_ray_files = FALSE;
-
-///////////// KDP_ray_files_dir ///////////////////////
-//
-// Directory for KDP ray files.
+// Values less than this are set to 0.
 //
 //
-// Type: string
+// Type: double
 //
 
-KDP_ray_files_dir = "/tmp/kdp_ray_files";
+KDP_min_valid_abs_kdp = 0.01;
 
 //======================================================================
 //
-// PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR.
+// ESTIMATING ATTENUATION CORRECTION FOR DBZ AND ZDR.
+//
+// Received power attenuation, and differential attenuation, occur 
+//   whenever scattering occurs, but is of most importance at shorter 
+//   wavelengths or in reqions of heavy precipition. We use the reference 
+//   text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, 
+//   Table 7.1, page 494, to provide the default coefficients from which 
+//   to estimate the attenuation correction. You may also choose to 
+//   specify these coefficients in this section.
 //
 //======================================================================
  
 ///////////// KDP_specify_coefficients_for_attenuation_correction 
 //
-// Option to specify the coefficients and exponents - see below.
+// Option to specify the coefficients and exponents.
 //
 // If false, the default coefficients will be determined for the radar 
 //   wavelength.
@@ -344,4 +379,40 @@ KDP_zdr_attenuation_coefficient = 0.003;
 //
 
 KDP_zdr_attenuation_exponent = 1.05;
+
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// KDP_debug ///////////////////////////////
+//
+// Option to print debug messages in KDP computation.
+//
+//
+// Type: boolean
+//
+
+KDP_debug = FALSE;
+
+///////////// KDP_write_ray_files /////////////////////
+//
+// Option to write ray files to debug KDP computation.
+//
+//
+// Type: boolean
+//
+
+KDP_write_ray_files = FALSE;
+
+///////////// KDP_ray_files_dir ///////////////////////
+//
+// Directory for KDP ray files.
+//
+//
+// Type: string
+//
+
+KDP_ray_files_dir = "/tmp/kdp_ray_files";
 

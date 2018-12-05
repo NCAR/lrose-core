@@ -26,18 +26,6 @@ paramdef enum debug_t {
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
-paramdef string {
-  p_default = "test";
-  p_descr = "Program instance for process registration.";
-  p_help = "This application registers with procmap. This is the instance used for registration.";
-} instance;
-
-paramdef int {
-  p_default = 60;
-  p_descr = "Interval for registering with procmap (secs).";
-  p_help = "REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.";
-} procmap_register_interval;
-
 commentdef {
   p_header = "THREADING FOR SPEED.";
 }
@@ -59,12 +47,6 @@ commentdef {
   p_header = "DATA INPUT";
 }
 
-paramdef string {
-  p_default = ".";
-  p_descr = "Input directory for searching for files.";
-  p_help = "Files will be searched for in this directory.";
-} input_dir;
-
 typedef enum {
   REALTIME, ARCHIVE, FILELIST
 } mode_t;
@@ -72,21 +54,18 @@ typedef enum {
 paramdef enum mode_t {
   p_default = FILELIST;
   p_descr = "Operating mode";
-  p_help = "In REALTIME mode, the program waits for a new input file.  "
-           "In ARCHIVE mode, it moves through the data between the start "
+  p_help = "\n\nIn REALTIME mode, the program waits for a new input file."
+           "\\nIn ARCHIVE mode, it moves through the data between the start "
            "and end times set on the command line. "
-           "In FILELIST mode, it moves through the list of file names "
-           "specified on the command line. "
-           "Paths (in ARCHIVE mode, at least) MUST contain a "
-           "day-directory above the data file -- ./data_file.ext will not "
-           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+           "\n\nIn FILELIST mode, it moves through the list of file names "
+           "specified on the command line.";
 } mode;
 
-paramdef int {
-  p_default = 300;
-  p_descr = "Maximum age of realtime data (secs)";
-  p_help =  "Only data less old than this will be used.";
-} max_realtime_data_age_secs;
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
 
 paramdef string {
   p_default = "";
@@ -174,9 +153,7 @@ commentdef {
 typedef enum {
   
   KDP,
-  KDP_ZZDR,
   KDP_COND,
-  PSOB,
 
   DBZ_ATTEN_CORRECTION,
   ZDR_ATTEN_CORRECTION,
@@ -206,29 +183,11 @@ paramdef struct output_field_t {
     }
     ,
     {
-      id = KDP_ZZDR,
-      name = "KDP_ZZDR",
-      long_name = "specific_differential_phase_modified_using_z_and_zdr",
-      standard_name = "specific_differential_phase_hv",
-      units = "deg/km",
-      do_write = TRUE
-    }
-    ,
-    {
       id = KDP_COND,
       name = "KDP_COND",
-      long_name = "conditional_kdp_from_estimated_kdp_and_kdpZZdr",
+      long_name = "kdp_conditioned_by_KDP_from_Z_and_ZDR",
       standard_name = "specific_differential_phase_hv",
       units = "deg/km",
-      do_write = FALSE
-    }
-    ,
-    {
-      id = PSOB,
-      name = "PSOB",
-      long_name = "phase_shift_on_backscatter",
-      standard_name = "phase_shift_on_backscatter",
-      units = "deg",
       do_write = FALSE
     }
     ,
@@ -273,20 +232,12 @@ paramdef struct output_field_t {
     "\nThe name and units can be set however the user prefers.\n"
     "\nThe output_encoding apply to CfRadial output only. \n\n"
     "\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n"
-    "\tKDP_ZZDR: KDP modified by Z-ZDR self-consistency (deg/km)\n"
     "\tKDP_COND: KDP conditioned - debug field (deg/km)\n"
-    "\tPSOB: phase shift on backscatter as deduced from the filtering (deg)\n"
     "\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n"
     "\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n"
     "\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n"
     "\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n";
 } output_fields[];
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Write extra fields to assist with debugging.";
-  p_help = "These are the intermediate fields used in computing KDP and attenuation.";
-} write_debug_fields;
 
 typedef enum {
   OUTPUT_ENCODING_FL32,
@@ -329,6 +280,16 @@ paramdef struct copy_field_t {
   p_descr = "These fields are copied through unchanged to the output file.";
   p_help = "You can change the name of the field on output.";
 } copy_fields[];
+
+commentdef {
+  p_header = "WRITING DEBUG FIELDS";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write extra fields to assist with debugging.";
+  p_help = "These are the intermediate fields used in computing KDP and attenuation.";
+} write_debug_fields;
 
 commentdef {
   p_header = "WRITING THE OUTPUT FILES";
@@ -374,4 +335,26 @@ paramdef enum output_format_t {
   p_default = OUTPUT_FORMAT_CFRADIAL;
   p_descr = "Format for the output files.";
 } output_format;
+
+commentdef {
+  p_header = "REALTIME OPERATIONS";
+}
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Interval for registering with procmap (secs).";
+  p_help = "REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.";
+} procmap_register_interval;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
 

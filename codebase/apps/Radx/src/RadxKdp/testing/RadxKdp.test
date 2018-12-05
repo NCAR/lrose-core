@@ -32,33 +32,6 @@
 
 debug = DEBUG_OFF;
 
-///////////// instance ////////////////////////////////
-//
-// Program instance for process registration.
-//
-// This application registers with procmap. This is the instance used 
-//   for registration.
-//
-//
-// Type: string
-//
-
-instance = "test";
-
-///////////// procmap_register_interval ///////////////
-//
-// Interval for registering with procmap (secs).
-//
-// REALTIME mode only. The app will register with procmap at this 
-//   interval, to update its status. If it does not register within twice 
-//   this interval, the auto_restart script will restart the app.
-//
-//
-// Type: int
-//
-
-procmap_register_interval = 60;
-
 //======================================================================
 //
 // THREADING FOR SPEED.
@@ -102,29 +75,18 @@ n_compute_threads = 4;
 //
 //======================================================================
  
-///////////// input_dir ///////////////////////////////
-//
-// Input directory for searching for files.
-//
-// Files will be searched for in this directory.
-//
-//
-// Type: string
-//
-
-input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur";
-
 ///////////// mode ////////////////////////////////////
 //
 // Operating mode.
 //
-// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+
+//
+// In REALTIME mode, the program waits for a new input file.\nIn ARCHIVE 
 //   mode, it moves through the data between the start and end times set 
-//   on the command line. In FILELIST mode, it moves through the list of 
-//   file names specified on the command line. Paths (in ARCHIVE mode, at 
-//   least) MUST contain a day-directory above the data file -- 
-//   ./data_file.ext will not work as a file path, but 
-//   ./yyyymmdd/data_file.ext will.
+//   on the command line. 
+//
+// In FILELIST mode, it moves through the list of file names specified 
+//   on the command line.
 //
 //
 // Type: enum
@@ -136,17 +98,17 @@ input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur";
 
 mode = FILELIST;
 
-///////////// max_realtime_data_age_secs //////////////
+///////////// input_dir ///////////////////////////////
 //
-// Maximum age of realtime data (secs).
+// Input directory for searching for files.
 //
-// Only data less old than this will be used.
+// Files will be searched for in this directory.
 //
 //
-// Type: int
+// Type: string
 //
 
-max_realtime_data_age_secs = 300;
+input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur";
 
 ///////////// input_file_search_ext ///////////////////
 //
@@ -309,7 +271,7 @@ RHOHV_field_name = "RHOHV_F";
 // Type: string
 //
 
-KDP_params_file_path = "./KdpParams.test";
+KDP_params_file_path = "./testing/KdpParams.test";
 
 //======================================================================
 //
@@ -328,9 +290,7 @@ KDP_params_file_path = "./KdpParams.test";
 // The output_encoding apply to CfRadial output only. 
 //
 // 	KDP: KDP from filtering PHIDP and computing slope (deg/km)
-// 	KDP_ZZDR: KDP modified by Z-ZDR self-consistency (deg/km)
 // 	KDP_COND: KDP conditioned - debug field (deg/km)
-// 	PSOB: phase shift on backscatter as deduced from the filtering (deg)
 // 	DBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)
 // 	ZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)
 // 	DBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)
@@ -342,9 +302,7 @@ KDP_params_file_path = "./KdpParams.test";
 //      output_field_id_t id;
 //        Options:
 //          KDP
-//          KDP_ZZDR
 //          KDP_COND
-//          PSOB
 //          DBZ_ATTEN_CORRECTION
 //          ZDR_ATTEN_CORRECTION
 //          DBZ_ATTEN_CORRECTED
@@ -370,29 +328,11 @@ output_fields = {
   }
   ,
   {
-    id = KDP_ZZDR,
-    name = "KDP_ZZDR",
-    long_name = "specific_differential_phase_modified_using_z_and_zdr",
-    standard_name = "specific_differential_phase_hv",
-    units = "deg/km",
-    do_write = TRUE
-  }
-  ,
-  {
     id = KDP_COND,
     name = "KDP_COND",
     long_name = "conditional_kdp_from_estimated_kdp_and_kdpZZdr",
     standard_name = "specific_differential_phase_hv",
     units = "deg/km",
-    do_write = FALSE
-  }
-  ,
-  {
-    id = PSOB,
-    name = "PSOB",
-    long_name = "phase_shift_on_backscatter",
-    standard_name = "phase_shift_on_backscatter",
-    units = "deg",
     do_write = FALSE
   }
   ,
@@ -432,19 +372,6 @@ output_fields = {
     do_write = FALSE
   }
 };
-
-///////////// write_debug_fields //////////////////////
-//
-// Write extra fields to assist with debugging.
-//
-// These are the intermediate fields used in computing KDP and 
-//   attenuation.
-//
-//
-// Type: boolean
-//
-
-write_debug_fields = TRUE;
 
 ///////////// output_encoding /////////////////////////
 //
@@ -536,6 +463,25 @@ copy_fields = {
 
 //======================================================================
 //
+// WRITING DEBUG FIELDS.
+//
+//======================================================================
+ 
+///////////// write_debug_fields //////////////////////
+//
+// Write extra fields to assist with debugging.
+//
+// These are the intermediate fields used in computing KDP and 
+//   attenuation.
+//
+//
+// Type: boolean
+//
+
+write_debug_fields = TRUE;
+
+//======================================================================
+//
 // WRITING THE OUTPUT FILES.
 //
 //======================================================================
@@ -607,4 +553,49 @@ append_year_dir_to_output_dir = FALSE;
 //
 
 output_format = OUTPUT_FORMAT_CFRADIAL;
+
+//======================================================================
+//
+// REALTIME OPERATIONS.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+///////////// procmap_register_interval ///////////////
+//
+// Interval for registering with procmap (secs).
+//
+// REALTIME mode only. The app will register with procmap at this 
+//   interval, to update its status. If it does not register within twice 
+//   this interval, the auto_restart script will restart the app.
+//
+//
+// Type: int
+//
+
+procmap_register_interval = 60;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
 

@@ -9,7 +9,12 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "KdpFilt computes KDP using a filtering technique, and modifies the KDP location using the Z-ZDR self consistency principle.";
+  p_header = "KdpFilt computes KDP from PHIDP.\n\nKDP is defined as half the change in PHIDP per km in range.\n\nRegions with valid PHIDP are determined by examining the quality of the PHIDP data, from RHOHV, and optionally from SNR and the variance of ZDR.\n\nPHIPD folds, so unfolding is the first step in the processing. After unfolding, filtering is applied to smooth PHIDP in range. This is followed by a step to identify regions with phase shift on backscatter.\n\nKDP is then computed as the PHIDP slope between range gates. For DBZ values < 20, 8 gates are used; for DBZ between 20 and 35, 4 gates are used; and if the DBZ exceeds 35, 2 adjacent gates are used.\n\nThe various filtering steps smeer out the KDP in range, which means that the high KDP values are not always located in the core of the precip. To help correct for this effect, we can make use of the self-consistency approach. This allows us to theoretically determine KDP from Z and ZDR - we can call this KDP_ZZDR. We can then use these theoretical KDP_ZZDR values to compute a conditioned KDP field, by constraining the estimated KDP values to the relevant gates. This reduces the smeering effect. We refer to this final conditioned KDP field as KDP_COND.";
+}
+
+commentdef {
+  p_header = "UNFOLDING AND INITIAL FILTERING";
+  p_text = "The first step is to unfold the PHIDP data. PHIDP folds at -180/180 for simultaneous mode radars, and at -90/90 for alternating mode radars. In order to compute the gradient of PHIDP, we need to unfold it so that it varies smoothly rather than folding.";
 }
 
 typedef enum {
@@ -30,26 +35,40 @@ paramdef enum KDP_fir_filter_len_t {
 paramdef int {
   p_default = 2;
   p_descr = "Sets the number of iterations for the initial FIR filter for unfolded PHIDP.";
-  p_help = "After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
+  p_help = "After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a set number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
 } KDP_n_filt_iterations_unfolded;
+
+commentdef {
+  p_header = "HANDLING PHASE SHIFT ON BACKSCATTER";
+  p_text = "As the beam passes through liquid precip, PHIDP generally increases. In some regions this increase is augmented by phase shift on backscatter (PSOB) leading to localized peaks in PHIDP. After a PSOB region, PHIDP will decrease to some intermediate level.\n\nKdpFilt offers 2 methods for handling PSOB:\n\t(a) The HUBBERT/BRINGI method, which uses an iterative filtering approach (Hubbert. J, and V.N.Bringi, 1995: An Iterative Filtering technique for the Analysis of Copolar Differential Phase and Dual-Frequency Radar Measurements. Journal of Atmospheric and Oceanic Technology, Vol 12, No 3, June 1995).\n\t(b) The Peak Removal method, which works backwards from longer to shorter ranges, finding the peaks caused by backscatter and trimming them off.";
+}
+
+typedef enum {
+  HUBBERT_BRINGI_METHOD, PEAK_REMOVAL_METHOD
+} psob_method_t;
+
+paramdef enum psob_method_t {
+  p_default = PEAK_REMOVAL_METHOD;
+  p_descr = "Method for handling pbase shift on backscatter.";
+  p_descr = "See explanation above.";
+} KDP_psob_method;
 
 paramdef int {
   p_default = 4;
-  p_descr = "Sets the number of iterations for the final FIR filter for conditioned PHIDP.";
-  p_help = "In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
-} KDP_n_filt_iterations_conditioned;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Perform iterative filtering to locate backscatter phase shift.";
-  p_descr = "This is the Hubbert-Bringi method.";
-} KDP_use_iterative_filtering;
+  p_descr = "Sets the number of iterations for the Hubbert Bringi method.";
+  p_help = "See above.";
+} KDP_n_filt_iterations_hubbert_bringi;
 
 paramdef double {
   p_default = 4.0;
-  p_descr = "Difference threshold for the iterative filtering method.";
-  p_help = "The FIR filter is applied successively, n_filt_iterations_conditioned times. After each iteration the result is checked against the original. If the difference is less than this parameter, the original value at that gate is retained. If the difference exceeds this parameter, the new filtered value is retained.";
-} KDP_phidp_difference_threshold;
+  p_descr = "Difference threshold for the Hubbert Bringi method.";
+  p_help = "After each iteration of the filter, the result is checked against the original. If the difference is less than this parameter, the original value at that gate is retained. If the difference exceeds this parameter, the new filtered value is retained.";
+} KDP_phidp_difference_threshold_hubbert_bringi;
+
+commentdef {
+  p_header = "IDENTIFYING VALID KDP REGIONS";
+  p_text = "In weak signal, the PHIDP is very noisy and contains no useful information. We compute various statistics to help to identify those gates containing valid PHIDP, and those with just noise.";
+}
 
 paramdef int {
   p_default = 9;
@@ -60,32 +79,14 @@ paramdef int {
 paramdef double {
   p_default = 20.0;
   p_descr = "Sets the threshold for the standard deviation of phidp in range.";
-  p_help = "The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+  p_help = "The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, we conclude we are in weather echo and the PHIDP is valid and KDP should be computed.";
 } KDP_phidp_sdev_max;
 
 paramdef double {
   p_default = 25.0;
   p_descr = "Sets the threshold for the jitter of phidp in range.";
-  p_help = "The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+  p_help = "The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, we conclude we are in weather echo, the PHIDP is valid and KDP should be computed at this gate.";
 } KDP_phidp_jitter_max;
-
-paramdef double {
-  p_default = 0.01;
-  p_descr = "Sets the min valid KDP value.";
-  p_help = "Values less than this are set to 0.";
-} KDP_min_valid_abs_kdp;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Check the SNR.";
-  p_descr = "This test can help identify regions of good PHIDP.";
-} KDP_check_snr;
-
-paramdef double {
-  p_default = -6.0;
-  p_descr = "Sets the threshold for checking SNR (dB).";
-  p_help = "If the SNR drops below this value, KDP will not be computed at this gate.";
-} KDP_snr_threshold;
 
 paramdef boolean {
   p_default = true;
@@ -101,6 +102,18 @@ paramdef double {
 
 paramdef boolean {
   p_default = false;
+  p_descr = "Check the SNR.";
+  p_descr = "This test can help identify regions of good PHIDP.";
+} KDP_check_snr;
+
+paramdef double {
+  p_default = -6.0;
+  p_descr = "Sets the threshold for checking SNR (dB).";
+  p_help = "If the SNR drops below this value, KDP will not be computed at this gate.";
+} KDP_snr_threshold;
+
+paramdef boolean {
+  p_default = false;
   p_descr = "Check the standard deviation of ZDR in range?";
   p_descr = "This test can help identify regions of clutter, and hence noisy PHIDP.";
 } KDP_check_zdr_sdev;
@@ -108,8 +121,12 @@ paramdef boolean {
 paramdef double {
   p_default = 2.0;
   p_descr = "Sets the threshold for the standard deviation of zdr in range.";
-  p_help = "The sdev of zdr is a good test for clutter. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+  p_help = "The sdev of zdr is a good test for clutter. If the sdev is less than this value, we conclude we are in weather echo rather than clutter.";
 } KDP_zdr_sdev_max;
+
+commentdef {
+  p_header = "COMPUTING KDP FROM Z and ZDR";
+}
 
 paramdef double {
   p_default = 0.25;
@@ -123,28 +140,25 @@ paramdef int {
   p_help = "The Z and ZDR fields are smoothed with a median filter of this length prior to estimating KDP_ZZDR.";
 } KDP_median_filter_len_for_ZZDR;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to print debug messages in KDP computation.";
-} KDP_debug;
+commentdef {
+  p_header = "SANITY CHECK ON KDP RESULTS";
+  p_text = "Ignore small KDP values, which are likely just noise.";
+}
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write ray files to debug KDP computation.";
-} KDP_write_ray_files;
-
-paramdef string {
-  p_default = "/tmp/kdp_ray_files";
-  p_descr = "Directory for KDP ray files.";
-} KDP_ray_files_dir;
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Sets the min valid KDP value.";
+  p_help = "Values less than this are set to 0.";
+} KDP_min_valid_abs_kdp;
 
 commentdef {
-  p_header = "PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR";
+  p_header = "ESTIMATING ATTENUATION CORRECTION FOR DBZ AND ZDR";
+  p_text = "Received power attenuation, and differential attenuation, occur whenever scattering occurs, but is of most importance at shorter wavelengths or in reqions of heavy precipition. We use the reference text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, Table 7.1, page 494, to provide the default coefficients from which to estimate the attenuation correction. You may also choose to specify these coefficients in this section.";
 }
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to specify the coefficients and exponents - see below.";
+  p_descr = "Option to specify the coefficients and exponents.";
   p_help = "If false, the default coefficients will be determined for the radar wavelength.";
 } KDP_specify_coefficients_for_attenuation_correction;
 
@@ -171,4 +185,23 @@ paramdef double {
   p_descr = "Exponent for computing ZDR attenuation correction.";
   p_help = "Default is 1.05. See Bringi and Chandrasekar, Table 7.1, page 494.";
 } KDP_zdr_attenuation_exponent;
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print debug messages in KDP computation.";
+} KDP_debug;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write ray files to debug KDP computation.";
+} KDP_write_ray_files;
+
+paramdef string {
+  p_default = "/tmp/kdp_ray_files";
+  p_descr = "Directory for KDP ray files.";
+} KDP_ray_files_dir;
 

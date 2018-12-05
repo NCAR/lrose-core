@@ -584,30 +584,6 @@
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
-    // Parameter 'instance'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("instance");
-    tt->descr = tdrpStrDup("Program instance for process registration.");
-    tt->help = tdrpStrDup("This application registers with procmap. This is the instance used for registration.");
-    tt->val_offset = (char *) &instance - &_start_;
-    tt->single_val.s = tdrpStrDup("test");
-    tt++;
-    
-    // Parameter 'procmap_register_interval'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("procmap_register_interval");
-    tt->descr = tdrpStrDup("Interval for registering with procmap (secs).");
-    tt->help = tdrpStrDup("REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.");
-    tt->val_offset = (char *) &procmap_register_interval - &_start_;
-    tt->single_val.i = 60;
-    tt++;
-    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -652,18 +628,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'input_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_dir");
-    tt->descr = tdrpStrDup("Input directory for searching for files.");
-    tt->help = tdrpStrDup("Files will be searched for in this directory.");
-    tt->val_offset = (char *) &input_dir - &_start_;
-    tt->single_val.s = tdrpStrDup(".");
-    tt++;
-    
     // Parameter 'mode'
     // ctype is '_mode_t'
     
@@ -671,7 +635,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file.  In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in ARCHIVE mode, at least) MUST contain a day-directory above the data file -- ./data_file.ext will not work as a file path, but ./yyyymmdd/data_file.ext will.");
+    tt->help = tdrpStrDup("\n\nIn REALTIME mode, the program waits for a new input file.\\nIn ARCHIVE mode, it moves through the data between the start and end times set on the command line. \n\nIn FILELIST mode, it moves through the list of file names specified on the command line.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
     tt->enum_def.nfields = 3;
@@ -686,16 +650,16 @@
     tt->single_val.e = FILELIST;
     tt++;
     
-    // Parameter 'max_realtime_data_age_secs'
-    // ctype is 'int'
+    // Parameter 'input_dir'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_realtime_data_age_secs");
-    tt->descr = tdrpStrDup("Maximum age of realtime data (secs)");
-    tt->help = tdrpStrDup("Only data less old than this will be used.");
-    tt->val_offset = (char *) &max_realtime_data_age_secs - &_start_;
-    tt->single_val.i = 300;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_dir");
+    tt->descr = tdrpStrDup("Input directory for searching for files.");
+    tt->help = tdrpStrDup("Files will be searched for in this directory.");
+    tt->val_offset = (char *) &input_dir - &_start_;
+    tt->single_val.s = tdrpStrDup(".");
     tt++;
     
     // Parameter 'input_file_search_ext'
@@ -876,13 +840,13 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("output_fields");
     tt->descr = tdrpStrDup("Indicate which fields should be written to the output file.");
-    tt->help = tdrpStrDup("Choose the ID from the list.\n\nThe name and units can be set however the user prefers.\n\nThe output_encoding apply to CfRadial output only. \n\n\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n\tKDP_ZZDR: KDP modified by Z-ZDR self-consistency (deg/km)\n\tKDP_COND: KDP conditioned - debug field (deg/km)\n\tPSOB: phase shift on backscatter as deduced from the filtering (deg)\n\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n");
+    tt->help = tdrpStrDup("Choose the ID from the list.\n\nThe name and units can be set however the user prefers.\n\nThe output_encoding apply to CfRadial output only. \n\n\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n\tKDP_COND: KDP conditioned - debug field (deg/km)\n\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n");
     tt->array_offset = (char *) &_output_fields - &_start_;
     tt->array_n_offset = (char *) &output_fields_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 8;
+    tt->array_n = 6;
     tt->struct_def.name = tdrpStrDup("output_field_t");
     tt->struct_def.nfields = 6;
     tt->struct_def.fields = (struct_field_t *)
@@ -893,25 +857,21 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 8;
+        tt->struct_def.fields[0].enum_def.nfields = 6;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("KDP");
         tt->struct_def.fields[0].enum_def.fields[0].val = KDP;
-        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("KDP_ZZDR");
-        tt->struct_def.fields[0].enum_def.fields[1].val = KDP_ZZDR;
-        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("KDP_COND");
-        tt->struct_def.fields[0].enum_def.fields[2].val = KDP_COND;
-        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("PSOB");
-        tt->struct_def.fields[0].enum_def.fields[3].val = PSOB;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
-        tt->struct_def.fields[0].enum_def.fields[4].val = DBZ_ATTEN_CORRECTION;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
-        tt->struct_def.fields[0].enum_def.fields[5].val = ZDR_ATTEN_CORRECTION;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("DBZ_ATTEN_CORRECTED");
-        tt->struct_def.fields[0].enum_def.fields[6].val = DBZ_ATTEN_CORRECTED;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("ZDR_ATTEN_CORRECTED");
-        tt->struct_def.fields[0].enum_def.fields[7].val = ZDR_ATTEN_CORRECTED;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("KDP_COND");
+        tt->struct_def.fields[0].enum_def.fields[1].val = KDP_COND;
+        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
+        tt->struct_def.fields[0].enum_def.fields[2].val = DBZ_ATTEN_CORRECTION;
+        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
+        tt->struct_def.fields[0].enum_def.fields[3].val = ZDR_ATTEN_CORRECTION;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("DBZ_ATTEN_CORRECTED");
+        tt->struct_def.fields[0].enum_def.fields[4].val = DBZ_ATTEN_CORRECTED;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("ZDR_ATTEN_CORRECTED");
+        tt->struct_def.fields[0].enum_def.fields[5].val = ZDR_ATTEN_CORRECTED;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -937,7 +897,7 @@
       tt->struct_def.fields[5].ptype = BOOL_TYPE;
       tt->struct_def.fields[5].rel_offset = 
         (char *) &_output_fields->do_write - (char *) _output_fields;
-    tt->n_struct_vals = 48;
+    tt->n_struct_vals = 36;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = KDP;
@@ -946,60 +906,36 @@
       tt->struct_vals[3].s = tdrpStrDup("specific_differential_phase_hv");
       tt->struct_vals[4].s = tdrpStrDup("deg/km");
       tt->struct_vals[5].b = pTRUE;
-      tt->struct_vals[6].e = KDP_ZZDR;
-      tt->struct_vals[7].s = tdrpStrDup("KDP_ZZDR");
-      tt->struct_vals[8].s = tdrpStrDup("specific_differential_phase_modified_using_z_and_zdr");
+      tt->struct_vals[6].e = KDP_COND;
+      tt->struct_vals[7].s = tdrpStrDup("KDP_COND");
+      tt->struct_vals[8].s = tdrpStrDup("kdp_conditioned_by_KDP_from_Z_and_ZDR");
       tt->struct_vals[9].s = tdrpStrDup("specific_differential_phase_hv");
       tt->struct_vals[10].s = tdrpStrDup("deg/km");
-      tt->struct_vals[11].b = pTRUE;
-      tt->struct_vals[12].e = KDP_COND;
-      tt->struct_vals[13].s = tdrpStrDup("KDP_COND");
-      tt->struct_vals[14].s = tdrpStrDup("conditional_kdp_from_estimated_kdp_and_kdpZZdr");
-      tt->struct_vals[15].s = tdrpStrDup("specific_differential_phase_hv");
-      tt->struct_vals[16].s = tdrpStrDup("deg/km");
+      tt->struct_vals[11].b = pFALSE;
+      tt->struct_vals[12].e = DBZ_ATTEN_CORRECTION;
+      tt->struct_vals[13].s = tdrpStrDup("DBZ_ATTEN_CORRECTION");
+      tt->struct_vals[14].s = tdrpStrDup("correction_to_dbz_for_attenuation");
+      tt->struct_vals[15].s = tdrpStrDup("dbz_attenuation_correction");
+      tt->struct_vals[16].s = tdrpStrDup("dB");
       tt->struct_vals[17].b = pFALSE;
-      tt->struct_vals[18].e = PSOB;
-      tt->struct_vals[19].s = tdrpStrDup("PSOB");
-      tt->struct_vals[20].s = tdrpStrDup("phase_shift_on_backscatter");
-      tt->struct_vals[21].s = tdrpStrDup("phase_shift_on_backscatter");
-      tt->struct_vals[22].s = tdrpStrDup("deg");
+      tt->struct_vals[18].e = ZDR_ATTEN_CORRECTION;
+      tt->struct_vals[19].s = tdrpStrDup("ZDR_ATTEN_CORRECTION");
+      tt->struct_vals[20].s = tdrpStrDup("correction_to_zdr_for_attenuation");
+      tt->struct_vals[21].s = tdrpStrDup("zdr_attenuation_correction");
+      tt->struct_vals[22].s = tdrpStrDup("dB");
       tt->struct_vals[23].b = pFALSE;
-      tt->struct_vals[24].e = DBZ_ATTEN_CORRECTION;
-      tt->struct_vals[25].s = tdrpStrDup("DBZ_ATTEN_CORRECTION");
-      tt->struct_vals[26].s = tdrpStrDup("correction_to_dbz_for_attenuation");
-      tt->struct_vals[27].s = tdrpStrDup("dbz_attenuation_correction");
-      tt->struct_vals[28].s = tdrpStrDup("dB");
+      tt->struct_vals[24].e = DBZ_ATTEN_CORRECTED;
+      tt->struct_vals[25].s = tdrpStrDup("DBZ_ATTEN_CORRECTED");
+      tt->struct_vals[26].s = tdrpStrDup("dbz_corrected_for_attenuation");
+      tt->struct_vals[27].s = tdrpStrDup("dbz_corrected_for_attenuation");
+      tt->struct_vals[28].s = tdrpStrDup("dBZ");
       tt->struct_vals[29].b = pFALSE;
-      tt->struct_vals[30].e = ZDR_ATTEN_CORRECTION;
-      tt->struct_vals[31].s = tdrpStrDup("ZDR_ATTEN_CORRECTION");
-      tt->struct_vals[32].s = tdrpStrDup("correction_to_zdr_for_attenuation");
-      tt->struct_vals[33].s = tdrpStrDup("zdr_attenuation_correction");
+      tt->struct_vals[30].e = ZDR_ATTEN_CORRECTED;
+      tt->struct_vals[31].s = tdrpStrDup("ZDR_ATTEN_CORRECTED");
+      tt->struct_vals[32].s = tdrpStrDup("zdr_corrected_for_attenuation");
+      tt->struct_vals[33].s = tdrpStrDup("zdr_corrected_for_attenuation");
       tt->struct_vals[34].s = tdrpStrDup("dB");
       tt->struct_vals[35].b = pFALSE;
-      tt->struct_vals[36].e = DBZ_ATTEN_CORRECTED;
-      tt->struct_vals[37].s = tdrpStrDup("DBZ_ATTEN_CORRECTED");
-      tt->struct_vals[38].s = tdrpStrDup("dbz_corrected_for_attenuation");
-      tt->struct_vals[39].s = tdrpStrDup("dbz_corrected_for_attenuation");
-      tt->struct_vals[40].s = tdrpStrDup("dBZ");
-      tt->struct_vals[41].b = pFALSE;
-      tt->struct_vals[42].e = ZDR_ATTEN_CORRECTED;
-      tt->struct_vals[43].s = tdrpStrDup("ZDR_ATTEN_CORRECTED");
-      tt->struct_vals[44].s = tdrpStrDup("zdr_corrected_for_attenuation");
-      tt->struct_vals[45].s = tdrpStrDup("zdr_corrected_for_attenuation");
-      tt->struct_vals[46].s = tdrpStrDup("dB");
-      tt->struct_vals[47].b = pFALSE;
-    tt++;
-    
-    // Parameter 'write_debug_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_debug_fields");
-    tt->descr = tdrpStrDup("Write extra fields to assist with debugging.");
-    tt->help = tdrpStrDup("These are the intermediate fields used in computing KDP and attenuation.");
-    tt->val_offset = (char *) &write_debug_fields - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'output_encoding'
@@ -1085,6 +1021,27 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("WRITING DEBUG FIELDS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'write_debug_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_debug_fields");
+    tt->descr = tdrpStrDup("Write extra fields to assist with debugging.");
+    tt->help = tdrpStrDup("These are the intermediate fields used in computing KDP and attenuation.");
+    tt->val_offset = (char *) &write_debug_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("WRITING THE OUTPUT FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1167,6 +1124,51 @@
       tt->enum_def.fields[2].name = tdrpStrDup("OUTPUT_FORMAT_UF");
       tt->enum_def.fields[2].val = OUTPUT_FORMAT_UF;
     tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("REALTIME OPERATIONS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'instance'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("instance");
+    tt->descr = tdrpStrDup("Program instance for process registration.");
+    tt->help = tdrpStrDup("This application registers with procmap. This is the instance used for registration.");
+    tt->val_offset = (char *) &instance - &_start_;
+    tt->single_val.s = tdrpStrDup("test");
+    tt++;
+    
+    // Parameter 'procmap_register_interval'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("procmap_register_interval");
+    tt->descr = tdrpStrDup("Interval for registering with procmap (secs).");
+    tt->help = tdrpStrDup("REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.");
+    tt->val_offset = (char *) &procmap_register_interval - &_start_;
+    tt->single_val.i = 60;
+    tt++;
+    
+    // Parameter 'max_realtime_data_age_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("max_realtime_data_age_secs");
+    tt->descr = tdrpStrDup("Maximum age of realtime data (secs)");
+    tt->help = tdrpStrDup("Only data less old than this will be used.");
+    tt->val_offset = (char *) &max_realtime_data_age_secs - &_start_;
+    tt->single_val.i = 300;
     tt++;
     
     // trailing entry has param_name set to NULL

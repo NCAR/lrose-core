@@ -26,6 +26,7 @@ HEADERS      += ../ExamineEdit/FunctionEditor.hh
 HEADERS      += ../ExamineEdit/SoloFunctions.hh
 HEADERS      += ../ExamineEdit/SoloFunctionsModel.hh
 HEADERS      += ../ExamineEdit/DataField.hh
+HEADERS      += ../SoloFunctionsApi/GeneralDefinitions.hh
 
 SOURCES       = Dialog.cc 
 SOURCES      += ../HawkEye/ColorMap.cc 
@@ -45,6 +46,8 @@ SOURCES      += ../ExamineEdit/spreadsheetdelegate.cc
 SOURCES      += ../ExamineEdit/FunctionEditor.cc
 SOURCES      += ../ExamineEdit/SoloFunctions.cc
 SOURCES      += ../ExamineEdit/SoloFunctionsModel.cc
+SOURCES      += ../SoloFunctionsApi/RemoveAcMotion.cc
+SOURCES      += ../SoloFunctionsApi/AcVel.cc
 SOURCES      += Main.cc
 
 RESOURCES = customcompleter.qrc
