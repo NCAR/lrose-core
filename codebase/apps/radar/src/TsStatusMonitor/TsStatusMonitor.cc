@@ -145,9 +145,9 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
   // create the reader from FMQ
   
   IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     iwrfDebug = IWRF_DEBUG_VERBOSE;
-  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+  } else if (_params.debug >= Params::DEBUG_NORM) {
     iwrfDebug = IWRF_DEBUG_NORM;
   } 
 
@@ -548,6 +548,12 @@ int TsStatusMonitor::_handlePulseArchive(IwrfTsPulse &pulse, bool &gotStatus)
   
   const IwrfTsInfo &info = pulse.getTsInfo();
   si64 statusXmlPktSeqNum = info.getStatusXmlPktSeqNum();
+  if (statusXmlPktSeqNum == 0) {
+    // if seq num is 0, compute a pseudo seq num from the time
+    // early data sets did not have the xml seq number set
+    const iwrf_status_xml_t &xmlHdr = info.getStatusXmlHdr();
+    statusXmlPktSeqNum = xmlHdr.packet.time_secs_utc + xmlHdr.packet.time_nano_secs;
+  }
 
   if (statusXmlPktSeqNum != _iwrfStatusXmlPktSeqNum) {
     

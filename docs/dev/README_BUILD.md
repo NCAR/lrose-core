@@ -55,7 +55,7 @@ Therefore LINUX is the preferred operating system.
 
 However, LROSE can be compiled and run under Mac OSX.
 
-Windows is supported using a Docker container.
+Windows is supported using a Docker container, or the [Windows Subsystem For Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 
 ### Required LINUX and gcc/g++ versions for LROSE build
 
