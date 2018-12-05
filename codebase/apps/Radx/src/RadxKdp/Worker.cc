@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// ComputeEngine.cc
+// Worker.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,12 +30,12 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// ComputeEngine computation - for multi-threading
+// Worker computation engine
 // There is one object per thread.
 //
 ///////////////////////////////////////////////////////////////
 
-#include "ComputeEngine.hh"
+#include "Worker.hh"
 #include "RadxKdp.hh"
 #include <toolsa/os_config.h>
 #include <toolsa/file_io.h>
@@ -45,14 +45,14 @@
 #include <Radx/RadxField.hh>
 #include <cerrno>
 using namespace std;
-pthread_mutex_t ComputeEngine::_debugPrintMutex = PTHREAD_MUTEX_INITIALIZER;
-const double ComputeEngine::missingDbl = -9999.0;
+pthread_mutex_t Worker::_debugPrintMutex = PTHREAD_MUTEX_INITIALIZER;
+const double Worker::missingDbl = -9999.0;
 
 // Constructor
 
-ComputeEngine::ComputeEngine(const Params &params,
-                             const KdpFiltParams &kdpFiltParams,
-                             int id)  :
+Worker::Worker(const Params &params,
+               const KdpFiltParams &kdpFiltParams,
+               int id)  :
         _params(params),
         _kdpFiltParams(kdpFiltParams),
         _id(id)
@@ -69,7 +69,7 @@ ComputeEngine::ComputeEngine(const Params &params,
 
 // destructor
 
-ComputeEngine::~ComputeEngine()
+Worker::~Worker()
 
 {
 
@@ -77,15 +77,15 @@ ComputeEngine::~ComputeEngine()
 
 //////////////////////////////////////////////////
 // compute the derived fields for given input ray
-// storing results in derived ray
+// storing results in output ray
 //
-// Creates derived ray and returns it.
+// Creates output ray and returns it.
 // It must be freed by caller.
 //
 // Returns NULL on error.
 
-RadxRay *ComputeEngine::compute(RadxRay *inputRay,
-                                double wavelengthM)
+RadxRay *Worker::compute(RadxRay *inputRay,
+                         double wavelengthM)
 {
 
   // set ray-specific metadata
@@ -104,8 +104,8 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
 
   // create moments ray
   
-  RadxRay *derivedRay = new RadxRay;
-  derivedRay->copyMetaData(*inputRay);
+  RadxRay *outputRay = new RadxRay;
+  outputRay->copyMetaData(*inputRay);
   
   // allocate input arrays for computing derived fields,
   // and load them up
@@ -123,16 +123,16 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
 
   // load output fields into the moments ray
   
-  _loadOutputFields(inputRay, derivedRay);
+  _loadOutputFields(inputRay, outputRay);
 
-  return derivedRay;
+  return outputRay;
 
 }
 
 //////////////////////////////////////
 // initialize KDP
   
-void ComputeEngine::_kdpInit()
+void Worker::_kdpInit()
   
 {
 
@@ -145,7 +145,7 @@ void ComputeEngine::_kdpInit()
 ////////////////////////////////////////////////
 // compute kdp from phidp, using Bringi's method
 
-void ComputeEngine::_kdpCompute()
+void Worker::_kdpCompute()
   
 {
 
@@ -196,7 +196,7 @@ void ComputeEngine::_kdpCompute()
 //////////////////////////////////////
 // alloc input arrays
   
-void ComputeEngine::_allocInputArrays()
+void Worker::_allocInputArrays()
   
 {
 
@@ -211,7 +211,7 @@ void ComputeEngine::_allocInputArrays()
 //////////////////////////////////////
 // alloc derived arrays
   
-void ComputeEngine::_allocDerivedArrays()
+void Worker::_allocDerivedArrays()
   
 {
   
@@ -224,7 +224,7 @@ void ComputeEngine::_allocDerivedArrays()
 /////////////////////////////////////////////////////
 // load input arrays ready for KDP
   
-int ComputeEngine::_loadInputArrays(RadxRay *inputRay)
+int Worker::_loadInputArrays(RadxRay *inputRay)
   
 {
   
@@ -264,10 +264,10 @@ int ComputeEngine::_loadInputArrays(RadxRay *inputRay)
 ////////////////////////////////////////
 // load a field array based on the name
 
-int ComputeEngine::_loadFieldArray(RadxRay *inputRay,
-                                   const string &fieldName,
-                                   bool required,
-                                   double *array)
+int Worker::_loadFieldArray(RadxRay *inputRay,
+                            const string &fieldName,
+                            bool required,
+                            double *array)
 
 {
   
@@ -282,7 +282,7 @@ int ComputeEngine::_loadFieldArray(RadxRay *inputRay,
     }
 
     pthread_mutex_lock(&_debugPrintMutex);
-    cerr << "ERROR - ComputeEngine::_getField" << endl;
+    cerr << "ERROR - Worker::_getField" << endl;
     cerr << "  Cannot find field in ray: " << fieldName<< endl;
     cerr << "  El, az: "
          << inputRay->getElevationDeg() << ", "
@@ -313,7 +313,7 @@ int ComputeEngine::_loadFieldArray(RadxRay *inputRay,
 //////////////////////////////////////////////////////////////
 // Compute the SNR field from the DBZ field
 
-void ComputeEngine::_computeSnrFromDbz()
+void Worker::_computeSnrFromDbz()
 
 {
 
@@ -347,8 +347,8 @@ void ComputeEngine::_computeSnrFromDbz()
 ///////////////////////////////
 // load up fields in output ray
 
-void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
-                                      RadxRay *derivedRay)
+void Worker::_loadOutputFields(RadxRay *inputRay,
+                               RadxRay *outputRay)
 
 {
 
@@ -415,7 +415,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
     // add to ray
 
-    derivedRay->addField(field);
+    outputRay->addField(field);
 
   } // ifield
   
@@ -430,7 +430,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
       if (inField != NULL) {
         RadxField *outField = new RadxField(*inField);
         outField->setName(cfield.output_name);
-        derivedRay->addField(outField);
+        outputRay->addField(outField);
       }
     } // ii
 
@@ -438,8 +438,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   // add debug fields if required
 
-  if (_params.write_debug_fields) {
-    _addDebugFields(derivedRay);
+  if (_params.KDP_write_debug_fields) {
+    _addDebugFields(outputRay);
   }
 
 }
@@ -447,101 +447,101 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 //////////////////////////////////////
 // add the debug fields
   
-void ComputeEngine::_addDebugFields(RadxRay *derivedRay)
+void Worker::_addDebugFields(RadxRay *outputRay)
 
 {
 
-  _addField(derivedRay,
+  _addField(outputRay,
             "KDP_ZZDR", "deg/km",
             "specific_differential_phase_theoretical_from_z_and_zdr",
             "specific_differential_phase_hv",
             _kdp.getKdpZZdr());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "PSOB", "deg",
             "phase_shift_on_backscatter",
             "phase_shift_on_backscatter",
             _kdp.getPsob());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "DBZ_FOR_KDP", "dBZ",
             "dbz_filtered_for_kdp_computations",
             "equivalent_reflectivity_factor",
             _kdp.getDbz());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "SNR_FOR_KDP", "dB",
             "snr_filtered_for_kdp_computations",
             "signal_to_noise_ratio",
             _kdp.getSnr());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "ZDR_FOR_KDP", "dB",
             "zdr_filtered_for_kdp_computations",
             "differential_reflectivity_hv",
             _kdp.getZdr());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "ZDR_SDEV_FOR_KDP", "dB",
             "standard_deviation_of_zdr_for_kdp_computations",
             "differential_reflectivity_hv",
             _kdp.getZdrSdev());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "RHOHV_FOR_KDP", "",
             "rhohv_filtered_for_kdp_computations",
             "cross_correlation_hv",
             _kdp.getRhohv());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "VALID_FLAG_FOR_KDP", "",
             "valid_flag_after_kdp_computations",
             "valid_flag_for_kdp",
             _kdp.getValidForKdp());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "PHIDP_FOR_KDP", "deg",
             "phidp_for_kdp_computations",
             "differential_phase_hv",
             _kdp.getPhidp());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "PHIDP_MEAN", "deg",
             "phidp_mean_for_kdp_computations",
             "differential_phase_hv",
             _kdp.getPhidpMean());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "PHIDP_MEAN_UNFOLD", "deg",
             "phidp_mean_unfold_for_kdp_computations",
             "differential_phase_hv",
             _kdp.getPhidpMeanUnfold());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "PHIDP_SDEV", "deg",
             "phidp_sdev_for_kdp_computations",
             "differential_phase_hv",
             _kdp.getPhidpSdev());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "PHIDP_JITTER", "deg",
             "phidp_jitter_for_kdp_computations",
             "differential_phase_hv",
             _kdp.getPhidpJitter());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "PHIDP_UNFOLD", "deg",
             "phidp_unfold_for_kdp_computations",
             "differential_phase_hv",
             _kdp.getPhidpUnfold());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "PHIDP_FILT", "deg",
             "phidp_filtered_for_kdp_computations",
             "differential_phase_hv",
             _kdp.getPhidpFilt());
   
-  _addField(derivedRay,
+  _addField(outputRay,
             "PHIDP_COND", "deg",
             "phidp_cond_for_kdp_computations",
             "differential_phase_hv",
@@ -550,14 +550,14 @@ void ComputeEngine::_addDebugFields(RadxRay *derivedRay)
 }
   
 //////////////////////////////////////
-// add a field to the derived ray
+// add a field to the output ray
   
-void ComputeEngine::_addField(RadxRay *derivedRay,
-                              const string &name,
-                              const string &units,
-                              const string &longName,
-                              const string standardName,
-                              const double *array64)
+void Worker::_addField(RadxRay *outputRay,
+                       const string &name,
+                       const string &units,
+                       const string &longName,
+                       const string standardName,
+                       const double *array64)
 
 {
 
@@ -581,20 +581,20 @@ void ComputeEngine::_addField(RadxRay *derivedRay,
   field->setStandardName(standardName);
   field->setTypeFl32(Radx::missingFl32);
   field->addDataFl32(_nGates, data32);
-  field->copyRangeGeom(*derivedRay);
+  field->copyRangeGeom(*outputRay);
   
   // add to ray
   
-  derivedRay->addField(field);
+  outputRay->addField(field);
 
 }
 
-void ComputeEngine::_addField(RadxRay *derivedRay,
-                              const string &name,
-                              const string &units,
-                              const string &longName,
-                              const string standardName,
-                              const bool *arrayBool)
+void Worker::_addField(RadxRay *outputRay,
+                       const string &name,
+                       const string &units,
+                       const string &longName,
+                       const string standardName,
+                       const bool *arrayBool)
 
 {
 
@@ -618,11 +618,11 @@ void ComputeEngine::_addField(RadxRay *derivedRay,
   field->setStandardName(standardName);
   field->setTypeFl32(Radx::missingFl32);
   field->addDataFl32(_nGates, data32);
-  field->copyRangeGeom(*derivedRay);
+  field->copyRangeGeom(*outputRay);
   
   // add to ray
   
-  derivedRay->addField(field);
+  outputRay->addField(field);
 
 }
 

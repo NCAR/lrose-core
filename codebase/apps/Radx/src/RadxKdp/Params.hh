@@ -451,7 +451,7 @@ public:
   copy_field_t *_copy_fields;
   int copy_fields_n;
 
-  tdrp_bool_t write_debug_fields;
+  tdrp_bool_t KDP_write_debug_fields;
 
   char* output_dir;
 

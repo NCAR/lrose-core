@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// ComputeEngine.hh
+// Worker.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,13 +30,13 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// ComputeEngine computation - for multi-threading
+// Worker computation engine
 // There is one object per thread.
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef ComputeEngine_HH
-#define ComputeEngine_HH
+#ifndef Worker_HH
+#define Worker_HH
 
 #include "Params.hh"
 #include <radar/KdpFilt.hh>
@@ -49,19 +49,19 @@ class RadxField;
 #include <pthread.h>
 using namespace std;
 
-class ComputeEngine {
+class Worker {
   
 public:
   
   // constructor
   
-  ComputeEngine(const Params &params,
-                const KdpFiltParams &kdpFiltParams,
-                int id);
+  Worker(const Params &params,
+         const KdpFiltParams &kdpFiltParams,
+         int id);
 
   // destructor
   
-  ~ComputeEngine();
+  ~Worker();
 
   // Creates derived fields ray and returns it.
   // It must be freed by caller.

@@ -24,7 +24,7 @@
 ///////////////////////////////////////////////////////////////
 // RadxKdp.cc
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Dec 2018
 //
@@ -36,7 +36,6 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "RadxKdp.hh"
 #include <cerrno>
 #include <algorithm>
 #include <toolsa/pmu.h>
@@ -53,6 +52,11 @@
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxXml.hh>
+
+#include "RadxKdp.hh"
+#include "Worker.hh"
+#include "WorkerThread.hh"
+
 using namespace std;
 
 // Constructor
@@ -62,7 +66,7 @@ RadxKdp::RadxKdp(int argc, char **argv)
 {
 
   OK = TRUE;
-  _engineSingle = NULL;
+  _workerSingle = NULL;
 
   // set programe name
 
@@ -118,8 +122,8 @@ RadxKdp::RadxKdp(int argc, char **argv)
     // set up compute thread pool
     
     for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-      ComputeThread *thread =
-        new ComputeThread(this, _params, _kdpFiltParams, ii);
+      WorkerThread *thread =
+        new WorkerThread(this, _params, _kdpFiltParams, ii);
       if (!thread->OK) {
         delete thread;
         OK = FALSE;
@@ -132,8 +136,8 @@ RadxKdp::RadxKdp(int argc, char **argv)
 
     // single threaded
     
-    _engineSingle = new ComputeEngine(_params, _kdpFiltParams, 0);
-    if (!_engineSingle->OK) {
+    _workerSingle = new Worker(_params, _kdpFiltParams, 0);
+    if (!_workerSingle->OK) {
       OK = FALSE;
     }
 
@@ -148,8 +152,8 @@ RadxKdp::~RadxKdp()
 
 {
 
-  if (_engineSingle) {
-    delete _engineSingle;
+  if (_workerSingle) {
+    delete _workerSingle;
   }
   
   // mutex
@@ -657,7 +661,7 @@ int RadxKdp::_computeSingleThreaded()
     // compute moments
     
     RadxRay *derivedRay =
-      _engineSingle->compute(inputRay, _wavelengthM);
+      _workerSingle->compute(inputRay, _wavelengthM);
     if (derivedRay == NULL) {
       cerr << "ERROR - _compute" << endl;
       return -1;
@@ -688,8 +692,8 @@ int RadxKdp::_computeMultiThreaded()
 
     // get a thread from the pool
     bool isDone = true;
-    ComputeThread *thread = 
-      (ComputeThread *) _threadPool.getNextThread(true, isDone);
+    WorkerThread *thread = 
+      (WorkerThread *) _threadPool.getNextThread(true, isDone);
     if (thread == NULL) {
       break;
     }
@@ -714,7 +718,7 @@ int RadxKdp::_computeMultiThreaded()
 
   _threadPool.setReadyForDoneCheck();
   while (!_threadPool.checkAllDone()) {
-    ComputeThread *thread = (ComputeThread *) _threadPool.getNextDoneThread();
+    WorkerThread *thread = (WorkerThread *) _threadPool.getNextDoneThread();
     if (thread == NULL) {
       break;
     } else {
@@ -732,11 +736,11 @@ int RadxKdp::_computeMultiThreaded()
 ///////////////////////////////////////////////////////////
 // Store the derived ray
 
-int RadxKdp::_storeDerivedRay(ComputeThread *thread)
+int RadxKdp::_storeDerivedRay(WorkerThread *thread)
 
 {
   
-  RadxRay *derivedRay = thread->getDerivedRay();
+  RadxRay *derivedRay = thread->getOutputRay();
   if (derivedRay != NULL) {
     // good return, add to results
     _derivedRays.push_back(derivedRay);
@@ -746,66 +750,3 @@ int RadxKdp::_storeDerivedRay(ComputeThread *thread)
 
 }
       
-///////////////////////////////////////////////////////////////
-// ComputeThread
-
-// Constructor
-
-RadxKdp::ComputeThread::ComputeThread(RadxKdp *obj,
-                                      const Params &params,
-                                      const KdpFiltParams &kdpFiltParams,
-                                      int threadNum) :
-        _this(obj),
-        _params(params),
-        _kdpFiltParams(kdpFiltParams),
-        _threadNum(threadNum)
-{
-
-  OK = TRUE;
-  _inputRay = NULL;
-  _derivedRay = NULL;
-
-  // create compute engine object
-  
-  _engine = new ComputeEngine(_params, _kdpFiltParams, _threadNum);
-  if (_engine == NULL) {
-    OK = FALSE;
-    return;
-  }
-  if (!_engine->OK) {
-    OK = FALSE;
-    _engine = NULL;
-    return;
-  }
-
-}  
-
-// Destructor
-
-RadxKdp::ComputeThread::~ComputeThread()
-{
-
-  if (_engine != NULL) {
-    delete _engine;
-  }
-
-}  
-
-// run method
-
-void RadxKdp::ComputeThread::run()
-{
-
-  // check
-
-  assert(_engine != NULL);
-  assert(_inputRay != NULL);
-  
-  // Compute engine object will create the derived ray
-  // The ownership of the ray is passed to the parent object
-  // which adds it to the output volume.
-
-  _derivedRay = _engine->compute(_inputRay,
-                                 _this->_wavelengthM);
-
-}

@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for RadxKdp
+ * TDRP params for ./RadxKdp
  **********************************************************************/
 
 //======================================================================
@@ -406,7 +406,7 @@ output_encoding = OUTPUT_ENCODING_INT16;
 // Type: boolean
 //
 
-copy_selected_input_fields_to_output = TRUE;
+copy_selected_input_fields_to_output = FALSE;
 
 ///////////// copy_fields /////////////////////////////
 //
@@ -467,7 +467,7 @@ copy_fields = {
 //
 //======================================================================
  
-///////////// write_debug_fields //////////////////////
+///////////// KDP_write_debug_fields //////////////////
 //
 // Write extra fields to assist with debugging.
 //
@@ -478,7 +478,7 @@ copy_fields = {
 // Type: boolean
 //
 
-write_debug_fields = TRUE;
+KDP_write_debug_fields = FALSE;
 
 //======================================================================
 //

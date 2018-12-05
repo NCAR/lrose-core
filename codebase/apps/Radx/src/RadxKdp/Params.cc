@@ -1025,15 +1025,15 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'write_debug_fields'
+    // Parameter 'KDP_write_debug_fields'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_debug_fields");
+    tt->param_name = tdrpStrDup("KDP_write_debug_fields");
     tt->descr = tdrpStrDup("Write extra fields to assist with debugging.");
     tt->help = tdrpStrDup("These are the intermediate fields used in computing KDP and attenuation.");
-    tt->val_offset = (char *) &write_debug_fields - &_start_;
+    tt->val_offset = (char *) &KDP_write_debug_fields - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

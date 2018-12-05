@@ -50,15 +50,17 @@ LOC_CFLAGS =
 HDRS = \
 	Params.hh \
 	Args.hh \
-	ComputeEngine.hh \
-	RadxKdp.hh
+	RadxKdp.hh \
+	Worker.hh \
+	WorkerThread.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
-	ComputeEngine.cc \
 	Main.cc \
-	RadxKdp.cc
+	RadxKdp.cc \
+	Worker.cc \
+	WorkerThread.cc
 
 #
 # tdrp macros

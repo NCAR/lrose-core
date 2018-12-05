@@ -289,7 +289,7 @@ paramdef boolean {
   p_default = FALSE;
   p_descr = "Write extra fields to assist with debugging.";
   p_help = "These are the intermediate fields used in computing KDP and attenuation.";
-} write_debug_fields;
+} KDP_write_debug_fields;
 
 commentdef {
   p_header = "WRITING THE OUTPUT FILES";
