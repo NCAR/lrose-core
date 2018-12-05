@@ -1,3 +1,5 @@
+#ifndef GENERALDEFINITIONS_H
+#define GENERALDEFINITIONS_H
 
 #include <stdio.h>
 #include <math.h>
@@ -30,3 +32,5 @@
 # define     LIDAR_MOVING 8
 # define      LIDAR_FIXED 9
 */
+
+#endif

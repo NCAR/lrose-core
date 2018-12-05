@@ -1,5 +1,6 @@
 
 #include "GeneralDefinitions.hh"
+#include "AcVel.cc"
 
 /* c------------------------------------------------------------------------ */
 
@@ -8,9 +9,16 @@
 //  int arg;
 //  struct ui_command *cmds;
 //{
+//
+// on 32-bit machine, same as on 64-bit machine
+// short  2 bytes  integer
+// int    4 bytes  
+// float  4 bytes 
+// double 8 bytes
+
 int  se_remove_ac_motion(float vert_velocity, float ew_velocity, float ns_velocity,
 		     float ew_gndspd_corr, float tilt, float elevation,
-		     short *data, // dds_qdata_ptrs[pn] or velocity data in this case 
+		     const short *data, // dds_qdata_ptrs[pn] or velocity data in this case 
 		     short bad, float parameter_scale, float parameter_bias, int dgi_clip_gate,
 		     short dds_radd_eff_unamb_vel,
 		     int seds_nyquist_velocity)

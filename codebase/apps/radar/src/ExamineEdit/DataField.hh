@@ -58,15 +58,21 @@ class DataField : public QObject
 public:
   DataField(QObject *parent = nullptr) : QObject(parent) {}
   DataField(QVector<double> someData, QObject *parent = nullptr) : QObject(parent) {_values = someData; }
+  DataField(string fieldName, QObject *parent = nullptr) : QObject(parent) {_name = QString::fromStdString(fieldName); }
 
   //  Q_PROPERTY(QVector<int> values MEMBER _values)
   Q_PROPERTY(QVector<double> values MEMBER _values)
+
+  Q_PROPERTY(QString name MEMBER _name)
 
  //add(QVector<int> v, QVector<int> v2) { QVector<int> v3(3); for (int i=0; i<3; i++) v3[i]=v[i]+v2[i]; return v3; }
 
 private:
   QVector<double> _values;
   //  persisted to underlying model (RadxVol)
+
+  QString _name;
+
 };
 
 

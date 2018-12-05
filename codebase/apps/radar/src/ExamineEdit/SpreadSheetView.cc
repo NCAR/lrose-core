@@ -527,19 +527,25 @@ qDebug() << a.toString(); // outputs "[1, 2, 3, 5]"
       // ======
 
     QJSValue result = engine.evaluate(text);
-    if (result.isArray()) {
-      cerr << " the result is an array\n"; 
-      //vector<int> myvector;
-      //myvector = engine.fromScriptValue(result);
-    }
-    cerr << " the result is " << result.toString().toStdString() << endl;
+    if (result.isError()) {
+      qDebug()
+	<< "Uncaught exception at line"
+	<< result.property("lineNumber").toInt()
+	<< ":" << result.toString();
+    } else {
+      if (result.isArray()) {
+        cerr << " the result is an array\n"; 
+        //vector<int> myvector;
+        //myvector = engine.fromScriptValue(result);
+      }
+      cerr << " the result is " << result.toString().toStdString() << endl;
 
-    // ======
-    // TODO: YES! This works.  The new global variables are listed here;
-    // just find them and add them to the spreadsheet and to the Model??
-    // HERE!!!
-    // try iterating over the properties of the globalObject to find new variables
-    QJSValue newGlobalObject = engine.globalObject();
+      // ======
+      // TODO: YES! This works.  The new global variables are listed here;
+      // just find them and add them to the spreadsheet and to the Model??
+      // HERE!!!
+      // try iterating over the properties of the globalObject to find new variables
+      QJSValue newGlobalObject = engine.globalObject();
 
       QJSValueIterator it2(newGlobalObject);
       while (it2.hasNext()) {
@@ -553,14 +559,15 @@ qDebug() << a.toString(); // outputs "[1, 2, 3, 5]"
       }
       // ======
 
-    int row = table->currentRow();
-    int col = table->currentColumn();
-    QTableWidgetItem *item = table->item(row, col);
-    if (!item)
-      table->setItem(row, col, new SpreadSheetItem(result.toString())); // text));
-    else
-      item->setData(Qt::EditRole, result.toString()); // text);
-    table->viewport()->update();
+      int row = table->currentRow();
+      int col = table->currentColumn();
+      QTableWidgetItem *item = table->item(row, col);
+      if (!item)
+        table->setItem(row, col, new SpreadSheetItem(result.toString())); // text));
+      else
+        item->setData(Qt::EditRole, result.toString()); // text);
+      table->viewport()->update();
+    }
 }
 
 void SpreadSheetView::cancelFormulaInput()
@@ -911,42 +918,6 @@ void SpreadSheetView::setupContextMenu()
     setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
-/*
-void SpreadSheetView::setupContentsBlank()
-{
-    QColor titleBackground(Qt::lightGray);
-    QFont titleFont = table->font();
-    titleFont.setBold(true);
-
-
-    int index;
-    index = 0;
-
-    // vector<string> fieldNames = {"one", "two"}; //  
-    vector<string> fieldNames = _controller->getFieldNames();
-
-    int c = 0;
-    int r = 0;
-    vector<string>::iterator it; 
-    for(it = fieldNames.begin(); it != fieldNames.end(); it++, c++) {
-      QString the_name(QString::fromStdString(*it));
-      cerr << *it << endl;
-      table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
-       
-      vector<double> data = _controller->getData(*it);
-
-      cerr << "number of data values = " << data.size() << endl;
-
-      for (r=0; r<20; r++) {
-        string format = "%g";
-        char formattedData[250];
-        //    sprintf(formattedData, format, data[0]);
-        sprintf(formattedData, "%g", data[r]); 
-        table->setItem(r, c, new SpreadSheetItem(formattedData));
-      }
-    }
-}
-*/
 
 void SpreadSheetView::setupContents()
 {
@@ -986,7 +957,40 @@ void SpreadSheetView::setupContents()
 
 
     //======
+
+    // This section of code makes every data field in volume a variable
+    // When the variable name is referenced in the formula bar,
+    // the variable name as a string is substituted.
+    //     
+    // for each field in model (RadxVol)
     
+    if (_controller != NULL) {
+    vector<string> fieldNames = _controller->getFieldNames();
+
+    int c = 0;
+    vector<string>::iterator it;
+    for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
+      QString fieldName(QString::fromStdString(*it));
+      //    try {
+        //vector<double> data = _controller->getData(*it);
+        QJSValue objectValue = engine.newQObject(new DataField(*it));
+        engine.globalObject().setProperty(fieldName, objectValue.property("name"));
+	//} catch (Exception ex) {
+	// cerr << "ERROR - problem setting property on field " << *it << endl;
+	//}
+    }
+    }
+    // end set global field values
+
+    //==========
+
+    /*
+    //======
+
+    // This section of code makes every data field in volume a variable
+    // When the variable name is referenced in the formula bar,
+    // the data values are substituted.
+    //     
     // for each field in model (RadxVol)
     
     if (_controller != NULL) {
@@ -1005,116 +1009,6 @@ void SpreadSheetView::setupContents()
     // end set global field values
 
     //==========
-
-    /* TODO: each of these columns and data must come from RadxVol
-    // column 0
-    table->setItem(0, 0, new SpreadSheetItem("Item"));
-    table->item(0, 0)->setBackgroundColor(titleBackground);
-    table->item(0, 0)->setToolTip("This column shows the purchased item/service");
-    table->item(0, 0)->setFont(titleFont);
-
-    table->setItem(1, 0, new SpreadSheetItem("AirportBus"));
-    table->setItem(2, 0, new SpreadSheetItem("Flight (Munich)"));
-    table->setItem(3, 0, new SpreadSheetItem("Lunch"));
-    table->setItem(4, 0, new SpreadSheetItem("Flight (LA)"));
-    table->setItem(5, 0, new SpreadSheetItem("Taxi"));
-    table->setItem(6, 0, new SpreadSheetItem("Dinner"));
-    table->setItem(7, 0, new SpreadSheetItem("Hotel"));
-    table->setItem(8, 0, new SpreadSheetItem("Flight (Oslo)"));
-    table->setItem(9, 0, new SpreadSheetItem("Total:"));
-
-    table->item(9, 0)->setFont(titleFont);
-    table->item(9, 0)->setBackgroundColor(Qt::lightGray);
-
-    // column 1
-    table->setItem(0, 1, new SpreadSheetItem("Date"));
-    table->item(0, 1)->setBackgroundColor(titleBackground);
-    table->item(0, 1)->setToolTip("This column shows the purchase date, double click to change");
-    table->item(0, 1)->setFont(titleFont);
-
-    table->setItem(1, 1, new SpreadSheetItem("15/6/2006"));
-    table->setItem(2, 1, new SpreadSheetItem("15/6/2006"));
-    table->setItem(3, 1, new SpreadSheetItem("15/6/2006"));
-    table->setItem(4, 1, new SpreadSheetItem("21/5/2006"));
-    table->setItem(5, 1, new SpreadSheetItem("16/6/2006"));
-    table->setItem(6, 1, new SpreadSheetItem("16/6/2006"));
-    table->setItem(7, 1, new SpreadSheetItem("16/6/2006"));
-    table->setItem(8, 1, new SpreadSheetItem("18/6/2006"));
-
-    table->setItem(9, 1, new SpreadSheetItem());
-    table->item(9, 1)->setBackgroundColor(Qt::lightGray);
-
-    // column 2
-    table->setItem(0, 2, new SpreadSheetItem("Price"));
-    table->item(0, 2)->setBackgroundColor(titleBackground);
-    table->item(0, 2)->setToolTip("This column shows the price of the purchase");
-    table->item(0, 2)->setFont(titleFont);
-
-    table->setItem(1, 2, new SpreadSheetItem("150"));
-    table->setItem(2, 2, new SpreadSheetItem("2350"));
-    table->setItem(3, 2, new SpreadSheetItem("-14"));
-    table->setItem(4, 2, new SpreadSheetItem("980"));
-    table->setItem(5, 2, new SpreadSheetItem("5"));
-    table->setItem(6, 2, new SpreadSheetItem("120"));
-    table->setItem(7, 2, new SpreadSheetItem("300"));
-    table->setItem(8, 2, new SpreadSheetItem("1240"));
-
-    table->setItem(9, 2, new SpreadSheetItem());
-    table->item(9, 2)->setBackgroundColor(Qt::lightGray);
-
-    // column 3
-    table->setItem(0, 3, new SpreadSheetItem("Currency"));
-    table->item(0, 3)->setBackgroundColor(titleBackground);
-    table->item(0, 3)->setToolTip("This column shows the currency");
-    table->item(0, 3)->setFont(titleFont);
-
-    table->setItem(1, 3, new SpreadSheetItem("NOK"));
-    table->setItem(2, 3, new SpreadSheetItem("NOK"));
-    table->setItem(3, 3, new SpreadSheetItem("EUR"));
-    table->setItem(4, 3, new SpreadSheetItem("EUR"));
-    table->setItem(5, 3, new SpreadSheetItem("USD"));
-    table->setItem(6, 3, new SpreadSheetItem("USD"));
-    table->setItem(7, 3, new SpreadSheetItem("USD"));
-    table->setItem(8, 3, new SpreadSheetItem("USD"));
-
-    table->setItem(9, 3, new SpreadSheetItem());
-    table->item(9,3)->setBackgroundColor(Qt::lightGray);
-
-    // column 4
-    table->setItem(0, 4, new SpreadSheetItem("Ex. Rate"));
-    table->item(0, 4)->setBackgroundColor(titleBackground);
-    table->item(0, 4)->setToolTip("This column shows the exchange rate to NOK");
-    table->item(0, 4)->setFont(titleFont);
-
-    table->setItem(1, 4, new SpreadSheetItem("1"));
-    table->setItem(2, 4, new SpreadSheetItem("1"));
-    table->setItem(3, 4, new SpreadSheetItem("8"));
-    table->setItem(4, 4, new SpreadSheetItem("8"));
-    table->setItem(5, 4, new SpreadSheetItem("7"));
-    table->setItem(6, 4, new SpreadSheetItem("7"));
-    table->setItem(7, 4, new SpreadSheetItem("7"));
-    table->setItem(8, 4, new SpreadSheetItem("7"));
-
-    table->setItem(9, 4, new SpreadSheetItem());
-    table->item(9,4)->setBackgroundColor(Qt::lightGray);
-
-    // column 5
-    table->setItem(0, 5, new SpreadSheetItem("NOK"));
-    table->item(0, 5)->setBackgroundColor(titleBackground);
-    table->item(0, 5)->setToolTip("This column shows the expenses in NOK");
-    table->item(0, 5)->setFont(titleFont);
-
-    table->setItem(1, 5, new SpreadSheetItem("* C2 E2"));
-    table->setItem(2, 5, new SpreadSheetItem("* C3 E3"));
-    table->setItem(3, 5, new SpreadSheetItem("* C4 E4"));
-    table->setItem(4, 5, new SpreadSheetItem("* C5 E5"));
-    table->setItem(5, 5, new SpreadSheetItem("* C6 E6"));
-    table->setItem(6, 5, new SpreadSheetItem("* C7 E7"));
-    table->setItem(7, 5, new SpreadSheetItem("* C8 E8"));
-    table->setItem(8, 5, new SpreadSheetItem("* C9 E9"));
-
-    table->setItem(9, 5, new SpreadSheetItem("sum F2 F9"));
-    table->item(9,5)->setBackgroundColor(Qt::lightGray);
     */
 }
 

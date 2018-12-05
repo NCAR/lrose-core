@@ -48,14 +48,16 @@ QString  SoloFunctions::REMOVE_AIRCRAFT_MOTION(QString field) {
   // then the QString contains all the values as a comma separated list in a string
   // parse the field data into a vector 
   //vector<string> x = split(field.toStdString(), ',');
-  vector<double> x = splitDouble(field.toStdString(), ',');
+  /*vector<double> x = splitDouble(field.toStdString(), ',');
 
   cerr << "list of field values: " << endl;
   for (vector<double>::iterator it = x.begin(); it != x.end(); ++it) 
     cerr << ' ' << *it;
   cerr << endl;
+  */
 
-  vector<double> result = soloFunctionsModel.RemoveAircraftMotion(x, dataModel);
+  vector<double> result = soloFunctionsModel.RemoveAircraftMotion(field.toStdString(), dataModel);
+  //  vector<double> result = soloFunctionsModel.RemoveAircraftMotion(x, dataModel);
 
   // TODO: what is being returned? the name of the new field in the model that
   // contains the results.
