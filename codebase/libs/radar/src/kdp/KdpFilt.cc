@@ -663,6 +663,8 @@ void KdpFilt::_initArrays(const double *snr,
   _psob = _psob_.alloc(_nGates);
   _dbzAttenCorr = _dbzAttenCorr_.alloc(_nGates);
   _zdrAttenCorr = _zdrAttenCorr_.alloc(_nGates);
+  _dbzCorrected = _dbzCorrected_.alloc(_nGates);
+  _zdrCorrected = _zdrCorrected_.alloc(_nGates);
   _gateStates = _gateStates_.alloc(_nGates);
   
   // copy data to working arrays
@@ -688,6 +690,8 @@ void KdpFilt::_initArrays(const double *snr,
   FilterUtils::applyMedianFilter(_dbzMedian, _nGates,
                                  _kdpZZdrMedianLen, _missingValue);
 
+  memcpy(_dbzCorrected, _dbz, _nGates * sizeof(double));
+
   if (zdr != NULL) {
     memcpy(_zdr, zdr, _nGates * sizeof(double));
     _zdrAvailable = true;
@@ -700,6 +704,7 @@ void KdpFilt::_initArrays(const double *snr,
   memcpy(_zdrMedian, _zdr, _nGates * sizeof(double));
   FilterUtils::applyMedianFilter(_zdrMedian, _nGates,
                                  _kdpZZdrMedianLen, _missingValue);
+  memcpy(_zdrCorrected, _zdr, _nGates * sizeof(double));
 
   if (rhohv != NULL) {
     memcpy(_rhohv, rhohv, _nGates * sizeof(double));
@@ -760,8 +765,8 @@ void KdpFilt::_initArrays(const double *snr,
       _kdpCond[ii] = 0;
       _psob[ii] = 0;
     }
-    _dbzAttenCorr[ii] = _missingValue;
-    _zdrAttenCorr[ii] = _missingValue;
+    _dbzAttenCorr[ii] = 0;
+    _zdrAttenCorr[ii] = 0;
   }
   
 }
@@ -1152,6 +1157,13 @@ void KdpFilt::_computeAttenCorrection()
 
     _dbzAttenCorr[ii] = sumDbzCorr;
     _zdrAttenCorr[ii] = sumZdrCorr;
+
+    if (_dbz[ii] > -9990) {
+      _dbzCorrected[ii] = _dbz[ii] + sumDbzCorr;
+    }
+    if (_zdr[ii] > -9990) {
+      _zdrCorrected[ii] = _zdr[ii] + sumZdrCorr;
+    }
 
   } // ii
 

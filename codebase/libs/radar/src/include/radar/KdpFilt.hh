@@ -384,6 +384,8 @@ public:
    */
   const double *getDbzAttenCorr() const { return _dbzAttenCorr; }
   const double *getZdrAttenCorr() const { return _zdrAttenCorr; }
+  const double *getDbzCorrected() const { return _dbzCorrected; }
+  const double *getZdrCorrected() const { return _zdrCorrected; }
 
   /**
    * set debug on
@@ -639,6 +641,12 @@ private:
 
   TaArray<double> _zdrAttenCorr_;
   double *_zdrAttenCorr;
+
+  TaArray<double> _dbzCorrected_;
+  double *_dbzCorrected;
+
+  TaArray<double> _zdrCorrected_;
+  double *_zdrCorrected;
 
   // Z and ZDR attenuation correction
 
