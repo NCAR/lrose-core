@@ -32,33 +32,6 @@
 
 debug = DEBUG_OFF;
 
-///////////// instance ////////////////////////////////
-//
-// Program instance for process registration.
-//
-// This application registers with procmap. This is the instance used 
-//   for registration.
-//
-//
-// Type: string
-//
-
-instance = "test";
-
-///////////// procmap_register_interval ///////////////
-//
-// Interval for registering with procmap (secs).
-//
-// REALTIME mode only. The app will register with procmap at this 
-//   interval, to update its status. If it does not register within twice 
-//   this interval, the auto_restart script will restart the app.
-//
-//
-// Type: int
-//
-
-procmap_register_interval = 60;
-
 //======================================================================
 //
 // THREADING FOR SPEED.
@@ -102,29 +75,18 @@ n_compute_threads = 4;
 //
 //======================================================================
  
-///////////// input_dir ///////////////////////////////
-//
-// Input directory for searching for files.
-//
-// Files will be searched for in this directory.
-//
-//
-// Type: string
-//
-
-input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur";
-
 ///////////// mode ////////////////////////////////////
 //
 // Operating mode.
 //
-// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+
+//
+// In REALTIME mode, the program waits for a new input file.\nIn ARCHIVE 
 //   mode, it moves through the data between the start and end times set 
-//   on the command line. In FILELIST mode, it moves through the list of 
-//   file names specified on the command line. Paths (in ARCHIVE mode, at 
-//   least) MUST contain a day-directory above the data file -- 
-//   ./data_file.ext will not work as a file path, but 
-//   ./yyyymmdd/data_file.ext will.
+//   on the command line. 
+//
+// In FILELIST mode, it moves through the list of file names specified 
+//   on the command line.
 //
 //
 // Type: enum
@@ -136,17 +98,17 @@ input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur";
 
 mode = FILELIST;
 
-///////////// max_realtime_data_age_secs //////////////
+///////////// input_dir ///////////////////////////////
 //
-// Maximum age of realtime data (secs).
+// Input directory for searching for files.
 //
-// Only data less old than this will be used.
+// Files will be searched for in this directory.
 //
 //
-// Type: int
+// Type: string
 //
 
-max_realtime_data_age_secs = 300;
+input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur";
 
 ///////////// input_file_search_ext ///////////////////
 //
@@ -411,19 +373,6 @@ output_fields = {
   }
 };
 
-///////////// write_debug_fields //////////////////////
-//
-// Write extra fields to assist with debugging.
-//
-// These are the intermediate fields used in computing KDP and 
-//   attenuation.
-//
-//
-// Type: boolean
-//
-
-write_debug_fields = TRUE;
-
 ///////////// output_encoding /////////////////////////
 //
 // Set the encoding for fields in the output files.
@@ -514,6 +463,25 @@ copy_fields = {
 
 //======================================================================
 //
+// WRITING DEBUG FIELDS.
+//
+//======================================================================
+ 
+///////////// write_debug_fields //////////////////////
+//
+// Write extra fields to assist with debugging.
+//
+// These are the intermediate fields used in computing KDP and 
+//   attenuation.
+//
+//
+// Type: boolean
+//
+
+write_debug_fields = TRUE;
+
+//======================================================================
+//
 // WRITING THE OUTPUT FILES.
 //
 //======================================================================
@@ -585,4 +553,49 @@ append_year_dir_to_output_dir = FALSE;
 //
 
 output_format = OUTPUT_FORMAT_CFRADIAL;
+
+//======================================================================
+//
+// REALTIME OPERATIONS.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+///////////// procmap_register_interval ///////////////
+//
+// Interval for registering with procmap (secs).
+//
+// REALTIME mode only. The app will register with procmap at this 
+//   interval, to update its status. If it does not register within twice 
+//   this interval, the auto_restart script will restart the app.
+//
+//
+// Type: int
+//
+
+procmap_register_interval = 60;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
 

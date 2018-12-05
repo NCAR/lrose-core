@@ -584,30 +584,6 @@
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
-    // Parameter 'instance'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("instance");
-    tt->descr = tdrpStrDup("Program instance for process registration.");
-    tt->help = tdrpStrDup("This application registers with procmap. This is the instance used for registration.");
-    tt->val_offset = (char *) &instance - &_start_;
-    tt->single_val.s = tdrpStrDup("test");
-    tt++;
-    
-    // Parameter 'procmap_register_interval'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("procmap_register_interval");
-    tt->descr = tdrpStrDup("Interval for registering with procmap (secs).");
-    tt->help = tdrpStrDup("REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.");
-    tt->val_offset = (char *) &procmap_register_interval - &_start_;
-    tt->single_val.i = 60;
-    tt++;
-    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -652,18 +628,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'input_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_dir");
-    tt->descr = tdrpStrDup("Input directory for searching for files.");
-    tt->help = tdrpStrDup("Files will be searched for in this directory.");
-    tt->val_offset = (char *) &input_dir - &_start_;
-    tt->single_val.s = tdrpStrDup(".");
-    tt++;
-    
     // Parameter 'mode'
     // ctype is '_mode_t'
     
@@ -671,7 +635,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file.  In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in ARCHIVE mode, at least) MUST contain a day-directory above the data file -- ./data_file.ext will not work as a file path, but ./yyyymmdd/data_file.ext will.");
+    tt->help = tdrpStrDup("\n\nIn REALTIME mode, the program waits for a new input file.\\nIn ARCHIVE mode, it moves through the data between the start and end times set on the command line. \n\nIn FILELIST mode, it moves through the list of file names specified on the command line.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
     tt->enum_def.nfields = 3;
@@ -686,16 +650,16 @@
     tt->single_val.e = FILELIST;
     tt++;
     
-    // Parameter 'max_realtime_data_age_secs'
-    // ctype is 'int'
+    // Parameter 'input_dir'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_realtime_data_age_secs");
-    tt->descr = tdrpStrDup("Maximum age of realtime data (secs)");
-    tt->help = tdrpStrDup("Only data less old than this will be used.");
-    tt->val_offset = (char *) &max_realtime_data_age_secs - &_start_;
-    tt->single_val.i = 300;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_dir");
+    tt->descr = tdrpStrDup("Input directory for searching for files.");
+    tt->help = tdrpStrDup("Files will be searched for in this directory.");
+    tt->val_offset = (char *) &input_dir - &_start_;
+    tt->single_val.s = tdrpStrDup(".");
     tt++;
     
     // Parameter 'input_file_search_ext'
@@ -974,18 +938,6 @@
       tt->struct_vals[35].b = pFALSE;
     tt++;
     
-    // Parameter 'write_debug_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_debug_fields");
-    tt->descr = tdrpStrDup("Write extra fields to assist with debugging.");
-    tt->help = tdrpStrDup("These are the intermediate fields used in computing KDP and attenuation.");
-    tt->val_offset = (char *) &write_debug_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'output_encoding'
     // ctype is '_output_encoding_t'
     
@@ -1069,6 +1021,27 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("WRITING DEBUG FIELDS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'write_debug_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_debug_fields");
+    tt->descr = tdrpStrDup("Write extra fields to assist with debugging.");
+    tt->help = tdrpStrDup("These are the intermediate fields used in computing KDP and attenuation.");
+    tt->val_offset = (char *) &write_debug_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("WRITING THE OUTPUT FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1151,6 +1124,51 @@
       tt->enum_def.fields[2].name = tdrpStrDup("OUTPUT_FORMAT_UF");
       tt->enum_def.fields[2].val = OUTPUT_FORMAT_UF;
     tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("REALTIME OPERATIONS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'instance'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("instance");
+    tt->descr = tdrpStrDup("Program instance for process registration.");
+    tt->help = tdrpStrDup("This application registers with procmap. This is the instance used for registration.");
+    tt->val_offset = (char *) &instance - &_start_;
+    tt->single_val.s = tdrpStrDup("test");
+    tt++;
+    
+    // Parameter 'procmap_register_interval'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("procmap_register_interval");
+    tt->descr = tdrpStrDup("Interval for registering with procmap (secs).");
+    tt->help = tdrpStrDup("REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.");
+    tt->val_offset = (char *) &procmap_register_interval - &_start_;
+    tt->single_val.i = 60;
+    tt++;
+    
+    // Parameter 'max_realtime_data_age_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("max_realtime_data_age_secs");
+    tt->descr = tdrpStrDup("Maximum age of realtime data (secs)");
+    tt->help = tdrpStrDup("Only data less old than this will be used.");
+    tt->val_offset = (char *) &max_realtime_data_age_secs - &_start_;
+    tt->single_val.i = 300;
     tt++;
     
     // trailing entry has param_name set to NULL

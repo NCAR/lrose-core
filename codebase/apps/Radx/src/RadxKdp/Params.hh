@@ -409,19 +409,13 @@ public:
 
   debug_t debug;
 
-  char* instance;
-
-  int procmap_register_interval;
-
   tdrp_bool_t use_multiple_threads;
 
   int n_compute_threads;
 
-  char* input_dir;
-
   mode_t mode;
 
-  int max_realtime_data_age_secs;
+  char* input_dir;
 
   char* input_file_search_ext;
 
@@ -450,14 +444,14 @@ public:
   output_field_t *_output_fields;
   int output_fields_n;
 
-  tdrp_bool_t write_debug_fields;
-
   output_encoding_t output_encoding;
 
   tdrp_bool_t copy_selected_input_fields_to_output;
 
   copy_field_t *_copy_fields;
   int copy_fields_n;
+
+  tdrp_bool_t write_debug_fields;
 
   char* output_dir;
 
@@ -469,6 +463,12 @@ public:
 
   output_format_t output_format;
 
+  char* instance;
+
+  int procmap_register_interval;
+
+  int max_realtime_data_age_secs;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -476,7 +476,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[40];
+  mutable TDRPtable _table[42];
 
   const char *_className;
 
