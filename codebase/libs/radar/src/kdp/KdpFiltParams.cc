@@ -48,7 +48,7 @@
  * @author Automatically generated
  *
  */
-#include "KdpFiltParams.hh"
+#include <radar/KdpFiltParams.hh>
 #include <cstring>
 
   ////////////////////////////////////////////
