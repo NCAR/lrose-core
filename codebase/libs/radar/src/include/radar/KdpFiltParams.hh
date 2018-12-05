@@ -74,6 +74,11 @@ public:
     KDP_FIR_LEN_10 = 5
   } KDP_fir_filter_len_t;
 
+  typedef enum {
+    HUBBERT_BRINGI_METHOD = 0,
+    PEAK_REMOVAL_METHOD = 1
+  } psob_method_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -363,11 +368,11 @@ public:
 
   int KDP_n_filt_iterations_unfolded;
 
-  int KDP_n_filt_iterations_conditioned;
+  psob_method_t KDP_psob_method;
 
-  tdrp_bool_t KDP_use_iterative_filtering;
+  int KDP_n_filt_iterations_hubbert_bringi;
 
-  double KDP_phidp_difference_threshold;
+  double KDP_phidp_difference_threshold_hubbert_bringi;
 
   int KDP_ngates_for_stats;
 
@@ -375,15 +380,13 @@ public:
 
   double KDP_phidp_jitter_max;
 
-  double KDP_min_valid_abs_kdp;
+  tdrp_bool_t KDP_check_rhohv;
+
+  double KDP_rhohv_threshold;
 
   tdrp_bool_t KDP_check_snr;
 
   double KDP_snr_threshold;
-
-  tdrp_bool_t KDP_check_rhohv;
-
-  double KDP_rhohv_threshold;
 
   tdrp_bool_t KDP_check_zdr_sdev;
 
@@ -393,11 +396,7 @@ public:
 
   int KDP_median_filter_len_for_ZZDR;
 
-  tdrp_bool_t KDP_debug;
-
-  tdrp_bool_t KDP_write_ray_files;
-
-  char* KDP_ray_files_dir;
+  double KDP_min_valid_abs_kdp;
 
   tdrp_bool_t KDP_specify_coefficients_for_attenuation_correction;
 
@@ -409,6 +408,12 @@ public:
 
   double KDP_zdr_attenuation_exponent;
 
+  tdrp_bool_t KDP_debug;
+
+  tdrp_bool_t KDP_write_ray_files;
+
+  char* KDP_ray_files_dir;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -416,7 +421,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[28];
+  mutable TDRPtable _table[34];
 
   const char *_className;
 

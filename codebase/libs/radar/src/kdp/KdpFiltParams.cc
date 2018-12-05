@@ -545,8 +545,17 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("KdpFilt computes KDP using a filtering technique, and modifies the KDP location using the Z-ZDR self consistency principle.");
+    tt->comment_hdr = tdrpStrDup("KdpFilt computes KDP from PHIDP.\n\nKDP is defined as half the change in PHIDP per km in range.\n\nRegions with valid PHIDP are determined by examining the quality of the PHIDP data, from RHOHV, and optionally from SNR and the variance of ZDR.\n\nPHIPD folds, so unfolding is the first step in the processing. After unfolding, filtering is applied to smooth PHIDP in range. This is followed by a step to identify regions with phase shift on backscatter.\n\nKDP is then computed as the PHIDP slope between range gates. For DBZ values < 20, 8 gates are used; for DBZ between 20 and 35, 4 gates are used; and if the DBZ exceeds 35, 2 adjacent gates are used.\n\nThe various filtering steps smeer out the KDP in range, which means that the high KDP values are not always located in the core of the precip. To help correct for this effect, we can make use of the self-consistency approach. This allows us to theoretically determine KDP from Z and ZDR - we can call this KDP_ZZDR. We can then use these theoretical KDP_ZZDR values to compute a conditioned KDP field, by constraining the estimated KDP values to the relevant gates. This reduces the smeering effect. We refer to this final conditioned KDP field as KDP_COND.");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 1'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 1");
+    tt->comment_hdr = tdrpStrDup("UNFOLDING AND INITIAL FILTERING");
+    tt->comment_text = tdrpStrDup("The first step is to unfold the PHIDP data. PHIDP folds at -180/180 for simultaneous mode radars, and at -90/90 for alternating mode radars. In order to compute the gradient of PHIDP, we need to unfold it so that it varies smoothly rather than folding.");
     tt++;
     
     // Parameter 'KDP_fir_filter_len'
@@ -584,45 +593,71 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("KDP_n_filt_iterations_unfolded");
     tt->descr = tdrpStrDup("Sets the number of iterations for the initial FIR filter for unfolded PHIDP.");
-    tt->help = tdrpStrDup("After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
+    tt->help = tdrpStrDup("After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a set number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
     tt->val_offset = (char *) &KDP_n_filt_iterations_unfolded - &_start_;
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'KDP_n_filt_iterations_conditioned'
+    // Parameter 'Comment 2'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 2");
+    tt->comment_hdr = tdrpStrDup("HANDLING PHASE SHIFT ON BACKSCATTER");
+    tt->comment_text = tdrpStrDup("As the beam passes through liquid precip, PHIDP generally increases. In some regions this increase is augmented by phase shift on backscatter (PSOB) leading to localized peaks in PHIDP. After a PSOB region, PHIDP will decrease to some intermediate level.\n\nKdpFilt offers 2 methods for handling PSOB:\n\t(a) The HUBBERT/BRINGI method, which uses an iterative filtering approach (Hubbert. J, and V.N.Bringi, 1995: An Iterative Filtering technique for the Analysis of Copolar Differential Phase and Dual-Frequency Radar Measurements. Journal of Atmospheric and Oceanic Technology, Vol 12, No 3, June 1995).\n\t(b) The Peak Removal method, which works backwards from longer to shorter ranges, finding the peaks caused by backscatter and trimming them off.");
+    tt++;
+    
+    // Parameter 'KDP_psob_method'
+    // ctype is '_psob_method_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("KDP_psob_method");
+    tt->descr = tdrpStrDup("Method for handling pbase shift on backscatter.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &KDP_psob_method - &_start_;
+    tt->enum_def.name = tdrpStrDup("psob_method_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("HUBBERT_BRINGI_METHOD");
+      tt->enum_def.fields[0].val = HUBBERT_BRINGI_METHOD;
+      tt->enum_def.fields[1].name = tdrpStrDup("PEAK_REMOVAL_METHOD");
+      tt->enum_def.fields[1].val = PEAK_REMOVAL_METHOD;
+    tt->single_val.e = PEAK_REMOVAL_METHOD;
+    tt++;
+    
+    // Parameter 'KDP_n_filt_iterations_hubbert_bringi'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_n_filt_iterations_conditioned");
-    tt->descr = tdrpStrDup("Sets the number of iterations for the final FIR filter for conditioned PHIDP.");
-    tt->help = tdrpStrDup("In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
-    tt->val_offset = (char *) &KDP_n_filt_iterations_conditioned - &_start_;
+    tt->param_name = tdrpStrDup("KDP_n_filt_iterations_hubbert_bringi");
+    tt->descr = tdrpStrDup("Sets the number of iterations for the Hubbert Bringi method.");
+    tt->help = tdrpStrDup("See above.");
+    tt->val_offset = (char *) &KDP_n_filt_iterations_hubbert_bringi - &_start_;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'KDP_use_iterative_filtering'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_use_iterative_filtering");
-    tt->descr = tdrpStrDup("Perform iterative filtering to locate backscatter phase shift.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_use_iterative_filtering - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_phidp_difference_threshold'
+    // Parameter 'KDP_phidp_difference_threshold_hubbert_bringi'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_phidp_difference_threshold");
-    tt->descr = tdrpStrDup("Difference threshold for the iterative filtering method.");
-    tt->help = tdrpStrDup("The FIR filter is applied successively, n_filt_iterations_conditioned times. After each iteration the result is checked against the original. If the difference is less than this parameter, the original value at that gate is retained. If the difference exceeds this parameter, the new filtered value is retained.");
-    tt->val_offset = (char *) &KDP_phidp_difference_threshold - &_start_;
+    tt->param_name = tdrpStrDup("KDP_phidp_difference_threshold_hubbert_bringi");
+    tt->descr = tdrpStrDup("Difference threshold for the Hubbert Bringi method.");
+    tt->help = tdrpStrDup("After each iteration of the filter, the result is checked against the original. If the difference is less than this parameter, the original value at that gate is retained. If the difference exceeds this parameter, the new filtered value is retained.");
+    tt->val_offset = (char *) &KDP_phidp_difference_threshold_hubbert_bringi - &_start_;
     tt->single_val.d = 4;
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("IDENTIFYING VALID KDP REGIONS");
+    tt->comment_text = tdrpStrDup("In weak signal, the PHIDP is very noisy and contains no useful information. We compute various statistics to help to identify those gates containing valid PHIDP, and those with just noise.");
     tt++;
     
     // Parameter 'KDP_ngates_for_stats'
@@ -644,7 +679,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("KDP_phidp_sdev_max");
     tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of phidp in range.");
-    tt->help = tdrpStrDup("The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
+    tt->help = tdrpStrDup("The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, we conclude we are in weather echo and the PHIDP is valid and KDP should be computed.");
     tt->val_offset = (char *) &KDP_phidp_sdev_max - &_start_;
     tt->single_val.d = 20;
     tt++;
@@ -656,45 +691,9 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("KDP_phidp_jitter_max");
     tt->descr = tdrpStrDup("Sets the threshold for the jitter of phidp in range.");
-    tt->help = tdrpStrDup("The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
+    tt->help = tdrpStrDup("The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, we conclude we are in weather echo, the PHIDP is valid and KDP should be computed at this gate.");
     tt->val_offset = (char *) &KDP_phidp_jitter_max - &_start_;
     tt->single_val.d = 25;
-    tt++;
-    
-    // Parameter 'KDP_min_valid_abs_kdp'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_min_valid_abs_kdp");
-    tt->descr = tdrpStrDup("Sets the min valid KDP value.");
-    tt->help = tdrpStrDup("Values less than this are set to 0.");
-    tt->val_offset = (char *) &KDP_min_valid_abs_kdp - &_start_;
-    tt->single_val.d = 0.01;
-    tt++;
-    
-    // Parameter 'KDP_check_snr'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_check_snr");
-    tt->descr = tdrpStrDup("Check the SNR.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_check_snr - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_snr_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_snr_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for checking SNR (dB).");
-    tt->help = tdrpStrDup("If the SNR drops below this value, KDP will not be computed at this gate.");
-    tt->val_offset = (char *) &KDP_snr_threshold - &_start_;
-    tt->single_val.d = -6;
     tt++;
     
     // Parameter 'KDP_check_rhohv'
@@ -721,6 +720,30 @@
     tt->single_val.d = 0.95;
     tt++;
     
+    // Parameter 'KDP_check_snr'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("KDP_check_snr");
+    tt->descr = tdrpStrDup("Check the SNR.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &KDP_check_snr - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'KDP_snr_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("KDP_snr_threshold");
+    tt->descr = tdrpStrDup("Sets the threshold for checking SNR (dB).");
+    tt->help = tdrpStrDup("If the SNR drops below this value, KDP will not be computed at this gate.");
+    tt->val_offset = (char *) &KDP_snr_threshold - &_start_;
+    tt->single_val.d = -6;
+    tt++;
+    
     // Parameter 'KDP_check_zdr_sdev'
     // ctype is 'tdrp_bool_t'
     
@@ -740,9 +763,18 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("KDP_zdr_sdev_max");
     tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of zdr in range.");
-    tt->help = tdrpStrDup("The sdev of zdr is a good test for clutter. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
+    tt->help = tdrpStrDup("The sdev of zdr is a good test for clutter. If the sdev is less than this value, we conclude we are in weather echo rather than clutter.");
     tt->val_offset = (char *) &KDP_zdr_sdev_max - &_start_;
     tt->single_val.d = 2;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("COMPUTING KDP FROM Z and ZDR");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'KDP_threshold_for_ZZDR'
@@ -769,49 +801,34 @@
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'KDP_debug'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_debug");
-    tt->descr = tdrpStrDup("Option to print debug messages in KDP computation.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_debug - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_write_ray_files'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_write_ray_files");
-    tt->descr = tdrpStrDup("Option to write ray files to debug KDP computation.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_write_ray_files - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_ray_files_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("KDP_ray_files_dir");
-    tt->descr = tdrpStrDup("Directory for KDP ray files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_ray_files_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/kdp_ray_files");
-    tt++;
-    
-    // Parameter 'Comment 1'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 1");
-    tt->comment_hdr = tdrpStrDup("PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR");
-    tt->comment_text = tdrpStrDup("");
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("SANITY CHECK ON KDP RESULTS");
+    tt->comment_text = tdrpStrDup("Ignore small KDP values, which are likely just noise.");
+    tt++;
+    
+    // Parameter 'KDP_min_valid_abs_kdp'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("KDP_min_valid_abs_kdp");
+    tt->descr = tdrpStrDup("Sets the min valid KDP value.");
+    tt->help = tdrpStrDup("Values less than this are set to 0.");
+    tt->val_offset = (char *) &KDP_min_valid_abs_kdp - &_start_;
+    tt->single_val.d = 0.01;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("ESTIMATING ATTENUATION CORRECTION FOR DBZ AND ZDR");
+    tt->comment_text = tdrpStrDup("Received power attenuation, and differential attenuation, occur whenever scattering occurs, but is of most importance at shorter wavelengths or in reqions of heavy precipition. We use the reference text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, Table 7.1, page 494, to provide the default coefficients from which to estimate the attenuation correction. You may also choose to specify these coefficients in this section.");
     tt++;
     
     // Parameter 'KDP_specify_coefficients_for_attenuation_correction'
@@ -820,7 +837,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("KDP_specify_coefficients_for_attenuation_correction");
-    tt->descr = tdrpStrDup("Option to specify the coefficients and exponents - see below.");
+    tt->descr = tdrpStrDup("Option to specify the coefficients and exponents.");
     tt->help = tdrpStrDup("If false, the default coefficients will be determined for the radar wavelength.");
     tt->val_offset = (char *) &KDP_specify_coefficients_for_attenuation_correction - &_start_;
     tt->single_val.b = pFALSE;
@@ -872,6 +889,51 @@
     tt->help = tdrpStrDup("Default is 1.05. See Bringi and Chandrasekar, Table 7.1, page 494.");
     tt->val_offset = (char *) &KDP_zdr_attenuation_exponent - &_start_;
     tt->single_val.d = 1.05;
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("DEBUGGING");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'KDP_debug'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("KDP_debug");
+    tt->descr = tdrpStrDup("Option to print debug messages in KDP computation.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &KDP_debug - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'KDP_write_ray_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("KDP_write_ray_files");
+    tt->descr = tdrpStrDup("Option to write ray files to debug KDP computation.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &KDP_write_ray_files - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'KDP_ray_files_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("KDP_ray_files_dir");
+    tt->descr = tdrpStrDup("Directory for KDP ray files.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &KDP_ray_files_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/kdp_ray_files");
     tt++;
     
     // trailing entry has param_name set to NULL

@@ -174,9 +174,7 @@ commentdef {
 typedef enum {
   
   KDP,
-  KDP_ZZDR,
   KDP_COND,
-  PSOB,
 
   DBZ_ATTEN_CORRECTION,
   ZDR_ATTEN_CORRECTION,
@@ -206,29 +204,11 @@ paramdef struct output_field_t {
     }
     ,
     {
-      id = KDP_ZZDR,
-      name = "KDP_ZZDR",
-      long_name = "specific_differential_phase_modified_using_z_and_zdr",
-      standard_name = "specific_differential_phase_hv",
-      units = "deg/km",
-      do_write = TRUE
-    }
-    ,
-    {
       id = KDP_COND,
       name = "KDP_COND",
-      long_name = "conditional_kdp_from_estimated_kdp_and_kdpZZdr",
+      long_name = "kdp_conditioned_by_KDP_from_Z_and_ZDR",
       standard_name = "specific_differential_phase_hv",
       units = "deg/km",
-      do_write = FALSE
-    }
-    ,
-    {
-      id = PSOB,
-      name = "PSOB",
-      long_name = "phase_shift_on_backscatter",
-      standard_name = "phase_shift_on_backscatter",
-      units = "deg",
       do_write = FALSE
     }
     ,
@@ -273,9 +253,7 @@ paramdef struct output_field_t {
     "\nThe name and units can be set however the user prefers.\n"
     "\nThe output_encoding apply to CfRadial output only. \n\n"
     "\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n"
-    "\tKDP_ZZDR: KDP modified by Z-ZDR self-consistency (deg/km)\n"
     "\tKDP_COND: KDP conditioned - debug field (deg/km)\n"
-    "\tPSOB: phase shift on backscatter as deduced from the filtering (deg)\n"
     "\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n"
     "\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n"
     "\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n"

@@ -82,13 +82,11 @@ public:
 
   typedef enum {
     KDP = 0,
-    KDP_ZZDR = 1,
-    KDP_COND = 2,
-    PSOB = 3,
-    DBZ_ATTEN_CORRECTION = 4,
-    ZDR_ATTEN_CORRECTION = 5,
-    DBZ_ATTEN_CORRECTED = 6,
-    ZDR_ATTEN_CORRECTED = 7
+    KDP_COND = 1,
+    DBZ_ATTEN_CORRECTION = 2,
+    ZDR_ATTEN_CORRECTION = 3,
+    DBZ_ATTEN_CORRECTED = 4,
+    ZDR_ATTEN_CORRECTED = 5
   } output_field_id_t;
 
   typedef enum {

@@ -354,7 +354,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   // initialize array pointers
 
-  const double *psob = _kdp.getPsob();
   const double *dbzAtten = _kdp.getDbzAttenCorr();
   const double *zdrAtten = _kdp.getZdrAttenCorr();
   
@@ -380,14 +379,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         default:
           *datp = _kdpArray[igate];
           break;
-        case Params::KDP_ZZDR:
-          *datp = _kdpZZdrArray[igate];
-          break;
         case Params::KDP_COND:
           *datp = _kdpCondArray[igate];
-          break;
-        case Params::PSOB:
-          *datp = psob[igate];
           break;
           
           // attenuation
@@ -402,12 +395,16 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           if (dbzAtten[igate] != missingDbl &&
               _dbzArray[igate] != missingDbl) {
             *datp = dbzAtten[igate] + _dbzArray[igate];
+          } else {
+            *datp = _dbzArray[igate];
           }
           break;
         case Params::ZDR_ATTEN_CORRECTED:
           if (zdrAtten[igate] != missingDbl &&
               _zdrArray[igate] != missingDbl) {
             *datp = zdrAtten[igate] + _zdrArray[igate];
+          } else {
+            *datp = _zdrArray[igate];
           }
           break;
 
@@ -534,6 +531,18 @@ void ComputeEngine::_addDebugFields(RadxRay *derivedRay)
 
 {
 
+  _addField(derivedRay,
+            "KDP_ZZDR", "deg/km",
+            "specific_differential_phase_theoretical_from_z_and_zdr",
+            "specific_differential_phase_hv",
+            _kdp.getKdpZZdr());
+  
+  _addField(derivedRay,
+            "PSOB", "deg",
+            "phase_shift_on_backscatter",
+            "phase_shift_on_backscatter",
+            _kdp.getPsob());
+  
   _addField(derivedRay,
             "DBZ_FOR_KDP", "dBZ",
             "dbz_filtered_for_kdp_computations",

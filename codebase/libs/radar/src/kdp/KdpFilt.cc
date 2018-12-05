@@ -326,10 +326,10 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
   setNGatesStats(params.KDP_ngates_for_stats);
   setMinValidAbsKdp(params.KDP_min_valid_abs_kdp);
   setNFiltIterUnfolded(params.KDP_n_filt_iterations_unfolded);
-  setNFiltIterCond(params.KDP_n_filt_iterations_conditioned);
-  if (params.KDP_use_iterative_filtering) {
+  setNFiltIterCond(params.KDP_n_filt_iterations_hubbert_bringi);
+  if (params.KDP_psob_method == KdpFiltParams::HUBBERT_BRINGI_METHOD) {
     setUseIterativeFiltering(true);
-    setPhidpDiffThreshold(params.KDP_phidp_difference_threshold);
+    setPhidpDiffThreshold(params.KDP_phidp_difference_threshold_hubbert_bringi);
   }
   setPhidpSdevMax(params.KDP_phidp_sdev_max);
   setPhidpJitterMax(params.KDP_phidp_jitter_max);
@@ -939,25 +939,25 @@ void KdpFilt::_computeKdp()
   
   // allocate working arrays
   
-  TaArray<double> yyy_, zzz_;
-  double *yyy = yyy_.alloc(arrayLen) + arrayOffset;
-  double *zzz = zzz_.alloc(arrayLen) + arrayOffset;
+  TaArray<double> work1_, work2_;
+  double *work1 = work1_.alloc(arrayLen) + arrayOffset;
+  double *work2 = work2_.alloc(arrayLen) + arrayOffset;
 
-  // initialize working array zzz
+  // initialize working array work2
   
-  _copyArray(zzz, _phidpMeanUnfold);
-  _padArray(zzz);
+  _copyArray(work2, _phidpMeanUnfold);
+  _padArray(work2);
   
-  // apply FIR filter, computing yyy from zzz, iterate
+  // apply FIR filter, computing work1 from work2, iterate
     
   for (int iloop = 0; iloop < _nFiltIterUnfolded; iloop++) {
-    _applyFirFilter(zzz, yyy);
-    _copyArray(zzz, yyy);
+    _applyFirFilter(work2, work1);
+    _copyArray(work2, work1);
   } // iloop
   
   // save filtered phidp
 
-  _copyArray(_phidpFilt, zzz);
+  _copyArray(_phidpFilt, work2);
   _copyArray(_phidpCond, _phidpFilt);
   
   // compute conditioned phidp
@@ -966,15 +966,15 @@ void KdpFilt::_computeKdp()
     
     // use iterative filtering to remove phase shift on backscatter
     
-    _copyArray(zzz, _phidpCond);
-    _padArray(zzz);
+    _copyArray(work2, _phidpCond);
+    _padArray(work2);
 
     for (int iloop = 0; iloop < _nFiltIterCond; iloop++) {
-      _applyFirFilter(zzz, yyy);
-      _copyArrayCond(zzz, yyy, _phidpCond);
+      _applyFirFilter(work2, work1);
+      _copyArrayCond(work2, work1, _phidpCond);
     } // iloop
     
-    _copyArray(_phidpCondFilt, zzz);
+    _copyArray(_phidpCondFilt, work2);
     
   } else {
 
@@ -984,19 +984,19 @@ void KdpFilt::_computeKdp()
     
     // apply the FIR filter to the increasing phidp
     
-    _copyArray(zzz, _phidpCond);
-    _padArray(zzz);
+    _copyArray(work2, _phidpCond);
+    _padArray(work2);
     
     for (int iloop = 0; iloop < _nFiltIterCond; iloop++) {
-      _applyFirFilter(zzz, yyy);
-      _copyArray(zzz, yyy);
+      _applyFirFilter(work2, work1);
+      _copyArray(work2, work1);
     } // iloop
 
-    _copyArray(_phidpCondFilt, yyy);
+    _copyArray(_phidpCondFilt, work1);
 
   }
   
-  // load up conditioned KDP
+  // compute KDP as slope between successive gates
 
   _loadKdp();
 
@@ -1780,9 +1780,13 @@ void KdpFilt::_writeRayDataToFile()
     double zdrCorrected = 0;
     if (_dbz[igate] > -9990 && _dbzAttenCorr[igate] > -9990) {
       dbzCorrected = _dbz[igate] + _dbzAttenCorr[igate];
+    } else {
+      dbzCorrected = _dbz[igate];
     }
     if (_zdr[igate] > -9990 && _zdrAttenCorr[igate] > -9990) {
       zdrCorrected = _zdr[igate] + _zdrAttenCorr[igate];
+    } else {
+      zdrCorrected = _zdr[igate];
     }
     fprintf(out,
             "%3d %3d %3d "

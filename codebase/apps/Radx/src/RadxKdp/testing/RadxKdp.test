@@ -309,7 +309,7 @@ RHOHV_field_name = "RHOHV_F";
 // Type: string
 //
 
-KDP_params_file_path = "./KdpParams.test";
+KDP_params_file_path = "./testing/KdpParams.test";
 
 //======================================================================
 //
@@ -328,9 +328,7 @@ KDP_params_file_path = "./KdpParams.test";
 // The output_encoding apply to CfRadial output only. 
 //
 // 	KDP: KDP from filtering PHIDP and computing slope (deg/km)
-// 	KDP_ZZDR: KDP modified by Z-ZDR self-consistency (deg/km)
 // 	KDP_COND: KDP conditioned - debug field (deg/km)
-// 	PSOB: phase shift on backscatter as deduced from the filtering (deg)
 // 	DBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)
 // 	ZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)
 // 	DBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)
@@ -342,9 +340,7 @@ KDP_params_file_path = "./KdpParams.test";
 //      output_field_id_t id;
 //        Options:
 //          KDP
-//          KDP_ZZDR
 //          KDP_COND
-//          PSOB
 //          DBZ_ATTEN_CORRECTION
 //          ZDR_ATTEN_CORRECTION
 //          DBZ_ATTEN_CORRECTED
@@ -370,29 +366,11 @@ output_fields = {
   }
   ,
   {
-    id = KDP_ZZDR,
-    name = "KDP_ZZDR",
-    long_name = "specific_differential_phase_modified_using_z_and_zdr",
-    standard_name = "specific_differential_phase_hv",
-    units = "deg/km",
-    do_write = TRUE
-  }
-  ,
-  {
     id = KDP_COND,
     name = "KDP_COND",
     long_name = "conditional_kdp_from_estimated_kdp_and_kdpZZdr",
     standard_name = "specific_differential_phase_hv",
     units = "deg/km",
-    do_write = FALSE
-  }
-  ,
-  {
-    id = PSOB,
-    name = "PSOB",
-    long_name = "phase_shift_on_backscatter",
-    standard_name = "phase_shift_on_backscatter",
-    units = "deg",
     do_write = FALSE
   }
   ,
