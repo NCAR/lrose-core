@@ -34,7 +34,7 @@
 /**
  * @file NcarParticleId.hh
  * @class NcarParticleId
- * @brief NcarParticleId reads dual pol moments in a DsRadar FMQ,
+ * @brief NcarParticleId takes dual pol moments,
  *        and computes particle ID
  */
 #ifndef NcarParticleId_HH
@@ -43,6 +43,7 @@
 #include <string>
 #include <vector>
 #include <toolsa/TaArray.hh>
+#include <radar/NcarPidParams.hh>
 #include <radar/PidImapManager.hh>
 #include <radar/PhidpProc.hh>
 #include <radar/TempProfile.hh>
@@ -251,6 +252,13 @@ public:
   void clear();
 
   /**
+   * Set processing options from params object
+   * returns 0 on success, -1 on failure
+   */
+
+  int setFromParams(const NcarPidParams &params);
+
+  /**
    * Set debugging on
    * @param[in] state True if debugging should be turned on
    */
@@ -366,6 +374,17 @@ public:
    */
   int readThresholdsFromFile(const string &path);
 
+  /**
+   * Set the temperature profile for the specified time.
+   * This reads in a new sounding, if available, if the time has changed
+   * by more that 900 secs. If this fails, the profile from
+   * the thresholds file is used.
+   * @param[in] dataTime: the time for the current data
+   * @return 0 on success, -1 on failure
+   */
+  
+  int setTempProfile(time_t dataTime);
+  
   /**
    * Set the temperature profile.
    * This is used to override the temperature profile in the
@@ -633,6 +652,7 @@ protected:
 private:
 
   static double _missingDouble; /**< The value to use for missing data */
+  NcarPidParams _params;
   bool _debug;              /**< Flag to indicate whether debug messages should be printed */
   bool _verbose;            /**< Flag to indicate whether verbose messages should be printed */
   double _wavelengthCm;     /**< The wavelength (cm) of the radar beam */
@@ -663,11 +683,15 @@ private:
   Particle* _chaff; /**< chaff for radar countermeasures */
   Particle* _misc;  /**< miscellaneous particle type */
 
-  vector<Particle*> _particleList;  /**< A vector of pointers to Particle objects, one for each possible particle type */
-
+  vector<Particle*> _particleList;  /**< A vector of pointers to Particle objects
+                                     ** one for each possible particle type */
+  
   // temperature profile
+
+  TempProfile _sounding;
   vector<TempProfile::PointVal> _tmpProfile; /**< Temperature profile */
   TaArray<double> _tmpHtArray_; /**< Array of temperature profile heights */
+  time_t _prevProfileDataTime;  /**< Time of previous request to retrieve temp profile */
   double *_tmpHtArray;          /**< Pointer to the array of temperature profile heights */
 
   int _tmpMinHtMeters;          /**< Mimimum height of the temperature profile (m) */
@@ -717,7 +741,8 @@ private:
   int *_pid;                     /**< Pointer to the array of computed primary particle ids */
   
   TaArray<double> _interest_;    /**< Array of computed primary particle interest scores */
-  double *_interest;             /**< Pointer to the array of computed primary particle interest scores */
+  double *_interest;             /**< Pointer to the array of computed primary
+                                  ** particle interest scores */
   
   TaArray<category_t> _category_; /**< Categories of particle id */
   category_t *_category;          /**< Pointer to the array of categories */
@@ -807,11 +832,17 @@ private:
   int _setId(Particle *part, const char *line);
 
   /**
-   * Set the default temperature profile from a line in the thresholds file 
+   * Parse the default temperature profile from a line in the thresholds file 
    * @param[in] line The thresholds file line to parse for the temperature profile
    * @return 0 on success, -1 on error
    */
-  int _setTempProfile(const char *line);
+  int _parseTempProfile(const char *line);
+
+  
+  /**
+   * Get temp profile from spdb
+   */
+  int _getTempProfileFromSpdb(time_t dataTime);
 
   /**
    * Compute membership lookup table for temperature 

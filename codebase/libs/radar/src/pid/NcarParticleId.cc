@@ -43,6 +43,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaFile.hh>
 #include <toolsa/TaStr.hh>
+#include <toolsa/DateTime.hh>
 #include <radar/FilterUtils.hh>
 #include <radar/DpolFilter.hh>
 #include <radar/NcarParticleId.hh>
@@ -158,6 +159,10 @@ NcarParticleId::NcarParticleId()
 
   _ngatesSdev = 9;
 
+  // temperature profile - init time
+
+  _prevProfileDataTime = 0;
+
   // melting layer
 
   _mlInit();
@@ -203,6 +208,53 @@ void NcarParticleId::clear()
   _tmpProfile.clear();
   _tmpHtArray_.free();
 
+}
+
+////////////////////////////////////////////
+// Set processing options from params object
+
+int NcarParticleId::setFromParams(const NcarPidParams &params)
+{
+  
+  _params = params;
+
+  setSnrThresholdDb(_params.PID_snr_threshold);
+  setSnrUpperThresholdDb(_params.PID_snr_upper_threshold);
+
+  if (_params.PID_apply_median_filter_to_DBZ) {
+    setApplyMedianFilterToDbz(_params.PID_DBZ_median_filter_len);
+  }
+  if (_params.PID_apply_median_filter_to_ZDR) {
+    setApplyMedianFilterToZdr(_params.PID_ZDR_median_filter_len);
+  }
+
+  if (_params.PID_apply_median_filter_to_LDR) {
+    setApplyMedianFilterToLdr(_params.PID_LDR_median_filter_len);
+  }
+  if (_params.PID_replace_missing_LDR) {
+    setReplaceMissingLdr(_params.PID_LDR_replacement_value);
+  }
+
+  if (_params.PID_apply_median_filter_to_RHOHV) {
+    setApplyMedianFilterToRhohv(_params.PID_RHOHV_median_filter_len);
+  }
+
+  setNgatesSdev(_params.PID_ngates_for_sdev);
+  setMinValidInterest(_params.PID_min_valid_interest);
+  
+  if (_params.PID_locate_melting_layer) {
+    setComputeMeltingLayer(true);
+  }
+  
+  if (readThresholdsFromFile(_params.PID_thresholds_file_path)) {
+    cerr << "ERROR - NcarParticleId::setFromParams" << endl;
+    cerr << "  Cannot read in pid thresholds from file: "
+         << _params.PID_thresholds_file_path << endl;
+    return -1;
+  }
+
+  return 0;
+  
 }
 
 /////////////////////////////////////////
@@ -272,7 +324,7 @@ int NcarParticleId::readThresholdsFromFile(const string &path)
     // set temperature profile
 
     if (strncmp(line, "tpf", 3) == 0) {
-      _setTempProfile(line);
+      _parseTempProfile(line);
     }
 
     // set weights
@@ -704,7 +756,7 @@ int NcarParticleId::_setId(Particle *part, const char *line)
 /////////////////////////////////////////////////////
 // set the temperature profile, from thresholds file
 
-int NcarParticleId::_setTempProfile(const char *line)
+int NcarParticleId::_parseTempProfile(const char *line)
   
 {
 
@@ -797,6 +849,133 @@ void NcarParticleId::_computeTempHtLookup()
     }
 
   }
+
+}
+
+///////////////////////////////////////////////////////////
+// Set the temperature profile for the specified time.
+// This reads in a new sounding, if available, if the time has changed
+// by more that 900 secs. If this fails, the profile from
+// the thresholds file is used.
+
+int NcarParticleId::setTempProfile(time_t dataTime)
+  
+{
+
+  // get profile from spdb sounding if appropriate
+  
+  if (_params.PID_use_soundings_from_spdb) {
+    if (_getTempProfileFromSpdb(dataTime) == 0) {
+      return 0;
+    }
+    if (_debug) {
+      cerr << "WARNING - NcarParticleId::setTempProfile" << endl;
+      cerr << "Cannot retrieve sounding, url: " << _params.PID_sounding_spdb_url << endl;
+      cerr << "                     dataTime: " << DateTime::strm(dataTime) << endl;
+    }
+  }
+  
+  // get profile from thresholds file
+  
+  if (_sounding.getProfileForPid(_params.PID_thresholds_file_path,
+                                 _tmpProfile)) {
+    cerr << "ERROR - NcarParticleId::setTempProfile" << endl;
+    cerr << "Cannot retrieve temp profile from file: "
+         << _params.PID_thresholds_file_path << endl;
+    return -1;
+  }
+
+  // compute the temperature height lookup table
+  
+  _computeTempHtLookup();
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////
+// Read the temperature profile for the specified time.
+// This reads in a new sounding, if available, if the time has changed
+// by more that 300 secs.
+// returns 0 on success, -1 on failure
+// the thresholds file is used.
+
+int NcarParticleId::_getTempProfileFromSpdb(time_t dataTime)
+  
+{
+  
+  double secsSincePrev = fabs((double) _prevProfileDataTime - (double) dataTime);
+  if (secsSincePrev < 300) {
+    return 0;
+  }
+  
+  _sounding.clear();
+  
+  _sounding.setSoundingLocationName
+    (_params.PID_sounding_location_name);
+  _sounding.setSoundingSearchTimeMarginSecs
+    (_params.PID_sounding_search_time_margin_secs);
+  
+  _sounding.setCheckPressureRange
+    (_params.PID_sounding_check_pressure_range);
+  _sounding.setSoundingRequiredMinPressureHpa
+    (_params.PID_sounding_required_pressure_range_hpa.min_val);
+  _sounding.setSoundingRequiredMaxPressureHpa
+    (_params.PID_sounding_required_pressure_range_hpa.max_val);
+  
+  _sounding.setCheckHeightRange
+    (_params.PID_sounding_check_height_range);
+  _sounding.setSoundingRequiredMinHeightM
+    (_params.PID_sounding_required_height_range_m.min_val);
+  _sounding.setSoundingRequiredMaxHeightM
+    (_params.PID_sounding_required_height_range_m.max_val);
+  
+  _sounding.setCheckPressureMonotonicallyDecreasing
+    (_params.PID_sounding_check_pressure_monotonically_decreasing);
+  
+  _sounding.setHeightCorrectionKm
+    (_params.PID_sounding_height_correction_km);
+  
+  if (_params.PID_sounding_use_wet_bulb_temp) {
+    _sounding.setUseWetBulbTemp(true);
+  }
+  
+  if (_debug) {
+    _sounding.setDebug();
+  }
+  if (_verbose) {
+    _sounding.setVerbose();
+  }
+  
+  time_t soundingTime = 0;
+  vector<TempProfile::PointVal> retrievedProfile;
+  if (_sounding.getTempProfile(_params.PID_sounding_spdb_url,
+                               dataTime,
+                               soundingTime,
+                               retrievedProfile)) {
+    // failure
+    return -1;
+  }
+
+  // store the profile
+
+  _tmpProfile = retrievedProfile;
+
+  // compute the temperature height lookup table
+  
+  _computeTempHtLookup();
+
+  if (_debug) {
+    cerr << "Retrieved sounding, url: " << _params.PID_sounding_spdb_url << endl;
+    cerr << "               dataTime: " << DateTime::strm(dataTime) << endl;
+    cerr << "           soundingTime: " << DateTime::strm(soundingTime) << endl;
+  }
+  
+  // success
+
+  _prevProfileDataTime = dataTime;
+
+  return 0;
 
 }
 

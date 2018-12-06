@@ -406,6 +406,10 @@ private:
 
   double _missingValue; /**< Value for missing or bad data */
 
+  // parameters
+
+  KdpFiltParams _params;
+
   // time for ray
 
   time_t _timeSecs;

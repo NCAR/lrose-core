@@ -308,6 +308,8 @@ void KdpFilt::setAttenCoeffs(double dbzCoeff, double dbzExpon,
 void KdpFilt::setFromParams(const KdpFiltParams &params)
 {
 
+  _params = params;
+
   // initialize KDP object
 
   if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_125) {
