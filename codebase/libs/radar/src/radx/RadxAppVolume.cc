@@ -4,7 +4,6 @@
 
 //------------------------------------------------------------------
 #include <radar/RadxAppVolume.hh>
-#include <dsdata/DsUrlTrigger.hh>
 #include <didss/DataFileNames.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxRay.hh>
@@ -227,6 +226,64 @@ RadxAppVolume::RadxAppVolume(const RadxAppParms *parms,
 }
 
 //------------------------------------------------------------------
+RadxAppVolume::RadxAppVolume(const RadxAppVolume &v) :
+  _vol(v._vol),
+  _time(v._time),
+  _parms(v._parms),
+  _activeGroup(v._activeGroup),
+  _pathIndex(v._pathIndex),
+  _paths(v._paths),
+  _realtime(v._realtime),
+  _ldata(v._ldata),
+  _ok(v._ok)
+{
+  _rays = &_vol.getRays();
+  _sweeps = &_vol.getSweeps();
+  if (!_rays->empty())
+  {
+    // just to have something around
+    _ray = (*_rays)[0];
+  }
+  else
+  {
+    _ray = NULL;
+  }
+}
+
+
+//------------------------------------------------------------------
+RadxAppVolume &RadxAppVolume::operator=(const RadxAppVolume &v)
+{
+  if (this == &v)
+  {
+    return *this;
+  }
+  
+  VolumeData::operator=(v);
+  _vol = v._vol;
+  _time = v._time;
+  _parms = v._parms;
+  _activeGroup = v._activeGroup;
+  _pathIndex = v._pathIndex;
+  _paths = v._paths;
+  _realtime = v._realtime;
+  _ldata = v._ldata;
+  _ok = v._ok;
+  _rays = &_vol.getRays();
+  _sweeps = &_vol.getSweeps();
+  if (!_rays->empty())
+  {
+    // just to have something around
+    _ray = (*_rays)[0];
+  }
+  else
+  {
+    _ray = NULL;
+  }
+  return *this;
+}
+
+//------------------------------------------------------------------
 RadxAppVolume::~RadxAppVolume(void)
 {
 }
@@ -286,6 +343,12 @@ void RadxAppVolume::trim(void)
 //------------------------------------------------------------------
 bool RadxAppVolume::write(void)
 {
+  return write(_parms->output_url);
+}
+
+//------------------------------------------------------------------
+bool RadxAppVolume::write(const std::string &path)
+{
   _vol.loadVolumeInfoFromRays();
   _vol.loadSweepInfoFromRays();
   _vol.setPackingFromRays();
@@ -309,11 +372,11 @@ bool RadxAppVolume::write(void)
 
   _setupWrite(*outFile);
 
-  if (outFile->writeToDir(_vol, _parms->output_url,
+  if (outFile->writeToDir(_vol, path,
                           _parms->append_day_dir_to_output_dir,
                           _parms->append_year_dir_to_output_dir))
   {
-    LOG(ERROR) << "Cannot write file to dir: " <<  _parms->output_url;
+    LOG(ERROR) << "Cannot write file to dir: " <<  path;
     LOG(ERROR) << outFile->getErrStr();
     delete outFile;
     return false;
@@ -327,7 +390,7 @@ bool RadxAppVolume::write(void)
   // in realtime mode, write latest data info file
 
   if (_parms->write_latest_data_info) {
-    LdataInfo ldata(_parms->output_url);
+    LdataInfo ldata(path);
     if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_VERBOSE))
     {
       ldata.setDebug(true);

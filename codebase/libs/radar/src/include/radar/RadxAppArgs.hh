@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
- * @file Args.hh
+ * @file RadxAppArgs.hh
  * @brief Command line argument handler
- * @class Args
+ * @class RadxAppArgs
  * @brief Command line argument handler
  */
 

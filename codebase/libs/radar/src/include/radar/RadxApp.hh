@@ -102,10 +102,10 @@ public:
    * Process a volume
    *
    * @param[in] P   Algorithm parameters
-   * @param[in] input  The volume data
+   * @param[in] volume  The volume data, inputs modified to include outputs
    * @return true for success
    */
-  bool update(const RadxAppParms &P, RadxAppVolume *input);
+  bool update(const RadxAppParms &P, RadxAppVolume *volume);
 
   /**
    * Write volume to configured URL
@@ -114,6 +114,62 @@ public:
    * @return true if successful
    */
   bool write(RadxAppVolume *vol);
+
+
+  /**
+   * return a copy of RayxData of a particular name
+   * @param[in] name  The name to match
+   * @param[in] ray  Input data ray (which might have the named data)
+   * @param[in] showError  If true, lack of data generates a printed error
+   *
+   * @return pointer to a new object that is a copy, or NULL
+   *
+   * Calling routine owns the returned pointer
+   */
+  static 
+  RayxData *retrieveRayPtr(const std::string &name, const RadxRay &ray,
+			   const bool showError=true);
+
+
+  /**
+   * return RadxData of a particular name
+   *
+   * @param[in] name  The name to match
+   * @param[in] ray  Input data ray (which might have the named data)
+   * @param[in] data Zero or more RadxData objects, one of which might have the
+   *                 name
+   * @param[out] isNew set True if the returned object was newly created
+   *                   and is owned by calling routine, false if it points
+   *                   to an existing object and is not to be freed by caller
+   * @param[in] showError  If true, lack of data generates a printed error
+   * @return pointer to object, or NULL
+   */
+  static RayxData *retrieveRayPtr(const std::string &name, const RadxRay &ray,
+				  std::vector<RayxData> &data, 
+				  bool &isNew, bool showError=true);
+
+  /**
+   * return RayxData, any field
+   *
+   * @param[in] ray  Input data ray
+   *
+   * @return pointer to a new object that is a copy, or NULL
+   *
+   * Calling routine owns the returned pointer
+   */
+  static RayxData *retrieveAnyRayPtr(const RadxRay &ray);
+
+  /**
+   * return RayxData of a particular name
+   * @param[in] name  The name to match
+   * @param[in] ray  Input data ray (which might have the named data)
+   * @param[out] r  The data (a fresh copy)
+   * @param[in] showError  If true, lack of data generates a printed error
+   *
+   * @return true if found the named data in the ray
+   */
+  static bool retrieveRay(const std::string &name, const RadxRay &ray,
+  			  RayxData &r, const bool showError=true);
 
   /**
    * return RadxData of a particular name
@@ -128,26 +184,6 @@ public:
   static bool retrieveRay(const std::string &name, const RadxRay &ray,
   			  const std::vector<RayxData> &data, RayxData &r,
   			  bool showError=true);
-  static RayxData *retrieveRayPtr(const std::string &name,
-				  const RadxRay &ray,
-				  std::vector<RayxData> &data, 
-				  bool &isNew, bool showError=true);
-
-  /**
-   * return RayxData of a particular name
-   * @param[in] name  The name to match
-   * @param[in] ray  Input data ray (which might have the named data)
-   * @param[out] r  The data (a fresh copy)
-   * @param[in] showError  If true, lack of data generates a printed error
-   *
-   * @return true if found the named data in the ray
-   */
-  static bool retrieveRay(const std::string &name, const RadxRay &ray,
-  			  RayxData &r, const bool showError=true);
-  static 
-  RayxData *retrieveRayPtr(const std::string &name, const RadxRay &ray,
-			   const bool showError=true);
-
 
   /**
    * return RayxData, any field
@@ -157,7 +193,6 @@ public:
    * @return true if found example data in the ray
    */
   static bool retrieveAnyRay(const RadxRay &ray, RayxData &r);
-  static RayxData *retrieveAnyRayPtr(const RadxRay &ray);
 
   /**
    * Take some RayxData and modify it based on other inputs
@@ -170,12 +205,11 @@ public:
   				 const std::string &units="", 
   				 const double missing=0);
 
-
   /**
    * add data for some RayxData to a RadxRay, then clear out all other fields
    * 
    * @param[in] r  Data to add
-   * @param[in,out] ray  Object to add to
+   * @param[in,out] ray  Object to add to/clear
    */
   static void updateRay(const RayxData &r, RadxRay &ray);
 
@@ -183,7 +217,7 @@ public:
    * add data for multiple RayxData's to a RadxRay, clearing out all other
    * fields
    * @param[in] r  Data to add
-   * @param[in,out] ray  Object to add to
+   * @param[in,out] ray  Object to add to/clear
    */
   static void updateRay(const vector<RayxData> &r, RadxRay &ray);
 

@@ -34,6 +34,19 @@ public:
    */
   RadxAppVolume(const RadxAppParms *parms, int argc, char **argv);
 
+
+  /**
+   * Copy constructor
+   * @param[in] v
+   */ 
+  RadxAppVolume(const RadxAppVolume &v);
+
+  /**
+   * @param[in] v
+   */ 
+  RadxAppVolume &operator=(const RadxAppVolume &v);
+  
+
   /**
    * Destructor
    */
@@ -62,6 +75,10 @@ public:
    */
   inline RadxVol & getVolRef(void) {return _vol;}
   
+  /**
+   * @return the volume time
+   */
+  inline time_t getTime(void) const {return _time;}
 
   /**
    * Trim down to only wanted output fields
@@ -73,12 +90,20 @@ public:
    */
   bool write(void);
 
+  /**
+   * Write volume out to a path
+   * @param[in] path
+   */
+  bool write(const std::string &path);
+
 protected:
+
   RadxVol _vol;  /**< Volume */
   time_t _time;             /**< Trigger time */
   const std::vector<RadxRay *> *_rays;  /**< Pointer to each ray in vol */
   const vector<RadxSweep *> *_sweeps;   /**< Pointer to each sweep */
   RadxRay *_ray;                       /**< Pointer to current ray */
+
 private:
 
   const RadxAppParms *_parms;         /**< Pointer to derived params */
@@ -88,7 +113,6 @@ private:
   std::vector<std::string> _paths;    /**< The files, archive or filelist mode*/
   bool _realtime;                     /**< True for real time mode */
   LdataInfo _ldata;                   /**< Triggering mechanism for REALTIME */
-
 
   /**
    * @return true if object is good

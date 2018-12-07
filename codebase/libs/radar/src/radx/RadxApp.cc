@@ -132,30 +132,30 @@ void RadxApp::algFinish(void)
 }
 
 //------------------------------------------------------------------
-bool RadxApp::update(const RadxAppParms &P, RadxAppVolume *input)
+bool RadxApp::update(const RadxAppParms &P, RadxAppVolume *volume)
 {
   // do the volume commands first
-  _p.processVolume(input);
+  _p.processVolume(volume);
 
   // then the loop commands, 1d
   _p.clearOutputDebugAll();
-  for (int ii=0; ii < input->numProcessingNodes(false); ++ii)
+  for (int ii=0; ii < volume->numProcessingNodes(false); ++ii)
   {
-    _p.processOneItem1d(input, ii);
+    _p.processOneItem1d(volume, ii);
   }
 
   // then the loop commands, 2d
-  for (int ii=0; ii < input->numProcessingNodes(true); ++ii)
+  for (int ii=0; ii < volume->numProcessingNodes(true); ++ii)
   {
-    _p.processOneItem2d(input, ii);
+    _p.processOneItem2d(volume, ii);
   }
   _p.setOutputDebugAll();
 
   // do the final volume commands
-  _p.processVolumeAfter(input);
+  _p.processVolumeAfter(volume);
 
   // trim to wanted outputs
-  input->trim();
+  volume->trim();
 
   return true;
 }
