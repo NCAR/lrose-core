@@ -34,88 +34,85 @@
 // and Remote Sensing, Vol. 5, No. 2, April 2012.
 ///////////////////////////////////////////////////////////////////////////
 
+#include "Parms.hh"
+#include "Alg.hh"
+#include "RayData.hh"
+#include <radar/RadxAppParmsTemplate.hh>
+
 #include "RadxPersistentClutterFirstPass.hh"
 #include "RadxPersistentClutterSecondPass.hh"
-#include <csignal>
-#include <new>
-#include <iostream>
-#include <toolsa/LogMsg.hh>
+#include <toolsa/LogStream.hh>
 
-static void tidy_and_exit (int sig);
-static void out_of_store(void);
-static RadxPersistentClutterFirstPass *Prog = NULL;
-static RadxPersistentClutterSecondPass *Prog2 = NULL;
+//--------------------------------------------------------------------
+// tidy up on exit
+static void cleanup(int sig)
+{
+  exit(sig);
+}
+
+// not used:
+// //--------------------------------------------------------------------
+// // Handle out-of-memory conditions
+// static void out_of_store()
+// {
+//   exit(-1);
+// }
 
 //----------------------------------------------------------------------
 int main(int argc, char **argv)
 
 {
-
-  // create program object
-
-  Prog = new RadxPersistentClutterFirstPass(argc, argv, tidy_and_exit,
-					    out_of_store);
-  if (!Prog->OK)
+  Parms params;
+  if (!parmAppInit(params, argc, argv))
   {
-    LOG(LogMsg::FATAL,
-	"Could not create RadxPersistentClutterFirstPass object.");
-    return(1);
+    exit(0);
   }
 
-  int iret = 0;
-  if (!Prog->run())
+  Alg alg(params, cleanup);
+  if (!alg.ok())
   {
-    LOG(LogMsg::ERROR, "running RadxPersistentClutter First pass");
-    iret = 1;
+    exit(1);
   }
-  else
+
+  RayData volume(&params, argc, argv);
+  string path;
+
+  // two passes
+  bool first = true;
+  bool converged = false;
+  RadxPersistentClutterFirstPass p1(params, cleanup);
+  while (volume.triggerRadxVolume(path))
   {
-    Prog2 = new RadxPersistentClutterSecondPass(*Prog);
-    delete Prog;
-    Prog = NULL;
-    if (!Prog2->OK)
+    if (!p1.processVolume(&volume, first))
     {
-      LOG(LogMsg::FATAL,
-	  "Could not create RadxPersistentClutterSecondPass object.");
-      return(1);
-    }
-    if (Prog2->run())
-    {
-      iret = 0;
+      LOG(DEBUG) << "No convergence yet";
     }
     else
     {
-      LOG(LogMsg::ERROR, "running RadxPersistentClutter Second pass");
-      iret = 1;
+      LOG(DEBUG) << "Converged";
+      converged = true;
+      break;
     }
   }
-  // clean up
-  tidy_and_exit(iret);
-  return (iret);
-  
+  if (!converged)
+  {
+    LOG(WARNING) << "Never converged";  
+    p1.finishBad();
+    return -1;
+  }
+
+  RayData vol2(&params, argc, argv);
+  RadxPersistentClutterSecondPass p2(p1);
+  first = true;
+  while (vol2.triggerRadxVolume(path))
+  {
+    if (p2.processVolume(&vol2, first))
+    {
+      // done, all is well
+      return 0;
+    }
+  }
+  p2.finishBad();
+  return -1;
 }
 
-//----------------------------------------------------------------------
-// tidy up on exit
-static void tidy_and_exit (int sig)
-{
-  if (Prog)
-  {
-    delete Prog;
-    Prog = NULL;
-  }
-  if (Prog2)
-  {
-    delete Prog2;
-    Prog2 = NULL;
-  }
-  exit(sig);
-}
-
-//----------------------------------------------------------------------
-// Handle out-of-memory conditions
-static void out_of_store(void)
-{
-  LOG(LogMsg::FATAL, "Operator new failed - out of store");
-  exit(-1);
-}

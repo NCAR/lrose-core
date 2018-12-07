@@ -55,15 +55,21 @@ HDRS = \
 
 CPPC_SRCS = \
 	Params.cc \
+	Parms.cc \
+	Alg.cc \
 	FrequencyCount.cc \
-	Info.cc \
 	Histo.cc \
-	Main.cc \
+	Info.cc \
 	RadxPersistentClutter.cc \
 	RadxPersistentClutterFirstPass.cc \
 	RadxPersistentClutterSecondPass.cc \
         RayClutterInfo.cc \
-	RayHistoInfo.cc
+	RayData.cc \
+	RayData1.cc \
+	RayData2.cc \
+	RayHistoInfo.cc \
+	Main.cc
+
 
 #
 # tdrp macros

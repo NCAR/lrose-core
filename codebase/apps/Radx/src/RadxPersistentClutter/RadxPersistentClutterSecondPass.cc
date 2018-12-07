@@ -26,7 +26,7 @@
  */
 #include "RadxPersistentClutterSecondPass.hh"
 #include <Radx/RadxRay.hh>
-#include <toolsa/LogMsg.hh>
+#include <toolsa/LogStream.hh>
 
 //------------------------------------------------------------------
 RadxPersistentClutterSecondPass::
@@ -37,15 +37,15 @@ RadxPersistentClutterSecondPass(const RadxPersistentClutter &p) :
   for (std::map<RadxAzElev, RayClutterInfo>::iterator ii = _store.begin();
        ii!=_store.end(); ++ii)
   {
-    RayHistoInfo h(ii->second, _params);
+    RayHistoInfo h(ii->second, _parms);
     _histo[ii->first] = h;
   }
 
-  // rewind for reprocessing
-  _alg.rewind();
+  // // rewind for reprocessing
+  // _alg.rewind();
 
   // redo the threading
-  _thread.reinit(_alg.parmRef().num_threads, _alg.parmRef().thread_debug);
+  _thread.reinit(_parms.num_threads, _parms.thread_debug);
 }
 
 //------------------------------------------------------------------
@@ -54,37 +54,34 @@ RadxPersistentClutterSecondPass::~RadxPersistentClutterSecondPass(void)
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterSecondPass::initFirstTime(const time_t &t,
-						    const RadxVol &vol)
+void RadxPersistentClutterSecondPass::initFirstTime(const RayData *vol)
 {
   // Save this volume, will use its time information later
-  _templateVol = vol;
+  _templateVol = *vol;
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterSecondPass::finishLastTimeGood(const time_t &t,
-							 RadxVol &vol)
+void RadxPersistentClutterSecondPass::finishLastTimeGood(RayData *vol)
 {
   // The input volume and time are what is to be written out, do so now
-  _alg.write(vol, t, _params.final_output_url);
-  LOG(LogMsg::DEBUG, "Successful second pass");
+  vol->write(_parms.final_output_url);
+  LOG(DEBUG) << "Successful second pass";
 }
 
 //------------------------------------------------------------------
 void RadxPersistentClutterSecondPass::finishBad(void)
 {
-  LOG(LogMsg::ERROR, "Never matched last time. No output");
+  LOG(ERROR) << "Never matched last time. No output";
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterSecondPass::processFinishVolume(const time_t &t,
-							  RadxVol &vol)
+bool RadxPersistentClutterSecondPass::processFinishVolume(RayData *vol)
 {
-  if (t == _final_t)
+  if (vol->getTime() == _final_t)
   {
     // replace vol with the first template volume when time matches final time
     // from first pass
-    vol = _templateVol;
+    (*vol) = _templateVol;
 
     // prepare this volume for output
     _processForOutput(vol);
@@ -128,11 +125,11 @@ bool RadxPersistentClutterSecondPass::setRayForOutput(const RayClutterInfo *h,
   bool stat;
 
   // put values into the clutter RayxData
-  stat = histo->setClutter(clutter, _params.clutter_percentile,
-			   _params.missing_clutter_value);
+  stat = histo->setClutter(clutter, _parms.clutter_percentile,
+			   _parms.missing_clutter_value);
 
   // prepare for output
-  RadxApp::modifyRayForOutput(clutter, _params.output_field);
+  RadxApp::modifyRayForOutput(clutter, _parms.output_field);
   RadxApp::updateRay(clutter, ray);
   return stat;
 }

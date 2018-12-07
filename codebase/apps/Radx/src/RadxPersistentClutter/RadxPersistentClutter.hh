@@ -31,17 +31,19 @@
 #ifndef RADXPERSISTENTCLUTTER_H
 #define RADXPERSISTENTCLUTTER_H
 
-#include "Params.hh"
+#include "Parms.hh"
 #include "RayClutterInfo.hh"
 #include <radar/RadxApp.hh>
 #include <Radx/RadxAzElev.hh>
 #include <Radx/RayxMapping.hh>
 #include <toolsa/TaThreadDoubleQue.hh>
+#include <toolsa/LogStream.hh>
 #include <map>
 #include <stdexcept>
 
 class FrequencyCount;
 class RadxVol;
+class RayData;
 
 class RadxPersistentClutter
 {
@@ -54,8 +56,7 @@ public:
    * @param[in] cleanup  Method to call on exit
    * @param[in] outOfStore  Method to call  when not enough memory
    */
-  RadxPersistentClutter (int argc, char **argv, void cleanup(int),
-			 void outOfStore(void));
+  RadxPersistentClutter(const Parms &parms, void cleanup(int));
 
   /**
    * Destructor
@@ -67,7 +68,7 @@ public:
    *
    * @return true for success
    */
-  bool run(void);
+  bool processVolume(RayData *volume, bool &first);
 
   /**
    * Compute method needed by threading
@@ -104,7 +105,7 @@ public:
       }
       catch (std::out_of_range err)
       {
-	printf("%s is out of range of mappings\n", ae.sprint().c_str());
+	LOG(WARNING) << ae.sprint() << " is out of range of mappings";
 	return NULL;
       }
     }
@@ -133,7 +134,7 @@ public:
       }
       catch (std::out_of_range err)
       {
-	printf("%s is out of range of mappings\n", ae.sprint().c_str());
+	LOG(WARNING) << ae.sprint() << " is out of range of mappings";
 	return NULL;
       }
     }
@@ -170,9 +171,9 @@ protected:
   };
 
 
-  RadxApp _alg;      /**< generic algorithm object */
-  Params _params;        /**< The parameters */
-  bool _first;           /**< True for first volume */
+  // RadxApp _alg;      /**< generic algorithm object */
+  Parms _parms;         /**< The parameters */
+  bool _first;          /**< True for first volume */
   RayxMapping _rayMap;
 
   /**
@@ -202,7 +203,7 @@ protected:
    *
    * @param[in,out] vol  The data to replace fields in for output
    */
-  void _processForOutput(RadxVol &vol);
+  void _processForOutput(RayData *vol);
 
 
   /**
@@ -231,14 +232,14 @@ private:
    *
    * @return true if this is the last data to process
    */
-  bool _process(const time_t t, RadxVol &vol);
+  bool _process(RayData *vol);
 
   /**
    * Process inputs, first time through
    * @param[in] t  Data time
    * @param[in] vol The data
    */
-  void _processFirst(const time_t t, const RadxVol &vol);
+  void _processFirst(const RayData *vol);
 
   /**
    * Process inputs

@@ -27,8 +27,10 @@
 
 #include "RadxPersistentClutterFirstPass.hh"
 #include "FrequencyCount.hh"
+#include "RayData.hh"
 #include <Radx/RadxRay.hh>
-#include <toolsa/LogMsg.hh>
+#include <toolsa/LogStream.hh>
+#include <toolsa/Path.hh>
 #include <toolsa/DateTime.hh>
 #include <algorithm>
 
@@ -58,14 +60,11 @@ static double _omega(const vector<double> &p, const int k)
 
 //------------------------------------------------------------------
 RadxPersistentClutterFirstPass::
-RadxPersistentClutterFirstPass(int argc, char **argv, void cleanup(int),
-			       void outOfStore(void)) :
-  RadxPersistentClutter(argc, argv, cleanup, outOfStore)
+RadxPersistentClutterFirstPass(const Parms &parms, void cleanup(int)) :
+  RadxPersistentClutter(parms, cleanup)
 {
   _nvolume = 0;
   _total_pixels = 0;
-  // _ascii_output = NULL;
-  // _freq_output = NULL;
 }
 
 //------------------------------------------------------------------
@@ -74,32 +73,59 @@ RadxPersistentClutterFirstPass::~RadxPersistentClutterFirstPass(void)
   if (!_ascii_output.empty())
   {
     FILE *fp = fopen(_ascii_fname.c_str(), "w");
-    for (size_t i=0; i<_ascii_output.size(); ++i)
+    if (fp == NULL)
     {
-      fprintf(fp, "%s\n", _ascii_output[i].c_str());
+      // try to make the path
+      Path path(_ascii_fname);
+      path.makeDirRecurse();
+      fp = fopen(_ascii_fname.c_str(), "w");
+      if (fp == NULL)
+      {
+	LOG(ERROR) << "Cannot open file " << _ascii_fname;
+      }
+      else
+      {
+	for (size_t i=0; i<_ascii_output.size(); ++i)
+	{
+	  fprintf(fp, "%s\n", _ascii_output[i].c_str());
+	}
+	fclose(fp);
+      }
     }
-    fclose(fp);
   }
 
   if (!_freq_output.empty())
   {
     FILE *fp = fopen(_freq_fname.c_str(), "w");
-    for (size_t i=0; i<_freq_output.size(); ++i)
+    if (fp == NULL)
     {
-      fprintf(fp, "%s\n", _freq_output[i].c_str());
+      // try to make the path
+      Path path(_freq_fname);
+      path.makeDirRecurse();
+      fp = fopen(_freq_fname.c_str(), "w");
+      if (fp == NULL)
+      {
+	LOG(ERROR) << "Cannot open file " << _freq_fname;
+      }
+      else
+      {
+	for (size_t i=0; i<_freq_output.size(); ++i)
+	{
+	  fprintf(fp, "%s\n", _freq_output[i].c_str());
+	}
+	fclose(fp);
+      }
     }
-    fclose(fp);
   }
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterFirstPass::initFirstTime(const time_t &t,
-						   const RadxVol &vol)
+void RadxPersistentClutterFirstPass::initFirstTime(const RayData *vol)
 {
   // build path
-  _ascii_fname = _params.output_ascii_path;
+  _ascii_fname = _parms.output_ascii_path;
   _ascii_fname += "/scan";
-  DateTime dt(t);
+  DateTime dt(vol->getTime());
   char buf[1000];
   sprintf(buf, "%04d-%02d-%02d", dt.getYear(), dt.getMonth(), dt.getDay());
   _ascii_fname += buf;
@@ -108,7 +134,7 @@ void RadxPersistentClutterFirstPass::initFirstTime(const time_t &t,
   _ascii_output.clear();
 
   // build other path
-  _freq_fname = _params.output_ascii_path;
+  _freq_fname = _parms.output_ascii_path;
   _freq_fname += "/frequency";
   _freq_fname += buf;
   _freq_fname += ".out";
@@ -116,28 +142,26 @@ void RadxPersistentClutterFirstPass::initFirstTime(const time_t &t,
   _freq_output.clear();
 
   // set first time member value
-  _first_t = t;
+  _first_t = vol->getTime();
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterFirstPass::finishLastTimeGood(const time_t &t,
-							RadxVol &vol)
+void RadxPersistentClutterFirstPass::finishLastTimeGood(RayData *vol)
 {
-  LOG(LogMsg::DEBUG, "Finished, with convergence");
+  LOG(DEBUG) << "Finished, with convergence";
 
   // set last time member value
-  _final_t = t;
+  _final_t = vol->getTime();
 }
 
 //------------------------------------------------------------------
 void RadxPersistentClutterFirstPass::finishBad(void)
 {
-  LOG(LogMsg::WARNING, "Never converged");  
+  LOG(WARNING) << "Never converged";
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterFirstPass::processFinishVolume(const time_t &t,
-							 RadxVol &vol)
+bool RadxPersistentClutterFirstPass::processFinishVolume(RayData *vol)
 {
   // Up the volume count
   ++_nvolume;
@@ -146,13 +170,13 @@ bool RadxPersistentClutterFirstPass::processFinishVolume(const time_t &t,
   _kstar = _computeHistoCutoff();
 
   // output some ASCII stuff that can be graphed later
-  bool ret = _output_for_graphics(t);
+  bool ret = _output_for_graphics(vol->getTime());
 
-  if (_params.diagnostic_output)
+  if (_parms.diagnostic_output)
   {
     // prepare this volume for output, and write it out
     _processForOutput(vol);
-    _alg.write(vol, t);
+    vol->write();
   }
   return ret;
 }
@@ -184,7 +208,7 @@ bool RadxPersistentClutterFirstPass::processRay(const RayxData &r,
 						RayClutterInfo *h) const
 {
   // Update the input RayClutterInfo object using the RayxData
-  return h->update(r, _params.threshold);
+  return h->update(r, _parms.threshold);
 }
 
 //------------------------------------------------------------------
@@ -208,7 +232,7 @@ bool RadxPersistentClutterFirstPass::setRayForOutput(const RayClutterInfo *h,
     if (h->loadNormalizedFrequency(rfreq, _nvolume))
     {
       // prepare for output (put stuff into ray)
-      RadxApp::modifyRayForOutput(clutter, _params.output_field);
+      RadxApp::modifyRayForOutput(clutter, _parms.output_field);
       vector<RayxData> vr;
       vr.push_back(r);
       vr.push_back(rfreq);
@@ -248,8 +272,7 @@ bool RadxPersistentClutterFirstPass::_processFirstRay(const RadxRay &ray,
     RadxAzElev ae = _rayMap.match(az, elev);
     if (_rayMap.isMulti(ae))
     {
-      LOGF(LogMsg::WARNING, "Multiple az,elev in volume %s",
-	      ae.sprint().c_str());
+      LOG(WARNING) << "Multiple az,elev in volume " << ae.sprint();
     }
     else
     {
@@ -261,8 +284,7 @@ bool RadxPersistentClutterFirstPass::_processFirstRay(const RadxRay &ray,
   }
   else
   {
-    LOGF(LogMsg::ERROR, "Elevation %lf not configured within tolerance\n",
-	    elev);
+    LOG(ERROR) << "Elevation not configured within tolerance " << elev;
     return false;
 
   }
@@ -356,7 +378,7 @@ bool RadxPersistentClutterFirstPass::_check_convergence(void)
 {
   // need at least a minimum number of volumes
   int n = static_cast<int>(_threshold.size());
-  if (n < _params.minimum_stable_volumes)
+  if (n < _parms.minimum_stable_volumes)
   {
     return false;
   }
@@ -367,18 +389,18 @@ bool RadxPersistentClutterFirstPass::_check_convergence(void)
 
   // see if at least the minimum number thresholds are all close to the last one
   // and that there is never a large change from one volume to the next
-  for (int i = 0; i<_params.minimum_stable_volumes; ++i)
+  for (int i = 0; i<_parms.minimum_stable_volumes; ++i)
   {
     int j = n - 1 - i;
     double thr = _threshold[j];
     double ch = _change[j];
 
-    if (ch > _params.maximum_percent_change)
+    if (ch > _parms.maximum_percent_change)
     {
       return false;
     }
 
-    if (fabs(thr - thresh) > _params.threshold_tolerance)
+    if (fabs(thr - thresh) > _parms.threshold_tolerance)
     {
       return false;
     }
