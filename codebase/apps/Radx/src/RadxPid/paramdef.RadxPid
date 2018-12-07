@@ -1,15 +1,14 @@
 /*********************************************************
- * Parameter definitions for RadxKdp
+ * Parameter definitions for RadxPid
  *
  * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
  *
  * Dec 2018
  */
 
-//////////////////////////////////////////////////////////
-
 commentdef {
-  p_header = "RadxKdp reads moments from Radx-type files, computes KDP and optionally attenuation, and writes out the results to CfRadial files.";
+  p_header = "RadxPid reads moments from Radx-type files, computes PID (and optionally KDP) and writes out the results to CfRadial files.";
+  p_text = "The NCAR PID method is based on a fuzzy logic approach. This is documented in the following reference: Cloud Microphysics Retrieval Using S-Band Dual-Polarization Radar Measurements: J. Vivekanandan, D. S. Zrnic, S. M. Ellis, R. Oye, A. V. Ryzhkov, and J. Straka. Bulletin of the American Meteorological Society, 1999";
 }
 
 commentdef {
@@ -74,7 +73,7 @@ paramdef string {
   p_help = "If set, only files with names containing this sub-string will be processed.";
 } input_file_search_substr;
 
-paramdef string {
+    paramdef string {
   p_default = "2015 06 26 00 00 00";
   p_descr = "Set the start time for ARCHIVE mode analysis.";
   p_help = "Format is 'yyyy mm dd hh mm ss'.";
@@ -85,6 +84,17 @@ paramdef string {
   p_descr = "Set the end time for ARCHIVE mode analysis.";
   p_help = "Format is 'yyyy mm dd hh mm ss'.";
 } end_time;
+
+commentdef {
+  p_header = "PID PARAMETER FILE";
+  p_text = "Specify the path to the PID parameters.";
+}
+
+paramdef string {
+  p_default = "use-defaults";
+  p_descr = "Path for parameters for computing PID.";
+  p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
+} PID_params_file_path;
 
 commentdef {
   p_header = "INPUT FIELD INFORMATION";
@@ -116,6 +126,12 @@ paramdef string {
 } DBZ_field_name;
 
 paramdef string {
+  p_default = "VEL";
+  p_descr = "Field name for radial velocity.";
+  p_help = "This is used in quality checks.";
+} VEL_field_name;
+
+paramdef string {
   p_default = "ZDR";
   p_descr = "Field name for ZDR.";
 } ZDR_field_name;
@@ -130,14 +146,35 @@ paramdef string {
   p_descr = "Field name for RHOHV.";
 } RHOHV_field_name;
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is LDR data available?";
+} LDR_available;
+
+paramdef string {
+  p_default = "LDR";
+  p_descr = "Field name for LDR.";
+} LDR_field_name;
+    
 commentdef {
   p_header = "COMPUTING KDP";
-  p_text = "The parameters for KDP computations are contained in a separate file. An example default file can be generated using the -print_params_kdp command line argument.";
+  p_text = "Option to compute KDP from PHIDP in the input files. This will be required if a good KDP field is not available in the input data.";
 }
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to compute KDP from PHIDP in the input files. This is generally recommended.";
+  p_help = "If this is FALSE, the 'KDP_field_name' parameter must identify the KDP field to be used in the input data.";
+} compute_KDP;
+
+paramdef string {
+  p_default = "KDP";
+  p_descr = "Field name for KDP in the input data.";
+} KDP_field_name;
 
 paramdef string {
   p_default = "use-defaults";
-  p_descr = "Path for parameters for KDP computations.";
+  p_descr = "Path for parameters for computing KDP.";
   p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
 } KDP_params_file_path;
 
@@ -146,7 +183,11 @@ commentdef {
 }
 
 typedef enum {
-  
+
+  PID,
+  PID_INTEREST,
+  TEMP_FOR_PID,
+
   KDP,
   KDP_COND,
 
@@ -169,6 +210,33 @@ typedef struct {
 paramdef struct output_field_t {
   p_default = {
     {
+      id = PID,
+      name = "PID",
+      long_name = "particle_id",
+      standard_name = "hydrometeor_type",
+      units = "",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = PID_INTEREST,
+      name = "PID_INTEREST",
+      long_name = "final_interest_value_for_pid_decision",
+      standard_name = "final_interest_value_for_pid_decision",
+      units = "",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = TEMP_FOR_PID,
+      name = "TEMP_FOR_PID",
+      long_name = "temperature_for_computing_pid",
+      standard_name = "temperature",
+      units = "C",
+      do_write = FALSE
+    }
+    ,
+    {
       id = KDP,
       name = "KDP",
       long_name = "specific_differential_phase",
@@ -183,15 +251,6 @@ paramdef struct output_field_t {
       long_name = "kdp_conditioned_by_KDP_from_Z_and_ZDR",
       standard_name = "specific_differential_phase_hv",
       units = "deg/km",
-      do_write = FALSE
-    }
-    ,
-    {
-      id = DBZ_ATTEN_CORRECTION,
-      name = "DBZ_ATTEN_CORRECTION",
-      long_name = "correction_to_dbz_for_attenuation",
-      standard_name = "dbz_attenuation_correction",
-      units = "dB",
       do_write = FALSE
     }
     ,
@@ -226,6 +285,9 @@ paramdef struct output_field_t {
   p_help = "Choose the ID from the list.\n"
     "\nThe name and units can be set however the user prefers.\n"
     "\nThe output_encoding apply to CfRadial output only. \n\n"
+    "\tPID: NCAR Particle ID\n"
+    "\tPID_INTEREST: final interest map for NCAR Particle ID values\n"
+    "\tTEMP_FOR_PID: temperature field for PID (C)\n"
     "\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n"
     "\tKDP_COND: KDP conditioned - debug field (deg/km)\n"
     "\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n"
@@ -258,40 +320,49 @@ paramdef boolean {
 typedef struct {
   string input_name; 
   string output_name;
+  boolean censor_non_weather;
 } copy_field_t;
 
 paramdef struct copy_field_t {
   p_default = {
     {
       input_name = "DBZ",
-      output_name = "DBZ"
+      output_name = "DBZ",
+      censor_non_weather = FALSE
     }
     ,
     {
       input_name = "VEL",
-      output_name = "VEL"
+      output_name = "VEL",
+      censor_non_weather = FALSE
     }
   };
   p_descr = "These fields are copied through unchanged to the output file.";
-  p_help = "You can change the name of the field on output.";
+  p_help = "You can change the name of the field on output. Optionally you can censor the non-weather echoes, based on the PID.";
 } copy_fields[];
 
 commentdef {
-  p_header = "WRITING DEBUG FIELDS";
+  p_header = "WRITE DEBUG FIELDS";
 }
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Write extra fields to assist with debugging.";
+  p_descr = "Write extra fields to assist with KDP debugging.";
   p_help = "These are the intermediate fields used in computing KDP and attenuation.";
 } KDP_write_debug_fields;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write extra fields to assist with PID debugging.";
+  p_help = "These are the intermediate fields used in computing PID.";
+} PID_write_debug_fields;
 
 commentdef {
   p_header = "WRITING THE OUTPUT FILES";
 }
 
 paramdef string {
-  p_default = "/tmp/kdp";
+  p_default = "/tmp/pid";
   p_descr = "Output directory path.";
   p_help = "Files will be written to this directory.";
 } output_dir;
@@ -330,6 +401,22 @@ paramdef enum output_format_t {
   p_default = OUTPUT_FORMAT_CFRADIAL;
   p_descr = "Format for the output files.";
 } output_format;
+
+commentdef {
+  p_header = "SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the standard 4/3 earth radius model for refraction.";
+  p_help = "If true, the standard 4/3 earth radius will be overridden. The US NWS NEXRAD system uses 1.21 instead of 1.333.";
+} override_standard_pseudo_earth_radius;
+
+paramdef double {
+  p_default = 1.33333333;
+  p_descr = "Ratio for computing the pseudo earth radius for beam height computations.";
+  p_help = "For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.";
+} pseudo_earth_radius_ratio;
 
 commentdef {
   p_header = "REALTIME OPERATIONS";

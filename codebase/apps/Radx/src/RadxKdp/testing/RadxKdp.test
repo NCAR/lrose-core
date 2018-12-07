@@ -36,22 +36,12 @@ debug = DEBUG_OFF;
 //
 // THREADING FOR SPEED.
 //
+// Multiple threads are used to improve performance. The computations 
+//   are carried out in parallel in separate threads. The read and write 
+//   stages occur in the main thread, since netCDF is not thread safe.
+//
 //======================================================================
  
-///////////// use_multiple_threads ////////////////////
-//
-// Option to use multiple compute threads to improve performance.
-//
-// The read and write stages occur in the main thread, since netCDF is 
-//   not thread safe. The compute stage can be multi-threaded to improve 
-//   performance.
-//
-//
-// Type: boolean
-//
-
-use_multiple_threads = TRUE;
-
 ///////////// n_compute_threads ///////////////////////
 //
 // The number of compute threads.
@@ -60,7 +50,7 @@ use_multiple_threads = TRUE;
 //   computing a fraction of the number of gates. For maximum performance, 
 //   n_threads should be set to the number of processors multiplied by 4. 
 //   For further tuning, use top to maximize CPU usage while varying the 
-//   number of threads.
+//   number of threads. For single-threaded operation set this to 1.
 //
 // Minimum val: 1
 //
@@ -271,7 +261,7 @@ RHOHV_field_name = "RHOHV_F";
 // Type: string
 //
 
-KDP_params_file_path = "./testing/KdpParams.test";
+KDP_params_file_path = "./KdpParams.test";
 
 //======================================================================
 //

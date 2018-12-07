@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// RadxKdp.cc
+// RadxPid.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,7 +30,7 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// RadxKdp reads moments from Radx-supported format files, 
+// RadxPid reads moments from Radx-supported format files, 
 // computes the KDP and attenuation and writes out the results 
 // to Radx-supported format files
 //
@@ -53,7 +53,7 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxXml.hh>
 
-#include "RadxKdp.hh"
+#include "RadxPid.hh"
 #include "Worker.hh"
 #include "WorkerThread.hh"
 
@@ -61,7 +61,7 @@ using namespace std;
 
 // Constructor
 
-RadxKdp::RadxKdp(int argc, char **argv)
+RadxPid::RadxPid(int argc, char **argv)
   
 {
 
@@ -69,7 +69,7 @@ RadxKdp::RadxKdp(int argc, char **argv)
 
   // set programe name
 
-  _progName = "RadxKdp";
+  _progName = "RadxPid";
   
   // parse command line args
   
@@ -91,11 +91,25 @@ RadxKdp::RadxKdp(int argc, char **argv)
     return;
   }
 
-  // print params for KDP then exit
-
-  if (_args.printParamsKdp) {
-    _printParamsKdp();
+  // print params for PID then exit
+  
+  if (_args.printParamsPid) {
+    _printParamsPid();
     exit(0);
+  }
+
+  // read params for Ncar PID
+
+  if (strstr(_params.PID_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_ncarPidParams.load(_params.PID_params_file_path,
+                            NULL, true, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for NcarPid: "
+           << _params.PID_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
   }
 
   // read params for KdpFilt
@@ -120,7 +134,8 @@ RadxKdp::RadxKdp(int argc, char **argv)
   
   for (int ii = 0; ii < _params.n_compute_threads; ii++) {
     WorkerThread *thread =
-      new WorkerThread(this, _params, _kdpFiltParams, ii);
+      new WorkerThread(this, _params, 
+                       _kdpFiltParams, _ncarPidParams, ii);
     if (!thread->OK) {
       delete thread;
       OK = FALSE;
@@ -128,13 +143,13 @@ RadxKdp::RadxKdp(int argc, char **argv)
     }
     _threadPool.addThreadToMain(thread);
   }
-
+  
 }
 
 //////////////////////////////////////
 // destructor
 
-RadxKdp::~RadxKdp()
+RadxPid::~RadxPid()
 
 {
 
@@ -149,31 +164,31 @@ RadxKdp::~RadxKdp()
 }
 
 //////////////////////////////////////////////////
-// Print params for KDP
+// Print params for PID
 
-void RadxKdp::_printParamsKdp()
+void RadxPid::_printParamsPid()
 {
 
   if (_params.debug) {
-    cerr << "Reading KDP params from file: " << _params.KDP_params_file_path << endl;
+    cerr << "Reading PID params from file: " << _params.PID_params_file_path << endl;
   }
 
   // do we need to expand environment variables?
 
   bool expandEnvVars = false;
-  if (_args.printParamsKdpMode.find("expand") != string::npos) {
+  if (_args.printParamsPidMode.find("expand") != string::npos) {
     expandEnvVars = true;
   }
 
-  // read in KDP params if applicable
+  // read in PID params if applicable
 
-  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+  if (strstr(_params.PID_params_file_path, "use-defaults") == NULL) {
     // not using defaults
-    if (_kdpFiltParams.load(_params.KDP_params_file_path,
+    if (_ncarPidParams.load(_params.PID_params_file_path,
                             NULL, expandEnvVars, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
-      cerr << "Cannot read params file for KdpFilt: "
-           << _params.KDP_params_file_path << endl;
+      cerr << "Cannot read params file for PidFilt: "
+           << _params.PID_params_file_path << endl;
       OK = FALSE;
       return;
     }
@@ -182,24 +197,24 @@ void RadxKdp::_printParamsKdp()
   // set print mode
 
   tdrp_print_mode_t printMode = PRINT_LONG;
-  if (_args.printParamsKdpMode.find("short") == 0) {
+  if (_args.printParamsPidMode.find("short") == 0) {
     printMode = PRINT_SHORT;
-  } else if (_args.printParamsKdpMode.find("norm") == 0) {
+  } else if (_args.printParamsPidMode.find("norm") == 0) {
     printMode = PRINT_NORM;
-  } else if (_args.printParamsKdpMode.find("verbose") == 0) {
+  } else if (_args.printParamsPidMode.find("verbose") == 0) {
     printMode = PRINT_VERBOSE;
   }
 
   // do the print to stdout
 
-  _kdpFiltParams.print(stdout, printMode);
+  _ncarPidParams.print(stdout, printMode);
 
 }
 
 //////////////////////////////////////////////////
 // Run
 
-int RadxKdp::Run()
+int RadxPid::Run()
 {
 
   if (_params.mode == Params::ARCHIVE) {
@@ -214,7 +229,7 @@ int RadxKdp::Run()
 //////////////////////////////////////////////////
 // Run in filelist mode
 
-int RadxKdp::_runFilelist()
+int RadxPid::_runFilelist()
 {
 
   // loop through the input file list
@@ -237,7 +252,7 @@ int RadxKdp::_runFilelist()
 //////////////////////////////////////////////////
 // Run in archive mode
 
-int RadxKdp::_runArchive()
+int RadxPid::_runArchive()
 {
 
   // get start and end times
@@ -267,7 +282,7 @@ int RadxKdp::_runArchive()
   }
 
   if (_params.debug) {
-    cerr << "RadxKdp::_runArchive" << endl;
+    cerr << "RadxPid::_runArchive" << endl;
     cerr << "  Input dir: " << _params.input_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
     cerr << "  End time: " << RadxTime::strm(endTime) << endl;
@@ -279,7 +294,7 @@ int RadxKdp::_runArchive()
   tlist.setDir(_params.input_dir);
   tlist.setModeInterval(startTime, endTime);
   if (tlist.compile()) {
-    cerr << "ERROR - RadxKdp::_runFilelist()" << endl;
+    cerr << "ERROR - RadxPid::_runFilelist()" << endl;
     cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
     cerr << "  End time: " << RadxTime::strm(endTime) << endl;
@@ -289,7 +304,7 @@ int RadxKdp::_runArchive()
 
   const vector<string> &paths = tlist.getPathList();
   if (paths.size() < 1) {
-    cerr << "ERROR - RadxKdp::_runFilelist()" << endl;
+    cerr << "ERROR - RadxPid::_runFilelist()" << endl;
     cerr << "  No files found, dir: " << _params.input_dir << endl;
     return -1;
   }
@@ -317,7 +332,7 @@ int RadxKdp::_runArchive()
 //////////////////////////////////////////////////
 // Run in realtime mode
 
-int RadxKdp::_runRealtime()
+int RadxPid::_runRealtime()
 {
 
   // init process mapper registration
@@ -352,7 +367,7 @@ int RadxKdp::_runRealtime()
 // Process a file
 // Returns 0 on success, -1 on failure
 
-int RadxKdp::_processFile(const string &filePath)
+int RadxPid::_processFile(const string &filePath)
 {
 
   PMU_auto_register("Processing file");
@@ -400,7 +415,7 @@ int RadxKdp::_processFile(const string &filePath)
   }
   
   if (_params.debug) {
-    cerr << "INFO - RadxKdp::Run" << endl;
+    cerr << "INFO - RadxPid::Run" << endl;
     cerr << "  Input path: " << filePath << endl;
   }
   
@@ -410,7 +425,7 @@ int RadxKdp::_processFile(const string &filePath)
   // read in file
   
   if (inFile.readFromPath(filePath, _vol)) {
-    cerr << "ERROR - RadxKdp::Run" << endl;
+    cerr << "ERROR - RadxPid::Run" << endl;
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
@@ -422,12 +437,14 @@ int RadxKdp::_processFile(const string &filePath)
 
   // set radar properties
 
+  _radarHtKm = _vol.getAltitudeKm();
   _wavelengthM = _vol.getWavelengthM();
+  
 
   // compute the derived fields
   
   if (_compute()) {
-    cerr << "ERROR - RadxKdp::Run" << endl;
+    cerr << "ERROR - RadxPid::Run" << endl;
     cerr << "  Cannot compute KDP and attenuation" << endl;
     return -1;
   }
@@ -445,7 +462,7 @@ int RadxKdp::_processFile(const string &filePath)
 //////////////////////////////////////////////////
 // set up read
 
-void RadxKdp::_setupRead(RadxFile &file)
+void RadxPid::_setupRead(RadxFile &file)
 {
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -479,7 +496,7 @@ void RadxKdp::_setupRead(RadxFile &file)
 //////////////////////////////////////////////////
 // encode fields for output
 
-void RadxKdp::_encodeFieldsForOutput()
+void RadxPid::_encodeFieldsForOutput()
 {
   
   if (_params.output_encoding == Params::OUTPUT_ENCODING_INT16) {
@@ -493,7 +510,7 @@ void RadxKdp::_encodeFieldsForOutput()
 //////////////////////////////////////////////////
 // set up write
 
-void RadxKdp::_setupWrite(RadxFile &file)
+void RadxPid::_setupWrite(RadxFile &file)
 {
 
   if (_params.debug) {
@@ -539,7 +556,7 @@ void RadxKdp::_setupWrite(RadxFile &file)
 //////////////////////////////////////////////////
 // write out the volume
 
-int RadxKdp::_writeVol()
+int RadxPid::_writeVol()
 {
 
   // clear the input rays
@@ -567,7 +584,7 @@ int RadxKdp::_writeVol()
   if (outFile.writeToDir(_vol, _params.output_dir,
                          _params.append_day_dir_to_output_dir,
                          _params.append_year_dir_to_output_dir)) {
-    cerr << "ERROR - RadxKdp::_writeVol" << endl;
+    cerr << "ERROR - RadxPid::_writeVol" << endl;
     cerr << "  Cannot write file to dir: " << _params.output_dir << endl;
     cerr << outFile.getErrStr() << endl;
     return -1;
@@ -586,7 +603,7 @@ int RadxKdp::_writeVol()
   ldata.setRelDataPath(relPath);
   ldata.setWriter(_progName);
   if (ldata.write(_vol.getEndTimeSecs())) {
-    cerr << "WARNING - RadxKdp::_writeVol" << endl;
+    cerr << "WARNING - RadxPid::_writeVol" << endl;
     cerr << "  Cannot write latest data info file to dir: "
          << _params.output_dir << endl;
   }
@@ -598,7 +615,7 @@ int RadxKdp::_writeVol()
 /////////////////////////////////////////////////////
 // compute the derived fields for all rays in volume
 
-int RadxKdp::_compute()
+int RadxPid::_compute()
 {
 
   // initialize the volume with ray numbers
@@ -661,7 +678,7 @@ int RadxKdp::_compute()
 ///////////////////////////////////////////////////////////
 // Store the derived ray
 
-int RadxKdp::_storeDerivedRay(WorkerThread *thread)
+int RadxPid::_storeDerivedRay(WorkerThread *thread)
 
 {
   

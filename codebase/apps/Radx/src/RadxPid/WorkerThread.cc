@@ -22,9 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// RadxKdp.hh
-//
-// RadxKdp object
+// WorkerThread.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,104 +30,79 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// RadxKdp reads moments from Radx-supported format files, 
-// computes the KDP and attenuation and writes out the results 
-// to Radx-supported format files
+// Thread class for handling computations
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef RadxKdp_H
-#define RadxKdp_H
-
-#include "Args.hh"
-#include "Params.hh"
-#include <string>
-#include <deque>
-#include <toolsa/TaThread.hh>
-#include <toolsa/TaThreadPool.hh>
+#include <cassert>
 #include <radar/KdpFiltParams.hh>
-#include <Radx/RadxVol.hh>
-#include <Radx/RadxArray.hh>
-class RadxVol;
-class RadxFile;
-class RadxRay;
-class RadxField;
-class Worker;
-class WorkerThread;
-using namespace std;
+#include <radar/NcarPidParams.hh>
+#include "RadxPid.hh"
+#include "WorkerThread.hh"
+#include "Worker.hh"
+#include "Params.hh"
 
-class RadxKdp {
+///////////////////////////////////////////////////////////////
+// Constructor
+
+WorkerThread::WorkerThread(RadxPid *parent,
+                           const Params &params,
+                           const KdpFiltParams &kdpFiltParams,
+                           const NcarPidParams &ncarPidParams,
+                           int threadNum) :
+        _parent(parent),
+        _params(params),
+        _kdpFiltParams(kdpFiltParams),
+        _ncarPidParams(ncarPidParams),
+        _threadNum(threadNum)
+{
   
-public:
-
-  // constructor
+  OK = TRUE;
+  _inputRay = NULL;
+  _outputRay = NULL;
   
-  RadxKdp (int argc, char **argv);
-
-  // destructor
+  // create compute worker object
   
-  ~RadxKdp();
+  _worker = new Worker(_params, _kdpFiltParams, _ncarPidParams, _threadNum);
+  if (_worker == NULL) {
+    OK = FALSE;
+    return;
+  }
+  if (!_worker->OK) {
+    OK = FALSE;
+    _worker = NULL;
+    return;
+  }
 
-  // run 
+}  
 
-  int Run();
+// Destructor
 
-  // data members
+WorkerThread::~WorkerThread()
+{
 
-  int OK;
+  if (_worker != NULL) {
+    delete _worker;
+  }
 
-  // get methods for threading
+}  
 
-  const Params &getParams() const { return _params; }
-  const KdpFiltParams &getKdpFiltParams() const { return _kdpFiltParams; }
-  double getWavelengthM() const { return _wavelengthM; }
+// run method
 
-protected:
-private:
+void WorkerThread::run()
+{
 
-  string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
-  KdpFiltParams _kdpFiltParams;
-  vector<string> _readPaths;
+  // check
 
-  // radar volume container
+  assert(_worker != NULL);
+  assert(_inputRay != NULL);
   
-  RadxVol _vol;
+  // Compute worker object will create the output ray
+  // The ownership of the ray is passed to the parent object
+  // which adds it to the output volume.
 
-  // derived rays - after compute
-
-  vector <RadxRay *> _derivedRays;
-
-  // radar properties
-
-  double _wavelengthM;
-
-  //////////////////////////////////////////////////////////////
-  // inner thread class for calling Moments computations
+  _outputRay = _worker->compute(_inputRay,
+                                _parent->getRadarHtKm(),
+                                _parent->getWavelengthM());
   
-  pthread_mutex_t _debugPrintMutex;
-  
-  // instantiate thread pool for parallel computations
-
-  TaThreadPool _threadPool;
-
-  // private methods
-  
-  void _printParamsKdp();
-  int _runFilelist();
-  int _runArchive();
-  int _runRealtime();
-  void _setupRead(RadxFile &file);
-  void _setupWrite(RadxFile &file);
-  int _writeVol();
-  int _processFile(const string &filePath);
-  void _encodeFieldsForOutput();
-  
-  int _compute();
-  int _storeDerivedRay(WorkerThread *thread);
-
-};
-
-#endif
+}

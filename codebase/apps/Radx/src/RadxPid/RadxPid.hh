@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// RadxKdp.hh
+// RadxPid.hh
 //
-// RadxKdp object
+// RadxPid object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,14 +32,14 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// RadxKdp reads moments from Radx-supported format files, 
-// computes the KDP and attenuation and writes out the results 
-// to Radx-supported format files
+// RadxPid reads moments from Radx-supported format files, 
+// computes the PID (and optionally KDP_ and writes out the
+// results to Radx-supported format files
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef RadxKdp_H
-#define RadxKdp_H
+#ifndef RadxPid_H
+#define RadxPid_H
 
 #include "Args.hh"
 #include "Params.hh"
@@ -48,6 +48,7 @@
 #include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
 #include <radar/KdpFiltParams.hh>
+#include <radar/NcarPidParams.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxArray.hh>
 class RadxVol;
@@ -58,17 +59,17 @@ class Worker;
 class WorkerThread;
 using namespace std;
 
-class RadxKdp {
+class RadxPid {
   
 public:
 
   // constructor
   
-  RadxKdp (int argc, char **argv);
+  RadxPid (int argc, char **argv);
 
   // destructor
   
-  ~RadxKdp();
+  ~RadxPid();
 
   // run 
 
@@ -81,7 +82,8 @@ public:
   // get methods for threading
 
   const Params &getParams() const { return _params; }
-  const KdpFiltParams &getKdpFiltParams() const { return _kdpFiltParams; }
+  const NcarPidParams &getPidFiltParams() const { return _ncarPidParams; }
+  double getRadarHtKm() const { return _radarHtKm; }
   double getWavelengthM() const { return _wavelengthM; }
 
 protected:
@@ -91,6 +93,7 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+  NcarPidParams _ncarPidParams;
   KdpFiltParams _kdpFiltParams;
   vector<string> _readPaths;
 
@@ -104,6 +107,7 @@ private:
 
   // radar properties
 
+  double _radarHtKm;
   double _wavelengthM;
 
   //////////////////////////////////////////////////////////////
@@ -111,13 +115,13 @@ private:
   
   pthread_mutex_t _debugPrintMutex;
   
-  // instantiate thread pool for parallel computations
+  // instantiate thread pool for computations
 
   TaThreadPool _threadPool;
 
   // private methods
   
-  void _printParamsKdp();
+  void _printParamsPid();
   int _runFilelist();
   int _runArchive();
   int _runRealtime();

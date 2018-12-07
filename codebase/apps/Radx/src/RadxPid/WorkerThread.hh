@@ -22,9 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// RadxKdp.hh
-//
-// RadxKdp object
+// WorkerThread.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,103 +30,86 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// RadxKdp reads moments from Radx-supported format files, 
-// computes the KDP and attenuation and writes out the results 
-// to Radx-supported format files
+// Thread class for handling computations
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef RadxKdp_H
-#define RadxKdp_H
+#ifndef WorkerThread_HH
+#define WorkerThread_HH
 
-#include "Args.hh"
-#include "Params.hh"
-#include <string>
-#include <deque>
 #include <toolsa/TaThread.hh>
-#include <toolsa/TaThreadPool.hh>
-#include <radar/KdpFiltParams.hh>
-#include <Radx/RadxVol.hh>
-#include <Radx/RadxArray.hh>
-class RadxVol;
-class RadxFile;
+
 class RadxRay;
-class RadxField;
+class RadxPid;
 class Worker;
-class WorkerThread;
-using namespace std;
+class Params;
+class KdpFiltParams;
+class NcarPidParams;
 
-class RadxKdp {
-  
+class WorkerThread : public TaThread
+{  
+
 public:
-
+  
   // constructor
   
-  RadxKdp (int argc, char **argv);
+  WorkerThread(RadxPid *parent, 
+               const Params &params,
+               const KdpFiltParams &kdpFiltParams,
+               const NcarPidParams &ncarPidParams,
+               int threadNum);
 
   // destructor
   
-  ~RadxKdp();
+  virtual ~WorkerThread();
 
-  // run 
+  // compute engine object
+  
+  inline Worker *getWorker() const { return _worker; }
+  
+  // set input ray
+  
+  inline void setInputRay(RadxRay *val) { _inputRay = val; }
+  
+  // derived ray - result of computations
+  
+  inline RadxRay *getOutputRay() const { return _outputRay; }
 
-  int Run();
+  // override run method
 
-  // data members
+  virtual void run();
 
-  int OK;
+  // constructor OK?
 
-  // get methods for threading
+  bool OK;
 
-  const Params &getParams() const { return _params; }
-  const KdpFiltParams &getKdpFiltParams() const { return _kdpFiltParams; }
-  double getWavelengthM() const { return _wavelengthM; }
-
-protected:
 private:
 
-  string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
-  KdpFiltParams _kdpFiltParams;
-  vector<string> _readPaths;
+  // parent object
 
-  // radar volume container
-  
-  RadxVol _vol;
+  RadxPid *_parent;
 
-  // derived rays - after compute
+  // params
 
-  vector <RadxRay *> _derivedRays;
+  const Params &_params;
+  const KdpFiltParams &_kdpFiltParams;
+  const NcarPidParams &_ncarPidParams;
 
-  // radar properties
+  // thread number
 
-  double _wavelengthM;
+  int _threadNum;
 
-  //////////////////////////////////////////////////////////////
-  // inner thread class for calling Moments computations
-  
-  pthread_mutex_t _debugPrintMutex;
-  
-  // instantiate thread pool for parallel computations
+  // computation engine
 
-  TaThreadPool _threadPool;
+  Worker *_worker;
 
-  // private methods
-  
-  void _printParamsKdp();
-  int _runFilelist();
-  int _runArchive();
-  int _runRealtime();
-  void _setupRead(RadxFile &file);
-  void _setupWrite(RadxFile &file);
-  int _writeVol();
-  int _processFile(const string &filePath);
-  void _encodeFieldsForOutput();
-  
-  int _compute();
-  int _storeDerivedRay(WorkerThread *thread);
+  // input ray
+
+  RadxRay *_inputRay;
+
+  // output ray
+
+  RadxRay *_outputRay;
 
 };
 

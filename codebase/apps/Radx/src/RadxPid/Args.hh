@@ -22,114 +22,61 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// RadxKdp.hh
-//
-// RadxKdp object
+// Args.h: Command line object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Dec 2018
 //
-///////////////////////////////////////////////////////////////
-//
-// RadxKdp reads moments from Radx-supported format files, 
-// computes the KDP and attenuation and writes out the results 
-// to Radx-supported format files
-//
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
-#ifndef RadxKdp_H
-#define RadxKdp_H
+#ifndef ARGS_H
+#define ARGS_H
 
-#include "Args.hh"
-#include "Params.hh"
+#include <iostream>
+#include <tdrp/tdrp.h>
 #include <string>
-#include <deque>
-#include <toolsa/TaThread.hh>
-#include <toolsa/TaThreadPool.hh>
-#include <radar/KdpFiltParams.hh>
-#include <Radx/RadxVol.hh>
-#include <Radx/RadxArray.hh>
-class RadxVol;
-class RadxFile;
-class RadxRay;
-class RadxField;
-class Worker;
-class WorkerThread;
+#include <vector>
 using namespace std;
 
-class RadxKdp {
+class Args {
   
 public:
 
   // constructor
+
+  Args ();
+
+  // Destructor
+
+  ~Args();
   
-  RadxKdp (int argc, char **argv);
+  // parse the command line
+  // Returns 0 on success, -1 on failure
 
-  // destructor
+  int parse (int argc, char **argv, string &prog_name);
+
+  // public data
   
-  ~RadxKdp();
+  tdrp_override_t override;
+  bool tdrpDebug;
 
-  // run 
+  bool printParamsPid;
+  string printParamsPidMode;
 
-  int Run();
-
-  // data members
-
-  int OK;
-
-  // get methods for threading
-
-  const Params &getParams() const { return _params; }
-  const KdpFiltParams &getKdpFiltParams() const { return _kdpFiltParams; }
-  double getWavelengthM() const { return _wavelengthM; }
+  bool startTimeSet, endTimeSet;
+  vector<string> inputFileList;
 
 protected:
+  
 private:
 
   string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
-  KdpFiltParams _kdpFiltParams;
-  vector<string> _readPaths;
-
-  // radar volume container
+  void _usage(ostream &out);
   
-  RadxVol _vol;
-
-  // derived rays - after compute
-
-  vector <RadxRay *> _derivedRays;
-
-  // radar properties
-
-  double _wavelengthM;
-
-  //////////////////////////////////////////////////////////////
-  // inner thread class for calling Moments computations
-  
-  pthread_mutex_t _debugPrintMutex;
-  
-  // instantiate thread pool for parallel computations
-
-  TaThreadPool _threadPool;
-
-  // private methods
-  
-  void _printParamsKdp();
-  int _runFilelist();
-  int _runArchive();
-  int _runRealtime();
-  void _setupRead(RadxFile &file);
-  void _setupWrite(RadxFile &file);
-  int _writeVol();
-  int _processFile(const string &filePath);
-  void _encodeFieldsForOutput();
-  
-  int _compute();
-  int _storeDerivedRay(WorkerThread *thread);
-
 };
 
 #endif
+
+
+

@@ -36,7 +36,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "Worker.hh"
-#include "RadxKdp.hh"
+#include "RadxPid.hh"
 #include <toolsa/os_config.h>
 #include <toolsa/file_io.h>
 #include <rapmath/trig.h>
@@ -52,18 +52,24 @@ const double Worker::missingDbl = -9999.0;
 
 Worker::Worker(const Params &params,
                const KdpFiltParams &kdpFiltParams,
+               const NcarPidParams &ncarPidParams,
                int id)  :
         _params(params),
         _kdpFiltParams(kdpFiltParams),
+        _ncarPidParams(ncarPidParams),
         _id(id)
   
 {
 
   OK = true;
   
-  // initialize kdp object
+  // initialize kdp and pid computations
 
   _kdpInit();
+
+  if (_pidInit()) {
+    OK = false;
+  }
 
 }
 
@@ -73,6 +79,17 @@ Worker::~Worker()
 
 {
 
+}
+
+///////////////////////////////////////////////////////////
+// Load the temperature profile for PID computations,
+// for the specified time.
+// This reads in a new sounding if needed.
+// If no sounding is available, the static profile is used
+
+void Worker::loadTempProfile(time_t dataTime)
+{
+  _pid.loadTempProfile(dataTime);
 }
 
 //////////////////////////////////////////////////
@@ -85,7 +102,9 @@ Worker::~Worker()
 // Returns NULL on error.
 
 RadxRay *Worker::compute(RadxRay *inputRay,
+                         double radarHtKm,
                          double wavelengthM)
+
 {
 
   // set ray-specific metadata
@@ -97,30 +116,51 @@ RadxRay *Worker::compute(RadxRay *inputRay,
   _elevation = inputRay->getElevationDeg();
   _timeSecs = inputRay->getTimeSecs();
   _nanoSecs = inputRay->getNanoSecs();
+  _nyquist = inputRay->getNyquistMps();
 
   // initialize
 
+  _radarHtKm = radarHtKm;
   _wavelengthM = wavelengthM;
 
-  // create moments ray
+  // initialize pid for wavelength
   
-  RadxRay *outputRay = new RadxRay;
-  outputRay->copyMetaData(*inputRay);
-  
+  _pid.setWavelengthCm(wavelengthM * 100.0);
+
+  // load temp profile for PID
+
+  if (_pid.loadTempProfile(inputRay->getTimeSecs())) {
+    return NULL;
+  }
+
   // allocate input arrays for computing derived fields,
   // and load them up
   
   _allocInputArrays();
   _loadInputArrays(inputRay);
 
+  // create output ray
+  
+  RadxRay *outputRay = new RadxRay;
+  outputRay->copyMetaData(*inputRay);
+  
   // alloc the derived field arrays
 
   _allocDerivedArrays();
   
   // compute kdp
-  
-  _kdpCompute();
 
+  if (_params.compute_KDP) {
+    _kdpCompute();
+  } else {
+    _kdp.initializeArrays(_nGates);
+  }
+
+  // compute pid
+
+  _pid.loadTempProfile(inputRay->getTimeSecs());
+  _pidCompute();
+  
   // load output fields into the moments ray
   
   _loadOutputFields(inputRay, outputRay);
@@ -194,6 +234,43 @@ void Worker::_kdpCompute()
 }
 
 //////////////////////////////////////
+// initialize PID
+  
+int Worker::_pidInit()
+  
+{
+
+  // initialize PID object
+
+  if (_pid.setFromParams(_ncarPidParams)) {
+    return -1;
+  }
+
+  return 0;
+  
+}
+
+//////////////////////////////////////
+// compute PID
+
+void Worker::_pidCompute()
+  
+{
+  
+  // compute particle ID
+  
+  _pid.computePidBeam(_nGates, _snrArray, _dbzArray, 
+                      _zdrArray, _kdpArray, _ldrArray, 
+                      _rhohvArray, _phidpArray, _tempForPid);
+  
+  // load results
+
+  memcpy(_pidArray, _pid.getPid(), _nGates * sizeof(int));
+  memcpy(_pidInterest, _pid.getInterest(), _nGates * sizeof(double));
+  
+}
+
+//////////////////////////////////////
 // alloc input arrays
   
 void Worker::_allocInputArrays()
@@ -203,6 +280,7 @@ void Worker::_allocInputArrays()
   _snrArray = _snrArray_.alloc(_nGates);
   _dbzArray = _dbzArray_.alloc(_nGates);
   _zdrArray = _zdrArray_.alloc(_nGates);
+  _ldrArray = _ldrArray_.alloc(_nGates);
   _rhohvArray = _rhohvArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
 
@@ -218,6 +296,9 @@ void Worker::_allocDerivedArrays()
   _kdpArray = _kdpArray_.alloc(_nGates);
   _kdpZZdrArray = _kdpZZdrArray_.alloc(_nGates);
   _kdpCondArray = _kdpCondArray_.alloc(_nGates);
+
+  _pidArray = _pidArray_.alloc(_nGates);
+  _pidInterest = _pidInterest_.alloc(_nGates);
 
 }
 
@@ -257,6 +338,30 @@ int Worker::_loadInputArrays(RadxRay *inputRay)
     return -1;
   }
   
+  if (_params.LDR_available) {
+    if (_loadFieldArray(inputRay, _params.LDR_field_name,
+                        true, _ldrArray)) {
+      return -1;
+    }
+  } else {
+    for (size_t igate = 0; igate < _nGates; igate++) {
+      _ldrArray[igate] = missingDbl;
+    }
+  }
+  
+  if (!_params.compute_KDP) {
+    if (_loadFieldArray(inputRay, _params.KDP_field_name,
+                        true, _kdpArray)) {
+      return -1;
+    }
+  } else {
+    for (size_t igate = 0; igate < _nGates; igate++) {
+      _kdpArray[igate] = missingDbl;
+    }
+  }
+
+  _loadFieldArray(inputRay, "temperature", true, _tempForPid);
+
   return 0;
   
 }
@@ -341,6 +446,27 @@ void Worker::_computeSnrFromDbz()
       *snr = -20;
     }
   }
+
+}
+
+//////////////////////////////////////////////////////////////
+// Censor gates with non-precip particle types
+
+void Worker::_censorNonPrecip(RadxField &field)
+
+{
+
+  const int *pid = _pid.getPid();
+  for (size_t ii = 0; ii < _nGates; ii++) {
+    int ptype = pid[ii];
+    if (ptype == NcarParticleId::FLYING_INSECTS ||
+        ptype == NcarParticleId::SECOND_TRIP ||
+        ptype == NcarParticleId::GROUND_CLUTTER ||
+        ptype < NcarParticleId::CLOUD ||
+        ptype > NcarParticleId::SATURATED_SNR) {
+      field.setGateToMissing(ii);
+    }
+  } // ii
 
 }
 

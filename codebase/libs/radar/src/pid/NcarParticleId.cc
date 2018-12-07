@@ -867,22 +867,35 @@ int NcarParticleId::loadTempProfile(time_t dataTime)
   
 {
 
+  double secsSincePrev
+    = fabs((double) _prevProfileDataTime - (double) dataTime);
+  if (secsSincePrev < 300) {
+    return 0;
+  }
+  
   // get profile from spdb sounding if appropriate
   
   if (_params.PID_use_soundings_from_spdb) {
+
     if (_getTempProfileFromSpdb(dataTime) == 0) {
+      _prevProfileDataTime = dataTime;
       return 0;
     }
+
     if (_debug) {
       cerr << "WARNING - NcarParticleId::loadTempProfile" << endl;
-      cerr << "Cannot retrieve sounding, url: " << _params.PID_sounding_spdb_url << endl;
-      cerr << "                     dataTime: " << DateTime::strm(dataTime) << endl;
+      cerr << "Cannot retrieve sounding, url: "
+           << _params.PID_sounding_spdb_url << endl;
+      cerr << "                     dataTime: "
+           << DateTime::strm(dataTime) << endl;
     }
-  }
+
+  } // if (_params.PID_use_soundings_from_spdb)
   
-  // get profile from thresholds file
+  // alternatively get profile from thresholds file
   
-  if (_tempProfile.loadFromPidThresholdsFile(_params.PID_thresholds_file_path)) {
+  if (_tempProfile.loadFromPidThresholdsFile
+      (_params.PID_thresholds_file_path)) {
     cerr << "ERROR - NcarParticleId::loadTempProfile" << endl;
     cerr << "Cannot retrieve temp profile from file: "
          << _params.PID_thresholds_file_path << endl;
@@ -892,6 +905,8 @@ int NcarParticleId::loadTempProfile(time_t dataTime)
   // compute the temperature height lookup table
   
   _computeTempHtLookup();
+  _prevProfileDataTime = dataTime;
+
 
   return 0;
 
@@ -907,11 +922,6 @@ int NcarParticleId::loadTempProfile(time_t dataTime)
 int NcarParticleId::_getTempProfileFromSpdb(time_t dataTime)
   
 {
-  
-  double secsSincePrev = fabs((double) _prevProfileDataTime - (double) dataTime);
-  if (secsSincePrev < 300) {
-    return 0;
-  }
   
   _tempProfile.clear();
   
@@ -970,8 +980,6 @@ int NcarParticleId::_getTempProfileFromSpdb(time_t dataTime)
   }
   
   // success
-
-  _prevProfileDataTime = dataTime;
 
   return 0;
 

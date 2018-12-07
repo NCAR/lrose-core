@@ -21,10 +21,9 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// RadxKdp.hh
+///////////////////////////////////////////////////////////////
 //
-// RadxKdp object
+// main for RadxPid
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,104 +31,87 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// RadxKdp reads moments from Radx-supported format files, 
+// RadxPid reads moments from Radx-supported format files, 
 // computes the KDP and attenuation and writes out the results 
 // to Radx-supported format files
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef RadxKdp_H
-#define RadxKdp_H
-
-#include "Args.hh"
-#include "Params.hh"
-#include <string>
-#include <deque>
-#include <toolsa/TaThread.hh>
-#include <toolsa/TaThreadPool.hh>
-#include <radar/KdpFiltParams.hh>
-#include <Radx/RadxVol.hh>
-#include <Radx/RadxArray.hh>
-class RadxVol;
-class RadxFile;
-class RadxRay;
-class RadxField;
-class Worker;
-class WorkerThread;
+#include "RadxPid.hh"
+#include <signal.h>
+#include <new>
+#include <iostream>
 using namespace std;
 
-class RadxKdp {
+// file scope
+
+static void tidy_and_exit (int sig);
+static void out_of_store();
+static RadxPid *Prog = NULL;
+
+// main
+
+int main(int argc, char **argv)
+
+{
+
+  // create program object
+
+  Prog = new RadxPid(argc, argv);
+  if (!Prog->OK) {
+    cerr << "Error: Could not create RadxPid object." << endl;
+    return(-1);
+  }
+
+  // set signal handling
   
-public:
+  signal(SIGINT, tidy_and_exit);
+  signal(SIGHUP, tidy_and_exit);
+  signal(SIGTERM, tidy_and_exit);
+  signal(SIGPIPE, SIG_IGN);
 
-  // constructor
+  // set new() memory failure handler function
+
+  set_new_handler(out_of_store);
+
+  // run it
+
+  int iret = Prog->Run();
+  if (iret < 0) {
+    cerr << "ERROR - running RadxPid" << endl;
+  }
   
-  RadxKdp (int argc, char **argv);
+  // clean up
 
-  // destructor
+  tidy_and_exit(iret);
+  return (iret);
   
-  ~RadxKdp();
+}
 
-  // run 
+// tidy up on exit
 
-  int Run();
+static void tidy_and_exit (int sig)
 
-  // data members
+{
+  if (Prog) {
+    delete Prog;
+    Prog = NULL;
+  }
+  exit(sig);
+}
 
-  int OK;
+////////////////////////////////////
+// out_of_store()
+//
+// Handle out-of-memory conditions
+//
 
-  // get methods for threading
+static void out_of_store()
 
-  const Params &getParams() const { return _params; }
-  const KdpFiltParams &getKdpFiltParams() const { return _kdpFiltParams; }
-  double getWavelengthM() const { return _wavelengthM; }
+{
 
-protected:
-private:
+  cerr << "FATAL ERROR - program RadxPid" << endl;
+  cerr << "  Operator new failed - out of store" << endl;
+  exit(-1);
 
-  string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
-  KdpFiltParams _kdpFiltParams;
-  vector<string> _readPaths;
-
-  // radar volume container
-  
-  RadxVol _vol;
-
-  // derived rays - after compute
-
-  vector <RadxRay *> _derivedRays;
-
-  // radar properties
-
-  double _wavelengthM;
-
-  //////////////////////////////////////////////////////////////
-  // inner thread class for calling Moments computations
-  
-  pthread_mutex_t _debugPrintMutex;
-  
-  // instantiate thread pool for parallel computations
-
-  TaThreadPool _threadPool;
-
-  // private methods
-  
-  void _printParamsKdp();
-  int _runFilelist();
-  int _runArchive();
-  int _runRealtime();
-  void _setupRead(RadxFile &file);
-  void _setupWrite(RadxFile &file);
-  int _writeVol();
-  int _processFile(const string &filePath);
-  void _encodeFieldsForOutput();
-  
-  int _compute();
-  int _storeDerivedRay(WorkerThread *thread);
-
-};
-
-#endif
+}
