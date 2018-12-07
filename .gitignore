@@ -591,6 +591,8 @@ codebase/apps/Radx/src/Ascii2Radx/Ascii2Radx
 codebase/apps/Radx/src/Dsr2Radx/Dsr2Radx
 codebase/apps/Radx/src/FixCfradialPaths/FixCfradialPaths
 codebase/apps/Radx/src/FixRadxPointing/FixRadxPointing
+codebase/apps/Radx/src/FixRadxValues/FixRadxValues
+codebase/apps/Radx/src/GroundEchoStats/GroundEchoStats
 codebase/apps/Radx/src/Radx2Dsr/Radx2Dsr
 codebase/apps/Radx/src/Radx2Grid/Radx2Grid
 codebase/apps/Radx/src/RadxBufr/RadxBufr
@@ -598,7 +600,9 @@ codebase/apps/Radx/src/RadxCheck/RadxCheck
 codebase/apps/Radx/src/RadxClutMon/RadxClutMon
 codebase/apps/Radx/src/RadxConvert/RadxConvert
 codebase/apps/Radx/src/RadxCov2Mom/RadxCov2Mom
+codebase/apps/Radx/src/RadxCreateVol/RadxCreateVol
 codebase/apps/Radx/src/RadxDiff/RadxDiff
+codebase/apps/Radx/src/RadxDiffFields/RadxDiffFields
 codebase/apps/Radx/src/RadxDwellCombine/RadxDwellCombine
 codebase/apps/Radx/src/RadxEvad/RadxEvad
 codebase/apps/Radx/src/RadxFilter/RadxFilter
@@ -609,10 +613,14 @@ codebase/apps/Radx/src/RadxMergeVols/RadxMergeVols
 codebase/apps/Radx/src/RadxMon/RadxMon
 codebase/apps/Radx/src/RadxModelQc/RadxModelQc
 codebase/apps/Radx/src/RadxPartRain/RadxPartRain
+codebase/apps/Radx/src/RadxPid/RadxPid
+codebase/apps/Radx/src/RadxPersistentClutter/RadxPersistentClutter
 codebase/apps/Radx/src/RadxPrint/RadxPrint
 codebase/apps/Radx/src/RadxQpe/RadxQpe
 codebase/apps/Radx/src/RadxQc/RadxQc
 codebase/apps/Radx/src/RadxSunMon/RadxSunMon
+codebase/apps/Radx/src/RadxTest/RadxTest
+codebase/apps/Radx/src/RadxTimeMedian/RadxTimeMedian
 codebase/apps/Radx/src/RadxBeamBlock/RadxBeamBlock
 codebase/apps/Radx/src/TestRadxMsg/TestRadxMsg
 

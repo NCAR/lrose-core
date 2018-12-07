@@ -946,7 +946,7 @@ void ComputeEngine::_pidCompute()
     if (_tempProfile) {
       const vector<TempProfile::PointVal> &profile = _tempProfile->getProfile();
       if (profile.size() > 0) {
-        _pid.setTempProfile(profile);
+        _pid.setTempProfile(*_tempProfile);
       }
     }
   }

@@ -473,7 +473,7 @@ int Dsr2CP2Mom::_processField(const string &fieldName,
     bytesSent =
       _pProductSocket->writeDatagram((const char*)outBuf.getPtr(),
 				     outBuf.getLen());
-    if(bytesSent == outBuf.getLen()) {
+    if(bytesSent == (int) outBuf.getLen()) {
       return 0;
     }
     umsleep(100);

@@ -96,7 +96,6 @@ int Sounding::retrieveTempProfile(time_t profileTime)
   assert(_params != NULL);
   
   time_t retrievedTime = profileTime;
-  vector<TempProfile::PointVal> retrievedProfile;
   _tempProfile.clear();
 
   if (_params->sounding_mode == Params::READ_SOUNDING_FROM_SPDB) {
@@ -130,10 +129,9 @@ int Sounding::retrieveTempProfile(time_t profileTime)
       _tempProfile.setDebug();
     }
   
-    if (_tempProfile.getTempProfile(_params->sounding_spdb_url,
-                                    profileTime,
-                                    retrievedTime,
-                                    retrievedProfile)) {
+    if (_tempProfile.loadFromSpdb(_params->sounding_spdb_url,
+                                  profileTime,
+                                  retrievedTime)) {
       cerr << "ERROR - Sounding::retrieveTempProfile" << endl;
       cerr << "  Cannot retrive profile for time: "
            << DateTime::strm(profileTime) << endl;

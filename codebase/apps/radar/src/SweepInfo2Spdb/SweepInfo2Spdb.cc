@@ -182,7 +182,7 @@ int SweepInfo2Spdb::_runArchive()
       iret = -1;
     }
   }
-  return -1;
+  return iret;
 
 }
 

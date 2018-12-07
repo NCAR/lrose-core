@@ -375,7 +375,7 @@ public:
   int readThresholdsFromFile(const string &path);
 
   /**
-   * Set the temperature profile for the specified time.
+   * Load the temperature profile for the specified time.
    * This reads in a new sounding, if available, if the time has changed
    * by more that 900 secs. If this fails, the profile from
    * the thresholds file is used.
@@ -383,7 +383,7 @@ public:
    * @return 0 on success, -1 on failure
    */
   
-  int setTempProfile(time_t dataTime);
+  int loadTempProfile(time_t dataTime);
   
   /**
    * Set the temperature profile.
@@ -391,7 +391,8 @@ public:
    * thresholds file, for example from a sounding.
    * @param
    */
-  void setTempProfile(const vector<TempProfile::PointVal> &profile);
+
+  void setTempProfile(const TempProfile &profile);
 
   // set flag to compute the melting layer
   // Follows Giangrande et al. - Automatic Designation of the
@@ -683,31 +684,34 @@ private:
   Particle* _chaff; /**< chaff for radar countermeasures */
   Particle* _misc;  /**< miscellaneous particle type */
 
-  vector<Particle*> _particleList;  /**< A vector of pointers to Particle objects
-                                     ** one for each possible particle type */
+  vector<Particle*> _particleList; /**< A vector of pointers to Particle
+                                    ** objects, one for each
+                                    ** possible particle type */
   
   // temperature profile
 
-  TempProfile _sounding;
-  vector<TempProfile::PointVal> _tmpProfile; /**< Temperature profile */
-  TaArray<double> _tmpHtArray_; /**< Array of temperature profile heights */
-  time_t _prevProfileDataTime;  /**< Time of previous request to retrieve temp profile */
-  double *_tmpHtArray;          /**< Pointer to the array of temperature profile heights */
+  TempProfile _tempProfile;
+  time_t _prevProfileDataTime;  /**< Time of previous request
+                                 ** to retrieve temp profile */
 
-  int _tmpMinHtMeters;          /**< Mimimum height of the temperature profile (m) */
-  int _tmpMaxHtMeters;          /**< Maximum height of the temperature profile (m) */
+  TaArray<double> _tempHtLookup_; /**< Lookup array of temp profile heights */
+  double *_tempHtLookup;          /**< Lookup array of temp profile heights */
+
+  int _tmpMinHtMeters;          /**< Mimimum height of temp profile (m) */
+  int _tmpMaxHtMeters;          /**< Maximum height of temp profile (m) */
   double _tmpBottomC;           /**< Temperature at the base of the profile */
   double _tmpTopC;              /**< Temperature at the top of the profile */
 
   // weights
-  double _tmpWt;   /**< Weight to assign to temperature feature field */
-  double _zhWt;    /**< Weight to assign to horizontally polarized dbz feature field */              
-  double _zdrWt;   /**< Weight to assign to zdr feature field */
-  double _kdpWt;   /**< Weight to assign to kdp feature field */
-  double _ldrWt;   /**< Weight to assign to ldr feature field */
-  double _rhvWt;   /**< Weight to assign to rhohv feature field */
-  double _sdzdrWt; /**< Weight to assign to std. dev of zdr feature field */
-  double _sphiWt;  /**< Weight to assign to std. dev of phidp feature field */
+
+  double _tmpWt;   /**< Weight for temperature feature field */
+  double _zhWt;    /**< Weight for horiz polarized dbz feature field */              
+  double _zdrWt;   /**< Weight for zdr feature field */
+  double _kdpWt;   /**< Weight for kdp feature field */
+  double _ldrWt;   /**< Weight for ldr feature field */
+  double _rhvWt;   /**< Weight for rhohv feature field */
+  double _sdzdrWt; /**< Weight for std. dev of zdr feature field */
+  double _sphiWt;  /**< Weight for std. dev of phidp feature field */
   
   // store input data in local arrays
   // this data is censored and filtered
@@ -836,7 +840,7 @@ private:
    * @param[in] line The thresholds file line to parse for the temperature profile
    * @return 0 on success, -1 on error
    */
-  int _parseTempProfile(const char *line);
+  int _parseTempProfileLine(const char *line);
 
   
   /**

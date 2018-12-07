@@ -1768,11 +1768,9 @@ int MdvPartRain::_overrideTempProfile(time_t dataTime)
   }
   
   time_t retrievedTime;
-  vector<TempProfile::PointVal> retrievedProfile;
-  if (tempProfile.getTempProfile(_params.sounding_spdb_url,
-                                 dataTime,
-                                 retrievedTime,
-                                 retrievedProfile)) {
+  if (tempProfile.loadFromSpdb(_params.sounding_spdb_url,
+                               dataTime,
+                               retrievedTime)) {
     cerr << "ERROR - MdvPartRain::tempProfileInit" << endl;
     cerr << "  Cannot retrive profile for time: "
          << DateTime::strm(dataTime) << endl;
@@ -1792,6 +1790,7 @@ int MdvPartRain::_overrideTempProfile(time_t dataTime)
   }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
+    const vector<TempProfile::PointVal> &retrievedProfile = tempProfile.getProfile();
     cerr << "=====================================" << endl;
     cerr << "Temp  profile" << endl;
     int nLevels = (int) retrievedProfile.size();
@@ -1827,7 +1826,7 @@ int MdvPartRain::_overrideTempProfile(time_t dataTime)
   
   // accept the profile
 
-  _partId.setTempProfile(tempProfile.getProfile());
+  _partId.setTempProfile(tempProfile);
   
   return 0;
   

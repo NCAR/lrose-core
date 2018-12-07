@@ -1078,7 +1078,6 @@ int RadxPartRain::_retrieveTempProfile()
 {
 
   time_t retrievedTime = time(NULL);
-  vector<TempProfile::PointVal> retrievedProfile;
   _tempProfile.clear();
 
   if (_params.use_soundings_from_spdb) {
@@ -1119,10 +1118,9 @@ int RadxPartRain::_retrieveTempProfile()
       _tempProfile.setVerbose();
     }
   
-    if (_tempProfile.getTempProfile(_params.sounding_spdb_url,
-                                    _vol.getStartTimeSecs(),
-                                    retrievedTime,
-                                    retrievedProfile)) {
+    if (_tempProfile.loadFromSpdb(_params.sounding_spdb_url,
+                                  _vol.getStartTimeSecs(),
+                                  retrievedTime)) {
       cerr << "ERROR - RadxPartRain::_tempProfileInit" << endl;
       cerr << "  Cannot retrive profile for time: "
            << RadxTime::strm(_vol.getStartTimeSecs()) << endl;
@@ -1136,8 +1134,7 @@ int RadxPartRain::_retrieveTempProfile()
     
     // get profile from PID file
 
-    if (_tempProfile.getProfileForPid(_params.pid_thresholds_file_path,
-                                      retrievedProfile)) {
+    if (_tempProfile.loadFromPidThresholdsFile(_params.pid_thresholds_file_path)) {
       return -1;
     }
 
@@ -1152,6 +1149,7 @@ int RadxPartRain::_retrieveTempProfile()
     cerr << "  freezingLevel: " << _tempProfile.getFreezingLevel() << endl;
   }
   if (_params.debug >= Params::DEBUG_VERBOSE) {
+    const vector<TempProfile::PointVal> &retrievedProfile = _tempProfile.getProfile();
     cerr << "=====================================" << endl;
     cerr << "Temp  profile" << endl;
     int nLevels = (int) retrievedProfile.size();

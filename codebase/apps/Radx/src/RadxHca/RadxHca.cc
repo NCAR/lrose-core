@@ -995,11 +995,9 @@ int RadxHca::_retrieveTempProfile(const RadxVol &vol)
   }
   
   time_t retrievedTime;
-  vector<TempProfile::PointVal> retrievedProfile;
-  if (_tempProfile.getTempProfile(_params.sounding_spdb_url,
-                                  vol.getStartTimeSecs(),
-                                  retrievedTime,
-                                  retrievedProfile)) {
+  if (_tempProfile.loadFromSpdb(_params.sounding_spdb_url,
+                                vol.getStartTimeSecs(),
+                                retrievedTime)) {
     cerr << "ERROR - RadxHca::_tempProfileInit" << endl;
     cerr << "  Cannot retrive profile for time: "
          << RadxTime::strm(vol.getStartTimeSecs()) << endl;

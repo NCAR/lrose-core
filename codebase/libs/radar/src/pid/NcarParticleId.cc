@@ -205,8 +205,8 @@ void NcarParticleId::clear()
 
 {
 
-  _tmpProfile.clear();
-  _tmpHtArray_.free();
+  _tempProfile.clear();
+  _tempHtLookup_.free();
 
 }
 
@@ -324,7 +324,7 @@ int NcarParticleId::readThresholdsFromFile(const string &path)
     // set temperature profile
 
     if (strncmp(line, "tpf", 3) == 0) {
-      _parseTempProfile(line);
+      _parseTempProfileLine(line);
     }
 
     // set weights
@@ -389,7 +389,7 @@ double NcarParticleId::getTmpC(double htKm)
   }
 
   int kk = htMeters - _tmpMinHtMeters;
-  return _tmpHtArray[kk];
+  return _tempHtLookup[kk];
 
 }
 
@@ -756,7 +756,7 @@ int NcarParticleId::_setId(Particle *part, const char *line)
 /////////////////////////////////////////////////////
 // set the temperature profile, from thresholds file
 
-int NcarParticleId::_parseTempProfile(const char *line)
+int NcarParticleId::_parseTempProfileLine(const char *line)
   
 {
 
@@ -781,26 +781,30 @@ int NcarParticleId::_parseTempProfile(const char *line)
 
   // scan in profile data
 
+  vector<TempProfile::PointVal> profile;
   for (int ii = 0; ii < (int) toks.size(); ii++) {
     double ht, tmp;
     if (sscanf(toks[ii].c_str(), "%lg,%lg", &ht, &tmp) == 2) {
       TempProfile::PointVal tmpPt(ht, tmp);
-      _tmpProfile.push_back(tmpPt); 
+      profile.push_back(tmpPt); 
     }
   }
 
+  _tempProfile.setProfile(profile);
+
+  if (_verbose) {
+    cerr << "NcarParticleId::_parseTempProfileLine()" << endl;
+    for (size_t ii = 0; ii < profile.size(); ii++) {
+      cerr << "1111111 press, htKm, tmpC: " 
+           << profile[ii].pressHpa << ", "
+           << profile[ii].htKm << ", "
+           << profile[ii].tmpC << endl;
+    }
+  }
+    
   // compute the temperature height lookup table
 
   _computeTempHtLookup();
-
-  // cerr << "11111111111111111111111" << endl;
-  // for (size_t ii = 0; ii < _tmpProfile.size(); ii++) {
-  //   cerr << "1111111 press, htKm, tmpC: " 
-  //        << _tmpProfile[ii].pressHpa << ", "
-  //        << _tmpProfile[ii].htKm << ", "
-  //        << _tmpProfile[ii].tmpC << endl;
-  // }
-  // cerr << "11111111111111111111111" << endl;
 
   return 0;
 
@@ -813,27 +817,29 @@ void NcarParticleId::_computeTempHtLookup()
   
 {
 
+  const vector<TempProfile::PointVal> &profile = _tempProfile.getProfile();
+  
   _tmpMinHtMeters =
-    (int) (_tmpProfile[0].htKm * 1000.0 + 0.5);
+    (int) (profile[0].htKm * 1000.0 + 0.5);
   _tmpMaxHtMeters =
-    (int) (_tmpProfile[_tmpProfile.size()-1].htKm * 1000.0 + 0.5);
+    (int) (profile[profile.size()-1].htKm * 1000.0 + 0.5);
 
-  _tmpBottomC = _tmpProfile[0].tmpC;
-  _tmpTopC = _tmpProfile[_tmpProfile.size()-1].tmpC;
+  _tmpBottomC = profile[0].tmpC;
+  _tmpTopC = profile[profile.size()-1].tmpC;
 
   // fill out temp array, every meter
 
   int nHt = (_tmpMaxHtMeters - _tmpMinHtMeters) + 1;
-  _tmpHtArray_.free();
-  _tmpHtArray = _tmpHtArray_.alloc(nHt);
+  _tempHtLookup_.free();
+  _tempHtLookup = _tempHtLookup_.alloc(nHt);
   
-  for (int ii = 1; ii < (int) _tmpProfile.size(); ii++) {
+  for (int ii = 1; ii < (int) profile.size(); ii++) {
 
-    int minHtMeters = (int) (_tmpProfile[ii-1].htKm * 1000.0 + 0.5);
-    double minTmp = _tmpProfile[ii-1].tmpC;
+    int minHtMeters = (int) (profile[ii-1].htKm * 1000.0 + 0.5);
+    double minTmp = profile[ii-1].tmpC;
 
-    int maxHtMeters = (int) (_tmpProfile[ii].htKm * 1000.0 + 0.5);
-    double maxTmp = _tmpProfile[ii].tmpC;
+    int maxHtMeters = (int) (profile[ii].htKm * 1000.0 + 0.5);
+    double maxTmp = profile[ii].tmpC;
 
     double deltaMeters = maxHtMeters - minHtMeters;
     double deltaTmp = maxTmp - minTmp;
@@ -843,8 +849,7 @@ void NcarParticleId::_computeTempHtLookup()
     
     for (int jj = minHtMeters; jj <= maxHtMeters; jj++, kk++, tmp += gradient) {
       if (kk >= 0 && kk < nHt) {
-	_tmpHtArray[kk] = tmp;
-        // cerr << "111111111 kk, tmp: " << kk << ", " << tmp << endl;
+	_tempHtLookup[kk] = tmp;
       }
     }
 
@@ -853,12 +858,12 @@ void NcarParticleId::_computeTempHtLookup()
 }
 
 ///////////////////////////////////////////////////////////
-// Set the temperature profile for the specified time.
+// Load the temperature profile for the specified time.
 // This reads in a new sounding, if available, if the time has changed
 // by more that 900 secs. If this fails, the profile from
 // the thresholds file is used.
 
-int NcarParticleId::setTempProfile(time_t dataTime)
+int NcarParticleId::loadTempProfile(time_t dataTime)
   
 {
 
@@ -869,7 +874,7 @@ int NcarParticleId::setTempProfile(time_t dataTime)
       return 0;
     }
     if (_debug) {
-      cerr << "WARNING - NcarParticleId::setTempProfile" << endl;
+      cerr << "WARNING - NcarParticleId::loadTempProfile" << endl;
       cerr << "Cannot retrieve sounding, url: " << _params.PID_sounding_spdb_url << endl;
       cerr << "                     dataTime: " << DateTime::strm(dataTime) << endl;
     }
@@ -877,9 +882,8 @@ int NcarParticleId::setTempProfile(time_t dataTime)
   
   // get profile from thresholds file
   
-  if (_sounding.getProfileForPid(_params.PID_thresholds_file_path,
-                                 _tmpProfile)) {
-    cerr << "ERROR - NcarParticleId::setTempProfile" << endl;
+  if (_tempProfile.loadFromPidThresholdsFile(_params.PID_thresholds_file_path)) {
+    cerr << "ERROR - NcarParticleId::loadTempProfile" << endl;
     cerr << "Cannot retrieve temp profile from file: "
          << _params.PID_thresholds_file_path << endl;
     return -1;
@@ -909,57 +913,51 @@ int NcarParticleId::_getTempProfileFromSpdb(time_t dataTime)
     return 0;
   }
   
-  _sounding.clear();
+  _tempProfile.clear();
   
-  _sounding.setSoundingLocationName
+  _tempProfile.setSoundingLocationName
     (_params.PID_sounding_location_name);
-  _sounding.setSoundingSearchTimeMarginSecs
+  _tempProfile.setSoundingSearchTimeMarginSecs
     (_params.PID_sounding_search_time_margin_secs);
   
-  _sounding.setCheckPressureRange
+  _tempProfile.setCheckPressureRange
     (_params.PID_sounding_check_pressure_range);
-  _sounding.setSoundingRequiredMinPressureHpa
+  _tempProfile.setSoundingRequiredMinPressureHpa
     (_params.PID_sounding_required_pressure_range_hpa.min_val);
-  _sounding.setSoundingRequiredMaxPressureHpa
+  _tempProfile.setSoundingRequiredMaxPressureHpa
     (_params.PID_sounding_required_pressure_range_hpa.max_val);
   
-  _sounding.setCheckHeightRange
+  _tempProfile.setCheckHeightRange
     (_params.PID_sounding_check_height_range);
-  _sounding.setSoundingRequiredMinHeightM
+  _tempProfile.setSoundingRequiredMinHeightM
     (_params.PID_sounding_required_height_range_m.min_val);
-  _sounding.setSoundingRequiredMaxHeightM
+  _tempProfile.setSoundingRequiredMaxHeightM
     (_params.PID_sounding_required_height_range_m.max_val);
   
-  _sounding.setCheckPressureMonotonicallyDecreasing
+  _tempProfile.setCheckPressureMonotonicallyDecreasing
     (_params.PID_sounding_check_pressure_monotonically_decreasing);
   
-  _sounding.setHeightCorrectionKm
+  _tempProfile.setHeightCorrectionKm
     (_params.PID_sounding_height_correction_km);
   
   if (_params.PID_sounding_use_wet_bulb_temp) {
-    _sounding.setUseWetBulbTemp(true);
+    _tempProfile.setUseWetBulbTemp(true);
   }
   
   if (_debug) {
-    _sounding.setDebug();
+    _tempProfile.setDebug();
   }
   if (_verbose) {
-    _sounding.setVerbose();
+    _tempProfile.setVerbose();
   }
   
   time_t soundingTime = 0;
-  vector<TempProfile::PointVal> retrievedProfile;
-  if (_sounding.getTempProfile(_params.PID_sounding_spdb_url,
-                               dataTime,
-                               soundingTime,
-                               retrievedProfile)) {
+  if (_tempProfile.loadFromSpdb(_params.PID_sounding_spdb_url,
+                                dataTime,
+                                soundingTime)) {
     // failure
     return -1;
   }
-
-  // store the profile
-
-  _tmpProfile = retrievedProfile;
 
   // compute the temperature height lookup table
   
@@ -984,13 +982,13 @@ int NcarParticleId::_getTempProfileFromSpdb(time_t dataTime)
 // This is used to override the temperature profile in the
 // thresholds file, for example from a sounding.
 
-void NcarParticleId::setTempProfile(const vector<TempProfile::PointVal> &profile)
+void NcarParticleId::setTempProfile(const TempProfile &profile)
   
 {
 
   // store the profile
 
-  _tmpProfile = profile;
+  _tempProfile = profile;
 
   // compute the temperature height lookup table
 
@@ -1260,11 +1258,12 @@ void NcarParticleId::print(ostream &out)
     _particleList[ii]->print(out);
   }
 
+  const vector<TempProfile::PointVal> &profile = _tempProfile.getProfile();
   out << "--- Temperature profile ---" << endl;
-  for (int ii = 0; ii < (int) _tmpProfile.size(); ii++) {
-    _tmpProfile[ii].print(out);
+  for (size_t ii = 0; ii < profile.size(); ii++) {
+    profile[ii].print(out);
   }
-
+  
   out << "--- Weights ---" << endl;
   out << "  tmpWt: " << _tmpWt << endl;
   out << "  zhWt: " << _zhWt << endl;

@@ -704,7 +704,7 @@ void Ascii2Radx::_finalizeVol(RadxVol &vol)
   if (_params.debug) {
     cerr << "DEBUG - computing sweep fixed angles from ray data" << endl;
   }
-  vol.computeSweepFixedAnglesFromRays();
+  vol.computeFixedAnglesFromRays();
 
   // sweep limits
   

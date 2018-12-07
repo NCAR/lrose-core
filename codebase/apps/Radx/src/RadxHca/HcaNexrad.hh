@@ -111,7 +111,6 @@ public:
    * thresholds file, for example from a sounding.
    * @param
    */
-  void setTempProfile(const TempProfile &tempProfile);
 
   void setTempAtTopOfMeltingLayerC(double val) { _tempAtTopOfMeltingLayerC = val; }
   void setTempAtBottomOfMeltingLayerC(double val) { _tempAtBottomOfMeltingLayerC = val; }
