@@ -118,6 +118,7 @@ private:
   // instantiate thread pool for computations
 
   TaThreadPool _threadPool;
+  vector<Worker *> _workers;
 
   // private methods
   

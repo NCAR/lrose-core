@@ -142,6 +142,7 @@ RadxPid::RadxPid(int argc, char **argv)
       return;
     }
     _threadPool.addThreadToMain(thread);
+    _workers.push_back(thread->getWorker());
   }
   
 }
@@ -439,8 +440,17 @@ int RadxPid::_processFile(const string &filePath)
 
   _radarHtKm = _vol.getAltitudeKm();
   _wavelengthM = _vol.getWavelengthM();
-  
 
+  // read the temperature profile into the threads
+
+  if (_workers.size() > 0) {
+    Worker *worker0 = _workers[0];
+    worker0->loadTempProfile(_vol.getStartTimeSecs());
+    for (size_t ii = 1; ii < _workers.size(); ii++) {
+      _workers[ii]->setTempProfile(worker0->getTempProfile());
+    }
+  }
+  
   // compute the derived fields
   
   if (_compute()) {

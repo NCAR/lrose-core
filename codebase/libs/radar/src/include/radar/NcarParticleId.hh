@@ -394,6 +394,10 @@ public:
 
   void setTempProfile(const TempProfile &profile);
 
+  // Get the temperature profile
+  
+  const TempProfile &getTempProfile() const { return _tempProfile; }
+
   // set flag to compute the melting layer
   // Follows Giangrande et al. - Automatic Designation of the
   // Melting Layer with Polarimitric Prototype of WSR-88D Radar.

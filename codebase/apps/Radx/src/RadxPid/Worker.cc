@@ -92,6 +92,22 @@ void Worker::loadTempProfile(time_t dataTime)
   _pid.loadTempProfile(dataTime);
 }
 
+///////////////////////////////////////////////////////////
+// Set the temperature profile
+
+void Worker::setTempProfile(const TempProfile &profile)
+{
+  _pid.setTempProfile(profile);
+}
+
+///////////////////////////////////////////////////////////
+// Get the temperature profile
+
+const TempProfile &Worker::getTempProfile() const
+{
+  return _pid.getTempProfile();
+}
+
 //////////////////////////////////////////////////
 // compute the derived fields for given input ray
 // storing results in output ray
@@ -126,12 +142,6 @@ RadxRay *Worker::compute(RadxRay *inputRay,
   // initialize pid for wavelength
   
   _pid.setWavelengthCm(wavelengthM * 100.0);
-
-  // load temp profile for PID
-
-  if (_pid.loadTempProfile(inputRay->getTimeSecs())) {
-    return NULL;
-  }
 
   // allocate input arrays for computing derived fields,
   // and load them up

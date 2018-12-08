@@ -41,11 +41,13 @@
 #include "Params.hh"
 #include <radar/KdpFilt.hh>
 #include <radar/KdpFiltParams.hh>
-#include <radar/AtmosAtten.hh>
+#include <radar/NcarParticleId.hh>
+#include <radar/NcarPidParams.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxTime.hh>
 class RadxRay;
 class RadxField;
+class TempProfile;
 #include <pthread.h>
 using namespace std;
 
@@ -70,6 +72,14 @@ public:
   // If no sounding is available, the static profile is used
   
   void loadTempProfile(time_t dataTime);
+  
+  // Set the temperature profile
+  
+  void setTempProfile(const TempProfile &profile);
+
+  // Get the temperature profile
+  
+  const TempProfile &getTempProfile() const;
 
   // Creates derived fields ray and returns it.
   // It must be freed by caller.
