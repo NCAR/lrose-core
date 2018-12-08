@@ -4,14 +4,32 @@
 
 //======================================================================
 //
-// KdpFilt computes KDP from PHIDP - as the slope of PHIDP in range. 
-//   Regions with valid PHIDP are determined from SNR and RHOHV. Filtering 
-//   is applied to smooth PHIDP in range and to identify regions with 
-//   phase shift on backscatter. The filtering tends to smeer out the KDP 
-//   in range. Furthermore, the self-consistency approach allows us to 
-//   theoretically determine KDP from Z and ZDR - which we can call 
-//   KDP(Z-ZDR). KDP(Z-ZDR) may then be used to constrain the higher KDP 
-//   values to those regions with high theoretical KDP.
+// KdpFilt computes KDP from PHIDP.
+//
+// KDP is defined as half the change in PHIDP per km in range.
+//
+// Regions with valid PHIDP are determined by examining the quality of 
+//   the PHIDP data, from RHOHV, and optionally from SNR and the variance 
+//   of ZDR.
+//
+// PHIPD folds, so unfolding is the first step in the processing. After 
+//   unfolding, filtering is applied to smooth PHIDP in range. This is 
+//   followed by a step to identify regions with phase shift on 
+//   backscatter.
+//
+// KDP is then computed as the PHIDP slope between range gates. For DBZ 
+//   values < 20, 8 gates are used; for DBZ between 20 and 35, 4 gates are 
+//   used; and if the DBZ exceeds 35, 2 adjacent gates are used.
+//
+// The various filtering steps smeer out the KDP in range, which means 
+//   that the high KDP values are not always located in the core of the 
+//   precip. To help correct for this effect, we can make use of the 
+//   self-consistency approach. This allows us to theoretically determine 
+//   KDP from Z and ZDR - we can call this KDP_ZZDR. We can then use these 
+//   theoretical KDP_ZZDR values to compute a conditioned KDP field, by 
+//   constraining the estimated KDP values to the relevant gates. This 
+//   reduces the smeering effect. We refer to this final conditioned KDP 
+//   field as KDP_COND.
 //
 //======================================================================
  
@@ -21,8 +39,8 @@
 //
 // The first step is to unfold the PHIDP data. PHIDP folds at -180/180 
 //   for simultaneous mode radars, and at -90/90 for alternating mode 
-//   radars. In order to compute the gradient of PHIDP, we need to first 
-//   unfold it so that it varies smoothly rather than folding.
+//   radars. In order to compute the gradient of PHIDP, we need to unfold 
+//   it so that it varies smoothly rather than folding.
 //
 //======================================================================
  
@@ -68,15 +86,17 @@ KDP_n_filt_iterations_unfolded = 2;
 // As the beam passes through liquid precip, PHIDP generally increases. 
 //   In some regions this increase is augmented by phase shift on 
 //   backscatter (PSOB) leading to localized peaks in PHIDP. After a PSOB 
-//   region, PHIDP will decrease to some intermediate level. KdpFilt 
-//   offers 2 methods for handling PSOB: (a) The HUBBERT/BRINGI method, 
-//   which uses an iterative filtering approach (Hubbert. J, and 
-//   V.N.Bringi, 1995: An Iterative Filtering technique for the Analysis 
-//   of Copolar Differential Phase and Dual-Frequency Radar Measurements. 
-//   Journal of Atmospheric and Oceanic Technology, Vol 12, No 3, June 
-//   1995). (b) The Peak Removal method, which works backwards from longer 
-//   to shorter ranges, finding the peaks caused by backscatter and 
-//   trimming them off.
+//   region, PHIDP will decrease to some intermediate level.
+//
+// KdpFilt offers 2 methods for handling PSOB:
+// 	(a) The HUBBERT/BRINGI method, which uses an iterative filtering 
+//   approach (Hubbert. J, and V.N.Bringi, 1995: An Iterative Filtering 
+//   technique for the Analysis of Copolar Differential Phase and 
+//   Dual-Frequency Radar Measurements. Journal of Atmospheric and Oceanic 
+//   Technology, Vol 12, No 3, June 1995).
+// 	(b) The Peak Removal method, which works backwards from longer to 
+//   shorter ranges, finding the peaks caused by backscatter and trimming 
+//   them off.
 //
 //======================================================================
  
@@ -152,8 +172,8 @@ KDP_ngates_for_stats = 9;
 //
 // The sdev of phidp is a good test for valid phidp. The sdev is 
 //   computed in the circle, so that it takes account of folding if 
-//   present. If the sdev is less than this value, it is assumed we are in 
-//   weather. Applies to computation of KDP only.
+//   present. If the sdev is less than this value, we conclude we are in 
+//   weather echo and the PHIDP is valid and KDP should be computed.
 //
 //
 // Type: double
@@ -168,8 +188,8 @@ KDP_phidp_sdev_max = 20;
 // The jitter of phidp is defined as the mean absolute change in angle 
 //   between successive phidp measurements in range. It is computed on the 
 //   circle to take account of folding. If the jitter is less than this 
-//   value, it is assumed we are in weather. Applies to computation of KDP 
-//   only.
+//   value, we conclude we are in weather echo, the PHIDP is valid and KDP 
+//   should be computed at this gate.
 //
 //
 // Type: double
@@ -238,8 +258,7 @@ KDP_check_zdr_sdev = FALSE;
 // Sets the threshold for the standard deviation of zdr in range.
 //
 // The sdev of zdr is a good test for clutter. If the sdev is less than 
-//   this value, it is assumed we are in weather. Applies to computation 
-//   of KDP only.
+//   this value, we conclude we are in weather echo rather than clutter.
 //
 //
 // Type: double

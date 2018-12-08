@@ -975,7 +975,7 @@
     tt->descr = tdrpStrDup("Option to use wet bulb temperature profile.");
     tt->help = tdrpStrDup("If TRUE, we use the wet bulb temperature profile from the sounding instead of the dry bulb. This is thought to more closely track the temperature of melting ice.");
     tt->val_offset = (char *) &PID_sounding_use_wet_bulb_temp - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // trailing entry has param_name set to NULL

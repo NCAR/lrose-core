@@ -64,6 +64,9 @@ public:
   bool printParamsPid;
   string printParamsPidMode;
 
+  bool printParamsKdp;
+  string printParamsKdpMode;
+
   bool startTimeSet, endTimeSet;
   vector<string> inputFileList;
 

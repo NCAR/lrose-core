@@ -107,6 +107,8 @@ int Args::parse (int argc, char **argv, string &prog_name)
       if (i < argc - 1) {
 	sprintf(tmp_str, "instance = %s;", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
+	sprintf(tmp_str, "mode = REALTIME;");
+	TDRP_add_override(&override, tmp_str);
       }
 	
     } else if (!strcmp(argv[i], "-start")) {
@@ -195,6 +197,7 @@ void Args::_usage(ostream &out)
 {
 
   out << "Usage: " << _progName << " [args as below]\n"
+      << "Compute KDP from radar moments in polar coords\n"
       << "Options:\n"
       << "\n"
       << "  [ -h ] produce this list.\n"
@@ -208,7 +211,8 @@ void Args::_usage(ostream &out)
       << "           Sets mode to FILELIST\n"
       << "\n"
       << "  [ -instance ?] specify the instance\n"
-      << "    app will register with procmap\n"
+      << "    app will register with procmap using this instance\n"
+      << "    forces REALTIME mode\n"
       << "\n"
       << "  [ -outdir ? ] set output directory\n"
       << "\n"

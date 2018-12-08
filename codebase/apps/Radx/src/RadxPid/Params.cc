@@ -776,18 +776,6 @@
     tt->single_val.s = tdrpStrDup("DBZ");
     tt++;
     
-    // Parameter 'VEL_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("VEL_field_name");
-    tt->descr = tdrpStrDup("Field name for radial velocity.");
-    tt->help = tdrpStrDup("This is used in quality checks.");
-    tt->val_offset = (char *) &VEL_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL");
-    tt++;
-    
     // Parameter 'ZDR_field_name'
     // ctype is 'char*'
     

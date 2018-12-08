@@ -126,12 +126,6 @@ paramdef string {
 } DBZ_field_name;
 
 paramdef string {
-  p_default = "VEL";
-  p_descr = "Field name for radial velocity.";
-  p_help = "This is used in quality checks.";
-} VEL_field_name;
-
-paramdef string {
   p_default = "ZDR";
   p_descr = "Field name for ZDR.";
 } ZDR_field_name;

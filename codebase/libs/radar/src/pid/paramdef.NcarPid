@@ -207,7 +207,7 @@ paramdef double {
 } PID_sounding_height_correction_km;
 
 paramdef boolean {
-  p_default = FALSE;
+  p_default = TRUE;
   p_descr = "Option to use wet bulb temperature profile.";
   p_help = "If TRUE, we use the wet bulb temperature profile from the sounding instead of the dry bulb. This is thought to more closely track the temperature of melting ice.";
 } PID_sounding_use_wet_bulb_temp;

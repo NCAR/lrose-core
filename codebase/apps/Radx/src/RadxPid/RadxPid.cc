@@ -91,10 +91,17 @@ RadxPid::RadxPid(int argc, char **argv)
     return;
   }
 
-  // print params for PID then exit
+  // if requested, print params for PID then exit
   
   if (_args.printParamsPid) {
     _printParamsPid();
+    exit(0);
+  }
+
+  // if requested, print params for KDP then exit
+  
+  if (_args.printParamsKdp) {
+    _printParamsKdp();
     exit(0);
   }
 
@@ -209,6 +216,54 @@ void RadxPid::_printParamsPid()
   // do the print to stdout
 
   _ncarPidParams.print(stdout, printMode);
+
+}
+
+//////////////////////////////////////////////////
+// Print params for KDP
+
+void RadxPid::_printParamsKdp()
+{
+
+  if (_params.debug) {
+    cerr << "Reading KDP params from file: " << _params.KDP_params_file_path << endl;
+  }
+
+  // do we need to expand environment variables?
+
+  bool expandEnvVars = false;
+  if (_args.printParamsKdpMode.find("expand") != string::npos) {
+    expandEnvVars = true;
+  }
+
+  // read in KDP params if applicable
+
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpFiltParams.load(_params.KDP_params_file_path,
+                            NULL, expandEnvVars, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // set print mode
+
+  tdrp_print_mode_t printMode = PRINT_LONG;
+  if (_args.printParamsKdpMode.find("short") == 0) {
+    printMode = PRINT_SHORT;
+  } else if (_args.printParamsKdpMode.find("norm") == 0) {
+    printMode = PRINT_NORM;
+  } else if (_args.printParamsKdpMode.find("verbose") == 0) {
+    printMode = PRINT_VERBOSE;
+  }
+
+  // do the print to stdout
+
+  _kdpFiltParams.print(stdout, printMode);
 
 }
 

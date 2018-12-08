@@ -437,8 +437,6 @@ public:
 
   char* DBZ_field_name;
 
-  char* VEL_field_name;
-
   char* ZDR_field_name;
 
   char* PHIDP_field_name;
@@ -496,7 +494,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[52];
+  mutable TDRPtable _table[51];
 
   const char *_className;
 
