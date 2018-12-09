@@ -1,0 +1,9 @@
+#! /bin/csh
+
+cd $HOME/git/lrose-core/codebase/apps/Radx/src/RadxPrecip/testing
+
+RadxPrecip -params RadxPrecip.spol -debug -start "2015 06 26 00 00 00" -end "2015 06 26 01 00 00"
+
+RadxPrecip -params RadxPrecip.kddc -debug -start "2015 06 26 00 00 00" -end "2015 06 26 01 00 00"
+
+

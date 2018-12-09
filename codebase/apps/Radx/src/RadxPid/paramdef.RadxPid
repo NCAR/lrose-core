@@ -86,17 +86,6 @@ paramdef string {
 } end_time;
 
 commentdef {
-  p_header = "PID PARAMETER FILE";
-  p_text = "Specify the path to the PID parameters.";
-}
-
-paramdef string {
-  p_default = "use-defaults";
-  p_descr = "Path for parameters for computing PID.";
-  p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
-} PID_params_file_path;
-
-commentdef {
   p_header = "INPUT FIELD INFORMATION";
   p_text = "Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. If SNR is not available, it is computed from DBZ.";
 }
@@ -153,8 +142,19 @@ paramdef string {
 paramdef string {
   p_default = "KDP";
   p_descr = "Field name for KDP in the input data.";
-  p_help = "This is applicable if 'compute_KDP' is false.";
+  p_help = "This is applicable if 'KDP_compute' is false.";
 } KDP_field_name;
+
+commentdef {
+  p_header = "PID PARAMETER FILE";
+  p_text = "Specify the path to the PID parameters.";
+}
+
+paramdef string {
+  p_default = "use-defaults";
+  p_descr = "Path for parameters for computing PID.";
+  p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
+} PID_params_file_path;
 
 commentdef {
   p_header = "COMPUTING KDP";

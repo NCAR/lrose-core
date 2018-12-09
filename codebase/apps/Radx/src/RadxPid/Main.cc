@@ -32,8 +32,8 @@
 ///////////////////////////////////////////////////////////////
 //
 // RadxPid reads moments from Radx-supported format files, 
-// computes the KDP and attenuation and writes out the results 
-// to Radx-supported format files
+// computes the NCAR-PID (and optionally KDP) and writes out the
+// results to Radx-supported format files
 //
 ///////////////////////////////////////////////////////////////
 

@@ -157,27 +157,6 @@ end_time = "2015 06 26 01 00 00";
 
 //======================================================================
 //
-// PID PARAMETER FILE.
-//
-// Specify the path to the PID parameters.
-//
-//======================================================================
- 
-///////////// PID_params_file_path ////////////////////
-//
-// Path for parameters for computing PID.
-//
-// If set to use-defaults, no parameter file will be read in, and the 
-//   default parameters will be used.
-//
-//
-// Type: string
-//
-
-PID_params_file_path = "PidParams.spol";
-
-//======================================================================
-//
 // INPUT FIELD INFORMATION.
 //
 // Names of fields in the input file. The following fields are required: 
@@ -291,13 +270,34 @@ LDR_field_name = "LDRH";
 //
 // Field name for KDP in the input data.
 //
-// This is applicable if 'compute_KDP' is false.
+// This is applicable if 'KDP_compute' is false.
 //
 //
 // Type: string
 //
 
 KDP_field_name = "KDP";
+
+//======================================================================
+//
+// PID PARAMETER FILE.
+//
+// Specify the path to the PID parameters.
+//
+//======================================================================
+ 
+///////////// PID_params_file_path ////////////////////
+//
+// Path for parameters for computing PID.
+//
+// If set to use-defaults, no parameter file will be read in, and the 
+//   default parameters will be used.
+//
+//
+// Type: string
+//
+
+PID_params_file_path = "PidParams.spol";
 
 //======================================================================
 //

@@ -33,7 +33,7 @@
 ///////////////////////////////////////////////////////////////
 //
 // RadxPid reads moments from Radx-supported format files, 
-// computes the PID (and optionally KDP_ and writes out the
+// computes the NCAR-PID (and optionally KDP) and writes out the
 // results to Radx-supported format files
 //
 ///////////////////////////////////////////////////////////////
