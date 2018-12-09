@@ -61,17 +61,17 @@ using namespace std;
 
 // initialize extra field names
 
-string RadxPid::smoothedDbzFieldName = "smoothedDbz";
-string RadxPid::smoothedRhohvFieldName = "smoothedRhohv";
-string RadxPid::elevationFieldName = "elevation";
-string RadxPid::rangeFieldName = "range";
-string RadxPid::beamHtFieldName = "beam_height";
-string RadxPid::tempFieldName = "temperature";
-string RadxPid::pidFieldName = "pid";
-string RadxPid::pidInterestFieldName = "pid_interest";
-string RadxPid::mlFieldName = "melting_layer";
-string RadxPid::mlExtendedFieldName = "ml_extended";
-string RadxPid::convFlagFieldName = "conv_flag";
+string RadxPid::smoothedDbzFieldName = "DBZ_SMOOTHED";
+string RadxPid::smoothedRhohvFieldName = "RHOHV_SMOOTHED";
+string RadxPid::elevationFieldName = "ELEV";
+string RadxPid::rangeFieldName = "RANGE";
+string RadxPid::beamHtFieldName = "BEAM_HT";
+string RadxPid::tempFieldName = "TEMP";
+string RadxPid::pidFieldName = "PID";
+string RadxPid::pidInterestFieldName = "PID_INTEREST";
+string RadxPid::mlFieldName = "MELTING_LAYER";
+string RadxPid::mlExtendedFieldName = "ML_EXTENDED";
+string RadxPid::convFlagFieldName = "CONV_FLAG";
 
 // Constructor
 
