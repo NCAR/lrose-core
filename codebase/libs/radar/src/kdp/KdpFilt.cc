@@ -208,7 +208,7 @@ KdpFilt::KdpFilt()
   _kdpZExpon = 1.0;
   _kdpZdrExpon = -2.05;
   _kdpZZdrCoeff = 3.32e-5;
-  _kdpZZdrThreshold = 0.25;
+  _kdpMinForSelfConsistency = 0.25;
   _kdpZZdrMedianLen = 5;
 
   // debugging
@@ -344,7 +344,7 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
     checkZdrSdev(true);
   }
   setZdrSdevMax(params.KDP_zdr_sdev_max);
-  setThresholdForKdpZZdr(params.KDP_threshold_for_ZZDR);
+  setKdpMinForSelfConsistency(params.KDP_minimum_for_self_consistency);
   setMedianFilterLenForKdpZZdr(params.KDP_median_filter_len_for_ZZDR);
 
   if (params.KDP_debug) {
@@ -488,12 +488,12 @@ int KdpFilt::compute(time_t timeSecs,
       if (_snr[igate] < _snrThreshold) {
         _kdp[igate] = _missingValue;
         _kdpZZdr[igate] = _missingValue;
-        _kdpCond[igate] = _missingValue;
+        _kdpSC[igate] = _missingValue;
         _psob[igate] = _missingValue;
       } else {
         _kdp[igate] = 0;
         _kdpZZdr[igate] = 0;
-        _kdpCond[igate] = 0;
+        _kdpSC[igate] = 0;
         _psob[igate] = 0;
       }
     }
@@ -538,7 +538,7 @@ int KdpFilt::compute(time_t timeSecs,
 
   // load up conditional KDP from estimated kdp and kdpZZdr
 
-  _loadKdpCond();
+  _loadKdpSC();
 
   // compute attenuation corrections
 
@@ -661,7 +661,7 @@ void KdpFilt::_initArrays(const double *snr,
   _validForUnfold = _validForUnfold_.alloc(_nGates);
   _kdp = _kdp_.alloc(_nGates);
   _kdpZZdr = _kdpZZdr_.alloc(_nGates);
-  _kdpCond = _kdpCond_.alloc(_nGates);
+  _kdpSC = _kdpSC_.alloc(_nGates);
   _psob = _psob_.alloc(_nGates);
   _dbzAttenCorr = _dbzAttenCorr_.alloc(_nGates);
   _zdrAttenCorr = _zdrAttenCorr_.alloc(_nGates);
@@ -759,12 +759,12 @@ void KdpFilt::_initArrays(const double *snr,
     if (_snr[ii] < _snrThreshold) {
       _kdp[ii] = _missingValue;
       _kdpZZdr[ii] = _missingValue;
-      _kdpCond[ii] = _missingValue;
+      _kdpSC[ii] = _missingValue;
       _psob[ii] = _missingValue;
     } else {
       _kdp[ii] = 0;
       _kdpZZdr[ii] = 0;
-      _kdpCond[ii] = 0;
+      _kdpSC[ii] = 0;
       _psob[ii] = 0;
     }
     _dbzAttenCorr[ii] = 0;
@@ -1069,7 +1069,7 @@ void KdpFilt::_loadKdp()
     if (_snr[ii] < _snrThreshold) {
       _kdp[ii] = _missingValue;
       _kdpZZdr[ii] = _missingValue;
-      _kdpCond[ii] = _missingValue;
+      _kdpSC[ii] = _missingValue;
       _psob[ii] = _missingValue;
       continue;
     }
@@ -1878,9 +1878,9 @@ double KdpFilt::_computeKdpFromZZdr(double dbz,
 }
 
 ////////////////////////////////////////////////////////////
-/// load up conditional kdp from computed kdp and kdpZZdr
+/// load up kdp conditioned using ZZDR self-consistency
 
-void KdpFilt::_loadKdpCond()
+void KdpFilt::_loadKdpSC()
 
 {
 
@@ -1891,7 +1891,7 @@ void KdpFilt::_loadKdpCond()
   for (int igate = 0; igate < _nGates; igate++) {
 
     if (_kdp[igate] == _missingValue ||
-        _kdp[igate] <= _kdpZZdrThreshold ||
+        _kdp[igate] <= _kdpMinForSelfConsistency ||
         _kdpZZdr[igate] == _missingValue) {
       
       // non-positive KDP
@@ -1900,7 +1900,7 @@ void KdpFilt::_loadKdpCond()
 
         // end of run so process it
       
-        _loadKdpCondRun(startGate, endGate);
+        _loadKdpSCRun(startGate, endGate);
 
       }
         
@@ -1927,15 +1927,16 @@ void KdpFilt::_loadKdpCond()
   // check for active run
   
   if (inRun) {
-    _loadKdpCondRun(startGate, endGate);
+    _loadKdpSCRun(startGate, endGate);
   }
 
 }
 
 ////////////////////////////////////////////////////////////
-/// load up conditional kdp for a specific run
+/// load up kdp conditioned using ZZDR self-consistency
+/// for a specific run
 
-void KdpFilt::_loadKdpCondRun(int startGate, int endGate)
+void KdpFilt::_loadKdpSCRun(int startGate, int endGate)
 
 {
 
@@ -1963,11 +1964,11 @@ void KdpFilt::_loadKdpCondRun(int startGate, int endGate)
 
   double condFactor = sumKdp / sumKdpZZdr;
 
-  // load the conditional KDP
+  // load the KDP conditioned by self-consistency
 
   for (int igate = startGate; igate <= endGate; igate++) {
-    _kdpCond[igate] = _kdpZZdr[igate] * condFactor;
-  } // igate
+    _kdpSC[igate] = _kdpZZdr[igate] * condFactor;
+  }
 
 }
 

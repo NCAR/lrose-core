@@ -836,6 +836,18 @@
     tt->single_val.s = tdrpStrDup("LDR");
     tt++;
     
+    // Parameter 'KDP_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("KDP_field_name");
+    tt->descr = tdrpStrDup("Field name for KDP in the input data.");
+    tt->help = tdrpStrDup("This is applicable if 'compute_KDP' is false.");
+    tt->val_offset = (char *) &KDP_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("KDP");
+    tt++;
+    
     // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -845,28 +857,16 @@
     tt->comment_text = tdrpStrDup("Option to compute KDP from PHIDP in the input files. This will be required if a good KDP field is not available in the input data.");
     tt++;
     
-    // Parameter 'compute_KDP'
+    // Parameter 'KDP_compute'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_KDP");
+    tt->param_name = tdrpStrDup("KDP_compute");
     tt->descr = tdrpStrDup("Option to compute KDP from PHIDP in the input files. This is generally recommended.");
     tt->help = tdrpStrDup("If this is FALSE, the 'KDP_field_name' parameter must identify the KDP field to be used in the input data.");
-    tt->val_offset = (char *) &compute_KDP - &_start_;
+    tt->val_offset = (char *) &KDP_compute - &_start_;
     tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'KDP_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("KDP_field_name");
-    tt->descr = tdrpStrDup("Field name for KDP in the input data.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("KDP");
     tt++;
     
     // Parameter 'KDP_params_file_path'
@@ -879,6 +879,18 @@
     tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
     tt->val_offset = (char *) &KDP_params_file_path - &_start_;
     tt->single_val.s = tdrpStrDup("use-defaults");
+    tt++;
+    
+    // Parameter 'KDP_use_conditioned_result'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("KDP_use_conditioned_result");
+    tt->descr = tdrpStrDup("When computing KDP, using conditioned KDP instead of normal filtered KDP.");
+    tt->help = tdrpStrDup("When KDP is computed, we compute both a normally-filtered result, and a conditioned result based on the self-consistency method with ZZDR. If this is set to TRUE, the conditioned result will be used instead of the normally-filtered result.");
+    tt->val_offset = (char *) &KDP_use_conditioned_result - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 7'
@@ -897,7 +909,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("output_fields");
     tt->descr = tdrpStrDup("Indicate which fields should be written to the output file.");
-    tt->help = tdrpStrDup("Choose the ID from the list.\n\nThe name and units can be set however the user prefers.\n\nThe output_encoding apply to CfRadial output only. \n\n\tPID: NCAR Particle ID\n\tPID_INTEREST: final interest map for NCAR Particle ID values\n\tTEMP_FOR_PID: temperature field for PID (C)\n\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n\tKDP_COND: KDP conditioned - debug field (deg/km)\n\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n");
+    tt->help = tdrpStrDup("Choose the ID from the list.\n\nThe name and units can be set however the user prefers.\n\nThe output_encoding apply to CfRadial output only. \n\n\tPID: NCAR Particle ID\n\tPID_INTEREST: final interest map for NCAR Particle ID values\n\tTEMP_FOR_PID: temperature field for PID (C)\n\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n\tKDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)\n\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n");
     tt->array_offset = (char *) &_output_fields - &_start_;
     tt->array_n_offset = (char *) &output_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -925,8 +937,8 @@
         tt->struct_def.fields[0].enum_def.fields[2].val = TEMP_FOR_PID;
         tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("KDP");
         tt->struct_def.fields[0].enum_def.fields[3].val = KDP;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("KDP_COND");
-        tt->struct_def.fields[0].enum_def.fields[4].val = KDP_COND;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("KDP_SC");
+        tt->struct_def.fields[0].enum_def.fields[4].val = KDP_SC;
         tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
         tt->struct_def.fields[0].enum_def.fields[5].val = DBZ_ATTEN_CORRECTION;
         tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
@@ -987,9 +999,9 @@
       tt->struct_vals[21].s = tdrpStrDup("specific_differential_phase_hv");
       tt->struct_vals[22].s = tdrpStrDup("deg/km");
       tt->struct_vals[23].b = pTRUE;
-      tt->struct_vals[24].e = KDP_COND;
-      tt->struct_vals[25].s = tdrpStrDup("KDP_COND");
-      tt->struct_vals[26].s = tdrpStrDup("kdp_conditioned_by_KDP_from_Z_and_ZDR");
+      tt->struct_vals[24].e = KDP_SC;
+      tt->struct_vals[25].s = tdrpStrDup("KDP_SC");
+      tt->struct_vals[26].s = tdrpStrDup("kdp_conditioned_using_ZZDR_self_consistency");
       tt->struct_vals[27].s = tdrpStrDup("specific_differential_phase_hv");
       tt->struct_vals[28].s = tdrpStrDup("deg/km");
       tt->struct_vals[29].b = pFALSE;

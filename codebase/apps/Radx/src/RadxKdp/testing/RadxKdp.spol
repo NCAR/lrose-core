@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./RadxKdp
+ * TDRP params for RadxKdp
  **********************************************************************/
 
 //======================================================================
@@ -280,7 +280,7 @@ KDP_params_file_path = "./KdpParams.test";
 // The output_encoding apply to CfRadial output only. 
 //
 // 	KDP: KDP from filtering PHIDP and computing slope (deg/km)
-// 	KDP_COND: KDP conditioned - debug field (deg/km)
+// 	KDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)
 // 	DBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)
 // 	ZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)
 // 	DBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)
@@ -292,7 +292,7 @@ KDP_params_file_path = "./KdpParams.test";
 //      output_field_id_t id;
 //        Options:
 //          KDP
-//          KDP_COND
+//          KDP_SC
 //          DBZ_ATTEN_CORRECTION
 //          ZDR_ATTEN_CORRECTION
 //          DBZ_ATTEN_CORRECTED
@@ -318,9 +318,9 @@ output_fields = {
   }
   ,
   {
-    id = KDP_COND,
-    name = "KDP_COND",
-    long_name = "conditional_kdp_from_estimated_kdp_and_kdpZZdr",
+    id = KDP_SC,
+    name = "KDP_SC",
+    long_name = "kdp_from_self_consistency_with_ZZDR",
     standard_name = "specific_differential_phase_hv",
     units = "deg/km",
     do_write = FALSE
@@ -396,7 +396,7 @@ output_encoding = OUTPUT_ENCODING_INT16;
 // Type: boolean
 //
 
-copy_selected_input_fields_to_output = FALSE;
+copy_selected_input_fields_to_output = TRUE;
 
 ///////////// copy_fields /////////////////////////////
 //
@@ -468,7 +468,7 @@ copy_fields = {
 // Type: boolean
 //
 
-KDP_write_debug_fields = FALSE;
+KDP_write_debug_fields = TRUE;
 
 //======================================================================
 //
@@ -486,7 +486,7 @@ KDP_write_debug_fields = FALSE;
 // Type: string
 //
 
-output_dir = "/tmp/cfradial/kdp";
+output_dir = "/tmp/cfradial/spol/kdp";
 
 ///////////// output_filename_mode ////////////////////
 //
@@ -561,7 +561,7 @@ output_format = OUTPUT_FORMAT_CFRADIAL;
 // Type: string
 //
 
-instance = "test";
+instance = "spol";
 
 ///////////// procmap_register_interval ///////////////
 //

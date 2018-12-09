@@ -143,24 +143,25 @@ RadxRay *Worker::compute(RadxRay *inputRay,
   
   _pid.setWavelengthCm(wavelengthM * 100.0);
 
-  // allocate input arrays for computing derived fields,
-  // and load them up
+  // alloc computation arrays
+
+  _allocArrays();
   
-  _allocInputArrays();
-  _loadInputArrays(inputRay);
+  // load input arrays
+  
+  if (_loadInputArrays(inputRay)) {
+    cerr << "ERROR - RadxPid::Worker - cannot load input arrays" << endl;
+    return NULL;
+  }
 
   // create output ray
   
   RadxRay *outputRay = new RadxRay;
   outputRay->copyMetaData(*inputRay);
   
-  // alloc the derived field arrays
-
-  _allocDerivedArrays();
-  
   // compute kdp
 
-  if (_params.compute_KDP) {
+  if (_params.KDP_compute) {
     _kdpCompute();
   } else {
     _kdp.initializeArrays(_nGates);
@@ -168,7 +169,10 @@ RadxRay *Worker::compute(RadxRay *inputRay,
 
   // compute pid
 
-  _pid.loadTempProfile(inputRay->getTimeSecs());
+  if (_pid.loadTempProfile(inputRay->getTimeSecs())) {
+    cerr << "ERROR - RadxPid::Worker - cannot load temp profile" << endl;
+    return NULL;
+  }
   _pidCompute();
   
   // load output fields into the moments ray
@@ -190,6 +194,10 @@ void Worker::_kdpInit()
 
   _kdp.setFromParams(_kdpFiltParams);
   
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _kdp.setDebug(true);
+  }
+
 }
 
 ////////////////////////////////////////////////
@@ -226,8 +234,7 @@ void Worker::_kdpCompute()
                missingDbl);
 
   const double *kdp = _kdp.getKdp();
-  const double *kdpZZdr = _kdp.getKdpZZdr();
-  const double *kdpCond = _kdp.getKdpCond();
+  const double *kdpSC = _kdp.getKdpSC();
   
   // put KDP into fields objects
   
@@ -237,8 +244,7 @@ void Worker::_kdpCompute()
     } else {
       _kdpArray[ii] = kdp[ii];
     }
-    _kdpZZdrArray[ii] = kdpZZdr[ii];
-    _kdpCondArray[ii] = kdpCond[ii];
+    _kdpSCArray[ii] = kdpSC[ii];
   }
 
 }
@@ -254,6 +260,11 @@ int Worker::_pidInit()
 
   if (_pid.setFromParams(_ncarPidParams)) {
     return -1;
+  }
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    _pid.setVerbose(true);
+  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _pid.setDebug(true);
   }
 
   return 0;
@@ -281,9 +292,9 @@ void Worker::_pidCompute()
 }
 
 //////////////////////////////////////
-// alloc input arrays
+// alloc computational arrays
   
-void Worker::_allocInputArrays()
+void Worker::_allocArrays()
   
 {
 
@@ -294,21 +305,12 @@ void Worker::_allocInputArrays()
   _rhohvArray = _rhohvArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
 
-}
-
-//////////////////////////////////////
-// alloc derived arrays
-  
-void Worker::_allocDerivedArrays()
-  
-{
-  
   _kdpArray = _kdpArray_.alloc(_nGates);
-  _kdpZZdrArray = _kdpZZdrArray_.alloc(_nGates);
-  _kdpCondArray = _kdpCondArray_.alloc(_nGates);
+  _kdpSCArray = _kdpSCArray_.alloc(_nGates);
 
   _pidArray = _pidArray_.alloc(_nGates);
   _pidInterest = _pidInterest_.alloc(_nGates);
+  _tempForPid = _tempForPid_.alloc(_nGates);
 
 }
 
@@ -359,7 +361,7 @@ int Worker::_loadInputArrays(RadxRay *inputRay)
     }
   }
   
-  if (!_params.compute_KDP) {
+  if (!_params.KDP_compute) {
     if (_loadFieldArray(inputRay, _params.KDP_field_name,
                         true, _kdpArray)) {
       return -1;
@@ -517,8 +519,8 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
         default:
           *datp = _kdpArray[igate];
           break;
-        case Params::KDP_COND:
-          *datp = _kdpCondArray[igate];
+        case Params::KDP_SC:
+          *datp = _kdpSCArray[igate];
           break;
           
           // attenuation
@@ -574,8 +576,12 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
 
   // add debug fields if required
 
+  if (_params.PID_write_debug_fields) {
+    _addPidDebugFields(inputRay, outputRay);
+  }
+
   if (_params.KDP_write_debug_fields) {
-    _addDebugFields(outputRay);
+    _addKdpDebugFields(outputRay);
   }
 
 }
@@ -583,7 +589,92 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
 //////////////////////////////////////
 // add the debug fields
   
-void Worker::_addDebugFields(RadxRay *outputRay)
+void Worker::_addPidDebugFields(const RadxRay *inputRay, 
+                                RadxRay *outputRay)
+
+{
+
+  _addField(outputRay,
+            "DBZ_FOR_PID", "dBZ",
+            "dbz_filtered_for_pid_computations",
+            "equivalent_reflectivity_factor",
+            _pid.getDbz());
+  
+  _addField(outputRay,
+            "ZDR_FOR_PID", "dB",
+            "zdr_filtered_for_pid_computations",
+            "differential_reflectivity_hv",
+            _pid.getZdr());
+  
+  _addField(outputRay,
+            "KDP_FOR_PID", "deg/km",
+            "specific_differential_phase_for_pid_computations",
+            "specific_differential_phase_hv",
+            _pid.getKdp());
+  
+  if (_params.LDR_available) {
+    _addField(outputRay,
+              "LDR_FOR_PID", "dB",
+              "linear_differential_refectivity_for_pid_computations",
+              "linear_differential_reflectivity",
+              _pid.getLdr());
+  }
+
+  _addField(outputRay,
+            "RHOHV_FOR_PID", "",
+            "rhohv_filtered_for_pid_computations",
+            "cross_correlation_hv",
+            _pid.getRhohv());
+  
+  _addField(outputRay,
+            "PHIDP_FOR_PID", "deg",
+            "phidp_for_pid_computations",
+            "differential_phase_hv",
+            _pid.getPhidp());
+  
+  _addField(outputRay,
+            "ZDR_SDEV_FOR_PID", "dB",
+            "standard_deviation_of_zdr_for_pid_computations",
+            "differential_reflectivity_hv",
+            _pid.getSdzdr());
+  
+  _addField(outputRay,
+            "PHIDP_SDEV_FOR_PID", "deg",
+            "standard_deviation_of_phidp_for_pid_computations",
+            "differential_phase_hv",
+            _pid.getSdphidp());
+  
+  _addField(outputRay,
+            "ML_INTEREST", "",
+            "melting_layer_interest",
+            "melting_layer_interest",
+            _pid.getMlInterest());
+  
+  _addField(outputRay,
+            "BEAM_HT", "km",
+            "beam_height",
+            "height_to_center_of_beam_msl",
+            inputRay->getField("beam_height")->getDataFl32());
+  
+  _addField(outputRay,
+            "RANGE", "km",
+            "range",
+            "range_to_center_of_gate",
+            inputRay->getField("range")->getDataFl32());
+  
+  _addField(outputRay,
+            "ELEVATION", "deg",
+            "elevation",
+            "elevation_angle",
+            inputRay->getField("elevation")->getDataFl32());
+  
+  
+}
+  
+//////////////////////////////////////
+// add the debug fields
+  
+void Worker::_addKdpDebugFields(RadxRay *outputRay)
 
 {
 
@@ -707,6 +798,46 @@ void Worker::_addField(RadxRay *outputRay,
       data32[igate] = Radx::missingFl32;
     } else {
       data32[igate] = array64[igate];
+    }
+  }
+    
+  // create field
+  
+  RadxField *field = new RadxField(name, units);
+  field->setLongName(longName);
+  field->setStandardName(standardName);
+  field->setTypeFl32(Radx::missingFl32);
+  field->addDataFl32(_nGates, data32);
+  field->copyRangeGeom(*outputRay);
+  
+  // add to ray
+  
+  outputRay->addField(field);
+
+}
+
+//////////////////////////////////////
+// add a field to the output ray
+  
+void Worker::_addField(RadxRay *outputRay,
+                       const string &name,
+                       const string &units,
+                       const string &longName,
+                       const string standardName,
+                       const Radx::fl32 *array32)
+  
+{
+
+  // load up data as fl32
+  
+  TaArray<Radx::fl32> data32_;
+  Radx::fl32 *data32 = data32_.alloc(_nGates);
+  
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    if (array32[igate] == missingDbl) {
+      data32[igate] = Radx::missingFl32;
+    } else {
+      data32[igate] = array32[igate];
     }
   }
     

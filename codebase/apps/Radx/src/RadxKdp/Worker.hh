@@ -118,12 +118,10 @@ private:
   // derived arrays
 
   RadxArray<double> _kdpArray_;
-  RadxArray<double> _kdpZZdrArray_;
-  RadxArray<double> _kdpCondArray_;
+  RadxArray<double> _kdpSCArray_;
 
   double *_kdpArray;
-  double *_kdpZZdrArray;
-  double *_kdpCondArray;
+  double *_kdpSCArray;
 
   // computing kdp
   
@@ -138,8 +136,7 @@ private:
   void _kdpInit();
   void _kdpCompute();
 
-  void _allocInputArrays();
-  void _allocDerivedArrays();
+  void _allocArrays();
   
   int _loadInputArrays(RadxRay *inputRay);
 

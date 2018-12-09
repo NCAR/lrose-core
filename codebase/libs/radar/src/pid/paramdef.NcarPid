@@ -16,7 +16,7 @@ commentdef {
 paramdef string {
   p_descr = "File path for fuzzy logic thresholds for PID.";
   p_help = "This file contains the thresholds and weights for computing particle ID.";
-  p_default = "./testing/s_band_pid_input_steraotables27.input";
+  p_default = "./pid_thresholds.nexrad";
 } PID_thresholds_file_path;
 
 paramdef double {
@@ -171,7 +171,7 @@ typedef struct {
 } data_range_t;
 
 paramdef boolean {
-  p_default = TRUE;
+  p_default = FALSE;
   p_descr = "Option to check that pressure covers the required range.";
   p_help = "If TRUE, we will check that pressure range in the sounding meets or exceeds the min and max specified."; 
 } PID_sounding_check_pressure_range;
@@ -183,7 +183,7 @@ paramdef struct data_range_t {
 } PID_sounding_required_pressure_range_hpa;
 
 paramdef boolean {
-  p_default = TRUE;
+  p_default = FALSE;
   p_descr = "Option to check that height covers the required range.";
   p_help = "If TRUE, we will check that height range in the sounding meets or exceeds the min and max specified."; 
 } PID_sounding_check_height_range;
@@ -195,7 +195,7 @@ paramdef struct data_range_t {
 } PID_sounding_required_height_range_m;
 
 paramdef boolean {
-  p_default = TRUE;
+  p_default = FALSE;
   p_descr = "Option to check that pressure decreases monotonically.";
   p_help = "If TRUE, we will check that pressure decreases monotonically. If not, the sounding is rejected and we look back for the next available one."; 
 } PID_sounding_check_pressure_monotonically_decreasing;

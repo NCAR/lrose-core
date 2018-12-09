@@ -558,7 +558,7 @@
     tt->descr = tdrpStrDup("File path for fuzzy logic thresholds for PID.");
     tt->help = tdrpStrDup("This file contains the thresholds and weights for computing particle ID.");
     tt->val_offset = (char *) &PID_thresholds_file_path - &_start_;
-    tt->single_val.s = tdrpStrDup("./testing/s_band_pid_input_steraotables27.input");
+    tt->single_val.s = tdrpStrDup("./pid_thresholds.nexrad");
     tt++;
     
     // Parameter 'PID_snr_threshold'
@@ -867,7 +867,7 @@
     tt->descr = tdrpStrDup("Option to check that pressure covers the required range.");
     tt->help = tdrpStrDup("If TRUE, we will check that pressure range in the sounding meets or exceeds the min and max specified.");
     tt->val_offset = (char *) &PID_sounding_check_pressure_range - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'PID_sounding_required_pressure_range_hpa'
@@ -909,7 +909,7 @@
     tt->descr = tdrpStrDup("Option to check that height covers the required range.");
     tt->help = tdrpStrDup("If TRUE, we will check that height range in the sounding meets or exceeds the min and max specified.");
     tt->val_offset = (char *) &PID_sounding_check_height_range - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'PID_sounding_required_height_range_m'
@@ -951,7 +951,7 @@
     tt->descr = tdrpStrDup("Option to check that pressure decreases monotonically.");
     tt->help = tdrpStrDup("If TRUE, we will check that pressure decreases monotonically. If not, the sounding is rejected and we look back for the next available one.");
     tt->val_offset = (char *) &PID_sounding_check_pressure_monotonically_decreasing - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'PID_sounding_height_correction_km'

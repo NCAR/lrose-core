@@ -44,13 +44,10 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
-#include <deque>
-#include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
 #include <radar/KdpFiltParams.hh>
 #include <radar/NcarPidParams.hh>
 #include <Radx/RadxVol.hh>
-#include <Radx/RadxArray.hh>
 class RadxVol;
 class RadxFile;
 class RadxRay;
@@ -86,6 +83,20 @@ public:
   double getRadarHtKm() const { return _radarHtKm; }
   double getWavelengthM() const { return _wavelengthM; }
 
+  // names for extra fields
+
+  static string smoothedDbzFieldName;
+  static string smoothedRhohvFieldName;
+  static string elevationFieldName;
+  static string rangeFieldName;
+  static string beamHtFieldName;
+  static string tempFieldName;
+  static string pidFieldName;
+  static string pidInterestFieldName;
+  static string mlFieldName;
+  static string mlExtendedFieldName;
+  static string convFlagFieldName;
+  
 protected:
 private:
 
@@ -130,12 +141,16 @@ private:
   int _runRealtime();
   void _setupRead(RadxFile &file);
   void _setupWrite(RadxFile &file);
-  int _writeVol();
   int _processFile(const string &filePath);
   void _encodeFieldsForOutput();
   
+  void _addExtraFieldsToInput();
+  void _addExtraFieldsToOutput();
+
   int _compute();
   int _storeDerivedRay(WorkerThread *thread);
+
+  int _writeVol();
 
 };
 

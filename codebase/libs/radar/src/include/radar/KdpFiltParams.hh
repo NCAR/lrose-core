@@ -392,7 +392,7 @@ public:
 
   double KDP_zdr_sdev_max;
 
-  double KDP_threshold_for_ZZDR;
+  double KDP_minimum_for_self_consistency;
 
   int KDP_median_filter_len_for_ZZDR;
 

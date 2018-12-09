@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ../RadxPid
+ * TDRP params for RadxPid
  **********************************************************************/
 
 //======================================================================
@@ -174,7 +174,7 @@ end_time = "2015 06 26 01 00 00";
 // Type: string
 //
 
-PID_params_file_path = "./PidParams.test";
+PID_params_file_path = "PidParams.spol";
 
 //======================================================================
 //
@@ -209,7 +209,7 @@ SNR_available = TRUE;
 // Type: string
 //
 
-SNR_field_name = "SNRHC_F";
+SNR_field_name = "SNRHC";
 
 ///////////// noise_dbz_at_100km //////////////////////
 //
@@ -235,7 +235,7 @@ noise_dbz_at_100km = 0;
 // Type: string
 //
 
-DBZ_field_name = "DBZ_F";
+DBZ_field_name = "DBZ";
 
 ///////////// ZDR_field_name //////////////////////////
 //
@@ -245,7 +245,7 @@ DBZ_field_name = "DBZ_F";
 // Type: string
 //
 
-ZDR_field_name = "ZDR_F";
+ZDR_field_name = "ZDR";
 
 ///////////// PHIDP_field_name ////////////////////////
 //
@@ -255,7 +255,7 @@ ZDR_field_name = "ZDR_F";
 // Type: string
 //
 
-PHIDP_field_name = "PHIDP_F";
+PHIDP_field_name = "PHIDP";
 
 ///////////// RHOHV_field_name ////////////////////////
 //
@@ -265,7 +265,7 @@ PHIDP_field_name = "PHIDP_F";
 // Type: string
 //
 
-RHOHV_field_name = "RHOHV_F";
+RHOHV_field_name = "RHOHV";
 
 ///////////// LDR_available ///////////////////////////
 //
@@ -285,7 +285,19 @@ LDR_available = TRUE;
 // Type: string
 //
 
-LDR_field_name = "LDRH_F";
+LDR_field_name = "LDRH";
+
+///////////// KDP_field_name //////////////////////////
+//
+// Field name for KDP in the input data.
+//
+// This is applicable if 'compute_KDP' is false.
+//
+//
+// Type: string
+//
+
+KDP_field_name = "KDP";
 
 //======================================================================
 //
@@ -296,7 +308,7 @@ LDR_field_name = "LDRH_F";
 //
 //======================================================================
  
-///////////// compute_KDP /////////////////////////////
+///////////// KDP_compute /////////////////////////////
 //
 // Option to compute KDP from PHIDP in the input files. This is 
 //   generally recommended.
@@ -308,17 +320,7 @@ LDR_field_name = "LDRH_F";
 // Type: boolean
 //
 
-compute_KDP = TRUE;
-
-///////////// KDP_field_name //////////////////////////
-//
-// Field name for KDP in the input data.
-//
-//
-// Type: string
-//
-
-KDP_field_name = "KDP";
+KDP_compute = TRUE;
 
 ///////////// KDP_params_file_path ////////////////////
 //
@@ -332,6 +334,22 @@ KDP_field_name = "KDP";
 //
 
 KDP_params_file_path = "./KdpParams.test";
+
+///////////// KDP_use_conditioned_result //////////////
+//
+// When computing KDP, using conditioned KDP instead of normal filtered 
+//   KDP.
+//
+// When KDP is computed, we compute both a normally-filtered result, and 
+//   a conditioned result based on the self-consistency method with ZZDR. 
+//   If this is set to TRUE, the conditioned result will be used instead 
+//   of the normally-filtered result.
+//
+//
+// Type: boolean
+//
+
+KDP_use_conditioned_result = FALSE;
 
 //======================================================================
 //
@@ -353,7 +371,7 @@ KDP_params_file_path = "./KdpParams.test";
 // 	PID_INTEREST: final interest map for NCAR Particle ID values
 // 	TEMP_FOR_PID: temperature field for PID (C)
 // 	KDP: KDP from filtering PHIDP and computing slope (deg/km)
-// 	KDP_COND: KDP conditioned - debug field (deg/km)
+// 	KDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)
 // 	DBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)
 // 	ZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)
 // 	DBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)
@@ -368,7 +386,7 @@ KDP_params_file_path = "./KdpParams.test";
 //          PID_INTEREST
 //          TEMP_FOR_PID
 //          KDP
-//          KDP_COND
+//          KDP_SC
 //          DBZ_ATTEN_CORRECTION
 //          ZDR_ATTEN_CORRECTION
 //          DBZ_ATTEN_CORRECTED
@@ -421,9 +439,9 @@ output_fields = {
   }
   ,
   {
-    id = KDP_COND,
-    name = "KDP_COND",
-    long_name = "kdp_conditioned_by_KDP_from_Z_and_ZDR",
+    id = KDP_SC,
+    name = "KDP_SC",
+    long_name = "kdp_conditioned_using_ZZDR_self_consistency",
     standard_name = "specific_differential_phase_hv",
     units = "deg/km",
     do_write = FALSE
@@ -512,45 +530,39 @@ copy_selected_input_fields_to_output = TRUE;
 
 copy_fields = {
   {
-    input_name = "SNRHC_F",
-    output_name = "SNR",
-    censor_non_weather = TRUE
-  }
-  ,
-  {
-    input_name = "DBZ_F",
+    input_name = "DBZ",
     output_name = "DBZ",
-    censor_non_weather = TRUE
+    censor_non_weather = FALSE
   }
   ,
   {
-    input_name = "VEL_F",
+    input_name = "VEL",
     output_name = "VEL",
-    censor_non_weather = TRUE
+    censor_non_weather = FALSE
   }
   ,
   {
-    input_name = "WIDTH_F",
+    input_name = "WIDTH",
     output_name = "WIDTH",
-    censor_non_weather = TRUE
+    censor_non_weather = FALSE
   }
   ,
   {
-    input_name = "ZDR_F",
+    input_name = "ZDR",
     output_name = "ZDR",
-    censor_non_weather = TRUE
+    censor_non_weather = FALSE
   }
   ,
   {
-    input_name = "PHIDP_F",
+    input_name = "PHIDP",
     output_name = "PHIDP",
-    censor_non_weather = TRUE
+    censor_non_weather = FALSE
   }
   ,
   {
-    input_name = "RHOHV_F",
+    input_name = "RHOHV",
     output_name = "RHOHV",
-    censor_non_weather = TRUE
+    censor_non_weather = FALSE
   }
 };
 
@@ -571,7 +583,7 @@ copy_fields = {
 // Type: boolean
 //
 
-KDP_write_debug_fields = TRUE;
+KDP_write_debug_fields = FALSE;
 
 ///////////// PID_write_debug_fields //////////////////
 //
@@ -601,7 +613,7 @@ PID_write_debug_fields = TRUE;
 // Type: string
 //
 
-output_dir = "/tmp/pid";
+output_dir = "/tmp/cfradial/pid/spol";
 
 ///////////// output_filename_mode ////////////////////
 //

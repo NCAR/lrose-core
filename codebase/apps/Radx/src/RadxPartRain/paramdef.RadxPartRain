@@ -404,9 +404,9 @@ paramdef double {
 
 paramdef double {
   p_default = 0.25;
-  p_descr = "Sets the threshold for computing conditional KDP from Z and ZDR.";
-  p_help = "We can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute the conditioned KDP - we call this KDP_COND. To compute KDP_COND, we first find the gates over which regular KDP exceeds this threshold. Over this run of gates we compute the PHIDP change from the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, we can compute KDP_COND such that the PHIDP change is the same for both KDP and KDP_COND.";
-} KDP_threshold_for_ZZDR;
+  p_descr = "Sets the lower limit of KDP for computing KDP conditioned by self-consistency.";
+  p_help = "To compute KDP_SC, we first find the gates over which regular KDP exceeds a minimum threshold (i.e. this parameter). Over this run of gates we compute the PHIDP change from the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, we can compute KDP_SC such that the PHIDP change over these gates is the same for both KDP and KDP_SC.";
+} KDP_minimum_for_self_consistency;
 
 paramdef int {
   p_default = 5;

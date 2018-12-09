@@ -828,7 +828,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("output_fields");
     tt->descr = tdrpStrDup("Indicate which fields should be written to the output file.");
-    tt->help = tdrpStrDup("Choose the ID from the list.\n\nThe name and units can be set however the user prefers.\n\nThe output_encoding apply to CfRadial output only. \n\n\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n\tKDP_COND: KDP conditioned - debug field (deg/km)\n\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n");
+    tt->help = tdrpStrDup("Choose the ID from the list.\n\nThe name and units can be set however the user prefers.\n\nThe output_encoding apply to CfRadial output only. \n\n\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n\tKDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)\n\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n");
     tt->array_offset = (char *) &_output_fields - &_start_;
     tt->array_n_offset = (char *) &output_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -850,8 +850,8 @@
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("KDP");
         tt->struct_def.fields[0].enum_def.fields[0].val = KDP;
-        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("KDP_COND");
-        tt->struct_def.fields[0].enum_def.fields[1].val = KDP_COND;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("KDP_SC");
+        tt->struct_def.fields[0].enum_def.fields[1].val = KDP_SC;
         tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
         tt->struct_def.fields[0].enum_def.fields[2].val = DBZ_ATTEN_CORRECTION;
         tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
@@ -894,9 +894,9 @@
       tt->struct_vals[3].s = tdrpStrDup("specific_differential_phase_hv");
       tt->struct_vals[4].s = tdrpStrDup("deg/km");
       tt->struct_vals[5].b = pTRUE;
-      tt->struct_vals[6].e = KDP_COND;
-      tt->struct_vals[7].s = tdrpStrDup("KDP_COND");
-      tt->struct_vals[8].s = tdrpStrDup("kdp_conditioned_by_KDP_from_Z_and_ZDR");
+      tt->struct_vals[6].e = KDP_SC;
+      tt->struct_vals[7].s = tdrpStrDup("KDP_SC");
+      tt->struct_vals[8].s = tdrpStrDup("kdp_conditioned_using_ZZDR_self_consistency");
       tt->struct_vals[9].s = tdrpStrDup("specific_differential_phase_hv");
       tt->struct_vals[10].s = tdrpStrDup("deg/km");
       tt->struct_vals[11].b = pFALSE;

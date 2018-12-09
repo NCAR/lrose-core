@@ -26,10 +26,10 @@
 //   precip. To help correct for this effect, we can make use of the 
 //   self-consistency approach. This allows us to theoretically determine 
 //   KDP from Z and ZDR - we can call this KDP_ZZDR. We can then use these 
-//   theoretical KDP_ZZDR values to compute a conditioned KDP field, by 
-//   constraining the estimated KDP values to the relevant gates. This 
-//   reduces the smeering effect. We refer to this final conditioned KDP 
-//   field as KDP_COND.
+//   self-consistent KDP_ZZDR values to compute a conditioned KDP field, 
+//   by constraining the estimated KDP values to the relevant gates. This 
+//   reduces the smeering effect. We refer to this KDP field, conditioned 
+//   using self-consistency, as KDP_SC.
 //
 //======================================================================
  
@@ -270,33 +270,38 @@ KDP_zdr_sdev_max = 2;
 //
 // COMPUTING KDP FROM Z and ZDR.
 //
+// Using the self-consistency approach, we can estimate KDP from Z and 
+//   ZDR - we call this KDP_ZZDR. We can then compute KDP conditioned 
+//   using self-consistenty. We call this KDP_SC.
+//
 //======================================================================
  
-///////////// KDP_threshold_for_ZZDR //////////////////
+///////////// KDP_minimum_for_self_consistency ////////
 //
-// Sets the threshold for computing conditional KDP from Z and ZDR.
+// Sets the lower limit of KDP for computing KDP conditioned by 
+//   self-consistency.
 //
-// We can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can 
-//   then compute the conditioned KDP - we call this KDP_COND. To compute 
-//   KDP_COND, we first find the gates over which regular KDP exceeds this 
-//   threshold. Over this run of gates we compute the PHIDP change from 
-//   the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / 
-//   sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, 
-//   we can compute KDP_COND such that the PHIDP change is the same for 
-//   both KDP and KDP_COND.
+// To compute KDP_SC, we first find the gates over which regular KDP 
+//   exceeds a minimum threshold (i.e. this parameter). Over this run of 
+//   gates we compute the PHIDP change from the regular KDP and from 
+//   KDP_ZZDR. By taking the ratio of sum(KDP) / sum(KDP_ZZDR), and 
+//   applying that ratio to KDP_ZZDR over these gates, we can compute 
+//   KDP_SC such that the PHIDP change over these gates is the same for 
+//   both KDP and KDP_SC.
 //
 //
 // Type: double
 //
 
-KDP_threshold_for_ZZDR = 0.25;
+KDP_minimum_for_self_consistency = 0.25;
 
 ///////////// KDP_median_filter_len_for_ZZDR //////////
 //
 // Sets the length of the median filter when computing KDP_ZZDR.
 //
-// The Z and ZDR fields are smoothed with a median filter of this length 
-//   prior to estimating KDP_ZZDR.
+// When we compute KDP_ZZDR, we first apply a median filter to both Z 
+//   and ZDR in range. This parameter is the length of that median filter, 
+//   in gates.
 //
 //
 // Type: int

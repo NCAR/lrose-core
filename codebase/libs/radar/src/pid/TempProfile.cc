@@ -98,7 +98,7 @@ int TempProfile::loadFromSpdb(const string &url,
                               time_t &soundingTime)
 
 {
-  
+
   _lutByMeterHt.clear();
   _profile.clear();
   _soundingSpdbUrl = url;
@@ -334,7 +334,7 @@ int TempProfile::_getTempProfile(time_t searchTime)
     return -1;
   }
   
-  if (_debug) {
+  if (_verbose) {
     cerr << "=======>> Got spdb sounding" << endl;
     cerr << "  Search time: " << DateTime::strm(searchTime) << endl;
     cerr << "  margin (secs): " << _soundingSearchTimeMarginSecs << endl;

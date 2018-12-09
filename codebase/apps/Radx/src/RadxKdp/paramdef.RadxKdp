@@ -148,7 +148,7 @@ commentdef {
 typedef enum {
   
   KDP,
-  KDP_COND,
+  KDP_SC,
 
   DBZ_ATTEN_CORRECTION,
   ZDR_ATTEN_CORRECTION,
@@ -178,9 +178,9 @@ paramdef struct output_field_t {
     }
     ,
     {
-      id = KDP_COND,
-      name = "KDP_COND",
-      long_name = "kdp_conditioned_by_KDP_from_Z_and_ZDR",
+      id = KDP_SC,
+      name = "KDP_SC",
+      long_name = "kdp_conditioned_using_ZZDR_self_consistency",
       standard_name = "specific_differential_phase_hv",
       units = "deg/km",
       do_write = FALSE
@@ -227,7 +227,7 @@ paramdef struct output_field_t {
     "\nThe name and units can be set however the user prefers.\n"
     "\nThe output_encoding apply to CfRadial output only. \n\n"
     "\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n"
-    "\tKDP_COND: KDP conditioned - debug field (deg/km)\n"
+    "\tKDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)\n"
     "\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n"
     "\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n"
     "\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n"

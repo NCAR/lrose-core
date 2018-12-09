@@ -1,9 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -33,8 +50,6 @@
  * @author Automatically generated
  *
  */
-using namespace std;
-
 #include "Params.hh"
 #include <cstring>
 
@@ -1287,15 +1302,15 @@ using namespace std;
     tt->single_val.d = 2.5;
     tt++;
     
-    // Parameter 'KDP_threshold_for_ZZDR'
+    // Parameter 'KDP_minimum_for_self_consistency'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_threshold_for_ZZDR");
-    tt->descr = tdrpStrDup("Sets the threshold for computing conditional KDP from Z and ZDR.");
-    tt->help = tdrpStrDup("We can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute the conditioned KDP - we call this KDP_COND. To compute KDP_COND, we first find the gates over which regular KDP exceeds this threshold. Over this run of gates we compute the PHIDP change from the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, we can compute KDP_COND such that the PHIDP change is the same for both KDP and KDP_COND.");
-    tt->val_offset = (char *) &KDP_threshold_for_ZZDR - &_start_;
+    tt->param_name = tdrpStrDup("KDP_minimum_for_self_consistency");
+    tt->descr = tdrpStrDup("Sets the lower limit of KDP for computing KDP conditioned by self-consistency.");
+    tt->help = tdrpStrDup("To compute KDP_SC, we first find the gates over which regular KDP exceeds a minimum threshold (i.e. this parameter). Over this run of gates we compute the PHIDP change from the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, we can compute KDP_SC such that the PHIDP change over these gates is the same for both KDP and KDP_SC.");
+    tt->val_offset = (char *) &KDP_minimum_for_self_consistency - &_start_;
     tt->single_val.d = 0.25;
     tt++;
     

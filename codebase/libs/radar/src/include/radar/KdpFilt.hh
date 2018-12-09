@@ -247,11 +247,11 @@ public:
 
 
   /**
-   * Set KDP threshold for valid run when estimating
-   * KDP from Z and ZDR
+   * Set KDP threshold for valid run when computing KDP using
+   * Z and ZDR self-consistency
    */
 
-  void setThresholdForKdpZZdr(double val) { _kdpZZdrThreshold = val; }
+  void setKdpMinForSelfConsistency(double val) { _kdpMinForSelfConsistency = val; }
   
   /**
    * Set length for Z and ZDR median filter when estimating
@@ -376,7 +376,8 @@ public:
    */
   const double *getKdp() const { return _kdp; }
   const double *getKdpZZdr() const { return _kdpZZdr; }
-  const double *getKdpCond() const { return _kdpCond; }
+  // self-consistency conditioned result
+  const double *getKdpSC() const { return _kdpSC; }
 
   /**
    * Get attenuation correction after calling compute()
@@ -634,8 +635,8 @@ private:
   TaArray<double> _kdpZZdr_;
   double *_kdpZZdr;
 
-  TaArray<double> _kdpCond_;
-  double *_kdpCond;
+  TaArray<double> _kdpSC_;
+  double *_kdpSC;
 
   TaArray<double> _psob_;
   double *_psob;
@@ -672,7 +673,7 @@ private:
   double _kdpZExpon;
   double _kdpZdrExpon;
   double _kdpZZdrCoeff;
-  double _kdpZZdrThreshold;
+  double _kdpMinForSelfConsistency;
   int _kdpZZdrMedianLen;
 
   // methods
@@ -746,8 +747,8 @@ private:
 
   /// load up conditional kdp from computed kdp and kdpZZdr
 
-  void _loadKdpCond();
-  void _loadKdpCondRun(int startGate, int endGate);
+  void _loadKdpSC();
+  void _loadKdpSCRun(int startGate, int endGate);
 
 };
 

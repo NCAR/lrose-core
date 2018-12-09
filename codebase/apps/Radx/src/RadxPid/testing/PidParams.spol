@@ -349,7 +349,7 @@ PID_sounding_location_name = "SPOL";
 // Type: boolean
 //
 
-PID_sounding_check_pressure_range = TRUE;
+PID_sounding_check_pressure_range = FALSE;
 
 ///////////// PID_sounding_required_pressure_range_hpa 
 //
@@ -384,7 +384,7 @@ PID_sounding_required_pressure_range_hpa = {
 // Type: boolean
 //
 
-PID_sounding_check_height_range = TRUE;
+PID_sounding_check_height_range = FALSE;
 
 ///////////// PID_sounding_required_height_range_m ////
 //
@@ -419,7 +419,7 @@ PID_sounding_required_height_range_m = {
 // Type: boolean
 //
 
-PID_sounding_check_pressure_monotonically_decreasing = TRUE;
+PID_sounding_check_pressure_monotonically_decreasing = FALSE;
 
 ///////////// PID_sounding_height_correction_km ///////
 //

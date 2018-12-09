@@ -150,6 +150,12 @@ paramdef string {
   p_descr = "Field name for LDR.";
 } LDR_field_name;
     
+paramdef string {
+  p_default = "KDP";
+  p_descr = "Field name for KDP in the input data.";
+  p_help = "This is applicable if 'compute_KDP' is false.";
+} KDP_field_name;
+
 commentdef {
   p_header = "COMPUTING KDP";
   p_text = "Option to compute KDP from PHIDP in the input files. This will be required if a good KDP field is not available in the input data.";
@@ -159,18 +165,19 @@ paramdef boolean {
   p_default = TRUE;
   p_descr = "Option to compute KDP from PHIDP in the input files. This is generally recommended.";
   p_help = "If this is FALSE, the 'KDP_field_name' parameter must identify the KDP field to be used in the input data.";
-} compute_KDP;
-
-paramdef string {
-  p_default = "KDP";
-  p_descr = "Field name for KDP in the input data.";
-} KDP_field_name;
+} KDP_compute;
 
 paramdef string {
   p_default = "use-defaults";
   p_descr = "Path for parameters for computing KDP.";
   p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
 } KDP_params_file_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When computing KDP, using conditioned KDP instead of normal filtered KDP.";
+  p_help = "When KDP is computed, we compute both a normally-filtered result, and a conditioned result based on the self-consistency method with ZZDR. If this is set to TRUE, the conditioned result will be used instead of the normally-filtered result.";
+} KDP_use_conditioned_result;
 
 commentdef {
   p_header = "SPECIFYING OUTPUT FIELDS";
@@ -183,7 +190,7 @@ typedef enum {
   TEMP_FOR_PID,
 
   KDP,
-  KDP_COND,
+  KDP_SC,
 
   DBZ_ATTEN_CORRECTION,
   ZDR_ATTEN_CORRECTION,
@@ -240,9 +247,9 @@ paramdef struct output_field_t {
     }
     ,
     {
-      id = KDP_COND,
-      name = "KDP_COND",
-      long_name = "kdp_conditioned_by_KDP_from_Z_and_ZDR",
+      id = KDP_SC,
+      name = "KDP_SC",
+      long_name = "kdp_conditioned_using_ZZDR_self_consistency",
       standard_name = "specific_differential_phase_hv",
       units = "deg/km",
       do_write = FALSE
@@ -283,7 +290,7 @@ paramdef struct output_field_t {
     "\tPID_INTEREST: final interest map for NCAR Particle ID values\n"
     "\tTEMP_FOR_PID: temperature field for PID (C)\n"
     "\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n"
-    "\tKDP_COND: KDP conditioned - debug field (deg/km)\n"
+    "\tKDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)\n"
     "\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n"
     "\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n"
     "\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n"

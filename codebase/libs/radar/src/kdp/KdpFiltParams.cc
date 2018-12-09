@@ -545,7 +545,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("KdpFilt computes KDP from PHIDP.\n\nKDP is defined as half the change in PHIDP per km in range.\n\nRegions with valid PHIDP are determined by examining the quality of the PHIDP data, from RHOHV, and optionally from SNR and the variance of ZDR.\n\nPHIPD folds, so unfolding is the first step in the processing. After unfolding, filtering is applied to smooth PHIDP in range. This is followed by a step to identify regions with phase shift on backscatter.\n\nKDP is then computed as the PHIDP slope between range gates. For DBZ values < 20, 8 gates are used; for DBZ between 20 and 35, 4 gates are used; and if the DBZ exceeds 35, 2 adjacent gates are used.\n\nThe various filtering steps smeer out the KDP in range, which means that the high KDP values are not always located in the core of the precip. To help correct for this effect, we can make use of the self-consistency approach. This allows us to theoretically determine KDP from Z and ZDR - we can call this KDP_ZZDR. We can then use these theoretical KDP_ZZDR values to compute a conditioned KDP field, by constraining the estimated KDP values to the relevant gates. This reduces the smeering effect. We refer to this final conditioned KDP field as KDP_COND.");
+    tt->comment_hdr = tdrpStrDup("KdpFilt computes KDP from PHIDP.\n\nKDP is defined as half the change in PHIDP per km in range.\n\nRegions with valid PHIDP are determined by examining the quality of the PHIDP data, from RHOHV, and optionally from SNR and the variance of ZDR.\n\nPHIPD folds, so unfolding is the first step in the processing. After unfolding, filtering is applied to smooth PHIDP in range. This is followed by a step to identify regions with phase shift on backscatter.\n\nKDP is then computed as the PHIDP slope between range gates. For DBZ values < 20, 8 gates are used; for DBZ between 20 and 35, 4 gates are used; and if the DBZ exceeds 35, 2 adjacent gates are used.\n\nThe various filtering steps smeer out the KDP in range, which means that the high KDP values are not always located in the core of the precip. To help correct for this effect, we can make use of the self-consistency approach. This allows us to theoretically determine KDP from Z and ZDR - we can call this KDP_ZZDR. We can then use these self-consistent KDP_ZZDR values to compute a conditioned KDP field, by constraining the estimated KDP values to the relevant gates. This reduces the smeering effect. We refer to this KDP field, conditioned using self-consistency, as KDP_SC.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -774,18 +774,18 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP FROM Z and ZDR");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("Using the self-consistency approach, we can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute KDP conditioned using self-consistenty. We call this KDP_SC.");
     tt++;
     
-    // Parameter 'KDP_threshold_for_ZZDR'
+    // Parameter 'KDP_minimum_for_self_consistency'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_threshold_for_ZZDR");
-    tt->descr = tdrpStrDup("Sets the threshold for computing conditional KDP from Z and ZDR.");
-    tt->help = tdrpStrDup("We can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute the conditioned KDP - we call this KDP_COND. To compute KDP_COND, we first find the gates over which regular KDP exceeds this threshold. Over this run of gates we compute the PHIDP change from the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, we can compute KDP_COND such that the PHIDP change is the same for both KDP and KDP_COND.");
-    tt->val_offset = (char *) &KDP_threshold_for_ZZDR - &_start_;
+    tt->param_name = tdrpStrDup("KDP_minimum_for_self_consistency");
+    tt->descr = tdrpStrDup("Sets the lower limit of KDP for computing KDP conditioned by self-consistency.");
+    tt->help = tdrpStrDup("To compute KDP_SC, we first find the gates over which regular KDP exceeds a minimum threshold (i.e. this parameter). Over this run of gates we compute the PHIDP change from the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, we can compute KDP_SC such that the PHIDP change over these gates is the same for both KDP and KDP_SC.");
+    tt->val_offset = (char *) &KDP_minimum_for_self_consistency - &_start_;
     tt->single_val.d = 0.25;
     tt++;
     
@@ -796,7 +796,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("KDP_median_filter_len_for_ZZDR");
     tt->descr = tdrpStrDup("Sets the length of the median filter when computing KDP_ZZDR.");
-    tt->help = tdrpStrDup("The Z and ZDR fields are smoothed with a median filter of this length prior to estimating KDP_ZZDR.");
+    tt->help = tdrpStrDup("When we compute KDP_ZZDR, we first apply a median filter to both Z and ZDR in range. This parameter is the length of that median filter, in gates.");
     tt->val_offset = (char *) &KDP_median_filter_len_for_ZZDR - &_start_;
     tt->single_val.i = 5;
     tt++;

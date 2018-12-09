@@ -795,7 +795,7 @@ int NcarParticleId::_parseTempProfileLine(const char *line)
   if (_verbose) {
     cerr << "NcarParticleId::_parseTempProfileLine()" << endl;
     for (size_t ii = 0; ii < profile.size(); ii++) {
-      cerr << "1111111 press, htKm, tmpC: " 
+      cerr << "==>> press, htKm, tmpC: " 
            << profile[ii].pressHpa << ", "
            << profile[ii].htKm << ", "
            << profile[ii].tmpC << endl;
@@ -874,7 +874,7 @@ int NcarParticleId::loadTempProfile(time_t dataTime)
   }
   
   // get profile from spdb sounding if appropriate
-  
+
   if (_params.PID_use_soundings_from_spdb) {
 
     if (_getTempProfileFromSpdb(dataTime) == 0) {
@@ -882,22 +882,24 @@ int NcarParticleId::loadTempProfile(time_t dataTime)
       return 0;
     }
 
-    if (_debug) {
-      cerr << "WARNING - NcarParticleId::loadTempProfile" << endl;
-      cerr << "Cannot retrieve sounding, url: "
-           << _params.PID_sounding_spdb_url << endl;
-      cerr << "                     dataTime: "
-           << DateTime::strm(dataTime) << endl;
-    }
-
   } // if (_params.PID_use_soundings_from_spdb)
+  
+  if (_debug) {
+    cerr << "WARNING - NcarParticleId::loadTempProfile" << endl;
+    cerr << "  Cannot retrieve sounding, url: "
+         << _params.PID_sounding_spdb_url << endl;
+    cerr << "                     dataTime: "
+         << DateTime::strm(dataTime) << endl;
+    cerr << "  Using thresholds file instead: "
+         << _params.PID_thresholds_file_path << endl;
+  }
   
   // alternatively get profile from thresholds file
   
   if (_tempProfile.loadFromPidThresholdsFile
       (_params.PID_thresholds_file_path)) {
     cerr << "ERROR - NcarParticleId::loadTempProfile" << endl;
-    cerr << "Cannot retrieve temp profile from file: "
+    cerr << "  Cannot retrieve temp profile from file: "
          << _params.PID_thresholds_file_path << endl;
     return -1;
   }
@@ -906,7 +908,6 @@ int NcarParticleId::loadTempProfile(time_t dataTime)
   
   _computeTempHtLookup();
   _prevProfileDataTime = dataTime;
-
 
   return 0;
 
@@ -960,11 +961,15 @@ int NcarParticleId::_getTempProfileFromSpdb(time_t dataTime)
   if (_verbose) {
     _tempProfile.setVerbose();
   }
-  
+
   time_t soundingTime = 0;
   if (_tempProfile.loadFromSpdb(_params.PID_sounding_spdb_url,
                                 dataTime,
                                 soundingTime)) {
+    cerr << "WARNING - NcarParticleId::_getTempProfileFromSpdb" << endl;
+    cerr << "  Cannot get sounding from URL: "
+         << _params.PID_sounding_spdb_url << endl;
+    cerr << "  dataTime: " << DateTime::strm(dataTime) << endl;
     // failure
     return -1;
   }
@@ -974,9 +979,15 @@ int NcarParticleId::_getTempProfileFromSpdb(time_t dataTime)
   _computeTempHtLookup();
 
   if (_debug) {
-    cerr << "Retrieved sounding, url: " << _params.PID_sounding_spdb_url << endl;
-    cerr << "               dataTime: " << DateTime::strm(dataTime) << endl;
-    cerr << "           soundingTime: " << DateTime::strm(soundingTime) << endl;
+    cerr << "Retrieved sounding, url: "
+         << _params.PID_sounding_spdb_url << endl;
+    cerr << "               dataTime: "
+         << DateTime::strm(dataTime) << endl;
+    cerr << "           soundingTime: "
+         << DateTime::strm(soundingTime) << endl;
+  }
+  if (_verbose) {
+    _tempProfile.print(cerr);
   }
   
   // success
@@ -993,6 +1004,7 @@ int NcarParticleId::_getTempProfileFromSpdb(time_t dataTime)
 void NcarParticleId::setTempProfile(const TempProfile &profile)
   
 {
+
 
   // store the profile
 

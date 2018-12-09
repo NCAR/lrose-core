@@ -45,19 +45,33 @@
 #include <toolsa/TaArray.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <Mdv/GenericRadxFile.hh>
+#include <radar/BeamHeight.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
-#include <Radx/RadxXml.hh>
 
 #include "RadxPid.hh"
 #include "Worker.hh"
 #include "WorkerThread.hh"
 
 using namespace std;
+
+// initialize extra field names
+
+string RadxPid::smoothedDbzFieldName = "smoothedDbz";
+string RadxPid::smoothedRhohvFieldName = "smoothedRhohv";
+string RadxPid::elevationFieldName = "elevation";
+string RadxPid::rangeFieldName = "range";
+string RadxPid::beamHtFieldName = "beam_height";
+string RadxPid::tempFieldName = "temperature";
+string RadxPid::pidFieldName = "pid";
+string RadxPid::pidInterestFieldName = "pid_interest";
+string RadxPid::mlFieldName = "melting_layer";
+string RadxPid::mlExtendedFieldName = "ml_extended";
+string RadxPid::convFlagFieldName = "conv_flag";
 
 // Constructor
 
@@ -499,19 +513,40 @@ int RadxPid::_processFile(const string &filePath)
   // read the temperature profile into the threads
 
   if (_workers.size() > 0) {
+    // thread 0
     Worker *worker0 = _workers[0];
+    if (_params.debug) {
+      cerr << "Thread #: " << 0 << endl;
+      cerr << "  Loading temp profile for time: "
+           << RadxTime::strm(_vol.getStartTimeSecs()) << endl;
+    }
     worker0->loadTempProfile(_vol.getStartTimeSecs());
+    // copy to other threads
     for (size_t ii = 1; ii < _workers.size(); ii++) {
+      if (_params.debug) {
+        cerr << "Thread #: " << ii << endl;
+        cerr << "  Copying temp profile from thread 0" << endl;
+      }
       _workers[ii]->setTempProfile(worker0->getTempProfile());
     }
   }
   
+  // add geometry and pid fields to the volume
+  
+  _addExtraFieldsToInput();
+
   // compute the derived fields
   
   if (_compute()) {
     cerr << "ERROR - RadxPid::Run" << endl;
     cerr << "  Cannot compute KDP and attenuation" << endl;
     return -1;
+  }
+
+  // add extra fields to output
+
+  if (_params.PID_write_debug_fields) {
+    _addExtraFieldsToOutput();
   }
 
   // write results to output file
@@ -546,6 +581,12 @@ void RadxPid::_setupRead(RadxFile &file)
   file.addReadField(_params.ZDR_field_name);
   file.addReadField(_params.PHIDP_field_name);
   file.addReadField(_params.RHOHV_field_name);
+  if (_params.LDR_available) {
+    file.addReadField(_params.LDR_field_name);
+  }
+  if (!_params.KDP_compute) {
+    file.addReadField(_params.KDP_field_name);
+  }
   if (_params.copy_selected_input_fields_to_output) {
     for (int ii = 0; ii < _params.copy_fields_n; ii++) {
       file.addReadField(_params._copy_fields[ii].input_name);
@@ -619,6 +660,207 @@ void RadxPid::_setupWrite(RadxFile &file)
 }
 
 //////////////////////////////////////////////////
+// add geometry and pid fields to the volume
+
+void RadxPid::_addExtraFieldsToInput()
+
+{
+
+  vector<RadxRay *> &rays = _vol.getRays();
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+
+    RadxRay *ray = rays[iray];
+
+    RadxField *smoothDbzFld = new RadxField(smoothedDbzFieldName, "dBZ");
+    RadxField *smoothRhohvFld = new RadxField(smoothedRhohvFieldName, "");
+    RadxField *elevFld = new RadxField(elevationFieldName, "deg");
+    RadxField *rangeFld = new RadxField(rangeFieldName, "km");
+    RadxField *beamHtFld = new RadxField(beamHtFieldName, "km");
+    RadxField *tempFld = new RadxField(tempFieldName, "C");
+    RadxField *pidFld = new RadxField(pidFieldName, "");
+    RadxField *pidIntrFld = new RadxField(pidInterestFieldName, "");
+    RadxField *mlFld = new RadxField(mlFieldName, "");
+
+    size_t nGates = ray->getNGates();
+
+    TaArray<Radx::fl32> elev_, rng_, ht_, temp_;
+    Radx::fl32 *elev = elev_.alloc(nGates);
+    Radx::fl32 *rng = rng_.alloc(nGates);
+    Radx::fl32 *ht = ht_.alloc(nGates);
+    Radx::fl32 *temp = temp_.alloc(nGates);
+    
+    double startRangeKm = ray->getStartRangeKm();
+    double gateSpacingKm = ray->getGateSpacingKm();
+
+    BeamHeight beamHt;
+    beamHt.setInstrumentHtKm(_vol.getAltitudeKm());
+    if (_params.override_standard_pseudo_earth_radius) {
+      beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
+    }
+
+    // loop through the gates
+    
+    double rangeKm = startRangeKm;
+    double elevationDeg = ray->getElevationDeg();
+    const TempProfile &profile = _workers[0]->getTempProfile();
+    for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
+      double htKm = beamHt.computeHtKm(elevationDeg, rangeKm);
+      double tempC = profile.getTempForHtKm(htKm);
+      elev[igate] = elevationDeg;
+      rng[igate] = rangeKm;
+      ht[igate] = htKm;
+      temp[igate] = tempC;
+    } // igate
+
+    smoothDbzFld->setTypeFl32(-9999.0);
+    smoothRhohvFld->setTypeFl32(-9999.0);
+    elevFld->setTypeFl32(-9999.0);
+    rangeFld->setTypeFl32(-9999.0);
+    beamHtFld->setTypeFl32(-9999.0);
+    tempFld->setTypeFl32(-9999.0);
+    pidFld->setTypeSi32(-9999, 1.0, 0.0);
+    pidIntrFld->setTypeFl32(-9999.0);
+    mlFld->setTypeSi32(-9999, 1.0, 0.0);
+    
+    smoothDbzFld->addDataMissing(nGates);
+    smoothRhohvFld->addDataMissing(nGates);
+    elevFld->addDataFl32(nGates, elev);
+    rangeFld->addDataFl32(nGates, rng);
+    beamHtFld->addDataFl32(nGates, ht);
+    tempFld->addDataFl32(nGates, temp);
+    pidFld->addDataMissing(nGates);
+    pidIntrFld->addDataMissing(nGates);
+    mlFld->addDataMissing(nGates);
+
+    ray->addField(smoothDbzFld);
+    ray->addField(smoothRhohvFld);
+    ray->addField(elevFld);
+    ray->addField(rangeFld);
+    ray->addField(beamHtFld);
+    ray->addField(tempFld);
+    ray->addField(pidFld);
+    ray->addField(pidIntrFld);
+    ray->addField(mlFld);
+
+  } // iray
+
+}
+
+//////////////////////////////////////////////////
+// add extra output fields
+
+void RadxPid::_addExtraFieldsToOutput()
+
+{
+
+  // loop through rays
+
+  vector<RadxRay *> &inputRays = _vol.getRays();
+  for (size_t iray = 0; iray < inputRays.size(); iray++) {
+    
+    RadxRay *inputRay = inputRays[iray];
+    RadxRay *outputRay = _derivedRays[iray];
+
+    // make a copy of the input fields
+
+    RadxField *mlFld = new RadxField(*inputRay->getField(mlFieldName));
+
+    // add to output
+
+    outputRay->addField(mlFld);
+
+  } // iray
+
+}
+
+/////////////////////////////////////////////////////
+// compute the derived fields for all rays in volume
+
+int RadxPid::_compute()
+{
+
+  // initialize the volume with ray numbers
+  
+  _vol.setRayNumbersInOrder();
+
+  // initialize derived
+
+  _derivedRays.clear();
+  
+  // loop through the input rays,
+  // computing the derived fields
+
+  const vector<RadxRay *> &inputRays = _vol.getRays();
+  for (size_t iray = 0; iray < inputRays.size(); iray++) {
+
+    // get a thread from the pool
+    bool isDone = true;
+    WorkerThread *thread = 
+      (WorkerThread *) _threadPool.getNextThread(true, isDone);
+    if (thread == NULL) {
+      break;
+    }
+    if (isDone) {
+      // store the results computed by the thread
+      if (_storeDerivedRay(thread)) {
+        cerr << "ERROR - RadxPid::_compute()" << endl;
+        cerr << "  Cannot compute for ray num: " << iray << endl;
+        break;
+      }
+      // return thread to the available pool
+      _threadPool.addThreadToAvail(thread);
+      // reduce iray by 1 since we did not actually process this ray
+      // we only handled a previously started thread
+      iray--;
+    } else {
+      // got a thread to use, set the input ray
+      thread->setInputRay(inputRays[iray]);
+      // set it running
+      thread->signalRunToStart();
+    }
+
+  } // iray
+    
+  // collect remaining done threads
+
+  _threadPool.setReadyForDoneCheck();
+  while (!_threadPool.checkAllDone()) {
+    WorkerThread *thread = (WorkerThread *) _threadPool.getNextDoneThread();
+    if (thread == NULL) {
+      break;
+    } else {
+      // store the results computed by the thread
+      _storeDerivedRay(thread);
+      // return thread to the available pool
+      _threadPool.addThreadToAvail(thread);
+    }
+  } // while
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////
+// Store the derived ray
+
+int RadxPid::_storeDerivedRay(WorkerThread *thread)
+
+{
+  
+  RadxRay *derivedRay = thread->getOutputRay();
+  if (derivedRay == NULL) {
+    // error
+    return -1;
+  }
+
+  // good return, add to results
+  _derivedRays.push_back(derivedRay);
+  
+  return 0;
+
+}
+      
+//////////////////////////////////////////////////
 // write out the volume
 
 int RadxPid::_writeVol()
@@ -677,83 +919,3 @@ int RadxPid::_writeVol()
 
 }
 
-/////////////////////////////////////////////////////
-// compute the derived fields for all rays in volume
-
-int RadxPid::_compute()
-{
-
-  // initialize the volume with ray numbers
-  
-  _vol.setRayNumbersInOrder();
-
-  // initialize derived
-
-  _derivedRays.clear();
-  
-  // loop through the input rays,
-  // computing the derived fields
-
-  const vector<RadxRay *> &inputRays = _vol.getRays();
-  for (size_t iray = 0; iray < inputRays.size(); iray++) {
-
-    // get a thread from the pool
-    bool isDone = true;
-    WorkerThread *thread = 
-      (WorkerThread *) _threadPool.getNextThread(true, isDone);
-    if (thread == NULL) {
-      break;
-    }
-    if (isDone) {
-      // store the results computed by the thread
-      _storeDerivedRay(thread);
-      // return thread to the available pool
-      _threadPool.addThreadToAvail(thread);
-      // reduce iray by 1 since we did not actually process this ray
-      // we only handled a previously started thread
-      iray--;
-    } else {
-      // got a thread to use, set the input ray
-      thread->setInputRay(inputRays[iray]);
-      // set it running
-      thread->signalRunToStart();
-    }
-
-  } // iray
-    
-  // collect remaining done threads
-
-  _threadPool.setReadyForDoneCheck();
-  while (!_threadPool.checkAllDone()) {
-    WorkerThread *thread = (WorkerThread *) _threadPool.getNextDoneThread();
-    if (thread == NULL) {
-      break;
-    } else {
-      // store the results computed by the thread
-      _storeDerivedRay(thread);
-      // return thread to the available pool
-      _threadPool.addThreadToAvail(thread);
-    }
-  } // while
-
-  return 0;
-
-}
-
-///////////////////////////////////////////////////////////
-// Store the derived ray
-
-int RadxPid::_storeDerivedRay(WorkerThread *thread)
-
-{
-  
-  RadxRay *derivedRay = thread->getOutputRay();
-  if (derivedRay != NULL) {
-    // good return, add to results
-    _derivedRays.push_back(derivedRay);
-  }
-  
-  return 0;
-
-}
-      

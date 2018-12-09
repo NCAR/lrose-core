@@ -43,6 +43,7 @@
 #include <radar/KdpFiltParams.hh>
 #include <radar/NcarParticleId.hh>
 #include <radar/NcarPidParams.hh>
+#include <Radx/Radx.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxTime.hh>
 class RadxRay;
@@ -145,19 +146,15 @@ private:
   RadxArray<double> _pidInterest_;
   RadxArray<double> _tempForPid_;
 
+  int *_pidArray;
+  double *_pidInterest;
+  double *_tempForPid;
+
   RadxArray<double> _kdpArray_;
-  RadxArray<double> _kdpZZdrArray_;
-  RadxArray<double> _kdpCondArray_;
+  RadxArray<double> _kdpSCArray_;
 
   double *_kdpArray;
-  double *_kdpZZdrArray;
-  double *_kdpCondArray;
-
-  int *_pidArray;
-  int *_pidArray2;
-  double *_pidInterest;
-  double *_pidInterest2;
-  double *_tempForPid;
+  double *_kdpSCArray;
 
   // computing kdp
   
@@ -180,8 +177,7 @@ private:
   int _pidInit();
   void _pidCompute();
   
-  void _allocInputArrays();
-  void _allocDerivedArrays();
+  void _allocArrays();
   
   int _loadInputArrays(RadxRay *inputRay);
 
@@ -197,7 +193,10 @@ private:
   void _loadOutputFields(RadxRay *inputRay,
                          RadxRay *derivedRay);
   
-  void _addDebugFields(RadxRay *derivedRay);
+  void _addPidDebugFields(const RadxRay *inputRay, 
+                          RadxRay *outputRay);
+
+  void _addKdpDebugFields(RadxRay *derivedRay);
 
   void _addField(RadxRay *derivedRay,
                  const string &name,
@@ -205,7 +204,13 @@ private:
                  const string &longName,
                  const string standardName,
                  const double *array64);
-
+  
+  void _addField(RadxRay *outputRay,
+                 const string &name,
+                 const string &units,
+                 const string &longName,
+                 const string standardName,
+                 const Radx::fl32 *array32);
 
   void _addField(RadxRay *derivedRay,
                  const string &name,

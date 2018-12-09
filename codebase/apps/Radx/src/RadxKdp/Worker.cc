@@ -106,17 +106,15 @@ RadxRay *Worker::compute(RadxRay *inputRay,
   
   RadxRay *outputRay = new RadxRay;
   outputRay->copyMetaData(*inputRay);
+
+  // alloc computational arrays
+
+  _allocArrays();
+
+  // load up input arrays
   
-  // allocate input arrays for computing derived fields,
-  // and load them up
-  
-  _allocInputArrays();
   _loadInputArrays(inputRay);
 
-  // alloc the derived field arrays
-
-  _allocDerivedArrays();
-  
   // compute kdp
   
   _kdpCompute();
@@ -140,6 +138,10 @@ void Worker::_kdpInit()
 
   _kdp.setFromParams(_kdpFiltParams);
   
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _kdp.setDebug(true);
+  }
+
 }
 
 ////////////////////////////////////////////////
@@ -176,8 +178,7 @@ void Worker::_kdpCompute()
                missingDbl);
 
   const double *kdp = _kdp.getKdp();
-  const double *kdpZZdr = _kdp.getKdpZZdr();
-  const double *kdpCond = _kdp.getKdpCond();
+  const double *kdpSC = _kdp.getKdpSC();
   
   // put KDP into fields objects
   
@@ -187,16 +188,15 @@ void Worker::_kdpCompute()
     } else {
       _kdpArray[ii] = kdp[ii];
     }
-    _kdpZZdrArray[ii] = kdpZZdr[ii];
-    _kdpCondArray[ii] = kdpCond[ii];
+    _kdpSCArray[ii] = kdpSC[ii];
   }
 
 }
 
 //////////////////////////////////////
-// alloc input arrays
+// alloc arrays
   
-void Worker::_allocInputArrays()
+void Worker::_allocArrays()
   
 {
 
@@ -206,18 +206,8 @@ void Worker::_allocInputArrays()
   _rhohvArray = _rhohvArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
 
-}
-
-//////////////////////////////////////
-// alloc derived arrays
-  
-void Worker::_allocDerivedArrays()
-  
-{
-  
   _kdpArray = _kdpArray_.alloc(_nGates);
-  _kdpZZdrArray = _kdpZZdrArray_.alloc(_nGates);
-  _kdpCondArray = _kdpCondArray_.alloc(_nGates);
+  _kdpSCArray = _kdpSCArray_.alloc(_nGates);
 
 }
 
@@ -381,8 +371,8 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
         default:
           *datp = _kdpArray[igate];
           break;
-        case Params::KDP_COND:
-          *datp = _kdpCondArray[igate];
+        case Params::KDP_SC:
+          *datp = _kdpSCArray[igate];
           break;
           
           // attenuation

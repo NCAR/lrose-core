@@ -85,7 +85,7 @@ public:
     PID_INTEREST = 1,
     TEMP_FOR_PID = 2,
     KDP = 3,
-    KDP_COND = 4,
+    KDP_SC = 4,
     DBZ_ATTEN_CORRECTION = 5,
     ZDR_ATTEN_CORRECTION = 6,
     DBZ_ATTEN_CORRECTED = 7,
@@ -447,11 +447,13 @@ public:
 
   char* LDR_field_name;
 
-  tdrp_bool_t compute_KDP;
-
   char* KDP_field_name;
 
+  tdrp_bool_t KDP_compute;
+
   char* KDP_params_file_path;
+
+  tdrp_bool_t KDP_use_conditioned_result;
 
   output_field_t *_output_fields;
   int output_fields_n;
@@ -494,7 +496,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[51];
+  mutable TDRPtable _table[52];
 
   const char *_className;
 
