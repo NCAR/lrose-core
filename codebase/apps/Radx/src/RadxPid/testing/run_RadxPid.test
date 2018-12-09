@@ -4,4 +4,6 @@ cd $HOME/git/lrose-core/codebase/apps/Radx/src/RadxPid/testing
 
 RadxPid -params RadxPid.spol -debug -start "2015 06 26 00 00 00" -end "2015 06 26 01 00 00"
 
+RadxPid -params RadxPid.kddc -debug -start "2015 06 26 00 00 00" -end "2015 06 26 01 00 00"
+
 

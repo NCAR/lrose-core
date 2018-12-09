@@ -143,54 +143,53 @@ SPOL_ML     SPOL_ML      /tmp/cfradial/pid/spol&melting_layer   cmd_flag.colors 
 =======   ======     /tmp/cfradial/pid/spol&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
 =======   ======     /tmp/cfradial/pid/spol&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
 
-
 # KDDC
 #
 
-KDDC_KDP       KDDC_KDP       /tmp/cfradial/kddc/pid&KDP       kdp_sband.colors   deg/km -5 80 5 radial 1 0     
-KDDC_KDP_SC    KDDC_KDP_SC    /tmp/cfradial/kddc/pid&KDP_SC    kdp_sband.colors   deg/km -5 80 5 radial 1 0     
-KDDC_PSOB      KDDC_PSOB      /tmp/cfradial/kddc/pid&PSOB      fraction.colors    deg    -5 80 5 radial 1 0     
-KDDC_KDP_ZZDR  KDDC_KDP_ZZDR  /tmp/cfradial/kddc/pid&KDP_ZZDR  kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+KDDC_PID          KDDC_PID           /tmp/cfradial/pid/kddc&PID           pid.colors      -    -5 80 5 radial 1 0     
+KDDC_PID_INT      KDDC_PID_INT       /tmp/cfradial/pid/kddc&PID_INTEREST  interest.colors -    -5 80 5 radial 1 0     
+KDDC_TEMP_FOR_PID KDDC_TEMP_FOR_PID  /tmp/cfradial/pid/kddc&TEMP_FOR_PID  temp.colors     C    -5 80 5 radial 1 0     
+=======        ======         /tmp/cfradial/pid/kddc&DBZ       dbz.colors        dBZ -5 80 5 radial 1 0
 
-KDDC_DBZ       KDDC_DBZ       /tmp/cfradial/kddc/pid&DBZ       dbz.colors        dBZ -5 80 5 radial 1 0
-KDDC_SNR       KDDC_SNR       /tmp/cfradial/kddc/pid&SNR       snr.colors        dB  -5 80 5 radial 1 0
-KDDC_VEL       KDDC_VEL       /tmp/cfradial/kddc/pid&VEL       vel.colors        m/s -5 80 5 radial 1 0
-KDDC_WIDTH     KDDC_WIDTH     /tmp/cfradial/kddc/pid&WIDTH     width.colors      m/s -5 80 5 radial 1 0
+KDDC_KDP       KDDC_KDP       /tmp/cfradial/pid/kddc&KDP       kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+KDDC_KDP_SC    KDDC_KDP_SC    /tmp/cfradial/pid/kddc&KDP_SC    kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+=======        ======         /tmp/cfradial/pid/kddc&DBZ       dbz.colors        dBZ -5 80 5 radial 1 0
+=======        ======         /tmp/cfradial/pid/kddc&DBZ       dbz.colors        dBZ -5 80 5 radial 1 0
 
-KDDC_PHIDP     KDDC_PHIDP     /tmp/cfradial/kddc/pid&PHIDP     phidp_alt.colors  deg -5 80 5 radial 1 0
-KDDC_ZDR       KDDC_ZDR       /tmp/cfradial/kddc/pid&ZDR       zdr.colors        dB  -5 80 5 radial 1 0
-KDDC_RHOHV     KDDC_RHOHV     /tmp/cfradial/kddc/pid&RHOHV     rhohv.colors      deg -5 80 5 radial 1 0
-=======        ======         /tmp/cfradial/kddc/pid&DBZ       dbz.colors        dBZ -5 80 5 radial 1 0
+KDDC_DBZ       KDDC_DBZ       /tmp/cfradial/pid/kddc&DBZ       dbz.colors        dBZ -5 80 5 radial 1 0
+KDDC_VEL       KDDC_VEL       /tmp/cfradial/pid/kddc&VEL       vel.colors        m/s -5 80 5 radial 1 0
+KDDC_WIDTH     KDDC_WIDTH     /tmp/cfradial/pid/kddc&WIDTH     width.colors      m/s -5 80 5 radial 1 0
+=======        ======         /tmp/cfradial/pid/kddc&DBZ       dbz.colors        dBZ -5 80 5 radial 1 0
 
-KDDC_DBZ_ATTEN_CORRECTION   KDDC_DBZ_ATTEN_CORRECTION /tmp/cfradial/kddc/pid&DBZ_ATTEN_CORRECTION fraction.colors  dB  -5 80 5 radial 1 0
-KDDC_DBZ_ATTEN_CORRECTED    KDDC_DBZ_ATTEN_CORRECTED  /tmp/cfradial/kddc/pid&DBZ_ATTEN_CORRECTED  dbz.colors       dBZ -5 80 5 radial 1 0
-KDDC_ZDR_ATTEN_CORRECTION   KDDC_ZDR_ATTEN_CORRECTION /tmp/cfradial/kddc/pid&ZDR_ATTEN_CORRECTION fraction.colors  dB  -5 80 5 radial 1 0
-KDDC_ZDR_ATTEN_CORRECTED    KDDC_ZDR_ATTEN_CORRECTED  /tmp/cfradial/kddc/pid&ZDR_ATTEN_CORRECTED  zdr.colors       dB  -5 80 5 radial 1 0
+KDDC_PHIDP     KDDC_PHIDP     /tmp/cfradial/pid/kddc&PHIDP     phidp_alt.colors  deg -5 80 5 radial 1 0
+KDDC_ZDR       KDDC_ZDR       /tmp/cfradial/pid/kddc&ZDR       zdr.colors        dB  -5 80 5 radial 1 0
+KDDC_RHOHV     KDDC_RHOHV     /tmp/cfradial/pid/kddc&RHOHV     rhohv.colors      deg -5 80 5 radial 1 0
+=======        ======         /tmp/cfradial/pid/kddc&DBZ       dbz.colors        dBZ -5 80 5 radial 1 0
 
-KDDC_DBZ_FOR_KDP       KDDC_DBZ_FOR_KDP       /tmp/cfradial/kddc/pid&DBZ_FOR_KDP        dbz.colors    dBZ -5 80 5 radial 1 0
-KDDC_SNR_FOR_KDP       KDDC_SNR_FOR_KDP       /tmp/cfradial/kddc/pid&SNR_FOR_KDP        snr.colors    dB  -5 80 5 radial 1 0
-KDDC_ZDR_FOR_KDP       KDDC_ZDR_FOR_KDP       /tmp/cfradial/kddc/pid&ZDR_FOR_KDP        zdr.colors    dB  -5 80 5 radial 1 0
-KDDC_ZDR_SDEV_FOR_KDP  KDDC_ZDR_SDEV_FOR_KDP  /tmp/cfradial/kddc/pid&ZDR_SDEV_FOR_KDP   sdzdr.colors  dB  -5 80 5 radial 1 0
+KDDC_DBZ_FOR_PID       KDDC_DBZ_FOR_PID       /tmp/cfradial/pid/kddc&DBZ_FOR_PID        dbz.colors    dBZ    -5 80 5 radial 1 0
+KDDC_ZDR_FOR_PID       KDDC_ZDR_FOR_PID       /tmp/cfradial/pid/kddc&ZDR_FOR_PID        zdr.colors    dB     -5 80 5 radial 1 0
+KDDC_KDP_FOR_PID       KDDC_KDP_FOR_PID       /tmp/cfradial/pid/kddc&KDP_FOR_PID        kdp.colors    deg/km -5 80 5 radial 1 0
+KDDC_LDR_FOR_PID       KDDC_LDR_FOR_PID       /tmp/cfradial/pid/kddc&LDR_FOR_PID        ldr.colors    dB     -5 80 5 radial 1 0
 
-KDDC_RHOHV_FOR_KDP      KDDC_RHOHV_FOR_KDP      /tmp/cfradial/kddc/pid&RHOHV_FOR_KDP       rhohv.colors    -   -5 80 5 radial 1 0
-KDDC_VALID_FLAG_FOR_KDP KDDC_VALID_FLAG_FOR_KDP /tmp/cfradial/kddc/pid&VALID_FLAG_FOR_KDP  cmd_flag.colors -   -5 80 5 radial 1 0
-=======                 ======                  /tmp/cfradial/kddc/pid&DBZ                 dbz.colors      dBZ -5 80 5 radial 1 0
-=======                 ======                  /tmp/cfradial/kddc/pid&DBZ                 dbz.colors      dBZ -5 80 5 radial 1 0
+KDDC_RHOHV_FOR_PID     KDDC_RHOHV_FOR_PID     /tmp/cfradial/pid/kddc&RHOHV_FOR_PID      rhohv.colors   -     -5 80 5 radial 1 0
+KDDC_PHIDP_FOR_PID     KDDC_PHIDP_FOR_PID     /tmp/cfradial/pid/kddc&PHIDP_FOR_PID      phidp.colors  deg    -5 80 5 radial 1 0
+KDDC_ZDR_SDEV_FOR_PID    KDDC_ZDR_SDEV_FOR_PID    /tmp/cfradial/pid/kddc&ZDR_SDEV_FOR_PID    sdzdr.colors    dB   -5 80 5 radial 1 0
+KDDC_PHIDP_SDEV_FOR_PID  KDDC_PHIDP_SDEV_FOR_PID  /tmp/cfradial/pid/kddc&PHIDP_SDEV_FOR_PID  sdphidp.colors  deg  -5 80 5 radial 1 0
 
-KDDC_PHIDP_FOR_KDP     KDDC_PHIDP_FOR_KDP      /tmp/cfradial/kddc/pid&PHIDP_FOR_KDP      phidp_alt.colors deg -5 80 5 radial 1 0
-KDDC_PHIDP_MEAN        KDDC_PHIDP_MEAN         /tmp/cfradial/kddc/pid&PHIDP_MEAN         phidp_alt.colors deg -5 80 5 radial 1 0
-KDDC_PHIDP_MEAN_UNFOLD KDDC_PHIDP_MEAN_UNFOLD  /tmp/cfradial/kddc/pid&PHIDP_MEAN_UNFOLD  phidp_alt.colors deg -5 80 5 radial 1 0
-KDDC_PHIDP_SDEV        KDDC_PHIDP_SDEV         /tmp/cfradial/kddc/pid&PHIDP_SDEV         sdphidp.colors   deg -5 80 5 radial 1 0
+KDDC_BEAM_HT         KDDC_BEAM_HT          /tmp/cfradial/pid/kddc&BEAM_HT   number.colors km   -5 80 5 radial 1 0
+KDDC_RANGE           KDDC_RANGE            /tmp/cfradial/pid/kddc&RANGE     range_250.colors  km   -5 80 5 radial 1 0
+KDDC_ELEVATION       KDDC_ELEVATION        /tmp/cfradial/pid/kddc&ELEVATION number.colors deg  -5 80 5 radial 1 0
+=======                 ======                  /tmp/cfradial/pid/kddc&DBZ                 dbz.colors      dBZ -5 80 5 radial 1 0
 
-KDDC_PHIDP_JITTER   KDDC_PHIDP_JITTER    /tmp/cfradial/kddc/pid&PHIDP_JITTER   sdphidp.colors   deg -5 80 5 radial 1 0
-KDDC_PHIDP_UNFOLD   KDDC_PHIDP_UNFOLD    /tmp/cfradial/kddc/pid&PHIDP_UNFOLD   phidp_alt.colors deg -5 80 5 radial 1 0
-KDDC_PHIDP_FILT     KDDC_PHIDP_FILT      /tmp/cfradial/kddc/pid&PHIDP_FILT     phidp_alt.colors deg -5 80 5 radial 1 0
-KDDC_PHIDP_COND     KDDC_PHIDP_COND      /tmp/cfradial/kddc/pid&PHIDP_COND     phidp_alt.colors deg -5 80 5 radial 1 0
+KDDC_ML_INT KDDC_ML_INT  /tmp/cfradial/pid/kddc&ML_INTEREST     interest.colors -   -5 80 5 radial 1 0
+KDDC_ML     KDDC_ML      /tmp/cfradial/pid/kddc&melting_layer   cmd_flag.colors -   -5 80 5 radial 1 0
+=======     ======       /tmp/cfradial/pid/kddc&DBZ             dbz.colors      dBZ -5 80 5 radial 1 0
+=======     ======       /tmp/cfradial/pid/kddc&DBZ             dbz.colors      dBZ -5 80 5 radial 1 0
 
-=======   ======     /tmp/cfradial/kddc/pid&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
-=======   ======     /tmp/cfradial/kddc/pid&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
-=======   ======     /tmp/cfradial/kddc/pid&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
-=======   ======     /tmp/cfradial/kddc/pid&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
+=======   ======     /tmp/cfradial/pid/kddc&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
+=======   ======     /tmp/cfradial/pid/kddc&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
+=======   ======     /tmp/cfradial/pid/kddc&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
+=======   ======     /tmp/cfradial/pid/kddc&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
 
 </GRIDS>
 
