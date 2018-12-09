@@ -446,33 +446,6 @@ output_fields = {
     units = "deg/km",
     do_write = FALSE
   }
-  ,
-  {
-    id = ZDR_ATTEN_CORRECTION,
-    name = "ZDR_ATTEN_CORRECTION",
-    long_name = "correction_to_zdr_for_attenuation",
-    standard_name = "zdr_attenuation_correction",
-    units = "dB",
-    do_write = FALSE
-  }
-  ,
-  {
-    id = DBZ_ATTEN_CORRECTED,
-    name = "DBZ_ATTEN_CORRECTED",
-    long_name = "dbz_corrected_for_attenuation",
-    standard_name = "dbz_corrected_for_attenuation",
-    units = "dBZ",
-    do_write = FALSE
-  }
-  ,
-  {
-    id = ZDR_ATTEN_CORRECTED,
-    name = "ZDR_ATTEN_CORRECTED",
-    long_name = "zdr_corrected_for_attenuation",
-    standard_name = "zdr_corrected_for_attenuation",
-    units = "dB",
-    do_write = FALSE
-  }
 };
 
 ///////////// output_encoding /////////////////////////

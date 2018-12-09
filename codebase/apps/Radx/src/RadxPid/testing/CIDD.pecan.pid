@@ -118,11 +118,6 @@ SPOL_ZDR       SPOL_ZDR       /tmp/cfradial/pid/spol&ZDR       zdr.colors       
 SPOL_RHOHV     SPOL_RHOHV     /tmp/cfradial/pid/spol&RHOHV     rhohv.colors      deg -5 80 5 radial 1 0
 =======        ======         /tmp/cfradial/pid/spol&DBZ       dbz.colors        dBZ -5 80 5 radial 1 0
 
-SPOL_DBZ_ATTEN_CORRECTION   SPOL_DBZ_ATTEN_CORRECTION /tmp/cfradial/pid/spol&DBZ_ATTEN_CORRECTION fraction.colors  dB  -5 80 5 radial 1 0
-SPOL_DBZ_ATTEN_CORRECTED    SPOL_DBZ_ATTEN_CORRECTED  /tmp/cfradial/pid/spol&DBZ_ATTEN_CORRECTED  dbz.colors       dBZ -5 80 5 radial 1 0
-SPOL_ZDR_ATTEN_CORRECTION   SPOL_ZDR_ATTEN_CORRECTION /tmp/cfradial/pid/spol&ZDR_ATTEN_CORRECTION fraction.colors  dB  -5 80 5 radial 1 0
-SPOL_ZDR_ATTEN_CORRECTED    SPOL_ZDR_ATTEN_CORRECTED  /tmp/cfradial/pid/spol&ZDR_ATTEN_CORRECTED  zdr.colors       dB  -5 80 5 radial 1 0
-
 SPOL_DBZ_FOR_PID       SPOL_DBZ_FOR_PID       /tmp/cfradial/pid/spol&DBZ_FOR_PID        dbz.colors    dBZ    -5 80 5 radial 1 0
 SPOL_ZDR_FOR_PID       SPOL_ZDR_FOR_PID       /tmp/cfradial/pid/spol&ZDR_FOR_PID        zdr.colors    dB     -5 80 5 radial 1 0
 SPOL_KDP_FOR_PID       SPOL_KDP_FOR_PID       /tmp/cfradial/pid/spol&KDP_FOR_PID        kdp.colors    deg/km -5 80 5 radial 1 0
@@ -138,10 +133,10 @@ SPOL_RANGE           SPOL_RANGE            /tmp/cfradial/pid/spol&RANGE     rang
 SPOL_ELEVATION       SPOL_ELEVATION        /tmp/cfradial/pid/spol&ELEVATION number.colors deg  -5 80 5 radial 1 0
 =======                 ======                  /tmp/cfradial/pid/spol&DBZ                 dbz.colors      dBZ -5 80 5 radial 1 0
 
-SPOL_ML_INTEREST SPOL_ML_INTEREST  /tmp/cfradial/pid/spol&ML_INTEREST     interest.colors -   -5 80 5 radial 1 0
-SPOL_ML          SPOL_ML           /tmp/cfradial/pid/spol&melting_layer   cmd_flag.colors -   -5 80 5 radial 1 0
-=======                 ======                  /tmp/cfradial/pid/spol&DBZ                 dbz.colors      dBZ -5 80 5 radial 1 0
-=======                 ======                  /tmp/cfradial/pid/spol&DBZ                 dbz.colors      dBZ -5 80 5 radial 1 0
+SPOL_ML_INT SPOL_ML_INT  /tmp/cfradial/pid/spol&ML_INTEREST     interest.colors -   -5 80 5 radial 1 0
+SPOL_ML     SPOL_ML      /tmp/cfradial/pid/spol&melting_layer   cmd_flag.colors -   -5 80 5 radial 1 0
+=======     ======       /tmp/cfradial/pid/spol&DBZ             dbz.colors      dBZ -5 80 5 radial 1 0
+=======     ======       /tmp/cfradial/pid/spol&DBZ             dbz.colors      dBZ -5 80 5 radial 1 0
 
 =======   ======     /tmp/cfradial/pid/spol&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
 =======   ======     /tmp/cfradial/pid/spol&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0

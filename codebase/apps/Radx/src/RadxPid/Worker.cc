@@ -513,10 +513,22 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
     
       switch (ofld.id) {
         
+        // PID
+        
+        case Params::PID:
+        default:
+          *datp = _pidArray[igate];
+          break;
+        case Params::PID_INTEREST:
+          *datp = _pidInterest[igate];
+          break;
+        case Params::TEMP_FOR_PID:
+          *datp = _tempForPid[igate];
+          break;
+          
         // computed KDP
         
         case Params::KDP:
-        default:
           *datp = _kdpArray[igate];
           break;
         case Params::KDP_SC:
