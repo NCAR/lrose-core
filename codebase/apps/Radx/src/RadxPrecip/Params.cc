@@ -815,79 +815,13 @@
     tt->single_val.s = tdrpStrDup("LDR");
     tt++;
     
-    // Parameter 'KDP_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("KDP_field_name");
-    tt->descr = tdrpStrDup("Field name for KDP in the input data.");
-    tt->help = tdrpStrDup("This is applicable if 'KDP_compute' is false.");
-    tt->val_offset = (char *) &KDP_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("KDP");
-    tt++;
-    
     // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("PRECIP PARAMETER FILE");
-    tt->comment_text = tdrpStrDup("Specify the path to the PRECIP parameters.");
-    tt++;
-    
-    // Parameter 'PRECIP_params_file_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_params_file_path");
-    tt->descr = tdrpStrDup("Path for parameters for computing PRECIP.");
-    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
-    tt->val_offset = (char *) &PRECIP_params_file_path - &_start_;
-    tt->single_val.s = tdrpStrDup("use-defaults");
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("PID PARAMETER FILE");
-    tt->comment_text = tdrpStrDup("Specify the path to the PID parameters.");
-    tt++;
-    
-    // Parameter 'PID_params_file_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("PID_params_file_path");
-    tt->descr = tdrpStrDup("Path for parameters for computing PID.");
-    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
-    tt->val_offset = (char *) &PID_params_file_path - &_start_;
-    tt->single_val.s = tdrpStrDup("use-defaults");
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP");
-    tt->comment_text = tdrpStrDup("Option to compute KDP from PHIDP in the input files. This will be required if a good KDP field is not available in the input data.");
-    tt++;
-    
-    // Parameter 'KDP_compute'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_compute");
-    tt->descr = tdrpStrDup("Option to compute KDP from PHIDP in the input files. This is generally recommended.");
-    tt->help = tdrpStrDup("If this is FALSE, the 'KDP_field_name' parameter must identify the KDP field to be used in the input data.");
-    tt->val_offset = (char *) &KDP_compute - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'KDP_params_file_path'
@@ -902,15 +836,93 @@
     tt->single_val.s = tdrpStrDup("use-defaults");
     tt++;
     
-    // Parameter 'KDP_use_conditioned_result'
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("COMPUTING PID");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'PID_params_file_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("PID_params_file_path");
+    tt->descr = tdrpStrDup("Path for parameters for computing PID.");
+    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
+    tt->val_offset = (char *) &PID_params_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("use-defaults");
+    tt++;
+    
+    // Parameter 'PID_use_KDP_self_consistency'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_use_conditioned_result");
-    tt->descr = tdrpStrDup("When computing KDP, using conditioned KDP instead of normal filtered KDP.");
-    tt->help = tdrpStrDup("When KDP is computed, we compute both a normally-filtered result, and a conditioned result based on the self-consistency method with ZZDR. If this is set to TRUE, the conditioned result will be used instead of the normally-filtered result.");
-    tt->val_offset = (char *) &KDP_use_conditioned_result - &_start_;
+    tt->param_name = tdrpStrDup("PID_use_KDP_self_consistency");
+    tt->descr = tdrpStrDup("When computing PID, using KDP conditioned for self-consistency.");
+    tt->help = tdrpStrDup("When KDP is computed, we compute both a standard result, and a conditioned result based on the self-consistency method. If this parameter is set to TRUE, the self-consistency result will be used instead of the standard result.");
+    tt->val_offset = (char *) &PID_use_KDP_self_consistency - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'PID_use_attenuation_corrected_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("PID_use_attenuation_corrected_fields");
+    tt->descr = tdrpStrDup("Option to use Z and ZDR fields that are corrected for attenuation.");
+    tt->help = tdrpStrDup("If TRUE, the attenuation-corrected Z and ZDR fields will be used for computing PID.");
+    tt->val_offset = (char *) &PID_use_attenuation_corrected_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("COMPUTING PRECIP RATE");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'PRECIP_params_file_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("PRECIP_params_file_path");
+    tt->descr = tdrpStrDup("Path for parameters for computing PRECIP.");
+    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
+    tt->val_offset = (char *) &PRECIP_params_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("use-defaults");
+    tt++;
+    
+    // Parameter 'PRECIP_use_KDP_self_consistency'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("PRECIP_use_KDP_self_consistency");
+    tt->descr = tdrpStrDup("When computing PRECIP, using KDP conditioned for self-consistency.");
+    tt->help = tdrpStrDup("When KDP is computed, we compute both a standard result, and a conditioned result based on the self-consistency method. If this parameter is set to TRUE, the self-consistency result will be used instead of the standard result.");
+    tt->val_offset = (char *) &PRECIP_use_KDP_self_consistency - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'PRECIP_use_attenuation_corrected_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("PRECIP_use_attenuation_corrected_fields");
+    tt->descr = tdrpStrDup("Option to use Z and ZDR fields that are corrected for attenuation.");
+    tt->help = tdrpStrDup("If TRUE, the attenuation-corrected Z and ZDR fields will be used for computing PRECIP.");
+    tt->val_offset = (char *) &PRECIP_use_attenuation_corrected_fields - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

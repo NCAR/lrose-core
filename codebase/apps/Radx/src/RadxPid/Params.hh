@@ -445,15 +445,13 @@ public:
 
   char* LDR_field_name;
 
-  char* KDP_field_name;
+  char* KDP_params_file_path;
 
   char* PID_params_file_path;
 
-  tdrp_bool_t KDP_compute;
+  tdrp_bool_t PID_use_KDP_self_consistency;
 
-  char* KDP_params_file_path;
-
-  tdrp_bool_t KDP_use_conditioned_result;
+  tdrp_bool_t PID_use_attenuation_corrected_fields;
 
   output_field_t *_output_fields;
   int output_fields_n;
@@ -496,7 +494,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[52];
+  mutable TDRPtable _table[51];
 
   const char *_className;
 

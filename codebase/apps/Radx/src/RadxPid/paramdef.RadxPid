@@ -139,15 +139,18 @@ paramdef string {
   p_descr = "Field name for LDR.";
 } LDR_field_name;
     
+commentdef {
+  p_header = "COMPUTING KDP";
+}
+
 paramdef string {
-  p_default = "KDP";
-  p_descr = "Field name for KDP in the input data.";
-  p_help = "This is applicable if 'KDP_compute' is false.";
-} KDP_field_name;
+  p_default = "use-defaults";
+  p_descr = "Path for parameters for computing KDP.";
+  p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
+} KDP_params_file_path;
 
 commentdef {
-  p_header = "PID PARAMETER FILE";
-  p_text = "Specify the path to the PID parameters.";
+  p_header = "COMPUTING PID";
 }
 
 paramdef string {
@@ -156,28 +159,17 @@ paramdef string {
   p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
 } PID_params_file_path;
 
-commentdef {
-  p_header = "COMPUTING KDP";
-  p_text = "Option to compute KDP from PHIDP in the input files. This will be required if a good KDP field is not available in the input data.";
-}
-
 paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to compute KDP from PHIDP in the input files. This is generally recommended.";
-  p_help = "If this is FALSE, the 'KDP_field_name' parameter must identify the KDP field to be used in the input data.";
-} KDP_compute;
-
-paramdef string {
-  p_default = "use-defaults";
-  p_descr = "Path for parameters for computing KDP.";
-  p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
-} KDP_params_file_path;
+  p_default = FALSE;
+  p_descr = "When computing PID, using KDP conditioned for self-consistency.";
+  p_help = "When KDP is computed, we compute both a standard result, and a conditioned result based on the self-consistency method. If this parameter is set to TRUE, the self-consistency result will be used instead of the standard result.";
+} PID_use_KDP_self_consistency;
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "When computing KDP, using conditioned KDP instead of normal filtered KDP.";
-  p_help = "When KDP is computed, we compute both a normally-filtered result, and a conditioned result based on the self-consistency method with ZZDR. If this is set to TRUE, the conditioned result will be used instead of the normally-filtered result.";
-} KDP_use_conditioned_result;
+  p_descr = "Option to use Z and ZDR fields that are corrected for attenuation.";
+  p_help = "If TRUE, the attenuation-corrected Z and ZDR fields will be used for computing PID.";
+} PID_use_attenuation_corrected_fields;
 
 commentdef {
   p_header = "SPECIFYING OUTPUT FIELDS";

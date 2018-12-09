@@ -264,29 +264,15 @@ LDR_available = TRUE;
 
 LDR_field_name = "LDR";
 
-///////////// KDP_field_name //////////////////////////
-//
-// Field name for KDP in the input data.
-//
-// This is applicable if 'KDP_compute' is false.
-//
-//
-// Type: string
-//
-
-KDP_field_name = "KDP";
-
 //======================================================================
 //
-// PRECIP PARAMETER FILE.
-//
-// Specify the path to the PRECIP parameters.
+// COMPUTING KDP.
 //
 //======================================================================
  
-///////////// PRECIP_params_file_path /////////////////
+///////////// KDP_params_file_path ////////////////////
 //
-// Path for parameters for computing PRECIP.
+// Path for parameters for computing KDP.
 //
 // If set to use-defaults, no parameter file will be read in, and the 
 //   default parameters will be used.
@@ -295,13 +281,11 @@ KDP_field_name = "KDP";
 // Type: string
 //
 
-PRECIP_params_file_path = "use-defaults";
+KDP_params_file_path = "use-defaults";
 
 //======================================================================
 //
-// PID PARAMETER FILE.
-//
-// Specify the path to the PID parameters.
+// COMPUTING PID.
 //
 //======================================================================
  
@@ -318,32 +302,43 @@ PRECIP_params_file_path = "use-defaults";
 
 PID_params_file_path = "use-defaults";
 
-//======================================================================
+///////////// PID_use_KDP_self_consistency ////////////
 //
-// COMPUTING KDP.
+// When computing PID, using KDP conditioned for self-consistency.
 //
-// Option to compute KDP from PHIDP in the input files. This will be 
-//   required if a good KDP field is not available in the input data.
-//
-//======================================================================
- 
-///////////// KDP_compute /////////////////////////////
-//
-// Option to compute KDP from PHIDP in the input files. This is 
-//   generally recommended.
-//
-// If this is FALSE, the 'KDP_field_name' parameter must identify the 
-//   KDP field to be used in the input data.
+// When KDP is computed, we compute both a standard result, and a 
+//   conditioned result based on the self-consistency method. If this 
+//   parameter is set to TRUE, the self-consistency result will be used 
+//   instead of the standard result.
 //
 //
 // Type: boolean
 //
 
-KDP_compute = TRUE;
+PID_use_KDP_self_consistency = FALSE;
 
-///////////// KDP_params_file_path ////////////////////
+///////////// PID_use_attenuation_corrected_fields ////
 //
-// Path for parameters for computing KDP.
+// Option to use Z and ZDR fields that are corrected for attenuation.
+//
+// If TRUE, the attenuation-corrected Z and ZDR fields will be used for 
+//   computing PID.
+//
+//
+// Type: boolean
+//
+
+PID_use_attenuation_corrected_fields = FALSE;
+
+//======================================================================
+//
+// COMPUTING PRECIP RATE.
+//
+//======================================================================
+ 
+///////////// PRECIP_params_file_path /////////////////
+//
+// Path for parameters for computing PRECIP.
 //
 // If set to use-defaults, no parameter file will be read in, and the 
 //   default parameters will be used.
@@ -352,23 +347,35 @@ KDP_compute = TRUE;
 // Type: string
 //
 
-KDP_params_file_path = "use-defaults";
+PRECIP_params_file_path = "use-defaults";
 
-///////////// KDP_use_conditioned_result //////////////
+///////////// PRECIP_use_KDP_self_consistency /////////
 //
-// When computing KDP, using conditioned KDP instead of normal filtered 
-//   KDP.
+// When computing PRECIP, using KDP conditioned for self-consistency.
 //
-// When KDP is computed, we compute both a normally-filtered result, and 
-//   a conditioned result based on the self-consistency method with ZZDR. 
-//   If this is set to TRUE, the conditioned result will be used instead 
-//   of the normally-filtered result.
+// When KDP is computed, we compute both a standard result, and a 
+//   conditioned result based on the self-consistency method. If this 
+//   parameter is set to TRUE, the self-consistency result will be used 
+//   instead of the standard result.
 //
 //
 // Type: boolean
 //
 
-KDP_use_conditioned_result = FALSE;
+PRECIP_use_KDP_self_consistency = FALSE;
+
+///////////// PRECIP_use_attenuation_corrected_fields /
+//
+// Option to use Z and ZDR fields that are corrected for attenuation.
+//
+// If TRUE, the attenuation-corrected Z and ZDR fields will be used for 
+//   computing PRECIP.
+//
+//
+// Type: boolean
+//
+
+PRECIP_use_attenuation_corrected_fields = FALSE;
 
 //======================================================================
 //

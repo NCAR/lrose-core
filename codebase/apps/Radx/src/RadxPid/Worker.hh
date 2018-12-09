@@ -151,10 +151,10 @@ private:
   double *_tempForPid;
 
   RadxArray<double> _kdpArray_;
-  RadxArray<double> _kdpSCArray_;
+  RadxArray<double> _kdpScArray_;
 
   double *_kdpArray;
-  double *_kdpSCArray;
+  double *_kdpScArray;
 
   // computing kdp
   

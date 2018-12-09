@@ -155,10 +155,10 @@ private:
   double *_tempForPid;
 
   RadxArray<double> _kdpArray_;
-  RadxArray<double> _kdpSCArray_;
+  RadxArray<double> _kdpScArray_;
 
   double *_kdpArray;
-  double *_kdpSCArray;
+  double *_kdpScArray;
 
   RadxArray<double> _rateZ_;
   RadxArray<double> _rateZSnow_;

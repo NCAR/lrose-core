@@ -66,7 +66,7 @@ string RadxPid::smoothedRhohvFieldName = "RHOHV_SMOOTHED";
 string RadxPid::elevationFieldName = "ELEV";
 string RadxPid::rangeFieldName = "RANGE";
 string RadxPid::beamHtFieldName = "BEAM_HT";
-string RadxPid::tempFieldName = "TEMP";
+string RadxPid::tempFieldName = "TEMPC";
 string RadxPid::pidFieldName = "PID";
 string RadxPid::pidInterestFieldName = "PID_INTEREST";
 string RadxPid::mlFieldName = "MELTING_LAYER";
@@ -583,9 +583,6 @@ void RadxPid::_setupRead(RadxFile &file)
   file.addReadField(_params.RHOHV_field_name);
   if (_params.LDR_available) {
     file.addReadField(_params.LDR_field_name);
-  }
-  if (!_params.KDP_compute) {
-    file.addReadField(_params.KDP_field_name);
   }
   if (_params.copy_selected_input_fields_to_output) {
     for (int ii = 0; ii < _params.copy_fields_n; ii++) {

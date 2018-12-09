@@ -161,11 +161,7 @@ RadxRay *Worker::compute(RadxRay *inputRay,
   
   // compute kdp
 
-  if (_params.KDP_compute) {
-    _kdpCompute();
-  } else {
-    _kdp.initializeArrays(_nGates);
-  }
+  _kdpCompute();
 
   // compute pid
 
@@ -244,7 +240,7 @@ void Worker::_kdpCompute()
     } else {
       _kdpArray[ii] = kdp[ii];
     }
-    _kdpSCArray[ii] = kdpSC[ii];
+    _kdpScArray[ii] = kdpSC[ii];
   }
 
 }
@@ -277,12 +273,27 @@ int Worker::_pidInit()
 void Worker::_pidCompute()
   
 {
-  
+
+  // select fields
+
+  const double *kdpArray = _kdpArray;
+  if (_params.PID_use_KDP_self_consistency) {
+    kdpArray = _kdpScArray;
+  }
+
+  const double *dbzArray = _dbzArray;
+  const double *zdrArray = _zdrArray;
+  if (_params.PID_use_attenuation_corrected_fields) {
+    dbzArray = _kdp.getDbzCorrected();
+    zdrArray = _kdp.getZdrCorrected();
+  }
+
   // compute particle ID
-  
-  _pid.computePidBeam(_nGates, _snrArray, _dbzArray, 
-                      _zdrArray, _kdpArray, _ldrArray, 
-                      _rhohvArray, _phidpArray, _tempForPid);
+
+  _pid.computePidBeam(_nGates, _snrArray,
+                      dbzArray, zdrArray, kdpArray,
+                      _ldrArray, _rhohvArray,
+                      _phidpArray, _tempForPid);
   
   // load results
 
@@ -306,7 +317,7 @@ void Worker::_allocArrays()
   _phidpArray = _phidpArray_.alloc(_nGates);
 
   _kdpArray = _kdpArray_.alloc(_nGates);
-  _kdpSCArray = _kdpSCArray_.alloc(_nGates);
+  _kdpScArray = _kdpScArray_.alloc(_nGates);
 
   _pidArray = _pidArray_.alloc(_nGates);
   _pidInterest = _pidInterest_.alloc(_nGates);
@@ -361,18 +372,7 @@ int Worker::_loadInputArrays(RadxRay *inputRay)
     }
   }
   
-  if (!_params.KDP_compute) {
-    if (_loadFieldArray(inputRay, _params.KDP_field_name,
-                        true, _kdpArray)) {
-      return -1;
-    }
-  } else {
-    for (size_t igate = 0; igate < _nGates; igate++) {
-      _kdpArray[igate] = missingDbl;
-    }
-  }
-
-  _loadFieldArray(inputRay, "temperature", true, _tempForPid);
+  _loadFieldArray(inputRay, "TEMPC", true, _tempForPid);
 
   return 0;
   
@@ -532,7 +532,7 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
           *datp = _kdpArray[igate];
           break;
         case Params::KDP_SC:
-          *datp = _kdpSCArray[igate];
+          *datp = _kdpScArray[igate];
           break;
           
           // attenuation
