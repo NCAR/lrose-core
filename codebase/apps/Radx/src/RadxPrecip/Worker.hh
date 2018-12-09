@@ -41,8 +41,10 @@
 #include "Params.hh"
 #include <radar/KdpFilt.hh>
 #include <radar/KdpFiltParams.hh>
-#include <radar/NcarParticleId.hh>
 #include <radar/NcarPidParams.hh>
+#include <radar/NcarParticleId.hh>
+#include <radar/PrecipRate.hh>
+#include <radar/PrecipRateParams.hh>
 #include <Radx/Radx.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxTime.hh>
@@ -61,6 +63,7 @@ public:
   Worker(const Params &params,
          const KdpFiltParams &kdpFiltParams,
          const NcarPidParams &ncarPidParams,
+         const PrecipRateParams &precipRateParams,
          int id);
 
   // destructor
@@ -103,6 +106,7 @@ private:
   const Params &_params;
   const KdpFiltParams &_kdpFiltParams;
   const NcarPidParams &_ncarPidParams;
+  const PrecipRateParams &_precipRateParams;
 
   int _id; // thread ID
   
@@ -156,6 +160,26 @@ private:
   double *_kdpArray;
   double *_kdpSCArray;
 
+  RadxArray<double> _rateZ_;
+  RadxArray<double> _rateZSnow_;
+  RadxArray<double> _rateZZdr_;
+  RadxArray<double> _rateKdp_;
+  RadxArray<double> _rateKdpZdr_;
+  RadxArray<double> _rateHybrid_;
+  RadxArray<double> _ratePid_;
+  RadxArray<double> _rateHidro_;
+  RadxArray<double> _rateBringi_;
+
+  double *_rateZ;
+  double *_rateZSnow;
+  double *_rateZZdr;
+  double *_rateKdp;
+  double *_rateKdpZdr;
+  double *_rateHybrid;
+  double *_ratePid;
+  double *_rateHidro;
+  double *_rateBringi;
+
   // computing kdp
   
   KdpFilt _kdp;
@@ -164,6 +188,10 @@ private:
 
   NcarParticleId _pid;
   const TempProfile *_tempProfile;
+
+  // precip
+
+  PrecipRate _precip;
 
   // debug printing
 
@@ -177,6 +205,9 @@ private:
   int _pidInit();
   void _pidCompute();
   
+  void _precipInit();
+  void _precipCompute();
+
   void _allocArrays();
   
   int _loadInputArrays(RadxRay *inputRay);

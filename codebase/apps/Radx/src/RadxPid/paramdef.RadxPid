@@ -73,7 +73,7 @@ paramdef string {
   p_help = "If set, only files with names containing this sub-string will be processed.";
 } input_file_search_substr;
 
-    paramdef string {
+paramdef string {
   p_default = "2015 06 26 00 00 00";
   p_descr = "Set the start time for ARCHIVE mode analysis.";
   p_help = "Format is 'yyyy mm dd hh mm ss'.";

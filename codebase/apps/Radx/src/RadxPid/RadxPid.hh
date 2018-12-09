@@ -79,7 +79,6 @@ public:
   // get methods for threading
 
   const Params &getParams() const { return _params; }
-  const NcarPidParams &getPidFiltParams() const { return _ncarPidParams; }
   double getRadarHtKm() const { return _radarHtKm; }
   double getWavelengthM() const { return _wavelengthM; }
 

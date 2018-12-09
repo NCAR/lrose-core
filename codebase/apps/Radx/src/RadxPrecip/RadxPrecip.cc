@@ -105,6 +105,13 @@ RadxPrecip::RadxPrecip(int argc, char **argv)
     return;
   }
 
+  // if requested, print params for PRECIP then exit
+  
+  if (_args.printParamsPrecip) {
+    _printParamsPrecip();
+    exit(0);
+  }
+
   // if requested, print params for PID then exit
   
   if (_args.printParamsPid) {
@@ -156,7 +163,10 @@ RadxPrecip::RadxPrecip(int argc, char **argv)
   for (int ii = 0; ii < _params.n_compute_threads; ii++) {
     WorkerThread *thread =
       new WorkerThread(this, _params, 
-                       _kdpFiltParams, _ncarPidParams, ii);
+                       _kdpFiltParams,
+                       _ncarPidParams,
+                       _precipRateParams,
+                       ii);
     if (!thread->OK) {
       delete thread;
       OK = FALSE;
@@ -182,6 +192,55 @@ RadxPrecip::~RadxPrecip()
   // unregister process
 
   PMU_auto_unregister();
+
+}
+
+//////////////////////////////////////////////////
+// Print params for PRECIP
+
+void RadxPrecip::_printParamsPrecip()
+{
+
+  if (_params.debug) {
+    cerr << "Reading PRECIP params from file: "
+         << _params.PRECIP_params_file_path << endl;
+  }
+  
+  // do we need to expand environment variables?
+
+  bool expandEnvVars = false;
+  if (_args.printParamsPrecipMode.find("expand") != string::npos) {
+    expandEnvVars = true;
+  }
+
+  // read in PRECIP params if applicable
+  
+  if (strstr(_params.PRECIP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_precipRateParams.load(_params.PRECIP_params_file_path,
+                               NULL, expandEnvVars, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for PrecipFilt: "
+           << _params.PRECIP_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // set print mode
+
+  tdrp_print_mode_t printMode = PRINT_LONG;
+  if (_args.printParamsPrecipMode.find("short") == 0) {
+    printMode = PRINT_SHORT;
+  } else if (_args.printParamsPrecipMode.find("norm") == 0) {
+    printMode = PRINT_NORM;
+  } else if (_args.printParamsPrecipMode.find("verbose") == 0) {
+    printMode = PRINT_VERBOSE;
+  }
+
+  // do the print to stdout
+
+  _precipRateParams.print(stdout, printMode);
 
 }
 

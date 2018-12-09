@@ -57,6 +57,7 @@ public:
                const Params &params,
                const KdpFiltParams &kdpFiltParams,
                const NcarPidParams &ncarPidParams,
+               const PrecipRateParams &precipRateParams,
                int threadNum);
 
   // destructor
@@ -94,6 +95,7 @@ private:
   const Params &_params;
   const KdpFiltParams &_kdpFiltParams;
   const NcarPidParams &_ncarPidParams;
+  const PrecipRateParams &_precipRateParams;
 
   // thread number
 

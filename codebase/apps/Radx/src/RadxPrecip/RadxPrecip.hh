@@ -47,6 +47,7 @@
 #include <toolsa/TaThreadPool.hh>
 #include <radar/KdpFiltParams.hh>
 #include <radar/NcarPidParams.hh>
+#include <radar/PrecipRateParams.hh>
 #include <Radx/RadxVol.hh>
 class RadxVol;
 class RadxFile;
@@ -79,7 +80,6 @@ public:
   // get methods for threading
 
   const Params &getParams() const { return _params; }
-  const NcarPidParams &getPidFiltParams() const { return _ncarPidParams; }
   double getRadarHtKm() const { return _radarHtKm; }
   double getWavelengthM() const { return _wavelengthM; }
 
@@ -104,6 +104,7 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+  PrecipRateParams _precipRateParams;
   NcarPidParams _ncarPidParams;
   KdpFiltParams _kdpFiltParams;
   vector<string> _readPaths;
@@ -133,6 +134,7 @@ private:
 
   // private methods
   
+  void _printParamsPrecip();
   void _printParamsPid();
   void _printParamsKdp();
 

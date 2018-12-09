@@ -81,15 +81,24 @@ public:
   } mode_t;
 
   typedef enum {
-    PID = 0,
-    PID_INTEREST = 1,
-    TEMP_FOR_PID = 2,
-    KDP = 3,
-    KDP_SC = 4,
-    DBZ_ATTEN_CORRECTION = 5,
-    ZDR_ATTEN_CORRECTION = 6,
-    DBZ_ATTEN_CORRECTED = 7,
-    ZDR_ATTEN_CORRECTED = 8
+    PRECIP_RATE_ZH = 0,
+    PRECIP_RATE_ZH_SNOW = 1,
+    PRECIP_RATE_Z_ZDR = 2,
+    PRECIP_RATE_KDP = 3,
+    PRECIP_RATE_KDP_ZDR = 4,
+    PRECIP_RATE_HYBRID = 5,
+    PRECIP_RATE_PID = 6,
+    PRECIP_RATE_HIDRO = 7,
+    PRECIP_RATE_BRINGI = 8,
+    PID = 9,
+    PID_INTEREST = 10,
+    TEMP_FOR_PID = 11,
+    KDP = 12,
+    KDP_SC = 13,
+    DBZ_ATTEN_CORRECTION = 14,
+    ZDR_ATTEN_CORRECTION = 15,
+    DBZ_ATTEN_CORRECTED = 16,
+    ZDR_ATTEN_CORRECTED = 17
   } output_field_id_t;
 
   typedef enum {
@@ -447,11 +456,7 @@ public:
 
   char* KDP_field_name;
 
-  char* PID_field_name;
-
   char* PRECIP_params_file_path;
-
-  tdrp_bool_t PID_compute;
 
   char* PID_params_file_path;
 
@@ -502,7 +507,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[56];
+  mutable TDRPtable _table[54];
 
   const char *_className;
 

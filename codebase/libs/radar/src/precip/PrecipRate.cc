@@ -112,6 +112,63 @@ PrecipRate::~PrecipRate()
 
 }
 
+////////////////////////////////////////////
+// Set processing options from params object
+
+void PrecipRate::setFromParams(const PrecipRateParams &params)
+{
+  
+  _params = params;
+
+  setSnrThresholdDb(_params.PRECIP_snr_threshold);
+
+  // initialize precip rate object
+
+  setZhAa(_params.PRECIP_zh_aa);
+  setZhBb(_params.PRECIP_zh_bb);
+
+  setZhAaSnow(_params.PRECIP_zh_aa_snow);
+  setZhBbSnow(_params.PRECIP_zh_bb_snow);
+
+  setZzdrAa(_params.PRECIP_zzdr_aa);
+  setZzdrBb(_params.PRECIP_zzdr_bb);
+  setZzdrCc(_params.PRECIP_zzdr_cc);
+  
+  setKdpAa(_params.PRECIP_kdp_aa);
+  setKdpBb(_params.PRECIP_kdp_bb);
+
+  setKdpZdrAa(_params.PRECIP_kdpzdr_aa);
+  setKdpZdrBb(_params.PRECIP_kdpzdr_bb);
+  setKdpZdrCc(_params.PRECIP_kdpzdr_cc);
+  
+  setPidKdpThreshold(_params.PRECIP_pid_rate_kdp_threshold);
+
+  setHybridDbzThreshold(_params.PRECIP_hybrid_dbz_threshold);
+  setHybridKdpThreshold(_params.PRECIP_hybrid_kdp_threshold);
+  setHybridZdrThreshold(_params.PRECIP_hybrid_zdr_threshold);
+
+  setHidroDbzThreshold(_params.PRECIP_hidro_dbz_threshold);
+  setHidroKdpThreshold(_params.PRECIP_hidro_kdp_threshold);
+  setHidroZdrThreshold(_params.PRECIP_hidro_zdr_threshold);
+
+  setBringiDbzThreshold(_params.PRECIP_bringi_dbz_threshold);
+  setBringiKdpThreshold(_params.PRECIP_bringi_kdp_threshold);
+  setBringiZdrThreshold(_params.PRECIP_bringi_zdr_threshold);
+
+  setMinValidRate(_params.PRECIP_min_valid_rate);
+  setMaxValidRate(_params.PRECIP_max_valid_rate);
+  setMaxValidDbz(_params.PRECIP_max_valid_dbz);
+  setBrightBandDbzCorrection(_params.PRECIP_brightband_dbz_correction);
+
+  if (_params.PRECIP_apply_median_filter_to_DBZ) {
+    setApplyMedianFilterToDbz(_params.PRECIP_DBZ_median_filter_len);
+  }
+  if (_params.PRECIP_apply_median_filter_to_ZDR) {
+    setApplyMedianFilterToZdr(_params.PRECIP_ZDR_median_filter_len);
+  }
+
+}
+
 ///////////////////////
 // compute precip rate
 //

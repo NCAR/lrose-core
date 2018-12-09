@@ -81,7 +81,6 @@ public:
   // get methods for threading
 
   const Params &getParams() const { return _params; }
-  const KdpFiltParams &getKdpFiltParams() const { return _kdpFiltParams; }
   double getWavelengthM() const { return _wavelengthM; }
 
 protected:

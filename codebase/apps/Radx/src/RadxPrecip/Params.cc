@@ -827,18 +827,6 @@
     tt->single_val.s = tdrpStrDup("KDP");
     tt++;
     
-    // Parameter 'PID_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("PID_field_name");
-    tt->descr = tdrpStrDup("Field name for PID in the input data.");
-    tt->help = tdrpStrDup("This is applicable if 'PID_compute' is false.");
-    tt->val_offset = (char *) &PID_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("PID");
-    tt++;
-    
     // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -867,18 +855,6 @@
     tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("PID PARAMETER FILE");
     tt->comment_text = tdrpStrDup("Specify the path to the PID parameters.");
-    tt++;
-    
-    // Parameter 'PID_compute'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("PID_compute");
-    tt->descr = tdrpStrDup("Option to compute PID from moments in the input files. This is generally recommended.");
-    tt->help = tdrpStrDup("If this is FALSE, the 'PID_field_name' parameter must identify the PID field to be used in the input data.");
-    tt->val_offset = (char *) &PID_compute - &_start_;
-    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'PID_params_file_path'
@@ -960,7 +936,7 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 8;
+    tt->array_n = 15;
     tt->struct_def.name = tdrpStrDup("output_field_t");
     tt->struct_def.nfields = 6;
     tt->struct_def.fields = (struct_field_t *)
@@ -971,27 +947,45 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 9;
+        tt->struct_def.fields[0].enum_def.nfields = 18;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("PID");
-        tt->struct_def.fields[0].enum_def.fields[0].val = PID;
-        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("PID_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[1].val = PID_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("TEMP_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[2].val = TEMP_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("KDP");
-        tt->struct_def.fields[0].enum_def.fields[3].val = KDP;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("KDP_SC");
-        tt->struct_def.fields[0].enum_def.fields[4].val = KDP_SC;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
-        tt->struct_def.fields[0].enum_def.fields[5].val = DBZ_ATTEN_CORRECTION;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
-        tt->struct_def.fields[0].enum_def.fields[6].val = ZDR_ATTEN_CORRECTION;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("DBZ_ATTEN_CORRECTED");
-        tt->struct_def.fields[0].enum_def.fields[7].val = DBZ_ATTEN_CORRECTED;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("ZDR_ATTEN_CORRECTED");
-        tt->struct_def.fields[0].enum_def.fields[8].val = ZDR_ATTEN_CORRECTED;
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("PRECIP_RATE_ZH");
+        tt->struct_def.fields[0].enum_def.fields[0].val = PRECIP_RATE_ZH;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("PRECIP_RATE_ZH_SNOW");
+        tt->struct_def.fields[0].enum_def.fields[1].val = PRECIP_RATE_ZH_SNOW;
+        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("PRECIP_RATE_Z_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[2].val = PRECIP_RATE_Z_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("PRECIP_RATE_KDP");
+        tt->struct_def.fields[0].enum_def.fields[3].val = PRECIP_RATE_KDP;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("PRECIP_RATE_KDP_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[4].val = PRECIP_RATE_KDP_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("PRECIP_RATE_HYBRID");
+        tt->struct_def.fields[0].enum_def.fields[5].val = PRECIP_RATE_HYBRID;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("PRECIP_RATE_PID");
+        tt->struct_def.fields[0].enum_def.fields[6].val = PRECIP_RATE_PID;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("PRECIP_RATE_HIDRO");
+        tt->struct_def.fields[0].enum_def.fields[7].val = PRECIP_RATE_HIDRO;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("PRECIP_RATE_BRINGI");
+        tt->struct_def.fields[0].enum_def.fields[8].val = PRECIP_RATE_BRINGI;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("PID");
+        tt->struct_def.fields[0].enum_def.fields[9].val = PID;
+        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("PID_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[10].val = PID_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("TEMP_FOR_PID");
+        tt->struct_def.fields[0].enum_def.fields[11].val = TEMP_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("KDP");
+        tt->struct_def.fields[0].enum_def.fields[12].val = KDP;
+        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("KDP_SC");
+        tt->struct_def.fields[0].enum_def.fields[13].val = KDP_SC;
+        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
+        tt->struct_def.fields[0].enum_def.fields[14].val = DBZ_ATTEN_CORRECTION;
+        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
+        tt->struct_def.fields[0].enum_def.fields[15].val = ZDR_ATTEN_CORRECTION;
+        tt->struct_def.fields[0].enum_def.fields[16].name = tdrpStrDup("DBZ_ATTEN_CORRECTED");
+        tt->struct_def.fields[0].enum_def.fields[16].val = DBZ_ATTEN_CORRECTED;
+        tt->struct_def.fields[0].enum_def.fields[17].name = tdrpStrDup("ZDR_ATTEN_CORRECTED");
+        tt->struct_def.fields[0].enum_def.fields[17].val = ZDR_ATTEN_CORRECTED;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -1017,57 +1011,99 @@
       tt->struct_def.fields[5].ptype = BOOL_TYPE;
       tt->struct_def.fields[5].rel_offset = 
         (char *) &_output_fields->do_write - (char *) _output_fields;
-    tt->n_struct_vals = 48;
+    tt->n_struct_vals = 90;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].e = PID;
-      tt->struct_vals[1].s = tdrpStrDup("PID");
-      tt->struct_vals[2].s = tdrpStrDup("particle_id");
-      tt->struct_vals[3].s = tdrpStrDup("hydrometeor_type");
-      tt->struct_vals[4].s = tdrpStrDup("");
+      tt->struct_vals[0].e = PRECIP_RATE_ZH;
+      tt->struct_vals[1].s = tdrpStrDup("RATE_ZH");
+      tt->struct_vals[2].s = tdrpStrDup("precip_rate_from_z");
+      tt->struct_vals[3].s = tdrpStrDup("precip_rate_from_z");
+      tt->struct_vals[4].s = tdrpStrDup("mm/hr");
       tt->struct_vals[5].b = pTRUE;
-      tt->struct_vals[6].e = PID_INTEREST;
-      tt->struct_vals[7].s = tdrpStrDup("PID_INTEREST");
-      tt->struct_vals[8].s = tdrpStrDup("final_interest_value_for_pid_decision");
-      tt->struct_vals[9].s = tdrpStrDup("final_interest_value_for_pid_decision");
-      tt->struct_vals[10].s = tdrpStrDup("");
-      tt->struct_vals[11].b = pFALSE;
-      tt->struct_vals[12].e = TEMP_FOR_PID;
-      tt->struct_vals[13].s = tdrpStrDup("TEMP_FOR_PID");
-      tt->struct_vals[14].s = tdrpStrDup("temperature_for_computing_pid");
-      tt->struct_vals[15].s = tdrpStrDup("temperature");
-      tt->struct_vals[16].s = tdrpStrDup("C");
-      tt->struct_vals[17].b = pFALSE;
-      tt->struct_vals[18].e = KDP;
-      tt->struct_vals[19].s = tdrpStrDup("KDP");
-      tt->struct_vals[20].s = tdrpStrDup("specific_differential_phase");
-      tt->struct_vals[21].s = tdrpStrDup("specific_differential_phase_hv");
-      tt->struct_vals[22].s = tdrpStrDup("deg/km");
+      tt->struct_vals[6].e = PRECIP_RATE_ZH_SNOW;
+      tt->struct_vals[7].s = tdrpStrDup("RATE_ZH_SNOW");
+      tt->struct_vals[8].s = tdrpStrDup("precip_rate_from_z_for_snow");
+      tt->struct_vals[9].s = tdrpStrDup("precip_rate_from_z_for_snow");
+      tt->struct_vals[10].s = tdrpStrDup("mm/hr");
+      tt->struct_vals[11].b = pTRUE;
+      tt->struct_vals[12].e = PRECIP_RATE_Z_ZDR;
+      tt->struct_vals[13].s = tdrpStrDup("RATE_Z_ZDR");
+      tt->struct_vals[14].s = tdrpStrDup("precip_rate_from_z_and_zdr");
+      tt->struct_vals[15].s = tdrpStrDup("precip_rate_from_z_and_zdr");
+      tt->struct_vals[16].s = tdrpStrDup("mm/hr");
+      tt->struct_vals[17].b = pTRUE;
+      tt->struct_vals[18].e = PRECIP_RATE_KDP;
+      tt->struct_vals[19].s = tdrpStrDup("RATE_KDP");
+      tt->struct_vals[20].s = tdrpStrDup("precip_rate_from_kdp");
+      tt->struct_vals[21].s = tdrpStrDup("precip_rate_from_kdp");
+      tt->struct_vals[22].s = tdrpStrDup("mm/hr");
       tt->struct_vals[23].b = pTRUE;
-      tt->struct_vals[24].e = KDP_SC;
-      tt->struct_vals[25].s = tdrpStrDup("KDP_SC");
-      tt->struct_vals[26].s = tdrpStrDup("kdp_conditioned_using_ZZDR_self_consistency");
-      tt->struct_vals[27].s = tdrpStrDup("specific_differential_phase_hv");
-      tt->struct_vals[28].s = tdrpStrDup("deg/km");
-      tt->struct_vals[29].b = pFALSE;
-      tt->struct_vals[30].e = ZDR_ATTEN_CORRECTION;
-      tt->struct_vals[31].s = tdrpStrDup("ZDR_ATTEN_CORRECTION");
-      tt->struct_vals[32].s = tdrpStrDup("correction_to_zdr_for_attenuation");
-      tt->struct_vals[33].s = tdrpStrDup("zdr_attenuation_correction");
-      tt->struct_vals[34].s = tdrpStrDup("dB");
-      tt->struct_vals[35].b = pFALSE;
-      tt->struct_vals[36].e = DBZ_ATTEN_CORRECTED;
-      tt->struct_vals[37].s = tdrpStrDup("DBZ_ATTEN_CORRECTED");
-      tt->struct_vals[38].s = tdrpStrDup("dbz_corrected_for_attenuation");
-      tt->struct_vals[39].s = tdrpStrDup("dbz_corrected_for_attenuation");
-      tt->struct_vals[40].s = tdrpStrDup("dBZ");
-      tt->struct_vals[41].b = pFALSE;
-      tt->struct_vals[42].e = ZDR_ATTEN_CORRECTED;
-      tt->struct_vals[43].s = tdrpStrDup("ZDR_ATTEN_CORRECTED");
-      tt->struct_vals[44].s = tdrpStrDup("zdr_corrected_for_attenuation");
-      tt->struct_vals[45].s = tdrpStrDup("zdr_corrected_for_attenuation");
-      tt->struct_vals[46].s = tdrpStrDup("dB");
-      tt->struct_vals[47].b = pFALSE;
+      tt->struct_vals[24].e = PRECIP_RATE_KDP_ZDR;
+      tt->struct_vals[25].s = tdrpStrDup("RATE_KDP_ZDR");
+      tt->struct_vals[26].s = tdrpStrDup("precip_rate_from_kdp_and_zdr");
+      tt->struct_vals[27].s = tdrpStrDup("precip_rate_from_kdp_and_zdr");
+      tt->struct_vals[28].s = tdrpStrDup("mm/hr");
+      tt->struct_vals[29].b = pTRUE;
+      tt->struct_vals[30].e = PRECIP_RATE_HYBRID;
+      tt->struct_vals[31].s = tdrpStrDup("RATE_HYBRID");
+      tt->struct_vals[32].s = tdrpStrDup("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
+      tt->struct_vals[33].s = tdrpStrDup("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
+      tt->struct_vals[34].s = tdrpStrDup("mm/hr");
+      tt->struct_vals[35].b = pTRUE;
+      tt->struct_vals[36].e = PRECIP_RATE_PID;
+      tt->struct_vals[37].s = tdrpStrDup("RATE_PID");
+      tt->struct_vals[38].s = tdrpStrDup("precip_rate_based_on_pid");
+      tt->struct_vals[39].s = tdrpStrDup("precip_rate_based_on_pid");
+      tt->struct_vals[40].s = tdrpStrDup("mm/hr");
+      tt->struct_vals[41].b = pTRUE;
+      tt->struct_vals[42].e = PID;
+      tt->struct_vals[43].s = tdrpStrDup("PID");
+      tt->struct_vals[44].s = tdrpStrDup("particle_id");
+      tt->struct_vals[45].s = tdrpStrDup("hydrometeor_type");
+      tt->struct_vals[46].s = tdrpStrDup("");
+      tt->struct_vals[47].b = pTRUE;
+      tt->struct_vals[48].e = PID_INTEREST;
+      tt->struct_vals[49].s = tdrpStrDup("PID_INTEREST");
+      tt->struct_vals[50].s = tdrpStrDup("final_interest_value_for_pid_decision");
+      tt->struct_vals[51].s = tdrpStrDup("final_interest_value_for_pid_decision");
+      tt->struct_vals[52].s = tdrpStrDup("");
+      tt->struct_vals[53].b = pFALSE;
+      tt->struct_vals[54].e = TEMP_FOR_PID;
+      tt->struct_vals[55].s = tdrpStrDup("TEMP_FOR_PID");
+      tt->struct_vals[56].s = tdrpStrDup("temperature_for_computing_pid");
+      tt->struct_vals[57].s = tdrpStrDup("temperature");
+      tt->struct_vals[58].s = tdrpStrDup("C");
+      tt->struct_vals[59].b = pFALSE;
+      tt->struct_vals[60].e = KDP;
+      tt->struct_vals[61].s = tdrpStrDup("KDP");
+      tt->struct_vals[62].s = tdrpStrDup("specific_differential_phase");
+      tt->struct_vals[63].s = tdrpStrDup("specific_differential_phase_hv");
+      tt->struct_vals[64].s = tdrpStrDup("deg/km");
+      tt->struct_vals[65].b = pTRUE;
+      tt->struct_vals[66].e = KDP_SC;
+      tt->struct_vals[67].s = tdrpStrDup("KDP_SC");
+      tt->struct_vals[68].s = tdrpStrDup("kdp_conditioned_using_ZZDR_self_consistency");
+      tt->struct_vals[69].s = tdrpStrDup("specific_differential_phase_hv");
+      tt->struct_vals[70].s = tdrpStrDup("deg/km");
+      tt->struct_vals[71].b = pFALSE;
+      tt->struct_vals[72].e = ZDR_ATTEN_CORRECTION;
+      tt->struct_vals[73].s = tdrpStrDup("ZDR_ATTEN_CORRECTION");
+      tt->struct_vals[74].s = tdrpStrDup("correction_to_zdr_for_attenuation");
+      tt->struct_vals[75].s = tdrpStrDup("zdr_attenuation_correction");
+      tt->struct_vals[76].s = tdrpStrDup("dB");
+      tt->struct_vals[77].b = pFALSE;
+      tt->struct_vals[78].e = DBZ_ATTEN_CORRECTED;
+      tt->struct_vals[79].s = tdrpStrDup("DBZ_ATTEN_CORRECTED");
+      tt->struct_vals[80].s = tdrpStrDup("dbz_corrected_for_attenuation");
+      tt->struct_vals[81].s = tdrpStrDup("dbz_corrected_for_attenuation");
+      tt->struct_vals[82].s = tdrpStrDup("dBZ");
+      tt->struct_vals[83].b = pFALSE;
+      tt->struct_vals[84].e = ZDR_ATTEN_CORRECTED;
+      tt->struct_vals[85].s = tdrpStrDup("ZDR_ATTEN_CORRECTED");
+      tt->struct_vals[86].s = tdrpStrDup("zdr_corrected_for_attenuation");
+      tt->struct_vals[87].s = tdrpStrDup("zdr_corrected_for_attenuation");
+      tt->struct_vals[88].s = tdrpStrDup("dB");
+      tt->struct_vals[89].b = pFALSE;
     tt++;
     
     // Parameter 'output_encoding'

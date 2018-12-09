@@ -49,11 +49,13 @@ WorkerThread::WorkerThread(RadxPrecip *parent,
                            const Params &params,
                            const KdpFiltParams &kdpFiltParams,
                            const NcarPidParams &ncarPidParams,
+                           const PrecipRateParams &precipRateParams,
                            int threadNum) :
         _parent(parent),
         _params(params),
         _kdpFiltParams(kdpFiltParams),
         _ncarPidParams(ncarPidParams),
+        _precipRateParams(precipRateParams),
         _threadNum(threadNum)
 {
   
@@ -63,7 +65,11 @@ WorkerThread::WorkerThread(RadxPrecip *parent,
   
   // create compute worker object
   
-  _worker = new Worker(_params, _kdpFiltParams, _ncarPidParams, _threadNum);
+  _worker = new Worker(_params,
+                       _kdpFiltParams,
+                       _ncarPidParams,
+                       _precipRateParams,
+                       _threadNum);
   if (_worker == NULL) {
     OK = FALSE;
     return;

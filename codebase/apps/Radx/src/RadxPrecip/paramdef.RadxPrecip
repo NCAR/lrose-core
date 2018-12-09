@@ -73,7 +73,7 @@ paramdef string {
   p_help = "If set, only files with names containing this sub-string will be processed.";
 } input_file_search_substr;
 
-    paramdef string {
+paramdef string {
   p_default = "2015 06 26 00 00 00";
   p_descr = "Set the start time for ARCHIVE mode analysis.";
   p_help = "Format is 'yyyy mm dd hh mm ss'.";
@@ -145,12 +145,6 @@ paramdef string {
   p_help = "This is applicable if 'KDP_compute' is false.";
 } KDP_field_name;
 
-paramdef string {
-  p_default = "PID";
-  p_descr = "Field name for PID in the input data.";
-  p_help = "This is applicable if 'PID_compute' is false.";
-} PID_field_name;
-
 commentdef {
   p_header = "PRECIP PARAMETER FILE";
   p_text = "Specify the path to the PRECIP parameters.";
@@ -166,12 +160,6 @@ commentdef {
   p_header = "PID PARAMETER FILE";
   p_text = "Specify the path to the PID parameters.";
 }
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to compute PID from moments in the input files. This is generally recommended.";
-  p_help = "If this is FALSE, the 'PID_field_name' parameter must identify the PID field to be used in the input data.";
-} PID_compute;
 
 paramdef string {
   p_default = "use-defaults";
@@ -208,6 +196,16 @@ commentdef {
 
 typedef enum {
 
+  PRECIP_RATE_ZH,
+  PRECIP_RATE_ZH_SNOW,
+  PRECIP_RATE_Z_ZDR,
+  PRECIP_RATE_KDP,
+  PRECIP_RATE_KDP_ZDR,
+  PRECIP_RATE_HYBRID,
+  PRECIP_RATE_PID,
+  PRECIP_RATE_HIDRO,
+  PRECIP_RATE_BRINGI,
+
   PID,
   PID_INTEREST,
   TEMP_FOR_PID,
@@ -233,6 +231,69 @@ typedef struct {
 
 paramdef struct output_field_t {
   p_default = {
+    {
+      id = PRECIP_RATE_ZH,
+      name = "RATE_ZH",
+      long_name = "precip_rate_from_z",
+      standard_name = "precip_rate_from_z",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = PRECIP_RATE_ZH_SNOW,
+      name = "RATE_ZH_SNOW",
+      long_name = "precip_rate_from_z_for_snow",
+      standard_name = "precip_rate_from_z_for_snow",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = PRECIP_RATE_Z_ZDR,
+      name = "RATE_Z_ZDR",
+      long_name = "precip_rate_from_z_and_zdr",
+      standard_name = "precip_rate_from_z_and_zdr",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = PRECIP_RATE_KDP,
+      name = "RATE_KDP",
+      long_name = "precip_rate_from_kdp",
+      standard_name = "precip_rate_from_kdp",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = PRECIP_RATE_KDP_ZDR,
+      name = "RATE_KDP_ZDR",
+      long_name = "precip_rate_from_kdp_and_zdr",
+      standard_name = "precip_rate_from_kdp_and_zdr",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = PRECIP_RATE_HYBRID,
+      name = "RATE_HYBRID",
+      long_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
+      standard_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = PRECIP_RATE_PID,
+      name = "RATE_PID",
+      long_name = "precip_rate_based_on_pid",
+      standard_name = "precip_rate_based_on_pid",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
     {
       id = PID,
       name = "PID",

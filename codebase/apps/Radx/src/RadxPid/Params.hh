@@ -427,8 +427,6 @@ public:
 
   char* end_time;
 
-  char* PID_params_file_path;
-
   tdrp_bool_t SNR_available;
 
   char* SNR_field_name;
@@ -448,6 +446,8 @@ public:
   char* LDR_field_name;
 
   char* KDP_field_name;
+
+  char* PID_params_file_path;
 
   tdrp_bool_t KDP_compute;
 

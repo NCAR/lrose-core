@@ -53,10 +53,12 @@ const double Worker::missingDbl = -9999.0;
 Worker::Worker(const Params &params,
                const KdpFiltParams &kdpFiltParams,
                const NcarPidParams &ncarPidParams,
+               const PrecipRateParams &precipRateParams,
                int id)  :
         _params(params),
         _kdpFiltParams(kdpFiltParams),
         _ncarPidParams(ncarPidParams),
+        _precipRateParams(precipRateParams),
         _id(id)
   
 {
@@ -70,6 +72,8 @@ Worker::Worker(const Params &params,
   if (_pidInit()) {
     OK = false;
   }
+
+  _precipInit();
 
 }
 
@@ -292,6 +296,46 @@ void Worker::_pidCompute()
 }
 
 //////////////////////////////////////
+// initialize PRECIP
+  
+void Worker::_precipInit()
+  
+{
+
+  // initialize PRECIP object
+
+  _precip.setFromParams(_precipRateParams);
+
+}
+
+//////////////////////////////////////
+// compute PRECIP
+  
+void Worker::_precipCompute()
+  
+{
+  
+  // compute rates
+  
+  _precip.computePrecipRates(_nGates, _snrArray,
+                             _dbzArray, _zdrArray, _kdpArray, 
+                             missingDbl, &_pid);
+  
+  // save results
+
+  memcpy(_rateZ, _precip.getRateZ(), _nGates * sizeof(double));
+  memcpy(_rateZSnow, _precip.getRateZSnow(), _nGates * sizeof(double));
+  memcpy(_rateZZdr, _precip.getRateZZdr(), _nGates * sizeof(double));
+  memcpy(_rateKdp, _precip.getRateKdp(), _nGates * sizeof(double));
+  memcpy(_rateKdpZdr, _precip.getRateKdpZdr(), _nGates * sizeof(double));
+  memcpy(_rateHybrid, _precip.getRateHybrid(), _nGates * sizeof(double));
+  memcpy(_ratePid, _precip.getRatePid(), _nGates * sizeof(double));
+  memcpy(_rateHidro, _precip.getRateHidro(), _nGates * sizeof(double));
+  memcpy(_rateBringi, _precip.getRateBringi(), _nGates * sizeof(double));
+
+}
+
+//////////////////////////////////////
 // alloc computational arrays
   
 void Worker::_allocArrays()
@@ -311,6 +355,16 @@ void Worker::_allocArrays()
   _pidArray = _pidArray_.alloc(_nGates);
   _pidInterest = _pidInterest_.alloc(_nGates);
   _tempForPid = _tempForPid_.alloc(_nGates);
+
+  _rateZ = _rateZ_.alloc(_nGates);
+  _rateZSnow = _rateZSnow_.alloc(_nGates);
+  _rateZZdr = _rateZZdr_.alloc(_nGates);
+  _rateKdp = _rateKdp_.alloc(_nGates);
+  _rateKdpZdr = _rateKdpZdr_.alloc(_nGates);
+  _rateHybrid = _rateHybrid_.alloc(_nGates);
+  _ratePid = _ratePid_.alloc(_nGates);
+  _rateHidro = _rateHidro_.alloc(_nGates);
+  _rateBringi = _rateBringi_.alloc(_nGates);
 
 }
 
@@ -509,14 +563,107 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
     Radx::fl32 *data = data_.alloc(_nGates);
     Radx::fl32 *datp = data;
     
+    double minValidPrecipRate = _precipRateParams.PRECIP_min_valid_rate;
+
     for (size_t igate = 0; igate < _nGates; igate++, datp++) {
     
       switch (ofld.id) {
+
+        // PRECIP RATE
         
+        case Params::PRECIP_RATE_ZH: {
+          double rate = _rateZ[igate];
+          if (rate < minValidPrecipRate) {
+            *datp = missingDbl;
+          } else {
+            *datp = rate;
+          }
+          break;
+        }
+          
+        case Params::PRECIP_RATE_ZH_SNOW: {
+          double rate = _rateZSnow[igate];
+          if (rate < minValidPrecipRate) {
+            *datp = missingDbl;
+          } else {
+            *datp = rate;
+          }
+          break;
+        }
+          
+        case Params::PRECIP_RATE_Z_ZDR: {
+          double rate = _rateZZdr[igate];
+          if (rate < minValidPrecipRate) {
+            *datp = missingDbl;
+          } else {
+            *datp = rate;
+          }
+          break;
+        }
+          
+        case Params::PRECIP_RATE_KDP: {
+          double rate = _rateKdp[igate];
+          if (rate < minValidPrecipRate) {
+            *datp = missingDbl;
+          } else {
+            *datp = rate;
+          }
+          break;
+        }
+
+        case Params::PRECIP_RATE_KDP_ZDR: {
+          double rate = _rateKdpZdr[igate];
+          if (rate < minValidPrecipRate) {
+            *datp = missingDbl;
+          } else {
+            *datp = rate;
+          }
+          break;
+        }
+
+        case Params::PRECIP_RATE_HYBRID: {
+          double rate = _rateHybrid[igate];
+          if (rate < minValidPrecipRate) {
+            *datp = missingDbl;
+          } else {
+            *datp = rate;
+          }
+          break;
+        }
+
+        case Params::PRECIP_RATE_PID: {
+          double rate = _ratePid[igate];
+          if (rate < minValidPrecipRate) {
+            *datp = missingDbl;
+          } else {
+            *datp = rate;
+          }
+          break;
+        }
+
+        case Params::PRECIP_RATE_HIDRO: {
+          double rate = _rateHidro[igate];
+          if (rate < minValidPrecipRate) {
+            *datp = missingDbl;
+          } else {
+            *datp = rate;
+          }
+          break;
+        }
+
+        case Params::PRECIP_RATE_BRINGI: {
+          double rate = _rateBringi[igate];
+          if (rate < minValidPrecipRate) {
+            *datp = missingDbl;
+          } else {
+            *datp = rate;
+          }
+          break;
+        }
+
         // PID
         
         case Params::PID:
-        default:
           *datp = _pidArray[igate];
           break;
         case Params::PID_INTEREST:

@@ -703,27 +703,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("PID PARAMETER FILE");
-    tt->comment_text = tdrpStrDup("Specify the path to the PID parameters.");
-    tt++;
-    
-    // Parameter 'PID_params_file_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("PID_params_file_path");
-    tt->descr = tdrpStrDup("Path for parameters for computing PID.");
-    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
-    tt->val_offset = (char *) &PID_params_file_path - &_start_;
-    tt->single_val.s = tdrpStrDup("use-defaults");
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("INPUT FIELD INFORMATION");
     tt->comment_text = tdrpStrDup("Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. If SNR is not available, it is computed from DBZ.");
     tt++;
@@ -843,9 +822,30 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("KDP_field_name");
     tt->descr = tdrpStrDup("Field name for KDP in the input data.");
-    tt->help = tdrpStrDup("This is applicable if 'compute_KDP' is false.");
+    tt->help = tdrpStrDup("This is applicable if 'KDP_compute' is false.");
     tt->val_offset = (char *) &KDP_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("KDP");
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("PID PARAMETER FILE");
+    tt->comment_text = tdrpStrDup("Specify the path to the PID parameters.");
+    tt++;
+    
+    // Parameter 'PID_params_file_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("PID_params_file_path");
+    tt->descr = tdrpStrDup("Path for parameters for computing PID.");
+    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
+    tt->val_offset = (char *) &PID_params_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("use-defaults");
     tt++;
     
     // Parameter 'Comment 6'
