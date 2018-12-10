@@ -354,6 +354,9 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
   for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
     
     const Params::output_field_t &ofld = _params._output_fields[ifield];
+    if (!ofld.do_write) {
+      continue;
+    }
     
     // fill data array
     

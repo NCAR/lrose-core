@@ -350,7 +350,7 @@ output_fields = {
     long_name = "dbz_corrected_for_attenuation",
     standard_name = "dbz_corrected_for_attenuation",
     units = "dBZ",
-    do_write = FALSE
+    do_write = TRUE
   }
   ,
   {
@@ -359,7 +359,7 @@ output_fields = {
     long_name = "zdr_corrected_for_attenuation",
     standard_name = "zdr_corrected_for_attenuation",
     units = "dB",
-    do_write = FALSE
+    do_write = TRUE
   }
 };
 

@@ -502,6 +502,9 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
   for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
     
     const Params::output_field_t &ofld = _params._output_fields[ifield];
+    if (!ofld.do_write) {
+      continue;
+    }
     
     // fill data array
     
@@ -666,19 +669,19 @@ void Worker::_addPidDebugFields(const RadxRay *inputRay,
             "BEAM_HT", "km",
             "beam_height",
             "height_to_center_of_beam_msl",
-            inputRay->getField("beam_height")->getDataFl32());
+            inputRay->getField("BEAM_HT")->getDataFl32());
   
   _addField(outputRay,
             "RANGE", "km",
             "range",
             "range_to_center_of_gate",
-            inputRay->getField("range")->getDataFl32());
+            inputRay->getField("RANGE")->getDataFl32());
   
   _addField(outputRay,
             "ELEVATION", "deg",
             "elevation",
             "elevation_angle",
-            inputRay->getField("elevation")->getDataFl32());
+            inputRay->getField("ELEV")->getDataFl32());
   
   
 }

@@ -515,7 +515,7 @@ int RadxPid::_processFile(const string &filePath)
   if (_workers.size() > 0) {
     // thread 0
     Worker *worker0 = _workers[0];
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Thread #: " << 0 << endl;
       cerr << "  Loading temp profile for time: "
            << RadxTime::strm(_vol.getStartTimeSecs()) << endl;
@@ -523,10 +523,6 @@ int RadxPid::_processFile(const string &filePath)
     worker0->loadTempProfile(_vol.getStartTimeSecs());
     // copy to other threads
     for (size_t ii = 1; ii < _workers.size(); ii++) {
-      if (_params.debug) {
-        cerr << "Thread #: " << ii << endl;
-        cerr << "  Copying temp profile from thread 0" << endl;
-      }
       _workers[ii]->setTempProfile(worker0->getTempProfile());
     }
   }
