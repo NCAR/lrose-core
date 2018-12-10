@@ -1,3 +1,7 @@
+```
+
+# PID Fuzzy Logic parameters - S-band Alternating Mode radars
+#
 # ---------------------------------
 # begin comments with the "#" sign
 # the mnemonics are forced to lower case so
@@ -647,3 +651,5 @@ Tbl.Zh.SPHI.Sld    (-20,30)   (0,1)  (10,1) (15,0)
 Tbl.Zh.SPHI.Bgs    (-20,35)   (5,0)  (10,1) (35,1)  (40,0)
 Tbl.Zh.SPHI.Trip2  (-20,35)   (0,1)  (10,1) (15,0)
 Tbl.Zh.SPHI.Gcl    (-20,70)   (0,0) (10,0)  (15,1) (100,1)
+
+```

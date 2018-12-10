@@ -1,3 +1,7 @@
+```
+
+# PID Fuzzy Logic parameters - X-band Simultaneous Mode radars
+#
 # --------------------------------------------
 # PID thresholds for XBAND - under development
 # --------------------------------------------
@@ -645,3 +649,5 @@ Tbl.Zh.SPHI.Sld     (-20,30)   (0,1)  (10,1) (15,0)
 Tbl.Zh.SPHI.Bgs     (-20,35)   (5,0)  (10,1) (35,1)  (40,0)
 Tbl.Zh.SPHI.Brd     (-20,35)   (0,1)  (10,1) (15,0)
 Tbl.Zh.SPHI.Gcl     (-20,70)   (40,0)  (45,1) (100,1)
+
+```
