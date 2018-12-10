@@ -80,7 +80,7 @@ To update the main parameter file, run commands similar to the following:
 You need to ensure you create a temporary file first, and then move the file into place.
 If you try to perform this in one step, you will destroy your original parameter file.
 
-Similarly, to update the KDP-specific parameter file, run commands similar to the following:
+To update the KDP-specific parameter file, run commands similar to the following:
 
 ```
   RadxKdp -params_kdp KdpParams.test -print_params_kdp > tempfile
