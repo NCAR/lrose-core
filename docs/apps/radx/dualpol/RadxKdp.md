@@ -5,7 +5,7 @@
 RadxKdp computes KDP from PHIDP in polar-coordinate radar data.
 It also computes the attenuation correction in Z and ZDR.
 
-### Usage
+### [Usage](./RadxKdpUsage.txt)
 
 ```
 Usage: RadxKdp [args as below]
@@ -60,17 +60,5 @@ KDP-specific parameters:
      see modes from -print_params above
 ```
 
-Click the following to see the usage:
-
-
-```
-  ./RadxKdpUsage.txt
-```
-
-### Parameters files
-
-| File              | URL   |
-| -------------     |:-------------:|
-| Main params       | ./RadxKdpParams.txt |
-| Params for KDP    | ./KdpParams.txt |
+Click the following to see the [usage](./RadxKdpUsage.txt)
 
