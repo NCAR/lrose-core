@@ -60,4 +60,76 @@ KDP-specific parameters:
      see modes from -print_params above
 ```
 
+### Generating the main parameter file
+
+RadxKdp reads in a main parameter file, which provides overall control to the mode of operation, reading in the data, and writing out the results.
+
+To generate a default parameter file, run the following command:
+
+```
+  RadxKdp -print_params > RadxKdpParams.test
+```
+
+will generate the parameter file ```RadxKdpParams.test```.
+
+Here is [an example RadxKdp parameter file](./RadxKdpParams.md).
+
+In that file, you will find the following parameter:
+
+```
+///////////// KDP_params_file_path ////////////////////
+//
+// Path for parameters for KDP computations.
+//
+// If set to use-defaults, no parameter file will be read in, and the 
+//   default parameters will be used.
+//
+//
+// Type: string
+//
+
+KDP_params_file_path = "use-defaults";
+```
+
+If you leave this set to ```use-defaults```, the default settings will be used for computing KDP and attenuation.
+
+If you set this to a path containing the KDP-specific parameters, this will override the default parameters.
+
+### Generating the KDP-specific parameter file
+
+To generate a KDP-specific parameter, run the following command:
+
+```
+  RadxKdp -print_params_kdp > KdpParams.test
+```
+
+will generate the parameter file ```RadxKdp.test```.
+
+Here is an [example](./KdpParams.md) of that file.
+
+### Updating the parameter files as the RadxKdp app changes
+
+Sometimes when the application is updated, the parameters will change or be augmented.
+
+You can update the parameter files using the instructions below.
+
+To update the main parameter file, run commands similar to the following:
+
+```
+  RadxKdp -params RadxKdp.test -print_params > tempfile
+  mv tempfile RadxKdp.test
+```
+
+You need to ensure you create a temporary file first, and then move the file into place.
+If you try to perform this in one step, you will destroy your original parameter file.
+
+Similarly, to update the KDP-specific parameter file, run commands similar to the following:
+
+```
+  RadxKdp -params_kdp KdpParams.test -print_params_kdp > tempfile
+  mv tempfile KdpParams.test
+```
+
+
+
 
