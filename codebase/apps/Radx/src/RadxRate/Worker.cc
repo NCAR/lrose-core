@@ -174,6 +174,10 @@ RadxRay *Worker::compute(RadxRay *inputRay,
     return NULL;
   }
   _pidCompute();
+
+  // compute precip
+
+  _precipCompute();
   
   // load output fields into the moments ray
   
