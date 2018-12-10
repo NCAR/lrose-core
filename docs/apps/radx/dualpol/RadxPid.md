@@ -55,7 +55,7 @@ If you leave this set to ```use-defaults```, the default settings will be used f
 
 If you set this to a path containing the PID-specific parameters, this will override the default parameters.
 
-Similarly you will need to set a parameter file path for KDP computations. [For more details, see](./RadxKdp.md).
+Similarly you will need to set a parameter file path for KDP computations. For more details, see [RadxKdp](./RadxKdp.md).
 
 ### Generating the PID-specific parameter file
 
