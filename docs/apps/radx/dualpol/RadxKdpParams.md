@@ -99,7 +99,7 @@ mode = FILELIST;
 // Type: string
 //
 
-input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/kddc/moments/";
+input_dir = "/tmp/cfradial/test/";
 
 ///////////// input_file_search_ext ///////////////////
 //

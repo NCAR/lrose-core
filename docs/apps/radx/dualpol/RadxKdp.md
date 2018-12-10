@@ -72,7 +72,7 @@ To generate a default parameter file, run the following command:
 
 This will generate the parameter file ```RadxKdpParams.test```.
 
-Here is an [example](./RadxKdpParams.md) RadxKdp parameter file.
+Here is an [example](./RadxKdpParams.md) RadxKdp main parameter file.
 
 In that file, you will find the following parameter:
 
@@ -105,7 +105,7 @@ To generate a KDP-specific parameter, run the following command:
 
 This will generate the parameter file ```RadxKdp.test```.
 
-Here is an [example](./KdpParams.md) of that file.
+Here is an [example](./KdpParams.md) KDP-specific parameter file.
 
 ### Updating the parameter files as the RadxKdp app changes
 
@@ -135,7 +135,7 @@ Similarly, to update the KDP-specific parameter file, run commands similar to th
 The following is an example of running RadxKdp, specifying which files you want to process:
 
 ```
-RadxKdp -params RadxKdp.kddc -debug -f /scr/rain1/rsfdata/projects/pecan/cfradial/kddc/moments/20150626/cfrad.20150626_00*.nc
+RadxKdp -params RadxKdp.test -debug -f /tmp/cfradial/test/20150626/cfrad.20150626_00*.nc
 ```
 
 ### Running RadxKdp by specifying the start and end times
@@ -143,10 +143,10 @@ RadxKdp -params RadxKdp.kddc -debug -f /scr/rain1/rsfdata/projects/pecan/cfradia
 The following command would produce the same result as that above:
 
 ```
-RadxKdp -params RadxKdp.kddc -debug -start "2015 06 26 00 00 00" -end "2015 06 26 01 00 00"
+RadxKdp -params RadxKdp.test -debug -start "2015 06 26 00 00 00" -end "2015 06 26 01 00 00"
 ```
 
-In the latter case, you need to ensure that the ```input_dir``` parameter is correctly set in RadxKdp.kddc.
+In the latter case, you need to ensure that the ```input_dir``` parameter is correctly set in RadxKdp.test.
 
 
 
