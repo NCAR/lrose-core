@@ -106,7 +106,7 @@ mode = FILELIST;
 // Type: string
 //
 
-input_dir = "/tmp/cfradial/test/";
+input_dir = "/tmp/cfradial/moments/";
 
 ///////////// input_file_search_ext ///////////////////
 //
@@ -304,7 +304,7 @@ KDP_params_file_path = "./KdpParams.test";
 // Type: string
 //
 
-PID_params_file_path = "PidParams.kddc";
+PID_params_file_path = "PidParams.test";
 
 ///////////// PID_use_KDP_self_consistency ////////////
 //
@@ -569,7 +569,7 @@ PID_write_debug_fields = TRUE;
 // Type: string
 //
 
-output_dir = "/tmp/cfradial/pid/kddc";
+output_dir = "/tmp/cfradial/pid/test";
 
 ///////////// output_filename_mode ////////////////////
 //

@@ -119,13 +119,6 @@ To update the PID-specific parameter file, run commands similar to the following
   mv tempfile PidParams.test
 ```
 
-To update the PID-specific parameter file, run commands similar to the following:
-
-```
-  RadxPid -params_pid PidParams.test -print_params_pid > tempfile
-  mv tempfile PidParams.test
-```
-
 To update the KDP-specific parameter file, run commands similar to the following:
 
 ```

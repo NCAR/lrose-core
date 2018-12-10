@@ -1,12 +1,17 @@
 ```
+
 /**********************************************************************
- * TDRP params for RadxKdp
+ * TDRP params for RadxRate
  **********************************************************************/
 
 //======================================================================
 //
-// RadxKdp reads moments from Radx-type files, computes KDP and 
-//   optionally attenuation, and writes out the results to CfRadial files.
+// RadxRate reads moments from Radx-type files, computes precip rate 
+//   (and optionally PID and KDP) and writes out the results to CfRadial 
+//   files.
+//
+// A number of precipitation rate methods are available, based on Z, 
+//   ZZDR and KDP, and various hybrids.
 //
 //======================================================================
  
@@ -148,7 +153,7 @@ start_time = "2015 06 26 00 00 00";
 // Type: string
 //
 
-end_time = "2015 06 26 12 00 00";
+end_time = "2015 06 26 01 00 00";
 
 //======================================================================
 //
@@ -241,19 +246,35 @@ PHIDP_field_name = "PHIDP";
 
 RHOHV_field_name = "RHOHV";
 
+///////////// LDR_available ///////////////////////////
+//
+// Is LDR data available?.
+//
+//
+// Type: boolean
+//
+
+LDR_available = FALSE;
+
+///////////// LDR_field_name //////////////////////////
+//
+// Field name for LDR.
+//
+//
+// Type: string
+//
+
+LDR_field_name = "LDRH";
+
 //======================================================================
 //
 // COMPUTING KDP.
-//
-// The parameters for KDP computations are contained in a separate file. 
-//   An example default file can be generated using the -print_params_kdp 
-//   command line argument.
 //
 //======================================================================
  
 ///////////// KDP_params_file_path ////////////////////
 //
-// Path for parameters for KDP computations.
+// Path for parameters for computing KDP.
 //
 // If set to use-defaults, no parameter file will be read in, and the 
 //   default parameters will be used.
@@ -263,6 +284,100 @@ RHOHV_field_name = "RHOHV";
 //
 
 KDP_params_file_path = "./KdpParams.test";
+
+//======================================================================
+//
+// COMPUTING PID.
+//
+//======================================================================
+ 
+///////////// PID_params_file_path ////////////////////
+//
+// Path for parameters for computing PID.
+//
+// If set to use-defaults, no parameter file will be read in, and the 
+//   default parameters will be used.
+//
+//
+// Type: string
+//
+
+PID_params_file_path = "./PidParams.test";
+
+///////////// PID_use_KDP_self_consistency ////////////
+//
+// When computing PID, using KDP conditioned for self-consistency.
+//
+// When KDP is computed, we compute both a standard result, and a 
+//   conditioned result based on the self-consistency method. If this 
+//   parameter is set to TRUE, the self-consistency result will be used 
+//   instead of the standard result.
+//
+//
+// Type: boolean
+//
+
+PID_use_KDP_self_consistency = FALSE;
+
+///////////// PID_use_attenuation_corrected_fields ////
+//
+// Option to use Z and ZDR fields that are corrected for attenuation.
+//
+// If TRUE, the attenuation-corrected Z and ZDR fields will be used for 
+//   computing PID.
+//
+//
+// Type: boolean
+//
+
+PID_use_attenuation_corrected_fields = FALSE;
+
+//======================================================================
+//
+// COMPUTING PRECIP RATE.
+//
+//======================================================================
+ 
+///////////// PRECIP_params_file_path /////////////////
+//
+// Path for parameters for computing PRECIP.
+//
+// If set to use-defaults, no parameter file will be read in, and the 
+//   default parameters will be used.
+//
+//
+// Type: string
+//
+
+PRECIP_params_file_path = "./PrecipRate.test";
+
+///////////// PRECIP_use_KDP_self_consistency /////////
+//
+// When computing PRECIP, using KDP conditioned for self-consistency.
+//
+// When KDP is computed, we compute both a standard result, and a 
+//   conditioned result based on the self-consistency method. If this 
+//   parameter is set to TRUE, the self-consistency result will be used 
+//   instead of the standard result.
+//
+//
+// Type: boolean
+//
+
+PRECIP_use_KDP_self_consistency = FALSE;
+
+///////////// PRECIP_use_attenuation_corrected_fields /
+//
+// Option to use Z and ZDR fields that are corrected for attenuation.
+//
+// If TRUE, the attenuation-corrected Z and ZDR fields will be used for 
+//   computing PRECIP.
+//
+//
+// Type: boolean
+//
+
+PRECIP_use_attenuation_corrected_fields = FALSE;
 
 //======================================================================
 //
@@ -280,6 +395,9 @@ KDP_params_file_path = "./KdpParams.test";
 //
 // The output_encoding apply to CfRadial output only. 
 //
+// 	PID: NCAR Particle ID
+// 	PID_INTEREST: final interest map for NCAR Particle ID values
+// 	TEMP_FOR_PID: temperature field for PID (C)
 // 	KDP: KDP from filtering PHIDP and computing slope (deg/km)
 // 	KDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)
 // 	DBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)
@@ -292,6 +410,18 @@ KDP_params_file_path = "./KdpParams.test";
 //   typedef struct {
 //      output_field_id_t id;
 //        Options:
+//          PRECIP_RATE_ZH
+//          PRECIP_RATE_ZH_SNOW
+//          PRECIP_RATE_Z_ZDR
+//          PRECIP_RATE_KDP
+//          PRECIP_RATE_KDP_ZDR
+//          PRECIP_RATE_HYBRID
+//          PRECIP_RATE_PID
+//          PRECIP_RATE_HIDRO
+//          PRECIP_RATE_BRINGI
+//          PID
+//          PID_INTEREST
+//          TEMP_FOR_PID
 //          KDP
 //          KDP_SC
 //          DBZ_ATTEN_CORRECTION
@@ -310,6 +440,96 @@ KDP_params_file_path = "./KdpParams.test";
 
 output_fields = {
   {
+    id = PRECIP_RATE_ZH,
+    name = "RATE_ZH",
+    long_name = "precip_rate_from_z",
+    standard_name = "precip_rate_from_z",
+    units = "mm/hr",
+    do_write = TRUE
+  }
+  ,
+  {
+    id = PRECIP_RATE_ZH_SNOW,
+    name = "RATE_ZH_SNOW",
+    long_name = "precip_rate_from_z_for_snow",
+    standard_name = "precip_rate_from_z_for_snow",
+    units = "mm/hr",
+    do_write = TRUE
+  }
+  ,
+  {
+    id = PRECIP_RATE_Z_ZDR,
+    name = "RATE_Z_ZDR",
+    long_name = "precip_rate_from_z_and_zdr",
+    standard_name = "precip_rate_from_z_and_zdr",
+    units = "mm/hr",
+    do_write = TRUE
+  }
+  ,
+  {
+    id = PRECIP_RATE_KDP,
+    name = "RATE_KDP",
+    long_name = "precip_rate_from_kdp",
+    standard_name = "precip_rate_from_kdp",
+    units = "mm/hr",
+    do_write = TRUE
+  }
+  ,
+  {
+    id = PRECIP_RATE_KDP_ZDR,
+    name = "RATE_KDP_ZDR",
+    long_name = "precip_rate_from_kdp_and_zdr",
+    standard_name = "precip_rate_from_kdp_and_zdr",
+    units = "mm/hr",
+    do_write = TRUE
+  }
+  ,
+  {
+    id = PRECIP_RATE_HYBRID,
+    name = "RATE_HYBRID",
+    long_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
+    standard_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
+    units = "mm/hr",
+    do_write = TRUE
+  }
+  ,
+  {
+    id = PRECIP_RATE_PID,
+    name = "RATE_PID",
+    long_name = "precip_rate_based_on_pid",
+    standard_name = "precip_rate_based_on_pid",
+    units = "mm/hr",
+    do_write = TRUE
+  }
+  ,
+  {
+    id = PID,
+    name = "PID",
+    long_name = "particle_id",
+    standard_name = "hydrometeor_type",
+    units = "",
+    do_write = TRUE
+  }
+  ,
+  {
+    id = PID_INTEREST,
+    name = "PID_INTEREST",
+    long_name = "final_interest_value_for_pid_decision",
+    standard_name = "final_interest_value_for_pid_decision",
+    units = "",
+    do_write = FALSE
+  }
+  ,
+  {
+    id = TEMP_FOR_PID,
+    name = "TEMP_FOR_PID",
+    long_name = "temperature_for_computing_pid",
+    standard_name = "temperature",
+    units = "C",
+    do_write = FALSE
+  }
+  ,
+  {
     id = KDP,
     name = "KDP",
     long_name = "specific_differential_phase",
@@ -321,19 +541,10 @@ output_fields = {
   {
     id = KDP_SC,
     name = "KDP_SC",
-    long_name = "kdp_from_self_consistency_with_ZZDR",
+    long_name = "kdp_conditioned_using_ZZDR_self_consistency",
     standard_name = "specific_differential_phase_hv",
     units = "deg/km",
-    do_write = FALSE
-  }
-  ,
-  {
-    id = DBZ_ATTEN_CORRECTION,
-    name = "DBZ_ATTEN_CORRECTION",
-    long_name = "correction_to_dbz_for_attenuation",
-    standard_name = "dbz_attenuation_correction",
-    units = "dB",
-    do_write = FALSE
+    do_write = TRUE
   }
   ,
   {
@@ -403,13 +614,15 @@ copy_selected_input_fields_to_output = TRUE;
 //
 // These fields are copied through unchanged to the output file.
 //
-// You can change the name of the field on output.
+// You can change the name of the field on output. Optionally you can 
+//   censor the non-weather echoes, based on the PID.
 //
 //
 // Type: struct
 //   typedef struct {
 //      string input_name;
 //      string output_name;
+//      boolean censor_non_weather;
 //   }
 //
 // 1D array - variable length.
@@ -418,44 +631,50 @@ copy_selected_input_fields_to_output = TRUE;
 copy_fields = {
   {
     input_name = "DBZ",
-    output_name = "DBZ"
+    output_name = "DBZ",
+    censor_non_weather = FALSE
   }
   ,
   {
     input_name = "VEL",
-    output_name = "VEL"
+    output_name = "VEL",
+    censor_non_weather = FALSE
   }
   ,
   {
     input_name = "WIDTH",
-    output_name = "WIDTH"
+    output_name = "WIDTH",
+    censor_non_weather = FALSE
   }
   ,
   {
     input_name = "ZDR",
-    output_name = "ZDR"
+    output_name = "ZDR",
+    censor_non_weather = FALSE
   }
   ,
   {
     input_name = "PHIDP",
-    output_name = "PHIDP"
+    output_name = "PHIDP",
+    censor_non_weather = FALSE
   }
   ,
   {
     input_name = "RHOHV",
-    output_name = "RHOHV"
+    output_name = "RHOHV",
+    censor_non_weather = FALSE
   }
 };
 
 //======================================================================
 //
-// WRITING DEBUG FIELDS.
+// WRITE DEBUG FIELDS.
 //
 //======================================================================
  
 ///////////// KDP_write_debug_fields //////////////////
 //
-// Write extra fields to assist with debugging.
+// Write extra fields to assist with KDP debugging.
 //
 // These are the intermediate fields used in computing KDP and 
 //   attenuation.
@@ -464,7 +683,19 @@ copy_fields = {
 // Type: boolean
 //
 
-KDP_write_debug_fields = TRUE;
+KDP_write_debug_fields = FALSE;
+
+///////////// PID_write_debug_fields //////////////////
+//
+// Write extra fields to assist with PID debugging.
+//
+// These are the intermediate fields used in computing PID.
+//
+//
+// Type: boolean
+//
+
+PID_write_debug_fields = FALSE;
 
 //======================================================================
 //
@@ -482,7 +713,7 @@ KDP_write_debug_fields = TRUE;
 // Type: string
 //
 
-output_dir = "/tmp/cfradial/kdp/test";
+output_dir = "/tmp/cfradial/rate/test";
 
 ///////////// output_filename_mode ////////////////////
 //
@@ -542,6 +773,41 @@ output_format = OUTPUT_FORMAT_CFRADIAL;
 
 //======================================================================
 //
+// SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS.
+//
+//======================================================================
+ 
+///////////// override_standard_pseudo_earth_radius ///
+//
+// Option to override the standard 4/3 earth radius model for 
+//   refraction.
+//
+// If true, the standard 4/3 earth radius will be overridden. The US NWS 
+//   NEXRAD system uses 1.21 instead of 1.333.
+//
+//
+// Type: boolean
+//
+
+override_standard_pseudo_earth_radius = FALSE;
+
+///////////// pseudo_earth_radius_ratio ///////////////
+//
+// Ratio for computing the pseudo earth radius for beam height 
+//   computations.
+//
+// For standard refraction this is 4/3. For super refraction it will be 
+//   less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 
+//   1.21.
+//
+//
+// Type: double
+//
+
+pseudo_earth_radius_ratio = 1.33333;
+
+//======================================================================
+//
 // REALTIME OPERATIONS.
 //
 //======================================================================
@@ -557,7 +823,7 @@ output_format = OUTPUT_FORMAT_CFRADIAL;
 // Type: string
 //
 
-instance = "nexrad";
+instance = "spol";
 
 ///////////// procmap_register_interval ///////////////
 //
@@ -586,4 +852,3 @@ procmap_register_interval = 60;
 max_realtime_data_age_secs = 300;
 
 ```
-
