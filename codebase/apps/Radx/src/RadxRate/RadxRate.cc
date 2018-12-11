@@ -105,10 +105,10 @@ RadxRate::RadxRate(int argc, char **argv)
     return;
   }
 
-  // if requested, print params for PRECIP then exit
+  // if requested, print params for RATE then exit
   
-  if (_args.printParamsPrecip) {
-    _printParamsPrecip();
+  if (_args.printParamsRate) {
+    _printParamsRate();
     exit(0);
   }
 
@@ -196,32 +196,32 @@ RadxRate::~RadxRate()
 }
 
 //////////////////////////////////////////////////
-// Print params for PRECIP
+// Print params for RATE
 
-void RadxRate::_printParamsPrecip()
+void RadxRate::_printParamsRate()
 {
 
   if (_params.debug) {
-    cerr << "Reading PRECIP params from file: "
-         << _params.PRECIP_params_file_path << endl;
+    cerr << "Reading RATE params from file: "
+         << _params.RATE_params_file_path << endl;
   }
   
   // do we need to expand environment variables?
 
   bool expandEnvVars = false;
-  if (_args.printParamsPrecipMode.find("expand") != string::npos) {
+  if (_args.printParamsRateMode.find("expand") != string::npos) {
     expandEnvVars = true;
   }
 
-  // read in PRECIP params if applicable
+  // read in RATE params if applicable
   
-  if (strstr(_params.PRECIP_params_file_path, "use-defaults") == NULL) {
+  if (strstr(_params.RATE_params_file_path, "use-defaults") == NULL) {
     // not using defaults
-    if (_precipRateParams.load(_params.PRECIP_params_file_path,
+    if (_precipRateParams.load(_params.RATE_params_file_path,
                                NULL, expandEnvVars, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for PrecipFilt: "
-           << _params.PRECIP_params_file_path << endl;
+           << _params.RATE_params_file_path << endl;
       OK = FALSE;
       return;
     }
@@ -230,11 +230,11 @@ void RadxRate::_printParamsPrecip()
   // set print mode
 
   tdrp_print_mode_t printMode = PRINT_LONG;
-  if (_args.printParamsPrecipMode.find("short") == 0) {
+  if (_args.printParamsRateMode.find("short") == 0) {
     printMode = PRINT_SHORT;
-  } else if (_args.printParamsPrecipMode.find("norm") == 0) {
+  } else if (_args.printParamsRateMode.find("norm") == 0) {
     printMode = PRINT_NORM;
-  } else if (_args.printParamsPrecipMode.find("verbose") == 0) {
+  } else if (_args.printParamsRateMode.find("verbose") == 0) {
     printMode = PRINT_VERBOSE;
   }
 

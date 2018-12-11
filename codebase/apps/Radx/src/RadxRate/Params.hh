@@ -81,15 +81,15 @@ public:
   } mode_t;
 
   typedef enum {
-    PRECIP_RATE_ZH = 0,
-    PRECIP_RATE_ZH_SNOW = 1,
-    PRECIP_RATE_Z_ZDR = 2,
-    PRECIP_RATE_KDP = 3,
-    PRECIP_RATE_KDP_ZDR = 4,
-    PRECIP_RATE_HYBRID = 5,
-    PRECIP_RATE_PID = 6,
-    PRECIP_RATE_HIDRO = 7,
-    PRECIP_RATE_BRINGI = 8,
+    RATE_ZH = 0,
+    RATE_ZH_SNOW = 1,
+    RATE_Z_ZDR = 2,
+    RATE_KDP = 3,
+    RATE_KDP_ZDR = 4,
+    RATE_HYBRID = 5,
+    RATE_PID = 6,
+    RATE_HIDRO = 7,
+    RATE_BRINGI = 8,
     PID = 9,
     PID_INTEREST = 10,
     TEMP_FOR_PID = 11,
@@ -462,11 +462,11 @@ public:
 
   tdrp_bool_t PID_use_attenuation_corrected_fields;
 
-  char* PRECIP_params_file_path;
+  char* RATE_params_file_path;
 
-  tdrp_bool_t PRECIP_use_KDP_self_consistency;
+  tdrp_bool_t RATE_use_KDP_self_consistency;
 
-  tdrp_bool_t PRECIP_use_attenuation_corrected_fields;
+  tdrp_bool_t RATE_use_attenuation_corrected_fields;
 
   output_field_t *_output_fields;
   int output_fields_n;

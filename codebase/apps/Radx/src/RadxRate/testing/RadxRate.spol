@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./RadxRate
+ * TDRP params for RadxRate
  **********************************************************************/
 
 //======================================================================
@@ -336,7 +336,7 @@ PID_use_attenuation_corrected_fields = FALSE;
 //
 //======================================================================
  
-///////////// PRECIP_params_file_path /////////////////
+///////////// RATE_params_file_path ///////////////////
 //
 // Path for parameters for computing PRECIP.
 //
@@ -347,9 +347,9 @@ PID_use_attenuation_corrected_fields = FALSE;
 // Type: string
 //
 
-PRECIP_params_file_path = "./PrecipRate.test";
+RATE_params_file_path = "./RateParams.test";
 
-///////////// PRECIP_use_KDP_self_consistency /////////
+///////////// RATE_use_KDP_self_consistency ///////////
 //
 // When computing PRECIP, using KDP conditioned for self-consistency.
 //
@@ -362,9 +362,9 @@ PRECIP_params_file_path = "./PrecipRate.test";
 // Type: boolean
 //
 
-PRECIP_use_KDP_self_consistency = FALSE;
+RATE_use_KDP_self_consistency = FALSE;
 
-///////////// PRECIP_use_attenuation_corrected_fields /
+///////////// RATE_use_attenuation_corrected_fields ///
 //
 // Option to use Z and ZDR fields that are corrected for attenuation.
 //
@@ -375,7 +375,7 @@ PRECIP_use_KDP_self_consistency = FALSE;
 // Type: boolean
 //
 
-PRECIP_use_attenuation_corrected_fields = FALSE;
+RATE_use_attenuation_corrected_fields = FALSE;
 
 //======================================================================
 //
@@ -393,6 +393,15 @@ PRECIP_use_attenuation_corrected_fields = FALSE;
 //
 // The output_encoding apply to CfRadial output only. 
 //
+// 	RATE_ZH: Precip rate from ZH
+// 	RATE_ZH_SNOW: Precip rate from ZH in dry snow
+// 	RATE_Z_ZDR: Precip rate from Z and ZDR
+// 	RATE_KDP: Precip rate from KDP
+// 	RATE_KDP_ZDR: Precip rate from KDP and ZDR
+// 	RATE_HYBRID: Precip rate from NCAR hybrid
+// 	RATE_PID: Precip rate using PID to select the appropriate rate
+// 	RATE_HIDRO: Precip rate using CSU HIDRO hybrid
+// 	RATE_BRINGI: Precip rate using Bringi hybrid
 // 	PID: NCAR Particle ID
 // 	PID_INTEREST: final interest map for NCAR Particle ID values
 // 	TEMP_FOR_PID: temperature field for PID (C)
@@ -408,15 +417,15 @@ PRECIP_use_attenuation_corrected_fields = FALSE;
 //   typedef struct {
 //      output_field_id_t id;
 //        Options:
-//          PRECIP_RATE_ZH
-//          PRECIP_RATE_ZH_SNOW
-//          PRECIP_RATE_Z_ZDR
-//          PRECIP_RATE_KDP
-//          PRECIP_RATE_KDP_ZDR
-//          PRECIP_RATE_HYBRID
-//          PRECIP_RATE_PID
-//          PRECIP_RATE_HIDRO
-//          PRECIP_RATE_BRINGI
+//          RATE_ZH
+//          RATE_ZH_SNOW
+//          RATE_Z_ZDR
+//          RATE_KDP
+//          RATE_KDP_ZDR
+//          RATE_HYBRID
+//          RATE_PID
+//          RATE_HIDRO
+//          RATE_BRINGI
 //          PID
 //          PID_INTEREST
 //          TEMP_FOR_PID
@@ -438,7 +447,7 @@ PRECIP_use_attenuation_corrected_fields = FALSE;
 
 output_fields = {
   {
-    id = PRECIP_RATE_ZH,
+    id = RATE_ZH,
     name = "RATE_ZH",
     long_name = "precip_rate_from_z",
     standard_name = "precip_rate_from_z",
@@ -447,7 +456,7 @@ output_fields = {
   }
   ,
   {
-    id = PRECIP_RATE_ZH_SNOW,
+    id = RATE_ZH_SNOW,
     name = "RATE_ZH_SNOW",
     long_name = "precip_rate_from_z_for_snow",
     standard_name = "precip_rate_from_z_for_snow",
@@ -456,7 +465,7 @@ output_fields = {
   }
   ,
   {
-    id = PRECIP_RATE_Z_ZDR,
+    id = RATE_Z_ZDR,
     name = "RATE_Z_ZDR",
     long_name = "precip_rate_from_z_and_zdr",
     standard_name = "precip_rate_from_z_and_zdr",
@@ -465,7 +474,7 @@ output_fields = {
   }
   ,
   {
-    id = PRECIP_RATE_KDP,
+    id = RATE_KDP,
     name = "RATE_KDP",
     long_name = "precip_rate_from_kdp",
     standard_name = "precip_rate_from_kdp",
@@ -474,7 +483,7 @@ output_fields = {
   }
   ,
   {
-    id = PRECIP_RATE_KDP_ZDR,
+    id = RATE_KDP_ZDR,
     name = "RATE_KDP_ZDR",
     long_name = "precip_rate_from_kdp_and_zdr",
     standard_name = "precip_rate_from_kdp_and_zdr",
@@ -483,7 +492,7 @@ output_fields = {
   }
   ,
   {
-    id = PRECIP_RATE_HYBRID,
+    id = RATE_HYBRID,
     name = "RATE_HYBRID",
     long_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
     standard_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
@@ -492,7 +501,7 @@ output_fields = {
   }
   ,
   {
-    id = PRECIP_RATE_PID,
+    id = RATE_PID,
     name = "RATE_PID",
     long_name = "precip_rate_based_on_pid",
     standard_name = "precip_rate_based_on_pid",
@@ -501,7 +510,7 @@ output_fields = {
   }
   ,
   {
-    id = PRECIP_RATE_HIDRO,
+    id = RATE_HIDRO,
     name = "RATE_HIDRO",
     long_name = "precip_rate_based_on_hidro",
     standard_name = "precip_rate_based_on_hidro",
@@ -510,7 +519,7 @@ output_fields = {
   }
   ,
   {
-    id = PRECIP_RATE_BRINGI,
+    id = RATE_BRINGI,
     name = "RATE_BRINGI",
     long_name = "precip_rate_based_on_bringi",
     standard_name = "precip_rate_based_on_bringi",

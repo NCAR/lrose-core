@@ -61,8 +61,8 @@ public:
   tdrp_override_t override;
   bool tdrpDebug;
 
-  bool printParamsPrecip;
-  string printParamsPrecipMode;
+  bool printParamsRate;
+  string printParamsRateMode;
 
   bool printParamsPid;
   string printParamsPidMode;

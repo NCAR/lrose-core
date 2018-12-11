@@ -134,7 +134,7 @@ private:
 
   // private methods
   
-  void _printParamsPrecip();
+  void _printParamsRate();
   void _printParamsPid();
   void _printParamsKdp();
 

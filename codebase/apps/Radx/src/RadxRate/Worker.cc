@@ -333,13 +333,13 @@ void Worker::_precipCompute()
   // select fields
 
   const double *kdpArray = _kdpArray;
-  if (_params.PRECIP_use_KDP_self_consistency) {
+  if (_params.RATE_use_KDP_self_consistency) {
     kdpArray = _kdpScArray;
   }
 
   const double *dbzArray = _dbzArray;
   const double *zdrArray = _zdrArray;
-  if (_params.PRECIP_use_attenuation_corrected_fields) {
+  if (_params.RATE_use_attenuation_corrected_fields) {
     dbzArray = _kdp.getDbzCorrected();
     zdrArray = _kdp.getZdrCorrected();
   }
@@ -585,7 +585,7 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
     Radx::fl32 *data = data_.alloc(_nGates);
     Radx::fl32 *datp = data;
     
-    double minValidPrecipRate = _precipRateParams.PRECIP_min_valid_rate;
+    double minValidPrecipRate = _precipRateParams.RATE_min_valid_rate;
 
     for (size_t igate = 0; igate < _nGates; igate++, datp++) {
     
@@ -593,7 +593,7 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
 
         // PRECIP RATE
         
-        case Params::PRECIP_RATE_ZH: {
+        case Params::RATE_ZH: {
           double rate = _rateZ[igate];
           if (rate < minValidPrecipRate) {
             *datp = missingDbl;
@@ -603,7 +603,7 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
           break;
         }
           
-        case Params::PRECIP_RATE_ZH_SNOW: {
+        case Params::RATE_ZH_SNOW: {
           double rate = _rateZSnow[igate];
           if (rate < minValidPrecipRate) {
             *datp = missingDbl;
@@ -613,7 +613,7 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
           break;
         }
           
-        case Params::PRECIP_RATE_Z_ZDR: {
+        case Params::RATE_Z_ZDR: {
           double rate = _rateZZdr[igate];
           if (rate < minValidPrecipRate) {
             *datp = missingDbl;
@@ -623,7 +623,7 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
           break;
         }
           
-        case Params::PRECIP_RATE_KDP: {
+        case Params::RATE_KDP: {
           double rate = _rateKdp[igate];
           if (rate < minValidPrecipRate) {
             *datp = missingDbl;
@@ -633,7 +633,7 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
           break;
         }
 
-        case Params::PRECIP_RATE_KDP_ZDR: {
+        case Params::RATE_KDP_ZDR: {
           double rate = _rateKdpZdr[igate];
           if (rate < minValidPrecipRate) {
             *datp = missingDbl;
@@ -643,7 +643,7 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
           break;
         }
 
-        case Params::PRECIP_RATE_HYBRID: {
+        case Params::RATE_HYBRID: {
           double rate = _rateHybrid[igate];
           if (rate < minValidPrecipRate) {
             *datp = missingDbl;
@@ -653,7 +653,7 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
           break;
         }
 
-        case Params::PRECIP_RATE_PID: {
+        case Params::RATE_PID: {
           double rate = _ratePid[igate];
           if (rate < minValidPrecipRate) {
             *datp = missingDbl;
@@ -663,7 +663,7 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
           break;
         }
 
-        case Params::PRECIP_RATE_HIDRO: {
+        case Params::RATE_HIDRO: {
           double rate = _rateHidro[igate];
           if (rate < minValidPrecipRate) {
             *datp = missingDbl;
@@ -673,7 +673,7 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
           break;
         }
 
-        case Params::PRECIP_RATE_BRINGI: {
+        case Params::RATE_BRINGI: {
           double rate = _rateBringi[igate];
           if (rate < minValidPrecipRate) {
             *datp = missingDbl;

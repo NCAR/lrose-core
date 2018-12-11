@@ -558,111 +558,111 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'PRECIP_snr_threshold'
+    // Parameter 'RATE_snr_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_snr_threshold");
+    tt->param_name = tdrpStrDup("RATE_snr_threshold");
     tt->descr = tdrpStrDup("Minimum SNR for valid PRECIP.");
     tt->help = tdrpStrDup("If the SNR at a gate is below this, the PRECIP is censored.");
-    tt->val_offset = (char *) &PRECIP_snr_threshold - &_start_;
+    tt->val_offset = (char *) &RATE_snr_threshold - &_start_;
     tt->single_val.d = 3;
     tt++;
     
-    // Parameter 'PRECIP_apply_median_filter_to_DBZ'
+    // Parameter 'RATE_apply_median_filter_to_DBZ'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_apply_median_filter_to_DBZ");
+    tt->param_name = tdrpStrDup("RATE_apply_median_filter_to_DBZ");
     tt->descr = tdrpStrDup("Option to filter DBZ with median filter.");
     tt->help = tdrpStrDup("The filter is computed in rang..");
-    tt->val_offset = (char *) &PRECIP_apply_median_filter_to_DBZ - &_start_;
+    tt->val_offset = (char *) &RATE_apply_median_filter_to_DBZ - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'PRECIP_DBZ_median_filter_len'
+    // Parameter 'RATE_DBZ_median_filter_len'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_DBZ_median_filter_len");
+    tt->param_name = tdrpStrDup("RATE_DBZ_median_filter_len");
     tt->descr = tdrpStrDup("Length of median filter for DBZ - gates.");
-    tt->help = tdrpStrDup("See 'PRECIP_apply_median_filter_to_DBZ'");
-    tt->val_offset = (char *) &PRECIP_DBZ_median_filter_len - &_start_;
+    tt->help = tdrpStrDup("See 'RATE_apply_median_filter_to_DBZ'");
+    tt->val_offset = (char *) &RATE_DBZ_median_filter_len - &_start_;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'PRECIP_apply_median_filter_to_ZDR'
+    // Parameter 'RATE_apply_median_filter_to_ZDR'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_apply_median_filter_to_ZDR");
+    tt->param_name = tdrpStrDup("RATE_apply_median_filter_to_ZDR");
     tt->descr = tdrpStrDup("Option to filter ZDR with median filter.");
     tt->help = tdrpStrDup("The filter is computed in range.");
-    tt->val_offset = (char *) &PRECIP_apply_median_filter_to_ZDR - &_start_;
+    tt->val_offset = (char *) &RATE_apply_median_filter_to_ZDR - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'PRECIP_ZDR_median_filter_len'
+    // Parameter 'RATE_ZDR_median_filter_len'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_ZDR_median_filter_len");
+    tt->param_name = tdrpStrDup("RATE_ZDR_median_filter_len");
     tt->descr = tdrpStrDup("Length of median filter for ZDR - gates.");
-    tt->help = tdrpStrDup("See 'PID_PRECIP_apply_median_filter_to_ZDR'");
-    tt->val_offset = (char *) &PRECIP_ZDR_median_filter_len - &_start_;
+    tt->help = tdrpStrDup("See 'PID_RATE_apply_median_filter_to_ZDR'");
+    tt->val_offset = (char *) &RATE_ZDR_median_filter_len - &_start_;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'PRECIP_min_valid_rate'
+    // Parameter 'RATE_min_valid_rate'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_min_valid_rate");
+    tt->param_name = tdrpStrDup("RATE_min_valid_rate");
     tt->descr = tdrpStrDup("Minimum valid precip rate (mm/hr).");
     tt->help = tdrpStrDup("If any computed rate is less than this value, it is set to 0.");
-    tt->val_offset = (char *) &PRECIP_min_valid_rate - &_start_;
+    tt->val_offset = (char *) &RATE_min_valid_rate - &_start_;
     tt->single_val.d = 0.1;
     tt++;
     
-    // Parameter 'PRECIP_max_valid_rate'
+    // Parameter 'RATE_max_valid_rate'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_max_valid_rate");
+    tt->param_name = tdrpStrDup("RATE_max_valid_rate");
     tt->descr = tdrpStrDup("Maximum valid precip rate (mm/hr).");
     tt->help = tdrpStrDup("If any computed rate exceeds this value, it is set to this max.");
-    tt->val_offset = (char *) &PRECIP_max_valid_rate - &_start_;
+    tt->val_offset = (char *) &RATE_max_valid_rate - &_start_;
     tt->single_val.d = 250;
     tt++;
     
-    // Parameter 'PRECIP_max_valid_dbz'
+    // Parameter 'RATE_max_valid_dbz'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_max_valid_dbz");
+    tt->param_name = tdrpStrDup("RATE_max_valid_dbz");
     tt->descr = tdrpStrDup("Maximum valid dbz for computing precip rate.");
     tt->help = tdrpStrDup("If any dbz exceeds this value, it is set to this max before use. This helps mitigate large DBZ values in hail.");
-    tt->val_offset = (char *) &PRECIP_max_valid_dbz - &_start_;
+    tt->val_offset = (char *) &RATE_max_valid_dbz - &_start_;
     tt->single_val.d = 53;
     tt++;
     
-    // Parameter 'PRECIP_brightband_dbz_correction'
+    // Parameter 'RATE_brightband_dbz_correction'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_brightband_dbz_correction");
+    tt->param_name = tdrpStrDup("RATE_brightband_dbz_correction");
     tt->descr = tdrpStrDup("Correction to be applied in brightband before computing precip rate.");
     tt->help = tdrpStrDup("This should be negative.");
-    tt->val_offset = (char *) &PRECIP_brightband_dbz_correction - &_start_;
+    tt->val_offset = (char *) &RATE_brightband_dbz_correction - &_start_;
     tt->has_max = TRUE;
     tt->max_val.d = 0;
     tt->single_val.d = -10;
@@ -682,31 +682,31 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_ZH");
+    tt->comment_hdr = tdrpStrDup("RATE_ZH");
     tt->comment_text = tdrpStrDup("RATE_ZH = zh_aa * (ZH ** zh_bb)");
     tt++;
     
-    // Parameter 'PRECIP_zh_aa'
+    // Parameter 'RATE_zh_aa'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_zh_aa");
-    tt->descr = tdrpStrDup("Coefficient for PRECIP_RATE_ZH.");
+    tt->param_name = tdrpStrDup("RATE_zh_aa");
+    tt->descr = tdrpStrDup("Coefficient for RATE_ZH.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PRECIP_zh_aa - &_start_;
+    tt->val_offset = (char *) &RATE_zh_aa - &_start_;
     tt->single_val.d = 0.017;
     tt++;
     
-    // Parameter 'PRECIP_zh_bb'
+    // Parameter 'RATE_zh_bb'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_zh_bb");
-    tt->descr = tdrpStrDup("Exponent for PRECIP_RATE_ZH.");
+    tt->param_name = tdrpStrDup("RATE_zh_bb");
+    tt->descr = tdrpStrDup("Exponent for RATE_ZH.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PRECIP_zh_bb - &_start_;
+    tt->val_offset = (char *) &RATE_zh_bb - &_start_;
     tt->single_val.d = 0.714;
     tt++;
     
@@ -715,31 +715,31 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_SNOW_ZH");
+    tt->comment_hdr = tdrpStrDup("RATE_SNOW_ZH");
     tt->comment_text = tdrpStrDup("RATE_SNOW_ZH = zh_aa_snow * (ZH ** zh_bb_snow)");
     tt++;
     
-    // Parameter 'PRECIP_zh_aa_snow'
+    // Parameter 'RATE_zh_aa_snow'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_zh_aa_snow");
-    tt->descr = tdrpStrDup("Coefficient for PRECIP_RATE_ZH in SNOW.");
+    tt->param_name = tdrpStrDup("RATE_zh_aa_snow");
+    tt->descr = tdrpStrDup("Coefficient for RATE_ZH in SNOW.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PRECIP_zh_aa_snow - &_start_;
+    tt->val_offset = (char *) &RATE_zh_aa_snow - &_start_;
     tt->single_val.d = 0.0365;
     tt++;
     
-    // Parameter 'PRECIP_zh_bb_snow'
+    // Parameter 'RATE_zh_bb_snow'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_zh_bb_snow");
-    tt->descr = tdrpStrDup("Exponent for PRECIP_RATE_ZH in SNOW.");
+    tt->param_name = tdrpStrDup("RATE_zh_bb_snow");
+    tt->descr = tdrpStrDup("Exponent for RATE_ZH in SNOW.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PRECIP_zh_bb_snow - &_start_;
+    tt->val_offset = (char *) &RATE_zh_bb_snow - &_start_;
     tt->single_val.d = 0.625;
     tt++;
     
@@ -748,43 +748,43 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_Z_ZDR");
+    tt->comment_hdr = tdrpStrDup("RATE_Z_ZDR");
     tt->comment_text = tdrpStrDup("RATE_Z_ZDR = zzdr_aa * (ZH ** zzdr_bb) * (ZDR ** zzdr_cc)");
     tt++;
     
-    // Parameter 'PRECIP_zzdr_aa'
+    // Parameter 'RATE_zzdr_aa'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_zzdr_aa");
-    tt->descr = tdrpStrDup("Coefficient for PRECIP_RATE_ZZDR.");
+    tt->param_name = tdrpStrDup("RATE_zzdr_aa");
+    tt->descr = tdrpStrDup("Coefficient for RATE_ZZDR.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PRECIP_zzdr_aa - &_start_;
+    tt->val_offset = (char *) &RATE_zzdr_aa - &_start_;
     tt->single_val.d = 0.00684;
     tt++;
     
-    // Parameter 'PRECIP_zzdr_bb'
+    // Parameter 'RATE_zzdr_bb'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_zzdr_bb");
-    tt->descr = tdrpStrDup("ZH exponent for PRECIP_RATE_ZZDR.");
+    tt->param_name = tdrpStrDup("RATE_zzdr_bb");
+    tt->descr = tdrpStrDup("ZH exponent for RATE_ZZDR.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PRECIP_zzdr_bb - &_start_;
+    tt->val_offset = (char *) &RATE_zzdr_bb - &_start_;
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'PRECIP_zzdr_cc'
+    // Parameter 'RATE_zzdr_cc'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_zzdr_cc");
-    tt->descr = tdrpStrDup("ZDR exponent for PRECIP_RATE_ZZDR.");
+    tt->param_name = tdrpStrDup("RATE_zzdr_cc");
+    tt->descr = tdrpStrDup("ZDR exponent for RATE_ZZDR.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PRECIP_zzdr_cc - &_start_;
+    tt->val_offset = (char *) &RATE_zzdr_cc - &_start_;
     tt->single_val.d = -4.86;
     tt++;
     
@@ -793,31 +793,31 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_KDP");
+    tt->comment_hdr = tdrpStrDup("RATE_KDP");
     tt->comment_text = tdrpStrDup("RATE_KDP = sign(KDP) * kdp_aa * (|KDP| ** kdp_bb)");
     tt++;
     
-    // Parameter 'PRECIP_kdp_aa'
+    // Parameter 'RATE_kdp_aa'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_kdp_aa");
-    tt->descr = tdrpStrDup("Coefficient for PRECIP_RATE_KDP.");
+    tt->param_name = tdrpStrDup("RATE_kdp_aa");
+    tt->descr = tdrpStrDup("Coefficient for RATE_KDP.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PRECIP_kdp_aa - &_start_;
+    tt->val_offset = (char *) &RATE_kdp_aa - &_start_;
     tt->single_val.d = 40.6;
     tt++;
     
-    // Parameter 'PRECIP_kdp_bb'
+    // Parameter 'RATE_kdp_bb'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_kdp_bb");
-    tt->descr = tdrpStrDup("Exponent for PRECIP_RATE_KDP.");
+    tt->param_name = tdrpStrDup("RATE_kdp_bb");
+    tt->descr = tdrpStrDup("Exponent for RATE_KDP.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PRECIP_kdp_bb - &_start_;
+    tt->val_offset = (char *) &RATE_kdp_bb - &_start_;
     tt->single_val.d = 0.866;
     tt++;
     
@@ -826,43 +826,43 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_KDP_ZDR");
+    tt->comment_hdr = tdrpStrDup("RATE_KDP_ZDR");
     tt->comment_text = tdrpStrDup("RATE_KDP_ZDR = sign(KDP) * kdpzdr_aa * (|KDP| ** kdpzdr_bb) * (ZDR ** kdpzdr_cc)");
     tt++;
     
-    // Parameter 'PRECIP_kdpzdr_aa'
+    // Parameter 'RATE_kdpzdr_aa'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_kdpzdr_aa");
-    tt->descr = tdrpStrDup("Coefficient for PRECIP_RATE_KDP_ZDR.");
+    tt->param_name = tdrpStrDup("RATE_kdpzdr_aa");
+    tt->descr = tdrpStrDup("Coefficient for RATE_KDP_ZDR.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PRECIP_kdpzdr_aa - &_start_;
+    tt->val_offset = (char *) &RATE_kdpzdr_aa - &_start_;
     tt->single_val.d = 136;
     tt++;
     
-    // Parameter 'PRECIP_kdpzdr_bb'
+    // Parameter 'RATE_kdpzdr_bb'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_kdpzdr_bb");
-    tt->descr = tdrpStrDup("KDP exponent for PRECIP_RATE_KDP_ZDR.");
+    tt->param_name = tdrpStrDup("RATE_kdpzdr_bb");
+    tt->descr = tdrpStrDup("KDP exponent for RATE_KDP_ZDR.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PRECIP_kdpzdr_bb - &_start_;
+    tt->val_offset = (char *) &RATE_kdpzdr_bb - &_start_;
     tt->single_val.d = 0.968;
     tt++;
     
-    // Parameter 'PRECIP_kdpzdr_cc'
+    // Parameter 'RATE_kdpzdr_cc'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_kdpzdr_cc");
-    tt->descr = tdrpStrDup("ZDR exponent for PRECIP_RATE_KDP_ZDR.");
+    tt->param_name = tdrpStrDup("RATE_kdpzdr_cc");
+    tt->descr = tdrpStrDup("ZDR exponent for RATE_KDP_ZDR.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &PRECIP_kdpzdr_cc - &_start_;
+    tt->val_offset = (char *) &RATE_kdpzdr_cc - &_start_;
     tt->single_val.d = -2.86;
     tt++;
     
@@ -875,15 +875,15 @@
     tt->comment_text = tdrpStrDup("The PID-based rate is a wieghted-average of the rates for the various precip types.\nThe weights are derived from the interest values for each PID particle type.\n\t  RATE_LIGHT_RAIN = RATE_ZH\n\t  RATE_MOD_RAIN = RATE_Z_ZDR\n\t  RATE_SNOW = RATE_ZH_SNOW\n\t  RATE_MIXED = RATE_ZH_MIXED\n\n\t  if (kdp > threshold && RATE_KDP is valid)\n\t    RATE_HVY_RAIN = RATE_KDP\n\t    RATE_HAIL = RATE_KDP\n\t  else\n\t    RATE_HVY_RAIN = RATE_ZZDR\n\t    RATE_HAIL = RATE_ZZDR\n\n\t  RATE = 0\n\t  RATE += RATE_LIGHT_RAIN * WT_LIGHT_RAIN\n\t  RATE += RATE_MOD_RAIN * WT_MOD_RAIN\n\t  RATE += RATE_HVY_RAIN * WT_HVY_RAIN\n\t  RATE += RATE_SNOW * WT_SNOW\n\t  RATE += RATE_MIXED * WT_MIXED\n\t  RATE += RATE_HAIL * WT_HAIL\n");
     tt++;
     
-    // Parameter 'PRECIP_pid_rate_kdp_threshold'
+    // Parameter 'RATE_pid_rate_kdp_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_pid_rate_kdp_threshold");
+    tt->param_name = tdrpStrDup("RATE_pid_rate_kdp_threshold");
     tt->descr = tdrpStrDup("Units are deg/km.");
     tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &PRECIP_pid_rate_kdp_threshold - &_start_;
+    tt->val_offset = (char *) &RATE_pid_rate_kdp_threshold - &_start_;
     tt->single_val.d = 0.3;
     tt++;
     
@@ -892,43 +892,43 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_HYBRID");
+    tt->comment_hdr = tdrpStrDup("RATE_HYBRID");
     tt->comment_text = tdrpStrDup("The HYBRID rate is based on the PID and the BRINGI algorithm. See 'Using dual-polarized radar and dual-frequency profiler for DSD characterization: a case study from Darwin, Australia', Hybrid et al, JTech, Vol 26, 2009, 2107 - 2122.\n\n\t  if hail or heavy rain\n\t    if KDP > threhsold and rateKDP is valid\n\t      use RATE_KDP\n\t    else\n\t      use RATE_KDP\n\t  else if snow/ice\n\t    use RATE_ZH_SNOW\n\t  else if mixed precip\n\t    use RATE_ZH_MIXED\n\t  else if rain or SLD\n\t    if dBZ > theshold and KDP > threhsold\n\t      if rateKDP is valid\n\t        use RATE_KDP\n\t      else\n\t        use RATE_ZZDR\n\t    else\n\t      if ZDR >= threshold\n\t        use RATE_Z\n\t      else\n\t        use RATE_ZZDR\n");
     tt++;
     
-    // Parameter 'PRECIP_hybrid_dbz_threshold'
+    // Parameter 'RATE_hybrid_dbz_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_hybrid_dbz_threshold");
+    tt->param_name = tdrpStrDup("RATE_hybrid_dbz_threshold");
     tt->descr = tdrpStrDup("Units are dBZ.");
     tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &PRECIP_hybrid_dbz_threshold - &_start_;
+    tt->val_offset = (char *) &RATE_hybrid_dbz_threshold - &_start_;
     tt->single_val.d = 40;
     tt++;
     
-    // Parameter 'PRECIP_hybrid_kdp_threshold'
+    // Parameter 'RATE_hybrid_kdp_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_hybrid_kdp_threshold");
+    tt->param_name = tdrpStrDup("RATE_hybrid_kdp_threshold");
     tt->descr = tdrpStrDup("Units are deg/km.");
     tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &PRECIP_hybrid_kdp_threshold - &_start_;
+    tt->val_offset = (char *) &RATE_hybrid_kdp_threshold - &_start_;
     tt->single_val.d = 0.3;
     tt++;
     
-    // Parameter 'PRECIP_hybrid_zdr_threshold'
+    // Parameter 'RATE_hybrid_zdr_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_hybrid_zdr_threshold");
+    tt->param_name = tdrpStrDup("RATE_hybrid_zdr_threshold");
     tt->descr = tdrpStrDup("Units are dB.");
     tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &PRECIP_hybrid_zdr_threshold - &_start_;
+    tt->val_offset = (char *) &RATE_hybrid_zdr_threshold - &_start_;
     tt->single_val.d = 0.5;
     tt++;
     
@@ -937,43 +937,43 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_HIDRO");
+    tt->comment_hdr = tdrpStrDup("RATE_HIDRO");
     tt->comment_text = tdrpStrDup("The HIDRO rate is based on the CSU-HIDRO algorithm. See 'A New Dual-Polarization Radar Rainfall Algorithm: Application to Colorado Precipition Events', Cifelli et al, JTech, Vol 28, 2011, 352 - 364. NOTE - this algorithm is generally only applied to liquid and mixed-phase precip, so you need to run PID for this to work as intended.\n\t  For ice:\n\t    RATE_HIDRO = MISSING\n\t  For hail or mixed:\n\t    if KDP >= threshold and rateKdp is valid\n\t      RATE_HIDRO = RATE_KDP\n\t    else\n\t      RATE_HIDRO = RATE_ZR\n\t  For rain or sld:\n\t    if KDP >= threshold and DBZ >= threhold\n\t      if ZDR >= threshold and rateKdpZdr is valid\n\t        RATE_HIDRO = RATE_KDPZDR\n\t      else if rateKdp is valid\n\t        RATE_HIDRO = RATE_KDP\n\t      else\n\t        RATE_HIDRO = RATE_ZZDR\n\t    else\n\t      if ZDR >= threshold\n\t        RATE_HIDRO = RATE_Z\n\t      else\n\t        RATE_HIDRO = RATE_ZZDR\n");
     tt++;
     
-    // Parameter 'PRECIP_hidro_dbz_threshold'
+    // Parameter 'RATE_hidro_dbz_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_hidro_dbz_threshold");
+    tt->param_name = tdrpStrDup("RATE_hidro_dbz_threshold");
     tt->descr = tdrpStrDup("Units are dBZ.");
     tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &PRECIP_hidro_dbz_threshold - &_start_;
+    tt->val_offset = (char *) &RATE_hidro_dbz_threshold - &_start_;
     tt->single_val.d = 38;
     tt++;
     
-    // Parameter 'PRECIP_hidro_kdp_threshold'
+    // Parameter 'RATE_hidro_kdp_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_hidro_kdp_threshold");
+    tt->param_name = tdrpStrDup("RATE_hidro_kdp_threshold");
     tt->descr = tdrpStrDup("Units are deg/km.");
     tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &PRECIP_hidro_kdp_threshold - &_start_;
+    tt->val_offset = (char *) &RATE_hidro_kdp_threshold - &_start_;
     tt->single_val.d = 0.3;
     tt++;
     
-    // Parameter 'PRECIP_hidro_zdr_threshold'
+    // Parameter 'RATE_hidro_zdr_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_hidro_zdr_threshold");
+    tt->param_name = tdrpStrDup("RATE_hidro_zdr_threshold");
     tt->descr = tdrpStrDup("Units are dB.");
     tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &PRECIP_hidro_zdr_threshold - &_start_;
+    tt->val_offset = (char *) &RATE_hidro_zdr_threshold - &_start_;
     tt->single_val.d = 0.5;
     tt++;
     
@@ -982,43 +982,43 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("PRECIP_RATE_BRINGI");
+    tt->comment_hdr = tdrpStrDup("RATE_BRINGI");
     tt->comment_text = tdrpStrDup("The BRINGI rate is based on the BRINGI algorithm. See 'Using dual-polarized radar and dual-frequency profiler for DSD characterization: a case study from Darwin, Australia', Bringi et al, JTech, Vol 26, 2009, 2107 - 2122.\n\t  if HAIL or RAIN/HAIL mixture and rateKdp is valid\n\t    RATE_BRINGI = RATE_KDP\n\t  else if dBZ > theshold and KDP > threhsold and rateKdp is valid\n\t    RATE_BRINGI = RATE_KDP\n\t  else\n\t    if ZDR >= threshold\n\t      RATE_BRINGI = RATE_ZZDR\n\t    else\n\t      RATE_BRINGI = RATE_Z\n");
     tt++;
     
-    // Parameter 'PRECIP_bringi_dbz_threshold'
+    // Parameter 'RATE_bringi_dbz_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_bringi_dbz_threshold");
+    tt->param_name = tdrpStrDup("RATE_bringi_dbz_threshold");
     tt->descr = tdrpStrDup("Units are dBZ.");
     tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &PRECIP_bringi_dbz_threshold - &_start_;
+    tt->val_offset = (char *) &RATE_bringi_dbz_threshold - &_start_;
     tt->single_val.d = 40;
     tt++;
     
-    // Parameter 'PRECIP_bringi_kdp_threshold'
+    // Parameter 'RATE_bringi_kdp_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_bringi_kdp_threshold");
+    tt->param_name = tdrpStrDup("RATE_bringi_kdp_threshold");
     tt->descr = tdrpStrDup("Units are deg/km.");
     tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &PRECIP_bringi_kdp_threshold - &_start_;
+    tt->val_offset = (char *) &RATE_bringi_kdp_threshold - &_start_;
     tt->single_val.d = 0.15;
     tt++;
     
-    // Parameter 'PRECIP_bringi_zdr_threshold'
+    // Parameter 'RATE_bringi_zdr_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("PRECIP_bringi_zdr_threshold");
+    tt->param_name = tdrpStrDup("RATE_bringi_zdr_threshold");
     tt->descr = tdrpStrDup("Units are dB.");
     tt->help = tdrpStrDup("See notes above for details on use.");
-    tt->val_offset = (char *) &PRECIP_bringi_zdr_threshold - &_start_;
+    tt->val_offset = (char *) &RATE_bringi_zdr_threshold - &_start_;
     tt->single_val.d = 0.1;
     tt++;
     

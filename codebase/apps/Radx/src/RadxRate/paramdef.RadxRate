@@ -179,19 +179,19 @@ paramdef string {
   p_default = "use-defaults";
   p_descr = "Path for parameters for computing PRECIP.";
   p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
-} PRECIP_params_file_path;
+} RATE_params_file_path;
 
 paramdef boolean {
   p_default = FALSE;
   p_descr = "When computing PRECIP, using KDP conditioned for self-consistency.";
   p_help = "When KDP is computed, we compute both a standard result, and a conditioned result based on the self-consistency method. If this parameter is set to TRUE, the self-consistency result will be used instead of the standard result.";
-} PRECIP_use_KDP_self_consistency;
+} RATE_use_KDP_self_consistency;
 
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to use Z and ZDR fields that are corrected for attenuation.";
   p_help = "If TRUE, the attenuation-corrected Z and ZDR fields will be used for computing PRECIP.";
-} PRECIP_use_attenuation_corrected_fields;
+} RATE_use_attenuation_corrected_fields;
 
 commentdef {
   p_header = "SPECIFYING OUTPUT FIELDS";
@@ -199,15 +199,15 @@ commentdef {
 
 typedef enum {
 
-  PRECIP_RATE_ZH,
-  PRECIP_RATE_ZH_SNOW,
-  PRECIP_RATE_Z_ZDR,
-  PRECIP_RATE_KDP,
-  PRECIP_RATE_KDP_ZDR,
-  PRECIP_RATE_HYBRID,
-  PRECIP_RATE_PID,
-  PRECIP_RATE_HIDRO,
-  PRECIP_RATE_BRINGI,
+  RATE_ZH,
+  RATE_ZH_SNOW,
+  RATE_Z_ZDR,
+  RATE_KDP,
+  RATE_KDP_ZDR,
+  RATE_HYBRID,
+  RATE_PID,
+  RATE_HIDRO,
+  RATE_BRINGI,
 
   PID,
   PID_INTEREST,
@@ -235,7 +235,7 @@ typedef struct {
 paramdef struct output_field_t {
   p_default = {
     {
-      id = PRECIP_RATE_ZH,
+      id = RATE_ZH,
       name = "RATE_ZH",
       long_name = "precip_rate_from_z",
       standard_name = "precip_rate_from_z",
@@ -244,7 +244,7 @@ paramdef struct output_field_t {
     }
     ,
     {
-      id = PRECIP_RATE_ZH_SNOW,
+      id = RATE_ZH_SNOW,
       name = "RATE_ZH_SNOW",
       long_name = "precip_rate_from_z_for_snow",
       standard_name = "precip_rate_from_z_for_snow",
@@ -253,7 +253,7 @@ paramdef struct output_field_t {
     }
     ,
     {
-      id = PRECIP_RATE_Z_ZDR,
+      id = RATE_Z_ZDR,
       name = "RATE_Z_ZDR",
       long_name = "precip_rate_from_z_and_zdr",
       standard_name = "precip_rate_from_z_and_zdr",
@@ -262,7 +262,7 @@ paramdef struct output_field_t {
     }
     ,
     {
-      id = PRECIP_RATE_KDP,
+      id = RATE_KDP,
       name = "RATE_KDP",
       long_name = "precip_rate_from_kdp",
       standard_name = "precip_rate_from_kdp",
@@ -271,7 +271,7 @@ paramdef struct output_field_t {
     }
     ,
     {
-      id = PRECIP_RATE_KDP_ZDR,
+      id = RATE_KDP_ZDR,
       name = "RATE_KDP_ZDR",
       long_name = "precip_rate_from_kdp_and_zdr",
       standard_name = "precip_rate_from_kdp_and_zdr",
@@ -280,7 +280,7 @@ paramdef struct output_field_t {
     }
     ,
     {
-      id = PRECIP_RATE_HYBRID,
+      id = RATE_HYBRID,
       name = "RATE_HYBRID",
       long_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
       standard_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
@@ -289,7 +289,7 @@ paramdef struct output_field_t {
     }
     ,
     {
-      id = PRECIP_RATE_PID,
+      id = RATE_PID,
       name = "RATE_PID",
       long_name = "precip_rate_based_on_pid",
       standard_name = "precip_rate_based_on_pid",
@@ -373,6 +373,15 @@ paramdef struct output_field_t {
   p_help = "Choose the ID from the list.\n"
     "\nThe name and units can be set however the user prefers.\n"
     "\nThe output_encoding apply to CfRadial output only. \n\n"
+    "\tRATE_ZH: Precip rate from ZH\n"
+    "\tRATE_ZH_SNOW: Precip rate from ZH in dry snow\n"
+    "\tRATE_Z_ZDR: Precip rate from Z and ZDR\n"
+    "\tRATE_KDP: Precip rate from KDP\n"
+    "\tRATE_KDP_ZDR: Precip rate from KDP and ZDR\n"
+    "\tRATE_HYBRID: Precip rate from NCAR hybrid\n"
+    "\tRATE_PID: Precip rate using PID to select the appropriate rate\n"
+    "\tRATE_HIDRO: Precip rate using CSU HIDRO hybrid\n"
+    "\tRATE_BRINGI: Precip rate using Bringi hybrid\n"
     "\tPID: NCAR Particle ID\n"
     "\tPID_INTEREST: final interest map for NCAR Particle ID values\n"
     "\tTEMP_FOR_PID: temperature field for PID (C)\n"

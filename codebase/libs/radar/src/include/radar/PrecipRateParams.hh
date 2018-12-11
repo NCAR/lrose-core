@@ -348,67 +348,67 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  double PRECIP_snr_threshold;
+  double RATE_snr_threshold;
 
-  tdrp_bool_t PRECIP_apply_median_filter_to_DBZ;
+  tdrp_bool_t RATE_apply_median_filter_to_DBZ;
 
-  int PRECIP_DBZ_median_filter_len;
+  int RATE_DBZ_median_filter_len;
 
-  tdrp_bool_t PRECIP_apply_median_filter_to_ZDR;
+  tdrp_bool_t RATE_apply_median_filter_to_ZDR;
 
-  int PRECIP_ZDR_median_filter_len;
+  int RATE_ZDR_median_filter_len;
 
-  double PRECIP_min_valid_rate;
+  double RATE_min_valid_rate;
 
-  double PRECIP_max_valid_rate;
+  double RATE_max_valid_rate;
 
-  double PRECIP_max_valid_dbz;
+  double RATE_max_valid_dbz;
 
-  double PRECIP_brightband_dbz_correction;
+  double RATE_brightband_dbz_correction;
 
-  double PRECIP_zh_aa;
+  double RATE_zh_aa;
 
-  double PRECIP_zh_bb;
+  double RATE_zh_bb;
 
-  double PRECIP_zh_aa_snow;
+  double RATE_zh_aa_snow;
 
-  double PRECIP_zh_bb_snow;
+  double RATE_zh_bb_snow;
 
-  double PRECIP_zzdr_aa;
+  double RATE_zzdr_aa;
 
-  double PRECIP_zzdr_bb;
+  double RATE_zzdr_bb;
 
-  double PRECIP_zzdr_cc;
+  double RATE_zzdr_cc;
 
-  double PRECIP_kdp_aa;
+  double RATE_kdp_aa;
 
-  double PRECIP_kdp_bb;
+  double RATE_kdp_bb;
 
-  double PRECIP_kdpzdr_aa;
+  double RATE_kdpzdr_aa;
 
-  double PRECIP_kdpzdr_bb;
+  double RATE_kdpzdr_bb;
 
-  double PRECIP_kdpzdr_cc;
+  double RATE_kdpzdr_cc;
 
-  double PRECIP_pid_rate_kdp_threshold;
+  double RATE_pid_rate_kdp_threshold;
 
-  double PRECIP_hybrid_dbz_threshold;
+  double RATE_hybrid_dbz_threshold;
 
-  double PRECIP_hybrid_kdp_threshold;
+  double RATE_hybrid_kdp_threshold;
 
-  double PRECIP_hybrid_zdr_threshold;
+  double RATE_hybrid_zdr_threshold;
 
-  double PRECIP_hidro_dbz_threshold;
+  double RATE_hidro_dbz_threshold;
 
-  double PRECIP_hidro_kdp_threshold;
+  double RATE_hidro_kdp_threshold;
 
-  double PRECIP_hidro_zdr_threshold;
+  double RATE_hidro_zdr_threshold;
 
-  double PRECIP_bringi_dbz_threshold;
+  double RATE_bringi_dbz_threshold;
 
-  double PRECIP_bringi_kdp_threshold;
+  double RATE_bringi_kdp_threshold;
 
-  double PRECIP_bringi_zdr_threshold;
+  double RATE_bringi_zdr_threshold;
 
   char _end_; // end of data region
               // needed for zeroing out data

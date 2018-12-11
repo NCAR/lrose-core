@@ -45,7 +45,7 @@ Args::Args ()
   tdrpDebug = false;
   printParamsKdp = false;
   printParamsPid = false;
-  printParamsPrecip = false;
+  printParamsRate = false;
   startTimeSet = false;
   endTimeSet = false;
 }
@@ -164,20 +164,20 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
-    } else if (!strcmp(argv[i], "-params_precip")) {
+    } else if (!strcmp(argv[i], "-params_rate")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "PRECIP_params_file_path = \"%s\";", argv[++i]);
+	sprintf(tmp_str, "RATE_params_file_path = \"%s\";", argv[++i]);
 	TDRP_add_override(&override, tmp_str);
       } else {
 	OK = false;
       }
 	
-    } else if (!strcmp(argv[i], "-print_params_precip")) {
+    } else if (!strcmp(argv[i], "-print_params_rate")) {
 
-      printParamsPrecip = true;
+      printParamsRate = true;
       if (i < argc - 1) {
-	printParamsPrecipMode = argv[++i];
+	printParamsRateMode = argv[++i];
       }
 	
     } else if (!strcmp(argv[i], "-params_pid")) {
@@ -262,10 +262,10 @@ void Args::_usage(ostream &out)
   Params::usage(out);
 
   out << endl;
-  out << "PRECIP-specific parameters:" << endl;
-  out << "   [ -params_precip ] specify PRECIP params file path" << endl;
+  out << "RATE-specific parameters:" << endl;
+  out << "   [ -params_rate ] specify RATE params file path" << endl;
   out << "     otherwise it is set in the main params file" << endl;
-  out << "   [ -print_params_precip [mode]] print PRECIP params" << endl;
+  out << "   [ -print_params_rate [mode]] print RATE params" << endl;
   out << "     see modes from -print_params above" << endl;
 
   out << endl;
