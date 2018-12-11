@@ -2,7 +2,7 @@
 
 ## KDP, PID and Precipitation Rate Applications - use of shared parameter files
 
-The following applications form a group that handle particle identification and precipitation rate estimation.
+The following applications form a group that handle KDP estimation, particle identification (PID) and precipitation rate estimation.
 
 | App                       | KDP   | Z & ZDR Attenuation | NCAR PID | Precip Rate |
 | -------------             | ----- | ------------------- | -------- | ----------- |
