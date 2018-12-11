@@ -2,7 +2,7 @@
 
 ### Purpose
 
-RadxPid computes PID from dual-pol moments in polar-coordinate radar data.
+RadxPid runs the NCAR Particle Identification algorithm on dual-pol moments in polar-coordinate radar data.
 
 In order to compute PID, RadxPid also computes KDP and the attenuation correction in Z and ZDR.
 
