@@ -45,10 +45,10 @@ TDRP args: [options as below]
    [ -tdrp_debug] debugging prints for tdrp
    [ -tdrp_usage] print this usage
 
-PRECIP-specific parameters:
-   [ -params_precip ] specify PRECIP params file path
+RATE-specific parameters:
+   [ -params_rate ] specify RATE params file path
      otherwise it is set in the main params file
-   [ -print_params_precip [mode]] print PRECIP params
+   [ -print_params_rate [mode]] print RATE params
      see modes from -print_params above
 
 PID-specific parameters:
