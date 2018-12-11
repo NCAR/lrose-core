@@ -16,9 +16,9 @@ The main file in turn points to shared parameter files for specific purposes.
 
 RadxKdp reads in a KDP-specific parameter file.
 
-RadxPid reads in the KDP parameter file, and in addition 2 PID-specific files: (a) the PID overview and (b) the PID-thredholds file that specifies the details of the fuzzy logic.
+RadxPid reads in the KDP parameter file, and in addition 2 PID-specific files: (a) the PID overview and (b) the thresholds file that specifies the details of the PID fuzzy logic.
 
-RadxRate reads in all of the above files, and in addition a file specific to the computation of precip rate.
+RadxRate reads in all of the above, plus a file specific to the computation of precip rate.
 
 
 
