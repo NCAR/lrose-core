@@ -109,7 +109,7 @@ To update the main parameter file, run commands similar to the following:
   mv tempfile RadxPid.test
 ```
 
-You need to ensure you create a temporary file first, and then move the file into place.
+Make sure you create a temporary file first, and then move the file into place.
 If you try to perform this in one step, you will destroy your original parameter file.
 
 To update the PID-specific parameter file, run commands similar to the following:
