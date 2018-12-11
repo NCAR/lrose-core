@@ -81,6 +81,10 @@ See [README_INSTALL_BIN.md](./docs/dev/README_INSTALL_BIN.md)
 
 See [README_CREATE_RELEASE.md](./docs/dev/README_CREATE_RELEASE.md)
 
+### Dual-polarization Radx Applications
+
+See [Radx Dual-Pol Apps](./docs/apps/radx/dualpol/README_RadxApps.md)
+
 This page is published at:
 
   [https://ncar.github.io/lrose-core](https://ncar.github.io/lrose-core)
