@@ -103,7 +103,7 @@ The following command would produce the same result as that above:
 RadxKdp -params RadxKdp.test -debug -start "2015 06 26 00 00 00" -end "2015 06 26 01 00 00"
 ```
 
-In the latter case, you need to ensure that the ```input_dir``` parameter is correctly set in RadxKdp.test.
+In the latter case, you need to ensure that the ```input_dir``` parameter is correctly set in ```RadxKdp.test``` so that the relevant archive files can be found.
 
 
 

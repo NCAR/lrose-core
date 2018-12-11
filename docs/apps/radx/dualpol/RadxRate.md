@@ -2,11 +2,11 @@
 
 ### Purpose
 
-RadxRate computes Precip-Rate from dual-pol moments in polar-coordinate radar data.
+RadxRate estimates precip rate from dual-pol moments in polar-coordinate radar data.
 
-In order to compute Precip-Rate, RadxRate also computes KDP, the attenuation correction in Z and ZDR and PID.
+In order to compute rate, RadxRate also computes KDP, the attenuation correction, and PID.
 
-Optionally, you may use the attenuation-corrected fields for computing Precip-Rate.
+You may optionally use the attenuation-corrected fields for computing precip rate.
 
 ### Usage
 
@@ -32,14 +32,14 @@ To generate a default parameter file, run the following command:
 
 This will generate the parameter file ```RadxRateParams.test```.
 
-Here is an [example](./RadxRateParams.md) RadxRate main parameter file.
+Here is an [example](./RadxRateParams.md) main parameter file.
 
 In that file, you will find the following parameter:
 
 ```
-///////////// PRECIP_params_file_path /////////////////
+///////////// RATE_params_file_path /////////////////
 //
-// Path for parameters for computing PRECIP.
+// Path for parameters for computing RATE.
 //
 // If set to use-defaults, no parameter file will be read in, and the 
 //   default parameters will be used.
@@ -48,56 +48,31 @@ In that file, you will find the following parameter:
 // Type: string
 //
 
-PRECIP_params_file_path = "use-defaults";
+RATE_params_file_path = "use-defaults";
 
 ```
 
-If you leave this set to ```use-defaults```, the default settings will be used for computing Precip-Rate.
+If you leave this set to ```use-defaults```, the default settings will be used for computing precip rate.
 
-If you set this to a path containing the Precip-Rate-specific parameters, this will override the default parameters.
+If you set this to a path containing the rate-specific parameters, this will override the default parameters.
 
-Also you will need to set a parameter file path for KDP computations. For more details, see [RadxKdp](./RadxKdp.md).
+Also you will need to set a parameter file path for KDP computations, and for PID computations.
 
-And you will need to set a parameter file path for PID computations. For more details, see [RadxPid](./RadxPid.md).
+### Generating the rate-specific parameter file
 
-### Generating the Precip-Rate-specific parameter file
-
-To generate a Precip-Rate-specific parameter, run the following command:
+To generate a rate-specific parameter, run the following command:
 
 ```
-  RadxRate -print_params_precip > PrecipRateParams.test
+  RadxRate -print_params_rate > RateParams.test
 ```
 
-This will generate the parameter file ```PrecipRateParams.test```.
+This will generate the parameter file ```RateParams.test```.
 
-Here is an [example](./PrecipRateParams.md) Precip-Rate-specific parameter file.
+Here is an [example](./RateParams.md) rate-specific parameter file.
 
-### Interest maps and thresholds for Precip-Rate Fuzzy Logic
+### Interest maps and thresholds for PID Fuzzy Logic
 
-In the [PidParams](./PidParams.md) file, you will find the following parameter:
-
-```
-///////////// PID_thresholds_file_path ////////////////
-//
-// File path for fuzzy logic thresholds for PID.
-//
-// This file contains the thresholds and weights for computing particle 
-//   ID.
-//
-//
-// Type: string
-//
-PID_thresholds_file_path = "./pid_thresholds.nexrad";
-```
-
-Set this to a file suitable for the radar transmit mode and wavelength:
-
-| Wavelength                | Transmit mode | thresholds_file_example |
-| -------------             | ------------- | ----------------------- |
-| S-band                    | Simultaneous  | [pid_thresholds.sband.shv](pid_thresholds.sband.shv.md) |
-| S-band                    | Alternating   | [pid_thresholds.sband.alt](pid_thresholds.sband.alt.md) |
-| C-band                    | Simultaneous  | [pid_thresholds.cband.shv](pid_thresholds.cband.shv.md) |
-| X-band                    | Simultaneous  | [pid_thresholds.xband.shv](pid_thresholds.xband.shv.md) |
+See [RadxPid](./RadxPid.md) for details on dealing with the fuzzy logic parameters for PID.
 
 ### Updating the parameter files as the RadxRate app changes
 
@@ -115,11 +90,11 @@ To update the main parameter file, run commands similar to the following:
 You need to ensure you create a temporary file first, and then move the file into place.
 If you try to perform this in one step, you will destroy your original parameter file.
 
-To update the Precip-Rate-specific parameter file, run commands similar to the following:
+To update the rate-specific parameter file, run commands similar to the following:
 
 ```
-  RadxRate -params_precip PrecipRateParams.test -print_params_precip > tempfile
-  mv tempfile PrecipRateParams.test
+  RadxRate -params_rate RateParams.test -print_params_rate > tempfile
+  mv tempfile RateParams.test
 ```
 
 To update the PID-specific parameter file, run commands similar to the following:
@@ -152,9 +127,4 @@ The following command would produce the same result as that above:
 RadxRate -params RadxRate.test -debug -start "2015 06 26 00 00 00" -end "2015 06 26 01 00 00"
 ```
 
-In the latter case, you need to ensure that the ```input_dir``` parameter is correctly set in RadxRate.test.
-
-
-
-
-
+In the latter case, you need to ensure that the ```input_dir``` parameter is correctly set in RadxRate.test, so that the archive files can be found.
