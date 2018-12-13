@@ -272,6 +272,27 @@ void iwrf_xmit_power_init(iwrf_xmit_power_t &val)
 }
 
 //////////////////////////////////////////////////////
+// init rx_power struct
+
+void iwrf_rx_power_init(iwrf_rx_power_t &val)
+
+{
+
+  MEM_zero(val);
+
+  val.packet.id = IWRF_RX_POWER_ID;
+  val.packet.len_bytes = sizeof(val);
+  val.packet.version_num = 1;
+  iwrf_set_packet_time_to_now(val.packet);
+
+  val.max_power_dbm_hc = IWRF_MISSING_FLOAT;
+  val.max_power_dbm_vc = IWRF_MISSING_FLOAT;
+  val.max_power_dbm_hx = IWRF_MISSING_FLOAT;
+  val.max_power_dbm_vx = IWRF_MISSING_FLOAT;
+
+}
+
+//////////////////////////////////////////////////////
 // init xmit_sample struct
 
 void iwrf_xmit_sample_init(iwrf_xmit_sample_t &val)
@@ -910,6 +931,11 @@ int iwrf_get_packet_id(const void* buf, int len, int &packet_id)
 	iret = -1;
       } break;
 
+    case IWRF_RX_POWER_ID:
+      if (len < (int) sizeof(iwrf_rx_power_t)) {
+	iret = -1;
+      } break;
+
     case IWRF_XMIT_SAMPLE_ID:
       if (len < (int) sizeof(iwrf_xmit_sample_t)) {
 	iret = -1;
@@ -1067,6 +1093,10 @@ int iwrf_packet_swap(void *buf, int len)
 
     case IWRF_XMIT_POWER_ID:
       iwrf_xmit_power_swap(*((iwrf_xmit_power_t *) buf));
+      break;
+
+    case IWRF_RX_POWER_ID:
+      iwrf_rx_power_swap(*((iwrf_rx_power_t *) buf));
       break;
 
     case IWRF_XMIT_SAMPLE_ID:
@@ -1247,6 +1277,22 @@ bool iwrf_xmit_power_swap(iwrf_xmit_power_t &power)
   if (swap) {
     ui08 *start = (ui08 *) &power + sizeof(iwrf_packet_info_t);
     int nbytes = sizeof(iwrf_xmit_power_t) - sizeof(iwrf_packet_info_t);
+    SWAP_array_32(start, nbytes);
+  }
+  return swap;
+}
+
+//////////////////////////////////////////////////////
+// swap rx_power
+// returns true is swapped, false if already in native
+
+bool iwrf_rx_power_swap(iwrf_rx_power_t &power)
+
+{
+  bool swap = iwrf_packet_info_swap(power.packet);
+  if (swap) {
+    ui08 *start = (ui08 *) &power + sizeof(iwrf_packet_info_t);
+    int nbytes = sizeof(iwrf_rx_power_t) - sizeof(iwrf_packet_info_t);
     SWAP_array_32(start, nbytes);
   }
   return swap;
@@ -1611,6 +1657,7 @@ string iwrf_packet_id_to_str(int packet_id)
     case IWRF_ANTENNA_CORRECTION_ID: return "IWRF_ANTENNA_CORRECTION_ID";
     case IWRF_TS_PROCESSING_ID: return "IWRF_TS_PROCESSING_ID";
     case IWRF_XMIT_POWER_ID: return "IWRF_XMIT_POWER_ID";
+    case IWRF_RX_POWER_ID: return "IWRF_RX_POWER_ID";
     case IWRF_XMIT_SAMPLE_ID: return "IWRF_XMIT_SAMPLE_ID";
     case IWRF_XMIT_SAMPLE_V2_ID: return "IWRF_XMIT_SAMPLE_V2_ID";
     case IWRF_BURST_HEADER_ID: return "IWRF_BURST_HEADER_ID";
@@ -2041,6 +2088,10 @@ void iwrf_packet_print(FILE *out, const void *buf, int len)
       iwrf_xmit_power_print(out, *((iwrf_xmit_power_t *) buf));
       break;
 
+    case IWRF_RX_POWER_ID:
+      iwrf_rx_power_print(out, *((iwrf_rx_power_t *) buf));
+      break;
+
     case IWRF_XMIT_SAMPLE_ID:
       iwrf_xmit_sample_print(out, *((iwrf_xmit_sample_t *) buf));
       break;
@@ -2367,6 +2418,27 @@ void iwrf_xmit_power_print(FILE *out,
   
   fprintf(out, "  power_dbm_h: %g\n", copy.power_dbm_h);
   fprintf(out, "  power_dbm_v: %g\n", copy.power_dbm_v);
+  fprintf(out, "=================================================================\n");
+
+}
+
+//////////////////////////////////////////////////////
+// print rx_power
+
+void iwrf_rx_power_print(FILE *out,
+                         const iwrf_rx_power_t &pwr)
+  
+{
+
+  iwrf_rx_power_t copy = pwr;
+  iwrf_rx_power_swap(copy);
+  fprintf(out, "==================== iwrf_rx_power ============================\n");
+  iwrf_packet_info_print(out, copy.packet);
+  
+  fprintf(out, "  max_power_dbm_hc: %g\n", copy.max_power_dbm_hc);
+  fprintf(out, "  max_power_dbm_vc: %g\n", copy.max_power_dbm_vc);
+  fprintf(out, "  max_power_dbm_hx: %g\n", copy.max_power_dbm_hx);
+  fprintf(out, "  max_power_dbm_vx: %g\n", copy.max_power_dbm_vx);
   fprintf(out, "=================================================================\n");
 
 }
@@ -3282,6 +3354,11 @@ void iwrf_print_all_formats(FILE *out)
   }
   
   {
+    iwrf_rx_power_t val;
+    iwrf_rx_power_print_format(out, val);
+  }
+  
+  {
     iwrf_xmit_sample_t val;
     iwrf_xmit_sample_print_format(out, val);
   }
@@ -3629,6 +3706,34 @@ void iwrf_xmit_power_print_format(FILE *out, const iwrf_xmit_power_t &val)
   fprintf(out, _dform, "fl32", "power_dbm_h", sizeof(val.power_dbm_h), (char *) &val.power_dbm_h - id);
   fprintf(out, _dform, "fl32", "power_dbm_v", sizeof(val.power_dbm_v), (char *) &val.power_dbm_v - id);
   fprintf(out, _dform, "si32", "unused[16]", sizeof(val.unused), (char *) val.unused - id);
+
+  _print_format_divider('-', out);
+
+}
+
+
+// print format of rx_power
+
+void iwrf_rx_power_print_format(FILE *out, const iwrf_rx_power_t &val)
+{
+
+  _print_format_divider('-', out);
+  fprintf(out, "  struct: 'iwrf_rx_power_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), IWRF_RX_POWER_ID);
+  fprintf(out, "  packet info:\n");
+  _print_format_header(out);
+  _print_packet_format(out, val.packet);
+
+  fprintf(out, "\n");
+  fprintf(out, "  meta-data:\n");
+  _print_format_header(out);
+
+  const char *id = (char *) &val.packet.id;
+  
+  fprintf(out, _dform, "fl32", "max_power_dbm_hc", sizeof(val.max_power_dbm_hc), (char *) &val.max_power_dbm_hc - id);
+  fprintf(out, _dform, "fl32", "max_power_dbm_vc", sizeof(val.max_power_dbm_vc), (char *) &val.max_power_dbm_vc - id);
+  fprintf(out, _dform, "fl32", "max_power_dbm_hx", sizeof(val.max_power_dbm_hx), (char *) &val.max_power_dbm_hx - id);
+  fprintf(out, _dform, "fl32", "max_power_dbm_vx", sizeof(val.max_power_dbm_vx), (char *) &val.max_power_dbm_vx - id);
+  fprintf(out, _dform, "si32", "unused[14]", sizeof(val.unused), (char *) val.unused - id);
 
   _print_format_divider('-', out);
 

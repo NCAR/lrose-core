@@ -120,6 +120,7 @@ extern "C" {
 #define IWRF_BURST_HEADER_ID 0x77770011 /**< ID for burst IQ data */
 #define IWRF_STATUS_XML_ID 0x77770012 /**< ID for status in XML format */
 #define IWRF_ANTENNA_ANGLES_ID 0x77770013 /**< ID for antenna angles */
+#define IWRF_RX_POWER_ID 0x77770014 /**< ID for measured received power packet */
 
 #define IWRF_RVP8_OPS_INFO_ID 0x77770070 /**< ID for RVP8 operations info packet */
 #define IWRF_RVP8_PULSE_HEADER_ID 0x77770071 /**< ID for RVP8 pulse header packet */
@@ -821,6 +822,27 @@ typedef struct iwrf_xmit_power {
   si32 unused[16]; /**< for future expansion */
 
 } iwrf_xmit_power_t;
+
+/************************************************************************/
+/**
+ * \struct iwrf_rx_power
+ *
+ * Measured received power
+ *
+ ************************************************************************/
+
+typedef struct iwrf_rx_power {
+
+  iwrf_packet_info_t packet; /*< packet_id = IWRF_RX_POWER_ID */
+  
+  fl32 max_power_dbm_hc; /**< Peak power at any gate, in dBm, in HC channel. */
+  fl32 max_power_dbm_vc; /**< Peak power at any gate, in dBm, in VC channel. */
+  fl32 max_power_dbm_hx; /**< Peak power at any gate, in dBm, in HX channel. */
+  fl32 max_power_dbm_vx; /**< Peak power at any gate, in dBm, in VX channel. */
+  
+  si32 unused[14]; /**< for future expansion */
+
+} iwrf_rx_power_t;
 
 /************************************************************************/
 /**

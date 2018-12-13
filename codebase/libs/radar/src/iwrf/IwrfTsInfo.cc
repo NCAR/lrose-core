@@ -78,6 +78,7 @@ void IwrfTsInfo::clear()
   iwrf_antenna_correction_init(_ant_corr);
   iwrf_ts_processing_init(_proc);
   iwrf_xmit_power_init(_xmit_power);
+  iwrf_rx_power_init(_rx_power);
   iwrf_xmit_sample_init(_xmit_sample);
   iwrf_status_xml_init(_status_xml_hdr);
   iwrf_calibration_init(_calib);
@@ -93,6 +94,7 @@ void IwrfTsInfo::clear()
   _ant_corr_active = false;
   _proc_active = false;
   _xmit_power_active = false;
+  _rx_power_active = false;
   _xmit_sample_active = false;
   _status_xml_active = false;
   _calib_active = false;
@@ -152,6 +154,10 @@ int IwrfTsInfo::setFromBuffer(const void *buf, int len)
     case IWRF_XMIT_POWER_ID: {
       setXmitPower(*(iwrf_xmit_power_t *) copy);
       setXmitPowerActive(true);
+    } break;
+    case IWRF_RX_POWER_ID: {
+      setRxPower(*(iwrf_rx_power_t *) copy);
+      setRxPowerActive(true);
     } break;
     case IWRF_XMIT_SAMPLE_ID: {
       setXmitSample(*(iwrf_xmit_sample_t *) copy);
@@ -302,6 +308,7 @@ bool IwrfTsInfo::isInfo(int id)
     case IWRF_ANTENNA_CORRECTION_ID:
     case IWRF_TS_PROCESSING_ID:
     case IWRF_XMIT_POWER_ID:
+    case IWRF_RX_POWER_ID:
     case IWRF_XMIT_SAMPLE_ID:
     case IWRF_STATUS_XML_ID:
     case IWRF_CALIBRATION_ID:
@@ -379,6 +386,18 @@ void IwrfTsInfo::setXmitPower(const iwrf_xmit_power_t &power,
   if (addToMetaQueue) {
     // _addIdToQueue(IWRF_XMIT_POWER_ID);
     _addMetaToQueue(sizeof(_xmit_power), &_xmit_power);
+  }
+}
+
+void IwrfTsInfo::setRxPower(const iwrf_rx_power_t &power,
+                              bool addToMetaQueue /* = true */) {
+  _rx_power = power;
+  _rx_power.packet.id = IWRF_RX_POWER_ID;
+  _rx_power.packet.len_bytes = sizeof(iwrf_rx_power_t);
+  _rx_power.packet.version_num = 1;
+  if (addToMetaQueue) {
+    // _addIdToQueue(IWRF_RX_POWER_ID);
+    _addMetaToQueue(sizeof(_rx_power), &_rx_power);
   }
 }
 
@@ -531,6 +550,10 @@ void IwrfTsInfo::setXmitPowerActive(bool state) {
   _xmit_power_active = state;
 }
 
+void IwrfTsInfo::setRxPowerActive(bool state) {
+  _rx_power_active = state;
+}
+
 void IwrfTsInfo::setXmitSampleActive(bool state) {
   _xmit_sample_active = state;
 }
@@ -590,6 +613,10 @@ void IwrfTsInfo::setXmitPowerPktSeqNum(si64 pkt_seq_num) {
   _xmit_power.packet.seq_num = pkt_seq_num;
 }
 
+void IwrfTsInfo::setRxPowerPktSeqNum(si64 pkt_seq_num) {
+  _rx_power.packet.seq_num = pkt_seq_num;
+}
+
 void IwrfTsInfo::setXmitSamplePktSeqNum(si64 pkt_seq_num) {
   _xmit_sample.packet.seq_num = pkt_seq_num;
 }
@@ -635,6 +662,7 @@ void IwrfTsInfo::setTime(time_t secs, int nano_secs) {
   iwrf_set_packet_time(_ant_corr.packet, secs, nano_secs);
   iwrf_set_packet_time(_proc.packet, secs, nano_secs);
   iwrf_set_packet_time(_xmit_power.packet, secs, nano_secs);
+  iwrf_set_packet_time(_rx_power.packet, secs, nano_secs);
   iwrf_set_packet_time(_xmit_sample.packet, secs, nano_secs);
   iwrf_set_packet_time(_status_xml_hdr.packet, secs, nano_secs);
   iwrf_set_packet_time(_calib.packet, secs, nano_secs);
@@ -676,6 +704,10 @@ void IwrfTsInfo::setTsProcessingTime(time_t secs, int nano_secs) {
 
 void IwrfTsInfo::setXmitPowerTime(time_t secs, int nano_secs) {
   iwrf_set_packet_time(_xmit_power.packet, secs, nano_secs);
+}
+
+void IwrfTsInfo::setRxPowerTime(time_t secs, int nano_secs) {
+  iwrf_set_packet_time(_rx_power.packet, secs, nano_secs);
 }
 
 void IwrfTsInfo::setXmitSampleTime(time_t secs, int nano_secs) {
@@ -737,6 +769,10 @@ void IwrfTsInfo::setXmitPowerTimeToNow() {
   iwrf_set_packet_time_to_now(_xmit_power.packet);
 }
 
+void IwrfTsInfo::setRxPowerTimeToNow() {
+  iwrf_set_packet_time_to_now(_rx_power.packet);
+}
+
 void IwrfTsInfo::setXmitSampleTimeToNow() {
   iwrf_set_packet_time_to_now(_xmit_sample.packet);
 }
@@ -794,6 +830,10 @@ double IwrfTsInfo::getTsProcessingTime() const {
 
 double IwrfTsInfo::getXmitPowerTime() const {
   return iwrf_get_packet_time_as_double(_xmit_power.packet);
+}
+
+double IwrfTsInfo::getRxPowerTime() const {
+  return iwrf_get_packet_time_as_double(_rx_power.packet);
 }
 
 double IwrfTsInfo::getXmitSampleTime() const {

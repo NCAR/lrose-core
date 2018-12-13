@@ -178,6 +178,8 @@ public:
                        bool addToMetaQueue = true);
   void setXmitPower(const iwrf_xmit_power_t &power,
                     bool addToMetaQueue = true);
+  void setRxPower(const iwrf_rx_power_t &power,
+                  bool addToMetaQueue = true);
   void setXmitSample(const iwrf_xmit_sample_t &sample,
                      bool addToMetaQueue = true);
   void setStatusXml(const iwrf_status_xml_t &hdr,
@@ -204,6 +206,7 @@ public:
   void setAntennaCorrectionPktSeqNum(si64 pkt_seq_num);
   void setTsProcessingPktSeqNum(si64 pkt_seq_num);
   void setXmitPowerPktSeqNum(si64 pkt_seq_num);
+  void setRxPowerPktSeqNum(si64 pkt_seq_num);
   void setXmitSamplePktSeqNum(si64 pkt_seq_num);
   void setStatusXmlPktSeqNum(si64 pkt_seq_num);
   void setCalibrationPktSeqNum(si64 pkt_seq_num);
@@ -230,6 +233,7 @@ public:
   void setAntennaCorrectionTime(time_t secs, int nano_secs);
   void setTsProcessingTime(time_t secs, int nano_secs);
   void setXmitPowerTime(time_t secs, int nano_secs);
+  void setRxPowerTime(time_t secs, int nano_secs);
   void setXmitSampleTime(time_t secs, int nano_secs);
   void setStatusXmlTime(time_t secs, int nano_secs);
   void setCalibrationTime(time_t secs, int nano_secs);
@@ -247,6 +251,7 @@ public:
   void setAntennaCorrectionTimeToNow();
   void setTsProcessingTimeToNow();
   void setXmitPowerTimeToNow();
+  void setRxPowerTimeToNow();
   void setXmitSampleTimeToNow();
   void setStatusXmlTimeToNow();
   void setCalibrationTimeToNow();
@@ -265,6 +270,7 @@ public:
   void setAntennaCorrectionActive(bool state);
   void setTsProcessingActive(bool state);
   void setXmitPowerActive(bool state);
+  void setRxPowerActive(bool state);
   void setXmitSampleActive(bool state);
   void setStatusXmlActive(bool state);
   void setCalibrationActive(bool state);
@@ -310,6 +316,7 @@ public:
   }
   inline const iwrf_ts_processing_t &getTsProcessing() const { return _proc; }
   inline const iwrf_xmit_power_t &getXmitPower() const { return _xmit_power; }
+  inline const iwrf_rx_power_t &getRxPower() const { return _rx_power; }
   inline const iwrf_xmit_sample_t &getXmitSample() const { 
     return _xmit_sample; 
   }
@@ -337,6 +344,7 @@ public:
   bool isAntennaCorrectionActive() const { return _ant_corr_active; }
   bool isTsProcessingActive() const { return _proc_active; }
   bool isXmitPowerActive() const { return _xmit_power_active; }
+  bool isRxPowerActive() const { return _rx_power_active; }
   bool isXmitSampleActive() const { return _xmit_sample_active; }
   bool isStatusXmlActive() const { return _status_xml_active; }
   bool isCalibrationActive() const { return _calib_active; }
@@ -362,6 +370,7 @@ public:
   double getAntennaCorrectionTime() const;
   double getTsProcessingTime() const;
   double getXmitPowerTime() const;
+  double getRxPowerTime() const;
   double getXmitSampleTime() const;
   double getStatusXmlTime() const;
   double getCalibrationTime() const;
@@ -379,6 +388,7 @@ public:
   si64 getAntennaCorrectionPktSeqNum() const { return _ant_corr.packet.seq_num; }
   si64 getTsProcessingPktSeqNum() const { return _proc.packet.seq_num; }
   si64 getXmitPowerPktSeqNum() const { return _xmit_power.packet.seq_num; }
+  si64 getRxPowerPktSeqNum() const { return _rx_power.packet.seq_num; }
   si64 getXmitSamplePktSeqNum() const { return _xmit_sample.packet.seq_num; }
   si64 getStatusXmlPktSeqNum() const { return _status_xml_hdr.packet.seq_num; }
   si64 getCalibrationPktSeqNum() const { return _calib.packet.seq_num; }
@@ -500,6 +510,21 @@ public:
 
   inline void set_xmit_power_dbm_h(fl32 x) { _xmit_power.power_dbm_h = x; }
   inline void set_xmit_power_dbm_v(fl32 x) { _xmit_power.power_dbm_v = x; }
+  
+  // set rx_power fields
+
+  inline void set_rx_max_power_dbm_hc(fl32 x) {
+    _rx_power.max_power_dbm_hc = x;
+  }
+  inline void set_rx_max_power_dbm_vc(fl32 x) {
+    _rx_power.max_power_dbm_vc = x;
+  }
+  inline void set_rx_max_power_dbm_hx(fl32 x) {
+    _rx_power.max_power_dbm_hx = x;
+  }
+  inline void set_rx_max_power_dbm_vx(fl32 x) {
+    _rx_power.max_power_dbm_vx = x;
+  }
   
   // set xmit_sample fields
 
@@ -746,6 +771,21 @@ public:
   inline fl32 get_xmit_power_dbm_h() const { return _xmit_power.power_dbm_h; }
   inline fl32 get_xmit_power_dbm_v() const { return _xmit_power.power_dbm_v; }
 
+  // get rx_power fields
+
+  inline fl32 get_rx_max_power_dbm_hc() const {
+    return _rx_power.max_power_dbm_hc;
+  }
+  inline fl32 get_rx_max_power_dbm_vc() const {
+    return _rx_power.max_power_dbm_vc;
+  }
+  inline fl32 get_rx_max_power_dbm_hx() const {
+    return _rx_power.max_power_dbm_hx;
+  }
+  inline fl32 get_rx_max_power_dbm_vx() const {
+    return _rx_power.max_power_dbm_vx;
+  }
+
   // get xmit_sample fields
 
   inline fl32 get_xmit_sample_dbm_h() const { return _xmit_sample.power_dbm_h; }
@@ -897,6 +937,7 @@ private:
   iwrf_antenna_correction_t _ant_corr;
   iwrf_ts_processing_t _proc;
   iwrf_xmit_power_t _xmit_power;
+  iwrf_rx_power_t _rx_power;
   iwrf_xmit_sample_t _xmit_sample;
   iwrf_status_xml_t _status_xml_hdr;
   string _status_xml_str;
@@ -913,6 +954,7 @@ private:
   bool _ant_corr_active;
   bool _proc_active;
   bool _xmit_power_active;
+  bool _rx_power_active;
   bool _xmit_sample_active;
   bool _status_xml_active;
   bool _calib_active;
