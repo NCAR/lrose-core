@@ -1248,7 +1248,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("");
+    tt->comment_hdr = tdrpStrDup("QC check");
     tt->comment_text = tdrpStrDup("");
     tt++;
     

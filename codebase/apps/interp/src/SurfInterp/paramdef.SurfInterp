@@ -365,7 +365,7 @@ paramdef struct genpt_fields_t
 } genptFields[];
 
 commentdef {
-  p_header = "QC check"
+  p_header = "QC check";
 }
 
 paramdef float {
