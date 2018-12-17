@@ -231,8 +231,8 @@ static const double nc3Bad_double = NC_FILL_DOUBLE;
     return (int) the_values[n];                                 \
   }
 
-#define NCINT64_MIN LONG_LONG_MIN
-#define NCINT64_MAX LONG_LONG_MAX
+#define NCINT64_MIN LLONG_MIN
+#define NCINT64_MAX LLONG_MAX
 #define as_int64_implement(TYPE)                                      \
   int64_t Nc3Val(TYPE)::as_int64( long n ) const                      \
   {                                                                   \
