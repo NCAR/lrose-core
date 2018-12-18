@@ -50,13 +50,10 @@
 #include <sys/wait.h>
 #include <ctime>
 #include <toolsa/DateTime.hh>
-#include <toolsa/uusleep.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaXml.hh>
 #include <toolsa/TaArray.hh>
 #include <toolsa/pmu.h>
-#include <toolsa/ServerSocket.hh>
-#include <radar/RadarComplex.hh>
 
 using namespace std;
 
@@ -68,19 +65,9 @@ TsMaxPower2Fmq::TsMaxPower2Fmq(int argc, char **argv)
 
   isOK = true;
   _pulseCount = 0;
-  // _totalPulseCount = 0;
-  // _printCount = 0;
   _pulseReader = NULL;
   _haveChan1 = false;
   _prevPulseSeqNum = 0;
-
-  // _prevAzimuth = -9999.0;
-  // _prevElevation = -9999.0;
-
-  // MEM_zero(_scanPrev);
-  // MEM_zero(_procPrev);
-  // MEM_zero(_calibPrev);
-  // _infoChanged = false;
 
   _gateForMax0 = 0;
   _gateForMax1 = 0;
@@ -115,10 +102,8 @@ TsMaxPower2Fmq::TsMaxPower2Fmq(int argc, char **argv)
   
   IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    iwrfDebug = IWRF_DEBUG_EXTRA;
-  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
     iwrfDebug = IWRF_DEBUG_VERBOSE;
-  } else if (_params.debug) {
+  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
     iwrfDebug = IWRF_DEBUG_NORM;
   } 
     
@@ -188,7 +173,7 @@ TsMaxPower2Fmq::TsMaxPower2Fmq(int argc, char **argv)
 
   _nSamples = _params.n_samples;
   _startGateRequested = _params.start_gate;
-  _nGatesRequested = _params.n_gates;
+  _nGates = 0;
 
 }
 
@@ -227,6 +212,7 @@ int TsMaxPower2Fmq::Run ()
     
     // initialize
     
+    _pulseCount = 0;
     _initMaxPowerStats();
     
     // accumulate max power stats
@@ -245,6 +231,7 @@ int TsMaxPower2Fmq::Run ()
 
       pulse->convertToFL32();
       _addToMaxPower(*pulse);
+      _pulseCount++;
       
       delete pulse;
       
@@ -253,7 +240,7 @@ int TsMaxPower2Fmq::Run ()
     // compute max power stats
     
     _computeMaxPowerStats();
-    
+
     // compile XML
     
     string xmlStr;
@@ -319,10 +306,12 @@ IwrfTsPulse *TsMaxPower2Fmq::_getNextPulse()
   si64 pulseSeqNum = pulse->getSeqNum();
   si64 nMissing = (pulseSeqNum - _prevPulseSeqNum) - 1;
   if (_prevPulseSeqNum != 0 && nMissing != 0) {
-    cerr << "WARNING - TsMaxPower2Fmq - n missing pulses: " << nMissing << endl;
-    cerr << "  prev pulse seq num: " << _prevPulseSeqNum << endl;
-    cerr << "  this pulse seq num: " << pulseSeqNum << endl;
-    cerr << "  file: " << _pulseReader->getPathInUse() << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - TsMaxPower2Fmq - n missing pulses: " << nMissing << endl;
+      cerr << "  prev pulse seq num: " << _prevPulseSeqNum << endl;
+      cerr << "  this pulse seq num: " << pulseSeqNum << endl;
+      cerr << "  file: " << _pulseReader->getPathInUse() << endl;
+    }
   }
   _prevPulseSeqNum = pulseSeqNum;
 
@@ -343,12 +332,7 @@ void TsMaxPower2Fmq::_conditionGateRange(const IwrfTsPulse &pulse)
     _startGate = 0;
   }
 
-  _nGates = _nGatesRequested;
-  _endGate = _startGate + _nGates - 1;
-  if (_endGate > pulse.getNGates() - 1) {
-    _endGate = pulse.getNGates() - 1;
-    _nGates = _endGate - _startGate + 1;
-  }
+  _nGates = pulse.getNGates();
 
 }
     
@@ -368,7 +352,6 @@ void TsMaxPower2Fmq::_saveCardinalValues(const IwrfTsPulse &pulse)
     _midPrt = pulse.getPrt();
     _midEl = pulse.getEl();
     _midAz = pulse.getAz();
-    _midTransition = pulse.antennaTransition();
   }
 
   _endTime = pulse.getFTime();
@@ -393,7 +376,7 @@ void TsMaxPower2Fmq::_addToMaxPower(const IwrfTsPulse &pulse)
   int gateForMax1 = 0;
 
   int index = _startGate * 2;
-  for (int igate = _startGate; igate <= _endGate; igate++, index += 2) {
+  for (int igate = _startGate; igate < _nGates; igate++, index += 2) {
     double ii0 = iqChan0[index];
     double qq0 = iqChan0[index + 1];
     double power0 = ii0 * ii0 + qq0 * qq0;
@@ -476,13 +459,10 @@ void TsMaxPower2Fmq::_initMaxPowerStats()
   
 {
   
-  _pulseCount = 0;
-
   _midTime = -999.9;
   _midPrt = -999.9;
   _midEl = -999.9;
   _midAz = -999.9;
-  _midTransition = false;
 
   _meanMaxPower0 = -9999.0;
   _meanMaxPower1 = -9999.0;
@@ -666,6 +646,12 @@ int TsMaxPower2Fmq::_writeToFmq(const string &xmlStr)
     cerr << "ERROR - TsMaxPower2Fmq::_writeToFmq" << endl;
     cerr << "  Cannot write FMQ: " << _outputFmqPath << endl;
     return -1;
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "===================================" << endl;
+    cerr << xmlStr;
+    cerr << "===================================" << endl;
   }
 
   return 0;

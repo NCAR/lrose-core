@@ -385,8 +385,6 @@ public:
 
   int start_gate;
 
-  int n_gates;
-
   distance_units_t distance_units;
 
   tdrp_bool_t apply_calibration;
@@ -410,7 +408,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[24];
+  mutable TDRPtable _table[23];
 
   const char *_className;
 

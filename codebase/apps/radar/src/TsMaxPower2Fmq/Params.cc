@@ -676,7 +676,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("n_samples");
-    tt->descr = tdrpStrDup("Number of pulse samples to be used in computations.");
+    tt->descr = tdrpStrDup("Number of pulse samples to be used in computing stats.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &n_samples - &_start_;
     tt->single_val.i = 1000;
@@ -692,18 +692,6 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &start_gate - &_start_;
     tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'n_gates'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_gates");
-    tt->descr = tdrpStrDup("Number of gates for analysis.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &n_gates - &_start_;
-    tt->single_val.i = 2048;
     tt++;
     
     // Parameter 'distance_units'
@@ -744,7 +732,7 @@
     tt->descr = tdrpStrDup("Option to apply calibration to compute powers.");
     tt->help = tdrpStrDup("Normally the powers are simply computed as I**2 + Q**2 - i.e. the power at the digitizer. If this param is set to TRUE, then the receiver gain from the calibration file will be subtracted from the powers, to give the powers detected by the LNAs.");
     tt->val_offset = (char *) &apply_calibration - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'cal_xml_file_path'

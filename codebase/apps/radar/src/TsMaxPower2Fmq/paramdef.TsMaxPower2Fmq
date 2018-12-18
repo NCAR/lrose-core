@@ -70,18 +70,13 @@ commentdef {
 
 paramdef int {
   p_default = 1000;
-  p_descr = "Number of pulse samples to be used in computations.";
+  p_descr = "Number of pulse samples to be used in computing stats.";
 } n_samples;
 
 paramdef int {
   p_default = 0;
   p_descr = "Start gate for analysis.";
 } start_gate;
-
-paramdef int {
-  p_default = 2048;
-  p_descr = "Number of gates for analysis.";
-} n_gates;
 
 typedef enum {
   DISTANCE_IN_METERS,
@@ -99,7 +94,7 @@ commentdef {
 };
 
 paramdef boolean {
-  p_default = FALSE;
+  p_default = TRUE;
   p_descr = "Option to apply calibration to compute powers.";
   p_help = "Normally the powers are simply computed as I**2 + Q**2 - i.e. the power at the digitizer. If this param is set to TRUE, then the receiver gain from the calibration file will be subtracted from the powers, to give the powers detected by the LNAs.";
 } apply_calibration;

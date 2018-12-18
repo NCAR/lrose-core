@@ -94,7 +94,11 @@ private:
   ssize_t _pulseCount;
   bool _haveChan1;
 
-  bool _midTransition;
+  int _nSamples;
+  int _startGateRequested;
+  int _nGates, _startGate;
+  double _startRangeM, _gateSpacingM;
+
   double _midTime, _midPrt;
   double _midAz, _midEl;
   double _startTime, _endTime;
@@ -107,11 +111,6 @@ private:
   double _rangeToMaxPower0, _rangeToMaxPower1;
   vector<RadarComplex_t> _iqForVelAtMaxPower0, _iqForVelAtMaxPower1;
   double _velAtMaxPower0, _velAtMaxPower1;
-
-  int _nSamples;
-  int _nGatesRequested, _startGateRequested;
-  int _nGates, _startGate, _endGate;
-  double _startRangeM, _gateSpacingM;
 
   // calibration
 
