@@ -601,8 +601,30 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("DATA INPUT - from file message queue (FMQ)");
+    tt->comment_hdr = tdrpStrDup("DATA INPUT MODES");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'mode'
+    // ctype is '_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("mode");
+    tt->descr = tdrpStrDup("Operating mode");
+    tt->help = tdrpStrDup("In FMQ realtime mode, we open the input_fmq, and read the time series data from the queue. In ARCHIVE mode, we specify a start and end time, and read in the files in this time interval from the input_dir. In FILELIST mode, we move through a list of file names specified on the command line. ");
+    tt->val_offset = (char *) &mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("mode_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("REALTIME_FMQ");
+      tt->enum_def.fields[0].val = REALTIME_FMQ;
+      tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
+      tt->enum_def.fields[1].val = ARCHIVE;
+      tt->enum_def.fields[2].name = tdrpStrDup("FILELIST");
+      tt->enum_def.fields[2].val = FILELIST;
+    tt->single_val.e = REALTIME_FMQ;
     tt++;
     
     // Parameter 'fmq_name'
@@ -611,7 +633,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("fmq_name");
-    tt->descr = tdrpStrDup("FMQ name. For FMQ input_mode only.");
+    tt->descr = tdrpStrDup("FMQ name. For REALTIME_FMQ input_mode only.");
     tt->help = tdrpStrDup("Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.");
     tt->val_offset = (char *) &fmq_name - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/fmq/ts");
@@ -627,6 +649,42 @@
     tt->help = tdrpStrDup("After this time elapses with no data, the status data is considered invalid until the data restarts.");
     tt->val_offset = (char *) &data_valid_interval_secs - &_start_;
     tt->single_val.i = 60;
+    tt++;
+    
+    // Parameter 'archive_data_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("archive_data_dir");
+    tt->descr = tdrpStrDup("Input directory for time series files.");
+    tt->help = tdrpStrDup("ARCHIVE mode.");
+    tt->val_offset = (char *) &archive_data_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/time_series");
+    tt++;
+    
+    // Parameter 'archive_start_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("archive_start_time");
+    tt->descr = tdrpStrDup("Start time for archive mode.");
+    tt->help = tdrpStrDup("In ARCHIVE mode, data retrieval starts at this time.");
+    tt->val_offset = (char *) &archive_start_time - &_start_;
+    tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
+    tt++;
+    
+    // Parameter 'archive_end_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("archive_end_time");
+    tt->descr = tdrpStrDup("End time for archive mode.");
+    tt->help = tdrpStrDup("In ARCHIVE mode, data retrieval ends at this time.");
+    tt->val_offset = (char *) &archive_end_time - &_start_;
+    tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
     tt++;
     
     // Parameter 'Comment 3'
@@ -1176,6 +1234,30 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &compress_spdb - &_start_;
     tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'spdb_put_mode'
+    // ctype is '_spdb_put_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("spdb_put_mode");
+    tt->descr = tdrpStrDup("Put mode for SPDB data base.");
+    tt->help = tdrpStrDup("PUT_OVER - new data will overwrite a previously-stored data for the same time. PUT_ADD: a chunk will be added to the list of chunks stored at a given valid_time. PUT_ADD_UNIQUE: a chunk will be added to the list of data stored at a given valid_time, provided identical data has not already been added. PUT_ONCE: you can only put data for a given time once. Trying to put at the same valid_time again will generate an error. ");
+    tt->val_offset = (char *) &spdb_put_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("spdb_put_mode_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("PUT_OVER");
+      tt->enum_def.fields[0].val = PUT_OVER;
+      tt->enum_def.fields[1].name = tdrpStrDup("PUT_ADD");
+      tt->enum_def.fields[1].val = PUT_ADD;
+      tt->enum_def.fields[2].name = tdrpStrDup("PUT_ADD_UNIQUE");
+      tt->enum_def.fields[2].val = PUT_ADD_UNIQUE;
+      tt->enum_def.fields[3].name = tdrpStrDup("PUT_ONCE");
+      tt->enum_def.fields[3].val = PUT_ONCE;
+    tt->single_val.e = PUT_OVER;
     tt++;
     
     // Parameter 'Comment 9'

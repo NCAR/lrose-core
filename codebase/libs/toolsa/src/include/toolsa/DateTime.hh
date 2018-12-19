@@ -71,6 +71,9 @@ public:
   // e.g. "19581228105700"
   //
   ///////////////////////////////////////////////////////////////////////////
+
+  void setToNow(); // sets to subsec precision, using getTimeOfDay()
+
   void set(time_t when);
  
   void set(time_t when, double subSec);

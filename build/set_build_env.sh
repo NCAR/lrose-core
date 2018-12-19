@@ -10,7 +10,14 @@
 # to the top dir for installation.
 #
 
-export HOST_OS=LINUX_CX11
+# Complain and bail out if LROSE_CORE_DIR and LROSE_INSTALL_DIR are not both set
+if [ -z "$LROSE_CORE_DIR" -o -z "$LROSE_INSTALL_DIR" ]; then
+	echo "Environment variables LROSE_CORE_DIR and LROSE_INSTALL_DIR must be"
+	echo "set before using this script!"
+	return
+fi
+
+export HOST_OS=LINUX_LROSE
 uname -a | grep x86_64
 if [ "$?" = 1 ]
 then

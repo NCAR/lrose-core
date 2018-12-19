@@ -43,28 +43,23 @@ public:
 
   int startIndex;
   int endIndex;
-  bool master;
+  // bool master;
   bool active;
   const RadxRay *ray;
 
   RayLoc() {
     startIndex = -1;
     endIndex = -1;
-    master = false;
+    // master = false;
     active = false;
     ray = NULL;
   }
 
   void clear() {
-    if (master && ray) {
-      if (ray->removeClient() == 0) {
-        delete ray;
-      }
-    }
     ray = NULL;
     startIndex = -1;
     endIndex = -1;
-    master = false;
+    // master = false;
     active = false;
   }
 

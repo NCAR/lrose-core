@@ -405,7 +405,7 @@ void check_for_io()
 	  case VERT_REQUEST:
 	      if( mr->v_mdvx->getThreadDone() ) { // Yes
 		  // OK - Data is now in.
-		  if(mr->v_mdvx->getThreadRetVal()) {
+		  if(mr->v_mdvx->getThreadRetVal() || mr->v_mdvx->getNFields() < 1) {
 
 		    mr->v_data = NULL;
 		    mr->v_fl32_data = NULL;

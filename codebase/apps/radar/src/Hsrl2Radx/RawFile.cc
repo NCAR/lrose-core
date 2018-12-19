@@ -410,12 +410,12 @@ int RawFile::_readGlobalAttributes()
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
 
-    cerr << "Gobal attr machType: " << _machType << endl;
-    cerr << "Gobal attr hostName: " << _hostName << endl;
-    cerr << "Gobal attr userName: " << _userName << endl;
-    cerr << "Gobal attr gitCommit: " << _gitCommit << endl;
-    cerr << "Gobal attr hsrlVersion: " << _hsrlVersion << endl;
-    cerr << "Gobal attr sourceSoftware: " << _sourceSoftware << endl;
+    cerr << "Global attr machType: " << _machType << endl;
+    cerr << "Global attr hostName: " << _hostName << endl;
+    cerr << "Global attr userName: " << _userName << endl;
+    cerr << "Global attr gitCommit: " << _gitCommit << endl;
+    cerr << "Global attr hsrlVersion: " << _hsrlVersion << endl;
+    cerr << "Global attr sourceSoftware: " << _sourceSoftware << endl;
     
   }
 
@@ -849,7 +849,7 @@ int RawFile::_createRays(const string &path)
     RadxRay *ray = new RadxRay;
     ray->setRangeGeom(_startRangeKm, _gateSpacingKm);
     ray->setTime(_dataTimes[ii]);
-    
+
     // sweep info
 
     ray->setVolumeNumber(-9999);
@@ -891,19 +891,23 @@ int RawFile::_createRays(const string &path)
           // pointing up
           geo.setRotation(-4.0);
           geo.setTilt(0.0);
+          ray->setElevationDeg(94.0);
           if (_params.correct_elevation_angle_for_roll) {
-            ray->setElevationDeg(94.0 - geo.getRoll());
-          } else {
-            ray->setElevationDeg(94.0);
+            double roll = geo.getRoll();
+            if (isfinite(roll) && roll > -45.0 && roll < 45.0) {
+              ray->setElevationDeg(94.0 - roll);
+            }
           }
         } else {
           // pointing down
           geo.setRotation(184.0);
           geo.setTilt(0.0);
+          ray->setElevationDeg(-94.0);
           if (_params.correct_elevation_angle_for_roll) {
-            ray->setElevationDeg(-94.0 - geo.getRoll());
-          } else {
-            ray->setElevationDeg(-94.0);
+            double roll = geo.getRoll();
+            if (isfinite(roll) && roll > -45.0 && roll < 45.0) {
+              ray->setElevationDeg(-94.0 - geo.getRoll());
+            }
           }
         }
 

@@ -39,6 +39,8 @@
 #ifndef PjgLambertAzimMath_hh
 #define PjgLambertAzimMath_hh
 
+#include <euclid/PjgMath.hh>
+
 class PjgLambertAzimMath : public PjgMath
 {
 

@@ -522,25 +522,41 @@ void RadxTimeList::_searchForValid(const string &topDir,
   // compute file end times from start time of next file
 
   vector<RadxTime> fileEndTimes;
-  RadxTime nextStartTime;
-  double prevTimeSpan = 1.0;
-  TimePathSet::iterator ii = all.begin();
-  TimePathSet::iterator jj = ii; jj++;
-  for (; ii != all.end(); ii++, jj++) {
-    nextStartTime = jj->fileStartTime;
-    if (ii->fileStartTime != ii->fileEndTime) {
-      fileEndTimes.push_back(ii->fileEndTime);
-    } else if (jj == all.end()) {
-      fileEndTimes.push_back(ii->fileStartTime + prevTimeSpan);
-      break;
-    } else {
-      fileEndTimes.push_back(nextStartTime);
+  RadxTime fStartTime;
+  RadxTime fEndTime;
+  RadxTime prevStart;
+  RadxTime prevEnd;
+  double timeSpan = 1.0;
+  bool firstIter = true;
+  for (TimePathSet::iterator ii = all.begin(); ii != all.end(); ++ii) {
+    fStartTime = ii->fileStartTime;
+    fEndTime =   ii->fileEndTime;
+    if (!firstIter) {
+      if (prevStart != prevEnd) {
+	fileEndTimes.push_back(prevEnd);
+      } else {
+	fileEndTimes.push_back(fStartTime);
+      }
+      timeSpan = fStartTime - prevStart;
     }
-    if (jj != all.end()) {
-      prevTimeSpan = nextStartTime - ii->fileStartTime;
+    
+    prevStart = fStartTime;
+    prevEnd = fEndTime;
+
+    if (firstIter) {
+      firstIter = false;
     }
   }
   
+  if (!all.empty()) {
+    // catch last time
+    if (prevStart != prevEnd) {
+      fileEndTimes.push_back(prevEnd);
+    } else {
+      fileEndTimes.push_back(prevStart + timeSpan);
+    }
+  }
+
   // check file times overlap desired range
 
   TimePathSet::iterator mm = all.begin();
@@ -998,6 +1014,14 @@ bool RadxTimeList::_isValidFile(const string &path)
 {
 
   RadxPath P(path);
+
+  // check extension
+
+  if (_fileExt.size() > 0) {
+    if (P.getExt() != _fileExt) {
+      return false;
+    }
+  }
 
 #ifdef NOTNOW
   string filename = P.getFile();

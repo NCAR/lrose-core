@@ -40,7 +40,7 @@
 #include <vector>
 #include <didss/DsInputPath.hh>
 #include <Fmq/DsRadarQueue.hh>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include "Args.hh"
 #include "Params.hh"
 using namespace std;
@@ -85,11 +85,11 @@ private:
   time_t _startTime, _endTime;
   
   int _processFile(const char *input_path);
-  int _checkFile(NcFile &ncf);
+  int _checkFile(Nc3File &ncf);
   
-  void _printFile(NcFile &ncf);
-  void _printAtt(NcAtt *att);
-  void _printVarVals(NcVar *var);
+  void _printFile(Nc3File &ncf);
+  void _printAtt(Nc3Att *att);
+  void _printVarVals(Nc3Var *var);
 
 };
 

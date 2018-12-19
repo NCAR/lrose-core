@@ -309,6 +309,10 @@ public:
 		   int msecSleep = -1,
 		   MsgLog *msgLog = NULL);
 
+  // Setting a timeout for blocking reads
+
+  void setBlockingReadTimeout(int msecs) { _msecBlockingReadTimeout = msecs; }
+ 
   // Closing the fmq
   // returns 0 on success, -1 on failure
 
@@ -593,6 +597,7 @@ protected:
   int _numSlots;
   int _bufSize;
   int _msecSleep;
+  int _msecBlockingReadTimeout;
 
   // logging
   

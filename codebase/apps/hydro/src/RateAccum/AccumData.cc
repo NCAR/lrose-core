@@ -148,7 +148,7 @@ int AccumData::processFile(const string &file_path,
   time_t fileStartTime = file_time - (int) (file_duration + 0.5);
 
   // read in the file
-
+  
   DsMdvx mdvx;
   mdvx.setReadPath(file_path);    
   
@@ -185,8 +185,10 @@ int AccumData::processFile(const string &file_path,
     }
 
     if (_params.debug >= Params::DEBUG_NORM) {    
-      cerr << "AccumData::processFile mhdr.time_begin = " << DateTime(mhdr.time_begin) << endl;
-      cerr << "AccumData::processFile mhdr.time_end = " << DateTime(mhdr.time_end) << endl;
+      cerr << "AccumData::processFile mhdr.time_begin = "
+           << DateTime(mhdr.time_begin) << endl;
+      cerr << "AccumData::processFile mhdr.time_end = "
+           << DateTime(mhdr.time_end) << endl;
     }
   
     _dataStartTime = fileStartTime;
@@ -225,7 +227,8 @@ int AccumData::processFile(const string &file_path,
   } // if (!_dataFound) 
   
   if (_params.debug >= Params::DEBUG_NORM) {
-    cerr << "AccumData: processing file at time: " << DateTime::strm(file_time) << endl;
+    cerr << "AccumData: processing file at time: "
+         << DateTime::strm(file_time) << endl;
   }
   
   // set the times
@@ -245,11 +248,11 @@ int AccumData::processFile(const string &file_path,
       return -1;
     }
     
-    _updateAccum(_rateFieldNames[ii], _inputIsDepth[ii], fld, _accumFieldData[ii], file_duration);
+    _updateAccum(_rateFieldNames[ii], _inputIsDepth[ii],
+                 fld, _accumFieldData[ii], file_duration);
     
   } // ii
 
-    
   return (0);
 
 }

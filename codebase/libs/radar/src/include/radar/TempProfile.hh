@@ -106,7 +106,8 @@ public:
     
     // data
 
-    double pressHpa;   /**< The pressure at this point (Hpa), or -9999 if unavailable */
+    double pressHpa;   /**< The pressure at this point (Hpa),
+                        ** or -9999 if unavailable */
     double htKm;       /**< The height of this point (km) */
     double tmpC;       /**< The temperature at this point (C) */
     double rhPercent;  /**< relative humidity (%) */
@@ -121,55 +122,20 @@ public:
   
   ~TempProfile();
 
-  // get a valid temperature profile
-  // returns 0 on success, -1 on failure
-  // on failure, tmpProfile will be empty
-
-  int getTempProfile(const string &url,
-                     time_t dataTime,
-                     time_t &soundingTime,
-                     vector<PointVal> &tmpProfile);
-
-  // Get a temperature profile from a PID thresholds file
-  // returns 0 on success, -1 on failure
-  // on failure, tmpProfile will be empty
-  
-  int getProfileForPid(const string &pidThresholdsPath,
-                       vector<PointVal> &tmpProfile);
-
-  // optionally get access to the profile
-  // If getTempProfile() returned failure, tmpProfile will be empty
-
-  const vector<PointVal> &getProfile() const { return _tmpProfile; }
-  
-  // get temperature at a given height
-  // returns -9999 if no temp profile available
-  // on first call will create lut
-  
-  double getTempForHtKm(double htKm) const;
-
-  // get the freezing level height
-
-  double getFreezingLevel() const;
-
-  // get height for specified temp
-  
-  double getHtKmForTempC(double tempC) const;
-
   // clear the profile
 
-  void clear() { _tmpProfile.clear(); }
+  void clear() { _profile.clear(); }
 
   // add a profile point
 
-  void addPoint(PointVal &val) { _tmpProfile.push_back(val); }
+  void addPoint(PointVal &val) { _profile.push_back(val); }
 
   // if you use addPoint, you need to call prepareForUse()
   // after all points have been added
 
   void prepareForUse();
 
-  // set and get methods for private members
+  // set methods for private members
 
   void setSoundingLocationName(const string &val) {
     _soundingLocationName = val; 
@@ -212,11 +178,54 @@ public:
     _checkPressureMonotonicallyDecreasing = val;
   }
 
+  // set the full profile
+
+  void setProfile(const vector<PointVal> &profile);
+  
+  // set the height correction in km
+  // this corection is added to the height read in
+
+  void setHeightCorrectionKm(double val) { _heightCorrectionKm = val; }
+
   // set to use wet-bulb temp instead of dry bulb
 
   void setUseWetBulbTemp(bool val) {
     _useWetBulbTemp = val;
   }
+
+  // load a valid temperature profile from SPDB
+  // returns 0 on success, -1 on failure
+  // on failure, tmpProfile will be empty
+
+  int loadFromSpdb(const string &url,
+                   time_t dataTime,
+                   time_t &soundingTime);
+
+  // Load from a PID thresholds file
+  // returns 0 on success, -1 on failure
+  
+  int loadFromPidThresholdsFile(const string &pidThresholdsPath);
+  
+  // optionally get access to the profile
+  // If getTempProfile() returned failure, tmpProfile will be empty
+
+  const vector<PointVal> &getProfile() const { return _profile; }
+  
+  // get temperature at a given height
+  // returns -9999 if no temp profile available
+  // on first call will create lut
+  
+  double getTempForHtKm(double htKm) const;
+
+  // get the freezing level height
+
+  double getFreezingLevel() const;
+
+  // get height for specified temp
+  
+  double getHtKmForTempC(double tempC) const;
+
+  // get methods for private members
 
   const string &getSoundingSpdbUrl() const {
     return _soundingSpdbUrl; 
@@ -263,11 +272,6 @@ public:
     return _useWetBulbTemp;
   }
 
-  // set the height correction in km
-  // this corection is added to the height read in
-
-  void setHeightCorrectionKm(double val) { _heightCorrectionKm = val; }
-
   /// print
 
   void print(ostream &out) const;
@@ -288,7 +292,7 @@ private:
   bool _verbose;
 
   time_t _soundingTime;
-  vector<PointVal> _tmpProfile;
+  vector<PointVal> _profile;
   double _freezingLevel;
   
   string _soundingSpdbUrl;

@@ -1374,7 +1374,6 @@ int Ncf2MdvTrans::_addOneTimeDataField(int itime, TimeDim *tdim,
 					 arrayDim.xDim, arrayDim.xVar);
         
   MdvxField *mdvxField = field->createMdvxField();
-  delete field;
 
   if (mdvxField != NULL) {
     mdvxField->setFieldHeaderFile(mdvxField->getFieldHeader());
@@ -1386,9 +1385,11 @@ int Ncf2MdvTrans::_addOneTimeDataField(int itime, TimeDim *tdim,
     string fieldName = dataVar->name();
     TaStr::AddStr(_errStr, "  Adding field: ", fieldName);
     TaStr::AddStr(_errStr, "  Cannot find field");
+    delete field;
     return -1;
   }
   _validTimes.insert(validTime);
+  delete field;
   return 0;
 }
 

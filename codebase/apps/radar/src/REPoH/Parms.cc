@@ -1,80 +1,112 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
  * @file Parms.cc
  */
 
-/*----------------------------------------------------------------*/
+//------------------------------------------------------------------
 #include "Parms.hh"
-#include <FiltAlg/ParmFiltAlgApp.hh>
+#include "Repoh.hh"
+#include <toolsa/LogStream.hh>
+#include <vector>
 
-/*----------------------------------------------------------------*/
-Parms::Parms() : FiltAlgParms()
+//------------------------------------------------------------------
+Parms::Parms() : FiltAlgParms(), RepohParams()
 {
 }
 
-/*----------------------------------------------------------------*/
-Parms::Parms(int argc, char **argv) : FiltAlgParms()
+//------------------------------------------------------------------
+Parms::Parms(const std::string &parmFileName,  bool expandEnv) :
+  FiltAlgParms(parmFileName, expandEnv), RepohParams()
 {
-  if (!parmFiltAlgAppSet(_main, *this, argc, argv))
-    exit(-1);
+  TDRP_warn_if_extra_params(FALSE);
+  char **o = NULL;
+  int env;
+  if (expandEnv)
+  {
+    env = 1;
+  }
+  else
+  {
+    env = 0;
+  }
+  if (RepohParams::load(parmFileName.c_str(), o, env, 0))
+  {
+    LOG(ERROR) << "Loading app params";
+    exit(1);
+  }
+  TDRP_warn_if_extra_params(TRUE);
+  
+  if (!FiltAlgParms::isOk())
+  {
+    LOG(ERROR) << "Loading filtAlg params";
+    exit(1);
+  }    
 }
 
-/*----------------------------------------------------------------*/
+//------------------------------------------------------------------
 Parms::~Parms()
 {
 }
 
-/*----------------------------------------------------------------*/
-bool Parms::name_is_humidity(const string &name)
+//------------------------------------------------------------------
+void Parms::printOperators(void) const
 {
-  if (name == "HUMIDITY")
-    return true;
-  else
+  Repoh alg;
+  alg.getAlgorithm()->printOperators();
+}
+
+//------------------------------------------------------------------
+void Parms::printParams(tdrp_print_mode_t mode)
+{
+  RepohParams::print(stdout, mode);
+  FiltAlgParms::printParams(mode);
+}
+
+//------------------------------------------------------------------
+void Parms::printInputOutputs(void) const
+{
+  printf("INPUTS:\n");
+  for (int i=0; i<input_n; ++i)
   {
-    printf("Bad name for humidity filter %s, name should = HUMIDITY\n",
-	   name.c_str());
-    return false;
+    printf("\t%s\n", _input[i]);
+  }
+
+  printf("OUTPUTS:\n");
+  for (int i=0; i<output_n; ++i)
+  {
+    printf("\t%s\n", _output[i]);
   }
 }
 
-/*----------------------------------------------------------------*/
-int
-Parms::app_max_elem_for_filter(const FiltAlgParams::data_filter_t f) const
+//------------------------------------------------------------------
+void Parms::setFiltersFromParms(void) 
 {
-  string s = f.app_filter_name;
-  if (name_is_humidity(s))
-    return 1;
-  else 
- {
-    printf("ERROR unkown app filter parm name %s\n", s.c_str());
-    return 0;
- }
-}
-
-/*----------------------------------------------------------------*/
-const void *Parms::app_parms(void) const
-{
-  return (void *)&_main;
+  _fixedConstants.clear();
+  for (int i=0; i<fixed_const_n; ++i)
+  {
+    _fixedConstants.push_back(_fixed_const[i]);
+  }
+  
+  _userData.clear();
+  for (int i=0; i<user_data_n; ++i)
+  {
+    _userData.push_back(_user_data[i]);
+  }
+  
+  _volumeBeforeFilters.clear();
+  for (int i=0; i<volume_before_filter_n; ++i)
+  {
+    _volumeBeforeFilters.push_back(_volume_before_filter[i]);
+  }
+  
+  _sweepFilters.clear();
+  for (int i=0; i<filter_n; ++i)
+  {
+    _sweepFilters.push_back(_filter[i]);
+  }
+  
+  _volumeAfterFilters.clear();
+  for (int i=0; i<volume_after_filter_n; ++i)
+  {
+    _volumeAfterFilters.push_back(_volume_after_filter[i]);
+  }
 }

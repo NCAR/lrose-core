@@ -62,6 +62,11 @@ DsServerMgr::DsServerMgr(string executableName,
 
 {
 
+  // Set default member values
+
+  _pingTimeoutMsecs = DS_DEFAULT_PING_TIMEOUT_MSECS;
+  _commTimeoutMsecs = DS_DEFAULT_COMM_TIMEOUT_MSECS;
+   
   // If base class's constructor failed, bail.
   if (!_isOkay) {
     return;
@@ -73,20 +78,18 @@ DsServerMgr::DsServerMgr(string executableName,
 
   // set ping and comm timeouts
   
-  _pingTimeoutMsecs = DS_DEFAULT_PING_TIMEOUT_MSECS;
   char *DS_PING_TIMEOUT_MSECS = getenv("DS_PING_TIMEOUT_MSECS");
   if (DS_PING_TIMEOUT_MSECS != NULL) {
     int timeout;
-    if (sscanf(DS_PING_TIMEOUT_MSECS, "%d", &timeout)) {
+    if (sscanf(DS_PING_TIMEOUT_MSECS, "%d", &timeout) == 1) {
       _pingTimeoutMsecs = timeout;
     }
   }
 
-  _commTimeoutMsecs = DS_DEFAULT_COMM_TIMEOUT_MSECS;
   char *DS_COMM_TIMEOUT_MSECS = getenv("DS_COMM_TIMEOUT_MSECS");
   if (DS_COMM_TIMEOUT_MSECS != NULL) {
     int timeout;
-    if (sscanf(DS_COMM_TIMEOUT_MSECS, "%d", &timeout)) {
+    if (sscanf(DS_COMM_TIMEOUT_MSECS, "%d", &timeout) == 1) {
       _commTimeoutMsecs = timeout;
     }
   }

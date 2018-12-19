@@ -90,29 +90,30 @@
 #include <unistd.h> 
 #include <signal.h>
 #include <math.h>
+#include <sys/types.h>
 
 #include <dataport/port_types.h>
 #include <toolsa/globals.h>
 #include <toolsa/mem.h>
 
 #define N_ALLOCATE 100
-#define NBYTES_WORD 4
+#define NBYTES_WORD 8
 #define UMALLOC_CODE 0x0ff10ff2
 #define START_ID 987654321
 
 static void alloc_check_space(void);
-static void alloc_check_block(char *addr, si32 *ret_start_id,
-			      si32 *ret_end_id, ui32 *ret_size);
+static void alloc_check_block(char *addr, int64_t *ret_start_id,
+			      int64_t *ret_end_id, u_int64_t *ret_size);
 static void umalloc_segv(void);
 
 static char **Malloc_addr;
 
-static si32 Narray = 0;
-static si32 Nmalloc = 0;
-static si32 Id = START_ID;
+static int64_t Narray = 0;
+static int64_t Nmalloc = 0;
+static int64_t Id = START_ID;
 
 static int Debug_level = 0;
-static int Nshift;
+static int Nshift = 4;
 static int Moffset = 0;
 static int Nbytes_extra = 0;
 
@@ -133,23 +134,11 @@ static int Nbytes_extra = 0;
 void umalloc_debug(int level)
 {
 
-  int nbytes_word = NBYTES_WORD;
   Debug_level = level;
 
   if (level > 0) {
-    
-    Nbytes_extra = 6 * sizeof(si32);
-    Moffset = 4 * sizeof(si32);
-    if (nbytes_word == 2) {
-      Nshift = 2;
-    } else if (nbytes_word == 4) {
-      Nshift = 3;
-    } else if (nbytes_word == 8) {
-      Nshift = 4;
-    } else {
-      Nshift = 5;
-    }
-
+    Nbytes_extra = 6 * sizeof(int64_t);
+    Moffset = 4 * sizeof(int64_t);
   }
 
 }
@@ -166,9 +155,9 @@ void *(umalloc)(size_t size)
 {
 
   int slot_found;
-  si32 imalloc;
-  si32 *laddr;
-  ui32 msize;
+  int64_t imalloc;
+  int64_t *laddr;
+  u_int64_t msize;
   char *addr, *user_addr;
 
   /*
@@ -212,16 +201,16 @@ void *(umalloc)(size_t size)
    */
 
   if (Debug_level > 0) {
-    laddr = (si32 *) addr;
+    laddr = (int64_t *) addr;
     *laddr = UMALLOC_CODE;
     laddr++;
     *laddr = Id;
     laddr++;
-    *laddr = (si32) msize;
+    *laddr = (int64_t) msize;
     laddr++;
     *laddr = 0L;
-    *((si32 *) (addr + msize - 2 * sizeof(si32))) = 0L;
-    *((si32 *) (addr + msize - sizeof(si32))) = Id;
+    *((int64_t *) (addr + msize - 2 * sizeof(int64_t))) = 0L;
+    *((int64_t *) (addr + msize - sizeof(int64_t))) = Id;
     Id++;
   }
 
@@ -425,7 +414,7 @@ void ***umalloc3(size_t l, size_t m, size_t n, size_t item_size)
 void *(ucalloc)(size_t num, size_t size)
 {
 
-  ui32 csize;
+  u_int64_t csize;
   char *user_addr;
 
   /*
@@ -612,9 +601,9 @@ void *(urealloc)(void *user_addr, size_t size)
 
   char *addr;
   char *new_addr;
-  si32 *laddr;
-  si32 imalloc = 0;
-  ui32 msize;
+  int64_t *laddr;
+  int64_t imalloc = 0;
+  u_int64_t msize;
   int match_found;
 
   /*
@@ -703,16 +692,16 @@ void *(urealloc)(void *user_addr, size_t size)
    */
   
   if (Debug_level > 0) {
-    laddr = (si32 *) new_addr;
+    laddr = (int64_t *) new_addr;
     *laddr = UMALLOC_CODE;
     laddr++;
     *laddr = Id;
     laddr++;
-    *laddr = (si32) msize;
+    *laddr = (int64_t) msize;
     laddr++;
     *laddr = 0L;
-    *((si32 *) (new_addr + msize - 2 * sizeof(si32))) = 0L;
-    *((si32 *) (new_addr + msize - sizeof(si32))) = Id;
+    *((int64_t *) (new_addr + msize - 2 * sizeof(int64_t))) = 0L;
+    *((int64_t *) (new_addr + msize - sizeof(int64_t))) = Id;
     Id++;
   }
 
@@ -824,11 +813,11 @@ void (ufree)(void *user_addr)
 {
 
   char *addr;
-  si32 match_found;
-  si32 start_id;
-  si32 end_id;
-  ui32 msize;
-  si32 imalloc;
+  int64_t match_found;
+  int64_t start_id;
+  int64_t end_id;
+  u_int64_t msize;
+  int64_t imalloc;
 
   if (user_addr == NULL) {
 
@@ -851,7 +840,7 @@ void (ufree)(void *user_addr)
    */
 
   if ((Debug_level == 0) ||
-      (*(si32 *) addr != UMALLOC_CODE)) {
+      (*(int64_t *) addr != UMALLOC_CODE)) {
     free ((char *) user_addr);
     return;
   }
@@ -1001,11 +990,11 @@ void umalloc_map(void)
 
 {
 
-  si32 mtotal = 0;
-  si32 imalloc;
-  si32 start_id;
-  si32 end_id;
-  ui32 msize;
+  int64_t mtotal = 0;
+  int64_t imalloc;
+  int64_t start_id;
+  int64_t end_id;
+  u_int64_t msize;
 
   if (Debug_level > 2) {
 
@@ -1051,11 +1040,11 @@ int umalloc_count(void)
 
 {
 
-  si32 mtotal = 0;
-  si32 imalloc;
-  si32 start_id;
-  si32 end_id;
-  ui32 msize;
+  int64_t mtotal = 0;
+  int64_t imalloc;
+  int64_t start_id;
+  int64_t end_id;
+  u_int64_t msize;
 
   if (Debug_level > 1) {
 
@@ -1090,10 +1079,10 @@ int umalloc_count(void)
 void umalloc_verify(void)
 {
 
-  si32 imalloc;
-  si32 start_id;
-  si32 end_id;
-  ui32 msize;
+  int64_t imalloc;
+  int64_t start_id;
+  int64_t end_id;
+  u_int64_t msize;
 
   if (Debug_level > 1) {
 
@@ -1116,20 +1105,20 @@ void umalloc_verify(void)
  *
  ********************************************************************/
 
-static void alloc_check_block(char *addr, si32 *ret_start_id,
-			      si32 *ret_end_id, ui32 *ret_size)
+static void alloc_check_block(char *addr, int64_t *ret_start_id,
+			      int64_t *ret_end_id, u_int64_t *ret_size)
 
 {
 
-  si32 *start_id;
-  si32 *end_id;
-  si32 *msize;
+  int64_t *start_id;
+  int64_t *end_id;
+  int64_t *msize;
 
   if (addr != NULL) {
 
-    start_id = (si32 *) addr + 1;
+    start_id = (int64_t *) addr + 1;
     msize = start_id + 1;
-    end_id = start_id + *msize / sizeof(si32) - 2;
+    end_id = start_id + *msize / sizeof(int64_t) - 2;
 
     if (*start_id <= 0 || *end_id <= 0 ||
 	*msize < 0 || *start_id != *end_id) {
@@ -1168,7 +1157,7 @@ static void alloc_check_space(void)
 {
 
   char **m_addr;
-  si32 n_array;
+  int64_t n_array;
 
   if (Nmalloc + 1 > Narray) {
 
@@ -1179,7 +1168,7 @@ static void alloc_check_space(void)
     n_array = Narray + N_ALLOCATE;
 
     if ((m_addr = (char **) malloc
-	 ((ui32) n_array * sizeof(char *))) == NULL) {
+	 ((u_int64_t) n_array * sizeof(char *))) == NULL) {
       fprintf(stderr, "ERROR - umalloc_alloc_addr_array\n");
       fprintf(stderr, "Cannot perform malloc for debug table\n");
       umalloc_segv();

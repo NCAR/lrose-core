@@ -76,7 +76,7 @@ TempProfile::TempProfile()
   _useWetBulbTemp = false;
 
   _lutByMeterHt.clear();
-  _tmpProfile.clear();
+  _profile.clear();
 
 }
 
@@ -89,23 +89,22 @@ TempProfile::~TempProfile()
 }
 
 ////////////////////////////////////////////////////////////////////////
-// Get a valid temperature profile
+// Load a valid temperature profile from SPDB
 // returns 0 on success, -1 on failure
 // on failure, tmpProfile will be empty
 
-int TempProfile::getTempProfile(const string &url,
-                                time_t dataTime,
-                                time_t &soundingTime,
-                                vector<PointVal> &tmpProfile)
+int TempProfile::loadFromSpdb(const string &url,
+                              time_t dataTime,
+                              time_t &soundingTime)
 
 {
 
   _lutByMeterHt.clear();
-  _tmpProfile.clear();
+  _profile.clear();
   _soundingSpdbUrl = url;
   time_t earliestTime = dataTime - _soundingSearchTimeMarginSecs;
   time_t searchTime = dataTime;
-
+  
   if (_debug) {
     cerr << "Searching for sounding, dataTime: "
 	 << DateTime::strm(dataTime) << endl;
@@ -115,7 +114,7 @@ int TempProfile::getTempProfile(const string &url,
   while (searchTime >= earliestTime) {
 
     // get a temperature profile from spdb
-
+    
     if (_getTempProfile(searchTime)) {
       // failed - move back in time and try again
       searchTime -= 3600;
@@ -145,8 +144,7 @@ int TempProfile::getTempProfile(const string &url,
     // accept the current profile
 
     soundingTime = _soundingTime;
-    tmpProfile = _tmpProfile;
-
+    
     if (_debug) {
       cerr << "TempProfile::getTempProfile, url: " << url << endl;
       cerr << "  Got profile at time: "
@@ -157,34 +155,31 @@ int TempProfile::getTempProfile(const string &url,
 
     _computeFreezingLevel();
 
+    // success
+    
     return 0;
   
   } // while
+  
+  // failure
 
-  // error
-
-  _tmpProfile.clear();
-  tmpProfile = _tmpProfile;
-
+  _profile.clear();
   return -1;
   
 }
 
 ////////////////////////////////////////////////////////////////////////
-// Get a temperature profile from a PID thresholds file
+// Load from a PID thresholds file
 // returns 0 on success, -1 on failure
-// on failure, tmpProfile will be empty
 
-int TempProfile::getProfileForPid(const string &pidThresholdsPath,
-                                  vector<PointVal> &tmpProfile)
-
+int TempProfile::loadFromPidThresholdsFile(const string &pidThresholdsPath)
+  
 {
-
+  
   _lutByMeterHt.clear();
-  _tmpProfile.clear();
-  tmpProfile = _tmpProfile;
+  _profile.clear();
   _soundingSpdbUrl = pidThresholdsPath;
-
+  
   if (_debug) {
     cerr << "Reading temperatures from threshold file: "
          << pidThresholdsPath << endl;
@@ -295,7 +290,7 @@ int TempProfile::_setTempProfileFromPidLine(const char *line)
     double ht, tmp;
     if (sscanf(toks[ii].c_str(), "%lg,%lg", &ht, &tmp) == 2) {
       PointVal tmpPt(ht, tmp);
-      _tmpProfile.push_back(tmpPt); 
+      _profile.push_back(tmpPt); 
     }
   }
 
@@ -303,6 +298,14 @@ int TempProfile::_setTempProfileFromPidLine(const char *line)
 
 }
 
+/////////////////////////////////////////////////////
+// set the full profile
+
+void TempProfile::setProfile(const vector<PointVal> &profile)
+{
+  _profile = profile;
+}
+  
 ////////////////////////////////////////////////////////////////////////
 // get temp profile from first sounding before given time.
 // returns 0 on success, -1 on failure
@@ -331,7 +334,7 @@ int TempProfile::_getTempProfile(time_t searchTime)
     return -1;
   }
   
-  if (_debug) {
+  if (_verbose) {
     cerr << "=======>> Got spdb sounding" << endl;
     cerr << "  Search time: " << DateTime::strm(searchTime) << endl;
     cerr << "  margin (secs): " << _soundingSearchTimeMarginSecs << endl;
@@ -350,7 +353,7 @@ int TempProfile::_getTempProfile(time_t searchTime)
     return -1;
   }
 
-  _tmpProfile.clear();
+  _profile.clear();
   int prodId = spdb.getProdId();
   _soundingTime = 0;
   
@@ -387,10 +390,10 @@ int TempProfile::_getTempProfile(time_t searchTime)
           double dewptC = PHYrhdp(tempC, rh);
           double tWet = PHYtwet(pressHpa, tempC, dewptC);
           PointVal tmpPt(pressHpa, htKm, tWet);
-          _tmpProfile.push_back(tmpPt);
+          _profile.push_back(tmpPt);
         } else {
           PointVal tmpPt(pressHpa, htKm, tempC);
-          _tmpProfile.push_back(tmpPt);
+          _profile.push_back(tmpPt);
         }
       }
       dataPtr++;
@@ -430,10 +433,10 @@ int TempProfile::_getTempProfile(time_t searchTime)
         if (_useWetBulbTemp && dewptC > -999) {
           double tWet = PHYtwet(pressHpa, tempC, dewptC);
           PointVal tmpPt(pressHpa, htKm, tWet);
-          _tmpProfile.push_back(tmpPt);
+          _profile.push_back(tmpPt);
         } else {
           PointVal tmpPt(pressHpa, htKm, tempC);
-          _tmpProfile.push_back(tmpPt);
+          _profile.push_back(tmpPt);
         }
       }
     }
@@ -454,10 +457,10 @@ int TempProfile::_checkTempProfile()
 
   // should have at least 5 points
 
-  if (_tmpProfile.size() < 5) {
+  if (_profile.size() < 5) {
     if (_debug) {
       cerr << "WARNING - checkTempProfile()" << endl;
-      cerr << "  Too few points in profile: " << _tmpProfile.size() << endl;
+      cerr << "  Too few points in profile: " << _profile.size() << endl;
     }
     return -1;
   }
@@ -466,15 +469,15 @@ int TempProfile::_checkTempProfile()
 
   if (_checkPressureMonotonicallyDecreasing) {
     
-    double prevPressure = _tmpProfile[0].getPressHpa();
+    double prevPressure = _profile[0].getPressHpa();
     size_t nSteps = 20;
-    size_t intv = _tmpProfile.size() / nSteps;
+    size_t intv = _profile.size() / nSteps;
     for (size_t ii = 1; ii < nSteps; ii++) {
       size_t jj = ii * intv; 
-      if (jj > _tmpProfile.size() - 1) {
-        jj = _tmpProfile.size() - 1;
+      if (jj > _profile.size() - 1) {
+        jj = _profile.size() - 1;
       }
-      double pressure = _tmpProfile[jj].getPressHpa();
+      double pressure = _profile[jj].getPressHpa();
       if (pressure > prevPressure) {
         if (_debug) {
           cerr << "WARNING - checkTempProfile()" << endl;
@@ -485,7 +488,7 @@ int TempProfile::_checkTempProfile()
         }
         return -1;
       }
-      if (jj == _tmpProfile.size() - 1) {
+      if (jj == _profile.size() - 1) {
         break;
       }
       prevPressure = pressure;
@@ -502,17 +505,17 @@ int TempProfile::_checkTempProfile()
   double minTemp = 1.0e99;
   double maxTemp = -1.0e99;
 
-  for (size_t ii = 1; ii < _tmpProfile.size(); ii++) {
+  for (size_t ii = 1; ii < _profile.size(); ii++) {
 
-    double press = _tmpProfile[ii].getPressHpa();
+    double press = _profile[ii].getPressHpa();
     if (press < minPress) minPress = press;
     if (press > maxPress) maxPress = press;
       
-    double htM = _tmpProfile[ii].getHtKm() * 1000.0;
+    double htM = _profile[ii].getHtKm() * 1000.0;
     if (htM < minHt) minHt = htM;
     if (htM > maxHt) maxHt = htM;
     
-    double tempC = _tmpProfile[ii].getTmpC();
+    double tempC = _profile[ii].getTmpC();
     if (tempC < minTemp) minTemp = tempC;
     if (tempC > maxTemp) maxTemp = tempC;
     
@@ -608,12 +611,12 @@ double TempProfile::getHtKmForTempC(double tempC) const
 
 {
 
-  for (size_t ii = 1; ii < _tmpProfile.size(); ii++) {
+  for (size_t ii = 1; ii < _profile.size(); ii++) {
 
-    double ht1 = _tmpProfile[ii-1].getHtKm();
-    double ht2 = _tmpProfile[ii].getHtKm();
-    double tmp1 = _tmpProfile[ii-1].getTmpC();
-    double tmp2 = _tmpProfile[ii].getTmpC();
+    double ht1 = _profile[ii-1].getHtKm();
+    double ht2 = _profile[ii].getHtKm();
+    double tmp1 = _profile[ii-1].getTmpC();
+    double tmp2 = _profile[ii].getTmpC();
     double dtmp1 = tmp1 - tempC;
     double dtmp2 = tmp2 - tempC;
     
@@ -678,30 +681,30 @@ void TempProfile::_createLutByMeterHt() const
 {
 
   _lutByMeterHt.clear();
-  if (_tmpProfile.size() < 1) {
+  if (_profile.size() < 1) {
     return;
   }
   
   _tmpMinHtMeters =
-    (int) (_tmpProfile[0].getHtKm() * 1000.0 + 0.5);
+    (int) (_profile[0].getHtKm() * 1000.0 + 0.5);
   _tmpMaxHtMeters =
-    (int) (_tmpProfile[_tmpProfile.size()-1].getHtKm() * 1000.0 + 0.5);
+    (int) (_profile[_profile.size()-1].getHtKm() * 1000.0 + 0.5);
 
-  _tmpBottomC = _tmpProfile[0].getTmpC();
-  _tmpTopC = _tmpProfile[_tmpProfile.size()-1].getTmpC();
+  _tmpBottomC = _profile[0].getTmpC();
+  _tmpTopC = _profile[_profile.size()-1].getTmpC();
 
   // fill out temp array, every meter
 
   int nHt = (_tmpMaxHtMeters - _tmpMinHtMeters) + 1;
   _lutByMeterHt.resize(nHt);
   
-  for (int ii = 1; ii < (int) _tmpProfile.size(); ii++) {
+  for (int ii = 1; ii < (int) _profile.size(); ii++) {
 
-    int minHtMeters = (int) (_tmpProfile[ii-1].getHtKm() * 1000.0 + 0.5);
-    double minTmp = _tmpProfile[ii-1].getTmpC();
+    int minHtMeters = (int) (_profile[ii-1].getHtKm() * 1000.0 + 0.5);
+    double minTmp = _profile[ii-1].getTmpC();
 
-    int maxHtMeters = (int) (_tmpProfile[ii].getHtKm() * 1000.0 + 0.5);
-    double maxTmp = _tmpProfile[ii].getTmpC();
+    int maxHtMeters = (int) (_profile[ii].getHtKm() * 1000.0 + 0.5);
+    double maxTmp = _profile[ii].getTmpC();
 
     double deltaMeters = maxHtMeters - minHtMeters;
     double deltaTmp = maxTmp - minTmp;
@@ -808,34 +811,34 @@ void TempProfile::print(ostream &out) const
     out << "  heightCorrectionKm: " << _heightCorrectionKm << endl;
   }
 
-  int nLevels = (int) _tmpProfile.size();
+  int nLevels = (int) _profile.size();
   int nPrint = 50;
   int printInterval = nLevels / nPrint;
   if (nLevels < nPrint) {
     printInterval = 1;
   }
-  for (size_t ii = 0; ii < _tmpProfile.size(); ii++) {
+  for (size_t ii = 0; ii < _profile.size(); ii++) {
     bool doPrint = false;
     if (ii % printInterval == 0) {
       doPrint = true;
     }
-    if (ii < _tmpProfile.size() - 1) {
-      if (_tmpProfile[ii].getTmpC() * _tmpProfile[ii].getTmpC() <= 0) {
+    if (ii < _profile.size() - 1) {
+      if (_profile[ii].getTmpC() * _profile[ii].getTmpC() <= 0) {
         // always print freezing level
         doPrint = true;
       }
     }
     if (ii > 0) {
-      if (_tmpProfile[ii-1].getTmpC() * _tmpProfile[ii].getTmpC() <= 0) {
+      if (_profile[ii-1].getTmpC() * _profile[ii].getTmpC() <= 0) {
         doPrint = true;
       }
     }
     if (doPrint) {
       out << "  ilevel, press(Hpa), alt(km), temp(C), RH(%): " << ii << ", "
-          << _tmpProfile[ii].getPressHpa() << ", "
-          << _tmpProfile[ii].getHtKm() << ", "
-          << _tmpProfile[ii].getTmpC() << ", "
-          << _tmpProfile[ii].getRhPercent() << endl;
+          << _profile[ii].getPressHpa() << ", "
+          << _profile[ii].getHtKm() << ", "
+          << _profile[ii].getTmpC() << ", "
+          << _profile[ii].getRhPercent() << endl;
     }
   }
   out << "=====================================" << endl;

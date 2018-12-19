@@ -45,6 +45,8 @@ RhiWidget::RhiWidget(QWidget* parent,
   
   _locArray = NULL;
   _prevElev = -9999.0;
+  _prevAz = -9999.0;
+  _prevTime = 0;
 
   if (_params.rhi_display_180_degrees) {
     _aspectRatio = _params.rhi_aspect_ratio * 2.0;
@@ -93,7 +95,7 @@ RhiWidget::~RhiWidget()
   // delete all of the dynamically created beams
 
   for (size_t i = 0; i < _rhiBeams.size(); ++i) {
-    delete _rhiBeams[i];
+    Beam::deleteIfUnused(_rhiBeams[i]);
   }
   _rhiBeams.clear();
 
@@ -118,11 +120,18 @@ void RhiWidget::addBeam(const RadxRay *ray,
   _computeAngleLimits(ray);
   _storeRayLoc(ray);
 
-  // Just add the beam to the beam list.
-
+  // Add the beam to the beam list
+  
   RhiBeam* beam = new RhiBeam(_params, ray,
                               _manager.getPlatform().getAltitudeKm(),
                               _fields.size(), _startElev, _endElev);
+  beam->addClient();
+
+  if ((int) _rhiBeams.size() == _params.rhi_beam_queue_size) {
+    RhiBeam *oldBeam = _rhiBeams.front();
+    Beam::deleteIfUnused(oldBeam);
+    _rhiBeams.pop_front();
+  }
   _rhiBeams.push_back(beam);
 
   // compute angles and times in archive mode
@@ -164,6 +173,11 @@ void RhiWidget::addBeam(const RadxRay *ray,
   // Start the threads to render the new beams
   
   _performRendering();
+
+  if (_params.debug >= Params::DEBUG_VERBOSE &&
+      _rhiBeams.size() % 10 == 0) {
+    cerr << "==>> _rhiBeams.size(): " << _rhiBeams.size() << endl;
+  }
 
 }
 
@@ -617,6 +631,18 @@ void RhiWidget::_computeAngleLimits(const RadxRay *ray)
   // }
 
   _prevElev = elev;
+
+  double az = ray->getAzimuthDeg();
+  double azDiff = Radx::computeAngleDiff(az, _prevAz);
+  _prevAz = az;
+
+  RadxTime rtime = ray->getRadxTime();
+  double timeDiff = rtime - _prevTime;
+  _prevTime = rtime;
+
+  if (azDiff > 2.0 || timeDiff > 30) {
+    clear();
+  }
     
 }
 
@@ -639,7 +665,7 @@ void RhiWidget::_storeRayLoc(const RadxRay *ray)
   for (int ii = startIndex; ii <= endIndex; ii++) {
     _rayLoc[ii].ray = ray;
     _rayLoc[ii].active = true;
-    _rayLoc[ii].master = false;
+    // _rayLoc[ii].master = false;
     _rayLoc[ii].startIndex = startIndex;
     _rayLoc[ii].endIndex = endIndex;
   }
@@ -647,9 +673,8 @@ void RhiWidget::_storeRayLoc(const RadxRay *ray)
   // indicate which ray is the master
   // i.e. it is responsible for ray memory
     
-  int midIndex = (int) (ray->getElevationDeg() * RayLoc::RAY_LOC_RES);
-  _rayLoc[midIndex].master = true;
-  ray->addClient();
+  // int midIndex = (int) (ray->getElevationDeg() * RayLoc::RAY_LOC_RES);
+  // _rayLoc[midIndex].master = true;
 
 }
 
@@ -691,12 +716,12 @@ void RhiWidget::_clearRayOverlap(const int startIndex,
 	// If the master is in the overlap area, then it needs to be moved
 	// outside of this area
 
-	if (_rayLoc[j].master)
-	  _rayLoc[startIndex-1].master = true;
+	// if (_rayLoc[j].master)
+	//   _rayLoc[startIndex-1].master = true;
 	
 	_rayLoc[j].ray = NULL;
 	_rayLoc[j].active = false;
-	_rayLoc[j].master = false;
+	// _rayLoc[j].master = false;
       }
 
       // Update the end indices for the remaining locations in the current
@@ -726,12 +751,12 @@ void RhiWidget::_clearRayOverlap(const int startIndex,
 	// If the master is in the overlap area, then it needs to be moved
 	// outside of this area
 
-	if (_rayLoc[j].master)
-	  _rayLoc[endIndex+1].master = true;
+	// if (_rayLoc[j].master)
+	//   _rayLoc[endIndex+1].master = true;
 	
 	_rayLoc[j].ray = NULL;
 	_rayLoc[j].active = false;
-	_rayLoc[j].master = false;
+	// _rayLoc[j].master = false;
       }
 
       // Update the start indices for the remaining locations in the current
@@ -785,7 +810,7 @@ void RhiWidget::_refreshImages()
     
     if (ifield == _selectedField || field->isBackgroundRendered()) {
 
-      std::vector< RhiBeam* >::iterator beam;
+      std::deque<RhiBeam*>::iterator beam;
       for (beam = _rhiBeams.begin(); beam != _rhiBeams.end(); ++beam) {
 	(*beam)->setBeingRendered(ifield, true);
 	field->addBeam(*beam);
@@ -813,7 +838,7 @@ void RhiWidget::clear()
   // Clear out the beam array
   
   for (size_t i = 0; i < _rhiBeams.size(); i++) {
-    delete _rhiBeams[i];
+    Beam::deleteIfUnused(_rhiBeams[i]);
   }
   _rhiBeams.clear();
   _pointClicked = false;
@@ -902,7 +927,7 @@ void RhiWidget::selectVar(const size_t index)
   // the beams for it
 
   if (!_fieldRenderers[index]->isBackgroundRendered()) {
-    std::vector<RhiBeam*>::iterator beam;
+    std::deque<RhiBeam*>::iterator beam;
     for (beam = _rhiBeams.begin(); beam != _rhiBeams.end(); ++beam) {
       (*beam)->setBeingRendered(index, true);
       _fieldRenderers[index]->addBeam(*beam);

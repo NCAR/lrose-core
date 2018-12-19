@@ -367,7 +367,7 @@ protected:
    * @brief The number of colors in the table.
    */
 
-  uint _numColors;
+  uint32_t _numColors;
 
   /**
    * @brief The data value at the center of the color palette.

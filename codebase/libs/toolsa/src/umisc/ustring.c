@@ -245,6 +245,7 @@ char *ustr_token(char **str_ptr,
 
   if (tok == (char *) NULL) {
     *str_ptr = (char *) NULL;
+    ufree(tmp_str);
     return ((char *) NULL);
   }
 

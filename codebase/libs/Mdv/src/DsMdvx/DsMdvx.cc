@@ -37,6 +37,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <toolsa/TaStr.hh>
+#include <toolsa/ugetenv.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/DsMdvxMsg.hh>
 #include <Mdv/Mdv2NcfTrans.hh>
@@ -1575,7 +1576,7 @@ void DsMdvx::setMdv2NcfCommentAttr(const string &comment)
 // set compression - uses HDF5
 
 void DsMdvx::setMdv2NcfCompression(bool compress,
-                             int compressionLevel)
+                                   int compressionLevel)
   
 {
   
@@ -3234,6 +3235,13 @@ string DsMdvx::_computeNcfOutputPath(const string &outputDir)
   
   _checkEnvBeforeWrite();
 
+  char *writeCompStr = getenv("MDV_NCF_COMPRESSION_LEVEL");
+  if (writeCompStr != NULL) {
+    int level = atoi(writeCompStr);
+    _ncfCompress = true;
+    _ncfCompressionLevel = level;
+  }
+  
   // compute path
   
   char yearSubdir[MAX_PATH_LEN];

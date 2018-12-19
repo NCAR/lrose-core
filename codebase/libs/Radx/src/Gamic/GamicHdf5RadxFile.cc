@@ -262,7 +262,7 @@ int GamicHdf5RadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
   
   cerr << "WARNING - GamicHdf5RadxFile::writeToDir" << endl;
-  cerr << "  Writing GamicHdf5 raw format files not supported" << endl;
+  cerr << "  Writing GamicHdf5 format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
   
   // set up NcfRadxFile object
@@ -302,7 +302,7 @@ int GamicHdf5RadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - GamicHdf5RadxFile::writeToPath" << endl;
-  cerr << "  Writing GamicHdf5 raw format files not supported" << endl;
+  cerr << "  Writing GamicHdf5 format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object

@@ -228,7 +228,7 @@ WRFData::WRFData() :
   // it would go out of scope at the end of the 
   // function.
 
-  _ncfError = new NcError(NcError::silent_nonfatal);
+  _ncfError = new Nc3Error(Nc3Error::silent_nonfatal);
 }
 
 //////////////
@@ -257,7 +257,7 @@ bool WRFData::initFile(const string &path)
   // Open the file
 
   _path = path;
-  _ncf = new NcFile(_path.c_str());
+  _ncf = new Nc3File(_path.c_str());
 
   if (!_ncf->is_valid())
   {
@@ -871,7 +871,7 @@ int WRFData::_findFileVersion()
   //first check to make sure we have a ARW type WRF file
   // the global attribute 'GRIDTYPE' is C for ARW and E for NMM. (J. Bresch)
 
-  NcAtt* att;
+  Nc3Att* att;
 
   att = _ncf->get_att("GRIDTYPE");
   if (att == NULL)
@@ -953,7 +953,7 @@ void WRFData::_load1dField(const string &ncd_field_name,
   
   // Access the variable in the netCDF file
 
-  NcVar* var = _ncf->get_var(ncd_field_name.c_str());
+  Nc3Var* var = _ncf->get_var(ncd_field_name.c_str());
 
   if (var == 0)
   {
@@ -991,7 +991,7 @@ void WRFData::_load2dField(const string &ncd_field_name,
   
   // Access the variable in the netCDF file
 
-  NcVar* var = _ncf->get_var(ncd_field_name.c_str());
+  Nc3Var* var = _ncf->get_var(ncd_field_name.c_str());
 
   if (var == 0)
   {
@@ -1030,7 +1030,7 @@ void WRFData::_load3dField(const string &ncd_field_name,
   
   // Access the variable in the netCDF file
 
-  NcVar* var = _ncf->get_var(ncd_field_name.c_str());
+  Nc3Var* var = _ncf->get_var(ncd_field_name.c_str());
 
   if (var == 0)
   {
@@ -2069,7 +2069,7 @@ void WRFData::_loadLandUsef()
   
   // Access the variable in the netCDF file
 
-  NcVar* lu_var = _ncf->get_var("LANDUSEF");
+  Nc3Var* lu_var = _ncf->get_var("LANDUSEF");
   if(lu_var == NULL)
   {
     cerr << "WARNING: 'LANDUSEF' variable missing from netCDF file" << endl;
@@ -2172,7 +2172,7 @@ void WRFData::_loadASoil(string WRF_var_name, fl32**& soil_data, int layer)
   
   // Access the field in the netCDF file
 
-  NcVar* soilVar = _ncf->get_var(WRF_var_name.c_str());
+  Nc3Var* soilVar = _ncf->get_var(WRF_var_name.c_str());
   if (soilVar == 0)
   {
     cerr << "WARNING: '" << WRF_var_name
@@ -2183,7 +2183,7 @@ void WRFData::_loadASoil(string WRF_var_name, fl32**& soil_data, int layer)
 
   // Access the dimension in the netCDF file
 
-  NcDim *dim = soilVar->get_dim(1);
+  Nc3Dim *dim = soilVar->get_dim(1);
   if (dim == 0 || dim->size() <= layer)
   {
     cerr << "WARNING: layer: " << layer << " not valid for '" 
@@ -2215,7 +2215,7 @@ void WRFData::_loadSoilInfo()
   _loadASoil("SMOIS", _soil_m_4, 3);
   _loadASoil("SMOIS", _soil_m_5, 4);
 
-  NcVar* var = _ncf->get_var("ZS");
+  Nc3Var* var = _ncf->get_var("ZS");
   if(var == NULL) 
   {
     cerr << "WARNING: 'ZS' variable missing - some fields may not be available\n";
@@ -2275,7 +2275,7 @@ void  WRFData::_setProjection()
   
   //set projection first
   
-  NcAtt* att;
+  Nc3Att* att;
 
   att = _ncf->get_att("MAP_PROJ");
   if (att == NULL)
@@ -2385,7 +2385,7 @@ void  WRFData::_setProjection()
 
   //get _llLat & long
 
-  NcVar *ncvar;
+  Nc3Var *ncvar;
   ncvar = _ncf->get_var("LON_LL_T");
   if (ncvar == NULL)
   {
@@ -2557,7 +2557,7 @@ bool  WRFData::_setTimes()
       TaArray<char> forecastTime_;
       char *forecastTime = forecastTime_.alloc(dateStringLen+1);
       memset(forecastTime, 0, dateStringLen + 1);
-      NcVar *time_var = _ncf->get_var("Times");
+      Nc3Var *time_var = _ncf->get_var("Times");
       time_var->get(forecastTime,1,dateStringLen);
 
       // Date looks like this: 2007-01-08_12:00:00
@@ -2572,7 +2572,7 @@ bool  WRFData::_setTimes()
       fDateTime.set(fyear,fmonth,fday,fhour,fmin,fsec);
 
       //get the genTime
-      NcAtt* att;
+      Nc3Att* att;
       //      char *attString;
       att =  _ncf->get_att(_startDateKey.c_str());
       if (att == NULL)
@@ -5065,12 +5065,12 @@ void WRFData::printFile()
   cout << "ndims: " << _ncf->num_dims() << endl;
   cout << "nvars: " << _ncf->num_vars() << endl;
   cout << "ngatts: " << _ncf->num_atts() << endl;
-  NcDim *unlimd = _ncf->rec_dim();
+  Nc3Dim *unlimd = _ncf->rec_dim();
   cout << "unlimdimid: " << unlimd->size() << endl;
   
   // dimensions
 
-  NcDim *dims[_ncf->num_dims()];
+  Nc3Dim *dims[_ncf->num_dims()];
   for (int idim = 0; idim < _ncf->num_dims(); idim++) {
     dims[idim] = _ncf->get_dim(idim);
 
@@ -5091,14 +5091,14 @@ void WRFData::printFile()
 
   for (int iatt = 0; iatt < _ncf->num_atts(); iatt++) {
     cout << "  Att num: " << iatt << endl;
-    NcAtt *att = _ncf->get_att(iatt);
+    Nc3Att *att = _ncf->get_att(iatt);
     _printAtt(att);
     delete att;
   }
 
   // loop through variables
 
-  NcVar *vars[_ncf->num_vars()];
+  Nc3Var *vars[_ncf->num_vars()];
   for (int ivar = 0; ivar < _ncf->num_vars(); ivar++) {
 
     vars[ivar] = _ncf->get_var(ivar);
@@ -5107,7 +5107,7 @@ void WRFData::printFile()
     cout << "  Name: " << vars[ivar]->name() << endl;
     cout << "  Is valid: " << vars[ivar]->is_valid() << endl;
     cout << "  N dims: " << vars[ivar]->num_dims();
-    NcDim *vdims[vars[ivar]->num_dims()];
+    Nc3Dim *vdims[vars[ivar]->num_dims()];
     if (vars[ivar]->num_dims() > 0) {
       cout << ": (";
       for (int ii = 0; ii < vars[ivar]->num_dims(); ii++) {
@@ -5125,7 +5125,7 @@ void WRFData::printFile()
     for (int iatt = 0; iatt < vars[ivar]->num_atts(); iatt++) {
 
       cout << "  Att num: " << iatt << endl;
-      NcAtt *att = vars[ivar]->get_att(iatt);
+      Nc3Att *att = vars[ivar]->get_att(iatt);
       _printAtt(att);
       delete att;
 
@@ -5141,7 +5141,7 @@ void WRFData::printFile()
 /////////////////////
 // print an attribute
 
-void WRFData::_printAtt(NcAtt *att)
+void WRFData::_printAtt(Nc3Att *att)
 
 {
 
@@ -5149,69 +5149,70 @@ void WRFData::_printAtt(NcAtt *att)
   cout << "    Num vals: " << att->num_vals() << endl;
   cout << "    Type: ";
   
-  NcValues *values = att->values();
+  Nc3Values *values = att->values();
 
   switch(att->type()) {
     
-  case ncNoType: {
-    cout << "No type: ";
-  }
-  break;
-  
-  case ncByte: {
-    cout << "BYTE: ";
-    unsigned char *vals = (unsigned char *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
+    case nc3Byte: {
+      cout << "BYTE: ";
+      unsigned char *vals = (unsigned char *) values->base();
+      for (long ii = 0; ii < att->num_vals(); ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
-  case ncChar: {
-    cout << "CHAR: ";
-    char vals[att->num_vals() + 1];
-    MEM_zero(vals);
-    memcpy(vals, values->base(), att->num_vals());
-    cout << vals;
-  }
-  break;
-  
-  case ncShort: {
-    cout << "SHORT: ";
-    short *vals = (short *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
+    case nc3Char: {
+      cout << "CHAR: ";
+      char vals[att->num_vals() + 1];
+      MEM_zero(vals);
+      memcpy(vals, values->base(), att->num_vals());
+      cout << vals;
+      break;
     }
-  }
-  break;
   
-  case ncInt: {
-    cout << "INT: ";
-    int *vals = (int *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
+    case nc3Short: {
+      cout << "SHORT: ";
+      short *vals = (short *) values->base();
+      for (long ii = 0; ii < att->num_vals(); ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
-  case ncFloat: {
-    cout << "FLOAT: ";
-    float *vals = (float *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
+    case nc3Int: {
+      cout << "INT: ";
+      int *vals = (int *) values->base();
+      for (long ii = 0; ii < att->num_vals(); ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
-  case ncDouble: {
-    cout << "DOUBLE: ";
-    double *vals = (double *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
+    case nc3Float: {
+      cout << "FLOAT: ";
+      float *vals = (float *) values->base();
+      for (long ii = 0; ii < att->num_vals(); ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
+    case nc3Double: {
+      cout << "DOUBLE: ";
+      double *vals = (double *) values->base();
+      for (long ii = 0; ii < att->num_vals(); ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
+    }
+  
+    case nc3NoType:
+    default: {
+      cout << "No type: ";
+      break;
+    }
+      
   }
   
   cout << endl;
@@ -5221,7 +5222,7 @@ void WRFData::_printAtt(NcAtt *att)
 }
 
     
-void WRFData::_printVarVals(NcVar *var)
+void WRFData::_printVarVals(Nc3Var *var)
 
 {
 
@@ -5230,69 +5231,70 @@ void WRFData::_printVarVals(NcVar *var)
     nprint = 100;
   }
 
-  NcValues *values = var->values();
+  Nc3Values *values = var->values();
 
   cout << "  Variable vals:";
   
   switch(var->type()) {
     
-  case ncNoType: {
-  }
-  break;
-  
-  case ncByte: {
-    cout << "(byte)";
-    unsigned char *vals = (unsigned char *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
+    case nc3Byte: {
+      cout << "(byte)";
+      unsigned char *vals = (unsigned char *) values->base();
+      for (long ii = 0; ii < nprint; ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
-  case ncChar: {
-    cout << "(char)";
-    char str[nprint + 1];
-    MEM_zero(str);
-    memcpy(str, values->base(), nprint);
-    cout << " " << str;
-  }
-  break;
-  
-  case ncShort: {
-    cout << "(short)";
-    short *vals = (short *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
+    case nc3Char: {
+      cout << "(char)";
+      char str[nprint + 1];
+      MEM_zero(str);
+      memcpy(str, values->base(), nprint);
+      cout << " " << str;
+      break;
     }
-  }
-  break;
   
-  case ncInt: {
-    cout << "(int)";
-    int *vals = (int *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
+    case nc3Short: {
+      cout << "(short)";
+      short *vals = (short *) values->base();
+      for (long ii = 0; ii < nprint; ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
-  case ncFloat: {
-    cout << "(float)";
-    float *vals = (float *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
+    case nc3Int: {
+      cout << "(int)";
+      int *vals = (int *) values->base();
+      for (long ii = 0; ii < nprint; ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
   
-  case ncDouble: {
-    cout << "(double)";
-    double *vals = (double *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
+    case nc3Float: {
+      cout << "(float)";
+      float *vals = (float *) values->base();
+      for (long ii = 0; ii < nprint; ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
     }
-  }
-  break;
+  
+    case nc3Double: {
+      cout << "(double)";
+      double *vals = (double *) values->base();
+      for (long ii = 0; ii < nprint; ii++) {
+        cout << " " << vals[ii];
+      }
+      break;
+    }
+  
+    case nc3NoType:
+    default: {
+      break;
+    }
   
   }
   

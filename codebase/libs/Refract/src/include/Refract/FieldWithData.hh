@@ -445,6 +445,11 @@ class FieldWithData
    */
   inline const fl32 *getDataPtr(void) const {return _data;}
 
+  /**
+   * @return const pointer to the field
+   */
+  const MdvxField *getFieldPtrConst(void) const {return _field;}
+
  private:
 
   std::string _name;                     /**< field name */

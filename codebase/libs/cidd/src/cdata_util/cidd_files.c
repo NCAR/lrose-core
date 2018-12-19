@@ -21,7 +21,7 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
- /*****************************************************************************
+/*****************************************************************************
  * CIDD_FILE_SEARCH.c Routines to find data files using the standard CIDD 
  * Naming convention style: top_dir/yyyymmdd/hhmmss.suffix
  *
@@ -51,29 +51,32 @@
  *
  */
 
-FILE *open_data_time(long time,int num_top_dirs, char **top_dir,char *suffix)
+FILE *open_data_time(long time,
+                     int num_top_dirs,
+                     char **top_dir,
+                     char *suffix)
 {
-    int i;
-    char file_name[1024];
-    char path_name[1024];
-    char format_str[32];
-    struct tm *tm;
-    FILE *file = NULL;
+  int i;
+  char file_name[1024];
+  char path_name[1024];
+  char format_str[32];
+  struct tm *tm;
+  FILE *file = NULL;
 
-    tm = gmtime(&time);
-    strcpy(format_str,"%Y%m%d/%H%M%S."); /* Build the file name format string */
-    strncat(format_str,suffix,32);       /* Add the file suffix */
+  tm = gmtime(&time);
+  strcpy(format_str,"%Y%m%d/%H%M%S."); /* Build the file name format string */
+  strncat(format_str,suffix,32);       /* Add the file suffix */
 
 
-    strftime(file_name,128,format_str,tm);  /* build the file name */
+  strftime(file_name,128,format_str,tm);  /* build the file name */
 
-    /* Check in each directory unitl found */
-    for(i=0; i < num_top_dirs && file == NULL; i++) {
-        sprintf(path_name,"%s/%s",top_dir[i],file_name);
-        file = ta_fopen_uncompress(path_name,"r");
-    }
+  /* Check in each directory unitl found */
+  for(i=0; i < num_top_dirs && file == NULL; i++) {
+    sprintf(path_name,"%s/%s",top_dir[i],file_name);
+    file = ta_fopen_uncompress(path_name,"r");
+  }
     
-    return file;
+  return file;
 }
  
  
@@ -83,9 +86,9 @@ FILE *open_data_time(long time,int num_top_dirs, char **top_dir,char *suffix)
 
 static int time_compare(const void *v1, const void *v2)
 
- {
-     return (*((long *)v1) - *((long *)v2));
- }
+{
+  return (*((long *)v1) - *((long *)v2));
+}
  
 
 /************************************************************************
@@ -96,118 +99,123 @@ static int time_compare(const void *v1, const void *v2)
  *        
  */
 
-int    find_all_data_times(long **time_ptr,int  num_top_dirs, char **top_dir,char *file_suffix,time_t min_time,time_t max_time)
+int find_all_data_times(long **time_ptr,
+                        int  num_top_dirs,
+                        char **top_dir,
+                        char *file_suffix,
+                        time_t min_time,
+                        time_t max_time)
 {
-    int    i;
-    long    year,month,day,hour,minute,second;
+  int    i;
+  long    year,month,day,hour,minute,second;
 
-    UTIMstruct    utm;
-    struct dirent *dp;
-    DIR *dirp1,*dirp2;
-    char    *ext_ptr,*dot_ptr;
-    char    ext_string[64];
-    char    dir_path[256];
-    char    file_name[256];
-    UTIMstruct dir_date;
-    UTIMstruct tmp_date;
-    time_t min_day;
-    time_t max_day;
-    time_t dir_time;
-    time_t data_time;
+  UTIMstruct    utm;
+  struct dirent *dp;
+  DIR *dirp1,*dirp2;
+  char    *ext_ptr,*dot_ptr;
+  char    ext_string[64];
+  char    dir_path[256];
+  char    file_name[256];
+  UTIMstruct dir_date;
+  UTIMstruct tmp_date;
+  time_t min_day;
+  time_t max_day;
+  time_t dir_time;
+  time_t data_time;
      
-    static long    *list;
-    static int data_list_len = 0;
-    static int num_entries = 0;
-    static int last_num_top_dirs = 0;
-    static time_t last_time = 0;
+  static long    *list;
+  static int data_list_len = 0;
+  static int num_entries = 0;
+  /* static int last_num_top_dirs = 0; */
+  /* static time_t last_time = 0; */
 
 
-    if(data_list_len == 0) {
-        data_list_len = 256;
-        list = (long *) calloc(data_list_len,sizeof(long));
-    }
+  if(data_list_len == 0) {
+    data_list_len = 256;
+    list = (long *) calloc(data_list_len,sizeof(long));
+  }
 
-    dir_date.hour = 0;
-    dir_date.min = 0;
-    dir_date.sec = 0;
+  dir_date.hour = 0;
+  dir_date.min = 0;
+  dir_date.sec = 0;
 
-    UTIMunix_to_date(min_time,&tmp_date);
-    tmp_date.hour = 0;
-    tmp_date.min = 0;
-    tmp_date.sec = 0;
-    min_day = UTIMdate_to_unix(&tmp_date);
+  UTIMunix_to_date(min_time,&tmp_date);
+  tmp_date.hour = 0;
+  tmp_date.min = 0;
+  tmp_date.sec = 0;
+  min_day = UTIMdate_to_unix(&tmp_date);
 
-    UTIMunix_to_date(max_time,&tmp_date);
-    tmp_date.hour = 0;
-    tmp_date.min = 0;
-    tmp_date.sec = 0;
-    max_day = UTIMdate_to_unix(&tmp_date);
+  UTIMunix_to_date(max_time,&tmp_date);
+  tmp_date.hour = 0;
+  tmp_date.min = 0;
+  tmp_date.sec = 0;
+  max_day = UTIMdate_to_unix(&tmp_date);
 
 
-      last_time = time(0);
-      last_num_top_dirs = num_top_dirs;
-      num_entries = 0;
-      for(i=0; i < num_top_dirs; i++) {    /* Search throuh all directories for data */
-        if((dirp1 = opendir(top_dir[i])) == NULL) continue;
-        for(dp = readdir(dirp1); dp != NULL; dp = readdir(dirp1)) {    /* Look for proper subdir's */
-            if (dp->d_name[0] == '.') continue; /* skip any dot files */
-	    if (strlen(dp->d_name) != 8) continue; /* skip any files that dont match the specified format: YYYYMMDD */
-            if (sscanf(dp->d_name, "%4ld%2ld%2ld", &year, &month, &day) != 3) continue;
-            if (year < 1970 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) continue;
+  /* last_time = time(0); */
+  /* last_num_top_dirs = num_top_dirs; */
+  num_entries = 0;
+  for(i=0; i < num_top_dirs; i++) {    /* Search throuh all directories for data */
+    if((dirp1 = opendir(top_dir[i])) == NULL) continue;
+    for(dp = readdir(dirp1); dp != NULL; dp = readdir(dirp1)) {    /* Look for proper subdir's */
+      if (dp->d_name[0] == '.') continue; /* skip any dot files */
+      if (strlen(dp->d_name) != 8) continue; /* skip any files that dont match the specified format: YYYYMMDD */
+      if (sscanf(dp->d_name, "%4ld%2ld%2ld", &year, &month, &day) != 3) continue;
+      if (year < 1970 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) continue;
 
-	    /* Skip daily directories that aren't within the specified range */
-	    dir_date.year = year;
-	    dir_date.month = month;
-	    dir_date.day = day;
-	    dir_time = UTIMdate_to_unix(&dir_date);
-	    if(dir_time < min_day || dir_time > max_day) continue;
+      /* Skip daily directories that aren't within the specified range */
+      dir_date.year = year;
+      dir_date.month = month;
+      dir_date.day = day;
+      dir_time = UTIMdate_to_unix(&dir_date);
+      if(dir_time < min_day || dir_time > max_day) continue;
 
-            sprintf(dir_path,"%s/%s",top_dir[i],dp->d_name);
+      sprintf(dir_path,"%s/%s",top_dir[i],dp->d_name);
 
-            if((dirp2 = opendir(dir_path)) == NULL) continue;
-            for(dp = readdir(dirp2); dp != NULL; dp = readdir(dirp2)) {    /* Look for proper data files */
-                if (dp->d_name[0] == '.') continue;
+      if((dirp2 = opendir(dir_path)) == NULL) continue;
+      for(dp = readdir(dirp2); dp != NULL; dp = readdir(dirp2)) {    /* Look for proper data files */
+        if (dp->d_name[0] == '.') continue;
 
-		/* check for an exact match of the file suffix */
+        /* check for an exact match of the file suffix */
 
-		if((ext_ptr = strchr(dp->d_name,'.')) == NULL) continue; /* find the first dot */
-		ext_ptr++; /* copy what's after it into a temp extension string */
-		strncpy(ext_string,ext_ptr,64);
-                /* Replace the next dot wiith a null - Avoids comparing .Z or.gz extension modifiers */
-		if((dot_ptr = strchr(ext_string,'.')) != NULL) *dot_ptr = '\0';
-		if(strcmp(ext_string,file_suffix)) continue;
-                strncpy(file_name,dp->d_name,6);
+        if((ext_ptr = strchr(dp->d_name,'.')) == NULL) continue; /* find the first dot */
+        ext_ptr++; /* copy what's after it into a temp extension string */
+        strncpy(ext_string,ext_ptr,64);
+        /* Replace the next dot wiith a null - Avoids comparing .Z or.gz extension modifiers */
+        if((dot_ptr = strchr(ext_string,'.')) != NULL) *dot_ptr = '\0';
+        if(strcmp(ext_string,file_suffix)) continue;
+        strncpy(file_name,dp->d_name,6);
 		 
-                file_name[6] = '\0';
-                if (sscanf(file_name, "%2ld%2ld%2ld", &hour, &minute, &second) != 3) continue;
-                if ( hour > 23 || minute > 59 || second > 59) continue;
-                utm.year = year;
-                utm.month = month;
-                utm.day = day;
-                utm.hour = hour;
-                utm.min = minute;
-                utm.sec = second;
-                data_time = UTIMdate_to_unix(&utm);
-                if(data_time >= min_time && data_time <= max_time) {
-					list[num_entries] = UTIMdate_to_unix(&utm);
-                    num_entries++;
+        file_name[6] = '\0';
+        if (sscanf(file_name, "%2ld%2ld%2ld", &hour, &minute, &second) != 3) continue;
+        if ( hour > 23 || minute > 59 || second > 59) continue;
+        utm.year = year;
+        utm.month = month;
+        utm.day = day;
+        utm.hour = hour;
+        utm.min = minute;
+        utm.sec = second;
+        data_time = UTIMdate_to_unix(&utm);
+        if(data_time >= min_time && data_time <= max_time) {
+          list[num_entries] = UTIMdate_to_unix(&utm);
+          num_entries++;
 
 
-                    if(num_entries >= data_list_len) {
-                        data_list_len *= 2;        /* increase buffer by two */
-                        list = (long *)  realloc(list,data_list_len * sizeof(long));
-                    }
-				}
-            }
-            closedir(dirp2);
+          if(num_entries >= data_list_len) {
+            data_list_len *= 2;        /* increase buffer by two */
+            list = (long *)  realloc(list,data_list_len * sizeof(long));
+          }
         }
-        closedir(dirp1);
       }
+      closedir(dirp2);
+    }
+    closedir(dirp1);
+  }
 
-      qsort((char *) list,num_entries,sizeof(long),time_compare);
+  qsort((char *) list,num_entries,sizeof(long),time_compare);
 
-    *time_ptr = list;
-    return num_entries;
+  *time_ptr = list;
+  return num_entries;
 }
  
 /************************************************************************
@@ -217,22 +225,29 @@ int    find_all_data_times(long **time_ptr,int  num_top_dirs, char **top_dir,cha
  *        
  */
 
-long find_latest_data_time(int    num_top_dirs, char **top_dir,char *suffix)
+long find_latest_data_time(int num_top_dirs,
+                           char **top_dir,
+                           char *suffix)
 {
-    long    num_entries;
-    long *list;
-    time_t now;
-    static time_t last_latest = 0;
-    now = time(0);
+  long    num_entries;
+  long *list;
+  time_t now;
+  static time_t last_latest = 0;
+  now = time(0);
 
-    num_entries = find_all_data_times(&list,num_top_dirs,top_dir,suffix,last_latest,now+1000000);
+  num_entries = find_all_data_times(&list,
+                                    num_top_dirs,
+                                    top_dir,
+                                    suffix,
+                                    last_latest,
+                                    now+1000000);
 
-    if(num_entries > 0) {
-	last_latest = list[num_entries -1];
-        return(list[num_entries -1]);
-    } else {
-        return 0;
-    }
+  if(num_entries > 0) {
+    last_latest = list[num_entries -1];
+    return(list[num_entries -1]);
+  } else {
+    return 0;
+  }
 }
 
  
@@ -244,36 +259,47 @@ long find_latest_data_time(int    num_top_dirs, char **top_dir,char *suffix)
  *   found.
  */
 
-long find_current_data_time(int    num_top_dirs, char **top_dir,char *suffix)
+long find_current_data_time(int num_top_dirs,
+                            char **top_dir,
+                            char *suffix)
 {
-    int    i;
-    long   dummy; /* dummy variable for secquence number on indexes */
+  int    i;
+  long   dummy; /* dummy variable for secquence number on indexes */
 
-    cdata_current_index_t    index;
-    struct stat buf;
-    char name[1024];
+  cdata_current_index_t    index;
+  struct stat buf;
+  char name[1024];
 
-    for(i=0; i < num_top_dirs; i++) {    /* Search through each top directory */
-        sprintf(name,"%s/%s",top_dir[i],CDATA_CURRENT_FILE_INDEX);
+  for(i=0; i < num_top_dirs; i++) {    /* Search through each top directory */
+    sprintf(name,"%s/%s",top_dir[i],CDATA_CURRENT_FILE_INDEX);
 
-        if(stat(name,&buf) == 0) {  /* If the index exists */
-            dummy = 0;
-            cdata_read_index_simple(top_dir[i],
-                0,&dummy,0,&index,"cidd_files","find_current_data_time",
-                0);
+    if(stat(name,&buf) == 0) {  /* If the index exists */
+      dummy = 0;
+      cdata_read_index_simple(top_dir[i],
+                              0,
+                              &dummy,
+                              0,
+                              &index,
+                              "cidd_files",
+                              "find_current_data_time",
+                              0);
 
-            /* Check to see if the file suffixes match */
-            if(strncmp(index.file_ext,suffix,CDATA_MAX_INDEX_STR) == 0) { 
-                if(index.exact_time) { 
-                    return index.unix_time;
-                } else {     /* must look for the closest time */
-                    return(find_best_data_time(index.unix_time -3600,index.unix_time,index.unix_time +3600,
-                        num_top_dirs,top_dir,suffix));
-                }
-            }
+      /* Check to see if the file suffixes match */
+      if(strncmp(index.file_ext,suffix,CDATA_MAX_INDEX_STR) == 0) { 
+        if(index.exact_time) { 
+          return index.unix_time;
+        } else {     /* must look for the closest time */
+          return(find_best_data_time(index.unix_time -3600,
+                                     index.unix_time,
+                                     index.unix_time +3600,
+                                     num_top_dirs,
+                                     top_dir,
+                                     suffix));
         }
+      }
     }
-    return 0;  /* No index or no data times within an hour of "current" */
+  }
+  return 0;  /* No index or no data times within an hour of "current" */
 }
 #endif
 
@@ -285,28 +311,36 @@ long find_current_data_time(int    num_top_dirs, char **top_dir,char *suffix)
  *        
  */
 
-long    find_best_data_time(long begin, long mid, long end,int  num_top_dirs, char **top_dir,char *suffix)
+long find_best_data_time(long begin,
+                         long mid,
+                         long end,
+                         int num_top_dirs,
+                         char **top_dir,
+                         char *suffix)
 {
-    int i,index = 0;
-    long num_entries;
-    long dist;    
-    long *list;
+  int i,index = 0;
+  long num_entries;
+  long dist;    
+  long *list;
 
-    num_entries = find_all_data_times(&list,num_top_dirs,top_dir,suffix,begin,end);
-    if(num_entries == 0) return 0;
+  num_entries = find_all_data_times(&list,
+                                    num_top_dirs, top_dir,
+                                    suffix, 
+                                    begin, end);
+  if(num_entries == 0) return 0;
 
-    dist = MAX_LONG;
-    for(i=0; i < num_entries; i++) {
-        if(abs(list[i] - mid) < dist) {
-            dist = abs(list[i] - mid);
-            index = i;
-        }
+  dist = MAX_LONG;
+  for(i=0; i < num_entries; i++) {
+    if(abs(list[i] - mid) < dist) {
+      dist = abs(list[i] - mid);
+      index = i;
     }
+  }
 
-    if(list[index] >= begin && list[index] <= end) {
-        return list[index];
-    } else {
-        return 0;
-    }
+  if(list[index] >= begin && list[index] <= end) {
+    return list[index];
+  } else {
+    return 0;
+  }
 }
 

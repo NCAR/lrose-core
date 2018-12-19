@@ -31,7 +31,7 @@
 //  Terri Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 //  September 2001
 //
-//  $Id: BinetNetCDF.hh,v 1.8 2016/03/07 01:23:07 dixon Exp $
+//  $Id: BinetNetCDF.hh,v 1.9 2018/01/26 20:15:07 jcraig Exp $
 //
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef _BINET_NetCDF_INC_
@@ -39,7 +39,8 @@
 
 #include <vector>
 #include <utility>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
+
 using namespace std;
 
 //
@@ -131,7 +132,7 @@ private:
    // NetCDF file handling
    //
    DsInputPath  *fileTrigger;
-   NcFile       *ncFile;
+   Nc3File       *ncFile;
    bool          fileIsOpen;
    bool          newFileRead;
 
@@ -140,7 +141,7 @@ private:
    //
    // NetCDF error handling
    //
-   NcError       ncError;
+   Nc3Error       ncError;
 
    const char*   ncErrorMsg(){ return nc_strerror(ncError.get_err()); }
 

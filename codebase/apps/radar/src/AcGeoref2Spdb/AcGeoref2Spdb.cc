@@ -125,28 +125,18 @@ AcGeoref2Spdb::AcGeoref2Spdb(int argc, char **argv)
 
   // set up the surface velocity filtering
   
-  _surfVel.initFilters(_params.surface_vel_stage1_filter_n,
-                       _params._surface_vel_stage1_filter,
-                       _params.surface_vel_spike_filter_n,
-                       _params._surface_vel_spike_filter,
-                       _params.surface_vel_final_filter_n,
-                       _params._surface_vel_final_filter);
-
   if (_params.debug) {
     _surfVel.setDebug(true);
   }
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _surfVel.setVerbose(true);
   }
-
   _surfVel.setDbzFieldName(_params.cfradial_dbz_field_name);
   _surfVel.setVelFieldName(_params.cfradial_vel_field_name);
-
   _surfVel.setMinRangeToSurfaceKm(_params.min_range_to_surface_km);
   _surfVel.setMinDbzForSurfaceEcho(_params.min_dbz_for_surface_echo);
   _surfVel.setNGatesForSurfaceEcho(_params.ngates_for_surface_echo);
-  _surfVel.setSpikeFilterDifferenceThreshold
-    (_params.surface_vel_spike_filter_difference_threshold);
+  _surfVel.setMaxNadirErrorDeg(_params.max_nadir_error_for_surface_vel);
   
   // init process mapper registration
   
@@ -1315,139 +1305,23 @@ void AcGeoref2Spdb::_getHcrTempsFromStatusXml(const string &statusXml,
 /////////////////////////////////////////////////////////////////////////
 // compute surface velocity
 //
-// Sets vel to (0.0) if cannot determine valocity from surface.
+// Sets vel to 0.0 if cannot determine velocity from surface.
 
 double AcGeoref2Spdb::_computeSurfaceVel(const RadxRay &ray)
   
 {
   
-  RadxRay *tmpRay = new RadxRay(ray);
-  tmpRay->addClient();
-  double surfVel = -9999.0;
-  
-  if (_surfVel.processRay(tmpRay) == 0) {
-    if (_surfVel.velocityIsValid()) {
-      surfVel = _surfVel.getSurfaceVelocity();
-    }
+  double velSurf = -9999.0;
+  double dbzSurf = -9999.0;
+  double rangeToSurf = -9999.0;
+  if (_surfVel.computeSurfaceVel(&ray,
+                                 velSurf,
+                                 dbzSurf,
+                                 rangeToSurf) == 0) {
+    return velSurf;
+  } else {
+    return 0.0;
   }
-
-  RadxRay::deleteIfUnused(tmpRay);
-  return surfVel;
-
-#ifdef INITIAL_VERSION
-
-  // init
-  
-  double surfaceVel = 0.0;
-
-  // check elevation
-  // cannot compute gnd vel if not pointing down
-  
-  double elev = ray.getElevationDeg();
-
-  if ((elev > -90 + _params.max_nadir_error_for_surface_vel) ||
-      (elev < -90 - _params.max_nadir_error_for_surface_vel)) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Bad elevation for finding surface, time, elev(deg): "
-           << ray.getRadxTime().asString() << ", "
-           << elev << endl;
-      cerr << "Max allowable error from nadir: " 
-           << _params.max_nadir_error_for_surface_vel << endl;
-    }
-    return surfaceVel;
-   }
-
-  // get dbz field
-
-  const RadxField *dbzField = ray.getField(_params.cfradial_dbz_field_name);
-  if (dbzField == NULL) {
-    cerr << "ERROR - HcrVelCorrect::_computeSurfaceVel" << endl;
-    cerr << "  No dbz field found, field name: " << _params.cfradial_dbz_field_name << endl;
-    return surfaceVel;
-  }
-  const Radx::fl32 *dbzArray = dbzField->getDataFl32();
-  Radx::fl32 dbzMiss = dbzField->getMissingFl32();
-
-  // get vel field
-
-  const RadxField *velField = ray.getField(_params.cfradial_vel_field_name);
-  if (velField == NULL) {
-    cerr << "ERROR - HcrVelCorrect::_computeSurfaceVel" << endl;
-    cerr << "  No vel field found, field name: " << _params.cfradial_vel_field_name << endl;
-    return surfaceVel;
-  }
-  const Radx::fl32 *velArray = velField->getDataFl32();
-  Radx::fl32 velMiss = velField->getMissingFl32();
-  
-  // get gate at which max dbz occurs
-
-  double range = dbzField->getStartRangeKm();
-  double drange = dbzField->getGateSpacingKm();
-  double dbzMax = -9999;
-  int gateForMax = -1;
-  double rangeToSurface = 0;
-  double foundSurface = false;
-  for (size_t igate = 0; igate < dbzField->getNPoints(); igate++, range += drange) {
-    if (range < _params.min_range_to_surface_km) {
-      continue;
-    }
-    Radx::fl32 dbz = dbzArray[igate];
-    if (dbz != dbzMiss) {
-      if (dbz > dbzMax) {
-        dbzMax = dbz;
-        gateForMax = igate;
-        rangeToSurface = range;
-        foundSurface = true;
-      }
-    }
-  }
-
-  // check for sufficient power
-
-  if (foundSurface) {
-    if (dbzMax < _params.min_dbz_for_surface_echo) {
-      foundSurface = false;
-      if (_params.debug) {
-        cerr << "WARNING - HcrVelCorrect::_computeSurfaceVel" << endl;
-        cerr << "  Ray at time: " << ray.getRadxTime().asString() << endl;
-        cerr << "  Dbz max not high enough for surface detection: " << dbzMax << endl;
-        cerr << "  Range to max dbz: " << rangeToSurface << endl;
-      }
-    }
-  }
-
-  size_t nEachSide = _params.ngates_for_surface_echo / 2;
-  if (foundSurface) {
-    for (size_t igate = gateForMax - nEachSide; igate <= gateForMax + nEachSide; igate++) {
-      Radx::fl32 dbz = dbzArray[igate];
-      if (dbz == dbzMiss) {
-        foundSurface = false;
-      }
-      if (dbz < _params.min_dbz_for_surface_echo) {
-        foundSurface = false;
-      }
-    }
-  }
-  
-  // compute surface vel
-  
-  if (foundSurface) {
-    double sum = 0.0;
-    double count = 0.0;
-    for (size_t igate = gateForMax - nEachSide; igate <= gateForMax + nEachSide; igate++) {
-      Radx::fl32 vel = velArray[igate];
-      if (vel == velMiss) {
-        foundSurface = false;
-      }
-      sum += vel;
-      count++;
-    }
-    surfaceVel = sum / count;
-  }
-
-  return surfaceVel;
-
-#endif
 
 }
 

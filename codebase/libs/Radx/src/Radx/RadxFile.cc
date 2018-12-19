@@ -51,6 +51,7 @@
 #include <Radx/NexradCmdRadxFile.hh>
 #include <Radx/NexradRadxFile.hh>
 #include <Radx/NidsRadxFile.hh>
+#include <Radx/NoaaFslRadxFile.hh>
 #include <Radx/NoxpNcRadxFile.hh>
 #include <Radx/NsslMrdRadxFile.hh>
 #include <Radx/OdimHdf5RadxFile.hh>
@@ -61,8 +62,9 @@
 #include <Radx/UfRadxFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
-#include <Ncxx/Hdf5xx.hh>
 #include <Radx/RadxSweep.hh>
+#include <Radx/RadxPath.hh>
+#include <Ncxx/Hdf5xx.hh>
 #include <unistd.h>
 #include <cstring>
 #include <cstdio>
@@ -188,6 +190,14 @@ bool RadxFile::_isSupportedNetCDF(const string &path)
     }
   }
   
+  // try EEC Edge netcdf
+  {
+    EdgeNcRadxFile file;
+    if (file.isEdgeNc(path)) {
+      return true;
+    }
+  }
+ 
   // try NOXP netcdf
   {
     NoxpNcRadxFile file;
@@ -212,14 +222,14 @@ bool RadxFile::_isSupportedNetCDF(const string &path)
     }
   }
   
-  // try EEC Edge netcdf
+  // try NOAA FSL netcdf
   {
-    EdgeNcRadxFile file;
-    if (file.isEdgeNc(path)) {
+    NoaaFslRadxFile file;
+    if (file.isNoaaFsl(path)) {
       return true;
     }
   }
- 
+  
   // try Cfarr netcdf
   {
     CfarrNcRadxFile file;
@@ -375,6 +385,11 @@ bool RadxFile::_isSupportedOther(const string &path)
 bool RadxFile::isNetCDF(const string &path)
 {
 
+  RadxPath rpath(path);
+  if (rpath.getExt() == "h5") {
+    return false;
+  }
+
   Nc3xFile ncf;
   if (ncf.openRead(path) == 0) {
     // open succeeded, so must be netcdf
@@ -394,6 +409,11 @@ bool RadxFile::isNetCDF(const string &path)
 
 bool RadxFile::isHdf5(const string &path)
 {
+
+  RadxPath rpath(path);
+  if (rpath.getExt() == "nc") {
+    return false;
+  }
 
   if (H5File::isHdf5(path)) {
     return true;
@@ -536,6 +556,7 @@ int RadxFile::writeToDir(const RadxVol &vol,
       _fileFormat == FILE_FORMAT_DOE_NC ||
       _fileFormat == FILE_FORMAT_NOXP_NC ||
       _fileFormat == FILE_FORMAT_D3R_NC ||
+      _fileFormat == FILE_FORMAT_NOAA_FSL ||
       _fileFormat == FILE_FORMAT_NEXRAD_CMD ||
       _fileFormat == FILE_FORMAT_LEOSPHERE ||
       _fileFormat == FILE_FORMAT_TWOLF ||
@@ -831,6 +852,7 @@ int RadxFile::writeToPath(const RadxVol &vol,
       _fileFormat == FILE_FORMAT_DOE_NC ||
       _fileFormat == FILE_FORMAT_NOXP_NC ||
       _fileFormat == FILE_FORMAT_D3R_NC ||
+      _fileFormat == FILE_FORMAT_NOAA_FSL ||
       _fileFormat == FILE_FORMAT_NEXRAD_CMD ||
       _fileFormat == FILE_FORMAT_LEOSPHERE ||
       _fileFormat == FILE_FORMAT_TWOLF ||
@@ -1061,6 +1083,8 @@ int RadxFile::readFromPath(const string &path,
   if (isNetCDF(path)) {
     if (_readFromPathNetCDF(path, vol) == 0) {
       return 0;
+    } else {
+      return -1;
     }
   }
 
@@ -1069,6 +1093,8 @@ int RadxFile::readFromPath(const string &path,
   if (isHdf5(path)) {
     if (_readFromPathHdf5(path, vol) == 0) {
       return 0;
+    } else {
+      return -1;
     }
   }
 
@@ -1097,8 +1123,6 @@ int RadxFile::_readFromPathNetCDF(const string &path,
   
 {
 
-  clearErrStr();
-
   // try CF radial first
 
   {
@@ -1117,8 +1141,17 @@ int RadxFile::_readFromPathNetCDF(const string &path,
           cerr << "INFO: RadxFile::readFromPath" << endl;
           cerr << "  Read CfRadial file, path: " << _pathInUse << endl;
         }
+      } else if (_verbose) {
+        cerr << "===>> ERROR in CfRadial file <<===" << endl;
+        cerr << file.getErrStr() << endl;
+        cerr << "===>> ERROR in CfRadial file <<===" << endl;
       }
       return iret;
+    } else {
+      if (_verbose) {
+        cerr << "Not CfRadial format" << endl;
+        cerr << file.getErrStr() << endl;
+      }
     }
   }
 
@@ -1260,6 +1293,29 @@ int RadxFile::_readFromPathNetCDF(const string &path,
     }
   }
 
+  // try NOAA FSL netcdf next
+
+  {
+    NoaaFslRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isNoaaFsl(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read NOAA FSL NC file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
   // try NEXRAD CMD next
   
   {
@@ -1345,8 +1401,6 @@ int RadxFile::_readFromPathHdf5(const string &path,
                                 RadxVol &vol)
   
 {
-
-  clearErrStr();
 
   // try ODIM HDF5 next
 
@@ -1981,9 +2035,9 @@ int RadxFile::makeDirRecurse(const string &dir)
 //
 // The tmp path is in the same directory as the final path.
 //
-// If tmp_file_name is non-null, it is used for the file name.
-// If it is NULL, the name is 'tmp.pid.tmp', where pid is
-// determined using the getpid() function.
+// If tmpFileName is non-empty, it is used for the file name.
+// If it is empty, the name is 'tmp.pid.timesec.timeusec.tmp',
+// where pid is determined using the getpid() function.
 
 string RadxFile::tmpPathFromDir(const string &dir,
                                 const string &tmpFileName)
@@ -2022,23 +2076,22 @@ string RadxFile::tmpPathFromDir(const string &dir,
 //
 // The tmp path is in the same directory as the final file.
 //
-// If tmp_file_name is non-null, it is used for the file name.
-// If it is NULL, the name is 'tmp.pid.tmp', where pid is
-// determined using the getpid() function.
+// If tmpFileName is non-empty, it is used for the file name.
+// If it is empty, the name is 'tmp.pid.timesec.timeusec.tmp',
+// where pid is determined using the getpid() function.
 
 string RadxFile::tmpPathFromFilePath(const string &finalFilePath,
                                      const string &tmpFileName)
 
 {
 
-  // get the dir by stripping off the last delimiter
+  // get the dir
 
-  size_t delimPos = finalFilePath.find_last_of(PATH_SEPARATOR);
-  if (delimPos == string::npos) {
+  RadxPath path(finalFilePath);
+  if (path.isDir()) {
     return tmpPathFromDir(finalFilePath, tmpFileName);
   } else {
-    string dir(finalFilePath, 0, delimPos);
-    return tmpPathFromDir(dir, tmpFileName);
+    return tmpPathFromDir(path.getDirectory(), tmpFileName);
   }
 
 }
@@ -2449,6 +2502,36 @@ void RadxFile::printReadRequest(ostream &out) const
   out << "  readRemoveShortRange: "
       << (_readRemoveShortRange?"Y":"N") << endl;
 
+  if (_readTimeList.getMode() != RadxTimeList::MODE_UNDEFINED) {
+    out << "-------------------------------------" << endl;
+    out << _readTimeList.getRequestString();
+    out << "-------------------------------------" << endl;
+    if (_readRaysInInterval) {
+      out << "==>> ReadingRaysInInterval <<==" << endl;
+      out << "  readRaysStartTime: " << _readRaysStartTime.asString(3) << endl;
+      out << "  readRaysEndTime: " << _readRaysEndTime.asString(3) << endl;
+      out << "  readDwellSecs: " << _readDwellSecs << endl;
+      out << "  readDwellStatsMethod: "
+          << RadxField::statsMethodToStr(_readDwellStatsMethod) << endl;
+      out << "-------------------------------------" << endl;
+    }
+  }
+
+  out << "=====================================" << endl;
+
+}
+
+/////////////////////////////////////////////////////////
+// print write request details
+
+void RadxFile::printWriteRequest(ostream &out) const
+  
+{
+  
+  out << "======= RadxFile write request =======" << endl;
+  out << "  debug: " << (_debug?"Y":"N") << endl;
+  out << "  verbose: " << (_verbose?"Y":"N") << endl;
+
   out << "  writeNativeByteOrder: "
       << (_writeNativeByteOrder?"Y":"N") << endl;
   out << "  writeForceNgatesVary: "
@@ -2478,21 +2561,6 @@ void RadxFile::printReadRequest(ostream &out) const
   out << "  compressionLevel: " << _compressionLevel << endl;
   out << "  writeLdataInfo: "
       << (_writeLdataInfo?"Y":"N") << endl;
-
-  if (_readTimeList.getMode() != RadxTimeList::MODE_UNDEFINED) {
-    out << "-------------------------------------" << endl;
-    out << _readTimeList.getRequestString();
-    out << "-------------------------------------" << endl;
-    if (_readRaysInInterval) {
-      out << "==>> ReadingRaysInInterval <<==" << endl;
-      out << "  readRaysStartTime: " << _readRaysStartTime.asString(3) << endl;
-      out << "  readRaysEndTime: " << _readRaysEndTime.asString(3) << endl;
-      out << "  readDwellSecs: " << _readDwellSecs << endl;
-      out << "  readDwellStatsMethod: "
-          << RadxField::statsMethodToStr(_readDwellStatsMethod) << endl;
-      out << "-------------------------------------" << endl;
-    }
-  }
 
   out << "=====================================" << endl;
 
@@ -2549,6 +2617,8 @@ string RadxFile::getFileFormatAsString() const
     return "TWOLF";
   } else if (_fileFormat == FILE_FORMAT_D3R_NC) {
     return "D3R_NC";
+  } else if (_fileFormat == FILE_FORMAT_NOAA_FSL) {
+    return "NOAA_FSL";
   } else if (_fileFormat == FILE_FORMAT_NOXP_NC) {
     return "NOXP_NC";
   } else if (_fileFormat == FILE_FORMAT_CFARR) {
@@ -2674,6 +2744,19 @@ int RadxFile::_printNativeNetCDF(const string &path, ostream &out,
     D3rNcRadxFile file;
     file.copyReadDirectives(*this);
     if (file.isD3rNc(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  // try NOAA FSL netcdf next
+  {
+    NoaaFslRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isNoaaFsl(path)) {
       int iret = file.printNative(path, out, printRays, printData);
       if (iret) {
         _errStr = file.getErrStr();

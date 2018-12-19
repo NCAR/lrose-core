@@ -288,8 +288,8 @@ void RadxVol::copyMeta(const RadxVol &rhs)
   // correction factors
 
   clearCfactors();
-  if (_cfactors != NULL) {
-    _cfactors = new RadxCfactors(*_cfactors);
+  if (rhs._cfactors != NULL) {
+    _cfactors = new RadxCfactors(*rhs._cfactors);
   } else {
     _cfactors = NULL;
   }
@@ -1065,6 +1065,7 @@ void RadxVol::setRayFieldPointers()
       const string &name = field->getName();
       const string &standardName = field->getStandardName();
       const string &longName = field->getLongName();
+      const string &comment = field->getComment();
       const string &units = field->getUnits();
       const string &thresholdFieldName = field->getThresholdFieldName();
       double thresholdValue = field->getThresholdValue();
@@ -1079,6 +1080,7 @@ void RadxVol::setRayFieldPointers()
                                           dptr + index, false);
           rfld->setStandardName(standardName);
           rfld->setLongName(longName);
+          rfld->setComment(comment);
           rfld->setThresholdFieldName(thresholdFieldName);
           rfld->setThresholdValue(thresholdValue);
           break;
@@ -1090,6 +1092,7 @@ void RadxVol::setRayFieldPointers()
                                           dptr + index, false);
           rfld->setStandardName(standardName);
           rfld->setLongName(longName);
+          rfld->setComment(comment);
           rfld->setThresholdFieldName(thresholdFieldName);
           rfld->setThresholdValue(thresholdValue);
           break;
@@ -1104,6 +1107,7 @@ void RadxVol::setRayFieldPointers()
                                           false);
           rfld->setStandardName(standardName);
           rfld->setLongName(longName);
+          rfld->setComment(comment);
           rfld->setThresholdFieldName(thresholdFieldName);
           rfld->setThresholdValue(thresholdValue);
           break;
@@ -1118,6 +1122,7 @@ void RadxVol::setRayFieldPointers()
                                           false);
           rfld->setStandardName(standardName);
           rfld->setLongName(longName);
+          rfld->setComment(comment);
           rfld->setThresholdFieldName(thresholdFieldName);
           rfld->setThresholdValue(thresholdValue);
           break;
@@ -1132,6 +1137,7 @@ void RadxVol::setRayFieldPointers()
                                           false);
           rfld->setStandardName(standardName);
           rfld->setLongName(longName);
+          rfld->setComment(comment);
           rfld->setThresholdFieldName(thresholdFieldName);
           rfld->setThresholdValue(thresholdValue);
           break;
@@ -4844,10 +4850,14 @@ void RadxVol::convertField(const string &name,
 ///
 /// If the geometry is not constant, remap to the predominant geom.
 ///
+/// maxFractionMissing indicates the maximum fraction of the input data field
+/// that can be missing for valid statistics. Should be between 0 and 1.
+/// 
 /// Returns NULL if no rays are present in the volume.
 /// Otherwise, returns ray containing results.
 
-RadxRay *RadxVol::computeFieldStats(RadxField::StatsMethod_t method)
+RadxRay *RadxVol::computeFieldStats(RadxField::StatsMethod_t method,
+                                    double maxFractionMissing /* = 0.25 */)
 
 {
 
@@ -4882,6 +4892,8 @@ RadxRay *RadxVol::computeFieldStats(RadxField::StatsMethod_t method)
 
     // assemble vector of this field on the ray
 
+    RadxField *field = _rays[0]->getField(fieldNames[ifield]);
+
     vector<const RadxField *> rayFields;
     for (size_t iray = 0; iray < _rays.size(); iray++) {
       RadxField *rayField = _rays[iray]->getField(fieldNames[ifield]);
@@ -4893,7 +4905,8 @@ RadxRay *RadxVol::computeFieldStats(RadxField::StatsMethod_t method)
     // compute the stats for this field
     // add field to ray
 
-    RadxField *statsField = RadxField::computeStats(method, rayFields);
+    RadxField *statsField = 
+      field->computeStats(method, rayFields, maxFractionMissing);
     if (statsField != NULL) {
       result->addField(statsField);
     }

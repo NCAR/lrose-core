@@ -1822,12 +1822,13 @@ int DoradeRadxFile::_handleRay(int nBytes, const char *block)
 
   if (DoradeData::isValid(_ddRadar)) {
     
+    ray->setPrtMode(Radx::PRT_MODE_FIXED);
     double prtLong = Radx::missingMetaDouble;
     double prtShort = Radx::missingMetaDouble;
     if (_ddRadar.prt1 > 0 && _ddRadar.prt2 < 0) {
-      prtShort = _ddRadar.prt1;
+      prtShort = _ddRadar.prt1 / 1000.0;
     } else if (_ddRadar.prt2 > 0 && _ddRadar.prt1 < 0) {
-      prtShort = _ddRadar.prt2;
+      prtShort = _ddRadar.prt2 / 1000.0;
     } else if (_ddRadar.prt1 > 0 && _ddRadar.prt2 > 0) {
       prtLong = _ddRadar.prt2 / 1000.0;
       prtShort = _ddRadar.prt1 / 1000.0;
@@ -1837,16 +1838,24 @@ int DoradeRadxFile::_handleRay(int nBytes, const char *block)
         prtLong = prtShort;
         prtShort = temp;
       }
+    } else if (_ddRadar.prt1 > 0) {
+      prtShort = _ddRadar.prt1 / 1000.0;
     }
-    
-    if (_ddRadar.num_ipps_trans < 2) {
+
+    if ((prtShort != Radx::missingMetaDouble) && (prtLong != Radx::missingMetaDouble)) {
+      if (_ddRadar.num_ipps_trans < 2) {
+        ray->setPrtMode(Radx::PRT_MODE_FIXED);
+        ray->setPrtSec(prtShort);
+      } else {
+        double prtRatio = prtShort / prtLong;
+        ray->setPrtSec(prtShort);
+        ray->setPrtRatio(prtRatio);
+        ray->setPrtMode(Radx::PRT_MODE_STAGGERED);
+      }
+    } else if (prtShort != Radx::missingMetaDouble) {
       ray->setPrtMode(Radx::PRT_MODE_FIXED);
       ray->setPrtSec(prtShort);
-    } else {
-      double prtRatio = prtShort / prtLong;
-      ray->setPrtSec(prtShort);
-      ray->setPrtRatio(prtRatio);
-      ray->setPrtMode(Radx::PRT_MODE_STAGGERED);
+      ray->setPrtRatio(1.0);
     }
 
   } else if (DoradeData::isValid(_ddLidar)) {
@@ -1861,9 +1870,6 @@ int DoradeRadxFile::_handleRay(int nBytes, const char *block)
   switch (scanMode) {
     case DoradeData::SCAN_MODE_TAR:
       ray->setFollowMode(Radx::FOLLOW_MODE_TARGET);
-      break;
-    case DoradeData::SCAN_MODE_AIR:
-      ray->setFollowMode(Radx::FOLLOW_MODE_AIRCRAFT);
       break;
     default:
       ray->setFollowMode(Radx::FOLLOW_MODE_NONE);
@@ -1951,6 +1957,8 @@ void DoradeRadxFile::_addGeorefToLatestRay()
   ref.setVertWind(_ddPlat.vert_wind);
   ref.setHeadingRate(_ddPlat.heading_change);
   ref.setPitchRate(_ddPlat.pitch_change);
+
+  ref.setRadxTime(_latestRay->getRadxTime());
 
   _latestRay->setGeoref(ref);
 
@@ -2308,20 +2316,29 @@ int DoradeRadxFile::_loadReadVolume()
       _readVol->setPlatformType(Radx::PLATFORM_TYPE_FIXED);
   }
 
-  _readVol->addFrequencyHz(_ddRadar.freq1 * 1.0e9);
-
   int nFreq = _ddRadar.num_freq_trans;
+  if (_ddRadar.freq1 > 0) {
+    _readVol->addFrequencyHz(_ddRadar.freq1 * 1.0e9);
+  }
   if (nFreq > 1) {
-    _readVol->addFrequencyHz(_ddRadar.freq2 * 1.0e9);
+    if (_ddRadar.freq2 > 0) {
+      _readVol->addFrequencyHz(_ddRadar.freq2 * 1.0e9);
+    }
   }
   if (nFreq > 2) {
-    _readVol->addFrequencyHz(_ddRadar.freq3 * 1.0e9);
+    if (_ddRadar.freq2 > 0) {
+      _readVol->addFrequencyHz(_ddRadar.freq3 * 1.0e9);
+    }
   }
   if (nFreq > 3) {
-    _readVol->addFrequencyHz(_ddRadar.freq4 * 1.0e9);
+    if (_ddRadar.freq2 > 0) {
+      _readVol->addFrequencyHz(_ddRadar.freq4 * 1.0e9);
+    }
   }
   if (nFreq > 4) {
-    _readVol->addFrequencyHz(_ddRadar.freq5 * 1.0e9);
+    if (_ddRadar.freq2 > 0) {
+      _readVol->addFrequencyHz(_ddRadar.freq5 * 1.0e9);
+    }
   }
 
   if (_ddRadar.antenna_gain > 0) {
@@ -2377,6 +2394,28 @@ int DoradeRadxFile::_loadReadVolume()
   _readVol->setHistory(_sedsStr);
   if (_radarName.find("ELDR") != string::npos) {
     _readVol->setPrimaryAxis(Radx::PRIMARY_AXIS_Y_PRIME);
+  } 
+  // if the extension_num contains a value
+  // override the primary axis. 
+  // the primary axis enum type starts at zero, but a zero
+  // value for primary axis could also just be an unset parameter,
+  // so we a base value of 1 for the enumeration. A zero indicates no
+  // value and 1,2,3,4,5,6 indicate a valid primary axis value. 
+  // Finally, for internal work, convert the Dorade axis type
+  // to the Radx axis type.
+  try {
+    if (_ddRadar.extension_num > 0) {
+      DoradeData::primary_axis_t axisType =
+        DoradeData::primaryAxisFromInt(_ddRadar.extension_num);
+      Radx::PrimaryAxis_t radxAxisType =
+        DoradeData::convertToRadxType(axisType);
+      _readVol->setPrimaryAxis(radxAxisType);
+    }
+  }  catch (const char*  ex) {
+    // we cannot set the primary axis
+    // report warning
+    cerr << "WARNING - DoradeRadxFile::_loadReadVolume()" << endl;
+    cerr << ex << endl;
   }
 
   _readVol->setLatitudeDeg(_ddRadar.radar_latitude);
@@ -2398,9 +2437,11 @@ int DoradeRadxFile::_loadReadVolume()
   
   // for each ray, find the maximum number of samples in any field
   // from the sampling ratio
+  // also set calib index
 
   for (size_t ii = 0; ii < _rays.size(); ii++) {
     RadxRay *ray = _rays[ii];
+    ray->setCalibIndex(0);
     int maxNSamples = 0;
     vector<RadxField *> fields = ray->getFields();
     for (size_t jj = 0; jj < fields.size(); jj++) {
@@ -2447,7 +2488,11 @@ int DoradeRadxFile::_loadReadVolume()
   RadxRcalib *cal = new RadxRcalib;
 
   cal->setCalibTime(_readVol->getStartTimeSecs());
-  cal->setPulseWidthUsec(pulseWidthUs);
+  if (_ddRadar.pulse_width <= 0) {
+    cal->setPulseWidthUsec(pulseWidthUs);
+  } else {
+    cal->setPulseWidthUsec(_ddRadar.pulse_width);
+  }
   double xmitPowerDbm = Radx::missingMetaDouble;
   if (_ddRadar.peak_power > 0) {
     xmitPowerDbm = 10.0 * log10(_ddRadar.peak_power * 1.0e6);
@@ -3489,6 +3534,15 @@ int DoradeRadxFile::_writeSuperSwib(int fileSize)
   
 {
 
+  // check environment for extended paths
+  bool write32Bit = false;
+  char *dorade32BitWriteStr = getenv("DORADE_WRITE_32BIT_SWIB");
+  if (dorade32BitWriteStr != NULL) {
+    if (!strcasecmp(dorade32BitWriteStr, "TRUE")) {
+      write32Bit = true;
+    }
+  }
+
   // fill
 
   DoradeData::init(_ddSwib);
@@ -3501,9 +3555,17 @@ int DoradeRadxFile::_writeSuperSwib(int fileSize)
   _ddSwib.num_params = _writeVol->getFields().size();
 
   strncpy(_ddSwib.radar_name, _writeVol->getInstrumentName().c_str(), 8);
-  _ddSwib.d_start_time = _ddSwib.start_time + _writeVol->getStartNanoSecs() / 1.0e9;
-  _ddSwib.d_stop_time = _ddSwib.stop_time + _writeVol->getEndNanoSecs() / 1.0e9;
-  
+  double delta_start = _writeVol->getStartNanoSecs() / 1.0e9;
+  double delta_stop = _writeVol->getEndNanoSecs() / 1.0e9;
+
+  // if the start or stop time is less than the precision we can report, 
+  // set the time to zero.  
+  if ((delta_start > 1.0) || (delta_start < 0.0)) delta_start = 0.0;
+  if ((delta_stop  > 1.0) || (delta_stop  < 0.0)) delta_stop  = 0.0;
+
+  _ddSwib.d_start_time = _ddSwib.start_time + delta_start;
+  _ddSwib.d_stop_time = _ddSwib.stop_time + delta_stop;;
+
   int numKeys = 0;
   if (_rotationTableSize > 0) {
     _ddSwib.key_table[numKeys].offset = _rotationTableOffset;
@@ -3520,22 +3582,45 @@ int DoradeRadxFile::_writeSuperSwib(int fileSize)
   _ddSwib.num_key_tables = numKeys;
 
   // byte swap as needed
+  
+  if (write32Bit) {
+    DoradeData::super_SWIB_t copy64 = _ddSwib;
+    DoradeData::super_SWIB_32bit_t copy;
+    //  Ah, but we need to convert 64 bit to 32 bit structure
+    // and change the number of bytes as well.
+    int byteAdjustment = sizeof(_ddSwib.pad);
+    copy64.sizeof_file -= byteAdjustment; // 4;
+    copy64.nbytes -= byteAdjustment; // 4;
+    DoradeData::copy(copy64, copy);
+    if (!_writeNativeByteOrder) {
+      DoradeData::swap(copy);
+    }
 
-  DoradeData::super_SWIB_t copy = _ddSwib;
-  if (!_writeNativeByteOrder) {
-    DoradeData::swap(copy);
+    // write                                                                                                                   
+    if (fwrite(&copy, sizeof(copy), 1, _file) != 1) {
+      _addErrStr("ERROR - DoradeRadxFile::_writeSuperSwib()");
+      _addErrStr("  Cannot write super sweep block 32");
+      _addErrStr("  file path: ", _pathInUse);
+      _addErrStr(strerror(errno));
+      return -1;
+    }
+  } else {
+    DoradeData::super_SWIB_t copy = _ddSwib;
+ 
+    if (!_writeNativeByteOrder) {
+      DoradeData::swap(copy);
+    }
+
+    // write
+
+    if (fwrite(&copy, sizeof(copy), 1, _file) != 1) {
+      _addErrStr("ERROR - DoradeRadxFile::_writeSuperSwib()");
+      _addErrStr("  Cannot write super sweep block");
+      _addErrStr("  file path: ", _pathInUse);
+      _addErrStr(strerror(errno));
+      return -1;
+    }
   }
-
-  // write
-
-  if (fwrite(&copy, sizeof(copy), 1, _file) != 1) {
-    _addErrStr("ERROR - DoradeRadxFile::_writeSuperSwib()");
-    _addErrStr("  Cannot write super sweep block");
-    _addErrStr("  file path: ", _pathInUse);
-    _addErrStr(strerror(errno));
-    return -1;
-  }
-
   return 0;
 
 }
@@ -3645,38 +3730,8 @@ int DoradeRadxFile::_writeRadar()
     _ddRadar.data_compress = DoradeData::COMPRESSION_NONE;
   }
 
-  switch (_writeVol->getPlatformType()) {
-    case Radx::PLATFORM_TYPE_FIXED:
-    case Radx::PLATFORM_TYPE_VEHICLE:
-      _ddRadar.radar_type = DoradeData::RADAR_GROUND;
-      break;
-    case Radx::PLATFORM_TYPE_SHIP:
-      _ddRadar.radar_type = DoradeData::RADAR_SHIP;
-      break;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_FORE:
-      _ddRadar.radar_type = DoradeData::RADAR_AIR_FORE;
-      break;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_AFT:
-      _ddRadar.radar_type = DoradeData::RADAR_AIR_AFT;
-      break;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_TAIL:
-      _ddRadar.radar_type = DoradeData::RADAR_AIR_TAIL;
-      break;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_BELLY:
-    case Radx::PLATFORM_TYPE_AIRCRAFT_ROOF:
-      _ddRadar.radar_type = DoradeData::RADAR_AIR_LF;
-      break;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_NOSE:
-      _ddRadar.radar_type = DoradeData::RADAR_AIR_NOSE;
-      break;
-    case Radx::PLATFORM_TYPE_SATELLITE_ORBIT:
-    case Radx::PLATFORM_TYPE_SATELLITE_GEOSTAT:
-      _ddRadar.radar_type = DoradeData::RADAR_SATELLITE;
-      break;
-    default:
-      _ddRadar.radar_type = DoradeData::RADAR_GROUND;
-  }
-  
+  // set scan mode
+
   _ddRadar.scan_mode = DoradeData::SCAN_MODE_SUR;
   if (_writeVol->getSweeps().size() > 0) {
     const RadxSweep &sweep = *_writeVol->getSweeps()[0];
@@ -3721,6 +3776,48 @@ int DoradeRadxFile::_writeRadar()
     _ddRadar.req_rotat_vel = sweep.getTargetScanRateDegPerSec();
   }
 
+  // set radar type
+  // for aircraft radars override scan mode
+
+  switch (_writeVol->getPlatformType()) {
+    case Radx::PLATFORM_TYPE_FIXED:
+    case Radx::PLATFORM_TYPE_VEHICLE:
+      _ddRadar.radar_type = DoradeData::RADAR_GROUND;
+      break;
+    case Radx::PLATFORM_TYPE_SHIP:
+      _ddRadar.radar_type = DoradeData::RADAR_SHIP;
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_FORE:
+      _ddRadar.radar_type = DoradeData::RADAR_AIR_FORE;
+      _ddRadar.scan_mode = DoradeData::SCAN_MODE_AIR;
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_AFT:
+      _ddRadar.radar_type = DoradeData::RADAR_AIR_AFT;
+      _ddRadar.scan_mode = DoradeData::SCAN_MODE_AIR;
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_TAIL:
+      _ddRadar.radar_type = DoradeData::RADAR_AIR_TAIL;
+      _ddRadar.scan_mode = DoradeData::SCAN_MODE_AIR;
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT:
+      _ddRadar.radar_type = DoradeData::RADAR_AIR_TAIL;
+      _ddRadar.scan_mode = DoradeData::SCAN_MODE_AIR;
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_BELLY:
+    case Radx::PLATFORM_TYPE_AIRCRAFT_ROOF:
+      _ddRadar.radar_type = DoradeData::RADAR_AIR_LF;
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_NOSE:
+      _ddRadar.radar_type = DoradeData::RADAR_AIR_NOSE;
+      break;
+    case Radx::PLATFORM_TYPE_SATELLITE_ORBIT:
+    case Radx::PLATFORM_TYPE_SATELLITE_GEOSTAT:
+      _ddRadar.radar_type = DoradeData::RADAR_SATELLITE;
+      break;
+    default:
+      _ddRadar.radar_type = DoradeData::RADAR_GROUND;
+  }
+  
   _ddRadar.radar_longitude = _writeVol->getLongitudeDeg();
   _ddRadar.radar_latitude = _writeVol->getLatitudeDeg();
   _ddRadar.radar_altitude = _writeVol->getAltitudeKm();
@@ -3728,18 +3825,28 @@ int DoradeRadxFile::_writeRadar()
   int nFreq = _writeVol->getFrequencyHz().size();
   _ddRadar.num_freq_trans = nFreq;
   if (nFreq > 0) {
-    _ddRadar.freq1 = _writeVol->getFrequencyHz()[0] / 1.0e9;
+    if (_writeVol->getFrequencyHz()[0] > 0) {
+      _ddRadar.freq1 = _writeVol->getFrequencyHz()[0] / 1.0e9;
+    }
     if (nFreq > 1) {
-      _ddRadar.freq2 = _writeVol->getFrequencyHz()[1] / 1.0e9;
+      if (_writeVol->getFrequencyHz()[1] > 0) {
+        _ddRadar.freq2 = _writeVol->getFrequencyHz()[1] / 1.0e9;
+      }
     }
     if (nFreq > 2) {
-      _ddRadar.freq3 = _writeVol->getFrequencyHz()[2] / 1.0e9;
+      if (_writeVol->getFrequencyHz()[2] > 0) {
+        _ddRadar.freq3 = _writeVol->getFrequencyHz()[2] / 1.0e9;
+      }
     }
     if (nFreq > 3) {
-      _ddRadar.freq4 = _writeVol->getFrequencyHz()[3] / 1.0e9;
+      if (_writeVol->getFrequencyHz()[3] > 0) {
+        _ddRadar.freq4 = _writeVol->getFrequencyHz()[3] / 1.0e9;
+      }
     }
     if (nFreq > 4) {
-      _ddRadar.freq5 = _writeVol->getFrequencyHz()[4] / 1.0e9;
+      if (_writeVol->getFrequencyHz()[4] > 0) {
+        _ddRadar.freq5 = _writeVol->getFrequencyHz()[4] / 1.0e9;
+      }
     }
   }
 
@@ -3749,16 +3856,43 @@ int DoradeRadxFile::_writeRadar()
     const RadxRay &ray = *_writeVol->getRays()[0];
     _ddRadar.eff_unamb_vel = ray.getNyquistMps();
     _ddRadar.eff_unamb_range = ray.getUnambigRangeKm();
-    _ddRadar.prt1 = ray.getPrtSec() * 1000.0; // msecs
+    _ddRadar.prt1 = 0;
+    _ddRadar.prt2 = 0;
+    _ddRadar.prt3 = 0;
+    _ddRadar.prt4 = 0;
+    _ddRadar.prt5 = 0;
+    // check for missing data values
+    double prt1 = ray.getPrtSec();
+    if (prt1 != Radx::missingMetaDouble) {
+      _ddRadar.prt1 = prt1 * 1000.0; // msecs
+    }
     if (ray.getPrtMode() != Radx::PRT_MODE_FIXED) {
       _ddRadar.num_ipps_trans = 2;
-      _ddRadar.prt2 = ray.getPrtSec() * 1000.0 / ray.getPrtRatio(); // msecs
+      // check for missing data values
+      double prt2 = ray.getPrtSec();
+      if (prt2 != Radx::missingMetaDouble) {
+        _ddRadar.prt2 = prt2 * 1000.0 / ray.getPrtRatio(); // msecs
+      }
     }
-    double pulseWidthUsec = ray.getPulseWidthUsec();
-    double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
-    _ddRadar.pulse_width = pulseWidthMeters;
+    //    double pulseWidthUsec = ray.getPulseWidthUsec();
+    //double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
+    //_ddRadar.pulse_width = pulseWidthMeters;
+    //double pulseWidthUsec = ray.getPulseWidthUsec();
+    //double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
+    _ddRadar.pulse_width = cal.getPulseWidthUsec(); // pulseWidthMeters;
   }
-  
+
+  try {
+    Radx::PrimaryAxis_t axis_t = _writeVol->getPrimaryAxis();
+    DoradeData::primary_axis_t doradeAxis = DoradeData::convertToDoradeType(axis_t);
+    _ddRadar.extension_num = DoradeData::primaryAxisToInt(doradeAxis);
+  } catch (const char*  ex) {
+    // report warning
+    cerr << "WARNING - DoradeRadxFile::_writeRadar()" << endl;
+    cerr << ex << endl;
+    cerr << "setting extension_num to zero indicating primary axis not set" << endl;
+    _ddRadar.extension_num = 0;
+  }
   _ddRadar.aperture_size = _writeVol->getLidarApertureDiamCm();
   _ddRadar.field_of_view = _writeVol->getLidarFieldOfViewMrad();
   _ddRadar.aperture_eff = _writeVol->getLidarApertureEfficiency();
@@ -4001,13 +4135,19 @@ int DoradeRadxFile::_writeParameter(int fieldNum)
 
     const RadxRay &ray = *_writeVol->getRays()[0];
     double pulseWidthUsec = ray.getPulseWidthUsec();
-    double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
-    parm.pulse_width = (short) (pulseWidthMeters + 0.5);
-    parm.recvr_bandwidth = 1.0 / pulseWidthUsec;
+    if (pulseWidthUsec != Radx::missingMetaDouble) {
+      double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
+      parm.pulse_width = (short) (pulseWidthMeters + 0.5);
+      parm.recvr_bandwidth = 1.0 / pulseWidthUsec;
+    } else {
+      parm.pulse_width = Radx::missingSi16; 
+      parm.recvr_bandwidth = Radx::missingMetaDouble;
+    }
     double rxBandwidthMhz = _writeVol->getRadarReceiverBandwidthMhz();
     if (rxBandwidthMhz > 0) {
       parm.recvr_bandwidth = rxBandwidthMhz;
     }
+
     parm.num_samples = (int) (ray.getNSamples() * field.getSamplingRatio() + 0.5);
 
     switch (ray.getPolarizationMode()) {

@@ -22,6 +22,7 @@ TARGET_FILE = ../libradar.a
 HDRS =
 
 CPPC_SRCS = \
+	PrecipRateParams.cc \
 	PrecipRate.cc
 
 #
@@ -33,6 +34,13 @@ include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
 #
 # local targets
 #
+
+PrecipRateParams.cc: paramdef.PrecipRate
+	tdrp_gen -f paramdef.PrecipRate -c++ -class PrecipRateParams -lib radar
+	/bin/mv -f PrecipRateParams.hh ../include/radar
+
+clean_tdrp:
+	$(RM) PrecipRateParams.cc ../include/radar/PrecipRateParams.hh
 
 depend: depend_generic
 

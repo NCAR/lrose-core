@@ -24,11 +24,8 @@
 //////////////////////////////////////////////////////////
 // VolScans - container class for dbz and vel files that
 //            that need to be combined
-//
-// $Id: VolScans.cc,v 1.6 2016/03/07 01:23:11 dixon Exp $
-//
 //////////////////////////////////////////////////////////
-#include <netcdf.hh>
+
 #include "VolScans.hh"
 #include "SweepMerge.hh"
 #include "DbzFile.hh"

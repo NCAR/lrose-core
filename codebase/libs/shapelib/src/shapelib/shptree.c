@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: shptree.c,v 1.3 2005/04/07 16:52:54 dixon Exp $
+ * $Id: shptree.c,v 1.4 2018/10/13 23:24:07 dixon Exp $
  *
  * Project:  Shapelib
  * Purpose:  Implementation of quadtree building and searching functions.
@@ -34,6 +34,9 @@
  ******************************************************************************
  *
  * $Log: shptree.c,v $
+ * Revision 1.4  2018/10/13 23:24:07  dixon
+ * Sync with EOL/github/lrose-core
+ *
  * Revision 1.3  2005/04/07 16:52:54  dixon
  * malloc.h -> stdlib.h
  *

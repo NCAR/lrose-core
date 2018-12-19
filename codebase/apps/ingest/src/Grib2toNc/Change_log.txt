@@ -1,0 +1,71 @@
+revision 1.22
+date: 2018-09-18 
+Adding return/exit code. Adding a fix to improve default chunking.
+Updating error message to be clear.
+Updating params_path initialization to not leak memory.
+Adding version define
+----------------------------
+revision 1.21
+date: 2018-06-12 
+Fixing grid_mapping attribute for lat/lon grids.  (was missing)
+Prevent user from picking vertmax and vertmin that result in no levels.
+Changing forecast analysis time to not be time dimensions, scalar instead.
+----------------------------
+revision 1.20
+date: 2017-12-13 
+Fixed NcError to use Nc3Error.
+Fixing issue with RH where output file would not be created.  Updated some error loggin.
+Fixing rounding issue with scaling.  Adding ability to select scale_factor and offset.
+----------------------------
+revision 1.19
+date: 2017-10-11 
+Adding ability to turn off auxillary lat/lon variables and ability to auto scale data, byte and short, based on grib2 packing info.
+Modfied ldata configuration to write as forecast if parameter force_lead_time_output == TRUE
+----------------------------
+revision 1.17
+date: 2017-09-15 
+Fixing earth radius units when sent to the pjg library.
+Fixing up merge with Ncxx library.
+Fixing false_easting values, adding Euclid set earth radius and adding library -lNcxx to make line.
+Changing units="level" to removing units attribute.
+----------------------------
+revision 1.12
+date: 2017-08-17 
+Large update to sync with external released version.  Adding fix for global models date line, adding earth radius output, fix for arakawa grids.
+----------------------------
+revision 1.11
+date: 2016-12-01 
+Adding rotated lat/lon support.
+----------------------------
+revision 1.10
+date: 2016-10-21 
+Fixed missing and secondary missing handeling.  Added force output lead time param.
+----------------------------
+revision 1.8
+date: 2015-12-01 
+Fixed memory failure on reorder routines.
+----------------------------
+revision 1.7
+date: 2015-07-09 
+Remoing strequal_exact for easier strcmp.
+Fix for mercator grid projection issue.
+----------------------------
+revision 1.5
+date: 2015-04-15 
+Additions/fixes and clean ups for external release.
+----------------------------
+revision 1.4
+date: 2015-03-12 
+Fixes for CF compliance, and additions found out of full testing of app.
+----------------------------
+revision 1.3
+date: 2015-02-26 
+Fixed resolutionFlag and dx/dy calculation.
+----------------------------
+revision 1.2
+date: 2015-02-25 
+Grid calculation fixes.
+----------------------------
+revision 1.1
+date: 2015-02-03 
+Initial check-in of Grib2toNc a direct Grib2 conversion to NetCDF 4 (or classic) using CF 1.0 conventions.

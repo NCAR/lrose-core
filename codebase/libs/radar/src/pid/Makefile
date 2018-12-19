@@ -22,6 +22,7 @@ TARGET_FILE = ../libradar.a
 HDRS =
 
 CPPC_SRCS = \
+	NcarPidParams.cc \
 	NcarParticleId.cc \
 	PidImapManager.cc \
 	PidInterestMap.cc \
@@ -36,6 +37,13 @@ include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
 #
 # local targets
 #
+
+NcarPidParams.cc: paramdef.NcarPid
+	tdrp_gen -f paramdef.NcarPid -c++ -class NcarPidParams -lib radar
+	/bin/mv -f NcarPidParams.hh ../include/radar
+
+clean_tdrp:
+	$(RM) NcarPidParams.cc ../include/radar/NcarPidParams.hh
 
 depend: depend_generic
 

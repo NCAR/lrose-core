@@ -3018,6 +3018,118 @@ string DoradeData::scanModeToShortStr(DoradeData::scan_mode_t mode)
   }
 }
 
+/////////////////////////////////////
+// conversions to int from enum and vice versa
+  
+DoradeData::primary_axis_t DoradeData::primaryAxisFromInt(Radx::ui32 value)
+{
+
+  switch (value) {
+  case 1:
+    return DoradeData::Z;
+    break;
+  case 2:
+    return DoradeData::Y;
+    break;
+  case 3:
+    return DoradeData::X;
+    break;
+  case 4:
+    return DoradeData::Z_PRIME;
+    break;
+  case 5:
+    return DoradeData::Y_PRIME;
+    break;
+  case 6:
+    return DoradeData::X_PRIME;
+    break;
+  default:
+    throw "Unrecognized value for primary axis of rotation";
+  }
+}
+
+Radx::ui32 DoradeData::primaryAxisToInt(DoradeData::primary_axis_t ptype)
+{
+
+  switch (ptype) {
+  case DoradeData::Z:
+    return 1;
+    break;
+  case DoradeData::Y:
+    return 2;
+    break;
+  case DoradeData::X:
+    return 3;
+    break;
+  case DoradeData::Z_PRIME:
+    return 4;
+    break;
+  case DoradeData::Y_PRIME:
+    return 5;
+    break;
+  case DoradeData::X_PRIME:
+    return 6;
+    break;
+  default:
+    throw "Unrecognized primary axis of rotation type";
+  }
+}
+
+Radx::PrimaryAxis_t DoradeData::convertToRadxType(DoradeData::primary_axis_t doradeAxis)
+{
+
+  switch (doradeAxis) {
+  case DoradeData::Z:
+    return Radx::PRIMARY_AXIS_Z;
+    break;
+  case DoradeData::Y:
+    return Radx::PRIMARY_AXIS_Y;
+    break;
+  case DoradeData::X:
+    return Radx::PRIMARY_AXIS_X;
+    break;
+  case DoradeData::Z_PRIME:
+    return Radx::PRIMARY_AXIS_Z_PRIME;
+    break;
+  case DoradeData::Y_PRIME:
+    return Radx::PRIMARY_AXIS_Y_PRIME;
+    break;
+  case DoradeData::X_PRIME:
+    return Radx::PRIMARY_AXIS_X_PRIME;
+    break;
+  default:
+    throw "Unrecognized DORADE primary axis of rotation";
+  }
+}
+
+DoradeData::primary_axis_t  DoradeData::convertToDoradeType(Radx::PrimaryAxis_t radxAxis)
+{
+
+  switch (radxAxis) {
+  case Radx::PRIMARY_AXIS_Z:
+    return DoradeData::Z;
+    break;
+  case Radx::PRIMARY_AXIS_Y:
+    return DoradeData::Y;
+    break;
+  case Radx::PRIMARY_AXIS_X:
+    return DoradeData::X;
+    break;
+  case Radx::PRIMARY_AXIS_Z_PRIME:
+    return DoradeData::Z_PRIME;
+    break;
+  case Radx::PRIMARY_AXIS_Y_PRIME:
+    return DoradeData::Y_PRIME;
+    break;
+  case Radx::PRIMARY_AXIS_X_PRIME:
+    return DoradeData::X_PRIME;
+    break;
+  default:
+    throw "Unrecognized Radx primary axis of rotation type";
+  }
+}
+
+
 //////////////////////////////////////////////////////////////////
 // decompress HRD 16-bit data
 // routine to unpacks actual data assuming MIT/HRD compression

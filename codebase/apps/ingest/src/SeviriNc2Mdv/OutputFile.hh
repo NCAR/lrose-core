@@ -24,7 +24,7 @@
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: OutputFile.hh,v 1.5 2016/03/07 01:23:05 dixon Exp $
+ *  $Id: OutputFile.hh,v 1.6 2018/01/26 18:43:35 jcraig Exp $
  *
  */
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -68,7 +68,7 @@ class OutputFile {
   
 public:
 
-  static const double MISSING_DATA_VALUE = -9999.0;
+  static const double MISSING_DATA_VALUE;
 
   ////////////////////
   // public methods //

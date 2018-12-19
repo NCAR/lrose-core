@@ -73,7 +73,7 @@ DataMapper::DataMapper(int argc, char **argv)
 
   // get TDRP params
   
-  _paramsPath = const_cast<char*>(string("unknown").c_str());
+  _paramsPath = (char*)"unknown";
   if (_params.loadFromArgs(argc, argv,
 			   _args.override.list,
 			   &_paramsPath)) {

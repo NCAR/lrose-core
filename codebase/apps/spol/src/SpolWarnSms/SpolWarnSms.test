@@ -1,0 +1,448 @@
+/**********************************************************************
+ * TDRP params for SpolWarnSms
+ **********************************************************************/
+
+//======================================================================
+//
+// SpolWarnSms reads status XML monitoring data from SPDB, for the 
+//   S-band and K-band. It checks the status in the XML, and determines if 
+//   a warning message should be sent.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT - from SPDB.
+//
+//======================================================================
+ 
+///////////// monitor_the_sband ///////////////////////
+//
+// Should we monitor the sband status?.
+//
+//
+// Type: boolean
+//
+
+monitor_the_sband = TRUE;
+
+///////////// sband_monitoring_spdb_url ///////////////
+//
+// URL for reading in monitoring data from SPDB.
+//
+// This holds the XML status monitoring for the S-band.
+//
+//
+// Type: string
+//
+
+sband_monitoring_spdb_url = "spdbp:://pgen1::spdb/monitor/sband";
+
+///////////// sband_spdb_margin_secs //////////////////
+//
+// The margin, relative to 'now', for retrieving spdb data (secs).
+//
+// If no data is found within this interval, an error is generated.
+//
+//
+// Type: int
+//
+
+sband_spdb_margin_secs = 120;
+
+///////////// monitor_the_kband ///////////////////////
+//
+// Should we monitor the kband status?.
+//
+//
+// Type: boolean
+//
+
+monitor_the_kband = TRUE;
+
+///////////// kband_monitoring_spdb_url ///////////////
+//
+// URL for reading in monitoring data from SPDB.
+//
+// This holds the XML status monitoring for the S-band.
+//
+//
+// Type: string
+//
+
+kband_monitoring_spdb_url = "spdbp:://pgen1::spdb/monitor/kband";
+
+///////////// kband_spdb_margin_secs //////////////////
+//
+// The margin, relative to 'now', for retrieving spdb data (secs).
+//
+// If no data is found within this interval, an error is generated.
+//
+//
+// Type: int
+//
+
+kband_spdb_margin_secs = 120;
+
+///////////// monitoring_interval_secs ////////////////
+//
+// How often to check for status (secs).
+//
+//
+// Type: int
+//
+
+monitoring_interval_secs = 10;
+
+//======================================================================
+//
+// XML STATUS CHECKING.
+//
+// Here we list the items to check for. Any item listed here is 
+//   considered critical. Failure of an item will generate a warning 
+//   message.
+//
+//======================================================================
+ 
+///////////// sband_xml_entries ///////////////////////
+//
+// Details of S-band XML entries for which to check.
+//
+// 	xml_tags: list of tags to specify entry in XML
+// 	entry_type: the type of data stored
+// 	ok_boolean: BOOLEAN only: the string value for an OK state
+// 	valid_lower_limit: NUMBER only: the lower limit for an OK state
+// 	valid_upper_limit: NUMBER only: the upper limit for an OK state
+// 	label: label to be used for message
+// .
+//
+//
+// Type: struct
+//   typedef struct {
+//      string xml_tags;
+//      xml_entry_type_t entry_type;
+//        Options:
+//          XML_ENTRY_BOOLEAN
+//          XML_ENTRY_NUMBER
+//      boolean ok_boolean;
+//      double valid_lower_limit;
+//      double valid_upper_limit;
+//      string label;
+//   }
+//
+// 1D array - variable length.
+//
+
+sband_xml_entries = {
+  {
+    xml_tags = "<SpolStatus><SpolTransmitStatus><HighVoltsOn>",
+    entry_type = XML_ENTRY_BOOLEAN,
+    ok_boolean = TRUE,
+    valid_lower_limit = 0,
+    valid_upper_limit = 0,
+    label = "Sband-HighVoltsOn-Fault"
+  }
+  ,
+  {
+    xml_tags = "<SpolStatus><SpolTemperatures><KlystronExhaust>",
+    entry_type = XML_ENTRY_NUMBER,
+    ok_boolean = FALSE,
+    valid_lower_limit = 0,
+    valid_upper_limit = 38,
+    label = "Sband-Klystron-Exhaust-TempC"
+  }
+  ,
+  {
+    xml_tags = "<SpolStatus><WaveguideStatus><pressPsi>",
+    entry_type = XML_ENTRY_NUMBER,
+    ok_boolean = FALSE,
+    valid_lower_limit = 4,
+    valid_upper_limit = 7,
+    label = "Sband-WG-Pressure-PSI"
+  }
+};
+
+///////////// kband_xml_entries ///////////////////////
+//
+// Details of K-band XML entries for which to check.
+//
+// 	xml_tags: list of tags to specify entry in XML
+// 	entry_type: the type of data stored
+// 	ok_boolean: BOOLEAN only: the string value for an OK state
+// 	valid_lower_limit: NUMBER only: the lower limit for an OK state
+// 	valid_upper_limit: NUMBER only: the upper limit for an OK state
+// 	label: label to be used for message
+// .
+//
+//
+// Type: struct
+//   typedef struct {
+//      string xml_tags;
+//      xml_entry_type_t entry_type;
+//        Options:
+//          XML_ENTRY_BOOLEAN
+//          XML_ENTRY_NUMBER
+//      boolean ok_boolean;
+//      double valid_lower_limit;
+//      double valid_upper_limit;
+//      string label;
+//   }
+//
+// 1D array - variable length.
+//
+
+kband_xml_entries = {
+  {
+    xml_tags = "<KaStatus><KaTransmitterStatus><MagnetronCurrentFault>",
+    entry_type = XML_ENTRY_BOOLEAN,
+    ok_boolean = FALSE,
+    valid_lower_limit = 0,
+    valid_upper_limit = 0,
+    label = "Kband-Xmit-Magnetron-Current-Fault"
+  }
+  ,
+  {
+    xml_tags = "<KaStatus><KaReceiverStatus><TxEnclosureTemp>",
+    entry_type = XML_ENTRY_NUMBER,
+    ok_boolean = FALSE,
+    valid_lower_limit = 0,
+    valid_upper_limit = 45,
+    label = "Kband-Tx-Enclosure-TempC"
+  }
+  ,
+  {
+    xml_tags = "<KaStatus><KaBandTestPulse><TestPulsePowerDbHc>",
+    entry_type = XML_ENTRY_NUMBER,
+    ok_boolean = FALSE,
+    valid_lower_limit = -40,
+    valid_upper_limit = -20,
+    label = "Kband-Test-Pulse-Hc-Dbm"
+  }
+};
+
+//======================================================================
+//
+// WARNING MESSAGE FILE OUTPUT.
+//
+//======================================================================
+ 
+///////////// warning_message_dir /////////////////////
+//
+// Dir path for warning messages.
+//
+// Warning messages are written to this directory. This will be watched 
+//   by the LdataWatcher, which will then call a script to send the SMS 
+//   messages.
+//
+//
+// Type: string
+//
+
+warning_message_dir = "$(HOME)/projDir/data/monitoring/messages";
+
+//======================================================================
+//
+// WARNING MESSAGE SPDB OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_warnings_to_spdb //////////////////
+//
+// If true, writes warnings to SPDB.
+//
+//
+// Type: boolean
+//
+
+write_warnings_to_spdb = TRUE;
+
+///////////// warning_spdb_url ////////////////////////
+//
+// URL for SPDB output.
+//
+// Messages are is written to this location.
+//
+//
+// Type: string
+//
+
+warning_spdb_url = "spdbp:://localhost::spdb/monitoring/messages";
+
+//======================================================================
+//
+// SMS DETAILS.
+//
+// If warnings are to sent out, an LdataInfo file is written to 
+//   warning_message_dir after the message file has been written. An 
+//   LdataWatcher is set up to watch the LdataInfo to update. If it does, 
+//   a script is called to dispatch the SMS.
+//
+//======================================================================
+ 
+///////////// send_warnings_to_sms ////////////////////
+//
+// If true, writes warnings using SMS.
+//
+//
+// Type: boolean
+//
+
+send_warnings_to_sms = TRUE;
+
+///////////// time_between_sms_secs ///////////////////
+//
+// Minimum time between warnings via SMS (secs).
+//
+// If warnings arrive more quickly, an SMS will only be sent out if the 
+//   warnings persist after this time has passed.
+//
+//
+// Type: int
+//
+
+time_between_sms_secs = 60;
+
+///////////// phone_book //////////////////////////////
+//
+// Phone book for SMS.
+//
+// For looking up the phone number from the name.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string number;
+//   }
+//
+// 1D array - variable length.
+//
+
+phone_book = {
+  {
+    name = "mike",
+    number = "+13035013346"
+  }
+  ,
+  {
+    name = "chris",
+    number = "+13035208624"
+  }
+  ,
+  {
+    name = "eric",
+    number = "+17203782812"
+  }
+  ,
+  {
+    name = "pei",
+    number = "+14132105682"
+  }
+  ,
+  {
+    name = "jonathan",
+    number = "+13038072936"
+  }
+  ,
+  {
+    name = "lucas",
+    number = "+17204380946"
+  }
+  ,
+  {
+    name = "rich",
+    number = "+12027098584"
+  }
+};
+
+///////////// monitoring_periods //////////////////////
+//
+// Setting up the monitoring times, and to whom to send the SMS.
+//
+// end_time is be in ISO time format: yyyy-mm-ddThh:mm:ss.
+//
+// Each interval has a time period, followed by a list of names to be 
+//   contacted.
+//
+// The time period is in the form 06:00-12:00, for example for 06:00 UTC 
+//   to 12:00 UTC each day.
+//
+// This is followed by a comma, and then a comma-delimited list of 
+//   names.
+//
+// If a period is not to be monitored, no names should be included.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string end_time;
+//      string interval_1;
+//      string interval_2;
+//      string interval_3;
+//      string interval_4;
+//   }
+//
+// 1D array - variable length.
+//
+
+monitoring_periods = {
+  {
+    end_time = "2018-06-06T19:00:00",
+    interval_1 = "00:00-06:00, mike",
+    interval_2 = "06:00-12:00, mike",
+    interval_3 = "12:00-18:00, eric, pei",
+    interval_4 = "18:00-24:00, mike"
+  }
+  ,
+  {
+    end_time = "2018-06-07T00:00:00",
+    interval_1 = "00:00-06:00, mike",
+    interval_2 = "06:00-12:00, mike",
+    interval_3 = "12:00-18:00, jonathan, rich",
+    interval_4 = "18:00-24:00, mike"
+  }
+  ,
+  {
+    end_time = "2018-06-08T00:00:00",
+    interval_1 = "00:00-06:00, jack",
+    interval_2 = "06:00-12:00, mike",
+    interval_3 = "12:00-18:00, mike",
+    interval_4 = "18:00-24:00, mike"
+  }
+};
+

@@ -259,10 +259,9 @@ void InfoStore::deleteInfo(const DMAP_info_t &info)
   while (pos != _infoSet.end()) {
     pos = _findInfoWild(info);
     if (pos != _infoSet.end()) {
-      _infoSet.erase(pos);
+      _infoSet.erase(pos++);
     }
   }
-  
 }
 
 ////////////////////////////////

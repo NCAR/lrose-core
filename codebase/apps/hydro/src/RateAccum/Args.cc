@@ -64,8 +64,6 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
   // loop through args
   
-  // loop through args
-  
   for (int i =  1; i < argc; i++) {
 
     if (!strcmp(argv[i], "--") ||
@@ -78,7 +76,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
       
     } else if (!strcmp(argv[i], "-d") ||
                !strcmp(argv[i], "-debug")) {
-                 
+      
       sprintf(tmp_str, "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
       
@@ -100,6 +98,8 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	sprintf(tmp_str, "mode = %s;", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
       } else {
+        cerr << "ERROR - Args::parse()" << endl;
+        cerr << "  Bad -mode arg" << endl;
 	iret = -1;
       }
 	
@@ -109,6 +109,8 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	sprintf(tmp_str, "trigger = %s;", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
       } else {
+        cerr << "ERROR - Args::parse()" << endl;
+        cerr << "  Bad -trigger arg" << endl;
 	iret = -1;
       }
 	
@@ -117,6 +119,8 @@ int Args::parse(int argc, char **argv, string &prog_name)
       if (i < argc - 1) {
 	if ((startTime = DateTime::parseDateTime(argv[++i]))
 	    == DateTime::NEVER) {
+          cerr << "ERROR - Args::parse()" << endl;
+          cerr << "  Bad -start arg" << endl;
 	  iret = -1;
 	} else {
 	  sprintf(tmp_str, "mode = ARCHIVE;");
@@ -131,6 +135,8 @@ int Args::parse(int argc, char **argv, string &prog_name)
       if (i < argc - 1) {
 	if ((endTime = DateTime::parseDateTime(argv[++i]))
 	    == DateTime::NEVER) {
+          cerr << "ERROR - Args::parse()" << endl;
+          cerr << "  Bad -end arg" << endl;
 	  iret = -1;
 	} else {
 	  sprintf(tmp_str, "mode = ARCHIVE;");

@@ -28,11 +28,12 @@
 //  Terri Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 //  September 2001
 //
-//  $Id: BinetNetCDF.cc,v 1.8 2016/03/07 01:23:07 dixon Exp $
+//  $Id: BinetNetCDF.cc,v 1.9 2018/01/26 20:15:07 jcraig Exp $
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <netcdf.h>
+#include <cassert>
+
 #include <didss/DsInputPath.hh>
 
 #include "Driver.hh"
@@ -40,7 +41,7 @@
 #include "BinetNetCDF.hh"
 using namespace std;
 
-const struct BinetNetCDF::fieldInfo_t 
+const BinetNetCDF::fieldInfo_t 
              BinetNetCDF::FIELD_INFO[] = { 
                 { Params::DM,     "DM",    "dBm" },
                 { Params::DZ,     "DZ",    "dBz" },
@@ -398,7 +399,7 @@ BinetNetCDF::openNextFile()
    // Constructor opens file in readOnly mode by default
    //
    POSTMSG( DEBUG, "Attempting to open file '%s'", filePath );
-   ncFile = new NcFile( filePath );
+   ncFile = new Nc3File( filePath );
    if ( !ncFile->is_valid() ) {
       POSTMSG( ERROR, "Unable to open file '%s'\n%s", filePath, ncErrorMsg());
       return( BAD_FILE );
@@ -478,7 +479,7 @@ BinetNetCDF::setRadarParams()
    //       of the radar parameters, eh?
    //
    char           *infoName;
-   NcVar          *infoVariable;
+   Nc3Var          *infoVariable;
    float           infoValue, missingValue;
 
    infoName = "bm_width";
@@ -549,7 +550,7 @@ BinetNetCDF::setDataScaling()
    //
    DsFieldParams  *fieldParams;
    char           *fieldName;
-   NcVar          *fieldVariable;
+   Nc3Var          *fieldVariable;
    float           scale, bias;
    ScaleBiasPair  *scaleBias;
 
@@ -599,7 +600,7 @@ BinetNetCDF::setRadarBeam()
    int            i, inIndex, outIndex;
    DsFieldParams *fieldParams;
    char          *fieldName;
-   NcValues      *fieldValues;
+   Nc3Values      *fieldValues;
    float          fieldScale, fieldBias;
    double         inValue;
    ui08           outValue;

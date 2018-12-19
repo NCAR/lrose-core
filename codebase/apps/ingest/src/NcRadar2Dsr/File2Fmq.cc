@@ -51,7 +51,7 @@ using namespace std;
 // Constructor
 
 File2Fmq::File2Fmq(const Params &params,
-		   const NcFile &ncf,
+		   const Nc3File &ncf,
 		   DsRadarQueue &r_queue) :
   _params(params),
   _ncf(ncf),
@@ -128,7 +128,7 @@ void File2Fmq::_setVars()
   _azimuthVals = _ncf.get_var("Azimuth")->values();
   _azimuthData = (float *) _azimuthVals->base();
 
-  NcVar *fixedAngleVar = _ncf.get_var("Fixed_Angle");
+  Nc3Var *fixedAngleVar = _ncf.get_var("Fixed_Angle");
   if (fixedAngleVar) {
     _fixedAngle = fixedAngleVar->as_float(0);
   } else {
@@ -164,9 +164,9 @@ void File2Fmq::_findFields()
 
     // first get the dimensions
     
-    NcVar *var = _ncf.get_var(ivar);
+    Nc3Var *var = _ncf.get_var(ivar);
     int nDims = var->num_dims();
-    const NcDim *dims[nDims];
+    const Nc3Dim *dims[nDims];
     long dimSizes[nDims];
     for (int ii = 0; ii < nDims; ii++) {
       dims[ii] = var->get_dim(ii);
@@ -211,7 +211,7 @@ void File2Fmq::_findFields()
 
 	  // modify nc scale, bias and missing as appropriate
 	  
-	  NcAtt *scaleAtt = var->get_att("scale_factor");
+	  Nc3Att *scaleAtt = var->get_att("scale_factor");
 	  if (scaleAtt) {
 	    fld->ncScale = scaleAtt->as_float(0);
 	    delete scaleAtt;
@@ -222,7 +222,7 @@ void File2Fmq::_findFields()
 	    cerr << "  Using " << fld->ncScale << " as default" << endl;
 	  }
 	  
-	  NcAtt *biasAtt = var->get_att("add_offset");
+	  Nc3Att *biasAtt = var->get_att("add_offset");
 	  if (biasAtt) {
 	    fld->ncBias = biasAtt->as_float(0);
 	    delete biasAtt;
@@ -233,7 +233,7 @@ void File2Fmq::_findFields()
 	    cerr << "  Using " << fld->ncBias << " as default" << endl;
 	  }
 	    
-	  NcAtt *missingAtt = var->get_att("missing_value");
+	  Nc3Att *missingAtt = var->get_att("missing_value");
 	  if (missingAtt) {
 	    fld->ncMissing = missingAtt->as_float(0);
 	    delete missingAtt;
@@ -309,13 +309,13 @@ int File2Fmq::writeParams()
   
   // override from the data file as available
 
-  NcAtt *nsampleAtt = _ncf.get_att( "Num_Samples" );
+  Nc3Att *nsampleAtt = _ncf.get_att( "Num_Samples" );
   if (nsampleAtt) {
     rp.samplesPerBeam = nsampleAtt->as_int(0);
     delete nsampleAtt;
   }
 
-  NcAtt *inameAtt = _ncf.get_att( "Instrument_Name" );
+  Nc3Att *inameAtt = _ncf.get_att( "Instrument_Name" );
   if (inameAtt) {
     rp.radarName = inameAtt->as_string(0);
     delete inameAtt;
@@ -492,7 +492,7 @@ int File2Fmq::writeBeams(int vol_num,
 
       switch(fld->var->type()) {
 
-      case ncByte: {
+      case nc3Byte: {
 	unsigned char *vals = (unsigned char *)
 	  fld->values->base() + itime * _maxCells;
 	for (int igate = 0; igate < _maxCells;
@@ -512,7 +512,7 @@ int File2Fmq::writeBeams(int vol_num,
       }
       break;
       
-      case ncShort: {
+      case nc3Short: {
 	short *vals = (short *) fld->values->base() + itime * _maxCells;
 	for (int igate = 0; igate < _maxCells;
 	     igate++, dptr += nfields, vals++) {
@@ -531,7 +531,7 @@ int File2Fmq::writeBeams(int vol_num,
       }
       break;
       
-      case ncInt: {
+      case nc3Int: {
 	int *vals = (int *) fld->values->base() + itime * _maxCells;
 	for (int igate = 0; igate < _maxCells;
 	     igate++, dptr += nfields, vals++) {
@@ -550,7 +550,7 @@ int File2Fmq::writeBeams(int vol_num,
       }
       break;
       
-      case ncFloat: {
+      case nc3Float: {
 	float *vals = (float *) fld->values->base() + itime * _maxCells;
 	for (int igate = 0; igate < _maxCells;
 	     igate++, dptr += nfields, vals++) {
@@ -568,7 +568,7 @@ int File2Fmq::writeBeams(int vol_num,
       }
       break;
       
-      case ncDouble: {
+      case nc3Double: {
 	double *vals = (double *) fld->values->base() + itime * _maxCells;
 	for (int igate = 0; igate < _maxCells;
 	     igate++, dptr += nfields, vals++) {

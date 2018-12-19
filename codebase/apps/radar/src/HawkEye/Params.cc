@@ -584,6 +584,18 @@
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
+    // Parameter 'check_ray_alloc'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_ray_alloc");
+    tt->descr = tdrpStrDup("Print out checks on ray memory allocation.");
+    tt->help = tdrpStrDup("If TRUE, the app will keep track of the number of rays allocated and freed, and print out that information every 100 rays.");
+    tt->val_offset = (char *) &check_ray_alloc - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'register_with_procmap'
     // ctype is 'tdrp_bool_t'
     
@@ -624,10 +636,10 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("input_mode");
     tt->descr = tdrpStrDup("Method for reading the input data");
-    tt->help = tdrpStrDup("\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.\n\tSIMULATED_RHI_INPUT: internally-generated test pattern data for RHIs.\n\tDSR_FMQ_INPUT: deprecated.");
+    tt->help = tdrpStrDup("\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.\n\tDSR_FMQ_INPUT: deprecated.");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
-    tt->enum_def.nfields = 5;
+    tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("IWRF_FMQ_INPUT");
@@ -636,10 +648,8 @@
       tt->enum_def.fields[1].val = IWRF_TCP_INPUT;
       tt->enum_def.fields[2].name = tdrpStrDup("SIMULATED_INPUT");
       tt->enum_def.fields[2].val = SIMULATED_INPUT;
-      tt->enum_def.fields[3].name = tdrpStrDup("SIMULATED_RHI_INPUT");
-      tt->enum_def.fields[3].val = SIMULATED_RHI_INPUT;
-      tt->enum_def.fields[4].name = tdrpStrDup("DSR_FMQ_INPUT");
-      tt->enum_def.fields[4].val = DSR_FMQ_INPUT;
+      tt->enum_def.fields[3].name = tdrpStrDup("DSR_FMQ_INPUT");
+      tt->enum_def.fields[3].val = DSR_FMQ_INPUT;
     tt->single_val.e = IWRF_FMQ_INPUT;
     tt++;
     
@@ -1713,6 +1723,18 @@
     tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
+    // Parameter 'rhi_beam_queue_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_beam_queue_size");
+    tt->descr = tdrpStrDup("Size of the queue for RHI beams.");
+    tt->help = tdrpStrDup("After the queue reaches this size, older beams are discarded.");
+    tt->val_offset = (char *) &rhi_beam_queue_size - &_start_;
+    tt->single_val.i = 360;
+    tt++;
+    
     // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -2669,7 +2691,7 @@
     tt->descr = tdrpStrDup("Number of milliseconds to sleep between beams in simulated input mode.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &sim_sleep_msecs - &_start_;
-    tt->single_val.i = 50;
+    tt->single_val.i = 10;
     tt++;
     
     // Parameter 'sim_n_gates'

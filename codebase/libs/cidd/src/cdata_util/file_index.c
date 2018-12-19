@@ -123,7 +123,7 @@ int cdata_index_alloc(cdata_current_index_t *index,
       fprintf(stderr, "ERROR - %s:%s:cdata_index_alloc\n",
 	      prog_name, calling_routine);
       fprintf(stderr, "Malloc or realloc error, %d bytes\n",
-	      n_fcasts * sizeof(long));
+	      (int) (n_fcasts * sizeof(long)));
       return (-1);
     }
     index->n_fcasts_alloc = n_fcasts;

@@ -24,7 +24,7 @@
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: SeviriNc2Mdv.hh,v 1.7 2016/03/07 01:23:05 dixon Exp $
+ *  $Id: SeviriNc2Mdv.hh,v 1.8 2018/01/26 18:43:35 jcraig Exp $
  */
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 
@@ -102,7 +102,7 @@ private:
 
   static const string _className;
 
-  static const float TINY_VALUE = 1.0e-5; 
+  static const float TINY_VALUE; 
 
   bool _isOK;
   string _progName;

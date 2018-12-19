@@ -124,6 +124,9 @@ void GateData::_initArraysToNull()
   iqhxF = NULL;
   iqvxF = NULL;
 
+  iqhcNotched = NULL;
+  iqvcNotched = NULL;
+
   iqhcPrtShortOrig = NULL;
   iqhcPrtLongOrig = NULL;
   iqvcPrtShortOrig = NULL;
@@ -221,12 +224,18 @@ void GateData::allocArrays(int nSamples,
     _allocArray(iqhxF, _nSamples);
     _allocArray(iqvxF, _nSamples);
 
+    _allocArray(iqhcNotched, _nSamples);
+    _allocArray(iqvcNotched, _nSamples);
+
   } else {
 
     _freeArray(iqhcF);
     _freeArray(iqvcF);
     _freeArray(iqhxF);
     _freeArray(iqvxF);
+
+    _freeArray(iqhcNotched);
+    _freeArray(iqvcNotched);
 
   }
 
@@ -356,6 +365,9 @@ void GateData::_freeArrays()
   _freeArray(iqhxF);
   _freeArray(iqvcF);
   _freeArray(iqvxF);
+
+  _freeArray(iqhcNotched);
+  _freeArray(iqvcNotched);
 
   _freeArray(iqhcPrtShortOrig);
   _freeArray(iqhcPrtLongOrig);

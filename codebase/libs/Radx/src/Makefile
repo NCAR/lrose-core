@@ -34,6 +34,7 @@ SUB_DIRS = \
 	Leosphere \
 	Ncf \
 	Nexrad \
+	NoaaFsl \
 	Noxp \
 	NsslMrd \
 	Odim \

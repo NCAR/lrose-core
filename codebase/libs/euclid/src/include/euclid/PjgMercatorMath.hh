@@ -39,6 +39,8 @@
 #ifndef PjgMercatorMath_hh
 #define PjgMercatorMath_hh
 
+#include <euclid/PjgMath.hh>
+
 class PjgMercatorMath : public PjgMath
 {
 

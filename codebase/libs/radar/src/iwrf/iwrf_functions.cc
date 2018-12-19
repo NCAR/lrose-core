@@ -272,6 +272,27 @@ void iwrf_xmit_power_init(iwrf_xmit_power_t &val)
 }
 
 //////////////////////////////////////////////////////
+// init rx_power struct
+
+void iwrf_rx_power_init(iwrf_rx_power_t &val)
+
+{
+
+  MEM_zero(val);
+
+  val.packet.id = IWRF_RX_POWER_ID;
+  val.packet.len_bytes = sizeof(val);
+  val.packet.version_num = 1;
+  iwrf_set_packet_time_to_now(val.packet);
+
+  val.max_power_dbm_hc = IWRF_MISSING_FLOAT;
+  val.max_power_dbm_vc = IWRF_MISSING_FLOAT;
+  val.max_power_dbm_hx = IWRF_MISSING_FLOAT;
+  val.max_power_dbm_vx = IWRF_MISSING_FLOAT;
+
+}
+
+//////////////////////////////////////////////////////
 // init xmit_sample struct
 
 void iwrf_xmit_sample_init(iwrf_xmit_sample_t &val)
@@ -520,6 +541,8 @@ void iwrf_event_notice_init(iwrf_event_notice_t &val)
   
   val.cause = IWRF_EVENT_CAUSE_NOT_SET;
   val.current_fixed_angle = IWRF_MISSING_FLOAT;
+
+  val.antenna_transition = 0;
 
 }
 
@@ -908,6 +931,11 @@ int iwrf_get_packet_id(const void* buf, int len, int &packet_id)
 	iret = -1;
       } break;
 
+    case IWRF_RX_POWER_ID:
+      if (len < (int) sizeof(iwrf_rx_power_t)) {
+	iret = -1;
+      } break;
+
     case IWRF_XMIT_SAMPLE_ID:
       if (len < (int) sizeof(iwrf_xmit_sample_t)) {
 	iret = -1;
@@ -1065,6 +1093,10 @@ int iwrf_packet_swap(void *buf, int len)
 
     case IWRF_XMIT_POWER_ID:
       iwrf_xmit_power_swap(*((iwrf_xmit_power_t *) buf));
+      break;
+
+    case IWRF_RX_POWER_ID:
+      iwrf_rx_power_swap(*((iwrf_rx_power_t *) buf));
       break;
 
     case IWRF_XMIT_SAMPLE_ID:
@@ -1245,6 +1277,22 @@ bool iwrf_xmit_power_swap(iwrf_xmit_power_t &power)
   if (swap) {
     ui08 *start = (ui08 *) &power + sizeof(iwrf_packet_info_t);
     int nbytes = sizeof(iwrf_xmit_power_t) - sizeof(iwrf_packet_info_t);
+    SWAP_array_32(start, nbytes);
+  }
+  return swap;
+}
+
+//////////////////////////////////////////////////////
+// swap rx_power
+// returns true is swapped, false if already in native
+
+bool iwrf_rx_power_swap(iwrf_rx_power_t &power)
+
+{
+  bool swap = iwrf_packet_info_swap(power.packet);
+  if (swap) {
+    ui08 *start = (ui08 *) &power + sizeof(iwrf_packet_info_t);
+    int nbytes = sizeof(iwrf_rx_power_t) - sizeof(iwrf_packet_info_t);
     SWAP_array_32(start, nbytes);
   }
   return swap;
@@ -1609,6 +1657,7 @@ string iwrf_packet_id_to_str(int packet_id)
     case IWRF_ANTENNA_CORRECTION_ID: return "IWRF_ANTENNA_CORRECTION_ID";
     case IWRF_TS_PROCESSING_ID: return "IWRF_TS_PROCESSING_ID";
     case IWRF_XMIT_POWER_ID: return "IWRF_XMIT_POWER_ID";
+    case IWRF_RX_POWER_ID: return "IWRF_RX_POWER_ID";
     case IWRF_XMIT_SAMPLE_ID: return "IWRF_XMIT_SAMPLE_ID";
     case IWRF_XMIT_SAMPLE_V2_ID: return "IWRF_XMIT_SAMPLE_V2_ID";
     case IWRF_BURST_HEADER_ID: return "IWRF_BURST_HEADER_ID";
@@ -2039,6 +2088,10 @@ void iwrf_packet_print(FILE *out, const void *buf, int len)
       iwrf_xmit_power_print(out, *((iwrf_xmit_power_t *) buf));
       break;
 
+    case IWRF_RX_POWER_ID:
+      iwrf_rx_power_print(out, *((iwrf_rx_power_t *) buf));
+      break;
+
     case IWRF_XMIT_SAMPLE_ID:
       iwrf_xmit_sample_print(out, *((iwrf_xmit_sample_t *) buf));
       break;
@@ -2129,7 +2182,7 @@ void iwrf_packet_info_print(FILE *out,
   fprintf(out, "  seq_num: %lld\n", (long long) copy.seq_num);
   fprintf(out, "  version_num: %d\n", copy.version_num);
   fprintf(out, "  radar_id: %d\n", copy.radar_id);
-  fprintf(out, "  time_secs_utc: %lld\n", copy.time_secs_utc);
+  fprintf(out, "  time_secs_utc: %lld\n", (long long) copy.time_secs_utc);
   fprintf(out, "  time_nano_secs: %d\n", copy.time_nano_secs);
   
   time_t ptime = copy.time_secs_utc;
@@ -2192,7 +2245,7 @@ void iwrf_sync_print(FILE *out,
 // print version packet
 
 void iwrf_version_print(FILE *out,
-		     const iwrf_version_t &version)
+                        const iwrf_version_t &version)
 
 {
 
@@ -2211,7 +2264,7 @@ void iwrf_version_print(FILE *out,
 // print scan_segment
 
 void iwrf_scan_segment_print(FILE *out,
-			   const iwrf_scan_segment_t &seg)
+                             const iwrf_scan_segment_t &seg)
 
 {
 
@@ -2370,6 +2423,27 @@ void iwrf_xmit_power_print(FILE *out,
 }
 
 //////////////////////////////////////////////////////
+// print rx_power
+
+void iwrf_rx_power_print(FILE *out,
+                         const iwrf_rx_power_t &pwr)
+  
+{
+
+  iwrf_rx_power_t copy = pwr;
+  iwrf_rx_power_swap(copy);
+  fprintf(out, "==================== iwrf_rx_power ============================\n");
+  iwrf_packet_info_print(out, copy.packet);
+  
+  fprintf(out, "  max_power_dbm_hc: %g\n", copy.max_power_dbm_hc);
+  fprintf(out, "  max_power_dbm_vc: %g\n", copy.max_power_dbm_vc);
+  fprintf(out, "  max_power_dbm_hx: %g\n", copy.max_power_dbm_hx);
+  fprintf(out, "  max_power_dbm_vx: %g\n", copy.max_power_dbm_vx);
+  fprintf(out, "=================================================================\n");
+
+}
+
+//////////////////////////////////////////////////////
 // print xmit_sample
 
 void iwrf_xmit_sample_print(FILE *out,
@@ -2463,7 +2537,7 @@ void iwrf_xmit_info_print(FILE *out,
 // print burst_iq
 
 void iwrf_burst_header_print(FILE *out,
-                         const iwrf_burst_header_t &val)
+                             const iwrf_burst_header_t &val)
   
 {
 
@@ -2657,6 +2731,7 @@ void iwrf_event_notice_print(FILE *out,
   fprintf(out, "  sweep_num: %d\n", copy.sweep_num);
   fprintf(out, "  cause: %s\n", iwrf_event_cause_to_str(copy.cause).c_str());
   fprintf(out, "  current_fixed_angle: %g\n", copy.current_fixed_angle);
+  fprintf(out, "  antenna_transition: %d\n", copy.antenna_transition);
   fprintf(out, "=================================================================\n");
 
 }
@@ -2781,7 +2856,8 @@ void iwrf_pulse_header_print(FILE *out,
     iwrf_platform_georef_t gcopy = *georef;
     iwrf_platform_georef_swap(gcopy);
     fprintf(out, "  Pulse is using georef:\n");
-    fprintf(out, "    georef time_secs_utc: %lld\n", gcopy.packet.time_secs_utc);
+    fprintf(out, "    georef time_secs_utc: %lld\n",
+            (long long) gcopy.packet.time_secs_utc);
     fprintf(out, "    georef time_nano_secs: %d\n", gcopy.packet.time_nano_secs);
     fprintf(out, "    georef unit_num: %d\n", gcopy.unit_num);
     fprintf(out, "    georef unit_id: %d\n", gcopy.unit_id);
@@ -3278,6 +3354,11 @@ void iwrf_print_all_formats(FILE *out)
   }
   
   {
+    iwrf_rx_power_t val;
+    iwrf_rx_power_print_format(out, val);
+  }
+  
+  {
     iwrf_xmit_sample_t val;
     iwrf_xmit_sample_print_format(out, val);
   }
@@ -3631,6 +3712,34 @@ void iwrf_xmit_power_print_format(FILE *out, const iwrf_xmit_power_t &val)
 }
 
 
+// print format of rx_power
+
+void iwrf_rx_power_print_format(FILE *out, const iwrf_rx_power_t &val)
+{
+
+  _print_format_divider('-', out);
+  fprintf(out, "  struct: 'iwrf_rx_power_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), IWRF_RX_POWER_ID);
+  fprintf(out, "  packet info:\n");
+  _print_format_header(out);
+  _print_packet_format(out, val.packet);
+
+  fprintf(out, "\n");
+  fprintf(out, "  meta-data:\n");
+  _print_format_header(out);
+
+  const char *id = (char *) &val.packet.id;
+  
+  fprintf(out, _dform, "fl32", "max_power_dbm_hc", sizeof(val.max_power_dbm_hc), (char *) &val.max_power_dbm_hc - id);
+  fprintf(out, _dform, "fl32", "max_power_dbm_vc", sizeof(val.max_power_dbm_vc), (char *) &val.max_power_dbm_vc - id);
+  fprintf(out, _dform, "fl32", "max_power_dbm_hx", sizeof(val.max_power_dbm_hx), (char *) &val.max_power_dbm_hx - id);
+  fprintf(out, _dform, "fl32", "max_power_dbm_vx", sizeof(val.max_power_dbm_vx), (char *) &val.max_power_dbm_vx - id);
+  fprintf(out, _dform, "si32", "unused[14]", sizeof(val.unused), (char *) val.unused - id);
+
+  _print_format_divider('-', out);
+
+}
+
+
 // print format of xmit_sample
 
 void iwrf_xmit_sample_print_format(FILE *out, const iwrf_xmit_sample_t &val)
@@ -3911,7 +4020,8 @@ void iwrf_event_notice_print_format(FILE *out, const iwrf_event_notice_t &val)
   fprintf(out, _dform, "si32", "sweep_num", sizeof(val.sweep_num), (char *) &val.sweep_num - id);
   fprintf(out, _dform, "si32", "cause", sizeof(val.cause), (char *) &val.cause - id);
   fprintf(out, _dform, "fl32", "current_fixed_angle", sizeof(val.current_fixed_angle), (char *) &val.current_fixed_angle - id);
-  fprintf(out, _dform, "si32", "unused[8]", sizeof(val.unused), (char *) val.unused - id);
+  fprintf(out, _dform, "si32", "antenna_transition", sizeof(val.antenna_transition), (char *) &val.antenna_transition - id);
+  fprintf(out, _dform, "si32", "unused[7]", sizeof(val.unused), (char *) val.unused - id);
 
   _print_format_divider('-', out);
 

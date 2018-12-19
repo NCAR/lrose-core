@@ -156,10 +156,10 @@ public:
   inline void setNoiseDbmVc(double val) { _noiseDbmVc = val; }
   inline void setNoiseDbmVx(double val) { _noiseDbmVx = val; }
 
-  inline void seti0DbmHc(double val) { _i0DbmHc = val; }
-  inline void seti0DbmHx(double val) { _i0DbmHx = val; }
-  inline void seti0DbmVc(double val) { _i0DbmVc = val; }
-  inline void seti0DbmVx(double val) { _i0DbmVx = val; }
+  inline void setI0DbmHc(double val) { _i0DbmHc = val; }
+  inline void setI0DbmHx(double val) { _i0DbmHx = val; }
+  inline void setI0DbmVc(double val) { _i0DbmVc = val; }
+  inline void setI0DbmVx(double val) { _i0DbmVx = val; }
 
   inline void setReceiverGainDbHc(double val) { _receiverGainDbHc = val; }
   inline void setReceiverGainDbHx(double val) { _receiverGainDbHx = val; }
@@ -271,6 +271,11 @@ public:
   inline double getReceiverSlopeDbHx() const { return _receiverSlopeDbHx; }
   inline double getReceiverSlopeDbVc() const { return _receiverSlopeDbVc; }
   inline double getReceiverSlopeDbVx() const { return _receiverSlopeDbVx; }
+
+  inline double getDynamicRangeDbHc() const { return _dynamicRangeDbHc; }
+  inline double getDynamicRangeDbHx() const { return _dynamicRangeDbHx; }
+  inline double getDynamicRangeDbVc() const { return _dynamicRangeDbVc; }
+  inline double getDynamicRangeDbVx() const { return _dynamicRangeDbVx; }
 
   inline double getBaseDbz1kmHc() const { return _baseDbz1kmHc; }
   inline double getBaseDbz1kmHx() const { return _baseDbz1kmHx; }

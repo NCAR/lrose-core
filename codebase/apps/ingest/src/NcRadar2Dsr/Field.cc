@@ -43,8 +43,8 @@ Field::Field(const string &nc_name,
 	     float nc_missing,
 	     double out_scale,
 	     double out_bias,
-	     NcVar *fld_var /* = NULL */,
-	     NcValues *fld_values /* = NULL*/ ) :
+	     Nc3Var *fld_var /* = NULL */,
+	     Nc3Values *fld_values /* = NULL*/ ) :
   ncName(nc_name),
   outName(out_name),
   outUnits(out_units),

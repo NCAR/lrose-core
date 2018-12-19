@@ -1,0 +1,303 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions SpolWarnSms
+//
+// Mike Dixon
+// EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// June 2018
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "SpolWarnSms reads status XML monitoring data from SPDB, for the S-band and K-band. It checks the status in the XML, and determines if a warning message should be sent.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT - from SPDB";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Should we monitor the sband status?";
+} monitor_the_sband;
+
+paramdef string {
+  p_default = "spdbp:://pgen1::spdb/monitor/sband";
+  p_descr = "URL for reading in monitoring data from SPDB.";
+  p_help = "This holds the XML status monitoring for the S-band.";
+} sband_monitoring_spdb_url;
+
+paramdef int {
+  p_default = 120;
+  p_descr = "The margin, relative to 'now', for retrieving spdb data (secs).";
+  p_help = "If no data is found within this interval, an error is generated.";
+} sband_spdb_margin_secs;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Should we monitor the kband status?";
+} monitor_the_kband;
+
+paramdef string {
+  p_default = "spdbp:://pgen1::spdb/monitor/kband";
+  p_descr = "URL for reading in monitoring data from SPDB.";
+  p_help = "This holds the XML status monitoring for the S-band.";
+} kband_monitoring_spdb_url;
+
+paramdef int {
+  p_default = 120;
+  p_descr = "The margin, relative to 'now', for retrieving spdb data (secs).";
+  p_help = "If no data is found within this interval, an error is generated.";
+} kband_spdb_margin_secs;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "How often to check for status (secs).";
+} monitoring_interval_secs;
+
+commentdef {
+  p_header = "XML STATUS CHECKING";
+  p_text = "Here we list the items to check for. Any item listed here is considered critical. Failure of an item will generate a warning message.";
+};
+
+typedef enum {
+  XML_ENTRY_BOOLEAN,
+  XML_ENTRY_NUMBER
+} xml_entry_type_t;
+
+typedef struct {
+  string xml_tags;
+  xml_entry_type_t entry_type;
+  boolean ok_boolean;
+  double valid_lower_limit;
+  double valid_upper_limit;
+  string label;
+} xml_entry_t;
+
+paramdef struct xml_entry_t {
+  p_default = {
+    {
+      xml_tags = "<SpolStatus><SpolTransmitStatus><Maintenance_Required_Fault>",
+      entry_type = XML_ENTRY_BOOLEAN,
+      ok_boolean = false,
+      valid_lower_limit = 0,
+      valid_upper_limit = 0,
+      label = "Sband-Xmit-Maintenance-Fault"
+    }
+    ,
+    {
+      xml_tags = "<SpolStatus><SpolTemperatures><KlystronExhaust>",
+      entry_type = XML_ENTRY_NUMBER,
+      ok_boolean = false,
+      valid_lower_limit = 0,
+      valid_upper_limit = 38,
+      label = "Sband-Klystron-Exhaust-TempC"
+    }
+    ,
+    {
+      xml_tags = "<SpolStatus><WaveguideStatus><pressPsi>",
+      entry_type = XML_ENTRY_NUMBER,
+      ok_boolean = false,
+      valid_lower_limit = 4,
+      valid_upper_limit = 7,
+      label = "Sband-WG-Pressure-PSI"
+    }
+  };
+  p_descr = "Details of S-band XML entries for which to check.";
+  p_help =
+    "\txml_tags: list of tags to specify entry in XML\n"
+    "\tentry_type: the type of data stored\n"
+    "\tok_boolean: BOOLEAN only: the string value for an OK state\n"
+    "\tvalid_lower_limit: NUMBER only: the lower limit for an OK state\n"
+    "\tvalid_upper_limit: NUMBER only: the upper limit for an OK state\n"
+    "\tlabel: label to be used for message\n"
+    ".";
+} sband_xml_entries[];
+
+paramdef struct xml_entry_t {
+  p_default = {
+    {
+      xml_tags = "<KaStatus><KaTransmitterStatus><MagnetronCurrentFault>",
+      entry_type = XML_ENTRY_BOOLEAN,
+      ok_boolean = false,
+      valid_lower_limit = 0,
+      valid_upper_limit = 0,
+      label = "Kband-Xmit-Magnetron-Current-Fault"
+    }
+    ,
+    {
+      xml_tags = "<KaStatus><KaReceiverStatus><TxEnclosureTemp>",
+      entry_type = XML_ENTRY_NUMBER,
+      ok_boolean = false,
+      valid_lower_limit = 0,
+      valid_upper_limit = 45,
+      label = "Kband-Tx-Enclosure-TempC"
+    }
+    ,
+    {
+      xml_tags = "<KaStatus><KaBandTestPulse><TestPulsePowerDbHc>",
+      entry_type = XML_ENTRY_NUMBER,
+      ok_boolean = false,
+      valid_lower_limit = -40,
+      valid_upper_limit = -20,
+      label = "Kband-Test-Pulse-Hc-Dbm"
+    }
+  };
+  p_descr = "Details of K-band XML entries for which to check.";
+  p_help =
+    "\txml_tags: list of tags to specify entry in XML\n"
+    "\tentry_type: the type of data stored\n"
+    "\tok_boolean: BOOLEAN only: the string value for an OK state\n"
+    "\tvalid_lower_limit: NUMBER only: the lower limit for an OK state\n"
+    "\tvalid_upper_limit: NUMBER only: the upper limit for an OK state\n"
+    "\tlabel: label to be used for message\n"
+    ".";
+} kband_xml_entries[];
+
+commentdef {
+  p_header = "WARNING MESSAGE FILE OUTPUT";
+};
+
+paramdef string {
+  p_default = "$(HOME)/projDir/data/monitoring/messages";
+  p_descr = "Dir path for warning messages.";
+  p_help = "Warning messages are written to this directory. This will be watched by the LdataWatcher, which will then call a script to send the SMS messages.";
+} warning_message_dir;
+
+commentdef {
+  p_header = "WARNING MESSAGE SPDB OUTPUT";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true, writes warnings to SPDB.";
+} write_warnings_to_spdb;
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/monitoring/messages";
+  p_descr = "URL for SPDB output.";
+  p_help = "Messages are is written to this location.";
+} warning_spdb_url;
+
+commentdef {
+  p_header = "SMS DETAILS";
+  p_text = "If warnings are to sent out, an LdataInfo file is written to warning_message_dir after the message file has been written. An LdataWatcher is set up to watch the LdataInfo to update. If it does, a script is called to dispatch the SMS.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, writes warnings using SMS.";
+} send_warnings_to_sms;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Minimum time between warnings via SMS (secs).";
+  p_help = "If warnings arrive more quickly, an SMS will only be sent out if the warnings persist after this time has passed.";
+} time_between_sms_secs;
+
+typedef struct {
+  string name;
+  string number;
+} phone_book_entry_t;
+
+paramdef struct phone_book_entry_t {
+  p_default = {
+    {
+      name = "mike",
+      number = "+13035013346"
+    }
+    ,
+    {
+      name = "chris",
+      number = "+13035208624"
+    }
+    ,
+    {
+      name = "eric",
+      number = "+17203782812"
+    }
+    ,
+    {
+      name = "pei",
+      number = "+14132105682"
+    }
+    ,
+    {
+      name = "jonathan",
+      number = "+13038072936"
+    }
+    ,
+    {
+      name = "lucas",
+      number = "+17204380946"
+    }
+    ,
+    {
+      name = "rich",
+      number = "+12027098584"
+    }
+  };
+  p_descr = "Phone book for SMS.";
+  p_help = "For looking up the phone number from the name.";
+} phone_book[];
+
+typedef struct {
+  string end_time;
+  string interval_1;
+  string interval_2;
+  string interval_3;
+  string interval_4;
+} monitoring_period_t;
+
+paramdef struct monitoring_period_t {
+
+  p_default = {
+    {
+      end_time = "2018-06-06T19:00:00",
+      interval_1 = "00:00-06:00, mike",
+      interval_2 = "06:00-12:00, mike",
+      interval_3 = "12:00-18:00, mike",
+      interval_4 = "18:00-24:00, mike"
+    }
+    ,
+    {
+      end_time = "2018-06-07T00:00:00",
+      interval_1 = "00:00-06:00, mike",
+      interval_2 = "06:00-12:00, mike",
+      interval_3 = "12:00-18:00, mike",
+      interval_4 = "18:00-24:00, mike"
+    }
+    ,
+    {
+      end_time = "2018-06-08T00:00:00",
+      interval_1 = "00:00-06:00, mike",
+      interval_2 = "06:00-12:00, mike",
+      interval_3 = "12:00-18:00, mike",
+      interval_4 = "18:00-24:00, mike"
+    }
+  };
+  p_descr = "Setting up the monitoring times, and to whom to send the SMS.";
+  p_help = "end_time is be in ISO time format: yyyy-mm-ddThh:mm:ss.\n\nEach interval has a time period, followed by a list of names to be contacted.\n\nThe time period is in the form 06:00-12:00, for example for 06:00 UTC to 12:00 UTC each day.\n\nThis is followed by a comma, and then a comma-delimited list of names.\n\nIf a period is not to be monitored, no names should be included.";
+
+} monitoring_periods[];

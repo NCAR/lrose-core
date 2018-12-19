@@ -1164,6 +1164,7 @@ private:
   bool _endOfVolumeFlag;
 
   // general purpose utility flag for identification during processing
+  // this is not stored out when CfRadial files are written
 
   bool _utilityFlag;
 

@@ -78,8 +78,7 @@ public:
     IWRF_FMQ_INPUT = 0,
     IWRF_TCP_INPUT = 1,
     SIMULATED_INPUT = 2,
-    SIMULATED_RHI_INPUT = 3,
-    DSR_FMQ_INPUT = 4
+    DSR_FMQ_INPUT = 3
   } input_mode_t;
 
   typedef enum {
@@ -448,6 +447,8 @@ public:
 
   debug_t debug;
 
+  tdrp_bool_t check_ray_alloc;
+
   tdrp_bool_t register_with_procmap;
 
   char* instance;
@@ -568,6 +569,8 @@ public:
   tdrp_bool_t rhi_elevation_lines_on_at_startup;
 
   legend_pos_t rhi_main_legend_pos;
+
+  int rhi_beam_queue_size;
 
   double bscan_time_span_secs;
 
@@ -713,7 +716,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[154];
+  mutable TDRPtable _table[156];
 
   const char *_className;
 

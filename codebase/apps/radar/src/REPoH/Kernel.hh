@@ -23,19 +23,23 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
  * @file Kernel.hh 
- * @brief kernel around an interesting point
+ * @brief kernel around an interesting point, along a beam
+ *
  * @class Kernel
- * @brief kernel around an interesting point
+ * @brief kernel around an interesting point, along a beam
  */
 
 #ifndef KERNEL_H
 #define KERNEL_H
 
+#include "RepohParams.hh"
+#include "KernelData.hh"
+#include "KernelPoints.hh"
+#include <euclid/PointList.hh>
 #include <string>
 #include <vector>
-#include "Params.hh"
 
-class GridProj;
+class MdvxProj;
 class Grid2d;
 class CloudGap;
 class DsSpdb;
@@ -46,58 +50,34 @@ class Kernel
 {
 public:
 
-  Kernel(const double vlevel, const bool is_far, const Grid2d &mask,
-	 const Grid2d &omask, const CloudGap &g, const Grid2d &clumps,
-	 const Params &params, const GridProj &gp);
+  /**
+   * @param[in] vlevel        Vertical level degrees
+   * @param[in] isFar         True for kernel farther from radar
+   * @param[in] mask          mask for clump points, for this kernel
+   * @param[in] outsideMask   mask for all points not in a clump
+   * @param[in] g             The cloud gap along the beam
+   * @param[in] params        parameters
+   * @param[in] gp            projection
+   *
+   * For 'far' kernels, we look at a near edge of a cloud, for 'near' kernels,
+   * opposite
+   */
+  Kernel(double vlevel, bool isFar, const Grid2d &mask,
+	 const Grid2d &omask, const CloudGap &g, 
+	 const RepohParams &params, const MdvxProj &gp);
 
   ~Kernel(void);
 
-
   /**
-   * Good means passed all tests
+   * Put centerpoint to a grid with value = local _color
+   * @param[in,out] g  
    */
-  inline bool is_good(void) const {return  _is_good;}
-
-  /**
-   * Ok means well formed with enough points
-   */
-  inline bool is_ok(void) const {return _ok;}
-
-  inline int npt(void) const {return (int)_pts.size();}
-  inline int npt_outside(void) const {return (int)_out_pts.size();}
-
-  /**
-   * Add a point to the kernel
-   */
-  inline void add(const int x, const int y)
-  {
-    _total_pts.push_back(pair<int,int>(x,y));
-    _pts.push_back(pair<int,int>(x,y));
-  }
-
-  /**
-   * Add a point to the 'outside' kernel points
-   */
-  inline void add_outside(const int x, const int y)
-  {
-    _total_out_pts.push_back(pair<int,int>(x,y));
-    _out_pts.push_back(pair<int,int>(x,y));
-  }
-
-  /**
-   * Put centerpoint to grid with value = _color
-   */
-  void cp_to_grid(Grid2d &g) const;
-
-  /**
-   * Put centerpoint to grid with value = input
-   */
-  void cp_to_grid(Grid2d &g, const double value) const;
+  void centerpointToGrid(Grid2d &g) const;
 
   /**
    * Print out a one line status summary to stdout
    */
-  void print_status(void) const;
+  void printStatus(void) const;
 
   /**
    * Print out all the kernel points
@@ -107,70 +87,103 @@ public:
   /**
    * Debugging: Print out kernel contents to a file for use by Scott Ellis
    * in a format he likes.
+   *
+   * @param[in] dir  Path to write to
+   * @param[in] id   ID value
+   * @param[in] vlevel  Vertical level angle
+   * @param[in] grids  Data grids used for kernels 
+   * @param[in]  kmPerGate  Kilometer gate spacing
    */
-  void print_debug(const std::string dir, const int id, const double vlevel,
-		   const KernelGrids &grids, const double km_per_gate);
+  void printDebug(const std::string dir, int id, double vlevel,
+		  const KernelGrids &grids, double kmPerGate);
 
   /**
    * Finish processing a kernel of points using inputs.
-   * Set i.d. to input i.
+   *
+   * @param[in] time    Data time
+   * @param[in] id      id to give kernel
+   * @param[in] vlevel  degrees
+   * @param[in] grids   grids used for kernels
+   * @param[in] P       params
+   * @param[in] kmPerGate  Kilometer gate spacing
+   *
    * Decide if its good or bad using equations
+   *
    * Print summary status
    */
-  void finish_processing(const time_t &time, const int i, const double vlevel,
-			 const KernelGrids &grids, const Params &P,
-			 const double km_per_gate);
+  void finishProcessing(const time_t &time, int id, double vlevel,
+			const KernelGrids &grids, const RepohParams &P,
+			double kmPerGate);
 
   /**
    * Write a genpoly surrounding the kernel points to Spdb,
    * outside = true for points just outside the kernel
+   *
    * does not write when at origin
+   *
+   * @param[in] time    Data time
+   * @param[in] outside  Flag telling which points to use
+   * @param[in] proj  Projection
+   * @param[in,out] D  Spdb server object
    */
-  bool write_genpoly(const time_t &t, const int nx, const int ny,
-		     const bool outside, DsSpdb &D) const;
+  bool writeGenpoly(const time_t &t, bool outside, const MdvxProj &proj,
+		    DsSpdb &D) const;
 
   /**
-   * @return the average point x and y, and the total attenuation
+   * return the average point x and y, and the total attenuation
+   * @param[out] x  Average x index for kernel points
+   * @param[out] y  Beam index for this object 
+   * @param[out] atten  Total Attenuation
    */
-  void get_attenuation(int &x, int &y, double &atten) const;
+  void getAttenuation(double &x, double &y, double &atten) const;
 
   /**
    * cubic equation for humidity using attenuation
+   * @param[in] a  Attenuation
+   * @return Humidity
    */
-  static double humidity_from_attenuation(const double a);
+  static double humidityFromAttenuation(const double a);
 
+  /**
+   * @return true if the kernel is one at the radar
+   */
+  inline bool atRadar(void) const
+  {
+    return _center.getX() == 0;
+  }
+
+  /**
+   * @return true if kernel data has passed all the tests
+   */
+  inline bool passedTests(void) const {return _data.passedTests();}
+
+  /**
+   * @return true if kernel has reasonable number of points
+   */
+  inline bool isBigEnough(void) const {return _kpts.isBigEnough();}
+  
 protected:
 private:
 
-  bool _ok;
-  bool _is_good;
-  int _color;
-  double _vlevel;
-  int _center_x, _center_y;
-  std::vector<std::pair<int,int> > _pts;
-  std::vector<std::pair<int,int> > _out_pts;
-  std::vector<std::pair<int,int> > _total_pts;
-  std::vector<std::pair<int,int> > _total_out_pts;
+  int _color;              /**< Color index for points */
+  double _vlevel;          /**< Vertical level degrees */
+  Point _center;           /**< Kernel center point */
 
-  bool _pid_ok, _sdbz_ok, _sdbz_out_ok, _D0_ok, _corr_ok, _sdbz_diff_ok;
-  bool _dbz_diff_ok;
-  double _sdbz_ave, _sdbz_ave_out, _kdbz_ave, _D0, _z_ave, _ZDR_ave, _Ag, _q;
-  double _corr, _sdbz_diff;
-  int _dbz_diff_npt_removed;
+  KernelPoints _kpts;      /**< Kernel points, filtered */
+  KernelPoints _totalKpts; /**< Kernel points, all */
 
-  void _set_good(const KernelGrids &grids, const Params &P,
-		 const double km_per_gate);
-  bool _set_genpoly(const time_t &time, const int id, const int nx,
-		    const int ny);
-  void _print(FILE *fp, const Grid2d &g) const;
-  int _x_ave(void) const;
-  void _to_grid0(Grid2d &g, const double value) const;
-  void _to_grid1(Grid2d &g, const double value) const;
-  double _gaseous_attenuation(const double km_per_gate) const;
-  bool _filter_dbz_diff(const Grid2d &dbz_diff, const Params &P);
-  bool _filter_dbz_diff_1(const Grid2d &dbz_diff, const Params &P);
-  bool _is_debug(const Params::mask_t &mask, const double range,
-		 const double az, const double vlevel) const;
+  KernelData _data;        /**< Data values and flags for this kernel */
+
+
+  double _Ag;              /**< Attenuation */
+  double _q;               /**< Humidiity */
+
+
+  double _gaseousAttenuation(const double km_per_gate) const;
+  bool _initializeDebugging(const MdvxProj &gp, double vlevel, 
+			    const RepohParams &params) const;
+  bool _isDebug(const RepohParams::mask_t &mask, double range,
+		double az, double vlevel) const;
 };
 
 #endif

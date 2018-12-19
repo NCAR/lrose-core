@@ -1,0 +1,427 @@
+/*********************************************************
+ * parameter definitions for PidZdrStats
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * June 1028
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "PidZdrStats reads in Particle ID data from a CfRadial file, and computes the statistics of the ZDR distribution in various PID categories.";
+}
+
+commentdef {
+  p_header = "Process control.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+commentdef {
+  p_header = "INPUT FIELD NAMES";
+}
+
+paramdef string {
+  p_default = "PID";
+  p_descr = "Field name for Particle ID in the input file.";
+} PID_field_name;
+
+paramdef string {
+  p_default = "ZDR";
+  p_descr = "Field name for ZDR in the input file.";
+} ZDR_field_name;
+
+paramdef string {
+  p_default = "RHOHV";
+  p_descr = "Field name for RHOHV in the input file.";
+} RHOHV_field_name;
+
+paramdef string {
+  p_default = "TEMP_FOR_PID";
+  p_descr = "Field name for temperature in the input file.";
+} TEMP_field_name;
+
+commentdef {
+  p_header = "MAX RANGE LIMIT";
+  p_help = "Can be useful for removing a test pulse at max range";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+commentdef {
+  p_header = "GLOBAL PARAMETERS";
+}
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Minimum consectutive gates with the correct conditions for analyzing ZDR.";
+  p_help = "We want to ensure that we are solidly in a region suitable for analyzing the ZDR. We eliminate noisy data by requiring that the conditions persist over a certain number of gates.";
+} pid_min_gate_run;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Minimum number of points in a volume for valid zdr stats.";
+  p_help = "For the results to be valid, we need a certain number of valid results for computing the statistics.";
+} pid_min_npoints_valid;
+
+commentdef {
+  p_header = "ZDR ANALYSIS BY PARTICLE TYPE";
+}
+
+typedef struct {
+  string label;
+  int pid;
+  double min_range_km;
+  double max_range_km;
+  double min_elev_deg;
+  double max_elev_deg;
+  double min_temp_c;
+  double max_temp_c;
+  double zdr_hist_lower_limit;
+  double zdr_hist_upper_limit;
+} pid_region_t;
+
+paramdef struct pid_region_t {
+
+  p_default = {
+    {
+      label = "cloud",
+      pid = 1,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "drizzle",
+      pid = 2,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "light_rain",
+      pid = 3,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "mod_rain",
+      pid = 4,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "heavy_rain",
+      pid = 5,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "hail",
+      pid = 6,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "rain_hail",
+      pid = 7,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "graupel",
+      pid = 8,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "rain_graupel",
+      pid = 9,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "dry_snow",
+      pid = 10,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "wet_snow",
+      pid = 11,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "ice_crystals",
+      pid = 12,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "irreg_ice",
+      pid = 13,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+    ,
+    {
+      label = "supercooled_drops",
+      pid = 14,
+      min_range_km = 5,
+      max_range_km = 148,
+      min_elev_deg = 0.0,
+      max_elev_deg = 90.0,
+      min_temp_c = -100.0,
+      max_temp_c = 50.0,
+      zdr_hist_lower_limit = -4.0,
+      zdr_hist_upper_limit = 10.0
+    }
+  };
+  p_descr = "Set up the PID regions for analysis.";
+  p_help = "The PID value must be between 1 and 20, inclusive, and should match the values produced by the NCAR PID algorithm. The range, elevation and temperature limits are applied at each gate when deciding whether to include that gate in the analysis. If the values read in are outside these limits, the gate is not used for the analysis. The histogram limits are used to govern how the histograms are computed and stored.";
+
+} pid_regions[];
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Min number of zdr points for valid statistics.";
+  p_help = "With too few points we cannot draw reliable conclusions about the ZDR statistics.";
+} min_npts_for_valid_stats;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Number of bins in histograms used to analyze ZDR stats.";
+} zdr_hist_n_bins;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the histogram limits from the standard deviation of the data.";
+  p_help = "If true, the limits will be set to the mean, plus/minus some multiple of the standard deviation. The zdr_hist_lower_limit and zdr_hist_upper_limit in the pid_regions table will not be used..";
+} set_zdr_hist_limits_from_sdev;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "The number of standard deviations, relative to the mean, to be used to compute the histogram limits.";
+  p_help = "See 'set_zdr_hist_limits_from_sdev'.";
+} n_sdev_for_hist_limits;
+
+commentdef {
+  p_header = "RETRIEVING SITE TEMPERATURE FROM SPDB";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read site temperature from SPDB.";
+  p_help = "The temperature closest to the radar volume time will be read in.";
+} read_site_temp_from_spdb;
+
+paramdef string {
+  p_default = "spdbp:://hail:0:pecan/spdb/spol/temp";
+  p_descr = "URL for temperatures from SPDB.";
+} site_temp_spdb_url;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Station name for site temperature.";
+} site_temp_station_name;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin when finding site temp data (secs).";
+  p_help = "We search for the temperature closest in time to the radar volume. This is the search margin on either side of the volume time.";
+} site_temp_search_margin_secs;
+
+commentdef {
+  p_header = "WRITE RESULTS OUT TO TEXT FILES";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out ZDR results to text files.";
+  p_help = "The results will be written in space-delimited columns.";
+} write_results_to_text_files;
+
+paramdef string {
+  p_default = "/tmp/PidZdrStats";
+  p_descr = "Output directory path.";
+  p_help = "Text files will be written to this directory. A day directory will be added, so the file path will be output_text_dir/yyyymmdd/filename.txt.";
+} text_output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out one text file per volume.";
+  p_help = "If false, a single text file will be written for all of the data times.";
+} write_one_text_file_per_volume;
+
+commentdef {
+  p_header = "WRITING RESULTS TO SPDB";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out ZDR results to SPDB.";
+  p_help = "The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
+} write_results_to_spdb;
+
+paramdef string {
+  p_default = "/tmp/spdb/zdr_bias";
+  p_descr = "URL for writing zdr bias results to SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} spdb_output_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write the full histogram details to SPDB.";
+  p_help = "If true, the counts, density, pdf and cdf arrays will be included in the SPDB output.";
+} write_histogram_to_spdb;
+

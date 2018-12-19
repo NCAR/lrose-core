@@ -52,7 +52,7 @@
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsReader.hh>
 #include <radar/IwrfCalib.hh>
-#include <radar/FindSurfaceVel.hh>
+#include <radar/HcrSurfaceVel.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxTime.hh>
@@ -151,7 +151,7 @@ private:
 
   // printing surface velocity data
 
-  FindSurfaceVel _surfVel;
+  HcrSurfaceVel _surfVel;
   RadxTime _timeLastVelPrint;
   double _velStatsCount;
   ac_georef_t _velStatsSum;

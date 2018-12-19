@@ -56,14 +56,6 @@ class BeamReader {
   
 public:
 
-  // scan mode for determining PPI vs RHI operations
-  
-  typedef enum {
-    SCAN_TYPE_UNKNOWN,
-    SCAN_TYPE_PPI,
-    SCAN_TYPE_RHI
-  } scan_type_t;
-  
   // constructor
   
   BeamReader(const string &prog_name,
@@ -98,7 +90,7 @@ public:
 
   const IwrfTsInfo &getOpsInfo() const { return _pulseReader->getOpsInfo(); }
   bool isOpsInfoNew() const { return _pulseReader->isOpsInfoNew(); }
-  scan_type_t getScanType() const { return _scanType; }
+  Beam::scan_type_t getScanType() const { return _scanType; }
 
 protected:
   
@@ -171,7 +163,7 @@ private:
 
   // beam properties
 
-  scan_type_t _scanType;
+  Beam::scan_type_t _scanType;
   int _nGates;
   int _nSamples;
 
@@ -284,6 +276,7 @@ private:
 
   void _initPpiMode();
   void _initRhiMode();
+  void _initVertMode();
 
   void _setPrt();
 

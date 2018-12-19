@@ -33,12 +33,22 @@ paramdef string {
 } instance;
 
 commentdef {
-  p_header = "DATA INPUT - from file message queue (FMQ)";
+  p_header = "DATA INPUT MODES";
 };
+
+typedef enum {
+  REALTIME_FMQ, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME_FMQ;
+  p_descr = "Operating mode";
+  p_help = "In FMQ realtime mode, we open the input_fmq, and read the time series data from the queue. In ARCHIVE mode, we specify a start and end time, and read in the files in this time interval from the input_dir. In FILELIST mode, we move through a list of file names specified on the command line. ";
+} mode;
 
 paramdef string {
   p_default = "/tmp/fmq/ts";
-  p_descr = "FMQ name. For FMQ input_mode only.";
+  p_descr = "FMQ name. For REALTIME_FMQ input_mode only.";
   p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
 } fmq_name;
 
@@ -47,6 +57,24 @@ paramdef int {
   p_descr = "Maximum interval with no data (secs).";
   p_help = "After this time elapses with no data, the status data is considered invalid until the data restarts.";
 } data_valid_interval_secs;
+
+paramdef string {
+  p_default = "/tmp/time_series";
+  p_descr = "Input directory for time series files.";
+  p_help = "ARCHIVE mode.";
+} archive_data_dir;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Start time for archive mode.";
+  p_help = "In ARCHIVE mode, data retrieval starts at this time.";
+} archive_start_time;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "End time for archive mode.";
+  p_help = "In ARCHIVE mode, data retrieval ends at this time.";
+} archive_end_time;
 
 commentdef {
   p_header = "XML STATUS INPUT";
@@ -324,6 +352,17 @@ paramdef boolean {
   p_default = true;
   p_descr = "If true, compress the SPDB chunks on write.";
 } compress_spdb;
+
+typedef enum {
+  PUT_OVER, PUT_ADD, PUT_ADD_UNIQUE, PUT_ONCE
+} spdb_put_mode_t;
+
+paramdef enum spdb_put_mode_t {
+  p_default = PUT_OVER;
+  p_descr = "Put mode for SPDB data base.";
+  p_help =
+  "PUT_OVER - new data will overwrite a previously-stored data for the same time. PUT_ADD: a chunk will be added to the list of chunks stored at a given valid_time. PUT_ADD_UNIQUE: a chunk will be added to the list of data stored at a given valid_time, provided identical data has not already been added. PUT_ONCE: you can only put data for a given time once. Trying to put at the same valid_time again will generate an error. ";
+} spdb_put_mode;
 
 commentdef {
   p_header = "STATISTICS OUTPUT TO CATALOG";

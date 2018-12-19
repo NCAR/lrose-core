@@ -1,0 +1,214 @@
+/*********************************************************
+ * parameter definitions for NcarParticleId lib module
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * December 2018
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "The NCAR PID method is based on a fuzzy logic approach.";
+  p_text = "This is documented in the following reference: Cloud Microphysics Retrieval Using S-Band Dual-Polarization Radar Measurements: J. Vivekanandan, D. S. Zrnic, S. M. Ellis, R. Oye, A. V. Ryzhkov, and J. Straka. Bulletin of the American Meteorological Society, 1999";
+}
+
+paramdef string {
+  p_descr = "File path for fuzzy logic thresholds for PID.";
+  p_help = "This file contains the thresholds and weights for computing particle ID.";
+  p_default = "./pid_thresholds.nexrad";
+} PID_thresholds_file_path;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Minimum SNR for valid PID.";
+  p_help = "If the SNR at a gate is below this, the PID is censored.";
+} PID_snr_threshold;
+
+paramdef double {
+  p_default = 9999.0;
+  p_descr = "Maximum SNR for valid PID.";
+  p_help = "If the SNR at a gate is above this value, the PID will be set to SATURATED_SNR = 18.";
+} PID_snr_upper_threshold;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minimum valid interest value for identifying a particle.";
+  p_help = "If the computed interest value is below this, the PID is set to missing.";
+} PID_min_valid_interest;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter DBZ with median filter.";
+  p_help = "The filter is computed in range.";
+} PID_apply_median_filter_to_DBZ;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for DBZ - gates.";
+  p_help = "See 'PID_apply_median_filter_to_DBZ'";
+} PID_DBZ_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter ZDR with median filter.";
+  p_help = "The filter is computed in range.";
+} PID_apply_median_filter_to_ZDR;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for ZDR - gates.";
+  p_help = "See 'PID_apply_median_filter_to_ZDR'";
+} PID_ZDR_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter RHOHV with median filter.";
+  p_help = "The filter is computed in range.";
+} PID_apply_median_filter_to_RHOHV;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for RHOHV - gates.";
+  p_help = "See 'PID_apply_median_filter_to_RHOHV'";
+} PID_RHOHV_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter LDR with median filter.";
+  p_help = "The filter is computed in range.";
+} PID_apply_median_filter_to_LDR;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for LDR - gates.";
+  p_help = "See 'PID_apply_median_filter_to_LDR'";
+} PID_LDR_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "For PID, option to replace missing LDR values with a specified value.";
+  p_help = "When the SNR gets low, LDR is unreliable since there is not sufficient dynamic range to provide an accurate cross-polar power measurement. In these cases, it makes sense to replace LDR with a neutral value, such as 0.0, so that we do not reject gates at which valuable data is available.";
+} PID_replace_missing_LDR;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Value to which LDR will be set if missing.";
+} PID_LDR_replacement_value;
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Number of gates for computing standard deviations.";
+  p_help = "This applies to computing the standard deviation of zdr and phidp.";
+} PID_ngates_for_sdev;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to output the individual interest fields.";
+  p_help = "If TRUE, the interest field for each particle type will be written to the output FMQ, in addition to the list in 'output_fields'.";
+} PID_output_particle_interest_fields;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to locate the melting layer.";
+  p_help = "If true, the melting layer will be located using the WET_SNOW category. In addition, the ML_INTEREST field will be computed. Otherwise it will be missing. Follows Giangrande et al. - Automatic Designation of the Melting Layer with Polarimitric Prototype of WSR-88D Radar - AMS JAMC, Vol47, 2008.";
+} PID_locate_melting_layer;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Percentile value for estimating the bottom of the melting layer.";
+  p_help = "To locate the melting layer limits, we rank the heights of all gates containing WET_SNOW, from bottom to top. This is the percentile value for the bottom of the layer.";
+} PID_melting_layer_percentile_for_bottom_limit;
+
+paramdef double {
+  p_default = 75.0;
+  p_descr = "Percentile value for estimating the top of the melting layer.";
+  p_help = "To locate the melting layer limits, we rank the heights of all gates containing WET_SNOW, from bottom to top. This is the percentile value for the top of the layer.";
+} PID_melting_layer_percentile_for_top_limit;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to save melting layer properties to spdb.";
+  p_help = "If true, the melting layer properties will be saved to SPDB using XML encoding. See 'melting_layer_spdb_output_url'";
+} PID_melting_layer_write_results_to_spdb;
+
+paramdef string {
+  p_default = "/tmp/spdb/melting_layer";
+  p_descr = "URL for writing melting layer results to SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} PID_melting_layer_spdb_output_url;
+
+commentdef {
+  p_header = "SOUNDINGS FOR PID TEMPERATURES";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to read sounding data from SPDB.";
+  p_help = "If TRUE, the program will read the closest (in time) available sounding from an SPDB data base. The temperature profile from the sounding will be used to override the temperature profile in the PID thresholds config file";
+} PID_use_soundings_from_spdb;
+
+paramdef string {
+  p_descr = "SPDB URL for sounding data.";
+  p_default = "spdb/soundings";
+} PID_sounding_spdb_url;
+
+paramdef int {
+  p_default = 86400;
+  p_descr = "Time margin for retrieving sounding, in secs.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
+} PID_sounding_search_time_margin_secs;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of sounding location.";
+  p_help = "If set, we request a profile just for that sounding. If empty, all soundings in the data base are considered valid.";
+} PID_sounding_location_name;
+
+typedef struct {
+  double min_val;
+  double max_val;
+} data_range_t;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check that pressure covers the required range.";
+  p_help = "If TRUE, we will check that pressure range in the sounding meets or exceeds the min and max specified."; 
+} PID_sounding_check_pressure_range;
+
+paramdef struct data_range_t {
+  p_default = { min_val = 300, max_val = 950 };
+  p_descr = "Required pressure range for sounding to be valid (hPa)";
+  p_help = "This is used to provide a quality check on the sounding. If the pressure data does not fully cover this range, the sounding is rejected and we look back for the next available one.";
+} PID_sounding_required_pressure_range_hpa;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check that height covers the required range.";
+  p_help = "If TRUE, we will check that height range in the sounding meets or exceeds the min and max specified."; 
+} PID_sounding_check_height_range;
+
+paramdef struct data_range_t {
+  p_default = { min_val = 500, max_val = 15000 };
+  p_descr = "Required height range for sounding to be valid (m)";
+  p_help = "This is used to provide a quality check on the sounding. If the height data does not fully cover this range, the sounding is rejected and we look back for the next available one.";
+} PID_sounding_required_height_range_m;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check that pressure decreases monotonically.";
+  p_help = "If TRUE, we will check that pressure decreases monotonically. If not, the sounding is rejected and we look back for the next available one."; 
+} PID_sounding_check_pressure_monotonically_decreasing;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction to the heights read in with the sounding (km).";
+  p_help = "This correction is ADDED to the heights read in. So if the freezing level seems low, the correction should be positive. If the freezing level appears high, it should be negative.";
+} PID_sounding_height_correction_km;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use wet bulb temperature profile.";
+  p_help = "If TRUE, we use the wet bulb temperature profile from the sounding instead of the dry bulb. This is thought to more closely track the temperature of melting ice.";
+} PID_sounding_use_wet_bulb_temp;
+

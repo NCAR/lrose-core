@@ -1,0 +1,173 @@
+/*********************************************************
+ * parameter definitions for MSG32Mdv
+ *
+ * Sue Dettling, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 2007
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Param file for MSG32Mdv";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This program registers with procmap. This is the instance used for registration.";
+} instance;
+
+typedef enum {
+  REALTIME, FILELIST, TIME_INTERVAL
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+} mode;
+
+commentdef {
+  p_header = "INPUT DATA";
+};
+
+paramdef string {
+  p_descr = "Geolocation latitude information";
+  p_default = "lat";
+} lat_fieldname;
+
+paramdef string {
+  p_descr = "Geolocation longitude information";
+  p_default = "lon";
+} lon_fieldname;
+
+typedef struct
+{
+  string ncfFieldName;
+  string mdvFieldName;
+  string units;
+  boolean applyWarmChannelAnalyticTempConversion;
+  float nu;
+  float alpha;
+  float beta;
+} field_t;
+
+paramdef struct field_t {
+  p_descr = "Satellite data fieldname";
+  p_help = "See http://www.eumetsat.int/website/home/Data/Products/Calibration/MSGCalibration/index.html for The Conversion from Effective Radiances to Equivalent Brightness Temperatures pdf and Conversion from radiances to reflectances for SEVIRI warm channels (PDF). For warm channel conversion, the struct member nu will hold Band Solar Irradiance Constant at 1 AU (expressed in mW*m^-2*(cm^-1)^-1). Otherwise, nu, alpha, and beta are as in the paper: The Conversion from Effective Radiances to Equivalent Brightness Temperatures."
+  " " ;
+  p_default = { 
+                {"ch1","vis.6Micron","mW m-2 sr-1(cm-1)-1", true,  65.5148,1,1},
+		{"ch2","vis.8Micron","mW m-2 sr-1(cm-1)-1", true,  73.1807,1,1},
+                {"ch3","1.6Micron",  "mW m-2 sr-1(cm-1)-1", true,  62.0208,1,1},
+		{"ch4","3.9Micron",  "mW m-2 sr-1(cm-1)-1", false, 2555.280, 0.9916, 2.9438}, 
+		{"ch5","6.2Micron",  "mW m-2 sr-1(cm-1)-1", false, 1596.080, 0.9959, 2.0780},
+		{"ch6","7.3Micron",  "mW m-2 sr-1(cm-1)-1", false, 1361.748, 0.9990, 0.4929},
+		{"ch7","8.7Micron",  "mW m-2 sr-1(cm-1)-1", false, 1147.433, 0.9996, 0.1731},
+		{"ch8","9.7Micron",  "mW m-2 sr-1(cm-1)-1", false, 1034.851, 0.9998, 0.0597},
+		{"ch9","10.8Micron", "mW m-2 sr-1(cm-1)-1", false, 931.122, 0.9983, 0.6256},
+		{"ch10","12Micron",  "mW m-2 sr-1(cm-1)-1", false, 839.113, 0.9988, 0.4002},
+		{"ch11","13.4Micron","mW m-2 sr-1(cm-1)-1", false, 748.585, 0.9981, 0.5635}};
+} fields[];
+
+paramdef string {
+  p_descr = "Name of x dimension of data fields";
+  p_help = "All fields have same x dimension";
+  p_default = "num_rows_vis_ir";
+}xdim;
+
+paramdef string {
+ p_descr = "Name of y dimension of data fields";
+  p_help = "All fields have same x dimension";
+  p_default = "num_columns_vis_ir";
+}ydim;
+
+
+paramdef string {
+  p_descr = "Input directory";
+  p_default = "/d1/satellite";
+} input_dir;
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Maximum age of file in minutes";
+  p_help =  "Used in REALTIME mode only.";
+} max_valid_realtime_age_min;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Latest data info file available";
+} ldata_info_avail;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Set wait for file to be written to disk before being served";
+  p_help =  "Used in REALTIME mode only.";
+} file_quiescence_sec;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Set wait for file between checks for new data";
+  p_help =  "Used in REALTIME mode only.";
+} check_input_sec;
+
+paramdef string {
+  p_default = "";
+  p_descr = "yyyymmddhhMMss";
+  p_help = "Set for TIME_INTERVAL mode only.";
+} start_time;
+
+paramdef string {
+  p_default = "";
+  p_descr = "yyyymmddhhMMss";
+  p_help = "Set for TIME_INTERVAL mode only.";
+} end_time;
+
+typedef enum
+{
+  PROJ_FLAT,
+  PROJ_LATLON,
+  PROJ_LC2
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  double minx;
+  double miny;
+  int nx;
+  int ny;
+  double dx;
+  double dy;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+  double lat1;
+  double lat2;
+} proj_t;
+
+paramdef struct proj_t
+{
+  p_descr = "Output projection";
+  p_default = {PROJ_LATLON, minx = -80, miny = -80, nx = 1280, ny = 1280,dx = 0.125,dy = .125,0,0,0,0,0};
+} output_proj;
+
+commentdef {
+  p_header = "OUTPUT DATA";
+};
+
+paramdef string {
+  p_default = "mdvp:://localhost::$(PROJECT)/mdv/msg3Sat";
+  p_descr = "URL for the output MDV files.";
+} output_url;
+

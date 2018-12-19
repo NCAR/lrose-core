@@ -463,6 +463,8 @@ public:
 
   int procmap_register_interval;
 
+  tdrp_bool_t use_legacy_processing;
+
   char* input_fmq_url;
 
   tdrp_bool_t seek_to_end_of_input;
@@ -697,6 +699,8 @@ public:
 
   tdrp_bool_t write_individual_ldata_info;
 
+  tdrp_bool_t register_with_data_mapper;
+
   netcdf_style_t netcdf_style;
 
   tdrp_bool_t output_native_byte_order;
@@ -746,7 +750,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[170];
+  mutable TDRPtable _table[172];
 
   const char *_className;
 

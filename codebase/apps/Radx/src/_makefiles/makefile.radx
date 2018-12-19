@@ -13,6 +13,7 @@ SUB_DIRS = \
 	Radx2Dsr \
 	Radx2Grid \
 	RadxBeamBlock \
+	RadxBufr \
 	RadxCheck \
 	RadxClutMon \
 	RadxConvert \
@@ -21,10 +22,14 @@ SUB_DIRS = \
 	RadxDwellCombine \
 	RadxEvad \
 	RadxFilter \
+        RadxKdp \
 	RadxMergeFields \
+	RadxMergeVols \
 	RadxMon \
 	RadxPartRain \
+        RadxPid \
 	RadxPrint \
+        RadxRate \
 	RadxSunMon \
 	RadxQpe
 

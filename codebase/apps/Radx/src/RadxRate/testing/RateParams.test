@@ -1,0 +1,533 @@
+/**********************************************************************
+ * TDRP params for PrecipRateParams
+ **********************************************************************/
+
+//======================================================================
+//
+// The PrecipRate module estimates precip rate from dual polarization 
+//   data.
+//
+// See NCAR_QPE.pdf.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// COMPUTING PRECIP RATE.
+//
+//======================================================================
+ 
+///////////// RATE_snr_threshold //////////////////////
+//
+// Minimum SNR for valid PRECIP.
+//
+// If the SNR at a gate is below this, the PRECIP is censored.
+//
+//
+// Type: double
+//
+
+RATE_snr_threshold = 3;
+
+///////////// RATE_apply_median_filter_to_DBZ /////////
+//
+// Option to filter DBZ with median filter.
+//
+// The filter is computed in rang..
+//
+//
+// Type: boolean
+//
+
+RATE_apply_median_filter_to_DBZ = TRUE;
+
+///////////// RATE_DBZ_median_filter_len //////////////
+//
+// Length of median filter for DBZ - gates.
+//
+// See 'RATE_apply_median_filter_to_DBZ'.
+//
+//
+// Type: int
+//
+
+RATE_DBZ_median_filter_len = 5;
+
+///////////// RATE_apply_median_filter_to_ZDR /////////
+//
+// Option to filter ZDR with median filter.
+//
+// The filter is computed in range.
+//
+//
+// Type: boolean
+//
+
+RATE_apply_median_filter_to_ZDR = TRUE;
+
+///////////// RATE_ZDR_median_filter_len //////////////
+//
+// Length of median filter for ZDR - gates.
+//
+// See 'PID_RATE_apply_median_filter_to_ZDR'.
+//
+//
+// Type: int
+//
+
+RATE_ZDR_median_filter_len = 5;
+
+///////////// RATE_min_valid_rate /////////////////////
+//
+// Minimum valid precip rate (mm/hr).
+//
+// If any computed rate is less than this value, it is set to 0.
+//
+//
+// Type: double
+//
+
+RATE_min_valid_rate = 0.1;
+
+///////////// RATE_max_valid_rate /////////////////////
+//
+// Maximum valid precip rate (mm/hr).
+//
+// If any computed rate exceeds this value, it is set to this max.
+//
+//
+// Type: double
+//
+
+RATE_max_valid_rate = 250;
+
+///////////// RATE_max_valid_dbz //////////////////////
+//
+// Maximum valid dbz for computing precip rate.
+//
+// If any dbz exceeds this value, it is set to this max before use. This 
+//   helps mitigate large DBZ values in hail.
+//
+//
+// Type: double
+//
+
+RATE_max_valid_dbz = 53;
+
+///////////// RATE_brightband_dbz_correction //////////
+//
+// Correction to be applied in brightband before computing precip rate.
+//
+// This should be negative.
+//
+// Maximum val: 0
+//
+// Type: double
+//
+
+RATE_brightband_dbz_correction = -10;
+
+//======================================================================
+//
+// PRECIP COEFFICIENTS.
+//
+// Coefficients for the precip equations.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// RATE_ZH.
+//
+// RATE_ZH = zh_aa * (ZH ** zh_bb).
+//
+//======================================================================
+ 
+///////////// RATE_zh_aa //////////////////////////////
+//
+// Coefficient for RATE_ZH.
+//
+//
+// Type: double
+//
+
+RATE_zh_aa = 0.017;
+
+///////////// RATE_zh_bb //////////////////////////////
+//
+// Exponent for RATE_ZH.
+//
+//
+// Type: double
+//
+
+RATE_zh_bb = 0.714;
+
+//======================================================================
+//
+// RATE_SNOW_ZH.
+//
+// RATE_SNOW_ZH = zh_aa_snow * (ZH ** zh_bb_snow).
+//
+//======================================================================
+ 
+///////////// RATE_zh_aa_snow /////////////////////////
+//
+// Coefficient for RATE_ZH in SNOW.
+//
+//
+// Type: double
+//
+
+RATE_zh_aa_snow = 0.0365;
+
+///////////// RATE_zh_bb_snow /////////////////////////
+//
+// Exponent for RATE_ZH in SNOW.
+//
+//
+// Type: double
+//
+
+RATE_zh_bb_snow = 0.625;
+
+//======================================================================
+//
+// RATE_Z_ZDR.
+//
+// RATE_Z_ZDR = zzdr_aa * (ZH ** zzdr_bb) * (ZDR ** zzdr_cc).
+//
+//======================================================================
+ 
+///////////// RATE_zzdr_aa ////////////////////////////
+//
+// Coefficient for RATE_ZZDR.
+//
+//
+// Type: double
+//
+
+RATE_zzdr_aa = 0.00684;
+
+///////////// RATE_zzdr_bb ////////////////////////////
+//
+// ZH exponent for RATE_ZZDR.
+//
+//
+// Type: double
+//
+
+RATE_zzdr_bb = 1;
+
+///////////// RATE_zzdr_cc ////////////////////////////
+//
+// ZDR exponent for RATE_ZZDR.
+//
+//
+// Type: double
+//
+
+RATE_zzdr_cc = -4.86;
+
+//======================================================================
+//
+// RATE_KDP.
+//
+// RATE_KDP = sign(KDP) * kdp_aa * (|KDP| ** kdp_bb).
+//
+//======================================================================
+ 
+///////////// RATE_kdp_aa /////////////////////////////
+//
+// Coefficient for RATE_KDP.
+//
+//
+// Type: double
+//
+
+RATE_kdp_aa = 40.6;
+
+///////////// RATE_kdp_bb /////////////////////////////
+//
+// Exponent for RATE_KDP.
+//
+//
+// Type: double
+//
+
+RATE_kdp_bb = 0.866;
+
+//======================================================================
+//
+// RATE_KDP_ZDR.
+//
+// RATE_KDP_ZDR = sign(KDP) * kdpzdr_aa * (|KDP| ** kdpzdr_bb) * (ZDR ** 
+//   kdpzdr_cc).
+//
+//======================================================================
+ 
+///////////// RATE_kdpzdr_aa //////////////////////////
+//
+// Coefficient for RATE_KDP_ZDR.
+//
+//
+// Type: double
+//
+
+RATE_kdpzdr_aa = 136;
+
+///////////// RATE_kdpzdr_bb //////////////////////////
+//
+// KDP exponent for RATE_KDP_ZDR.
+//
+//
+// Type: double
+//
+
+RATE_kdpzdr_bb = 0.968;
+
+///////////// RATE_kdpzdr_cc //////////////////////////
+//
+// ZDR exponent for RATE_KDP_ZDR.
+//
+//
+// Type: double
+//
+
+RATE_kdpzdr_cc = -2.86;
+
+//======================================================================
+//
+// PRECIP RATE BASED ON PID.
+//
+// The PID-based rate is a wieghted-average of the rates for the various 
+//   precip types.
+// The weights are derived from the interest values for each PID 
+//   particle type.
+// 	  RATE_LIGHT_RAIN = RATE_ZH
+// 	  RATE_MOD_RAIN = RATE_Z_ZDR
+// 	  RATE_SNOW = RATE_ZH_SNOW
+// 	  RATE_MIXED = RATE_ZH_MIXED
+//
+// 	  if (kdp > threshold && RATE_KDP is valid)
+// 	    RATE_HVY_RAIN = RATE_KDP
+// 	    RATE_HAIL = RATE_KDP
+// 	  else
+// 	    RATE_HVY_RAIN = RATE_ZZDR
+// 	    RATE_HAIL = RATE_ZZDR
+//
+// 	  RATE = 0
+// 	  RATE += RATE_LIGHT_RAIN * WT_LIGHT_RAIN
+// 	  RATE += RATE_MOD_RAIN * WT_MOD_RAIN
+// 	  RATE += RATE_HVY_RAIN * WT_HVY_RAIN
+// 	  RATE += RATE_SNOW * WT_SNOW
+// 	  RATE += RATE_MIXED * WT_MIXED
+// 	  RATE += RATE_HAIL * WT_HAIL.
+//
+//======================================================================
+ 
+///////////// RATE_pid_rate_kdp_threshold /////////////
+//
+// Units are deg/km.
+//
+// See notes above for details on use.
+//
+//
+// Type: double
+//
+
+RATE_pid_rate_kdp_threshold = 0.3;
+
+//======================================================================
+//
+// RATE_HYBRID.
+//
+// The HYBRID rate is based on the PID and the BRINGI algorithm. See 
+//   'Using dual-polarized radar and dual-frequency profiler for DSD 
+//   characterization: a case study from Darwin, Australia', Hybrid et al, 
+//   JTech, Vol 26, 2009, 2107 - 2122.
+//
+// 	  if hail or heavy rain
+// 	    if KDP > threhsold and rateKDP is valid
+// 	      use RATE_KDP
+// 	    else
+// 	      use RATE_KDP
+// 	  else if snow/ice
+// 	    use RATE_ZH_SNOW
+// 	  else if mixed precip
+// 	    use RATE_ZH_MIXED
+// 	  else if rain or SLD
+// 	    if dBZ > theshold and KDP > threhsold
+// 	      if rateKDP is valid
+// 	        use RATE_KDP
+// 	      else
+// 	        use RATE_ZZDR
+// 	    else
+// 	      if ZDR >= threshold
+// 	        use RATE_Z
+// 	      else
+// 	        use RATE_ZZDR.
+//
+//======================================================================
+ 
+///////////// RATE_hybrid_dbz_threshold ///////////////
+//
+// Units are dBZ.
+//
+// See notes above for details on use.
+//
+//
+// Type: double
+//
+
+RATE_hybrid_dbz_threshold = 40;
+
+///////////// RATE_hybrid_kdp_threshold ///////////////
+//
+// Units are deg/km.
+//
+// See notes above for details on use.
+//
+//
+// Type: double
+//
+
+RATE_hybrid_kdp_threshold = 0.3;
+
+///////////// RATE_hybrid_zdr_threshold ///////////////
+//
+// Units are dB.
+//
+// See notes above for details on use.
+//
+//
+// Type: double
+//
+
+RATE_hybrid_zdr_threshold = 0.5;
+
+//======================================================================
+//
+// RATE_HIDRO.
+//
+// The HIDRO rate is based on the CSU-HIDRO algorithm. See 'A New 
+//   Dual-Polarization Radar Rainfall Algorithm: Application to Colorado 
+//   Precipition Events', Cifelli et al, JTech, Vol 28, 2011, 352 - 364. 
+//   NOTE - this algorithm is generally only applied to liquid and 
+//   mixed-phase precip, so you need to run PID for this to work as 
+//   intended.
+// 	  For ice:
+// 	    RATE_HIDRO = MISSING
+// 	  For hail or mixed:
+// 	    if KDP >= threshold and rateKdp is valid
+// 	      RATE_HIDRO = RATE_KDP
+// 	    else
+// 	      RATE_HIDRO = RATE_ZR
+// 	  For rain or sld:
+// 	    if KDP >= threshold and DBZ >= threhold
+// 	      if ZDR >= threshold and rateKdpZdr is valid
+// 	        RATE_HIDRO = RATE_KDPZDR
+// 	      else if rateKdp is valid
+// 	        RATE_HIDRO = RATE_KDP
+// 	      else
+// 	        RATE_HIDRO = RATE_ZZDR
+// 	    else
+// 	      if ZDR >= threshold
+// 	        RATE_HIDRO = RATE_Z
+// 	      else
+// 	        RATE_HIDRO = RATE_ZZDR.
+//
+//======================================================================
+ 
+///////////// RATE_hidro_dbz_threshold ////////////////
+//
+// Units are dBZ.
+//
+// See notes above for details on use.
+//
+//
+// Type: double
+//
+
+RATE_hidro_dbz_threshold = 38;
+
+///////////// RATE_hidro_kdp_threshold ////////////////
+//
+// Units are deg/km.
+//
+// See notes above for details on use.
+//
+//
+// Type: double
+//
+
+RATE_hidro_kdp_threshold = 0.3;
+
+///////////// RATE_hidro_zdr_threshold ////////////////
+//
+// Units are dB.
+//
+// See notes above for details on use.
+//
+//
+// Type: double
+//
+
+RATE_hidro_zdr_threshold = 0.5;
+
+//======================================================================
+//
+// RATE_BRINGI.
+//
+// The BRINGI rate is based on the BRINGI algorithm. See 'Using 
+//   dual-polarized radar and dual-frequency profiler for DSD 
+//   characterization: a case study from Darwin, Australia', Bringi et al, 
+//   JTech, Vol 26, 2009, 2107 - 2122.
+// 	  if HAIL or RAIN/HAIL mixture and rateKdp is valid
+// 	    RATE_BRINGI = RATE_KDP
+// 	  else if dBZ > theshold and KDP > threhsold and rateKdp is valid
+// 	    RATE_BRINGI = RATE_KDP
+// 	  else
+// 	    if ZDR >= threshold
+// 	      RATE_BRINGI = RATE_ZZDR
+// 	    else
+// 	      RATE_BRINGI = RATE_Z.
+//
+//======================================================================
+ 
+///////////// RATE_bringi_dbz_threshold ///////////////
+//
+// Units are dBZ.
+//
+// See notes above for details on use.
+//
+//
+// Type: double
+//
+
+RATE_bringi_dbz_threshold = 40;
+
+///////////// RATE_bringi_kdp_threshold ///////////////
+//
+// Units are deg/km.
+//
+// See notes above for details on use.
+//
+//
+// Type: double
+//
+
+RATE_bringi_kdp_threshold = 0.15;
+
+///////////// RATE_bringi_zdr_threshold ///////////////
+//
+// Units are dB.
+//
+// See notes above for details on use.
+//
+//
+// Type: double
+//
+
+RATE_bringi_zdr_threshold = 0.1;
+

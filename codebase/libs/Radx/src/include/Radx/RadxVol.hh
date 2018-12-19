@@ -44,6 +44,7 @@
 #include <Radx/RadxPlatform.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/RadxTime.hh>
 class RadxSweep;
 class RadxRay;
 class RadxRcalib;
@@ -1144,10 +1145,14 @@ public:
   ///
   /// If the geometry is not constant, remap to the predominant geom.
   ///
+  /// maxFractionMissing indicates the maximum fraction of the input data field
+  /// that can be missing for valid statistics. Should be between 0 and 1.
+  /// 
   /// Returns NULL if no rays are present in the volume.
   /// Otherwise, returns ray containing results.
   
-  RadxRay *computeFieldStats(RadxField::StatsMethod_t method);
+  RadxRay *computeFieldStats(RadxField::StatsMethod_t method,
+                             double maxFractionMissing = 0.25);
 
   //@}
 
@@ -1218,6 +1223,15 @@ public:
   /// Get volume number.
 
   inline int getVolumeNumber() const { return _volNum; }
+
+  /// get start end end time as RadxTime
+
+  inline RadxTime getStartRadxTime() const {
+    return RadxTime(_startTimeSecs, _startNanoSecs / 1.0e9);
+  }
+  inline RadxTime getEndRadxTime() const {
+    return RadxTime(_endTimeSecs, _endNanoSecs / 1.0e9);
+  }
 
   /// Get start time in seconds.
   /// Combine with getNanoSecs() for high-precision time.
@@ -1601,7 +1615,7 @@ public:
   
   void clear();
   
-  /// Remove all ray on object.
+  /// Remove all rays on object.
 
   void clearRays();
 

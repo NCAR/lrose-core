@@ -24,14 +24,13 @@
 ///////////////////////////////////////////////////////////
 // FileInfo - container class for information retrieved
 //            from file name
-//
-// $Id: FileInfo.hh,v 1.5 2016/03/07 01:23:11 dixon Exp $
-//
 //////////////////////////////////////////////////////////
 #ifndef _FILE_INFO_INC_
 #define _FILE_INFO_INC_
 
 #include <string>
+
+using namespace std;
 
 class FileInfo 
 {

@@ -1,6 +1,5 @@
 D/_makefiles////
 /.cvsignore/1.1/Thu Dec 29 22:57:39 2016//
-/Makefile/1.6/Thu Dec 29 22:57:39 2016//
 /Makefile.juneau/1.3/Thu Dec 29 22:57:39 2016//
 /beta.c/1.4/Thu Dec 29 22:57:39 2016//
 /exponential.c/1.7/Thu Dec 29 22:57:39 2016//
@@ -9,3 +8,8 @@ D/_makefiles////
 /weibull.c/1.8/Thu Dec 29 22:57:39 2016//
 /normal.c/1.7/Thu Aug 10 17:22:40 2017//
 /primes.c/1.6/Mon Sep  4 21:09:20 2017//
+/DistLognorm.cc/1.1/Sat Jun 16 17:33:48 2018//
+/DistNormal.cc/1.1/Sat Jun 16 17:33:58 2018//
+/Distribution.cc/1.1/Tue Jun 19 01:26:13 2018//
+/Makefile/1.7/Thu Jun 14 01:16:40 2018//
+/DistPolynomial.cc/1.2/Wed Oct 10 21:50:23 2018//

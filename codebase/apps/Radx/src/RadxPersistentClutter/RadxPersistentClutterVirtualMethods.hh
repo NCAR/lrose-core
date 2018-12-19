@@ -35,7 +35,7 @@
  *
  * These are actions to take only on the first data 
  */
-virtual void initFirstTime(const time_t &t, const RadxVol &vol) = 0;
+virtual void initFirstTime(const RayData *vol) = 0;
 
 /**
  * Completion step (good)
@@ -45,7 +45,7 @@ virtual void initFirstTime(const time_t &t, const RadxVol &vol) = 0;
  *
  * These are actions to take only on the last data, after it is processed
  */
-virtual void finishLastTimeGood(const time_t &t, RadxVol &vol) = 0;
+virtual void finishLastTimeGood(RayData *vol) = 0;
 
 /**
  * Completion step (bad)
@@ -64,7 +64,7 @@ virtual void finishBad(void) = 0;
  *
  * These are the steps taken after each ray has been processed
  */
-virtual bool processFinishVolume(const time_t &t, RadxVol &vol) = 0;
+virtual bool processFinishVolume(RayData *vol) = 0;
 
 /**
  * Pre-process a ray.
@@ -129,7 +129,7 @@ RayClutterInfo * matchingClutterInfoConst(const double az,
  *
  * These are actions to take only on the first data 
  */
-virtual void initFirstTime(const time_t &t, const RadxVol &vol);
+virtual void initFirstTime(const RayData *vol);
 
 /**
  * Completion step (good)
@@ -139,7 +139,7 @@ virtual void initFirstTime(const time_t &t, const RadxVol &vol);
  *
  * These are actions to take only on the last data, after it is processed
  */
-virtual void finishLastTimeGood(const time_t &t, RadxVol &vol);
+virtual void finishLastTimeGood(RayData *vol);
 
 /**
  * Completion step (bad)
@@ -158,7 +158,7 @@ virtual void finishBad(void);
  *
  * These are the steps taken after each ray has been processed
  */
-virtual bool processFinishVolume(const time_t &t, RadxVol &vol);
+virtual bool processFinishVolume(RayData *vol);
 
 /**
  * Pre-process a ray.

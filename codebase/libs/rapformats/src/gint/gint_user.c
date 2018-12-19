@@ -165,14 +165,15 @@ return(0);
 unsigned char *GINT_get_plane(int field, int cappi_ind, FILE *file, Tvolume_header *hd)
 {
     unsigned char *buf,*ipt;
-    int offset,len,ind;
+    int offset,len,ind,nxy;
 
     /* check */
     if(field<0 || field>=hd->vh->n_fields ||
            cappi_ind<0 || cappi_ind>=hd->vh->nz || file == NULL) return (NULL);
 
     /* allocate the space */
-    if((buf=(unsigned char *)calloc(1,hd->vh->nx*hd->vh->ny))==NULL){
+    nxy = hd->vh->nx * hd->vh->ny;
+    if((buf=(unsigned char *)calloc(1,nxy))==NULL){
         printf("Failed in allocating cappi space.\n");
         return (NULL);
     }
@@ -198,13 +199,23 @@ unsigned char *GINT_get_plane(int field, int cappi_ind, FILE *file, Tvolume_head
         case NOT_ENCODED:
         break;
 
-        case RL7_ENCODED:
-            ind = GINT_run_length_decode(len,ipt,buf);
+      case RL7_ENCODED: {
+        ind = GINT_run_length_decode(len,ipt,buf);
+        if (ind > nxy) {
+          free(buf);
+          return NULL;
+        }
         break;
+      }
 
-        case RL8_ENCODED:
-            ind = GINT_run_length_decode_byte(len,ipt,buf);
+      case RL8_ENCODED: {
+        ind = GINT_run_length_decode_byte(len,ipt,buf);
+        if (ind > nxy) {
+          free(buf);
+          return NULL;
+        }
         break;
+      }
     } 
     return (buf);
 }

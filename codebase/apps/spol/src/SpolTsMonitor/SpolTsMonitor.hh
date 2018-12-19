@@ -100,6 +100,7 @@ private:
   
   // test pulse
 
+  iwrf_xmit_rcv_mode _xmitRcvMode;
   int _nSamplesTestPulse;
   time_t _testPulseLatestTime;
   string _testPulseXml;
@@ -182,6 +183,10 @@ private:
   int _handleBooleanNagios(const string &xml,
                            const Params::xml_entry_t &entry,
                            FILE *nagiosFile);
+
+  int _handleBooleanToIntNagios(const string &xml,
+                                const Params::xml_entry_t &entry,
+                                FILE *nagiosFile);
 
   int _handleIntNagios(const string &xml,
                        const Params::xml_entry_t &entry,

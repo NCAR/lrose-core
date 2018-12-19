@@ -636,10 +636,10 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("\nREALTIME: wait for a new input file.  \n\nARCHIVE: move through the data between the start and end times set on the command line. \n\nFILELIST: move through the list of file names specified on the command line. \nPaths (in ARCHIVE mode, at least) MUST contain a day-directory above the data file -- ./data_file.ext will not work as a file path, but ./yyyymmdd/data_file.ext will.\n\nFMQ: read data from one moments FMQ, combine the dwells and write to an output queue.");
+    tt->help = tdrpStrDup("\nREALTIME: wait for a new input file. Expects latest_data_info to be available. \n\nARCHIVE: move through the data between the start and end times set on the command line. \n\nFILELIST: move through the list of file names specified on the command line. \nPaths (in ARCHIVE mode, at least) MUST contain a day-directory above the data file -- ./data_file.ext will not work as a file path, but ./yyyymmdd/data_file.ext will.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
-    tt->enum_def.nfields = 4;
+    tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("REALTIME");
@@ -648,8 +648,6 @@
       tt->enum_def.fields[1].val = ARCHIVE;
       tt->enum_def.fields[2].name = tdrpStrDup("FILELIST");
       tt->enum_def.fields[2].val = FILELIST;
-      tt->enum_def.fields[3].name = tdrpStrDup("FMQ");
-      tt->enum_def.fields[3].val = FMQ;
     tt->single_val.e = REALTIME;
     tt++;
     
@@ -677,66 +675,18 @@
     tt->single_val.i = 300;
     tt++;
     
-    // Parameter 'latest_data_info_avail'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("latest_data_info_avail");
-    tt->descr = tdrpStrDup("Is _latest_data_info file available?");
-    tt->help = tdrpStrDup("If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.");
-    tt->val_offset = (char *) &latest_data_info_avail - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'search_recursively'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("search_recursively");
-    tt->descr = tdrpStrDup("Option to recurse to subdirectories while looking for new files.");
-    tt->help = tdrpStrDup("If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE.");
-    tt->val_offset = (char *) &search_recursively - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'max_recursion_depth'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_recursion_depth");
-    tt->descr = tdrpStrDup("Maximum depth for recursive directory scan.");
-    tt->help = tdrpStrDup("Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.");
-    tt->val_offset = (char *) &max_recursion_depth - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
     // Parameter 'wait_between_checks'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("wait_between_checks");
-    tt->descr = tdrpStrDup("Sleep time between checking directory for input - secs.");
-    tt->help = tdrpStrDup("If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.");
+    tt->descr = tdrpStrDup("Sleep time between checking for input data (secs).");
+    tt->help = tdrpStrDup("REALTIME mode only");
     tt->val_offset = (char *) &wait_between_checks - &_start_;
     tt->has_min = TRUE;
     tt->min_val.i = 1;
     tt->single_val.i = 2;
-    tt++;
-    
-    // Parameter 'file_quiescence'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("file_quiescence");
-    tt->descr = tdrpStrDup("File quiescence when checking for files - secs.");
-    tt->help = tdrpStrDup("This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.");
-    tt->val_offset = (char *) &file_quiescence - &_start_;
-    tt->single_val.i = 5;
     tt++;
     
     // Parameter 'search_ext'
@@ -749,30 +699,6 @@
     tt->help = tdrpStrDup("If set, only files with this extension will be processed.");
     tt->val_offset = (char *) &search_ext - &_start_;
     tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'input_fmq_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_fmq_url");
-    tt->descr = tdrpStrDup("FMQ from which to read the moments stream.");
-    tt->help = tdrpStrDup("FMQ mode only.");
-    tt->val_offset = (char *) &input_fmq_url - &_start_;
-    tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/input");
-    tt++;
-    
-    // Parameter 'seek_to_end_of_input_fmq'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("seek_to_end_of_input_fmq");
-    tt->descr = tdrpStrDup("Option to seek to the end of the input FMQ.");
-    tt->help = tdrpStrDup("If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.");
-    tt->val_offset = (char *) &seek_to_end_of_input_fmq - &_start_;
-    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'Comment 3'
@@ -806,6 +732,18 @@
     tt->help = tdrpStrDup("We will search for the surface echo in the gates beyound this range.");
     tt->val_offset = (char *) &min_range_to_surface_km - &_start_;
     tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'max_surface_height_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_surface_height_km");
+    tt->descr = tdrpStrDup("Max expected height of the terrain (km).");
+    tt->help = tdrpStrDup("We ignore gates above this maximum, since they cannot be at the surface.");
+    tt->val_offset = (char *) &max_surface_height_km - &_start_;
+    tt->single_val.d = 9;
     tt++;
     
     // Parameter 'min_dbz_for_surface_echo'
@@ -851,9 +789,45 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("corrected_vel_field_name");
     tt->descr = tdrpStrDup("Name of field for corrected velocity.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("This is the main output field from this app. It will be added to the input data as an extra field.");
     tt->val_offset = (char *) &corrected_vel_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("VEL_CORR");
+    tt++;
+    
+    // Parameter 'add_delta_vel_field'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_delta_vel_field");
+    tt->descr = tdrpStrDup("Option to add in the delta velocity as a separate field.");
+    tt->help = tdrpStrDup("This allows the users to see how the velocity was corrected, or if no correction was applied.");
+    tt->val_offset = (char *) &add_delta_vel_field - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'delta_vel_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("delta_vel_field_name");
+    tt->descr = tdrpStrDup("Name of field for delta between uncorrected and corrected velocity.");
+    tt->help = tdrpStrDup("This documents how the velocity was corrected.");
+    tt->val_offset = (char *) &delta_vel_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_DELTA");
+    tt++;
+    
+    // Parameter 'max_nadir_error_for_surface_vel'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_nadir_error_for_surface_vel");
+    tt->descr = tdrpStrDup("Maximum error from nadir pointing for computing surface velocity (deg).");
+    tt->help = tdrpStrDup("We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).");
+    tt->val_offset = (char *) &max_nadir_error_for_surface_vel - &_start_;
+    tt->single_val.d = 5;
     tt++;
     
     // Parameter 'Comment 4'
@@ -861,6 +835,63 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("COMPUTING THE CORRECTED SPECTRUM WIDTH");
+    tt->comment_text = tdrpStrDup("Spectrum width may be corrected for spectral broadening, cause by the aircraft motion and the beam width.");
+    tt++;
+    
+    // Parameter 'add_corrected_spectrum_width_field'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_corrected_spectrum_width_field");
+    tt->descr = tdrpStrDup("Option to compute the corrected spectrum width, and add the corrected field to the output volume.");
+    tt->help = tdrpStrDup("Spectrum width may be corrected for spectral broadening, cause by the aircraft motion and the beam width.");
+    tt->val_offset = (char *) &add_corrected_spectrum_width_field - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'width_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("width_field_name");
+    tt->descr = tdrpStrDup("Name of uncorrected spectrum width field.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &width_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("WIDTH");
+    tt++;
+    
+    // Parameter 'corrected_width_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("corrected_width_field_name");
+    tt->descr = tdrpStrDup("Name of corrected spectrum width field.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &corrected_width_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("WIDTH_CORR");
+    tt++;
+    
+    // Parameter 'width_correction_beamwidth_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("width_correction_beamwidth_deg");
+    tt->descr = tdrpStrDup("Maximum error from nadir pointing for computing surface velocity (deg).");
+    tt->help = tdrpStrDup("We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).");
+    tt->val_offset = (char *) &width_correction_beamwidth_deg - &_start_;
+    tt->single_val.d = 0.69;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OUTPUT FIELD DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -889,11 +920,11 @@
     tt->single_val.e = OUTPUT_ENCODING_FLOAT32;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -934,11 +965,11 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1051,93 +1082,119 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OUTPUT IN FMQ MODE");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_fmq_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_url");
-    tt->descr = tdrpStrDup("FMQ to which the combined dwells are written.");
-    tt->help = tdrpStrDup("FMQ mode only.");
-    tt->val_offset = (char *) &output_fmq_url - &_start_;
-    tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/output");
-    tt++;
-    
-    // Parameter 'output_fmq_compress'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_compress");
-    tt->descr = tdrpStrDup("Option to compress the output fmq.");
-    tt->help = tdrpStrDup("The default is for no compression.");
-    tt->val_offset = (char *) &output_fmq_compress - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_fmq_n_slots'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_n_slots");
-    tt->descr = tdrpStrDup("Number of slots in output FMQ.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_fmq_n_slots - &_start_;
-    tt->single_val.i = 5000;
-    tt++;
-    
-    // Parameter 'output_fmq_buf_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_buf_size");
-    tt->descr = tdrpStrDup("Size of buffer in output FMQ.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_fmq_buf_size - &_start_;
-    tt->single_val.i = 100000000;
-    tt++;
-    
-    // Parameter 'output_fmq_write_blocking'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_write_blocking");
-    tt->descr = tdrpStrDup("Option to block on write when the radar queue fills up.");
-    tt->help = tdrpStrDup("If false, the program writes data to the output queue without regard to whether the reader is keeping up. This mode should usually be used in realtime, to avoid holding things up if a client becomes slow. If true, the program will not overwrite data in the queue which has not been read by the reader. This is recommended for ARCHIVE and FILELIST mode. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.");
-    tt->val_offset = (char *) &output_fmq_write_blocking - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_fmq_data_mapper_report_interval'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_data_mapper_report_interval");
-    tt->descr = tdrpStrDup("Number of seconds between reports to DataMapper.");
-    tt->help = tdrpStrDup("If > 0, the program will register with the DataMapper when the output FMQs are written to. If <= 0, registration will not be performed.");
-    tt->val_offset = (char *) &output_fmq_data_mapper_report_interval - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
     // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("FIR FILTERING FOR VELOCITY ESTIMATES");
+    tt->comment_hdr = tdrpStrDup("WRITING SURFACE VEL RESULTS TO SPDB IN XML");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'write_surface_vel_results_to_spdb'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_surface_vel_results_to_spdb");
+    tt->descr = tdrpStrDup("Option to write out surface velocity results to SPDB.");
+    tt->help = tdrpStrDup("The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.");
+    tt->val_offset = (char *) &write_surface_vel_results_to_spdb - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'surface_vel_results_spdb_output_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("surface_vel_results_spdb_output_url");
+    tt->descr = tdrpStrDup("URL for writing surface vel results to SPDB XML.");
+    tt->help = tdrpStrDup("For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir");
+    tt->val_offset = (char *) &surface_vel_results_spdb_output_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/spdb/hcr_surface_vel");
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("FILTERING");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'filter_type'
+    // ctype is '_filter_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("filter_type");
+    tt->descr = tdrpStrDup("Filtering option");
+    tt->help = tdrpStrDup("The FIR filter approach was developed for the data from NOREASTER and CSET. For SOCRATES is was found that this filter does not work with the large waves in the southern ocean. The WAVE_FILTER approach was developed for SOCRATES.");
+    tt->val_offset = (char *) &filter_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("filter_type_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("WAVE_FILTER");
+      tt->enum_def.fields[0].val = WAVE_FILTER;
+      tt->enum_def.fields[1].name = tdrpStrDup("FIR_FILTER");
+      tt->enum_def.fields[1].val = FIR_FILTER;
+    tt->single_val.e = FIR_FILTER;
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("WAVE FILTERING");
+    tt->comment_text = tdrpStrDup("We want to fiter out the effects of the ocean surface waves, but preserve the variability induced by the aircraft motion and antenna control. We first run a simple median noise filter, and the run a polynomial filter on the results of the noise filter.");
+    tt++;
+    
+    // Parameter 'noise_filter_length_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("noise_filter_length_secs");
+    tt->descr = tdrpStrDup("Length of the noise filter (secs).");
+    tt->help = tdrpStrDup("The noise filter is a running median to smooth out the measurement noise in the velocity measurements. The noise filter precedes the wave filter - i.e. is computed ahead of the wave filter.");
+    tt->val_offset = (char *) &noise_filter_length_secs - &_start_;
+    tt->single_val.d = 3;
+    tt++;
+    
+    // Parameter 'wave_filter_length_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("wave_filter_length_secs");
+    tt->descr = tdrpStrDup("Length of the wave filter (secs).");
+    tt->help = tdrpStrDup("The same length is used for mean, median and polynomial filtering. All are computed but only the selected method is applied for the velocity correction. We compute the filtered values at the center of the filtered length.");
+    tt->val_offset = (char *) &wave_filter_length_secs - &_start_;
+    tt->single_val.d = 30;
+    tt++;
+    
+    // Parameter 'wave_filter_polynomial_order'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("wave_filter_polynomial_order");
+    tt->descr = tdrpStrDup("Order of the polynomial fit for the wave filter.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wave_filter_polynomial_order - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'Comment 11'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 11");
+    tt->comment_hdr = tdrpStrDup("FIR FILTERING");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1148,7 +1205,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("spike_filter_difference_threshold");
     tt->descr = tdrpStrDup("Threshold for removing spikes in the original data and resetting the value to that form the short filter.");
-    tt->help = tdrpStrDup("We apply both the stage-1 and spike filters to the time series of surface velocity. If the absolute difference between the two exceeds this threshold, then the conditioned data is set to the output from the stage-1 filter. If the absolute difference is below this threshold then the original data point is retained. After this step the final filter it applied to the conditioned data to compute the final filtered value.");
+    tt->help = tdrpStrDup("We apply both the stage-1 and spike filters to the time series of surface velocity. If the absolute difference between the two exceeds this threshold, then the conditioned data is set to the output from the stage-1 filter. If the absolute difference is below this threshold then the original data point is retained. After this step the final filter is applied to the conditioned data to compute the final filtered value.");
     tt->val_offset = (char *) &spike_filter_difference_threshold - &_start_;
     tt->single_val.d = 0.11;
     tt++;

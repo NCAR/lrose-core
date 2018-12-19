@@ -47,6 +47,8 @@
 #include <toolsa/TaXml.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
+#include <toolsa/file_io.h>
+#include <sys/stat.h>
 using namespace std;
 
 // Constructor
@@ -296,6 +298,10 @@ int RadxBufr::_runArchive()
   if (_params.aggregate_sweep_files_on_read) {
     tlist.setReadAggregateSweeps(true);
   }
+  if (strlen(_params.search_ext) > 0) {
+    tlist.setFileExt(_params.search_ext);
+  }
+
   if (tlist.compile()) {
     cerr << "ERROR - RadxBufr::_runFilelist()" << endl;
     cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
@@ -310,6 +316,13 @@ int RadxBufr::_runArchive()
     cerr << "ERROR - RadxBufr::_runFilelist()" << endl;
     cerr << "  No files found, dir: " << _params.input_dir << endl;
     return -1;
+  }
+
+  if (_params.debug) {
+    cerr << "Archive file list to be processed:" << endl;
+    for (size_t ii = 0; ii < paths.size(); ii++) {
+      cerr << "  " << paths[ii] << endl;
+    }
   }
   
   // loop through the input file list
@@ -467,11 +480,11 @@ int RadxBufr::_runRealtimeNoLdata()
 //         -1 on failure
 
 int RadxBufr::_readFile(const string &readPath,
-                           RadxVol &vol)
+                        RadxVol &vol)
 {
-
+  
   PMU_auto_register("Processing file");
-
+  
   // clear all data on volume object
 
   vol.clear();
@@ -483,7 +496,7 @@ int RadxBufr::_readFile(const string &readPath,
   for (size_t ii = 0; ii < _readPaths.size(); ii++) {
     RadxPath listPath(_readPaths[ii]);
     if (thisPath.getFile() == listPath.getFile()) {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
+      if (_params.debug) {
         cerr << "Skipping file: " << readPath << endl;
         cerr << "  Previously processed in aggregation step" << endl;
       }
@@ -496,22 +509,40 @@ int RadxBufr::_readFile(const string &readPath,
     cerr << "  Input path: " << readPath << endl;
   }
   
-  // if we are reading gematronik files in realtime mode, we need to wait
+  // if we are reading incremental files in realtime mode, we need to wait
   // for all fields to be written before proceeding
-  /*
-  if (_params.mode == Params::REALTIME && _params.gematronik_realtime_mode) {
-    if (_params.debug) {
-      cerr << "Waiting for all Gematronik fields, sleeping for secs: "
-           << _params.gematronik_realtime_wait_secs << endl;
+  if (_params.mode == Params::REALTIME && _params.incremental_realtime_mode) {
+
+    // get the modify time on the file
+
+    struct stat fstat;
+    if (ta_stat(readPath.c_str(), &fstat)) {
+      int errnum = errno;
+      cerr << "ERROR - RadxBufr::_readFile" << endl;
+      cerr << "  Cannot stat file: " << readPath << endl;
+      cerr << "  " << strerror(errnum) << endl;
+      return -1;
     }
-    for (int ii = 0; ii < _params.gematronik_realtime_wait_secs; ii++) {
-      PMU_auto_register("Waiting for Gematronik files");
-      umsleep(1000);
+    
+    time_t now = time(NULL);
+    double ageSecs = (double) now - (double) fstat.st_mtime;
+    double waitSecs = _params.incremental_realtime_wait_secs - ageSecs;
+    int nsecsWait = (int) (waitSecs + 0.5);
+    if (nsecsWait > 0) {
+      if (_params.debug) {
+        cerr << "Waiting for incremental fields, sleeping for secs: "
+             << nsecsWait << endl;
+      }
+      for (int ii = 0; ii < nsecsWait; ii++) {
+        PMU_auto_register("Waiting for Incremental files");
+        umsleep(1000);
+      }
     }
-    PMU_force_register("Got Gematronik files");
+
+    PMU_force_register("Got Incremental files");
+
   }
-  */
-  //GenericRadxFile inFile;
+
   BufrRadxFile inFile;
   _setupRead(inFile);
   if (strlen(_params.tables) > 0) {
@@ -528,9 +559,10 @@ int RadxBufr::_readFile(const string &readPath,
   }
   inFile.print(cout);
   _readPaths = inFile.getReadPaths();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+
+  if (_params.debug) {
     for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-      cerr << "  ==>> read in file: " << _readPaths[ii] << endl;
+      cerr << "  ==>> processed input file: " << _readPaths[ii] << endl;
     }
   }
 
@@ -546,6 +578,12 @@ int RadxBufr::_readFile(const string &readPath,
 void RadxBufr::_finalizeVol(RadxVol &vol)
   
 {
+
+  // compute zdr if requested
+
+  if (_params.zdr_compute_from_input_fields) {
+    _computeZdrFromInputFields(vol);
+  }
 
   // remove unwanted fields
   
@@ -1249,6 +1287,37 @@ int RadxBufr::_writeVol(RadxVol &vol)
       default:
         outputDir += _params.surveillance_subdir;
     }
+  } else if (_params.separate_output_dirs_by_range_geometry &&
+             vol.getNRays() > 0) {
+    RadxRay *ray0 = vol.getRays()[0];
+    double minGateSpacingKm = ray0->getGateSpacingKm();
+    double maxGateSpacingKm = ray0->getGateSpacingKm();
+    for (size_t ii = 1; ii < vol.getNRays(); ii++) {
+      RadxRay *ray = vol.getRays()[ii];
+      double gateSpacingKm = ray->getGateSpacingKm();
+      if (gateSpacingKm < minGateSpacingKm) {
+        minGateSpacingKm = gateSpacingKm;
+      }
+      if (gateSpacingKm > maxGateSpacingKm) {
+        maxGateSpacingKm = gateSpacingKm;
+      }
+    }
+    for (int jj = 0; jj < _params.dir_from_range_geometry_n; jj++) {
+      const Params::dir_from_range_geometry_t &geom =
+        _params._dir_from_range_geometry[jj];
+      if (minGateSpacingKm >= geom.min_range_gate_spacing_km &&
+          maxGateSpacingKm <= geom.max_range_gate_spacing_km) {
+        outputDir += PATH_DELIM;
+        outputDir += geom.output_subdir;
+        if (_params.debug) {
+          cerr << "DEBUG - changing output_dir based on range geometry" << endl;
+          cerr << "  minGateSpacingKm: " << minGateSpacingKm << endl;
+          cerr << "  maxGateSpacingKm: " << maxGateSpacingKm << endl;
+          cerr << "  sub_dir: " << geom.output_subdir << endl;
+          cerr << "  outputDir: " << outputDir << endl;
+        }
+      }
+    } // jj
   }
     
   if (_params.output_filename_mode == Params::SPECIFY_FILE_NAME) {
@@ -1479,3 +1548,98 @@ void RadxBufr::_censorRay(RadxRay *ray)
 }
 
 
+//////////////////////////////////////////////////
+// Compute ZDR from input fields
+
+void RadxBufr::_computeZdrFromInputFields(RadxVol &vol)
+{
+  // do this one ray at a time
+  for (size_t ii = 1; ii < vol.getNRays(); ii++) {
+    RadxRay *ray = vol.getRays()[ii];
+    if (_computeZdr(ray)) {
+      return;
+    }
+  }
+} 
+
+int RadxBufr::_computeZdr(RadxRay *ray)
+{
+  // get the input fields
+
+  RadxField *fld1 = ray->getField(_params.zdr_compute_input_field_1);
+  RadxField *fld2 = ray->getField(_params.zdr_compute_input_field_2);
+  if (fld1 == NULL || fld2 == NULL) {
+    if (_params.debug) {
+      if (fld1 == NULL) {
+        cerr << "WARNING - _computeZDR - cannot find field 1: "
+             << _params.zdr_compute_input_field_1 << endl;
+      }
+      if (fld2 == NULL) {
+        cerr << "WARNING - _computeZDR - cannot find field 2: "
+             << _params.zdr_compute_input_field_2 << endl;
+      }
+    }
+    return -1;
+  }
+
+  // remap the range geometry to the finest resolution
+
+  ray->remapRangeGeomToFinest();
+  
+  // create ZDR field
+
+  RadxField *zdr =
+    new RadxField(_params.zdr_compute_output_field_name, "dB");
+  zdr->copyMetaData(*fld1);
+  zdr->setName(_params.zdr_compute_output_field_name);
+  zdr->setUnits("dB");
+  zdr->setStandardName("radar_differential_reflectivity_hv");
+  zdr->setLongName("differential_reflectivity");
+  Radx::fl32 fmiss = -9999.0;
+  zdr->setMissingFl32(fmiss);
+
+  // create data array, fill with missing
+  
+  size_t nGates = ray->getNGates();
+  RadxArray<Radx::fl32> data_;
+  Radx::fl32 *data = data_.alloc(nGates);
+  for (size_t ii = 0; ii < nGates; ii++) {
+    data[ii] = fmiss;
+  }
+
+  // compute ZDR and load into array
+
+  fld1->convertToFl32();
+  fld2->convertToFl32();
+
+  const Radx::fl32 *vals1 = fld1->getDataFl32();
+  const Radx::fl32 *vals2 = fld2->getDataFl32();
+
+  Radx::fl32 miss1 = fld1->getMissingFl32();
+  Radx::fl32 miss2 = fld2->getMissingFl32();
+
+  Radx::fl32 corr = _params.zdr_compute_correction_db;
+
+  for (size_t ii = 0; ii < nGates; ii++) {
+    Radx::fl32 val1 = vals1[ii];
+    Radx::fl32 val2 = vals2[ii];
+    if (val1 == miss1 || val2 == miss2) {
+      data[ii] = fmiss;
+    } else {
+      data[ii] = (val1 - val2) + corr;
+    }
+  }
+
+  // add the data array to the field
+
+  zdr->addDataFl32(nGates, data);
+  
+  // add field to ray
+  
+  ray->addField(zdr);
+
+  return 0;
+
+}
+
+  

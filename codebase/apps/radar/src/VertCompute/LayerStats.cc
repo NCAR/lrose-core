@@ -67,6 +67,7 @@ void LayerStats::clearData()
 {
   _nValid = 0;
  _momentData.clear();
+ _dist.clearValues();
 }
 
 // add a zdr value
@@ -141,9 +142,12 @@ void LayerStats::computeStats()
   _nValid = 0;
   for (int ii = 0; ii < (int) _momentData.size(); ii++) {
     if (_momentData[ii].valid) {
-      _sum.add(_momentData[ii]);
-      _sum2.addSquared(_momentData[ii]);
+      const MomentData &mdata = _momentData[ii];
+      _sum.add(mdata);
+      _sum2.addSquared(mdata);
       _nValid++;
+      _dist.addValue(mdata.zdrm);
+      _globalDist.addValue(mdata.zdrm);
     }
   }
 
@@ -155,6 +159,16 @@ void LayerStats::computeStats()
 
   MomentData::computeMeanSdev(_nValid, _sum, _sum2, _mean, _sdev);
 
+  _dist.computeBasicStats();
+  _dist.setHistRangeFromSdev(3.0);
+  _dist.computeHistogram();
+  _dist.performFit();
+  _dist.computeGof();
+  if (_nValid > 0 && _params.debug >= Params::DEBUG_VERBOSE) {
+    print(cerr);
+    _dist.printHistogram(stderr);
+  }
+  
 };
 
 // compute global stats
@@ -165,6 +179,16 @@ void LayerStats::computeGlobalStats()
   MomentData::computeMeanSdev(_globalNValid,
                               _globalSum, _globalSum2,
                               _globalMean, _globalSdev);
+  _globalDist.computeBasicStats();
+  _globalDist.setHistRangeFromSdev(3.0);
+  _globalDist.computeHistogram();
+  _globalDist.performFit();
+  _globalDist.computeGof();
+  if (_globalNValid > 0 && _params.debug >= Params::DEBUG_VERBOSE) {
+    print(cerr);
+    _globalDist.printHistogram(stderr);
+  }
+
 }
 
 // compute mean and sdev of zdrm

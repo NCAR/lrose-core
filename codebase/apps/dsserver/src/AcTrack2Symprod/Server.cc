@@ -429,12 +429,15 @@ int Server::_doGet(const Params &params,
   // check prod_id
 
   int prod_id = spdb.getProdId();
-  if (prod_id != SPDB_AC_POSN_ID && prod_id != SPDB_AC_DATA_ID) {
+  if (prod_id != SPDB_AC_POSN_ID &&
+      prod_id != SPDB_AC_POSN_WMOD_ID &&
+      prod_id != SPDB_AC_DATA_ID) {
     cerr << "WARNING - " << _executableName << "::Server::_doGet" << endl;
     cerr << "  Incorrect prod_id: " << prod_id << endl;
-    cerr << "  Should be SPDB_AC_POSN_ID: " << SPDB_AC_POSN_ID
-	 << ", or" << endl;
-    cerr << "  Should be SPDB_AC_DATA_ID: " << SPDB_AC_DATA_ID << endl;
+    cerr << "    Should be one of: " << endl;
+    cerr << "      SPDB_AC_POSN_ID: " << SPDB_AC_POSN_ID << endl;
+    cerr << "      SPDB_AC_POSN_WMOD_ID: " << SPDB_AC_POSN_WMOD_ID << endl;
+    cerr << "      SPDB_AC_DATA_ID: " << SPDB_AC_DATA_ID << endl;
     return -1;
   }
 
@@ -504,6 +507,29 @@ void Server::_transformData(const Params &params,
       }
     } // i
 
+  } else if (prod_id == SPDB_AC_POSN_WMOD_ID) {
+
+    if (params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "prod_id: SPDB_AC_POSN_WMOD_ID" << endl;
+    }
+    
+    for (int i = 0; i < n_chunks_in; i++) {
+      ac_posn_wmod_t posn;
+      memcpy(&posn,
+	     (char *) chunk_data_in + chunk_refs_in[i].offset,
+	     sizeof(ac_posn_wmod_t));
+      BE_to_ac_posn_wmod(&posn);
+      if (_acceptPoint(posn.lat, posn.lon)) {
+	location_t loc;
+	loc.time = chunk_refs_in[i].valid_time;
+	loc.lat = posn.lat;
+	loc.lon = posn.lon;
+	loc.alt = posn.alt;
+	loc.callsign = posn.callsign;
+	locations.push_back(loc);
+      }
+    } // i
+    
   } else if (prod_id == SPDB_AC_DATA_ID) {
 
     if (params.debug >= Params::DEBUG_VERBOSE) {

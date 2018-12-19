@@ -2,12 +2,12 @@
 /DsFmq.hh/1.33/Thu Dec 29 22:57:37 2016//
 /DsFmqMsg.hh/1.20/Thu Dec 29 22:57:37 2016//
 /DsRadarQueue.hh/1.10/Thu Dec 29 22:57:37 2016//
-/Fmq.hh/1.34/Thu Dec 29 22:57:37 2016//
-/FmqDevice.hh/1.7/Thu Dec 29 22:57:37 2016//
-/FmqDeviceFile.hh/1.6/Thu Dec 29 22:57:37 2016//
-/FmqDeviceShmem.hh/1.7/Thu Dec 29 22:57:37 2016//
 /GenericQueue.hh/1.4/Thu Dec 29 22:57:37 2016//
 /NowcastProcess.hh/1.5/Thu Dec 29 22:57:37 2016//
 /NowcastQueue.hh/1.14/Thu Dec 29 22:57:37 2016//
 /RemoteUIQueue.hh/1.5/Thu Dec 29 22:57:37 2016//
+/FmqDevice.hh/1.8/Wed Dec 20 15:56:32 2017//
+/FmqDeviceFile.hh/1.7/Wed Dec 20 15:56:54 2017//
+/FmqDeviceShmem.hh/1.8/Mon Mar 19 14:59:05 2018//
+/Fmq.hh/1.36/Sun Oct 14 05:00:56 2018//
 D

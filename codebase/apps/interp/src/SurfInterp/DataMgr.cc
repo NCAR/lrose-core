@@ -24,7 +24,6 @@
 #include <vector>
 
 #include <rapmath/math_macros.h>
-
 #include "DataMgr.hh"  
 
 using namespace std;
@@ -34,9 +33,11 @@ using namespace std;
  * Constructors
  */
 
-DataMgr::DataMgr() :
-  _progName(""),
-  _debug(Params::DEBUG_OFF)
+DataMgr::DataMgr(const string &progName,
+                 const Params &params) :
+        _progName(progName),
+        _params(params),
+        _debug(Params::DEBUG_OFF)
 {
 } 
 
@@ -679,18 +680,17 @@ void DataMgr::_getSurfaceData(const string &data_url,
   
   for (int i = 0; i < nreps; i++)
   {
-    // Convert the report from big-endian to whatever ordering is used in
-    // memory
 
-    station_report_from_be((station_report_t *)chunks[i].data);
+    // get the observation
 
-    // Copy the station to a new object that will be added to the vector
-    // if it passes other tests
+    WxObs obs;
+    obs.disassemble(chunks[i].data, chunks[i].len);
+
+    // Convert to report
 
     station_report_t *repPtr = new station_report_t;
+    obs.loadStationReport(*repPtr);
     
-    memcpy(repPtr, chunks[i].data, sizeof(station_report_t));
-
     // Don't use this station if it is too far outside of the boundaries
     // of the output grid.
 
@@ -703,11 +703,35 @@ void DataMgr::_getSurfaceData(const string &data_url,
       
     // Do some QC on the ceiling and visibility values
 
-    if (repPtr->ceiling != STATION_NAN && repPtr->ceiling > max_ceiling)
+    if (repPtr->ceiling != STATION_NAN &&
+        repPtr->ceiling > max_ceiling) {
       repPtr->ceiling = STATION_NAN;
-	  
-    if (repPtr->visibility != STATION_NAN && repPtr->visibility > max_vis)
+    }
+    
+    if (repPtr->visibility != STATION_NAN &&
+        repPtr->visibility > max_vis) {
       repPtr->visibility = STATION_NAN;
+    }
+
+    if (repPtr->temp != STATION_NAN &&
+        repPtr->temp > _params.MaxValidTempC) {
+      repPtr->temp = STATION_NAN;
+    }
+
+    if (repPtr->temp != STATION_NAN &&
+        repPtr->temp < _params.MinValidTempC) {
+      repPtr->temp = STATION_NAN;
+    }
+
+    if (repPtr->dew_point != STATION_NAN &&
+        repPtr->dew_point > _params.MaxValidTempC) {
+      repPtr->dew_point = STATION_NAN;
+    }
+
+    if (repPtr->dew_point != STATION_NAN &&
+        repPtr->dew_point < _params.MinValidTempC) {
+      repPtr->dew_point = STATION_NAN;
+    }
 	  
     // Avoid duplicate stations. If two reps have the same lat and lon
     // then keep the rep with the latest time.

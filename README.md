@@ -71,15 +71,19 @@ If you are performing development, it is best to use the NCAR development enviro
 
 If you just wish to build and use the software, the automake/configure build is preferable.
 
-See [README_BUILD.md](./docs/README_BUILD.md) for details.
+See [README_BUILD.md](./docs/dev/README_BUILD.md) for details.
 
 ### Installing a binary LROSE release
 
-See [README_INSTALL_BIN.md](./docs/README_INSTALL_BIN.md)
+See [README_INSTALL_BIN.md](./docs/dev/README_INSTALL_BIN.md)
 
 ### Creating an LROSE release
 
-See [README_CREATE_RELEASE.md](./docs/README_CREATE_RELEASE.md)
+See [README_CREATE_RELEASE.md](./docs/dev/README_CREATE_RELEASE.md)
+
+### Dual-polarization Radx Applications
+
+See [README_RadxDualpolApps.md](./docs/apps/radx/dualpol/README_RadxApps.md)
 
 This page is published at:
 

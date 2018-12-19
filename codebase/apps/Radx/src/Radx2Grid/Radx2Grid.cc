@@ -171,15 +171,6 @@ int Radx2Grid::Run()
 int Radx2Grid::_runFilelist()
 {
 
-  // init process mapper registration
-
-  if (_params.register_with_procmap) {
-    PMU_auto_init(_progName.c_str(),
-                  _params.instance,
-                  _params.procmap_register_interval);
-    PMU_auto_register("Init fileList mode");
-  }
-
   // loop through the input file list
 
   int iret = 0;
@@ -202,15 +193,6 @@ int Radx2Grid::_runFilelist()
 
 int Radx2Grid::_runArchive()
 {
-
-  // init process mapper registration
-
-  if (_params.register_with_procmap) {
-    PMU_auto_init(_progName.c_str(),
-                  _params.instance,
-                  _params.procmap_register_interval);
-    PMU_auto_register("Init archive mode");
-  }
 
   // get start and end times
 

@@ -499,7 +499,7 @@ def decodeLibLine(line):
             libs.append("hdf5_cpp")
             libs.append("hdf5_hl")
             libs.append("hdf5")
-            libs.append("udunits2")
+            # libs.append("udunits2")
             libs.append("z")
             libs.append("bz2")
         elif (thisTok.find("NETCDF_C_AND_C++_LIBS") >= 0):
@@ -539,7 +539,7 @@ def getLoadLibList():
                    'hdf5_cpp',
                    'hdf5_hl',
                    'hdf5',
-                   'udunits2',
+                   # 'udunits2',
                    'expat',
                    'jasper',
                    'fl',

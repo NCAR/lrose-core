@@ -110,32 +110,65 @@ int SpdbXml2Table::Run ()
 
   _lineCount = 0;
 
-  DsSpdb spdb;
+  // loop through the times a day at a time
 
-  if (spdb.getInterval(_params.input_url,
-                       _startTime.utime(),
-                       _endTime.utime(),
-                       _params.data_type,
-                       _params.data_type_2)) {
-    cerr << "ERROR - SpdbXml2Table::Run" << endl;
-    cerr << spdb.getErrStr() << endl;
-    return -1;
-  }
-
-  // add comment lines is appropriate
-
-  if (_params.add_commented_header) {
-    _printComments(stdout);
-  }
-
-  // get chunks
+  time_t startSecs = _startTime.utime();
+  time_t endSecs = _endTime.utime();
   
-  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  long long startDay = startSecs / 86400;
+  long long endDay = endSecs / 86400;
+
   if (_params.debug) {
-    cerr << "==>> got n entries: " << chunks.size() << endl;
+    cerr << "global start time: " << DateTime::strm(startSecs) << endl;
+    cerr << "global end   Time: " << DateTime::strm(endSecs) << endl;
   }
-  for (size_t ii = 0; ii < chunks.size(); ii++) {
-    _printLine(stdout, chunks[ii]);
+
+  for (long long iday = startDay; iday <= endDay; iday++) {
+
+    DsSpdb spdb;
+    
+    time_t startTime = iday * 86400;
+    time_t endTime = startTime + 86399;
+
+    if (startTime < startSecs) {
+      startTime = startSecs;
+    }
+    if (endTime > endSecs) {
+      endTime = endSecs;
+    }
+    
+    if (_params.debug) {
+      cerr << "  Working on day: " << iday << endl;
+      cerr << "  day start time: " << DateTime::strm(startTime) << endl;
+      cerr << "  day end   time: " << DateTime::strm(endTime) << endl;
+    }
+
+    if (spdb.getInterval(_params.input_url,
+                         startTime,
+                         endTime,
+                         _params.data_type,
+                         _params.data_type_2)) {
+      cerr << "ERROR - SpdbXml2Table::Run" << endl;
+      cerr << spdb.getErrStr() << endl;
+      return -1;
+    }
+    
+    // add comment lines is appropriate
+    
+    if (_params.add_commented_header && _lineCount == 0) {
+      _printComments(stdout);
+    }
+
+    // get chunks
+    
+    const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+    if (_params.debug) {
+      cerr << "==>> got n entries: " << chunks.size() << endl;
+    }
+    for (size_t ii = 0; ii < chunks.size(); ii++) {
+      _printLine(stdout, chunks[ii]);
+    }
+
   }
 
   return 0;
@@ -167,9 +200,9 @@ void SpdbXml2Table::_printComments(FILE *out)
     fprintf(out, "%s", delim);
     const Params::xml_entry_t &entry = _params._xml_entries[ii];
     if (entry.specify_label) {
-      fprintf(out, "%s ", entry.label);
+      fprintf(out, "%s", entry.label);
     } else {
-      fprintf(out, "%s ", entry.xml_tag_list);
+      fprintf(out, "%s", entry.xml_tag_list);
     }
   } // ii
   fprintf(out, "\n");
@@ -258,6 +291,7 @@ void SpdbXml2Table::_printLine(FILE *out,
   // loop through XML entries
 
   bool allNans = true;
+  bool anyNans = false;
   
   for (int ii = 0; ii < _params.xml_entries_n; ii++) {
     
@@ -305,6 +339,8 @@ void SpdbXml2Table::_printLine(FILE *out,
 
         if (val.find("nan") != 0) {
           allNans = false;
+        } else {
+          anyNans = true;
         }
         if (_params.replace_string_in_output) {
           size_t pos = 0;
@@ -342,6 +378,10 @@ void SpdbXml2Table::_printLine(FILE *out,
   } // ii
   
   if (_params.ignore_if_all_nans && allNans) {
+    return;
+  }
+
+  if (_params.ignore_if_any_nans && anyNans) {
     return;
   }
 

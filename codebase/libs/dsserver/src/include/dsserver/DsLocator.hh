@@ -270,7 +270,7 @@ const DsLOCATOR::serverInfo_t DsLOCATOR::serverInfo[] =
     { "SunCal2Symprod",          5487,   "spdbp",  true  },
     { "DeTectGenPoly2Symprod",   5488,   "spdbp",  true  },
     { "Amdar2Symprod",           5489,   "spdbp",  true  },
-    { "spare_ll",                5490,   "spdbp",  true  },
+    { "GenPtCircle2Symprod",     5490,   "spdbp",  true  },
     { "spare_mm",                5491,   "spdbp",  true  },
     { "spare_nn",                5492,   "spdbp",  true  },
     { "spare_oo",                5493,   "spdbp",  true  },

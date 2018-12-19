@@ -2783,21 +2783,9 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("instance");
     tt->descr = tdrpStrDup("Program instance for process registration.");
-    tt->help = tdrpStrDup("This application registers with procmap. This is the instance used for registration.");
+    tt->help = tdrpStrDup("REALTIME mode only. This application registers with procmap. This is the instance used for registration.");
     tt->val_offset = (char *) &instance - &_start_;
     tt->single_val.s = tdrpStrDup("test");
-    tt++;
-    
-    // Parameter 'register_with_procmap'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("register_with_procmap");
-    tt->descr = tdrpStrDup("Option to register this process with the process mapper (procmap).");
-    tt->help = tdrpStrDup("If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.");
-    tt->val_offset = (char *) &register_with_procmap - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'procmap_register_interval'
@@ -2807,7 +2795,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("procmap_register_interval");
     tt->descr = tdrpStrDup("Interval for registering with procmap (secs).");
-    tt->help = tdrpStrDup("The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.");
+    tt->help = tdrpStrDup("REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.");
     tt->val_offset = (char *) &procmap_register_interval - &_start_;
     tt->single_val.i = 60;
     tt++;
@@ -2967,42 +2955,6 @@
     tt->single_val.s = tdrpStrDup("DBZ");
     tt++;
     
-    // Parameter 'conv_strat_texture_radius_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_texture_radius_km");
-    tt->descr = tdrpStrDup("Radius for texture analysis (km).");
-    tt->help = tdrpStrDup("We determine the reflectivity 'texture' at a point by computing the standard deviation of the square of the reflectivity, for all grid points within this radius of the central point. We then compute the square root of that sdev.");
-    tt->val_offset = (char *) &conv_strat_texture_radius_km - &_start_;
-    tt->single_val.d = 7;
-    tt++;
-    
-    // Parameter 'conv_strat_texture_depth_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_texture_depth_km");
-    tt->descr = tdrpStrDup("Depth of region for computing texture (km).");
-    tt->help = tdrpStrDup("We compute the reflectivity 'texture' considering all radar points within a specified region, centered on the grid points. This is the depth of that region. It does not necessarily match the vertical grid spacing - it is likely that the depth will be greater than the grid vertical spacing, to allow for more points to be included in computing the texture. However, the depth should not exceed 2km or so, because the texture is intended to find layers (such as bright-band) in the observations.");
-    tt->val_offset = (char *) &conv_strat_texture_depth_km - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'conv_strat_min_valid_fraction_for_texture'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_min_valid_fraction_for_texture");
-    tt->descr = tdrpStrDup("Minimum fraction of surroundingpoints for texture computations.");
-    tt->help = tdrpStrDup("For a valid computation of texture, we require at least this fraction of points around the central point to have reflectivity in excess of min_valid_dbz.");
-    tt->val_offset = (char *) &conv_strat_min_valid_fraction_for_texture - &_start_;
-    tt->single_val.d = 0.33;
-    tt++;
-    
     // Parameter 'conv_strat_min_valid_height'
     // ctype is 'double'
     
@@ -3063,6 +3015,30 @@
     tt->single_val.d = 5;
     tt++;
     
+    // Parameter 'conv_strat_texture_radius_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_texture_radius_km");
+    tt->descr = tdrpStrDup("Radius for texture analysis (km).");
+    tt->help = tdrpStrDup("We determine the reflectivity 'texture' at a point by computing the standard deviation of the square of the reflectivity, for all grid points within this radius of the central point. We then compute the square root of that sdev.");
+    tt->val_offset = (char *) &conv_strat_texture_radius_km - &_start_;
+    tt->single_val.d = 7;
+    tt++;
+    
+    // Parameter 'conv_strat_min_valid_fraction_for_texture'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_min_valid_fraction_for_texture");
+    tt->descr = tdrpStrDup("Minimum fraction of surroundingpoints for texture computations.");
+    tt->help = tdrpStrDup("For a valid computation of texture, we require at least this fraction of points around the central point to have reflectivity in excess of min_valid_dbz.");
+    tt->val_offset = (char *) &conv_strat_min_valid_fraction_for_texture - &_start_;
+    tt->single_val.d = 0.33;
+    tt++;
+    
     // Parameter 'conv_strat_min_texture_for_convection'
     // ctype is 'double'
     
@@ -3084,6 +3060,30 @@
     tt->descr = tdrpStrDup("Option to write out the convective/stratiform partition.");
     tt->help = tdrpStrDup("If true, the 2-D partition will be added to the output file.");
     tt->val_offset = (char *) &conv_strat_write_partition - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'conv_strat_write_mean_texture'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_write_mean_texture");
+    tt->descr = tdrpStrDup("Option to write out the mean texture.");
+    tt->help = tdrpStrDup("If true, the mean texture will be written to the outptu file. This is a 2-D field - the mean over height of the 3-D texture fields.");
+    tt->val_offset = (char *) &conv_strat_write_mean_texture - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'conv_strat_write_convective_dbz'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_write_convective_dbz");
+    tt->descr = tdrpStrDup("Option to write out the dbz field in convection.");
+    tt->help = tdrpStrDup("This is a 3D field - the reflectivity trimmed only to convective regions, based on the convective/stratiform partition.");
+    tt->val_offset = (char *) &conv_strat_write_convective_dbz - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

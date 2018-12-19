@@ -26,9 +26,8 @@
  */
 #include "CloudGaps.hh"
 #include "CloudGap.hh"
-#include "CloudEdge.hh"
 #include "ClumpAssociate.hh"
-
+#include <toolsa/LogStream.hh>
 using std::vector;
 using std::string;
 
@@ -38,9 +37,8 @@ using std::string;
 // v0 = value of clump
 // depth = param
 //
-static void _add_edges(const Grid2d &clumps, const int x0, const int x1,
-		       const int y, const int nx, const double v0,
-		       const int depth, vector<CloudEdge> &edges)
+static void _add_edges(const Grid2d &clumps, int x0, int x1, int y, int nx,
+		       double v0, int depth, vector<RayCloudEdge> &edges)
 {
   int length = x1 - x0 + 1;
   
@@ -52,13 +50,17 @@ static void _add_edges(const Grid2d &clumps, const int x0, const int x1,
   {
     double v;
     if (clumps.getValue(x, y, v))
+    {
       // part of another clump, meaning back 'in' after being 'out'
       break;
-
+    }
+    
     // still 'out', adjust range by one
     x00 = x;
     if (x01 == -1)
+    {
       x01 = x;
+    }
   }
 
   // create 'outside' points above, from just after x1 to a maximum depth
@@ -68,47 +70,136 @@ static void _add_edges(const Grid2d &clumps, const int x0, const int x1,
   {
     double v;
     if (clumps.getValue(x, y, v))
+    {
       // part of another clump, meaning back 'in' .. done
       break;
+    }
     // adjust range by 1
     x11 = x;
     if (x10 == -1)
+    {
       x10 = x;
+    }
   }
 
   // now build the two CloudEdge objects and save
   int w;
   if (length > depth)
+  {
     w = depth;
+  }
   else
+  {
     w = length;
+  }
 
   if (x00 != -1)
   {
-    CloudEdge p(y, x0, x0+w-1, x00, x01, v0, true);
+    RaySubset cloud(x0, x0+w-1, y);
+    RaySubset outside(x00, x01, y);
+    RayCloudEdge p(y, cloud, outside, v0, true);
+    //x0, x0+w-1, x00, x01, v0, true);
     p.log("Adding");
     edges.push_back(p);
   }
   else
+  {
     LOG(DEBUG_VERBOSE) << "Skipping";
+  }
   if (x10 != -1)
   {
-    CloudEdge p(y, x1-w+1, x1, x10, x11, v0, false);
+    RaySubset cloud(x1-w+1, x1, y);
+    RaySubset outside(x10, x11, y);
+    // CloudEdge p(y, cloud, outside, v0, true);//x0, x0+w-1, x00, x01, v0, true);
+    RayCloudEdge p(y, cloud, outside, v0, false);
     p.log("Adding");
     edges.push_back(p);
   }
   else
+  {
     LOG(DEBUG_VERBOSE) << "Skipping";
+  }
 }
 
 /*----------------------------------------------------------------*/
-CloudGaps::CloudGaps(void)
+static void _updateRun(const Grid2d &clumps, int depth, int x, int y, 
+		       int nx, 
+		       bool &inside, int &in0, int &in1, double &v0,
+		       vector<RayCloudEdge> &edges)
+{
+  double v = 0.0;
+  if (clumps.getValue(x,  y, v))
+  {
+    if (!inside)
+    {
+      // start a 'cloud' run at x with value
+      inside = true;
+      in0 = in1 = x;
+      v0 = v;
+    }
+    else
+    {
+      // continue the run
+      if (v0 != v)
+      {
+	LOG(WARNING) << "clumping not right";
+      }
+      in1 = x;
+    }
+  }
+  else
+  {
+    if (inside)
+    {
+      // finish the cloud run, adding to edge state
+      inside = false;
+      _add_edges(clumps, in0, in1, y, nx, v0, depth, edges);
+    }
+  }
+}
+
+/*----------------------------------------------------------------*/
+CloudGaps::CloudGaps(void) : MathUserData()
 {
 }
 
 /*----------------------------------------------------------------*/
 CloudGaps::~CloudGaps()
 {
+}
+
+/*----------------------------------------------------------------*/
+bool CloudGaps::getFloat(double &f) const
+{
+  return false;
+}
+
+/*----------------------------------------------------------------*/
+void CloudGaps::addGaps(int y, int nx, const Grid2d &clumps, int depth)
+{
+  // start outside
+  bool inside = false;
+  int in0 = 0, in1 = 0;
+  vector<RayCloudEdge> edges;
+  double v0 = 0.0;
+  for (int x=0; x<nx; ++x)
+  {
+    _updateRun(clumps, depth, x, y, nx, inside, in0, in1, v0, edges);
+  }
+
+  if (edges.size() == 0)
+    return;
+
+  // the 0th gap is assumed going back to the radar
+  CloudGap e(edges[0]);
+  _gap.push_back(e);
+
+  // now build up all the gaps (pairs) and add
+  for (int i=2; i<(int)edges.size(); i+=2)
+  {
+    CloudGap e(edges[i-1], edges[i]);
+    _gap.push_back(e);
+  }
 }
 
 /*----------------------------------------------------------------*/
@@ -122,32 +213,32 @@ void CloudGaps::print(void) const
 }
 
 /*----------------------------------------------------------------*/
-Grid2d CloudGaps::edge(const int nx, const int ny) const
+Grid2d CloudGaps::edge(int nx, int ny) const
 {
   Grid2d ret("edge", nx, ny, 0);
   vector<CloudGap>::const_iterator i;
   for (i=_gap.begin(); i!=_gap.end(); ++i)
-    i->to_grid(ret);
+    i->toGrid(ret);
   return ret;
 }
 
 /*----------------------------------------------------------------*/
-Grid2d CloudGaps::outside(const int nx, const int ny) const
+Grid2d CloudGaps::outside(int nx, int ny) const
 {
   Grid2d ret("outside", nx, ny, 0);
   vector<CloudGap>::const_iterator i;
   for (i=_gap.begin(); i!=_gap.end(); ++i)
-    i->to_outside_grid(ret);
+    i->toOutsideGrid(ret);
   return ret;
 }
 
 /*----------------------------------------------------------------*/
-void CloudGaps::filter(int const min_gridpt)
+void CloudGaps::filter(int minGridpt)
 {
   vector<CloudGap>::iterator i;
   for (i=_gap.begin(); i!=_gap.end(); )
   {
-    if (i->npt_between() >= min_gridpt)
+    if (i->nptBetween() >= minGridpt)
       ++i;
     else
       i = _gap.erase(i);
@@ -156,80 +247,26 @@ void CloudGaps::filter(int const min_gridpt)
 
 /*----------------------------------------------------------------*/
 void CloudGaps::filter(const Grid2d &pid_clumps, ClumpAssociate &ca,
-		       const int max_gridpt)
+		       int maxGridpt)
 {
   vector<CloudGap>::iterator i;
   for (i=_gap.begin(); i!=_gap.end(); )
   {
     int npt0, npt1;
     ca.penetration(*i, pid_clumps, npt0, npt1);
-    if (npt0 > max_gridpt || npt1 > max_gridpt)
+    if (npt0 > maxGridpt || npt1 > maxGridpt)
     {
       vector<string> debug = ca.get_penetration_report();
-      if (npt0 > max_gridpt)
+      if (npt0 > maxGridpt)
 	LOG(DEBUG_VERBOSE) << "FILTER penetration in npt=" << npt0 << " "
 			   << debug[0];
-      if (npt1 > max_gridpt)
+      if (npt1 > maxGridpt)
 	LOG(DEBUG_VERBOSE) << "FILTER penetration out npt=" << npt1 << " "
 			   << debug[1];
       i = _gap.erase(i);
     }
     else
       ++i;
-  }
-}
-
-/*----------------------------------------------------------------*/
-void CloudGaps::add_gaps(const int y, const int nx, const Grid2d &clumps,
-			 const int depth)
-{
-  // start outside
-  bool inside = false;
-  int in0 = 0, in1 = 0;
-  vector<CloudEdge> edges;
-  double v0 = 0.0;
-  for (int x=0; x<nx; ++x)
-  {
-    double v = 0.0;
-    if (clumps.getValue(x,  y, v))
-    {
-      if (!inside)
-      {
-	// start a 'cloud' run at x with value
-	inside = true;
-	in0 = in1 = x;
-	v0 = v;
-      }
-      else
-      {
-	// continue the run
-	if (v0 != v)
-	  LOG(WARNING) << "clumping not right";
-	in1 = x;
-      }
-    }
-    else
-    {
-      if (inside)
-      {
-	// finish the cloud run, adding to edge state
-	inside = false;
-	_add_edges(clumps, in0, in1, y, nx, v0, depth, edges);
-      }
-    }
-  }
-  if (edges.size() == 0)
-    return;
-
-  // the 0th gap is assumed going back to the radar
-  CloudGap e(edges[0]);
-  _gap.push_back(e);
-
-  // now build up all the gaps (pairs) and add
-  for (int i=2; i<(int)edges.size(); i+=2)
-  {
-    CloudGap e(edges[i-1], edges[i]);
-    _gap.push_back(e);
   }
 }
 

@@ -107,7 +107,9 @@ private:
   // menus
 
   QMenu *_fileMenu;
+  QMenu *_configMenu;
   QMenu *_overlaysMenu;
+  QMenu *_actionsMenu;
   QMenu *_vertMenu;
   QMenu *_helpMenu;
 

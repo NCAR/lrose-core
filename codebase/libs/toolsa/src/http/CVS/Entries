@@ -1,6 +1,6 @@
 /.cvsignore/1.1/Thu Dec 29 22:57:39 2016//
-/HTTPgetURL.c/1.14/Thu Dec 29 22:57:39 2016//
-/HTTPgetURL_via_proxy.c/1.6/Thu Dec 29 22:57:39 2016//
 /HttpConnection.cc/1.9/Thu Dec 29 22:57:39 2016//
 /Makefile/1.7/Thu Dec 29 22:57:39 2016//
+/HTTPgetURL.c/1.15/Mon Mar 19 14:59:05 2018//
+/HTTPgetURL_via_proxy.c/1.7/Mon Mar 19 14:59:05 2018//
 D

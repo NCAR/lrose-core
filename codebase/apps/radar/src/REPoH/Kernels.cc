@@ -25,6 +25,7 @@
  * @file Kernels.cc
  */
 #include "Kernels.hh"
+#include <euclid/Grid2d.hh>
 #include <Spdb/DsSpdb.hh>
 
 /*----------------------------------------------------------------*/
@@ -39,6 +40,12 @@ Kernels::~Kernels()
 }
 
 /*----------------------------------------------------------------*/
+bool Kernels::getFloat(double &f) const
+{
+  return false;
+}
+
+/*----------------------------------------------------------------*/
 void Kernels::print(void) const
 {
   vector<KernelPair>::const_iterator i;
@@ -47,31 +54,53 @@ void Kernels::print(void) const
 }
 
 /*----------------------------------------------------------------*/
-void Kernels::add(const KernelPair &k, const time_t &time, const double vlevel, 
-		  const KernelGrids &grids, const Params &params,
-		  const double dx, Grid2d &kcp)
+void Kernels::computeAttenuation(double dx, Grid2d &att) const
 {
-  KernelPair k0(k);
-  k0.finish_processing(time, vlevel, grids, params, dx, _next_available_id,
-		       kcp);
-  _k.push_back(k0);
-  _next_available_id += 2; //  because the KernelPair uses up two i.d.s
+  att.setAllMissing();
+  for (size_t i=0; i<_k.size(); ++i)
+  {
+    _k[i].computeAttenuation(dx, att);
+  }
+}
+/*----------------------------------------------------------------*/
+void Kernels::computeHumidity(double dx, Grid2d &hum) const
+{
+  hum.setAllMissing();
+  for (size_t i=0; i<_k.size(); ++i)
+  {
+    _k[i].computeHumidity(dx, hum);
+  }
 }
 
 /*----------------------------------------------------------------*/
-string Kernels::humidity_estimate(const double vlevel, const GridProj &gp,
-				  Grid2d &att, Grid2d &hum) const
+string Kernels::asciiOutput(double vlevel, const MdvxProj &gp) const
 {
   string ret;
   for (int i=0; i<(int)_k.size(); i++)
-    ret += _k[i].humidity_estimate(vlevel, gp, att, hum);
+    ret += _k[i].asciiOutput(vlevel, gp);
   return ret;
+}  
+
+/*----------------------------------------------------------------*/
+void Kernels::filterToGood(void)
+{
+  std::vector<KernelPair>::iterator i;
+  for (i=_k.begin(); i!= _k.end(); )
+  {
+    if (i->passedTests())
+    {
+      i++;
+    }
+    else
+    {
+      i = _k.erase(i);
+    }
+  }
 }
 
 /*----------------------------------------------------------------*/
-bool Kernels::write_genpoly(const string &url, const time_t &time,
-			    const int nx, const int ny,
-			    const bool outside) const
+bool Kernels::writeGenpoly(const string &url, const time_t &time,
+			   bool outside, const MdvxProj &proj) const
 {
   DsSpdb D;
   D.clearPutChunks();
@@ -79,7 +108,7 @@ bool Kernels::write_genpoly(const string &url, const time_t &time,
   D.addUrl(url);
   bool stat = true;
   for (int i=0; i<(int)_k.size(); ++i)
-    if (!_k[i].write_genpoly(time, nx, ny, outside, D))
+    if (!_k[i].writeGenpoly(time, outside, proj, D))
       stat = false;
   return stat;
 }

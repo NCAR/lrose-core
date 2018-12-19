@@ -30,30 +30,60 @@
 
 #ifndef AsciiOutput_H
 #define AsciiOutput_H
+#include <rapmath/MathUserData.hh>
 #include <string>
 
 /*----------------------------------------------------------------*/
-class AsciiOutput
+class AsciiOutput : public MathUserData
 {
 public:
-  AsciiOutput(const std::string &dir, const time_t &t);
+
+  /**
+   * @param[in] name  Variable name
+   * @param[in] dir  Top path
+   * @param[in] t    Time
+   *
+   * Set up all the member values and create the path  needed
+   */
+  AsciiOutput(const std::string &name, const std::string &dir, const time_t &t);
+
   ~AsciiOutput();
 
+  /**
+   * @return true if input name = local name
+   * @param[in] name
+   */
+  inline bool nameMatch(const std::string &name) const {return _name == name;}
+
+  /**
+   * Remove the path
+   */
   void clear(void) const;
-  bool no_output(void) const;
+
+  /**
+   * Append input string to the file, with a '\n'
+   */
   void append(const std::string &s) const;
-  void append_nocr(const std::string &s) const;
-  void write_ldata_info();
+
+  /**
+   * Append input string to the file, without a '\n'
+   */
+  void appendNoCr(const std::string &s) const;
+
+  
+  void writeLdataInfo();
+
+  inline virtual bool getFloat(double &f) const {return false;}
 
 protected:
 private:
 
-  bool _has_output;
-  std::string _dir;
-  std::string _fileName;
-  std::string _relPath;
-  std::string _path;
-  time_t _time;
+  std::string _name;      /**< variable name within the app */
+  std::string _dir;       /**< Top path */
+  std::string _fileName;  /**< Name of one file yyyymmdd_hhmmss.humidity.ascii*/
+  std::string _relPath;   /**< relative path yyyymmdd/<file> */
+  std::string _path;      /**< Full path _dir / _relPath */
+  time_t _time;           /**< Current time */
 };
 
 #endif

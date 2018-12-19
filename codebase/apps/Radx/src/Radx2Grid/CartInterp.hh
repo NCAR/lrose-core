@@ -39,6 +39,7 @@
 #include "Interp.hh"
 #include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
+#include <radar/ConvStrat.hh>
 class DsMdvx;
 
 class CartInterp : public Interp {
@@ -162,6 +163,7 @@ private:
   DerivedField *_urElDebug;
   DerivedField *_urAzDebug;
 
+#ifdef JUNK
   DerivedField *_convStratDbzMax;
   DerivedField *_convStratDbzCount;
   DerivedField *_convStratDbzSum;
@@ -176,12 +178,17 @@ private:
   DerivedField *_convStratMeanTexture;
   DerivedField *_convStratMeanSqTexture;
   DerivedField *_convStratCategory;
+#endif
 
   vector<DerivedField *> _derived3DFields;
   vector<DerivedField *> _derived2DFields;
 
   // convective / stratiform split
 
+  ConvStrat _convStrat;
+  bool _gotConvStrat;
+
+#ifdef JUNK
   typedef enum {
     CATEGORY_MISSING = 0,
     CATEGORY_STRATIFORM = 1,
@@ -210,6 +217,8 @@ private:
   static const int NLOOKUP = 3000;
   int _textureIzLower[NLOOKUP];
   int _textureIzUpper[NLOOKUP];
+
+#endif
 
   // private methods
 
@@ -335,11 +344,16 @@ private:
                        const string &longName,
                        const string &units);
 
+  int _convStratCompute();
+
+#ifdef JUNK
+
   void _convStratPrepare();
-  void _convStratCompute();
   static bool _compareKernels(kernel_t x, kernel_t y);
   void _convStratComputeKernels();
   void _convStratComputeVertLookups();
+
+#endif
 
   //////////////////////////////////////////////////////////////
   // Classes for threads
@@ -450,6 +464,8 @@ private:
   // instantiate thread pool for interpolation
   TaThreadPool _threadPoolInterp;
 
+#ifdef JUNK
+
   //////////////////////////////////////////////////////////////
   // inner thread class for computing 2D texture
 
@@ -523,6 +539,8 @@ private:
   };
 
   //////////////////////////////////////////////////////////////
+
+#endif
 
 };
 

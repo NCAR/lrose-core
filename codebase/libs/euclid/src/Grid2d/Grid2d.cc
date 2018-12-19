@@ -378,3 +378,29 @@ void Grid2d::setAllToValue(double value)
   }
 }
 
+int Grid2d::_firstValidIndex(int y) const
+{
+  for (int x=0; x<_nx; ++x)
+  {
+    if (_data[_ipt(x, y)] != _missing)
+    {
+      return x;
+    }
+  }
+  return -1;
+}
+
+
+int Grid2d::_lastValidIndex(int y) const
+{
+  for (int x=_nx-1; x>=0; --x)
+  {
+    if (_data[_ipt(x, y)] != _missing)
+    {
+      return x;
+    }
+  }
+  return -1;
+}
+
+

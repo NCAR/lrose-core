@@ -238,12 +238,8 @@ private:
   int _putCoordinateVariables();
   int _putFieldDataVariables();
 
-  void _remap(fl32 *data, Grib2Nc::FieldInfo* fieldInfo);
-
-  //void _remapLambertLambert(Grib2Nc::FieldInfo, fl32* data);
-
-  //float _interp2(Grib2Nc::FieldInfo, 
-  //               double x, double y, int z, float *field);
+  void _remap(fl32 **data, Grib2Nc::FieldInfo* fieldInfo);
+  float _interp2(Grib2Nc::FieldInfo* fieldInfo, double x, double y, int z, float *field);
 
 };
 

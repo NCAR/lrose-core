@@ -78,7 +78,7 @@ EdgeRead::init( int argc, char **argv )
    // Read the parameter file
    //
    params = new Params();
-   paramsPath = "unknown";
+   paramsPath = (char *) "unknown";
    if( params->loadFromArgs(argc, argv,
 			    override.list,
 			    &paramsPath)) {

@@ -46,6 +46,7 @@
 #include <sstream>
 #include <limits.h>
 #include <netcdf.h>
+#include <sys/types.h>
 
 // Documentation warned this might change and now it has, for
 // consistency with C interface 
@@ -71,7 +72,8 @@ enum Nc3Type
     nc3Int = NC_INT,
     nc3Long = NC_LONG,		// deprecated, someday want to use for 64-bit ints
     nc3Float = NC_FLOAT, 
-    nc3Double = NC_DOUBLE
+    nc3Double = NC_DOUBLE,
+    nc3Int64 = NC_INT64
   };
 
 #define nc3Bad_ncbyte nc3Bad_byte
@@ -114,6 +116,7 @@ static const double nc3Bad_double = NC_FILL_DOUBLE;
     virtual int as_int( long n ) const;                         \
     virtual int as_nclong( long n ) const;                      \
     virtual long as_long( long n ) const;                       \
+    virtual int64_t as_int64( long n ) const;                   \
     virtual float as_float( long n ) const;                     \
     virtual double as_double( long n ) const;                   \
     virtual char* as_string( long n ) const;                    \
@@ -228,6 +231,16 @@ static const double nc3Bad_double = NC_FILL_DOUBLE;
     return (int) the_values[n];                                 \
   }
 
+#define NCINT64_MIN LLONG_MIN
+#define NCINT64_MAX LLONG_MAX
+#define as_int64_implement(TYPE)                                      \
+  int64_t Nc3Val(TYPE)::as_int64( long n ) const                      \
+  {                                                                   \
+    if (the_values[n] < NCINT64_MIN || the_values[n] > NCINT64_MAX)   \
+      return nc3Bad_int;                                              \
+    return (int64_t) the_values[n];                                   \
+  }
+
 #define NCLONG_MIN INT_MIN
 #define NCLONG_MAX INT_MAX
 #define as_nclong_implement(TYPE)                                       \
@@ -287,6 +300,7 @@ public:
   virtual char as_char( long n ) const = 0;     // nth value as char
   virtual short as_short( long n ) const = 0;   // nth value as short
   virtual int    as_int( long n ) const = 0;    // nth value as int
+  virtual int64_t as_int64( long n ) const = 0;    // nth value as int64
   virtual int    as_nclong( long n ) const = 0; // nth value as nclong
   virtual long as_long( long n ) const = 0;     // nth value as long
   virtual float as_float( long n ) const = 0;   // nth value as floating-point
@@ -305,6 +319,7 @@ declare(Nc3Values,ncbyte)
   declare(Nc3Values,int)
   declare(Nc3Values,nclong)
   declare(Nc3Values,long)
+  declare(Nc3Values,int64_t)
   declare(Nc3Values,float)
   declare(Nc3Values,double)
 

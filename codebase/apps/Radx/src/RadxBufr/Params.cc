@@ -1,9 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -33,8 +50,6 @@
  * @author Automatically generated
  *
  */
-using namespace std;
-
 #include "Params.hh"
 #include <cstring>
 
@@ -731,28 +746,28 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'gematronik_realtime_mode'
+    // Parameter 'incremental_realtime_mode'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("gematronik_realtime_mode");
-    tt->descr = tdrpStrDup("Set to TRUE if we are watching for Gematronik XML volumes.");
-    tt->help = tdrpStrDup("Gematronik volumes (for a given time) are stored in multiple files, one for each field. Therefore, after the time on a volume changes and a new field file is detected, we need to wait a while to ensure that all of the files have had a chance to be writted to disk. You need to set gematronik_realtime_wait_secs to a value in excess of the time it takes for all of the files to be written.");
-    tt->val_offset = (char *) &gematronik_realtime_mode - &_start_;
+    tt->param_name = tdrpStrDup("incremental_realtime_mode");
+    tt->descr = tdrpStrDup("Set to TRUE if fields come in incrementally.");
+    tt->help = tdrpStrDup("Some systems write fields from the same volume to separate files, so they come in incrementally. In this case, we need to wait some time for all of the fields to arrive before processing.");
+    tt->val_offset = (char *) &incremental_realtime_mode - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'gematronik_realtime_wait_secs'
+    // Parameter 'incremental_realtime_wait_secs'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("gematronik_realtime_wait_secs");
+    tt->param_name = tdrpStrDup("incremental_realtime_wait_secs");
     tt->descr = tdrpStrDup("Number of seconds to wait, so that all field files can be written to disk before we start to read.");
-    tt->help = tdrpStrDup("See 'gematronik_realtime_mode'.");
-    tt->val_offset = (char *) &gematronik_realtime_wait_secs - &_start_;
-    tt->single_val.i = 5;
+    tt->help = tdrpStrDup("See 'incremental_realtime_mode'.");
+    tt->val_offset = (char *) &incremental_realtime_wait_secs - &_start_;
+    tt->single_val.i = 90;
     tt++;
     
     // Parameter 'Comment 4'
@@ -2226,6 +2241,75 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 21");
+    tt->comment_hdr = tdrpStrDup("OPTION TO COMPUTE ZDR FROM OTHER FIELDS.");
+    tt->comment_text = tdrpStrDup("Normally ZDR = DBZH - DBZV.");
+    tt++;
+    
+    // Parameter 'zdr_compute_from_input_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("zdr_compute_from_input_fields");
+    tt->descr = tdrpStrDup("Compute ZDR from 2 other fields.");
+    tt->help = tdrpStrDup("Normally ZDR = DBZH - DBZV.");
+    tt->val_offset = (char *) &zdr_compute_from_input_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'zdr_compute_input_field_1'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("zdr_compute_input_field_1");
+    tt->descr = tdrpStrDup("First field for computing ZDR.");
+    tt->help = tdrpStrDup("ZDR will be (field_1 - field_2) + correction.");
+    tt->val_offset = (char *) &zdr_compute_input_field_1 - &_start_;
+    tt->single_val.s = tdrpStrDup("TH");
+    tt++;
+    
+    // Parameter 'zdr_compute_input_field_2'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("zdr_compute_input_field_2");
+    tt->descr = tdrpStrDup("Second field for computing ZDR.");
+    tt->help = tdrpStrDup("ZDR will be (field_1 - field_2) + correction.");
+    tt->val_offset = (char *) &zdr_compute_input_field_2 - &_start_;
+    tt->single_val.s = tdrpStrDup("TV");
+    tt++;
+    
+    // Parameter 'zdr_compute_correction_db'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("zdr_compute_correction_db");
+    tt->descr = tdrpStrDup("Correction applied when computing ZDR.");
+    tt->help = tdrpStrDup("ZDR will be (field_1 - field_2) + correction.");
+    tt->val_offset = (char *) &zdr_compute_correction_db - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'zdr_compute_output_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("zdr_compute_output_field_name");
+    tt->descr = tdrpStrDup("Name for computed ZDR fields.");
+    tt->help = tdrpStrDup("Units will be dB.");
+    tt->val_offset = (char *) &zdr_compute_output_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("ZDR");
+    tt++;
+    
+    // Parameter 'Comment 22'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2290,11 +2374,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2323,11 +2407,11 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2356,11 +2440,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2569,11 +2653,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("SEPARATING VOLUMES BY TYPE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2650,11 +2734,76 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("sun");
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 27");
+    tt->comment_hdr = tdrpStrDup("SEPARATING OUTPUT VOLUMES BASED ON RANGE GEOMETRY");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'separate_output_dirs_by_range_geometry'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("separate_output_dirs_by_range_geometry");
+    tt->descr = tdrpStrDup("Option to separate the files based on range geometry.");
+    tt->help = tdrpStrDup("In some scan strategies, the operational mode alternates between long and short range scans. For example there may be a long range scan without doppler moments, followed by a short range scan. The range gate length varies for each of these scans. This option allows you to write the volumes into separate directories based on the range geometry.");
+    tt->val_offset = (char *) &separate_output_dirs_by_range_geometry - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'dir_from_range_geometry'
+    // ctype is '_dir_from_range_geometry_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("dir_from_range_geometry");
+    tt->descr = tdrpStrDup("Sub-directories to be used for different range geometry.");
+    tt->help = tdrpStrDup("If the gate spacing is within the specified limits, the specified sub-directory is used (appended to 'output_dir'). If the gate spacing is not within any of the specified limits, then 'output_dir' is used as-is.");
+    tt->array_offset = (char *) &_dir_from_range_geometry - &_start_;
+    tt->array_n_offset = (char *) &dir_from_range_geometry_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(dir_from_range_geometry_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("dir_from_range_geometry_t");
+    tt->struct_def.nfields = 3;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("min_range_gate_spacing_km");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_dir_from_range_geometry->min_range_gate_spacing_km - (char *) _dir_from_range_geometry;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("max_range_gate_spacing_km");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_dir_from_range_geometry->max_range_gate_spacing_km - (char *) _dir_from_range_geometry;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("output_subdir");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_dir_from_range_geometry->output_subdir - (char *) _dir_from_range_geometry;
+    tt->n_struct_vals = 6;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 0;
+      tt->struct_vals[1].d = 0.2;
+      tt->struct_vals[2].s = tdrpStrDup("short_range");
+      tt->struct_vals[3].d = 0.2;
+      tt->struct_vals[4].d = 0.5;
+      tt->struct_vals[5].s = tdrpStrDup("long_range");
+    tt++;
+    
+    // Parameter 'Comment 28'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE MISSING VALUES");
     tt->comment_text = tdrpStrDup("Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n");
     tt++;

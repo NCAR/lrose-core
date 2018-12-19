@@ -870,6 +870,18 @@
     tt->single_val.i = 1000;
     tt++;
     
+    // Parameter 'pad_n_gates_to_max'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("pad_n_gates_to_max");
+    tt->descr = tdrpStrDup("Option to pad all rays out to the maximum number of gates in the file.");
+    tt->help = tdrpStrDup("If true, we read through the file to determine the maximum number of gates in the file. Then, if the number of gates varies from ray to ray, the shorter rays are padded out to the maximum number of gates found. Also, the number of gates per ray is stored out as a netCDF variable nGatesRay. This option is not compatible with 'specify_n_gates_save'.");
+    tt->val_offset = (char *) &pad_n_gates_to_max - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'one_file_only'
     // ctype is 'tdrp_bool_t'
     

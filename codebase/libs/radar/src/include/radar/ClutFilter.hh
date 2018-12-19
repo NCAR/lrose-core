@@ -76,7 +76,9 @@ public:
   //   filteredPower: mean power in filtered spectrum
   //   powerRemoved: mean power removed by the filter (mW)
   //   spectralNoise: noise determined from the spectrum (mW)
-  
+  //   weatherPos: spectral location of weather peak
+  //   clutterPos: spectral location of clutter peak
+
   static void performAdaptive(const double *rawPowerSpec, 
                               int nSamples,
                               double maxClutterVel,
@@ -91,7 +93,9 @@ public:
                               double &rawPower,
                               double &filteredPower,
                               double &powerRemoved,
-                              double &spectralNoise);
+                              double &spectralNoise,
+                              int &weatherPos,
+                              int &clutterPos);
   
   // Given a spectrum which has been filtered,
   // fill in the notch using a gaussian fit.

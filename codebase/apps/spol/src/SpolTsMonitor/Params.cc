@@ -672,17 +672,19 @@
       tt->struct_def.fields[2].rel_offset = 
         (char *) &_xml_entries->entry_type - (char *) _xml_entries;
         tt->struct_def.fields[2].enum_def.name = tdrpStrDup("xml_entry_type_t");
-        tt->struct_def.fields[2].enum_def.nfields = 4;
+        tt->struct_def.fields[2].enum_def.nfields = 5;
         tt->struct_def.fields[2].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[2].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[2].enum_def.fields[0].name = tdrpStrDup("XML_ENTRY_BOOLEAN");
         tt->struct_def.fields[2].enum_def.fields[0].val = XML_ENTRY_BOOLEAN;
-        tt->struct_def.fields[2].enum_def.fields[1].name = tdrpStrDup("XML_ENTRY_INT");
-        tt->struct_def.fields[2].enum_def.fields[1].val = XML_ENTRY_INT;
-        tt->struct_def.fields[2].enum_def.fields[2].name = tdrpStrDup("XML_ENTRY_DOUBLE");
-        tt->struct_def.fields[2].enum_def.fields[2].val = XML_ENTRY_DOUBLE;
-        tt->struct_def.fields[2].enum_def.fields[3].name = tdrpStrDup("XML_ENTRY_STRING");
-        tt->struct_def.fields[2].enum_def.fields[3].val = XML_ENTRY_STRING;
+        tt->struct_def.fields[2].enum_def.fields[1].name = tdrpStrDup("XML_ENTRY_BOOLEAN_TO_INT");
+        tt->struct_def.fields[2].enum_def.fields[1].val = XML_ENTRY_BOOLEAN_TO_INT;
+        tt->struct_def.fields[2].enum_def.fields[2].name = tdrpStrDup("XML_ENTRY_INT");
+        tt->struct_def.fields[2].enum_def.fields[2].val = XML_ENTRY_INT;
+        tt->struct_def.fields[2].enum_def.fields[3].name = tdrpStrDup("XML_ENTRY_DOUBLE");
+        tt->struct_def.fields[2].enum_def.fields[3].val = XML_ENTRY_DOUBLE;
+        tt->struct_def.fields[2].enum_def.fields[4].name = tdrpStrDup("XML_ENTRY_STRING");
+        tt->struct_def.fields[2].enum_def.fields[4].val = XML_ENTRY_STRING;
       tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[3].fname = tdrpStrDup("ok_boolean");
       tt->struct_def.fields[3].ptype = BOOL_TYPE;
@@ -815,7 +817,7 @@
     tt->descr = tdrpStrDup("Tag to delineate test pulse block in output XML.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &test_pulse_xml_tag - &_start_;
-    tt->single_val.s = tdrpStrDup("KaBandTestPulse");
+    tt->single_val.s = tdrpStrDup("SBandTestPulse");
     tt++;
     
     // Parameter 'test_pulse_range_km_hc'
@@ -878,28 +880,28 @@
     tt->single_val.i = 5000;
     tt++;
     
-    // Parameter 'dual_pol_alternating_mode'
+    // Parameter 'alternating_mode'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("dual_pol_alternating_mode");
-    tt->descr = tdrpStrDup("If this is a dual-polarization system, is it operating in fast alternating mode?");
+    tt->param_name = tdrpStrDup("alternating_mode");
+    tt->descr = tdrpStrDup("Is it operating in fast alternating mode");
     tt->help = tdrpStrDup("If true, the HV flag is used to determine which receiver path to use.");
-    tt->val_offset = (char *) &dual_pol_alternating_mode - &_start_;
+    tt->val_offset = (char *) &alternating_mode - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'dual_pol_switching_receivers'
+    // Parameter 'switching_receivers'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("dual_pol_switching_receivers");
-    tt->descr = tdrpStrDup("If this is a dual-polarization system, does it have switching receivers?");
+    tt->param_name = tdrpStrDup("switching_receivers");
+    tt->descr = tdrpStrDup("Does it have switching receivers");
     tt->help = tdrpStrDup("If true, then there is a co-pol receiver path and a cross-pol receiver path. If false, there is an H and V receiver path.");
-    tt->val_offset = (char *) &dual_pol_switching_receivers - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->val_offset = (char *) &switching_receivers - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'Comment 5'

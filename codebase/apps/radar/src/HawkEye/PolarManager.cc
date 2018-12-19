@@ -107,6 +107,8 @@ PolarManager::PolarManager(const Params &params,
   // initialize
 
   _firstTime = true;
+
+  // setWindowIcon(QIcon("HawkEyePolarIcon.icns"));
   
   _prevAz = -9999.0;
   _prevEl = -9999.0;
@@ -1215,11 +1217,10 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
   // do we need to reconfigure the PPI?
 
-  int nGates = ray->getNGates();
-  double maxRange = ray->getStartRangeKm() + nGates * ray->getGateSpacingKm();
+  _nGates = ray->getNGates();
+  double maxRange = ray->getStartRangeKm() + _nGates * ray->getGateSpacingKm();
   
   if ((maxRange - _maxRangeKm) > 0.001) {
-    _nGates = nGates;
     _maxRangeKm = maxRange;
     _ppi->configureRange(_maxRangeKm);
     _rhi->configureRange(_maxRangeKm);
@@ -1228,35 +1229,75 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   // create 2D field data vector
 
   vector< vector<double> > fieldData;
-  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-    vector<double> field;
-    fieldData.push_back(field);
-  }
-
+  fieldData.resize(_fields.size());
+  
   // fill data vector
 
   for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+
     vector<double> &data = fieldData[ifield];
+    data.resize(_nGates);
     RadxField *rfld = ray->getField(_fields[ifield]->getName());
+
+    // at this point, we know the data values for the field AND the color map                                                                        
+    bool haveColorMap = _fields[ifield]->haveColorMap();
+    Radx::fl32 min = FLT_MAX;;
+    Radx::fl32 max = FLT_MIN;
+
     if (rfld == NULL) {
       // fill with missing
       for (int igate = 0; igate < _nGates; igate++) {
-        data.push_back(-9999);
+        data[igate] = -9999.0;
       }
     } else {
       rfld->convertToFl32();
       const Radx::fl32 *fdata = rfld->getDataFl32();
       const Radx::fl32 missingVal = rfld->getMissingFl32();
-      for (int igate = 0; igate < _nGates; igate++, fdata++) {
+      // we can only look at the data available, so only go to nGates
+      for (int igate = 0; igate < _nGates; igate++, fdata++) {  // was _nGates
         Radx::fl32 val = *fdata;
         if (fabs(val - missingVal) < 0.0001) {
-          data.push_back(-9999);
+          data[igate] = -9999.0;
         } else {
-          data.push_back(*fdata);
-        }
-      }
-    }
-  }
+	  //<<<<<<< HEAD
+          data[igate] = val;
+        
+	  //=======
+	    //data.push_back(*fdata);  // ==> We know the data value here; determine min and max of values
+          if (!haveColorMap) {
+            // keep track of min and max data values
+	    // just display something.  The color scale can be edited as needed, later.
+	    bool newMinOrMax = false;
+            if (val < min) {
+              min = *fdata;
+	      newMinOrMax = true;
+	    }
+            if (val > max) {
+	      max = *fdata;
+	      newMinOrMax = true;
+	    }
+	    if ((newMinOrMax) && (_params.debug >= Params::DEBUG_VERBOSE)) { 
+	      printf("field index %zu, gate %d \t", ifield, igate);
+	      printf("new min, max of data %g, %g\t", min,  max);
+	      printf("missing value %g\t", missingVal);
+	      printf("current value %g\n", val);
+	    }
+          }
+        } // end else not missing value
+      } // end for each gate
+      // fill the remainder with missing 
+      //for (int igate = nGates; igate < _nGates; igate++) {
+      //  data.push_back(-9999);
+	//>>>>>>> forVivek
+      //}
+
+      if (!haveColorMap) {                              
+        _fields[ifield]->setColorMapRange(min, max);
+        _fields[ifield]->changeColorMap(); // just change bounds on existing map
+      } // end do not have color map
+
+    } // end else vector not NULL
+  } // end for each field
 
   // Store the ray location (which also sets _startAz and _endAz), then
   // draw beam on the PPI or RHI, as appropriate
@@ -1267,19 +1308,6 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
     _rhiMode = true;
 
-    // Store the ray location using the elevation angle and the RHI location
-    // table
-
-    // double el = 90.0 - ray->getElevationDeg();
-    // if (el < 0.0)
-    //   el += 360.0;
-    // _storeRayLoc(ray, el, platform.getRadarBeamWidthDegV(), _rhiRayLoc);
-
-    // Save the angle information for the next iteration
-
-    // _prevEl = el;
-    // _prevAz = -9999.0;
-    
     // If this is the first RHI beam we've encountered, automatically open
     // the RHI window.  After this, opening and closing the window will be
     // left to the user.
@@ -1295,7 +1323,6 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     _rhi->addBeam(ray, fieldData, _fields);
     _rhiWindow->setAzimuth(ray->getAzimuthDeg());
     _rhiWindow->setElevation(ray->getElevationDeg());
-    AllocCheck::inst().addAlloc();
     
   } else {
 
@@ -1315,7 +1342,6 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     // Add the beam to the display
     
     _ppi->addBeam(ray, _startAz, _endAz, fieldData, _fields);
-    AllocCheck::inst().addAlloc();
 
   }
   
@@ -1369,7 +1395,7 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
   for (int ii = startIndex; ii <= endIndex; ii++) {
     ray_loc[ii].ray = ray;
     ray_loc[ii].active = true;
-    ray_loc[ii].master = false;
+    // ray_loc[ii].master = false;
     ray_loc[ii].startIndex = startIndex;
     ray_loc[ii].endIndex = endIndex;
   }
@@ -1377,9 +1403,8 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
   // indicate which ray is the master
   // i.e. it is responsible for ray memory
     
-  int midIndex = (int) (az * RayLoc::RAY_LOC_RES);
-  ray_loc[midIndex].master = true;
-  ray->addClient();
+  // int midIndex = (int) (az * RayLoc::RAY_LOC_RES);
+  // ray_loc[midIndex].master = true;
 
 }
 
@@ -1419,12 +1444,12 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
 	// If the master is in the overlap area, then it needs to be moved
 	// outside of this area
 
-	if (ray_loc[j].master)
-	  ray_loc[start_index-1].master = true;
+	// if (ray_loc[j].master)
+	//   ray_loc[start_index-1].master = true;
 	
 	ray_loc[j].ray = NULL;
 	ray_loc[j].active = false;
-	ray_loc[j].master = false;
+	// ray_loc[j].master = false;
       }
 
       // Update the end indices for the remaining locations in the current
@@ -1451,11 +1476,11 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
       for (int j = loc_start_index; j <= end_index; ++j) {
 	// If the master is in the overlap area, then it needs to be moved
 	// outside of this area
-	if (ray_loc[j].master)
-	  ray_loc[end_index+1].master = true;
+	// if (ray_loc[j].master)
+	//   ray_loc[end_index+1].master = true;
 	ray_loc[j].ray = NULL;
 	ray_loc[j].active = false;
-	ray_loc[j].master = false;
+	// ray_loc[j].master = false;
       }
 
       // Update the start indices for the remaining locations in the current
@@ -1598,7 +1623,7 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm,
     if (_params.debug) {
       cerr << "    No ray data yet..." << endl;
       cerr << "      active = " << _ppiRayLoc[rayIndex].active << endl;
-      cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
+      // cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
       cerr << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex << endl;
       cerr << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex << endl;
     }
@@ -1692,7 +1717,7 @@ void PolarManager::_locationClicked(double xkm, double ykm,
   _rangeClicked->setText(text);
   
   for (size_t ii = 0; ii < _fields.size(); ii++) {
-    _fields[ii]->setSelectValue(-9999);
+    _fields[ii]->setSelectValue(-9999.0);
     _fields[ii]->setDialogText("----");
   }
   

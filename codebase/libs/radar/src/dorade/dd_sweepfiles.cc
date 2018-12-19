@@ -21,7 +21,7 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/* 	$Id: dd_sweepfiles.cc,v 1.8 2016/10/17 23:50:58 dixon Exp $	 */
+/* 	$Id: dd_sweepfiles.cc,v 1.9 2018/10/13 22:42:50 dixon Exp $	 */
 
 
 # include <cerrno>

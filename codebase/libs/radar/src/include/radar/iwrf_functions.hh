@@ -64,6 +64,7 @@ extern void iwrf_scan_segment_init(iwrf_scan_segment_t &val);
 extern void iwrf_antenna_correction_init(iwrf_antenna_correction_t &val);
 extern void iwrf_ts_processing_init(iwrf_ts_processing_t &val);
 extern void iwrf_xmit_power_init(iwrf_xmit_power_t &val);
+extern void iwrf_rx_power_init(iwrf_rx_power_t &val);
 extern void iwrf_xmit_sample_init(iwrf_xmit_sample_t &val);
 extern void iwrf_xmit_sample_v2_init(iwrf_xmit_sample_v2_t &val);
 extern void iwrf_burst_header_init(iwrf_burst_header_t &val);
@@ -193,6 +194,11 @@ extern bool iwrf_ts_processing_swap(iwrf_ts_processing_t &processing);
 // returns true is swapped, false if already in native
 
 extern bool iwrf_xmit_power_swap(iwrf_xmit_power_t &power);
+
+// swap rx_power
+// returns true is swapped, false if already in native
+
+extern bool iwrf_rx_power_swap(iwrf_rx_power_t &power);
 
 // swap xmit_sample
 // returns true is swapped, false if already in native
@@ -339,6 +345,11 @@ extern void iwrf_ts_processing_print
 extern void iwrf_xmit_power_print
   (FILE *out, const iwrf_xmit_power_t &pwr);
 
+// print rx_power
+
+extern void iwrf_rx_power_print
+  (FILE *out, const iwrf_rx_power_t &pwr);
+
 // print xmit_sample
 
 extern void iwrf_xmit_sample_print
@@ -481,6 +492,11 @@ extern void iwrf_ts_processing_print_format
 
 extern void iwrf_xmit_power_print_format
   (FILE *out, const iwrf_xmit_power_t &val);
+
+// print format of rx_power
+
+extern void iwrf_rx_power_print_format
+  (FILE *out, const iwrf_rx_power_t &val);
 
 // print format of xmit_sample
 

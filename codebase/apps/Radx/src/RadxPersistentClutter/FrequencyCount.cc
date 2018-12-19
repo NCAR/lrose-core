@@ -28,7 +28,6 @@
 #include <cmath>
 #include "FrequencyCount.hh"
 #include <Radx/RayxData.hh>
-#include <toolsa/LogMsg.hh>
 
 //------------------------------------------------------------------
 FrequencyCount::FrequencyCount(const int nbins, const int nscan)

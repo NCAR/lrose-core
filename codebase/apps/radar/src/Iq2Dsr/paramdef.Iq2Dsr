@@ -324,10 +324,6 @@ paramdef double {
   p_help = "See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.";
 } elevation_offset;
 
-commentdef {
-  p_header = "MOMENTS COMPUTATIONS";
-};
-
 typedef enum {
 
   SCAN_MODE_UNKNOWN = 0,
@@ -343,6 +339,22 @@ typedef enum {
   SCAN_MODE_MANUAL_RHI = 16
 
 } scan_mode_t;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the scan mode in the time series data.";
+  p_help = "Set this to TRUE if the scan_mode is incorrect in the time series, and you can override to a constant scan mode.";
+} override_scan_mode;
+
+paramdef enum scan_mode_t {
+  p_default = SCAN_MODE_UNKNOWN;
+  p_descr = "Select the scan mode for override";
+  p_help = "See 'override_scan_mode'";
+} scan_mode_for_override;
+
+commentdef {
+  p_header = "MOMENTS COMPUTATIONS";
+};
 
 typedef enum {
 
@@ -764,14 +776,14 @@ paramdef boolean {
 } change_phidp_sign;
 
 commentdef {
-  p_header = "CORRECT RECEIVER GAINS BASED ON MEASURED TEMPERATURE";
+  p_header = "CORRECT RECEIVER GAINS BASED ON MEASURED TEMPERATURE IN STATUS XML";
 }
 
 paramdef boolean {
   p_default = false;
   p_descr = "Option to correct the calibration receiver gains based on temperature.";
   p_help = "Receiver channel gains can change with temperature and may require correction. If this parameter is TRUE, the gains will be adjusted, using temperature values stored in the status_xml in the time series. IMPORTANT NOTE: this computes the CORRECTION. The correction is then applied to the calibration values read in by Iq2Dsr.";
-} correct_receiver_gains_for_temperature;
+} correct_rx_gains_for_temperature;
 
 typedef enum {
   RX_CHANNEL_HC,
@@ -784,26 +796,68 @@ typedef struct {
   rx_channel_t rx_channel;
   double slope;
   double intercept;
-} rx_gain_correction_t;
+  string temp_tag_list_in_status_xml;
+} rx_temp_gain_correction_t;
 
-paramdef struct rx_gain_correction_t {
+paramdef struct rx_temp_gain_correction_t {
   p_default = {
-    { RX_CHANNEL_HC, -0.0776, 1.5564 },
-    { RX_CHANNEL_VC, -0.0776, 1.5564 },
-    { RX_CHANNEL_HX, -0.0776, 1.5564 },
-    { RX_CHANNEL_VX, -0.0776, 1.5564 }
-  };
+    {
+      rx_channel = RX_CHANNEL_HC,
+      slope = -0.0776,
+      intercept = 1.5564,
+      temp_tag_list_in_status_xml = "<HcrStatus><HcrReceiverStatus><EikTemp>"
+    }
+    ,
+    {
+      rx_channel = RX_CHANNEL_VC,
+      slope = -0.0776,
+      intercept = 1.5564,
+      temp_tag_list_in_status_xml = "<HcrStatus><HcrReceiverStatus><EikTemp>"
+    }
+    ,
+    {
+      rx_channel = RX_CHANNEL_HX,
+      slope = -0.0776,
+      intercept = 1.5564,
+      temp_tag_list_in_status_xml = "<HcrStatus><HcrReceiverStatus><EikTemp>"
+    }
+    ,
+    {
+      rx_channel = RX_CHANNEL_VX,
+      slope = -0.0776,
+      intercept = 1.5564,
+      temp_tag_list_in_status_xml = "<HcrStatus><HcrReceiverStatus><EikTemp>"
+    }
+  }
   p_descr = "Correction to be applied to the gain in each receiver channel.";
-  p_help = "The correction is computed as:\n\n    correction = intercept + temperature * slope.";
-} rx_gain_correction[];
+  p_help = "\n\nThe correction is computed as:\n\n    correction = intercept + temperature * slope. \n\n The tag list allows us to find the temperature in the status xml block in the time series. These should be delimited in xml format, using '<' and '>'. \n\nThe temperature will be searched for in the status_xml section of the time series data. These tags specify how to find the temperature value.\n\nThe status_xml could look something like this:\n\n  <HcrStatus>\n    ....\n    <HcrReceiverStatus>\n      ....\n      <EikTemp>27.4626</EikTemp>\n      ....\n    </HcrReceiverStatus>\n    ....\n  </HcrStatus>\n\nin which case this parameter would be set to:\n\n  <HcrStatus><HcrReceiverStatus><EikTemp>";
+} rx_temp_gain_corrections[];
 
+commentdef {
+  p_header = "FOR HCR, CORRECT RECEIVER GAIN FOR TEMPERATURE USING VALUES FROM SPDB";
+}
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to correct the HCR V-channel receiver gain for temperature.";
+  p_help = "Computing the HCR receiver gain correction is complicated. Therefore this is done offline, and the results are stored as XML in SPDB. Here we retrieve the values from SPDB and apply them to correct the receiver gain.";
+} correct_hcr_v_rx_gain_for_temperature;
 
 paramdef string {
-  p_default = "<HcrStatus><HcrReceiverStatus><EikTemp>";
-  p_descr = "Specify the tag list for locating the temperature. These should be delimited in xml format, using '<' and '>'";
-  p_help = "The temperature will be searched for in the status_xml section of the time series data. These tags specify how to find the temperature value.\n\nThe status_xml could look something like this:\n\n  <HcrStatus>\n    ....\n    <HcrReceiverStatus>\n      ....\n      <EikTemp>27.4626</EikTemp>\n      ....\n    </HcrReceiverStatus>\n    ....\n  </HcrStatus>\n\nin which case this parameter would be set to:\n\n  <HcrStatus><HcrReceiverStatus><EikTemp>";
-} temperature_tags_in_status_xml;
+  p_default = "/scr/rain1/rsfdata/projects/socrates/hcr/qc/data/socrates/spdb/tempVsGain";
+  p_descr = "URL for HCR gain correction from SPDB.";
+} hcr_delta_gain_spdb_url;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin when finding gain correction data (secs).";
+  p_help = "We search for the value closest in time to the beam time. This is the search margin on either side of the search time.";
+} hcr_delta_gain_search_margin_secs;
+
+paramdef string {
+  p_default = "<HcrTempGainCorrection><v_delta_gain>";
+  p_descr = "URL for HCR gain correction from SPDB.";
+} hcr_v_rx_delta_gain_tag_list;
 
 commentdef {
   p_header = "PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR";

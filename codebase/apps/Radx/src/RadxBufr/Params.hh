@@ -1,9 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.hh
 //
@@ -32,8 +49,6 @@
 #ifndef Params_hh
 #define Params_hh
 
-using namespace std;
-
 #include <tdrp/tdrp.h>
 #include <iostream>
 #include <cstdio>
@@ -41,6 +56,8 @@ using namespace std;
 #include <cstring>
 #include <climits>
 #include <cfloat>
+
+using namespace std;
 
 // Class definition
 
@@ -161,6 +178,12 @@ public:
     char* xml_tag;
     char* lookup_table;
   } variable_transform_field_t;
+
+  typedef struct {
+    double min_range_gate_spacing_km;
+    double max_range_gate_spacing_km;
+    char* output_subdir;
+  } dir_from_range_geometry_t;
 
   ///////////////////////////
   // Member functions
@@ -471,9 +494,9 @@ public:
 
   char* search_ext;
 
-  tdrp_bool_t gematronik_realtime_mode;
+  tdrp_bool_t incremental_realtime_mode;
 
-  int gematronik_realtime_wait_secs;
+  int incremental_realtime_wait_secs;
 
   tdrp_bool_t set_fixed_angle_limits;
 
@@ -637,6 +660,16 @@ public:
   variable_transform_field_t *_variable_transform_fields;
   int variable_transform_fields_n;
 
+  tdrp_bool_t zdr_compute_from_input_fields;
+
+  char* zdr_compute_input_field_1;
+
+  char* zdr_compute_input_field_2;
+
+  double zdr_compute_correction_db;
+
+  char* zdr_compute_output_field_name;
+
   output_format_t output_format;
 
   netcdf_style_t netcdf_style;
@@ -693,6 +726,11 @@ public:
 
   char* sun_subdir;
 
+  tdrp_bool_t separate_output_dirs_by_range_geometry;
+
+  dir_from_range_geometry_t *_dir_from_range_geometry;
+  int dir_from_range_geometry_n;
+
   tdrp_bool_t override_missing_metadata_values;
 
   double missing_metadata_double;
@@ -722,7 +760,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[159];
+  mutable TDRPtable _table[168];
 
   const char *_className;
 

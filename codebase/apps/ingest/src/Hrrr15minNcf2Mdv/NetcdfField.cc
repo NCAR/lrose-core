@@ -91,7 +91,7 @@ NetcdfField::~NetcdfField()
  * createMdvField()
  */
 
-MdvxField *NetcdfField::createMdvField(const NcFile &nc_file,
+MdvxField *NetcdfField::createMdvField(const Nc3File &nc_file,
 				       const MdvxProj &input_proj,
 				       const int forecast_index,
 				       const int forecast_secs,
@@ -101,7 +101,7 @@ MdvxField *NetcdfField::createMdvField(const NcFile &nc_file,
   
   // Get a pointer to the variable in the netCDF file
 
-  NcVar *var;
+  Nc3Var *var;
 
   if ((var = nc_file.get_var(_ncFieldName.c_str())) == 0)
   {
@@ -122,7 +122,7 @@ MdvxField *NetcdfField::createMdvField(const NcFile &nc_file,
     return 0;
   }
   
-  if (var->type() != ncFloat)
+  if (var->type() != nc3Float)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << _ncFieldName << " variable is not of type ncFloat." << endl;

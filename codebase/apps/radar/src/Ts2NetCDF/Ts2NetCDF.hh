@@ -122,6 +122,7 @@ private:
 
   int _nGates;
   int _nGatesSave;
+  int _nGatesMax;
 
   bool _alternatingMode;
 
@@ -140,14 +141,16 @@ private:
 
   // meta data arrays
 
+  vector<int> _nGatesRay;
+
   vector<double> _timeArrayHc, _dtimeArrayHc;
   vector<float> _elArrayHc, _azArrayHc, _fixedAngleArrayHc;
   vector<float> _prtArrayHc;
   vector<float> _pulseWidthArrayHc;
   vector<float> _modCodeArrayHc;
   vector<int> _transitionFlagArrayHc;
-  vector<float> _burstMagArrayHc, _burstMagArrayVc;
-  vector<float> _burstArgArrayHc, _burstArgArrayVc;
+  vector<float> _burstMagArrayHc;
+  vector<float> _burstArgArrayHc;
 
   vector<double> _timeArrayVc, _dtimeArrayVc;
   vector<float> _elArrayVc, _azArrayVc, _fixedAngleArrayVc;
@@ -155,6 +158,8 @@ private:
   vector<float> _pulseWidthArrayVc;
   vector<float> _modCodeArrayVc;
   vector<int> _transitionFlagArrayVc;
+  vector<float> _burstMagArrayVc;
+  vector<float> _burstArgArrayVc;
 
   // IQ data
 
@@ -178,6 +183,7 @@ private:
 
   // functions
   
+  void _setNGatesMax();
   bool _checkInfoChanged(const IwrfTsPulse &pulse);
   bool _checkReadyToWrite(const IwrfTsPulse &pulse);
   int _handlePulse(IwrfTsPulse &pulse);

@@ -23,7 +23,8 @@ LOC_CFLAGS =
 
 TARGET_FILE = ../librapmath.a
 
-HDRS = ../include/rapmath/stats.h
+HDRS = ../include/rapmath/stats.h \
+	../include/rapmath/Distribution.hh
 
 SRCS = \
 	beta.c \
@@ -33,6 +34,12 @@ SRCS = \
 	primes.c \
 	uniform.c \
 	weibull.c
+
+CPPC_SRCS = \
+	DistLognorm.cc \
+	DistNormal.cc \
+	DistPolynomial.cc \
+	Distribution.cc
 
 #
 # general targets

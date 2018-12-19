@@ -126,6 +126,23 @@ RayxData::~RayxData()
 }
 
 //-----------------------------------------------------------------
+bool RayxData::transferData(const RayxData &r)
+{
+  if (r._npt != _npt)
+  {
+    cerr << "ERROR - RayxData::transferdata" << endl;
+    cerr << "  Npt input " << r._npt << " versus local " << _npt << endl;
+    return false;
+  }
+  _missing = r._missing;
+  for (int i=0; i<_npt; ++i)
+  {
+    _data[i] = r._data[i];
+  }
+  return true;
+}
+
+//-----------------------------------------------------------------
 bool RayxData::retrieveData(Radx::fl32 *data, const int npt) const
 {
   if (npt != _npt)
@@ -137,6 +154,26 @@ bool RayxData::retrieveData(Radx::fl32 *data, const int npt) const
   for (int i=0; i<npt; ++i)
   {
     data[i] = static_cast<Radx::fl32>(_data[i]);
+  }
+  return true;
+}
+
+//-----------------------------------------------------------------
+bool RayxData::retrieveSubsetData(Radx::fl32 *data, const int npt) const
+{
+  if (npt < _npt)
+  {
+    cerr << "ERROR - RayxData::retrieveSubsetData" << endl;
+    cerr << "  Npt input " << npt << " versus local " << _npt << endl;
+    return false;
+  }
+  for (int i=0; i<_npt; ++i)
+  {
+    data[i] = static_cast<Radx::fl32>(_data[i]);
+  }
+  for (int i=_npt; i<npt; ++i)
+  {
+    data[i] = static_cast<Radx::fl32>(_missing);
   }
   return true;
 }
@@ -1273,6 +1310,102 @@ void RayxData::constrain(int minGateIndex, int maxGateIndex)
 }
 
 //-----------------------------------------------------------------
+void RayxData::variance(double npt, double maxPctMissing)
+{
+  vector<double> tmp = _data;
+  int half = (int)(npt/2.0);
+  int maxMissing = (int)(npt*maxPctMissing);
+
+  // set tmp to mean values
+  for (int i=0; i<_npt; ++i)
+  {
+    int i0 = i-half;
+    int i1 = i+half;
+    double mean = 0.0;
+    int nmissing = 0;
+    double ngood = 0;
+    bool isSet = false;
+    for (int j=i0; j<=i1; ++j)
+    {
+      if (j >= 0 && j < _npt)
+      {
+	if (_data[j] == _missing)
+	{
+	  ++nmissing;
+	}
+	else
+	{
+	  mean += _data[j];
+	  ++ngood;
+	}
+      }
+      else
+      {
+	++nmissing;
+      }
+      if (nmissing > maxMissing)
+      {
+	tmp[i] = _missing;
+	isSet = true;
+	break;
+      }
+    }
+    if (!isSet)
+    {
+      tmp[i] = mean/ngood;
+    }
+  }
+
+  // set tmp2 to data, then use tmp and tmp2 to write back variances
+  vector<double> tmp2 = _data;
+  for (int i=0; i<_npt; ++i)
+  {
+    if (tmp[i] == _missing)
+    {
+      _data[i] = _missing;
+    }
+    else
+    {
+      int i0 = i-half;
+      int i1 = i+half;
+      double var = 0.0;
+      int nmissing = 0;
+      double ngood = 0;
+      bool isSet = false;
+      for (int j=i0; j<=i1; ++j)
+      {
+	if (j >= 0 && j < _npt)
+	{
+	  if (tmp2[j] == _missing)
+	  {
+	    ++nmissing;
+	  }
+	  else
+	  {
+	    var += pow(tmp2[j] - tmp[i], 2);
+	    ++ngood;
+	  }
+	}
+	else
+	{
+	  ++nmissing;
+	}
+	if (nmissing > maxMissing)
+	{
+	  isSet = true;
+	  _data[i] = _missing;
+	  break;
+	}
+      }
+      if (!isSet)
+      {
+	_data[i] = var/ngood;
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------
 double RayxData::_applyFIR(int j, int i0, int i1, int centerCoeff, 
 			   FirFilter_t type,
 			   const std::vector<double> &tmpData,
@@ -1546,7 +1679,6 @@ double RayxData::_sumProduct(const std::vector<double> &coeff, double sumCoeff,
   return sumprod/sumCoeff;
 }
   
-
 //-----------------------------------------------------------------
 int RayxData::_firstValidIndex(void) const
 {

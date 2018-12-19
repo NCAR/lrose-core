@@ -1,0 +1,311 @@
+/*********************************************************
+ * parameter definitions for PrecipRate lib module
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * December 2018
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "The PrecipRate module estimates precip rate from dual polarization data.";
+  p_text = "See NCAR_QPE.pdf.";
+}
+
+commentdef {
+  p_header = "COMPUTING PRECIP RATE";
+}
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Minimum SNR for valid PRECIP.";
+  p_help = "If the SNR at a gate is below this, the PRECIP is censored.";
+} RATE_snr_threshold;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter DBZ with median filter.";
+  p_help = "The filter is computed in rang..";
+} RATE_apply_median_filter_to_DBZ;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for DBZ - gates.";
+  p_help = "See 'RATE_apply_median_filter_to_DBZ'";
+} RATE_DBZ_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter ZDR with median filter.";
+  p_help = "The filter is computed in range.";
+} RATE_apply_median_filter_to_ZDR;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for ZDR - gates.";
+  p_help = "See 'PID_RATE_apply_median_filter_to_ZDR'";
+} RATE_ZDR_median_filter_len;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Minimum valid precip rate (mm/hr).";
+  p_help = "If any computed rate is less than this value, it is set to 0.";
+} RATE_min_valid_rate;
+
+paramdef double {
+  p_default = 250.0;
+  p_descr = "Maximum valid precip rate (mm/hr).";
+  p_help = "If any computed rate exceeds this value, it is set to this max.";
+} RATE_max_valid_rate;
+
+paramdef double {
+  p_default = 53.0;
+  p_descr = "Maximum valid dbz for computing precip rate.";
+  p_help = "If any dbz exceeds this value, it is set to this max before use. This helps mitigate large DBZ values in hail.";
+} RATE_max_valid_dbz;
+
+paramdef double {
+  p_default = -10.0;
+  p_max = 0.0;
+  p_descr = "Correction to be applied in brightband before computing precip rate.";
+  p_help = "This should be negative.";
+} RATE_brightband_dbz_correction;
+
+commentdef {
+  p_header = "PRECIP COEFFICIENTS";
+  p_text = "Coefficients for the precip equations.";
+}
+
+commentdef {
+  p_header = "RATE_ZH";
+  p_text = "RATE_ZH = zh_aa * (ZH ** zh_bb)";
+}
+
+paramdef double {
+  p_default = 0.017;
+  p_descr = "Coefficient for RATE_ZH.";
+} RATE_zh_aa;
+
+paramdef double {
+  p_default = 0.714;
+  p_descr = "Exponent for RATE_ZH.";
+} RATE_zh_bb;
+
+commentdef {
+  p_header = "RATE_SNOW_ZH";
+  p_text = "RATE_SNOW_ZH = zh_aa_snow * (ZH ** zh_bb_snow)";
+}
+
+paramdef double {
+  p_default = 0.0365;
+  p_descr = "Coefficient for RATE_ZH in SNOW.";
+} RATE_zh_aa_snow;
+
+paramdef double {
+  p_default = 0.625;
+  p_descr = "Exponent for RATE_ZH in SNOW.";
+} RATE_zh_bb_snow;
+
+commentdef {
+  p_header = "RATE_Z_ZDR";
+  p_text = "RATE_Z_ZDR = zzdr_aa * (ZH ** zzdr_bb) * (ZDR ** zzdr_cc)";
+}
+
+paramdef double {
+  p_default = 0.00684;
+  p_descr = "Coefficient for RATE_ZZDR.";
+} RATE_zzdr_aa;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "ZH exponent for RATE_ZZDR.";
+} RATE_zzdr_bb;
+
+paramdef double {
+  p_default = -4.86;
+  p_descr = "ZDR exponent for RATE_ZZDR.";
+} RATE_zzdr_cc;
+
+commentdef {
+  p_header = "RATE_KDP";
+  p_text = "RATE_KDP = sign(KDP) * kdp_aa * (|KDP| ** kdp_bb)";
+}
+
+paramdef double {
+  p_default = 40.6;
+  p_descr = "Coefficient for RATE_KDP.";
+} RATE_kdp_aa;
+
+paramdef double {
+  p_default = 0.866;
+  p_descr = "Exponent for RATE_KDP.";
+} RATE_kdp_bb;
+
+commentdef {
+  p_header = "RATE_KDP_ZDR";
+  p_text = "RATE_KDP_ZDR = sign(KDP) * kdpzdr_aa * (|KDP| ** kdpzdr_bb) * (ZDR ** kdpzdr_cc)";
+}
+
+paramdef double {
+  p_default = 136;
+  p_descr = "Coefficient for RATE_KDP_ZDR.";
+} RATE_kdpzdr_aa;
+
+paramdef double {
+  p_default = 0.968;
+  p_descr = "KDP exponent for RATE_KDP_ZDR.";
+} RATE_kdpzdr_bb;
+
+paramdef double {
+  p_default = -2.86;
+  p_descr = "ZDR exponent for RATE_KDP_ZDR.";
+} RATE_kdpzdr_cc;
+
+commentdef {
+  p_header = "PRECIP RATE BASED ON PID";
+  p_text =
+    "The PID-based rate is a wieghted-average of the rates for the various precip types.\n"
+    "The weights are derived from the interest values for each PID particle type.\n"
+    "\t  RATE_LIGHT_RAIN = RATE_ZH\n"
+    "\t  RATE_MOD_RAIN = RATE_Z_ZDR\n"
+    "\t  RATE_SNOW = RATE_ZH_SNOW\n"
+    "\t  RATE_MIXED = RATE_ZH_MIXED\n\n"
+    "\t  if (kdp > threshold && RATE_KDP is valid)\n"
+    "\t    RATE_HVY_RAIN = RATE_KDP\n"
+    "\t    RATE_HAIL = RATE_KDP\n"
+    "\t  else\n"
+    "\t    RATE_HVY_RAIN = RATE_ZZDR\n"
+    "\t    RATE_HAIL = RATE_ZZDR\n\n"
+    "\t  RATE = 0\n"
+    "\t  RATE += RATE_LIGHT_RAIN * WT_LIGHT_RAIN\n"
+    "\t  RATE += RATE_MOD_RAIN * WT_MOD_RAIN\n"
+    "\t  RATE += RATE_HVY_RAIN * WT_HVY_RAIN\n"
+    "\t  RATE += RATE_SNOW * WT_SNOW\n"
+    "\t  RATE += RATE_MIXED * WT_MIXED\n"
+    "\t  RATE += RATE_HAIL * WT_HAIL\n";
+}
+paramdef double {
+  p_default = 0.30;
+  p_descr = "Units are deg/km.";
+  p_help = "See notes above for details on use.";
+} RATE_pid_rate_kdp_threshold;
+
+commentdef {
+  p_header = "RATE_HYBRID";
+  p_text = "The HYBRID rate is based on the PID and the BRINGI algorithm. See 'Using dual-polarized radar and dual-frequency profiler for DSD characterization: a case study from Darwin, Australia', Hybrid et al, JTech, Vol 26, 2009, 2107 - 2122.\n\n"
+    "\t  if hail or heavy rain\n"
+    "\t    if KDP > threhsold and rateKDP is valid\n"
+    "\t      use RATE_KDP\n"
+    "\t    else\n"
+    "\t      use RATE_KDP\n"
+    "\t  else if snow/ice\n"
+    "\t    use RATE_ZH_SNOW\n"
+    "\t  else if mixed precip\n"
+    "\t    use RATE_ZH_MIXED\n"
+    "\t  else if rain or SLD\n"
+    "\t    if dBZ > theshold and KDP > threhsold\n"
+    "\t      if rateKDP is valid\n"
+    "\t        use RATE_KDP\n"
+    "\t      else\n"
+    "\t        use RATE_ZZDR\n"
+    "\t    else\n"
+    "\t      if ZDR >= threshold\n"
+    "\t        use RATE_Z\n"
+    "\t      else\n"
+    "\t        use RATE_ZZDR\n";
+}
+
+paramdef double {
+  p_default = 40;
+  p_descr = "Units are dBZ.";
+  p_help = "See notes above for details on use.";
+} RATE_hybrid_dbz_threshold;
+
+paramdef double {
+  p_default = 0.30;
+  p_descr = "Units are deg/km.";
+  p_help = "See notes above for details on use.";
+} RATE_hybrid_kdp_threshold;
+
+paramdef double {
+  p_default = 0.50;
+  p_descr = "Units are dB.";
+  p_help = "See notes above for details on use.";
+} RATE_hybrid_zdr_threshold;
+
+commentdef {
+  p_header = "RATE_HIDRO";
+  p_text = "The HIDRO rate is based on the CSU-HIDRO algorithm. See 'A New Dual-Polarization Radar Rainfall Algorithm: Application to Colorado Precipition Events', Cifelli et al, JTech, Vol 28, 2011, 352 - 364. NOTE - this algorithm is generally only applied to liquid and mixed-phase precip, so you need to run PID for this to work as intended.\n"
+    "\t  For ice:\n"
+    "\t    RATE_HIDRO = MISSING\n"
+    "\t  For hail or mixed:\n"
+    "\t    if KDP >= threshold and rateKdp is valid\n"
+    "\t      RATE_HIDRO = RATE_KDP\n"
+    "\t    else\n"
+    "\t      RATE_HIDRO = RATE_ZR\n"
+    "\t  For rain or sld:\n"
+    "\t    if KDP >= threshold and DBZ >= threhold\n"
+    "\t      if ZDR >= threshold and rateKdpZdr is valid\n"
+    "\t        RATE_HIDRO = RATE_KDPZDR\n"
+    "\t      else if rateKdp is valid\n"
+    "\t        RATE_HIDRO = RATE_KDP\n"
+    "\t      else\n"
+    "\t        RATE_HIDRO = RATE_ZZDR\n"
+    "\t    else\n"
+    "\t      if ZDR >= threshold\n"
+    "\t        RATE_HIDRO = RATE_Z\n"
+    "\t      else\n"
+    "\t        RATE_HIDRO = RATE_ZZDR\n";
+}
+
+paramdef double {
+  p_default = 38;
+  p_descr = "Units are dBZ.";
+  p_help = "See notes above for details on use.";
+} RATE_hidro_dbz_threshold;
+
+paramdef double {
+  p_default = 0.3;
+  p_descr = "Units are deg/km.";
+  p_help = "See notes above for details on use.";
+} RATE_hidro_kdp_threshold;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Units are dB.";
+  p_help = "See notes above for details on use.";
+} RATE_hidro_zdr_threshold;
+
+commentdef {
+  p_header = "RATE_BRINGI";
+  p_text = "The BRINGI rate is based on the BRINGI algorithm. See 'Using dual-polarized radar and dual-frequency profiler for DSD characterization: a case study from Darwin, Australia', Bringi et al, JTech, Vol 26, 2009, 2107 - 2122.\n"
+    "\t  if HAIL or RAIN/HAIL mixture and rateKdp is valid\n"
+    "\t    RATE_BRINGI = RATE_KDP\n"
+    "\t  else if dBZ > theshold and KDP > threhsold and rateKdp is valid\n"
+    "\t    RATE_BRINGI = RATE_KDP\n"
+    "\t  else\n"
+    "\t    if ZDR >= threshold\n"
+    "\t      RATE_BRINGI = RATE_ZZDR\n"
+    "\t    else\n"
+    "\t      RATE_BRINGI = RATE_Z\n";
+}
+
+paramdef double {
+  p_default = 40;
+  p_descr = "Units are dBZ.";
+  p_help = "See notes above for details on use.";
+} RATE_bringi_dbz_threshold;
+
+paramdef double {
+  p_default = 0.15;
+  p_descr = "Units are deg/km.";
+  p_help = "See notes above for details on use.";
+} RATE_bringi_kdp_threshold;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Units are dB.";
+  p_help = "See notes above for details on use.";
+} RATE_bringi_zdr_threshold;
+

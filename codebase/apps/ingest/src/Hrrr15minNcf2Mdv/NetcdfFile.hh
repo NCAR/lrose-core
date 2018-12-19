@@ -39,7 +39,7 @@
 #include <string>
 #include <vector>
 
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
@@ -288,7 +288,7 @@ protected:
    * @brief The netCDF file object.
    */
 
-  NcFile _ncFile;
+  Nc3File _ncFile;
   
 
   /**
@@ -366,7 +366,7 @@ protected:
 
   inline int _getDimension(const string &dim_name) const
   {
-    NcDim *dim;
+    Nc3Dim *dim;
 
     if ((dim = _ncFile.get_dim(dim_name.c_str())) == 0)
     {
@@ -396,7 +396,7 @@ protected:
 
   float _getGlobalAttAsFloat(const string &att_name) const
   {
-    NcAtt *att;
+    Nc3Att *att;
   
     if ((att = _ncFile.get_att(att_name.c_str())) == 0)
     {
@@ -420,7 +420,7 @@ protected:
 
   int _getGlobalAttAsInt(const string &att_name) const
   {
-    NcAtt *att;
+    Nc3Att *att;
   
     if ((att = _ncFile.get_att(att_name.c_str())) == 0)
     {
@@ -442,9 +442,9 @@ protected:
    * @return Returns the attribute value on success, "" on failure.
    */
 
-  string _getVarAttAsString(const NcVar &var, const string &att_name) const
+  string _getVarAttAsString(const Nc3Var &var, const string &att_name) const
   {
-    NcAtt *att;
+    Nc3Att *att;
   
     if ((att = var.get_att(att_name.c_str())) == 0)
     {

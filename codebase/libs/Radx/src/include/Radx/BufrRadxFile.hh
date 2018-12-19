@@ -181,16 +181,21 @@ public:
 
 protected:
 
-void _getFieldPathsRMA(const string &primaryPath,
-                                 vector<string> &fileNames,
-                                 vector<string> &filePaths,
-				     vector<string> &fieldNames);
-
-void _getFieldPathsPAG(const string &primaryPath,
-                                 vector<string> &fileNames,
-                                 vector<string> &filePaths,
-				     vector<string> &fieldNames);
-
+  void _getFieldPathsRMA(const string &primaryPath,
+                         vector<string> &fileNames,
+                         vector<string> &filePaths,
+                         vector<string> &fieldNames);
+  
+  int _getFieldPathsRMA2(const string &primaryPath,
+                         vector<string> &fileNames,
+                         vector<string> &filePaths,
+                         vector<string> &fieldNames);
+  
+  void _getFieldPathsPAG(const string &primaryPath,
+                         vector<string> &fileNames,
+                         vector<string> &filePaths,
+                         vector<string> &fieldNames);
+  
 private:
 
   // BUFR file

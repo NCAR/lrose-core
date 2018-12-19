@@ -43,6 +43,7 @@
 
 #include "Args.hh"
 #include <dsserver/DsLdataInfo.hh>
+#include <didss/DsInputPath.hh>
 using namespace std;
 
 ////////////////////////
@@ -74,10 +75,12 @@ private:
 
   string _progName;
   Args _args;
+  DsInputPath *_input;
 
   int _runNormal();
   int _runMaxTimeMode();
-  int _refresh();
+  int _refreshLatestTime();
+  int _refreshSpecifiedTimes();
   void _setFromArgs(DsLdataInfo &ldata);
 
 };

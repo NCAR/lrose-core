@@ -313,6 +313,7 @@ int Nc3xFile::readGlobAttr(const string &name, string &val)
     return -1;
   }
   val = asString(att);
+  delete att;
   return 0;
 }
 
@@ -333,9 +334,11 @@ int Nc3xFile::readGlobAttr(const string &name, int &val)
     _addErrStr("  name: ", name);
     _addErrStr("  val: ", sval);
     _addErrStr("  file: ", _pathInUse);
+    delete att;
     return -1;
   }
   val = ival;
+  delete att;
   return 0;
 }
 
@@ -356,9 +359,11 @@ int Nc3xFile::readGlobAttr(const string &name, float &val)
     _addErrStr("  name: ", name);
     _addErrStr("  val: ", sval);
     _addErrStr("  file: ", _pathInUse);
+    delete att;
     return -1;
   }
   val = fval;
+  delete att;
   return 0;
 }
 
@@ -379,8 +384,10 @@ int Nc3xFile::readGlobAttr(const string &name, double &val)
     _addErrStr("  name: ", name);
     _addErrStr("  val: ", sval);
     _addErrStr("  file: ", _pathInUse);
+    delete att;
     return -1;
   }
+  delete att;
   val = dval;
   return 0;
 }
@@ -828,6 +835,56 @@ int Nc3xFile::readIntVal(const string &name,
 }
 
 ///////////////////////////////////
+// read int variable, set val
+// with units if available
+
+int Nc3xFile::readIntVal(const string &name, 
+                         int &val, 
+                         string &units,
+                         int missingVal,
+                         bool required)
+  
+{
+  
+  val = missingVal;
+  units.clear();
+
+  Nc3Var* var = _ncFile->get_var(name.c_str());
+  if (var == NULL) {
+    if (required) {
+      _addErrStr("ERROR - Nc3xFile::_readIntVal");
+      _addErrStr("  Cannot read variable, name: ", name);
+      _addErrStr("  file: ", _pathInUse);
+      _addErrStr(_err->get_errmsg());
+    }
+    return -1;
+  }
+  
+  // check size
+  
+  if (var->num_vals() < 1) {
+    if (required) {
+      _addErrStr("ERROR - Nc3xFile::_readIntVal");
+      _addErrStr("  variable name: ", name);
+      _addErrStr("  variable has no data");
+      _addErrStr("  file: ", _pathInUse);
+    }
+    return -1;
+  }
+
+  val = var->as_int(0);
+  
+  Nc3Att* unitsAtt = var->get_att("units");
+  if (unitsAtt != NULL) {
+    units = Nc3xFile::asString(unitsAtt);
+    delete unitsAtt;
+  }
+
+  return 0;
+  
+}
+
+///////////////////////////////////
 // read float variable
 // Returns 0 on success, -1 on failure
 
@@ -907,6 +964,54 @@ int Nc3xFile::readFloatVal(const string &name,
 }
 
 ///////////////////////////////////
+// read float value
+// with units if available
+
+int Nc3xFile::readFloatVal(const string &name,
+                           float &val,
+                           string &units,
+                           float missingVal,
+                           bool required)
+  
+{
+  
+  val = missingVal;
+  units.clear();
+  
+  Nc3Var* var = _ncFile->get_var(name.c_str());
+  if (var == NULL) {
+    if (required) {
+      _addErrStr("ERROR - Nc3xFile::readFloatVal");
+      _addErrStr("  Cannot read variable, name: ", name);
+      _addErrStr(_err->get_errmsg());
+    }
+    return -1;
+  }
+  
+  // check size
+  
+  if (var->num_vals() < 1) {
+    if (required) {
+      _addErrStr("ERROR - Nc3xFile::readFloatVal");
+      _addErrStr("  variable name: ", name);
+      _addErrStr("  variable has no data");
+    }
+    return -1;
+  }
+
+  val = var->as_float(0);
+  
+  Nc3Att* unitsAtt = var->get_att("units");
+  if (unitsAtt != NULL) {
+    units = Nc3xFile::asString(unitsAtt);
+    delete unitsAtt;
+  }
+
+  return 0;
+  
+}
+
+///////////////////////////////////
 // read double variable
 // Returns 0 on success, -1 on failure
 
@@ -981,6 +1086,54 @@ int Nc3xFile::readDoubleVal(const string &name,
 
   val = var->as_double(0);
   
+  return 0;
+  
+}
+
+///////////////////////////////////
+// read double value
+// with units if available
+
+int Nc3xFile::readDoubleVal(const string &name,
+                            double &val,
+                            string &units,
+                            double missingVal,
+                            bool required)
+
+{
+  
+  val = missingVal;
+  units.clear();
+
+  Nc3Var* var = _ncFile->get_var(name.c_str());
+  if (var == NULL) {
+    if (required) {
+      _addErrStr("ERROR - Nc3xFile::readDoubleVal");
+      _addErrStr("  Cannot read variable, name: ", name);
+      _addErrStr(_err->get_errmsg());
+    }
+    return -1;
+  }
+
+  // check size
+  
+  if (var->num_vals() < 1) {
+    if (required) {
+      _addErrStr("ERROR - Nc3xFile::readDoubleVal");
+      _addErrStr("  variable name: ", name);
+      _addErrStr("  variable has no data");
+    }
+    return -1;
+  }
+
+  val = var->as_double(0);
+  
+  Nc3Att* unitsAtt = var->get_att("units");
+  if (unitsAtt != NULL) {
+    units = Nc3xFile::asString(unitsAtt);
+    delete unitsAtt;
+  }
+
   return 0;
   
 }

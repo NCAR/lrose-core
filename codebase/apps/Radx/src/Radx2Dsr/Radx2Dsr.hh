@@ -86,7 +86,6 @@ private:
   DsInputPath *_input;
   DsRadarQueue _rQueue;
 
-  RadxVol _vol;
   Radx::DataType_t _dataType;
   int _dataByteWidth;
   vector<string> _readPaths;
@@ -97,14 +96,15 @@ private:
 
   int _runSimulate();
   int _processFile(const string filePath);
-  int _processSweep(int sweepIndex);
+  int _processSweep(const RadxVol &vol, int sweepIndex);
   void _setupRead(RadxFile &file);
-  void _convertFieldsToUniformType();
+  void _convertFieldsToUniformType(RadxVol &vol);
 
-  int _writeParams(const RadxSweep &sweep, const RadxRay &ray);
-  int _writeStatusXml();
-  int _writeCalibration();
-  int _writeBeam(const RadxSweep &sweep,
+  int _writeParams(const RadxVol &vol, const RadxSweep &sweep, const RadxRay &ray);
+  int _writeStatusXml(const RadxVol &vol);
+  int _writeCalibration(const RadxVol &vol);
+  int _writeBeam(const RadxVol &vol,
+                 const RadxSweep &sweep,
                  int rayNumInSweep, const RadxRay &ray);
 
   int _getDsRadarType(Radx::PlatformType_t ptype);

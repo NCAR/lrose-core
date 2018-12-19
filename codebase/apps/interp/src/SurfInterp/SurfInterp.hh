@@ -123,8 +123,7 @@ private:
   // Triggering object
 
   DsTrigger *_trigger;
-  
-  DataMgr _dataMgr;
+  DataMgr *_dataMgr;
   
   map< int, StnInterpField* > _stnInterpFields;
   vector< GenPtInterpField* > _genptInterpFields;

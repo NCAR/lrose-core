@@ -31,7 +31,7 @@
 //
 // July 2005
 //
-// $Id: Beam.cc,v 1.26 2017/06/07 22:34:17 jcraig Exp $
+// $Id: Beam.cc,v 1.33 2018/10/16 20:43:22 jcraig Exp $
 //
 ///////////////////////////////////////////////////////////////
 
@@ -40,6 +40,7 @@
 #include <cmath>
 #include <toolsa/DateTime.hh>
 #include <toolsa/toolsa_macros.h>
+#include <dataport/bigend.h>
 #include "Beam.hh"
 #include "SweepData.hh"
 using namespace std;
@@ -57,6 +58,7 @@ InterestMap *Beam::_velSdevInterestMap = NULL;
 const double Beam::DBZ_DIFF_SQ_MAX = 10000.0;
 const double Beam::MISSING_DBL     = -9999.0;
 const double Beam::M_TO_KM         = 0.001;
+const double Beam::SPEED_OF_LIGHT  = 299792458;
 
 //
 //   These constants are assumed in the ridds data stream.
@@ -96,6 +98,10 @@ Beam::Beam( Params *params, RIDDS_data_hdr* nexradData,
   _el           = (nexradData->elevation/8.0)*(180.0/4096.0);
   _az           = (nexradData->azimuth/8.0)*(180.0/4096.0);
   _unambRange   = ((float) nexradData->unamb_range_x10) / 10;
+  _prf          = (float)(SPEED_OF_LIGHT / (2 * _unambRange * 1000));
+  _nVelocity    = ((float) nexradData->nyquist_vel) / 100;
+  _horizNoise   = -999.0;
+  _vertNoise    = -999.0;
 
   _dbz          = NULL;
   _vel          = NULL;
@@ -252,6 +258,10 @@ Beam::Beam( Params *params, RIDDS_data_31_hdr* nexradData,
   _el           = nexradData->elevation;
   _az           = nexradData->azimuth;
   _unambRange   = ((float) radialData->unamb_range_x10) / 10;
+  _prf          = (float)(SPEED_OF_LIGHT / (2 * _unambRange * 1000));
+  _nVelocity    = ((float) radialData->nyquist_vel) / 100;
+  _horizNoise   = radialData->horiz_noise;
+  _vertNoise    = radialData->vert_noise;
 
   _dbz          = NULL;
   _vel          = NULL;
@@ -363,11 +373,39 @@ Beam::Beam( Params *params, RIDDS_data_31_hdr* nexradData,
     _rangeToFirstReflGate = (float) reflData->gate1;
     _reflGateWidth        = (float) reflData->gate_width;
     
-    _storeData( ((ui08*)reflData + sizeof(RIDDS_data_31)), _nReflGates, &_dbz);
+    if(reflData->data_size == 8)
+      _storeData( ((ui08*)reflData + sizeof(RIDDS_data_31)), _nReflGates, &_dbz);
+    else
+      POSTMSG( ERROR, "REFL data size is not ui08." );
 
-    if(print)
-      POSTMSG( DEBUG, "DbzScale %f, DbzBias %f, NReflGates = %d", 
-	       _dbzScale, _dbzBias,  _nReflGates);
+    if(_saveZdr && nexradData->zdr_ptr != 0) {
+      RIDDS_data_31 *zdrData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->zdr_ptr);
+      _zdrScale = 1.0 / zdrData->scale;
+      _zdrBias = (zdrData->offset / zdrData->scale) * -1.0;
+      if(zdrData->data_size == 8)
+	_storeData( ((ui08*)zdrData + sizeof(RIDDS_data_31)), _nReflGates, zdrData->num_gates, &_zdr);
+      else
+	POSTMSG( ERROR, "ZDR data size is not ui08." );
+    }
+    if(_savePhi && nexradData->phi_ptr != 0) {
+      RIDDS_data_31 *phiData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->phi_ptr);
+      _phiScale = 1.0 / phiData->scale;
+      _phiBias = (32768.0 - phiData->offset) / phiData->scale;
+      if(phiData->data_size == 8)
+	POSTMSG( ERROR, "ZDR data size is not ui16." );
+      else
+	_storeData( (ui16*)((ui08*)phiData + sizeof(RIDDS_data_31)), _nReflGates, phiData->num_gates, &_phi);
+    }
+
+    if(_saveRho && nexradData->rho_ptr != 0) {
+      RIDDS_data_31 *rhoData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->rho_ptr);
+      _rhoScale = 1.0 / rhoData->scale;
+      _rhoBias = (rhoData->offset / rhoData->scale) * -1.0;
+      if(rhoData->data_size == 8)
+	_storeData( ((ui08*)rhoData + sizeof(RIDDS_data_31)), _nReflGates, rhoData->num_gates, &_rho);
+      else
+	POSTMSG( ERROR, "RHO data size is not ui08." );
+    }
 
     if( !_params->combineSweeps ) {
       _beamComplete = true;
@@ -391,14 +429,19 @@ Beam::Beam( Params *params, RIDDS_data_31_hdr* nexradData,
     _nVelGates       = (int) velData->num_gates;
     _rangeToFirstVelGate = (float) velData->gate1;
     _velGateWidth    = (float) velData->gate_width;
-
-    _storeData( ((ui08*)velData + sizeof(RIDDS_data_31)), _nVelGates, &_vel);
+    if(velData->data_size == 8)
+      _storeData( ((ui08*)velData + sizeof(RIDDS_data_31)), _nVelGates, &_vel);
+    else
+      POSTMSG( ERROR, "VEL data size is not ui08." );
 
     if(nexradData->sw_ptr != 0) {
       swData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->sw_ptr);
       _swScale = 1.0 / swData->scale;
       _swBias = (swData->offset / swData->scale) * -1.0;
-      _storeData( ((ui08*)swData + sizeof(RIDDS_data_31)), _nVelGates, &_width);
+      if(swData->data_size == 8)
+	_storeData( ((ui08*)swData + sizeof(RIDDS_data_31)), _nVelGates, &_width);
+      else
+	POSTMSG( ERROR, "SW data size is not ui08." );
 
       if(swData->gate1 != _rangeToFirstVelGate) {
 	POSTMSG( ERROR, "SW gate1 does not equal Vel gate1." );
@@ -413,21 +456,30 @@ Beam::Beam( Params *params, RIDDS_data_31_hdr* nexradData,
       RIDDS_data_31 *zdrData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->zdr_ptr);
       _zdrScale = 1.0 / zdrData->scale;
       _zdrBias = (zdrData->offset / zdrData->scale) * -1.0;
-      _storeData( ((ui08*)zdrData + sizeof(RIDDS_data_31)), _nVelGates, zdrData->num_gates, &_zdr);
+      if(zdrData->data_size == 8)
+	_storeData( ((ui08*)zdrData + sizeof(RIDDS_data_31)), _nVelGates, zdrData->num_gates, &_zdr);
+      else
+	POSTMSG( ERROR, "ZDR data size is not ui08." );
     }
 
     if(_savePhi && nexradData->phi_ptr != 0) {
       RIDDS_data_31 *phiData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->phi_ptr);
       _phiScale = 1.0 / phiData->scale;
       _phiBias = (phiData->offset / phiData->scale) * -1.0;
-      _storeData( ((ui08*)phiData + sizeof(RIDDS_data_31)), _nVelGates, phiData->num_gates, &_phi);
+      if(phiData->data_size == 8)
+	POSTMSG( ERROR, "PHI data size is not ui16." );
+      else
+	_storeData( (ui16*)((ui08*)phiData + sizeof(RIDDS_data_31)), _nVelGates, phiData->num_gates, &_phi);
     }
 
     if(_saveRho && nexradData->rho_ptr != 0) {
       RIDDS_data_31 *rhoData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->rho_ptr);
       _rhoScale = 1.0 / rhoData->scale;
       _rhoBias = (rhoData->offset / rhoData->scale) * -1.0;
-      _storeData( ((ui08*)rhoData + sizeof(RIDDS_data_31)), _nVelGates, rhoData->num_gates, &_rho);
+      if(rhoData->data_size == 8)
+	_storeData( ((ui08*)rhoData + sizeof(RIDDS_data_31)), _nVelGates, rhoData->num_gates, &_rho);
+      else
+	POSTMSG( ERROR, "RHO data size is not ui08." );
     }
 
     _beamComplete = true;
@@ -436,15 +488,10 @@ Beam::Beam( Params *params, RIDDS_data_31_hdr* nexradData,
       if(_prevSweep->getNBeams() > 0 ) {
 	_mergeDbz();
 	if(print) {
-	  POSTMSG( DEBUG, "Beam Merged with previous DBZ");
-	  POSTMSG( DEBUG, "VelScale %f, VelBias %f, NVelGates %d, DbzScale %f, DbzBias %f, NReflGates = %d", 
-		   _velScale, _velBias, _nVelGates, _dbzScale, _dbzBias,  _nReflGates);
+	  POSTMSG( DEBUG, "Beam Merged with previous sweep");
 	}
       } else {
 	_beamComplete = false;
-	if(print)
-	  POSTMSG( DEBUG, "VelScale %f, VelBias %f, NVelGates %d", 
-		   _velScale, _velBias, _nVelGates);
       }
     }
 
@@ -462,8 +509,10 @@ Beam::Beam( Params *params, RIDDS_data_31_hdr* nexradData,
     _rangeToFirstVelGate  = (float) velData->gate1;
     _velGateWidth         = (float) velData->gate_width;
 
-
-    _storeData( ((ui08*)velData + sizeof(RIDDS_data_31)), _nVelGates, &_vel);
+    if(velData->data_size == 8)
+      _storeData( ((ui08*)velData + sizeof(RIDDS_data_31)), _nVelGates, &_vel);
+    else
+      POSTMSG( ERROR, "VEL data size is not ui08." );
 
     if(nexradData->sw_ptr != 0) {
       swData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->sw_ptr);
@@ -472,7 +521,10 @@ Beam::Beam( Params *params, RIDDS_data_31_hdr* nexradData,
       }
       _swScale = 1.0 / swData->scale;
       _swBias = (swData->offset / swData->scale) * -1.0;
-      _storeData( ((ui08*)swData + sizeof(RIDDS_data_31)), _nVelGates, &_width);
+      if(swData->data_size == 8)
+	_storeData( ((ui08*)swData + sizeof(RIDDS_data_31)), _nVelGates, &_width);
+      else
+	POSTMSG( ERROR, "SW data size is not ui08." );
     }
 
     if(_params->combineSweeps && _prevSweep != NULL && _prevSweep->getNBeams() > 0 && _prevSweep->getScanType() == SweepData::REFL_ONLY) {
@@ -485,38 +537,47 @@ Beam::Beam( Params *params, RIDDS_data_31_hdr* nexradData,
       _nReflGates           = (int) reflData->num_gates;
       _rangeToFirstReflGate = (float) reflData->gate1;
       _reflGateWidth        = (float) reflData->gate_width;
-      _storeData( ((ui08*)reflData + sizeof(RIDDS_data_31)), _nReflGates, &_dbz);      
+      if(reflData->data_size == 8)
+	_storeData( ((ui08*)reflData + sizeof(RIDDS_data_31)), _nReflGates, &_dbz);
+      else
+	POSTMSG( ERROR, "REFL data size is not ui08." );
+
     }
 
     if(_saveZdr && nexradData->zdr_ptr != 0) {
       RIDDS_data_31 *zdrData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->zdr_ptr);
       _zdrScale = 1.0 / zdrData->scale;
       _zdrBias = (zdrData->offset / zdrData->scale) * -1.0;
-      _storeData( ((ui08*)zdrData + sizeof(RIDDS_data_31)), _nVelGates, zdrData->num_gates, &_zdr);
+      if(zdrData->data_size == 8)
+	_storeData( ((ui08*)zdrData + sizeof(RIDDS_data_31)), _nVelGates, zdrData->num_gates, &_zdr);
+      else
+	POSTMSG( ERROR, "ZDR data size is not ui08." );
     }
 
     if(_savePhi && nexradData->phi_ptr != 0) {
       RIDDS_data_31 *phiData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->phi_ptr);
       _phiScale = 1.0 / phiData->scale;
       _phiBias = (phiData->offset / phiData->scale) * -1.0;
-      _storeData( ((ui08*)phiData + sizeof(RIDDS_data_31)), _nVelGates, phiData->num_gates, &_phi);
+      if(phiData->data_size == 8)
+	POSTMSG( ERROR, "PHI data size is not ui16." );
+      else
+	_storeData( (ui16*)((ui08*)phiData + sizeof(RIDDS_data_31)), _nVelGates, phiData->num_gates, &_phi);
     }
 
     if(_saveRho && nexradData->rho_ptr != 0) {
       RIDDS_data_31 *rhoData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->rho_ptr);
       _rhoScale = 1.0 / rhoData->scale;
       _rhoBias = (rhoData->offset / rhoData->scale) * -1.0;
-      _storeData( ((ui08*)rhoData + sizeof(RIDDS_data_31)), _nVelGates, rhoData->num_gates, &_rho);
+      if(rhoData->data_size == 8)
+	_storeData( ((ui08*)rhoData + sizeof(RIDDS_data_31)), _nVelGates, rhoData->num_gates, &_rho);
+      else
+	POSTMSG( ERROR, "RHO data size is not ui08." );
     }
 
     if(_calcSnr)
       _computeSnr();
     if(_calcPr)
       _computePR();
-
-    if(print)
-      POSTMSG( DEBUG, "VelScale %f, VelBias %f, NVelGates %d, DbzScale %f, DbzBias %f, NReflGates = %d", 
-	       _velScale, _velBias, _nVelGates, _dbzScale, _dbzBias,  _nReflGates);
 
     _beamComplete = true;
     break;
@@ -580,7 +641,8 @@ int Beam::createInterestMaps(Params *params)
       _dbzTextureInterestMap =
          new InterestMap( "DbzTexture", pts,
 		          params->dbzTextureInterestWeight );
-      POSTMSG( DEBUG, "Creating reflectivity texture interest map" );
+      if(params->verbose)
+	POSTMSG( DEBUG, "Creating reflectivity texture interest map" );
    }
 
    //
@@ -596,8 +658,8 @@ int Beam::createInterestMaps(Params *params)
       _dbzSpinInterestMap =
          new InterestMap("DbzSpin", pts,
 		         params->dbzSpinInterestWeight);
-
-      POSTMSG( DEBUG, "Creating reflectivity spin interest map" );
+      if(params->verbose)
+	POSTMSG( DEBUG, "Creating reflectivity spin interest map" );
    }
 
    //
@@ -613,8 +675,8 @@ int Beam::createInterestMaps(Params *params)
 
       _velInterestMap =
          new InterestMap("velocity", pts, params->velInterestWeight);
-      
-      POSTMSG( DEBUG, "Creating velocity interest map" );
+      if(params->verbose)
+	POSTMSG( DEBUG, "Creating velocity interest map" );
    }
 
    //
@@ -630,8 +692,8 @@ int Beam::createInterestMaps(Params *params)
 
       _widthInterestMap =
          new InterestMap("spectrum width", pts, params->widthInterestWeight);
-      
-      POSTMSG( DEBUG, "Creating spectrum width interest map" );
+      if(params->verbose)
+	POSTMSG( DEBUG, "Creating spectrum width interest map" );
    }
 
    //
@@ -648,8 +710,8 @@ int Beam::createInterestMaps(Params *params)
       _velSdevInterestMap =
          new InterestMap("velocity sdev", pts, 
                          params->velSdevInterestWeight);
-      
-      POSTMSG( DEBUG, "Creating standard devation of velocity interest map" );
+      if(params->verbose)
+	POSTMSG( DEBUG, "Creating standard devation of velocity interest map" );
    }
 
    return 0;
@@ -870,7 +932,7 @@ void Beam::computeRec( const deque<Beam *> beams,
 
 }
 
-void Beam::_storeData(ui08* nexradData, int numGatesIn, ui08** data) 
+void Beam::_storeData(const ui08* nexradData, int numGatesIn, ui08** data) 
 {
   *data = new ui08 [numGatesIn];
 
@@ -893,7 +955,32 @@ void Beam::_storeData(ui08* nexradData, int numGatesIn, ui08** data)
   }  
 }
 
-void Beam::_storeData(ui08* nexradData, int numGatesOut, int numGatesIn, ui08** data) 
+void Beam::_storeData(const ui16* nexradData, int numGatesIn, si16** data) 
+{
+  *data = new si16 [numGatesIn];
+
+  //
+  // Loop through all the values in our input data buffer
+  //
+  for( int i = 0; i < numGatesIn; i++ ) {
+    
+    ui16 value = nexradData[i];
+    BE_from_array_16(&value, 2);
+
+    si16 sval;
+    if (value < 2) {
+      sval = -999.99;
+    } else {
+      int ival = value - 32768;
+      sval = ival;
+    }
+
+    (*data)[i] = sval;
+    
+  }  
+}
+
+void Beam::_storeData(const ui08* nexradData, int numGatesOut, int numGatesIn, ui08** data) 
 {
   *data = new ui08 [numGatesOut];
 
@@ -926,34 +1013,66 @@ void Beam::_storeData(ui08* nexradData, int numGatesOut, int numGatesIn, ui08** 
 
 }
 
-void Beam::_storeData(RIDDS_data_31* nexradData, int compression, int length, ui08** data) 
+void Beam::_storeData(const ui16* nexradData, int numGatesOut, int numGatesIn, si16** data) 
 {
-  if(nexradData->data_size != 8) {
-    POSTMSG( ERROR, "Data size not equal to 8 is unsupported." );
-  }
+  *data = new si16 [numGatesOut];
 
-  *data = new ui08[nexradData->num_gates];
+  //
+  // Store only the numGatesOut from the input data buffer
+  // or if input data is smaller, store missing after input buffer ends
+  //
+  int numGates = numGatesOut;
+  if(numGatesIn < numGatesOut)
+    numGates = numGatesIn;
 
-  if(compression != 0) {
-    POSTMSG( ERROR, "Internal data compression currently unsupported." );
-  }
+  for( int i = 0; i < numGates; i++ ) {
+    
+    ui16 value = nexradData[i];
+    BE_from_array_16(&value, 2);
 
-  ui08 *uncompressedData = (ui08 *)nexradData + sizeof(RIDDS_data_31);
-
-  for( int i = 0; i < nexradData->num_gates; i++ ) {
-
-    ui08 value = uncompressedData[i];
-
-    // 0: below SNR, 1: ambiguous range
-    if ( value != 0  &&  value != 1 ) {
-      (*data)[i] = value;
+    si16 sval;
+    if (value < 2) {
+      sval = -999.99;
     } else {
-      (*data)[i] = 0;
+      int ival = value - 32768;
+      sval = ival;
     }
+
+    (*data)[i] = sval;
+    
   }
+
+  if(numGates < numGatesOut)
+    for( int i = numGates; i < numGatesOut; i++ )
+      (*data)[i] = -999.99;
 
 }
 
+void Beam::_storeData(const si16* nexradData, int numGatesOut, int numGatesIn, si16** data) 
+{
+  *data = new si16 [numGatesOut];
+
+  //
+  // Store only the numGatesOut from the input data buffer
+  // or if input data is smaller, store missing after input buffer ends
+  //
+  int numGates = numGatesOut;
+  if(numGatesIn < numGatesOut)
+    numGates = numGatesIn;
+
+  for( int i = 0; i < numGates; i++ ) {
+    
+    si16 value = nexradData[i];
+
+    (*data)[i] = value;
+    
+  }
+
+  if(numGates < numGatesOut)
+    for( int i = numGates; i < numGatesOut; i++ )
+      (*data)[i] = -999.99;
+
+}
 
 void Beam::_computeSnr() 
 {
@@ -1061,7 +1180,7 @@ void Beam::_mergeDbz()
   //
   Beam *dbzBeam = _prevSweep->getClosestBeam( _az, _el, _time );
   
-  if( !dbzBeam ) {
+  if( !dbzBeam || !dbzBeam->getDbz() ) {
     POSTMSG( DEBUG, "Failed to Merge Beam. elevation: %f azimuth: %f", _el, _az);   
     _nReflGates     = 0;
     _reflGateWidth  = 0;
@@ -1089,6 +1208,28 @@ void Beam::_mergeDbz()
   _dbz = new ui08 [_nReflGates];
   memcpy( (void *) _dbz, (void *) dbzIn, _nReflGates * sizeof(ui08) );
 
+  if(_saveZdr && !_zdr && dbzBeam->getZdr())
+  {
+    _zdrScale         = dbzBeam->getZdrScale();
+    _zdrBias          = dbzBeam->getZdrBias();
+    const ui08 *zdrIn = dbzBeam->getZdr();
+    _storeData(zdrIn, _nVelGates, _nReflGates, &_zdr);
+  }
+  if(_savePhi && !_phi && dbzBeam->getPhi())
+  {
+    _phiScale         = dbzBeam->getPhiScale();
+    _phiBias          = dbzBeam->getPhiBias();
+    const si16 *phiIn = dbzBeam->getPhi();
+    _storeData(phiIn, _nVelGates, _nReflGates, &_phi);
+  }
+  if(_saveRho && !_rho && dbzBeam->getRho())
+  {
+    _rhoScale         = dbzBeam->getRhoScale();
+    _rhoBias          = dbzBeam->getRhoBias();
+    const ui08 *rhoIn = dbzBeam->getRho();
+    _rho = new ui08 [_nVelGates];
+    _storeData(rhoIn, _nVelGates, _nReflGates, &_rho);
+  }
   
   if(_calcSnr)
     _computeSnr();

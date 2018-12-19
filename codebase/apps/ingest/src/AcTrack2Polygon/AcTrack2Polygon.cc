@@ -53,7 +53,7 @@ AcTrack2Polygon::AcTrack2Polygon(int argc, char **argv)
   //
   // get TDRP params
   //
-  _paramsPath = "unknown";
+  _paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv, _args.override.list,
 			   &_paramsPath)) 
     {

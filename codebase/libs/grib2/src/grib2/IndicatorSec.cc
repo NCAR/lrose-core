@@ -27,7 +27,7 @@
 // Used wgrib by Wesley Ebisuzaki at NOAA as
 // reference (http://wesley.wwb.noaa.gov/wgrib.html)
 //
-// $Id: IndicatorSec.cc,v 1.9 2016/03/03 18:38:02 dixon Exp $
+// $Id: IndicatorSec.cc,v 1.10 2018/10/13 22:29:11 dixon Exp $
 ////////////////////////////////////////////
 #include <grib2/IndicatorSec.hh>
 #include <iostream>
@@ -106,7 +106,7 @@ IndicatorSec::print(FILE *stream) const
   fprintf(stream, "\n\n");
   fprintf(stream, "Indicator section:\n");
   fprintf(stream, "----------------------------------------------------\n");
-  fprintf(stream, "Message Length %lld\n", _numMsgBytes);
+  fprintf(stream, "Message Length %lu\n", _numMsgBytes);
   fprintf(stream, "Discipline Number %d\n", _disciplineNum);
   fprintf(stream, "Edition %d\n\n", _editionNum);
 

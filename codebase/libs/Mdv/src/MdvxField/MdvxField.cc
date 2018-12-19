@@ -798,7 +798,14 @@ int MdvxField::convertType
     return -1;
   }
   
-  // for ASIS encoding, set output_encoding accordingly
+  // for floats ensure the scale and bias are neutral
+
+  if (_fhdr.encoding_type == Mdvx::ENCODING_FLOAT32) {
+    _fhdr.scale = 1.0;
+    _fhdr.bias = 0.0;
+  }
+
+ // for ASIS encoding, set output_encoding accordingly
   
   if (output_encoding == Mdvx::ENCODING_ASIS) {
     output_encoding =
@@ -1296,6 +1303,13 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
   if (_fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
     // no-op
     return 0;
+  }
+
+  if (_fhdr.nz < 1)
+  {
+    fprintf(stderr, "ERROR - MdvxField::convert2Composite\n");
+    fprintf(stderr, "  _fhdr.nz < 1\n");
+    return -1;
   }
 
   int lowerPlaneNum = lower_plane_num;
@@ -3224,13 +3238,20 @@ void MdvxField::computePlaneLimits(double vlevel1,
 
   // reorder as necessary
 
-  if (p1 < p2) {
+  if (p1 < p2 ) {
     lower_plane = p1;
     upper_plane = p2;
   } else {
     lower_plane = p2;
     upper_plane = p1;
   }
+
+  // sanity check on upper_plane and lower_plane values insures no out-of-bounds array access 
+  if (lower_plane < 0)
+    lower_plane = 0;
+  if (upper_plane < 0)
+    upper_plane = 0;
+ 
   
   // check for data order
   
@@ -3360,7 +3381,7 @@ void MdvxField::printHeaders(ostream &out,
       Mdvx::printFieldHeader(*_fhdrFile, out);
     }
     
-    if (_vhdrFile != NULL) {
+    if (_vhdrFile != NULL && _fhdrFile != NULL) {
       out << "======================================================" << endl;
       out << "   Vlevel header as in file" << endl;
       out << "======================================================" << endl;
@@ -3675,7 +3696,7 @@ void MdvxField::_int8_to_float32()
   _fhdr.data_element_nbytes = 4;
   _fhdr.missing_data_value = float_missing_val;
   _fhdr.bad_data_value = float_bad_val;
-  _fhdr.scale = 0.0;
+  _fhdr.scale = 1.0;
   _fhdr.bias = 0.0;
   
 }
@@ -3742,7 +3763,7 @@ void MdvxField::_int16_to_float32()
     _fhdr.missing_data_value * scale + bias;
   _fhdr.bad_data_value =
     _fhdr.bad_data_value * scale + bias;
-  _fhdr.scale = 0.0;
+  _fhdr.scale = 1.0;
   _fhdr.bias = 0.0;
   
 }
@@ -4217,6 +4238,10 @@ void MdvxField::constrainVertical(const Mdvx &mdvx)
     minPlane = maxPlane;
     maxPlane = tmpPlane;
   }
+
+  // Sanity check on _fhdr.nz value insures no out-of-bounds array access
+  if (_fhdr.nz < 1)
+     _fhdr.nz = 1;
 
   if (minPlane < 0) {
     minPlane = 0;
@@ -5861,7 +5886,13 @@ int MdvxField::_read_volume(TaFile &infile,
 {
 
   clearErrStr();
-  infile.fseek(_fhdr.field_data_offset, SEEK_SET);
+  if (infile.fseek(_fhdr.field_data_offset, SEEK_SET)) {
+    _errStr += "ERROR - MdvxField::_read_volume\n";
+    _errStr += "  Cannot read field: ";
+    _errStr += _fhdr.field_name;
+    _errStr += "\n";
+    return -1;
+  }
 
   int volume_size = _fhdr.volume_size;
   void *buf = _volBuf.prepare(volume_size);
@@ -5918,50 +5949,6 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
   
 {
 
-  // check whether we need to do anything
-  // and return if not
-
-  bool doSomething = false;
-  if (_fhdr.min_value == 0.0 && _fhdr.max_value == 0.0) {
-    // need to compute min and max
-    doSomething = true;
-  }
-  if (do_decimate || fill_missing || is_vsection) {
-    doSomething = true;
-  }
-  if (mdvx._readSpecifyVlevelType) {
-    if (mdvx._readVlevelType != _fhdr.vlevel_type) {
-      doSomething = true;
-    }
-  }
-  if (mdvx._readRemapSet) {
-    doSomething = true;
-  }
-  if (mdvx._readComposite || mdvx._readVlevelLimitsSet) {
-    doSomething = true;
-  }
-  if (mdvx._readHorizLimitsSet && !is_vsection) {
-    doSomething = true;
-  }
-  if (mdvx._readAutoRemap2LatLon) {
-    doSomething = true;
-  }
-  if (do_final_convert) {
-    if (mdvx._readEncodingType != Mdvx::ENCODING_ASIS) {
-      if (mdvx._readEncodingType != _fhdr.encoding_type) {
-        doSomething = true;
-      }
-    }
-  }
-
-  // temporarily force doSomething to TRUE, to circumvent bug
-  // TODO - DIXON - FIX this properly
-  doSomething = true;
-
-  if (!doSomething) {
-    return 0;
-  }
-                   
   // set output compression type
 
   Mdvx::compression_type_t output_compression = mdvx._readCompressionType;
@@ -6812,6 +6799,7 @@ void MdvxField::_plane_fill_missing(int encoding_type,
       } // iy
       nloop++;
       if (nloop > maxloops) {
+        delete [] aa;
 	return;
       }
     } // while (!done)
@@ -6885,6 +6873,7 @@ void MdvxField::_plane_fill_missing(int encoding_type,
       } // iy
       nloop++;
       if (nloop > maxloops) {
+        delete [] aa;
 	return;
       }
     } // while (!done)
@@ -6958,6 +6947,7 @@ void MdvxField::_plane_fill_missing(int encoding_type,
       } // iy
       nloop++;
       if (nloop > maxloops) {
+        delete [] aa;
 	return;
       }
     } // while (!done)
@@ -7054,6 +7044,7 @@ void MdvxField::_vsection_fill_missing(int encoding_type,
       } // iz
       nloop++;
       if (nloop > maxloops) {
+        delete [] aa;
 	return;
       }
     } // while (!done)
@@ -7130,6 +7121,7 @@ void MdvxField::_vsection_fill_missing(int encoding_type,
       } // iz
       nloop++;
       if (nloop > maxloops) {
+        delete [] aa;
 	return;
       }
     } // while (!done)
@@ -7206,6 +7198,7 @@ void MdvxField::_vsection_fill_missing(int encoding_type,
       } // iz
       nloop++;
       if (nloop > maxloops) {
+        delete [] aa;
 	return;
       }
     } // while (!done)

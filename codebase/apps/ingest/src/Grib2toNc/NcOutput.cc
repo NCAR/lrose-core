@@ -223,7 +223,7 @@ void NcOutput::addField(fl32 *field, Grib2Nc::FieldInfo fieldInfo)
 {
    // Remap Data if requested
    if(_params->remap_output) {
-     _remap(field, &fieldInfo);
+     _remap(&field, &fieldInfo);
    }
    
    //
@@ -477,8 +477,21 @@ int NcOutput::_openNcFile(const string &path)
 
   _closeNcFile();
 
+  // Create the netcdf file with the C interface so we can control the cmode
+  int cmode = 0;
+  int ncid;
+  if(_params->file_format == Params::NETCDF4 || _params->file_format == Params::NETCDF4_CLASSIC)
+    cmode = NC_NETCDF4;
+  int status = nc_create(path.c_str(), cmode, &ncid);
+  if(status != NC_NOERR) {
+    cerr << "ERROR - Cannot create netCDF file: " << path << endl;
+    return -1;
+  }
+  nc_close(ncid);
+
+  // Open the blank netcdf file created with the C++ interface
   Nc3File::FileFormat ncFormat = (Nc3File::FileFormat) _params->file_format;
-  _ncFile = new Nc3File(path.c_str(), Nc3File::Replace, NULL, 0, ncFormat);
+  _ncFile = new Nc3File(path.c_str(), Nc3File::Write, NULL, 0, ncFormat);
   
   if (!_ncFile || !_ncFile->is_valid()) {
     cerr << "ERROR - Cannot open netCDF file: " << path << endl;
@@ -496,7 +509,10 @@ int NcOutput::_openNcFile(const string &path)
   // on any failure, and leaves any other error handling to the
   // calling program.
   
-  _ncErr = new Nc3Error(Nc3Error::silent_nonfatal);
+  if(_params->debug == 0)
+    _ncErr = new Nc3Error(Nc3Error::silent_nonfatal);
+  else
+    _ncErr = new Nc3Error(Nc3Error::verbose_nonfatal);
  
   return 0;
 
@@ -732,7 +748,7 @@ int NcOutput::_addTimeVariables(time_t genTime, long int leadSecs)
 
     // Forecast reference time
     if (!(_forecastReferenceVar = _ncFile->add_var(NcOutput::forecast_reference_time,
-                                                   nc3Double, _timeDim))) 
+                                                   nc3Double)))
     {
       cerr << "ERROR - Cannot add " << NcOutput::forecast_reference_time << " variable" << endl;
       cerr << _ncErr->get_errmsg() << endl;
@@ -1185,7 +1201,7 @@ int NcOutput::_addFieldDataVariables()
     
     // Add NcVar to Nc3File object and the attributes relevant to no data packing
     if (_params->debug) {
-      cerr << "adding field: " << fieldName << endl;
+      cout << "adding field: " << fieldName << endl;
     }
     
     Nc3Type ncType = nc3Float;
@@ -1225,6 +1241,8 @@ int NcOutput::_addFieldDataVariables()
 	cerr << "\txDim: '" << xDim->name() << "' size: " << xDim->size() << endl;
       return -1;
     }
+
+
   
     // data packing scheme for non-floats
     // We map the valid range (_minOut, _maxOut) to ( -2^(n-1)+ 1, 2^(n-1) -1)
@@ -1278,19 +1296,23 @@ int NcOutput::_addFieldDataVariables()
       Nc3Var *latVar = _uniqueGridxVar[_uniqueGrid[i]];
       Nc3Var *lonVar = _uniqueGridyVar[_uniqueGrid[i]];  
       Nc3Var *zVar = _uniqueVerticalzVar[_uniqueGrid[i]];
-      Nc3Var *projVar = _uniqueGridprojVar[_uniqueGrid[i]];  
-      if(latVar == NULL || lonVar == NULL || projVar == NULL) {
-	cerr << "ERROR - Cannot find unique lat/lon proj variables matching variable " << _fieldInfo[i].name << endl;
+
+      if(latVar == NULL || lonVar == NULL || zVar == NULL) {
+	cerr << "ERROR - Cannot find unique lat/lon/z proj variables matching variable " << _fieldInfo[i].name << endl;
 	return -1;
       }
       sprintf(auxVarNames, "%s %s %s %s", _timeVar->name(), zVar->name(), latVar->name(), lonVar->name());
       iret |= !fieldVar->add_att(NcOutput::coordinates, auxVarNames);
       
-      sprintf(auxVarNames, "%s", projVar->name());
-      iret |= !fieldVar->add_att(NcOutput::grid_mapping, auxVarNames);
-
-
     }
+
+    Nc3Var *projVar = _uniqueGridprojVar[_uniqueGrid[i]];
+    if(projVar == NULL) {
+      cerr << "ERROR - Cannot find unique lat/lon proj variables matching variable " << _fieldInfo[i].name << endl;
+      return -1;
+    }
+    iret |= !fieldVar->add_att(NcOutput::grid_mapping, projVar->name());
+
 
     if(iret != 0) {
       cerr << "ERROR - Failed to add variable attributes for " << _fieldInfo[i].name << endl;
@@ -1298,8 +1320,8 @@ int NcOutput::_addFieldDataVariables()
       return -1;
     }
 
-    // Set compression if we are working with netCDF4 hdf files
 
+    // Set compression if requested and we are working with netCDF4 hdf files
     if (_params->compress_data &&
 	(_params->file_format == Params::NETCDF4 || _params->file_format == Params::NETCDF4_CLASSIC)) {
 
@@ -1317,10 +1339,103 @@ int NcOutput::_addFieldDataVariables()
 				    deflateControl, newLevel);
       if (iret != NC_NOERR) {
 	cerr << "ERROR - Failed setting compression for variable: " << _fieldInfo[i].name << endl;
-	cerr << _ncErr->get_errmsg() << endl;
+	if(iret == NC_EBADID)
+	  cerr << "Bad ncid. " << endl;
+	if(iret == NC_ENOTNC4)
+	  cerr << "Not a netCDF-4 file. " << endl;
+	if(iret == NC_ENOTVAR)
+	  cerr << "Can't find this variable. " << endl;
+	if(iret == NC_ELATEDEF)
+	  cerr << "This variable has already been the subject of a nc_enddef call." << endl;
+	if(iret == NC_ENOTINDEFINE)
+	  cerr << "Not in define mode. This is returned for netCDF classic or 64-bit offset files, or for netCDF-4 files, when they were been created with NC_STRICT_NC3 flag. (see nc_create). " << endl;
+	if(iret == NC_EPERM)
+	  cerr << "Attempt to create object in read-only file. " << endl;
+	if(iret == NC_EINVAL)
+	  cerr << "Invalid deflate_level. The deflate level must be between 0 and 9, inclusive." << endl;
+
 	return -1;
       }
     }
+
+
+
+    // Force zdimension chunking to 1 if requested and we are working with netCDF4 hdf files
+    if(_params->force_zchunk_size && 
+       (_params->file_format == Params::NETCDF4 || _params->file_format == Params::NETCDF4_CLASSIC)) {
+
+      int fileId = _ncFile->id();
+      int varId = fieldVar->id();
+
+      Nc3Type ncType = nc3Float;
+      if(_fieldInfo[i].ncType == Params::DATA_PACK_BYTE)
+	ncType = nc3Byte;
+      if(_fieldInfo[i].ncType == Params::DATA_PACK_SHORT)
+	ncType = nc3Short;
+
+      Nc3Dim *zDim = _uniqueVerticalzDim[_uniqueVertical[i]];
+      Nc3Dim *xDim = _uniqueGridxDim[_uniqueGrid[i]];
+      Nc3Dim *yDim = _uniqueGridyDim[_uniqueGrid[i]];
+      
+      size_t max_chunk_size = _params->max_chunk_size;
+      size_t *chunk_size = new size_t[4];
+
+      int type_size = 4;
+      if(ncType == nc3Short)
+	type_size = 2;
+      if(ncType == nc3Byte)
+	type_size = 1;
+
+      size_t zdimsize = zDim->size();
+      size_t dim1size = xDim->size();
+      size_t dim2size = yDim->size();
+      if(_fieldInfo[i].gridInfo.ncfGridName.compare(NcOutput::rotated_latitude_longitude) == 0) {
+	size_t dim1size = yDim->size();
+	size_t dim2size = xDim->size();
+      }
+
+
+      int dim_nchunks = 2;  // Start with 2 chunk in x/y dims
+      while( max_chunk_size < (ceil( float(dim1size) / float(dim_nchunks) ) *
+			       ceil( float(dim2size) / float(dim_nchunks) ) ) * type_size )
+	{
+	  // increase nchunks up while keeping vertical nchunks at 1
+	  dim_nchunks++;
+	}
+
+      chunk_size[0] = 1;
+      chunk_size[1] = 1;
+      chunk_size[2] = ceil( float(dim2size) / float(dim_nchunks) );
+      chunk_size[3] = ceil( float(dim1size) / float(dim_nchunks) );
+
+      if (_params->debug) {
+	cout << "Requesting Chunk Sizes: " << chunk_size[0] << " " << chunk_size[1] << " " << chunk_size[2] << " " << chunk_size[3] << 
+	  "  Total: " << (zdimsize * ceil( float(dim1size) / float(dim_nchunks) ) * ceil( float(dim2size) / float(dim_nchunks) ) ) << endl;
+      }
+
+      int iret = nc_def_var_chunking(fileId, varId, NC_CHUNKED, chunk_size);
+
+      if (iret != NC_NOERR) {
+	cerr << "ERROR - Failed setting chunking for variable: " << _fieldInfo[i].name << endl;
+	if(iret == NC_EBADID)
+	  cerr << "Bad ncid. " << endl;
+	if(iret == NC_ENOTNC4)
+	  cerr << "Not a netCDF-4 file. " << endl;
+	if(iret == NC_ENOTVAR)
+	  cerr << "Can't find this variable. " << endl;
+	if(iret == NC_ELATEDEF)
+	  cerr << "This variable has already been the subject of a nc_enddef call." << endl;
+	if(iret == NC_ENOTINDEFINE)
+	  cerr << "Not in define mode. This is returned for netCDF classic or 64-bit offset files, or for netCDF-4 files, when they were been created with NC_STRICT_NC3 flag. (see nc_create). " << endl;
+	if(iret = NC_ESTRICTNC3)
+	  cerr << "Unable to set requested chunk size, may be too big. Try reducing max_chunk_size parameter. " << endl;
+	if(iret == NC_EPERM)
+	  cerr << "Attempt to create object in read-only file. " << endl;
+
+	return -1;
+      }
+    }
+
 
     _fieldVar.push_back(fieldVar);
 
@@ -1618,8 +1733,6 @@ int NcOutput::_putFieldDataVariables()
     }
 
     fieldVar->set_cur((long int)0);
-    // long int field_size = _fieldInfo[i].gridInfo.nx *
-    //   _fieldInfo[i].gridInfo.ny * _fieldInfo[i].vlevelInfo.nz;
 
     int iret;
     if(_fieldInfo[i].ncType == Params::DATA_PACK_BYTE)
@@ -1641,151 +1754,221 @@ int NcOutput::_putFieldDataVariables()
   return 0;
 }
 
-void NcOutput::_remap(fl32 *data, Grib2Nc::FieldInfo* fieldInfo)
+void NcOutput::_remap(fl32 **data, Grib2Nc::FieldInfo* fieldInfo)
 {
-  /*
-  MdvxRemapLut lut;
 
-  switch( _params->out_projection_info.type) {
-  case Params::PROJ_LATLON:
-    inputField->remap2Latlon(lut, _params->out_grid_info.nx, _params->out_grid_info.ny, 
-			_params->out_grid_info.minx, _params->out_grid_info.miny, 
-			_params->out_grid_info.dx, _params->out_grid_info.dy );
-    break;
+  //MdvxProj inproj, outproj;
+  Pjg inpjg, outpjg;
 
-  case Params::PROJ_LAMBERT_CONF:
-    if(inputField->getFieldHeader().proj_type == Mdvx::PROJ_LAMBERT_CONF)
-      _remapLambertLambert(inputField);
-    else
-      inputField->remap2Lc2(lut, _params->out_grid_info.nx, _params->out_grid_info.ny, 
-			    _params->out_grid_info.minx, _params->out_grid_info.miny, 
-			    _params->out_grid_info.dx, _params->out_grid_info.dy,
-			    _params->out_projection_info.origin_lat, 
-			    _params->out_projection_info.origin_lon,
-			    _params->out_projection_info.ref_lat_1, 
-			    _params->out_projection_info.ref_lat_2 );
-    break;
-  default:
-    cerr <<"-- unknown projection; remapping failed." << endl;
+  if(fieldInfo->gridInfo.ncfGridName.compare(NcOutput::latitude_longitude) == 0) {
+
+    inpjg.initLatlon(fieldInfo->gridInfo.nx,
+		     fieldInfo->gridInfo.ny,
+		     1, // nz
+		     fieldInfo->gridInfo.dx,
+		     fieldInfo->gridInfo.dy,
+		     1.0,  // dz
+		     fieldInfo->gridInfo.minx,
+		     fieldInfo->gridInfo.miny,
+		     0.0  // minz 
+		     );
+    
+  } else if(fieldInfo->gridInfo.ncfGridName.compare(NcOutput::lambert_conformal_conic) == 0) {
+    
+    inpjg.initLc2(fieldInfo->gridInfo.proj_origin_lat,
+		  fieldInfo->gridInfo.proj_origin_lon,
+		  fieldInfo->gridInfo.lat1,
+		  fieldInfo->gridInfo.lat2,
+		  fieldInfo->gridInfo.nx,
+		  fieldInfo->gridInfo.ny,
+		  1, // nz
+		  fieldInfo->gridInfo.dx,
+		  fieldInfo->gridInfo.dy,
+		  1.0,  // dz
+		  fieldInfo->gridInfo.minx,
+		  fieldInfo->gridInfo.miny,
+		  0.0  // minz 
+		  );
+
+  } else if(fieldInfo->gridInfo.ncfGridName.compare(NcOutput::polar_stereographic) == 0) {
+    PjgTypes::pole_type_t poleType = PjgTypes::POLE_NORTH;
+    if(fieldInfo->gridInfo.pole_type != 0)
+      poleType = PjgTypes::POLE_SOUTH;
+    
+    inpjg.initPolarStereo(fieldInfo->gridInfo.tan_lon,
+			  poleType,
+			  fieldInfo->gridInfo.central_scale,
+			  fieldInfo->gridInfo.nx,
+			  fieldInfo->gridInfo.ny,
+			  1, // nz
+			  fieldInfo->gridInfo.dx,
+			  fieldInfo->gridInfo.dy,
+			  1.0,  // dz
+			  fieldInfo->gridInfo.minx,
+			  fieldInfo->gridInfo.miny,
+			  0.0  // minz 
+			  );			  
+
+  } else if(fieldInfo->gridInfo.ncfGridName.compare(NcOutput::mercator) == 0) {
+    
+    inpjg.initMercator(fieldInfo->gridInfo.proj_origin_lat,
+		       fieldInfo->gridInfo.proj_origin_lon,
+		       fieldInfo->gridInfo.nx,
+		       fieldInfo->gridInfo.ny,
+		       1, // nz
+		       fieldInfo->gridInfo.dx,
+		       fieldInfo->gridInfo.dy,
+		       1.0,  // dz
+		       fieldInfo->gridInfo.minx,
+		       fieldInfo->gridInfo.miny,
+		       0.0  // minz 
+		       );
+
+  } else {
+    cerr << "ERROR - uninmplemented data projection; remapping failed." << endl;
+    return;
   }
-  */
-}
-/*
-void NcOutput::_remapLambertLambert(fl32 *data, Grib2Nc::FieldInfo fieldInfo)
-{
 
-  Mdvx::field_header_t fhdr = inputField->getFieldHeader();
-  
+  if(_params->out_projection_info.type == Params::PROJ_LATLON) {
+    
+    outpjg.initLatlon(_params->out_grid_info.nx,
+		      _params->out_grid_info.ny,
+		      1, // nz
+		      _params->out_grid_info.dx,
+		      _params->out_grid_info.dy,
+		      1.0,  // dz
+		      _params->out_grid_info.minx,
+		      _params->out_grid_info.miny,
+		      0.0  // minz 
+		      );
+
+  } else if(_params->out_projection_info.type == Params::PROJ_LAMBERT_CONF) {
+
+    outpjg.initLc2(_params->out_projection_info.origin_lat, 
+		   _params->out_projection_info.origin_lon,
+		   _params->out_projection_info.ref_lat_1,
+		   _params->out_projection_info.ref_lat_2,
+		   _params->out_grid_info.nx,
+		   _params->out_grid_info.ny,
+		   1, // nz
+		   _params->out_grid_info.dx,
+		   _params->out_grid_info.dy,
+		   1.0,  // dz
+		   _params->out_grid_info.minx,
+		   _params->out_grid_info.miny,
+		   0.0  // minz 
+		   );
+    
+  } else {
+    cerr <<"-- unknown projection; remapping failed." << endl;
+    return;
+  }  
+ 
   int nx = _params->out_grid_info.nx;
   int ny = _params->out_grid_info.ny;
-  int nz = fhdr.nz;
+  int nz = fieldInfo->vlevelInfo.nz;
 
-  MdvxProj inproj, outproj;
-  outproj.initLambertConf(_params->out_projection_info.origin_lat, 
-			  _params->out_projection_info.origin_lon,
-			  _params->out_projection_info.ref_lat_1,
-			  _params->out_projection_info.ref_lat_2);
-
-  outproj.setGrid(nx, ny, _params->out_grid_info.dx, _params->out_grid_info.dy,
-		  _params->out_grid_info.minx, _params->out_grid_info.miny);
-  
-  inproj.init(fhdr);
-  
   float *odata = new float[nx*ny*nz];
-  float *idata = (float *)inputField->getVol();
+  float *idata = *data;
 
   double lat, lon;
-  double ix, iy;
+  int ix, iy;
   for(int y = 0; y < ny; y++) 
   {
     for(int x = 0; x < nx; x++)
     {
 
-      outproj.xyIndex2latlon(x, y, lat, lon);
+      outpjg.xyIndex2latlon(x, y, lat, lon);
 
-      int ingrid = inproj.latlon2xyIndex(lat, lon, ix, iy);
+      int ingrid = inpjg.latlon2xyIndex(lat, lon, ix, iy);
 
       // If we are within 1/100th of the dx past the end of the grid
       // allow it to be set to the end of the grid.  
       // (rounding issue from projection library)
-      if(ix > fhdr.nx-1 && ix < fhdr.nx -.99)
-	ix = fhdr.nx-1;
-      if(iy > fhdr.ny-1 && iy < fhdr.ny -.99)
-	iy = fhdr.ny-1;
+      if(ix > fieldInfo->gridInfo.nx-1 && ix < fieldInfo->gridInfo.nx -.99)
+	ix = fieldInfo->gridInfo.nx-1;
+      if(iy > fieldInfo->gridInfo.ny-1 && iy < fieldInfo->gridInfo.ny -.99)
+	iy = fieldInfo->gridInfo.ny-1;
 
       if(ingrid != -1 && ix >= 0 && iy >= 0)
 	for(int z = 0; z < nz; z++)
-	  odata[(z*ny*nx)+(y*nx)+x] = _interp2(&fhdr, ix, iy, z, idata);
+	  odata[(z*ny*nx)+(y*nx)+x] = _interp2(fieldInfo, ix, iy, z, idata);
       else
 	for(int z = 0; z < nz; z++)
-	  odata[(z*ny*nx)+(y*nx)+x] = fhdr.missing_data_value;
+	  odata[(z*ny*nx)+(y*nx)+x] = fieldInfo->missing;
     }
   }
 
-  fhdr.nx = _params->out_grid_info.nx;
-  fhdr.ny = _params->out_grid_info.ny;
-  fhdr.grid_minx = _params->out_grid_info.minx;
-  fhdr.grid_miny = _params->out_grid_info.miny;
-  fhdr.grid_dx = _params->out_grid_info.dx;
-  fhdr.grid_dy = _params->out_grid_info.dy;
-  fhdr.proj_type = _params->out_projection_info.type;
-  fhdr.proj_origin_lat = _params->out_projection_info.origin_lat;
-  fhdr.proj_origin_lon = _params->out_projection_info.origin_lon;
-  fhdr.proj_param[0] = _params->out_projection_info.ref_lat_1;
-  fhdr.proj_param[1] = _params->out_projection_info.ref_lat_2;
-  fhdr.volume_size =
-    fhdr.nx * fhdr.ny * fhdr.nz * fhdr.data_element_nbytes; 
+  if(_params->out_projection_info.type == Params::PROJ_LATLON) {
+    fieldInfo->gridInfo.ncfGridName = NcOutput::latitude_longitude;
+  } else if(_params->out_projection_info.type == Params::PROJ_LAMBERT_CONF) {
+    fieldInfo->gridInfo.ncfGridName = NcOutput::lambert_conformal_conic;
+  }
 
-  inputField->setFieldHeader(fhdr);
-  inputField->setVolData(odata, fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
+  fieldInfo->gridInfo.nx = _params->out_grid_info.nx;
+  fieldInfo->gridInfo.ny = _params->out_grid_info.ny;
+  fieldInfo->gridInfo.minx = _params->out_grid_info.minx;
+  fieldInfo->gridInfo.miny = _params->out_grid_info.miny;
+  fieldInfo->gridInfo.dx = _params->out_grid_info.dx;
+  fieldInfo->gridInfo.dy = _params->out_grid_info.dy;
+  fieldInfo->gridInfo.proj_origin_lat = _params->out_projection_info.origin_lat;
+  fieldInfo->gridInfo.proj_origin_lon = _params->out_projection_info.origin_lon;
+  fieldInfo->gridInfo.lat1 = _params->out_projection_info.ref_lat_1;
+  fieldInfo->gridInfo.lat2 = _params->out_projection_info.ref_lat_2;
 
-  delete []odata;
+  delete []idata;
+  *data = odata;
 
 }
 
-float NcOutput::_interp2(Grib2Nc::FieldInfo, , double x, double y, int z, float *field)
+float NcOutput::_interp2(Grib2Nc::FieldInfo* fieldInfo, double x, double y, int z, float *field)
 {
   int ix = floor(x);
   int iy = floor(y);
   int ix1 = ix+1;
   int iy1 = iy+1;
+  int nx = fieldInfo->gridInfo.nx;
+  int ny = fieldInfo->gridInfo.ny;
+
 
   // Allow wraping in longitude if x is between -.5 and 0, and a global lat/lon model
-  if(x > -.5 && ix == -1 && fieldHdr->proj_type == 0 && fieldHdr->proj_origin_lon == 0 &&
-     (fieldHdr->nx * fieldHdr->grid_dx) + fieldHdr->grid_minx > 360.0)
-    ix = floor((360.0 - fieldHdr->grid_minx) / fieldHdr->grid_dx);
-  if(field == NULL || ix < 0 || y < 0 || ix1 > fieldHdr->nx || iy1 > fieldHdr->ny)
-    return fieldHdr->missing_data_value;
+  if(x > -.5 && ix == -1 && fieldInfo->gridInfo.proj_origin_lon == 0 &&
+     fieldInfo->gridInfo.ncfGridName.compare(NcOutput::latitude_longitude) == 0 &&
+     (nx * fieldInfo->gridInfo.dx) + fieldInfo->gridInfo.minx > 360.0)
+    ix = floor((360.0 - fieldInfo->gridInfo.minx) / fieldInfo->gridInfo.dx);
+  if(field == NULL || ix < 0 || y < 0 || ix1 > nx || iy1 > ny)
+    return fieldInfo->missing;
   if(z < 0)
     z = 0;
-  if(z >= fieldHdr->nz)
-    z = fieldHdr->nz -1;
-  if(field[(z*fieldHdr->ny*fieldHdr->nx)+(iy*fieldHdr->nx)+ix] == fieldHdr->missing_data_value ||
-     field[(z*fieldHdr->ny*fieldHdr->nx)+(iy*fieldHdr->nx)+ix1] == fieldHdr->missing_data_value ||
-     field[(z*fieldHdr->ny*fieldHdr->nx)+((iy1)*fieldHdr->nx)+ix] == fieldHdr->missing_data_value ||
-     field[(z*fieldHdr->ny*fieldHdr->nx)+((iy1)*fieldHdr->nx)+ix1] == fieldHdr->missing_data_value)
-    return fieldHdr->missing_data_value;
+  if(z >= fieldInfo->vlevelInfo.nz)
+    z = fieldInfo->vlevelInfo.nz -1;
+
+  if(field[(z*ny*nx)+(iy*nx)+ix] == fieldInfo->missing ||
+     field[(z*ny*nx)+(iy*nx)+ix1] == fieldInfo->missing ||
+     field[(z*ny*nx)+((iy1)*nx)+ix] == fieldInfo->missing ||
+     field[(z*ny*nx)+((iy1)*nx)+ix1] == fieldInfo->missing)
+    return fieldInfo->missing;
 
   float val;
   // Allow being exactly on the last point in the grid (x or y or both)
-  if(ix1 == fieldHdr->nx && iy1 == fieldHdr->ny)
-    val = field[(z*fieldHdr->ny*fieldHdr->nx)+(iy*fieldHdr->nx)+ix] * (1-(x-ix));
-  else if(ix1 == fieldHdr->nx)
-    val = field[(z*fieldHdr->ny*fieldHdr->nx)+(iy*fieldHdr->nx)+ix] * (1-(y-iy)) + 
-      field[(z*fieldHdr->ny*fieldHdr->nx)+((iy1)*fieldHdr->nx)+ix] * (y-iy);
-  else if(iy1 == fieldHdr->ny)
-    val = field[(z*fieldHdr->ny*fieldHdr->nx)+(iy*fieldHdr->nx)+ix] * (1-(x-ix)) + 
-	   field[(z*fieldHdr->ny*fieldHdr->nx)+(iy*fieldHdr->nx)+ix1] * (x-ix);
+  if(ix1 == nx && iy1 == ny)
+    val = field[(z*ny*nx)+(iy*nx)+ix] * (1-(x-ix));
+  else if(ix1 == nx)
+    val = field[(z*ny*nx)+(iy*nx)+ix] * (1-(y-iy)) + 
+      field[(z*ny*nx)+((iy1)*nx)+ix] * (y-iy);
+  else if(iy1 == ny)
+    val = field[(z*ny*nx)+(iy*nx)+ix] * (1-(x-ix)) + 
+	   field[(z*ny*nx)+(iy*nx)+ix1] * (x-ix);
   else  // Normal 2D interpolation
-    val = (field[(z*fieldHdr->ny*fieldHdr->nx)+(iy*fieldHdr->nx)+ix] * (1-(x-ix)) + 
-	   field[(z*fieldHdr->ny*fieldHdr->nx)+(iy*fieldHdr->nx)+ix1] * (x-ix)) * (1-(y-iy)) + 
-      (field[(z*fieldHdr->ny*fieldHdr->nx)+((iy1)*fieldHdr->nx)+ix] * (1-(x-ix)) + 
-       field[(z*fieldHdr->ny*fieldHdr->nx)+((iy1)*fieldHdr->nx)+ix1] * (x-ix)) * (y-iy);
+    val = (field[(z*ny*nx)+(iy*nx)+ix] * (1-(x-ix)) + 
+	   field[(z*ny*nx)+(iy*nx)+ix1] * (x-ix)) * (1-(y-iy)) + 
+      (field[(z*ny*nx)+((iy1)*nx)+ix] * (1-(x-ix)) + 
+       field[(z*ny*nx)+((iy1)*nx)+ix1] * (x-ix)) * (y-iy);
   
   if(val != val)
-    return fieldHdr->missing_data_value;
+    return fieldInfo->missing;
   else
     return val;
 
 }
-*/
+

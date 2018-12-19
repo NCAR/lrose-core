@@ -24,7 +24,7 @@
 ///////////////////////////////////////////////////////////////////////////
 //  rucIngest top-level application class
 //
-//  $Id: RucIngest.cc,v 1.18 2016/03/07 01:23:11 dixon Exp $
+//  $Id: RucIngest.cc,v 1.19 2018/10/08 20:37:11 dixon Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -82,7 +82,7 @@ RucIngest::RucIngest(int argc, char **argv) :
 
   // get TDRP params
   _params = new Params();
-  char *paramsPath = "unknown";
+  char *paramsPath = (char *) "unknown";
   if (_params->loadFromArgs(argc, argv, _args->override.list, 
 			    &paramsPath)) {
     _errStr += "\tProblem with TDRP parameters.\n";

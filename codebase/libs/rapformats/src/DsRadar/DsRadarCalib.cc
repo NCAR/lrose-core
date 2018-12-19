@@ -709,6 +709,10 @@ int DsRadarCalib::readFromXmlFile(const string &calPath, string &errStr)
   }
   fclose(calFile);
 
+  // null terminate xmlBuf
+
+  xmlBuf[fileLen] = '\0';
+
   string xmlErrStr;
   if (setFromXml(xmlBuf, xmlErrStr)) {
     TaStr::AddStr(errStr, "ERROR decoding XML file: ", calPath);

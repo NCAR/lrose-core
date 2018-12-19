@@ -48,7 +48,7 @@ using namespace std;
 ProcessServer::ProcessServer(const string & executableName,
 			     const string & instanceName,
 			     int port,
-			     int maxClients /* = 128 */,
+			     int maxClients /* = 1024 */,
 			     bool isDebug /* = false */,
 			     bool isVerbose /* = false */) :
 	_isChild(false),
@@ -101,11 +101,21 @@ ProcessServer::ProcessServer(const string & executableName,
   char *DS_COMM_TIMEOUT_MSECS = getenv("DS_COMM_TIMEOUT_MSECS");
   if (DS_COMM_TIMEOUT_MSECS != NULL) {
     int timeout;
-    if (sscanf(DS_COMM_TIMEOUT_MSECS, "%d", &timeout)) {
+    if (sscanf(DS_COMM_TIMEOUT_MSECS, "%d", &timeout) == 1) {
       _commTimeoutMsecs = timeout;
     }
   }
   
+  // override max clients from environment?
+  
+  char *DS_SERVER_MAX_CLIENTS = getenv("DS_SERVER_MAX_CLIENTS");
+  if (DS_SERVER_MAX_CLIENTS != NULL) {
+    int max_clients;
+    if (sscanf(DS_SERVER_MAX_CLIENTS, "%d", &max_clients) == 1) {
+      _maxClients = max_clients;
+    }
+  }
+
   // Open socket on the port.
   _serverSocket = new ServerSocket();
   if (_serverSocket->openServer(_port) < 0) {
@@ -121,7 +131,8 @@ ProcessServer::ProcessServer(const string & executableName,
   }
   
   if (_isDebug) {
-    cerr << "Server has opened ServerSocket at port " << _port << "." << endl;
+    cerr << "ProcessServer has opened ServerSocket at port " << _port << endl;
+    cerr << "  _maxClients: " << _maxClients << endl;
   }
   
   // Set status.

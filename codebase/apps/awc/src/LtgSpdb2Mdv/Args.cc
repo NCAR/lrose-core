@@ -100,6 +100,8 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	  uconvert_to_utime(&start);
 	  startTime = start.unix_time;
 	  //TDRP_add_override(&override, tmp_str);
+          sprintf(tmp_str, "mode = ARCHIVE;");
+          TDRP_add_override(&override, tmp_str);
 	}
       } else {
 	iret = -1;
@@ -118,6 +120,8 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	  uconvert_to_utime(&end);
 	  endTime = end.unix_time;
 	  //TDRP_add_override(&override, tmp_str);
+          sprintf(tmp_str, "mode = ARCHIVE;");
+          TDRP_add_override(&override, tmp_str);
 	}
       } else {
 	iret = -1;

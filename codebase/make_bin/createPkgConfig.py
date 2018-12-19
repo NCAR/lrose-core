@@ -314,20 +314,21 @@ def formatted(set_or_list):
 
 #
 # order the libraries based on the file defining the order
-# ..... lrose-core/docs/lrose_libs_order.txt
+# ..... lrose-core/codebase/make_bin/lrose_libs_order.txt
 # return the list of libraries in the correct order
 def ordered(set_or_list):
+
     orderedList = []
 
     # read the prescribed order for the libraries
     # and create a dictionary of them, with the number of votes as their value
     order = []
+    path = './make_bin/lrose_libs_order.txt'
     try:
-        fp = open('../docs/lrose_libs_order.txt', 'r')
+        fp = open(path, 'r')
     except IOError as e:
         print >>sys.stdout, "ERROR - ", thisScriptName
         print >>sys.stdout, "  Cannot open file:", path
-        print >>sys.stdout, "  dir: ", options.dir
         return orderedList
 
     lines = fp.readlines()
@@ -370,7 +371,6 @@ def getValueListForKey(path, key):
     except IOError as e:
         print >>sys.stdout, "ERROR - ", thisScriptName
         print >>sys.stdout, "  Cannot open file:", path
-        print >>sys.stdout, "  dir: ", options.dir
         return valueList
 
     lines = fp.readlines()
@@ -445,7 +445,6 @@ def getKeyValuesFromFile(path, keys):
     except IOError as e:
         print >>sys.stdout, "ERROR - ", thisScriptName
         print >>sys.stdout, "  Cannot open file:", path
-        print >>sys.stdout, "  dir: ", options.dir
         return valueList
 
     lines = fp.readlines()
@@ -488,8 +487,8 @@ if __name__ == "__main__":
     variables_libs, idict_libs = main(libs_path, module_keyword)
 
     if (using_apps):
-        apps_path = './apps'                                                                               
-        module_keyword = 'TARGET_FILE'                                                                     
+        apps_path = './apps'
+        module_keyword = 'TARGET_FILE'
         variables_apps, idict_apps = main(apps_path, module_keyword)  
     else:
         variables_apps = set()

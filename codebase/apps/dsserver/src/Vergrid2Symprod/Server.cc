@@ -329,7 +329,7 @@ void Server::add_truth_text(Params *serverParams, Symprod &prod,
   add_text(serverParams, prod,
 	   serverParams->truth_color,
 	   Symprod::VERT_ALIGN_TOP,
-	   "Now",
+	   (char *) "Now",
 	   percent_coverage,
 	   CenterLat, CenterLon);
   
@@ -350,7 +350,7 @@ void Server::add_forecast_text(Params *serverParams,
 	   prod,
 	   serverParams->forecast_color,
 	   Symprod::VERT_ALIGN_BOTTOM,
-	   "Fcast",
+	   (char *) "Fcast",
 	   percent_coverage,
 	   CenterLat, CenterLon);
   

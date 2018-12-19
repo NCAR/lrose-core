@@ -52,6 +52,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/Path.hh>
 #include <toolsa/TaXml.hh>
+#include <didss/DsInputPath.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include "TsStatusMonitor.hh"
 
@@ -64,13 +65,13 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
 {
 
   isOK = true;
-  _pulseLatestTime = time(NULL);
-  _prevSpdbTime = time(NULL);
-  _prevNagiosTime = time(NULL);
-  _iwrfStatusLatestTime = time(NULL);
+  _pulseLatestTime = 0;
+  _prevSpdbTime = 0;
+  _prevNagiosTime = 0;
+  _iwrfStatusLatestTime = 0;
   _iwrfStatusXmlPktSeqNum = 0;
 
-  _movementMonitorTime = time(NULL);
+  _movementMonitorTime = 0;
   _moveCheckAz = -999;
   _moveCheckEl = -999;
 
@@ -120,23 +121,66 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
     isOK = false;
     return;
   }
-  
+
+  // check params
+
+  if (_params.mode == Params::ARCHIVE) {
+    _archiveStartTime = DateTime::parseDateTime(_params.archive_start_time);
+    if (_archiveStartTime == DateTime::NEVER) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Bad archive_start_time: " << _params.archive_start_time << endl;
+      isOK = false;
+    }
+    _archiveEndTime = DateTime::parseDateTime(_params.archive_end_time);
+    if (_archiveEndTime == DateTime::NEVER) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Bad archive_end_time: " << _params.archive_end_time << endl;
+      isOK = false;
+    }
+    if (!isOK) {
+      return;
+    }
+  }
+
   // create the reader from FMQ
   
   IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     iwrfDebug = IWRF_DEBUG_VERBOSE;
-  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+  } else if (_params.debug >= Params::DEBUG_NORM) {
     iwrfDebug = IWRF_DEBUG_NORM;
   } 
-  _pulseReader = new IwrfTsReaderFmq(_params.fmq_name, iwrfDebug);
-  _pulseReader->setNonBlocking(100);
+
+  if (_params.mode == Params::REALTIME_FMQ) {
+    _pulseReader = new IwrfTsReaderFmq(_params.fmq_name, iwrfDebug);
+    _pulseReader->setNonBlocking(100);
+  } else if (_params.mode == Params::FILELIST) {
+    _pulseReader = new IwrfTsReaderFile(_args.inputFileList, iwrfDebug);
+  } else if (_params.mode == Params::ARCHIVE) {
+    DsInputPath input(_progName,
+                      _params.debug >= Params::DEBUG_VERBOSE,
+                      _params.archive_data_dir,
+                      _archiveStartTime,
+                      _archiveEndTime);
+    vector<string> paths = input.getPathList();
+    if (paths.size() < 1) {
+      cerr << "ERROR: " << _progName << " - ARCHIVE mode" << endl;
+      cerr << "  No paths found, dir: " << _params.archive_data_dir << endl;
+      cerr << "  Start time: " << DateTime::strm(_archiveStartTime) << endl;
+      cerr << "  End time: " << DateTime::strm(_archiveEndTime) << endl;
+      isOK = false;
+      return;
+    }
+    _pulseReader = new IwrfTsReaderFile(paths, iwrfDebug);
+  }
   
   // init process mapper registration
   
-  PMU_auto_init((char *) _progName.c_str(),
-                _params.instance,
-                PROCMAP_REGISTER_INTERVAL);
+  if (_params.mode == Params::REALTIME_FMQ) {
+    PMU_auto_init((char *) _progName.c_str(),
+                  _params.instance,
+                  PROCMAP_REGISTER_INTERVAL);
+  }
 
   // SPDB if needed
 
@@ -147,6 +191,20 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
     if (_params.compress_spdb) {
       _spdb.setChunkCompressOnPut(Spdb::COMPRESSION_GZIP);
     }
+  }
+  switch (_params.spdb_put_mode) {
+    case Params::PUT_OVER:
+      _spdb.setPutMode(Spdb::putModeOver);
+      break;
+    case Params::PUT_ADD:
+      _spdb.setPutMode(Spdb::putModeAdd);
+      break;
+    case Params::PUT_ADD_UNIQUE:
+      _spdb.setPutMode(Spdb::putModeAddUnique);
+      break;
+    case Params::PUT_ONCE:
+      _spdb.setPutMode(Spdb::putModeOnce);
+      break;
   }
 
   // allocate arrays for test pulse if needed
@@ -240,6 +298,20 @@ TsStatusMonitor::~TsStatusMonitor()
 }
 
 //////////////////////////////////////////////////
+// get latest time
+// now in realtime mode
+// latest pulse time in archive mode
+
+time_t TsStatusMonitor::_getLatestTime()
+{
+  if (_params.mode == Params::REALTIME_FMQ) {
+    return time(NULL); // now
+  } else {
+    return _pulseLatestTime;
+  }
+}
+
+//////////////////////////////////////////////////
 // Run
 
 int TsStatusMonitor::Run ()
@@ -253,6 +325,24 @@ int TsStatusMonitor::Run ()
     cerr << "Running TsStatusMonitor - verbose debug mode" << endl;
   } else if (_params.debug) {
     cerr << "Running TsStatusMonitor - debug mode" << endl;
+  }
+  
+  if (_params.mode == Params::REALTIME_FMQ) {
+    return _runRealtime();
+  } else {
+    return _runArchive();
+  }
+
+}
+
+//////////////////////////////////////////////////
+// Run in realtime mode
+
+int TsStatusMonitor::_runRealtime()
+{
+  
+  if (_params.debug) {
+    cerr << "  REALTIME mode" << endl;
   }
   
   while (true) {
@@ -271,6 +361,8 @@ int TsStatusMonitor::Run ()
     // read next pulse
 
     IwrfTsPulse *pulse = _pulseReader->getNextPulse();
+    _pulseLatestTime = pulse->getTime();
+
     if (pulse == NULL) {
       
       if (_pulseReader->getTimedOut()) {
@@ -287,7 +379,7 @@ int TsStatusMonitor::Run ()
       
       // handle this pulse
       
-      if (_handlePulse(*pulse)) {
+      if (_handlePulseRealtime(*pulse)) {
         delete pulse;
         return -1;
       }
@@ -299,7 +391,7 @@ int TsStatusMonitor::Run ()
     
     if (_params.write_to_nagios) {
       if (now - _prevNagiosTime > _params.nagios_interval_secs) {
-        _updateNagios(now);
+        _updateNagios();
         _prevNagiosTime = now;
       }
     }
@@ -308,9 +400,63 @@ int TsStatusMonitor::Run ()
 
     if (_params.write_to_spdb) {
       if (now - _prevSpdbTime > _params.spdb_interval_secs) {
-        _updateSpdb(now);
+        _updateSpdb();
         _prevSpdbTime = now;
       }
+    }
+
+  } // while
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////
+// Run in archive mode
+
+int TsStatusMonitor::_runArchive()
+{
+  
+  if (_params.debug) {
+    cerr << "  ARCHIVE mode" << endl;
+  }
+
+  while (true) {
+    
+    // read next pulse
+    
+    IwrfTsPulse *pulse = _pulseReader->getNextPulse();
+    if (pulse == NULL) {
+      // end of data
+      return 0;
+    }
+    _pulseLatestTime = pulse->getTime();
+
+    // handle this pulse
+      
+    bool gotStatus = false;
+    if (_handlePulseArchive(*pulse, gotStatus)) {
+      delete pulse;
+      return -1;
+    }
+
+    // clean up
+
+    delete pulse;
+      
+    // update spdb?
+
+    if (!_params.write_to_spdb) {
+      continue;
+    }
+
+    if (_pulseLatestTime - _prevSpdbTime < _params.spdb_interval_secs) {
+      continue;
+    }
+
+    if (gotStatus) {
+      _updateSpdb();
+      _prevSpdbTime = _pulseLatestTime;
     }
 
   } // while
@@ -332,14 +478,12 @@ void TsStatusMonitor::_clearStatus()
   _removeNagiosStatusFile();
 }
 
-/////////////////////////////
-// handle a pulse
+/////////////////////////////////////
+// handle a pulse in realtime mode
 
-int TsStatusMonitor::_handlePulse(IwrfTsPulse &pulse)
+int TsStatusMonitor::_handlePulseRealtime(IwrfTsPulse &pulse)
 
 {
-
-  _pulseLatestTime = pulse.getTime();
 
   // get ops info
   
@@ -368,9 +512,75 @@ int TsStatusMonitor::_handlePulse(IwrfTsPulse &pulse)
     _iwrfStatusXmlPktSeqNum = statusXmlPktSeqNum;
 
     if (_params.write_stats_files_to_catalog) {
-      _updateCatalogStats(now);
+      _updateCatalogStats();
     }
+    
+  }
 
+  // test pulse
+  
+  if (_params.monitor_test_pulse) {
+    _monitorTestPulse(pulse, info);
+  }
+  
+  if (_params.monitor_g0_velocity) {
+    _monitorG0(pulse, info);
+  }
+  
+  if (_params.check_for_moving_antenna) {
+    _monitorAntennaMovement(pulse);
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////
+// handle a pulse in archive mode
+
+int TsStatusMonitor::_handlePulseArchive(IwrfTsPulse &pulse, bool &gotStatus)
+
+{
+
+  gotStatus = false;
+
+  // get ops info
+  
+  const IwrfTsInfo &info = pulse.getTsInfo();
+  si64 statusXmlPktSeqNum = info.getStatusXmlPktSeqNum();
+  if (statusXmlPktSeqNum == 0) {
+    // if seq num is 0, compute a pseudo seq num from the time
+    // early data sets did not have the xml seq number set
+    const iwrf_status_xml_t &xmlHdr = info.getStatusXmlHdr();
+    statusXmlPktSeqNum = xmlHdr.packet.time_secs_utc + xmlHdr.packet.time_nano_secs;
+  }
+
+  if (statusXmlPktSeqNum != _iwrfStatusXmlPktSeqNum) {
+    
+    // handle new status xml packet
+    
+    const iwrf_status_xml_t &xmlHdr = info.getStatusXmlHdr();
+    time_t xmlPktTime = xmlHdr.packet.time_secs_utc;
+    time_t now = _getLatestTime();
+    double secsSinceXml = (double) now - (double) xmlPktTime;
+    
+    if (secsSinceXml < _params.data_valid_interval_secs) {
+      _iwrfStatusXml = info.getStatusXmlStr();
+      _iwrfStatusLatestTime = now;
+      if (_params.debug >= Params::DEBUG_EXTRA) {
+        cerr << "==============================================" << endl;
+        cerr << _iwrfStatusXml << endl;
+        cerr << "==============================================" << endl;
+      }
+      gotStatus = true;
+    }
+    
+    _iwrfStatusXmlPktSeqNum = statusXmlPktSeqNum;
+    
+    if (_params.write_stats_files_to_catalog) {
+      _updateCatalogStats();
+    }
+    
   }
 
   // test pulse
@@ -403,7 +613,7 @@ void TsStatusMonitor::_monitorAntennaMovement(IwrfTsPulse &pulse)
     return;
   }
 
-  time_t now = time(NULL);
+  time_t now = _getLatestTime();
   double maxAngleChange = _params.stationary_max_angle_change;
   if (fabs(pulse.getAz() - _moveCheckAz) > maxAngleChange ||
       fabs(pulse.getEl() - _moveCheckEl) > maxAngleChange) {
@@ -546,7 +756,7 @@ void TsStatusMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
 
   // create test pulse XML
 
-  _testPulseLatestTime = time(NULL);
+  _testPulseLatestTime = _getLatestTime();
   _testPulseXml.clear();
   _testPulseXml += TaXml::writeStartTag(_params.test_pulse_xml_tag, 0);
   _testPulseXml += TaXml::writeTime("Time", 1, _testPulseLatestTime);
@@ -671,7 +881,7 @@ void TsStatusMonitor::_monitorG0(IwrfTsPulse &pulse,
 
   // create test pulse XML
 
-  _g0LatestTime = time(NULL);
+  _g0LatestTime = _getLatestTime();
   _g0Xml.clear();
   _g0Xml += TaXml::writeStartTag(_params.g0_velocity_xml_tag, 0);
   _g0Xml += TaXml::writeTime("Time", 1, _g0LatestTime);
@@ -711,14 +921,14 @@ void TsStatusMonitor::_loadG0Iq(IwrfTsPulse &pulse,
 // Puts together the iwrf status, test pulse and movement xml
 // strings as appropriate
 
-string TsStatusMonitor::_getCombinedXml(time_t now)
+string TsStatusMonitor::_getCombinedXml()
 
 {
 
-  time_t validTime = now - _params.data_valid_interval_secs;
+  time_t validTime = _getLatestTime() - _params.data_valid_interval_secs;
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "_getCombinedXml(), time: " << DateTime::strm(now) << endl;
+    cerr << "_getCombinedXml(), time: " << DateTime::strm(_getLatestTime()) << endl;
     cerr << "_getCombinedXml(), looking back to: " << DateTime::strm(validTime) << endl;
   }
 
@@ -766,18 +976,19 @@ string TsStatusMonitor::_getCombinedXml(time_t now)
 /////////////////////////////
 // update the SPDB data base
 
-int TsStatusMonitor::_updateSpdb(time_t now)
+int TsStatusMonitor::_updateSpdb()
 
 {
 
+  time_t now = _getLatestTime();
+
   if (_params.debug) {
-    cerr << "==>> updating SPDB" << endl;
+    cerr << "==>> updating SPDB, time: " << DateTime::strm(now) << endl;
   }
 
   // get the concatenated xml string
 
-  string xml = _getCombinedXml(now);
-  
+  string xml = _getCombinedXml();
   if (xml.size() == 0) {
     return 0;
   }
@@ -804,17 +1015,19 @@ int TsStatusMonitor::_updateSpdb(time_t now)
 /////////////////////////////
 // update the NAGIOS file
 
-int TsStatusMonitor::_updateNagios(time_t now)
+int TsStatusMonitor::_updateNagios()
 
 {
 
+  time_t now = _getLatestTime();
+  
   if (_params.debug) {
-    cerr << "==>> updating Nagios" << endl;
+    cerr << "==>> updating Nagios, time: " << DateTime::strm(now) << endl;
   }
 
   // get the concatenated xml string
 
-  string xml = _getCombinedXml(now);
+  string xml = _getCombinedXml();
   
   if (_params.debug) {
     cerr << "statusXml for nagios: " << endl;
@@ -1359,17 +1572,18 @@ void TsStatusMonitor::_initStatsFields()
 /////////////////////////////
 // update the catalog stats
 
-int TsStatusMonitor::_updateCatalogStats(time_t now)
+int TsStatusMonitor::_updateCatalogStats()
 
 {
 
+  time_t now = _getLatestTime();
   if (_params.debug) {
-    cerr << "==>> updating catalog stats" << endl;
+    cerr << "==>> updating catalog stats, time: " << DateTime::strm(now) << endl;
   }
 
   // get the concatenated xml string
 
-  string xml = _getCombinedXml(now);
+  string xml = _getCombinedXml();
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "statusXml for stats: " << endl;

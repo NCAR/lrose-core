@@ -101,7 +101,7 @@ void BufrFile::clear()
   freeTree(GTree);
   GTree = NULL;
   _descriptorsToProcess.clear();
-  nOctetsRead = 0;
+  _numBytesRead = 0;
   _addBitsToDataWidth = 0;
   _addBitsToDataScale = 0;
   _multiplyFactorForReferenceValue = 1;
@@ -119,7 +119,6 @@ void BufrFile::clearForNextMessage()
   freeTree(GTree);
   GTree = NULL;
   _descriptorsToProcess.clear();
-  //nOctetsRead = 0;
   _addBitsToDataWidth = 0;
   _addBitsToDataScale = 0;
   _multiplyFactorForReferenceValue = 1;
@@ -382,9 +381,10 @@ int BufrFile::readSection0()
     if (_verbose) printf("BUFR edition number %d\n", bufr_edition); 
 
     _bufrMessageCount += 1;
-    printf("Processing BUFR message %d at nBytesRead %d\n", _bufrMessageCount,
-           _numBytesRead);
-    
+    if (_debug) {
+      printf("Processing BUFR message %d at nBytes %d\n", _bufrMessageCount,
+             _getCurrentBytePositionInFile());
+    }
   } catch (const char *msg) {
     close();
     Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection0()", true);
@@ -489,14 +489,16 @@ int BufrFile::readSection1_edition4()
   if (_s0.edition != 4)
     throw "ERROR - Wrong version of section1 called ";
 
-    _s1.masterTable = ExtractIt(8); //  buffer[0];
-    _s1.generatingCenter =  ExtractIt(16); // buffer[1] << 8 | (buffer[2]);
-    _s1.originatingSubcenter =  ExtractIt(16); // buffer[3] << 8 | (buffer[4]);
-    _s1.updateSequenceNumber =  ExtractIt(8); // buffer[5]; // original BUFR message
-    _s1.hasSection2 = ExtractIt(1); ExtractIt(7);
-    _s1.dataCategoryType = ExtractIt(8); //  buffer[7];
-    _s1.localTableVersionNumber =  ExtractIt(8); // buffer[11];
-    _s1.masterTableVersionNumber =  ExtractIt(8); // buffer[10];
+    _s1.masterTable = ExtractIt(8); //  octet 4
+    _s1.generatingCenter =  ExtractIt(16); // octet 5-6  originating/generating center
+    _s1.originatingSubcenter =  ExtractIt(16); // octet 7-8 originating sub-center
+    _s1.updateSequenceNumber =  ExtractIt(8); // octet 9
+    _s1.hasSection2 = ExtractIt(1); ExtractIt(7); // octet 10 optional sections 2 flag
+    _s1.dataCategoryType = ExtractIt(8); //  octet 11 data category (Table A)
+    ExtractIt(8); //  octet 12 international data sub-category
+    ExtractIt(8); //  octet 13 local data sub-category
+    _s1.masterTableVersionNumber =  ExtractIt(8); // octet 14
+    _s1.localTableVersionNumber =  ExtractIt(8); // octet 15
 
     if (_verbose) {
       cerr << "section 2? " ;
@@ -514,14 +516,14 @@ int BufrFile::readSection1_edition4()
       printf("local table version: %d\n", _s1.localTableVersionNumber);
       printf("master table version: %d\n", _s1.masterTableVersionNumber);
     }
-    yearOfCentury =  ExtractIt(16); // 0;
-    //yearOfCentury = yearOfCentury |  buffer[13];
-    //yearOfCentury = yearOfCentury | (buffer[12] << 8);
-    month =  ExtractIt(8); // buffer[14] | 0;
-    day =  ExtractIt(8); // buffer[15] | 0;
-    hour =  ExtractIt(8); // buffer[16] | 0;
-    minute =  ExtractIt(8); // buffer[17] | 0;
-    seconds =  ExtractIt(8); // buffer[18] | 0;
+    //    Radx::ui16 junk = ExtractIt(16); // don't know why, but, just need to toss 16 bits. 
+    //cout << "junk = " << junk << endl;
+    yearOfCentury =  ExtractIt(16); // octet 16-17
+    month =  ExtractIt(8); // octet 18-22 month, day, hour, minute, second
+    day =  ExtractIt(8); // 
+    hour =  ExtractIt(8); // 
+    minute =  ExtractIt(8); // 
+    seconds =  ExtractIt(8); // 
     _s1.year = yearOfCentury;
     _s1.month = month;
     _s1.day = day;
@@ -620,14 +622,16 @@ int BufrFile::readSection1_edition2()
 
   if (_s0.edition != 2) 
     throw "ERROR - Wrong version of section1 called ";
-  _s1.masterTable = ExtractIt(8); //  buffer[0];
-  _s1.generatingCenter =  ExtractIt(16); // buffer[1] << 8 | (buffer[2]);
-  _s1.originatingSubcenter = 0; // buffer[1] << 8 | (buffer[2]);
-  _s1.updateSequenceNumber =  ExtractIt(8); // buffer[3]; // original BUFR message
-  _s1.hasSection2 = ExtractIt(1); ExtractIt(7);
-  _s1.dataCategoryType =  ExtractIt(8); //buffer[5];
-  _s1.localTableVersionNumber =  ExtractIt(8); //buffer[8];
-  _s1.masterTableVersionNumber =  ExtractIt(8); //buffer[7];
+  _s1.masterTable = ExtractIt(8); // Octet 4
+  _s1.originatingSubcenter  =  0; 
+  _s1.generatingCenter = ExtractIt(16); // octets 5,6
+  _s1.updateSequenceNumber =  ExtractIt(8); // octet 7
+  _s1.hasSection2 = ExtractIt(1); ExtractIt(7); // octet 8
+  _s1.dataCategoryType =  ExtractIt(8); // octet 9 BUFR Table A
+  ExtractIt(8);  // octet 10 data category sub-type
+  _s1.masterTableVersionNumber =  ExtractIt(8); // octet 11
+  _s1.localTableVersionNumber =  ExtractIt(8); // octet 12
+
 
   if (_verbose) {
     cerr << "section 2? " ;
@@ -644,14 +648,13 @@ int BufrFile::readSection1_edition2()
     printf("local table version: %d\n", _s1.localTableVersionNumber);
     printf("master table version: %d\n", _s1.masterTableVersionNumber);
   }
-  // yearOfCentury = 0;
-  yearOfCentury = ExtractIt(8); // yearOfCentury |  buffer[9];
-  //  yearOfCentury = yearOfCentury | (buffer[12] << 8);
-  month =  ExtractIt(8); // buffer[10] | 0;
-  day =  ExtractIt(8); // buffer[11] | 0;
-  hour =  ExtractIt(8); // buffer[12] | 0;
-  minute =  ExtractIt(8); // buffer[13] | 0;
-  seconds = 0; // buffer[18] | 0;
+  yearOfCentury = ExtractIt(8); // octet 13
+  month =  ExtractIt(8); // octet 14
+  day =  ExtractIt(8); // octet 15
+  hour =  ExtractIt(8); // octet 16
+  minute =  ExtractIt(8); // octet 17
+  //ExtractIt(8); // octet 18 reserved
+  seconds = 0; //
   _s1.year = yearOfCentury;
   _s1.month = month;
   _s1.day = day;
@@ -664,9 +667,12 @@ int BufrFile::readSection1_edition2()
   hdr_day = day;
   if (_verbose) printf("year-month-day hour:minute:sec\n%d-%d-%d %d:%d:%d\n",
 		       yearOfCentury, month, day, hour, minute, seconds); 
+
+  // read the rest of the octets in this section ...
+  Radx::ui32 i;
+  for (i=18; i<=sectionLen; i++)
+    ExtractIt(8);
     
-  //_numBytesRead += sectionLen;
-  //free(buffer);
   return 0;
 }
 
@@ -800,9 +806,12 @@ int BufrFile::readSection5() {
   // look for ending "7777" coded in CCITT International Alphabet No. 5
   string value;
   inSection5 = true;
+  bool foundEndMark = false;
   try {
-    if (_debug) printf("looking for 7777 at %d bytes\n", _numBytesRead);
     MoveToNextByteBoundary();
+    if (_debug) printf("looking for 7777 at %d bytes\n", _getCurrentBytePositionInFile());
+
+    /*
     do {
       value = ExtractText(8);
     } while (value.compare("7") != 0);
@@ -812,13 +821,82 @@ int BufrFile::readSection5() {
     if (value.compare("77") != 0) {
       throw " Did not find ending code ";
     }
+    */
+    int countSeven = 0;
+    do {
+      value = ExtractText(8);
+      if (value.compare("7") == 0) {
+        countSeven += 1;
+        if (countSeven >= 3)
+          foundEndMark = true;
+      } else {
+        countSeven = 0;
+      }
+    } while (!foundEndMark);
+
   } catch (const char *msg) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::readSection5", true);
     Radx::addErrStr(_errString, " ", " Could not read ending code", true);
     throw _errString.c_str();
   }
+
+  if (!foundEndMark) {
+    throw " Did not find ending code ";
+  }
   
   return 0;
+}
+
+//
+// peek ahead at the next few bytes for the ending 7777
+//
+bool BufrFile::isEndInSight() {
+  // peek ahead for the last section 
+  // look for ending "7777" coded in CCITT International Alphabet No. 5
+  string value;
+  // copy the current index values into the buffer
+  int peekIndexBits =  currentBufferIndexBits;
+  int peekLengthBits = currentBufferLengthBits;
+  bool endFound = false;
+  bool endMarkFound = false;
+  
+  try {
+    if (_debug) printf("peeking ahead for 7777 at %d bytes\n", _getCurrentBytePositionInFile());
+    int i;
+    i = peekIndexBits/8;
+    int timesThroughLoop = 0;
+    int lastByte;
+    lastByte = peekLengthBits/8;
+    if (_debug) printf("starting at byte %d/%d bytes in buffer\n", i, lastByte);
+    bool end = false;
+    int countSeven = 0;
+    // just peek at the next 10 bytes, if we see four 7's then flag it
+    while (!end) {
+      if (_dataBuffer[i] == '7') {
+        countSeven += 1;
+        if (_debug) printf("  found 7 at %d\n", i);
+        if (countSeven >= 3) endMarkFound = true;
+      }
+      else countSeven = 0;
+      i += 1;
+      timesThroughLoop += 1;
+      // only look at the next 10 bytes
+      if ((i >= lastByte) || timesThroughLoop > 10) end = true;
+    }
+    if (endMarkFound || (i >= lastByte)) endFound = true;
+    if (_debug) {
+      if (endMarkFound)  printf("  found >3 contiguous 7's\n");
+      else  printf("  endMarkFound not found\n");
+    }
+  } catch (const char *msg) {
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::isEndInSight", true);
+    Radx::addErrStr(_errString, " ", " Could not find ending code before end of file", true);
+    throw _errString.c_str();
+  }
+  
+  // of course, this doesn't work if we are right on the end of the buffer
+  // and the ending 7777 crosses the buffer edge. TODO: fix this problem.
+  return endFound;
 }
 
 void BufrFile::printSection1(ostream &out) {
@@ -898,7 +976,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
     Radx::ui32 sectionLenOctets;
     sectionLenOctets = ExtractIt(24); // nBytes;
 
-    if (_verbose) cerr << "sectionLen in octets " << sectionLenOctets << endl;
+    if (_debug) cerr << "sectionLen in octets " << sectionLenOctets << endl;
     /*
     Radx::ui08 *buffer;
     buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
@@ -932,6 +1010,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
     // sometimes the number of data subsets does not agree
     // with the length of the section, so go with the
     // length of the section over the number of data subsets
+    // TODO: commenting this because it may be needed only for gsi, not cordoba??
     Radx::ui16 nDataSubsetsCalc = (sectionLenOctets - 7) /2;
     if (_verbose) printf("nDataSubsets = %d\n", nDataSubsetsCalc);
     if (nDataSubsets != nDataSubsetsCalc) {
@@ -942,13 +1021,16 @@ int BufrFile::readDataDescriptors() {  // read section 3
       }
       nDataSubsets = nDataSubsetsCalc;
     }
-
+    
     // octet 7: determine observed and compressed info
     //bool observedData = buffer[3] & 0x80;
     //bool compressedData = buffer[3] & 0x40;
     ExtractIt(8);
     // read the descriptors and keep them in a list for
     // traversal later 
+
+    unsigned int nOctetsRead;
+    nOctetsRead = 7;
 
     int i;
     //int startOffset = 4;
@@ -968,12 +1050,27 @@ int BufrFile::readDataDescriptors() {  // read section 3
       unsigned short key;
       key = TableMapKey().EncodeKey(d.f, d.x, d.y);
       _descriptorsToProcess.insert(_descriptorsToProcess.begin(), key);
+      nOctetsRead += 2;
     }
-
+   
+    // needed for Allison's data; but not for Cordoba or ODIM
     // read any extra octets
-    unsigned int extraOctets;
-    extraOctets = sectionLenOctets - (nDataSubsets*2 + 7);
-    ExtractIt(8*extraOctets);
+    //unsigned int extraOctets;
+    //extraOctets = sectionLenOctets - (nDataSubsets*2 + 7);
+    //cerr << "extraOctets " << extraOctets << endl;
+    // ExtractIt(8*extraOctets);
+    // end ... needed for Allison's data
+
+    // the extra filler octets are optional for edition 4,
+    // so don't bother reading them. Only read them for
+    // older editions
+    if (_s0.edition < 4) {
+      // get to the end of this section ... 
+      unsigned int  n;
+      n = sectionLenOctets - nOctetsRead;
+      cerr << "n octets to the end " << n << endl;
+      ExtractIt(8*n);   
+    }
     /*
     int i;
     int startOffset = 4;
@@ -1001,6 +1098,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
     // on the data descriptors of section 3
     _isGsi = false;
     if (matches_204_31_X(_descriptorsToProcess)) {
+      ExtractIt(8); // WHOA!  TODO:  skipping 8 bits???
       currentTemplate = new BufrProduct_204_31_X();
     } else if (matches_gsi(_descriptorsToProcess)) {
       currentTemplate = new BufrProduct_gsi();
@@ -1103,9 +1201,6 @@ int BufrFile::ReplenishBuffer() {
   int nBytesRead;
   nBytesRead = fread(_dataBuffer, 1, MAX_BUFFER_SIZE_BYTES, _file);
 
-  nOctetsRead += nBytesRead;
-  if (_very_verbose) printf("nOctetsRead = %d\n", nOctetsRead);
-
   _numBytesRead += nBytesRead;
   if (_debug) printf("Read %d/%d bytes ", _numBytesRead, _s0.nBytes);
 
@@ -1168,11 +1263,18 @@ void BufrFile::MoveToNextByteBoundary() {
   }
 }
 
+int BufrFile::_getCurrentBytePositionInFile() {
+  int currentBytePositionInFile;
+  currentBytePositionInFile = _numBytesRead/MAX_BUFFER_SIZE_BYTES - 1 +
+    currentBufferIndexBits/8;
+  return currentBytePositionInFile;
+}
+
 // on error, throw exception; otherwise, return a string
 string BufrFile::ExtractText(unsigned int nBits) {
 
   string val;
-  unsigned char character;
+  unsigned char character = 0;
 
   val.clear();
 
@@ -1879,12 +1981,13 @@ void BufrFile::freeTree(DNode *tree) {
 int BufrFile::TraverseNew(vector<unsigned short> descriptors) {
 
   GTree = buildTree(descriptors, false);
-  bool continuousRepeat = false;
-  if (_isGsi) continuousRepeat = true;
+  // bool continuousRepeat = false;
+  //if (_isGsi) continuousRepeat = true;
   int result = -1;
-  do {
+  //do {
     result = _descend(GTree);
-  } while (continuousRepeat);
+    // What remains in the buffer at this point?
+    //} while (!isEndInSight()); // (continuousRepeat);
   return result;
 }
 
@@ -2318,10 +2421,10 @@ void BufrFile::_visitVariableRepeater(DNode *p, unsigned char x) {
   // get the number of repeats from section 4 data
   Radx::ui32 nRepeats; // actually read this from the data section
   nRepeats = Apply(tableMap.Retrieve(delayed_replication_descriptor));
-  //if (_verbose) 
-  printf("nrepeats from Data = %u\n", nRepeats);
-  if (nRepeats == 0)
-    printf("HERE<<<<< \n");
+  if (_verbose) 
+    printf("nrepeats from Data = %u\n", nRepeats);
+  //if (nRepeats == 0)
+  //  printf("HERE<<<<< \n");
   currentTemplate->storeReplicator(nRepeats);
   p->ivalue = nRepeats;
   if (p->children == NULL) {
@@ -2343,8 +2446,8 @@ void BufrFile::_visitVariableRepeater(DNode *p, unsigned char x) {
       printf("%d out of %d repeats\n", i+1, nRepeats);
     _descend(p->children);
   }
-  //if (_verbose) 
-  printf("-- end repeat %d\n", nRepeats);
+  if (_verbose) 
+    printf("-- end repeat %d\n", nRepeats);
   // transition state; set location levels
   currentTemplate->trashReplicator();
 
@@ -2445,7 +2548,7 @@ int BufrFile::_descend(DNode *tree) {
 
   if (_very_verbose) _verbosePrintTree(tree);
 
-  unsigned short des;
+  unsigned short des = 0;
   DNode *p;
   p = tree;
   bool compressionStart = false;

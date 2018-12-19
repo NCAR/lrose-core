@@ -1367,7 +1367,7 @@ static int expand_for_single_val(tdrpVal_t *val)
     
     tot_len = pre_len + env_len + post_len + 1;
     
-    if (tot_len > TDRP_LINE_MAX) {
+    if (tot_len >= TDRP_LINE_MAX) {
       
       /*
        * expanded string too long
@@ -1387,7 +1387,7 @@ static int expand_for_single_val(tdrpVal_t *val)
     
     *dollar_bracket = '\0';
     snprintf(combo_str, TDRP_LINE_MAX, "%s%s%s", pre_str, env_val, post_str);
-    strncpy(work_str, combo_str, TDRP_LINE_MAX);
+    strncpy(work_str, combo_str, TDRP_LINE_MAX-1);
     env_found = TRUE;
     
   } /* while */
@@ -1500,7 +1500,7 @@ static int expand_token(tdrpToken_t *token)
     
     tot_len = pre_len + env_len + post_len + 1;
     
-    if (tot_len > TDRP_LINE_MAX) {
+    if (tot_len >= TDRP_LINE_MAX) {
       
       /*
        * expanded string too long
@@ -1520,7 +1520,7 @@ static int expand_token(tdrpToken_t *token)
     
     *dollar_bracket = '\0';
     snprintf(combo_str, TDRP_LINE_MAX, "%s%s%s", pre_str, env_val, post_str);
-    strncpy(work_str, combo_str, TDRP_LINE_MAX);
+    strncpy(work_str, combo_str, TDRP_LINE_MAX-1);
     env_found = TRUE;
     
   } /* while */

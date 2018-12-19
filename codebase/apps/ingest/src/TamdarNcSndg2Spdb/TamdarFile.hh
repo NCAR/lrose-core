@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: jcraig $
  *   $Locker:  $
- *   $Date: 2016/03/07 01:23:06 $
- *   $Id: TamdarFile.hh,v 1.4 2016/03/07 01:23:06 dixon Exp $
- *   $Revision: 1.4 $
+ *   $Date: 2018/01/26 20:06:07 $
+ *   $Id: TamdarFile.hh,v 1.5 2018/01/26 20:06:07 jcraig Exp $
+ *   $Revision: 1.5 $
  *   $State: Exp $
  */
  
@@ -50,8 +50,8 @@
 
 #include <string>
 #include <vector>
-#include <netcdf.hh>
 
+#include <Ncxx/Nc3File.hh>
 #include <rapformats/Sndg.hh>
 #include <Spdb/Spdb.hh>
 #include <toolsa/DateTime.hh>
@@ -164,7 +164,7 @@ protected:
   bool _debug;
   string _filePath;
   
-  NcFile *_tamdarFile;
+  Nc3File *_tamdarFile;
   
   // netCDF file dimension names
 
@@ -203,7 +203,7 @@ protected:
    * Returns a pointer to the byte values on success, 0 on failure.
    */
 
-  NcValues *_getByteFieldVar(const string &field_name) const;
+  Nc3Values *_getByteFieldVar(const string &field_name) const;
   
 
   /*********************************************************************
@@ -213,7 +213,7 @@ protected:
    * Returns a pointer to the character values on success, 0 on failure.
    */
 
-  NcValues *_getCharFieldVar(const string &field_name) const;
+  Nc3Values *_getCharFieldVar(const string &field_name) const;
   
 
   /*********************************************************************
@@ -223,7 +223,7 @@ protected:
    * Returns a pointer to the double values on success, 0 on failure.
    */
 
-  NcValues *_getDoubleFieldVar(const string &field_name) const;
+  Nc3Values *_getDoubleFieldVar(const string &field_name) const;
   
 
   /*********************************************************************
@@ -233,7 +233,7 @@ protected:
    * Returns a pointer to the float values on success, 0 on failure.
    */
 
-  NcValues *_getFloatFieldVar(const string &field_name,
+  Nc3Values *_getFloatFieldVar(const string &field_name,
 			      float &missing_data_value) const;
   
 
@@ -244,7 +244,7 @@ protected:
    * Returns a pointer to the integer values on success, 0 on failure.
    */
 
-  NcValues *_getIntFieldVar(const string &field_name) const;
+  Nc3Values *_getIntFieldVar(const string &field_name) const;
   
 
   /*********************************************************************
@@ -255,7 +255,7 @@ protected:
    * success, the global FLOAT_MISSING_DATA_VALUE on failure.
    */
 
-  float _getVarFloatAtt(const NcVar &variable,
+  float _getVarFloatAtt(const Nc3Var &variable,
 			const string &att_name) const;
   
 

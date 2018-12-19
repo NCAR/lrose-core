@@ -23,14 +23,23 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
  * @file CloudGap.hh 
- * @brief CloudGap the gap between two clouds along a beam
+ * @brief CloudGap The gap between two clouds along a beam
+ *                 or between the radar and the 1st cloud
  * @class CloudGap 
- * @brief CloudGap the gap between two clouds along a beam
- * 
+ * @brief CloudGap The gap between two clouds along a beam
+ *                 or between the radar and the 1st cloud
+ *
+ * Storage for information about range of indices along a beam
+ * as you 'leave' the closer cloud and eventually 'enter' the farter cloud
+ *
+ * At the near boundary, the outside cloud indices are bigger than inside,
+ * At the farther bounday, the outside cloud indices are smaller than cloud
  */
 
 #ifndef CloudGap_H
 #define CloudGap_H
+
+#include "RayCloudEdge.hh"
 
 class CloudEdge;
 class Grid2d;
@@ -41,105 +50,94 @@ class CloudGap
 public:
   /**
    * The gap between the radar and the first encountered cloud
+   *
+   * @param[in] e  The near edge of the first cloud
    */
-  CloudGap(const CloudEdge &e);
+  CloudGap(const RayCloudEdge &e);
 
   /**
    * The gap between two clouds
-   * e0 = closest clouds exit points
-   * e1 = further clouds entry points.
+   *
+   * @param[in] e0   farthest edge of the near cloud
+   * @param[in] e1   nearest edge of the far cloud
    */
-  CloudGap(const CloudEdge &e0, const CloudEdge &e1);
+  CloudGap(const RayCloudEdge &e0, const RayCloudEdge &e1);
 
+  /**
+   * Destructor
+   */
   virtual ~CloudGap();
 
   /**
-   * Return this clouds color index value
-   * is_far = true for the further out cloud
+   * @return clump value for the clump representing one of the two clouds
+   * @param[in] isFar   True to return index for farther away
+   *                     cloud, false for near cloud
    */
-  inline double get_color(const bool is_far) const
+  inline double getValue(bool isFar) const
   {
-    if (is_far)
-      return _v1;
+    if (isFar)
+    {
+      return _far.getValue();
+    }
     else
-      return _v0;
+    {
+      return _near.getValue();
+    }
   }
 
   /**
-   * Put cloud points to the input grid.
+   * Put 'in cloud' points for both clouds to the input grid, using the
+   * value found in the objects, which is clump value.
+   *
+   * @param[in,out] data
    */
-  void to_grid(Grid2d &data) const;
+  void toGrid(Grid2d &data) const;
 
   /**
-   * Put cloud 'just outside' points to the input grid.
+   * Put 'outside cloud' points to the input grid, for both clouds, using
+   * the value found in the objects, which is clump value
+   *
+   * @param[in,out] data
    */
-  void to_outside_grid(Grid2d &data) const;
+  void toOutsideGrid(Grid2d &data) const;
 
   /**
-   * @return # of points in the gap
+   * @return number of points in the gap between the near and far clouds
    */
-  int npt_between(void) const;
-
+  int nptBetween(void) const;
   
-  inline bool is_closest(void) const
+  /**
+   * @return true if this is the gap from radar to the first cloud
+   */
+  inline bool isClosest(void) const
   {
-    return _xout0[0] == -1 &&_xout0[1] == -1;
+    return _near.isAtRadar();
   }
 
-#ifdef NOTDEF
-  void get_close_kernel_info(int &x,  double &v) const;
-
-  void get_far_kernel_info(int &x,  double &v) const;
-
-
-#endif
-
-  inline int get_y(void) const {return _y;}
+  /**
+   * @return beam (y) index
+   */
+  inline int getY(void) const {return _y;}
 
   /**
-   * return index to x where first touch the storm (near or far)
+   * @return boundary x index for the cloud
+   *
+   * @param[in] isFar  true=Return smallest x index for far cloud
+   *                   False=Return largest x index for near cloud
    */
-  int get_x(const bool is_far) const;
+  int getX(bool isFar) const;
 
+  /**
+   * Debug print to stdout
+   */
   void print(void) const;
 
 protected:
 private:
 
-  /**
-   * y index value for the gap
-   */
-  int _y;
-
-  /**
-   * run of points in the near cloud
-   */
-  int _x0[2]; 
-
-  /**
-   * Run of points just outside the  near cloud (farther from radar)
-   */
-  int _xout0[2];
-
-  /** 
-   * Value of the clump (color) for near cloud.
-   */
-  double _v0;
-
-  /**
-   * Run of points in the farther cloud
-   */
-  int _x1[2];
-
-  /**
-   * Run of points just outside the farther cloud (closer to radar)
-   */
-  int _xout1[2];
-
-  /** 
-   * Value of the clump (color) for far cloud.
-   */
-  double _v1;
+  int _y;             /**< Y index (beam) */
+  RayCloudEdge _near; /**< Near cloud near edge points */
+  RayCloudEdge _far;  /**< Farther cloud near edge points */
 };
 
 #endif

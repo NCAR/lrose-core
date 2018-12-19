@@ -344,6 +344,12 @@ int Grib2Nc::getData()
 	    levelMax = GribRecords.size() - 1;
           }
 
+	  if(levelMin > levelMax) {
+	    cerr << "WARNING: Field " <<  _field->param << " level " << _field->level << " vertmin " << _field->vert_level_min
+		 << " and vertmax " << _field->vert_level_max << " produced no data." << endl;
+	    break;
+	  }
+
 	  size_t levelDz = 1;
 	  if( _field->vert_level_dz > 1)
 	    levelDz =  _field->vert_level_dz;
@@ -412,7 +418,7 @@ int Grib2Nc::getData()
 	      _reOrderAdjacentRows(data, _fieldInfo.gridInfo.nx, _fieldInfo.gridInfo.ny);
 	    if(_reOrderDate_Line)
 	      _reOrderDateLine(data, _fieldInfo.gridInfo.nx, _fieldInfo.gridInfo.ny, _fieldInfo.gridInfo.dx);
-	    
+
 	    memcpy ( currDataPtr, data, sizeof(fl32)*_fieldInfo.gridInfo.nx*_fieldInfo.gridInfo.ny );
 	    currDataPtr += _fieldInfo.gridInfo.nx*_fieldInfo.gridInfo.ny;
 	    if(_reMapField)
@@ -441,15 +447,15 @@ int Grib2Nc::getData()
 	      fieldDataPtr = _encode(fieldDataPtr, _paramsPtr->packing_type);
 	    } else {
 	      for (int i = 0; i < _paramsPtr->output_fields_n; i++) {
-		if (strcmp(_paramsPtr->_output_fields[i].param,
-			   _GribRecord->summary->name.c_str()) == 0 &&
-		    strcmp(_paramsPtr->_output_fields[i].level,
-			   _GribRecord->summary->levelType.c_str()) == 0 ) {
+		if (strcmp(_paramsPtr->_output_fields[i].param, _field->param) == 0 &&
+		    strcmp(_paramsPtr->_output_fields[i].level, _field->level) == 0 ) {
 		  _setFieldNames(i);
 		  _limitDataRange(i,fieldDataPtr);
 		  _convertUnits(i,fieldDataPtr);
 		  _convertVerticalUnits(i);
-		  fieldDataPtr = _encode(fieldDataPtr, _paramsPtr->_output_fields[i].packing_type);
+		  fieldDataPtr = _encode(fieldDataPtr, _paramsPtr->_output_fields[i].packing_type,
+					 _paramsPtr->_output_fields[i].scale_factor,
+					 _paramsPtr->_output_fields[i].add_offset);
 		}
 	      }
 	    }
@@ -1240,20 +1246,20 @@ fl32 *Grib2Nc::_calcMinMax(fl32 *dataPtr)
 
 //
 // Performs data encoding if requested
-fl32 *Grib2Nc::_encode(fl32 *dataPtr, Params::data_pack_t output_encoding)
+fl32 *Grib2Nc::_encode(fl32 *dataPtr, Params::data_pack_t output_encoding, float scale_factor, float add_offset)
 {
   dataPtr = _calcMinMax(dataPtr);
 
   if (output_encoding != Params::DATA_PACK_NONE)
   {    
-    if (output_encoding == Params::DATA_PACK_AUTO) {
+    if (output_encoding == Params::DATA_PACK_GRIB) {
       fl32 alog2 = 0.69314718;  //  ln(2.0)
       fl32 range = _fieldInfo.max_value-_fieldInfo.min_value;
       if(range < 1.0)
 	range = 1.0;
-      si32 maxdif = (int)((range * _fieldInfo.scaleFactor) + .5);
+      si32 maxdif = (int) round((range * _fieldInfo.scaleFactor));
       if(_fieldInfo.scaleFactor < 1.0 && _fieldInfo.scaleFactor > -1.0)
-	maxdif = (int)((range / _fieldInfo.scaleFactor) + .5);
+	maxdif = (int) round((range / _fieldInfo.scaleFactor));
       fl32 temp = log((double)(maxdif+1))/alog2;
       si32 nbits = (int)ceil(temp);
       if (_paramsPtr->debug)
@@ -1263,7 +1269,7 @@ fl32 *Grib2Nc::_encode(fl32 *dataPtr, Params::data_pack_t output_encoding)
 	dataPtr = (fl32*) _float32_to_int8(dataPtr, _fieldInfo.scaleFactor);
 	if (_paramsPtr->debug)
 	  cout << " -> BYTE scaleFactor: " <<  _fieldInfo.scaleFactor << endl;
-      } else if(nbits <= 24) {
+      } else if(nbits <= 16) {
 	output_encoding = Params::DATA_PACK_SHORT;
 	dataPtr = (fl32*) _float32_to_int16(dataPtr, _fieldInfo.scaleFactor);
 	if (_paramsPtr->debug)
@@ -1273,9 +1279,15 @@ fl32 *Grib2Nc::_encode(fl32 *dataPtr, Params::data_pack_t output_encoding)
 	  cout << " -> FLOAT: " << endl;
     } else {
       if (output_encoding == Params::DATA_PACK_SHORT) {
-	dataPtr = (fl32*) _float32_to_int16(dataPtr);
+	if(scale_factor != 0.0)
+	  dataPtr = (fl32*) _float32_to_int16(dataPtr, scale_factor, add_offset);
+	else
+	  dataPtr = (fl32*) _float32_to_int16(dataPtr);
       } else if (output_encoding == Params::DATA_PACK_BYTE) {
-	dataPtr = (fl32*) _float32_to_int8(dataPtr);
+	if(scale_factor != 0.0)
+	  dataPtr = (fl32*) _float32_to_int8(dataPtr, scale_factor, add_offset);
+	else
+	  dataPtr = (fl32*) _float32_to_int8(dataPtr);
       }
     }
 
@@ -1287,45 +1299,48 @@ fl32 *Grib2Nc::_encode(fl32 *dataPtr, Params::data_pack_t output_encoding)
 
 // 
 // Encode FLOAT32 to INT8
-void *Grib2Nc::_float32_to_int8(fl32 *inDataPtr, fl32 scaleFactor)
+void *Grib2Nc::_float32_to_int8(fl32 *inDataPtr, fl32 scaleFactor, fl32 addOffset)
 {
 
   // set missing and bad
-
   fl32 in_missing = _fieldInfo.missing;
   fl32 in_bad =  _fieldInfo.secondaryMissing;
   ui08 out_missing = 0 - 128;
   ui08 out_bad = out_missing;
 
-  // compute scale and offset
-  
+  // Determine scale and offset  
   double scale, offset;
-
-  if (_fieldInfo.max_value == _fieldInfo.min_value) {
-
-    scale = 1.0;
-    offset = _fieldInfo.min_value;
-    
+  if(scaleFactor != 0.0 && addOffset != 0.0) {
+    // Use user defined scale and offset
+    scale = scaleFactor;
+    offset = addOffset;
   } else {
-    
-    double range = _fieldInfo.max_value - _fieldInfo.min_value;
-    scale = range / 250;
-    offset = (_fieldInfo.max_value + _fieldInfo.min_value) / 2.0;
-
-    // If scaleFactor requested is within range
-    if(scaleFactor > scale) {
-      // align offset to be a multiple of the scaleFactor
-      if(_fieldInfo.scaleFactor < 1.0 && _fieldInfo.scaleFactor > -1.0) {
-	int mid = (int)((range / scaleFactor / 2.0) + .5);
-	offset = _fieldInfo.min_value + (mid * scaleFactor);
-      } else {
-	int mid = (int)((range / scaleFactor / 2.0) + .5);
-	offset = _fieldInfo.min_value + (mid * scaleFactor);
+    if (_fieldInfo.max_value == _fieldInfo.min_value) {
+      
+      scale = 1.0;
+      offset = _fieldInfo.min_value;
+      
+    } else {
+      // Calculate optimal scale and offset
+      double range = _fieldInfo.max_value - _fieldInfo.min_value;
+      scale = range / 250;
+      offset = (_fieldInfo.max_value + _fieldInfo.min_value) / 2.0;
+      
+      // If requested scaleFactor is within range use it
+      if(scaleFactor > scale) {
+	// align offset to be a multiple of the scaleFactor
+	if(_fieldInfo.scaleFactor < 1.0 && _fieldInfo.scaleFactor > -1.0) {
+	  int mid = (int) round((range / scaleFactor / 2.0));
+	  offset = _fieldInfo.min_value + (mid * scaleFactor);
+	} else {
+	  int mid = (int) round((range / scaleFactor / 2.0));
+	  offset = _fieldInfo.min_value + (mid * scaleFactor);
+	}
+	scale = scaleFactor;
       }
-      scale = scaleFactor;
     }
   }
-  
+
   // allocate the output buffer
 
   size_t npoints = _fieldInfo.gridInfo.nx * _fieldInfo.gridInfo.ny * _fieldInfo.vlevelInfo.nz;
@@ -1344,7 +1359,7 @@ void *Grib2Nc::_float32_to_int8(fl32 *inDataPtr, fl32 scaleFactor)
     } else if (in_val == in_bad) {
       *out = out_bad;
     } else {
-      int out_val = (int) ((in_val - offset) / scale + 0.49999);
+      int out_val = (int) round((in_val - offset) / scale);
       if (out_val > 128) {
         nBad++;
  	*out = out_missing;
@@ -1369,8 +1384,8 @@ void *Grib2Nc::_float32_to_int8(fl32 *inDataPtr, fl32 scaleFactor)
   _fieldInfo.ncType = Params::DATA_PACK_BYTE;
   _fieldInfo.missing = (fl32)out_missing;
   _fieldInfo.secondaryMissing = (fl32)out_bad;
-  _fieldInfo.max_value = (int) ((_fieldInfo.max_value - offset) / scale + 0.49999);
-  _fieldInfo.min_value = (int) ((_fieldInfo.min_value - offset) / scale + 0.49999);
+  _fieldInfo.max_value = (int) round((_fieldInfo.max_value - offset) / scale);
+  _fieldInfo.min_value = (int) round((_fieldInfo.min_value - offset) / scale);
   _fieldInfo.scaleFactor = (fl32) scale;
   _fieldInfo.addOffset = (fl32) offset;
   
@@ -1382,45 +1397,46 @@ void *Grib2Nc::_float32_to_int8(fl32 *inDataPtr, fl32 scaleFactor)
 //
 // encode FLOAT32 to INT16
 //
-void *Grib2Nc::_float32_to_int16(fl32 *inDataPtr, fl32 scaleFactor)  
+void *Grib2Nc::_float32_to_int16(fl32 *inDataPtr, fl32 scaleFactor, fl32 addOffset)
 {
 
   // set missing and bad
-
   fl32 in_missing = _fieldInfo.missing;
   fl32 in_bad =  _fieldInfo.secondaryMissing;
   ui16 out_missing = 0 - 32768;
   ui16 out_bad = out_missing;
 
-  // compute scale and offset
-
+  // Determine scale and offset
   double scale, offset;
-
-  if (_fieldInfo.max_value == _fieldInfo.min_value) {
-    
-    scale = 1.0;
-    offset = _fieldInfo.min_value;
-    
+  if(scaleFactor != 0.0 && addOffset != 0.0) {
+    // Use user defined scale and offset
+    scale = scaleFactor;
+    offset = addOffset;
   } else {
-    
-    double range = _fieldInfo.max_value - _fieldInfo.min_value;
-    scale = range / 65534;
-    offset = (_fieldInfo.max_value + _fieldInfo.min_value) / 2.0;
-
-    // If scaleFactor requested is within range
-    if(scaleFactor > scale) {
-      // align offset to be a multiple of the scaleFactor
-      if(_fieldInfo.scaleFactor < 1.0 && _fieldInfo.scaleFactor > -1.0) {
-	int mid = (int)((range / scaleFactor / 2.0) + .5);
-	offset = _fieldInfo.min_value + (mid * scaleFactor);
-      } else {
-	int mid = (int)((range / scaleFactor / 2.0) + .5);
-	offset = _fieldInfo.min_value + (mid * scaleFactor);
+    if (_fieldInfo.max_value == _fieldInfo.min_value) {
+      scale = 1.0;
+      offset = _fieldInfo.min_value;    
+    } else {
+      // Calculate optimal scale and offset
+      double range = _fieldInfo.max_value - _fieldInfo.min_value;
+      scale = range / 65534;
+      offset = (_fieldInfo.max_value + _fieldInfo.min_value) / 2.0;
+      
+      // If requested scaleFactor is within range
+      if(scaleFactor > scale) {
+	// align offset to be a multiple of the scaleFactor
+	if(_fieldInfo.scaleFactor < 1.0 && _fieldInfo.scaleFactor > -1.0) {
+	  int mid = (int) round((range / scaleFactor / 2.0));
+	  offset = _fieldInfo.min_value + (mid * scaleFactor);
+	} else {
+	  int mid = (int) round((range / scaleFactor / 2.0));
+	  offset = _fieldInfo.min_value + (mid * scaleFactor);
+	}
+	scale = scaleFactor;
       }
-      scale = scaleFactor;
     }
   }
-  
+
   // allocate the output buffer
   
   size_t npoints = _fieldInfo.gridInfo.nx * _fieldInfo.gridInfo.ny * _fieldInfo.vlevelInfo.nz;
@@ -1439,7 +1455,7 @@ void *Grib2Nc::_float32_to_int16(fl32 *inDataPtr, fl32 scaleFactor)
     } else if (in_val == in_bad) {
       *out = out_bad;
     } else {
-      int out_val = (int) ((in_val - offset) / scale + 0.49999);
+      int out_val = (int) round((in_val - offset) / scale);
       if (out_val > 32768) {
         nBad++;
  	*out = out_missing;
@@ -1464,8 +1480,8 @@ void *Grib2Nc::_float32_to_int16(fl32 *inDataPtr, fl32 scaleFactor)
   _fieldInfo.ncType = Params::DATA_PACK_SHORT;
   _fieldInfo.missing = (fl32)out_missing;
   _fieldInfo.secondaryMissing = (fl32)out_bad;
-  _fieldInfo.max_value = (int) ((_fieldInfo.max_value - offset) / scale + 0.49999);
-  _fieldInfo.min_value = (int) ((_fieldInfo.min_value - offset) / scale + 0.49999);
+  _fieldInfo.max_value = (int) round((_fieldInfo.max_value - offset) / scale);
+  _fieldInfo.min_value = (int) round((_fieldInfo.min_value - offset) / scale);
   _fieldInfo.scaleFactor = (fl32) scale;
   _fieldInfo.addOffset = (fl32) offset;
   

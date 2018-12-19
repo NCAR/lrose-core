@@ -391,9 +391,7 @@ int DsLdataServer::_handleRead(const DsLdataMsg &inMsg,
   int iret = 0;
   if (forced) {
     iret = _ldata.readForced(maxValidAge);
-  } else {
-    iret = _ldata.read(maxValidAge);
-  }
+  } 
 
   if (iret) {
 

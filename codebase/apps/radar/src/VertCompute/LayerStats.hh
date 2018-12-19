@@ -36,6 +36,7 @@
 
 #include <vector>
 #include <iostream>
+#include <rapmath/DistNormal.hh>
 #include "MomentData.hh"
 #include "Params.hh"
 using namespace std;
@@ -90,6 +91,12 @@ public:
   const MomentData &getGlobalMean() const { return _globalMean; }
   const MomentData &getGlobalSdev() const { return _globalSdev; }
 
+  DistNormal &getDist() { return _dist; }
+  const DistNormal &getDist() const { return _dist; }
+
+  DistNormal &getGlobalDist() { return _globalDist; }
+  const DistNormal &getGlobalDist() const { return _globalDist; }
+
 protected:
 private:
 
@@ -99,12 +106,15 @@ private:
   double _maxHt;
   vector<MomentData> _momentData;
 
+  DistNormal _dist;
+  DistNormal _globalDist;
+
   int _nValid;
   MomentData _mean;
   MomentData _sdev;
   MomentData _sum;
   MomentData _sum2;
-  
+
   int _globalNValid;
   MomentData _globalMean;
   MomentData _globalSdev;

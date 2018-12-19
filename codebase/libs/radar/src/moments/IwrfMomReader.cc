@@ -43,6 +43,7 @@
 #include <dataport/swap.h>
 #include <radar/IwrfMoments.hh>
 #include <radar/IwrfMomReader.hh>
+#include <radar/RadarCalib.hh>
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxGeoref.hh>
 using namespace std;
@@ -55,7 +56,8 @@ IwrfMomReader::IwrfMomReader()
 {
   _opsInfo.setDebug(IWRF_DEBUG_OFF);
   _nonBlocking = false;
-  _msecsWait = 0;
+  _msecsNonblockingWait = 0;
+  _msecsBlockingTimeout = -1;
   _timedOut = false;
   _endOfFile = false;
   _latestRay = NULL;
@@ -339,73 +341,7 @@ void IwrfMomReader::_decodeDsRadarCalib()
   // create RadxRcalib
 
   RadxRcalib rcal;
-  
-  DateTime ctime(dsCalib.getCalibTime());
-  
-  rcal.setCalibTime(ctime.getYear(),
-                    ctime.getMonth(),
-                    ctime.getDay(),
-                    ctime.getHour(),
-                    ctime.getMin(),
-                    ctime.getSec());
-  
-  rcal.setPulseWidthUsec(dsCalib.getPulseWidthUs());
-  rcal.setXmitPowerDbmH(dsCalib.getXmitPowerDbmH());
-  rcal.setXmitPowerDbmV(dsCalib.getXmitPowerDbmV());
-  
-  rcal.setTwoWayWaveguideLossDbH(dsCalib.getTwoWayWaveguideLossDbH());
-  rcal.setTwoWayWaveguideLossDbV(dsCalib.getTwoWayWaveguideLossDbV());
-  rcal.setTwoWayRadomeLossDbH(dsCalib.getTwoWayRadomeLossDbH());
-  rcal.setTwoWayRadomeLossDbV(dsCalib.getTwoWayRadomeLossDbV());
-  rcal.setReceiverMismatchLossDb(dsCalib.getReceiverMismatchLossDb());
-  
-  rcal.setRadarConstantH(dsCalib.getRadarConstH());
-  rcal.setRadarConstantV(dsCalib.getRadarConstV());
-  
-  rcal.setAntennaGainDbH(dsCalib.getAntGainDbH());
-  rcal.setAntennaGainDbV(dsCalib.getAntGainDbV());
-
-  rcal.setNoiseDbmHc(dsCalib.getNoiseDbmHc());
-  rcal.setNoiseDbmHx(dsCalib.getNoiseDbmHx());
-  rcal.setNoiseDbmVc(dsCalib.getNoiseDbmVc());
-  rcal.setNoiseDbmVx(dsCalib.getNoiseDbmVx());
-  
-  rcal.setReceiverGainDbHc(dsCalib.getReceiverGainDbHc());
-  rcal.setReceiverGainDbHx(dsCalib.getReceiverGainDbHx());
-  rcal.setReceiverGainDbVc(dsCalib.getReceiverGainDbVc());
-  rcal.setReceiverGainDbVx(dsCalib.getReceiverGainDbVx());
-  
-  rcal.setReceiverSlopeDbHc(dsCalib.getReceiverSlopeDbHc());
-  rcal.setReceiverSlopeDbHx(dsCalib.getReceiverSlopeDbHx());
-  rcal.setReceiverSlopeDbVc(dsCalib.getReceiverSlopeDbVc());
-  rcal.setReceiverSlopeDbVx(dsCalib.getReceiverSlopeDbVx());
-  
-  rcal.setBaseDbz1kmHc(dsCalib.getBaseDbz1kmHc());
-  rcal.setBaseDbz1kmHx(dsCalib.getBaseDbz1kmHx());
-  rcal.setBaseDbz1kmVc(dsCalib.getBaseDbz1kmVc());
-  rcal.setBaseDbz1kmVx(dsCalib.getBaseDbz1kmVx());
-  
-  rcal.setSunPowerDbmHc(dsCalib.getSunPowerDbmHc());
-  rcal.setSunPowerDbmHx(dsCalib.getSunPowerDbmHx());
-  rcal.setSunPowerDbmVc(dsCalib.getSunPowerDbmVc());
-  rcal.setSunPowerDbmVx(dsCalib.getSunPowerDbmVx());
-  
-  rcal.setNoiseSourcePowerDbmH(dsCalib.getNoiseSourcePowerDbmH());
-  rcal.setNoiseSourcePowerDbmV(dsCalib.getNoiseSourcePowerDbmV());
-  
-  rcal.setPowerMeasLossDbH(dsCalib.getPowerMeasLossDbH());
-  rcal.setPowerMeasLossDbV(dsCalib.getPowerMeasLossDbV());
-  
-  rcal.setCouplerForwardLossDbH(dsCalib.getCouplerForwardLossDbH());
-  rcal.setCouplerForwardLossDbV(dsCalib.getCouplerForwardLossDbV());
-  
-  rcal.setZdrCorrectionDb(dsCalib.getZdrCorrectionDb());
-  rcal.setLdrCorrectionDbH(dsCalib.getLdrCorrectionDbH());
-  rcal.setLdrCorrectionDbV(dsCalib.getLdrCorrectionDbV());
-  rcal.setSystemPhidpDeg(dsCalib.getSystemPhidpDeg());
-  
-  rcal.setTestPowerDbmH(dsCalib.getTestPowerDbmH());
-  rcal.setTestPowerDbmV(dsCalib.getTestPowerDbmV());
+  RadarCalib::copyDsRadarToRadx(dsCalib, rcal);
 
   // remove cal with the same pulse width
   // if one already exists
@@ -570,6 +506,8 @@ void IwrfMomReader::_decodeDsRadarBeam()
     georef.setHeadingRate(dsGeoref.heading_rate_dps);
     georef.setPitchRate(dsGeoref.pitch_rate_dps);
     georef.setRollRate(dsGeoref.roll_rate_dps);
+    georef.setDriveAngle1(dsGeoref.drive_angle_1_deg);
+    georef.setDriveAngle2(dsGeoref.drive_angle_2_deg);
     _latestRay->clearGeoref();
     _latestRay->setGeoref(georef);
   }
@@ -1004,12 +942,15 @@ int IwrfMomReaderFmq::_getNextMsg()
                                "IwrfMomReader",
                                _debug >= IWRF_DEBUG_NORM,
                                initPos, 
-                               _msecsWait);
+                               _msecsNonblockingWait);
     } else {
       iret = _fmq.initReadBlocking(_inputFmq.c_str(),
                                    "IwrfMomReader",
                                    _debug >= IWRF_DEBUG_NORM,
                                    initPos);
+      if (_msecsBlockingTimeout > 0) {
+        _fmq.setBlockingReadTimeout(_msecsBlockingTimeout);
+      }
     }
     
     if (iret) {
@@ -1030,7 +971,7 @@ int IwrfMomReaderFmq::_getNextMsg()
   if (_nonBlocking) {
     bool gotOne = false;
     _timedOut = false;
-    if (_fmq.readMsg(&gotOne, -1, _msecsWait)) {
+    if (_fmq.readMsg(&gotOne, -1, _msecsNonblockingWait)) {
       cerr << "ERROR - IwrfMomReaderFmq::_getNextMsg" << endl;
       cerr << _fmq.getErrStr() << endl;
       _fmq.closeMsgQueue();
@@ -1172,7 +1113,8 @@ int IwrfMomReaderTcp::_getNextMsg()
 
     if (_nonBlocking) {
       _timedOut = false;
-      if (_sock.readBuffer(packetTop, sizeof(packetTop), _msecsWait)) {
+      if (_sock.readBuffer(packetTop, sizeof(packetTop),
+                           _msecsNonblockingWait)) {
         if (_sock.getErrNum() == SockUtil::TIMED_OUT) {
           _timedOut = true;
           return -1;

@@ -56,68 +56,89 @@ Args::Args (int argc, char **argv, char *prog_name)
   okay = true;
   _startTime = -1;
   _endTime = -1;
-  
+  _inputFileList.clear();
+
   TDRP_init_override(&override);
   
   // search for command options
   
-  for (int i =  1; i < argc; i++)
-  {
+  for (int i =  1; i < argc; i++) {
+
     if (STRequal_exact(argv[i], "--") ||
+	STRequal_exact(argv[i], "-h") ||
 	STRequal_exact(argv[i], "-help") ||
-	STRequal_exact(argv[i], "-man"))
-    {
+	STRequal_exact(argv[i], "-man")) {
+
       _usage(prog_name, stdout);
       exit(0);
-    }
-    else if (STRequal_exact(argv[i], "-debug"))
-    {
-      sprintf(tmp_str, "debug = true;");
+
+    } else if (STRequal_exact(argv[i], "-debug")) {
+
+      snprintf(tmp_str, BUFSIZ, "debug = true;");
       TDRP_add_override(&override, tmp_str);
-    }
-    else if (STRequal_exact(argv[i], "-endtime"))
-    {
-      if (i < argc - 1)
-      {
+
+    } else if (STRequal_exact(argv[i], "-endtime")) {
+
+      if (i < argc - 1) {
         if ((_endTime = _parseTime(argv[i+1], prog_name,
-                                   (char *) "endtime")) < 0)
-        {
+                                   (char *) "endtime")) < 0) {
           okay = FALSE;
         }
-      }
-      else
-      {
-        okay = FALSE;
-      }
-
-    }
-    else if (STRequal_exact(argv[i], "-mode"))
-    {
-      if (i < argc - 1)
-      {
-        sprintf(tmp_str, "mode = %s_MODE;", argv[++i]);
+        snprintf(tmp_str, BUFSIZ, "mode = ARCHIVE_MODE;");
         TDRP_add_override(&override, tmp_str);
-      }
-      else
-      {
+      } else {
         okay = FALSE;
       }
-    }
-    else if (STRequal_exact(argv[i], "-starttime"))
-    {
-      if (i < argc - 1)
-      {
-        if ((_startTime = _parseTime(argv[i+1], prog_name,
-                                     (char *) "starttime")) < 0)
-        {
-          okay = FALSE;
-        }
-      }
-      else
-      {
+      
+    } else if (STRequal_exact(argv[i], "-mode")) {
+
+      if (i < argc - 1) {
+        snprintf(tmp_str, BUFSIZ, "mode = %s_MODE;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
         okay = FALSE;
       }
 
+    } else if (STRequal_exact(argv[i], "-starttime")) {
+
+      if (i < argc - 1) {
+        if ((_startTime = _parseTime(argv[i+1], prog_name,
+                                     (char *) "starttime")) < 0) {
+          okay = FALSE;
+        }
+        snprintf(tmp_str, BUFSIZ, "mode = ARCHIVE_MODE;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+        okay = FALSE;
+      }
+      
+    } else if (STRequal_exact(argv[i], "-in_url")) {
+
+      if (i < argc - 1) {
+        snprintf(tmp_str, BUFSIZ, "input_url = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+        okay = FALSE;
+      }
+      
+    } else if (!strcmp(argv[i], "-f")) {
+      
+      if (i < argc - 1) {
+	// load up file list vector. Break at next arg which
+	// start with -
+	for (int j = i + 1; j < argc; j++) {
+	  if (argv[j][0] == '-') {
+	    break;
+	  } else {
+	    _inputFileList.push_back(argv[j]);
+	  }
+	}
+	sprintf(tmp_str, "mode = FILELIST_MODE;");
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	okay = false;
+      }
+      
     }
     
   } /* i */
@@ -196,9 +217,12 @@ void Args::_usage(char *prog_name, FILE *stream)
 	  "Usage:\n\n", prog_name, " [options] as below:\n\n"
 	  "       [ --, -help, -man ] produce this list.\n"
 	  "       [ -debug ] debugging on\n"
-          "       [ -endtime yyyy/mm/dd_hh:mm:ss ] end time (ARCHIVE_MODE only)\n"
+          "       [ -endtime yyyy/mm/dd_hh:mm:ss ] end time, sets to ARCHIVE_MODE\n"
+          "       [ -f ? ] set file paths, sets mode to FILELIST\n"
+          "       [ -f ? ] set file paths, sets mode to FILELIST\n"
           "       [ -mode ?] ARCHIVE or REALTIME\n"
-          "       [ -starttime yyyy/mm/dd_hh:mm:ss ] start time (ARCHIVE_MODE only)\n"
+          "       [ -starttime yyyy/mm/dd_hh:mm:ss ] start time, sets to ARCHIVE_MODE\n"
+          "       [ -in_url ? ] set file paths, sets mode to FILELIST\n"
 	  "\n");
 
 

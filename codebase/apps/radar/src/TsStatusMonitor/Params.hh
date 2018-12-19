@@ -75,11 +75,24 @@ public:
   } debug_t;
 
   typedef enum {
+    REALTIME_FMQ = 0,
+    ARCHIVE = 1,
+    FILELIST = 2
+  } mode_t;
+
+  typedef enum {
     XML_ENTRY_BOOLEAN = 0,
     XML_ENTRY_INT = 1,
     XML_ENTRY_DOUBLE = 2,
     XML_ENTRY_STRING = 3
   } xml_entry_type_t;
+
+  typedef enum {
+    PUT_OVER = 0,
+    PUT_ADD = 1,
+    PUT_ADD_UNIQUE = 2,
+    PUT_ONCE = 3
+  } spdb_put_mode_t;
 
   // struct typedefs
 
@@ -392,9 +405,17 @@ public:
 
   char* instance;
 
+  mode_t mode;
+
   char* fmq_name;
 
   int data_valid_interval_secs;
+
+  char* archive_data_dir;
+
+  char* archive_start_time;
+
+  char* archive_end_time;
 
   xml_entry_t *_xml_entries;
   int xml_entries_n;
@@ -453,6 +474,8 @@ public:
 
   tdrp_bool_t compress_spdb;
 
+  spdb_put_mode_t spdb_put_mode;
+
   tdrp_bool_t write_stats_files_to_catalog;
 
   int stats_interval_secs;
@@ -486,7 +509,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[56];
+  mutable TDRPtable _table[61];
 
   const char *_className;
 

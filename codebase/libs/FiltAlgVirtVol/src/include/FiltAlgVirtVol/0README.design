@@ -1,0 +1,34 @@
+Virtual Volume = 
+
+     projection information
+
+     vector<SingleValue> 
+
+     vector<FiltData>
+
+     volume time            
+
+SingleValue = 
+     named single values, which can be written or not (XML?)
+
+FiltData = 
+        any number of named single values, written or not (XML?)
+        any number of 2d grids, written out or not = SingleData
+        the elevation angle
+        the elevation angle index??
+        projection information copied from virtvol, used by some algs
+   
+
+
+SingleData = 
+
+        Grid2d
+
+FiltData is passed in and out of 2d algorithm filters
+
+VirtualVolume is passed into and out of 1d filters, after the 2d filters
+
+
+
+
+

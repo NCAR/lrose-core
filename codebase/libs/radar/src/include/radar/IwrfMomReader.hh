@@ -83,9 +83,17 @@ public:
 
   void setNonBlocking(int msecsWait) {
     _nonBlocking = true;
-    _msecsWait = msecsWait;
+    _msecsNonblockingWait = msecsWait;
   }
+
+  // optionally set timeout for blocking reads
+  // will return with error after this timeout
   
+  void setBlockingTimeout(int msecsTimeout) {
+    _nonBlocking = false;
+    _msecsBlockingTimeout = msecsTimeout;
+  }
+
   // Read next ray.
   // Returns RadxRay pointer on success, NULL on failure.
   //
@@ -209,9 +217,10 @@ protected:
   
   // device info
 
-  bool _nonBlocking; // reads are non-blocking (FMQ and TCP only)
-  int _msecsWait;    // millisecs to wait in non-blocking mode
-
+  bool _nonBlocking;         // reads are non-blocking (FMQ and TCP only)
+  int _msecsNonblockingWait; // millisecs to wait in non-blocking reads
+  int _msecsBlockingTimeout; // timeout millisecs for blocking reads
+  
   bool _timedOut;    // applies to non-blocking ops only
   bool _endOfFile;   /* applies for file-based classes only
                       * other classes will always have this

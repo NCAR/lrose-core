@@ -1,0 +1,435 @@
+/*********************************************************
+ * Parameter definitions for RadxPid
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Dec 2018
+ */
+
+commentdef {
+  p_header = "RadxPid reads moments from Radx-type files, computes PID (and optionally KDP) and writes out the results to CfRadial files.";
+  p_text = "The NCAR PID method is based on a fuzzy logic approach. This is documented in the following reference: Cloud Microphysics Retrieval Using S-Band Dual-Polarization Radar Measurements: J. Vivekanandan, D. S. Zrnic, S. M. Ellis, R. Oye, A. V. Ryzhkov, and J. Straka. Bulletin of the American Meteorological Society, 1999";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "THREADING FOR SPEED.";
+  p_text = "Multiple threads are used to improve performance. The computations are carried out in parallel in separate threads. The read and write stages occur in the main thread, since netCDF is not thread safe.";
+}
+
+paramdef int {
+  p_default = 4;
+  p_min = 1;
+  p_descr = "The number of compute threads.";
+  p_help = "The moments computations are segmented in range, with each thread computing a fraction of the number of gates. For maximum performance, n_threads should be set to the number of processors multiplied by 4. For further tuning, use top to maximize CPU usage while varying the number of threads. For single-threaded operation set this to 1.";
+} n_compute_threads;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FILELIST;
+  p_descr = "Operating mode";
+  p_help = "\n\nIn REALTIME mode, the program waits for a new input file."
+           "\\nIn ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "\n\nIn FILELIST mode, it moves through the list of file names "
+           "specified on the command line.";
+} mode;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} input_file_search_ext;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name sub-string.";
+  p_help = "If set, only files with names containing this sub-string will be processed.";
+} input_file_search_substr;
+
+paramdef string {
+  p_default = "2015 06 26 00 00 00";
+  p_descr = "Set the start time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} start_time;
+
+paramdef string {
+  p_default = "2015 06 26 12 00 00";
+  p_descr = "Set the end time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} end_time;
+
+commentdef {
+  p_header = "INPUT FIELD INFORMATION";
+  p_text = "Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. If SNR is not available, it is computed from DBZ.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is SNR data available?";
+  p_help = "If not, SNR will be computed from the DBZ field. See 'noise_dbz_at_100km'.";
+} SNR_available;
+
+paramdef string {
+  p_default = "SNR";
+  p_descr = "Field name for SNR.";
+  p_help = "Signal-to-noise ratio (dB).";
+} SNR_field_name;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "The noise value, represented as dBZ at a range of 100km.";
+  p_help = "This is used for computing the SNR from the DBZ field. It is only used if SNR_available is FALSE. The SNR will be computed by range-correcting this value and using it as the noise value.";
+} noise_dbz_at_100km;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for DBZ.";
+  p_help = "Horizontally-polarized reflectivity factor.";
+} DBZ_field_name;
+
+paramdef string {
+  p_default = "ZDR";
+  p_descr = "Field name for ZDR.";
+} ZDR_field_name;
+
+paramdef string {
+  p_default = "PHIDP";
+  p_descr = "Field name for PHIDP.";
+} PHIDP_field_name;
+
+paramdef string {
+  p_default = "RHOHV";
+  p_descr = "Field name for RHOHV.";
+} RHOHV_field_name;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is LDR data available?";
+} LDR_available;
+
+paramdef string {
+  p_default = "LDR";
+  p_descr = "Field name for LDR.";
+} LDR_field_name;
+    
+commentdef {
+  p_header = "COMPUTING KDP";
+}
+
+paramdef string {
+  p_default = "use-defaults";
+  p_descr = "Path for parameters for computing KDP.";
+  p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
+} KDP_params_file_path;
+
+commentdef {
+  p_header = "COMPUTING PID";
+}
+
+paramdef string {
+  p_default = "use-defaults";
+  p_descr = "Path for parameters for computing PID.";
+  p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
+} PID_params_file_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When computing PID, using KDP conditioned for self-consistency.";
+  p_help = "When KDP is computed, we compute both a standard result, and a conditioned result based on the self-consistency method. If this parameter is set to TRUE, the self-consistency result will be used instead of the standard result.";
+} PID_use_KDP_self_consistency;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use Z and ZDR fields that are corrected for attenuation.";
+  p_help = "If TRUE, the attenuation-corrected Z and ZDR fields will be used for computing PID.";
+} PID_use_attenuation_corrected_fields;
+
+commentdef {
+  p_header = "SPECIFYING OUTPUT FIELDS";
+}
+
+typedef enum {
+
+  PID,
+  PID_INTEREST,
+  TEMP_FOR_PID,
+
+  KDP,
+  KDP_SC,
+
+  DBZ_ATTEN_CORRECTION,
+  ZDR_ATTEN_CORRECTION,
+  DBZ_ATTEN_CORRECTED,
+  ZDR_ATTEN_CORRECTED
+
+} output_field_id_t;
+
+typedef struct {
+  output_field_id_t id;
+  string name; 
+  string long_name; 
+  string standard_name; 
+  string units;
+  boolean do_write;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    {
+      id = PID,
+      name = "PID",
+      long_name = "particle_id",
+      standard_name = "hydrometeor_type",
+      units = "",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = PID_INTEREST,
+      name = "PID_INTEREST",
+      long_name = "final_interest_value_for_pid_decision",
+      standard_name = "final_interest_value_for_pid_decision",
+      units = "",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = TEMP_FOR_PID,
+      name = "TEMP_FOR_PID",
+      long_name = "temperature_for_computing_pid",
+      standard_name = "temperature",
+      units = "C",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = KDP,
+      name = "KDP",
+      long_name = "specific_differential_phase",
+      standard_name = "specific_differential_phase_hv",
+      units = "deg/km",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = KDP_SC,
+      name = "KDP_SC",
+      long_name = "kdp_conditioned_using_ZZDR_self_consistency",
+      standard_name = "specific_differential_phase_hv",
+      units = "deg/km",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = ZDR_ATTEN_CORRECTION,
+      name = "ZDR_ATTEN_CORRECTION",
+      long_name = "correction_to_zdr_for_attenuation",
+      standard_name = "zdr_attenuation_correction",
+      units = "dB",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = DBZ_ATTEN_CORRECTED,
+      name = "DBZ_ATTEN_CORRECTED",
+      long_name = "dbz_corrected_for_attenuation",
+      standard_name = "dbz_corrected_for_attenuation",
+      units = "dBZ",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = ZDR_ATTEN_CORRECTED,
+      name = "ZDR_ATTEN_CORRECTED",
+      long_name = "zdr_corrected_for_attenuation",
+      standard_name = "zdr_corrected_for_attenuation",
+      units = "dB",
+      do_write = FALSE
+    }
+  };
+  p_descr = "Indicate which fields should be written to the output file.";
+  p_help = "Choose the ID from the list.\n"
+    "\nThe name and units can be set however the user prefers.\n"
+    "\nThe output_encoding apply to CfRadial output only. \n\n"
+    "\tPID: NCAR Particle ID\n"
+    "\tPID_INTEREST: final interest map for NCAR Particle ID values\n"
+    "\tTEMP_FOR_PID: temperature field for PID (C)\n"
+    "\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n"
+    "\tKDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)\n"
+    "\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n"
+    "\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n"
+    "\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n"
+    "\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n";
+} output_fields[];
+
+typedef enum {
+  OUTPUT_ENCODING_FL32,
+  OUTPUT_ENCODING_INT16
+} output_encoding_t;
+
+paramdef enum output_encoding_t {
+  p_default = OUTPUT_ENCODING_INT16;
+  p_descr = "Set the encoding for fields in the output files.";
+  p_help = "INT16 provides better compression. FL32 writes 32-bit floats.";
+} output_encoding;
+
+commentdef {
+  p_header = "SPECIFY COPY-THROUGH FIELDS";
+  p_text = "These fields are copied unchanged from the input file to the output file. This allows the user to consolidate the input and output data set in a single file.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to copy input fields unchanged to the output file.";
+} copy_selected_input_fields_to_output;
+
+typedef struct {
+  string input_name; 
+  string output_name;
+  boolean censor_non_weather;
+} copy_field_t;
+
+paramdef struct copy_field_t {
+  p_default = {
+    {
+      input_name = "DBZ",
+      output_name = "DBZ",
+      censor_non_weather = FALSE
+    }
+    ,
+    {
+      input_name = "VEL",
+      output_name = "VEL",
+      censor_non_weather = FALSE
+    }
+  };
+  p_descr = "These fields are copied through unchanged to the output file.";
+  p_help = "You can change the name of the field on output. Optionally you can censor the non-weather echoes, based on the PID.";
+} copy_fields[];
+
+commentdef {
+  p_header = "WRITE DEBUG FIELDS";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write extra fields to assist with KDP debugging.";
+  p_help = "These are the intermediate fields used in computing KDP and attenuation.";
+} KDP_write_debug_fields;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write extra fields to assist with PID debugging.";
+  p_help = "These are the intermediate fields used in computing PID.";
+} PID_write_debug_fields;
+
+commentdef {
+  p_header = "WRITING THE OUTPUT FILES";
+}
+
+paramdef string {
+  p_default = "/tmp/pid";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
+typedef enum {
+  START_AND_END_TIMES,
+  START_TIME_ONLY,
+  END_TIME_ONLY
+} filename_mode_t;
+
+paramdef enum filename_mode_t {
+  p_default = START_AND_END_TIMES;
+  p_descr = "Mode for computing output file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.";
+} output_filename_mode;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+
+typedef enum {
+  OUTPUT_FORMAT_CFRADIAL,
+  OUTPUT_FORMAT_DORADE,
+  OUTPUT_FORMAT_UF
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = OUTPUT_FORMAT_CFRADIAL;
+  p_descr = "Format for the output files.";
+} output_format;
+
+commentdef {
+  p_header = "SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the standard 4/3 earth radius model for refraction.";
+  p_help = "If true, the standard 4/3 earth radius will be overridden. The US NWS NEXRAD system uses 1.21 instead of 1.333.";
+} override_standard_pseudo_earth_radius;
+
+paramdef double {
+  p_default = 1.33333333;
+  p_descr = "Ratio for computing the pseudo earth radius for beam height computations.";
+  p_help = "For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.";
+} pseudo_earth_radius_ratio;
+
+commentdef {
+  p_header = "REALTIME OPERATIONS";
+}
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Interval for registering with procmap (secs).";
+  p_help = "REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.";
+} procmap_register_interval;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+

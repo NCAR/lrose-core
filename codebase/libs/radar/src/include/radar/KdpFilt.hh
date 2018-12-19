@@ -40,10 +40,12 @@
 #define KdpFilt_hh
 
 #include <toolsa/TaArray.hh>
+#include <radar/KdpFiltParams.hh>
 #include <string>
 #include <vector>
 #include <iostream>
 using namespace std;
+class KdpFiltParams;
 
 ////////////////////////
 // This class
@@ -245,11 +247,11 @@ public:
 
 
   /**
-   * Set KDP threshold for valid run when estimating
-   * KDP from Z and ZDR
+   * Set KDP threshold for valid run when computing KDP using
+   * Z and ZDR self-consistency
    */
 
-  void setThresholdForKdpZZdr(double val) { _kdpZZdrThreshold = val; }
+  void setKdpMinForSelfConsistency(double val) { _kdpMinForSelfConsistency = val; }
   
   /**
    * Set length for Z and ZDR median filter when estimating
@@ -258,6 +260,12 @@ public:
 
   void setMedianFilterLenForKdpZZdr(int val) { _kdpZZdrMedianLen = val; }
   
+  /**
+   * Set parameters from KdpFiltParams object
+   */
+
+  void setFromParams(const KdpFiltParams &params);
+
   /**
    * Initialize the object arrays for later use.
    * Do this if you need access to the arrays, but have not yet called
@@ -368,7 +376,8 @@ public:
    */
   const double *getKdp() const { return _kdp; }
   const double *getKdpZZdr() const { return _kdpZZdr; }
-  const double *getKdpCond() const { return _kdpCond; }
+  // self-consistency conditioned result
+  const double *getKdpSC() const { return _kdpSC; }
 
   /**
    * Get attenuation correction after calling compute()
@@ -376,6 +385,8 @@ public:
    */
   const double *getDbzAttenCorr() const { return _dbzAttenCorr; }
   const double *getZdrAttenCorr() const { return _zdrAttenCorr; }
+  const double *getDbzCorrected() const { return _dbzCorrected; }
+  const double *getZdrCorrected() const { return _zdrCorrected; }
 
   /**
    * set debug on
@@ -395,6 +406,10 @@ protected:
 private:
 
   double _missingValue; /**< Value for missing or bad data */
+
+  // parameters
+
+  KdpFiltParams _params;
 
   // time for ray
 
@@ -620,8 +635,8 @@ private:
   TaArray<double> _kdpZZdr_;
   double *_kdpZZdr;
 
-  TaArray<double> _kdpCond_;
-  double *_kdpCond;
+  TaArray<double> _kdpSC_;
+  double *_kdpSC;
 
   TaArray<double> _psob_;
   double *_psob;
@@ -631,6 +646,12 @@ private:
 
   TaArray<double> _zdrAttenCorr_;
   double *_zdrAttenCorr;
+
+  TaArray<double> _dbzCorrected_;
+  double *_dbzCorrected;
+
+  TaArray<double> _zdrCorrected_;
+  double *_zdrCorrected;
 
   // Z and ZDR attenuation correction
 
@@ -652,7 +673,7 @@ private:
   double _kdpZExpon;
   double _kdpZdrExpon;
   double _kdpZZdrCoeff;
-  double _kdpZZdrThreshold;
+  double _kdpMinForSelfConsistency;
   int _kdpZZdrMedianLen;
 
   // methods
@@ -726,8 +747,8 @@ private:
 
   /// load up conditional kdp from computed kdp and kdpZZdr
 
-  void _loadKdpCond();
-  void _loadKdpCondRun(int startGate, int endGate);
+  void _loadKdpSC();
+  void _loadKdpSCRun(int startGate, int endGate);
 
 };
 

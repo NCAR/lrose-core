@@ -148,6 +148,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 #
 # in order to build SiiTest_Main, comment any calls to Qt and QBrush, etc. in ColorMap.cc/.hh
 #
+
 SiiTest_Main: ColorMap.o SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o
 	g++ -o SiiTest_Main SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o ColorMap.o -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp  -L/usr/local/Cellar/qt/5.10.1/lib -F/usr/local/Cellar/qt/5.10.1/lib -framework QtWidgets -F/usr/local/Cellar/qt/5.10.1/lib -framework QtGui -F/usr/local/Cellar/qt/5.10.1/lib -framework QtCore -lz -lm -g
 
@@ -158,6 +159,31 @@ SiiTest_MainNoQt:
 	g++ -o SiiTest_Main SiiPalette.cc SiiTest_Main.cc SoloDefaultColorWrapper.cc PaletteManager.cc ColorTableManager.cc ColorMap.cc -I/Users/brenda/lrose/include -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp -lz -lm -g
 
 #	g++ -o SiiTest_Main SiiPalette.cc SiiTest_Main.cc SoloDefaultColorWrapper.cc PaletteManager.cc ColorTableManager.cc ColorMap.cc -I/Users/brenda/lrose/include -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp -lz -lm -g
+
+
+#
+# build Mac OSX application
+#
+hawkeye_app:
+	# Make HawkEye and the Makefile.qmake
+	make 
+	# Make the bundle (HawkEye.app tree structure)
+	make from_qmake
+	# copy the system libraries to the .app tree structure
+	mkdir -p HawkEye.app/Contents/Frameworks
+	cp /usr/lib/libexpat.1.dylib  HawkEye.app/Contents/Frameworks/.
+	cp /usr/lib/libbz2.1.0.dylib  HawkEye.app/Contents/Frameworks/.
+	cp /usr/lib/libz.1.dylib      HawkEye.app/Contents/Frameworks/.
+	cp /usr/lib/libSystem.B.dylib HawkEye.app/Contents/Frameworks/.
+	mkdir -p HawkEye.app/Contents/MacOS/../share
+	cp -r ~/git/lrose-displays/color_scales HawkEye.app/Contents/MacOS/../share/.
+	# make the dmg  
+	macdeployqt HawkEye.app -dmg -always-overwrite -codesign="${CERT_NAME}"
+	# now build the folder for the dmg installer
+	mkdir -p HawkEye_bkg_test
+	cp ~/Desktop/arrow.pdf HawkEye_bkg_test/.background
+	rsync -r HawkEye.app HawkEye_bkg_test/.
+	hdiutil create -volname HawkEye_Installer4 -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye_bkg_test -ov -format UDZO HawkEye_test4.dmg
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

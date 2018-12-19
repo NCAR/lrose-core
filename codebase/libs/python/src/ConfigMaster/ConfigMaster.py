@@ -102,7 +102,7 @@ class ConfigMaster:
   def init(self, program_description=None, **kwargs):
     self.assignDefaultParams()
 
-    self.parser = argparse.ArgumentParser(description=program_description)
+    self.parser = argparse.ArgumentParser(description=program_description, formatter_class=argparse.RawDescriptionHelpFormatter)
 
     if "add_param_args" in kwargs:
       self.addParseArgs(add_param_args = kwargs["add_param_args"])

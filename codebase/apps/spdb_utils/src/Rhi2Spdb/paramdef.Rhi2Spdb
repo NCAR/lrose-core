@@ -31,7 +31,11 @@
 
 commentdef {
   p_header = "Program name: Rhi2Spdb";
-  p_text = "Rhi2Spdb reads mdv files containing measured RHI data, creates a GenPt to describe the rhi details and stores it in SPDB.";
+  p_text = "Rhi2Spdb reads Radx or MDV files containing RHI radar data, creates a GenPt to describe the rhi details and stores it in SPDB.";
+}
+
+commentdef {
+  p_header = "PROGRAM CONTROL";
 }
 
 typedef enum {
@@ -57,8 +61,18 @@ typedef enum {
 paramdef enum mode_t {
   p_default = ARCHIVE;
   p_descr = "Operating mode";
-  p_help = "In REALTIME mode, the program waits for a new input file - and this requires that the latest_data_info files are available. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in FILELIST mode, at least) MUST contain a day-directory below the data file -- ./data_file.mdv will not work as a file path";
+  p_help = "In REALTIME mode, the program waits for a new input file - and this requires that the latest_data_info files are available. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
 } mode;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "/tmp/rhi/input";
+  p_descr = "Input DIR for RHI data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_url;
 
 paramdef int {
   p_default = 600;
@@ -66,23 +80,10 @@ paramdef int {
   p_help =  "Only data less old than this will be used.";
 } max_realtime_data_age_secs;
 
-paramdef int {
-  p_default = 5;
-  p_descr = "Time between checking for new data (secs)";
-  p_help = "The app checks for new data at this interval.";
-} time_between_checks_secs;
-
-paramdef int {
-  p_default = 180;
-  p_descr = "Search margin for finding the closest MDV data (secs)";
-  p_help = "Normally 0 will work, but it is good to widen the search a bit so as not to miss data with a non-standard time stamp.";
-} mdv_search_margin_secs;
-
-paramdef string {
-  p_default = "mdv/input";
-  p_descr = "Input URL for MDV data.";
-  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
-} input_url;
+commentdef {
+  p_header = "DATA OUTPUT";
+  p_text = "Spdb output";
+}
 
 paramdef string {
   p_default = "spdb/rhi";

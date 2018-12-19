@@ -72,7 +72,7 @@ PpiWidget::~PpiWidget()
   // delete all of the dynamically created beams
   
   for (size_t i = 0; i < _ppiBeams.size(); ++i) {
-    delete _ppiBeams[i];
+    Beam::deleteIfUnused(_ppiBeams[i]);
   }
   _ppiBeams.clear();
 
@@ -87,7 +87,7 @@ void PpiWidget::clear()
   // Clear out the beam array
   
   for (size_t i = 0; i < _ppiBeams.size(); i++) {
-    delete _ppiBeams[i];
+    Beam::deleteIfUnused(_ppiBeams[i]);
   }
   _ppiBeams.clear();
   
@@ -178,6 +178,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
                         const std::vector< std::vector< double > > &beam_data,
                         const std::vector< DisplayField* > &fields)
 {
+
   // add a new beam to the display. 
   // The steps are:
   // 1. preallocate mode: find the beam to be drawn, or dynamic mode:
@@ -210,7 +211,9 @@ void PpiWidget::addBeam(const RadxRay *ray,
     // This beam does not cross the 0 degree angle.  Just add the beam to
     // the beam list.
 
-    PpiBeam* b = new PpiBeam(_params, ray, _fields.size(), n_start_angle, n_stop_angle);
+    PpiBeam* b = new PpiBeam(_params, ray, _fields.size(), 
+                             n_start_angle, n_stop_angle);
+    b->addClient();
     _cullBeams(b);
     _ppiBeams.push_back(b);
     newBeams.push_back(b);
@@ -221,6 +224,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
     // beam to the left of the 0 degree point.
 
     PpiBeam* b1 = new PpiBeam(_params, ray, _fields.size(), n_start_angle, 360.0);
+    b1->addClient();
     _cullBeams(b1);
     _ppiBeams.push_back(b1);
     newBeams.push_back(b1);
@@ -228,6 +232,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
     // Now add the portion of the beam to the right of the 0 degree point.
 
     PpiBeam* b2 = new PpiBeam(_params, ray, _fields.size(), 0.0, n_stop_angle);
+    b2->addClient();
     _cullBeams(b2);
     _ppiBeams.push_back(b2);
     newBeams.push_back(b2);
@@ -256,6 +261,11 @@ void PpiWidget::addBeam(const RadxRay *ray,
     
   } // if (newBeams.size() > 0) 
 
+
+  if (_params.debug >= Params::DEBUG_VERBOSE &&
+      _ppiBeams.size() % 10 == 0) {
+    cerr << "==>> _ppiBeams.size(): " << _ppiBeams.size() << endl;
+  }
 
   // newBeams has pointers to all of the newly added beams.  Render the
   // beam data.
@@ -1011,7 +1021,7 @@ void PpiWidget::_cullBeams(const PpiBeam *beamAB)
 
       if (_ppiBeams[i]->hidden && !_ppiBeams[i]->isBeingRendered())
       {
-	delete _ppiBeams[i];
+        Beam::deleteIfUnused(_ppiBeams[i]);
 	_ppiBeams.erase(_ppiBeams.begin()+i);
       }
     }

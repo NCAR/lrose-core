@@ -28,7 +28,7 @@
 // Jaimi Yee, RAP, NCAR, P.O.Box 3000, Boulder, CO, 
 //   80307-3000, USA
 //
-// $Id: SweepData.cc,v 1.20 2016/03/07 01:23:03 dixon Exp $
+// $Id: SweepData.cc,v 1.23 2018/10/16 20:43:22 jcraig Exp $
 //
 /////////////////////////////////////////////////////////
 #include <math.h>
@@ -142,12 +142,12 @@ status_t SweepData::setInfo(RIDDS_data_31_hdr* nexradData,
   vcp              = volData->vol_coverage_pattern;
   fixedAngle       = nexradData->elevation;
   nyquistVelocity  = ((float) radialData->nyquist_vel) / 100;
-  unambiguousRange = ((float) radialData->unamb_range_x10) / 10;
-  prf              = (float)(SPEED_OF_LIGHT / (2 * unambiguousRange * 1000));
+  //unambiguousRange = ((float) radialData->unamb_range_x10) / 10;
+  //prf              = (float)(SPEED_OF_LIGHT / (2 * unambiguousRange * 1000));
   velScaleBiasFactor = 1.0;
   dbz0             = elevData->dbz0;
-  horiz_noise      = radialData->horiz_noise;
-  vert_noise       = radialData->vert_noise;
+  //horiz_noise      = radialData->horiz_noise;
+  //vert_noise       = radialData->vert_noise;
 
   if(nexradData->ref_ptr != 0) {
     RIDDS_data_31 *reflData = (RIDDS_data_31 *)((ui08*)nexradData + nexradData->ref_ptr);
@@ -174,21 +174,25 @@ status_t SweepData::setInfo(RIDDS_data_31_hdr* nexradData,
   // Decide what data we have in this sweep
   if( nexradData->ref_ptr > 0 && nexradData->vel_ptr <= 0) {
     scanType         = REFL_ONLY;
-    POSTMSG( DEBUG, "Sweep has Reflectivity only data");
+    if(params->verbose)
+      POSTMSG( DEBUG, "Sweep has Reflectivity only data");
    }
    else if( nexradData->ref_ptr <= 0 && nexradData->vel_ptr > 0 ) {
       scanType         = VEL_ONLY;
-      POSTMSG( DEBUG, "Sweep has Velocity only data");
+      if(params->verbose)
+	POSTMSG( DEBUG, "Sweep has Velocity only data");
    }
    else if( params->combineSweeps && vcpElev && vcpElev->waveform_type == 1 && 
 	    nexradData->ref_ptr > 0 && nexradData->vel_ptr > 0) {
     scanType         = REFL_ONLY;
-    POSTMSG( DEBUG, "Sweep has both Reflectivity and Velocity but is a Contiguous Surveillance Cut");
+    if(params->verbose)
+      POSTMSG( DEBUG, "Sweep has both Reflectivity and Velocity but is a Contiguous Surveillance Cut");
    }
    else if( params->combineSweeps && vcpElev && vcpElev->waveform_type == 2 && 
 	    nexradData->ref_ptr > 0 && nexradData->vel_ptr > 0) {
     scanType         = VEL_ONLY;
-    POSTMSG( DEBUG, "Sweep has both Reflectivity and Velocity but is a Contiguous Doppler Cut");
+    if(params->verbose)
+      POSTMSG( DEBUG, "Sweep has both Reflectivity and Velocity but is a Contiguous Doppler Cut");
    }
    else if( nexradData->ref_ptr > 0 && nexradData->vel_ptr > 0 ) {
       scanType         = BOTH;
@@ -200,9 +204,11 @@ status_t SweepData::setInfo(RIDDS_data_31_hdr* nexradData,
 	nexradData->sw_ptr = nexradData->vel_ptr;
 	nexradData->vel_ptr = nexradData->ref_ptr;
 	nexradData->ref_ptr = 0;
-	POSTMSG( DEBUG, "Sweep has Velocity only data");
+	if(params->verbose)
+	  POSTMSG( DEBUG, "Sweep has Velocity only data");
       } else {
-	POSTMSG( DEBUG, "Sweep has both Reflectivity and Velocity data");
+	if(params->verbose)
+	  POSTMSG( DEBUG, "Sweep has both Reflectivity and Velocity data");
       }
    }
    else {
@@ -242,8 +248,8 @@ status_t SweepData::setInfo( RIDDS_data_hdr* nexradData,
   vcp              = nexradData->vol_coverage_pattern;
   fixedAngle       = (nexradData->elevation / 8.) * (180. / 4096.);
   nyquistVelocity  = ((float) nexradData->nyquist_vel) / 100;
-  unambiguousRange = ((float) nexradData->unamb_range_x10) / 10;
-  prf              = (float)(SPEED_OF_LIGHT / (2 * unambiguousRange * 1000));
+  //unambiguousRange = ((float) nexradData->unamb_range_x10) / 10;
+  //prf              = (float)(SPEED_OF_LIGHT / (2 * unambiguousRange * 1000));
   cellSpacingRefl  = (float) nexradData->ref_gate_width;
   cellSpacingVel   = (float) nexradData->vel_gate_width;
   rangeToFirstReflGate = (float) nexradData->ref_gate1;
@@ -251,8 +257,8 @@ status_t SweepData::setInfo( RIDDS_data_hdr* nexradData,
   numGatesRefl     = nexradData->ref_num_gates;
   numGatesVel      = nexradData->vel_num_gates;
   dbz0             = -999.0;
-  horiz_noise      = -999.0;
-  vert_noise       = -999.0;
+  //horiz_noise      = -999.0;
+  //vert_noise       = -999.0;
   
   // Decide what data we have in this sweep
   if( nexradData->ref_ptr > 0 &&
@@ -363,7 +369,8 @@ void SweepData::calculatePulseCount()
     double startT = (beams[0])->getTime();
     float endaz = (beams[bsize-1])->getAzimuth();
     double endT = (beams[bsize-1])->getTime();
-    
+    float prf = (beams[0])->getPrf();
+
     if(endT == startT)
       return;
     
@@ -787,4 +794,35 @@ short SweepData::getRecBad()
   if(beams.size() > 0)
     return beams[0]->getRecBad();
   return -1;
+}
+float SweepData::getUnambiguousRange()
+{
+  if(beams.size() > 0)
+    return beams[0]->getUnambiguousRange();
+  return -999.0;
+}
+float SweepData::getPrf()
+{
+  if(beams.size() > 0)
+    return beams[0]->getPrf();
+  return -999.0;
+}
+float SweepData::getHorizNoise()
+{
+  if(beams.size() > 0)
+    return beams[0]->getHorizNoise();
+  return -999.0;
+}
+float SweepData::getVertNoise()
+{
+  if(beams.size() > 0)
+    return beams[0]->getVertNoise();
+  return -999.0;
+}
+
+float SweepData::getNyquistVelocity()
+{
+  if(beams.size() > 0)
+    return beams[0]->getNyquistVelocity();
+  return -999.0;
 }

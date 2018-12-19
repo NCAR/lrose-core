@@ -978,11 +978,15 @@ public:
   /// If the number of points in the field is not constant, use the minumum number
   /// of points in the supplied fields.
   ///
+  /// maxFractionMissing indicates the maximum fraction of the input data field
+  /// that can be missing for valid statistics. Should be between 0 and 1.
+  ///
   /// Returns NULL if fieldIn.size() == 0.
   /// Otherwise, returns field containing results.
   
-  static RadxField *computeStats(RadxField::StatsMethod_t method,
-                                 const vector<const RadxField *> &fieldsIn);
+  RadxField *computeStats(RadxField::StatsMethod_t method,
+                          const vector<const RadxField *> &fieldsIn,
+                          double maxFractionMissing = 0.25);
 
   /// convert enums to strings
 
@@ -1104,28 +1108,41 @@ private:
   static double _getFoldAngle(double val, double foldLimitLower, double foldRange);
   static double _getFoldValue(double angle, double foldLimitLower, double foldRange);
 
-  static void _computeMean(size_t nPoints,
-                           const vector<const RadxField *> &fieldsIn,
-                           Radx::fl64 *data);
+  void _computeMean(size_t nPoints,
+                    const vector<const RadxField *> &fieldsIn,
+                    Radx::fl64 *data,
+                    double maxFractionMissing);
   
-  static void _computeMeanFolded(size_t nPoints,
-                                 double foldLimitLower,
-                                 double foldRange,
-                                 const vector<const RadxField *> &fieldsIn,
-                                 Radx::fl64 *data);
+  void _computeMeanFolded(size_t nPoints,
+                          double foldLimitLower,
+                          double foldRange,
+                          const vector<const RadxField *> &fieldsIn,
+                          Radx::fl64 *data,
+                          double maxFractionMissing);
   
-  static void _computeMedian(size_t nPoints,
-                             const vector<const RadxField *> &fieldsIn,
-                             Radx::fl64 *data);
+  void _computeMedian(size_t nPoints,
+                      const vector<const RadxField *> &fieldsIn,
+                      Radx::fl64 *data,
+                      double maxFractionMissing);
 
-  static void _computeMaximum(size_t nPoints,
-                              const vector<const RadxField *> &fieldsIn,
-                              Radx::fl64 *data);
+  void _computeMaximum(size_t nPoints,
+                       const vector<const RadxField *> &fieldsIn,
+                       Radx::fl64 *data,
+                       double maxFractionMissing);
 
-  static void _computeMinimum(size_t nPoints,
-                              const vector<const RadxField *> &fieldsIn,
-                              Radx::fl64 *data);
+  void _computeMinimum(size_t nPoints,
+                       const vector<const RadxField *> &fieldsIn,
+                       Radx::fl64 *data,
+                       double maxFractionMissing);
 
+  void _computeMiddle(size_t nPoints,
+                      const vector<const RadxField *> &fieldsIn,
+                      Radx::fl64 *data,
+                      double maxFractionMissing);
+
+  int _computeMinValid(int nn,
+                       double maxFractionMissing);
+  
   /////////////////////////////////////////////////
   // serialization
   /////////////////////////////////////////////////

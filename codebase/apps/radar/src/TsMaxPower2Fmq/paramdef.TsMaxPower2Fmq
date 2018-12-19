@@ -1,0 +1,139 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for TsMaxPower2Fmq
+//
+//  Mike Dixon, EOL, NCAR
+//  P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+//  Dec 2018
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsMaxPower2Fmq - max power monitoring for HCR.";
+  p_text = "TsMaxPower2Fmq reads radar time series data from an FMQ, computes the max power at any location, and writes the result as XML text to an FMQ. The HCR control app reads this data and disables the transmitter if the received power is too high.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Register with procmap.";
+} reg_with_procmap;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  TS_FILE_INPUT, TS_FMQ_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = TS_FMQ_INPUT;
+  p_descr = "Input mode - files or time series API.";
+  p_help = "If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts/wband/shmem_10000";
+  p_descr = "FMQ name. For TS_FMQ_INPUT only.";
+  p_help = "Path to FMQ. This path does not include any extension.";
+} input_fmq_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If true, use the secondary georeference packet.";
+  p_help = "By default, we use the primary georeference packet. And most mobile radars only have one georeference. For those radars that have 2 georef devices, set this to true to use the secondary reference.";
+} use_secondary_georeference;
+
+commentdef {
+  p_header = "SAMPLING";
+};
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of pulse samples to be used in computing stats.";
+} n_samples;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Start gate for analysis.";
+} start_gate;
+
+typedef enum {
+  DISTANCE_IN_METERS,
+  DISTANCE_IN_FEET
+} distance_units_t;
+
+paramdef enum distance_units_t {
+  p_default = DISTANCE_IN_METERS;
+  p_descr = "Units for displaying distance.";
+  p_help = "In MAX_POWER mode, the distance to the max power gate for each channel is printed out. This can be either in feet or meters.";
+} distance_units;
+
+commentdef {
+  p_header = "CALIBRATION";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to apply calibration to compute powers.";
+  p_help = "Normally the powers are simply computed as I**2 + Q**2 - i.e. the power at the digitizer. If this param is set to TRUE, then the receiver gain from the calibration file will be subtracted from the powers, to give the powers detected by the LNAs.";
+} apply_calibration;
+
+paramdef string {
+  p_default = "calibration.xml";
+  p_descr = "Path for calibration file - see apply_calibration above.";
+  p_help = "This file will be read in and the gain values applied to compute the powers,m if apply_calibration is TRUE.";
+} cal_xml_file_path;
+
+commentdef {
+  p_header = "WRITING THE RESULTS OUT TO FMQ";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/max_power/shmem_15000";
+  p_descr = "FMQ name for output.";
+} output_fmq_path;
+
+paramdef int {
+  p_default = 10000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of slots in the output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to register with DataMapper.";
+  p_help = "If true, this app will register with the DataMapper at set intervals.";
+} output_fmq_reg_with_datamapper;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Frequency for DataMapper registration (secs).";
+} output_fmq_datamapper_reg_interval;
+

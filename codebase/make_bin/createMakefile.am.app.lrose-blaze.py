@@ -488,7 +488,7 @@ def decodeLibLine(line):
             libs.append("hdf5_cpp")
             libs.append("hdf5_hl")
             libs.append("hdf5")
-            libs.append("udunits2")
+            # libs.append("udunits2")
             libs.append("z")
             libs.append("bz2")
         elif (thisTok.find("NETCDF_C_AND_C++_LIBS") >= 0):
@@ -503,11 +503,11 @@ def decodeLibLine(line):
             libs.append("netcdff")
         elif (thisTok.find("TDRP_LIBS") >= 0):
             libs.append("tdrp")
-        elif (thisTok.find("QT_LIBS") >= 0):
-            libs.append("Qt5Core")
-            libs.append("Qt5Gui")
-            libs.append("Qt5Widgets")
-            libs.append("Qt5Network")
+        # elif (thisTok.find("QT_LIBS") >= 0):
+        #    libs.append("Qt5Core")
+        #    libs.append("Qt5Gui")
+        #    libs.append("Qt5Widgets")
+        #    libs.append("Qt5Network")
 
     return libs
 
@@ -614,10 +614,20 @@ def writeMakefileAm():
     if (needQt == True):
         fo.write("# qt libs\n")
         fo.write("\n")
-        fo.write("LDADD += $(shell pkg-config --libs Qt5Core)\n")
-        fo.write("LDADD += $(shell pkg-config --libs Qt5Gui)\n")
-        fo.write("LDADD += $(shell pkg-config --libs Qt5Widgets)\n")
-        fo.write("LDADD += $(shell pkg-config --libs Qt5Network)\n")
+        # result = os.system('pkg-config --libs Qt5Core')
+        # fo.write("LDADD += -lQt5Core\n")
+        # result = os.system('pkg-config --libs Qt5Gui')
+        # fo.write("LDADD += -lQt5Gui\n")
+        # result = os.system('pkg-config --libs Qt5Widgets')
+        # fo.write("LDADD += -lQt5Widgets\n")
+        # result = os.system('pkg-config --libs Qt5Network')
+        # fo.write("LDADD += -lQt5Network\n")
+
+        # trying to get the syntax right for this variable
+        fo.write("LDADD += $(QT_LIBS)\n")
+        # fo.write("LDADD += $(shell pkg-config --libs Qt5Gui)\n")
+        # fo.write("LDADD += $(shell pkg-config --libs Qt5Widgets)\n")
+        # fo.write("LDADD += $(shell pkg-config --libs Qt5Network)\n")
 
     fo.write("# set app name\n")
     fo.write("\n")

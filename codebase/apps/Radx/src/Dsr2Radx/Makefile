@@ -38,8 +38,8 @@ TARGET_FILE = Dsr2Radx
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lFmq -ldsserver -lrapformats -ldidss \
-	-lRadx -ltoolsa -ldataport -ltdrp \
+LOC_LIBS = -lFmq -lradar -ldsserver -lrapformats -ldidss \
+	-lRadx -lNcxx -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
@@ -52,6 +52,7 @@ HDRS = \
 	Args.hh \
 	Antenna.hh \
 	Dsr2Radx.hh \
+	Legacy.hh \
 	SweepMgr.hh
 
 CPPC_SRCS = \
@@ -59,6 +60,7 @@ CPPC_SRCS = \
 	Args.cc \
 	Antenna.cc \
 	Dsr2Radx.cc \
+	Legacy.cc \
 	Main.cc \
 	SweepMgr.cc
 

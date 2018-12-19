@@ -482,7 +482,11 @@ public:
 
   double dwell_time_secs;
 
+  tdrp_bool_t center_dwell_on_time;
+
   dwell_stats_method_t dwell_stats_method;
+
+  double dwell_stats_max_fraction_missing;
 
   char* radar_name_override;
 
@@ -546,6 +550,10 @@ public:
 
   char* output_filename_prefix;
 
+  tdrp_bool_t write_output_files_on_time_boundaries;
+
+  int output_file_time_interval_secs;
+
   tdrp_bool_t include_instrument_name_in_file_name;
 
   tdrp_bool_t include_site_name_in_file_name;
@@ -587,7 +595,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[83];
+  mutable TDRPtable _table[87];
 
   const char *_className;
 

@@ -18,301 +18,105 @@ commentdef {
   p_header =
     "Filters to apply";
   p_text =
-    "The filters to apply, in order applied. A brief description of each filter is:\n"
-    " \n"
-    "AZ_GRADIENT = Compute gradient azimuthally at each point\n"
-    "CLUTTER_2D_QUAL = Compute quality factor based on clutter\n"
-    "COMMENT = Non filter that just prints out 'input field' as a comment followeed by a more extensive message\n"
-    "CONSTRAIN = set missing outside a range\n"
-    "FIR = 1 dimensional FIR filter along beams\n"
-    "GAUSSIAN_2D_REMAP = Map 2 variables to a gaussian result\n"
-    "GRIDDED_MATH = Do math operations pointwise using 2 grids\n"
-    "MASK = change data when mask has particular value\n"
-    "MATH = Do mathematical operations on each data point\n"
-    "PASSTHROUGH = Set the output equal to the input, with a name change\n"
-    "QSCALE = Scaling filter r.e. (exp(-.69*(values))\n"
-    "SW_NORM = Spectrum width normalization\n"
-    "THRESH = Threshold filter, do something to data outside a threshold val\n"
-    "The parameters for each filter are found in arrays, one array per filter type, later in this file\n";
+    "new";
 }
-
-typedef enum
+paramdef string
 {
-  AZ_GRADIENT,
-  CLUTTER_2D_QUAL,
-  COMMENT,
-  CONSTRAIN,
-  FIR,
-  GAUSSIAN_2D_REMAP,
-  GRIDDED_MATH,
-  MASK,
-  MATH,
-  PASSTHROUGH,
-  QSCALE,
-  SW_NORM,
-  THRESH
-} filter_t;
+  p_descr = "Fixed constant strings that are interpreted by user functions";
+  p_default = {"Prt", "NSamples"};
+} fixed_const[];
 
-typedef struct
+paramdef string
 {
-  filter_t filter;
-  int filter_index;
-  string input_field;
-  string output_field;
-  string output_units;
-  double output_missing;
-  boolean write_output_field;
-} data_filter_t;
+  p_descr = "Non gridded data names";
+  p_default = { "MeanPrt", "MeanNSamples", "AzGradState"};
+} user_data[];
 
-typedef enum
+paramdef string
 {
-  MULT, ADD, SUBTRACT, NOOP
-} math_e;
+  p_descr = "Volume Filters to apply before doing ray filters";
+  p_default = {
+    "MeanPrt = VolAverage(Prt)",
+    "MeanNSamples = VolAverage(NSamples)",
+    "AzGradState = VolAzGradientState()"
+  };
+} volume_before_filter[];  
 
-typedef enum
+paramdef string
 {
-   LESS, LESS_OR_EQUAL, GREATER, GREATER_OR_EQUAL, MISSING
-} thresh_e;
+  p_descr = "Sweep filters to apply";
+  p_default = {
+    "VEL_Var_2d = Variance2d(VEL_FIR_DIFF)",
+    "DBZ_Var_2d = Variance2d(DBZ_FIR_DIFF)"
+  };
+} sweep_filter[];  
 
-paramdef struct data_filter_t
+paramdef string
 {
-  p_descr = "Filters to apply";
-  p_help =
-    "filter = The filter to apply\n"
-    "filter_index = index into an array of params for that filter type (found below)\n"
-    "input_field = name of input field to the filter, could be input to app, or output of an upstream filter\n"
-    "output_field = name of output field to the filter\n"
-    "output_units = name of output field to the filter (empty to pass through input as is)\n"
-    "output_missing = new output missing value (when output_units is not empty)\n"
-    "write_output_field=TRUE to write output field, FALSE to keep it only as a passthrough to downstream filters\n";
-  p_default = {};} filter[];  
+  p_descr = "Single ray Filters to apply";
+  p_default = {
+    "DBZ_FIR = FIR(DBZ_F)",
+    "DBZ_FIR_DIFF = DBZ_FIR - DBZ_F",
+    "VEL_FIR = FIR(VEL_F)",
+    "VEL_FIR_DIFF = VEL_FIR - VEL_F",
+    "DBZ_Var = Variance1d(DBZ_FIR_DIFF, 20, 0.1)",
+    "VEL_Var = Variance1d(VEL_FIR_DIFF, 20, 0.1)",
+    "pidMask = PID",
+    "if (PID > 15.5) then (pidMask = missing)",
+    "F_snr_vr = OneMinusQscale(SNRHC_F, 0.69, 1.5, -6)",
+    "if (F_snr_vr < -6) then (F_snr_vr = 0)",
+    "PHIDP = PHIDP_F",
+    "ZDR = ZDR_F",
+    "DBZ = DBZ_F",
+    "Dphidp_daz = AzGradient(PHIDP, AzGradState, 70)",
+    "Dzdr_daz = AzGradient(ZDR, AzGradState, 0)",
+    "Ddbz_daz = AzGradient(DBZ, AzGradState, 0)",
+    "F_snr_dbz = OneMinusQscale(SNRHC_F, 0.69, 1.5, -1)",
+    "if (F_snr_dbz < -1) then (F_snr_dbz = 0)",
+    "OneMinusNCP = 1 - NCP_F",
+    "F_ncp_dbz = Qscale(OneMinusNCP, 0.69, 0.5, 0)",
+    "WIDTH0 = WIDTH_F",
+    "if (WIDTH0 <= 0) then (WIDTH0 = missing)",
+    "SD_DBZ = Special0(WIDTH0, MeanPrt, MeanNSamples)",
+    "SD_VR = Special1(WIDTH0, MeanPrt, MeanNSamples)",
+    "F_sw_dbz = Qscale(SD_DBZ, 0.69, 2, 0.4)",
+    "F_sw_vr = Qscale(SD_VR, 0.69, 2, 0)",
+    "PHIDPp70 = PHIDP_F + 70",
+    "F_Att = Qscale(PHIDPp70, 0.69, 250, 0)",
+    "CLUT0 = CLUT",
+    "if (CLUT0 < -300) then (CLUT0 = missing)",
+    "SCR = DBZ_F - CLUT0",
+    "F_scr = OneMinusQscale(SCR, 0.69, 8, 25)",
+    "if (SCR < -25) then (F_scr = 0)",
+    "F_clut = CLUTTER_2D_QUAL(F_scr, 0.69, VEL_F, 1.5, WIDTH_F, 0.5)",
+    "if (CMD_FLAG < 0.5) then (F_clut = 1.0)",
+    "del_dbz = Ddbz_daz*Ddbz_daz*0.0086",
+    "del_zdr = Dzdr_daz*Dzdr_daz*0.0173",
+    "F_del_dbz = Qscale(del_dbz, 0.69, 2, 0.4)",
+    "if (F_del_dbz < 0.4) then (F_del_dbz = 1)",
+    "F_total_vr = F_snr_vr*F_clut*F_sw_vr",
+    "F_total_dbz = F_snr_dbz*F_Att*F_clut*F_del_dbz*F_sw_dbz",
+    "if (pidMask > 15.5) then (F_total_vr = 0)",
+    "if (pidMask = missing) then (F_total_vr = 0)",
+    "if (pidMask > 15.5) then (F_total_dbz = 0)",
+    "if (pidMask = missing) then (F_total_dbz = 0)",
+    "vr_thresh = VEL_F",
+    "if (F_total_vr < 0.5) then vr_thresh = missing",
+    "dbz_thresh = DBZ_F",
+    "if (F_total_dbz < 0.5) then dbz_thresh = missing",
+    "if (vr_thresh = missing) then (VEL_FIR_DIFF = missing)",
+    "if (dbz_thresh = missing) then (DBZ_FIR_DIFF = missing)"
+  };
+} ray_filter[];  
 
-typedef struct {
-  int dummy;
-} dummy_t;
-
-typedef struct {
-  math_e type;
-  double value;
-} math_t;
-
-paramdef struct math_t
+paramdef string
 {
-  p_descr = "MATH and AZ_GRADIENT params";
-  p_help = "replace values by doing math operations at each point (for AZ_GRADIENT, prior to doing the actual AZ_GRADIENT)\n"
-    "type = what to do\n"
-    "value = how much\n"
-    " for example type=ADD and value=7 means add 7 to each point\n";
+  p_descr = "Volume Filters to apply after doing ray filters";
   p_default = {};
-} parm_math[];
-
-typedef struct
-{
-  string vel_field_name;
-  string width_field_name;
-  string cmdflag_field_name;
-  double sw_shape_factor;
-  double vr_shape_factor;
-} clutter_2d_qual_t;
-
-paramdef struct clutter_2d_qual_t
-{
-  p_descr = "CLUTTER_2D_QUAL params";
-  p_help = "\n"
-    "vel_field_name = Input velocity field name\n"
-    "width_field_name = Input spectrum width field name\n"
-    "cmdflag_field_name = input cmdflag field name\n"
-    "sw_shape_factor = param\n"
-    "vr_shape_factor = param\n"
-    "Main input is 'fscr'.  Output is 'fclut'.\n"
-    " fvrsw = (1 - exp(-.69*(|vel|*vr_shape_factor + width*sw_shape_factor)))\n"
-    " fclut = fvrsw*fcsr\n"
-    " fclut(cmdFlag < 0.5) = 1";
-  p_default = {};
-} parm_clutter_2d_qual[];
-
-typedef struct
-{
-  string comment;
-} comment_t;
-
-paramdef struct comment_t
-{
-  p_descr = "COMMENT params";
-  p_help = "Print out a comment\n"
-    "comment = the comment";
-  p_default = {};
-} parm_comment[];
-
-typedef struct
-{
-  string y_field_name;
-  double x_factor;
-  double y_factor;
-  boolean x_is_absolute;
-  boolean y_is_absolute;
-  double scale;
-} gaussian_2d_mapping_t;
-
-paramdef struct gaussian_2d_mapping_t
-{
-  p_descr = "GAUSSIAN_2D_REMAP params";
-  p_help = "the main input is the 'X' variable, the y_field_name is the 'Y' variable, and the mapping is f(x,y) = 1.0 - exp(-scale*(x*xfactor + y*yfactor)), where x and y may or may not be absolute values of input based on the the x_is_absolute and y_is_absolute settings";
-  p_default = {};
-} parm_2d_gaussian_mapping[];
-
-typedef struct {
-  math_e type;
-  string input;
-} gridded_math_t;
-
-paramdef struct gridded_math_t
-{
-  p_descr = "GRIDDED_MATH params";
-  p_help = "replace values by doing pointwise math operations at each point\n"
-    "type = what to do\n"
-    "input = other grid name\n"
-    " for example type=ADD, means add main input and input at each point";
-  p_default = {};
-} parm_gridded_math[];
-
-typedef struct
-{
-  string mask_field_name;  /**< name of input variable to use as mask*/
-  thresh_e type;  /**< threshold test */
-  double mask_threshold;
-  double data_replacement_value; /**< Value to replace with in data */
-  boolean replace_with_missing; /**< True to replace with missing when test satisfied*/
-} mask_t;
-
-paramdef struct mask_t
-{
-  p_descr = "MASK params";
-  p_help = "when mask is within threshold (or missing), replace values in data\n"
-    "mask_field_name =  name of input variable to use as mask\n"
-    "type = threshold test to do\n"
-    "mask_threshold = threshold value\n"
-    "data_replacement_value = Value to replace with in data";
-    "replace_with_missing = true to ignore replacement value and replace with missing value when test satisfied\n";
-  p_default = {};
-} parm_mask[];
-
-paramdef struct dummy_t
-
-{
-  p_descr = "params for filters with no params";
-  p_help = "dummy    = placeholder. \n"
-    "filts with no parms: PASSTHROUGH";
-  p_default = {};
-} parm_dummy[];
-
-typedef struct {
-  double scale;
-  double topv;
-  double lowv;
-  boolean invert;
-} qscale_t;
-
-paramdef struct qscale_t
-{
-  p_descr = "QSCALE params";
-  p_help = "replace values V at all points with scaled value:\n"
-    " exp(-scale*(V/topv - lowv/topv)^2)    (invert = false)\n"
-    " 1 - exp(-scale*(V/topv - lowv/topv)^2)    (invert = true)\n";
-  p_default = {};
-} parm_qscale[];
-
-
-typedef struct
-{
-  boolean dbz;  /**< DBZ or VR */
-  double lambda;
-} sw_norm_t;
-
-paramdef struct sw_norm_t
-{
-  p_descr = "SW_NORM params";
-  p_help = "compute normalized spectrum width, using width field input W\n"
-    "dbz = TRUE for DBZ, FALSE for VR\n"
-    "lambda = constant\n"
-    " dwell = mean(prt)*mean(n_samples)\n"
-    " Mi = 4*sqrt(pi)*W*W*dwell/lambda\n"
-    " If dbz=true    output = 10*log10(1+sqrt(1/Mi))\n"
-    " If dbz = false  output= W*lambda/(8*dwell*sqrt(pi))";
-  p_default = {};
-} parm_sw_norm[];
-
-typedef struct {
-  thresh_e type;
-  double threshold;
-  double replacement;
-  boolean replace_with_missing;
-} thresh_t;
-
-paramdef struct thresh_t
-{
-  p_descr = "THRESH params";
-  p_help = "replace values when within threshold with replacement\n"
-    "type = threshold test to do\n"
-    "threshold = threshold  value \n"
-    "replacement = replacement value when test satisfied\n"
-    "replace_with_missing = true to ignore replacement value and replace with missing value when test satisfied\n";
-  p_default = {};
-} parm_thresh[];
-
-typedef enum
-{
-  USE_FIRST_DATA,
-  MIRROR,
-  MEAN,
-  INTERP
-} FIR_edge_e;
-
-typedef struct {
-  int coeff_index;
-  FIR_edge_e edge_compute;
-  string noise_field_name;
-} fir_t;
-
-paramdef struct fir_t
-{
-  p_descr = "FIR params";
-  p_help = "FIR filter, 1 dimensional over beam\n"
-    "coeff_index = index to coefficients array coeff\n"
-    "edge_compute = USE_FIRST_DATA, MIRROR, MEAN, or INTERP\n"
-    "noise_field_name = name of output field noise (main output is signal)";
-  p_default = {};
-} parm_fir[];
-
-
-typedef struct {
-  int min_gate_index;
-  int max_gate_index;
-} constrain_t;
-
-paramdef struct constrain_t
-{
-  p_descr = "CONSTRAIN params";
-  p_help = "Constrain values to a range, missing elsewhere\n"
-    "min_gate_indexx = index to first valid data\n"
-    "max_gate_indexx = index to last valid data";
-  p_default = {};
-} parm_constrain[];
+} volume_after_filter[];  
 
 paramdef double
 {
-  p_descr = "coeff0";
-  p_default = {};
-} coeff0[];
-
-paramdef double
-{
-  p_descr = "coeff1";
-  p_default = {};
-} coeff1[];
-
-paramdef double
-{
-  p_descr = "coeff2";
-  p_default = {};
-} coeff2[];
+ p_descr = "Radius for 2d variance";
+ p_default = 1.0;
+} variance_radius_km;

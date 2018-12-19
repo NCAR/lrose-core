@@ -293,6 +293,8 @@ void StratFinder::_addFields()
   fhdr.data_element_nbytes = 4;
   fhdr.missing_data_value = _missing;
   fhdr.bad_data_value = _missing;
+  fhdr.scale = 1.0;
+  fhdr.bias = 0.0;
   
   Mdvx::vlevel_header_t vhdr;
   MEM_zero(vhdr);
@@ -324,7 +326,7 @@ void StratFinder::_addFields()
                              Mdvx::ENCODING_FLOAT32);
     textureField->convertType(Mdvx::ENCODING_FLOAT32,
                               Mdvx::COMPRESSION_GZIP);
-    textureField->setFieldName("DbzTexture");
+    textureField->setFieldName("DbzTextureMean");
     textureField->setFieldNameLong("Mean texture of dbz");
     textureField->setUnits("dBZ");
     _outMdvx.addField(textureField);
@@ -338,7 +340,7 @@ void StratFinder::_addFields()
                          Mdvx::ENCODING_FLOAT32);
     maxField->convertType(Mdvx::ENCODING_FLOAT32,
                           Mdvx::COMPRESSION_GZIP);
-    maxField->setFieldName("ColMaxDbz");
+    maxField->setFieldName("DbzColMax");
     maxField->setFieldNameLong("Column max dbz");
     maxField->setUnits("dBZ");
     _outMdvx.addField(maxField);
@@ -404,7 +406,7 @@ void StratFinder::_addFields()
     _outMdvx.addField(partitionField);
     
   }
-
+  
   // the following 3d fields are floats
   
   Mdvx::field_header_t fhdr3d = dbzField->getFieldHeader();
@@ -439,7 +441,7 @@ void StratFinder::_addFields()
     if (_params.convert_stratiform_dbz_to_column_max) {
       stratDbzField->convert2Composite();
     }
-    stratDbzField->convertType(Mdvx::ENCODING_INT16,
+    stratDbzField->convertType(Mdvx::ENCODING_FLOAT32,
                                Mdvx::COMPRESSION_GZIP);
     stratDbzField->setFieldName(_params.stratiform_dbz_field_name);
     stratDbzField->setFieldNameLong("Stratiform reflectivity");
@@ -493,6 +495,10 @@ int StratFinder::_doWrite()
     cerr << "  Cannot write data set." << endl;
     cerr << _outMdvx.getErrStr() << endl;
     return -1;
+  }
+
+  if (_params.debug) {
+    cerr << "Wrote file: " << _outMdvx.getPathInUse() << endl;
   }
 
   return 0;

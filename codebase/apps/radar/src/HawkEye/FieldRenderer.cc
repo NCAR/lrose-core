@@ -82,6 +82,7 @@ void FieldRenderer::addBeam(Beam *beam)
   TaThread::LockForScope locker;
 
   _beams.push_back(beam);
+  beam->addClient();
 
 }
 
@@ -179,6 +180,10 @@ void FieldRenderer::run()
     (*beam)->setBeingRendered(_fieldIndex, false);
   }
   
+  for (beam = _beams.begin(); beam != _beams.end(); ++beam)
+  {
+    Beam::deleteIfUnused(*beam);
+  }
   _beams.clear();
   
 }

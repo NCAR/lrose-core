@@ -51,14 +51,16 @@ public:
   static const si32 FLIGHTNUM_NAME_LEN = 16;
   static const si32 AIRLINE_NAME_LEN = 8; 
 
-  static const si32 NUM_SPARE_INTS = 8;
+  static const si32 NUM_SPARE_INTS = 9;
   static const si32 NUM_SPARE_FLOATS = 8;
   static const si32 NUM_QC_INDS = 4;
   static const si32 NUM_QC_FLAGS = 4;
 
   static const si32 NBYTES_32 = 156;
   
-  static const fl32 VALUE_UNKNOWN;
+  static const fl32 VALUE_UNKNOWN; // = -9999.0;
+
+  //                EDR QC FLAGS
   static const si32 QC_NO_VALUE = 99990;
   static const si32 QC_BAD_CHR = 99991;
   static const si32 QC_BAD_CGA = 99992;
@@ -69,6 +71,7 @@ public:
   static const si32 QC_BAD_VALUE = 99999;
   static const si32 QC_GOOD_VALUE = 1;
 
+  //                QC ALGORITHM BIT FLAGS
   static const si32 BELOW_MIN_ALT = 1;
   static const si32 FAILED_ONBOARD_QC = 2;
   static const si32 FAILED_BOUNDS_CK = 4;
@@ -81,45 +84,41 @@ public:
    */
   typedef struct
   {
-    si32 time;      /*!< Data time */
-    si32 fileTime;  /*!< File time */
-    fl32 lat;       /*!< Report latitude */
-    fl32 lon;       /*!< Report longitude */
-    fl32 alt;       /*!< Altitude (feet) */
-    si32 interpLoc; /*!< Interpolated location vs actual */
-    fl32 edrPeak;   /*!< EDR peak */
-    fl32 edrAve;    /*!< EDR median */
-    fl32 wspd;      /*!< Wind speed */
-    fl32 wdir;      /*!< Wind direction */
-    fl32 sat;       /*!< Static air temperature P==plus M==minus */
-    fl32 qcConf;    /*!< QC confidence */
-    fl32 qcThresh;  /*!< QC threshold */
-    fl32 qcVersion; /*!< QC version */
-    fl32 edrAlgVersion; /*!< Algorithm version running on aircraft */
+    si32 time;                        /*!< Data time */
+    si32 fileTime;                    /*!< File time */
+    fl32 lat;                         /*!< Report latitude */
+    fl32 lon;                         /*!< Report longitude */
+    fl32 alt;                         /*!< Altitude (feet) */
+    si32 interpLoc;                   /*!< Interpolated location vs actual */
+    fl32 edrPeak;                     /*!< EDR peak */
+    fl32 edrAve;                      /*!< EDR median */
+    fl32 wspd;                        /*!< Wind speed */
+    fl32 wdir;                        /*!< Wind direction */
+    fl32 sat;                         /*!< Static air temperature */
+    fl32 qcConf;                      /*!< QC confidence */
+    fl32 qcThresh;                    /*!< QC threshold */
+    fl32 qcVersion;                   /*!< QC version that processed the EDR message */
+    fl32 edrAlgVersion;               /*!< Algorithm version running on aircraft */
 
-    fl32 PeakConf;      /*!< Peak confidence (onboard QC) */
-    fl32 MeanConf;      /*!< Mean confidence (onboard QC) */
-    fl32 PeakLocation;  /*!< Peak location (onboard QC) */
-    fl32 NumGood;       /*!< Number of good values (onboard QC) */
+    fl32 PeakConf;                    /*!< Peak confidence (onboard QC) */
+    fl32 MeanConf;                    /*!< Mean confidence (onboard QC) */
+    fl32 PeakLocation;                /*!< Peak location (onboard QC) */
+    fl32 NumGood;                     /*!< Number of good values (onboard QC) */
 
-    fl32 edrAveQcInds[NUM_QC_FLAGS];   /*!< EDR average QC indices (onboard QC) */ 
-    si32 edrPeakQcFlags[NUM_QC_FLAGS]; /*!< EDR peak QC flags (onboard QC) */
-                                       
-    si32 edrAveQcFlags[NUM_QC_FLAGS];   /*!< EDR average QC flags (onboard QC) */
+    fl32 edrAveQcInds[NUM_QC_INDS];   /*!< EDR average QC indices (onboard QC) */ 
+    si32 edrPeakQcFlags[NUM_QC_FLAGS];/*!< EDR peak QC flags (onboard QC)  (EDR QC FLAGS)*/
+    si32 edrAveQcFlags[NUM_QC_FLAGS]; /*!< EDR average QC flags (onboard QC) (EDR QC FLAGS) */
 
+    fl32 mach;                        /*!< Mach speed */
+    fl32 rms;                         /*!< Max rms during previous 15 minutes */
+    fl32 runningMinConf;              /*!< Running minimum confidence (onboard QC) */        
+    fl32 spareFloats[NUM_SPARE_FLOATS];/*!< Allows for future additions */
 
-    fl32 mach;              /*!< MDCRS specific information */
-    fl32 rms;               /*!< Max rms during previous 15 minutes, MDCRS */
-    fl32 runningMinConf;    /*!< Running minimum confidence (onboard QC) */        
-    fl32 spareFloats[NUM_SPARE_FLOATS]; /*!< Allows for future growth */
-
-    si32 maxNumBad;                  /*!< Maximum number of bad (onboard QC) */   
-    si32 QcDescriptionBitFlags;      /*!< Bit flag - set to VALUE_UNKNOWN if undefined */
-    si32 computedAirspeed;           /*!< Delta MDCRS specific data */
-    si32 is767;                      /*!< Is aircraft a 767 (0 = FALSE, 1 = TRUE); */
-    si32 spareInts[NUM_SPARE_INTS];  /*!< Currently zero - may want to add space for future use */
-
-	si32 isIcing;                       /*!< Boeing 777 downlink also includes an icing indicater */
+    si32 maxNumBad;                   /*!< Maximum number of bad (onboard QC) */   
+    si32 QcDescriptionBitFlags;       /*!< Bit masked flags (QC ALGORITHM BIT FLAGS) */
+    si32 computedAirspeed;            /*!< Airspeed */
+    si32 spareInts[NUM_SPARE_INTS];   /*!< Allows for future additions */
+    si32 isIcing;                     /*!< Boeing 777 also includes an icing indicater */
 
     char aircraftRegNum[TAILNUM_NAME_LEN];  /*!< Aircraft registry number */
     char encodedAircraftRegNum[TAILNUM_NAME_LEN];  /*!< Optional Encoded Aircraft registry number */
@@ -127,8 +126,8 @@ public:
     char origAirport[AIRPORT_NAME_LEN]; /*!< Origination airport */
     char destAirport[AIRPORT_NAME_LEN]; /*!< Destination airport */
     char airlineId[AIRLINE_NAME_LEN];   /*!< Airline ID */
-    char sourceName[SRC_NAME_LEN];      /*!< Maybe reclaim this space since we won't know - related to is767 */
-    char sourceFmt[SRC_FMT_LEN];        /*!< Format of downlinked message - 620 or MDCRS */
+    char sourceName[SRC_NAME_LEN];      /*!< Aircraft type */
+    char sourceFmt[SRC_FMT_LEN];        /*!< Downlinked message format */
 
 
   } Edr_t;

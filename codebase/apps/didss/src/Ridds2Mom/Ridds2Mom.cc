@@ -70,7 +70,7 @@ Ridds2Mom::init( int argc, char **argv )
    //
    // Read the parameter file
    //
-   paramsPath = "unknown";
+   paramsPath = (char *) "unknown";
    if( params.loadFromArgs( argc, argv, override.list, &paramsPath ) ) {
       POSTMSG( ERROR, "Problem with TDRP parameters" );
       return( DSR_FAILURE );

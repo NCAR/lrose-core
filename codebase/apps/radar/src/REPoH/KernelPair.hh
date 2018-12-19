@@ -26,6 +26,8 @@
  * @brief KernelPair a pair of kernels along a beam between a gap
  * @class KernelPair 
  * @brief KernelPair a pair of kernels along a beam between a gap
+ *
+ * A near kernel, and a far kernel
  * 
  */
 
@@ -35,8 +37,8 @@
 #include "Kernel.hh"
 
 class Grid2d;
-class Params;
-class GridProj;
+class RepohParams;
+class MdvxProj;
 class KernelGrids;
 class DsSpdb;
 
@@ -45,57 +47,109 @@ class KernelPair
 {
 public:
 
-  KernelPair (const double vlevel, const Grid2d &mask_far,
-	      const Grid2d &mask_near, const Grid2d &omask,
-	      const CloudGap &g, const Grid2d &clumps,
-	      const Params &params, const GridProj &gp);
+  /**
+   * @param[in] vlevel        Vertical level degrees
+   * @param[in] maskFar       mask for clump points, far kernel
+   * @param[in] maskNear      mask for clump points, near kernel
+   * @param[in] outsideMask   mask for all points not in a clump
+   * @param[in] g             The cloud gap along the beam
+   * @param[in] params        parameters
+   * @param[in] gp            projection
+   */
+  KernelPair (double vlevel, const Grid2d &mask_far,
+	      const Grid2d &mask_near, const Grid2d &outsideMask,
+	      const CloudGap &g, const RepohParams &params,
+	      const MdvxProj &gp);
+
   ~KernelPair();
 
   /**
-   * Ok means both kernels are well formed 
+   * @return true if both kernels have enough content
    */
-  inline bool is_ok(void) const {return _near.is_ok() && _far.is_ok();}
+  inline bool isBigEnough(void) const {return (_near.isBigEnough() &&
+					       _far.isBigEnough());}
 
   /**
-   * good means both kernels pass all tests
+   * @return true if both kernels passed all the data related tests
    */
-  inline bool is_good(void) const {return _near.is_good() && _far.is_good();}
+  inline bool passedTests(void) const
+  {
+    return _near.passedTests() && _far.passedTests();
+  }
 
+  /**
+   * Debug print */
   void print(void) const;
 
   /**
-   * Write centerpoints to the input grid
+   * Write near and far centerpoints to the grid
+   * @param[in,out] kcp  The grid
    */
-  void cp_to_grid(Grid2d &kcp) const;
+  void centerpointToGrid(Grid2d &kcp) const;
 
   /**
    * Finish up both near and far kernel objects using inputs
-   * give kernel objects:   id, id+1
-   * Write to kcp input
+   * @param[in] time    Data time
+   * @param[in] vlevel  degrees
+   * @param[in] grids   grids used for kernels
+   * @param[in] P       params
+   * @param[in] kmPerGate  
+   * @param[in] nearId  id to give near kernel
+   * @param[in] farId   id to give far kernel
    */
-  void finish_processing(const time_t &time, const double vlevel,
-			 const KernelGrids &grids, const Params &P,
-			 const double km_per_gate, const int &id, Grid2d &kcp);
+  void finishProcessing(const time_t &time, double vlevel,
+			const KernelGrids &grids, const RepohParams &P,
+			double kmPerGate, int nearId, int farId);
 
   /**
-   * derive a humidity estimate for the gap between the two kernels.
-   * write values to att and hum
-   * return a one line string summary
+   * Compute attenuation for one kernel pair and write value to the grid
+   * @param[in] dx  Km per gate
+   * @param[in,out] att  Attenuation output grid
    */
-  string humidity_estimate(const double vlevel, const GridProj &gp,
-			   Grid2d &att, Grid2d &hum) const;
+  void computeAttenuation(double dx, Grid2d &att) const;
+
+  /**
+   * Compute humidity for one kernel pair and write value to the grid
+   * @param[in] dx  Km per gate
+   * @param[in,out] hum  Humidity output grid
+   */
+  void computeHumidity(double dx, Grid2d &hum) const;
+
+  /**
+   * @return ascii output for this Kernel pair
+   *
+   * @param[in] vlevel vertical level degrees
+   * @param[in] gp Grid projection
+   */
+  string asciiOutput(const double vlevel, const MdvxProj &gp) const;
+  
+  /**
+   * @return the attenuation estimate for this pair
+   *
+   * @param[in] dx  Gate spacing km
+   * @param[out] x0  Average x value for near kernel (gate index)
+   * @param[out] x1  Average x value for far kernel (gate index)
+   * @param[out] y0  Beam index
+   */
+  double attenuation(double dx, double &x0, double &x1, double &y0) const;
 
   /**
    * Write kernel boundary as  genpoly to SPDB
+   * @param[in] t  data time
+   * @param[in] outside true to write the kernel pair 'outside' points
+   * @param[in] proj  grid projection
+   * @param[in,out] D  Server object
+   *
+   * @return true for sucess
    */
-  bool write_genpoly(const time_t &t, const int nx, const int ny, 
-		     const bool outside, DsSpdb &D) const;
+  bool writeGenpoly(const time_t &t, bool outside,
+		    const MdvxProj &proj, DsSpdb &D) const;
 
 protected:
 private:
 
-  Kernel _near;
-  Kernel _far;
+  Kernel _near;    /**< Near kernel */
+  Kernel _far;     /**< Far kernel */
 };
 
 #endif

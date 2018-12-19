@@ -154,10 +154,14 @@ int Server::convertToSymprod(const void *params,
        hazard = hazard_buffer.getNextHazard()) {
 
     switch(hazard->getHazardType()) {
-    case WxHazard::CONVECTIVE_REGION_HAZARD :
-      _addConvRegion(prod, serverParams,
-		     (ConvRegionHazard *) hazard);
-      break;
+      case WxHazard::CONVECTIVE_REGION_HAZARD : {
+        _addConvRegion(prod, serverParams,
+                       (ConvRegionHazard *) hazard);
+        break;
+      }
+      case WxHazard::CONVECTIVE_REGION_HAZARD_EXTENDED : {
+        break;
+      }
     }
     
   }

@@ -72,8 +72,8 @@ PhidpProc::~PhidpProc()
 //   nGatesSdev: number of gates over which we compute the sdev
 //   missingVal: missingDataValue
 
-void PhidpProc::computePhidpSdev(size_t nGatesData, 
-                                 size_t nGatesSdev,
+void PhidpProc::computePhidpSdev(int nGatesData, 
+                                 int nGatesSdev,
                                  double *phidp,
                                  double missingVal)
   
@@ -92,14 +92,14 @@ void PhidpProc::computePhidpSdev(size_t nGatesData,
 
   // compute number of gates in kernel
   
-  size_t nGatesKernel = _nGatesSdev;
-  size_t nGatesHalf = nGatesKernel / 2;
+  int nGatesKernel = _nGatesSdev;
+  int nGatesHalf = nGatesKernel / 2;
   
   // save phidp to states array
   
   _phidpStates.resize(_nGatesData);
   
-  for (size_t igate = 0; igate < _nGatesData; igate++) {
+  for (int igate = 0; igate < _nGatesData; igate++) {
     PhidpState &state = _phidpStates[igate];
     state.init(_missingVal);
     state.phidp = _phidp[igate];
@@ -114,7 +114,7 @@ void PhidpProc::computePhidpSdev(size_t nGatesData,
   
   // fill in missing data with noise
 
-  for (size_t igate = 0; igate < _nGatesData; igate++) {
+  for (int igate = 0; igate < _nGatesData; igate++) {
     PhidpState &state = _phidpStates[igate];
     if (state.missing) {
       double randVal = STATS_uniform_gen();
@@ -127,7 +127,7 @@ void PhidpProc::computePhidpSdev(size_t nGatesData,
 
   // init (x,y) representation of phidp
   
-  for (size_t igate = 0; igate < _nGatesData; igate++) {
+  for (int igate = 0; igate < _nGatesData; igate++) {
     PhidpState &state = _phidpStates[igate];
     if (!state.missing) {
       double phase = state.phidp;
@@ -143,7 +143,7 @@ void PhidpProc::computePhidpSdev(size_t nGatesData,
 
   // compute mean phidp at each gate
 
-  for (size_t igate = 0; igate < _nGatesData; igate++) {
+  for (int igate = 0; igate < _nGatesData; igate++) {
   
     PhidpState &istate = _phidpStates[igate];
     
@@ -151,7 +151,7 @@ void PhidpProc::computePhidpSdev(size_t nGatesData,
     double sumxx = 0.0;
     double sumyy = 0.0;
     
-    for (ssize_t jj = igate - nGatesHalf; jj <= igate + nGatesHalf; jj++) {
+    for (int jj = igate - nGatesHalf; jj <= igate + nGatesHalf; jj++) {
       if (jj < 0 || jj >= _nGatesData) {
         continue;
       }
@@ -185,7 +185,7 @@ void PhidpProc::computePhidpSdev(size_t nGatesData,
   // compute standard deviation at each gate
   // we center on the mean value
   
-  for (size_t igate = 0; igate < _nGatesData; igate++) {
+  for (int igate = 0; igate < _nGatesData; igate++) {
     
     PhidpState &istate = _phidpStates[igate];
     
@@ -193,7 +193,7 @@ void PhidpProc::computePhidpSdev(size_t nGatesData,
     double sum = 0.0;
     double sumSq = 0.0;
     
-    for (ssize_t jj = igate - nGatesHalf; jj <= igate + nGatesHalf; jj++) {
+    for (int jj = igate - nGatesHalf; jj <= igate + nGatesHalf; jj++) {
       
       if (jj < 0 || jj >= _nGatesData) {
         continue;
@@ -255,7 +255,7 @@ void PhidpProc::_computePhidpFoldingRange()
   double phidpMin = 9999;
   double phidpMax = -9999;
 
-  for (size_t igate = 0; igate < _nGatesData; igate++) {
+  for (int igate = 0; igate < _nGatesData; igate++) {
     if (!_phidpStates[igate].missing) {
       double phidp = _phidpStates[igate].phidp;
       if (phidp < phidpMin) phidpMin = phidp;
@@ -274,7 +274,7 @@ void PhidpProc::_computePhidpFoldingRange()
   // if values range from (0 -> 360), normalize to (-180 -> 180)
   
   if (phidpMin >= 0 && phidpMax > 180) {
-    for (size_t igate = 0; igate < _nGatesData; igate++) {
+    for (int igate = 0; igate < _nGatesData; igate++) {
       if (!_phidpStates[igate].missing) {
         _phidpStates[igate].phidp -= 180.0;
       }

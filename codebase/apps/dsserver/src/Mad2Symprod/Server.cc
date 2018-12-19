@@ -589,8 +589,8 @@ void Server::add_polygon_to_buffer(Symprod &prod,
 
   rshape_xy_t *pt_array;
 
-  double min_lat, max_lat;
-  double min_lon, max_lon;
+  double min_lat = 90.0, max_lat = -90.0;
+  double min_lon = 360.0, max_lon = -360.0;
 
   PJGflat_init(polygon->latitude, polygon->longitude, 0.0);
   
@@ -699,8 +699,8 @@ void Server::add_polygon_to_buffer(Symprod &prod,
 				   Params *serverParams)
 {
 
-  double min_lat, max_lat;
-  double min_lon, max_lon;
+  double min_lat = 90.0, max_lat = -90.0;
+  double min_lon = 360.0, max_lon = -360.0;
 
   MemBuf ptBuf;
   

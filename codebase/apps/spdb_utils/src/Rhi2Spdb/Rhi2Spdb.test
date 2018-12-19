@@ -6,15 +6,23 @@
 //
 // Program name: Rhi2Spdb.
 //
-// Rhi2Spdb reads mdv files containing measured RHI data, creates a 
-//   GenPtArray to describe the rhi details and stores it in SPDB.
+// Rhi2Spdb reads Radx or MDV files containing RHI radar data, creates a 
+//   GenPt to describe the rhi details and stores it in SPDB.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROGRAM CONTROL.
 //
 //======================================================================
  
 ///////////// debug ///////////////////////////////////
 //
 // Debug option.
+//
 // If set, debug messages will be printed appropriately.
+//
 //
 // Type: enum
 // Options:
@@ -28,7 +36,10 @@ debug = DEBUG_OFF;
 ///////////// instance ////////////////////////////////
 //
 // Process instance.
+//
 // Used for registration with procmap.
+//
+//
 // Type: string
 //
 
@@ -37,12 +48,13 @@ instance = "test";
 ///////////// mode ////////////////////////////////////
 //
 // Operating mode.
-// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//
+// In REALTIME mode, the program waits for a new input file - and this 
+//   requires that the latest_data_info files are available. In ARCHIVE 
 //   mode, it moves through the data between the start and end times set 
 //   on the command line. In FILELIST mode, it moves through the list of 
-//   file names specified on the command line. Paths (in FILELIST mode, at 
-//   least) MUST contain a day-directory below the data file -- 
-//   ./data_file.mdv will not work as a file path.
+//   file names specified on the command line.
+//
 //
 // Type: enum
 // Options:
@@ -53,19 +65,50 @@ instance = "test";
 
 mode = ARCHIVE;
 
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
 ///////////// input_url ///////////////////////////////
 //
-// Input URL for MDV data.
+// Input DIR for RHI data.
+//
 // This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
 //   the file paths are specified on the command line.
+//
+//
 // Type: string
 //
 
-input_url = "mdv/input";
+input_url = "/tmp/rhi/input";
 
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 600;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+// Spdb output.
+//
+//======================================================================
+ 
 ///////////// output_url //////////////////////////////
 //
 // Output URL for SPBD data.
+//
+//
 // Type: string
 //
 

@@ -144,6 +144,10 @@ int NcfFieldData::addToNc(Nc3File *ncFile, Nc3Dim *timeDim,
 
   int iret = 0;
 
+  // ensure min and max are set appropriately
+
+  _mdvField.computeMinAndMax();
+  _fhdrIn = _mdvField.getFieldHeader();
   _minOut = _fhdrIn.min_value;
   _maxOut = _fhdrIn.max_value;
   

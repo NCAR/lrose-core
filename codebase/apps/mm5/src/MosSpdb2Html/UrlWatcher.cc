@@ -62,7 +62,7 @@ int UrlWatcher::init( int argc, char **argv ){
   // Get TDRP args and check in to PMU.
   //
 
-  char *paramsPath = "unknown";
+  char *paramsPath = (char *) "unknown";
   if (P.loadFromArgs(argc,argv,override.list,&paramsPath)){
     cerr << "Specify params file with -params option." << endl ;
     return(-1);

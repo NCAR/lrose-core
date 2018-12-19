@@ -931,7 +931,12 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
   }
 
   if (_scanNameVal) {
-    _scanNameVal->setText(ray->getScanName().c_str());
+    string scanName = ray->getScanName();
+    size_t len = scanName.size();
+    if (len > 8) {
+      scanName = scanName.substr(0, 8);
+    }
+    _scanNameVal->setText(scanName.c_str());
   }
 
   if (_sweepModeVal) {
@@ -1187,8 +1192,35 @@ void DisplayManager::_howto()
 
 void DisplayManager::_about()
 {
-  QMessageBox::about(this, tr("About Menu"),
-		     tr("DisplayManager is an engineering display "
-                        "for beam-by-beam radar data."));
-}
+  //QMessageBox::about(this, tr("About Menu"),
+		     //tr("HawkEye is an engineering display for beam-by-beam radar data. "));
+  string text;
+  
+  text += "HawkEye is an LROSE application for engineering and research display of radar data. \n\n";
+  text += "Get help with HawkEye ...  \n ";
+  text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
+  text += "\nHawkEye Version ... \n ";  
+  text += "\nCopyright UCAR (c) 1990 - 2018  ";  
+  text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
+  text += "\nNational Center for Atmospheric Research (NCAR)   ";  
+  text += "\nBoulder, Colorado, USA ";  
+  text += "\n\nBSD licence applies - redistribution and use in source and binary";  
+  text += " forms, with or without modification, are permitted provided that";  
+  text += " the following conditions are met: ";  
+  text += "\n1) If the software is modified to produce derivative works,";  
+  text += " such modified software should be clearly marked, so as not";  
+  text += " to confuse it with the version available from UCAR. ";  
+  text += "\n2) Redistributions of source code must retain the above copyright";  
+  text += " notice, this list of conditions and the following disclaimer.";  
+  text += "\n3) Redistributions in binary form must reproduce the above copyright";  
+  text += " notice, this list of conditions and the following disclaimer in the";  
+  text += " documentation and/or other materials provided with the distribution.";  
+  text += "\n4) Neither the name of UCAR nor the names of its contributors,";  
+  text += "if any, may be used to endorse or promote products derived from";  
+  text += " this software without specific prior written permission.";  
+  text += "\n\nDISCLAIMER: THIS SOFTWARE IS PROVIDED \"AS IS\" AND WITHOUT ANY EXPRESS ";  
+  text += " OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED";  
+  text += " WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.";  
 
+  QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
+}

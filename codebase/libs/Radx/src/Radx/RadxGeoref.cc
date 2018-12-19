@@ -139,6 +139,24 @@ void RadxGeoref::setToZero()
 }
 
 //////////////////////////////////////////////////
+// set time from RadxTime
+
+void RadxGeoref::setRadxTime(const RadxTime &rtime)
+{
+  _timeSecs = rtime.utime();
+  _nanoSecs = rtime.getSubSec() * 1.0e9;
+}
+
+//////////////////////////////////////////////////
+// get time as RadxTime
+
+RadxTime RadxGeoref::getRadxTime() const
+{
+  RadxTime rtime(_timeSecs, _nanoSecs / 1.0e9);
+  return rtime;
+}
+
+//////////////////////////////////////////////////
 /// increment count if elements are not missing
 ///
 /// Goes through the object looking for non-missing elements and

@@ -245,6 +245,10 @@ int SKU_open_client(const char *hostname, int port)
   
   int sockfd; /* socket file descriptor */
   struct sockaddr_in rem_soc;
+  
+  /* Initialize rem_soc */
+  memset((void*)&rem_soc, 0, sizeof(rem_soc));
+
   struct hostent *hostport; /* host port info */
 
   hostport = gethostbyname(hostname); /* get the remote host info */
@@ -310,6 +314,9 @@ int SKU_open_client_timed(const char *hostname, int port, long wait_msecs)
   
   int sockfd; /* socket file descriptor */
   struct sockaddr_in rem_soc;
+  /* initalize rem_soc */
+  memset((void*) &rem_soc, 0, sizeof(rem_soc));
+  
   struct hostent *hostport; /* host port info */
   
   int select_status;
@@ -438,6 +445,9 @@ int SKU_open_server(int port)
   
   int protofd; 	/* file descriptor */
   struct sockaddr_in loc_soc; /* local socket info */
+
+  /* initialize loc_soc */
+  memset((void*)&loc_soc, 0, sizeof(loc_soc));
   
   /*
    * get a file descriptor for the connection to the remote port

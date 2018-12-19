@@ -29,6 +29,12 @@ paramdef enum debug_t {
 
 paramdef boolean {
   p_default = FALSE;
+  p_descr = "Print out checks on ray memory allocation.";
+  p_help = "If TRUE, the app will keep track of the number of rays allocated and freed, and print out that information every 100 rays.";
+} check_ray_alloc;
+
+paramdef boolean {
+  p_default = FALSE;
   p_descr = "Option to register this process with the process mapper (procmap).";
   p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
 } register_with_procmap;
@@ -47,14 +53,13 @@ typedef enum {
   IWRF_FMQ_INPUT, 
   IWRF_TCP_INPUT, 
   SIMULATED_INPUT, 
-  SIMULATED_RHI_INPUT,
   DSR_FMQ_INPUT // deprecated
 } input_mode_t;
 
 paramdef enum input_mode_t {
   p_default = IWRF_FMQ_INPUT;
   p_descr = "Method for reading the input data";
-  p_help = "\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.\n\tSIMULATED_RHI_INPUT: internally-generated test pattern data for RHIs.\n\tDSR_FMQ_INPUT: deprecated.";
+  p_help = "\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.\n\tDSR_FMQ_INPUT: deprecated.";
 } input_mode;
 
 paramdef string {
@@ -586,6 +591,12 @@ paramdef enum legend_pos_t {
   p_help = "This include time, field name and elevation angle.";
 } rhi_main_legend_pos;
 
+paramdef int {
+  p_default = 360;
+  p_descr = "Size of the queue for RHI beams.";
+  p_help = "After the queue reaches this size, older beams are discarded.";
+} rhi_beam_queue_size;
+
 commentdef {
   p_header = "BSCAN TIME LIMITS";
 }
@@ -1028,7 +1039,7 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 50;
+  p_default = 10;
   p_descr = "Number of milliseconds to sleep between beams in simulated input "
             "mode.";
 } sim_sleep_msecs;

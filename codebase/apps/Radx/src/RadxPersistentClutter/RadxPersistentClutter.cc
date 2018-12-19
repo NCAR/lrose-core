@@ -25,13 +25,22 @@
  * @file RadxPersistentClutter.cc
  */
 
+//////////////////////////////////////////////////////////////////////////
+// Based on following paper:
+// Lakshmanan V., J. Zhang, K. Hondl and C. Langston.
+// A Statistical Approach to Mitigating Persistent Clutter in
+// Radar Reflectivity Data.
+// IEEE Journal of Selected Topics in Applied Earth Observations
+// and Remote Sensing, Vol. 5, No. 2, April 2012.
+///////////////////////////////////////////////////////////////////////////
 
 #include "RadxPersistentClutter.hh"
+#include "RayData.hh"
 #include "Info.hh"
-#include <radar/RadxAppTemplate.hh>
+#include <radar/RadxApp.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxVol.hh>
-#include <toolsa/LogMsg.hh>
+#include <toolsa/LogStream.hh>
 #include <toolsa/TaThreadSimple.hh>
 #include <algorithm>
 
@@ -45,69 +54,48 @@ TaThread *RadxPersistentClutter::RadxThreads::clone(int index)
 }
 
 //------------------------------------------------------------------
-RadxPersistentClutter::RadxPersistentClutter(int argc, char **argv,
-					     void cleanup(int),
-					     void outOfStore(void))
+RadxPersistentClutter::RadxPersistentClutter(const Parms &parms,
+					     void cleanup(int) ) :
+  _parms(parms)
 {
-  // call the library initializer
-  OK = parmAppInit(_params, _alg, argc, argv);
+  RadxApp::algInit("Radx2PersistentClutter", parms, cleanup);
 
-  // and the algorithm initializer
-  vector<string> input;
-  input.push_back(_params.input_field);
-  if (!_alg.init(cleanup, outOfStore, input))
-  {
-    OK = false;
-  }
-
-  _rayMap = RayxMapping(_params.fixedElevations_n, _params._fixedElevations,
-                        _params.azToleranceDegrees,
-                        _params.elevToleranceDegrees);
+  _rayMap = RayxMapping(parms.fixedElevations_n, parms._fixedElevations,
+                        parms.azToleranceDegrees,
+                        parms.elevToleranceDegrees);
   
-  _thread.init(_alg.parmRef().num_threads, _alg.parmRef().thread_debug);
+  _thread.init(parms.num_threads, parms.thread_debug);
 }
 
 //------------------------------------------------------------------
 RadxPersistentClutter::~RadxPersistentClutter(void)
 {
-  _alg.finish();
+  RadxApp::algFinish();
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutter::run(void)
+bool RadxPersistentClutter::processVolume(RayData *volume,  bool &first)
 {
-  RadxVol vol;
-  time_t t;
-  bool last;
-
-  bool first = true;
-
-  // trigger at time
-  while (_alg.trigger(vol, t, last))
+  if (first)
   {
-    if (first)
-    {
-      // virtual method
-      initFirstTime(t, vol);
-      _processFirst(t, vol);
-      first = false;
-    }
-
-    // process the vol
-    bool done = _process(t, vol);
-
-    if (done)
-    {
-      // it has converged
-      _thread.waitForThreads();
-
-      // virtual method
-      finishLastTimeGood(t, vol);
-      return true;
-    }
+    // virtual method
+    initFirstTime(volume);
+    _processFirst(volume);
+    first = false;
   }
-  // virtual method
-  finishBad();
+
+  // process the vol
+  bool done = _process(volume);
+
+  if (done)
+  {
+    // it has converged
+    _thread.waitForThreads();
+
+    // virtual method
+    finishLastTimeGood(volume);
+    return true;
+  }
   return false;
 }
 
@@ -119,7 +107,7 @@ void RadxPersistentClutter::compute(void *ti)
 
   if (info->_time == 0 || info->_ray == NULL || info->_alg == NULL)
   {
-    LOG(LogMsg::ERROR, "Values not set on entry");
+    LOG(ERROR) << "Values not set on entry";
     return;
   }
 
@@ -139,7 +127,7 @@ RayClutterInfo *RadxPersistentClutter::_initRayThreaded(const RadxRay &ray,
 {
   // lock because the method can change ray, in spite of the const!
   _thread.lockForIO();
-  if (!RadxApp::retrieveRay(_params.input_field, ray, r))
+  if (!RadxApp::retrieveRay(_parms.input_field, ray, r))
   {
     _thread.unlockAfterIO();
     return NULL;
@@ -152,21 +140,20 @@ RayClutterInfo *RadxPersistentClutter::_initRayThreaded(const RadxRay &ray,
   RayClutterInfo *h = matchingClutterInfo(az, elev);
   if (h == NULL)
   {
-    LOGF(LogMsg::WARNING, "No histo match for az=%lf elev=%lf",
-	    az, elev);
+    LOG(WARNING) << "No histo match for az,elev= " << az << "," << elev;
   }
   else
   {
-    LOGF(LogMsg::DEBUG_VERBOSE, "Updating ray az:%lf  elev:%lf", az, elev);
+    LOG(DEBUG_VERBOSE) << "Updating ray az,elev= " << az << "," << elev;
   }
   return h;
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutter::_processForOutput(RadxVol &vol)
+void RadxPersistentClutter::_processForOutput(RayData *vol)
 {
   // break the volume into rays and process each one
-  const vector<RadxRay *> &rays = vol.getRays();
+  const vector<RadxRay *> &rays = vol->getVolRef().getRays();
   for (size_t ii = 0; ii < rays.size(); ii++)
   {
     RadxRay *ray = rays[ii];
@@ -203,31 +190,30 @@ int RadxPersistentClutter::_updateClutterState(const int kstar,
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutter::_process(const time_t t, RadxVol &vol)
+bool RadxPersistentClutter::_process(RayData *vol)
 {
 
   // break the volume into rays and process each one
-  const vector<RadxRay *> &rays = vol.getRays();
-  LOGF(LogMsg::DEBUG_VERBOSE, "Nrays=%d", static_cast<int>(rays.size()));
+  const vector<RadxRay *> &rays = vol->getVolRef().getRays();
+  LOG(DEBUG_VERBOSE) << "Nrays=" << rays.size();
   for (size_t ii = 0; ii < rays.size(); ii++)
   {
     RadxRay *ray = rays[ii];
-    _processRay(t, ray);
+    _processRay(vol->getTime(), ray);
   }
 
   _thread.waitForThreads();
 
   // virtual method at the end of processing all rays
-  return processFinishVolume(t, vol);
+  return processFinishVolume(vol);
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutter::_processFirst(const time_t t, const RadxVol &vol)
+void RadxPersistentClutter::_processFirst(const RayData *vol)
 {
-
   // break the volume into rays and process each one
-  const vector<RadxRay *> &rays = vol.getRays();
-  LOGF(LogMsg::DEBUG_VERBOSE, "Nrays=%d", static_cast<int>(rays.size()));
+  const vector<RadxRay *> &rays = vol->getVolRef().getRays();
+  LOG(DEBUG_VERBOSE) << "Nrays=" << rays.size();
   for (size_t ii = 0; ii < rays.size(); ii++)
   {
     RadxRay *ray = rays[ii];
@@ -274,7 +260,7 @@ bool RadxPersistentClutter::_processRayForOutput(RadxRay &ray)
 RayClutterInfo *RadxPersistentClutter::_initRay(const RadxRay &ray,
 						RayxData &r)
 {
-  if (!RadxApp::retrieveRay(_params.input_field, ray, r))
+  if (!RadxApp::retrieveRay(_parms.input_field, ray, r))
   {
     return NULL;
   }
@@ -285,13 +271,11 @@ RayClutterInfo *RadxPersistentClutter::_initRay(const RadxRay &ray,
   RayClutterInfo *h = matchingClutterInfo(az, elev);
   if (h == NULL)
   {
-    LOGF(LogMsg::WARNING, "No histo match for az=%lf elev=%lf",
-	    az, elev);
+    LOG(WARNING) << "No histo match for az,elev=" << az << "," << elev;
   }
   else
   {
-    LOGF(LogMsg::DEBUG_VERBOSE, "Updating ray az:%lf  elev:%lf", az, elev);
+    LOG(DEBUG_VERBOSE) << "Updating ray az,elev=" << az << "," << elev;
   }
   return h;
 }
-

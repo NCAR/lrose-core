@@ -1086,19 +1086,13 @@ commentdef {
 paramdef string {
   p_default = "test";
   p_descr = "Program instance for process registration.";
-  p_help = "This application registers with procmap. This is the instance used for registration.";
+  p_help = "REALTIME mode only. This application registers with procmap. This is the instance used for registration.";
 } instance;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to register this process with the process mapper (procmap).";
-  p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
-} register_with_procmap;
 
 paramdef int {
   p_default = 60;
   p_descr = "Interval for registering with procmap (secs).";
-  p_help = "The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.";
+  p_help = "REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.";
 } procmap_register_interval;
 
 commentdef {
@@ -1180,24 +1174,6 @@ paramdef string {
 } conv_strat_dbz_field_name;
 
 paramdef double {
-  p_default = 7.0;
-  p_descr = "Radius for texture analysis (km).";
-  p_help = "We determine the reflectivity 'texture' at a point by computing the standard deviation of the square of the reflectivity, for all grid points within this radius of the central point. We then compute the square root of that sdev.";
-} conv_strat_texture_radius_km;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Depth of region for computing texture (km).";
-  p_help = "We compute the reflectivity 'texture' considering all radar points within a specified region, centered on the grid points. This is the depth of that region. It does not necessarily match the vertical grid spacing - it is likely that the depth will be greater than the grid vertical spacing, to allow for more points to be included in computing the texture. However, the depth should not exceed 2km or so, because the texture is intended to find layers (such as bright-band) in the observations.";
-} conv_strat_texture_depth_km;
-
-paramdef double {
-  p_default = 0.33;
-  p_descr = "Minimum fraction of surroundingpoints for texture computations.";
-  p_help = "For a valid computation of texture, we require at least this fraction of points around the central point to have reflectivity in excess of min_valid_dbz.";
-} conv_strat_min_valid_fraction_for_texture;
-
-paramdef double {
   p_default = 0.0;
   p_descr = "Min height used in analysis (km).";	
   p_help = "Only data at or above this altitude is used.";
@@ -1228,16 +1204,40 @@ paramdef double {
 } conv_strat_convective_radius_km;
 
 paramdef double {
+  p_default = 7.0;
+  p_descr = "Radius for texture analysis (km).";
+  p_help = "We determine the reflectivity 'texture' at a point by computing the standard deviation of the square of the reflectivity, for all grid points within this radius of the central point. We then compute the square root of that sdev.";
+} conv_strat_texture_radius_km;
+
+paramdef double {
+  p_default = 0.33;
+  p_descr = "Minimum fraction of surroundingpoints for texture computations.";
+  p_help = "For a valid computation of texture, we require at least this fraction of points around the central point to have reflectivity in excess of min_valid_dbz.";
+} conv_strat_min_valid_fraction_for_texture;
+
+paramdef double {
   p_default = 15.0;
   p_descr = "Minimum texture for convection at a point.";
   p_help = "If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using convetive_radius_km.";
 } conv_strat_min_texture_for_convection;
 
 paramdef boolean {
-  p_default = FALSE;
+  p_default = TRUE;
   p_descr = "Option to write out the convective/stratiform partition.";
   p_help = "If true, the 2-D partition will be added to the output file.";
 } conv_strat_write_partition;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write out the mean texture.";
+  p_help = "If true, the mean texture will be written to the outptu file. This is a 2-D field - the mean over height of the 3-D texture fields.";
+} conv_strat_write_mean_texture;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write out the dbz field in convection.";
+  p_help = "This is a 3D field - the reflectivity trimmed only to convective regions, based on the convective/stratiform partition.";
+} conv_strat_write_convective_dbz;
 
 paramdef boolean {
   p_default = FALSE;

@@ -144,15 +144,6 @@ ChillTsFile2Fmq::ChillTsFile2Fmq(int argc, char **argv) :
   _msg.clearAll();
   _msg.setType(0);
 
-  // initialize the time series data reader object
-
-  IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    iwrfDebug = IWRF_DEBUG_VERBOSE;
-  } else if (_params.debug >= Params::DEBUG_NORM) {
-    iwrfDebug = IWRF_DEBUG_NORM;
-  }
-
   if (_params.mode == Params::REALTIME) {
     
     // realtime mode - no latest_data_info file

@@ -66,6 +66,41 @@ BufrProduct_204_31_X::~BufrProduct_204_31_X()
 }
 
 /*
+// This is a CCITT string to handle
+bool BufrProduct_204_31_X::StuffIt(unsigned short des, string fieldName, string &value) {
+  //  if (f._descriptor.units.find("CCITT") != string::npos) {
+  //  string  value;
+  //  value = ExtractText(f._descriptor.dataWidthBits);
+  //  if (_verbose) {
+  //    cout << " " << f._descriptor.dataWidthBits << endl;
+  //    cout << "extracted string = " << value << endl;
+  //  }
+  //  _tempStringValue = value;
+  //  string fieldName;
+  //  fieldName = f._descriptor.fieldName;
+    std::transform(fieldName.begin(), fieldName.end(), fieldName.begin(), ::tolower);
+
+    if (fieldName.find("station identifier") != string::npos) {
+      if (fieldName.find("type of") != string::npos) {
+        typeOfStationId = value;
+      } else {
+        stationId = value;
+      }
+    } else if (fieldName.find("odim quantity") != string::npos) {
+      currentTemplate->typeOfProduct = value;
+    }
+    return 0;
+    //} else {
+    //Radx::ui32 value;
+    //value = ExtractIt(f._descriptor.dataWidthBits + _addBitsToDataWidth);
+    //if (_debug) cout << "returning unmodified " << value << endl;
+    //return value;
+    //}
+
+}
+*/
+
+/*
 void BufrProduct_204_31_X::reset() {
   currentState = 0;  // initial state
   nData = 0;

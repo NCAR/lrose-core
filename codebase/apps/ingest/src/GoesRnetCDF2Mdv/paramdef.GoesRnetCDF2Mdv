@@ -1,0 +1,478 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.GoesRnetCDF2Mdv
+ *
+ * This file contains the TDRP parameter definitions for
+ * GoesRnetCDF2Mdv.
+ */
+
+commentdef
+{
+  p_header = "GoesRnetCDF2Mdv";
+  p_text = "This program reads a set of GOES-R netCDF-formatted files 
+            and writes the data to an MDV file.";
+}
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_default = DEBUG_OFF;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Instance";
+  p_help = "Used for process registration";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Input parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT PARAMETERS";
+};
+
+typedef enum
+{
+  LATEST_DATA,
+  REALTIME,
+  FILE_LIST
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In LATEST_DATA mode, the program will trigger whenever a new "
+           "ldata file in the input_dir indicates that there is a new "
+           "file ready to be processed.\n"
+	   "In REALTIME mode, the program will trigger whenever a new "
+	   "file appears in the specified input directories that is ready "
+	   "to be processed."
+           "In FILE_LIST mode, the program operates on the input files "
+           "specified on the command line.\n";
+  p_default = FILE_LIST;
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "List of Input directories to watch";
+  p_help = "There can be one directory that is watched and recursed. "
+  "It may be that there is a directory for each channel, band, or derived "
+  "product.";
+  p_default = "raw/g16";
+} input_dir;
+
+paramdef long
+{
+  p_descr = "Maximum age of input data that will be processed in realtime, "
+            "in seconds.";
+  p_default = 3600;
+} max_valid_secs;
+
+paramdef string
+{
+  p_descr = "Sub-string used in filename that identifies the scene or scan";
+  p_help = "For files named following the G-16 PUG, the names are: RadC, "
+    "RadF, RadM1, and RadM2.";
+  p_default = "";
+} scene_sub_str;
+
+paramdef string
+{
+  p_descr = "Sub-string used in filename that identifies the band or channel";
+  p_help = "For files named following the G-16 PUG, the level-1 names are: C01 through C16.";
+  p_default = "";
+} channel_sub_str;
+
+
+/***********************************************************************
+ * Output parameters
+ */
+
+commentdef
+{
+  p_header = "OUTPUT PARAMETERS";
+};
+
+typedef enum
+{
+  TIMESTAMP_BEGIN,
+  TIMESTAMP_END,
+  TIMESTAMP_MIDDLE
+} timestamp_t;
+
+paramdef enum timestamp_t
+{
+  p_descr = "Flag indicating how to time stamp the output file.";
+  p_help = "For TIMESTAMP_BEGIN, the time of the first line in the image will "
+           "be used. "
+           "For TIMESTAMP_END, the time of the last line in the image will "
+           "be used. "
+           "For TIMESTAMP_MIDDLE, the timestamp will be the average of the "
+           "times of the first and last lines in the file.\n";
+  p_default = TIMESTAMP_MIDDLE;
+} output_timestamp;
+
+paramdef int
+{
+  p_desr = " Number of second to add to scene end time for time_expire in master header.";
+  p_help = "";
+  p_defualt = 0;
+} expire_offset;
+
+typedef enum
+{
+  VERT_TYPE_SURFACE,
+  VERT_TYPE_Z,
+  VERT_SATELLITE_IMAGE,
+  VERT_FLIGHT_LEVEL
+} vlevel_type_t;
+
+paramdef enum vlevel_type_t
+{
+  p_descr = "Vertical level type to use for the output fields.";
+  p_help = "By default, we use the satellite image vertical type, "
+           "but some applications need a different vertical level type "
+           "for the data. "
+           "Note that the vertical level is set to 0.0, no matter what "
+           "vertical type is chosen.";
+  p_default = VERT_SATELLITE_IMAGE;
+} output_vlevel_type;
+
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output URL.";
+  p_help = "Output data is written to this URL.";
+} output_url;
+
+paramdef boolean
+{
+  p_descr = "Option to output data with zero rather than MISSING_DATA_VALIUE";
+  p_help = "";
+  p_default = false;
+} init_zero;
+
+/***********************************************************************
+ * Output domain parameters
+ */
+
+commentdef
+{
+  p_header = "OUTPUT DOMAIN PARAMETERS";
+};
+
+typedef enum {
+  PROJ_LATLON = 0,
+  PROJ_LAMBERT_CONF = 3,
+  PROJ_MERCATOR =  4,
+  PROJ_POLAR_STEREO = 5,
+  PROJ_FLAT = 8,
+  PROJ_OBLIQUE_STEREO = 12,
+  PROJ_TRANS_MERCATOR = 15,
+  PROJ_ALBERS = 16,
+  PROJ_LAMBERT_AZIM = 17
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = PROJ_FLAT;
+  p_descr = "Projection for mapping in x,y. See projection param below.";
+  p_help =
+  "\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n"
+  "\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n"
+  "\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n"
+  "\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n"
+  "\tPROJ_MERCATOR: Mercator - EW orientation\n"
+  "\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n"
+  "\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n"
+  "\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n"
+  "\tPROJ_ALBERS: Albers Equal Area Conic\n";
+} out_projection;
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_params_t;
+
+paramdef struct grid_params_t {
+  p_default = {1, 1, 0.0, 0.0, 1.0, 1.0};
+  p_descr = "Grid parameters for remapping in x,y.";
+  p_help = "Units in km, except for LATLON, which is in degrees.";
+} out_grid;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Grid rotation.";
+  p_help = "This applies only to PROJ_FLAT projections.";
+} out_rotation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Grid origin latitude.";
+  p_help = "This applies to all projections except LATLON.";
+} out_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Grid origin longitude.";
+  p_help = "This applies to all projections except LATLON.";
+} out_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Grid reference latitude 1.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} out_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Grid reference latitude 2.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} out_lat2;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Central scale for projections.";
+  p_help = "This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR projections.";
+} out_central_scale;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Tangent latitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO only.";
+} out_tangent_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Tangent longitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO and POLAR_STEREO.";
+} out_tangent_lon;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Flag indicating stereogtraphic is over the NORTH pole.";
+  p_help = "This applies to POLAR_STEREO. If false, the projection is over the south pole.";
+} out_pole_is_north;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Flag indicating that earth radius should be taken from earth_radius parameter.";
+  p_help = "If true, the earth's radius is taken from TaPjg staic class."
+    " radius is 6378.137 km";
+} set_earth_radius;
+
+paramdef double {
+  p_default = 6378.137;
+  p_descr = "Alternate earth radius used in projective geometry caclulation.";
+  p_help = "Use set_earth_radius parameter to set radius in km.";
+} earth_radius; 
+
+
+/***********************************************************************
+ * Units conversion parameters
+ */
+
+commentdef
+{
+  p_header = "UNITS CONVERSION PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to convert the field units on output.";
+  p_default = false;
+} convert_units;
+
+typedef enum
+{
+  CONVERT_K_TO_C
+} units_convert_type_t;
+
+paramdef enum units_convert_type_t
+{
+  p_descr = "Type of units conversion to do on the data before putting it "
+            "into the MDV file.";
+  p_help = "Used only if convert_units is set to true.";
+  p_default = CONVERT_K_TO_C;
+} units_convert_type;
+
+/***********************************************************************
+ * Correct albedo for sun angle
+ */
+
+commentdef
+{
+  p_header = "CORRECT ALBEDO FOR SUN ANGLE";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to correct albedo fields for sun angle.";
+  p_help = "If true, the albedo fields are corrected for sun incidence angle. This brigtens the scene at low sun angles.";
+  p_default = false;
+} correct_albedo_for_sun_angle;
+
+/***********************************************************************
+ * Check quality field
+ */
+
+commentdef
+{
+  p_header = "CHECK QUALITY FIELD";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to check quality field when filling output data field.";
+  p_help = "If true, the output data field will only be filled if the quality field value is 0. If false, the quality field will not be checked.";
+  p_default = true;
+} check_quality_field;
+
+/***********************************************************************
+ * Encoding and compression parameters
+ */
+
+commentdef {
+  p_header = "ENCODING AND COMPRESSION CONVERSION";
+}
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+typedef enum {
+  COMPRESSION_ASIS = -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4,
+  COMPRESSION_GZIP =  5,
+  COMPRESSION_GZIP_VOL =  6,
+  COMPRESSION_TYPES_N = 7
+} compression_type_t;
+
+typedef enum {
+  SCALING_ASIS =       -1,
+  SCALING_NONE =       0,
+  SCALING_ROUNDED =    1,
+  SCALING_INTEGRAL =   2,
+  SCALING_DYNAMIC =    3,
+  SCALING_SPECIFIED =  4
+} scaling_type_t;
+
+
+typedef struct {
+ string short_name;
+ string long_name;
+ string units;
+ encoding_type_t encoding_type;
+ compression_type_t compression_type;
+ scaling_type_t scaling_type;
+ float scale;
+ float bias;
+} data_out_t;
+
+paramdef struct data_out_t
+{
+  p_descr = "Data prep for the output data.";
+  p_help = "This is only relevant when converting from float32 to int8 or "
+           "int16 or if force_scale_change is set.";
+  p_default = { "data", "long_data", "units", ENCODING_ASIS, COMPRESSION_ASIS, SCALING_ASIS, 1.0, 0.0 };
+} out_data_prep;
+
+paramdef boolean
+{
+  p_descr = "Flag to include the QC field in the MDV output.";
+  p_help = "";
+  p_defualt = false;
+} include_qc_field;
+
+paramdef struct data_out_t
+{
+  p_descr = "Data prep for the QC data.";
+  p_help = "This is only relevant when converting from float32 to int8 or "
+           "int16 or if force_scale_change is set.";
+  p_default = { "QC", "long_QC", "units", ENCODING_ASIS, COMPRESSION_ASIS, SCALING_ASIS, 1.0, 0.0 };
+} qc_data_prep;
+
+paramdef boolean
+{
+  p_descr = "Flag to include the radiance field in the MDV output.";
+  p_help = "";
+  p_defualt = false;
+} include_rad_field;
+
+paramdef struct data_out_t
+{
+  p_descr = "Data prep for the radiance data.";
+  p_help = "This is only relevant when converting from float32 to int8 or "
+           "int16 or if force_scale_change is set.";
+  p_default = { "radiance", "long_radinace", "units", ENCODING_ASIS, COMPRESSION_ASIS, SCALING_ASIS, 1.0, 0.0 };
+} rad_data_prep;
+
+

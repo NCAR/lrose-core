@@ -24,15 +24,14 @@
 //////////////////////////////////////////////////////////
 // VolScans - container class for dbz and vel files that
 //            that need to be combined
-//
-// $Id: VolScans.hh,v 1.7 2016/03/07 01:23:11 dixon Exp $
-//
 //////////////////////////////////////////////////////////
 #ifndef _VOL_SCANS_INC_
 #define _VOL_SCANS_INC_
 
 #include <string>
 #include <map>
+
+using namespace std;
 
 //
 // Forward class declarations

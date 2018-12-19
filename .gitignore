@@ -68,6 +68,10 @@ codebase/missing
 codebase/stamp-h1
 codebase/autom4te.cache
 
+# qt
+
+.qmake*
+
 # distro makefiles
 
 codebase/apps/Radx/src/makefile
@@ -206,6 +210,8 @@ codebase/apps/hydro/src/Shape2Map/Shape2Map
 codebase/apps/ingest/src/AcData2Spdb/AcData2Spdb
 codebase/apps/ingest/src/AcTrack2Polygon/AcTrack2Polygon
 codebase/apps/ingest/src/AcarsNc2GenPt/AcarsNc2GenPt
+codebase/apps/ingest/src/ArgentineAwsIngest/ArgentineAwsIngest
+codebase/apps/ingest/src/AsciiPosn2Spdb/AsciiPosn2Spdb
 codebase/apps/ingest/src/Awos2Spdb/Awos2Spdb
 codebase/apps/ingest/src/Aws2Spdb/Aws2Spdb
 codebase/apps/ingest/src/BomAws2Spdb/BomAws2Spdb
@@ -215,9 +221,12 @@ codebase/apps/ingest/src/CreateStationList/CreateStationList
 codebase/apps/ingest/src/CsuSounding2Spdb/CsuSounding2Spdb
 codebase/apps/ingest/src/Dorade2Dsr/Dorade2Dsr
 codebase/apps/ingest/src/Dorade2DsrArchiveDriver/Dorade2DsrArchiveDriver
+codebase/apps/ingest/src/EolMobileKml2Spdb/EolMobileKml2Spdb
 codebase/apps/ingest/src/GemScan2Dsr/GemScan2Dsr
 codebase/apps/ingest/src/GemVolXml2Dsr/GemVolXml2Dsr
 codebase/apps/ingest/src/Gini2Mdv/Gini2Mdv
+codebase/apps/ingest/src/GoesRGLM2Spdb/GoesRGLM2Spdb
+codebase/apps/ingest/src/GoesRnetCDF2Mdv/GoesRnetCDF2Mdv
 codebase/apps/ingest/src/Grib2Mdv/Grib2Mdv
 codebase/apps/ingest/src/Grib2toMdv/Grib2toMdv
 codebase/apps/ingest/src/Grib2toNc/Grib2toNc
@@ -411,6 +420,7 @@ codebase/apps/radar/src/HawkEye/moc_TimeScaleWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_predefs.h
 
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
+codebase/apps/radar/src/HcrTempRxGain/HcrTempRxGain
 codebase/apps/radar/src/HsrlMon/HsrlMon
 codebase/apps/radar/src/Hsrl2Radx/Hsrl2Radx
 codebase/apps/radar/src/HsrlSim/HsrlSim
@@ -422,8 +432,10 @@ codebase/apps/radar/src/Mdv2Vad/Mdv2Vad
 codebase/apps/radar/src/MdvFold/MdvFold
 codebase/apps/radar/src/MdvPartRain/MdvPartRain
 codebase/apps/radar/src/MdvRadarShear/MdvRadarShear
+codebase/apps/radar/src/MergeHcrAndHsrl/MergeHcrAndHsrl
 codebase/apps/radar/src/NexradPowerStats/NexradPowerStats
 codebase/apps/radar/src/PartRain/PartRain
+codebase/apps/radar/src/PidZdrStats/PidZdrStats
 codebase/apps/radar/src/PointingCpCompute/PointingCpCompute
 codebase/apps/radar/src/PowerInfo2Spdb/PowerInfo2Spdb
 codebase/apps/radar/src/Qmap2Cidd/Qmap2Cidd
@@ -432,6 +444,7 @@ codebase/apps/radar/src/RadarCal/RadarCal
 codebase/apps/radar/src/RadarConst/RadarConst
 codebase/apps/radar/src/RadarMdvCompare/RadarMdvCompare
 codebase/apps/radar/src/RapMap2Chill/RapMap2Chill
+codebase/apps/radar/src/REPoH/REPoH
 codebase/apps/radar/src/SimCpCompute/SimCpCompute
 codebase/apps/radar/src/SpectraPrint/SpectraPrint
 codebase/apps/radar/src/StaggeredLimits/StaggeredLimits
@@ -445,6 +458,7 @@ codebase/apps/radar/src/TsConvert/TsConvert
 codebase/apps/radar/src/TsFile2Fmq/TsFile2Fmq
 codebase/apps/radar/src/TsFmq2Tcp/TsFmq2Tcp
 codebase/apps/radar/src/TsGamic2Iwrf/TsGamic2Iwrf
+codebase/apps/radar/src/TsMaxPower2Fmq/TsMaxPower2Fmq
 codebase/apps/radar/src/TsMerge/TsMerge
 codebase/apps/radar/src/TsOverlay/TsOverlay
 codebase/apps/radar/src/TsPrint/TsPrint
@@ -507,6 +521,7 @@ codebase/apps/spol/src/SpolSysconRelay/SpolSysconRelay
 codebase/apps/spol/src/SpolTs2Fmq/SpolTs2Fmq
 codebase/apps/spol/src/SpolTsMonitor/SpolTsMonitor
 codebase/apps/spol/src/SpolDishTemp2Spdb/SpolDishTemp2Spdb
+codebase/apps/spol/src/SpolWarnSms/SpolWarnSms
 
 codebase/apps/titan/src/AcPosnAscii2Spdb/AcPosnAscii2Spdb
 codebase/apps/titan/src/Alenia2Mom/Alenia2Mom
@@ -582,25 +597,37 @@ codebase/apps/Radx/src/Ascii2Radx/Ascii2Radx
 codebase/apps/Radx/src/Dsr2Radx/Dsr2Radx
 codebase/apps/Radx/src/FixCfradialPaths/FixCfradialPaths
 codebase/apps/Radx/src/FixRadxPointing/FixRadxPointing
+codebase/apps/Radx/src/FixRadxValues/FixRadxValues
+codebase/apps/Radx/src/GroundEchoStats/GroundEchoStats
 codebase/apps/Radx/src/Radx2Dsr/Radx2Dsr
 codebase/apps/Radx/src/Radx2Grid/Radx2Grid
+codebase/apps/Radx/src/RadxBufr/RadxBufr
 codebase/apps/Radx/src/RadxCheck/RadxCheck
 codebase/apps/Radx/src/RadxClutMon/RadxClutMon
 codebase/apps/Radx/src/RadxConvert/RadxConvert
 codebase/apps/Radx/src/RadxCov2Mom/RadxCov2Mom
+codebase/apps/Radx/src/RadxCreateVol/RadxCreateVol
 codebase/apps/Radx/src/RadxDiff/RadxDiff
+codebase/apps/Radx/src/RadxDiffFields/RadxDiffFields
 codebase/apps/Radx/src/RadxDwellCombine/RadxDwellCombine
 codebase/apps/Radx/src/RadxEvad/RadxEvad
 codebase/apps/Radx/src/RadxFilter/RadxFilter
 codebase/apps/Radx/src/RadxHca/RadxHca
+codebase/apps/Radx/src/RadxKdp/RadxKdp
 codebase/apps/Radx/src/RadxMergeFields/RadxMergeFields
 codebase/apps/Radx/src/RadxMergeVols/RadxMergeVols
 codebase/apps/Radx/src/RadxMon/RadxMon
+codebase/apps/Radx/src/RadxModelQc/RadxModelQc
 codebase/apps/Radx/src/RadxPartRain/RadxPartRain
+codebase/apps/Radx/src/RadxPid/RadxPid
+codebase/apps/Radx/src/RadxPersistentClutter/RadxPersistentClutter
 codebase/apps/Radx/src/RadxPrint/RadxPrint
 codebase/apps/Radx/src/RadxQpe/RadxQpe
 codebase/apps/Radx/src/RadxQc/RadxQc
+codebase/apps/Radx/src/RadxRate/RadxRate
 codebase/apps/Radx/src/RadxSunMon/RadxSunMon
+codebase/apps/Radx/src/RadxTest/RadxTest
+codebase/apps/Radx/src/RadxTimeMedian/RadxTimeMedian
 codebase/apps/Radx/src/RadxBeamBlock/RadxBeamBlock
 codebase/apps/Radx/src/TestRadxMsg/TestRadxMsg
 

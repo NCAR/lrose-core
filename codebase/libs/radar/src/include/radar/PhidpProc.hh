@@ -68,15 +68,15 @@ public:
   //   nGatesSdev: number of gates over which we compute the sdev
   //   missingVal: missingDataValue
   
-  void computePhidpSdev(size_t nGatesData, 
-                        size_t nGatesSdev,
+  void computePhidpSdev(int nGatesData, 
+                        int nGatesSdev,
                         double *phidp,
                         double missingVal);
   
   // get methods, after calling computeSdev
   
-  size_t getNGatesData() const { return _nGatesData; }
-  size_t getNGatesSdev() const { return _nGatesSdev; }
+  int getNGatesData() const { return _nGatesData; }
+  int getNGatesSdev() const { return _nGatesSdev; }
   const double *getPhidp() const { return _phidp; }
   const double *getPhidpSdev() const { return _phidpSdev; }
   double getMissingVal() const { return _missingVal; }
@@ -120,8 +120,8 @@ private:
 
   // sdev data
 
-  size_t _nGatesData;
-  size_t _nGatesSdev;
+  int _nGatesData;
+  int _nGatesSdev;
   TaArray<double> _phidp_;
   TaArray<double> _phidpSdev_;
 

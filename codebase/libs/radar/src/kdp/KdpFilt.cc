@@ -46,6 +46,7 @@
 #include <radar/KdpFilt.hh>
 #include <radar/FilterUtils.hh>
 #include <radar/DpolFilter.hh>
+#include <radar/KdpFiltParams.hh>
 using namespace std;
 
 const double KdpFilt::firCoeff_125[FIR_LEN_125+1] = {
@@ -207,7 +208,7 @@ KdpFilt::KdpFilt()
   _kdpZExpon = 1.0;
   _kdpZdrExpon = -2.05;
   _kdpZZdrCoeff = 3.32e-5;
-  _kdpZZdrThreshold = 0.25;
+  _kdpMinForSelfConsistency = 0.25;
   _kdpZZdrMedianLen = 5;
 
   // debugging
@@ -301,6 +302,68 @@ void KdpFilt::setAttenCoeffs(double dbzCoeff, double dbzExpon,
 
 }
   
+////////////////////////////////////////////
+// Set processing options from params object
+
+void KdpFilt::setFromParams(const KdpFiltParams &params)
+{
+
+  _params = params;
+
+  // initialize KDP object
+
+  if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_125) {
+    setFIRFilterLen(KdpFilt::FIR_LENGTH_125);
+  } else if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_60) {
+    setFIRFilterLen(KdpFilt::FIR_LENGTH_60);
+  } else if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_40) {
+    setFIRFilterLen(KdpFilt::FIR_LENGTH_40);
+  } else if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_30) {
+    setFIRFilterLen(KdpFilt::FIR_LENGTH_30);
+  } else if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_20) {
+    setFIRFilterLen(KdpFilt::FIR_LENGTH_20);
+  } else {
+    setFIRFilterLen(KdpFilt::FIR_LENGTH_10);
+  }
+  setNGatesStats(params.KDP_ngates_for_stats);
+  setMinValidAbsKdp(params.KDP_min_valid_abs_kdp);
+  setNFiltIterUnfolded(params.KDP_n_filt_iterations_unfolded);
+  setNFiltIterCond(params.KDP_n_filt_iterations_hubbert_bringi);
+  if (params.KDP_psob_method == KdpFiltParams::HUBBERT_BRINGI_METHOD) {
+    setUseIterativeFiltering(true);
+    setPhidpDiffThreshold(params.KDP_phidp_difference_threshold_hubbert_bringi);
+  }
+  setPhidpSdevMax(params.KDP_phidp_sdev_max);
+  setPhidpJitterMax(params.KDP_phidp_jitter_max);
+  setMinValidAbsKdp(params.KDP_min_valid_abs_kdp);
+  checkSnr(params.KDP_check_snr);
+  setSnrThreshold(params.KDP_snr_threshold);
+  checkRhohv(params.KDP_check_rhohv);
+  setRhohvThreshold(params.KDP_rhohv_threshold);
+  if (params.KDP_check_zdr_sdev) {
+    checkZdrSdev(true);
+  }
+  setZdrSdevMax(params.KDP_zdr_sdev_max);
+  setKdpMinForSelfConsistency(params.KDP_minimum_for_self_consistency);
+  setMedianFilterLenForKdpZZdr(params.KDP_median_filter_len_for_ZZDR);
+
+  if (params.KDP_debug) {
+    setDebug(true);
+  }
+  if (params.KDP_write_ray_files) {
+    setWriteRayFile(true, params.KDP_ray_files_dir);
+  }
+
+  if (params.KDP_specify_coefficients_for_attenuation_correction) {
+    setAttenCoeffs(params.KDP_dbz_attenuation_coefficient,
+                   params.KDP_dbz_attenuation_exponent,
+                   params.KDP_zdr_attenuation_coefficient,
+                   params.KDP_zdr_attenuation_exponent);
+  }
+  setComputeAttenCorr(true);
+
+}
+
 ////////////////////////////////////////////////////////////////////////
 // Initialize the object arrays for later use.
 // Do this if you need access to the arrays, but have not yet called
@@ -425,12 +488,12 @@ int KdpFilt::compute(time_t timeSecs,
       if (_snr[igate] < _snrThreshold) {
         _kdp[igate] = _missingValue;
         _kdpZZdr[igate] = _missingValue;
-        _kdpCond[igate] = _missingValue;
+        _kdpSC[igate] = _missingValue;
         _psob[igate] = _missingValue;
       } else {
         _kdp[igate] = 0;
         _kdpZZdr[igate] = 0;
-        _kdpCond[igate] = 0;
+        _kdpSC[igate] = 0;
         _psob[igate] = 0;
       }
     }
@@ -475,7 +538,7 @@ int KdpFilt::compute(time_t timeSecs,
 
   // load up conditional KDP from estimated kdp and kdpZZdr
 
-  _loadKdpCond();
+  _loadKdpSC();
 
   // compute attenuation corrections
 
@@ -598,10 +661,12 @@ void KdpFilt::_initArrays(const double *snr,
   _validForUnfold = _validForUnfold_.alloc(_nGates);
   _kdp = _kdp_.alloc(_nGates);
   _kdpZZdr = _kdpZZdr_.alloc(_nGates);
-  _kdpCond = _kdpCond_.alloc(_nGates);
+  _kdpSC = _kdpSC_.alloc(_nGates);
   _psob = _psob_.alloc(_nGates);
   _dbzAttenCorr = _dbzAttenCorr_.alloc(_nGates);
   _zdrAttenCorr = _zdrAttenCorr_.alloc(_nGates);
+  _dbzCorrected = _dbzCorrected_.alloc(_nGates);
+  _zdrCorrected = _zdrCorrected_.alloc(_nGates);
   _gateStates = _gateStates_.alloc(_nGates);
   
   // copy data to working arrays
@@ -627,6 +692,8 @@ void KdpFilt::_initArrays(const double *snr,
   FilterUtils::applyMedianFilter(_dbzMedian, _nGates,
                                  _kdpZZdrMedianLen, _missingValue);
 
+  memcpy(_dbzCorrected, _dbz, _nGates * sizeof(double));
+
   if (zdr != NULL) {
     memcpy(_zdr, zdr, _nGates * sizeof(double));
     _zdrAvailable = true;
@@ -639,6 +706,7 @@ void KdpFilt::_initArrays(const double *snr,
   memcpy(_zdrMedian, _zdr, _nGates * sizeof(double));
   FilterUtils::applyMedianFilter(_zdrMedian, _nGates,
                                  _kdpZZdrMedianLen, _missingValue);
+  memcpy(_zdrCorrected, _zdr, _nGates * sizeof(double));
 
   if (rhohv != NULL) {
     memcpy(_rhohv, rhohv, _nGates * sizeof(double));
@@ -691,16 +759,16 @@ void KdpFilt::_initArrays(const double *snr,
     if (_snr[ii] < _snrThreshold) {
       _kdp[ii] = _missingValue;
       _kdpZZdr[ii] = _missingValue;
-      _kdpCond[ii] = _missingValue;
+      _kdpSC[ii] = _missingValue;
       _psob[ii] = _missingValue;
     } else {
       _kdp[ii] = 0;
       _kdpZZdr[ii] = 0;
-      _kdpCond[ii] = 0;
+      _kdpSC[ii] = 0;
       _psob[ii] = 0;
     }
-    _dbzAttenCorr[ii] = _missingValue;
-    _zdrAttenCorr[ii] = _missingValue;
+    _dbzAttenCorr[ii] = 0;
+    _zdrAttenCorr[ii] = 0;
   }
   
 }
@@ -878,25 +946,25 @@ void KdpFilt::_computeKdp()
   
   // allocate working arrays
   
-  TaArray<double> yyy_, zzz_;
-  double *yyy = yyy_.alloc(arrayLen) + arrayOffset;
-  double *zzz = zzz_.alloc(arrayLen) + arrayOffset;
+  TaArray<double> work1_, work2_;
+  double *work1 = work1_.alloc(arrayLen) + arrayOffset;
+  double *work2 = work2_.alloc(arrayLen) + arrayOffset;
 
-  // initialize working array zzz
+  // initialize working array work2
   
-  _copyArray(zzz, _phidpMeanUnfold);
-  _padArray(zzz);
+  _copyArray(work2, _phidpMeanUnfold);
+  _padArray(work2);
   
-  // apply FIR filter, computing yyy from zzz, iterate
+  // apply FIR filter, computing work1 from work2, iterate
     
   for (int iloop = 0; iloop < _nFiltIterUnfolded; iloop++) {
-    _applyFirFilter(zzz, yyy);
-    _copyArray(zzz, yyy);
+    _applyFirFilter(work2, work1);
+    _copyArray(work2, work1);
   } // iloop
   
   // save filtered phidp
 
-  _copyArray(_phidpFilt, zzz);
+  _copyArray(_phidpFilt, work2);
   _copyArray(_phidpCond, _phidpFilt);
   
   // compute conditioned phidp
@@ -905,15 +973,15 @@ void KdpFilt::_computeKdp()
     
     // use iterative filtering to remove phase shift on backscatter
     
-    _copyArray(zzz, _phidpCond);
-    _padArray(zzz);
+    _copyArray(work2, _phidpCond);
+    _padArray(work2);
 
     for (int iloop = 0; iloop < _nFiltIterCond; iloop++) {
-      _applyFirFilter(zzz, yyy);
-      _copyArrayCond(zzz, yyy, _phidpCond);
+      _applyFirFilter(work2, work1);
+      _copyArrayCond(work2, work1, _phidpCond);
     } // iloop
     
-    _copyArray(_phidpCondFilt, zzz);
+    _copyArray(_phidpCondFilt, work2);
     
   } else {
 
@@ -923,19 +991,19 @@ void KdpFilt::_computeKdp()
     
     // apply the FIR filter to the increasing phidp
     
-    _copyArray(zzz, _phidpCond);
-    _padArray(zzz);
+    _copyArray(work2, _phidpCond);
+    _padArray(work2);
     
     for (int iloop = 0; iloop < _nFiltIterCond; iloop++) {
-      _applyFirFilter(zzz, yyy);
-      _copyArray(zzz, yyy);
+      _applyFirFilter(work2, work1);
+      _copyArray(work2, work1);
     } // iloop
 
-    _copyArray(_phidpCondFilt, yyy);
+    _copyArray(_phidpCondFilt, work1);
 
   }
   
-  // load up conditioned KDP
+  // compute KDP as slope between successive gates
 
   _loadKdp();
 
@@ -1001,7 +1069,7 @@ void KdpFilt::_loadKdp()
     if (_snr[ii] < _snrThreshold) {
       _kdp[ii] = _missingValue;
       _kdpZZdr[ii] = _missingValue;
-      _kdpCond[ii] = _missingValue;
+      _kdpSC[ii] = _missingValue;
       _psob[ii] = _missingValue;
       continue;
     }
@@ -1091,6 +1159,13 @@ void KdpFilt::_computeAttenCorrection()
 
     _dbzAttenCorr[ii] = sumDbzCorr;
     _zdrAttenCorr[ii] = sumZdrCorr;
+
+    if (_dbz[ii] > -9990) {
+      _dbzCorrected[ii] = _dbz[ii] + sumDbzCorr;
+    }
+    if (_zdr[ii] > -9990) {
+      _zdrCorrected[ii] = _zdr[ii] + sumZdrCorr;
+    }
 
   } // ii
 
@@ -1719,9 +1794,13 @@ void KdpFilt::_writeRayDataToFile()
     double zdrCorrected = 0;
     if (_dbz[igate] > -9990 && _dbzAttenCorr[igate] > -9990) {
       dbzCorrected = _dbz[igate] + _dbzAttenCorr[igate];
+    } else {
+      dbzCorrected = _dbz[igate];
     }
     if (_zdr[igate] > -9990 && _zdrAttenCorr[igate] > -9990) {
       zdrCorrected = _zdr[igate] + _zdrAttenCorr[igate];
+    } else {
+      zdrCorrected = _zdr[igate];
     }
     fprintf(out,
             "%3d %3d %3d "
@@ -1799,9 +1878,9 @@ double KdpFilt::_computeKdpFromZZdr(double dbz,
 }
 
 ////////////////////////////////////////////////////////////
-/// load up conditional kdp from computed kdp and kdpZZdr
+/// load up kdp conditioned using ZZDR self-consistency
 
-void KdpFilt::_loadKdpCond()
+void KdpFilt::_loadKdpSC()
 
 {
 
@@ -1812,7 +1891,7 @@ void KdpFilt::_loadKdpCond()
   for (int igate = 0; igate < _nGates; igate++) {
 
     if (_kdp[igate] == _missingValue ||
-        _kdp[igate] <= _kdpZZdrThreshold ||
+        _kdp[igate] <= _kdpMinForSelfConsistency ||
         _kdpZZdr[igate] == _missingValue) {
       
       // non-positive KDP
@@ -1821,7 +1900,7 @@ void KdpFilt::_loadKdpCond()
 
         // end of run so process it
       
-        _loadKdpCondRun(startGate, endGate);
+        _loadKdpSCRun(startGate, endGate);
 
       }
         
@@ -1848,15 +1927,16 @@ void KdpFilt::_loadKdpCond()
   // check for active run
   
   if (inRun) {
-    _loadKdpCondRun(startGate, endGate);
+    _loadKdpSCRun(startGate, endGate);
   }
 
 }
 
 ////////////////////////////////////////////////////////////
-/// load up conditional kdp for a specific run
+/// load up kdp conditioned using ZZDR self-consistency
+/// for a specific run
 
-void KdpFilt::_loadKdpCondRun(int startGate, int endGate)
+void KdpFilt::_loadKdpSCRun(int startGate, int endGate)
 
 {
 
@@ -1884,11 +1964,11 @@ void KdpFilt::_loadKdpCondRun(int startGate, int endGate)
 
   double condFactor = sumKdp / sumKdpZZdr;
 
-  // load the conditional KDP
+  // load the KDP conditioned by self-consistency
 
   for (int igate = startGate; igate <= endGate; igate++) {
-    _kdpCond[igate] = _kdpZZdr[igate] * condFactor;
-  } // igate
+    _kdpSC[igate] = _kdpZZdr[igate] * condFactor;
+  }
 
 }
 

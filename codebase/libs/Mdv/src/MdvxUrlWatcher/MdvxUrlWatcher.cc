@@ -358,11 +358,19 @@ bool MdvxUrlWatcher::_slow_fcst_getdata(void)
       // set the actual 'gen' time to the oldest time
       _time = ti[0] - _fcst_dt0;
       _logDebug(method, "Got all forecasts");
+      if (ti)
+      {
+         delete [] ti;
+      }
       return true;
     }
     ++i;
   }
   _logDebug(method, "No more data in fcst get");
+  if (ti)
+  {
+     delete [] ti;
+  }
   return false;
 }
 

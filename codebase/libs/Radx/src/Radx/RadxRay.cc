@@ -54,7 +54,21 @@ using namespace std;
 RadxRay::RadxRay()
   
 {
+
+  // initialize fields
+  
   _init();
+
+  // initialize client counting
+
+  _nClients = 0;
+
+#if defined (__linux__)
+  _nClientsMutex = PTHREAD_MUTEX_INITIALIZER;
+#else
+  pthread_mutex_init(&_nClientsMutex, NULL);
+#endif
+  
 }
 
 /////////////////////////////
@@ -64,8 +78,24 @@ RadxRay::RadxRay()
 RadxRay::RadxRay(const RadxRay &rhs)
      
 {
+  // initialize fields
+  
   _init();
+
+  // initialize client counting
+
+  _nClients = 0;
+
+#if defined (__linux__)
+  _nClientsMutex = PTHREAD_MUTEX_INITIALIZER;
+#else
+  pthread_mutex_init(&_nClientsMutex, NULL);
+#endif
+
+  // copy
+  
   _copy(rhs);
+
 }
 
 /////////////////////////////////////////////////////////
@@ -149,11 +179,6 @@ void RadxRay::_init()
 
   clearRangeGeom();
   clearFields();
-
-  // initialize client counting
-
-  _nClients = 0;
-  pthread_mutex_init(&_nClientsMutex, NULL);
 
 }
 

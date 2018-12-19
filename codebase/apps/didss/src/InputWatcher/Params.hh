@@ -433,9 +433,13 @@ public:
 
   tdrp_bool_t copy_using_original_name;
 
+  tdrp_bool_t append_date_time_to_original_name;
+
   tdrp_bool_t without_date_directory;
 
   char* copy_dir;
+
+  char* copy_prefix;
 
   char* copy_ext;
 
@@ -462,7 +466,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[53];
+  mutable TDRPtable _table[55];
 
   const char *_className;
 

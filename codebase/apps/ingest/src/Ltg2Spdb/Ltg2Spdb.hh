@@ -48,7 +48,7 @@
 #include "Params.hh"
 using namespace std;
 
-class NcFile;
+class Nc3File;
 
 ////////////////////////
 // This class
@@ -138,7 +138,7 @@ private:
   int _processFile(const char *file_path);
   int _processNldnFile(const char *file_path);
   int _processAOAWSNetCDFFile(const char *file_path);
-  int _checkAOAWSNetCDFFile(const NcFile &ncf);
+  int _checkAOAWSNetCDFFile(const Nc3File &ncf);
 
   int _decode_format_1(const char *line);
   int _decode_format_2(const char *line);
@@ -152,6 +152,7 @@ private:
   int _decode_napln(const char *line);
   int _decode_ksc(const char *line, const char *file_path );
   int _decode_alblm(const char *line);
+  int _decode_starnet(const char *line);
   int _checkNearDuplicate(const LTG_extended_t &strike );
   int _checkNearDuplicate(const LTG_strike_t &strike );
   int _checkNearDuplicate(const double lat, const double lon, const time_t time, const int nanosecs );

@@ -47,6 +47,7 @@
 #include <toolsa/sincos.h>
 #include <rapformats/ds_radar.h>
 #include <radar/FilterUtils.hh>
+#include <Spdb/DsSpdb.hh>
 #include "Beam.hh"
 using namespace std;
 
@@ -93,7 +94,7 @@ Beam::Beam(const string &progName,
   _endOfSweepFlag = false;
   _endOfVolFlag = false;
 
-  _isPpi = true;
+  _scanType = SCAN_TYPE_PPI;
   _antennaTransition = false;
 
   _startRangeKm = 0.0;
@@ -176,7 +177,7 @@ void Beam::init(const MomentsMgr &mmgr,
                 bool beamIsIndexed,
                 double angularResolution,
                 double meanPointingAngle,
-                bool isPpi,
+                scan_type_t scanType,
                 bool isAlternating,
                 bool isStagPrt,
                 double prt,
@@ -200,7 +201,7 @@ void Beam::init(const MomentsMgr &mmgr,
   _beamIsIndexed = beamIsIndexed;
   _angularResolution = angularResolution;
   _meanPointingAngle = meanPointingAngle;
-  _isPpi = isPpi;
+  _scanType = scanType;
   _isAlternating = isAlternating;
   _isStagPrt = isStagPrt;
   _prt = prt;
@@ -417,15 +418,27 @@ void Beam::_prepareForComputeMoments()
 
   // set elevation / azimuth
 
-  if (_isPpi) {
-    _az = _getCorrectedAz(_meanPointingAngle);
-    _el = _getCorrectedEl(midPulse->getEl());
-  } else {
+  if (_scanType == SCAN_TYPE_VERT) {
     _el = _getCorrectedEl(_meanPointingAngle);
     _az = _getCorrectedAz(midPulse->getAz());
+  } else if (_scanType == SCAN_TYPE_RHI) {
+    _el = _getCorrectedEl(_meanPointingAngle);
+    _az = _getCorrectedAz(midPulse->getAz());
+  } else {
+    _az = _getCorrectedAz(_meanPointingAngle);
+    _el = _getCorrectedEl(midPulse->getEl());
   }
-  _targetEl = _getCorrectedEl(midPulse->getFixedEl());
-  _targetAz = _getCorrectedAz(midPulse->getFixedAz());
+  if (midPulse->getFixedEl() > -990) {
+    _targetEl = _getCorrectedEl(midPulse->getFixedEl());
+  } else {
+    _targetEl = _meanPointingAngle;
+  }
+  if (midPulse->getFixedAz() > -990) {
+    _targetAz = _getCorrectedAz(midPulse->getFixedAz());
+  } else {
+    _targetAz = _meanPointingAngle;
+  }
+
   if (std::isnan(_targetEl) || _targetEl < -990) {
     _targetEl = _el;
   }
@@ -444,9 +457,6 @@ void Beam::_prepareForComputeMoments()
   _followMode = midPulse->get_follow_mode();
   _sweepNum = _getSweepNum();
   _volNum = _getVolNum();
-  if (_volNum < 0) {
-    _volNum = _volNum + 65536;
-  }
 
   // set antenna transition flag
 
@@ -641,7 +651,9 @@ int Beam::_getVolNum()
     volNums.push_back(_pulses[ii]->get_volume_num());
   }
   sort(volNums.begin(), volNums.end());
-
+  if (volNums[_nSamplesHalf] < 0) {
+    return 0;
+  }
   return volNums[_nSamplesHalf];
 
 }
@@ -660,6 +672,9 @@ int Beam::_getSweepNum()
   }
   sort(sweepNums.begin(), sweepNums.end());
 
+  if (sweepNums[_nSamplesHalf] < 0) {
+    return -1;
+  }
   return sweepNums[_nSamplesHalf];
 
 }
@@ -1225,13 +1240,13 @@ void Beam::_computeMomDpAltHvCoCross()
   // override noise for moments computations
   
   double noisePowerHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
-  // double noisePowerVc = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
     _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
     _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
+    _mom->setEstimatedNoiseDbmHx(_noise->getMedianNoiseDbmHx());
+    _mom->setEstimatedNoiseDbmVx(_noise->getMedianNoiseDbmVx());
     noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
-    // noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
   }
     
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1320,13 +1335,11 @@ void Beam::_computeMomDpAltHvCoOnly()
   // override noise for moments computations
   
   double noisePowerHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
-  // double noisePowerVc = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
     _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
     _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
     noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
-    // noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
   }
     
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1426,13 +1439,11 @@ void Beam::_computeMomDpSimHv()
   // override noise for moments computations
   
   double noisePowerHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
-  // double noisePowerVc = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
     _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
     _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
     noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
-    // noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
   }
     
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1600,6 +1611,7 @@ void Beam::_computeMomDpHOnly()
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
     _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
+    _mom->setEstimatedNoiseDbmVx(_noise->getMedianNoiseDbmVx());
     noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
   }
     
@@ -1697,6 +1709,7 @@ void Beam::_computeMomDpVOnly()
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
     _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
+    _mom->setEstimatedNoiseDbmHx(_noise->getMedianNoiseDbmHx());
     noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
   }
     
@@ -1779,7 +1792,7 @@ void Beam::_filterSp()
                              gate->iqhcOrig,
                              gate->iqhc, specHc,
                              calibNoise,
-                             gate->iqhcF,
+                             gate->iqhcF, NULL,
                              filterRatio,
                              spectralNoise,
                              spectralSnr);
@@ -2088,10 +2101,12 @@ void Beam::_filterDpAltHvCoCross()
 			     gate->iqhc, specHc,
 			     calibNoise,
 			     gate->iqhcF,
+			     gate->iqhcNotched,
 			     filterRatio,
 			     spectralNoise,
 			     spectralSnr,
 			     specRatio);
+
     if (filterRatio > 1.0) {
       fields.clut_2_wx_ratio = 10.0 * log10(filterRatio - 1.0);
     } else {
@@ -2103,13 +2118,16 @@ void Beam::_filterDpAltHvCoCross()
     // apply the filter ratio to other channels
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvc, specRatio, gate->iqvcF);
+                           gate->iqvc, specRatio,
+                           gate->iqvcF, gate->iqvcNotched);
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqhx, specRatio, gate->iqhxF);
+                           gate->iqhx, specRatio,
+                           gate->iqhxF, NULL);
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvx, specRatio, gate->iqvxF);
+                           gate->iqvx, specRatio,
+                           gate->iqvxF, NULL);
     
     // compute filtered moments for this gate
     
@@ -2130,6 +2148,30 @@ void Beam::_filterDpAltHvCoCross()
                                    fieldsF.lag2_vc,
                                    igate, 
                                    fieldsF);
+
+    // compute notched moments for rhohv, phidp and zdr
+
+    MomentsFields fieldsN;
+    _mom->computeCovarDpAltHvCoCross(gate->iqhcF, gate->iqvcF,
+                                     gate->iqhxF, gate->iqvxF, 
+                                     fieldsN);
+    _mom->computeMomDpAltHvCoCross(fieldsN.lag0_hc,
+                                   fieldsN.lag0_hx,
+                                   fieldsN.lag0_vc,
+                                   fieldsN.lag0_vx,
+                                   fieldsN.lag0_vchx,
+                                   fieldsN.lag0_hcvx,
+                                   fieldsN.lag1_vxhx,
+                                   fieldsN.lag1_vchc,
+                                   fieldsN.lag1_hcvc,
+                                   fieldsN.lag2_hc,
+                                   fieldsN.lag2_vc,
+                                   igate, 
+                                   fieldsN);
+
+    fieldsF.test = fieldsN.zdr;
+    fieldsF.test2 = fieldsN.phidp;
+    fieldsF.test3 = fieldsN.rhohv;
     
     // compute clutter power
     
@@ -2232,7 +2274,7 @@ void Beam::_filterDpAltHvCoOnly()
                              gate->iqhcOrig,
                              gate->iqhc, specHc,
                              calibNoise,
-                             gate->iqhcF,
+                             gate->iqhcF, gate->iqhcNotched,
                              filterRatio,
                              spectralNoise,
                              spectralSnr,
@@ -2249,7 +2291,8 @@ void Beam::_filterDpAltHvCoOnly()
     // apply the filter ratio to other channels
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvc, specRatio, gate->iqvcF);
+                           gate->iqvc, specRatio, 
+                           gate->iqvcF, gate->iqvcNotched);
     
     // compute filtered moments for this gate
     
@@ -2323,7 +2366,7 @@ void Beam::_filterDpSimHvFixedPrt()
                              gate->iqhcOrig,
                              gate->iqhc, specHc,
                              calibNoise,
-                             gate->iqhcF,
+                             gate->iqhcF, gate->iqhcNotched,
                              filterRatio,
                              spectralNoise,
                              spectralSnr,
@@ -2340,7 +2383,8 @@ void Beam::_filterDpSimHvFixedPrt()
     // apply the filter ratio to other channel
     
     _mom->applyFilterRatio(_nSamples, *_fft,
-                           gate->iqvc, specRatio, gate->iqvcF);
+                           gate->iqvc, specRatio,
+                           gate->iqvcF, gate->iqvcNotched);
     
     // compute filtered moments for this gate
     
@@ -2419,10 +2463,10 @@ void Beam::_filterDpSimHvStagPrt()
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
                            gate->iqvcPrtShort, specRatioShort,
-                           gate->iqvcPrtShortF);
+                           gate->iqvcPrtShortF, NULL);
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
                            gate->iqvcPrtLong, specRatioLong,
-                           gate->iqvcPrtLongF);
+                           gate->iqvcPrtLongF, NULL);
     
     // compute filtered moments for this gate
     
@@ -2483,7 +2527,7 @@ void Beam::_filterDpHOnlyFixedPrt()
                              gate->iqhcOrig,
                              gate->iqhc, specHc,
                              calibNoise,
-                             gate->iqhcF,
+                             gate->iqhcF, NULL,
                              filterRatio,
                              spectralNoise,
                              spectralSnr,
@@ -2500,7 +2544,7 @@ void Beam::_filterDpHOnlyFixedPrt()
     // apply the filter ratio to other channel
     
     _mom->applyFilterRatio(_nSamples, *_fft,
-                           gate->iqvx, specRatio, gate->iqvxF);
+                           gate->iqvx, specRatio, gate->iqvxF, NULL);
     
     // compute filtered moments for this gate
     
@@ -2578,11 +2622,11 @@ void Beam::_filterDpHOnlyStagPrt()
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
                            gate->iqvxPrtShort, specRatioShort,
-                           gate->iqvxPrtShortF);
+                           gate->iqvxPrtShortF, NULL);
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
                            gate->iqvxPrtLong, specRatioLong,
-                           gate->iqvxPrtLongF);
+                           gate->iqvxPrtLongF, NULL);
     
     // compute filtered moments for this gate
     
@@ -2643,7 +2687,7 @@ void Beam::_filterDpVOnlyFixedPrt()
                              gate->iqvcOrig,
                              gate->iqvc, specVc,
                              calibNoise,
-                             gate->iqvcF,
+                             gate->iqvcF, NULL,
                              filterRatio,
                              spectralNoise,
                              spectralSnr,
@@ -2660,7 +2704,8 @@ void Beam::_filterDpVOnlyFixedPrt()
     // apply the filter ratio to other channel
     
     _mom->applyFilterRatio(_nSamples, *_fft,
-                           gate->iqhx, specRatio, gate->iqhxF);
+                           gate->iqhx, specRatio,
+                           gate->iqhxF, NULL);
     
     // compute filtered moments for this gate
     
@@ -2738,11 +2783,11 @@ void Beam::_filterDpVOnlyStagPrt()
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
                            gate->iqhxPrtShort, specRatioShort,
-                           gate->iqhxPrtShortF);
+                           gate->iqhxPrtShortF, NULL);
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
                            gate->iqhxPrtLong, specRatioLong,
-                           gate->iqhxPrtLongF);
+                           gate->iqhxPrtLongF, NULL);
     
     // compute filtered moments for this gate
     
@@ -2896,23 +2941,17 @@ void Beam::_initMomentsObject()
   
   _mom->setNSamples(_nSamples);
 
-  _mom->setUseSimpleNotchFilter(_params.use_simple_notch_clutter_filter,
-                                _params.simple_notch_filter_width_mps);
-
-  _mom->setUseAdaptiveFilter();
-
   _mom->setApplySpectralResidueCorrection
     (_params.apply_residue_correction_in_adaptive_filter,
      _params.min_snr_db_for_residue_correction);
-
+  
+  _mom->setUseAdaptiveFilter();
+  
   if (_params.use_polynomial_regression_clutter_filter) {
     _mom->setUseRegressionFilter
-      (true, _params.regression_filter_interp_across_notch);
-  }
-
-  if (_params.use_simple_notch_clutter_filter) {
-    _mom->setUseSimpleNotchFilter
-      (true, _params.simple_notch_filter_width_mps);
+      (_params.regression_filter_interp_across_notch);
+  } else if (_params.use_simple_notch_clutter_filter) {
+    _mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
   }
 
   if (_params.correct_for_system_phidp) {
@@ -3567,6 +3606,7 @@ void Beam::_checkAntennaTransition(const vector<const IwrfTsPulse *> &pulses)
   if (_params.check_transition_from_fixed_angle_error) {
 
     if (_scanMode == IWRF_SCAN_MODE_RHI ||
+        _scanMode == IWRF_SCAN_MODE_VERTICAL_POINTING ||
         _scanMode == IWRF_SCAN_MODE_EL_SURV ||
         _scanMode == IWRF_SCAN_MODE_MANRHI ||
         _scanMode == IWRF_SCAN_MODE_SUNSCAN_RHI) {
@@ -4415,8 +4455,12 @@ int Beam::_checkCalib()
 {
   
   int iret = 0;
-  
-  if (_params.correct_receiver_gains_for_temperature) {
+
+  if (_params.correct_hcr_v_rx_gain_for_temperature) {
+    if (_correctHcrVRxGainForTemp()) {
+      iret = -1;
+    }
+  } else if (_params.correct_rx_gains_for_temperature) {
     if (_correctCalibGainsForTemp()) {
       iret = -1;
     }
@@ -4470,90 +4514,105 @@ int Beam::_checkCalib()
 
 /////////////////////////////////////////////////
 // Correct calibration gains for temperature
+// reads the temperature from the XML status block,
+// and then computes the temperature correction.
 
 int Beam::_correctCalibGainsForTemp()
   
 {
 
-  // get tag list
-    
-  vector<string> tags;
-  TaStr::tokenize(_params.temperature_tags_in_status_xml, "<>", tags);
-  if (tags.size() == 0) {
-    // no tags
-    cerr << "WARNING - no tags found in params.temperature_tags_in_status_xml: "
-         << _params.temperature_tags_in_status_xml << endl;
-    return -1;
-  }
-  
-  // read through the outer tags in status XML
-  
-  string buf(_statusXml);
-  for (size_t jj = 0; jj < tags.size(); jj++) {
-    string val;
-    if (TaXml::readString(buf, tags[jj], val)) {
-      cerr << "WARNING - bad tags found in status xml, expecting: "
-           << _params.temperature_tags_in_status_xml << endl;
-      return -1;
-    }
-    buf = val;
-  }
-
-  // read temperature
-  
-  double temp = -9999.0;
-  if (TaXml::readDouble(buf, temp)) {
-    cerr << "WARNING - bad temp found in status xml, buf: " << buf << endl;
-    return -1;
-  }
+  // get temps for each channel, and gain correction
   
   double gainCorrectionHc = 0.0;
   double gainCorrectionVc = 0.0;
   double gainCorrectionHx = 0.0;
   double gainCorrectionVx = 0.0;
 
-  for (int ii = 0; ii < _params.rx_gain_correction_n; ii++) {
-    const Params::rx_gain_correction_t &corr = 
-      _params._rx_gain_correction[ii];
+  double tempHc = NAN;
+  double tempVc = NAN;
+  double tempHx = NAN;
+  double tempVx = NAN;
+  
+  for (int ii = 0; ii < _params.rx_temp_gain_corrections_n; ii++) {
+
+    const Params::rx_temp_gain_correction_t &corr = 
+      _params._rx_temp_gain_corrections[ii];
+
     switch (corr.rx_channel) {
-      case Params::RX_CHANNEL_HC:
-        gainCorrectionHc = corr.intercept + temp * corr.slope;
+      
+      case Params::RX_CHANNEL_HC: {
+        tempHc = _getTempFromTagList(corr.temp_tag_list_in_status_xml);
+        if (!std::isnan(tempHc)) {
+          gainCorrectionHc = corr.intercept + tempHc * corr.slope;
+          if (_params.debug >= Params::DEBUG_VERBOSE) {
+            cerr << "DEBUG: _correctCalibGainsForTemp()" << endl;
+            cerr << "  Got tempHc from status XML: " << tempHc << endl;
+            cerr << "  computed gainCorrectionHc: " << gainCorrectionHc << endl;
+          }
+        }
         break;
-      case Params::RX_CHANNEL_VC:
-        gainCorrectionVc = corr.intercept + temp * corr.slope;
+      }
+        
+      case Params::RX_CHANNEL_VC: {
+        tempVc = _getTempFromTagList(corr.temp_tag_list_in_status_xml);
+        if (!std::isnan(tempVc)) {
+          gainCorrectionVc = corr.intercept + tempVc * corr.slope;
+          if (_params.debug >= Params::DEBUG_VERBOSE) {
+            cerr << "DEBUG: _correctCalibGainsForTemp()" << endl;
+            cerr << "  Got tempVc from status XML: " << tempVc << endl;
+            cerr << "  computed gainCorrectionVc: " << gainCorrectionVc << endl;
+          }
+        }
         break;
-      case Params::RX_CHANNEL_HX:
-        gainCorrectionHx = corr.intercept + temp * corr.slope;
+      }
+
+      case Params::RX_CHANNEL_HX: {
+        tempHx = _getTempFromTagList(corr.temp_tag_list_in_status_xml);
+        if (!std::isnan(tempHx)) {
+          gainCorrectionHx = corr.intercept + tempHx * corr.slope;
+          if (_params.debug >= Params::DEBUG_VERBOSE) {
+            cerr << "DEBUG: _correctCalibGainsForTemp()" << endl;
+            cerr << "  Got tempHx from status XML: " << tempHx << endl;
+            cerr << "  computed gainCorrectionHx: " << gainCorrectionHx << endl;
+          }
+        }
         break;
-      case Params::RX_CHANNEL_VX:
-        gainCorrectionVx = corr.intercept + temp * corr.slope;
+      }
+
+      case Params::RX_CHANNEL_VX: {
+        tempVx = _getTempFromTagList(corr.temp_tag_list_in_status_xml);
+        if (!std::isnan(tempVx)) {
+          gainCorrectionVx = corr.intercept + tempVx * corr.slope;
+          if (_params.debug >= Params::DEBUG_VERBOSE) {
+            cerr << "DEBUG: _correctCalibGainsForTemp()" << endl;
+            cerr << "  Got tempVx from status XML: " << tempVx << endl;
+            cerr << "  computed gainCorrectionVx: " << gainCorrectionVx << endl;
+          }
+        }
         break;
+      }
+
     } // switch
+
   } // ii
 
-  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
-    cerr << "======= CALIBRATION BEFORE TEMP CORRECTION =============" << endl;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "+++++++ CALIBRATION BEFORE TEMP CORRECTION +++++++++++++" << endl;
     _calib.print(cerr);
-    cerr << "======= END CALIBRATION BEFORE TEMP CORRECTION =========" << endl;
+    cerr << "+++++++ END CALIBRATION BEFORE TEMP CORRECTION +++++++++" << endl;
   }
     
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "correctCalibGainsForTemp(): got temp from status XML" << endl;
-    cerr << "  temp: " << temp << endl;
-    cerr << "  gainCorrectionHc: " << gainCorrectionHc << endl;
-    cerr << "  gainCorrectionVc: " << gainCorrectionVc << endl;
-    cerr << "  gainCorrectionHx: " << gainCorrectionHx << endl;
-    cerr << "  gainCorrectionVx: " << gainCorrectionVx << endl;
-  }
-
   // augment status xml in ops info
 
   string tempCorrXml;
   tempCorrXml += TaXml::writeStartTag("TempBasedRxGainCorrection", 0);
-  tempCorrXml += TaXml::writeDouble("temp", 1, temp);
+  tempCorrXml += TaXml::writeDouble("tempHc", 1, tempHc);
   tempCorrXml += TaXml::writeDouble("gainCorrectionHc", 1, gainCorrectionHc);
+  tempCorrXml += TaXml::writeDouble("tempVc", 1, tempVc);
   tempCorrXml += TaXml::writeDouble("gainCorrectionVc", 1, gainCorrectionVc);
+  tempCorrXml += TaXml::writeDouble("tempHx", 1, tempHx);
   tempCorrXml += TaXml::writeDouble("gainCorrectionHx", 1, gainCorrectionHx);
+  tempCorrXml += TaXml::writeDouble("tempVx", 1, tempVx);
   tempCorrXml += TaXml::writeDouble("gainCorrectionVx", 1, gainCorrectionVx);
   tempCorrXml += TaXml::writeEndTag("TempBasedRxGainCorrection", 0);
   _statusXml += tempCorrXml;
@@ -4616,16 +4675,205 @@ int Beam::_correctCalibGainsForTemp()
     _calib.setNoiseDbmVx(noiseFixed);
   }
   
-  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
-    cerr << "####### CALIBRATION AFTER TEMP CORRECTION #############" << endl;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "+++++++ CALIBRATION AFTER TEMP CORRECTION +++++++++++++" << endl;
     _calib.print(cerr);
-    cerr << "####### END CALIBRATION AFTER TEMP CORRECTION #########" << endl;
+    cerr << "+++++++ END CALIBRATION AFTER TEMP CORRECTION +++++++++" << endl;
+  }
+  
+  return 0;
+  
+}
+
+////////////////////////////////////////////////////////
+// Correct HCR V RX calibration gains for temperature
+// the reads in the correction from SPDB
+
+int Beam::_correctHcrVRxGainForTemp()
+  
+{
+  
+  // get gain correction data from SPDB
+
+  DsSpdb spdb;
+  if (spdb.getClosest(_params.hcr_delta_gain_spdb_url,
+                      _timeSecs,
+                      _params.hcr_delta_gain_search_margin_secs)) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - Beam::_correctHcrVRxGainForTemp()" << endl;
+      cerr << "  Cannot get delta gain from URL: "
+           << _params.hcr_delta_gain_spdb_url << endl;
+      cerr << "  Search time: " << DateTime::strm(_timeSecs) << endl;
+      cerr << "  Search margin (secs): "
+           << _params.hcr_delta_gain_search_margin_secs << endl;
+      cerr << spdb.getErrStr() << endl;
+    }
+    return -1;
+  }
+  
+  // got chunks
+  
+  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  if (chunks.size() < 1) {
+    cerr << "ERROR - Beam::_correctHcrVRxGainForTemp()" << endl;
+    cerr << "  No suitable gain data from URL: "
+         << _params.hcr_delta_gain_spdb_url << endl;
+    cerr << "  Search time: " << DateTime::strm(_timeSecs) << endl;
+    cerr << "  Search margin (secs): "
+         << _params.hcr_delta_gain_search_margin_secs << endl;
+    return -1;
+  }
+  const Spdb::chunk_t &chunk = chunks[0];
+
+  // get xml string with gain results
+  
+  string deltaGainXml((char *) chunk.data, chunk.len - 1);
+
+  // find delta gain in xml
+  
+  double deltaGainVc =
+    _getDeltaGainFromXml(deltaGainXml, _params.hcr_v_rx_delta_gain_tag_list);
+  
+  if (std::isnan(deltaGainVc)) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - Beam::_correctHcrVRxGainForTemp()" << endl;
+      cerr << "  Cannot find deltaGain in XML: " << deltaGainXml << endl;
+    }
+    return -1;
+  }
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "++++ CALIBRATION BEFORE HCR GAIN CORRECTION +++++++++++++" << endl;
+    _calib.print(cerr);
+    cerr << "++++ END CALIBRATION BEFORE HCR GAIN TEMP CORRECTION ++++" << endl;
+    cerr << "Delta gain XML - created by HcrTempRxGain app" << endl;
+    cerr << deltaGainXml << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  }
+  
+  // augment status xml in ops info
+
+  _statusXml += deltaGainXml;
+  
+  // compute base dbz if needed
+  
+  if (!_calib.isMissing(_calib.getReceiverGainDbVc())) {
+    double rconst = _calib.getRadarConstV();
+    double noise = _calib.getNoiseDbmVc();
+    double noiseFixed = noise + deltaGainVc;
+    double gain = _calib.getReceiverGainDbVc();
+    double gainFixed = gain + deltaGainVc;
+    double baseDbz1km = noiseFixed - gainFixed + rconst;
+    if (!_calib.isMissing(noise) && !_calib.isMissing(rconst)) {
+      _calib.setBaseDbz1kmVc(baseDbz1km);
+    }
+    _calib.setReceiverGainDbVc(gainFixed);
+    _calib.setNoiseDbmVc(noiseFixed);
+  }
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "++++ CALIBRATION AFTER HCR GAIN CORRECTION +++++++++++++" << endl;
+    _calib.print(cerr);
+    cerr << "++++ END CALIBRATION AFTER HCR GAIN TEMP CORRECTION ++++" << endl;
   }
     
   return 0;
   
 }
 
+/////////////////////////////////////////////////////////////////
+// get temperature from status xml, given the tag list
+// returns temp on success, NAN on failure
+
+double Beam::_getTempFromTagList(const string &tagList) const
+  
+{
+
+  // get tags in list
+    
+  vector<string> tags;
+  TaStr::tokenize(tagList, "<>", tags);
+  if (tags.size() == 0) {
+    // no tags
+    cerr << "WARNING - Beam::_getTempFromTagList()" << endl;
+    cerr << "  Temp tag not found: " << tagList << endl;
+    return NAN;
+  }
+  
+  // read through the outer tags in status XML
+  
+  string buf(_statusXml);
+  for (size_t jj = 0; jj < tags.size(); jj++) {
+    string val;
+    if (TaXml::readString(buf, tags[jj], val)) {
+      cerr << "WARNING - Beam::_getTempFromTagList()" << endl;
+      cerr << "  Bad tags found in status xml, expecting: "
+           << tagList << endl;
+      return NAN;
+    }
+    buf = val;
+  }
+
+  // read temperature
+  
+  double temp = NAN;
+  if (TaXml::readDouble(buf, temp)) {
+    cerr << "WARNING - Beam::_getTempFromTagList()" << endl;
+    cerr << "  Bad temp found in status xml, buf: " << buf << endl;
+    return NAN;
+  }
+  
+  return temp;
+
+}
+  
+/////////////////////////////////////////////////////////////////
+// get delta gain from XML string, given the tag list
+// returns delta gain, NAN on failure
+
+double Beam::_getDeltaGainFromXml(const string &xml,
+                                  const string &tagList) const
+  
+{
+  
+  // get tags in list
+  
+  vector<string> tags;
+  TaStr::tokenize(tagList, "<>", tags);
+  if (tags.size() == 0) {
+    // no tags
+    cerr << "WARNING - Beam::_getDeltaGainFromXml()" << endl;
+    cerr << "  deltaGain tag not found: " << tagList << endl;
+    return NAN;
+  }
+  
+  // read through the outer tags in status XML
+  
+  string buf(xml);
+  for (size_t jj = 0; jj < tags.size(); jj++) {
+    string val;
+    if (TaXml::readString(buf, tags[jj], val)) {
+      cerr << "WARNING - Beam::_getDeltaGainFromXml()" << endl;
+      cerr << "  Bad tags found in status xml, expecting: "
+           << tagList << endl;
+      return NAN;
+    }
+    buf = val;
+  }
+
+  // read delta gain
+  
+  double deltaGain = NAN;
+  if (TaXml::readDouble(buf, deltaGain)) {
+    cerr << "WARNING - Beam::_getDeltaGainFromXml()" << endl;
+    cerr << "  Bad deltaGain found in status xml, buf: " << buf << endl;
+    return NAN;
+  }
+  
+  return deltaGain;
+
+}
+  
 /////////////////////////////////////////////////////////////////
 // Apply time-domain filter to IQ data
 
@@ -4827,6 +5075,9 @@ void Beam::_performClutterFiltering()
   // copy the unfiltered fields to the filtered fields
   
   for (int igate = 0; igate < _nGates; igate++) {
+    _gateData[igate]->fields.test = _gateData[igate]->fields.zdr;
+    _gateData[igate]->fields.test2 = _gateData[igate]->fields.phidp;
+    _gateData[igate]->fields.test3 = _gateData[igate]->fields.rhohv;
     _gateData[igate]->fieldsF = _gateData[igate]->fields;
   }
   
@@ -5114,7 +5365,11 @@ void Beam::_setNoiseFields()
   const vector<double> &phaseChangeError = _noise->getPhaseChangeError();
   const vector<double> &dbmSdev = _noise->getDbmSdev();
   const vector<double> &ncpMean = _noise->getNcpMean();
-  
+
+  if ((int) noiseFlag.size() < _nGates) {
+    return;
+  }
+
   for (int igate = 0; igate < _nGates; igate++) {
     GateData *gate = _gateData[igate];
     MomentsFields &fields = gate->fields;

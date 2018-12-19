@@ -860,9 +860,21 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("ignore_if_all_nans");
-    tt->descr = tdrpStrDup("Do not print a line if all string values are 'nan'.");
+    tt->descr = tdrpStrDup("Do not print a line if all values are 'nan'.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ignore_if_all_nans - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'ignore_if_any_nans'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ignore_if_any_nans");
+    tt->descr = tdrpStrDup("Do not print a line if any values are 'nan'.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ignore_if_any_nans - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

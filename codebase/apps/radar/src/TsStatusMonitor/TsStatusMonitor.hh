@@ -78,7 +78,7 @@ public:
   // run 
 
   int Run();
-
+  
   // data members
 
   bool isOK;
@@ -92,10 +92,17 @@ private:
   Args _args;
   Params _params;
 
-  // reading pulses
+  // time limits in archive mode
 
+  time_t _archiveStartTime;
+  time_t _archiveEndTime;
+
+  // reading pulses
+  
   IwrfTsReader *_pulseReader;
   time_t _pulseLatestTime;
+
+  // keeping track of when data was written
 
   time_t _prevSpdbTime;
   time_t _prevNagiosTime;
@@ -160,9 +167,16 @@ private:
 
   // functions
 
+  int _runRealtime();
+  int _runArchive();
+
+  time_t _getLatestTime();
+
   void _clearStatus();
 
-  int _handlePulse(IwrfTsPulse &pulse);
+  int _handlePulseRealtime(IwrfTsPulse &pulse);
+  int _handlePulseArchive(IwrfTsPulse &pulse,
+                          bool &gotStatus);
 
   void _monitorAntennaMovement(IwrfTsPulse &pulse);
   
@@ -182,11 +196,11 @@ private:
                  int gateNum,
                  RadarComplex_t *iq);
 
-  string _getCombinedXml(time_t now);
+  string _getCombinedXml();
 
-  int _updateSpdb(time_t now);
+  int _updateSpdb();
 
-  int _updateNagios(time_t now);
+  int _updateNagios();
 
   int _handleBooleanNagios(const string &xml,
                            const Params::xml_entry_t &entry,
@@ -214,7 +228,7 @@ private:
 
   void _initStatsFields();
 
-  int _updateCatalogStats(time_t now);
+  int _updateCatalogStats();
 
   void _printStats(FILE *out);
 

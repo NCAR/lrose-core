@@ -39,6 +39,7 @@
 #define PrecipRate_HH
 
 #include <toolsa/TaArray.hh>
+#include <radar/PrecipRateParams.hh>
 #include <radar/NcarParticleId.hh>
 
 using namespace std;
@@ -57,6 +58,10 @@ public:
   // destructor
   
   ~PrecipRate();
+
+  // Set processing options from params object
+
+  void setFromParams(const PrecipRateParams &params);
 
   // set the wavelength in cm
 
@@ -269,6 +274,7 @@ public:
 protected:
 private:
 
+  PrecipRateParams _params;
   double _missingVal;
   int _nGates;
 

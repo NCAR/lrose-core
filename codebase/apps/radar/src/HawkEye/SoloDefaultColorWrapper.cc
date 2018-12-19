@@ -22,10 +22,6 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include "SoloDefaultColorWrapper.hh"
-//#include "rgb.hh"
-//#include "SiiPalette.hh"
-//#include "PaletteManager.hh"
-//#include "ColorTableManager.hh"
 #include <cmath>
 #include <cstring>
 #include <cstdlib>
@@ -43,59 +39,25 @@ using namespace std;
 
 SoloDefaultColorWrapper::SoloDefaultColorWrapper() 
 {
+  _debug = false;
+
   ImportSoloPalettes();
 }
 
 SoloDefaultColorWrapper::~SoloDefaultColorWrapper() 
 {
 }
-/*
-//
-// Find the SiiPalette for the usual parameter name
-//
-SiiPalette *SoloDefaultColorWrapper::lookup(string name) 
-{
-  cerr << "looking for " << name << endl;
-
-  // TODO: convert the list of Palettes to a dictionary in order to perform the lookup
- 
- // PaletteManager::getInstance()->getPalettesList(); 
-  PaletteManager *pi = PaletteManager::getInstance();
-  SiiPalette *si;
-  // seek gets the palette by the paletteName "p_ahav"
-  si = pi->seek(name);
-
-  // isParameterIncluded returns true/false if palette
-
-  return si;
-}
-
-// 
-// Find the SiiPalette by the palette name
-//
-SiiPalette *SoloDefaultColorWrapper::lookupByUsualName(string parm) 
-{
-  cerr << "looking for " << parm << endl;
- 
-  PaletteManager *pi = PaletteManager::getInstance();
-  SiiPalette *si;
-  // get the palette by the usual parameter name associated  "AH"
-  si = pi->_paletteForParam(parm);
-
-  return si;
-}
-*/
 
 // 
 // Find the ColorMap by the palette name
 // e.g. lookupColorTable("carbone17");
+// It throws out_of_range if parm is not recognized.
 ColorMap SoloDefaultColorWrapper::lookupColorTable(string parm) 
 {
-  cerr << "looking for " << parm << endl;
+  if (_debug)
+    cerr << "looking for " << parm << endl;
   return _SoloColorTableToHawkEyeColorMap[parm];
 }
-
-
 
 //
 // Convert an SiiPalette to a ColorMap
@@ -109,29 +71,16 @@ ColorMap SoloDefaultColorWrapper::ToColorMap(vector<string> colors) {
   //colorMap->
   std::vector<std::vector<float> > numericColors;
 
-  //for (vector<string>::iterator it=colors.begin(); it != colors.end(); it++) {
-  //    vector<float> rgb = ToRGB(*it);
   vector<float> rgb;
-    rgb = ToRGB(" 0.5 0.3 0.2");
-    numericColors.push_back(rgb);
-    /*
-    ColorMap::CmapEntry *cme = new ColorMap::CmapEntry(0.0, 100.0, colorNumbers);
-    int r,g,b;
-    r = g = b = 0;
-    // will need to convert unsigned int to int
-    r = (int) rgb->at(0);
-    g = (int) rgb->at(1);
-    b = (int) rgb->at(2);
-    cme->setColor(r,g,b);
-    */
-    //}
+  rgb = ToRGB(" 0.5 0.3 0.2");
+  numericColors.push_back(rgb);
 
   ColorMap colorMap(0.0, 100.0, numericColors);
   
   return colorMap;
 }
 
-  // set min and max value for associated ColorMap
+// set min and max value for associated ColorMap
 vector<double> SoloDefaultColorWrapper::_minMaxValue(double _centerDataValue, int  _numColors, double _colorWidth){
   vector<double> minMax;
   minMax.push_back( _centerDataValue - 0.5 * _numColors * _colorWidth);
@@ -147,9 +96,10 @@ ColorMap SoloDefaultColorWrapper::constructColorMap(double center, double width,
   baseColorTable = _colorTableNameToRgbList[colorTableName];
   // const vector<ColorMap::CmapEntry> colors = colorMap.getEntries();
   vector<double> bounds = _minMaxValue(center, baseColorTable.size(), width);
-  // colorMap.setRange(bounds[0], bounds[1]);
-  ColorMap colorMap(bounds[0], bounds[1], baseColorTable); 
-  return colorMap;
+  //ColorMap colorMap(bounds[0], bounds[1], baseColorTable); 
+  //return colorMap;
+  return  ColorMap(bounds[0], bounds[1], baseColorTable); 
+
 }
 
 /*
@@ -164,7 +114,7 @@ End For
 
 void SoloDefaultColorWrapper::makeAssociations() {
 
-  /* 
+  /*  keep this ... it helps document the notation below 
 SiiPalette(const string &palette_name,
              const string &usual_parms,
              const double center_data_value, const double color_width,
@@ -172,18 +122,7 @@ SiiPalette(const string &palette_name,
   */
 
   ColorMap colorMap;
-  // set min and max value for associated ColorMap
-  //  _minValue(_centerDataValue - 0.5 * _numColors * _colorWidth),
-  //_maxValue(_centerDataValue + _numColors * _colorWidth),
-
-  //SiiPalette * pal;
-
-  // create dictionary to query by usual parms                                                                    
-  // map <usual parm, palette name>   _usualParmToPaletteName;                                                       
-  // map<string, string> _usualParmToPaletteName;
-
-  // map <palette name, color table name> _paletteNameToColorTable;                                         
-  // map<string, string> _paletteNameToColorTable;
+  // set min and max value for ColorMap, along with the color table
 
   //pal = new SiiPalette("p_ahav", "AH,AV,", 0.0, 22.0, "carbone17");
   colorMap = constructColorMap(0.0, 22.0, "carbone17");
@@ -348,6 +287,7 @@ SiiPalette(const string &palette_name,
   ColorMapForUsualParm["UDBZ"] = colorMap;//"p_dBz";
   ColorMapForUsualParm["CDZ"] = colorMap;//"p_dBz";
   ColorMapForUsualParm["DCZ"] = colorMap;//"p_dBz";
+  ColorMapForUsualParm["REF"] = colorMap;//"p_dBz";
   //_paletteNameToColorTable["p_dBz"] = colorMap;//"carbone17";
 
   // pal = new SiiPalette("p_spectral", "SR,SW,S1,S2", 8.0, 1.0, "carbone17");
@@ -357,6 +297,7 @@ SiiPalette(const string &palette_name,
   ColorMapForUsualParm["SW"] = colorMap;//"p_spectral";
   ColorMapForUsualParm["S1"] = colorMap;//"p_spectral";
   ColorMapForUsualParm["S2"] = colorMap;//"p_spectral";
+  ColorMapForUsualParm["WIDTH"] = colorMap;//"p_spectral";
   //_paletteNameToColorTable["p_spectral"] = colorMap;//"carbone17";
 
   // pal = new SiiPalette("p_ncp", "NCP,NC,", 0.5, 0.1, "carbone17");
@@ -381,7 +322,11 @@ SiiPalette(const string &palette_name,
   ColorMapForUsualParm["VT"] = colorMap;//"p_vel";
   ColorMapForUsualParm["V1"] = colorMap;//"p_vel";
   ColorMapForUsualParm["V2"] = colorMap;//"p_vel";
+  ColorMapForUsualParm["VEL"] = colorMap;//"p_vel";
   ColorMapForUsualParm["VELOCITY"] = colorMap;//"p_vel";
+  // cerr << " ==> ColorMap for VEL " << endl;
+  // colorMap.print(cout);
+
   //_paletteNameToColorTable["p_vel"] = colorMap; //colorMap;//"carbone17";
 
   // pal = new SiiPalette("p_rrate", "RR_DSD,RNX,RZD,RKD,", 0.0, 0.4, "rrate11");
@@ -416,10 +361,6 @@ void SoloDefaultColorWrapper::ImportSoloPalettes() {
   // map <palette name, color table name> _paletteNameToColorTable;                         
  
   // create dictionary to query by color table name and get ColorMap returned
-
-  //vector <string> *SoloColorTable;
-  //SoloColorTable = lookup("p_ahav");
-  // convert SoloColorTable to ColorMap
   
   // stuff ColorMap into dictionary with name as key
 
@@ -444,7 +385,7 @@ void SoloDefaultColorWrapper::ImportSoloPalettes() {
       if (rgb.size() == 3) {
         numericColors.push_back(rgb);
       } else {
-	cerr << " discarding line: " << *it << endl;
+	if (_debug) cerr << " discarding line: " << *it << endl;
       }
     }
 
@@ -455,13 +396,15 @@ void SoloDefaultColorWrapper::ImportSoloPalettes() {
 
     ColorMap colorMap(0.0, 100.0, numericColors);
 
-    cout << "key is " << key << endl;
+    if (_debug) 
+      cout << "key is " << key << endl;
 
     _SoloColorTableToHawkEyeColorMap[key] = colorMap;
    // map<string, vector< vector <float> > _colorTableNameToRgbList; 
    _colorTableNameToRgbList[key] = numericColors;
 
-    cout << " after colorMap insert into dictionary " << endl;
+    if (_debug) 
+      cout << " after colorMap insert into dictionary " << endl;
   }
  
   makeAssociations();
@@ -469,105 +412,72 @@ void SoloDefaultColorWrapper::ImportSoloPalettes() {
  
 }
 
-/*
-vector<unsigned int> *SoloDefaultColorWrapper::ToRGB(string colorStr,
-  double saturation) {
-
-  unsigned int rgb;
-
-  char *token;
-  char *colorString;
-  colorString = new char[colorStr.length() + 1];
-  strcpy(colorString, colorStr.c_str());
-  token = std::strtok(colorString, " ,\t");
-
-  vector<unsigned int> *colors = new vector<unsigned int>[3];
-
-  for (int i=0; i<3; i++) {
-    rgb = 0;  
-    if (token == NULL) {
-      cerr << "Error reading RGB color from string " << colorStr << endl;
-      cerr << " setting values to 0" << endl;
-    } else {
-      // read in RGB                                                                          
-      double fcolor;
-      if (sscanf(token, "%lg",
-             &fcolor) == 1) {
-        cout << "read " << fcolor;
-        // scale for saturation                                                               
-        double mult = 255.0 / saturation;
-        rgb = (unsigned int) floor(fcolor * mult + 0.5);
-        if (rgb > 255) rgb = 255;
-        cout << " converted to " << rgb << endl;
-      }
-    }
-    colors->push_back(rgb);
-    // get the next color                                                                
-    token = std::strtok(NULL, " ");
-  } 
-  free(colorString);
-
-  return colors;
-}
-*/
-
-
 vector<float> SoloDefaultColorWrapper::ToRGB(string colorStr) {
 
   vector<float> colors;
   float fr, fg, fb;
       
   if (sscanf(colorStr.c_str(), "%g%g%g", &fr, &fg, &fb) == 3) {
-    cout << "read " << fr << ", " << fg << ", " << fb << endl;
-	colors.push_back(fr);
-	colors.push_back(fg);
-	colors.push_back(fb);
-
+    if (_debug) 
+      cout << "read " << fr << ", " << fg << ", " << fb << endl;
+    colors.push_back(fr);
+    colors.push_back(fg);
+    colors.push_back(fb);
   }  else {
-    cerr << "Error reading RBG color from line " << colorStr <<  endl;
+    if (_debug) cerr << "Error reading RBG color from line " << colorStr <<  endl;
   }
 
   return colors;
 }
 
-/*
-vector<float> SoloDefaultColorWrapper::ToRGB(string colorStr) {
-  //double saturation = 1.0;
-
-  unsigned int rgb;
-
-  char *token;
-  char colorString[1024];;
-  //colorString = nchar[colorStr.length() + 1];
-  strcpy(colorString, colorStr.c_str());
-  token = std::strtok(colorString, " ,\t");
-
-  vector<float> colors;
-  float fcolor;
-      
-  for (int i=0; i<3; i++) {
-    rgb = 0;  
-    if (token == NULL) {
-      cerr << "Error reading RGB color from string " << colorStr << endl;
-      cerr << " setting values to 0" << endl;
-    } else {
-      // read in RGB                                                                          
-      if (sscanf(token, "%g",
-             &fcolor) == 1) {
-        cout << "read " << fcolor << endl;
-        // scale for saturation                                                               
-        //double mult = 255.0 / saturation;
-        //rgb = (unsigned int) floor(fcolor * mult + 0.5);
-        //if (rgb > 255) rgb = 255;
-        //cout << " converted to " << rgb << endl;
-      }
-    }
-    colors.push_back(fcolor);
-    // get the next color                                                                
-    token = std::strtok(NULL, " ");
+// Pulled this code from stackoverflow site 
+void SoloDefaultColorWrapper::FindNiceMinMax(double min, double max, int tickCount,
+					     double *newMin, double *newMax) {
+  
+  if (min > max) {
+    cerr << "WARNING - min is greater than max when computing colorscale boundaries\n";
+    cerr << "   attempting recovery by switching min and max\n";
+    double save;
+    save = min;
+    min = max;
+    max = save;
+  }
+  double range = max - min;
+  double unroundedTickSize = range/tickCount;
+  if (unroundedTickSize > 0) {
+    double x = ceil(log10(unroundedTickSize)-1);
+    double pow10x = pow(10, x);
+    double roundedTickRange = ceil(unroundedTickSize / pow10x) * pow10x;
+    *newMin = roundedTickRange * floor(min/roundedTickRange);
+    *newMax = roundedTickRange * ceil(max/roundedTickRange);
+  } else {
+    cerr << "WARNING - min and max are almost equal when computing colorscale boundaries\n";
+    cerr << "   attempting recovery by using (min -1, max) for the colorscale boundaries\n";
+    *newMin = min - 1.0;
+    *newMax = max;
   } 
-  //free(colorString);
-
-  return colors;
 }
-*/
+
+
+void SoloDefaultColorWrapper::PrintColorScales() {
+
+  std::map<string,bool> printed;
+
+
+  cout << " ====== Default Color Scales and Their Usual Parameters ====== \n";
+  // print all the usual parameter names and the associated color scale name
+  // print the color scale just the first time; throw the name into the printed list.
+ 
+  for (std::map<string,ColorMap>::iterator it=ColorMapForUsualParm.begin();
+    it!=ColorMapForUsualParm.end(); ++it) {
+    ColorMap colorMap = it->second;
+    string colorMapName = colorMap.getName();
+    std::cout << it->first << " => " << colorMapName << '\n';  
+    if (printed.find(colorMapName) == printed.end()) {
+      colorMap.print(cout);
+      printed[colorMapName] = true;
+    }
+  }
+
+  cout << " ========================================================== \n";
+}

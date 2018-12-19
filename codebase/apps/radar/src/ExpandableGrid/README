@@ -1,0 +1,39 @@
+
+to run:
+
+ ./DynamicLayouts.app/Contents/MacOS/DynamicLayouts
+
+maybe use a QtableView for the grid?  Can we easily add/delete rows and columns?
+
+#include <QtGui>
+#include "widget.h"
+
+Widget::Widget(QWidget *parent)
+    : QWidget(parent)
+{
+    QVBoxLayout *l=new QVBoxLayout(this);
+    table=new QTableView(this);
+    table->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(table, SIGNAL(customContextMenuRequested(QPoint)), 
+            SLOT(customMenuRequested(QPoint)));
+    l->addWidget(table);
+}
+
+Widget::~Widget(){}
+
+void Widget::customMenuRequested(QPoint pos){
+    QModelIndex index=table->indexAt(pos);
+
+    QMenu *menu=new QMenu(this);
+    menu->addAction(new QAction("Action 1", this));
+    menu->addAction(new QAction("Action 2", this));
+    menu->addAction(new QAction("Action 3", this));
+    menu->popup(table->viewport()->mapToGlobal(pos));
+}
+Basically, we tell our QTableView that we want to use a custom context menu by calling the setContextMenuPolicy() method with the arguments Qt::CustomContextMenu. We then create a slot customMenuRequested() and connect it to the customContextMenuRequested() signal. This signal has a QPoint as its argument which is the position at which the request was made relative to the table. This position is useful because we can use it to discover which table cell was clicked on (if any) using the indexAt() method and also to position our menu correctly relative to the mouse.
+
+use setCellWidget() to use widget in the QTableWidget cells.
+
+deriving QTableWidget and reimplementing the dropEvent() method.
+
+QStyledItemDelegate ???

@@ -251,6 +251,18 @@ public:
     COMPRESSION_RDP_8_BIT = 8 /**< deprecated */
   } compression_t;
 
+  /// primary axis of rotation types
+  
+  typedef enum {
+    Z = 1, /**< z */
+    Y = 2, /**< y */
+    X = 3, /**< x */
+    Z_PRIME = 4, /**< z-prime */
+    Y_PRIME = 5, /**< y-prime */
+    X_PRIME = 6 /**< x-prime */
+  } primary_axis_t;
+
+
   ///////////////////////////////////////////////////
   // structure definitions
 
@@ -495,6 +507,7 @@ public:
 
 				/**< 1995 extension #1 */
     Radx::si32  extension_num;  /**< not sure */
+                                /**< harnessing this unused field for primary axis of rotation */
     char config_name[8];	/**< used to identify this set of
 				 * unique radar characteristics */
     Radx::si32  config_num;	/**< facilitates a quick lookup of radar
@@ -2004,6 +2017,20 @@ public:
   static string scanModeToShortStr(DoradeData::scan_mode_t mode);
 
   //@}
+
+  ////////////////////////////////////////////////////////////// 
+  /// \name Get int for enums and vice versa.
+  //@{                                                                                                                                      
+
+  static primary_axis_t primaryAxisFromInt(Radx::ui32 value);
+
+  static Radx::ui32 primaryAxisToInt(DoradeData::primary_axis_t ptype);
+
+  static Radx::PrimaryAxis_t convertToRadxType(DoradeData::primary_axis_t doradeAxis);
+
+  static DoradeData::primary_axis_t convertToDoradeType(Radx::PrimaryAxis_t radxAxis);
+
+  //@}                                              
 
   ////////////////////////////////////////////////////////////////////
   /// Decompress HRD 16-bit data.

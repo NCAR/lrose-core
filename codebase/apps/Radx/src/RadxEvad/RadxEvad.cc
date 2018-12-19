@@ -133,6 +133,14 @@ RadxEvad::RadxEvad(int argc, char **argv)
     OK = FALSE;
   }
 
+  // init process mapper registration
+
+  if (_params.mode == Params::REALTIME) {
+    PMU_auto_init( _progName.c_str(),
+                  _params.instance,
+                  PROCMAP_REGISTER_INTERVAL);
+  }
+
 }
 
 // destructor
@@ -2180,7 +2188,7 @@ int RadxEvad::_writeNetcdfOutput()
   RadxTime fileTime(_readVol.getStartTimeSecs());
 
   string outDir(_params.output_netcdf_dir);
-  if (_params.append_day_dir_to_output_dir) {
+  if (_params.append_year_dir_to_output_dir) {
     char yearStr[BUFSIZ];
     sprintf(yearStr, "%s%.4d", PATH_DELIM, fileTime.getYear());
     outDir += yearStr;
@@ -2216,7 +2224,7 @@ int RadxEvad::_writeNetcdfOutput()
   // open file for writing
 
   Nc3xFile file;
-  if (file.openRead(outPath)) {
+  if (file.openWrite(outPath, Nc3File::Netcdf4)) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << "  Cannot open netCDF file: " << outPath << endl;
     return -1;

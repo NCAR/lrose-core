@@ -21,6 +21,7 @@ SUB_DIRS = \
 	RadxMergeFields \
 	RadxMergeVols \
 	RadxMon \
+	RadxModelQc \
 	RadxPrint
 
 # add back in later

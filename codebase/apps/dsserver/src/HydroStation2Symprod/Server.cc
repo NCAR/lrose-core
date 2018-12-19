@@ -161,7 +161,7 @@ int Server::convertToSymprod(const void *params,
   
   for (int i = 0; i < serverParams->field_render_list_n; ++i)
   {
-    double field_data_value;
+    double field_data_value = 0.0;
     
     switch (serverParams->_field_render_list[i].field)
     {

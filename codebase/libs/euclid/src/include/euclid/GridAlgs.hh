@@ -131,7 +131,7 @@ public:
   /**
    * @return vector of x,y locations at which data equals a value
    *
-   * @param[in] v  The value
+   * @param[in] value  The value
    */
   std::vector<std::pair<int,int> > pointsAtValue(double value) const;
 
@@ -283,6 +283,13 @@ public:
    * @param[in] value  Value to increment by
    */
   void increment(int x, int y, double value);
+
+  /**
+   * increment value at ipt by input value
+   * @param[in] ipt  Index
+   * @param[in] value  Value to increment by
+   */
+  void increment(int ipt, double value);
 
   /**
    * Add input value to grid.
@@ -531,6 +538,13 @@ public:
    */
   void fillInMask(const Grid2d &mask);
 
+  /**
+   * At each point where mask is not missing, increment data value
+   * @param[in] mask  Grid to use as mask
+   * @param[in] inc  Increment amount
+   */
+  void incrementInMask(const Grid2d &mask, double inc);
+
   /** 
    * At all points where data is missing and mask data is not missing, set 
    * local data to a value, and set mask at that point to missing
@@ -687,6 +701,7 @@ public:
    *
    * @param[in] sx
    * @param[in] sy
+   * @param[in] numThread  Number of threads to create
    */
   void smoothThreaded(int sx, int sy, int numThread);
 
@@ -742,16 +757,14 @@ public:
    * calculate the standard deviation within a box
    * @return standard deviation
    *
-   * @param[in] x0  lower left
-   * @param[in] y0  lower left
-   * @param[in] nx  number of points
-   * @param[in] ny  number of points
-   * @param[in] needHalf  True if at least half the points must be non-missing
-   *                      to return a non-missing value, 
-   *                      false for no restrictions
+   * @param[in] x  lower left
+   * @param[in] y  lower left
+   * @param[in] xw  number of points in box, x
+   * @param[in] yw  number of points in box, y
+   * @param[in] needHalf  True if at least half the points must be nonmissing to
+   *                      return a nonmissing value, false for no restrictions
    */
-  double localBoxSdev(int x, int y, int xw, int yw,
-		      bool needHalf = false) const;
+  double localBoxSdev(int x, int y, int xw, int yw, bool needHalf=false) const;
 
   /**
    * calculate the standard deviation within a box
@@ -776,7 +789,7 @@ public:
    * Grid2dLoopA and passing around a Grid2dLoopAlgMean object
    *
    * @param[in] xw  Width (x)
-   * @param[in] xy  Width (y)
+   * @param[in] yw  Width (y)
    */
   void sdev(int xw, int yw);
 
@@ -936,6 +949,17 @@ public:
   void medianNoOverlap(int nx, int ny, double binMin,
 			 double binMax, double binDelta,
 			 bool allowAnyData);
+
+  /**
+   * Median over the entire grid
+   * @param[in] binMin  Data minimum bin center (histograms)
+   * @param[in] binMax  Data maximum bin center (histograms)
+   * @param[in] binDelta Data diff between bin centers (histograms)
+   * 
+   * @param[in] mask  True to mask out areas where input data is missing
+   */
+  void medianEntireDomain(double binMin, double binMax, double binDelta,
+			  bool mask=true);
 
 
   // ------------ Speckle -------------------------------------------------
@@ -1187,7 +1211,85 @@ public:
   void maskExcept(double v);
 
   /**
+   * Apply a fuzzy function at each point
+   * @param[in] fuzzy  The fuzzy mapping
+   */
+  void fuzzyRemap(const FuzzyF &fuzzy);
+  
+  /**
+   * Apply a FIR filter in X using input coefficients
+   * @param[in] coeff
+   */
+  void FIRfilter(const std::vector<double> &coeff);
+
+  void nptBetweenGoodDataPointsX(const Grid2d &clumps,
+				 const Grid2d &data,
+				 int minPt);
+
+  /**
+   * compute total attenuation within each clump along each X
+   * by taking DWR(x2) - DWR(x1) for each x within the clump such that
+   * (x2-x1)*kmPerX >= minKm
+   *
+   */
+  void totalAttenuation(const Grid2d &clumps, const Grid2d &dwr,
+			double minKm, double kmPerX);
+
+
+  void averageAttenuation(const Grid2d &extent, const Grid2d &atotal);
+  
+  void sumZ(const Grid2d &Z, const Grid2d &extent, double p);
+
+
+  /**
+   * Take weighted average of inputs, optionally normalize.
+   * @param[in] inputs  Grids to average
+   * @param[in] weights  Weights for each input
+   * @param[in] normalize  True to normalize false to not
+   *
+   * @note this does divide by full sum of weights even if some inputs
+   * missing at the point
+   */
+  void weightedAverage(const std::vector<Grid2d> &inputs,
+		       const std::vector<double> &weights,
+		       bool normalize=true);
+
+  /**
+   * Take weighted average of angular inputs, optionally normalize.
+   * @param[in] inputs  Grids to average
+   * @param[in] weights  Weights for each input
+   * @param[in] is360  True for inputs [0,360), false for
+   *                   orientations in range [0,180)
+   * @param[in] normalize  True to normalize false to not
+   *
+   * @note this always normalizes, nothing else makes sense
+   */
+  void weightedAngleAverage(const std::vector<Grid2d> &inputs,
+			    const std::vector<double> &weights,
+			    bool is360);
+
+  /**
+   * Set value at each point to the max of values in an nx by ny box around
+   * the point
+   * @param[in] nx
+   * @param[in] ny
+   *
+   * @note same as dilate()
+   */
+  void maxExpand(int nx, int ny);
+
+  /**
+   * Expand along direction, when local grid is assumed to have direction
+   * values in it from 0 to 180.  Expands into missing data regions.  The
+   * idea is to make linear features longer.
+   *
+   * @param[in] npt  Number of expansion points
+   */
+  void expandLaterally(double npt);
+
+  /**
    * Compute method used in threaded algorithms
+   * @param[in] ti  Pointer to GridAlgsInfo
    */
   static void compute(void *ti);
 
@@ -1197,7 +1299,7 @@ protected:
 private:
 
   /**
-   * @class AlgThreads
+   * @class GridAlgThreads
    * @brief Simple class to instantiate TaThreadDoubleQue by implementing
    * the clone() method.
    */
@@ -1219,22 +1321,44 @@ private:
     TaThread *clone(int index);
   };
 
+  /**
+   * @class GridAlgsInfo
+   * @brief  Information needed to do grid algs in a thread
+   */
   class GridAlgsInfo
   {
   public:
+    /**
+     * @enum Info_t  
+     * @brief The algorithms that are implemented for threading
+     */
     typedef enum {SMOOTH, SDEV, TEXTURE_X, TEXTURE_Y, NONE} Info_t;
     
+    /**
+     * Constructor, values are stored into the corresponding members
+     *
+     * @param[in] t
+     * @param[in] sx
+     * @param[in] sy
+     * @param[in] iy
+     * @param[in] alg
+     * @param[in,out] out
+     */
     inline GridAlgsInfo(Info_t t, int sx, int sy, int iy, const GridAlgs *alg,
 			Grid2d &out) :
       _type(t), _sx(sx), _sy(sy), _y(iy), _gridAlgs(alg), _out(out) {}
+
+    /**
+     * Destructor
+     */
     inline virtual ~GridAlgsInfo(void) {}
 
-    Info_t _type;
-    int _sx;
-    int _sy;
-    int _y;
-    const GridAlgs *_gridAlgs;
-    Grid2d &_out;
+    Info_t _type;                 /**< The algorithm */
+    int _sx;                      /**< box size, x */
+    int _sy;                      /**< box size, y */
+    int _y;                       /**< Y index for this thread */
+    const GridAlgs *_gridAlgs;    /**< Pointer to the actual GridAlgs */
+    Grid2d &_out;                 /**< Reference to the output data grid */
   protected:
   private:
   };
@@ -1268,6 +1392,36 @@ private:
    */
   void _fillBox(int x0, int y0, int nx, int ny, double v);
 
+  void _FIRfilterY(int y, const std::vector<double> &coeff);
+  void _applyFIR(int x, int y, int i0, int i1, int centerCoeff, 
+		 const std::vector<double> &tmpData,
+		 const std::vector<double> &gapFilledData,
+		 const std::vector<double> &coeff, double sumCoeff);
+  double _FIRquality(int centerCoeff, const std::vector<double> &tmpData,
+		     const std::vector<double> &gapFilledData,
+		     int tIndex) const;
+  double _sumProduct(const std::vector<double> &coeff, double sumCoeff,
+		     const std::vector<double> &data, int i0) const;
+  bool _linearRegression(int y, int i0, int i1, int npt, bool up,
+			 double &slope, double &intercept) const;
+  std::vector<double> _extendData(int y, int i0, int i1, int centerCoeff,
+				  int nCoeff, bool allbad0, double m0,
+				  double int0, bool allbad1,
+				  double m1, double int1) const;
+  double _extend(int y, int interpIndex, double m, double intercept,
+		 bool allbad) const;
+
+  void _totalAttenuationAlongY(int y, const Grid2d &clumps, const Grid2d &dwr,
+			       double minKm, double kmPerX);
+  void _nptBetweenGoodDataPointsAlongY(int y, const Grid2d &clumps,
+					    const Grid2d &data,
+					    int minpt);
+  void _nptBetweenGoodDataPointsAlongYSubset(int x0, int x1, int y,
+					     const Grid2d &data,
+					     int minpt);
+  void _totalAttenuationAlongYSubset(int x0, int x1, int y,
+				     const Grid2d &dwr, double minKm,
+				     double kmPerX);
 };
 
 #endif

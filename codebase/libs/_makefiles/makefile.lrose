@@ -8,6 +8,7 @@ TARGETS = $(GENERAL_TARGETS) $(LIB_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
 	FiltAlg \
+	FiltAlgVirtVol \
 	Fmq \
 	Mdv \
         Ncxx \
@@ -29,7 +30,6 @@ SUB_DIRS = \
 	hydro \
 	kd \
         mm5 \
-	perl5 \
 	physics \
 	radar \
 	rapformats \

@@ -1,0 +1,262 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.GoesRGLM2Spdb
+ *
+ * This file contains the TDRP parameter definitions for
+ * GoesRGLM2Spdb.
+ */
+
+commentdef
+{
+  p_header = "GoesRGLM2Spdb";
+  p_text = "This program reads a set of GOES-R netCDF-formatted files "
+            "and writes the data to an MDV file. The netCDF files used "
+            "are from running goes-restitch.py which can be found at "
+            "https://github.com/Unidata/ldm-alchemy/blob/master/goes-restitch.py "
+            "goes-restitch.py works on the NOTHER LDM feed (TI....) and stitches the "
+            "Sectorized Cloud Moisture Images (SCMI) back together.\n\n "
+            "This currently only works on the CONUS and MESOSCLAE scans with a "
+            "lambert conformal projection. There are issues when testing on "
+            "the Puerto Rico region which uses a Mercator projection. "
+            "The Full Disk data from NoaaPort has 6km resolution and there is no "
+            "current need for this data so the GEOSTATIONARY mapping has not been implemented.\n\n "
+            "Flashes and Groups have data quality flags associated with them: \n "
+            "flag_values = 0, 1, 3, 5 \n "
+            "flag_meanings = \n "
+            "good_quality \n "
+            "degraded_due_to_flash_constituent_events_out_of_time_order \n "
+            "degraded_due_to_flash_constituent_event_count_exceeds_threshold \n "
+            "degraded_due_to_flash_duration_exceeds_threshold";
+}
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_default = DEBUG_OFF;
+} debug;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Instance";
+  p_help = "Used for process registration";
+  p_default = "Test";
+} instance;
+
+paramdef int
+{
+  p_descr = "Procmap registration interval.";
+  p_default = 120;
+} procmap_reg_interval;
+
+/***********************************************************************
+ * Input parameters
+ */
+
+commentdef
+{
+  p_header = "INPUT PARAMETERS";
+};
+
+typedef enum
+{
+  REALTIME,
+  FILE_LIST
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "In REALTIME mode, the program will trigger whenever a new "
+	       "file appears in the specified input directory.\n"
+           "In FILE_LIST mode, the program operates on the input files "
+           "specified on the command line.\n";
+  p_default = FILE_LIST;
+} mode;
+
+paramdef string
+{
+  p_descr = "List of Input directories to watch";
+  p_help = "There can be one directory that is watched and recursed. "
+  "It may be that there is a directory for each channel, band, or derived "
+  "product.";
+  p_default = "raw/g16";
+} input_dir;
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Maximum age of file in minutes";
+  p_help =  "Used in REALTIME mode only.";
+} max_valid_realtime_age_min;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Latest data info file available";
+} ldata_info_avail;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Set wait for file to be written to disk before being served";
+  p_help =  "Used in REALTIME mode only.";
+} file_quiescence_sec;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Set wait for file between checks for new data";
+  p_help =  "Used in REALTIME mode only.";
+} check_input_sec;
+
+paramdef int
+{
+  p_descr = "Search no more than this level deep in the realtime_input_dir";
+  p_help = "This can be used to only ingest one domain.";
+  p_default = 3;
+} Dir_search_depth;
+
+paramdef string
+{
+  p_descr = "If set to other than NULL, filenames must contain this string to be ingested.";
+  p_help = "This allows you to control which files will be processed. The app checks that this substring exists in the file name before processing.";
+  p_default = "";
+} DomainString;
+
+paramdef string
+{
+  p_descr = "If set to other than NULL, filenames must have this extension "
+            "to be ingested.";
+  p_help = "This can be used to limit the type of files processed.";
+  p_default = "";
+} File_extension;
+
+typedef enum
+{
+  EVENTS,
+  GROUPS,
+  FLASHES,
+} data_type_t;
+
+paramdef enum data_type_t
+{
+  p_descr = "Type of data to extract.";
+  p_help = "";
+  p_default = FLASHES;
+} data_type;
+
+
+commentdef
+{
+  p_header = "BOUNDING BOX";
+  p_text = "Optionally limit the data to within a bounding box";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set to TRUE to check that location is within a bounding box.";
+} limit_location_to_bounding_box;
+
+typedef struct {
+  double min_lat;
+  double max_lat;
+  double min_lon;
+  double max_lon;
+} bbox_t;
+
+paramdef struct bbox_t {
+  p_default = { -90.0, 90.0, -180.0, 180.0 };
+  p_descr = "Bounding box to check.";
+  p_help = "See limit_location_to_bounding_box.";
+} bounding_box;
+
+/***********************************************************************
+ * Output parameters
+ */
+
+commentdef
+{
+  p_header = "OUTPUT PARAMETERS";
+};
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output URL.";
+  p_help = "Output data is written to this URL.";
+} output_url;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Expire time in seconds for each strike";
+} expire_seconds;
+
+paramdef int {
+  p_default = {1, 3, 5};
+  p_descr = "Remove groups or flashes with these data quality values. "
+            "Events have no quality values associated with them";
+  p_help = "Description from netcdf files: \n"
+           "0 - good_quality \n"
+           "1 - degraded_due_to_flash_constituent_events_out_of_time_order \n"
+           "3 - degraded_due_to_flash_constituent_event_count_exceeds_threshold \n"
+           "5 - degraded_due_to_flash_duration_exceeds_threshold";
+} quality_values_to_remove[];
+
+typedef struct {
+  boolean do_user_defined_quality_control;
+  int number_of_groups;
+  int number_of_events;
+} quality_control_t;
+
+paramdef struct quality_control_t {
+  p_default = {FALSE, 2, 3};
+  p_descr = "Set this to true in order to remove flashes, groups, or events from the output "
+            "(depending on what data type is requested).";
+  p_help = "If a flash has no more than this number_of_groups, and all of these groups have "
+           "no more than this number_of_events then the flash and all corresponding groups "
+           "and events will be flagged as low quality and will not be included in the output.";
+} quality_control;

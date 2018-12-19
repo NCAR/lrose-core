@@ -39,7 +39,9 @@
 
 #include <toolsa/umisc.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/Path.hh>
 #include <dsserver/DsLdataInfo.hh>
+#include <didss/DataFileNames.hh>
 #include "LdataWriter.hh"
 using namespace std;
 
@@ -50,6 +52,7 @@ LdataWriter::LdataWriter(int argc, char **argv)
 {
 
   isOK = true;
+  _input = NULL;
 
   // set programe name
 
@@ -64,6 +67,24 @@ LdataWriter::LdataWriter(int argc, char **argv)
     return;
   }
 
+  if (_args.refresh) {
+    if (_args.inputFileList.size() > 0) {
+      // FILELIST mode
+      _input = new DsInputPath(_progName,
+                               _args.verbose,
+                               _args.inputFileList);
+    } else if (_args.startTime != 0 && _args.endTime != 0) {
+      // archive mode - start time to end time
+      _input = new DsInputPath(_progName,
+                               _args.verbose,
+                               _args.dir,
+                               _args.startTime, _args.endTime);
+    } else {
+      // single time refresh mode
+      _input = NULL;
+    }
+  }
+  
   return;
 
 }
@@ -73,6 +94,10 @@ LdataWriter::LdataWriter(int argc, char **argv)
 LdataWriter::~LdataWriter()
 
 {
+
+  if (_input != NULL) {
+    delete _input;
+  }
 
 }
 
@@ -87,9 +112,13 @@ int LdataWriter::Run ()
   // side effect: file mod times are updated
 
   if (_args.refresh) {
-    return _refresh();
+    if (_input == NULL) {
+      return _refreshLatestTime();
+    } else {
+      return _refreshSpecifiedTimes();
+    }
   }
-
+  
   // max time mode?
   // only register with DataMapper if latest time exceeds max time
 
@@ -116,10 +145,7 @@ int LdataWriter::_runNormal()
     url = _args.dir;
   }
 
-  DsLdataInfo ldata(url, _args.debug);
-  if (_args.debug) {
-    ldata.setDebug(true);
-  }
+  DsLdataInfo ldata(url, _args.verbose);
 
   // set object from command line args
 
@@ -134,7 +160,7 @@ int LdataWriter::_runNormal()
     iret = -1;
   } else {
     if (_args.debug) {
-      cerr << "Writing to " << _args.dir
+      cerr << "Wrote ldata to " << _args.dir
            << ", time: " << DateTime::str(_args.latestTime) << endl;
     }
   }
@@ -158,7 +184,7 @@ int LdataWriter::_runMaxTimeMode()
     url = _args.dir;
   }
   
-  DsLdataInfo ldata(url, _args.debug);
+  DsLdataInfo ldata(url, _args.verbose);
   if(ldata.readForced()) {
     // no previous data
     if (_args.debug) {
@@ -203,8 +229,9 @@ int LdataWriter::_runMaxTimeMode()
 
 //////////////////////////////////////////////////
 // refresh option
+// single latest time
 
-int LdataWriter::_refresh()
+int LdataWriter::_refreshLatestTime()
 {
 
   // create Ldata file object
@@ -213,16 +240,88 @@ int LdataWriter::_refresh()
   
   if (ldata.read() == 0) {
     if (ldata.write()) {
-      cerr << "ERROR - LdataWriter::_refresh" << endl;
+      cerr << "ERROR - LdataWriter::_refreshLatestTime" << endl;
       cerr << "  Cannot re-write _latest_data_info" << endl;
       cerr << "  dir: " << _args.dir << endl;
       return -1;
     }
   } else {
-    cerr << "ERROR - LdataWriter::_refresh" << endl;
+    cerr << "ERROR - LdataWriter::_refreshLatestTime" << endl;
     cerr << "  Cannot read _latest_data_info" << endl;
     cerr << "  dir: " << _args.dir << endl;
     return -1;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// refresh option
+// multiple times specified on command line
+
+int LdataWriter::_refreshSpecifiedTimes()
+{
+
+  DsLdataInfo ldata(_args.dir, _args.verbose);
+  if (ldata.readForced()) {
+    cerr << "WARNING - LdataWriter::_refreshSpecifiedTimes" << endl;
+    cerr << "  Cannot read _latest_data_info" << endl;
+    cerr << "  dir: " << _args.dir << endl;
+    cerr << "  not all info will be correct" << endl;
+  }
+  
+  // loop through specified paths
+  
+  char *inputPath;
+  while ((inputPath = _input->next()) != NULL) {
+    
+    // get the data time for the file
+    
+    time_t dataTime;
+    bool dateOnly;
+
+    if (DataFileNames::getDataTime(inputPath, dataTime, dateOnly, false) == 0) {
+      
+      // get relative file path
+
+      Path ipath(inputPath);
+      string relPath;
+      Path::stripDir(_args.dir, inputPath, relPath);
+
+      // rewrite the latest data info
+
+      ldata.setLatestTime(dataTime);
+      ldata.setRelDataPath(relPath);
+      
+      if (ldata.write()) {
+        cerr << "ERROR - LdataWriter::_refreshSpecifiedTimes" << endl;
+        cerr << "  Cannot write _latest_data_info" << endl;
+        cerr << "  dir: " << _args.dir << endl;
+        cerr << "  path: " << inputPath << endl;
+        cerr << "  data time: " << DateTime::strm(dataTime) << endl;
+        return -1;
+      }
+
+      if (_args.verbose) {
+        cerr << "Refreshed _latest_data_info" << endl;
+        cerr << "  dir: " << _args.dir << endl;
+        cerr << "  path: " << inputPath << endl;
+        cerr << "  data time: " << DateTime::strm(dataTime) << endl;
+      } else if (_args.debug) {
+        cerr << "Writing ldata to " << _args.dir
+             << ", time: " << DateTime::str(dataTime) << endl;
+      }
+
+      umsleep(_args.msecsSleep);
+
+    } else {
+      
+      cerr << "WARNING - LdataWriter::_refreshSpecifiedTimes()" << endl;
+      cerr << "  Cannot get time for file: " << inputPath << endl;
+
+    }
+
   }
 
   return 0;

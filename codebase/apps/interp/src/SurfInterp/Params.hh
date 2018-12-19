@@ -509,6 +509,10 @@ public:
   genpt_fields_t *_genptFields;
   int genptFields_n;
 
+  float MinValidTempC;
+
+  float MaxValidTempC;
+
   InterpMethod_t InterpMethod;
 
   float MaxAltError;
@@ -555,7 +559,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[54];
+  mutable TDRPtable _table[57];
 
   const char *_className;
 

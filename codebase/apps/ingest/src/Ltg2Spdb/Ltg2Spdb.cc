@@ -36,8 +36,8 @@
 ////////////////////////////////////////////////////////////////
 
 #include <cerrno>
-#include <netcdf.hh>
 #include <string>
+#include <Ncxx/Nc3File.hh>
 #include <toolsa/umisc.h>
 #include <toolsa/file_io.h>
 #include <toolsa/pmu.h>
@@ -258,6 +258,10 @@ int Ltg2Spdb::_processFile(const char *file_path)
       continue;
     }
 
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Decoding line: " << line;
+    }
+
     // NAPLN data has lines that start with
     // LIGHTNING-NAPLN1EX
     if (line[0] == 'L') {
@@ -321,12 +325,16 @@ int Ltg2Spdb::_processFile(const char *file_path)
         break;
       }
 
-    case Params::ALBLM: {
-       _decode_alblm(line);
+      case Params::ALBLM: {
+        _decode_alblm(line);
         break;
-    }
-
-    
+      }
+        
+      case Params::STARNET: {
+        _decode_starnet(line);
+        break;
+      }
+        
       default: {}
 
     } // switch
@@ -365,7 +373,7 @@ int Ltg2Spdb::_processAOAWSNetCDFFile(const char *file_path)
 	const string methodName = "Ltg2Spdb::_processAOAWSNetCDFFile";
 
 	int iret = 0;
-	NcFile ncfFile(file_path);
+	Nc3File ncfFile(file_path);
 
 	if(!ncfFile.is_valid()) {
 		cerr << "ERROR - " << methodName << endl;
@@ -375,7 +383,7 @@ int Ltg2Spdb::_processAOAWSNetCDFFile(const char *file_path)
 
 	// declare an error object
 
-	NcError err(NcError::silent_nonfatal);
+	Nc3Error err(Nc3Error::silent_nonfatal);
 
 
 	// check that this is a valid file
@@ -394,9 +402,9 @@ int Ltg2Spdb::_processAOAWSNetCDFFile(const char *file_path)
 		cerr << "\t" << nRecords << " records to read\n";
 	}
 
-  NcVar *latVar = ncfFile.get_var(_params.netcdf_lat_var);
-  NcVar *lonVar = ncfFile.get_var(_params.netcdf_lon_var);
-  NcVar *timeVar = ncfFile.get_var(_params.netcdf_time_var);
+  Nc3Var *latVar = ncfFile.get_var(_params.netcdf_lat_var);
+  Nc3Var *lonVar = ncfFile.get_var(_params.netcdf_lon_var);
+  Nc3Var *timeVar = ncfFile.get_var(_params.netcdf_time_var);
 
   vector<float> latVector;
   vector<float> lonVector;
@@ -482,7 +490,7 @@ int Ltg2Spdb::_processAOAWSNetCDFFile(const char *file_path)
   return iret;
 }
 
-int Ltg2Spdb::_checkAOAWSNetCDFFile(const NcFile &ncf)
+int Ltg2Spdb::_checkAOAWSNetCDFFile(const Nc3File &ncf)
 {
 
   const string methodName = "Ltg2Spdb::_checkAOAWSNetCDFFIle";
@@ -846,24 +854,51 @@ int Ltg2Spdb::_decode_format_2(const char *line)
 // NOTE: this fills out LTG_extended_t
 
 int Ltg2Spdb::_decode_format_3(const char *line)
-  {
+{
 
-  int year, month, day, hour, min, sec, cg;
+  int year, month, day, hour, min, sec;
+  char cc;
   double dSec;
-  double lat, lon, amplitude;
+  double lat, lon;
+  double amplitude = 0.0;
+  int cg = 0;
+  
+  // try full line
 
-  if (sscanf(line, "%d/%d/%d %d:%d:%lf %lg %lg %lg %d",
-             &year, &month, &day, &hour, &min, &dSec,
-             &lat, &lon, &amplitude, &cg) != 10) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "ERROR - _decode_format_3" << endl;
-      cerr << "  Cannot decode line: " << line << endl;
-      cerr << "  month/day/year hour:min:sec lat lon Ka C/G, where "
-           << "sec is a float (not an int) and C/G is either 0 or 1"
-           << "lat lon alt amplitude type(G or C)" << endl;
-    }
-    return -1;
-  }
+  if (sscanf(line, "%d/%d/%d%1c%d:%d:%lf %lg %lg %lg %d",
+             &month, &day, &year, 
+             &cc, 
+             &hour, &min, &dSec,
+             &lat, &lon, &amplitude, &cg) != 11) {
+
+    // try without cg
+    
+    if (sscanf(line, "%d/%d/%d%1c%d:%d:%lf %lg %lg %lg",
+               &month, &day, &year, 
+               &cc, 
+               &hour, &min, &dSec,
+               &lat, &lon, &amplitude) != 10) {
+
+      // try without amplitude or cg
+      
+      if (sscanf(line, "%d/%d/%d%1c%d:%d:%lf %lg %lg",
+                 &month, &day, &year, 
+                 &cc, 
+                 &hour, &min, &dSec,
+                 &lat, &lon) != 9) {
+        
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          cerr << "ERROR - _decode_format_3" << endl;
+          cerr << "  Cannot decode line: " << line << endl;
+          cerr << "  month/day/year hour:min:sec lat lon Ka C/G, where "
+               << "sec is a float (not an int) and C/G is either 0 or 1"
+               << "lat lon alt amplitude type(G or C)" << endl;
+        }
+        return -1;
+        
+      } // scanf == 9
+    } // scanf == 10
+  } // sscanf == 11
   
   // check bounding box?
   
@@ -1577,8 +1612,8 @@ int Ltg2Spdb::_decode_ksc(char const* line, char const *file_path)
     cerr << "Decoding line: " << line;
   }
 
-  const double ksc_lat = 28.538486;
-  const double ksc_lon = -80.639578; 
+  // const double ksc_lat = 28.538486;
+  // const double ksc_lon = -80.639578; 
 
   int jday, hour, min, sec, usec;
   int xCoord, yCoord, zCoord;
@@ -1659,6 +1694,101 @@ int Ltg2Spdb::_decode_ksc(char const* line, char const *file_path)
     
   }
   return 0;
+}
+
+///////////////////////////////////////////
+// decode STARNET line
+// NOTE: this fills out LTG_extended_t
+
+int Ltg2Spdb::_decode_starnet(const char *line)
+  
+{
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Decoding line: " << line;
+  }
+
+  int year, month, day, hour, min, sec, microsec;
+  double lat, lon;
+  double ellipse_error_m, atd_error_microsec;
+  double float1, float2;
+  int quality, polarity;
+  int n_rx, n_atd;
+
+  if (sscanf(line,
+             "%d %d %d %d %d %d %d "
+             "%lg %lg "
+             "%lg %lg "
+             "%lg %lg "
+             "%d %d "
+             "%d %d",
+             &year, &month, &day, &hour, &min, &sec, &microsec,
+             &lat, &lon,
+             &ellipse_error_m, &atd_error_microsec,
+             &float1, &float2,
+             &quality, &polarity,
+             &n_rx, &n_atd) != 17) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - _decode_starnet" << endl;
+      cerr << "  Cannot decode line: " << line << endl;
+      cerr << "  Expecting 15+ fields: " << endl;
+      cerr << "    year month day hour min sec microsecsec" << endl;
+      cerr << "    lat lon ellipse_error_m atd_error_microsec" << endl;
+      cerr << "    float1 float2" << endl;
+      cerr << "    quality polarity n_rx n_atd" << endl;
+    }
+    return -1;
+  }
+  
+  // check bounding box?
+  
+  if (_params.checkBoundingBox) {
+    if (lat < _params.boundingBox.min_lat ||
+        lat > _params.boundingBox.max_lat ||
+        lon < _params.boundingBox.min_lon ||
+        lon > _params.boundingBox.max_lon) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "WARNING - _decode_ualf_lf_1" << endl;
+        cerr << "  Data outside bounding box" << endl;
+        cerr << "  Data line: " << line << endl;
+      }
+      return -1;
+    }
+  }
+
+  // load up strike
+
+  DateTime stime(year, month, day, hour, min, sec);
+  time_t utime = stime.utime();
+  LTG_extended_t strike;
+  LTG_init_extended(&strike);
+  strike.time = (si32) utime;
+  strike.latitude = (fl32) lat;
+  strike.longitude = (fl32) lon;
+  strike.nanosecs = microsec * 1000;
+  strike.n_sensors = n_atd;
+  
+  // Check for duplicates?
+  if (_params.duplicates.check){
+    if ( _checkNearDuplicate( strike ) ){
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+	cerr << "Strike for " << strike.latitude << ", ";
+	cerr << strike.longitude << " at " << utimstr(strike.time);
+	cerr << " rejected as near duplicate." << endl;
+      }
+      return -1;
+    }
+  }
+
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    LTG_print_extended(stderr, &strike);
+  }
+
+  _addStrike(strike);
+
+  return 0;
+
 }
 
 /*********************************************************************

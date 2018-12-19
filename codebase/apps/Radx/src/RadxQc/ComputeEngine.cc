@@ -1051,9 +1051,8 @@ void ComputeEngine::_pidCompute()
   
   if (_params.use_soundings_from_spdb) {
     if (_tempProfile) {
-      const vector<TempProfile::PointVal> &profile = _tempProfile->getProfile();
-      if (profile.size() > 0) {
-        _pid.setTempProfile(profile);
+      if (_tempProfile->getProfile().size() > 0) {
+        _pid.setTempProfile(*_tempProfile);
       }
     }
   }

@@ -1,0 +1,10 @@
+
+to run ...
+
+./CustomCompleter.app/Contents/MacOS/CustomCompleter
+
+Remember, the idiosyncrasies of the wordlist:
+- case doesn't matter
+- underscores "_" are ok,
+--> the words need to be in alphabetical order!
+- duplicates are ok 

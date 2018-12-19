@@ -114,15 +114,15 @@ paramdef string {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Set to TRUE if we are watching for Gematronik XML volumes.";
-  p_help = "Gematronik volumes (for a given time) are stored in multiple files, one for each field. Therefore, after the time on a volume changes and a new field file is detected, we need to wait a while to ensure that all of the files have had a chance to be writted to disk. You need to set gematronik_realtime_wait_secs to a value in excess of the time it takes for all of the files to be written.";
-} gematronik_realtime_mode;
+  p_descr = "Set to TRUE if fields come in incrementally.";
+  p_help = "Some systems write fields from the same volume to separate files, so they come in incrementally. In this case, we need to wait some time for all of the fields to arrive before processing.";
+} incremental_realtime_mode;
 
 paramdef int {
-  p_default = 5;
+  p_default = 90;
   p_descr = "Number of seconds to wait, so that all field files can be written to disk before we start to read.";
-  p_help = "See 'gematronik_realtime_mode'.";
-} gematronik_realtime_wait_secs;
+  p_help = "See 'incremental_realtime_mode'.";
+} incremental_realtime_wait_secs;
 
 commentdef {
   p_header = "OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS";
@@ -869,6 +869,41 @@ paramdef struct variable_transform_field_t {
 } variable_transform_fields[];
 
 commentdef {
+  p_header = "OPTION TO COMPUTE ZDR FROM OTHER FIELDS.";
+  p_text = "Normally ZDR = DBZH - DBZV.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Compute ZDR from 2 other fields.";
+  p_help = "Normally ZDR = DBZH - DBZV.";
+} zdr_compute_from_input_fields;
+
+paramdef string {
+  p_default = "TH";
+  p_descr = "First field for computing ZDR.";
+  p_help = "ZDR will be (field_1 - field_2) + correction.";
+} zdr_compute_input_field_1;
+
+paramdef string {
+  p_default = "TV";
+  p_descr = "Second field for computing ZDR.";
+  p_help = "ZDR will be (field_1 - field_2) + correction.";
+} zdr_compute_input_field_2;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction applied when computing ZDR.";
+  p_help = "ZDR will be (field_1 - field_2) + correction.";
+} zdr_compute_correction_db;
+
+paramdef string {
+  p_default = "ZDR";
+  p_descr = "Name for computed ZDR fields.";
+  p_help = "Units will be dB.";
+} zdr_compute_output_field_name;
+
+commentdef {
   p_header = "OUTPUT FORMAT";
 }
 
@@ -1079,6 +1114,31 @@ paramdef string {
   p_help = "See 'separate_by_scan_type'. If the scan mode is sun, this subdirectory will be created under the ouput dir.";
 } sun_subdir;
 
+commentdef {
+  p_header = "SEPARATING OUTPUT VOLUMES BASED ON RANGE GEOMETRY";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to separate the files based on range geometry.";
+  p_help = "In some scan strategies, the operational mode alternates between long and short range scans. For example there may be a long range scan without doppler moments, followed by a short range scan. The range gate length varies for each of these scans. This option allows you to write the volumes into separate directories based on the range geometry.";
+} separate_output_dirs_by_range_geometry;
+
+typedef struct {
+  double min_range_gate_spacing_km; 
+  double max_range_gate_spacing_km; 
+  string output_subdir;
+} dir_from_range_geometry_t;
+
+paramdef struct dir_from_range_geometry_t {
+  p_default = {
+    { 0.0, 0.20, "short_range" },
+    { 0.20, 0.50, "long_range" }
+  };
+  p_descr = "Sub-directories to be used for different range geometry.";
+  p_help = "If the gate spacing is within the specified limits, the specified sub-directory is used (appended to 'output_dir'). If the gate spacing is not within any of the specified limits, then 'output_dir' is used as-is."; 
+} dir_from_range_geometry[];
+  
 commentdef {
   p_header = "OPTION TO OVERRIDE MISSING VALUES";
   p_text = "Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n";

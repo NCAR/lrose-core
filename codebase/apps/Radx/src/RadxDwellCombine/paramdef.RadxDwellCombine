@@ -166,6 +166,12 @@ paramdef double {
   p_help = "Dwells from the input data will be combined to form dwells covering the specified time.";
 } dwell_time_secs;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to center the dwell on a multiple of the dwell_time.";
+  p_help = "The dwell will be chosen so that the center time of the dwell will be close to an even multiple of the dwell_time_secs. So if for example dwell_time_secs is set to 0.5, the dwell centers would be at 0.25, 0.75, 1.25 secs etc.";
+} center_dwell_on_time;
+
 typedef enum {
   DWELL_STATS_MEAN = 0,
   DWELL_STATS_MEDIAN = 1,
@@ -179,6 +185,14 @@ paramdef enum dwell_stats_method_t {
   p_descr = "Method for computing stats on the dwell.";
   p_help = "MIDDLE refers to the middle ray in the dwell sequence.";
 } dwell_stats_method;
+
+paramdef double {
+  p_default = 0.25;
+  p_min = 0.0;
+  p_max = 1.0;
+  p_descr = "Specify the max fraction of the dwell that can have missing data.";
+  p_help = "We compute how much of the dwell is missing for each field. If the fraction exceeds this parameter, the combined value will be set to missing.";
+} dwell_stats_max_fraction_missing;
 
 commentdef {
   p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
@@ -446,7 +460,7 @@ paramdef int {
 } compression_level;
 
 commentdef {
-  p_header = "OUTPUT DIRECTORY AND FILE NAME";
+  p_header = "WRITE CFRADIAL FILES";
 }
 
 paramdef string {
@@ -473,6 +487,18 @@ paramdef string {
   p_descr = "Optional prefix for output filename.";
   p_help = "If empty, the standard prefix will be used.";
 } output_filename_prefix;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write the output files on time boundaries.";
+  p_help = "See 'output_file_time_interval_secs'.";
+} write_output_files_on_time_boundaries;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Time interval at which files will be written out (secs).";
+  p_help = "See 'split_output_files_on_time'. To make sense, this interval should divide evenly into an hour - i.e. 3600.";
+} output_file_time_interval_secs;
 
 paramdef boolean {
   p_default = true;

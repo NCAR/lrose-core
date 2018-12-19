@@ -38,7 +38,7 @@ TARGET_FILE = HcrVelCorrect
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lradar -lFmq \
-	-lMdv -ldsserver -ldidss -lrapformats \
+	-lSpdb -ldsserver -ldidss -lrapformats -lrapmath \
 	-leuclid -ltoolsa -ltdrp -ldataport \
 	$(NETCDF4_LIBS) -lbz2 -lz
 

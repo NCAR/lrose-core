@@ -370,13 +370,9 @@ public:
 
   mode_t mode;
 
-  int max_realtime_data_age_secs;
-
-  int time_between_checks_secs;
-
-  int mdv_search_margin_secs;
-
   char* input_url;
+
+  int max_realtime_data_age_secs;
 
   char* output_url;
 
@@ -387,7 +383,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[10];
+  mutable TDRPtable _table[11];
 
   const char *_className;
 

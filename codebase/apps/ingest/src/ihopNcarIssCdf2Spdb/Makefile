@@ -38,7 +38,7 @@ TARGET_FILE = ihopNcarIssCdf2Spdb
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lnetcdf_c++ -lnetcdf -lSpdb -ldsserver \
+LOC_LIBS = -lSpdb -ldsserver \
 	-ldidss -lrapformats -leuclid -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm

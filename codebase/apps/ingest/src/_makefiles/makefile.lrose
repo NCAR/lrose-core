@@ -9,6 +9,7 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 SUB_DIRS = \
          AcTrack2Polygon \
          AcarsNc2GenPt \
+         ArgentineAwsIngest \
          Awos2Spdb \
          Aws2Spdb \
          BomAws2Spdb \

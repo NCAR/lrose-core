@@ -55,7 +55,7 @@ DsServer::DsServer(const string & executableName,
                    const string & instanceName,
                    int port,
                    int maxQuiescentSecs /* = -1*/,
-                   int maxClients /* = 128*/,
+                   int maxClients /* = 1024 */,
                    bool forkClientHandlers /* = false*/,
                    bool isDebug /* = false*/,
                    bool isVerbose /* = false*/,
@@ -146,6 +146,16 @@ DsServer::DsServer(const string & executableName,
     PMU_force_register((char *) pmuStr.c_str());
 #endif
 
+    // override max clients from environment?
+    
+    char *DS_SERVER_MAX_CLIENTS = getenv("DS_SERVER_MAX_CLIENTS");
+    if (DS_SERVER_MAX_CLIENTS != NULL) {
+      int max_clients;
+      if (sscanf(DS_SERVER_MAX_CLIENTS, "%d", &max_clients) == 1) {
+        _maxClients = max_clients;
+      }
+    }
+    
     // Open socket on the port.
     _serverSocket = new ServerSocket();
     if (_serverSocket->openServer(_port) < 0) {
@@ -160,8 +170,8 @@ DsServer::DsServer(const string & executableName,
     }
 
     if (_isVerbose) {
-        cerr << "Server has opened ServerSocket at port "
-             << _port << "." << endl;
+      cerr << "DsServer has opened ServerSocket at port " << _port << endl;
+      cerr << "  _maxClients: " << _maxClients << endl;
     }
 
     // Set status.
@@ -1011,10 +1021,15 @@ void * DsServer::__serveClient(void * svrsockstruct)
     Socket * socket = sss->socket;
     DsServer * server = sss->server;
 
-// Todo: Clean this up. This is a mess! Try one return point.
-
     // Delete the ServerSocketStruct -- it is owned by this thread.
     delete sss;
+
+    // Must have a valid server.
+    if (server == NULL) {
+      // No way to tell client. This is a bad error.
+      cerr << "Error: Got NULL server in __serveClient." << endl;
+      return NULL;
+    }
 
     if (server->isVerbose()) {
         cerr << "Client handler thread started..." << endl;
@@ -1026,29 +1041,12 @@ void * DsServer::__serveClient(void * svrsockstruct)
     // Register this as the last action time on the server.
     server->updateLastActionTime();
 
-    // Must have a valid server.
-    if (server == NULL) {
-        if (server->isDebug()) {
-            cerr << "Error: Got NULL server in __serveClient." << endl;
-        }
-
-        // No way to tell client. This is a bad error.
-        // Todo: Anything to do here?
-
-        // Remove this thread from the client count.
-        server->clientDone();
-        return NULL;
-    }
-
     // Should have a valid open socket now.
     if (socket == NULL) {
         if (server->isDebug()) {
             cerr << "Error: Got NULL socket in DsServer::__serveClient." << endl;
         }
-
         // No way to tell client. This is a bad error.
-        // Todo: Anything to do here?
-
         // Remove this thread from the client count.
         server->clientDone();
         return NULL;
@@ -1060,10 +1058,7 @@ void * DsServer::__serveClient(void * svrsockstruct)
                  << socket->getErrString() << endl;
 	    cerr << "  " << DateTime::str() << endl;
         }
-
         // No way to tell client. This is a bad error.
-        // Todo: Anything to do here?
-
         // Remove this thread from the client count.
         server->clientDone();
         return NULL;

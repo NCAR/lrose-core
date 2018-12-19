@@ -38,6 +38,7 @@
 
 #include <iostream>
 #include <Radx/RadxMsg.hh>
+class RadxTime;
 using namespace std;
 
 /////////////////Ra//////////////////////////////////////////////
@@ -75,6 +76,7 @@ public:
   /// \name Set methods:
   //@{
 
+  void setRadxTime(const RadxTime &rtime);
   inline void setTimeSecs(time_t val) { _timeSecs = val; }
   inline void setNanoSecs(double val) { _nanoSecs = val; }
   inline void setUnitNum(Radx::si64 val) { _unitNum = val; }
@@ -106,6 +108,7 @@ public:
   /// \name Get methods:
   //@{
 
+  RadxTime getRadxTime() const;
   inline time_t getTimeSecs() const { return _timeSecs; }
   inline double getNanoSecs() const { return _nanoSecs; }
   inline Radx::si64 getUnitNum() const { return _unitNum; }

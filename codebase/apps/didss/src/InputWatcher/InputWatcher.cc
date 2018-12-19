@@ -144,6 +144,18 @@ int InputWatcher::Run ()
   }
   // input.setDirScanSleep(_params.wait_between_checks);
   time_t timeLastAction = time(NULL);
+
+  if (_params.debug) {
+    cerr << "InputWatcher - watching dir: " << _params.input_dir << endl;
+    cerr << "  FileQuiescence: " << _params.file_quiescence << endl;
+    cerr << "  SearchExt: " << _params.search_ext << endl;
+    cerr << "  SubString: " << _params.search_substr << endl;
+    cerr << "  Recursion: " << _params.search_recursively << endl;
+    cerr << "  MaxRecursionDepth: " << _params.max_recursion_depth << endl;
+    cerr << "  MaxDirAge: " << _params.max_dir_age << endl;
+    cerr << "  FollowLinks: " << _params.follow_links << endl;
+    cerr << "  UseInotify: " << _params.use_inotify << endl;
+  }
   
   while(true) {
     // check for new data
@@ -268,6 +280,9 @@ int InputWatcher::_writeLdataInfoFile(const char *inputPath, time_t modTime)
 {
 
   DsLdataInfo ldata;
+  if (_params.debug) {
+    ldata.setDebug(true);
+  }
   if (_params.write_latest_data_info_to_proxy_dir) {
     ldata.setDir(_params.latest_data_info_proxy_dir);
     ldata.setDisplacedDirPath(_params.input_dir);
@@ -291,6 +306,11 @@ int InputWatcher::_writeLdataInfoFile(const char *inputPath, time_t modTime)
     cerr << "  Cannot write latest data file to input dir: "
 	 << _params.input_dir << endl;
     return -1;
+  }
+
+  if (_params.debug) {
+    cerr << "===== wrote ldata info ====" << endl;
+    ldata.printAsXml(cerr);
   }
 
   return 0;
@@ -346,12 +366,19 @@ int InputWatcher::_copyFile(const char *inputPath, time_t modTime)
 	    mtime.getYear(), mtime.getMonth(), mtime.getDay());
   }
 
+  // prefix if needed
+
+  string prefixStr(_params.copy_prefix);
+  if (prefixStr.size() > 0) {
+    prefixStr += "_";
+  }
+  
   // ext if needed
   
-  char extStr[128];
-  MEM_zero(extStr);
+  string extStr;
   if (strlen(_params.copy_ext) > 0) {
-    sprintf(extStr, ".%s", _params.copy_ext);
+    extStr += ".";
+    extStr += _params.copy_ext;
   }
 
   // copy file name
@@ -360,19 +387,33 @@ int InputWatcher::_copyFile(const char *inputPath, time_t modTime)
   if (_params.copy_to_time_stamped_file) {
     if (_params.add_day_to_filename) {
       // YYYYMMDD_HHMMSS
-      sprintf(copyName, "%.4d%.2d%.2d_%.2d%.2d%.2d%s",
-	      mtime.getYear(), mtime.getMonth(), mtime.getDay(),
-	      mtime.getHour(), mtime.getMin(), mtime.getSec(),
-              extStr);
+      snprintf(copyName, MAX_PATH_LEN,
+               "%s%.4d%.2d%.2d_%.2d%.2d%.2d%s",
+               prefixStr.c_str(),
+               mtime.getYear(), mtime.getMonth(), mtime.getDay(),
+               mtime.getHour(), mtime.getMin(), mtime.getSec(),
+               extStr.c_str());
     } else {
       // HHMMSS
-      sprintf(copyName, "%.2d%.2d%.2d%s",
-	      mtime.getHour(), mtime.getMin(), mtime.getSec(),
-              extStr);
+      snprintf(copyName, MAX_PATH_LEN,
+               "%s%.2d%.2d%.2d%s",
+               prefixStr.c_str(),
+               mtime.getHour(), mtime.getMin(), mtime.getSec(),
+               extStr.c_str());
     }
   } else {
-    // use original name
-    sprintf(copyName, "%s", ppath.getFile().c_str());
+    if (_params.append_date_time_to_original_name) {
+      // append date_time to original name
+      snprintf(copyName, MAX_PATH_LEN,
+               "%s_%.4d%.2d%.2d_%.2d%.2d%.2d",
+               ppath.getFile().c_str(),
+               mtime.getYear(), mtime.getMonth(), mtime.getDay(),
+               mtime.getHour(), mtime.getMin(), mtime.getSec());
+    } else {
+      // use original name unchanged
+      snprintf(copyName, MAX_PATH_LEN,
+               "%s", ppath.getFile().c_str());
+    }
   }
 
   // compression extensions

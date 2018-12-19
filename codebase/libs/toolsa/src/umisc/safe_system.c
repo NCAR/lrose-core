@@ -81,7 +81,7 @@ int safe_system(const char * command, int timeout_seconds)
 	return -1;
     }
 
-   strncpy(cmd,command,MAX_CMD_LEN);
+   strncpy(cmd,command,MAX_CMD_LEN-1);
 
    /* Parse the command string - Note this modifies the string cmd
     * replacing spaces, and quotes with nulls 

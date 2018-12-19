@@ -1022,11 +1022,9 @@ int RadxQc::_retrieveTempProfile(const RadxVol &vol)
   }
   
   time_t retrievedTime;
-  vector<TempProfile::PointVal> retrievedProfile;
-  if (_tempProfile.getTempProfile(_params.sounding_spdb_url,
-                                  vol.getStartTimeSecs(),
-                                  retrievedTime,
-                                  retrievedProfile)) {
+  if (_tempProfile.loadFromSpdb(_params.sounding_spdb_url,
+                                vol.getStartTimeSecs(),
+                                retrievedTime)) {
     cerr << "ERROR - RadxQc::_tempProfileInit" << endl;
     cerr << "  Cannot retrive profile for time: "
          << RadxTime::strm(vol.getStartTimeSecs()) << endl;
@@ -1045,6 +1043,7 @@ int RadxQc::_retrieveTempProfile(const RadxVol &vol)
     cerr << "  freezingLevel: " << _tempProfile.getFreezingLevel() << endl;
   }
   if (_params.debug >= Params::DEBUG_VERBOSE) {
+    const vector<TempProfile::PointVal> &retrievedProfile = _tempProfile.getProfile();
     cerr << "=====================================" << endl;
     cerr << "Temp  profile" << endl;
     int nLevels = (int) retrievedProfile.size();

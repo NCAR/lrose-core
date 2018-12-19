@@ -86,6 +86,7 @@ as_ncbyte_implement(short)
 as_ncbyte_implement(int)
 as_ncbyte_implement(nclong)
 as_ncbyte_implement(long)
+as_ncbyte_implement(int64_t)
 as_ncbyte_implement(float)
 as_ncbyte_implement(double)
 
@@ -103,6 +104,7 @@ as_char_implement(short)
 as_char_implement(int)
 as_char_implement(nclong)
 as_char_implement(long)
+as_char_implement(int64_t)
 as_char_implement(float)
 as_char_implement(double)
 
@@ -119,6 +121,7 @@ inline char Nc3Values_char::as_char( long n ) const
 as_short_implement(int)
 as_short_implement(nclong)
 as_short_implement(long)
+as_short_implement(int64_t)
 as_short_implement(float)
 as_short_implement(double)
 
@@ -171,6 +174,11 @@ inline int Nc3Values_long::as_int( long n ) const
     return the_values[n];
 }
 
+inline int Nc3Values_int64_t::as_int( long n ) const
+{
+    return the_values[n];
+}
+
 as_nclong_implement(float)
 as_nclong_implement(double)
 
@@ -200,6 +208,11 @@ inline nclong Nc3Values_nclong::as_nclong( long n ) const
 }
 
 inline nclong Nc3Values_long::as_nclong( long n ) const
+{
+    return the_values[n];
+}
+
+inline nclong Nc3Values_int64_t::as_nclong( long n ) const
 {
     return the_values[n];
 }
@@ -237,12 +250,57 @@ inline long Nc3Values_long::as_long( long n ) const
     return the_values[n];
 }
 
+inline long Nc3Values_int64_t::as_long( long n ) const
+{
+    return the_values[n];
+}
+
+
+as_int64_implement(float)
+as_int64_implement(double)
+
+inline int64_t Nc3Values_ncbyte::as_int64( long n ) const
+{
+    return the_values[n];
+}
+
+inline int64_t Nc3Values_char::as_int64( long n ) const
+{
+    return the_values[n];
+}
+
+inline int64_t Nc3Values_short::as_int64( long n ) const
+{
+    return the_values[n];
+}
+
+inline int64_t Nc3Values_int::as_int64( long n ) const
+{
+    return the_values[n];
+}
+
+inline int64_t Nc3Values_nclong::as_int64( long n ) const
+{
+    return the_values[n];
+}
+
+inline int64_t Nc3Values_long::as_int64( long n ) const
+{
+    return the_values[n];
+}
+
+inline int64_t Nc3Values_int64_t::as_int64( long n ) const
+{
+    return the_values[n];
+}
+
 as_float_implement(ncbyte)
 as_float_implement(char)
 as_float_implement(short)
 as_float_implement(int)
 as_float_implement(nclong)
 as_float_implement(long)
+as_float_implement(int64_t)
 as_float_implement(float)
 as_float_implement(double)
 
@@ -252,6 +310,7 @@ as_double_implement(short)
 as_double_implement(int)
 as_double_implement(nclong)
 as_double_implement(long)
+as_double_implement(int64_t)
 as_double_implement(float)
 as_double_implement(double)
 
@@ -259,6 +318,7 @@ as_string_implement(short)
 as_string_implement(int)
 as_string_implement(nclong)
 as_string_implement(long)
+as_string_implement(int64_t)
 as_string_implement(float)
 as_string_implement(double)
 

@@ -63,6 +63,9 @@ public:
 
   int getButtonRow() const { return _buttonRow; }
   bool getIsFilt() const { return _isFilt; }
+  bool haveColorMap() const { return _haveColorMap; }
+  void setNoColorMap() { _haveColorMap = false; }
+  void changeColorMap() { _haveColorMap = true; }
 
   void setSelectValue(double value) { _selectValue = value; }
   double getSelectValue() const { return _selectValue; }
@@ -75,6 +78,7 @@ public:
   const string getDialogText() const { return _dialog->text().toStdString(); }
 
   void print(ostream &out);
+  void setColorMapRange(double min, double max);
 
 private:
 
@@ -86,7 +90,7 @@ private:
 
   int _buttonRow;
   bool _isFilt;
-
+  bool _haveColorMap;
   double _selectValue;
   QLabel *_dialog;
 

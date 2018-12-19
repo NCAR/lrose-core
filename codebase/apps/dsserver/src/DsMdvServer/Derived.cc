@@ -380,34 +380,38 @@ MdvxField *DsMdvServer::_createDerivedField(Params::derived_field_t *derived,
 
   switch (derived->function) {
     
-  case Params::FUNC_LINEAR:
-    field = _createLinear(derived, base, errStr);
-    break;
-
-  case Params::FUNC_SPEED_FROM_U_V:
-    field = _createSpeedFromUV(derived, base, errStr);
-    break;
-
-  case Params::FUNC_DIRN_FROM_U_V:
-    field = _createDirnFromUV(derived, base, errStr);
-    break;
-
-  case Params::FUNC_DIFF_FIELDS_SAME_FILE:
-    field = _createDiffFieldsSameFile(derived, base, errStr);
-    break;
-
-  case Params::FUNC_DIFF_FIELDS:
-    field = _createDiffFields(derived, base, action, errStr);
-    break;
-
-  case Params::FUNC_DIFF_IN_TIME:
-    field = _createDiffInTime(derived, base, action, errStr);
-    break;
-
-  case Params::FUNC_VERT_COMPOSITE:
-    field = _createVertComposite(derived, base, action, errStr);
-    break;
-
+    case Params::FUNC_LINEAR:
+      field = _createLinear(derived, base, errStr);
+      break;
+      
+    case Params::FUNC_SPEED_FROM_U_V:
+      field = _createSpeedFromUV(derived, base, errStr);
+      break;
+      
+    case Params::FUNC_DIRN_FROM_U_V:
+      field = _createDirnFromUV(derived, base, errStr);
+      break;
+      
+    case Params::FUNC_DIFF_FIELDS_SAME_FILE:
+      field = _createDiffFieldsSameFile(derived, base, errStr);
+      break;
+      
+    case Params::FUNC_DIFF_FIELDS:
+      field = _createDiffFields(derived, base, action, errStr);
+      break;
+      
+    case Params::FUNC_DIFF_IN_TIME:
+      field = _createDiffInTime(derived, base, action, errStr);
+      break;
+      
+    case Params::FUNC_VERT_COMPOSITE:
+      field = _createVertComposite(derived, base, action, errStr);
+      break;
+      
+    case Params::FUNC_PSEUDO_COLOR_IMAGE:
+      field = _createPseudoColorImage(derived, base, action, errStr);
+      break;
+    
   } // switch
 
   if (!field) {
@@ -744,11 +748,16 @@ MdvxField *DsMdvServer::_createDiffFields(Params::derived_field_t *derived,
   // get the second field from another file based on url_2
 
   DsMdvx other(base);
+  time_t searchTime = base.getMasterHeader().time_centroid;
+  int searchMarginSecs = 0;
+  if (derived->i_arg_2 > 0) {
+    searchMarginSecs = derived->i_arg_2;
+  }
   if (base._readTimeSet) {
-    other.setReadTime(base._readSearchMode,
+    other.setReadTime(Mdvx::READ_CLOSEST,
 		      derived->url_2,
-		      base._readSearchMargin,
-		      base._readSearchTime + derived->i_arg_1,
+                      searchMarginSecs,
+		      searchTime + derived->i_arg_1,
 		      base._readForecastLeadTime);
   } else {
     other.setReadPath(derived->url_2);
@@ -1054,6 +1063,132 @@ MdvxField *DsMdvServer::_createVertComposite(Params::derived_field_t *derived,
 }
 
 /////////////////////////////////////////////////////////
+// create a derived field using FUNC_PSEUDO_COLOR_IMAGE
+//
+// Returns MdvxField* on success, NULL on failure
+
+MdvxField *DsMdvServer::_createPseudoColorImage(Params::derived_field_t *derived,
+                                                const DsMdvx &base,
+                                                DsMdvServer::read_action_t action,
+                                                string &errStr)
+  
+{
+
+  if (_isDebug) {
+    cerr << "Creating derived field: FUNC_PSEUDO_COLOR_IMAGE" << endl;
+  }
+
+  // get the red field from the base object
+  
+  MdvxField *fldRed = base.getFieldByName(derived->field_name_1);
+  if (!fldRed) {
+    errStr += "MdvxField *DsMdvServer::_createPseudoColorImage'\n";
+    TaStr::AddStr(errStr, "  Cannot find red field: ", derived->field_name_1);
+    return NULL;
+  }
+  fldRed->transform2Linear();
+  fldRed->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+  
+  // get the green field from another file based on url_2
+  
+  DsMdvx green(base);
+  time_t searchTime = base.getMasterHeader().time_centroid;
+  int searchMarginSecs = 0;
+  if (derived->i_arg_2 > 0) {
+    searchMarginSecs = derived->i_arg_2;
+  }
+  if (base._readTimeSet) {
+    green.setReadTime(Mdvx::READ_CLOSEST,
+		      derived->url_2,
+                      searchMarginSecs,
+		      searchTime + derived->i_arg_1,
+		      base._readForecastLeadTime);
+  } else {
+    green.setReadPath(derived->url_2);
+  }
+  green.clearReadFields();
+  green.addReadField(derived->field_name_2);
+  
+  if (_isDebug) {
+    cerr << "Deriving field - DIFF_FIELDS" << endl;
+    green.printReadRequest(cerr);
+  }
+
+  int iret = 0;
+  switch (action) {
+    case READ_VOLUME:
+      iret = green.readVolume();
+      break;
+    case READ_VSECTION:
+      iret = green.readVsection();
+      break;
+    default:
+      iret = -1;
+  }
+
+  if (_isDebug) {
+    cerr << "read path: " << green.getPathInUse() << endl;
+  }
+
+  if (iret) {
+    errStr += "MdvxField *DsMdvServer::_createPseudoColorImage'\n";
+    TaStr::AddStr(errStr, "  Cannot read in field 2: ", derived->field_name_2);
+    TaStr::AddStr(errStr, "  Url: ", derived->url_2);
+    errStr += green.getErrStr();
+    return NULL;
+  }
+
+  MdvxField *fld2 = green.getFieldByName(derived->field_name_2);
+  if (!fld2) {
+    errStr += "MdvxField *DsMdvServer::_createPseudoColorImage'\n";
+    TaStr::AddStr(errStr, "  Cannot find field 2: ", derived->field_name_2);
+    return NULL;
+  }
+  fld2->transform2Linear();
+  fld2->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+
+  // check that fields have the same grid geometry
+  
+  const Mdvx::field_header_t &fhdr1 = fldRed->getFieldHeader();
+  const Mdvx::field_header_t &fhdr2 = fld2->getFieldHeader();
+  if (!_checkFieldGeometry(fhdr1, fhdr2)) {
+    errStr += "MdvxField *DsMdvServer::_createPseudoColorImage'\n";
+    TaStr::AddStr(errStr, "  Fields 1 and 2 have different geometry");
+    TaStr::AddStr(errStr, "  Field 1: ", derived->field_name_1);
+    TaStr::AddStr(errStr, "  Field 2: ", derived->field_name_2);
+    return NULL;
+  }
+
+  // make copy of field 1 to be the template for the diff field
+  
+  MdvxField *diffField = new MdvxField(*fldRed);
+  const Mdvx::field_header_t &dfhdr = diffField->getFieldHeader();
+  
+  // compute diff from U and V
+  
+  fl32 *diff = (fl32 *) diffField->getVol();
+  fl32 *f1 = (fl32 *) fldRed->getVol();
+  fl32 *f2 = (fl32 *) fld2->getVol();
+  fl32 uMissing = fhdr1.missing_data_value;
+  fl32 vMissing = fhdr2.missing_data_value;
+  fl32 dMissing = dfhdr.missing_data_value;
+  int npts = dfhdr.nx * dfhdr.ny * dfhdr.nz;
+  
+  for (int ii = 0; ii < npts; ii++, diff++, f1++, f2++) {
+    fl32 val1 = *f1;
+    fl32 val2 = *f2;
+    if (val1 == uMissing || val2 == vMissing) {
+      *diff = dMissing;
+    } else {
+      *diff = val1 - val2;
+    }
+  }
+
+  return diffField;
+
+}
+
+/////////////////////////////////////////////////////////
 // check fields have same geometry
 //
 // Returns true is same, false if different
@@ -1303,6 +1438,7 @@ int DsMdvServer::_doCompileDerivedTimeHeight(DsMdvx &mdvx,
 			      mdvx._readScale,
 			      mdvx._readBias)) {
       mdvx.addToErrStr("ERROR - _compileTimeHeight\n");
+      delete thtField;
       return -1;
     }
     

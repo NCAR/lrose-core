@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 // RCS info
-//   $Author: dixon $
+//   $Author: jcraig $
 //   $Locker:  $
-//   $Date: 2016/03/07 01:23:09 $
-//   $Id: InputVariable.cc,v 1.2 2016/03/07 01:23:09 dixon Exp $
-//   $Revision: 1.2 $
+//   $Date: 2018/01/26 20:17:16 $
+//   $Id: InputVariable.cc,v 1.3 2018/01/26 20:17:16 jcraig Exp $
+//   $Revision: 1.3 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -82,7 +82,7 @@ InputVariable::~InputVariable(void)
  * init() - initialize the InputVariable object
  */
 
-bool InputVariable::init(const NcFile &fileObject)
+bool InputVariable::init(const Nc3File &fileObject)
 {
   if(_debug)
     cerr << "InputVariable::init(): Initializing variable: " 
@@ -108,7 +108,7 @@ bool InputVariable::init(const NcFile &fileObject)
       _checkForMissing = true;
     }
 
-  //initialize the value of _totalNumValues, using the NcVar pointer's num_vals() method
+  //initialize the value of _totalNumValues, using the Nc3Var pointer's num_vals() method
   _totalNumValues = _ncVarPtr->num_vals();
 
   _isInitialized = true;

@@ -40,6 +40,9 @@
 #include <toolsa/os_config.h>
 #include <dataport/swap.h>
 #include <rapformats/ccm_file.h>
+#if defined(__linux)
+extern void swab(const void *from, void *to, ssize_t n);
+#endif
 
 /****************************************************************************
  * GET_CCM_HEADER: Read a ccm file header into the supplied area 

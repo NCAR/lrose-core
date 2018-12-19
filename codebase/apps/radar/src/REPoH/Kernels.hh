@@ -23,71 +23,110 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
  * @file Kernels.hh 
- * @brief Kernels The set of Kernels
+ * @brief Kernels The set of Kernels for a Sweep
  * @class Kernels
- * @brief Kernels The set of Kernels
- * 
+ * @brief Kernels The set of Kernels for a Sweep
  */
 
 #ifndef Kernels_H
 #define Kernels_H
 
 #include "KernelPair.hh"
+#include <rapmath/MathUserData.hh>
 #include <vector>
 
 /*----------------------------------------------------------------*/
-class Kernels
+class Kernels : public MathUserData
 {
 public:
   Kernels();
   ~Kernels();
 
-  inline void append(const KernelPair &k) {_k.push_back(k);}
+  #include <rapmath/MathUserDataVirtualMethods.hh>
 
+  /**
+   * @return the next available i.d. value
+   */
+  inline int nextAvailableId(void) const {return _next_available_id;}
+
+  /**
+   * Append a kernel pair to the state
+   * @param[in] k  Object to append
+   */ 
+  inline void append(const KernelPair &k) { _k.push_back(k); }
+
+  /**
+   * Increment the local available i.d. by a number
+   * @param[in] num
+   */
+  inline void incrementNextAvailableId(int num)
+  {
+    _next_available_id += num;
+  }
+  
+  /**
+   * Debug print
+   */
   void print(void) const;
 
   /**
-   * Return # of Kernel pairs
+   * Return number of Kernel pairs
    */
-  inline int num(void) const
-  {
-    return (int)_k.size();
-  }
+  inline size_t size(void) const   {return _k.size(); }
 
   /**
-   * Return ref. to the 'ith' Kernel pair
+   * @return reference to the 'ith' Kernel pair
    */
-  inline const KernelPair &ith_kernel_pair(const int i) const
-  {
-    return _k[i];
-  }
+  inline const KernelPair &operator[](int i) const  {return _k[i]; }
 
   /**
-   * Finish up a KernelPair using the other inputs, then store locally
+   * @return reference to the 'ith' Kernel pair
    */
-  void add(const KernelPair &k, const time_t &time, const double vlevel, 
-	   const KernelGrids &grids, const Params &params, const double dx,
-	   Grid2d &kcp);
-
+  inline KernelPair &operator[](int i) {return _k[i]; }
 
   /**
-   * Make humidity estimation for all KernelPair objects, write results
-   * to att and hum input grids, and return one line summary strings
+   * Compute attenuation for all kernel pairs and write values to the grid
+   * @param[in] dx  Km per gate
+   * @param[out] att  Attenuation output grid
    */
-  string humidity_estimate(const double vlevel, const GridProj &gp,
-			   Grid2d &att, Grid2d &hum) const;
+  void computeAttenuation(double dx, Grid2d &att) const;
+
+  /**
+   * Compute humidity for all kernel pairs and write values to the grid
+   * @param[in] dx  Km per gate
+   * @param[out] hum  Humidity output grid
+   */
+  void computeHumidity(double dx, Grid2d &hum) const;
+
+  /**
+   * @return ascii output for the Kernel pairs
+   *
+   * @param[in] vlevel vertical level degrees
+   * @param[in] gp Grid projection
+   */
+  string asciiOutput(double vlevel, const MdvxProj &gp) const;
+
+  /**
+   * Filter to keep only kernel pairs for which both kernels passed all tests
+   */
+  void filterToGood(void);
 
   /**
    * Write genpoly representation of kernels to SPDB
+   * @param[in] url   Where to write
+   * @param[in] time  data time
+   * @param[in] outside true to write the kernel pair 'outside' points
+   * @param[in] proj  grid projection
    */
-  bool write_genpoly(const string &url, const time_t &time, const int nx,
-		     const int ny, const bool outside) const;
+  bool writeGenpoly(const string &url, const time_t &time,
+		    bool outside, const MdvxProj &proj) const;
+
 
 protected:
 private:
 
-  int _next_available_id;
-  std::vector<KernelPair> _k;
+  int _next_available_id;       /**< Counter maintained to agree with _k */
+  std::vector<KernelPair> _k;   /**< The kernel pairs */
 };
 
 #endif

@@ -195,12 +195,12 @@ int Shape2Map::_convertShapeFile(const char *shapePath)
   if (iconLats.size() > 0) {
 
     fprintf(stdout,
-            "\nICONDEF CROSS 6\n 0 -5\n 0 5\n 32767 32767\n"
-            " -5 0\n 5 0\n 32767 32767\n #\n");
+            "\nICONDEF CROSS 6\n 0 -5\n 0 5\n -1000.0 -1000.0\n"
+            " -5 0\n 5 0\n -1000.0 -1000.0\n #\n");
 
     for (size_t ii = 0; ii < iconLats.size(); ii++) {
       fprintf(stdout,
-              "ICON CROSS %10.6f %10.6f 32767 32767 nl\n",
+              "ICON CROSS %10.6f %10.6f -1000.0 -1000.0 nl\n",
               iconLats[ii], iconLons[ii]);
     }
 
@@ -250,7 +250,7 @@ void Shape2Map::_handlePolyline(SHPObject *SO)
 
   for(size_t ii = 0; ii < lats.size(); ii++) {
     if (lats[ii] < -999) {
-      fprintf(stdout, "  32767 32767\n");
+      fprintf(stdout, "  -1000.0 -1000.0\n");
     } else {
       fprintf(stdout, "  %10.6f %10.6f\n",
               lats[ii], lons[ii]);

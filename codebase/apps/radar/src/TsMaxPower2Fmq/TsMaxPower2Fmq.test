@@ -1,0 +1,250 @@
+/**********************************************************************
+ * TDRP params for TsMaxPower2Fmq
+ **********************************************************************/
+
+//======================================================================
+//
+// TsMaxPower2Fmq - max power monitoring for HCR.
+//
+// TsMaxPower2Fmq reads radar time series data from an FMQ, computes the 
+//   max power at any location, and writes the result as XML text to an 
+//   FMQ. The HCR control app reads this data and disables the transmitter 
+//   if the received power is too high.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// reg_with_procmap ////////////////////////
+//
+// Register with procmap.
+//
+//
+// Type: boolean
+//
+
+reg_with_procmap = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - files or time series API.
+//
+// If TS_FMQ_INPUT, the application will read the time series from a 
+//   file message queue and process the pulses as they come in. If 
+//   TS_FILE_INPUT, the application will process all the files specified 
+//   on the command line.
+//
+//
+// Type: enum
+// Options:
+//     TS_FILE_INPUT
+//     TS_FMQ_INPUT
+//
+
+input_mode = TS_FMQ_INPUT;
+
+///////////// input_fmq_path //////////////////////////
+//
+// FMQ name. For TS_FMQ_INPUT only.
+//
+// Path to FMQ. This path does not include any extension.
+//
+//
+// Type: string
+//
+
+input_fmq_path = "/tmp/fmq/ts/wband/shmem_10000";
+
+///////////// use_secondary_georeference //////////////
+//
+// If true, use the secondary georeference packet.
+//
+// By default, we use the primary georeference packet. And most mobile 
+//   radars only have one georeference. For those radars that have 2 
+//   georef devices, set this to true to use the secondary reference.
+//
+//
+// Type: boolean
+//
+
+use_secondary_georeference = FALSE;
+
+//======================================================================
+//
+// SAMPLING.
+//
+//======================================================================
+ 
+///////////// n_samples ///////////////////////////////
+//
+// Number of pulse samples to be used in computing stats.
+//
+//
+// Type: int
+//
+
+n_samples = 10000;
+
+///////////// start_gate //////////////////////////////
+//
+// Start gate for analysis.
+//
+//
+// Type: int
+//
+
+start_gate = 30;
+
+///////////// distance_units //////////////////////////
+//
+// Units for displaying distance.
+//
+// In MAX_POWER mode, the distance to the max power gate for each 
+//   channel is printed out. This can be either in feet or meters.
+//
+//
+// Type: enum
+// Options:
+//     DISTANCE_IN_METERS
+//     DISTANCE_IN_FEET
+//
+
+distance_units = DISTANCE_IN_METERS;
+
+//======================================================================
+//
+// CALIBRATION.
+//
+//======================================================================
+ 
+///////////// apply_calibration ///////////////////////
+//
+// Option to apply calibration to compute powers.
+//
+// Normally the powers are simply computed as I**2 + Q**2 - i.e. the 
+//   power at the digitizer. If this param is set to TRUE, then the 
+//   receiver gain from the calibration file will be subtracted from the 
+//   powers, to give the powers detected by the LNAs.
+//
+//
+// Type: boolean
+//
+
+apply_calibration = TRUE;
+
+///////////// cal_xml_file_path ///////////////////////
+//
+// Path for calibration file - see apply_calibration above.
+//
+// This file will be read in and the gain values applied to compute the 
+//   powers,m if apply_calibration is TRUE.
+//
+//
+// Type: string
+//
+
+cal_xml_file_path = "$(HOME)/git/HCR_configuration/projDir/moments/params/fallback_cal.xml";
+
+//======================================================================
+//
+// WRITING THE RESULTS OUT TO FMQ.
+//
+//======================================================================
+ 
+///////////// output_fmq_path /////////////////////////
+//
+// FMQ name for output.
+//
+//
+// Type: string
+//
+
+output_fmq_path = "/tmp/fmq/max_power/shmem_15000";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+//
+// This is the total size of the output FMQ buffer.
+//
+//
+// Type: int
+//
+
+output_fmq_size = 10000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in the output FMQ.
+//
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+//
+//
+// Type: int
+//
+
+output_fmq_nslots = 500;
+
+///////////// output_fmq_reg_with_datamapper //////////
+//
+// Option to register with DataMapper.
+//
+// If true, this app will register with the DataMapper at set intervals.
+//
+//
+// Type: boolean
+//
+
+output_fmq_reg_with_datamapper = TRUE;
+
+///////////// output_fmq_datamapper_reg_interval //////
+//
+// Frequency for DataMapper registration (secs).
+//
+//
+// Type: int
+//
+
+output_fmq_datamapper_reg_interval = 2;
+

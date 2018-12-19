@@ -27,7 +27,7 @@
 // Used wgrib by Wesley Ebisuzaki at NOAA as
 // reference (http://wesley.wwb.noaa.gov/wgrib.html)
 //
-// $Id: BMS.cc,v 1.12 2017/09/20 22:16:10 jcraig Exp $
+// $Id: BMS.cc,v 1.13 2018/10/13 22:29:11 dixon Exp $
 //
 /////////////////////////////////////////////////
 
@@ -181,7 +181,6 @@ int BMS::pack(ui08 *bmsPtr)
        if(num > 0) 
        {
 	 int rem[8];
-	 // int val = 0;
 	 for(int i = 0; i < num; i++)
 	   rem[i] = _bitMap[ind + i];
 	 for(int i = num; i < 8; i++)

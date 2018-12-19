@@ -1,0 +1,633 @@
+================= DORADE FORMAT ==================
+--------------------------------------------------
+  struct: 'comment_t'
+  size: 508
+  id: COMM
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     char             comment[500]     500       8
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'super_SWIB_t'
+  size: 196
+  id: SSWB
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si32                last_used       4       8
+     si32               start_time       4      12
+     si32                stop_time       4      16
+     si32              sizeof_file       4      20
+     si32         compression_flag       4      24
+     si32        volume_time_stamp       4      28
+     si32               num_params       4      32
+     char            radar_name[8]       8      36
+     fl64             d_start_time       8      44
+     fl64              d_stop_time       8      52
+     si32              version_num       4      60
+     si32           num_key_tables       4      64
+     si32                   status       4      68
+     si32          place_holder[7]      28      72
+  key_table:
+     si32      key_table[0].offset       4     100
+     si32      key_table[0].size         4     104
+     si32      key_table[0].type         4     108
+     si32      key_table[1].offset       4     112
+     si32      key_table[1].size         4     116
+     si32      key_table[1].type         4     120
+     ....
+     ....
+     ....
+     ....
+     si32      key_table[6].offset       4     172
+     si32      key_table[6].size         4     176
+     si32      key_table[6].type         4     180
+     si32      key_table[7].offset       4     184
+     si32      key_table[7].size         4     188
+     si32      key_table[7].type         4     192
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'volume_t'
+  size: 72
+  id: VOLD
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si16           format_version       2       8
+     si16               volume_num       2      10
+     si32            maximum_bytes       4      12
+     char            proj_name[20]      20      16
+     si16                     year       2      36
+     si16                    month       2      38
+     si16                      day       2      40
+     si16            data_set_hour       2      42
+     si16          data_set_minute       2      44
+     si16          data_set_second       2      46
+     char            flight_num[8]       8      48
+     char          gen_facility[8]       8      56
+     si16                 gen_year       2      64
+     si16                gen_month       2      66
+     si16                  gen_day       2      68
+     si16        number_sensor_des       2      70
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'radar_t'
+  size: 300
+  id: RADD
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     char            radar_name[8]       8       8
+     fl32              radar_const       4      16
+     fl32               peak_power       4      20
+     fl32              noise_power       4      24
+     fl32            receiver_gain       4      28
+     fl32             antenna_gain       4      32
+     fl32              system_gain       4      36
+     fl32          horz_beam_width       4      40
+     fl32          vert_beam_width       4      44
+     si16               radar_type       2      48
+     si16                scan_mode       2      50
+     fl32            req_rotat_vel       4      52
+     fl32          scan_mode_pram0       4      56
+     fl32          scan_mode_pram1       4      60
+     si16        num_parameter_des       2      64
+     si16            total_num_des       2      66
+     si16            data_compress       2      68
+     si16           data_reduction       2      70
+     fl32           data_red_parm0       4      72
+     fl32           data_red_parm1       4      76
+     fl32          radar_longitude       4      80
+     fl32           radar_latitude       4      84
+     fl32           radar_altitude       4      88
+     fl32            eff_unamb_vel       4      92
+     fl32          eff_unamb_range       4      96
+     si16           num_freq_trans       2     100
+     si16           num_ipps_trans       2     102
+     fl32                    freq1       4     104
+     fl32                    freq2       4     108
+     fl32                    freq3       4     112
+     fl32                    freq4       4     116
+     fl32                    freq5       4     120
+     fl32                     prt1       4     124
+     fl32                     prt2       4     128
+     fl32                     prt3       4     132
+     fl32                     prt4       4     136
+     fl32                     prt5       4     140
+     si32            extension_num       4     144
+     char           config_name[8]       8     148
+     si32               config_num       4     156
+     fl32            aperture_size       4     160
+     fl32            field_of_view       4     164
+     fl32             aperture_eff       4     168
+     fl32             aux_freq[11]      44     172
+     fl32              aux_prt[11]      44     216
+     fl32              pulse_width       4     260
+     fl32       primary_cop_baseln       4     264
+     fl32     secondary_cop_baseln       4     268
+     fl32        pc_xmtr_bandwidth       4     272
+     si32         pc_waveform_type       4     276
+     char            site_name[20]      20     280
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'correction_t'
+  size: 72
+  id: CFAC
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     fl32             azimuth_corr       4       8
+     fl32           elevation_corr       4      12
+     fl32         range_delay_corr       4      16
+     fl32           longitude_corr       4      20
+     fl32            latitude_corr       4      24
+     fl32        pressure_alt_corr       4      28
+     fl32           radar_alt_corr       4      32
+     fl32           ew_gndspd_corr       4      36
+     fl32           ns_gndspd_corr       4      40
+     fl32            vert_vel_corr       4      44
+     fl32             heading_corr       4      48
+     fl32                roll_corr       4      52
+     fl32               pitch_corr       4      56
+     fl32               drift_corr       4      60
+     fl32           rot_angle_corr       4      64
+     fl32                tilt_corr       4      68
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'parameter_t'
+  size: 216
+  id: PARM
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     char        parameter_name[8]       8       8
+     char    param_description[40]      40      16
+     char           param_units[8]       8      56
+     si16          interpulse_time       2      64
+     si16             xmitted_freq       2      66
+     fl32          recvr_bandwidth       4      68
+     si16              pulse_width       2      72
+     si16             polarization       2      74
+     si16              num_samples       2      76
+     si16            binary_format       2      78
+     char       threshold_field[8]       8      80
+     fl32          threshold_value       4      88
+     fl32          parameter_scale       4      92
+     fl32           parameter_bias       4      96
+     si32                 bad_data       4     100
+     si32            extension_num       4     104
+     char           config_name[8]       8     108
+     si32               config_num       4     116
+     si32           offset_to_data       4     120
+     fl32           mks_conversion       4     124
+     si32               num_qnames       4     128
+     char          qdata_names[32]      32     132
+     si32             num_criteria       4     164
+     char       criteria_names[32]      32     168
+     si32             number_cells       4     200
+     fl32     meters_to_first_cell       4     204
+     fl32     meters_between_cells       4     208
+     fl32            eff_unamb_vel       4     212
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'cell_vector_t'
+  size: 6012
+  id: CELV
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si32             number_cells       4       8
+     fl32         dist_cells[1500]    6000      12
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'cell_spacing_fp_t'
+  size: 64
+  id: CSFD
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si32             num_segments       4       8
+     fl32            dist_to_first       4      12
+     fl32               spacing[8]      32      16
+     si16             num_cells[8]      16      48
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'sweepinfo_t'
+  size: 40
+  id: SWIB
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     char            radar_name[8]       8       8
+     si32                sweep_num       4      16
+     si32                 num_rays       4      20
+     fl32              start_angle       4      24
+     fl32               stop_angle       4      28
+     fl32              fixed_angle       4      32
+     si32              filter_flag       4      36
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'platform_t'
+  size: 80
+  id: ASIB
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     fl32                longitude       4       8
+     fl32                 latitude       4      12
+     fl32             altitude_msl       4      16
+     fl32             altitude_agl       4      20
+     fl32              ew_velocity       4      24
+     fl32              ns_velocity       4      28
+     fl32            vert_velocity       4      32
+     fl32                  heading       4      36
+     fl32                     roll       4      40
+     fl32                    pitch       4      44
+     fl32              drift_angle       4      48
+     fl32           rotation_angle       4      52
+     fl32                     tilt       4      56
+     fl32            ew_horiz_wind       4      60
+     fl32            ns_horiz_wind       4      64
+     fl32                vert_wind       4      68
+     fl32           heading_change       4      72
+     fl32             pitch_change       4      76
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'ray_t'
+  size: 44
+  id: RYIB
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si32                sweep_num       4       8
+     si32               julian_day       4      12
+     si16                     hour       2      16
+     si16                   minute       2      18
+     si16                   second       2      20
+     si16              millisecond       2      22
+     fl32                  azimuth       4      24
+     fl32                elevation       4      28
+     fl32               peak_power       4      32
+     fl32           true_scan_rate       4      36
+     si32               ray_status       4      40
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'paramdata_t'
+  size: 16
+  id: RDAT
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     char            pdata_name[8]       8       8
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'qparamdata_t'
+  size: 56
+  id: QDAT
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     char            pdata_name[8]       8       8
+     si32            extension_num       4      16
+     si32               config_num       4      20
+     si16            first_cell[4]       8      24
+     si16             num_cells[4]       8      32
+     fl32        criteria_value[4]      16      40
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'extra_stuff_t'
+  size: 24
+  id: XTSF
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si32                      one       4       8
+     si32            source_format       4      12
+     si32     offset_to_first_item       4      16
+     si32          transition_flag       4      20
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'null_block_t'
+  size: 8
+  id: NULL
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'rot_angle_table_t'
+  size: 28
+  id: RKTB
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     fl32                angle2ndx       4       8
+     si32             ndx_que_size       4      12
+     si32         first_key_offset       4      16
+     si32       angle_table_offset       4      20
+     si32                 num_rays       4      24
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'rot_table_entry_t'
+  size: 12
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     fl32           rotation_angle       4       0
+     si32                   offset       4       4
+     si32                     size       4       8
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'radar_test_status_t'
+  size: 52
+  id: FRAD
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si32          data_sys_status       4       8
+     char            radar_name[8]       8      12
+     fl32         test_pulse_level       4      20
+     fl32          test_pulse_dist       4      24
+     fl32         test_pulse_width       4      28
+     fl32          test_pulse_freq       4      32
+     si16         test_pulse_atten       2      36
+     si16          test_pulse_fnum       2      38
+     fl32              noise_power       4      40
+     si32                ray_count       4      44
+     si16           first_rec_gate       2      48
+     si16            last_rec_gate       2      50
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'field_radar_t'
+  size: 264
+  id: FRIB
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si32              data_sys_id       4       8
+     fl32                 loss_out       4      12
+     fl32                  loss_in       4      16
+     fl32              loss_rjoint       4      20
+     fl32                ant_v_dim       4      24
+     fl32                ant_h_dim       4      28
+     fl32           ant_noise_temp       4      32
+     fl32           r_noise_figure       4      36
+     fl32            xmit_power[5]      20      40
+     fl32              x_band_gain       4      60
+     fl32         receiver_gain[5]      20      64
+     fl32               if_gain[5]      20      84
+     fl32          conversion_gain       4     104
+     fl32          scale_factor[5]      20     108
+     fl32          processor_const       4     128
+     si32         dly_tube_antenna       4     132
+     si32    dly_rndtrip_chip_atod       4     136
+     si32     dly_timmod_testpulse       4     140
+     si32         dly_modulator_on       4     144
+     si32        dly_modulator_off       4     148
+     fl32        peak_power_offset       4     152
+     fl32        test_pulse_offset       4     156
+     fl32            E_plane_angle       4     160
+     fl32            H_plane_angle       4     164
+     fl32       encoder_antenna_up       4     168
+     fl32         pitch_antenna_up       4     172
+     si16         indepf_times_flg       2     176
+     si16          indep_freq_gate       2     178
+     si16         time_series_gate       2     180
+     si16          num_base_params       2     182
+     char            file_name[80]      80     184
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'lidar_t'
+  size: 148
+  id: LIDR
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     char            lidar_name[8]       8       8
+     fl32              lidar_const       4      16
+     fl32             pulse_energy       4      20
+     fl32               peak_power       4      24
+     fl32              pulse_width       4      28
+     fl32            aperture_size       4      32
+     fl32            field_of_view       4      36
+     fl32             aperture_eff       4      40
+     fl32          beam_divergence       4      44
+     si16               lidar_type       2      48
+     si16                scan_mode       2      50
+     fl32            req_rotat_vel       4      52
+     fl32          scan_mode_pram0       4      56
+     fl32          scan_mode_pram1       4      60
+     si16        num_parameter_des       2      64
+     si16            total_num_des       2      66
+     si16            data_compress       2      68
+     si16           data_reduction       2      70
+     fl32           data_red_parm0       4      72
+     fl32           data_red_parm1       4      76
+     fl32          lidar_longitude       4      80
+     fl32           lidar_latitude       4      84
+     fl32           lidar_altitude       4      88
+     fl32            eff_unamb_vel       4      92
+     fl32          eff_unamb_range       4      96
+     si32          num_wvlen_trans       4     100
+     fl32                      prf       4     104
+     fl32           wavelength[10]      40     108
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'field_lidar_t'
+  size: 748
+  id: FLIB
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si32              data_sys_id       4       8
+     fl32    transmit_beam_div[10]      40      12
+     fl32           xmit_power[10]      40      52
+     fl32         receiver_fov[10]      40      92
+     si32        receiver_type[10]      40     132
+     fl32        r_noise_floor[10]      40     172
+     fl32     receiver_spec_bw[10]      40     212
+     fl32     receiver_elec_bw[10]      40     252
+     fl32          calibration[10]      40     292
+     si32              range_delay       4     332
+     fl32     peak_power_multi[10]      40     336
+     fl32        encoder_mirror_up       4     376
+     fl32          pitch_mirror_up       4     380
+     si32      max_digitizer_count       4     384
+     fl32       max_digitizer_volt       4     388
+     fl32           digitizer_rate       4     392
+     si32        total_num_samples       4     396
+     si32         samples_per_cell       4     400
+     si32            cells_per_ray       4     404
+     fl32                 pmt_temp       4     408
+     fl32                 pmt_gain       4     412
+     fl32                 apd_temp       4     416
+     fl32                 apd_gain       4     420
+     si32                 transect       4     424
+     char    derived_names[10][12]     120     428
+     char     derived_units[10][8]      80     548
+     char       temp_names[10][12]     120     628
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'insitu_descript_t'
+  size: 4108
+  id: SITU
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si32            number_params       4       8
+  params:
+     char       params[0].name[8]        8      12
+     char       params[0].units[8]       8      20
+     char       params[1].name[8]        8      28
+     char       params[1].units[8]       8      36
+     char       params[2].name[8]        8      44
+     char       params[2].units[8]       8      52
+     ....
+     ....
+     ....
+     char     params[253].name[8]        8    4060
+     char     params[253].units[8]       8    4068
+     char     params[254].name[8]        8    4076
+     char     params[254].units[8]       8    4084
+     char     params[255].name[8]        8    4092
+     char     params[255].units[8]       8    4100
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'insitu_data_t'
+  size: 16
+  id: ISIT
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si16               julian_day       2       8
+     si16                    hours       2      10
+     si16                  minutes       2      12
+     si16                  seconds       2      14
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'indep_freq_t'
+  size: 8
+  id: INDF
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'minirims_data_t'
+  size: 4112
+  id: MINI
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si16                  command       2       8
+     si16                   status       2      10
+     fl32              temperature       4      12
+     fl32         x_axis_gyro[128]     512      16
+     fl32         y_axis_gyro[128]     512     528
+     fl32         z_axis_gyro[128]     512    1040
+     fl32        xr_axis_gyro[128]     512    1552
+     fl32          x_axis_vel[128]     512    2064
+     fl32          y_axis_vel[128]     512    2576
+     fl32          z_axis_vel[128]     512    3088
+     fl32          x_axis_pos[128]     512    3600
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'nav_descript_t'
+  size: 16
+  id: NDDS
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     si16                 ins_flag       2       8
+     si16                 gps_flag       2      10
+     si16            minirims_flag       2      12
+     si16              kalman_flag       2      14
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'time_series_t'
+  size: 8
+  id: TIME
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+--------------------------------------------------
+--------------------------------------------------
+  struct: 'waveform_t'
+  size: 364
+  id: WAVE
+
+     type                     name    size  offset
+     ----                     ----    ----  ------
+     char                    id[4]       4       0
+     si32                   nbytes       4       4
+     char         ps_file_name[16]      16       8
+     si16             num_chips[6]      12      24
+     char          blank_chip[256]     256      36
+     fl32               repeat_seq       4     292
+     si16          repeat_seq_dwel       2     296
+     si16                total_pcp       2     298
+     si16           chip_offset[6]      12     300
+     si16            chip_width[6]      12     312
+     fl32                   ur_pcp       4     324
+     fl32                   uv_pcp       4     328
+     si16             num_gates[6]      12     332
+     si16            gate_dist1[2]       4     344
+     si16            gate_dist2[2]       4     348
+     si16            gate_dist3[2]       4     352
+     si16            gate_dist4[2]       4     356
+     si16            gate_dist5[2]       4     360
+--------------------------------------------------
+==================================================

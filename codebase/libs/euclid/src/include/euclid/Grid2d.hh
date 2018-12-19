@@ -465,21 +465,27 @@ public:
 
   /**
    * @return reference to i'th data element
+   * @param[in] i
    */
   double& operator[](size_t i)                { return _data[i]; }
 
   /**
    * @return const reference to i'th data element
+   * @param[in] i
    */
   const double& operator[](size_t i) const    { return _data[i]; }
 
   /**
    * @return reference to x,y'th data element
+   * @param[in] x
+   * @param[in] y
    */
   double& operator()(size_t x, size_t y)    { return _data[_ipt(x,y)]; }
 
   /**
    * @return const reference to x,y'th data element
+   * @param[in] x
+   * @param[in] y
    */
   const double& operator()(size_t x, size_t y) const { return _data[_ipt(x,y)]; }
 
@@ -499,6 +505,9 @@ protected:
    * @param[in] iy
    */
   inline int _ipt(int ix, int iy) const { return iy*_nx + ix;}
+
+  int _firstValidIndex(int y) const;
+  int _lastValidIndex(int y) const;
 
 private:
 

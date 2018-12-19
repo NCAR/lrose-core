@@ -24,7 +24,7 @@
 /////////////////////////////////////////////
 // Grib2File - Main class for manipulating GRIB files.
 //
-// $Id: Grib2File.cc,v 1.20 2016/03/03 18:38:02 dixon Exp $
+// $Id: Grib2File.cc,v 1.21 2018/05/25 15:39:52 jcraig Exp $
 ////////////////////////////////////////////
 
 #include <iostream>
@@ -35,6 +35,7 @@
 
 #include <grib2/Grib2File.hh>
 #include <toolsa/file_io.h>
+#include <toolsa/str.h>
 
 #define EDITION_LOCATION 7
 #define GRIB2 2
@@ -136,20 +137,6 @@ int Grib2File::read(const string &file_path)
   if (_fileContentsRead)
     return GRIB_SUCCESS;
   
-  // Determine the input file size
-
-  struct stat file_stat;
-  
-  if (stat(_filePath.c_str(), &file_stat) != 0)
-  {
-    cerr << "ERROR: " << method_name << endl;
-    cerr << "Error stat'ing input GRIB file." << endl;
-    perror(_filePath.c_str());
-    
-    return GRIB_FAILURE;
-  }
-  
-  ui32 file_size = file_stat.st_size;
   
   // Open the input file
 
@@ -161,7 +148,36 @@ int Grib2File::read(const string &file_path)
     
     return GRIB_FAILURE;
   }
+
+  char *uncompressPath = STRdup(_filePath.c_str());
+  char *ext = uncompressPath + strlen(uncompressPath) - 2;
+  if (!strncmp(ext, ".Z", 2)) {
+    *ext = '\0';
+  }
+
+  ext = uncompressPath + strlen(uncompressPath) - 3; 
+  if (!strncmp(ext, ".gz", 3)) {
+    *ext = '\0';
+  }
+
+  ext = uncompressPath + strlen(uncompressPath) - 4;
+  if (!strncmp(ext, ".bz2", 4)) {
+    *ext = '\0';
+  }
+
+  // Determine the input file size
+  struct stat file_stat;
+  if (stat(uncompressPath, &file_stat) != 0)
+  {
+    cerr << "ERROR: " << method_name << endl;
+    cerr << "Error stat'ing input GRIB file." << endl;
+    perror(_filePath.c_str());
+    
+    return GRIB_FAILURE;
+  }
   
+  ui32 file_size = file_stat.st_size;
+
   // Read the input file into a local buffer
 
   ui08 *grib_contents = new ui08[file_size];

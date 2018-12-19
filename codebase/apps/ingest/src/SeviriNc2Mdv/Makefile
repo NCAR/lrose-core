@@ -39,7 +39,7 @@ TARGET_FILE = SeviriNc2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -lnetcdf_c++ -lnetcdf \
+LOC_LIBS = -lMdv -lRadx \
 	-ldsdata -ldsserver -ldidss -lrapformats \
 	-leuclid -ltoolsa -ldataport -ltdrp \
 	-lrapmath $(NETCDF4_LIBS) -lbz2 -lz \

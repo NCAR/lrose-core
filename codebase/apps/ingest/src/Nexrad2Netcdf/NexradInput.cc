@@ -33,7 +33,7 @@
 //
 // May 2005
 //
-// $Id: NexradInput.cc,v 1.13 2017/06/07 22:34:17 jcraig Exp $
+// $Id: NexradInput.cc,v 1.14 2018/10/16 20:43:22 jcraig Exp $
 //
 ///////////////////////////////////////////////////////////
 #include <cerrno>
@@ -154,8 +154,6 @@ int NexradInput::readHundredBeamFile( char* filePath, bool decompress )
 
          cookieFound = true;
 
-         POSTMSG( DEBUG, "Found cookie" );
-
          //
          // Write the cookie to the buffer
          //
@@ -184,7 +182,6 @@ int NexradInput::readHundredBeamFile( char* filePath, bool decompress )
       int length = ntohl(len);
       if ( length < 0 ) {
          length = -length;
-         POSTMSG( DEBUG, "Received negative value for length" );
       }
       if ( length > MAX_FILE_LEN ) {
          POSTMSG( ERROR, "Length too large: %d", length );

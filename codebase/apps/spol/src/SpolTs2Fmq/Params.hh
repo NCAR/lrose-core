@@ -424,21 +424,27 @@ public:
 
   tdrp_bool_t append_test_pulse_to_status_xml;
 
-  char* test_pulse_xml_tag;
-
   tdrp_bool_t merge_secondary_status_from_fmq;
 
   char* secondary_status_fmq_path;
 
   tdrp_bool_t monitor_test_pulse;
 
-  double test_pulse_range_km;
+  char* test_pulse_xml_tag;
+
+  double test_pulse_range_km_hc;
+
+  double test_pulse_range_km_hx;
+
+  double test_pulse_range_km_vc;
+
+  double test_pulse_range_km_vx;
 
   int test_pulse_n_samples;
 
-  tdrp_bool_t dual_pol_alternating_mode;
+  tdrp_bool_t alternating_mode;
 
-  tdrp_bool_t dual_pol_switching_receivers;
+  tdrp_bool_t switching_receivers;
 
   tdrp_bool_t zero_sweep_number_at_start_of_vol;
 
@@ -473,7 +479,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[66];
+  mutable TDRPtable _table[69];
 
   const char *_className;
 

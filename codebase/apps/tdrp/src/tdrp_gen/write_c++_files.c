@@ -72,8 +72,11 @@ static void write_copyright(FILE *out);
  * Returns 0 on success, -1 on failure.
  */
 
-int write_hh_file(const char *class_name, const TDRPtable *t_entries,
-		  int n_defs, const char *prog_name)
+int write_hh_file(const char *class_name, 
+                  const TDRPtable *t_entries,
+		  int n_defs,
+                  const char *prog_name,
+                  const char *lib_name)
 
 {
 
@@ -108,7 +111,7 @@ int write_hh_file(const char *class_name, const TDRPtable *t_entries,
   fprintf(hfile, "//\n");
   fprintf(hfile, "// TDRP header file for '%s' class.\n", class_name);
   fprintf(hfile, "//\n");
-  if (strlen(prog_name) > 0) {
+  if (prog_name != NULL) {
     fprintf(hfile, "// Code for program %s\n", prog_name);
     fprintf(hfile, "//\n");
   }
@@ -470,9 +473,12 @@ int write_hh_file(const char *class_name, const TDRPtable *t_entries,
  * Returns 0 on success, -1 on failure.
  */
 
-int write_cc_file(const char *class_name, const TDRPtable *t_entries,
-		  int n_defs, const char *prog_name)
-
+int write_cc_file(const char *class_name,
+                  const TDRPtable *t_entries,
+		  int n_defs,
+                  const char *prog_name,
+                  const char *lib_name)
+  
 {
 
   char cname[4192];
@@ -510,7 +516,7 @@ int write_cc_file(const char *class_name, const TDRPtable *t_entries,
   fprintf(cfile, "// TDRP C++ code file for class '%s'.\n", class_name);
   fprintf(cfile, "//\n");
   
-  if (strlen(prog_name) > 0) {
+  if (prog_name != NULL) {
     fprintf(cfile, "// Code for program %s\n", prog_name);
     fprintf(cfile, "//\n");
   }
@@ -537,11 +543,19 @@ int write_cc_file(const char *class_name, const TDRPtable *t_entries,
 	  " *\n"
 	  " * @author Automatically generated\n"
 	  " *\n"
-	  " */\n"
-	  "#include \"%s.hh\"\n"
-	  "#include <cstring>\n"
-	  "\n",
-	  class_name);
+	  " */\n");
+  if (lib_name == NULL) {
+    fprintf(cfile,
+            "#include \"%s.hh\"\n",
+            class_name);
+  } else {
+    fprintf(cfile,
+            "#include <%s/%s.hh>\n",
+            lib_name,
+            class_name);
+  }
+  fprintf(cfile, "#include <cstring>\n");
+  fprintf(cfile, "\n");
   
   /*
    * member functions

@@ -66,6 +66,15 @@ class Beam {
   
 public:
 
+  // scan mode for determining PPI vs RHI operations
+  
+  typedef enum {
+    SCAN_TYPE_UNKNOWN,
+    SCAN_TYPE_PPI,
+    SCAN_TYPE_RHI,
+    SCAN_TYPE_VERT
+  } scan_type_t;
+  
   // Constructor
   
   Beam(const string &progName,
@@ -81,7 +90,7 @@ public:
             bool beamIsIndexed,
             double angularResolution,
             double meanPointingAngle,
-            bool isPpi,
+            scan_type_t scanType,
             bool isAlternating,
             bool isStagPrt,
             double prt,
@@ -227,7 +236,7 @@ private:
   bool _endOfSweepFlag;
   bool _endOfVolFlag;
   
-  bool _isPpi;
+  scan_type_t _scanType;
   bool _antennaTransition;
 
   // range geometry
@@ -357,6 +366,8 @@ private:
 
   NoiseLocator *_noise;
 
+  // fields for moments
+
   TaArray<MomentsFields> _momFields_;
   MomentsFields *_momFields;
 
@@ -461,9 +472,17 @@ private:
   void _loadGateIqStagPrt(const fl32 **iqChan0, const fl32 **iqChan1);
   void _initStagPrt(int nGatesPrtShort, int nGatesPrtLong,
                     double prtShort, double prtLong);
+
   void _copyDataToOutputFields();
   int _checkCalib();
+
   int _correctCalibGainsForTemp();
+  int _correctHcrVRxGainForTemp();
+
+  double _getTempFromTagList(const string &tagList) const;
+  double _getDeltaGainFromXml(const string &xml,
+                              const string &tagList) const;
+  
   void _applyTimeDomainFilter(const RadarComplex_t *iq,
                               RadarComplex_t *filtered) const;
   void _applyMedianFilterToCPA(int nGates);

@@ -407,6 +407,8 @@ public:
 
   int n_gates_save;
 
+  tdrp_bool_t pad_n_gates_to_max;
+
   tdrp_bool_t one_file_only;
 
   char _end_; // end of data region
@@ -416,7 +418,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[29];
+  mutable TDRPtable _table[30];
 
   const char *_className;
 

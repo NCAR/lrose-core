@@ -1,0 +1,168 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/******************************************************************
+ *
+ * Parameter definitions for ArgentineAwsIngest
+ *
+ */
+
+commentdef {
+  p_header = "ArgentineAwsIngest reads AWS records from CVS files, converts them to WQxObs objects, and writes them to SPDB and/or NetCDF.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the appropriate level of detail.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum {
+  REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In this mode it is optional to watch for a latest_data_info file. In FILELIST mode, it processes all of the files in the list specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "$(HOME)/raw/relampago_aws";
+  p_descr = "Input directory";
+  p_help = "Directory where input data files can be found.";
+} input_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to true if there is a latest_data_info file available in the input directory.";
+  p_help = "REALTIME mode only.";
+} latest_data_info_avail;
+
+paramdef int {
+  p_default = 7200;
+  p_min = 1;
+  p_descr = "Max valid age of input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+typedef enum {
+  FIELD_LATITUDE,
+  FIELD_LONGITUDE,
+  FIELD_ALTITUDE,
+  FIELD_STATION_CODE,
+  FIELD_TIME_UTC,
+  FIELD_TEMPERATURE_C,
+  FIELD_RH_PERCENT,
+  FIELD_DEWPOINT_C,
+  FIELD_WIND_VEL_KMPH,
+  FIELD_WIND_DIRN_DEGT,
+  FIELD_PRESSURE_HPA,
+  FIELD_RAIN_4HR_MM,
+  FIELD_RAIN_6HR_MM,
+  FIELD_PRECIP_1HR_MM,
+  FIELD_PRECIP_10MIN_MM
+} csv_field_t;
+
+paramdef enum csv_field_t {
+  p_default = {
+    FIELD_LATITUDE,
+    FIELD_LONGITUDE,
+    FIELD_ALTITUDE,
+    FIELD_STATION_CODE,
+    FIELD_TIME_UTC,
+    FIELD_TEMPERATURE_C,
+    FIELD_RH_PERCENT,
+    FIELD_DEWPOINT_C,
+    FIELD_WIND_VEL_KMPH,
+    FIELD_WIND_DIRN_DEGT,
+    FIELD_PRESSURE_HPA,
+    FIELD_RAIN_4HR_MM,
+    FIELD_RAIN_6HR_MM,
+    FIELD_PRECIP_1HR_MM,
+    FIELD_PRECIP_10MIN_MM
+  };
+  p_descr = "List of input fields, by column";
+  p_help = "This is the column-ordered list of fields in the CSV file.";
+} input_fields[];
+
+commentdef {
+  p_header = "DATA OUTPUT.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to write data out to SPDB data base files.";
+} write_to_spdb;
+
+paramdef string {
+  p_default = "spdbp:://localhost::spdb/relampago/aws";
+  p_descr = "Output URL for decoded AWS data.";
+  p_help = "See the DIDSS docs for details on URL usage.";
+} spdb_output_url;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Expire time in seconds for each observation.";
+  p_help = "This value will be added to the obs time to determine the expire time for the observation.";
+} spdb_expire_seconds;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to write data out to NetCDF files.";
+} write_to_netcdf;
+
+paramdef string {
+  p_default = "/tmp/netcdf/relampago/aws";
+  p_descr = "Output directory for NetCDF files.";
+} netcdf_output_dir;
+
+
+
+
+
+
+
+

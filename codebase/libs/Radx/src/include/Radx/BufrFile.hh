@@ -140,6 +140,7 @@ public:
   int readDescriptorTables();
   int readData();
   int readSection5();
+  bool isEndInSight();
 
   bool matches_204_31_X(vector<unsigned short> &descriptors);
   bool matches_gsi(vector<unsigned short> &descriptors);
@@ -213,6 +214,7 @@ private:
 
 
   //bool StuffIt(string fieldName, double value);
+  int _getCurrentBytePositionInFile();
   Radx::ui32 ExtractIt(unsigned int nBits);
   string ExtractText(unsigned int nBits);
   double fastPow10(int n);

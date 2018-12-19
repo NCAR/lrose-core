@@ -243,6 +243,8 @@ int Grib2Mdv::getData()
       filePath = trigger_info.getFilePath();
       Path file_path_obj(filePath);
       
+      PMU_auto_register(filePath.c_str());
+
       // Check for appropriate substring and extension
 
       bool substring_found = false;
@@ -264,8 +266,8 @@ int Grib2Mdv::getData()
       
       //
       // Inventory the file
-      PMU_auto_register( "Processing grib2 file" );
-      cout << "Processing file " << filePath << endl << flush;
+      PMU_auto_register( "Reading grib2 file" );
+      cerr << "Reading file " << filePath << endl;
       if(_Grib2File->read(filePath) != Grib2::GRIB_SUCCESS)
 	continue;
 
@@ -293,6 +295,7 @@ int Grib2Mdv::getData()
 	list <string>::const_iterator field;
 
 	for (field = fieldList.begin(); field != fieldList.end(); ++field) {
+          PMU_auto_register(filePath.c_str());
 	  list <string> fieldLevelList = _Grib2File->getFieldLevels(*(field));
 	  list <string>::const_iterator level;
 
@@ -332,6 +335,8 @@ int Grib2Mdv::getData()
       // Loop over the lead times, each time will become a mdv file
       for (leadTime = forecastList.begin(); leadTime != forecastList.end(); ++leadTime) {
         
+        PMU_auto_register(filePath.c_str());
+
         // check the lead time if required
 
         if (_paramsPtr->check_lead_time &&
@@ -353,7 +358,8 @@ int Grib2Mdv::getData()
         }
 
 	if (_paramsPtr->debug)
-	  cout << "Getting fields for forecast time of " << *leadTime << " seconds." << endl;
+	  cerr << "Getting fields for forecast time of "
+               << *leadTime << " seconds." << endl;
 
 	// Loop over the list of fields to process
 	// Keep track of the generate and forecast times
@@ -362,10 +368,15 @@ int Grib2Mdv::getData()
 	PMU_auto_register( "Reading grib2 file" );
 	_field = _gribFields.begin();
 	while (_field != _gribFields.end()) {
+
+          PMU_auto_register(filePath.c_str());
+
 	  if (_paramsPtr->debug)
-	    cout << "Looking for field " <<  _field->param << " level  " << _field->level << endl;
+	    cerr << "Looking for field " <<  _field->param
+                 << " level  " << _field->level << endl;
 	  
-	  vector<Grib2::Grib2Record::Grib2Sections_t> GribRecords = _Grib2File->getRecords(_field->param, _field->level, *leadTime);
+	  vector<Grib2::Grib2Record::Grib2Sections_t>
+            GribRecords = _Grib2File->getRecords(_field->param, _field->level, *leadTime);
 	  
 	  if(GribRecords.size() > 1)
 	    _sortByLevel(GribRecords.begin(), GribRecords.end());
@@ -375,12 +386,13 @@ int Grib2Mdv::getData()
 	  fl32 *currDataPtr = NULL;
 
 	  if (_paramsPtr->debug)
-	    cout << "Found " << GribRecords.size() << " records." << endl;
+	    cerr << "Found " << GribRecords.size() << " records." << endl;
 	  if(GribRecords.size() >= MDV_MAX_VLEVELS) {
-	    cerr << "ERROR: Too many fields for one record! " << GribRecords.size() << " > Max Mdv Vlevels" << endl;
+	    cerr << "ERROR: Too many fields for one record! "
+                 << GribRecords.size() << " > Max Mdv Vlevels" << endl;
 	    return( RI_FAILURE );
 	  }
-
+          
 	  //
 	  // Set requested vertical level bounds
 	  int levelMin = 0;
@@ -407,14 +419,14 @@ int Grib2Mdv::getData()
 	    _GribRecord = &(GribRecords[levelNum]);
 
 	    if (_paramsPtr->debug) {
-	      cout <<  _GribRecord->summary->name.c_str() << " ";
-	      cout <<  _GribRecord->summary->longName.c_str() << " ";
-	      cout <<  _GribRecord->summary->units.c_str() << " ";
-	      cout <<  _GribRecord->summary->category << " ";
-	      cout <<  _GribRecord->summary->paramNumber << " ";
-	      cout <<  _GribRecord->summary->levelType.c_str() << " ";
-	      cout <<  _GribRecord->summary->levelVal;
-	      cout <<  endl;
+	      cerr <<  _GribRecord->summary->name.c_str() << " ";
+	      cerr <<  _GribRecord->summary->longName.c_str() << " ";
+	      cerr <<  _GribRecord->summary->units.c_str() << " ";
+	      cerr <<  _GribRecord->summary->category << " ";
+	      cerr <<  _GribRecord->summary->paramNumber << " ";
+	      cerr <<  _GribRecord->summary->levelType.c_str() << " ";
+	      cerr <<  _GribRecord->summary->levelVal;
+	      cerr <<  endl;
 	    }
 
 	    //
@@ -426,7 +438,8 @@ int Grib2Mdv::getData()
 	      _vlevelHeader.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE;
 	      
 	      if ( _createFieldHdr() != RI_SUCCESS ) {
-		cerr << "WARNING: File " << filePath << " not processed." << endl << flush;
+		cerr << "WARNING: File " << filePath
+                     << " not processed." << endl;
 		_outputFile->clear();
 		_Grib2File->clearInventory();
 		return( RI_FAILURE );
@@ -438,7 +451,7 @@ int Grib2Mdv::getData()
 		_fieldHeader.nz ++;
 
 	      if (_paramsPtr->debug) {
-		cout << "Processing  " << _fieldHeader.nz << " records." << endl;
+		cerr << "Processing  " << _fieldHeader.nz << " records." << endl;
 	      }
 	  
 	      fieldDataPtr = new fl32[(size_t)_fieldHeader.nz*(size_t)_fieldHeader.nx*(size_t)_fieldHeader.ny];
@@ -449,7 +462,8 @@ int Grib2Mdv::getData()
 	    // Generation time changed. This shouldn't happen and we can't handle it correctly.
 	    if (currDataPtr != fieldDataPtr && _GribRecord->ids->getGenerateTime() != lastGenerateTime) {
 	      
-	      cerr << "ERROR: File containes multiple generation times, currently unsupported." << endl << flush;
+	      cerr << "ERROR: File containes multiple gen times." << endl;
+	      cerr << "       currently unsupported." << endl;
 	      _outputFile->clear();
 	      _Grib2File->clearInventory();
 	      return( RI_FAILURE );
@@ -459,7 +473,8 @@ int Grib2Mdv::getData()
 	    // Get and save the data, reordering and remaping if needed.
 	    fl32 *data = _GribRecord->ds->getData();
 	    if(data == NULL) {
-	      cerr << "ERROR: Failed to get field " <<  _field->param << " level " << _field->level << endl << flush;
+	      cerr << "ERROR: Failed to get field "
+                   <<  _field->param << " level " << _field->level << endl;
 	      return( RI_FAILURE );
 	    }
 
@@ -502,15 +517,17 @@ int Grib2Mdv::getData()
 	  }
 	  
 	  if(GribRecords.size() == 0) {
-	    cerr << "WARNING: Field " <<  _field->param << " level  " << _field->level <<
-	      " not found in grib file." << endl;
+	    cerr << "WARNING: Field " <<  _field->param
+                 << " level  " << _field->level
+                 << " not found in grib file." << endl;
 	  } else {
-
+            
+	    Mdvx::encoding_type_t encoding = Mdvx::ENCODING_FLOAT32;    
 	    if(_paramsPtr->process_everything) {
 	      _setFieldNames(-1);
 	      _convertUnits(-1,fieldDataPtr);
 	      _convertVerticalUnits(-1);
-	      fieldDataPtr = _encode(fieldDataPtr, _paramsPtr->encoding_type);
+	      encoding = OutputFile::mdvEncoding(_paramsPtr->encoding_type);
 	    } else {
 	      for (int i = 0; i < _paramsPtr->output_fields_n; i++) {
 		if (STRequal_exact(_paramsPtr->_output_fields[i].param,
@@ -521,7 +538,7 @@ int Grib2Mdv::getData()
 		  _limitDataRange(i,fieldDataPtr);
 		  _convertUnits(i,fieldDataPtr);
 		  _convertVerticalUnits(i);
-		  fieldDataPtr = _encode(fieldDataPtr, _paramsPtr->_output_fields[i].encoding_type);
+		  encoding = OutputFile::mdvEncoding(_paramsPtr->_output_fields[i].encoding_type);
 		}
 	      }
 	    }
@@ -530,16 +547,16 @@ int Grib2Mdv::getData()
 	      (si32)_fieldHeader.nz * (si32)_fieldHeader.data_element_nbytes;
 
 	    if(_fieldHeader.volume_size < 0) {
-	      cerr << "ERROR: Field " <<  _field->param << " with " << _fieldHeader.nz << " levels is larger than Mdv can handle." << endl;
+	      cerr << "ERROR: Field " <<  _field->param << " with " 
+                   << _fieldHeader.nz << " levels is larger than Mdv can handle." << endl;
 	      cerr << "Use encoding_type of INT8 or INT16 to reduce output size to under 2.156 GB" << endl;
 	      delete [] fieldDataPtr;
 	      return( RI_FAILURE );
 	    }
 
 	    MdvxField *fieldPtr = new MdvxField(_fieldHeader, _vlevelHeader, fieldDataPtr );
-	    //fieldData.free();
 	    delete [] fieldDataPtr;
-	    _outputFile->addField(fieldPtr);
+	    _outputFile->addField(fieldPtr, encoding);
 
 	  }
 
@@ -589,12 +606,13 @@ int Grib2Mdv::_writeMdvFile(time_t generateTime, long int forecastTime)
   if( (generateTime < 0) || (forecastTime < 0)) {
     cerr << " WARNING: File times don't make sense" << endl;
     cerr << "    Generate time = " << generateTime << endl;
-    cerr << "    Forecast time = " << forecastTime << endl << flush;
+    cerr << "    Forecast time = " << forecastTime << endl;
     return( RI_SUCCESS );
   }
 
   DateTime genTime( generateTime );
-  cout << "Writing grid output file at " << genTime.dtime() << " for a forecast time of " \
+  cerr << "Writing grid output file at "
+       << genTime.dtime() << " for a forecast time of "
        << (forecastTime/3600) << " hours" << endl << flush;
 
   if ( _outputFile->writeVol( generateTime, forecastTime ) != 0 )
@@ -687,7 +705,7 @@ int Grib2Mdv::_createFieldHdr ()
   _fieldHeader.data_element_nbytes = sizeof(fl32);
   _fieldHeader.encoding_type       = Mdvx::ENCODING_FLOAT32;    
   _fieldHeader.field_data_offset   = 0;
-  _fieldHeader.compression_type    = Mdvx::COMPRESSION_ASIS;
+  _fieldHeader.compression_type    = Mdvx::COMPRESSION_NONE;
   _fieldHeader.transform_type      = Mdvx::DATA_TRANSFORM_NONE;
   _fieldHeader.scaling_type        = Mdvx::SCALING_NONE;
   _fieldHeader.native_vlevel_type  = _convertGribLevel2MDVLevel( _GribRecord->summary->levelType );
@@ -885,7 +903,7 @@ int Grib2Mdv::_createFieldHdr ()
     }
 
   } else {
-    cerr << "ERROR: Unimplemented projection type " << projID << endl << flush;
+    cerr << "ERROR: Unimplemented projection type " << projID << endl;
     return( RI_FAILURE );
   }
   
@@ -1183,244 +1201,6 @@ void Grib2Mdv::_convertUnits(int paramsIndex, fl32 *dataPtr)
 
 }
 
-// Performs simple unit conversions, which are prescribed in the parameter file
-//
-fl32 *Grib2Mdv::_encode(fl32 *dataPtr, Params::encoding_type_t output_encoding)
-{
-  if (output_encoding != Params::ENCODING_FLOAT32)
-  {
-    fl32 min_val = std::numeric_limits<fl32>::max(); //1.0e99;
-    fl32 max_val = std::numeric_limits<fl32>::min(); //-1.0e99;
-    fl32 missing = _fieldHeader.missing_data_value;
-    fl32 bad = _fieldHeader.bad_data_value;
-    size_t npoints = (size_t)_fieldHeader.nz*(size_t)_fieldHeader.nx*(size_t)_fieldHeader.ny;
-    fl32 *val = dataPtr;
-    
-    for (size_t i = 0; i < npoints; i++, val++) {
-      fl32 this_val = *val;
-      if (this_val != missing && this_val != bad) {
-	min_val = MIN(min_val, this_val);
-	max_val = MAX(max_val, this_val);
-      }
-    }
-    _fieldHeader.min_value = min_val;
-    _fieldHeader.max_value = max_val;
-    
-    if (output_encoding == Params::ENCODING_INT8) {
-      dataPtr = (fl32*) _float32_to_int8(dataPtr);
-    } else if (output_encoding == Params::ENCODING_INT16) {
-      dataPtr = (fl32*)  _float32_to_int16(dataPtr);
-    }
-  }
-  return dataPtr;
-}
-
-
-// 
-// Encode FLOAT32 to INT8
-void *Grib2Mdv::_float32_to_int8(fl32 *inDataPtr)
-{
-
-  // set missing and bad
-
-  fl32 in_missing = _fieldHeader.missing_data_value;
-  fl32 in_bad =  _fieldHeader.bad_data_value;
-  ui08 out_missing = 0;
-  ui08 out_bad;
-  if (in_missing == in_bad) {
-    out_bad = out_missing;
-  } else {
-    out_bad = 1;
-  }
-
-  // compute scale and bias
-  
-  double scale, bias;
-
-  if (_paramsPtr->output_scaling_info.SpecifyScaling) {
-    scale = _paramsPtr->output_scaling_info.scale;
-    bias = _paramsPtr->output_scaling_info.bias;
-  }
-  else {
-    if (_fieldHeader.max_value == _fieldHeader.min_value) {
-      // scale = 1.0;
-      // bias = _fieldHeader.min_value - 4.0;
-      if (_fieldHeader.max_value == 0.0) {
-	scale = 1.0;
-      } else {
-	scale = fabs(_fieldHeader.max_value);
-      }
-      bias = _fieldHeader.min_value - 4.0 * scale;
-    } else {
-      double range = _fieldHeader.max_value - _fieldHeader.min_value;
-      scale = range / 250.0;
-      bias = _fieldHeader.min_value - scale * 4.0;
-    }
-  }
-
-  // allocate the output buffer
-
-  size_t npoints = _fieldHeader.nx * _fieldHeader.ny * _fieldHeader.nz;
-  size_t output_size = npoints * sizeof(ui08);
-  void *outDataPtr = new ui08[output_size];
-
-  // convert data
-  
-  fl32 *in = inDataPtr;
-  ui08 *out = (ui08 *) outDataPtr;
-  size_t nBad = 0;
-
-  for (size_t i = 0; i < npoints; i++, in++, out++) {
-    fl32 in_val = *in;
-    if (in_val == in_missing) {
-      *out = out_missing;
-    } else if (in_val == in_bad) {
-      *out = out_bad;
-    } else {
-      int out_val = (int) ((in_val - bias) / scale + 0.49999);
-      if (out_val > 255) {
-        nBad++;
- 	*out = 255;
-      } else if (out_val < 3) {
-        nBad++;
- 	*out = 3;
-      } else {
-	*out = (ui08) out_val;
-      }
-    }
-  } // i */
-
-  if (nBad > 0) {
-    cerr << "ERROR - float32_to_int8" << endl;
-    cerr << "  Out of range data found, field: " << _fieldHeader.field_name << endl;
-    cerr << "  n points: " << nBad << endl;
-    cerr << "  Replaced with min or max values as appropriate" << endl;
-  }
-
-  // adjust header
-  
-  _fieldHeader.volume_size = output_size;
-  _fieldHeader.encoding_type = Mdvx::ENCODING_INT8;
-
-  if (_paramsPtr->output_scaling_info.SpecifyScaling) {
-    _fieldHeader.scaling_type = Mdvx::SCALING_SPECIFIED;
-  }
-  else {
-    _fieldHeader.scaling_type = Mdvx::SCALING_DYNAMIC;
-  }
-
-  _fieldHeader.data_element_nbytes = 1;
-  _fieldHeader.missing_data_value = out_missing;
-  _fieldHeader.bad_data_value = out_bad;
-  _fieldHeader.scale = (fl32) scale;
-  _fieldHeader.bias = (fl32) bias;
-  
-  delete [] inDataPtr;
-  return outDataPtr;
-}
-
-
-//
-// encode FLOAT32 to INT16
-//
-void *Grib2Mdv::_float32_to_int16(fl32 *inDataPtr)  
-{
-
-  // set missing and bad
-
-  fl32 in_missing = _fieldHeader.missing_data_value;
-  fl32 in_bad =  _fieldHeader.bad_data_value;
-  ui16 out_missing = 0;
-  ui16 out_bad;
-  if (in_missing == in_bad) {
-    out_bad = out_missing;
-  } else {
-    out_bad = 1;
-  }
-
-  // compute scale and bias
-
-  double scale, bias;
-  if (_paramsPtr->output_scaling_info.SpecifyScaling) {
-    scale = _paramsPtr->output_scaling_info.scale;
-    bias = _paramsPtr->output_scaling_info.bias;
-  }
-  else {
-    if (_fieldHeader.max_value == _fieldHeader.min_value) {
-    
-      scale = 1.0;
-      bias = _fieldHeader.min_value - 20.0;
-    
-    } else {
-    
-      double range = _fieldHeader.max_value - _fieldHeader.min_value;
-      scale = range / 65500.0;
-      bias = _fieldHeader.min_value - scale * 20.0;
-
-    }
-  }
-
-  // allocate the output buffer
-  
-  size_t npoints = _fieldHeader.nx * _fieldHeader.ny * _fieldHeader.nz;
-  size_t output_size = npoints * sizeof(ui16);
-  void *outDataPtr = new ui16[npoints];
-
-  // convert data
-  
-  fl32 *in = (fl32 *) inDataPtr;
-  ui16 *out = (ui16 *) outDataPtr;
-  size_t nBad = 0;
-
-  for (size_t i = 0; i < npoints; i++, in++, out++) {
-    fl32 in_val = *in;
-    if (in_val == in_missing) {
-      *out = out_missing;
-    } else if (in_val == in_bad) {
-      *out = out_bad;
-    } else {
-      int out_val = (int) ((in_val - bias) / scale + 0.49999);
-      if (out_val > 65535) {
-        nBad++;
- 	*out = 65535;
-      } else if (out_val < 20) {
-        nBad++;
- 	*out = 20;
-      } else {
-	*out = (ui16) out_val;
-      }
-    }
-  } // i */
-
-  if (nBad > 0) {
-    cerr << "ERROR - MdvxField::_float32_to_int16" << endl;
-    cerr << "  Out of range data found, field: " << _fieldHeader.field_name << endl;
-    cerr << "  n points: " << nBad << endl;
-    cerr << "  Replaced with min or max values as appropriate" << endl;
-  }
-
-  // adjust header
-  
-  _fieldHeader.volume_size = output_size;
-  _fieldHeader.encoding_type = Mdvx::ENCODING_INT16;
-
-  if (_paramsPtr->output_scaling_info.SpecifyScaling) {
-    _fieldHeader.scaling_type = Mdvx::SCALING_SPECIFIED;
-  }
-  else {
-    _fieldHeader.scaling_type = Mdvx::SCALING_DYNAMIC;
-  }
-  
-  _fieldHeader.data_element_nbytes = 2;
-  _fieldHeader.missing_data_value = out_missing;
-  _fieldHeader.bad_data_value = out_bad;
-  _fieldHeader.scale = (fl32) scale;
-  _fieldHeader.bias = (fl32) bias;
-  
-  delete [] inDataPtr;
-  return outDataPtr;
-}
-
 
 float inline getInd(double out, double in1, double in2)
 {
@@ -1468,7 +1248,7 @@ fl32 *Grib2Mdv::_reMapReducedOrGaussian(fl32 *data, Mdvx::field_header_t fhdr)
     Grib2::GausLatLonProj *latlonProj = (Grib2::GausLatLonProj *)_GribRecord->gds->getProjection();
     latlonProj->getGaussianLats(&lats);
     if(lats == NULL) {
-      cerr << "ERROR: Calculation of Gaussian Latitude failure." << endl << flush;
+      cerr << "ERROR: Calculation of Gaussian Latitude failure." << endl;
       return NULL;
     }
     nx = latlonProj->_maxNi;
@@ -1496,7 +1276,8 @@ fl32 *Grib2Mdv::_reMapReducedOrGaussian(fl32 *data, Mdvx::field_header_t fhdr)
     }
 
   }  else {
-    cerr << "ERROR: Unsupported Reduced grid type, cannot remap to regular lat/lon grid." << endl << flush;
+    cerr << "ERROR: Unsupported Reduced grid type." << endl;
+    cerr << "  Cannot remap to regular lat/lon grid." << endl;
     return NULL;
   }
 

@@ -72,7 +72,6 @@ DailyDriver::DailyDriver(const string &prog_name, const Args &args, const Params
     }
   }
 
-
 }
 
 //////////////
@@ -105,7 +104,7 @@ int DailyDriver::Run ()
 
   while ((_triggerTime = _trigger->next()) >= 0) {
     
-    PMU_auto_register("MethodDriver::Run");
+    PMU_auto_register("DailyDriver::Run");
     
     if (_params.debug) {
       fprintf(stderr, "----> Trigger time: %s\n", utimstr(_triggerTime));

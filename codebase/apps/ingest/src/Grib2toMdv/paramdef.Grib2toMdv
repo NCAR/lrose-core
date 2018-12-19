@@ -443,12 +443,12 @@ typedef struct {
 
 paramdef struct projection_info_t {
   p_descr = "This is the user defined projection";
-  p_help = "If remap_output is true this defines the projection to remap too."
-           "The choice of projections are PROJ_LATLON, PROJ_LAMBERT_CONF and "
-           "PROJ_FLAT. PROJ_LATLON is a latitude/longitude projection, and if "
-           "it is chosen the remaining parameters can be ignored. PROJ_FLAT is "
+  p_help = "If remap_output is true this defines the projection to remap to."
+           "\n\nThe choice of projections are PROJ_LATLON, PROJ_LAMBERT_CONF and "
+           "PROJ_FLAT.\n\nPROJ_LATLON is a latitude/longitude projection, and if "
+           "it is chosen the remaining parameters can be ignored.\n\nPROJ_FLAT is "
            "a flat projection, and if it is chosen the parameters rotation, "
-           "origin_lat, origin_lon must be set. PROJ_LAMBERT_CONF is a Lambert "
+           "origin_lat, origin_lon must be set.\n\nPROJ_LAMBERT_CONF is a Lambert "
            "conformal projection, and if it is chosen the parameters origin_lat, "
            "origin_lon, ref_lat_1 and ref_lat_2 must be set.";
   p_default = {PROJ_LAMBERT_CONF, 0.0, 25.0, -95.0, 25.0, 25.0};
@@ -464,8 +464,8 @@ typedef struct {
 } grid_info_t;
 
 paramdef struct grid_info_t {
-  p_descr = "This is the user defined grid";
-  p_help = "if remap_output is true this defines the grid info for the remap.";
+  p_descr = "This is the user defined grid.";
+  p_help = "If remap_output is true this defines the grid info for the remap.\n\nFor a LATLON projection:\n  minx = minLon\n  miny = minLat\n  dx = deltaLon\n  dy = deltaLat.";
   p_default = {301, 225, -3332.142334, -588.890442, 20.318001, 20.318001};
 } out_grid_info; 
 

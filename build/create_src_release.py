@@ -56,7 +56,7 @@ def main():
                       help='Configure for MAC OSX')
     parser.add_option('--package',
                       dest='package', default='lrose',
-                      help='Package name. Options are lrose (default), radx, cidd, hcr, hsrl, titan, lrose-blaze')
+                      help='Package name. Options are lrose, lrose-blaze, radx, cidd, titan')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
@@ -98,6 +98,8 @@ def main():
     # set directories
 
     releaseDir = os.path.join(options.releaseTopDir, options.package)
+    if (options.osx == True):
+        releaseDir = os.path.join(releaseDir, "osx")
     tmpDir = os.path.join(releaseDir, "tmp")
     coreDir = os.path.join(tmpDir, "lrose-core")
     codebaseDir = os.path.join(coreDir, "codebase")
@@ -105,7 +107,7 @@ def main():
     # compute release name and dir name
 
     if (options.osx == True):
-        releaseName = options.package + "-" + versionStr + ".macosx_64.src"
+        releaseName = options.package + "-" + versionStr + ".src.mac_osx"
     else:
         releaseName = options.package + "-" + versionStr + ".src"
     tarName = releaseName + ".tgz"
@@ -258,6 +260,7 @@ def gitCheckout():
     os.chdir(tmpDir)
     shellCmd("git clone https://github.com/NCAR/lrose-core")
     shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
+    shellCmd("git clone https://github.com/NCAR/lrose-displays")
 
 ########################################################################
 # set up autoconf for configure etc
@@ -272,17 +275,17 @@ def setupAutoconf():
 
     if (options.static):
         if (options.package == "cidd"):
-             shutil.copy("../build/configure.base.cidd", "./configure.base")
+             shutil.copy("../build/autoconf/configure.base.cidd", "./configure.base")
         else:
-             shutil.copy("../build/configure.base", "./configure.base")
+             shutil.copy("../build/autoconf/configure.base", "./configure.base")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base" +
                  " --pkg " + options.package + argsStr)
     else:
         if (options.package == "cidd"):
-            shutil.copy("../build/configure.base.shared.cidd", "./configure.base.shared")
+            shutil.copy("../build/autoconf/configure.base.shared.cidd", "./configure.base.shared")
         else:
-            shutil.copy("../build/configure.base.shared", "./configure.base.shared")
+            shutil.copy("../build/autoconf/configure.base.shared", "./configure.base.shared")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + options.package + argsStr)
@@ -291,6 +294,9 @@ def setupAutoconf():
 # Run qmake for QT apps such as HawkEye to create _moc files
 
 def createQtMocFiles(appDir):
+    
+    if (os.path.isdir(appDir) == False):
+        return
     
     os.chdir(appDir)
     shellCmd("rm -f moc*");
@@ -332,8 +338,8 @@ def createTarFile():
 
     # copy some scripts into tar directory
 
-    shellCmd("cp build/create_bin_release.py " + tarDir)
-    shellCmd("cp build/build_src_release " + tarDir)
+    shellCmd("rsync -av build/create_bin_release.py " + tarDir)
+    shellCmd("rsync -av build/build_src_release.py " + tarDir)
 
     # move lrose contents into tar dir
 
@@ -348,6 +354,13 @@ def createTarFile():
     netcdfDir = os.path.join(tmpDir, "lrose-netcdf")
     netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
     os.makedirs(netcdfSubDir)
+
+    # Copy the color-scales dir from lrose-displays into tar dir (under share)
+    
+    displaysDir = os.path.join(tmpDir, "lrose-displays/color_scales")
+    displaysSubDir = os.path.join(tarDir, "share/")
+    os.makedirs(displaysSubDir)
+    shellCmd("rsync -av " + displaysDir + " " + displaysSubDir)
     
     if (options.package == "cidd"):
         name = "build_and_install_netcdf.m32"
@@ -381,7 +394,7 @@ def createBrewFormula():
     tarUrl = "https://github.com/NCAR/lrose-core/releases/download/" + \
              options.package + "-" + versionStr + "/" + tarName
     formulaName = options.package + ".rb"
-    scriptName = "build_" + options.package + "_formula"
+    scriptName = "formulas/build_" + options.package + "_formula"
     buildDirPath = os.path.join(tarDir, "build")
     scriptPath = os.path.join(buildDirPath, scriptName)
 
@@ -490,7 +503,7 @@ def trimToMakefiles(subDir):
     for entry in entries:
         theName = os.path.join(dirPath, entry)
         print >>sys.stderr, "considering: " + theName
-        if (entry == "scripts") or (entry == "include"):
+        if (entry == "scripts") or (entry == "example_scripts") or (entry == "include"):
             # always keep scripts directories
             continue
         if (os.path.isdir(theName)):

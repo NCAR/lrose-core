@@ -1,0 +1,174 @@
+/*********************************************************
+ * parameter definitions for MergeHcrAndHsrl
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 2018
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Merges field data from HCR and HSRL instruments. HCR is the primary instrument, we merge the HSRL onto the HCR data.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in FILELIST mode, at least) MUST contain a "
+           "day-directory below the data file -- ./data_file.ext will not "
+           "work as a file path";
+} mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+commentdef {
+  p_header = "DATA LOCATIONS";
+  p_text = "HCR is the primary data set, and the HCR data files are read in first. Then the associate HSRL data is found, and merged into the HCR data set.";
+}
+
+paramdef string {
+  p_default = "/scr/rain1/rsfdata/projects/socrates/hcr/qc/cfradial/velcorr/2hz";
+  p_descr = "Directory for HCR data files.";
+  p_help = "These are in CfRadial format.";
+} hcr_data_dir;
+
+paramdef string {
+  p_default = "/scr/rain1/rsfdata/projects/socrates/hsrl/qc/cfradial/qc_moments";
+  p_descr = "Directory for HSRL data files.";
+  p_help = "These are in CfRadial format.";
+} hsrl_data_dir;
+
+paramdef double {
+  p_default = 900;
+  p_descr = "Time tolerance for matching the HSRL files to the HCR files (secs).";
+  p_help = "Only files within this tolerance will be matched.";
+} file_match_time_tolerance_sec;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Time tolerance for matching the HSRL rays to the HCR rays (secs).";
+  p_help = "Only rays within this tolerance are used.";
+} ray_match_time_tolerance_sec;
+
+paramdef double {
+  p_default = 7.5;
+  p_descr = "Angular elevation tolerance for matching the HSRL rays to the HCR rays (deg).";
+  p_help = "Only rays within this tolerance are used. The HSRL points 4 degrees off vertical, so this values should always be > 4. Also, when the aircraft banks, the HSRL elevation changes, whereas the HCR antenna control should keep the beam vertical.";
+} ray_match_elevation_tolerance_deg;
+
+commentdef {
+  p_header = "SPECIFYING FIELDS TO COPY FROM EACH SOURCE";
+}
+
+typedef struct {
+  string input_field_name;
+  string output_field_name;
+} field_t;
+
+paramdef struct field_t {
+  p_default = {
+    { "DBZ", "HCR_DBZ" },
+    { "VEL_CORR", "HCR_VEL" },
+    { "WIDTH", "HCR_WIDTH" },
+    { "LDR", "HCR_LDR" },
+    { "NCP", "HCR_NCP" },
+    { "SNR", "HCR_SNR" },
+    { "DBMVC", "HCR_DBM" }
+  };
+  p_descr = "Specs of HCR fields to be included.";
+  p_help = "\n\ninput_field_name: name of field in input file.\n\noutput_field_name: name of field in output file.\n\nencoding: output encoding for the field.";
+} hcr_fields[];
+
+paramdef struct field_t {
+  p_default = {
+    { "Aerosol_Backscatter_Coefficient", "Backscat_Coeff" },
+    { "Particle_Linear_Depolarization_Ratio", "Particle_LDR" },
+    { "Volume_Linear_Depolarization_Ratio", "Volume_LDR" },
+    { "Optical_Depth", "Optical_Depth" },
+    { "Aerosol_Extinction_Coefficient", "Extinction_Coeff" }
+  };
+  p_descr = "Specs of HSRL fields to be included.";
+  p_help = "\n\ninput_field_name: name of field in input file.\n\noutput_field_name: name of field in output file.\n\nencoding: output encoding for the field.";
+} hsrl_fields[];
+
+commentdef {
+  p_header = "OUTPUT DETAILS";
+}
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Compression level for output, if compressed.";
+  p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
+} compression_level;
+
+typedef enum {
+  ENCODING_FLOAT32,
+  ENCODING_INT16
+} encoding_t;
+
+paramdef enum encoding_t {
+  p_default = ENCODING_INT16;
+  p_descr = "Encoding for output fields.";
+  p_help = "Encoding with smaller types improves compression.";
+} output_encoding;
+
+commentdef {
+  p_header = "OUTPUT DIRECTORY AND FILE NAME";
+}
+
+paramdef string {
+  p_default = "/tmp/cfradial/HcrAndHsrl";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+

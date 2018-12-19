@@ -440,9 +440,9 @@ public:
   // the argument list.
   
   char *getClosest(time_t search_time,
-				time_t start_time,
-				time_t end_time,
-				time_t *data_time) const;
+                   time_t start_time,
+                   time_t end_time,
+                   time_t *data_time) const;
 
   /////////////////////////////////////////////////////////////////
   // get closest file to given time within the given time margin
@@ -524,6 +524,7 @@ public:
   mode_t getMode() { return _mode; };
 
   const PathTimeMap &getPathTimes() { return _pathTimeList; }
+  const vector<string> &getPathList() const { return _pathList; }
   
 protected:
 
@@ -607,6 +608,7 @@ private:
   void _load_timelist_realtime(const string &input_dir, int depth);
 
   bool _hasExt(const string &path);
+  bool _hasExt(const string &path, string ext);
 
   bool _hasSubStr(const string &path);
 

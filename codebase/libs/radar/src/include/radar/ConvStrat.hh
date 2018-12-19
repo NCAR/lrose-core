@@ -189,6 +189,24 @@ public:
   const ui08 *getConvFromColMax() const { return _convFromColMax.buf(); }
   const ui08 *getConvFromTexture() const { return _convFromTexture.buf(); }
 
+  // get missing value for float arrays
+
+  fl32 getMissingVal() const { return _missing; }
+
+  // get grid details
+
+  int getGridNx() const { return _nx; }
+  int getGridNy() const { return _ny; }
+
+  double getGridMinx() const { return _minx; }
+  double getGridMiny() const { return _miny; }
+
+  double getGridDx() const { return _dx; }
+  double getGridDy() const { return _dy; }
+  
+  const vector<double> &getZKm() const { return _zKm; }
+  bool getProjIsLatlon() const { return _projIsLatLon; }
+
   // free up arrays when done, if you want to keep memory usage down
 
   void freeArrays();

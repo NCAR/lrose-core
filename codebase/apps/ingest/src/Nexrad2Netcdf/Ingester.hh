@@ -28,13 +28,11 @@
 // Jaimi Yee, RAP, NCAR, Boulder, CO, 80307, USA
 // September 2004
 //
-// $Id: Ingester.hh,v 1.9 2016/03/07 01:23:03 dixon Exp $
+// $Id: Ingester.hh,v 1.10 2018/01/22 16:28:40 jcraig Exp $
 //
 //////////////////////////////////////////////////////
 #ifndef _INGESTER_INC_
 #define _INGESTER_INC_
-
-#include <netcdf.hh>
 
 #include "Nexrad2Netcdf.hh"
 #include "NcOutput.hh"

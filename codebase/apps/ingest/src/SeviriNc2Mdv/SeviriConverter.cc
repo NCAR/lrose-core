@@ -24,12 +24,12 @@
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: SeviriConverter.cc,v 1.5 2016/03/07 01:23:05 dixon Exp $
+ *  $Id: SeviriConverter.cc,v 1.6 2018/01/26 18:43:35 jcraig Exp $
  *
  */
 
 # ifndef    lint
-static char RCSid[] = "$Id: SeviriConverter.cc,v 1.5 2016/03/07 01:23:05 dixon Exp $";
+static char RCSid[] = "$Id: SeviriConverter.cc,v 1.6 2018/01/26 18:43:35 jcraig Exp $";
 # endif     /* not lint */
 
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -63,6 +63,15 @@ using namespace std;
 
 // define any constants
 const string SeviriConverter::_className    = "SeviriConverter";
+
+const int SeviriConverter::NUM_BANDS = 12; 
+const int SeviriConverter::START_IR_BANDS = 4;
+const int SeviriConverter::END_IR_BANDS = 11;
+const int SeviriConverter::MIN_COUNT_VALUE = 0;
+const int SeviriConverter::MAX_COUNT_VALUE = 1023;
+const float SeviriConverter::EPSILON = 0.000001;
+const float SeviriConverter::_coeff1 = 1.19104e-5; // !mWm^-2sr^-1(cm^-1)^-4
+const float SeviriConverter::_coeff2 = 1.43877;   // K(cm^-1)^-1
 
 const float SeviriConverter::_radainceCalScale[NUM_BANDS] = 
   { 0.023128100, 0.029726600, 0.023621900, 0.0036586667, 0.0083181079, 0.038621984, 

@@ -522,7 +522,7 @@ int DmapAccess::_communicate(void *buf,
   char *DS_COMM_TIMEOUT_MSECS = getenv("DS_COMM_TIMEOUT_MSECS");
   if (DS_COMM_TIMEOUT_MSECS != NULL) {
     int timeout;
-    if (sscanf(DS_COMM_TIMEOUT_MSECS, "%d", &timeout)) {
+    if (sscanf(DS_COMM_TIMEOUT_MSECS, "%d", &timeout) == 1) {
       commTimeoutMsecs = timeout;
     }
   }

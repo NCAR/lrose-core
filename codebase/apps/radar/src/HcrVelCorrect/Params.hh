@@ -77,8 +77,7 @@ public:
   typedef enum {
     REALTIME = 0,
     ARCHIVE = 1,
-    FILELIST = 2,
-    FMQ = 3
+    FILELIST = 2
   } mode_t;
 
   typedef enum {
@@ -101,6 +100,11 @@ public:
     END_TIME_ONLY = 2,
     SPECIFY_FILE_NAME = 3
   } filename_mode_t;
+
+  typedef enum {
+    WAVE_FILTER = 0,
+    FIR_FILTER = 1
+  } filter_type_t;
 
   ///////////////////////////
   // Member functions
@@ -401,25 +405,15 @@ public:
 
   int max_realtime_data_age_secs;
 
-  tdrp_bool_t latest_data_info_avail;
-
-  tdrp_bool_t search_recursively;
-
-  int max_recursion_depth;
-
   int wait_between_checks;
 
-  int file_quiescence;
-
   char* search_ext;
-
-  char* input_fmq_url;
-
-  tdrp_bool_t seek_to_end_of_input_fmq;
 
   char* dbz_field_name;
 
   double min_range_to_surface_km;
+
+  double max_surface_height_km;
 
   double min_dbz_for_surface_echo;
 
@@ -428,6 +422,20 @@ public:
   char* vel_field_name;
 
   char* corrected_vel_field_name;
+
+  tdrp_bool_t add_delta_vel_field;
+
+  char* delta_vel_field_name;
+
+  double max_nadir_error_for_surface_vel;
+
+  tdrp_bool_t add_corrected_spectrum_width_field;
+
+  char* width_field_name;
+
+  char* corrected_width_field_name;
+
+  double width_correction_beamwidth_deg;
 
   output_encoding_t output_encoding;
 
@@ -451,17 +459,17 @@ public:
 
   tdrp_bool_t write_latest_data_info;
 
-  char* output_fmq_url;
+  tdrp_bool_t write_surface_vel_results_to_spdb;
 
-  tdrp_bool_t output_fmq_compress;
+  char* surface_vel_results_spdb_output_url;
 
-  int output_fmq_n_slots;
+  filter_type_t filter_type;
 
-  int output_fmq_buf_size;
+  double noise_filter_length_secs;
 
-  tdrp_bool_t output_fmq_write_blocking;
+  double wave_filter_length_secs;
 
-  int output_fmq_data_mapper_report_interval;
+  int wave_filter_polynomial_order;
 
   double spike_filter_difference_threshold;
 
@@ -481,7 +489,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[52];
+  mutable TDRPtable _table[57];
 
   const char *_className;
 

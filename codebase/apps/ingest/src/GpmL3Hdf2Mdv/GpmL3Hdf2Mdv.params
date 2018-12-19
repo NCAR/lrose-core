@@ -1,0 +1,177 @@
+
+** Program 'GpmL3Hdf2Mdv'
+** Copyright (c) 1992-2014 UCAR
+** University Corporation for Atmospheric Research - UCAR.
+** National Center for Atmospheric Research - NCAR.
+** Research Applications Program - RAP.
+** P.O.Box 3000, Boulder, Colorado, 80307, USA.
+** Run-time 2014/10/28 22:23:40.
+
+/**********************************************************************
+ * TDRP params for GpmL3Hdf2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// This program converts GPM Level 3 HDF5 files into MDV format.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING PARAMETERS.
+//
+// Parameters controlling debug outputs.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// debug flag.
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// verbose /////////////////////////////////
+//
+// verbose debug flag.
+// Type: boolean
+//
+
+verbose = TRUE;
+
+//======================================================================
+//
+// PROCESS PARAMETERS.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROCESS I/O PARAMETERS.
+//
+// Parameters describing the input and output locations.
+//
+//======================================================================
+ 
+///////////// trigger_mode ////////////////////////////
+//
+// Input triggering mode.
+// 	In FILE_LIST mode, the program operates on the files specified on 
+//   the command line.
+// 	In INPUT_DIR mode, the program will process new files as they appear 
+//   in the input_dir directory.
+// 	In INPUT_DIR_RECURSE mode, the program will process new files as 
+//   they appear in the input_dir directory or in any subdirectory.
+// 	In LATEST_DATA mode, the program will process new files as they 
+//   appear in the _latest_data_info file in the input_dir directory.
+//
+// Type: enum
+// Options:
+//     FILE_LIST
+//     INPUT_DIR
+//     INPUT_DIR_RECURSE
+//     LATEST_DATA
+//
+
+trigger_mode = FILE_LIST;
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Type: string
+//
+
+input_dir = "$(RAP_DATA_DIR)/raw/hdf5/gpm";
+
+///////////// input_substring /////////////////////////
+//
+// Input filename substring.
+// Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. 
+//   The program will only process files whose name contains this 
+//   substring. Set to "" to process all files in the input directory.
+// Type: string
+//
+
+input_substring = "";
+
+///////////// exclude_substring ///////////////////////
+//
+// Input filename exclude substring.
+// Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. 
+//   The program will not process files whose name contains this 
+//   substring. Set to "" to process all files in the input directory.
+// Type: string
+//
+
+exclude_substring = "";
+
+///////////// max_valid_secs //////////////////////////
+//
+// Maximum number of seconds input files are valid.
+// Used only if trigger_mode is set to LATEST_DATA.
+// Type: long
+//
+
+max_valid_secs = 600;
+
+///////////// datasets ////////////////////////////////
+//
+// HDF5 datasets to write in Mdv file.
+// Type: string
+// 1D array - variable length.
+//
+
+datasets = { "/Grid/probabilityLiquidPrecipitation", 
+	     "/Grid/precipitationCal",
+             "/Grid/precipitationUncal",
+	     "/Grid/HQprecipitation",
+             "/Grid/IRprecipitation", 
+             "/Grid/HQprecipSource" };
+
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// Type: string
+//
+
+output_url = "mdvp:://localhost::$(PROJECT)/mdv/gpm/level3";
+
+///////////// output_proj /////////////////////////////
+//
+// Output projection.
+//
+// Type: struct
+//   typedef struct {
+//      proj_type_t proj_type;
+//        Options:
+//          PROJ_FLAT
+//          PROJ_LATLON
+//          PROJ_LC2
+//      double minx;
+//      double miny;
+//      int nx;
+//      int ny;
+//      double dx;
+//      double dy;
+//      double origin_lat;
+//      double origin_lon;
+//      double rotation;
+//      double lat1;
+//      double lat2;
+//   }
+//
+//
+
+output_proj = { PROJ_LATLON, -180, -90, 3600, 1800, 0.1, 0.1, 0, 0, 0, 0, 0 };
+

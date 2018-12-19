@@ -297,3 +297,18 @@ paramdef string {
   p_help = "Files are written to this directory when the radar is in vertically-stationary mode.";
 } stationary_output_dir;
 
+commentdef {
+  p_header = "WRITING LATEST DATA INFO TO PROXY";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write to the LdataInfo at a proxy location.";
+  p_help = "TsSmartSave always writes to the LdataInfo with the path of the actual file location. If this option is set, it will in addition write the LdataInfo with a proxy location, irrespective of the scan mode. This allows us to watch for updates at the proxy location, instead of the individual locations for different scan modes.";
+} write_ldata_info_to_proxy_path;
+
+paramdef string {
+  p_default = "./tsarchive/proxy";
+  p_descr = "Directory for ldata info proxy location.";
+} ldata_info_proxy_path;
+

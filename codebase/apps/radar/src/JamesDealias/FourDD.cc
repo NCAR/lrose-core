@@ -129,9 +129,9 @@ int FourDD::Dealias(Volume *lastVelVol, Volume *currVelVol, Volume *currDbzVol,
 {
   Volume* velVolCopy;
   Volume* soundVolume;  
-  unsigned short nolast = 0, firstGuessSuccess = 0, unfoldSuccess = 0, prep;
-  int numSweepsLast;
-  int numSweepsCurrent;
+  unsigned short /* nolast = 0, */ firstGuessSuccess = 0, unfoldSuccess = 0 /* , prep */;
+  // int numSweepsLast;
+  // int numSweepsCurrent;
 
   
   //
@@ -141,7 +141,7 @@ int FourDD::Dealias(Volume *lastVelVol, Volume *currVelVol, Volume *currDbzVol,
     {
       if(currDbzVol == NULL)
 	printf("No DZ field available\n");
-      prep = 0;
+      // prep = 0;
     }
 
   //
@@ -149,7 +149,7 @@ int FourDD::Dealias(Volume *lastVelVol, Volume *currVelVol, Volume *currDbzVol,
   //
   if (currVelVol != NULL)  
     {
-      numSweepsCurrent = currVelVol->h.nsweeps;
+      // numSweepsCurrent = currVelVol->h.nsweeps;
 
       //
       // Get a copy of the radial velocity, if unfolding fails we'll 
@@ -169,11 +169,11 @@ int FourDD::Dealias(Volume *lastVelVol, Volume *currVelVol, Volume *currDbzVol,
   //
   if (lastVelVol != NULL) 
     { 
-      numSweepsLast = lastVelVol->h.nsweeps;
+      // numSweepsLast = lastVelVol->h.nsweeps;
     } 
   else
     {
-      nolast = 1;
+      // nolast = 1;
     }
   
   //
@@ -394,8 +394,8 @@ void FourDD::firstGuess(Volume* soundVolume, float missingVal,
   int  alt, i, sweepIndex, currIndex, index, numBins, numRays, 
        numSweeps;
   unsigned short flag = 0;
-  float ke,dRdz,height,rnge,elev,az,start_range,h_range,gate_size,val
-    ,wind, wind_val_rv,dir,offset,ang, U, V;
+  float ke,dRdz,height,rnge,elev,az,start_range,h_range,gate_size,val;
+  float wind = 0.0, wind_val_rv,dir = 0.0,offset,ang, U, V;
 
   //
   // Load and retrieve spdb sounding data
@@ -869,7 +869,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
      int sweepIndex, currIndex, i, l, direction, numSweeps, numRays,
        numBins,  left, right, next, prev, rayindex[8], binindex[8],
        countindex, numneg, numpos, in, out, startray, endray, firstbin, 
-       lastbin, step = -1, startindex, endindex, prevIndex, abIndex, loopcount,
+       lastbin, step = -1, startindex, endindex, prevIndex = 0, abIndex = 0, loopcount,
        countbins;
     
      unsigned short numtimes, dcase, flag=1, wsuccess;
@@ -878,7 +878,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
                                         sizeof(short));
      float NyqVelocity, NyqInterval, val, diff, fraction, finalval,
        valcheck, goodval, winval,  diffs[8], fraction2;
-     float prevval, abval, pfraction,  cval, soundval, std;
+     float prevval = 0.0, abval = 0.0, pfraction,  cval, soundval = 0.0, std;
      Volume* VALS;
 
      numSweeps = rvVolume->h.nsweeps;

@@ -1,0 +1,9 @@
+To build ...
+
+   136	14:00	make clean
+   137	14:00	qmake
+   138	14:00	make
+
+To run ...
+
+./StandardDialogs.app/Contents/MacOS/StandardDialogs

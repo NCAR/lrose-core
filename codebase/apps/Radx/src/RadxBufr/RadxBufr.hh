@@ -95,7 +95,8 @@ private:
   int _writeVol(RadxVol &vol);
   void _censorFields(RadxVol &vol);
   void _censorRay(RadxRay *ray);
-
+  void _computeZdrFromInputFields(RadxVol &vol);
+  int _computeZdr(RadxRay *ray);
 
 };
 

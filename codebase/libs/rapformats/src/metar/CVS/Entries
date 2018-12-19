@@ -1,9 +1,9 @@
 /.cvsignore/1.1/Fri Oct 23 21:25:24 2015//
 /Makefile/1.3/Thu Oct  7 23:50:06 2010//
 /antoi.c/1.6/Thu Mar  3 18:45:40 2016//
-/dcdmetar.c/1.36/Thu Mar  3 18:45:40 2016//
-/dcdmtrmk.c/1.20/Thu Mar  3 18:45:40 2016//
 /fracpart.c/1.3/Thu Mar  3 18:45:40 2016//
 /metar_private.h/1.4/Thu Mar  3 18:45:40 2016//
 /stspack2.c/1.5/Thu Mar  3 18:45:40 2016//
+/dcdmetar.c/1.37/Sat Oct 13 23:10:27 2018//
+/dcdmtrmk.c/1.21/Sat Oct 13 23:13:01 2018//
 D

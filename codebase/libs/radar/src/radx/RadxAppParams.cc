@@ -1,9 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2017
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // RadxAppParams.cc
 //
@@ -31,9 +48,6 @@
  * @author Automatically generated
  *
  */
-#include <iostream>
-using namespace std;
-
 #include "RadxAppParams.hh"
 #include <cstring>
 
@@ -603,6 +617,18 @@ using namespace std;
     tt->single_val.e = FILELIST;
     tt++;
     
+    // Parameter 'ymd_subdirectories'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ymd_subdirectories");
+    tt->descr = tdrpStrDup("Are yyyymmdd directories expected?");
+    tt->help = tdrpStrDup("If TRUE, expect data at trigger_url and all input urls to have data organized into yyyymmdd subdirectories.");
+    tt->val_offset = (char *) &ymd_subdirectories - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'trigger_url'
     // ctype is 'char*'
     
@@ -903,6 +929,36 @@ using namespace std;
     tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("Data Write Parameters");
     tt->comment_text = tdrpStrDup(" Parameters that control the writing of output data ");
+    tt++;
+    
+    // Parameter 'output_all_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_all_fields");
+    tt->descr = tdrpStrDup("True to output all fields, false to use list");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &output_all_fields - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'output_fields'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_fields");
+    tt->descr = tdrpStrDup("fields to output");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_output_fields - &_start_;
+    tt->array_n_offset = (char *) &output_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
     tt++;
     
     // Parameter 'netcdf_style'

@@ -21,18 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/07 01:23:10 $
-//   $Id: netCDF2StnRptSpdb.cc,v 1.11 2016/03/07 01:23:10 dixon Exp $
-//   $Revision: 1.11 $
-//   $State: Exp $
-//
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * netCDF2StnRptSpdb: netCDF2StnRptSpdb program object.
  *
@@ -45,8 +33,7 @@
  *********************************************************************/
 
 #include <iostream>
-//#include <netcdf/netcdfcpp.h>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3File.hh>
 #include <string>
 
 #include <cassert>
@@ -261,7 +248,7 @@ bool netCDF2StnRptSpdb::_processData(const string& file_name)
 
   //create a netCDF file object
 
-  NcFile netCDFfile(file_name.c_str());
+  Nc3File netCDFfile(file_name.c_str());
 
   //check to ensure the file is valid
 
@@ -347,17 +334,17 @@ bool netCDF2StnRptSpdb::_processData(const string& file_name)
       return false;
     }
 
-  //create an NcVar pointer for the dataProvider variable name
+  //create an Nc3Var pointer for the dataProvider variable name
 
-  NcVar *dataProviderVar = netCDFfile.get_var(_params->dataProviderVar);
+  Nc3Var *dataProviderVar = netCDFfile.get_var(_params->dataProviderVar);
 
   //need to know the string size since netCDF uses char *'s not strings
 
   int stringSize = dataProviderVar->get_dim(1)->size();
 
-  //create an NcVar pointer for the stationID variable name; need its size as well
+  //create an Nc3Var pointer for the stationID variable name; need its size as well
 
-  NcVar *stationIDVar = netCDFfile.get_var(_params->stationIDVar);
+  Nc3Var *stationIDVar = netCDFfile.get_var(_params->stationIDVar);
   int stringSizeTwo = stationIDVar->get_dim(1)->size();
 
   //netCDF uses char *'s so need to divide by that to get the number of values

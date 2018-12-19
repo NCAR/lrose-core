@@ -151,8 +151,7 @@ StratiformFilter::StratiformFilter(int argc, char **argv)
   {
   case Params::REALTIME_MODE :
     if (_fileRetriever.setRealtime(_params->input_url, _params->max_valid_age,
-				   PMU_auto_register) != 0)
-    {
+				   PMU_auto_register) != 0) {
       okay = false;
       return;
     }
@@ -161,8 +160,14 @@ StratiformFilter::StratiformFilter(int argc, char **argv)
   case Params::ARCHIVE_MODE :
     if (_fileRetriever.setArchive(_params->input_url,
 				  _args->getStartTime(),
-				  _args->getEndTime()) != 0)
-    {
+				  _args->getEndTime()) != 0) {
+      okay = false;
+      return;
+    }
+    break;
+
+  case Params::FILELIST_MODE :
+    if (_fileRetriever.setFilelist(_args->getInputFileList()) != 0) {
       okay = false;
       return;
     }
@@ -659,7 +664,11 @@ bool StratiformFilter::_readNextFile(DsMdvx &mdv_file)
 
   mdv_file.clearRead();
   mdv_file.clearReadFields();
-  mdv_file.addReadField(_params->field_num);
+  if (strlen(_params->dbz_field_name) > 0) {
+    mdv_file.addReadField(_params->dbz_field_name);
+  } else {
+    mdv_file.addReadField(_params->field_num);
+  }
   mdv_file.clearReadVertLimits();
   mdv_file.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
   mdv_file.setReadCompressionType(Mdvx::COMPRESSION_NONE);

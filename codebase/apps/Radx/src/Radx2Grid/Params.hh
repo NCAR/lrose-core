@@ -741,8 +741,6 @@ public:
 
   char* instance;
 
-  tdrp_bool_t register_with_procmap;
-
   int procmap_register_interval;
 
   tdrp_bool_t free_memory_between_files;
@@ -763,12 +761,6 @@ public:
 
   char* conv_strat_dbz_field_name;
 
-  double conv_strat_texture_radius_km;
-
-  double conv_strat_texture_depth_km;
-
-  double conv_strat_min_valid_fraction_for_texture;
-
   double conv_strat_min_valid_height;
 
   double conv_strat_max_valid_height;
@@ -779,9 +771,17 @@ public:
 
   double conv_strat_convective_radius_km;
 
+  double conv_strat_texture_radius_km;
+
+  double conv_strat_min_valid_fraction_for_texture;
+
   double conv_strat_min_texture_for_convection;
 
   tdrp_bool_t conv_strat_write_partition;
+
+  tdrp_bool_t conv_strat_write_mean_texture;
+
+  tdrp_bool_t conv_strat_write_convective_dbz;
 
   tdrp_bool_t conv_strat_write_debug_fields;
 

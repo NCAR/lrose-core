@@ -202,12 +202,17 @@ public:
   string getRequestString() const;
 
   ///////////////////////////////////////////////////////////////
-  // Set functions for Mdv-related classes
+  // Set functions
   // WARNING - do not use these without fully understanding the
   // classes and side effects.
 
   void setDir(const string &dir) { _dir = dir; }
   void addValidTime(RadxTime time) { _fileStartTimes.push_back(time); }
+
+  // set the required file extension
+  // if empty this is not used
+
+  void setFileExt(const string &ext) { _fileExt = ext; }
   
   // Get time for Dorade file path.
   // Sets doradeTime object.
@@ -247,9 +252,11 @@ private:
   RadxTime _endTime;
   RadxTime _searchTime;
   double _timeMargin;
+  string _fileExt;
 
   vector<RadxTime> _fileStartTimes;
   vector<string> _pathList;
+
   
   bool _readAggregateSweeps;
 

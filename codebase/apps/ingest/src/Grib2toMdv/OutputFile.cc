@@ -88,9 +88,40 @@ OutputFile::writeVol( time_t genTime, long int leadSecs )
   }
   
   // convert field encoding and compression
-  
-  for (int ii = 0; ii < _mdvObj->getNFields(); ii++) {
-    _compressField(_mdvObj->getField(ii));
+
+  if (_paramsPtr->process_everything) {
+
+    // loop through fields, converting and compressing
+
+    Mdvx::encoding_type_t encoding = mdvEncoding(_paramsPtr->encoding_type);
+    Mdvx::compression_type_t compression = mdvCompression(_paramsPtr->compression_type);
+
+    for (int ii = 0; ii < _mdvObj->getNFields(); ii++) {
+      MdvxField *field = _mdvObj->getField(ii);
+      field->convertType(encoding, compression);
+    } // ii
+
+  } else {
+
+    // loop through fields, converting and compressing
+
+    Mdvx::compression_type_t compression = mdvCompression(_paramsPtr->compression_type);
+    
+    for (int ii = 0; ii < _mdvObj->getNFields(); ii++) {
+      MdvxField *field = _mdvObj->getField(ii);
+      string fieldName(field->getFieldHeader().field_name);
+      // find encoding for this particular fields
+      Mdvx::encoding_type_t encoding = mdvEncoding(_paramsPtr->encoding_type);
+      for (int jj = 0; jj < _paramsPtr->output_fields_n; jj++) {
+        Params::out_field_t ofld = _paramsPtr->_output_fields[jj];
+        string mdvName(ofld.mdv_name);
+        if (mdvName == fieldName) {
+          encoding = mdvEncoding(ofld.encoding_type);
+        }
+      }
+      field->convertType(encoding, compression);
+    } // ii
+
   }
 
   // latest data info
@@ -102,7 +133,7 @@ OutputFile::writeVol( time_t genTime, long int leadSecs )
   }
 
   if(_paramsPtr->writeLdataInfo && _paramsPtr->debug) {
-    cout << "Writing LdataInfo..." << endl << flush;
+    cerr << "Writing LdataInfo..." << endl << flush;
   }
 
   // Write non forecast style file
@@ -118,6 +149,10 @@ OutputFile::writeVol( time_t genTime, long int leadSecs )
 	_setMasterHdr( genTime, 0, false );
       }
     }
+    if(_paramsPtr->debug) {
+      cerr << "Writing non-forecast style to dir: "
+           << _paramsPtr->non_forecast_mdv_url << endl;
+    }
     if( _mdvObj->writeToDir( _paramsPtr->non_forecast_mdv_url ) ) {
       cerr << "ERROR: Could not write file: "
            << _mdvObj->getErrStr() << endl << flush;
@@ -130,6 +165,10 @@ OutputFile::writeVol( time_t genTime, long int leadSecs )
   if( _paramsPtr->write_forecast ) {
     _setMasterHdr( genTime, leadSecs, false );
     _mdvObj->setWriteAsForecast();
+    if(_paramsPtr->debug) {
+      cerr << "Writing forecast style to dir: "
+           << _paramsPtr->forecast_mdv_url << endl;
+    }
     if( _mdvObj->writeToDir( _paramsPtr->forecast_mdv_url ) ) {
       cerr << "ERROR: Could not write file: "
            << _mdvObj->getErrStr() << endl << flush;
@@ -137,7 +176,7 @@ OutputFile::writeVol( time_t genTime, long int leadSecs )
     }
   }
 
-  cout << "File written: " << _mdvObj->getPathInUse() << endl;
+  cerr << "File written: " << _mdvObj->getPathInUse() << endl;
 
   // Clean up
 
@@ -197,28 +236,29 @@ OutputFile::_setMasterHdr( time_t genTime, long int leadSecs, bool isObs )
 }
 
 void
-OutputFile::addField( MdvxField *inputField)
+OutputFile::addField( MdvxField *field, Mdvx::encoding_type_t encoding)
 {
    // Remap Data
 
    if(_paramsPtr->remap_output) {
-     _remap(inputField);
+     _remap(field);
    }
 
    // Add field to volume
+  
+   _mdvObj->addField( field );
 
-   _mdvObj->addField( inputField );
 }
 
 void 
-OutputFile::_remap(MdvxField* inputField)
+OutputFile::_remap(MdvxField* field)
 {
 
   MdvxRemapLut lut;
 
   switch( _paramsPtr->out_projection_info.type) {
   case Params::PROJ_FLAT:
-    inputField->remap2Flat(lut, _paramsPtr->out_grid_info.nx, _paramsPtr->out_grid_info.ny, 
+    field->remap2Flat(lut, _paramsPtr->out_grid_info.nx, _paramsPtr->out_grid_info.ny, 
 		      _paramsPtr->out_grid_info.minx, _paramsPtr->out_grid_info.miny, 
 		      _paramsPtr->out_grid_info.dx, _paramsPtr->out_grid_info.dy, 
 		      _paramsPtr->out_projection_info.origin_lat, 
@@ -227,16 +267,16 @@ OutputFile::_remap(MdvxField* inputField)
     break;
 	  
   case Params::PROJ_LATLON:
-    inputField->remap2Latlon(lut, _paramsPtr->out_grid_info.nx, _paramsPtr->out_grid_info.ny, 
+    field->remap2Latlon(lut, _paramsPtr->out_grid_info.nx, _paramsPtr->out_grid_info.ny, 
 			_paramsPtr->out_grid_info.minx, _paramsPtr->out_grid_info.miny, 
 			_paramsPtr->out_grid_info.dx, _paramsPtr->out_grid_info.dy );
     break;
 
   case Params::PROJ_LAMBERT_CONF:
-    if(inputField->getFieldHeader().proj_type == Mdvx::PROJ_LAMBERT_CONF)
-      _remapLambertLambert(inputField);
+    if(field->getFieldHeader().proj_type == Mdvx::PROJ_LAMBERT_CONF)
+      _remapLambertLambert(field);
     else
-      inputField->remap2Lc2(lut, _paramsPtr->out_grid_info.nx, _paramsPtr->out_grid_info.ny, 
+      field->remap2Lc2(lut, _paramsPtr->out_grid_info.nx, _paramsPtr->out_grid_info.ny, 
 			    _paramsPtr->out_grid_info.minx, _paramsPtr->out_grid_info.miny, 
 			    _paramsPtr->out_grid_info.dx, _paramsPtr->out_grid_info.dy,
 			    _paramsPtr->out_projection_info.origin_lat, 
@@ -250,14 +290,14 @@ OutputFile::_remap(MdvxField* inputField)
 
 }
 
-void OutputFile::_remapLambertLambert(MdvxField* inputField)
+void OutputFile::_remapLambertLambert(MdvxField* field)
 {
 
-  // inputField is encoded as bytes -- convert back to float
-  inputField->convertType();
+  // field is encoded as bytes -- convert back to float
+  field->convertType();
   
 
-  Mdvx::field_header_t fhdr = inputField->getFieldHeader();
+  Mdvx::field_header_t fhdr = field->getFieldHeader();
   
   int nx = _paramsPtr->out_grid_info.nx;
   int ny = _paramsPtr->out_grid_info.ny;
@@ -275,7 +315,7 @@ void OutputFile::_remapLambertLambert(MdvxField* inputField)
   inproj.init(fhdr);
   
   float *odata = new float[nx*ny*nz];
-  float *idata = (float *)inputField->getVol();
+  float *idata = (float *)field->getVol();
 
   double lat, lon;
   double ix, iy;
@@ -319,8 +359,8 @@ void OutputFile::_remapLambertLambert(MdvxField* inputField)
   fhdr.volume_size =
     fhdr.nx * fhdr.ny * fhdr.nz * fhdr.data_element_nbytes; 
 
-  inputField->setFieldHeader(fhdr);
-  inputField->setVolData(odata, fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
+  field->setFieldHeader(fhdr);
+  field->setVolData(odata, fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
 
   delete []odata;
 
@@ -372,20 +412,8 @@ float OutputFile::_interp2(Mdvx::field_header_t *fieldHdr, double x, double y, i
 
 }
 
-// convert field encoding
-
-void OutputFile::_compressField(MdvxField *field)
-{
-
-  Params::compression_type_t compressionType = _paramsPtr->compression_type;
-  
-  field->convertType(Mdvx::ENCODING_ASIS,
-                     _mdvCompression(compressionType));
-
-}
-
 Mdvx::encoding_type_t
-  OutputFile::_mdvEncoding(Params::encoding_type_t paramEncoding)
+  OutputFile::mdvEncoding(Params::encoding_type_t paramEncoding)
 
 {
   switch(paramEncoding) {
@@ -401,7 +429,7 @@ Mdvx::encoding_type_t
 }
 
 Mdvx::compression_type_t
-  OutputFile::_mdvCompression(Params::compression_type_t paramCompression)
+  OutputFile::mdvCompression(Params::compression_type_t paramCompression)
   
 {
   switch(paramCompression) {

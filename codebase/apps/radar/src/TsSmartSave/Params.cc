@@ -1137,6 +1137,39 @@
     tt->single_val.s = tdrpStrDup("./tsarchive/stationary");
     tt++;
     
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("WRITING LATEST DATA INFO TO PROXY");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'write_ldata_info_to_proxy_path'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_ldata_info_to_proxy_path");
+    tt->descr = tdrpStrDup("Option to write to the LdataInfo at a proxy location.");
+    tt->help = tdrpStrDup("TsSmartSave always writes to the LdataInfo with the path of the actual file location. If this option is set, it will in addition write the LdataInfo with a proxy location, irrespective of the scan mode. This allows us to watch for updates at the proxy location, instead of the individual locations for different scan modes.");
+    tt->val_offset = (char *) &write_ldata_info_to_proxy_path - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'ldata_info_proxy_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ldata_info_proxy_path");
+    tt->descr = tdrpStrDup("Directory for ldata info proxy location.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ldata_info_proxy_path - &_start_;
+    tt->single_val.s = tdrpStrDup("./tsarchive/proxy");
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

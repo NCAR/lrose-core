@@ -27,6 +27,7 @@ SUB_DIRS = \
 	DsrMerge \
 	DualDopplerLobes \
 	HawkEye \
+	HcrTempRxGain \
 	HcrVelCorrect \
 	IntfRemove \
 	Iq2Dsr \

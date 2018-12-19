@@ -39,6 +39,8 @@
 #ifndef PjgLatlonMath_hh
 #define PjgLatlonMath_hh
 
+#include <euclid/PjgMath.hh>
+
 class PjgLatlonMath : public PjgMath
 {
 

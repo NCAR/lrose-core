@@ -75,7 +75,7 @@ NcRadar2Dsr::NcRadar2Dsr(int argc, char **argv)
 
   // get TDRP params
   
-  _paramsPath = "unknown";
+  _paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv, _args.override.list,
 			   &_paramsPath)) {
     cerr << "ERROR: " << _progName << endl;
@@ -240,7 +240,7 @@ int NcRadar2Dsr::_processFile(const char *input_path)
 
   // open file
 
-  NcFile ncf(input_path);
+  Nc3File ncf(input_path);
   if (!ncf.is_valid()) {
     cerr << "ERROR - NcRadar2Dsr::_processFile" << endl;
     cerr << "  File: " << input_path << endl;
@@ -249,7 +249,7 @@ int NcRadar2Dsr::_processFile(const char *input_path)
 
   // declare an error object
 
-  NcError err(NcError::silent_nonfatal);
+  Nc3Error err(Nc3Error::silent_nonfatal);
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _printFile(ncf);
@@ -316,7 +316,7 @@ int NcRadar2Dsr::_processFile(const char *input_path)
 //
 // Returns 0 on success, -1 on failure
 
-int NcRadar2Dsr::_checkFile(NcFile &ncf)
+int NcRadar2Dsr::_checkFile(Nc3File &ncf)
 
 {
 
@@ -350,7 +350,7 @@ int NcRadar2Dsr::_checkFile(NcFile &ncf)
     return -1;
   }
 
-  NcVar *btime = ncf.get_var("base_time");
+  Nc3Var *btime = ncf.get_var("base_time");
   if (btime == NULL) {
     cerr << "ERROR - NcRadar2Dsr::_checkFile" << endl;
     cerr << "  base_time variable missing" << endl;
@@ -358,13 +358,13 @@ int NcRadar2Dsr::_checkFile(NcFile &ncf)
   }
   _startTime = btime->as_long(0);
 
-  NcVar *toffsetVar = ncf.get_var("time_offset");
+  Nc3Var *toffsetVar = ncf.get_var("time_offset");
   if (toffsetVar == NULL) {
     cerr << "ERROR - NcRadar2Dsr::_checkFile" << endl;
     cerr << "  time_offset variable missing" << endl;
     return -1;
   }
-  NcValues *toffsetVals = toffsetVar->values();
+  Nc3Values *toffsetVals = toffsetVar->values();
   double *toffsets = (double *) toffsetVals->base();
   _endTime = _startTime + (int) (toffsets[toffsetVar->num_vals()] + 0.5);
   delete toffsetVals;
@@ -377,7 +377,7 @@ int NcRadar2Dsr::_checkFile(NcFile &ncf)
     _startTime += tdiff;
   }
   
-  NcAtt *vnum = ncf.get_att("Volume_Number");
+  Nc3Att *vnum = ncf.get_att("Volume_Number");
   if (vnum == NULL) {
     cerr << "ERROR - NcRadar2Dsr::_checkFile" << endl;
     cerr << "  Volume_Number attribute missing" << endl;
@@ -393,19 +393,19 @@ int NcRadar2Dsr::_checkFile(NcFile &ncf)
 ///////////////////////////////
 // print data in file
 
-void NcRadar2Dsr::_printFile(NcFile &ncf)
+void NcRadar2Dsr::_printFile(Nc3File &ncf)
 
 {
 
   cout << "ndims: " << ncf.num_dims() << endl;
   cout << "nvars: " << ncf.num_vars() << endl;
   cout << "ngatts: " << ncf.num_atts() << endl;
-  NcDim *unlimd = ncf.rec_dim();
+  Nc3Dim *unlimd = ncf.rec_dim();
   cout << "unlimdimid: " << unlimd->size() << endl;
   
   // dimensions
 
-  NcDim *dims[ncf.num_dims()];
+  Nc3Dim *dims[ncf.num_dims()];
   for (int idim = 0; idim < ncf.num_dims(); idim++) {
     dims[idim] = ncf.get_dim(idim);
 
@@ -426,14 +426,14 @@ void NcRadar2Dsr::_printFile(NcFile &ncf)
 
   for (int iatt = 0; iatt < ncf.num_atts(); iatt++) {
     cout << "  Att num: " << iatt << endl;
-    NcAtt *att = ncf.get_att(iatt);
+    Nc3Att *att = ncf.get_att(iatt);
     _printAtt(att);
     delete att;
   }
 
   // loop through variables
 
-  NcVar *vars[ncf.num_vars()];
+  Nc3Var *vars[ncf.num_vars()];
   for (int ivar = 0; ivar < ncf.num_vars(); ivar++) {
 
     vars[ivar] = ncf.get_var(ivar);
@@ -442,7 +442,7 @@ void NcRadar2Dsr::_printFile(NcFile &ncf)
     cout << "  Name: " << vars[ivar]->name() << endl;
     cout << "  Is valid: " << vars[ivar]->is_valid() << endl;
     cout << "  N dims: " << vars[ivar]->num_dims();
-    NcDim *vdims[vars[ivar]->num_dims()];
+    Nc3Dim *vdims[vars[ivar]->num_dims()];
     if (vars[ivar]->num_dims() > 0) {
       cout << ": (";
       for (int ii = 0; ii < vars[ivar]->num_dims(); ii++) {
@@ -460,7 +460,7 @@ void NcRadar2Dsr::_printFile(NcFile &ncf)
     for (int iatt = 0; iatt < vars[ivar]->num_atts(); iatt++) {
 
       cout << "  Att num: " << iatt << endl;
-      NcAtt *att = vars[ivar]->get_att(iatt);
+      Nc3Att *att = vars[ivar]->get_att(iatt);
       _printAtt(att);
       delete att;
 
@@ -476,7 +476,7 @@ void NcRadar2Dsr::_printFile(NcFile &ncf)
 /////////////////////
 // print an attribute
 
-void NcRadar2Dsr::_printAtt(NcAtt *att)
+void NcRadar2Dsr::_printAtt(Nc3Att *att)
 
 {
 
@@ -484,16 +484,16 @@ void NcRadar2Dsr::_printAtt(NcAtt *att)
   cout << "    Num vals: " << att->num_vals() << endl;
   cout << "    Type: ";
   
-  NcValues *values = att->values();
+  Nc3Values *values = att->values();
 
   switch(att->type()) {
     
-  case ncNoType: {
+  case nc3NoType: {
     cout << "No type: ";
   }
   break;
   
-  case ncByte: {
+  case nc3Byte: {
     cout << "BYTE: ";
     unsigned char *vals = (unsigned char *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -502,7 +502,7 @@ void NcRadar2Dsr::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncChar: {
+  case nc3Char: {
     cout << "CHAR: ";
     char vals[att->num_vals() + 1];
     MEM_zero(vals);
@@ -511,7 +511,7 @@ void NcRadar2Dsr::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncShort: {
+  case nc3Short: {
     cout << "SHORT: ";
     short *vals = (short *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -520,7 +520,7 @@ void NcRadar2Dsr::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncInt: {
+  case nc3Int: {
     cout << "INT: ";
     int *vals = (int *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -529,7 +529,7 @@ void NcRadar2Dsr::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncFloat: {
+  case nc3Float: {
     cout << "FLOAT: ";
     float *vals = (float *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -538,7 +538,7 @@ void NcRadar2Dsr::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncDouble: {
+  case nc3Double: {
     cout << "DOUBLE: ";
     double *vals = (double *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -556,7 +556,7 @@ void NcRadar2Dsr::_printAtt(NcAtt *att)
 }
 
     
-void NcRadar2Dsr::_printVarVals(NcVar *var)
+void NcRadar2Dsr::_printVarVals(Nc3Var *var)
 
 {
 
@@ -565,17 +565,17 @@ void NcRadar2Dsr::_printVarVals(NcVar *var)
     nprint = 100;
   }
 
-  NcValues *values = var->values();
+  Nc3Values *values = var->values();
 
   cout << "  Variable vals:";
   
   switch(var->type()) {
     
-  case ncNoType: {
+  case nc3NoType: {
   }
   break;
   
-  case ncByte: {
+  case nc3Byte: {
     cout << "(byte)";
     unsigned char *vals = (unsigned char *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -584,7 +584,7 @@ void NcRadar2Dsr::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncChar: {
+  case nc3Char: {
     cout << "(char)";
     char str[nprint + 1];
     MEM_zero(str);
@@ -593,7 +593,7 @@ void NcRadar2Dsr::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncShort: {
+  case nc3Short: {
     cout << "(short)";
     short *vals = (short *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -602,7 +602,7 @@ void NcRadar2Dsr::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncInt: {
+  case nc3Int: {
     cout << "(int)";
     int *vals = (int *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -611,7 +611,7 @@ void NcRadar2Dsr::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncFloat: {
+  case nc3Float: {
     cout << "(float)";
     float *vals = (float *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -620,7 +620,7 @@ void NcRadar2Dsr::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncDouble: {
+  case nc3Double: {
     cout << "(double)";
     double *vals = (double *) values->base();
     for (long ii = 0; ii < nprint; ii++) {

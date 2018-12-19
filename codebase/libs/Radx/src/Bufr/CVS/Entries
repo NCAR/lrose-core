@@ -1,11 +1,17 @@
-/Makefile/1.1/Fri Sep 22 16:14:41 2017//
 /TableMapElement.cc/1.1/Fri Sep 22 16:14:41 2017//
-/BufrFile.cc/1.5/Fri Nov  3 15:36:12 2017//
-/BufrProduct.cc/1.4/Wed Nov  1 00:00:21 2017//
-/BufrRadxFile.cc/1.4/Fri Nov  3 15:36:12 2017//
-/CompressedData.cc/1.2/Wed Oct 18 22:59:35 2017//
-/TableMap.cc/1.3/Wed Nov  1 00:00:21 2017//
-/TableMapKey.cc/1.3/Tue Oct 17 22:22:59 2017//
-/BufrTables.cc/0/dummy timestamp//
-/BufrTables.hh/0/dummy timestamp//
+/TableMapKey.cc/1.4/Sat Oct 13 21:41:56 2018//
+/BufrFile.cc/1.7/Sat Oct 13 21:45:44 2018//
+/BufrProduct.cc/1.6/Sat Oct 13 21:45:44 2018//
+/BufrProductGeneric.cc/1.2/Sat Oct 13 21:52:57 2018//
+/BufrProductGeneric.hh/1.2/Sat Oct 13 21:52:57 2018//
+/BufrProduct_204_31_X.cc/1.2/Sat Oct 13 21:52:57 2018//
+/BufrProduct_204_31_X.hh/1.2/Sat Oct 13 21:52:57 2018//
+/BufrProduct_gsi.cc/1.1/Sat Oct 13 21:52:57 2018//
+/BufrProduct_gsi.hh/1.1/Sat Oct 13 21:52:57 2018//
+/BufrRadxFile.cc/1.6/Sat Oct 13 21:45:44 2018//
+/BufrTables.cc/1.2/Sat Oct 13 21:52:57 2018//
+/BufrTables.hh/1.2/Sat Oct 13 21:52:57 2018//
+/TableMap.cc/1.5/Sat Oct 13 21:45:44 2018//
+/decode_mnemonic.py/1.1/Tue Mar  6 18:49:42 2018//
+/Makefile/1.3/Mon Oct 15 22:45:06 2018//
 D

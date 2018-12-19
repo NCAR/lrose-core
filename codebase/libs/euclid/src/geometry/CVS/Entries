@@ -22,10 +22,10 @@
 /point_on_segment.c/1.4/Thu Dec 29 22:57:37 2016//
 /polygon_area.c/1.3/Thu Dec 29 22:57:37 2016//
 /polygon_centroid.c/1.3/Thu Dec 29 22:57:37 2016//
-/polygon_intersect.c/1.6/Thu Dec 29 22:57:37 2016//
 /random_bdry.c/1.8/Mon Sep  4 21:14:02 2017//
 /segment_intersect.c/1.6/Thu Dec 29 22:57:37 2016//
 /sincos.c/1.2/Thu Dec 29 22:57:37 2016//
 /unit_vector.c/1.4/Thu Dec 29 22:57:37 2016//
 /vect_add.c/1.3/Thu Dec 29 22:57:37 2016//
+/polygon_intersect.c/1.7/Sat Oct 13 22:14:07 2018//
 D

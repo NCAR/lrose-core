@@ -112,10 +112,14 @@ int OutputFile::writeVol()
     cerr << "ERROR - OutputFile::writeVol" << endl;
     cerr << _mdvx.getErrStr() << endl;
     return -1;
-  } else {
-    return 0;
   }
 
+  if (_params.debug) {
+    fprintf(stderr, "Wrote file: %s\n", _mdvx.getPathInUse().c_str());
+  }
+
+  return 0;
+  
 }
 
 ////////////////////////////////////////////////////

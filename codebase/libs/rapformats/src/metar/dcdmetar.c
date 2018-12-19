@@ -2148,9 +2148,10 @@ int DcdMETAR( char *string , Decoded_METAR *Mptr,int  clear_flag)
                         AUTO, COR, windData, MinMaxWinDir, visibility,
                         RVR, presentWX, PartialObscur,
                         skyCond, tempGroup,
-                        altimStng, NotIDed = 99} StartGroup,
-                                      SaveStartGroup,
-                                      MetarGroup;
+                        altimStng, NotIDed = 99 }
+     StartGroup = NotIDed,
+     SaveStartGroup = NotIDed,
+     MetarGroup = NotIDed;
  
  
    int    ndex,

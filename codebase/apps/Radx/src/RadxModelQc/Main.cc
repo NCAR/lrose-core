@@ -1,71 +1,23 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/**
- * @file Main.cc
- */
 #include "RadxModelQc.hh"
+#include "Parms.hh"
+#include "CircularLookupHandler.hh"
+#include "RayData.hh"
+#include <radar/RadxAppParmsTemplate.hh>
 #include <toolsa/LogStream.hh>
-#include <csignal>
-#include <new>
-#include <iostream>
 
-static void tidy_and_exit (int sig);
-static void out_of_store(void);
-static RadxModelQc *Prog = NULL;
+static CircularLookupHandler *_lookup = NULL;
 
-//--------------------------------------------------------------------
-int main(int argc, char **argv)
-
-{
-  // create program object
-  Prog = new RadxModelQc(argc, argv, tidy_and_exit, out_of_store);
-  if (!Prog->OK)
-  {
-    LOG(FATAL) << "Could not create RadxModelQc object.";
-    return(1);
-  }
-
-  // run it
-  int iret = Prog->Run();
-  if (iret != 0)
-  {
-    LOG(ERROR) << "running RadxModelQc";
-  }
-  
-  // clean up
-  tidy_and_exit(iret);
-  return (iret);
-  
-}
+static void _createLookups(double r, RadxVol &vol);
+static bool _processVolume(const Parms &parms, RayData &vol,
+			   RadxModelQc &alg);
 
 //--------------------------------------------------------------------
 // tidy up on exit
-static void tidy_and_exit (int sig)
+static void cleanup(int sig)
 {
-  if (Prog) {
-    delete Prog;
-    Prog = NULL;
+  if (_lookup != NULL)
+  {
+    delete _lookup;
   }
   exit(sig);
 }
@@ -73,8 +25,63 @@ static void tidy_and_exit (int sig)
 //--------------------------------------------------------------------
 // Handle out-of-memory conditions
 static void out_of_store()
-
 {
-  LOG(FATAL) << "Operator new failed - out of store";
   exit(-1);
 }
+
+//--------------------------------------------------------------------
+int main(int argc, char **argv)
+{
+  Parms params;
+  if (!parmAppInit(params, argc, argv))
+  {
+    exit(0);
+  }
+
+  RadxModelQc alg(params, cleanup);
+  if (!alg.ok())
+  {
+    exit(1);
+  }
+  
+  RayData volume(&params, argc, argv);
+  string path;
+  while (volume.triggerRadxVolume(path))
+  {
+    LOG(DEBUG) << " processing  " << path;
+    _createLookups(params.variance_radius_km, volume.getVolRef());
+    if (!_processVolume(params, volume, alg))
+    {
+      LOG(ERROR) << "Processing this volume. No output";
+    }
+    else
+    {
+      alg.write(&volume);
+    }
+  }
+
+  LOG(DEBUG) << "Done";
+  return 0;
+}
+
+//-----------------------------------------------------------------------
+static void _createLookups(double r, RadxVol &vol)
+{
+  if (_lookup != NULL)
+  {
+    delete _lookup;
+    _lookup = NULL;
+  }
+
+  // pass in # as arg
+  _lookup = new CircularLookupHandler(r, vol);
+}
+
+//-----------------------------------------------------------------------
+static bool _processVolume(const Parms &parms, RayData &volume,
+			   RadxModelQc &alg)
+{
+  volume.initialize(_lookup);
+  return alg.run(&volume);
+}
+

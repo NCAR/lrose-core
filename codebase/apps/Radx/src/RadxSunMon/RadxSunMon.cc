@@ -46,6 +46,7 @@
 #include <Radx/RadxXml.hh>
 #include <Radx/RadxRcalib.hh>
 #include <Radx/RadxArray.hh>
+#include <radar/RadarCalib.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/DsInputPath.hh>
 #include <toolsa/pmu.h>
@@ -389,7 +390,7 @@ int RadxSunMon::_processVol()
 
   if (_momentsVol.getNRcalibs() > 0) {
     const vector<RadxRcalib *> rcalibs = _momentsVol.getRcalibs();
-    _calib.setFromRadxRcalib(*(rcalibs[0]));
+    RadarCalib::copyRadxToIwrf(*(rcalibs[0]), _calib);
   }
 
   _radarConstDb = _params.radar_constant_db;

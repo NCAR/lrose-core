@@ -40,12 +40,12 @@
 #include <map>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
+#include <euclid/SunAngle.hh>
 #include "ChannelSet.hh"
 #include "FieldSet.hh"
 #include "ChannelFiles.hh"
 #include "Params.hh"
 #include "Hrit.hh"
-#include "SunAngle.hh"
 
 using namespace std;
 

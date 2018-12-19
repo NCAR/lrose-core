@@ -162,7 +162,9 @@ char *PORThostIpAddr(void)
 
   strp = ipaddr;
   for (i = 0; i < h->h_length; i++) {
-    sprintf (strp, "%d", (unsigned char) h->h_addr_list[0][i]);
+    char addrPart[32];
+    snprintf(addrPart,31,"%d",(unsigned char)h->h_addr_list[0][i]);
+    sprintf (strp, "%s", addrPart);
     strp = ipaddr + strlen(ipaddr);
     if (i < h->h_length - 1) {
       *strp = '.';
@@ -196,10 +198,13 @@ char *PORTremoteIpAddr(char *remote_hostname)
   if ((h = gethostbyname(remote_hostname)) == NULL) {
     return ("Unknown");
   }
-
+  
+  
   strp = ipaddr;
   for (i = 0; i < h->h_length; i++) {
-    sprintf (strp, "%d", (unsigned char) h->h_addr_list[0][i]);
+    char addrPart[32];
+    snprintf(addrPart,31,"%d",(unsigned char)h->h_addr_list[0][i]);
+    sprintf (strp, "%s", addrPart);
     strp = ipaddr + strlen(ipaddr);
     if (i < h->h_length - 1) {
       *strp = '.';

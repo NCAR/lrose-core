@@ -18,9 +18,14 @@ TARGET_FILE = ../libradar.a
 #
 
 HDRS = \
-	../include/radar/IntfLocator.hh
+	../include/radar/HcrVelFirFilt.hh \
+	../include/radar/HcrSurfaceVel.hh \
+	../include/radar/IntfLocator.hh \
+	../include/radar/SeaClutter.hh
 
 CPPC_SRCS = \
+	HcrVelFirFilt.cc \
+	HcrSurfaceVel.cc \
 	IntfLocator.cc \
 	SeaClutter.cc
 

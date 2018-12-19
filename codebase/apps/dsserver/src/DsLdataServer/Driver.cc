@@ -52,9 +52,10 @@ Driver::Driver(int argc, char **argv)
   OK = TRUE;
   _server = NULL;
   
-  // set programe name
+  // set programe name and default params path
   
   _progName = "DsLdataServer";
+  _paramsPath = (char *) "unknown";
 
   // parse command line args
   
@@ -67,7 +68,7 @@ Driver::Driver(int argc, char **argv)
 
   // get TDRP params
   
-  _paramsPath = "unknown";
+  _paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv,
 			   _args.override.list,
 			   &_paramsPath)) {

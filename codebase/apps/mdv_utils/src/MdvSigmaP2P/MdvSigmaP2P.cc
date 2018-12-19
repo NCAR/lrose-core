@@ -72,7 +72,7 @@ MdvSigmaP2P::MdvSigmaP2P(int argc, char **argv)
 
   // get TDRP params
   
-  _paramsPath = "unknown";
+  _paramsPath = (char *) "unknown";
   if (
     _params.loadFromArgs(
       argc,

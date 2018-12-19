@@ -100,12 +100,6 @@ CartInterp::CartInterp(const string &progName,
     _createDebugFields();
   }
   
-  // create convective/stratiform fields if needed
-
-  if (_params.identify_convective_stratiform_split) {
-    _createConvStratFields();
-  }
-  
   // initialize the output grid dimensions
   
   _initGrid();
@@ -113,6 +107,35 @@ CartInterp::CartInterp(const string &progName,
   // set up thread objects
 
   _createThreads();
+
+  // set up ConvStrat object
+
+#ifdef NOTNOW
+  // create convective/stratiform fields if needed
+  if (_params.identify_convective_stratiform_split) {
+    _createConvStratFields();
+  }
+#endif
+  
+  if (_params.identify_convective_stratiform_split) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      _convStrat.setVerbose(true);
+    } else if (_params.debug) {
+      _convStrat.setDebug(true);
+    }
+    _convStrat.setMinValidHtKm(_params.conv_strat_min_valid_height);
+    _convStrat.setMaxValidHtKm(_params.conv_strat_max_valid_height);
+    _convStrat.setMinValidDbz(_params.conv_strat_min_valid_dbz);
+    _convStrat.setDbzForDefiniteConvection
+      (_params.conv_strat_dbz_threshold_for_definite_convection);
+    _convStrat.setConvectiveRadiusKm(_params.conv_strat_convective_radius_km);
+    _convStrat.setTextureRadiusKm(_params.conv_strat_texture_radius_km);
+    _convStrat.setMinValidFractionForTexture
+      (_params.conv_strat_min_valid_fraction_for_texture);
+    _convStrat.setMinTextureForConvection
+      (_params.conv_strat_min_texture_for_convection);
+  }
+  _gotConvStrat = false;
 
 }
 
@@ -159,14 +182,6 @@ int CartInterp::interpVol()
   _printRunTime("Cart interp - before _initOutputArrays");
   _initOutputArrays();
   _printRunTime("Cart interp - after _initOutputArrays");
-
-  // convective / stratiform split
-
-  if (_params.identify_convective_stratiform_split) {
-    _printRunTime("Cart interp - before strat/conv");
-    _convStratCompute();
-    _printRunTime("Cart interp - after strat/conv");
-  }
 
   // compute the scan azimuth and elevation delta angle
   // these are used in the search process
@@ -228,6 +243,18 @@ int CartInterp::interpVol()
   _doInterp();
   _printRunTime("Interpolating");
 
+  // compute convective stratiform split
+
+  _gotConvStrat = false;
+  if (_params.identify_convective_stratiform_split) {
+    // convective / stratiform split
+    _printRunTime("Cart interp - before strat/conv");
+    if (_convStratCompute() == 0) {
+      _gotConvStrat = true;
+    }
+    _printRunTime("Cart interp - after strat/conv");
+  }
+  
   // transform for output
 
   _transformForOutput();
@@ -359,6 +386,8 @@ void CartInterp::_createDebugFields()
   _derived3DFields.push_back(_urAzDebug);
   
 }
+
+#ifdef NOTNOW
   
 //////////////////////////////////////////////////
 // create the conv-strat fields
@@ -368,7 +397,6 @@ void CartInterp::_createConvStratFields()
 {
   
   bool writeDebug = _params.conv_strat_write_debug_fields;
-  bool writePartition = _params.conv_strat_write_partition;
 
   _convStratDbzMax = new DerivedField("DbzMax",
                                       "max_dbz_for_conv_strat", 
@@ -432,10 +460,12 @@ void CartInterp::_createConvStratFields()
 
   _convStratCategory = new DerivedField("ConvStrat",
                                         "category_for_conv_strat",
-                                        "", writePartition);
+                                        "", true);
   _derived2DFields.push_back(_convStratCategory);
   
 }
+
+#endif
   
 //////////////////////////////////////////////////
 // free the derived fields
@@ -542,12 +572,14 @@ void CartInterp::_initGrid()
     _derived2DFields[ii]->alloc(_nPointsPlane, singleLevel);
   }
 
+#ifdef JUNK
   if (_params.identify_convective_stratiform_split) {
     _convStratDbzCount->setToZero();
     _convStratDbzSum->setToZero();
     _convStratDbzSqSum->setToZero();
     _convStratDbzSqSqSum->setToZero();
   }
+#endif
 
 }
   
@@ -2434,6 +2466,13 @@ int CartInterp::_writeOutputFile()
     }
   }
 
+  // convective stratiform split
+
+  if (_params.identify_convective_stratiform_split && _gotConvStrat) {
+    out.addConvStratFields(_convStrat, _readVol,
+                           _proj, _gridZLevels);
+  }
+
   // chunks
 
   out.addChunks(_readVol, _interpFields.size());
@@ -2691,6 +2730,7 @@ void CartInterp::_addMatrixField(DsMdvx &mdvx,
 
 }
 
+#ifdef JUNK
 
 //////////////////////////////////////////////////
 // Prepare for convective/stratiform analysis
@@ -2789,12 +2829,51 @@ void CartInterp::_convStratPrepare()
   
 }
 
+#endif
+
 //////////////////////////////////////////////////
 // Compute convective/stratiform split
 
-void CartInterp::_convStratCompute()
+int CartInterp::_convStratCompute()
 {
 
+  // set the grid in the ConvStrat object
+
+  bool isLatLon = (_params.grid_projection == Params::PROJ_LATLON);
+  _convStrat.setGrid(_gridNx, _gridNy,
+                     _gridDx, _gridDy,
+                     _gridMinx, _gridMiny,
+                     _gridZLevels,
+                     isLatLon);
+
+  // get the dbz field for ConvStrat
+
+  string dbzName(_params.conv_strat_dbz_field_name);
+  fl32 *dbzVals = NULL;
+  for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
+    const Field &ifld = _interpFields[ifield];
+    if (ifld.radxName == dbzName) {
+      dbzVals = _outputFields[ifield];
+      break;
+    }
+  }
+  if (dbzVals == NULL) {
+    cerr << "ERROR - CartInterp::_convStratCompute()" << endl;
+    cerr << "  Cannot find dbz field: " << dbzName << endl;
+    cerr << "  conv/strat partition will not be computed" << endl;
+    return -1;
+  }
+
+  // compute the convective/stratiform partition
+  
+  if (_convStrat.computePartition(dbzVals, missingFl32)) {
+    cerr << "ERROR - CartInterp::_convStratCompute()" << endl;
+    cerr << "  _convStrat.computePartition() failed" << endl;
+    return -1;
+  }
+
+#ifdef JUNK
+  
   // prepare the data
 
   _convStratComputeVertLookups();
@@ -2986,9 +3065,15 @@ void CartInterp::_convStratCompute()
     }
   }
 
+#endif
+
   _printRunTime("CartInterp::_convStratCompute");
+
+  return 0;
   
 }
+
+#ifdef JUNK
 
 //////////////////////////////////////
 // compute the kernels for this grid
@@ -3078,11 +3163,13 @@ void CartInterp::_convStratComputeVertLookups()
     _textureIzUpper[ii] = 0;
   }
 
+  double conv_strat_texture_depth_km = 1.0;
+
   for (int ii = 0; ii < NLOOKUP; ii++) {
     
     double zz = ii * 0.01; // ht in km
-    double zLowerLimit = zz - _params.conv_strat_texture_depth_km / 2.0;
-    double zUpperLimit = zz + _params.conv_strat_texture_depth_km / 2.0;
+    double zLowerLimit = zz - conv_strat_texture_depth_km / 2.0;
+    double zUpperLimit = zz + conv_strat_texture_depth_km / 2.0;
     
     for (int jj = 0; jj < (int) _gridZLevels.size(); jj++) {
       double zLevel = _gridZLevels[jj];
@@ -3103,6 +3190,8 @@ void CartInterp::_convStratComputeVertLookups()
   }
 
 }
+
+#endif
 
 ///////////////////////////////////////////////////////////////
 // FillSearchLowerLeft thread
@@ -3211,6 +3300,8 @@ void CartInterp::PerformInterp::run()
 {
   _this->_interpRow(_zIndex, _yIndex);
 }
+
+#ifdef JUNK
 
 ///////////////////////////////////////////////////////////////
 // ComputeTexture thread
@@ -3328,4 +3419,4 @@ void CartInterp::ComputeTexture::run()
   
 }
 
-
+#endif

@@ -28,7 +28,7 @@
 // Jaimi Yee, RAP, NCAR, Boulder, CO, 80307, USA
 // September 2004
 //
-// $Id: Ingester.cc,v 1.20 2016/03/07 01:23:03 dixon Exp $
+// $Id: Ingester.cc,v 1.21 2018/10/16 20:43:22 jcraig Exp $
 //
 //////////////////////////////////////////////////////
 #include <ctype.h>
@@ -377,7 +377,8 @@ void Ingester::_setNewElevationInfo(time_t beamTime, int msec_past_midnight, int
     }
     
     fileEnd = time( NULL );
-    POSTMSG( DEBUG, "Process time = %d seconds", fileEnd - fileStart );
+    if(params->verbose)
+      POSTMSG( DEBUG, "Process time = %d seconds", fileEnd - fileStart );
     
     //
     // If the previous sweep was not merged, write
@@ -535,7 +536,7 @@ status_t Ingester::addMsg31Beam(RIDDS_data_31_hdr *nexradData, bool volumeTitleS
 		     nexradData->millisecs_past_midnight / 1000);
 
   if(firstBeam) {
-    POSTMSG( DEBUG, "First Tilt. Elevation Num: %d", nexradData->elev_num );
+    POSTMSG( DEBUG, "Elevation Num: %d   %2.1f", nexradData->elev_num, nexradData->elevation);
 
     RIDDS_volume_31_hdr *volData = (RIDDS_volume_31_hdr *)((ui08*)nexradData + nexradData->volume_ptr);
 
@@ -555,7 +556,7 @@ status_t Ingester::addMsg31Beam(RIDDS_data_31_hdr *nexradData, bool volumeTitleS
     _setNewElevationInfo(beamTime, nexradData->millisecs_past_midnight, nexradData->elev_num,
 			 nexradData->elevation, volumeTitleSeen, nexradData->radial_status);
 
-    POSTMSG( DEBUG, "New Tilt Detected. Starting Elevation Num: %d", nexradData->elev_num );
+    POSTMSG( DEBUG, "Elevation Num: %d   %2.1f", nexradData->elev_num, nexradData->elevation);
 
     if( currentSweep->setInfo( nexradData, prevSweep ) != ALL_OK ) {
       POSTMSG( ERROR, "Could not get information needed to process "

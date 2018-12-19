@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: jcraig $
  *   $Locker:  $
- *   $Date: 2016/03/07 18:17:27 $
- *   $Id: SweepFile.hh,v 1.2 2016/03/07 18:17:27 dixon Exp $
- *   $Revision: 1.2 $
+ *   $Date: 2018/01/26 20:39:39 $
+ *   $Id: SweepFile.hh,v 1.3 2018/01/26 20:39:39 jcraig Exp $
+ *   $Revision: 1.3 $
  *   $State: Exp $
  */
  
@@ -50,8 +50,8 @@
 
 #include <string>
 #include <map>
-#include <netcdf.hh>
 
+#include <Ncxx/Nc3File.hh>
 #include "NegateVar.hh"
 
 using namespace std;
@@ -140,7 +140,7 @@ protected:
   bool _debug;
   
   string _filePath;
-  NcFile *_sweepFile;
+  Nc3File *_sweepFile;
   
   map< string, NegateVar > _negateVarList;
   
@@ -160,7 +160,7 @@ protected:
    * Returns true on success, false on failure.
    */
 
-  bool _addDimensions(NcFile &output_file) const;
+  bool _addDimensions(Nc3File &output_file) const;
   
 
   /*********************************************************************
@@ -170,7 +170,7 @@ protected:
    * Returns true on success, false on failure.
    */
 
-  bool _addGlobalAttributes(NcFile &output_file) const;
+  bool _addGlobalAttributes(Nc3File &output_file) const;
   
 
   /*********************************************************************
@@ -180,8 +180,8 @@ protected:
    * Returns true on success, false on failure.
    */
 
-  bool _addVariableAttributes(const NcVar &input_var,
-			      NcVar &output_var) const;
+  bool _addVariableAttributes(const Nc3Var &input_var,
+			      Nc3Var &output_var) const;
   
 
   /*********************************************************************
@@ -190,7 +190,7 @@ protected:
    * Returns true on success, false on failure.
    */
 
-  bool _addVariables(NcFile &output_file) const;
+  bool _addVariables(Nc3File &output_file) const;
   
 
   /*********************************************************************
@@ -200,8 +200,8 @@ protected:
    * Returns true on success, false on failure.
    */
 
-  bool _copyData(NcVar &input_var,
-		 NcVar &output_var,
+  bool _copyData(Nc3Var &input_var,
+		 Nc3Var &output_var,
 		 const int num_dims) const;
 
 
@@ -209,7 +209,7 @@ protected:
    * _negateVariable() - Negate the data values for this variable.
    */
 
-  bool _negateVariable(NcVar &output_var,
+  bool _negateVariable(Nc3Var &output_var,
 		       const string &negate_fill_attr_name) const;
   
 
@@ -217,8 +217,8 @@ protected:
   // Protected templates //
   /////////////////////////
 
-  template< class T > bool _copyDataT(NcVar &input_var,
-				      NcVar &output_var,
+  template< class T > bool _copyDataT(Nc3Var &input_var,
+				      Nc3Var &output_var,
 				      T *vals,
 				      long *counts,
 				      long *cur,
@@ -263,7 +263,7 @@ protected:
     return true;
   }
   
-  template< class T > void _negateDataT(NcVar &output_var,
+  template< class T > void _negateDataT(Nc3Var &output_var,
 					const long *counts,
 					const T fill_value,
 					const int num_vals) const

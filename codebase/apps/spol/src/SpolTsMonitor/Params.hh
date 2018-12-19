@@ -76,9 +76,10 @@ public:
 
   typedef enum {
     XML_ENTRY_BOOLEAN = 0,
-    XML_ENTRY_INT = 1,
-    XML_ENTRY_DOUBLE = 2,
-    XML_ENTRY_STRING = 3
+    XML_ENTRY_BOOLEAN_TO_INT = 1,
+    XML_ENTRY_INT = 2,
+    XML_ENTRY_DOUBLE = 3,
+    XML_ENTRY_STRING = 4
   } xml_entry_type_t;
 
   // struct typedefs
@@ -410,9 +411,9 @@ public:
 
   int test_pulse_n_samples;
 
-  tdrp_bool_t dual_pol_alternating_mode;
+  tdrp_bool_t alternating_mode;
 
-  tdrp_bool_t dual_pol_switching_receivers;
+  tdrp_bool_t switching_receivers;
 
   tdrp_bool_t monitor_g0_velocity;
 

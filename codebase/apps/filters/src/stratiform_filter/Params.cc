@@ -612,13 +612,15 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
-    tt->enum_def.nfields = 2;
+    tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("REALTIME_MODE");
       tt->enum_def.fields[0].val = REALTIME_MODE;
       tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE_MODE");
       tt->enum_def.fields[1].val = ARCHIVE_MODE;
+      tt->enum_def.fields[2].name = tdrpStrDup("FILELIST_MODE");
+      tt->enum_def.fields[2].val = FILELIST_MODE;
     tt->single_val.e = REALTIME_MODE;
     tt++;
     
@@ -641,6 +643,32 @@
     tt->help = tdrpStrDup("RAP URL that describes the location of the input data.\nFor data on local disk, this can just be the directory containing the input MDV files.  For data retrieved from a server, it is the URL for the server.  A server URL looks like the following:\n\tmdvp:://host:port:directory_path\nThis URL specifies a DsMdvServer process running on the specified host and using the specified port.  The data would reside on the specified host under $RAP_DATRA_DIR/directory_path.");
     tt->val_offset = (char *) &input_url - &_start_;
     tt->single_val.s = tdrpStrDup("mdvp:://host:port:directory_path");
+    tt++;
+    
+    // Parameter 'dbz_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("dbz_field_name");
+    tt->descr = tdrpStrDup("Field name for DBZ input data");
+    tt->help = tdrpStrDup("If empty, the field_num will be used instead");
+    tt->val_offset = (char *) &dbz_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DBZ");
+    tt++;
+    
+    // Parameter 'field_num'
+    // ctype is 'long'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = LONG_TYPE;
+    tt->param_name = tdrpStrDup("field_num");
+    tt->descr = tdrpStrDup("field number to use for algorithm");
+    tt->help = tdrpStrDup("The algorithm will only be run on this field.");
+    tt->val_offset = (char *) &field_num - &_start_;
+    tt->has_min = TRUE;
+    tt->min_val.l = 0;
+    tt->single_val.l = 0;
     tt++;
     
     // Parameter 'max_valid_age'
@@ -675,10 +703,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("field_name_for_convective_input_data");
-    tt->descr = tdrpStrDup("Field name for input data in convective regions.");
-    tt->help = tdrpStrDup("The input data is filtered to only include the convective parts.");
+    tt->descr = tdrpStrDup("Output field name for convective DBZ.");
+    tt->help = tdrpStrDup("The input DBZ field is filtered to only include the convective parts.");
     tt->val_offset = (char *) &field_name_for_convective_input_data - &_start_;
-    tt->single_val.s = tdrpStrDup("conv partitioned data");
+    tt->single_val.s = tdrpStrDup("DbzConv");
     tt++;
     
     // Parameter 'field_name_for_partition_flag'
@@ -690,7 +718,7 @@
     tt->descr = tdrpStrDup("Field name for the partition flag.");
     tt->help = tdrpStrDup("0: missing; 1: stratiform; 2: convective.");
     tt->val_offset = (char *) &field_name_for_partition_flag - &_start_;
-    tt->single_val.s = tdrpStrDup("conv partition");
+    tt->single_val.s = tdrpStrDup("ConvStrat");
     tt++;
     
     // Parameter 'field_name_for_background_mean'
@@ -702,7 +730,7 @@
     tt->descr = tdrpStrDup("Field name for the background mean.");
     tt->help = tdrpStrDup("This is the mean reflectivity in the background template.");
     tt->val_offset = (char *) &field_name_for_background_mean - &_start_;
-    tt->single_val.s = tdrpStrDup("conv means");
+    tt->single_val.s = tdrpStrDup("DbzBackground");
     tt++;
     
     // Parameter 'include_input_field'
@@ -736,20 +764,6 @@
     tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("ALGORITHM PARAMETERS");
     tt->comment_text = tdrpStrDup("Parameters defining how the algorithm will work.\nThis program is an implementation of the stratiform identification algorithm described by Steiner, etal in \"Climatological Characterization of Three-Dimensional Storm Structure from Operation Radar and Rain Guage Data\" in the Journal of Applied Meteorology, Sept. 1995, vol. 34, pp. 1983-1990.");
-    tt++;
-    
-    // Parameter 'field_num'
-    // ctype is 'long'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = LONG_TYPE;
-    tt->param_name = tdrpStrDup("field_num");
-    tt->descr = tdrpStrDup("field number to use for algorithm");
-    tt->help = tdrpStrDup("The algorithm will only be run on this field.");
-    tt->val_offset = (char *) &field_num - &_start_;
-    tt->has_min = TRUE;
-    tt->min_val.l = 0;
-    tt->single_val.l = 0;
     tt++;
     
     // Parameter 'do_composite'

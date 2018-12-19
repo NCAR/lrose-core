@@ -575,7 +575,7 @@ static int _readyForBeam()
   if (_beamAz < 0) {
     _beamAz += 360.0;
   }
-  double _beamEl = _computeAngleMean(pulse0->el, pulse1->el);
+  _beamEl = _computeAngleMean(pulse0->el, pulse1->el);
   
   /* compute cosine of elevation for correcting azimuth relative to sun */
 
@@ -770,6 +770,7 @@ static void _correctPowersForNoise()
       }
       beam->dbmH = 10.0 * log10(beam->powerH);
       beam->dbmV = 10.0 * log10(beam->powerV);
+      beam->dbm = (beam->dbmH + beam->dbmV) / 2.0;
     } /* iaz */
   } /* iel */
 }
@@ -933,7 +934,7 @@ static void _interpMomentsToRegularGrid()
         interp->azOffset = azOffset;
         interp->powerH = (wt0 * raw0.powerH) + (wt1 * raw1.powerH);
         interp->powerV = (wt0 * raw0.powerV) + (wt1 * raw1.powerV);
-        interp->dbmH = (wt0 * raw0.dbmH) + (wt1 * raw1.dbmV);
+        interp->dbmH = (wt0 * raw0.dbmH) + (wt1 * raw1.dbmH);
         interp->dbmV = (wt0 * raw0.dbmV) + (wt1 * raw1.dbmV);
         interp->dbm = (wt0 * raw0.dbm) + (wt1 * raw1.dbm);
         interp->zdr = (wt0 * raw0.zdr) + (wt1 * raw1.zdr);
@@ -2059,9 +2060,7 @@ int nexradSolarWriteGriddedTextFiles(const char *output_dir)
 
 {
 
-  fprintf(stderr, "11111111111111111111111111\n");
-
- // create the directory for the output files
+  // create the directory for the output files
   
   struct tm *mtime;
   time_t meanTime = (time_t) _meanSunTime;

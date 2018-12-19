@@ -59,7 +59,7 @@ Archiver::Archiver(int argc, char **argv)
   // get TDRP params
   
   _params = new Params();
-  _paramsPath = "unknown";
+  _paramsPath = (char *) "unknown";
   if (_params->loadFromArgs(argc, argv,
 			    args.override.list,
 			    &_paramsPath)) {

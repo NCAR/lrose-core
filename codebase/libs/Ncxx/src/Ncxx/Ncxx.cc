@@ -82,21 +82,43 @@ int Ncxx::getByteWidth(nc_type nctype)
 {
   
   switch (nctype) {
-    case NC_DOUBLE:
-      return sizeof(double);
-    case NC_FLOAT:
-      return sizeof(float);
-    case NC_INT:
-      return sizeof(int);
+    case NC_BYTE:
+      return sizeof(char);
+    case NC_CHAR:
+      return sizeof(char);
     case NC_SHORT:
       return sizeof(short);
+    case NC_INT:
+      return sizeof(int);
+    case NC_FLOAT:
+      return sizeof(float);
+    case NC_DOUBLE:
+      return sizeof(double);
     case NC_UBYTE:
-    default:
       return sizeof(unsigned char);
+    case NC_USHORT:
+      return sizeof(unsigned short);
+    case NC_UINT:
+      return sizeof(unsigned int);
+    case NC_INT64:
+      return sizeof(si64);
+    case NC_UINT64:
+      return sizeof(ui64);
+    case NC_STRING:
+      return sizeof(char);
+    case NC_VLEN:
+      return 0;
+    case NC_OPAQUE:
+      return 0;
+    case NC_ENUM:
+      return sizeof(int);
+    case NC_COMPOUND:
+    default:
+      return 0;
   }
 
 }
-  
+
 ///////////////////////////////
 // get byte width of data type
 
@@ -133,19 +155,42 @@ string Ncxx::ncTypeToStr(nc_type nctype)
 {
   
   switch (nctype) {
-    case NC_DOUBLE:
-      return "NC_DOUBLE";
-    case NC_FLOAT:
-      return "NC_FLOAT";
-    case NC_INT:
-      return "NC_INT";
+    case NC_BYTE:
+      return "NC_BYTE";
+    case NC_CHAR:
+      return "NC_CHAR";
     case NC_SHORT:
       return "NC_SHORT";
+    case NC_INT:
+      return "NC_INT";
+    case NC_FLOAT:
+      return "NC_FLOAT";
+    case NC_DOUBLE:
+      return "NC_DOUBLE";
     case NC_UBYTE:
-    default:
       return "NC_UBYTE";
+    case NC_USHORT:
+      return "NC_USHORT";
+    case NC_UINT:
+      return "NC_UINT";
+    case NC_INT64:
+      return "NC_INT64";
+    case NC_UINT64:
+      return "NC_UINT64";
+    case NC_STRING:
+      return "NC_STRING";
+    case NC_VLEN:
+      return "NC_VLEN";
+    case NC_OPAQUE:
+      return "NC_OPAQUE";
+    case NC_ENUM:
+      return "NC_ENUM";
+    case NC_COMPOUND:
+      return "NC_COMPOUND";
+    default:
+      return "UNKNOWN";
   }
-  
+
 }
 
 string Ncxx::ncxxTypeToStr(NcxxType nctype)

@@ -294,7 +294,7 @@ void Args::_usage(string &prog_name, ostream &out)
       << "  [-check_missing ?] check for missing beams\n"
       << "     Specify the max delta angle (deg) for normal ops.\n"
       << "  [-data] full plus data - very verbose\n"
-      << "  [ -d, -debug ] print debug messages\n"
+      << "  [-d, -debug] print debug messages\n"
       << "  [-f, -files ???] specify input file list.\n"
       << "     Reads moments data from specified files.\n"
       << "     Sets FILE_INPUT mode.\n"
@@ -325,8 +325,8 @@ void Args::_usage(string &prog_name, ostream &out)
       << "  [-update ?] update interval in seconds\n"
       << "     If 0, every beam printed.\n"
       << "     If < 0, updates on beam count instead of secs\n"
-      << "  [ -v, -verbose ] print verbose debug messages\n"
-      << "  [ -vv, -extra ] print extra verbose debug messages\n"
+      << "  [-v, -verbose] print verbose debug messages\n"
+      << "  [-vv, -extra] print extra verbose debug messages\n"
       << endl;
   
   Params::usage(out);

@@ -29,6 +29,7 @@
 #include <time.h>
 
 #include <euclid/Pjg.hh>
+#include <rapformats/WxObs.hh>
 #include <rapformats/station_reports.h>
 #include <rapformats/Sndg.hh>
 #include <rapformats/GenPt.hh>
@@ -51,7 +52,8 @@ class DataMgr {
    * Constructors
    */
 
-  DataMgr();
+  DataMgr(const string &progName,
+          const Params &params);
 
 
   /*********************************************************************
@@ -187,7 +189,6 @@ class DataMgr {
     _debug = debug_level;
   }
   
-
   /*********************************************************************
    * setProgName() - Set the program name.
    */
@@ -234,6 +235,7 @@ class DataMgr {
   /////////////////////
 
   string _progName;
+  const Params &_params;
   Params::debug_t _debug;
   
   Pjg _proj;

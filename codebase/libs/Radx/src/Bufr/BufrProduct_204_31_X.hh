@@ -61,6 +61,8 @@ public:
 
   void reset();
 
+  //  bool StuffIt(unsigned short des, string fieldName, string &value);
+
   /*
   //////////////////////////////////////////////////////////////
   /// \name Debugging:

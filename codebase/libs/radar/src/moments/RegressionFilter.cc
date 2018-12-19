@@ -225,7 +225,7 @@ void RegressionFilter::setup(int nSamples,
     xx += xDelta;
   }
 
-  // compute CC matrix for pater use
+  // compute CC matrix for later use
 
   _computeCc();
   
@@ -287,7 +287,7 @@ void RegressionFilter::setupStaggered(int nSamples,
     }
   }
 
-  // compute CC matrix for pater use
+  // compute CC matrix for later use
 
   _computeCc();
   

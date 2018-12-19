@@ -853,6 +853,18 @@
     tt->single_val.d = 1;
     tt++;
     
+    // Parameter 'center_dwell_on_time'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("center_dwell_on_time");
+    tt->descr = tdrpStrDup("Option to center the dwell on a multiple of the dwell_time.");
+    tt->help = tdrpStrDup("The dwell will be chosen so that the center time of the dwell will be close to an even multiple of the dwell_time_secs. So if for example dwell_time_secs is set to 0.5, the dwell centers would be at 0.25, 0.75, 1.25 secs etc.");
+    tt->val_offset = (char *) &center_dwell_on_time - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'dwell_stats_method'
     // ctype is '_dwell_stats_method_t'
     
@@ -877,6 +889,22 @@
       tt->enum_def.fields[4].name = tdrpStrDup("DWELL_STATS_MIDDLE");
       tt->enum_def.fields[4].val = DWELL_STATS_MIDDLE;
     tt->single_val.e = DWELL_STATS_MEAN;
+    tt++;
+    
+    // Parameter 'dwell_stats_max_fraction_missing'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("dwell_stats_max_fraction_missing");
+    tt->descr = tdrpStrDup("Specify the max fraction of the dwell that can have missing data.");
+    tt->help = tdrpStrDup("We compute how much of the dwell is missing for each field. If the fraction exceeds this parameter, the combined value will be set to missing.");
+    tt->val_offset = (char *) &dwell_stats_max_fraction_missing - &_start_;
+    tt->has_min = TRUE;
+    tt->has_max = TRUE;
+    tt->min_val.d = 0;
+    tt->max_val.d = 1;
+    tt->single_val.d = 0.25;
     tt++;
     
     // Parameter 'Comment 5'
@@ -1493,7 +1521,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 13");
-    tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
+    tt->comment_hdr = tdrpStrDup("WRITE CFRADIAL FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1543,6 +1571,30 @@
     tt->help = tdrpStrDup("If empty, the standard prefix will be used.");
     tt->val_offset = (char *) &output_filename_prefix - &_start_;
     tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'write_output_files_on_time_boundaries'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_output_files_on_time_boundaries");
+    tt->descr = tdrpStrDup("Option to write the output files on time boundaries.");
+    tt->help = tdrpStrDup("See 'output_file_time_interval_secs'.");
+    tt->val_offset = (char *) &write_output_files_on_time_boundaries - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'output_file_time_interval_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("output_file_time_interval_secs");
+    tt->descr = tdrpStrDup("Time interval at which files will be written out (secs).");
+    tt->help = tdrpStrDup("See 'split_output_files_on_time'. To make sense, this interval should divide evenly into an hour - i.e. 3600.");
+    tt->val_offset = (char *) &output_file_time_interval_secs - &_start_;
+    tt->single_val.i = 600;
     tt++;
     
     // Parameter 'include_instrument_name_in_file_name'

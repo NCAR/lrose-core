@@ -25,44 +25,20 @@
  * @file CloudGap.cc
  */
 #include "CloudGap.hh"
-#include "CloudEdge.hh"
+#include "RayCloudEdge.hh"
 #include <euclid/Grid2d.hh>
 #include <cstdio>
 
 /*----------------------------------------------------------------*/
-CloudGap::CloudGap(const CloudEdge &e)
+CloudGap::CloudGap(const RayCloudEdge &e) :
+  _y(e.beamIndex()), _near(e.beamIndex()), _far(e)
 {
-  _y = e.get_y();
-
-  _x0[0] = _x0[1] = 0;
-  _xout0[0] = _xout0[1] = -1;
-  _v0 = 0.0;
-
-  _x1[0] = e.get_x0();
-  _x1[1] = e.get_x1();
-  _xout1[0] = e.get_xout0();
-  _xout1[1] = e.get_xout1();
-  _v1 = e.get_color();
 }
 
 /*----------------------------------------------------------------*/
-CloudGap::CloudGap(const CloudEdge &e0, const CloudEdge &e1)
+CloudGap::CloudGap(const RayCloudEdge &e0, const RayCloudEdge &e1) :
+  _y(e0.beamIndex()), _near(e0), _far(e1)
 {
-  _y = e0.get_y();
-  if (e1.get_y() != _y)
-    LOG(ERROR) << _y << " " << e1.get_y() << " values";
-
-  _x0[0] = e0.get_x0();
-  _x0[1] = e0.get_x1();
-  _xout0[0] = e0.get_xout0();
-  _xout0[1] = e0.get_xout1();
-  _v0 = e0.get_color();
-
-  _x1[0] = e1.get_x0();
-  _x1[1] = e1.get_x1();
-  _xout1[0] = e1.get_xout0();
-  _xout1[1] = e1.get_xout1();
-  _v1 = e1.get_color();
 }
 
 /*----------------------------------------------------------------*/
@@ -71,58 +47,39 @@ CloudGap::~CloudGap()
 }
 
 /*----------------------------------------------------------------*/
-void CloudGap::to_grid(Grid2d &data) const
+void CloudGap::toGrid(Grid2d &data) const
 {
-  for (int x=_x0[0]; x<=_x0[1]; ++x)
-  {
-    if (x >= 0)
-      data.setValue(x, _y, _v0);
-  }
-  for (int x=_x1[0]; x<=_x1[1]; ++x)
-  {
-    if (x >= 0)
-      data.setValue(x, _y, _v1);
-  }
+  _near.toGrid(data);
+  _far.toGrid(data);
 }
 
 /*----------------------------------------------------------------*/
-void CloudGap::to_outside_grid(Grid2d &outside) const
+void CloudGap::toOutsideGrid(Grid2d &outside) const
 {
-  for (int x=_xout0[0]; x<=_xout0[1]; ++x)
-  {
-    if (x >= 0)
-      outside.setValue(x, _y, _v0);
-  }
-  for (int x=_xout1[0]; x<=_xout1[1]; ++x)
-  {
-    if (x >= 0)
-      outside.setValue(x, _y, _v1);
-  }
+  _near.toOutsideGrid(outside);
+  _far.toOutsideGrid(outside);
 }
 
 /*----------------------------------------------------------------*/
-int CloudGap::npt_between(void) const	
+int CloudGap::nptBetween(void) const	
 {
-  return _x1[0] - _x0[1];
+  return _far.closestCloudPoint() - _near.farthestCloudPoint();
 }
 
 /*----------------------------------------------------------------*/
-int CloudGap::get_x(const bool is_far) const
+int CloudGap::getX(bool isFar) const
 {
-  if (is_far)
-    // first x is it
-    return _x1[0];
+  if (isFar)
+    return _far.closestCloudPoint();
   else
-    // last x is it
-    return _x0[1];
+    return _near.farthestCloudPoint();
 }
 
 /*----------------------------------------------------------------*/
 void CloudGap::print(void) const
 {
-  printf("x0:[%d,%d]  x0_out:[%d,%d]   x1:[%d,%d]  x1_out:[%d,%d]  v0:%lf v1:%lf\n",
-	 _x0[0], _x0[1], _xout0[0], _xout0[1], 
-	 _x1[0], _x1[1], _xout1[0], _xout1[1], _v0, _v1);
+  printf("gap[%d] : Near:%s  Far:%s \n", _y, _near.sprint().c_str(),
+	 _far.sprint().c_str());
 }
 
 

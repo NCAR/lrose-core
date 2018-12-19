@@ -466,6 +466,11 @@ int SunCal::_runForTimeSeries()
 
     if (useThisPulse) {
       _processPulse(pulse);
+    } else {
+      // delete pulse by adding to queue and then
+      // clearing the queue
+      _addPulseToQueue(pulse);
+      _clearPulseQueue();
     }
 
     // process data if end of vol
@@ -477,7 +482,7 @@ int SunCal::_runForTimeSeries()
       _endOfVol = false;
     }
 
-  }
+  } // while
 
   // process any remaining data
 
@@ -634,6 +639,8 @@ int SunCal::_processPulse(const IwrfTsPulse *pulse)
       if (_params.debug) {
         cerr << "Starting new analysis" << endl;
       }
+      // add to queue for next analysis
+      _addPulseToQueue(pulse);
       return 0;
     }
   }
@@ -641,7 +648,7 @@ int SunCal::_processPulse(const IwrfTsPulse *pulse)
   _endTime = pulseTime;
 
   // add the pulse to the queue
-
+  
   _addPulseToQueue(pulse);
   _totalPulseCount++;
   
@@ -974,44 +981,39 @@ int SunCal::_addPulseToNexradQueue(const IwrfTsPulse *iwrfPulse)
 
   // load up IQ data along the pulse
   
-  int nn = 0;
-  int ii = _startGateSun;
+  int count = 0;
   int ii2 = _startGateSun * 2;
-  for (int igate = _startGateSun; igate <= _endGateSun; igate++) {
+  for (int igate = _startGateSun; igate <= _endGateSun; igate++, ii2 += 2) {
     
-    iqh[nn].re = iq0[ii2];
-    iqh[nn].im = iq0[ii2 + 1];
+    iqh[count].re = iq0[ii2];
+    iqh[count].im = iq0[ii2 + 1];
     
-    iqv[nn].re = iq1[ii2];
-    iqv[nn].im = iq1[ii2 + 1];
+    iqv[count].re = iq1[ii2];
+    iqv[count].im = iq1[ii2 + 1];
 
     // check power for interference
     
     double power =
-      (RadarComplex::power(iqh[nn]) + RadarComplex::power(iqv[nn])) / 2.0;
+      (RadarComplex::power(iqh[count]) + RadarComplex::power(iqv[count])) / 2.0;
     double dbm = 10.0 * log10(power);
-    if (dbm > _maxValidSunPowerDbm) {
-      // don't use this gate - probably interference
-      continue;
+    if (dbm <= _maxValidSunPowerDbm) {
+      // probably not interference so use this gate
+      // so increment count
+      count++;
     }
-
-    nn++;
-    ii++;
-    ii2 += 2;
 
   } // igate
 
-  if (nn < 3) {
+  if (count < 3) {
     return -1;
   }
 
   // compute moments
   
-  double meanPowerH = RadarComplex::meanPower(iqh, nn - 1);
-  double meanPowerV = RadarComplex::meanPower(iqv, nn - 1);
-  
+  double meanPowerH = RadarComplex::meanPower(iqh, count);
+  double meanPowerV = RadarComplex::meanPower(iqv, count);
   RadarComplex_t Rvvhh0 =
-    RadarComplex::meanConjugateProduct(iqh, iqv, nn - 1);
+    RadarComplex::meanConjugateProduct(iqh, iqv, count);
   
   solar_pulse_t solarPulse;
   solarPulse.time = iwrfPulse->getFTime();
@@ -1021,7 +1023,7 @@ int SunCal::_addPulseToNexradQueue(const IwrfTsPulse *iwrfPulse)
   solarPulse.powerV = meanPowerV;
   solarPulse.rvvhh0.re = Rvvhh0.re;
   solarPulse.rvvhh0.im = Rvvhh0.im;
-  solarPulse.nGatesUsed = nn;
+  solarPulse.nGatesUsed = count;
 
   nexradSolarAddPulseToQueue(&solarPulse);
 
@@ -1825,6 +1827,7 @@ int SunCal::_performAnalysis(bool force)
 {
 
   PMU_auto_register("performAnalysis");
+  int iret = 0;
 
   // check if we are ready
 
@@ -2052,10 +2055,10 @@ int SunCal::_performAnalysis(bool force)
 
     if (_params.write_text_files) {
       if (_writeGriddedTextFiles()) {
-        return -1;
+        iret = -1;
       }
       if (_writeSummaryText()) {
-        return -1;
+        iret = -1;
       }
       if (_params.test_nexrad_processing) {
         nexradSolarWriteGriddedTextFiles(_params.nexrad_text_output_dir);
@@ -2068,7 +2071,7 @@ int SunCal::_performAnalysis(bool force)
     
     if (_params.write_mdv_files) {
       if (_writeToMdv()) {
-        return -1;
+        iret = -1;
       }
       if (_params.test_nexrad_processing) {
         _writeNexradToMdv();
@@ -2077,7 +2080,7 @@ int SunCal::_performAnalysis(bool force)
     
     if (_params.write_summary_to_spdb) {
       if (_writeSummaryToSpdb()) {
-        return -1;
+        iret = -1;
       }
       if (_params.test_nexrad_processing) {
         _writeNexradSummaryToSpdb();
@@ -2091,7 +2094,7 @@ int SunCal::_performAnalysis(bool force)
   _initForAnalysis();
   _clearPulseQueue();
 
-  return 0;
+  return iret;
 
 }
 
@@ -3462,6 +3465,30 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
     cerr << "  parabolaWidthRatio: " << widthRatio << endl;
   }
 
+  // add in check for parabola fit
+  // typical parabola width is 4.75
+
+  if (widthAz3Db < 2.5 || widthAz3Db > 7.5) {
+    _validCentroid = false;
+    if (_params.debug) {
+      cerr << "ERROR - SunCal::_computeSunCentroid" << endl;
+      cerr << "  Parabola width Az out of limits: "
+           << widthAz3Db << endl;
+      cerr << "  Should be within 2.5 to 7.5 deg" << endl;
+      cerr << "  Setting centroid invalid" << endl;
+    }
+  }
+  if (widthEl3Db < 2.5 || widthEl3Db > 7.5) {
+    _validCentroid = false;
+    if (_params.debug) {
+      cerr << "ERROR - SunCal::_computeSunCentroid" << endl;
+      cerr << "  Parabola width El out of limits: "
+           << widthEl3Db << endl;
+      cerr << "  Should be within 2.5 to 7.5 deg" << endl;
+      cerr << "  Setting centroid invalid" << endl;
+    }
+  }
+
   double quadPowerDbm = (_ccAz + _ccEl) / 2.0 - 200.0;
 
   switch (channel) {
@@ -3491,7 +3518,7 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
     _sunCentroidElOffset = sunCentroidElOffset;
     break;
   }
-
+  
 }
 
 ////////////////////////////////////////////

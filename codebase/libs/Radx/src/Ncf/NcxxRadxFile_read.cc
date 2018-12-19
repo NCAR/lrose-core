@@ -1728,6 +1728,7 @@ int NcxxRadxFile::_readRayVariables()
     }
   } else {
     // not HSRL
+    clearErrStr();
     _readRayVar(_elevationVar, ELEVATION, _rayElevations);
   }
   if (_rayElevations.size() < _raysFromFile.size()) {
@@ -2167,189 +2168,321 @@ int NcxxRadxFile::_readCal(RadxRcalib &cal, int index)
   double val;
   time_t ctime;
 
-  iret |= _readCalTime(R_CALIB_TIME, 
-                       _rCalTimeVar, index, ctime);
-  cal.setCalibTime(ctime);
+  // time
+
+  if (_readCalTime(R_CALIB_TIME, 
+                   _rCalTimeVar, index, ctime) == 0) {
+    cal.setCalibTime(ctime);
+  }
+
+  // pulse width
 
   iret |= _readCalVar(R_CALIB_PULSE_WIDTH, 
                       _rCalPulseWidthVar, index, val, true);
   cal.setPulseWidthUsec(val * 1.0e6);
 
-  iret |= _readCalVar(R_CALIB_XMIT_POWER_H, 
-                      _rCalXmitPowerHVar, index, val);
-  cal.setXmitPowerDbmH(val);
+  // xmit power
 
-  iret |= _readCalVar(R_CALIB_XMIT_POWER_V, 
-                      _rCalXmitPowerVVar, index, val);
-  cal.setXmitPowerDbmV(val);
+  if (_readCalVar(R_CALIB_XMIT_POWER_H, 
+                  _rCalXmitPowerHVar, index, val) == 0) {
+    cal.setXmitPowerDbmH(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_H,
-                      _rCalTwoWayWaveguideLossHVar, index, val);
-  cal.setTwoWayWaveguideLossDbH(val);
+  if (_readCalVar(R_CALIB_XMIT_POWER_V, 
+                  _rCalXmitPowerVVar, index, val) == 0) {
+    cal.setXmitPowerDbmV(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_V,
-                      _rCalTwoWayWaveguideLossVVar, index, val);
-  cal.setTwoWayWaveguideLossDbV(val);
+  // waveguide loss
 
-  iret |= _readCalVar(R_CALIB_TWO_WAY_RADOME_LOSS_H,
-                      _rCalTwoWayRadomeLossHVar, index, val);
-  cal.setTwoWayRadomeLossDbH(val);
+  if (_readCalVar(R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_H,
+                  _rCalTwoWayWaveguideLossHVar, index, val) == 0) {
+    cal.setTwoWayWaveguideLossDbH(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_TWO_WAY_RADOME_LOSS_V,
-                      _rCalTwoWayRadomeLossVVar, index, val);
-  cal.setTwoWayRadomeLossDbV(val);
+  if (_readCalVar(R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_V,
+                  _rCalTwoWayWaveguideLossVVar, index, val) == 0) {
+    cal.setTwoWayWaveguideLossDbV(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_RECEIVER_MISMATCH_LOSS,
-                      _rCalReceiverMismatchLossVar, index, val);
-  cal.setReceiverMismatchLossDb(val);
+  // radome loss
 
-  iret |= _readCalVar(R_CALIB_RADAR_CONSTANT_H, 
-                      _rCalRadarConstHVar, index, val);
-  cal.setRadarConstantH(val);
+  if (_readCalVar(R_CALIB_TWO_WAY_RADOME_LOSS_H,
+                  _rCalTwoWayRadomeLossHVar, index, val) == 0) {
+    cal.setTwoWayRadomeLossDbH(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_RADAR_CONSTANT_V, 
-                      _rCalRadarConstVVar, index, val);
-  cal.setRadarConstantV(val);
+  if (_readCalVar(R_CALIB_TWO_WAY_RADOME_LOSS_V,
+                  _rCalTwoWayRadomeLossVVar, index, val) == 0) {
+    cal.setTwoWayRadomeLossDbV(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_ANTENNA_GAIN_H, 
-                      _rCalAntennaGainHVar, index, val);
-  cal.setAntennaGainDbH(val);
+  // receiver mismatch loss
   
-  iret |= _readCalVar(R_CALIB_ANTENNA_GAIN_V, 
-                      _rCalAntennaGainVVar, index, val);
-  cal.setAntennaGainDbV(val);
+  if (_readCalVar(R_CALIB_RECEIVER_MISMATCH_LOSS,
+                  _rCalReceiverMismatchLossVar, index, val) == 0) {
+    cal.setReceiverMismatchLossDb(val);
+  }
+  
+  // k squared water
 
-  iret |= _readCalVar(R_CALIB_NOISE_HC, 
-                      _rCalNoiseHcVar, index, val, true);
-  cal.setNoiseDbmHc(val);
+  if (_readCalVar(R_CALIB_K_SQUARED_WATER,
+                  _rCalKSquaredWaterVar, index, val) == 0) {
+    cal.setKSquaredWater(val);
+  }
+  
+  // radar constant
 
-  iret |= _readCalVar(R_CALIB_NOISE_HX, 
-                      _rCalNoiseHxVar, index, val);
-  cal.setNoiseDbmHx(val);
+  if (_readCalVar(R_CALIB_RADAR_CONSTANT_H, 
+                  _rCalRadarConstHVar, index, val) == 0) {
+    cal.setRadarConstantH(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_NOISE_VC, 
-                      _rCalNoiseVcVar, index, val);
-  cal.setNoiseDbmVc(val);
+  if (_readCalVar(R_CALIB_RADAR_CONSTANT_V, 
+                  _rCalRadarConstVVar, index, val) == 0) {
+    cal.setRadarConstantV(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_NOISE_VX, 
-                      _rCalNoiseVxVar, index, val);
-  cal.setNoiseDbmVx(val);
+  // antenna gain
 
-  iret |= _readCalVar(R_CALIB_RECEIVER_GAIN_HC, 
-                      _rCalReceiverGainHcVar, index, val, true);
-  cal.setReceiverGainDbHc(val);
+  if (_readCalVar(R_CALIB_ANTENNA_GAIN_H, 
+                  _rCalAntennaGainHVar, index, val) == 0) {
+    cal.setAntennaGainDbH(val);
+  }
+  
+  if (_readCalVar(R_CALIB_ANTENNA_GAIN_V, 
+                  _rCalAntennaGainVVar, index, val) == 0) {
+    cal.setAntennaGainDbV(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_RECEIVER_GAIN_HX, 
-                      _rCalReceiverGainHxVar, index, val);
-  cal.setReceiverGainDbHx(val);
+  // noise dbm
 
-  iret |= _readCalVar(R_CALIB_RECEIVER_GAIN_VC, 
-                      _rCalReceiverGainVcVar, index, val);
-  cal.setReceiverGainDbVc(val);
+  if (_readCalVar(R_CALIB_NOISE_HC, 
+                  _rCalNoiseHcVar, index, val, true) == 0) {
+    cal.setNoiseDbmHc(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_RECEIVER_GAIN_VX, 
-                      _rCalReceiverGainVxVar, index, val);
-  cal.setReceiverGainDbVx(val);
+  if (_readCalVar(R_CALIB_NOISE_HX, 
+                  _rCalNoiseHxVar, index, val) == 0) {
+    cal.setNoiseDbmHx(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_BASE_DBZ_1KM_HC, 
-                      _rCalBaseDbz1kmHcVar, index, val);
-  cal.setBaseDbz1kmHc(val);
+  if (_readCalVar(R_CALIB_NOISE_VC, 
+                  _rCalNoiseVcVar, index, val) == 0) {
+    cal.setNoiseDbmVc(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_BASE_DBZ_1KM_HX, 
-                      _rCalBaseDbz1kmHxVar, index, val);
-  cal.setBaseDbz1kmHx(val);
+  if (_readCalVar(R_CALIB_NOISE_VX, 
+                  _rCalNoiseVxVar, index, val) == 0) {
+    cal.setNoiseDbmVx(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_BASE_DBZ_1KM_VC, 
-                      _rCalBaseDbz1kmVcVar, index, val);
-  cal.setBaseDbz1kmVc(val);
+  // i0 dbm
 
-  iret |= _readCalVar(R_CALIB_BASE_DBZ_1KM_VX, 
-                      _rCalBaseDbz1kmVxVar, index, val);
-  cal.setBaseDbz1kmVx(val);
+  if (_readCalVar(R_CALIB_I0_DBM_HC, 
+                  _rCalI0HcVar, index, val, true) == 0) {
+    cal.setI0DbmHc(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_SUN_POWER_HC, 
-                      _rCalSunPowerHcVar, index, val);
-  cal.setSunPowerDbmHc(val);
+  if (_readCalVar(R_CALIB_I0_DBM_HX, 
+                  _rCalI0HxVar, index, val) == 0) {
+    cal.setI0DbmHx(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_SUN_POWER_HX, 
-                      _rCalSunPowerHxVar, index, val);
-  cal.setSunPowerDbmHx(val);
+  if (_readCalVar(R_CALIB_I0_DBM_VC, 
+                  _rCalI0VcVar, index, val) == 0) {
+    cal.setI0DbmVc(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_SUN_POWER_VC, 
-                      _rCalSunPowerVcVar, index, val);
-  cal.setSunPowerDbmVc(val);
+  if (_readCalVar(R_CALIB_I0_DBM_VX, 
+                  _rCalI0VxVar, index, val) == 0) {
+    cal.setI0DbmVx(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_SUN_POWER_VX, 
-                      _rCalSunPowerVxVar, index, val);
-  cal.setSunPowerDbmVx(val);
+  // receiver gain
+  
+  if (_readCalVar(R_CALIB_RECEIVER_GAIN_HC, 
+                  _rCalReceiverGainHcVar, index, val, true) == 0) {
+    cal.setReceiverGainDbHc(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_NOISE_SOURCE_POWER_H, 
-                      _rCalNoiseSourcePowerHVar, index, val);
-  cal.setNoiseSourcePowerDbmH(val);
+  if (_readCalVar(R_CALIB_RECEIVER_GAIN_HX, 
+                  _rCalReceiverGainHxVar, index, val) == 0) {
+    cal.setReceiverGainDbHx(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_NOISE_SOURCE_POWER_V, 
-                      _rCalNoiseSourcePowerVVar, index, val);
-  cal.setNoiseSourcePowerDbmV(val);
+  if (_readCalVar(R_CALIB_RECEIVER_GAIN_VC, 
+                  _rCalReceiverGainVcVar, index, val) == 0) {
+    cal.setReceiverGainDbVc(val);
+  }
+  
+  if (_readCalVar(R_CALIB_RECEIVER_GAIN_VX, 
+                  _rCalReceiverGainVxVar, index, val) == 0) {
+    cal.setReceiverGainDbVx(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_POWER_MEASURE_LOSS_H, 
-                      _rCalPowerMeasLossHVar, index, val);
-  cal.setPowerMeasLossDbH(val);
+  // receiver slope
 
-  iret |= _readCalVar(R_CALIB_POWER_MEASURE_LOSS_V, 
-                      _rCalPowerMeasLossVVar, index, val);
-  cal.setPowerMeasLossDbV(val);
+  if (_readCalVar(R_CALIB_RECEIVER_SLOPE_HC, 
+                  _rCalReceiverSlopeHcVar, index, val) == 0) {
+    cal.setReceiverSlopeDbHc(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_COUPLER_FORWARD_LOSS_H, 
-                      _rCalCouplerForwardLossHVar, index, val);
-  cal.setCouplerForwardLossDbH(val);
+  if (_readCalVar(R_CALIB_RECEIVER_SLOPE_HX, 
+                  _rCalReceiverSlopeHxVar, index, val) == 0) {
+    cal.setReceiverSlopeDbHx(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_COUPLER_FORWARD_LOSS_V, 
-                      _rCalCouplerForwardLossVVar, index, val);
-  cal.setCouplerForwardLossDbV(val);
+  if (_readCalVar(R_CALIB_RECEIVER_SLOPE_VC, 
+                  _rCalReceiverSlopeVcVar, index, val) == 0) {
+    cal.setReceiverSlopeDbVc(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_DBZ_CORRECTION, 
-                      _rCalDbzCorrectionVar, index, val);
-  cal.setDbzCorrection(val);
+  if (_readCalVar(R_CALIB_RECEIVER_SLOPE_VX, 
+                  _rCalReceiverSlopeVxVar, index, val) == 0) {
+    cal.setReceiverSlopeDbVx(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_ZDR_CORRECTION, 
-                      _rCalZdrCorrectionVar, index, val);
-  cal.setZdrCorrectionDb(val);
+  // dynamic range
 
-  iret |= _readCalVar(R_CALIB_LDR_CORRECTION_H, 
-                      _rCalLdrCorrectionHVar, index, val);
-  cal.setLdrCorrectionDbH(val);
+  if (_readCalVar(R_CALIB_DYNAMIC_RANGE_DB_HC, 
+                  _rCalI0HcVar, index, val, true) == 0) {
+    cal.setDynamicRangeDbHc(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_LDR_CORRECTION_V, 
-                      _rCalLdrCorrectionVVar, index, val);
-  cal.setLdrCorrectionDbV(val);
+  if (_readCalVar(R_CALIB_DYNAMIC_RANGE_DB_HX, 
+                  _rCalI0HxVar, index, val) == 0) {
+    cal.setDynamicRangeDbHx(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_SYSTEM_PHIDP, 
-                      _rCalSystemPhidpVar, index, val);
-  cal.setSystemPhidpDeg(val);
+  if (_readCalVar(R_CALIB_DYNAMIC_RANGE_DB_VC, 
+                  _rCalI0VcVar, index, val) == 0) {
+    cal.setDynamicRangeDbVc(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_TEST_POWER_H, 
-                      _rCalTestPowerHVar, index, val);
-  cal.setTestPowerDbmH(val);
+  if (_readCalVar(R_CALIB_DYNAMIC_RANGE_DB_VX, 
+                  _rCalI0VxVar, index, val) == 0) {
+    cal.setDynamicRangeDbVx(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_TEST_POWER_V, 
-                      _rCalTestPowerVVar, index, val);
-  cal.setTestPowerDbmV(val);
+  // base dbz 1km
 
-  iret |= _readCalVar(R_CALIB_RECEIVER_SLOPE_HC, 
-                      _rCalReceiverSlopeHcVar, index, val);
-  cal.setReceiverSlopeDbHc(val);
+  if (_readCalVar(R_CALIB_BASE_DBZ_1KM_HC, 
+                  _rCalBaseDbz1kmHcVar, index, val) == 0) {
+    cal.setBaseDbz1kmHc(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_RECEIVER_SLOPE_HX, 
-                      _rCalReceiverSlopeHxVar, index, val);
-  cal.setReceiverSlopeDbHx(val);
+  if (_readCalVar(R_CALIB_BASE_DBZ_1KM_HX, 
+                  _rCalBaseDbz1kmHxVar, index, val) == 0) {
+    cal.setBaseDbz1kmHx(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_RECEIVER_SLOPE_VC, 
-                      _rCalReceiverSlopeVcVar, index, val);
-  cal.setReceiverSlopeDbVc(val);
+  if (_readCalVar(R_CALIB_BASE_DBZ_1KM_VC, 
+                  _rCalBaseDbz1kmVcVar, index, val) == 0) {
+    cal.setBaseDbz1kmVc(val);
+  }
 
-  iret |= _readCalVar(R_CALIB_RECEIVER_SLOPE_VX, 
-                      _rCalReceiverSlopeVxVar, index, val);
-  cal.setReceiverSlopeDbVx(val);
+  if (_readCalVar(R_CALIB_BASE_DBZ_1KM_VX, 
+                  _rCalBaseDbz1kmVxVar, index, val) == 0) {
+    cal.setBaseDbz1kmVx(val);
+  }
+
+  // sun power
+
+  if (_readCalVar(R_CALIB_SUN_POWER_HC, 
+                  _rCalSunPowerHcVar, index, val) == 0) {
+    cal.setSunPowerDbmHc(val);
+  }
+
+  if (_readCalVar(R_CALIB_SUN_POWER_HX, 
+                  _rCalSunPowerHxVar, index, val) == 0) {
+    cal.setSunPowerDbmHx(val);
+  }
+
+  if (_readCalVar(R_CALIB_SUN_POWER_VC, 
+                  _rCalSunPowerVcVar, index, val) == 0) {
+    cal.setSunPowerDbmVc(val);
+  }
+
+  if (_readCalVar(R_CALIB_SUN_POWER_VX, 
+                  _rCalSunPowerVxVar, index, val) == 0) {
+    cal.setSunPowerDbmVx(val);
+  }
+
+  // noise source power
+
+  if (_readCalVar(R_CALIB_NOISE_SOURCE_POWER_H, 
+                  _rCalNoiseSourcePowerHVar, index, val) == 0) {
+    cal.setNoiseSourcePowerDbmH(val);
+  }
+
+  if (_readCalVar(R_CALIB_NOISE_SOURCE_POWER_V, 
+                  _rCalNoiseSourcePowerVVar, index, val) == 0) {
+    cal.setNoiseSourcePowerDbmV(val);
+  }
+
+  // power measurement loss
+
+  if (_readCalVar(R_CALIB_POWER_MEASURE_LOSS_H, 
+                  _rCalPowerMeasLossHVar, index, val) == 0) {
+    cal.setPowerMeasLossDbH(val);
+  }
+
+  if (_readCalVar(R_CALIB_POWER_MEASURE_LOSS_V, 
+                  _rCalPowerMeasLossVVar, index, val) == 0) {
+    cal.setPowerMeasLossDbV(val);
+  }
+
+  // coupler loss
+
+  if (_readCalVar(R_CALIB_COUPLER_FORWARD_LOSS_H, 
+                  _rCalCouplerForwardLossHVar, index, val) == 0) {
+    cal.setCouplerForwardLossDbH(val);
+  }
+
+  if (_readCalVar(R_CALIB_COUPLER_FORWARD_LOSS_V, 
+                  _rCalCouplerForwardLossVVar, index, val) == 0) {
+    cal.setCouplerForwardLossDbV(val);
+  }
+
+  // corrections
+
+  if (_readCalVar(R_CALIB_DBZ_CORRECTION, 
+                  _rCalDbzCorrectionVar, index, val) == 0) {
+    cal.setDbzCorrection(val);
+  }
+
+  if (_readCalVar(R_CALIB_ZDR_CORRECTION, 
+                  _rCalZdrCorrectionVar, index, val) == 0) {
+    cal.setZdrCorrectionDb(val);
+  }
+
+  if (_readCalVar(R_CALIB_LDR_CORRECTION_H, 
+                  _rCalLdrCorrectionHVar, index, val) == 0) {
+    cal.setLdrCorrectionDbH(val);
+  }
+
+  if (_readCalVar(R_CALIB_LDR_CORRECTION_V, 
+                  _rCalLdrCorrectionVVar, index, val) == 0) {
+    cal.setLdrCorrectionDbV(val);
+  }
+
+  if (_readCalVar(R_CALIB_SYSTEM_PHIDP, 
+                  _rCalSystemPhidpVar, index, val) == 0) {
+    cal.setSystemPhidpDeg(val);
+  }
+
+  // test power
+
+  if (_readCalVar(R_CALIB_TEST_POWER_H, 
+                  _rCalTestPowerHVar, index, val) == 0) {
+    cal.setTestPowerDbmH(val);
+  }
+
+  if (_readCalVar(R_CALIB_TEST_POWER_V, 
+                  _rCalTestPowerVVar, index, val) == 0) {
+    cal.setTestPowerDbmV(val);
+  }
 
   return iret;
 

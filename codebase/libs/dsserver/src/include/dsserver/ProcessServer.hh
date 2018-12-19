@@ -92,7 +92,7 @@ public:
   ProcessServer(const string & executableName,
 		const string & instanceName,
 		int port,
-		int maxClients = 128,
+		int maxClients = 1024,
 		bool isDebug = false,
 		bool isVerbose = false);
 

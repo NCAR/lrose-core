@@ -44,6 +44,7 @@
 #include "Params.hh"
 #include "Reader.hh"
 #include "AllocCheck.hh"
+#include "SoloDefaultColorWrapper.hh"
 #include <toolsa/Path.hh>
 
 #include <string>
@@ -109,6 +110,12 @@ HawkEye::HawkEye(int argc, char **argv) :
   // set params on alloc checker
 
   AllocCheck::inst().setParams(&_params);
+
+  // print color scales if debugging
+  if (_params.debug) {
+    SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
+    sd.PrintColorScales();
+  } 
 
   // set up display fields
 
@@ -220,25 +227,6 @@ int HawkEye::_setupReader()
       break;
     }
       
-    case Params::SIMULATED_RHI_INPUT: {
-      
-      SimRhiReader *simReader = new SimRhiReader(_params);
-      _reader = simReader;
-      
-      vector<SimRhiReader::Field> simFields;
-      for (size_t ii = 0; ii < _displayFields.size(); ii++) {
-        SimRhiReader::Field simField;
-        simField.name = _displayFields[ii]->getName();
-        simField.units = _displayFields[ii]->getUnits();
-        simField.minVal = _displayFields[ii]->getColorMap().rangeMin();
-        simField.maxVal = _displayFields[ii]->getColorMap().rangeMax();
-        simFields.push_back(simField);
-      }
-      simReader->setFields(simFields);
-      
-      break;
-    }
-      
     case Params::SIMULATED_INPUT:
     default: {
       
@@ -325,20 +313,44 @@ int HawkEye::_setupDisplayFields()
     ColorMap map;
     map.setName(pfld.label);
     map.setUnits(pfld.units);
-    // TODO: add call here for smart color map; look up the field name/label and
-    // see if it is a usual parameter for a known color map
+    // TODO: the logic here is a little weird ... the label and units have been set, but are we throwing them away?
+
+    bool noColorMap = false;
+
     if (map.readMap(colorMapPath)) {
-      cerr << "ERROR - HawkEye::_setupDisplayFields()" << endl;
-      cerr << "  Cannot read in color map file: " << colorMapPath << endl;
-      return -1;
+        cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
+        cerr << "  Cannot read in color map file: " << colorMapPath << endl;
+        cerr << "  Looking for default color map for field " << pfld.label << endl; 
+
+        try {
+          // check here for smart color scale; look up by field name/label and
+          // see if the name is a usual parameter for a known color map
+          SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
+          ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
+          cerr << "  found default color map for " <<  pfld.label  << endl;
+          if (_params.debug) {
+             if (_params.debug) colorMap.print(cout);
+          }
+          map = colorMap;
+          // HERE: What is missing from the ColorMap object??? 
+        } catch (std::out_of_range ex) {
+          cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
+	  // Just set the colormap to a generic color map
+	  // use range to indicate it needs update; update when we have access to the actual data values
+          map = ColorMap(0.0, 1.0);
+	  noColorMap = true; 
+          // return -1
+        }
     }
-    
+
     // unfiltered field
 
     DisplayField *field =
       new DisplayField(pfld.label, pfld.raw_name, pfld.units, 
                        pfld.shortcut, map, ifield, false);
-    
+    if (noColorMap)
+      field->setNoColorMap();
+
     _displayFields.push_back(field);
 
     // filtered field

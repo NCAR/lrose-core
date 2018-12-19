@@ -232,7 +232,7 @@ int NexradCmdRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
   
   cerr << "WARNING - NexradCmdRadxFile::writeToDir" << endl;
-  cerr << "  Writing NexradCmd raw format files not supported" << endl;
+  cerr << "  Writing NexradCmd format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
   
   // set up NcfRadxFile object
@@ -272,7 +272,7 @@ int NexradCmdRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - NexradCmdRadxFile::writeToPath" << endl;
-  cerr << "  Writing NexradCmd raw format files not supported" << endl;
+  cerr << "  Writing NexradCmd format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object

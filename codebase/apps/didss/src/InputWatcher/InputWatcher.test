@@ -66,7 +66,7 @@ instance = "test";
 // Type: string
 //
 
-input_dir = "$(HOME)/cvs/libs/toolsa";
+input_dir = "/tmp/input";
 
 ///////////// wait_between_checks /////////////////////
 //
@@ -80,7 +80,7 @@ input_dir = "$(HOME)/cvs/libs/toolsa";
 // Type: int
 //
 
-wait_between_checks = 2;
+wait_between_checks = 1;
 
 ///////////// file_quiescence /////////////////////////
 //
@@ -93,7 +93,7 @@ wait_between_checks = 2;
 // Type: int
 //
 
-file_quiescence = 5;
+file_quiescence = 1;
 
 ///////////// max_valid_age ///////////////////////////
 //
@@ -202,7 +202,7 @@ max_recursion_depth = 5;
 // Type: boolean
 //
 
-follow_links = FALSE;
+follow_links = TRUE;
 
 ///////////// use_inotify /////////////////////////////
 //
@@ -215,13 +215,14 @@ follow_links = FALSE;
 // Type: boolean
 //
 
-use_inotify = TRUE;
+use_inotify = FALSE;
 
 ///////////// search_ext //////////////////////////////
 //
 // File name extension.
 //
-// If set, only files with this extension will be processed.
+// If set, only files with this extension will be processed. This can be 
+//   a comma-delimited list of extensions.
 //
 //
 // Type: string
@@ -499,7 +500,8 @@ data_late_secs = 3600;
 //
 // If TRUE, the file will be copied to a file, in the directory 
 //   'output_dir', with the path based on the file modify time. The path 
-//   will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'.
+//   will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'. This option takes 
+//   precedence over copy_using_original_name.
 //
 //
 // Type: boolean
@@ -521,6 +523,19 @@ copy_to_time_stamped_file = FALSE;
 //
 
 copy_using_original_name = FALSE;
+
+///////////// append_date_time_to_original_name ///////
+//
+// Option to append the date and time to the original name.
+//
+// If TRUE, yyyymmdd_hhmmss will be appended to the original file name. 
+//   This helps to keep forecast data unique, if applicable.
+//
+//
+// Type: boolean
+//
+
+append_date_time_to_original_name = FALSE;
 
 ///////////// without_date_directory //////////////////
 //
@@ -545,6 +560,18 @@ without_date_directory = FALSE;
 //
 
 copy_dir = "./output";
+
+///////////// copy_prefix /////////////////////////////
+//
+// Prefix for file name of copy.
+//
+// If empty, no prefix will be added.
+//
+//
+// Type: string
+//
+
+copy_prefix = "";
 
 ///////////// copy_ext ////////////////////////////////
 //

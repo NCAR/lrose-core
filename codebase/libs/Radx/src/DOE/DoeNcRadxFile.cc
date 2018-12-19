@@ -282,7 +282,7 @@ int DoeNcRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
   
   cerr << "WARNING - DoeNcRadxFile::writeToDir" << endl;
-  cerr << "  Writing DoeNc raw format files not supported" << endl;
+  cerr << "  Writing DoeNc format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
   
   // set up NcfRadxFile object
@@ -322,7 +322,7 @@ int DoeNcRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - DoeNcRadxFile::writeToPath" << endl;
-  cerr << "  Writing DoeNc raw format files not supported" << endl;
+  cerr << "  Writing DoeNc format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object

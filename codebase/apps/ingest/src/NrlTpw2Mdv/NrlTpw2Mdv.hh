@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: jcraig $
  *   $Locker:  $
- *   $Date: 2016/03/07 01:23:04 $
- *   $Id: NrlTpw2Mdv.hh,v 1.3 2016/03/07 01:23:04 dixon Exp $
- *   $Revision: 1.3 $
+ *   $Date: 2018/01/22 19:54:16 $
+ *   $Id: NrlTpw2Mdv.hh,v 1.4 2018/01/22 19:54:16 jcraig Exp $
+ *   $Revision: 1.4 $
  *   $State: Exp $
  */
  
@@ -48,11 +48,10 @@
 #ifndef NrlTpw2Mdv_HH
 #define NrlTpw2Mdv_HH
 
-#include <netcdf.hh>
 #include <string>
 #include <sys/time.h>
 #include <vector>
-
+#include <Ncxx/Nc3File.hh>
 #include <dsdata/DsTrigger.hh>
 #include <Mdv/MdvxPjg.hh>
 #include <toolsa/DateTime.hh>
@@ -170,7 +169,7 @@ class NrlTpw2Mdv
    */
 
   bool _getTpwField(Mdvx &mdvx,
-		    const NcFile &nc_file,
+		    const Nc3File &nc_file,
 		    const string &input_file_path) const;
   
 
@@ -196,7 +195,7 @@ class NrlTpw2Mdv
    */
 
   bool _updateFieldHeader(Mdvx::field_header_t &field_hdr,
-			  const NcFile &nc_file,
+			  const Nc3File &nc_file,
 			  const string &input_file_path,
 			  const string &tpw_units) const;
   
@@ -210,7 +209,7 @@ class NrlTpw2Mdv
    */
 
   bool _updateMasterHeader(Mdvx &mdvx,
-			   const NcFile &nc_file,
+			   const Nc3File &nc_file,
 			   const string &input_file_path) const;
   
 

@@ -452,6 +452,10 @@ public:
 
   char* stationary_output_dir;
 
+  tdrp_bool_t write_ldata_info_to_proxy_path;
+
+  char* ldata_info_proxy_path;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -459,7 +463,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[50];
+  mutable TDRPtable _table[53];
 
   const char *_className;
 
