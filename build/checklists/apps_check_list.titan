@@ -20,7 +20,6 @@ Binary2Mdv
 BomAws2Spdb
 BomSounding2Spdb
 BrightBand
-CP2Udp2Fmq
 CalCompute
 CalcHumidity
 CaseStats
@@ -56,7 +55,6 @@ DsServerMgr
 DsServerQuery
 DsSpdbServer
 DsTitanServer
-Dsr2CP2Mom
 Dsr2File
 Dsr2Mdv
 Dsr2MdvLookup

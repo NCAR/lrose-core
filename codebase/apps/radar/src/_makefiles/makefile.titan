@@ -10,7 +10,6 @@ SUB_DIRS = \
 	AcGeoref2Spdb \
 	AcGeorefCompare \
 	AltCpCompute \
-	CP2Udp2Fmq \
 	CalCompute \
 	CedricPrint \
 	ChillCal2Xml \
@@ -22,7 +21,6 @@ SUB_DIRS = \
 	CmdVerify \
 	Cov2Mom \
 	DowSendFreq \
-	Dsr2CP2Mom \
 	DsrGrabber \
 	DsrMerge \
 	DualDopplerLobes \

@@ -58,7 +58,6 @@ DsFmqServer
 DsLdataServer
 DsMdvServer
 DsProxyServer
-Dsr2CP2Mom
 Dsr2Radx
 Dsr2Sweep
 Dsr2Vol
