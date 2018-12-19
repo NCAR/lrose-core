@@ -269,9 +269,6 @@ ShearForLeadingEdge
 ShipObsIngest
 SigAirMet2Spdb
 SigAirMet2Symprod
-Sigmet2Dsr
-SigmetRaw2Dsr
-SigmetUdp2Dsr
 SimCpCompute
 Socket2File
 SpdbQuery
