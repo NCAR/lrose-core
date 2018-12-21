@@ -805,6 +805,27 @@ void RadxTimeList::_addValid(const string &dayDir,
 
 }
 
+
+/////////////////////////////////////
+// getthe first and last date, time of data files
+// 
+
+void RadxTimeList::getFirstAndLastTime(RadxTime &fileStartTime, RadxTime &fileEndTime) {
+  int ntimes = _fileStartTimes.size();
+  if (ntimes >= 2) {
+    fileStartTime = _fileStartTimes.at(0);
+    fileEndTime = _fileStartTimes.at(ntimes-1);
+  }  else {
+    // send a warning, but fail safely by sending
+    // some start and end time
+    fileStartTime = RadxTime::ZERO;
+    fileEndTime = RadxTime::NOW;
+    _errStr += "WARNING - RadxTimeList::getFirstAndLastTime\n";
+    _errStr += "  less than two data files found\n";
+  }
+}
+
+
 /////////////////////////////////////
 // add first file to set
 

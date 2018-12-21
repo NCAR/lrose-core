@@ -219,7 +219,8 @@ public:
   // Returns 0 on success, -1 on failure
   
   static int getDoradeTime(const string &path, RadxTime &doradeTime);
-  
+  void getFirstAndLastTime(RadxTime &fileStartTime, RadxTime &fileEndTime);
+
 protected:
 private:
 

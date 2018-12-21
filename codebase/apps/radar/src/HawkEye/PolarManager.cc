@@ -274,10 +274,6 @@ void PolarManager::timerEvent(QTimerEvent *event)
 
   }
 
-  //if (!_timeControlPlaced) {
-  //  _placeTimeControl();
-  //}
-
   // check for image creation
   
   if (_params.images_auto_create) {
@@ -2095,9 +2091,11 @@ void PolarManager::_openFile()
   {
     QByteArray qb = filename.toUtf8();
     const char *name = qb.constData();
-    cerr << "selected file path : " << name << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "selected file path : " << name << endl;
+    }
 
-    // trying this ... 
+    // trying this ... to get the data from the file selected
     _setArchiveRetrievalPending();
     vector<string> list;
     list.push_back(name);
@@ -2111,6 +2109,65 @@ void PolarManager::_openFile()
       return;
     }
   }
+
+  // now update the time controller window
+  QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
+  _setArchiveStartTimeFromGui(epoch);
+  QDateTime now = QDateTime::currentDateTime();
+  _setArchiveEndTimeFromGui(now);
+  //_params.archive_data_url = "/Users/brenda/data/dorade/dow"; 
+  //_acceptGuiTimes();  // also loads associated data files
+
+  
+  _archiveStartTime = _guiStartTime;
+  _archiveEndTime = _guiEndTime;
+  QFileInfo fileInfo(filename);
+  string absolutePath = fileInfo.absolutePath().toStdString();
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "changing to path " << absolutePath << endl;
+  }
+//  loadArchiveFileList(dir.absolutePath());
+
+  RadxTimeList timeList;
+  timeList.setDir(absolutePath);
+  timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
+  if (timeList.compile()) {
+    cerr << "ERROR - PolarManager::openFile()" << endl;
+    cerr << "  " << timeList.getErrStr() << endl;
+  }
+
+  vector<string> pathList = timeList.getPathList();
+  if (pathList.size() <= 0) {
+    cerr << "ERROR - PolarManager::openFile()" << endl;
+    cerr << "  pathList is empty" << endl;
+    cerr << "  " << timeList.getErrStr() << endl;
+  } else {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "pathList is NOT empty" << endl;
+      for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
+       cerr << *i << endl;
+      }
+      cerr << endl;
+    }
+  
+    setArchiveFileList(pathList, false);
+
+    // now fetch the first time and last time from the directory
+    // and set these values in the time controller display
+
+    RadxTime firstTime;
+    RadxTime lastTime;
+    timeList.getFirstAndLastTime(firstTime, lastTime);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "first time " << firstTime << endl;
+      cerr << "last time " << lastTime << endl;
+    }
+    // convert RadxTime to QDateTime 
+    _archiveStartTime = firstTime;
+    _archiveEndTime = lastTime;
+    _setGuiFromArchiveStartTime();
+    _setGuiFromArchiveEndTime();
+  } // end else pathList is not empty
 }
 
 void PolarManager::_createFileChooserDialog()
@@ -2118,16 +2175,10 @@ void PolarManager::_createFileChooserDialog()
   _refreshFileChooserDialog();
 }
 
-///////////////////////////////////////////////////////
-// set the state on the time controller dialog
-
 void PolarManager::_refreshFileChooserDialog()
 {
 
 }
-
-/////////////////////////////////////
-// show the time controller dialog
 
 void PolarManager::_showFileChooserDialog()
 {
