@@ -190,7 +190,6 @@ MrmsGribIngest
 MultMsgFmq2Fmq
 NcarAcPosn2Spdb
 NcGeneric2Mdv
-NcMdvServer
 NcRadar2Dsr
 NcRadarSplit
 NegBuoyancy
