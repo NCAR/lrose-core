@@ -8,8 +8,6 @@
 
 ### 1. Prepare
 
-#### Required LINUX versions for LROSE build
-
 Most good, up-to date LINUX distributions should work.
 
 Recommended distributions are:
