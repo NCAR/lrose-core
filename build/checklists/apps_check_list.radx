@@ -6,7 +6,7 @@ FixCfradialPaths
 FixRadxPointing
 Radx2Dsr
 Radx2Grid
-RadxBeamBlock
+#RadxBeamBlock
 RadxCheck
 RadxConvert
 RadxCov2Mom
