@@ -4,7 +4,11 @@
 2. [install](#install)
 3. [verify](#verify)
 
-### Required LINUX versions for LROSE build
+<a name="prepare"/>
+
+### 1. Prepare
+
+#### Required LINUX versions for LROSE build
 
 Most good, up-to date LINUX distributions should work.
 
@@ -15,10 +19,6 @@ Recommended distributions are:
   * RedHat
   * Centos (based on RedHat)
   * Fedora (based on RedHat)
-
-<a name="prepare"/>
-
-### 1. Prepare
 
 First, you will need to install the required packages.
 
