@@ -53,7 +53,7 @@ cd /usr/bin; sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake
 
 ```
 
-<a name="install"/>
+<a name="download"/>
 
 ### 2. Download
 
