@@ -83,7 +83,7 @@ See [README_CREATE_RELEASE.md](./docs/dev/README_CREATE_RELEASE.md)
 
 ### Dual-polarization Radx Applications
 
-See [README_RadxDualpolApps.md](./docs/apps/radx/dualpol/README_RadxApps.md)
+See [README_RadxDualpolApps.md](./docs/apps/radx/dualpol/README_RadxDualpolApps.md)
 
 This page is published at:
 
