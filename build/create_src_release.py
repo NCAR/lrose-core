@@ -274,18 +274,29 @@ def setupAutoconf():
     shutil.copy("../build/Makefile.top", "Makefile")
 
     if (options.static):
+
         if (options.package == "cidd"):
-             shutil.copy("../build/autoconf/configure.base.cidd", "./configure.base")
+             shutil.copy("../build/autoconf/configure.base.cidd",
+                         "./configure.base")
         else:
-             shutil.copy("../build/autoconf/configure.base", "./configure.base")
+             shutil.copy("../build/autoconf/configure.base",
+                         "./configure.base")
+
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base" +
                  " --pkg " + options.package + argsStr)
     else:
+
         if (options.package == "cidd"):
-            shutil.copy("../build/autoconf/configure.base.shared.cidd", "./configure.base.shared")
+            shutil.copy("../build/autoconf/configure.base.shared.cidd",
+                        "./configure.base.shared")
+        elif (options.osx == True):
+            shutil.copy("../build/autoconf/configure.base.shared.osx",
+                        "./configure.base.shared")
         else:
-            shutil.copy("../build/autoconf/configure.base.shared", "./configure.base.shared")
+            shutil.copy("../build/autoconf/configure.base.shared",
+                        "./configure.base.shared")
+
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + options.package + argsStr)
