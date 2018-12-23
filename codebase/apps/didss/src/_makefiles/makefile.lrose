@@ -20,16 +20,12 @@ SUB_DIRS = \
 	LdataWatcher \
 	LdataMultWatcher \
 	LdataWriter \
-	Mdv2Dsr \
 	MultMsgFmq2Fmq \
 	RadMon \
-	Rapic2Dsr \
 	Scout \
 	Socket2File \
-	Test2Dsr \
 	TimeCalc \
 	VerifyGrid \
-	edge2dsr \
 	fmq_print \
 	ltgSpdb2GenPt \
 	nprtLtg2Spdb

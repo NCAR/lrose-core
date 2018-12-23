@@ -8,16 +8,13 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
 	AcPosnAscii2Spdb \
-	Alenia2Mom \
 	ClutterAuto \
 	ClutterCompute \
-	ClutterTableGenerate \
         EchoTops \
 	EsdAcIngest \
 	FilterStorms \
 	PrintTitanFiles \
 	PrintTitanServer \
-	RdasSim \
 	Rview \
         StratFinder \
 	StormInit2Field \
@@ -31,7 +28,6 @@ SUB_DIRS = \
 	Storms2Xml2 \
 	TimeHist \
 	Titan \
-	TitanLite \
 	TitanSelect \
 	TitanVectors2Mdv \
 	TstormTemporalSmooth \
@@ -40,10 +36,7 @@ SUB_DIRS = \
 	Tstorms2Xml \
 	UpdateStormFields \
         UpdateStormSpeeds \
-	acmg_acpos_filter \
 	bearing2latlon \
-	forecast_monitor \
-	suncal \
 	titan_print \
 	tstorm_refl_fcst
 

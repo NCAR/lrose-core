@@ -16,9 +16,6 @@ SUB_DIRS = \
          BomSounding2Spdb \
          CreateStationList \
          CsuSounding2Spdb \
-         Dorade2Dsr \
-         Dorade2DsrArchiveDriver \
-         GemScan2Dsr \
          GemVolXml2Dsr \
          Gini2Mdv \
          Grib2Mdv \
