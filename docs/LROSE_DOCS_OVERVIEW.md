@@ -34,7 +34,7 @@ The most important TDRP app is `tdrp_gen`.
 
 See the full TDRP docs at:
 
- https://rawgit.com/NCAR/lrose-core/master/tdrp/index.html
+  http://htmlpreview.github.io/?https://github.com/NCAR/lrose-core/blob/master/docs/tdrp/index.html
 
 ## LROSE applications and data system
 
