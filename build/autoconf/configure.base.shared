@@ -57,18 +57,21 @@ AC_MSG_RESULT([$NETCDFDIR])
 AC_SUBST(NETCDFDIR, [$NETCDFDIR])
 
 # Add the HDF5 directory to includes and link flags
+
 if test ! "x$HDF5DIR" = x; then
    CPPFLAGS="${CPPFLAGS} -I${HDF5DIR}/include"
    LDFLAGS="${LDFLAGS} -L${HDF5DIR}/lib"
-   LDFLAGS="${LDFLAGS} ${HDF5DIR}/lib/libhdf5_cpp.so"
-   LDFLAGS="${LDFLAGS} ${HDF5DIR}/lib/libhdf5_hl.so"
-   LDFLAGS="${LDFLAGS} ${HDF5DIR}/lib/libhdf5.so"
+#  Add in hdf libraries specifically
+#  For some reason, libhdf5_cpp.so does not correctly get into the
+#  link line for HawkEye, so we need to force it
+#  TODO - Dixon - figure out why this occurs
    LIBS="${LIBS} ${HDF5DIR}/lib/libhdf5_cpp.so"
    LIBS="${LIBS} ${HDF5DIR}/lib/libhdf5_hl.so"
    LIBS="${LIBS} ${HDF5DIR}/lib/libhdf5.so"
 fi    
 
 # Add the NETCDF directory to includes and link flags
+
 if test ! "x$NETCDFDIR" = x; then
    CPPFLAGS="${CPPFLAGS} -I${NETCDFDIR}/include"
    LDFLAGS="${LDFLAGS} -L${NETCDFDIR}/lib"
