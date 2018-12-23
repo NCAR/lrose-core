@@ -1,4 +1,4 @@
-## LROSE download and build from source - LINUX
+## Download LROSE release and build from source - LINUX
 
 1. [prepare](#prepare)
 2. [download](#download)
@@ -134,7 +134,7 @@ Try the commands:
   ~/lrose/bin/HawkEye
 ```
 
-### Handling build errors
+### 5. Handling build errors
 
 If the build does not complete successfully, you will need to
 track down the errors.
