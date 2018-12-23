@@ -39,7 +39,6 @@ CleanupRvp8Data
 ClutterAuto
 ClutterCompute
 ClutterRemove
-ClutterTableGenerate
 CmdVerify
 combine_ltg_radar
 Cov2Mom
@@ -50,7 +49,6 @@ CwbRadar2Mdv
 DataMapper
 DissectURL
 DistFit
-Dorade2Dsr
 DowSendFreq
 DsFCopyServer
 DsFileDist
@@ -70,7 +68,6 @@ DsSpdbServer
 DsTitanServer
 DualDopplerLobes
 EchoTops
-edge2dsr
 EsdAcIngest
 extractStationLocationList
 File2Dsr
@@ -83,8 +80,6 @@ Fmq2Fmq
 Fmq2MultMsgFmq
 FmqMon
 fmq_print
-forecast_monitor
-GemScan2Dsr
 GemVolXml2Dsr
 GenPoly2Symprod
 GenPt2Spdb
@@ -127,7 +122,6 @@ Mdv2Ascii
 Mdv2AsciiContour
 Mdv2Axf
 Mdv2AxfCont
-Mdv2Dsr
 Mdv2Grib
 Mdv2Medoc
 Mdv2NetCDF
@@ -171,7 +165,6 @@ MdvMerge2
 MdvModel2Vil
 MdvMultFilt
 MdvOffsetField
-MdvPartRain
 MdvPatch
 MdvPointExtract
 MdvPull
@@ -215,7 +208,6 @@ NoiseFilter
 nprtLtg2Spdb
 NWSsoundingIngest
 PartialProps
-PartRain
 PhaseDiff
 Pirep2Symprod
 Plain2Mdv
@@ -264,11 +256,9 @@ RadxPrint
 RadxQpe
 RadxSunMon
 RainGage
-Rapic2Dsr
 RapMap2Chill
 RateAccum
 Rdas2Dsr
-RdasSim
 ReadDEM
 ReadRUCDEM
 Refract
@@ -318,7 +308,6 @@ storms_to_ascii
 storms_to_tifs
 StratFinder
 stratiform_filter
-suncal
 SunCal
 SunCal2Symprod
 SunCpCompute
@@ -333,7 +322,6 @@ Taf2Spdb
 tdrp_gen
 tdrp_test
 TdrpTest
-Test2Dsr
 TestDataMap
 test_procmap
 test_tserver
@@ -342,7 +330,6 @@ TimeCalc
 TimeHist
 TimeProps
 Titan
-TitanLite
 titan_print
 TitanSelect
 TitanVectors2Mdv
