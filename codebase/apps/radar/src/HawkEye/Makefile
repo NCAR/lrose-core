@@ -38,7 +38,7 @@ TARGET_FILE = HawkEye
 
 LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lradar -lrapformats -lFmq -lRadx \
+LOC_LIBS = -lSpdb -lradar -lrapformats -lFmq -lRadx -lNcxx \
 	-ldsserver -ldidss -leuclid -lphysics \
 	-lrapmath -ltoolsa -ldataport -ltdrp \
 	$(QT_LIBS) $(NETCDF4_LIBS) \
