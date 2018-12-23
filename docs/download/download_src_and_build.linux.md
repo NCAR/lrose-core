@@ -86,17 +86,24 @@ A typical source release would be:
 The distribution will be unpacked into a subdirectory:
 
 ```
-  ~/lrose_build/lrose-blaze-20160823.src
+  cd ~/lrose_build/lrose-blaze-20160823.src
 ```
 
 #### Run the build script:
 
-Build and install into the default directory: `~/lrose`
+```
+  ./build_src_release.py --help
+```
+
+shows the usage.
+
+To build and install into the default directory: `~/lrose`
 
 ```
   ./build_src_release.py
 ```
-or set an install directory:
+
+Or set an install directory:
 
 ```
   ./build_src_release.py --prefix /my/install/dir
