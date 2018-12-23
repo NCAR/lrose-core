@@ -5,7 +5,7 @@
 | Package           | URL      |
 | -------------     |:-------------:|
 | core              | https://github.com/NCAR/lrose-core |
-| build docs        | https://github.com/NCAR/lrose-core/tree/master/docs |
+| core overview     | https://github.com/NCAR/lrose-core/tree/master/docs |
 | user docs         | https://github.com/NCAR/lrose-docs |
 | netcdf support    | https://github.com/NCAR/lrose-netcdf |
 | display support   | https://github.com/NCAR/lrose-displays |
@@ -34,7 +34,7 @@ The most important TDRP app is `tdrp_gen`.
 
 See the full TDRP docs at:
 
- https://rawgit.com/NCAR/lrose-docs/master/tdrp/index.html
+ https://rawgit.com/NCAR/lrose-core/master/tdrp/index.html
 
 ## LROSE applications and data system
 
