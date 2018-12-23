@@ -6,9 +6,9 @@ The following applications form a group that handle KDP estimation, particle ide
 
 | App                       | KDP   | Z & ZDR Attenuation | NCAR PID | Precip Rate |
 | -------------             | ----- | ------------------- | -------- | ----------- |
-| [RadxKdp](./RadxKdp.md)   | :heavy_check_mark: | :heavy_check_mark: | :x: | :x: |
-| [RadxPid](./RadxPid.md)   | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :x: |
-| [RadxRate](./RadxRate.md) | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| [RadxKdp](./RadxKdp.md)   | YES   | YES                 | NO       | NO          |
+| [RadxPid](./RadxPid.md)   | YES   | YES                 | YES      | NO          |
+| [RadxRate](./RadxRate.md) | YES   | YES                 | YES      | YES         |
 
 Each of these apps has a main parameter file, which controls file handling, operational modes etc.
 
