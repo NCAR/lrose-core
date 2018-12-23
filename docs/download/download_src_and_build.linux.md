@@ -25,9 +25,9 @@ First, you will need to install the required packages.
 On Redhat-based hosts, run the following (as root or sudo):
 
 ```
-yum install -y epel-release
+sudo yum install -y epel-release
 
-yum install -y \
+sudo yum install -y \
 tcsh perl perl-Env ftp git svn cvs tkcvs emacs tkcvs m4 \
 gcc gcc-c++ gcc-gfortran glibc-devel libX11-devel libXext-devel \
 libpng-devel libtiff-devel jasper-devel zlib-devel expat-devel \
@@ -35,7 +35,8 @@ flex-devel fftw3-devel bzip2-devel jasper-devel qt5-qtbase-devel xrdb \
 Xvfb xorg-x11-fonts-misc xorg-x11-fonts-75dpi xorg-x11-fonts-100dpi \
 gnuplot ImageMagick-devel ImageMagick-c++-devel
 
-ln -s /usr/bin/qmake /usr/bin/qmake-qt5
+cd /usr/bin; sudo ln -s qmake-qt5 qmake
+
 ```
 
 On Debian-based hosts run the following (as root or sudo):
@@ -49,7 +50,8 @@ sudo apt-get install -y  \
     gcc g++ gfortran libfl-dev \
     automake make libtool pkg-config libexpat1-dev python
 
-sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake /usr/bin/qmake-qt5
+cd /usr/bin; sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake
+
 ```
 
 <a name="install"/>
