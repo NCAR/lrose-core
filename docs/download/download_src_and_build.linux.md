@@ -1,8 +1,9 @@
 ## LROSE download and build from source - LINUX
 
 1. [prepare](#prepare)
-2. [install](#install)
-3. [verify](#verify)
+2. [download](#download)
+3. [build](#build)
+4. [verify](#verify)
 
 <a name="prepare"/>
 
@@ -74,28 +75,32 @@ Download the source tar file from:
 A typical source release would be:
 
 ```
-  lrose-blaze-20160823.src.tgz
+  lrose-20160823.src.tgz
 ```
 
 #### Untar
 
 ```
-  tar xvfz lrose-blaze-20160823.src.tgz
+  tar xvfz lrose-20160823.src.tgz
 ```
 
 The distribution will be unpacked into a subdirectory:
 
 ```
-  cd ~/lrose_build/lrose-blaze-20160823.src
+  cd ~/lrose_build/lrose-20160823.src
 ```
 
+<a name="build"/>
+
+### 3. Build
+
 #### Run the build script:
+
+To see the usage:
 
 ```
   ./build_src_release.py --help
 ```
-
-shows the usage.
 
 To build and install into the default directory: `~/lrose`
 
@@ -111,7 +116,7 @@ Or set an install directory:
 
 <a name="verify"/>
 
-### 3. Verify
+### 4. Verify
 
 Look in ~/lrose or /my/install/dir for
 
