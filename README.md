@@ -24,24 +24,24 @@ To download LROSE, run:
 git clone https://github.com/NCAR/lrose-core
 ```
 
+### DOWNLOADS
+
+| Download documentation |
+| ---------------------- |
+| [Download and build source release - LINUX](./docs/download/download_src_and_build.linux.md) |
+| [Download and install binary release - LINUX](./docs/download/download_binary_and_install.linux.md) |
+
 ### Organization of the LROSE repository
 
 | Location      | Description   |
 | ------------- |:-------------:|
-| docs          | README files |
-| release_notes | release notes for the various packages in LROSE |
-| build         | build scripts, release scripts and associated files |
-| codebase/apps | application source code |
-| codebase/libs | support library source code |
-| codebase/make_bin | release and build support scripts |
-| codebase/make_include | incude files for NCAR-style make system |
-
-### DOWNLOADS
-
-| Download type |
-| ------------- |
-| [Download and build source release - LINUX](./docs/download/download_src_and_build.linux.md) |
-| [Download and install binary release - LINUX](./docs/download/download_binary_release_and_install.linux.md) |
+| [docs](./docs) | README files |
+| [docs/release_notes](./docs/release_notes) | release notes for the various packages in LROSE |
+| [build](./build) | build scripts, release scripts and associated files |
+| [codebase/libs](./codebase/libs) | library source code |
+| [codebase/apps](./codebase/apps) | application source code |
+| [codebase/make_bin](./codebase/make_bin) | scripts to support release and build tasks |
+| [codebase/make_include](./codebase/make_include) | macros and rules for NCAR-style make system |
 
 ### Running dual-polarization Radx Applications
 
