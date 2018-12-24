@@ -100,6 +100,8 @@ This will install lrose in:
   /usr/local/opt/lrose/bin
 ```
 
+See also: [Homebrew Notes](./homebrew_notes.md)
+
 <a name="verify"/>
 
 ## 4. Verify the installation
