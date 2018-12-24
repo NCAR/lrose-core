@@ -30,6 +30,7 @@ To download this repository from GitHub, run:
 | --------------------- |
 | [Download and build source release - LINUX](./docs/download/download_src_and_build.linux.md) |
 | [Download and install binary release - LINUX](./docs/download/download_binary_and_install.linux.md) |
+| [Clone and build source release - LINUX](./docs/download/clone_src_and_build.linux.md) |
 
 ### REPOSITORY ORGANIZATION
 
