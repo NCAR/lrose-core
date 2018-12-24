@@ -57,7 +57,7 @@ cd /usr/bin; sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake
 
 ## 2. Download
 
-Create a working directory for building the distribution:
+### Create a working directory for building the distribution:
 
 ```
   mkdir ~/lrose_build

@@ -9,7 +9,7 @@
 
 ## 1. Prepare
 
-Most good, up-to date LINUX distributions should work.
+### Most good, up-to date LINUX distributions should work.
 
 Recommended distributions are:
 
@@ -21,7 +21,7 @@ Recommended distributions are:
 
 First, you will need to install the required packages.
 
-On Redhat-based hosts, run the following (as root or sudo):
+### On Redhat-based hosts, run the following (as root or sudo):
 
 ```
 sudo yum install -y epel-release
@@ -38,7 +38,7 @@ cd /usr/bin; sudo ln -s qmake-qt5 qmake
 
 ```
 
-On Debian-based hosts run the following (as root or sudo):
+### On Debian-based hosts run the following (as root or sudo):
 
 ```
 sudo apt-get update 
