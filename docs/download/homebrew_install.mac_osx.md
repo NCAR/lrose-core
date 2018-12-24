@@ -75,7 +75,7 @@ Download lrose.rb from:
   https://github.com/NCAR/lrose-core/releases 
 ```
 
-Choose from the available distributions.
+Choose from the appropriate distribution.
 
 <a name="install"/>
 

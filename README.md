@@ -32,6 +32,8 @@ To download this repository from GitHub, run:
 | [Download and install binary release - LINUX](./docs/download/download_binary_and_install.linux.md) |
 | [Clone and build source release - LINUX](./docs/download/clone_src_and_build.linux.md) |
 | [Homebrew build and install - MAC OSX](./docs/download/homebrew_install.mac_osx.md) |
+| Install from RedHat .rpm package - coming soon |
+| Install from Debian .deb package - coming soon |
 
 ### REPOSITORY ORGANIZATION
 
