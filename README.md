@@ -41,18 +41,24 @@ To download this repository from GitHub, run:
 | Location      | Description   |
 | ------------- |:-------------:|
 | [docs](./docs) | README files |
-| [docs/release_notes](./docs/release_notes) | release notes for the various packages in LROSE |
+| [release_notes](./release_notes) | release notes for the various packages in LROSE |
 | [build](./build) | build scripts, release scripts and associated files |
 | [codebase/libs](./codebase/libs) | library source code |
 | [codebase/apps](./codebase/apps) | application source code |
 | [codebase/make_bin](./codebase/make_bin) | scripts to support release and build tasks |
 | [codebase/make_include](./codebase/make_include) | macros and rules for NCAR-style make system |
+| [codebase/make_include](./codebase/make_include) | macros and rules for NCAR-style make system |
+| [LROSE_DOCS_OVERVIEW.md](./docs/LROSE_DOCS_OVERVIEW.md) | Documentation index |
+| [RadxDualPolApps.md](./docs/apps/radx/dualpol/README_RadxDualpolApps.md) | Documentation index |
 
-### Running dual-polarization Radx Applications
+### DOCUMENTATION
 
-See [README_RadxDualpolApps.md](./docs/apps/radx/dualpol/README_RadxDualpolApps.md)
+| Name           | Description   |
+| -------------- |:-------------:|
+| [LROSE_DOCS_OVERVIEW.md](./docs/LROSE_DOCS_OVERVIEW.md) | Documentation index |
+| [RadxDualPolApps.md](./docs/apps/radx/dualpol/RadxDualpolApps.md) | Running dual-pol apps |
 
-This page is published at:
+### This page is published at:
 
   [https://ncar.github.io/lrose-core](https://ncar.github.io/lrose-core)
 
