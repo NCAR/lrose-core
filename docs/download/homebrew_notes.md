@@ -11,7 +11,15 @@ To do this you need admin privileges:
 ## 2. Ensure the /usr/local directories are owned by you
 
 ```
-sudo chown -R $(whoami) /usr/local/Cellar /usr/local/Homebrew /usr/local/bin /usr/local/etc /usr/local/etc/bash_completion.d /usr/local/include /usr/local/lib /usr/local/lib/pkgconfig /usr/local/opt /usr/local/sbin /usr/local/share /usr/local/share/aclocal /usr/local/share/doc /usr/local/share/info /usr/local/share/locale /usr/local/share/man /usr/local/share/man/man1 /usr/local/share/man/man3 /usr/local/share/man/man5 /usr/local/share/man/man7 /usr/local/share/zsh /usr/local/share/zsh/site-functions /usr/local/var/homebrew/linked /usr/local/var/homebrew/locks
+sudo chown -R $(whoami) /usr/local/Cellar /usr/local/Homebrew /usr/local/bin \
+     /usr/local/etc /usr/local/etc/bash_completion.d /usr/local/include \
+     /usr/local/lib /usr/local/lib/pkgconfig /usr/local/opt /usr/local/sbin \
+     /usr/local/share /usr/local/share/aclocal /usr/local/share/doc \ 
+     /usr/local/share/info /usr/local/share/locale /usr/local/share/man \
+     /usr/local/share/man/man1 /usr/local/share/man/man3 \
+     /usr/local/share/man/man5 /usr/local/share/man/man7 \
+     /usr/local/share/zsh /usr/local/share/zsh/site-functions \
+     /usr/local/var/homebrew/linked /usr/local/var/homebrew/locks
 ```
 
 ## 3. Download lrose.rb
@@ -37,7 +45,8 @@ You should see output similar to the following:
 
 ```
 
-==> Installing dependencies for lrose: gmp, isl, mpfr, libmpc, gcc, szip, hdf5, netcdf, udunits, fftw, gettext, flex, jpeg, jasper, libpng, qt and pkg-config
+==> Installing dependencies for lrose: gmp, isl, mpfr, libmpc, gcc, szip, hdf5,
+    netcdf, udunits, fftw, gettext, flex, jpeg, jasper, libpng, qt and pkg-config
 
 ==> Installing lrose dependency: gmp
 ==> Downloading https://homebrew.bintray.com/bottles/gmp-6.1.2_2.high_sierra.bottle.tar.gz
