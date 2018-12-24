@@ -1,4 +1,4 @@
-## Download LROSE binary release and install (Linux)
+## Download LROSE binary release and install - LINUX
 
 1. [prepare](#prepare)
 2. [download](#download)

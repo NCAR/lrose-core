@@ -24,10 +24,6 @@ To download LROSE, run:
 git clone https://github.com/NCAR/lrose-core
 ```
 
-### :exclamation: :exclamation: NOTES :exclamation: :exclamation:
-
-LROSE now depends on QT5, not QT4. You will need to install QT5 to build LROSE on your host.
-
 ### Organization of the LROSE repository
 
 | Location      | Description   |
@@ -40,48 +36,14 @@ LROSE now depends on QT5, not QT4. You will need to install QT5 to build LROSE o
 | codebase/make_bin | release and build support scripts |
 | codebase/make_include | incude files for NCAR-style make system |
 
-### Running LROSE on LINUX
+### DOWNLOADS
 
-To run LROSE on LINUX, you will need a good, up-to date LINUX distribution.
+| Download type |
+| ------------- |
+| [Download and build source release - LINUX](./docs/download/download_src_and_build.linux.md) |
+| [Download and install binary release - LINUX](./docs/download/download_binary_release_and_install.linux.md) |
 
-Recommended distributions are:
-
-  * Debian
-  * Ubuntu
-  * RedHat
-  * Centos
-  * Fedora
-  * Suse
-
-The gcc/g++ version should be 4.8.5 or later.
-
-Distributions dated after June 2015 should work.
-
-LROSE builds requires support for the c++11 standard.
-
-### Building LROSE
-
-You can build LROSE using either of the following:
-
-  * NCAR development environment build
-  * automake configure-based build
-  * download pre-configured source distribution
-
-If you are performing development, it is best to use the NCAR development environment.
-
-If you just wish to build and use the software, the automake/configure build is preferable.
-
-See [README_BUILD.md](./docs/build/README_BUILD.md) for details.
-
-### Installing a binary LROSE release
-
-See [README_INSTALL_BIN.md](./docs/download/README_INSTALL_BIN.md)
-
-### Creating an LROSE release
-
-See [README_CREATE_RELEASE.md](./docs/packages/README_CREATE_RELEASE.md)
-
-### Dual-polarization Radx Applications
+### Running dual-polarization Radx Applications
 
 See [README_RadxDualpolApps.md](./docs/apps/radx/dualpol/README_RadxDualpolApps.md)
 
