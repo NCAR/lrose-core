@@ -37,7 +37,7 @@ To download this repository from GitHub, run:
 | Install from RedHat .rpm package - coming soon |
 | Install from Debian .deb package - coming soon |
 
-### SETUP FOR CODE DEVELOPMENT
+### CODE DEVELOPMENT
 
 Use the following if you need to set up an environment suitable for code development.
 
