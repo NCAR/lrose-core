@@ -14,24 +14,24 @@ LROSE is a co-operative project between:
 
 LROSE is funded by the [National Science Foundation](https://www.nsf.gov).
 
-### LROSE source in GitHub
+### LROSE REPOSITORY
 
-This distribution contains the core software for LROSE.
+This GitHub distribution contains the core software for LROSE.
 
-To download LROSE, run:
+To download this repository from GitHub, run:
 
 ```
-git clone https://github.com/NCAR/lrose-core
+  git clone https://github.com/NCAR/lrose-core
 ```
 
 ### DOWNLOADS
 
-| Download documentation |
-| ---------------------- |
+| Download instructions |
+| --------------------- |
 | [Download and build source release - LINUX](./docs/download/download_src_and_build.linux.md) |
 | [Download and install binary release - LINUX](./docs/download/download_binary_and_install.linux.md) |
 
-### Organization of the LROSE repository
+### REPOSITORY ORGANIZATION
 
 | Location      | Description   |
 | ------------- |:-------------:|
