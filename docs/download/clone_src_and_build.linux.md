@@ -1,4 +1,4 @@
-## CLONE LROSE from GitHub and build from source - LINUX
+## Clone LROSE from GitHub and build from source - LINUX
 
 1. [prepare](#prepare)
 2. [download](#download)
@@ -93,9 +93,6 @@ To see the usage:
 ```
 
 ```
-  cd ~/git/lrose-core
-  ./build/checkout_and_build_auto.py --help
-
   Usage: checkout_and_build_auto.py [options]
   Options:
     -h, --help           show this help message and exit
