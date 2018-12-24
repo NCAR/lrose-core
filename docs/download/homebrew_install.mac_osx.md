@@ -24,6 +24,12 @@ From the App Store, install XCode.
 Start XCode, open the preferences window, select the 'Downloads' tab, and 
 install "Command Line Tools"
 
+You may also need to run:
+
+```
+  xcode-select --install
+```
+
 ### Installing stand-alone XCode command line tools
 
 Alternatively, you can install the stand-alone XCode command line tools by downloading

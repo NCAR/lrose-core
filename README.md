@@ -30,7 +30,7 @@ To download this repository from GitHub, run:
 | --------------------- |
 | [Download and build source release - LINUX](./docs/download/download_src_and_build.linux.md) |
 | [Download and install binary release - LINUX](./docs/download/download_binary_and_install.linux.md) |
-| [Clone and build source release - LINUX](./docs/download/clone_src_and_build.linux.md) |
+| [Clone and build latest source - LINUX](./docs/download/clone_src_and_build.linux.md) |
 | [Homebrew build and install - MAC OSX](./docs/download/homebrew_install.mac_osx.md) |
 | Install from OSX DMG file - coming soon |
 | Install from RedHat .rpm package - coming soon |
@@ -56,7 +56,16 @@ To download this repository from GitHub, run:
 | Name           | Description   |
 | -------------- |:-------------:|
 | [LROSE_DOCS_OVERVIEW.md](./docs/LROSE_DOCS_OVERVIEW.md) | Documentation index |
-| [RadxDualPolApps.md](./docs/apps/radx/dualpol/RadxDualpolApps.md) | Running dual-pol apps |
+| [RadxDualPolApps.md](./docs/apps/radx/dualpol/RadxDualpolApps.md) | Dual-polarization apps |
+
+### BUILDING FOR DEVELOPMENT
+
+Use the following if you need to build the code in an environment suitable for development.
+
+| Setup instructions |
+| --------------------- |
+| [Set up NCAR build environment](./docs/build/NCAR_build_environment.md) |
+| [Build NetCDF for the NCAR environment](./docs/build/NCAR_netcdf_build.md) |
 
 ### This page is published at:
 

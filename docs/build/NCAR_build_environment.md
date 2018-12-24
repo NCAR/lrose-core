@@ -1,15 +1,27 @@
-## Building using the NCAR development system
+# Building using the NCAR development environment
 
-### Setting up the environment
+Setting up the NCAR development environmant allows a user to
+develop LROSE-specific code in an efficient environment.
+
+It uses simple Makefiles, rather than the complex makefiles generated
+by autoconf and automake.
+
+## Setting up your environment
 
 The software development system at NCAR/RAL (formerly RAP) and NCAR/EOL makes use of a recursive makefile approach, using environment variables to identify the various directories used during the build.
 
 Therefore, before performing the build, you need to set up the correct environment, as follows:
 
-##### Set the environment variable for the directory into which you wish to install the build:
+### Set the environment variable for the directory into which you wish to install the build:
 
 ```
   $LROSE_INSTALL_DIR
+```
+
+This will normally be:
+
+```
+  ~/lrose
 ```
 
 The build will be installed in:
@@ -20,7 +32,7 @@ The build will be installed in:
   $LROSE_INSTALL_DIR/include
 ```
 
-##### Set the environment variable to point to the git lrose-core directory:
+### Set the environment variable to point to the git lrose-core directory:
 
 ```
   $LROSE_CORE_DIR
@@ -28,7 +40,13 @@ The build will be installed in:
 
 This should point to the top of the distribution, i.e. lrose-core.
 
-##### Source the environment, depending on the shell you are using:
+This will normally be:
+
+```
+  ~/git/lrose-core
+```
+
+### Source the environment, depending on the shell you are using:
 
 For sh or bash:
 ```
@@ -42,6 +60,8 @@ For csh or tcsh:
   source build/set_build_env.csh
 ```
 
+You can insert these files directly into your `.cshrc` or `.bashrc` file, so that the environment is always set.
+
 This will set the following important environment variables:
 
 ```
@@ -54,13 +74,13 @@ This will set the following important environment variables:
 
 Several other variables are set as well.
 
-### Check out, build and install **netcdf** support
+## Check out, build and install **netcdf** support
 
-See [README_NETCDF_BUILD.md](./README_NETCDF_BUILD.md)
+See [NCAR_netcdf_build.md](./NCAR_netcdf_build.md)
 
 Install in $LROSE_INSTALL_DIR
 
-### Installing the makefiles
+## Installing the makefiles
 
 The `make` application can use makefiles named either `Makefile` or `makefile`.
 The lower-case version takes preference.
@@ -98,23 +118,9 @@ For the **titan** distribtion, run the following:
   ./make_bin/install_package_makefiles.py --package titan
 ```
 
-For the **hcr** package, run the following:
+## Performing the build
 
-```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py --package hcr
-```
-
-For the **hsrl** package, run the following:
-
-```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py --package hsrl
-```
-
-### Performing the build
-
-#### Building and installing the TDRP parameter handling utility
+### (a) Build and install the TDRP parameter handling utility
 
 ```
   cd $LROSE_CORE_DIR/codebase/libs/tdrp/src
@@ -123,20 +129,36 @@ For the **hsrl** package, run the following:
   make opt install
 ```
 
-#### Building and installing the libraries
+### (b) Build and install the libraries
 
 ```
   cd $LROSE_CORE_DIR/codebase/libs/
   make install_include
   make -j 8 opt
-  make install
+  make -j 8 install
 ```
 
-#### Building and installing the applications
+### (c) Build and instal the applications
 
 ```
   cd $LROSE_CORE_DIR/codebase/apps
   make -j 8 opt
+  make -j 8 install
+```
+
+## Building individual applications
+
+Once you have set up the environment specified above, you are free
+to edit and build individual applications.
+
+For example, if you want to work on RadxConvert, you would go
+to the relevant directory and perform the build locally there.
+
+```
+  cd $LROSE_CORE_DIR/codebase/apps/Radx/src/RadxConvert
+  make clean
+  make opt
   make install
 ```
+
 

@@ -1,5 +1,7 @@
 # Clone LROSE from GitHub and build from source - LINUX
 
+This will checkout and build the latest source from GitHub.
+
 1. [prepare](#prepare)
 2. [download](#download)
 3. [build](#build)

@@ -1,6 +1,9 @@
-# Building lrose-netcdf
+# Building netcdf for NCAR LROSE development
 
-### Choose the prefix - i.e. the install directory
+Follow these steps to build HDF5 and NetCDF support for the
+NCAR LROSE development and build environment.
+
+## Choose the prefix - i.e. the install directory
 
 The default install location for LROSE is:
 
@@ -10,11 +13,13 @@ The default install location for LROSE is:
 
 You can specify the prefix with the ```-x``` command line argument.
 
-### Check out, build and install **netcdf** support
+## Check out, build and install **netcdf** support
 
 The following is the default:
 
 ```
+  mkdir -p ~/git
+  cd ~/git
   git clone https://github.com/NCAR/lrose-netcdf
   cd lrose-netcdf
   ./build_and_install_netcdf
@@ -33,17 +38,21 @@ For, say, installing in `/usr/local/lrose`:
 For OSX, you will install NetCDF using brew.
 So the build step is generally not necessary.
 
-If you do want to build a specific copy of NetCDF:
+brew will install netcdf and hdf5 in /usr/local/opt.
+
+If you do want to build a specific copy of NetCDF, do so
+in the user's home directory so it does not conflict with
+the version installed by homebrew.
 
 ```
   git clone https://github.com/NCAR/lrose-netcdf
   cd lrose-netcdf
-  ./build_and_install_netcdf.osx -x /usr/local/lrose
+  ./build_and_install_netcdf.osx -x ~/lrose
 ```
 
 will install NetCDF and HDF5 in:
 
 ```
-  /usr/local/lrose
+  ~/lrose
 ```
 
