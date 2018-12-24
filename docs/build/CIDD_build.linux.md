@@ -1,4 +1,4 @@
-# The CIDD build and run-time environment
+# The CIDD build and run-time environment - LINUX
 
 CIDD must be built as a 32-bit application.
 

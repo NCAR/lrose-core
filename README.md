@@ -64,9 +64,10 @@ Use the following if you need to build the code in an environment suitable for d
 
 | Setup instructions |
 | --------------------- |
-| [Set up NCAR build environment](./docs/build/NCAR_build_environment.md) |
-| [Build NetCDF for the NCAR environment](./docs/build/NCAR_netcdf_build.md) |
-| [CIDD build - 32-bit mode](./docs/build/CIDD_build.md) |
+| [Set up NCAR build environment - LINUX](./docs/build/NCAR_build_environment.linux.md) |
+| [Build NetCDF for the NCAR environment - LINUX](./docs/build/NCAR_netcdf_build.linux.md) |
+| [Set up NCAR build environment - OSX](./docs/build/NCAR_build_environment.osx.md) |
+| [CIDD build - 32-bit mode - LINUX](./docs/build/CIDD_build.linux.md) |
 
 ### This page is published at:
 

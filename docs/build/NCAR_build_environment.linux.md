@@ -1,12 +1,98 @@
-# Building using the NCAR development environment
+# Building using the NCAR development environment - LINUX
 
 Setting up the NCAR development environmant allows a user to
 develop LROSE-specific code in an efficient environment.
 
-It uses simple Makefiles, rather than the complex makefiles generated
-by autoconf and automake.
+It uses Makefiles that are simple to use, rather than the complex makefiles generated
+by the GNU tools autoconf and automake.
 
-## Setting up your environment
+1. [prepare](#prepare)
+2. [download](#download)
+3. [setenv](#setenv)
+4. [build](#build)
+
+<a name="prepare"/>
+
+## 1. Prepare the OS
+
+Most good, up-to date LINUX distributions should work.
+
+Recommended distributions are:
+
+  * Debian
+  * Ubuntu (based on Debian)
+  * RedHat
+  * Centos (based on RedHat)
+  * Fedora (based on RedHat)
+
+First, you will need to install the required packages.
+
+On Redhat-based hosts, run the following (as root or sudo):
+
+```
+sudo yum install -y epel-release
+
+sudo yum install -y \
+tcsh perl perl-Env ftp git svn cvs tkcvs emacs tkcvs m4 \
+gcc gcc-c++ gcc-gfortran glibc-devel libX11-devel libXext-devel \
+libpng-devel libtiff-devel jasper-devel zlib-devel expat-devel \
+flex-devel fftw3-devel bzip2-devel jasper-devel qt5-qtbase-devel xrdb \
+Xvfb xorg-x11-fonts-misc xorg-x11-fonts-75dpi xorg-x11-fonts-100dpi \
+gnuplot ImageMagick-devel ImageMagick-c++-devel
+
+cd /usr/bin; sudo ln -s qmake-qt5 qmake
+
+```
+
+On Debian-based hosts run the following (as root or sudo):
+
+```
+sudo apt-get update 
+
+sudo apt-get install -y  \
+    libbz2-dev libx11-dev libpng12-dev libfftw3-dev \
+    libjasper-dev qtbase5-dev git \
+    gcc g++ gfortran libfl-dev \
+    automake make libtool pkg-config libexpat1-dev python
+
+cd /usr/bin; sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake
+
+```
+
+<a name="download"/>
+
+## 2. Download from GitHub
+
+Create a working directory for cloning:
+
+```
+  mkdir -p ~/git
+  cd ~/git
+```
+
+### Clone the current LROSE version from GitHub
+
+```
+  cd ~/git
+  git clone https://github.com/ncar/lrose-core 
+```
+
+The distribution will be in the lrose-core subdirectory:
+
+```
+  cd ~/git/lrose-core
+```
+
+### Clone the NetCDF support rom GitHub
+
+```
+  cd ~/git
+  git clone https://github.com/ncar/lrose-netcdf
+```
+
+<a name="setenv"/>
+
+## 3. Setting up your environment
 
 The software development system at NCAR/RAL (formerly RAP) and NCAR/EOL makes use of a recursive makefile approach, using environment variables to identify the various directories used during the build.
 
@@ -60,11 +146,14 @@ For csh or tcsh:
   source build/set_build_env.csh
 ```
 
-You can insert these files directly into your `.cshrc` or `.bashrc` file, so that the environment is always set.
+Preferably, you should permanently copy the contents of these these files
+directly into your `.cshrc` or `.bashrc` file.
+That way the environment will always be correcty set.
 
 This will set the following important environment variables:
 
 ```
+ $HOST_OS: the flavor of OS for your system.
  $RAP_MAKE_INC_DIR: include files used by the makefiles
  $RAP_MAKE_BIN_DIR: scripts for the make
  $RAP_INC_DIR: the include install directory
@@ -74,13 +163,17 @@ This will set the following important environment variables:
 
 Several other variables are set as well.
 
-## Check out, build and install **netcdf** support
+<a name="build"/>
 
-See [NCAR_netcdf_build.md](./NCAR_netcdf_build.md)
+## 4. Build
 
-Install in $LROSE_INSTALL_DIR
+### First build the NetCDF support.
 
-## Installing the makefiles
+See [NCAR_netcdf_build.linux.md](./NCAR_netcdf_build.linux.md)
+
+Install NetCDF in $LROSE_INSTALL_DIR, which will normally be `~/lrose`.
+
+### Install the makefiles
 
 The `make` application can use makefiles named either `Makefile` or `makefile`.
 The lower-case version takes preference.
@@ -118,9 +211,9 @@ For the **titan** distribtion, run the following:
   ./make_bin/install_package_makefiles.py --package titan
 ```
 
-## Performing the build
+### Perform the build
 
-### (a) Build and install the TDRP parameter handling utility
+#### (a) Build and install the TDRP parameter handling utility
 
 ```
   cd $LROSE_CORE_DIR/codebase/libs/tdrp/src
@@ -129,7 +222,7 @@ For the **titan** distribtion, run the following:
   make opt install
 ```
 
-### (b) Build and install the libraries
+#### (b) Build and install the libraries
 
 ```
   cd $LROSE_CORE_DIR/codebase/libs/
@@ -138,7 +231,7 @@ For the **titan** distribtion, run the following:
   make -j 8 install
 ```
 
-### (c) Build and instal the applications
+#### (c) Build and instal the applications
 
 ```
   cd $LROSE_CORE_DIR/codebase/apps
@@ -146,7 +239,7 @@ For the **titan** distribtion, run the following:
   make -j 8 install
 ```
 
-## Building individual applications
+### Building individual applications
 
 Once you have set up the environment specified above, you are free
 to edit and build individual applications.
