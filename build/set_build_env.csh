@@ -18,10 +18,6 @@ if ( ! $?LROSE_CORE_DIR || ! $?LROSE_INSTALL_DIR ) then
 endif
 
 setenv HOST_OS LINUX_LROSE
-uname -a | grep x86_64
-if ($status == 1) then
-    setenv HOST_OS LINUX
-endif
 
 setenv RAP_MAKE_INC_DIR $LROSE_CORE_DIR/codebase/make_include
 setenv RAP_MAKE_BIN_DIR $LROSE_CORE_DIR/codebase/make_bin

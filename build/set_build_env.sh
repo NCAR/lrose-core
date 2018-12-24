@@ -18,11 +18,6 @@ if [ -z "$LROSE_CORE_DIR" -o -z "$LROSE_INSTALL_DIR" ]; then
 fi
 
 export HOST_OS=LINUX_LROSE
-uname -a | grep x86_64
-if [ "$?" = 1 ]
-then
-    export HOST_OS=LINUX
-fi
 
 export RAP_MAKE_INC_DIR=$LROSE_CORE_DIR/codebase/make_include
 export RAP_MAKE_BIN_DIR=$LROSE_CORE_DIR/codebase/make_bin

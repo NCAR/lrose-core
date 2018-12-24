@@ -1,10 +1,10 @@
-## The CIDD build and run-time environment
+# The CIDD build and run-time environment
 
 CIDD must be built as a 32-bit application.
 
 And to run CIDD, you must have the required 32-bit packages installed.
 
-### Required LINUX packages for the CIDD build
+## Required LINUX packages for the CIDD build
 
 For a full CIDD build under LINUX, you need the following packages:
 
@@ -89,9 +89,9 @@ and use apt-get to install the following:
                    libbz2-dev:i386
 ```
 
-## Building CIDD using AUTOMAKE and CONFIGURE
+# Building CIDD using AUTOMAKE and CONFIGURE
 
-### Choose your install directory (prefix)
+## Choose your install directory (prefix)
 
 The CIDD display uses the xview library, which must be compiled with 32-bit emulation.
 
@@ -104,7 +104,7 @@ So, for a CIDD build we recommend you use a temporary prefix location, for examp
 
 After the package has been built into this temporary location, it can be copied into the final location.
 
-### Check out, build and install netcdf support
+## Check out, build and install netcdf support
 
 Build and install netcdf into the temporary build area:
 
@@ -116,14 +116,14 @@ Build and install netcdf into the temporary build area:
 
 This will install in `/tmp/cidd_m32`
 
-### Check out LROSE
+## Check out LROSE
 
 ```
   git clone https://github.com/NCAR/lrose-core
 ```
 
 <!---
-### Install the makefile tree
+## Install the makefile tree
 
 The `make` application can use files named either `Makefile` or `makefile`.
 
@@ -140,7 +140,7 @@ To install the makefiles for the **cidd** package, perform the following:
 ```
 --->
 
-### Perform the build
+## Perform the build
 
 Build using automake:
 
@@ -149,7 +149,7 @@ Build using automake:
   ./build/build_lrose.py --package cidd --prefix /tmp/cidd_m32
 ```
 
-### Copy the binaries to the final install location
+## Copy the binaries to the final install location
 
 Use rsync to copy the binaries to the final location.
 

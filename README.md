@@ -66,6 +66,7 @@ Use the following if you need to build the code in an environment suitable for d
 | --------------------- |
 | [Set up NCAR build environment](./docs/build/NCAR_build_environment.md) |
 | [Build NetCDF for the NCAR environment](./docs/build/NCAR_netcdf_build.md) |
+| [CIDD build - 32-bit mode](./docs/build/CIDD_build.md) |
 
 ### This page is published at:
 
