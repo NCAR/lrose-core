@@ -64,7 +64,7 @@ Run the following ruby script:
 ```
 <a name="download"/>
 
-### 2. Download
+## 2. Download
 
 You need to download the brew formula from the lrose repository.
 This formula is used to perform the homebrew build.
@@ -79,9 +79,7 @@ Choose from the available distributions.
 
 <a name="install"/>
 
-### Use homebrew to perform the install
-
-Create a directory for the distribution:
+## 3. Install
 
 ```
   cd ~/Downloads
@@ -98,7 +96,7 @@ This will install lrose in:
 
 <a name="verify"/>
 
-### Verify the installation
+## 4. Verify the installation
 
 Try the commands:
 ```
