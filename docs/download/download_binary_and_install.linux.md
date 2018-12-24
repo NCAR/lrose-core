@@ -1,4 +1,4 @@
-## Download LROSE binary release and install - LINUX
+# Download LROSE binary release and install - LINUX
 
 1. [prepare](#prepare)
 2. [download](#download)
@@ -7,7 +7,7 @@
 
 <a name="prepare"/>
 
-### 1. Prepare
+## 1. Prepare
 
 The current LINUX binary release is built under CENTOS 7.5.
 This should run on most up-to-date RedHat-based systems.
@@ -26,7 +26,7 @@ For the Qt apps (e.g. HawkEye) to run, make sure Qt5 is installed:
 
 <a name="download"/>
 
-### 2. Download
+## 2. Download
 
 Choose your install directory (prefix location). The default is:
 
@@ -67,9 +67,9 @@ So go there:
 
 <a name="install"/>
 
-### 3. Install
+## 3. Install
 
-#### Run the build script:
+### Run the build script:
 
 To see the install script usage:
 
@@ -99,7 +99,7 @@ Or to specify the install directory, run something like the following:
 
 <a name="verify"/>
 
-### 4. Verify
+## 4. Verify
 
 Look in ~/lrose or /my/install/dir for
 

@@ -1,4 +1,4 @@
-## Download LROSE release and build from source - LINUX
+# Download LROSE release and build from source - LINUX
 
 1. [prepare](#prepare)
 2. [download](#download)
@@ -7,7 +7,7 @@
 
 <a name="prepare"/>
 
-### 1. Prepare
+## 1. Prepare
 
 Most good, up-to date LINUX distributions should work.
 
@@ -55,7 +55,7 @@ cd /usr/bin; sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake
 
 <a name="download"/>
 
-### 2. Download
+## 2. Download
 
 Create a working directory for building the distribution:
 
@@ -64,7 +64,7 @@ Create a working directory for building the distribution:
   cd ~/lrose_build
 ```
 
-#### Download the source release for Linux
+### Download the source release for Linux
 
 Download the source tar file from:
 
@@ -78,7 +78,7 @@ A typical source release would be:
   lrose-20160823.src.tgz
 ```
 
-#### Untar
+### Untar
 
 ```
   tar xvfz lrose-20160823.src.tgz
@@ -92,9 +92,9 @@ The distribution will be unpacked into a subdirectory:
 
 <a name="build"/>
 
-### 3. Build
+## 3. Build
 
-#### Run the build script:
+### Run the build script:
 
 To see the usage:
 
@@ -116,7 +116,7 @@ Or set an install directory:
 
 <a name="verify"/>
 
-### 4. Verify
+## 4. Verify
 
 Look in ~/lrose or /my/install/dir for
 
@@ -134,7 +134,7 @@ Try the commands:
   ~/lrose/bin/HawkEye
 ```
 
-### 5. Handling build errors
+## 5. Handling build errors
 
 If the build does not complete successfully, you will need to
 track down the errors.

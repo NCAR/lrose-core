@@ -1,4 +1,4 @@
-## Clone LROSE from GitHub and build from source - LINUX
+# Clone LROSE from GitHub and build from source - LINUX
 
 1. [prepare](#prepare)
 2. [download](#download)
@@ -7,7 +7,7 @@
 
 <a name="prepare"/>
 
-### 1. Prepare
+## 1. Prepare
 
 Most good, up-to date LINUX distributions should work.
 
@@ -55,7 +55,7 @@ cd /usr/bin; sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake
 
 <a name="download"/>
 
-### 2. Download from GitHub
+## 2. Download from GitHub
 
 Create a working directory for cloning:
 
@@ -64,7 +64,7 @@ Create a working directory for cloning:
   cd ~/git
 ```
 
-#### Clone the current version in GitHub
+### Clone the current version in GitHub
 
 ```
   git clone https://github.com/ncar/lrose-core 
@@ -78,9 +78,9 @@ The distribution will be in the lrose-core subdirectory:
 
 <a name="build"/>
 
-### 3. Build
+## 3. Build
 
-#### Run the build script:
+### Run the build script:
 
 ```
   cd ~/git/lrose-core/build
@@ -157,7 +157,7 @@ To cleanup between builds:
 
 <a name="verify"/>
 
-### 4. Verify
+## 4. Verify
 
 Try the commands:
 ```
@@ -167,7 +167,7 @@ Try the commands:
   ~/lrose/bin/HawkEye
 ```
 
-### 5. Handling build errors
+## 5. Handling build errors
 
 If the build does not complete successfully, you will need to
 track down the errors.
