@@ -75,10 +75,42 @@ include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
 include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 
 #
+# QT C++ targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_qt_targets
+
+#
 # local targets
 #
 
 depend: depend_generic
+
+#
+# build Mac OSX application
+#
+RadxPrint_app:
+	@echo $(HOME)
+	# Make HawkEye and the Makefile.qmake
+	make 
+	# Make the bundle (HawkEye.app tree structure)
+	make from_qmake
+	# make -f Makefile.qmake
+	# copy the system libraries to the .app tree structure
+	mkdir -p RadxPrint.app/Contents/Frameworks
+	cp /usr/lib/libexpat.1.dylib  RadxPrint.app/Contents/Frameworks/.
+	cp /usr/lib/libbz2.1.0.dylib  RadxPrint.app/Contents/Frameworks/.
+	cp /usr/lib/libz.1.dylib      RadxPrint.app/Contents/Frameworks/.
+	cp /usr/lib/libSystem.B.dylib RadxPrint.app/Contents/Frameworks/.
+	# mkdir -p RadxPrint.app/Contents/MacOS/../share
+	# cp -r ~/git/lrose-displays/color_scales RadxPrint.app/Contents/MacOS/../share/.
+	# make the dmg  
+	macdeployqt RadxPrint.app -dmg -always-overwrite -codesign="${CERT_NAME}"
+	# now build the folder for the dmg installer
+	mkdir -p RadxPrint_bkg_test
+	cp ~/Desktop/arrow.pdf RadxPrint_bkg_test/.background
+	rsync -r RadxPrint.app RadxPrint_bkg_test/.
+	hdiutil create -volname RadxPrint_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/Radx/src/RadxPrint/RadxPrint_bkg_test -ov -format UDZO RadxPrint_test.dmg
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
