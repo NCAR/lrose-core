@@ -33,7 +33,10 @@ Reference-style:
 
 This is a test
 
-Inline-style: 
+PPI showing DBZ: 
 ![alt text](./images/ppi_dbz.png "PPI DBZ")
+
+RHI showing DBZ: 
+![alt text](./images/rhi_dbz.png "RHI DBZ")
 
 This is a test
