@@ -1,6 +1,6 @@
 # Example Images for Dual-Polarization Applications
 
-## KDP, PID and Precipitation Rate Applications - example images
+## The measured fields are DBZ, VEL, WIDTH, ZDR, RHOHV and PHIDP
 
 ### DBZ
 
@@ -34,14 +34,6 @@ PPI
 RHI 
 ![alt text](./images/rhi_zdr.png "RHI ZDR")
 
-### PHIDP
-
-PPI 
-![alt text](./images/ppi_phidp.png "PPI PHIDP")
-
-RHI 
-![alt text](./images/rhi_phidp.png "RHI PHIDP")
-
 ### RHOHV
 
 PPI 
@@ -50,13 +42,15 @@ PPI
 RHI 
 ![alt text](./images/rhi_rhohv.png "RHI RHOHV")
 
-### TEMP
+### PHIDP
 
 PPI 
-![alt text](./images/ppi_temp.png "PPI TEMP")
+![alt text](./images/ppi_phidp.png "PPI PHIDP")
 
 RHI 
-![alt text](./images/rhi_temp.png "RHI TEMP")
+![alt text](./images/rhi_phidp.png "RHI PHIDP")
+
+## We compute KDP from PHIDP
 
 ### KDP
 
@@ -66,6 +60,16 @@ PPI
 RHI 
 ![alt text](./images/rhi_kdp.png "RHI KDP")
 
+## We compute PDI from the above dual-pol fields, in addition to temperature
+
+### TEMP
+
+PPI 
+![alt text](./images/ppi_temp.png "PPI TEMP")
+
+RHI 
+![alt text](./images/rhi_temp.png "RHI TEMP")
+
 ### PID
 
 PPI 
@@ -73,6 +77,8 @@ PPI
 
 RHI 
 ![alt text](./images/rhi_pid.png "RHI PID")
+
+## Precip rate can be computed from DBZH, Z/ZDR and KDP
 
 ### RATE_ZH
 
@@ -82,6 +88,14 @@ PPI
 RHI 
 ![alt text](./images/rhi_rate_zh.png "RHI RATE_ZH")
 
+### RATE_Z_ZDR
+
+PPI 
+![alt text](./images/ppi_rate_z_zdr.png "PPI RATE_Z_ZDR")
+
+RHI 
+![alt text](./images/rhi_rate_z_zdr.png "RHI RATE_Z_ZDR")
+
 ### RATE_KDP
 
 PPI 
@@ -90,6 +104,8 @@ PPI
 RHI 
 ![alt text](./images/rhi_rate_kdp.png "RHI RATE_KDP")
 
+## A HYBRID rate is computed as a combination of the above rates
+
 ### RATE_HYBRID
 
 PPI 
@@ -97,12 +113,4 @@ PPI
 
 RHI 
 ![alt text](./images/rhi_rate_hybrid.png "RHI RATE_HYBRID")
-
-### DBZ
-
-PPI 
-![alt text](./images/ppi_dbz.png "PPI DBZ")
-
-RHI 
-![alt text](./images/rhi_dbz.png "RHI DBZ")
 
