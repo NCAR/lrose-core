@@ -46,5 +46,5 @@ image
 * A few screen shots
 
 ### Demo with Data
-/Volumes/KINGSTON/
+~/Workshop2019
 start_HawkEye.test  
