@@ -62,9 +62,9 @@ def main():
                       action="store_true",
                       help='Set verbose debugging on')
     parser.add_option('--package',
-                      dest='package', default='lrose',
+                      dest='package', default='lrose-core',
                       help='Package name. Options are: ' + \
-                      'lrose (default), cidd, radx, titan, lrose-blaze')
+                      'lrose-core (default), cidd, radx, titan, lrose-blaze')
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDirDefault,
                       help='Install directory')
