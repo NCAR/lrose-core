@@ -1,10 +1,10 @@
 # HawkEye
 What is HawkEye?
 
-## Polar Display
+## Polar (PPI/RHI) Display
 image
 
-## RHI/BSCAN Display
+## BSCAN Display
 image
 
 ## How to install HawkEye
