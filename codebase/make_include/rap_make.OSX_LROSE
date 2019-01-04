@@ -64,11 +64,6 @@ PROFILE_FLAG = -pg
 DEBUG_FLAG = -g
 OPT_FLAG = -O2
 
-# pgc
-
-PGI_CC = pgcc
-PGI_SYS_CFLAGS = -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 -Minform,severe -silent $(MY_PGI_CFLAGS)
-
 #
 # cc
 #
@@ -78,19 +73,11 @@ CPPC = g++
 SYS_CPPC_INCLUDES =
 ACC = $(CC)
 
-PGI_CPPC = pgCC
-PGI_SYS_CPPC_CFLAGS = -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 -Minform=severe -silent -fPIC $(MY_PGI_CPPC_CFLAGS)
-
 # fortran
 
 FC = gfortran
 F90C = gfortran
 F95C = gfortran
-
-PGI_F90C=pgf90
-PGI_FC=pgf90
-PGI_F95C=pgf95
-SYS_PGI_FFLAGS=-DLITENDIAN $(MY_PGI_FFLAGS)
 
 # Compile -- special for C <-> FORTRAN
 # The "NATIVE" compilers need to be either both GNU or both
@@ -178,28 +165,20 @@ NCAR_CPPC=ncarg++
 #          some using netCDF 4.
 #	NETCDF_INCS	defines location of default netCDF include files
 #	NETCDF_LDFLAGS	defines location of default netCDF libraries
-#	PGI_NETCDF_INCS	defines location of PGI netCDF include files
-#	PGI_NETCDF_LDFLAGS	defines location of PGI-compiled netCDF libraries
 #       NETCDF4_INCS defines location of netCDF 4 include files
 #       NETCDF4_LDFLAGS defines location of netCDF 4 libraries
-#	PGI_NETCDF4_INCS	defines location of PGI netCDF 4 include files
-#	PGI_NETCDF4_LDFLAGS	defines location of PGI-compiled netCDF 4 libraries
 
 NETCDF_INCS=$(MY_NETCDF_INCS) -I/usr/local/netcdf/include
 NETCDF_LDFLAGS=$(MY_NETCDF_LDFLAGS) -L/usr/local/netcdf/lib
-PGI_NETCDF_INCS=$(MY_PGI_NETCDF_INCS) -I/usr/local/netcdf-3.6.2-pgi7/include
-PGI_NETCDF_LDFLAGS=$(MY_PGI_NETCDF_LDFLAGS) -L/usr/local/netcdf-3.6.2-pgi7/lib
-NETCDF4_INCS=$(MY_NETCDF4_INCS) -I/usr/local/netcdf4/include
-NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS) -L/usr/local/netcdf4/lib
-PGI_NETCDF4_INCS=$(MY_PGI_NETCDF4_INCS) -I/usr/local/netcdf4-pgi/include
-PGI_NETCDF4_LDFLAGS=$(MY_PGI_NETCDF4_LDFLAGS) -L/usr/local/netcdf4-pgi/lib
+NETCDF4_INCS=$(MY_NETCDF4_INCS)
+NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS)
 
 NETCDF_C_LIB=-lnetcdf
 NETCDF_C++_LIB=-lnetcdf_c++
 NETCDF_FF_LIB=-lnetcdff
-NETCDF_C_AND_C++_LIBS=-lnetcdf -lnetcdf_c++
+NETCDF_C_AND_C++_LIBS=-lnetcdf
 NETCDF_C_AND_F_LIBS=-lnetcdff -lnetcdf
-NETCDF4_LIBS=-lNcxx -lnetcdf_c++ -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat
+NETCDF4_LIBS=-lNcxx -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -lbz2 -lexpat
 
 #
 # Java
