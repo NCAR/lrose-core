@@ -8,7 +8,14 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
 	Radx2Grid \
+        RadxBufr \
 	RadxConvert \
-	RadxPrint
+        RadxEvad \
+        RadxKdp \
+        RadxPartRain \
+        RadxPid \
+	RadxPrint \
+        RadxRate \
+        RadxQpe
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
