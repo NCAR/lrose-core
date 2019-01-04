@@ -123,12 +123,12 @@ bool XmlFile::init(const string &output_dir,
     cerr << "Error opening output file for write" << endl;
     perror(xml_filename);
     
-    delete xml_filename;
+    delete[] xml_filename;
     
     return false;
   }
   
-  delete xml_filename;
+  delete[] xml_filename;
   
   // Write the first line to the output file
 
