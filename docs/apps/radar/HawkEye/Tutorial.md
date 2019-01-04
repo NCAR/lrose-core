@@ -2,10 +2,10 @@
 What is HawkEye?
 
 ## Polar (PPI/RHI) Display
-image
+![Polar Display](images/Screen Shot 2018-05-01 at 4.35.34 PM.png)
 
 ## BSCAN Display
-image
+![BSCAN Display](images/Screen Shot 2018-06-29 at 2.05.06 PM.png)
 
 ## How to install HawkEye
 ### Linux
@@ -27,7 +27,9 @@ image
 
 
 ### Windows
-#### TODO: Bruno's email
+| As ... |
+|----------|
+|[Linux subsystem](https://github.com/NCAR/lrose-core/issues/61) |
 
 
 ## How to use HawkEye
