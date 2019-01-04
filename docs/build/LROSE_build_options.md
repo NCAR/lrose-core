@@ -104,6 +104,7 @@ For a full LROSE build under LINUX, you need the following packages:
   jasper-devel
   zlib-devel
   libexpat-devel
+  libcurl-devel
   flex-devel
   fftw3-devel
   bzip2-devel
@@ -129,7 +130,7 @@ yum install -y epel-release
 yum install -y \
 tcsh perl perl-Env ftp git svn cvs tkcvs emacs tkcvs m4 \
 gcc gcc-c++ gcc-gfortran glibc-devel libX11-devel libXext-devel \
-libpng-devel libtiff-devel jasper-devel zlib-devel expat-devel \
+libpng-devel libtiff-devel jasper-devel zlib-devel expat-devel libcurl-devel \
 flex-devel fftw3-devel bzip2-devel jasper-devel qt5-qtbase-devel xrdb \
 Xvfb xorg-x11-fonts-misc xorg-x11-fonts-75dpi xorg-x11-fonts-100dpi \
 gnuplot ImageMagick-devel ImageMagick-c++-devel
