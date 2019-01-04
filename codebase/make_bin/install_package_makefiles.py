@@ -39,7 +39,7 @@ def main():
                       dest='codedir', default=defaultCodeDir,
                       help='Code dir from which we search for makefiles')
     parser.add_option('--package',
-                      dest='package', default="lrose",
+                      dest='package', default="lrose-core",
                       help='Name of distribution for which we are building')
     parser.add_option('--osx',
                       dest='osx', default=False,
