@@ -28,3 +28,17 @@ image
 ### Windows
 #### TODO: Bruno's email
 
+
+## How to use HawkEye
+### The parameter file
+#### How to generate one
+#### Where is a default one?
+#### The Top 10 Parameters
+
+## The Future of HawkEye - advertisement
+
+* Open Params File menu option
+* Merge SOLOII into HawkEye
+* UNDO 
+* A few screen shots
+
