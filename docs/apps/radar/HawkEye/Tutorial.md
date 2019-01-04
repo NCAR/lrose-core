@@ -21,7 +21,7 @@ image
 |----------|-------------------|------------------|---------------|
 | Source   | | | |
 | Container (Docker) | | | |
-| Brew | | | |
+| Brew | ** menus may not work ** | | |
 | App | | | |
 
 
@@ -35,6 +35,9 @@ image
 #### Where is a default one?
 #### The Top 10 Parameters
 
+### The Color Scales
+
+
 ## The Future of HawkEye - advertisement
 
 * Open Params File menu option
@@ -42,3 +45,6 @@ image
 * UNDO 
 * A few screen shots
 
+### Demo with Data
+/Volumes/KINGSTON/
+start_HawkEye.test  
