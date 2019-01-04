@@ -87,7 +87,7 @@ DataField::~DataField()
  *             file.
  */
 
-void DataField::getData(NcFile &nc_file,
+void DataField::getData(Nc3File &nc_file,
 			const string &missing_data_value_att_name)
 {
   static const string method_name = "DataField::getData()";
@@ -96,7 +96,7 @@ void DataField::getData(NcFile &nc_file,
   
   // Get the variable object from the netCDF file
 
-  NcVar *field = 0;
+  Nc3Var *field = 0;
 
   if ((field = nc_file.get_var(_ncFieldName.c_str())) == 0)
   {
@@ -115,7 +115,7 @@ void DataField::getData(NcFile &nc_file,
     return;
   }
 
-  if (field->type() != ncFloat)
+  if (field->type() != nc3Float)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Variable " << _ncFieldName << " not a float variable, as expected" << endl;
@@ -156,12 +156,12 @@ void DataField::getData(NcFile &nc_file,
  * success, the global FLOAT_MISSING_DATA_VALUE on failure.
  */
 
-float DataField::_getVarFloatAtt(const NcVar &variable,
+float DataField::_getVarFloatAtt(const Nc3Var &variable,
 				  const string &att_name) const
 {
   static const string method_name = "AcarsFile::_getVarFloatAtt()";
   
-  NcAtt *attribute;
+  Nc3Att *attribute;
   
   if ((attribute = variable.get_att(att_name.c_str())) == 0)
   {
@@ -172,7 +172,7 @@ float DataField::_getVarFloatAtt(const NcVar &variable,
     return FLOAT_MISSING_DATA_VALUE;
   }
   
-  NcValues *att_values;
+  Nc3Values *att_values;
   
   if ((att_values = attribute->values()) == 0)
   {

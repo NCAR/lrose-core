@@ -48,7 +48,7 @@
 #ifndef DataField_H
 #define DataField_H
 
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include <string>
 
 #include "Converter.hh"
@@ -88,7 +88,7 @@ public:
    *             file.
    */
 
-  void getData(NcFile &nc_file,
+  void getData(Nc3File &nc_file,
 	       const string &missing_data_value_att_name);
   
 
@@ -159,7 +159,7 @@ protected:
   
   Converter *_converter;
   
-  NcValues *_fieldValues;
+  Nc3Values *_fieldValues;
   float _missingDataValue;
   bool _dataRead;
   
@@ -176,7 +176,7 @@ protected:
    * success, the global FLOAT_MISSING_DATA_VALUE on failure.
    */
 
-  float _getVarFloatAtt(const NcVar &variable,
+  float _getVarFloatAtt(const Nc3Var &variable,
 			const string &att_name) const;
   
 

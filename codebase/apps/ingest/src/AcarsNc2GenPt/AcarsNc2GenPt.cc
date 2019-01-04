@@ -36,7 +36,6 @@
 #include <iostream>
 #include <signal.h>
 #include <math.h>
-#include <netcdf.hh>
 #include <string>
 #include <unistd.h>
 #include <sys/stat.h>
