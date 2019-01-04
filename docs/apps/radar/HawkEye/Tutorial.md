@@ -2,10 +2,11 @@
 What is HawkEye?
 
 ## Polar (PPI/RHI) Display
-![Polar Display](Polar_Display.png)
+![alt_text](./images/Polar_Display.png)
+
 
 ## BSCAN Display
-![BSCAN Display](BSCAN_Display.png)
+![alt_text](./images/BSCAN_Display.png)
 
 ## How to install HawkEye
 ### Linux
