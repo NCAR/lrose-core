@@ -7,15 +7,12 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-	Radx2Grid \
-        RadxBufr \
-	RadxConvert \
-        RadxEvad \
-        RadxKdp \
-        RadxPartRain \
-        RadxPid \
-	RadxPrint \
-        RadxRate \
-        RadxQpe
+	ApRemoval \
+	BrightBand \
+	ClutterRemove \
+	LogFilter \
+	NoiseFilter \
+	stratiform_filter \
+	tops_filter
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

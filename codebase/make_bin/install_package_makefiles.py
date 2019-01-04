@@ -8,6 +8,7 @@
 
 import os
 import sys
+from sys import platform
 import shutil
 from optparse import OptionParser
 from datetime import datetime
@@ -31,27 +32,36 @@ def main():
     defaultCodeDir = os.path.join(coreDir, "codebase")
     parser = OptionParser(usage)
     parser.add_option('--debug',
-                      dest='debug', default='False',
+                      dest='debug', default=False,
                       action="store_true",
                       help='Set debugging on')
     parser.add_option('--codedir',
                       dest='codedir', default=defaultCodeDir,
                       help='Code dir from which we search for makefiles')
     parser.add_option('--package',
-                      dest='package', default="lrose",
+                      dest='package', default="lrose-core",
                       help='Name of distribution for which we are building')
     parser.add_option('--osx',
-                      dest='osx', default='False',
+                      dest='osx', default=False,
                       action="store_true",
                       help='Configure for MAC OSX')
 
     (options, args) = parser.parse_args()
+
+    # set flag to indicate OSX
+    # If we are on a mac, force this to true
+
+    isOsx = False
+    if (platform == "darwin"):
+        isOsx = True
+    if (options.osx):
+        isOsx = True
     
-    if (options.debug == True):
+    if (options.debug):
         print >>sys.stderr, "Running %s:" % thisScriptName
         print >>sys.stderr, "  codedir:", options.codedir
         print >>sys.stderr, "  package:", options.package
-        print >>sys.stderr, "  osx: ", options.osx
+        print >>sys.stderr, "  osx: ", isOsx
 
     # go to the code dir
 
@@ -59,7 +69,7 @@ def main():
 
     # install the makefiles
 
-    if (options.osx == True):
+    if (isOsx):
         doInstallOsx()
     else:
         doInstall()
@@ -74,7 +84,7 @@ def doInstall():
     # search for given makefile name
 
     packageMakefileName = "makefile" + "." + options.package
-    if (options.debug == True):
+    if (options.debug):
         print >>sys.stderr, "Searching for makefiles: ", packageMakefileName
 
     # first remove any existing 'makefile' files
@@ -116,7 +126,7 @@ def doInstallOsx():
     # search for given makefile name
 
     packageMakefileName = "makefile" + "." + options.package
-    if (options.debug == True):
+    if (options.debug):
         print >>sys.stderr, "Searching for makefiles: ", packageMakefileName
 
     # find _makefiles dirs in tree
@@ -132,9 +142,9 @@ def doInstallOsx():
                 if (os.path.isfile(packageMakefilePath)):
                     # remove makefile in the target dir
                     # because OSX is not properly case sensitive
-                    if (os.path.isfile(makefilePathLower) == True):
+                    if (os.path.isfile(makefilePathLower)):
                         os.remove(makefilePathLower)
-                    if (os.path.isfile(makefilePathUpper) == True):
+                    if (os.path.isfile(makefilePathUpper)):
                         os.remove(makefilePathUpper)
                     # copy the package makefile to the root/makefile
                     if (options.debug):

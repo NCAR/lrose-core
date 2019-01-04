@@ -7,7 +7,7 @@ import os
 template = """
 require 'formula'
 
-class Lrose < Formula
+class LroseCore < Formula
   homepage 'https://github.com/NCAR/lrose-core'
 
   url '{0}'
@@ -58,7 +58,7 @@ if "check_output" not in dir( subprocess ): # duck punch it in!
     subprocess.check_output = f
 
 def build_lrose_formula(tar_url, tar_name, formula_name):
-    """ build a Homebrew forumula file for lrose """	
+    """ build a Homebrew forumula file for lrose-core """	
     dash = tar_name.find('-')
     period = tar_name.find('.', dash)
     version = tar_name[dash+1:period]

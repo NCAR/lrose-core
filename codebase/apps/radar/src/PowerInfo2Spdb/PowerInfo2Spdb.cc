@@ -169,7 +169,7 @@ int PowerInfo2Spdb::Run ()
   short int port = _params.udp_port;
   my_addr.sin_port = htons(port);
   my_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  int rcb = bind(sock, (struct sockaddr *)&my_addr, sizeof(my_addr));
+  int rcb = ::bind(sock, (struct sockaddr *)&my_addr, sizeof(my_addr));
   if (rcb < 0) {
     cerr << "ERROR - PowerInfo2Spdb::_runUdp()" << endl;
     cerr << "  Cannot bind to port: " << port  << endl;

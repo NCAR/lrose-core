@@ -50,7 +50,7 @@
 
 #include <string>
 #include <vector>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 
 #include <Spdb/Spdb.hh>
 #include <toolsa/DateTime.hh>
@@ -178,7 +178,8 @@ protected:
   bool _debug;
   string _filePath;
   
-  NcFile *_acarsFile;
+  Nc3File *_acarsFile;
+  Nc3Error *_ncfError;
   
   // netCDF file dimension names
 
@@ -215,7 +216,7 @@ protected:
    * Returns a pointer to the byte values on success, 0 on failure.
    */
 
-  NcValues *_getByteFieldVar(const string &field_name) const;
+  Nc3Values *_getByteFieldVar(const string &field_name) const;
   
 
   /*********************************************************************
@@ -225,7 +226,7 @@ protected:
    * Returns a pointer to the character values on success, 0 on failure.
    */
 
-  NcValues *_getCharFieldVar(const string &field_name) const;
+  Nc3Values *_getCharFieldVar(const string &field_name) const;
   
 
   /*********************************************************************
@@ -235,7 +236,7 @@ protected:
    * Returns a pointer to the double values on success, 0 on failure.
    */
 
-  NcValues *_getDoubleFieldVar(const string &field_name,
+  Nc3Values *_getDoubleFieldVar(const string &field_name,
 			       double &missing_data_value) const;
   
 
@@ -246,7 +247,7 @@ protected:
    * Returns a pointer to the float values on success, 0 on failure.
    */
 
-  NcValues *_getFloatFieldVar(const string &field_name,
+  Nc3Values *_getFloatFieldVar(const string &field_name,
 			      float &missing_data_value) const;
   
 
@@ -257,7 +258,7 @@ protected:
    * Returns a pointer to the integer values on success, 0 on failure.
    */
 
-  NcValues *_getIntFieldVar(const string &field_name) const;
+  Nc3Values *_getIntFieldVar(const string &field_name) const;
   
 
   /*********************************************************************
@@ -268,7 +269,7 @@ protected:
    * success, the global DOUBLE_MISSING_DATA_VALUE on failure.
    */
 
-  double _getVarDoubleAtt(const NcVar &variable,
+  double _getVarDoubleAtt(const Nc3Var &variable,
 			  const string &att_name) const;
   
 
@@ -280,7 +281,7 @@ protected:
    * success, the global FLOAT_MISSING_DATA_VALUE on failure.
    */
 
-  float _getVarFloatAtt(const NcVar &variable,
+  float _getVarFloatAtt(const Nc3Var &variable,
 			const string &att_name) const;
   
 

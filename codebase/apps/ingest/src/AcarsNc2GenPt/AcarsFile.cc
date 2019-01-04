@@ -84,6 +84,8 @@ AcarsFile::AcarsFile() :
   _objectInitialized(false),
   _fileInitialized(false)
 {
+  _acarsFile = NULL;
+  _ncfError = new Nc3Error(Nc3Error::silent_nonfatal);
 }
 
   
@@ -93,8 +95,10 @@ AcarsFile::AcarsFile() :
 
 AcarsFile::~AcarsFile()
 {
-  _acarsFile->close();
-  delete _acarsFile;
+  if (_acarsFile) {
+    _acarsFile->close();
+    delete _acarsFile;
+  }
 
   vector< DataField* >::iterator field;
   for (field = _dataFields.begin(); field != _dataFields.end(); ++field)
@@ -171,7 +175,7 @@ bool AcarsFile::initializeFile(const string &acars_file_path)
   
   _filePath = acars_file_path;
   
-  _acarsFile = new NcFile(_filePath.c_str());
+  _acarsFile = new Nc3File(_filePath.c_str());
   
   if (!_acarsFile->is_valid())
   {
@@ -239,11 +243,11 @@ bool AcarsFile::writeAsSpdb(const string &spdb_url,
  * Returns a pointer to the byte values on success, 0 on failure.
  */
 
-NcValues *AcarsFile::_getByteFieldVar(const string &field_name) const
+Nc3Values *AcarsFile::_getByteFieldVar(const string &field_name) const
 {
   static const string method_name = "AcarsFile::_getByteFieldVar()";
 
-  NcVar *field = 0;
+  Nc3Var *field = 0;
 
   if ((field = _acarsFile->get_var(field_name.c_str())) == 0)
   {
@@ -263,7 +267,7 @@ NcValues *AcarsFile::_getByteFieldVar(const string &field_name) const
     return 0;
   }
 
-  if (field->type() != ncByte)
+  if (field->type() != nc3Byte)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Variable not a float variable, as expected" << endl;
@@ -273,7 +277,7 @@ NcValues *AcarsFile::_getByteFieldVar(const string &field_name) const
     return 0;
   }
   
-  NcValues *field_values;
+  Nc3Values *field_values;
   if ((field_values = field->values()) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -294,11 +298,11 @@ NcValues *AcarsFile::_getByteFieldVar(const string &field_name) const
  * Returns a pointer to the character values on success, 0 on failure.
  */
 
-NcValues *AcarsFile::_getCharFieldVar(const string &field_name) const
+Nc3Values *AcarsFile::_getCharFieldVar(const string &field_name) const
 {
   static const string method_name = "AcarsFile::_getCharFieldVar()";
 
-  NcVar *field = 0;
+  Nc3Var *field = 0;
 
   if ((field = _acarsFile->get_var(field_name.c_str())) == 0)
   {
@@ -318,7 +322,7 @@ NcValues *AcarsFile::_getCharFieldVar(const string &field_name) const
     return 0;
   }
 
-  if (field->type() != ncChar)
+  if (field->type() != nc3Char)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Variable not a character variable, as expected" << endl;
@@ -328,7 +332,7 @@ NcValues *AcarsFile::_getCharFieldVar(const string &field_name) const
     return 0;
   }
   
-  NcValues *field_values;
+  Nc3Values *field_values;
   if ((field_values = field->values()) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -349,12 +353,12 @@ NcValues *AcarsFile::_getCharFieldVar(const string &field_name) const
  * Returns a pointer to the double values on success, 0 on failure.
  */
 
-NcValues *AcarsFile::_getDoubleFieldVar(const string &field_name,
+Nc3Values *AcarsFile::_getDoubleFieldVar(const string &field_name,
 					double &missing_data_value) const
 {
   static const string method_name = "AcarsFile::_getDoubleFieldVar()";
 
-  NcVar *field = 0;
+  Nc3Var *field = 0;
 
   if ((field = _acarsFile->get_var(field_name.c_str())) == 0)
   {
@@ -374,7 +378,7 @@ NcValues *AcarsFile::_getDoubleFieldVar(const string &field_name,
     return 0;
   }
 
-  if (field->type() != ncDouble)
+  if (field->type() != nc3Double)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Variable not a double variable, as expected" << endl;
@@ -384,7 +388,7 @@ NcValues *AcarsFile::_getDoubleFieldVar(const string &field_name,
     return 0;
   }
   
-  NcValues *field_values;
+  Nc3Values *field_values;
   if ((field_values = field->values()) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -409,14 +413,14 @@ NcValues *AcarsFile::_getDoubleFieldVar(const string &field_name,
  * Returns a pointer to the float values on success, 0 on failure.
  */
 
-NcValues *AcarsFile::_getFloatFieldVar(const string &field_name,
+Nc3Values *AcarsFile::_getFloatFieldVar(const string &field_name,
 				       float &missing_data_value) const
 {
   static const string method_name = "AcarsFile::_getFloatFieldVar()";
 
   // Get the variable object from the netCDF file
 
-  NcVar *field = 0;
+  Nc3Var *field = 0;
 
   if ((field = _acarsFile->get_var(field_name.c_str())) == 0)
   {
@@ -436,7 +440,7 @@ NcValues *AcarsFile::_getFloatFieldVar(const string &field_name,
     return 0;
   }
 
-  if (field->type() != ncFloat)
+  if (field->type() != nc3Float)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Variable not a float variable, as expected" << endl;
@@ -448,7 +452,7 @@ NcValues *AcarsFile::_getFloatFieldVar(const string &field_name,
   
   // Get the actual variable values from the file
 
-  NcValues *field_values;
+  Nc3Values *field_values;
   if ((field_values = field->values()) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -473,11 +477,11 @@ NcValues *AcarsFile::_getFloatFieldVar(const string &field_name,
  * Returns a pointer to the integer values on success, 0 on failure.
  */
 
-NcValues *AcarsFile::_getIntFieldVar(const string &field_name) const
+Nc3Values *AcarsFile::_getIntFieldVar(const string &field_name) const
 {
   static const string method_name = "AcarsFile::_getIntFieldVar()";
 
-  NcVar *field = 0;
+  Nc3Var *field = 0;
 
   if ((field = _acarsFile->get_var(field_name.c_str())) == 0)
   {
@@ -497,7 +501,7 @@ NcValues *AcarsFile::_getIntFieldVar(const string &field_name) const
     return 0;
   }
 
-  if (field->type() != ncInt)
+  if (field->type() != nc3Int)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Variable not an integer variable, as expected" << endl;
@@ -507,7 +511,7 @@ NcValues *AcarsFile::_getIntFieldVar(const string &field_name) const
     return 0;
   }
   
-  NcValues *field_values;
+  Nc3Values *field_values;
   if ((field_values = field->values()) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -529,12 +533,12 @@ NcValues *AcarsFile::_getIntFieldVar(const string &field_name) const
  * success, the global DOUBLE_MISSING_DATA_VALUE on failure.
  */
 
-double AcarsFile::_getVarDoubleAtt(const NcVar &variable,
+double AcarsFile::_getVarDoubleAtt(const Nc3Var &variable,
 				   const string &att_name) const
 {
   static const string method_name = "AcarsFile::_getVarDoubleAtt()";
   
-  NcAtt *attribute;
+  Nc3Att *attribute;
   
   if ((attribute = variable.get_att(att_name.c_str())) == 0)
   {
@@ -546,7 +550,7 @@ double AcarsFile::_getVarDoubleAtt(const NcVar &variable,
     return DOUBLE_MISSING_DATA_VALUE;
   }
   
-  NcValues *att_values;
+  Nc3Values *att_values;
   
   if ((att_values = attribute->values()) == 0)
   {
@@ -575,12 +579,12 @@ double AcarsFile::_getVarDoubleAtt(const NcVar &variable,
  * success, the global FLOAT_MISSING_DATA_VALUE on failure.
  */
 
-float AcarsFile::_getVarFloatAtt(const NcVar &variable,
+float AcarsFile::_getVarFloatAtt(const Nc3Var &variable,
 				  const string &att_name) const
 {
   static const string method_name = "AcarsFile::_getVarFloatAtt()";
   
-  NcAtt *attribute;
+  Nc3Att *attribute;
   
   if ((attribute = variable.get_att(att_name.c_str())) == 0)
   {
@@ -592,7 +596,7 @@ float AcarsFile::_getVarFloatAtt(const NcVar &variable,
     return FLOAT_MISSING_DATA_VALUE;
   }
   
-  NcValues *att_values;
+  Nc3Values *att_values;
   
   if ((att_values = attribute->values()) == 0)
   {
@@ -628,7 +632,7 @@ bool AcarsFile::_retrieveData(Spdb &spdb,
   
   // First, get the number of records in the file.
 
-  NcDim *num_recs_dim;
+  Nc3Dim *num_recs_dim;
   if ((num_recs_dim = _acarsFile->get_dim(_numRecsDimName.c_str())) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -645,7 +649,7 @@ bool AcarsFile::_retrieveData(Spdb &spdb,
   
   // Now get the number of characters stored for the tail number
 
-  NcDim *tail_len_dim;
+  Nc3Dim *tail_len_dim;
   if ((tail_len_dim = _acarsFile->get_dim(_tailLenDimName.c_str())) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -667,15 +671,15 @@ bool AcarsFile::_retrieveData(Spdb &spdb,
   float altitude_missing_data_value;
   double data_times_missing_data_value;
   
-  NcValues *latitudes = _getFloatFieldVar(_latitudeVarName,
+  Nc3Values *latitudes = _getFloatFieldVar(_latitudeVarName,
 					  latitude_missing_data_value);
-  NcValues *longitudes = _getFloatFieldVar(_longitudeVarName,
+  Nc3Values *longitudes = _getFloatFieldVar(_longitudeVarName,
 					   longitude_missing_data_value);
-  NcValues *altitudes = _getFloatFieldVar(_altitudeVarName,
+  Nc3Values *altitudes = _getFloatFieldVar(_altitudeVarName,
 					  altitude_missing_data_value);
-  NcValues *tail_numbers = _getCharFieldVar(_tailNumberVarName);
-  NcValues *data_sources = _getByteFieldVar(_dataSourceVarName);
-  NcValues *data_times = _getDoubleFieldVar(_dataTimesVarName,
+  Nc3Values *tail_numbers = _getCharFieldVar(_tailNumberVarName);
+  Nc3Values *data_sources = _getByteFieldVar(_dataSourceVarName);
+  Nc3Values *data_times = _getDoubleFieldVar(_dataTimesVarName,
 					    data_times_missing_data_value);
   
   if (latitudes == 0 ||
