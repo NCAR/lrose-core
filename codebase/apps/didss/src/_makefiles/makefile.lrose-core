@@ -1,0 +1,33 @@
+#
+# Recursive make - makes the subdirectory code
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	Dsr2Vol \
+	Dsr2Sweep \
+	File2Dsr \
+	Fmq2Fmq \
+	Fmq2MultMsgFmq \
+	FmqMon \
+	GenPt2Spdb \
+	InputWatcher \
+	Janitor \
+	LdataInformer \
+	LdataWatcher \
+	LdataMultWatcher \
+	LdataWriter \
+	MultMsgFmq2Fmq \
+	RadMon \
+	Scout \
+	Socket2File \
+	TimeCalc \
+	VerifyGrid \
+	fmq_print \
+	ltgSpdb2GenPt \
+	nprtLtg2Spdb
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
