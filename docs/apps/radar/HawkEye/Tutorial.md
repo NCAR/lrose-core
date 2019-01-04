@@ -22,6 +22,7 @@ image
 | Source   | | | |
 | Container (Docker) | | | |
 | Brew | ** menus may not work ** | | |
+|      | click away then back     | | |
 | App | | | |
 
 
