@@ -1,0 +1,39 @@
+#
+# start with an image that contains all the packages needed to 
+# build lrose-core + rpmbuilder
+#
+FROM rpmbuild/centos7
+ 
+# make the spec file available to the container
+#
+ADD . /tmp/rpm_files
+
+RUN yum -y install git
+RUN yum -y install libtool
+
+# create user rpmbuilder
+#RUN useradd -ms /bin/bash rpmbuilder 
+#USER rpmbuilder
+#WORKDIR /home/rpmbuilder
+
+# build hierarchy for rpmbuild:
+RUN cd ~
+RUN mkdir BUILD RPMS SOURCES SPECS SRPMS
+#
+# import the files
+#
+RUN cp /tmp/rpm_files/lrose-core.spec SPECS/lrose-core.spec
+RUN cp /tmp/bj/lrose-core-20180516.src.tgz SOURCES/lrose-core-20180516.src.tgz
+# 
+# RUN cd lrose_core/SOURCES
+# RUN git clone https://github.com/NCAR/lrose-core
+#
+# RUN ./build/create_src_release.py --package=lrose-core
+# RUN mv ~/releases/tmp/lrose-core-20180516.src.tgz ~/SOURCES/.
+# RUN cd ..
+#
+RUN rpmbuild -v -bb --define "debug_package %{nil}" SPECS/lrose-core.spec
+#
+# export the package
+#
+RUN rsync RPMS /tmp/rpm_files/RPMS

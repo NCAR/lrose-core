@@ -1,0 +1,11 @@
+
+Build the container for testing ...
+
+% cd RPM/centos-bin-x11
+% docker build —rm -t "centos:bin-x11" .
+
+
+Test - install the RPM and run sanity tests on RadxPrint, Convert, 2Grid, HawkEye
+
+% xhost +128.117.80.109:0
+% docker run -ti --rm -e DISPLAY=128.117.80.109:0 -v /tmp/.X11-unix:/tmp/.X11-unix:rw centos:bin-x11
