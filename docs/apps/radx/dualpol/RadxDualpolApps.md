@@ -22,11 +22,11 @@ RadxPid reads in the KDP parameter file, and in addition 2 PID-specific files: (
 
 RadxRate reads in all of the above, plus a file specific to the computation of precip rate.
 
-| App                       | KdpParams          | PidParams           | Pid Interest Maps  | RateParams         |
-| -------------             | ------------------ | ------------------- | ------------------ | ------------------ |
-| [RadxKdp](./RadxKdp.md)   | :heavy_check_mark: | :x:                 | :x:                | :x:                |
-| [RadxPid](./RadxPid.md)   | :heavy_check_mark: | :heavy_check_mark:  | :heavy_check_mark: | :x:                |
-| [RadxRate](./RadxRate.md) | :heavy_check_mark: | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+| App                       | Main params file   | Kdp-specific params | Pid-specific params | Pid Interest Maps  | Rate-specific params |
+| -------------             | ------------------ | ------------------- | ------------------  | ------------------ | -------------------- |
+| [RadxKdp](./RadxKdp.md)   | :heavy_check_mark: | :heavy_check_mark:  | :x:                 | :x:                | :x:                  |
+| [RadxPid](./RadxPid.md)   | :heavy_check_mark: | :heavy_check_mark:  | :heavy_check_mark:  | :heavy_check_mark: | :x:                  |
+| [RadxRate](./RadxRate.md) | :heavy_check_mark: | :heavy_check_mark:  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark:   |
 
 ## Example images
 
