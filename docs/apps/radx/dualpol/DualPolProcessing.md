@@ -9,14 +9,14 @@ site near Hays, Kansas during the PECAN field project in 2015.
 ## The measured fields
 
 * DBZ
-<!---
-* VEL
-* WIDTH
---->
 * ZDR
 * RHOHV
 * PHIDP
 * TEMP
+<!---
+* VEL
+* WIDTH
+--->
 
 ### DBZ
 
