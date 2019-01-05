@@ -37,7 +37,6 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-#include <ncType.h>
 #include <dataport/bigend.h>
 #include <toolsa/mem.h>
 #include <toolsa/TaStr.hh>
