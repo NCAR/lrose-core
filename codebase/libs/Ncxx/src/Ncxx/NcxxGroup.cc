@@ -68,7 +68,6 @@
 #include <Ncxx/NcxxFloat.hh>
 #include <Ncxx/NcxxDouble.hh>
 #include <Ncxx/NcxxString.hh>
-#include <ncException.h>
 #include <Ncxx/NcxxCheck.hh>
 using namespace std;
 

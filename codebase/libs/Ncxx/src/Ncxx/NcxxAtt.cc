@@ -52,7 +52,6 @@
 #include <Ncxx/NcxxAtt.hh>
 #include <Ncxx/NcxxGroup.hh>
 #include <Ncxx/NcxxException.hh>
-#include <ncException.h>
 #include <Ncxx/NcxxCheck.hh>
 
 using namespace std;

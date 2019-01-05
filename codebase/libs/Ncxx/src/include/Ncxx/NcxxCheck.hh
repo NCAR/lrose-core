@@ -47,9 +47,10 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include <string>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
 
 #ifndef NcxxCheckFunction
 #define NcxxCheckFunction

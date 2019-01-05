@@ -50,7 +50,6 @@
 
 #include <cstring>
 #include <netcdf.h>
-#include <ncException.h>
 #include <Ncxx/NcxxCheck.hh>
 #include <Ncxx/NcxxException.hh>
 using namespace std;
