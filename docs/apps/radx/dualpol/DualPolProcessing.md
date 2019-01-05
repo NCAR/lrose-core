@@ -1,4 +1,10 @@
-# Example Images for Dual-Polarization Applications
+# Dual-Polarization Processing in LROSE
+
+In this document we illustrate some of the basic operations
+that the Radx apps in LROSE can perform for dual-polarization processing.
+
+In these examples we are using some data from the NCAR S-Pol radar at the
+site near Hays, Kansas during the PECAN field project in 2015.
 
 ## The measured fields are DBZ, VEL, WIDTH, ZDR, RHOHV and PHIDP
 
@@ -12,8 +18,10 @@ RHI
 
 ### VEL
 
+<!---
 PPI 
 ![alt text](./images/ppi_vel.png "PPI VEL")
+--->
 
 RHI 
 ![alt text](./images/rhi_vel.png "RHI VEL")
