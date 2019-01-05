@@ -53,23 +53,6 @@ Run the following ruby script:
   /usr/local/bin/brew update
 ```
 
-### Install required packages, using brew
-
-```
-  brew install pkg-config
-  brew install szip
-  brew install hdf5 --enable-cxx
-  brew install netcdf
-  brew install udunits
-  brew install fftw
-  brew install flex
-  brew install jasper
-  brew install jpeg
-  brew install libpng
-  brew install qt
-```
-<a name="download"/>
-
 ## 2. Download
 
 You need to download the brew formula from the lrose repository.
@@ -87,18 +70,51 @@ Choose from the appropriate distribution.
 
 ## 3. Install
 
+Let us assume you have downloaded the latest core distribution, containing all of the core apps.
+
 ```
   cd ~/Downloads
-  brew install lrose.rb
+  brew install lrose-core.rb
 ```
 
-This will install lrose in:
+While homebrew is building, it creates log files so you can track the progress.
+
+The location of the log files for the various distributions will be:
+
+```
+  ~/Library/Logs/Homebrew/lrose-core
+  ~/Library/Logs/Homebrew/lrose-blaze
+  ~/Library/Logs/Homebrew/lrose-cyclone
+  ~/Library/Logs/Homebrew/radx
+```
+
+You will see the following log files:
+
+```
+  00.options.out
+  01.configure.cc
+  01.configure
+  02.make
+  02.make.cc
+```
+
+You can watch the progress using:
+
+```
+  tail -f 01.configure
+  tail -f 02.make
+```
+
+If the build is successful, lrose will be installed in:
 
 ```
   /usr/local/opt/lrose/include
   /usr/local/opt/lrose/lib
   /usr/local/opt/lrose/bin
 ```
+
+In these directories, links will be created that point to the actual files
+in ```/usr/local/Cellar```.
 
 See also: [Homebrew Notes](./homebrew_notes.md)
 
