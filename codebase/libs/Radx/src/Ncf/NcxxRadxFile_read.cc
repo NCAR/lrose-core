@@ -43,7 +43,6 @@
 #include <Radx/RadxRcalib.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
-#include <ncException.h>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
