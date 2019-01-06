@@ -16,26 +16,26 @@ Quote from [NSF-LROSE](https://nsf-lrose.github.io/howtorun_HawkEye.html)
 ### Linux
 | From ... | Download Location | Install with ... | Start Command |
 |----------|-------------------|------------------|---------------|
-| Source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | `/install/path/bin/HawkEye`|
-| Container (Docker) | | 1st try lrose wrapper script (ask Bruno) `lrose -h`| 
-|                    | | or run it straight away `docker run lrose-container`|
-| RPM | [lrose-core](https://github.com/NCAR/lrose-core) | | |
+| source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| python build script | `/install/path/bin/HawkEye`|
+| container (Docker) | [NSF LROSE](https://nsf-lrose.github.io/software.html)| `docker pull nsflrose/lrose-blaze`| lrose wrapper script (ask Bruno) `lrose -h`| 
+|          | | | or `docker run lrose-blaze <various args>`|
+| RPM | [lrose-core](https://github.com/NCAR/lrose-core) |`rpm -i lrose-blaze-yyyymmdd.x86_64.rpm` | `/usr/local/lrose/bin/HawkEye` |
 
 
 ### MacOS
 | From ... | Download Location | Install with ... | Start Command |
 |----------|-------------------|------------------|---------------|
-| Source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | |
-| Container (Docker) | same as for Linux above | | |
-| Brew |  | `brew install lrose-blaze` | `/usr/local/bin/HawkEye`|
+| source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| python build script | `/install/path/bin/HawkEye`|
+| container (Docker) | same as for Linux above | same as for Linux above| same as for Linux above|
+| brew |  | `brew install lrose-blaze.rb` | `/usr/local/bin/HawkEye`|
 |      |  |                            | ** menus may not work ** |
 |      |  |                            | click away then back |
-| App | [lrose-core](https://github.com/NCAR/lrose-core)| download .dmg file; | click on App |
+| App | [lrose-core](https://github.com/NCAR/lrose-core)| download .dmg file | click on App |
 |     |                                                 | drag icon to Applications folder | |
 
 
 ### Windows
-| As ... |
+| as ... |
 |----------|
 |[Linux subsystem](https://github.com/NCAR/lrose-core/issues/61) |
 
@@ -148,7 +148,16 @@ executable.
 * undo editing
 * A few screen shots
 
-### Demo with Data
+### Examine as Spreadsheet
+![Examine as Spreadsheet](./images/HawkEye_SOLOII_examine.png "Examine as Spreadsheet")
+
+### Color Palette Editor
+![alt_text](./images/HawkEye_SOLOII_color_palette.png "Color Palette Editor")
+
+### Predefined Color Scales
+![alt_text](./images/HawkEye_SOLOII_sample_color_palettes.png "Predefined Color Scales")
+
+## Demo with Data
 ~/Workshop2019
 start_HawkEye.test  
 
