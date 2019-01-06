@@ -32,45 +32,19 @@
 #
 ###########################################################################
 
-# NOTE ON FORAY library
-#
-# Install the foray includes in $(RAP_INC_DIR)/foray
-# Install the foray .a files in $(RAP_LIB_DIR)/foray
-
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = Dsr2Sweep
 
-# Use the following for linking against lib forayRal, which is
-# built using make, with HDF5 support
-
 LOC_INCLUDES = $(NETCDF4_INCS)
-LOC_CPPC_CFLAGS =
+
+LOC_LIBS = -lFmq -lMdv -lRadx -lNcxx -ldsserver -ldidss \
+	-lrapformats -leuclid -ltoolsa -ltdrp \
+	-ldataport -lforayRal $(NETCDF4_LIBS) -lbz2 -lz
+
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+
 LOC_CFLAGS =
-
-LOC_LIBS = \
-	-lFmq -ldsserver -lrapformats -ldidss \
-	-ltoolsa -ldataport -ltdrp -lforayRal \
-	-lnetcdf -lnetcdf_c++ -lhdf5_hl -lhdf5 \
-	-ludunits2 -lexpat -lbz2 -lz
-
-# Use the following for linking against lib forayRal, which is
-# built using make, without HDF5 support
-
-#LOC_INCLUDES = $(NETCDF_INCS)
-#LOC_CPPC_CFLAGS =
-#LOC_LDFLAGS = $(NETCDF_LDFLAGS)
-#LOC_CFLAGS =
-
-#LOC_LIBS = -lFmq -ldsserver -lrapformats -ldidss -ltoolsa -lz -ldataport \
-#		-ltdrp -lforayRal -lnetcdf -lnetcdf_c++
-
-# Use the following for linking against Foray built using scons
-#LOC_LIBS = -lFmq -ldsserver -lrapformats -ldidss \
-#	-ltoolsa -lz -ldataport -ltdrp \
-#	-ldorade -lncradar -lrayfile -lforayutil \
-#	-lnetcdf -lnetcdf_c++ -lpthread
 
 HDRS = \
 	$(PARAMS_HH) \
