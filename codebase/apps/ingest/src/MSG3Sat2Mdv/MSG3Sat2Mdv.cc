@@ -6,11 +6,10 @@
 #include "sunae.h"
 #include <cmath>
 #include <math.h>
-#include <netcdf>
+#include <Ncxx/Ncxx.hh>
+#include <Ncxx/NcxxFile.hh>
 
 using namespace std;
-using namespace netCDF;
-using namespace netCDF::exceptions;
 
 const float MSG3Sat2Mdv::GEO_MISSING = -999.0;
 const float MSG3Sat2Mdv::SAT_MISSING = -9999.9;
@@ -264,16 +263,16 @@ int MSG3Sat2Mdv::_netcdf2MdvFields(char *filename)
   //
   // Open the file. 
   // 
-  NcFile ncFile(filename, NcFile::read);
+  NcxxFile ncFile(filename, NcxxFile::read);
 
   //
   // Get dimensions
   //
-  NcDim xDim = ncFile.getDim(_params.xdim);
+  NcxxDim xDim = ncFile.getDim(_params.xdim);
 
   _nx = (int) xDim.getSize();
 
-  NcDim yDim = ncFile.getDim(_params.ydim);
+  NcxxDim yDim = ncFile.getDim(_params.ydim);
 
   _ny = (int) yDim.getSize();
   
@@ -301,7 +300,7 @@ int MSG3Sat2Mdv::_netcdf2MdvFields(char *filename)
   //
   // Get latitude data
   //
-  NcVar latData =  ncFile.getVar(_params.lat_fieldname);
+  NcxxVar latData =  ncFile.getVar(_params.lat_fieldname);
 
   if(latData.isNull()) 
   {
@@ -312,12 +311,12 @@ int MSG3Sat2Mdv::_netcdf2MdvFields(char *filename)
 
   float *latitudes = new float[_nx*_ny];
   
-  latData.getVar(latitudes);
+  latData.getVal(latitudes);
 
   //
   // Get longitude data
   //
-  NcVar lonData =  ncFile.getVar(_params.lon_fieldname);
+  NcxxVar lonData =  ncFile.getVar(_params.lon_fieldname);
  
   if (lonData.isNull())
   {
@@ -328,11 +327,11 @@ int MSG3Sat2Mdv::_netcdf2MdvFields(char *filename)
 
   float *longitudes = new float[_nx*_ny];
 
-  lonData.getVar(longitudes);
+  lonData.getVal(longitudes);
     
   for (int k = 0; k < _params.fields_n; k++)
   {
-    NcVar satData = ncFile.getVar(_params._fields[k].ncfFieldName);
+    NcxxVar satData = ncFile.getVar(_params._fields[k].ncfFieldName);
   
     if (satData.isNull())
     {
@@ -344,12 +343,12 @@ int MSG3Sat2Mdv::_netcdf2MdvFields(char *filename)
 
     short *satShortVals = new short[_nx*_ny];
    
-    satData.getVar(satShortVals);
+    satData.getVal(satShortVals);
     
     //
     //  Get scale and bias
     //
-    NcVarAtt scaleAtt = satData.getAtt("scale_factor");
+    NcxxVarAtt scaleAtt = satData.getAtt("scale_factor");
     
     if (scaleAtt.isNull())
     {
@@ -363,7 +362,7 @@ int MSG3Sat2Mdv::_netcdf2MdvFields(char *filename)
     scaleAtt.getValues(&satFieldScale);
   
   
-    NcVarAtt biasAtt = satData.getAtt("add_offset");
+    NcxxVarAtt biasAtt = satData.getAtt("add_offset");
     
     if (biasAtt.isNull())
     {
