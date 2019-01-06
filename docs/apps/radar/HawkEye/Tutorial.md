@@ -16,18 +16,18 @@ Quote from [NSF-LROSE](https://nsf-lrose.github.io/howtorun_HawkEye.html)
 ### Linux
 | From ... | Download Location | Install with ... | Start Command |
 |----------|-------------------|------------------|---------------|
-| Source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | `/install/path/bin/HawkEye`|
-| Container (Docker) | | 1st try lrose wrapper script (ask Bruno) `lrose -h`| 
-|                    | | or run it straight away `docker run lrose-container`|
-| RPM | [lrose-core](https://github.com/NCAR/lrose-core) | | |
+| source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | `/install/path/bin/HawkEye`|
+| container (Docker) | [NSF LROSE](https://nsf-lrose.github.io/software.html)| 1st try lrose wrapper script (ask Bruno) `lrose -h`| 
+|                    | `docker pull nsflrose/lrose-blaze`| then try `docker run lrose-blaze <various args>`|
+| RPM | [lrose-core](https://github.com/NCAR/lrose-core) |`rpm -i lrose-blaze-yyyymmdd.x86_64.rpm` | `/usr/local/lrose/bin/HawkEye` |
 
 
 ### MacOS
 | From ... | Download Location | Install with ... | Start Command |
 |----------|-------------------|------------------|---------------|
-| Source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | |
-| Container (Docker) | same as for Linux above | | |
-| Brew |  | `brew install lrose-blaze` | `/usr/local/bin/HawkEye`|
+| source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | |
+| container (Docker) | same as for Linux above | | |
+| brew |  | `brew install lrose-blaze` | `/usr/local/bin/HawkEye`|
 |      |  |                            | ** menus may not work ** |
 |      |  |                            | click away then back |
 | App | [lrose-core](https://github.com/NCAR/lrose-core)| download .dmg file; | click on App |
@@ -35,7 +35,7 @@ Quote from [NSF-LROSE](https://nsf-lrose.github.io/howtorun_HawkEye.html)
 
 
 ### Windows
-| As ... |
+| as ... |
 |----------|
 |[Linux subsystem](https://github.com/NCAR/lrose-core/issues/61) |
 
