@@ -19,8 +19,8 @@ Quote from [NSF-LROSE](https://nsf-lrose.github.io/howtorun_HawkEye.html)
 | source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| python build script | `/install/path/bin/HawkEye`|
 | container (Docker) | [NSF LROSE](https://nsf-lrose.github.io/software.html)| `docker pull nsflrose/lrose-blaze`| lrose wrapper script (ask Bruno) `lrose -h`| 
 |          | | | or `docker run lrose-blaze <various args>`|
-| RPM | [lrose-core](https://github.com/NCAR/lrose-core) |`rpm -i lrose-blaze-yyyymmdd.x86_64.rpm` | `/usr/local/lrose/bin/HawkEye` |
-
+| RPM | [lrose-alpha](https://github.com/NCAR/lrose-alpha/releases)|`rpm -i lrose-blaze-yyyymmdd.x86_64.rpm` | `/usr/local/lrose/bin/HawkEye` |
+| (alpha release)| `lrose-blaze-20180629.x86_64.rpm` | | |
 
 ### MacOS
 | From ... | Download Location | Install with ... | Start Command |
