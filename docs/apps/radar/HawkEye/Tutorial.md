@@ -17,20 +17,20 @@ Quote from [NSF-LROSE](https://nsf-lrose.github.io/howtorun_HawkEye.html)
 | From ... | Download Location | Install with ... | Start Command |
 |----------|-------------------|------------------|---------------|
 | source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | `/install/path/bin/HawkEye`|
-| container (Docker) | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | lrose wrapper script (ask Bruno) `lrose -h`| 
-|          | | `docker pull nsflrose/lrose-blaze`| or `docker run lrose-blaze <various args>`|
+| container (Docker) | [NSF LROSE](https://nsf-lrose.github.io/software.html)| `docker pull nsflrose/lrose-blaze`| lrose wrapper script (ask Bruno) `lrose -h`| 
+|          | | | or `docker run lrose-blaze <various args>`|
 | RPM | [lrose-core](https://github.com/NCAR/lrose-core) |`rpm -i lrose-blaze-yyyymmdd.x86_64.rpm` | `/usr/local/lrose/bin/HawkEye` |
 
 
 ### MacOS
 | From ... | Download Location | Install with ... | Start Command |
 |----------|-------------------|------------------|---------------|
-| source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | |
+| source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | `/install/path/bin/HawkEye`|
 | container (Docker) | same as for Linux above | | |
-| brew |  | `brew install lrose-blaze` | `/usr/local/bin/HawkEye`|
+| brew |  | `brew install lrose-blaze.rb` | `/usr/local/bin/HawkEye`|
 |      |  |                            | ** menus may not work ** |
 |      |  |                            | click away then back |
-| App | [lrose-core](https://github.com/NCAR/lrose-core)| download .dmg file; | click on App |
+| App | [lrose-core](https://github.com/NCAR/lrose-core)| download .dmg file | click on App |
 |     |                                                 | drag icon to Applications folder | |
 
 
@@ -148,16 +148,16 @@ executable.
 * undo editing
 * A few screen shots
 
-# Examine as Spreadsheet
+### Examine as Spreadsheet
 ![Examine as Spreadsheet](./images/HawkEye_SOLOII_examine.png "Examine as Spreadsheet")
 
-# Color Palette Editor
+### Color Palette Editor
 ![alt_text](./images/HawkEye_SOLOII_color_palette.png "Color Palette Editor")
 
-# Predefined Color Scales
+### Predefined Color Scales
 ![alt_text](./images/HawkEye_SOLOII_sample_color_palettes.png "Predefined Color Scales")
 
-### Demo with Data
+## Demo with Data
 ~/Workshop2019
 start_HawkEye.test  
 
