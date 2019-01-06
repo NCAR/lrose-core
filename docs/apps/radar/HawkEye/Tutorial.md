@@ -19,7 +19,7 @@ Quote from [NSF-LROSE](https://nsf-lrose.github.io/howtorun_HawkEye.html)
 | source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| python build script | `/install/path/bin/HawkEye`|
 | container (Docker) | [NSF LROSE](https://nsf-lrose.github.io/software.html)| `docker pull nsflrose/lrose-blaze`| lrose wrapper script (ask Bruno) `lrose -h`| 
 |          | | | or `docker run lrose-blaze <various args>`|
-| RPM | [lrose-core](https://github.com/NCAR/lrose-core) |`rpm -i lrose-blaze-yyyymmdd.x86_64.rpm` | `/usr/local/lrose/bin/HawkEye` |
+| RPM | (test)[lrose-alpha](https://github.com/NCAR/lrose-alpha/releases)`lrose-blaze-20180629.x86_64.rpm`|`rpm -i lrose-blaze-yyyymmdd.x86_64.rpm` | `/usr/local/lrose/bin/HawkEye` |
 
 
 ### MacOS
@@ -30,8 +30,9 @@ Quote from [NSF-LROSE](https://nsf-lrose.github.io/howtorun_HawkEye.html)
 | brew |  | `brew install lrose-blaze.rb` | `/usr/local/bin/HawkEye`|
 |      |  |                            | ** menus may not work ** |
 |      |  |                            | click away then back |
-| App | [lrose-core](https://github.com/NCAR/lrose-core)| download .dmg file | click on App |
-|     |                                                 | drag icon to Applications folder | |
+| App | (test)[lrose-release-test](https://github.com/NCAR/lrose-release-test/releases)`HawkEye_Blaze.dmg`| download .dmg file | click on App |
+| |                                              | drag icon to Applications folder | |
+
 
 
 ### Windows
