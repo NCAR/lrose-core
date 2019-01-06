@@ -42,8 +42,7 @@ LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_LIBS = \
 	-lFmq -ldsserver -lrapformats -ldidss \
 	-lRadx -ltoolsa -ldataport -ltdrp \
-	-lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 \
-	-ludunits2 -lbz2 -lz
+	$(NETCDF4_LIBS) -lbz2 -lz
 
 HDRS = \
 	$(PARAMS_HH)

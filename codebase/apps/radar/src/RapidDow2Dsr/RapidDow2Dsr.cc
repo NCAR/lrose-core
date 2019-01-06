@@ -524,8 +524,8 @@ int RapidDow2Dsr::_writeParams()
     }
   }
 
-  if (_vol.getCalibs().size() > 0) {
-    rparams.radarConstant = _vol.getCalibs()[0]->getRadarConstantH();
+  if (_vol.getRcalibs().size() > 0) {
+    rparams.radarConstant = _vol.getRcalibs()[0]->getRadarConstantH();
   }
 
   rparams.altitude = _vol.getAltitudeKm();
@@ -558,8 +558,8 @@ int RapidDow2Dsr::_writeParams()
     rparams.unambigVelocity = ray.getNyquistMps();
   }
 
-  if (_vol.getCalibs().size() > 0) {
-    const RadxRcalib &cal = *_vol.getCalibs()[0];
+  if (_vol.getRcalibs().size() > 0) {
+    const RadxRcalib &cal = *_vol.getRcalibs()[0];
     rparams.xmitPeakPower = pow(10.0, cal.getXmitPowerDbmH() / 10.0) / 1000.0;
     rparams.receiverGain = cal.getReceiverGainDbHc();
     rparams.receiverMds = cal.getNoiseDbmHc() - rparams.receiverGain;
@@ -632,7 +632,7 @@ int RapidDow2Dsr::_writeCalibration()
   
 {
 
-  if (_vol.getCalibs().size() < 1) {
+  if (_vol.getRcalibs().size() < 1) {
     // no cal data
     return 0;
   }
@@ -641,7 +641,7 @@ int RapidDow2Dsr::_writeCalibration()
 
   DsRadarMsg msg;
   DsRadarCalib &calOut = msg.getRadarCalib();
-  const RadxRcalib &calIn = *_vol.getCalibs()[0];
+  const RadxRcalib &calIn = *_vol.getRcalibs()[0];
 
   calOut.setCalibTime(calIn.getCalibTime());
 
