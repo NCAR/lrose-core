@@ -12,22 +12,26 @@ Quote from [NSF-LROSE](https://nsf-lrose.github.io/howtorun_HawkEye.html)
 ![alt_text](./images/BSCAN_Display.png)
 
 ## How to install HawkEye
+
 ### Linux
 | From ... | Download Location | Install with ... | Start Command |
 |----------|-------------------|------------------|---------------|
-| Source   | | | |
-| Container (Docker) | | | |
-| RPM | | | |
+| Source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | `/install/path/bin/HawkEye`|
+| Container (Docker) | | 1st try lrose wrapper script (ask Bruno) `lrose -h`| 
+|                    | | or run it straight away `docker run lrose-container`|
+| RPM | [lrose-core](https://github.com/NCAR/lrose-core) | | |
 
 
 ### MacOS
 | From ... | Download Location | Install with ... | Start Command |
 |----------|-------------------|------------------|---------------|
-| Source   | | | |
-| Container (Docker) | | | |
-| Brew | ** menus may not work ** | | |
-|      | click away then back     | | |
-| App | | | |
+| Source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | |
+| Container (Docker) | same as for Linux above | | |
+| Brew |  | `brew install lrose-blaze` | `/usr/local/bin/HawkEye`|
+|      |  |                            | ** menus may not work ** |
+|      |  |                            | click away then back |
+| App | [lrose-core](https://github.com/NCAR/lrose-core)| download .dmg file; | click on App |
+|     |                                                 | drag icon to Applications folder | |
 
 
 ### Windows
