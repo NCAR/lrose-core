@@ -49,8 +49,7 @@
 
 #include <toolsa/os_config.h>
 
-//#include <netcdf/netcdfcpp.h>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3File.hh>
 #include <rapformats/station_reports.h>
 #include <rapmath/math_macros.h>
 #include <Spdb/DsSpdb.hh>
@@ -123,7 +122,7 @@ ihopNcarSfcCdf2Spdb::ihopNcarSfcCdf2Spdb(int argc, char **argv):
   // Get TDRP parameters.
 
   _params = new Params();
-  char *params_path = "unknown";
+  char *params_path = (char *) "unknown";
   
   if (_params->loadFromArgs(argc, argv,
 			    _args->override.list,
@@ -307,7 +306,7 @@ bool ihopNcarSfcCdf2Spdb::_processData(const string& file_name)
 
   //create a netCDF file object
 
-  NcFile netCDFfile(file_name.c_str());
+  Nc3File netCDFfile(file_name.c_str());
 
   //check to ensure the file is valid
   
@@ -434,7 +433,7 @@ bool ihopNcarSfcCdf2Spdb::_processData(const string& file_name)
 
   // will use the number of time offsets as the number of data readings in the file
 
-  NcVar *offsetVar = netCDFfile.get_var(_params->timeOffset);
+  Nc3Var *offsetVar = netCDFfile.get_var(_params->timeOffset);
   int numRecs = offsetVar->num_vals();
 
   for (int i = 0; i < numRecs; ++i)

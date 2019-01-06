@@ -52,7 +52,7 @@
 
 //#include <netcdf/netcdf.hh>
 
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include "Converter.hh"
 
 using namespace std;
@@ -111,7 +111,7 @@ class InputVariable
 
 public:
 
-  bool init(const NcFile &fileObject);
+  bool init(const Nc3File &fileObject);
   double getValue(const int recordNumber);
 
 protected:
@@ -122,7 +122,7 @@ protected:
   double _totalNumValues;
   string _variableName;
   string _missingValueAttName;
-  NcVar *_ncVarPtr;
+  Nc3Var *_ncVarPtr;
   Converter *_converter;
 
 private:

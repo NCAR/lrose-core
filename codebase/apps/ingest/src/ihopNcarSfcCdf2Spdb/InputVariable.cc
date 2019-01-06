@@ -82,7 +82,7 @@ InputVariable::~InputVariable(void)
  * init() - initialize the InputVariable object
  */
 
-bool InputVariable::init(const NcFile &fileObject)
+bool InputVariable::init(const Nc3File &fileObject)
 {
   if(_debug)
     cerr << "InputVariable::init(): Initializing variable: " 

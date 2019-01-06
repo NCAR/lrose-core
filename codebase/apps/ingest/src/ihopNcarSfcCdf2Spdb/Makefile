@@ -38,16 +38,11 @@ TARGET_FILE = ihopNcarSfcCdf2Spdb
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lnetcdf_c++ -lnetcdf -lSpdb -ldsserver \
-	-ldidss -lrapformats -leuclid -ltoolsa \
-	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
-	-lz -lm
+LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
+	-lphysics -ltoolsa -ldataport -ltdrp \
+	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
-
-LOC_CFLAGS =
-
-MODULE_TYPE = progcpp
 
 HDRS = \
 	Params.hh \
@@ -63,20 +58,22 @@ CPPC_SRCS = \
 	InputVariable.cc
 
 #
+# tdrp macros
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+
+#
 # standard targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_targets
+include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
 
 #
-# tdrp
+# tdrp targets
 #
 
-Params.cc: paramdef.$(TARGET_FILE)
-	tdrp_gen -f paramdef.$(TARGET_FILE) -c++ -prog $(TARGET_FILE)
-
-clean_tdrp:
-	$(RM) Params.hh Params.cc
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 
 #
 # local targets
