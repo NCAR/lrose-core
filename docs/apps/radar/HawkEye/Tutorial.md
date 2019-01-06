@@ -17,8 +17,8 @@ Quote from [NSF-LROSE](https://nsf-lrose.github.io/howtorun_HawkEye.html)
 | From ... | Download Location | Install with ... | Start Command |
 |----------|-------------------|------------------|---------------|
 | source   | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | `/install/path/bin/HawkEye`|
-| container (Docker) | [NSF LROSE](https://nsf-lrose.github.io/software.html)| 1st try lrose wrapper script (ask Bruno) `lrose -h`| 
-|                    | `docker pull nsflrose/lrose-blaze`| then try `docker run lrose-blaze <various args>`|
+| container (Docker) | [NSF LROSE](https://nsf-lrose.github.io/software.html)| | lrose wrapper script (ask Bruno) `lrose -h`| 
+|          | | `docker pull nsflrose/lrose-blaze`| or `docker run lrose-blaze <various args>`|
 | RPM | [lrose-core](https://github.com/NCAR/lrose-core) |`rpm -i lrose-blaze-yyyymmdd.x86_64.rpm` | `/usr/local/lrose/bin/HawkEye` |
 
 
@@ -147,6 +147,15 @@ executable.
 * Merge SOLOII into HawkEye
 * undo editing
 * A few screen shots
+
+# Examine as Spreadsheet
+![Examine as Spreadsheet](./images/HawkEye_SOLOII_examine.png "Examine as Spreadsheet")
+
+# Color Palette Editor
+![alt_text](./images/HawkEye_SOLOII_color_palette.png "Color Palette Editor")
+
+# Predefined Color Scales
+![alt_text](./images/HawkEye_SOLOII_sample_color_palettes.png "Predefined Color Scales")
 
 ### Demo with Data
 ~/Workshop2019
