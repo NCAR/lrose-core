@@ -37,12 +37,34 @@ Quote from [NSF-LROSE](https://nsf-lrose.github.io/howtorun_HawkEye.html)
 
 
 ## How to use HawkEye
+Generally, just start HawkEye via the command line or click the App. 
+
+```
+HawkEye
+HawkEye -h
+HawkEye -f test_data/cfradial/kddc/20150626/cfrad.20150626_025610.151_to_20150626_030145.891_KDDC_v270_Surveillance_SUR.nc
+HawkEye -p field_project.HawkEye.params
+```
+
+Then, you can play with the ...
+1. parameter file
+2. color scales
+3. directory structure
+
 ### The parameter file
+
+* Many parameters available to customize the display
+* Many parameters can also be set on the command line
+
 #### How to generate one
+```
+HawkEye --print_params 
+HawkEye --print_params > field_project.HawkEye.params
+```
 #### Where is a default one?
 #### The Top 10 Parameters
 
-These are my favorites, the parameters I check and change to get running.
+These are my favorites, the parameters I check and change to get things running.
 1. archive vs. realtime mode
 ```
 begin_in_archive_mode = TRUE; or FALSE;
@@ -58,37 +80,39 @@ fields = {
         shortcut = “1”
 };
 ```
-3. start/end date and timeA
+3. start date and time
 ```
 archive_start_time = “1970 01 01 00 00 00”;
+```
+4. some kind of end time 
+```
 archive_stop_time = “1970 01 01 00 00 00”;
 archive_time_span_secs = 3600;
 ```
-4. color scales
+5. color scales
 ```
 color_scale_dir = “../share/color_scales”;
 ```
-5. data source ** Note: There is an expected directory structure for the data files
+6. data source ** Note: There is an expected directory structure for the data files
 ```
 archive_data_url = “/data/cfradial/kddc”;
 ```
-6. display mode (POLAR or BSCAN)
+7. display mode (POLAR or BSCAN)
 ```
 display_mode = POLAR_DISPLAY;
 ```
-7. saving images to file
+8. saving images to file
 ```
 images_output_dir = “/tmp/images/HawkEye”;
 ```
-8. image file format (png, jpg, gif)
+9. image file format (png, jpg, gif)
 ```
 images_file_name_extension = “png”;
 ```
-9. debug mode
+10. debug mode
 ```
 debug = DEBUG_NORM;
 ```
-10. window height and width
 
 ### The Color Scales
 The color scales are expected to be in a particular location. However, there are some internal, default color scales:
@@ -117,7 +141,7 @@ executable.
 
 * Open Params File menu option
 * Merge SOLOII into HawkEye
-* UNDO 
+* undo editing
 * A few screen shots
 
 ### Demo with Data
