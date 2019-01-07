@@ -35,22 +35,16 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = Mdv2NetCDF
 
-LOC_INCLUDES = $(NETCDF4_INCS) -I/usr/local/udunits2/include
+LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -leuclid \
 	-lSpdb -ldsserver -ldidss -lrapformats \
 	-ltoolsa -ldataport -lRadx -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
-LOC_LDFLAGS = $(NETCDF4_LDFLAGS) -L/usr/local/udunits2/lib
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_CPPC_CFLAGS =
-
-# Needs the following libraries
-# netCDF4 v4.1 or later
-# HDF5 v1.8.1 or later
-# udunits v2.0.0 or later
-
 
 HDRS = \
 	$(PARAMS_HH) \

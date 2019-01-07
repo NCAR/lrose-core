@@ -46,12 +46,6 @@ LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_CPPC_CFLAGS =
 
-# Needs the following libraries
-# netCDF4 v4.1 or later
-# HDF5 v1.8.1 or later
-# udunits v2.0.0 or later
-
-
 HDRS = \
 	$(PARAMS_HH) \
 	MdvPull.hh \
