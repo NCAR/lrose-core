@@ -178,7 +178,7 @@ SZIP_LIBS=$(MY_SZIP_LIBS) -lsz
 UDUNITS_INCS=$(MY_UDUNITS_INCS) -I/opt/udunits2/include -I/usr/local/udunits2/include -I/usr/local/include
 UDUNITS_LDFLAGS=$(MY_UDUNITS_LDFLAGS) -Wl,-rpath,/usr/local/udunits2/lib -L/opt/udunits2/lib -L/usr/local/udunits2/lib
 
-HDF5_INCLUDES =$(MY_HDF5_INCS) -I/opt/hdf5/include -I/usr/local/hdf5/include $(SZIP_INCLUDES) $(ZLIB_INCLUDES)
+HDF5_INCLUDES =$(MY_HDF5_INCS) -I/opt/hdf5/include -I/usr/local/hdf5/include -I/usr/include/hdf5/serial $(SZIP_INCLUDES) $(ZLIB_INCLUDES)
 HDF5_LDFLAGS =$(MY_HDF5_LDFLAGS) -Wl,-rpath,/usr/local/hdf5/lib -L/opt/hdf5/lib -L/usr/local/hdf5/lib $(SZIP_LDFLAGS) $(ZLIB_LDFLAGS)
 HDF5_LIBS = $(MY_HDF5_LIBS) -lhdf5_cpp -lhdf5 -lhdf5_hl $(SZIP_LIBS) $(ZLIB_LIBS)
 
