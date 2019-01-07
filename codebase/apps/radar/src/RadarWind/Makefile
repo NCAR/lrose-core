@@ -29,7 +29,7 @@ SRC = $(shell ls *.hh *.cc)
 INCDIRB=/d1/steves/ftp/geographicLib/tdi/include
 LIBDIRB=/d1/steves/ftp/geographicLib/tdi/lib
 
-INCDIRC=/d1/steves/cvs/include
+INCDIRC=/d1/steves/cvs/includeg
 LIBDIRC=/d1/steves/cvs/lib
 
 INCDIRD=/usr/local/netcdf4/include
@@ -48,7 +48,7 @@ RadarWind: ${SRC}
 	  -L${LIBDIRB} -lGeographic \
 	  -L${LIBDIRE} -lkd -lRadx \
 	  -L/usr/local/netcdf4/lib  \
-	  -lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 -lz -ludunits2
+	  -lnetcdf -lhdf5_hl -lhdf5 -lz
 
 
 # Test tdi/RadarWind.cc
@@ -60,7 +60,7 @@ RadarWindi: tdi/RadarWind.cc
 	  -L${LIBDIRB} -lGeographic \
 	  -L${LIBDIRE} -lkd -lRadx \
 	  -L/usr/local/netcdf4/lib  \
-	  -lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 -lz -ludunits2
+	  -lnetcdf -lhdf5_hl -lhdf5 -lz
 
 
 
@@ -75,7 +75,7 @@ Tradx: ${SRC}
 	  -L/d1/steves/cvs/lib -lRadx \
 	  -L${LIBDIRB} -lGeographic \
 	  -L/usr/local/netcdf4/lib  \
-	  -lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 -lz -ludunits2
+	  -lnetcdf -lhdf5_hl -lhdf5 -lz
 
 
 tradx: Tradx
@@ -114,7 +114,7 @@ brodzik:
 olda:
 	g++ -g -c -I${INCDIRA} -I${INCDIRB} RadarWind.cc
 
-	g++ -g -o RadarWind RadarWind.o -L${LIBDIRA} -L${LIBDIRB} -lRadx -ltdrp -lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 -lz -ludunits2 -lGeographic
+	g++ -g -o RadarWind RadarWind.o -L${LIBDIRA} -L${LIBDIRB} -lRadx -ltdrp -lnetcdf -lhdf5_hl -lhdf5 -lz -lGeographic
 
 	LD_LIBRARY_PATH=${LIBDIRB} ./RadarWind \
 	  -inDir tda \
@@ -128,7 +128,7 @@ oldb:
 	  -L${LIBDIRB} -lGeographic \
 	  -L/rap/dev/lib  -lRadx \
 	  -L/usr/local/netcdf4/lib  \
-	  -lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 -lz -ludunits2
+	  -lnetcdf -lhdf5_hl -lhdf5 -lz
 
 
 
@@ -138,7 +138,7 @@ testnca: ${SRC}
 	g++ -g -o testnca testnca.o \
 	  -L/d1/steves/cvs/lib -lRadx \
 	  -L/usr/local/netcdf4/lib  \
-	  -lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 -lz -ludunits2
+	  -lnetcdf -lhdf5_hl -lhdf5 -lz
 
 
 
