@@ -147,7 +147,10 @@ sudo apt-get install -y  \
     gcc g++ gfortran libfl-dev \
     automake make libtool pkg-config libexpat1-dev python
 
-sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake /usr/bin/qmake-qt5
+cd /usr/bin
+ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake
+ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
+
 ```
 
 ### Required LINUX packages for the CIDD build
