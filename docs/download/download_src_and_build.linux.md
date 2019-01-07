@@ -44,7 +44,7 @@ On Debian-based hosts run the following (as root or sudo):
 sudo apt-get update 
 
 sudo apt-get install -y  \
-    libbz2-dev libx11-dev libpng12-dev libfftw3-dev \
+    libbz2-dev libx11-dev libpng-dev libfftw3-dev \
     libjasper-dev qtbase5-dev git \
     gcc g++ gfortran libfl-dev \
     automake make libtool pkg-config libexpat1-dev python
