@@ -29,20 +29,16 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = mrms_to_CFncdf
 
-LOC_INCLUDES = $(NETCDF_INCS)
+LOC_INCLUDES = $(NETCDF4_INCS)
 
-#
-#Temporarily pointing to explicit library versions until datapath3 
-# has it default libraries re-established to gcc rather than pgi
-# Once gcc are the default libs, the version specific LDFLAGS can be replace with the generic LOC_LDFLAGS
-#
-#LOC_LDFLAGS = $(NETCDF_LDFLAGS)
-LOC_LDFLAGS = -L/opt/netcdf-4.1.1-gcc/lib -L/opt/hdf5-1.8.5-gcc/lib -L/opt/udunits/lib -L/opt/szip/lib
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -leuclid \
+	-lSpdb -ldsserver -ldidss -lrapformats \
+	-ltoolsa -ldataport -lRadx -ltdrp \
+	$(NETCDF4_LIBS) -lbz2 -lz
 
-LOC_LIBS = \
-	$(NETCDF_LIB_LIST) -lz -lm
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
-SYS_CFLAGS = -Wall -O3 -DNETCDF_4_OUT
+LOC_CPPC_CFLAGS =
 
 HDRS = \
 	func_prototype.h \
