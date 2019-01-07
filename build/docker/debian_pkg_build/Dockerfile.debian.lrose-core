@@ -11,18 +11,15 @@ RUN apt-get update && apt-get install -y  \
     libjasper-dev qtbase5-dev git \
     gcc g++ gfortran libfl-dev \
     automake make libtool pkg-config libexpat1-dev python \
-    cmake libgeographic-dev libeigen3-dev libzip-dev 
+    cmake libgeographic-dev libeigen3-dev libzip-dev \
+    libhdf5-dev libhdf5-cpp-11 libnetcdf-dev
  
 # create link for qtmake
 
 WORKDIR /tmp
 
+#RUN  cd /usr/bin; ln -s qtchooser qmake-qt5
 RUN ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake /usr/bin/qmake-qt5
-
-#RUN \
- #  cd /usr/bin; \
- # ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake; \
- # ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
 
 # get lrose-core
     
@@ -46,18 +43,24 @@ RUN ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake /usr/bin/qmake-qt5
 # cd /usr/local/src/lrose-core; \
 #  ./codebase/make_bin/install_package_makefiles.py --package lrose-core --debug
 
+# build tdrp_gen
+
+RUN \
+  cd /usr/local/src/lrose-core/codebase/libs/tdrp; /bin/make opt install; \
+  cd /usr/local/src/lrose-core/codebase/apps/tdrp/src/tdrp_gen; make opt install
+
 # build libraries
 
-#RUN \
-# cd /usr/local/src/lrose-core/codebase/libs; /bin/make -j 8 install_include; \
-#  cd /usr/local/src/lrose-core/codebase/libs; /bin/make -j 8 opt; \
-#  cd /usr/local/src/lrose-core/codebase/libs; /bin/make -j 8 install
+RUN \
+  cd /usr/local/src/lrose-core/codebase/libs; /bin/make -j 8 install_include; \
+  cd /usr/local/src/lrose-core/codebase/libs; /bin/make -j 8 opt; \
+  cd /usr/local/src/lrose-core/codebase/libs; /bin/make -j 8 install
 
 # build apps
 
-#RUN \
-# cd /usr/local/src/lrose-core/codebase/apps; /bin/make -j 8 opt; \ 
-#  cd /usr/local/src/lrose-core/codebase/apps; /bin/make -j 8 install
+RUN \
+   cd /usr/local/src/lrose-core/codebase/apps; /bin/make -j 8 opt; \ 
+  cd /usr/local/src/lrose-core/codebase/apps; /bin/make -j 8 install
 
 # make the spec file available to the container
 #
