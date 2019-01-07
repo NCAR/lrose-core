@@ -55,7 +55,7 @@
 #include "TornadoVortexSig.hh"
 #include "HailIndex.hh"
 #include "Mesocyclone.hh"
-#include "orpg_product.h"
+#include "orpg_product.hh"
 
 const fl32 hiResRadialFile::_missingFl32 = -999.0;
 

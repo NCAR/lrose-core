@@ -33,16 +33,16 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = NidsIngest
 
-LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
+LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lMdv -lRadx -lNcxx -leuclid \
+LOC_LIBS = -lNcxx -lSpdb -lMdv -lRadx -leuclid \
 	-lrapmath -ldsserver -lrapformats -ldidss \
 	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz -lpthread
 
-LOC_LDFLAGS = $(NETCDF_LDFLAGS) -L/lib64 -L/opt/udunits2/lib $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
-LOC_CPPC_CFLAGS =  -std=gnu++0x -g 
+LOC_CPPC_CFLAGS =
 
 
 HDRS = \
@@ -75,7 +75,7 @@ HDRS = \
 	TdwrRefl.hh \
 	DigitalHybridRefl.hh \
 	Swap.hh \
-	orpg_product.h 
+	orpg_product.hh 
     
  
 
@@ -110,7 +110,7 @@ CPPC_SRCS = \
 	TdwrRefl.cc \
 	Swap.cc \
 	DigitalHybridRefl.cc \
-	orpg_xdr.c \
+	orpg_xdr.cc \
 	DigitalTotalAccum.cc 
 
 #

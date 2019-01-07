@@ -664,7 +664,7 @@ void NidsIngest::_createMdvVolume( NidsFile & nidsFile, const string filepath, c
     _fhdr.compression_type = Mdvx::COMPRESSION_NONE;
     _fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
     _fhdr.scaling_type = Mdvx::SCALING_NONE;
-    sprintf(_fhdr.field_name, _params->_fields[_ifield].outFieldName);
+    sprintf(_fhdr.field_name, "%s", _params->_fields[_ifield].outFieldName);
     sprintf(_fhdr.field_name_long, _params->_fields[_ifield].outFieldNameLong);
     sprintf(_fhdr.units, _params->_fields[_ifield].outFieldUnits);
     sprintf( _fhdr.transform,"%s","none");

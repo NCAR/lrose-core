@@ -45,7 +45,7 @@
 #include <time.h>
 #include <rpc/xdr.h>
 
-#include "orpg_product.h"
+#include "orpg_product.hh"
 
 #define MAX_ARRAY_SIZE 0x7fffffff	/* there is no limit on array size in C
 					*/

@@ -57,7 +57,7 @@
 #include "HailIndex.hh"
 #include "TdwrRefl.hh"
 #include "DigitalHybridRefl.hh"
-#include "orpg_product.h"
+#include "orpg_product.hh"
 
 const fl32 NidsFile::_missingFl32 = -999.0;
 
