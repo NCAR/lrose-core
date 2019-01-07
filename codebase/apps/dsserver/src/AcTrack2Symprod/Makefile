@@ -37,11 +37,11 @@ TARGET_FILE = AcTrack2Symprod
 
 LOC_INCLUDES =
 LOC_CFLAGS =
-LOC_LDFLAGS = $(NETCDF4_LDFLAGS) -L/usr/local/udunits2/lib
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_LIBS = \
 	-lSpdb -ldsserver -ldidss -lrapformats \
 	-ltoolsa -ldataport -lrapmath -ltdrp \
-	$(NETCDF4_LIB_LIST) -lbz2 -lz -lpthread \
+	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \
 	-lm
 
 HDRS = \
