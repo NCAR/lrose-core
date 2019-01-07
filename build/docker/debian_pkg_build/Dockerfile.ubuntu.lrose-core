@@ -1,0 +1,97 @@
+#
+# start with clean image
+#
+
+FROM ubuntu:16.04 as builder
+
+# install required packages
+
+RUN apt-get update && apt-get install -y  \
+    libbz2-dev libx11-dev libpng12-dev libfftw3-dev \
+    libjasper-dev qtbase5-dev git \
+    gcc g++ gfortran libfl-dev \
+    automake make libtool pkg-config libexpat1-dev python \
+    cmake libgeographic-dev libeigen3-dev libzip-dev \
+    libhdf5-dev libhdf5-cpp-11 libnetcdf-dev
+ 
+# create link for qtmake
+
+WORKDIR /tmp
+
+RUN ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake /usr/bin/qmake-qt5
+
+# get lrose-core
+
+RUN cd /usr/local/src; git clone https://github.com/NCAR/lrose-core
+
+# set up build environment
+
+ENV HOST_OS LINUX_LROSE
+ENV RAP_MAKE_INC_DIR /usr/local/src/lrose-core/codebase/make_include
+ENV RAP_MAKE_BIN_DIR /usr/local/src/lrose-core/codebase/make_bin
+ENV RAP_INC_DIR /usr/local/include
+ENV RAP_LIB_DIR /usr/local/lib
+ENV RAP_BIN_DIR /usr/local/bin
+ENV RAP_SHARED_INC_DIR /usr/local/include
+ENV RAP_SHARED_LIB_DIR /usr/local/lib
+ENV RAP_SHARED_BIN_DIR /usr/local/bin
+
+# install makefiles
+
+RUN \
+  cd /usr/local/src/lrose-core; \
+   ./codebase/make_bin/install_package_makefiles.py --package lrose-core --debug
+
+# build tdrp_gen
+
+RUN \
+  cd /usr/local/src/lrose-core/codebase/libs/tdrp; make opt install; \
+  cd /usr/local/src/lrose-core/codebase/apps/tdrp/src/tdrp_gen; make opt install
+
+# build libraries
+
+RUN \
+  cd /usr/local/src/lrose-core/codebase/libs; make -j 8 install_include; \
+  cd /usr/local/src/lrose-core/codebase/libs; make -j 8 opt; \
+  cd /usr/local/src/lrose-core/codebase/libs; make -j 8 install
+
+# build apps
+
+RUN \
+   cd /usr/local/src/lrose-core/codebase/apps; make -j 8 opt; \ 
+  cd /usr/local/src/lrose-core/codebase/apps; make -j 8 install
+
+# make the spec file available to the container
+#
+
+#ADD . /tmp/rpm_files
+
+# create user rpmbuilder
+#RUN useradd -ms /bin/bash rpmbuilder 
+#USER rpmbuilder
+#WORKDIR /home/rpmbuilder
+
+# build hierarchy for rpmbuild:
+
+#RUN cd ~
+#RUN mkdir BUILD RPMS SOURCES SPECS SRPMS
+
+#
+# import the files
+#
+#RUN cp /tmp/rpm_files/lrose-core.spec SPECS/lrose-core.spec
+#RUN cp /tmp/bj/lrose-core-????????.src.tgz SOURCES
+# 
+# RUN cd lrose_core/SOURCES
+# RUN git clone https://github.com/NCAR/lrose-core
+#
+# RUN ./build/create_src_release.py --package=lrose-core
+# RUN mv ~/releases/tmp/lrose-core-20180516.src.tgz ~/SOURCES/.
+# RUN cd ..
+#
+#RUN rpmbuild -v -bb --define "debug_package %{nil}" SPECS/lrose-core.spec
+#
+# export the package
+#
+#RUN rsync RPMS /tmp/rpm_files/RPMS
+
