@@ -76,7 +76,7 @@ and use apt-get to install the following:
 ```
   apt-get install libx11-6:i386 \
                    libstdc++-4.9-dev:i386 \
-                   libpng12-dev:i386 \
+                   libpng-dev:i386 \
                    libx11-dev:i386 \
                    libxext-dev:i386 \
                    lib32stdc++-4.9-dev \

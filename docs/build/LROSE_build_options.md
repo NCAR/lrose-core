@@ -142,7 +142,7 @@ On Debian-based hosts you can install the packages required to build the lrose-b
 ```
 sudo apt-get update 
 sudo apt-get install -y  \
-    libbz2-dev libx11-dev libpng12-dev libfftw3-dev \
+    libbz2-dev libx11-dev libpng-dev libfftw3-dev \
     libjasper-dev qtbase5-dev git \
     gcc g++ gfortran libfl-dev \
     automake make libtool pkg-config libexpat1-dev python
