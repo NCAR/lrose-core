@@ -38,7 +38,9 @@
 #include <grib2/DataTemp.hh>
 #include <dataport/port_types.h>
 #include <grib2/Template7.41.hh>
+#ifndef NO_JASPER_LIB
 #include <grib2/Template7.4000.hh>
+#endif
 #include <grib2/Template7.0.hh>
 #include <grib2/Template7.2.hh>
 

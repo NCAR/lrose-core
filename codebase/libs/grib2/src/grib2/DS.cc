@@ -94,12 +94,14 @@ DS::DS (Grib2Record::Grib2Sections_t sectionsPtr) :
       _dataTemp = new Template7_pt_2(_sectionsPtr);
       break;
 
+#ifndef NO_JASPER_LIB
     case 40:     // Jpeg 2000 packing
     case 4000:   // Jpeg 2000 packing
 
       _dataTemp = new Template7_pt_4000(_sectionsPtr);
        
       break;
+#endif
 
     case 41:    // PNG packing 
     case 40010: // PNG packing 
