@@ -170,7 +170,7 @@ def main():
 
     # trim libs and apps to those required by distribution makefiles
 
-    if (package != "lrose"):
+    if (package != "lrose-core"):
         trimToMakefiles("libs")
         trimToMakefiles("apps")
 

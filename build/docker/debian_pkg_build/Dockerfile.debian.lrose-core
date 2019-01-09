@@ -3,11 +3,17 @@
 #
 
 FROM debian as builder
-
+ 
 # install required packages
 
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
+COPY sources.list /etc/apt
+RUN echo "---------------------------------------------"
+RUN echo "here is /etc/apt/sources.list: "; cat  /etc/apt/sources.list
+RUN echo "---------------------------------------------"
+
 RUN apt-get update && apt-get install -y  \
-    libbz2-dev libx11-dev libpng12-dev libfftw3-dev \
+    libbz2-dev libx11-dev libpng-dev libfftw3-dev \
     libjasper-dev qtbase5-dev git \
     gcc g++ gfortran libfl-dev \
     automake make libtool pkg-config libexpat1-dev python \
@@ -18,49 +24,48 @@ RUN apt-get update && apt-get install -y  \
 
 WORKDIR /tmp
 
-#RUN  cd /usr/bin; ln -s qtchooser qmake-qt5
-RUN ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake /usr/bin/qmake-qt5
+RUN cd /usr/bin; rm qmake; ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
 
 # get lrose-core
-    
-#RUN cd /usr/local/src; git clone https://github.com/NCAR/lrose-core
+
+RUN cd /usr/local/src; git clone https://github.com/NCAR/lrose-core
 
 # set up build environment
 
-#ENV HOST_OS LINUX_LROSE
-#ENV RAP_MAKE_INC_DIR /usr/local/src/lrose-core/codebase/make_include
-#ENV RAP_MAKE_BIN_DIR /usr/local/src/lrose-core/codebase/make_bin
-#ENV RAP_INC_DIR /usr/local/include
-#ENV RAP_LIB_DIR /usr/local/lib
-#ENV RAP_BIN_DIR /usr/local/bin
-#ENV RAP_SHARED_INC_DIR /usr/local/include
-#ENV RAP_SHARED_LIB_DIR /usr/local/lib
-#ENV RAP_SHARED_BIN_DIR /usr/local/bin
+ENV HOST_OS LINUX_LROSE
+ENV RAP_MAKE_INC_DIR /usr/local/src/lrose-core/codebase/make_include
+ENV RAP_MAKE_BIN_DIR /usr/local/src/lrose-core/codebase/make_bin
+ENV RAP_INC_DIR /usr/local/include
+ENV RAP_LIB_DIR /usr/local/lib
+ENV RAP_BIN_DIR /usr/local/bin
+ENV RAP_SHARED_INC_DIR /usr/local/include
+ENV RAP_SHARED_LIB_DIR /usr/local/lib
+ENV RAP_SHARED_BIN_DIR /usr/local/bin
 
 # install makefiles
 
-#RUN \
-# cd /usr/local/src/lrose-core; \
-#  ./codebase/make_bin/install_package_makefiles.py --package lrose-core --debug
+RUN \
+  cd /usr/local/src/lrose-core; \
+   ./codebase/make_bin/install_package_makefiles.py --package lrose-core --debug
 
 # build tdrp_gen
 
 RUN \
-  cd /usr/local/src/lrose-core/codebase/libs/tdrp; /bin/make opt install; \
+  cd /usr/local/src/lrose-core/codebase/libs/tdrp; make opt install; \
   cd /usr/local/src/lrose-core/codebase/apps/tdrp/src/tdrp_gen; make opt install
 
 # build libraries
 
 RUN \
-  cd /usr/local/src/lrose-core/codebase/libs; /bin/make -j 8 install_include; \
-  cd /usr/local/src/lrose-core/codebase/libs; /bin/make -j 8 opt; \
-  cd /usr/local/src/lrose-core/codebase/libs; /bin/make -j 8 install
+  cd /usr/local/src/lrose-core/codebase/libs; make -j 8 install_include; \
+  cd /usr/local/src/lrose-core/codebase/libs; make -j 8 opt; \
+  cd /usr/local/src/lrose-core/codebase/libs; make -j 8 install
 
 # build apps
 
 RUN \
-   cd /usr/local/src/lrose-core/codebase/apps; /bin/make -j 8 opt; \ 
-  cd /usr/local/src/lrose-core/codebase/apps; /bin/make -j 8 install
+   cd /usr/local/src/lrose-core/codebase/apps; make -j 8 opt; \ 
+  cd /usr/local/src/lrose-core/codebase/apps; make -j 8 install
 
 # make the spec file available to the container
 #
