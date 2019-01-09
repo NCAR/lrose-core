@@ -55,7 +55,7 @@ def main():
                       action="store_true",
                       help='Create shared lib objects')
     parser.add_option('--pkg',
-                      dest='pkg', default="lrose",
+                      dest='pkg', default="lrose-core",
                       help='Name of package being built')
 
     (options, args) = parser.parse_args()
@@ -246,7 +246,7 @@ def searchDir(dir):
         scriptPath = os.path.join(thisScriptDir, createScript)
         if (os.path.exists(scriptPath) == False):
             # no package version, use default
-            createScript = "createMakefile.am.app.lrose.py"
+            createScript = "createMakefile.am.app.lrose-core.py"
             scriptPath = os.path.join(thisScriptDir, createScript)
         if (options.debug):
             print >>sys.stderr, "  createScript:", createScript
