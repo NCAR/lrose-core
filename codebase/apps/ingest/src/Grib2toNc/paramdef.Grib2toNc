@@ -229,7 +229,7 @@ paramdef boolean
 } writeLdataInfo;
 
 paramdef string {
-  p_default = "Converted to NetCDF from Grib2 with Grib2toNc from NCAR-RAL.";
+  p_default = "Converted to NetCDF from Grib2 with Grib2toNc, V1.23, from NCAR-RAL.";
   p_descr = "Data set info.";
   p_help = "This is placed in the netcdf file 'history'.";
 } data_set_info;

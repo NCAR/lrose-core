@@ -23,8 +23,8 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 # RCS info
 #   $Author: jcraig $
-#   $Date: 2017/09/12 16:02:46 $
-#   $Revision: 1.11 $
+#   $Date: 2019/01/11 21:04:07 $
+#   $Revision: 1.12 $
 ###########################################################################
 #
 # Makefile for MdvtoGrib2.
@@ -41,17 +41,17 @@ MODULE_TYPE=progcpp
 
 TARGET_FILE = MdvtoGrib2
 
-LOC_INCLUDES = $(NETCDF4_INCS)
+LOC_INCLUDES = $(JASPER_INCLUDES) $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
 	-ldsserver -ldidss -lrapformats -lgrib2 \
-	-leuclid -ltoolsa -lpng \
+	-leuclid -ltoolsa $(JASPER_LIBS) -lpng \
 	-ldataport -ltdrp -lrapmath -lz \
-	$(JASPER_LIBS) $(NETCDF4_LIBS) \
-	-lbz2 -lz -lm
+	$(NETCDF4_LIBS) -lbz2 -lz -lm
 
 LOC_LDFLAGS = $(JASPER_LDFLAGS) $(NETCDF4_LDFLAGS)
 
+LOC_CFLAGS =
 LOC_CPPC_CFLAGS = 
 
 HDRS = \

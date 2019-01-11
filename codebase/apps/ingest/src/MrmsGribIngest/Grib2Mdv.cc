@@ -280,6 +280,13 @@ int Grib2Mdv::readFile(const string &filePath, DsMdvx &out)
       // Get and save the data, reordering and remaping if needed.
 
       fl32 *data = _gribRecord->ds->getData();
+      if(data == NULL) {
+	cerr << "ERROR: Unable to read field " <<  _field->param << " level  "
+             << _field->level << endl;
+	delete [] fieldDataPtr;
+	return( -1 );
+      }
+
       if(_reMapField) {
         data = _reMapReducedOrGaussian(data, _fieldHeader);
       }

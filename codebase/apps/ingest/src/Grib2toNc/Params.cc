@@ -925,7 +925,7 @@
     tt->descr = tdrpStrDup("Data set info.");
     tt->help = tdrpStrDup("This is placed in the netcdf file 'history'.");
     tt->val_offset = (char *) &data_set_info - &_start_;
-    tt->single_val.s = tdrpStrDup("Converted to NetCDF from Grib2 with Grib2toNc from NCAR-RAL.");
+    tt->single_val.s = tdrpStrDup("Converted to NetCDF from Grib2 with Grib2toNc, V1.23, from NCAR-RAL.");
     tt++;
     
     // Parameter 'data_set_title'

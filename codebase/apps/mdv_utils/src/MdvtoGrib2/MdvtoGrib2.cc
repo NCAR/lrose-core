@@ -24,9 +24,9 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: prestop $
- *   $Date: 2017/06/09 16:27:58 $
- *   $Revision: 1.30 $
+ *   $Author: jcraig $
+ *   $Date: 2019/01/11 21:04:07 $
+ *   $Revision: 1.32 $
  */
 
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -732,8 +732,12 @@ bool MdvtoGrib2::_processData(TriggerInfo &trigger_info)
       //
       // Add the Field to the Grib2 File
       //
-      grib2file.addField(prodDefNum, prodDefTemplate, dataRepNum, dataRepTemplate,
-                         mdv_data, bitMapType, bitmap);
+      if(grib2file.addField(prodDefNum, prodDefTemplate, dataRepNum, dataRepTemplate,
+			    mdv_data, bitMapType, bitmap) == Grib2::GRIB_FAILURE) {
+	delete [] bitmap;
+	delete [] grib_data;
+	return false;
+      }
 
       delete [] bitmap;
       delete [] grib_data;
@@ -759,6 +763,9 @@ bool MdvtoGrib2::_processData(TriggerInfo &trigger_info)
   }
 
   grib_file_path += grib_file_name;
+  if (_params->debug) {
+    cout << " Writing out file " << grib_file_path << endl;
+  }
   grib2file.write(grib_file_path.c_str());
 
   //
@@ -836,7 +843,10 @@ bool MdvtoGrib2::_readMdvFile(DsMdvx &input_mdv,
 
   //
   // Apply Remaping on read, if requested
-  if (_params->remap_output)
+  if (_params->auto_remap_to_latlon ){
+    input_mdv.setReadAutoRemap2LatLon();
+  }
+  else if (_params->remap_output)
   {
     switch (_params->remap_info.proj_type)
     {
@@ -1188,14 +1198,6 @@ int MdvtoGrib2::_createPDSTemplate(MdvxField *field, int field_num, int z, time_
 
   _scaleFactorValue(firstValue, scaleFactorFirst);
   _scaleFactorValue(secondValue, scaleFactorSecond);
-
-  if (_params->debug)
-    {
-      cerr << "      grib first surface type = " << firstSurfaceType << endl;
-      cerr << "      grib first value = " << (int)(firstValue + .5) << endl;
-      cerr << "      grib second surface type = " << secondSurfaceType << endl;
-      cerr << "      grib second value = " << (int)(secondValue + .5) << endl;
-    }
 
   //
   // Determine forecast time and units

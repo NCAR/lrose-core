@@ -38,7 +38,7 @@
 #include "Args.hh"
 using namespace std;
 
-#define Grib2toNc_VERSION 1.22
+#define Grib2toNc_VERSION 1.23
 
 //
 // Defines for success and failure returns

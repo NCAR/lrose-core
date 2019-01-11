@@ -333,6 +333,15 @@ paramdef boolean
   p_default = FALSE;
 } remap_output;
 
+paramdef boolean
+{
+  p_descr = "Option to automatically remap the grid to a lat-lon projection.";
+  p_help = "If true, the data in the file will be remapped to a latlon grid "
+           "which matches the existing grid in resolution and extent. Other "
+           "remap parameters will be ignored.";
+  p_default = false;
+} auto_remap_to_latlon;
+
 typedef enum
 {
   PROJ_LATLON,

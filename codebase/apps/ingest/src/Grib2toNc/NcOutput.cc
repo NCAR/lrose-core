@@ -28,6 +28,7 @@
 
 #include "NcOutput.hh"
 #include "Grib2Nc.hh"
+#include "Grib2toNc.hh"
 
 #include <math.h>
 #include <sys/types.h>
@@ -253,6 +254,7 @@ void NcOutput::addField(fl32 *field, Grib2Nc::FieldInfo fieldInfo)
      }
 
      if(fieldInfo.vlevelInfo.standardName.compare(_fieldInfo[i].vlevelInfo.standardName) == 0 &&
+	fieldInfo.vlevelInfo.longName.compare(_fieldInfo[i].vlevelInfo.longName) == 0 &&
 	fieldInfo.vlevelInfo.units.compare(_fieldInfo[i].vlevelInfo.units) == 0 &&
 	fieldInfo.vlevelInfo.nz == _fieldInfo[i].vlevelInfo.nz)
      {
@@ -812,7 +814,7 @@ int NcOutput::_addCoordinateVariables()
 	cerr << _ncErr->get_errmsg() << endl;
 	return -1;
       }
-      
+
       // Add Attributes
       int iret = 0;      
       if (_fieldInfo[i].vlevelInfo.standardName.size() > 0) {
@@ -1295,7 +1297,7 @@ int NcOutput::_addFieldDataVariables()
       char auxVarNames[1024];
       Nc3Var *latVar = _uniqueGridxVar[_uniqueGrid[i]];
       Nc3Var *lonVar = _uniqueGridyVar[_uniqueGrid[i]];  
-      Nc3Var *zVar = _uniqueVerticalzVar[_uniqueGrid[i]];
+      Nc3Var *zVar = _uniqueVerticalzVar[_uniqueVertical[i]];
 
       if(latVar == NULL || lonVar == NULL || zVar == NULL) {
 	cerr << "ERROR - Cannot find unique lat/lon/z proj variables matching variable " << _fieldInfo[i].name << endl;

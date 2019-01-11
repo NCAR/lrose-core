@@ -36,13 +36,12 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGET_FILE = MrmsGribIngest
 MODULE_TYPE = progcpp
 
-LOC_INCLUDES = $(NETCDF4_INCS)
+LOC_INCLUDES = $(JASPER_INCS) $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -ldsserver \
 	-ldidss -lrapformats -lgrib2 -leuclid \
-	-ltoolsa -lphysics -lpng \
-	-ldataport -ltdrp -lrapmath \
-	$(JASPER_LIBS) $(NETCDF4_LIBS) \
+	-ltoolsa -lphysics $(JASPER_LIBS) -lpng \
+	-ldataport -ltdrp -lrapmath $(NETCDF4_LIBS) \
 	-lbz2 -lz -lpthread -lm
 
 LOC_LDFLAGS = $(JASPER_LDFLAGS) $(NETCDF4_LDFLAGS)

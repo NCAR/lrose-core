@@ -1,3 +1,8 @@
+revision 1.23
+date: 2018-11-06 
+uniqueVertical zDim within coordinates attribute bug fix
+Adding Version number to history global attribute
+----------------------------
 revision 1.22
 date: 2018-09-18 
 Adding return/exit code. Adding a fix to improve default chunking.
