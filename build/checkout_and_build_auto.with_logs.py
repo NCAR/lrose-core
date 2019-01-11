@@ -33,6 +33,7 @@ def main():
     global displaysDir
     global coreDir
     global codebaseDir
+    global codebasePath
     global tmpDir
     global tmpBinDir
     global binDir
@@ -345,8 +346,9 @@ def getValueListForKey(path, key):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open file:", path
+        if (options.verbose):
+            print >>sys.stderr, "ERROR - ", thisScriptName
+            print >>sys.stderr, "  Cannot open file:", path
         return valueList
 
     lines = fp.readlines()
@@ -394,7 +396,8 @@ def getValueListForKey(path, key):
 
 def trimToMakefiles(subDir):
 
-    print >>sys.stderr, "Trimming unneeded dirs, subDir: " + subDir
+    if (options.verbose):
+        print >>sys.stderr, "Trimming unneeded dirs, subDir: " + subDir
 
     # get list of subdirs in makefile
 
@@ -404,28 +407,33 @@ def trimToMakefiles(subDir):
     # need to allow upper and lower case Makefile (makefile or Makefile)
     subNameList = getValueListForKey("makefile", "SUB_DIRS")
     if not subNameList:
-        print >>sys.stderr, "Trying uppercase Makefile ... "
+        if (options.verbose):
+            print >>sys.stderr, "Trying uppercase Makefile ... "
         subNameList = getValueListForKey("Makefile", "SUB_DIRS")
     
     for subName in subNameList:
         if (os.path.isdir(subName)):
-            print >>sys.stderr, "  need sub dir: " + subName
+            if (options.verbose):
+                print >>sys.stderr, "  need sub dir: " + subName
             
     # get list of files in subDir
 
     entries = os.listdir(dirPath)
     for entry in entries:
         theName = os.path.join(dirPath, entry)
-        print >>sys.stderr, "considering: " + theName
+        if (options.verbose):
+            print >>sys.stderr, "considering: " + theName
         if (entry == "scripts") or (entry == "include"):
             # always keep scripts directories
             continue
         if (os.path.isdir(theName)):
             if (entry not in subNameList):
-                print >>sys.stderr, "discarding it"
+                if (options.verbose):
+                    print >>sys.stderr, "discarding it"
                 shutil.rmtree(theName)
             else:
-                print >>sys.stderr, "keeping it and recurring"
+                if (options.verbose):
+                    print >>sys.stderr, "keeping it and recurring"
                 # check this child's required subdirectories ( recurse )
                 # nextLevel = os.path.join(dirPath, entry)
                 # print >> sys.stderr, "trim to makefile on subdirectory: "
@@ -574,8 +582,8 @@ def prepareLogFile(logFileName):
 
     logPath = os.path.join(options.logDir, logFileName + ".log.txt");
     if (logPath.find('no-logging') >= 0):
-        return
-    if (options.debug):
+        return logPath
+    if (options.verbose):
         print >> sys.stderr, "====>> Creating log file: " + logPath + " <<=="
     fp = open(logPath, "w+")
     fp.write("===========================================\n")
@@ -589,13 +597,13 @@ def prepareLogFile(logFileName):
 
 def shellCmd(cmd):
 
-    print >>sys.stderr, "====>> Running cmd:", cmd, " <<===="
+    print >>sys.stderr, "====>> Running cmd:", cmd
     
     if (logPath.find('no-logging') >= 0):
         cmdToRun = cmd
     else:
-        print >>sys.stderr, "======>> Log file is:", logPath, " <<======"
-        print >>sys.stderr, "  ....................."
+        print >>sys.stderr, "====>> Log file is:", logPath
+        print >>sys.stderr, "       ...."
         cmdToRun = cmd + " 1>> " + logPath + " 2>&1"
 
     try:
@@ -610,8 +618,7 @@ def shellCmd(cmd):
         print >>sys.stderr, "Execution failed:", e
         sys.exit(1)
 
-    if (options.debug):
-        print >>sys.stderr, ".... done"
+    print >>sys.stderr, "       ==>> done"
     
 ########################################################################
 # Run - entry point

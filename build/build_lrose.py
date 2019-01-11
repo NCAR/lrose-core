@@ -55,9 +55,7 @@ def main():
     thisScriptName = os.path.basename(__file__)
 
     global options
-    global codebasePath
-    global dateStr
-    global timeStr
+    global codebaseDir
     global debugStr
     global package
     global prefix
@@ -78,7 +76,7 @@ def main():
                       help='Set verbose debugging on')
     parser.add_option('--package',
                       dest='package', default='lrose-core',
-                      help='Package name. Options are lrose-core (default), radx, cidd, hcr, hsrl, titan, lrose-blaze')
+                      help='Package name. Options are lrose-core (default), radx, cidd, titan, lrose-blaze')
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDefault,
                       help='Prefix name for install location')
@@ -106,15 +104,13 @@ def main():
     now = time.gmtime()
     nowTime = datetime(now.tm_year, now.tm_mon, now.tm_mday,
                        now.tm_hour, now.tm_min, now.tm_sec)
-    dateStr = nowTime.strftime("%Y%m%d")
-    timeStr = nowTime.strftime("%Y%m%d%H%M%S")
     dateTimeStr = nowTime.strftime("%Y/%m/%d-%H:%M:%S")
     corePath = os.getcwd()
     
     # check we are in the correct place
 
-    codebasePath = os.path.join(corePath, "codebase")
-    if (os.path.isdir(codebasePath) == False):
+    codebaseDir = os.path.join(corePath, "codebase")
+    if (os.path.isdir(codebaseDir) == False):
         print >>sys.stderr, "ERROR - script: ", thisScriptName
         print >>sys.stderr, "  Incorrect run directory: ", corePath
         print >>sys.stderr, "  Must be run just above codebase dir"
@@ -122,7 +118,7 @@ def main():
 
     # run qmake for QT apps to create moc_ files
 
-    hawkEyeDir = os.path.join(codebasePath, "apps/radar/src/HawkEye")
+    hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
     createQtMocFiles(hawkEyeDir)
 
     # set the environment
@@ -146,19 +142,19 @@ def main():
 
     # do the build and install
 
-    os.chdir(codebasePath)
+    os.chdir(codebaseDir)
     cmd = "./configure --with-hdf5=" + prefix + \
           " --with-netcdf=" + prefix + \
           " --prefix=" + prefix
     shellCmd(cmd)
 
-    os.chdir(os.path.join(codebasePath, "libs"))
+    os.chdir(os.path.join(codebaseDir, "libs"))
     cmd = "make -k -j 8"
     shellCmd(cmd)
     cmd = "make -k install-strip"
     shellCmd(cmd)
 
-    os.chdir(os.path.join(codebasePath, "apps"))
+    os.chdir(os.path.join(codebaseDir, "apps"))
     cmd = "make -k -j 8"
     shellCmd(cmd)
     cmd = "make -k install-strip"
@@ -176,21 +172,21 @@ def main():
         except:
             print >>sys.stderr, "Dir exists: " + perl5Dir
 
-        perl5LibDir = os.path.join(codebasePath, "libs/perl5/src")
+        perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
         if (os.path.isdir(perl5LibDir)):
-            os.chdir(os.path.join(codebasePath, "libs/perl5/src"))
+            os.chdir(os.path.join(codebaseDir, "libs/perl5/src"))
             shellCmd("rsync -av *pm " + perl5Dir)
 
         # procmap
 
-        procmapScriptsDir = os.path.join(codebasePath, "apps/procmap/src/scripts")
+        procmapScriptsDir = os.path.join(codebaseDir, "apps/procmap/src/scripts")
         if (os.path.isdir(procmapScriptsDir)):
             os.chdir(procmapScriptsDir)
             shellCmd("./install_scripts.lrose " + prefix + "bin")
 
         # general
 
-        generalScriptsDir = os.path.join(codebasePath, "apps/scripts/src")
+        generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")
         if (os.path.isdir(generalScriptsDir)):
             os.chdir(generalScriptsDir)
             shellCmd("./install_scripts.lrose " + prefix + "bin")
