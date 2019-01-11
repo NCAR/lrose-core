@@ -24,7 +24,7 @@
 /////////////////////////////////////////////
 // Grib2Record - Main class for manipulating GRIB records.
 //
-// $Id: Grib2Record.cc,v 1.25 2016/03/03 18:38:02 dixon Exp $
+// $Id: Grib2Record.cc,v 1.26 2019/01/11 21:08:22 jcraig Exp $
 ////////////////////////////////////////////
 
 #include <iostream>
@@ -734,7 +734,7 @@ void Grib2Record::setGrid(si32 numberDataPoints, si32 gridDefNum, GribProj *proj
   _repeatSec.push_back(RS);
 }
 
-void Grib2Record::addField(si32 prodDefNum, ProdDefTemp *productTemplate, 
+int Grib2Record::addField(si32 prodDefNum, ProdDefTemp *productTemplate, 
 			   si32 dataRepNum, DataRepTemp *dataRepTemplate,
 			   fl32 *data, si32 bitMapType, si32 *bitMap)
 {
@@ -807,21 +807,24 @@ void Grib2Record::addField(si32 prodDefNum, ProdDefTemp *productTemplate,
       sectionsPtr.bms = RS.bms;
 
       RS.ds = new DS(sectionsPtr);
-      RS.ds->encode(data);
+      if(RS.ds->encode(data) == GRIB_FAILURE)
+	return GRIB_FAILURE;
       sectionsPtr.ds = RS.ds;
 
       rec_summary_t summary;
       RS.pds->getRecSummary(&summary);
       RS.summary = summary;
       sectionsPtr.summary = &(RS.summary);
-      return;
+      return GRIB_SUCCESS;;
     } else {
       cerr << "ERROR: Grib2Record::addField()" << endl;
       cerr << "Must call addGrid before addField." << endl;
+      return GRIB_FAILURE;
     }
   } else {
     cerr << "ERROR: Grib2Record::addField()" << endl;
     cerr << "Must call addGrid before addField." << endl;
+    return GRIB_FAILURE;
   }
 
 }

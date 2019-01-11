@@ -312,7 +312,7 @@ public:
    * -   255   = Bit map does not apply to this product
    * @param[in] bitMap Pointer to the bitmap if bitMapType = 0, NULL otherwise
    */
-  void addField(si32 prodDefNum, ProdDefTemp *productTemplate, 
+  int addField(si32 prodDefNum, ProdDefTemp *productTemplate, 
 		si32 dataRepNum, DataRepTemp *dataRepTemplate,
 		fl32 *data, si32 bitMapType, si32 *bitMap);
 

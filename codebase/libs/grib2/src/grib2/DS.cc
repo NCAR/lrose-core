@@ -94,14 +94,12 @@ DS::DS (Grib2Record::Grib2Sections_t sectionsPtr) :
       _dataTemp = new Template7_pt_2(_sectionsPtr);
       break;
 
-#ifndef NO_JASPER_LIB
     case 40:     // Jpeg 2000 packing
     case 4000:   // Jpeg 2000 packing
 
       _dataTemp = new Template7_pt_4000(_sectionsPtr);
        
       break;
-#endif
 
     case 41:    // PNG packing 
     case 40010: // PNG packing 
@@ -177,7 +175,8 @@ fl32 *DS::getData()
   if(_dataTemp == NULL)
     return NULL;
 
-  _dataTemp->unpack(dataPtr);
+  if(_dataTemp->unpack(dataPtr) == GRIB_FAILURE)
+    return NULL;
 
   if(_data_status == READ) {
     delete[] _readDataPtr;
@@ -235,7 +234,8 @@ int DS::encode(fl32 *dataPtr)
     case 41:    // PNG packing 
     case 40010: // PNG packing 
 
-       _dataTemp->pack(dataPtr);
+       if(_dataTemp->pack(dataPtr) == GRIB_FAILURE)
+	 return GRIB_FAILURE;
        _sectionLen = _dataTemp->getTemplateSize();
        _data_status = ENCODE;
        return GRIB_SUCCESS;

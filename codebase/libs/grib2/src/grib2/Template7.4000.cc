@@ -89,6 +89,12 @@ int Template7_pt_4000::pack (fl32 *dataPtr)
 //                       successful.  If not, try again with different encoder
 //                       options.
 
+#ifdef NO_JASPER_LIB
+  cerr << "ERROR: Template7_pt_4000::pack()" << endl;
+  cerr << " NO_JASPER_LIB installed - cannot encode jpeg2000" << endl;
+  return GRIB_FAILURE;
+#endif
+
   fl32 *pdataPtr = _applyBitMapPack(dataPtr);
   si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
   DataRepTemp::data_representation_t drsConstants = _sectionsPtr.drs->getDrsConstants();
@@ -272,7 +278,10 @@ int Template7_pt_4000::unpack (ui08 *dataPtr)
     si32 *tmp_data = new si32 [gridSz];
     si32 compressed_len = _sectionsPtr.ds->getSize() - 5;
 
-    decode_jpeg2000 ((char *) dataPtr, compressed_len, tmp_data);
+    if(decode_jpeg2000 ((char *) dataPtr, compressed_len, tmp_data) == GRIB_FAILURE) {
+      delete [] tmp_data;
+      return GRIB_FAILURE;
+    }
     
     for (int i = 0; i < gridSz; i++) {
       outputData[i] = (((fl32) tmp_data[i] * bscale) + reference) * dscale;
@@ -297,7 +306,7 @@ int Template7_pt_4000::decode_jpeg2000 (char *input, si32 inputSize, si32 *outpu
 
   cerr << "ERROR: Template7_pt_4000::decode_jpeg2000()" << endl;
   cerr << " NO_JASPER_LIB installed - cannot decode jpeg2000" << endl;
-  return -3;
+  return GRIB_FAILURE;
 
 #else
 
@@ -451,8 +460,8 @@ int Template7_pt_4000::encode_jpeg2000 (ui08 *cin,int pwidth,int pheight,int pnb
 #ifdef NO_JASPER_LIB
 
   cerr << "ERROR: Template7_pt_4000::encode_jpeg2000()" << endl;
-  cerr << " NO_JASPER_LIB installed - cannot decode jpeg2000" << endl;
-  return -3;
+  cerr << " NO_JASPER_LIB installed - cannot encode jpeg2000" << endl;
+  return GRIB_FAILURE;
 
 #else
 

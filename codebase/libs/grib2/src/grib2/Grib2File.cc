@@ -24,7 +24,7 @@
 /////////////////////////////////////////////
 // Grib2File - Main class for manipulating GRIB files.
 //
-// $Id: Grib2File.cc,v 1.21 2018/05/25 15:39:52 jcraig Exp $
+// $Id: Grib2File.cc,v 1.22 2019/01/11 21:08:22 jcraig Exp $
 ////////////////////////////////////////////
 
 #include <iostream>
@@ -441,8 +441,9 @@ int Grib2File::addField(si32 prodDefNum, ProdDefTemp *productTemplate,
      && !_inventory.empty())
   {
     file_inventory_t inventory = _inventory[_inventory.size()-1];
-    inventory.record->addField(prodDefNum, productTemplate, dataRepNum, dataRepTemplate,
-			       data, bitMapType, bitMap);
+    if(inventory.record->addField(prodDefNum, productTemplate, dataRepNum, dataRepTemplate,
+			       data, bitMapType, bitMap) == GRIB_FAILURE)
+      return GRIB_FAILURE;
 
     _last_file_action = ADDFIELD;
     return GRIB_SUCCESS;
