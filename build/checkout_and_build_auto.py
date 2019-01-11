@@ -33,6 +33,7 @@ def main():
     global displaysDir
     global coreDir
     global codebaseDir
+    global codebasePath
     global tmpDir
     global tmpBinDir
     global binDir
@@ -41,6 +42,7 @@ def main():
     global shareDir
     global versionStr
     global debugStr
+    global logPath
 
     # parse the command line
 
@@ -48,6 +50,7 @@ def main():
     homeDir = os.environ['HOME']
     prefixDirDefault = os.path.join(homeDir, 'lrose')
     buildDirDefault = '/tmp/lrose_build'
+    logDirDefault = '/tmp/lrose_build/logs'
     parser = OptionParser(usage)
     parser.add_option('--clean',
                       dest='clean', default=False,
@@ -71,6 +74,9 @@ def main():
     parser.add_option('--buildDir',
                       dest='buildDir', default=buildDirDefault,
                       help='Temporary build dir')
+    parser.add_option('--logDir',
+                      dest='logDir', default=logDirDefault,
+                      help='Logging dir')
     parser.add_option('--static',
                       dest='static', default=False,
                       action="store_true",
@@ -82,7 +88,7 @@ def main():
 
     (options, args) = parser.parse_args()
     
-    if (options.verbose == True):
+    if (options.verbose):
         options.debug = True
 
     # for CIDD, set to static linkage
@@ -120,12 +126,15 @@ def main():
     includeDir = os.path.join(prefix, 'include')
     shareDir = os.path.join(prefix, 'share')
     
-    if (options.debug == True):
+    logPath = os.path.join(options.logDir, "master");
+
+    if (options.debug):
         print >>sys.stderr, "Running %s:" % thisScriptName
         print >>sys.stderr, "  package: ", package
         print >>sys.stderr, "  releaseName: ", releaseName
         print >>sys.stderr, "  static: ", options.static
         print >>sys.stderr, "  buildDir: ", options.buildDir
+        print >>sys.stderr, "  logDir: ", options.logDir
         print >>sys.stderr, "  coreDir: ", coreDir
         print >>sys.stderr, "  codebaseDir: ", codebaseDir
         print >>sys.stderr, "  displaysDir: ", displaysDir
@@ -145,27 +154,31 @@ def main():
     try:
         os.makedirs(tmpDir)
         os.makedirs(tmpBinDir)
+        os.makedirs(options.logDir)
     except:
         print >>sys.stderr, "  note - dirs already exist"
 
     # get repos from git
 
+    logPath = prepareLogFile("git-checkout");
     gitCheckout()
 
     # install the distribution-specific makefiles
 
+    logPath = prepareLogFile("install-package-makefiles");
     os.chdir(codebaseDir)
     shellCmd("./make_bin/install_package_makefiles.py --package " + 
              package + " --codedir .")
 
     # trim libs and apps to those required by distribution makefiles
 
-    if (package != "lrose-core"):
+    if (package != "lrose"):
         trimToMakefiles("libs")
         trimToMakefiles("apps")
 
     # set up autoconf
 
+    logPath = prepareLogFile("setup-autoconf");
     setupAutoconf()
 
     # create the release information file
@@ -174,6 +187,7 @@ def main():
 
     # run qmake for QT apps to create moc_ files
 
+    logPath = prepareLogFile("create-qt-moc-files");
     hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
     createQtMocFiles(hawkEyeDir)
 
@@ -183,6 +197,7 @@ def main():
 
     # build netcdf support
     
+    logPath = prepareLogFile("build-netcdf");
     buildNetcdf()
 
     # build the package
@@ -191,12 +206,14 @@ def main():
 
     # perform the install
 
-    doInstall();
+    logPath = prepareLogFile("do-final-install");
+    doFinalInstall();
 
     # check the install
 
+    logPath = prepareLogFile("no-logging");
     checkInstall()
-
+    
     # delete the tmp dir
 
     if (options.clean):
@@ -230,7 +247,10 @@ def createBuildDir():
         shutil.rmtree(options.buildDir)
 
     # make it clean
-
+    
+    print("INFO: you are about to create build dir: " + 
+          options.buildDir)
+    
     os.makedirs(options.buildDir)
 
 ########################################################################
@@ -325,8 +345,9 @@ def getValueListForKey(path, key):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open file:", path
+        if (options.verbose):
+            print >>sys.stderr, "ERROR - ", thisScriptName
+            print >>sys.stderr, "  Cannot open file:", path
         return valueList
 
     lines = fp.readlines()
@@ -343,7 +364,7 @@ def getValueListForKey(path, key):
             multiLine = multiLine + line
             if (line.find("\\") < 0):
                 break;
-        elif (foundKey == True):
+        elif (foundKey):
             if (line[0] == '#'):
                 break
             if (len(line) < 2):
@@ -374,7 +395,8 @@ def getValueListForKey(path, key):
 
 def trimToMakefiles(subDir):
 
-    print >>sys.stderr, "Trimming unneeded dirs, subDir: " + subDir
+    if (options.verbose):
+        print >>sys.stderr, "Trimming unneeded dirs, subDir: " + subDir
 
     # get list of subdirs in makefile
 
@@ -384,28 +406,33 @@ def trimToMakefiles(subDir):
     # need to allow upper and lower case Makefile (makefile or Makefile)
     subNameList = getValueListForKey("makefile", "SUB_DIRS")
     if not subNameList:
-        print >>sys.stderr, "Trying uppercase Makefile ... "
+        if (options.verbose):
+            print >>sys.stderr, "Trying uppercase Makefile ... "
         subNameList = getValueListForKey("Makefile", "SUB_DIRS")
     
     for subName in subNameList:
         if (os.path.isdir(subName)):
-            print >>sys.stderr, "  need sub dir: " + subName
+            if (options.verbose):
+                print >>sys.stderr, "  need sub dir: " + subName
             
     # get list of files in subDir
 
     entries = os.listdir(dirPath)
     for entry in entries:
         theName = os.path.join(dirPath, entry)
-        print >>sys.stderr, "considering: " + theName
+        if (options.verbose):
+            print >>sys.stderr, "considering: " + theName
         if (entry == "scripts") or (entry == "include"):
             # always keep scripts directories
             continue
         if (os.path.isdir(theName)):
             if (entry not in subNameList):
-                print >>sys.stderr, "discarding it"
+                if (options.verbose):
+                    print >>sys.stderr, "discarding it"
                 shutil.rmtree(theName)
             else:
-                print >>sys.stderr, "keeping it and recurring"
+                if (options.verbose):
+                    print >>sys.stderr, "keeping it and recurring"
                 # check this child's required subdirectories ( recurse )
                 # nextLevel = os.path.join(dirPath, entry)
                 # print >> sys.stderr, "trim to makefile on subdirectory: "
@@ -430,31 +457,101 @@ def buildNetcdf():
 
 def buildPackage():
 
-    os.chdir(coreDir)
+    global logPath
 
-    # perform the build
+    # set the environment
 
-    args = ""
-    args = args + " --prefix " + tmpDir
-    args = args + " --package " + package
+    os.environ["LDFLAGS"] = "-L" + prefix + "/lib " + \
+                            " -Wl,-rpath,'$$ORIGIN/" + package + "_runtime_libs:" + \
+                            prefix + "/lib'"
+    os.environ["FC"] = "gfortran"
+    os.environ["F77"] = "gfortran"
+    os.environ["F90"] = "gfortran"
+
+    if (platform == "darwin"):
+        os.environ["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
+    else:
+        os.environ["CXXFLAGS"] = " -std=c++11 "
+
+    # print out environment
+
+    logPath = prepareLogFile("print-environment");
+    cmd = "env"
+    shellCmd(cmd)
+
+    # run configure
+
+    logPath = prepareLogFile("run-configure");
+    os.chdir(codebaseDir)
+    cmd = "./configure --with-hdf5=" + prefix + \
+          " --with-netcdf=" + prefix + \
+          " --prefix=" + prefix
+    shellCmd(cmd)
+
+    # build the libraries
+
+    logPath = prepareLogFile("build-libs");
+    os.chdir(os.path.join(codebaseDir, "libs"))
+    cmd = "make -k -j 8"
+    shellCmd(cmd)
+
+    # install the libraries
+
+    logPath = prepareLogFile("install-libs-to-tmp");
+
+    cmd = "make -k install-strip"
+    shellCmd(cmd)
+
+    # build the apps
+
+    logPath = prepareLogFile("build-apps");
+    os.chdir(os.path.join(codebaseDir, "apps"))
+    cmd = "make -k -j 8"
+    shellCmd(cmd)
+
+    # install the apps
+
+    logPath = prepareLogFile("install-apps-to-tmp");
+    cmd = "make -k install-strip"
+    shellCmd(cmd)
+
+    # optionally install the scripts
+
     if (options.installScripts):
-        args = args + " --scripts "
-    shellCmd("./build/build_lrose.py " + args)
 
-    # detect which dynamic libs are needed
-    # copy the dynamic libraries into runtime area:
-    #     $prefix/bin/${package}_runtime_libs
+        logPath = prepareLogFile("install-scripts-to-tmp");
 
-    if (platform != "darwin"):
-        os.chdir(coreDir)
-        shellCmd("./codebase/make_bin/installOriginLibFiles.py " + \
-                 " --binDir " + tmpBinDir +
-                 " --relDir " + package + "_runtime_libs --debug")
+        # install perl5
+        
+        perl5Dir = os.path.join(prefix, "lib/perl5")
+        try:
+            os.makedirs(perl5Dir)
+        except:
+            print >>sys.stderr, "Dir exists: " + perl5Dir
+
+        perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
+        if (os.path.isdir(perl5LibDir)):
+            os.chdir(os.path.join(codebaseDir, "libs/perl5/src"))
+            shellCmd("rsync -av *pm " + perl5Dir)
+
+        # procmap
+
+        procmapScriptsDir = os.path.join(codebaseDir, "apps/procmap/src/scripts")
+        if (os.path.isdir(procmapScriptsDir)):
+            os.chdir(procmapScriptsDir)
+            shellCmd("./install_scripts.lrose " + prefix + "bin")
+
+        # general
+
+        generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")
+        if (os.path.isdir(generalScriptsDir)):
+            os.chdir(generalScriptsDir)
+            shellCmd("./install_scripts.lrose " + prefix + "bin")
 
 ########################################################################
-# perform install
+# perform final install
 
-def doInstall():
+def doFinalInstall():
 
     # make target dirs
 
@@ -525,14 +622,16 @@ def prune(tree):
         contents = os.listdir(tree)
 
         if (len(contents) == 0):
-            print >> sys.stderr, "pruning empty dir: " + tree
+            if (options.verbose):
+                print >> sys.stderr, "pruning empty dir: " + tree
             shutil.rmtree(tree)
         else:
             for l in contents:
                 # remove CVS directories
                 if (l == "CVS") or (l == ".git"): 
                     thepath = os.path.join(tree,l)
-                    print >> sys.stderr, "pruning dir: " + thepath
+                    if (options.verbose):
+                        print >> sys.stderr, "pruning dir: " + thepath
                     shutil.rmtree(thepath)
                 else:
                     thepath = os.path.join(tree,l)
@@ -541,20 +640,44 @@ def prune(tree):
             # check if this tree is now empty
             newcontents = os.listdir(tree)
             if (len(newcontents) == 0):
-                print >> sys.stderr, "pruning empty dir: " + tree
+                if (options.verbose):
+                    print >> sys.stderr, "pruning empty dir: " + tree
                 shutil.rmtree(tree)
 
+########################################################################
+# prepare log file
+
+def prepareLogFile(logFileName):
+
+    logPath = os.path.join(options.logDir, logFileName + ".log.txt");
+    if (logPath.find('no-logging') >= 0):
+        return logPath
+    print >> sys.stderr, "========================= " + logFileName + " ========================="
+    if (options.verbose):
+        print >> sys.stderr, "====>> Creating log file: " + logPath + " <<=="
+    fp = open(logPath, "w+")
+    fp.write("===========================================\n")
+    fp.write("Log file from script: " + thisScriptName + "\n")
+    fp.close()
+
+    return logPath
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
 
 def shellCmd(cmd):
 
-    if (options.debug):
-        print >>sys.stderr, "running cmd:", cmd, " ....."
+    print >>sys.stderr, "Running cmd:", cmd
     
+    if (logPath.find('no-logging') >= 0):
+        cmdToRun = cmd
+    else:
+        print >>sys.stderr, "Log file is:", logPath
+        print >>sys.stderr, "    ...."
+        cmdToRun = cmd + " 1>> " + logPath + " 2>&1"
+
     try:
-        retcode = subprocess.check_call(cmd, shell=True)
+        retcode = subprocess.check_call(cmdToRun, shell=True)
         if retcode != 0:
             print >>sys.stderr, "Child exited with code: ", retcode
             sys.exit(1)
@@ -565,8 +688,7 @@ def shellCmd(cmd):
         print >>sys.stderr, "Execution failed:", e
         sys.exit(1)
 
-    if (options.debug):
-        print >>sys.stderr, ".... done"
+    print >>sys.stderr, "    done"
     
 ########################################################################
 # Run - entry point
