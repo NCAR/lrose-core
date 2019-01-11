@@ -541,7 +541,7 @@ def getLoadLibList():
                    'hdf5',
                    # 'udunits2',
                    'expat',
-                   'jasper',
+                   # 'jasper',
                    'fl',
                    'X11',
                    'Xext',

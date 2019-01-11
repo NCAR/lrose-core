@@ -8,7 +8,6 @@
  -ldsdata 
  -lradar
  -lSpdb
- -lSpdb
  -lMdv
  -lRadx
  -lNcxx
