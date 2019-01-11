@@ -159,13 +159,12 @@ def main():
 
     # get repos from git
 
-    logPath = prepareLogFile("gitCheckout.log");
-    logPath = prepareLogFile("logging-off");
+    logPath = prepareLogFile("gitCheckout");
     gitCheckout()
 
     # install the distribution-specific makefiles
 
-    logPath = prepareLogFile("logging-off");
+    logPath = prepareLogFile("install_package_makefiles");
     os.chdir(codebaseDir)
     shellCmd("./make_bin/install_package_makefiles.py --package " + 
              package + " --codedir .")
@@ -178,7 +177,7 @@ def main():
 
     # set up autoconf
 
-    logPath = prepareLogFile("setupAutoConf.log");
+    logPath = prepareLogFile("setupAutoConf");
     setupAutoconf()
 
     # create the release information file
@@ -187,7 +186,7 @@ def main():
 
     # run qmake for QT apps to create moc_ files
 
-    logPath = prepareLogFile("createQtMocFiles.log");
+    logPath = prepareLogFile("createQtMocFiles");
     hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
     createQtMocFiles(hawkEyeDir)
 
@@ -197,24 +196,24 @@ def main():
 
     # build netcdf support
     
-    logPath = prepareLogFile("buildNetcdf.log");
+    logPath = prepareLogFile("buildNetcdf");
     buildNetcdf()
 
     # build the package
 
-    logPath = prepareLogFile("buildPackage.log");
+    logPath = prepareLogFile("buildPackage");
     buildPackage()
 
     # perform the install
 
-    logPath = prepareLogFile("doInstall.log");
+    logPath = prepareLogFile("doInstall");
     doInstall();
 
     # check the install
 
-    logPath = prepareLogFile("logging-off");
+    logPath = prepareLogFile("no-logging");
     checkInstall()
-
+    
     # delete the tmp dir
 
     if (options.clean):
@@ -573,7 +572,9 @@ def prune(tree):
 
 def prepareLogFile(logFileName):
 
-    logPath = os.path.join(options.logDir, logFileName);
+    logPath = os.path.join(options.logDir, logFileName + ".log.txt");
+    if (logPath.find('no-logging') >= 0):
+        return
     if (options.debug):
         print >> sys.stderr, "====>> Creating log file: " + logPath + " <<=="
     fp = open(logPath, "w+")
@@ -590,7 +591,7 @@ def shellCmd(cmd):
 
     print >>sys.stderr, "====>> Running cmd:", cmd, " <<===="
     
-    if (logPath.find('logging-off') >= 0):
+    if (logPath.find('no-logging') >= 0):
         cmdToRun = cmd
     else:
         print >>sys.stderr, "======>> Log file is:", logPath, " <<======"
