@@ -919,6 +919,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'auto_remap_to_latlon'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("auto_remap_to_latlon");
+    tt->descr = tdrpStrDup("Option to automatically remap the grid to a lat-lon projection.");
+    tt->help = tdrpStrDup("If true, the data in the file will be remapped to a latlon grid which matches the existing grid in resolution and extent. Other remap parameters will be ignored.");
+    tt->val_offset = (char *) &auto_remap_to_latlon - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'remap_info'
     // ctype is '_remap_info_t'
     

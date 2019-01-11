@@ -455,6 +455,8 @@ public:
 
   tdrp_bool_t remap_output;
 
+  tdrp_bool_t auto_remap_to_latlon;
+
   remap_info_t remap_info;
 
   tdrp_bool_t use_horiz_limits;
@@ -472,7 +474,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[24];
+  mutable TDRPtable _table[25];
 
   const char *_className;
 
