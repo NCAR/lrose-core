@@ -65,9 +65,9 @@ if test ! "x$HDF5DIR" = x; then
 #  For some reason, libhdf5_cpp.so does not correctly get into the
 #  link line for HawkEye, so we need to force it
 #  TODO - Dixon - figure out why this occurs
-   LIBS="${LIBS} ${HDF5DIR}/lib/libhdf5_cpp.so"
-   LIBS="${LIBS} ${HDF5DIR}/lib/libhdf5_hl.so"
-   LIBS="${LIBS} ${HDF5DIR}/lib/libhdf5.so"
+#   LIBS="${LIBS} ${HDF5DIR}/lib/libhdf5_cpp.so"
+#   LIBS="${LIBS} ${HDF5DIR}/lib/libhdf5_hl.so"
+#   LIBS="${LIBS} ${HDF5DIR}/lib/libhdf5.so"
 fi    
 
 # Add the NETCDF directory to includes and link flags
