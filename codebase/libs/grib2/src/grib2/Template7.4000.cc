@@ -38,7 +38,10 @@
 #include <grib2/DataRepTemp.hh>
 #include <grib2/Template5.4000.hh>
 #include <dataport/port_types.h>
+
+#ifndef NO_JASPER_LIB
 #include <jasper/jasper.h>
+#endif
 
 using namespace std;
 
@@ -290,6 +293,14 @@ int Template7_pt_4000::unpack (ui08 *dataPtr)
 int Template7_pt_4000::decode_jpeg2000 (char *input, si32 inputSize, si32 *output) 
 {
 
+#ifdef NO_JASPER_LIB
+
+  cerr << "ERROR: Template7_pt_4000::decode_jpeg2000()" << endl;
+  cerr << " NO_JASPER_LIB installed - cannot decode jpeg2000" << endl;
+  return -3;
+
+#else
+
 // Converted to a C++ method from:
 //  SUBPROGRAM:    decode_jpeg2000      Decodes JPEG2000 code stream
 //   PRGMMR: Gilbert          ORG: W/NP11     DATE: 2002-12-02
@@ -370,6 +381,9 @@ int Template7_pt_4000::decode_jpeg2000 (char *input, si32 inputSize, si32 *outpu
 
     return GRIB_SUCCESS;
 
+// ifdef NO_JASPER_LIB
+#endif
+
 }
 
 
@@ -433,6 +447,15 @@ int Template7_pt_4000::encode_jpeg2000 (ui08 *cin,int pwidth,int pheight,int pnb
 *
 *$$$*/
 {
+
+#ifdef NO_JASPER_LIB
+
+  cerr << "ERROR: Template7_pt_4000::encode_jpeg2000()" << endl;
+  cerr << " NO_JASPER_LIB installed - cannot decode jpeg2000" << endl;
+  return -3;
+
+#else
+
     int ier,rwcnt;
     jas_image_t image;
     jas_stream_t *jpcstream,*istream;
@@ -538,6 +561,9 @@ int Template7_pt_4000::encode_jpeg2000 (ui08 *cin,int pwidth,int pheight,int pnb
 //      Return size of jpeg2000 code stream
 //
     return (rwcnt);
+
+// ifdef NO_JASPER_LIB
+#endif
 
 }
 
