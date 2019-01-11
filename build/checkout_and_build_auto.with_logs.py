@@ -160,12 +160,12 @@ def main():
 
     # get repos from git
 
-    logPath = prepareLogFile("gitCheckout");
+    logPath = prepareLogFile("git-checkout");
     gitCheckout()
 
     # install the distribution-specific makefiles
 
-    logPath = prepareLogFile("install_package_makefiles");
+    logPath = prepareLogFile("install-package-makefiles");
     os.chdir(codebaseDir)
     shellCmd("./make_bin/install_package_makefiles.py --package " + 
              package + " --codedir .")
@@ -178,7 +178,7 @@ def main():
 
     # set up autoconf
 
-    logPath = prepareLogFile("setupAutoConf");
+    logPath = prepareLogFile("setup-autoconf");
     setupAutoconf()
 
     # create the release information file
@@ -187,7 +187,7 @@ def main():
 
     # run qmake for QT apps to create moc_ files
 
-    logPath = prepareLogFile("createQtMocFiles");
+    logPath = prepareLogFile("create-qt-moc-files");
     hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
     createQtMocFiles(hawkEyeDir)
 
@@ -197,18 +197,17 @@ def main():
 
     # build netcdf support
     
-    logPath = prepareLogFile("buildNetcdf");
+    logPath = prepareLogFile("build-netcdf");
     buildNetcdf()
 
     # build the package
 
-    logPath = prepareLogFile("buildPackage");
     buildPackage()
 
     # perform the install
 
-    logPath = prepareLogFile("doInstall");
-    doInstall();
+    logPath = prepareLogFile("do-final-install");
+    doFinalInstall();
 
     # check the install
 
@@ -458,31 +457,101 @@ def buildNetcdf():
 
 def buildPackage():
 
-    os.chdir(coreDir)
+    global logPath
 
-    # perform the build
+    # set the environment
 
-    args = ""
-    args = args + " --prefix " + tmpDir
-    args = args + " --package " + package
+    os.environ["LDFLAGS"] = "-L" + prefix + "/lib " + \
+                            " -Wl,-rpath,'$$ORIGIN/" + package + "_runtime_libs:" + \
+                            prefix + "/lib'"
+    os.environ["FC"] = "gfortran"
+    os.environ["F77"] = "gfortran"
+    os.environ["F90"] = "gfortran"
+
+    if (platform == "darwin"):
+        os.environ["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
+    else:
+        os.environ["CXXFLAGS"] = " -std=c++11 "
+
+    # print out environment
+
+    logPath = prepareLogFile("print-environment");
+    cmd = "env"
+    shellCmd(cmd)
+
+    # run configure
+
+    logPath = prepareLogFile("run-configure");
+    os.chdir(codebaseDir)
+    cmd = "./configure --with-hdf5=" + prefix + \
+          " --with-netcdf=" + prefix + \
+          " --prefix=" + prefix
+    shellCmd(cmd)
+
+    # build the libraries
+
+    logPath = prepareLogFile("build-libs");
+    os.chdir(os.path.join(codebaseDir, "libs"))
+    cmd = "make -k -j 8"
+    shellCmd(cmd)
+
+    # install the libraries
+
+    logPath = prepareLogFile("install-libs-to-tmp");
+
+    cmd = "make -k install-strip"
+    shellCmd(cmd)
+
+    # build the apps
+
+    logPath = prepareLogFile("build-apps");
+    os.chdir(os.path.join(codebaseDir, "apps"))
+    cmd = "make -k -j 8"
+    shellCmd(cmd)
+
+    # install the apps
+
+    logPath = prepareLogFile("install-apps-to-tmp");
+    cmd = "make -k install-strip"
+    shellCmd(cmd)
+
+    # optionally install the scripts
+
     if (options.installScripts):
-        args = args + " --scripts "
-    shellCmd("./build/build_lrose.py " + args)
 
-    # detect which dynamic libs are needed
-    # copy the dynamic libraries into runtime area:
-    #     $prefix/bin/${package}_runtime_libs
+        logPath = prepareLogFile("install-scripts-to-tmp");
 
-    if (platform != "darwin"):
-        os.chdir(coreDir)
-        shellCmd("./codebase/make_bin/installOriginLibFiles.py " + \
-                 " --binDir " + tmpBinDir +
-                 " --relDir " + package + "_runtime_libs --debug")
+        # install perl5
+        
+        perl5Dir = os.path.join(prefix, "lib/perl5")
+        try:
+            os.makedirs(perl5Dir)
+        except:
+            print >>sys.stderr, "Dir exists: " + perl5Dir
+
+        perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
+        if (os.path.isdir(perl5LibDir)):
+            os.chdir(os.path.join(codebaseDir, "libs/perl5/src"))
+            shellCmd("rsync -av *pm " + perl5Dir)
+
+        # procmap
+
+        procmapScriptsDir = os.path.join(codebaseDir, "apps/procmap/src/scripts")
+        if (os.path.isdir(procmapScriptsDir)):
+            os.chdir(procmapScriptsDir)
+            shellCmd("./install_scripts.lrose " + prefix + "bin")
+
+        # general
+
+        generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")
+        if (os.path.isdir(generalScriptsDir)):
+            os.chdir(generalScriptsDir)
+            shellCmd("./install_scripts.lrose " + prefix + "bin")
 
 ########################################################################
-# perform install
+# perform final install
 
-def doInstall():
+def doFinalInstall():
 
     # make target dirs
 
@@ -583,6 +652,7 @@ def prepareLogFile(logFileName):
     logPath = os.path.join(options.logDir, logFileName + ".log.txt");
     if (logPath.find('no-logging') >= 0):
         return logPath
+    print >> sys.stderr, "========================= " + logFileName + " ========================="
     if (options.verbose):
         print >> sys.stderr, "====>> Creating log file: " + logPath + " <<=="
     fp = open(logPath, "w+")
@@ -597,13 +667,13 @@ def prepareLogFile(logFileName):
 
 def shellCmd(cmd):
 
-    print >>sys.stderr, "====>> Running cmd:", cmd
+    print >>sys.stderr, "Running cmd:", cmd
     
     if (logPath.find('no-logging') >= 0):
         cmdToRun = cmd
     else:
-        print >>sys.stderr, "====>> Log file is:", logPath
-        print >>sys.stderr, "       ...."
+        print >>sys.stderr, "Log file is:", logPath
+        print >>sys.stderr, "    ...."
         cmdToRun = cmd + " 1>> " + logPath + " 2>&1"
 
     try:
@@ -618,7 +688,7 @@ def shellCmd(cmd):
         print >>sys.stderr, "Execution failed:", e
         sys.exit(1)
 
-    print >>sys.stderr, "       ==>> done"
+    print >>sys.stderr, "    done"
     
 ########################################################################
 # Run - entry point
