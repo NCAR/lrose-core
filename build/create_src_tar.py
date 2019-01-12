@@ -2,7 +2,7 @@
 
 #===========================================================================
 #
-# Create an LROSE source release
+# Create an LROSE source tar file suitable for building
 #
 #===========================================================================
 
@@ -40,7 +40,7 @@ def main():
 
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
-    releaseDirDefault = os.path.join(homeDir, 'releases')
+    releaseDirDefault = os.path.join(homeDir, 'tarReleases')
     parser = OptionParser(usage)
     parser.add_option('--debug',
                       dest='debug', default=True,
@@ -106,10 +106,9 @@ def main():
 
     # compute release name and dir name
 
+    releaseName = options.package + "-" + versionStr
     if (options.osx):
-        releaseName = options.package + "-" + versionStr + ".src.mac_osx"
-    else:
-        releaseName = options.package + "-" + versionStr + ".src"
+        releaseName = options.package + "-" + versionStr + ".mac_osx"
     tarName = releaseName + ".tgz"
     tarDir = os.path.join(coreDir, releaseName)
 
@@ -260,8 +259,6 @@ def gitCheckout():
 
     os.chdir(tmpDir)
     shellCmd("git clone https://github.com/NCAR/lrose-core")
-    shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
-    shellCmd("git clone https://github.com/NCAR/lrose-displays")
 
 ########################################################################
 # set up autoconf for configure etc
@@ -350,48 +347,24 @@ def createTarFile():
 
     # copy some scripts into tar directory
 
-    shellCmd("rsync -av build/create_bin_release.py " + tarDir)
-    shellCmd("rsync -av build/build_src_release.py " + tarDir)
+    #shellCmd("rsync -av build/build_src_release.py " + tarDir)
 
     # move lrose contents into tar dir
 
     for fileName in [ "LICENSE.txt", "README.md", "ReleaseInfo.txt" ]:
         os.rename(fileName, os.path.join(tarDir, fileName))
         
-    for dirName in [ "build", "codebase", "docs", "release_notes" ]:
+    for dirName in [ "build", "docs", "release_notes" ]:
         os.rename(dirName, os.path.join(tarDir, dirName))
 
-    # move netcdf support into tar dir
-
-    netcdfDir = os.path.join(tmpDir, "lrose-netcdf")
-    netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
-    os.makedirs(netcdfSubDir)
-
-    # Copy the color-scales dir from lrose-displays into tar dir (under share)
-    
-    displaysDir = os.path.join(tmpDir, "lrose-displays/color_scales")
-    displaysSubDir = os.path.join(tarDir, "share/")
-    os.makedirs(displaysSubDir)
-    shellCmd("rsync -av " + displaysDir + " " + displaysSubDir)
-    
-    if (options.package == "cidd"):
-        name = "build_and_install_netcdf.m32"
-        os.rename(os.path.join(netcdfDir, name),
-                  os.path.join(netcdfSubDir, name))
-    else:
-        name = "build_and_install_netcdf"
-        os.rename(os.path.join(netcdfDir, name),
-                  os.path.join(netcdfSubDir, name))
-        name = "build_and_install_netcdf.osx"
-        os.rename(os.path.join(netcdfDir, name),
-                  os.path.join(netcdfSubDir, name))
-
-    for name in [ "README.md", "tar_files" ]:
-        os.rename(os.path.join(netcdfDir, name),
-                  os.path.join(netcdfSubDir, name))
+    os.chdir(codebaseDir)
+    entries = os.listdir(codebaseDir)
+    for entry in entries:
+        os.rename(entry, os.path.join(tarDir, entry))
 
     # create the tar file
 
+    os.chdir(coreDir)
     shellCmd("tar cvfzh " + tarName + " " + releaseName)
     
 ########################################################################
