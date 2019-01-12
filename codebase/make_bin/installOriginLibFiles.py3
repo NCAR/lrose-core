@@ -37,7 +37,7 @@ def main():
                         ',libcommon,libcompiler,libcopy,libcore' + \
                         ',libcrypto,libdispatch,libdyld,libkeymgr' + \
                         ',libobjc,libremovefile,libsystem,libunwind' + \
-                        ',libpthread,libdl,libX,libxpc,libgcc'
+                        ',libpthread,libdl,libX,libxpc'
     else:
         # LINUX
         ignoreDefault = 'libc.so,libpthread.so,libdl.so'
@@ -73,15 +73,15 @@ def main():
         options.debug = True
 
     if (options.debug == True):
-        print("  Running " + thisScriptName, file = sys.stderr)
-        print("    platform: ", platform, file = sys.stderr)
-        print("  Options:", file = sys.stderr)
-        print("    debug: ", options.debug, file = sys.stderr)
-        print("    verbose: ", options.verbose, file = sys.stderr)
-        print("    binDir: ", options.binDir, file = sys.stderr)
-        print("    relDir: ", options.relDir, file = sys.stderr)
-        print("    ignore: ", options.ignore, file = sys.stderr)
-        print("    ignoreList: ", ignoreList, file = sys.stderr)
+        print("  Running " + thisScriptName, file=sys.stderr)
+        print("    platform: ", platform, file=sys.stderr)
+        print("  Options:", file=sys.stderr)
+        print("    debug: ", options.debug, file=sys.stderr)
+        print("    verbose: ", options.verbose, file=sys.stderr)
+        print("    binDir: ", options.binDir, file=sys.stderr)
+        print("    relDir: ", options.relDir, file=sys.stderr)
+        print("    ignore: ", options.ignore, file=sys.stderr)
+        print("    ignoreList: ", ignoreList, file=sys.stderr)
 
     # create list of binaries in install dir
     
@@ -93,12 +93,12 @@ def main():
             binPathList.append(binPath)
 
     if (options.debug):
-        print("------------------------------------------------", file = sys.stderr)
-        print("====>> binPathList: ", file = sys.stderr)
-        print("====>> nBins: ", len(binPathList), file = sys.stderr)
+        print("------------------------------------------------", file=sys.stderr)
+        print("====>> binPathList: ", file=sys.stderr)
+        print("====>> nBins: ", len(binPathList), file=sys.stderr)
         for binPath in binPathList:
-            print("  ", binPath, file = sys.stderr)
-        print("------------------------------------------------", file = sys.stderr)
+            print("  ", binPath, file=sys.stderr)
+        print("------------------------------------------------", file=sys.stderr)
         
     # compile dictionary of dynamic libraries
     # that are dependent on the binaries
@@ -113,20 +113,20 @@ def main():
         libsInBins.update(libsInFile)
 
     if (options.verbose):
-        print("------------------------------------------------", file = sys.stderr)
-        print("====>> dictionary of libs in bins: ", file = sys.stderr)
-        print("====>> nLibs: ", len(libsInBins), file = sys.stderr)
-        for libName in libsInBins.keys():
+        print("------------------------------------------------", file=sys.stderr)
+        print("====>> dictionary of libs in bins: ", file=sys.stderr)
+        print("====>> nLibs: ", len(libsInBins), file=sys.stderr)
+        for libName in list(libsInBins.keys()):
             libPath = libsInBins[libName]
-            print("  ", libName, ",", libPath, file = sys.stderr)
-        print("------------------------------------------------", file = sys.stderr)
+            print("  ", libName, ",", libPath, file=sys.stderr)
+        print("------------------------------------------------", file=sys.stderr)
 
     # now for each lib add any sub libs needed
     # also keep a lookup of libs for each lib file
     
     libPathLookup = {}
     libsInLibs = {}
-    for libName in libsInBins.keys():
+    for libName in list(libsInBins.keys()):
         libPath = libsInBins[libName]
         libsInFile = {}
         findLibsForFile(libPath, libsInFile)
@@ -140,7 +140,7 @@ def main():
     while (startCount != endCount):
         startCount = len(libPathLookup)
         libsInLibs2 = {}
-        for libName in libsInLibs.keys():
+        for libName in list(libsInLibs.keys()):
             libPath = libsInLibs[libName]
             libsInFile = {}
             findLibsForFile(libPath, libsInFile)
@@ -150,30 +150,30 @@ def main():
         endCount = len(libPathLookup)
 
     if (options.verbose):
-        print("------------------------------------------------", file = sys.stderr)
-        print("====>> dictionary of libs in libs: ", file = sys.stderr)
-        print("====>> nLibs: ", len(libsInLibs), file = sys.stderr)
-        for libName in libsInLibs.keys():
+        print("------------------------------------------------", file=sys.stderr)
+        print("====>> dictionary of libs in libs: ", file=sys.stderr)
+        print("====>> nLibs: ", len(libsInLibs), file=sys.stderr)
+        for libName in list(libsInLibs.keys()):
             libPath = libsInLibs[libName]
-            print("  ", libName, ",", libPath, file = sys.stderr)
-        print("------------------------------------------------", file = sys.stderr)
+            print("  ", libName, ",", libPath, file=sys.stderr)
+        print("------------------------------------------------", file=sys.stderr)
 
     # merge lib dicts
 
-    libsInAll = {**libsInBins, **libsInLibs}
+    libsInAll = dict(list(libsInBins.items()) + list(libsInLibs.items()))
 
     if (options.debug):
-        print("------------------------------------------------", file = sys.stderr)
-        print("====>> dictionary of all libs: ", file = sys.stderr)
-        print("====>> nLibs: ", len(libsInAll), file = sys.stderr)
-        for libName in libsInAll.keys():
+        print("------------------------------------------------", file=sys.stderr)
+        print("====>> dictionary of all libs: ", file=sys.stderr)
+        print("====>> nLibs: ", len(libsInAll), file=sys.stderr)
+        for libName in list(libsInAll.keys()):
             libPath = libsInAll[libName]
-            print("  ", libName, ",", libPath, file = sys.stderr)
-        print("------------------------------------------------", file = sys.stderr)
+            print("  ", libName, ",", libPath, file=sys.stderr)
+        print("------------------------------------------------", file=sys.stderr)
 
     # copy each library file into runtime area
 
-    for libName in libsInAll.keys():
+    for libName in list(libsInAll.keys()):
         libPath = libsInAll[libName]
         copyLibToRelDir(libName, libPath)
 
@@ -187,7 +187,7 @@ def main():
 
     for binPath in binPathList:
         libsInBin = binPathLookup[binPath]
-        for libName in libsInBin.keys():
+        for libName in list(libsInBin.keys()):
             libPath = libsInBin[libName]
             modifyBinSubPathOsx(binPath, libName, libPath)
 
@@ -195,11 +195,11 @@ def main():
     # id is correct for relative location and that their
     # embedded dynamic library paths point to the relative location
     
-    for libName in libsInAll.keys():
+    for libName in list(libsInAll.keys()):
         libPath = libsInAll[libName]
         modifyLibIdOsx(libName)
         libsInLib = libPathLookup[libPath]
-        for subLibName in libsInLib.keys():
+        for subLibName in list(libsInLib.keys()):
             subLibPath = libsInLib[subLibName]
             modifyLibSubPathOsx(libName, subLibName, subLibPath)
 
@@ -214,7 +214,7 @@ def main():
 def findLibsForFile(filePath, validLibs):
     
     if (options.verbose):
-        print("===>>> finding libs for file: ", filePath, file = sys.stderr)
+        print("===>>> finding libs for file: ", filePath, file=sys.stderr)
 
     # get list of dynamic libs
     
@@ -234,8 +234,8 @@ def findLibsForFile(filePath, validLibs):
     allLibs = {}
 
     for line in lines:
+
         line.strip()
-        line = line.decode("utf-8")
         lineToks = line.split()
         libName = ''
         libPath = ''
@@ -270,7 +270,7 @@ def findLibsForFile(filePath, validLibs):
 
     # loop through libs
 
-    for libName in allLibs.keys():
+    for libName in list(allLibs.keys()):
 
         libPath = allLibs[libName]
 
@@ -282,14 +282,14 @@ def findLibsForFile(filePath, validLibs):
                 # ignore this library - belongs to system
                 ignoreThisLib = True
                 if (options.verbose):
-                    print("  ===>>> ignoring lib: ", libName, file = sys.stderr)
+                    print("  ===>>> ignoring lib: ", libName, file=sys.stderr)
                 break
 
         if (ignoreThisLib == False):
             # add to main dictionary
             validLibs[libName] = libPath
             if (options.verbose):
-                print("  ===>>> adding lib: ", libName, file = sys.stderr)
+                print("  ===>>> adding lib: ", libName, file=sys.stderr)
 
 ########################################################################
 # Test if a file is an execultable or library
@@ -297,54 +297,42 @@ def findLibsForFile(filePath, validLibs):
 
 def fileIsBinary(filePath):
 
-    
     # is this a file?
+
     if (os.path.isfile(filePath) == False):
         return False
 
     # check the file is binary
 
     if (options.verbose):
-        print("  Checking file is binary: ", filePath, file = sys.stderr)
+        print("  Checking file is binary: ", filePath, file=sys.stderr)
 
+    pipe = subprocess.Popen('file ' + filePath, shell=True,
+                            stdout=subprocess.PIPE).stdout
+    lines = pipe.readlines()
     isExecFile = False
-    
-    f = os.popen("file " + filePath, 'r')
-    line = f.read()
+
     if (platform == "darwin"):
-        if(line.find('Mach-O') >= 0):
-            isExecFile = True
+
+        # MAC OSX
+
+        for line in lines:
+            if (line.find('Mach-O') >= 0):
+                isExecFile = True
+                break
+
     else:
-        if(line.fine('ELF') >= 0):
-            isExecFile = True
-            
-    # pipe = subprocess.Popen('file ' + filePath, shell=True,
-    #                         stdout=subprocess.PIPE).stdout
-    # lines = pipe.readlines()
-    # isExecFile = False
 
-    # if (platform == "darwin"):
-
-    #     # MAC OSX
-
-    #     for line in lines:
-    #         print("++++" + line)
-    #         if (line.find('Mach-O') >= 0):
-    #             isExecFile = True
-    #             break
-
-    # else:
-
-    #     # LINUX
+        # LINUX
     
-    #     for line in lines:
-    #         if (line.find('ELF') >= 0):
-    #             isExecFile = True
-    #             break
-    
+        for line in lines:
+            if (line.find('ELF') >= 0):
+                isExecFile = True
+                break
+
     if (isExecFile):
         if (options.verbose):
-            print("INFO - isExecutable: ", filePath, file = sys.stderr)
+            print("INFO - isExecutable: ", filePath, file=sys.stderr)
 
     return isExecFile
 
@@ -358,12 +346,12 @@ def copyLibToRelDir(libName, libPath):
     
     if (libPath.find("loader_path") >= 0):
         if (options.debug):
-            print("===>>> lib contains loader_path, ignoring: ", libPath, file = sys.stderr)
+            print("===>>> lib contains loader_path, ignoring: ", libPath, file=sys.stderr)
         return
             
     if (options.debug):
-        print("===>>> Copying lib: ", libPath, file = sys.stderr)
-        print("                to: ", destDir, file = sys.stderr)
+        print("===>>> Copying lib: ", libPath, file=sys.stderr)
+        print("                to: ", destDir, file=sys.stderr)
 
     # ensure directory exists
     
@@ -378,7 +366,7 @@ def copyLibToRelDir(libName, libPath):
     # try:
     #     shutil.copy2(libPath, destDir)
     # except (shutil.Error, IOError), err:
-    #     print("===>>> WARNING: ", err
+    #     print >>sys.stderr, "===>>> WARNING: ", err
 
 ########################################################################
 # Modify a library dependency paths in an executable file
@@ -386,8 +374,8 @@ def copyLibToRelDir(libName, libPath):
 def modifyBinSubPathOsx(binPath, libName, libPath):
 
     if (options.debug):
-        print("===>>> modifyBinSubPathOsx, binPath, libName, libPath: ",
-            binPath, ",", libName, ",", libPath, file = sys.stderr)
+        print("===>>> modifyBinSubPathOsx, binPath, libName, libPath: ", \
+            binPath, ",", libName, ",", libPath, file=sys.stderr)
 
     libRelDir = os.path.join("@loader_path", options.relDir)
     libRelPath = os.path.join(libRelDir, libName)
@@ -409,7 +397,7 @@ def modifyBinSubPathOsx(binPath, libName, libPath):
 def modifyLibIdOsx(libName):
 
     if (options.debug):
-        print("===>>> modifyLibIdOsx, libName: ", libName, file = sys.stderr)
+        print("===>>> modifyLibIdOsx, libName: ", libName, file=sys.stderr)
 
     libRelDir = os.path.join("@loader_path", options.relDir)
     libRelPath = os.path.join(libRelDir, libName)
@@ -434,8 +422,8 @@ def modifyLibIdOsx(libName):
 def modifyLibSubPathOsx(parentLibName, subLibName, subLibPath):
 
     if (options.debug):
-        print("===>>> modifyLibSubPathOsx, parentLibName, subLibName, subLibPath: ",
-            parentLibName, ",", subLibName, ",", subLibPath, file = sys.stderr)
+        print("===>>> modifyLibSubPathOsx, parentLibName, subLibName, subLibPath: ", \
+            parentLibName, ",", subLibName, ",", subLibPath, file=sys.stderr)
 
     subLibRelPath = os.path.join("@loader_path", subLibName)
 
@@ -460,28 +448,25 @@ def modifyLibSubPathOsx(parentLibName, subLibName, subLibPath):
 def runCommand(cmd):
 
     if (options.debug):
-        print("running cmd:",cmd, file = sys.stderr)
+        print("running cmd:",cmd, file=sys.stderr)
     
     try:
         retcode = subprocess.check_call(cmd, shell=True)
         if retcode != 0:
-            print("Child exited with code: ", retcode, file = sys.stderr)
-            # exit(1)
-            print("exit(1) code commented out running the following command:")
-            print("=================", cmd)
+            print("Child exited with code: ", retcode, file=sys.stderr)
+            exit(1)
         else:
             if (options.debug):
-                print("Child returned code: ", retcode, file = sys.stderr)
-    #except OSError as e:
-    except:
-        e = "generic exception"
-        print("Execution failed:", e, file = sys.stderr)
-        ## exit(1) TODO
-        print("exit(1) code commented out running the following command:")
-        print("=================", cmd)
+                print("Child returned code: ", retcode, file=sys.stderr)
+    except OSError as e:
+        print("Execution failed:", e, file=sys.stderr)
+        exit(1)
 
 ########################################################################
 # Run - entry point
+
+if sys.version_info[0] < 3:
+    raise Exception("Must be using Python 3")
 
 if __name__ == "__main__":
    main()

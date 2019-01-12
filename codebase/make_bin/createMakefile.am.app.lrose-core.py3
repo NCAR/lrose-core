@@ -623,6 +623,7 @@ def writeMakefileAm():
     fo.write("\n")
 
     if (needQt == True):
+        fo.write("PKG_CONFIG_PATH = /usr/lib/pkgconfig\n")
         fo.write("PKG_CONFIG_PATH += /usr/local/opt/qt/lib/pkgconfig\n")
 
     fo.write("AM_CFLAGS = -I.\n")
@@ -700,6 +701,9 @@ def writeMakefileAm():
 
 ########################################################################
 # Run - entry point
+
+if sys.version_info[0] < 3:
+    raise Exception("Must be using Python 3")
 
 if __name__ == "__main__":
    main()

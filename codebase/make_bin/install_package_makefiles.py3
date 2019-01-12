@@ -8,6 +8,7 @@
 
 import os
 import sys
+from sys import platform
 import shutil
 from optparse import OptionParser
 from datetime import datetime
@@ -31,7 +32,7 @@ def main():
     defaultCodeDir = os.path.join(coreDir, "codebase")
     parser = OptionParser(usage)
     parser.add_option('--debug',
-                      dest='debug', default='False',
+                      dest='debug', default=False,
                       action="store_true",
                       help='Set debugging on')
     parser.add_option('--codedir',
@@ -41,17 +42,26 @@ def main():
                       dest='package', default="lrose-core",
                       help='Name of distribution for which we are building')
     parser.add_option('--osx',
-                      dest='osx', default='False',
+                      dest='osx', default=False,
                       action="store_true",
                       help='Configure for MAC OSX')
 
     (options, args) = parser.parse_args()
+
+    # set flag to indicate OSX
+    # If we are on a mac, force this to true
+
+    isOsx = False
+    if (platform == "darwin"):
+        isOsx = True
+    if (options.osx):
+        isOsx = True
     
-    if (options.debug == True):
-        print("Running %s:" % thisScriptName, file = sys.stderr)
-        print("  codedir:", options.codedir, file = sys.stderr)
-        print("  package:", options.package, file = sys.stderr)
-        print("  osx: ", options.osx, file = sys.stderr)
+    if (options.debug):
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  codedir:", options.codedir, file=sys.stderr)
+        print("  package:", options.package, file=sys.stderr)
+        print("  osx: ", isOsx, file=sys.stderr)
 
     # go to the code dir
 
@@ -59,7 +69,7 @@ def main():
 
     # install the makefiles
 
-    if (options.osx == True):
+    if (isOsx):
         doInstallOsx()
     else:
         doInstall()
@@ -74,9 +84,8 @@ def doInstall():
     # search for given makefile name
 
     packageMakefileName = "makefile" + "." + options.package
-    if (options.debug == True):
-        print("Searching for makefiles: ", packageMakefileName,
-              file = sys.stderr)
+    if (options.debug):
+        print("Searching for makefiles: ", packageMakefileName, file=sys.stderr)
 
     # first remove any existing 'makefile' files
 
@@ -87,7 +96,7 @@ def doInstall():
             makefilePath = os.path.join(root, "makefile")
             if (os.path.isfile(makefilePath)):
                 if (options.debug):
-                    print("Removing " + makefilePath, file = sys.stderr)
+                    print("Removing " + makefilePath, file=sys.stderr)
                 os.remove(makefilePath)
 
     # find _makefiles dirs in tree
@@ -102,8 +111,8 @@ def doInstall():
                 if (os.path.isfile(packageMakefilePath)):
                     # copy the package makefile to the root/makefile
                     if (options.debug):
-                        print("Copying " + packageMakefilePath + 
-                              " to " + makefilePath, file = sys.stderr)
+                        print("Copying " + packageMakefilePath + \
+                        " to " + makefilePath, file=sys.stderr)
                     shutil.copy(packageMakefilePath, makefilePath)
 
     return
@@ -116,9 +125,8 @@ def doInstallOsx():
     # search for given makefile name
 
     packageMakefileName = "makefile" + "." + options.package
-    if (options.debug == True):
-        print("Searching for makefiles: ", packageMakefileName,
-              file = sys.stderr)
+    if (options.debug):
+        print("Searching for makefiles: ", packageMakefileName, file=sys.stderr)
 
     # find _makefiles dirs in tree
 
@@ -133,14 +141,14 @@ def doInstallOsx():
                 if (os.path.isfile(packageMakefilePath)):
                     # remove makefile in the target dir
                     # because OSX is not properly case sensitive
-                    if (os.path.isfile(makefilePathLower) == True):
+                    if (os.path.isfile(makefilePathLower)):
                         os.remove(makefilePathLower)
-                    if (os.path.isfile(makefilePathUpper) == True):
+                    if (os.path.isfile(makefilePathUpper)):
                         os.remove(makefilePathUpper)
                     # copy the package makefile to the root/makefile
                     if (options.debug):
-                        print("Copying " + packageMakefilePath +
-                            " to " + makefilePathLower, file = sys.stderr)
+                        print("Copying " + packageMakefilePath + \
+                            " to " + makefilePathLower, file=sys.stderr)
                     shutil.copy(packageMakefilePath, makefilePathLower)
 
     return
