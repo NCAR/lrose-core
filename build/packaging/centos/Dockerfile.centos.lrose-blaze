@@ -26,41 +26,16 @@ RUN \
     
 RUN cd /usr/local/src; git clone https://github.com/NCAR/lrose-core
 
-# set up build environment
+# perform the build
 
-ENV HOST_OS LINUX_LROSE
-ENV RAP_MAKE_INC_DIR /usr/local/src/lrose-core/codebase/make_include
-ENV RAP_MAKE_BIN_DIR /usr/local/src/lrose-core/codebase/make_bin
-ENV RAP_INC_DIR /usr/local/include
-ENV RAP_LIB_DIR /usr/local/lib
-ENV RAP_BIN_DIR /usr/local/bin
-ENV RAP_SHARED_INC_DIR /usr/local/include
-ENV RAP_SHARED_LIB_DIR /usr/local/lib
-ENV RAP_SHARED_BIN_DIR /usr/local/bin
-
-# install makefiles
-
-RUN \
-  cd /usr/local/src/lrose-core; \
-  ./codebase/make_bin/install_package_makefiles.py --package lrose-blaze --debug
-
-# build libraries
-
-RUN \
-  cd /usr/local/src/lrose-core/codebase/libs; /bin/make -j 8 install_include; \
-  cd /usr/local/src/lrose-core/codebase/libs; /bin/make -j 8 opt; \
-  cd /usr/local/src/lrose-core/codebase/libs; /bin/make -j 8 install
-
-# build apps
-
-RUN \
-  cd /usr/local/src/lrose-core/codebase/apps; /bin/make -j 8 opt; \ 
-  cd /usr/local/src/lrose-core/codebase/apps; /bin/make -j 8 install
+RUN cd /usr/local/src/lrose-core/build; \
+    ./checkout_and_build_auto.py --package lrose-blaze \
+    --useSystemNetcdf --prefix /usr/local/bin
 
 # make the spec file available to the container
 #
 
-ADD . /tmp/rpm_files
+#ADD . /tmp/rpm_files
 
 # create user rpmbuilder
 #RUN useradd -ms /bin/bash rpmbuilder 
@@ -69,8 +44,8 @@ ADD . /tmp/rpm_files
 
 # build hierarchy for rpmbuild:
 
-RUN cd ~
-RUN mkdir BUILD RPMS SOURCES SPECS SRPMS
+#RUN cd ~
+#RUN mkdir BUILD RPMS SOURCES SPECS SRPMS
 
 #
 # import the files
