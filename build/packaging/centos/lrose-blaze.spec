@@ -1,41 +1,37 @@
-%define build_timestamp %(date +"%Y%m%d")
-%define _topdir     /root/build
-%define name        lrose 
-%define release     %{build_timestamp}
-%define version     blaze 
-%define buildroot %{_topdir}/%{name}-%{version}-%{release}-root
+%define build_timestamp  %(date +"%Y%m%d")
+%define topDir           /root/build
+%define name             lrose
+%define release          %{build_timestamp}
+%define version          blaze 
+%define buildroot        %{topDir}/%{name}-%{version}-%{release}-root
  
-BuildRoot:      %{_topdir}/installedhere
+BuildRoot:      %{topDir}/installedhere
 Summary:        LROSE
-License:        BSD LICENSE
+License:        BSD
 Name:           %{name}
 Version:        %{version}
 Release:        %{release}
-#Source:         
-# %{name}-%{version}-%{release}.src.tgz
+Source:         %{name}-%{version}-%{release}.tgz
 Prefix:         /usr/local/lrose
 Group:          Scientific Tools
 AutoReqProv:    no
  
 %description
-LROSE - Lidar Radar Open Software Environment
+LROSE - The Lidar Radar Open Software Environment Core
  
-#%prep
-#%setup 
-# -q -n lrose-blaze-20180516.src
+%prep
+%setup -q
  
 %build
+%configure
+%make_install
 
-git clone https://github.com/NCAR/lrose-core
-./lrose-core/build/checkout_and_build_auto.py  --package=lrose-blaze 
-
-rm -f %{_topdir}/SPECS/lrose-pkg-files
-# find /usr/local/lrose -type d | sed 's/usr/duck/'
-find /root/lrose -type d | sed 's/root/usr\/local/' > %{_topdir}/SPECS/lrose-pkg-files
-find /root/lrose -type l | sed 's/root/usr\/local/' >> %{_topdir}/SPECS/lrose-pkg-files
+rm -f %{topDir}/SPECS/lrose-pkg-files
+find /root/lrose -type d | sed 's/root/usr\/local/' > %{topDir}/SPECS/lrose-pkg-files
+find /root/lrose -type l | sed 's/root/usr\/local/' >> %{topDir}/SPECS/lrose-pkg-files
 
 %install
 mkdir -p %{buildroot}/usr/local/lrose
 rsync -ra /root/lrose %{buildroot}/usr/local
 
-%files -f %{_topdir}/SPECS/lrose-pkg-files
+%files -f %{topDir}/SPECS/lrose-pkg-files

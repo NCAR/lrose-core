@@ -33,11 +33,11 @@ RUN \
     cd ~/git; \
     git clone https://github.com/NCAR/lrose-core
 
-# create a release
+# create a source tar file
 
 RUN \
     cd ~/git/lrose-core/build; \
-    ./create_src_release.py --package lrose-blaze
+    ./create_src_tar.py --package lrose-blaze
 
 # build hierarchy for rpmbuild
 
@@ -46,15 +46,15 @@ RUN \
     cd ~/build; \
     mkdir BUILD RPMS SOURCES SPECS SRPMS
 
-# copy in the files
+# copy in the required files
 
 RUN \
     cp ~/git/lrose-core/build/packaging/centos/lrose-blaze.spec SPECS; \
-    cp ~/releases/lrose-blaze/lrose-blaze-????????.src.tgz SOURCES
+    cp ~/tarReleases/lrose-blaze/lrose-blaze-????????.src.tgz SOURCES
 
 # perform the build
 
-#RUN rpmbuild -v -bb --define "debug_package %{nil}" SPECS/lrose-blaze.spec
+RUN rpmbuild -v -bb --define "debug_package %{nil}" SPECS/lrose-blaze.spec
 
 # export the package
 
