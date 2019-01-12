@@ -1,5 +1,5 @@
 %define build_timestamp %(date +"%Y%m%d")
-%define _topdir     /tmp/centos_blaze
+%define _topdir     /root/build
 %define name        lrose 
 %define release     %{build_timestamp}
 %define version     blaze 
