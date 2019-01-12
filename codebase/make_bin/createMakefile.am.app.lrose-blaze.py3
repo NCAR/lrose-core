@@ -598,7 +598,7 @@ def writeMakefileAm():
 
     fo.write("# load flags\n")
     fo.write("\n")
-    fo.write("AM_LDFLAGS = -headerpad_max_install_names -L.\n")
+    fo.write("AM_LDFLAGS = -L.\n")
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
     if (needQt == True):

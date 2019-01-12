@@ -34,7 +34,7 @@ def main():
     global coreDir
     global codebaseDir
     global codebasePath
-    global tmpDir
+    global tmpBuildDir
     global tmpBinDir
     global binDir
     global libDir
@@ -68,9 +68,9 @@ def main():
                       dest='package', default='lrose-core',
                       help='Package name. Options are: ' + \
                       'lrose-core (default), cidd, radx, titan, lrose-blaze')
-    parser.add_option('--tag',
-                      dest='tag', default='master',
-                      help='Tag to check out')
+    parser.add_option('--lroseCoreTag',
+                      dest='lroseCoreTag', default='master',
+                      help='Tag to check out lrose-core')
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDirDefault,
                       help='Install directory')
@@ -88,6 +88,10 @@ def main():
                       dest='installScripts', default=False,
                       action="store_true",
                       help='Install scripts as well as binaries')
+    parser.add_option('--useSystemNetcdf',
+                      dest='useSystemNetcdf', default=False,
+                      action="store_true",
+                      help='Use system install of NetCDF and HDF5 instead of building it here')
 
     (options, args) = parser.parse_args()
     
@@ -116,14 +120,14 @@ def main():
 
     # set directories
     
-    tmpDir = os.path.join(options.buildDir, 'tmp')
+    tmpBuildDir = os.path.join(options.buildDir, 'tmp')
     coreDir = os.path.join(options.buildDir, "lrose-core")
     displaysDir = os.path.join(options.buildDir, "lrose-displays")
     netcdfDir = os.path.join(options.buildDir, "lrose-netcdf")
     codebaseDir = os.path.join(coreDir, "codebase")
     releaseName = options.package + "-" + versionStr + ".src"
     
-    tmpBinDir = os.path.join(tmpDir, 'bin')
+    tmpBinDir = os.path.join(tmpBuildDir, 'bin')
     binDir = os.path.join(prefix, 'bin')
     libDir = os.path.join(prefix, 'lib')
     includeDir = os.path.join(prefix, 'include')
@@ -133,6 +137,7 @@ def main():
 
     if (options.debug):
         print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  lroseCoreTag: ", options.lroseCoreTag, file=sys.stderr)
         print("  package: ", package, file=sys.stderr)
         print("  releaseName: ", releaseName, file=sys.stderr)
         print("  static: ", options.static, file=sys.stderr)
@@ -147,6 +152,7 @@ def main():
         print("  libDir: ", libDir, file=sys.stderr)
         print("  includeDir: ", includeDir, file=sys.stderr)
         print("  shareDir: ", shareDir, file=sys.stderr)
+        print("  useSystemNetcdf: ", options.useSystemNetcdf, file=sys.stderr)
 
     # create build dir
     
@@ -155,7 +161,7 @@ def main():
     # make tmp dirs
 
     try:
-        os.makedirs(tmpDir)
+        os.makedirs(tmpBuildDir)
         os.makedirs(tmpBinDir)
         os.makedirs(options.logDir)
     except:
@@ -200,8 +206,9 @@ def main():
 
     # build netcdf support
     
-    logPath = prepareLogFile("build-netcdf");
-    buildNetcdf()
+    if (options.useSystemNetcdf == False):
+        logPath = prepareLogFile("build-netcdf");
+        buildNetcdf()
 
     # build the package
 
@@ -262,8 +269,19 @@ def createBuildDir():
 def gitCheckout():
 
     os.chdir(options.buildDir)
-    shellCmd("git clone --branch " + options.tag + " https://github.com/NCAR/lrose-core")
-    shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
+
+    # lrose core
+
+    shellCmd("git clone --branch " + options.lroseCoreTag + \
+             " https://github.com/NCAR/lrose-core")
+
+    # netcdf and hdf5
+
+    if (options.useSystemNetcdf == False):
+        shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
+
+    # color scales and maps in displays repo
+
     shellCmd("git clone https://github.com/NCAR/lrose-displays")
 
 ########################################################################
@@ -316,7 +334,7 @@ def createReleaseInfoFile():
 
     # go to core dir
 
-    os.chdir(tmpDir)
+    os.chdir(tmpBuildDir)
 
     # open info file
 
@@ -448,12 +466,12 @@ def buildNetcdf():
 
     os.chdir(netcdfDir)
     if (package == "cidd"):
-        shellCmd("./build_and_install_netcdf.m32 -x " + tmpDir)
+        shellCmd("./build_and_install_netcdf.m32 -x " + tmpBuildDir)
     else:
         if platform == "darwin":
-            shellCmd("./build_and_install_netcdf.osx -x " + tmpDir)
+            shellCmd("./build_and_install_netcdf.osx -x " + tmpBuildDir)
         else:
-            shellCmd("./build_and_install_netcdf -x " + tmpDir)
+            shellCmd("./build_and_install_netcdf -x " + tmpBuildDir)
 
 ########################################################################
 # build package
@@ -464,9 +482,9 @@ def buildPackage():
 
     # set the environment
 
-    os.environ["LDFLAGS"] = "-L" + prefix + "/lib " + \
+    os.environ["LDFLAGS"] = "-L" + tmpBuildDir + "/lib " + \
                             " -Wl,-rpath,'$$ORIGIN/" + package + "_runtime_libs:" + \
-                            prefix + "/lib'"
+                            tmpBuildDir + "/lib'"
     os.environ["FC"] = "gfortran"
     os.environ["F77"] = "gfortran"
     os.environ["F90"] = "gfortran"
@@ -486,9 +504,12 @@ def buildPackage():
 
     logPath = prepareLogFile("run-configure");
     os.chdir(codebaseDir)
-    cmd = "./configure --with-hdf5=" + prefix + \
-          " --with-netcdf=" + prefix + \
-          " --prefix=" + prefix
+    if (options.useSystemNetcdf):
+        cmd = "./configure --prefix=" + tmpBuildDir
+    else:
+        cmd = "./configure --with-hdf5=" + tmpBuildDir + \
+              " --with-netcdf=" + tmpBuildDir + \
+                                " --prefix=" + tmpBuildDir
     shellCmd(cmd)
 
     # build the libraries
@@ -585,7 +606,7 @@ def doFinalInstall():
 
     # install binaries and libs
 
-    os.chdir(tmpDir)
+    os.chdir(tmpBuildDir)
 
     shellCmd("rsync -av bin " + prefix)
     shellCmd("rsync -av lib " + prefix)
