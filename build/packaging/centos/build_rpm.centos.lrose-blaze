@@ -6,8 +6,13 @@
 
 cd ~/git/lrose-core/build/packaging/centos
 
-docker build -t centos:lrose-blaze -f Dockerfile.centos.lrose-blaze .
+mkdir -p /tmp/centos.lrose-blaze
+
+docker build \
+#    -v type=bind,source=/tmp/centos.lrose-blaze,target=/tmp \
+    -t centos:lrose-blaze \
+    -f Dockerfile.centos.lrose-blaze .
+
 
 # docker cp 5424a9571ff6:/root/build/RPMS /tmp
-
 
