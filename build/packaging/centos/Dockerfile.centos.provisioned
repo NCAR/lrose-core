@@ -26,3 +26,13 @@ RUN \
     cd /usr/bin; \
     ln -s qmake-qt5 qmake;
 
+# get lrose-core
+    
+RUN \
+  cd ${HOME}; \
+  mkdir -p ~/git; \
+  cd ~/git; \
+  git clone https://github.com/NCAR/lrose-core
+
+
+

@@ -2,10 +2,8 @@
 
 # get lrose-core
     
-cd
-mkdir -p ~/git
-cd ~/git
-git clone https://github.com/NCAR/lrose-core
+cd ~/git/lrose-core
+git pull
 
 # create a source tar file
 
