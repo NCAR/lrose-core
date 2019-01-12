@@ -451,16 +451,16 @@ def appendToLibList(line):
         elif ((thisTok.find("NETCDF4_LIBS") >= 0) or
               (thisTok.find("NETCDF_LIBS") >= 0)):
             loadLibList.append("-lNcxx")
-            loadLibList.append("-lnetcdf_c++")
+            # loadLibList.append("-lnetcdf_c++")
             loadLibList.append("-lnetcdf")
             loadLibList.append("-lhdf5_cpp")
             loadLibList.append("-lhdf5_hl")
             loadLibList.append("-lhdf5")
-#            loadLibList.append("-ludunits2")
+            # loadLibList.append("-ludunits2")
             loadLibList.append("-lz")
             loadLibList.append("-lbz2")
         elif (thisTok.find("NETCDF_C_AND_C++_LIBS") >= 0):
-            loadLibList.append("-lnetcdf_c++")
+            # loadLibList.append("-lnetcdf_c++")
             loadLibList.append("-lnetcdf")
         elif (thisTok.find("NETCDF_C_AND_F_LIBS") >= 0):
             loadLibList.append("-lnetcdff")

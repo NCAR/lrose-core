@@ -68,6 +68,9 @@ def main():
                       dest='package', default='lrose-core',
                       help='Package name. Options are: ' + \
                       'lrose-core (default), cidd, radx, titan, lrose-blaze')
+    parser.add_option('--tag',
+                      dest='tag', default='master',
+                      help='Tag to check out')
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDirDefault,
                       help='Install directory')
@@ -259,7 +262,7 @@ def createBuildDir():
 def gitCheckout():
 
     os.chdir(options.buildDir)
-    shellCmd("git clone https://github.com/NCAR/lrose-core")
+    shellCmd("git clone --branch " + options.tag + " https://github.com/NCAR/lrose-core")
     shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
     shellCmd("git clone https://github.com/NCAR/lrose-displays")
 
