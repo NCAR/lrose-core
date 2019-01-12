@@ -42,19 +42,20 @@ RUN \
 # build hierarchy for rpmbuild
 
 RUN \
-    mkdir -p ~/build; \
-    cd ~/build; \
+    mkdir -p ~/rpmbuild; \
+    cd ~/rpmbuild; \
     mkdir BUILD RPMS SOURCES SPECS SRPMS
 
 # copy in the required files
 
 RUN \
-    cp ~/git/lrose-core/build/packaging/centos/lrose-blaze.spec SPECS; \
-    cp ~/tarReleases/lrose-blaze/lrose-blaze-????????.src.tgz SOURCES
+    cp ~/git/lrose-core/build/packaging/centos/lrose-blaze.spec ~/build/SPECS; \
+    cp ~/tarReleases/lrose-blaze/lrose-blaze-????????.tgz ~/build/SOURCES
 
 # perform the build
 
-RUN rpmbuild -v -bb --define "debug_package %{nil}" SPECS/lrose-blaze.spec
+RUN \
+    rpmbuild -v -bb --define "debug_package %{nil}" ~/rpmbuild/SPECS/lrose-blaze.spec
 
 # export the package
 
