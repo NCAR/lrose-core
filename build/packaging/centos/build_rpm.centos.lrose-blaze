@@ -1,18 +1,29 @@
 #! /bin/csh
 
-#
-# build RPM for lrose-blaze on centos
-#
+# get lrose-core
+    
+cd ~/git/lrose-core
+git pull
 
-cd ~/git/lrose-core/build/packaging/centos
+# create a source tar file
 
-mkdir -p /tmp/centos.lrose-blaze
+cd ~/git/lrose-core/build;
+./create_src_tar.py --package lrose-blaze
 
-docker build \
-#    -v type=bind,source=/tmp/centos.lrose-blaze,target=/tmp \
-    -t centos:lrose-blaze \
-    -f Dockerfile.centos.lrose-blaze .
+# build hierarchy for rpmbuild
 
+mkdir -p ~/rpmbuild; \
+cd ~/rpmbuild; \
+mkdir BUILD RPMS SOURCES SPECS SRPMS
 
-# docker cp 5424a9571ff6:/root/build/RPMS /tmp
+# copy in the required files
+
+cp ~/git/lrose-core/build/packaging/centos/lrose-blaze.spec ~/rpmbuild/SPECS; \
+cp ~/tarReleases/lrose-blaze/lrose-blaze-????????.tgz ~/rpmbuild/SOURCES
+
+# perform the build
+
+#cd ~/rpmbuild
+#rpmbuild -v -bb --define "debug_package %{nil}" SPECS/lrose-blaze.spec
+
 

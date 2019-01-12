@@ -1,7 +1,7 @@
 #! /bin/csh
 
 #
-# build docker images centos, with required packages
+# build docker image for centos, with required packages
 #
 
 cd ~/git/lrose-core/build/packaging/centos
