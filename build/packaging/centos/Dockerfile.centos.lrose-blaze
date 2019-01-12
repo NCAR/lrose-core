@@ -7,30 +7,62 @@ FROM centos
 # install required packages
 
 RUN \
-   yum install -y epel-release; \
-   yum install -y tcsh perl perl-Env git tkcvs emacs \
-   m4 make libtool autoconf automake \
-   gcc gcc-c++ gcc-gfortran glibc-devel libX11-devel libXext-devel \
-   libpng-devel libtiff-devel jasper-devel zlib-devel expat-devel libcurl-devel \
-   flex-devel fftw3-devel bzip2-devel qt5-qtbase-devel \
-   hdf5-devel netcdf-devel \
-   xorg-x11-xauth xorg-x11-apps \
-   rpm-build redhat-rpm-config
+    yum install -y epel-release; \
+    yum install -y tcsh git tkcvs emacs \
+    m4 make libtool autoconf automake \
+    gcc gcc-c++ gcc-gfortran glibc-devel \
+    libX11-devel libXext-devel \
+    libpng-devel libtiff-devel zlib-devel \
+    expat-devel libcurl-devel \
+    flex-devel fftw3-devel \
+    bzip2-devel qt5-qtbase-devel \
+    hdf5-devel netcdf-devel \
+    xorg-x11-xauth xorg-x11-apps \
+    rpm-build redhat-rpm-config
 
 # create link for qtmake
 
 RUN \
-   cd /usr/bin; ln -s qmake-qt5 qmake;
+    cd /usr/bin; \
+    ln -s qmake-qt5 qmake;
 
 # get lrose-core
     
-RUN cd /usr/local/src; git clone https://github.com/NCAR/lrose-core
+RUN \
+    mkdir -p ~/git; \
+    cd ~/git; \
+    git clone https://github.com/NCAR/lrose-core
+
+# create a release
+
+RUN \
+    cd ~/git/lrose-core/build; \
+    ./create_src_release.py --package lrose-blaze
+
+# build hierarchy for rpmbuild
+
+RUN \
+    mkdir -p ~/build; \
+    cd ~/build; \
+    mkdir BUILD RPMS SOURCES SPECS SRPMS
+
+# copy in the files
+
+RUN \
+    cp ~/git/lrose-core/build/packaging/centos/lrose-blaze.spec SPECS; \
+    cp ~/releases/lrose-blaze/lrose-blaze-????????.src.tgz SOURCES
 
 # perform the build
 
-RUN cd /usr/local/src/lrose-core/build; \
-    ./checkout_and_build_auto.py --package lrose-blaze \
-    --useSystemNetcdf --prefix /usr/local/bin
+#RUN rpmbuild -v -bb --define "debug_package %{nil}" SPECS/lrose-blaze.spec
+
+# export the package
+
+# RUN rsync RPMS /tmp/rpm_files/RPMS
+
+#RUN cd /usr/local/src/lrose-core/build; \
+#    ./checkout_and_build_auto.py --package lrose-blaze \
+#    --useSystemNetcdf --prefix /usr/local/bin
 
 # make the spec file available to the container
 #
@@ -41,11 +73,6 @@ RUN cd /usr/local/src/lrose-core/build; \
 #RUN useradd -ms /bin/bash rpmbuilder 
 #USER rpmbuilder
 #WORKDIR /home/rpmbuilder
-
-# build hierarchy for rpmbuild:
-
-#RUN cd ~
-#RUN mkdir BUILD RPMS SOURCES SPECS SRPMS
 
 #
 # import the files

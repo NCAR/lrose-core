@@ -1,0 +1,10 @@
+#! /bin/csh
+
+#
+# build RPM for lrose-blaze on centos
+#
+
+cd ~/git/lrose-core/build/packaging/centos
+
+docker build -t centos:lrose-blaze -f Dockerfile.centos.lrose-blaze .
+
