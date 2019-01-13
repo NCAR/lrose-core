@@ -1,5 +1,5 @@
 %define build_timestamp %(date +"%Y%m%d")
-%define _topdir     /tmp/build
+%define _topdir     /root/rpmbuild
 %define name        lrose 
 %define release     %{build_timestamp}
 %define version     blaze 

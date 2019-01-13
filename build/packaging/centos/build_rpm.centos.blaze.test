@@ -9,5 +9,3 @@ cd ~/git/lrose-core/build/packaging/centos
 docker build \
     -t centos:blaze-test \
     -f Dockerfile.centos.blaze.test .
-
-

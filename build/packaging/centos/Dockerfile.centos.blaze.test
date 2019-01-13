@@ -31,21 +31,25 @@ RUN \
 # get lrose-core
     
 RUN \
-  cd ${HOME}; \
-  mkdir -p ~/git; \
-  cd ~/git; \
-  git clone https://github.com/NCAR/lrose-core
+    cd ${HOME}; \
+    mkdir -p ~/git; \
+    cd ~/git; \
+    git clone https://github.com/NCAR/lrose-core
 
 # build hierarchy for rpmbuild:
 
-RUN cd ~
-RUN mkdir BUILD RPMS SOURCES SPECS SRPMS
-
-# copy in the spec file
-
-RUN cp ~/git/lrose-core/build/packaging/centos/test.blaze.spec SPECS
+RUN \
+    cd ${HOME}; \
+    mkdir rpmbuild; \
+    cd rpmbuild; \
+    mkdir BUILD RPMS SOURCES SPECS SRPMS; \
+    cp ~/git/lrose-core/build/packaging/centos/test.blaze.spec SPECS
 
 # build the rpm
 
-RUN rpmbuild -v -bb --define "debug_package %{nil}" SPECS/test.blaze.spec
+RUN \
+    cd ${HOME}/rpmbuild; \
+    rpmbuild -v -bb --define "debug_package %{nil}" ./SPECS/test.blaze.spec
+
+
 
