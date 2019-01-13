@@ -1,0 +1,51 @@
+#
+# start with an image that contains all the packages needed to 
+# build lrose-blaze + rpmbuilder
+#
+
+FROM centos
+
+# install required packages
+
+RUN \
+    yum install -y epel-release; \
+    yum install -y tcsh git tkcvs emacs \
+    m4 make libtool autoconf automake \
+    gcc gcc-c++ gcc-gfortran glibc-devel \
+    libX11-devel libXext-devel \
+    libpng-devel libtiff-devel zlib-devel \
+    expat-devel libcurl-devel \
+    flex-devel fftw3-devel \
+    bzip2-devel qt5-qtbase-devel \
+    hdf5-devel netcdf-devel \
+    xorg-x11-xauth xorg-x11-apps \
+    rpm-build redhat-rpm-config \
+    rpm-devel rpmdevtools
+
+# create link for qtmake
+
+RUN \
+    cd /usr/bin; \
+    ln -s qmake-qt5 qmake;
+
+# get lrose-core
+    
+RUN \
+  cd ${HOME}; \
+  mkdir -p ~/git; \
+  cd ~/git; \
+  git clone https://github.com/NCAR/lrose-core
+
+# build hierarchy for rpmbuild:
+
+RUN cd ~
+RUN mkdir BUILD RPMS SOURCES SPECS SRPMS
+
+# copy in the spec file
+
+RUN cp ~/git/lrose-core/build/packaging/centos/test.blaze.spec SPECS
+
+# build the rpm
+
+RUN rpmbuild -v -bb --define "debug_package %{nil}" SPECS/test.blaze.spec
+
