@@ -1,18 +1,18 @@
 %define build_timestamp  %(date +"%Y%m%d")
 %define topDir           /root/rpmbuild
-%define name             lrose
+%define name             lrose-blaze
 %define release          %{build_timestamp}
-%define version          blaze 
-%define buildroot        %{topDir}/%{name}-%{version}-%{release}-root
+%define version          1.0
+%define buildroot        %{topDir}/%{name}-%{release}-root
  
-BuildRoot:      %{topDir}/installedhere
+BuildRoot:      %{topDir}/install
 Summary:        LROSE
 License:        BSD
 Name:           %{name}
 Version:        %{version}
 Release:        %{release}
-Source:         %{name}-%{version}-%{release}.tgz
-Prefix:         /usr/local/lrose
+Source:         %{name}-%{release}.tgz
+Prefix:         /usr
 Group:          Scientific Tools
 AutoReqProv:    no
  
@@ -24,13 +24,15 @@ LROSE - The Lidar Radar Open Software Environment Core
  
 %build
 %configure
-%make_install
+make -j 8
 
 #rm -f %{topDir}/SPECS/lrose-pkg-files
-#find /root/lrose -type d | sed 's/root/usr\/local/' > %{topDir}/SPECS/lrose-pkg-files
-#find /root/lrose -type l | sed 's/root/usr\/local/' >> %{topDir}/SPECS/lrose-pkg-files
+#find %{topDir} -type d | sed 's/root/usr\/local/' > %{topDir}/SPECS/lrose-pkg-files
+#find %{topDir} -type l | sed 's/root/usr\/local/' >> %{topDir}/SPECS/lrose-pkg-files
 
-#%install
+%install
+make install
+
 #mkdir -p %{buildroot}/usr/local/lrose
 #rsync -ra /root/lrose %{buildroot}/usr/local
 
