@@ -51,5 +51,10 @@ RUN \
     cd ${HOME}/rpmbuild; \
     rpmbuild -v -bb --define "debug_package %{nil}" ./SPECS/test.blaze.spec
 
+# export the package
+
+RUN \
+    cd ${HOME}/rpmbuild; \
+    rsync RPMS /tmp/rpm_files/RPMS
 
 
