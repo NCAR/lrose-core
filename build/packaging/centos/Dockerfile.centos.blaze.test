@@ -53,8 +53,8 @@ RUN \
 
 # export the package
 
-RUN \
-    cd ${HOME}/rpmbuild; \
-    rsync RPMS /tmp/rpm_files/RPMS
+#RUN \
+#    cd ${HOME}/rpmbuild; \
+#    rsync RPMS /tmp
 
 
