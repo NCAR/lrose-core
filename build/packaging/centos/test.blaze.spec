@@ -25,8 +25,9 @@ LROSE - Lidar Radar Open Software Environment
 # -q -n lrose-blaze-20180516.src
  
 %build
-git clone https://github.com/NCAR/lrose-core
-./lrose-core/build/checkout_and_build_auto.py  --package=lrose-blaze 
+#git clone https://github.com/NCAR/lrose-core
+#./lrose-core/build/checkout_and_build_auto.py  --package=lrose-blaze 
+/root/git/lrose-core/build/checkout_and_build_auto.py  --package=lrose-blaze 
 rm -f %{_topdir}/SPECS/lrose-pkg-files
 # find /usr/local/lrose -type d | sed 's/usr/duck/'
 find /root/lrose -type d | sed 's/root/usr\/local/' > %{_topdir}/SPECS/lrose-pkg-files
