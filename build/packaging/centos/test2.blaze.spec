@@ -37,6 +37,6 @@ find %{prefix} -type l >> %{_topdir}/SPECS/lrose-pkg-files
 
 %install
 mkdir -p %{buildroot}%{prefix}
-rsync -ra %{prefix} %{buildroot}%{prefix}
+rsync -av %{prefix}/* %{buildroot}%{prefix}
 
 %files -f %{_topdir}/SPECS/lrose-pkg-files
