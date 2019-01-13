@@ -18,7 +18,8 @@ RUN \
     bzip2-devel qt5-qtbase-devel \
     hdf5-devel netcdf-devel \
     xorg-x11-xauth xorg-x11-apps \
-    rpm-build redhat-rpm-config
+    rpm-build redhat-rpm-config \
+    rpm-devel rpmdevtools
 
 # create link for qtmake
 
