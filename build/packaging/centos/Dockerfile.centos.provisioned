@@ -34,5 +34,10 @@ RUN \
   cd ~/git; \
   git clone https://github.com/NCAR/lrose-core
 
+# Set links to rpm build scripts
+
+RUN \
+  cd ${HOME}; \
+  ln -s git/lrose-core/build/packaging/centos/build_rpm.centos.lrose-blaze
 
 
