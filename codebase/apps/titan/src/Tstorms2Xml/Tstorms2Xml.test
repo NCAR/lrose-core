@@ -415,3 +415,12 @@ write_to_spdb = TRUE;
 
 spdb_url = "$(DATA_DIR)/spdb/tstorms_xml";
 
+///////////// include_prec_flux_xml /////////////////////////
+//
+// Option to include precipitation flux into output Xml.
+// If true element <precipitation_flux> will be added to
+//  <nowcast-parameters> block in WXML format.
+// Type: boolean
+//
+
+include_prec_flux_xml = TRUE;

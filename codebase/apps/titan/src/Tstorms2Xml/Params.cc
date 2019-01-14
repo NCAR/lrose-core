@@ -469,8 +469,8 @@
   {
     out << "TDRP args: [options as below]\n"
         << "   [ -params/--params path ] specify params file path\n"
-        << "   [ -check_params/--check_params] check which params are not set\n"
-        << "   [ -print_params/--print_params [mode]] print parameters\n"
+        << "   [ -check_params] check which params are not set\n"
+        << "   [ -print_params [mode]] print parameters\n"
         << "     using following modes, default mode is 'norm'\n"
         << "       short:   main comments only, no help or descr\n"
         << "                structs and arrays on a single line\n"
@@ -1107,6 +1107,18 @@
     tt->help = tdrpStrDup("The XML will be stored in SPDB in exactly the same format as is written to XML files.");
     tt->val_offset = (char *) &spdb_url - &_start_;
     tt->single_val.s = tdrpStrDup("./output/spdb/tstorms_xml");
+    tt++;
+    
+    // Parameter 'include_prec_flux_xml'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_prec_flux_xml");
+    tt->descr = tdrpStrDup("Option to publish precipitation flux to otuput Xml");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &include_prec_flux_xml - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // trailing entry has param_name set to NULL
