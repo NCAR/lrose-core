@@ -34,7 +34,6 @@ field::field(std::string id)
 // should be = default - but can't due to non-conforming std::string in gcc
 auto field::operator=(field&& rhs) noexcept -> field&
 {
-  //metadata::operator=(std::move(rhs));
   id_ = std::move(rhs.id_);
   return *this;
 }
