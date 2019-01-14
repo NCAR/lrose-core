@@ -355,9 +355,13 @@ codebase/apps/mdv_utils/src/UpdateMdvOrigin/UpdateMdvOrigin
 codebase/apps/mdv_utils/src/UpdateMdvStartEndTimes/UpdateMdvStartEndTimes
 codebase/apps/mdv_utils/src/UpdateMdvVlevelTypes/UpdateMdvVlevelTypes
 codebase/apps/mdv_utils/src/WorldTerrain/WorldTerrain
+codebase/apps/mdv_utils/src/ascii2mdv/ascii2mdv
 codebase/apps/mdv_utils/src/mdv2netCDF/mdv2netCDF
+codebase/apps/mdv_utils/src/mdv_be2le/mdv_be2le
 codebase/apps/mdv_utils/src/mdv_bin_data/mdv_bin_data
 codebase/apps/mdv_utils/src/mdv_constant_data/mdv_constant_data
+codebase/apps/mdv_utils/src/mdv_le2be/mdv_le2be
+codebase/apps/mdv_utils/src/mdv_repeat_day/mdv_repeat_day
 codebase/apps/mdv_utils/src/print_mdv/print_mdv
 codebase/apps/mdv_utils/src/update_mdv_times/update_mdv_times
 

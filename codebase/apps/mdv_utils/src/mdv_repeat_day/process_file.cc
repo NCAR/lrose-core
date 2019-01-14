@@ -24,9 +24,9 @@
 
 #include <toolsa/umisc.h>
 #include <cstdio>
-#include <mdv/mdv_handle.h>
-#include <mdv/mdv_read.h>
-#include <mdv/mdv_write.h>
+#include <Mdv/mdv/mdv_handle.h>
+#include <Mdv/mdv/mdv_read.h>
+#include <Mdv/mdv/mdv_write.h>
 #include <dsserver/DmapAccess.hh>
 using namespace std;
 

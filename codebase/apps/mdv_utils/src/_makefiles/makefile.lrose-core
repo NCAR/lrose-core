@@ -84,8 +84,12 @@ SUB_DIRS = \
          UpdateMdvStartEndTimes \
          UpdateMdvVlevelTypes \
          WorldTerrain \
+         ascii2mdv \
+         mdv_be2le \
          mdv_bin_data \
          mdv_constant_data \
+         mdv_le2be \
+         mdv_repeat_day \
          print_mdv \
          update_mdv_times
 

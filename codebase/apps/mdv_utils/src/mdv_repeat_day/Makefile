@@ -35,14 +35,13 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = mdv_repeat_day
 
-LOC_INCLUDES = 
-LOC_CFLAGS =
-LOC_CPPC_CFLAGS = 
-LOC_LDFLAGS = 
-LOC_LIBS = \
-	-ldsserver -ldidss -lmdv -lrapformats \
-	-ldidss -ltdrp -ltoolsa -ldataport \
-	-lbz2 -lz
+LOC_INCLUDES = $(NETCDF4_INCS)
+
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
+	-lrapformats -ltoolsa -ldataport $(NETCDF4_LIBS) \
+	-lbz2 -lz -lm -ltdrp
+
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 HDRS = $(PARAMS_HH) \
 	scan_input_dir.hh \
