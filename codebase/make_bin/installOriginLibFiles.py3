@@ -9,13 +9,16 @@
 #
 # ========================================================================== #
 
-import string
+from __future__ import print_function
 import os
-from os.path import join, getsize
 import sys
+import shutil
+import subprocess
+
+import string
+from os.path import join, getsize
 import subprocess
 from optparse import OptionParser
-import shutil
 from sys import platform
 
 def main():

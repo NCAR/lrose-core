@@ -6,10 +6,11 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
-from sys import platform
 import shutil
+from sys import platform
 from optparse import OptionParser
 from datetime import datetime
 

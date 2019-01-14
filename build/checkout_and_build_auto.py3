@@ -6,6 +6,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
 import shutil
@@ -247,7 +248,11 @@ def createBuildDir():
         for filename in contents:
             print(("  " + filename))
         print("===============================================")
-        answer = input("WARNING: do you wish to proceed (y/n)? ")
+        answer = "n"
+        if (sys.version_info > (3, 0)):
+            answer = input("WARNING: do you wish to proceed (y/n)? ")
+        else:
+            answer = raw_input("WARNING: do you wish to proceed (y/n)? ")
         if (answer != "y"):
             print("  aborting ....")
             sys.exit(1)
