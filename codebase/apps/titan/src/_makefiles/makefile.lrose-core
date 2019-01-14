@@ -13,8 +13,10 @@ SUB_DIRS = \
         EchoTops \
 	EsdAcIngest \
 	FilterStorms \
+        OpticalFlow \
 	PrintTitanFiles \
 	PrintTitanServer \
+	RdasSim \
 	Rview \
         StratFinder \
 	StormInit2Field \
@@ -39,7 +41,6 @@ SUB_DIRS = \
 	bearing2latlon \
 	titan_print \
 	tstorm_refl_fcst
-
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
 
