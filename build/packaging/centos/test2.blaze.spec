@@ -17,6 +17,15 @@ Prefix:         /usr/local/lrose
 Group:          Scientific Tools
 AutoReqProv:    no
  
+Requires: epel-release
+Requires: libX11-devel, libXext-devel
+Requires: libpng-devel, libtiff-devel, zlib-devel
+Requires: expat-devel, libcurl-devel
+Requires: flex-devel, fftw3-devel
+Requires: bzip2-devel, qt5-qtbase-devel
+Requires: hdf5-devel, netcdf-devel
+Requires: xorg-x11-xauth, xorg-x11-apps
+
 %description
 LROSE - Lidar Radar Open Software Environment
  

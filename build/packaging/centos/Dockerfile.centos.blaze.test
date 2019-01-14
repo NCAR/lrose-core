@@ -3,38 +3,36 @@
 # build lrose-blaze + rpmbuilder
 #
 
-FROM centos
+FROM centos:provisioned
 
 # install required packages
 
-RUN \
-    yum install -y epel-release; \
-    yum install -y tcsh git tkcvs emacs \
-    m4 make libtool autoconf automake \
-    gcc gcc-c++ gcc-gfortran glibc-devel \
-    libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel \
-    expat-devel libcurl-devel \
-    flex-devel fftw3-devel \
-    bzip2-devel qt5-qtbase-devel \
-    hdf5-devel netcdf-devel \
-    xorg-x11-xauth xorg-x11-apps \
-    rpm-build redhat-rpm-config \
-    rpm-devel rpmdevtools
+#RUN \
+#    yum install -y epel-release; \
+#    yum install -y tcsh git tkcvs emacs \
+#    m4 make libtool autoconf automake \
+#    gcc gcc-c++ gcc-gfortran glibc-devel \
+#    libX11-devel libXext-devel \
+#    libpng-devel libtiff-devel zlib-devel \
+#    expat-devel libcurl-devel \
+#    flex-devel fftw3-devel \
+#    bzip2-devel qt5-qtbase-devel \
+#    hdf5-devel netcdf-devel \
+#    xorg-x11-xauth xorg-x11-apps \
+#    rpm-build redhat-rpm-config \
+#    rpm-devel rpmdevtools
 
 # create link for qtmake
 
-RUN \
-    cd /usr/bin; \
-    ln -s qmake-qt5 qmake;
+#RUN \
+#    cd /usr/bin; \
+#    ln -s qmake-qt5 qmake;
 
 # get lrose-core
     
 RUN \
-    cd ${HOME}; \
-    mkdir -p ~/git; \
-    cd ~/git; \
-    git clone https://github.com/NCAR/lrose-core
+    cd ${HOME}/git/lrose-core; \
+    git pull
 
 # build hierarchy for rpmbuild:
 
@@ -43,18 +41,13 @@ RUN \
     mkdir rpmbuild; \
     cd rpmbuild; \
     mkdir BUILD RPMS SOURCES SPECS SRPMS; \
-    cp ~/git/lrose-core/build/packaging/centos/test.blaze.spec SPECS
+    cp ~/git/lrose-core/build/packaging/centos/test2.blaze.spec SPECS
 
 # build the rpm
+# save to mounted volume
 
 RUN \
     cd ${HOME}/rpmbuild; \
-    rpmbuild -v -bb --define "debug_package %{nil}" ./SPECS/test.blaze.spec
+    rpmbuild -v -bb --define "debug_package %{nil}" ./SPECS/test2.blaze.spec;
 
-# export the package
-
-#RUN \
-#    cd ${HOME}/rpmbuild; \
-#    rsync RPMS /tmp
-
-
+#    rsync -av RPMS /tmp-on-host

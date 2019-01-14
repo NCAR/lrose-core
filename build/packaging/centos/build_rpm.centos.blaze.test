@@ -6,6 +6,9 @@
 
 cd ~/git/lrose-core/build/packaging/centos
 
+mkdir -p /tmp/blaze-test
+
 docker build \
     -t centos:blaze-test \
+    -v /tmp/blaze-test:/tmp-on-host \
     -f Dockerfile.centos.blaze.test .
