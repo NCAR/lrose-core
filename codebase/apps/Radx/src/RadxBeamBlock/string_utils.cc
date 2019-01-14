@@ -187,7 +187,7 @@ auto rainfields::tokenize(const std::string& str, const char* delims) -> std::ve
     size_t len = (end == std::string::npos) ? end : end - pos;
     ret.emplace_back(str, pos, len);
   }
-  return std::move(ret);
+  return ret;
 }
 
 

@@ -174,7 +174,7 @@ namespace rainfields
   }
 
   template <>
-  inline constexpr auto is_nan<angle>(angle val) -> bool
+  inline auto is_nan<angle>(angle val) -> bool
   {
     return std::isnan(val.radians());
   }

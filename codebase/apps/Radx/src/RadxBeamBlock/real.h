@@ -247,7 +247,7 @@ namespace rainfields
   }
 
   template <typename T>
-  inline constexpr auto is_nan(T val) -> bool
+  inline auto is_nan(T val) -> bool
   {
     static_assert(std::is_floating_point<T>::value, "is_nan() instanciated on non floating point type");
     return std::isnan(val);

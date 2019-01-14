@@ -27,7 +27,6 @@
 #include <cstddef>
 #include <type_traits>
 #include <utility>
-#include <tr2/type_traits>
 
 namespace rainfields
 {
@@ -190,16 +189,6 @@ namespace rainfields
   template <typename List, typename T>
   struct typelist_contains<List, T, true> : std::false_type
   { };
-
-  /// generate a typelist of all base classes of a type
-  template <typename T>
-  struct bases
-  {
-    typedef typename std::tr2::bases<T>::type type;
-  };
-
-  // TODO - stuff below here are not technically traits, but usefull function objects or templates
-  //        that don't seem to belong elsewhere yet
 
   /// function object used to call the subscript operator on an object
   struct subscript
