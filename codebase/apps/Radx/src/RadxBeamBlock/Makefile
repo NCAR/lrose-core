@@ -81,10 +81,8 @@ CPPC_SRCS = \
 	digital_elevation.cc \
 	field.cc \
 	latlon.cc \
-	metadata.cc \
 	spheroid.cc \
 	string_utils.cc  \
-	timestamp.cc \
 	trace.cc \
 	xml.cc
 

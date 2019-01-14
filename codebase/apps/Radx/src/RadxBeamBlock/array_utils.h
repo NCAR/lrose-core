@@ -42,7 +42,7 @@ namespace array_utils {
   }
 
   /// Zero the contents of an array
-  template <typename T, typename = typename std::enable_if<std::has_trivial_copy_constructor<typename T::value_type>::value>::type>
+  template <typename T>
   T& zero(T& output)
   {
     std::memset(output.data(), 0, sizeof(typename T::value_type) * output.size());

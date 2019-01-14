@@ -40,19 +40,10 @@ namespace rainfields {
     }
   };
 
-  // TODO - should use is_trivially_copyable<T> when it becomes available
   template <typename T>
-  typename std::enable_if<!std::has_trivial_copy_constructor<T>::value, void>::type
-  copy_array(const T* src, size_t count, T* dest)
+  void copy_array(const T* src, size_t count, T* dest)
   {
     std::copy(src, src + count, dest);
-  }
-
-  template <typename T>
-  typename std::enable_if<std::has_trivial_copy_constructor<T>::value, void>::type
-  copy_array(const T* src, size_t count, T* dest)
-  {
-    std::memcpy(dest, src, sizeof(T) * count);
   }
 
   template <

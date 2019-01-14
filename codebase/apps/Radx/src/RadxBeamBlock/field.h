@@ -24,7 +24,6 @@
 #ifndef ANCILLA_CORE_FIELD_H
 #define ANCILLA_CORE_FIELD_H
 
-#include "metadata.h"
 #include "array.h"
 #include "real.h"
 #include <string>
@@ -89,7 +88,7 @@ namespace ancilla {
     return nan_payload(val) == 83U;
   }
 
-  class field : public metadata
+  class field
   {
   public:
     field() = default;
@@ -105,9 +104,6 @@ namespace ancilla {
 
     auto id() const -> const std::string&                   { return id_; }
     virtual auto set_id(const std::string& val) -> void;
-
-  protected:
-    auto meta_proxy(size_t i) const -> const proxy*;
 
   private:
     std::string id_;
