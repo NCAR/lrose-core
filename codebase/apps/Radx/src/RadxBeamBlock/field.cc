@@ -25,11 +25,6 @@
 
 using namespace rainfields::ancilla;
 
-static constexpr metadata::proxy_table meta_table = 
-{
-  metadata::make_proxy<field, std::string, &field::id, &field::set_id>("id")
-};
-
 field::field(std::string id)
   : id_(std::move(id))
 {
@@ -39,7 +34,7 @@ field::field(std::string id)
 // should be = default - but can't due to non-conforming std::string in gcc
 auto field::operator=(field&& rhs) noexcept -> field&
 {
-  metadata::operator=(std::move(rhs));
+  //metadata::operator=(std::move(rhs));
   id_ = std::move(rhs.id_);
   return *this;
 }
@@ -47,13 +42,6 @@ auto field::operator=(field&& rhs) noexcept -> field&
 auto field::set_id(const std::string& val) -> void
 {
   id_ = val;
-}
-
-auto field::meta_proxy(size_t i) const -> const proxy*
-{
-  if (i < std::extent<decltype(meta_table)>::value)
-    return &meta_table[i];
-  return nullptr;
 }
 
 field1::field1(std::string id, size_t size)
