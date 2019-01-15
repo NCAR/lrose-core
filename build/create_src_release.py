@@ -6,6 +6,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
 import shutil
@@ -114,17 +115,17 @@ def main():
     tarDir = os.path.join(coreDir, releaseName)
 
     if (options.debug):
-        print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  package: ", options.package
-        print >>sys.stderr, "  osx: ", options.osx
-        print >>sys.stderr, "  releaseTopDir: ", options.releaseTopDir
-        print >>sys.stderr, "  releaseDir: ", releaseDir
-        print >>sys.stderr, "  tmpDir: ", tmpDir
-        print >>sys.stderr, "  force: ", options.force
-        print >>sys.stderr, "  static: ", options.static
-        print >>sys.stderr, "  versionStr: ", versionStr
-        print >>sys.stderr, "  releaseName: ", releaseName
-        print >>sys.stderr, "  tarName: ", tarName
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  package: ", options.package, file=sys.stderr)
+        print("  osx: ", options.osx, file=sys.stderr)
+        print("  releaseTopDir: ", options.releaseTopDir, file=sys.stderr)
+        print("  releaseDir: ", releaseDir, file=sys.stderr)
+        print("  tmpDir: ", tmpDir, file=sys.stderr)
+        print("  force: ", options.force, file=sys.stderr)
+        print("  static: ", options.static, file=sys.stderr)
+        print("  versionStr: ", versionStr, file=sys.stderr)
+        print("  releaseName: ", releaseName, file=sys.stderr)
+        print("  tarName: ", tarName, file=sys.stderr)
         
     # save previous releases
 
@@ -141,7 +142,7 @@ def main():
     # install the distribution-specific makefiles
 
     os.chdir(codebaseDir)
-    cmd = "./make_bin/install_package_makefiles.py --package " + \
+    cmd = "./make_bin/install_package_makefiles.py3 --package " + \
           options.package + " --codedir . "
     if (options.osx):
         cmd = cmd + " --osx "
@@ -220,8 +221,8 @@ def savePrevReleases():
     for name in oldReleases:
         newName = os.path.join(prevDirPath, name)
         if (options.debug):
-            print >>sys.stderr, "saving oldRelease: ", name
-            print >>sys.stderr, "to: ", newName
+            print("saving oldRelease: ", name, file=sys.stderr)
+            print("to: ", newName, file=sys.stderr)
         os.rename(name, newName)
 
 ########################################################################
@@ -234,13 +235,17 @@ def createTmpDir():
     if (os.path.isdir(tmpDir)):
 
         if (options.force == False):
-            print("WARNING: you are about to remove all contents in dir: " + tmpDir)
+            print(("WARNING: you are about to remove all contents in dir: " + tmpDir))
             print("===============================================")
             contents = os.listdir(tmpDir)
             for filename in contents:
-                print("  " + filename)
+                print(("  " + filename))
             print("===============================================")
-            answer = raw_input("WARNING: do you wish to proceed (y/n)? ")
+            answer = "n"
+            if (sys.version_info > (3, 0)):
+                answer = input("WARNING: do you wish to proceed (y/n)? ")
+            else:
+                answer = raw_input("WARNING: do you wish to proceed (y/n)? ")
             if (answer != "y"):
                 print("  aborting ....")
                 sys.exit(1)
@@ -283,7 +288,7 @@ def setupAutoconf():
              shutil.copy("../build/autoconf/configure.base",
                          "./configure.base")
 
-        shellCmd("./make_bin/createConfigure.am.py --dir ." +
+        shellCmd("./make_bin/createConfigure.am.py3 --dir ." +
                  " --baseName configure.base" +
                  " --pkg " + options.package + argsStr)
     else:
@@ -298,7 +303,7 @@ def setupAutoconf():
             shutil.copy("../build/autoconf/configure.base.shared",
                         "./configure.base.shared")
 
-        shellCmd("./make_bin/createConfigure.am.py --dir ." +
+        shellCmd("./make_bin/createConfigure.am.py3 --dir ." +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + options.package + argsStr)
 
@@ -350,8 +355,8 @@ def createTarFile():
 
     # copy some scripts into tar directory
 
-    shellCmd("rsync -av build/create_bin_release.py " + tarDir)
-    shellCmd("rsync -av build/build_src_release.py " + tarDir)
+    shellCmd("rsync -av build/create_bin_release.py3 " + tarDir)
+    shellCmd("rsync -av build/build_src_release.py3 " + tarDir)
 
     # move lrose contents into tar dir
 
@@ -413,9 +418,9 @@ def createBrewFormula():
     # check if script exists
 
     if (os.path.isfile(scriptPath) == False):
-        print >>sys.stderr, "WARNING - ", thisScriptName
-        print >>sys.stderr, "  No script: ", scriptPath
-        print >>sys.stderr, "  Will not build brew formula for package"
+        print("WARNING - ", thisScriptName, file=sys.stderr)
+        print("  No script: ", scriptPath, file=sys.stderr)
+        print("  Will not build brew formula for package", file=sys.stderr)
         return
 
     # create the brew formula file
@@ -443,8 +448,8 @@ def getValueListForKey(path, key):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open file:", path
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open file:", path, file=sys.stderr)
         return valueList
 
     lines = fp.readlines()
@@ -492,7 +497,7 @@ def getValueListForKey(path, key):
 
 def trimToMakefiles(subDir):
 
-    print >>sys.stderr, "Trimming unneeded dirs, subDir: " + subDir
+    print("Trimming unneeded dirs, subDir: " + subDir, file=sys.stderr)
 
     # get list of subdirs in makefile
 
@@ -502,28 +507,28 @@ def trimToMakefiles(subDir):
     # need to allow upper and lower case Makefile (makefile or Makefile)
     subNameList = getValueListForKey("makefile", "SUB_DIRS")
     if not subNameList:
-        print >>sys.stderr, "Trying uppercase Makefile ... "
+        print("Trying uppercase Makefile ... ", file=sys.stderr)
         subNameList = getValueListForKey("Makefile", "SUB_DIRS")
     
     for subName in subNameList:
         if (os.path.isdir(subName)):
-            print >>sys.stderr, "  need sub dir: " + subName
+            print("  need sub dir: " + subName, file=sys.stderr)
             
     # get list of files in subDir
 
     entries = os.listdir(dirPath)
     for entry in entries:
         theName = os.path.join(dirPath, entry)
-        print >>sys.stderr, "considering: " + theName
+        print("considering: " + theName, file=sys.stderr)
         if (entry == "scripts") or (entry == "example_scripts") or (entry == "include"):
             # always keep scripts directories
             continue
         if (os.path.isdir(theName)):
             if (entry not in subNameList):
-                print >>sys.stderr, "discarding it"
+                print("discarding it", file=sys.stderr)
                 shutil.rmtree(theName)
             else:
-                print >>sys.stderr, "keeping it and recurring"
+                print("keeping it and recurring", file=sys.stderr)
                 # check this child's required subdirectories ( recurse )
                 # nextLevel = os.path.join(dirPath, entry)
                 # print >> sys.stderr, "trim to makefile on subdirectory: "
@@ -535,22 +540,22 @@ def trimToMakefiles(subDir):
 def shellCmd(cmd):
 
     if (options.debug):
-        print >>sys.stderr, "running cmd:", cmd, " ....."
+        print("running cmd:", cmd, " .....", file=sys.stderr)
     
     try:
         retcode = subprocess.check_call(cmd, shell=True)
         if retcode != 0:
-            print >>sys.stderr, "Child exited with code: ", retcode
+            print("Child exited with code: ", retcode, file=sys.stderr)
             sys.exit(1)
         else:
             if (options.verbose):
-                print >>sys.stderr, "Child returned code: ", retcode
-    except OSError, e:
-        print >>sys.stderr, "Execution failed:", e
+                print("Child returned code: ", retcode, file=sys.stderr)
+    except OSError as e:
+        print("Execution failed:", e, file=sys.stderr)
         sys.exit(1)
 
     if (options.debug):
-        print >>sys.stderr, ".... done"
+        print(".... done", file=sys.stderr)
     
 ########################################################################
 # prune empty dirs
@@ -562,14 +567,14 @@ def prune(tree):
         contents = os.listdir(tree)
 
         if (len(contents) == 0):
-            print >> sys.stderr, "pruning empty dir: " + tree
+            print("pruning empty dir: " + tree, file=sys.stderr)
             shutil.rmtree(tree)
         else:
             for l in contents:
                 # remove CVS directories
                 if (l == "CVS") or (l == ".git"): 
                     thepath = os.path.join(tree,l)
-                    print >> sys.stderr, "pruning dir: " + thepath
+                    print("pruning dir: " + thepath, file=sys.stderr)
                     shutil.rmtree(thepath)
                 else:
                     thepath = os.path.join(tree,l)
@@ -578,7 +583,7 @@ def prune(tree):
             # check if this tree is now empty
             newcontents = os.listdir(tree)
             if (len(newcontents) == 0):
-                print >> sys.stderr, "pruning empty dir: " + tree
+                print("pruning empty dir: " + tree, file=sys.stderr)
                 shutil.rmtree(tree)
 
 

@@ -79,7 +79,7 @@ def main():
 
     # create makefile.am at top level
 
-    cmd = os.path.join(thisScriptDir, "createMakefile.am.topdir.py3") + \
+    cmd = os.path.join(thisScriptDir, "createMakefile.am.topdir.py") + \
           " --dir " + options.dir
     if (options.debug == True):
         cmd += " --debug"
@@ -125,7 +125,7 @@ def main():
     if (options.shared == True):
         sharedStr = " --shared "
 
-    cmd = os.path.join(thisScriptDir, "runAutoConf.py3") + \
+    cmd = os.path.join(thisScriptDir, "runAutoConf.py") + \
           " --dir " + options.dir + sharedStr + debugStr
     runCommand(cmd)
 
@@ -226,7 +226,7 @@ def searchDir(dir):
         sharedStr = ""
         if (options.shared == True):
             sharedStr = " --shared "
-        cmd = os.path.join(thisScriptDir, "createMakefile.am.lib.py3") + \
+        cmd = os.path.join(thisScriptDir, "createMakefile.am.lib.py") + \
               " --dir " + libDir + sharedStr + debugStr
         cmd += " --libList " + libList
         runCommand(cmd)
@@ -244,11 +244,11 @@ def searchDir(dir):
         # app directory
         # create makefile.am for app
         # use package version if available
-        createScript = "createMakefile.am.app." + options.pkg + ".py3"
+        createScript = "createMakefile.am.app." + options.pkg + ".py"
         scriptPath = os.path.join(thisScriptDir, createScript)
         if (os.path.exists(scriptPath) == False):
             # no package version, use default
-            createScript = "createMakefile.am.app.lrose.py3"
+            createScript = "createMakefile.am.app.lrose.py"
             scriptPath = os.path.join(thisScriptDir, createScript)
         if (options.debug):
             print("  createScript:", createScript, file=sys.stderr)
@@ -262,7 +262,7 @@ def searchDir(dir):
         return
     else:
         # create makefile.am for recursion
-        cmd = os.path.join(thisScriptDir, "createMakefile.am.recurse.py3") + \
+        cmd = os.path.join(thisScriptDir, "createMakefile.am.recurse.py") + \
               " --dir " + absDir + debugStr
         runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)

@@ -93,7 +93,7 @@ def runAutoConf():
     #cmd = "autoreconf"
     #runCommand(cmd)
 
-    cmd = os.path.join(thisScriptDir, "fixConfigure.py3") + \
+    cmd = os.path.join(thisScriptDir, "fixConfigure.py") + \
           " --dir %s" % options.dir
     runCommand(cmd)
 

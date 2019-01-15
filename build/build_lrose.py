@@ -36,8 +36,10 @@
 
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
+import shutil
 import subprocess
 from optparse import OptionParser
 import time
@@ -47,6 +49,7 @@ from datetime import timedelta
 import glob
 from sys import platform
 
+
 def main():
 
     # globals
@@ -55,7 +58,9 @@ def main():
     thisScriptName = os.path.basename(__file__)
 
     global options
-    global codebaseDir
+    global codebasePath
+    global dateStr
+    global timeStr
     global debugStr
     global package
     global prefix
@@ -104,21 +109,23 @@ def main():
     now = time.gmtime()
     nowTime = datetime(now.tm_year, now.tm_mon, now.tm_mday,
                        now.tm_hour, now.tm_min, now.tm_sec)
+    dateStr = nowTime.strftime("%Y%m%d")
+    timeStr = nowTime.strftime("%Y%m%d%H%M%S")
     dateTimeStr = nowTime.strftime("%Y/%m/%d-%H:%M:%S")
     corePath = os.getcwd()
     
     # check we are in the correct place
 
-    codebaseDir = os.path.join(corePath, "codebase")
-    if (os.path.isdir(codebaseDir) == False):
-        print >>sys.stderr, "ERROR - script: ", thisScriptName
-        print >>sys.stderr, "  Incorrect run directory: ", corePath
-        print >>sys.stderr, "  Must be run just above codebase dir"
+    codebasePath = os.path.join(corePath, "codebase")
+    if (os.path.isdir(codebasePath) == False):
+        print("ERROR - script: ", thisScriptName, file=sys.stderr)
+        print("  Incorrect run directory: ", corePath, file=sys.stderr)
+        print("  Must be run just above codebase dir", file=sys.stderr)
         sys.exit(1)
 
     # run qmake for QT apps to create moc_ files
 
-    hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
+    hawkEyeDir = os.path.join(codebasePath, "apps/radar/src/HawkEye")
     createQtMocFiles(hawkEyeDir)
 
     # set the environment
@@ -136,25 +143,25 @@ def main():
         os.environ["CXXFLAGS"] = " -std=c++11 "
 
     cmd = "env"
-    print >>sys.stderr, "========================================="
+    print("=========================================", file=sys.stderr)
     shellCmd(cmd)
-    print >>sys.stderr, "========================================="
+    print("=========================================", file=sys.stderr)
 
     # do the build and install
 
-    os.chdir(codebaseDir)
+    os.chdir(codebasePath)
     cmd = "./configure --with-hdf5=" + prefix + \
           " --with-netcdf=" + prefix + \
           " --prefix=" + prefix
     shellCmd(cmd)
 
-    os.chdir(os.path.join(codebaseDir, "libs"))
+    os.chdir(os.path.join(codebasePath, "libs"))
     cmd = "make -k -j 8"
     shellCmd(cmd)
     cmd = "make -k install-strip"
     shellCmd(cmd)
 
-    os.chdir(os.path.join(codebaseDir, "apps"))
+    os.chdir(os.path.join(codebasePath, "apps"))
     cmd = "make -k -j 8"
     shellCmd(cmd)
     cmd = "make -k install-strip"
@@ -170,23 +177,23 @@ def main():
         try:
             os.makedirs(perl5Dir)
         except:
-            print >>sys.stderr, "Dir exists: " + perl5Dir
+            print("Dir exists: " + perl5Dir, file=sys.stderr)
 
-        perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
+        perl5LibDir = os.path.join(codebasePath, "libs/perl5/src")
         if (os.path.isdir(perl5LibDir)):
-            os.chdir(os.path.join(codebaseDir, "libs/perl5/src"))
+            os.chdir(os.path.join(codebasePath, "libs/perl5/src"))
             shellCmd("rsync -av *pm " + perl5Dir)
 
         # procmap
 
-        procmapScriptsDir = os.path.join(codebaseDir, "apps/procmap/src/scripts")
+        procmapScriptsDir = os.path.join(codebasePath, "apps/procmap/src/scripts")
         if (os.path.isdir(procmapScriptsDir)):
             os.chdir(procmapScriptsDir)
             shellCmd("./install_scripts.lrose " + prefix + "bin")
 
         # general
 
-        generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")
+        generalScriptsDir = os.path.join(codebasePath, "apps/scripts/src")
         if (os.path.isdir(generalScriptsDir)):
             os.chdir(generalScriptsDir)
             shellCmd("./install_scripts.lrose " + prefix + "bin")
@@ -201,22 +208,22 @@ def main():
 def checkInstall(corePath):
 
     os.chdir(corePath)
-    print("============= Checking libs for " + package + " =============")
-    shellCmd("./codebase/make_bin/check_libs.py " + \
+    print(("============= Checking libs for " + package + " ============="))
+    shellCmd("./codebase/make_bin/check_libs.py3 " + \
              "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + prefix + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
-    print("============= Checking apps for " + package + " =============")
-    shellCmd("./codebase/make_bin/check_apps.py " + \
+    print(("============= Checking apps for " + package + " ============="))
+    shellCmd("./codebase/make_bin/check_apps.py3 " + \
              "--listPath ./build/checklists/apps_check_list." + package + " " + \
              "--appDir " + prefix + "/bin " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
     
     print("**************************************************")
-    print("*** Done building package: " + package)
-    print("*** Installed in dir: " + prefix + " ***")
+    print(("*** Done building package: " + package))
+    print(("*** Installed in dir: " + prefix + " ***"))
     print("**************************************************")
 
 ########################################################################
@@ -241,22 +248,22 @@ def createQtMocFiles(appDir):
 def shellCmd(cmd):
 
     if (options.debug):
-        print >>sys.stderr, "running cmd:", cmd, " ....."
+        print("running cmd:", cmd, " .....", file=sys.stderr)
     
     try:
         retcode = subprocess.check_call(cmd, shell=True)
         if retcode != 0:
-            print >>sys.stderr, "Child exited with code: ", retcode
+            print("Child exited with code: ", retcode, file=sys.stderr)
             sys.exit(1)
         else:
             if (options.verbose):
-                print >>sys.stderr, "Child returned code: ", retcode
-    except OSError, e:
-        print >>sys.stderr, "Execution failed:", e
+                print("Child returned code: ", retcode, file=sys.stderr)
+    except OSError as e:
+        print("Execution failed:", e, file=sys.stderr)
         sys.exit(1)
 
     if (options.debug):
-        print >>sys.stderr, ".... done"
+        print(".... done", file=sys.stderr)
     
 ########################################################################
 # Run - entry point

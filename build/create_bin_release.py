@@ -6,6 +6,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
 import shutil
@@ -114,7 +115,8 @@ def main():
             buildDir = options.prefix
     else:
         if (options.prefix == "not-set"):
-            buildDir = os.path.join("/tmp", package + "_prepare_release_bin_directory")
+            buildDir = os.path.join("/tmp", 
+                                    package + "_prepare_release_bin_directory")
         else:
             buildDir = options.prefix
 
@@ -130,30 +132,33 @@ def main():
     tarName = releaseName + ".tgz"
     tarDir = os.path.join(buildDir, releaseName)
     
-    print >>sys.stderr, "*********************************************************************"
-    print >>sys.stderr, "  Running " + thisScriptName
-    print >>sys.stderr, ""
-    print >>sys.stderr, "  Preparing " + package + " binary release"
-    print >>sys.stderr, "  OS type: " + ostype
-    print >>sys.stderr, ""
-    print >>sys.stderr, "  NCAR, Boulder, CO, USA"
-    print >>sys.stderr, ""
-    print >>sys.stderr, "  " + dateTimeStr
-    print >>sys.stderr, ""
-    print >>sys.stderr, "*********************************************************************"
-    print >>sys.stderr, "  dateStr: ", dateStr
-    print >>sys.stderr, "  timeStr: ", timeStr
-    print >>sys.stderr, "  platform: ", platform
-    print >>sys.stderr, "  prefix: ", options.prefix
-    print >>sys.stderr, "  package: ", package
-    print >>sys.stderr, "  version: ", version
-    print >>sys.stderr, "  srcRelease: ", srcRelease
-    print >>sys.stderr, "  buildDir: ", buildDir
-    print >>sys.stderr, "  releaseName: ", releaseName
-    print >>sys.stderr, "  tarName: ", tarName
-    print >>sys.stderr, "  tarDir: ", tarDir
-    print >>sys.stderr, "  installScripts: ", options.installScripts
-    print >>sys.stderr, "*********************************************************************"
+    print("*****************************************************************", 
+          file=sys.stderr)
+    print("  Running " + thisScriptName, file=sys.stderr)
+    print("", file=sys.stderr)
+    print("  Preparing " + package + " binary release", file=sys.stderr)
+    print("  OS type: " + ostype, file=sys.stderr)
+    print("", file=sys.stderr)
+    print("  NCAR, Boulder, CO, USA", file=sys.stderr)
+    print("", file=sys.stderr)
+    print("  " + dateTimeStr, file=sys.stderr)
+    print("", file=sys.stderr)
+    print("*****************************************************************",
+          file=sys.stderr)
+    print("  dateStr: ", dateStr, file=sys.stderr)
+    print("  timeStr: ", timeStr, file=sys.stderr)
+    print("  platform: ", platform, file=sys.stderr)
+    print("  prefix: ", options.prefix, file=sys.stderr)
+    print("  package: ", package, file=sys.stderr)
+    print("  version: ", version, file=sys.stderr)
+    print("  srcRelease: ", srcRelease, file=sys.stderr)
+    print("  buildDir: ", buildDir, file=sys.stderr)
+    print("  releaseName: ", releaseName, file=sys.stderr)
+    print("  tarName: ", tarName, file=sys.stderr)
+    print("  tarDir: ", tarDir, file=sys.stderr)
+    print("  installScripts: ", options.installScripts, file=sys.stderr)
+    print("*****************************************************************",
+          file=sys.stderr)
 
     # create build dir for staging area
 
@@ -184,7 +189,7 @@ def main():
     os.chdir(runDir)
 
     if (platform != "darwin"):
-        shellCmd("./codebase/make_bin/installOriginLibFiles.py --binDir " + \
+        shellCmd("./codebase/make_bin/installOriginLibFiles.py3 --binDir " + \
                  buildDir + "/bin " + \
                  "--relDir " + package + "_runtime_libs --debug")
 
@@ -195,7 +200,7 @@ def main():
     shellCmd("rsync -av ReleaseInfo.txt " + tarDir)
     shellCmd("rsync -av release_notes " + tarDir)
     # shellCmd("rsync -av docs/README_INSTALL_BIN.txt " + tarDir)
-    shellCmd("rsync -av ./build/install_bin_release.py " + tarDir)
+    shellCmd("rsync -av ./build/install_bin_release.py3 " + tarDir)
     shellCmd("rsync -av " + buildDir + "/bin " + tarDir)
     shellCmd("rsync -av " + buildDir + "/lib " + tarDir)
     shellCmd("rsync -av " + buildDir + "/include " + tarDir)
@@ -223,14 +228,14 @@ def main():
     # check the build
     
     os.chdir(runDir)
-    print("============= Checking libs for " + package + " =============")
-    shellCmd("./codebase/make_bin/check_libs.py " + \
+    print(("============= Checking libs for " + package + " ============="))
+    shellCmd("./codebase/make_bin/check_libs.py3 " + \
              "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + buildDir + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
-    print("============= Checking apps for " + package + " =============")
-    shellCmd("./codebase/make_bin/check_apps.py " + \
+    print(("============= Checking apps for " + package + " ============="))
+    shellCmd("./codebase/make_bin/check_apps.py3 " + \
              "--listPath ./build/checklists/apps_check_list." + package + " " + \
              "--appDir " + buildDir + "/bin " + \
              "--label " + package + " --maxAge 3600")
@@ -241,8 +246,8 @@ def main():
     
     print("  **************************************************")
     print("  *** Done preparing binary release ***")
-    print("  *** binary tar file name: " + tarName + " ***")
-    print("  *** installed in run dir: " + runDir + " ***")
+    print(("  *** binary tar file name: " + tarName + " ***"))
+    print(("  *** installed in run dir: " + runDir + " ***"))
     print("  **************************************************")
 
     sys.exit(0)
@@ -264,7 +269,7 @@ def readReleaseInfoFile():
     
     releaseInfoPath = "ReleaseInfo.txt"
     if (options.verbose):
-        print >>sys.stderr, "==>> reading info file: ", releaseInfoPath
+        print("==>> reading info file: ", releaseInfoPath, file=sys.stderr)
         
     info = open(releaseInfoPath, 'r')
 
@@ -279,16 +284,16 @@ def readReleaseInfoFile():
     # decode lines
 
     if (len(lines) < 1):
-        print >>sys.stderr, "ERROR reading info file: ", releaseInfoPath
-        print >>sys.stderr, "  No contents"
+        print("ERROR reading info file: ", releaseInfoPath, file=sys.stderr)
+        print("  No contents", file=sys.stderr)
         sys.exit(1)
 
     for line in lines:
         line = line.strip()
         toks = line.split(":")
         if (options.verbose):
-            print >>sys.stderr, "  line: ", line
-            print >>sys.stderr, "  toks: ", toks
+            print("  line: ", line, file=sys.stderr)
+            print("  toks: ", toks, file=sys.stderr)
         if (len(toks) == 2):
             if (toks[0] == "package"):
                 package = toks[1]
@@ -298,7 +303,7 @@ def readReleaseInfoFile():
                 srcRelease = toks[1]
         
     if (options.verbose):
-        print >>sys.stderr, "==>> done reading info file: ", releaseInfoPath
+        print("==>> done reading info file: ", releaseInfoPath, file=sys.stderr)
 
 ########################################################################
 # get the OS type
@@ -320,14 +325,14 @@ def getOsType():
     f.close()
 
     if (len(lines) < 1):
-        print >>sys.stderr, "ERROR getting OS type"
-        print >>sys.stderr, "  'uname -a' call did not succeed"
+        print("ERROR getting OS type", file=sys.stderr)
+        print("  'uname -a' call did not succeed", file=sys.stderr)
         sys.exit(1)
 
     for line in lines:
         line = line.strip()
         if (options.verbose):
-            print >>sys.stderr, "  line: ", line
+            print("  line: ", line, file=sys.stderr)
         if (line.find("x86_64") > 0):
             ostype = "x86_64"
         elif (line.find("i686") > 0):
@@ -350,16 +355,16 @@ def createBuildDir():
         if (options.force == False):
             print("\n===============================================")
             print("WARNING: you are about to remove all contents in dir:")
-            print("    " + buildDir)
+            print(("    " + buildDir))
             print("Contents:")
             contents = os.listdir(buildDir)
             for filename in contents:
-                print("  " + filename)
+                print(("  " + filename))
             answer = "n"
             if (sys.version_info > (3, 0)):
-                answer = input("Do you wish to proceed (y/n)? ")
+                answer = eval(input("Do you wish to proceed (y/n)? "))
             else:
-                answer = raw_input("Do you wish to proceed (y/n)? ")
+                answer = input("Do you wish to proceed (y/n)? ")
             if (answer != "y"):
                 print("  aborting ....")
                 sys.exit(1)
@@ -380,8 +385,8 @@ def copyCiddBinaries():
     ciddBinDir = "/tmp/cidd_prepare_bin_release_directory/bin"
     if (os.path.isdir(ciddBinDir)):
         if (options.debug):
-            print >>sys.stderr, "Copying in CIDD binaries from: "
-            print >>sys.stderr, "  " + ciddBinDir
+            print("Copying in CIDD binaries from: ", file=sys.stderr)
+            print("  " + ciddBinDir, file=sys.stderr)
         shellCmd("rsync -av " + ciddBinDir + " " + buildDir)
 
 ########################################################################
@@ -412,7 +417,7 @@ def buildPackage():
     if (options.installScripts):
         args = args + " --scripts "
 
-    shellCmd("./build/build_lrose.py " + args)
+    shellCmd("./build/build_lrose.py3 " + args)
 
 ########################################################################
 # create the tar file
@@ -454,22 +459,22 @@ def createTarFile():
 def shellCmd(cmd):
 
     if (options.debug):
-        print >>sys.stderr, "running cmd:", cmd, " ....."
+        print("running cmd:", cmd, " .....", file=sys.stderr)
     
     try:
         retcode = subprocess.check_call(cmd, shell=True)
         if retcode != 0:
-            print >>sys.stderr, "Child exited with code: ", retcode
+            print("Child exited with code: ", retcode, file=sys.stderr)
             sys.exit(1)
         else:
             if (options.verbose):
-                print >>sys.stderr, "Child returned code: ", retcode
-    except OSError, e:
-        print >>sys.stderr, "Execution failed:", e
+                print("Child returned code: ", retcode, file=sys.stderr)
+    except OSError as e:
+        print("Execution failed:", e, file=sys.stderr)
         sys.exit(1)
 
     if (options.debug):
-        print >>sys.stderr, ".... done"
+        print(".... done", file=sys.stderr)
     
 ########################################################################
 # Run - entry point

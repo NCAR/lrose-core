@@ -6,6 +6,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
 import shutil
@@ -136,23 +137,23 @@ def main():
     logPath = os.path.join(options.logDir, "master");
 
     if (options.debug):
-        print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  lroseCoreTag: ", options.lroseCoreTag
-        print >>sys.stderr, "  package: ", package
-        print >>sys.stderr, "  releaseName: ", releaseName
-        print >>sys.stderr, "  static: ", options.static
-        print >>sys.stderr, "  buildDir: ", options.buildDir
-        print >>sys.stderr, "  logDir: ", options.logDir
-        print >>sys.stderr, "  coreDir: ", coreDir
-        print >>sys.stderr, "  codebaseDir: ", codebaseDir
-        print >>sys.stderr, "  displaysDir: ", displaysDir
-        print >>sys.stderr, "  netcdfDir: ", netcdfDir
-        print >>sys.stderr, "  prefixDir: ", prefix
-        print >>sys.stderr, "  binDir: ", binDir
-        print >>sys.stderr, "  libDir: ", libDir
-        print >>sys.stderr, "  includeDir: ", includeDir
-        print >>sys.stderr, "  shareDir: ", shareDir
-        print >>sys.stderr, "  useSystemNetcdf: ", options.useSystemNetcdf
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  lroseCoreTag: ", options.lroseCoreTag, file=sys.stderr)
+        print("  package: ", package, file=sys.stderr)
+        print("  releaseName: ", releaseName, file=sys.stderr)
+        print("  static: ", options.static, file=sys.stderr)
+        print("  buildDir: ", options.buildDir, file=sys.stderr)
+        print("  logDir: ", options.logDir, file=sys.stderr)
+        print("  coreDir: ", coreDir, file=sys.stderr)
+        print("  codebaseDir: ", codebaseDir, file=sys.stderr)
+        print("  displaysDir: ", displaysDir, file=sys.stderr)
+        print("  netcdfDir: ", netcdfDir, file=sys.stderr)
+        print("  prefixDir: ", prefix, file=sys.stderr)
+        print("  binDir: ", binDir, file=sys.stderr)
+        print("  libDir: ", libDir, file=sys.stderr)
+        print("  includeDir: ", includeDir, file=sys.stderr)
+        print("  shareDir: ", shareDir, file=sys.stderr)
+        print("  useSystemNetcdf: ", options.useSystemNetcdf, file=sys.stderr)
 
     # create build dir
     
@@ -165,7 +166,7 @@ def main():
         os.makedirs(tmpBinDir)
         os.makedirs(options.logDir)
     except:
-        print >>sys.stderr, "  note - dirs already exist"
+        print("  note - dirs already exist", file=sys.stderr)
 
     # get repos from git
 
@@ -176,7 +177,7 @@ def main():
 
     logPath = prepareLogFile("install-package-makefiles");
     os.chdir(codebaseDir)
-    shellCmd("./make_bin/install_package_makefiles.py --package " + 
+    shellCmd("./make_bin/install_package_makefiles.py3 --package " + 
              package + " --codedir .")
 
     # trim libs and apps to those required by distribution makefiles
@@ -240,14 +241,18 @@ def createBuildDir():
 
     if (os.path.isdir(options.buildDir)):
 
-        print("WARNING: you are about to remove all contents in dir: " + 
-              options.buildDir)
+        print(("WARNING: you are about to remove all contents in dir: " + 
+              options.buildDir))
         print("===============================================")
         contents = os.listdir(options.buildDir)
         for filename in contents:
-            print("  " + filename)
+            print(("  " + filename))
         print("===============================================")
-        answer = raw_input("WARNING: do you wish to proceed (y/n)? ")
+        answer = "n"
+        if (sys.version_info > (3, 0)):
+            answer = input("WARNING: do you wish to proceed (y/n)? ")
+        else:
+            answer = raw_input("WARNING: do you wish to proceed (y/n)? ")
         if (answer != "y"):
             print("  aborting ....")
             sys.exit(1)
@@ -258,8 +263,8 @@ def createBuildDir():
 
     # make it clean
     
-    print("INFO: you are about to create build dir: " + 
-          options.buildDir)
+    print(("INFO: you are about to create build dir: " + 
+          options.buildDir))
     
     os.makedirs(options.buildDir)
 
@@ -300,7 +305,7 @@ def setupAutoconf():
              shutil.copy("../build/autoconf/configure.base.cidd", "./configure.base")
         else:
              shutil.copy("../build/autoconf/configure.base", "./configure.base")
-        shellCmd("./make_bin/createConfigure.am.py --dir ." +
+        shellCmd("./make_bin/createConfigure.am.py3 --dir ." +
                  " --baseName configure.base" +
                  " --pkg " + package + debugStr)
     else:
@@ -310,7 +315,7 @@ def setupAutoconf():
         else:
             shutil.copy("../build/autoconf/configure.base.shared",
                         "./configure.base.shared")
-        shellCmd("./make_bin/createConfigure.am.py --dir ." +
+        shellCmd("./make_bin/createConfigure.am.py3 --dir ." +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + package + debugStr)
 
@@ -367,8 +372,8 @@ def getValueListForKey(path, key):
         fp = open(path, 'r')
     except IOError as e:
         if (options.verbose):
-            print >>sys.stderr, "ERROR - ", thisScriptName
-            print >>sys.stderr, "  Cannot open file:", path
+            print("ERROR - ", thisScriptName, file=sys.stderr)
+            print("  Cannot open file:", path, file=sys.stderr)
         return valueList
 
     lines = fp.readlines()
@@ -417,7 +422,7 @@ def getValueListForKey(path, key):
 def trimToMakefiles(subDir):
 
     if (options.verbose):
-        print >>sys.stderr, "Trimming unneeded dirs, subDir: " + subDir
+        print("Trimming unneeded dirs, subDir: " + subDir, file=sys.stderr)
 
     # get list of subdirs in makefile
 
@@ -428,13 +433,13 @@ def trimToMakefiles(subDir):
     subNameList = getValueListForKey("makefile", "SUB_DIRS")
     if not subNameList:
         if (options.verbose):
-            print >>sys.stderr, "Trying uppercase Makefile ... "
+            print("Trying uppercase Makefile ... ", file=sys.stderr)
         subNameList = getValueListForKey("Makefile", "SUB_DIRS")
     
     for subName in subNameList:
         if (os.path.isdir(subName)):
             if (options.verbose):
-                print >>sys.stderr, "  need sub dir: " + subName
+                print("  need sub dir: " + subName, file=sys.stderr)
             
     # get list of files in subDir
 
@@ -442,18 +447,18 @@ def trimToMakefiles(subDir):
     for entry in entries:
         theName = os.path.join(dirPath, entry)
         if (options.verbose):
-            print >>sys.stderr, "considering: " + theName
+            print("considering: " + theName, file=sys.stderr)
         if (entry == "scripts") or (entry == "include"):
             # always keep scripts directories
             continue
         if (os.path.isdir(theName)):
             if (entry not in subNameList):
                 if (options.verbose):
-                    print >>sys.stderr, "discarding it"
+                    print("discarding it", file=sys.stderr)
                 shutil.rmtree(theName)
             else:
                 if (options.verbose):
-                    print >>sys.stderr, "keeping it and recurring"
+                    print("keeping it and recurring", file=sys.stderr)
                 # check this child's required subdirectories ( recurse )
                 # nextLevel = os.path.join(dirPath, entry)
                 # print >> sys.stderr, "trim to makefile on subdirectory: "
@@ -551,7 +556,7 @@ def buildPackage():
         try:
             os.makedirs(perl5Dir)
         except:
-            print >>sys.stderr, "Dir exists: " + perl5Dir
+            print("Dir exists: " + perl5Dir, file=sys.stderr)
 
         perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
         if (os.path.isdir(perl5LibDir)):
@@ -585,7 +590,7 @@ def doFinalInstall():
         os.makedirs(includeDir)
         os.makedirs(shareDir)
     except:
-        print >>sys.stderr, "  note - dirs already exist"
+        print("  note - dirs already exist", file=sys.stderr)
     
     # install docs etc
     
@@ -618,14 +623,14 @@ def doFinalInstall():
 def checkInstall():
 
     os.chdir(coreDir)
-    print("============= Checking libs for " + package + " =============")
-    shellCmd("./codebase/make_bin/check_libs.py " + \
+    print(("============= Checking libs for " + package + " ============="))
+    shellCmd("./codebase/make_bin/check_libs.py3 " + \
              "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + prefix + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
-    print("============= Checking apps for " + package + " =============")
-    shellCmd("./codebase/make_bin/check_apps.py " + \
+    print(("============= Checking apps for " + package + " ============="))
+    shellCmd("./codebase/make_bin/check_apps.py3 " + \
              "--listPath ./build/checklists/apps_check_list." + package + " " + \
              "--appDir " + prefix + "/bin " + \
              "--label " + package + " --maxAge 3600")
@@ -633,7 +638,7 @@ def checkInstall():
     
     print("**************************************************")
     print("*** Done building auto release *******************")
-    print("*** Installed in dir: " + prefix + " ***")
+    print(("*** Installed in dir: " + prefix + " ***"))
     print("**************************************************")
 
 ########################################################################
@@ -647,7 +652,7 @@ def prune(tree):
 
         if (len(contents) == 0):
             if (options.verbose):
-                print >> sys.stderr, "pruning empty dir: " + tree
+                print("pruning empty dir: " + tree, file=sys.stderr)
             shutil.rmtree(tree)
         else:
             for l in contents:
@@ -655,7 +660,7 @@ def prune(tree):
                 if (l == "CVS") or (l == ".git"): 
                     thepath = os.path.join(tree,l)
                     if (options.verbose):
-                        print >> sys.stderr, "pruning dir: " + thepath
+                        print("pruning dir: " + thepath, file=sys.stderr)
                     shutil.rmtree(thepath)
                 else:
                     thepath = os.path.join(tree,l)
@@ -665,7 +670,7 @@ def prune(tree):
             newcontents = os.listdir(tree)
             if (len(newcontents) == 0):
                 if (options.verbose):
-                    print >> sys.stderr, "pruning empty dir: " + tree
+                    print("pruning empty dir: " + tree, file=sys.stderr)
                 shutil.rmtree(tree)
 
 ########################################################################
@@ -676,9 +681,9 @@ def prepareLogFile(logFileName):
     logPath = os.path.join(options.logDir, logFileName + ".log.txt");
     if (logPath.find('no-logging') >= 0):
         return logPath
-    print >> sys.stderr, "========================= " + logFileName + " ========================="
+    print("========================= " + logFileName + " =========================", file=sys.stderr)
     if (options.verbose):
-        print >> sys.stderr, "====>> Creating log file: " + logPath + " <<=="
+        print("====>> Creating log file: " + logPath + " <<==", file=sys.stderr)
     fp = open(logPath, "w+")
     fp.write("===========================================\n")
     fp.write("Log file from script: " + thisScriptName + "\n")
@@ -691,28 +696,28 @@ def prepareLogFile(logFileName):
 
 def shellCmd(cmd):
 
-    print >>sys.stderr, "Running cmd:", cmd
+    print("Running cmd:", cmd, file=sys.stderr)
     
     if (logPath.find('no-logging') >= 0):
         cmdToRun = cmd
     else:
-        print >>sys.stderr, "Log file is:", logPath
-        print >>sys.stderr, "    ...."
+        print("Log file is:", logPath, file=sys.stderr)
+        print("    ....", file=sys.stderr)
         cmdToRun = cmd + " 1>> " + logPath + " 2>&1"
 
     try:
         retcode = subprocess.check_call(cmdToRun, shell=True)
         if retcode != 0:
-            print >>sys.stderr, "Child exited with code: ", retcode
+            print("Child exited with code: ", retcode, file=sys.stderr)
             sys.exit(1)
         else:
             if (options.verbose):
-                print >>sys.stderr, "Child returned code: ", retcode
-    except OSError, e:
-        print >>sys.stderr, "Execution failed:", e
+                print("Child returned code: ", retcode, file=sys.stderr)
+    except OSError as e:
+        print("Execution failed:", e, file=sys.stderr)
         sys.exit(1)
 
-    print >>sys.stderr, "    done"
+    print("    done", file=sys.stderr)
     
 ########################################################################
 # Run - entry point
