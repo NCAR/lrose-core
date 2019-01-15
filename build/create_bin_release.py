@@ -189,7 +189,7 @@ def main():
     os.chdir(runDir)
 
     if (platform != "darwin"):
-        shellCmd("./codebase/make_bin/installOriginLibFiles.py3 --binDir " + \
+        shellCmd("./codebase/make_bin/installOriginLibFiles.py --binDir " + \
                  buildDir + "/bin " + \
                  "--relDir " + package + "_runtime_libs --debug")
 
@@ -200,7 +200,7 @@ def main():
     shellCmd("rsync -av ReleaseInfo.txt " + tarDir)
     shellCmd("rsync -av release_notes " + tarDir)
     # shellCmd("rsync -av docs/README_INSTALL_BIN.txt " + tarDir)
-    shellCmd("rsync -av ./build/install_bin_release.py3 " + tarDir)
+    shellCmd("rsync -av ./build/install_bin_release.py " + tarDir)
     shellCmd("rsync -av " + buildDir + "/bin " + tarDir)
     shellCmd("rsync -av " + buildDir + "/lib " + tarDir)
     shellCmd("rsync -av " + buildDir + "/include " + tarDir)
@@ -229,13 +229,13 @@ def main():
     
     os.chdir(runDir)
     print(("============= Checking libs for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_libs.py3 " + \
+    shellCmd("./codebase/make_bin/check_libs.py " + \
              "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + buildDir + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
     print(("============= Checking apps for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_apps.py3 " + \
+    shellCmd("./codebase/make_bin/check_apps.py " + \
              "--listPath ./build/checklists/apps_check_list." + package + " " + \
              "--appDir " + buildDir + "/bin " + \
              "--label " + package + " --maxAge 3600")
@@ -417,7 +417,7 @@ def buildPackage():
     if (options.installScripts):
         args = args + " --scripts "
 
-    shellCmd("./build/build_lrose.py3 " + args)
+    shellCmd("./build/build_lrose.py " + args)
 
 ########################################################################
 # create the tar file

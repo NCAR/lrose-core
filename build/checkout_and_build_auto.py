@@ -177,7 +177,7 @@ def main():
 
     logPath = prepareLogFile("install-package-makefiles");
     os.chdir(codebaseDir)
-    shellCmd("./make_bin/install_package_makefiles.py3 --package " + 
+    shellCmd("./make_bin/install_package_makefiles.py --package " + 
              package + " --codedir .")
 
     # trim libs and apps to those required by distribution makefiles
@@ -305,7 +305,7 @@ def setupAutoconf():
              shutil.copy("../build/autoconf/configure.base.cidd", "./configure.base")
         else:
              shutil.copy("../build/autoconf/configure.base", "./configure.base")
-        shellCmd("./make_bin/createConfigure.am.py3 --dir ." +
+        shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base" +
                  " --pkg " + package + debugStr)
     else:
@@ -315,7 +315,7 @@ def setupAutoconf():
         else:
             shutil.copy("../build/autoconf/configure.base.shared",
                         "./configure.base.shared")
-        shellCmd("./make_bin/createConfigure.am.py3 --dir ." +
+        shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + package + debugStr)
 
@@ -624,13 +624,13 @@ def checkInstall():
 
     os.chdir(coreDir)
     print(("============= Checking libs for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_libs.py3 " + \
+    shellCmd("./codebase/make_bin/check_libs.py " + \
              "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + prefix + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
     print(("============= Checking apps for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_apps.py3 " + \
+    shellCmd("./codebase/make_bin/check_apps.py " + \
              "--listPath ./build/checklists/apps_check_list." + package + " " + \
              "--appDir " + prefix + "/bin " + \
              "--label " + package + " --maxAge 3600")

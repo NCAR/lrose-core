@@ -142,7 +142,7 @@ def main():
     # install the distribution-specific makefiles
 
     os.chdir(codebaseDir)
-    cmd = "./make_bin/install_package_makefiles.py3 --package " + \
+    cmd = "./make_bin/install_package_makefiles.py --package " + \
           options.package + " --codedir . "
     if (options.osx):
         cmd = cmd + " --osx "
@@ -288,7 +288,7 @@ def setupAutoconf():
              shutil.copy("../build/autoconf/configure.base",
                          "./configure.base")
 
-        shellCmd("./make_bin/createConfigure.am.py3 --dir ." +
+        shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base" +
                  " --pkg " + options.package + argsStr)
     else:
@@ -303,7 +303,7 @@ def setupAutoconf():
             shutil.copy("../build/autoconf/configure.base.shared",
                         "./configure.base.shared")
 
-        shellCmd("./make_bin/createConfigure.am.py3 --dir ." +
+        shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + options.package + argsStr)
 
@@ -355,8 +355,8 @@ def createTarFile():
 
     # copy some scripts into tar directory
 
-    shellCmd("rsync -av build/create_bin_release.py3 " + tarDir)
-    shellCmd("rsync -av build/build_src_release.py3 " + tarDir)
+    shellCmd("rsync -av build/create_bin_release.py " + tarDir)
+    shellCmd("rsync -av build/build_src_release.py " + tarDir)
 
     # move lrose contents into tar dir
 
