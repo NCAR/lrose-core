@@ -6,6 +6,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 from sys import platform
 import os
 import sys
@@ -55,8 +56,8 @@ def main():
         options.debug = True
     
     if (options.debug == True):
-        print("Running %s:" % thisScriptName, file=sys.stderr)
-        print("  Dir:", options.dir, file=sys.stderr)
+        print("Running:", thisScriptName, file=sys.stderr)
+        print("    Dir:", options.dir, file=sys.stderr)
 
     # go to the dir
 
