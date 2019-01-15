@@ -366,11 +366,6 @@ def copyLibToRelDir(libName, libPath):
     cmd = "rsync -avL " + libPath + " " + destDir
     runCommand(cmd)
 
-    # try:
-    #     shutil.copy2(libPath, destDir)
-    # except (shutil.Error, IOError), err:
-    #     print >>sys.stderr, "===>>> WARNING: ", err
-
 ########################################################################
 # Modify a library dependency paths in an executable file
 
@@ -467,9 +462,6 @@ def runCommand(cmd):
 
 ########################################################################
 # Run - entry point
-
-if sys.version_info[0] < 3:
-    raise Exception("Must be using Python 3")
 
 if __name__ == "__main__":
    main()

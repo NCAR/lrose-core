@@ -485,8 +485,5 @@ def runCommand(cmd):
 ########################################################################
 # Run - entry point
 
-if sys.version_info[0] < 3:
-    raise Exception("Must be using Python 3")
-              
 if __name__ == "__main__":
    main()

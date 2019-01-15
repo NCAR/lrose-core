@@ -355,7 +355,11 @@ def createBuildDir():
             contents = os.listdir(buildDir)
             for filename in contents:
                 print("  " + filename)
-            answer = raw_input("Do you wish to proceed (y/n)? ")
+            answer = "n"
+            if (sys.version_info > (3, 0)):
+                answer = input("Do you wish to proceed (y/n)? ")
+            else:
+                answer = raw_input("Do you wish to proceed (y/n)? ")
             if (answer != "y"):
                 print("  aborting ....")
                 sys.exit(1)
