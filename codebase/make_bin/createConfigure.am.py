@@ -6,8 +6,10 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
+import shutil
 import subprocess
 from optparse import OptionParser
 from datetime import datetime
@@ -64,12 +66,12 @@ def main():
         options.debug = True
     
     if (options.debug == True):
-        print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  Top level dir: ", options.dir
-        print >>sys.stderr, "  Base file name: ", options.baseName
-        print >>sys.stderr, "  shared: ", options.shared
-        print >>sys.stderr, "  pkg: ", options.pkg
-        print >>sys.stderr, "  osx: ", options.osx
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  Top level dir: ", options.dir, file=sys.stderr)
+        print("  Base file name: ", options.baseName, file=sys.stderr)
+        print("  shared: ", options.shared, file=sys.stderr)
+        print("  pkg: ", options.pkg, file=sys.stderr)
+        print("  osx: ", options.osx, file=sys.stderr)
 
     # go to the dir
 
@@ -77,7 +79,7 @@ def main():
 
     # create makefile.am at top level
 
-    cmd = os.path.join(thisScriptDir, "createMakefile.am.topdir.py") + \
+    cmd = os.path.join(thisScriptDir, "createMakefile.am.topdir.py3") + \
           " --dir " + options.dir
     if (options.debug == True):
         cmd += " --debug"
@@ -89,8 +91,8 @@ def main():
     appsDir = "apps"
 
     if (options.debug == True):
-        print >>sys.stderr, "  libs dir: ", libsDir
-        print >>sys.stderr, "  apps dir: ", appsDir
+        print("  libs dir: ", libsDir, file=sys.stderr)
+        print("  apps dir: ", appsDir, file=sys.stderr)
 
     # get list of libs
     
@@ -104,7 +106,7 @@ def main():
 
     if (options.debug == True):
         for path in makefileCreateList:
-            print >>sys.stderr, "  Need to create makefile: ", path
+            print("  Need to create makefile: ", path, file=sys.stderr)
             
     # write out configure.ac
             
@@ -123,7 +125,7 @@ def main():
     if (options.shared == True):
         sharedStr = " --shared "
 
-    cmd = os.path.join(thisScriptDir, "runAutoConf.py") + \
+    cmd = os.path.join(thisScriptDir, "runAutoConf.py3") + \
           " --dir " + options.dir + sharedStr + debugStr
     runCommand(cmd)
 
@@ -139,27 +141,27 @@ def getLibList(dir):
     libArray = []
 
     if (options.debug == True):
-        print >>sys.stderr, "  Getting lib list from dir: ", dir
+        print("  Getting lib list from dir: ", dir, file=sys.stderr)
 
     # check if this dir has a makefile or Makefile
 
     makefilePath = getMakefileTemplatePath(dir)
     if (os.path.exists(makefilePath) == False):
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  No makefile in lib dir: ", dir
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  No makefile in lib dir: ", dir, file=sys.stderr)
         exit(1)
 
     if (options.debug == True):
-        print >>sys.stderr, "  Searching makefile template: ", makefilePath
+        print("  Searching makefile template: ", makefilePath, file=sys.stderr)
 
     # search for SUB_DIRS key in makefile
 
     subNameList = getValueListForKey(makefilePath, "SUB_DIRS")
 
     if (len(subNameList) < 1):
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot find SUB_DIRS in ", makefileName
-        print >>sys.stderr, "  dir: ", options.dir
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find SUB_DIRS in ", makefileName, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         exit(1)
 
     for subName in subNameList:
@@ -174,7 +176,7 @@ def getLibList(dir):
             libList += ","
 
     if (options.debug == True):
-        print >>sys.stderr, "  libList: ", libList
+        print("  libList: ", libList, file=sys.stderr)
 
     return
 
@@ -186,25 +188,25 @@ def searchDir(dir):
     global makefileCreateList
 
     if (options.debug == True):
-        print >>sys.stderr, "  Searching dir: ", dir
+        print("  Searching dir: ", dir, file=sys.stderr)
 
     # check if this dir has a makefile or Makefile
 
     makefilePath = getMakefileTemplatePath(dir)
     if (os.path.exists(makefilePath) == False):
         if (options.verbose == True):
-            print >>sys.stderr, "  No makefile or Makefile found"
+            print("  No makefile or Makefile found", file=sys.stderr)
         return
 
     # detect which type of directory we are in
         
     if (options.verbose == True):
-        print >>sys.stderr, "  Found makefile: ", makefilePath
+        print("  Found makefile: ", makefilePath, file=sys.stderr)
 
     if ((dir == "libs/perl5") or
         (dir == "apps/scripts")):
         if (options.debug):
-            print >>sys.stderr, "  Ignoring dir:", dir
+            print("  Ignoring dir:", dir, file=sys.stderr)
         return
 
     debugStr = "";
@@ -224,7 +226,7 @@ def searchDir(dir):
         sharedStr = ""
         if (options.shared == True):
             sharedStr = " --shared "
-        cmd = os.path.join(thisScriptDir, "createMakefile.am.lib.py") + \
+        cmd = os.path.join(thisScriptDir, "createMakefile.am.lib.py3") + \
               " --dir " + libDir + sharedStr + debugStr
         cmd += " --libList " + libList
         runCommand(cmd)
@@ -235,21 +237,21 @@ def searchDir(dir):
           (pathToks[ntoks-1] == "scripts")):
         # scripts dir - do nothing
         if (options.debug):
-            print >>sys.stderr, "  Ignoring dir:", dir
+            print("  Ignoring dir:", dir, file=sys.stderr)
         return
     elif ((pathToks[ntoks-4] == "apps") and
           (pathToks[ntoks-2] == "src")):
         # app directory
         # create makefile.am for app
         # use package version if available
-        createScript = "createMakefile.am.app." + options.pkg + ".py"
+        createScript = "createMakefile.am.app." + options.pkg + ".py3"
         scriptPath = os.path.join(thisScriptDir, createScript)
         if (os.path.exists(scriptPath) == False):
             # no package version, use default
-            createScript = "createMakefile.am.app.lrose-core.py"
+            createScript = "createMakefile.am.app.lrose.py3"
             scriptPath = os.path.join(thisScriptDir, createScript)
         if (options.debug):
-            print >>sys.stderr, "  createScript:", createScript
+            print("  createScript:", createScript, file=sys.stderr)
         cmd = scriptPath
         cmd += " --dir " + absDir + debugStr
         cmd += " --libList " + libList
@@ -260,7 +262,7 @@ def searchDir(dir):
         return
     else:
         # create makefile.am for recursion
-        cmd = os.path.join(thisScriptDir, "createMakefile.am.recurse.py") + \
+        cmd = os.path.join(thisScriptDir, "createMakefile.am.recurse.py3") + \
               " --dir " + absDir + debugStr
         runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)
@@ -286,9 +288,9 @@ def loadSubdirList(dir):
         fp = open(makefilePath, 'r')
     except IOError as e:
         if (options.verbose == True):
-            print >>sys.stderr, "ERROR - ", thisScriptName
-            print >>sys.stderr, "  Cannot find makefile or Makefile"
-            print >>sys.stderr, "  dir: ", options.dir
+            print("ERROR - ", thisScriptName, file=sys.stderr)
+            print("  Cannot find makefile or Makefile", file=sys.stderr)
+            print("  dir: ", options.dir, file=sys.stderr)
         return
 
     lines = fp.readlines()
@@ -328,10 +330,10 @@ def writeConfigureAc():
     try:
         base = open(options.baseName, "r")
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot read base configure template"
-        print >>sys.stderr, "  base name: ", options.baseName
-        print >>sys.stderr, "  This file should be in: ", options.dir
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot read base configure template", file=sys.stderr)
+        print("  base name: ", options.baseName, file=sys.stderr)
+        print("  This file should be in: ", options.dir, file=sys.stderr)
         return 1
 
     base = open(options.baseName, "r")
@@ -343,9 +345,9 @@ def writeConfigureAc():
     try:
         confac = open("configure.ac", "w")
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open configure.ac for writing"
-        print >>sys.stderr, "  dir: ", options.dir
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open configure.ac for writing", file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         return 1
 
     confac = open("configure.ac", "w")
@@ -418,9 +420,9 @@ def getValueListForKey(path, key):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open file:", path
-        print >>sys.stderr, "  dir: ", options.dir
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open file:", path, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         return valueList
 
     lines = fp.readlines()
@@ -466,18 +468,18 @@ def getValueListForKey(path, key):
 def runCommand(cmd):
 
     if (options.debug == True):
-        print >>sys.stderr, "running cmd:",cmd
+        print("running cmd:",cmd, file=sys.stderr)
     
     try:
         retcode = subprocess.check_call(cmd, shell=True)
         if retcode != 0:
-            print >>sys.stderr, "Child exited with code: ", retcode
+            print("Child exited with code: ", retcode, file=sys.stderr)
             exit(1)
         else:
             if (options.verbose == True):
-                print >>sys.stderr, "Child returned code: ", retcode
-    except OSError, e:
-        print >>sys.stderr, "Execution failed:", e
+                print("Child returned code: ", retcode, file=sys.stderr)
+    except OSError as e:
+        print("Execution failed:", e, retcode, file=sys.stderr)
         exit(1)
 
 ########################################################################

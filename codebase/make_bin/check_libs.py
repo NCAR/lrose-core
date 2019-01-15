@@ -6,6 +6,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import time
 import sys
@@ -49,11 +50,11 @@ def main():
     (options, args) = parser.parse_args()
     
     if (options.debug == True):
-        print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  libDir:", options.libDir
-        print >>sys.stderr, "  listPath:", options.listPath
-        print >>sys.stderr, "  label:", options.label
-        print >>sys.stderr, "  maxAge:", options.maxAge
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  libDir:", options.libDir, file=sys.stderr)
+        print("  listPath:", options.listPath, file=sys.stderr)
+        print("  label:", options.label, file=sys.stderr)
+        print("  maxAge:", options.maxAge, file=sys.stderr)
 
     # read in required list
 
@@ -65,24 +66,24 @@ def main():
     checkForLibs()
 
     if (len(missingLibs) > 0):
-        print >>sys.stderr, "==================>> ERROR <<===================="
-        print >>sys.stderr, "=====>> INCOMPLETE " + options.label + " LIBS INSTALLATION <<===="
-        print >>sys.stderr, "  n libraries missing: " + str(len(missingLibs))
+        print("==================>> ERROR <<====================", file=sys.stderr)
+        print("=====>> INCOMPLETE " + options.label + " LIBS INSTALLATION <<====", file=sys.stderr)
+        print("  n libraries missing: " + str(len(missingLibs)), file=sys.stderr)
         for index, lib in enumerate(missingLibs):
-            print >>sys.stderr, "    missing lib: " + requiredLibsLine[lib]
+            print("    missing lib: " + requiredLibsLine[lib], file=sys.stderr)
     else:
-        print >>sys.stderr, "=================>> SUCCESS <<==================="
-        print >>sys.stderr, "=========>> ALL " + options.label + " LIBS INSTALLED <<========"
+        print("=================>> SUCCESS <<===================", file=sys.stderr)
+        print("=========>> ALL " + options.label + " LIBS INSTALLED <<========", file=sys.stderr)
 
     if (len(oldLibs) > 0):
-        print >>sys.stderr, "=================>> WARNING <<==================="
-        print >>sys.stderr, "===========>> SOME " + options.label + " LIBS ARE OLD <<========="
-        print >>sys.stderr, "  n old libs: " + str(len(oldLibs))
-        print >>sys.stderr, "  These libs may not have been built"
+        print("=================>> WARNING <<===================", file=sys.stderr)
+        print("===========>> SOME " + options.label + " LIBS ARE OLD <<=========", file=sys.stderr)
+        print("  n old libs: " + str(len(oldLibs)), file=sys.stderr)
+        print("  These libs may not have been built", file=sys.stderr)
         for lib in oldLibs:
-            print >>sys.stderr, "    lib out-of-date: " + lib
+            print("    lib out-of-date: " + lib, file=sys.stderr)
 
-    print >>sys.stderr, "================================================="
+    print("=================================================", file=sys.stderr)
 
     sys.exit(0)
 
@@ -99,8 +100,8 @@ def readRequiredList(path):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open lib list file:", path
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open lib list file:", path, file=sys.stderr)
         return -1
 
     lines = fp.readlines()
@@ -119,9 +120,9 @@ def readRequiredList(path):
             requiredLibsLine[libName] = line
 
     if (options.debug == True):
-        print >>sys.stderr, "Required libs:"
+        print("Required libs:", file=sys.stderr)
         for name in requiredLibs:
-            print >>sys.stderr, "    ", requiredLibsLine[name]
+            print("    ", requiredLibsLine[name], file=sys.stderr)
 
     return 0
 
@@ -140,20 +141,20 @@ def checkForLibs():
         path = os.path.join(options.libDir, name)
 
         if (options.debug == True):
-            print >>sys.stderr, "Checking for installed lib: ", path
+            print("Checking for installed lib: ", path, file=sys.stderr)
 
         if (os.path.isfile(path) == False):
             if (options.debug == True):
-                print >>sys.stderr, "   .... missing"
+                print("   .... missing", file=sys.stderr)
             missingLibs.append(name)
         else:
             if (options.debug == True):
-                print >>sys.stderr, "   .... found"
+                print("   .... found", file=sys.stderr)
             age = getFileAge(path)
             if (age > float(options.maxAge)):
                 oldLibs.append(name)
                 if (options.debug == True):
-                    print >>sys.stderr, "   file is old, age: ", age
+                    print("   file is old, age: ", age, file=sys.stderr)
 
 
 ########################################################################

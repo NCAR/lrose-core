@@ -6,6 +6,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
 import shutil
@@ -68,9 +69,9 @@ def main():
         options.debug = True
     
     if (options.debug == True):
-        print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  Lib dir: ", options.dir
-        print >>sys.stderr, "  Lib list: ", options.libList
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  Lib dir: ", options.dir, file=sys.stderr)
+        print("  Lib list: ", options.libList, file=sys.stderr)
 
     # set up list of other libs which may be used for include
 
@@ -94,15 +95,15 @@ def main():
 #        includeList.append(lib)
      
     if (options.debug == True):
-        print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  App dir:", options.dir
-        print >>sys.stderr, "  Lib list: ", libList
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  App dir:", options.dir, file=sys.stderr)
+        print("  Lib list: ", libList, file=sys.stderr)
 
     # go to the src dir
 
     srcDir = os.path.join(options.dir, 'src')
     if (options.debug == True):
-        print >>sys.stderr, "src dir: ", srcDir
+        print("src dir: ", srcDir, file=sys.stderr)
     os.chdir(srcDir)
 
     # get makefile name in use
@@ -114,9 +115,9 @@ def main():
         if (os.path.exists(makefileName) == False):
             makefileName = 'Makefile'
             if (os.path.exists(makefileName) == False):
-                print >>sys.stderr, "ERROR - ", thisScriptName
-                print >>sys.stderr, "  Cannot find makefile or Makefile"
-                print >>sys.stderr, "  dir: ", options.dir
+                print("ERROR - ", thisScriptName, file=sys.stderr)
+                print("  Cannot find makefile or Makefile", file=sys.stderr)
+                print("  dir: ", options.dir, file=sys.stderr)
                 exit(1)
 
     # copy makefile in case we rerun this script
@@ -125,25 +126,25 @@ def main():
         shutil.copy(makefileName, "__makefile.template")
 
     if (options.debug == True):
-        print >>sys.stderr, "-->> using makefile template: ", makefileName
+        print("-->> using makefile template: ", makefileName, file=sys.stderr)
 
     # get the lib name
 
     thisLibName = ""
     getLibName()
     if (options.debug == True):
-        print >>sys.stderr, "  Lib name: ", thisLibName
+        print("  Lib name: ", thisLibName, file=sys.stderr)
 
     # get list of subdirs and their makefiles
 
     getSubDirList()
 
     if (options.debug == True):
-        print >>sys.stderr, "======================="
+        print("=======================", file=sys.stderr)
         for subDir in subDirList:
-            print >>sys.stderr, "subDir, makefile: %s, %s" % \
-                (subDir.subDirName, subDir.makefilePath)
-        print >>sys.stderr, "======================="
+            print("subDir, makefile: %s, %s" % \
+                (subDir.subDirName, subDir.makefilePath), file=sys.stderr)
+        print("=======================", file=sys.stderr)
 
     # load list of files to be compiled
 
@@ -152,19 +153,19 @@ def main():
         addSubDirToCompileList(subDir)
 
     if (options.debug == True):
-        print >>sys.stderr, "======================="
+        print("=======================", file=sys.stderr)
         for compileFile in compileFileList:
-            print >>sys.stderr, "compileFile: %s" % (compileFile)
-        print >>sys.stderr, "======================="
+            print("compileFile: %s" % (compileFile), file=sys.stderr)
+        print("=======================", file=sys.stderr)
 
     # get list of header files
 
     loadHeaderFileList()
     if (options.debug == True):
-        print >>sys.stderr, "======================="
+        print("=======================", file=sys.stderr)
         for headerFile in headerFileList:
-            print >>sys.stderr, "headerFile: %s" % (headerFile)
-        print >>sys.stderr, "======================="
+            print("headerFile: %s" % (headerFile), file=sys.stderr)
+        print("=======================", file=sys.stderr)
 
     # get list of include directories to be referenced
 
@@ -177,7 +178,7 @@ def main():
 #    if (options.debug == True):
 #        for lib in includeList:
 #            if (lib.used == True):
-#                print >>sys.stderr, "Use lib for include: %s" % (lib.name)
+#                print("Use lib for include: %s" % (lib.name)
 
     # write out makefile.am
 
@@ -200,9 +201,9 @@ def getValueListForKey(path, key):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open file:", path
-        print >>sys.stderr, "  dir: ", options.dir
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open file:", path, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         return valueList
 
     lines = fp.readlines()
@@ -257,9 +258,9 @@ def getLibName():
     valList = getValueListForKey(makefileName, "MODULE_NAME")
 
     if (len(valList) < 1):
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot find MODULE_NAME in ", makefileName
-        print >>sys.stderr, "  dir: ", options.dir
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find MODULE_NAME in ", makefileName, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         exit(1)
 
     thisLibName = valList[len(valList)-1]
@@ -277,9 +278,9 @@ def getSubDirList():
     subNameList = getValueListForKey(makefileName, "SUB_DIRS")
 
     if (len(subNameList) < 1):
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot find SUB_DIRS in ", makefileName
-        print >>sys.stderr, "  dir: ", options.dir
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find SUB_DIRS in ", makefileName, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         exit(1)
 
     for subName in subNameList:
@@ -405,7 +406,7 @@ def setIncludeList(sourceFile):
     global includeList
     
     if (options.verbose == True):
-        print >>sys.stderr, "-->> looking for includes in: ", sourceFile
+        print("-->> looking for includes in: ", sourceFile, file=sys.stderr)
 
     fp = open(sourceFile, 'r')
     lines = fp.readlines()
@@ -419,7 +420,7 @@ def setIncludeList(sourceFile):
             continue
 
         if (options.verbose == True):
-            print >>sys.stderr, "  -->> ", line.strip()
+            print("  -->> ", line.strip(), file=sys.stderr)
         
         for lib in includeList:
             if (lib.name == thisLibName):
@@ -428,7 +429,7 @@ def setIncludeList(sourceFile):
             searchStr = "<%s/" % lib.name
             if (line.find(searchStr) > 0):
                 if (options.verbose == True):
-                    print >>sys.stderr, "  -->> found lib", lib.name
+                    print("  -->> found lib", lib.name, file=sys.stderr)
                 lib.used = True
             
 ########################################################################

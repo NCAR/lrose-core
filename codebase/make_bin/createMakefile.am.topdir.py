@@ -6,9 +6,11 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
 import subprocess
+import shutil
 from optparse import OptionParser
 from datetime import datetime
 
@@ -44,8 +46,8 @@ def main():
         options.debug = True
     
     if (options.debug == True):
-        print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  Dir: ", options.dir
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  Dir: ", options.dir, file=sys.stderr)
 
     # go to the dir
 

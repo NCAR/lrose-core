@@ -6,6 +6,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
 import subprocess
@@ -45,8 +46,8 @@ def main():
         options.debug = True
     
     if (options.debug == True):
-        print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  Dir: ", options.dir
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  Dir: ", options.dir, file=sys.stderr)
 
     # go to the dir
 
@@ -61,9 +62,9 @@ def main():
         if (os.path.exists(makefileName) == False):
             makefileName = 'Makefile'
             if (os.path.exists(makefileName) == False):
-                print >>sys.stderr, "ERROR - ", thisScriptName
-                print >>sys.stderr, "  Cannot find makefile or Makefile"
-                print >>sys.stderr, "  dir: ", options.dir
+                print("ERROR - ", thisScriptName, file=sys.stderr)
+                print("  Cannot find makefile or Makefile", file=sys.stderr)
+                print("  dir: ", options.dir, file=sys.stderr)
                 exit(1)
 
     # copy makefile in case we rerun this script
@@ -72,7 +73,7 @@ def main():
         shutil.copy(makefileName, "__makefile.template")
 
     if (options.debug == True):
-        print >>sys.stderr, "-->> using makefile template: ", makefileName
+        print("-->> using makefile template: ", makefileName, file=sys.stderr)
 
     # load list of subdirs
 
@@ -80,11 +81,11 @@ def main():
     getSubdirList()
 
     if (options.debug == True):
-        print >>sys.stderr, "======================="
-        print >>sys.stderr, "subdirList:"
+        print("=======================", file=sys.stderr)
+        print("subdirList:", file=sys.stderr)
         for subdir in subdirList:
-            print >>sys.stderr, "subdir: %s" % (subdir)
-        print >>sys.stderr, "======================="
+            print("subdir: %s" % (subdir), file=sys.stderr)
+        print("=======================", file=sys.stderr)
 
     # write out makefile.am
             
@@ -107,9 +108,9 @@ def getValueListForKey(path, key):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open file:", path
-        print >>sys.stderr, "  dir: ", options.dir
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open file:", path, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         return valueList
 
     lines = fp.readlines()
@@ -162,9 +163,9 @@ def getSubdirList():
     subNameList = getValueListForKey(makefileName, "SUB_DIRS")
 
     if (len(subNameList) < 1):
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot find SUB_DIRS in ", makefileName
-        print >>sys.stderr, "  dir: ", options.dir
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find SUB_DIRS in ", makefileName, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         exit(1)
 
     for subName in subNameList:

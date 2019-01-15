@@ -6,6 +6,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
 import shutil
@@ -44,8 +45,8 @@ def main():
         options.debug = True
     
     if (options.debug == True):
-        print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  Dir:", options.dir
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  Dir:", options.dir, file=sys.stderr)
 
     # go to the dir
 
@@ -72,9 +73,9 @@ def fix():
         bak = open('configure.bak', 'r')
     except IOError as e:
         if (options.verbose == True):
-            print >>sys.stderr, "ERROR - ", thisScriptName
-            print >>sys.stderr, "  Cannot open file configure.bak for reading"
-            print >>sys.stderr, "  dir: ", options.dir
+            print("ERROR - ", thisScriptName, file=sys.stderr)
+            print("  Cannot open file configure.bak for reading", file=sys.stderr)
+            print("  dir: ", options.dir, file=sys.stderr)
         return(-1)
 
     lines = bak.readlines()
@@ -86,9 +87,9 @@ def fix():
         conf = open('configure', 'w')
     except IOError as e:
         if (options.verbose == True):
-            print >>sys.stderr, "ERROR - ", thisScriptName
-            print >>sys.stderr, "  Cannot open file configure for writing"
-            print >>sys.stderr, "  dir: ", options.dir
+            print("ERROR - ", thisScriptName, file=sys.stderr)
+            print("  Cannot open file configure for writing", file=sys.stderr)
+            print("  dir: ", options.dir, file=sys.stderr)
         return(-1)
 
     inBad = False

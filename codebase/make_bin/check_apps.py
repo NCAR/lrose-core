@@ -6,6 +6,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import time
 import sys
@@ -48,11 +49,11 @@ def main():
     (options, args) = parser.parse_args()
     
     if (options.debug == True):
-        print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  appDir:", options.appDir
-        print >>sys.stderr, "  listPath:", options.listPath
-        print >>sys.stderr, "  label:", options.label
-        print >>sys.stderr, "  maxAge:", options.maxAge
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  appDir:", options.appDir, file=sys.stderr)
+        print("  listPath:", options.listPath, file=sys.stderr)
+        print("  label:", options.label, file=sys.stderr)
+        print("  maxAge:", options.maxAge, file=sys.stderr)
 
     # read in required list
 
@@ -64,24 +65,24 @@ def main():
     checkForApps()
 
     if (len(missingApps) > 0):
-        print >>sys.stderr, "==================>> ERROR <<===================="
-        print >>sys.stderr, "=====>> INCOMPLETE " + options.label + " APPS INSTALLATION <<===="
-        print >>sys.stderr, "  n applications missing: " + str(len(missingApps))
+        print("==================>> ERROR <<====================", file=sys.stderr)
+        print("=====>> INCOMPLETE " + options.label + " APPS INSTALLATION <<====", file=sys.stderr)
+        print("  n applications missing: " + str(len(missingApps)), file=sys.stderr)
         for app in missingApps:
-            print >>sys.stderr, "    missing app: " + app
-        print >>sys.stderr, "================================================="
+            print("    missing app: " + app, file=sys.stderr)
+        print("=================================================", file=sys.stderr)
     else:
-        print >>sys.stderr, "================>> SUCCESS <<=================="
-        print >>sys.stderr, "=========>> ALL " + options.label + " APPS INSTALLED <<========"
-        print >>sys.stderr, "==============================================="
+        print("================>> SUCCESS <<==================", file=sys.stderr)
+        print("=========>> ALL " + options.label + " APPS INSTALLED <<========", file=sys.stderr)
+        print("===============================================", file=sys.stderr)
 
     if (len(oldApps) > 0):
-        print >>sys.stderr, "==================>> WARNING <<===================="
-        print >>sys.stderr, "=====>> SOME " + options.label + " APPS ARE OLD <<===="
-        print >>sys.stderr, "  n old apps: " + str(len(oldApps))
+        print("==================>> WARNING <<====================", file=sys.stderr)
+        print("=====>> SOME " + options.label + " APPS ARE OLD <<====", file=sys.stderr)
+        print("  n old apps: " + str(len(oldApps)), file=sys.stderr)
         for app in oldApps:
-            print >>sys.stderr, "    old app: " + app
-        print >>sys.stderr, "================================================="
+            print("    old app: " + app, file=sys.stderr)
+        print("=================================================", file=sys.stderr)
 
     sys.exit(0)
 
@@ -96,8 +97,8 @@ def readRequiredList(path):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open app list file:", path
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open app list file:", path, file=sys.stderr)
         return -1
 
     lines = fp.readlines()
@@ -112,9 +113,9 @@ def readRequiredList(path):
         requiredApps.append(line)
 
     if (options.debug == True):
-        print >>sys.stderr, "Required apps:"
+        print("Required apps:", file=sys.stderr)
         for name in requiredApps:
-            print >>sys.stderr, "    ", name
+            print("    ", name, file=sys.stderr)
 
     return 0
 
@@ -133,20 +134,20 @@ def checkForApps():
         path = os.path.join(options.appDir, name)
 
         if (options.debug == True):
-            print >>sys.stderr, "Checking for installed app: ", path
+            print("Checking for installed app: ", path, file=sys.stderr)
 
         if (os.path.isfile(path) == False):
             if (options.debug == True):
-                print >>sys.stderr, "   .... missing"
+                print("   .... missing", file=sys.stderr)
             missingApps.append(path)
         else:
             if (options.debug == True):
-                print >>sys.stderr, "   .... found"
+                print("   .... found", file=sys.stderr)
             age = getFileAge(path)
             if (age > float(options.maxAge)):
                 oldApps.append(path)
                 if (options.debug == True):
-                    print >>sys.stderr, "   file is old, age: ", age
+                    print("   file is old, age: ", age, file=sys.stderr)
 
 
 ########################################################################
