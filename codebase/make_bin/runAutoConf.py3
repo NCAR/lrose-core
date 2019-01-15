@@ -55,8 +55,8 @@ def main():
         options.debug = True
     
     if (options.debug == True):
-        print("Running %s:" % thisScriptName, file = sys.stderr)
-        print("  Dir:", options.dir, file = sys.stderr)
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  Dir:", options.dir, file=sys.stderr)
 
     # go to the dir
 
@@ -102,22 +102,22 @@ def runAutoConf():
 def runCommand(cmd):
 
     if (options.debug == True):
-        print("running cmd:", cmd, " .....", file = sys.stderr)
+        print("running cmd:", cmd, " .....", file=sys.stderr)
     
     try:
         retcode = subprocess.check_call(cmd, shell=True)
         if retcode != 0:
-            print("Child exited with code: ", retcode, file = sys.stderr)
+            print("Child exited with code: ", retcode, file=sys.stderr)
             sys.exit(1)
         else:
             if (options.verbose == True):
-                print("Child returned code: ", retcode, file = sys.stderr)
+                print("Child returned code: ", retcode, file=sys.stderr)
     except OSError as e:
-        print("Execution failed:", e, file = sys.stderr)
+        print("Execution failed:", e, file=sys.stderr)
         sys.exit(1)
 
     if (options.debug == True):
-        print(".... done", file = sys.stderr)
+        print(".... done", file=sys.stderr)
     
 ########################################################################
 # Run - entry point

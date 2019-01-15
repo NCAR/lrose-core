@@ -46,8 +46,8 @@ def main():
         options.debug = True
     
     if (options.debug == True):
-        print("Running %s:" % thisScriptName, file = sys.stderr)
-        print("  Dir: ", options.dir, file = sys.stderr)
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  Dir: ", options.dir, file=sys.stderr)
 
     # go to the dir
 

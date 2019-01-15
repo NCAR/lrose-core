@@ -72,10 +72,10 @@ def main():
     pathParts = options.dir.split('/')
 
     if (options.debug == True):
-        print("Running %s:" % thisScriptName, file = sys.stderr)
-        print("  App dir:", options.dir, file = sys.stderr)
-        print("  Lib list: ", options.libList, file = sys.stderr)
-        print("  osx: ", options.osx, file = sys.stderr)
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  App dir:", options.dir, file=sys.stderr)
+        print("  Lib list: ", options.libList, file=sys.stderr)
+        print("  osx: ", options.osx, file=sys.stderr)
 
     # go to the app dir
 
@@ -90,9 +90,9 @@ def main():
         if (os.path.exists(makefileName) == False):
             makefileName = 'Makefile'
             if (os.path.exists(makefileName) == False):
-                print("ERROR - ", thisScriptName, file = sys.stderr)
-                print("  Cannot find makefile or Makefile", file = sys.stderr)
-                print("  dir: ", options.dir, file = sys.stderr)
+                print("ERROR - ", thisScriptName, file=sys.stderr)
+                print("  Cannot find makefile or Makefile", file=sys.stderr)
+                print("  dir: ", options.dir, file=sys.stderr)
                 exit(1)
 
     # copy makefile in case we rerun this script
@@ -101,13 +101,13 @@ def main():
         shutil.copy(makefileName, "__makefile.template")
 
     if (options.debug == True):
-        print("-->> using makefile template: ", makefileName, file = sys.stderr)
+        print("-->> using makefile template: ", makefileName, file=sys.stderr)
 
     # parse the RAL Makefile to get the app name
 
     getAppName()
     if (options.debug == True):
-        print("thisAppName: %s" % thisAppName, file = sys.stderr)
+        print("thisAppName: %s" % thisAppName, file=sys.stderr)
 
     # load list of files to be compiled
 
@@ -115,20 +115,20 @@ def main():
     setCompileList()
 
     if (options.debug == True):
-        print("=======================", file = sys.stderr)
+        print("=======================", file=sys.stderr)
         for compileFile in compileFileList:
-            print("  compileFile: %s" % (compileFile), file = sys.stderr)
-        print("=======================", file = sys.stderr)
+            print("  compileFile: %s" % (compileFile), file=sys.stderr)
+        print("=======================", file=sys.stderr)
 
     # set list of header files
 
     headerFileList = []
     setHeaderFileList()
     if (options.debug == True):
-        print("=======================", file = sys.stderr)
+        print("=======================", file=sys.stderr)
         for headerFile in headerFileList:
-            print("  headerFile: %s" % (headerFile), file = sys.stderr)
-        print("=======================", file = sys.stderr)
+            print("  headerFile: %s" % (headerFile), file=sys.stderr)
+        print("=======================", file=sys.stderr)
             
     # get list showing order in which compiled libs need to be linked
 
@@ -149,19 +149,19 @@ def main():
             orderedLibList.append(entry)
     # orderedLibList.reverse()
     if (options.debug == True):
-        print("======== ordered lib list ===================", file = sys.stderr)
+        print("======== ordered lib list ===================", file=sys.stderr)
         for lib in orderedLibList:
-            print("  ordered lib: %s" % lib, file = sys.stderr)
-        print("=============================================", file = sys.stderr)
+            print("  ordered lib: %s" % lib, file=sys.stderr)
+        print("=============================================", file=sys.stderr)
 
     # get list of libs listed in makefile
 
     makefileLibList = getMakefileLibList()
     if (options.debug == True):
-        print("========= makefile lib list ==============", file = sys.stderr)
+        print("========= makefile lib list ==============", file=sys.stderr)
         for lib in makefileLibList:
-            print("  makefile lib: %s" % lib, file = sys.stderr)
-        print("==========================================", file = sys.stderr)
+            print("  makefile lib: %s" % lib, file=sys.stderr)
+        print("==========================================", file=sys.stderr)
 
     # check if we need Qt support
 
@@ -174,10 +174,10 @@ def main():
 
     loadLibList = getLoadLibList()
     if (options.debug == True):
-        print("======= load lib list ================", file = sys.stderr)
+        print("======= load lib list ================", file=sys.stderr)
         for lib in loadLibList:
-            print("  load lib: -l%s" % lib, file = sys.stderr)
-        print("======================================", file = sys.stderr)
+            print("  load lib: -l%s" % lib, file=sys.stderr)
+        print("======================================", file=sys.stderr)
 
     # write out makefile.am
             
@@ -200,9 +200,9 @@ def getValueListForKey(path, key):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print("ERROR - ", thisScriptName, file = sys.stderr)
-        print("  Cannot open file:", path, file = sys.stderr)
-        print("  dir: ", options.dir, file = sys.stderr)
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open file:", path, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         return valueList
 
     lines = fp.readlines()
@@ -257,9 +257,9 @@ def getAppName():
     valList = getValueListForKey(makefileName, "TARGET_FILE")
 
     if (len(valList) < 1):
-        print("ERROR - ", thisScriptName, file = sys.stderr)
-        print("  Cannot find TARGET_FILE in ", makefileName, file = sys.stderr)
-        print("  dir: ", options.dir, file = sys.stderr)
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find TARGET_FILE in ", makefileName, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         exit(1)
 
     thisAppName = valList[len(valList)-1]
@@ -280,8 +280,8 @@ def setCompileList():
     try:
         fp = open(makefileName, 'r')
     except IOError as e:
-        print("ERROR - ", thisScriptName, file = sys.stderr)
-        print("  Cannot open: ", makefileName, file = sys.stderr)
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open: ", makefileName, file=sys.stderr)
         exit(1)
 
     lines = fp.readlines()
@@ -298,8 +298,8 @@ def checkForQt():
     try:
         fp = open(makefileName, 'r')
     except IOError as e:
-        print("ERROR - ", thisScriptName, file = sys.stderr)
-        print("  Cannot open: ", makefileName, file = sys.stderr)
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open: ", makefileName, file=sys.stderr)
         exit(1)
 
     lines = fp.readlines()
@@ -319,8 +319,8 @@ def checkForX11():
     try:
         fp = open(makefileName, 'r')
     except IOError as e:
-        print("ERROR - ", thisScriptName, file = sys.stderr)
-        print("  Cannot open: ", makefileName, file = sys.stderr)
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open: ", makefileName, file=sys.stderr)
         exit(1)
 
     lines = fp.readlines()
@@ -408,7 +408,7 @@ def setIncludeList(sourceFile):
     global includeList
     
     if (options.verbose == True):
-        print("-->> looking for includes in:", sourceFile, file = sys.stderr)
+        print("-->> looking for includes in:", sourceFile, file=sys.stderr)
 
     fp = open(sourceFile, 'r')
     lines = fp.readlines()
@@ -422,7 +422,7 @@ def setIncludeList(sourceFile):
             continue
 
         if (options.verbose == True):
-            print("  -->> ", line.strip(), file = sys.stderr)
+            print("  -->> ", line.strip(), file=sys.stderr)
         
         for lib in includeList:
             if (lib.name == thisAppName):
@@ -431,7 +431,7 @@ def setIncludeList(sourceFile):
             searchStr = "<%s/" % lib.name
             if (line.find(searchStr) > 0):
                 if (options.verbose == True):
-                    print("  -->> found lib", lib.name, file = sys.stderr)
+                    print("  -->> found lib", lib.name, file=sys.stderr)
                 lib.used = True
             
 ########################################################################

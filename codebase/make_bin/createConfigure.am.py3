@@ -66,12 +66,12 @@ def main():
         options.debug = True
     
     if (options.debug == True):
-        print("Running %s:" % thisScriptName, file = sys.stderr)
-        print("  Top level dir: ", options.dir, file = sys.stderr)
-        print("  Base file name: ", options.baseName, file = sys.stderr)
-        print("  shared: ", options.shared, file = sys.stderr)
-        print("  pkg: ", options.pkg, file = sys.stderr)
-        print("  osx: ", options.osx, file = sys.stderr)
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  Top level dir: ", options.dir, file=sys.stderr)
+        print("  Base file name: ", options.baseName, file=sys.stderr)
+        print("  shared: ", options.shared, file=sys.stderr)
+        print("  pkg: ", options.pkg, file=sys.stderr)
+        print("  osx: ", options.osx, file=sys.stderr)
 
     # go to the dir
 
@@ -91,8 +91,8 @@ def main():
     appsDir = "apps"
 
     if (options.debug == True):
-        print("  libs dir: ", libsDir, file = sys.stderr)
-        print("  apps dir: ", appsDir, file = sys.stderr)
+        print("  libs dir: ", libsDir, file=sys.stderr)
+        print("  apps dir: ", appsDir, file=sys.stderr)
 
     # get list of libs
     
@@ -106,7 +106,7 @@ def main():
 
     if (options.debug == True):
         for path in makefileCreateList:
-            print("  Need to create makefile: ", path, file = sys.stderr)
+            print("  Need to create makefile: ", path, file=sys.stderr)
             
     # write out configure.ac
             
@@ -141,27 +141,27 @@ def getLibList(dir):
     libArray = []
 
     if (options.debug == True):
-        print("  Getting lib list from dir: ", dir, file = sys.stderr)
+        print("  Getting lib list from dir: ", dir, file=sys.stderr)
 
     # check if this dir has a makefile or Makefile
 
     makefilePath = getMakefileTemplatePath(dir)
     if (os.path.exists(makefilePath) == False):
-        print("ERROR - ", thisScriptName, file = sys.stderr)
-        print("  No makefile in lib dir: ", dir, file = sys.stderr)
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  No makefile in lib dir: ", dir, file=sys.stderr)
         exit(1)
 
     if (options.debug == True):
-        print("  Searching makefile template: ", makefilePath, file = sys.stderr)
+        print("  Searching makefile template: ", makefilePath, file=sys.stderr)
 
     # search for SUB_DIRS key in makefile
 
     subNameList = getValueListForKey(makefilePath, "SUB_DIRS")
 
     if (len(subNameList) < 1):
-        print("ERROR - ", thisScriptName, file = sys.stderr)
-        print("  Cannot find SUB_DIRS in ", makefileName, file = sys.stderr)
-        print("  dir: ", options.dir, file = sys.stderr)
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find SUB_DIRS in ", makefileName, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         exit(1)
 
     for subName in subNameList:
@@ -176,7 +176,7 @@ def getLibList(dir):
             libList += ","
 
     if (options.debug == True):
-        print("  libList: ", libList, file = sys.stderr)
+        print("  libList: ", libList, file=sys.stderr)
 
     return
 
@@ -188,25 +188,25 @@ def searchDir(dir):
     global makefileCreateList
 
     if (options.debug == True):
-        print("  Searching dir: ", dir, file = sys.stderr)
+        print("  Searching dir: ", dir, file=sys.stderr)
 
     # check if this dir has a makefile or Makefile
 
     makefilePath = getMakefileTemplatePath(dir)
     if (os.path.exists(makefilePath) == False):
         if (options.verbose == True):
-            print("  No makefile or Makefile found", file = sys.stderr)
+            print("  No makefile or Makefile found", file=sys.stderr)
         return
 
     # detect which type of directory we are in
         
     if (options.verbose == True):
-        print("  Found makefile: ", makefilePath, file = sys.stderr)
+        print("  Found makefile: ", makefilePath, file=sys.stderr)
 
     if ((dir == "libs/perl5") or
         (dir == "apps/scripts")):
         if (options.debug):
-            print("  Ignoring dir:", dir, file = sys.stderr)
+            print("  Ignoring dir:", dir, file=sys.stderr)
         return
 
     debugStr = "";
@@ -237,7 +237,7 @@ def searchDir(dir):
           (pathToks[ntoks-1] == "scripts")):
         # scripts dir - do nothing
         if (options.debug):
-            print("  Ignoring dir:", dir, file = sys.stderr)
+            print("  Ignoring dir:", dir, file=sys.stderr)
         return
     elif ((pathToks[ntoks-4] == "apps") and
           (pathToks[ntoks-2] == "src")):
@@ -251,7 +251,7 @@ def searchDir(dir):
             createScript = "createMakefile.am.app.lrose.py3"
             scriptPath = os.path.join(thisScriptDir, createScript)
         if (options.debug):
-            print("  createScript:", createScript, file = sys.stderr)
+            print("  createScript:", createScript, file=sys.stderr)
         cmd = scriptPath
         cmd += " --dir " + absDir + debugStr
         cmd += " --libList " + libList
@@ -288,9 +288,9 @@ def loadSubdirList(dir):
         fp = open(makefilePath, 'r')
     except IOError as e:
         if (options.verbose == True):
-            print("ERROR - ", thisScriptName, file = sys.stderr)
-            print("  Cannot find makefile or Makefile", file = sys.stderr)
-            print("  dir: ", options.dir, file = sys.stderr)
+            print("ERROR - ", thisScriptName, file=sys.stderr)
+            print("  Cannot find makefile or Makefile", file=sys.stderr)
+            print("  dir: ", options.dir, file=sys.stderr)
         return
 
     lines = fp.readlines()
@@ -330,10 +330,10 @@ def writeConfigureAc():
     try:
         base = open(options.baseName, "r")
     except IOError as e:
-        print("ERROR - ", thisScriptName, file = sys.stderr)
-        print("  Cannot read base configure template", file = sys.stderr)
-        print("  base name: ", options.baseName, file = sys.stderr)
-        print("  This file should be in: ", options.dir, file = sys.stderr)
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot read base configure template", file=sys.stderr)
+        print("  base name: ", options.baseName, file=sys.stderr)
+        print("  This file should be in: ", options.dir, file=sys.stderr)
         return 1
 
     base = open(options.baseName, "r")
@@ -345,9 +345,9 @@ def writeConfigureAc():
     try:
         confac = open("configure.ac", "w")
     except IOError as e:
-        print("ERROR - ", thisScriptName, file = sys.stderr)
-        print("  Cannot open configure.ac for writing", file = sys.stderr)
-        print("  dir: ", options.dir, file = sys.stderr)
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open configure.ac for writing", file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         return 1
 
     confac = open("configure.ac", "w")
@@ -420,9 +420,9 @@ def getValueListForKey(path, key):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print("ERROR - ", thisScriptName, file = sys.stderr)
-        print("  Cannot open file:", path, file = sys.stderr)
-        print("  dir: ", options.dir, file = sys.stderr)
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open file:", path, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         return valueList
 
     lines = fp.readlines()
@@ -468,18 +468,18 @@ def getValueListForKey(path, key):
 def runCommand(cmd):
 
     if (options.debug == True):
-        print("running cmd:",cmd, file = sys.stderr)
+        print("running cmd:",cmd, file=sys.stderr)
     
     try:
         retcode = subprocess.check_call(cmd, shell=True)
         if retcode != 0:
-            print("Child exited with code: ", retcode, file = sys.stderr)
+            print("Child exited with code: ", retcode, file=sys.stderr)
             exit(1)
         else:
             if (options.verbose == True):
-                print("Child returned code: ", retcode, file = sys.stderr)
+                print("Child returned code: ", retcode, file=sys.stderr)
     except OSError as e:
-        print("Execution failed:", e, retcode, file = sys.stderr)
+        print("Execution failed:", e, retcode, file=sys.stderr)
         exit(1)
 
 ########################################################################
