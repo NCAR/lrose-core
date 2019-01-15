@@ -8,6 +8,7 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
 	Radx2Grid \
+	RadxBeamBlock \
         RadxBufr \
 	RadxConvert \
         RadxEvad \

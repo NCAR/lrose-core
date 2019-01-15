@@ -32,7 +32,7 @@
 # -----------------------------------
 # Before running this,
 # checkout https://github.com/NCAR/lrose-netcdf
-# build and install hdf5, netcdf, udunits
+# build and install hdf5, netcdf
 
 #===========================================================================
 

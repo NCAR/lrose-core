@@ -12,6 +12,7 @@ SUB_DIRS = \
 	FixRadxPointing \
 	Radx2Dsr \
 	Radx2Grid \
+	RadxBeamBlock \
 	RadxBufr \
 	RadxCheck \
 	RadxClutMon \
@@ -32,7 +33,5 @@ SUB_DIRS = \
 	RadxRate \
 	RadxSunMon \
 	RadxQpe
-
-#	RadxBeamBlock \
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
