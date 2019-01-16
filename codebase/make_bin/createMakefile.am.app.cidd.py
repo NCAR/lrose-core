@@ -520,7 +520,7 @@ def getLoadLibList():
                    'hdf5_cpp',
                    'hdf5_hl',
                    'hdf5',
-                   'expat',
+                   # 'expat',
                    'X11',
                    'z',
                    'bz2',
