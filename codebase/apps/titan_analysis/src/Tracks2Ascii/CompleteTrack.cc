@@ -37,6 +37,7 @@
 #include <toolsa/mem.h>
 #include <toolsa/utim.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/pjg.h>
 #include <rapmath/math_macros.h>
 #include <rapmath/umath.h>
 using namespace std;
@@ -100,7 +101,10 @@ CompleteTrack::CompleteTrack(const string &prog_name, const Params &params) :
 	  "MeanDirection(degT),"
 	  "POD,"
 	  "FAR,"
-	  "CSI");
+	  "CSI,"
+          "minRange(km),"
+          "maxRange(km),"
+          "meanRange(km)");
 
   // read in case file
 
@@ -154,6 +158,10 @@ int CompleteTrack::comps_init(storm_file_handle_t *s_handle,
   _sumTop = 0.0;
   _sumU = 0.0;
   _sumV = 0.0;
+
+  _sumRange = 0.0;
+  _minRange = 1.0e99;
+  _maxRange = 0.0;
   
   _maxVolume = -LARGE_DOUBLE;
   _maxMass = -LARGE_DOUBLE;
@@ -207,7 +215,7 @@ int CompleteTrack::compute(storm_file_handle_t *s_handle,
   int this_scan, last_scan;
   int precip_layer;
 
-  double volume, vol_two_thirds;
+  double volume;
   double mass, precip_flux;
   double precip_area, proj_area;
   double dbz_max, dbz_mean;
@@ -216,16 +224,11 @@ int CompleteTrack::compute(storm_file_handle_t *s_handle,
   double precip_z;
 
   date_time_t last_time, entry_time;
-  storm_file_global_props_t *gprops;
   storm_file_run_t *run;
-  storm_file_params_t *sparams;
-  track_file_params_t *tparams;
-  track_file_forecast_props_t *fprops;
-
-  sparams = &s_handle->header->params;
-  tparams = &t_handle->header->params;
-  gprops = s_handle->gprops + t_handle->entry->storm_num;
-  fprops = &t_handle->entry->dval_dt;
+  
+  storm_file_params_t *sparams = &s_handle->header->params;
+  storm_file_global_props_t *gprops = s_handle->gprops + t_handle->entry->storm_num;
+  track_file_forecast_props_t *fprops = &t_handle->entry->dval_dt;
 
   if (_params.use_box_limits) {
     if (gprops->refl_centroid_x >= _params.box.min_x &&
@@ -236,8 +239,20 @@ int CompleteTrack::compute(storm_file_handle_t *s_handle,
     }
   } // if (_params.use_box_limits)
 
+  // compute range and azimuth of refl centroid
+
+  storm_file_global_props_t gpropsConvert = *gprops;
+  RfStormGpropsXY2LatLon(s_handle->scan, &gpropsConvert);
+  double refl_centroid_lon = gpropsConvert.refl_centroid_x;
+  double refl_centroid_lat = gpropsConvert.refl_centroid_y;
+  double reflCentroidRangeKm, reflCentroidAzimuthDeg;
+  PJGLatLon2RTheta(_grid.proj_origin_lat, _grid.proj_origin_lon,
+                   refl_centroid_lat, refl_centroid_lon,
+                   &reflCentroidRangeKm, &reflCentroidAzimuthDeg);
+
+  // set props
+
   volume = gprops->volume;
-  vol_two_thirds = pow(volume, 0.66666667);
   mass = gprops->mass;
   precip_flux = gprops->precip_flux;
   precip_area = gprops->precip_area;
@@ -261,6 +276,14 @@ int CompleteTrack::compute(storm_file_handle_t *s_handle,
   _sumDbz += dbz_mean;
   _sumU += u;
   _sumV += v;
+
+  _sumRange += reflCentroidRangeKm;
+  if (reflCentroidRangeKm < _minRange) {
+    _minRange = reflCentroidRangeKm;
+  }
+  if (reflCentroidRangeKm > _maxRange) {
+    _maxRange = reflCentroidRangeKm;
+  }
 
   _maxMass = MAX(_maxMass, mass);
   _maxPrecipFlux = MAX(_maxPrecipFlux, precip_flux);
@@ -401,6 +424,7 @@ int CompleteTrack::comps_done(storm_file_handle_t *s_handle,
   double mean_dbz;
   double mean_u, mean_v;
   double mean_speed, mean_dirn;
+  double mean_range;
   double pod, far, csi;
   double percent_in_box;
   double element_area, runs_swath_area;
@@ -442,6 +466,7 @@ int CompleteTrack::comps_done(storm_file_handle_t *s_handle,
   mean_dbz = _sumDbz / _totEntries;
   mean_u = _sumU / _totEntries;
   mean_v = _sumV / _totEntries;
+  mean_range = _sumRange / _totEntries;
 
   mean_speed = sqrt(mean_u * mean_u + mean_v * mean_v);
 
@@ -589,7 +614,7 @@ int CompleteTrack::comps_done(storm_file_handle_t *s_handle,
 	   mean_dbz,
 	   _maxDbz);
 
-    fprintf(stdout, "%g %g %g %g %g %g %g %g %g\n",
+    fprintf(stdout, "%g %g %g %g %g %g %g %g %g ",
 	   _rerv,
 	   ati,
 	   ellipse_swath_area,
@@ -599,6 +624,11 @@ int CompleteTrack::comps_done(storm_file_handle_t *s_handle,
 	   pod,
 	   far,
 	   csi);
+    
+    fprintf(stdout, "%g %g %g\n",
+            _minRange,
+            _maxRange,
+            mean_range);
     
   }
 

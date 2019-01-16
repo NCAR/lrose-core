@@ -160,9 +160,11 @@ TrackEntry::TrackEntry(const string &prog_name, const Params &params) :
             "HailWaldvogelProb,"
             "HailMassAloft(ktons),"
             "HailVihm(kg/m2),"
+	    "ReflCentroidRange(km),"
+	    "ReflCentroidAzimuth(deg),"
             "parents,"
             "children");
-    
+            
     if (_params.print_polygons) {
       fprintf(stdout, " nPolySidesPolygonRays*%d", N_POLY_SIDES);
     }
@@ -330,7 +332,7 @@ void TrackEntry::_computeAll(storm_file_handle_t *s_handle,
   RfStormGpropsEllipses2Km(s_handle->scan, &gpropsConvert);
   RfStormGpropsXY2LatLon(s_handle->scan, &gpropsConvert);
 
-    // load props for printing
+  // load props for printing
     
   double vol_centroid_lon = gpropsConvert.vol_centroid_x;
   double vol_centroid_lat = gpropsConvert.vol_centroid_y;
@@ -361,6 +363,11 @@ void TrackEntry::_computeAll(storm_file_handle_t *s_handle,
   double proj_area_orientation = gpropsConvert.proj_area_orientation;
   double proj_area_major_radius = gpropsConvert.proj_area_major_radius;
   double proj_area_minor_radius = gpropsConvert.proj_area_minor_radius;
+
+  double reflCentroidRangeKm, reflCentroidAzimuthDeg;
+  PJGLatLon2RTheta(grid.proj_origin_lat, grid.proj_origin_lon,
+                   refl_centroid_lat, refl_centroid_lon,
+                   &reflCentroidRangeKm, &reflCentroidAzimuthDeg);
     
   double top = gprops->top;
   double base = gprops->base;
@@ -456,7 +463,7 @@ void TrackEntry::_computeAll(storm_file_handle_t *s_handle,
   fprintf(stdout, " %g", refl_centroid_x);
   fprintf(stdout, " %g", refl_centroid_y);
   fprintf(stdout, " %g", refl_centroid_z);
-    
+
   fprintf(stdout, " %g", precip_area_centroid_lat);
   fprintf(stdout, " %g", precip_area_centroid_lon);
   fprintf(stdout, " %g", precip_area_centroid_x);
@@ -518,6 +525,9 @@ void TrackEntry::_computeAll(storm_file_handle_t *s_handle,
   fprintf(stdout, " %g", gprops->add_on.hail_metrics.waldvogelProbability);
   fprintf(stdout, " %g", gprops->add_on.hail_metrics.hailMassAloft);
   fprintf(stdout, " %g", gprops->add_on.hail_metrics.vihm);
+
+  fprintf(stdout, " %g", reflCentroidRangeKm);
+  fprintf(stdout, " %g", reflCentroidAzimuthDeg);
 
   // parent simple track numbers
 

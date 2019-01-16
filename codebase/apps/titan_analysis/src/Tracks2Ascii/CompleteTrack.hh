@@ -81,6 +81,7 @@ private:
   double _sumBase, _maxBase;
   double _sumTop, _maxTop;
   double _sumU, _sumV;
+  double _sumRange, _minRange, _maxRange;
   double _remDuration;
   titan_grid_t _grid;
 
