@@ -149,6 +149,8 @@ codebase/apps/didss/src/fmq_print/fmq_print
 codebase/apps/didss/src/kavltg2spdb/kavltg2spdb
 codebase/apps/didss/src/ltgSpdb2GenPt/ltgSpdb2GenPt
 codebase/apps/didss/src/nprtLtg2Spdb/nprtLtg2Spdb
+codebase/apps/didss/src/wsi_ingest/wsi_ingest
+codebase/apps/didss/src/wsim2mdv/wsim2mdv
 
 codebase/apps/dsserver/src/AcTrack2Symprod/AcTrack2Symprod
 codebase/apps/dsserver/src/Acars2Symprod/Acars2Symprod
