@@ -1188,7 +1188,7 @@ void Mdvx::printVol(ostream &out,
       }
     }
 
-    MdvxProj proj(field->getFieldHeader());
+    MdvxProj proj(mdvx->getMasterHeader(), field->getFieldHeader());
     MdvxRadar mdvxRadar;
     if (mdvxRadar.loadFromMdvx(*mdvx) == 0) {
       DsRadarParams radar = mdvxRadar.getRadarParams();
@@ -1465,7 +1465,7 @@ void Mdvx::printAllHeaders(ostream &out,
     mdvx->printFieldHeader(fhdr, out);
     const Mdvx::vlevel_header_t &vhdr = mdvx->getVlevelHeaderFile(i);
     mdvx->printVlevelHeader(vhdr, fhdr.nz, fhdr.field_name, out);
-    MdvxProj proj(fhdr);
+    MdvxProj proj(mhdr, fhdr);
     proj.print(out);
   }
 
