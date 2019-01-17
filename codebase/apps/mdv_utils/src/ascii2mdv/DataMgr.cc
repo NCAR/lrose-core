@@ -153,7 +153,7 @@ int DataMgr::init(Params &params)
 
 int DataMgr::format2mdv(const char *input_file_path)
 {
-  int     i;
+
   Path    input_path(input_file_path);
 
 
@@ -179,7 +179,7 @@ int DataMgr::format2mdv(const char *input_file_path)
 
   PMU_auto_register("fetching input data");
   ifstream input_file(input_file_path);
-  if (input_file == 0)
+  if (!input_file.is_open())
   {
     POSTMSG(ERROR, "Unable to open input ascii file '%s'", input_file_path);
     return -1;
@@ -195,7 +195,7 @@ int DataMgr::format2mdv(const char *input_file_path)
     POSTMSG( DEBUG, "Skipping header line: %s", header_line);
   }
    
-  delete header_line;
+  delete[] header_line;
    
   // Read in the input data from the ascii file
 
@@ -242,8 +242,9 @@ int DataMgr::format2mdv(const char *input_file_path)
    
   // Make sure the geometry of the input grid 
   // matches that specified for the output grid
-
-  for (int i = 0; input_file >> input_value; ++i);
+  
+  int i = 0;
+  for (i = 0; input_file >> input_value; ++i);
   if (i)
     POSTMSG(WARNING, "Extra %d values in ascii input file '%s'.",
 	    i, input_file_path );
