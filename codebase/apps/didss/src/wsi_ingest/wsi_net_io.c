@@ -102,7 +102,6 @@ int open_net(char *ip_address, int iPort)
   
   /* set up signals */
 
-  PORTsignal(SIGPOLL, handle_sigpoll);
   PORTsignal(SIGIO, handle_sigpoll);
 
   /* Open the connection */
@@ -133,7 +132,7 @@ int ReadMsg(char *program_name, ui08 *pBuf)
 {
   ui32   len;
   int    msgLen;
-  ui08   *pTmp, c1, c2, c3, c4;
+  ui08   *pTmp, c1 = 0, c2 = 0, c3 = 0, c4 = 0;
 
   /***** Initializing I/O Buffers *****/
 
