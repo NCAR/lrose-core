@@ -20,7 +20,6 @@ SUB_DIRS = \
 	ascii_to_xgraph \
 	cart_convert \
 	grid_forecast \
-	mhr_analysis \
 	rtiming \
 	storms_to_ascii \
 	storms_to_tifs \
@@ -30,7 +29,6 @@ SUB_DIRS = \
 	tracks_to_ascii \
 	verify_day \
 	verify_grid \
-	verify_tracks \
-	vol_to_plane
+	verify_tracks
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

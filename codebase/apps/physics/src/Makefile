@@ -7,15 +7,21 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-	AverageFields \
-	CalcHumidity \
-	ThetaEAdvect \
-	TrendField \
-	VerticalAverage \
-	VerticalShear
+        AverageFields \
+        CalcHumidity \
+        ModelDerive \
+        NegBuoyancy \
+        Pressure2Height \
+        ShearForLeadingEdge \
+        ThetaEAdvect \
+        TrendField \
+        VerticalAverage \
+        VerticalShear \
 
-include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+$(TARGETS): FORCE
+	$(MAKE) $(SUB_DIRS) TARGET=$@
 
-include $(RAP_MAKE_INC_DIR)/rap_make_doc_targets
+$(SUB_DIRS): FORCE
+	cd $@; $(MAKE) $(TARGET)
 
-
+FORCE:

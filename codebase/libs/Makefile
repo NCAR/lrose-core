@@ -1,5 +1,5 @@
 #
-# Recursive make - makes the subdirectory code
+# Recursive make for LROSE libraries
 #
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
@@ -7,29 +7,38 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGETS = $(GENERAL_TARGETS) $(LIB_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-        Mdv \
-        dataport \
+	FiltAlg \
+	FiltAlgVirtVol \
+	Fmq \
+	Mdv \
+        Ncxx \
+	Radx \
+        Refract \
+	Spdb \
+	advect \
+	cidd \
+	contour \
+	dataport \
 	didss \
 	dsdata \
 	dsserver \
-        euclid \
-	Fmq \
+        edge \
+	euclid \
+	forayRal \
+	grib \
+	grib2 \
+	hydro \
+	kd \
+        mm5 \
 	physics \
+	radar \
 	rapformats \
 	rapmath \
 	rapplot \
-        tdrp \
-        toolsa
+	shapelib \
+	tdrp \
+	titan \
+	toolsa \
+	trmm_rsl
 
-$(TARGETS): FORCE
-	$(MAKE) $(SUB_DIRS) TARGET=$@
-
-$(SUB_DIRS): FORCE
-	cd $@; $(MAKE) $(TARGET)
-
-FORCE:
-
-
-
-
-
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

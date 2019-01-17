@@ -27,8 +27,6 @@
 /////////////////////////////////////////////////////////////////////
 
 #include "EndEOVStrategy.hh"
-using namespace std;
-
 
 EndEOVStrategy::EndEOVStrategy(const double end_elevation,
 			       const ScanStrategy &scan_strategy) :

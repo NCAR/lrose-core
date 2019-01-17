@@ -34,9 +34,6 @@
 #ifndef EOVStrategy_hh
 #define EOVStrategy_hh
 
-using namespace std;
-
-
 class EOVStrategy
 {
 

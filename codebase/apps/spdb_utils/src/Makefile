@@ -7,26 +7,15 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-	AcPolygonStats \
-	AdvectPolygon \
-	AverageSpdbSndg \
-	FixStationAltitudes \
-	GenPoly2Mdv \
-	Hash \
+	extractStationLocationList \
 	NetCDF2Spdb \
 	PrintGenPt1D \
 	PrintHydroStation \
-	PrintSigAirMet \
-	PrintSpdbMetar \
+        PrintSigAirMet \
+        PrintSpdbMetar \
 	Rhi2Spdb \
-	Sigmet2Mdv \
-	Sndg2Ascii \
-	SpdbBdry2Axf \
-	SpdbMultSim \
-	StationCompare \
-	extractStationLocationList \
-	spdbLatencies \
-	spdbIntervalCount \
-	station2ascii
+	spdb_merge \
+        Taf2Spdb
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+

@@ -8,18 +8,17 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
 	AcPosnAscii2Spdb \
-	Alenia2Mom \
-	CIDD_titan \
+	ClutterAuto \
 	ClutterCompute \
-	ClutterTableGenerate \
+        EchoTops \
 	EsdAcIngest \
 	FilterStorms \
-	MDV_server \
+        OpticalFlow \
 	PrintTitanFiles \
 	PrintTitanServer \
 	RdasSim \
 	Rview \
-	ScaleSep \
+        StratFinder \
 	StormInit2Field \
 	StormInitBdry \
 	StormInitClimatology \
@@ -28,52 +27,20 @@ SUB_DIRS = \
 	StormInitLocDump \
 	StormInitLocation \
 	Storms2Xml \
-	StratFinder \
+	Storms2Xml2 \
 	TimeHist \
 	Titan \
-	TitanLite \
 	TitanSelect \
 	TitanVectors2Mdv \
 	TstormTemporalSmooth \
 	Tstorms2GenPoly \
 	Tstorms2Spdb \
+	Tstorms2Xml \
 	UpdateStormFields \
-	ac_ingest \
-	ac_tape_recover \
-	acmg_acpos_filter \
+        UpdateStormSpeeds \
 	bearing2latlon \
-	bprp2gate \
-	bprp_ac_ingest \
-	cart_slave   \
-	clutter_compute \
-	clutter_remove \
-	clutter_table_generate \
-	dobson2mdv \
-	dva_cart \
-	dva_ingest \
-	dva_mkgrid \
-	dva_mklookup \
-	forecast_monitor \
-	polar2gate \
-	polar2mdv \
-	polar_ingest \
-	precip_map \
-	radmon_server \
-	rctable_generate \
-	rdacs2gate \
-	read_bprp_tape \
-	storm_file_v3_to_v5 \
-	suncal \
-	test2gate \
-	time_hist \
 	titan_print \
-	track_server \
-	tstorm_refl_fcst \
-	uf2gate \
-	ufnexrad2gate \
-	wmi_ac_ingest \
-	wmi_ac_recover \
-	UpdateStormSpeeds
+	tstorm_refl_fcst
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
 

@@ -10,7 +10,6 @@ SUB_DIRS = \
 	AcGeoref2Spdb \
 	AcGeorefCompare \
 	AltCpCompute \
-	CP2Udp2Fmq \
 	CalCompute \
 	CedricPrint \
 	ChillCal2Xml \
@@ -22,15 +21,15 @@ SUB_DIRS = \
 	CmdVerify \
 	Cov2Mom \
 	DowSendFreq \
-	Dsr2CP2Mom \
 	DsrGrabber \
 	DsrMerge \
 	DualDopplerLobes \
 	HawkEye \
-	HcrTempRxGain \
 	HcrVelCorrect \
+	Hsrl2Radx \
 	IntfRemove \
 	Iq2Dsr \
+	JamesDealias \
 	KinGin2Ncf \
 	Mdv2Vad \
 	MdvFold \
@@ -47,6 +46,7 @@ SUB_DIRS = \
 	SimCpCompute \
 	SpectraPrint \
 	StaggeredLimits \
+	SunCal \
 	SunCpCompute \
 	SweepInfo2Spdb \
 	Ts2NetCDF \
@@ -54,7 +54,7 @@ SUB_DIRS = \
 	TsConvert \
 	TsFile2Fmq \
 	TsFmq2Tcp \
-        TsGamic2Iwrf \
+	TsGamic2Iwrf \
 	TsMerge \
 	TsOverlay \
 	TsPrint \
@@ -69,12 +69,5 @@ SUB_DIRS = \
 	UfRadarPrint \
 	VertCompute \
 	ZdrCalSimHv
-
-# Temporarily removed - add in after sync with RAL
-
-# MdvPartRain
-# PartRain
-# SunCal
-
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

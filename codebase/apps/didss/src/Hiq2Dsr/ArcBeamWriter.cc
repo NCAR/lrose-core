@@ -214,12 +214,12 @@ bool ArcBeamWriter::_updateBeamData(const ArcBeamMsg &beam_msg,
     cerr << "ERROR: " << method_name << endl;
     cerr << "Error loading beam data from HiQ messages" << endl;
 
-    delete refl_buffer;
-    delete vel_buffer;
-    delete sw_buffer;
-    delete coh_refl_buffer;
-    delete ncp_buffer;
-    delete power_buffer;
+    delete[] refl_buffer;
+    delete[] vel_buffer;
+    delete[] sw_buffer;
+    delete[] coh_refl_buffer;
+    delete[] ncp_buffer;
+    delete[] power_buffer;
 
     delete product_handler;
 
@@ -280,16 +280,16 @@ bool ArcBeamWriter::_updateBeamData(const ArcBeamMsg &beam_msg,
 
   // Reclaim the space
 
-  delete refl_buffer;
-  delete vel_buffer;
-  delete sw_buffer;
-  delete coh_refl_buffer;
-  delete ncp_buffer;
-  delete power_buffer;
+  delete[] refl_buffer;
+  delete[] vel_buffer;
+  delete[] sw_buffer;
+  delete[] coh_refl_buffer;
+  delete[] ncp_buffer;
+  delete[] power_buffer;
 
   radar_beam.loadData(beam_buffer, beam_buffer_size);
 
-  delete beam_buffer;
+  delete[] beam_buffer;
 
   return true;
 }
@@ -343,7 +343,6 @@ void ArcBeamWriter::_updateParams(const ArcBeamMsg &beam_msg)
 void ArcBeamWriter::_writeBeam(ArcBeamMsg &beam_msg)
 {
   static const string method_name = "ArcBeamWriter::_writeBeam()";
-  static time_t last_data_time;
   // Make sure everything is initialized
   
   if (!_objectInitialized)

@@ -27,8 +27,6 @@
 /////////////////////////////////////////////////////////////////////
 
 #include "EOVStrategy.hh"
-using namespace std;
-
 
 EOVStrategy::EOVStrategy()
 {

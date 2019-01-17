@@ -8,7 +8,10 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
 	CalcMoisture \
-	DataScanning \
+	CalcNexrad \
+	Chill2netCDFSweep \
+	CleanupRvp8Data \
+	DsrAddSnr \
 	MdvAddSnr \
 	PhaseDiff \
 	Refract \
@@ -17,4 +20,3 @@ SUB_DIRS = \
 	RefrMerge
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
-

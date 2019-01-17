@@ -11,8 +11,7 @@ SUB_DIRS = \
 	SpolCal2Xml \
 	SpolSysconRelay \
 	SpolTsMonitor \
-	SpolTs2Fmq \
-	SpolWarnSms
+	SpolTs2Fmq
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
 

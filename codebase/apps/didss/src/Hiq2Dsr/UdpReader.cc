@@ -151,7 +151,7 @@ bool UdpReader::init()
   
   PMU_auto_register("Binding address to socket");
 
-  if (bind(_udpFd, (struct sockaddr *)&udp_address, 
+  if (::bind(_udpFd, (struct sockaddr *)&udp_address, 
 	   sizeof(udp_address)) < 0)
   {
     cerr << "ERROR: " << method_name << endl;

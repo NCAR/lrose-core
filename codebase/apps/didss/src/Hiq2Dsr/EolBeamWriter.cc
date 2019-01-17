@@ -263,12 +263,12 @@ bool EolBeamWriter::_updateBeamData(const EolRadarMsg &radar_msg,
     cerr << "ERROR: " << method_name << endl;
     cerr << "Error loading beam data from HiQ messages" << endl;
 
-    delete refl_buffer;
-    delete vel_buffer;
-    delete sw_buffer;
-    delete coh_refl_buffer;
-    delete ncp_buffer;
-    delete power_buffer;
+    delete[] refl_buffer;
+    delete[] vel_buffer;
+    delete[] sw_buffer;
+    delete[] coh_refl_buffer;
+    delete[] ncp_buffer;
+    delete[] power_buffer;
 
     delete product_handler;
 
@@ -329,16 +329,16 @@ bool EolBeamWriter::_updateBeamData(const EolRadarMsg &radar_msg,
 
   // Reclaim the space
 
-  delete refl_buffer;
-  delete vel_buffer;
-  delete sw_buffer;
-  delete coh_refl_buffer;
-  delete ncp_buffer;
-  delete power_buffer;
+  delete[] refl_buffer;
+  delete[] vel_buffer;
+  delete[] sw_buffer;
+  delete[] coh_refl_buffer;
+  delete[] ncp_buffer;
+  delete[] power_buffer;
 
   radar_beam.loadData(beam_buffer, beam_buffer_size);
 
-  delete beam_buffer;
+  delete[] beam_buffer;
 
   return true;
 }

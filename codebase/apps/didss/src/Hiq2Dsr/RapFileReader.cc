@@ -189,7 +189,7 @@ int RapFileReader::_readBytes(char *buffer, const int buffer_size)
     char *temp_input_buffer = new char[input_buffer_len];
     fread(temp_input_buffer, sizeof(char), input_buffer_len,
 	  _currentFilePtr);
-    delete temp_input_buffer;
+    delete[] temp_input_buffer;
     
     return 0;
   }

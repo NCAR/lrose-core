@@ -1,5 +1,6 @@
 #
-# Recursive make - makes the subdirectory code
+# makefile as template for configure
+# does not include scripts dir
 #
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
@@ -11,7 +12,6 @@ SUB_DIRS = \
 	procmap \
 	procmap_register \
 	procmap_unregister \
-	scripts \
 	test_procmap
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

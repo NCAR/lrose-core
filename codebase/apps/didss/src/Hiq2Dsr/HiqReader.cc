@@ -330,7 +330,7 @@ HiqMsg *HiqReader::getNextMsg()
 
     _messageBuffer.load(bytes_left_buffer, bytes_left);
 
-    delete bytes_left_buffer;
+    delete []bytes_left_buffer;
   }
 
   return msg;
