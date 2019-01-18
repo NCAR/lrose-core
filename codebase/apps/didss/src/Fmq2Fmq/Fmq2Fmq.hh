@@ -45,11 +45,14 @@
 
 #include <string>
 #include <dataport/port_types.h>
+#include <toolsa/TaArray.hh>
+#include <Fmq/DsFmq.hh>
 #include "Args.hh"
 #include "Params.hh"
 using namespace std;
 
 class Socket;
+class MsgLog;
 
 ////////////////////////
 // This class
@@ -82,8 +85,15 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+  MsgLog *_msgLog;
+
+  DsFmq _inputFmq;
+  TaArray<DsFmq> _outputFmqs_;
+  DsFmq *_outputFmqs;
+  time_t _prevTimeForOpen;
 
   int _run();
+  void _openOutputFmqs();
 
 };
 

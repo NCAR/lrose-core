@@ -45,8 +45,6 @@
 #include <toolsa/pmu.h>
 #include <toolsa/compress.h>
 #include <toolsa/MsgLog.hh>
-#include <toolsa/TaArray.hh>
-#include <Fmq/DsFmq.hh>
 #include "Fmq2Fmq.hh"
 using namespace std;
 
@@ -81,6 +79,15 @@ Fmq2Fmq::Fmq2Fmq(int argc, char **argv)
     cerr << "Problem with TDRP parameters" << endl;
     isOK = FALSE;
   }
+
+  // allocate output FMQs
+
+  _outputFmqs = _outputFmqs_.alloc(_params.output_urls_n);
+  _prevTimeForOpen = 0;
+
+  // logging
+
+  _msgLog = new MsgLog(_progName);
 
   // init process mapper registration
   
@@ -120,10 +127,6 @@ int Fmq2Fmq::Run ()
     cerr << "Fmq2Fmq::Run:" << endl;
     cerr << "  Trying to contact input server at url: "
 	 << _params.input_url << endl;
-    for (int i = 0; i < _params.output_urls_n; i++) {
-      cerr << "  Trying to contact output server at url: "
-	   << _params._output_urls[i] << endl;
-    }
   }
 
   return (0);
@@ -140,19 +143,14 @@ int Fmq2Fmq::_run ()
   
   PMU_auto_register("_run");
 
-  // open input and output FMQ's
+  // open input FMQ
 
-  DsFmq input;
-  TaArray<DsFmq> outputs_;
-  DsFmq *outputs = outputs_.alloc(_params.output_urls_n);
-  MsgLog msgLog(_progName);
-
-  if (input.initReadBlocking(_params.input_url,
-			     _progName.c_str(),
-			     _params.debug >= Params::DEBUG_VERBOSE,
-			     DsFmq::END,
-			     _params.msecs_sleep_blocking,
-			     &msgLog)) {
+  if (_inputFmq.initReadBlocking(_params.input_url,
+                                 _progName.c_str(),
+                                 _params.debug >= Params::DEBUG_VERBOSE,
+                                 DsFmq::END,
+                                 _params.msecs_sleep_blocking,
+                                 _msgLog)) {
     cerr << "ERROR - Fmq2Fmq::Run" << endl;
     cerr << "  Cannot open input FMQ at url: " << _params.input_url << endl;
     return -1;
@@ -163,57 +161,10 @@ int Fmq2Fmq::_run ()
   }
   PMU_auto_register("opened input");
 
-  for (int i = 0; i < _params.output_urls_n; i++) {
+  // open output FMQ's
 
-    if (outputs[i].initReadWrite(_params._output_urls[i],
-				 _progName.c_str(),
-				 (_params.debug >= Params::DEBUG_VERBOSE),
-				 DsFmq::END,
-				 (_params.output_compression !=
-				  Params::NO_COMPRESSION),
-				 _params.output_n_slots,
-				 _params.output_buf_size,
-				 _params.msecs_sleep_blocking,
-				 &msgLog)) {
-      cerr << "ERROR - Fmq2Fmq::Run" << endl;
-      cerr << "  Cannot open output FMQ at url: "
-	   << _params._output_urls[i] << endl;
-      return -1;
-    }
-    if (_params.data_mapper_report_interval > 0) {
-      outputs[i].setRegisterWithDmap(true, _params.data_mapper_report_interval);
-    }
-    
-    if (_params.debug) {
-      cerr << "Opened output to URL: " << _params._output_urls[i] << endl;
-    }
-    
-    if (_params.output_compression != Params::NO_COMPRESSION) {
-      switch(_params.output_compression) {
-      case Params::RLE_COMPRESSION:
-	outputs[i].setCompressionMethod(TA_COMPRESSION_RLE);
-	break;
-      case Params::LZO_COMPRESSION:
-	outputs[i].setCompressionMethod(TA_COMPRESSION_LZO);
-	break;
-      case Params::ZLIB_COMPRESSION:
-	outputs[i].setCompressionMethod(TA_COMPRESSION_ZLIB);
-	break;
-      case Params::BZIP_COMPRESSION:
-	outputs[i].setCompressionMethod(TA_COMPRESSION_BZIP);
-	break;
-      default:
-	break;
-      }
-    } // if (_params.output_compression ...
-
-    if (_params.write_blocking) {
-      outputs[i].setBlockingWrite();
-    }
-
-  } // i
-
-  PMU_auto_register("opened outputs");
+  _openOutputFmqs();
+  PMU_auto_register("Initial open output FMQs");
 
   // read / write
 
@@ -222,63 +173,139 @@ int Fmq2Fmq::_run ()
     PMU_auto_register("Run: read loop");
 
     // read 
-
+    
     bool gotOne;
-    if (input.readMsg(&gotOne)) {
+    if (_inputFmq.readMsg(&gotOne)) {
       cerr << "ERROR - Fmq2Fmq::Run" << endl;
       cerr << "  Cannot read from FMQ at url: " << _params.input_url << endl;
+      _inputFmq.closeMsgQueue();
       return -1;
     }
     
     if (gotOne) {
-
+      
       if (_params.debug >= Params::DEBUG_VERBOSE) {
-	cerr << "    Read message, len: " << setw(8) << input.getMsgLen()
-	     << ", type: " << setw(8) << input.getMsgType()
-	     << ", subtype: " << setw(8) << input.getMsgSubtype()
+	cerr << "    Read message, len: " << setw(8) << _inputFmq.getMsgLen()
+	     << ", type: " << setw(8) << _inputFmq.getMsgType()
+	     << ", subtype: " << setw(8) << _inputFmq.getMsgSubtype()
 	     << endl;
       }
 
       // add message to write cache
       
-      for (int ii = 0; ii < _params.output_urls_n; ii++) {
-        PMU_auto_register("write to cache");
-	outputs[ii].addToWriteCache(input.getMsgType(), input.getMsgSubtype(),
-				    input.getMsg(), input.getMsgLen());
+      for (int ii = 0; ii < _outputFmqs_.size(); ii++) {
+        DsFmq &fmq = _outputFmqs[ii];
+        if (fmq.isOpen()) {
+          PMU_auto_register("write to cache");
+          fmq.addToWriteCache(_inputFmq.getMsgType(), _inputFmq.getMsgSubtype(),
+                               _inputFmq.getMsg(), _inputFmq.getMsgLen());
+        }
       }
-      
+
     }
     
     // write
 
-    for (int ii = 0; ii < _params.output_urls_n; ii++) {
-
+    for (int ii = 0; ii < _outputFmqs_.size(); ii++) {
+      DsFmq &fmq = _outputFmqs[ii];
       PMU_auto_register("write to output");
-
-      int cacheSize = outputs[ii].getWriteCacheSize();
+      int cacheSize = fmq.getWriteCacheSize();
       if (cacheSize > 0 && (!gotOne || cacheSize > _params.max_cache_size)) {
 	if (_params.debug >= Params::DEBUG_VERBOSE) {
 	  cerr << "Fmq2Fmq - writing cache, size: " << cacheSize << endl;
 	}
-	if (outputs[ii].writeTheCache()) {
+	if (fmq.writeTheCache()) {
 	  cerr << "ERROR - Fmq2Fmq::Run" << endl;
 	  cerr << "  Cannot write to FMQ at url: "
 	       << _params._output_urls[ii] << endl;
-	  return -1;
+          fmq.closeMsgQueue();
 	}
       }
-
     } // ii
-
+    
     // sleep if no data available
-
+    
     if (!gotOne) {
       umsleep(20);
     }
     
-  }
+  } // while
   
   return (0);
 
 }
 
+//////////////////////////////////////////////////
+// open output FMQ's
+
+void Fmq2Fmq::_openOutputFmqs()
+
+{
+
+  // check if 60 secs has elapsed since last open
+
+  time_t now = time(NULL);
+  double timeSinceOpen = (double) now - (double) _prevTimeForOpen;
+  if (timeSinceOpen < 60) {
+    return;
+  }
+  _prevTimeForOpen = now;
+
+  for (int ii = 0; ii < _outputFmqs_.size(); ii++) {
+    
+    DsFmq &fmq = _outputFmqs[ii];
+    if (fmq.isOpen()) {
+      continue;
+    }
+    
+    if (fmq.initReadWrite(_params._output_urls[ii],
+                           _progName.c_str(),
+                           (_params.debug >= Params::DEBUG_VERBOSE),
+                           DsFmq::END,
+                           (_params.output_compression !=
+                            Params::NO_COMPRESSION),
+                           _params.output_n_slots,
+                           _params.output_buf_size,
+                           _params.msecs_sleep_blocking,
+                           _msgLog)) {
+      cerr << "WARNING - Fmq2Fmq::Run" << endl;
+      cerr << "  Cannot open output FMQ at url: "
+	   << _params._output_urls[ii] << endl;
+    }
+
+    if (_params.data_mapper_report_interval > 0) {
+      fmq.setRegisterWithDmap(true, _params.data_mapper_report_interval);
+    }
+    
+    if (_params.debug) {
+      cerr << "Opened output to URL: " << _params._output_urls[ii] << endl;
+    }
+    
+    if (_params.output_compression != Params::NO_COMPRESSION) {
+      switch(_params.output_compression) {
+      case Params::RLE_COMPRESSION:
+	fmq.setCompressionMethod(TA_COMPRESSION_RLE);
+	break;
+      case Params::LZO_COMPRESSION:
+	fmq.setCompressionMethod(TA_COMPRESSION_LZO);
+	break;
+      case Params::ZLIB_COMPRESSION:
+	fmq.setCompressionMethod(TA_COMPRESSION_ZLIB);
+	break;
+      case Params::BZIP_COMPRESSION:
+	fmq.setCompressionMethod(TA_COMPRESSION_BZIP);
+	break;
+      default:
+	break;
+      }
+    } // if (_params.output_compression ...
+
+    if (_params.write_blocking) {
+      fmq.setBlockingWrite();
+    }
+
+  } // ii
+
+}
+
+  
