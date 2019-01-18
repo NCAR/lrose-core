@@ -1692,7 +1692,7 @@
     tt->descr = tdrpStrDup("List of tags to find site temp in status XML.");
     tt->help = tdrpStrDup("This is the tag list, from outer to inner, use to find the temperature in the status XML embedded in the time series.");
     tt->val_offset = (char *) &temp_tag_list_in_status_xml - &_start_;
-    tt->single_val.s = tdrpStrDup("<SpolStatus><WxStation><TempC>");
+    tt->single_val.s = tdrpStrDup("<SpolStatus><WxStation><tempC>");
     tt++;
     
     // Parameter 'Comment 15'
