@@ -533,6 +533,22 @@ paramdef int {
 } xpol_ratio_search_margin_secs;
 
 commentdef {
+  p_header = "OPTION TO RETRIEVE SITE TEMP from XML in time series";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read the site ambient temperature from the XML status in the time series.";
+  p_help = "It can be useful to check for dependency between the solar data, xpol ratio and temperature. This gives you the option of retrieving the temperature from the XML status in the time series.";
+} read_site_temp_from_time_series_xml;
+
+paramdef string {
+  p_default = "<SpolStatus><WxStation><TempC>";
+  p_descr = "List of tags to find site temp in status XML.";
+  p_help = "This is the tag list, from outer to inner, use to find the temperature in the status XML embedded in the time series.";
+} temp_tag_list_in_status_xml;
+  
+commentdef {
   p_header = "OPTION TO RETRIEVE SITE TEMP from SPDB";
 };
 

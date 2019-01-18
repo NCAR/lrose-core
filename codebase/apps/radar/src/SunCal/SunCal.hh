@@ -369,7 +369,7 @@ private:
   double _xpolRatioDbFromSpdb;
 
   time_t _timeForSiteTemp;
-  double _siteTempFromSpdb;
+  double _siteTempC;
 
   // methods
 
@@ -484,6 +484,10 @@ private:
   int _retrieveSiteTempFromSpdb(time_t scanTime,
                                 double &tempC,
                                 time_t &timeForTemp);
+
+  int _retrieveSiteTempFromXml(time_t scanTime,
+                               double &tempC,
+                               time_t &timeForTemp);
 
   int _writeSummaryText();
   void _writeSummaryText(FILE *out);

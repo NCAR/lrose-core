@@ -1667,6 +1667,39 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 14");
+    tt->comment_hdr = tdrpStrDup("OPTION TO RETRIEVE SITE TEMP from XML in time series");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'read_site_temp_from_time_series_xml'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("read_site_temp_from_time_series_xml");
+    tt->descr = tdrpStrDup("Option to read the site ambient temperature from the XML status in the time series.");
+    tt->help = tdrpStrDup("It can be useful to check for dependency between the solar data, xpol ratio and temperature. This gives you the option of retrieving the temperature from the XML status in the time series.");
+    tt->val_offset = (char *) &read_site_temp_from_time_series_xml - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'temp_tag_list_in_status_xml'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("temp_tag_list_in_status_xml");
+    tt->descr = tdrpStrDup("List of tags to find site temp in status XML.");
+    tt->help = tdrpStrDup("This is the tag list, from outer to inner, use to find the temperature in the status XML embedded in the time series.");
+    tt->val_offset = (char *) &temp_tag_list_in_status_xml - &_start_;
+    tt->single_val.s = tdrpStrDup("<SpolStatus><WxStation><TempC>");
+    tt++;
+    
+    // Parameter 'Comment 15'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("OPTION TO RETRIEVE SITE TEMP from SPDB");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1731,11 +1764,11 @@
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("TEST PULSE ANALYSIS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1776,11 +1809,11 @@
     tt->single_val.d = 147.8;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("TRANSMITTER POWERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1797,11 +1830,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("WRITE RESULTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1866,11 +1899,11 @@
     tt->single_val.s = tdrpStrDup("SunCal.global_results.txt");
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("OUTPUT RESULTS TO MDV FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1899,11 +1932,11 @@
     tt->single_val.s = tdrpStrDup("./mdv");
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("OUTPUT SUMMARY RESULTS TO SPDB XML");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1932,11 +1965,11 @@
     tt->single_val.s = tdrpStrDup("./spdb");
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("OPTION TO TEST C CODE FOR NEXRAD PROCESSING");
     tt->comment_text = tdrpStrDup("");
     tt++;

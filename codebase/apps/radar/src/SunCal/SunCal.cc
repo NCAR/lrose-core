@@ -52,6 +52,7 @@
 #include <toolsa/file_io.h>
 #include <toolsa/TaXml.hh>
 #include <toolsa/TaArray.hh>
+#include <toolsa/TaStr.hh>
 #include <toolsa/sincos.h>
 #include <radar/RadarComplex.hh>
 #include <rapformats/WxObs.hh>
@@ -356,7 +357,7 @@ void SunCal::_initMembers()
   _xpolRatioDbFromSpdb = 0;
 
   _timeForSiteTemp = 0;
-  _siteTempFromSpdb = 0;
+  _siteTempC = -9999;
 
 }
 
@@ -540,18 +541,18 @@ int SunCal::_createReaders()
   if (_params.input_mode == Params::TS_REALTIME_DIR_INPUT) {
 
     _tsReader = new IwrfTsReaderFile(_params.input_dir, 300,
-                                   PMU_auto_register, true, iwrfDebug);
+                                     PMU_auto_register, true, iwrfDebug);
 
   } else if (_params.input_mode == Params::TS_FILELIST_INPUT) {
-
+    
     _tsReader = new IwrfTsReaderFile(_args.inputFileList, iwrfDebug);
 
   } else if (_params.input_mode == Params::TS_FMQ_INPUT) {
 
     _tsReader = new IwrfTsReaderFmq(_params.input_fmq_name, iwrfDebug);
-
+    
   } else if (_params.input_mode == Params::COVAR_REALTIME_INPUT) {
-
+    
     _covarReader = new DsInputPath(_progName,
                                    _params.debug >= Params::DEBUG_VERBOSE,
                                    _params.input_dir,
@@ -2009,7 +2010,11 @@ int SunCal::_performAnalysis(bool force)
   if (_dualPol) {
     _zdrCorr = MomentsSun::missing;
     _retrieveXpolRatioFromSpdb(_startTime, _xpolRatioDbFromSpdb, _timeForXpolRatio);
-    _retrieveSiteTempFromSpdb(_startTime, _siteTempFromSpdb, _timeForSiteTemp);
+    if (_params.read_site_temp_from_time_series_xml) {
+      _retrieveSiteTempFromXml(_startTime, _siteTempC, _timeForSiteTemp);
+    } else {
+      _retrieveSiteTempFromSpdb(_startTime, _siteTempC, _timeForSiteTemp);
+    }
     if (_params.use_xpol_ratio_from_spdb) {
       if (_statsForZdrBias.meanS1S2 > -99 && _xpolRatioDbFromSpdb > -99) {
         _zdrCorr = _statsForZdrBias.meanS1S2 + _xpolRatioDbFromSpdb;
@@ -4742,6 +4747,70 @@ bool SunCal::_isDualPol()
 }
 
 //////////////////////////////////////////////////
+// retrieve xpol ratio from SPDB for scan time
+
+int SunCal::_retrieveXpolRatioFromSpdb(time_t scanTime,
+                                       double &xpolRatio,
+                                       time_t &timeForXpolRatio)
+  
+{
+
+  xpolRatio = -9999.0;
+  timeForXpolRatio = time(NULL);
+  
+  if (!_params.read_xpol_ratio_from_spdb) {
+    return 0;
+  }
+  
+  // get temp data from SPDB
+  
+  DsSpdb spdb;
+  si32 dataType = 0;
+  if (strlen(_params.xpol_ratio_radar_name) > 0) {
+    dataType =  Spdb::hash4CharsToInt32(_params.xpol_ratio_radar_name);
+  }
+  if (spdb.getClosest(_params.xpol_ratio_spdb_url,
+                      scanTime,
+                      _params.xpol_ratio_search_margin_secs,
+                      dataType)) {
+    cerr << "WARNING - SunCal::_retrieveXpolRatioFromSpdb" << endl;
+    cerr << "  Cannot get xpol ratio from URL: " 
+         << _params.xpol_ratio_spdb_url << endl;
+    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
+    cerr << "  Search margin (secs): "
+         << _params.xpol_ratio_search_margin_secs << endl;
+    cerr << spdb.getErrStr() << endl;
+    return -1;
+  }
+  
+  // got chunks
+  
+  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  if (chunks.size() < 1) {
+    cerr << "WARNING - SunCal::_retrieveXpolRatioFromSpdb" << endl;
+    cerr << "  No suitable xpol ratio data from URL: "
+         << _params.xpol_ratio_spdb_url << endl;
+    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
+    cerr << "  Search margin (secs): "
+         << _params.xpol_ratio_search_margin_secs << endl;
+    return -1;
+  }
+
+  const Spdb::chunk_t &chunk = chunks[0];
+  string xml((const char *) chunk.data);
+  double ratio = 0.0;
+  if (TaXml::readDouble(xml, "ratioHxVxDbClutter", ratio)) {
+    return -1;
+  }
+
+  xpolRatio = ratio;
+  timeForXpolRatio = chunk.valid_time;
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////
 // retrieve site temp from SPDB for scan time
 
 int SunCal::_retrieveSiteTempFromSpdb(time_t scanTime,
@@ -4820,70 +4889,80 @@ int SunCal::_retrieveSiteTempFromSpdb(time_t scanTime,
   
 }
 
-//////////////////////////////////////////////////
-// retrieve xpol ratio from SPDB for scan time
+/////////////////////////////////////////////////////////////////
+// get temperature from status xml in the time series,
+// given the tag list
+// returns 0 on success, -1 on failure
 
-int SunCal::_retrieveXpolRatioFromSpdb(time_t scanTime,
-                                       double &xpolRatio,
-                                       time_t &timeForXpolRatio)
+int SunCal::_retrieveSiteTempFromXml(time_t scanTime,
+                                     double &tempC,
+                                     time_t &timeForTemp)
   
 {
 
-  xpolRatio = -9999.0;
-  timeForXpolRatio = time(NULL);
+  // init to error condition
   
-  if (!_params.read_xpol_ratio_from_spdb) {
-    return 0;
-  }
+  tempC = -9999.0;
   
-  // get temp data from SPDB
-  
-  DsSpdb spdb;
-  si32 dataType = 0;
-  if (strlen(_params.xpol_ratio_radar_name) > 0) {
-    dataType =  Spdb::hash4CharsToInt32(_params.xpol_ratio_radar_name);
-  }
-  if (spdb.getClosest(_params.xpol_ratio_spdb_url,
-                      scanTime,
-                      _params.xpol_ratio_search_margin_secs,
-                      dataType)) {
-    cerr << "WARNING - SunCal::_retrieveXpolRatioFromSpdb" << endl;
-    cerr << "  Cannot get xpol ratio from URL: " 
-         << _params.xpol_ratio_spdb_url << endl;
-    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
-    cerr << "  Search margin (secs): "
-         << _params.xpol_ratio_search_margin_secs << endl;
-    cerr << spdb.getErrStr() << endl;
+  // get the XML string
+
+  const IwrfTsInfo &info = _tsReader->getOpsInfo();
+  if (!info.isStatusXmlActive()) {
     return -1;
   }
-  
-  // got chunks
-  
-  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
-  if (chunks.size() < 1) {
-    cerr << "WARNING - SunCal::_retrieveXpolRatioFromSpdb" << endl;
-    cerr << "  No suitable xpol ratio data from URL: "
-         << _params.xpol_ratio_spdb_url << endl;
-    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
-    cerr << "  Search margin (secs): "
-         << _params.xpol_ratio_search_margin_secs << endl;
+  timeForTemp = (time_t) info.getStatusXmlTime();
+  string xmlStr = info.getStatusXmlStr();
+
+  double tdiff = fabs((double) timeForTemp - (double) scanTime);
+  if (tdiff > 3600) {
+    cerr << "WARNING - SunCal::_retrieveSiteTempFromXml()" << endl;
+    cerr << "  No recent temp data" << endl;
+    cerr << "  Latest temp time: " << DateTime::strm(timeForTemp) << endl;
     return -1;
   }
 
-  const Spdb::chunk_t &chunk = chunks[0];
-  string xml((const char *) chunk.data);
-  double ratio = 0.0;
-  if (TaXml::readDouble(xml, "ratioHxVxDbClutter", ratio)) {
+  // get tags in list
+    
+  string tagList = _params.temp_tag_list_in_status_xml;
+  vector<string> tags;
+  TaStr::tokenize(tagList, "<>", tags);
+  if (tags.size() == 0) {
+    // no tags
+    cerr << "WARNING - SunCal::_retrieveSiteTempFromXml()" << endl;
+    cerr << "  Temp tags not found: " << tagList << endl;
+    return -1;
+  }
+  
+  // read through the outer tags in status XML
+  
+  string buf(xmlStr);
+  for (size_t jj = 0; jj < tags.size(); jj++) {
+    string val;
+    if (TaXml::readString(buf, tags[jj], val)) {
+      cerr << "WARNING - SunCal::_retrieveSiteTempFromXml()" << endl;
+      cerr << "  Bad tags found in status xml, expecting: "
+           << tagList << endl;
+      return -1;
+    }
+    buf = val;
+  }
+
+  // read temperature
+  
+  double tempVal = -9999.0;
+  if (TaXml::readDouble(buf, tempVal)) {
+    cerr << "WARNING - SunCal::_retrieveSiteTempFromXml()" << endl;
+    cerr << "  Bad temp found in status xml, buf: " << buf << endl;
     return -1;
   }
 
-  xpolRatio = ratio;
-  timeForXpolRatio = chunk.valid_time;
-  
+  // success
+
+  tempC = tempVal;
   return 0;
-  
-}
 
+}
+  
 //////////////////////////
 // write out results data
 
@@ -5051,7 +5130,14 @@ void SunCal::_writeSummaryText(FILE *out)
 
   if (_params.read_site_temp_from_spdb) {
     fprintf(out, "========== site temp from spdb ==========\n");
-    fprintf(out, "  _siteTempFromSpdb: %g\n", _siteTempFromSpdb);
+    fprintf(out, "  _siteTempC: %g\n", _siteTempC);
+    fprintf(out, "  _timeForSiteTemp: %s\n", DateTime::strm(_timeForSiteTemp).c_str());
+    fprintf(out, "=================================================\n\n");
+  }
+
+  if (_params.read_site_temp_from_time_series_xml) {
+    fprintf(out, "========== site temp from status xml ==========\n");
+    fprintf(out, "  _siteTempC: %g\n", _siteTempC);
     fprintf(out, "  _timeForSiteTemp: %s\n", DateTime::strm(_timeForSiteTemp).c_str());
     fprintf(out, "=================================================\n\n");
   }
@@ -5230,8 +5316,9 @@ int SunCal::_appendToGlobalResults()
     _appendFloatToFile(out, _xpolRatioDbFromSpdb);
   }
 
-  if (_params.read_site_temp_from_spdb) {
-    _appendFloatToFile(out, _siteTempFromSpdb);
+  if (_params.read_site_temp_from_spdb ||
+      _params.read_site_temp_from_time_series_xml) {
+    _appendFloatToFile(out, _siteTempC);
   }
 
   if (_params.compute_test_pulse_powers) {
@@ -5966,8 +6053,10 @@ int SunCal::_writeSummaryToSpdb()
   if (_params.read_xpol_ratio_from_spdb) {
     xml += TaXml::writeDouble("xpolRatioDbFromSpdb", 1, _xpolRatioDbFromSpdb);
   }
-  if (_params.read_site_temp_from_spdb) {
-    xml += TaXml::writeDouble("siteTempFromSpdb", 1, _siteTempFromSpdb);
+  if (_params.read_site_temp_from_spdb ||
+      _params.read_site_temp_from_time_series_xml) {
+    xml += TaXml::writeDouble("siteTempC", 1, _siteTempC);
+    xml += TaXml::writeTime("timeForSiteTemp", 1, _timeForSiteTemp);
   }
 
   xml += TaXml::writeEndTag("RadarSunCal", 0);

@@ -538,6 +538,10 @@ public:
 
   int xpol_ratio_search_margin_secs;
 
+  tdrp_bool_t read_site_temp_from_time_series_xml;
+
+  char* temp_tag_list_in_status_xml;
+
   tdrp_bool_t read_site_temp_from_spdb;
 
   char* site_temp_spdb_url;
@@ -589,7 +593,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[117];
+  mutable TDRPtable _table[120];
 
   const char *_className;
 
