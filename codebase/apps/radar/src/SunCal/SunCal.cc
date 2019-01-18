@@ -5441,7 +5441,8 @@ void SunCal::_writeGlobalHeader(FILE *out)
     fprintf(out, " %10s", "xRatioDb");
   }
 
-  if (_params.read_site_temp_from_spdb) {
+  if (_params.read_site_temp_from_spdb ||
+      _params.read_site_temp_from_time_series_xml) {
     fprintf(out, " %10s", "siteTemp");
   }
 
