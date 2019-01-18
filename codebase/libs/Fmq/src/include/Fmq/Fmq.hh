@@ -413,8 +413,8 @@ public:
 
   // get queue details
   
-  inline bool isOpen() { return _dev != NULL; }
-  inline bool isServer() { return _server; }
+  virtual bool isOpen() { return _dev != NULL; }
+  bool isServer() { return _server; }
 
   ///////////////////////////////////////
   // get fmq details

@@ -308,6 +308,10 @@ public:
   
   int writeTheCache();
   
+  // get queue details
+  
+  virtual bool isOpen() { return _socket != NULL; }
+
   // Get URL info
 
   inline const string getUrlStr() const { return _urlStr; }
