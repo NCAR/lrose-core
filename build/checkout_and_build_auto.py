@@ -39,6 +39,7 @@ def main():
     global tmpBinDir
     global binDir
     global libDir
+    global libRelDir
     global includeDir
     global shareDir
     global versionStr
@@ -111,6 +112,7 @@ def main():
 
     package = options.package
     prefix = options.prefix
+    libRelDir = package + "_runtime_libs"
 
     # runtime
 
@@ -222,7 +224,6 @@ def main():
 
     if (platform != "darwin"):
         os.chdir(codebaseDir)
-        libRelDir = package + "_runtime_libs"
         cmd = "./make_bin/installOriginLibFiles.py" + \
               " --binDir " + tmpBinDir + \
               " --relDir " + libRelDir
@@ -505,8 +506,8 @@ def buildPackage():
     # set the environment
 
     os.environ["LDFLAGS"] = "-L" + scratchBuildDir + "/lib " + \
-                            " -Wl,-rpath,'$$ORIGIN/" + package + "_runtime_libs:" + \
-                            scratchBuildDir + "/lib'"
+                            " -Wl,-rpath,'$$ORIGIN/" + libRelDir + \
+                            ":" + scratchBuildDir + "/lib'"
     os.environ["FC"] = "gfortran"
     os.environ["F77"] = "gfortran"
     os.environ["F90"] = "gfortran"
