@@ -1,29 +1,23 @@
 #! /bin/csh
 
-#
-# build blaze in centos7 image
-#
-
-cd ~/git/lrose-core/build/packaging/centos
-
 # create the rpm structure
 
 cd
-mkdir rpmbuild
+mkdir -p rpmbuild
 cd rpmbuild
-mkdir BUILD RPMS SOURCES SPECS SRPMS
+mkdir -p BUILD RPMS SOURCES SPECS SRPMS
 
 # copy in the spec file
 
-cp ~/git/lrose-core/build/packaging/centos/rpmbuild-blaze.spec SPECS
+rsync -av ~/git/lrose-core/build/packaging/centos/rpm_from_binary.blaze.spec SPECS
 
 # build the rpm
 
-rpmbuild -v -bb ./SPECS/rpmbuild-blaze.spec
+rpmbuild -v -bb ./SPECS/rpm_from_binary.blaze.spec
 
 # copy the rpm to the cross-mounted director
 
-rsync -av RPMS /rpmdir
+rsync -av RPMS /output
 
 
 
