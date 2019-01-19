@@ -6,13 +6,14 @@
 
 cd ~/git/lrose-core/build/packaging/centos
 
-mkdir -p /tmp/centos7-blaze
+set rpmDir = /tmp/centos6-blaze/rpms
+mkdir -p $rpmDir
 
 docker run \
-    -v /tmp/centos6-blaze:/output \
-    centos7:blaze \
+    -v ${rpmDir}:/rpms \
+    centos6:blaze \
     /root/git/lrose-core/build/packaging/centos/run_rpmbuild.blaze
 
 mkdir -p ~/releases/lrose-blaze
 
-rsync -av /tmp/centos6-blaze/*/*/*.rpm ~/releases/lrose-blaze
+rsync -av ${rpmDir}/*/*.rpm ~/releases/lrose-blaze
