@@ -9,7 +9,7 @@ FROM centos6:provisioned
 
 RUN \
     cd ${HOME}; \
-    mkdir git; cd git; \
+    mkdir -p git; cd git; \
     git clone https://github.com/NCAR/lrose-core
 
 # alternatively get checkout script only

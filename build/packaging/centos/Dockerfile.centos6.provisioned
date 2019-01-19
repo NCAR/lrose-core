@@ -1,6 +1,6 @@
-#
+###############################################################
 # start with clean image
-#
+# provision with the required packages
 
 FROM centos:6
 
@@ -26,19 +26,4 @@ RUN \
 RUN \
     cd /usr/bin; \
     ln -s qmake-qt5 qmake;
-
-# get lrose-core
-    
-RUN \
-  cd ${HOME}; \
-  mkdir -p ~/git; \
-  cd ~/git; \
-  git clone https://github.com/NCAR/lrose-core
-
-# Set links to rpm build scripts
-
-RUN \
-  cd ${HOME}; \
-  ln -s git/lrose-core/build/packaging/centos/build_rpm.centos.lrose-blaze
-
 
