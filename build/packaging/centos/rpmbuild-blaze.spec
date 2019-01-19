@@ -11,8 +11,6 @@ License:        BSD LICENSE
 Name:           %{name}
 Version:        %{version}
 Release:        %{release}
-#Source:         
-# %{name}-%{version}-%{release}.src.tgz
 Prefix:         /usr/local/lrose
 Group:          Scientific Tools
 AutoReqProv:    no
@@ -33,19 +31,24 @@ LROSE - Lidar Radar Open Software Environment
 #%setup 
 # -q -n lrose-blaze-20180516.src
  
-%build
-#git clone https://github.com/NCAR/lrose-core
-#./lrose-core/build/checkout_and_build_auto.py  --package=lrose-blaze 
-/root/git/lrose-core/build/checkout_and_build_auto.py --package lrose-blaze --prefix %{prefix} --useSystemNetcdf
-rm -f %{_topdir}/SPECS/lrose-pkg-files
+# The build has already been completed
+# we just need to copy the files into place
+
+#%build
+#/root/git/lrose-core/build/checkout_and_build_auto.py --package lrose-blaze --prefix %{prefix} --useSystemNetcdf
+#rm -f %{_topdir}/SPECS/lrose-pkg-files
 # find /usr/local/lrose -type d | sed 's/usr/duck/'
 #find /root/lrose -type d | sed 's/root/usr\/local/' > %{_topdir}/SPECS/lrose-pkg-files
 #find /root/lrose -type l | sed 's/root/usr\/local/' >> %{_topdir}/SPECS/lrose-pkg-files
-find %{prefix} -type d > %{_topdir}/SPECS/lrose-pkg-files
-find %{prefix} -type l >> %{_topdir}/SPECS/lrose-pkg-files
+#find %{prefix} -type d > %{_topdir}/SPECS/lrose-pkg-files
+#find %{prefix} -type l >> %{_topdir}/SPECS/lrose-pkg-files
+
+# The build has already been completed
+# we just need to install the files into place
 
 %install
 mkdir -p %{buildroot}%{prefix}
 rsync -av %{prefix}/* %{buildroot}%{prefix}
 
-%files -f %{_topdir}/SPECS/lrose-pkg-files
+#%files -f %{_topdir}/SPECS/lrose-pkg-files
+

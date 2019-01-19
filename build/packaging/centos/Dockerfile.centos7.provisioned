@@ -1,6 +1,6 @@
-#
+###############################################################
 # start with clean image
-#
+# provision with the required packages
 
 FROM centos:7
 
@@ -8,7 +8,7 @@ FROM centos:7
 
 RUN \
     yum install -y epel-release; \
-    yum install -y tcsh git tkcvs emacs \
+    yum install -y tcsh wget git tkcvs emacs \
     m4 make libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel \
     libX11-devel libXext-devel \
@@ -26,19 +26,4 @@ RUN \
 RUN \
     cd /usr/bin; \
     ln -s qmake-qt5 qmake;
-
-# get lrose-core
-    
-RUN \
-  cd ${HOME}; \
-  mkdir -p ~/git; \
-  cd ~/git; \
-  git clone https://github.com/NCAR/lrose-core
-
-# Set links to rpm build scripts
-
-RUN \
-  cd ${HOME}; \
-  ln -s git/lrose-core/build/packaging/centos/build_rpm.centos.lrose-blaze
-
 

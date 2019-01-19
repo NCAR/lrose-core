@@ -1,0 +1,42 @@
+#
+# start with an image that contains all the packages needed to 
+# build lrose-blaze + rpmbuilder
+#
+
+FROM centos7:provisioned
+
+# get build script
+
+RUN \
+    cd ${HOME}; \
+    mkdir git; cd git \
+    git clone https://github.com/NCAR/lrose-core
+
+# alternatively get checkout script only
+
+#RUN \
+#    wget "https://raw.githubusercontent.com/NCAR/lrose-core/master/build/checkout_and_build_auto.py"; \
+#    chmod +x checkout_and_build_auto.py
+
+# run the build script
+
+RUN \
+    cd ${HOME}/git/lrose-core/build; \
+    ./checkout_and_build_auto.py --package lrose-blaze \
+    --prefix /usr/local/lrose --scripts --useSystemNetcdf
+
+# build hierarchy for rpmbuild:
+
+RUN \
+    cd ${HOME}; \
+    mkdir rpmbuild; \
+    cd rpmbuild; \
+    mkdir BUILD RPMS SOURCES SPECS SRPMS; \
+    cp ~/git/lrose-core/build/packaging/centos/lrose-blaze.spec SPECS
+
+# build the rpm
+
+RUN \
+    cd ${HOME}/rpmbuild; \
+    rpmbuild -v -bb ./SPECS/lrose-blaze.spec
+
