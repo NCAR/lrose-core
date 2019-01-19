@@ -1,0 +1,15 @@
+#! /bin/csh
+
+#
+# in docker image, create rpm, place it in /tmp/rpms
+#
+
+cd ~/git/lrose-core/build/packaging/centos
+
+set rpmDir = /tmp/centos7-blaze/rpms
+
+docker run \
+    -v ${rpmDir}:/rpms \
+    -it \
+    centos:7
+
