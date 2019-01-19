@@ -5,10 +5,6 @@
 
 FROM centos6:provisioned
 
-# enable updated gcc and g++
-
-RUN scl enable devtoolset-2 bash
-
 # get build script
 
 RUN \
@@ -25,11 +21,10 @@ RUN \
 # run the build script
 
 RUN \
-    scl enable devtoolset-2 bash; \
     cd ${HOME}/git/lrose-core/build; \
     ./checkout_and_build_auto.py --package lrose-blaze \
     --prefix /usr/local/lrose --scripts --useSystemNetcdf \
-    --buildDir /tmp/lrose_build --logDir /tmp/build_logs --clean 
+    --buildDir /tmp/lrose_build --logDir /tmp/build_logs
 
 # clean up
 
