@@ -9,7 +9,7 @@ FROM centos7:provisioned
 
 RUN \
     cd ${HOME}; \
-    mkdir git; cd git \
+    mkdir git; cd git; \
     git clone https://github.com/NCAR/lrose-core
 
 # alternatively get checkout script only
@@ -32,11 +32,11 @@ RUN \
     mkdir rpmbuild; \
     cd rpmbuild; \
     mkdir BUILD RPMS SOURCES SPECS SRPMS; \
-    cp ~/git/lrose-core/build/packaging/centos/lrose-blaze.spec SPECS
+    cp ~/git/lrose-core/build/packaging/centos/rpmbuild-blaze.spec SPECS
 
 # build the rpm
 
 RUN \
     cd ${HOME}/rpmbuild; \
-    rpmbuild -v -bb ./SPECS/lrose-blaze.spec
+    rpmbuild -v -bb ./SPECS/rpmbuild-blaze.spec
 
