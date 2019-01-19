@@ -13,6 +13,6 @@ docker run \
     centos7:blaze \
     /root/git/lrose-core/build/packaging/centos/run_rpmbuild.centos7.blaze
 
-rsync -av /tmp/rpms/centos7-blaze/* ~/releases/lrose-blaze
+mkdir -p ~/releases/lrose-blaze
 
-
+rsync -av /tmp/centos7-blaze/*/*/*.rpm ~/releases/lrose-blaze

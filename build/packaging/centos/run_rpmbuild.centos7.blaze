@@ -23,6 +23,9 @@ rpmbuild -v -bb ./SPECS/rpm_from_binary.blaze.spec
 # copy the rpm to the cross-mounted director
 
 rsync -av RPMS /output
+chmod +w -R /output/*
+
+
 
 
 
