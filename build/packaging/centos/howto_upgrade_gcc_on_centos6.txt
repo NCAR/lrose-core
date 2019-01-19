@@ -1,0 +1,33 @@
+##########################################################
+# How to update gcc / g++ to version 4.8.5 on Centos 6
+#
+# This is necessary to get -std=c++11 support for g++
+
+# install the updated toolchain
+
+sudo wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
+sudo yum install -y devtoolset-2-gcc devtoolset-2-binutils
+sudo yum install -y devtoolset-2-gcc-c++ devtoolset-2-gcc-gfortran
+
+# enable the toolchain in your shell
+
+scl enable devtoolset-2 bash
+
+# add the following to your .bashrc
+
+source /opt/rh/devtoolset-2/enable
+
+#Test the environment:
+
+$ gcc --version
+gcc (GCC) 4.8.2 20140120 (Red Hat 4.8.2-15)
+...
+
+$ g++ --version
+g++ (GCC) 4.8.2 20140120 (Red Hat 4.8.2-15)
+...
+
+$ gfortran --version
+GNU Fortran (GCC) 4.8.2 20140120 (Red Hat 4.8.2-15)
+...
+
