@@ -215,6 +215,16 @@ def main():
 
     buildPackage()
 
+    # detect which dynamic libs are needed
+    # copy the dynamic libraries into runtime area:
+    #     $prefix/bin/${package}_runtime_libs
+
+    if (platform != "darwin"):
+        os.chdir(codebaseDir)
+        shellCmd("./make_bin/installOriginLibFiles.py --binDir " + \
+                 binDir + \
+                 " --relDir " + package + "_runtime_libs --debug")
+
     # perform the install
 
     logPath = prepareLogFile("do-final-install");
