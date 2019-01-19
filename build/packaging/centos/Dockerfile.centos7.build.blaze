@@ -23,20 +23,11 @@ RUN \
 RUN \
     cd ${HOME}/git/lrose-core/build; \
     ./checkout_and_build_auto.py --package lrose-blaze \
-    --prefix /usr/local/lrose --scripts --useSystemNetcdf
+    --prefix /usr/local/lrose --scripts --useSystemNetcdf \
+    --buildDir /tmp/lrose_build --logDir /tmp/build_logs --clean 
 
-# build hierarchy for rpmbuild:
-
-RUN \
-    cd ${HOME}; \
-    mkdir rpmbuild; \
-    cd rpmbuild; \
-    mkdir BUILD RPMS SOURCES SPECS SRPMS; \
-    cp ~/git/lrose-core/build/packaging/centos/rpmbuild-blaze.spec SPECS
-
-# build the rpm
+# clean up
 
 RUN \
-    cd ${HOME}/rpmbuild; \
-    rpmbuild -v -bb ./SPECS/rpmbuild-blaze.spec
+    /bin/rm -rf /tmp/lrose_build
 
