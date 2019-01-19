@@ -171,6 +171,7 @@ int Fmq2Fmq::_run ()
   while (true) {
     
     PMU_auto_register("Run: read loop");
+    _openOutputFmqs();
 
     // read 
     
@@ -181,9 +182,9 @@ int Fmq2Fmq::_run ()
       _inputFmq.closeMsgQueue();
       return -1;
     }
-    
+
     if (gotOne) {
-      
+
       if (_params.debug >= Params::DEBUG_VERBOSE) {
 	cerr << "    Read message, len: " << setw(8) << _inputFmq.getMsgLen()
 	     << ", type: " << setw(8) << _inputFmq.getMsgType()
@@ -253,6 +254,10 @@ void Fmq2Fmq::_openOutputFmqs()
 
   for (int ii = 0; ii < _outputFmqs_.size(); ii++) {
     
+    if (_params.debug) {
+      cerr << "Opening FMQ to URL: " << _params._output_urls[ii] << endl;
+    }
+    
     DsFmq &fmq = _outputFmqs[ii];
     if (fmq.isOpen()) {
       continue;
@@ -271,6 +276,7 @@ void Fmq2Fmq::_openOutputFmqs()
       cerr << "WARNING - Fmq2Fmq::Run" << endl;
       cerr << "  Cannot open output FMQ at url: "
 	   << _params._output_urls[ii] << endl;
+      continue;
     }
 
     if (_params.data_mapper_report_interval > 0) {
@@ -307,5 +313,3 @@ void Fmq2Fmq::_openOutputFmqs()
   } // ii
 
 }
-
-  
