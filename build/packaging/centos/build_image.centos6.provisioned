@@ -7,7 +7,7 @@
 cd ~/git/lrose-core/build/packaging/centos
 
 docker build \
-    --tag centos:provisioned \
-    --file Dockerfile.centos.provisioned .
+    --tag centos6:provisioned \
+    --file Dockerfile.centos6.provisioned .
 
 
