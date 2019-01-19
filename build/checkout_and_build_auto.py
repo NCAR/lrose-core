@@ -695,7 +695,7 @@ def prune(tree):
 
 def prepareLogFile(logFileName):
 
-    logPath = os.path.join(options.logDir, logFileName + ".log.txt");
+    logPath = os.path.join(options.logDir, logFileName + ".log");
     if (logPath.find('no-logging') >= 0):
         return logPath
     print("========================= " + logFileName + " =========================", file=sys.stderr)
