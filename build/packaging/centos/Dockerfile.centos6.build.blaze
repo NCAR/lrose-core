@@ -25,6 +25,7 @@ RUN \
 # run the build script
 
 RUN \
+    scl enable devtoolset-2 bash; \
     cd ${HOME}/git/lrose-core/build; \
     ./checkout_and_build_auto.py --package lrose-blaze \
     --prefix /usr/local/lrose --scripts --useSystemNetcdf \
