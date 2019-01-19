@@ -1,5 +1,10 @@
 #! /bin/csh
 
+# update the repo as needed
+
+cd ~/git/lrose-core
+git pull
+
 # create the rpm structure
 
 cd
