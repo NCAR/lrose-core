@@ -22,8 +22,13 @@ rpmbuild -v -bb ./SPECS/rpm_from_binary.blaze.spec
 
 # copy the rpm to the cross-mounted director
 
-rsync -av RPMS /output
-chmod +w -R /output/*
+rsync -av RPMS/* /rpms
+
+# add write permissions since this is created by root
+# and we need to remove them from the cross-mount later
+
+chmod o+w -R /rpms/*
+chmod g+w -R /rpms/*
 
 
 
