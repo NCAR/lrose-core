@@ -6,22 +6,25 @@
 
 cd ~/git/lrose-core/build/packaging/centos
 
-docker build \
-    --tag centos7:blaze \
-    --file Dockerfile.centos7.build.blaze .
+# create the rpm structure
 
-# build hierarchy for rpmbuild:
+cd
+mkdir rpmbuild
+cd rpmbuild
+mkdir BUILD RPMS SOURCES SPECS SRPMS
 
-RUN \
-    cd ${HOME}; \
-    mkdir rpmbuild; \
-    cd rpmbuild; \
-    mkdir BUILD RPMS SOURCES SPECS SRPMS; \
-    cp ~/git/lrose-core/build/packaging/centos/rpmbuild-blaze.spec SPECS
+# copy in the spec file
+
+cp ~/git/lrose-core/build/packaging/centos/rpmbuild-blaze.spec SPECS
 
 # build the rpm
 
-RUN \
-    cd ${HOME}/rpmbuild; \
-    rpmbuild -v -bb ./SPECS/rpmbuild-blaze.spec
+rpmbuild -v -bb ./SPECS/rpmbuild-blaze.spec
+
+# copy the rpm to the cross-mounted director
+
+rsync -av RPMS /rpmdir
+
+
+
 
