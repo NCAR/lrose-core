@@ -248,7 +248,7 @@ def searchDir(dir):
         scriptPath = os.path.join(thisScriptDir, createScript)
         if (os.path.exists(scriptPath) == False):
             # no package version, use default
-            createScript = "createMakefile.am.app.lrose.py"
+            createScript = "createMakefile.am.app.lrose-core.py"
             scriptPath = os.path.join(thisScriptDir, createScript)
         if (options.debug):
             print("  createScript:", createScript, file=sys.stderr)

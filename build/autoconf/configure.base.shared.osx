@@ -74,7 +74,7 @@ fi
 CPPFLAGS="${CPPFLAGS} -DNO_JASPER_LIB"
 
 # Set up libtool.
-AM_PROG_AR
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_MSG_NOTICE([setting up libtool])
 LT_PREREQ([2.2])
 LT_INIT
