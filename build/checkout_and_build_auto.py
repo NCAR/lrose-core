@@ -578,14 +578,14 @@ def buildPackage():
         procmapScriptsDir = os.path.join(codebaseDir, "apps/procmap/src/scripts")
         if (os.path.isdir(procmapScriptsDir)):
             os.chdir(procmapScriptsDir)
-            shellCmd("./install_scripts.lrose " + prefix + "bin")
+            shellCmd("./install_scripts.lrose " + binDir)
 
         # general
 
         generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")
         if (os.path.isdir(generalScriptsDir)):
             os.chdir(generalScriptsDir)
-            shellCmd("./install_scripts.lrose " + prefix + "bin")
+            shellCmd("./install_scripts.lrose " + binDir)
 
 ########################################################################
 # perform final install
