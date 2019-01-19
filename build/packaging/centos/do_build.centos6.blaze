@@ -1,0 +1,12 @@
+#! /bin/csh
+
+#
+# build blaze in centos6 image
+#
+
+cd ~/git/lrose-core/build/packaging/centos
+
+docker build \
+    --tag centos6:blaze \
+    --file Dockerfile.centos6.build.blaze .
+
