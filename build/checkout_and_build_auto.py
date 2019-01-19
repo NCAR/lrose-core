@@ -35,7 +35,7 @@ def main():
     global coreDir
     global codebaseDir
     global codebasePath
-    global tmpBuildDir
+    global scratchBuildDir
     global tmpBinDir
     global binDir
     global libDir
@@ -121,14 +121,14 @@ def main():
 
     # set directories
     
-    tmpBuildDir = os.path.join(options.buildDir, 'tmp')
+    scratchBuildDir = os.path.join(options.buildDir, 'scratch')
     coreDir = os.path.join(options.buildDir, "lrose-core")
     displaysDir = os.path.join(options.buildDir, "lrose-displays")
     netcdfDir = os.path.join(options.buildDir, "lrose-netcdf")
     codebaseDir = os.path.join(coreDir, "codebase")
     releaseName = options.package + "-" + versionStr + ".src"
     
-    tmpBinDir = os.path.join(tmpBuildDir, 'bin')
+    tmpBinDir = os.path.join(scratchBuildDir, 'bin')
     binDir = os.path.join(prefix, 'bin')
     libDir = os.path.join(prefix, 'lib')
     includeDir = os.path.join(prefix, 'include')
@@ -162,7 +162,7 @@ def main():
     # make tmp dirs
 
     try:
-        os.makedirs(tmpBuildDir)
+        os.makedirs(scratchBuildDir)
         os.makedirs(tmpBinDir)
         os.makedirs(options.logDir)
     except:
@@ -216,14 +216,21 @@ def main():
     buildPackage()
 
     # detect which dynamic libs are needed
-    # copy the dynamic libraries into runtime area:
-    #     $prefix/bin/${package}_runtime_libs
+    # copy the dynamic libraries into a directory relative
+    # to the binary install dir:
+    #     bin/${package}_runtime_libs
 
     if (platform != "darwin"):
         os.chdir(codebaseDir)
-        shellCmd("./make_bin/installOriginLibFiles.py --binDir " + \
-                 binDir + \
-                 " --relDir " + package + "_runtime_libs --debug")
+        libRelDir = package + "_runtime_libs"
+        cmd = "./make_bin/installOriginLibFiles.py" + \
+              " --binDir " + tmpBinDir + \
+              " --relDir " + libRelDir
+        if (options.verbose):
+            cmd = cmd + " --verbose"
+        elif (options.debug):
+            cmd = cmd + " --debug"
+        shellCmd(cmd)
 
     # perform the install
 
@@ -349,7 +356,7 @@ def createReleaseInfoFile():
 
     # go to core dir
 
-    os.chdir(tmpBuildDir)
+    os.chdir(scratchBuildDir)
 
     # open info file
 
@@ -481,12 +488,12 @@ def buildNetcdf():
 
     os.chdir(netcdfDir)
     if (package == "cidd"):
-        shellCmd("./build_and_install_netcdf.m32 -x " + tmpBuildDir)
+        shellCmd("./build_and_install_netcdf.m32 -x " + scratchBuildDir)
     else:
         if platform == "darwin":
-            shellCmd("./build_and_install_netcdf.osx -x " + tmpBuildDir)
+            shellCmd("./build_and_install_netcdf.osx -x " + scratchBuildDir)
         else:
-            shellCmd("./build_and_install_netcdf -x " + tmpBuildDir)
+            shellCmd("./build_and_install_netcdf -x " + scratchBuildDir)
 
 ########################################################################
 # build package
@@ -497,9 +504,9 @@ def buildPackage():
 
     # set the environment
 
-    os.environ["LDFLAGS"] = "-L" + tmpBuildDir + "/lib " + \
+    os.environ["LDFLAGS"] = "-L" + scratchBuildDir + "/lib " + \
                             " -Wl,-rpath,'$$ORIGIN/" + package + "_runtime_libs:" + \
-                            tmpBuildDir + "/lib'"
+                            scratchBuildDir + "/lib'"
     os.environ["FC"] = "gfortran"
     os.environ["F77"] = "gfortran"
     os.environ["F90"] = "gfortran"
@@ -520,11 +527,11 @@ def buildPackage():
     logPath = prepareLogFile("run-configure");
     os.chdir(codebaseDir)
     if (options.useSystemNetcdf):
-        cmd = "./configure --prefix=" + tmpBuildDir
+        cmd = "./configure --prefix=" + scratchBuildDir
     else:
-        cmd = "./configure --with-hdf5=" + tmpBuildDir + \
-              " --with-netcdf=" + tmpBuildDir + \
-                                " --prefix=" + tmpBuildDir
+        cmd = "./configure --with-hdf5=" + scratchBuildDir + \
+              " --with-netcdf=" + scratchBuildDir + \
+                                " --prefix=" + scratchBuildDir
     shellCmd(cmd)
 
     # build the libraries
@@ -621,7 +628,7 @@ def doFinalInstall():
 
     # install binaries and libs
 
-    os.chdir(tmpBuildDir)
+    os.chdir(scratchBuildDir)
 
     shellCmd("rsync -av bin " + prefix)
     shellCmd("rsync -av lib " + prefix)
