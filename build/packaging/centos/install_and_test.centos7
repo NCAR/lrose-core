@@ -1,12 +1,21 @@
 #! /bin/csh
 
 #
-# in cleandocker image, install rpm and test that the apps work
+# in clean docker image,
+# install rpm and test that the apps work
 #
 
 cd ~/git/lrose-core/build/packaging/centos
 
+# remove any old image
+
+docker rm image centos7:installed
+
+# make rpms available to container
+
 set rpmDir = /tmp/centos7-blaze/rpms
+
+# install the rpms in a container
 
 docker build \
     -v ${rpmDir}:/rpms \

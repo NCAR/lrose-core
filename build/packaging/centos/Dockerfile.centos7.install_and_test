@@ -3,7 +3,7 @@
 # start with clean image
 # install the RPM and test it
 
-FROM centos7:provisioned
+FROM centos:7
 
 # install epel-release
 
