@@ -5,6 +5,10 @@
 
 FROM centos6:provisioned
 
+# enable updated gcc and g++
+
+scl enable devtoolset-2 bash
+
 # get build script
 
 RUN \

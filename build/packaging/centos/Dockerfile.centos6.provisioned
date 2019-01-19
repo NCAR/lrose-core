@@ -27,3 +27,12 @@ RUN \
     cd /usr/bin; \
     ln -s qmake-qt5 qmake;
 
+# install updated gcc and g++
+
+RUN \
+    wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo; \
+    yum install -y devtoolset-2-gcc devtoolset-2-binutils; \
+    yum install -y devtoolset-2-gcc-c++ devtoolset-2-gcc-gfortran; \
+    scl enable devtoolset-2 bash
+
+
