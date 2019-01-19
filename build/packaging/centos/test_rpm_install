@@ -1,9 +1,0 @@
-#! /bin/bash
-
-#
-# test that an rpm works in a container
-#
-
-yum -y install epel-release
-yum -y install /rpms/x86_64/*.rpm 
-/usr/local/lrose/bin/RadxPrint -h

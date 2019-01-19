@@ -1,0 +1,20 @@
+###############################################################
+# Install lrose-blaze on centos 7 using the RPM
+# start with clean image
+# install the RPM and test it
+
+FROM centos7:provisioned
+
+# install epel-release
+
+RUN yum install -y epel-release
+
+# install the rpm
+
+RUN yum install -y /rpms/x86_64/*.rpm
+
+# check that RadxPrint runs
+
+RUN /usr/local/lrose/bin/RadxPrint -h
+
+

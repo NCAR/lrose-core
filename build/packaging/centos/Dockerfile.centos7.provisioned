@@ -1,6 +1,7 @@
 ###############################################################
+# provision a Docker image for building lrose
 # start with clean image
-# provision with the required packages
+# install the required packages
 
 FROM centos:7
 

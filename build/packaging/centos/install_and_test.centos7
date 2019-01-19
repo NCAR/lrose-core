@@ -1,0 +1,15 @@
+#! /bin/csh
+
+#
+# in cleandocker image, install rpm and test that the apps work
+#
+
+cd ~/git/lrose-core/build/packaging/centos
+
+set rpmDir = /tmp/centos7-blaze/rpms
+
+docker build \
+    -v ${rpmDir}:/rpms \
+    --tag centos7:installed \
+    --file Dockerfile.centos7.install_and_test .
+
