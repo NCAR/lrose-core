@@ -9,7 +9,8 @@ FROM centos:7
 
 RUN \
     yum install -y epel-release; \
-    yum install -y tcsh wget git tkcvs emacs \
+    yum install -y tcsh wget git tkcvs \
+    emacs rsync python \
     m4 make libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel \
     libX11-devel libXext-devel \

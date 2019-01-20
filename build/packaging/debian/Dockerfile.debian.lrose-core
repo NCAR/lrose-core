@@ -2,21 +2,22 @@
 # start with clean image
 #
 
-FROM debian as builder
+FROM debian
  
 # install required packages
 
-RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
-COPY sources.list /etc/apt
-RUN echo "---------------------------------------------"
-RUN echo "here is /etc/apt/sources.list: "; cat  /etc/apt/sources.list
-RUN echo "---------------------------------------------"
+#RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
+#COPY sources.list /etc/apt
+#RUN echo "---------------------------------------------"
+#RUN echo "here is /etc/apt/sources.list: "; cat  /etc/apt/sources.list
+#RUN echo "---------------------------------------------"
 
-RUN apt-get update && apt-get install -y  \
+RUN apt-get update && \
+    apt-get install -y  \
     libbz2-dev libx11-dev libpng-dev libfftw3-dev \
-    libjasper-dev qtbase5-dev git \
+    qtbase5-dev git \
     gcc g++ gfortran libfl-dev \
-    automake make libtool pkg-config libexpat1-dev python \
+    automake make libtool pkg-config python \
     cmake libgeographic-dev libeigen3-dev libzip-dev \
     libhdf5-dev libhdf5-cpp-11 libnetcdf-dev
  

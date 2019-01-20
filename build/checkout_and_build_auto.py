@@ -37,9 +37,10 @@ def main():
     global codebasePath
     global scratchBuildDir
     global tmpBinDir
+    global tmpLibDir
     global binDir
     global libDir
-    global libRelDir
+    global runtimeLibRelDir
     global includeDir
     global shareDir
     global versionStr
@@ -86,6 +87,20 @@ def main():
                       dest='static', default=False,
                       action="store_true",
                       help='use static linking, default is dynamic')
+    parser.add_option('--installAllRuntimeLibs',
+                      dest='installAllRuntimeLibs', default=False,
+                      action="store_true",
+                      help=\
+                      'Install dynamic runtime libraries for all binaries, ' + \
+                      'in a directory relative to the bin dir. ' + \
+                      'System libraries are included.')
+    parser.add_option('--installLroseRuntimeLibs',
+                      dest='installLroseRuntimeLibs', default=False,
+                      action="store_true",
+                      help=\
+                      'Install dynamic runtime lrose libraries for all binaries, ' + \
+                      'in a directory relative to the bin dir. ' + \
+                      'System libraries are not included.')
     parser.add_option('--scripts',
                       dest='installScripts', default=False,
                       action="store_true",
@@ -112,7 +127,7 @@ def main():
 
     package = options.package
     prefix = options.prefix
-    libRelDir = package + "_runtime_libs"
+    runtimeLibRelDir = package + "_runtime_libs"
 
     # runtime
 
@@ -131,6 +146,7 @@ def main():
     releaseName = options.package + "-" + versionStr + ".src"
     
     tmpBinDir = os.path.join(scratchBuildDir, 'bin')
+    tmpLibDir = os.path.join(scratchBuildDir, 'lib')
     binDir = os.path.join(prefix, 'bin')
     libDir = os.path.join(prefix, 'lib')
     includeDir = os.path.join(prefix, 'include')
@@ -222,11 +238,22 @@ def main():
     # to the binary install dir:
     #     bin/${package}_runtime_libs
 
-    if (platform != "darwin"):
+    if (options.installAllRuntimeLibs):
         os.chdir(codebaseDir)
         cmd = "./make_bin/installOriginLibFiles.py" + \
               " --binDir " + tmpBinDir + \
-              " --relDir " + libRelDir
+              " --relDir " + runtimeLibRelDir
+        if (options.verbose):
+            cmd = cmd + " --verbose"
+        elif (options.debug):
+            cmd = cmd + " --debug"
+        shellCmd(cmd)
+    elif (options.installLroseRuntimeLibs):
+        os.chdir(codebaseDir)
+        cmd = "./make_bin/installOriginLroseLibs.py" + \
+              " --binDir " + tmpBinDir + \
+              " --libDir " + tmpLibDir + \
+              " --relDir " + runtimeLibRelDir
         if (options.verbose):
             cmd = cmd + " --verbose"
         elif (options.debug):
@@ -506,7 +533,7 @@ def buildPackage():
     # set the environment
 
     os.environ["LDFLAGS"] = "-L" + scratchBuildDir + "/lib " + \
-                            " -Wl,-rpath,'$$ORIGIN/" + libRelDir + \
+                            " -Wl,-rpath,'$$ORIGIN/" + runtimeLibRelDir + \
                             ":" + scratchBuildDir + "/lib'"
     os.environ["FC"] = "gfortran"
     os.environ["F77"] = "gfortran"
