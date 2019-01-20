@@ -1,0 +1,24 @@
+#! /bin/csh
+
+#
+# in clean docker image,
+# install rpm and test that the apps work
+#
+
+cd ~/git/lrose-core/build/packaging/centos
+
+# remove any old image
+
+docker rm image fedora29:installed
+
+# make rpms available to container
+
+set rpmDir = /tmp/fedora29-blaze/rpms
+
+# install the rpms in a container
+
+docker build \
+    -v ${rpmDir}:/rpms \
+    --tag fedora29:installed \
+    --file Dockerfile.fedora29.install_and_test .
+

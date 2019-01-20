@@ -1,0 +1,12 @@
+#! /bin/csh
+
+#
+# build blaze in fedora29 image
+#
+
+cd ~/git/lrose-core/build/packaging/centos
+
+docker build \
+    --tag fedora29:blaze \
+    --file Dockerfile.fedora29.build.blaze .
+
