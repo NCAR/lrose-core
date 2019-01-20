@@ -14,11 +14,11 @@ mkdir -p BUILD RPMS SOURCES SPECS SRPMS
 
 # copy in the spec file
 
-rsync -av ~/git/lrose-core/build/packaging/centos/rpm.centos.blaze.spec SPECS
+rsync -av ~/git/lrose-core/build/packaging/centos/rpm.centos6.blaze.spec SPECS
 
 # build the rpm
 
-rpmbuild -v -bb ./SPECS/rpm.centos.blaze.spec
+rpmbuild -v -bb ./SPECS/rpm.centos6.blaze.spec
 
 # copy the rpm to the cross-mounted director
 

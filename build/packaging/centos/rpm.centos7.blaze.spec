@@ -1,8 +1,8 @@
 %define build_timestamp %(date +"%Y%m%d")
 %define _topdir     /root/rpmbuild
 %define name        lrose 
-%define release     %{build_timestamp}.fedora29
-%define version     blaze
+%define release     %{build_timestamp}
+%define version     blaze 
 %define buildroot %{_topdir}/%{name}-%{version}-%{release}-root
  
 BuildRoot:      %{_topdir}/installedhere
@@ -15,6 +15,7 @@ Prefix:         /usr/local/lrose
 Group:          Scientific Tools
 AutoReqProv:    no
  
+Requires: epel-release
 Requires: libX11-devel, libXext-devel
 Requires: libpng-devel, libtiff-devel, zlib-devel
 Requires: expat-devel, libcurl-devel

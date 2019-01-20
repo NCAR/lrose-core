@@ -12,7 +12,7 @@ mkdir -p $rpmDir
 docker run \
     -v ${rpmDir}:/rpms \
     fedora29:blaze \
-    /root/git/lrose-core/build/packaging/fedora/run_rpmbuild.fedora.blaze
+    /root/git/lrose-core/build/packaging/fedora/run_rpmbuild.fedora29.blaze
 
 mkdir -p ~/releases/lrose-blaze
 
