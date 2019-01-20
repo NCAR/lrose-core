@@ -14,6 +14,7 @@ docker rm image fedora29:installed
 # make rpms available to container
 
 set rpmDir = /tmp/fedora29-blaze/rpms
+mkdir -p $rpmDir
 
 # install the rpms in a container
 
