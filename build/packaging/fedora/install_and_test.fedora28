@@ -9,16 +9,17 @@ cd ~/git/lrose-core/build/packaging/fedora
 
 # remove any old image
 
-docker rm image fedora29:installed
+docker rm image fedora28:installed
 
 # make rpms available to container
 
-set rpmDir = /tmp/fedora29-blaze/rpms
+set rpmDir = /tmp/fedora28-blaze/rpms
+mkdir -p $rpmDir
 
 # install the rpms in a container
 
 docker build \
     -v ${rpmDir}:/rpms \
-    --tag fedora29:installed \
-    --file Dockerfile.fedora29.install_and_test .
+    --tag fedora28:installed \
+    --file Dockerfile.fedora28.install_and_test .
 

@@ -1,0 +1,14 @@
+#! /bin/csh
+
+#
+# build blaze in fedora28 image
+#
+
+cd ~/git/lrose-core/build/packaging/fedora
+
+docker image rm fedora28:blaze
+
+docker build \
+    --tag fedora28:blaze \
+    --file Dockerfile.fedora28.build.blaze .
+
