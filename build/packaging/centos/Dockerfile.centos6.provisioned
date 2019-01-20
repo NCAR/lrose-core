@@ -33,9 +33,12 @@ RUN \
     wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo; \
     yum install -y devtoolset-2-gcc devtoolset-2-binutils; \
     yum install -y devtoolset-2-gcc-c++ devtoolset-2-gcc-gfortran; \
-    cd; \
-    cat .bashrc /opt/rh/devtoolset-2/enable > /tmp/bashrc; \
-    /bin/mv -f /tmp/bashrc .bashrc
+    cd /opt/rh/devtoolset-2/root; \
+    rsync -av * /
+
+#    cd; \
+#    cat .bashrc /opt/rh/devtoolset-2/enable > /tmp/bashrc; \
+#    /bin/mv -f /tmp/bashrc .bashrc
 
 
 
