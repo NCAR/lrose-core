@@ -1,7 +1,7 @@
 %define build_timestamp %(date +"%Y%m%d")
 %define _topdir     /root/rpmbuild
 %define name        lrose 
-%define release     %{build_timestamp}
+%define release     %{build_timestamp}.centos7
 %define version     blaze 
 %define buildroot %{_topdir}/%{name}-%{version}-%{release}-root
  
