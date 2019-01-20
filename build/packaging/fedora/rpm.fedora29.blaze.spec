@@ -2,7 +2,7 @@
 %define _topdir     /root/rpmbuild
 %define name        lrose 
 %define release     %{build_timestamp}
-%define version     blaze 
+%define version     blaze.fedora29 
 %define buildroot %{_topdir}/%{name}-%{version}-%{release}-root
  
 BuildRoot:      %{_topdir}/installedhere

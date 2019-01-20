@@ -5,7 +5,7 @@
 # install rpm and test that the apps work
 #
 
-cd ~/git/lrose-core/build/packaging/centos
+cd ~/git/lrose-core/build/packaging/fedora
 
 # remove any old image
 

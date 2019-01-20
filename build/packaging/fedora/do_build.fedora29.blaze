@@ -4,7 +4,7 @@
 # build blaze in fedora29 image
 #
 
-cd ~/git/lrose-core/build/packaging/centos
+cd ~/git/lrose-core/build/packaging/fedora
 
 docker build \
     --tag fedora29:blaze \

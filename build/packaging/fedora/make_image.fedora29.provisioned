@@ -1,10 +1,10 @@
 #! /bin/csh
 
 #
-# build docker image for centos, with required packages
+# build docker image for fedora, with required packages
 #
 
-cd ~/git/lrose-core/build/packaging/centos
+cd ~/git/lrose-core/build/packaging/fedora
 
 docker build \
     --tag fedora29:provisioned \
