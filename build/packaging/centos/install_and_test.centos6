@@ -9,7 +9,7 @@ cd ~/git/lrose-core/build/packaging/centos
 
 # remove any old image
 
-docker rm image centos6:installed
+docker rm image centos6:install
 
 # make rpms available to container
 
@@ -20,6 +20,6 @@ mkdir -p $rpmDir
 
 docker build \
     -v ${rpmDir}:/rpms \
-    --tag centos6:installed \
+    --tag centos6:install \
     --file Dockerfile.centos6.install_and_test .
 

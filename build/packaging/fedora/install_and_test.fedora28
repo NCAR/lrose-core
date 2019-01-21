@@ -9,7 +9,7 @@ cd ~/git/lrose-core/build/packaging/fedora
 
 # remove any old image
 
-docker rm image fedora28:installed
+docker rm image fedora28:install
 
 # make rpms available to container
 
@@ -20,6 +20,6 @@ mkdir -p $rpmDir
 
 docker build \
     -v ${rpmDir}:/rpms \
-    --tag fedora28:installed \
+    --tag fedora28:install \
     --file Dockerfile.fedora28.install_and_test .
 

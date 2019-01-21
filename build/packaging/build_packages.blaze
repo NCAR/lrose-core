@@ -8,10 +8,10 @@ docker rm `docker ps -aq`
 
 # remove previous images
 
-docker image rm centos6:blaze  centos6:installed
-docker image rm centos7:blaze  centos7:installed
-docker image rm fedora28:blaze fedora28:installed
-docker image rm fedora29:blaze fedora29:installed
+docker image rm centos6:build  centos6:install
+docker image rm centos7:build  centos7:install
+docker image rm fedora28:build fedora28:install
+docker image rm fedora29:build fedora29:install
 
 # centos 6
 
