@@ -26,19 +26,19 @@ Requires: xorg-x11-xauth, xorg-x11-apps
 %description
 LROSE - Lidar Radar Open Software Environment
  
+# build has been done previously
+# so no compile is needed
+# create a directory listing
+
 %build
 rm -f %{_topdir}/SPECS/lrose-pkg-files
 find %{prefix} -type d > %{_topdir}/SPECS/lrose-pkg-files
-find %{prefix} -type l >> %{_topdir}/SPECS/lrose-pkg-files
-
-# The build has already been completed
-# we just need to install the files into place
 
 %install
 mkdir -p %{buildroot}%{prefix}
-rsync -av %{prefix}/* %{buildroot}%{prefix}
+rsync -aL %{prefix}/* %{buildroot}%{prefix}
+
+# for files, use the directory listing
 
 %files -f %{_topdir}/SPECS/lrose-pkg-files
-
-
 
