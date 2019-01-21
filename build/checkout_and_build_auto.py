@@ -39,6 +39,7 @@ def main():
     global tmpBinDir
     global tmpLibDir
     global binDir
+    global scriptsDir
     global libDir
     global runtimeLibRelDir
     global includeDir
@@ -148,6 +149,7 @@ def main():
     tmpBinDir = os.path.join(scratchBuildDir, 'bin')
     tmpLibDir = os.path.join(scratchBuildDir, 'lib')
     binDir = os.path.join(prefix, 'bin')
+    scriptsDir = os.path.join(prefix, 'scripts')
     libDir = os.path.join(prefix, 'lib')
     includeDir = os.path.join(prefix, 'include')
     shareDir = os.path.join(prefix, 'share')
@@ -613,14 +615,14 @@ def buildPackage():
         procmapScriptsDir = os.path.join(codebaseDir, "apps/procmap/src/scripts")
         if (os.path.isdir(procmapScriptsDir)):
             os.chdir(procmapScriptsDir)
-            shellCmd("./install_scripts.lrose " + binDir)
+            shellCmd("./install_scripts.lrose " + scriptsDir)
 
         # general
 
         generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")
         if (os.path.isdir(generalScriptsDir)):
             os.chdir(generalScriptsDir)
-            shellCmd("./install_scripts.lrose " + binDir)
+            shellCmd("./install_scripts.lrose " + scriptsDir)
 
 ########################################################################
 # perform final install
