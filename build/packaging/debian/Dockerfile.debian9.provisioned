@@ -11,11 +11,9 @@ RUN apt-get update && apt-get install -y  \
     git gcc g++ gfortran cmake \
     automake make libtool pkg-config python \
     libfl-dev libbz2-dev libx11-dev libpng-dev \
-    libfftw3-dev qtbase5-dev \
+    libfftw3-dev qtbase5-dev libexpat1-dev \
     libgeographic-dev libeigen3-dev libzip-dev
 
-#    libhdf5-dev libhdf5-cpp-11 libnetcdf-dev
- 
 # create link for qtmake
 
 RUN \
