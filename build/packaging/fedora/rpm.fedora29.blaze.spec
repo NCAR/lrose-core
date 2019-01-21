@@ -42,19 +42,3 @@ rsync -aL %{prefix}/* %{buildroot}%{prefix}
 
 %files -f %{_topdir}/SPECS/lrose-pkg-files
 
-#%build
-#rm -f %{_topdir}/SPECS/lrose-pkg-files
-#find %{prefix} -type d > %{_topdir}/SPECS/lrose-pkg-files
-#find %{prefix} -type l >> %{_topdir}/SPECS/lrose-pkg-files
-
-# The build has already been completed
-# we just need to install the files into place
-
-#%install
-#mkdir -p %{buildroot}%{prefix}
-#rsync -av %{prefix}/* %{buildroot}%{prefix}
-
-#%files -f %{_topdir}/SPECS/lrose-pkg-files
-
-
-
