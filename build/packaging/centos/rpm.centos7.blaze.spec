@@ -27,23 +27,29 @@ Requires: xorg-x11-xauth, xorg-x11-apps
 %description
 LROSE - Lidar Radar Open Software Environment
 
-# no build - it has been previously done and
-# installed in /usr/local/lrose
- 
-# We just need to install the files into place
-# copy the install into buildroot/usr/local/lrose
-# and make a listing of the files
+%build
+rm -f %{_topdir}/SPECS/lrose-pkg-files
+find %{prefix} -type d > %{_topdir}/SPECS/lrose-pkg-files
 
 %install
 mkdir -p %{buildroot}%{prefix}
-rsync -avL %{prefix}/* %{buildroot}%{prefix}
-# find %{prefix} -type d > %{_topdir}/SPECS/lrose-pkg-files
+rsync -aL %{prefix}/* %{buildroot}%{prefix}
 
-# set the list of files
-# they are just the files installed in buildroot
+%files -f %{_topdir}/SPECS/lrose-pkg-files
 
-#%files -f %{_topdir}/SPECS/lrose-pkg-files
-%files
+#find %{prefix} -type f > %{_topdir}/SPECS/lrose-pkg-files
+#find %{prefix} -type d > %{_topdir}/SPECS/lrose-pkg-files
+#find %{prefix} -type l >> %{_topdir}/SPECS/lrose-pkg-files
+
+#rsync -av /usr/local/lrose/bin/RadxPrint %{buildroot}%{prefix}/bin
+#rsync -av /usr/local/lrose/bin/RadxConvert %{buildroot}%{prefix}/bin
+#rsync -av /usr/local/lrose/bin/Radx2Grid %{buildroot}%{prefix}/bin
+
+#%files
+#/usr/local/lrose/bin/RadxPrint
+#/usr/local/lrose/bin/RadxConvert
+#/usr/local/lrose/bin/Radx2Grid
+
 
 
 
