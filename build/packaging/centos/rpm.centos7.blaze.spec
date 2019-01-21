@@ -30,8 +30,6 @@ LROSE - Lidar Radar Open Software Environment
 # no build - it has been previously done and
 # installed in /usr/local/lrose
  
-%build
-
 # We just need to install the files into place
 # copy the install into buildroot/usr/local/lrose
 # and make a listing of the files
