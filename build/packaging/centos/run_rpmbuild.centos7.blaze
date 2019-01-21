@@ -18,7 +18,7 @@ rsync -av ~/git/lrose-core/build/packaging/centos/rpm.centos7.blaze.spec SPECS
 
 # build the rpm
 
-rpmbuild -v -bb ./SPECS/rpm.centos7.blaze.spec
+rpmbuild -v -bb ./SPECS/rpm.centos7.blaze.spec |& grep -v "warning:"
 
 # copy the rpm to the cross-mounted director
 
