@@ -1,0 +1,47 @@
+#! /bin/csh
+
+# build RPMs for blaze release
+
+# remove any running containers
+
+docker rm `docker ps -aq`
+
+# remove previous images
+
+docker image rm centos6:blaze  centos6:installed
+docker image rm centos7:blaze  centos7:installed
+docker image rm fedora28:blaze fedora28:installed
+docker image rm fedora29:blaze fedora29:installed
+
+# centos 6
+
+cd ~/git/lrose-core/build/packaging/centos
+
+./do_build.centos6.blaze
+./create_rpm.centos6.blaze
+./install_and_test.centos6
+
+# centos 7
+
+cd ~/git/lrose-core/build/packaging/centos
+
+./do_build.centos7.blaze
+./create_rpm.centos7.blaze
+./install_and_test.centos7
+
+# fedora 28
+
+cd ~/git/lrose-core/build/packaging/fedora
+
+./do_build.fedora28.blaze
+./create_rpm.fedora28.blaze
+./install_and_test.fedora28
+
+# fedora 29
+
+cd ~/git/lrose-core/build/packaging/fedora
+
+./do_build.fedora29.blaze
+./create_rpm.fedora29.blaze
+./install_and_test.fedora29
+
