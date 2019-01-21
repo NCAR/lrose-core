@@ -14,11 +14,11 @@ mkdir -p BUILD RPMS SOURCES SPECS SRPMS
 
 # copy in the spec file
 
-rsync -av ~/git/lrose-core/build/packaging/fedora/rpm.fedora29.blaze.spec SPECS
+rsync -av ~/git/lrose-core/build/packaging/fedora/rpm.spec.fedora29.blaze SPECS
 
 # build the rpm
 
-rpmbuild -v -bb ./SPECS/rpm.fedora29.blaze.spec |& grep -v "warning:"
+rpmbuild -v -bb ./SPECS/rpm.spec.fedora29.blaze |& grep -v "warning:"
 
 # copy the rpm to the cross-mounted director
 
