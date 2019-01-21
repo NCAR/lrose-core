@@ -1,0 +1,13 @@
+#! /bin/csh
+
+#
+# build docker image for ubuntu, with required packages
+#
+
+cd ~/git/lrose-core/build/packaging/debian
+
+docker build \
+    --tag debian9:provisioned \
+    --file Dockerfile.debian9.provisioned .
+
+

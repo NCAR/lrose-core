@@ -1,0 +1,26 @@
+###############################################################
+# provision a Docker image for building lrose
+# start with clean image
+# install the required packages
+
+FROM debian:9
+
+# install required packages
+
+RUN apt-get update && apt-get install -y  \
+    libbz2-dev libx11-dev libpng12-dev libfftw3-dev \
+    libjasper-dev qtbase5-dev git \
+    gcc g++ gfortran libfl-dev \
+    automake make libtool pkg-config libexpat1-dev python \
+    cmake libgeographic-dev libeigen3-dev libzip-dev \
+    libhdf5-dev libhdf5-cpp-11 libnetcdf-dev
+ 
+# create link for qtmake
+
+RUN \
+    cd /usr/bin; \
+    /bin/rm -f qmake qmake-qt5; \
+    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake; \
+    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
+
+
