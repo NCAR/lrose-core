@@ -21,6 +21,6 @@ RUN \
     cd /usr/bin; \
     /bin/rm -f qmake qmake-qt5; \
     ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake; \
-    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake-qt5
+    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
 
 
