@@ -3,7 +3,7 @@
 # start with clean image
 # install the required packages
 
-FROM ubuntu:16.04 as builder
+FROM ubuntu:16.04
 
 # install required packages
 
@@ -17,11 +17,10 @@ RUN apt-get update && apt-get install -y  \
  
 # create link for qtmake
 
-WORKDIR /tmp
-
 RUN \
     cd /usr/bin; \
-    rm qmake; \
-    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
+    /bin/rm qmake qmake-qt5; \
+    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake; \
+    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake-qt5
 
 

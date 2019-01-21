@@ -1,0 +1,14 @@
+#! /bin/csh
+
+#
+# build blaze in ubuntu16 image
+#
+
+cd ~/git/lrose-core/build/packaging/ubuntu
+
+docker image rm ubuntu16:build
+
+docker build \
+    --tag ubuntu16:build \
+    --file Dockerfile.ubuntu16.build.blaze .
+
