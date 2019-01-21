@@ -19,7 +19,7 @@ RUN \
     ./checkout_and_build_auto.py --package lrose-blaze \
     --prefix /usr/local/lrose --scripts \
     --buildDir /tmp/lrose_build --logDir /tmp/build_logs \
-    --installLroseRuntimeLibs
+    --installLroseRuntimeLibs --useSystemNetcdf
 
 # clean up
 
