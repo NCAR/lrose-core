@@ -18,7 +18,7 @@ rsync -av ~/git/lrose-core/build/packaging/fedora/rpm.fedora28.blaze.spec SPECS
 
 # build the rpm
 
-rpmbuild -v -bb ./SPECS/rpm.fedora28.blaze.spec | grep -v "warning:"
+rpmbuild -v -bb ./SPECS/rpm.fedora28.blaze.spec |& grep -v "warning:"
 
 # copy the rpm to the cross-mounted director
 

@@ -42,3 +42,4 @@ rsync -aL %{prefix}/* %{buildroot}%{prefix}
 # for files, use the directory listing
 
 %files -f %{_topdir}/SPECS/lrose-pkg-files
+

@@ -12,12 +12,6 @@ RUN \
     mkdir -p git; cd git; \
     git clone https://github.com/NCAR/lrose-core
 
-# alternatively get checkout script only
-
-#RUN \
-#    wget "https://raw.githubusercontent.com/NCAR/lrose-core/master/build/checkout_and_build_auto.py"; \
-#    chmod +x checkout_and_build_auto.py
-
 # run the build script
 
 RUN \
