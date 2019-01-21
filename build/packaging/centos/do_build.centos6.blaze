@@ -6,9 +6,9 @@
 
 cd ~/git/lrose-core/build/packaging/centos
 
-docker image rm centos6:blaze
+docker image rm centos6:build
 
 docker build \
-    --tag centos6:blaze \
+    --tag centos6:build \
     --file Dockerfile.centos6.build.blaze .
 

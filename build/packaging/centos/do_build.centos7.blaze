@@ -6,9 +6,9 @@
 
 cd ~/git/lrose-core/build/packaging/centos
 
-docker image rm centos7:blaze
+docker image rm centos7:build
 
 docker build \
-    --tag centos7:blaze \
+    --tag centos7:build \
     --file Dockerfile.centos7.build.blaze .
 

@@ -6,9 +6,9 @@
 
 cd ~/git/lrose-core/build/packaging/fedora
 
-docker image rm fedora28:blaze
+docker image rm fedora28:build
 
 docker build \
-    --tag fedora28:blaze \
+    --tag fedora28:build \
     --file Dockerfile.fedora28.build.blaze .
 
