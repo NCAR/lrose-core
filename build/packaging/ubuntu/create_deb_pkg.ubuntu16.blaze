@@ -1,0 +1,20 @@
+#! /bin/csh
+
+#
+# in docker image, create .deb file, place it in /tmp/debs
+#
+
+cd ~/git/lrose-core/build/packaging/ubuntu
+
+set debDir = /tmp/ubuntu16-blaze/debs
+/bin/rm -rf $debDir
+mkdir -p $debDir
+
+docker run \
+    -v ${debDir}:/debs \
+    ubuntu16:build \
+    /root/git/lrose-core/build/packaging/ubuntu/run_deb_build.ubuntu16.blaze
+
+mkdir -p ~/releases/lrose-blaze
+
+rsync -av ${debDir}/*/*.deb ~/releases/lrose-blaze

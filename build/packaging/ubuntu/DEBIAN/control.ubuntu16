@@ -1,0 +1,10 @@
+Package: lrose-blaze
+Version: 20190105
+Section: base
+Priority: optional
+Architecture: amd64
+Depends: libqt5gui5, libqt5core5a, qt5-default, libx11-6, libfftw3-3, libgeographic14, libfreetype6, libcurl3
+Maintainer: Bruno Melli <bpmelli@rams.colostate.edu>
+Description: lrose-blaze
+  Binary package of lrose-blaze on Debian x.xx and Ubuntu 16.04
+
