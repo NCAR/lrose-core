@@ -535,8 +535,11 @@ def buildPackage():
     # set the environment
 
     os.environ["LDFLAGS"] = "-L" + scratchBuildDir + "/lib " + \
-                            " -Wl,-rpath,'$$ORIGIN/" + runtimeLibRelDir + \
-                            ":" + scratchBuildDir + "/lib'"
+                            " -Wl,-rpath," + \
+                            "'$$ORIGIN/" + runtimeLibRelDir + \
+                            ":$$ORIGIN/../lib" + \
+                            ":" + libDir + \
+                            ":" + tmpLibDir + "'"
     os.environ["FC"] = "gfortran"
     os.environ["F77"] = "gfortran"
     os.environ["F90"] = "gfortran"
