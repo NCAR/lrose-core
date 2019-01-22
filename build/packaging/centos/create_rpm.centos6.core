@@ -1,0 +1,20 @@
+#! /bin/csh
+
+#
+# in docker image, create rpm, place it in /tmp/rpms
+#
+
+cd ~/git/lrose-core/build/packaging/centos
+
+set rpmDir = /tmp/centos6-core/rpms
+/bin/rm -rf $rpmDir
+mkdir -p $rpmDir
+
+docker run \
+    -v ${rpmDir}:/rpms \
+    centos6:build \
+    /root/git/lrose-core/build/packaging/centos/run_rpmbuild.centos6.core
+
+mkdir -p ~/releases/lrose-core
+
+rsync -av ${rpmDir}/*/*.rpm ~/releases/lrose-core
