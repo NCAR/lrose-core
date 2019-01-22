@@ -13,7 +13,7 @@ docker rm image centos6:install
 
 # make rpms available to container
 
-set rpmDir = /tmp/centos6-blaze/rpms
+set rpmDir = /tmp/centos6-core/rpms
 mkdir -p $rpmDir
 
 # install the rpms in a container
