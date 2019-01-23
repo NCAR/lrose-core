@@ -13,9 +13,13 @@
 #        debian9:build \
 #        /root/git/lrose-core/build/packages/ubuntu/run_deb_build.debian9.blaze
 
+# Make sure we have rsync
+apt-get update
+apt-get install -y rsync
+
 DATE_STR=`date +"%Y%m%d"`
 LROSE_ROOT=/usr/local/lrose
-BUILD_ROOT=/build_lrose_blaze_pkg
+BUILD_ROOT=/build_pkg
 BUILD_DIR=lrose-blaze_${DATE_STR}_debian9
 
 if [ ! -d "$LROSE_ROOT" ]; then
@@ -24,22 +28,32 @@ if [ ! -d "$LROSE_ROOT" ]; then
 fi
 
 mkdir -p $BUILD_ROOT
-mkdir -p $BUILD_ROOT/$BUILD_DIR/usr/local
 cd $BUILD_ROOT
-
-# Make sure we have rsync
-apt-get update
-apt-get install -y rsync
+mkdir -p /usr/local
 
 # Mirror the /usr/local/lrose hierarchy under the BUILD_ROOT
-rsync -avz /usr/local/lrose $BUILD_DIR/usr/local/
+rsync -avz $LROSE_ROOT $BUILD_ROOT/usr/local/
+
+# create the control file
+
+mkdir -p $BUILD_ROOT/DEBIAN
+cd $BUILD_ROOT/DEBIAN
+/bin/rm -f control
+touch control
+echo "Package: lrose-blaze" >> control
+echo "Version: 20190105" >> control
+echo "Section: base" >> control
+echo "Priority: optional" >> control
+echo "Architecture: x86_64" >> control
+echo "Depends: libqt5gui5, libqt5core5a, qt5-default, qtbase5, libx11-6, libfftw3-3, libgeographic14, libfreetype6, libcurl3, libfl, libbz2, libx11, libpng, libfftw3, libeigen3, libzip" >> control
+echo "Maintainer: NCAR/EOL/RSF <lrose-help@rams.colostate.edu>" >> control
+echo "Description: lrose-blaze" >> control
+echo "  Binary package of lrose-blaze on Debian x.xx" >> control
 
 # Make the package
+cd $BUILD_ROOT
 dpkg-deb --build lrose-blaze-${DATE_STR}.debian9
 
 # The resulting package can be installed with
 # apt-get update
 # apt install -y lrose-blaze_${DATE_STR}.debian9.deb
-
-
-
