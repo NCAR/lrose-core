@@ -1,0 +1,13 @@
+#! /bin/csh
+
+#
+# build docker image for centos, with required packages
+#
+
+cd ~/git/lrose-core/build/packages/centos
+
+docker build \
+    --tag centos6:provisioned \
+    --file Dockerfile.centos6.provisioned .
+
+

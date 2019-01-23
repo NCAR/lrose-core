@@ -1,0 +1,14 @@
+#! /bin/csh
+
+#
+# build core in debian9 image
+#
+
+cd ~/git/lrose-core/build/packages/debian
+
+docker image rm debian9:build
+
+docker build \
+    --tag debian9:build \
+    --file Dockerfile.debian9.build.core .
+

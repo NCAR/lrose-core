@@ -1,0 +1,25 @@
+#! /bin/csh
+
+#
+# in clean docker image,
+# install rpm and test that the apps work
+#
+
+cd ~/git/lrose-core/build/packages/centos
+
+# remove any old image
+
+docker rm image centos6:install
+
+# make rpms available to container
+
+set rpmDir = /tmp/centos6-core/rpms
+mkdir -p $rpmDir
+
+# install the rpms in a container
+
+docker build \
+    -v ${rpmDir}:/rpms \
+    --tag centos6:install \
+    --file Dockerfile.centos6.install_and_test .
+

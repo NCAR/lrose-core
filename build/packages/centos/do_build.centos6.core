@@ -1,0 +1,14 @@
+#! /bin/csh
+
+#
+# build core in centos6 image
+#
+
+cd ~/git/lrose-core/build/packages/centos
+
+docker image rm centos6:build
+
+docker build \
+    --tag centos6:build \
+    --file Dockerfile.centos6.build.core .
+

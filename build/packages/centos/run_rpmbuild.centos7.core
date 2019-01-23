@@ -1,0 +1,31 @@
+#! /bin/csh
+
+# update the repo as needed
+
+cd ~/git/lrose-core
+git pull
+
+# create the rpm structure
+
+cd
+mkdir -p rpmbuild
+cd rpmbuild
+mkdir -p BUILD RPMS SOURCES SPECS SRPMS
+
+# copy in the spec file
+
+rsync -av ~/git/lrose-core/build/packages/centos/rpm.spec.centos7.core SPECS
+
+# build the rpm
+
+rpmbuild -v -bb ./SPECS/rpm.spec.centos7.core |& grep -v "warning:"
+
+# copy the rpm to the cross-mounted director
+
+rsync -av RPMS/* /rpms
+
+# add write permissions since this is created by root
+# and we need to remove them from the cross-mount later
+
+chmod o+w -R /rpms/*
+chmod g+w -R /rpms/*
