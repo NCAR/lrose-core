@@ -41,7 +41,7 @@ cd $BUILD_ROOT/DEBIAN
 /bin/rm -f control
 touch control
 echo "Package: lrose-blaze" >> control
-echo "Version: 20190105" >> control
+echo "Version: ${DATE_STR}" >> control
 echo "Section: base" >> control
 echo "Priority: optional" >> control
 echo "Architecture: x86_64" >> control
