@@ -7,7 +7,7 @@
 cd ~/git/lrose-core/build/packages/debian
 
 docker build \
-    --tag debian9:provisioned \
-    --file Dockerfile.debian9.provisioned .
+    --tag debian9:custom \
+    --file Dockerfile.debian9.custom .
 
 

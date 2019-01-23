@@ -1,9 +1,9 @@
 ###############################################################
 # build lrose-blaze on centos7
-# start with provisioned image
+# start with custom image
 # perform the build
 
-FROM centos7:provisioned
+FROM centos7:custom
 
 # get build script
 

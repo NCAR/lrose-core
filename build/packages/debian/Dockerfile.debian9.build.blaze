@@ -1,9 +1,9 @@
 ###############################################################
 # build lrose-blaze on debian9
-# start with provisioned image
+# start with custom image
 # perform the build
 
-FROM debian9:provisioned
+FROM debian9:custom
 
 # get build script
 

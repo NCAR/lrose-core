@@ -1,9 +1,9 @@
 ###############################################################
 # build lrose-blaze on fedora29
-# start with provisioned image
+# start with custom image
 # perform the build
 
-FROM fedora29:provisioned
+FROM fedora29:custom
 
 # get build script
 

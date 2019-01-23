@@ -17,15 +17,15 @@ so that a build will complete successfully.
 
 The scripts are:
 
-  * make_image.centos6.provisioned
-  * make_image.centos7.provisioned
+  * make_image.centos6.custom
+  * make_image.centos7.custom
 
-The resulting provisioned containers are:
+The resulting custom containers are:
 
 ```
   REPOSITORY          TAG        
-  centos6             provisioned
-  centos7             provisioned
+  centos6             custom
+  centos7             custom
 ```
 
 <a name="build"/>
@@ -39,7 +39,7 @@ The scripts are:
   * do_build.centos6.blaze
   * do_build.centos7.blaze
 
-The resulting provisioned containers are:
+The resulting custom containers are:
 
 ```
   REPOSITORY          TAG        

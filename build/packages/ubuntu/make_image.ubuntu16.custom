@@ -7,7 +7,7 @@
 cd ~/git/lrose-core/build/packages/ubuntu
 
 docker build \
-    --tag ubuntu16:provisioned \
-    --file Dockerfile.ubuntu16.provisioned .
+    --tag ubuntu16:custom \
+    --file Dockerfile.ubuntu16.custom .
 
 

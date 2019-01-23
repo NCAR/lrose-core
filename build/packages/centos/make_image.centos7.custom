@@ -7,7 +7,7 @@
 cd ~/git/lrose-core/build/packages/centos
 
 docker build \
-    --tag centos6:provisioned \
-    --file Dockerfile.centos6.provisioned .
+    --tag centos7:custom \
+    --file Dockerfile.centos7.custom .
 
 

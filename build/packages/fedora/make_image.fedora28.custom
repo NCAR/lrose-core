@@ -7,7 +7,7 @@
 cd ~/git/lrose-core/build/packages/fedora
 
 docker build \
-    --tag fedora29:provisioned \
-    --file Dockerfile.fedora29.provisioned .
+    --tag fedora28:custom \
+    --file Dockerfile.fedora28.custom .
 
 

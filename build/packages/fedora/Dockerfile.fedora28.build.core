@@ -1,9 +1,9 @@
 ###############################################################
 # build lrose-core on fedora28
-# start with provisioned image
+# start with custom image
 # perform the build
 
-FROM fedora28:provisioned
+FROM fedora28:custom
 
 # get build script
 
