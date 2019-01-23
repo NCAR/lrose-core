@@ -1,7 +1,7 @@
 #! /bin/csh
 
 #
-# in docker image, create rpm, place it in /tmp/rpms
+# in docker image, create rpm, place it in /tmp
 #
 
 cd ~/git/lrose-core/build/packaging/fedora

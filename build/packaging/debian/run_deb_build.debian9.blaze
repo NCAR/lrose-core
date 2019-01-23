@@ -3,12 +3,15 @@
 # This script is to be executed inside an lrose-blaze container
 # It assume lrose-base is installed at /usr/local/lrose
 #
-# It also assumes that the container invocation was done such that this scrit,
+# It also assumes that the container invocation was done such that this script,
 # and package definition are available in $BUILD_ROOT
 # The resulting .db package will be available n $BUILD_ROOT
 #
-# For example,
-# docker run -v $HOME/docker/lrose-docker-scripts/debian:/build_lrose_blaze_pkg nsflrose/lrose-blaze /build_lrose_blaze_pkg/build_pkg.sh
+# For example:
+#    docker run \
+#        -v ${debDir}:/debs \
+#        debian9:build \
+#        /root/git/lrose-core/build/packaging/ubuntu/run_deb_build.debian9.blaze
 
 DATE_STR=`date +"%Y%m%d"`
 LROSE_ROOT=/usr/local/lrose
@@ -20,8 +23,9 @@ if [ ! -d "$LROSE_ROOT" ]; then
     exit 1
 fi
 
+mkdir -p $BUILD_ROOT
+mkdir -p $BUILD_ROOT/$BUILD_DIR/usr/local
 cd $BUILD_ROOT
-mkdir -p $BUILD_DIR/usr/local
 
 # Make sure we have rsync
 apt-get update

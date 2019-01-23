@@ -1,10 +1,10 @@
 #! /bin/csh
 
 #
-# in docker image, create .deb file, place it in /tmp/debs
+# in docker image, create .deb file, place it in /tmp
 #
 
-cd ~/git/lrose-core/build/packaging/ubuntu
+cd ~/git/lrose-core/build/packaging/debian
 
 set debDir = /tmp/debian9-blaze/debs
 /bin/rm -rf $debDir
