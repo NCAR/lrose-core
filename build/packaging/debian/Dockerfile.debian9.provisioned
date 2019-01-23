@@ -10,7 +10,7 @@ FROM debian:9
 RUN apt-get update && \
     apt-get install -y \
     git gcc g++ gfortran cmake \
-    libcurl4-openssl-dev curl \
+    libcurl3 curl \
     automake make libtool pkg-config python \
     libfl-dev libbz2-dev libx11-dev libpng-dev \
     libfftw3-dev qtbase5-dev libexpat1-dev \
