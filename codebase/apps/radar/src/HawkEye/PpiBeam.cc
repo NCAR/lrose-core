@@ -119,6 +119,8 @@ void PpiBeam::paint(QImage *image,
   
   QPolygonF polygon(4);
 
+  if (_polygons.size() <= 0) return;
+
   polygon[0] = QPointF(_polygons[0].pts[0].x, _polygons[0].pts[0].y);
   polygon[1] = QPointF(_polygons[0].pts[1].x, _polygons[0].pts[1].y);
   polygon[2] = QPointF(_polygons[0].pts[2].x, _polygons[0].pts[2].y);
