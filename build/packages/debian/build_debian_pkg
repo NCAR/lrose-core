@@ -19,7 +19,7 @@ apt-get install -y rsync
 DATE_STR=`date +"%Y%m%d"`
 LROSE_ROOT=/usr/local/lrose
 BUILD_ROOT=/pkg_build
-PKG_NAME=lrose-${lrose_package}_${DATE_STR}_${os_version}
+PKG_NAME=lrose-${lrose_package}-${DATE_STR}.amd64.${os_version}
 BUILD_DIR=${BUILD_ROOT}/${PKG_NAME}
 
 if [ ! -d "$LROSE_ROOT" ]; then
