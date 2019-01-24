@@ -31,7 +31,7 @@ fi
 
 mkdir -p $BUILD_DIR
 mkdir -p ${BUILD_DIR}/usr/local
-rsync -avz $LROSE_ROOT $BUILD_DIR/usr/local/
+rsync -aL $LROSE_ROOT $BUILD_DIR/usr/local/
 
 # create the control file
 
@@ -44,7 +44,7 @@ echo "Package: lrose-${lrose_package}" >> control
 echo "Version: ${DATE_STR}" >> control
 echo "Section: base" >> control
 echo "Priority: optional" >> control
-echo "Architecture: x86_64" >> control
+echo "Architecture: amd64" >> control
 echo "Depends: libqt5gui5, libqt5core5a, qt5-default, qtbase5, libx11-6, libfftw3-3, libgeographic14, libfreetype6, libcurl3, libfl, libbz2, libx11, libpng, libfftw3, libeigen3, libzip" >> control
 echo "Maintainer: NCAR/EOL/RSF <lrose-help@rams.colostate.edu>" >> control
 echo "Description: lrose-${lrose_package}" >> control
@@ -57,7 +57,7 @@ dpkg-deb --build ${PKG_NAME}
 
 # Copy the package to the cross-mount
 
-rsync -av $PKG_NAME}.deb /debs
+rsync -av ${PKG_NAME}.deb /debs
 
 # The resulting package can be installed with
 # apt-get update
