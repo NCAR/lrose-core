@@ -1,4 +1,4 @@
-#! /bin/csh
+#! /bin/bash
 
 #
 # build lrose in debian image

@@ -1,4 +1,4 @@
-#! /bin/csh
+#! /bin/bash
 
 #
 # build docker image for ubuntu, with required packages
