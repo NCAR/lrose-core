@@ -1,0 +1,13 @@
+#! /bin/bash
+
+# install lrose package from within a container
+
+# update
+
+apt-get update
+
+# install package
+
+cd /debs
+apt-get install -y ./*.deb
+

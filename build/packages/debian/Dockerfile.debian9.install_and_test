@@ -7,8 +7,8 @@ FROM debian:9
 
 # install the .deb file
 
-RUN apt-get update
-RUN apt-get install -y /debs/*.deb
+WORKDIR /root
+RUN ./git/lrose-core/build/packages/debian/install_pkg_inside_container.debian
 
 # check that RadxPrint runs
 
