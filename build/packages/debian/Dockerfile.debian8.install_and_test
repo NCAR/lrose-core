@@ -1,0 +1,28 @@
+###############################################################
+# Install lrose-blaze on debian 8 using the .deb pkg file
+# start with clean image
+# install the .deb and test it
+
+FROM debian:8
+
+# get git
+
+RUN apt-get update; apt-get install -y git
+
+# checkout lrose
+
+WORKDIR /root
+RUN mkdir git
+
+WORKDIR /root/git
+RUN git clone https://github.com/ncar/lrose-core
+
+# install the .deb file
+
+RUN ./lrose-core/build/packages/debian/install_pkg_inside_container.debian
+
+# check that RadxPrint runs
+
+RUN /usr/local/lrose/bin/RadxPrint -h
+
+
