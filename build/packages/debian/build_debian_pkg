@@ -16,10 +16,11 @@ apt-get install -y rsync
 
 # set up build location
 
+ARCH=amd64
 DATE_STR=`date +"%Y%m%d"`
 LROSE_ROOT=/usr/local/lrose
 BUILD_ROOT=/pkg_build
-PKG_NAME=lrose-${lrose_package}-${DATE_STR}.amd64.${os_version}
+PKG_NAME=lrose-${lrose_package}-${DATE_STR}.${os_version}.${ARCH}
 BUILD_DIR=${BUILD_ROOT}/${PKG_NAME}
 
 if [ ! -d "$LROSE_ROOT" ]; then
@@ -44,7 +45,7 @@ echo "Package: lrose-${lrose_package}" >> control
 echo "Version: ${DATE_STR}" >> control
 echo "Section: base" >> control
 echo "Priority: optional" >> control
-echo "Architecture: amd64" >> control
+echo "Architecture: ${ARCH}" >> control
 echo "Depends: libqt5gui5, libqt5core5a, qt5-default, qtbase5, libx11-6, libfftw3-3, libgeographic14, libfreetype6, libcurl3, libfl, libbz2, libx11, libpng, libfftw3, libeigen3, libzip" >> control
 echo "Maintainer: NCAR/EOL/RSF <lrose-help@rams.colostate.edu>" >> control
 echo "Description: lrose-${lrose_package}" >> control
