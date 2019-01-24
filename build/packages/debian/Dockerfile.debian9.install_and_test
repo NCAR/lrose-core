@@ -1,0 +1,17 @@
+###############################################################
+# Install lrose-blaze on debian 9 using the .deb pkg file
+# start with clean image
+# install the .deb and test it
+
+FROM debian:9
+
+# install the .deb file
+
+RUN apt-get update
+RUN apt-get install -y /debs/*.deb
+
+# check that RadxPrint runs
+
+RUN /usr/local/lrose/bin/RadxPrint -h
+
+

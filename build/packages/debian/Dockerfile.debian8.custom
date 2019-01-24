@@ -3,7 +3,7 @@
 # start with clean image
 # install the required packages
 
-FROM debian:9
+FROM debian:8
 
 # install required packages
 
