@@ -4,10 +4,12 @@
 # build docker image for ubuntu, with required packages
 #
 
+os_version=$1
+
 cd ~/git/lrose-core/build/packages/debian
 
 docker build \
-    --tag debian9:custom \
-    --file Dockerfile.debian9.custom .
+    --tag ${os_version}:custom \
+    --file Dockerfile.${os_version}.custom .
 
 
