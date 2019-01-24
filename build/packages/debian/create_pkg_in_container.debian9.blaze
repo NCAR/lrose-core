@@ -11,7 +11,7 @@ mkdir -p $debDir
 docker run \
     -v ${debDir}:/debs \
     debian9:build \
-    /root/git/lrose-core/build/packages/ubuntu/create_debian_package debian9 blaze
+    /root/git/lrose-core/build/packages/debian/create_debian_pkg debian9 blaze
 
 mkdir -p ~/releases/lrose-blaze
 
