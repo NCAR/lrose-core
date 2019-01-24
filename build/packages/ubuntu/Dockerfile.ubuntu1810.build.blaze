@@ -3,7 +3,7 @@
 # start with custom image
 # perform the build
 
-FROM ubuntu18:custom
+FROM ubuntu1810:custom
 
 # get build script
 
