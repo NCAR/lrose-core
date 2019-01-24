@@ -7,7 +7,7 @@ lrose_package=$2
 
 cd ~/git/lrose-core/build/packages/debian
 
-set debDir = /tmp/${os_version}-${lrose_package}/debs
+debDir=/tmp/${os_version}-${lrose_package}/debs
 /bin/rm -rf $debDir
 mkdir -p $debDir
 
