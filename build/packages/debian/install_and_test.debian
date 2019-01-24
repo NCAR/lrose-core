@@ -14,10 +14,13 @@ cd ~/git/lrose-core/build/packages/debian
 
 docker rm image ${os_version}:install
 
-# make rpms available to container
+# make .deb file available to container
 
-debDir=/tmp/${os_version}-${lrose-package}/debs
-mkdir -p $debDir
+debDir=/tmp/${os_version}-${lrose_package}/debs
+
+# copy install script into that dir so it is available to the container
+
+cp install_pkg_inside_container.debian $debDir
 
 # install the rpms in a container
 
