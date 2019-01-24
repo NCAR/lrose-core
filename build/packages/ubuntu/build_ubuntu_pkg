@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# This script is to be executed inside a docker debian container
+# It assume lrose-base is installed at /usr/local/lrose
+#
+# The package will be build and copied to the cross-mounted dir
+# so it will be visible from outside the container.
+
+os_version=$1
+lrose_package=$2
+
+# Make sure we have rsync
+
+apt-get update
+apt-get install -y rsync
+
+# set up build location
+
+ARCH=amd64
+DATE_STR=`date +"%Y%m%d"`
+LROSE_ROOT=/usr/local/lrose
+BUILD_ROOT=/pkg_build
+PKG_NAME=lrose-${lrose_package}-${DATE_STR}.${os_version}.${ARCH}
+BUILD_DIR=${BUILD_ROOT}/${PKG_NAME}
+
+if [ ! -d "$LROSE_ROOT" ]; then
+    echo "-E- No such directory '$LROSE_ROOT'"
+    exit 1
+fi
+
+# Mirror the /usr/local/lrose hierarchy under the BUILD_ROOT
+
+mkdir -p $BUILD_DIR
+mkdir -p ${BUILD_DIR}/usr/local
+rsync -aL $LROSE_ROOT $BUILD_DIR/usr/local/
+
+# create the control file
+
+cd $BUILD_DIR
+mkdir -p DEBIAN
+cd DEBIAN
+/bin/rm -f control
+touch control
+echo "Package: lrose-${lrose_package}" >> control
+echo "Version: ${DATE_STR}" >> control
+echo "Section: base" >> control
+echo "Priority: optional" >> control
+echo "Architecture: ${ARCH}" >> control
+echo "Depends: git, gcc, g++, gfortran, cmake, automake, make, libtool, pkg-config, python, libcurl3-dev, curl, libfl-dev, libbz2-dev, libx11-dev, libpng-dev, libfftw3-dev, qtbase5-dev, libexpat1-dev, libgeographic-dev, libeigen3-dev, libzip-dev" >> control
+echo "Maintainer: NCAR/EOL/RSF <lrose-help@rams.colostate.edu>" >> control
+echo "Description: lrose-${lrose_package}" >> control
+echo "  Binary package of lrose-${lrose_package} on Debian x.xx" >> control
+
+# Make the package
+
+cd $BUILD_ROOT
+dpkg-deb --build ${PKG_NAME}
+
+# Copy the package to the cross-mount
+
+rsync -av ${PKG_NAME}.deb /debs
+
+# The resulting package can be installed with
+# apt-get update
+# apt install -y lrose-${lrose_package}_${DATE_STR}.${os_version}.deb

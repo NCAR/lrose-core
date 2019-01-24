@@ -1,0 +1,21 @@
+#! /bin/bash
+
+os_version=$1
+lrose_package=$2
+
+# in docker image, create .deb file, place it in /tmp
+
+cd ~/git/lrose-core/build/packages/ubuntu
+
+debDir=/tmp/${os_version}-${lrose_package}/debs
+/bin/rm -rf $debDir
+mkdir -p $debDir
+
+docker run \
+    -v ${debDir}:/debs \
+    ${os_version}:build \
+    /root/git/lrose-core/build/packages/debian/create_debian_pkg ${os_version} ${lrose_package}
+
+mkdir -p ~/releases/lrose-${lrose_package}
+
+rsync -av ${debDir}/*.deb ~/releases/lrose-${lrose_package}

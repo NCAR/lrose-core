@@ -1,9 +1,9 @@
 ###############################################################
-# build lrose-blaze on ubuntu16
+# build lrose-blaze on ubuntu 18.10
 # start with custom image
 # perform the build
 
-FROM ubuntu16:custom
+FROM ubuntu18:custom
 
 # get build script
 
@@ -17,8 +17,8 @@ RUN \
 RUN \
     cd ${HOME}/git/lrose-core/build; \
     ./checkout_and_build_auto.py --package lrose-blaze \
-    --prefix /usr/local/lrose --scripts --useSystemNetcdf \
-    --buildDir /tmp/lrose_build --logDir /tmp/build_logs \
+    --prefix /usr/local/lrose --scripts \
+    --buildDir /tmp/lrose_build --logDir /tmp/build_logs
 
 # clean up
 

@@ -1,0 +1,27 @@
+###############################################################
+# provision a Docker image for building lrose
+# start with clean image
+# install the required packages
+
+FROM ubuntu:16.04
+
+# install required packages
+
+RUN apt-get update && \
+    apt-get install -y \
+    git gcc g++ gfortran cmake rsync \
+    automake make libtool pkg-config python \
+    libcurl3-dev curl \
+    libfl-dev libbz2-dev libx11-dev libpng-dev \
+    libfftw3-dev qtbase5-dev libexpat1-dev \
+    libgeographic-dev libeigen3-dev libzip-dev
+
+# create link for qtmake
+
+RUN \
+    cd /usr/bin; \
+    /bin/rm -f qmake qmake-qt5; \
+    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake; \
+    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
+
+

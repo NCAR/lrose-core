@@ -1,0 +1,16 @@
+###############################################################
+# Install lrose-blaze on ubuntu 18.10 using the .deb pkg file
+# start with clean image
+# install the .deb and test it
+
+FROM ubuntu:18.10
+
+# install the .deb file
+
+RUN /debs/install_pkg_inside_container.ubuntu
+
+# check that RadxPrint runs
+
+RUN /usr/local/lrose/bin/RadxPrint -h
+
+

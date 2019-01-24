@@ -1,0 +1,17 @@
+#! /bin/bash
+
+#
+# build lrose in ubuntu image
+#
+
+os_version=$1
+lrose_package=$2
+
+cd ~/git/lrose-core/build/packages/ubuntu
+
+docker image rm ${os_version}:build
+
+docker build \
+    --tag ${os_version}:build \
+    --file Dockerfile.${os_version}.build.${lrose_package} .
+

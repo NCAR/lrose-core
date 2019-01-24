@@ -1,13 +1,15 @@
-#! /bin/csh
+#! /bin/bash
 
 #
 # build docker image for ubuntu, with required packages
 #
 
+os_version=$1
+
 cd ~/git/lrose-core/build/packages/ubuntu
 
 docker build \
-    --tag ubuntu16:custom \
-    --file Dockerfile.ubuntu16.custom .
+    --tag ${os_version}:custom \
+    --file Dockerfile.${os_version}.custom .
 
 
