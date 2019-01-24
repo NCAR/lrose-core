@@ -5,10 +5,21 @@
 
 FROM debian:9
 
-# install the .deb file
+# get git
+
+RUN apt-get update; apt-get install -y git
+
+# checkout lrose
 
 WORKDIR /root
-RUN ./git/lrose-core/build/packages/debian/install_pkg_inside_container.debian
+RUN mkdir git
+
+WORKDIR /root/git
+RUN git clone https://github.com/ncar/lrose-core
+
+# install the .deb file
+
+RUN ./lrose-core/build/packages/debian/install_pkg_inside_container.debian
 
 # check that RadxPrint runs
 
