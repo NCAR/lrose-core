@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# This script is to be executed inside a docker debian container
+# It assume lrose-base is installed at /usr/local/lrose
+#
+# The package will be build and copied to the cross-mounted dir
+# so it will be visible from outside the container.
+
+os_version=$1
+lrose_package=$2
+
+# Make sure we have rsync
+
+apt-get update
+apt-get install -y rsync
+
+# set up build location
+
+DATE_STR=`date +"%Y%m%d"`
+LROSE_ROOT=/usr/local/lrose
+BUILD_ROOT=/pkg_build
+PKG_NAME=lrose-${lrose_package}_${DATE_STR}_${os_version}
+BUILD_DIR=${BUILD_ROOT}/${PKG_NAME}
+
+if [ ! -d "$LROSE_ROOT" ]; then
+    echo "-E- No such directory '$LROSE_ROOT'"
+    exit 1
+fi
+
+# Mirror the /usr/local/lrose hierarchy under the BUILD_ROOT
+
+mkdir -p $BUILD_DIR
+mkdir -p ${BUILD_DIR}/usr/local
+rsync -avz $LROSE_ROOT $BUILD_DIR/usr/local/
+
+# create the control file
+
+cd $BUILD_DIR
+mkdir -p DEBIAN
+cd DEBIAN
+/bin/rm -f control
+touch control
+echo "Package: lrose-${lrose_package}" >> control
+echo "Version: ${DATE_STR}" >> control
+echo "Section: base" >> control
+echo "Priority: optional" >> control
+echo "Architecture: x86_64" >> control
+echo "Depends: libqt5gui5, libqt5core5a, qt5-default, qtbase5, libx11-6, libfftw3-3, libgeographic14, libfreetype6, libcurl3, libfl, libbz2, libx11, libpng, libfftw3, libeigen3, libzip" >> control
+echo "Maintainer: NCAR/EOL/RSF <lrose-help@rams.colostate.edu>" >> control
+echo "Description: lrose-${lrose_package}" >> control
+echo "  Binary package of lrose-${lrose_package} on Debian x.xx" >> control
+
+# Make the package
+
+cd $BUILD_ROOT
+dpkg-deb --build ${PKG_NAME}
+
+# Copy the package to the cross-mount
+
+rsync -av $PKG_NAME}.deb /debs
+
+# The resulting package can be installed with
+# apt-get update
+# apt install -y lrose-${lrose_package}_${DATE_STR}.${os_version}.deb
