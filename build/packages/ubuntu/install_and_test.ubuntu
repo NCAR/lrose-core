@@ -8,7 +8,7 @@ lrose_package=$2
 # install rpm and test that the apps work
 #
 
-cd ~/git/lrose-core/build/packages/debian
+cd ~/git/lrose-core/build/packages/ubuntu
 
 # remove any old image
 
@@ -20,7 +20,7 @@ debDir=/tmp/${os_version}-${lrose_package}/debs
 
 # copy install script into that dir so it is available to the container
 
-cp install_pkg_inside_container.debian $debDir
+cp install_pkg_inside_container.ubuntu $debDir
 
 # install the rpms in a container
 

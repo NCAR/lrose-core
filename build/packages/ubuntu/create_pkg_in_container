@@ -14,7 +14,7 @@ mkdir -p $debDir
 docker run \
     -v ${debDir}:/debs \
     ${os_version}:build \
-    /root/git/lrose-core/build/packages/debian/create_debian_pkg ${os_version} ${lrose_package}
+    /root/git/lrose-core/build/packages/ubuntu/create_ubuntu_pkg ${os_version} ${lrose_package}
 
 mkdir -p ~/releases/lrose-${lrose_package}
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script is to be executed inside a docker debian container
+# This script is to be executed inside a docker ubuntu container
 # It assume lrose-base is installed at /usr/local/lrose
 #
 # The package will be build and copied to the cross-mounted dir

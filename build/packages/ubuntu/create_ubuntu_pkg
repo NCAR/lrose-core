@@ -10,10 +10,10 @@ lrose_package=$2
 cd ~/git/lrose-core/
 git pull
 
-# go to debian dir
+# go to ubuntu dir
 
-cd build/packages/debian
+cd build/packages/ubuntu
 
 # run the build script
 
-./build_debian_pkg $os_version $lrose_package
+./build_ubuntu_pkg $os_version $lrose_package
