@@ -450,8 +450,8 @@ def getLibLinkOrder():
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print >>sys.stdout, "ERROR - ", thisScriptName
-        print >>sys.stdout, "  Cannot open file:", path
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  Cannot open file: ", path, file=sys.stderr)
         return linkOrder
 
     lines = fp.readlines()
@@ -469,8 +469,9 @@ def getLibLinkOrder():
             idx = order.index(lib)
             votes[idx] = 1
         except ValueError as e:        
-            print >> sys.stderr, "WARNING - ", thisScriptName
-            print >> sys.stderr, "  Library not found in expected list:" , lib
+            print("WARNING - %s:" % thisScriptName, file=sys.stderr)
+            print("  Library not found in expected list: ",
+                  lib, file=sys.stderr)
 
     for idx, val in enumerate(votes):
         if (val > 0):
