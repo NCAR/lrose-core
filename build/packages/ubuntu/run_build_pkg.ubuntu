@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# call script to build package
+# call script to actually build package
 
 os_version=$1
 lrose_package=$2
@@ -16,4 +16,4 @@ cd build/packages/ubuntu
 
 # run the build script
 
-./build_ubuntu_pkg $os_version $lrose_package
+./build_pkg.ubuntu $os_version $lrose_package

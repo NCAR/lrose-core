@@ -7,7 +7,7 @@ FROM ubuntu:16.04
 
 # install the .deb file
 
-RUN /debs/install_pkg_inside_container.ubuntu
+RUN /debs/run_install_and_test.ubuntu
 
 # check that RadxPrint runs
 

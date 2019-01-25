@@ -5,7 +5,7 @@ lrose_package=$2
 
 #
 # in clean docker image,
-# install rpm and test that the apps work
+# install package and test that the apps work
 #
 
 cd ~/git/lrose-core/build/packages/ubuntu
@@ -20,7 +20,7 @@ debDir=/tmp/${os_version}-${lrose_package}/debs
 
 # copy install script into that dir so it is available to the container
 
-cp install_pkg_inside_container.ubuntu $debDir
+cp run_install_and_test.ubuntu $debDir
 
 # install the rpms in a container
 
