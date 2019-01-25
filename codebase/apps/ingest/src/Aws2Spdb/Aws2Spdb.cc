@@ -447,7 +447,7 @@ int Aws2Spdb::_processFile(const char *file_path,
     //
     // Check to see if AWS station is in the list
     //
-    map< int, StationLoc, less<string> >::iterator iloc;
+    map< int, StationLoc, less<int> >::iterator iloc;
     iloc = _locations.find(stationID);
     if (iloc == _locations.end()) 
       {
