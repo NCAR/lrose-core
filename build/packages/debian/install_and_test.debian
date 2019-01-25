@@ -12,7 +12,7 @@ cd ~/git/lrose-core/build/packages/debian
 
 # remove any old image
 
-docker rm image ${os_version}:install
+docker image rm ${os_version}:install
 
 # make .deb file available to container
 
