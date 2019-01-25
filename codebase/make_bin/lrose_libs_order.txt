@@ -1,37 +1,40 @@
  -lmm5
- -lFiltAlg
- -ltitan
  -lRefract
- -ladvect
- -lcontour
- -lfreezing_level
- -lniwot_basic
- -ldsdata 
+ -lFiltAlg
+ -ldsdata
  -lradar
+ -lhydro
+ -ltitan
+ -lFmq
  -lSpdb
  -lMdv
+ -ladvect
+ -lphysics
+ -lrapplot  (X11/Xlib.h, X11/Xutil.h, X11/Xatom.h, X11/Xresource.h, X11/Xos.h)
  -lRadx
  -lNcxx
- -lhydro
- -lshapelib
- -lcidd  (X11/Xlib.h, X11/Xutil.h, X11/Xatom.h, X11/Xresource.h, X11/Xos.h)
+ -lrapformats
  -ldsserver
  -ldidss
- -ledge
- -lrapformats
- -lrapmath
- -lkd
  -lgrib
- -lgrib2 (jasper)
+ -lgrib2
+ -lcontour
  -leuclid
- -lphysics
  -lrapmath
- -lrapplot  (X11/Xlib.h, X11/Xutil.h, X11/Xatom.h, X11/Xresource.h, X11/Xos.h)
  -ltoolsa
- -ltdrp
  -ldataport
- -lforayRal
+ -ltdrp
+ -lshapelib
+ -lcidd (X11/Xlib.h, X11/Xutil.h, X11/Xatom.h, X11/Xresource.h, X11/Xos.h)
+ -ldevguide
+ -lxview
+ -lolgx
  -ltrmm_rsl
+ -lforayRal
+ -lfreezing_level
+ -lniwot_basic
+ -ledge
+ -lkd
  -lnetcdf_c++
  -lnetcdf
  -lhdf5_hl_cpp
@@ -39,7 +42,6 @@
  -lhdf5_hl
  -lhdf5
  -lfftw3
- -ljasper
  -lX11
  -lXext
  -lbz2

@@ -441,44 +441,43 @@ def getLibLinkOrder():
 
     # set up list showing order in which compiled libs need to be linked
     
-    linkOrder = []
-
-    # read the prescribed order for the libraries
-    # and create a dictionary of them, with the number of votes as their value
-    order = []
-    path = './make_bin/lrose_libs_order.txt'
-    try:
-        fp = open(path, 'r')
-    except IOError as e:
-        print("Running %s:" % thisScriptName, file=sys.stderr)
-        print("  Cannot open file: ", path, file=sys.stderr)
-        return linkOrder
-
-    lines = fp.readlines()
-    fp.close()
-
-    for line in lines:
-        tokens = line.split()
-        if (len(tokens) > 0):
-            order.append(tokens[0])
-
-    votes = [0] * len(order)
-
-    for lib in set_or_list:
-        try:
-            idx = order.index(lib)
-            votes[idx] = 1
-        except ValueError as e:        
-            print("WARNING - %s:" % thisScriptName, file=sys.stderr)
-            print("  Library not found in expected list: ",
-                  lib, file=sys.stderr)
-
-    for idx, val in enumerate(votes):
-        if (val > 0):
-            linkOrder.append(order[idx])
+    linkOrder = [ 'mm5',
+                  'Refract',
+                  'FiltAlg',
+                  'dsdata',
+                  'radar',
+                  'hydro',
+                  'titan',
+                  'Fmq',
+                  'Spdb',
+                  'Mdv',
+                  'advect',
+                  'physics',
+                  'rapplot',
+                  'Radx',
+                  'Ncxx',
+                  'rapformats',
+                  'dsserver',
+                  'didss',
+                  'grib',
+                  'grib2',
+                  'contour',
+                  'euclid',
+                  'rapmath',
+                  'kd',
+                  'toolsa',
+                  'dataport',
+                  'tdrp',
+                  'shapelib',
+                  'cidd',
+                  'devguide',
+                  'xview',
+                  'olgx',
+                  'trmm_rsl',
+                  'forayRal']
     
     return linkOrder
-
+    
 ########################################################################
 # get list of libraries in makefile
 
