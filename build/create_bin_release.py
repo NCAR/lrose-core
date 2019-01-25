@@ -362,9 +362,9 @@ def createBuildDir():
                 print(("  " + filename))
             answer = "n"
             if (sys.version_info > (3, 0)):
-                answer = eval(input("Do you wish to proceed (y/n)? "))
+                answer = input("WARNING: do you wish to proceed (y/n)? ")
             else:
-                answer = input("Do you wish to proceed (y/n)? ")
+                answer = raw_input("WARNING: do you wish to proceed (y/n)? ")
             if (answer != "y"):
                 print("  aborting ....")
                 sys.exit(1)
