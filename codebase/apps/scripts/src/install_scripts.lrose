@@ -8,13 +8,6 @@ bin_dir=$1
 mkdir -p $bin_dir
 
 /bin/cp -f \
-	CheckDataStatusAll \
-	IngestSatMdv \
-	MySqlSave.py \
-	MySqlInsituEvent.py \
-	Profiler2Class.pl \
-	archive_data_list \
-	backupToMSS.pl \
 	check_Janitor_files.pl \
 	check_backup.pl \
 	check_build_dirs.pl \
@@ -25,7 +18,6 @@ mkdir -p $bin_dir
 	check_lib_includes \
 	check_uparams \
 	checkout_and_build.pl \
-	config4dwxLdm \
         copyright_editor.py \
 	copyright_prepend \
 	copyright_remove \
@@ -35,20 +27,12 @@ mkdir -p $bin_dir
 	daily_backup.pl \
 	daily_command.pl \
 	dmesg_timestamp_reformat.pl \
-	do_distribs_rdiff.pl \
-	do_distribs_rtag.pl \
-	find_file_access_times.pl \
-	getXwdFromFtp.sh \
-	get_mss_ls_cvs_repository.sh \
 	gm2gif.py \
 	grab_backup.pl \
 	ipcrm_irix \
 	ipcrm_libc5 \
 	ipcrm_linux \
-	itar_header_prepend \
-	itar_header_remove \
 	job_queue.py \
-	kill_hung_spong_df.sh \
 	ldd_smart \
 	ldmMgr \
 	log_cpu_load.sh \
@@ -69,10 +53,8 @@ mkdir -p $bin_dir
 	monitor_ldm_fos.pl \
 	monitor_ps_procs.pl \
 	not_running \
-	nsslRetrieve \
 	nuke_ipcs.linux \
 	package4dwxLdm \
-	processData \
 	pull_ASAP_ftp_files.py \
 	pull_files \
 	pull_files_ftp.py \
@@ -86,7 +68,6 @@ mkdir -p $bin_dir
 	push_rap_files_rcp.py \
 	push_spdb_files_ftp.py \
 	push_spdb_files_rcp.py \
-	putXwd2Ftp.sh \
 	renew_params \
 	rm_baks \
 	rm_core \
@@ -105,10 +86,8 @@ mkdir -p $bin_dir
 	run_clc \
 	run_cyclo \
 	running \
-	save_cvs_repository_to_mss.sh \
 	saveLogFilterFile \
 	scrub \
-	scrub.ncwf_kc \
 	sendYesterdaysToStore \
 	setupRapDataDirs.py \
 	snuff \
