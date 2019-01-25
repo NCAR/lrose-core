@@ -13,7 +13,6 @@ SUB_DIRS = \
 	DualDopplerLobes \
 	HawkEye \
 	IntfRemove \
-	JamesDealias \
 	Mdv2Vad \
 	MdvFold \
 	RadarCal \
