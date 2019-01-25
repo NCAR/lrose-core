@@ -535,7 +535,8 @@ def buildPackage():
     # set the environment
 
     os.environ["LDFLAGS"] = "-L" + scratchBuildDir + "/lib " + \
-                            " -Wl,-rpath," + \
+                            "-Wl,--enable-new-dtags," + \
+                            "-rpath," + \
                             "'$$ORIGIN/" + runtimeLibRelDir + \
                             ":$$ORIGIN/../lib" + \
                             ":" + libDir + \
