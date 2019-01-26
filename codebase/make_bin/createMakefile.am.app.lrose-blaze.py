@@ -11,6 +11,7 @@ import os
 import sys
 import shutil
 import subprocess
+import platform
 from optparse import OptionParser
 from datetime import datetime
 
@@ -33,9 +34,17 @@ def main():
     global makefileLibList
     global loadLibList
     global needQt
+    global isDebianBased
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
+
+    distName = platform.dist()[0].lower()
+    isDebianBased = False
+    if ("debian" in distName):
+        isDebianBased = True
+    if ("ubuntu" in distName):
+        isDebianBased = True
 
     # parse the command line
 
@@ -587,6 +596,8 @@ def writeMakefileAm():
         fo.write("PKG_CONFIG_PATH += /usr/local/opt/qt/lib/pkgconfig\n")
 
     fo.write("AM_CFLAGS = -I.\n")
+    if (isDebianBased):
+        fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
     if (needQt == True):
@@ -601,6 +612,8 @@ def writeMakefileAm():
     fo.write("# load flags\n")
     fo.write("\n")
     fo.write("AM_LDFLAGS = -L.\n")
+    if (isDebianBased):
+        fo.write("AM_LDFLAGS += -L/usr/lib/x86_64-linux-gnu/hdf5/serial\n")
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
     if (needQt == True):
