@@ -45,3 +45,31 @@ cd ~/git/lrose-core/build/packages/fedora
 ./create_rpm.fedora29.core
 ./install_and_test.fedora29
 
+# debian / ubuntu
+
+cd ~/git/lrose-core/build/packages/ubuntu
+
+# debian 9
+
+./do_lrose_build.ubuntu debian 9 core
+./make_package.ubuntu debian 9 core
+./install_pkg_and_test.ubuntu debian 9 core
+
+# ubuntu 16.04
+
+./do_lrose_build.ubuntu ubuntu 16.04 core
+./make_package.ubuntu ubuntu 16.04 core
+./install_pkg_and_test.ubuntu ubuntu 16.04 core
+
+# ubuntu 18.04
+
+./do_lrose_build.ubuntu ubuntu 18.04 core
+./make_package.ubuntu ubuntu 18.04 core
+./install_pkg_and_test.ubuntu ubuntu 18.04 core
+
+# ubuntu 18.10
+
+./do_lrose_build.ubuntu ubuntu 18.10 core
+./make_package.ubuntu ubuntu 18.10 core
+./install_pkg_and_test.ubuntu ubuntu 18.10 core
+
