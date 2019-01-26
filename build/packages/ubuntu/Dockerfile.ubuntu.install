@@ -4,7 +4,7 @@
 
 # install the .deb file
 
-RUN /debs/run_install_and_test.ubuntu
+RUN /debs/run_install_pkg.ubuntu
 
 # check that RadxPrint runs
 
