@@ -1,0 +1,29 @@
+#==============================================================
+# provision a Docker image for building lrose
+# start with clean image
+# install the required packages
+
+# install required packages
+
+RUN \
+    yum install -y epel-release; \
+    yum install -y tcsh wget git tkcvs \
+    emacs rsync python \
+    m4 make libtool autoconf automake \
+    gcc gcc-c++ gcc-gfortran glibc-devel \
+    libX11-devel libXext-devel \
+    libpng-devel libtiff-devel zlib-devel \
+    expat-devel libcurl-devel \
+    flex-devel fftw3-devel \
+    bzip2-devel qt5-qtbase-devel \
+    hdf5-devel netcdf-devel \
+    xorg-x11-xauth xorg-x11-apps \
+    rpm-build redhat-rpm-config \
+    rpm-devel rpmdevtools
+
+# create link for qtmake
+
+RUN \
+    cd /usr/bin; \
+    ln -s qmake-qt5 qmake;
+

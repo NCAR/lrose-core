@@ -11,6 +11,7 @@ import os
 import sys
 import shutil
 import subprocess
+import platform
 from optparse import OptionParser
 from datetime import datetime
 
@@ -34,9 +35,17 @@ def main():
     global loadLibList
     global needQt
     global needX11
+    global isDebianBased
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
+
+    distName = platform.dist()[0].lower()
+    isDebianBased = False
+    if ("debian" in distName):
+        isDebianBased = True
+    if ("ubuntu" in distName):
+        isDebianBased = True
 
     # parse the command line
 
@@ -149,19 +158,23 @@ def main():
             orderedLibList.append(entry)
     # orderedLibList.reverse()
     if (options.debug == True):
-        print("======== ordered lib list ===================", file=sys.stderr)
+        print("======== ordered lib list ===================",
+              file=sys.stderr)
         for lib in orderedLibList:
             print("  ordered lib: %s" % lib, file=sys.stderr)
-        print("=============================================", file=sys.stderr)
+        print("=============================================",
+              file=sys.stderr)
 
     # get list of libs listed in makefile
 
     makefileLibList = getMakefileLibList()
     if (options.debug == True):
-        print("========= makefile lib list ==============", file=sys.stderr)
+        print("========= makefile lib list ==============",
+              file=sys.stderr)
         for lib in makefileLibList:
             print("  makefile lib: %s" % lib, file=sys.stderr)
-        print("==========================================", file=sys.stderr)
+        print("==========================================",
+              file=sys.stderr)
 
     # check if we need Qt support
 
@@ -174,10 +187,12 @@ def main():
 
     loadLibList = getLoadLibList()
     if (options.debug == True):
-        print("======= load lib list ================", file=sys.stderr)
+        print("======= load lib list ================",
+              file=sys.stderr)
         for lib in loadLibList:
             print("  load lib: -l%s" % lib, file=sys.stderr)
-        print("======================================", file=sys.stderr)
+        print("======================================",
+              file=sys.stderr)
 
     # write out makefile.am
             
@@ -401,40 +416,6 @@ def setHeaderFileList():
             headerFileList.append(fileName)
 
 ########################################################################
-# set the list of libs to be used for include
-
-def setIncludeList(sourceFile):
-                    
-    global includeList
-    
-    if (options.verbose == True):
-        print("-->> looking for includes in:", sourceFile, file=sys.stderr)
-
-    fp = open(sourceFile, 'r')
-    lines = fp.readlines()
-    
-    for line in lines:
-        if ((line[0] != '#') or
-            (line.find("include") < 0) or
-            (line.find("/") < 0) or
-            (line.find("<") < 0) or
-            (line.find(">") < 0)):
-            continue
-
-        if (options.verbose == True):
-            print("  -->> ", line.strip(), file=sys.stderr)
-        
-        for lib in includeList:
-            if (lib.name == thisAppName):
-                # skip this lib
-                continue
-            searchStr = "<%s/" % lib.name
-            if (line.find(searchStr) > 0):
-                if (options.verbose == True):
-                    print("  -->> found lib", lib.name, file=sys.stderr)
-                lib.used = True
-            
-########################################################################
 # get link order for libraries
 
 def getLibLinkOrder():
@@ -630,6 +611,9 @@ def writeMakefileAm():
         fo.write("PKG_CONFIG_PATH += /usr/local/opt/qt/lib/pkgconfig\n")
 
     fo.write("AM_CFLAGS = -I.\n")
+    if (isDebianBased):
+        fo.write("# NOTE: add in Debian location of HDF5\n")
+        fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
     if (options.osx == True):
@@ -649,6 +633,9 @@ def writeMakefileAm():
     fo.write("# load flags\n")
     fo.write("\n")
     fo.write("AM_LDFLAGS = -L.\n")
+    if (isDebianBased):
+        fo.write("# NOTE: add in Debian location of HDF5\n")
+        fo.write("AM_LDFLAGS += -L/usr/lib/x86_64-linux-gnu/hdf5/serial\n")
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
     if (options.osx == True):

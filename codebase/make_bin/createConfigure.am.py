@@ -220,8 +220,9 @@ def searchDir(dir):
 
     if (pathToks[ntoks-3] == "libs" and
         pathToks[ntoks-1] == "src"):
-        # src level of lib
-        # create makefile.am for lib
+
+        # src level of lib - create makefile.am for lib
+
         libDir = absDir[:-4]
         sharedStr = ""
         if (options.shared == True):
@@ -231,27 +232,39 @@ def searchDir(dir):
         cmd += " --libList " + libList
         runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)
+
         return
+
     elif ((pathToks[ntoks-4] == "apps") and
           (pathToks[ntoks-2] == "src") and
           (pathToks[ntoks-1] == "scripts")):
+
         # scripts dir - do nothing
         if (options.debug):
             print("  Ignoring dir:", dir, file=sys.stderr)
+
         return
+
     elif ((pathToks[ntoks-4] == "apps") and
           (pathToks[ntoks-2] == "src")):
-        # app directory
-        # create makefile.am for app
-        # use package version if available
-        createScript = "createMakefile.am.app." + options.pkg + ".py"
+
+        # app directory - create makefile.am for app
+
+        # compute default script path - assumes core package
+
+        createScript = "createMakefile.am.app.lrose-core.py"
         scriptPath = os.path.join(thisScriptDir, createScript)
-        if (os.path.exists(scriptPath) == False):
-            # no package version, use default
-            createScript = "createMakefile.am.app.lrose-core.py"
-            scriptPath = os.path.join(thisScriptDir, createScript)
+
+        # use package-specific version if available
+        pkgCreateScript = "createMakefile.am.app." + options.pkg + ".py"
+        pkgScriptPath = os.path.join(thisScriptDir, pkgCreateScript)
+        if (os.path.exists(pkgScriptPath)):
+            createScript = pkgCreateScript
+            scriptPath = pkgScriptPath
+
         if (options.debug):
             print("  createScript:", createScript, file=sys.stderr)
+
         cmd = scriptPath
         cmd += " --dir " + absDir + debugStr
         cmd += " --libList " + libList
@@ -259,8 +272,11 @@ def searchDir(dir):
             cmd += " --osx "
         runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)
+
         return
+
     else:
+
         # create makefile.am for recursion
         cmd = os.path.join(thisScriptDir, "createMakefile.am.recurse.py") + \
               " --dir " + absDir + debugStr

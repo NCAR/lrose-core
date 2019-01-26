@@ -168,10 +168,12 @@ def main():
 
     makefileLibList = getMakefileLibList()
     if (options.debug == True):
-        print("========= makefile lib list ==============", file=sys.stderr)
+        print("========= makefile lib list ==============",
+              file=sys.stderr)
         for lib in makefileLibList:
             print("  makefile lib: %s" % lib, file=sys.stderr)
-        print("==========================================", file=sys.stderr)
+        print("==========================================",
+              file=sys.stderr)
 
     # check if we need Qt support
 
@@ -183,10 +185,12 @@ def main():
 
     loadLibList = getLoadLibList()
     if (options.debug == True):
-        print("======= load lib list ================", file=sys.stderr)
+        print("======= load lib list ================",
+              file=sys.stderr)
         for lib in loadLibList:
             print("  load lib: -l%s" % lib, file=sys.stderr)
-        print("======================================", file=sys.stderr)
+        print("======================================",
+              file=sys.stderr)
 
     # write out makefile.am
             
@@ -388,42 +392,6 @@ def setHeaderFileList():
         if (last2 == ".h") or (last3 == ".hh"):
             headerFileList.append(fileName)
 
-########################################################################
-# set the list of libs to be used for include
-
-# TODO this is not used
-
-def setIncludeList(sourceFile):
-                    
-    global includeList
-    
-    if (options.verbose == True):
-        print("-->> looking for includes in:", sourceFile, file=sys.stderr)
-
-    fp = open(sourceFile, 'r')
-    lines = fp.readlines()
-    
-    for line in lines:
-        if ((line[0] != '#') or
-            (line.find("include") < 0) or
-            (line.find("/") < 0) or
-            (line.find("<") < 0) or
-            (line.find(">") < 0)):
-            continue
-
-        if (options.verbose == True):
-            print("  -->> ", line.strip(), file=sys.stderr)
-        
-        for lib in includeList:
-            if (lib.name == thisAppName):
-                # skip this lib
-                continue
-            searchStr = "<%s/" % lib.name
-            if (line.find(searchStr) > 0):
-                if (options.verbose == True):
-                    print("  -->> found lib", lib.name, file=sys.stderr)
-                lib.used = True
-            
 ########################################################################
 # get link order for libraries
 
