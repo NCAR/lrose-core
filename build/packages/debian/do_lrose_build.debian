@@ -1,7 +1,7 @@
 #! /bin/bash
 
 ###########################################################
-# build lrose in ubuntu image
+# build lrose in debian image
 # $1: os_type, e.g. ubuntu
 # $2: os_version, e.g. 16.04
 # $3: lrose_pkg, e.g. core
@@ -10,7 +10,7 @@ os_type=$1
 os_version=$2
 lrose_pkg=$3
 
-cd ~/git/lrose-core/build/packages/ubuntu
+cd ~/git/lrose-core/build/packages/debian
 
 # compute Dockerfile path
 
@@ -31,7 +31,7 @@ echo "#" >> ${DockerfilePath}
 
 # append the body of the Dockerfile
 
-cat Dockerfile.ubuntu.build >> ${DockerfilePath}
+cat Dockerfile.debian.build >> ${DockerfilePath}
 
 # remove any old image
 

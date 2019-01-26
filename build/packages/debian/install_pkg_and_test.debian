@@ -11,7 +11,7 @@ os_type=$1
 os_version=$2
 lrose_pkg=$3
 
-cd ~/git/lrose-core/build/packages/ubuntu
+cd ~/git/lrose-core/build/packages/debian
 
 # compute Dockerfile path
 
@@ -32,7 +32,7 @@ echo "#" >> ${DockerfilePath}
 
 # append the body of the Dockerfile
 
-cat Dockerfile.ubuntu.install >> ${DockerfilePath}
+cat Dockerfile.debian.install >> ${DockerfilePath}
 
 # remove any old image
 
@@ -45,7 +45,7 @@ debDir=/tmp/${os_type}-${os_version}-${lrose_pkg}/debs
 
 # copy install script into that dir so it is available to the container
 
-cp run_install_pkg.ubuntu $debDir
+cp run_install_pkg.debian $debDir
 
 # run the install, creating a new image for it
 

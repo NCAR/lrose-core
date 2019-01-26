@@ -1,5 +1,5 @@
 #===================================================
-# build lrose in ubuntu container
+# build lrose in debian container
 
 ARG LROSE_PKG=core
 

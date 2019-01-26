@@ -11,7 +11,7 @@ os_type=$1
 os_version=$2
 lrose_pkg=$3
 
-cd ~/git/lrose-core/build/packages/ubuntu
+cd ~/git/lrose-core/build/packages/debian
 
 # create directory to hold the .deb file
 # that will be written
@@ -26,7 +26,7 @@ mkdir -p $debDir
 docker run \
     -v ${debDir}:/debs \
     build.${lrose_pkg}/${os_type}:${os_version} \
-    /root/git/lrose-core/build/packages/ubuntu/run_build_pkg.ubuntu ${os_type} ${os_version} ${lrose_pkg}
+    /root/git/lrose-core/build/packages/debian/run_build_pkg.debian ${os_type} ${os_version} ${lrose_pkg}
 
 # ensure the release dir exists
 

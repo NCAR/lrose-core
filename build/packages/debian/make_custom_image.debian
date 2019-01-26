@@ -1,15 +1,43 @@
 #! /bin/bash
 
-#
-# build docker image for ubuntu, with required packages
-#
+###########################################################
+# build docker image for debian, with required packages
+# $1: os_type, e.g. ubuntu
+# $2: os_version, e.g. 16.04
 
-os_version=$1
+os_type=$1
+os_version=$2
 
 cd ~/git/lrose-core/build/packages/debian
 
+# compute Dockerfile path
+
+DockerfilePath=/tmp/docker/Dockerfile.custom.${os_type}.${os_version}
+
+echo "Creating custom docker image for lrose"
+echo "  os_type: ${os_type}"
+echo "  os_version: ${os_version}"
+echo "  Dockerfile path: " $DockerfilePath
+
+# create Dockerfile preamble with the FROM command
+
+mkdir -p /tmp/docker
+echo "####################################################" > ${DockerfilePath}
+echo "FROM ${os_type}:${os_version}" >> ${DockerfilePath}
+echo "#" >> ${DockerfilePath}
+
+# append the body of the Dockerfile
+
+cat Dockerfile.debian.custom >> ${DockerfilePath}
+
+# create the custom image
+
+cd /tmp/docker
+
 docker build \
-    --tag ${os_version}:custom \
-    --file Dockerfile.${os_version}.custom .
+    --tag custom/${os_type}:${os_version} \
+    --file ${DockerfilePath} .
+
+
 
 
