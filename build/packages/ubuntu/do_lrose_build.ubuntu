@@ -1,17 +1,49 @@
 #! /bin/bash
 
-#
+###########################################################
 # build lrose in ubuntu image
-#
+# $1: os_type, e.g. ubuntu
+# $2: os_version, e.g. 16.04
+# $3: lrose_pkg, e.g. core
 
-os_version=$1
-lrose_package=$2
+os_type=$1
+os_version=$2
+lrose_pkg=$3
 
 cd ~/git/lrose-core/build/packages/ubuntu
 
-docker image rm ${os_version}:build
+# compute Dockerfile path
+
+DockerfilePath=/tmp/docker/Dockerfile.build.${os_type}.${os_version}.${lrose_pkg}
+
+echo "Performing lrose build in docker container"
+echo "  os_type: ${os_type}"
+echo "  os_version: ${os_version}"
+echo "  lrose_pkg: ${lrose_pkg}"
+echo "  Dockerfile path: " $DockerfilePath
+
+# create Dockerfile preamble with the FROM command
+
+mkdir -p /tmp/docker
+echo "####################################################" > ${DockerfilePath}
+echo "FROM custom/${os_type}:${os_version}" >> ${DockerfilePath}
+echo "#" >> ${DockerfilePath}
+
+# append the body of the Dockerfile
+
+cat Dockerfile.ubuntu.build >> ${DockerfilePath}
+
+# remove any old image
+
+tag=build.${lrose_pkg}/${os_type}:${os_version}
+docker image rm ${tag}
+
+# run the build, creating a new image for it
+
+cd /tmp/docker
 
 docker build \
-    --tag ${os_version}:build \
-    --file Dockerfile.${os_version}.build.${lrose_package} .
+    --tag ${tag} \
+    --build-arg LROSE_PKG=${lrose_pkg} \
+    --file ${DockerfilePath} .
 

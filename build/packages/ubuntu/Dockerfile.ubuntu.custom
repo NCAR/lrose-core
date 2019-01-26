@@ -1,12 +1,9 @@
-###############################################################
+#===================================================
 # create a custom Docker image for building lrose
 # start with clean image
 # install the required packages
 #
 # This file will be pre-pended with the FROM command
-
-ARG OS_TYPE=ubuntu
-ARG OS_VERSION=16.04
 
 # install required packages
 

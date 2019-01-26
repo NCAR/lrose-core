@@ -1,36 +1,43 @@
 #! /bin/bash
 
-#
+###########################################################
 # build docker image for ubuntu, with required packages
-#
-# e.g. os_type = ubuntu, os_version = 16.04
-#
+# $1: os_type, e.g. ubuntu
+# $2: os_version, e.g. 16.04
 
 os_type=$1
 os_version=$2
 
 cd ~/git/lrose-core/build/packages/ubuntu
 
-# create Dockerfile
+# compute Dockerfile path
+
+DockerfilePath=/tmp/docker/Dockerfile.custom.${os_type}.${os_version}
+
+echo "Creating custom docker image for lrose"
+echo "  os_type: ${os_type}"
+echo "  os_version: ${os_version}"
+echo "  Dockerfile path: " $DockerfilePath
+
+# create Dockerfile preamble with the FROM command
 
 mkdir -p /tmp/docker
-DockerfilePath=/tmp/docker/Dockerfile.custom.${os_type}.${os_version}
-echo "file name is: " $DockerfilePath
-
 echo "####################################################" > ${DockerfilePath}
-echo "# Creating a custom Dockerfile for a build" >> ${DockerfilePath}
-echo "#" >> ${DockerfilePath}
 echo "FROM ${os_type}:${os_version}" >> ${DockerfilePath}
 echo "#" >> ${DockerfilePath}
+
+# append the body of the Dockerfile
+
 cat Dockerfile.ubuntu.custom >> ${DockerfilePath}
+
+# create the custom image
 
 cd /tmp/docker
 
 docker build \
     --tag custom/${os_type}:${os_version} \
-    --build-arg OS_TYPE=${os_type} \
-    --build-arg OS_VERSION=${os_version} \
     --file ${DockerfilePath} .
+
 
 
 
