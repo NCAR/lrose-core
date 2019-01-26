@@ -18,7 +18,8 @@ RUN \
     cd ${HOME}/git/lrose-core/build; \
     ./checkout_and_build_auto.py --package lrose-core \
     --prefix /usr/local/lrose --scripts \
-    --buildDir /tmp/lrose_build --logDir /tmp/build_logs
+    --buildDir /tmp/lrose_build --logDir /tmp/build_logs \
+    --useSystemNetcdf
 
 # clean up
 
