@@ -41,7 +41,7 @@ docker image rm ${tag}
 
 # make .deb file available to container
 
-debDir=/tmp/${os_type}-${os_version}-${lrose_package}/debs
+debDir=/tmp/${os_type}-${os_version}-${lrose_pkg}/debs
 
 # copy install script into that dir so it is available to the container
 

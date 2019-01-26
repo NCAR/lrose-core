@@ -21,4 +21,4 @@ cd build/packages/ubuntu
 
 # run the build script
 
-./build_pkg.ubuntu ${os_type} $os_version $lrose_package
+./build_pkg.ubuntu ${os_type} $os_version $lrose_pkg

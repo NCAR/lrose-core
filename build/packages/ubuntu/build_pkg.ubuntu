@@ -26,7 +26,7 @@ ARCH=amd64
 DATE_STR=`date +"%Y%m%d"`
 LROSE_ROOT=/usr/local/lrose
 BUILD_ROOT=/pkg_build
-PKG_NAME=lrose-${lrose_package}-${DATE_STR}.${os_type}-${os_version}.${ARCH}
+PKG_NAME=lrose-${lrose_pkg}-${DATE_STR}.${os_type}-${os_version}.${ARCH}
 BUILD_DIR=${BUILD_ROOT}/${PKG_NAME}
 
 if [ ! -d "$LROSE_ROOT" ]; then
@@ -47,15 +47,15 @@ mkdir -p DEBIAN
 cd DEBIAN
 /bin/rm -f control
 touch control
-echo "Package: lrose-${lrose_package}" >> control
+echo "Package: lrose-${lrose_pkg}" >> control
 echo "Version: ${DATE_STR}" >> control
 echo "Section: base" >> control
 echo "Priority: optional" >> control
 echo "Architecture: ${ARCH}" >> control
 echo "Depends: git, gcc, g++, gfortran, cmake, automake, make, libtool, pkg-config, python, libcurl3-dev, curl, libfl-dev, libbz2-dev, libx11-dev, libpng-dev, libfftw3-dev, qtbase5-dev, libexpat1-dev, libgeographic-dev, libeigen3-dev, libzip-dev, libnetcdf-dev, netcdf-bin, libhdf5-dev, hdf5-tools" >> control
 echo "Maintainer: NCAR/EOL/RSF <lrose-help@rams.colostate.edu>" >> control
-echo "Description: lrose-${lrose_package}" >> control
-echo "  Binary package of lrose-${lrose_package} on Debian x.xx" >> control
+echo "Description: lrose-${lrose_pkg}" >> control
+echo "  Binary package of lrose-${lrose_pkg} on Debian x.xx" >> control
 
 # Make the package
 
@@ -68,4 +68,4 @@ rsync -av ${PKG_NAME}.deb /debs
 
 # The resulting package can be installed with
 # apt-get update
-# apt install -y lrose-${lrose_package}_${DATE_STR}.${os_version}.deb
+# apt install -y lrose-${lrose_pkg}_${DATE_STR}.${os_version}.deb

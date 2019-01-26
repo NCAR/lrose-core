@@ -30,7 +30,7 @@ docker run \
 
 # ensure the release dir exists
 
-mkdir -p ~/releases/lrose-${lrose_package}
+mkdir -p ~/releases/lrose-${lrose_pkg}
 
 # copy the package to the release dir
 
