@@ -66,6 +66,9 @@ dpkg-deb --build ${PKG_NAME}
 
 rsync -av ${PKG_NAME}.deb /debs
 
-# The resulting package can be installed with
-# apt-get update
-# apt install -y lrose-${lrose_pkg}_${DATE_STR}.${os_version}.deb
+# add write permissions since this is created by root
+# and we need to remove them from the cross-mount later
+
+chmod o+w -R /debs/*
+chmod g+w -R /debs/*
+

@@ -1,0 +1,39 @@
+#! /bin/bash
+
+###########################################################
+# in the docker build image,
+# create .rpm file, place it in crossmounted dir
+# $1: os_type, e.g. centos
+# $2: os_version, e.g. 7
+# $3: lrose_pkg, e.g. core
+
+os_type=$1
+os_version=$2
+lrose_pkg=$3
+
+cd ~/git/lrose-core/build/packages/redhat
+
+# create directory that will hold the .rpm file
+
+pkgDir=/tmp/${os_type}-${os_version}-${lrose_pkg}/pkgs
+/bin/rm -rf $pkgDir
+mkdir -p $pkgDir
+
+# run script in container to make the package
+# use -v to cross-mount the pkgs directory and
+# scripts directory into the container
+
+docker run \
+    -v ${pkgDir}:/pkgs \
+    -v .:/scripts \
+    build.${lrose_pkg}/${os_type}:${os_version} \
+    /scripts/build_pkg.redhat ${os_type} ${os_version} ${lrose_pkg}
+
+# ensure the release dir exists
+
+mkdir -p ~/releases/lrose-${lrose_pkg}
+
+# copy the package to the release dir
+
+rsync -av ${pkgDir}/*.rpm ~/releases/lrose-${lrose_pkg}
+

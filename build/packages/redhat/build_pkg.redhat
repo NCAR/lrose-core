@@ -1,0 +1,50 @@
+#!/bin/bash
+
+#################################################################
+# This script is to be executed inside a docker redhat container
+# It assume lrose-base is installed at /usr/local/lrose
+#
+# The package will be built and copied to the cross-mounted dir
+# so it will be visible from outside the container.
+
+# $1: os_type, e.g. centos
+# $2: os_version, e.g. 7
+# $3: lrose_pkg, e.g. core
+
+os_type=$1
+os_version=$2
+lrose_pkg=$3
+
+# create the rpm structure
+
+cd
+mkdir -p rpmbuild
+cd rpmbuild
+mkdir -p BUILD RPMS SOURCES SPECS SRPMS
+
+# create the spec file
+
+cd SPECS
+date_str=`date +"%Y%m%d"`
+release=${date_str}.${os_type}${os_version}
+
+echo "####################################" > rpm.spec
+echo "%define release ${release}" >> rpm.spec
+echo "%define version ${lrose_pkg}" >> rpm.spec
+cat /scripts/rpm.spec.body >> rpm.spec
+
+# build the rpm
+
+cd /root/rpmbuild
+rpmbuild -v -bb ./SPECS/rpm.spec
+
+# copy the rpm to the cross-mounted director
+
+rsync -av RPMS/* /pkgs
+
+# add write permissions since this is created by root
+# and we need to remove them from the cross-mount later
+
+chmod o+w -R /pkgs/*
+chmod g+w -R /pkgs/*
+

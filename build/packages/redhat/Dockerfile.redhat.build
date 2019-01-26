@@ -1,0 +1,32 @@
+#===================================================
+# build lrose in redhat container
+
+ARG LROSE_PKG=core
+
+# checkout lrose-core so we have the scripts
+
+RUN \
+    echo "Building lrose in redhat container"; \
+    echo "  package is: ${LROSE_PKG}" 
+
+RUN \
+    cd ${HOME}; \
+    mkdir -p git; cd git; \
+    git clone https://github.com/NCAR/lrose-core
+
+# run the build script
+
+RUN \
+    cd ${HOME}/git/lrose-core/build; \
+    ./checkout_and_build_auto.py \
+    --package lrose-${LROSE_PKG} \
+    --prefix /usr/local/lrose \
+    --buildDir /tmp/lrose_build \
+    --logDir /tmp/build_logs \
+    --useSystemNetcdf \
+    --scripts
+
+# clean up
+
+RUN \
+    /bin/rm -rf /tmp/lrose_build

@@ -1,0 +1,56 @@
+#%define datestr %(date +"%Y%m%d")
+#%define release     %{datestr}.centos7
+#%define version     blaze 
+
+############################################################
+# spec file body for redhat package build for lrose
+#
+# release and version will be prepended by calling script
+#############################################################
+
+%define name        lrose 
+%define _topdir     /root/rpmbuild
+%define buildroot %{_topdir}/%{name}-%{version}-%{release}-root
+ 
+BuildRoot:      %{_topdir}/installedhere
+Summary:        LROSE
+License:        BSD
+Name:           %{name}
+Version:        %{version}
+Release:        %{release}
+Prefix:         /usr/local/lrose
+Group:          Scientific Tools
+AutoReqProv:    no
+ 
+Requires: libX11-devel
+Requires: libXext-devel
+Requires: libpng-devel
+Requires: libtiff-devel
+Requires: zlib-devel
+Requires: expat-devel
+Requires: libcurl-devel
+Requires: flex-devel
+Requires: fftw3-devel
+Requires: bzip2-devel
+Requires: qt5-qtbase-devel
+Requires: hdf5-devel
+Requires: netcdf-devel
+Requires: xorg-x11-xauth
+Requires: xorg-x11-apps
+
+%description
+LROSE - Lidar Radar Open Software Environment
+
+# build has been done previously so no compile is needed
+# just copy the files into the correct location
+
+%install
+mkdir -p %{buildroot}%{prefix}
+rsync -av %{prefix}/* %{buildroot}%{prefix}
+
+# add all files in /usr/local/lrose
+
+%files
+/usr/local/lrose
+
+
