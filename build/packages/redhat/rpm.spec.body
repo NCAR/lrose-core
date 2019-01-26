@@ -1,12 +1,7 @@
-#%define datestr %(date +"%Y%m%d")
-#%define release     %{datestr}.centos7
-#%define version     blaze 
-
-############################################################
+#===========================================================
 # spec file body for redhat package build for lrose
-#
-# release and version will be prepended by calling script
-#############################################################
+# release and version are prepended by calling script
+#===========================================================
 
 %define name        lrose 
 %define _topdir     /root/rpmbuild
@@ -45,12 +40,14 @@ LROSE - Lidar Radar Open Software Environment
 # just copy the files into the correct location
 
 %install
+echo "==>> rsync /usr/local/lrose to buildroot"
 mkdir -p %{buildroot}%{prefix}
-rsync -av %{prefix}/* %{buildroot}%{prefix}
+rsync -a %{prefix}/* %{buildroot}%{prefix}
 
 # add all files in /usr/local/lrose
 
 %files
 /usr/local/lrose
 
+############################################################
 

@@ -11,6 +11,11 @@ os_type=$1
 os_version=$2
 lrose_pkg=$3
 
+echo "Making package for redhat"
+echo "  os_type: ${os_type}"
+echo "  os_version: ${os_version}"
+echo "  lrose_pkg: ${lrose_pkg}"
+
 cd ~/git/lrose-core/build/packages/redhat
 
 # create directory that will hold the .rpm file
@@ -25,15 +30,16 @@ mkdir -p $pkgDir
 
 docker run \
     -v ${pkgDir}:/pkgs \
-    -v .:/scripts \
+    -v `pwd`:/scripts \
     build.${lrose_pkg}/${os_type}:${os_version} \
-    /scripts/build_pkg.redhat ${os_type} ${os_version} ${lrose_pkg}
+    /scripts/build_rpm ${os_type} ${os_version} ${lrose_pkg}
 
 # ensure the release dir exists
 
-mkdir -p ~/releases/lrose-${lrose_pkg}
+releaseDir=${HOME}/releases/lrose-${lrose_pkg}
+mkdir -p ${releaseDir}
 
 # copy the package to the release dir
 
-rsync -av ${pkgDir}/*.rpm ~/releases/lrose-${lrose_pkg}
+rsync -av ${pkgDir}/*/*.rpm ${releaseDir}
 

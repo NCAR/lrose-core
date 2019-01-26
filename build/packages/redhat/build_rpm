@@ -15,6 +15,11 @@ os_type=$1
 os_version=$2
 lrose_pkg=$3
 
+echo "Creating RPM"
+echo "  os_type: ${os_type}"
+echo "  os_version: ${os_version}"
+echo "  lrose_pkg: ${lrose_pkg}"
+
 # create the rpm structure
 
 cd
@@ -24,21 +29,29 @@ mkdir -p BUILD RPMS SOURCES SPECS SRPMS
 
 # create the spec file
 
+echo "==>> creating spec file"
+
 cd SPECS
 date_str=`date +"%Y%m%d"`
-release=${date_str}.${os_type}${os_version}
+release=${date_str}.${os_type}_${os_version}
 
-echo "####################################" > rpm.spec
+echo "############################################################" > rpm.spec
 echo "%define release ${release}" >> rpm.spec
 echo "%define version ${lrose_pkg}" >> rpm.spec
 cat /scripts/rpm.spec.body >> rpm.spec
 
+echo "==>> spec file contents:"
+cat rpm.spec
+
 # build the rpm
 
+echo "==>> building the rpm:"
 cd /root/rpmbuild
 rpmbuild -v -bb ./SPECS/rpm.spec
 
 # copy the rpm to the cross-mounted director
+
+echo "==>> rsync rpm back to /pkgs"
 
 rsync -av RPMS/* /pkgs
 
