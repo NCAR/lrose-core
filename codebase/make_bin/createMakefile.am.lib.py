@@ -11,6 +11,7 @@ import os
 import sys
 import shutil
 import subprocess
+import platform
 from optparse import OptionParser
 from datetime import datetime
 
@@ -35,9 +36,17 @@ def main():
     global includeList
     global libList
     global includesInSubDir
+    global isDebianBased
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
+
+    distName = platform.dist()[0].lower()
+    isDebianBased = False
+    if ("debian" in distName):
+        isDebianBased = True
+    if ("ubuntu" in distName):
+        isDebianBased = True
 
     # parse the command line
 
@@ -454,6 +463,9 @@ def writeMakefileAm():
     fo.write("# compile flags - include header subdirectory\n")
     fo.write("\n")
     fo.write("AM_CFLAGS = -I./include\n")
+    if (isDebianBased):
+        fo.write("# NOTE: add in Debian location of HDF5\n")
+        fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
     fo.write("# NOTE: add in Mac OSX location of XQuartz\n")
     fo.write("AM_CFLAGS += -I/usr/X11R6/include -I/opt/X11/include\n")
     if (options.shared == True):

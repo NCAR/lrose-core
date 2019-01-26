@@ -597,6 +597,7 @@ def writeMakefileAm():
 
     fo.write("AM_CFLAGS = -I.\n")
     if (isDebianBased):
+        fo.write("# NOTE: add in Debian location of HDF5\n")
         fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
@@ -613,6 +614,7 @@ def writeMakefileAm():
     fo.write("\n")
     fo.write("AM_LDFLAGS = -L.\n")
     if (isDebianBased):
+        fo.write("# NOTE: add in Debian location of HDF5\n")
         fo.write("AM_LDFLAGS += -L/usr/lib/x86_64-linux-gnu/hdf5/serial\n")
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
