@@ -14,7 +14,8 @@ RUN apt-get update && \
     libcurl3-dev curl \
     libfl-dev libbz2-dev libx11-dev libpng-dev \
     libfftw3-dev qtbase5-dev libexpat1-dev \
-    libgeographic-dev libeigen3-dev libzip-dev
+    libgeographic-dev libeigen3-dev libzip-dev \
+    libnetcdf-dev libhdf5-dev
 
 # create link for qtmake
 
