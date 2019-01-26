@@ -25,7 +25,7 @@ mkdir -p $debDir
 
 docker run \
     -v ${debDir}:/debs \
-    ${os_version}:build \
+    build.${lrose_pkg}/${os_type}:${os_version} \
     /root/git/lrose-core/build/packages/ubuntu/run_build_pkg.ubuntu ${os_type} ${os_version} ${lrose_pkg}
 
 # ensure the release dir exists

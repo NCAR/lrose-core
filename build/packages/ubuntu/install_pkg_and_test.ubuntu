@@ -45,12 +45,15 @@ debDir=/tmp/${os_type}-${os_version}-${lrose_pkg}/debs
 
 # copy install script into that dir so it is available to the container
 
-cp run_install_and_test.ubuntu $debDir
+cp run_install_pkg.ubuntu $debDir
 
-# install the rpms in a container
+# run the install, creating a new image for it
+
+cd /tmp/docker
 
 docker build \
     -v ${debDir}:/debs \
-    --tag ${os_version}:install \
-    --file Dockerfile.${os_version}.install_and_test .
+    --tag ${tag} \
+    --file ${DockerfilePath} .
+
 
