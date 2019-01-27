@@ -9,8 +9,6 @@ docker rm `docker ps -aq`
 # centos 6
 
 cd ~/git/lrose-core/build/packages/redhat
-
-make_custom_image.redhat centos 6
 do_lrose_build.redhat centos 6 blaze
 make_package.redhat centos 6 blaze
 install_pkg_and_test.redhat centos 6 blaze
@@ -18,8 +16,6 @@ install_pkg_and_test.redhat centos 6 blaze
 # centos 7
 
 cd ~/git/lrose-core/build/packages/redhat
-
-make_custom_image.redhat centos 7
 do_lrose_build.redhat centos 7 blaze
 make_package.redhat centos 7 blaze
 install_pkg_and_test.redhat centos 7 blaze
@@ -27,8 +23,6 @@ install_pkg_and_test.redhat centos 7 blaze
 # fedora 28
 
 cd ~/git/lrose-core/build/packages/redhat
-
-make_custom_image.redhat fedora 28
 do_lrose_build.redhat fedora 28 blaze
 make_package.redhat fedora 28 blaze
 install_pkg_and_test.redhat fedora 28 blaze
@@ -36,8 +30,6 @@ install_pkg_and_test.redhat fedora 28 blaze
 # fedora 29
 
 cd ~/git/lrose-core/build/packages/redhat
-
-make_custom_image.redhat fedora 29
 do_lrose_build.redhat fedora 29 blaze
 make_package.redhat fedora 29 blaze
 install_pkg_and_test.redhat fedora 29 blaze
@@ -45,8 +37,6 @@ install_pkg_and_test.redhat fedora 29 blaze
 # debian 9
 
 cd ~/git/lrose-core/build/packages/debian
-
-make_custom_image.debian debian 9
 do_lrose_build.debian debian 9 blaze
 make_package.debian debian 9 blaze
 install_pkg_and_test.debian debian 9 blaze
@@ -54,8 +44,6 @@ install_pkg_and_test.debian debian 9 blaze
 # ubuntu 16.04
 
 cd ~/git/lrose-core/build/packages/debian
-
-make_custom_image.debian ubuntu 16.04
 do_lrose_build.debian ubuntu 16.04 blaze
 make_package.debian ubuntu 16.04 blaze
 install_pkg_and_test.debian ubuntu 16.04 blaze
@@ -63,8 +51,6 @@ install_pkg_and_test.debian ubuntu 16.04 blaze
 # ubuntu 18.04
 
 cd ~/git/lrose-core/build/packages/debian
-
-make_custom_image.debian ubuntu 18.04
 do_lrose_build.debian ubuntu 18.04 blaze
 make_package.debian ubuntu 18.04 blaze
 install_pkg_and_test.debian ubuntu 18.04 blaze
@@ -72,8 +58,6 @@ install_pkg_and_test.debian ubuntu 18.04 blaze
 # ubuntu 18.10
 
 cd ~/git/lrose-core/build/packages/debian
-
-make_custom_image.debian ubuntu 18.10
 do_lrose_build.debian ubuntu 18.10 blaze
 make_package.debian ubuntu 18.10 blaze
 install_pkg_and_test.debian ubuntu 18.10 blaze

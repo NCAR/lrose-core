@@ -1,0 +1,48 @@
+#! /bin/csh
+
+# build custom images for the OSs
+
+# remove any running containers
+
+docker rm `docker ps -aq`
+
+# centos 6
+
+cd ~/git/lrose-core/build/packages/redhat
+make_custom_image.redhat centos 6
+
+# centos 7
+
+cd ~/git/lrose-core/build/packages/redhat
+make_custom_image.redhat centos 7
+
+# fedora 28
+
+cd ~/git/lrose-core/build/packages/redhat
+make_custom_image.redhat fedora 28
+
+# fedora 29
+
+cd ~/git/lrose-core/build/packages/redhat
+make_custom_image.redhat fedora 29
+
+# debian 9
+
+cd ~/git/lrose-core/build/packages/debian
+make_custom_image.debian debian 9
+
+# ubuntu 16.04
+
+cd ~/git/lrose-core/build/packages/debian
+make_custom_image.debian ubuntu 16.04
+
+# ubuntu 18.04
+
+cd ~/git/lrose-core/build/packages/debian
+make_custom_image.debian ubuntu 18.04
+
+# ubuntu 18.10
+
+cd ~/git/lrose-core/build/packages/debian
+make_custom_image.debian ubuntu 18.10
+
