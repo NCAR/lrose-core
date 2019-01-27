@@ -4,10 +4,6 @@
 # in clean docker image
 # install rpm and test that the apps work
 
-os_type=$1
-os_version=$2
-lrose_pkg=$3
-
 #--------------------------------------------------------------------
 # usage function
 #
@@ -87,8 +83,10 @@ mkdir -p /tmp/docker
 echo "#####################################################" > ${DockerfilePath}
 echo "FROM ${os_type}:${os_version}" >> ${DockerfilePath}
 echo "#" >> ${DockerfilePath}
-cat Dockerfile.redhat.install >> ${DockerfilePath}
 
+# append the body of the Dockerfile
+
+cat Dockerfile.redhat.install >> ${DockerfilePath}
 echo "Dockerfile content:"
 cat ${DockerfilePath}
 

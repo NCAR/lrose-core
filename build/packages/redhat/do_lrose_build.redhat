@@ -81,8 +81,7 @@ cd ~/git/lrose-core/build/packages/redhat
 # compute Dockerfile path
 
 DockerfilePath=/tmp/docker/Dockerfile.build.${os_type}.${os_version}.${lrose_pkg}
-
-echo "  Dockerfile path: " $DockerfilePath
+echo "Dockerfile path: " $DockerfilePath
 
 # create Dockerfile preamble with the FROM command
 

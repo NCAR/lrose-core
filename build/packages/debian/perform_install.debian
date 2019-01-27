@@ -1,0 +1,69 @@
+#! /bin/bash
+
+###########################################################
+# install debian package from within a container and test it
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Perform lrose .deb install"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -t ? :  set os_type"
+    echo "          e.g. debian, ubuntu"
+    echo
+}
+
+scriptName=$(basename $0)
+
+os_type=centos
+debug=true
+
+# Parse command line options.
+while getopts hdt: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        t)
+            os_type=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  performing .deb install"
+  echo "    os_type: ${os_type}"
+fi
+
+# update
+
+apt-get update
+
+# install package
+
+debPath=`ls /pkgs/*.deb`
+echo "  pkgFile: $debPath"
+
+apt-get install -y ${debPath}
+
+# check that RadxPrint runs
+
+/usr/local/lrose/bin/RadxPrint -h

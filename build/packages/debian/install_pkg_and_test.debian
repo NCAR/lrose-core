@@ -3,25 +3,79 @@
 ###########################################################
 # in clean docker image,
 # install package and test that the apps work
-# $1: os_type, e.g. ubuntu
-# $2: os_version, e.g. 16.04
-# $3: lrose_pkg, e.g. core
 
-os_type=$1
-os_version=$2
-lrose_pkg=$3
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Install .deb file in clean docker container"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set lrose_pkg"
+    echo "          e.g. core, blaze, cyclone, radx"
+    echo "  -t ? :  set os_type"
+    echo "          e.g. debian, ubuntu"
+    echo "  -v ? :  set os_version"
+    echo "          e.g. 9 for debian 9, 18.04 for ubuntu 18.04"
+    echo
+}
+
+scriptName=$(basename $0)
+
+os_type=debian
+os_version=9
+lrose_pkg=core
+debug=true
+
+# Parse command line options.
+while getopts hdt:v:p: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            lrose_pkg=$OPTARG
+            ;;
+        t)
+            os_type=$OPTARG
+            ;;
+        v)
+            os_version=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  installing .deb file in clean docker container"
+  echo "    os_type: ${os_type}"
+  echo "    os_version: ${os_version}"
+  echo "    lrose_pkg: ${lrose_pkg}"
+fi
+
+# go to scripts dir
 
 cd ~/git/lrose-core/build/packages/debian
 
 # compute Dockerfile path
 
 DockerfilePath=/tmp/docker/Dockerfile.install.${os_type}.${os_version}.${lrose_pkg}
-
-echo "Performing lrose install in clean docker container"
-echo "  os_type: ${os_type}"
-echo "  os_version: ${os_version}"
-echo "  lrose_pkg: ${lrose_pkg}"
-echo "  Dockerfile path: " $DockerfilePath
+echo "Dockerfile path: " $DockerfilePath
 
 # create Dockerfile preamble with the FROM command
 
@@ -33,6 +87,8 @@ echo "#" >> ${DockerfilePath}
 # append the body of the Dockerfile
 
 cat Dockerfile.debian.install >> ${DockerfilePath}
+echo "Dockerfile content:"
+cat ${DockerfilePath}
 
 # remove any old image
 
@@ -43,9 +99,9 @@ docker image rm ${tag}
 
 pkgDir=/tmp/${os_type}-${os_version}-${lrose_pkg}/pkgs
 
-# copy install script into that dir so it is available to the container
+# make install scripts available to container
 
-cp run_install_pkg.debian $pkgDir
+scriptsDir=`pwd`
 
 # run the install, creating a new image for it
 
@@ -53,6 +109,8 @@ cd /tmp/docker
 
 docker build \
     -v ${pkgDir}:/pkgs \
+    -v ${scriptsDir}:/scripts \
+    --build-arg OS_TYPE=${os_type} \
     --tag ${tag} \
     --file ${DockerfilePath} .
 
