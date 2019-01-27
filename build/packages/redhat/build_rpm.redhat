@@ -1,8 +1,11 @@
-#! /bin/bash
+#!/bin/bash
 
-###########################################################
-# in the docker build image,
-# create .rpm file, place it in crossmounted dir
+#################################################################
+# This script is to be executed inside a docker redhat container
+# It assume lrose-base is installed at /usr/local/lrose
+#
+# The package will be built and copied to the cross-mounted dir
+# so it will be visible from outside the container.
 
 #--------------------------------------------------------------------
 # usage function
@@ -10,7 +13,7 @@
 
 function usage() {
     echo
-    echo "Make RPM package in docker container"
+    echo "Build the RPM inside the docker container"
     echo "Usage:"
     echo "  $scriptName [options below]"
     echo "  -h   :  help"
@@ -62,38 +65,50 @@ done
 if [ "$debug" == "true" ]
 then
   echo "Running $scriptName"
-  echo "  making RPM package in docker container"
+  echo "  building the RPM inside the docker container"
   echo "    os_type: ${os_type}"
   echo "    os_version: ${os_version}"
   echo "    lrose_pkg: ${lrose_pkg}"
 fi
 
-# go to scripts dir
+# create the rpm structure
 
-cd ~/git/lrose-core/build/packages/redhat
+cd
+mkdir -p rpmbuild
+cd rpmbuild
+mkdir -p BUILD RPMS SOURCES SPECS SRPMS
 
-# create directory that will hold the .rpm file
+# create the spec file
 
-pkgDir=/tmp/${os_type}-${os_version}-${lrose_pkg}/pkgs
-/bin/rm -rf $pkgDir
-mkdir -p $pkgDir
+echo "==>> creating spec file"
 
-# run script in container to make the package
-# use -v to cross-mount the pkgs directory and
-# scripts directory into the container
+cd SPECS
+date_str=`date +"%Y%m%d"`
+release=${date_str}.${os_type}_${os_version}
 
-docker run \
-    -v ${pkgDir}:/pkgs \
-    -v `pwd`:/scripts \
-    build.${lrose_pkg}/${os_type}:${os_version} \
-    /scripts/build_rpm.redhat -t ${os_type} -v ${os_version} -p ${lrose_pkg}
+echo "############################################################" > rpm.spec
+echo "%define release ${release}" >> rpm.spec
+echo "%define version ${lrose_pkg}" >> rpm.spec
+cat /scripts/rpm.spec.body >> rpm.spec
 
-# ensure the release dir exists
+echo "==>> spec file contents:"
+cat rpm.spec
 
-releaseDir=${HOME}/releases/lrose-${lrose_pkg}
-mkdir -p ${releaseDir}
+# build the rpm
 
-# copy the package to the release dir
+echo "==>> building the rpm:"
+cd /root/rpmbuild
+rpmbuild -v -bb ./SPECS/rpm.spec
 
-rsync -av ${pkgDir}/*/*.rpm ${releaseDir}
+# copy the rpm to the cross-mounted director
+
+echo "==>> rsync rpm back to /pkgs"
+
+rsync -av RPMS/* /pkgs
+
+# add write permissions since this is created by root
+# and we need to remove them from the cross-mount later
+
+chmod o+w -R /pkgs/*
+chmod g+w -R /pkgs/*
 

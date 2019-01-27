@@ -2,12 +2,10 @@
 # Install lrose rpm in clean container
 
 ARG OS_TYPE=centos
-ARG OS_VERSION=7
-ARG LROSE_PKG=core
 
 # run test script
 
-RUN /scripts/perform_install_and_test ${OS_TYPE} ${OS_VERSION} ${LROSE_PKG}
+RUN /scripts/perform_install.redhat -t ${OS_TYPE}
 
 #####################################################
 
