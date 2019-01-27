@@ -31,17 +31,20 @@ def main():
     global coreDir
     global codebaseDir
     global versionStr
-    global debugStr
     global argsStr
     global releaseName
     global tarName
     global tarDir
+    global debugStr
+    global logPath
+    global logFp
 
     # parse the command line
 
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
     releaseDirDefault = os.path.join(homeDir, 'releases')
+    logDirDefault = '/tmp/create_src_release/logs'
     parser = OptionParser(usage)
     parser.add_option('--debug',
                       dest='debug', default=True,
@@ -61,6 +64,9 @@ def main():
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
+    parser.add_option('--logDir',
+                      dest='logDir', default=logDirDefault,
+                      help='Logging dir')
     parser.add_option('--force',
                       dest='force', default=False,
                       action="store_true",
@@ -114,12 +120,18 @@ def main():
     tarName = releaseName + ".tgz"
     tarDir = os.path.join(coreDir, releaseName)
 
+    if (os.path.isdir(options.logDir) == False):
+        os.makedirs(options.logDir)
+    logPath = os.path.join(options.logDir, "master");
+    logFp = open(logPath, "w+")
+
     if (options.debug):
         print("Running %s:" % thisScriptName, file=sys.stderr)
         print("  package: ", options.package, file=sys.stderr)
         print("  osx: ", options.osx, file=sys.stderr)
         print("  releaseTopDir: ", options.releaseTopDir, file=sys.stderr)
         print("  releaseDir: ", releaseDir, file=sys.stderr)
+        print("  logDir: ", options.logDir, file=sys.stderr)
         print("  tmpDir: ", tmpDir, file=sys.stderr)
         print("  force: ", options.force, file=sys.stderr)
         print("  static: ", options.static, file=sys.stderr)
@@ -137,10 +149,12 @@ def main():
 
     # get repos from git
 
+    logPath = prepareLogFile("git-checkout");
     gitCheckout()
 
     # install the distribution-specific makefiles
 
+    logPath = prepareLogFile("install-package-makefiles");
     os.chdir(codebaseDir)
     cmd = "./make_bin/install_package_makefiles.py --package " + \
           options.package + " --codedir . "
@@ -150,12 +164,12 @@ def main():
 
     # trim libs and apps to those required by distribution makefiles
 
-    if (options.package != "lrose-core"):
-        trimToMakefiles("libs")
-        trimToMakefiles("apps")
+    trimToMakefiles("libs")
+    trimToMakefiles("apps")
 
     # set up autoconf
 
+    logPath = prepareLogFile("setup-autoconf");
     setupAutoconf()
 
     # create the release information file
@@ -164,20 +178,24 @@ def main():
 
     # run qmake for QT apps to create moc_ files
 
+    logPath = prepareLogFile("create-qt-moc-files");
     hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
     createQtMocFiles(hawkEyeDir)
 
     # prune any empty directories
 
+    logPath = prepareLogFile("prune-empty_dirs");
     prune(codebaseDir)
 
     # create the tar file
 
+    logPath = prepareLogFile("create-tar-file");
     createTarFile()
 
     # create the brew formula for OSX builds
 
     if (options.osx):
+        logPath = prepareLogFile("create-brew-formula");
         createBrewFormula()
 
     # move the tar file up into release dir
@@ -190,6 +208,7 @@ def main():
 
     shutil.rmtree(tmpDir)
 
+    logFp.close()
     sys.exit(0)
 
 ########################################################################
@@ -221,8 +240,8 @@ def savePrevReleases():
     for name in oldReleases:
         newName = os.path.join(prevDirPath, name)
         if (options.debug):
-            print("saving oldRelease: ", name, file=sys.stderr)
-            print("to: ", newName, file=sys.stderr)
+            print("saving oldRelease: ", name, file=logFp)
+            print("to: ", newName, file=logFp)
         os.rename(name, newName)
 
 ########################################################################
@@ -418,9 +437,9 @@ def createBrewFormula():
     # check if script exists
 
     if (os.path.isfile(scriptPath) == False):
-        print("WARNING - ", thisScriptName, file=sys.stderr)
-        print("  No script: ", scriptPath, file=sys.stderr)
-        print("  Will not build brew formula for package", file=sys.stderr)
+        print("WARNING - ", thisScriptName, file=logFp)
+        print("  No script: ", scriptPath, file=logFp)
+        print("  Will not build brew formula for package", file=logFp)
         return
 
     # create the brew formula file
@@ -448,8 +467,8 @@ def getValueListForKey(path, key):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot open file:", path, file=sys.stderr)
+        print("ERROR - ", thisScriptName, file=logFp)
+        print("  Cannot open file:", path, file=logFp)
         return valueList
 
     lines = fp.readlines()
@@ -497,7 +516,7 @@ def getValueListForKey(path, key):
 
 def trimToMakefiles(subDir):
 
-    print("Trimming unneeded dirs, subDir: " + subDir, file=sys.stderr)
+    print("Trimming unneeded dirs, subDir: " + subDir, file=logFp)
 
     # get list of subdirs in makefile
 
@@ -507,56 +526,33 @@ def trimToMakefiles(subDir):
     # need to allow upper and lower case Makefile (makefile or Makefile)
     subNameList = getValueListForKey("makefile", "SUB_DIRS")
     if not subNameList:
-        print("Trying uppercase Makefile ... ", file=sys.stderr)
+        print("Trying uppercase Makefile ... ", file=logFp)
         subNameList = getValueListForKey("Makefile", "SUB_DIRS")
     
     for subName in subNameList:
         if (os.path.isdir(subName)):
-            print("  need sub dir: " + subName, file=sys.stderr)
+            print("  need sub dir: " + subName, file=logFp)
             
     # get list of files in subDir
 
     entries = os.listdir(dirPath)
     for entry in entries:
         theName = os.path.join(dirPath, entry)
-        print("considering: " + theName, file=sys.stderr)
+        print("considering: " + theName, file=logFp)
         if (entry == "scripts") or (entry == "example_scripts") or (entry == "include"):
             # always keep scripts directories
             continue
         if (os.path.isdir(theName)):
             if (entry not in subNameList):
-                print("discarding it", file=sys.stderr)
+                print("discarding it", file=logFp)
                 shutil.rmtree(theName)
             else:
-                print("keeping it and recurring", file=sys.stderr)
+                print("keeping it and recurring", file=logFp)
                 # check this child's required subdirectories ( recurse )
                 # nextLevel = os.path.join(dirPath, entry)
-                # print >> sys.stderr, "trim to makefile on subdirectory: "
+                # print >> logFp, "trim to makefile on subdirectory: "
                 trimToMakefiles(os.path.join(subDir, entry))
 
-########################################################################
-# Run a command in a shell, wait for it to complete
-
-def shellCmd(cmd):
-
-    if (options.debug):
-        print("running cmd:", cmd, " .....", file=sys.stderr)
-    
-    try:
-        retcode = subprocess.check_call(cmd, shell=True)
-        if retcode != 0:
-            print("Child exited with code: ", retcode, file=sys.stderr)
-            sys.exit(1)
-        else:
-            if (options.verbose):
-                print("Child returned code: ", retcode, file=sys.stderr)
-    except OSError as e:
-        print("Execution failed:", e, file=sys.stderr)
-        sys.exit(1)
-
-    if (options.debug):
-        print(".... done", file=sys.stderr)
-    
 ########################################################################
 # prune empty dirs
 
@@ -567,14 +563,14 @@ def prune(tree):
         contents = os.listdir(tree)
 
         if (len(contents) == 0):
-            print("pruning empty dir: " + tree, file=sys.stderr)
+            print("pruning empty dir: " + tree, file=logFp)
             shutil.rmtree(tree)
         else:
             for l in contents:
                 # remove CVS directories
                 if (l == "CVS") or (l == ".git"): 
                     thepath = os.path.join(tree,l)
-                    print("pruning dir: " + thepath, file=sys.stderr)
+                    print("pruning dir: " + thepath, file=logFp)
                     shutil.rmtree(thepath)
                 else:
                     thepath = os.path.join(tree,l)
@@ -583,10 +579,58 @@ def prune(tree):
             # check if this tree is now empty
             newcontents = os.listdir(tree)
             if (len(newcontents) == 0):
-                print("pruning empty dir: " + tree, file=sys.stderr)
+                print("pruning empty dir: " + tree, file=logFp)
                 shutil.rmtree(tree)
 
 
+########################################################################
+# prepare log file
+
+def prepareLogFile(logFileName):
+
+    global logFp
+
+    logFp.close()
+    logPath = os.path.join(options.logDir, logFileName + ".log");
+    if (logPath.find('no-logging') >= 0):
+        return logPath
+    print("========================= " + logFileName + " =========================", file=sys.stderr)
+    if (options.verbose):
+        print("====>> Creating log file: " + logPath + " <<==", file=sys.stderr)
+    logFp = open(logPath, "w+")
+    logFp.write("===========================================\n")
+    logFp.write("Log file from script: " + thisScriptName + "\n")
+
+    return logPath
+
+########################################################################
+# Run a command in a shell, wait for it to complete
+
+def shellCmd(cmd):
+
+    print("Running cmd:", cmd, file=sys.stderr)
+    
+    if (logPath.find('no-logging') >= 0):
+        cmdToRun = cmd
+    else:
+        print("Log file is:", logPath, file=sys.stderr)
+        print("    ....", file=sys.stderr)
+        cmdToRun = cmd + " 1>> " + logPath + " 2>&1"
+
+    try:
+        retcode = subprocess.check_call(cmdToRun, shell=True)
+        if retcode != 0:
+            print("Child exited with code: ", retcode, file=sys.stderr)
+            sys.exit(1)
+        else:
+            if (options.verbose):
+                print("Child returned code: ", retcode, file=sys.stderr)
+    except OSError as e:
+        print("Execution failed:", e, file=sys.stderr)
+        sys.exit(1)
+
+    print("    done", file=sys.stderr)
+    
 ########################################################################
 # Run - entry point
 
