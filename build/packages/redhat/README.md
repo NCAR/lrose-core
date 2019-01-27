@@ -101,7 +101,7 @@ This step is not needed for fedora.
 The use yum to install the RPM. For example:
 
 ```
-  yum install -r ./lrose-blaze-20190127.fedora_29.x86_64.rpm
+  yum install -y ./lrose-blaze-20190127.fedora_29.x86_64.rpm
 ```
 
 Note that you need to specify the absolute path, hence the '.'.
