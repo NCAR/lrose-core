@@ -31,18 +31,6 @@
 #ifndef INCFieldRadarh
 #define INCFieldRadarh
 
-#ifdef OK_RPC
-
-#if defined(UNIX) && defined(sun)
-#include <rpc/rpc.h>
-#else
-#if defined(WRS)
-#include "rpc/rpc.h"
-#endif
-#endif
-
-#endif
-
 struct field_radar_i {
     char  field_radar_info[4];	/* Identifier for a field written */
 				/* radar information block */
@@ -254,11 +242,5 @@ struct field_radar_i_v0 {
 
 typedef struct field_radar_i field_radar_i;
 typedef struct field_radar_i FIELDRADAR;
-
-#ifdef OK_RPC
-
-bool_t xdr_field_radar_i(XDR *, FIELDRADAR *);
-
-#endif 
 
 #endif 

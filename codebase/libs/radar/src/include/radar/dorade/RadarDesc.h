@@ -31,19 +31,6 @@
 #ifndef INCRadarDesch
 #define INCRadarDesch
 
-#ifdef OK_RPC
-
-#if defined(UNIX) && defined(sun)
-#include <rpc/rpc.h>
-#else
-# if defined(WRS)
-#   include "rpc/rpc.h"
-# endif
-#endif /* UNIX */
-
-
-#endif /* OK_RPC */
-
 struct radar_d {
     char  radar_des[4];		/* Identifier for a radar descriptor */
 				/* block (ascii characters "RADD"). */
@@ -145,13 +132,6 @@ struct radar_d {
 
 typedef struct radar_d radar_d;
 typedef struct radar_d RADARDESC;
-
-#ifdef OK_RPC
-
-bool_t xdr_radar_d(XDR *, RADARDESC *);
-
-#endif /* OK_RPC */
-
 
 struct radar_d_v01 {
     char  radar_des[4];		/* Identifier for a radar descriptor */

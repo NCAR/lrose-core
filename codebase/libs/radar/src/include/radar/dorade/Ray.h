@@ -53,18 +53,6 @@
 #ifndef INCRayh
 #define INCRayh
 
-#ifdef OK_RPC
-
-#if defined(UNIX) && defined(sun)
-#include <rpc/rpc.h>
-#else
-#if defined(WRS)
-#include "rpc/rpc.h"
-#endif
-#endif /* UNIX */
-
-#endif /* OK_RPC */
-
 struct ray_i {
     char  ray_info[4];		/* Identifier for a data ray info. */
 				/* block (ascii characters "RYIB"). */
@@ -87,13 +75,6 @@ struct ray_i {
 
 typedef struct ray_i ray_i;
 typedef struct ray_i RAY;
-
-#ifdef OK_RPC
-#if defined(sun) || defined(WRS)
-bool_t xdr_ray_i(XDR *, RAY *);
-#endif
-
-#endif /* OK_RPC */
 
 #endif /* INCRayh */
 

@@ -54,18 +54,6 @@
 #ifndef INCCellSpacingFPh
 #define INCCellSpacingFPh
 
-#ifdef OK_RPC
-
-#if defined(UNIX) && defined(sun)
-#include <rpc/rpc.h>
-#else 
-# if defined(WRS)
-#   include "rpc/rpc.h"
-# endif
-#endif /* UNIX */
-
-#endif /* OK_RPC */
-
 struct cell_spacing_fp_d {
     char   cell_spacing_des[4]; /* Identifier for a cell spacing descriptor */
 				/* (ascii characters CSFD). */
@@ -80,13 +68,6 @@ struct cell_spacing_fp_d {
 
 typedef struct cell_spacing_fp_d cell_spacing_fp_d;
 typedef struct cell_spacing_fp_d CELLSPACINGFP;
-
-#ifdef OK_RPC
-#if defined(sun) || defined(WRS)
-bool_t xdr_cell_spacing_fp_d(XDR *, cell_spacing_fp_d *);
-#endif
-
-#endif /* OK_RPC */
 
 #endif /* INCCellSpacingPFh */
 

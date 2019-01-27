@@ -53,18 +53,6 @@
 #ifndef INCVolumeh
 #define INCVolumeh
 
-#ifdef OK_RPC
-
-#if defined(UNIX) && defined(sun)
-#include <rpc/rpc.h>
-#else 
-#if defined(WRS)
-#include "rpc/rpc.h"
-#endif
-#endif /* UNIX */
-
-#endif /* OK_RPC */
-
 struct volume_d {
     char  volume_des[4];	/* Volume descriptor identifier: ASCII */
 				/* characters "VOLD" stand for Volume */
@@ -98,13 +86,6 @@ struct volume_d {
 
 typedef struct volume_d volume_d;
 typedef struct volume_d VOLUME;
-
-#ifdef OK_RPC
-#if defined(sun) || defined(WRS)
-bool_t xdr_volume_d(XDR *, VOLUME *);
-#endif
-
-#endif /* OK_RPC */
 
 #endif /* INCVolumeh */
 

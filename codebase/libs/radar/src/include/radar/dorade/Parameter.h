@@ -66,18 +66,6 @@
 #ifndef INCParameterh
 #define INCParameterh
 
-#ifdef OK_RPC
-
-#if defined(UNIX) && defined(sun)
-#include <rpc/rpc.h>
-#else
-#if defined(WRS)
-#include "rpc/rpc.h"
-#endif
-#endif /* UNIX */
-
-#endif /* OK_RPC */
-
 struct parameter_d {
     char  parameter_des[4];	/* Parameter Descriptor identifier */
 				/* (ascii characters "PARM"). */
@@ -179,13 +167,6 @@ struct parameter_d_v00 {
 
 typedef struct parameter_d parameter_d;
 typedef struct parameter_d PARAMETER;
-
-#ifdef OK_RPC
-#if defined(sun) || defined(WRS)
-bool_t xdr_parameter_d(XDR *, PARAMETER *);
-#endif
-
-#endif /* OK_RPC */
 
 #endif /* INCParameterh */
 

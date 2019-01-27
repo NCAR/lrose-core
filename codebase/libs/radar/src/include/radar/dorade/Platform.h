@@ -59,18 +59,6 @@
 #ifndef INCPlatformh
 #define INCPlatformh
 
-#ifdef OK_RPC
-
-#if defined(UNIX) && defined(sun)
-#include <rpc/rpc.h>
-#else
-#if defined(WRS)
-#include "rpc/rpc.h"
-#endif
-#endif /* UNIX */
-
-#endif /* OK_RPC */
-
 struct platform_i {
     char  platform_info[4];	/* Identifier for the aircraft/ship */
 				/* parameters block (ascii characters ASIB) */
@@ -129,13 +117,6 @@ struct platform_i {
 typedef struct platform_i platform_i;
 typedef struct platform_i PLATFORM;
 typedef struct platform_i AIRCRAFT;
-
-#ifdef OK_RPC
-#if defined(sun) || defined(WRS)
-bool_t xdr_platform_i(XDR *, PLATFORM *);
-#endif
-
-#endif /* OK_RPC */
 
 #endif /* INCPlatformh */
 
