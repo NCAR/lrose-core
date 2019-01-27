@@ -13,7 +13,7 @@ cd ~/git/lrose-core/build/packages/redhat
 make_custom_image.redhat centos 6
 do_lrose_build.redhat centos 6 core
 make_package.redhat centos 6 core
-install_rpm_and_test centos 6 core
+install_pkg_and_test.redhat centos 6 core
 
 # centos 7
 
@@ -22,7 +22,7 @@ cd ~/git/lrose-core/build/packages/redhat
 make_custom_image.redhat centos 7
 do_lrose_build.redhat centos 7 core
 make_package.redhat centos 7 core
-install_rpm_and_test centos 7 core
+install_pkg_and_test.redhat centos 7 core
 
 # fedora 28
 
@@ -31,7 +31,7 @@ cd ~/git/lrose-core/build/packages/redhat
 make_custom_image.redhat fedora 28
 do_lrose_build.redhat fedora 28 core
 make_package.redhat fedora 28 core
-install_rpm_and_test fedora 28 core
+install_pkg_and_test.redhat fedora 28 core
 
 # fedora 29
 
@@ -40,7 +40,7 @@ cd ~/git/lrose-core/build/packages/redhat
 make_custom_image.redhat fedora 29
 do_lrose_build.redhat fedora 29 core
 make_package.redhat fedora 29 core
-install_rpm_and_test fedora 29 core
+install_pkg_and_test.redhat fedora 29 core
 
 # debian 9
 

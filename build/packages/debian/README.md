@@ -1,6 +1,6 @@
 # Building .deb package files for Debian-type OS versions (debian, ubuntu)
 
-## Building .deb files using docker
+## Building .deb package files for LROSE using docker
 
 We use docker containers to build the .deb package files for various Debian-based versions of LINUX.
 
@@ -21,10 +21,10 @@ The following are the steps required in the process:
 | --------- | -------------  |
 | Create custom container | ```make_custom_image.debian``` |
 | Perform the lrose build | ```do_lrose_build.debian``` |
-| Create the deb | ```make_package.debian``` |
-| Install and test the deb | ```install_pkg_and_test.debian``` |
+| Create the package | ```make_package.debian``` |
+| Install and test the package | ```install_pkg_and_test.debian``` |
 
-For the test step, the DEB is installed into a clean container, and one of the applications is run to make sure the installation was successful.
+For the test step, the package is installed into a clean container, and one of the applications is run to make sure the installation was successful.
 
 ## Examples of running the scripts
 

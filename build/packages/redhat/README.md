@@ -22,7 +22,7 @@ The following are the steps required in the process:
 | Create custom container | ```make_custom_image.redhat``` |
 | Perform the lrose build | ```do_lrose_build.redhat``` |
 | Create the rpm | ```make_package.redhat``` |
-| Install and test the rpm | ```install_rpm_and_test``` |
+| Install and test the rpm | ```install_pkg_and_test.redhat``` |
 
 For the test step, the RPM is installed into a clean container, and one of the applications is run to make sure the installation was successful.
 
@@ -34,7 +34,7 @@ For the test step, the RPM is installed into a clean container, and one of the a
   make_custom_image.redhat centos 6
   do_lrose_build.redhat centos 6 blaze
   make_package.redhat centos 6 blaze
-  install_rpm_and_test centos 6 blaze
+  install_pkg_and_test.redhat centos 6 blaze
 ```
 
 ### Centos 7 for core
@@ -43,7 +43,7 @@ For the test step, the RPM is installed into a clean container, and one of the a
   make_custom_image.redhat centos 7
   do_lrose_build.redhat centos 7 core
   make_package.redhat centos 7 core
-  install_rpm_and_test centos 7 core
+  install_pkg_and_test.redhat centos 7 core
 ```
 
 ### Fedora 28 for blaze
@@ -52,7 +52,7 @@ For the test step, the RPM is installed into a clean container, and one of the a
   make_custom_image.redhat fedora 28
   do_lrose_build.redhat fedora 28 blaze
   make_package.redhat fedora 28 blaze
-  install_rpm_and_test fedora 28 blaze
+  install_pkg_and_test.redhat fedora 28 blaze
 ```
 
 ### Fedora 29 for core
@@ -61,7 +61,7 @@ For the test step, the RPM is installed into a clean container, and one of the a
   make_custom_image.redhat fedora 29
   do_lrose_build.redhat fedora 29 core
   make_package.redhat fedora 29 core
-  install_rpm_and_test fedora 29 core
+  install_pkg_and_test.redhat fedora 29 core
 ```
 
 ## Location of RPMs
