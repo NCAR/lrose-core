@@ -36,7 +36,6 @@ def main():
     global displaysDir
     global coreDir
     global codebaseDir
-    global codebasePath
     global scratchBuildDir
     global tmpBinDir
     global tmpLibDir

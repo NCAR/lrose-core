@@ -120,6 +120,8 @@ def main():
     tarName = releaseName + ".tgz"
     tarDir = os.path.join(coreDir, releaseName)
 
+    # initialize logging
+
     if (os.path.isdir(options.logDir) == False):
         os.makedirs(options.logDir)
     logPath = os.path.join(options.logDir, "master");
