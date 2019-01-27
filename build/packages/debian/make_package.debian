@@ -16,17 +16,22 @@ cd ~/git/lrose-core/build/packages/debian
 # create directory to hold the .deb file
 # that will be written
 
-debDir=/tmp/${os_type}-${os_version}-${lrose_pkg}/debs
-/bin/rm -rf $debDir
-mkdir -p $debDir
+pkgDir=/tmp/${os_type}-${os_version}-${lrose_pkg}/pkgs
+/bin/rm -rf $pkgDir
+mkdir -p $pkgDir
+
+# make scripts available to container
+
+scriptsDir=`pwd`
 
 # run script in container to make the package
 # use -v to cross-mount the tmp directory into the container
 
 docker run \
-    -v ${debDir}:/debs \
+    -v ${scriptsDir}:/scripts \
+    -v ${pkgDir}:/pkgs \
     build.${lrose_pkg}/${os_type}:${os_version} \
-    /root/git/lrose-core/build/packages/debian/run_build_pkg.debian ${os_type} ${os_version} ${lrose_pkg}
+    /scripts/build_pkg.debian ${os_type} ${os_version} ${lrose_pkg}
 
 # ensure the release dir exists
 
@@ -34,5 +39,5 @@ mkdir -p ~/releases/lrose-${lrose_pkg}
 
 # copy the package to the release dir
 
-rsync -av ${debDir}/*.deb ~/releases/lrose-${lrose_pkg}
+rsync -av ${pkgDir}/*.deb ~/releases/lrose-${lrose_pkg}
 

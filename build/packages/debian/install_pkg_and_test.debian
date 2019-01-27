@@ -41,18 +41,18 @@ docker image rm ${tag}
 
 # make .deb file available to container
 
-debDir=/tmp/${os_type}-${os_version}-${lrose_pkg}/debs
+pkgDir=/tmp/${os_type}-${os_version}-${lrose_pkg}/pkgs
 
 # copy install script into that dir so it is available to the container
 
-cp run_install_pkg.debian $debDir
+cp run_install_pkg.debian $pkgDir
 
 # run the install, creating a new image for it
 
 cd /tmp/docker
 
 docker build \
-    -v ${debDir}:/debs \
+    -v ${pkgDir}:/pkgs \
     --tag ${tag} \
     --file ${DockerfilePath} .
 

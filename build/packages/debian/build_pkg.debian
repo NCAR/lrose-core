@@ -64,11 +64,11 @@ dpkg-deb --build ${PKG_NAME}
 
 # Copy the package to the cross-mount
 
-rsync -av ${PKG_NAME}.deb /debs
+rsync -av ${PKG_NAME}.deb /pkgs
 
 # add write permissions since this is created by root
 # and we need to remove them from the cross-mount later
 
-chmod o+w -R /debs/*
-chmod g+w -R /debs/*
+chmod o+w -R /pkgs/*
+chmod g+w -R /pkgs/*
 

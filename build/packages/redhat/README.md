@@ -66,7 +66,7 @@ For the test step, the RPM is installed into a clean container, and one of the a
 
 ## Location of RPMs
 
-The RPMs are build in the containers, and then copied across onto cross-mounted locations on the host.
+The RPMs are built in the containers, and then copied across onto cross-mounted locations on the host.
 
 After the RPMs are built they are placed in /tmp.
 

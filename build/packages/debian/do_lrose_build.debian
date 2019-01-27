@@ -38,11 +38,16 @@ cat Dockerfile.debian.build >> ${DockerfilePath}
 tag=build.${lrose_pkg}/${os_type}:${os_version}
 docker image rm ${tag}
 
+# make build scripts available to container
+
+scriptsDir=~/git/lrose-core/build
+
 # run the build, creating a new image for it
 
 cd /tmp/docker
 
 docker build \
+    -v ${scriptsDir}:/scripts \
     --tag ${tag} \
     --build-arg LROSE_PKG=${lrose_pkg} \
     --file ${DockerfilePath} .

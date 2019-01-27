@@ -8,6 +8,6 @@ apt-get update
 
 # install package
 
-cd /debs
+cd /pkgs
 apt-get install -y ./*.deb
 

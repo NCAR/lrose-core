@@ -4,7 +4,7 @@
 
 # install the .deb file
 
-RUN /debs/run_install_pkg.debian
+RUN /pkgs/run_install_pkg.debian
 
 # check that RadxPrint runs
 

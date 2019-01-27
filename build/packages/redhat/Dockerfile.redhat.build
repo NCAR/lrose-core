@@ -3,8 +3,6 @@
 
 ARG LROSE_PKG=core
 
-# checkout lrose-core so we have the scripts
-
 RUN \
     echo "Building lrose in redhat container"; \
     echo "  package is: ${LROSE_PKG}" 
