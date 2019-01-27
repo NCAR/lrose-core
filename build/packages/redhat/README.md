@@ -1,4 +1,4 @@
-# Building RPM packages for RedHat-type OS
+# Building RPM packages for RedHat-type OSs (RHEL, CENTOS, FEDORA)
 
 ## Building RPMS using docker
 
