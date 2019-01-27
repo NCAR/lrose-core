@@ -30,6 +30,8 @@ def main():
     global package
     global prefix
     global releaseName
+    global releaseTag
+    global releaseDate
     global netcdfDir
     global displaysDir
     global coreDir
@@ -44,7 +46,7 @@ def main():
     global runtimeLibRelDir
     global includeDir
     global shareDir
-    global versionStr
+    global dateStr
     global debugStr
     global logPath
 
@@ -72,8 +74,8 @@ def main():
                       dest='package', default='lrose-core',
                       help='Package name. Options are: ' + \
                       'lrose-core (default), cidd, radx, titan, lrose-blaze')
-    parser.add_option('--lroseCoreTag',
-                      dest='lroseCoreTag', default='master',
+    parser.add_option('--releaseDate',
+                      dest='releaseDate', default='latest',
                       help='Tag to check out lrose-core')
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDirDefault,
@@ -135,8 +137,24 @@ def main():
     now = time.gmtime()
     nowTime = datetime(now.tm_year, now.tm_mon, now.tm_mday,
                        now.tm_hour, now.tm_min, now.tm_sec)
-    versionStr = nowTime.strftime("%Y%m%d")
+    dateStr = nowTime.strftime("%Y%m%d")
 
+    # set release tag
+
+    if (options.releaseDate == "latest"):
+        releaseDate = datetime(int(dateStr[0:4]),
+                               int(dateStr[4:6]),
+                               int(dateStr[6:8]))
+        releaseTag = "master"
+        releaseName = options.package + "-" + dateStr
+    else:
+        # check we have a good release date
+        releaseDate = datetime(int(options.releaseDate[0:4]),
+                               int(options.releaseDate[4:6]),
+                               int(options.releaseDate[6:8]))
+        releaseTag = options.package + "-" + options.releaseDate[0:8]
+        releaseName = releaseTag
+    
     # set directories
     
     scratchBuildDir = os.path.join(options.buildDir, 'scratch')
@@ -144,8 +162,7 @@ def main():
     displaysDir = os.path.join(options.buildDir, "lrose-displays")
     netcdfDir = os.path.join(options.buildDir, "lrose-netcdf")
     codebaseDir = os.path.join(coreDir, "codebase")
-    releaseName = options.package + "-" + versionStr + ".src"
-    
+
     tmpBinDir = os.path.join(scratchBuildDir, 'bin')
     tmpLibDir = os.path.join(scratchBuildDir, 'lib')
     binDir = os.path.join(prefix, 'bin')
@@ -158,9 +175,10 @@ def main():
 
     if (options.debug):
         print("Running %s:" % thisScriptName, file=sys.stderr)
-        print("  lroseCoreTag: ", options.lroseCoreTag, file=sys.stderr)
         print("  package: ", package, file=sys.stderr)
+        print("  releaseDate: ", releaseDate, file=sys.stderr)
         print("  releaseName: ", releaseName, file=sys.stderr)
+        print("  releaseTag: ", releaseTag, file=sys.stderr)
         print("  static: ", options.static, file=sys.stderr)
         print("  buildDir: ", options.buildDir, file=sys.stderr)
         print("  logDir: ", options.logDir, file=sys.stderr)
@@ -324,7 +342,7 @@ def gitCheckout():
 
     # lrose core
 
-    shellCmd("git clone --branch " + options.lroseCoreTag + \
+    shellCmd("git clone --branch " + releaseTag + \
              " https://github.com/NCAR/lrose-core")
 
     # netcdf and hdf5
@@ -396,7 +414,7 @@ def createReleaseInfoFile():
     # write release info
 
     info.write("package:" + package + "\n")
-    info.write("version:" + versionStr + "\n")
+    info.write("version:" + dateStr + "\n")
     info.write("release:" + releaseName + "\n")
 
     # close
