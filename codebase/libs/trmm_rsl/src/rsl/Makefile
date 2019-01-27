@@ -48,7 +48,6 @@ SRCS = \
 	histogram.c \
 	image_gen.c \
 	interp.c \
-	lassen.c \
 	lassen_to_radar.c \
 	mcgill.c \
 	mcgill_to_radar.c \
