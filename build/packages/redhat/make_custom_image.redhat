@@ -9,14 +9,25 @@ os_type=$1
 os_version=$2
 
 cd ~/git/lrose-core/build/packages/redhat
+echo "Creating custom docker image for lrose"
+echo "  os_type: ${os_type}"
+echo "  os_version: ${os_version}"
+
+# rhel/centos 6  is a special case since it does
+# not natively support c++11
+
+if [ "${os_version}" = 6 ] ; then
+  echo "  Special build - centos 6"
+  echo "  Dockerfile path: Dockerfile.centos6.custom"
+  docker build \
+      --tag custom/${os_type}:${os_version} \
+      --file Dockerfile.centos6.custom
+  exit 0
+fi
 
 # compute Dockerfile path
 
 DockerfilePath=/tmp/docker/Dockerfile.custom.${os_type}.${os_version}
-
-echo "Creating custom docker image for lrose"
-echo "  os_type: ${os_type}"
-echo "  os_version: ${os_version}"
 echo "  Dockerfile path: " $DockerfilePath
 
 # create Dockerfile preamble with the FROM command
@@ -35,9 +46,7 @@ cat Dockerfile.redhat.custom >> ${DockerfilePath}
 cd /tmp/docker
 
 docker build \
+    --build-arg OS_TYPE=${os_type} \
     --tag custom/${os_type}:${os_version} \
     --file ${DockerfilePath} .
-
-
-
 

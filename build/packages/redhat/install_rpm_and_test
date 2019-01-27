@@ -1,0 +1,63 @@
+#! /bin/bash
+
+###########################################################
+# in clean docker image
+# install rpm and test that the apps work
+# $1: os_type, e.g. centos
+# $2: os_version, e.g. 7
+# $3: lrose_pkg, e.g. core
+
+os_type=$1
+os_version=$2
+lrose_pkg=$3
+
+cd ~/git/lrose-core/build/packages/redhat
+
+# compute Dockerfile path
+
+DockerfilePath=/tmp/docker/Dockerfile.install.${os_type}.${os_version}.${lrose_pkg}
+
+echo "Performing lrose rpm install in clean docker container"
+echo "  os_type: ${os_type}"
+echo "  os_version: ${os_version}"
+echo "  lrose_pkg: ${lrose_pkg}"
+echo "  Dockerfile path: " $DockerfilePath
+
+# create Dockerfile preamble with the FROM command
+
+mkdir -p /tmp/docker
+echo "#####################################################" > ${DockerfilePath}
+echo "FROM ${os_type}:${os_version}" >> ${DockerfilePath}
+echo "#" >> ${DockerfilePath}
+cat Dockerfile.redhat.install >> ${DockerfilePath}
+
+echo "Dockerfile content:"
+cat ${DockerfilePath}
+
+# remove any old image
+
+tag=install.${lrose_pkg}/${os_type}:${os_version}
+docker image rm ${tag}
+
+# make rpm file available to container
+
+pkgDir=/tmp/${os_type}-${os_version}-${lrose_pkg}/pkgs
+
+# make install scripts available to container
+
+scriptsDir=`pwd`
+
+# run the install, creating a new image for it
+
+cd /tmp/docker
+
+docker build \
+    -v ${pkgDir}:/pkgs \
+    -v ${scriptsDir}:/scripts \
+    --build-arg OS_TYPE=${os_type} \
+    --build-arg OS_VERSION=${os_version} \
+    --build-arg LROSE_PKG=${lrose_pkg} \
+    --tag ${tag} \
+    --file ${DockerfilePath} .
+
+

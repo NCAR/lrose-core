@@ -3,10 +3,18 @@
 # start with clean image
 # install the required packages
 
+ARG OS_TYPE=centos
+
 # install required packages
 
 RUN \
-    yum install -y epel-release; \
+    echo "OS_TYPE: ${OS_TYPE}"; \
+    if [ "${OS_TYPE}" = centos ]; then \
+       echo "==>> install epel-release <<=="; \
+       yum install -y epel-release; \
+    fi
+
+RUN \
     yum install -y tcsh wget git \
     tkcvs emacs rsync python \
     m4 make libtool autoconf automake \
