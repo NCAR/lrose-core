@@ -256,7 +256,7 @@ EXTERN_FUNCTION (Notify_error 	notify_start, (void));
 EXTERN_FUNCTION (Notify_error 	notify_stop, (void));
 EXTERN_FUNCTION (Notify_error 	notify_veto_destroy, (Notify_client nclient));
 EXTERN_FUNCTION (void 		notify_perror, (char *str));
-EXTERN_FUNCTION (void 		notify_enable_rpc_svc, (int flag));
+/* EXTERN_FUNCTION (void 		notify_enable_rpc_svc, (int flag)); */
 
 #endif	/* ~_NOTIFY_MIN_SYMBOLS */
 

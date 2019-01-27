@@ -23,7 +23,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <X11/Xatom.h>
-#include <rpc/rpc.h>
+/* #include <rpc/rpc.h> */
 
 /*
  ***********************************************************************

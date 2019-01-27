@@ -46,7 +46,7 @@ static char     sccsid[] = "@(#)ndet_loop.c 20.36 93/06/28 Copyr 1985 Sun Micro"
 #endif /* SVR4 */
 
 #include <stdio.h>		/* For temp debugging */
-#include <rpc/rpc.h>
+/* #include <rpc/rpc.h> */
 
 extern int      errno;
 
@@ -129,7 +129,7 @@ syscall(a)
 
 #endif				/* lint */
 
-static do_rpc = 0;
+/* static do_rpc = 0; */
 static int pipefds[2], pipe_started;
 
 extern          Notify_error
@@ -194,8 +194,8 @@ notify_start()
 		 ndis_clients != NTFY_CLIENT_NULL) ?
 	    &ndet_polling_tv : NTFY_TIMEVAL_NULL;
 	ibits = ndet_ibits;
-	if (do_rpc)
-	    (void) ntfy_fd_cpy_or (&ibits, &svc_fdset);
+	/* if (do_rpc) */
+	/*     (void) ntfy_fd_cpy_or (&ibits, &svc_fdset); */
 	obits = ndet_obits;
 	ebits = ndet_ebits;
 	NTFY_END_CRITICAL;
@@ -317,20 +317,19 @@ notify_start()
 	}
 
 	if (ntfy_fd_anyset(&ibits)) {
-	    fd_set rpc_bits;
-
-	    if (do_rpc) {
-		rpc_bits = svc_fdset;
-		(void) ntfy_fd_cpy_and (&rpc_bits, &ibits);
-		(void) ntfy_fd_cpy_and (&ibits, &ndet_ibits);
-	    }
+	    /* fd_set rpc_bits; */
+	    /* if (do_rpc) { */
+	    /*     rpc_bits = svc_fdset; */
+	    /*     (void) ntfy_fd_cpy_and (&rpc_bits, &ibits); */
+	    /*     (void) ntfy_fd_cpy_and (&ibits, &ndet_ibits); */
+	    /* } */
 	    if (ntfy_new_enum_conditions(ntfy_cndtbl[(int) NTFY_INPUT],
 			      ndet_fd_send, (NTFY_ENUM_DATA) & enum_send) ==
 		(int) NTFY_ENUM_TERM)
 		goto Protected_Error;
 		/* micropriority to UI events over network */
-	    if (do_rpc)
-		svc_getreqset (&rpc_bits);
+	    /* if (do_rpc) */
+	    /*     svc_getreqset (&rpc_bits); */
 	}
 	if (ntfy_fd_anyset(&obits))
 	    if (ntfy_new_enum_conditions(ntfy_cndtbl[(int) NTFY_OUTPUT],
@@ -1068,9 +1067,9 @@ notify_get_signal_context()
     return (ndet_signal_context);
 }
 
-extern void
-notify_enable_rpc_svc (flag)
-    int flag;
-{
-    do_rpc = flag;
-}
+/* extern void */
+/* notify_enable_rpc_svc (flag) */
+/*     int flag; */
+/* { */
+/*     do_rpc = flag; */
+/* } */
