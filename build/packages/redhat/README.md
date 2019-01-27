@@ -85,3 +85,26 @@ These are also copied into the release directories:
   $HOME/releases/lrose-blaze
   $HOME/releases/lrose-core
 ```
+
+## Installing the RPMs on a host system
+
+You use yum to install the RPMs on your host.
+
+For RHEL and CENTOS, you first need to install epel-release:
+
+```
+  yum install -y epel-release
+```
+
+This step is not needed for fedora.
+
+The use yum to install the RPM. For example:
+
+```
+  yum install -r ./lrose-blaze-20190127.fedora_29.x86_64.rpm
+```
+
+Note that you need to specify the absolute path, hence the '.'.
+
+  
+
