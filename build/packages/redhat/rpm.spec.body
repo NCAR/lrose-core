@@ -46,14 +46,14 @@ rsync -a %{prefix}/* %{buildroot}%{prefix}
 # add all files in /usr/local/lrose
 
 %files
-%license LICENSE.txt
+%license /usr/local/lrose/LICENSE.txt
 /usr/local/lrose/bin
 /usr/local/lrose/scripts
 /usr/local/lrose/include
 /usr/local/lrose/lib
 /usr/local/lrose/share
-%doc /usr/local/lrose/docs
-%doc /usr/local/lrose/release_notes
+/usr/local/lrose/docs
+/usr/local/lrose/release_notes
 
 ############################################################
 

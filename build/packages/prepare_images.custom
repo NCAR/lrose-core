@@ -1,0 +1,18 @@
+#! /bin/bash
+
+# remove any running containers
+
+docker rm `docker ps -aq`
+
+# prepare custom images for the OSs
+
+./redhat/make_custom_image.redhat -t centos -v 6
+./redhat/make_custom_image.redhat -t centos -v 7
+./redhat/make_custom_image.redhat -t fedora -v 28
+./redhat/make_custom_image.redhat -t fedora -v 29
+
+./debian/make_custom_image.debian -t debian -v 9
+./debian/make_custom_image.debian -t ubuntu -v 16.04
+./debian/make_custom_image.debian -t ubuntu -v 18.04
+./debian/make_custom_image.debian -t ubuntu -v 18.10
+

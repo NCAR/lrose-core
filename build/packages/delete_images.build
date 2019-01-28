@@ -1,0 +1,61 @@
+#! /bin/bash
+
+# delete build images for the specified package
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Delete build images for the specified package"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set lrose_pkg"
+    echo "          e.g. core, blaze, cyclone, radx"
+    echo
+}
+
+scriptName=$(basename $0)
+lrose_pkg=core
+
+# Parse command line options.
+while getopts hdp: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            lrose_pkg=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+# remove any running containers
+
+docker rm `docker ps -aq`
+
+# delete build images
+
+docker image rm build.${lrose_pkg}/centos:6
+docker image rm build.${lrose_pkg}/centos:7
+docker image rm build.${lrose_pkg}/fedora:28
+docker image rm build.${lrose_pkg}/fedora:29
+
+docker image rm build.${lrose_pkg}/debian:9
+docker image rm build.${lrose_pkg}/ubuntu:16.04
+docker image rm build.${lrose_pkg}/ubuntu:18.04
+docker image rm build.${lrose_pkg}/ubuntu:18.10
+
