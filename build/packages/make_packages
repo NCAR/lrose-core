@@ -1,0 +1,70 @@
+#! /bin/csh
+
+# make packages for specified package
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Make packages for specified package name"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set lrose_pkg"
+    echo "          e.g. core, blaze, cyclone, radx"
+    echo
+}
+
+scriptName=$(basename $0)
+lrose_pkg=core
+
+# Parse command line options.
+while getopts hdp: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            lrose_pkg=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+# make the packages
+
+./redhat/make_package.redhat -t centos -v 6  -p ${lrose_pkg} -r ${release_date}
+./redhat/make_package.redhat -t centos -v 7  -p ${lrose_pkg} -r ${release_date}
+./redhat/make_package.redhat -t fedora -v 28 -p ${lrose_pkg} -r ${release_date}
+./redhat/make_package.redhat -t fedora -v 29 -p ${lrose_pkg} -r ${release_date}
+
+./debian/make_package.debian -t debian -v 9      -p ${lrose_pkg} -r ${release_date}
+./debian/make_package.debian -t ubuntu -v 16.04  -p ${lrose_pkg} -r ${release_date}
+./debian/make_package.debian -t ubuntu -v 18.04  -p ${lrose_pkg} -r ${release_date}
+./debian/make_package.debian -t ubuntu -v 18.10  -p ${lrose_pkg} -r ${release_date}
+
+# perform the install and test
+
+./redhat/perform_install.redhat -t centos -v 6  -p ${lrose_pkg}
+./redhat/perform_install.redhat -t centos -v 7  -p ${lrose_pkg}
+./redhat/perform_install.redhat -t fedora -v 28 -p ${lrose_pkg}
+./redhat/perform_install.redhat -t fedora -v 29 -p ${lrose_pkg}
+
+./debian/perform_install.debian -t debian -v 9      -p ${lrose_pkg}
+./debian/perform_install.debian -t ubuntu -v 16.04  -p ${lrose_pkg}
+./debian/perform_install.debian -t ubuntu -v 18.04  -p ${lrose_pkg}
+./debian/perform_install.debian -t ubuntu -v 18.10  -p ${lrose_pkg}
+
+

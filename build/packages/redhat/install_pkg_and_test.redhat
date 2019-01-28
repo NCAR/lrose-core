@@ -93,7 +93,7 @@ cat ${DockerfilePath}
 # remove any old image
 
 tag=install.${lrose_pkg}/${os_type}:${os_version}
-docker image rm ${tag}
+docker image rm -f ${tag}
 
 # make rpm file available to container
 

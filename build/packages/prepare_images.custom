@@ -1,9 +1,5 @@
 #! /bin/bash
 
-# remove any running containers
-
-docker rm `docker ps -aq`
-
 # prepare custom images for the OSs
 
 ./redhat/make_custom_image.redhat -t centos -v 6

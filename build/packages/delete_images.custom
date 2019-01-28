@@ -1,18 +1,14 @@
 #! /bin/bash
 
-# remove any running containers
-
-docker rm `docker ps -aq`
-
 # delete custom images
 
-docker image rm custom/centos:6
-docker image rm custom/centos:7
-docker image rm custom/fedora:28
-docker image rm custom/fedora:29
+docker image rm -f custom/centos:6
+docker image rm -f custom/centos:7
+docker image rm -f custom/fedora:28
+docker image rm -f custom/fedora:29
 
-docker image rm custom/debian:9
-docker image rm custom/ubuntu:16.04
-docker image rm custom/ubuntu:18.04
-docker image rm custom/ubuntu:18.10
+docker image rm -f custom/debian:9
+docker image rm -f custom/ubuntu:16.04
+docker image rm -f custom/ubuntu:18.04
+docker image rm -f custom/ubuntu:18.10
 

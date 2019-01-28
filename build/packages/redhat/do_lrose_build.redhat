@@ -97,7 +97,7 @@ cat Dockerfile.redhat.build >> ${DockerfilePath}
 # remove old image if present
 
 tag=build.${lrose_pkg}/${os_type}:${os_version}
-docker image rm ${tag}
+docker image rm -f ${tag}
 
 # make build script available to container
 

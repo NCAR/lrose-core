@@ -97,7 +97,7 @@ cat Dockerfile.debian.build >> ${DockerfilePath}
 # remove any old image
 
 tag=build.${lrose_pkg}/${os_type}:${os_version}
-docker image rm ${tag}
+docker image rm -f ${tag}
 
 # make build scripts available to container
 
