@@ -22,6 +22,7 @@ function usage() {
 
 scriptName=$(basename $0)
 lrose_pkg=core
+release_date=latest
 
 # Parse command line options.
 while getopts hdp:r: OPT; do
@@ -62,14 +63,14 @@ done
 
 # perform the install and test
 
-./redhat/perform_install.redhat -t centos -v 6  -p ${lrose_pkg}
-./redhat/perform_install.redhat -t centos -v 7  -p ${lrose_pkg}
-./redhat/perform_install.redhat -t fedora -v 28 -p ${lrose_pkg}
-./redhat/perform_install.redhat -t fedora -v 29 -p ${lrose_pkg}
+./redhat/install_pkg_and_test.redhat -t centos -v 6  -p ${lrose_pkg}
+./redhat/install_pkg_and_test.redhat -t centos -v 7  -p ${lrose_pkg}
+./redhat/install_pkg_and_test.redhat -t fedora -v 28 -p ${lrose_pkg}
+./redhat/install_pkg_and_test.redhat -t fedora -v 29 -p ${lrose_pkg}
 
-./debian/perform_install.debian -t debian -v 9      -p ${lrose_pkg}
-./debian/perform_install.debian -t ubuntu -v 16.04  -p ${lrose_pkg}
-./debian/perform_install.debian -t ubuntu -v 18.04  -p ${lrose_pkg}
-./debian/perform_install.debian -t ubuntu -v 18.10  -p ${lrose_pkg}
+./debian/install_pkg_and_test.debian -t debian -v 9      -p ${lrose_pkg}
+./debian/install_pkg_and_test.debian -t ubuntu -v 16.04  -p ${lrose_pkg}
+./debian/install_pkg_and_test.debian -t ubuntu -v 18.04  -p ${lrose_pkg}
+./debian/install_pkg_and_test.debian -t ubuntu -v 18.10  -p ${lrose_pkg}
 
 

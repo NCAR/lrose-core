@@ -45,9 +45,9 @@ done
 
 # perform the builds
 
-perform_builds -p blaze -r ${release_date}
-perform_builds -p core  -r ${release_date}
-perform_builds -p radx  -r ${release_date}
+#perform_builds -p blaze -r ${release_date}
+#perform_builds -p core  -r ${release_date}
+#perform_builds -p radx  -r ${release_date}
 
 # make the packages
 

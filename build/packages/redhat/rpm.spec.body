@@ -8,13 +8,13 @@
  
 BuildRoot:      %{_topdir}/installedhere
 Summary:        LROSE
-License:        BSD
 Name:           %{name}
 Version:        %{version}
 Release:        %{release}
 Prefix:         /usr/local/lrose
 Group:          Scientific Tools
 AutoReqProv:    no
+License:        BSD
  
 Requires: libX11-devel
 Requires: libXext-devel
@@ -46,14 +46,7 @@ rsync -a %{prefix}/* %{buildroot}%{prefix}
 # add all files in /usr/local/lrose
 
 %files
-%license /usr/local/lrose/LICENSE.txt
-/usr/local/lrose/bin
-/usr/local/lrose/scripts
-/usr/local/lrose/include
-/usr/local/lrose/lib
-/usr/local/lrose/share
-/usr/local/lrose/docs
-/usr/local/lrose/release_notes
+/usr/local/lrose
 
 ############################################################
 
