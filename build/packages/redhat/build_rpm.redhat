@@ -35,6 +35,7 @@ os_type=centos
 os_version=7
 lrose_pkg=core
 debug=true
+release_date=latest
 
 # Parse command line options.
 while getopts hdp:r:t:v: OPT; do

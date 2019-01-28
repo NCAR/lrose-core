@@ -71,7 +71,7 @@ def main():
     parser.add_option('--package',
                       dest='package', default='lrose-core',
                       help='Package name. Options are: ' + \
-                      'lrose-core (default), cidd, radx, titan, lrose-blaze')
+                      'lrose-core (default), lrose-blaze, lrose-radx, lrose-cidd')
     parser.add_option('--releaseDate',
                       dest='releaseDate', default='latest',
                       help='Tag to check out lrose-core')
