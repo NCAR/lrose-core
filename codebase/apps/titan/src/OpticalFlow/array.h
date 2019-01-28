@@ -1,5 +1,5 @@
 // %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
+// ** Rainfields Utilities Library (rainutil)
 // ** Copyright BOM (C) 2013
 // ** Bureau of Meteorology, Commonwealth of Australia, 
 // ** BSD licence applies - redistribution and use in source and binary      
@@ -21,10 +21,8 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
 
-#ifndef ANCILLA_UTIL_ARRAY_H
-#define ANCILLA_UTIL_ARRAY_H
-
-//#include "traits.h"
+#ifndef OPTFLOW_ARRAY_TEMPLATE_H
+#define OPTFLOW_ARRAY_TEMPLATE_H
 
 #include <cstring> // for memcpy
 #include <iterator>
@@ -40,11 +38,8 @@ namespace ancilla {
     }
   };
 
-  // TODO - should use is_trivially_copyable<T> when it becomes available
-
   template <typename T>
   void copy_array(const T* src, size_t count, T* dest)
-
   {
     std::copy(src, src + count, dest);
   }
@@ -231,6 +226,7 @@ namespace ancilla {
   using array1 = array<1, T, alloc, dealloc>;
   template <typename T, class alloc = allocate_array<T>, class dealloc = std::default_delete<T[]>>
   using array2 = array<2, T, alloc, dealloc>;
+
 }
 
 #endif
