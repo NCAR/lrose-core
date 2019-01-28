@@ -19,7 +19,6 @@ libgrib.a    # Depends on gfortran app and development library
 libgrib2.a   # Depends on gfortran, and jasper library
 libhydro.a
 libkd.a
-libmm5.a
 libphysics.a
 libradar.a   # Depends on fftw3 library
 librapformats.a
@@ -29,8 +28,11 @@ libshapelib.a
 libtdrp.a
 libtitan.a
 libtoolsa.a
-libtrmm_rsl.a
+
 #libolgx.a    # Must be compiled in 32-bit mode or on 32-bit OS.
 #libguidexv.a # Must be compiled in 32-bit mode or on 32-bit OS.
 #libxview.a   # Must be compiled in 32-bit mode or on 32-bit OS.
+
+#libmm5.a
+#libtrmm_rsl.a
 

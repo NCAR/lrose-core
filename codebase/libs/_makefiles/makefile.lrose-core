@@ -22,14 +22,12 @@ SUB_DIRS = \
 	didss \
 	dsdata \
 	dsserver \
-        edge \
 	euclid \
 	forayRal \
 	grib \
 	grib2 \
 	hydro \
 	kd \
-        mm5 \
 	physics \
 	radar \
 	rapformats \
@@ -38,7 +36,6 @@ SUB_DIRS = \
 	shapelib \
 	tdrp \
 	titan \
-	toolsa \
-	trmm_rsl
+	toolsa
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
