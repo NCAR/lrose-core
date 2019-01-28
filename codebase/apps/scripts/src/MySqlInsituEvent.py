@@ -1,4 +1,4 @@
-#!/usr/local/python-2.4/bin/python
+#!/usr/bin/env python2
 import sys,os
 import getopt
 import pdb

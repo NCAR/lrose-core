@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 #
 # larc_gdcp_retrive.py -- this script uses ftp to retrive Goes Derived Cloud Product

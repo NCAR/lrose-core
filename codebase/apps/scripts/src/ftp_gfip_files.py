@@ -1,4 +1,4 @@
-#!/usr/local/python/bin/python
+#!/usr/bin/env python2
 
 # This program copies GFIP files from NCEP.  It is meant to be run once
 # per day and will get files from the previous day.

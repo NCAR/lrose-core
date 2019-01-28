@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 #
 # This script reads the airport location files, airports.tbl, and assigns a

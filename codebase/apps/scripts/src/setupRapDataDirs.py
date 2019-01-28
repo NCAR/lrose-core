@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # NOTE: August 10, 2000 (Terri Betancourt)
 #       For autoNowcast projects, the easies way to use this script

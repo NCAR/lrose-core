@@ -1,4 +1,4 @@
-#!/usr/local/python/bin/python
+#!/usr/bin/env python2
 
 # This program converts a NCAR Graphics image into gif.
 

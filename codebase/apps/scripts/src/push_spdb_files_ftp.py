@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 ##############################################################
 # push_spdb_files_ftp.py                                     #

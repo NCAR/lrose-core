@@ -1,4 +1,4 @@
-#!/usr/X11R6/bin/python
+#!/usr/bin/env python2
 
 # This program copies realtime GDCP files from the ftp site, which
 # has been cross mounted to satrs.

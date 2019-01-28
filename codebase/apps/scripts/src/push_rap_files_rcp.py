@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 ##############################################################
 # push_rap_files_rcp.py                                      #

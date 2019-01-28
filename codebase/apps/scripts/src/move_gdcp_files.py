@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 #
 # move_gdcp_files.py -- this script moves and renames files GDCP files from LARC. The goal

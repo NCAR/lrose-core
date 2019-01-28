@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 # ** Copyright UCAR (c) 1992 - 2012 
 # ** University Corporation for Atmospheric Research(UCAR) 

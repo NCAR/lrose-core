@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 #
 # grib_scraps - This script is a companion to grib_notify that copies over

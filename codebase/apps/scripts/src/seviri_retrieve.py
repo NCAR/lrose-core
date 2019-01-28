@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # seviri_retrive.py -- this script uses ftp to retrive SEVIRI satellite
 #   data from NOAA/NESDIS.
