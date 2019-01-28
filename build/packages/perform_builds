@@ -25,7 +25,7 @@ lrose_pkg=core
 release_date=latest
 
 # Parse command line options.
-while getopts hdp: OPT; do
+while getopts hdp:r: OPT; do
     case "$OPT" in
         h)
             usage
