@@ -21,10 +21,8 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
 
-#ifndef RAINUTIL_ARRAY_H
-#define RAINUTIL_ARRAY_H
-
-#include "traits.h"
+#ifndef ARRAY_TEMPLATE_H
+#define ARRAY_TEMPLATE_H
 
 #include <cstring> // for memcpy
 #include <iterator>
@@ -229,13 +227,6 @@ namespace rainfields {
   template <typename T, class alloc = allocate_array<T>, class dealloc = std::default_delete<T[]>>
   using array2 = array<2, T, alloc, dealloc>;
 
-#if 0 // no speed improvement observed thus far...
-  // predeclared common instanciations to reduce compilation time
-  extern template class array<1, float>;
-  extern template class array<1, double>;
-  extern template class array<2, float>;
-  extern template class array<2, double>;
-#endif
 }
 
 #endif
