@@ -19,7 +19,6 @@ class LroseCore < Formula
   depends_on 'udunits'
   depends_on 'fftw'
   depends_on 'flex'
-  depends_on 'jasper'
   depends_on 'jpeg'
   depends_on 'libpng'
   depends_on 'qt'

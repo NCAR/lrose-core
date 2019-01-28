@@ -6,7 +6,7 @@ import os
 template = """
 require 'formula'
 
-class Radx < Formula
+class LroseRadx < Formula
   homepage 'https://ncar.github.io/lrose-core'
 
   url '{0}'
@@ -18,12 +18,14 @@ class Radx < Formula
   depends_on 'udunits'
   depends_on 'fftw'
   depends_on 'flex'
-  depends_on 'jasper'
   depends_on 'jpeg'
+  depends_on 'qt'
   depends_on 'szip'
   depends_on 'pkg-config'
+  depends_on :x11
 
   def install
+    ENV["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
     Dir.chdir("codebase")
     system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"
     system "make install"
@@ -53,7 +55,7 @@ if "check_output" not in dir( subprocess ): # duck punch it in!
     subprocess.check_output = f
 
 def build_radx_formula(tar_url, tar_name, formula_name):
-    """ build a Homebrew forumula file for radx """	
+    """ build a Homebrew forumula file for lrose-radx """	
     dash = tar_name.find('-')
     period = tar_name.find('.', dash)
     version = tar_name[dash+1:period]
@@ -69,4 +71,3 @@ if __name__ == '__main__':
 	build_radx_formula(sys.argv[1], sys.argv[2], sys.argv[3])
     else:
 	print "usage: {0} ftp_dir tar_name formula_name".format(sys.argv[0])
-
