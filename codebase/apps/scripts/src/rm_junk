@@ -1,3 +1,5 @@
+#! /bin/bash
+
 nice find . '(' -name '*~' -o -name 'junk*' \
          -o -name '*.i' -o -name a.out -o -name '*errlog' \
          -o -name 'TAGS' ')' \

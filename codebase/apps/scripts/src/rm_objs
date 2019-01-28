@@ -1,2 +1,4 @@
+#! /bin/bash
+
 nice find . '(' -name core -o -name '*.o' ')' \
          -user $USER -type f -print -exec \rm '{}' \;

@@ -1,2 +1,5 @@
+#! /bin/bash
+
 nice find . '(' -name '*.bak' ')' \
          -user $USER -type f -print -exec \rm '{}' \;
+

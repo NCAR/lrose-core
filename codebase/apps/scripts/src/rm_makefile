@@ -1,2 +1,4 @@
+#! /bin/bash
+
 nice find . '(' -name makefile ')' \
          -user $USER -type f -print -exec \rm '{}' \;

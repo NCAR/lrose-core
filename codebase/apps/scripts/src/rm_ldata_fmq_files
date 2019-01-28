@@ -1,4 +1,4 @@
-#! /bin/csh
+#! /bin/bash
 
 #
 # remove all _latest_data_info.buf and _latest_data_info.stat files
