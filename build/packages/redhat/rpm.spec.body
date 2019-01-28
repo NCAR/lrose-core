@@ -1,9 +1,8 @@
 #===========================================================
 # spec file body for redhat package build for lrose
-# release and version are prepended by calling script
+# name, version and release are prepended by calling script
 #===========================================================
 
-%define name        lrose 
 %define _topdir     /root/rpmbuild
 %define buildroot %{_topdir}/%{name}-%{version}-%{release}-root
  
@@ -47,7 +46,14 @@ rsync -a %{prefix}/* %{buildroot}%{prefix}
 # add all files in /usr/local/lrose
 
 %files
-/usr/local/lrose
+%license LICENSE.txt
+/usr/local/lrose/bin
+/usr/local/lrose/scripts
+/usr/local/lrose/include
+/usr/local/lrose/lib
+/usr/local/lrose/share
+%doc /usr/local/lrose/docs
+%doc /usr/local/lrose/release_notes
 
 ############################################################
 

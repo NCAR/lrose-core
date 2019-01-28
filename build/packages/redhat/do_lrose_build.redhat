@@ -46,11 +46,11 @@ while getopts hdp:r:t:v: OPT; do
         p)
             lrose_pkg=$OPTARG
             ;;
-        t)
-            os_type=$OPTARG
-            ;;
         r)
             release_date=$OPTARG
+            ;;
+        t)
+            os_type=$OPTARG
             ;;
         v)
             os_version=$OPTARG

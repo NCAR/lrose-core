@@ -20,6 +20,8 @@ function usage() {
     echo "  -d   :  turn debugging on"
     echo "  -p ? :  set lrose_pkg"
     echo "          e.g. core, blaze, cyclone, radx"
+    echo "  -r ? :  set release_date"
+    echo "          e.g. latest, 20190105"
     echo "  -t ? :  set os_type"
     echo "          e.g. centos, fedora"
     echo "  -v ? :  set os_version"
@@ -35,7 +37,7 @@ lrose_pkg=core
 debug=true
 
 # Parse command line options.
-while getopts hdt:v:p: OPT; do
+while getopts hdp:r:t:v: OPT; do
     case "$OPT" in
         h)
             usage
@@ -46,6 +48,9 @@ while getopts hdt:v:p: OPT; do
             ;;
         p)
             lrose_pkg=$OPTARG
+            ;;
+        r)
+            release_date=$OPTARG
             ;;
         t)
             os_type=$OPTARG
@@ -69,6 +74,7 @@ then
   echo "    os_type: ${os_type}"
   echo "    os_version: ${os_version}"
   echo "    lrose_pkg: ${lrose_pkg}"
+  echo "    release_date: ${release_date}"
 fi
 
 # create the rpm structure
@@ -82,13 +88,20 @@ mkdir -p BUILD RPMS SOURCES SPECS SRPMS
 
 echo "==>> creating spec file"
 
-cd SPECS
-date_str=`date +"%Y%m%d"`
-release=${date_str}.${os_type}_${os_version}
+name=lrose-${lrose_pkg}
+version=${release_date}
+if [ "$release_date" == "latest" ]
+then
+    version=`date +"%Y%m%d"`
+fi
 
+release=1.${os_type}_${os_version}
+
+cd SPECS
 echo "############################################################" > rpm.spec
+echo "%define name ${name}" >> rpm.spec
+echo "%define version ${version}" >> rpm.spec
 echo "%define release ${release}" >> rpm.spec
-echo "%define version ${lrose_pkg}" >> rpm.spec
 cat /scripts/rpm.spec.body >> rpm.spec
 
 echo "==>> spec file contents:"
@@ -104,11 +117,11 @@ rpmbuild -v -bb ./SPECS/rpm.spec
 
 echo "==>> rsync rpm back to /pkgs"
 
-rsync -av RPMS/* /pkgs
+rsync -av RPMS/*/* /pkgs
 
 # add write permissions since this is created by root
 # and we need to remove them from the cross-mount later
 
-chmod o+w -R /pkgs/*
-chmod g+w -R /pkgs/*
+chmod o+w -R /pkgs
+chmod g+w -R /pkgs
 
