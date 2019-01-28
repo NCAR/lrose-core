@@ -17,7 +17,6 @@ from datetime import datetime
 from datetime import date
 from datetime import timedelta
 import glob
-from sys import platform
 
 def main():
 
@@ -536,7 +535,7 @@ def buildNetcdf():
     if (package == "cidd"):
         shellCmd("./build_and_install_netcdf.m32 -x " + scratchBuildDir)
     else:
-        if platform == "darwin":
+        if sys.platform == "darwin":
             shellCmd("./build_and_install_netcdf.osx -x " + scratchBuildDir)
         else:
             shellCmd("./build_and_install_netcdf -x " + scratchBuildDir)
@@ -561,7 +560,7 @@ def buildPackage():
     os.environ["F77"] = "gfortran"
     os.environ["F90"] = "gfortran"
 
-    if (platform == "darwin"):
+    if (sys.platform == "darwin"):
         os.environ["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
     else:
         os.environ["CXXFLAGS"] = " -std=c++11 "

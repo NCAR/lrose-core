@@ -17,7 +17,7 @@ from datetime import datetime
 from datetime import date
 from datetime import timedelta
 import glob
-from sys import platform
+import platform
 
 def main():
 
@@ -121,14 +121,17 @@ def main():
 
     # get the OS type - x86_64, i686, macosx_64
     
-    getOsType()
+    if (platform.system() == "Darwin"):
+        ostype = "mac_osx"
+    else:
+        ostype = platform.machine()
 
     # set buildDir temporary staging area
     # this is set to a very long name because on macosx
     # we need to reset the library paths and we need to
     # ensure there is space available for the rename
 
-    if (platform == "darwin"):
+    if (sys.platform == "darwin"):
         if (options.prefix == "not-set"):
             buildDir = "/usr/local/lrose"
         else:
@@ -167,7 +170,7 @@ def main():
           file=sys.stderr)
     print("  dateStr: ", dateStr, file=sys.stderr)
     print("  timeStr: ", timeStr, file=sys.stderr)
-    print("  platform: ", platform, file=sys.stderr)
+    print("  platform: ", sys.platform, file=sys.stderr)
     print("  prefix: ", options.prefix, file=sys.stderr)
     print("  package: ", package, file=sys.stderr)
     print("  version: ", version, file=sys.stderr)
@@ -213,7 +216,7 @@ def main():
 
     os.chdir(runDir)
 
-    if (platform != "darwin"):
+    if (sys.platform != "darwin"):
         shellCmd("./codebase/make_bin/installOriginLibFiles.py --binDir " + \
                  buildDir + "/bin " + \
                  "--relDir " + package + "_runtime_libs --debug")
@@ -331,41 +334,6 @@ def readReleaseInfoFile():
         print("==>> done reading info file: ", releaseInfoPath, file=sys.stderr)
 
 ########################################################################
-# get the OS type
-
-def getOsType():
-
-    global ostype
-
-    if (platform == "darwin"):
-        ostype = "mac_osx"
-        return
-
-    ostype = "x86_64"
-    tmpFile = os.path.join("/tmp", "ostype." + timeStr + ".txt")
-
-    cmd = "uname -a > " + tmpFile
-    shellCmd(cmd)
-
-    f = open(tmpFile, 'r')
-    lines = f.readlines()
-    f.close()
-
-    if (len(lines) < 1):
-        print("ERROR getting OS type", file=sys.stderr)
-        print("  'uname -a' call did not succeed", file=sys.stderr)
-        sys.exit(1)
-
-    for line in lines:
-        line = line.strip()
-        if (options.verbose):
-            print("  line: ", line, file=sys.stderr)
-        if (line.find("x86_64") > 0):
-            ostype = "x86_64"
-        elif (line.find("i686") > 0):
-            ostype = "i686"
-            
-########################################################################
 # create the build dir
 
 def createBuildDir():
@@ -426,7 +394,7 @@ def buildNetcdf():
     if (package == "cidd"):
         shellCmd("./build_and_install_netcdf.m32 -x " + buildDir)
     else:
-        if (platform == "darwin"):
+        if (sys.platform == "darwin"):
             shellCmd("./build_and_install_netcdf.osx -x " + buildDir)
         else:
             shellCmd("./build_and_install_netcdf -x " + buildDir)
@@ -461,7 +429,7 @@ def buildPackage():
     os.environ["F77"] = "gfortran"
     os.environ["F90"] = "gfortran"
 
-    if (platform == "darwin"):
+    if (sys.platform == "darwin"):
         os.environ["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
     else:
         os.environ["CXXFLAGS"] = " -std=c++11 "
@@ -568,7 +536,7 @@ def createTarFile():
 
     # for LINUX, move netcdf support into tar dir
 
-    if (platform != "darwin"):
+    if (sys.platform != "darwin"):
 
         netcdfDir = os.path.join(buildDir, "lrose-netcdf")
         netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
