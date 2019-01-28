@@ -1,4 +1,4 @@
-#! /bin/csh
+#! /bin/bash
 
 # make packages for specified package
 
@@ -15,6 +15,8 @@ function usage() {
     echo "  -d   :  turn debugging on"
     echo "  -p ? :  set lrose_pkg"
     echo "          e.g. core, blaze, cyclone, radx"
+    echo "  -r ? :  set release_date"
+    echo "          e.g. latest, 20190105"
     echo
 }
 
@@ -22,7 +24,7 @@ scriptName=$(basename $0)
 lrose_pkg=core
 
 # Parse command line options.
-while getopts hdp: OPT; do
+while getopts hdp:r: OPT; do
     case "$OPT" in
         h)
             usage
@@ -33,6 +35,9 @@ while getopts hdp: OPT; do
             ;;
         p)
             lrose_pkg=$OPTARG
+            ;;
+        r)
+            release_date=$OPTARG
             ;;
         \?)
             # getopts issues an error message

@@ -1,4 +1,4 @@
-#! /bin/csh
+#! /bin/bash
 
 # perform builds for specified package
 
@@ -58,5 +58,4 @@ done
 ./debian/do_lrose_build.debian -t ubuntu -v 16.04  -p ${lrose_pkg} -r ${release_date}
 ./debian/do_lrose_build.debian -t ubuntu -v 18.04  -p ${lrose_pkg} -r ${release_date}
 ./debian/do_lrose_build.debian -t ubuntu -v 18.10  -p ${lrose_pkg} -r ${release_date}
-
 
