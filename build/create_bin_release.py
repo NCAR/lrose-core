@@ -43,6 +43,9 @@ def main():
     global version
     global srcRelease
 
+    global logPath
+    global logFp
+
     global ostype
 
     # parse the command line
@@ -50,6 +53,7 @@ def main():
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
     releaseDirDefault = os.path.join(homeDir, 'releases')
+    logDirDefault = '/tmp/create_bin_release/logs'
     parser = OptionParser(usage)
     parser.add_option('--debug',
                       dest='debug', default=False,
@@ -65,6 +69,9 @@ def main():
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
+    parser.add_option('--logDir',
+                      dest='logDir', default=logDirDefault,
+                      help='Logging dir')
     parser.add_option('--force',
                       dest='force', default=False,
                       action="store_true",
@@ -73,6 +80,10 @@ def main():
                       dest='installScripts', default=False,
                       action="store_true",
                       help='Install scripts as well as binaries')
+    parser.add_option('--useSystemNetcdf',
+                      dest='useSystemNetcdf', default=False,
+                      action="store_true",
+                      help='Use system install of NetCDF and HDF5 instead of building it here')
 
     (options, args) = parser.parse_args()
 
@@ -84,6 +95,15 @@ def main():
         debugStr = " --verbose "
     elif (options.debug):
         debugStr = " --debug "
+
+    # initialize logging
+
+    if (os.path.isdir(options.logDir)):
+        shutil.rmtree(options.logDir)
+    os.makedirs(options.logDir)
+
+    logPath = os.path.join(options.logDir, "no-logging");
+    logFp = open(logPath, "w+")
 
     # runtime
 
@@ -152,7 +172,9 @@ def main():
     print("  package: ", package, file=sys.stderr)
     print("  version: ", version, file=sys.stderr)
     print("  srcRelease: ", srcRelease, file=sys.stderr)
+    print("  codebaseDir: ", codebaseDir, file=sys.stderr)
     print("  buildDir: ", buildDir, file=sys.stderr)
+    print("  logDir: ", options.logDir, file=sys.stderr)
     print("  releaseName: ", releaseName, file=sys.stderr)
     print("  tarName: ", tarName, file=sys.stderr)
     print("  tarDir: ", tarDir, file=sys.stderr)
@@ -166,7 +188,8 @@ def main():
 
     # For full LROSE package, copy in CIDD binaries if they are available
 
-    if (package == "lrose"):
+    if (package == "lrose-core"):
+        logPath = prepareLogFile("copy-cidd-binaries");
         copyCiddBinaries()
 
     # create the tar dir
@@ -175,11 +198,13 @@ def main():
 
     # build netcdf support
 
-    if (platform != "darwin"):
+    if (options.useSystemNetcdf == False):
+        logPath = prepareLogFile("build-netcdf");
         buildNetcdf()
 
     # build the package
 
+    logPath = prepareLogFile("build-package");
     buildPackage()
 
     # detect which dynamic libs are needed
@@ -199,7 +224,6 @@ def main():
     shellCmd("rsync -av LICENSE.txt " + tarDir)
     shellCmd("rsync -av ReleaseInfo.txt " + tarDir)
     shellCmd("rsync -av release_notes " + tarDir)
-    # shellCmd("rsync -av docs/README_INSTALL_BIN.txt " + tarDir)
     shellCmd("rsync -av ./build/install_bin_release.py " + tarDir)
     shellCmd("rsync -av " + buildDir + "/bin " + tarDir)
     shellCmd("rsync -av " + buildDir + "/lib " + tarDir)
@@ -227,6 +251,7 @@ def main():
 
     # check the build
     
+    logPath = prepareLogFile("no-logging");
     os.chdir(runDir)
     print(("============= Checking libs for " + package + " ============="))
     shellCmd("./codebase/make_bin/check_libs.py " + \
@@ -319,7 +344,9 @@ def getOsType():
     ostype = "x86_64"
     tmpFile = os.path.join("/tmp", "ostype." + timeStr + ".txt")
 
-    shellCmd("uname -a > " + tmpFile)
+    cmd = "uname -a > " + tmpFile
+    shellCmd(cmd)
+
     f = open(tmpFile, 'r')
     lines = f.readlines()
     f.close()
@@ -409,15 +436,117 @@ def buildNetcdf():
 
 def buildPackage():
 
-    os.chdir(runDir)
+    global logPath
 
-    args = ""
-    args = args + " --prefix " + buildDir
-    args = args + " --package " + package
+    # args = ""
+    # args = args + " --prefix " + buildDir
+    # args = args + " --package " + package
+    # if (options.installScripts):
+    #     args = args + " --scripts "
+
+    # shellCmd("./build/build_lrose.py " + args)
+
+    # set the environment
+
+    runtimeLibRelDir = package + "_runtime_libs"
+
+    os.environ["LDFLAGS"] = "-L" + buildDir + "/lib " + \
+                            "-Wl,--enable-new-dtags," + \
+                            "-rpath," + \
+                            "'$$ORIGIN/" + runtimeLibRelDir + \
+                            ":$$ORIGIN/../lib" + \
+                            ":" + buildDir + "/lib'"
+
+    os.environ["FC"] = "gfortran"
+    os.environ["F77"] = "gfortran"
+    os.environ["F90"] = "gfortran"
+
+    if (platform == "darwin"):
+        os.environ["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
+    else:
+        os.environ["CXXFLAGS"] = " -std=c++11 "
+
+    # print out environment
+
+    logPath = prepareLogFile("print-environment");
+    cmd = "env"
+    shellCmd(cmd)
+
+    # the build is done relative to the current dir
+
+    baseDir = os.path.join(runDir, "codebase")
+    os.chdir(baseDir)
+
+    # run configure
+
+    logPath = prepareLogFile("run-configure");
+    if (options.useSystemNetcdf):
+        cmd = "./configure --prefix=" + buildDir
+    else:
+        cmd = "./configure --with-hdf5=" + buildDir + \
+              " --with-netcdf=" + buildDir + \
+                                " --prefix=" + buildDir
+    shellCmd(cmd)
+
+    # build the libraries
+
+    logPath = prepareLogFile("build-libs");
+    os.chdir(os.path.join(baseDir, "libs"))
+    cmd = "make -k -j 8"
+    shellCmd(cmd)
+
+    # install the libraries
+
+    logPath = prepareLogFile("install-libs-to-tmp");
+
+    cmd = "make -k install-strip"
+    shellCmd(cmd)
+
+    # build the apps
+
+    logPath = prepareLogFile("build-apps");
+    os.chdir(os.path.join(baseDir, "apps"))
+    cmd = "make -k -j 8"
+    shellCmd(cmd)
+
+    # install the apps
+
+    logPath = prepareLogFile("install-apps-to-tmp");
+    cmd = "make -k install-strip"
+    shellCmd(cmd)
+
+    # optionally install the scripts
+
     if (options.installScripts):
-        args = args + " --scripts "
 
-    shellCmd("./build/build_lrose.py " + args)
+        logPath = prepareLogFile("install-scripts");
+
+        # install perl5
+        
+        perl5Dir = os.path.join(prefix, "lib/perl5")
+        try:
+            os.makedirs(perl5Dir)
+        except:
+            print("Dir exists: " + perl5Dir, file=sys.stderr)
+
+        perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
+        if (os.path.isdir(perl5LibDir)):
+            os.chdir(os.path.join(baseDir, "libs/perl5/src"))
+            shellCmd("rsync -av *pm " + perl5Dir)
+
+        # procmap
+
+        procmapScriptsDir = os.path.join(baseDir, "apps/procmap/src/scripts")
+        if (os.path.isdir(procmapScriptsDir)):
+            os.chdir(procmapScriptsDir)
+            shellCmd("./install_scripts.lrose " + scriptsDir)
+
+        # general
+
+        generalScriptsDir = os.path.join(baseDir, "apps/scripts/src")
+        if (os.path.isdir(generalScriptsDir)):
+            os.chdir(generalScriptsDir)
+            shellCmd("./install_scripts.lrose " + scriptsDir)
 
 ########################################################################
 # create the tar file
@@ -454,15 +583,41 @@ def createTarFile():
     shellCmd("tar cvfz " + tarName + " " + releaseName)
     
 ########################################################################
+# prepare log file
+
+def prepareLogFile(logFileName):
+
+    global logFp
+
+    logFp.close()
+    logPath = os.path.join(options.logDir, logFileName + ".log");
+    if (logPath.find('no-logging') >= 0):
+        return logPath
+    print("========================= " + logFileName + " =========================", file=sys.stderr)
+    if (options.verbose):
+        print("====>> Creating log file: " + logPath + " <<==", file=sys.stderr)
+    logFp = open(logPath, "w+")
+    logFp.write("===========================================\n")
+    logFp.write("Log file from script: " + thisScriptName + "\n")
+
+    return logPath
+
+########################################################################
 # Run a command in a shell, wait for it to complete
 
 def shellCmd(cmd):
 
-    if (options.debug):
-        print("running cmd:", cmd, " .....", file=sys.stderr)
+    print("Running cmd:", cmd, file=sys.stderr)
     
+    if (logPath.find('no-logging') >= 0):
+        cmdToRun = cmd
+    else:
+        print("Log file is:", logPath, file=sys.stderr)
+        print("    ....", file=sys.stderr)
+        cmdToRun = cmd + " 1>> " + logPath + " 2>&1"
+
     try:
-        retcode = subprocess.check_call(cmd, shell=True)
+        retcode = subprocess.check_call(cmdToRun, shell=True)
         if retcode != 0:
             print("Child exited with code: ", retcode, file=sys.stderr)
             sys.exit(1)
@@ -473,8 +628,7 @@ def shellCmd(cmd):
         print("Execution failed:", e, file=sys.stderr)
         sys.exit(1)
 
-    if (options.debug):
-        print(".... done", file=sys.stderr)
+    print("    done", file=sys.stderr)
     
 ########################################################################
 # Run - entry point
