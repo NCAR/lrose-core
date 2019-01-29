@@ -28,14 +28,13 @@ To download this repository from GitHub, run:
 
 | Download instructions |
 | --------------------- |
-| [Download and build source release - LINUX](./docs/download/download_src_and_build.linux.md) |
-| [Download and install binary release - LINUX](./docs/download/download_binary_and_install.linux.md) |
-| [Clone and build latest source - LINUX](./docs/download/clone_src_and_build.linux.md) |
-| [Homebrew build and install - MAC OSX](./docs/download/homebrew_install.mac_osx.md) |
+| [LINUX - download and build source release](./docs/download/download_src_and_build.linux.md) |
+| [LINUX - git clone and build latest source](./docs/download/clone_src_and_build.linux.md) |
+| [OSX - homebrew build and install](./docs/download/homebrew_install.mac_osx.md) |
+| [OSX - install HawkEye from DMG file]() |
+| [LINUX - install from RedHat .rpm package]() |
+| [LINUX - install from Debian .deb package]() |
 | [CIDD build - 32-bit mode - LINUX](./docs/build/CIDD_build.linux.md) |
-| Install from OSX DMG file - coming soon |
-| Install from RedHat .rpm package - coming soon |
-| Install from Debian .deb package - coming soon |
 
 ### CODE DEVELOPMENT
 
