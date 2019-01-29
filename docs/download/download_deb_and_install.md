@@ -1,4 +1,4 @@
-# Download DEBIAN .deb package and install - Debian, Ubuntu
+# Download DEBIAN package and install - Debian, Ubuntu
 
 1. [download](#download)
 2. [install](#install)
