@@ -78,7 +78,8 @@ if test ! "x$NETCDFDIR" = x; then
 fi    
 
 # do not use jasper
-CPPFLAGS="${CPPFLAGS} -DNO_JASPER_LIB -std=c++11"
+CPPFLAGS="${CPPFLAGS} -DNO_JASPER_LIB"
+CXXFLAGS="-std=c++11"
 
 # Set up libtool.
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
