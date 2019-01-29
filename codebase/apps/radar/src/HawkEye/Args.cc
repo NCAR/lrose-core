@@ -30,6 +30,7 @@
 //////////////////////////////////////////////////////////
 
 #include "Args.hh"
+#include "Params.hh"
 #include <cstring>
 #include <cstdlib>
 using namespace std;
@@ -325,6 +326,8 @@ void Args::_usage(ostream &out)
       << "       [ -v, -verbose ] print verbose debug messages\n"
       << "       [ -vv, -extra ] print extra verbose debug messages\n"
       << endl;
+
+  Params::usage(out);
 
 }
 
