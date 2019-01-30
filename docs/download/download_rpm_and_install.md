@@ -25,17 +25,19 @@ If you do not want to do this, you can omit this step.
 
 ## 2. Download
 
-Download the rpm file from:
+Download the RPM file from:
 
 ```
   https://github.com/NCAR/lrose-core/releases
 ```
 
-A typical rpm release would be:
+A typical RPM release would be:
 
 ```
   lrose-core-20190129-1.centos_7.x86_64.rpm
 ```
+
+Choose the RPM that matches your operating system.
 
 <a name="install"/>
 
