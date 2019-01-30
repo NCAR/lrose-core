@@ -31,7 +31,7 @@ To download this repository from GitHub, run:
 | [LINUX - download and build source release](./docs/download/download_src_and_build.linux.md) |
 | [LINUX - git clone and build latest source](./docs/download/clone_src_and_build.linux.md) |
 | [OSX - homebrew build and install](./docs/download/homebrew_install.mac_osx.md) |
-| [OSX - install HawkEye from DMG file]() |
+| [OSX - install HawkEye from DMG file](./docs/download/hawkeye_install_from_dmg.md) |
 | [LINUX - install from RedHat .rpm package](./docs/download/download_rpm_and_install.md) |
 | [LINUX - install from Debian .deb package](./docs/download/download_deb_and_install.md) |
 | [CIDD build - 32-bit mode - LINUX](./docs/build/CIDD_build.linux.md) |
