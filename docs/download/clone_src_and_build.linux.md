@@ -29,14 +29,23 @@ First, you will need to install the required packages.
 sudo yum install -y epel-release
 
 sudo yum install -y \
-tcsh perl perl-Env ftp git svn cvs tkcvs emacs tkcvs m4 \
-gcc gcc-c++ gcc-gfortran glibc-devel libX11-devel libXext-devel \
-libpng-devel libtiff-devel jasper-devel zlib-devel expat-devel libcurl-devel \
-flex-devel fftw3-devel bzip2-devel jasper-devel qt5-qtbase-devel xrdb \
-Xvfb xorg-x11-fonts-misc xorg-x11-fonts-75dpi xorg-x11-fonts-100dpi \
-gnuplot ImageMagick-devel ImageMagick-c++-devel
+    tcsh wget git \
+    tkcvs emacs rsync python \
+    m4 make libtool autoconf automake \
+    gcc gcc-c++ gcc-gfortran glibc-devel \
+    libX11-devel libXext-devel \
+    libpng-devel libtiff-devel zlib-devel \
+    expat-devel libcurl-devel \
+    flex-devel fftw3-devel \
+    bzip2-devel qt5-qtbase-devel \
+    hdf5-devel netcdf-devel \
+    xorg-x11-xauth xorg-x11-apps \
+    rpm-build redhat-rpm-config \
+    rpm-devel rpmdevtools
 
-cd /usr/bin; sudo ln -s qmake-qt5 qmake
+cd /usr/bin
+
+sudo ln -s qmake-qt5 qmake
 
 ```
 
@@ -45,13 +54,21 @@ cd /usr/bin; sudo ln -s qmake-qt5 qmake
 ```
 sudo apt-get update 
 
-sudo apt-get install -y  \
-    libbz2-dev libx11-dev libpng-dev libfftw3-dev \
-    libjasper-dev qtbase5-dev git \
-    gcc g++ gfortran libfl-dev \
-    automake make libtool pkg-config libexpat1-dev python
+sudo apt-get install -y \
+    git gcc g++ gfortran cmake rsync mlocate \
+    automake make libtool pkg-config python \
+    libcurl3-dev curl \
+    libfl-dev libbz2-dev libx11-dev libpng-dev \
+    libfftw3-dev qtbase5-dev libexpat1-dev \
+    libgeographic-dev libeigen3-dev libzip-dev \
+    libnetcdf-dev netcdf-bin libhdf5-dev hdf5-tools
 
-cd /usr/bin; sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake
+# create link for qtmake
+
+cd /usr/bin
+sudo /bin/rm -f qmake qmake-qt5
+sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake
+sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
 
 ```
 

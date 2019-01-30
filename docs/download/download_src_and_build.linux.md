@@ -23,10 +23,9 @@ Recommended distributions are:
 
 First, you will need to install the required packages.
 
-On Redhat-based hosts, run the following (as root or sudo):
+### On Redhat-based hosts, run the following (as root or sudo):
 
 ```
-
 sudo yum install -y epel-release
 
 sudo yum install -y \
@@ -45,13 +44,11 @@ sudo yum install -y \
     rpm-devel rpmdevtools
 
 cd /usr/bin
-
 sudo ln -s qmake-qt5 qmake
-
 
 ```
 
-On Debian-based hosts run the following (as root or sudo):
+### On Debian-based hosts run the following (as root or sudo):
 
 ```
 sudo apt-get update 
