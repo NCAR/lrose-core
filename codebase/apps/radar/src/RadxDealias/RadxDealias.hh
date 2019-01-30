@@ -47,10 +47,11 @@
 #include <vector>
 #include "Args.hh"
 #include "Params.hh"
-#include <rapformats/DsRadarMsg.hh>
-#include <Fmq/DsRadarQueue.hh>
+//#include <rapformats/DsRadarMsg.hh>
+//#include <Fmq/DsRadarQueue.hh>
+#include <Radx/RadxVol.hh>
 #include "Rsl.hh"
-#include "Dsr2Radar.hh"
+//#include "Dsr2Radar.hh"
 #include "FourDD.hh"
 using namespace std;
 
@@ -70,23 +71,29 @@ private:
 
   int _run();
 
+  int _runArchive();
+  int _runFilelist();
+
   //
   //  Read message from fmq
   //
-  int _readMsg(DsRadarQueue &radarQueue,
+  /*  int _readMsg(DsRadarQueue &radarQueue,
 	       DsRadarMsg &radarMsg,
 	       bool &end_of_vol,
 	       int &contents);
+  */
+  int _readFile(const string &filePath, RadxVol &vol);
+
 
   //
   // Dealias _currRadarVol if possible
   // 
-  void _processVol();
-
+  void _processVol(Volume *_prevVelVol, Volume *_currVelVol,
+		   Volume *currDbzVol, time_t volTime);
   //
   // Write beams in _currRadarVol to fmq
   //
-  void _writeVol(DsRadarQueue &outputQueue);
+  int  _writeVol(RadxVol &vol);
 
   //
   // Reset the Dsr2Radar _currRadarVol and _prevRadarVol in
@@ -105,15 +112,22 @@ private:
   
   Params _params;
 
+
+  //  Volume *_extractVel(const RadxVol &radxVol); // , Volume *currVelVol);
+  Volume *_extractFieldData(const RadxVol &radxVol, string fieldName); // , Volume *currDbzVol);
+  
+  void _insertDbz(Volume *currDbzVol, RadxVol &radxVol);
+  void _insertVel(Volume *currVelVol, RadxVol &radxVol);
+
   //
   // Reformatter and holder of beams for current radar vol
   //
-  Dsr2Radar *_currRadarVol;
+  //Dsr2Radar *_currRadarVol;
   
   //
   // Holder of beams for previous radar vol
   //
-  Dsr2Radar *_prevRadarVol;
+  //Dsr2Radar *_prevRadarVol;
   
   //
   // Dealiser methods

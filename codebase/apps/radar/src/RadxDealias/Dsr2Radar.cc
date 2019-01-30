@@ -351,7 +351,7 @@ void Dsr2Radar::fillRadar()
   // space for volume pointers allocated.
   // We leave space for the edited velocity field.
   //
-  radar = RSL::new_radar(numFields + 1);
+  radar = Rsl::new_radar(numFields + 1);
 
   //
   // Year
@@ -452,7 +452,7 @@ void Dsr2Radar::fillVolumes()
       // Create volume struct, volume header member nsweeps is set, 
       // space for sweep pointers allocated.  
       //
-      Volume *volume =  RSL::new_volume(nSweepsVol); 
+      Volume *volume =  Rsl::new_volume(nSweepsVol); 
       
       volume->h.f = NULL;
 
@@ -514,7 +514,7 @@ void Dsr2Radar::fillSweeps()
       // Create sweep struct, sweep header member nrays is set, 
       // space for ray pointers allocated.  
       //
-      Sweep *sweep = RSL::new_sweep(nbeamsTilt);
+      Sweep *sweep = Rsl::new_sweep(nbeamsTilt);
       
       sweep->h.sweep_num = tiltNum;
       
@@ -572,7 +572,7 @@ void Dsr2Radar::beam2rays()
       //
       // Allocate memory for the ray and the range array.
       //
-      Ray *ray = RSL::new_ray(numGates);
+      Ray *ray = Rsl::new_ray(numGates);
       
       //
       // fill in stuff that is the same for all bytewidths
@@ -618,7 +618,7 @@ void Dsr2Radar::clearData()
   // sweeps of each volume, and rays of each sweep.
   //
   if (radar)
-    RSL::free_radar(radar);
+    Rsl::free_radar(radar);
   
   radar = NULL;
 
@@ -1038,14 +1038,14 @@ void Dsr2Radar::deleteLastSweep()
 
   //
   // Free sweep for each field. Note that the rays of the sweep
-  // will be freed through the RSL::free_sweep( Sweep *)
+  // will be freed through the Rsl::free_sweep( Sweep *)
   //
   for( int i = 0; i < numFields; i++)
     {
       int n = fieldSweeps[i].size();
  
       if ( n > 0 )
-	RSL::free_sweep( fieldSweeps[i][n - 1] );
+	Rsl::free_sweep( fieldSweeps[i][n - 1] );
 
       fieldSweeps[i].erase(fieldSweeps[i].end() - 1, fieldSweeps[i].end()); 
     }
@@ -1371,13 +1371,13 @@ void Dsr2Radar::_beam2ray_0(Ray &ray, DsFieldParams &j)
  
   if ( strncmp("DB", j.name.c_str(),2 ) == 0)
   {
-    ray.h.f = RSL::DZ_F;        // assigning a function that converts from Range to float
-    ray.h.invf = RSL::DZ_INVF;  // assigning a function that converts from float to Range
+    ray.h.f = Rsl::DZ_F;        // assigning a function that converts from Range to float
+    ray.h.invf = Rsl::DZ_INVF;  // assigning a function that converts from float to Range
   }
   else
   {
-    ray.h.f = RSL::VR_F;
-    ray.h.invf = RSL::VR_INVF;
+    ray.h.f = Rsl::VR_F;
+    ray.h.invf = Rsl::VR_INVF;
   }
 }
 

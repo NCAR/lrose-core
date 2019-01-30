@@ -129,82 +129,35 @@ int FourDD::Dealias(Volume *lastVelVol, Volume *currVelVol, Volume *currDbzVol,
 {
   Volume* velVolCopy;
   Volume* soundVolume;  
-  unsigned short /* nolast = 0, */ firstGuessSuccess = 0, unfoldSuccess = 0 /* , prep */;
-  // int numSweepsLast;
-  // int numSweepsCurrent;
-
+  unsigned short firstGuessSuccess = 0, unfoldSuccess = 0;
   
-  //
-  // Check for reflectivity volume 
-  //  
-  if (params.prep)
-    {
+  if (params.prep) {
       if(currDbzVol == NULL)
-	printf("No DZ field available\n");
-      // prep = 0;
-    }
-
-  //
-  // Check for current radial velocity data
-  //
-  if (currVelVol != NULL)  
-    {
-      // numSweepsCurrent = currVelVol->h.nsweeps;
-
+	printf("No DBZ field available\n");
+  }
+  if (currVelVol != NULL) {
       //
       // Get a copy of the radial velocity, if unfolding fails we'll 
       // have the original data
       //
-      velVolCopy = RSL::copy_volume(currVelVol);
-    } 
-  else 
-    {
+      velVolCopy = Rsl::copy_volume(currVelVol);
+  } else {
       fprintf(stderr, "No Radial Velocity field available to unfold; aborting\n");
-      
       exit(-1);
-    }
-  
-  //
-  // Check for previous radial velocity volume
-  //
-  if (lastVelVol != NULL) 
-    { 
-      // numSweepsLast = lastVelVol->h.nsweeps;
-    } 
-  else
-    {
-      // nolast = 1;
-    }
-  
+  }
+    
   //
   // Create first guess field from VAD and put in soundVolume.
   //  
-  soundVolume = RSL::copy_volume(currVelVol);
-
-
+  soundVolume = Rsl::copy_volume(currVelVol);
   firstGuess(soundVolume, params.missing_vel, &firstGuessSuccess, volTime);
-
-  if (!firstGuessSuccess) 
-    {
-      //
-      // free memory for soundVolume
-      //
-      RSL::free_volume( soundVolume);
-
-      soundVolume = NULL;
-    }
 
   //
   // Unfold Volume if we have either a previous volume or VAD data
   //
-  if ( firstGuessSuccess  || lastVelVol != NULL) 
-    { 
-      //
-      // Proceed with unfolding  
-      //
+  if ( firstGuessSuccess  || lastVelVol != NULL) { 
       if(params.debug)
 	fprintf(stderr, "Dealiasing\n");
-
       //
       // Remove any bins where reflectivity is missing (if 
       // params.no_dbz_rm_rv == 1 or ouside the interval 
@@ -212,80 +165,55 @@ int FourDD::Dealias(Volume *lastVelVol, Volume *currVelVol, Volume *currDbzVol,
       //
       if (params.prep) 
 	prepVolume(currDbzVol, currVelVol, params.missing_vel);
-     
       //
       // Finally, we call unfoldVolume, which unfolds the velocity field.
       // usuccess is 1 if unfolding has been  performed successfully.  
       //
-      
       unfoldVolume(currVelVol, soundVolume, lastVelVol,params.missing_vel , 
 		   params.filt, &unfoldSuccess);
-    }
+  }
   
-  if (!unfoldSuccess) 
-    {
-      fprintf(stderr, "Velocity Volume was NOT unfolded!\n");
-      
+  if (!unfoldSuccess) {
+      fprintf(stderr, "Velocity Volume was NOT unfolded!\n");      
       //
       // In case we modified the current velocity volume, copy
       // the original data back into bins of the rays of each sweep of
       // current velocity volume.
       //
       int nSweeps = currVelVol->h.nsweeps;
-  
-      for (int i = 0; i < nSweeps;  i++)
-	{
+      for (int i = 0; i < nSweeps;  i++) {
 	  int nRays = currVelVol->sweep[i]->h.nrays;
-	 
-	  for (int j = 0; j < nRays ; j ++)
-	    {
+	  for (int j = 0; j < nRays ; j ++) {
 	      int nBins = currVelVol->sweep[i]->ray[j]->h.nbins;
-	
-	      for (int k = 0; k < nBins  ; k++)
-		{ 
+	      for (int k = 0; k < nBins  ; k++) { 
 		  currVelVol->sweep[i]->ray[j]->range[k] = velVolCopy->sweep[i]->ray[j]->range[k];
-		}
-	    }
-	}
-    }
-  else 
-    {
+	      }
+	  }
+      }
+  } else {
       if(params.debug)
 	printf("Velocity Volume was unfolded.\n");
-    }
+  }
 
-  //
-  // free memory
-  //
-  RSL::free_volume( velVolCopy);
-
-  if( firstGuessSuccess)
-    {
-
-      if (params.output_soundVol)
-	{
-	  //
-	  // Debug 
-	  //
+  if ( firstGuessSuccess) {
+      if (params.output_soundVol) {
 	  int nSweeps = currVelVol->h.nsweeps;
 	  int nRays = currVelVol->sweep[0]->h.nrays;
 	  int nBins = currVelVol->sweep[0]->ray[0]->h.nbins;
 	  
 	  for (int i = 0; i < nSweeps;  i++)
 	    for (int j = 0; j < nRays ; j ++)
-	      for (int k = 0; k < nBins  ; k++)
-		{ 
+	      for (int k = 0; k < nBins  ; k++) { 
 		  currVelVol->sweep[i]->ray[j]->range[k] = soundVolume->sweep[i]->ray[j]->range[k];
-		}
-	      fprintf(stderr, "\nREPLACED VELOCITY DATA WITH SOUNDING DATA!!\n");
-	}
-      RSL::free_volume( soundVolume);
+	      }
+	  fprintf(stderr, "\nREPLACED VELOCITY DATA WITH SOUNDING DATA!!\n");
+      }
+  }
+
+  Rsl::free_volume( velVolCopy);
+  Rsl::free_volume( soundVolume);
       
-    }
-
   return 0;
-
-
 } // FourDD  
 
 
@@ -882,7 +810,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
      Volume* VALS;
 
      numSweeps = rvVolume->h.nsweeps;
-     VALS=RSL::copy_volume(rvVolume);
+     VALS=Rsl::copy_volume(rvVolume);
      if (params.comp_thresh>1.0 || params.comp_thresh<=0.0 ) fraction=0.25;
      else fraction=params.comp_thresh;
      if (params.comp_thresh2>1.0 || params.comp_thresh2<=0.0 ) fraction2=0.25;
@@ -1946,7 +1874,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
      //
      // free memory 
      //
-     RSL::free_volume(VALS);
+     Rsl::free_volume(VALS);
 
      ufree2((void **) GOOD);
 

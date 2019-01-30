@@ -10,7 +10,7 @@ TARGET_FILE = RadxDealias
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lrapmath -lFmq -ldsserver \
+LOC_LIBS = -lSpdb -lRadx -lrapmath -lFmq -ldsserver \
 	-lrapformats -ldidss -leuclid -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
@@ -24,17 +24,19 @@ HDRS = \
 	Rsl.hh \
 	Args.hh \
 	RadxDealias.hh \
-	Dsr2Radar.hh \
-	FourDD.hh 
+	FourDD.hh
+#
+	#Dsr2Radar.hh \
+	#FourDD.hh 
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Rsl.cc \
 	Args.cc \
 	RadxDealias.cc \
-	Dsr2Radar.cc \
 	FourDD.cc \
 	Main.cc 
+	# Dsr2Radar.cc \
 
 #
 # tdrp macros

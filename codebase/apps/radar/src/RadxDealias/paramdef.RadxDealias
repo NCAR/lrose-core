@@ -9,8 +9,8 @@
 //////////////////////////////////////////////////////////////////////
 
 commentdef {
-  p_text = "JamesDealias reads input radar data from fmq, dealiases the
- data, and writes it to an fmq";
+  p_text = "RadxDealias reads input radar data from a file, dealiases the
+ data, and writes it to a file";
 }
 
 commentdef {
@@ -39,32 +39,74 @@ commentdef {
 }
 
 paramdef string {
-  p_descr = "Input URL for DsRadar data via FMQ";
-  p_default = {"fmqp:://localhost::./fmq.dsRadar"};
-} input_fmq_url;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to seek to the end of the input FMQ.";
-  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
-} seek_to_end_of_input;
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
 
 typedef enum {
-  END_OF_VOL_FLAG, LAST_TILT_IN_VOL
-} end_of_vol_decision_t;
-  
-paramdef enum end_of_vol_decision_t {
-  p_default = END_OF_VOL_FLAG;
-  p_descr = "Decision type for end-of-volume.";
-  p_help = "If END_OF_VOL_FLAG, the end-of-volume flag in the data will be used to trigger the end of volume. If LAST_TILT_IN_VOL, the end of the tilt number given by 'last_tilt_in_vol' will be used  to trigger the end-of-volume.";
-} end_of_vol_decision;
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
 
-paramdef int {
-  p_descr = "The tilt number used to end the volume.";
-  p_help = "Only applies if 'end_of_vol_decision' is set to LAST_TILT_IN_VOL.";
-  p_default = 0;
-} last_tilt_in_vol;
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
 
+commentdef {
+  p_header = "OUTPUT DIRECTORY AND FILE NAME";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
+typedef enum {
+  START_AND_END_TIMES,
+  START_TIME_ONLY,
+  END_TIME_ONLY,
+  SPECIFY_FILE_NAME
+} filename_mode_t;
+
+paramdef enum filename_mode_t {
+  p_default = START_AND_END_TIMES;
+  p_descr = "Mode for computing output file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name. SPECIFY_FILE_NAME: file of this name will be written to output_dir.";
+} output_filename_mode;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Optional prefix for output filename.";
+  p_help = "If empty, the standard prefix will be used. Only applies to CfRadial files. Standard prefix is 'cfrad.'";
+} output_filename_prefix;
+
+paramdef string {
+  p_default = "cfradial.test.nc";
+  p_descr = "Name of output file.";
+  p_help = "Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.";
+} output_filename;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
 
 paramdef boolean {
   p_default = TRUE;
@@ -120,30 +162,6 @@ paramdef struct radar_location_t {
 commentdef {
   p_header = "DATA OUTPUT";
 }
-
-paramdef string {
-  p_default = {"fmqp:://localhost::./fmq.dsRadarOut"};
-  p_descr = "URL for output fmq.";
-} output_fmq_url;
-
-paramdef long {
-  p_default = {30000000};
-  p_descr = "Size of output FMQ, in bytes.";
-  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
-} output_fmq_size;
- 
-paramdef long {
-  p_default = {7200};
-  p_descr = "Number of slots in output FMQ.";
-  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
-} output_fmq_nslots;
-
-paramdef boolean {
-  p_default = {FALSE};
-  p_descr = "FMQ compression option.";
-  p_help = "If TRUE FMQ messages are compressed.";
-} output_fmq_compress;
-
 
 commentdef {
   p_header = "Dealiasing Parameters ";
@@ -305,6 +323,11 @@ paramdef float {
 
 } sounding_look_back;
 
+paramdef string {
+  p_default = "";
+  p_descr = "Name of sounding location.";
+  p_help = "If set, we request a profile just for that sounding. If empty, all soundings in the data base are considered valid.";
+} sounding_location_name;
 
 paramdef float {
   p_descr = "Minimum altitude (in km) used from the sounding to calculate average wind";

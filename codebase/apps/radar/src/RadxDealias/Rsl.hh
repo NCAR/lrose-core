@@ -10,7 +10,7 @@
 // Let's just make it all TWO_BYTE_PRECISION
 // If #define USE_TWO_BYTE_PRECISION when building and installing RSL, then
 //typedef unsigned short Range;  // 2 bytes
-typedef Radx::ui16 Range;  // 2 bytes
+typedef Radx::fl32 Range;  // 2 bytes
 // else,
 // typedef unsigned char Range;
 
@@ -20,6 +20,9 @@ typedef Radx::ui16 Range;  // 2 bytes
 
 //
 // copy of trmm_rsl data structures
+
+// ----------------
+// Ray
 
 typedef struct {
   Radx::si32   month; /* Date for this ray; month (1-12). */
@@ -85,9 +88,8 @@ typedef struct {
                  */
 } Ray; 
 
-
-
 // ----------------
+// Sweep
 
 typedef struct {
   Radx::si32 sweep_num;      /* Integer sweep number. */
@@ -107,6 +109,7 @@ typedef struct {
 } Sweep; 
 
 // --------------
+// Volume
 
 typedef struct {
   char *type_str;  /* One of:'Reflectivity', 'Velocity' or 'Spectrum width' */
@@ -123,7 +126,8 @@ typedef struct {
   Sweep **sweep;   /* sweep[0..nsweeps-1]. */
 } Volume; 
 
-//  ------------------
+// ------------------
+// Radar
 
 typedef struct { 
   Radx::si32 month, day, year; 
@@ -237,12 +241,12 @@ typedef struct {
  * TI     TIME (unknown)  for MCTEX data.        TI_INDEX
  */
 
-class RSL
+class Rsl
 {
 public: 
 
-  RSL();
-  ~RSL();
+  Rsl();
+  ~Rsl();
 
   static Radar *new_radar(Radx::si32 nvolumes);
   static Volume *new_volume(Radx::si32 max_sweeps);
@@ -250,8 +254,9 @@ public:
   static Ray *new_ray(Radx::si32 max_bins);
 
   static void free_radar(Radar *radar);
-  static void free_sweep(Sweep *sweep);
   static void free_volume(Volume *volume);
+  static void free_sweep(Sweep *sweep);
+  static void free_ray(Ray *ray);
 
   static Volume *copy_volume(Volume *v);
 
@@ -260,6 +265,13 @@ public:
 
   static Range DZ_INVF(Radx::fl32 x);
   static Range VR_INVF(Radx::fl32 x);
+
+  static void print_volume(Volume *volume);
+  static void print_sweep(Sweep *sweep);
+  static void print_ray(Ray *ray);
+  static void print_ray_header(Ray_header header);
+
+
 };
 
 #endif 
