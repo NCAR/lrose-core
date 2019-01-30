@@ -3,6 +3,7 @@
 1. [download](#download)
 2. [install](#install)
 3. [verify](#verify)
+4. [upgrade](#upgrade)
 
 ## 1. Download
 
@@ -67,3 +68,23 @@ Test by trying the commands:
   /usr/local/lrose/bin/Radx2Grid -h
   /usr/local/lrose/bin/HawkEye
 ```
+
+## 4. Upgrade
+
+Assume the download is in:
+
+```
+  $HOME/downloads
+```
+
+Then:
+
+```
+  cd ~/Downloads
+  yum install -y ./lrose-core-20190129-1.centos_7.x86_64.rpm
+```
+
+Make sure you include the leading '.'.
+
+<a name="verify"/>
+
