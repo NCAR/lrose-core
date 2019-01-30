@@ -4,7 +4,8 @@
 2. [download](#download)
 3. [install](#install)
 4. [verify](#verify)
-5. [upgrade](#upgrade)
+5. [set path](#set_path)
+6. [upgrade](#upgrade)
 
 <a name="prepare"/>
 
@@ -72,15 +73,6 @@ LROSE will be installed in:
   /usr/local/lrose/share
 ```
 
-To run the binaries, and scripts, you will need to add:
-
-```
-  /usr/local/lrose/bin
-  /usr/local/lrose/scripts
-```
-
-to your path.
-
 Test the installation by running the commands:
 
 ```
@@ -90,13 +82,29 @@ Test the installation by running the commands:
   /usr/local/lrose/bin/HawkEye
 ```
 
-If you have trouble with runtime libraries, you may need to add the library directory to your LD_LIBRARY_PATH:
+<a name="set_path"/>
+
+## 5. Set Path
+
+Since the binaries and scripts are installed in:
+
+```
+  /usr/local/lrose/bin
+  /usr/local/lrose/scripts
+```
+
+you need to add these directories to your path.
+
+If you have trouble with runtime libraries, you may need to add the
+installation library directory to your LD_LIBRARY_PATH:
 
 ```
   LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lrose/lib
 ```
 
-## 5. Upgrade
+<a name="upgrade"/>
+
+## 6. Upgrade
 
 To upgrade, you need to download a new version of the RPM.
 
