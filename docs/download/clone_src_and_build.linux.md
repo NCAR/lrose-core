@@ -46,7 +46,6 @@ sudo yum install -y \
 cd /usr/bin
 
 sudo ln -s qmake-qt5 qmake
-
 ```
 
 ### On Debian-based hosts run the following (as root or sudo):
@@ -69,7 +68,6 @@ cd /usr/bin
 sudo /bin/rm -f qmake qmake-qt5
 sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake
 sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
-
 ```
 
 <a name="download"/>
