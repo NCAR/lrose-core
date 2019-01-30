@@ -4,6 +4,7 @@
 2. [download](#download)
 3. [build](#build)
 4. [verify](#verify)
+4. [update](#update)
 
 <a name="prepare"/>
 
@@ -157,5 +158,13 @@ Alternatively, run
 ```
 
 and then inspect the make.log file, searching for `error`.
+
+<a name="update"/>
+
+## 5. Update
+
+To update, just repeat the procedure in sections 2, 3 and 4 above.
+
+The new version will be installed over the previous version.
 
 
