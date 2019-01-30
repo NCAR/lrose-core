@@ -80,6 +80,12 @@ Let us assume you have downloaded the latest core distribution, containing all o
 
 While homebrew is building, it creates log files so you can track the progress.
 
+You can ignore the following message:
+
+```
+  Warning: lrose-core dependency gcc was built with a different C++ standard
+```
+
 The location of the log files for the various distributions will be:
 
 ```
