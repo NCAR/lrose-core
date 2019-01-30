@@ -1,11 +1,29 @@
 # Download RPM and install - RHEL, RedHat, Fedora
 
-1. [download](#download)
-2. [install](#install)
-3. [verify](#verify)
-4. [upgrade](#upgrade)
+1. [prepare](#prepare)
+2. [download](#download)
+3. [install](#install)
+4. [verify](#verify)
+5. [upgrade](#upgrade)
 
-## 1. Download
+<a name="prepare"/>
+
+## 1. Prepare
+
+It is a good idea to update your OS first:
+
+```
+  yum update -y
+```
+
+WARNING - this will update to the latest sub-version of the release.
+For example, from Centos 7.5 to 7.6.
+
+If you do not want to do this, you can omit this step.
+
+<a name="download"/>
+
+## 2. Download
 
 Download the rpm file from:
 
@@ -21,12 +39,12 @@ A typical rpm release would be:
 
 <a name="install"/>
 
-## 2. Install
+## 3. Install
 
 Assume the download is in:
 
 ```
-  $HOME/downloads
+  $HOME/Downloads
 ```
 
 Then:
@@ -36,22 +54,23 @@ Then:
   yum install -y ./lrose-core-20190129-1.centos_7.x86_64.rpm
 ```
 
-Make sure you include the leading '.'.
+Make sure you include the leading ```.```.
 
 <a name="verify"/>
 
-## 3. Verify
+## 4. Verify
 
-Lrose will be installed in:
+LROSE will be installed in:
 
 ```
   /usr/local/lrose/bin
   /usr/local/lrose/scripts
   /usr/local/lrose/include
   /usr/local/lrose/lib
+  /usr/local/lrose/share
 ```
 
-You will need to add:
+To run the binaries, and scripts, you will need to add:
 
 ```
   /usr/local/lrose/bin
@@ -60,7 +79,7 @@ You will need to add:
 
 to your path.
 
-Test by trying the commands:
+Test the installation by running the commands:
 
 ```
   /usr/local/lrose/bin/RadxPrint -h
@@ -69,9 +88,17 @@ Test by trying the commands:
   /usr/local/lrose/bin/HawkEye
 ```
 
-## 4. Upgrade
+If you have trouble with runtime libraries, you may need to add the library directory to your LD_LIBRARY_PATH:
 
-Assume the download is in:
+```
+  LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lrose/lib
+```
+
+## 5. Upgrade
+
+To upgrade, you need to download a new version of the RPM.
+
+Assume the new RPM is in:
 
 ```
   $HOME/downloads
@@ -81,10 +108,10 @@ Then:
 
 ```
   cd ~/Downloads
-  yum install -y ./lrose-core-20190129-1.centos_7.x86_64.rpm
+  yum install -y ./lrose-core-20190130-1.centos_7.x86_64.rpm
 ```
 
-Make sure you include the leading '.'.
+This will upgrade to the new version.
 
-<a name="verify"/>
+You can also downgrade by installing an older version of the RPM.
 
