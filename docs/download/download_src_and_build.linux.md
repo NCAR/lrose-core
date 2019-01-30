@@ -4,7 +4,8 @@
 2. [download](#download)
 3. [build](#build)
 4. [verify](#verify)
-4. [update](#update)
+5. [handling errors](#handling_errors)
+6. [update](#update)
 
 <a name="prepare"/>
 
@@ -135,6 +136,8 @@ Try the commands:
   ~/lrose/bin/HawkEye
 ```
 
+<a name="handling_errors"/>
+
 ## 5. Handling build errors
 
 If the build does not complete successfully, you will need to
@@ -161,7 +164,7 @@ and then inspect the make.log file, searching for `error`.
 
 <a name="update"/>
 
-## 5. Update
+## 6. Update
 
 To update, just repeat the procedure in sections 2, 3 and 4 above.
 
