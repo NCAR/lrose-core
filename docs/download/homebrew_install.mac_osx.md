@@ -4,6 +4,7 @@
 2. [download](#download)
 3. [install](#install)
 4. [verify](#verify)
+5. [update](#update)
 
 <a name="prepare"/>
 
@@ -58,7 +59,7 @@ Run the following ruby script:
 You need to download the brew formula from the lrose repository.
 This formula is used to perform the homebrew build.
 
-Download lrose.rb from:
+For example, download lrose-core.rb from:
 
 ```
   https://github.com/NCAR/lrose-core/releases 
@@ -129,5 +130,43 @@ Try the commands:
   /usr/local/opt/lrose/bin/Radx2Grid -h
   /usr/local/opt/lrose/bin/HawkEye
 ```
+
+<a name="update"/>
+
+## 5. Update to a new version
+
+First, uninstall the current version.
+
+To find the name of the currently-installed lrose package, run:
+
+```
+  brew list
+```
+
+This could be ```lrose```, ```lrose-core```, ```radx``` etc.
+
+Suppose it is ```lrose-core```.
+
+Uninstall it as follows:
+
+```
+  brew uninstall lrose-core
+```
+Next, download the new version of the brew formula, from:
+
+```
+  https://github.com/NCAR/lrose-core/releases 
+```
+
+Choose from the appropriate distribution.
+
+Then:
+
+```
+  cd ~/Downloads
+  brew install lrose-core.rb
+```
+
+See [install](#install) for checking on the install.
 
 
