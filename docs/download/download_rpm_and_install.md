@@ -106,7 +106,7 @@ installation library directory to your LD_LIBRARY_PATH:
 
 ## 6. Upgrade
 
-To upgrade, you need to download a new version of the RPM.
+When the time comes to upgrade, you will need to download a new version of the RPM.
 
 Assume the new RPM is in:
 

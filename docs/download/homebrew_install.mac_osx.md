@@ -4,7 +4,7 @@
 2. [download](#download)
 3. [install](#install)
 4. [verify](#verify)
-5. [update](#update)
+5. [upgrade](#upgrade)
 
 <a name="prepare"/>
 
@@ -137,11 +137,11 @@ Try the commands:
   /usr/local/opt/lrose/bin/HawkEye
 ```
 
-<a name="update"/>
+<a name="upgrade"/>
 
-## 5. Update to a new version
+## 5. Upgrade to a new version
 
-First, uninstall the current version.
+When the time comes to upgrade, you will first need to uninstall the current version.
 
 To find the name of the currently-installed lrose package, run:
 

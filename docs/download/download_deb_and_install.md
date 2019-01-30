@@ -101,7 +101,7 @@ installation library directory to your LD_LIBRARY_PATH:
 
 ## 6. Upgrade
 
-To upgrade, you need to download a new version of the .deb file.
+When the time comes to upgrade, you will need to download a new version of the .deb file.
 
 Assume the new file is in:
 
