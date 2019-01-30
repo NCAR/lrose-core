@@ -1,4 +1,4 @@
-# Download .deb and install - Debian, Ubuntu
+# Download DEB package and install - Debian, Ubuntu
 
 1. [prepare](#prepare)
 2. [download](#download)
