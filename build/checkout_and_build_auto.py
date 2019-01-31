@@ -47,6 +47,7 @@ def main():
     global dateStr
     global debugStr
     global logPath
+    global logFp
 
     # parse the command line
 
@@ -169,7 +170,14 @@ def main():
     includeDir = os.path.join(prefix, 'include')
     shareDir = os.path.join(prefix, 'share')
     
-    logPath = os.path.join(options.logDir, "master");
+    # initialize logging
+
+    if (os.path.isdir(options.logDir) == False):
+        os.makedirs(options.logDir)
+    logPath = os.path.join(options.logDir, "initialize");
+    logFp = open(logPath, "w+")
+
+    # debug print
 
     if (options.debug):
         print("Running %s:" % thisScriptName, file=sys.stderr)
@@ -292,6 +300,7 @@ def main():
     if (options.clean):
         shutil.rmtree(options.buildDir)
 
+    logFp.close()
     sys.exit(0)
 
 ########################################################################
@@ -484,7 +493,7 @@ def getValueListForKey(path, key):
 def trimToMakefiles(subDir):
 
     if (options.verbose):
-        print("Trimming unneeded dirs, subDir: " + subDir, file=sys.stderr)
+        print("Trimming unneeded dirs, subDir: " + subDir, file=logFp)
 
     # get list of subdirs in makefile
 
@@ -495,13 +504,13 @@ def trimToMakefiles(subDir):
     subNameList = getValueListForKey("makefile", "SUB_DIRS")
     if not subNameList:
         if (options.verbose):
-            print("Trying uppercase Makefile ... ", file=sys.stderr)
+            print("Trying uppercase Makefile ... ", file=logFp)
         subNameList = getValueListForKey("Makefile", "SUB_DIRS")
     
     for subName in subNameList:
         if (os.path.isdir(subName)):
             if (options.verbose):
-                print("  need sub dir: " + subName, file=sys.stderr)
+                print("  need sub dir: " + subName, file=logFp)
             
     # get list of files in subDir
 
@@ -509,21 +518,19 @@ def trimToMakefiles(subDir):
     for entry in entries:
         theName = os.path.join(dirPath, entry)
         if (options.verbose):
-            print("considering: " + theName, file=sys.stderr)
-        if (entry == "scripts") or (entry == "include"):
+            print("considering: " + theName, file=logFp)
+        if (entry == "perl5") or (entry == "scripts") or (entry == "include"):
             # always keep scripts directories
             continue
         if (os.path.isdir(theName)):
             if (entry not in subNameList):
                 if (options.verbose):
-                    print("discarding it", file=sys.stderr)
+                    print("discarding it", file=logFp)
                 shutil.rmtree(theName)
             else:
                 if (options.verbose):
-                    print("keeping it and recurring", file=sys.stderr)
-                # check this child's required subdirectories ( recurse )
-                # nextLevel = os.path.join(dirPath, entry)
-                # print >> sys.stderr, "trim to makefile on subdirectory: "
+                    print("keeping it and recurring", file=logFp)
+                # check this child's required subdirectories (recurse)
                 trimToMakefiles(os.path.join(subDir, entry))
 
 ########################################################################
@@ -618,16 +625,20 @@ def buildPackage():
 
         # install perl5
         
-        perl5Dir = os.path.join(prefix, "lib/perl5")
+        perl5InstallDir = os.path.join(prefix, "lib/perl5")
         try:
-            os.makedirs(perl5Dir)
+            os.makedirs(perl5InstallDir)
         except:
-            print("Dir exists: " + perl5Dir, file=sys.stderr)
+            print("Dir exists: " + perl5InstallDir, file=logFp)
 
-        perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
-        if (os.path.isdir(perl5LibDir)):
-            os.chdir(os.path.join(codebaseDir, "libs/perl5/src"))
-            shellCmd("rsync -av *pm " + perl5Dir)
+        perl5SourceDir = os.path.join(codebaseDir, "libs/perl5/src")
+        print("==>> perl5SourceDir:", perl5SourceDir, file=logFp)
+        print("==>> perl5InstallDir:", perl5InstallDir, file=logFp)
+        if (os.path.isdir(perl5SourceDir)):
+            os.chdir(perl5SourceDir)
+            cmd = "rsync -av *pm " + perl5InstallDir
+            print("running cmd:", cmd, file=logFp)
+            shellCmd("rsync -av *pm " + perl5InstallDir)
 
         # procmap
 
@@ -656,7 +667,7 @@ def doFinalInstall():
         os.makedirs(includeDir)
         os.makedirs(shareDir)
     except:
-        print("  note - dirs already exist", file=sys.stderr)
+        print("  note - dirs already exist", file=logFp)
     
     # install docs etc
     
@@ -718,7 +729,7 @@ def prune(tree):
 
         if (len(contents) == 0):
             if (options.verbose):
-                print("pruning empty dir: " + tree, file=sys.stderr)
+                print("pruning empty dir: " + tree, file=logFp)
             shutil.rmtree(tree)
         else:
             for l in contents:
@@ -726,7 +737,7 @@ def prune(tree):
                 if (l == "CVS") or (l == ".git"): 
                     thepath = os.path.join(tree,l)
                     if (options.verbose):
-                        print("pruning dir: " + thepath, file=sys.stderr)
+                        print("pruning dir: " + thepath, file=logFp)
                     shutil.rmtree(thepath)
                 else:
                     thepath = os.path.join(tree,l)
@@ -736,7 +747,7 @@ def prune(tree):
             newcontents = os.listdir(tree)
             if (len(newcontents) == 0):
                 if (options.verbose):
-                    print("pruning empty dir: " + tree, file=sys.stderr)
+                    print("pruning empty dir: " + tree, file=logFp)
                 shutil.rmtree(tree)
 
 ########################################################################
@@ -744,16 +755,19 @@ def prune(tree):
 
 def prepareLogFile(logFileName):
 
+    global logFp
+
+    logFp.close()
     logPath = os.path.join(options.logDir, logFileName + ".log");
     if (logPath.find('no-logging') >= 0):
         return logPath
     print("========================= " + logFileName + " =========================", file=sys.stderr)
     if (options.verbose):
         print("====>> Creating log file: " + logPath + " <<==", file=sys.stderr)
-    fp = open(logPath, "w+")
-    fp.write("===========================================\n")
-    fp.write("Log file from script: " + thisScriptName + "\n")
-    fp.close()
+    logFp = open(logPath, "w+")
+    logFp.write("===========================================\n")
+    logFp.write("Log file from script: " + thisScriptName + "\n")
+    logFp.write(logFileName + "\n")
 
     return logPath
 

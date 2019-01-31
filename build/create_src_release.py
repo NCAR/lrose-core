@@ -551,9 +551,7 @@ def trimToMakefiles(subDir):
                 shutil.rmtree(theName)
             else:
                 print("keeping it and recurring", file=logFp)
-                # check this child's required subdirectories ( recurse )
-                # nextLevel = os.path.join(dirPath, entry)
-                # print >> logFp, "trim to makefile on subdirectory: "
+                # check this child's required subdirectories (recurse)
                 trimToMakefiles(os.path.join(subDir, entry))
 
 ########################################################################
