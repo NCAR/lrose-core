@@ -29,6 +29,7 @@
 #include <euclid/Grid2d.hh>
 #include <euclid/GridAlgs.hh>
 #include <toolsa/LogMsg.hh>
+#include <toolsa/file_io.h>
 
 using namespace rainfields;
 using namespace ancilla;
@@ -54,7 +55,12 @@ int RadxBeamBlock::Run(void)
   // in some cases
   pair<double, double> sw, ne;
   _params.latlonExtrema(sw, ne);
-
+  
+  if (!ta_stat_is_dir(_params.input_dem_path)) {
+    LOGF(LogMsg::ERROR, "DEM dir does not exist: %s", _params.input_dem_path);
+    exit(1);
+  }
+  
   // set up the digital elevation object
   if (!_dem.set(sw, ne))
   {
@@ -157,7 +163,8 @@ void RadxBeamBlock::_processBeam(RayHandler &ray, latlonalt origin,
   angle azAngle = ray.azimuth();
   angle elevAngle = ray.elev();
 
-  LOGF(LogMsg::DEBUG, "  processing beam %lf", ray.azDegrees());
+  LOGF(LogMsg::DEBUG, "  processing beam, el, az: %7.2g, %7.2g", 
+       ray.elevDegrees(), ray.azDegrees());
 
   // subsample each azimuth based on the number of horizontal cells in our
   // cross section
@@ -182,6 +189,15 @@ void RadxBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
 				 const beam_power_cross_section &csec,
 				 angle &max_ray_theta)
 {
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (gate.getData(Params::BLOCKAGE) > 0) {
+      LOGF(LogMsg::DEBUG,
+           "elev, bearing, range, blocakge: %g, %g, %g, %g", 
+           elevAngle, bearing, gate.meters(), gate.getData(Params::BLOCKAGE));
+    }
+  }
+  
   double gateMeters = gate.meters();
 
   // get maximum height of DEM along ray in segment bounded by this bin
