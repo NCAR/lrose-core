@@ -89,6 +89,8 @@ private:
   DigitalElevationHandler _dem; /**< handles reading and use of digital
 				 * elevation data */
 
+  int64_t _nGatesBlocked;
+
   bool _processScan(ScanHandler &scan,
 		    const rainfields::ancilla::beam_power &power_model,
 		    rainfields::latlonalt origin, bool &short_circuit);

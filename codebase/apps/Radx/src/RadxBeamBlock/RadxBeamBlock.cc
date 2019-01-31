@@ -40,6 +40,8 @@ RadxBeamBlock::RadxBeamBlock(const Parms &params) : _params(params),
 						    _dem(params)
 {
 
+  _nGatesBlocked = 0;
+
 }
 
 //------------------------------------------------------------------
@@ -163,8 +165,8 @@ void RadxBeamBlock::_processBeam(RayHandler &ray, latlonalt origin,
   angle azAngle = ray.azimuth();
   angle elevAngle = ray.elev();
 
-  LOGF(LogMsg::DEBUG, "  processing beam, el, az: %7.2g, %7.2g", 
-       ray.elevDegrees(), ray.azDegrees());
+  LOGF(LogMsg::DEBUG, "  processing beam, el, az, nSoFar: %7.2f, %7.2f, %d", 
+       ray.elevDegrees(), ray.azDegrees(), _nGatesBlocked);
 
   // subsample each azimuth based on the number of horizontal cells in our
   // cross section
@@ -190,8 +192,9 @@ void RadxBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
 				 angle &max_ray_theta)
 {
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    if (gate.getData(Params::BLOCKAGE) > 0) {
+  if (gate.getData(Params::BLOCKAGE) > 0) {
+    _nGatesBlocked++;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       LOGF(LogMsg::DEBUG,
            "elev, bearing, range, blocakge: %g, %g, %g, %g", 
            elevAngle, bearing, gate.meters(), gate.getData(Params::BLOCKAGE));
