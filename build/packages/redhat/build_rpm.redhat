@@ -96,7 +96,7 @@ then
     version=`date +"%Y%m%d"`
 fi
 
-release=1.${os_type}_${os_version}
+release=${os_type}_${os_version}
 
 cd SPECS
 echo "############################################################" > rpm.spec

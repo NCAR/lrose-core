@@ -249,15 +249,22 @@ int OutputMdv::writeVol()
 
   if (_mdvx.getNFields() == 0) {
     cerr << "WARNING - no fields in file" << endl;
-    cerr << "  Not writing MDV file, time : " << utimstr(ftime) << endl;
+    cerr << "  Not writing Cartesian file, time : " << utimstr(ftime) << endl;
     cerr << "  Dir path: " << _outputDir << endl;
     return -1;
   }
 
-  LOGF(LogMsg::DEBUG_VERBOSE, "Writing MDV file, time : %s", utimstr(ftime));
-  LOGF(LogMsg::DEBUG_VERBOSE, "  Dir path: %s", _outputDir.c_str());
+  LOGF(LogMsg::DEBUG_VERBOSE, "Writing Cartesian file, time : %s", utimstr(ftime));
+  LOGF(LogMsg::DEBUG_VERBOSE, "  Dir dir: %s", _outputDir.c_str());
 
   // write out file
+  
+  if (_params.write_cartesian_files_as_netcdf) {
+    _mdvx.setWriteFormat(Mdvx::FORMAT_NCF);
+    _mdvx.setMdv2NcfFormat(DsMdvx::NCF_FORMAT_NETCDF4);
+    _mdvx.setMdv2NcfCompression(true, 4);  
+    _mdvx.setMdv2NcfOutput(true, true, true);
+  }
 
   if (!_params.write_latest_data_info) {
     _mdvx.clearWriteLdataInfo();

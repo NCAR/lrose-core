@@ -520,6 +520,8 @@ public:
 
   char* output_cartesian_dir;
 
+  tdrp_bool_t write_cartesian_files_as_netcdf;
+
   projection_t grid_projection;
 
   grid_xy_geom_t grid_xy_geom;
@@ -574,7 +576,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[77];
+  mutable TDRPtable _table[78];
 
   const char *_className;
 

@@ -367,12 +367,17 @@ commentdef {
   p_text = "The Cartesian grid is an additional optional output, where the polar data is interpolated to a PPI grid.";
 }
 
-
 paramdef string {
   p_default = "/tmp/RadxQpe/cart";
   p_descr = "Output directory path for cartesian data.";
   p_help = "Regridded cartesian files will be written to this directory. Set to empty for no cartesian output";
 } output_cartesian_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write Cartesian files as CF NetCDF.";
+  p_help = "If false, the Cartesian files will be written as MDV.";
+} write_cartesian_files_as_netcdf;
 
 typedef enum {
   PROJ_LATLON = 0,
@@ -521,7 +526,6 @@ paramdef int {
   p_descr = "Minimum number of valid data points for the interpolation.";
   p_help = "The program performs an 8-point linear interpolation. This is the number of valid data points, out of the possible 8, which must be present for interpolation to proceed. A high number will exclude marginal points. A low number will include marginal points.";
 } min_nvalid_for_interp;
-
 
 paramdef boolean {
   p_default = FALSE;

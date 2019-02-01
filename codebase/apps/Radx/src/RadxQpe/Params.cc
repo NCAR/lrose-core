@@ -1346,6 +1346,18 @@
     tt->single_val.s = tdrpStrDup("/tmp/RadxQpe/cart");
     tt++;
     
+    // Parameter 'write_cartesian_files_as_netcdf'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_cartesian_files_as_netcdf");
+    tt->descr = tdrpStrDup("Write Cartesian files as CF NetCDF.");
+    tt->help = tdrpStrDup("If false, the Cartesian files will be written as MDV.");
+    tt->val_offset = (char *) &write_cartesian_files_as_netcdf - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'grid_projection'
     // ctype is '_projection_t'
     
