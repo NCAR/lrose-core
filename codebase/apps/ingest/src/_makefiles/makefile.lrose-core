@@ -16,8 +16,11 @@ SUB_DIRS = \
          BomSounding2Spdb \
          CreateStationList \
          CsuSounding2Spdb \
+         EolMobileKml2Spdb \
          GemVolXml2Dsr \
          Gini2Mdv \
+         GoesRGLM2Spdb \
+         GoesRnetCDF2Mdv \
          Grib2Mdv \
          Grib2toMdv \
          GtsSockIngest \
