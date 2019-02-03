@@ -140,7 +140,7 @@ export LD_LIBRARY_PATH=$RAP_LIB_DIR:$LD_LIBRARY_PATH
 # ------------------------------------
 
 cd $codebaseDir
-./make_bin/install_package_makefiles.osx.py --package $package
+./make_bin/installPackageMakefiles.osx.py --package $package
 
 cd $codebaseDir/libs/tdrp/src
 make -j 8 opt

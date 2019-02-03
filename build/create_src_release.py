@@ -159,7 +159,7 @@ def main():
 
     logPath = prepareLogFile("install-package-makefiles");
     os.chdir(codebaseDir)
-    cmd = "./make_bin/install_package_makefiles.py --package " + \
+    cmd = "./make_bin/installPackageMakefiles.py --package " + \
           options.package + " --codedir . "
     if (options.osx):
         cmd = cmd + " --osx "

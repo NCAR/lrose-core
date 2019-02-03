@@ -221,7 +221,7 @@ def main():
 
     logPath = prepareLogFile("install-package-makefiles");
     os.chdir(codebaseDir)
-    shellCmd("./make_bin/install_package_makefiles.py --package " + 
+    shellCmd("./make_bin/installPackageMakefiles.py --package " + 
              package + " --codedir .")
 
     # trim libs and apps to those required by distribution makefiles
