@@ -209,7 +209,6 @@ class GoesRnetCDF2Mdv
   static const time_t J2000_EPOCH_START;
 
   static const float MISSING_DATA_VALUE;
-  static const float BAD_DATA_VALUE;
 
   static const int EMISSIVE_BAND_START;
   

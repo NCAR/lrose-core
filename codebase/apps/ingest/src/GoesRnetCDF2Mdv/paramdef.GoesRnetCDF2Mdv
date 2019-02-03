@@ -205,7 +205,7 @@ paramdef string {
 
 paramdef boolean
 {
-  p_descr = "Option to output data with zero rather than MISSING_DATA_VALIUE";
+  p_descr = "Option to output data with zero rather than MISSING_DATA_VALUE";
   p_help = "";
   p_default = false;
 } init_zero;

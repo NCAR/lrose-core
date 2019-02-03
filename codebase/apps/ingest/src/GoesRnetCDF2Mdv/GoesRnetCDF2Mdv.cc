@@ -67,7 +67,6 @@ const time_t GoesRnetCDF2Mdv::J2000_EPOCH_START = 946728000;
   
 // missing and and bad values used in MDV files.
 const float GoesRnetCDF2Mdv::MISSING_DATA_VALUE = 999999.0;
-const float GoesRnetCDF2Mdv::BAD_DATA_VALUE = 888888.0;
 const int GoesRnetCDF2Mdv::EMISSIVE_BAND_START = 7;
 
 
@@ -408,7 +407,7 @@ MdvxField *GoesRnetCDF2Mdv::_createField(const string &field_name,
   field_hdr.data_dimension = 2;
   field_hdr.scale = 1.0;
   field_hdr.bias = 0.0;
-  field_hdr.bad_data_value =  BAD_DATA_VALUE;
+  field_hdr.bad_data_value =  MISSING_DATA_VALUE;
   field_hdr.missing_data_value =  MISSING_DATA_VALUE;
   STRcopy(field_hdr.field_name_long, long_field_name.c_str(), MDV_LONG_FIELD_LEN);
   STRcopy(field_hdr.field_name, field_name.c_str(), MDV_SHORT_FIELD_LEN);

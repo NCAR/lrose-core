@@ -776,7 +776,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("init_zero");
-    tt->descr = tdrpStrDup("Option to output data with zero rather than MISSING_DATA_VALIUE");
+    tt->descr = tdrpStrDup("Option to output data with zero rather than MISSING_DATA_VALUE");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &init_zero - &_start_;
     tt->single_val.b = pFALSE;
