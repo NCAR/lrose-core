@@ -232,7 +232,7 @@ def main():
     shellCmd("rsync -av " + buildDir + "/lib " + tarDir)
     shellCmd("rsync -av " + buildDir + "/include " + tarDir)
 
-    if (package == "cidd"):
+    if (package == "lrose-cidd"):
         scriptDir = "./codebase/apps/cidd/src/CIDD/example_scripts"
         if (os.path.isdir(scriptDir)):
             shellCmd("rsync -av ./codebase/apps/cidd/src/CIDD/example_scripts " + tarDir)
@@ -391,7 +391,7 @@ def buildNetcdf():
 
     netcdfDir = os.path.join(runDir, "lrose-netcdf")
     os.chdir(netcdfDir)
-    if (package == "cidd"):
+    if (package == "lrose-cidd"):
         shellCmd("./build_and_install_netcdf.m32 -x " + buildDir)
     else:
         if (sys.platform == "darwin"):

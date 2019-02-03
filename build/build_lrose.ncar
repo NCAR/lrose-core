@@ -102,7 +102,7 @@ export LROSE_INSTALL_DIR=${prefix}
 # ------------------------
 
 export HOST_OS=LINUX_LROSE
-if [ "$package" == "cidd" ]
+if [ "$package" == "lrose-cidd" ]
 then
   export HOST_OS=LINUX_64_CIDD32
 fi

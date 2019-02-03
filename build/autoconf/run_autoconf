@@ -39,7 +39,7 @@ function usage() {
 
 # defaults
 
-package=lrose
+package=lrose-core
 debug=true
 verbose=false
 static=false
@@ -120,7 +120,7 @@ cd codebase
 /bin/cp ../build/autoconf/configure.base.shared .
 /bin/cp ../build/Makefile.top ./Makefile
 
-if [ "$package" == "cidd" ]
+if [ "$package" == "lrose-cidd" ]
 then
 # for CIDD, we need m32 build
   /bin/cp ../build/autoconf/configure.base.cidd ./configure.base

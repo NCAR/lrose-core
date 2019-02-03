@@ -77,7 +77,7 @@ def main():
         options.debug = True
 
     # for CIDD, set to static linkage
-    if (options.package == "cidd"):
+    if (options.package == "lrose-cidd"):
         options.static = True
         
     debugStr = " "
@@ -279,7 +279,7 @@ def setupAutoconf():
 
     if (options.static):
 
-        if (options.package == "cidd"):
+        if (options.package == "lrose-cidd"):
              shutil.copy("../build/autoconf/configure.base.cidd",
                          "./configure.base")
         else:
@@ -291,7 +291,7 @@ def setupAutoconf():
                  " --pkg " + options.package + argsStr)
     else:
 
-        if (options.package == "cidd"):
+        if (options.package == "lrose-cidd"):
             shutil.copy("../build/autoconf/configure.base.shared.cidd",
                         "./configure.base.shared")
         elif (options.osx):

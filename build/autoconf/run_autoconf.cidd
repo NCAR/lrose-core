@@ -37,7 +37,7 @@ function usage() {
 
 # defaults
 
-package=cidd
+package=lrose-cidd
 debug=true
 verbose=false
 static=true
