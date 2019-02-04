@@ -1120,13 +1120,13 @@ void Cf2RadxFile::_readSweepMeta(NcxxGroup &group,
   }
 
   if (sweep->getRaysAreIndexed()) {
-    NcxxVar var = group.getVar(RAY_ANGLE_RES);
+    NcxxVar var = group.getVar(RAY_ANGLE_RESOLUTION);
     if (!var.isNull()) {
       size_t len = var.getDimCount();
       if (var.isNull() || len != 0) {
         NcxxErrStr err;
         err.addErrStr("ERROR - Cf2RadxFile::_readSweepMeta");
-        err.addErrStr("  Reading var: ", RAY_ANGLE_RES);
+        err.addErrStr("  Reading var: ", RAY_ANGLE_RESOLUTION);
         err.addErrInt("  Bad dimCount, should be 0, found: ", len);
         throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
       }

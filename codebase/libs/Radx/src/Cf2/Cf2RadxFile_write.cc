@@ -1552,11 +1552,11 @@ void Cf2RadxFile::_addSweepAttributes(const RadxSweep *sweep,
   if (sweep->getRaysAreIndexed()) {
     sweepGroup.putAtt(RAYS_ARE_INDEXED, "true");
     float angleRes = sweep->getAngleResDeg();
-    sweepGroup.putAtt(RAY_ANGLE_RES, ncxxFloat, angleRes);
+    sweepGroup.putAtt(RAY_ANGLE_RESOLUTION, ncxxFloat, angleRes);
   } else {
     sweepGroup.putAtt(RAYS_ARE_INDEXED, "false");
     float angleRes = -9999.0;
-    sweepGroup.putAtt(RAY_ANGLE_RES, ncxxFloat, angleRes);
+    sweepGroup.putAtt(RAY_ANGLE_RESOLUTION, ncxxFloat, angleRes);
   }
   
   float IFreq = sweep->getIntermedFreqHz();
@@ -1900,7 +1900,8 @@ void Cf2RadxFile::_addSweepScalars(const RadxSweep *sweep,
   // ray angle resolution
   if (sweep->getRaysAreIndexed()) {
     NcxxVar var = 
-      sweepGroup.addVar(RAY_ANGLE_RES, "", RAY_ANGLE_RES_LONG,
+      sweepGroup.addVar(RAY_ANGLE_RESOLUTION, "",
+                        RAY_ANGLE_RESOLUTION_LONG,
                         ncxxFloat, "", true);
     var.putAtt(UNITS, DEGREES);
     var.putVal((float) sweep->getAngleResDeg());

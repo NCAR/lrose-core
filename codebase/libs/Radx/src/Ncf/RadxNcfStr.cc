@@ -239,6 +239,7 @@ RadxNcfStr::RadxNcfStr()
   RANGE_CORRECTION = "range_correction";
   RAYS_ARE_INDEXED = "rays_are_indexed";
   RAY_ANGLE_RES = "ray_angle_res";
+  RAY_ANGLE_RESOLUTION = "ray_angle_resolution";
   RAY_GATE_SPACING = "ray_gate_spacing";
   RAY_N_GATES = "ray_n_gates";
   RAY_START_INDEX = "ray_start_index";
@@ -499,6 +500,7 @@ RadxNcfStr::RadxNcfStr()
   RANGE_LONG = "range_to_center_of_measurement_volume";
   RAYS_ARE_INDEXED_LONG = "flag_for_indexed_rays";
   RAY_ANGLE_RES_LONG = "angular_resolution_between_rays";
+  RAY_ANGLE_RESOLUTION_LONG = "angular_resolution_between_rays";
   RECEIVER_GAIN_HC_LONG = "calibrated_radar_receiver_gain_h_co_polar_channel";
   RECEIVER_GAIN_HX_LONG = "calibrated_radar_receiver_gain_h_cross_polar_channel";
   RECEIVER_GAIN_VC_LONG = "calibrated_radar_receiver_gain_v_co_polar_channel";

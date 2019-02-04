@@ -252,6 +252,7 @@ protected:
   const char* RANGE_CORRECTION;
   const char* RAYS_ARE_INDEXED;
   const char* RAY_ANGLE_RES;
+  const char* RAY_ANGLE_RESOLUTION;
   const char* RAY_GATE_SPACING;
   const char* RAY_N_GATES;
   const char* RAY_START_INDEX;
@@ -511,6 +512,7 @@ protected:
   const char* RANGE_LONG;
   const char* RAYS_ARE_INDEXED_LONG;
   const char* RAY_ANGLE_RES_LONG;
+  const char* RAY_ANGLE_RESOLUTION_LONG;
   const char* RECEIVER_GAIN_HC_LONG;
   const char* RECEIVER_GAIN_HX_LONG;
   const char* RECEIVER_GAIN_VC_LONG;
