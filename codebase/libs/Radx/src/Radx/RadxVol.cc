@@ -721,6 +721,9 @@ Radx::SweepMode_t RadxVol::getPredomSweepMode() const
   modeMap[Radx::SWEEP_MODE_MANUAL_PPI] = 0;
   modeMap[Radx::SWEEP_MODE_MANUAL_RHI] = 0;
   modeMap[Radx::SWEEP_MODE_SUNSCAN_RHI] = 0;
+  modeMap[Radx::SWEEP_MODE_DOPPLER_BEAM_SWINGING] = 0;
+  modeMap[Radx::SWEEP_MODE_COMPLEX_TRAJECTORY] = 0;
+  modeMap[Radx::SWEEP_MODE_ELECTRONIC_STEERING] = 0;
 
   // accumulate the number of rays for each mode
   

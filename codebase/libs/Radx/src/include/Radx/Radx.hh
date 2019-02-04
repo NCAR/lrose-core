@@ -317,6 +317,9 @@ public:
     SWEEP_MODE_MANUAL_RHI = 16, /**< Manual RHI mode - azimuth does
                                  * not step automatically */
     SWEEP_MODE_SUNSCAN_RHI = 17,  ///< scanning the sun in RHI mode
+    SWEEP_MODE_DOPPLER_BEAM_SWINGING = 18, ///< as in profiler or lidar
+    SWEEP_MODE_COMPLEX_TRAJECTORY = 19,  ///< any sequential angle sequence
+    SWEEP_MODE_ELECTRONIC_STEERING = 20,  ///< as in phased array
     SWEEP_MODE_LAST
 
   } SweepMode_t;
@@ -443,8 +446,11 @@ public:
   const static char* AZIMUTH_SURVEILLANCE;
   const static char* CALIBRATION;
   const static char* CIRCULAR;
+  const static char* COMPLEX_TRAJECTORY;
   const static char* COPLANE;
+  const static char* DOPPLER_BEAM_SWINGING;
   const static char* DUAL;
+  const static char* ELECTRONIC_STEERING;
   const static char* ELEVATION_SURVEILLANCE;
   const static char* FIXED;
   const static char* HORIZONTAL;

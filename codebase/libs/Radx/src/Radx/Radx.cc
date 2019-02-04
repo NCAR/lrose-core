@@ -94,8 +94,11 @@ const char* Radx::AXIS_Z_PRIME = "axis_z_prime";
 const char* Radx::AZIMUTH_SURVEILLANCE = "azimuth_surveillance";
 const char* Radx::CALIBRATION = "calibration";
 const char* Radx::CIRCULAR = "circular";
+const char* Radx::COMPLEX_TRAJECTORY = "complex_trajectory";
 const char* Radx::COPLANE = "coplane";
+const char* Radx::DOPPLER_BEAM_SWINGING = "doppler_beam_swinging";
 const char* Radx::DUAL = "dual";
+const char* Radx::ELECTRONIC_STEERING = "electronic_steering";
 const char* Radx::ELEVATION_SURVEILLANCE = "elevation_surveillance";
 const char* Radx::FIXED = "fixed";
 const char* Radx::HORIZONTAL = "horizontal";
@@ -461,6 +464,15 @@ string Radx::sweepModeToStr(SweepMode_t mode)
     case SWEEP_MODE_SUNSCAN_RHI: {
       return Radx::SUNSCAN_RHI;
     }
+    case SWEEP_MODE_DOPPLER_BEAM_SWINGING: {
+      return Radx::DOPPLER_BEAM_SWINGING;
+    }
+    case SWEEP_MODE_COMPLEX_TRAJECTORY: {
+      return Radx::COMPLEX_TRAJECTORY;
+    }
+    case SWEEP_MODE_ELECTRONIC_STEERING: {
+      return Radx::ELECTRONIC_STEERING;
+    }
     default: {
       return Radx::UNKNOWN;
     }
@@ -508,6 +520,15 @@ string Radx::sweepModeToShortStr(SweepMode_t mode)
     case SWEEP_MODE_MANUAL_PPI:
     case SWEEP_MODE_MANUAL_RHI: {
       return "MAN";
+    }
+    case SWEEP_MODE_DOPPLER_BEAM_SWINGING: {
+      return "DBS";
+    }
+    case SWEEP_MODE_COMPLEX_TRAJECTORY: {
+      return "TRJ";
+    }
+    case SWEEP_MODE_ELECTRONIC_STEERING: {
+      return "PAR";
     }
     default: {
       return "SUR";
@@ -586,6 +607,15 @@ Radx::SweepMode_t Radx::sweepModeFromStr(const string &str)
   if (str.find(Radx::SUNSCAN_RHI) != string::npos) {
     return SWEEP_MODE_SUNSCAN_RHI;
   }
+  if (str.find(Radx::DOPPLER_BEAM_SWINGING) != string::npos) {
+    return SWEEP_MODE_DOPPLER_BEAM_SWINGING;
+  }
+  if (str.find(Radx::COMPLEX_TRAJECTORY) != string::npos) {
+    return SWEEP_MODE_COMPLEX_TRAJECTORY;
+  }
+  if (str.find(Radx::ELECTRONIC_STEERING) != string::npos) {
+    return SWEEP_MODE_ELECTRONIC_STEERING;
+  }
   return SWEEP_MODE_NOT_SET;
 }
 
@@ -617,6 +647,12 @@ string Radx::sweepModeOptions()
   options += Radx::MANUAL_RHI;
   options += ", ";
   options += Radx::SUNSCAN_RHI;
+  options += ", ";
+  options += Radx::DOPPLER_BEAM_SWINGING;
+  options += ", ";
+  options += Radx::COMPLEX_TRAJECTORY;
+  options += ", ";
+  options += Radx::ELECTRONIC_STEERING;
   return options;
 }
 
