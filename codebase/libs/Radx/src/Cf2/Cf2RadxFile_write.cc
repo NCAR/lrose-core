@@ -1531,7 +1531,7 @@ void Cf2RadxFile::_addSweepAttributes(const RadxSweep *sweep,
   sweepGroup.putAtt(SWEEP_NUMBER, ncxxInt, sweep->getSweepNumber());
 
   float fixedAngle = sweep->getFixedAngleDeg();
-  sweepGroup.putAtt(FIXED_ANGLE, ncxxFloat, fixedAngle);
+  sweepGroup.putAtt(SWEEP_FIXED_ANGLE, ncxxFloat, fixedAngle);
   
   string sweepModeStr = Radx::sweepModeToStr(sweep->getSweepMode());
   sweepGroup.putAtt(SWEEP_MODE, sweepModeStr);
@@ -1829,7 +1829,7 @@ void Cf2RadxFile::_addSweepScalars(const RadxSweep *sweep,
   // fixed angle
   {
     NcxxVar var = 
-      sweepGroup.addVar(FIXED_ANGLE, "", FIXED_ANGLE_LONG,
+      sweepGroup.addVar(SWEEP_FIXED_ANGLE, "", FIXED_ANGLE_LONG,
                         ncxxFloat, "", true);
     var.putAtt(UNITS, DEGREES);
     var.putVal((float) sweep->getFixedAngleDeg());

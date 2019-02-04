@@ -996,7 +996,7 @@ void Cf2RadxFile::_readSweepMeta(NcxxGroup &group,
   // fixed angle
   _fixedAngleFound = false;
   try {
-    NcxxVar var = group.getVar(FIXED_ANGLE);
+    NcxxVar var = group.getVar(SWEEP_FIXED_ANGLE);
     if (!var.isNull()) {
       float val;
       var.getVal(&val);
