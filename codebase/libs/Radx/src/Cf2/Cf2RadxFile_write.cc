@@ -613,7 +613,7 @@ void Cf2RadxFile::_addGlobalAttributes()
   
   // Version
 
-  _version = CurrentVersion;
+  _version = CurrentVersion2;
   // if (_writeVol->getVersion().size() > 0) {
   //   _version = _writeVol->getVersion();
   // }
@@ -1394,6 +1394,10 @@ void Cf2RadxFile::_addSweeps()
     char name[128];
     sprintf(name, "sweep_%.4d", isweep + 1);
     _sweepGroupNames.push_back(name);
+
+    if (_debug) {
+      cerr << "adding sweep: " << name << endl;
+    }
 
     // add group
   
@@ -2591,9 +2595,8 @@ void Cf2RadxFile::_addSweepFields(const RadxSweep *sweep,
 
     // free up
     delete copy;
-    if (_debug) {
-      cerr << "  ... sweep: " << sweep->getSweepNumber()
-           << "  ... field written: " << name << endl;
+    if (_debug && (sweep->getSweepNumber() == 1)) {
+      cerr << "  ... adding field: " << name << endl;
     }
     
   } // ifield
