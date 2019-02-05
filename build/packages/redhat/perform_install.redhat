@@ -69,4 +69,9 @@ yum install -y ${rpmPath}
 
 # check that RadxPrint runs
 
-/usr/local/lrose/bin/RadxPrint -h
+if [ -f "/usr/local/cidd/bin/CIDD" ]
+then
+  /usr/local/cidd/bin/CIDD -h
+else
+  /usr/local/lrose/bin/RadxPrint -h
+fi

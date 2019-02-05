@@ -19,9 +19,9 @@ License:        BSD
 Requires: glibc-devel.i686
 Requires: libX11-devel.i686
 Requires: libXext-devel.i686
-Requries: libtiff-devel.i686
-Requries: libpng-devel.i686
-Requries: libcurl-devel.i686
+Requires: libtiff-devel.i686
+Requires: libpng-devel.i686
+Requires: libcurl-devel.i686
 Requires: libstdc++-devel.i686
 Requires: libtiff-devel.i686
 Requires: zlib-devel.i686
