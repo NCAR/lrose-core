@@ -233,9 +233,9 @@ def main():
     shellCmd("rsync -av " + buildDir + "/include " + tarDir)
 
     if (package == "lrose-cidd"):
-        scriptDir = "./codebase/apps/cidd/src/CIDD/example_scripts"
+        scriptDir = "./codebase/apps/cidd/src/CIDD/scripts"
         if (os.path.isdir(scriptDir)):
-            shellCmd("rsync -av ./codebase/apps/cidd/src/CIDD/example_scripts " + tarDir)
+            shellCmd("rsync -av ./codebase/apps/cidd/src/CIDD/scripts " + tarDir)
 
     # make the tar file, copy into run dir
 

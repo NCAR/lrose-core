@@ -678,7 +678,7 @@ def doFinalInstall():
     shellCmd("rsync -av docs " + prefix)
 
     if (package == "lrose-cidd"):
-        shellCmd("rsync -av ./codebase/apps/cidd/src/CIDD/example_scripts " +
+        shellCmd("rsync -av ./codebase/apps/cidd/src/CIDD/scripts " +
                  options.prefix)
 
     # install color scales

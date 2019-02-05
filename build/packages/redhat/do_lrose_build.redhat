@@ -92,7 +92,12 @@ echo "#" >> ${DockerfilePath}
 
 # append the body of the Dockerfile
 
-cat Dockerfile.redhat.build >> ${DockerfilePath}
+if [ "$lrose_pkg" == "cidd" ]
+then
+  cat Dockerfile.redhat.build.cidd >> ${DockerfilePath}
+else
+  cat Dockerfile.redhat.build >> ${DockerfilePath}
+fi
 
 # remove old image if present
 
