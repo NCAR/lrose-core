@@ -103,7 +103,13 @@ echo "############################################################" > rpm.spec
 echo "%define name ${name}" >> rpm.spec
 echo "%define version ${version}" >> rpm.spec
 echo "%define release ${release}" >> rpm.spec
-cat /scripts/rpm.spec.body >> rpm.spec
+
+if [ "$lrose_pkg" == "cidd" ]
+then
+  cat /scripts/rpm.spec.body.cidd >> rpm.spec
+else
+  cat /scripts/rpm.spec.body >> rpm.spec
+fi
 
 echo "==>> spec file contents:"
 cat rpm.spec
