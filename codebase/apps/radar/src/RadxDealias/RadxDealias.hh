@@ -45,6 +45,7 @@
 
 #include <string>
 #include <vector>
+#include <sys/stat.h>
 #include "Args.hh"
 #include "Params.hh"
 //#include <rapformats/DsRadarMsg.hh>
@@ -71,8 +72,8 @@ private:
 
   int _run();
 
-  int _runArchive();
-  int _runFilelist();
+  int _useCommandLineStartEndTimes();
+  int _useCommandLineFileList();
 
   //
   //  Read message from fmq
@@ -82,7 +83,7 @@ private:
 	       bool &end_of_vol,
 	       int &contents);
   */
-  int _readFile(const string &filePath, RadxVol &vol);
+  void _readFile(const string &filePath, RadxVol &vol);
 
 
   //
@@ -93,13 +94,21 @@ private:
   //
   // Write beams in _currRadarVol to fmq
   //
-  int  _writeVol(RadxVol &vol);
+  void _writeVol(RadxVol &vol);
+
+  void statusReport(int nError, int nGood);
+
 
   //
   // Reset the Dsr2Radar _currRadarVol and _prevRadarVol in
   // preparation for start of new volume.
   //
   void _reset();
+
+  inline bool file_exists (const std::string& name) {
+    struct stat buffer;   
+    return (stat (name.c_str(), &buffer) == 0); 
+  }
 
   //
   // Data members

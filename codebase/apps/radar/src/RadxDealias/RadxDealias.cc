@@ -127,9 +127,9 @@ int RadxDealias::Run ()
   _fourDD = new FourDD(_params);
 
   if (_params.mode == Params::ARCHIVE) {
-    return _runArchive();
+    return _useCommandLineStartEndTimes();
   } else if (_params.mode == Params::FILELIST) {
-    return _runFilelist();
+    return _useCommandLineFileList();
   } else {
 
     // run real time mode 
@@ -152,15 +152,24 @@ int RadxDealias::Run ()
 
 //////////////////////////////////////////////////
 // Run in filelist mode
+void RadxDealias::statusReport(int nError, int nGood) {
 
-int RadxDealias::_runFilelist()
+  // if (_params.debug) {
+    cerr << "  ====>> n good files so far: " << nGood << endl;
+    cerr << "  ====>> n errors     so far: " << nError << endl;
+    cerr << "  ====>> sum          so far: " << nGood + nError << endl;
+    //}
+}
+
+
+int RadxDealias::_useCommandLineFileList()
 {
   
   int iret = 0;
 
   if (_params.debug) {
-    cerr << "Running RadxDealias" << endl;
-    cerr << "  n input files: " << _args.inputFileList.size() << endl;
+    cerr << "RadxDealias is running ..." << endl;
+    cerr << _args.inputFileList.size() << " input file(s) " << endl;
   }
 
   int nGood = 0;
@@ -177,58 +186,55 @@ int RadxDealias::_runFilelist()
     // loop through the input file list
 
     for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
-      string inputPath = _args.inputFileList[ii];
-      // read input file
-      int jret = _readFile(inputPath, vol);
-      if (jret == 0) {
-        //_processVol(vol);
+      string inputPath = _params.input_dir;
+      inputPath.append("/");
+      inputPath.append(_args.inputFileList[ii]);
+      if (_params.debug) {
+	cerr << "reading " << inputPath << endl;
+      }
+      
+      int resultOfWriting = 0;
+      int resultOfReading = 0;
+      
+      try {
+	// read input file
+	_readFile(inputPath, vol);
 
-        vol.loadFieldsFromRays();
-	//vol.convertToFl32(); // TODO: does FourDD use signed ints?
-	// convert from RadxVol to Volume structures
-	currDbzVol = _extractFieldData(vol, "DBZ"); 
-	currVelVol = _extractFieldData(vol, "VEL");
-	// 
-	if ((currDbzVol != NULL) && (currVelVol != NULL)) {
-	time_t volTime = vol.getStartTimeSecs(); // _currRadarVol->getVolTime();
+	vol.loadFieldsFromRays();
+	vol.remapToFinestGeom();
+
+        vol.setNGatesConstant();
+	vol.convertToSi16();
+//vol.convertToFl32(); // does FourDD use signed ints? No, it seems to use floats
+	  // convert from RadxVol to Volume structures
+	//char *fieldName = _params.required_fields;
+
+
+	currDbzVol = _extractFieldData(vol, _params._required_fields[0]); 
+	currVelVol = _extractFieldData(vol, _params._required_fields[1]);
+
+	if ((currDbzVol == NULL) || (currVelVol == NULL))
+	  throw "Error, velocity or reflectivity field could not be read from data file";
+
+	Rsl::verifyEqualDimensions(currDbzVol, currVelVol);
+
+	time_t volTime = vol.getStartTimeSecs();
 
 	_processVol(prevVelVol, currVelVol, currDbzVol, volTime);
 
-	// insert dealiased values from Volume structures to RadxVol  
-	//_insertDbz(currDbzVol, vol);
-	//_insertVel(currVelVol, vol);
-
 	prevVelVol = currVelVol;
-
-        // finalize the volume
-        //_finalizeVol(vol);
-        // write the volume out
-        if (_writeVol(vol)) {
-          cerr << "ERROR - RadxDealias::_runFileList" << endl;
-          cerr << "  Cannot write volume to file" << endl;
-          iret = -1;
-          nError++;
-          if (_params.debug) {
-            cerr << "  ====>> n errors so far: " << nError << endl;
-          }
-        } else {
-          nGood++;
-          if (_params.debug) {
-            cerr << "  ====>> n good files so far: " << nGood << endl;
-            cerr << "  ====>> n errors     so far: " << nError << endl;
-            cerr << "  ====>> sum          so far: " << nGood + nError << endl;
-          }
-        }
-      } else if (jret < 0) {
-        iret = -1;
-        nError++;
-        if (_params.debug) {
-          cerr << "  ====>> n errors so far: " << nError << endl;
-        }
+	// write the volume data
+	_writeVol(vol);
+	nGood++;
+      } catch (const char*  errorMsg) {
+	  iret = -1;
+	  nError++;
+          cerr << errorMsg << endl;
       }
+
+      statusReport(nError, nGood);
       // free up
       // vol.clear();
-      } // end if !NULL
     } // end for each file
     /*
   } else {
@@ -282,7 +288,7 @@ int RadxDealias::_runFilelist()
 //////////////////////////////////////////////////
 // Run in archive mode
 
-int RadxDealias::_runArchive()
+int RadxDealias::_useCommandLineStartEndTimes()
 {
   int iret = 0;
 
@@ -532,7 +538,7 @@ int RadxDealias::_run ()
 //         1 if already read,
 //         -1 on failure
 
-int RadxDealias::_readFile(const string &readPath,
+void RadxDealias::_readFile(const string &readPath,
                            RadxVol &vol)
 {
 
@@ -562,8 +568,12 @@ int RadxDealias::_readFile(const string &readPath,
   */
 
   if (_params.debug) {
-    cerr << "INFO - RadxDealias::Run" << endl;
+    cerr << "INFO - RadxDealias::_readFile" << endl;
     cerr << "  Input path: " << readPath << endl;
+  }
+
+  if (!file_exists(readPath)) {
+    throw "ERROR - RadxDealias::_readFile\n  Cannot access file";
   }
 
   // At this point, the file must be a cfradial file;
@@ -572,33 +582,32 @@ int RadxDealias::_readFile(const string &readPath,
   //_setupRead(inFile);
   
   // read in file
-
-  if (inFile.readFromPath(readPath, vol)) {
-    cerr << "ERROR - RadxDealias::_readFile" << endl;
-    cerr << "  path: " << readPath << endl;
-    cerr << inFile.getErrStr() << endl;
-    return -1;
+  if (inFile.readFromPath(readPath, vol)) {  
+    string errorMsg;
+    errorMsg.append("ERROR - RadxDealias::_readFile\n");
+    errorMsg.append("  path: ");
+    errorMsg.append(readPath);
+    errorMsg.append(inFile.getErrStr());
+    throw errorMsg.c_str();
   }
-  /*
-  _readPaths = inFile.getReadPaths();
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-      cerr << "  ==>> read in file: " << _readPaths[ii] << endl;
-    }
+      cerr << "  ==>> read in file: " << readPath << endl;
   }
-  */
-
-  return 0;
 
 }
 
 //////////////////////////////////////////////////
 // write out the volume
-
-int RadxDealias::_writeVol(RadxVol &vol)
+// TODO:  if errors encountered, throw a string exception
+void RadxDealias::_writeVol(RadxVol &vol)
 {
 
   // output file
+  
+  if (_params.debug) {
+    cerr << "Writing Volume ..." << endl;
+  }
   /*
 
   Ncf/NcfRadxFile_write.cc:int NcfRadxFile::writeToDir(const RadxVol &vol,
@@ -639,7 +648,11 @@ int RadxDealias::_writeVol(RadxVol &vol)
 
   string outputPath = outFile.getPathInUse();
   */
-  return 0;
+
+  if (_params.debug) {
+    cerr << "Finished writing volume" << endl;
+  }
+
 
 }
 
@@ -734,10 +747,10 @@ int RadxPrint::_handleViaPath(const string &path)
   }
 
   // set number of gates constant if requested                                                                                        
-
-  if (_params.set_ngates_constant) {
-    vol.setNGatesConstant();
-  }
+// TODO: don't make this optional!  The Dealiasing code requries it!
+//  if (_params.set_ngates_constant) {
+//    vol.setNGatesConstant();
+//  }
 
   // trim to 360s if requested                                                                                                        
 
@@ -1190,6 +1203,10 @@ Volume *RadxDealias::_extractDbz(const RadxVol &radxVol) {
 Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName) {
 
 
+  if (_params.debug) {
+    cerr << " looking for data in field " << fieldName << endl;
+  }
+
   // 1st, make sure the field is in the volume
   //  vector<string> getUniqueFieldNameList() const;
   vector<string> fieldNames = radxVol.getUniqueFieldNameList();
@@ -1210,59 +1227,66 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
 
   // Sweeps
   for (int i=0; i<volume->h.nsweeps; i++) {
-    Sweep *sweep = volume->sweep[i];
-    sweep = Rsl::new_sweep(radxVol.getNRays());
+    Sweep **sweeps = volume->sweep;
+    Sweep *newSweep = Rsl::new_sweep(radxVol.getNRays());
+    sweeps[i] = newSweep;
 
     // Rays    
-    vector<RadxRay *> radxRays = radxVol.getRays();      
+    Ray **rays = newSweep->ray;
 
-    for (int j=0; j<sweep->h.nrays; j++) {
+    vector<RadxRay *> radxRays = radxVol.getRays();      
+    for (int j=0; j<newSweep->h.nrays; j++) {
 
       RadxRay *radxRay = radxRays.at(j);
   
       // convert the rays
-      Ray *ray = sweep->ray[j];
-      ray = Rsl::new_ray(radxRay->getNGates());
-      ray->h.azimuth = radxRay->getAzimuthDeg();
-      ray->h.elev = radxRay->getElevationDeg();
-      ray->h.nyq_vel = radxRay->getNyquistMps();
+      Ray *newRay = Rsl::new_ray(radxRay->getNGates());
+      // if (_params.debug) cerr << " adding ray with " << radxRay->getNGates() << " gates " << endl;
+      rays[j] = newRay;
+      newRay->h.azimuth = radxRay->getAzimuthDeg();
+      newRay->h.elev = radxRay->getElevationDeg();
+      newRay->h.nyq_vel = radxRay->getNyquistMps();
       // get the Range Geometry
       // void RadxVol::getPredomRayGeom(double &startRangeKm, double &gateSpacingKm)
       // radxRay->getGateRangeKm? radxRay->getGateSpacingKm?
       double startRangeKm;
       double gateSpacingKm;
       radxVol.getPredomRayGeom(startRangeKm, gateSpacingKm);
-      ray->h.gate_size = startRangeKm; 
-      ray->h.range_bin1 = gateSpacingKm;
+      newRay->h.gate_size = startRangeKm; 
+      newRay->h.range_bin1 = gateSpacingKm;
 
       // keep the data as float; ignore the RANGE type
-      // NO! Keep the data as is originally is; the FourDD algorithm uses scale and bias.
+      // NO! Keep the data as it originally is; the FourDD algorithm uses scale and bias.
       // move the field data
       RadxField *velocityField = radxRay->getField(fieldName);
       // save the original data type
       Radx::DataType_t originalDataType = velocityField->getDataType();
+      if (originalDataType != Radx::SI16)
+        throw "Error - Expected signed int 16 data";
+      Radx::si16 *data = velocityField->getDataSi16();
 
       //velocityField->convertToSi32();
-      //      Radx::fl32 *data = velocityField->getDataFl32();
-      Radx::si16 *data = velocityField->getDataSi16();
+      //Radx::fl32 *data = velocityField->getDataFl32();
       if (data == NULL) 
 	cout << "data values are NULL" << endl;
       else {
-	cout << "data values for " << fieldName << " " ;
+        if (0) { // _params.debug) {
+	  cout << "data values for " << fieldName << " " ;
 	  for (int i = 0; i< 10; i++) 
 	    cout << data[i] << " ";
-	cout << endl;
-
+	  cout << endl;
+	}
 	//	     << data[0] << " " <<  data[1] << " " << data[3] << " " << data[4] << endl;
       }
 
-      ray->h.bias = velocityField->getOffset();  // TODO: bias
-      ray->h.scale = velocityField->getScale(); // TODO: scale
+      newRay->h.bias = velocityField->getOffset();  // TODO: bias
+      newRay->h.scale = velocityField->getScale(); // TODO: scale
 
       // TODO; Hmmm, copy the data, or just let the data be modified?
       //memcpy(ray->range, data, sizeof(Radx::fl32)*ray->getNGates());
       // TODO: reinstate ...  ray->range = data;
- 
+      newRay->range = data;
+
     } // for each ray
   } // for each sweep  
 
@@ -1271,7 +1295,6 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
   }
   return volume;
 }
-
 
 void RadxDealias::jamesCopyright()
 {

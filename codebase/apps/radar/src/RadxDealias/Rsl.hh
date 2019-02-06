@@ -10,12 +10,13 @@
 // Let's just make it all TWO_BYTE_PRECISION
 // If #define USE_TWO_BYTE_PRECISION when building and installing RSL, then
 //typedef unsigned short Range;  // 2 bytes
-typedef Radx::fl32 Range;  // 2 bytes
+typedef Radx::si16 Range;  // 2 bytes
+//typedef Radx::fl32 Range;  // 4 bytes
 // else,
 // typedef unsigned char Range;
 
 // TODO: convert this to a missing or bad value from Radx.hh
-#define BADVAL  (Radx::fl32)0x20000  // 4 bytes
+//#define BADVAL  (Radx::si16)0x2000  // 2 bytes
 
 
 //
@@ -74,9 +75,10 @@ typedef struct {
   Radx::fl32 frequency;   /* Bandwidth GHz. */
   Radx::fl32 wavelength;  /* Wavelength. Meters. */
   Radx::fl32 nyq_vel;    /* Nyquist velocity. m/s */
-  Radx::fl32 (*f)(Range x);       /* Data conversion function. f(x). */
-  Range (*invf)(Radx::fl32 x);    /* Data conversion function. invf(x). */
+  //Radx::fl32 (*f)(Range x);       /* Data conversion function. f(x). */
+  //Range (*invf)(Radx::fl32 x);    /* Data conversion function. invf(x). */
   Radx::si32   nbins;               /* Number of array elements for 'Range'. */
+  bool binDataAllocated;
 } Ray_header;
 
 typedef struct {
@@ -98,8 +100,8 @@ typedef struct {
   Radx::fl32 vert_half_bw; /* Vertical beam width divided by 2 */
   Radx::fl32 horz_half_bw; /* Horizontal beam width divided by 2 */
   Radx::si32 nrays;
-  Radx::fl32 (*f)(Range x); /* Data conversion function. f(x). */
-  Range (*invf)(Radx::fl32 x); /* Data conversion function. invf(x). */ 
+  //Radx::fl32 (*f)(Range x); /* Data conversion function. f(x). */
+  //Range (*invf)(Radx::fl32 x); /* Data conversion function. invf(x). */ 
 } Sweep_header; 
 
 
@@ -115,8 +117,8 @@ typedef struct {
   char *type_str;  /* One of:'Reflectivity', 'Velocity' or 'Spectrum width' */
   Radx::si32 nsweeps;
   Radx::fl32 calibr_const;        /* Calibration constant. */
-  Radx::fl32 (*f)(Range x);       /* Data conversion function. f(x). */
-  Range (*invf)(Radx::fl32 x);    /* Data conversion function. invf(x). */
+  //Radx::fl32 (*f)(Range x);       /* Data conversion function. f(x). */
+  //Range (*invf)(Radx::fl32 x);    /* Data conversion function. invf(x). */
 } Volume_header;
 
 
@@ -259,6 +261,8 @@ public:
   static void free_ray(Ray *ray);
 
   static Volume *copy_volume(Volume *v);
+  static Sweep  *copy_sweep(Sweep *sweep);
+  static Ray    *copy_ray(Ray *ray);
 
   static Radx::fl32 DZ_F(Range x);
   static Radx::fl32 VR_F(Range x);
@@ -270,7 +274,9 @@ public:
   static void print_sweep(Sweep *sweep);
   static void print_ray(Ray *ray);
   static void print_ray_header(Ray_header header);
+  static void print_sweep_header(Sweep_header header);
 
+  static void verifyEqualDimensions(Volume *currDbzVol, Volume *currVelVol);
 
 };
 

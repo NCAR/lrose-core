@@ -150,6 +150,8 @@ int FourDD::Dealias(Volume *lastVelVol, Volume *currVelVol, Volume *currDbzVol,
   // Create first guess field from VAD and put in soundVolume.
   //  
   soundVolume = Rsl::copy_volume(currVelVol);
+  Rsl::verifyEqualDimensions(soundVolume, currVelVol);
+
   firstGuess(soundVolume, params.missing_vel, &firstGuessSuccess, volTime);
 
   //
@@ -311,6 +313,8 @@ int FourDD::findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int
 //  HISTORY:
 //	An elaboration of the NSSL-Eilts algorithm.
 //
+
+
 void FourDD::firstGuess(Volume* soundVolume, float missingVal,
 			short unsigned int *success,time_t soundingTime) 
 {
@@ -349,6 +353,9 @@ void FourDD::firstGuess(Volume* soundVolume, float missingVal,
       *success = 0;
       return ;
     }
+
+
+  int savedValue = 996; // soundVolume->sweep[1]->ray[0]->h.nbins
 
   //
   // Allocate space for matrix to a hold sounding data and derived data
@@ -408,7 +415,7 @@ void FourDD::firstGuess(Volume* soundVolume, float missingVal,
   numLevs = k - 1;
 
   //
-  // Force wind at ground to be same as that of first level: */
+  // Force wind at ground to be same as that of first level: 
   //
   ua_data[0][1] = ua_data[1][1];
   ua_data[0][2] = ua_data[1][2];
@@ -451,13 +458,13 @@ void FourDD::firstGuess(Volume* soundVolume, float missingVal,
 
       //
       // Now we create a first-guess velocity field using the sounding
-      // or VAD profile. (We assume standard atmospheric refraction).*/
+      // or VAD profile. (We assume standard atmospheric refraction).
       //
       for(i = 0; i < numBins; i++) 
 	{
 
 	  //
-	  //To print out a range circle of radial velocity values: */
+	  //To print out a range circle of radial velocity values: 
 	  //
 	  rnge = start_range + i*gate_size + gate_size/2.0;
 
@@ -553,6 +560,10 @@ void FourDD::firstGuess(Volume* soundVolume, float missingVal,
 	      //->h.scale * (soundVolume->sweep[sweepIndex]->ray[currIndex]->
 	      //    range[i]) + soundVolume->sweep[sweepIndex]->ray[currIndex]->h.bias;
 	      
+
+              if ((sweepIndex==0) &&(currIndex==5296) && (i==512))
+		cerr << "Watch out!" << endl;
+
 	      if ( wind >= 0.0 && dir >= 0.0) 
 		{
 		  az = PI * (soundVolume->sweep[sweepIndex]->ray[currIndex]->
@@ -567,11 +578,8 @@ void FourDD::firstGuess(Volume* soundVolume, float missingVal,
 		  
 		  val = (wind_val_rv - soundVolume->sweep[sweepIndex]->ray[currIndex]->h.bias)/
 		    soundVolume->sweep[sweepIndex]->ray[currIndex]->h.scale;
-		  
-                 
-		  soundVolume->sweep[sweepIndex]->ray[currIndex]->range[i]=
-		    (Range) (val);
-		 
+		  soundVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = (Range) val;
+		    //  (Range) (val);		 
                  
                  if (flag==0) 
 		   flag=1;
@@ -603,6 +611,178 @@ void FourDD::firstGuess(Volume* soundVolume, float missingVal,
   return;
 
 }
+
+
+ /*
+void FourDD::firstGuess(Volume* soundVolume, float missingVal,
+			short unsigned int *success,time_t soundingTime) 
+{
+
+  int numLevs;
+
+  float meanShearU = 0.0, meanShearV = 0.0;
+
+  int  alt, i, sweepIndex, currIndex, index, numBins, numRays, 
+       numSweeps;
+  unsigned short flag = 0;
+  float ke,dRdz,height,rnge,elev,az,start_range,h_range,gate_size,val;
+  float wind = 0.0, wind_val_rv,dir = 0.0,offset,ang, U, V;
+
+  
+  //
+  // Load and retrieve spdb sounding data
+  //
+  int ret =  loadSoundingData(soundingTime);
+  
+  if( ret <= 0 )
+    {
+      *success = 0;
+      return ;
+    }
+
+  double *soundingU = sounding.getU();
+
+  double *soundingV = sounding.getV();
+  
+  double *soundingAlt = sounding.getAlts();
+
+  if( (soundingU == NULL) || (soundingV == NULL) || (soundingAlt == NULL) )
+    {
+      if (params.debug)
+	cerr << "Failed to obtain U and V from sounding. Sounding will not be used\n";
+      *success = 0;
+      return ;
+    }
+
+
+  int savedValue = 996; // soundVolume->sweep[1]->ray[0]->h.nbins
+
+  //
+  // Allocate space for matrix to a hold sounding data and derived data
+  //
+  int numPoints = sounding.getNumPoints();
+
+  float** ua_data = new float*[numPoints + 1];
+  
+  for (int i = 0; i < numPoints + 1 ; i++)
+    ua_data[i] = new float[5];
+
+  ua_data[0][0]=0.0;
+  ua_data[0][1]=0.0;
+  ua_data[0][2]=0.0;
+  ua_data[0][3]=0.0;
+  ua_data[0][4]=0.0;
+  
+ 
+  int k = 1;
+  for( int i = 0 ; i < numPoints; i++)
+    {
+      //
+      // Get U,V and Alt
+      //
+      ua_data[k][0] = soundingAlt[i];
+      
+      ua_data[k][1] = soundingU[i];
+      
+      ua_data[k][2] = soundingV[i];
+      
+      if (ua_data[k][0] == sounding.getMissingValue() || 
+	  ua_data[k][1] == sounding.getMissingValue() ||
+	  ua_data[k][2]  == sounding.getMissingValue())
+	continue;
+
+      //
+      // calculate shear U
+      //
+      ua_data[k][3]=(ua_data[k][1]-ua_data[k-1][1])/
+                     (ua_data[k][0]-ua_data[k-1][0]);
+
+      //
+      // calculate shear V
+      //
+      ua_data[k][4]=(ua_data[k][2]-ua_data[k-1][2])/
+                     (ua_data[k][0]-ua_data[k-1][0]);
+      
+      if (fabs( ua_data[k][3] ) <= params.max_shear && 
+  	  fabs( ua_data[k][4] ) <= params.max_shear )
+  	  {
+  	    k++; 
+  	  }
+       
+    }
+
+  
+  numLevs = k - 1;
+
+  //
+  // Force wind at ground to be same as that of first level: 
+  //
+  ua_data[0][1] = ua_data[1][1];
+  ua_data[0][2] = ua_data[1][2];
+  ua_data[1][3] = 0.0;
+  ua_data[1][4] = 0.0;
+
+
+
+  if(params.debug)
+    fprintf(stderr, "Number of sounding levels used: %d\n\n", numLevs);
+
+  
+  numSweeps = soundVolume->h.nsweeps;
+  cout << "numSweeps " << numSweeps << endl;
+  //
+  // Standard Atmosphere refractivity gradient in km^-1
+  //
+  
+  dRdz=-39.2464; 
+
+  alt = soundVolume->sweep[0]->ray[0]->h.alt;
+  
+  if(params.debug)
+    fprintf(stderr,"Radar altitude: %d\n",alt);
+
+  
+  for(sweepIndex = 0; sweepIndex < numSweeps; sweepIndex++) 
+    {
+
+      //numRays =  soundVolume->sweep[sweepIndex]->h.nrays;
+      numBins = soundVolume->sweep[sweepIndex]->ray[0]->h.nbins;
+
+      cout << "numRays " << numRays << endl;
+      cout << "numBins " << numBins << endl;
+
+      for(i = 0; i < numBins; i++) {
+        numRays =  soundVolume->sweep[sweepIndex]->h.nrays;
+
+	for(currIndex = 0; currIndex < numRays; currIndex++) {
+
+	  //	  cout << "sweep " << sweepIndex << " has " << soundVolume->sweep[sweepIndex]->h.nrays << " rays; ray " <<
+          //  currIndex << " has " << 
+	  //  soundVolume->sweep[sweepIndex]->ray[currIndex]->h.nbins << " bins " << endl;
+		  soundVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = -1; // (Range) val;
+	} // end for curr index
+      } // end for i < num_bins
+    }// end for sweepindex < numsweeps
+
+  if (numLevs==0) 
+    {
+      flag = 0;
+    }
+  if (flag) 
+    *success = 1;
+
+  
+  // free memory 
+  //
+  for (int i = 0; i < numPoints + 1; i++)
+    delete[](ua_data[i]);
+
+  delete[](ua_data);
+
+  return;
+}
+  */
+
      
 ////////////////////////////////////////////////////////////////////////
 //
@@ -2008,7 +2188,7 @@ int FourDD::loadSoundingData( time_t issueTime )
    //
    // Try to read a sounding
    // 
-   int ret = sounding.readSounding( issueTime );
+  int ret = sounding.readSounding( issueTime );
 
    if ( ret < 0 ) {
       fprintf( stderr, "Cannot read sounding data at %s\n",

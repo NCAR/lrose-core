@@ -29,8 +29,9 @@ Volume *Rsl::new_volume(Radx::si32 max_sweeps) {
   }
   if (volume->sweep == NULL) 
     throw std::bad_alloc(); // "Memory allocation failed for Volume");
+  Sweep **sweeps = volume->sweep;
   for (int i=0; i<max_sweeps; i++) 
-    volume->sweep[i] = NULL;
+    sweeps[i] = NULL;
 
   volume->h.type_str = NULL;
 
@@ -47,8 +48,9 @@ Sweep *Rsl::new_sweep(Radx::si32 max_rays) {
   }
   if (sweep->ray == NULL) 
     throw std::bad_alloc(); // "Memory allocation failed for Sweep");
+  Ray **rays = sweep->ray;
   for (int i=0; i<max_rays; i++) 
-    sweep->ray[i] = NULL;
+    rays[i] = NULL;
 
   return sweep;
 };
@@ -60,8 +62,9 @@ Ray *Rsl::new_ray(Radx::si32 max_bins) {
   if (ray != NULL) {
     ray->h.nbins = max_bins;
     // don't allocate memory, we are just going to use pointers to data
-    //ray->range = (Range *) malloc(sizeof(Range) * max_bins);
+    ray->h.binDataAllocated = false;
   }
+
   return ray;
 };
 
@@ -73,10 +76,9 @@ Ray *Rsl::new_ray(Radx::si32 max_bins) {
 void Rsl::free_radar(Radar *radar) {
   if (radar == NULL) return;
 
-  Volume **ptr = radar->v;
+  Volume **volumes = radar->v;
   for (Radx::si32 i=0; i<radar->h.nvolumes; i++) {
-    free_volume(*ptr);
-    ptr++;
+    free_volume(volumes[i]);
   } 
   free(radar->v);
   free(radar);
@@ -85,10 +87,9 @@ void Rsl::free_radar(Radar *radar) {
 void Rsl::free_volume(Volume *volume) {
   if (volume == NULL) return;
 
-  Sweep **ptr = volume->sweep;
+  Sweep **sweeps = volume->sweep;
   for (Radx::si32 i=0; i<volume->h.nsweeps; i++) {
-    free_sweep(*ptr);
-    ptr++;
+    free_sweep(sweeps[i]);
   } 
   free(volume->sweep);
   char *type_str = volume->h.type_str;
@@ -100,10 +101,9 @@ void Rsl::free_volume(Volume *volume) {
 void Rsl::free_sweep(Sweep *sweep) {
   if (sweep == NULL) return;
 
-  Ray **ptr = sweep->ray;
+  Ray **rays = sweep->ray;
   for (Radx::si32 i=0; i<sweep->h.nrays; i++) {
-    free_ray(*ptr);
-    ptr++;
+    free_ray(rays[i]);
   } 
   free(sweep->ray);
   free(sweep);
@@ -113,37 +113,119 @@ void Rsl::free_sweep(Sweep *sweep) {
 void Rsl::free_ray(Ray *ray) {
   if (ray == NULL) return;
 
-  Range *ptr = ray->range;
-  free(ptr);
+  if (ray->h.binDataAllocated) {
+    free(ray->range);
+  } 
+  // else 
+  // don't free the data because it is used by RadxVol
+  //Range *ptr = ray->range;
+
   free(ray);
 }
 
 
 // TODO: write some unit tests for these
 
+
+Ray *Rsl::copy_ray(Ray *ray) {
+
+  if (ray == NULL) return NULL;
+
+  Ray *rayCopy;
+  int nbins = ray->h.nbins;
+  rayCopy = Rsl::new_ray(nbins);
+  //memcpy(&(rayCopy->h), &(ray->h), sizeof(Ray_header)); 
+  rayCopy->h.nbins = ray->h.nbins;
+
+
+  rayCopy->h.azimuth = ray->h.azimuth;
+  rayCopy->h.elev = ray->h.elev;
+  rayCopy->h.nyq_vel = ray->h.nyq_vel;
+  rayCopy->h.gate_size = ray->h.gate_size;;
+  rayCopy->h.range_bin1 = ray->h.range_bin1;
+  rayCopy->h.bias = ray->h.bias;
+  rayCopy->h.scale = ray->h.scale;
+
+  // copy the bin data               
+  /*
+  Range *binData = (Range *) malloc(sizeof(Range) * nbins);
+
+  memcpy(binData, ray->range, ray->h.nbins * sizeof(Range));
+  rayCopy->range = binData;
+  */
+
+  rayCopy->range = (Range *) malloc(sizeof(Range) * nbins); 
+  rayCopy->h.binDataAllocated = true;
+
+  for (int i=0; i<nbins; i++) 
+    rayCopy->range[i] = ray->range[i];
+
+  return rayCopy;
+}
+
+
+
+Sweep *Rsl::copy_sweep(Sweep *sweep) {
+
+  if (sweep == NULL) return NULL;
+
+  Sweep *sweepCopy;
+  sweepCopy = Rsl::new_sweep(sweep->h.nrays);
+  //memcpy(&(sweepCopy->h), &(sweep->h), sizeof(Sweep_header));
+  sweepCopy->h.nrays = sweep->h.nrays;
+
+  // copy the rays 
+  for (int i=0; i<sweep->h.nrays; i++) {
+    //Ray **rays = sweep->ray;
+    //Ray **copyOfRays = sweepCopy->ray;
+    //Ray *rayCopy = Rsl::copy_ray(rays[i]);
+    //copyOfRays[i] = rayCopy;
+    //sweepCopy->ray[i] = rayCopy;  // new
+    sweepCopy->ray[i] = Rsl::copy_ray(sweep->ray[i]); 
+  }
+
+  // does this do a deep copy? does it copy all the rays and data, too? Yes.
+
+  return sweepCopy;
+}
+
+
+
+
 Volume *Rsl::copy_volume(Volume *v) {
 
   if (v == NULL) return NULL;
 
-  Volume *the_copy;
-  the_copy = Rsl::new_volume(v->h.nsweeps);
+  Volume *vcopy;
+  vcopy = Rsl::new_volume(v->h.nsweeps);
 
-  // TODO: fix this up ...
   // allocate and copy the string for type_str
   if (v->h.type_str != NULL) {
     size_t len = sizeof(v->h.type_str);
-    the_copy->h.type_str = (char *) malloc(len);
-    memcpy(the_copy->h.type_str, v->h.type_str, len);
-    the_copy->h.calibr_const = v->h.calibr_const;
+    vcopy->h.type_str = (char *) malloc(len);
+    //memcpy(vcopy->h.type_str, v->h.type_str, len);
   }
- 
+  //memcpy(&(vcopy->h), &(v->h), sizeof(Volume_header));
+  vcopy->h.nsweeps = v->h.nsweeps;
 
-  // how to copy the data conversion functions?
-  
-  // does this do a deep copy? does it copy all the rays and data too?
-  memcpy(the_copy->sweep, v->sweep, sizeof(Sweep) * v->h.nsweeps);
-  return the_copy;
+  // copy the sweeps              
+  for (int i=0; i<v->h.nsweeps; i++) {
+    // Sweep **sweeps = v->sweep;
+    //Sweep **copyOfSweeps = vcopy->sweep;
+    //Sweep *sweepCopy = Rsl::copy_sweep(sweeps[i]);
+    //    copyOfSweeps[i] = sweepCopy;
+
+    vcopy->sweep[i] = Rsl::copy_sweep(v->sweep[i]);
+  }
+
+  // does this do a deep copy? does it copy all the rays and data, too? Yes.
+  cout << "copy of volume" << endl;
+  print_volume(vcopy);
+  cout << "end copy of volume" << endl;
+
+  return vcopy;
 }
+
 
 
 /* Internal storage conversion functions. These may be any conversion and
@@ -184,16 +266,23 @@ Range Rsl::VR_INVF(Radx::fl32 x)
 
 void Rsl::print_ray_header(Ray_header header) {
   
-  cout << "Ray header " << endl;
-  cout << " --------" << endl;
-  cout << "    azimuth=" << header.azimuth << endl;
-  cout << "       elev=" << header.elev << endl;
-  cout << "range bin 1=" << header.range_bin1 << endl;
-  cout << "  gate size=" << header.gate_size << endl;
-  cout << "       bias=" << header.bias << endl;
-  cout << "      scale=" << header.scale << endl;
-  cout << "    nyq vel=" << header.nyq_vel << endl;
-  cout << " --------" << endl;
+  cout << "   Ray header " << endl;
+  cout << "   --------" << endl;
+  cout << "         nbins=" << header.nbins << endl;
+  cout << "       azimuth=" << header.azimuth << endl;
+  cout << "          elev=" << header.elev << endl;
+  cout << "   range bin 1=" << header.range_bin1 << endl;
+  cout << "     gate size=" << header.gate_size << endl;
+  cout << "          bias=" << header.bias << endl;
+  cout << "         scale=" << header.scale << endl;
+  cout << "       nyq vel=" << header.nyq_vel << endl;
+  cout << "     allocated=";
+  if (header.binDataAllocated) 
+    cout << "yes";
+  else
+    cout << "no";
+  cout << endl;
+  cout << "   --------" << endl;
 }
 
 
@@ -207,16 +296,37 @@ void Rsl::print_ray(Ray *ray)
     // print the header
     print_ray_header(ray->h);
 
+    
     // print the data
     if (ray->range != NULL) {
       Range *bin = ray->range;
-      for (int i = 0; i < ray->h.nbins; i++) {
+      int maxToPrint = 10; // ray->h.nbins;
+      for (int i = 0; i < maxToPrint; i++) {
 	cout << bin[i] << " ";
       }
       cout << endl;
     }
+    
   }
 }
+
+void Rsl::print_sweep_header(Sweep_header header) {
+  
+  cout << "Sweep header " << endl;
+  cout << "--------" << endl;
+  cout << " nrays=" << header.nrays << endl;
+  /*
+  cout << "       azimuth=" << header.azimuth << endl;
+  cout << "          elev=" << header.elev << endl;
+  cout << "   range bin 1=" << header.range_bin1 << endl;
+  cout << "     gate size=" << header.gate_size << endl;
+  cout << "          bias=" << header.bias << endl;
+  cout << "         scale=" << header.scale << endl;
+  cout << "       nyq vel=" << header.nyq_vel << endl;
+  */
+  cout << "--------" << endl;
+}
+
 
 
 // print the Sweep and walk down the pointers to Rays and print the contents
@@ -227,12 +337,14 @@ void Rsl::print_sweep(Sweep *sweep)
     cout << "Sweep is NULL" << endl;
   else {
     // print the sweep header
-    //print_sweep_header(sweep->h);
+    print_sweep_header(sweep->h);
 
     // print each ray
     if (sweep->ray != NULL) {
       Ray **ray = sweep->ray;
-      for (int i = 0; i < sweep->h.nrays; i++) {
+      int maxToPrint = 5; // sweep->h.nrays 
+      for (int i = 0; i < maxToPrint; i++) {
+        cout << "  Ray " << i << endl;
 	print_ray(ray[i]);
       }
     }
@@ -255,7 +367,9 @@ void Rsl::print_volume(Volume *volume)
     // print each sweep
     if (volume->sweep != NULL) {
       Sweep **sweep = volume->sweep;
-      for (int i = 0; i < volume->h.nsweeps; i++) {
+      int nSweepsToPrint = 3; // volume->h.nsweeps 
+      for (int i = 0; i < nSweepsToPrint; i++) {
+        cout << "Sweep " << i << endl;
 	print_sweep(sweep[i]);
       }
     }
@@ -264,3 +378,26 @@ void Rsl::print_volume(Volume *volume)
 
 }
 
+void Rsl::verifyEqualDimensions(Volume *currDbzVol, Volume *currVelVol) {
+
+  // check number of sweeps                                                                                                     
+  if (currDbzVol->h.nsweeps != currVelVol->h.nsweeps)
+    throw "ERROR - velocity and reflectivity must has same number of sweeps";
+
+  for (int s=0; s<currDbzVol->h.nsweeps; s++) {
+    if (currDbzVol->sweep[s]->h.nrays != currVelVol->sweep[s]->h.nrays) {
+      char msg[1024];
+      sprintf(msg, "ERROR - velocity and reflectivity must has same number of rays for each sweep\n. \                          
+              check sweep %d\n", s);
+      throw msg;
+    }
+    for (int r=0; r<currDbzVol->sweep[s]->h.nrays; r++) {
+      if (currDbzVol->sweep[s]->ray[r]->h.nbins != currVelVol->sweep[s]->ray[r]->h.nbins) {
+        char msg[1024];
+        sprintf(msg, "ERROR - velocity and reflectivity must has same number of bins for each ray\n. \                          
+              check ray %d\n", r);
+        throw msg;
+      }
+    }
+  }
+}
