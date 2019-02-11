@@ -120,7 +120,8 @@ public:
 
   typedef enum {
     BEAM_SPECIFY_N_SAMPLES = 0,
-    BEAM_SPECIFY_ANGLE = 1
+    BEAM_SPECIFY_ANGLE = 1,
+    BEAM_CONSTANT_STEERING_ANGLE = 2
   } beam_method_t;
 
   typedef enum {

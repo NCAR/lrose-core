@@ -71,6 +71,7 @@ BeamReader::BeamReader(const string &prog_name,
   
   _pulseSeqNum = 0;
   _prevPulseSeqNum = 0;
+  _latestPulse = NULL;
   _prevPulse = NULL;
   _pulseCount = 0;
   _pulseCountSinceStatus = 0;
@@ -295,7 +296,14 @@ Beam *BeamReader::getNextBeam()
     
     // choose action depending on mode
     
-    if (_indexTheBeams) {
+    if (_momentsMgr->getBeamMethod() == Params::BEAM_CONSTANT_STEERING_ANGLE) {
+
+      if (_readConstantSteeringAngleBeam()) {
+        // end of data
+        return NULL;
+      }
+      
+    } else if (_indexTheBeams) {
       
       // indexed beams
       
@@ -601,6 +609,91 @@ int BeamReader::_readNonIndexedBeam()
 
   return 0;
 
+}
+    
+//////////////////////////////////////////////////
+// read in data for a beam with constant steering
+// angle, as in phsed array radar.
+// returns 0 on success, -1 on failure
+
+int BeamReader::_readConstantSteeringAngleBeam()
+  
+{
+
+  // find the indexed center of the next beam
+  // side effect: sets _nSamples
+  
+  if (_findNextIndexedBeam()) {
+    // end of data
+    return -1;
+  }
+
+  // check that indexing is still in force
+  // it could have been turned off because the antenna is
+  // not moving fast enough
+
+  if (!_indexTheBeams) {
+    // antenna too slow for indexing
+    // finalize non-indexed beam for use
+    if (_finalizeNonIndexedBeam()) {
+      return -1;
+    }
+    return 0;
+  }
+
+  // save sequence number as a starting point for next time
+
+  _prevBeamPulseSeqNum = _pulseQueue[0]->getPulseSeqNum();
+  
+  // set PRT (and mean PRF)
+
+  // _setPrt();
+  
+  // compute the current scan rate
+  
+  _computeBeamAzRate(0, -1);
+  _computeBeamElRate(0, -1);
+
+  // compute the number of samples
+
+  _nSamples = _computeNSamplesIndexed();
+  
+  // read in second half of beam
+
+  int nSamplesHalf = _nSamples / 2;
+  int nNeeded = nSamplesHalf - 1;
+  for (int ii = 0; ii < nNeeded; ii++) {
+    if (_getNextPulse() == NULL) {
+      // end of data
+      return -1;
+    }
+  }
+
+  // check that we start on the correct
+  // pulse type for alternating or staggered PRT mode
+  
+  if (_checkStartConditions()) {
+    return -1;
+  }
+
+  // set indices, compute angles and rate
+  
+  _endIndex = 0;
+  _startIndex = _nSamples - 1;
+  _midIndex = _nSamples / 2;
+
+  // constrain pulses to be within the dwell
+  // this step is needed to take care of overshoot when the
+  // antenna rate is varying
+
+  _constrainPulsesToWithinDwell();
+
+  // set PRT (and mean PRF)
+
+  _setPrt();
+
+  return 0;
+  
 }
     
 //////////////////////////////////////////////////
@@ -1189,6 +1282,7 @@ IwrfTsPulse *BeamReader::_getNextPulse()
 
     // return pointer to this pulse
 
+    _latestPulse = pulse;
     return pulse;
   
   } // while (true)
@@ -1277,10 +1371,6 @@ IwrfTsPulse *BeamReader::_doReadNextPulse()
   if (latest == NULL) {
     return NULL;
   }
-
-  // 11111111111 FIX FOR ARC
-  // int s_vol_num = _pulseReader->getOpsInfo().get_scan_volume_num();
-  // latest->set_volume_num(s_vol_num);
 
   // swap the PRT values if the current prt refers to the 
   // time to NEXT pulse instead of time since PREV pulse

@@ -126,6 +126,7 @@ private:
   si64 _pulseSeqNum;
   si64 _prevPulseSeqNum;
   IwrfTsPulse *_prevPulse;
+  IwrfTsPulse *_latestPulse;
   deque<IwrfTsPulse *> _pulseQueue;
   deque<IwrfTsPulse *> _pulseCache;
   int _pulseCount;
@@ -247,6 +248,7 @@ private:
 
   int _readDualPrtBeam();
   int _readNonIndexedBeam();
+  int _readConstantSteeringAngleBeam();
   int _readIndexedBeam();
 
   int _findPrevIndexedBeam();
