@@ -448,6 +448,12 @@ void RhiWidget::_drawOverlays(QPainter &painter)
 
     painter.save();
     painter.setTransform(_zoomTransform);
+
+    // set narrow line width
+    QPen pen = painter.pen();
+    pen.setWidth(0);
+    painter.setPen(pen);
+
     double ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
       QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
@@ -611,6 +617,10 @@ void RhiWidget::_computeAngleLimits(const RadxRay *ray)
   // if (ray->getIsIndexed() || fabs(elevDiff) > beamWidth * 4.0) {
     
   double halfAngle = ray->getAngleResDeg() / 2.0;
+  if (_params.rhi_override_rendering_beam_width) {
+    halfAngle = _params.rhi_rendering_beam_width / 2.0;
+  }
+
   _startElev = elev - halfAngle;
   _endElev = elev + halfAngle;
     

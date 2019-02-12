@@ -1462,6 +1462,30 @@
     tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
+    // Parameter 'ppi_override_rendering_beam_width'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ppi_override_rendering_beam_width");
+    tt->descr = tdrpStrDup("Option to override the azimuth beam width for rendering.");
+    tt->help = tdrpStrDup("Normally HawkEye determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.");
+    tt->val_offset = (char *) &ppi_override_rendering_beam_width - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'ppi_rendering_beam_width'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("ppi_rendering_beam_width");
+    tt->descr = tdrpStrDup("Rendering beam width, if override is active.");
+    tt->help = tdrpStrDup("See 'ppi_override_rendering_beam_width'");
+    tt->val_offset = (char *) &ppi_rendering_beam_width - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
     // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1733,6 +1757,30 @@
     tt->help = tdrpStrDup("After the queue reaches this size, older beams are discarded.");
     tt->val_offset = (char *) &rhi_beam_queue_size - &_start_;
     tt->single_val.i = 360;
+    tt++;
+    
+    // Parameter 'rhi_override_rendering_beam_width'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("rhi_override_rendering_beam_width");
+    tt->descr = tdrpStrDup("Option to override the azimuth beam width for rendering.");
+    tt->help = tdrpStrDup("Normally HawkEye determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.");
+    tt->val_offset = (char *) &rhi_override_rendering_beam_width - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'rhi_rendering_beam_width'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("rhi_rendering_beam_width");
+    tt->descr = tdrpStrDup("Rendering beam width, if override is active.");
+    tt->help = tdrpStrDup("See 'rhi_override_rendering_beam_width'");
+    tt->val_offset = (char *) &rhi_rendering_beam_width - &_start_;
+    tt->single_val.d = 1;
     tt++;
     
     // Parameter 'Comment 12'
