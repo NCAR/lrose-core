@@ -125,8 +125,7 @@ private:
   //  Volume *_extractVel(const RadxVol &radxVol); // , Volume *currVelVol);
   Volume *_extractFieldData(const RadxVol &radxVol, string fieldName); // , Volume *currDbzVol);
   
-  void _insertDbz(Volume *currDbzVol, RadxVol &radxVol);
-  void _insertVel(Volume *currVelVol, RadxVol &radxVol);
+  void _insertFieldData(RadxVol *radxVol, string fieldName, Volume *volume); 
 
   //
   // Reformatter and holder of beams for current radar vol

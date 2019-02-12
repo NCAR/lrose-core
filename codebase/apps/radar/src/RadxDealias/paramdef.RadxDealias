@@ -66,7 +66,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "./output";
+  p_default = "./dealiased_output";
   p_descr = "Output directory path.";
   p_help = "Files will be written to this directory.";
 } output_dir;
@@ -125,9 +125,9 @@ paramdef enum repeated_tilt_decision_t {
 } delete_tilt_decision;
 
 paramdef int {
-  p_default = -1;
+  p_default = 1;
   p_descr = "Option for padding the number of gates in the beam data so that "
-            "a constant beam geometry is processed.";
+            "a constant beam geometry is processed. The dealiasing algorithm requires the same number of gates for all rays and sweeps.";
   p_help = "Set to a positive number to activate padding.";
 } input_num_gates;
 

@@ -209,7 +209,6 @@ int RadxDealias::_useCommandLineFileList()
 	  // convert from RadxVol to Volume structures
 	//char *fieldName = _params.required_fields;
 
-
 	currDbzVol = _extractFieldData(vol, _params._required_fields[0]); 
 	currVelVol = _extractFieldData(vol, _params._required_fields[1]);
 
@@ -222,7 +221,23 @@ int RadxDealias::_useCommandLineFileList()
 
 	_processVol(prevVelVol, currVelVol, currDbzVol, volTime);
 
+	// seed the next unfolding with the results
 	prevVelVol = currVelVol;
+
+	//move the unfolded data back into the RadxVol structure
+	// first, move the data back to the rays, so that we can add a couple
+	// new fields to the rays                                                                                             
+	vol.loadRaysFromFields();
+
+	// only the velocity should change; NOT the reflectivity
+	//        _insertFieldData(&vol, _params._required_fields[0], currDbzVol); 
+	_insertFieldData(&vol, _params._required_fields[1], currVelVol);
+
+	// load the data back into the fields
+        vol.loadFieldsFromRays();
+
+  vector<string> fieldNamesNow = vol.getUniqueFieldNameList();
+
 	// write the volume data
 	_writeVol(vol);
 	nGood++;
@@ -611,49 +626,43 @@ void RadxDealias::_writeVol(RadxVol &vol)
   /*
 
   Ncf/NcfRadxFile_write.cc:int NcfRadxFile::writeToDir(const RadxVol &vol,
+  */
   RadxFile outFile;
   //_setupWrite(outFile);
-
+  
   string outputDir = _params.output_dir;
     
-  if (_params.output_filename_mode == Params::SPECIFY_FILE_NAME) {
-    
+  if (_params.output_filename_mode == Params::SPECIFY_FILE_NAME) {    
     string outPath = outputDir;
     outPath += PATH_DELIM;
     outPath += _params.output_filename;
 
-    // write to path
-  
-    if (outFile.writeToPath(vol, outPath)) {
-      cerr << "ERROR - RadxDealias::_writeVol" << endl;
-      cerr << "  Cannot write file to path: " << outPath << endl;
-      cerr << outFile.getErrStr() << endl;
-      return -1;
-    }
-    
-  } else {
+    if (_params.debug) cerr << " to " << outPath << endl;
 
-    // write to dir
-  
+    if (outFile.writeToPath(vol, outPath)) {
+      char errMsg[1024];
+      string systemErrorMsg = outFile.getErrStr();
+      sprintf(errMsg, "ERROR - RadxDealias::_writeVol\n   Cannot write file to path: %s\n   %s\n",
+	      outPath.c_str(), systemErrorMsg.c_str());
+      throw errMsg;
+    }    
+  } else {
+    if (_params.debug) cerr << " to " << outputDir << endl;
+
     if (outFile.writeToDir(vol, outputDir,
                            _params.append_day_dir_to_output_dir,
                            _params.append_year_dir_to_output_dir)) {
-      cerr << "ERROR - RadxDealias::_writeVol" << endl;
-      cerr << "  Cannot write file to dir: " << outputDir << endl;
-      cerr << outFile.getErrStr() << endl;
-      return -1;
+      char errMsg[1024];
+      string systemErrorMsg = outFile.getErrStr();
+      sprintf(errMsg, "ERROR - RadxDealias::_writeVol\n  Cannot write file to dir: %s\n   %s\n",
+	      outputDir.c_str(), systemErrorMsg.c_str());
+      throw errMsg;
     }
-
   }
-
-  string outputPath = outFile.getPathInUse();
-  */
 
   if (_params.debug) {
     cerr << "Finished writing volume" << endl;
   }
-
-
 }
 
 /*
@@ -1285,7 +1294,12 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
       // TODO; Hmmm, copy the data, or just let the data be modified?
       //memcpy(ray->range, data, sizeof(Radx::fl32)*ray->getNGates());
       // TODO: reinstate ...  ray->range = data;
-      newRay->range = data;
+      // don't copy the data ...
+      //newRay->range = data;
+      // copy the data ...
+
+      newRay->range = (Range *) malloc(sizeof(Range) * newRay->h.nbins);
+      memcpy(newRay->range, data, sizeof(Range) * newRay->h.nbins);
 
     } // for each ray
   } // for each sweep  
@@ -1295,6 +1309,82 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
   }
   return volume;
 }
+
+
+void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *volume) {
+
+
+  if (_params.debug) {
+    cerr << " inserting data into field " << fieldName << endl;
+  }
+
+  // 1st, make sure the field is in the volume
+  //  vector<string> getUniqueFieldNameList() const;
+  vector<string> fieldNames = radxVol->getUniqueFieldNameList();
+  vector<string>::iterator s;
+  bool found = false;
+  for (s=fieldNames.begin(); s != fieldNames.end(); s++) {
+    if (fieldName.compare(*s) == 0) {
+      found = true;
+    }
+  }
+  if (!found) {
+    cerr << "ERROR - no field found in data " << fieldName << endl;
+    return;
+  }
+
+  // loop over the rays in the RadxVol, and pull the specific data from the trmml Volume->Sweep... structure
+  // fetch the total number of rays (#sweeps * #rays)                                                                   
+  vector<RadxRay *> currentRays = radxVol->getRays();
+
+  int rayNum = 0;
+  string unfoldedName = fieldName + "_UNF";
+
+  // for each ray of data                                                                                             
+  for (vector<RadxRay *>::iterator r=currentRays.begin(); r<currentRays.end(); r++) {
+      RadxRay *radxRay = *r;
+
+
+
+	// TODO: verify this ... we may want the management to go to the RadxVol?
+      bool isLocal = true;
+      //      int nGates = radxRay->h.nbins;
+      int sweepNumber = radxRay->getSweepNumber() - 1;
+      Radx::si16 *newData = volume->sweep[sweepNumber]->ray[rayNum]->range;
+      double scale = volume->sweep[sweepNumber]->ray[rayNum]->h.scale;
+      double offset = volume->sweep[sweepNumber]->ray[rayNum]->h.bias;
+      int nGates = volume->sweep[sweepNumber]->ray[rayNum]->h.nbins;
+      // pull the missing value  from the associated RadxField
+      RadxField *radxField = radxRay->getField(fieldName);
+      // TODO: get the missing value based on the data type?
+      double missingValue = (double) radxField->getMissingSi16();
+      // get the units; this should be pulled from the associate RadxRay
+      string units = radxField->getUnits();
+
+      /*
+      if (_params.debug) {
+        cout << "original data ..." << endl;
+	for (int ii=0; ii < nGates; ii++)
+	  cout << newData[ii] << ", ";
+	cout << endl;
+
+        cout << "unfolded data ..." << endl;
+	for (int ii=0; ii < nGates; ii++) 
+	  cout << newData[ii] << ", ";
+	cout << endl;
+      }
+      */
+
+      RadxField *field1 = radxRay->addField(unfoldedName, units, nGates, missingValue, newData, scale, offset, isLocal);
+
+      rayNum += 1;
+
+    } // for each ray
+
+  vector<string> fieldNamesNew = radxVol->getUniqueFieldNameList();
+
+}
+
 
 void RadxDealias::jamesCopyright()
 {
