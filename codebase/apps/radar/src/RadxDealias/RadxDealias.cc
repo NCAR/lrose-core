@@ -204,8 +204,8 @@ int RadxDealias::_useCommandLineFileList()
 	vol.remapToFinestGeom();
 
         vol.setNGatesConstant();
-	vol.convertToSi16();
-//vol.convertToFl32(); // does FourDD use signed ints? No, it seems to use floats
+	// vol.convertToSi16();
+        vol.convertToFl32(); // does FourDD use signed ints? No, it seems to use floats
 	  // convert from RadxVol to Volume structures
 	//char *fieldName = _params.required_fields;
 
@@ -1270,9 +1270,16 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
       RadxField *velocityField = radxRay->getField(fieldName);
       // save the original data type
       Radx::DataType_t originalDataType = velocityField->getDataType();
+      /*
       if (originalDataType != Radx::SI16)
         throw "Error - Expected signed int 16 data";
       Radx::si16 *data = velocityField->getDataSi16();
+      */
+
+      if (originalDataType != Radx::FL32)
+        throw "Error - Expected float 32 data";
+      Radx::fl32 *data = velocityField->getDataFl32();
+
 
       //velocityField->convertToSi32();
       //Radx::fl32 *data = velocityField->getDataFl32();
@@ -1350,14 +1357,16 @@ void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *v
       bool isLocal = true;
       //      int nGates = radxRay->h.nbins;
       int sweepNumber = radxRay->getSweepNumber() - 1;
-      Radx::si16 *newData = volume->sweep[sweepNumber]->ray[rayNum]->range;
+      //Radx::si16 *newData = volume->sweep[sweepNumber]->ray[rayNum]->range;
+      Radx::fl32 *newData = volume->sweep[sweepNumber]->ray[rayNum]->range;
       double scale = volume->sweep[sweepNumber]->ray[rayNum]->h.scale;
       double offset = volume->sweep[sweepNumber]->ray[rayNum]->h.bias;
       int nGates = volume->sweep[sweepNumber]->ray[rayNum]->h.nbins;
       // pull the missing value  from the associated RadxField
       RadxField *radxField = radxRay->getField(fieldName);
       // TODO: get the missing value based on the data type?
-      double missingValue = (double) radxField->getMissingSi16();
+      double missingValue = (double) radxField->getMissingFl32();
+      //double missingValue = (double) radxField->getMissingSi16();
       // get the units; this should be pulled from the associate RadxRay
       string units = radxField->getUnits();
 
@@ -1375,7 +1384,9 @@ void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *v
       }
       */
 
-      RadxField *field1 = radxRay->addField(unfoldedName, units, nGates, missingValue, newData, scale, offset, isLocal);
+      RadxField *field1 = radxRay->addField(unfoldedName, units, nGates, missingValue, newData, isLocal);
+      // for si16
+      //RadxField *field1 = radxRay->addField(unfoldedName, units, nGates, missingValue, newData, scale, offset, isLocal);
 
       rayNum += 1;
 

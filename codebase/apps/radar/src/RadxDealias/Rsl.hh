@@ -10,8 +10,8 @@
 // Let's just make it all TWO_BYTE_PRECISION
 // If #define USE_TWO_BYTE_PRECISION when building and installing RSL, then
 //typedef unsigned short Range;  // 2 bytes
-typedef Radx::si16 Range;  // 2 bytes
-//typedef Radx::fl32 Range;  // 4 bytes
+//typedef Radx::si16 Range;  // 2 bytes
+typedef Radx::fl32 Range;  // 4 bytes
 // else,
 // typedef unsigned char Range;
 

@@ -560,10 +560,6 @@ void FourDD::firstGuess(Volume* soundVolume, float missingVal,
 	      //->h.scale * (soundVolume->sweep[sweepIndex]->ray[currIndex]->
 	      //    range[i]) + soundVolume->sweep[sweepIndex]->ray[currIndex]->h.bias;
 	      
-
-              if ((sweepIndex==0) &&(currIndex==5296) && (i==512))
-		cerr << "Watch out!" << endl;
-
 	      if ( wind >= 0.0 && dir >= 0.0) 
 		{
 		  az = PI * (soundVolume->sweep[sweepIndex]->ray[currIndex]->
