@@ -1335,6 +1335,7 @@ void TsCalAuto::_setSiggenPower(double powerDbm)
    } else {
     char buf[1024];
     if (_params.debug) {
+      cerr << "======================================================" << endl;
       cerr << "Setting siggen power (dBm): " << powerDbm << endl;
     }
     sprintf(buf,"POW %gDBM\n",powerDbm);  // Build SCPI command
