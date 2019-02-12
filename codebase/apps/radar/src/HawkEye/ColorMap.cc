@@ -26,6 +26,7 @@
 #include <toolsa/TaXml.hh>
 #include <toolsa/TaFile.hh>
 #include <toolsa/MemBuf.hh>
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <cstdlib>
@@ -620,6 +621,8 @@ int ColorMap::readRalMap(const std::string &file_path)
     double start_val, end_val;
     if (_parseRalColorScaleLine(line, start_val, end_val, colorname) == 0) {
       CmapEntry entry;
+      // strip the color name of any "!" characters
+      colorname.erase(std::remove(colorname.begin(), colorname.end(), '!'), colorname.end());
       entry.colorName = colorname;
       entry.minVal = start_val;
       entry.maxVal = end_val;
