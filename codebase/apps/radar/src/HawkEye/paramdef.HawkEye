@@ -478,6 +478,18 @@ paramdef enum legend_pos_t {
   p_help = "This include time, field name and elevation angle.";
 } ppi_main_legend_pos;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the azimuth beam width for rendering.";
+  p_help = "Normally HawkEye determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
+} ppi_override_rendering_beam_width;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Rendering beam width, if override is active.";
+  p_help = "See 'ppi_override_rendering_beam_width'";
+} ppi_rendering_beam_width;
+
 commentdef {
   p_header = "RHI MODE DISPLAY";
 }
@@ -596,6 +608,18 @@ paramdef int {
   p_descr = "Size of the queue for RHI beams.";
   p_help = "After the queue reaches this size, older beams are discarded.";
 } rhi_beam_queue_size;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the azimuth beam width for rendering.";
+  p_help = "Normally HawkEye determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
+} rhi_override_rendering_beam_width;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Rendering beam width, if override is active.";
+  p_help = "See 'rhi_override_rendering_beam_width'";
+} rhi_rendering_beam_width;
 
 commentdef {
   p_header = "BSCAN TIME LIMITS";

@@ -516,28 +516,21 @@ void PpiWidget::_drawOverlays(QPainter &painter)
   // save painter state
 
   painter.save();
-  
+
   // store font
   
   QFont origFont = painter.font();
   
-  // Set the painter to use the right color and font
-
-  // painter.setWindow(_zoomWindow);
-  
-
   // Draw rings
 
   if (_ringSpacing > 0.0 && _ringsEnabled) {
 
-    // Draw the rings
-
+    // Set up the painter
+    
     painter.save();
     painter.setTransform(_zoomTransform);
-
-    // set color
     painter.setPen(_gridRingsColor);
-
+  
     // set narrow line width
     QPen pen = painter.pen();
     pen.setWidth(0);
@@ -575,6 +568,12 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
   if (_ringSpacing > 0.0 && _gridsEnabled)  {
 
+    // Set up the painter
+    
+    painter.save();
+    painter.setTransform(_zoomTransform);
+    painter.setPen(_gridRingsColor);
+  
     double ringRange = _ringSpacing;
     double maxRingRange = ringRange;
     while (ringRange <= _maxRangeKm) {
@@ -587,6 +586,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
       maxRingRange = ringRange;
       ringRange += _ringSpacing;
     }
+    painter.restore();
 
     _zoomWorld.setSpecifyTicks(true, -maxRingRange, _ringSpacing);
 
@@ -603,6 +603,11 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
   if (_angleLinesEnabled) {
 
+    // Set up the painter
+    
+    painter.save();
+    painter.setPen(_gridRingsColor);
+  
     // Draw the lines along the X and Y axes
 
     _zoomWorld.drawLine(painter, 0, -_maxRangeKm, 0, _maxRangeKm);
@@ -617,6 +622,8 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     _zoomWorld.drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
     _zoomWorld.drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
     _zoomWorld.drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
+
+    painter.restore();
 
   }
   

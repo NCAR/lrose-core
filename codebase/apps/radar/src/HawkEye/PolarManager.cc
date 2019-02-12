@@ -1349,20 +1349,21 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
                                 const double beam_width, RayLoc *ray_loc)
 {
+
   // Determine the extent of this ray
 
-  if (ray->getIsIndexed())
-  {
+  if (_params.ppi_override_rendering_beam_width) {
+    double half_angle = _params.ppi_rendering_beam_width / 2.0;
+    _startAz = az - half_angle - 0.1;
+    _endAz = az + half_angle + 0.1;
+  } else if (ray->getIsIndexed()) {
     double half_angle = ray->getAngleResDeg() / 2.0;
     _startAz = az - half_angle - 0.1;
     _endAz = az + half_angle + 0.1;
-  }
-  else
-  {
+  } else {
     double max_half_angle = beam_width / 2.0;
     double prev_offset = max_half_angle;
-    if (_prevAz >= 0.0)
-    {
+    if (_prevAz >= 0.0) {
       double az_diff = az - _prevAz;
       if (az_diff < 0.0)
 	az_diff += 360.0;
@@ -1371,7 +1372,6 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
       if (prev_offset > half_az_diff)
 	prev_offset = half_az_diff;
     }
-      
     _startAz = az - prev_offset - 0.1;
     _endAz = az + max_half_angle + 0.1;
   }
