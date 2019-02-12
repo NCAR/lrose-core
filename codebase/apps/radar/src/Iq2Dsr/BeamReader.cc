@@ -620,80 +620,68 @@ int BeamReader::_readConstantSteeringAngleBeam()
   
 {
 
-  // find the indexed center of the next beam
-  // side effect: sets _nSamples
+  // read in pulses until PRT changes
+
+  int count = 0;
+  double az = -9999;
+  double el = -9999;
   
-  if (_findNextIndexedBeam()) {
-    // end of data
-    return -1;
-  }
-
-  // check that indexing is still in force
-  // it could have been turned off because the antenna is
-  // not moving fast enough
-
-  if (!_indexTheBeams) {
-    // antenna too slow for indexing
-    // finalize non-indexed beam for use
-    if (_finalizeNonIndexedBeam()) {
-      return -1;
-    }
-    return 0;
-  }
-
-  // save sequence number as a starting point for next time
-
-  _prevBeamPulseSeqNum = _pulseQueue[0]->getPulseSeqNum();
-  
-  // set PRT (and mean PRF)
-
-  // _setPrt();
-  
-  // compute the current scan rate
-  
-  _computeBeamAzRate(0, -1);
-  _computeBeamElRate(0, -1);
-
-  // compute the number of samples
-
-  _nSamples = _computeNSamplesIndexed();
-  
-  // read in second half of beam
-
-  int nSamplesHalf = _nSamples / 2;
-  int nNeeded = nSamplesHalf - 1;
-  for (int ii = 0; ii < nNeeded; ii++) {
-    if (_getNextPulse() == NULL) {
+  while (count <= _params.max_n_samples) {
+    
+    // get a pulse
+    
+    IwrfTsPulse *pulse = _getNextPulse();
+    if (pulse == NULL) {
       // end of data
       return -1;
     }
-  }
 
-  // check that we start on the correct
-  // pulse type for alternating or staggered PRT mode
-  
-  if (_checkStartConditions()) {
-    return -1;
-  }
+    // save az/el from first pulse
+    
+    if (count == 0) {
+      az = pulse->getAz();
+      el = pulse->getEl();
+    }
 
-  // set indices, compute angles and rate
-  
-  _endIndex = 0;
-  _startIndex = _nSamples - 1;
-  _midIndex = _nSamples / 2;
+    // check if angles have changed
 
-  // constrain pulses to be within the dwell
-  // this step is needed to take care of overshoot when the
-  // antenna rate is varying
+    if ((fabs(az - pulse->getAz()) > 1.0e-3) ||
+        (fabs(el - pulse->getEl()) > 1.0e-3)) {
+      // new angle
+      // save pulse for next beam
+      _cacheLatestPulse();
+      break;
+    }
+    
+    count++;
 
-  _constrainPulsesToWithinDwell();
+  } // while
 
   // set PRT (and mean PRF)
 
   _setPrt();
 
-  return 0;
+  // set number of samples, ensuring an even number of pulses
+  // by dropping one pulse if needed
   
+  _nSamples = (count / 2) * 2;
+  _midIndex = _nSamples / 2;
+
+  _startIndex = _nSamples - 1;
+  _endIndex = 0;
+
+  _az = _conditionAz(_pulseQueue[_midIndex]->getAz());
+  _el = _conditionEl(_pulseQueue[_midIndex]->getEl());
+
+  _computeBeamAzRate(0, _nSamples);
+  _computeBeamElRate(0, _nSamples);
+
+  // save sequence numbers in case we switch to indexed search
+  
+  _prevBeamPulseSeqNum = _pulseQueue[_midIndex]->getPulseSeqNum();
+  
+  return 0;
+
 }
     
 //////////////////////////////////////////////////
@@ -728,10 +716,6 @@ int BeamReader::_readIndexedBeam()
   // save sequence number as a starting point for next time
 
   _prevBeamPulseSeqNum = _pulseQueue[0]->getPulseSeqNum();
-  
-  // set PRT (and mean PRF)
-
-  // _setPrt();
   
   // compute the current scan rate
   
