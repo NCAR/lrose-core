@@ -110,7 +110,11 @@ public:
     WINDOW_RECT = 0,
     WINDOW_VONHANN = 1,
     WINDOW_BLACKMAN = 2,
-    WINDOW_BLACKMAN_NUTTALL = 3
+    WINDOW_BLACKMAN_NUTTALL = 3,
+    WINDOW_TUKEY_10 = 4,
+    WINDOW_TUKEY_20 = 5,
+    WINDOW_TUKEY_30 = 6,
+    WINDOW_TUKEY_50 = 7
   } window_t;
 
   typedef enum {

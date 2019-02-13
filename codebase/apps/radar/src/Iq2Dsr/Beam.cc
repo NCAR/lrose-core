@@ -2921,6 +2921,18 @@ void Beam::_computeWindows()
   } else if (_mmgr.getWindowType() == Params::WINDOW_BLACKMAN_NUTTALL) {
     _window = RadarMoments::createWindowBlackmanNuttall(_nSamples);
     _windowHalf = RadarMoments::createWindowBlackmanNuttall(_nSamplesHalf);
+  } else if (_mmgr.getWindowType() == Params::WINDOW_TUKEY_10) {
+    _window = RadarMoments::createWindowTukey(0.1, _nSamples);
+    _windowHalf = RadarMoments::createWindowTukey(0.1, _nSamplesHalf);
+  } else if (_mmgr.getWindowType() == Params::WINDOW_TUKEY_20) {
+    _window = RadarMoments::createWindowTukey(0.2, _nSamples);
+    _windowHalf = RadarMoments::createWindowTukey(0.2, _nSamplesHalf);
+  } else if (_mmgr.getWindowType() == Params::WINDOW_TUKEY_30) {
+    _window = RadarMoments::createWindowTukey(0.3, _nSamples);
+    _windowHalf = RadarMoments::createWindowTukey(0.3, _nSamplesHalf);
+  } else if (_mmgr.getWindowType() == Params::WINDOW_TUKEY_50) {
+    _window = RadarMoments::createWindowTukey(0.5, _nSamples);
+    _windowHalf = RadarMoments::createWindowTukey(0.5, _nSamplesHalf);
   }
 
   _windowVonHann = RadarMoments::createWindowVonhann(_nSamples);
