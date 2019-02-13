@@ -296,7 +296,6 @@ void RegressionFilter::setupStaggered(int nSamples,
 }
 
 /////////////////////////////////////////////////////
-// Perform adaptive filtering on a power spectrum
 // Perform regression filtering on I,Q data
 //
 // Inputs:
