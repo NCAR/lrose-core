@@ -6212,6 +6212,56 @@ void RadarMoments::initWindowBlackmanNuttall(int nSamples, double *window)
 }
   
 /////////////////////////////////////
+// initialize Tukey window
+// alpha can vary between 0 and 1
+// alpha == 1 implies a VonHann window
+// alpha == 0 implies a rectangular window
+
+void RadarMoments::initWindowTukey(double alpha, int nSamples, double *window)
+
+{
+
+  // sanity check
+
+  if (alpha < 0.0) {
+    alpha = 0.0;
+  } else if (alpha > 1.0) {
+    alpha = 1.0;
+  }
+
+  // compute limits between which function is 1.0
+
+  double lowerLimit = (alpha * (nSamples - 1.0)) / 2.0;
+  double upperLimit = (nSamples - 1.0) * (1.0 - alpha / 2.0);
+
+  // compute window terms
+
+  for (int ii = 0; ii < nSamples; ii++) {
+    if (ii < lowerLimit) {
+      double term1 = ((2.0 * ii) / (alpha * (nSamples - 1.0))) - 1.0;
+      window[ii] = 0.5 * (1.0 + cos(M_PI * term1));
+    } else if (ii > upperLimit) {
+      double term1 = ((2.0 * ii) / (alpha * (nSamples - 1.0))) - (2.0 / alpha) + 1.0;
+      window[ii] = 0.5 * (1.0 + cos(M_PI * term1));
+    } else {
+      window[ii] = 1.0;
+    }
+  }
+
+  // adjust window to keep power constant
+  
+  double sumsq = 0.0;
+  for (int ii = 0; ii < nSamples; ii++) {
+    sumsq += window[ii] * window[ii];
+  }
+  double rms = sqrt(sumsq / nSamples);
+  for (int ii = 0; ii < nSamples; ii++) {
+    window[ii] /= rms;
+  }
+
+}
+  
+/////////////////////////////////////
 // create rectangular window
 // Allocates memory and returns window
 
@@ -6263,6 +6313,20 @@ double *RadarMoments::createWindowBlackmanNuttall(int nSamples)
   
   double *window = new double[nSamples];
   initWindowBlackmanNuttall(nSamples, window);
+  return window;
+  
+}
+  
+/////////////////////////////////////
+// create Tukey window
+// Allocates memory and returns window
+
+double *RadarMoments::createWindowTukey(double alpha, int nSamples)
+
+{
+  
+  double *window = new double[nSamples];
+  initWindowTukey(alpha, nSamples, window);
   return window;
   
 }

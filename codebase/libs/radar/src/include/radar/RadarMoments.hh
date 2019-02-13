@@ -1118,6 +1118,13 @@ public:
   
   static void initWindowBlackmanNuttall(int nSamples, double *window);
   
+  // initialize Tukey window
+  // alpha can vary between 0 and 1
+  // alpha == 1 implies a VonHann window
+  // alpha == 0 implies a rectangular window
+
+  static void initWindowTukey(double alpha, int nSamples, double *window);
+
   // create rectangular window
   // Allocates memory and returns window
   
@@ -1137,6 +1144,11 @@ public:
   // Allocates memory and returns window
 
   static double *createWindowBlackmanNuttall(int nSamples);
+
+  // create Tukey window
+  // Allocates memory and returns window
+
+  static double *createWindowTukey(double alpha, int nSamples);
 
   // apply window to IQ samples, in place
   
