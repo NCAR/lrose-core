@@ -145,6 +145,7 @@ Ray *Rsl::copy_ray(Ray *ray) {
   rayCopy->h.range_bin1 = ray->h.range_bin1;
   rayCopy->h.bias = ray->h.bias;
   rayCopy->h.scale = ray->h.scale;
+  rayCopy->h.alt = ray->h.alt;
 
   // copy the bin data               
   /*
@@ -275,7 +276,7 @@ void Rsl::print_ray_header(Ray_header header) {
   cout << "     gate size=" << header.gate_size << endl;
   cout << "          bias=" << header.bias << endl;
   cout << "         scale=" << header.scale << endl;
-  cout << "       nyq vel=" << header.nyq_vel << endl;
+  cout << "  altitude (m)=" << header.alt << endl;
   cout << "     allocated=";
   if (header.binDataAllocated) 
     cout << "yes";
@@ -315,15 +316,6 @@ void Rsl::print_sweep_header(Sweep_header header) {
   cout << "Sweep header " << endl;
   cout << "--------" << endl;
   cout << " nrays=" << header.nrays << endl;
-  /*
-  cout << "       azimuth=" << header.azimuth << endl;
-  cout << "          elev=" << header.elev << endl;
-  cout << "   range bin 1=" << header.range_bin1 << endl;
-  cout << "     gate size=" << header.gate_size << endl;
-  cout << "          bias=" << header.bias << endl;
-  cout << "         scale=" << header.scale << endl;
-  cout << "       nyq vel=" << header.nyq_vel << endl;
-  */
   cout << "--------" << endl;
 }
 
@@ -351,7 +343,33 @@ void Rsl::print_sweep(Sweep *sweep)
   }
 }
 
+void Rsl::findMaxNBins(Volume *volume, int *maxNBins, int *maxNRays) {
 
+  cout << "Finding max number of bins and rays ... " << endl;
+
+  int maxBins = 0;
+  int maxRays = 0;
+  if (volume != NULL) {
+    for (int i=0; i<volume->h.nsweeps; i++) {
+      if (volume->sweep[i] != NULL) {
+	int nrays = volume->sweep[i]->h.nrays;
+	if (nrays > maxRays)
+	  maxRays = nrays;
+	for (int j=0; j<nrays; j++) {
+	  if (volume->sweep[i]->ray[j] != NULL) {
+	    int nbins = volume->sweep[i]->ray[j]->h.nbins;
+	    if (nbins > maxBins)
+	      maxBins = nbins;
+	  } // if ray[j] != NULL
+	} // for rays
+      } // if sweeps[i] != NULL
+    } // for sweeps
+  } // end for volume != NULL
+  *maxNBins = maxBins;
+  *maxNRays = maxRays;
+  
+  cout << " found " << *maxNBins << " bins and " << *maxNRays << " rays" << endl;
+}
 
 // print the Volume and walk down the pointers to Rays and print the contents
 void Rsl::print_volume(Volume *volume) 
@@ -387,15 +405,13 @@ void Rsl::verifyEqualDimensions(Volume *currDbzVol, Volume *currVelVol) {
   for (int s=0; s<currDbzVol->h.nsweeps; s++) {
     if (currDbzVol->sweep[s]->h.nrays != currVelVol->sweep[s]->h.nrays) {
       char msg[1024];
-      sprintf(msg, "ERROR - velocity and reflectivity must has same number of rays for each sweep\n. \                          
-              check sweep %d\n", s);
+      sprintf(msg, "ERROR - velocity and reflectivity need same number of rays for each sweep\n. Check sweep %d\n", s);
       throw msg;
     }
     for (int r=0; r<currDbzVol->sweep[s]->h.nrays; r++) {
       if (currDbzVol->sweep[s]->ray[r]->h.nbins != currVelVol->sweep[s]->ray[r]->h.nbins) {
         char msg[1024];
-        sprintf(msg, "ERROR - velocity and reflectivity must has same number of bins for each ray\n. \                          
-              check ray %d\n", r);
+        sprintf(msg, "ERROR - velocity and reflectivity need same number of bins for each ray\n. Check ray %d\n", r);
         throw msg;
       }
     }

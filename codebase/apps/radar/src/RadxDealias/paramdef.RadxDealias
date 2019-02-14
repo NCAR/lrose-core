@@ -10,29 +10,10 @@
 
 commentdef {
   p_text = "RadxDealias reads input radar data from a file, dealiases the
- data, and writes it to a file";
+ velocity data, and writes the results to a file.  The output file contains
+ a new field that contains the unfolded velocity. The unfolded velocity
+ field has the same name with _UNF appended. ";
 }
-
-commentdef {
-  p_header = "DEBUGGING AND PROCESS CONTROL";
-}
-
-typedef enum {
-  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
-} debug_t;
-  
-paramdef enum debug_t
-{
-  p_default = DEBUG_OFF;
-  p_descr = "Debug option";
-  p_help = "If set, debug messages will be printed appropriately";
-} debug;
-
-paramdef string {
-  p_default = "Test";
-  p_descr = "Process instance";
-  p_help = "Used for registration with procmap.";
-} instance;
 
 commentdef {
   p_header = "DATA INPUT";
@@ -108,6 +89,42 @@ paramdef boolean {
   p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
 } append_year_dir_to_output_dir;
 
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Output sounding or vad volume velocities INSTEAD OF dealiased velocties.";
+  p_help = "A debug tool.";
+} output_soundVol ;
+
+commentdef {
+  p_header = "PROCESS CONTROL";
+}
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = { "DBZ", "VEL" };
+  p_descr = "Expected fields. Dealiaser will not initialize without these fields. All beams will be discarded until these fields are present\n";
+} required_fields[];
+ 
 paramdef boolean {
   p_default = TRUE;
   p_descr = "Option to delete repeated tilts in volume";
@@ -131,11 +148,6 @@ paramdef int {
   p_help = "Set to a positive number to activate padding.";
 } input_num_gates;
 
-paramdef string {
-  p_default = { "DBZ", "VEL" };
-  p_descr = "Expected fields. Dealiaser will not initialize without these fields. All beams will be discarded until these fields are present\n";
-} required_fields[];
- 
 commentdef {
   p_header = "RADAR PARAMETERS";
 }
@@ -158,28 +170,10 @@ paramdef struct radar_location_t {
   p_help = "The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used.";
 } radar_location;
 
-
-commentdef {
-  p_header = "DATA OUTPUT";
-}
-
 commentdef {
   p_header = "Dealiasing Parameters ";
 }
  
-paramdef int {
-  p_default = 375;
-  p_descr = "Maximum number of rays in a sweep.";
-  p_help = "Used by FourDD to allocate memory for RSL structs.";
-} max_rays;
-
-paramdef int {
-  p_default = 1024;
-  p_descr = "Maximum number of bins per ray.";
-  p_help = "Used by FourDD to allocate memory for RSL structs.";
-} max_bins;
-	
-
 paramdef  int {
   p_default = 6;
   p_descr = "Unfolding using windowing";
@@ -206,7 +200,7 @@ paramdef float {
 paramdef  int {
   p_default = 5;
   p_descr = "Number of good values required within unfolding window to unfold the current bin.";
-  p_help = "This parameter specifies the minumum number of gates successfully dealiased during initial and spatial dealiasing located within the window (of size (PROXIMITY*2+1) X (PROXIMITY*2+1)) to consider adequate for dealiasing a particular gate the windowing procedure.";
+  p_help = "This parameter specifies the minumum number of gates successfully dealiased during initial and spatial dealiasing located within the window (of size (PROXIMITY*2+1) X (PROXIMITY*2+1)) to consider adequate for dealiasing a particular gate in the windowing procedure.";
 } min_good;
 
 
@@ -215,7 +209,18 @@ paramdef float {
   p_descr = "Fraction of the Nyquist velocity to use as a standard deviation threshold when windowing.";
   p_help = "This parameter prevents very noisy data from being used for dealiasing during the windowing routine. The lower this value, the stricter the algorithm will be about allowing bad data to come into play during windowing. (Check use in windowing routine)";
 } std_thresh;
-	
+
+
+commentdef {
+  p_header = "PREP VOLUME BEFORE UNFOLDING";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Prep volume before unfolding. Velocity gates with DBZ >  high_dbz and lower that low_dbz will be automatically deleted.";
+  p_help = "";
+} prep ;
+
 paramdef float {
   p_default = 0.0;
   p_descr = "All radial velocity bins with dbz values less than
@@ -230,6 +235,11 @@ paramdef float {
  deleted if prep is set to true.";
   p_help = "This parameter should be greater than 75 dBZ.";
 } high_dbz;
+
+
+commentdef {
+  p_header = "PRUNING";
+}
 
 paramdef boolean {
   p_default = false;
@@ -272,21 +282,9 @@ paramdef float {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Prep volume before unfolding. Velocity gates with DBZ >  high_dbz and lower that low_dbz will be automatically deleted.";
-  p_help = "";
-} prep ;
-
-paramdef boolean {
-  p_default = false;
   p_descr = "Use Bergen and Albers filter";
   p_help = "";
 } filt ;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Output sounding or vad volume velocities INSTEAD OF dealiased velocties.";
-  p_help = "A debug tool.";
-} output_soundVol ;
 
 paramdef float{
   p_default = 0;
@@ -360,14 +358,3 @@ paramdef float {
   p_default = 0.0;
 } avg_wind_v;
 
-paramdef float {
-  p_descr = "the range of dbz values used for scale/biasing (dBZ)";
-  p_help = "this is used only when input data is floating point";
-  p_default = {-32, 80};
-} dbz_range[2];
-
-paramdef float {
-  p_descr = "the range of vel values used for scale/biasing (m/s)";
-  p_help = "this is used only when input data is floating point";
-  p_default = {-80, 80};
-} vel_range[2];

@@ -204,6 +204,7 @@ int RadxDealias::_useCommandLineFileList()
 	vol.remapToFinestGeom();
 
         vol.setNGatesConstant();
+
 	// vol.convertToSi16();
         vol.convertToFl32(); // does FourDD use signed ints? No, it seems to use floats
 	  // convert from RadxVol to Volume structures
@@ -1247,7 +1248,7 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
     for (int j=0; j<newSweep->h.nrays; j++) {
 
       RadxRay *radxRay = radxRays.at(j);
-  
+
       // convert the rays
       Ray *newRay = Rsl::new_ray(radxRay->getNGates());
       // if (_params.debug) cerr << " adding ray with " << radxRay->getNGates() << " gates " << endl;
@@ -1255,14 +1256,20 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
       newRay->h.azimuth = radxRay->getAzimuthDeg();
       newRay->h.elev = radxRay->getElevationDeg();
       newRay->h.nyq_vel = radxRay->getNyquistMps();
+      newRay->h.alt = radxVol.getAltitudeKm()*1000.0; // TRMM RSL wants altitude in meters
+
       // get the Range Geometry
       // void RadxVol::getPredomRayGeom(double &startRangeKm, double &gateSpacingKm)
       // radxRay->getGateRangeKm? radxRay->getGateSpacingKm?
       double startRangeKm;
       double gateSpacingKm;
-      radxVol.getPredomRayGeom(startRangeKm, gateSpacingKm);
-      newRay->h.gate_size = startRangeKm; 
-      newRay->h.range_bin1 = gateSpacingKm;
+
+      if (!radxRay->getRangeGeomSet())
+	radxRay->copyRangeGeomFromFields();
+      //      radxVol.getPredomRayGeom(startRangeKm, gateSpacingKm);
+      // trmm rsl expects gate size and distance to first gate in meters 
+      newRay->h.gate_size = radxRay->getStartRangeKm() * 1000.0; 
+      newRay->h.range_bin1 = radxRay->getGateSpacingKm() * 1000.0;
 
       // keep the data as float; ignore the RANGE type
       // NO! Keep the data as it originally is; the FourDD algorithm uses scale and bias.

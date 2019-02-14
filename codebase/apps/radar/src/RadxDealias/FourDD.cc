@@ -354,9 +354,6 @@ void FourDD::firstGuess(Volume* soundVolume, float missingVal,
       return ;
     }
 
-
-  int savedValue = 996; // soundVolume->sweep[1]->ray[0]->h.nbins
-
   //
   // Allocate space for matrix to a hold sounding data and derived data
   //
@@ -976,9 +973,26 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
        lastbin, step = -1, startindex, endindex, prevIndex = 0, abIndex = 0, loopcount,
        countbins;
     
+     int maxNBins = 0;
+     int maxNRays = 0;
+     int countNBins;
+     int countNRays;
+
      unsigned short numtimes, dcase, flag=1, wsuccess;
-     short **GOOD = (short **) umalloc2(params.max_bins,
-                                        params.max_rays,
+     // determine max number of bins from data
+     Rsl::findMaxNBins(rvVolume, &countNBins, &countNRays);
+     if (countNBins > maxNBins) maxNBins = countNBins;
+     if (countNRays > maxNRays) maxNRays = countNRays;
+     Rsl::findMaxNBins(rvVolume, &countNBins, &countNRays);
+     if (countNBins > maxNBins) maxNBins = countNBins;
+     if (countNRays > maxNRays) maxNRays = countNRays;
+     Rsl::findMaxNBins(rvVolume, &countNBins, &countNRays);
+     if (countNBins > maxNBins) maxNBins = countNBins;
+     if (countNRays > maxNRays) maxNRays = countNRays;
+     
+     // determine max number of rays from data
+     short **GOOD = (short **) umalloc2(maxNBins,
+                                        maxNRays,
                                         sizeof(short));
      float NyqVelocity, NyqInterval, val, diff, fraction, finalval,
        valcheck, goodval, winval,  diffs[8], fraction2;

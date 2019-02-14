@@ -277,7 +277,7 @@ public:
   static void print_sweep_header(Sweep_header header);
 
   static void verifyEqualDimensions(Volume *currDbzVol, Volume *currVelVol);
-
+  static void findMaxNBins(Volume *volume, int *maxNBins, int *maxNRays);
 };
 
 #endif 
