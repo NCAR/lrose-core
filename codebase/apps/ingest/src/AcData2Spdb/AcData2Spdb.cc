@@ -1100,7 +1100,7 @@ int AcData2Spdb::_decodeIWG1(const char *line,
   // time
 
   DateTime dtime;
-  if (dtime.setFromW3c(toks[1].c_str())) {
+  if (dtime.setFromW3c(toks[0].c_str())) {
     cerr << "ERROR - AcData2Spdb::_decodeIWG1" << endl;
     cerr << "  Cannot decode ISO time, token[1]: " << toks[1] << endl;
     cerr << "  line: " << line << endl;
@@ -1113,66 +1113,66 @@ int AcData2Spdb::_decodeIWG1(const char *line,
   double lat = -9999.0;
   double lon = -9999.0;
 
-  if (toks[2].size() > 0) {
-    lat = atof(toks[2].c_str());
+  if (toks[1].size() > 0) {
+    lat = atof(toks[1].c_str());
   }
-  if (toks[3].size() > 0) {
-    lon = atof(toks[3].c_str());
+  if (toks[2].size() > 0) {
+    lon = atof(toks[2].c_str());
   }
   
   // altitude
 
   double altM = -9999.0;
-  if (toks[4].size() > 0) {
+  if (toks[3].size() > 0) {
+    altM = atof(toks[3].c_str());
+  } else if (toks[4].size() > 0) {
     altM = atof(toks[4].c_str());
   } else if (toks[5].size() > 0) {
-    altM = atof(toks[5].c_str());
-  } else if (toks[6].size() > 0) {
-    altM = atof(toks[6].c_str()) * 0.3048;
+    altM = atof(toks[5].c_str()) * 0.3048;
   }
 
   // speed
   
-  if (toks.size() < 10) {
+  if (toks.size() < 9) {
     return 0;
   }
 
   double groundSpeedMps = -9999.0;
   double tasMps = -9999.0;
 
-  if (toks[8].size() > 0) {
-    groundSpeedMps = atof(toks[8].c_str());
+  if (toks[7].size() > 0) {
+    groundSpeedMps = atof(toks[7].c_str());
   }
-  if (toks[9].size() > 0) {
-    tasMps = atof(toks[9].c_str());
+  if (toks[8].size() > 0) {
+    tasMps = atof(toks[8].c_str());
   }
 
   // heading
   
-  if (toks.size() < 14) {
+  if (toks.size() < 13) {
     return 0;
   }
 
   double headingDeg = -9999.0;
 
-  if (toks[13].size() > 0) {
-    headingDeg = atof(toks[13].c_str());
+  if (toks[12].size() > 0) {
+    headingDeg = atof(toks[12].c_str());
   }
 
   // temp, dewpt
   
-  if (toks.size() < 22) {
+  if (toks.size() < 21) {
     return 0;
   }
 
   double tempC = -9999.0;
   double dewptC = -9999.0;
 
-  if (toks[20].size() > 0) {
-    tempC = atof(toks[20].c_str());
+  if (toks[19].size() > 0) {
+    tempC = atof(toks[19].c_str());
   }
-  if (toks[21].size() > 0) {
-    dewptC = atof(toks[21].c_str());
+  if (toks[20].size() > 0) {
+    dewptC = atof(toks[20].c_str());
   }
 
   double rh = -9999.0;
@@ -1182,18 +1182,18 @@ int AcData2Spdb::_decodeIWG1(const char *line,
 
   // wind
 
-  if (toks.size() < 28) {
+  if (toks.size() < 27) {
     return 0;
   }
 
   double windSpeedMps = -9999.0;
   double windDirnDegT = -9999.0;
 
-  if (toks[26].size() > 0) {
-    windSpeedMps = atof(toks[26].c_str());
+  if (toks[25].size() > 0) {
+    windSpeedMps = atof(toks[25].c_str());
   }
-  if (toks[27].size() > 0) {
-    windDirnDegT = atof(toks[27].c_str());
+  if (toks[26].size() > 0) {
+    windDirnDegT = atof(toks[26].c_str());
   }
 
   double uu = -9999.0;
