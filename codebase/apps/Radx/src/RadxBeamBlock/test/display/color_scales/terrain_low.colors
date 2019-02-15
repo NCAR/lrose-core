@@ -1,0 +1,22 @@
+#
+# Queer little color scale with a thin blue line
+# at altitude 180 - the elevation of the great lakes
+# in the THOR project. Niles Oien Feb 2002.
+#
+#MIN     MAX     NAME                
+-40 	-1 	Sienna               
+-1 	0.25 	MidnightBlue         
+0.25 	50 	DarkGreen            
+50	100    	SpringGreen4         
+100     180     SpringGreen3
+180     200	SpringGreen3         
+200 	250 	SpringGreen2         
+250 	275 	DarkGoldenrod        
+275 	300 	goldenrod            
+300 	400 	LightGoldenrod       
+400 	500 	LightGoldenrodYellow 
+500 	750 	DarkGray                
+750 	1000 	Gray            
+1000 	1250 	LightGray                 
+1250 	1500 	ivory            
+1500    2000    white

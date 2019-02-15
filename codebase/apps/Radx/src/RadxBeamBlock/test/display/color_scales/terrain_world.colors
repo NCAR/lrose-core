@@ -1,0 +1,19 @@
+#MIN     MAX     NAME                 COLOR LABEL
+
+-500     -1     Brown
+  -1 	  1     SkyBlue1
+   1 	250     DarkGreen
+ 250 	500     forestgreen
+ 500 	750     OliveDrab
+ 750   1000     YellowGreen
+1000   1500 	LimeGreen
+1500   2000 	Green
+2000   2500 	PaleGreen
+2500   3000 	saddlebrown
+3000   3500 	Sienna
+3500   4000 	DarkGoldenrod
+4000   4500 	goldenrod
+4500   5000 	LightGoldenrod
+5000   5500 	PaleGoldenrod
+5500   6000 	cornsilk
+6000   9000 	ivory

@@ -1,0 +1,19 @@
+#
+# Colorscale taylored to the terrain
+# at WSMR, Niles Oien.
+#
+#MIN     MAX     NAME                
+650 	900 	Sienna               
+900 	1100	MidnightBlue         
+1100 	1300 	DarkGreen            
+1300	1500  	SpringGreen4         
+1500    1700	SpringGreen3         
+1700 	1900 	SpringGreen2         
+1900 	2100 	DarkGoldenrod        
+2100 	2300 	goldenrod            
+2300 	2500 	LightGoldenrod       
+2500 	2700 	LightGoldenrodYellow 
+2700 	2900 	ivory                
+2900 	3100 	LightGray            
+3100 	3300 	Gray                 
+3300 	3500 	DarkGray             
