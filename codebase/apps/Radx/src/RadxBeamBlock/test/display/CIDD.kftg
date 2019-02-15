@@ -346,7 +346,7 @@ cidd.request_compressed_data: 1
 #
 # Sets the projection for cidd's plan view - Current valid choices are:
 # CARTESIAN, LAT_LON, LAMBERT
-cidd.projection_type:    CARTESIAN
+cidd.projection_type:   LAT_LON
 
 # These must be set if using a Lambert conformal projection - Ignored otherwise
 # cidd.lambert_lat1: 20.0
@@ -412,18 +412,18 @@ cidd.xsect_start_page:      1
 
 #
 # The Outer most domain:
-cidd.num_zoom_levels:       3
-cidd.start_zoom_level:      2
+cidd.num_zoom_levels:       1
+cidd.start_zoom_level:      1
 #
 # Note, the Domain labels are used for automated output imagery.
 # It's suggested that names without spaces be used when running
 # in.
 #
-cidd.level1_label:                RANGE_closeup
-cidd.level1_min_xkm:               -50.0
-cidd.level1_min_ykm:               -50.0
-cidd.level1_max_xkm:                50.0
-cidd.level1_max_ykm:                50.0
+cidd.level1_label:                 KFTG
+cidd.level1_min_xkm:               -108
+cidd.level1_min_ykm:               35
+cidd.level1_max_xkm:               -100
+cidd.level1_max_ykm:               45
 #
 cidd.level2_label:                RANGE_200
 cidd.level2_min_xkm:               -200.0
@@ -534,7 +534,7 @@ cidd.height_axis_color: pink
 cidd.height_indicator_color: gray80
 
 # Range rings and azmiuth lines
-cidd.range_ring_color: gray
+cidd.range_ring_color: blue
 # 
 # Set the follwing colors to 'transparent' to avoid having these
 # plotted. (This is the default) Otherwise, these data will be
@@ -654,9 +654,24 @@ cidd.range_ring_y_space:    13
 cidd.azmith_interval:       30.0
 cidd.azmith_radius:         200.0
 
+#  Render Range rings at the origin of the data, instead of the origin of the display.
+cidd.range_ring_follows_data: 1
+
+#  Shift the Domain if the data shifts.
+cidd.domain_follows_data: 0
+
+# x_space, y_space in pixels determine allowable space for range ring labels
+cidd.range_ring_x_space:    40
+cidd.range_ring_y_space:    13
+cidd.azmith_interval:       45.0
+cidd.azmith_radius:         450.0
+
 # Toggles to turn on/off  Extras features on startup
-cidd.range_rings:             0
-cidd.azmith_lines:            0
+cidd.range_rings:             1
+cidd.range_ring_for_radar_only: 1
+cidd.azmith_lines:            1
+cidd.range_ring_spacing:        25.0
+cidd.max_ring_range:            450.0
 
 # Starting state of the All Winds ON/OFF feature
 cidd.all_winds_on: 1

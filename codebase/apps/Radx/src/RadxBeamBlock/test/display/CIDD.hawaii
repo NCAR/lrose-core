@@ -78,26 +78,30 @@
 #Label  Label       URL                     Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
 #----------------------------------------------------------------------------------------------------------
 
-TERRAIN     TERRAIN           /tmp/RadxBeamBlock/cart_terrain&terrain_ht terrain_low.colors m        0 50    10 cart 1 0
-BEAMB_PHKI  BEAMB_PHKI        /scr/snow2/rsfdata/BeamBlock/PHKI&BEAMB    dbz.colors         dB       0 250   10 cont 1 0 
-BEAML_PHKI  BEAML_PHKI        /scr/snow2/rsfdata/BeamBlock/PHKI&BEAML    interest.colors    percent  0 250   10 cont 1 0 
-BEAME_PHKI  BEAME_PHKI        /scr/snow2/rsfdata/BeamBlock/PHKI&BEAME    interest.colors    percent  0 250   10 cont 1 0 
-PEAK_PHKI   PEAK_PHKI         /scr/snow2/rsfdata/BeamBlock/PHKI&PEAK     height2.colors    percent  0 250   10 cont 1 0 
+TERRAIN     TERRAIN           /tmp/RadxBeamBlock/cart_terrain&terrain_ht terrain.colors m        0 50    10 cart 1 0
+TERRAIN_LOW TERRAIN_LOW       /tmp/RadxBeamBlock/cart_terrain&terrain_ht terrain_low.colors m        0 50    10 cart 1 0
+TERRAIN     TERRAIN           /tmp/RadxBeamBlock/cart_terrain&terrain_ht terrain.colors m        0 50    10 cart 1 0
+TERRAIN_LOW TERRAIN_LOW       /tmp/RadxBeamBlock/cart_terrain&terrain_ht terrain_low.colors m        0 50    10 cart 1 0
 
-BEAMB_PHKM  BEAMB_PHKM        /scr/snow2/rsfdata/BeamBlock/PHKM&BEAMB    dbz.colors         dB       0 250   10 cont 1 0 
-BEAML_PHKM  BEAML_PHKM        /scr/snow2/rsfdata/BeamBlock/PHKM&BEAML    interest.colors    percent  0 250   10 cont 1 0 
-BEAME_PHKM  BEAME_PHKM        /scr/snow2/rsfdata/BeamBlock/PHKM&BEAME    interest.colors    percent  0 250   10 cont 1 0 
-PEAK_PHKM   PEAK_PHKM         /scr/snow2/rsfdata/BeamBlock/PHKM&PEAK     height2.colors    percent  0 250   10 cont 1 0 
+BEAMB_PHKI  BEAMB_PHKI        /tmp/BeamBlock/PHKI&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
+BEAML_PHKI  BEAML_PHKI        /tmp/BeamBlock/PHKI&BEAML   interest.colors    percent  0 250   10 cont 1 0 
+BEAME_PHKI  BEAME_PHKI        /tmp/BeamBlock/PHKI&BEAME   interest.colors    percent  0 250   10 cont 1 0 
+PEAK_PHKI   PEAK_PHKI         /tmp/BeamBlock/PHKI&PEAK    height2.colors    percent  0 250   10 cont 1 0 
 
-BEAMB_PHMO  BEAMB_PHMO        /scr/snow2/rsfdata/BeamBlock/PHMO&BEAMB    dbz.colors         dB       0 250   10 cont 1 0 
-BEAML_PHMO  BEAML_PHMO        /scr/snow2/rsfdata/BeamBlock/PHMO&BEAML    interest.colors    percent  0 250   10 cont 1 0 
-BEAME_PHMO  BEAME_PHMO        /scr/snow2/rsfdata/BeamBlock/PHMO&BEAME    interest.colors    percent  0 250   10 cont 1 0 
-PEAK_PHMO   PEAK_PHMO         /scr/snow2/rsfdata/BeamBlock/PHMO&PEAK     height2.colors    percent  0 250   10 cont 1 0 
+BEAMB_PHKM  BEAMB_PHKM        /tmp/BeamBlock/PHKM&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
+BEAML_PHKM  BEAML_PHKM        /tmp/BeamBlock/PHKM&BEAML   interest.colors    percent  0 250   10 cont 1 0 
+BEAME_PHKM  BEAME_PHKM        /tmp/BeamBlock/PHKM&BEAME   interest.colors    percent  0 250   10 cont 1 0 
+PEAK_PHKM   PEAK_PHKM         /tmp/BeamBlock/PHKM&PEAK    height2.colors    percent  0 250   10 cont 1 0 
 
-BEAMB_PHWA  BEAMB_PHWA        /scr/snow2/rsfdata/BeamBlock/PHWA&BEAMB    dbz.colors         dB       0 250   10 cont 1 0 
-BEAML_PHWA  BEAML_PHWA        /scr/snow2/rsfdata/BeamBlock/PHWA&BEAML    interest.colors    percent  0 250   10 cont 1 0 
-BEAME_PHWA  BEAME_PHWA        /scr/snow2/rsfdata/BeamBlock/PHWA&BEAME    interest.colors    percent  0 250   10 cont 1 0 
-PEAK_PHWA   PEAK_PHWA         /scr/snow2/rsfdata/BeamBlock/PHWA&PEAK     height2.colors    percent  0 250   10 cont 1 0 
+BEAMB_PHMO  BEAMB_PHMO        /tmp/BeamBlock/PHMO&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
+BEAML_PHMO  BEAML_PHMO        /tmp/BeamBlock/PHMO&BEAML   interest.colors    percent  0 250   10 cont 1 0 
+BEAME_PHMO  BEAME_PHMO        /tmp/BeamBlock/PHMO&BEAME   interest.colors    percent  0 250   10 cont 1 0 
+PEAK_PHMO   PEAK_PHMO         /tmp/BeamBlock/PHMO&PEAK    height2.colors    percent  0 250   10 cont 1 0 
+
+BEAMB_PHWA  BEAMB_PHWA        /tmp/BeamBlock/PHWA&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
+BEAML_PHWA  BEAML_PHWA        /tmp/BeamBlock/PHWA&BEAML   interest.colors    percent  0 250   10 cont 1 0 
+BEAME_PHWA  BEAME_PHWA        /tmp/BeamBlock/PHWA&BEAME   interest.colors    percent  0 250   10 cont 1 0 
+PEAK_PHWA   PEAK_PHWA         /tmp/BeamBlock/PHWA&PEAK    height2.colors    percent  0 250   10 cont 1 0 
 
 </GRIDS>
 
@@ -653,9 +657,24 @@ cidd.range_ring_y_space:    13
 cidd.azmith_interval:       30.0
 cidd.azmith_radius:         200.0
 
+#  Render Range rings at the origin of the data, instead of the origin of the display.
+cidd.range_ring_follows_data: 1
+
+#  Shift the Domain if the data shifts.
+cidd.domain_follows_data: 0
+
+# x_space, y_space in pixels determine allowable space for range ring labels
+cidd.range_ring_x_space:    40
+cidd.range_ring_y_space:    13
+cidd.azmith_interval:       45.0
+cidd.azmith_radius:         450.0
+
 # Toggles to turn on/off  Extras features on startup
-cidd.range_rings:             0
-cidd.azmith_lines:            0
+cidd.range_rings:             1
+cidd.range_ring_for_radar_only: 1
+cidd.azmith_lines:            1
+cidd.range_ring_spacing:        25.0
+cidd.max_ring_range:            450.0
 
 # Starting state of the All Winds ON/OFF feature
 cidd.all_winds_on: 1
