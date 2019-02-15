@@ -1,10 +1,40 @@
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+// ** Copyright UCAR (c) 1990 - 2016
+// ** University Corporation for Atmospheric Research (UCAR)
+// ** National Center for Atmospheric Research (NCAR)
+// ** Boulder, Colorado, USA
+// ** BSD licence applies - redistribution and use in source and binary
+// ** forms, with or without modification, are permitted provided that
+// ** the following conditions are met:
+// ** 1) If the software is modified to produce derivative works,
+// ** such modified software should be clearly marked, so as not
+// ** to confuse it with the version available from UCAR.
+// ** 2) Redistributions of source code must retain the above copyright
+// ** notice, this list of conditions and the following disclaimer.
+// ** 3) Redistributions in binary form must reproduce the above copyright
+// ** notice, this list of conditions and the following disclaimer in the
+// ** documentation and/or other materials provided with the distribution.
+// ** 4) Neither the name of UCAR nor the names of its contributors,
+// ** if any, may be used to endorse or promote products derived from
+// ** this software without specific prior written permission.
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/*
+ *   Module: Rsl.hh
+ *
+ *   Date:   02/14/2019
+ *
+ *   Description: Class Rsl is based on the trmm RSL library.
+ *
+ */
+
 #ifndef RSL_HH
 #define RSL_HH
 
 #include <climits>
 #include <Radx/Radx.hh>
-
-// TODO: convert all the Radx::si32, Radx::fl32, etc. to Radx::Int32, etc.
 
 // how to handle this ?
 // Let's just make it all TWO_BYTE_PRECISION
@@ -14,10 +44,6 @@
 typedef Radx::fl32 Range;  // 4 bytes
 // else,
 // typedef unsigned char Range;
-
-// TODO: convert this to a missing or bad value from Radx.hh
-//#define BADVAL  (Radx::si16)0x2000  // 2 bytes
-
 
 //
 // copy of trmm_rsl data structures
@@ -42,16 +68,16 @@ typedef struct {
   Radx::si32   ray_num;   /* Ray no. within elevation scan. */
   Radx::fl32 elev;       /* Elevation angle. (degrees). */
   Radx::si32   elev_num;   /* Elevation no. within volume scan. */
-  
+
   Radx::si32   range_bin1; /* Range to first gate.(meters) */
   Radx::si32   gate_size;  /* Data gate size (meters)*/
-  
+
   Radx::fl32  vel_res;    /* Doppler velocity resolution */
   Radx::fl32 sweep_rate;   /* Sweep rate. Full sweeps/min. */
 
   Radx::fl32 scale;
   Radx::fl32 bias;
-  
+
   Radx::si32 prf;          /* Pulse repitition frequency, in Hz. */
   Radx::si32 prf2;         /* Second PRF, for Sigmet dual PRF. */
   Radx::fl32 azim_rate;  /* Sweep rate in degrees/second.*/
@@ -85,10 +111,10 @@ typedef struct {
   Ray_header h;
   Range *range; /* range[0..nbins-1] */
                 /* For wsr88d file:
-                 * 0..460 for reflectivity, 0..920 for velocity and 
+                 * 0..460 for reflectivity, 0..920 for velocity and
                  * spectrum width. You must allocate this space.
                  */
-} Ray; 
+} Ray;
 
 // ----------------
 // Sweep
@@ -101,14 +127,14 @@ typedef struct {
   Radx::fl32 horz_half_bw; /* Horizontal beam width divided by 2 */
   Radx::si32 nrays;
   //Radx::fl32 (*f)(Range x); /* Data conversion function. f(x). */
-  //Range (*invf)(Radx::fl32 x); /* Data conversion function. invf(x). */ 
-} Sweep_header; 
+  //Range (*invf)(Radx::fl32 x); /* Data conversion function. invf(x). */
+} Sweep_header;
 
 
 typedef struct {
   Sweep_header h;
   Ray **ray; /* ray[0..nrays-1]. */
-} Sweep; 
+} Sweep;
 
 // --------------
 // Volume
@@ -126,14 +152,14 @@ typedef struct {
   Volume_header h; /* Specific info for each elev. */
                    /* Includes resolution: km/bin. */
   Sweep **sweep;   /* sweep[0..nsweeps-1]. */
-} Volume; 
+} Volume;
 
 // ------------------
 // Radar
 
-typedef struct { 
-  Radx::si32 month, day, year; 
-  Radx::si32 hour, minute; 
+typedef struct {
+  Radx::si32 month, day, year;
+  Radx::si32 hour, minute;
   Radx::fl32 sec; /* Second plus fractional part. */
   char radar_type[50]; /* Type of radar. Use for QC-ing the data.
                         * Supported types are:
@@ -141,7 +167,7 @@ typedef struct {
                         * "nsig", "nsig2", "mcgill",
                         * "kwajalein", "rsl", "toga".
                         * Set by appropriate ingest routine.
-                        */ 
+                        */
   Radx::si32 nvolumes;
   Radx::si32 number;        /* arbitrary number of this radar site */
   char name[8];      /* Nexrad site name */
@@ -188,9 +214,9 @@ typedef struct {
 
 /*
  * DZ     Reflectivity (dBZ), may contain some   DZ_INDEX
- *        signal-processor level QC and/or      
- *        filters. This field would contain 
- *        Darwin's CZ, or WSR88D's standard 
+ *        signal-processor level QC and/or
+ *        filters. This field would contain
+ *        Darwin's CZ, or WSR88D's standard
  *        reflectivity. In other words, unless
  *        the field is described otherwise, it
  *        should always go here. In essence, this
@@ -245,7 +271,7 @@ typedef struct {
 
 class Rsl
 {
-public: 
+public:
 
   Rsl();
   ~Rsl();
@@ -280,4 +306,4 @@ public:
   static void findMaxNBins(Volume *volume, int *maxNBins, int *maxNRays);
 };
 
-#endif 
+#endif
