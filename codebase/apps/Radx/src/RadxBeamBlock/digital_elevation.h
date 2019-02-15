@@ -28,6 +28,7 @@
 #include "angle.h"
 #include "array.h"
 #include "latlon.h"
+#include "Params.hh"
 
 #include <list>
 
@@ -39,6 +40,8 @@ namespace ancilla {
     class model_error;
 
   public:
+    
+    digital_elevation(const Params &params);
     virtual ~digital_elevation();
 
     /// Get the reference spheroid used for by this elevation model
@@ -52,6 +55,10 @@ namespace ancilla {
 
     virtual auto testBOM(void) -> void = 0;
     virtual auto testFTG(void) -> void = 0;
+
+  protected:
+    const Params &_params;
+
   };
 
   class digital_elevation::model_error : public std::runtime_error
@@ -76,7 +83,8 @@ namespace ancilla {
   class digital_elevation_srtm3 : public digital_elevation
   {
   public:
-    digital_elevation_srtm3(std::string path, size_t cache_size = 16);
+    digital_elevation_srtm3(const Params &params,
+                            std::string path, size_t cache_size = 16);
 
     auto reference_spheroid() -> const spheroid&;
     auto lookup(const latlon& loc) -> real;
@@ -117,16 +125,18 @@ namespace ancilla {
   {
   public:
     digital_elevation_esri(
-          const std::string& path
-        , latlon sw
-        , latlon ne
-        , spheroid::standard reference_spheroid = spheroid::standard::wgs84);
+            const Params &params
+            , const std::string& path
+            , latlon sw
+            , latlon ne
+            , spheroid::standard reference_spheroid = spheroid::standard::wgs84);
     digital_elevation_esri(
-          const std::string& path
-        , latlon sw
-        , latlon ne
-        , spheroid reference_spheroid);
-
+            const Params &params
+            , const std::string& path
+            , latlon sw
+            , latlon ne
+            , spheroid reference_spheroid);
+    
     auto reference_spheroid() -> const spheroid&;
     auto lookup(const latlon& loc) -> real;
     auto lookup(latlonalt* values, size_t count) -> void;

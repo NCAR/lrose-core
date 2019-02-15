@@ -28,34 +28,43 @@
 #include <arpa/inet.h> // just for ntohs()
 #include <fstream>
 #include <memory>
+#include <iostream>
+using namespace std;
 
 using namespace rainfields::ancilla;
 
+digital_elevation::digital_elevation(const Params &params) :
+        _params(params)
+{
+}
+
 digital_elevation::~digital_elevation()
 {
-
+  
 }
 
 digital_elevation::model_error::model_error(std::string description)
-  : runtime_error(description)
-  , description_(std::move(description))
-  , location_(nan<angle>(), nan<angle>())
+        : runtime_error(description)
+        , description_(std::move(description))
+        , location_(nan<angle>(), nan<angle>())
 {
-
+  
 }
 
 digital_elevation::model_error::model_error(std::string description, latlon location)
-  : runtime_error(msg{} << description << std::endl << "  location: " << location)
-  , description_(std::move(description))
-  , location_(location)
+        : runtime_error(msg{} << description << std::endl << "  location: " << location)
+        , description_(std::move(description))
+        , location_(location)
 {
-
+  
 }
 
-digital_elevation_srtm3::digital_elevation_srtm3(std::string path, size_t cache_size)
-  : path_(std::move(path))
-  , cache_size_(cache_size)
-  , wgs84_(spheroid::standard::wgs84)
+digital_elevation_srtm3::digital_elevation_srtm3(const Params &params,
+                                                 std::string path, size_t cache_size)
+        : digital_elevation(params)
+        , path_(std::move(path))
+        , cache_size_(cache_size)
+        , wgs84_(spheroid::standard::wgs84)
 {
   if (path_.empty())
     path_.assign("./");
@@ -232,7 +241,10 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const array2<real>&
     }
   }
 
-  printf("New tile %d,%d\n", lat, lon); 
+  if (_params.debug) {
+    cerr << "New terrain tile for lat, lon: " << lat << ", " << lon << endl;
+  }
+
   // allocate or reuse a tile
   if (tiles_.size() < cache_size_)
     tiles_.emplace_front();
@@ -261,7 +273,10 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const array2<real>&
   std::ifstream file((path_ + file_name).c_str(), std::ifstream::in | std::ifstream::binary);
   if (file)
   {
-    trace::debug() << "srtm3: requesting tile: " << file_name;
+
+    if (_params.debug) {
+      cerr << "srtm3: requesting tile: " << file_name << endl;
+    }
 
     std::unique_ptr<std::int16_t[]> buf{new std::int16_t[tile_samples_y * tile_samples_x]};
     file.read(reinterpret_cast<char*>(buf.get()), sizeof(int16_t) * tile_samples_y * tile_samples_x);
@@ -289,21 +304,24 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const array2<real>&
 }
 
 digital_elevation_esri::digital_elevation_esri(
-      const std::string& path
-    , latlon sw
-    , latlon ne
-    , spheroid::standard reference_spheroid)
-  : digital_elevation_esri(path, sw, ne, spheroid{reference_spheroid})
+        const Params &params
+        , const std::string& path
+        , latlon sw
+        , latlon ne
+        , spheroid::standard reference_spheroid)
+        : digital_elevation_esri(params, path, sw, ne, spheroid{reference_spheroid})
 {
 
 }
 
 digital_elevation_esri::digital_elevation_esri(
-      const std::string& path
-    , latlon sw
-    , latlon ne
-    , spheroid reference_spheroid)
-  : spheroid_(std::move(reference_spheroid))
+        const Params &params
+        , const std::string& path
+        , latlon sw
+        , latlon ne
+        , spheroid reference_spheroid)
+        : digital_elevation(params)
+        , spheroid_(std::move(reference_spheroid))
 {
   std::ifstream file(path);
   if (!file)

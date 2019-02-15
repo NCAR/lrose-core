@@ -533,7 +533,7 @@ cidd.height_axis_color: pink
 cidd.height_indicator_color: gray80
 
 # Range rings and azmiuth lines
-cidd.range_ring_color: gray
+cidd.range_ring_color: white
 # 
 # Set the follwing colors to 'transparent' to avoid having these
 # plotted. (This is the default) Otherwise, these data will be

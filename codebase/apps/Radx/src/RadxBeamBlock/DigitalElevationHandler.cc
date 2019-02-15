@@ -89,7 +89,8 @@ bool DigitalElevationHandler::set(const std::pair<double,double> &sw,
   switch (_params.input_data_format)
   {
   case Params::SHUTTLE_RADAR_TOPOGRAPHY:
-    _dem.reset(new digital_elevation_srtm3(_params.input_dem_path));
+    _dem.reset(new digital_elevation_srtm3(_params,
+                                           _params.input_dem_path));
     break;
   case Params::ESRI_I65:
   case Params::ESRI_ANS:
@@ -188,6 +189,7 @@ void DigitalElevationHandler::_set(const std::pair<double,double> &sw,
   a1.set_degrees(ne.second);
   latlon lne(a0, a1);
 
-  _dem.reset(new digital_elevation_esri(_params.input_dem_path, lsw, lne,
+  _dem.reset(new digital_elevation_esri(_params,
+                                        _params.input_dem_path, lsw, lne,
 					spheroid(which)));
 }

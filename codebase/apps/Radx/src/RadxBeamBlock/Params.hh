@@ -503,6 +503,14 @@ public:
 
   tdrp_bool_t write_latest_data_info;
 
+  tdrp_bool_t create_cart_terrain_grid;
+
+  char* cart_terrain_grid_dir;
+
+  double cart_terrain_grid_res;
+
+  char* cart_terrain_field_name;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -510,7 +518,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[49];
+  mutable TDRPtable _table[54];
 
   const char *_className;
 

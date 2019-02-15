@@ -91,6 +91,8 @@
 ##############################
 ### Observational Datasets ###
 ##############################
+
+TERRAIN     TERRAIN  /tmp/RadxBeamBlock/kftg_terrain&terrain_ht terrain.colors m        0 50    10 cart 1 0
 REF    REF          mdvp:://plyo::/d1/dave/KFTG&REF  dbz.colors        db       0 250   10 cont 1 0 
 VEL    VEL          mdvp:://plyo::/d1/dave/KFTG&VEl  vel.colors        db       0 250   10 cont 1 0 
 SW     SW          mdvp:://plyo::/d1/dave/KFTG&SW    width.colors        db       0 250   10 cont 1 0 
@@ -191,7 +193,7 @@ cidd.debug2_flag:           0
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
 #
-#cidd.demo_time:  01:00 08/01/2010 
+cidd.demo_time:  00:00 01/01/2014
 #cidd.demo_time:  00:00 06/15/2013
 
 # Set times to the nearest value divisible by the number of seconds

@@ -47,6 +47,7 @@
 #include "DigitalElevationHandler.hh"
 #include "beam_power.h"
 #include "beam_propagation.h"
+#include <Mdv/DsMdvx.hh>
 
 class GridAlgs;
 class Grid2d;
@@ -94,15 +95,18 @@ private:
   bool _processScan(ScanHandler &scan,
 		    const rainfields::ancilla::beam_power &power_model,
 		    rainfields::latlonalt origin, bool &short_circuit);
+
   void _processBeam(RayHandler &ray, rainfields::latlonalt origin, 
 		    const rainfields::ancilla::beam_propagation &bProp,
 		    const rainfields::ancilla::beam_power_cross_section &csec);
+
   void _processGate(GateHandler &ray, rainfields::angle elevAngle, size_t iray,
 		    rainfields::latlonalt origin,
 		    const rainfields::ancilla::beam_propagation &bProp,
 		    rainfields::angle bearing,
 		    const rainfields::ancilla::beam_power_cross_section &csec,
 		    rainfields::angle &max_ray_theta);
+
   void _adjustValues(size_t ray,
 		     const rainfields::ancilla::beam_propagation &bProp,
 		     rainfields::real peak_ground_range, 
@@ -112,6 +116,15 @@ private:
 		     rainfields::angle &max_ray_theta, 
 		     rainfields::real &progressive_loss);
 
+  int _createCartTerrainGrid(double minLat, double minLon,
+                             double maxLat, double maxLon);
+
+  void _setTerrainMdvMasterHeader(DsMdvx &mdv);
+
+  void _addTerrainMdvField(DsMdvx &mdv,
+                           double minLat, double minLon,
+                           double maxLat, double maxLon);
+  
 };
 
 #endif

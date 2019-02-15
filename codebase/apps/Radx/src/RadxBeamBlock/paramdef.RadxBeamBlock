@@ -90,7 +90,8 @@ commentdef {
 
 paramdef int  {
   p_default = {2014, 03, 24, 00, 00, 00};
-  p_descr = "Time to give output data";
+  p_descr = "Time for output files";
+  p_descr = "This is year, month, day, hour, min, sec";
 } time[6];
 
 paramdef string {
@@ -340,3 +341,31 @@ paramdef boolean {
   p_descr = "Option to write out _latest_data_info files.";
   p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
 } write_latest_data_info;
+
+commentdef {
+  p_header = "CREATE CARTESIAN GRID FOR CHECKING TERRAIN DATA";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to create a Cartesian grid with terrain data.";
+  p_help = "This can be used to check that the terrain data tiles are being correctly interpreted.";
+} create_cart_terrain_grid;
+
+paramdef string {
+  p_default = "/tmp/RadxBeamBlock/cart_terrain";
+  p_descr = "Output directory path for Cartesian terrain grid.";
+  p_help = "This will be written as a CF NetCDF file, from an MDV object.";
+} cart_terrain_grid_dir;
+
+paramdef double {
+  p_default = 0.001;
+  p_descr = "Grid resolution for terrain grid (deg).";
+  p_help = "The grid extent will be determined by the radar coverage.";
+} cart_terrain_grid_res;
+
+paramdef string {
+  p_default = "terrain_ht";
+  p_descr = "Name of terrain height field in NetCDF MDV output file.";
+} cart_terrain_field_name;
+
