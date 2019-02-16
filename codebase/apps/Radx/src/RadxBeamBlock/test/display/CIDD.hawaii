@@ -78,20 +78,20 @@
 #Label  Label       URL                     Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
 #----------------------------------------------------------------------------------------------------------
 
-TERRAIN     TERRAIN           /tmp/RadxBeamBlock/cart_terrain&terrain_ht terrain.colors m        0 50    10 cart 1 0
-TERRAIN_LOW TERRAIN_LOW       /tmp/RadxBeamBlock/cart_terrain&terrain_ht terrain_low.colors m        0 50    10 cart 1 0
-TERRAIN     TERRAIN           /tmp/RadxBeamBlock/cart_terrain&terrain_ht terrain.colors m        0 50    10 cart 1 0
-TERRAIN_LOW TERRAIN_LOW       /tmp/RadxBeamBlock/cart_terrain&terrain_ht terrain_low.colors m        0 50    10 cart 1 0
-
-BEAMB_PHKI  BEAMB_PHKI        /tmp/BeamBlock/PHKI&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
-BEAML_PHKI  BEAML_PHKI        /tmp/BeamBlock/PHKI&BEAML   interest.colors    percent  0 250   10 cont 1 0 
-BEAME_PHKI  BEAME_PHKI        /tmp/BeamBlock/PHKI&BEAME   interest.colors    percent  0 250   10 cont 1 0 
-PEAK_PHKI   PEAK_PHKI         /tmp/BeamBlock/PHKI&PEAK    terrain.colors    percent  0 250   10 cont 1 0 
+TERRAIN     TERRAIN           /tmp/BeamBlock/PHKM/cart_terrain&terrain_ht terrain.colors m        0 50    10 cart 1 0
+TERRAIN_LOW TERRAIN_LOW       /tmp/BeamBlock/PHKM/cart_terrain&terrain_ht terrain_low.colors m        0 50    10 cart 1 0
+TERRAIN     TERRAIN           /tmp/BeamBlock/PHKM/cart_terrain&terrain_ht terrain.colors m        0 50    10 cart 1 0
+TERRAIN_LOW TERRAIN_LOW       /tmp/BeamBlock/PHKM/cart_terrain&terrain_ht terrain_low.colors m        0 50    10 cart 1 0
 
 BEAMB_PHKM  BEAMB_PHKM        /tmp/BeamBlock/PHKM&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
 BEAML_PHKM  BEAML_PHKM        /tmp/BeamBlock/PHKM&BEAML   interest.colors    percent  0 250   10 cont 1 0 
 BEAME_PHKM  BEAME_PHKM        /tmp/BeamBlock/PHKM&BEAME   interest.colors    percent  0 250   10 cont 1 0 
 PEAK_PHKM   PEAK_PHKM         /tmp/BeamBlock/PHKM&PEAK    terrain.colors    percent  0 250   10 cont 1 0 
+
+BEAMB_PHKI  BEAMB_PHKI        /tmp/BeamBlock/PHKI&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
+BEAML_PHKI  BEAML_PHKI        /tmp/BeamBlock/PHKI&BEAML   interest.colors    percent  0 250   10 cont 1 0 
+BEAME_PHKI  BEAME_PHKI        /tmp/BeamBlock/PHKI&BEAME   interest.colors    percent  0 250   10 cont 1 0 
+PEAK_PHKI   PEAK_PHKI         /tmp/BeamBlock/PHKI&PEAK    terrain.colors    percent  0 250   10 cont 1 0 
 
 BEAMB_PHMO  BEAMB_PHMO        /tmp/BeamBlock/PHMO&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
 BEAML_PHMO  BEAML_PHMO        /tmp/BeamBlock/PHMO&BEAML   interest.colors    percent  0 250   10 cont 1 0 
@@ -197,7 +197,7 @@ cidd.debug2_flag:           0
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
 #
-cidd.demo_time:  00:00 01/01/2014 
+cidd.demo_time:  00:00 01/01/2000 
 
 # Set times to the nearest value divisible by the number of seconds
 cidd.temporal_rounding:    1

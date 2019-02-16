@@ -589,52 +589,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("ALGORITHM PARAMS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'num_elev_subsample'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("num_elev_subsample");
-    tt->descr = tdrpStrDup("num_elev_subsample");
-    tt->help = tdrpStrDup("Number of subsamples per elevation");
-    tt->val_offset = (char *) &num_elev_subsample - &_start_;
-    tt->single_val.i = 64;
-    tt++;
-    
-    // Parameter 'num_gate_subsample'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("num_gate_subsample");
-    tt->descr = tdrpStrDup("num_gate_subsample");
-    tt->help = tdrpStrDup("Number of subsamples per gate. I think gates are actually azimuths");
-    tt->val_offset = (char *) &num_gate_subsample - &_start_;
-    tt->single_val.i = 64;
-    tt++;
-    
-    // Parameter 'num_bin_subsample'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("num_bin_subsample");
-    tt->descr = tdrpStrDup("num_bin_subsample");
-    tt->help = tdrpStrDup("Number of subsamples per range bin");
-    tt->val_offset = (char *) &num_bin_subsample - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'Comment 3'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("INPUT PARAMS");
+    tt->comment_hdr = tdrpStrDup("DIGITAL ELEVATION DATA");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -657,7 +612,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("input_data_format");
     tt->descr = tdrpStrDup("format of input digital elevation model data");
-    tt->help = tdrpStrDup("supported digital elevation models:\n  Shuttle Radar Topography Mission (3 arc-second resolution)\n          format: srtm3 (data found here:\n   	     http://dds.cr.usgs.gov/srtm/version2_1/SRTM3\n ESRI grid data (spheroid), with the various standard spheroids\n");
+    tt->help = tdrpStrDup("supported digital elevation models:\n  Shuttle Radar Topography Mission (3 arc-second resolution)\n          format: srtm3 (data found here:\n   	     http://dds.cr.usgs.gov/srtm/version2_1/SRTM3\n  ESRI grid data (spheroid), with the various standard spheroids\n");
     tt->val_offset = (char *) &input_data_format - &_start_;
     tt->enum_def.name = tdrpStrDup("DigitalElevationModel_t");
     tt->enum_def.nfields = 9;
@@ -684,6 +639,51 @@
     tt->single_val.e = SHUTTLE_RADAR_TOPOGRAPHY;
     tt++;
     
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("SAMPLING STRATEGY");
+    tt->comment_text = tdrpStrDup("We compute blockage using a micro-grid, within the radar elevation, azimuth and gate (bin) geometry. This allows us to compute the effective blockage across the beam.");
+    tt++;
+    
+    // Parameter 'num_elev_subsample'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("num_elev_subsample");
+    tt->descr = tdrpStrDup("Number of subsamples in elevation");
+    tt->help = tdrpStrDup("We sample the beam in elevation using this number of sub angles");
+    tt->val_offset = (char *) &num_elev_subsample - &_start_;
+    tt->single_val.i = 64;
+    tt++;
+    
+    // Parameter 'num_az_subsample'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("num_az_subsample");
+    tt->descr = tdrpStrDup("Number of subsamples in azimuth");
+    tt->help = tdrpStrDup("We sample the beam in azimuth using this number of sub angles");
+    tt->val_offset = (char *) &num_az_subsample - &_start_;
+    tt->single_val.i = 64;
+    tt++;
+    
+    // Parameter 'num_range_subsample'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("num_range_subsample");
+    tt->descr = tdrpStrDup("Number of subsamples in range");
+    tt->help = tdrpStrDup("We sample the beam in range using this number of sub ranges");
+    tt->val_offset = (char *) &num_range_subsample - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -693,40 +693,58 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'time'
-    // ctype is 'int'
+    // Parameter 'output_time_stamp'
+    // ctype is '_datetime_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("time");
-    tt->descr = tdrpStrDup("Time for output files");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_time - &_start_;
-    tt->array_n_offset = (char *) &time_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = TRUE;
-    tt->array_elem_size = sizeof(int);
-    tt->array_n = 6;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].i = 2014;
-      tt->array_vals[1].i = 3;
-      tt->array_vals[2].i = 24;
-      tt->array_vals[3].i = 0;
-      tt->array_vals[4].i = 0;
-      tt->array_vals[5].i = 0;
-    tt++;
-    
-    // Parameter 'site_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("site_name");
-    tt->descr = tdrpStrDup("Name of radar site");
-    tt->help = tdrpStrDup("Stored in netCDF file.");
-    tt->val_offset = (char *) &site_name - &_start_;
-    tt->single_val.s = tdrpStrDup("SITE");
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("output_time_stamp");
+    tt->descr = tdrpStrDup("Time stamp for output files");
+    tt->help = tdrpStrDup("We need to set a time so that the output files can be correctly named. SRTM shuttle mission 99 occurred in early 2000.");
+    tt->val_offset = (char *) &output_time_stamp - &_start_;
+    tt->struct_def.name = tdrpStrDup("datetime_t");
+    tt->struct_def.nfields = 6;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[0].fname = tdrpStrDup("year");
+      tt->struct_def.fields[0].ptype = INT_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &output_time_stamp.year - (char *) &output_time_stamp;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[1].fname = tdrpStrDup("month");
+      tt->struct_def.fields[1].ptype = INT_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &output_time_stamp.month - (char *) &output_time_stamp;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[2].fname = tdrpStrDup("day");
+      tt->struct_def.fields[2].ptype = INT_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &output_time_stamp.day - (char *) &output_time_stamp;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[3].fname = tdrpStrDup("hour");
+      tt->struct_def.fields[3].ptype = INT_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &output_time_stamp.hour - (char *) &output_time_stamp;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[4].fname = tdrpStrDup("min");
+      tt->struct_def.fields[4].ptype = INT_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &output_time_stamp.min - (char *) &output_time_stamp;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[5].fname = tdrpStrDup("sec");
+      tt->struct_def.fields[5].ptype = INT_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &output_time_stamp.sec - (char *) &output_time_stamp;
+    tt->n_struct_vals = 6;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].i = 2000;
+      tt->struct_vals[1].i = 1;
+      tt->struct_vals[2].i = 1;
+      tt->struct_vals[3].i = 0;
+      tt->struct_vals[4].i = 0;
+      tt->struct_vals[5].i = 0;
     tt++;
     
     // Parameter 'radar_name'
@@ -738,7 +756,7 @@
     tt->descr = tdrpStrDup("Name of radar");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &radar_name - &_start_;
-    tt->single_val.s = tdrpStrDup("NAME");
+    tt->single_val.s = tdrpStrDup("UNKNOWN");
     tt++;
     
     // Parameter 'radar_location'
@@ -748,7 +766,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("radar_location");
     tt->descr = tdrpStrDup("Radar location");
-    tt->help = tdrpStrDup("The radar_location, note that the altitude is in meters MSL.");
+    tt->help = tdrpStrDup("The radar_location, note that the altitude is in km MSL.");
     tt->val_offset = (char *) &radar_location - &_start_;
     tt->struct_def.name = tdrpStrDup("radar_location_t");
     tt->struct_def.nfields = 3;
@@ -798,7 +816,7 @@
     tt->descr = tdrpStrDup("Radar wavelength, cm");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &radar_wavelength_cm - &_start_;
-    tt->single_val.d = 2;
+    tt->single_val.d = 5.4;
     tt++;
     
     // Parameter 'horiz_beam_width_deg'
@@ -807,7 +825,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("horiz_beam_width_deg");
-    tt->descr = tdrpStrDup("Radar beamwidth horizontal");
+    tt->descr = tdrpStrDup("Radar beamwidth in the horizontal plane.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &horiz_beam_width_deg - &_start_;
     tt->single_val.d = 1;
@@ -819,10 +837,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("vert_beam_width_deg");
-    tt->descr = tdrpStrDup("Radar beamwidth vertical");
+    tt->descr = tdrpStrDup("Radar beamwidth in the vertical plane.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vert_beam_width_deg - &_start_;
     tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("GEOMETRY FOR COMPUTATIONS");
+    tt->comment_text = tdrpStrDup("We compute the beam blockage using the geometry for a theoretical scan. The blockage is then stored in a CfRadial file, using these parameters. When the blockage file is later used, we search for the closest compute gate, in (elev, az, range) space, to that of the acutal measured gate.");
     tt++;
     
     // Parameter 'gates'
@@ -933,11 +960,11 @@
       tt->struct_vals[2].i = 5;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -949,7 +976,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("output_fields");
     tt->descr = tdrpStrDup("Array of output fields.");
-    tt->help = tdrpStrDup("The program will only output these fields. long_name and standard_name are netCDF conventions. Set the output encoding type to select the resolution of the output data.");
+    tt->help = tdrpStrDup("We will write out these fields. long_name and standard_name are netCDF conventions. Set the output encoding type to select the resolution of the output data.");
     tt->array_offset = (char *) &_output_fields - &_start_;
     tt->array_n_offset = (char *) &output_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -1041,11 +1068,11 @@
       tt->struct_vals[23].e = EXTENDED_BLOCKAGE;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("DATA SET INFORMATION");
     tt->comment_text = tdrpStrDup("Will be stored in CfRadial files, and other formats to the extent supported by the format.");
     tt++;
@@ -1059,7 +1086,7 @@
     tt->descr = tdrpStrDup("Title string for netCDF file.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &title - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("Radar beam blockage computed from digital elevation data.");
     tt++;
     
     // Parameter 'institution'
@@ -1083,50 +1110,14 @@
     tt->descr = tdrpStrDup("References string for netCDF file.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &references - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("Created by LROSE app RadxBeamBlock");
     tt++;
     
-    // Parameter 'source'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("source");
-    tt->descr = tdrpStrDup("Source string for netCDF file.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &source - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'history'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("history");
-    tt->descr = tdrpStrDup("History string for netCDF file.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &history - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'comment'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("comment");
-    tt->descr = tdrpStrDup("Comment string for netCDF file.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &comment - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1159,101 +1150,11 @@
     tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
     tt++;
     
-    // Parameter 'netcdf_style'
-    // ctype is '_netcdf_style_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_style");
-    tt->descr = tdrpStrDup("NetCDF style - if output_format is CFRADIAL");
-    tt->help = tdrpStrDup("netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls");
-    tt->val_offset = (char *) &netcdf_style - &_start_;
-    tt->enum_def.name = tdrpStrDup("netcdf_style_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("CLASSIC");
-      tt->enum_def.fields[0].val = CLASSIC;
-      tt->enum_def.fields[1].name = tdrpStrDup("NC64BIT");
-      tt->enum_def.fields[1].val = NC64BIT;
-      tt->enum_def.fields[2].name = tdrpStrDup("NETCDF4");
-      tt->enum_def.fields[2].val = NETCDF4;
-      tt->enum_def.fields[3].name = tdrpStrDup("NETCDF4_CLASSIC");
-      tt->enum_def.fields[3].val = NETCDF4_CLASSIC;
-    tt->single_val.e = NETCDF4;
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_native_byte_order'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_native_byte_order");
-    tt->descr = tdrpStrDup("Option to leave data in native byte order.");
-    tt->help = tdrpStrDup("If false, data will be byte-swapped as appropriate on output.");
-    tt->val_offset = (char *) &output_native_byte_order - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_compressed'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_compressed");
-    tt->descr = tdrpStrDup("Option to compress data fields on output.");
-    tt->help = tdrpStrDup("Applies to netCDF and Dorade. UF does not support compression.");
-    tt->val_offset = (char *) &output_compressed - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_force_ngates_vary'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_force_ngates_vary");
-    tt->descr = tdrpStrDup("Option to force the use of ragged arrays for CfRadial files.");
-    tt->help = tdrpStrDup("Only applies to CfRadial. If true, forces the use of ragged arrays even if the number of gates for all rays is constant.");
-    tt->val_offset = (char *) &output_force_ngates_vary - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'compression_level'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("compression_level");
-    tt->descr = tdrpStrDup("Compression level for output, if compressed.");
-    tt->help = tdrpStrDup("Applies to netCDF only. Dorade compression is run-length encoding, and has not options..");
-    tt->val_offset = (char *) &compression_level - &_start_;
-    tt->single_val.i = 4;
-    tt++;
-    
-    // Parameter 'Comment 10'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1265,54 +1166,20 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("output_dir");
     tt->descr = tdrpStrDup("Output directory path.");
-    tt->help = tdrpStrDup("Files will be written to this directory.");
+    tt->help = tdrpStrDup("Output file will be written to this directory.");
     tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/RadxCreateVol/data");
+    tt->single_val.s = tdrpStrDup("/tmp/RadxBeamBlock");
     tt++;
     
-    // Parameter 'output_filename_mode'
-    // ctype is '_filename_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_filename_mode");
-    tt->descr = tdrpStrDup("Mode for computing output file name.");
-    tt->help = tdrpStrDup("START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.");
-    tt->val_offset = (char *) &output_filename_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("filename_mode_t");
-    tt->enum_def.nfields = 3;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("START_AND_END_TIMES");
-      tt->enum_def.fields[0].val = START_AND_END_TIMES;
-      tt->enum_def.fields[1].name = tdrpStrDup("START_TIME_ONLY");
-      tt->enum_def.fields[1].val = START_TIME_ONLY;
-      tt->enum_def.fields[2].name = tdrpStrDup("END_TIME_ONLY");
-      tt->enum_def.fields[2].val = END_TIME_ONLY;
-    tt->single_val.e = START_AND_END_TIMES;
-    tt++;
-    
-    // Parameter 'append_day_dir_to_output_dir'
+    // Parameter 'append_radar_name_to_output_dir'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("append_day_dir_to_output_dir");
-    tt->descr = tdrpStrDup("Add the day directory to the output directory.");
-    tt->help = tdrpStrDup("Path will be output_dir/yyyymmdd/filename.");
-    tt->val_offset = (char *) &append_day_dir_to_output_dir - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'append_year_dir_to_output_dir'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("append_year_dir_to_output_dir");
-    tt->descr = tdrpStrDup("Add the year directory to the output directory.");
-    tt->help = tdrpStrDup("Path will be output_dir/yyyy/yyyymmdd/filename.");
-    tt->val_offset = (char *) &append_year_dir_to_output_dir - &_start_;
+    tt->param_name = tdrpStrDup("append_radar_name_to_output_dir");
+    tt->descr = tdrpStrDup("Option to add the radar name to the output path.");
+    tt->help = tdrpStrDup("If true, the output dir will be 'output_dir/radar_name'.");
+    tt->val_offset = (char *) &append_radar_name_to_output_dir - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -1328,32 +1195,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("REGISTERING LATEST DATA INFO");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'write_latest_data_info'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_latest_data_info");
-    tt->descr = tdrpStrDup("Option to write out _latest_data_info files.");
-    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
-    tt->val_offset = (char *) &write_latest_data_info - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 12'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("CREATE CARTESIAN GRID FOR CHECKING TERRAIN DATA");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1370,16 +1216,16 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'cart_terrain_grid_dir'
+    // Parameter 'cart_terrain_grid_subdir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("cart_terrain_grid_dir");
+    tt->param_name = tdrpStrDup("cart_terrain_grid_subdir");
     tt->descr = tdrpStrDup("Output directory path for Cartesian terrain grid.");
     tt->help = tdrpStrDup("This will be written as a CF NetCDF file, from an MDV object.");
-    tt->val_offset = (char *) &cart_terrain_grid_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/RadxBeamBlock/cart_terrain");
+    tt->val_offset = (char *) &cart_terrain_grid_subdir - &_start_;
+    tt->single_val.s = tdrpStrDup("cart_terrain");
     tt++;
     
     // Parameter 'cart_terrain_grid_res'
@@ -1391,7 +1237,7 @@
     tt->descr = tdrpStrDup("Grid resolution for terrain grid (deg).");
     tt->help = tdrpStrDup("The grid extent will be determined by the radar coverage.");
     tt->val_offset = (char *) &cart_terrain_grid_res - &_start_;
-    tt->single_val.d = 0.001;
+    tt->single_val.d = 0.005;
     tt++;
     
     // Parameter 'cart_terrain_field_name'

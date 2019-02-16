@@ -80,12 +80,9 @@ int VolHandler::write(void)
   _vol.setTitle(_params.title);
   _vol.setInstitution(_params.institution);
   _vol.setReferences(_params.references);
-  _vol.setSource(_params.source);
-  _vol.setHistory(_params.history);
-  _vol.setComment(_params.comment);
 
   _vol.setInstrumentName(_params.radar_name);
-  _vol.setSiteName(_params.site_name);
+  _vol.setSiteName(_params.radar_name);
   _vol.setInstrumentType(Radx::INSTRUMENT_TYPE_RADAR);
   _vol.setPlatformType(Radx::PLATFORM_TYPE_FIXED);
   _vol.setPrimaryAxis(Radx::PRIMARY_AXIS_Z);
@@ -114,10 +111,7 @@ void VolHandler::_addBeam(const RayHandler &beam, double elev, int ielev)
   ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
   ray->setVolumeNumber(0);
 
-  // struct timeval tv;
-  // gettimeofday(&tv, NULL);
   ray->setTime(_params._utime, 0);
-  // ray->setTime(tv.tv_sec, tv.tv_usec * 1000);
   ray->setAzimuthDeg(az);
   ray->setElevationDeg(elev);
   ray->setFixedAngleDeg(elev);
@@ -175,33 +169,21 @@ int VolHandler::_writeVol(void)
   _setupWrite(outFile);
   
   // write to dir
-  
-  if (outFile.writeToDir(_vol, _params.output_dir,
-                         _params.append_day_dir_to_output_dir,
-                         _params.append_year_dir_to_output_dir)) {
+
+  string outputDir(_params.output_dir);
+  if (_params.append_radar_name_to_output_dir) {
+    outputDir += PATH_DELIM;
+    outputDir += _vol.getInstrumentName();
+  }
+  if (outFile.writeToDir(_vol, outputDir, true, false)) {
     cerr << "ERROR - RadxConvert::_writeVol" << endl;
-    cerr << "  Cannot write file to dir: " << _params.output_dir << endl;
+    cerr << "  Cannot write file to dir: " << outputDir << endl;
     cerr << outFile.getErrStr() << endl;
     return -1;
   }
   string outputPath = outFile.getPathInUse();
-
-  // in realtime mode, write latest data info file
-  
-  if (_params.write_latest_data_info) {
-    DsLdataInfo ldata(_params.output_dir);
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      ldata.setDebug(true);
-    }
-    string relPath;
-    RadxPath::stripDir(_params.output_dir, outputPath, relPath);
-    ldata.setRelDataPath(relPath);
-    ldata.setWriter(_params._progName);
-    if (ldata.write(_vol.getEndTimeSecs())) {
-      cerr << "WARNING - RadxConvert::_writeVol" << endl;
-      cerr << "  Cannot write latest data info file to dir: "
-           << _params.output_dir << endl;
-    }
+  if (_params.debug) {
+    cerr << "Wrote file: " << outputPath << endl;
   }
 
   return 0;
@@ -220,26 +202,10 @@ void VolHandler::_setupWrite(RadxFile &file)
     file.setVerbose(true);
   }
 
-  if (_params.output_filename_mode == Params::START_TIME_ONLY) {
-    file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_TIME_ONLY);
-  } else if (_params.output_filename_mode == Params::END_TIME_ONLY) {
-    file.setWriteFileNameMode(RadxFile::FILENAME_WITH_END_TIME_ONLY);
-  } else {
-    file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);
-  }
-
-  if (_params.output_compressed) {
-    file.setWriteCompressed(true);
-    file.setCompressionLevel(_params.compression_level);
-  } else {
-    file.setWriteCompressed(false);
-  }
-
-  if (_params.output_native_byte_order) {
-    file.setWriteNativeByteOrder(true);
-  } else {
-    file.setWriteNativeByteOrder(false);
-  }
+  file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_TIME_ONLY);
+  file.setWriteInstrNameInFileName(true);
+  file.setWriteCompressed(true);
+  file.setCompressionLevel(4);
 
   // set output format
 
@@ -266,26 +232,12 @@ void VolHandler::_setupWrite(RadxFile &file)
 
   // set netcdf format - used for CfRadial
 
-  switch (_params.netcdf_style) {
-  case Params::NETCDF4_CLASSIC:
-    file.setNcFormat(RadxFile::NETCDF4_CLASSIC);
-    break;
-  case Params::NC64BIT:
-    file.setNcFormat(RadxFile::NETCDF_OFFSET_64BIT);
-    break;
-  case Params::NETCDF4:
-    file.setNcFormat(RadxFile::NETCDF4);
-    break;
-  default:
-    file.setNcFormat(RadxFile::NETCDF_CLASSIC);
-  }
+  file.setNcFormat(RadxFile::NETCDF4);
+
+  // write sweeps individually?
 
   if (_params.write_individual_sweeps) {
     file.setWriteIndividualSweeps(true);
-  }
-
-  if (_params.output_force_ngates_vary) {
-    file.setWriteForceNgatesVary(true);
   }
 
 }

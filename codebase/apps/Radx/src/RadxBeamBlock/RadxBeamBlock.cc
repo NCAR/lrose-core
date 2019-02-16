@@ -129,7 +129,7 @@ bool RadxBeamBlock::_processScan(ScanHandler &scan,
   angle_width.set_degrees(_params.azimuths.delta);
   beam_power_cross_section csec{power_model, angle_width,
       static_cast<size_t>(_params.num_elev_subsample),
-      static_cast<size_t>(_params.num_gate_subsample),
+      static_cast<size_t>(_params.num_range_subsample),
       beam_width_v, beam_width_h};
   csec.make_vertical_integration();
 
@@ -218,7 +218,7 @@ void RadxBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
   _dem.determine_dem_segment_peak(origin, bearing, gateMeters,
 				  gateMeters + _params.gates.delta*1000.0,
 				  peak_ground_range, peak_altitude,
-				  _params.num_bin_subsample);
+				  _params.num_range_subsample);
 
   // if DEM gave us no valid values we can fail this condition
   // this is usually due to sea regions not being included in the DEM
@@ -316,7 +316,16 @@ int RadxBeamBlock::_createCartTerrainGrid(double minLat, double minLon,
   // write it out
 
   mdv.setWriteFormat(Mdvx::FORMAT_NCF);
-  if (mdv.writeToDir(_params.cart_terrain_grid_dir)) {
+
+  string outputDir(_params.output_dir);
+  if (_params.append_radar_name_to_output_dir) {
+    outputDir += PATH_DELIM;
+    outputDir += _params.radar_name;
+  }
+  outputDir += PATH_DELIM;
+  outputDir += _params.cart_terrain_grid_subdir;
+
+  if (mdv.writeToDir(outputDir.c_str())) {
     cerr << "ERROR - RadxBeamBlock::_createCartTerrainGrid" << endl;
     cerr << mdv.getErrStr() << endl;
   }
@@ -340,8 +349,12 @@ void RadxBeamBlock::_setTerrainMdvMasterHeader(DsMdvx &mdv)
   Mdvx::master_header_t mhdr;
   MEM_zero(mhdr);
 
-  RadxTime ttime(_params._time[0], _params._time[1], _params._time[2], 
-                 _params._time[3], _params._time[4], _params._time[5]);
+  RadxTime ttime(_params.output_time_stamp.year,
+                 _params.output_time_stamp.month,
+                 _params.output_time_stamp.day,
+                 _params.output_time_stamp.hour,
+                 _params.output_time_stamp.min,
+                 _params.output_time_stamp.sec);
 
   mhdr.time_gen = time(NULL);
   mhdr.time_begin = ttime.utime();

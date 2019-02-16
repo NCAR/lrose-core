@@ -33,7 +33,12 @@
 Parms::Parms(const Params &p, const std::string &progName) : Params(p), 
 							     _progName(progName)
 {
-  DateTime dt(_time[0], _time[1], _time[2], _time[3], _time[4], _time[5]);
+  DateTime dt(output_time_stamp.year,
+              output_time_stamp.month,
+              output_time_stamp.day,
+              output_time_stamp.hour,
+              output_time_stamp.min,
+              output_time_stamp.sec);
   _utime = dt.utime();
 }
 

@@ -108,20 +108,16 @@ public:
     OUTPUT_FORMAT_MDV_RADIAL = 5
   } output_format_t;
 
-  typedef enum {
-    CLASSIC = 0,
-    NC64BIT = 1,
-    NETCDF4 = 2,
-    NETCDF4_CLASSIC = 3
-  } netcdf_style_t;
-
-  typedef enum {
-    START_AND_END_TIMES = 0,
-    START_TIME_ONLY = 1,
-    END_TIME_ONLY = 2
-  } filename_mode_t;
-
   // struct typedefs
+
+  typedef struct {
+    int year;
+    int month;
+    int day;
+    int hour;
+    int min;
+    int sec;
+  } datetime_t;
 
   typedef struct {
     double latitudeDeg;
@@ -431,20 +427,17 @@ public:
 
   debug_t debug;
 
-  int num_elev_subsample;
-
-  int num_gate_subsample;
-
-  int num_bin_subsample;
-
   char* input_dem_path;
 
   DigitalElevationModel_t input_data_format;
 
-  int *_time;
-  int time_n;
+  int num_elev_subsample;
 
-  char* site_name;
+  int num_az_subsample;
+
+  int num_range_subsample;
+
+  datetime_t output_time_stamp;
 
   char* radar_name;
 
@@ -473,39 +466,17 @@ public:
 
   char* references;
 
-  char* source;
-
-  char* history;
-
-  char* comment;
-
   output_format_t output_format;
-
-  netcdf_style_t netcdf_style;
-
-  tdrp_bool_t output_native_byte_order;
-
-  tdrp_bool_t output_compressed;
-
-  tdrp_bool_t output_force_ngates_vary;
-
-  int compression_level;
 
   char* output_dir;
 
-  filename_mode_t output_filename_mode;
-
-  tdrp_bool_t append_day_dir_to_output_dir;
-
-  tdrp_bool_t append_year_dir_to_output_dir;
+  tdrp_bool_t append_radar_name_to_output_dir;
 
   tdrp_bool_t write_individual_sweeps;
 
-  tdrp_bool_t write_latest_data_info;
-
   tdrp_bool_t create_cart_terrain_grid;
 
-  char* cart_terrain_grid_dir;
+  char* cart_terrain_grid_subdir;
 
   double cart_terrain_grid_res;
 
@@ -518,7 +489,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[54];
+  mutable TDRPtable _table[40];
 
   const char *_className;
 

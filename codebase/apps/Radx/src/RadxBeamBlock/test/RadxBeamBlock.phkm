@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for RadxBeamBlock
+ * TDRP params for ./RadxBeamBlock
  **********************************************************************/
 
 //======================================================================
@@ -36,49 +36,7 @@ debug = DEBUG_VERBOSE;
 
 //======================================================================
 //
-// ALGORITHM PARAMS.
-//
-//======================================================================
- 
-///////////// num_elev_subsample //////////////////////
-//
-// num_elev_subsample.
-//
-// Number of subsamples per elevation.
-//
-//
-// Type: int
-//
-
-num_elev_subsample = 64;
-
-///////////// num_gate_subsample //////////////////////
-//
-// num_gate_subsample.
-//
-// Number of subsamples per gate. I think gates are actually azimuths.
-//
-//
-// Type: int
-//
-
-num_gate_subsample = 64;
-
-///////////// num_bin_subsample ///////////////////////
-//
-// num_bin_subsample.
-//
-// Number of subsamples per range bin.
-//
-//
-// Type: int
-//
-
-num_bin_subsample = 2;
-
-//======================================================================
-//
-// INPUT PARAMS.
+// DIGITAL ELEVATION DATA.
 //
 //======================================================================
  
@@ -102,7 +60,7 @@ input_dem_path = "/scr/snow2/rsfdata/srtm30";
 //   Shuttle Radar Topography Mission (3 arc-second resolution)
 //           format: srtm3 (data found here:
 //    	     http://dds.cr.usgs.gov/srtm/version2_1/SRTM3
-//  ESRI grid data (spheroid), with the various standard spheroids.
+//   ESRI grid data (spheroid), with the various standard spheroids.
 //
 //
 // Type: enum
@@ -122,39 +80,84 @@ input_data_format = SHUTTLE_RADAR_TOPOGRAPHY;
 
 //======================================================================
 //
+// SAMPLING STRATEGY.
+//
+// We compute blockage using a micro-grid, within the radar elevation, 
+//   azimuth and gate (bin) geometry. This allows us to compute the 
+//   effective blockage across the beam.
+//
+//======================================================================
+ 
+///////////// num_elev_subsample //////////////////////
+//
+// Number of subsamples in elevation.
+//
+// We sample the beam in elevation using this number of sub angles.
+//
+//
+// Type: int
+//
+
+num_elev_subsample = 64;
+
+///////////// num_az_subsample ////////////////////////
+//
+// Number of subsamples in azimuth.
+//
+// We sample the beam in azimuth using this number of sub angles.
+//
+//
+// Type: int
+//
+
+num_az_subsample = 64;
+
+///////////// num_range_subsample /////////////////////
+//
+// Number of subsamples in range.
+//
+// We sample the beam in range using this number of sub ranges.
+//
+//
+// Type: int
+//
+
+num_range_subsample = 10;
+
+//======================================================================
+//
 // RADAR PARAMETERS.
 //
 //======================================================================
  
-///////////// time ////////////////////////////////////
+///////////// output_time_stamp ///////////////////////
 //
-// Time for output files.
+// Time stamp for output files.
+//
+// We need to set a time so that the output files can be correctly 
+//   named. SRTM shuttle mission 99 occurred in early 2000.
 //
 //
-// Type: int
-// 1D array - fixed length - 6 elements.
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
 //
 
-time = {
- 2014,
- 1,
- 1,
- 0,
- 0,
- 0
+output_time_stamp = {
+    year = 2000,
+    month = 1,
+    day = 1,
+    hour = 0,
+    min = 0,
+    sec = 0
 };
-
-///////////// site_name ///////////////////////////////
-//
-// Name of radar site.
-//
-// Stored in netCDF file.
-//
-//
-// Type: string
-//
-
-site_name = "PHKM";
 
 ///////////// radar_name //////////////////////////////
 //
@@ -170,7 +173,7 @@ radar_name = "PHKM";
 //
 // Radar location.
 //
-// The radar_location, note that the altitude is in meters MSL.
+// The radar_location, note that the altitude is in km MSL.
 //
 //
 // Type: struct
@@ -213,7 +216,7 @@ radar_wavelength_cm = 10;
 
 ///////////// horiz_beam_width_deg ////////////////////
 //
-// Radar beamwidth horizontal.
+// Radar beamwidth in the horizontal plane.
 //
 //
 // Type: double
@@ -223,7 +226,7 @@ horiz_beam_width_deg = 0.9;
 
 ///////////// vert_beam_width_deg /////////////////////
 //
-// Radar beamwidth vertical.
+// Radar beamwidth in the vertical plane.
 //
 //
 // Type: double
@@ -231,6 +234,18 @@ horiz_beam_width_deg = 0.9;
 
 vert_beam_width_deg = 0.9;
 
+//======================================================================
+//
+// GEOMETRY FOR COMPUTATIONS.
+//
+// We compute the beam blockage using the geometry for a theoretical 
+//   scan. The blockage is then stored in a CfRadial file, using these 
+//   parameters. When the blockage file is later used, we search for the 
+//   closest compute gate, in (elev, az, range) space, to that of the 
+//   acutal measured gate.
+//
+//======================================================================
+ 
 ///////////// gates ///////////////////////////////////
 //
 // Gate specification (km).
@@ -301,9 +316,9 @@ elevations = {
 //
 // Array of output fields.
 //
-// The program will only output these fields. long_name and 
-//   standard_name are netCDF conventions. Set the output encoding type to 
-//   select the resolution of the output data.
+// We will write out these fields. long_name and standard_name are 
+//   netCDF conventions. Set the output encoding type to select the 
+//   resolution of the output data.
 //
 //
 // Type: struct
@@ -331,8 +346,8 @@ elevations = {
 output_fields = {
   {
     name = "BEAMB",
-    long_name = "BEAMB",
-    standard_name = "BEAMB",
+    long_name = "BeamBlockageFractionDb",
+    standard_name = "BeamBlockageFractionDbPerGate",
     units = "dB",
     encoding = OUTPUT_FLOAT,
     type = BLOCKAGE
@@ -340,8 +355,8 @@ output_fields = {
   ,
   {
     name = "BEAML",
-    long_name = "BEAML",
-    standard_name = "BEAML",
+    long_name = "BeamBlockageFraction",
+    standard_name = "BeamBlockageFractionPerGate",
     units = "fraction",
     encoding = OUTPUT_FLOAT,
     type = LINEAR_BLOCKAGE
@@ -349,17 +364,17 @@ output_fields = {
   ,
   {
     name = "PEAK",
-    long_name = "PEAK",
-    standard_name = "PEAK",
-    units = "fraction",
+    long_name = "MaxTerrainHt",
+    standard_name = "MaxTerrainHtPerGate",
+    units = "m",
     encoding = OUTPUT_FLOAT,
     type = PEAK
   }
   ,
   {
     name = "BEAME",
-    long_name = "BEAME",
-    standard_name = "BEAME",
+    long_name = "CumulativeBeamExtinctionFraction",
+    standard_name = "CumulativeBeamExtinctionFractionInRange",
     units = "fraction",
     encoding = OUTPUT_FLOAT,
     type = EXTENDED_BLOCKAGE
@@ -383,7 +398,7 @@ output_fields = {
 // Type: string
 //
 
-title = "";
+title = "Radar beam blockage computed from digital elevation data.";
 
 ///////////// institution /////////////////////////////
 //
@@ -403,37 +418,7 @@ institution = "EOL/NCAR";
 // Type: string
 //
 
-references = "";
-
-///////////// source //////////////////////////////////
-//
-// Source string for netCDF file.
-//
-//
-// Type: string
-//
-
-source = "";
-
-///////////// history /////////////////////////////////
-//
-// History string for netCDF file.
-//
-//
-// Type: string
-//
-
-history = "";
-
-///////////// comment /////////////////////////////////
-//
-// Comment string for netCDF file.
-//
-//
-// Type: string
-//
-
-comment = "";
+references = "Created by LROSE app RadxBeamBlock";
 
 //======================================================================
 //
@@ -458,86 +443,6 @@ comment = "";
 
 output_format = OUTPUT_FORMAT_CFRADIAL;
 
-///////////// netcdf_style ////////////////////////////
-//
-// NetCDF style - if output_format is CFRADIAL.
-//
-// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
-//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
-//
-//
-// Type: enum
-// Options:
-//     CLASSIC
-//     NC64BIT
-//     NETCDF4
-//     NETCDF4_CLASSIC
-//
-
-netcdf_style = NETCDF4;
-
-//======================================================================
-//
-// OUTPUT BYTE-SWAPPING and COMPRESSION.
-//
-//======================================================================
- 
-///////////// output_native_byte_order ////////////////
-//
-// Option to leave data in native byte order.
-//
-// If false, data will be byte-swapped as appropriate on output.
-//
-//
-// Type: boolean
-//
-
-output_native_byte_order = FALSE;
-
-///////////// output_compressed ///////////////////////
-//
-// Option to compress data fields on output.
-//
-// Applies to netCDF and Dorade. UF does not support compression.
-//
-//
-// Type: boolean
-//
-
-output_compressed = TRUE;
-
-//======================================================================
-//
-// OUTPUT OPTIONS FOR CfRadial FILES.
-//
-//======================================================================
- 
-///////////// output_force_ngates_vary ////////////////
-//
-// Option to force the use of ragged arrays for CfRadial files.
-//
-// Only applies to CfRadial. If true, forces the use of ragged arrays 
-//   even if the number of gates for all rays is constant.
-//
-//
-// Type: boolean
-//
-
-output_force_ngates_vary = FALSE;
-
-///////////// compression_level ///////////////////////
-//
-// Compression level for output, if compressed.
-//
-// Applies to netCDF only. Dorade compression is run-length encoding, 
-//   and has not options..
-//
-//
-// Type: int
-//
-
-compression_level = 4;
-
 //======================================================================
 //
 // OUTPUT DIRECTORY AND FILE NAME.
@@ -548,55 +453,25 @@ compression_level = 4;
 //
 // Output directory path.
 //
-// Files will be written to this directory.
+// Output file will be written to this directory.
 //
 //
 // Type: string
 //
 
-output_dir = "/tmp/BeamBlock/PHKM";
+output_dir = "/tmp/BeamBlock";
 
-///////////// output_filename_mode ////////////////////
+///////////// append_radar_name_to_output_dir /////////
 //
-// Mode for computing output file name.
+// Option to add the radar name to the output path.
 //
-// START_AND_END_TIMES: include both start and end times in file name. 
-//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
-//   include only end time in file name.
-//
-//
-// Type: enum
-// Options:
-//     START_AND_END_TIMES
-//     START_TIME_ONLY
-//     END_TIME_ONLY
-//
-
-output_filename_mode = START_TIME_ONLY;
-
-///////////// append_day_dir_to_output_dir ////////////
-//
-// Add the day directory to the output directory.
-//
-// Path will be output_dir/yyyymmdd/filename.
+// If true, the output dir will be 'output_dir/radar_name'.
 //
 //
 // Type: boolean
 //
 
-append_day_dir_to_output_dir = TRUE;
-
-///////////// append_year_dir_to_output_dir ///////////
-//
-// Add the year directory to the output directory.
-//
-// Path will be output_dir/yyyy/yyyymmdd/filename.
-//
-//
-// Type: boolean
-//
-
-append_year_dir_to_output_dir = FALSE;
+append_radar_name_to_output_dir = TRUE;
 
 ///////////// write_individual_sweeps /////////////////
 //
@@ -611,25 +486,6 @@ append_year_dir_to_output_dir = FALSE;
 //
 
 write_individual_sweeps = FALSE;
-
-//======================================================================
-//
-// REGISTERING LATEST DATA INFO.
-//
-//======================================================================
- 
-///////////// write_latest_data_info //////////////////
-//
-// Option to write out _latest_data_info files.
-//
-// If true, the _latest_data_info files will be written after the 
-//   converted file is written.
-//
-//
-// Type: boolean
-//
-
-write_latest_data_info = FALSE;
 
 //======================================================================
 //
@@ -650,7 +506,7 @@ write_latest_data_info = FALSE;
 
 create_cart_terrain_grid = TRUE;
 
-///////////// cart_terrain_grid_dir ///////////////////
+///////////// cart_terrain_grid_subdir ////////////////
 //
 // Output directory path for Cartesian terrain grid.
 //
@@ -660,7 +516,7 @@ create_cart_terrain_grid = TRUE;
 // Type: string
 //
 
-cart_terrain_grid_dir = "/tmp/RadxBeamBlock/cart_terrain";
+cart_terrain_grid_subdir = "cart_terrain";
 
 ///////////// cart_terrain_grid_res ///////////////////
 //
@@ -672,7 +528,7 @@ cart_terrain_grid_dir = "/tmp/RadxBeamBlock/cart_terrain";
 // Type: double
 //
 
-cart_terrain_grid_res = 0.001;
+cart_terrain_grid_res = 0.005;
 
 ///////////// cart_terrain_field_name /////////////////
 //
