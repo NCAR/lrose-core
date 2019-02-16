@@ -554,7 +554,7 @@ compression_level = 4;
 // Type: string
 //
 
-output_dir = "/tmp/BeamBlock";
+output_dir = "/tmp/BeamBlock/KFTG";
 
 ///////////// output_filename_mode ////////////////////
 //
@@ -672,7 +672,7 @@ cart_terrain_grid_dir = "/tmp/RadxBeamBlock/kftg_terrain";
 // Type: double
 //
 
-cart_terrain_grid_res = 0.001;
+cart_terrain_grid_res = 0.01;
 
 ///////////// cart_terrain_field_name /////////////////
 //

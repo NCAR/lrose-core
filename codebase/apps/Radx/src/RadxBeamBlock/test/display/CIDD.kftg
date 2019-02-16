@@ -92,14 +92,14 @@
 ### Observational Datasets ###
 ##############################
 
-TERRAIN     TERRAIN  /tmp/RadxBeamBlock/kftg_terrain&terrain_ht terrain.colors m        0 50    10 cart 1 0
-REF    REF          mdvp:://plyo::/d1/dave/KFTG&REF  dbz.colors        db       0 250   10 cont 1 0 
-VEL    VEL          mdvp:://plyo::/d1/dave/KFTG&VEl  vel.colors        db       0 250   10 cont 1 0 
-SW     SW          mdvp:://plyo::/d1/dave/KFTG&SW    width.colors        db       0 250   10 cont 1 0 
-BEAMB  BEAMB        mdvp:://plyo::BeamBlock&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
-BEAML  BEAML        mdvp:://plyo::BeamBlock&BEAML   interest.colors    percent  0 250   10 cont 1 0 
-BEAME  BEAME        mdvp:://plyo::BeamBlock&BEAME   interest.colors    percent  0 250   10 cont 1 0 
-PEAK   PEAK         mdvp:://plyo::BeamBlock&PEAK    height2.colors    percent  0 250   10 cont 1 0 
+TERRAIN     TERRAIN  /tmp/RadxBeamBlock/kftg_terrain&terrain_ht height2.colors m        0 50    10 cart 1 0
+REF    REF          /tmp//d1/dave/KFTG&REF  dbz.colors        db       0 250   10 cont 1 0 
+VEL    VEL          /tmp//d1/dave/KFTG&VEl  vel.colors        db       0 250   10 cont 1 0 
+SW     SW          /tmp//d1/dave/KFTG&SW    width.colors        db       0 250   10 cont 1 0 
+BEAMB  BEAMB        /tmp/BeamBlock/KFTG&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
+BEAML  BEAML        /tmp/BeamBlock/KFTG&BEAML   interest.colors    percent  0 250   10 cont 1 0 
+BEAME  BEAME        /tmp/BeamBlock/KFTG&BEAME   interest.colors    percent  0 250   10 cont 1 0 
+PEAK   PEAK         /tmp/BeamBlock/KFTG&PEAK    height2.colors    percent  0 250   10 cont 1 0 
 </GRIDS>
 
 <WINDS>
