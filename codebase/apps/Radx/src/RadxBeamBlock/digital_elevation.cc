@@ -29,6 +29,8 @@
 #include <fstream>
 #include <memory>
 #include <iostream>
+#include <toolsa/file_io.h>
+
 using namespace std;
 
 using namespace rainfields::ancilla;
@@ -88,26 +90,28 @@ auto digital_elevation_srtm3::lookup(const latlon& loc) -> real
   int tilelat = loc.lat.radians() < 0.0 ? -ilat - 1 : ilat;
   int tilelon = loc.lon.radians() < 0.0 ? -ilon - 1 : ilon;
 
+  const srtm_tile &tile = get_tile(tilelat, tilelon);
+
   // determine the indices within the tile
   int x, y;
   if (tilelat >= 0)
   {
-    y = std::lround((ilat + 1 - lat)/sample_width);
+    y = std::lround((ilat + 1 - lat) / tile.dlat);
   }
   else
   {
-    y = std::lround((lat - ilat) / sample_width);
+    y = std::lround((lat - ilat) / tile.dlat);
   }
   if (tilelon >= 0)
   {
-    x = std::lround((lon - ilon) / sample_width);
+    x = std::lround((lon - ilon) / tile.dlon);
   }
   else
   {
-    x = std::lround((ilon + 1 - lon) / sample_width);
+    x = std::lround((ilon + 1 - lon) / tile.dlon);
   }
   
-  return get_tile(tilelat, tilelon)[y][x];
+  return tile.data[y][x];
      
 }
 
@@ -129,8 +133,8 @@ auto digital_elevation_srtm3::testBOM(void) ->void
 auto digital_elevation_srtm3::test(int lat0, int lon0, int lat1, int lon1, 
 				   int lat2, int lon2, int lat3, int lon3) ->void
 {
-  array2<real> t0 = get_tile(lat0, lon0);
-  array2<real> t1 = get_tile(lat1, lon1);
+  array2<real> t0 = get_tile(lat0, lon0).data;
+  array2<real> t1 = get_tile(lat1, lon1).data;
   bool match01_00 = true;
   bool match01_01 = true;
   bool match01_10 = true;
@@ -176,8 +180,8 @@ auto digital_elevation_srtm3::test(int lat0, int lon0, int lat1, int lon1,
   }
 
 
-  t0 = get_tile(lat2, lon2);
-  t1 = get_tile(lat3, lon3);
+  t0 = get_tile(lat2, lon2).data;
+  t1 = get_tile(lat3, lon3).data;
   match01_00 = true;
   match01_01 = true;
   match01_10 = true;
@@ -223,12 +227,13 @@ auto digital_elevation_srtm3::test(int lat0, int lon0, int lat1, int lon1,
   }
 }
 
-digital_elevation_srtm3::tile::tile()
-  : data(tile_samples_y, tile_samples_x)
+srtm_tile::srtm_tile()
+        : data(1, 1)
 { }
 
-auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const array2<real>&
+auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
 {
+
   // do we have this tile cached?
   for (auto i = tiles_.begin(); i != tiles_.end(); ++i)
   {
@@ -237,7 +242,7 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const array2<real>&
       // promote tile to front of list
       if (i != tiles_.begin())
         tiles_.splice(tiles_.begin(), tiles_, i);
-      return i->data;
+      return *i;
     }
   }
 
@@ -252,25 +257,49 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const array2<real>&
     tiles_.splice(tiles_.begin(), tiles_, --tiles_.end());
   auto& tile = tiles_.front();
 
+  // compute tile file name and path
+  char file_name[128];
+  snprintf(
+          file_name
+          , sizeof(file_name)
+          , "%c%02d%c%03d.hgt"
+          , lat < 0 ? 'S' : 'N'
+          , std::abs(lat)
+          , lon < 0 ? 'W' : 'E'
+          , std::abs(lon));
+  string file_path = path_ + file_name;
+
+  // check tile dimensions
+
+  long nBytes = ta_stat_get_len(file_path.c_str());
+  long nCells = nBytes / 2; // data is 2 byte ints
+  int tileDim = sqrt(nCells);
+  if (_params.debug) {
+    cerr << "Tile path: " << file_path << endl;
+    cerr << "      dim: " << tileDim << endl;
+  }
+  
   // set tile metadata
+  // depends on tile dimension
+  // 3-sec data has tiles 1201 x 1201
+  // 1-sec data has tiles 3601 x 3601
+
   tile.lat = lat;
   tile.lon = lon;
+  tile.nlat = tileDim;
+  tile.nlon = tileDim;
+  tile.dlat = 1.0 / (tileDim - 1.0);
+  tile.dlon = 1.0 / (tileDim - 1.0);
 
-  // try to load tile data from disk
-  // generate the file name
-  char file_name[16];
-  snprintf(
-        file_name
-      , sizeof(file_name)
-      , "%c%02d%c%03d.hgt"
-      , lat < 0 ? 'S' : 'N'
-      , std::abs(lat)
-      , lon < 0 ? 'W' : 'E'
-      , std::abs(lon));
+  // allocate space for tile data
+
+  tile.data.resize(tile.nlat, tile.nlon);
 
   // fill tile data
   // if no tile - trace about it and fill the tile with NaNs
-  std::ifstream file((path_ + file_name).c_str(), std::ifstream::in | std::ifstream::binary);
+
+  std::ifstream file((path_ + file_name).c_str(),
+                     std::ifstream::in | std::ifstream::binary);
   if (file)
   {
 
@@ -278,19 +307,22 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const array2<real>&
       cerr << "srtm3: requesting tile: " << file_name << endl;
     }
 
-    std::unique_ptr<std::int16_t[]> buf{new std::int16_t[tile_samples_y * tile_samples_x]};
-    file.read(reinterpret_cast<char*>(buf.get()), sizeof(int16_t) * tile_samples_y * tile_samples_x);
+    std::unique_ptr<std::int16_t[]>
+      buf{new std::int16_t[tile.nlat * tile.nlon]};
+
+    file.read(reinterpret_cast<char*>(buf.get()),
+              sizeof(int16_t) * tile.nlat * tile.nlon);
     if (!file)
       throw model_error{
           msg{} << "srtm3: tile read failed: " << path_ << file_name
         , {lat * 1_deg, lon * 1_deg}};
 
     // convert from big-endian into host order
-    for (size_t i = 0; i < tile_samples_y * tile_samples_x; ++i)
+    for (int i = 0; i < tile.nlat * tile.nlon; ++i)
       buf[i] = ntohs(buf[i]);
 
     // convert to real replacing void values with NaN
-    for (size_t i = 0; i < tile_samples_y * tile_samples_x; ++i)
+    for (int i = 0; i < tile.nlat * tile.nlon; ++i)
       tile.data.data()[i] = buf[i] == void_value ? nan() : buf[i];
   }
   else
@@ -300,7 +332,7 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const array2<real>&
     array_utils::fill(tile.data, nan());
   }
 
-  return tile.data;
+  return tile;
 }
 
 digital_elevation_esri::digital_elevation_esri(
@@ -348,7 +380,7 @@ digital_elevation_esri::digital_elevation_esri(
   if (!file || label != "yllcorner")
     throw model_error{msg{} << "esri: dataset expected yllcorner: " << path};
 
-  file >> label >> sample_width_;
+  file >> label >> delta_deg_;
   if (!file || label != "cellsize")
     throw model_error{msg{} << "esri: dataset expected cellsize: " << path};
 
@@ -357,10 +389,10 @@ digital_elevation_esri::digital_elevation_esri(
     throw model_error{msg{} << "esri: dataset expected NODATA_value: " << path};
 
   // determine the subset of points to load
-  int miny = rows - (ne.lat.degrees() - lly) / sample_width_;
-  int maxy = miny + (ne.lat - sw.lat).degrees() / sample_width_;
-  int minx = (sw.lon.degrees() - llx) / sample_width_;
-  int maxx = minx + (ne.lon - sw.lon).degrees() / sample_width_;
+  int miny = rows - (ne.lat.degrees() - lly) / delta_deg_;
+  int maxy = miny + (ne.lat - sw.lat).degrees() / delta_deg_;
+  int minx = (sw.lon.degrees() - llx) / delta_deg_;
+  int maxx = minx + (ne.lon - sw.lon).degrees() / delta_deg_;
 
   // clamp subset to the actual data
   bool warn = false;
@@ -391,8 +423,8 @@ digital_elevation_esri::digital_elevation_esri(
   data_ = array2<real>(maxy - miny, maxx - minx);
 
   // record central position of 0,0 point of our array
-  nw_.lat.set_degrees(lly + (rows - miny - 0.5_r) * sample_width_);
-  nw_.lon.set_degrees(llx + (minx + 0.5_r) * sample_width_);
+  nw_.lat.set_degrees(lly + (rows - miny - 0.5_r) * delta_deg_);
+  nw_.lon.set_degrees(llx + (minx + 0.5_r) * delta_deg_);
 
   // skip to the first row we want to load
   file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -428,8 +460,8 @@ auto digital_elevation_esri::reference_spheroid() -> const spheroid&
 auto digital_elevation_esri::lookup(const latlon& loc) -> real
 {
   // determine the array coordinates
-  auto y = std::lround((nw_.lat - loc.lat).degrees() / sample_width_);
-  auto x = std::lround((loc.lon - nw_.lon).degrees() / sample_width_);
+  auto y = std::lround((nw_.lat - loc.lat).degrees() / delta_deg_);
+  auto x = std::lround((loc.lon - nw_.lon).degrees() / delta_deg_);
 
   if (   y < 0 || y >= (int) data_.rows()
       || x < 0 || x >= (int) data_.cols())
