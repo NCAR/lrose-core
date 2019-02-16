@@ -188,10 +188,41 @@ typedef struct {
 
 paramdef struct output_field_t {
   p_default = {
-    {"BEAMB", "BEAMB", "BEAMB", "dB",       OUTPUT_FLOAT, BLOCKAGE },
-    {"BEAML", "BEAML", "BEAML", "fraction", OUTPUT_FLOAT, LINEAR_BLOCKAGE },
-    {"PEAK",  "PEAK",  "PEAK",  "fraction", OUTPUT_FLOAT, PEAK },
-    {"BEAME", "BEAME", "BEAME", "fraction", OUTPUT_FLOAT, EXTENDED_BLOCKAGE }
+    {
+      name = "BEAMB",
+      long_name = "BeamBlockageFractionDb",
+      standard_name = "BeamBlockageFractionDbPerGate",
+      units = "dB",
+      encoding = OUTPUT_FLOAT,
+      type = BLOCKAGE
+    }
+    ,
+    {
+      name = "BEAML",
+      long_name = "BeamBlockageFraction",
+      standard_name = "BeamBlockageFractionPerGate",
+      units = "fraction",
+      encoding = OUTPUT_FLOAT,
+      type = LINEAR_BLOCKAGE
+    }
+    ,
+    {
+      name = "PEAK",
+      long_name = "MaxTerrainHt",
+      standard_name = "MaxTerrainHtPerGate",
+      units = "m",
+      encoding = OUTPUT_FLOAT,
+      type = PEAK
+    }
+    ,
+    {
+      name = "BEAME",
+      long_name = "CumulativeBeamExtinctionFraction",
+      standard_name = "CumulativeBeamExtinctionFractionInRange",
+      units = "fraction",
+      encoding = OUTPUT_FLOAT,
+      type = EXTENDED_BLOCKAGE
+    }
   };
   p_descr = "Array of output fields.";
   p_help = "The program will only output these fields. long_name and standard_name are netCDF conventions. Set the output encoding type to select the resolution of the output data.";

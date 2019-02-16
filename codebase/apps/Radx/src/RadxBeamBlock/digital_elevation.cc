@@ -29,7 +29,7 @@
 #include <fstream>
 #include <memory>
 #include <iostream>
-#include <toolsa/file_io.h>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -267,9 +267,9 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
 
   // check tile dimensions
 
-  long nBytes = ta_stat_get_len(file_path.c_str());
-  if (nBytes < 1) {
-    // file does not exist, set tile to have no dimension
+  struct stat fileStat;
+  if (stat(file_path.c_str(), &fileStat)) {
+    // file does not exist, set tile to have size 0x0
     if (_params.debug) {
       cerr << "Missing tile path: " << file_path << endl;
       cerr << "  Probably a sea tile" << endl;
@@ -283,6 +283,7 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
     return tile;
   }
 
+  int nBytes = fileStat.st_size;
   long nCells = nBytes / 2; // data is 2 byte ints
   int tileDim = sqrt(nCells);
   if (_params.debug) {
