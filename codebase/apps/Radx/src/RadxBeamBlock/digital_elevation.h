@@ -86,7 +86,6 @@ namespace rainfields {
     class srtm_tile
     {
     public:
-      srtm_tile();
       int lat, lon;
       int nlat, nlon;
       double dlat, dlon;

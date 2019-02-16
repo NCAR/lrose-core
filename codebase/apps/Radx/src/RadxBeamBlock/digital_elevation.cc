@@ -89,8 +89,11 @@ auto digital_elevation_srtm3::lookup(const latlon& loc) -> real
   // determine the tile to use
   int tilelat = loc.lat.radians() < 0.0 ? -ilat - 1 : ilat;
   int tilelon = loc.lon.radians() < 0.0 ? -ilon - 1 : ilon;
-
+  
   const srtm_tile &tile = get_tile(tilelat, tilelon);
+  if (tile.nlat == 0 || tile.nlon == 0) {
+    return 0.0; // sea location
+  }
 
   // determine the indices within the tile
   int x, y;
@@ -227,10 +230,6 @@ auto digital_elevation_srtm3::test(int lat0, int lon0, int lat1, int lon1,
   }
 }
 
-srtm_tile::srtm_tile()
-        : data(1, 1)
-{ }
-
 auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
 {
 
@@ -246,15 +245,12 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
     }
   }
 
-  if (_params.debug) {
-    cerr << "New terrain tile for lat, lon: " << lat << ", " << lon << endl;
-  }
-
   // allocate or reuse a tile
   if (tiles_.size() < cache_size_)
     tiles_.emplace_front();
   else
     tiles_.splice(tiles_.begin(), tiles_, --tiles_.end());
+
   auto& tile = tiles_.front();
 
   // compute tile file name and path
@@ -272,13 +268,29 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
   // check tile dimensions
 
   long nBytes = ta_stat_get_len(file_path.c_str());
+  if (nBytes < 1) {
+    // file does not exist, set tile to have no dimension
+    if (_params.debug) {
+      cerr << "Missing tile path: " << file_path << endl;
+      cerr << "  Probably a sea tile" << endl;
+    }
+    tile.lat = lat;
+    tile.lon = lon;
+    tile.nlat = 0;
+    tile.nlon = 0;
+    tile.dlat = 0;
+    tile.dlon = 0;
+    return tile;
+  }
+
   long nCells = nBytes / 2; // data is 2 byte ints
   int tileDim = sqrt(nCells);
   if (_params.debug) {
     cerr << "Tile path: " << file_path << endl;
+    cerr << " lat, lon: " << lat << ", " << lon << endl;
     cerr << "      dim: " << tileDim << endl;
   }
-  
+
   // set tile metadata
   // depends on tile dimension
   // 3-sec data has tiles 1201 x 1201
@@ -296,20 +308,14 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
   tile.data.resize(tile.nlat, tile.nlon);
 
   // fill tile data
-  // if no tile - trace about it and fill the tile with NaNs
 
   std::ifstream file((path_ + file_name).c_str(),
                      std::ifstream::in | std::ifstream::binary);
-  if (file)
-  {
-
-    if (_params.debug) {
-      cerr << "srtm3: requesting tile: " << file_name << endl;
-    }
-
+  if (file) {
+    
     std::unique_ptr<std::int16_t[]>
       buf{new std::int16_t[tile.nlat * tile.nlon]};
-
+    
     file.read(reinterpret_cast<char*>(buf.get()),
               sizeof(int16_t) * tile.nlat * tile.nlon);
     if (!file)
@@ -318,21 +324,19 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
         , {lat * 1_deg, lon * 1_deg}};
 
     // convert from big-endian into host order
-    for (int i = 0; i < tile.nlat * tile.nlon; ++i)
+    for (int i = 0; i < tile.nlat * tile.nlon; ++i) {
       buf[i] = ntohs(buf[i]);
+    }
 
     // convert to real replacing void values with NaN
-    for (int i = 0; i < tile.nlat * tile.nlon; ++i)
+    for (int i = 0; i < tile.nlat * tile.nlon; ++i) {
       tile.data.data()[i] = buf[i] == void_value ? nan() : buf[i];
-  }
-  else
-  {
-    // this is quite normal for sea tiles
-    trace::debug() << "srtm3: requested tile not found: " << path_ << file_name;
-    array_utils::fill(tile.data, nan());
+    }
+
   }
 
   return tile;
+
 }
 
 digital_elevation_esri::digital_elevation_esri(

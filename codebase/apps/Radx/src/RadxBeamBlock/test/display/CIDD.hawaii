@@ -86,22 +86,22 @@ TERRAIN_LOW TERRAIN_LOW       /tmp/RadxBeamBlock/cart_terrain&terrain_ht terrain
 BEAMB_PHKI  BEAMB_PHKI        /tmp/BeamBlock/PHKI&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
 BEAML_PHKI  BEAML_PHKI        /tmp/BeamBlock/PHKI&BEAML   interest.colors    percent  0 250   10 cont 1 0 
 BEAME_PHKI  BEAME_PHKI        /tmp/BeamBlock/PHKI&BEAME   interest.colors    percent  0 250   10 cont 1 0 
-PEAK_PHKI   PEAK_PHKI         /tmp/BeamBlock/PHKI&PEAK    height2.colors    percent  0 250   10 cont 1 0 
+PEAK_PHKI   PEAK_PHKI         /tmp/BeamBlock/PHKI&PEAK    terrain.colors    percent  0 250   10 cont 1 0 
 
 BEAMB_PHKM  BEAMB_PHKM        /tmp/BeamBlock/PHKM&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
 BEAML_PHKM  BEAML_PHKM        /tmp/BeamBlock/PHKM&BEAML   interest.colors    percent  0 250   10 cont 1 0 
 BEAME_PHKM  BEAME_PHKM        /tmp/BeamBlock/PHKM&BEAME   interest.colors    percent  0 250   10 cont 1 0 
-PEAK_PHKM   PEAK_PHKM         /tmp/BeamBlock/PHKM&PEAK    height2.colors    percent  0 250   10 cont 1 0 
+PEAK_PHKM   PEAK_PHKM         /tmp/BeamBlock/PHKM&PEAK    terrain.colors    percent  0 250   10 cont 1 0 
 
 BEAMB_PHMO  BEAMB_PHMO        /tmp/BeamBlock/PHMO&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
 BEAML_PHMO  BEAML_PHMO        /tmp/BeamBlock/PHMO&BEAML   interest.colors    percent  0 250   10 cont 1 0 
 BEAME_PHMO  BEAME_PHMO        /tmp/BeamBlock/PHMO&BEAME   interest.colors    percent  0 250   10 cont 1 0 
-PEAK_PHMO   PEAK_PHMO         /tmp/BeamBlock/PHMO&PEAK    height2.colors    percent  0 250   10 cont 1 0 
+PEAK_PHMO   PEAK_PHMO         /tmp/BeamBlock/PHMO&PEAK    terrain.colors    percent  0 250   10 cont 1 0 
 
 BEAMB_PHWA  BEAMB_PHWA        /tmp/BeamBlock/PHWA&BEAMB   dbz.colors         dB       0 250   10 cont 1 0 
 BEAML_PHWA  BEAML_PHWA        /tmp/BeamBlock/PHWA&BEAML   interest.colors    percent  0 250   10 cont 1 0 
 BEAME_PHWA  BEAME_PHWA        /tmp/BeamBlock/PHWA&BEAME   interest.colors    percent  0 250   10 cont 1 0 
-PEAK_PHWA   PEAK_PHWA         /tmp/BeamBlock/PHWA&PEAK    height2.colors    percent  0 250   10 cont 1 0 
+PEAK_PHWA   PEAK_PHWA         /tmp/BeamBlock/PHWA&PEAK    terrain.colors    percent  0 250   10 cont 1 0 
 
 </GRIDS>
 
