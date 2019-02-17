@@ -57,7 +57,7 @@ public:
   /**
    * Apply Finishing steps to _scan data, then copy to _vol
    */
-  void finish(void);
+  void finish(int nScans);
 
   /**
    * Write _vol data
@@ -73,7 +73,14 @@ public:
   auto end() -> iterator                         { return _scan.end(); }
   auto end() const -> const_iterator             { return _scan.end(); }
 
-  bool isOK;   /**< True if object is good to go */
+  size_t nScans() const { return _scan.size(); }
+  double getElev(size_t scanNum) const {
+    if (scanNum >= _scan.size()) {
+      return _scan[_scan.size() - 1].elevDegrees();
+    } else {
+      return _scan[scanNum].elevDegrees();
+    }
+  }
 
 protected:
 private:

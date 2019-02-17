@@ -51,11 +51,12 @@ VolHandler::~VolHandler(void)
 }
 
 //----------------------------------------------------------------
-void VolHandler::finish(void)
+void VolHandler::finish(int nScans)
 {
   // loop through scans
-  for (auto &scan : _scan)
+  for (int iscan = 0; iscan < nScans; iscan++)
   {
+    ScanHandler &scan = _scan[iscan];
     scan.finish();
     double elev = scan.elevDegrees();
     int ielev = scan.elevIndex();

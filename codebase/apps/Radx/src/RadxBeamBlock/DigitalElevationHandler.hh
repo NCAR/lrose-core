@@ -97,8 +97,6 @@ public:
 
   double getElevation(const rainfields::latlon& loc) const;
 
-  bool isOK; /**< True for object ok */
-
 protected:
   
 private:

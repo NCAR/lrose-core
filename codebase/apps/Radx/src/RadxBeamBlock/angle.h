@@ -41,6 +41,13 @@ namespace rainfields
 
   public:
     angle() noexcept = default;
+    angle(double val, bool isDegrees) {
+      if (isDegrees) {
+        set_degrees(val);
+      } else {
+        set_radians(val);
+      }
+    }
 
     constexpr angle(const angle& rhs) noexcept = default;
     constexpr angle(angle&& rhs) noexcept = default;

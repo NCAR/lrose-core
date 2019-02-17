@@ -86,19 +86,22 @@ protected:
 private:
 
   Parms _params;                /**< Alg parameters */
-  VolHandler _data;             /**< Handles creation and writing of Radx*/
+  VolHandler _vol;              /**< Handles creation and writing of Radx*/
   DigitalElevationHandler _dem; /**< handles reading and use of digital
 				 * elevation data */
 
   int64_t _nGatesBlocked;
 
+  vector<bool> _azBlocked;
+
   bool _processScan(ScanHandler &scan,
 		    const rainfields::ancilla::beam_power &power_model,
-		    rainfields::latlonalt origin, bool &short_circuit);
+		    rainfields::latlonalt origin);
 
   void _processBeam(RayHandler &ray, rainfields::latlonalt origin, 
 		    const rainfields::ancilla::beam_propagation &bProp,
-		    const rainfields::ancilla::beam_power_cross_section &csec);
+		    const rainfields::ancilla::beam_power_cross_section &csec,
+                    bool &foundBlockage);
 
   void _processGate(GateHandler &ray, rainfields::angle elevAngle, size_t iray,
 		    rainfields::latlonalt origin,

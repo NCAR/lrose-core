@@ -38,11 +38,17 @@ using namespace ancilla;
 
 //------------------------------------------------------------------
 RadxBeamBlock::RadxBeamBlock(const Parms &params) : _params(params),
-						    _data(params),
+						    _vol(params),
 						    _dem(params)
 {
 
+  // initialize checks for still blocked
+
   _nGatesBlocked = 0;
+  
+  for (int i=0; i<_params.nazimuth(); ++i) {
+    _azBlocked.push_back(true);
+  }
 
 }
 
@@ -77,22 +83,17 @@ int RadxBeamBlock::Run(void)
     _createCartTerrainGrid(sw.first, sw.second, ne.first, ne.second);
   }
   
-  angle a0, a1;
-  a0.set_degrees(_params.radar_location.latitudeDeg);
-  a1.set_degrees(_params.radar_location.longitudeDeg);
+  angle lat(_params.radar_location.latitudeDeg, true);
+  angle lon(_params.radar_location.longitudeDeg, true);
 
   double elevation;
-  if (_params.do_lookup_radar_altitude)
-  {
-    latlon ll(a0, a1);
+  if (_params.do_lookup_radar_altitude) {
+    latlon ll(lat, lon);
     elevation = _dem.getElevation(ll);
-  }
-  else
-  {
+  } else {
     elevation = _params.radar_location.altitudeKm*1000.0;
   }
-  // latlonalt origin(a0, a1, _params.radar_location.altitudeKm*1000.0);
-  latlonalt origin(a0, a1, elevation);
+  latlonalt origin(lat, lon, elevation);
 
   // convert the site location of the volume into the native spheroid of the DEM
   origin = _dem.radarOrigin(origin); 
@@ -104,20 +105,33 @@ int RadxBeamBlock::Run(void)
   beam_power power_model(width, height);
 
   // process each scan
-  bool short_circuit = false;
-  for (auto &scan : _data)
-  {
-    _processScan(scan, power_model, origin, short_circuit);
+  size_t nScans = 0;
+  for (auto &scan : _vol) {
+    bool done = _processScan(scan, power_model, origin);
+    nScans++;
+    if (done) {
+      break;
+    }
   }
-  _data.finish();
+
+  if (nScans < _vol.nScans()) {
+    cerr << "SUCCESS - completed early, nscans used: " << nScans << endl;
+  } else {
+    cerr << "WARNING - terrain still visible at top scan, elev: "
+         << _vol.getElev(nScans - 1) << endl;
+  }
+
+  _vol.finish(nScans);
   return 0;
+
 }
 
 //------------------------------------------------------------------
 bool RadxBeamBlock::_processScan(ScanHandler &scan,
 				 const beam_power &power_model,
-				 latlonalt origin, bool &short_circuit)
+				 latlonalt origin)
 {
+
   angle elevAngle = scan.elevation();
   LOGF(LogMsg::DEBUG, "  occluding tilt: %lf", scan.elevDegrees());
 
@@ -132,43 +146,43 @@ bool RadxBeamBlock::_processScan(ScanHandler &scan,
       static_cast<size_t>(_params.num_range_subsample),
       beam_width_v, beam_width_h};
   csec.make_vertical_integration();
+  
+  bool foundBlockage = false;
+  for (size_t iray = 0; iray < scan.nRays(); iray++) {
 
-  // // shortcut if we've already found a tilt with no occlusion...
-  // if (short_circuit)
-  // {
-  //   _data.insert(scan);
-  //   return true;
-  // }
+    if (!_azBlocked[iray]) {
+      // no remaining blockage on this azimuth
+      continue;
+    }
 
-  for (auto &ray : scan)
-  {
-    _processBeam(ray, origin, bProp, csec);
+    RayHandler &ray = scan.getRay(iray);
+    bool thisAzBlocked = false;
+    _processBeam(ray, origin, bProp, csec, thisAzBlocked);
+    if (thisAzBlocked) {
+      foundBlockage = true;
+    } else {
+      _azBlocked[iray] = false;
+    }
+
+  } // iray
+
+  if (foundBlockage) {
+    // not done
+    return false;
+  } else {
+    // done
+    return true;
   }
-
-// #if 0
-//   // if this tilt was not occluded at all, tell remaining ones to short-circuit
-//   short_circuit = true;
-//   for (size_t i = 0; i < outb.size(); ++i)
-//   {
-//     if (outb.data()[i] > 0.0_r)
-//     {
-//       short_circuit = false;
-//       break;
-//     }
-//   }
-//   if (short_circuit)
-//     trace::log() << "  no occlusion detected - shortcut remaining tilts";
-// #endif
-
-  return true;
+  
 }
 
 
 //------------------------------------------------------------------
 void RadxBeamBlock::_processBeam(RayHandler &ray, latlonalt origin, 
 				 const beam_propagation &bProp,
-				 const beam_power_cross_section &csec)
-
+				 const beam_power_cross_section &csec,
+                                 bool &foundBlockage)
+  
 {
   angle azAngle = ray.azimuth();
   angle elevAngle = ray.elev();
@@ -178,18 +192,22 @@ void RadxBeamBlock::_processBeam(RayHandler &ray, latlonalt origin,
 
   // subsample each azimuth based on the number of horizontal cells in our
   // cross section
-  for (size_t iray = 0; iray < csec.cols(); ++iray)
-  {
+  for (size_t iray = 0; iray < csec.cols(); ++iray) {
+
     const angle bearing = azAngle + csec.offset_azimuth(iray);
     angle max_ray_theta = -90.0_deg;  // updated as we go
-
+    
     // walk out along our ray, keeping track of the total power loss at each bin
-    for (auto & gate : ray)
-    {
+    for (auto & gate : ray) {
       _processGate(gate, elevAngle, iray, origin, bProp, bearing, csec,
 		   max_ray_theta);
+      if (gate.getBeamL() > 0) {
+        foundBlockage = true;
+      }
     }
-  }
+
+  } // iray
+
 }
 
 //------------------------------------------------------------------
@@ -200,12 +218,12 @@ void RadxBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
 				 angle &max_ray_theta)
 {
 
-  if (gate.getData(Params::BLOCKAGE) > 0) {
+  if (gate.getBeamL() > 0) {
     _nGatesBlocked++;
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       LOGF(LogMsg::DEBUG,
            "elev, bearing, range, blocakge: %g, %g, %g, %g", 
-           elevAngle, bearing, gate.meters(), gate.getData(Params::BLOCKAGE));
+           elevAngle, bearing, gate.meters(), gate.getBeamL());
     }
   }
   
@@ -222,8 +240,7 @@ void RadxBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
 
   // if DEM gave us no valid values we can fail this condition
   // this is usually due to sea regions not being included in the DEM
-  if (peak_ground_range > 0.0_r)
-  {
+  if (peak_ground_range > 0.0_r) {
     _adjustValues(iray, bProp, peak_ground_range, peak_altitude, elevAngle,
 		  csec, max_ray_theta, progressive_loss);
 
@@ -233,6 +250,7 @@ void RadxBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
 
   // add the loss in this ray,bin to the gate,bin total
   gate.incrementLoss(progressive_loss);
+
 }
 
 //------------------------------------------------------------------
@@ -252,24 +270,18 @@ void RadxBeamBlock::_adjustValues(size_t ray, const beam_propagation &bProp,
 
   // if we've got a new highest obstruction, then we need to lookup the new 
   // progressive fractional loss for this ray from the cross-section model
-  if (max_bin_theta > max_ray_theta)
-  {
+  if (max_bin_theta > max_ray_theta) {
     max_ray_theta = max_bin_theta;
               
     // what is the closest vertical bin
     const angle csec_delta = csec.height() / csec.rows();
     const real csec_y_offset = csec.rows() / 2.0_r;
     int y = std::floor(max_ray_theta / csec_delta + csec_y_offset);
-    if (y >= static_cast<int>(csec.rows()))
-    {
+    if (y >= static_cast<int>(csec.rows())) {
       progressive_loss = csec.power(csec.rows() - 1, ray);
-    }
-    else if (y >= 0)
-    {
+    } else if (y >= 0) {
       progressive_loss = csec.power(y, ray);
-    }
-    else
-    {
+    } else {
       ; // y < 0 - no loss - do nothing
     }
   }
@@ -278,7 +290,7 @@ void RadxBeamBlock::_adjustValues(size_t ray, const beam_propagation &bProp,
 //------------------------------------------------------------------
 int RadxBeamBlock::Write(void)
 {
-  return _data.write();
+  return _vol.write();
 }
 
 

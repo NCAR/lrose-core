@@ -44,7 +44,6 @@ GateHandler::~GateHandler(void)
 //----------------------------------------------------------------
 void GateHandler::finish(void)
 {
-  _beaml = _beamb;
   if (_beamb < 1.0)
   {
     _beamb = 10.0*log10(1.0/(1.0 - _beamb));

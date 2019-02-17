@@ -121,8 +121,6 @@ public:
   auto end() -> iterator                         { return _gate.end(); }
   auto end() const -> const_iterator             { return _gate.end(); }
 
-  bool isOK;  /**< True if object  is good */
-
 protected:
   
 private:

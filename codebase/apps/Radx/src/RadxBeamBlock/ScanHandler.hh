@@ -84,8 +84,14 @@ public:
   auto end() -> iterator                         { return _ray.end(); }
   auto end() const -> const_iterator             { return _ray.end(); }
 
-
-  bool isOK;  /**< True if object  is good */
+  size_t nRays() const { return _ray.size(); }
+  RayHandler &getRay(size_t iray) {
+    if (iray >= _ray.size()) {
+      return _ray[_ray.size() - 1];
+    } else {
+      return _ray[iray];
+    }
+  }
 
 protected:
   

@@ -63,7 +63,10 @@ public:
    * Add input loss to the beam blockage local value
    * @param[in] loss
    */
-  inline void incrementLoss(double loss) {_beamb += loss;}
+  inline void incrementLoss(double loss) {
+    _beaml += loss;
+    _beamb += loss;
+  }
 
   /**
    * Apply finishing calculations to the data
@@ -71,14 +74,19 @@ public:
   void finish(void);
 
   /**
+   * @return the locally stored data value for each field
+   */
+
+  Radx::fl32 getBeamB() const { return _beamb; }
+  Radx::fl32 getBeamL() const { return _beaml; }
+  Radx::fl32 getPeak() const { return _peak; }
+  
+  /**
    * @return the locally stored data value for the input type
    * @param[in] type  The type
    */
   Radx::fl32 getData(Params::output_data_t type) const;
-
   
-  bool isOK;  /**< True if object  is good */
-
 protected:
   
 private:
