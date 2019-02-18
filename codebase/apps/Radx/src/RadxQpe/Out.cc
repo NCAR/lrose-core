@@ -141,7 +141,7 @@ bool Out::_evaluate(const VertData1 &v, const Parms &parms)
       return false;
     }
   }
-  if (v._beamb > parms.max_beam_block_percent)
+  if (v._beamE > parms.max_beam_block_fraction)
   {
     // blocked, move up
     ++_nblock;

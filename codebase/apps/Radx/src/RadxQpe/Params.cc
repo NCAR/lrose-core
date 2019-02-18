@@ -700,15 +700,19 @@
     tt->single_val.d = 5;
     tt++;
     
-    // Parameter 'max_beam_block_percent'
+    // Parameter 'max_beam_block_fraction'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_beam_block_percent");
-    tt->descr = tdrpStrDup("Beam blockage threshold");
-    tt->help = tdrpStrDup("When beam blockage percentage > max_beam_block_percent, a higher elevation angle is used");
-    tt->val_offset = (char *) &max_beam_block_percent - &_start_;
+    tt->param_name = tdrpStrDup("max_beam_block_fraction");
+    tt->descr = tdrpStrDup("Cumulative beam blockage threshold");
+    tt->help = tdrpStrDup("When the cumulative beam blockage exceeds max_beam_block_fraction, a higher elevation angle is used");
+    tt->val_offset = (char *) &max_beam_block_fraction - &_start_;
+    tt->has_min = TRUE;
+    tt->has_max = TRUE;
+    tt->min_val.d = 0;
+    tt->max_val.d = 1;
     tt->single_val.d = 0.25;
     tt++;
     

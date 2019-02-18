@@ -95,10 +95,12 @@ paramdef double
 
 paramdef double
 {
-  p_descr = "Beam blockage threshold";
-  p_help = "When beam blockage percentage > max_beam_block_percent, a higher elevation angle is used";
+  p_descr = "Cumulative beam blockage threshold";
+  p_help = "When the cumulative beam blockage exceeds max_beam_block_fraction, a higher elevation angle is used";
   p_default = 0.25;
-} max_beam_block_percent;
+  p_min = 0.0;
+  p_max = 1.0;
+} max_beam_block_fraction;
 
 paramdef double
 {

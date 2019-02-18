@@ -458,7 +458,7 @@ public:
 
   double min_snr;
 
-  double max_beam_block_percent;
+  double max_beam_block_fraction;
 
   double max_beam_height_km_msl;
 
