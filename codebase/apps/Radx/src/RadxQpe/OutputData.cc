@@ -144,10 +144,6 @@ void OutputData::_addField(const Params::output_field_t &pfield, string &name,
     {
       field->convertToSi16();
     }
-    else if (pfield.encoding == Params::OUTPUT_BYTE)
-    {
-      field->convertToSi08();
-    }
     // add field to ray
     ray->addField(field);
 }
@@ -173,10 +169,6 @@ void OutputData::_addRateField(const Params::rainrate_field_t &pfield,
     {
       field->convertToSi16();
     }
-    else if (pfield.encoding == Params::OUTPUT_BYTE)
-    {
-      field->convertToSi08();
-    }
     // add field to ray
     ray->addField(field);
 }
@@ -184,7 +176,7 @@ void OutputData::_addRateField(const Params::rainrate_field_t &pfield,
 //----------------------------------------------------------------
 void OutputData::_writeVolume(const Data &inp)
 {
-  if (strlen(_params.output_dir) == 0)
+  if (strlen(_params.output_polar_dir) == 0)
   {
     // not writing this data out
     return;
@@ -221,12 +213,10 @@ void OutputData::_writeVolume(const Data &inp)
 
   _setupWrite(outFile);
   
-  if (outFile.writeToDir(_outVol, _params.output_dir,
-                         _params.append_day_dir_to_output_dir,
-                         _params.append_year_dir_to_output_dir))
+  if (outFile.writeToDir(_outVol, _params.output_polar_dir, true, false))
   {
     LOGF(LogMsg::ERROR, 
-	 "  Cannot write file to dir: %s", _params.output_dir);
+	 "  Cannot write file to dir: %s", _params.output_polar_dir);
     LOG(LogMsg::ERROR, outFile.getErrStr().c_str());
     return;
   }
@@ -238,19 +228,19 @@ void OutputData::_writeVolume(const Data &inp)
   
   if (_params.write_latest_data_info)
   {
-    DsLdataInfo ldata(_params.output_dir);
+    DsLdataInfo ldata(_params.output_polar_dir);
     if (_params.debug_verbose)
     {
       ldata.setDebug(true);
     }
     string relPath;
-    RadxPath::stripDir(_params.output_dir, outputPath, relPath);
+    RadxPath::stripDir(_params.output_polar_dir, outputPath, relPath);
     ldata.setRelDataPath(relPath);
     ldata.setWriter(_params._progName);
     if (ldata.write(_outVol.getEndTimeSecs()))
     {
       LOGF(LogMsg::WARNING, "  Cannot write latest data info file to dir: %s",
-           _params.output_dir);
+           _params.output_polar_dir);
     }
   }
 
@@ -265,36 +255,13 @@ void OutputData::_setupWrite(RadxFile &file)
     file.setDebug(true);
   }
 
-  if (_params.output_filename_mode == Params::START_TIME_ONLY)
-  {
-    file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_TIME_ONLY);
-  }
-  else if (_params.output_filename_mode == Params::END_TIME_ONLY)
-  {
-    file.setWriteFileNameMode(RadxFile::FILENAME_WITH_END_TIME_ONLY);
-  }
-  else
-  {
-    file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);
-  }
+  file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);
 
-  if (_params.output_compressed)
-  {
+  if(_params.compression_level > 0) {
     file.setWriteCompressed(true);
     file.setCompressionLevel(_params.compression_level);
-  }
-  else
-  {
+  } else {
     file.setWriteCompressed(false);
-  }
-
-  if (_params.output_native_byte_order)
-  {
-    file.setWriteNativeByteOrder(true);
-  }
-  else
-  {
-    file.setWriteNativeByteOrder(false);
   }
 
   // set output format
@@ -323,28 +290,6 @@ void OutputData::_setupWrite(RadxFile &file)
 
   // set netcdf format - used for CfRadial
 
-  switch (_params.netcdf_style)
-  {
-  case Params::NETCDF4_CLASSIC:
-    file.setNcFormat(RadxFile::NETCDF4_CLASSIC);
-    break;
-  case Params::NC64BIT:
-    file.setNcFormat(RadxFile::NETCDF_OFFSET_64BIT);
-    break;
-  case Params::NETCDF4:
-    file.setNcFormat(RadxFile::NETCDF4);
-    break;
-  default:
-    file.setNcFormat(RadxFile::NETCDF_CLASSIC);
-  }
+  file.setNcFormat(RadxFile::NETCDF4);
 
-  if (_params.write_individual_sweeps)
-  {
-    file.setWriteIndividualSweeps(true);
-  }
-
-  if (_params.output_force_ngates_vary)
-  {
-    file.setWriteForceNgatesVary(true);
-  }
 }
