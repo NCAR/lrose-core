@@ -265,53 +265,69 @@ static int _readFile(char *FileName, Params *P)
     Decoders D(P, fileStat.st_ctime, FileName);
     
     size_t start;
-
+    
     if ((start = clean.find("TTAA")) != string::npos) {
       decoded = D.TTAA_decode("TTAA", clean);
-      if (P->debug) D.print();
-      if (D.gotData()) D.write();
+      if (P->use_TTAA) {
+        if (P->debug) D.print();
+        if (D.gotData()) D.write();
+      }
     }
     
     if ((start = clean.find("TTBB")) != string::npos) {
       decoded = D.TTBB_decode("TTBB", clean);
-      if (P->debug) D.print();
-      if (D.gotData()) D.write();
+      if (P->use_TTBB) {
+        if (P->debug) D.print();
+        if (D.gotData()) D.write();
+      }
     }
     
     if ((start = clean.find("TTCC")) != string::npos) {
       decoded = D.TTCC_decode("TTCC", clean);
-      if (P->debug) D.print();
-      if (D.gotData()) D.write();
+      if (P->use_TTCC) {
+        if (P->debug) D.print();
+        if (D.gotData()) D.write();
+      }
     }
     
     if ((start = clean.find("TTDD")) != string::npos) {
       decoded = D.TTDD_decode("TTDD", clean);
-      if (P->debug) D.print();
-      if (D.gotData()) D.write();
+      if (P->use_TTDD) {
+        if (P->debug) D.print();
+        if (D.gotData()) D.write();
+      }
     }
     
     if ((start = clean.find("PPAA")) != string::npos) {
       decoded = D.PPAA_decode("PPAA", clean);
-      if (P->debug) D.print();
-      if (D.gotData()) D.write();
+      if (P->use_PPAA) {
+        if (P->debug) D.print();
+        if (D.gotData()) D.write();
+      }
     }
     
     if ((start = clean.find("PPBB")) != string::npos) {
       decoded = D.PPBB_decode("PPBB", clean);
-      if (P->debug) D.print();
-      if (D.gotData()) D.write();
+      if (P->use_PPBB) {
+        if (P->debug) D.print();
+        if (D.gotData()) D.write();
+      }
     }
     
     if ((start = clean.find("PPCC")) != string::npos) {
       decoded = D.PPCC_decode("PPCC", clean);
-      if (P->debug) D.print();
-      if (D.gotData()) D.write();
+      if (P->use_PPCC) {
+        if (P->debug) D.print();
+        if (D.gotData()) D.write();
+      }
     }
     
     if ((start = clean.find("PPDD")) != string::npos) {
       decoded = D.PPDD_decode("PPDD", clean);
-      if (P->debug) D.print();
-      if (D.gotData()) D.write();
+      if (P->use_PPDD) {
+        if (P->debug) D.print();
+        if (D.gotData()) D.write();
+      }
     }
     
     if (decoded) messagesDecoded++;;

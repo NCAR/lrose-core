@@ -99,6 +99,59 @@ paramdef int {
 } max_realtime_valid_age;
 
 commentdef {
+  p_header = "SPECIFY THE BLOCKS TO USE.";
+  p_text = "A sounding may comprise a number of blocks: TTAA, TTBB, TTCC, TTDD, PPAA, PPBB, PPCC and PPDD. Generally you only want to use TTAA and TTBB blocks, but the option is there to use the other blocks as well. Data from the various blocks, at the same time, will be merged into a single sounding.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Use the TTAA block?";
+  p_help = "This contains the mandatory levels - 1000, 925, 850,  700, 500, 400, 300, 200, 150, 100 hPa.";
+} use_TTAA;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Use the TTBB block?";
+  p_help = "This contains the significant levels - i.e. where there is a change in slope in the sounding.";
+} use_TTBB;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Use the TTCC block?";
+  p_help = "This contains possible mandatory levels above 100 hPa - 70, 50, 30, 20, 10.";
+} use_TTCC;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Use the TTDD block?";
+  p_help = "This contains possible significant levels above 100 hPa.";
+} use_TTDD;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Use the PPAA block?";
+  p_help = "PP blocks contain wind data. Generally not used. See TTAA.";
+} use_PPAA;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Use the PPBB block?";
+  p_help = "PP blocks contain wind data. Generally not used. See TTBB.";
+} use_PPBB;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Use the PPCC block?";
+  p_help = "PP blocks contain wind data. Generally not used. See TTCC.";
+} use_PPCC;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Use the PPDD block?";
+  p_help = "PP blocks contain wind data. Generally not used. See TTDD.";
+} use_PPDD;
+
+commentdef {
   p_header = "LOCATION INFORMATION.";
   p_text = "The name is optional. If it has a non-zero length it will be used instead of the ID for station identification.";
 }
@@ -251,7 +304,6 @@ commentdef {
   p_header = "DATA OUTPUT.";
 }
 
-
 paramdef string {
   p_default = "spdbp:://localhost::$(PROJECT)/spdb/NWSsoundings";
   p_descr = "URL for output SPDB data.";
@@ -279,8 +331,6 @@ paramdef double {
            "heights and interleaved.\n\nValues of less than 0.5 for\n"
            "epsilon are problematic and are not allowed (points are\n"
            "(never merged if epsilon is 0.0, even if they are identical).";
-
-
 
 } soundingMergeEpsilon;
 

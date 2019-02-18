@@ -2456,8 +2456,12 @@ int Decoders::write(){
   toBeAdded.prs = _pressure;
   toBeAdded.relHum = _rh;
   toBeAdded.temp = _temp;
-  toBeAdded.lat = _lat;  toBeAdded.lon = _lon;  toBeAdded.alt = _alt;
-  toBeAdded.numPoints = _numPoints; toBeAdded.badVal = _badVal;
+  toBeAdded.lat = _lat;
+  toBeAdded.lon = _lon;
+  toBeAdded.alt = _alt;
+  toBeAdded.numPoints = _numPoints;
+  toBeAdded.badVal = _badVal;
+
   if (_source == NULL){
     toBeAdded.source = "Unknown";
   } else {

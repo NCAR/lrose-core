@@ -669,6 +669,111 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
+    tt->comment_hdr = tdrpStrDup("SPECIFY THE BLOCKS TO USE.");
+    tt->comment_text = tdrpStrDup("A sounding may comprise a number of blocks: TTAA, TTBB, TTCC, TTDD, PPAA, PPBB, PPCC and PPDD. Generally you only want to use TTAA and TTBB blocks, but the option is there to use the other blocks as well. Data from the various blocks, at the same time, will be merged into a single sounding.");
+    tt++;
+    
+    // Parameter 'use_TTAA'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_TTAA");
+    tt->descr = tdrpStrDup("Use the TTAA block?");
+    tt->help = tdrpStrDup("This contains the mandatory levels - 1000, 925, 850,  700, 500, 400, 300, 200, 150, 100 hPa.");
+    tt->val_offset = (char *) &use_TTAA - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'use_TTBB'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_TTBB");
+    tt->descr = tdrpStrDup("Use the TTBB block?");
+    tt->help = tdrpStrDup("This contains the significant levels - i.e. where there is a change in slope in the sounding.");
+    tt->val_offset = (char *) &use_TTBB - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'use_TTCC'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_TTCC");
+    tt->descr = tdrpStrDup("Use the TTCC block?");
+    tt->help = tdrpStrDup("This contains possible mandatory levels above 100 hPa - 70, 50, 30, 20, 10.");
+    tt->val_offset = (char *) &use_TTCC - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'use_TTDD'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_TTDD");
+    tt->descr = tdrpStrDup("Use the TTDD block?");
+    tt->help = tdrpStrDup("This contains possible significant levels above 100 hPa.");
+    tt->val_offset = (char *) &use_TTDD - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'use_PPAA'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_PPAA");
+    tt->descr = tdrpStrDup("Use the PPAA block?");
+    tt->help = tdrpStrDup("PP blocks contain wind data. Generally not used. See TTAA.");
+    tt->val_offset = (char *) &use_PPAA - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'use_PPBB'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_PPBB");
+    tt->descr = tdrpStrDup("Use the PPBB block?");
+    tt->help = tdrpStrDup("PP blocks contain wind data. Generally not used. See TTBB.");
+    tt->val_offset = (char *) &use_PPBB - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'use_PPCC'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_PPCC");
+    tt->descr = tdrpStrDup("Use the PPCC block?");
+    tt->help = tdrpStrDup("PP blocks contain wind data. Generally not used. See TTCC.");
+    tt->val_offset = (char *) &use_PPCC - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'use_PPDD'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_PPDD");
+    tt->descr = tdrpStrDup("Use the PPDD block?");
+    tt->help = tdrpStrDup("PP blocks contain wind data. Generally not used. See TTDD.");
+    tt->val_offset = (char *) &use_PPDD - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("LOCATION INFORMATION.");
     tt->comment_text = tdrpStrDup("The name is optional. If it has a non-zero length it will be used instead of the ID for station identification.");
     tt++;
@@ -1298,11 +1403,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT.");
     tt->comment_text = tdrpStrDup("");
     tt++;

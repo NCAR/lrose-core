@@ -78,6 +78,10 @@ int SoundingMerge::Init(time_t dataTime, int id, const string &name){
   _dataTime = dataTime;
   _stationName = name;
 
+  if (_stationName.size() > 0) {
+    _id = Spdb::hash4CharsToInt32(_stationName.c_str());
+  }
+
   //
   // See if we have data in the database for this time.
   //
@@ -93,10 +97,10 @@ int SoundingMerge::Init(time_t dataTime, int id, const string &name){
   if (_params->debug){
     fprintf(stderr,"Looking for existing data in %s\n", _params->OutUrl );
     fprintf(stderr,"at time %s\n",utimstr( dataTime ));
-    fprintf(stderr,"ID is %d\n",id);
+    fprintf(stderr,"ID is %d\n",_id);
   }
   //
-  int numProds = _Sget.readSounding( dataTime, id );
+  int numProds = _Sget.readSounding( dataTime, _id );
   if (_params->debug){
     if (numProds < 1){
       fprintf(stderr,"No products found.\n");
@@ -113,7 +117,7 @@ int SoundingMerge::Init(time_t dataTime, int id, const string &name){
   //
   for (int i=0; i < numProds; i++){
     _Sget.loadProduct( i );
-    if (id == _Sget.getSiteId()){
+    if (_id == _Sget.getSiteId()){
       _productIndex = i;
     }
   }

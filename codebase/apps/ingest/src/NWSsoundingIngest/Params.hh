@@ -389,6 +389,22 @@ public:
 
   int max_realtime_valid_age;
 
+  tdrp_bool_t use_TTAA;
+
+  tdrp_bool_t use_TTBB;
+
+  tdrp_bool_t use_TTCC;
+
+  tdrp_bool_t use_TTDD;
+
+  tdrp_bool_t use_PPAA;
+
+  tdrp_bool_t use_PPBB;
+
+  tdrp_bool_t use_PPCC;
+
+  tdrp_bool_t use_PPDD;
+
   id_t *_siteLocations;
   int siteLocations_n;
 
@@ -413,7 +429,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[21];
+  mutable TDRPtable _table[30];
 
   const char *_className;
 
