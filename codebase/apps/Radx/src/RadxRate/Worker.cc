@@ -535,9 +535,9 @@ void Worker::_computeSnrFromDbz()
 }
 
 //////////////////////////////////////////////////////////////
-// Censor gates with non-precip particle types
+// Censor gates with non-weather particle types
 
-void Worker::_censorNonPrecip(RadxField &field)
+void Worker::_censorNonWeather(RadxField &field)
 
 {
 
@@ -749,6 +749,9 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
       if (inField != NULL) {
         RadxField *outField = new RadxField(*inField);
         outField->setName(cfield.output_name);
+        if (cfield.censor_non_weather) {
+          _censorNonWeather(*outField);
+        }
         outputRay->addField(outField);
       }
     } // ii

@@ -219,7 +219,7 @@ private:
 
   void _computeSnrFromDbz();
 
-  void _censorNonPrecip(RadxField &field);
+  void _censorNonWeather(RadxField &field);
 
   void _loadOutputFields(RadxRay *inputRay,
                          RadxRay *derivedRay);
