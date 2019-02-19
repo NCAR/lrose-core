@@ -38,8 +38,7 @@
 
 #include <toolsa/str.h>
 #include <toolsa/port.h>
-#include <signal.h>
-#include <new.h>
+#include <csignal>
 
 #define _TSTORMS2SHAPEFILE_MAIN_
 #include "Tstorms2Shapefile.hh"

@@ -35,7 +35,7 @@
 
 #include <string>
 #include <vector>
-#include <stream.h>
+#include <iostream>
 #include <tdrp/tdrp.h>
 
 using namespace std;

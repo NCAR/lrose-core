@@ -35,7 +35,7 @@
 //
 ////////////////////////////////////////////////////////////////
 
-#include <ostream.h>
+#include <iostream>
 #include <toolsa/ucopyright.h>
 #include <toolsa/pmu.h>
 #include <toolsa/str.h>
