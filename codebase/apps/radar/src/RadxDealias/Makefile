@@ -25,9 +25,6 @@ HDRS = \
 	Args.hh \
 	RadxDealias.hh \
 	FourDD.hh
-#
-	#Dsr2Radar.hh \
-	#FourDD.hh 
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
@@ -36,7 +33,6 @@ CPPC_SRCS = \
 	RadxDealias.cc \
 	FourDD.cc \
 	Main.cc 
-	# Dsr2Radar.cc \
 
 #
 # tdrp macros

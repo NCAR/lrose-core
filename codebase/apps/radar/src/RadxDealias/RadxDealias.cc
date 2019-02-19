@@ -85,14 +85,6 @@ RadxDealias::RadxDealias(int argc, char **argv)
   		_params.instance,
   	PROCMAP_REGISTER_INTERVAL);
 
-  //
-  // Initialize Dsr2Radar pointers
-  //
-  //_currRadarVol = NULL;
- 
-  //_prevRadarVol = NULL;
-
-  return;
 }
 
 //////////////////////////////////////////////////////////////
@@ -120,19 +112,14 @@ int RadxDealias::Run()
   // create the dealiasing object and send it the input parameters
   _fourDD = new FourDD(_params);
 
-
   try {
   // build the list of files depending on the mode
-  //vector<string> fileList;
-  //const vector<string> *fileList2;
   // then process the list of files 
   if (_params.mode == Params::ARCHIVE) {
-    // return _useCommandLineStartEndTimes();
     const vector<string> &fileList = _useCommandLineStartEndTimes();
     return _run(fileList);
   } else if (_params.mode == Params::FILELIST) {
-    //return _useCommandLineFileList();
-    vector<string> fileList = _useCommandLineFileList(); // _args.inputFileList; // 
+    vector<string> fileList = _useCommandLineFileList();
     cerr << "fileList ";
     for (vector<string>::iterator it = fileList.begin(); it < fileList.end(); it++) 
       cerr << *it << endl;
@@ -176,9 +163,6 @@ vector<string>  RadxDealias::_useCommandLineFileList()
     RadxPath path(_args.inputFileList[ii]);
     if (!path.pathExists()) {
       path.setDirectory(_params.input_dir);
-	//      string inputPath = _params.input_dir;
-	//inputPath.append(separator); // "/");
-	//inputPath.append(_args.inputFileList[ii]);
     }
     inputFiles.push_back(path.getPath());
   } // end for each file
@@ -211,9 +195,6 @@ int RadxDealias::_run(vector<string> fileList)
     // loop through the file list
 
     for (int ii = 0; ii < (int) fileList.size(); ii++) {
-      //string inputPath = _params.input_dir;
-      //inputPath.append("/");
-      //inputPath.append(fileList[ii]);
       if (_params.debug) {
 	cerr << "reading " << fileList[ii] << endl;
       }
@@ -227,10 +208,8 @@ int RadxDealias::_run(vector<string> fileList)
 
         vol.setNGatesConstant();
 
-	// vol.convertToSi16();
         vol.convertToFl32(); // does FourDD use signed ints? No, it seems to use floats
-	  // convert from RadxVol to Volume structures
-	//char *fieldName = _params.required_fields;
+	// convert from RadxVol to Volume structures
 
 	currDbzVol = _extractFieldData(vol, _params._required_fields[0], 0.0); 
 	currVelVol = _extractFieldData(vol, _params._required_fields[1], _params.nyquist_mps);
@@ -245,7 +224,6 @@ int RadxDealias::_run(vector<string> fileList)
 	if (_params.nyquist_mps != 0.0) {
 	}
 
-
 	time_t volTime = vol.getStartTimeSecs();
 
 	_processVol(prevVelVol, currVelVol, currDbzVol, volTime);
@@ -259,7 +237,6 @@ int RadxDealias::_run(vector<string> fileList)
 	vol.loadRaysFromFields();
 
 	// only the velocity should change; NOT the reflectivity
-	//        _insertFieldData(&vol, _params._required_fields[0], currDbzVol); 
 	_insertFieldData(&vol, _params._required_fields[1], currVelVol);
 
 	// load the data back into the fields
@@ -277,7 +254,8 @@ int RadxDealias::_run(vector<string> fileList)
       }
 
       statusReport(nError, nGood);
-      // free up
+
+      // clear all data on volume object
       vol.clear();
       Rsl::free_volume(currDbzVol);
     } // end for each file
@@ -310,7 +288,6 @@ void RadxDealias::statusReport(int nError, int nGood) {
 
 vector<string> RadxDealias::_useCommandLineStartEndTimes()
 {
-  int iret = 0;
 
   // get the files to be processed
 
@@ -332,7 +309,6 @@ vector<string> RadxDealias::_useCommandLineStartEndTimes()
     throw errMsg.c_str();
   }
 
-  //  const vector<string> &paths = tlist.getPathList();
   vector<string> paths = tlist.getPathList();
   if (paths.size() < 1) {
     string errMsg("ERROR - RadxDealias::_runFilelist()\n");
@@ -546,29 +522,6 @@ void RadxDealias::_readFile(const string &readPath,
 
   PMU_auto_register("Processing file");
 
-  // clear all data on volume object
-
-  // vol.clear();
-
-  // check we have not already processed this file
-  // in the file aggregation step
-  /*
-  if (_params.aggregate_sweep_files_on_read ||
-      _params.aggregate_all_files_on_read) {
-    RadxPath thisPath(readPath);
-    for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-      RadxPath listPath(_readPaths[ii]);
-      if (thisPath.getFile() == listPath.getFile()) {
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
-          cerr << "Skipping file: " << readPath << endl;
-          cerr << "  Previously processed in aggregation step" << endl;
-        }
-        return 1;
-      }
-    }
-  }
-  */
-
   if (_params.debug) {
     cerr << "INFO - RadxDealias::_readFile" << endl;
     cerr << "  Input path: " << readPath << endl;
@@ -604,19 +557,12 @@ void RadxDealias::_readFile(const string &readPath,
 // TODO:  if errors encountered, throw a string exception
 void RadxDealias::_writeVol(RadxVol &vol)
 {
-
-  // output file
   
   if (_params.debug) {
     cerr << "Writing Volume ..." << endl;
   }
-  /*
 
-  Ncf/NcfRadxFile_write.cc:int NcfRadxFile::writeToDir(const RadxVol &vol,
-  */
-  RadxFile outFile;
-  //_setupWrite(outFile);
-  
+  RadxFile outFile;  
   string outputDir = _params.output_dir;
     
   if (_params.output_filename_mode == Params::SPECIFY_FILE_NAME) {    
@@ -652,325 +598,6 @@ void RadxDealias::_writeVol(RadxVol &vol)
   }
 }
 
-/*
-
-//////////////////////////////////////////////////                                                                                    
-// handle file via specified path                                                                                                     
-
-int RadxPrint::_handleViaPath(const string &path)
-{
-
-  // does file exist?                                                                                                                 
-
-  struct stat fileStat;
-  if (stat(path.c_str(), &fileStat)) {
-    int errNum = errno;
-    cerr << "ERROR - RadxPrint::_handleViaPath" << endl;
-    cerr << "  Cannot stat file: " << path << endl;
-    cerr << strerror(errNum) << endl;
-    return -1;
-  }
-
-  // set up file                                                                                                                      
-
-  GenericRadxFile file;
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    file.setDebug(true);
-  }
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    file.setDebug(true);
-    file.setVerbose(true);
-  }
-
-  if (_params.debug) {
-    cerr << "Working on file: " << path << endl;
-  }
-
-  // set up read                                                                                                                     
-  // _setupRead(file);
-  if (_params.aggregate_sweep_files_on_read) {
-    file.setReadAggregateSweeps(true);
-  } else {
-    file.setReadAggregateSweeps(false);
-  }
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    file.printReadRequest(cerr);
-  }
-
-  // read into vol                                                                                                                    
-  RadxVol vol;
-
-  if (!_params.aggregate_all_files_on_read) {
-
-    // read in file                                                                                                                   
-
-    if (file.readFromPath(path, vol)) {
-      cerr << "ERROR - RadxPrint::_handleViaPath" << endl;
-      cerr << "  Printing file: " << path << endl;
-      cerr << file.getErrStr() << endl;
-      return -1;
-    }
-    _readPaths = file.getReadPaths();
-    if (_params.debug) {
-      for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-        cerr << "  ==>> read in file: " << _readPaths[ii] << endl;
-      }
-    }
-
-  } else {
-
-    // aggregate files on read                                                                                                        
-
-    _readPaths = _args.inputFileList;
-    if (file.aggregateFromPaths(_readPaths, vol)) {
-      cerr << "ERROR - RadxPrint::_handleViaPath" << endl;
-      cerr << "Aggregating files on read" << endl;
-      cerr << "  paths: " << endl;
-      for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-        cerr << "         " << _readPaths[ii] << endl;
-      }
-      return -1;
-    }
-
-    if (_params.debug) {
-      cerr << "Aggregating files on read" << endl;
-      for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-        cerr << "==>> read in path: " << _readPaths[ii] << endl;
-      }
-    }
-
-  }
-
-  // set number of gates constant if requested                                                                                        
-// TODO: don't make this optional!  The Dealiasing code requries it!
-//  if (_params.set_ngates_constant) {
-//    vol.setNGatesConstant();
-//  }
-
-  // trim to 360s if requested                                                                                                        
-
-  if (_params.trim_surveillance_sweeps_to_360deg) {
-    vol.trimSurveillanceSweepsTo360Deg();
-  }
-
-  // do print                                                                                                                         
-
-  _printVol(vol);
-
-  return 0;
-
-}
-*/
-
-/*
-////////////////////////////////////////////////////                                                                                  
-// Handle search via specified time and search mode                                                                                   
-
-int RadxPrint::_handleViaTime()
-{
-
-  GenericRadxFile file;
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    file.setDebug(true);
-  }
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    file.setDebug(true);
-    file.setVerbose(true);
-  }
-
-  // set up read                                                                                                                      
-
-  _setupRead(file);
-
-  if (_params.aggregate_sweep_files_on_read) {
-    file.setReadAggregateSweeps(true);
-  } else {
-    file.setReadAggregateSweeps(false);
-  }
-
-  RadxField::StatsMethod_t dwellStatsMethod;
-  switch (_params.read_dwell_stats) {
-  case Params::DWELL_STATS_MEAN:
-    dwellStatsMethod = RadxField::STATS_METHOD_MEAN;
-    break;
-  case Params::DWELL_STATS_MEDIAN:
-    dwellStatsMethod = RadxField::STATS_METHOD_MEDIAN;
-    break;
-  case Params::DWELL_STATS_MAXIMUM:
-    dwellStatsMethod = RadxField::STATS_METHOD_MAXIMUM;
-    break;
-  case Params::DWELL_STATS_MINIMUM:
-    dwellStatsMethod = RadxField::STATS_METHOD_MINIMUM;
-    break;
-  case Params::DWELL_STATS_MIDDLE:
-  default:
-    dwellStatsMethod = RadxField::STATS_METHOD_MIDDLE;
-    break;
-  }
-
-  switch (_params.read_search_mode) {
-  case Params::READ_RAYS_IN_INTERVAL:
-    file.setReadRaysInInterval(_readStartTime,
-			       _readEndTime,
-			       _params.read_dwell_secs,
-			       dwellStatsMethod);
-    break;
-  case Params::READ_CLOSEST:
-    file.setReadModeClosest(_readSearchTime.utime(),
-			    _params.read_search_margin);
-    break;
-  case Params::READ_FIRST_BEFORE:
-    file.setReadModeFirstBefore(_readSearchTime.utime(),
-				_params.read_search_margin);
-    break;
-  case Params::READ_FIRST_AFTER:
-    file.setReadModeFirstAfter(_readSearchTime.utime(),
-			       _params.read_search_margin);
-    break;
-  case Params::READ_LATEST:
-  default:
-    file.setReadModeLast();
-  }
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    file.printReadRequest(cerr);
-  }
-
-  // perform the read                                                                                                                 
-
-  RadxVol vol;
-  if (file.readFromDir(_params.dir, vol)) {
-    cerr << "ERROR - RadxPrint::_handleViaTime" << endl;
-    cerr << file.getErrStr() << endl;
-    return -1;
-  }
-
-  _readPaths = file.getReadPaths();
-  if (_params.debug) {
-    for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-      cerr << "  ==>> read in file: " << _readPaths[ii] << endl;
-    }
-  }
-
-  // set number of gates constant if requested                                                                                        
-
-  if (_params.set_ngates_constant) {
-    vol.setNGatesConstant();
-  }
-
-  // trim to 360s if requested                                                                                                        
-
-  if (_params.trim_surveillance_sweeps_to_360deg) {
-    vol.trimSurveillanceSweepsTo360Deg();
-  }
-
-  // do print                                                                                                                         
-
-  _printVol(vol);
-
-  return 0;
-
-}
-*/
-
-//////////////////////////////////////////////////                                                                                    
-// set up read                                                                                                                        
- /*
-void RadxDealias::_setupRead(NcfRadxFile &file)
-{
-
-}
- */
-
-
-/*
-////////////////////////////////////////////////////////////////////
-// _readMsg()
-//
-// Read a message from the queue. If appropriate, reformat and store 
-// data, set end of vol flag.
-//
-
-int RadxDealias::_readMsg(DsRadarQueue &radarQueue, DsRadarMsg &radarMsg,
-		      bool &end_of_vol, int &contents) 
-  
-{
-  
-  PMU_auto_register("Reading radar queue");
-
-  end_of_vol = false;
-  
-  if (radarQueue.getDsMsg(radarMsg, &contents)) 
-    {
-      return -1;
-    }
-
-  if (contents != 0)
-    {
-      //
-      // Reformat beam and store in RSL structs
-      //
-      _currRadarVol->reformat(radarMsg, contents);
-      
-      //
-      // Check for end of volume.
-      //
-      if (contents & DsRadarMsg::RADAR_FLAGS) 
-	{      
-	  const DsRadarFlags &flags = radarMsg.getRadarFlags();
-        
-	  if (_params.end_of_vol_decision == Params::END_OF_VOL_FLAG) 
-	    {
-	      if (flags.endOfVolume) 
-		{
-		  end_of_vol = true;
-		}
-	    } 
-	  else if (flags.endOfTilt &&
-		   flags.tiltNum == _params.last_tilt_in_vol) 
-	    {
-	      end_of_vol = true;
-	    } 
-	} // end if (contents & DsRadarMsg::RADAR_FLAGS)
-      
-    } // end if (contents ! = 0);
-  return 0;
-
-}
-
-////////////////////////////////////////////////////////////////
-// 
-// _processVol(): Dealias the volume if possible.
-//              The James dealiaser requires that the previous
-//              radar volume (if there is one) is the same 
-//              size (ie. same number of tilts) as the current
-//              volume. If previous and current are not the same
-//              size we dont do the dealiasing. 
-//
-
-void RadxDealias::_volumeProcessWrapper(Dsr2Radar *prevRadarVol, Dsr2Radar *currRadarVol)
-{
-
-  if (_params.debug) {
-      cerr << "_volumeProcessWrapper(): " << endl;
-  }
- 
-  if (_currRadarVol->isEmpty()) {
-    cerr << "Current volume is empty. No processing.\n";
-    return;
-  }
-
-  Volume *currDbzVol = currRadarVol->getDbzVolume();
-  Volume *currVelVol = currRadarVol->getVelVolume();
-  Volume *prevVelVol = prevRadarVol->getVelVolume();
-  time_t volTime = currRadarVol->getVolTime();
-  
-  _processVol(prevVelVol, currVelVol, currDbzVol, volTime);
-
-}
-*/
 
 ////////////////////////////////////////////////////////////////
 // 
@@ -1007,124 +634,6 @@ void RadxDealias::_processVol(Volume *prevVelVol, Volume *currVelVol,
   }
 }
 
-/*
-//////////////////////////////////////////////////////////////////////
-//
-//  _writeVol(): write current radar volume to output fmq.
-//
-void RadxDealias::_writeVol(DsRadarQueue &outputQueue)
-{
-  
-  if (_params.debug) 
-    {
-      cerr << "_writeVol(): writing processed beams to fmq " << endl;
-    }
- 
-  _currRadarVol->writeVol(outputQueue);
-
-}
-*/
-
- /*
-/////////////////////////////////////////////////////////////////
-//  
-// _reset(): clean out _prevRadarVol for recycling,
-//           _currRadarVol is set to _prevRadarVol,
-//           _prevRadarVol gets set to _currRadarVol
-//
-void RadxDealias::_reset()
-
-{
-  if ( ! _currRadarVol->isEmpty() )
-    {
-      _prevRadarVol->clearData();
-      
-      Dsr2Radar *tmpRadarVol = _prevRadarVol;
-      
-      _prevRadarVol = _currRadarVol;
-      
-      _currRadarVol = tmpRadarVol;
-    }
-  else 
-    _currRadarVol->clearData();
-
-
-  if (_params.debug) {
-    cerr << "=========== Start of volume ==================" << endl;
-  }
-}
- */
-
-  /*
-//////////////////////////////////////////////////
-// write out the volume
-
-int RadxDealias::_writeVol(RadxVol &vol)
-{
-
-  // output file
-
-  GenericRadxFile outFile;
-  _setupWrite(outFile);
-
-  string outputDir = _params.output_dir;
-    
-  if (_params.output_filename_mode == Params::SPECIFY_FILE_NAME) {
-    
-    string outPath = outputDir;
-    outPath += PATH_DELIM;
-    outPath += _params.output_filename;
-
-    // write to path
-  
-    if (outFile.writeToPath(vol, outPath)) {
-      cerr << "ERROR - RadxDealias::_writeVol" << endl;
-      cerr << "  Cannot write file to path: " << outPath << endl;
-      cerr << outFile.getErrStr() << endl;
-      return -1;
-    }
-    
-  } else {
-
-    // write to dir
-  
-    if (outFile.writeToDir(vol, outputDir,
-                           _params.append_day_dir_to_output_dir,
-                           _params.append_year_dir_to_output_dir)) {
-      cerr << "ERROR - RadxDealias::_writeVol" << endl;
-      cerr << "  Cannot write file to dir: " << outputDir << endl;
-      cerr << outFile.getErrStr() << endl;
-      return -1;
-    }
-
-  }
-
-  string outputPath = outFile.getPathInUse();
-
-  // write latest data info file if requested 
-  
-  if (_params.write_latest_data_info) {
-    DsLdataInfo ldata(outputDir);
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      ldata.setDebug(true);
-    }
-    string relPath;
-    RadxPath::stripDir(outputDir, outputPath, relPath);
-    ldata.setRelDataPath(relPath);
-    ldata.setWriter(_progName);
-    if (ldata.write(vol.getStartTimeSecs())) {
-      cerr << "WARNING - RadxDealias::_writeVol" << endl;
-      cerr << "  Cannot write latest data info file to dir: "
-           << outputDir << endl;
-    }
-  }
-
-  return 0;
-
-}
-
-  */
-
 // convert from RadxVol to Volume structures
 // These variables need to be filled:
 // h.nsweeps        X
@@ -1141,7 +650,6 @@ int RadxDealias::_writeVol(RadxVol &vol)
 //   
 
 Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName, float override_nyquist_vel) {
-
 
   if (_params.debug) {
     cerr << " looking for data in field " << fieldName << endl;
@@ -1181,51 +689,34 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName,
 
       // convert the rays
       Ray *newRay = Rsl::new_ray(radxRay->getNGates());
-      // if (_params.debug) cerr << " adding ray with " << radxRay->getNGates() << " gates " << endl;
       rays[j] = newRay;
       newRay->h.azimuth = radxRay->getAzimuthDeg();
       newRay->h.elev = radxRay->getElevationDeg();
 
- if (override_nyquist_vel != 0.0) {
-      newRay->h.nyq_vel = override_nyquist_vel;
- } else {
-      newRay->h.nyq_vel = radxRay->getNyquistMps();
- }
+      if (override_nyquist_vel != 0.0) {
+	newRay->h.nyq_vel = override_nyquist_vel;
+      } else {
+	newRay->h.nyq_vel = radxRay->getNyquistMps();
+      }
 
-      newRay->h.alt = radxVol.getAltitudeKm()*1000.0; // TRMM RSL wants altitude in meters
+      // TRMM RSL wants altitude in meters
+      newRay->h.alt = radxVol.getAltitudeKm()*1000.0;
 
       // get the Range Geometry
-      // void RadxVol::getPredomRayGeom(double &startRangeKm, double &gateSpacingKm)
-      // radxRay->getGateRangeKm? radxRay->getGateSpacingKm?
-      double startRangeKm;
-      double gateSpacingKm;
-
       if (!radxRay->getRangeGeomSet())
 	radxRay->copyRangeGeomFromFields();
-      //      radxVol.getPredomRayGeom(startRangeKm, gateSpacingKm);
       // trmm rsl expects gate size and distance to first gate in meters 
       newRay->h.gate_size = radxRay->getStartRangeKm() * 1000.0; 
       newRay->h.range_bin1 = radxRay->getGateSpacingKm() * 1000.0;
 
-      // keep the data as float; ignore the RANGE type
-      // NO! Keep the data as it originally is; the FourDD algorithm uses scale and bias.
       // move the field data
       RadxField *velocityField = radxRay->getField(fieldName);
-      // save the original data type
+      // check the original data type
       Radx::DataType_t originalDataType = velocityField->getDataType();
-      /*
-      if (originalDataType != Radx::SI16)
-        throw "Error - Expected signed int 16 data";
-      Radx::si16 *data = velocityField->getDataSi16();
-      */
-
       if (originalDataType != Radx::FL32)
         throw "Error - Expected float 32 data";
       Radx::fl32 *data = velocityField->getDataFl32();
 
-
-      //velocityField->convertToSi32();
-      //Radx::fl32 *data = velocityField->getDataFl32();
       if (data == NULL) 
 	cout << "data values are NULL" << endl;
       else {
@@ -1235,17 +726,11 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName,
 	    cout << data[i] << " ";
 	  cout << endl;
 	}
-	//	     << data[0] << " " <<  data[1] << " " << data[3] << " " << data[4] << endl;
       }
 
-      newRay->h.bias = velocityField->getOffset();  // TODO: bias
-      newRay->h.scale = velocityField->getScale(); // TODO: scale
+      newRay->h.bias = velocityField->getOffset();
+      newRay->h.scale = velocityField->getScale();
 
-      // TODO; Hmmm, copy the data, or just let the data be modified?
-      //memcpy(ray->range, data, sizeof(Radx::fl32)*ray->getNGates());
-      // TODO: reinstate ...  ray->range = data;
-      // don't copy the data ...
-      //newRay->range = data;
       // copy the data ...
 
       newRay->range = (Range *) malloc(sizeof(Range) * newRay->h.nbins);
@@ -1263,13 +748,11 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName,
 
 void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *volume) {
 
-
   if (_params.debug) {
     cerr << " inserting data into field " << fieldName << endl;
   }
 
   // 1st, make sure the field is in the volume
-  //  vector<string> getUniqueFieldNameList() const;
   vector<string> fieldNames = radxVol->getUniqueFieldNameList();
   vector<string>::iterator s;
   bool found = false;
@@ -1294,51 +777,27 @@ void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *v
   for (vector<RadxRay *>::iterator r=currentRays.begin(); r<currentRays.end(); r++) {
       RadxRay *radxRay = *r;
 
-
-
 	// TODO: verify this ... we may want the management to go to the RadxVol?
       bool isLocal = true;
-      //      int nGates = radxRay->h.nbins;
       int sweepNumber = radxRay->getSweepNumber() - 1;
-      //Radx::si16 *newData = volume->sweep[sweepNumber]->ray[rayNum]->range;
       Radx::fl32 *newData = volume->sweep[sweepNumber]->ray[rayNum]->range;
-      double scale = volume->sweep[sweepNumber]->ray[rayNum]->h.scale;
-      double offset = volume->sweep[sweepNumber]->ray[rayNum]->h.bias;
       int nGates = volume->sweep[sweepNumber]->ray[rayNum]->h.nbins;
       // pull the missing value  from the associated RadxField
       RadxField *radxField = radxRay->getField(fieldName);
-      // TODO: get the missing value based on the data type?
       double missingValue = (double) radxField->getMissingFl32();
-      //double missingValue = (double) radxField->getMissingSi16();
       // get the units; this should be pulled from the associate RadxRay
       string units = radxField->getUnits();
 
-      /*
-      if (_params.debug) {
-        cout << "original data ..." << endl;
-	for (int ii=0; ii < nGates; ii++)
-	  cout << newData[ii] << ", ";
-	cout << endl;
-
-        cout << "unfolded data ..." << endl;
-	for (int ii=0; ii < nGates; ii++) 
-	  cout << newData[ii] << ", ";
-	cout << endl;
-      }
-      */
-
-      RadxField *field1 = radxRay->addField(unfoldedName, units, nGates, missingValue, newData, isLocal);
-      // for si16
-      //RadxField *field1 = radxRay->addField(unfoldedName, units, nGates, missingValue, newData, scale, offset, isLocal);
+      // Note: discarding the field returned, after adding it to the ray, since we don't need it.
+      radxRay->addField(unfoldedName, units, nGates, missingValue, newData, isLocal);
 
       rayNum += 1;
 
     } // for each ray
 
-  vector<string> fieldNamesNew = radxVol->getUniqueFieldNameList();
+    vector<string> fieldNamesNew = radxVol->getUniqueFieldNameList();
 
 }
-
 
 void RadxDealias::jamesCopyright()
 {
@@ -1347,103 +806,3 @@ void RadxDealias::jamesCopyright()
         << "** University of Washington, Seattle, WA, USA. Copyright 2001.\n\n";
 
 }
-
-
-
-/*
-int RadxDealias::_useCommandLineFileList()
-{
-  
-  int iret = 0;
-
-  if (_params.debug) {
-    cerr << "RadxDealias is running ..." << endl;
-    cerr << _args.inputFileList.size() << " input file(s) " << endl;
-  }
-
-  int nGood = 0;
-  int nError = 0;
-  
-    Volume *prevVelVol = NULL;
-    Volume *currDbzVol = NULL;
-    Volume *currVelVol = NULL;  
-
-    RadxVol vol;
-
-    // loop through the input file list
-
-    for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
-      string inputPath = _params.input_dir;
-      inputPath.append("/");
-      inputPath.append(_args.inputFileList[ii]);
-      if (_params.debug) {
-	cerr << "reading " << inputPath << endl;
-      }
-            
-      try {
-	// read input file
-	_readFile(inputPath, vol);
-
-	vol.loadFieldsFromRays();
-	vol.remapToFinestGeom();
-
-        vol.setNGatesConstant();
-
-	// vol.convertToSi16();
-        vol.convertToFl32(); // does FourDD use signed ints? No, it seems to use floats
-	  // convert from RadxVol to Volume structures
-	//char *fieldName = _params.required_fields;
-
-	currDbzVol = _extractFieldData(vol, _params._required_fields[0]); 
-	currVelVol = _extractFieldData(vol, _params._required_fields[1]);
-
-	if ((currDbzVol == NULL) || (currVelVol == NULL))
-	  throw "Error, velocity or reflectivity field could not be read from data file";
-
-	Rsl::verifyEqualDimensions(currDbzVol, currVelVol);
-
-	time_t volTime = vol.getStartTimeSecs();
-
-	_processVol(prevVelVol, currVelVol, currDbzVol, volTime);
-
-	// seed the next unfolding with the results
-	prevVelVol = currVelVol;
-
-	//move the unfolded data back into the RadxVol structure
-	// first, move the data back to the rays, so that we can add a couple
-	// new fields to the rays                                                                                             
-	vol.loadRaysFromFields();
-
-	// only the velocity should change; NOT the reflectivity
-	//        _insertFieldData(&vol, _params._required_fields[0], currDbzVol); 
-	_insertFieldData(&vol, _params._required_fields[1], currVelVol);
-
-	// load the data back into the fields
-        vol.loadFieldsFromRays();
-
-  vector<string> fieldNamesNow = vol.getUniqueFieldNameList();
-
-	// write the volume data
-	_writeVol(vol);
-	nGood++;
-      } catch (const char*  errorMsg) {
-	  iret = -1;
-	  nError++;
-          cerr << errorMsg << endl;
-      }
-
-      statusReport(nError, nGood);
-      // free up
-      // vol.clear();
-    } // end for each file
-
-  if (_params.debug) {
-    cerr << "RadxDealias done" << endl;
-    cerr << "====>> n good files processed: " << nGood << endl;
-  }
-
-  return iret;
-
-}
-*/
-
