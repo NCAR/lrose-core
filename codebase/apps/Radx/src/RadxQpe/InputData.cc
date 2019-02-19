@@ -127,7 +127,9 @@ bool InputData::nextVolume(time_t &t)
   if (_params.SNR_available) {
     fields.push_back(_params.SNR_field_name);
   } else {
-    fields.push_back(_params.DBZ_field_name);
+    if (strlen(_params.DBZ_field_name) > 0) {
+      fields.push_back(_params.DBZ_field_name);
+    }
   }
   fields.push_back(_params.PID_field_name);
 

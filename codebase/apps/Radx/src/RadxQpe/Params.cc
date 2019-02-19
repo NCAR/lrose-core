@@ -742,7 +742,7 @@
     tt->descr = tdrpStrDup("Is SNR data available?");
     tt->help = tdrpStrDup("If not, SNR will be computed from the DBZ field. See 'noise_dbz_at_100km'.");
     tt->val_offset = (char *) &SNR_available - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'SNR_field_name'
@@ -775,8 +775,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("DBZ_field_name");
-    tt->descr = tdrpStrDup("Field name for DBZ.");
-    tt->help = tdrpStrDup("Required if we are to compute SNR from DBZ.");
+    tt->descr = tdrpStrDup("Field name for DBZ. Used to compute SNR from DBZ.");
+    tt->help = tdrpStrDup("Set to empty if no DBZ field is available.");
     tt->val_offset = (char *) &DBZ_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("DBZ");
     tt++;

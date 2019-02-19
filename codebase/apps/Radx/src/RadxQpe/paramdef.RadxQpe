@@ -102,7 +102,7 @@ paramdef double {
 } min_SNR;
 
 paramdef boolean {
-  p_default = TRUE;
+  p_default = FALSE;
   p_descr = "Is SNR data available?";
   p_help = "If not, SNR will be computed from the DBZ field. See 'noise_dbz_at_100km'.";
 } SNR_available;
@@ -121,8 +121,8 @@ paramdef double {
 
 paramdef string {
   p_default = "DBZ";
-  p_descr = "Field name for DBZ.";
-  p_help = "Required if we are to compute SNR from DBZ.";
+  p_descr = "Field name for DBZ. Used to compute SNR from DBZ.";
+  p_help = "Set to empty if no DBZ field is available.";
 } DBZ_field_name;
 
 commentdef {

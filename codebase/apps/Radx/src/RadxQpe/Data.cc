@@ -74,7 +74,8 @@ bool Data::mismatch(const Data &data) const
 
 //----------------------------------------------------------------
 bool Data::readLite(const std::string &path,
-		    const std::vector<std::string> &fields)
+		    const std::vector<std::string> &fields,
+                    bool isBeamBlock)
 {
   _sweeps.clear();
 
@@ -84,7 +85,7 @@ bool Data::readLite(const std::string &path,
   {
     primaryFile.addReadField(fields[i]);
   }
-  return _readLite(primaryFile, path);
+  return _readLite(primaryFile, path, isBeamBlock);
 }
 
 //----------------------------------------------------------------
@@ -154,11 +155,12 @@ std::vector<double> Data::getElev(void) const
 }
 
 //----------------------------------------------------------------
-bool Data::_readLite(RadxFile &primaryFile, const std::string &path)
+bool Data::_readLite(RadxFile &primaryFile, const std::string &path,
+                     bool isBeamBlock)
 {
   string name = nameWithoutPath(path);
-  LOGF(LogMsg::DEBUG, "full name: %s", path.c_str());
-  LOGF(LogMsg::DEBUG, "name without path: %s", name.c_str());
+  LOGF(LogMsg::DEBUG, "data path: %s", path.c_str());
+  LOGF(LogMsg::DEBUG, "file name: %s", name.c_str());
   
   // primaryFile.setReadFixedAngleLimits(_minElev, _maxElev);
   if (primaryFile.readFromPath(path, _vol))
@@ -180,7 +182,7 @@ bool Data::_readLite(RadxFile &primaryFile, const std::string &path)
   // convert to floats
   _vol.convertToFl32();
 
-  if (!_params.SNR_available) {
+  if (!_params.SNR_available && !isBeamBlock) {
     if (_estimateSnrField()) {
       return false;
     }
@@ -258,34 +260,50 @@ int Data::_estimateSnrField()
     double startRange = ray->getStartRangeKm();
     double gateSpacing = ray->getGateSpacingKm();
 
-    // get the DBZ field
-    
-    RadxField *dbzField = ray->getField(_params.DBZ_field_name);
-    if (dbzField == NULL) {
-      LOGF(LogMsg::ERROR, "Cannot find DBZ field: %s", _params.DBZ_field_name);
-      return -1;
-    }
-    const Radx::fl32 *dbz = dbzField->getDataFl32();
-    Radx::fl32 dbzMiss = dbzField->getMissingFl32();
-    
-    // estimate SNR
+    // set up SNR array
 
     RadxArray<Radx::fl32> snr_;
     Radx::fl32 *snr = snr_.alloc(ray->getNGates());
-    for (size_t ii = 0; ii < ray->getNGates(); ii++) {
-      if (dbz[ii] == dbzMiss) {
-        snr[ii] = Radx::missingFl32;
-      } else {
-        double range = startRange + ii * gateSpacing;
-        if (range < 0) {
-          range = gateSpacing / 2;
-        }
-        double noiseDbz = _params.noise_dbz_at_100km +
-          20.0 * (log10(range) - log10(100.0));
-        snr[ii] = dbz[ii] - noiseDbz;
-      }
-    } // ii
+    
+    if (strlen(_params.DBZ_field_name) > 0) {
 
+      // get the DBZ field
+      
+      RadxField *dbzField = ray->getField(_params.DBZ_field_name);
+      if (dbzField == NULL) {
+        LOGF(LogMsg::ERROR, "Cannot find DBZ field: %s", _params.DBZ_field_name);
+        return -1;
+      }
+      const Radx::fl32 *dbz = dbzField->getDataFl32();
+      Radx::fl32 dbzMiss = dbzField->getMissingFl32();
+      
+      // estimate SNR
+      
+      for (size_t ii = 0; ii < ray->getNGates(); ii++) {
+        if (dbz[ii] == dbzMiss) {
+          snr[ii] = Radx::missingFl32;
+        } else {
+          double range = startRange + ii * gateSpacing;
+          if (range < 0) {
+            range = gateSpacing / 2;
+          }
+          double noiseDbz = _params.noise_dbz_at_100km +
+            20.0 * (log10(range) - log10(100.0));
+          snr[ii] = dbz[ii] - noiseDbz;
+        }
+      } // ii
+
+    } else {
+      
+      // no DBZ field, set SNR to high value
+      // so that no gates are rejected because of SNR
+
+      for (size_t ii = 0; ii < ray->getNGates(); ii++) {
+        snr[ii] = 100;
+      }
+
+    }
+      
     // add SNR field to ray
 
     RadxField *snrField = new RadxField(_params.SNR_field_name, "dB");

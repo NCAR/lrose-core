@@ -65,7 +65,8 @@ public:
    * @return true if successful
    */
   bool readLite(const std::string &path,
-		const std::vector<std::string> &fields);
+		const std::vector<std::string> &fields,
+                bool isBeamBlock = false);
   /**
    * Read fields from a path, filling in all member values
    * @param[in] path  
@@ -131,7 +132,8 @@ private:
   double _lat;        /**< Radar location */
   double _lon;        /**< Radar location */
 
-  bool _readLite(RadxFile &primaryFile, const std::string &path);
+  bool _readLite(RadxFile &primaryFile, const std::string &path, 
+                 bool isBeamBlock = false);
   int _estimateSnrField();
 
 };
