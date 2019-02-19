@@ -1,0 +1,25 @@
+##########################################################################
+# README ON NEW PARAMETERS - 2018/02/18
+##########################################################################
+
+min_snr -> min_SNR
+
+max_beam_block_percent -> max_beam_block_fraction
+
+data_url -> input_dir
+
+volume_time_margin_seconds -> input_time_margin_seconds
+
+snr_field -> SNR_field_name
+
+pid_field -> PID_field_name
+
+beam_block_field -> beam_block_field_name
+
+rainrate_fields -> rate_fields
+
+output_dir -> polar_output_dir
+
+output_cartesian_dir -> cartesian_output_dir
+
+min_nvalid_for_interp -> min_nvalid_for_cart_interp
