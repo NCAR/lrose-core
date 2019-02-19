@@ -33,7 +33,7 @@ BeamBlock::BeamBlock(const Parms &params) : Data(params)
   // don't set up grids yet
   LOG(LogMsg::DEBUG, "Reading beam blockage file");
   vector<string> fields;
-  fields.push_back(params.beam_block_field);
+  fields.push_back(params.beam_block_field_name);
   _dataIsOK = readLite(params.beam_block_path, fields);
   for (size_t i=0; i<_sweeps.size(); ++i)
   {

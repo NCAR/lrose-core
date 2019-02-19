@@ -52,6 +52,7 @@ public:
 
   bool nextVolume(time_t &t);
 
+  bool isOK;
 
 protected:
 private:

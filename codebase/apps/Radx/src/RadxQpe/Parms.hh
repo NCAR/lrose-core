@@ -71,18 +71,16 @@ public:
   
 
   /**
-   * @param[in] name  Rainrate output field name
+   * @param[in] name  Rate output field name
    */
-  const Params::rainrate_field_t *matchingRainrate(const std::string &name) const;
+  const Params::rate_field_t *matchingRate(const std::string &name) const;
 
   /**
    * @return true if input named field is a mask field
    */
   bool isMask(const std::string &name) const;
 
-  bool hasSnr(void) const;
-
-  int numRainRate(void) const;
+  int numRate(void) const;
   std::string ithOutputRateName(int i) const;
   std::string ithInputPrecipName(int i) const;
 

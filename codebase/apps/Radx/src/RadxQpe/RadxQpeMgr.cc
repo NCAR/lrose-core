@@ -158,7 +158,7 @@ int RadxQpeMgr::Run(void)
     LOG(LogMsg::DEBUG, " Writing polar output ---- ");
     _out->writeVolume(t, *_data, index++);
 
-    if (strlen(_params->output_cartesian_dir) != 0)
+    if (strlen(_params->cartesian_output_dir) != 0)
     {
       LOG(LogMsg::DEBUG, " Interpolating/writing cartesian output ---- ");
       _interpolate(_out->getOutputVol());

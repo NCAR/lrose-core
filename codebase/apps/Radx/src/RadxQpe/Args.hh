@@ -60,26 +60,23 @@ public:
    *
    * @return 0 for o.k.
    */
-  int parse(int argc, char **argv, std::string &prog_name);
+  int parse(int argc, char **argv, string &prog_name);
 
   /**
    * public data
    */
 
   tdrp_override_t override;
-
-  bool _isArchive;
-  time_t _archiveT0;
-  time_t _archiveT1;
-
-  bool _isFilelist;
+  bool tdrpDebug;
+  bool startTimeSet, endTimeSet;
   vector<string> inputFileList;
 
 protected:
   
 private:
 
-  void _usage(std::string &prog_name, std::ostream &out);
+  string _progName;
+  void _usage(ostream &out);
   
 };
 

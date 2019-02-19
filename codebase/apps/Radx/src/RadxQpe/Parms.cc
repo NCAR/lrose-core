@@ -39,12 +39,6 @@ Parms::~Parms(void)
 }
 
 //------------------------------------------------------------------
-bool Parms::hasSnr(void) const
-{
-  return strlen(snr_field) > 0;
-}
-
-//------------------------------------------------------------------
 bool Parms::isMask(const std::string &name) const
 {
   for (int i=0; i<output_fields_n; ++i)
@@ -87,14 +81,14 @@ Parms::matchingOutput(const std::string &name) const
   
 
 //------------------------------------------------------------------
-const Params::rainrate_field_t *
-Parms::matchingRainrate(const std::string &name) const
+const Params::rate_field_t *
+Parms::matchingRate(const std::string &name) const
 {
-  for (int i=0; i<rainrate_fields_n; ++i)
+  for (int i=0; i<rate_fields_n; ++i)
   {
-    if (_rainrate_fields[i].output_rainrate_name == name)
+    if (_rate_fields[i].output_rate_name == name)
     {
-      return &_rainrate_fields[i];
+      return &_rate_fields[i];
     }
   }
   return NULL;
@@ -102,21 +96,21 @@ Parms::matchingRainrate(const std::string &name) const
   
 
 //------------------------------------------------------------------
-int Parms::numRainRate(void) const
+int Parms::numRate(void) const
 {
-  return rainrate_fields_n;
+  return rate_fields_n;
 }
 
 //------------------------------------------------------------------
 std::string Parms::ithOutputRateName(int i) const
 {
-  return _rainrate_fields[i].output_rainrate_name;
+  return _rate_fields[i].output_rate_name;
 }
 
 //------------------------------------------------------------------
 std::string Parms::ithInputPrecipName(int i) const
 {
-  return _rainrate_fields[i].input_precip_name;
+  return _rate_fields[i].input_rate_name;
 }
   
 

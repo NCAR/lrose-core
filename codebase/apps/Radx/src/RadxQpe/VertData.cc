@@ -74,25 +74,19 @@ VertData::VertData(const Data &data, const BeamBlock &block,
     {    
       // note that blockage input assumed to have same # of elevations
       size_t j = data.index(sweep);
-      blockage = _setValue(igt, iaz, params.beam_block_field, block[j]);
+      blockage = _setValue(igt, iaz, params.beam_block_field_name, block[j]);
     }
     else
     {
       blockage = 0.0;
     }
 
-    if (params.hasSnr())
-    {
-      _data.push_back(VertData1(_setValue(igt, iaz, params.pid_field, sweep),
-				blockage, elevDeg, htKm, rangeKm,
-				_setValue(igt, iaz, params.snr_field, sweep)));
-    }
-    else
-    {
-      _data.push_back(VertData1(_setValue(igt, iaz, params.pid_field, sweep),
-				blockage, elevDeg, htKm, rangeKm));
-    }
-  }
+    _data.push_back(VertData1(_setValue(igt, iaz, params.PID_field_name, sweep),
+                              blockage, elevDeg, htKm, rangeKm,
+                              _setValue(igt, iaz, params.SNR_field_name, sweep)));
+  
+  } // i
+
 }
 
 

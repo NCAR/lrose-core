@@ -1,177 +1,197 @@
-///////////////////////////////////////////////////////
-//  parameter definitions for RadxQpe
-//
-////////////////////////////////////////////////////////
+/*********************************************************
+ * Parameter definitions for RadxQpe
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Feb 2019
+ */
 
 commentdef {
-  p_header = "RadxQpe program";
-  p_text = "Produce quantitative precipitation estimates on a grid";
+  p_header = "RadxQpe program - quantitative precipitation estimation at the surface.";
+  p_text = "Input data contains precipitation rates in 3D polar coordinates. The output is a 2D field of precipitation estimates at the surface. Both polar and Cartesian output coordinates are supported.";
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-commentdef
-{
-  p_header = "PROCESS CONTROL";
-  p_text = "Parameters associated with process control (registering, signals..)";
-}
-
-paramdef string
-{
-  p_descr = "Process instance";
-  p_help = "Used for registration with procmap.";
-  p_default = "Test";
-} instance;
-
-paramdef boolean
-{
-  p_descr = "debug flag";
-  p_help = "Debug flag.";
-  p_default = FALSE;
-} debug_norm;
-
-paramdef boolean
-{
-  p_descr = "verbose debug flag";
-  p_help = "Debug flag.";
-  p_default = FALSE;
-} debug_verbose;
 
 commentdef {
-  p_header = "THREADING FOR SPEED.";
-}
-
-paramdef int {
-  p_default = 4;
-  p_min = 1;
-  p_descr = "The number of compute threads.";
-  p_help = "The interpolation are segmented in azimuth, with each thread computing an azimuth. For maximum performance, n_threads should be set to the number of processors multiplied by 4. For further tuning, use top to maximize CPU usage while varying the number of threads. If set to 1, threading is disabled";
-} n_compute_threads;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Thread debug";
-  p_help = "Set to true to see debug information regarding threading";
-} threads_debug;
-
-///////////////////////////////////////////////////////////////////////////////
-commentdef
-{
   p_header = "ALGORITHM PARAMETERS";
   p_text = "Parameters to control the QPE algorithm itself.";
 }
 
-paramdef double
-{
-  p_descr = "azimuth res";
-  p_help = "Output azimuthal resolution in degrees";
+paramdef double {
   p_default = 1.0;
+  p_descr = "Output azimuthal resolution (degrees)";
+  p_descr = "This is the angular resolution for which we compute the precip rate at the surface.";
 } azimuthal_resolution_degrees;
 
-paramdef double
-{
-  p_descr = "SNR threshold";
-  p_help = "When SNR < min_snr a higher elevation angle is used, which happens only when there is input SNR data configured for";
-  p_default = 5.0;
-} min_snr;
-
-paramdef double
-{
-  p_descr = "Cumulative beam blockage threshold";
-  p_help = "When the cumulative beam blockage exceeds max_beam_block_fraction, a higher elevation angle is used";
+paramdef double {
   p_default = 0.25;
   p_min = 0.0;
   p_max = 1.0;
+  p_descr = "Cumulative beam blockage threshold";
+  p_help = "When the cumulative beam blockage exceeds max_beam_block_fraction, a higher elevation angle is used";
 } max_beam_block_fraction;
 
-paramdef double
-{
+paramdef double {
   p_descr = "Max height of beam for valid precip rate (km MSL).";
   p_help = "If beam is above this height, the precip rate is set to 0.";
   p_default = 6.0;
 } max_beam_height_km_msl;
 
-paramdef double
-{
+paramdef double {
   p_descr = "Minimum valid precip rate (mm/hr).";
   p_help = "If rate is less than this, it is set to 0.";
   p_default = 1.0;
 } min_valid_precip_rate;
 
-///////////////////////////////////////////////////////////////////////////////
-
-commentdef
-{
-  p_header = "INPUTS/OUTPUTS";
-  p_text = "Parameters associated with inputs and outputs. The input precip fields are found in the rainrate_fields struct. One rainrate output field is produced for each precip field. Additional diagnostic output fields are given in the output_fields struct array.\n"
-"Up to two output formats are allowed, Polar and Cartesian, where the Cartesian is an interpolation of the Polar, and the Polar is a two dimensional grid with the same radar polar dimensions as the input data. To disable either of these outputs, set its URL to the empty string.";
+commentdef {
+  p_header = "INPUT DATA";
 }
 
-paramdef string
-{
-  p_header = "input data";
-  p_help = "URL of input data";
-  p_default = "unknown";
-} data_url;
+commentdef {
+  p_header = "OPERATIONS MODE";
+};
 
-paramdef int
-{
-  p_header = "time margin";
-  p_help = "expected maximum difference between start and end times for volume, in seconds";
-  p_default = 500;
-} volume_time_margin_seconds;
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
 
-paramdef string
-{
-  p_header = "input data signal to noise ratio name";
-  p_help = "field name, SNR, empty for no SNR useage";
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "By default RadxQpe operates in REALTIME mode. It watches for files arriving in the input_dir directory, and then processes each file in order. If you specify -f on the command lines, the app will operate in FILELIST mode and process each of the files that are specified. If you specify -start and -end on the command line, RadxQpe will operate in ARCHIVE mode, processing all of the files in input_dir that are between the specified start and end times.";
+} mode;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance - REALTIME mode only.";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef string {
+  p_default = "/tmp/RadxRate";
+  p_descr = "Location of input precip rate data.";
+  p_help = "Set this to the directory containing the input data.";
+} input_dir;
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Time margin when searching for data files (sec).";
+  p_help = "Extent of time search. Should be at least as long as a radar volume.";
+} input_time_margin_seconds;
+
+paramdef string {
+  p_default = "2018 08 20 00 00 00";
+  p_descr = "Set the start time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} start_time;
+
+paramdef string {
+  p_default = "2018 08 30 00 00 00";
+  p_descr = "Set the end time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} end_time;
+
+commentdef {
+  p_header = "CHECKING SNR";
+  p_text = "We check SNR to ensure reasonable data quality. If SNR is not available, we estimate it from DBZ.";
+}
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "SNR threshold (dB)";
+  p_help = "When SNR < min_SNR at a gate, we move up to a higher elevation sweep.";
+} min_SNR;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is SNR data available?";
+  p_help = "If not, SNR will be computed from the DBZ field. See 'noise_dbz_at_100km'.";
+} SNR_available;
+
+paramdef string {
   p_default = "SNR";
-} snr_field;
+  p_descr = "Field name for SNR.";
+  p_help = "Signal-to-noise ratio (dB). Set this to 'SNR' if SNR_available is false, so that we can estimate the SNR and place it in a suitably-named field.";
+} SNR_field_name;
 
-paramdef string
-{
-  p_header = "input data PID name";
-  p_help = "field name, PID";
+paramdef double {
+  p_default = 0.0;
+  p_descr = "The noise value, represented as dBZ at a range of 100km.";
+  p_help = "This is used for computing the SNR from the DBZ field. It is only used if SNR_available is FALSE. The SNR will be computed by range-correcting this value and using it as the noise value.";
+} noise_dbz_at_100km;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for DBZ.";
+  p_help = "Required if we are to compute SNR from DBZ.";
+} DBZ_field_name;
+
+commentdef {
+  p_header = "BEAM BLOCKAGE and PARTICLE ID";
+}
+
+paramdef string {
   p_default = "PID";
-} pid_field;
+  p_descr = "Field name of particle ID in input data";
+  p_help = "This is required.";
+} PID_field_name;
 
-paramdef string
-{
-  p_header = "input beam block data";
-  p_help = "path of input beam block data (assumed on local host, RadxVol)";
+paramdef string {
   p_default = "unknown";
+  p_descr = "Full path to beam blockage file.";
+  p_help = "This file is created using RadxBeamBlock";
 } beam_block_path;
 
-paramdef string
-{
-  p_header = "input beam block field name to use";
-  p_help = "field name, extended maximum beam blockage percentage";
+paramdef string {
   p_default = "BEAME";
-} beam_block_field;
+  p_descr = "Field name for cumulative beam blockage with range.";
+  p_help = "This field contains a fraction - between 0 and 1 - of the power blocked.";
+} beam_block_field_name;
+
+commentdef {
+  p_header = "PRECIP RATE FIELDS";
+}
 
 typedef enum {
   OUTPUT_FLOAT, OUTPUT_SHORT
 } output_encoding_t;
-  
-  
+
 typedef struct {
-  string input_precip_name;
-  string output_rainrate_name;
+  string input_rate_name;
+  string output_rate_name;
   string long_name;
   string standard_name;
   string units;
   output_encoding_t encoding;
-} rainrate_field_t;
+} rate_field_t;
 
-paramdef struct rainrate_field_t {
+paramdef struct rate_field_t {
   p_default = {
-    {"RATE_ZH", "RATE_ZH", "RATE_ZH", "RATE_ZH", "mm/h",  OUTPUT_FLOAT},
-    {"RATE_HYBRID", "RATE_HYBRID", "RATE_HYBRID", "RATE_HYBRID", "mm/h",  OUTPUT_FLOAT}
+    {
+      input_rate_name = "RATE_ZH",
+      output_rate_name = "RATE_ZH",
+      long_name = "precip_rate_computed_from_ZH",
+      standard_name = "precip_rate_computed_from_ZH",
+      units = "mm/h",
+      encoding = OUTPUT_FLOAT
+    }
+    ,
+    {
+      input_rate_name = "RATE_HYBRID",
+      output_rate_name = "RATE_HYBRID",
+      long_name = "precip_rate_computed_from_NCAR_hybrid_method",
+      standard_name = "precip_rate_computed_from_NCAR_hybrid_method",
+      units = "mm/h",
+      encoding = OUTPUT_FLOAT
+    }
   };
-  p_descr = "The array of rain rate input/output fields.";
-  p_help = "The program will read in one precip field per entry here, and produce an output rain rate field from it. Long_name and standard_name are netCDF conventions. Set the output encoding type to select the resolution of the output data.";
-} rainrate_fields[];
+  p_descr = "The array of precip rate input/output fields.";
+  p_help = "The program will read in one precip field per entry here, and produce an output precip rate field from it. Long_name and standard_name are netCDF conventions. Set the output encoding type to select the resolution of the output data.";
+} rate_fields[];
 
+commentdef {
+  p_header = "DIAGNOSTIC FIELDS";
+  p_text = "Additional diagnostic output fields are given in the output_fields struct array.\n";
+}
 
 typedef enum {
   PID, ELEVATION, HEIGHT, RANGE, NUM_BLOCKED, NUM_LOW_SNR, NUM_CLUTTER, MASK
@@ -188,23 +208,135 @@ typedef struct {
 
 paramdef struct output_field_t {
   p_default = {
-    {"PID",    "PID", "PID", "none",  OUTPUT_FLOAT, PID},
-    {"ELEVATION", "ELEVATION", "ELEVATION", "deg",  OUTPUT_FLOAT, ELEVATION},
-    {"HEIGHT", "HEIGHT", "HEIGHT", "km",  OUTPUT_FLOAT, HEIGHT},
-    {"RANGE", "RANGE", "RANGE", "km",  OUTPUT_FLOAT, RANGE},
-    {"NBLOCK", "NBLOCK", "NBLOCK", "count", OUTPUT_FLOAT, NUM_BLOCKED},
-    {"NLOW_SNR", "NLOW_SNR", "NLOW_SNR", "count", OUTPUT_FLOAT, NUM_LOW_SNR},
-    {"NCLUT", "NCLUT", "NCLUT", "count", OUTPUT_FLOAT, NUM_CLUTTER},
-    {"MASK", "MASK", "MASK", "mask", OUTPUT_FLOAT, MASK}
+    {
+      name = "PID",
+      long_name = "NCAR_particle_ID",
+      standard_name = "NCAR_particle_ID",
+      units = "",
+      encoding = OUTPUT_SHORT,
+      type = PID
+    }
+    ,
+    {
+      name = "ELEVATION",
+      long_name = "elevation_angle_of_lowest_valid_rate_echo",
+      standard_name = "elevation_angle_of_lowest_valid_rate_echo",
+      units = "deg",
+      encoding = OUTPUT_SHORT,
+      type = ELEVATION
+    }
+    ,
+    {
+      name = "HEIGHT",
+      long_name = "height_of_lowest_valid_rate_echo",
+      standard_name = "height_of_lowest_valid_rate_echo",
+      units = "km",
+      encoding = OUTPUT_SHORT,
+      type = HEIGHT
+    }
+    ,
+    {
+      name = "RANGE",
+      long_name = "range_of_lowest_valid_rate_echo",
+      standard_name = "range_of_lowest_valid_rate_echo",
+      units = "km",
+      encoding = OUTPUT_SHORT,
+      type = RANGE
+    }
+    ,
+    {
+      name = "NBLOCK",
+      long_name = "number_of_blocked_angles",
+      standard_name = "number_of_blocked_angles",
+      units = "count",
+      encoding = OUTPUT_SHORT,
+      type = NUM_BLOCKED
+    }
+    ,
+    {
+      name = "NLOW_SNR",
+      long_name = "number_of_low_snr_angles",
+      standard_name = "number_of_low_snr_angles",
+      units = "count",
+      encoding = OUTPUT_SHORT,
+      type = NUM_LOW_SNR
+    }
+    ,
+    {
+      name = "NCLUT",
+      long_name = "number_of_clutter_angles",
+      standard_name = "number_of_clutter_angles",
+      units = "count",
+      encoding = OUTPUT_SHORT,
+      type = NUM_CLUTTER
+    }
+    ,
+    {
+      name = "MASK",
+      long_name = "mask_for_domain",
+      standard_name = "mask_for_domain",
+      units = "",
+      encoding = OUTPUT_SHORT,
+      type = MASK
+    }
   };
-  p_descr = "Array of additional output fields besides the rain rate fields.";
-  p_help = "The program will output these fields in addition to the rain rate output fields. long_name and standard_name are netCDF conventions. Set the output encoding type to select the resolution of the output data. These fields are more for diagnostic use. The MASK field itself is set to 1 over the entire grid so you can see the domain.";
+
+  p_descr = "Array of additional output fields besides the precip rate fields.";
+  p_help = "The program will output these fields in addition to the precip rate output fields. long_name and standard_name are netCDF conventions. Set the output encoding type to select the resolution of the output data. These fields are more for diagnostic use. The MASK field itself is set to 1 over the entire grid so you can see the domain.";
 } output_fields[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set 'is_discrete' flag for individual fields.";
+  p_descr = "If TRUE, the specified fields will be treated as holding discrete values, and for the Cartesian interpolation the nearest neighbor approach will be used rather than interpolation. You should do this for classification fields such as PID - particle ID, HCA.";
+} set_discrete_fields;
+
+typedef struct {
+  string input_name;
+  boolean is_discrete;
+} discrete_field_t;
+
+paramdef struct discrete_field_t {
+  p_default = {
+    {
+      input_name = "PID",
+      is_discrete = TRUE
+    }
+  };
+  p_descr = "Use this to set the 'is_discrete' flag on a field.";
+  p_help = "If this is specified, nearest neighbor will be used for this field. You can use this to override the is_discrete flag on a field.";
+} discrete_fields[];
 
 commentdef {
   p_header = "POLAR OUTPUT DATA SET INFORMATION";
   p_text = "The output is CfRadial files, and other formats to the extent supported by the format.";
 }
+
+paramdef string {
+  p_default = "";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory. Set empty for no polar output";
+} polar_output_dir;
+
+typedef enum {
+  OUTPUT_FORMAT_CFRADIAL,
+  OUTPUT_FORMAT_DORADE,
+  OUTPUT_FORMAT_FORAY,
+  OUTPUT_FORMAT_NEXRAD,
+  OUTPUT_FORMAT_UF,
+  OUTPUT_FORMAT_MDV_RADIAL
+} polar_output_format_t;
+
+paramdef enum polar_output_format_t {
+  p_default = OUTPUT_FORMAT_CFRADIAL;
+  p_descr = "Format for the output files.";
+} polar_output_format;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Compression level for output.";
+  p_help = "Applies to netCDF only. 0 means no compression.";
+} compression_level;
 
 paramdef string {
   p_default = "Radar-based quantative precipitation estimation";
@@ -218,70 +350,37 @@ paramdef string {
 
 paramdef string {
   p_default = "LROSE RadxQpe application";
-  p_descr = "References string for netCDF file.";
-} references;
-
-paramdef string {
-  p_default = "";
   p_descr = "Source string for netCDF file.";
 } source;
 
-paramdef string {
-  p_default = "";
-  p_descr = "History string for netCDF file.";
-} history;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Comment string for netCDF file.";
-} comment;
-
 commentdef {
-  p_header = "POLAR COORDINATE OUTPUT";
+  p_header = "CARTESIAN GRID OUTPUT";
+  p_text = "Cartesian grids are represented as MDV - these may be written out as CF-compliant NetCDF.";
 }
 
 paramdef string {
-  p_default = "";
-  p_descr = "Output directory path.";
-  p_help = "Files will be written to this directory. Set empty for no polar output";
-} output_polar_dir;
-
-typedef enum {
-  OUTPUT_FORMAT_CFRADIAL,
-  OUTPUT_FORMAT_DORADE,
-  OUTPUT_FORMAT_FORAY,
-  OUTPUT_FORMAT_NEXRAD,
-  OUTPUT_FORMAT_UF,
-  OUTPUT_FORMAT_MDV_RADIAL
-} output_format_t;
-
-paramdef enum output_format_t {
-  p_default = OUTPUT_FORMAT_CFRADIAL;
-  p_descr = "Format for the output files.";
-} output_format;
-
-paramdef int {
-  p_default = 4;
-  p_descr = "Compression level for output.";
-  p_help = "Applies to netCDF only. 0 means no compression.";
-} compression_level;
-
-commentdef {
-  p_header = "CARTESIAN GRID PROJECTION AND XY DETAILS, AND OUTPUT SPECIFICATION";
-  p_text = "The Cartesian grid is an optional output. The polar data is interpolated to an XY grid.";
-}
-
-paramdef string {
-  p_default = "/tmp/RadxQpe/cart";
+  p_default = "/tmp/RadxQpe/mdv/cart";
   p_descr = "Output directory path for cartesian data.";
   p_help = "Regridded cartesian files will be written to this directory. Set to empty for no cartesian output";
-} output_cartesian_dir;
+} cartesian_output_dir;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Write Cartesian files as CF NetCDF.";
   p_help = "If false, the Cartesian files will be written as MDV.";
 } write_cartesian_files_as_netcdf;
+
+paramdef int {	
+  p_default = 3;
+  p_min = 1;
+  p_max = 4;
+  p_descr = "Minimum number of valid data points for the interpolation.";
+  p_help = "The program performs a 4-point linear interpolation from 2D-polar to 2D-Cartesian space. This is the number of valid data points, out of the max of 4, which must be present for interpolation to proceed. A high number will exclude marginal points. A low number will include marginal points.";
+} min_nvalid_for_cart_interp;
+
+commentdef {
+  p_header = "CARTESIAN GRID PROJECTION";
+}
 
 typedef enum {
   PROJ_LATLON = 0,
@@ -294,9 +393,9 @@ typedef enum {
   PROJ_ALBERS = 16,
   PROJ_LAMBERT_AZIM = 17,
   PROJ_VERT_PERSP = 18
-} projection_t;
+} grid_projection_t;
 
-paramdef enum projection_t {
+paramdef enum grid_projection_t {
   p_default = PROJ_FLAT;
   p_descr = "Projection for cartesian grid. See projection param below.";
   p_help =
@@ -322,7 +421,7 @@ typedef struct {
 } grid_xy_geom_t;
 
 paramdef struct grid_xy_geom_t {
-  p_default = {1, 1, 0.0, 0.0, 1.0, 1.0};
+  p_default = {600, 600, -299.5, -299.5, 1.0, 1.0};
   p_descr = "Cartesian grid parameters in x,y.";
   p_help = "Units in km, except LATLON, which is in degrees.";
 } grid_xy_geom;
@@ -423,36 +522,6 @@ paramdef double {
   p_help = "See grid_set_offset_origin.";
 } grid_offset_origin_longitude;
 
-paramdef int {	
-  p_default = 3;
-  p_min = 1;
-  p_max = 4;
-  p_descr = "Minimum number of valid data points for the interpolation.";
-  p_help = "The program performs a 4-point linear interpolation. This is the number of valid data points, out of the possible 4, which must be present for interpolation to proceed. A high number will exclude marginal points. A low number will include marginal points.";
-} min_nvalid_for_interp;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to set 'is_discrete' flag for individual fields.";
-  p_descr = "If TRUE, the specified fields will be treated as holding discrete values, and the nearest neighbor approach will be used rather than nearest neighbor. You should do this for fields such as PID (particle ID).";
-} set_discrete_fields;
-
-typedef struct {
-  string input_name;
-  boolean is_discrete;
-} discrete_field_t;
-
-paramdef struct discrete_field_t {
-  p_default = {
-    {
-      input_name = "PID",
-      is_discrete = TRUE
-    }
-  };
-  p_descr = "Use this to set the 'is_discrete' flag on a field.";
-  p_help = "If this is specified, nearest neighbor will be used for this field. You can use this to override the is_discrete flag on a field.";
-} discrete_fields[];
-
 commentdef {
   p_header = "SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS";
 }
@@ -469,15 +538,24 @@ paramdef double {
   p_help = "For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.";
 } pseudo_earth_radius_ratio;
 
-commentdef {
-  p_header = "REALTIME OPERATIONS";
-};
+commentdef
+{
+  p_header = "DEBUG CONTROL";
+}
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out _latest_data_info files.";
-  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
-} write_latest_data_info;
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_help = "Debug flag.";
+  p_default = FALSE;
+} debug_norm;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_help = "Debug flag.";
+  p_default = FALSE;
+} debug_verbose;
 
 paramdef boolean
 {
@@ -496,4 +574,20 @@ paramdef boolean
   p_help = "TRUE to show the C++ class and method in the logged messages";
 } debug_show_class_and_method;
 
+commentdef {
+  p_header = "THREADING FOR SPEED.";
+}
+
+paramdef int {
+  p_default = 4;
+  p_min = 1;
+  p_descr = "The number of compute threads.";
+  p_help = "The interpolation are segmented in azimuth, with each thread computing an azimuth. For maximum performance, n_threads should be set to the number of processors multiplied by 4. For further tuning, use top to maximize CPU usage while varying the number of threads. If set to 1, threading is disabled";
+} n_compute_threads;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Thread debug";
+  p_help = "Set to true to see debug information regarding threading";
+} threads_debug;
 

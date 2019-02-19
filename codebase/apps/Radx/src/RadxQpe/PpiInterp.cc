@@ -1067,7 +1067,7 @@ void PpiInterp::_loadNearestGridPt(int ifield,
   
   // compute weighted mean
   
-  if (nContrib >= _params.min_nvalid_for_interp) {
+  if (nContrib >= _params.min_nvalid_for_cart_interp) {
     _outputFields[ifield][ptIndex] = closestVal;
   } else {
     _outputFields[ifield][ptIndex] = missingFl32;
@@ -1106,7 +1106,7 @@ void PpiInterp::_loadInterpGridPt(int ifield,
   
   // compute weighted mean
   
-  if (nContrib >= _params.min_nvalid_for_interp) {
+  if (nContrib >= _params.min_nvalid_for_cart_interp) {
     double interpVal = missingDouble;
     if (sumWts > 0) {
       interpVal = sumVals / sumWts;
@@ -1157,7 +1157,7 @@ int PpiInterp::_writeOutputFile()
   
   if (out.writeVol()) {
     LOGF(LogMsg::ERROR, "  Cannot write file to output_dir: %s",
-         _params.output_cartesian_dir);
+         _params.cartesian_output_dir);
     return -1;
   }
   LOG(LogMsg::DEBUG_VERBOSE, "  Wrote output file");

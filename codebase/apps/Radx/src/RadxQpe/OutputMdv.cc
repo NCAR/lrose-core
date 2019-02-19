@@ -244,7 +244,7 @@ int OutputMdv::writeVol()
 
 {
 
-  _outputDir = _params.output_cartesian_dir;
+  _outputDir = _params.cartesian_output_dir;
   time_t ftime = _mdvx.getMasterHeader().time_centroid;
 
   if (_mdvx.getNFields() == 0) {
@@ -266,7 +266,7 @@ int OutputMdv::writeVol()
     _mdvx.setMdv2NcfOutput(true, true, true);
   }
 
-  if (!_params.write_latest_data_info) {
+  if (_params.mode != Params::REALTIME) {
     _mdvx.clearWriteLdataInfo();
   }
   if (_mdvx.writeToDir(_outputDir)) {

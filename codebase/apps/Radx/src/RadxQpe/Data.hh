@@ -132,6 +132,8 @@ private:
   double _lon;        /**< Radar location */
 
   bool _readLite(RadxFile &primaryFile, const std::string &path);
+  int _estimateSnrField();
+
 };
 
 #endif

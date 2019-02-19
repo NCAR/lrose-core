@@ -118,12 +118,12 @@ bool Data::read(const time_t &t,
 		const std::vector<std::string> &fields)
 {
   RadxTimeList tlist;
-  tlist.setDir(_params.data_url);
-  tlist.setModeFirstBefore(t, _params.volume_time_margin_seconds);
+  tlist.setDir(_params.input_dir);
+  tlist.setModeFirstBefore(t, _params.input_time_margin_seconds);
 
   if (tlist.compile())
   {
-    LOGF(LogMsg::ERROR, "Cannot compile time list, dir: %s", _params.data_url);
+    LOGF(LogMsg::ERROR, "Cannot compile time list, dir: %s", _params.input_dir);
     LOG(LogMsg::ERROR, tlist.getErrStr().c_str());
     return false;
   }
@@ -132,7 +132,7 @@ bool Data::read(const time_t &t,
   {
     LOGF(LogMsg::ERROR,
 	 "No input data in time range specified, which is %s to %s",
-	 DateTime::strn(t-_params.volume_time_margin_seconds).c_str(),
+	 DateTime::strn(t-_params.input_time_margin_seconds).c_str(),
 	 DateTime::strn(t).c_str());
     return false;
   }
@@ -179,6 +179,12 @@ bool Data::_readLite(RadxFile &primaryFile, const std::string &path)
 
   // convert to floats
   _vol.convertToFl32();
+
+  if (!_params.SNR_available) {
+    if (_estimateSnrField()) {
+      return false;
+    }
+  }
 
   // sort into ascending sweep order
   _vol.sortSweepsByFixedAngle();
@@ -235,5 +241,61 @@ bool Data::_readLite(RadxFile &primaryFile, const std::string &path)
   Geom::operator=(Geom(isIndexed, angleResDeg, az, nr, r0, dr,
 		       _params.azimuthal_resolution_degrees));
   return true;
+}
+
+/////////////////////////////////////////////////////////////
+// Estimate SNR from DBZ field
+
+int Data::_estimateSnrField()
+{
+
+  vector<RadxRay *> &rays = _vol.getRays();
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+
+    // get the ray
+
+    RadxRay *ray = rays[iray];
+    double startRange = ray->getStartRangeKm();
+    double gateSpacing = ray->getGateSpacingKm();
+
+    // get the DBZ field
+    
+    RadxField *dbzField = ray->getField(_params.DBZ_field_name);
+    if (dbzField == NULL) {
+      LOGF(LogMsg::ERROR, "Cannot find DBZ field: %s", _params.DBZ_field_name);
+      return -1;
+    }
+    const Radx::fl32 *dbz = dbzField->getDataFl32();
+    Radx::fl32 dbzMiss = dbzField->getMissingFl32();
+    
+    // estimate SNR
+
+    RadxArray<Radx::fl32> snr_;
+    Radx::fl32 *snr = snr_.alloc(ray->getNGates());
+    for (size_t ii = 0; ii < ray->getNGates(); ii++) {
+      if (dbz[ii] == dbzMiss) {
+        snr[ii] = Radx::missingFl32;
+      } else {
+        double range = startRange + ii * gateSpacing;
+        if (range < 0) {
+          range = gateSpacing / 2;
+        }
+        double noiseDbz = _params.noise_dbz_at_100km +
+          20.0 * (log10(range) - log10(100.0));
+        snr[ii] = dbz[ii] - noiseDbz;
+      }
+    } // ii
+
+    // add SNR field to ray
+
+    RadxField *snrField = new RadxField(_params.SNR_field_name, "dB");
+    snrField->addDataFl32(ray->getNGates(), snr);
+    ray->addField(snrField);
+    
+
+  } // iray
+
+  return 0;
+
 }
 

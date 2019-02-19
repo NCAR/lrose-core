@@ -68,6 +68,12 @@ public:
   // enum typedefs
 
   typedef enum {
+    REALTIME = 0,
+    ARCHIVE = 1,
+    FILELIST = 2
+  } mode_t;
+
+  typedef enum {
     OUTPUT_FLOAT = 0,
     OUTPUT_SHORT = 1
   } output_encoding_t;
@@ -90,7 +96,7 @@ public:
     OUTPUT_FORMAT_NEXRAD = 3,
     OUTPUT_FORMAT_UF = 4,
     OUTPUT_FORMAT_MDV_RADIAL = 5
-  } output_format_t;
+  } polar_output_format_t;
 
   typedef enum {
     PROJ_LATLON = 0,
@@ -103,18 +109,18 @@ public:
     PROJ_ALBERS = 16,
     PROJ_LAMBERT_AZIM = 17,
     PROJ_VERT_PERSP = 18
-  } projection_t;
+  } grid_projection_t;
 
   // struct typedefs
 
   typedef struct {
-    char* input_precip_name;
-    char* output_rainrate_name;
+    char* input_rate_name;
+    char* output_rate_name;
     char* long_name;
     char* standard_name;
     char* units;
     output_encoding_t encoding;
-  } rainrate_field_t;
+  } rate_field_t;
 
   typedef struct {
     char* name;
@@ -126,6 +132,11 @@ public:
   } output_field_t;
 
   typedef struct {
+    char* input_name;
+    tdrp_bool_t is_discrete;
+  } discrete_field_t;
+
+  typedef struct {
     int nx;
     int ny;
     double minx;
@@ -133,11 +144,6 @@ public:
     double dx;
     double dy;
   } grid_xy_geom_t;
-
-  typedef struct {
-    char* input_name;
-    tdrp_bool_t is_discrete;
-  } discrete_field_t;
 
   ///////////////////////////
   // Member functions
@@ -424,19 +430,7 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  char* instance;
-
-  tdrp_bool_t debug_norm;
-
-  tdrp_bool_t debug_verbose;
-
-  int n_compute_threads;
-
-  tdrp_bool_t threads_debug;
-
   double azimuthal_resolution_degrees;
-
-  double min_snr;
 
   double max_beam_block_fraction;
 
@@ -444,47 +438,64 @@ public:
 
   double min_valid_precip_rate;
 
-  char* data_url;
+  mode_t mode;
 
-  int volume_time_margin_seconds;
+  char* instance;
 
-  char* snr_field;
+  char* input_dir;
 
-  char* pid_field;
+  int input_time_margin_seconds;
+
+  char* start_time;
+
+  char* end_time;
+
+  double min_SNR;
+
+  tdrp_bool_t SNR_available;
+
+  char* SNR_field_name;
+
+  double noise_dbz_at_100km;
+
+  char* DBZ_field_name;
+
+  char* PID_field_name;
 
   char* beam_block_path;
 
-  char* beam_block_field;
+  char* beam_block_field_name;
 
-  rainrate_field_t *_rainrate_fields;
-  int rainrate_fields_n;
+  rate_field_t *_rate_fields;
+  int rate_fields_n;
 
   output_field_t *_output_fields;
   int output_fields_n;
+
+  tdrp_bool_t set_discrete_fields;
+
+  discrete_field_t *_discrete_fields;
+  int discrete_fields_n;
+
+  char* polar_output_dir;
+
+  polar_output_format_t polar_output_format;
+
+  int compression_level;
 
   char* title;
 
   char* institution;
 
-  char* references;
-
   char* source;
 
-  char* history;
-
-  char* comment;
-
-  char* output_polar_dir;
-
-  output_format_t output_format;
-
-  int compression_level;
-
-  char* output_cartesian_dir;
+  char* cartesian_output_dir;
 
   tdrp_bool_t write_cartesian_files_as_netcdf;
 
-  projection_t grid_projection;
+  int min_nvalid_for_cart_interp;
+
+  grid_projection_t grid_projection;
 
   grid_xy_geom_t grid_xy_geom;
 
@@ -520,24 +531,23 @@ public:
 
   double grid_offset_origin_longitude;
 
-  int min_nvalid_for_interp;
-
-  tdrp_bool_t set_discrete_fields;
-
-  discrete_field_t *_discrete_fields;
-  int discrete_fields_n;
-
   tdrp_bool_t override_standard_pseudo_earth_radius;
 
   double pseudo_earth_radius_ratio;
 
-  tdrp_bool_t write_latest_data_info;
+  tdrp_bool_t debug_norm;
+
+  tdrp_bool_t debug_verbose;
 
   tdrp_bool_t debug_triggering;
 
   tdrp_bool_t debug_show_realtime;
 
   tdrp_bool_t debug_show_class_and_method;
+
+  int n_compute_threads;
+
+  tdrp_bool_t threads_debug;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -546,7 +556,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[67];
+  mutable TDRPtable _table[73];
 
   const char *_className;
 

@@ -110,7 +110,7 @@ void OutputData::_addFieldsToRay(const Sweep &s, int iaz, RadxRay *ray)
     }
     else
     {
-      const Params::rainrate_field_t *rfield = _params.matchingRainrate(name);
+      const Params::rate_field_t *rfield = _params.matchingRate(name);
       if (rfield != NULL)
       {
 	_addRateField(*rfield, name, fld, iaz, ray);
@@ -149,7 +149,7 @@ void OutputData::_addField(const Params::output_field_t &pfield, string &name,
 }
 
 //----------------------------------------------------------------
-void OutputData::_addRateField(const Params::rainrate_field_t &pfield,
+void OutputData::_addRateField(const Params::rate_field_t &pfield,
 			       string &name, const Field &fld,
 			       int iaz, RadxRay *ray)
 {
@@ -176,7 +176,7 @@ void OutputData::_addRateField(const Params::rainrate_field_t &pfield,
 //----------------------------------------------------------------
 void OutputData::_writeVolume(const Data &inp)
 {
-  if (strlen(_params.output_polar_dir) == 0)
+  if (strlen(_params.polar_output_dir) == 0)
   {
     // not writing this data out
     return;
@@ -188,10 +188,7 @@ void OutputData::_writeVolume(const Data &inp)
 
   _outVol.setTitle(_params.title);
   _outVol.setInstitution(_params.institution);
-  _outVol.setReferences(_params.references);
   _outVol.setSource(_params.source);
-  _outVol.setHistory(_params.history);
-  _outVol.setComment(_params.comment);
 
   // get these from input volume
   _outVol.setInstrumentName(inp.getVol().getInstrumentName());
@@ -213,10 +210,10 @@ void OutputData::_writeVolume(const Data &inp)
 
   _setupWrite(outFile);
   
-  if (outFile.writeToDir(_outVol, _params.output_polar_dir, true, false))
+  if (outFile.writeToDir(_outVol, _params.polar_output_dir, true, false))
   {
     LOGF(LogMsg::ERROR, 
-	 "  Cannot write file to dir: %s", _params.output_polar_dir);
+	 "  Cannot write file to dir: %s", _params.polar_output_dir);
     LOG(LogMsg::ERROR, outFile.getErrStr().c_str());
     return;
   }
@@ -226,21 +223,20 @@ void OutputData::_writeVolume(const Data &inp)
 
   // in realtime mode, write latest data info file
   
-  if (_params.write_latest_data_info)
-  {
-    DsLdataInfo ldata(_params.output_polar_dir);
+  if (_params.mode == Params::REALTIME) {
+    DsLdataInfo ldata(_params.polar_output_dir);
     if (_params.debug_verbose)
     {
       ldata.setDebug(true);
     }
     string relPath;
-    RadxPath::stripDir(_params.output_polar_dir, outputPath, relPath);
+    RadxPath::stripDir(_params.polar_output_dir, outputPath, relPath);
     ldata.setRelDataPath(relPath);
     ldata.setWriter(_params._progName);
     if (ldata.write(_outVol.getEndTimeSecs()))
     {
       LOGF(LogMsg::WARNING, "  Cannot write latest data info file to dir: %s",
-           _params.output_polar_dir);
+           _params.polar_output_dir);
     }
   }
 
@@ -266,7 +262,7 @@ void OutputData::_setupWrite(RadxFile &file)
 
   // set output format
 
-  switch (_params.output_format)
+  switch (_params.polar_output_format)
   {
   case Params::OUTPUT_FORMAT_UF:
     file.setFileFormat(RadxFile::FILE_FORMAT_UF);

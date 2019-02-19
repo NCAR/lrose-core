@@ -83,7 +83,7 @@ public:
    *
    * This constructor sets all data values to missing
    */
-  Field(const Params::rainrate_field_t &field, const Geom &geom);
+  Field(const Params::rate_field_t &field, const Geom &geom);
 
   /**
    *  Destructor

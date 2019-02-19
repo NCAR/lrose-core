@@ -57,9 +57,9 @@ Sweep::Sweep(double elv, const Geom &geom, const Parms &parms) :
   {
     _grids.push_back(Field(parms._output_fields[i], geom));
   }
-  for (int i=0; i<parms.rainrate_fields_n; ++i)
+  for (int i=0; i<parms.rate_fields_n; ++i)
   {
-    _grids.push_back(Field(parms._rainrate_fields[i], geom));
+    _grids.push_back(Field(parms._rate_fields[i], geom));
   }
 }
 

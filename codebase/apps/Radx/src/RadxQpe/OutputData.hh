@@ -78,7 +78,7 @@ private:
   void _addFieldsToRay(const Sweep &s, int iaz, RadxRay *ray);
   void _addField(const Params::output_field_t &pfield, string &name, 
 		 const Field &fld, int iaz, RadxRay *ray);
-  void _addRateField(const Params::rainrate_field_t &pfield, string &name,
+  void _addRateField(const Params::rate_field_t &pfield, string &name,
 		     const Field &fld,  int iaz, RadxRay *ray);
   void _writeVolume(const Data &inp);
   void _setupWrite(RadxFile &file);

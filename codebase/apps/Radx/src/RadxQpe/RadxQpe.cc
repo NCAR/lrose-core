@@ -109,7 +109,7 @@ void RadxQpe::_processAzimuth(QpeInfo &info)
     outdata.store(igt, info._iaz, _params, (*info._out)[0]);
 
     // process each precip field
-    for (int i=0; i<_params.numRainRate(); ++i)
+    for (int i=0; i<_params.numRate(); ++i)
     {
       string name = _params.ithInputPrecipName(i);
       VertPrecipData pdata(*info._data, igt, info._iaz, name, i);

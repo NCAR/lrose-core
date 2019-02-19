@@ -1,0 +1,1019 @@
+/**********************************************************************
+ * TDRP params for RadxQpe
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxQpe program - quantitative precipitation estimation at the 
+//   surface.
+//
+// Input data contains precipitation rates in 3D polar coordinates. The 
+//   output is a 2D field of precipitation estimates at the surface. Both 
+//   polar and Cartesian output coordinates are supported.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// ALGORITHM PARAMETERS.
+//
+// Parameters to control the QPE algorithm itself.
+//
+//======================================================================
+ 
+///////////// azimuthal_resolution_degrees ////////////
+//
+// Output azimuthal resolution (degrees).
+//
+//
+// Type: double
+//
+
+azimuthal_resolution_degrees = 1;
+
+///////////// max_beam_block_fraction /////////////////
+//
+// Cumulative beam blockage threshold.
+//
+// When the cumulative beam blockage exceeds max_beam_block_fraction, a 
+//   higher elevation angle is used.
+//
+// Minimum val: 0
+// Maximum val: 1
+//
+// Type: double
+//
+
+max_beam_block_fraction = 0.25;
+
+///////////// max_beam_height_km_msl //////////////////
+//
+// Max height of beam for valid precip rate (km MSL).
+//
+// If beam is above this height, the precip rate is set to 0.
+//
+//
+// Type: double
+//
+
+max_beam_height_km_msl = 6;
+
+///////////// min_valid_precip_rate ///////////////////
+//
+// Minimum valid precip rate (mm/hr).
+//
+// If rate is less than this, it is set to 0.
+//
+//
+// Type: double
+//
+
+min_valid_precip_rate = 1;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// OPERATIONS MODE.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// By default RadxQpe operates in REALTIME mode. It watches for files 
+//   arriving in the input_dir directory, and then processes each file in 
+//   order. If you specify -f on the command lines, the app will operate 
+//   in FILELIST mode and process each of the files that are specified. If 
+//   you specify -start and -end on the command line, RadxQpe will operate 
+//   in ARCHIVE mode, processing all of the files in input_dir that are 
+//   between the specified start and end times.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance - REALTIME mode only.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+///////////// input_dir ///////////////////////////////
+//
+// Location of input precip rate data.
+//
+// Set this to the directory containing the input data.
+//
+//
+// Type: string
+//
+
+input_dir = "/tmp/RadxRate";
+
+///////////// input_time_margin_seconds ///////////////
+//
+// Time margin when searching for data files (sec).
+//
+// Extent of time search. Should be at least as long as a radar volume.
+//
+//
+// Type: int
+//
+
+input_time_margin_seconds = 900;
+
+///////////// start_time //////////////////////////////
+//
+// Set the start time for ARCHIVE mode analysis.
+//
+// Format is 'yyyy mm dd hh mm ss'.
+//
+//
+// Type: string
+//
+
+start_time = "2018 08 20 00 00 00";
+
+///////////// end_time ////////////////////////////////
+//
+// Set the end time for ARCHIVE mode analysis.
+//
+// Format is 'yyyy mm dd hh mm ss'.
+//
+//
+// Type: string
+//
+
+end_time = "2018 08 30 00 00 00";
+
+//======================================================================
+//
+// CHECKING SNR.
+//
+// We check SNR to ensure reasonable data quality. If SNR is not 
+//   available, we estimate it from DBZ.
+//
+//======================================================================
+ 
+///////////// min_SNR /////////////////////////////////
+//
+// SNR threshold (dB).
+//
+// When SNR < min_SNR at a gate, we move up to a higher elevation sweep.
+//
+//
+// Type: double
+//
+
+min_SNR = 3;
+
+///////////// SNR_available ///////////////////////////
+//
+// Is SNR data available?.
+//
+// If not, SNR will be computed from the DBZ field. See 
+//   'noise_dbz_at_100km'.
+//
+//
+// Type: boolean
+//
+
+SNR_available = TRUE;
+
+///////////// SNR_field_name //////////////////////////
+//
+// Field name for SNR.
+//
+// Signal-to-noise ratio (dB). Set this to 'SNR' if SNR_available is 
+//   false, so that we can estimate the SNR and place it in a 
+//   suitably-named field.
+//
+//
+// Type: string
+//
+
+SNR_field_name = "SNR";
+
+///////////// noise_dbz_at_100km //////////////////////
+//
+// The noise value, represented as dBZ at a range of 100km.
+//
+// This is used for computing the SNR from the DBZ field. It is only 
+//   used if SNR_available is FALSE. The SNR will be computed by 
+//   range-correcting this value and using it as the noise value.
+//
+//
+// Type: double
+//
+
+noise_dbz_at_100km = 0;
+
+///////////// DBZ_field_name //////////////////////////
+//
+// Field name for DBZ.
+//
+// Required if we are to compute SNR from DBZ.
+//
+//
+// Type: string
+//
+
+DBZ_field_name = "DBZ";
+
+//======================================================================
+//
+// BEAM BLOCKAGE and PARTICLE ID.
+//
+//======================================================================
+ 
+///////////// PID_field_name //////////////////////////
+//
+// Field name of particle ID in input data.
+//
+// This is required.
+//
+//
+// Type: string
+//
+
+PID_field_name = "PID";
+
+///////////// beam_block_path /////////////////////////
+//
+// Full path to beam blockage file.
+//
+// This file is created using RadxBeamBlock.
+//
+//
+// Type: string
+//
+
+beam_block_path = "unknown";
+
+///////////// beam_block_field_name ///////////////////
+//
+// Field name for cumulative beam blockage with range.
+//
+// This field contains a fraction - between 0 and 1 - of the power 
+//   blocked.
+//
+//
+// Type: string
+//
+
+beam_block_field_name = "BEAME";
+
+//======================================================================
+//
+// PRECIP RATE FIELDS.
+//
+//======================================================================
+ 
+///////////// rate_fields /////////////////////////////
+//
+// The array of precip rate input/output fields.
+//
+// The program will read in one precip field per entry here, and produce 
+//   an output precip rate field from it. Long_name and standard_name are 
+//   netCDF conventions. Set the output encoding type to select the 
+//   resolution of the output data.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_rate_name;
+//      string output_rate_name;
+//      string long_name;
+//      string standard_name;
+//      string units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_FLOAT
+//          OUTPUT_SHORT
+//   }
+//
+// 1D array - variable length.
+//
+
+rate_fields = {
+  {
+    input_rate_name = "RATE_ZH",
+    output_rate_name = "RATE_ZH",
+    long_name = "precip_rate_computed_from_ZH",
+    standard_name = "precip_rate_computed_from_ZH",
+    units = "mm/h",
+    encoding = OUTPUT_FLOAT
+  }
+  ,
+  {
+    input_rate_name = "RATE_HYBRID",
+    output_rate_name = "RATE_HYBRID",
+    long_name = "precip_rate_computed_from_NCAR_hybrid_method",
+    standard_name = "precip_rate_computed_from_NCAR_hybrid_method",
+    units = "mm/h",
+    encoding = OUTPUT_FLOAT
+  }
+};
+
+//======================================================================
+//
+// DIAGNOSTIC FIELDS.
+//
+// Additional diagnostic output fields are given in the output_fields 
+//   struct array.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Array of additional output fields besides the precip rate fields.
+//
+// The program will output these fields in addition to the precip rate 
+//   output fields. long_name and standard_name are netCDF conventions. 
+//   Set the output encoding type to select the resolution of the output 
+//   data. These fields are more for diagnostic use. The MASK field itself 
+//   is set to 1 over the entire grid so you can see the domain.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string long_name;
+//      string standard_name;
+//      string units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_FLOAT
+//          OUTPUT_SHORT
+//      output_data_t type;
+//        Options:
+//          PID
+//          ELEVATION
+//          HEIGHT
+//          RANGE
+//          NUM_BLOCKED
+//          NUM_LOW_SNR
+//          NUM_CLUTTER
+//          MASK
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    name = "PID",
+    long_name = "NCAR_particle_ID",
+    standard_name = "NCAR_particle_ID",
+    units = "",
+    encoding = OUTPUT_SHORT,
+    type = PID
+  }
+  ,
+  {
+    name = "ELEVATION",
+    long_name = "elevation_angle_of_lowest_valid_rate_echo",
+    standard_name = "elevation_angle_of_lowest_valid_rate_echo",
+    units = "deg",
+    encoding = OUTPUT_SHORT,
+    type = ELEVATION
+  }
+  ,
+  {
+    name = "HEIGHT",
+    long_name = "height_of_lowest_valid_rate_echo",
+    standard_name = "height_of_lowest_valid_rate_echo",
+    units = "km",
+    encoding = OUTPUT_SHORT,
+    type = HEIGHT
+  }
+  ,
+  {
+    name = "RANGE",
+    long_name = "range_of_lowest_valid_rate_echo",
+    standard_name = "range_of_lowest_valid_rate_echo",
+    units = "km",
+    encoding = OUTPUT_SHORT,
+    type = RANGE
+  }
+  ,
+  {
+    name = "NBLOCK",
+    long_name = "number_of_blocked_angles",
+    standard_name = "number_of_blocked_angles",
+    units = "count",
+    encoding = OUTPUT_SHORT,
+    type = NUM_BLOCKED
+  }
+  ,
+  {
+    name = "NLOW_SNR",
+    long_name = "number_of_low_snr_angles",
+    standard_name = "number_of_low_snr_angles",
+    units = "count",
+    encoding = OUTPUT_SHORT,
+    type = NUM_LOW_SNR
+  }
+  ,
+  {
+    name = "NCLUT",
+    long_name = "number_of_clutter_angles",
+    standard_name = "number_of_clutter_angles",
+    units = "count",
+    encoding = OUTPUT_SHORT,
+    type = NUM_CLUTTER
+  }
+  ,
+  {
+    name = "MASK",
+    long_name = "mask_for_domain",
+    standard_name = "mask_for_domain",
+    units = "",
+    encoding = OUTPUT_SHORT,
+    type = MASK
+  }
+};
+
+///////////// set_discrete_fields /////////////////////
+//
+// Option to set 'is_discrete' flag for individual fields.
+//
+//
+// Type: boolean
+//
+
+set_discrete_fields = FALSE;
+
+///////////// discrete_fields /////////////////////////
+//
+// Use this to set the 'is_discrete' flag on a field.
+//
+// If this is specified, nearest neighbor will be used for this field. 
+//   You can use this to override the is_discrete flag on a field.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      boolean is_discrete;
+//   }
+//
+// 1D array - variable length.
+//
+
+discrete_fields = {
+  {
+    input_name = "PID",
+    is_discrete = TRUE
+  }
+};
+
+//======================================================================
+//
+// POLAR OUTPUT DATA SET INFORMATION.
+//
+// The output is CfRadial files, and other formats to the extent 
+//   supported by the format.
+//
+//======================================================================
+ 
+///////////// polar_output_dir ////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory. Set empty for no polar 
+//   output.
+//
+//
+// Type: string
+//
+
+polar_output_dir = "";
+
+///////////// polar_output_format /////////////////////
+//
+// Format for the output files.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_NEXRAD
+//     OUTPUT_FORMAT_UF
+//     OUTPUT_FORMAT_MDV_RADIAL
+//
+
+polar_output_format = OUTPUT_FORMAT_CFRADIAL;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output.
+//
+// Applies to netCDF only. 0 means no compression.
+//
+//
+// Type: int
+//
+
+compression_level = 4;
+
+///////////// title ///////////////////////////////////
+//
+// Title string for netCDF file.
+//
+//
+// Type: string
+//
+
+title = "Radar-based quantative precipitation estimation";
+
+///////////// institution /////////////////////////////
+//
+// Institution string for netCDF file.
+//
+//
+// Type: string
+//
+
+institution = "EOL/NCAR";
+
+///////////// source //////////////////////////////////
+//
+// Source string for netCDF file.
+//
+//
+// Type: string
+//
+
+source = "LROSE RadxQpe application";
+
+//======================================================================
+//
+// CARTESIAN GRID OUTPUT.
+//
+// Cartesian grids are represented as MDV - these may be written out as 
+//   CF-compliant NetCDF.
+//
+//======================================================================
+ 
+///////////// cartesian_output_dir ////////////////////
+//
+// Output directory path for cartesian data.
+//
+// Regridded cartesian files will be written to this directory. Set to 
+//   empty for no cartesian output.
+//
+//
+// Type: string
+//
+
+cartesian_output_dir = "/tmp/RadxQpe/mdv/cart";
+
+///////////// write_cartesian_files_as_netcdf /////////
+//
+// Write Cartesian files as CF NetCDF.
+//
+// If false, the Cartesian files will be written as MDV.
+//
+//
+// Type: boolean
+//
+
+write_cartesian_files_as_netcdf = TRUE;
+
+///////////// min_nvalid_for_cart_interp //////////////
+//
+// Minimum number of valid data points for the interpolation.
+//
+// The program performs a 4-point linear interpolation from 2D-polar to 
+//   2D-Cartesian space. This is the number of valid data points, out of 
+//   the max of 4, which must be present for interpolation to proceed. A 
+//   high number will exclude marginal points. A low number will include 
+//   marginal points.
+//
+// Minimum val: 1
+// Maximum val: 4
+//
+// Type: int
+//
+
+min_nvalid_for_cart_interp = 3;
+
+//======================================================================
+//
+// CARTESIAN GRID PROJECTION.
+//
+//======================================================================
+ 
+///////////// grid_projection /////////////////////////
+//
+// Projection for cartesian grid. See projection param below.
+//
+// 	PROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)
+// 	PROJ_FLAT: Azimuthal Equidistant (Radar)
+// 	PROJ_LAMBERT_CONF: Lambert Conformal Conic
+// 	PROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area
+// 	PROJ_MERCATOR: Mercator - EW orientation
+// 	PROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation
+// 	PROJ_POLAR_STEREO: Stereographic- polar aspect
+// 	PROJ_OBLIQUE_STEREO: Stereographic - oblique aspect
+// 	PROJ_ALBERS: Albers Equal Area Conic
+// 	PROJ_VERT_PERSP: Vertical Perspective (satellite view).
+//
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_LAMBERT_CONF
+//     PROJ_MERCATOR
+//     PROJ_POLAR_STEREO
+//     PROJ_FLAT
+//     PROJ_OBLIQUE_STEREO
+//     PROJ_TRANS_MERCATOR
+//     PROJ_ALBERS
+//     PROJ_LAMBERT_AZIM
+//     PROJ_VERT_PERSP
+//
+
+grid_projection = PROJ_FLAT;
+
+///////////// grid_xy_geom ////////////////////////////
+//
+// Cartesian grid parameters in x,y.
+//
+// Units in km, except LATLON, which is in degrees.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+grid_xy_geom = {
+    nx = 600,
+    ny = 600,
+    minx = -299.5,
+    miny = -299.5,
+    dx = 1,
+    dy = 1
+};
+
+///////////// grid_rotation ///////////////////////////
+//
+// Cartesian Grid rotation.
+//
+// This applies only to PROJ_FLAT projections.
+//
+//
+// Type: double
+//
+
+grid_rotation = 0;
+
+///////////// center_grid_on_radar ////////////////////
+//
+// Option to set the Cartesian grid origin at the radar.
+//
+// If true, the latitude and longitude of the grid origin will be set at 
+//   the radar location. If false, grid_origin_lat and grid_origin_lon 
+//   will be used. This does not apply for moving platforms.
+//
+//
+// Type: boolean
+//
+
+center_grid_on_radar = TRUE;
+
+///////////// grid_origin_lat /////////////////////////
+//
+// Cartesian Grid origin latitude.
+//
+// This applies to all projections except LATLON. Not used if 
+//   'center_grid_on_radar' is true.
+//
+//
+// Type: double
+//
+
+grid_origin_lat = 0;
+
+///////////// grid_origin_lon /////////////////////////
+//
+// Cartesian Grid origin longitude.
+//
+// This applies to all projections except LATLON. Not used if 
+//   'center_grid_on_radar' is true.
+//
+//
+// Type: double
+//
+
+grid_origin_lon = 0;
+
+///////////// grid_lat1 ///////////////////////////////
+//
+// Cartesian Grid reference latitude 1.
+//
+// This applies to LAMBERT_CONF and ALBERS projections.
+//
+//
+// Type: double
+//
+
+grid_lat1 = 0;
+
+///////////// grid_lat2 ///////////////////////////////
+//
+// Cartesian Grid reference latitude 2.
+//
+// This applies to LAMBERT_CONF and ALBERS projections.
+//
+//
+// Type: double
+//
+
+grid_lat2 = 0;
+
+///////////// grid_central_scale //////////////////////
+//
+// Cartesian Central scale for projections.
+//
+// This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR 
+//   projections.
+//
+//
+// Type: double
+//
+
+grid_central_scale = 1;
+
+///////////// grid_tangent_lat ////////////////////////
+//
+// Cartesian Tangent latitude (deg).
+//
+// This applies to OBLIQUE_STEREO only.
+//
+//
+// Type: double
+//
+
+grid_tangent_lat = 0;
+
+///////////// grid_tangent_lon ////////////////////////
+//
+// Cartesian Tangent longitude (deg).
+//
+// This applies to OBLIQUE_STEREO and POLAR_STEREO.
+//
+//
+// Type: double
+//
+
+grid_tangent_lon = 0;
+
+///////////// grid_pole_is_north //////////////////////
+//
+// Flag indicating stereogtraphic is over the NORTH pole.
+//
+// This applies to POLAR_STEREO. If false, the projection is over thouth 
+//   pole.
+//
+//
+// Type: boolean
+//
+
+grid_pole_is_north = TRUE;
+
+///////////// grid_persp_radius ///////////////////////
+//
+// Radius of perspective point (km).
+//
+// This applies to VERT_PERSP.
+//
+//
+// Type: double
+//
+
+grid_persp_radius = 35786;
+
+///////////// grid_false_northing /////////////////////
+//
+// False northing correction.
+//
+// Occasionally, this is added to the Y coordinate so that all 
+//   coordinates are positive. Normally 0. As an alternative to 
+//   false_northing and false_easting, you can set the offset_latitude and 
+//   offset_longitude.
+//
+//
+// Type: double
+//
+
+grid_false_northing = 0;
+
+///////////// grid_false_easting //////////////////////
+//
+// False easting correction.
+//
+// Occasionally, this is added to the X coordinate so that all 
+//   coordinates are positive. Normally 0.
+//
+//
+// Type: double
+//
+
+grid_false_easting = 0;
+
+///////////// grid_set_offset_origin //////////////////
+//
+// Do you want to specify an offset origin using lat/lon instead of 
+//   false_northing and false_easting?.
+//
+// If true, set grid_offset_origin_latitude and 
+//   grid_offset_origin_longitude.
+//
+//
+// Type: boolean
+//
+
+grid_set_offset_origin = FALSE;
+
+///////////// grid_offset_origin_latitude /////////////
+//
+// Latitude of offset origin.
+//
+// See grid_set_offset_origin.
+//
+//
+// Type: double
+//
+
+grid_offset_origin_latitude = 0;
+
+///////////// grid_offset_origin_longitude ////////////
+//
+// Longitude of offset origin.
+//
+// See grid_set_offset_origin.
+//
+//
+// Type: double
+//
+
+grid_offset_origin_longitude = 0;
+
+//======================================================================
+//
+// SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS.
+//
+//======================================================================
+ 
+///////////// override_standard_pseudo_earth_radius ///
+//
+// Option to override the standard 4/3 earth radius model for 
+//   refraction.
+//
+// If true, the standard 4/3 earth radius will be overridden. The US NWS 
+//   NEXRAD system uses 1.21 instead of 1.333.
+//
+//
+// Type: boolean
+//
+
+override_standard_pseudo_earth_radius = FALSE;
+
+///////////// pseudo_earth_radius_ratio ///////////////
+//
+// Ratio for computing the pseudo earth radius for beam height 
+//   computations.
+//
+// For standard refraction this is 4/3. For super refraction it will be 
+//   less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 
+//   1.21.
+//
+//
+// Type: double
+//
+
+pseudo_earth_radius_ratio = 1.33333;
+
+//======================================================================
+//
+// DEBUG CONTROL.
+//
+//======================================================================
+ 
+///////////// debug_norm //////////////////////////////
+//
+// debug flag.
+//
+// Debug flag.
+//
+//
+// Type: boolean
+//
+
+debug_norm = FALSE;
+
+///////////// debug_verbose ///////////////////////////
+//
+// verbose debug flag.
+//
+// Debug flag.
+//
+//
+// Type: boolean
+//
+
+debug_verbose = FALSE;
+
+///////////// debug_triggering ////////////////////////
+//
+//
+// Type: boolean
+//
+
+debug_triggering = FALSE;
+
+///////////// debug_show_realtime /////////////////////
+//
+// TRUE to show real time in all logged messages.
+//
+//
+// Type: boolean
+//
+
+debug_show_realtime = FALSE;
+
+///////////// debug_show_class_and_method /////////////
+//
+// TRUE to show the C++ class and method in the logged messages.
+//
+//
+// Type: boolean
+//
+
+debug_show_class_and_method = FALSE;
+
+//======================================================================
+//
+// THREADING FOR SPEED.
+//
+//======================================================================
+ 
+///////////// n_compute_threads ///////////////////////
+//
+// The number of compute threads.
+//
+// The interpolation are segmented in azimuth, with each thread 
+//   computing an azimuth. For maximum performance, n_threads should be 
+//   set to the number of processors multiplied by 4. For further tuning, 
+//   use top to maximize CPU usage while varying the number of threads. If 
+//   set to 1, threading is disabled.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+n_compute_threads = 4;
+
+///////////// threads_debug ///////////////////////////
+//
+// Thread debug.
+//
+// Set to true to see debug information regarding threading.
+//
+//
+// Type: boolean
+//
+
+threads_debug = FALSE;
+

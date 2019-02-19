@@ -115,8 +115,8 @@ Field::Field(const Params::output_field_t &field, const Geom &geom) :
 
 
 //----------------------------------------------------------------
-Field::Field(const Params::rainrate_field_t &field, const Geom &geom) :
-  Grid2d(field.output_rainrate_name, geom.nGate(), geom.nOutputAz(),
+Field::Field(const Params::rate_field_t &field, const Geom &geom) :
+  Grid2d(field.output_rate_name, geom.nGate(), geom.nOutputAz(),
 	 BadValue::value()),
   _isOK(true),  _units(field.units)
 {

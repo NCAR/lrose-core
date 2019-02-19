@@ -134,7 +134,7 @@ bool Out::_evaluate(const VertData1 &v, const Parms &parms)
       ++_nlow_snr;
       return false;
     }
-    if (v._snr < parms.min_snr)
+    if (v._snr < parms.min_SNR)
     {
       // move up
       ++_nlow_snr;

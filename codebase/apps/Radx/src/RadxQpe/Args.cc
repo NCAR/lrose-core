@@ -46,6 +46,9 @@ Args::Args()
 
 {
   TDRP_init_override(&override);
+  tdrpDebug = false;
+  startTimeSet = false;
+  endTimeSet = false;
 }
 
 // destructor
@@ -62,11 +65,9 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
 {
 
-  _isArchive = false;
-  _isFilelist = false;
-
+  _progName = prog_name;
+  char tmp_str[BUFSIZ];
   int iret = 0;
-  char tmp_str[256];
 
   // loop through args
   
@@ -77,7 +78,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	!strcmp(argv[i], "-help") ||
 	!strcmp(argv[i], "-man")) {
       
-      _usage(prog_name, cout);
+      _usage(cout);
       exit (0);
       
     } else if (!strcmp(argv[i], "-d") ||
@@ -112,16 +113,63 @@ int Args::parse(int argc, char **argv, string &prog_name)
       if (i < argc - 1) {
 	sprintf(tmp_str, "instance = %s;", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = REALTIME;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = 1;
+      }
+
+    } else if (!strcmp(argv[i], "-input_dir")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "input_dir = %s;", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = 1;
       }
 	
-    } else if (!strcmp(argv[i], "-interval") ||
-               !strcmp(argv[i], "-start")) {
-
-      // don't write latest data in archive mode
-
-      sprintf(tmp_str, "write_latest_data_info = FALSE;");
-      TDRP_add_override(&override, tmp_str);
+    } else if (!strcmp(argv[i], "-cart_outdir")) {
       
+      if (i < argc - 1) {
+	sprintf(tmp_str, "cartesian_output_dir = %s;", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = 1;
+      }
+	
+    } else if (!strcmp(argv[i], "-polar_outdir")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "polar_output_dir = %s;", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = 1;
+      }
+	
+    } else if (!strcmp(argv[i], "-start")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "start_time = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);
+        startTimeSet = true;
+      } else {
+	iret = -1;
+      }
+	
+    } else if (!strcmp(argv[i], "-end")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "end_time = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);
+        endTimeSet = true;
+      } else {
+	iret = -1;
+      }
+	
     } else if (!strcmp(argv[i], "-f")) {
       
       if (i < argc - 1) {
@@ -134,56 +182,62 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	    inputFileList.push_back(argv[j]);
 	  }
 	}
-        _isFilelist = true;
+	sprintf(tmp_str, "mode = FILELIST;");
+	TDRP_add_override(&override, tmp_str);
       } else {
-	iret = 1;
+	iret = -1;
       }
       
     } // if
     
   } // i
-
-
-  if(!_isFilelist) 
-  {
-    bool error = false;
-    if (!DsUrlTrigger::checkArgs(argc, argv, _archiveT0, _archiveT1, _isArchive,
-                                 error))
-    {
-      iret = 1;
-    }
-    if (error)
-    {
-      iret = 1;
-    }
+  
+  if (iret) {
+    _usage(cerr);
   }
-
-  if (iret)
-  {
-    _usage(prog_name, cerr);
-  }
-
+  
   return (iret);
     
 }
 
-void Args::_usage(string &prog_name, ostream &out)
+void Args::_usage(ostream &out)
 {
 
-  out << "Usage: " << prog_name << " [options as below]\n"
-      << "options:\n"
-      << "       [ --, -h, -help, -man ] produce this list.\n"
-      << "       [ -d, -debug ] print debug messages\n"
-      << "       [ -f ? ] list of input files\n"
-      << "       [ -v, -verbose ] print verbose debug messages\n"
-      << "       [ -debug_trigger ] print debug messages about triggering\n"
-      << "       [ -debug_realtime ] print debug messages about realtime ops\n"
-      << "       [ -debug_methods ] print debug messages about classes and methods\n"
-      << "       [ -instance ?] specify the instance\n"
-      << "      -interval yyyymmddhhmmss yyyymmddhhmmss\n"
-      << "      -start \"yyyy mm dd hh mm ss\" -end \"yyyy mm dd hh mm ss\"\n"
+  out << "Usage: " << _progName << " [options as below]\n"
+      << "Compute QPE at surface in polar/cartesian coords\n"
+      << "Options:\n"
+      << "\n"
+      << "  [ -h ] produce this list.\n"
+      << "\n"
+      << "  [ -cart_outdir ? ] set directory for cartesian results\n"
+      << "\n"
+      << "  [ -input_dir ? ] set input data directory\n"
+      << "                   REALTIME and ARCHIVE modes\n"
+      << "\n"
+      << "  [ -d, -debug ] print debug messages\n"
+      << "  [ -debug_trigger ] print debug messages about triggering\n"
+      << "  [ -debug_realtime ] print debug messages about realtime ops\n"
+      << "  [ -debug_methods ] print debug messages about classes and methods\n"
+      << "\n"
+      << "  [ -end \"yyyy mm dd hh mm ss\"] end time\n"
+      << "           Sets mode to ARCHIVE\n"
+      << "\n"
+      << "  [ -f ? ] set file paths\n"
+      << "           Sets mode to FILELIST\n"
+      << "\n"
+      << "  [ -instance ?] specify the instance\n"
+      << "     app will register with procmap using this instance\n"
+      << "     forces REALTIME mode\n"
+      << "\n"
+      << "  [ -polar_outdir ? ] set directory for polar results\n"
+      << "\n"
+      << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
+      << "           Sets mode to ARCHIVE\n"
+      << "\n"
+      << "  [ -v, -verbose ] print verbose debug messages\n"
+      << "\n"
       << endl;
-  
+
   Params::usage(out);
 
 }

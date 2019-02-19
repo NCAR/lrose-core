@@ -35,26 +35,74 @@
 InputData::InputData(const Parms &params, const Args &args) :
   Data(params),  _trigger(NULL)
 {
+
+  isOK = true;
+
+  // filelist mode
+  
   _fileListPos = 0;
-  if (args.inputFileList.size() > 0) 
-  {
-    // filelist mode
+
+  if (_params.mode == Params::FILELIST) {
+
+    // FILELIST mode
+    
+    if (args.inputFileList.size() == 0) {
+      cerr << "ERROR - RadxQpe::InputData" << endl;
+      cerr << "  FILELIST mode - no files specified on command line" << endl;
+      cerr << "  Use the -f arg" << endl;
+      isOK = false;
+      return;
+    }
+    
     _inputFileList = args.inputFileList;
-  }
-  else
-  {
-    if (args._isArchive)
-    {
-      // archive mode
-      _trigger = new DsUrlTrigger(args._archiveT0, args._archiveT1, 
-                                  params.data_url, DsUrlTrigger::OBS, false);
+
+  } else if (_params.mode == Params::ARCHIVE) {
+
+    // ARCHIVE mode
+    
+    time_t startTime = RadxTime::parseDateTime(_params.start_time);
+    if (startTime == RadxTime::NEVER) {
+      cerr << "ERROR - RadxQpe::InputData" << endl;
+      cerr << "  Start time format incorrect: " << _params.start_time << endl;
+      if (args.startTimeSet) {
+        cerr << "  Check command line" << endl;
+      } else {
+        cerr << "  Check params file" << endl;
+      }
+      isOK = false;
+      return;
     }
-    else
-    {
-      // realtime mode
-      _trigger = new DsUrlTrigger(params.data_url, DsUrlTrigger::OBS, false);
+    
+    time_t endTime = RadxTime::parseDateTime(_params.end_time);
+    if (endTime == RadxTime::NEVER) {
+      cerr << "ERROR - RadxQpe::InputData" << endl;
+      cerr << "  End time format incorrect: " << _params.end_time << endl;
+      if (args.endTimeSet) {
+        cerr << "  Check command line" << endl;
+      } else {
+        cerr << "  Check params file" << endl;
+      }
+      isOK = false;
+      return;
     }
+
+    if (_params.debug_norm) {
+      cerr << "RadxQpe::InputData" << endl;
+      cerr << "  Input dir: " << _params.input_dir << endl;
+      cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
+      cerr << "  End time: " << RadxTime::strm(endTime) << endl;
+    }
+
+    _trigger = new DsUrlTrigger(startTime, endTime, 
+                                params.input_dir, DsUrlTrigger::OBS, false);
+    
+  } else {
+
+    // REALTIME mode
+
+    _trigger = new DsUrlTrigger(params.input_dir, DsUrlTrigger::OBS, false);
   }
+
 }
 
 //----------------------------------------------------------------
@@ -73,18 +121,17 @@ bool InputData::nextVolume(time_t &t)
   // set up field list
 
   vector<string> fields;
-  for (int i=0; i<_params.numRainRate(); ++i)
-  {
+  for (int i=0; i<_params.numRate(); ++i) {
     fields.push_back(_params.ithInputPrecipName(i));
   }
-  if (_params.hasSnr())
-  {
-    fields.push_back(_params.snr_field);
+  if (_params.SNR_available) {
+    fields.push_back(_params.SNR_field_name);
+  } else {
+    fields.push_back(_params.DBZ_field_name);
   }
-  fields.push_back(_params.pid_field);
+  fields.push_back(_params.PID_field_name);
 
-  if (_inputFileList.size() > 0)
-  {
+  if (_inputFileList.size() > 0) {
     // filelist mode
     if (_fileListPos >= _inputFileList.size()) {
       return false;
@@ -98,17 +145,12 @@ bool InputData::nextVolume(time_t &t)
       LOG(LogMsg::ERROR, path);
     }
     return read(path, fields);
-  }
-  else
-  {
-    if (_trigger->nextTime(t))
-    {
+  } else {
+    if (_trigger->nextTime(t)) {
       LOGF(LogMsg::PRINT, "---Triggered %s ---",  DateTime::strn(t).c_str());
       
       return read(t, fields);
-    }
-    else
-    {
+    } else {
       return false;
     }
   }
