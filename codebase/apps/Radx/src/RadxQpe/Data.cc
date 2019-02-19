@@ -120,7 +120,7 @@ bool Data::read(const time_t &t,
 {
   RadxTimeList tlist;
   tlist.setDir(_params.input_dir);
-  tlist.setModeFirstBefore(t, _params.input_time_margin_seconds);
+  tlist.setModeClosest(t, _params.input_time_margin_seconds);
 
   if (tlist.compile())
   {

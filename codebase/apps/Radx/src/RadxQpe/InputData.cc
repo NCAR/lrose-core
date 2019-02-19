@@ -94,13 +94,17 @@ InputData::InputData(const Parms &params, const Args &args) :
     }
 
     _trigger = new DsUrlTrigger(startTime, endTime, 
-                                params.input_dir, DsUrlTrigger::OBS, false);
+                                params.input_dir,
+                                DsUrlTrigger::OBS, 
+                                _params.debug_verbose);
     
   } else {
 
     // REALTIME mode
 
-    _trigger = new DsUrlTrigger(params.input_dir, DsUrlTrigger::OBS, false);
+    _trigger = new DsUrlTrigger(params.input_dir,
+                                DsUrlTrigger::OBS,
+                                _params.debug_verbose);
   }
 
 }

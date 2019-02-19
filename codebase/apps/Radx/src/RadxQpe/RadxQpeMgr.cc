@@ -90,6 +90,9 @@ RadxQpeMgr::RadxQpeMgr(int argc, char **argv, void tidyAndExit(int)) :
   // use params to create the remaining objects
   _alg = new RadxQpe(*_params);
   _data = new InputData(*_params, args);
+  if (!_data->isOK) {
+    _isOK = false;
+  }
   _out = new OutputData(*_params);
   _beamBlock = new BeamBlock(*_params);
 
