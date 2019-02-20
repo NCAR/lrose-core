@@ -442,3 +442,59 @@ void Rsl::verifyEqualDimensions(Volume *currDbzVol, Volume *currVelVol) {
     }
   }
 }
+
+void Rsl::verifyEqualDimensionsGetMaxDimensions(Volume *currDbzVol, Volume *currVelVol, int *maxNBins, int *maxNRays) {
+
+  if ((currDbzVol == NULL) || (currVelVol == NULL))
+    throw "ERROR - velocity or reflectivity Volume is NULL";
+
+  // check number of sweeps
+  if (currDbzVol->h.nsweeps != currVelVol->h.nsweeps)
+    throw "ERROR - velocity and reflectivity must has same number of sweeps";
+
+  int maxBins = 0;
+  int maxRays = 0;
+
+  for (int s=0; s<currDbzVol->h.nsweeps; s++) {
+    // check for NULL
+    if ((currDbzVol->sweep[s] == NULL) || (currVelVol->sweep[s] == NULL)) {
+      char msg[1024];
+      sprintf(msg, "ERROR - velocity or reflectivity sweep[%d] is NULL\n", s);
+      throw msg;
+    }
+    if (currDbzVol->sweep[s]->h.nrays != currVelVol->sweep[s]->h.nrays) {
+      char msg[1024];
+      sprintf(msg, "ERROR - velocity and reflectivity need same number of rays for each sweep\n. Check sweep %d\n", s);
+      throw msg;
+    }
+    // we're ok; check the number of rays
+    int nrays = currDbzVol->sweep[s]->h.nrays;
+    if (nrays > maxRays)
+      maxRays = nrays;
+    
+    for (int r=0; r<currDbzVol->sweep[s]->h.nrays; r++) {
+      // check for NULL
+      if ((currDbzVol->sweep[s]->ray[r] == NULL) || (currVelVol->sweep[s]->ray[r] == NULL)) {
+        char msg[1024];
+        sprintf(msg, "ERROR - velocity or reflectivity ray is NULL; sweep[%d] ray[%d]\n.", s, r);
+        throw msg;
+      }
+      if (currDbzVol->sweep[s]->ray[r]->h.nbins != currVelVol->sweep[s]->ray[r]->h.nbins) {
+        char msg[1024];
+        sprintf(msg, "ERROR - velocity and reflectivity need same number of bins for each ray\n. Check ray %d\n", r);
+        throw msg;
+      }
+      // we're ok; check the number of bins
+      int nbins = currDbzVol->sweep[s]->ray[r]->h.nbins;
+      if (nbins > maxBins)
+	maxBins = nbins;
+
+    } // for bins
+  } // for rays
+
+  *maxNBins = maxBins;
+  *maxNRays = maxRays;
+
+  cout << " found " << *maxNBins << " bins and " << *maxNRays << " rays" << endl;
+
+}

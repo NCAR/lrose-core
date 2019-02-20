@@ -218,7 +218,7 @@ int RadxDealias::_run(vector<string> fileList)
 	  throw "Error, velocity or reflectivity field could not be read from data file";
 
 	// TODO: this could be coordinated with find maxNBins & maxNRays
-	Rsl::verifyEqualDimensions(currDbzVol, currVelVol);
+	//Rsl::verifyEqualDimensions(currDbzVol, currVelVol);
 
 	// override Nyquist frequency if directed from params file
 	if (_params.nyquist_mps != 0.0) {

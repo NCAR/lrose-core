@@ -150,7 +150,7 @@ int FourDD::Dealias(Volume *lastVelVol, Volume *currVelVol, Volume *currDbzVol,
   // Create first guess field from VAD and put in soundVolume.
   //  
   soundVolume = Rsl::copy_volume(currVelVol);
-  Rsl::verifyEqualDimensions(soundVolume, currVelVol);
+  // Rsl::verifyEqualDimensions(soundVolume, currVelVol);
 
   firstGuess(soundVolume, params.missing_vel, &firstGuessSuccess, volTime);
 
@@ -975,11 +975,15 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
     
      int maxNBins = 0;
      int maxNRays = 0;
-     int countNBins;
-     int countNRays;
+     //     int countNBins;
+     //int countNRays;
 
      unsigned short numtimes, dcase, flag=1, wsuccess;
+
      // determine max number of bins from data
+     Rsl::verifyEqualDimensionsGetMaxDimensions(rvVolume, soundVolume, &maxNBins, &maxNRays);
+
+     /*
      Rsl::findMaxNBins(rvVolume, &countNBins, &countNRays);
      if (countNBins > maxNBins) maxNBins = countNBins;
      if (countNRays > maxNRays) maxNRays = countNRays;
@@ -989,7 +993,8 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
      Rsl::findMaxNBins(rvVolume, &countNBins, &countNRays);
      if (countNBins > maxNBins) maxNBins = countNBins;
      if (countNRays > maxNRays) maxNRays = countNRays;
-     
+     */     
+
      // determine max number of rays from data
      short **GOOD = (short **) umalloc2(maxNBins,
                                         maxNRays,
