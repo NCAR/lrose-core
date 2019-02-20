@@ -228,9 +228,6 @@ int RadxDealias::_run(vector<string> fileList)
 
 	_processVol(prevVelVol, currVelVol, currDbzVol, volTime);
 
-	// seed the next unfolding with the results
-	prevVelVol = currVelVol;
-
 	//move the unfolded data back into the RadxVol structure
 	// first, move the data back to the rays, so that we can add a couple
 	// new fields to the rays                                                                                             
@@ -255,9 +252,15 @@ int RadxDealias::_run(vector<string> fileList)
 
       statusReport(nError, nGood);
 
+      // reset and free memory as needed
+      Rsl::free_volume(prevVelVol);
+      Rsl::free_volume(currDbzVol);
+
+      // seed the next unfolding with the results
+      prevVelVol = currVelVol;
+
       // clear all data on volume object
       vol.clear();
-      Rsl::free_volume(currDbzVol);
     } // end for each file
 
   if (_params.debug) {
@@ -554,7 +557,7 @@ void RadxDealias::_readFile(const string &readPath,
 
 //////////////////////////////////////////////////
 // write out the volume
-// TODO:  if errors encountered, throw a string exception
+// if errors encountered, throw a string exception
 void RadxDealias::_writeVol(RadxVol &vol)
 {
   
@@ -734,6 +737,7 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName,
       // copy the data ...
 
       newRay->range = (Range *) malloc(sizeof(Range) * newRay->h.nbins);
+      newRay->h.binDataAllocated = true;
       memcpy(newRay->range, data, sizeof(Range) * newRay->h.nbins);
 
     } // for each ray
