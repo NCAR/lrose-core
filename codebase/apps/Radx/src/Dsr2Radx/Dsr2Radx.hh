@@ -155,6 +155,7 @@ private:
   int _prevTiltNum;
   int _prevSweepNum;
   int _sweepNumOverride;
+  bool _sweepNumDecreasing;
   bool _endOfVol;
 
   // is this a solar scan?

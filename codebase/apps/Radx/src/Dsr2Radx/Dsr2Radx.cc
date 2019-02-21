@@ -84,6 +84,7 @@ Dsr2Radx::Dsr2Radx(int argc, char **argv)
   _prevTiltNum = -1;
   _prevSweepNum = -1;
   _sweepNumOverride = 1;
+  _sweepNumDecreasing = false;
   _endOfVol = false;
   _endOfVolTime = -1;
   _antenna = NULL;
@@ -403,7 +404,7 @@ int Dsr2Radx::_processRay(RadxRay *ray)
     _sweepNumbersMissing = true;
   } else if (ray->getSweepNumber() < _prevTiltNum) {
     // tilt number decreased, so reset sweepNum
-    _sweepNumOverride = 1;
+    _sweepNumDecreasing = true;
   }
   _prevTiltNum = ray->getSweepNumber();
 
@@ -434,7 +435,12 @@ int Dsr2Radx::_processRay(RadxRay *ray)
       double deltaPrev = _computeDeltaAngle(transDeg, prevAz);
       double deltaThis = _computeDeltaAngle(transDeg, thisAz);
       if (deltaPrev > 0 && deltaThis <= 0) {
-        _sweepNumOverride++;
+        if (_sweepNumDecreasing) {
+          _sweepNumOverride = 1;
+          _sweepNumDecreasing = false;
+        } else {
+          _sweepNumOverride++;
+        }
         if (_params.debug) {
           cerr << "====>> Forcing sweep number change, az: "
                << thisAz << " <<====" << endl;
@@ -507,8 +513,10 @@ int Dsr2Radx::_processRay(RadxRay *ray)
     if ((_nRaysRead > 0) && (_nRaysRead % nPrintFreq == 0) &&
         (int) _vol.getNRays() != _nCheckPrint) {
       _nCheckPrint = (int) _vol.getNRays();
-      cerr << "  nRays, latest time, el, az: "
+      cerr << "  nRays, sweep, vol, latest time, el, az: "
            << _nRaysRead << ", "
+           << ray->getSweepNumber() << ", "
+           << ray->getVolumeNumber() << ", "
            << utimstr(ray->getTimeSecs()) << ", "
            << ray->getElevationDeg() << ", "
            << ray->getAzimuthDeg() << endl;
@@ -522,8 +530,8 @@ int Dsr2Radx::_processRay(RadxRay *ray)
     if (_endOfVolTime < 0) {
       // initialize
       _computeEndOfVolTime(ray->getTimeSecs());
-    } else if ((_endOfVolTime - ray->getTimeSecs())
-               > _params.nsecs_per_volume) {
+    } else if ((_endOfVolTime - ray->getTimeSecs()) >
+               _params.nsecs_per_volume) {
       // we have gone back in time
       // maybe reprocessing old data
       if (_params.debug) {
@@ -542,7 +550,17 @@ int Dsr2Radx::_processRay(RadxRay *ray)
       _endOfVol = true;
     }
     
-  } else {
+  } else if (_params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
+    
+    int sweepNum = ray->getSweepNumber();
+    if (sweepNum >= 0 && sweepNum != _prevSweepNum) {
+      if (_prevSweepNum >= 0) {
+        _endOfVol = true;
+      }
+      _prevSweepNum = sweepNum;
+    }
+    
+  } else if (_params.end_of_vol_decision == Params::CHANGE_IN_VOL_NUM) {
     
     int volNum = ray->getVolumeNumber();
     if (volNum != -1 && volNum != _prevVolNum) {
@@ -550,26 +568,13 @@ int Dsr2Radx::_processRay(RadxRay *ray)
           _params.end_of_vol_decision == Params::CHANGE_IN_VOL_NUM) {
         _endOfVol = true;
       }
-      if (_prevVolNum != -99999 &&
-          _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
-        _endOfVol = true;
-      }
       _prevVolNum = volNum;
     }
     
-    int sweepNum = ray->getSweepNumber();
-    if (sweepNum >= 0 && sweepNum != _prevSweepNum) {
-      if (_prevSweepNum >= 0 &&
-          _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
-        _endOfVol = true;
-      }
-      _prevSweepNum = sweepNum;
-    }
+  } else if (_endOfVolAutomatic) {
     
-    if (_endOfVolAutomatic) {
-      if (_antenna->addRay(ray)) {
-        _endOfVol = true;
-      }
+    if (_antenna->addRay(ray)) {
+      _endOfVol = true;
     }
     
   } // if (_params.end_of_vol_decision == Params::ELAPSED_TIME
@@ -591,6 +596,7 @@ int Dsr2Radx::_processRay(RadxRay *ray)
   const vector<RadxEvent> &events = _reader->getEvents();
   if (!_endOfVolAutomatic &&
       _params.end_of_vol_decision != Params::CHANGE_IN_VOL_NUM &&
+      _params.end_of_vol_decision != Params::CHANGE_IN_SWEEP_NUM &&
       events.size() > 0) {
     
     for (size_t ievent = 0; ievent < events.size(); ievent++) {

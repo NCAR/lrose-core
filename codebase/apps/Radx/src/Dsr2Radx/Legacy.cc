@@ -69,6 +69,10 @@ Legacy::Legacy(const string &prog_name,
 
 {
 
+  if (_params.debug) {
+    cerr << "WARNING - using legacy processing" << endl;
+  }
+
   _clearData();
   _nCheckPrint = 0;
   _nWarnCensorPrint = 0;
@@ -82,6 +86,7 @@ Legacy::Legacy(const string &prog_name,
   _prevTiltNum = -1;
   _prevSweepNum = -1;
   _sweepNumOverride = 1;
+  _sweepNumDecreasing = false;
   _endOfVol = false;
   _endOfVolTime = -1;
   _antenna = NULL;
@@ -410,8 +415,10 @@ int Legacy::_readMsg(DsRadarQueue &radarQueue,
       if ((_nRaysRead > 0) && (_nRaysRead % nPrintFreq == 0) &&
           (int) _vol.getNRays() != _nCheckPrint) {
         _nCheckPrint = (int) _vol.getNRays();
-        cerr << "  nRays, latest time, el, az: "
+        cerr << "  nRays, sweep, vol, latest time, el, az: "
              << _nRaysRead << ", "
+             << ray->getSweepNumber() << ", "
+             << ray->getVolumeNumber() << ", "
              << utimstr(ray->getTimeSecs()) << ", "
              << ray->getElevationDeg() << ", "
              << ray->getAzimuthDeg() << endl;
@@ -425,7 +432,8 @@ int Legacy::_readMsg(DsRadarQueue &radarQueue,
       if (_endOfVolTime < 0) {
         // initialize
         _computeEndOfVolTime(ray->getTimeSecs());
-      } else if ((_endOfVolTime - ray->getTimeSecs()) > _params.nsecs_per_volume) {
+      } else if ((_endOfVolTime - ray->getTimeSecs()) >
+                 _params.nsecs_per_volume) {
         // we have gone back in time
         // maybe reprocessing old data
         if (_params.debug) {
@@ -444,37 +452,34 @@ int Legacy::_readMsg(DsRadarQueue &radarQueue,
         _endOfVol = true;
       }
 
-    } else {
-    
+    } else if (_params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
+
+      int sweepNum = ray->getSweepNumber();
+      if (sweepNum >= 0 && sweepNum != _prevSweepNum) {
+        if (_prevSweepNum >= 0) {
+          _endOfVol = true;
+        }
+        _prevSweepNum = sweepNum;
+      }
+      
+    } else if (_params.end_of_vol_decision == Params::CHANGE_IN_VOL_NUM) {
+
       int volNum = ray->getVolumeNumber();
       if (volNum != -1 && volNum != _prevVolNum) {
         if (_prevVolNum != -99999 &&
             _params.end_of_vol_decision == Params::CHANGE_IN_VOL_NUM) {
           _endOfVol = true;
         }
-        if (_prevVolNum != -99999 &&
-            _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
-          _endOfVol = true;
-        }
         _prevVolNum = volNum;
       }
       
-      int sweepNum = ray->getSweepNumber();
-      if (sweepNum >= 0 && sweepNum != _prevSweepNum) {
-        if (_prevSweepNum >= 0 &&
-            _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
-          _endOfVol = true;
-        }
-        _prevSweepNum = sweepNum;
-      }
-      
-      if (_endOfVolAutomatic) {
-        if (_antenna->addRay(ray)) {
-          _endOfVol = true;
-        }
+    } else if (_endOfVolAutomatic) {
+
+      if (_antenna->addRay(ray)) {
+        _endOfVol = true;
       }
 
-    } // else
+    } // if (_params.end_of_vol_decision == Params::ELAPSED_TIME) {
     
   } // if (msgContents ...
   
@@ -492,7 +497,7 @@ int Legacy::_readMsg(DsRadarQueue &radarQueue,
 
     if (_params.end_of_vol_decision == Params::END_OF_VOL_FLAG &&
         flags.endOfVolume) {
-
+      
       _endOfVol = true;
       
     } else if (_params.end_of_vol_decision == Params::LAST_SWEEP_IN_VOL &&
@@ -1218,7 +1223,7 @@ RadxRay *Legacy::_createInputRay(const DsRadarMsg &radarMsg,
   ray->setVolumeNumber(rbeam.volumeNum);
   if (rbeam.tiltNum < _prevTiltNum) {
     // tilt number decreased, so reset sweepNum
-    _sweepNumOverride = 1;
+    _sweepNumDecreasing = true;
   }
   _prevTiltNum = rbeam.tiltNum;
   ray->setSweepNumber(rbeam.tiltNum);
@@ -1262,7 +1267,12 @@ RadxRay *Legacy::_createInputRay(const DsRadarMsg &radarMsg,
       double deltaPrev = _computeDeltaAngle(transDeg, prevAz);
       double deltaThis = _computeDeltaAngle(transDeg, thisAz);
       if (deltaPrev > 0 && deltaThis <= 0) {
-        _sweepNumOverride++;
+        if (_sweepNumDecreasing) {
+          _sweepNumOverride = 1;
+          _sweepNumDecreasing = false;
+        } else {
+          _sweepNumOverride++;
+        }
         if (_params.debug) {
           cerr << "====>> Forcing sweep number change, az: "
                << thisAz << " <<====" << endl;
