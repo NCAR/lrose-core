@@ -647,10 +647,12 @@ int BeamReader::_readConstantSteeringAngleBeam()
 
     if ((fabs(az - pulse->getAz()) > 1.0e-3) ||
         (fabs(el - pulse->getEl()) > 1.0e-3)) {
-      // new angle
-      // save pulse for next beam
-      _cacheLatestPulse();
-      break;
+      if (count > 1) {
+        // new angle
+        // save pulse for next beam
+        _cacheLatestPulse();
+        break;
+      }
     }
     
     count++;
