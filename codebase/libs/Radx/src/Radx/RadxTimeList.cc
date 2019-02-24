@@ -771,6 +771,19 @@ void RadxTimeList::_addValid(const string &dayDir,
       fileStartTime = etime;
       fileEndTime = etime;
       break;
+    } else if (sscanf(start, "%4d%2d%2d%1c%2d%2d",
+                      &year, &month, &day, &cc, &hour, &min) == 6) {
+      // extended format - yyyymmdd_hhmmss
+      if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
+        return;
+      }
+      if (hour < 0 || hour > 23 || min < 0 || min > 59) {
+        return;
+      }
+      RadxTime etime(year, month, day, hour, min, 0);
+      fileStartTime = etime;
+      fileEndTime = etime;
+      break;
     } else if (sscanf(start, "%2d%2d%2d", &hour, &min, &sec) == 3) {
       // normal format - yyyymmdd/hhmmss
       if (hour < 0 || hour > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {

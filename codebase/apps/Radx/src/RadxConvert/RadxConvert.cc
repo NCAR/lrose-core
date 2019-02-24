@@ -296,7 +296,7 @@ int RadxConvert::_runArchive()
     tlist.setReadAggregateSweeps(true);
   }
   if (tlist.compile()) {
-    cerr << "ERROR - RadxConvert::_runFilelist()" << endl;
+    cerr << "ERROR - RadxConvert::_runArchive()" << endl;
     cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(_args.startTime) << endl;
     cerr << "  End time: " << RadxTime::strm(_args.endTime) << endl;
@@ -306,7 +306,7 @@ int RadxConvert::_runArchive()
 
   const vector<string> &paths = tlist.getPathList();
   if (paths.size() < 1) {
-    cerr << "ERROR - RadxConvert::_runFilelist()" << endl;
+    cerr << "ERROR - RadxConvert::_runArchive()" << endl;
     cerr << "  No files found, dir: " << _params.input_dir << endl;
     return -1;
   }
