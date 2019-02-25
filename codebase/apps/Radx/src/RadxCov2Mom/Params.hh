@@ -120,11 +120,12 @@ public:
 
   typedef enum {
     SINGLE_POL = 0,
-    DUAL_POL_ALT_HV_CO_ONLY = 1,
-    DUAL_POL_ALT_HV_CO_CROSS = 2,
-    DUAL_POL_SIM_HV = 3,
-    DUAL_POL_H_ONLY = 4,
-    DUAL_POL_V_ONLY = 5
+    SINGLE_POL_V = 1,
+    DUAL_POL_ALT_HV_CO_ONLY = 2,
+    DUAL_POL_ALT_HV_CO_CROSS = 3,
+    DUAL_POL_SIM_HV = 4,
+    DUAL_POL_H_ONLY = 5,
+    DUAL_POL_V_ONLY = 6
   } xmit_rcv_mode_t;
 
   typedef enum {

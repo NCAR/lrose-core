@@ -891,6 +891,9 @@ void Beam::_computeMoments()
       _computeMomDpVOnly();
       break;
       
+    case IWRF_SINGLE_POL_V:
+      _computeMomSpV();
+      
     case IWRF_SINGLE_POL:
     default:
       if (_applySz1) {
@@ -898,7 +901,7 @@ void Beam::_computeMoments()
       } else if (_isStagPrt) {
         _computeMomSpStagPrt();
       } else {
-        _computeMomSp();
+        _computeMomSpH();
       }
       
   }
@@ -948,6 +951,9 @@ void Beam::_filterMoments()
       }
       break;
       
+    case IWRF_SINGLE_POL_V:
+      _filterSpV();
+      
     case IWRF_SINGLE_POL:
     default:
       if (_applySz1) {
@@ -955,7 +961,7 @@ void Beam::_filterMoments()
       } else if (_isStagPrt) {
         _filterSpStagPrt();
       } else {
-        _filterSp();
+        _filterSpH();
       }
       
   }
@@ -1008,10 +1014,10 @@ void Beam::_computeTripNcp()
 }
   
 ///////////////////////////////////////////////////////////
-// Compute moments - SP
+// Compute moments - single pol H channel
 // Single pol, data in hc
 
-void Beam::_computeMomSp()
+void Beam::_computeMomSpH()
 
 {
 
@@ -1067,14 +1073,14 @@ void Beam::_computeMomSp()
   for (int igate = 0; igate < _nGates; igate++) {
     GateData *gate = _gateData[igate];
     MomentsFields &fields = _momFields[igate];
-    _mom->computeCovarSinglePol(gate->iqhc, fields);
-    _mom->singlePolNoisePrep(fields.lag0_hc, fields.lag1_hc, fields);
+    _mom->computeCovarSinglePolH(gate->iqhc, fields);
+    _mom->singlePolHNoisePrep(fields.lag0_hc, fields.lag1_hc, fields);
   }
   
   // identify noise regions, and compute the mean noise
   // mean noise values are stored in moments
   
-  _noise->computeNoiseSinglePol(_momFields);
+  _noise->computeNoiseSinglePolH(_momFields);
   _noise->addToMoments(_momFields);
   
   // override noise for moments computations
@@ -1092,12 +1098,12 @@ void Beam::_computeMomSp()
     GateData *gate = _gateData[igate];
     MomentsFields &fields = _momFields[igate];
       
-    _mom->computeMomSinglePol(fields.lag0_hc,
-                              fields.lag1_hc,
-                              fields.lag2_hc,
-                              fields.lag3_hc,
-                              igate,
-                              fields);
+    _mom->computeMomSinglePolH(fields.lag0_hc,
+                               fields.lag1_hc,
+                               fields.lag2_hc,
+                               fields.lag3_hc,
+                               igate,
+                               fields);
 
     // wind farm check
 
@@ -1128,6 +1134,126 @@ void Beam::_computeMomSp()
 }
 
 ///////////////////////////////////////////////////////////
+// Compute moments - single pol V channel
+// Single pol, data in vc
+
+void Beam::_computeMomSpV()
+
+{
+
+  double noisePower = _calib.getNoiseDbmVc();
+  double notchWidth = _params.notch_width_for_offzero_snr;
+
+  // copy gate fields to _momFields array
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    _momFields[igate] = _gateData[igate]->fields;
+  }
+
+  // phase code processing
+
+  if (_applyPhaseDecoding) {
+
+    // compute ncp for all appropriate trips
+    
+    for (int igate = 0; igate < _nGates; igate++) {
+      GateData *gate = _gateData[igate];
+      memcpy(gate->iqTrip1, gate->iqvc, _nSamples * sizeof(RadarComplex_t));
+    }
+    _computeTripNcp();
+
+    // mitigate second trip
+
+    for (int igate = 0; igate < _nGates; igate++) {
+      
+      GateData *gate = _gateData[igate];
+      MomentsFields &fields = _momFields[igate];
+
+      // check ncp
+      
+      if (fields.ncp_trip2 < _params.phase_decoding_ncp_threshold) {
+        continue;
+      }
+      
+      // notch out second trip
+
+      _pcode.applyNotch(*_fft, gate->iqTrip2, _params.phase_decoding_notch_width);
+      
+      // cohere back to first trip
+
+      _pcode.revertFromTrip2(gate->iqTrip2, _burstPhases, gate->iqMeas);
+      _pcode.cohereToTrip1(gate->iqMeas, _burstPhases, gate->iqvc);
+      
+    } // igate
+
+  } // if (_applyPhaseDecoding ...
+  
+  // compute covariances and prepare for noise comps
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    GateData *gate = _gateData[igate];
+    MomentsFields &fields = _momFields[igate];
+    _mom->computeCovarSinglePolV(gate->iqvc, fields);
+    _mom->singlePolVNoisePrep(fields.lag0_vc, fields.lag1_vc, fields);
+  }
+  
+  // identify noise regions, and compute the mean noise
+  // mean noise values are stored in moments
+  
+  _noise->computeNoiseSinglePolV(_momFields);
+  _noise->addToMoments(_momFields);
+  
+  // override noise for moments computations
+  
+  double noisePowerVc = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
+  if (_params.use_estimated_noise_for_noise_subtraction) {
+    _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
+    noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
+  }
+
+  // compute main moments
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    
+    GateData *gate = _gateData[igate];
+    MomentsFields &fields = _momFields[igate];
+      
+    _mom->computeMomSinglePolV(fields.lag0_vc,
+                               fields.lag1_vc,
+                               fields.lag2_vc,
+                               fields.lag3_vc,
+                               igate,
+                               fields);
+
+    // wind farm check
+
+    if (_checkForWindfarms &&
+        fields.snrvc > _minSnrForWindfarmCheck &&
+        fields.cpa > _minCpaForWindfarmCheck) {
+      double spectralNoise, spectralSnr;
+      _mom->computeSpectralSnr(_nSamples, *_fft,
+                               gate->iqvc, gate->specVc,
+                               noisePowerVc,
+                               spectralNoise, spectralSnr);
+      gate->specVcComputed = true;
+      fields.spectral_noise = 10.0 * log10(spectralNoise);
+      fields.spectral_snr = 10.0 * log10(spectralSnr);
+    }
+    
+    gate->fields.ozsnr =
+      _mom->computeOzSnr(gate->iqvcOrig, _windowVonHann, _nSamples,
+                         *_fft, notchWidth, noisePower);
+  } // igate
+
+  // copy back to gate data
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    _gateData[igate]->fields = _momFields[igate];
+  }
+
+}
+
+///////////////////////////////////////////////////////////
 // Compute moments - SP - phase coding applies
 // Single pol, data in hc
 
@@ -1137,7 +1263,7 @@ void Beam::_computeMomSpSz()
 
   for (int igate = 0; igate < _nGates; igate++) {
     GateData *gate = _gateData[igate];
-    _mom->singlePolSz864(*gate, _txDelta12, igate, _nGates, *_fft);
+    _mom->singlePolHSz864(*gate, _txDelta12, igate, _nGates, *_fft);
   }
 
 }
@@ -1161,16 +1287,16 @@ void Beam::_computeMomSpStagPrt()
   for (int igate = 0; igate < _nGates; igate++) {
     GateData *gate = _gateData[igate];
     MomentsFields &fields = _momFields[igate];
-    _mom->singlePolStagPrtNoisePrep(gate->iqhcOrig,
-                                    gate->iqhcPrtShort,
-                                    gate->iqhcPrtLong,
-                                    fields);
+    _mom->singlePolHStagPrtNoisePrep(gate->iqhcOrig,
+                                     gate->iqhcPrtShort,
+                                     gate->iqhcPrtLong,
+                                     fields);
   }
   
   // identify noise regions, and compute the mean noise
   // mean noise values are stored in moments
   
-  _noise->computeNoiseSinglePol(_momFields);
+  _noise->computeNoiseSinglePolH(_momFields);
   _noise->addToMoments(_momFields);
   
   // override noise for moments computations
@@ -1186,10 +1312,10 @@ void Beam::_computeMomSpStagPrt()
       
     // compute main moments
       
-    _mom->singlePolStagPrt(gate->iqhcOrig,
-                           gate->iqhcPrtShort,
-                           gate->iqhcPrtLong,
-                           igate, false, fields);
+    _mom->singlePolHStagPrt(gate->iqhcOrig,
+                            gate->iqhcPrtShort,
+                            gate->iqhcPrtLong,
+                            igate, false, fields);
     
   } // igate
 
@@ -1754,10 +1880,10 @@ void Beam::_computeMomDpVOnly()
 }
 
 ///////////////////////////////////////////////////////////
-// Filter clutter SP
+// Filter clutter SP, horizontal channel
 // Single pol, data in hc
 
-void Beam::_filterSp()
+void Beam::_filterSpH()
 {
 
   double calibNoise = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
@@ -1807,16 +1933,88 @@ void Beam::_filterSp()
     
     // compute filtered moments for this gate
     
-    _mom->computeCovarSinglePol(gate->iqhcF,
-                                fieldsF);
+    _mom->computeCovarSinglePolH(gate->iqhcF,
+                                 fieldsF);
     
-    _mom->computeMomSinglePol(fieldsF.lag0_hc,
-                              fieldsF.lag1_hc,
-                              fieldsF.lag2_hc,
-                              fieldsF.lag3_hc,
-                              igate,
-                              fieldsF);
+    _mom->computeMomSinglePolH(fieldsF.lag0_hc,
+                               fieldsF.lag1_hc,
+                               fieldsF.lag2_hc,
+                               fieldsF.lag3_hc,
+                               igate,
+                               fieldsF);
+    
+    // compute clutter power
+    
+    gate->fields.clut = _computeClutPower(fields, fieldsF);
+    
+  } // igate
 
+}
+
+///////////////////////////////////////////////////////////
+// Filter clutter SP, vertical channel
+// Single pol, data in vc
+
+void Beam::_filterSpV()
+{
+
+  double calibNoise = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
+
+  for (int igate = 0; igate < _nGates; igate++) {
+      
+    GateData *gate = _gateData[igate];
+    MomentsFields &fields = gate->fields;
+    MomentsFields &fieldsF = gate->fieldsF;
+
+    // check if we have clutter at this gate
+    
+    if (!gate->fields.cmd_flag) {
+      continue;
+    }
+      
+    // filter the VC time series
+    
+    double spectralNoise = 1.0e-13;
+    double filterRatio = 1.0;
+    double spectralSnr = 1.0;
+
+    RadarComplex_t *specVc = NULL;
+    if (gate->specVcComputed) {
+      specVc = gate->specVc;
+    }
+    
+    _mom->applyClutterFilter(_nSamples,
+                             *_fft,
+                             *_regr,
+                             _window,
+                             gate->iqvcOrig,
+                             gate->iqvc, specVc,
+                             calibNoise,
+                             gate->iqvcF, NULL,
+                             filterRatio,
+                             spectralNoise,
+                             spectralSnr);
+    
+    if (filterRatio > 1.0) {
+      fields.clut_2_wx_ratio = 10.0 * log10(filterRatio - 1.0);
+    } else {
+      fields.clut_2_wx_ratio = MomentsFields::missingDouble;
+    }
+    fields.spectral_noise = 10.0 * log10(spectralNoise);
+    fields.spectral_snr = 10.0 * log10(spectralSnr);
+    
+    // compute filtered moments for this gate
+    
+    _mom->computeCovarSinglePolV(gate->iqvcF,
+                                 fieldsF);
+    
+    _mom->computeMomSinglePolV(fieldsF.lag0_vc,
+                               fieldsF.lag1_vc,
+                               fieldsF.lag2_vc,
+                               fieldsF.lag3_vc,
+                               igate,
+                               fieldsF);
+    
     // compute clutter power
     
     gate->fields.clut = _computeClutPower(fields, fieldsF);
@@ -1898,10 +2096,10 @@ void Beam::_filterRegrSpStagPrt()
     
     // compute filtered moments for this gate
     
-    _mom->singlePolStagPrt(gate->iqhc,
-                           gate->iqhcPrtShortF,
-                           gate->iqhcPrtLongF,
-                           igate, true, fieldsF);
+    _mom->singlePolHStagPrt(gate->iqhc,
+                            gate->iqhcPrtShortF,
+                            gate->iqhcPrtLongF,
+                            igate, true, fieldsF);
     
     // compute clutter power
     
@@ -1958,10 +2156,10 @@ void Beam::_filterAdapSpStagPrt()
     
     // compute filtered moments for this gate
     
-    _mom->singlePolStagPrt(gate->iqhc,
-                           gate->iqhcPrtShortF,
-                           gate->iqhcPrtLongF,
-                           igate, true, fieldsF);
+    _mom->singlePolHStagPrt(gate->iqhc,
+                            gate->iqhcPrtShortF,
+                            gate->iqhcPrtLongF,
+                            igate, true, fieldsF);
     
     // compute clutter power
     
@@ -2020,7 +2218,7 @@ void Beam::_filterSpSz864()
     
     // compute moments
     
-    _mom->singlePolSz864Filtered(*gate, igate, _nGates);
+    _mom->singlePolHSz864Filtered(*gate, igate, _nGates);
     
     // compute clutter power
     

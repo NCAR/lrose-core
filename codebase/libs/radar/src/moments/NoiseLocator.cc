@@ -534,7 +534,7 @@ void NoiseLocator::_computeNcpMean(const MomentsFields *mfields)
 // The following must be set in mfields prior to calling:
 //   lag0_hc_db
 
-void NoiseLocator::computeNoiseSinglePol(MomentsFields *mfields)
+void NoiseLocator::computeNoiseSinglePolH(MomentsFields *mfields)
   
   
 {
@@ -629,6 +629,108 @@ void NoiseLocator::computeNoiseSinglePol(MomentsFields *mfields)
   for (int igate = 0; igate < _nGates; igate++) {
     MomentsFields &mfield = mfields[igate];
     mfield.noise_bias_db_hc = _noiseBiasDbHc;
+  }
+  
+}
+
+// The following must be set in mfields prior to calling:
+//   lag0_vc_db
+
+void NoiseLocator::computeNoiseSinglePolV(MomentsFields *mfields)
+  
+  
+{
+
+  // initialize
+
+  _medianNoiseDbmVc = _calib.getNoiseDbmVc();
+
+  // locate the noise gates
+  
+  locate(mfields);
+  
+  if (_computeMethod == RAY_BY_RAY) {
+  
+    // compute median noise for ray
+    
+    vector<double> noiseVc;
+    for (int igate = 0; igate < _nGates; igate++) {
+      const MomentsFields &mfield = mfields[igate];
+      if (_noiseFlag[igate]) {
+        noiseVc.push_back(mfield.lag0_vc_db);
+      }
+    }
+    
+    // set mean noise if noise was present at a large enough number
+    // of gates, otherwise use the calibrated noise
+    
+    if ((int) noiseVc.size() >= _minNGatesRayMedian) {
+      
+      _medianNoiseDbmVc = _computeMedian(noiseVc);
+      
+      // save the data in a grid
+      
+      pthread_mutex_lock(&_prevGridMutex);
+      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
+      nval.noiseVc = _medianNoiseDbmVc;
+      pthread_mutex_unlock(&_prevGridMutex);
+      
+    } else {
+      
+      // check for previously saved data
+      
+      noise_val_t prev;
+      if (_getSavedNoiseClosestVc(prev) == 0) {
+        // use previously saved data
+        _medianNoiseDbmVc = prev.noiseVc;
+      }
+      
+    }
+
+  } else {
+
+    // running MEDIAN method
+    
+    pthread_mutex_lock(&_runningMedianMutex);
+    
+    for (int igate = 0; igate < _nGates; igate++) {
+      
+      // add valid gates to the arrays
+      
+      const MomentsFields &mfield = mfields[igate];
+      if (_noiseFlag[igate]) {
+        _runningValsDbmVc[_nGatesRunningCount] = mfield.lag0_vc_db;
+        _nGatesRunningCount++;
+      }
+      
+      if (_nGatesRunningCount == _nGatesRunningMedian) {
+        
+        // if reached correct size, compute the medians
+        
+        _runningMedianNoiseDbmVc = _computeMedian(_runningValsDbmVc);
+        _nGatesRunningCount = 0;
+        
+      }
+      
+    } // igate
+    
+    // set the mean to the latest median
+    
+    if (_runningMedianNoiseDbmVc > -9990) {
+      _medianNoiseDbmVc = _runningMedianNoiseDbmVc;
+    }
+
+    pthread_mutex_unlock(&_runningMedianMutex);
+
+  }
+
+  // set the noise bias in the moments
+
+  _noiseBiasDbVc = _medianNoiseDbmVc - _calib.getNoiseDbmVc();
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    MomentsFields &mfield = mfields[igate];
+    mfield.noise_bias_db_vc = _noiseBiasDbVc;
   }
   
 }

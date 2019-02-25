@@ -1699,6 +1699,7 @@ string iwrf_xmit_rcv_mode_to_str(int xmit_rcv_mode)
     case IWRF_H_ONLY_FIXED_HV: return "IWRF_H_ONLY_FIXED_HV";
     case IWRF_V_ONLY_FIXED_HV: return "IWRF_V_ONLY_FIXED_HV";
     case IWRF_ALT_HHVV_FIXED_HV: return "IWRF_ALT_HHVV_FIXED_HV";
+    case IWRF_SINGLE_POL_V: return "IWRF_SINGLE_POL_V";
     default: return "UNKNOWN";
   }
 

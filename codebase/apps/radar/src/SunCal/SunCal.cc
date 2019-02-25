@@ -2151,7 +2151,7 @@ void SunCal::_computeMomentsAllGates()
                      igate, false, _fields[igate]);
       }
     } else {
-      rmom.singlePol(gate->iqhc, igate, false, _fields[igate]);
+      rmom.singlePolH(gate->iqhc, igate, false, _fields[igate]);
     }
 
   } // igate

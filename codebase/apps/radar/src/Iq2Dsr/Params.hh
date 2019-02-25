@@ -103,7 +103,8 @@ public:
     DP_SIM_HV_FIXED_HV = 4,
     DP_SIM_HV_SWITCHED_HV = 5,
     DP_H_ONLY_FIXED_HV = 6,
-    DP_V_ONLY_FIXED_HV = 7
+    DP_V_ONLY_FIXED_HV = 7,
+    SINGLE_POL_V = 10
   } xmit_rcv_mode_t;
 
   typedef enum {

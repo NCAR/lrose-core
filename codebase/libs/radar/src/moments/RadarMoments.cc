@@ -314,10 +314,10 @@ void RadarMoments::setDbForDb(double db_for_db_ratio,
 ///////////////////////////////////////////////////////////
 // Compute covariances
 // Single polarization
-// Assumes the data is in the horizontal channel
+// Horizontal channel
 
-void RadarMoments::computeCovarSinglePol(RadarComplex_t *iqhc,
-                                         MomentsFields &fields)
+void RadarMoments::computeCovarSinglePolH(RadarComplex_t *iqhc,
+                                          MomentsFields &fields)
   
 {
   
@@ -344,6 +344,43 @@ void RadarMoments::computeCovarSinglePol(RadarComplex_t *iqhc,
     fields.cpa = computeCpaAlt(iqhc, _nSamples);
   } else {
     fields.cpa = computeCpa(iqhc, _nSamples);
+  }
+
+}
+
+///////////////////////////////////////////////////////////
+// Compute covariances
+// Single polarization
+// Vertical channel
+
+void RadarMoments::computeCovarSinglePolV(RadarComplex_t *iqvc,
+                                          MomentsFields &fields)
+  
+{
+  
+  // covariances
+
+  fields.lag0_vc = RadarComplex::meanPower(iqvc, _nSamples);
+
+  fields.lag1_vc =
+    RadarComplex::meanConjugateProduct(iqvc + 1, iqvc, _nSamples - 1);
+  
+  fields.lag2_vc =
+    RadarComplex::meanConjugateProduct(iqvc + 2, iqvc, _nSamples - 2);
+
+  fields.lag3_vc =
+    RadarComplex::meanConjugateProduct(iqvc + 3, iqvc, _nSamples - 3);
+  
+  // refractivity
+  
+  computeRefract(iqvc, _nSamples, fields.aiq_vc, fields.niq_vc, _changeAiqSign);
+  
+  // CPA
+  
+  if (_computeCpaUsingAlt) {
+    fields.cpa = computeCpaAlt(iqvc, _nSamples);
+  } else {
+    fields.cpa = computeCpa(iqvc, _nSamples);
   }
 
 }
@@ -612,13 +649,13 @@ void RadarMoments::computeCovarDpVOnly(RadarComplex_t *iqvc,
 
 ///////////////////////////////////////////////////////////
 // Single polarization
-// Assumes the data is in the horizontal channel
+// Horizontal channel
 // IQ passed in
 
-void RadarMoments::singlePol(RadarComplex_t *iqhc,
-                             int gateNum,
-                             bool isFiltered,
-                             MomentsFields &fields)
+void RadarMoments::singlePolH(RadarComplex_t *iqhc,
+                              int gateNum,
+                              bool isFiltered,
+                              MomentsFields &fields)
   
 {
   
@@ -641,9 +678,9 @@ void RadarMoments::singlePol(RadarComplex_t *iqhc,
   
   // compute moments from covariances
 
-  computeMomSinglePol(lag0_hc, lag1_hc, lag2_hc, lag3_hc,
-                      gateNum, fields);
-
+  computeMomSinglePolH(lag0_hc, lag1_hc, lag2_hc, lag3_hc,
+                       gateNum, fields);
+  
   if (!isFiltered) {
     
     // refractivity
@@ -664,15 +701,67 @@ void RadarMoments::singlePol(RadarComplex_t *iqhc,
 
 ///////////////////////////////////////////////////////////
 // Single polarization
-// Assumes the data is in the horizontal channel
+// Vertical channel
+// IQ passed in
+
+void RadarMoments::singlePolV(RadarComplex_t *iqvc,
+                              int gateNum,
+                              bool isFiltered,
+                              MomentsFields &fields)
+  
+{
+  
+  // initialize field meta data
+
+  _setFieldMetaData(fields);
+
+  // compute lag covariances
+  
+  double lag0_vc = RadarComplex::meanPower(iqvc, _nSamples);
+
+  RadarComplex_t lag1_vc =
+    RadarComplex::meanConjugateProduct(iqvc + 1, iqvc, _nSamples - 1);
+  
+  RadarComplex_t lag2_vc =
+    RadarComplex::meanConjugateProduct(iqvc + 2, iqvc, _nSamples - 2);
+
+  RadarComplex_t lag3_vc =
+    RadarComplex::meanConjugateProduct(iqvc + 3, iqvc, _nSamples - 3);
+  
+  // compute moments from covariances
+
+  computeMomSinglePolV(lag0_vc, lag1_vc, lag2_vc, lag3_vc,
+                       gateNum, fields);
+  
+  if (!isFiltered) {
+    
+    // refractivity
+    
+    computeRefract(iqvc, _nSamples, fields.aiq_vc, fields.niq_vc, _changeAiqSign);
+
+    // CPA
+
+    if (_computeCpaUsingAlt) {
+      fields.cpa = computeCpaAlt(iqvc, _nSamples);
+    } else {
+      fields.cpa = computeCpa(iqvc, _nSamples);
+    }
+
+  }
+  
+}
+
+///////////////////////////////////////////////////////////
+// Single polarization
+// Horizontal channel
 // covariances passed in
   
-void RadarMoments::computeMomSinglePol(double lag0_hc,
-                                       RadarComplex_t lag1_hc,
-                                       RadarComplex_t lag2_hc,
-                                       RadarComplex_t lag3_hc,
-                                       int gateNum,
-                                       MomentsFields &fields)
+void RadarMoments::computeMomSinglePolH(double lag0_hc,
+                                        RadarComplex_t lag1_hc,
+                                        RadarComplex_t lag2_hc,
+                                        RadarComplex_t lag3_hc,
+                                        int gateNum,
+                                        MomentsFields &fields)
   
 {
 
@@ -773,6 +862,136 @@ void RadarMoments::computeMomSinglePol(double lag0_hc,
   if (snrHcOK) {
 
     double r0 = lag0_hc_ns;
+    
+    double r0r1 = _computeR0R1Width(r0,r1,_nyquist);
+    fields.width_r0r1 = _constrain(r0r1, 0.01, _nyquist);
+    double r0r1r2 = _computePplsWidth(r0,r1,r2,_nyquist);
+    fields.width_ppls = _constrain(r0r1r2, 0.01, _nyquist);
+    
+    if (_widthMethod == WIDTH_METHOD_R0R1) {
+      fields.width = fields.width_r0r1;
+    }
+
+    if (_widthMethod == WIDTH_METHOD_HYBRID) {
+      double width = _computeHybridWidth(r0, r1, r2, r3, _nyquist);
+      fields.width = _constrain(width, 0.01, _nyquist);
+    }
+
+  }
+
+}
+
+///////////////////////////////////////////////////////////
+// Single polarization
+// Vertical channel
+// covariances passed in
+
+void RadarMoments::computeMomSinglePolV(double lag0_vc,
+                                        RadarComplex_t lag1_vc,
+                                        RadarComplex_t lag2_vc,
+                                        RadarComplex_t lag3_vc,
+                                        int gateNum,
+                                        MomentsFields &fields)
+  
+{
+
+  _setFieldMetaData(fields);
+
+  // lag0
+  
+  fields.lag0_vc_db = 10.0 * log10(lag0_vc);
+
+  // compute dbm
+  
+  double dbm_vc = 10.0 * log10(lag0_vc) - _receiverGainDbVc;
+  fields.dbmvc = dbm_vc;
+  fields.dbm = dbm_vc;
+
+  // compute noise-subtracted lag0
+  
+  double lag0_vc_ns = lag0_vc - _estNoisePowerVc;
+  
+  bool snrVcOK = true;
+  double min_valid_pwr_vc = _estNoisePowerVc * _minDetectableSnr;
+  if (lag0_vc_ns < min_valid_pwr_vc) {
+    snrVcOK = false;
+    fields.censoring_flag = 1;
+  }
+  
+  // snr & dbz
+  
+  if (snrVcOK) {
+    
+    double snr_vc = lag0_vc_ns / _calNoisePowerVc;
+    double snrDb = 10.0 * log10(snr_vc);
+
+    fields.dbmvc_ns = 10.0 * log10(lag0_vc_ns) - _receiverGainDbVc;
+    fields.snrvc = snrDb;
+    fields.snr = snrDb;
+
+    double dbz_vc_no_atten_corr = 
+      10.0 * log10(snr_vc) + _baseDbz1kmVc + _rangeCorr[gateNum] + _dbzCorrection;
+    double dbz_vc = dbz_vc_no_atten_corr + _atmosAttenCorr[gateNum];
+    fields.dbzvc = _adjustDbzForPwrH(dbz_vc);
+    fields.dbz = fields.dbzvc;
+    fields.dbz_no_atmos_atten = _adjustDbzForPwrH(dbz_vc_no_atten_corr);
+    
+  } else {
+
+    fields.dbmvc_ns = _missing;
+    fields.snrvc = _missing;
+    fields.snr = _missing;
+    fields.dbz = _missing;
+    fields.dbzvc = _missing;
+    fields.dbz_no_atmos_atten = _missing;
+
+  }
+  
+  // velocity
+
+  double lag1_vc_mag = RadarComplex::mag(lag1_vc);
+  double argVel = RadarComplex::argRad(lag1_vc);
+
+  fields.lag1_vc_db = 20.0 * log10(lag1_vc_mag);
+  fields.lag1_vc_phase = argVel * RAD_TO_DEG;
+  
+  double vel = (argVel / M_PI) * _nyquist;
+  fields.vel = vel * _velSign * -1.0;
+
+  fields.phase_for_noise = lag1_vc;
+
+  // ncp
+  
+  double ncp = lag1_vc_mag / lag0_vc;
+  ncp = _constrain(ncp, 0.0, 1.0);
+  fields.ncp = ncp;
+  
+  // width
+  
+  double lag2_vc_mag = RadarComplex::mag(lag2_vc);
+  fields.lag2_vc_db = 20.0 * log10(lag2_vc_mag);
+  fields.lag2_vc_phase = RadarComplex::argDeg(lag2_vc);
+  
+  double lag3_vc_mag = RadarComplex::mag(lag3_vc);
+  fields.lag3_vc_db = 20.0 * log10(lag3_vc_mag);
+  fields.lag3_vc_phase = RadarComplex::argDeg(lag3_vc);
+
+  double r1 = lag1_vc_mag / _windowR1;
+  double r2 = lag2_vc_mag / _windowR2;
+  double r3 = lag3_vc_mag / _windowR3;
+  
+  double r1r2 = _computeR1R2Width(r1,r2,_nyquist);
+  fields.width_r1r2 = _constrain(r1r2, 0.01, _nyquist);
+  double r1r3 = _computeR1R3Width(r1,r3,_nyquist);
+  fields.width_r1r3 = _constrain(r1r3, 0.01, _nyquist);
+
+  // default to R1R2
+
+  fields.width = fields.width_r1r2;
+
+  if (snrVcOK) {
+
+    double r0 = lag0_vc_ns;
     
     double r0r1 = _computeR0R1Width(r0,r1,_nyquist);
     fields.width_r0r1 = _constrain(r0r1, 0.01, _nyquist);
@@ -2451,14 +2670,14 @@ void RadarMoments::computeMomDpVOnly(double lag0_vc,
 
 ///////////////////////////////////////////////////////////
 // Single polarization Staggered-PRT
-// Assumes data is in horizontal channel
+// Horizontal channel
 
-void RadarMoments::singlePolStagPrt(RadarComplex_t *iqhc,
-                                    RadarComplex_t *iqhcShort,
-                                    RadarComplex_t *iqhcLong,
-                                    int gateNum,
-                                    bool isFiltered,
-                                    MomentsFields &fields)
+void RadarMoments::singlePolHStagPrt(RadarComplex_t *iqhc,
+                                     RadarComplex_t *iqhcShort,
+                                     RadarComplex_t *iqhcLong,
+                                     int gateNum,
+                                     bool isFiltered,
+                                     MomentsFields &fields)
   
 {
   
@@ -2487,15 +2706,15 @@ void RadarMoments::singlePolStagPrt(RadarComplex_t *iqhc,
   RadarComplex_t lag1_hc_long_to_short =
     RadarComplex::meanConjugateProduct(iqhcLong, iqhcShort + 1, _nSamplesHalf - 1);
   
-  singlePolStagPrt(lag0_hc_long,
-                   lag0_hc_short,
-                   lag1_hc_long,
-                   lag1_hc_short,
-                   lag1_hc_short_to_long,
-                   lag1_hc_long_to_short,
-                   gateNum,
-                   isFiltered,
-                   fields);
+  singlePolHStagPrt(lag0_hc_long,
+                    lag0_hc_short,
+                    lag1_hc_long,
+                    lag1_hc_short,
+                    lag1_hc_short_to_long,
+                    lag1_hc_long_to_short,
+                    gateNum,
+                    isFiltered,
+                    fields);
   
   if (!isFiltered) {
     // CPA and refractivity
@@ -2512,18 +2731,18 @@ void RadarMoments::singlePolStagPrt(RadarComplex_t *iqhc,
 
 ///////////////////////////////////////////////////////////
 // Single polarization Staggered-PRT
-// Assumes data is in horizontal channel
+// Horizontal channel
 // covariances passed in
 
-void RadarMoments::singlePolStagPrt(double lag0_hc_long,
-                                    double lag0_hc_short,
-                                    RadarComplex_t &lag1_hc_long,
-                                    RadarComplex_t &lag1_hc_short,
-                                    RadarComplex_t &lag1_hc_short_to_long,
-                                    RadarComplex_t &lag1_hc_long_to_short,
-                                    int gateNum,
-                                    bool isFiltered,
-                                    MomentsFields &fields)
+void RadarMoments::singlePolHStagPrt(double lag0_hc_long,
+                                     double lag0_hc_short,
+                                     RadarComplex_t &lag1_hc_long,
+                                     RadarComplex_t &lag1_hc_short,
+                                     RadarComplex_t &lag1_hc_short_to_long,
+                                     RadarComplex_t &lag1_hc_long_to_short,
+                                     int gateNum,
+                                     bool isFiltered,
+                                     MomentsFields &fields)
   
 {
   
@@ -2554,9 +2773,9 @@ void RadarMoments::singlePolStagPrt(double lag0_hc_long,
   // compute power-related fields
 
   if (lag0_hc_long < lag0_hc_short) {
-    singlePolStagPrtPower(lag0_hc_long, gateNum, isFiltered, fields);
+    singlePolHStagPrtPower(lag0_hc_long, gateNum, isFiltered, fields);
   } else {
-    singlePolStagPrtPower(lag0_hc_short, gateNum, isFiltered, fields);
+    singlePolHStagPrtPower(lag0_hc_short, gateNum, isFiltered, fields);
   }
   bool snrHcOK = (fields.snrhc != _missing);
   
@@ -2687,10 +2906,10 @@ void RadarMoments::singlePolStagPrt(double lag0_hc_long,
 // Single polarization staggered PRT power
 // Assumes the data is in the horizontal channel
 
-void RadarMoments::singlePolStagPrtPower(double lag0_hc,
-                                         int gateNum,
-                                         bool isFiltered,
-                                         MomentsFields &fields)
+void RadarMoments::singlePolHStagPrtPower(double lag0_hc,
+                                          int gateNum,
+                                          bool isFiltered,
+                                          MomentsFields &fields)
   
 {
 
@@ -3858,11 +4077,11 @@ void RadarMoments::dpVOnlyStagPrtPower(double lag0_vc,
 ///////////////////////////////////////////////////////////
 // Single polarization, range unfolding using SZ864
 
-void RadarMoments::singlePolSz864(GateData &gateData,
-                                  RadarComplex_t *delta12,
-                                  int gateNum,
-                                  int ngatesPulse,
-                                  const RadarFft &fft)
+void RadarMoments::singlePolHSz864(GateData &gateData,
+                                   RadarComplex_t *delta12,
+                                   int gateNum,
+                                   int ngatesPulse,
+                                   const RadarFft &fft)
   
 {
 
@@ -3890,9 +4109,9 @@ void RadarMoments::singlePolSz864(GateData &gateData,
   if (!gateData.censorStrong) {
     
     if (gateData.trip1IsStrong) {
-      singlePol(gateData.iqStrong, gateNum, false, gateData.fields);
+      singlePolH(gateData.iqStrong, gateNum, false, gateData.fields);
     } else {
-      singlePol(gateData.iqStrong, gateNum + ngatesPulse, false, gateData.secondTrip);
+      singlePolH(gateData.iqStrong, gateNum + ngatesPulse, false, gateData.secondTrip);
     }
     
   }
@@ -3902,9 +4121,9 @@ void RadarMoments::singlePolSz864(GateData &gateData,
   if (!gateData.censorWeak) {
     
     if (gateData.trip1IsStrong) {
-      singlePol(gateData.iqWeak, gateNum + ngatesPulse, false, gateData.secondTrip);
+      singlePolH(gateData.iqWeak, gateNum + ngatesPulse, false, gateData.secondTrip);
     } else {
-      singlePol(gateData.iqWeak, gateNum, false, gateData.fields);
+      singlePolH(gateData.iqWeak, gateNum, false, gateData.fields);
     }
     
   }
@@ -3914,9 +4133,9 @@ void RadarMoments::singlePolSz864(GateData &gateData,
 ///////////////////////////////////////////////////////////
 // Single polarization, SZ864, Filtered
 
-void RadarMoments::singlePolSz864Filtered(GateData &gateData,
-                                          int gateNum,
-                                          int ngatesPulse)
+void RadarMoments::singlePolHSz864Filtered(GateData &gateData,
+                                           int gateNum,
+                                           int ngatesPulse)
   
 {
   
@@ -3924,10 +4143,10 @@ void RadarMoments::singlePolSz864Filtered(GateData &gateData,
   
   if (gateData.clutterInStrong) {
     if (gateData.trip1IsStrong) {
-      singlePol(gateData.iqStrongF, gateNum, true, gateData.fieldsF);
+      singlePolH(gateData.iqStrongF, gateNum, true, gateData.fieldsF);
     } else {
-      singlePol(gateData.iqStrongF, gateNum + ngatesPulse,
-                true, gateData.secondTripF);
+      singlePolH(gateData.iqStrongF, gateNum + ngatesPulse,
+                 true, gateData.secondTripF);
     }
   }
     
@@ -3935,9 +4154,9 @@ void RadarMoments::singlePolSz864Filtered(GateData &gateData,
   
   if (gateData.clutterInWeak) {
     if (gateData.trip1IsStrong) {
-      singlePol(gateData.iqWeakF, gateNum + ngatesPulse, true, gateData.secondTripF);
+      singlePolH(gateData.iqWeakF, gateNum + ngatesPulse, true, gateData.secondTripF);
     } else {
-      singlePol(gateData.iqWeakF, gateNum, true, gateData.fieldsF);
+      singlePolH(gateData.iqWeakF, gateNum, true, gateData.fieldsF);
     }
   }
     
@@ -7407,11 +7626,11 @@ void RadarMoments::_setFieldMetaData(MomentsFields &fields)
 
 ///////////////////////////////////////////////////////////
 // prepare for noise detection - single polarization
-// Assumes the data is in the hc channel
+// hc channel
   
-void RadarMoments::singlePolNoisePrep(double lag0_hc,
-                                      RadarComplex_t lag1_hc,
-                                      MomentsFields &fields)
+void RadarMoments::singlePolHNoisePrep(double lag0_hc,
+                                       RadarComplex_t lag1_hc,
+                                       MomentsFields &fields)
   
 {
   
@@ -7428,6 +7647,33 @@ void RadarMoments::singlePolNoisePrep(double lag0_hc,
   
   double lag1_hc_mag = RadarComplex::mag(lag1_hc);
   double ncp = lag1_hc_mag / lag0_hc;
+  fields.ncp = _constrain(ncp, 0.0, 1.0);
+  
+}
+
+///////////////////////////////////////////////////////////
+// prepare for noise detection - single polarization
+// vc channel
+  
+void RadarMoments::singlePolVNoisePrep(double lag0_vc,
+                                       RadarComplex_t lag1_vc,
+                                       MomentsFields &fields)
+  
+{
+  
+  // lag0 power
+
+  fields.lag0_vc_db = 10.0 * log10(lag0_vc);
+  fields.dbm_for_noise = fields.lag0_vc_db;
+
+  // phase for noise detection
+
+  fields.phase_for_noise = lag1_vc;
+
+  // ncp
+  
+  double lag1_vc_mag = RadarComplex::mag(lag1_vc);
+  double ncp = lag1_vc_mag / lag0_vc;
   fields.ncp = _constrain(ncp, 0.0, 1.0);
   
 }
@@ -7603,10 +7849,10 @@ void RadarMoments::dpVOnlyNoisePrep(double lag0_vc,
 // prepare for noise detection
 // Single polarization Staggered-PRT
 
-void RadarMoments::singlePolStagPrtNoisePrep(RadarComplex_t *iqhc,
-                                             RadarComplex_t *iqhcShort,
-                                             RadarComplex_t *iqhcLong,
-                                             MomentsFields &fields)
+void RadarMoments::singlePolHStagPrtNoisePrep(RadarComplex_t *iqhc,
+                                              RadarComplex_t *iqhcShort,
+                                              RadarComplex_t *iqhcLong,
+                                              MomentsFields &fields)
   
 {
   

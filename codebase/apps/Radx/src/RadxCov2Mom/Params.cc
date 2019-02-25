@@ -1562,24 +1562,26 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("xmit_rcv_mode");
     tt->descr = tdrpStrDup("Transmit/receive mode.");
-    tt->help = tdrpStrDup("This governs the type of moments computations to be applied.\n\tSINGLE_POL:\n\t\tSingle polarization\n\tDUAL_POL_ALT_HV_CO_ONLY:\n\t\tDual pol, alternating transmission\n\t\t          copolar receiver only\n\tDUAL_POL_ALT_HV_CO_CROSS:\n\t\tDual pol, alternating transmission\n\t\t          co-polar and cross-polar receivers\n\tDUAL_POL_SIM_HV:\n\t\tDual pol, simultaneous transmit/receive\n\tDUAL_POL_H_ONLY:\n\t\tDual pol, H transmission\n\t\t          simultaneous H and V receive\n\tDUAL_POL_V_ONLY:\n\t\tDual pol, V transmission\n\t\t          simultaneous H and V receive\n");
+    tt->help = tdrpStrDup("This governs the type of moments computations to be applied.\n\tSINGLE_POL:\n\t\tSingle polarization - H channel\n\tSINGLE_POL_V:\n\t\tSingle polarization - V channel\n\tDUAL_POL_ALT_HV_CO_ONLY:\n\t\tDual pol, alternating transmission\n\t\t          copolar receiver only\n\tDUAL_POL_ALT_HV_CO_CROSS:\n\t\tDual pol, alternating transmission\n\t\t          co-polar and cross-polar receivers\n\tDUAL_POL_SIM_HV:\n\t\tDual pol, simultaneous transmit/receive\n\tDUAL_POL_H_ONLY:\n\t\tDual pol, H transmission\n\t\t          simultaneous H and V receive\n\tDUAL_POL_V_ONLY:\n\t\tDual pol, V transmission\n\t\t          simultaneous H and V receive\n");
     tt->val_offset = (char *) &xmit_rcv_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("xmit_rcv_mode_t");
-    tt->enum_def.nfields = 6;
+    tt->enum_def.nfields = 7;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("SINGLE_POL");
       tt->enum_def.fields[0].val = SINGLE_POL;
-      tt->enum_def.fields[1].name = tdrpStrDup("DUAL_POL_ALT_HV_CO_ONLY");
-      tt->enum_def.fields[1].val = DUAL_POL_ALT_HV_CO_ONLY;
-      tt->enum_def.fields[2].name = tdrpStrDup("DUAL_POL_ALT_HV_CO_CROSS");
-      tt->enum_def.fields[2].val = DUAL_POL_ALT_HV_CO_CROSS;
-      tt->enum_def.fields[3].name = tdrpStrDup("DUAL_POL_SIM_HV");
-      tt->enum_def.fields[3].val = DUAL_POL_SIM_HV;
-      tt->enum_def.fields[4].name = tdrpStrDup("DUAL_POL_H_ONLY");
-      tt->enum_def.fields[4].val = DUAL_POL_H_ONLY;
-      tt->enum_def.fields[5].name = tdrpStrDup("DUAL_POL_V_ONLY");
-      tt->enum_def.fields[5].val = DUAL_POL_V_ONLY;
+      tt->enum_def.fields[1].name = tdrpStrDup("SINGLE_POL_V");
+      tt->enum_def.fields[1].val = SINGLE_POL_V;
+      tt->enum_def.fields[2].name = tdrpStrDup("DUAL_POL_ALT_HV_CO_ONLY");
+      tt->enum_def.fields[2].val = DUAL_POL_ALT_HV_CO_ONLY;
+      tt->enum_def.fields[3].name = tdrpStrDup("DUAL_POL_ALT_HV_CO_CROSS");
+      tt->enum_def.fields[3].val = DUAL_POL_ALT_HV_CO_CROSS;
+      tt->enum_def.fields[4].name = tdrpStrDup("DUAL_POL_SIM_HV");
+      tt->enum_def.fields[4].val = DUAL_POL_SIM_HV;
+      tt->enum_def.fields[5].name = tdrpStrDup("DUAL_POL_H_ONLY");
+      tt->enum_def.fields[5].val = DUAL_POL_H_ONLY;
+      tt->enum_def.fields[6].name = tdrpStrDup("DUAL_POL_V_ONLY");
+      tt->enum_def.fields[6].val = DUAL_POL_V_ONLY;
     tt->single_val.e = SINGLE_POL;
     tt++;
     

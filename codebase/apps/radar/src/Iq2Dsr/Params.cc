@@ -1404,7 +1404,7 @@
       tt->struct_def.fields[16].rel_offset = 
         (char *) &_moments_params->xmit_rcv_mode - (char *) _moments_params;
         tt->struct_def.fields[16].enum_def.name = tdrpStrDup("xmit_rcv_mode_t");
-        tt->struct_def.fields[16].enum_def.nfields = 8;
+        tt->struct_def.fields[16].enum_def.nfields = 9;
         tt->struct_def.fields[16].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[16].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[16].enum_def.fields[0].name = tdrpStrDup("SINGLE_POL");
@@ -1423,6 +1423,8 @@
         tt->struct_def.fields[16].enum_def.fields[6].val = DP_H_ONLY_FIXED_HV;
         tt->struct_def.fields[16].enum_def.fields[7].name = tdrpStrDup("DP_V_ONLY_FIXED_HV");
         tt->struct_def.fields[16].enum_def.fields[7].val = DP_V_ONLY_FIXED_HV;
+        tt->struct_def.fields[16].enum_def.fields[8].name = tdrpStrDup("SINGLE_POL_V");
+        tt->struct_def.fields[16].enum_def.fields[8].val = SINGLE_POL_V;
       tt->struct_def.fields[17].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[17].fname = tdrpStrDup("apply_clutter_filter");
       tt->struct_def.fields[17].ptype = BOOL_TYPE;
@@ -1844,7 +1846,7 @@
       tt->struct_def.fields[3].rel_offset = 
         (char *) &_pulse_width_cals->xmit_rcv_mode - (char *) _pulse_width_cals;
         tt->struct_def.fields[3].enum_def.name = tdrpStrDup("xmit_rcv_mode_t");
-        tt->struct_def.fields[3].enum_def.nfields = 8;
+        tt->struct_def.fields[3].enum_def.nfields = 9;
         tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("SINGLE_POL");
@@ -1863,6 +1865,8 @@
         tt->struct_def.fields[3].enum_def.fields[6].val = DP_H_ONLY_FIXED_HV;
         tt->struct_def.fields[3].enum_def.fields[7].name = tdrpStrDup("DP_V_ONLY_FIXED_HV");
         tt->struct_def.fields[3].enum_def.fields[7].val = DP_V_ONLY_FIXED_HV;
+        tt->struct_def.fields[3].enum_def.fields[8].name = tdrpStrDup("SINGLE_POL_V");
+        tt->struct_def.fields[3].enum_def.fields[8].val = SINGLE_POL_V;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
       tt->struct_def.fields[4].fname = tdrpStrDup("zdr_correction_db");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;

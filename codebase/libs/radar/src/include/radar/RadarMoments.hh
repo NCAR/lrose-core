@@ -297,10 +297,16 @@ public:
   // covariance computations
 
   // Single polarization
-  // Assumes the data is in the horizontal channel
+  // Horizontal channel
   
-  void computeCovarSinglePol(RadarComplex_t *iqhc,
-                             MomentsFields &fields);
+  void computeCovarSinglePolH(RadarComplex_t *iqhc,
+                              MomentsFields &fields);
+  
+  // Single polarization
+  // Vertical channel
+  
+  void computeCovarSinglePolV(RadarComplex_t *iqvc,
+                              MomentsFields &fields);
   
   // Compute covariances
   // DP_ALT_HV_CO_ONLY
@@ -346,24 +352,44 @@ public:
   // moments computations
 
   // Single polarization
-  // Assumes the data is in the horizontal channel
   // IQ passed in
+  // Horizontal channel
   
-  void singlePol(RadarComplex_t *iqhc,
-                 int gateNum,
-                 bool isFiltered,
-                 MomentsFields &fields);
+  void singlePolH(RadarComplex_t *iqhc,
+                  int gateNum,
+                  bool isFiltered,
+                  MomentsFields &fields);
+  
+  // Single polarization
+  // IQ passed in
+  // Vertical channel
+  
+  void singlePolV(RadarComplex_t *iqvc,
+                  int gateNum,
+                  bool isFiltered,
+                  MomentsFields &fields);
 
   // Single polarization
-  // Assumes the data is in the horizontal channel
+  // Horizontal channel
   // covariances passed in
   
-  void computeMomSinglePol(double lag0_hc,
-                           RadarComplex_t lag1_hc,
-                           RadarComplex_t lag2_hc,
-                           RadarComplex_t lag3_hc,
-                           int gateNum,
-                           MomentsFields &fields);
+  void computeMomSinglePolH(double lag0_hc,
+                            RadarComplex_t lag1_hc,
+                            RadarComplex_t lag2_hc,
+                            RadarComplex_t lag3_hc,
+                            int gateNum,
+                            MomentsFields &fields);
+  
+  // Single polarization
+  // Vertical channel
+  // covariances passed in
+
+  void computeMomSinglePolV(double lag0_vc,
+                            RadarComplex_t lag1_vc,
+                            RadarComplex_t lag2_vc,
+                            RadarComplex_t lag3_vc,
+                            int gateNum,
+                            MomentsFields &fields);
   
   // Compute reflectivity only
   
@@ -498,33 +524,33 @@ public:
   // Single polarization
   // Staggered-PRT
   
-  void singlePolStagPrt(RadarComplex_t *iqhc,
-                        RadarComplex_t *iqhcShort,
-                        RadarComplex_t *iqhcLong,
-                        int gateNum,
-                        bool isFiltered,
-                        MomentsFields &fields);
+  void singlePolHStagPrt(RadarComplex_t *iqhc,
+                         RadarComplex_t *iqhcShort,
+                         RadarComplex_t *iqhcLong,
+                         int gateNum,
+                         bool isFiltered,
+                         MomentsFields &fields);
   
   // Single polarization Staggered-PRT
   // Assumes data is in horizontal channel
   // covariances passed in
 
-  void singlePolStagPrt(double lag0_hc_long,
-                        double lag0_hc_short,
-                        RadarComplex_t &lag1_hc_long,
-                        RadarComplex_t &lag1_hc_short,
-                        RadarComplex_t &lag1_hc_short_to_long,
-                        RadarComplex_t &lag1_hc_long_to_short,
-                        int gateNum,
-                        bool isFiltered,
-                        MomentsFields &fields);
+  void singlePolHStagPrt(double lag0_hc_long,
+                         double lag0_hc_short,
+                         RadarComplex_t &lag1_hc_long,
+                         RadarComplex_t &lag1_hc_short,
+                         RadarComplex_t &lag1_hc_short_to_long,
+                         RadarComplex_t &lag1_hc_long_to_short,
+                         int gateNum,
+                         bool isFiltered,
+                         MomentsFields &fields);
 
   // single pol stag prt power
 
-  void singlePolStagPrtPower(double lag0_hc,
-                             int gateNum,
-                             bool isFiltered,
-                             MomentsFields &fields);
+  void singlePolHStagPrtPower(double lag0_hc,
+                              int gateNum,
+                              bool isFiltered,
+                              MomentsFields &fields);
   
   // Dual pol, transmit simultaneous, receive fixed channels
   // Staggered-PRT
@@ -609,7 +635,7 @@ public:
 
   // Single polarization, range unfolding using SZ864
   
-  void singlePolSz864(GateData &gateData,
+  void singlePolHSz864(GateData &gateData,
                       RadarComplex_t *delta12,
                       int gateNum,
                       int ngatesPulse,
@@ -617,7 +643,7 @@ public:
   
   // Single polarization, SZ864, Filtered
   
-  void singlePolSz864Filtered(GateData &gateData,
+  void singlePolHSz864Filtered(GateData &gateData,
                               int gateNum,
                               int ngatesPulse);
   
@@ -1233,9 +1259,13 @@ public:
   // prepare for noise detection by computing the
   // lag0 power and the velocity phase
 
-  void singlePolNoisePrep(double lag0_hc,
-                          RadarComplex_t lag1_hc,
-                          MomentsFields &fields);
+  void singlePolHNoisePrep(double lag0_hc,
+                           RadarComplex_t lag1_hc,
+                           MomentsFields &fields);
+  
+  void singlePolVNoisePrep(double lag0_vc,
+                           RadarComplex_t lag1_vc,
+                           MomentsFields &fields);
   
   void dpAltHvCoOnlyNoisePrep(double lag0_hc,
                               double lag0_vc,
@@ -1267,10 +1297,10 @@ public:
                         RadarComplex_t lag1_vc,
                         MomentsFields &fields);
   
-  void singlePolStagPrtNoisePrep(RadarComplex_t *iqhc,
-                                 RadarComplex_t *iqhcShort,
-                                 RadarComplex_t *iqhcLong,
-                                 MomentsFields &fields);
+  void singlePolHStagPrtNoisePrep(RadarComplex_t *iqhc,
+                                  RadarComplex_t *iqhcShort,
+                                  RadarComplex_t *iqhcLong,
+                                  MomentsFields &fields);
   
   void dpSimHvStagPrtNoisePrep(RadarComplex_t *iqhc,
                                RadarComplex_t *iqvc,

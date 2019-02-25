@@ -191,9 +191,13 @@ RadxRay *Moments::compute(const RadxRay *covRay,
       iret = _getCovariancesDpVOnly(covRay);
       break;
 
+    case Params::SINGLE_POL_V:
+      iret = _getCovariancesSinglePolV(covRay);
+      break;
+
     case Params::SINGLE_POL:
     default:
-      iret = _getCovariancesSinglePol(covRay);
+      iret = _getCovariancesSinglePolH(covRay);
       break;
 
   } // switch
@@ -234,9 +238,11 @@ RadxRay *Moments::compute(const RadxRay *covRay,
       case Params::DUAL_POL_V_ONLY:
         _computeNoiseDpVOnly(momRay);
         break;
+      case Params::SINGLE_POL_V:
+        _computeNoiseSinglePolV(momRay);
       case Params::SINGLE_POL:
       default:
-        _computeNoiseSinglePol(momRay);
+        _computeNoiseSinglePolH(momRay);
     } // switch
 
   } // if (locateNoise) ...
@@ -265,9 +271,13 @@ RadxRay *Moments::compute(const RadxRay *covRay,
       _computeMomDpVOnly();
       break;
 
+    case Params::SINGLE_POL_V:
+      _computeMomSinglePolV();
+      break;
+
     case Params::SINGLE_POL:
     default:
-      _computeMomSinglePol();
+      _computeMomSinglePolH();
       break;
 
   } // switch
@@ -307,9 +317,9 @@ RadxRay *Moments::compute(const RadxRay *covRay,
 
 //////////////////////////////////////////////////
 // retrieve the covariances for given covariance ray
-// Single pol
+// Single pol - H channel
 
-int Moments::_getCovariancesSinglePol(const RadxRay *covRay)
+int Moments::_getCovariancesSinglePolH(const RadxRay *covRay)
   
 {
   
@@ -333,7 +343,7 @@ int Moments::_getCovariancesSinglePol(const RadxRay *covRay)
   if (fldLag3HcPhase == NULL) iret = -1;
 
   if (iret) {
-    cerr << "ERROR - Moments::_getCovariancesSinglePol" << endl;
+    cerr << "ERROR - Moments::_getCovariancesSinglePolH" << endl;
     return -1;
   }
 
@@ -374,6 +384,82 @@ int Moments::_getCovariancesSinglePol(const RadxRay *covRay)
 
     rap_sincos(lag3HcPhase, &sinval, &cosval);
     covar.lag3Hc.set(lag3HcMag * cosval, lag3HcMag * sinval);
+
+  } // igate
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// retrieve the covariances for given covariance ray
+// Single pol - V channel
+
+int Moments::_getCovariancesSinglePolV(const RadxRay *covRay)
+  
+{
+  
+  int iret = 0;
+
+  // identify the fields we need
+
+  const RadxField *fldLag0VcDb = _getField(covRay, Params::LAG0_VC_DB);
+  if (fldLag0VcDb == NULL) iret = -1;
+  const RadxField *fldLag1VcDb = _getField(covRay, Params::LAG1_VC_DB);
+  if (fldLag1VcDb == NULL) iret = -1;
+  const RadxField *fldLag1VcPhase = _getField(covRay, Params::LAG1_VC_PHASE);
+  if (fldLag1VcPhase == NULL) iret = -1;
+  const RadxField *fldLag2VcDb = _getField(covRay, Params::LAG2_VC_DB);
+  if (fldLag2VcDb == NULL) iret = -1;
+  const RadxField *fldLag2VcPhase = _getField(covRay, Params::LAG2_VC_PHASE);
+  if (fldLag2VcPhase == NULL) iret = -1;
+  const RadxField *fldLag3VcDb = _getField(covRay, Params::LAG3_VC_DB);
+  if (fldLag3VcDb == NULL) iret = -1;
+  const RadxField *fldLag3VcPhase = _getField(covRay, Params::LAG3_VC_PHASE);
+  if (fldLag3VcPhase == NULL) iret = -1;
+
+  if (iret) {
+    cerr << "ERROR - Moments::_getCovariancesSinglePolV" << endl;
+    return -1;
+  }
+
+  Radx::fl32 *lag0VcDb = (Radx::fl32 *) fldLag0VcDb->getData();
+
+  Radx::fl32 *lag1VcDb = (Radx::fl32 *) fldLag1VcDb->getData();
+  Radx::fl32 *lag1VcPhaseDeg = (Radx::fl32 *) fldLag1VcPhase->getData();
+
+  Radx::fl32 *lag2VcDb = (Radx::fl32 *) fldLag2VcDb->getData();
+  Radx::fl32 *lag2VcPhaseDeg = (Radx::fl32 *) fldLag2VcPhase->getData();
+
+  Radx::fl32 *lag3VcDb = (Radx::fl32 *) fldLag3VcDb->getData();
+  Radx::fl32 *lag3VcPhaseDeg = (Radx::fl32 *) fldLag3VcPhase->getData();
+
+  Covars *covars = _covars.dat();
+
+  for (int igate = 0; igate < _nGates; igate++) {
+
+    Covars &covar = covars[igate];
+    covar.lag0Vc = pow(10.0, lag0VcDb[igate] / 10.0);
+
+    double lag1VcMag = pow(10.0, lag1VcDb[igate] / 20.0);
+    double lag1VcPhase = lag1VcPhaseDeg[igate] * DEG_TO_RAD;
+
+    double lag2VcMag = pow(10.0, lag2VcDb[igate] / 20.0);
+    double lag2VcPhase = lag2VcPhaseDeg[igate] * DEG_TO_RAD;
+
+    double lag3VcMag = pow(10.0, lag3VcDb[igate] / 20.0);
+    double lag3VcPhase = lag3VcPhaseDeg[igate] * DEG_TO_RAD;
+
+    double sinval, cosval;
+
+    rap_sincos(lag1VcPhase, &sinval, &cosval);
+    covar.lag1Vc.set(lag1VcMag * cosval, lag1VcMag * sinval);
+
+    rap_sincos(lag2VcPhase, &sinval, &cosval);
+    covar.lag2Vc.set(lag2VcMag * cosval, lag2VcMag * sinval);
+
+    rap_sincos(lag3VcPhase, &sinval, &cosval);
+    covar.lag3Vc.set(lag3VcMag * cosval, lag3VcMag * sinval);
 
   } // igate
 
@@ -959,9 +1045,9 @@ int Moments::_getCovariancesDpVOnly(const RadxRay *covRay)
 
 //////////////////////////////////////////////////
 // compute the moments for given covariance ray
-// Single pol
+// Single pol - H channel
 
-void Moments::_computeMomSinglePol()
+void Moments::_computeMomSinglePolH()
   
 {
   
@@ -969,12 +1055,35 @@ void Moments::_computeMomSinglePol()
   MomentsFields *mfields = _momFields.dat();
   for (int igate = 0; igate < _nGates; igate++) {
     Covars &covar = covars[igate];
-    _rmom.computeMomSinglePol(covar.lag0Hc,
-                              covar.lag1Hc,
-                              covar.lag2Hc,
-                              covar.lag3Hc,
-                              igate,
-                              mfields[igate]);
+    _rmom.computeMomSinglePolH(covar.lag0Hc,
+                               covar.lag1Hc,
+                               covar.lag2Hc,
+                               covar.lag3Hc,
+                               igate,
+                               mfields[igate]);
+    
+  } // igate
+
+}
+
+//////////////////////////////////////////////////
+// compute the moments for given covariance ray
+// Single pol - V channel
+
+void Moments::_computeMomSinglePolV()
+  
+{
+  
+  Covars *covars = _covars.dat();
+  MomentsFields *mfields = _momFields.dat();
+  for (int igate = 0; igate < _nGates; igate++) {
+    Covars &covar = covars[igate];
+    _rmom.computeMomSinglePolV(covar.lag0Vc,
+                               covar.lag1Vc,
+                               covar.lag2Vc,
+                               covar.lag3Vc,
+                               igate,
+                               mfields[igate]);
     
   } // igate
 
@@ -1131,9 +1240,9 @@ void Moments::_computeMomDpVOnly()
 
 //////////////////////////////////////////////////
 // compute the noise
-// Single pol
+// Single pol - H channel
 
-void Moments::_computeNoiseSinglePol(RadxRay *ray)
+void Moments::_computeNoiseSinglePolH(RadxRay *ray)
   
 {
   
@@ -1143,13 +1252,13 @@ void Moments::_computeNoiseSinglePol(RadxRay *ray)
   MomentsFields *mfields = _momFields.dat();
   for (int igate = 0; igate < _nGates; igate++) {
     Covars &covar = covars[igate];
-    _rmom.singlePolNoisePrep(covar.lag0Hc, covar.lag1Hc, mfields[igate]);
+    _rmom.singlePolHNoisePrep(covar.lag0Hc, covar.lag1Hc, mfields[igate]);
   }
 
   // identify noise regions, and compute the mea noise
   // mean noise values are stored in moments
 
-  _noise.computeNoiseSinglePol(mfields);
+  _noise.computeNoiseSinglePolH(mfields);
 
   // override noise for moments computations
 
@@ -1157,6 +1266,42 @@ void Moments::_computeNoiseSinglePol(RadxRay *ray)
     _rmom.setEstimatedNoiseDbmHc(_noise.getMedianNoiseDbmHc());
     ray->setEstimatedNoiseDbmHc(_noise.getMedianNoiseDbmHc() -
                                 _calib.getReceiverGainDbHc());
+  }
+
+  // set the noise-related fields in moments
+  
+  _setNoiseFields();
+
+}
+
+//////////////////////////////////////////////////
+// compute the noise
+// Single pol - V channel
+
+void Moments::_computeNoiseSinglePolV(RadxRay *ray)
+  
+{
+  
+  // detect noise at each gate
+
+  Covars *covars = _covars.dat();
+  MomentsFields *mfields = _momFields.dat();
+  for (int igate = 0; igate < _nGates; igate++) {
+    Covars &covar = covars[igate];
+    _rmom.singlePolVNoisePrep(covar.lag0Vc, covar.lag1Vc, mfields[igate]);
+  }
+
+  // identify noise regions, and compute the mea noise
+  // mean noise values are stored in moments
+
+  _noise.computeNoiseSinglePolV(mfields);
+
+  // override noise for moments computations
+
+  if (_params.use_estimated_noise_for_noise_subtraction) {
+    _rmom.setEstimatedNoiseDbmVc(_noise.getMedianNoiseDbmVc());
+    ray->setEstimatedNoiseDbmVc(_noise.getMedianNoiseDbmVc() -
+                                _calib.getReceiverGainDbVc());
   }
 
   // set the noise-related fields in moments

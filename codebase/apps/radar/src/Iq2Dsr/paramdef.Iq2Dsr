@@ -358,7 +358,7 @@ commentdef {
 
 typedef enum {
 
-  /// Single polarization (NEXRAD)
+  /// Single polarization H channel
   SINGLE_POL = 0, 
   /// Dual pol, alternating transmission, copolar receiver only
   /// (CP2 SBand)
@@ -379,7 +379,9 @@ typedef enum {
   /// Dual pol, H transmission, fixed H and V receivers (CP2 X band)
   DP_H_ONLY_FIXED_HV = 6,
   /// Dual pol, V transmission, fixed H and V receivers (CP2 X band)
-  DP_V_ONLY_FIXED_HV = 7
+  DP_V_ONLY_FIXED_HV = 7,
+  /// Single polarization V channel
+  SINGLE_POL_V = 10
 
 } xmit_rcv_mode_t;
 

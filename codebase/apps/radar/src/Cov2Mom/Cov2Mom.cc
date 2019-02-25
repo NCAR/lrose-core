@@ -1191,11 +1191,11 @@ void Cov2Mom::_computeMomentsSp(RadarMoments &rmom)
 
     MomentsFields fields;
     
-    rmom.computeMomSinglePol(_lag0_hc[ii],
-                             _lag1_hc[ii],
-                             _lag2_hc[ii],
-                             _lag3_hc[ii],
-                             ii, fields);
+    rmom.computeMomSinglePolH(_lag0_hc[ii],
+                              _lag1_hc[ii],
+                              _lag2_hc[ii],
+                              _lag3_hc[ii],
+                              ii, fields);
 
     _ncp[ii] = fields.ncp;
     _snr[ii] = fields.snr;

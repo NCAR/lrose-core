@@ -155,11 +155,17 @@ public:
   //
   // Must call setRayProps before any of these methods
   
-  // Single pol
+  // Single pol H channel
   // The following must be set in mfields prior to calling:
   //   lag0_hc_db
 
-  void computeNoiseSinglePol(MomentsFields *mfields);
+  void computeNoiseSinglePolH(MomentsFields *mfields);
+
+  // Single pol V channel
+  // The following must be set in mfields prior to calling:
+  //   lag0_vc_db
+
+  void computeNoiseSinglePolV(MomentsFields *mfields);
 
   // Alternating mode dual pol, co-pol receiver only
   // The following must be set in mfields prior to calling:

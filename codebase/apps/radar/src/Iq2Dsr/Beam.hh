@@ -421,7 +421,8 @@ private:
   void _filterMoments();
 
   void _computeTripNcp();
-  void _computeMomSp();
+  void _computeMomSpH();
+  void _computeMomSpV();
   void _computeMomSpSz();
   void _computeMomSpStagPrt();
 
@@ -432,7 +433,8 @@ private:
   void _computeMomDpHOnly();
   void _computeMomDpVOnly();
 
-  void _filterSp();
+  void _filterSpH();
+  void _filterSpV();
   void _filterSpStagPrt();
   void _filterRegrSpStagPrt();
   void _filterAdapSpStagPrt();

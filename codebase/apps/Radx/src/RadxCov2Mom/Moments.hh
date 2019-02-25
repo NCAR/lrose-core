@@ -250,21 +250,24 @@ private:
 
   // private methods
   
-  int _getCovariancesSinglePol(const RadxRay *covRay);
+  int _getCovariancesSinglePolH(const RadxRay *covRay);
+  int _getCovariancesSinglePolV(const RadxRay *covRay);
   int _getCovariancesDpAltHvCoOnly(const RadxRay *covRay);
   int _getCovariancesDpAltHvCoCross(const RadxRay *covRay);
   int _getCovariancesDpSimHv(const RadxRay *covRay);
   int _getCovariancesDpHOnly(const RadxRay *covRay);
   int _getCovariancesDpVOnly(const RadxRay *covRay);
 
-  void _computeMomSinglePol();
+  void _computeMomSinglePolH();
+  void _computeMomSinglePolV();
   void _computeMomDpAltHvCoOnly();
   void _computeMomDpAltHvCoCross();
   void _computeMomDpSimHv();
   void _computeMomDpHOnly();
   void _computeMomDpVOnly();
 
-  void _computeNoiseSinglePol(RadxRay *ray);
+  void _computeNoiseSinglePolH(RadxRay *ray);
+  void _computeNoiseSinglePolV(RadxRay *ray);
   void _computeNoiseDpAltHvCoOnly(RadxRay *ray);
   void _computeNoiseDpAltHvCoCross(RadxRay *ray);
   void _computeNoiseDpSimHv(RadxRay *ray);

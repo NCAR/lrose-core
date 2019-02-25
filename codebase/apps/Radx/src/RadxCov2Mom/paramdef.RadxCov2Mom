@@ -465,6 +465,7 @@ commentdef {
 
 typedef enum {
   SINGLE_POL, 
+  SINGLE_POL_V, 
   DUAL_POL_ALT_HV_CO_ONLY, 
   DUAL_POL_ALT_HV_CO_CROSS,
   DUAL_POL_SIM_HV,
@@ -477,7 +478,9 @@ paramdef enum xmit_rcv_mode_t {
   p_descr = "Transmit/receive mode.";
   p_help = "This governs the type of moments computations to be applied.\n"
   "\tSINGLE_POL:\n"
-  "\t\tSingle polarization\n"
+  "\t\tSingle polarization - H channel\n"
+  "\tSINGLE_POL_V:\n"
+  "\t\tSingle polarization - V channel\n"
   "\tDUAL_POL_ALT_HV_CO_ONLY:\n"
   "\t\tDual pol, alternating transmission\n"
   "\t\t          copolar receiver only\n"

@@ -182,7 +182,7 @@ typedef enum iwrf_xmit_rcv_mode {
   
   IWRF_XMIT_RCV_MODE_NOT_SET = 0,
 
-  /** single polarization */
+  /** single polarization - H  */
 
   IWRF_SINGLE_POL = 1,
 
@@ -225,6 +225,10 @@ typedef enum iwrf_xmit_rcv_mode {
 
   IWRF_ALT_HHVV_FIXED_HV = 9,
   
+  /** single polarization - V  */
+
+  IWRF_SINGLE_POL_V = 10,
+
   /** not used */
   
   IWRF_XMIT_RCV_MODE_LAST
