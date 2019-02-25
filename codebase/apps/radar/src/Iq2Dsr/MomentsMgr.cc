@@ -131,6 +131,9 @@ void MomentsMgr::init(const Params::moments_params_t &mparams)
     case Params::SINGLE_POL: 
       _xmitRcvMode = IWRF_SINGLE_POL;
       break;
+    case Params::SINGLE_POL_V: 
+      _xmitRcvMode = IWRF_SINGLE_POL_V;
+      break;
     case Params::DP_ALT_HV_CO_ONLY:
       _xmitRcvMode = IWRF_ALT_HV_CO_ONLY;
       break;

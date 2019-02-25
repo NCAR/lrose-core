@@ -375,7 +375,8 @@ void Beam::_prepareForComputeMoments()
     _nyquist = ((wavelengthMeters / _prt) / 4.0);
   }
 
-  if (_xmitRcvMode == IWRF_SINGLE_POL) {
+  if (_xmitRcvMode == IWRF_SINGLE_POL ||
+      _xmitRcvMode == IWRF_SINGLE_POL_V) {
     _dualPol = false;
   } else {
     _dualPol = true;
@@ -743,6 +744,7 @@ void Beam::computeMoments()
       break;
 
     case IWRF_SINGLE_POL:
+    case IWRF_SINGLE_POL_V:
     default:
       {}
       break;
@@ -4145,6 +4147,24 @@ void Beam::_loadGateIq(const fl32 **iqChan0,
         // windowed data
         memcpy(gate->iqhc, gate->iqhcOrig, nBytesComplex);
         RadarMoments::applyWindow(gate->iqhc, _window, _nSamples);
+      }
+
+    } break;
+    
+    case IWRF_SINGLE_POL_V: {
+    
+      int nBytesComplex = _nSamples * sizeof(RadarComplex_t);
+      for (int igate = 0, ipos = 0; igate < _nGates; igate++, ipos += 2) {
+        GateData *gate = _gateData[igate];
+        // original data
+        RadarComplex_t *iqvc = gate->iqvcOrig;
+        for (int isamp = 0; isamp < _nSamples; isamp++, iqvc++) {
+          iqvc->re = iqChan0[isamp][ipos];
+          iqvc->im = iqChan0[isamp][ipos + 1];
+        }
+        // windowed data
+        memcpy(gate->iqvc, gate->iqvcOrig, nBytesComplex);
+        RadarMoments::applyWindow(gate->iqvc, _window, _nSamples);
       }
 
     } break;

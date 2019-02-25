@@ -529,6 +529,8 @@ iwrf_xmit_rcv_mode_t Calibration::_getXmitRcvMode(Params::xmit_rcv_mode_t mode)
     
     case Params::SINGLE_POL: 
       return IWRF_SINGLE_POL;
+    case Params::SINGLE_POL_V: 
+      return IWRF_SINGLE_POL_V;
     case Params::DP_ALT_HV_CO_ONLY:
       return IWRF_ALT_HV_CO_ONLY;
     case Params::DP_ALT_HV_CO_CROSS:
