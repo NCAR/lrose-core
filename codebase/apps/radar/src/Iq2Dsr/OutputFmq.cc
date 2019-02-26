@@ -163,6 +163,9 @@ int OutputFmq::writeParams(const Beam &beam)
     case IWRF_SINGLE_POL:
       rp.polarization = DS_POLARIZATION_HORIZ_TYPE;
       break;
+    case IWRF_SINGLE_POL_V:
+      rp.polarization = DS_POLARIZATION_VERT_TYPE;
+      break;
     case IWRF_ALT_HV_CO_ONLY:
     case IWRF_ALT_HV_CO_CROSS:
     case IWRF_ALT_HV_FIXED_HV:

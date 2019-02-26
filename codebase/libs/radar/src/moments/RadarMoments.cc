@@ -932,9 +932,9 @@ void RadarMoments::computeMomSinglePolV(double lag0_vc,
     double dbz_vc_no_atten_corr = 
       10.0 * log10(snr_vc) + _baseDbz1kmVc + _rangeCorr[gateNum] + _dbzCorrection;
     double dbz_vc = dbz_vc_no_atten_corr + _atmosAttenCorr[gateNum];
-    fields.dbzvc = _adjustDbzForPwrH(dbz_vc);
+    fields.dbzvc = _adjustDbzForPwrV(dbz_vc);
     fields.dbz = fields.dbzvc;
-    fields.dbz_no_atmos_atten = _adjustDbzForPwrH(dbz_vc_no_atten_corr);
+    fields.dbz_no_atmos_atten = _adjustDbzForPwrV(dbz_vc_no_atten_corr);
     
   } else {
 
