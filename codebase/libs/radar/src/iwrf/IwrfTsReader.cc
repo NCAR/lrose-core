@@ -177,16 +177,10 @@ void IwrfTsReader::_setPlatformGeoref(IwrfTsPulse &pulse)
 
 {
 
-  // check whether we should use the secondary
+  // check whether we should try the secondary
 
-  bool trySecondary = false;
-  if (_georefUseSecondary) {
-    if (_opsInfo.isPlatformGeoref1Active()) {
-      trySecondary = true;
-    }
-  }
-
-  if (trySecondary) {
+  if (_georefUseSecondary &&
+      _opsInfo.isPlatformGeoref1Active()) {
     const iwrf_platform_georef_t &georef1 = _opsInfo.getPlatformGeoref1();
     double gtime = iwrf_get_packet_time_as_double(georef1.packet);
     double ptime = pulse.getFTime();
@@ -197,14 +191,16 @@ void IwrfTsReader::_setPlatformGeoref(IwrfTsPulse &pulse)
     }
   }
 
-  // use primary
+  // use primary if active
 
-  const iwrf_platform_georef_t &georef = _opsInfo.getPlatformGeoref();
-  double gtime = iwrf_get_packet_time_as_double(georef.packet);
-  double ptime = pulse.getFTime();
-  double dtime = fabs(gtime - ptime);
-  if (dtime <= _georefTimeMarginSecs) {
-    pulse.setPlatformGeoref(georef);
+  if (_opsInfo.isPlatformGeorefActive()) {
+    const iwrf_platform_georef_t &georef = _opsInfo.getPlatformGeoref();
+    double gtime = iwrf_get_packet_time_as_double(georef.packet);
+    double ptime = pulse.getFTime();
+    double dtime = fabs(gtime - ptime);
+    if (dtime <= _georefTimeMarginSecs) {
+      pulse.setPlatformGeoref(georef);
+    }
   }
 
 }

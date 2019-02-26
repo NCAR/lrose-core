@@ -773,7 +773,8 @@ void iwrf_platform_georef_init(iwrf_platform_georef_t &val)
   val.packet.id = IWRF_PLATFORM_GEOREF_ID;
   val.packet.len_bytes = sizeof(val);
   val.packet.version_num = 1;
-  iwrf_set_packet_time_to_now(val.packet);
+  // do not initialize time at this stage
+  // iwrf_set_packet_time_to_now(val.packet);
 }
 
 //////////////////////////////////////////////////////

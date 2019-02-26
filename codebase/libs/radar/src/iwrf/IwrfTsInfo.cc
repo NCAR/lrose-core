@@ -670,8 +670,12 @@ void IwrfTsInfo::setTime(time_t secs, int nano_secs) {
   iwrf_set_packet_time(_phasecode.packet, secs, nano_secs);
   iwrf_set_packet_time(_xmit_info.packet, secs, nano_secs);
   iwrf_set_packet_time(_rvp8.packet, secs, nano_secs);
-  iwrf_set_packet_time(_platform_georef0.packet, secs, nano_secs);
-  iwrf_set_packet_time(_platform_georef1.packet, secs, nano_secs);
+  if (_platform_georef0_active) {
+    iwrf_set_packet_time(_platform_georef0.packet, secs, nano_secs);
+  }
+  if (_platform_georef1_active) {
+    iwrf_set_packet_time(_platform_georef1.packet, secs, nano_secs);
+  }
 }
 
 ////////////////////////////////////////////////////////////
