@@ -60,7 +60,10 @@ dcmp6h_header_t *dcmp6h_get_header( FILE *infile)
 {
     static dcmp6h_header_t head;
 
-    fseek(infile,KAV_HEADER_OFFSET,2);
+    if (fseek(infile,KAV_HEADER_OFFSET,2)) {
+        return NULL;
+    }
+
     if((fread(&head,sizeof(dcmp6h_header_t),1,infile)) != 1) {
         return NULL;
     }

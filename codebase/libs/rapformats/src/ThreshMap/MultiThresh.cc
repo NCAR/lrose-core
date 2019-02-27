@@ -4,6 +4,7 @@
 
 //------------------------------------------------------------------
 #include <rapformats/MultiThresh.hh>
+#include <rapformats/TileInfo.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/LogStream.hh>
 #include <toolsa/DateTime.hh>
@@ -294,9 +295,11 @@ MultiThresh::checkColdstart(const time_t &t,
 }
 
 //------------------------------------------------------------------
-void MultiThresh::print(int leadTime, int tileIndex, bool verbose) const
+void MultiThresh::print(int leadTime, int tileIndex, const TileInfo &info,
+			bool verbose) const
 {
-  printf("        lt:%08d tile:%d ", leadTime, tileIndex);
+  printf("        lt:%08d tile[%3d(%s)] ", leadTime,
+	 tileIndex, info.latlonDebugString(tileIndex).c_str());
   for (size_t i=0; i<_thresh.size(); ++i)
   {
     printf("%s ", _thresh[i].sprint2().c_str());
@@ -361,10 +364,12 @@ void MultiThresh::logDebug(int leadTime, int tileIndex, bool verbose) const
 
 //------------------------------------------------------------------
 std::string MultiThresh::sprint(int leadTime, int tileIndex,
+				const TileInfo &info,
 				bool verbose) const
 {
   char buf[10000];
-  sprintf(buf, "lt:%08d tile:%d", leadTime, tileIndex);
+  sprintf(buf, "lt:%08d tile[%3d(%s)] ", leadTime,
+	  tileIndex, info.latlonDebugString(tileIndex).c_str());
   for (size_t i=0; i<_thresh.size(); ++i)
   {
     sprintf(buf+strlen(buf), "%s ", _thresh[i].sprint2().c_str());

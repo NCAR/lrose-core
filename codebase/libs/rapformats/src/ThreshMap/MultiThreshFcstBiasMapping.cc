@@ -215,13 +215,13 @@ setColdstart(int leadTime, int numTiles,
 }
 
 //------------------------------------------------------------------
-void MultiThreshFcstBiasMapping::print(bool verbose) const
+void MultiThreshFcstBiasMapping::print(const TileInfo &info, bool verbose) const
 {
   printf("     Gt_hms:%02d:%02d:%02d\n", _genHour, _genMinute, _genSecond);
   std::map<int, TiledMultiThresh>::const_iterator i;
   for (i=_map.begin(); i!=_map.end(); ++i)
   {
-    i->second.print(i->first, verbose);
+    i->second.print(i->first, info, verbose);
   }
 }
 
@@ -229,6 +229,7 @@ void MultiThreshFcstBiasMapping::print(bool verbose) const
 void MultiThreshFcstBiasMapping::print(const std::vector<int> &gtHour,
 				       const std::vector<int> &ltSec,
 				       const std::vector<int> &tiles,
+				       const TileInfo &tileInfo,
 				       bool verbose) const
 {
   if (!gtHour.empty())
@@ -247,12 +248,12 @@ void MultiThreshFcstBiasMapping::print(const std::vector<int> &gtHour,
     {
       if (find(ltSec.begin(), ltSec.end(), i->first) != ltSec.end())
       {
-	i->second.print(i->first, tiles, verbose);
+	i->second.print(i->first, tiles, tileInfo, verbose);
       }
     }
     else
     {
-      i->second.print(i->first, tiles, verbose);
+      i->second.print(i->first, tiles, tileInfo, verbose);
     }
   }
 }

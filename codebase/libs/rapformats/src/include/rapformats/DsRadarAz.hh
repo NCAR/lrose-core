@@ -96,7 +96,6 @@ public:
 protected:
 
   int _nAz;
-  int _chunkLen;
   MemBuf _azBuf;
   MemBuf _chunkBuf;
 

@@ -26,6 +26,20 @@ TileInfo::TileInfo(const std::string &xml) :
     return;
   }
 
+  if (TaXml::readBoolean(block, "HasLatLon", _hasLatlon))
+  {
+    // this is ok
+  }
+  else
+  {
+    _latlon = TileLatLon(block);
+    if (!_latlon.isOk())
+    {
+      LOG(ERROR) << "Reading XML for lat lons";
+      _ok = false;
+    }
+  }
+
   if (TaXml::readInt(block, "TileNptX", _tileNptX))
   {
     LOG(ERROR) << "No tag TileNptX in string";
@@ -101,9 +115,164 @@ TileInfo::TileInfo(const std::string &xml) :
 }
 
 //-------------------------------------------------------------------------
+bool TileInfo::equalExceptLatlons(const TileInfo &t) const
+{
+  return (_tileNptX == t._tileNptX &&
+	  _tileNptY == t._tileNptY &&
+	  _tileNptOverlapX == t._tileNptOverlapX &&
+	  _tileNptOverlapY == t._tileNptOverlapY &&
+	  _gridNptX == t._gridNptX &&
+	  _gridNptY == t._gridNptY &&
+	  _nTiles == t._nTiles &&
+	  _nTilesX == t._nTilesX &&
+	  _nTilesY == t._nTilesY &&
+	  _motherSubset == t._motherSubset &&
+	  _motherMinX == t._motherMinX &&
+	  _motherMaxX == t._motherMaxX &&
+	  _motherMinY == t._motherMinY &&
+	  _motherMaxY == t._motherMaxY);
+}
+
+//-------------------------------------------------------------------------
+bool TileInfo::operator==(const TileInfo &t) const
+{
+  if (!equalExceptLatlons(t))
+  {
+    return false;
+  }
+
+  if (_hasLatlon == t._hasLatlon)
+  {
+    if (_hasLatlon)
+    {
+      return _latlon == t._latlon;
+    }
+    else
+    {
+      return true;
+    }
+  }
+  else
+  {
+    return false;
+  }      
+}
+
+//-------------------------------------------------------------------------
+void TileInfo::printDiffs(const TileInfo &t) const
+{
+  if (_hasLatlon != t._hasLatlon)
+  {
+    LOG(ERROR) << "_hasLatLon local:" << _hasLatlon
+	       << "input:" << t._hasLatlon;
+  }
+  else
+  {
+    if (_hasLatlon)
+    {
+      if (!(_latlon == t._latlon))
+      {
+	LOG(ERROR) << "latlons differ";
+	_latlon.printDiffs(t._latlon);
+      }
+    }
+  }
+  if (_tileNptX != t._tileNptX)
+  {
+    LOG(ERROR) << "_tileNptX != t._tileNptX";
+  }
+  if (_tileNptY != t._tileNptY)
+  {
+    LOG(ERROR) << "_tileNptY != t._tileNptY";
+  }
+  if (_tileNptOverlapX != t._tileNptOverlapX)
+  {
+    LOG(ERROR) << "_tileNptOverlapX != t._tileNptOverlapX";
+  }
+  if (_tileNptOverlapY != t._tileNptOverlapY)
+  {
+    LOG(ERROR) << "_tileNptOverlapY != t._tileNptOverlapY";
+  }
+  if (_gridNptX != t._gridNptX)
+  {
+    LOG(ERROR) << "_gridNptX != t._gridNptX";
+  }
+  if (_gridNptY != t._gridNptY)
+  {
+    LOG(ERROR) << "_gridNptY != t._gridNptY";
+  }
+  if (_nTiles != t._nTiles)
+  {
+    LOG(ERROR) << "_nTiles != t._nTiles";
+  }
+  if (_nTilesX != t._nTilesX)
+  {
+    LOG(ERROR) << "_nTilesX != t._nTilesX";
+  }
+  if (_nTilesY != t._nTilesY)
+  {
+    LOG(ERROR) << "_nTilesY != t._nTilesY";
+  }
+  if (_motherSubset != t._motherSubset)
+  {
+    LOG(ERROR) << "_motherSubset != t._motherSubset";
+  }
+  if (_motherMinX != t._motherMinX)
+  {
+    LOG(ERROR) << "_motherMinX != t._motherMinX";
+  }
+  if (_motherMaxX != t._motherMaxX)
+  {
+    LOG(ERROR) << "_motherMaxX != t._motherMaxX";
+  }
+  if (_motherMinY != t._motherMinY)
+  {
+    LOG(ERROR) << "_motherMinY != t._motherMinY";
+  }
+  if (_motherMaxY != t._motherMaxY)
+  {
+    LOG(ERROR) << "_motherMaxY != t._motherMaxY";
+  }
+}
+
+
+//-------------------------------------------------------------------------
+void TileInfo::setLatLons(const TileLatLon &latlon)
+{
+  _latlon = latlon;
+  _hasLatlon = (int)(_latlon.size()) == _nTiles;
+  if (!_hasLatlon)
+  {
+    LOG(ERROR) << "Wrong number of tiles expect " << _nTiles << " got "
+	       << _latlon.size();
+  }
+}
+
+//-------------------------------------------------------------------------
+void TileInfo::addLatlons(const TileInfo &t)
+{
+  if (_hasLatlon)
+  {
+    return;
+  }
+  _latlon = t._latlon;
+  _hasLatlon = t._hasLatlon;
+  if (!_hasLatlon)
+  {
+    LOG(WARNING) << "No latlons to add to state";
+  }
+}
+
+
+//-------------------------------------------------------------------------
 std::string TileInfo::toXml(void) const
 {
   string xml = TaXml::writeStartTag(_tag, 0);
+  xml += TaXml::writeBoolean("HasLatLon", 1, _hasLatlon);
+  if (_hasLatlon)
+  {
+    xml += _latlon.getXml();
+  }
   xml += TaXml::writeInt("TileNptX", 1, _tileNptX);
   xml += TaXml::writeInt("TileNptY", 1, _tileNptY);
   xml += TaXml::writeInt("NptOverlapX", 1, _tileNptOverlapX);
@@ -239,7 +408,7 @@ bool TileInfo::outOfBoundsY(int tIndex, int &belowTile) const
 }
 
 //-------------------------------------------------------------------------
-void TileInfo::print(void) const
+void TileInfo::print(bool verbose) const
 {
   printf("Tiling: NptXY:(%d,%d) OverlapNpt:(%d,%d) NumTiles:(%d,%d) [%d]\n",
 	 _tileNptX, _tileNptY, _tileNptOverlapX, _tileNptOverlapY,
@@ -289,7 +458,7 @@ bool TileInfo::constructTiledGrid(const std::string &fieldName,
       LOG(ERROR) << "Ranges not computed";
       return false;
     }
-    LOG(DEBUG) << " Tile i x0,y0 = " << r.getX0() << " " << r.getY0();
+    LOG(DEBUG_VERBOSE) << " Tile i x0,y0 = " << r.getX0() << " " << r.getY0();
     for (int y=r.getY0(); r.inRangeY(y); ++y)
     {
       // allow for wraparound in Y as well, we just assume the
@@ -480,6 +649,20 @@ int TileInfo::tileBelow(int index) const
     return -1;
   }
   return tileFromTileIndex(tx, ty-1);
+}
+
+//-------------------------------------------------------------------------
+std::string TileInfo::latlonDebugString(int tileIndex) const
+{
+  if (_hasLatlon)
+  {
+    return _latlon.debugString(tileIndex);
+  }
+  else
+  {
+    string ret = "           ";
+    return ret;
+  }
 }
 
 //-------------------------------------------------------------------------

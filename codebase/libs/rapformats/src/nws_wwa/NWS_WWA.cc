@@ -133,6 +133,52 @@ void NWS_WWA::print(FILE *out) const
 	if(_hdr.hazard_sub_type != 0) {
 		fprintf(out, "   Hazard Sub type = %s\n",wwa[_hdr.hazard_sub_type].match_str);
 	}
+        switch (_hdr.action)
+        {
+           /* New Event */
+           case ACT_NEW:
+              fprintf(out, "   Action = NEW,  New event\n");
+              break;
+           /* Event continued */
+           case ACT_CON:
+              fprintf(out, "   Action = CON, event continued \n");
+              break;
+           /* Event extended (time)*/
+           case ACT_EXT:
+              fprintf(out, "   Action = EXT, event extended time \n");
+              break;
+            /* Event extended (area) */
+            case ACT_EXA:
+              fprintf(out, "   Action = EXA, event extended area \n");
+              break;
+            /* Event extended (both time and area) */
+            case ACT_EXB:
+              fprintf(out, "   Action = EXB, event extended time and area \n");
+              break;
+            /* Event upgraded */
+            case ACT_UPG:
+              fprintf(out, "   Action = UPG, event upgraded \n");
+              break;
+            /* Event cancelled */
+            case ACT_CAN:
+              fprintf(out, "   Action = CAN, event cancelled \n");
+              break;
+            /* Event expired */
+            case ACT_EXP:
+              fprintf(out, "   Action = EXP, notification of expire time of event \n");
+              break;
+            /* Event correction */
+            case ACT_COR:
+              fprintf(out, "   Action = COR, event correction \n");
+              break;
+            /* Event routine */
+            case ACT_ROU:
+              fprintf(out, "   Action = ROU, event routine  \n");
+              break;
+            default:
+              fprintf(out, "   Action is unknown, not in list of known action types \n");
+              break;
+        } 
 	fprintf(out, "   Motion Time = %s \n",utimstr(_hdr.motion_time));
 	fprintf(out, "   Motion Lat, Lon = %g, %g \n",_hdr.motion_lat,_hdr.motion_lon);
 	fprintf(out, "   Motion Direction = %ddeg\n",_hdr.motion_dir);

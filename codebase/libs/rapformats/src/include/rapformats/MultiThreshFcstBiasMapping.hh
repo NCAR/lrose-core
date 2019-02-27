@@ -19,6 +19,7 @@ class MultiThreshItem;
 class FieldThresh2;
 class TileInfo;
 class Grid2d;
+class TileInfo;
 
 //----------------------------------------------------------------
 class MultiThreshFcstBiasMapping
@@ -139,9 +140,10 @@ public:
   /**
    * Debug print
    *
+   * @param[in] info  Information about tiling
    * @param[in] verbose  True to print more
    */
-  void print(bool verbose=false) const;
+  void print(const TileInfo &info, bool verbose=false) const;
 
   /**
    * Debug print with limitation on what is printed
@@ -151,11 +153,14 @@ public:
    * @param[in] leadSeconds  Print only lead time seconds equal to input,
    *                         unless empty in which case print all lead times
    * @param[in] tiles     Tile indices to print, empty to print all tiles
+   * @param[in] info  Information about tiling
    * @param[in] verbose  True to print more
    */
   void print(const std::vector<int> &genHours,
 	     const std::vector<int> &leadSeconds, 
-	     const std::vector<int> &tiles, bool verbose=false) const;
+	     const std::vector<int> &tiles,
+	     const TileInfo &info,
+	     bool verbose=false) const;
 
   /**
    * Retrieve information for a particular gen/lead time/ tile

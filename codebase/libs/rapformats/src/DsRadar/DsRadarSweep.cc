@@ -243,7 +243,10 @@ int DsRadarSweep::disassemble(const void *buf, int len)
       iret = -1;
     }
   }
-  TaXml::readDouble(xmlBuf, "fixed_az", _fixedAz);
+  if (TaXml::readDouble(xmlBuf, "fixed_az", _fixedAz)) {
+     cerr << "  ERROR - cannot find <fixed_az>" << endl;
+     iret = -1;
+  }
   if (TaXml::readBoolean(xmlBuf, "is_clock_wise", _isClockWise)) {
     cerr << "  ERROR - cannot find <is_clock_wise>" << endl;
     iret = -1;
@@ -272,8 +275,10 @@ int DsRadarSweep::disassemble(const void *buf, int len)
     cerr << "  ERROR - cannot find <n_gates>" << endl;
     iret = -1;
   }
-  TaXml::readBoolean(xmlBuf, "antenna_transition", _antennaTransition);
 
+  if (TaXml::readBoolean(xmlBuf, "antenna_transition", _antennaTransition)) {
+    // this is assumed an optional xml field, with default set to false
+  }
   if (iret) {
     cerr << "ERROR -  DsRadarSweep::disassemble" << endl;
     cerr << "XML buffer: " << endl;

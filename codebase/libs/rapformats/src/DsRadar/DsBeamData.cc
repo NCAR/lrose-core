@@ -380,6 +380,12 @@ void DsBeamData::_copy(const DsBeamData &b)
     _i2ptr = NULL;
     memcpy(_i1ptr, b._i1ptr, sizeof(ui08)*_ngates*_nfields);
   }
+  else
+  {
+    _f4ptr = NULL;
+    _i2ptr = NULL;
+    _i1ptr = NULL;
+  }
 }
 
 /*----------------------------------------------------------------*/

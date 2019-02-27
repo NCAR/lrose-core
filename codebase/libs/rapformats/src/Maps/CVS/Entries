@@ -1,12 +1,12 @@
-/.cvsignore/1.1/Fri Oct 23 21:23:27 2015//
-/Makefile/1.4/Thu Oct  7 23:50:05 2010//
-/Map.cc/1.10/Thu Mar  3 18:45:39 2016//
-/MapIconDef.cc/1.10/Thu Mar  3 18:45:39 2016//
-/MapPolyline.cc/1.10/Thu Mar  3 18:45:39 2016//
-/MapIcon.cc/1.8/Sat Oct 13 23:22:11 2018//
-/MapIconPoint.cc/1.5/Sat Oct 13 23:22:11 2018//
-/MapObject.cc/1.5/Sat Oct 13 23:22:11 2018//
-/MapPoint.cc/1.5/Sat Oct 13 23:22:11 2018//
-/MapPointOffset.cc/1.4/Sat Oct 13 23:22:11 2018//
-/MapSimpleLabel.cc/1.5/Sat Oct 13 23:22:11 2018//
+/.cvsignore/1.1/Thu Jan 10 23:56:19 2019//
+/Makefile/1.4/Thu Jan 10 23:56:19 2019//
+/Map.cc/1.10/Thu Jan 10 23:56:19 2019//
+/MapIcon.cc/1.8/Thu Jan 10 23:56:19 2019//
+/MapIconDef.cc/1.10/Thu Jan 10 23:56:19 2019//
+/MapIconPoint.cc/1.5/Thu Jan 10 23:56:19 2019//
+/MapObject.cc/1.5/Thu Jan 10 23:56:19 2019//
+/MapPoint.cc/1.5/Thu Jan 10 23:56:19 2019//
+/MapPointOffset.cc/1.4/Thu Jan 10 23:56:19 2019//
+/MapPolyline.cc/1.10/Thu Jan 10 23:56:19 2019//
+/MapSimpleLabel.cc/1.5/Thu Jan 10 23:56:19 2019//
 D

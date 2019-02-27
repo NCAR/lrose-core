@@ -104,6 +104,20 @@ enum hazard_type_t {
 	WS_SLADV, /* SLeet Advisory */
 };
 
+enum action_t {
+  ACT_NEW, /* New Event */
+  ACT_CON, /* Event continued */
+  ACT_EXT, /* Event extended (time)*/
+  ACT_EXA, /* Event extended (area) */
+  ACT_EXB, /* Event extended (both time and area) */
+  ACT_UPG, /* Event upgraded */
+  ACT_CAN, /* Event cancelled */
+  ACT_EXP, /* Event expired */
+  ACT_COR, /* Event correction */
+  ACT_ROU  /* Event Routine */
+}; 
+
+
 typedef struct {
 	char *match_str;
 	enum hazard_type_t code;
@@ -141,8 +155,8 @@ typedef struct {
 	ui32 motion_time; // Time stamp in the TIME...MOT...LOC line
 	ui32 motion_dir;  // Degrees from true North
 	ui32 motion_kts;  // Motion Speed in Knots. 
-
-	ui32 unused_int_spares[54];   // fill out struct to 256 bytes.
+        enum action_t action; // Warning action: NEW CON EXT EXA EXB UPG CAN EXP COR ROU
+	ui32 unused_int_spares[53];   // fill out struct to 256 bytes.
 
 	fl32 lat_min;                // Latitude Bounds.
 	fl32 lat_max;
@@ -234,11 +248,11 @@ protected:
 static char wwa_colors[NUM_NWS_WWA_TYPES][WWA_COLOR_STR_LEN] = {
   "#FF0000\0", "#FFFF00\0", "#FFA500\0", "#DB7093\0", "#00FFFF\0",
   "#8B0000\0", "#32CD32\0", "#B22222\0", "#F08080\0", "#DC143C\0",
-  "#FF00FF\0", "#00FF00\0", "#2E8B57\0", "#FF69B4\0", "#00008B\0",
+  "#FF00FF\0", "#00FF00\0", "#2E8B57\0", "#FF69B4\0", "#FFA500B\0",
   "#DB7093\0", "#B0C4DE\0", "#AFEEEE\0", "#C71585\0", "#FF7F50\0",
-  "#DAA520\0", "#90EE90\0", "#708090\0", "#00FFFF\0", "#228B22\0",
+  "#DAA520\0", "#D2B48C\0", "#708090\0", "#483D8B\0", "#228B22\0",
   "#B0E0E6\0", "#4B0082\0", "#4B0082\0", "#4B0082\0", "#696969\0",
-  "#8B4513\0", "#A0522D\0", "#ADFF2F\0", "#8A2BE2\0", "#008B8B\0",
+  "#8B4513\0", "#A0522D\0", "#FF4500\0", "#8A2BE2\0", "#008B8B\0",
   "#8B008B\0", "#87CEEB\0", "#6699CC\0", "#48D1CC\0", "#7B68EE\0"
 };
 
@@ -264,7 +278,7 @@ static char wwa_labels[NUM_NWS_WWA_TYPES][WWA_LBL_STR_LEN] = {
   "Flood Watch\0", "Winter Storm Warning\0", "Winter Storm Watch\0",
   "Special Marine Warning\0", "Wind Chill Warning\0", "Wind Chill Advisory\0",
   "Excessive Heat Warning\0", "Heat Advisory\0", "High Wind Warning\0",
-  "Wind Advisory\0", "Dense Fog Advisory\0", "freeze Warning\0",
+  "Wind Advisory\0", "Dense Fog Advisory\0", "Freeze Warning\0",
   "Lakeshore warning\0", "Blowing Snow Advisory\0", "Radiological Hazard Warning\0",
   "Nuclear Hazard Warning\0", "Hazardous Materials Warning\0", "Volcano Warning\0",
   "Earthquake Warning\0", "Fire Warning\0", "Blizzard Warning\0",

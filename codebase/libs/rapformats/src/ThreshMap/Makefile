@@ -34,7 +34,8 @@ HDRS = \
 	../include/rapformats/MultiThreshFcstBiasMapping.hh \
 	../include/rapformats/MultiThresholdsBiasMapping.hh \
 	../include/rapformats/TiledMultiThresh.hh \
-	../include/rapformats/TileInfo.hh
+	../include/rapformats/TileInfo.hh \
+	../include/rapformats/TileLatLon.hh
 
 CPPC_SRCS = \
 	FieldThresh.cc \
@@ -45,7 +46,8 @@ CPPC_SRCS = \
 	MultiThreshItem.cc \
 	MultiThresholdsBiasMapping.cc \
 	TiledMultiThresh.cc \
-	TileInfo.cc
+	TileInfo.cc \
+	TileLatLon.cc
 
 #
 # general targets

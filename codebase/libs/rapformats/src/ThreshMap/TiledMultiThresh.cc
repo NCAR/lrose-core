@@ -181,22 +181,23 @@ TiledMultiThresh::replaceValues(const TiledMultiThresh &filtMap,
 }
 
 //------------------------------------------------------------------
-void TiledMultiThresh::print(int leadTime, bool verbose) const
+void TiledMultiThresh::print(int leadTime, const TileInfo &info,
+			     bool verbose) const
 {
   std::map<int, MultiThresh>::const_iterator i;
   for (i=_map.begin(); i!=_map.end(); ++i)
   {
-    i->second.print(leadTime, i->first, verbose);
+    i->second.print(leadTime, i->first, info, verbose);
   }
 }
 
 //------------------------------------------------------------------
 void TiledMultiThresh::print(int leadTime, const std::vector<int> &tiles,
-			     bool verbose) const
+			     const TileInfo &info, bool verbose) const
 {
   if (tiles.empty())
   {
-    print(leadTime, verbose);
+    print(leadTime, info, verbose);
   }
 
   std::map<int, MultiThresh>::const_iterator i;
@@ -204,7 +205,7 @@ void TiledMultiThresh::print(int leadTime, const std::vector<int> &tiles,
   {
     if (find(tiles.begin(), tiles.end(), i->first) != tiles.end())
     {
-      i->second.print(leadTime, i->first, verbose);
+      i->second.print(leadTime, i->first, info, verbose);
     }
   }
 }

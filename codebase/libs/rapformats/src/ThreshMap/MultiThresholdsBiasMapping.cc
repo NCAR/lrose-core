@@ -72,6 +72,12 @@ setColdStart(int genFrequencySeconds, const std::vector<FieldThresh2> &thresh)
 }
 
 //------------------------------------------------------------------
+void MultiThresholdsBiasMapping::addLatlonsIfNeeded(const TileInfo &t)
+{
+  _tiling.addLatlons(t);
+}
+
+//------------------------------------------------------------------
 bool MultiThresholdsBiasMapping::
 replaceValues(const MultiThresholdsBiasMapping &filtMap,
 	      const std::vector<std::string> &filterFields)
@@ -95,6 +101,24 @@ replaceValues(const MultiThresholdsBiasMapping &filtMap,
   else
   {
     LOG(ERROR) << "State of input object not equal to that of local";
+    if (!(_fields == filtMap._fields))
+    {
+      LOG(ERROR) << "Fields diff";
+    }
+    if (!(_leadSeconds == filtMap._leadSeconds))
+    {
+      LOG(ERROR) << "LeadSec diff";
+    }
+    if (!(_tiling == filtMap._tiling))
+    {
+      LOG(ERROR) << "Tiling diff";
+      _tiling.printDiffs(filtMap._tiling);
+    }
+    if (_fcst.size() != filtMap._fcst.size())
+    {
+      LOG(ERROR) << "Size diff" << _fcst.size() << " "
+		 << filtMap._fcst.size();
+    }
     ret = false;
   }
   if (!ret)
@@ -125,7 +149,8 @@ std::string MultiThresholdsBiasMapping::toXml(void) const
 
 //------------------------------------------------------------------
 bool MultiThresholdsBiasMapping::fromXml(const std::string &xml,
-					 bool fieldsLeadTilesSet)
+					 bool fieldsLeadTilesSet,
+					 bool latlonsOptional)
 {
   if (!_fieldsFromXml(xml, fieldsLeadTilesSet))
   {
@@ -135,7 +160,7 @@ bool MultiThresholdsBiasMapping::fromXml(const std::string &xml,
   {
     return false;
   }
-  if (!_tilingFromXml(xml, fieldsLeadTilesSet))
+  if (!_tilingFromXml(xml, fieldsLeadTilesSet, latlonsOptional))
   {
     return false;
   }
@@ -269,11 +294,11 @@ void MultiThresholdsBiasMapping::printState(const time_t &t,
   }
   printf("\n");
 
-  _tiling.print();
+  _tiling.print(verbose);
 
   for (size_t i=0; i<_fcst.size(); ++i)
   {
-    _fcst[i].print(verbose);
+    _fcst[i].print(_tiling, verbose);
   }
   printf("-----End Threshold/bias information ------------------\n");
 }
@@ -304,11 +329,11 @@ MultiThresholdsBiasMapping::printState(const time_t &t, bool verbose,
     printf("%d,", _leadSeconds[i]);
   }
   printf("\n");
-  _tiling.print();
+  _tiling.print(verbose);
 
   for (size_t i=0; i<_fcst.size(); ++i)
   {
-    _fcst[i].print(genHours, leadSec, tiles, verbose);
+    _fcst[i].print(genHours, leadSec, tiles, _tiling, verbose);
   }
   printf("-----End Threshold/bias information ------------------\n");
 }
@@ -575,7 +600,8 @@ bool MultiThresholdsBiasMapping::_leadsFromXml(const std::string &xml,
 
 //------------------------------------------------------------------
 bool MultiThresholdsBiasMapping::_tilingFromXml(const std::string &xml,
-						bool fieldsLeadTilesSet)
+						bool fieldsLeadTilesSet,
+						bool latlonsOptional)
 {
   TileInfo tinfo(xml);
   if (!tinfo.isOk())
@@ -584,7 +610,16 @@ bool MultiThresholdsBiasMapping::_tilingFromXml(const std::string &xml,
   }
   if (fieldsLeadTilesSet)
   {
-    if (!(tinfo == _tiling))
+    bool status = true;
+    if (latlonsOptional)
+    {
+      status = tinfo.equalExceptLatlons(_tiling);
+    }
+    else
+    {
+      status = (tinfo == _tiling);
+    }
+    if (!status)
     {
       LOG(ERROR) << "Tiling does not match local state";
       return false;

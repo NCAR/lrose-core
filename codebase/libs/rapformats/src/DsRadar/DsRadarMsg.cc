@@ -105,7 +105,9 @@ DsRadarMsg::disassemble( const void *in_msg, const int msg_len,
   }
 
   // disassemble the message
-  DsMessage::disassemble(in_msg, msg_len);
+  if (DsMessage::disassemble(in_msg, msg_len)) {
+    return( -1 );
+  }
 
   //
   // Interpret the message parts

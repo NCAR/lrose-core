@@ -115,18 +115,21 @@ public:
    * Debug print to stdout
    *
    * @param[in] leadTime  Leadtime seconds represented here
+   * @param[in] info  Information about tiling
    * @param[in] verbose  True for more output
    */
-  void print(int leadTime, bool verbose) const;
+  void print(int leadTime, const TileInfo &info, bool verbose) const;
 
   /**
    * Debug print to stdout, specific tiles only
    *
    * @param[in] leadTime  Leadtime seconds represented here
    * @param[in] tiles     Tile indices to print, empty to print all tiles
+   * @param[in] tileInfo  Information about tiling
    * @param[in] verbose  True for more output
    */
-  void print(int leadTime, const std::vector<int> &tiles, bool verbose) const;
+  void print(int leadTime, const std::vector<int> &tiles,
+	     const TileInfo &tileInfo, bool verbose) const;
 
   /**
    * Construct grids with thresholds at each grid point for each field

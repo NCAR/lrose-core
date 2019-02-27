@@ -24,6 +24,8 @@
 #include <vector>
 #include <map>
 
+class TileInfo;
+
 //----------------------------------------------------------------
 class MultiThresh
 {
@@ -137,9 +139,11 @@ public:
    *
    * @param[in] leadTime  Lead seconds
    * @param[in] tileIndex Tile index
+   * @param[in] info  Information about tiling
    * @param[in] verbose  True to print more stuff
    */
-  void print(int leadTime, int tileIndex, bool verbose=false) const;
+  void print(int leadTime, int tileIndex, const TileInfo &info,
+	     bool verbose=false) const;
 
   /**
    * Debug logging, including a lead time and tile index
@@ -155,11 +159,13 @@ public:
    *
    * @param[in] leadTime  Lead seconds
    * @param[in] tileIndex Tile index
+   * @param[in] info  Information about tiling
    * @param[in] verbose  True to print more stuff
    *
    * @return string with output print
    */
-  std::string sprint(int leadTime, int tileIndex, bool verbose=false) const;
+  std::string sprint(int leadTime, int tileIndex, const TileInfo &info,
+		     bool verbose=false) const;
 
   /**
    * @return true if input names match local state in the same order

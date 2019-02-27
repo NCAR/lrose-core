@@ -54,6 +54,12 @@ public:
   void clearMapping(void);
 
   /**
+   * Add lat/lon information to tiling member, if not already there
+   * @param[in] info  Information about tiling that contains lat/lon info
+   */
+  void addLatlonsIfNeeded(const TileInfo &info);
+
+  /**
    * Set state to coldstart values for all the gen times that are spaced
    * apart evenly starting at (h,m,s)=(0,0,0)
    *
@@ -94,9 +100,14 @@ public:
    * @param[in] xml  The XML to parse
    * @param[in] fieldsLeadsTilesSet  True if local state has fields, tiles,
    *                                 and lead times to compare the parsed XML to
+   * @param[in] latlonsOptional True if local state can have lat/lons, but
+   *                            input might now.  If False, the local and
+   *                            XML must either both have lat/lons, or neither
+
    * @return true if successful
    */
-  bool fromXml(const std::string &xml, bool fieldsLeadsTilesSet=true);
+  bool fromXml(const std::string &xml, bool fieldsLeadsTilesSet=true,
+	       bool latlonsOptional = true);
 
   /**
    * Set state to coldstart values if not already set to coldstart,
@@ -272,7 +283,8 @@ public:
   std::string _mappingsToXml(void) const;
   bool _fieldsFromXml(const std::string &xml, bool fieldsLeadTilesSet);
   bool _leadsFromXml(const std::string &xml, bool fieldsLeadTilesSet);
-  bool _tilingFromXml(const std::string &xml, bool fieldsLeadTilesSet);
+  bool _tilingFromXml(const std::string &xml, bool fieldsLeadTilesSet,
+		      bool latlonsOptional);
   bool _mappingsFromXml(const std::string &xml);
   bool _fieldThreshNamesOk(const std::vector<FieldThresh2> &fieldThresh) const;
   bool _leadTimeExists(int leadTime, const std::string &debugName) const;

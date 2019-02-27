@@ -1,14 +1,14 @@
-/.cvsignore/1.1/Fri Oct 23 21:25:57 2015//
-/HydroStation.cc/1.5/Thu Mar  3 18:45:40 2016//
-/Makefile/1.9/Thu Oct  7 23:50:06 2010//
-/SsiFile.cc/1.5/Thu Mar  3 18:45:40 2016//
-/StationData.cc/1.19/Thu Mar  3 18:45:40 2016//
-/TaiwanAwos.cc/1.12/Thu Mar  3 18:45:40 2016//
-/WxObs.cc/1.64/Sun Oct 16 17:39:17 2016//
-/WxObsField.cc/1.2/Thu Mar  3 18:45:40 2016//
-/WxTypeField.cc/1.2/Thu Mar  3 18:45:40 2016//
-/decoded_metar_to_report.c/1.29/Thu Mar  3 18:45:40 2016//
-/print_metar_data.c/1.15/Thu Mar  3 18:45:40 2016//
-/station_file.cc/1.10/Thu Mar  3 18:45:40 2016//
-/station_reports.c/1.40/Thu Mar  3 18:45:40 2016//
+/.cvsignore/1.1/Thu Jan 10 23:56:19 2019//
+/HydroStation.cc/1.5/Thu Jan 10 23:56:19 2019//
+/Makefile/1.9/Thu Jan 10 23:56:19 2019//
+/SsiFile.cc/1.5/Thu Jan 10 23:56:19 2019//
+/StationData.cc/1.19/Thu Jan 10 23:56:19 2019//
+/TaiwanAwos.cc/1.12/Thu Jan 10 23:56:19 2019//
+/WxObs.cc/1.64/Thu Jan 10 23:56:19 2019//
+/WxObsField.cc/1.2/Thu Jan 10 23:56:19 2019//
+/WxTypeField.cc/1.2/Thu Jan 10 23:56:19 2019//
+/decoded_metar_to_report.c/1.29/Thu Jan 10 23:56:19 2019//
+/print_metar_data.c/1.15/Thu Jan 10 23:56:19 2019//
+/station_file.cc/1.10/Thu Jan 10 23:56:19 2019//
+/station_reports.c/1.40/Thu Jan 10 23:56:19 2019//
 D

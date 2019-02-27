@@ -8,6 +8,7 @@
 # ifndef    TileInfo_hh
 # define    TileInfo_hh
 
+#include <rapformats/TileLatLon.hh>
 #include <string>
 #include <vector>
 class TileRange;
@@ -26,7 +27,7 @@ public:
 			  _gridNptX(0), _gridNptY(0), _nTiles(0),
 			  _nTilesX(0), _nTilesY(0), _motherSubset(false),
 			  _motherMinX(0), _motherMaxX(0), _motherMinY(0),
-			  _motherMaxY(0), _ok(false){}
+			  _motherMaxY(0), _hasLatlon(false), _ok(false){}
 
 
   /**
@@ -39,9 +40,10 @@ public:
     _tileNptX(gridNptX), _tileNptY(gridNptY), _tileNptOverlapX(0),
     _tileNptOverlapY(0), _gridNptX(gridNptX), _gridNptY(gridNptY),
     _nTiles(1), _nTilesX(1), _nTilesY(1), _motherSubset(false),
-    _motherMinX(0), _motherMaxX(0), _motherMinY(0), _motherMaxY(0), 
-    _ok(true) {}
-
+    _motherMinX(0), _motherMaxX(0), _motherMinY(0), _motherMaxY(0),
+    _hasLatlon(false), _ok(true)
+  {
+  }
 
   /**
    * Constructor for more than one tile
@@ -71,7 +73,8 @@ public:
     _tileNptOverlapX(tileNptOverlapX), _tileNptOverlapY(tileNptOverlapY),
     _gridNptX(gridNptX), _gridNptY(gridNptY), _motherSubset(motherIsSubset),
     _motherMinX(motherLowerLeftX), _motherMaxX(motherUpperRightX),
-    _motherMinY(motherLowerLeftY), _motherMaxY(motherUpperRightY),  _ok(true)
+    _motherMinY(motherLowerLeftY), _motherMaxY(motherUpperRightY),
+    _hasLatlon(false), _ok(true)
   {
     _deriveNumTiles();
   }
@@ -89,28 +92,31 @@ public:
   inline virtual ~TileInfo(void) {}
 
   /**
-   * Operator==
-   *
+   * @return true if the input object is the same as local object, except no
+   * comparisions of lat/lon info
    * @param[in] t
-   * @return true if same
    */
-  inline bool operator==(const TileInfo &t) const
-  {
-    return (_tileNptX == t._tileNptX &&
-	    _tileNptY == t._tileNptY &&
-	    _tileNptOverlapX == t._tileNptOverlapX &&
-	    _tileNptOverlapY == t._tileNptOverlapY &&
-	    _gridNptX == t._gridNptX &&
-	    _gridNptY == t._gridNptY &&
-	    _nTiles == t._nTiles &&
-	    _nTilesX == t._nTilesX &&
-	    _nTilesY == t._nTilesY &&
-	    _motherSubset == t._motherSubset &&
-	    _motherMinX == t._motherMinX &&
-	    _motherMaxX == t._motherMaxX &&
-	    _motherMinY == t._motherMinY &&
-	    _motherMaxY == t._motherMaxY);
-  }
+  bool equalExceptLatlons(const TileInfo &t) const;
+
+  /**
+   * @return true if the input object is the same as local object
+   * @param[in] t
+   */
+  bool operator==(const TileInfo &t) const;
+
+  void printDiffs(const TileInfo &t) const;
+
+  /**
+   * Add lat/lon from input object to local state
+   * @param[in] t
+   */
+  void addLatlons(const TileInfo &t);
+
+  /**
+   * Set lat/lon using input object into local state
+   * @param[in] latlon
+   */
+  void setLatLons(const TileLatLon &latlon);
 
   /**
    * @return XML representation of state
@@ -238,8 +244,19 @@ public:
 
   /**
    * Debug print
+   * @param[in] verbose
    */
-  void print(void) const;
+  void print(bool verbose=false) const;
+
+  
+  /**
+   * For debug print, return a string that has lat/lon value for 
+   * a tile.  If lat/lons not set, return the index number instead
+   *
+   * @param[in] tileIndex
+   * @return lat/lon string
+   */
+  std::string latlonDebugString(int tileIndex) const;
 
   /**
    * @return true if object is valid
@@ -274,6 +291,9 @@ private:
 					 * used only when _motherSubset */
   int _motherMaxY;                      /**< Maximum Y index, mother tile,
 					 * used only when _motherSubset */
+
+  bool _hasLatlon;        /**< True if lat/lon for each tile centerpt is set */
+  TileLatLon _latlon;     /**< The lat/lon pairs if _hasLatlon is true */
 
   bool _ok;                             /**< status */
 

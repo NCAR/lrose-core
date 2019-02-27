@@ -30,6 +30,8 @@
 #include <rapformats/MultiThresh.hh>
 #include <vector>
 
+class TileInfo;
+
 //----------------------------------------------------------------
 class MultiThreshItem 
 {
@@ -118,8 +120,9 @@ public:
   
   /**
    * Debug print
+   * @param[in] info  Information about tiling
    */
-  void print(void) const;
+  void print(const TileInfo &info) const;
 
   /**
    * Debug log message to DEBUG

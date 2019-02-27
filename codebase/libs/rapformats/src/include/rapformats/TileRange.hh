@@ -23,7 +23,7 @@ public:
 
 
   /**
-   * Construct from ags
+   * Construct from args
    */
   inline TileRange(int x0, int y0, int nx, int ny, int index) :
     _x0(x0), _y0(y0), _nx(nx), _ny(ny), _index(index), _ok(true) {}

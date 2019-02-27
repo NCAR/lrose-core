@@ -96,7 +96,6 @@ public:
 protected:
 
   int _nElev;
-  int _chunkLen;
   MemBuf _elevBuf;
   MemBuf _chunkBuf;
 
