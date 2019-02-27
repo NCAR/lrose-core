@@ -109,6 +109,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "save_second_geometry = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-one_file_only")) {
+      
+      sprintf(tmp_str, "one_file_only = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-preserve_fname")) {
       
       sprintf(tmp_str, "preserve_file_name = TRUE;");
@@ -262,6 +267,7 @@ void Args::_usage(string &prog_name, ostream &out)
       << "       [ -max_pulses ? ] limit number of pulses per file)\n"
       << "       [ -n_gates_save ? ] only save out rays\n"
       << "         with this number of gates\n"
+      << "       [ -one_file_only ] only save 1 file, then quit.\n"
       << "       [ -outdir ? ] specify output directory.\n"
       << "       [ -pad_ngates_to_max] option to pad the number of gates out\n"
       << "         to the max number of gates in the file.\n"

@@ -101,7 +101,7 @@ private:
 
   // previous values - to check for changes
 
-  int _nGatesPrev;
+  int _nGatesPrev, _nGatesPrev2;
   int _nChannelsPrev;
   iwrf_radar_info_t _radarPrev;
   iwrf_scan_segment_t _scanPrev;

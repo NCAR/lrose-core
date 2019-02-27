@@ -66,6 +66,7 @@ Ts2NetCDF::Ts2NetCDF(int argc, char **argv)
   _pulseReader = NULL;
   _nPulsesRead = 0;
   _nGatesPrev = -1;
+  _nGatesPrev2 = -1;
   _nChannelsPrev = -1;
   MEM_zero(_radarPrev);
 
@@ -354,10 +355,17 @@ bool Ts2NetCDF::_checkInfoChanged(const IwrfTsPulse &pulse)
   bool changed = false;
 
   if (pulse.getNGates() != _nGatesPrev) {
-    _nGatesPrev = pulse.getNGates();
     if (!_params.pad_n_gates_to_max) {
+      if (pulse.getNGates() == _nGatesPrev2) {
+        cerr << "WARNING - ngates changed, prev, now: "
+             << _nGatesPrev << ", " << pulse.getNGates() << endl;
+        cerr << "May be staggered mode, consider setting -pad_n_gates_to_max" 
+             << endl;
+      }
       changed = true;
     }
+    _nGatesPrev2 = _nGatesPrev;
+    _nGatesPrev = pulse.getNGates();
   }
 
   if (pulse.getNChannels() != _nChannelsPrev) {
