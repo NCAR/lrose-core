@@ -493,13 +493,10 @@ static void alloc_toks(token_handle_t *handle, int n_needed)
 static void store_current_tok(token_handle_t *handle)
 
 {
-
-  if (handle->string_in_progress != FALSE) {
+  if (handle->string_in_progress != FALSE || 
+      handle->nbuf > 0) {
     store_tok(handle);
-  } else if (handle->nbuf > 0) {
-    store_tok(handle);
-  }
-
+  } 
 }
 
 /*********************************************************

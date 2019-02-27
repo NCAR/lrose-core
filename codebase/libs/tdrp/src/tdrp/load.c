@@ -466,10 +466,11 @@ int tdrpLoadApplyArgs(const char *params_path,
     }
   }
 
-  if (iret != 0) {
-    tdrpUsage(stderr);
-    return (-1);
-  }
+  // remove dead code-- iret == 0
+  //if (iret != 0) {
+  //  tdrpUsage(stderr);
+  //  return (-1);
+  //}
 
   if (tdrpLoad(params_path, table, params,
 	       override_list, expand_env, debug)) {

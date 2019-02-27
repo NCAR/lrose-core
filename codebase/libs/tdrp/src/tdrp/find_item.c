@@ -470,6 +470,12 @@ int tdrpLoadMultipleItem(token_handle_t *handle,
   int itok = start_tok;
   int done;
 
+  if (following_token == NULL) {
+    fprintf(stderr, "\n>>> TDRP_ERROR <<<\n");
+    fprintf(stderr, "No following token for multiple item data\n");
+    return (-1);
+  }
+
   if (!strcmp(tokens[itok].tok, "{")) {
     /* braces included */
     braces_included = TRUE;
@@ -627,6 +633,12 @@ int tdrpLoadStruct(token_handle_t *handle,
   int itok = start_tok;
   int ifield;
   struct_def_t *def = &tt->struct_def;
+
+  if (following_token == NULL) {
+    fprintf(stderr, "\n>>> TDRP_ERROR <<<\n");
+    fprintf(stderr, "No following token for struct data\n");
+    return (-1);
+  }
 
   if (strcmp(tokens[itok].tok, "{")) {
     fprintf(stderr, "\n>>> TDRP_ERROR <<<\n");
@@ -795,19 +807,16 @@ int tdrpLoadStruct(token_handle_t *handle,
   } /* ifield */
 
   /*
-   * check for the expected following_token if set
+   * check for the expected following_token
    */
-
-  if (following_token != NULL) {
-    if (strcmp(tokens[itok].tok, following_token)) {
-      fprintf(stderr, "\n>>> TDRP_ERROR <<<\n");
-      fprintf(stderr, "Syntax error in struct data\n");
-      fprintf(stderr, "Found '%s', expecting '%s'\n",
-	      tokens[itok].tok, following_token);
-      fprintf(stderr, "%s\n", tdrpLineInfo(handle, &tokens[itok]));
-      return (-1);
-    }
-  } /* if (following_token != NULL) */
+  if (strcmp(tokens[itok].tok, following_token)) {
+    fprintf(stderr, "\n>>> TDRP_ERROR <<<\n");
+    fprintf(stderr, "Syntax error in struct data\n");
+    fprintf(stderr, "Found '%s', expecting '%s'\n",
+	    tokens[itok].tok, following_token);
+    fprintf(stderr, "%s\n", tdrpLineInfo(handle, &tokens[itok]));
+    return (-1);
+  }
 
   *last_tok_p = itok;
   return (0);
