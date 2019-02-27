@@ -46,9 +46,6 @@ bool IwrfTsPulse::_sigmetLegacyUnpacking = false;
 bool IwrfTsPulse::_sigmetLegacyUnpackingActive = false;
 fl32 IwrfTsPulse::_sigmetFloatLut[65536] = { 0 };
 const double IwrfTsPulse::PHASE_MULT = 180.0 / 32767.0;
-const double IwrfTsPulse::RVP8_SATURATION_DBM = 6.0;
-const double IwrfTsPulse::RVP8_SATURATION_MULT =
-  pow(10.0, IwrfTsPulse::RVP8_SATURATION_DBM / 20.0);
 
 // Constructor
 
@@ -627,9 +624,11 @@ void IwrfTsPulse::getIq(int chanNum,
     
     // unpack the shorts into floats
     
-    ival = _sigmetFloatLut[(ui16)_packed[offset]] * RVP8_SATURATION_MULT;
-    qval = _sigmetFloatLut[(ui16)_packed[offset+1]] * RVP8_SATURATION_MULT;
-
+    ival = _sigmetFloatLut[(ui16)_packed[offset]] *
+      _info.getRvp8SaturationMult();
+    qval = _sigmetFloatLut[(ui16)_packed[offset+1]] *
+      _info.getRvp8SaturationMult();
+    
   }
 
 }
@@ -782,7 +781,7 @@ void IwrfTsPulse::convertToPacked(iwrf_iq_encoding_t encoding)
     fl32 *siq = siqArray;
     fl32 *iq = _iqData;
     for (int ii = 0; ii < _hdr.n_data; ii++, siq++, iq++) {
-      *siq = *iq / RVP8_SATURATION_MULT;
+      *siq = *iq / _info.getRvp8SaturationMult();
     }
     vecPackIQFromFloatIQ((ui16 *) _packed, siqArray, _hdr.n_data);
     delete[] siqArray;
@@ -1802,7 +1801,7 @@ void IwrfTsPulse::_deriveFromRvp8Header()
   _hdr.hv_flag = _rvp8_hdr.i_polar_bits;
   _hdr.phase_cohered = 1;
 
-  _hdr.scale = RVP8_SATURATION_MULT;
+  _hdr.scale = _info.getRvp8SaturationMult();
 
   _phaseDiff[0] = (_rvp8_hdr.i_burst_arg[0] / 65536.0) * 360.0;
   _phaseDiff[1] = (_rvp8_hdr.i_burst_arg[1] / 65536.0) * 360.0;
@@ -1877,7 +1876,8 @@ void IwrfTsPulse::_loadIqFromSigmetFL16()
   // I squared plus Q squared
 
   for (int ii = 0; ii < (int) _hdr.n_data; ii++) {
-    _iqData[ii] = _sigmetFloatLut[(ui16)_packed[ii]] * RVP8_SATURATION_MULT;
+    _iqData[ii] =
+      _sigmetFloatLut[(ui16)_packed[ii]] * _info.getRvp8SaturationMult();
   }
 
 }

@@ -86,6 +86,7 @@ void IwrfTsInfo::clear()
   iwrf_phasecode_init(_phasecode);
   iwrf_xmit_info_init(_xmit_info);
   iwrf_rvp8_ops_info_init(_rvp8);
+  _rvp8SaturationMult = pow(10.0, _rvp8.f_saturation_dbm / 20.0);
   iwrf_platform_georef_init(_platform_georef0);
   iwrf_platform_georef_init(_platform_georef1);
 
@@ -1925,7 +1926,7 @@ int IwrfTsInfo::_readRvp8Info(FILE *in)
     }
 
     if (!fSaturationDBMFound && sscanf(line, "fSaturationDBM=%lg", &dval) == 1) {
-      _rvp8.f_saturation_dbm = dval;
+      set_rvp8_f_saturation_dbm(dval);
       fSaturationDBMFound = true;
       continue;
     }

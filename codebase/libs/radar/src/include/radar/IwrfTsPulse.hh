@@ -558,8 +558,6 @@ private:
   // constants
 
   static const double PHASE_MULT;
-  static const double RVP8_SATURATION_DBM;
-  static const double RVP8_SATURATION_MULT;
 
   // info
 

@@ -329,6 +329,7 @@ public:
   inline const iwrf_phasecode_t &getPhasecode() const { return _phasecode; }
   inline const iwrf_xmit_info_t &getXmitInfo() const { return _xmit_info; }
   inline const iwrf_rvp8_ops_info_t &getRvp8Info() const { return _rvp8; }
+  inline double getRvp8SaturationMult() const { return _rvp8SaturationMult; }
   inline const iwrf_platform_georef_t &getPlatformGeoref() const { 
     return _platform_georef0; 
   }
@@ -651,7 +652,10 @@ public:
   inline void set_rvp8_i_playback_version(si32 x) { _rvp8.i_playback_version = x; }
   inline void set_rvp8_f_sy_clk_mhz(fl32 x) { _rvp8.f_sy_clk_mhz = x; }
   inline void set_rvp8_f_wavelength_cm(fl32 x) { _rvp8.f_wavelength_cm = x; }
-  inline void set_rvp8_f_saturation_dbm(fl32 x) { _rvp8.f_saturation_dbm = x; }
+  inline void set_rvp8_f_saturation_dbm(fl32 x) {
+    _rvp8.f_saturation_dbm = x;
+    _rvp8SaturationMult = pow(10.0, x / 20.0);
+  }
   inline void set_rvp8_f_range_mask_res(fl32 x) { _rvp8.f_range_mask_res = x; }
   void set_rvp8_i_range_mask(int i, ui16 x);
   void set_rvp8_f_noise_dbm(int chan, fl32 x);
@@ -946,6 +950,7 @@ private:
   iwrf_phasecode_t _phasecode;
   iwrf_xmit_info_t _xmit_info;
   iwrf_rvp8_ops_info_t _rvp8;
+  double _rvp8SaturationMult;
   iwrf_platform_georef_t _platform_georef0;
   iwrf_platform_georef_t _platform_georef1;
 
