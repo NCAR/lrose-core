@@ -1824,14 +1824,27 @@ int Mdvx::readUsingBuf()
 
   // get the file size
 
-  infile.fstat();
+  if (infile.fstat()){
+    _errStr += "ERROR - Mdvx::readUsingBuf\n";
+    _errStr += "File: ";
+    _errStr += _pathInUse;
+    _errStr += "\n";
+    _errStr += " Failure to stat file";
+    _errStr += "\n";
+    return -1; 
+  }
+
   int size = infile.getStat().st_size;
 
   // prepare mem buffer
 
   MemBuf buf;
   buf.reserve(size);
-  
+  if ( !buf.getPtr()) {
+   _errStr += "ERROR - Mdvx::readUsingBuf\n";
+   _errStr += "Error allocating mem in MemBuf object" ;
+   return -1;
+  } 
   // read in entire buffer
   
   if((infile.fread(buf.getPtr(), 1, size)) != size) {
@@ -2519,23 +2532,27 @@ int Mdvx::_read_volume(bool fill_missing,
   // up _readFieldNames.
 
   if (_readFieldNames.size() > 0) {
+    char *mdvReadLongOnly = getenv("MDV_READ_LONG_FIELD_NAMES_ONLY");
+    bool readLongOnly = (mdvReadLongOnly != NULL);
     bool error = false;
     _readFieldNums.clear();
     for (size_t i = 0; i < _readFieldNames.size(); i++) {
       bool fieldFound = false;
       for (int j = 0; j < _mhdr.n_fields; j++) {
-        if (!strcmp((char *) _readFieldNames[i].c_str(),
-                    _fhdrsFile[j].field_name)) {
-          // short field name
-          _readFieldNums.push_back(j);
-          fieldFound = true;
-          break;
-        } else if (!strcmp((char *) _readFieldNames[i].c_str(),
-                           _fhdrsFile[j].field_name_long)) {
-          // long field name
-          _readFieldNums.push_back(j);
-          fieldFound = true;
-          break;
+	if (readLongOnly) {
+	  if (!strcmp((char *) _readFieldNames[i].c_str(), _fhdrsFile[j].field_name_long)) {
+	    _readFieldNums.push_back(j);
+	    fieldFound = true;
+	    break;
+	  }
+	} else {
+	  // short or long field name
+	  if (!strcmp((char *) _readFieldNames[i].c_str(), _fhdrsFile[j].field_name) || 
+	      !strcmp((char *) _readFieldNames[i].c_str(), _fhdrsFile[j].field_name_long)) {
+	    _readFieldNums.push_back(j);
+	    fieldFound = true;
+	    break;
+	  }
         }
       } // j
       if (!fieldFound) {
@@ -2609,7 +2626,14 @@ int Mdvx::_read_volume(bool fill_missing,
   for (size_t i = 0; i < _readFieldNums.size(); i++) {
     
     MdvxField *field = new MdvxField(_fhdrsFile[_readFieldNums[i]],
-                                     _vhdrsFile[_readFieldNums[i]], NULL);
+                                      _vhdrsFile[_readFieldNums[i]], NULL);
+    if (field == NULL) {
+       _errStr += "ERROR - Mdvx::_read_volume.\n";
+       char errstr[128];
+       sprintf(errstr, " Allocating field mem");
+       _errStr += errstr;
+       return -1;
+    }
     
     if (field->_read_volume(infile, *this, fill_missing,
 			    do_decimate, do_final_convert, remapLut,
@@ -2619,8 +2643,7 @@ int Mdvx::_read_volume(bool fill_missing,
       sprintf(errstr, "  Reading field %d\n", (int) i);
       _errStr += errstr;
       _errStr += field->getErrStr();
-      if (field)
-         delete field;
+      delete field;
       return -1;
     }
 
@@ -2637,15 +2660,21 @@ int Mdvx::_read_volume(bool fill_missing,
   for (size_t i = 0; i < _readChunkNums.size(); i++) {
     
     MdvxChunk *chunk = new MdvxChunk(_chdrsFile[_readChunkNums[i]], NULL);
-
+    if (chunk == NULL){
+       _errStr += "ERROR - Mdvx::_read_volume.\n";
+       char errstr[128];
+       sprintf(errstr, " Allocating chunk mem");
+       _errStr += errstr;
+       return -1;
+    }
+   
     if (chunk->_read_data(infile)) {
       _errStr += "ERROR - Mdvx::_read_volume.\n";
       char errstr[128];
       sprintf(errstr, "  Reading chunk %d\n", (int) i);
       _errStr += errstr;
       _errStr += chunk->getErrStr();
-      if(chunk)
-         delete chunk;
+      delete chunk;
       return -1;
     }
 

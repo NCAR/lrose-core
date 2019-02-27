@@ -1401,11 +1401,9 @@ int DsMdvxMsg::_getWriteUrl(DsMdvx &mdvx)
   if (_debug) {
     cerr << "Found output URL part: " << outputUrl << endl;
   }
-  if (_subType == MDVP_WRITE_TO_DIR) {
+  if (_subType == MDVP_WRITE_TO_DIR || _subType == MDVP_WRITE_TO_PATH) {
     mdvx._outputUrl = outputUrl;
-  } else if (_subType == MDVP_WRITE_TO_PATH) {
-    mdvx._outputUrl = outputUrl;
-  }
+  } 
   return 0;
 }
 

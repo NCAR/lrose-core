@@ -1071,17 +1071,13 @@ int Mdvx::_load_xml_read_field_nums(const vector<string> &fieldXmls)
     for (size_t ii = 0; ii < _readFieldNames.size(); ii++) {
       bool fieldFound = false;
       for (int jj = 0; jj < (int) fieldNames.size(); jj++) {
-        if (_readFieldNames[ii] == fieldNames[jj]) {
-          // short field name
+        if (_readFieldNames[ii] == fieldNames[jj] || 
+            _readFieldNames[ii] == fieldNamesLong[jj]) {
+          // short or long field name found
           _readFieldNums.push_back(jj);
           fieldFound = true;
           break;
-        } else if (_readFieldNames[ii] == fieldNamesLong[jj]) {
-          // long field name
-          _readFieldNums.push_back(jj);
-          fieldFound = true;
-          break;
-        }
+        } 
       } // j
       if (!fieldFound) {
         _errStr += "ERROR - Mdvx::_read_volume_xml\n";

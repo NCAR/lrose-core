@@ -490,7 +490,7 @@ int Mdvx::_compileTimeHeight()
                     "  Cannot read in vsection for path: ", paths[ix]);
       _errStr += vsect.getErrStr();
       // free up fields
-      for (int jj = 0; jj << (int) fields.size(); jj++) {
+      for (int jj = 0; jj < (int) fields.size(); jj++) {
         delete fields[jj];
       }
       return -1;

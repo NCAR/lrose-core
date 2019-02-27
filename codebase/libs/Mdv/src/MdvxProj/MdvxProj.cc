@@ -1950,11 +1950,8 @@ void MdvxProj::_loadCoordFromFieldHdr(const Mdvx::field_header_t &fhdr)
   if (_coord.proj_type == Mdvx::PROJ_LATLON) {
     strcpy(_coord.unitsx, "deg");
     strcpy(_coord.unitsy, "deg");
-  } else if (_coord.proj_type == Mdvx::PROJ_POLAR_RADAR) {
-    strcpy(_coord.unitsx, "km");
-    strcpy(_coord.unitsy, "deg");
-    strcpy(_coord.unitsz, "deg");
-  } else if (_coord.proj_type == Mdvx::PROJ_RHI_RADAR) {
+  } else if (_coord.proj_type == Mdvx::PROJ_POLAR_RADAR ||
+             _coord.proj_type == Mdvx::PROJ_RHI_RADAR) {
     strcpy(_coord.unitsx, "km");
     strcpy(_coord.unitsy, "deg");
     strcpy(_coord.unitsz, "deg");

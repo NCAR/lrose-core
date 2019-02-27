@@ -1,15 +1,17 @@
-# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-# ** Copyright UCAR (c) 2008 
-# ** University Corporation for Atmospheric Research(UCAR) 
-# ** National Center for Atmospheric Research(NCAR) 
-# ** Research Applications Program(RAP) 
-# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
-# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# Copyright, University Corporation for Atmospheric Research (UCAR) 2009-2017. 
+# The Government's right to use this data and/or software is restricted per 
+# the terms of Cooperative Agreement between UCAR and the National  Science 
+# Foundation, to government use only which includes the nonexclusive, 
+# nontransferable, irrevocable, royalty-free license to exercise or have 
+# exercised for or on behalf of the U.S. Government throughout the world. 
+# All other rights are reserved. 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 LOC_INCLUDES = -I../include $(NETCDF4_INCS)
-LOC_CFLAGS =
+MY_CFLAGS = -DNO_RADX_DATA
 
 TARGET_FILE = ../libMdv.a
 

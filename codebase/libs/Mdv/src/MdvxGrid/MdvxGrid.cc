@@ -218,9 +218,14 @@ MdvxGrid::setGridDataFromMdvxField( Grid& grid,
    //
    // By now the grid and field geometry must match
    //
-   assert( (int) (geom.getNx() * geom.getNy() * geom.getNz()) ==
-           (int) (field.getVolLen() / grid.getDataElementNbytes()) );
+   int numBytesEl = grid.getDataElementNbytes();
+   assert (numBytesEl != 0);
 
+//   if ( numBytesEl != 0){
+    
+       assert( (int) (geom.getNx() * geom.getNy() * geom.getNz()) ==
+           (int) (field.getVolLen() / numBytesEl) );
+ //  }
    //
    // Set the grid data from a field of the same datatype
    // Because Grid::setFromTArray does not apply the fuzzy function

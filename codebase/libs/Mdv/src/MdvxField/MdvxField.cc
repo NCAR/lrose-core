@@ -1362,6 +1362,11 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
   case Mdvx::ENCODING_INT8: {
     int nbytes_comp = npoints_plane * sizeof(ui08);
     ui08 *comp = (ui08 *) workBuf.prepare(nbytes_comp);
+    if (comp == NULL) {
+      fprintf(stderr, "ERROR - MdvxField::convert2Composite\n");
+      fprintf(stderr, "  Error allocating memory\n");
+      return -1;
+    }
     for (int i = 0; i < npoints_plane; ++i)
       comp[i] = (ui08) _fhdr.missing_data_value;
     for (int j = lowerPlaneNum; j <= upperPlaneNum; j++) {
@@ -1383,6 +1388,11 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
   case Mdvx::ENCODING_INT16: {
     int nbytes_comp = npoints_plane * sizeof(ui16);
     ui16 *comp = (ui16 *) workBuf.prepare(nbytes_comp);
+    if (comp == NULL) {
+      fprintf(stderr, "ERROR - MdvxField::convert2Composite\n");
+      fprintf(stderr, "  Error allocating memory\n");
+      return -1;
+    }
     for (int i = 0; i < npoints_plane; ++i)
       comp[i] = (ui16) _fhdr.missing_data_value;
     for (int j = lowerPlaneNum; j <= upperPlaneNum; j++) {
@@ -1404,6 +1414,11 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
   case Mdvx::ENCODING_FLOAT32: {
     int nbytes_comp = npoints_plane * sizeof(fl32);
     fl32 *comp = (fl32 *) workBuf.prepare(nbytes_comp);
+    if (comp == NULL) {
+      fprintf(stderr, "ERROR - MdvxField::convert2Composite\n");
+      fprintf(stderr, "  Error allocating memory\n");
+      return -1;
+    }
     fl32 *c = comp;
     for (int i = 0; i < npoints_plane; i++, c++) {
       *c = _fhdr.missing_data_value;
@@ -1845,6 +1860,14 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   int nBytes = nGridOut * _fhdr.data_element_nbytes;
   workBuf.prepare(nBytes);
   
+  if ( workBuf.getPtr() == NULL) {
+    _errStr += "ERROR - MdvxField::convertRhi2Vsect\n";
+    delete[] elev;
+    delete[] sinElev;
+    delete[] cosElev;
+    return -1;
+  }
+
   fl32 missing = (fl32) _fhdr.missing_data_value;
   fl32 *vval = (fl32 *) workBuf.getPtr();
   for (int i = 0;  i < nGridOut; i++, vval++) {
@@ -2203,7 +2226,14 @@ void MdvxField::_vsectionElev2Ht(const Mdvx::master_header_t &mhdr,
   MemBuf interpBuf;
   int nBytes = nSamplePoints * nz * _fhdr.data_element_nbytes;
   interpBuf.prepare(nBytes);
-
+  if (interpBuf.getPtr() == NULL){
+    _errStr += "ERROR - MdvxField::vsectionElev2Ht\n";
+    _errStr += "  MemBuf mem allocation error";
+    delete[] sinElev;
+    delete[] cosElev;
+    delete[] gndRange;
+    return;
+  }
   // initialize the interp buffer to missing vals
   
   fl32 missing = (fl32) _fhdr.missing_data_value;
@@ -2951,6 +2981,11 @@ int MdvxField::remap(MdvxRemapLut &lut,
   int nBytesTargetPlane = nPointsTargetPlane * _fhdr.data_element_nbytes;
   int nBytesTargetVol = nBytesTargetPlane * _fhdr.nz;
   workBuf.prepare(nBytesTargetVol);
+
+  if ( workBuf.getPtr() == NULL) {
+       _errStr += "ERROR - MdvxField::remap\n";
+       return -1;
+  }
 
   // zero out the work buffer
 
@@ -4412,6 +4447,13 @@ void MdvxField::_check_lon_domain(double read_min_lon,
   workBuf.reserve(replyNLon * _fhdr.ny * _fhdr.nz *
 		  _fhdr.data_element_nbytes);
   
+  if (workBuf.getPtr() == NULL ) {
+    cerr << "ERROR - MdvxField::_check_lon_domain" << endl;
+    cerr << "  MemBuf allocation error " << endl;
+    delete [] lut;
+    return;
+  }
+
   for (int iz = 0; iz < _fhdr.nz; iz++) {
     for (int iy = 0; iy < _fhdr.ny; iy++) {
       
@@ -5218,7 +5260,11 @@ int MdvxField::_decimate_rgba(int max_nxy)
   // set up working buffer
   MemBuf targetBuf;
   targetBuf.prepare(nBytesTargetVol);
-  
+  if ( targetBuf.getPtr() == NULL){
+     _errStr += "ERROR - MdvxField::decimate\n";
+     return -1;
+  }
+ 
  
   // loop through z, decimating into target buffer
   ui32 *sourceVol = (ui32 *) _volBuf.getPtr();
@@ -5263,11 +5309,18 @@ int MdvxField::_decimate_rgba(int max_nxy)
            if(y_loc >= _fhdr.ny ) y_loc = _fhdr.ny - 1;
          } // input data row loop
 
-         r_val =  (double) r_sum / count;
-         g_val =  (double) g_sum / count;
-         b_val =  (double) b_sum / count;
-         a_val =  (double) a_sum / count;
-         *target = (r_val << 24) + (g_val << 16) + (b_val << 8) + a_val;
+         if ( count != 0) {
+           r_val =  (double) r_sum / count;
+           g_val =  (double) g_sum / count;
+           b_val =  (double) b_sum / count;
+           a_val =  (double) a_sum / count;
+
+           *target = (r_val << 24) + (g_val << 16) + (b_val << 8) + a_val;
+         }
+         else {
+            *target = 0;
+         }
+
          target++; // move to the next output pixel
       } 
     } 

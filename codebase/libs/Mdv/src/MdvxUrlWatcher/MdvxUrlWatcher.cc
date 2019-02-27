@@ -321,9 +321,13 @@ bool MdvxUrlWatcher::_fcst_getdata(void)
 bool MdvxUrlWatcher::_slow_fcst_getdata(void)
 {
   // expect to get _nfcst forecasts _fcst_dt apart. 
-  time_t *ti = new time_t[_nfcst];
-  int i=0;
   static const string method = "_slow_fcst_getdata";
+  time_t *ti = new time_t[_nfcst];
+  if ( !ti) {
+    _logDebug(method, "Memory allocation failure");
+    return false;
+  }
+  int i=0;
   while (_getdata())
   {
     ti[i] = _time;
@@ -358,19 +362,13 @@ bool MdvxUrlWatcher::_slow_fcst_getdata(void)
       // set the actual 'gen' time to the oldest time
       _time = ti[0] - _fcst_dt0;
       _logDebug(method, "Got all forecasts");
-      if (ti)
-      {
-         delete [] ti;
-      }
+      delete [] ti;
       return true;
     }
     ++i;
   }
   _logDebug(method, "No more data in fcst get");
-  if (ti)
-  {
-     delete [] ti;
-  }
+  delete [] ti;
   return false;
 }
 
