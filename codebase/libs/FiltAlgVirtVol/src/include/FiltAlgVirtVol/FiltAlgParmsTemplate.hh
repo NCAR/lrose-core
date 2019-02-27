@@ -26,12 +26,18 @@ bool parmAppInit(T &appParams, int argc, char **argv)
 {
   tdrp_print_mode_t printMode;
   int expandEnv;
-  bool pp, po, pr;
+  bool pp, po, pr, help;
   string fileName;
   pp = FiltAlgParms::isPrintParams(argc, argv, printMode, expandEnv);
   po = FiltAlgParms::isPrintOperators(argc, argv);
+  help = FiltAlgParms::isHelp(argc, argv);
   pr = FiltAlgParms::isSetParams(argc, argv, fileName);
 
+  if (help)
+  {
+    appParams.printHelp();
+    return false;
+  }
   if (po)
   {
     appParams.printOperators();

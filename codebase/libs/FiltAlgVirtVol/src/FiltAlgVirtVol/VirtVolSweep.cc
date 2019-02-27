@@ -1,10 +1,10 @@
 /**
- * @file SweepMdv.cc
+ * @file VirtVolSweep.cc
  */
 
 //------------------------------------------------------------------
-#include <FiltAlgVirtVol/SweepMdv.hh>
-#include <FiltAlgVirtVol/VolumeMdv.hh>
+#include <FiltAlgVirtVol/VirtVolSweep.hh>
+#include <FiltAlgVirtVol/VirtVolVolume.hh>
 #include <euclid/GridAlgs.hh>
 #include <euclid/Grid2dClump.hh>
 #include <rapmath/MathParser.hh>
@@ -21,12 +21,13 @@
 #include <algorithm>
 
 //------------------------------------------------------------------
-SweepMdv::SweepMdv(void) : _grid2d(NULL)
+VirtVolSweep::VirtVolSweep(void) : _grid2d(NULL)
 {
 }
 
 //------------------------------------------------------------------
-SweepMdv::SweepMdv(const VolumeMdv &volume, int index, double vlevel)
+VirtVolSweep::VirtVolSweep(const VirtVolVolume &volume,
+			   int index, double vlevel)
 {
   _time = volume._time;
   _proj = volume._proj;
@@ -39,48 +40,49 @@ SweepMdv::SweepMdv(const VolumeMdv &volume, int index, double vlevel)
 }
 
 //------------------------------------------------------------------
-SweepMdv::~SweepMdv(void)
+VirtVolSweep::~VirtVolSweep(void)
 {
 }
 
 //------------------------------------------------------------------
-const MathUserData *SweepMdv::specialDataPtrConst(const std::string &name) const
+const MathUserData *
+VirtVolSweep::specialDataPtrConst(const std::string &name) const
 {
   return _special.matchingDataPtrConst(name);
 }
 
 //------------------------------------------------------------------
-MathUserData *SweepMdv::specialDataPtr(const std::string &name)
+MathUserData *VirtVolSweep::specialDataPtr(const std::string &name)
 {
   return _special.matchingDataPtr(name);
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::isCircular(void) const
+bool VirtVolSweep::isCircular(void) const
 {
   Mdvx::coord_t coord = _proj.getCoord();
   return fabs(coord.ny*coord.dy >= 358);
 }
 
 //------------------------------------------------------------------
-int SweepMdv::numData(void) const
+int VirtVolSweep::numData(void) const
 {
   return (*_grid2d)[0].getNdata();
 }
 
 //------------------------------------------------------------------
-void SweepMdv::finishProcessingNode(int index, VolumeData *v)
+void VirtVolSweep::finishProcessingNode(int index, VolumeData *v)
 {
-  VolumeMdv *vol = (VolumeMdv *)v;
-  vol->addNewMdv(index, *this);
+  VirtVolVolume *vol = (VirtVolVolume *)v;
+  vol->addNewSweep(index, *this);
   v->addNew(index, (MathData *)this);
 }
 
 //------------------------------------------------------------------
-bool
-SweepMdv::synchGriddedInputsAndOutputs(const std::string &output,
-				       const std::vector<std::string> &inputs,
-				       bool &haveAll)
+bool VirtVolSweep::
+synchGriddedInputsAndOutputs(const std::string &output,
+			     const std::vector<std::string> &inputs,
+			     bool &haveAll)
 {
   // try to get inputs into the _data
   GriddedData *m=NULL;
@@ -114,7 +116,7 @@ SweepMdv::synchGriddedInputsAndOutputs(const std::string &output,
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::isSynchedInput(const std::string &name) const
+bool VirtVolSweep::isSynchedInput(const std::string &name) const
 {
   for (size_t i=0; i<_inps.size(); ++i)
   {
@@ -127,38 +129,41 @@ bool SweepMdv::isSynchedInput(const std::string &name) const
 }
 
 //------------------------------------------------------------------
-MathLoopData *SweepMdv::dataPtr(const std::string &name)
+MathLoopData *VirtVolSweep::dataPtr(const std::string &name)
 {
   return (MathLoopData *)_match(name);
 }
 
 //------------------------------------------------------------------
-const MathLoopData *SweepMdv::dataPtrConst(const std::string &name) const
+const MathLoopData *
+VirtVolSweep::dataPtrConst(const std::string &name) const
 {
   return (const MathLoopData *)_matchConst(name);
 }
 
 //------------------------------------------------------------------
-const MathUserData *SweepMdv::userDataPtrConst(const std::string &name) const
+const MathUserData *
+VirtVolSweep::userDataPtrConst(const std::string &name) const
 {
   return specialDataPtrConst(name);
 }
 
 //------------------------------------------------------------------
-MathUserData *SweepMdv::userDataPtr(const std::string &name)
+MathUserData *VirtVolSweep::userDataPtr(const std::string &name)
 {
   return specialDataPtr(name);
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::storeMathUserData(const std::string &name, MathUserData *v)
+bool VirtVolSweep::storeMathUserData(const std::string &name,
+					    MathUserData *v)
 {
   return _special.store(name, v);
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::smooth(MathLoopData *out,
-		      std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::smooth(MathLoopData *out,
+			  std::vector<ProcessingNode *> &args) const
 {
   // expect field, nx, ny as args
   double nx, ny;
@@ -181,8 +186,8 @@ bool SweepMdv::smooth(MathLoopData *out,
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::smoothDBZ(MathLoopData *out,
-			 std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::smoothDBZ(MathLoopData *out,
+			     std::vector<ProcessingNode *> &args) const
 {
   // expect field, nx, ny as args
   double nx, ny;
@@ -207,8 +212,8 @@ bool SweepMdv::smoothDBZ(MathLoopData *out,
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::stddev(MathLoopData *out,
-		      std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::stddev(MathLoopData *out,
+			  std::vector<ProcessingNode *> &args) const
 {
   // expect field, nx, ny as args
   double nx, ny;
@@ -229,8 +234,8 @@ bool SweepMdv::stddev(MathLoopData *out,
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::fuzzy(MathLoopData *out,
-		     std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::fuzzy(MathLoopData *out,
+			 std::vector<ProcessingNode *> &args) const
 {
   
   const MathLoopData *lfield;
@@ -252,8 +257,8 @@ bool SweepMdv::fuzzy(MathLoopData *out,
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::average(MathLoopData *out,
-		       std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::average(MathLoopData *out,
+			   std::vector<ProcessingNode *> &args) const
 {
   vector<const MathLoopData *> fields;
   double nx;
@@ -290,8 +295,8 @@ bool SweepMdv::average(MathLoopData *out,
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::max(MathLoopData *out,
-		   std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::max(MathLoopData *out,
+		       std::vector<ProcessingNode *> &args) const
 {
   vector<const MathLoopData *> lfields;
   if (!loadMultiData(args, lfields))
@@ -313,8 +318,8 @@ bool SweepMdv::max(MathLoopData *out,
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::mask(MathLoopData *out,
-		    std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::mask(MathLoopData *out,
+			std::vector<ProcessingNode *> &args) const
 {
   const MathLoopData *ldata;
   vector<pair<double,double> > ranges;
@@ -340,8 +345,8 @@ bool SweepMdv::mask(MathLoopData *out,
 
 //-----------------------------------------------------------------------
 bool
-SweepMdv::mask_missing_to_missing(MathLoopData *out,
-				  std::vector<ProcessingNode *> &args) const
+VirtVolSweep::mask_missing_to_missing(MathLoopData *out,
+				      std::vector<ProcessingNode *> &args) const
 {
   // expect 2 args, 1st is input data, 2nd is input mask
   const MathLoopData *ldata, *lmask;
@@ -358,8 +363,8 @@ SweepMdv::mask_missing_to_missing(MathLoopData *out,
 }
 
 //-----------------------------------------------------------------------
-bool SweepMdv::trapezoid(MathLoopData *out,
-			 std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::trapezoid(MathLoopData *out,
+			     std::vector<ProcessingNode *> &args) const
 {
   // expect 5 args, input data, and 4 parameters a,b,c,d
 
@@ -388,8 +393,8 @@ bool SweepMdv::trapezoid(MathLoopData *out,
 }
 
 //-----------------------------------------------------------------------
-bool SweepMdv::s_remap(MathLoopData *out,
-		       std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::s_remap(MathLoopData *out,
+			   std::vector<ProcessingNode *> &args) const
 {
   // expect 3 args, input data, and 2 parameters a,b
   // expect field, nx, ny as args
@@ -416,8 +421,8 @@ bool SweepMdv::s_remap(MathLoopData *out,
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::max_expand(MathLoopData *out,
-			  std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::max_expand(MathLoopData *out,
+			      std::vector<ProcessingNode *> &args) const
 {
   // expect 3 args, input data, and nx, ny
   double nx, ny;
@@ -437,9 +442,9 @@ bool SweepMdv::max_expand(MathLoopData *out,
 }
 
 //------------------------------------------------------------------
-bool
-SweepMdv::expand_angles_laterally(MathLoopData *out,
-				  std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::
+expand_angles_laterally(MathLoopData *out,
+			std::vector<ProcessingNode *> &args) const
 {
   // expect field, npt
   double npt;
@@ -460,8 +465,8 @@ SweepMdv::expand_angles_laterally(MathLoopData *out,
 
 //------------------------------------------------------------------
 bool
-SweepMdv::clump(MathLoopData *out,
-		std::vector<ProcessingNode *> &args) const
+VirtVolSweep::clump(MathLoopData *out,
+		    std::vector<ProcessingNode *> &args) const
 {
   // expect field, npt
   double npt;
@@ -489,8 +494,8 @@ SweepMdv::clump(MathLoopData *out,
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::median(MathLoopData *out,
-		      std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::median(MathLoopData *out,
+			  std::vector<ProcessingNode *> &args) const
 {
   // expect input data, and 5 parameters nx, ny, binMin, binMax, binDelta
   const MathLoopData *ldata;
@@ -511,8 +516,8 @@ bool SweepMdv::median(MathLoopData *out,
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::weighted_average(MathLoopData *out,
-				std::vector<ProcessingNode *> &args) const
+bool VirtVolSweep::weighted_average(MathLoopData *out,
+				    std::vector<ProcessingNode *> &args) const
 {
 
   // expect 0th arg to be number of x to skip, then pairs of field/weight
@@ -548,8 +553,9 @@ bool SweepMdv::weighted_average(MathLoopData *out,
 }
 
 //------------------------------------------------------------------
-bool SweepMdv::weighted_angle_average(MathLoopData *out,
-				      std::vector<ProcessingNode *> &args) const
+bool
+VirtVolSweep::weighted_angle_average(MathLoopData *out,
+				     std::vector<ProcessingNode *> &args) const
 {
   // expect 0th arg to be 1 (360) or 0 (180), then pairs of field/weight
   // so need odd args, at least 3
@@ -592,7 +598,8 @@ bool SweepMdv::weighted_angle_average(MathLoopData *out,
 }
 
 //------------------------------------------------------------------
-GriddedData *SweepMdv::_refToData(const std::string &name,  bool suppressWarn)
+GriddedData *VirtVolSweep::_refToData(const std::string &name,
+				      bool suppressWarn)
 {
   // try to pull out of existing data derived
   for (size_t i=0; i<_data.size(); ++i)
@@ -623,7 +630,7 @@ GriddedData *SweepMdv::_refToData(const std::string &name,  bool suppressWarn)
 }    
 
 //------------------------------------------------------------------
-GriddedData *SweepMdv::_exampleData(const std::string &name)
+GriddedData *VirtVolSweep::_exampleData(const std::string &name)
 {
   // see if already there
   GriddedData *s = _refToData(name, true);
@@ -646,7 +653,7 @@ GriddedData *SweepMdv::_exampleData(const std::string &name)
 }
 
 //------------------------------------------------------------------
-GriddedData *SweepMdv::_match(const std::string &n) 
+GriddedData *VirtVolSweep::_match(const std::string &n) 
 {
   // try to pull out of existing rays in data
   for (size_t i=0; i<_data.size(); ++i)
@@ -660,7 +667,7 @@ GriddedData *SweepMdv::_match(const std::string &n)
 }      
 
 //------------------------------------------------------------------
-const GriddedData *SweepMdv::_matchConst(const std::string &n) const
+const GriddedData *VirtVolSweep::_matchConst(const std::string &n) const
 {
   // try to pull out of existing rays in data
   for (size_t i=0; i<_data.size(); ++i)
@@ -674,9 +681,9 @@ const GriddedData *SweepMdv::_matchConst(const std::string &n) const
 }      
 
 
-bool SweepMdv::_loadGridValueValue(std::vector<ProcessingNode *> &args,
-				   const GriddedData **field, double &nx,
-				   double &ny) const
+bool VirtVolSweep::_loadGridValueValue(std::vector<ProcessingNode *> &args,
+				       const GriddedData **field, double &nx,
+				       double &ny) const
 {
   if (args.size() != 3)
   {
@@ -711,7 +718,7 @@ bool SweepMdv::_loadGridValueValue(std::vector<ProcessingNode *> &args,
   return true;
 }
 
-bool SweepMdv::
+bool VirtVolSweep::
 _loadGridandPairs(std::vector<ProcessingNode *> &args,
 		  const GriddedData **field,
 		  std::vector<std::pair<double,double> > &pairs) const
@@ -756,7 +763,7 @@ _loadGridandPairs(std::vector<ProcessingNode *> &args,
   return true;
 }
 
-bool SweepMdv::
+bool VirtVolSweep::
 _loadValueAndMultiFields(std::vector<ProcessingNode *> &args,
 			 double &value,
 			 std::vector<const GriddedData *> &fields) const
@@ -795,7 +802,7 @@ _loadValueAndMultiFields(std::vector<ProcessingNode *> &args,
   return true;
 }
 
-bool SweepMdv::
+bool VirtVolSweep::
 _loadMultiFields(std::vector<ProcessingNode *> &args,
 		 std::vector<const GriddedData *> &fields) const
 {

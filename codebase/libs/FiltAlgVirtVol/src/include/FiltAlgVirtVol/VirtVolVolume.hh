@@ -1,12 +1,12 @@
 /**
- * @file VolumeMdv.hh
+ * @file VirtVolVolume.hh
  * @brief Volume data, with Mdv as the IO
- * @class VolumeMdv
+ * @class VirtVolVolume
  * @brief Volume data, with Mdv as the IO
  */
 
-#ifndef VOLUME_MDV_HH
-#define VOLUME_MDV_HH
+#ifndef VIRT_VOL_VOLUME_HH
+#define VIRT_VOL_VOLUME_HH
 
 #include <FiltAlgVirtVol/FiltAlgParms.hh>
 #include <FiltAlgVirtVol/GriddedData.hh>
@@ -21,18 +21,19 @@
 
 class DsTrigger;
 class DsMdvx;
-class SweepMdv;
+class VirtVolSweep;
 
 //------------------------------------------------------------------
-class VolumeMdv : public VolumeData
+class VirtVolVolume : public VolumeData
 {
-  friend class SweepMdv;
+  friend class VirtVolSweep;
+
 public:
 
   /**
    * Empty constructor
    */
-  VolumeMdv(void);
+  VirtVolVolume(void);
 
   /**
    * Constructor.  Parses argc and argv to set up triggering
@@ -41,16 +42,17 @@ public:
    * @param[in] argc
    * @param[in] argv
    */
-  VolumeMdv(const FiltAlgParms *parms, int argc, char **argv);
+  VirtVolVolume(const FiltAlgParms *parms, int argc, char **argv);
 
   /**
    * Destructor
    */
-  virtual ~VolumeMdv(void);
+  virtual ~VirtVolVolume(void);
 
 
   #define FILTALG_BASE
   #include <rapmath/VolumeDataVirtualMethods.hh>
+  #include <FiltAlgVirtVol/VirtVolVolumeVirtualMethods.hh>
   #undef FILTALG_BASE
 
   /**
@@ -60,7 +62,7 @@ public:
    *
    * @return true if a time was triggered, false for no more triggering.
    */
-  bool triggerMdv(time_t &t);
+  bool triggerVirtVol(time_t &t);
 
   /**
    * Clear out the _data vector
@@ -86,7 +88,7 @@ public:
    * @param[in] zIndex  Index to height for this Sweep
    * @param[in] s  The sweep
    */
-  void addNewMdv(int zIndex, const SweepMdv &s);
+  void addNewSweep(int zIndex, const VirtVolSweep &s);
 
   /**
    * Take the input gridded data and add it to a height as a new field
@@ -104,7 +106,7 @@ public:
    *
    * @note the pointer v becomes owned by this object
    */
-  bool storeMathUserDataMdv(const std::string &name, MathUserData *v);
+  bool storeMathUserDataVirtVol(const std::string &name, MathUserData *v);
 
   /**
    * Output entire volume as MDV, based on internal state
@@ -161,7 +163,15 @@ protected:
      */
     inline ~GridFields(void) {}
 
+    /**
+     * @return number of 2d grids in the volume
+     */
     inline int num(void) const {return (int)_grid2d.size();}
+
+    /**
+     * @return pointer to i'th 2d grid
+     * @param[in] i
+     */
     inline const GriddedData *ithGrid(int i) const {return &_grid2d[i];}
     
     int _z;                            /**< The height index */

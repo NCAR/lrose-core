@@ -605,6 +605,30 @@
       tt->array_vals[1].d = -1;
     tt++;
     
+    // Parameter 'restrict_max_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("restrict_max_range");
+    tt->descr = tdrpStrDup("Set TRUE to restrict maximum range to a parameter, FALSE to use all the data");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &restrict_max_range - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'max_range'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_range");
+    tt->descr = tdrpStrDup("If restrict_max_range = TRUE, this is the max range index");
+    tt->help = tdrpStrDup("Not used when restrict_max_range = FALSE, or if the value is >=0");
+    tt->val_offset = (char *) &max_range - &_start_;
+    tt->single_val.d = -1;
+    tt++;
+    
     // Parameter 'virtvol_input'
     // ctype is '_External_data_t'
     

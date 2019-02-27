@@ -39,6 +39,19 @@ paramdef double
   p_default = {-1, -1};
 } vertical_level_range[2];
 
+paramdef boolean
+{
+  p_descr = "Set TRUE to restrict maximum range to a parameter, FALSE to use all the data";
+  p_default = FALSE;
+} restrict_max_range;
+
+paramdef double
+{
+  p_descr = "If restrict_max_range = TRUE, this is the max range index";
+  p_help = "Not used when restrict_max_range = FALSE, or if the value is >=0";
+  p_default = -1;
+} max_range;
+
 typedef enum {VIRTUAL_VOLUME, DATABASE, ASCII} Url_t;
 typedef enum {GRID, VALUE, NOT_SET} Data_t;
 typedef struct 

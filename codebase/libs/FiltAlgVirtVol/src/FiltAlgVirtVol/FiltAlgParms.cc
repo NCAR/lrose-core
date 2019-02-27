@@ -141,6 +141,15 @@ bool FiltAlgParms::isPrintOperators(int argc, char **argv)
 }
 
 //------------------------------------------------------------------
+void FiltAlgParms::printHelp(void)
+{
+  std::cout << "FiltAlgParms options:\n"
+	    << " [-print_operators] Print out all binary and unary operators\n"
+	    << " [-interval yyyymmddhhmmss yyyymmddhhmmss] Archive mode\n";
+  AlgorithmParams::usage(std::cout);
+}
+
+//------------------------------------------------------------------
 void FiltAlgParms::printParams(tdrp_print_mode_t mode)
 {
   AlgorithmParms::printParams(mode);
@@ -169,3 +178,18 @@ bool FiltAlgParms::isSetParams(int argc, char **argv, std::string &fileName)
   }
   return false;
 }
+
+//------------------------------------------------------------------
+bool FiltAlgParms::isHelp(int argc, char **argv)
+{
+  for (int i=0; i<argc; ++i)
+  {
+    string s = argv[i];
+    if (s == "--" || s == "-h" || s == "-help" || s == "-man")
+    {
+      return true;
+    }
+  }
+  return false;
+}
+

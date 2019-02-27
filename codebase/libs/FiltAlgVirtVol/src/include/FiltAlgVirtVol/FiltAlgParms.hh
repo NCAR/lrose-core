@@ -56,6 +56,11 @@ public:
 			    tdrp_print_mode_t &printMode, int &expandEnv);
 
   /**
+   * TDRP print the base class params, plus the one thing about operators
+   */
+  void printHelp(void);
+
+  /**
    * Print the TDRP params
    * @param[in] mode TDRP printing mode
    */
@@ -75,6 +80,14 @@ public:
    * @param[out] fileName  Set if true
    */
   static bool isSetParams(int argc, char **argv, std::string &fileName);
+
+  /**
+   * @return true if command line arguments contain -h, -help, -man
+   * @param[in] argc
+   * @param[in] argv
+   */
+  static bool isHelp(int argc, char **argv);
+    
 
 protected:
 private:

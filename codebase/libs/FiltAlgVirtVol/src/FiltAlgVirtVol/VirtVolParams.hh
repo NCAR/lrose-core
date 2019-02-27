@@ -381,6 +381,10 @@ public:
   double *_vertical_level_range;
   int vertical_level_range_n;
 
+  tdrp_bool_t restrict_max_range;
+
+  double max_range;
+
   External_data_t *_virtvol_input;
   int virtvol_input_n;
 
@@ -394,7 +398,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[8];
+  mutable TDRPtable _table[10];
 
   const char *_className;
 

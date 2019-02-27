@@ -1,10 +1,10 @@
 /**
- * @file VolumeMdv.cc
+ * @file VirtVolVolume.cc
  */
 
 //------------------------------------------------------------------
-#include <FiltAlgVirtVol/VolumeMdv.hh>
-#include <FiltAlgVirtVol/SweepMdv.hh>
+#include <FiltAlgVirtVol/VirtVolVolume.hh>
+#include <FiltAlgVirtVol/VirtVolSweep.hh>
 #include <rapmath/UnaryNode.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
@@ -21,14 +21,15 @@
 #include <cstdlib>
 
 //------------------------------------------------------------------
-VolumeMdv::VolumeMdv(void) :
+VirtVolVolume::VirtVolVolume(void) :
   _archiveChecked(false), _isArchiveMode(false), _debug(false), _T(NULL),
   _parms(NULL), _special(NULL)
 {
 }
 
 //------------------------------------------------------------------
-VolumeMdv::VolumeMdv(const FiltAlgParms *parms, int argc, char **argv):
+VirtVolVolume::VirtVolVolume(const FiltAlgParms *parms,
+			     int argc, char **argv):
   _archiveChecked(false), _isArchiveMode(false), _debug(false), _T(NULL),
   _parms(parms), _special(NULL)
 {
@@ -80,7 +81,7 @@ VolumeMdv::VolumeMdv(const FiltAlgParms *parms, int argc, char **argv):
 }
 
 //------------------------------------------------------------------
-VolumeMdv::~VolumeMdv(void)
+VirtVolVolume::~VirtVolVolume(void)
 {
   if (_T != NULL)
   {
@@ -94,7 +95,7 @@ VolumeMdv::~VolumeMdv(void)
 }
 
 //------------------------------------------------------------------
-bool VolumeMdv::triggerMdv(time_t &t)
+bool VirtVolVolume::triggerVirtVol(time_t &t)
 {
   if (_T == NULL)
   {
@@ -153,19 +154,20 @@ bool VolumeMdv::triggerMdv(time_t &t)
 }
 
 //------------------------------------------------------------------
-void VolumeMdv::clear(void)
+void VirtVolVolume::clear(void)
 {
   _data.clear();
 }
 
 //------------------------------------------------------------------
-const std::vector<GriddedData> *VolumeMdv::get2d(int index) const
+const std::vector<GriddedData> *VirtVolVolume::get2d(int index) const
 {
   return &(_data[index]._grid2d);
 }
 
 //------------------------------------------------------------------
-std::vector<GriddedData> VolumeMdv::getField3d(const std::string &name) const
+std::vector<GriddedData>
+VirtVolVolume::getField3d(const std::string &name) const
 {
   std::vector<GriddedData> ret;
   
@@ -193,7 +195,7 @@ std::vector<GriddedData> VolumeMdv::getField3d(const std::string &name) const
 }
 
 //------------------------------------------------------------------
-void VolumeMdv::addNewMdv(int zIndex, const SweepMdv &s)
+void VirtVolVolume::addNewSweep(int zIndex, const VirtVolSweep &s)
 {
   const std::vector<GriddedData> &newD = s.newDataRef();
   for (size_t i=0; i<newD.size(); ++i)
@@ -221,7 +223,7 @@ void VolumeMdv::addNewMdv(int zIndex, const SweepMdv &s)
 }
 
 //------------------------------------------------------------------
-void VolumeMdv::addNewGrid(int zIndex, const GriddedData &g)
+void VirtVolVolume::addNewGrid(int zIndex, const GriddedData &g)
 {
   string name = g.getName();
   string ename;
@@ -250,7 +252,8 @@ void VolumeMdv::addNewGrid(int zIndex, const GriddedData &g)
 }
 
 //------------------------------------------------------------------
-bool VolumeMdv::storeMathUserDataMdv(const std::string &name, MathUserData *v)
+bool VirtVolVolume::storeMathUserDataVirtVol(const std::string &name,
+					     MathUserData *v)
 {
   if (_special == NULL)
   {
@@ -264,7 +267,7 @@ bool VolumeMdv::storeMathUserDataMdv(const std::string &name, MathUserData *v)
 }
 
 //------------------------------------------------------------------
-void VolumeMdv::output(const time_t &t)
+void VirtVolVolume::output(const time_t &t)
 {
   // for each output url
   for (size_t i=0; i<_parms->_virtvol_outputs.size(); ++i)
@@ -274,7 +277,7 @@ void VolumeMdv::output(const time_t &t)
 }
 
 //------------------------------------------------------------------
-int VolumeMdv::numProcessingNodes(bool twoD) const
+int VirtVolVolume::numProcessingNodes(bool twoD) const
 {
   if (twoD)
   {
@@ -287,41 +290,51 @@ int VolumeMdv::numProcessingNodes(bool twoD) const
 }
 
 //------------------------------------------------------------------
-int VolumeMdv::getNGates(void) const
+// virtual
+bool VirtVolVolume::
+synchUserDefinedInputs(const std::string &userKey,
+		       const std::vector<std::string> &names)
+{
+  return virtVolSynchUserInputs(userKey, names);
+}
+
+//------------------------------------------------------------------
+int VirtVolVolume::getNGates(void) const
 {
   Mdvx::coord_t coord = _proj.getCoord();
   return coord.nx;
 }  
 
 //------------------------------------------------------------------
-double VolumeMdv::getDeltaGateKm(void) const
+double VirtVolVolume::getDeltaGateKm(void) const
 {
   Mdvx::coord_t coord = _proj.getCoord();
   return coord.dx;
 }
 
 //------------------------------------------------------------------
-double VolumeMdv::getDeltaAzDeg(void) const
+double VirtVolVolume::getDeltaAzDeg(void) const
 {
   Mdvx::coord_t coord = _proj.getCoord();
   return coord.dy;
 }
 
 //------------------------------------------------------------------
-double VolumeMdv::getStartRangeKm(void) const
+double VirtVolVolume::getStartRangeKm(void) const
 {
   Mdvx::coord_t coord = _proj.getCoord();
   return coord.minx;
 }
 
 //------------------------------------------------------------------
-int VolumeMdv::nz(void) const
+int VirtVolVolume::nz(void) const
 {
   return _nz;
 }
 
 //------------------------------------------------------------------
-bool VolumeMdv::_initialInitializeInput(const time_t &t, const UrlSpec &u)
+bool
+VirtVolVolume::_initialInitializeInput(const time_t &t, const UrlSpec &u)
 {
   vector<NamePair> fields = u.fieldNames();
   if (fields.empty())
@@ -353,19 +366,32 @@ bool VolumeMdv::_initialInitializeInput(const time_t &t, const UrlSpec &u)
       u._url;
     return  false;
   }
+  _masterHdr = mdv.getMasterHeader();
   Mdvx::field_header_t hdr = f->getFieldHeader();
   _nz = hdr.nz;
-  _nx = hdr.nx;
   _ny = hdr.ny;
+  _nx = hdr.nx;
+  if (_parms->restrict_max_range)
+  {
+    _nx = _parms->max_range;
+    _fieldHdr = hdr;
+    _fieldHdr.nx = _parms->max_range;
+    _fieldHdr.volume_size = _fieldHdr.nx *  _fieldHdr.ny * 
+      _fieldHdr.nz * _fieldHdr.data_element_nbytes;
+    _proj = MdvxProj(_masterHdr, _fieldHdr);
+  }
+  else
+  {
+    _proj = MdvxProj(_masterHdr, hdr);
+    _fieldHdr = hdr;
+  }
   _data.clear();
   for (int i=0; i<_nz; ++i)
   {
     _data.push_back(GridFields(i));
   }
-  _masterHdr = mdv.getMasterHeader();
-  _fieldHdr = hdr;
   _vlevelHdr = f->getVlevelHeader();
-  _proj = MdvxProj(_masterHdr, hdr);
+
   Mdvx::coord_t coord = _proj.getCoord();
   _positiveDy = coord.dy > 0.0;
   MdvxRadar mdvRadar;
@@ -393,7 +419,7 @@ bool VolumeMdv::_initialInitializeInput(const time_t &t, const UrlSpec &u)
 }
 
 //------------------------------------------------------------------
-bool VolumeMdv::_initializeInput(const time_t &t, const UrlSpec &u)
+bool VirtVolVolume::_initializeInput(const time_t &t, const UrlSpec &u)
 {
   vector<NamePair> fields = u.fieldNames();
   if (!fields.empty())
@@ -430,23 +456,38 @@ bool VolumeMdv::_initializeInput(const time_t &t, const UrlSpec &u)
       }
       f->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
       Mdvx::field_header_t hdr = f->getFieldHeader();
-      if (_nz != hdr.nz || _nx != hdr.nx || _ny != hdr.ny)
+      if (_nz != hdr.nz || _ny != hdr.ny)
       {
-	LOG(ERROR) << "Unequal dimensions";
+	LOG(ERROR) << "Unequal dimensions in z or y";
 	return false;
       }
+      if (!_parms->restrict_max_range)
+      {
+	if (_nx != hdr.nx)
+	{
+	  LOG(ERROR) << "Unequal dimensions in x";
+	  return false;
+	}
+      }
+
       for (int j=0; j<hdr.nz; ++j)
       {
-	Grid2d g(fields[i]._internal, hdr.nx, hdr.ny, hdr.missing_data_value);
+	Grid2d g(fields[i]._internal, _nx, hdr.ny, hdr.missing_data_value);
 	GriddedData gd(g);
 	fl32 *data = (fl32 *)f->getVol();
-	int k0 = hdr.nx*hdr.ny*j;
-	for (int k=0; k<hdr.nx*hdr.ny ; ++k)
+	// use input data x dimension always,
+	// and downsample
+	int k0 = hdr.nx*hdr.ny*j;  
+	for (int iy=0; iy<hdr.ny ; ++iy)
 	{
-	  if (data[k0+k] != hdr.bad_data_value &&
-	      data[k0+k] != hdr.missing_data_value)
+	  for (int ix=0; ix<_nx; ++ix)
 	  {
-	    gd.setValue(k, static_cast<double>(data[k0+k]));
+	    int k = iy*hdr.nx + ix;
+	    if (data[k0+k] != hdr.bad_data_value &&
+	      data[k0+k] != hdr.missing_data_value)
+	    {
+	      gd.setValue(ix, iy, static_cast<double>(data[k0+k]));
+	    }
 	  }
 	}
 	_data[j]._grid2d.push_back(gd);
@@ -457,7 +498,7 @@ bool VolumeMdv::_initializeInput(const time_t &t, const UrlSpec &u)
 }
 
 //------------------------------------------------------------------
-void VolumeMdv::_outputToUrl(const time_t &t, const UrlSpec &u)
+void VirtVolVolume::_outputToUrl(const time_t &t, const UrlSpec &u)
 {
   vector<NamePair> names = u.fieldNames();
 
@@ -494,9 +535,9 @@ void VolumeMdv::_outputToUrl(const time_t &t, const UrlSpec &u)
 }
 
 //------------------------------------------------------------------
-void VolumeMdv::_outputFieldToUrl(const std::string &internalName,
-				  const std::string &externalName,
-				  const time_t &t, DsMdvx &out)
+void VirtVolVolume::_outputFieldToUrl(const std::string &internalName,
+				      const std::string &externalName,
+				      const time_t &t, DsMdvx &out)
 {
   _fieldHdr.encoding_type = Mdvx::ENCODING_FLOAT32;
   _fieldHdr.data_element_nbytes = 4;

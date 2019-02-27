@@ -24,12 +24,12 @@ CPPC_SRCS = \
 	GriddedData.cc \
 	GridUserData.cc \
 	InterfaceAlgorithm.cc \
-	SweepMdv.cc \
 	UrlSpec.cc \
 	VirtVolParams.cc \
 	VirtVolParms.cc \
-	VolumeInfo.cc \
-	VolumeMdv.cc
+	VirtVolSweep.cc \
+	VirtVolVolume.cc \
+	VolumeInfo.cc
 
 #
 # general targets

@@ -26,16 +26,15 @@ Algorithm::Algorithm(const MathData &data, const VolumeData &vdata)
 {
   _ok = false;
 
-  std::vector<std::pair<std::string,std::string> >
-	      userUops = data.userUnaryOperators();
+  std::vector<FunctionDef> userUops = data.userUnaryOperators();
   for (size_t i=0; i<userUops.size(); ++i)
   {
-    _p.addUserUnaryOperator(userUops[i].first, userUops[i].second);
+    _p.addUserUnaryOperator(userUops[i]);
   }
   userUops = vdata.userUnaryOperators();
   for (size_t i=0; i<userUops.size(); ++i)
   {
-    _p.addUserUnaryOperator(userUops[i].first, userUops[i].second);
+    _p.addUserUnaryOperator(userUops[i]);
   }
 }
 
@@ -45,16 +44,15 @@ Algorithm::Algorithm(const AlgorithmParms &p, const MathData &data,
 {
   _ok = true;
 
-  std::vector<std::pair<std::string,std::string> >
-	      userUops = data.userUnaryOperators();
+  std::vector<FunctionDef> userUops = data.userUnaryOperators();
   for (size_t i=0; i<userUops.size(); ++i)
   {
-    _p.addUserUnaryOperator(userUops[i].first, userUops[i].second);
+    _p.addUserUnaryOperator(userUops[i]);
   }
   userUops = vdata.userUnaryOperators();
   for (size_t i=0; i<userUops.size(); ++i)
   {
-    _p.addUserUnaryOperator(userUops[i].first, userUops[i].second);
+    _p.addUserUnaryOperator(userUops[i]);
   }
 
   for (size_t i=0; i<p._volumeBeforeFilters.size(); ++i)
@@ -65,7 +63,7 @@ Algorithm::Algorithm(const AlgorithmParms &p, const MathData &data,
 
   for (size_t i=0; i<p._sweepFilters.size(); ++i)
   {
-    _p.parse(p._sweepFilters[i], MathParser::LOOP2D, p._fixedConstants,
+    _p.parse(p._sweepFilters[i], MathParser::LOOP2D_TO_2D, p._fixedConstants,
 	     p._userData);
   }
 

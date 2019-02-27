@@ -1,14 +1,14 @@
 /**
- * @file SweepMdv.hh
- * @brief SweepMdv data.  Any number of 2d grids and any number of special data
- *                        pointers.
- * @class SweepMdv
- * @brief SweepMdv data.  Any number of 2d grids and any number of special data
- *                        pointers.
+ * @file VirtVolSweep.hh
+ * @brief VirtVolSweep   Any number of 2d grids and any number of
+ *                       special data pointers.
+ * @class VirtVolSweep
+ * @brief VirtVolSweep   Any number of 2d grids and any number of
+ *                       special data pointers.
  */
 
-#ifndef SWEEP_MDV_HH
-#define SWEEP_MDV_HH
+#ifndef VIRTVOL_SWEEP_HH
+#define VIRTVOL_SWEEP_HH
 
 #include <FiltAlgVirtVol/FiltAlgParms.hh>
 #include <FiltAlgVirtVol/GriddedData.hh>
@@ -18,18 +18,18 @@
 #include <Mdv/MdvxRadar.hh>
 #include <vector>
 
-class VolumeMdv;
+class VirtVolVolume;
 class Algorithm;
 
 //------------------------------------------------------------------
-class SweepMdv : public MathData
+class VirtVolSweep : public MathData
 {
 public:
 
   /**
    * Empty constructor
    */
-  SweepMdv(void);
+  VirtVolSweep(void);
 
   /**
    * Constructor
@@ -37,12 +37,12 @@ public:
    * @param[in] index  Index into sweeps 0 = lowest
    * @param[in] vlevel Vertical level for the sweep
    */
-  SweepMdv(const VolumeMdv &volume, int index, double vlevel);
+  VirtVolSweep(const VirtVolVolume &volume, int index, double vlevel);
 
   /**
    * Destructor
    */
-  virtual ~SweepMdv(void);
+  virtual ~VirtVolSweep(void);
 
   /**
    * @return true if it is a full 360 degree sweep
@@ -75,7 +75,7 @@ public:
   /**
    * @return true for clockwise azimuthal increments
    */
-  bool clockwise(void) const {return _clockwise;}
+  inline bool clockwise(void) const {return _clockwise;}
 
   #define FILTALG_BASE
   #include <rapmath/MathDataVirtualMethods.hh>
@@ -84,7 +84,7 @@ public:
   /**
    * @return reference to the data vector
    */
-  const std::vector<GriddedData> &newDataRef(void) const {return _data;}
+  inline const std::vector<GriddedData> &newDataRef(void) const {return _data;}
 
   /**
    * @return pointer to named special data, or NULL for no match
