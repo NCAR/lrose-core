@@ -69,9 +69,10 @@ void AssignmentNode::printParsed(void) const
 }
 
 //-------------------------------------------------------------------
-bool AssignmentNode::isUnaryUserOpRightHandSide(std::string &keyword) const
+bool AssignmentNode::isUnaryUserOpRightHandSide(std::string &keyword,
+						bool warn) const
 {
-  return _assignedValue->isUserUnaryOp(keyword);
+  return _assignedValue->isUserUnaryOp(keyword, warn);
 }
 
 //-------------------------------------------------------------------
@@ -82,9 +83,9 @@ AssignmentNode::processVol(VolumeData *data) const
 }
 
 //-------------------------------------------------------------------
-MathUserData*AssignmentNode::processUserDefined(MathData *data) const
+MathUserData*AssignmentNode::processToUserDefined(MathData *data) const
 {
-  return _assignedValue->processUserDefined(data);
+  return _assignedValue->processToUserDefined(data);
 }
 
 //-------------------------------------------------------------------

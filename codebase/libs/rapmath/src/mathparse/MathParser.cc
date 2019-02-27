@@ -734,11 +734,11 @@ bool MathParser::parse(const std::string &s, Filter_t filterType,
     }
     _volFilters.push_back(f);
     break;
-  case LOOP2D:
+  case LOOP2D_TO_2D:
     if (find(userDataNames.begin(), userDataNames.end(), f._output) !=
 	userDataNames.end())
     {
-      f._dataType = LOOP2D_USER;
+      f._dataType = LOOP2D_TO_USER_DEFINED;
     }
     _filters2d.push_back(f);
     break;
@@ -748,7 +748,7 @@ bool MathParser::parse(const std::string &s, Filter_t filterType,
   case VOLUME_AFTER:
     _volFiltersAfter.push_back(f);
     break;
-  case LOOP2D_USER:
+  case LOOP2D_TO_USER_DEFINED:
   case VOLUME_BEFORE_USER:
   default:
     LOG(ERROR) << "Bad input";
@@ -1293,6 +1293,21 @@ void MathParser::_processLoop(const Filter &filter, MathData *rdata,
     LOG(ERROR) << "Could not synch up data";
   }
 
+  string keyword;
+  if (filter._filter->isUserAssignmentWithUnaryOp(keyword, false))
+  {
+    if (!rdata->synchUserDefinedInputs(keyword, filter._inputs))
+    {
+      LOG(ERROR) << "Could not synch up inputs";
+      return;
+    }
+  }
+  // else
+  // {
+  //   LOG(DEBUG) << "What does this mean, not sure";
+  // }
+
+
   // loop through all the individual loop items
   
 
@@ -1324,9 +1339,9 @@ void MathParser::_processLoop(const Filter &filter, MathData *rdata,
     // Needs work
   case Node::DO_IT_THE_HARD_WAY:
   default:
-    if (filter._dataType == LOOP2D_USER)
+    if (filter._dataType == LOOP2D_TO_USER_DEFINED)
     {
-      MathUserData *s = filter._filter->processUserDefined(rdata);
+      MathUserData *s = filter._filter->processToUserDefined(rdata);
       if (s == NULL)
       {
 	LOG(ERROR) << " Could not process user defined filtering";

@@ -44,10 +44,12 @@ public:
    * If this is a user unary node, return it's keyword in the arg
    *
    * @param[out] keyword
+   * @param[in] warn  True to warn if not a user unary node, or there are
+   *  problems, false to be silent
    *
    * @return true if it was a user unary node
    */
-  bool getUserUnaryKeyword(std::string &keyword) const;
+  bool getUserUnaryKeyword(std::string &keyword, bool warn=false) const;
   
   /**
    * @return true if this is user unary node, false otherwise

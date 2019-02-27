@@ -86,7 +86,7 @@ MathUserData *LogicalNode::processVol(VolumeData *data) const
 }
 
 //-------------------------------------------------------------------
-MathUserData*LogicalNode::processUserDefined(MathData *data) const
+MathUserData*LogicalNode::processToUserDefined(MathData *data) const
 {
   LOG(ERROR) << "only assignments based on unary functions";
   return NULL;

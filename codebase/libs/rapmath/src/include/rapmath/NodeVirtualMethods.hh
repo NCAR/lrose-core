@@ -22,7 +22,7 @@
    * @param[in,out] data
    * @return pointer to user data
    */
-  virtual MathUserData *processUserDefined(MathData *data) const = 0;
+  virtual MathUserData *processToUserDefined(MathData *data) const = 0;
 
   /**
    * Do the action at this node, entire volume
@@ -80,11 +80,11 @@
   virtual bool process(MathData *data) const;
 
   /**
-   * Do the action at this node, processing loop
+   * Do the action at this node, processing loop, result is user defined data
    * @param[in,out] data
    * @return pointer to user data
    */
-  virtual MathUserData *processUserDefined(MathData *data) const;
+  virtual MathUserData *processToUserDefined(MathData *data) const;
 
   /**
    * Do the action at this node, entire volume

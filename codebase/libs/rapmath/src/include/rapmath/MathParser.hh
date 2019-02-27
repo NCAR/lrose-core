@@ -23,16 +23,16 @@ public:
 
   /**
    * Types of filtering:
-   * LOOP2D = looping within a volume, 2d slices, returns a 2d slice
-   * LOOP2D_USER = looping within a volume, 2d slices, returns user defined data
+   * LOOP2D_TO_2D =   looping within a volume, 2d slices, returns a 2d slice
+   * LOOP2D_TO_USER_DEFINED = looping within a volume, 2d slices, returns user defined data
    * LOOP1D = looping within a volume, 1d rays
    * VOLUME_BEFORE = processing the entire volume, before LOOP2d and LOOP1D
    * VOLUME_BEFORE_USER = processing the entire volume, before LOOP2d and 
    *                      LOOP1D, returns user defined data
    * VOLUME_AFTER = processing the entire volume, after LOOP2d and LOOP1D
    */
-  typedef enum {LOOP2D, LOOP2D_USER, LOOP1D, VOLUME_BEFORE, VOLUME_BEFORE_USER,
-		VOLUME_AFTER} Filter_t;
+  typedef enum {LOOP2D_TO_2D, LOOP2D_TO_USER_DEFINED, LOOP1D, VOLUME_BEFORE,
+		VOLUME_BEFORE_USER, VOLUME_AFTER} Filter_t;
 
   /**
    * Constructor
@@ -71,24 +71,20 @@ public:
 
   /**
    * Store a user defined binary operator
-   * @param[in] name
-   * @param[in] descr  
+   * @param[in] def
    */
-  inline void addUserBinaryOperator(const std::string &name,
-				    const std::string &descr)
+  inline void addUserBinaryOperator(const FunctionDef &def)
   {
-    _userBinaryOperators.push_back(FunctionDef(name, descr));
+    _userBinaryOperators.push_back(def);
   }    
 
   /**
    * Store a user defined unary operator
-   * @param[in] name
-   * @param[in] descr  
+   * @param[in] def
    */
-  inline void addUserUnaryOperator(const std::string &name,
-				   const std::string &descr)
+  inline void addUserUnaryOperator(const FunctionDef &def)
   {
-    _userUnaryOperators.push_back(FunctionDef(name, descr));
+    _userUnaryOperators.push_back(def);
   }
 
   /**
@@ -139,7 +135,8 @@ public:
 
   /**
    * Process 2 dimensional input data, as defined by the input data itself
-   * by going through the LOOP2D/LOOP2D_USER filters in sequential order.
+   * by going through the LOOP2D_TO_2D/LOOP2D_TO_USER_DEFINED filters in
+   * sequential order.
    *
    * @param[in,out] rdata Pointer to the volume, assumed to have 2d subsets,
    *                      added to by this method
@@ -150,7 +147,8 @@ public:
   /**
    * Threaded 
    * Process 2 dimensional input data, as defined by the input data itself
-   * by going through the LOOP2D/LOOP2D_USER filters in sequential order.
+   * by going through the LOOP2D_TO_2D/LOOP2D_TO_USER_DEFINED filters in 
+   * sequential order.
    *
    * @param[in,out] rdata Pointer to the volume, assumed to have 2d subsets,
    *                      added to by this method

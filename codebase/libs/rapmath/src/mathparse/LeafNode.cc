@@ -85,7 +85,7 @@ MathUserData *LeafNode::processVol(VolumeData *data) const
 }
 
 //-------------------------------------------------------------------
-MathUserData*LeafNode::processUserDefined(MathData *data) const
+MathUserData*LeafNode::processToUserDefined(MathData *data) const
 {
   LOG(ERROR) << "no processing except at top level";
   return NULL;

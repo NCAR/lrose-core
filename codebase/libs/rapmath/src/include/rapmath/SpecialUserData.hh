@@ -30,6 +30,10 @@ public:
    */
   virtual ~SpecialUserData(void);
 
+  /**
+   * Set the ownership state to the input value
+   * @param[in] status
+   */
   inline void setOwnership(bool status) {_ownsPointers = status;}
 
   /**
@@ -60,8 +64,9 @@ public:
    */
   const MathUserData *matchingDataPtrConst(const std::string &name) const;
 
-  
-
+  /**
+   * @return number of named user data items in the state
+   */
   inline size_t size(void) const {return _special.size();}
 
 protected:

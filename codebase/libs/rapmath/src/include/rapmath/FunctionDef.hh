@@ -20,6 +20,25 @@ public:
     _name(name), _description(descr)  {  }
 
   /**
+   * construct from pieces
+   *   _description = 'leftHandSide=name(args), comments'
+   *   _name = name
+   */
+  inline FunctionDef(const std::string &name,
+		     const std::string &leftHandSide,
+		     const std::string &args,
+		     const std::string &comments) :
+    _name(name)
+  {
+    _description = leftHandSide + "=";
+    _description += name;
+    _description += "(";
+    _description += args;
+    _description += "), ";
+    _description += comments;
+  }
+
+  /**
    * Destructor
    */
   inline virtual ~FunctionDef(void) {}

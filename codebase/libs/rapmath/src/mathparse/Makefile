@@ -36,9 +36,11 @@ LeafNode.cc \
 LogicalArgs.cc \
 LogicalNode.cc \
 MathData.cc \
+MathDataSimple.cc \
 MathParser.cc \
 ProcessingNode.cc \
 SpecialUserData.cc \
+StatusUserData.cc \
 UnaryNode.cc
 
 #

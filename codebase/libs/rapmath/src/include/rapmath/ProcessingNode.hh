@@ -218,13 +218,13 @@ public:
   bool process(MathData *data) const;
 
   /**
-   * Process the input, update data state
+   * Process the input, update data state, return pointer to user defined data
    *
    * @param[in,out] data  Data to read/write
    *
    * @return Pointer to user defined data created by the filter
    */
-  MathUserData *processUserDefined(MathData *data) const;
+  MathUserData *processToUserDefined(MathData *data) const;
 
   /**
    * Process the input, assumed for the entire volume, update data state
@@ -293,15 +293,18 @@ public:
    * on the right hand side, being assigned to the left hand side
    *
    * @param[out] keyword  The user keyword when true
+   * @param[in] warn True to warn if not a user unary op, false to stay silent
    */
-  bool isUserAssignmentWithUnaryOp(std::string &keyword) const;
+  bool isUserAssignmentWithUnaryOp(std::string &keyword,
+				   bool warn=false) const;
 
   /**
    * @return true if this node is a user defined unary operation
    *
    * @param[out] keyword  The user's keyword when true
+   * @param[in] warn True to warn if not a user unary op, false to stay silent
    */
-  bool isUserUnaryOp(std::string &keyword) const;
+  bool isUserUnaryOp(std::string &keyword,  bool warn=false) const;
 
   /**
    * @return pointers the arguments to a unary operation (zero or more)

@@ -701,9 +701,9 @@ bool ProcessingNode::process(MathData *data) const
 }
 
 //-------------------------------------------------------------------
-MathUserData *ProcessingNode::processUserDefined(MathData *data) const
+MathUserData *ProcessingNode::processToUserDefined(MathData *data) const
 {
-  return _content->processUserDefined(data);
+  return _content->processToUserDefined(data);
 }
 
 //-------------------------------------------------------------------
@@ -753,11 +753,13 @@ LeafContent ProcessingNode::getLeafContent(void) const
 }  
 
 //-------------------------------------------------------------------
-bool ProcessingNode::isUserAssignmentWithUnaryOp(std::string &keyword) const
+bool ProcessingNode::isUserAssignmentWithUnaryOp(std::string &keyword,
+						 bool warn) const
 {
   if (_type == ASSIGNMENT)
   {
-    return ((AssignmentNode *)(_content))->isUnaryUserOpRightHandSide(keyword);
+    return ((AssignmentNode *)(_content))->isUnaryUserOpRightHandSide(keyword,
+								      warn);
   }
   else
   {
@@ -766,11 +768,11 @@ bool ProcessingNode::isUserAssignmentWithUnaryOp(std::string &keyword) const
 }
 
 //-------------------------------------------------------------------
-bool ProcessingNode::isUserUnaryOp(std::string &keyword) const
+bool ProcessingNode::isUserUnaryOp(std::string &keyword, bool warn) const
 {
   if (_type == UNARY)
   {
-    return ((UnaryNode *)(_content))->getUserUnaryKeyword(keyword);
+    return ((UnaryNode *)(_content))->getUserUnaryKeyword(keyword, warn);
   }
   else
   {

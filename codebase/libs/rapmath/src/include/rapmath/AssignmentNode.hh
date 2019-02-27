@@ -35,8 +35,9 @@ public:
   /**
    * @return true if the value computation is a user unary operation
    * @param[out] keyword  Keyword for user unary op when return is true
+   * @param[in] warn  True to warn if false is returned, false to remain silent
    */
-  bool isUnaryUserOpRightHandSide(std::string &keyword) const;
+  bool isUnaryUserOpRightHandSide(std::string &keyword, bool warn=false) const;
 
   /**
    * @return true if this is a simple assignment Variable=number or 

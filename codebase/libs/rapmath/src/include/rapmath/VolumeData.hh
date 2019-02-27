@@ -16,6 +16,7 @@ class MathData;
 class ProcessingNode;
 class MathUserData;
 class UnaryNode;
+class FunctionDef;
 
 #include <vector>
 #include <string>

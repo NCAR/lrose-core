@@ -73,8 +73,7 @@
    * @return the user defined unary operators as pairs with
    * first=name, second=description
    */
-  virtual std::vector<std::pair<std::string, std::string> >
-  userUnaryOperators(void) const = 0;
+  virtual std::vector<FunctionDef> userUnaryOperators(void) const = 0;
 
 #else
 #ifdef FILTALG_BASE
@@ -126,7 +125,7 @@
    */
   virtual bool
   synchUserDefinedInputs(const std::string &userKey,
-  			 const std::vector<std::string> &names) = 0;
+  			 const std::vector<std::string> &names);
 
 
   /**
@@ -152,8 +151,7 @@
    * @return the user defined unary operators as pairs with
    * first=name, second=description
    */
-  virtual std::vector<std::pair<std::string, std::string> >
-  userUnaryOperators(void) const = 0;
+  virtual std::vector<FunctionDef> userUnaryOperators(void) const = 0;
 
 #else
 #ifdef FILTALG_DERIVED
@@ -182,22 +180,6 @@
 
 
   /**
-   * Synchronize inputs for a user defined operation.
-   * Each user defined operation has it's own particular action,
-   * which is handled by the VolumeData derived class
-   *
-   * @param[in] userKey  Keyword for the user operation, which the derived class
-   *                     should recognize
-   * @param[in] names  Input data names
-   *
-   * @return true if successful
-   */
-  virtual bool
-  synchUserDefinedInputs(const std::string &userKey,
-  			 const std::vector<std::string> &names);
-
-
-  /**
    * Process at a node assumed to be a Unary node (user defined)
    *
    * @return MathUserData pointer created by the unary function,
@@ -219,8 +201,7 @@
    * @return the user defined unary operators as pairs with
    * first=name, second=description
    */
-  virtual std::vector<std::pair<std::string, std::string> >
-  userUnaryOperators(void) const;
+  virtual std::vector<FunctionDef> userUnaryOperators(void) const;
 
 #else
 
@@ -295,8 +276,7 @@
    * @return the user defined unary operators as pairs with
    * first=name, second=description
    */
-  virtual std::vector<std::pair<std::string, std::string> >
-  userUnaryOperators(void) const;
+  virtual std::vector<FunctionDef> userUnaryOperators(void) const;
 
 #endif
 #endif

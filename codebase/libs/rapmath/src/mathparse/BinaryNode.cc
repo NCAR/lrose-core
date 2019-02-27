@@ -73,7 +73,7 @@ MathUserData *BinaryNode::processVol(VolumeData *data) const
 }
 
 //-------------------------------------------------------------------
-MathUserData*BinaryNode::processUserDefined(MathData *data) const
+MathUserData*BinaryNode::processToUserDefined(MathData *data) const
 {
   LOG(ERROR) << "no processing except at top level";
   return NULL;

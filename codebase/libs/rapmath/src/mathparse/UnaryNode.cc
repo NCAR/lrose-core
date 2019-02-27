@@ -79,11 +79,11 @@ MathUserData *UnaryNode::processVol(VolumeData *data) const
 }
 
 //-------------------------------------------------------------------
-MathUserData*UnaryNode::processUserDefined(MathData *data) const
+MathUserData*UnaryNode::processToUserDefined(MathData *data) const
 {
   // expect only an assignment, or the right hand side, which must be a
   // unary operation (so far)
-  return data->processUserLoop2dFunction(*this);
+  return data->processUserLoopFunctionToUserData(*this);
 }
 
 //-------------------------------------------------------------------
@@ -153,16 +153,22 @@ void UnaryNode::inputFields(std::vector<std::string> &names) const
 }
 
 //-------------------------------------------------------------------
-bool UnaryNode::getUserUnaryKeyword(std::string &keyword) const
+bool UnaryNode::getUserUnaryKeyword(std::string &keyword, bool warn) const
 {
   if (_uop != ProcessingNode::UUSER)
   {
-    LOG(DEBUG) << "Not user function";
+    if (warn)
+    {
+      LOG(DEBUG) << "Not user function";
+    }
     return false;
   }
   if (_userUopKey.empty())
   {
-    LOG(DEBUG) << "No key";
+    if (warn)
+    {
+      LOG(DEBUG) << "No key";
+    }
     return false;
   }
   keyword = _userUopKey;
