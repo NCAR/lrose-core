@@ -175,7 +175,9 @@ void TaThreadPool::initForRun()
 
 void TaThreadPool::setReadyForDoneCheck()
 {
+  pthread_mutex_lock(&_mutex);
   _readyForDoneCheck = true;
+  pthread_mutex_unlock(&_mutex);
 }
 
 /////////////////////////////////////////////////////////////

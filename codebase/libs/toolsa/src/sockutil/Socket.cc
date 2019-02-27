@@ -67,6 +67,10 @@ Socket::Socket() : SockUtil()
   _data = NULL;
   _nDataAlloc = 0;
   _seqNo = 0;
+
+  _msgId = 0;
+  _msgLen = 0;
+  _msgSeqNo = 0;
 }
 
 /////////////////////////////////////////////////////////////
@@ -88,6 +92,10 @@ Socket::Socket(int sd) : SockUtil()
   _data = NULL;
   _nDataAlloc = 0;
   _seqNo = 0;
+
+  _msgId = 0;
+  _msgLen = 0;
+  _msgSeqNo = 0; 
 }
 
 ///////////////
@@ -906,7 +914,10 @@ int Socket::stripHttpHeader(string &header,
     struct timeval tv;
     tv.tv_sec = wait_msecs / 1000;
     tv.tv_usec = (wait_msecs % 1000) * 1000;
-    setsockopt (_sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv);
+    if (setsockopt (_sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv)) {
+      _errString += "  setsockopt() failed";
+      return (-1);
+    }
   }
   
   while(true) {
@@ -1057,7 +1068,9 @@ ssize_t Socket::_read(void *mess, const ssize_t len,
     struct timeval tv;
     tv.tv_sec = wait_msecs / 1000;
     tv.tv_usec = (wait_msecs % 1000) * 1000;
-    setsockopt (_sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv);
+    if (setsockopt (_sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv)) {
+      return (0);
+    }
   }
   
   while(nTarget) {
@@ -1122,7 +1135,9 @@ ssize_t Socket::_peek(void *mess, const ssize_t len,
     struct timeval tv;
     tv.tv_sec = wait_msecs / 1000;
     tv.tv_usec = (wait_msecs % 1000) * 1000;
-    setsockopt (_sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv);
+    if (setsockopt (_sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv)) {
+       return (0);
+    }
   }
   
   while(nTarget) {

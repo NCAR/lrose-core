@@ -191,6 +191,7 @@ void *(umalloc)(size_t size)
     fprintf(stderr, "ERROR - umalloc\n");
     fprintf(stderr, "Cannot perform malloc, size = %d\n", (int) size);
     umalloc_segv();
+    return ((void*)NULL);
   }
 
   user_addr = addr + Moffset;
@@ -656,6 +657,7 @@ void *(urealloc)(void *user_addr, size_t size)
       fprintf(stderr, "Trying to realloc block at addr %p.\n", addr);
       fprintf(stderr, "This block not currently allocated.\n");
       umalloc_segv();
+      return((void*)NULL);
 	
     } /* if (match_found == FALSE)  */
 
@@ -682,6 +684,7 @@ void *(urealloc)(void *user_addr, size_t size)
 	    "Cannot perform realloc, addr, size = %p, %d\n",
 	    addr, (int) size);
     umalloc_segv();
+    return((void*)NULL);
   }
 
   user_addr = (void *) (new_addr + Moffset);
@@ -892,7 +895,7 @@ void (ufree)(void *user_addr)
       fprintf(stderr, "Trying to free block at addr %p.\n", addr);
       fprintf(stderr, "This block not currently allocated.\n");
       umalloc_segv();
-      
+      return;
     } /* if (match_found == FALSE)  */
     
   } /* if (Debug_level > 1) */
@@ -1133,7 +1136,7 @@ static void alloc_check_block(char *addr, int64_t *ret_start_id,
 	      (int) *start_id,
 	      (int) *msize, (int) (*msize - Nbytes_extra));
       umalloc_segv();
-
+      return;
     } /* if (*start_id != *end_id) */
 
     *ret_start_id = *start_id;
@@ -1172,6 +1175,7 @@ static void alloc_check_space(void)
       fprintf(stderr, "ERROR - umalloc_alloc_addr_array\n");
       fprintf(stderr, "Cannot perform malloc for debug table\n");
       umalloc_segv();
+      return;
     }
 
     memset ((void *)  m_addr,

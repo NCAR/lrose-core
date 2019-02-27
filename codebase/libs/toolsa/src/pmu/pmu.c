@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <signal.h>
+#include <limits.h>
 
 #include <netinet/in.h> /* sin_family sin_addr */
 
@@ -270,7 +271,7 @@ int PMU_get_default_port()
     defaultPort = basePort + portOffset;
   } else {
     int port;
-    if (sscanf(portstr, "%d", &port) == 1 && port > 5000) {
+    if (sscanf(portstr, "%d", &port) == 1 && port > 5000 && port < INT_MAX - portOffset) {
       defaultPort = port + portOffset;
     } else {
       fprintf(stderr, "ERROR - pmu::get_default_port\n"
@@ -522,32 +523,38 @@ static int _requestInfoRelay(PROCMAP_request_t *req, int *n_procs,
   STRncopy(req_relay.instance, req->instance, PROCMAP_INSTANCE_MAX);
 
   /*
-   * try host 1
+   * try host 1 if you can
    */
-
-  colon = strstr(hostlist1, ":");
-  if (colon == NULL) {
-    STRncopy(contact_host, hostlist1, PROCMAP_HOST_RELAY_MAX);
-    STRncopy(req_relay.relay_hosts, "", PROCMAP_HOST_RELAY_MAX);
+  if (hostlist1 == NULL) {
+    ret = FALSE;
   } else {
-    STRncopy(contact_host, hostlist1, colon - hostlist1);
-    STRncopy(req_relay.relay_hosts, colon, PROCMAP_HOST_RELAY_MAX);
+    colon = strstr(hostlist1, ":");
+    if (colon == NULL) {
+      STRncopy(contact_host, hostlist1, PROCMAP_HOST_RELAY_MAX);
+      STRncopy(req_relay.relay_hosts, "", PROCMAP_HOST_RELAY_MAX);
+    } else {
+      STRncopy(contact_host, hostlist1, colon - hostlist1);
+      STRncopy(req_relay.relay_hosts, colon, PROCMAP_HOST_RELAY_MAX);
+    }
+    ret = Communicate(PROCMAP_GET_INFO_RELAY,
+		      Pmu_hostname(contact_host), &req_relay, 
+		      sizeof(req_relay), &mess, &mess_len);
   }
 
-  if (FALSE == (ret = Communicate(PROCMAP_GET_INFO_RELAY,
-				  Pmu_hostname(contact_host), &req_relay, 
-				  sizeof(req_relay), &mess, &mess_len))) {
-
+  if (ret == FALSE) {
     /*
-     * try second host
+     * try second host, if you can
      */
+    if (hostlist2 == NULL) {
+      return -1;
+    }
     
     colon = strstr(hostlist2, ":");
     if (colon == NULL) {
       STRncopy(contact_host, hostlist2, PROCMAP_HOST_RELAY_MAX);
       STRncopy(req_relay.relay_hosts, "", PROCMAP_HOST_RELAY_MAX);
     } else {
-      STRncopy(contact_host, hostlist2, colon - hostlist1);
+      STRncopy(contact_host, hostlist2, colon - hostlist2);
       STRncopy(req_relay.relay_hosts, colon, PROCMAP_HOST_RELAY_MAX);
     }
     

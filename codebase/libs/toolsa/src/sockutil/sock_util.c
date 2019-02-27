@@ -83,8 +83,10 @@ void SetSocketOptions(int sd)
 
   val = 1;
   errno = 0;
-  setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *) &val, valen);
-  
+  if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *) &val, valen)){
+    fprintf(stderr,"SetSocketOptions(): setsockopt() failed");
+  }
+
   /*
    * make sockets disappear quickly on close
    */
@@ -92,8 +94,9 @@ void SetSocketOptions(int sd)
   errno = 0;
   memset(&sl, 0, sizeof(sl));
   sl.l_onoff = 0;
-  setsockopt(sd, SOL_SOCKET, SO_LINGER, (char *) &sl, sizeof(sl));
-
+  if (setsockopt(sd, SOL_SOCKET, SO_LINGER, (char *) &sl, sizeof(sl))) {
+     fprintf(stderr,"SetSocketOptions(): setsockopt() failed");
+  }
 }
 
 /****************************************************

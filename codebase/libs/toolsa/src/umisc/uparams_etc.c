@@ -117,6 +117,10 @@ char *uparams_read(char **argv, int argc, char *prog_name)
       umalloc(strlen(prog_name) + strlen("_params") + 1);
     sprintf(default_params_var, "%s%s", prog_name, "_params");
     params_file_path = getenv(default_params_var);
+    if (! params_file_path) {
+      ufree(default_params_var);
+      return ((char *) NULL);
+    } 
     ufree(default_params_var);
 
   } /* if (use_default == TRUE) */

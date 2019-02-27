@@ -376,6 +376,7 @@ static int fmq_recover (FMQ_handle_t *handle)
 
   zero_present = FALSE;
   max_present = FALSE;
+  slot = handle->fslots; 
   for (islot = 0; islot < nslots; islot++, slot++) {
     if (slot->id == 0) {
       zero_present = TRUE;

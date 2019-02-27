@@ -388,7 +388,7 @@ DB_url_t *DB_decode_url(char *url_string)
       ufree(url_struct.translator);
     
     if (url_struct.param_file != (char *)NULL)
-      ufree(url_struct.translator);
+      ufree(url_struct.param_file);
     
     if (url_struct.host != (char *)NULL)
       ufree(url_struct.host);

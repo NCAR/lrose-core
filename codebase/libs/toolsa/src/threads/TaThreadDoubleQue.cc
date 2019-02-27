@@ -27,8 +27,11 @@
 
 #include <toolsa/TaThreadDoubleQue.hh>
 #include <toolsa/TaThread.hh>
+#include <toolsa/LogStream.hh>
 #include <unistd.h>
+#include <stdlib.h>
 #include <cassert>
+#include <stdexcept>
 
 //------------------------------------------------------------------
 TaThreadDoubleQue::TaThreadDoubleQue() : TaThreadQue()
@@ -38,7 +41,15 @@ TaThreadDoubleQue::TaThreadDoubleQue() : TaThreadQue()
 //------------------------------------------------------------------
 TaThreadDoubleQue::~TaThreadDoubleQue()
 {
-  releaseThreads();
+  try
+  {
+    releaseThreads();
+  }
+  catch (std::runtime_error &r)
+  {
+    LOG(FATAL) << "Caught runtime error " << r.what();
+    exit(-1);
+  }
 }
 
 //------------------------------------------------------------------

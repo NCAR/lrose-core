@@ -26,7 +26,7 @@
 // Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 // January 1998
 //
-// $Id: Path.cc,v 1.30 2018/10/13 21:11:29 dixon Exp $
+// $Id: Path.cc,v 1.32 2018/10/22 19:58:28 dave Exp $
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -39,6 +39,8 @@
 #include <toolsa/Path.hh>
 #include <toolsa/file_io.h>
 #include <unistd.h> // Added by Niles for getpid() proto
+#include <stdlib.h>
+
 using namespace std;
 //
 // static definitions
@@ -561,7 +563,7 @@ string Path::getExecPath()
 
   char *epath = get_exec_path();
   string execPath(epath);
-  delete[] epath;
+  free(epath);
   return execPath;
 
 }
