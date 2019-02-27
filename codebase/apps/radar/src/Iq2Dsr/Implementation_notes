@@ -4,26 +4,26 @@ Implementation notes for Iq2Dsr
 1. IQ time-series data
 ----------------------
 
-The RadarTs classes are used for reading in the time series data.
+The IwrfTs classes are used for reading in the time series data.
 
-A RadarTsPulse object owns the pulse header data and the IQ data.
-There is one RadarTsPulse for each pulse.
+A IwrfTsPulse object owns the pulse header data and the IQ data.
+There is one IwrfTsPulse for each pulse.
 
-A RadarTsInfo object stores the operational information, which does not
+A IwrfTsInfo object stores the operational information, which does not
 change as fast as the pulse header information. The info is
 updated every so often, for example when something changes or once
 every tilt.
 
-Pulses and info are read into RadarTsPulse and RadarTsInfo objects, 
-using a RadarTsReader object. As currently implemented, the reader
+Pulses and info are read into IwrfTsPulse and IwrfTsInfo objects, 
+using a IwrfTsReader object. As currently implemented, the reader
 can handle data from a file in SIGMET TsArchive format or a file message
-queue (FMQ) in RadarTs format. The RadarTs format is specified in
+queue (FMQ) in IwrfTs format. The IwrfTs format is specified in
 the ds_radar_ts.h header file, in rapformats.
 
 2. Forming pulses into beams
 ----------------------------
 
-A BeamReader object manages a RadarTsReader object. It determines when a
+A BeamReader object manages a IwrfTsReader object. It determines when a
 series of pulses is ready to be formed into a Beam.
 
 The getNextBeam() method creates a new Beam object and returns it.
@@ -38,7 +38,7 @@ some pre-set value.
 A Beam object holds a pointer to a MomentsMgr object. The MomentsMgr objects
 are managed by the top level object, Iq2Dsr.
 
-When a Beam is created, it loads the IQ data from the RadarTsPulse objects
+When a Beam is created, it loads the IQ data from the IwrfTsPulse objects
 into the MomentsMgr object. So Beam does not itself hold the IQ data. This
 is done for efficiency. The MomentsMgr objects are long-lived, so the memory
 associated with the IQ data, and intermediate results of the moments
