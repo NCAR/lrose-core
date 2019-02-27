@@ -1,10 +1,10 @@
 /*
- *	$Id: FieldRadar.h,v 1.1 2008/01/24 22:22:32 rehak Exp $
+ *	$Id: FieldRadar.h,v 1.2 2019/02/27 02:59:40 dixon Exp $
  *
  *	Module:		 FieldRadar.h
  *	Original Author: Richard E. K. Neitzel
  *      Copywrited by the National Center for Atmospheric Research
- *	Date:		 $Date: 2008/01/24 22:22:32 $
+ *	Date:		 $Date: 2019/02/27 02:59:40 $
  *
  * revision history
  * ----------------

@@ -1,14 +1,17 @@
 /*
- *	$Id: Parameter.h,v 1.1 2008/01/24 22:22:32 rehak Exp $
+ *	$Id: Parameter.h,v 1.2 2019/02/27 02:59:40 dixon Exp $
  *
  *	Module:		 Parameter.h
  *	Original Author: Richard E. K. Neitzel
  *      Copywrited by the National Center for Atmospheric Research
- *	Date:		 $Date: 2008/01/24 22:22:32 $
+ *	Date:		 $Date: 2019/02/27 02:59:40 $
  *
  * revision history
  * ----------------
  * $Log: Parameter.h,v $
+ * Revision 1.2  2019/02/27 02:59:40  dixon
+ * Sync with changes and additions in EOL LROSE Git
+ *
  * Revision 1.1  2008/01/24 22:22:32  rehak
  * Added dorade module
  *
