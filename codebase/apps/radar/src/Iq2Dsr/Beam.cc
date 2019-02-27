@@ -895,6 +895,7 @@ void Beam::_computeMoments()
       
     case IWRF_SINGLE_POL_V:
       _computeMomSpV();
+      break;
       
     case IWRF_SINGLE_POL:
     default:
@@ -955,6 +956,7 @@ void Beam::_filterMoments()
       
     case IWRF_SINGLE_POL_V:
       _filterSpV();
+      break;
       
     case IWRF_SINGLE_POL:
     default:
