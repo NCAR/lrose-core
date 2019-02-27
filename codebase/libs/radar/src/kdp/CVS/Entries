@@ -1,9 +1,11 @@
-/.cvsignore/1.1/Thu Dec 29 22:57:39 2016//
-/KdpBringi.cc/1.42/Thu Dec 29 22:57:39 2016//
-/KdpCompute.cc/1.4/Thu Dec 29 22:57:39 2016//
-/PlotKdpRays.py/1.23/Thu Dec 29 22:57:39 2016//
 /KdpFilt.cc/1.54/Mon Mar 13 17:06:09 2017//
 /Makefile/1.4/Thu Dec 29 22:57:39 2016//
-/PlotKdpEquations.py/1.2/Thu Dec 29 22:57:39 2016//
-/PhidpProc.cc/1.2/Sun May 27 20:49:41 2018//
+/.cvsignore/1.1/Thu Jan 10 23:56:19 2019//
+/KdpBringi.cc/1.42/Thu Jan 10 23:56:19 2019//
+/KdpCompute.cc/1.4/Thu Jan 10 23:56:19 2019//
+/PhidpProc.cc/1.2/Thu Jan 10 23:56:19 2019//
+/PlotKdpEquations.py/1.2/Thu Jan 10 23:56:19 2019//
+/PlotKdpRays.py/1.23/Thu Jan 10 23:56:19 2019//
+/KdpFiltParams.cc/0/dummy timestamp//
+/paramdef.KdpFilt/0/dummy timestamp//
 D

@@ -17,7 +17,9 @@
 //------------------------------------------------------------------
 class RadxAppVolume : public VolumeData
 {
-  friend class RadxAppSweep;
+  friend class RadxAppRayData;
+  friend class RadxAppSweepData;
+
 public:
 
   /**
@@ -54,7 +56,9 @@ public:
 
   #define FILTALG_BASE
   #include <rapmath/VolumeDataVirtualMethods.hh>
+  #include <radar/RadxAppVolumeVirtualMethods.hh>
   #undef FILTALG_BASE
+
 
   /**
    * Triggering method. Waits till new data triggers a return.
@@ -69,6 +73,11 @@ public:
    * @return reference to the local RadxVol
    */
   inline const RadxVol & getVolRef(void) const {return _vol;}
+
+  /**
+   * @return pointer to the local RadxRay pointers vector
+   */
+  const std::vector<RadxRay *> *getRaysPtr(void) const {return _rays;}
 
   /**
    * @return reference to the local RadxVol
@@ -96,6 +105,16 @@ public:
    */
   bool write(const std::string &path);
 
+  /**
+   * Rewind the state so that path index points to the first file
+   */
+  void rewind(void);
+
+  /**
+   * Fast forward state so that path index points to beyond the last file
+   */
+  void fastForward(void);
+  
 protected:
 
   RadxVol _vol;  /**< Volume */
@@ -103,10 +122,10 @@ protected:
   const std::vector<RadxRay *> *_rays;  /**< Pointer to each ray in vol */
   const vector<RadxSweep *> *_sweeps;   /**< Pointer to each sweep */
   RadxRay *_ray;                       /**< Pointer to current ray */
+  const RadxAppParms *_parms;         /**< Pointer to derived params */
 
 private:
 
-  const RadxAppParms *_parms;         /**< Pointer to derived params */
   RadxAppConfig::Group _activeGroup;  /**< Used when reading stuff */
   int _pathIndex;                     /**< index to next file,
 				       * archive or filelist modes*/

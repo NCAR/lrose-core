@@ -328,6 +328,26 @@ int RadxAppVolume::numProcessingNodes(bool twoD) const
 }
 
 //------------------------------------------------------------------
+// virtual
+bool RadxAppVolume::synchUserDefinedInputs(const std::string &userKey,
+					   const std::vector<std::string> &names)
+{
+  if (!needToSynch(userKey))
+  {
+    return true;
+  }
+  for (size_t i=0; i<names.size(); ++i)
+  {
+    if (!hasData(userKey, names[i], false))
+    {
+      LOG(ERROR) << "Cannot synch";
+      return false;
+    }
+  }
+  return true;
+}
+
+//------------------------------------------------------------------
 void RadxAppVolume::trim(void)
 {
   if (_parms->_outputAllFields)
@@ -406,6 +426,26 @@ bool RadxAppVolume::write(const std::string &path)
   }
   return true;
 
+}
+
+//---------------------------------------------------------------
+void RadxAppVolume::rewind(void)
+{
+  if (_realtime)
+  {
+    LOG(ERROR) << "Cannot rewind in real time mode";
+  }
+  _pathIndex = 0;
+}
+
+//---------------------------------------------------------------
+void RadxAppVolume::fastForward(void)
+{
+  if (_realtime)
+  {
+    LOG(ERROR) << "Cannot fast forward in real time mode";
+  }
+  _pathIndex = (int)_paths.size();
 }
 
 //---------------------------------------------------------------

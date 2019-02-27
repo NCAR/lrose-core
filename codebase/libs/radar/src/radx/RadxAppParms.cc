@@ -111,6 +111,20 @@ bool RadxAppParms::isPrintOperators(int argc, char **argv)
 }
 
 //------------------------------------------------------------------
+bool RadxAppParms::isHelp(int argc, char **argv)
+{
+  for (int i=0; i<argc; ++i)
+  {
+    string s = argv[i];
+    if (s == "--" || s == "-h" || s == "-help" || s == "-man")
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+//------------------------------------------------------------------
 bool RadxAppParms::isPrintParams(int argc, char **argv,
 				 tdrp_print_mode_t &printMode,
 				 int &expandEnv)
@@ -187,8 +201,17 @@ bool RadxAppParms::isPrintParams(int argc, char **argv,
 //------------------------------------------------------------------
 void RadxAppParms::printParams(tdrp_print_mode_t mode)
 {
-  
   RadxAppParams::print(stdout, mode);
+}
+
+//------------------------------------------------------------------
+void RadxAppParms::printHelp(void)
+{
+  std::cout << "RadxAppParms options:\n"
+	    << " [-print_operators] Print out all binary and unary operators\n"
+	    << " [-interval yyyymmddhhmmss yyyymmddhhmmss] Archive mode\n";
+
+  RadxAppParams::usage(std::cout);
 }
 
 //------------------------------------------------------------------

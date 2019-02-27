@@ -25,6 +25,8 @@ HDRS = \
 	../include/radar/RadxAppArgs.hh \
 	../include/radar/RadxAppConfig.hh \
 	../include/radar/RadxAppParams.hh \
+	../include/radar/RadxAppRayData.hh \
+	../include/radar/RadxAppRayLoopData.hh \
 	../include/radar/AtmosAttenTemplate.hh
 
 CPPC_SRCS = \
@@ -32,8 +34,13 @@ CPPC_SRCS = \
 	RadxAppParms.cc \
 	RadxApp.cc \
 	RadxAppArgs.cc \
+	RadxAppCircularLookupHandler.cc \
 	RadxAppConfig.cc \
-	RadxAppVolume.cc 
+	RadxAppVolume.cc \
+	RadxAppRayData.cc  \
+	RadxAppRayLoopData.cc \
+	RadxAppSweepData.cc  \
+	RadxAppSweepLoopData.cc 
 
 #
 # general targets

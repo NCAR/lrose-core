@@ -61,8 +61,8 @@ RadxApp::RadxApp(const RadxAppParms &parms,
 
   for (size_t i=0; i<parms._sweepFilters.size(); ++i)
   {
-    _p.parse(parms._sweepFilters[i], MathParser::LOOP2D, parms._fixedConstants,
-	     parms._userData);
+    _p.parse(parms._sweepFilters[i], MathParser::LOOP2D_TO_2D,
+	     parms._fixedConstants, parms._userData);
   }
 
   for (size_t i=0; i<parms._rayFilters.size(); ++i)
@@ -400,25 +400,30 @@ bool RadxApp::write(RadxAppVolume *vol)
   return vol->write();
 }
 
+//---------------------------------------------------------------
+bool RadxApp::write(RadxAppVolume *vol, const std::string &url)
+{
+  return vol->write(url);
+}
+
 //------------------------------------------------------------------
 void RadxApp::_setupUserUnaryOps(const MathData &sweepData,
 				 const MathData &rayData,
 				 const VolumeData &vdata)
 {
-  std::vector<std::pair<std::string,std::string> >
-	      userUops = sweepData.userUnaryOperators();
+  std::vector<FunctionDef> userUops = sweepData.userUnaryOperators();
   for (size_t i=0; i<userUops.size(); ++i)
   {
-    _p.addUserUnaryOperator(userUops[i].first, userUops[i].second);
+    _p.addUserUnaryOperator(userUops[i]);
   }
   userUops = rayData.userUnaryOperators();
   for (size_t i=0; i<userUops.size(); ++i)
   {
-    _p.addUserUnaryOperator(userUops[i].first, userUops[i].second);
+    _p.addUserUnaryOperator(userUops[i]);
   }
   userUops = vdata.userUnaryOperators();
   for (size_t i=0; i<userUops.size(); ++i)
   {
-    _p.addUserUnaryOperator(userUops[i].first, userUops[i].second);
+    _p.addUserUnaryOperator(userUops[i]);
   }
 }

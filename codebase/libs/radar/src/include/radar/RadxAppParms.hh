@@ -63,6 +63,11 @@ public:
   void printParams(tdrp_print_mode_t mode = PRINT_LONG);
 
   /**
+   * TDRP print the base class params, plus the one thing about operators
+   */
+  void printHelp(void);
+
+  /**
    * @return true if input string is a fixed constant 
    * @param[in] s
    */
@@ -92,6 +97,13 @@ public:
    */
   static bool isPrintOperators(int argc, char **argv);
 
+  /**
+   * @return true if command line arguments contain -h, -help, -man
+   * @param[in] argc
+   * @param[in] argv
+   */
+  static bool isHelp(int argc, char **argv);
+    
   /**
    * @return true if command line arguments contain '-f' or '-path'
    * @param[in] argc

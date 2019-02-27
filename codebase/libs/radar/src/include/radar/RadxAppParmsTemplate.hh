@@ -26,13 +26,20 @@ bool parmAppInit(T &appParams, int argc, char **argv)
 {
   tdrp_print_mode_t printMode;
   int expandEnv;
-  bool pp, po, pr, files;
+  bool pp, po, pr, files, help;
   string fileName;
   vector<string> fileList;
   pp = RadxAppParms::isPrintParams(argc, argv, printMode, expandEnv);
   po = RadxAppParms::isPrintOperators(argc, argv);
+  help = RadxAppParms::isHelp(argc, argv);
   pr = RadxAppParms::isSetParams(argc, argv, fileName);
   files = RadxAppParms::isFileList(argc, argv, fileList);
+
+  if (help)
+  {
+    appParams.printHelp();
+    return false;
+  }
 
   if (po)
   {

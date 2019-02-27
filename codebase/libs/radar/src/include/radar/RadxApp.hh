@@ -115,6 +115,14 @@ public:
    */
   bool write(RadxAppVolume *vol);
 
+  /**
+   * Write volume to specified URL
+   * @param[in] vol Volume to write
+   * @param[in] url
+   *
+   * @return true if successful
+   */
+  bool write(RadxAppVolume *vol, const std::string &url);
 
   /**
    * return a copy of RayxData of a particular name
