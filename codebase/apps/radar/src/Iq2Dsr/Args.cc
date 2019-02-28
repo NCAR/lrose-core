@@ -101,6 +101,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "compute_noise = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-write_blocking")) {
+      
+      sprintf(tmp_str, "write_blocking = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-radar_id")) {
       
       if (i < argc - 1) {
@@ -157,6 +162,7 @@ void Args::usage(string &prog_name, ostream &out) const
       << "       [ -radar_id ? ] filter on this radar_id\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"
       << "       [ -vv, -extra ] print extra verbose debug messages\n"
+      << "       [ -write_blocking ] set output FMQ to block\n"
       << endl;
   
   Params::usage(out);
