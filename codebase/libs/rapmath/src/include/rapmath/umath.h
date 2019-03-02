@@ -140,6 +140,18 @@ extern "C" {
 			double *r_squared_p);
 
   /***************************************************************************
+   * linear fit of line through x/y data, using orthogonal regression
+   *
+   * Compute a (slope) and b (intercept) so that: y = ax + b
+   *
+   * Returns 0 on success, -1 on error.
+   *
+   ***************************************************************************/
+  
+  int uLinearFitOrthogonal(int n, double *x, double *y,
+                           double *a, double *b);
+  
+  /***************************************************************************
    * compute linear fit of line through x/y data, using principal components
    *
    * Compute a (slope) and b (intercept) so that: y = ax + b

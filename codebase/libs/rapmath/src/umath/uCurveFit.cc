@@ -499,6 +499,64 @@ int uLinearFitPC(int n, double *x, double *y,
 
 }
 
+/***************************************************************************
+ * linear fit of line through x/y data, using orthogonal regression
+ *
+ * Compute a (slope) and b (intercept) so that: y = ax + b
+ *
+ * Returns 0 on success, -1 on error.
+ *
+ ***************************************************************************/
+ 
+int uLinearFitOrthogonal(int n, double *x, double *y,
+                         double *a, double *b)
+  
+{
+
+  if (n < 2) {
+    return -1;
+  }
+
+  // compute x and y mean
+
+  double dn = (double) n;
+  double sumx = 0.0;
+  double sumy = 0.0;
+
+  for (int ii = 0; ii < n; ii++) {
+    sumx += x[ii];
+    sumy += y[ii];
+  }
+
+  double xmean = sumx / dn;
+  double ymean = sumy / dn;
+
+  // compute squared sums
+
+  double sxx = 0.0;
+  double sxy = 0.0;
+  double syy = 0.0;
+  
+  for (int ii = 0; ii < n; ii++) {
+    double dx = x[ii] - xmean;
+    double dy = y[ii] - ymean;
+    sxx += dx * dx;
+    sxy += dx * dy;
+    syy += dy * dy;
+  }
+
+  double dyyxx = syy - sxx;
+  double beta1 =
+    (dyyxx + sqrt((dyyxx * dyyxx) + (4.0 * sxy * sxy))) / (2.0 * sxy);
+  double beta0 = ymean - beta1 * xmean;
+
+  *a = beta0;
+  *b = beta1;
+
+  return 0;
+
+}
+
 /*********************************************************************
  * uPolyFit()
  *
