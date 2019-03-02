@@ -550,8 +550,8 @@ int uLinearFitOrthogonal(int n, double *x, double *y,
     (dyyxx + sqrt((dyyxx * dyyxx) + (4.0 * sxy * sxy))) / (2.0 * sxy);
   double beta0 = ymean - beta1 * xmean;
 
-  *a = beta0;
-  *b = beta1;
+  *a = beta1;
+  *b = beta0;
 
   return 0;
 
