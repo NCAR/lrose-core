@@ -78,6 +78,7 @@ CPPC_SRCS = \
 	DS.cc \
 	DataTemp.cc \
         Template7.41.cc \
+        Template7.4000.cc \
         Template7.0.cc \
         Template7.2.cc \
 	ES.cc \
