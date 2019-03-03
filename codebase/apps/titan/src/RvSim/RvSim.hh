@@ -36,11 +36,10 @@
 
 #include <string>
 #include <vector>
-#include <netcdf.hh>
+#include <radar/RadarComplex.hh>
+#include <radar/RadarFft.hh>
 #include "Args.hh"
 #include "Params.hh"
-#include "Complex.hh"
-#include "Fft.hh"
 
 using namespace std;
 
@@ -87,7 +86,7 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  Fft *_fft;
+  RadarFft *_fft;
   
   int _beamNum;
   int _gateNum;
@@ -98,7 +97,7 @@ private:
 
   static const int _phaseCodeN = 8;
   static const int _phaseCodeM = 64;
-  Complex_t _phaseCode[_phaseCodeM];
+  RadarComplex_t _phaseCode[_phaseCodeM];
   
    void _initPhaseCodes();
 
@@ -115,35 +114,35 @@ private:
   void _createGaussian(double power,
 		       double vel,
 		       double width,
-		       Complex_t *volts);
+		       RadarComplex_t *volts);
 
   void _encodeTrip(int tripNum,
-		   const Complex_t *trip,
-		   Complex_t *tripEncoded);
+		   const RadarComplex_t *trip,
+		   RadarComplex_t *tripEncoded);
 
-  void _cohere2Trip1(const Complex_t *IQ,
-		     Complex_t *trip1);
+  void _cohere2Trip1(const RadarComplex_t *IQ,
+		     RadarComplex_t *trip1);
   
   void _printComplex(ostream &out,
 		     const string &heading,
-		     const Complex_t *comp);
+		     const RadarComplex_t *comp);
 
   void _printVector(ostream &out,
 		    const string &heading,
-		    const Complex_t *comp);
+		    const RadarComplex_t *comp);
 
-  double _computePower(const Complex_t *IQ);
+  double _computePower(const RadarComplex_t *IQ);
 
-  void _momentsByPp(const Complex_t *IQ, double prtSecs,
+  void _momentsByPp(const RadarComplex_t *IQ, double prtSecs,
 		    double &power, double &vel, double &width);
 
-  void _momentsByFft(const Complex_t *IQ, double prtSecs,
+  void _momentsByFft(const RadarComplex_t *IQ, double prtSecs,
 		     double &power, double &vel, double &width);
 
   double _computeSpectralNoise(const double *magCentered);
   
   void _writeSpectraFile(const string &heading,
-			 const Complex_t *comp);
+			 const RadarComplex_t *comp);
   
   int _writeTmpFile(const string &tmpPath,
 		    const vector<iq_t> &iqVec,

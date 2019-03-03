@@ -40,6 +40,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <Ncxx/Nc3File.hh>
 #include <toolsa/os_config.h>
 #include <toolsa/pmu.h>
 #include <toolsa/mem.h>
@@ -111,8 +112,7 @@ RvSim::RvSim(int argc, char **argv)
 
   // set up FFT object
 
-  _fft = new Fft(_nSamples, _params.debug,
-		 _params.data_mode == Params::RANDOM_DATA);
+  _fft = new RadarFft(_nSamples);
 
   // initialize the phase codes
 
@@ -362,8 +362,8 @@ void RvSim::_createGateData(const moments_t &trip1Mom,
 	 << trip2Mom.vel << ", " << trip2Mom.width << endl;
   }
   
-  Complex_t trip1Td[_nSamples];
-  Complex_t trip2Td[_nSamples];
+  RadarComplex_t trip1Td[_nSamples];
+  RadarComplex_t trip2Td[_nSamples];
   memset(trip1Td, 0, sizeof(trip1Td));
   memset(trip2Td, 0, sizeof(trip2Td));
   
@@ -423,15 +423,15 @@ void RvSim::_createGateData(const moments_t &trip1Mom,
 
   // code up the trips
   
-  Complex_t trip1Encoded[_nSamples];
-  Complex_t trip2Encoded[_nSamples];
+  RadarComplex_t trip1Encoded[_nSamples];
+  RadarComplex_t trip2Encoded[_nSamples];
   _encodeTrip(1, trip1Td, trip1Encoded);
   _encodeTrip(2, trip2Td, trip2Encoded);
   
   // combine the trips
   
-  Complex_t combined[_nSamples];
-  Complex_t combinedCoded[_nSamples];
+  RadarComplex_t combined[_nSamples];
+  RadarComplex_t combinedCoded[_nSamples];
   for (int ii = 0; ii < _nSamples; ii++) {
     combined[ii].re = trip1Td[ii].re + trip2Td[ii].re;
     combined[ii].im = trip1Td[ii].im + trip2Td[ii].im;
@@ -441,28 +441,28 @@ void RvSim::_createGateData(const moments_t &trip1Mom,
 
   // cohere combined to trip1
 
-  Complex_t coheredTrip1[_nSamples];
+  RadarComplex_t coheredTrip1[_nSamples];
   _cohere2Trip1(combinedCoded, coheredTrip1);
   
   if (_params.write_spectra_files) {
     
-    Complex_t specTrip1[_nSamples];
+    RadarComplex_t specTrip1[_nSamples];
     _fft->fwd(trip1Td, specTrip1);
     _writeSpectraFile("sim_trip1", specTrip1);
 
-    Complex_t specTrip2[_nSamples];
+    RadarComplex_t specTrip2[_nSamples];
     _fft->fwd(trip2Td, specTrip2);
     _writeSpectraFile("sim_trip2", specTrip2);
 
-    Complex_t specCombined[_nSamples];
+    RadarComplex_t specCombined[_nSamples];
     _fft->fwd(combined, specCombined);
     _writeSpectraFile("sim_combined", specCombined);
 
-    Complex_t specCombinedCoded[_nSamples];
+    RadarComplex_t specCombinedCoded[_nSamples];
     _fft->fwd(combinedCoded, specCombinedCoded);
     _writeSpectraFile("sim_combined_coded", specCombinedCoded);
     
-    Complex_t specCoheredTrip1[_nSamples];
+    RadarComplex_t specCoheredTrip1[_nSamples];
     _fft->fwd(coheredTrip1, specCoheredTrip1);
     _writeSpectraFile("cohered_trip1", specCoheredTrip1);
     
@@ -485,7 +485,7 @@ void RvSim::_createGateData(const moments_t &trip1Mom,
 void RvSim::_createGaussian(double power,
 			    double vel,
 			    double width,
-			    Complex_t *volts)
+			    RadarComplex_t *volts)
 
 {
 
@@ -504,7 +504,7 @@ void RvSim::_createGaussian(double power,
   double C1 = power / Ts;
   double C2 = 1.0 / (sqrt(2.0 * M_PI) * fvsigma);
 
-  Complex_t spec[_nSamples];
+  RadarComplex_t spec[_nSamples];
 
   for (int k = 0; k < _nSamples; k++) {
     spec[k].re = 0.0;
@@ -598,8 +598,8 @@ void RvSim::_createGaussian(double power,
 // encode a trip
 
 void RvSim::_encodeTrip(int tripNum,
-			const Complex_t *trip,
-			Complex_t *tripEncoded)
+			const RadarComplex_t *trip,
+			RadarComplex_t *tripEncoded)
 
 {
 
@@ -626,8 +626,8 @@ void RvSim::_encodeTrip(int tripNum,
 // beamCode runs from [-4 to 63].
 // Therefore trip_num can vary from 1 to 4.
 
-void RvSim::_cohere2Trip1(const Complex_t *IQ,
-			  Complex_t *trip1)
+void RvSim::_cohere2Trip1(const RadarComplex_t *IQ,
+			  RadarComplex_t *trip1)
   
 {
 
@@ -636,7 +636,7 @@ void RvSim::_cohere2Trip1(const Complex_t *IQ,
   // done by multiplying the i/q value by the complex conjugate
   // of the phase code
 
-  const Complex_t *code = _phaseCode;
+  const RadarComplex_t *code = _phaseCode;
   
   for (int ii = 0; ii < _nSamples; ii++, IQ++, trip1++, code++) {
     trip1->re = (IQ->re * code->re) + (IQ->im * code->im);
@@ -650,7 +650,7 @@ void RvSim::_cohere2Trip1(const Complex_t *IQ,
 
 void RvSim::_printComplex(ostream &out,
 			  const string &heading,
-			  const Complex_t *comp)
+			  const RadarComplex_t *comp)
   
 {
   
@@ -672,7 +672,7 @@ void RvSim::_printComplex(ostream &out,
 
 void RvSim::_printVector(ostream &out,
 			 const string &heading,
-			 const Complex_t *comp)
+			 const RadarComplex_t *comp)
   
 {
   
@@ -694,12 +694,12 @@ void RvSim::_printVector(ostream &out,
 ///////////////////////////////////////////////
 // compute time-domain power
 
-double RvSim::_computePower(const Complex_t *IQ)
+double RvSim::_computePower(const RadarComplex_t *IQ)
   
 {
   
   double p = 0.0;
-  const Complex_t *iq0 = IQ;
+  const RadarComplex_t *iq0 = IQ;
   for (int i = 0; i < _nSamples; i++, iq0++) {
     p += ((iq0->re * iq0->re) + (iq0->im * iq0->im));
   }
@@ -709,7 +709,7 @@ double RvSim::_computePower(const Complex_t *IQ)
 ///////////////////////////////////////////////
 // compute time-domain moments using pulse-pair
 
-void RvSim::_momentsByPp(const Complex_t *IQ, double prtSecs,
+void RvSim::_momentsByPp(const RadarComplex_t *IQ, double prtSecs,
 			 double &power, double &vel, double &width)
   
 {
@@ -718,8 +718,8 @@ void RvSim::_momentsByPp(const Complex_t *IQ, double prtSecs,
   
   double a = 0.0, b = 0.0, p = 0.0;
   
-  const Complex_t *iq0 = IQ;
-  const Complex_t *iq1 = IQ + 1;
+  const RadarComplex_t *iq0 = IQ;
+  const RadarComplex_t *iq1 = IQ + 1;
   
   p += ((iq0->re * iq0->re) + (iq0->im * iq0->im));
   
@@ -735,7 +735,7 @@ void RvSim::_momentsByPp(const Complex_t *IQ, double prtSecs,
   double c = 0.0, d = 0.0;
   
   iq0 = IQ;
-  const Complex_t *iq2 = IQ + 2;
+  const RadarComplex_t *iq2 = IQ + 2;
 
   for (int i = 0; i < _nSamples - 2; i++, iq0++, iq2++) {
     c += ((iq0->re * iq2->re) + (iq0->im * iq2->im));
@@ -803,7 +803,7 @@ void RvSim::_momentsByPp(const Complex_t *IQ, double prtSecs,
 ///////////////////////////////
 // compute spectral moments
 
-void RvSim::_momentsByFft(const Complex_t *IQ, double prtSecs,
+void RvSim::_momentsByFft(const RadarComplex_t *IQ, double prtSecs,
 			  double &power, double &vel, double &width)
   
 {
@@ -812,13 +812,13 @@ void RvSim::_momentsByFft(const Complex_t *IQ, double prtSecs,
   
   // compute fft
   
-  Complex_t spectra[_nSamples];
+  RadarComplex_t spectra[_nSamples];
   _fft->fwd(IQ, spectra);
 
   // compute magnitudes
 
   double magnitude[_nSamples];
-  Complex_t *spp = spectra;
+  RadarComplex_t *spp = spectra;
   double *mp = magnitude;
   for (int ii = 0; ii < _nSamples; ii++, spp++, mp++) {
     *mp = (spp->re * spp->re + spp->im * spp->im);
@@ -983,7 +983,7 @@ double RvSim::_computeSpectralNoise(const double *magCentered)
 // write spectra file
 
 void RvSim::_writeSpectraFile(const string &heading,
-			      const Complex_t *comp)
+			      const RadarComplex_t *comp)
   
 {
   
@@ -1034,11 +1034,11 @@ int RvSim::_writeTmpFile(const string &tmpPath,
   }
 
   ////////////////////////
-  // create NcFile object
+  // create Nc3File object
   
-  NcError err(NcError::verbose_nonfatal);
+  Nc3Error err(Nc3Error::verbose_nonfatal);
   
-  NcFile out(tmpPath.c_str(), NcFile::Replace);
+  Nc3File out(tmpPath.c_str(), Nc3File::Replace);
   if (!out.is_valid()) {
     cerr << "ERROR - RvSim::_writeTmpFile" << endl;
     cerr << "  Cannot create file: " << tmpPath << endl;
@@ -1070,12 +1070,12 @@ int RvSim::_writeTmpFile(const string &tmpPath,
   //////////////////
   // add dimensions
   
-  NcDim *gatesDim = out.add_dim("gates", _nGates);
+  Nc3Dim *gatesDim = out.add_dim("gates", _nGates);
   //int gatesId = gatesDim->id();
   
-  NcDim *beamDim = out.add_dim("beams", _nBeams);
+  Nc3Dim *beamDim = out.add_dim("beams", _nBeams);
 
-  NcDim *frtimeDim = out.add_dim("frtime");
+  Nc3Dim *frtimeDim = out.add_dim("frtime");
   //int frtimeId = frtimeDim->id();
 
   /////////////////////////////////
@@ -1083,7 +1083,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // I variable
 
-  NcVar *iVar = out.add_var("I", ncFloat, frtimeDim, gatesDim);
+  Nc3Var *iVar = out.add_var("I", nc3Float, frtimeDim, gatesDim);
   iVar->add_att("long_name", "In-phase time series variable");
   iVar->add_att("units", "scaled A/D counts");
   {
@@ -1105,7 +1105,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // Q variable
 
-  NcVar *qVar = out.add_var("Q", ncFloat, frtimeDim, gatesDim);
+  Nc3Var *qVar = out.add_var("Q", nc3Float, frtimeDim, gatesDim);
   qVar->add_att("long_name", "Quadruture time series variable");
   qVar->add_att("units", "scaled A/D counts");
   {
@@ -1127,7 +1127,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // trip 1 dbm
 
-  NcVar *dbm1Var = out.add_var("dbm1", ncFloat, beamDim, gatesDim);
+  Nc3Var *dbm1Var = out.add_var("dbm1", nc3Float, beamDim, gatesDim);
   qVar->add_att("long_name", "Trip 1 dbm");
   qVar->add_att("units", "dbm");
   {
@@ -1148,7 +1148,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // trip 1 power
 
-  NcVar *power1Var = out.add_var("power1", ncFloat, beamDim, gatesDim);
+  Nc3Var *power1Var = out.add_var("power1", nc3Float, beamDim, gatesDim);
   qVar->add_att("long_name", "Trip 1 power");
   qVar->add_att("units", "volts");
   {
@@ -1169,7 +1169,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // trip 1 vel
 
-  NcVar *vel1Var = out.add_var("vel1", ncFloat, beamDim, gatesDim);
+  Nc3Var *vel1Var = out.add_var("vel1", nc3Float, beamDim, gatesDim);
   qVar->add_att("long_name", "Trip 1 velocity");
   qVar->add_att("units", "m/s");
   {
@@ -1190,7 +1190,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // trip 1 width
 
-  NcVar *width1Var = out.add_var("width1", ncFloat, beamDim, gatesDim);
+  Nc3Var *width1Var = out.add_var("width1", nc3Float, beamDim, gatesDim);
   qVar->add_att("long_name", "Trip 1 width");
   qVar->add_att("units", "m/s");
   {
@@ -1211,7 +1211,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // trip 2 dbm
 
-  NcVar *dbm2Var = out.add_var("dbm2", ncFloat, beamDim, gatesDim);
+  Nc3Var *dbm2Var = out.add_var("dbm2", nc3Float, beamDim, gatesDim);
   qVar->add_att("long_name", "Trip 2 dbm");
   qVar->add_att("units", "dbm");
   {
@@ -1232,7 +1232,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // trip 2 power
 
-  NcVar *power2Var = out.add_var("power2", ncFloat, beamDim, gatesDim);
+  Nc3Var *power2Var = out.add_var("power2", nc3Float, beamDim, gatesDim);
   qVar->add_att("long_name", "Trip 2 power");
   qVar->add_att("units", "volts");
   {
@@ -1253,7 +1253,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // trip 2 vel
 
-  NcVar *vel2Var = out.add_var("vel2", ncFloat, beamDim, gatesDim);
+  Nc3Var *vel2Var = out.add_var("vel2", nc3Float, beamDim, gatesDim);
   qVar->add_att("long_name", "Trip 2 velocity");
   qVar->add_att("units", "m/s");
   {
@@ -1274,7 +1274,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // trip 2 width
 
-  NcVar *width2Var = out.add_var("width2", ncFloat, beamDim, gatesDim);
+  Nc3Var *width2Var = out.add_var("width2", nc3Float, beamDim, gatesDim);
   qVar->add_att("long_name", "Trip 2 width");
   qVar->add_att("units", "m/s");
   {
@@ -1295,7 +1295,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // SampleNum variable
 
-  NcVar *sampleNumVar = out.add_var("SampleNum", ncInt, frtimeDim);
+  Nc3Var *sampleNumVar = out.add_var("SampleNum", nc3Int, frtimeDim);
   sampleNumVar->add_att("long_name", "Sample Number");
   sampleNumVar->add_att("units", "Counter");
   sampleNumVar->add_att("valid_range", 100000000);
@@ -1310,7 +1310,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // Azimuth variable
 
-  NcVar *azVar = out.add_var("Azimuth", ncFloat, frtimeDim);
+  Nc3Var *azVar = out.add_var("Azimuth", nc3Float, frtimeDim);
   azVar->add_att("long_name", "Antenna Azimuth");
   azVar->add_att("units", "degrees");
   {
@@ -1329,7 +1329,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // Elevation variable
   
-  NcVar *elVar = out.add_var("Elevation", ncFloat, frtimeDim);
+  Nc3Var *elVar = out.add_var("Elevation", nc3Float, frtimeDim);
   elVar->add_att("long_name", "Antenna Elevation");
   elVar->add_att("units", "degrees");
   {
@@ -1348,7 +1348,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
 
   // PRT variable
 
-  NcVar *prtVar = out.add_var("Prt", ncInt, frtimeDim);
+  Nc3Var *prtVar = out.add_var("Prt", nc3Int, frtimeDim);
   prtVar->add_att("long_name", "Pulse Repetition Time");
   prtVar->add_att("units", "microseconds");
   prtVar->add_att("valid_range", 1000000);
@@ -1363,7 +1363,7 @@ int RvSim::_writeTmpFile(const string &tmpPath,
   
   // Time variable
 
-  NcVar *timeVar = out.add_var("Time", ncDouble, frtimeDim);
+  Nc3Var *timeVar = out.add_var("Time", nc3Double, frtimeDim);
   timeVar->add_att("long_name", "Date/Time value");
   timeVar->add_att("units", "days since 0000-01-01");
   timeVar->add_att("_FillValue", 0.0);

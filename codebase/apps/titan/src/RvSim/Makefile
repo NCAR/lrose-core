@@ -36,24 +36,22 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = RvSim
 
-LOC_INCLUDES =
+LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_CFLAGS =
-LOC_LDFLAGS =
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_LIBS = \
-	-ldsserver -ldidss -ltoolsa -ldataport \
-	-lrapmath -ltdrp -lnetcdf_c++ -lnetcdf \
-	-lfftw -lbz2 -lz
+	-lradar -ldsserver -ldidss -ltoolsa -ldataport \
+	-lrapmath -ltdrp $(NETCDF4_LIBS) \
+	-lfftw3
 
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	Fft.hh \
 	RvSim.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
-	Fft.cc \
 	Main.cc \
 	RvSim.cc
 
