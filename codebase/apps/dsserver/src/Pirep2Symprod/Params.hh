@@ -443,6 +443,15 @@ public:
   char* *_turb_icon_colors;
   int turb_icon_colors_n;
 
+  tdrp_bool_t send_ice_pireps_only;
+
+  tdrp_bool_t plot_ice_icon;
+
+  int ice_icon_size;
+
+  char* *_ice_icon_colors;
+  int ice_icon_colors_n;
+
   tdrp_bool_t activate_hidden_text;
 
   char* hidden_text_font_name;
@@ -484,7 +493,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[59];
+  mutable TDRPtable _table[64];
 
   const char *_className;
 

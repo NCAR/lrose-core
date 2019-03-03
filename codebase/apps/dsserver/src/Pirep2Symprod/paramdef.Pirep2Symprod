@@ -347,6 +347,46 @@ paramdef string
 		"red", "red", "red", "red" };
 } turb_icon_colors[9];
 
+///////////////////////////
+// icing icon options
+
+commentdef
+{
+  p_header = "ICING ICON PARAMETERS";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to only send pireps related to icing.";
+  p_help = "If true, only pireps with a icing intensity filled in will be sent.";
+  p_default = FALSE;
+} send_ice_pireps_only;
+
+paramdef boolean
+{
+  p_descr = "Option to plot icing icons.";
+  p_help = "If true, the relevant ICAO icing symbol is plotted.";
+  p_default = FALSE;
+} plot_ice_icon;
+
+paramdef int
+{
+  p_descr = "Size of turb icon in pixels";
+  p_help = "Pirep is represented by a diamond. This is the distance from the center to each extremity of the diamond shape.";
+  p_default = 8;
+} ice_icon_size;
+
+paramdef string
+{
+  p_descr = "Color for icing icons.";
+  p_help = "Name of color suggested for rendering icing icons.";
+  p_default = { "blue",
+		"green", "green", "green",
+		"orange", "orange",
+		"red", "red", "red" };
+} ice_icon_colors[9];
+
+
 commentdef {
   p_header = "FULL PIREP MESSAGE AS HIDDEN TEXT";
 };

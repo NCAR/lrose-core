@@ -116,26 +116,6 @@ commentdef
   p_header = "RENDERING PARAMETERS";
 };
 
-paramdef boolean
-{
-  p_descr = "Polyline dashed flag";
-  p_help = "If set, the polyline will be rendered using a dashed line "
-           "rather than a solid line.";
-  p_default =  false;
-} polyline_dashed;
-
-paramdef string
-{
-  p_descr = "Polyline color";
-  p_help = "Name of color suggested for rendering the polylines.";
-  p_default = "yellow";
-} polyline_color;
-
-commentdef
-{
-  p_header = "Line styles";
-}
-
 typedef enum
 {
   LINETYPE_SOLID,
@@ -185,6 +165,149 @@ paramdef enum joinstyle_t
   p_help = "Joinstyle suggested for using on the display.";
   p_default = { JOINSTYLE_BEVEL };
 } suggested_joinstyle;
+
+
+/* Hazardouus Weather Type Bitwize flags - Taken from NOAA/NWS definitions */
+typedef enum {
+        HW_TOWAR,  /* Tornado Warning */
+        HW_TOWAT,  /* Tornado Watch */
+        HW_STWAR, /* Severe ThunderStorm Warning */
+        HW_STWAT, /* Severe ThunderStorm Watch */
+        HW_SWS, /* Severe Weather Statement */
+        HW_FFWAR, /* Flash Flood Warning */
+        HW_FFWAT, /* Flash Flood Watch */
+        HW_TSWAR, /* Tropical Storm Warning */
+        HW_TSWAT, /* Tropical Storm Watch */
+        HW_HUWAR, /* Hurricane Warning */
+        HW_HUWAT, /* Hurricane Watch */
+        HW_FLWAR, /* Flood Warning */
+        HW_FLWAT, /* Flood Watch */
+        HW_WSWAR, /* Winter Storm Warning */
+        HW_WSWAT, /* Winter Storm Watch*/
+        HW_SMWAR, /* Special Marine Warning (Squalls,   Tornados) */
+        HW_WCWAR, /* Wind Chill Warning*/
+        HW_WCADV, /* Wind Chill Advisory */
+        HW_EHWAR, /* Excessive Heat Warning */
+        HW_HEADV, /* Heat Advisory */
+        HW_HWWAR, /* High Wind Warning */
+        HW_WIADV, /* Wind Advisory */
+        HW_DFADV, /* Dense Fog Advisory */
+        HW_FZWAR, /* Freeze Warning */
+        HW_FRADV, /* Frost Advisory */
+        HW_LSWAR, /* LakeShore (Flooding) Warning */
+        HW_BSADV, /* Blowing Snow Advisory */
+        HW_RAWAR, /* Radiological Hazard Warning */
+        HW_NUWAR, /* Nuclear Hazard Warning */
+        HW_HMWAR, /* Hazardous Materials Warning */
+        HW_VOWAR, /* Volcano Warning */
+        HW_EAWAR, /* Earthquake Warning */
+        HW_FIWAR, /* Fire Warning */
+        WS_BLWAR,       /* Blizard Warning */
+        WS_HSWAR, /* Heavy Snow Warning */
+        WS_LEWAR, /* Lake Effect Snow Warning */
+        WS_ISWAR, /* Ice Storm Warning */
+        WS_HLWAR, /* Heavy sLeet Warning */
+        WS_SNADV, /* Snow Advisory */
+        WS_LEADV, /* Lake Efeect Snow Advisory */
+        WS_SLADV, /* SLeet Advisory */
+} hazard_type_t;
+
+typedef struct
+{
+  hazard_type_t hazard;
+  string hex_color_str;
+  line_type_t line_type;
+  long line_width;
+} warn_color_t;
+
+paramdef struct warn_color_t {
+p_descr = "Each element of the struct has an enumerated warning type and a color. The defaults can be found here : https://www.weather.gov/help-map. Following is the default settings list:\n";
+p_help = "Tornado Warning, red\n"
+ "{HW_TOWAR,\"#FF0000\", LINETYPE_SOLID, 1}\n\n"
+ "Tornado Watch, yellow\n"
+ "{HW_TOWAT,\"#FFFF00\", LINETYPE_SOLID, 1},\n\n"
+ "Severe ThunderStorm Warning, orange\n"
+ "{HW_STWAR,\"#FFA500\", LINETYPE_SOLID, 1},\n\n"
+ "Severe ThunderStorm Watch, Palevioletred\n"
+ "{HW_STWAT, \"#DB7093\", LINETYPE_SOLID, 1},\n\n"
+ "Severe Weather Statement, aqua\n" 
+ "{HW_SWS,\"#00FFFF\", LINETYPE_SOLID, 1},\n\n"
+ "Flash Flood Warning, Darkred\n"
+ "{HW_FFWAR, \"#8B0000\", LINETYPE_SOLID, 1},\n\n"
+ "Flash Flood Watch, Seagreen \n"
+ "{HW_FFWAT, \"#32CD32\", LINETYPE_SOLID, 1},\n\n"
+ "Tropical Storm Warning, Firebrick\n"
+ "{HW_TSWAR, \"#B22222\", LINETYPE_SOLID, 1},\n\n"
+ "Tropical Storm Watch, Lightcoral\n"
+ "{HW_TSWAT, \"#F08080\", LINETYPE_SOLID, 1},\n\n"
+ "Hurricane Warning, Crimson\n"
+ "{HW_HUWAR, \"#DC143C\", LINETYPE_SOLID, 1},\n\n"
+ "Hurricane Watch, Magenta\n"
+ "{HW_HUWAT, \"#FF00FF\", LINETYPE_SOLID, 1},\n\n"
+ "Flood Warning, Lime\n"
+ "{HW_FLWAR, \"#00FF00\", LINETYPE_SOLID, 1},\n\n"
+ "Flood Watch, Seagreen\n"
+ "{HW_FLWAT, \"#2E8B57\", LINETYPE_SOLID, 1},\n\n"
+ "Winter Storm Warning, Hotpink\n"
+ "{HW_WSWAR, \"#FF69B4\", LINETYPE_SOLID, 1},\n\n"
+ "Winter Storm Watch, Steelblue\n"
+ "{HW_WSWAT, \"#4682B4\", LINETYPE_SOLID, 1},\n\n"
+ "Special Marine Warning (Squalls, Tornados), orange\n"
+ "{HW_SMWAR, \"#FFA500\", LINETYPE_SOLID, 1},\n\n"
+ "Wind Chill Warning, Lightsteelblue\n"
+ "{HW_WCWAR, \"#B0C4DE\", LINETYPE_SOLID, 1},\n\n"
+ "Wind Chill Advisory, Paleturquoise\n"
+ "{HW_WCADV, \"#AFEEEE\", LINETYPE_SOLID, 1},\n\n"
+ "Excessive Heat Warning, Mediumvioletred\n"
+ "{HW_EHWAR, \"#C71585\", LINETYPE_SOLID, 1},\n\n"
+ "Heat Advisory, Coral\n"
+ "{HW_HEADV, \"#FF7F50\", LINETYPE_SOLID, 1},\n\n"
+ "High Wind Warning, Goldenrod\n"
+ "{HW_HWWAR, \"#DAA520\", LINETYPE_SOLID, 1},\n\n"
+ "Wind Advisoryi, Tan\n"
+ "{HW_WIADV,\"#D2B48C\", LINETYPE_SOLID, 1},\n\n"
+ "Dense Fog Advisory, Slategray\n"
+ "{HW_DFADV,\"#708090\", LINETYPE_SOLID, 1},\n\n"
+ "Freeze Warning, Darkslateblue\n"
+ "{HW_FZWAR, \"#483D8B\", LINETYPE_SOLID, 1},\n\n"
+ "Frost Advisory, Cornflower, NOT INCLUDED IN RAPFORMATS AS OPTION\n"
+ "{HW_FRADV,  \"#649FED\", LINETYPE_SOLID, 1},\n\n"
+ "LakeShore (Flooding) Warning , Forestgreen\n"
+ "{HW_LSWAR,  \"#228B22\", LINETYPE_SOLID, 1},\n\n"
+ "Blowing Snow Advisory, THIS DOESNT SHOW UP AS OPTION ON WEB PAGE\n"
+ "{HW_BSADV, \"#B0E0E6\", LINETYPE_SOLID, 1},\n\n"
+ "Radiological Hazard Warning, Indigo\n"
+ "{HW_RAWAR, \"#4B0082\", LINETYPE_SOLID, 1},\n\n"
+ "Nuclear Power Plant Warning, Indigo\n"
+ "{HW_NUWAR, \"#4B0082\", LINETYPE_SOLID, 1},\n\n"
+ "Hazardous Materials Warning, Indigo\n"
+ "{HW_HMWAR, \"#4B0082\", LINETYPE_SOLID, 1},\n\n"
+ "Volcano Warning, darkslategray\n"
+ "{HW_VOWAR,\"#696969\", LINETYPE_SOLID, 1},\n\n"
+ "Earthquake Warning, Saddlebrown\n"
+ "{HW_EAWAR, \"#8B4513\", LINETYPE_SOLID, 1},\n\n"
+ "Fire Warning, Sienna\n"
+ "{HW_FIWAR, \"#A0522D\", LINETYPE_SOLID, 1},\n\n"
+ "Blizzard Warning, Orangered\n"
+ "{WS_BLWAR,  \"#FF4500\", LINETYPE_SOLID, 1},\n\n"
+ "Heavy Snow Warning, THIS DOESNT SHOW UP AS OPTION ON WEB PAGE\n"
+ "{WS_HSWAR, \"#8A2BE2\", LINETYPE_SOLID, 1},\n\n"
+ "Lake Effect Snow Warning, Darkcyan\n"
+ "{WS_LEWAR,\"#008B8B\", LINETYPE_SOLID, 1},\n\n"
+ "Ice Storm Warning , Darkmagenta\n"
+ "{WS_ISWAR, \"#8B008B\", LINETYPE_SOLID, 1},\n\n"
+ "Sleet Warning,  THIS DOESNT SHOW UP AS OPTION ON WEB PAGE \n"
+ "{WS_HLWAR, \"#87CEEB\", LINETYPE_SOLID, 1},\n\n"
+ "Snow Advisory, THIS DOESNT SHOW UP AS OPTION ON WEB PAGE \n"
+ "{WS_SNADV, \"#6699CC\", LINETYPE_SOLID, 1},\n\n"
+ "Lake Effect Snow Advisory, Mediumturquoise \n"
+ "{WS_LEADV,\"#48D1CC\", LINETYPE_SOLID, 1},\n\n"
+ "Sleet Advisory THIS DOESNT SHOW UP AS OPTION ON WEB PAGE\n"
+ "{WS_SLADV,\"#7B68EE\"\n";
+
+p_default = { }; 
+
+}warn_config_override[];
 
 paramdef boolean
 {

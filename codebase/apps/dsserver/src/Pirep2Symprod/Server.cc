@@ -214,6 +214,10 @@ int Server::convertToSymprod(const void *params,
     return -1;
   }
 
+  if (serverParams->send_ice_pireps_only && pirep->getIceObs1().intensity < 0) {
+    return -1;
+  }
+
   // Check that the station position is within the bounding box, if requested
   if (_horizLimitsSet) {
 
@@ -268,6 +272,12 @@ int Server::convertToSymprod(const void *params,
 
     if (serverParams->plot_turb_icon) {
       _addTurbIcon(serverParams, *pirep, prod);
+    }
+
+    // icing icons
+
+    if (serverParams->plot_ice_icon) {
+      _addIcingIcon(serverParams, *pirep, prod);
     }
 
     // hidden text
@@ -520,7 +530,7 @@ void Server::_addTurbIcon(const Params *serverParams,
     { up, up },
     { sz, -sz },
     { sz*2, -sz }
-  };
+ };
 
   Symprod::ppt_t light_icon[] =
   {
@@ -671,6 +681,270 @@ void Server::_addTurbIcon(const Params *serverParams,
 			 extreme_icon, 1, &origin, 0, detail_level);
     break;
 
+  } // switch
+    
+}
+
+void Server::_addIcingIcon(const Params *serverParams,
+			   Pirep &pirep,
+			   Symprod &prod)
+
+{
+  
+  int detail_level = 0;
+  if (serverParams->plot_unscaled) {
+    detail_level = Symprod::DETAIL_LEVEL_DO_NOT_SCALE;
+  }
+
+  // set up the icon
+  
+  int sz = serverParams->ice_icon_size;
+  int up = Symprod::PPT_PENUP;
+  
+  Symprod::ppt_t none_icon[] =
+   {
+    { 0, sz },
+    { sz/2, sz },
+    { sz, sz/2 },
+    { sz, 0 },
+    { sz, -sz/2 },
+    { sz/2, -sz },
+    { 0, -sz },
+    { -sz/2, -sz },
+    { -sz, -sz/2 },
+    { -sz, 0 },
+    { -sz, sz/2 },
+    { -sz/2, sz },
+    { 0, sz },
+    { up, up },
+    { -sz*2, -sz*2 },
+    { sz*2, sz*2 }
+  };
+  
+  Symprod::ppt_t trace_icon[] =
+  {
+    { -sz, sz },
+    { -sz, sz/2 },
+    { -sz/2, 0 },
+    { sz/2, 0 },
+    { sz, sz/2 },
+    { sz, sz }
+  };
+
+Symprod::ppt_t trace_light_icon[] =
+  {
+    { -sz, sz },
+    { -sz, sz/2 },
+    { -sz/2, 0 },
+    { sz/2, 0 },
+    { sz, sz/2 },
+    { sz, sz },
+    { up, up },
+    { 0, 0 },
+    { 0, sz/2 }    
+  };
+
+  Symprod::ppt_t light_icon[] =
+  {
+    { -sz, sz },
+    { -sz, sz/2 },
+    { -sz/2, 0 },
+    { sz/2, 0 },
+    { sz, sz/2 },
+    { sz, sz },
+    { up, up },
+    { 0, -sz/2 },
+    { 0, sz/2 }
+  };
+
+  Symprod::ppt_t light_mod_icon[] =
+  {
+    { -sz, sz },
+    { -sz, sz/2 },
+    { -sz/2, 0 },
+    { sz/2, 0 },
+    { sz, sz/2 },
+    { sz, sz },
+    { up, up },
+    { sz/4, 0 },
+    { sz/4, sz/2 },    
+    { up, up },
+    { -sz/4, 0 },
+    { -sz/4, sz/2 }    
+  };
+
+  Symprod::ppt_t mod_icon[] =
+  {
+    { -sz, sz },
+    { -sz, sz/2 },
+    { -sz/2, 0 },
+    { sz/2, 0 },
+    { sz, sz/2 },
+    { sz, sz },
+    { up, up },
+    { sz/4, -sz/2 },
+    { sz/4, sz/2 },    
+    { up, up },
+    { -sz/4, -sz/2 },
+    { -sz/4, sz/2 }    
+  };
+
+  Symprod::ppt_t mod_hvy_icon[] =
+  {
+    { -sz, sz },
+    { -sz, sz/2 },
+    { -sz/2, 0 },
+    { sz/2, 0 },
+    { sz, sz/2 },
+    { sz, sz },
+    { up, up },
+    { 0, 0 },
+    { 0, sz/2 },    
+    { up, up },
+    { sz/4, 0 },
+    { sz/4, sz/2 },    
+    { up, up },
+    { -sz/4, 0 },
+    { -sz/4, sz/2 }    
+  };
+
+  Symprod::ppt_t heavy_icon[] =
+  {
+    { -sz, sz },
+    { -sz, sz/2 },
+    { -sz/2, 0 },
+    { sz/2, 0 },
+    { sz, sz/2 },
+    { sz, sz },
+    { up, up },
+    { 0, -sz/2 },
+    { 0, sz/2 },
+    { up, up },
+    { sz/4, -sz/2 },
+    { sz/4, sz/2 },    
+    { up, up },
+    { -sz/4, -sz/2 },
+    { -sz/4, sz/2 }    
+  };
+
+  Symprod::ppt_t severe_icon[] =
+  {
+    { -sz, sz },
+    { -sz, sz/2 },
+    { -sz/2, 0 },
+    { sz/2, 0 },
+    { sz, sz/2 },
+    { sz, sz },
+    { up, up },
+    { 0, -sz/2 },
+    { 0, sz/2 },
+    { up, up },
+    { sz/4, -sz/2 },
+    { sz/4, sz/2 },    
+    { up, up },
+    { -sz/4, -sz/2 },
+    { -sz/4, sz/2 }    
+  };
+
+  // origin
+  
+  Symprod::wpt_t origin;
+  origin.lat = pirep.getLatitude();
+  origin.lon = pirep.getLongitude();
+
+  //  switch (pirep.turb_index) {
+  int ice_index = pirep.getIceObs1().intensity;
+
+  if (serverParams->debug >= Params::DEBUG_VERBOSE){
+    cerr << "ice_index is " << ice_index << endl;
+  }
+
+  switch (ice_index) {
+
+  case Pirep::NONE_II:  // 0
+    if (serverParams->debug >= Params::DEBUG_VERBOSE){
+      cerr << "NONE_II  type" << endl;
+    }
+    prod.addStrokedIcons(serverParams->_ice_icon_colors[ice_index],
+    			 sizeof(none_icon) / sizeof(Symprod::ppt_t),
+    			 none_icon, 1, &origin, 0, detail_level);
+
+    break;
+  case Pirep::TRC_II:  //  1
+    if (serverParams->debug >= Params::DEBUG_VERBOSE){
+      cerr << "TRC_II  type" << endl;
+    }
+    prod.addStrokedIcons(serverParams->_ice_icon_colors[ice_index],
+			 sizeof(trace_icon) / sizeof(Symprod::ppt_t),
+			 trace_icon, 1, &origin, 0, detail_level);
+    break;
+  case Pirep::TRC_LGHT_II:  // 2
+    if (serverParams->debug >= Params::DEBUG_VERBOSE){
+      cerr << "TRC_LGHT_II  type" << endl;
+    }
+    prod.addStrokedIcons(serverParams->_ice_icon_colors[ice_index],
+			 sizeof(trace_light_icon) / sizeof(Symprod::ppt_t),
+			 trace_light_icon, 1, &origin, 0, detail_level);
+    break;
+  case Pirep::LGHT_II:  // 3
+    if (serverParams->debug >= Params::DEBUG_VERBOSE){
+      cerr << "LGHT_II  type" << endl;
+    }
+    prod.addStrokedIcons(serverParams->_ice_icon_colors[ice_index],
+			 sizeof(light_icon) / sizeof(Symprod::ppt_t),
+			 light_icon, 1, &origin, 0, detail_level);
+    break;
+  case Pirep::LGHT_MOD_II:  // 4
+    if (serverParams->debug >= Params::DEBUG_VERBOSE){
+      cerr << "LGHT_MOD_II  type" << endl;
+    }
+    prod.addStrokedIcons(serverParams->_ice_icon_colors[ice_index],
+			 sizeof(light_mod_icon) / sizeof(Symprod::ppt_t),
+			 light_mod_icon, 1, &origin, 0, detail_level);
+    break;
+  case Pirep::MOD_II:  // 5
+    if (serverParams->debug >= Params::DEBUG_VERBOSE){
+      cerr << "MOD_II  type" << endl;
+    }
+    prod.addStrokedIcons(serverParams->_ice_icon_colors[ice_index],
+			 sizeof(mod_icon) / sizeof(Symprod::ppt_t),
+			 mod_icon, 1, &origin, 0, detail_level);
+    break;
+  case Pirep::MOD_HVY_II:  // 6
+    if (serverParams->debug >= Params::DEBUG_VERBOSE){
+      cerr << "MOD_HVY  type" << endl;
+    }
+    prod.addStrokedIcons(serverParams->_ice_icon_colors[ice_index],
+			 sizeof(mod_hvy_icon) / sizeof(Symprod::ppt_t),
+			 mod_hvy_icon, 1, &origin, 0, detail_level);
+    break;
+  case Pirep::HVY_II:  // 7
+    if (serverParams->debug >= Params::DEBUG_VERBOSE){
+      cerr << "HVY_II  type" << endl;
+    }
+    prod.addStrokedIcons(serverParams->_ice_icon_colors[ice_index],
+			 sizeof(heavy_icon) / sizeof(Symprod::ppt_t),
+			 heavy_icon, 1, &origin, 0, detail_level);
+  case Pirep::SEVR_II:  // 8
+  if (serverParams->debug >= Params::DEBUG_VERBOSE){
+      cerr << "SEVR_II  type" << endl;
+  }
+    prod.addStrokedIcons(serverParams->_ice_icon_colors[ice_index],
+			 sizeof(severe_icon) / sizeof(Symprod::ppt_t),
+			 severe_icon, 1, &origin, 0, detail_level);
+    break;
+
+  case Pirep::FILL_II:  // -9
+    if (serverParams->debug >= Params::DEBUG_VERBOSE){
+      cerr << "FILL_II  type" << endl;
+    }
+   // do nothing
+   break;
+
+  default:
+    if (serverParams->debug >= Params::DEBUG_VERBOSE){
+      cerr <<  "unknown ice index: " << ice_index;
+    }
   } // switch
     
 }

@@ -639,7 +639,7 @@
     tt->descr = tdrpStrDup("Maximum number of clients");
     tt->help = tdrpStrDup("This is the maximum number of threads the application will produce to handle client requests.  If the maximum is reached, new clients will receive a SERVICE_DENIED error message and will have to request the data again.  If set to -1, no maximum is enforced.");
     tt->val_offset = (char *) &max_clients - &_start_;
-    tt->single_val.i = 32;
+    tt->single_val.i = 1024;
     tt++;
     
     // Parameter 'Comment 2'

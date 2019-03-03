@@ -39,6 +39,7 @@
 #include <string>
 
 #include <rapformats/Edr.hh>
+#include <rapformats/Edr_expanded.hh>
 #include <Spdb/Symprod.hh>
 #include <Spdb/DsSymprodServer.hh>
 

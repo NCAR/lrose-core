@@ -116,12 +116,17 @@ int Server::convertToSymprod(const void *params,
   
   // check prod_id
 
-  if (prod_id != SPDB_EDR_POINT_ID) {
+  if (prod_id != SPDB_EDR_POINT_ID && prod_id != SPDB_EDR_VER2_POINT_ID) {
     cerr << "ERROR - " << _executableName << ":Server::convertToSymprod" << endl;
     cerr << "  Incorrect prod_id: " << prod_id << endl;
-    cerr << "  Should be SPDB_EDR_POINT_ID: " << SPDB_EDR_POINT_ID << endl;
+    cerr << "  Should be SPDB_EDR_POINT_ID: " << SPDB_EDR_POINT_ID <<
+	  " or SPDB_EDR_VER2_POINT_ID : " << SPDB_EDR_VER2_POINT_ID << endl;
     return -1;
   }
+
+  bool newFormat = false;
+  if (prod_id == SPDB_EDR_VER2_POINT_ID)
+    newFormat = TRUE;
 
   Params *serverParams = (Params*) params;
 
@@ -129,16 +134,32 @@ int Server::convertToSymprod(const void *params,
     return 0;
   }
 
-  Edr edr;
-
-  edr.disassemble(spdb_data, spdb_len); 
-
-  Edr::edr_t edrPt = edr.getRep();
+  Edr::edr_t edrRep;
+  if(newFormat) {
+    EDR edr;
+    edr.disassemble(spdb_data, spdb_len); 
+    EDR::Edr_t EDRrep = edr.getRep();
+    edrRep.lat = EDRrep.lat;
+    edrRep.lon = EDRrep.lon;
+    edrRep.alt = EDRrep.alt;
+    edrRep.qcConf = EDRrep.qcConf;
+    edrRep.edrAve = EDRrep.edrAve;
+    edrRep.edrPeak = EDRrep.edrPeak;
+    edrRep.sat = EDRrep.sat;
+    edrRep.wspd = EDRrep.wspd;
+    edrRep.wdir = EDRrep.wdir;
+    sprintf(edrRep.flightNum, "%s", EDRrep.flightNum);
+  } else {
+    Edr edr;
+    
+    edr.disassemble(spdb_data, spdb_len); 
+    edrRep = edr.getRep();
+  }
  
   // check clipping
 
   if (serverParams->apply_flight_level_limits) {
-    double fl = edrPt.alt / 100.0;
+    double fl = edrRep.alt / 100.0;
     if (fl < serverParams->min_flight_level ||
 	fl > serverParams->max_flight_level) {
       return -1;
@@ -146,17 +167,17 @@ int Server::convertToSymprod(const void *params,
   }
 
   if (serverParams->apply_lat_lon_limits) {
-    if (edrPt.lat < serverParams->min_lat ||
-	edrPt.lat > serverParams->max_lat) {
+    if (edrRep.lat < serverParams->min_lat ||
+	edrRep.lat > serverParams->max_lat) {
       return -1;
     }
-    if (edrPt.lon < serverParams->min_lon ||
-	edrPt.lon > serverParams->max_lon) {
+    if (edrRep.lon < serverParams->min_lon ||
+	edrRep.lon > serverParams->max_lon) {
       return -1;
     }
   }
   if (serverParams->apply_qcConf_filtering) {
-    if (edrPt.qcConf != 1) {
+    if (edrRep.qcConf != 1) {
       return -1;
     }
   }
@@ -175,12 +196,12 @@ int Server::convertToSymprod(const void *params,
   // icon
 
   if (serverParams->plot_icon) {
-    _addIcon(serverParams, edrPt, prod);
+    _addIcon(serverParams, edrRep, prod);
   }
 
   // text fields
   
-  _addText(serverParams, edrPt, prod);
+  _addText(serverParams, edrRep, prod);
 
   // copy internal representation of product to output buffer
 
@@ -191,7 +212,7 @@ int Server::convertToSymprod(const void *params,
 }
 
 void Server::_addText(const Params *serverParams,
-		      Edr::edr_t &edrPt,
+		      Edr::edr_t &edrRep,
 		      Symprod &prod)
 
 {
@@ -206,14 +227,14 @@ void Server::_addText(const Params *serverParams,
   
   if (serverParams->flight_num_label.do_draw ) {
   
-    char *text = (char*)edrPt.flightNum;
+    char *text = (char*)edrRep.flightNum;
     char *color = serverParams->flight_num_label.color;
     if (serverParams->debug >= Params::DEBUG_VERBOSE){
       cerr << "Flight_Num text : " << text << endl;
     }
     
     prod.addText(text,
-		 edrPt.lat, edrPt.lon, color,
+		 edrRep.lat, edrRep.lon, color,
 		 serverParams->flight_num_label.background_color,
 		 serverParams->flight_num_label.x_offset,
 		 serverParams->flight_num_label.y_offset - iconSize / 2,
@@ -232,14 +253,14 @@ void Server::_addText(const Params *serverParams,
   if (serverParams->flight_level_label.do_draw ) {
     char *color = serverParams->flight_level_label.color;
     char text[64];
-    int flevel = (int) (edrPt.alt / 100.0 + 0.5);
+    int flevel = (int) (edrRep.alt / 100.0 + 0.5);
     sprintf(text, "FL%.3d", flevel);
     if (serverParams->debug >= Params::DEBUG_VERBOSE){
       cerr << "Flight_Level text : " << text << endl;
     }
 
     prod.addText(text,
-		 edrPt.lat, edrPt.lon, color,
+		 edrRep.lat, edrRep.lon, color,
 		 serverParams->flight_level_label.background_color,
 		 serverParams->flight_level_label.x_offset,
 		 serverParams->flight_level_label.y_offset - iconSize / 2,
@@ -259,17 +280,17 @@ void Server::_addText(const Params *serverParams,
 	
     char *color = NULL;
     for(int k = serverParams->NumEdrVals-1; k >= 0; k--)
-      if(edrPt.edrAve <= serverParams->_EdrMaxVals[k])
+      if(edrRep.edrAve <= serverParams->_EdrMaxVals[k])
 	color = serverParams->_EdrColors[k];
 
     char text[64];
-    sprintf(text, "%.2fA", edrPt.edrAve);
+    sprintf(text, "%.2fA", edrRep.edrAve);
     if (serverParams->debug >= Params::DEBUG_VERBOSE){
       cerr << "Edr Ave text : " << text << endl;
     }
 
     prod.addText(text,
-		 edrPt.lat, edrPt.lon, color,
+		 edrRep.lat, edrRep.lon, color,
 		 serverParams->edr_ave_label.background_color,
 		 serverParams->edr_ave_label.x_offset,
 		 serverParams->edr_ave_label.y_offset - iconSize / 2,
@@ -290,17 +311,17 @@ void Server::_addText(const Params *serverParams,
 	
     char *color = NULL;
     for(int k = serverParams->NumEdrVals-1; k >= 0; k--)
-      if(edrPt.edrPeak <= serverParams->_EdrMaxVals[k])
+      if(edrRep.edrPeak <= serverParams->_EdrMaxVals[k])
 	color = serverParams->_EdrColors[k];
 
     char text[64];
-    sprintf(text, "%.2fP", edrPt.edrPeak);
+    sprintf(text, "%.2fP", edrRep.edrPeak);
     if (serverParams->debug >= Params::DEBUG_VERBOSE){
       cerr << "Edr Peak text : " << text << endl;
     }
 
     prod.addText(text,
-		 edrPt.lat, edrPt.lon, color,
+		 edrRep.lat, edrRep.lon, color,
 		 serverParams->edr_peak_label.background_color,
 		 serverParams->edr_peak_label.x_offset,
 		 serverParams->edr_peak_label.y_offset - iconSize / 2,
@@ -319,13 +340,13 @@ void Server::_addText(const Params *serverParams,
   if (serverParams->temperature_label.do_draw ) {
     char *color = serverParams->temperature_label.color;
     char text[64];
-    sprintf(text, "%.1fF", edrPt.sat);
+    sprintf(text, "%.1fF", edrRep.sat);
     if (serverParams->debug >= Params::DEBUG_VERBOSE){
       cerr << "Temperature text : " << text << endl;
     }
 
     prod.addText(text,
-		 edrPt.lat, edrPt.lon, color,
+		 edrRep.lat, edrRep.lon, color,
 		 serverParams->temperature_label.background_color,
 		 serverParams->temperature_label.x_offset,
 		 serverParams->temperature_label.y_offset - iconSize / 2,
@@ -344,13 +365,13 @@ void Server::_addText(const Params *serverParams,
   if (serverParams->wind_label.do_draw ) {
     char *color = serverParams->wind_label.color;
     char text[64];
-    sprintf(text, "%.0f/%.0fdeg", edrPt.wspd, edrPt.wdir);
+    sprintf(text, "%.0f/%.0fdeg", edrRep.wspd, edrRep.wdir);
     if (serverParams->debug >= Params::DEBUG_VERBOSE){
       cerr << "Wind text : " << text << endl;
     }
 
     prod.addText(text,
-		 edrPt.lat, edrPt.lon, color,
+		 edrRep.lat, edrRep.lon, color,
 		 serverParams->wind_label.background_color,
 		 serverParams->wind_label.x_offset,
 		 serverParams->wind_label.y_offset - iconSize / 2,
@@ -367,7 +388,7 @@ void Server::_addText(const Params *serverParams,
 }
 
 void Server::_addIcon(const Params *serverParams,
-		      Edr::edr_t &edrPt,
+		      Edr::edr_t &edrRep,
 		      Symprod &prod)
 
 {
@@ -389,16 +410,16 @@ void Server::_addIcon(const Params *serverParams,
   };
   
   // Add icon
-  float edrVal = edrPt.edrPeak;
+  float edrVal = edrRep.edrPeak;
   if(serverParams->use_edrAve)
-    edrVal = edrPt.edrAve;
+    edrVal = edrRep.edrAve;
 
   char *color = NULL;
   for(int k = serverParams->NumEdrVals-1; k >= 0; k--)
     if(edrVal <= serverParams->_EdrMaxVals[k])
       color = serverParams->_EdrColors[k];
 
-  prod.addIconline(edrPt.lat, edrPt.lon,
+  prod.addIconline(edrRep.lat, edrRep.lon,
 		   3, icon,
 		   color,
 		   Symprod::LINETYPE_SOLID, 1,
@@ -409,8 +430,8 @@ void Server::_addIcon(const Params *serverParams,
   
   if (_isVerbose) {
     cerr << "Adding icon, lat, lon: "
-	 << edrPt.lat << ", "
-	 << edrPt.lon << endl;
+	 << edrRep.lat << ", "
+	 << edrRep.lon << endl;
   }
 
 }

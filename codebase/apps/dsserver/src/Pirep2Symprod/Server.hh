@@ -102,6 +102,10 @@ private:
                     Pirep & pirep,
 		    Symprod &prod);
 
+  void _addIcingIcon(const Params *serverParams,
+		     Pirep & pirep,
+		     Symprod &prod);
+
   void _addHiddenText(Params *serverParams,
                       Pirep & pirep,
                       const string &message,

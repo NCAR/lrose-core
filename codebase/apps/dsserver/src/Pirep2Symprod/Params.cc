@@ -1410,6 +1410,78 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("ICING ICON PARAMETERS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'send_ice_pireps_only'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("send_ice_pireps_only");
+    tt->descr = tdrpStrDup("Option to only send pireps related to icing.");
+    tt->help = tdrpStrDup("If true, only pireps with a icing intensity filled in will be sent.");
+    tt->val_offset = (char *) &send_ice_pireps_only - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'plot_ice_icon'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("plot_ice_icon");
+    tt->descr = tdrpStrDup("Option to plot icing icons.");
+    tt->help = tdrpStrDup("If true, the relevant ICAO icing symbol is plotted.");
+    tt->val_offset = (char *) &plot_ice_icon - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'ice_icon_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ice_icon_size");
+    tt->descr = tdrpStrDup("Size of turb icon in pixels");
+    tt->help = tdrpStrDup("Pirep is represented by a diamond. This is the distance from the center to each extremity of the diamond shape.");
+    tt->val_offset = (char *) &ice_icon_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'ice_icon_colors'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ice_icon_colors");
+    tt->descr = tdrpStrDup("Color for icing icons.");
+    tt->help = tdrpStrDup("Name of color suggested for rendering icing icons.");
+    tt->array_offset = (char *) &_ice_icon_colors - &_start_;
+    tt->array_n_offset = (char *) &ice_icon_colors_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = TRUE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 9;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("blue");
+      tt->array_vals[1].s = tdrpStrDup("green");
+      tt->array_vals[2].s = tdrpStrDup("green");
+      tt->array_vals[3].s = tdrpStrDup("green");
+      tt->array_vals[4].s = tdrpStrDup("orange");
+      tt->array_vals[5].s = tdrpStrDup("orange");
+      tt->array_vals[6].s = tdrpStrDup("red");
+      tt->array_vals[7].s = tdrpStrDup("red");
+      tt->array_vals[8].s = tdrpStrDup("red");
+    tt++;
+    
+    // Parameter 'Comment 11'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("FULL PIREP MESSAGE AS HIDDEN TEXT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1542,11 +1614,11 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("WIND BARB PLOT");
     tt->comment_text = tdrpStrDup("");
     tt++;

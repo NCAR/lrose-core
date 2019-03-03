@@ -80,7 +80,7 @@ paramdef int {
            "new clients will receive a SERVICE_DENIED error message and will "
            "have to request the data again.  If set to -1, no maximum is "
            "enforced.";
-  p_default = 32;
+  p_default = 1024;
 } max_clients;
 
 commentdef {

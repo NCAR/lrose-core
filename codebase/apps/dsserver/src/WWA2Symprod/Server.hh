@@ -89,7 +89,7 @@ private:
 
   // Add a SYMPROD polyline object for the current outline.
 
-  void _convert2Symprod(Params *serverParams, Symprod &prod,NWS_WWA &W, int data_type);
+  void _convert2Symprod(Params *serverParams, Symprod &prod,NWS_WWA &W, int data_type, int data_type2);
 
   // Calculate the centroid of a polyline. 
   void _calcCentroid(NWS_WWA &W, double &centroid_lat, double &centroid_lon );

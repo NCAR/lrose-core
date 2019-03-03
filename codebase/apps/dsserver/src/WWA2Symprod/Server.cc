@@ -131,7 +131,12 @@ int Server::convertToSymprod(const void *params,
     
     return -1;
   }
-  
+ 
+  if (W._hdr.action == ACT_CAN ){
+     cerr << "WARNING: Action is CAN, event was cancelled " << endl;
+     return -1;
+  }
+   
   // create Symprod object
 
   now = time(NULL);
@@ -144,7 +149,7 @@ int Server::convertToSymprod(const void *params,
 
   // Convert the SPDB data to symprod format
 
-  _convert2Symprod(serverParams, prod, W, chunk_ref.data_type);
+  _convert2Symprod(serverParams, prod, W, chunk_ref.data_type, chunk_ref.data_type2);
   
   // set return buffer
 
@@ -160,7 +165,8 @@ int Server::convertToSymprod(const void *params,
 // _convert2Symprod() - Add the SYMPROD objects for the WWA
 //  to the product buffer. 
 
-void Server::_convert2Symprod(Params *serverParams, Symprod &prod, NWS_WWA &W, int data_type)
+void Server::_convert2Symprod(Params *serverParams, Symprod &prod, NWS_WWA &W,
+                              int data_type, int data_type2)
 {
 
 
@@ -174,8 +180,10 @@ void Server::_convert2Symprod(Params *serverParams, Symprod &prod, NWS_WWA &W, i
 
     // Assemble the string.
     char labelString[256];
-	string s = Spdb::dehashInt32To4Chars(data_type);
-    sprintf(labelString, serverParams->id_format_string,s.c_str());
+    string s1 = Spdb::dehashInt32To4Chars(data_type);
+    string s2 = Spdb::dehashInt32To4Chars(data_type2);
+    string s3 = s1 + string(" etn: ") + s2; 
+    sprintf(labelString, serverParams->id_format_string,s3.c_str());
 
     // Add this ID text to the prod.
     prod.addText(labelString,
@@ -211,12 +219,30 @@ void Server::_convert2Symprod(Params *serverParams, Symprod &prod, NWS_WWA &W, i
   
   // Add the polyline to the product
   int npts = pointBuf.getLen() / sizeof(Symprod::wpt_t);
-  
+ 
+  // Set defaults for color, line type, and line width 
+  const char *polylineColor = wwa[W._hdr.hazard_type -1].color;
+  Params::line_type_t lineType = serverParams->suggested_line_type;
+  int lineWidth = serverParams->suggested_line_width;
+ 
+  // Search for hazard in warn_config_override list, if found use those 
+  // values for color, line type, line width. 
+  for (int i = 0; i < serverParams->warn_config_override_n; i++)
+  {
+      if ( serverParams->_warn_config_override[i].hazard == W._hdr.hazard_type)
+      {
+        polylineColor = serverParams->_warn_config_override[i].hex_color_str;
+        lineType =  serverParams->_warn_config_override[i].line_type;
+        lineWidth = serverParams->_warn_config_override[i].line_width;
+        cerr << "Found override for warn config : hazard: " << (int) W._hdr.hazard_type <<  " line color: " << polylineColor << " line width: " << lineWidth << endl; 
+        i = serverParams->warn_config_override_n; 
+      }
+  }
   prod.addPolyline(npts,
 		   (Symprod::wpt_t *) pointBuf.getPtr(),
-		   wwa[W._hdr.hazard_type -1].color,
-		   _convertLineTypeParam(serverParams->suggested_line_type),
-		   serverParams->suggested_line_width,
+		   polylineColor,
+		   _convertLineTypeParam(lineType),
+		   lineWidth,
 		   _convertCapstyleParam(serverParams->suggested_capstyle),
 		   _convertJoinstyleParam(serverParams->suggested_joinstyle));
   
