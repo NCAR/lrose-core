@@ -49,6 +49,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include <Ncxx/Ncxx.hh>
+#include <Ncxx/NcxxPort.hh>
 
 // missing values in meta-data
 

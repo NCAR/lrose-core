@@ -408,6 +408,11 @@ int Hdf5xx::loadAttribute(H5Object &obj,
   hsize_t *dims = NULL;
   if (ndims > 0) {
     dims = new hsize_t[ndims];
+    if (!dims) {
+       _addErrStr("Hdf5xx::loadArrayAttribute");
+       _addErrStr("  Mem allocation error ");
+       return -1;
+    }
     dataspace.getSimpleExtentDims(dims);
   }
 
@@ -597,8 +602,8 @@ int Hdf5xx::loadAttribute(H5Object &obj,
 
   // clean up
 
-  if (attr) delete attr;
-  if (dims) delete[] dims;
+  delete attr;
+  delete[] dims;
 
   return 0;
 
@@ -638,6 +643,11 @@ int Hdf5xx::loadArrayAttribute(H5Object &obj,
   hsize_t *dims = NULL;
   if (ndims > 0) {
     dims = new hsize_t[ndims];
+    if (!dims) {
+       _addErrStr("Hdf5xx::loadArrayAttribute");
+       _addErrStr("  Mem allocation error ");
+       return -1;
+   } 
     dataspace.getSimpleExtentDims(dims);
   }
 
@@ -842,8 +852,8 @@ int Hdf5xx::loadArrayAttribute(H5Object &obj,
 
   // clean up
 
-  if (attr) delete attr;
-  if (dims) delete[] dims;
+  delete attr;
+  delete [] dims;
 
   return 0;
 

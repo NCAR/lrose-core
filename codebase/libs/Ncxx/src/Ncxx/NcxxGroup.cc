@@ -1653,7 +1653,8 @@ map<string,NcxxGroup> NcxxGroup::getCoordVars(NcxxGroup::Location location) cons
 	coordVars.insert(pair<const string,NcxxGroup>(string(coordName),tmpGroup));
       }
     }
-    if(location != ParentsAndCurrent || location != All || tmpGroup.isRootGroup()) {
+    //if(location != ParentsAndCurrent || location != All || tmpGroup.isRootGroup()) {
+    if(location != ParentsAndCurrent ||  tmpGroup.isRootGroup()) {
       break;
     }
     // continue loop with the parent.
@@ -1695,7 +1696,9 @@ void NcxxGroup::getCoordVar(string& coordVarName,
       ncVar=itV->second;
       return;
     }
-    if(location != ParentsAndCurrent || location != All || tmpGroup.isRootGroup()) {
+    
+    //if(location != ParentsAndCurrent || location != All || tmpGroup.isRootGroup()) {
+    if (location != ParentsAndCurrent || tmpGroup.isRootGroup()) {
       break;
     }
     // continue loop with the parent.
