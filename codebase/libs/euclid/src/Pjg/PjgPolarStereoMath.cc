@@ -125,7 +125,6 @@ void PjgPolarStereoMath::printDetails(ostream &out) const
   out << "  Derived:" << endl;
   out << "    tangent_lon_rad: " << _tangent_lon_rad << endl;
   out << "    sin_tangent_lat: " << _sin_tangent_lat << endl;
-  out << "    cos_tangent_lat: " << _cos_tangent_lat << endl;
   out << "    false_easting  : " << _false_easting << endl;
   out << "    false_northing : " << _false_northing << endl;
 

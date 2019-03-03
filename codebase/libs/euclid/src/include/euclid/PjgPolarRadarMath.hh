@@ -84,22 +84,22 @@ public:
   
 protected:
   
-  double _rotation;     // rotation relative to TN - deg
+  //double _rotation;     // rotation relative to TN - deg
 
   // angles in radians
 
-  double _origin_lat_rad;
-  double _origin_lon_rad;
-  double _origin_colat_rad;
-  double _rotation_rad;
+  //double _origin_lat_rad;
+  //double _origin_lon_rad;
+  //double _origin_colat_rad;
+  //double _rotation_rad;
 
   // sin and cosine pre-computed
   
-  double _sin_origin_lat;
-  double _cos_origin_lat;
+  //double _sin_origin_lat;
+  //double _cos_origin_lat;
 
-  double _sin_origin_colat;
-  double _cos_origin_colat;
+  //double _sin_origin_colat;
+  //double _cos_origin_colat;
   
 private:
 

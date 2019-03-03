@@ -101,7 +101,6 @@ protected:
   
   double _tangent_lon_rad;
   double _sin_tangent_lat;
-  double _cos_tangent_lat; 
 
 private:
 

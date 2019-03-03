@@ -88,7 +88,6 @@ protected:
 
   double _origin_lat_rad;
   double _origin_lon_rad;
-  double _origin_colat_rad;
 
   // pre-computed
   

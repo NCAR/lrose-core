@@ -420,11 +420,7 @@ GridGeom::getClosestZ( float targetAltitude ) const
    // Now check the rest of the altitudes
    //
    for( i=1, currentAltitude=minz; i <= nz; i++, currentAltitude+=dz ) {
-      if ( currentAltitude == targetAltitude ) {
-         closestZ = i-1;
-         break;
-      }
-      else if ( i == nz ) {
+      if ( currentAltitude == targetAltitude || i == nz ) {
          closestZ = i-1;
          break;
       }

@@ -2627,7 +2627,7 @@ double GridAlgs::localCenteredTexture(int x, int y, int xw, int yw, bool isX,
       }
     }
   }
-  if (n > maxbad)
+  if (n > maxbad && n != 0)
   {
     return A/static_cast<double>(n);//yw*xw-1);
   }
@@ -2702,9 +2702,8 @@ void GridAlgs::db2linear(void)
   {
     for (int x=0; x<_nx; x++)
     {
-      if (!isMissing(x,y))
+      if( getValue(x, y, v1) )
       {
-        getValue(x, y, v1);
         v2 = v1/10;
         _data[y*_nx + x] = pow(10,v2); 
       }
@@ -2728,9 +2727,8 @@ void GridAlgs::linear2db(void)
   {
     for (int x=0; x<_nx; x++)
     {
-      if (!isMissing(x,y))
+      if (getValue(x,y,v1))
       {
-	getValue(x, y, v1);
 	if (v1 != 0)
 	{
 	  _data[y*_nx + x] = 10*log10(v1);
@@ -2871,18 +2869,10 @@ void GridAlgs::xMaxForAllY(int nx, double min_v)
 	  {
 	    if (v >= min_v)
 	    {
-	      if (first)
-	      {
-		max = v;
-		first = false;
-	      }
-	      else
-	      {
 		if (v > max)
 		{
 		  max = v;
 		}
-	      }
 	    }
 	  }
 	}

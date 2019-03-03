@@ -90,7 +90,6 @@ protected:
 
   double _origin_lat_rad;
   double _origin_lon_rad;
-  double _origin_colat_rad;
 
   double _sin_origin_lat;
   double _cos_origin_lat;

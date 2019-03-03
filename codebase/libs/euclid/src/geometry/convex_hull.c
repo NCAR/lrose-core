@@ -41,9 +41,11 @@ int EG_read_points(double **P, double points[][2], int N) {
 	int n = 0;
 	char buf[100];
 	while (fgets(buf, sizeof(buf), stdin)) {
-		assert(2==sscanf(buf, input_format, &points[n][0], &points[n][1]));
+                int ret = sscanf(buf, input_format, &points[n][0], &points[n][1]);
+		assert(2==ret);
 		P[n] = points[n];
-		assert(++n <= N);
+                ++n;
+		assert(n <= N);
 	}
 	return n;
 }

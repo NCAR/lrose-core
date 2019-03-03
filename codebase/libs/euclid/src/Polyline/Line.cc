@@ -1569,9 +1569,11 @@ void Line::adjustVelWithHandedness(double speed)
   else
   {
     MotionVector mv;
-    getMotionVector(mv);
-    mv.scale(speed/s);
-    setMotionVector(mv);
+    if ( getMotionVector(mv))
+    {
+      mv.scale(speed/s);
+      setMotionVector(mv);
+    }
   }
 }
 

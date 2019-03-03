@@ -231,7 +231,7 @@ static void _location(const Line &line, const LineList &l, double a, double &x,
     x = lx1 + 0.1*(x1 - lx1);
     axy = Point(-1.0, 0.0);
   }
-  else if (d10 <= d00 && d10 <= d00 && d10 <= d11)
+  else if (d10 <= d00 && d10 <= d01 && d10 <= d11)
   {
     x = lx0 - 0.1*(lx0 - x0);
     axy = Point(1.0, 0.0);
@@ -1726,17 +1726,20 @@ void LineList::removeRedundancies(void)
  
     int ipt = it - _line.begin();
     AttributesEuclid *ia = dynamic_cast<AttributesEuclid *>(&_line[ipt]);
-    *ia = a;
-
-    // remove all redundant things now.
-    for (it2=it+1; it2 != _line.end();)
+    if (ia)
     {
-      if (it->equalNoAttributes(*it2))
-	it2 = _line.erase(it2);
-      else
-	++it2;
-    }
-  }
+       *ia = a;
+
+       // remove all redundant things now.
+       for (it2=it+1; it2 != _line.end();)
+       {
+         if (it->equalNoAttributes(*it2))
+	   it2 = _line.erase(it2);
+         else
+	   ++it2;
+       } 
+    }// end if
+  } // end for 
 }
 
 

@@ -39,6 +39,7 @@ using namespace std;
 
 #define TINY_ANGLE 1.e-4
 #define TINY_DBL 1.e-10
+#define VALUE_NOT_SET -9999.0
 
 ////////////////////////
 // Constructor
@@ -121,13 +122,16 @@ PjgLambertConfMath::PjgLambertConfMath(double origin_lat,
     
     t0n = pow( tan(M_PI_4 + _origin_lat_rad/2), _n);
     _rho = Pjg::EradKm * _F / t0n;
+    _sin0 = VALUE_NOT_SET;
+    _tan0 = VALUE_NOT_SET;
 
   } else {
 
     _sin0 = sin(_lat1_rad);
     _tan0 = tan( M_PI_4 - _lat1_rad / 2);
     _rho = Pjg::EradKm / tan(_lat1_rad);
-
+    _n = VALUE_NOT_SET;
+    _F = VALUE_NOT_SET;
   }
   
 }
