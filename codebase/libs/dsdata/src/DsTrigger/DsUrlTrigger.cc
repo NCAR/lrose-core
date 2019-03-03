@@ -365,5 +365,10 @@ void DsUrlTrigger::_initArchive(const std::string &trigger_url,
     LOG(FATAL) << "bad input";
     exit(-1);
   }
+  if (!_trigger)
+  {
+    LOG(FATAL) << "Did not create viable object";
+    exit(-1);
+  }
   _trigger->archiveInit(t0, t1);
 }

@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 // RCS info
-//   $Author: dixon $
+//   $Author: gaydos $
 //   $Locker:  $
-//   $Date: 2016/03/03 18:06:33 $
-//   $Id: DsInputPathTrigger.cc,v 1.4 2016/03/03 18:06:33 dixon Exp $
-//   $Revision: 1.4 $
+//   $Date: 2019/01/03 16:37:59 $
+//   $Id: DsInputPathTrigger.cc,v 1.5 2019/01/03 16:37:59 gaydos Exp $
+//   $Revision: 1.5 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -88,6 +88,13 @@ DsInputPathTrigger::~DsInputPathTrigger()
  * input_dir: directory to watch for new files.
  * max_file_age: maximum valid age for a file in seconds
  * heartbeat_func: pointer to the heartbeat function
+ * use_ldata_info flag: If true, we use the latest_data_info
+ *            file, if false we watch the directory recursively
+ *            for new files.
+ * latest_file_only flag: Only applies if use_ldata_info is
+ *            false. If set, the routine returns the latest file.
+ *            If false, it returns the earliest file which is younger than
+ *            the max valid age and which has not been used yet.
  *
  *  Returns 0 on success, -1 on error.
  *
@@ -96,7 +103,9 @@ DsInputPathTrigger::~DsInputPathTrigger()
 
 int DsInputPathTrigger::init(const string &input_dir,
 			     const int max_file_age,
-			     const heartbeat_func_t heartbeat_func)
+			     const heartbeat_func_t heartbeat_func,
+ 			     bool use_ldata_info /* = true */,
+                             bool latest_file_only /* = true */) 
 {
   const string method_name = "DsInputPathTrigger::init()";
   
@@ -108,7 +117,9 @@ int DsInputPathTrigger::init(const string &input_dir,
 			       false,
 			       input_dir,
 			       max_file_age,
-			       heartbeat_func);
+			       heartbeat_func,
+                               use_ldata_info,
+                               latest_file_only);
   
   _heartbeatFunc = heartbeat_func;
   

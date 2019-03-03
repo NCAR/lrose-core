@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: nowcast $
 //   $Locker:  $
-//   $Date: 2018/07/30 22:02:12 $
-//   $Id: DsInputDirTrigger.cc,v 1.12 2018/07/30 22:02:12 nowcast Exp $
-//   $Revision: 1.12 $
+//   $Date: 2018/10/19 18:14:32 $
+//   $Id: DsInputDirTrigger.cc,v 1.13 2018/10/19 18:14:32 nowcast Exp $
+//   $Revision: 1.13 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -185,7 +185,9 @@ int DsInputDirTrigger::next()
       }
       return -1;
     } else {
-      _heartbeatFunc("Waiting for data");
+       if (_heartbeatFunc) {
+          _heartbeatFunc("Waiting for data");
+       }
     }
 
     if (_debug) {

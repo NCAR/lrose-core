@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: gaydos $
  *   $Locker:  $
- *   $Date: 2016/03/03 18:06:33 $
- *   $Id: DsInputPathTrigger.hh,v 1.2 2016/03/03 18:06:33 dixon Exp $
- *   $Revision: 1.2 $
+ *   $Date: 2019/01/03 16:37:59 $
+ *   $Id: DsInputPathTrigger.hh,v 1.3 2019/01/03 16:37:59 gaydos Exp $
+ *   $Revision: 1.3 $
  *   $State: Exp $
  */
  
@@ -92,6 +92,13 @@ public:
    * input_dir: directory to watch for new files.
    * max_file_age: maximum valid age for a file in seconds
    * heartbeat_func: pointer to the heartbeat function
+   * use_ldata_info flag: If true, we use the latest_data_info
+   *            file, if false we watch the directory recursively
+   *            for new files.
+   * latest_file_only flag: Only applies if use_ldata_info is
+   *            false. If set, the routine returns the latest file.
+   *            If false, it returns the earliest file which is younger than
+   *            the max valid age and which has not been used yet.
    *
    *  Returns 0 on success, -1 on error.
    *
@@ -100,7 +107,10 @@ public:
 
   int init(const string &input_dir,
 	   const int max_file_age,
-	   const heartbeat_func_t heartbeat_func = 0);
+	   const heartbeat_func_t heartbeat_func = 0,
+           bool use_ldata_info = true,
+           bool latest_file_only = true);
+
   
 
   ////////////////////
