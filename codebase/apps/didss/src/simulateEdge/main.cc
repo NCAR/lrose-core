@@ -22,8 +22,6 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //
-// $Id: main.cc,v 1.4 2016/03/06 23:53:43 dixon Exp $
-//
 // Main entry point for simulateEdge program
 //
 

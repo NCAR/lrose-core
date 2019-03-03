@@ -47,6 +47,7 @@
  */
 
 #include <cstring>
+#include <string>
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
 #include <didss/RapDataDir.hh>
@@ -66,7 +67,9 @@ Janitor::Janitor(int argc, char **argv)
 
   // set programe name
 
-  _progName = strdup("Janitor");
+  _progName = string("Janitor");
+
+  _paramsPath = (char *) "unknown";
 
   // get command line args
   
@@ -79,7 +82,6 @@ Janitor::Janitor(int argc, char **argv)
   
   // get TDRP params
   
-  _paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv,
                            _args.override.list,
                            &_paramsPath)) {
@@ -102,7 +104,6 @@ Janitor::Janitor(int argc, char **argv)
 Janitor::~Janitor()
 
 {
-
   // unregister wilh procmap
 
   PMU_auto_unregister();

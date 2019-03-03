@@ -21,12 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// $Id: EdgeTape.cc,v 1.7 2016/03/06 23:53:42 dixon Exp $
-//
-// Enterprise tape input class
-////////////////////////////////////////////////////////////
-
 #include <fcntl.h>
 #include <dataport/bigend.h>
 #include <toolsa/ttape.h>

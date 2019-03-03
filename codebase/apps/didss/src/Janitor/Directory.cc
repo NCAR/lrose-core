@@ -77,6 +77,7 @@ Directory::Directory (const string prog_name,
         _paramsAreLocal(false),
         _diskFullDeleteList(delete_list)
 {
+  OK = false;
 
   // Load the local params file, if one exists
 
@@ -100,6 +101,18 @@ Directory::Directory (const string prog_name,
     _params = global_params;
     _paramsAreLocal = false;
   }
+
+  // Initialize private members
+
+  _nFilesFound = 0;
+  _nFilesRemaining = 0;
+  _nFilesDeleted = 0;
+
+  _nFilesCompressed = 0;
+  _nBytesUncompressed = 0;
+  _nBytesCompressed = 0;
+ 
+  _eventListsOkay = true; 
 
   // create deletion object
 
@@ -131,6 +144,7 @@ Directory::Directory (const string prog_name,
     cerr << "  maxNoModSecsCompress: " << _maxNoModSecsCompress << endl;
     _writeParams(stderr);
   }
+  OK = true;
 
 }
 
@@ -216,6 +230,12 @@ int Directory::process()
     cerr << "ERROR - " << _progName << ":Directory::process" << endl;
     cerr << "  Cannot open directory '" << _dirPath << "'" << endl;
     perror(_dirPath.c_str());
+   
+    // Unlock directory.
+    if (_params->UseLockfiles) {
+       ta_remove_lock_file(lock_file.c_str(), lfp);
+     }
+ 
     return -1;
   }
 
@@ -666,49 +686,56 @@ void Directory::_processDirectory(const string current_path)
     // stat this directory to get the age
     
     stat_struct_t dStat;
-    ta_stat(current_path.c_str(), &dStat);
-    int age = time(NULL) - dStat.st_mtime;
-    
-    // Determine if we can remove the directory
-
-    bool do_remove = FALSE;
-
-    if (age > _maxDirAgeSecs)
-      {
-	if (_params->date_format)
-	  {
-	    if (_dirMatchesDateFormat(current_path))
-	      do_remove = TRUE;
-	  }
-	else
-	  {
-	    do_remove = TRUE;
-	  }
-      }
-
-    if (!_isEmpty(current_path)) {
-      do_remove = FALSE;
-    }
-
-    // Remove the directory if we can
-
-    if (do_remove)
+    int ret = ta_stat(current_path.c_str(), &dStat);
+    if (ret == -1)
     {
-      if (_params->debug) {
-	cerr << "Removing empty dir: " << current_path << endl;
-      }
-
-      if (rmdir(current_path.c_str())) {
-	perror("rmdir failed");
-	cerr << "Failed to remove empty directory: " << current_path
-             << endl;
-      }
+      cerr << "ERROR processing dir: " << current_path << endl;
     }
+    else
+    {
+       int age = time(NULL) - dStat.st_mtime;
+    
+       // Determine if we can remove the directory
 
+       bool do_remove = FALSE;
+
+       if (age > _maxDirAgeSecs)
+         {
+	   if (_params->date_format)
+	     {
+	       if (_dirMatchesDateFormat(current_path))
+	         do_remove = TRUE;
+	     }
+	   else
+	     {
+	       do_remove = TRUE;
+	     }
+         }
+
+       if (!_isEmpty(current_path)) {
+         do_remove = FALSE;
+       }
+
+       // Remove the directory if we can
+
+       if (do_remove)
+       {
+         if (_params->debug) {
+	   cerr << "Removing empty dir: " << current_path << endl;
+         }
+
+         if (rmdir(current_path.c_str())) {
+	   perror("rmdir failed");
+	   cerr << "Failed to remove empty directory: " << current_path
+                << endl;
+         }
+       }
+
+     }
   }
-
+  
   delete(dir);
-
+   
   _params->process = process_now; // Restore current state.
 }
 

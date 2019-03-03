@@ -21,11 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//////////////////////////////////////////////////////////////////////
-// $Id: EndEOVStrategy.cc,v 1.3 2016/03/06 23:53:42 dixon Exp $
-//
-/////////////////////////////////////////////////////////////////////
-
 #include "EndEOVStrategy.hh"
 using namespace std;
 

@@ -21,11 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-////////////////////////////////////////////////////////////
-// $Id: Test2Edge.cc,v 1.5 2016/03/06 23:53:41 dixon Exp $
-//
-// Top level application class
-////////////////////////////////////////////////////////////
 #include <toolsa/MsgLog.hh>
 #include <toolsa/umisc.h>
 

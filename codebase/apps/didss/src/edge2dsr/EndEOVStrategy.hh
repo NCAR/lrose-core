@@ -21,10 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-////////////////////////////////////////////////////////////////////////////
-// $Id: EndEOVStrategy.hh,v 1.3 2016/03/06 23:53:42 dixon Exp $
-//
-///////////////////////////////////////////////////////////////////////////
 
 /**************************************************************************
  * EndEOVStrategy - Class which triggers an end-of-volume when a beam is

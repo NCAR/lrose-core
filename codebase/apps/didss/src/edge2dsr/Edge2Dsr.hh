@@ -21,9 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-////////////////////////////////////////////////////////////////////////////
-// $Id: Edge2Dsr.hh,v 1.5 2016/03/06 23:53:42 dixon Exp $
-//
 // Top level application class
 ///////////////////////////////////////////////////////////////////////////
 

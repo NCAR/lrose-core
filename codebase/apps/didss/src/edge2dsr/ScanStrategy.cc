@@ -21,10 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//////////////////////////////////////////////////////////////////////
-// $Id: ScanStrategy.cc,v 1.4 2016/03/06 23:53:42 dixon Exp $
-//
-/////////////////////////////////////////////////////////////////////
 
 #include "ScanStrategy.hh"
 #include <math.h>

@@ -22,8 +22,6 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ////////////////////////////////////////////////////////////
-// $Id: SimEdge.cc,v 1.4 2016/03/06 23:53:43 dixon Exp $
-//
 // Top level application class
 ////////////////////////////////////////////////////////////
 #include <toolsa/MsgLog.hh>

@@ -21,11 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//////////////////////////////////////////////////////////////////////////////
-// $Id: Edge2Dsr.cc,v 1.10 2016/03/06 23:53:42 dixon Exp $
-//
-// Top level application class
-/////////////////////////////////////////////////////////////////////////////
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
 #include <toolsa/MsgLog.hh>

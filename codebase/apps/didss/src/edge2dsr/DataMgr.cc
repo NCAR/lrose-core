@@ -21,11 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//////////////////////////////////////////////////////////////////////
-// $Id: DataMgr.cc,v 1.53 2016/03/06 23:53:42 dixon Exp $
-//
-// Data managment class
-/////////////////////////////////////////////////////////////////////
 #include <vector>
 #include <climits>
 #include <cmath>

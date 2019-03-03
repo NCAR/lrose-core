@@ -40,8 +40,8 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ldsserver -ldidss -ltoolsa -ldataport \
-	-ltdrp -lbz2 -lz
+  -ldsserver -ldidss -ltoolsa -ldataport \
+	-lbz2 -lz
 
 HDRS = \
 	Args.hh \

@@ -21,12 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-////////////////////////////////////////////////////////////////////////////
-//  Ridds2Mom top-level application class
-//
-//  $Id: Ridds2Mom.cc,v 1.3 2016/03/06 23:53:41 dixon Exp $
-//
-//////////////////////////////////////////////////////////////////////////
 #include <toolsa/MsgLog.hh>
 
 #include "Ridds2Mom.hh"

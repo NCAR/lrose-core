@@ -22,8 +22,6 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //////////////////////////////////////////////////////////////////////////////
-// $Id: EdgeRead.cc,v 1.3 2016/03/06 23:53:42 dixon Exp $
-//
 // Top level application class
 /////////////////////////////////////////////////////////////////////////////
 #include <toolsa/MsgLog.hh>
