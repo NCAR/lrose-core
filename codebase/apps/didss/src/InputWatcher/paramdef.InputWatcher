@@ -123,6 +123,14 @@ paramdef boolean {
   p_help = "If TRUE, the latest read info will be saved out in a file to preserve state in case the application dies. On restart, the latest read info will be read in to re-initialize the application, so that data already read will not be read again.";
 } save_latest_read_time;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to ignore hidden files.";
+  p_help = "If TRUE, all hidden files will be ignored. This is useful when monitoring directories where files are bring copied using the approach of copying as a hidden file, then moving file to is working name.";
+} ignore_hidden;
+
+
+
 commentdef {
   p_header = "CALL SCRIPT WHEN NEW DATA ARRIVES";
 } 

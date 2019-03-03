@@ -399,6 +399,8 @@ public:
 
   tdrp_bool_t save_latest_read_time;
 
+  tdrp_bool_t ignore_hidden;
+
   script_style_t script_style;
 
   tdrp_bool_t call_data_arrived_script;
@@ -466,7 +468,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[55];
+  mutable TDRPtable _table[56];
 
   const char *_className;
 

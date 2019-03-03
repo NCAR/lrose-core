@@ -45,7 +45,6 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
 {
 
-  int iret = 0;
   char tmp_str[256];
 
   // intialize
@@ -77,9 +76,9 @@ int Args::parse(int argc, char **argv, string &prog_name)
       TDRP_add_override(&override, tmp_str);
 
     } else if (!strcmp(argv[i], "-vv") ||
-	       !strcmp(argv[i], "-extra")) {
+               !strcmp(argv[i], "-extra")) {
       
-      sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
+      sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
 
     } else if(!strcmp(argv[i], "-instance")) {
@@ -98,11 +97,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
     
   } // i
 
-  if (iret) {
-    _usage(prog_name, cerr);
-  }
-
-  return (iret);
+  return 0;
     
 }
 

@@ -78,7 +78,7 @@ InputWatcher::InputWatcher(int argc, char **argv)
 
   // get TDRP params
   
-  _paramsPath = const_cast<char*>(string("unknown").c_str());
+  _paramsPath = (char*)"unknown";
   if (_params.loadFromArgs(argc, argv, _args.override.list,
 			   &_paramsPath)) {
     cerr << "ERROR: " << _progName << endl;
@@ -172,6 +172,24 @@ int InputWatcher::Run ()
     
     if (inputPath != NULL) {
 
+      if (_params.ignore_hidden == true) {
+	if (_params.debug) {
+	  cerr << "checking for a hidden file." << endl;
+	}
+	// find the location for the start of the file name
+	char* ret_val = strrchr(inputPath, '/');
+	if (ret_val != NULL) {
+	  char* fn_start = ret_val + 1;
+	  ret_val = strchr(fn_start, '.');
+	  if ((ret_val - fn_start) == 0) {
+	    if (_params.debug) {
+	      cerr << "Ignoring file, it is a hidden file: " << inputPath << endl;
+	    }
+	    continue;
+	  }
+  	}
+      }    
+      
       if (strlen(_params.search_substr) > 0) {
 	if (strstr(inputPath, _params.search_substr) == NULL) {
 	  if (_params.debug) {
@@ -191,7 +209,13 @@ int InputWatcher::Run ()
       timeLastAction = time(NULL);
       PMU_force_register(ipath.getFile().c_str());
       struct stat fileStat;
-      ta_stat(inputPath, &fileStat);
+      int ret = ta_stat(inputPath, &fileStat);
+      if (ret == -1 ) {
+        if (_params.debug) {
+           cerr << "stat of file failed: " << inputPath << endl;
+        }
+        continue;
+      }
       time_t modTime = fileStat.st_mtime;
       
       // call script as required
@@ -496,7 +520,11 @@ int InputWatcher::_copyFile(const char *inputPath, time_t modTime)
     if (_params.debug) {
       cerr << "Removing file: " << inputPath << endl;
     }
-    remove(inputPath);
+    int ret = remove(inputPath);
+
+    if (ret != 0) {
+      cerr << "Failure to remove file " << inputPath << endl;
+    }
   }
   
   // uncompress as required

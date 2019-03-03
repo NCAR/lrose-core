@@ -787,6 +787,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'ignore_hidden'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ignore_hidden");
+    tt->descr = tdrpStrDup("Option to ignore hidden files.");
+    tt->help = tdrpStrDup("If TRUE, all hidden files will be ignored. This is useful when monitoring directories where files are bring copied using the approach of copying as a hidden file, then moving file to is working name.");
+    tt->val_offset = (char *) &ignore_hidden - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
