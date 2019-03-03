@@ -21,12 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-////////////////////////////////////////////////////////////////////////////
-//  DsrAddTime top-level application class
-//
-//  $Id: DsrAddTime.cc,v 1.6 2016/03/06 23:53:40 dixon Exp $
-//
-//////////////////////////////////////////////////////////////////////////
 #include <toolsa/ucopyright.h>
 #include <toolsa/MsgLog.hh>
 
