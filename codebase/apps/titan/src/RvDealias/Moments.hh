@@ -36,7 +36,8 @@
 
 #include <string>
 #include <vector>
-#include "Fft.hh"
+#include <radar/RadarFft.hh>
+#include <radar/RadarComplex.hh>
 
 using namespace std;
 
@@ -104,46 +105,46 @@ public:
 
   // apply hanning window
   
-  void applyHanningWindow(const Complex_t *in, Complex_t *out);
+  void applyHanningWindow(const RadarComplex_t *in, RadarComplex_t *out);
   
   // apply modified hanning window
 
-  void applyModHanningWindow(const Complex_t *in, Complex_t *out);
+  void applyModHanningWindow(const RadarComplex_t *in, RadarComplex_t *out);
 
   // compute total power
 
-  double computeTotalPower(const Complex_t *IQ);
+  double computeTotalPower(const RadarComplex_t *IQ);
     
   // check if we should threshold based on signal-to-noise of total power
   // Side-effect: passes back total power
 
-  bool checkSnThreshold(const Complex_t *IQ, double &totalPower);
+  bool checkSnThreshold(const RadarComplex_t *IQ, double &totalPower);
     
   // compute time-domain moments using ABP pulse-pair method
   
-  void computeByAbp(const Complex_t *IQ,
+  void computeByAbp(const RadarComplex_t *IQ,
 		    double prtSecs,
 		    double &power, double &vel,
 		    double &width);
   
   // compute moments using pulse-pair
   
-  void computeByPp(const Complex_t *IQ,
+  void computeByPp(const RadarComplex_t *IQ,
 		   double prtSecs,
 		   double &power, double &vel,
 		   double &width, int &flags);
   
   // compute moments using spectra
 
-  void computeByFft(const Complex_t *IQ,
+  void computeByFft(const RadarComplex_t *IQ,
 		    double prtSecs,
 		    double &power, double &vel,
 		    double &width, int &flags);
   
   // compute moments using SZ 8/64 algorithm using PP
   
-  void computeBySzPp(const Complex_t *IQ,
-		     const Complex_t *delta12,
+  void computeBySzPp(const RadarComplex_t *IQ,
+		     const RadarComplex_t *delta12,
 		     double prtSecs,
 		     double &power1, double &vel1,
 		     double &width1, int &flags1,
@@ -153,8 +154,8 @@ public:
   // compute moments using SZ 8/64 algorithm using FFT
   // beamCode should run from [-4 to 63].
   
-  void computeBySzFft(const Complex_t *IQ,
-		      const Complex_t *delta12,
+  void computeBySzFft(const RadarComplex_t *IQ,
+		      const RadarComplex_t *delta12,
 		      double prtSecs,
 		      double &power1, double &vel1,
 		      double &width1, int &flags1,
@@ -163,10 +164,10 @@ public:
 
   // cohere to a given trip
 
-  void cohere2Trip(const Complex_t *IQ,
-		   const Complex_t *beamCode,
+  void cohere2Trip(const RadarComplex_t *IQ,
+		   const RadarComplex_t *beamCode,
 		   int trip_num,
-		   Complex_t *iqTrip);
+		   RadarComplex_t *iqTrip);
   
 protected:
   
@@ -205,10 +206,10 @@ private:
   
   static const int _phaseCodeN = 8;
   static const int _nSamples = 64;
-  Complex_t _modCode12[_nSamples];
-  Complex_t _modCode21[_nSamples];
-  static const double _missingDbl = -9999.0;
-  static const double _smallValue = 1.0e-9;
+  RadarComplex_t _modCode12[_nSamples];
+  RadarComplex_t _modCode21[_nSamples];
+  static constexpr double _missingDbl = -9999.0;
+  static constexpr double _smallValue = 1.0e-9;
 
   // censoring flags
 
@@ -220,13 +221,13 @@ private:
 
   static const int _szNotchWidth75 = 48;
   static const int _szPowerWidth75 = 16;
-  static const double _szFracPower75 = 0.25;
+  static constexpr double _szFracPower75 = 0.25;
 
   // 1/2 notch
   
   static const int _szNotchWidth50 = 32;
   static const int _szPowerWidth50 = 32;
-  static const double _szFracPower50 = 0.5;
+  static constexpr  double _szFracPower50 = 0.5;
 
   // windows
 
@@ -238,7 +239,7 @@ private:
   double _deconvMatrix75[_nSamples * _nSamples];
   double _deconvMatrix50[_nSamples * _nSamples];
 
-  Fft *_fft;
+  RadarFft *_fft;
 
   // functions
 
@@ -250,37 +251,37 @@ private:
   void _initModHanning(double *window);
 
   void _applyWindow(const double *window,
-		    const Complex_t *in, Complex_t *out);
+		    const RadarComplex_t *in, RadarComplex_t *out);
 
-  double _computeMeanPower(const Complex_t *IQ);
+  double _computeMeanPower(const RadarComplex_t *IQ);
   
-  double _computeR1(const Complex_t *IQ);
+  double _computeR1(const RadarComplex_t *IQ);
   
-  void _cohereTrip1_to_Trip2(const Complex_t *trip1,
-			     const Complex_t *delta12,
-			     Complex_t *trip2);
+  void _cohereTrip1_to_Trip2(const RadarComplex_t *trip1,
+			     const RadarComplex_t *delta12,
+			     RadarComplex_t *trip2);
   
-  void _cohereTrip2_to_Trip1(const Complex_t *trip2,
-			     const Complex_t *delta12,
-			     Complex_t *trip1);
+  void _cohereTrip2_to_Trip1(const RadarComplex_t *trip2,
+			     const RadarComplex_t *delta12,
+			     RadarComplex_t *trip1);
 
-  void _addCode(const Complex_t *in, const Complex_t *code,
-		Complex_t *sum);
+  void _addCode(const RadarComplex_t *in, const RadarComplex_t *code,
+		RadarComplex_t *sum);
   
-  void _addCode(const Complex_t *in, const Complex_t *code, int trip,
-		Complex_t *sum);
+  void _addCode(const RadarComplex_t *in, const RadarComplex_t *code, int trip,
+		RadarComplex_t *sum);
   
-  void _subCode(const Complex_t *in, const Complex_t *code,
-		Complex_t *diff);
+  void _subCode(const RadarComplex_t *in, const RadarComplex_t *code,
+		RadarComplex_t *diff);
 
-  void _subCode(const Complex_t *in, const Complex_t *code, int trip,
-		Complex_t *diff);
+  void _subCode(const RadarComplex_t *in, const RadarComplex_t *code, int trip,
+		RadarComplex_t *diff);
   
-  void _conjugate(const Complex_t *in, Complex_t *conj);
+  void _conjugate(const RadarComplex_t *in, RadarComplex_t *conj);
   
-  void _computeMag(const Complex_t *in, double *mag);
+  void _computeMag(const RadarComplex_t *in, double *mag);
 
-  void _normalizeMag(const Complex_t *in, double *norm_mag);
+  void _normalizeMag(const RadarComplex_t *in, double *norm_mag);
 
   void _computeSpectralNoise(const double *powerCentered,
 			     double &noiseMean,
@@ -291,21 +292,21 @@ private:
 			 double prtSecs);
 
   void _applyNotch(int startIndex,
-		   Complex_t *in,
+		   RadarComplex_t *in,
 		   int notchWidth,
 		   int powerWidth,
 		   double fracPower,
-		   Complex_t *notched);
+		   RadarComplex_t *notched);
   
   void _applyNotch75(int startIndex,
-		     Complex_t *in,
-		     Complex_t *notched);
+		     RadarComplex_t *in,
+		     RadarComplex_t *notched);
 
   void _applyNotch50(int startIndex,
-		     Complex_t *in,
-		     Complex_t *notched);
+		     RadarComplex_t *in,
+		     RadarComplex_t *notched);
 
-  void _velWidthFromTd(const Complex_t *IQ,
+  void _velWidthFromTd(const RadarComplex_t *IQ,
 		       double prtSecs,
 		       double &vel, double &width);
   
@@ -319,14 +320,14 @@ private:
   
   void _printComplex(ostream &out,
 		     const string &heading,
-		     const Complex_t *comp);
+		     const RadarComplex_t *comp);
   
   void _printVector(ostream &out,
 		    const string &heading,
-		    const Complex_t *comp);
+		    const RadarComplex_t *comp);
 
   void _writeComplex2File(const string &heading,
-			  const Complex_t *comp);
+			  const RadarComplex_t *comp);
   
   void _writeMag2File(const string &heading,
 		      const double *mag);

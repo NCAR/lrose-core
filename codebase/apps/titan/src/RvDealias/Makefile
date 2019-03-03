@@ -36,19 +36,17 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = RvDealias
 
-LOC_INCLUDES =
+LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_CFLAGS =
-LOC_LDFLAGS =
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_LIBS = \
-	-ldidss -ltoolsa -ldataport -ltdrp \
-	-lnetcdf_c++ -lnetcdf -lfftw -lbz2 \
-	-lz
+	-lradar -ldidss -ltoolsa -ldataport -ltdrp \
+	$(NETCDF4_LIBS) -lfftw3
 
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
 	ErrorMatrix.hh \
-	Fft.hh \
 	Moments.hh \
 	RvDealias.hh \
 	Verify.hh
@@ -57,7 +55,6 @@ CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
 	ErrorMatrix.cc \
-	Fft.cc \
 	Main.cc \
 	Moments.cc \
 	RvDealias.cc \

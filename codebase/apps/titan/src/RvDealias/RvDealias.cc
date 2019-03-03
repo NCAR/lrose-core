@@ -315,7 +315,7 @@ int RvDealias::_processFile(const char *input_path)
 
   // open file
 
-  NcFile ncf(input_path);
+  Nc3File ncf(input_path);
   if (!ncf.is_valid()) {
     cerr << "ERROR - RvDealias::_processFile" << endl;
     cerr << "  File: " << input_path << endl;
@@ -324,7 +324,7 @@ int RvDealias::_processFile(const char *input_path)
 
   // declare an error object
 
-  NcError err(NcError::silent_nonfatal);
+  Nc3Error err(Nc3Error::silent_nonfatal);
 
   // if (_params.debug >= Params::DEBUG_VERBOSE) {
   // _printFile(ncf);
@@ -398,9 +398,9 @@ void RvDealias::_processBeam(int beam_num)
   //   and wrap the data around.
   // Also compute trip1 to trip 2 difference.
   
-  Complex_t beamCodeArray[4 + _nSamples];
-  Complex_t *beamCode = beamCodeArray + 4;
-  Complex_t delta12[_nSamples];
+  RadarComplex_t beamCodeArray[4 + _nSamples];
+  RadarComplex_t *beamCode = beamCodeArray + 4;
+  RadarComplex_t delta12[_nSamples];
   for (int ii = -4; ii < _nSamples; ii++) {
     int index = (ii + _params.trip1_phase_index + _nSamples) % _nSamples;
     beamCode[ii] = _phaseCode[index];
@@ -440,8 +440,8 @@ void RvDealias::_processBeam(int beam_num)
 
     // load up IQ data
 
-    Complex_t IQ[_nSamples];
-    Complex_t *iq = IQ;
+    RadarComplex_t IQ[_nSamples];
+    RadarComplex_t *iq = IQ;
     
     float *II = _I + istart * _nGates + ii;
     float *QQ = _Q + istart * _nGates + ii;
@@ -475,7 +475,7 @@ void RvDealias::_processBeam(int beam_num)
     }
       
     case Params::FFT_HANNING: {
-      Complex_t IQ_hanning[_nSamples];
+      RadarComplex_t IQ_hanning[_nSamples];
       _moments->applyHanningWindow(IQ, IQ_hanning);
       _moments->computeByFft(IQ_hanning, meanPrt,
 			     power1, vel1, width1, flags1);
@@ -483,7 +483,7 @@ void RvDealias::_processBeam(int beam_num)
     }
     
     case Params::FFT_MOD_HANNING: {
-      Complex_t IQ_modHanning[_nSamples];
+      RadarComplex_t IQ_modHanning[_nSamples];
       _moments->applyModHanningWindow(IQ, IQ_modHanning);
       _moments->computeByFft(IQ_modHanning, meanPrt,
 			     power1, vel1, width1, flags1);
@@ -494,7 +494,7 @@ void RvDealias::_processBeam(int beam_num)
 
       // cohere to trip 1
       
-      Complex_t trip1[_nSamples];
+      RadarComplex_t trip1[_nSamples];
       _moments->cohere2Trip(IQ, beamCode, 1, trip1);
       
       _moments->computeBySzPp(trip1, delta12, meanPrt,
@@ -508,7 +508,7 @@ void RvDealias::_processBeam(int beam_num)
 
       // cohere to trip 1
       
-      Complex_t trip1[_nSamples];
+      RadarComplex_t trip1[_nSamples];
       _moments->cohere2Trip(IQ, beamCode, 1, trip1);
       
       _moments->computeBySzFft(trip1, delta12, meanPrt,
@@ -582,12 +582,12 @@ void RvDealias::_processBeam(int beam_num)
 //
 // Returns 0 on success, -1 on failure
 
-int RvDealias::_loadFromFile(NcFile &ncf)
+int RvDealias::_loadFromFile(Nc3File &ncf)
 
 {
 
   _freeArrays();
-  NcValues *vals;
+  Nc3Values *vals;
 
   if (ncf.rec_dim() == NULL) {
     cerr << "ERROR - RvDealias::_loadFromFile" << endl;
@@ -731,7 +731,7 @@ int RvDealias::_loadFromFile(NcFile &ncf)
   memcpy(_Prt, vals->base(), _nTimes * sizeof(int));
   delete vals;
 
-  NcVar *timeVar = ncf.get_var("Time");
+  Nc3Var *timeVar = ncf.get_var("Time");
   if (timeVar == NULL) {
     cerr << "ERROR - RvDealias::_loadFromFile" << endl;
     cerr << "  Time variable missing" << endl;
@@ -742,7 +742,7 @@ int RvDealias::_loadFromFile(NcFile &ncf)
   memcpy(_Time, vals->base(), _nTimes * sizeof(double));
   delete vals;
 
-  NcAtt *firstGateAtt = ncf.get_att("FirstGate");
+  Nc3Att *firstGateAtt = ncf.get_att("FirstGate");
   if (firstGateAtt == NULL) {
     cerr << "ERROR - RvDealias::_loadFromFile" << endl;
     cerr << "  FirstGate attribute missing" << endl;
@@ -851,19 +851,19 @@ void RvDealias::_printData()
 ///////////////////////////////
 // print data in file
 
-void RvDealias::_printFile(NcFile &ncf)
+void RvDealias::_printFile(Nc3File &ncf)
 
 {
 
   cout << "ndims: " << ncf.num_dims() << endl;
   cout << "nvars: " << ncf.num_vars() << endl;
   cout << "nattributes: " << ncf.num_atts() << endl;
-  NcDim *unlimd = ncf.rec_dim();
+  Nc3Dim *unlimd = ncf.rec_dim();
   cout << "unlimdimid: " << unlimd->size() << endl;
   
   // dimensions
 
-  NcDim *dims[ncf.num_dims()];
+  Nc3Dim *dims[ncf.num_dims()];
   for (int idim = 0; idim < ncf.num_dims(); idim++) {
     dims[idim] = ncf.get_dim(idim);
 
@@ -884,14 +884,14 @@ void RvDealias::_printFile(NcFile &ncf)
 
   for (int iatt = 0; iatt < ncf.num_atts(); iatt++) {
     cout << "  Att num: " << iatt << endl;
-    NcAtt *att = ncf.get_att(iatt);
+    Nc3Att *att = ncf.get_att(iatt);
     _printAtt(att);
     delete att;
   }
 
   // loop through variables
 
-  NcVar *vars[ncf.num_vars()];
+  Nc3Var *vars[ncf.num_vars()];
   for (int ivar = 0; ivar < ncf.num_vars(); ivar++) {
 
     vars[ivar] = ncf.get_var(ivar);
@@ -900,7 +900,7 @@ void RvDealias::_printFile(NcFile &ncf)
     cout << "  Name: " << vars[ivar]->name() << endl;
     cout << "  Is valid: " << vars[ivar]->is_valid() << endl;
     cout << "  N dims: " << vars[ivar]->num_dims();
-    NcDim *vdims[vars[ivar]->num_dims()];
+    Nc3Dim *vdims[vars[ivar]->num_dims()];
     if (vars[ivar]->num_dims() > 0) {
       cout << ": (";
       for (int ii = 0; ii < vars[ivar]->num_dims(); ii++) {
@@ -918,7 +918,7 @@ void RvDealias::_printFile(NcFile &ncf)
     for (int iatt = 0; iatt < vars[ivar]->num_atts(); iatt++) {
 
       cout << "  Att num: " << iatt << endl;
-      NcAtt *att = vars[ivar]->get_att(iatt);
+      Nc3Att *att = vars[ivar]->get_att(iatt);
       _printAtt(att);
       delete att;
 
@@ -934,7 +934,7 @@ void RvDealias::_printFile(NcFile &ncf)
 /////////////////////
 // print an attribute
 
-void RvDealias::_printAtt(NcAtt *att)
+void RvDealias::_printAtt(Nc3Att *att)
 
 {
 
@@ -942,16 +942,16 @@ void RvDealias::_printAtt(NcAtt *att)
   cout << "    Num vals: " << att->num_vals() << endl;
   cout << "    Type: ";
   
-  NcValues *values = att->values();
+  Nc3Values *values = att->values();
 
   switch(att->type()) {
     
-  case ncNoType: {
+  case nc3NoType: {
     cout << "No type: ";
   }
   break;
   
-  case ncByte: {
+  case nc3Byte: {
     cout << "BYTE: ";
     unsigned char *vals = (unsigned char *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -960,7 +960,7 @@ void RvDealias::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncChar: {
+  case nc3Char: {
     cout << "CHAR: ";
     char vals[att->num_vals() + 1];
     MEM_zero(vals);
@@ -969,7 +969,7 @@ void RvDealias::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncShort: {
+  case nc3Short: {
     cout << "SHORT: ";
     short *vals = (short *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -978,7 +978,7 @@ void RvDealias::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncInt: {
+  case nc3Int: {
     cout << "INT: ";
     int *vals = (int *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -987,7 +987,16 @@ void RvDealias::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncFloat: {
+  case nc3Int64: {
+    cout << "INT: ";
+    int64_t *vals = (int64_t *) values->base();
+    for (long ii = 0; ii < att->num_vals(); ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Float: {
     cout << "FLOAT: ";
     float *vals = (float *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -996,7 +1005,7 @@ void RvDealias::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncDouble: {
+  case nc3Double: {
     cout << "DOUBLE: ";
     double *vals = (double *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -1014,7 +1023,7 @@ void RvDealias::_printAtt(NcAtt *att)
 }
 
     
-void RvDealias::_printVarVals(NcVar *var)
+void RvDealias::_printVarVals(Nc3Var *var)
 
 {
 
@@ -1024,17 +1033,17 @@ void RvDealias::_printVarVals(NcVar *var)
     cout << "  NOTE - only printing first 100 vals" << endl;
   }
 
-  NcValues *values = var->values();
+  Nc3Values *values = var->values();
 
   cout << "  Variable vals:";
   
   switch(var->type()) {
     
-  case ncNoType: {
+  case nc3NoType: {
   }
   break;
   
-  case ncByte: {
+  case nc3Byte: {
     cout << "(byte)";
     unsigned char *vals = (unsigned char *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1043,7 +1052,7 @@ void RvDealias::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncChar: {
+  case nc3Char: {
     cout << "(char)";
     char str[nprint + 1];
     MEM_zero(str);
@@ -1052,7 +1061,7 @@ void RvDealias::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncShort: {
+  case nc3Short: {
     cout << "(short)";
     short *vals = (short *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1061,7 +1070,7 @@ void RvDealias::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncInt: {
+  case nc3Int: {
     cout << "(int)";
     int *vals = (int *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1070,7 +1079,16 @@ void RvDealias::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncFloat: {
+  case nc3Int64: {
+    cout << "(int64_t)";
+    int64_t *vals = (int64_t *) values->base();
+    for (long ii = 0; ii < nprint; ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Float: {
     cout << "(float)";
     float *vals = (float *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1079,7 +1097,7 @@ void RvDealias::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncDouble: {
+  case nc3Double: {
     cout << "(double)";
     double *vals = (double *) values->base();
     for (long ii = 0; ii < nprint; ii++) {

@@ -35,6 +35,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include <cerrno>
+#include <cmath>
 #include <toolsa/os_config.h>
 #include <toolsa/mem.h>
 #include <toolsa/file_io.h>

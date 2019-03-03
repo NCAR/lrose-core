@@ -35,6 +35,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include <cmath>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -76,7 +77,7 @@ Moments::Moments()
 
   // set up FFT plan
   
-  _fft = new Fft(_nSamples, _isVerbose);
+  _fft = new RadarFft(_nSamples);
   
   // init phase codes
 
@@ -182,8 +183,8 @@ void Moments::setSzOutOfTripPowerNReplicas(int n) {
 ///////////////////////////////////
 // apply hanning window
 
-void Moments::applyHanningWindow(const Complex_t *in,
-				 Complex_t *out)
+void Moments::applyHanningWindow(const RadarComplex_t *in,
+				 RadarComplex_t *out)
   
 {
   _applyWindow(_hanning, in, out);
@@ -192,8 +193,8 @@ void Moments::applyHanningWindow(const Complex_t *in,
 ///////////////////////////////////
 // apply modified hanning window
 
-void Moments::applyModHanningWindow(const Complex_t *in,
-				    Complex_t *out)
+void Moments::applyModHanningWindow(const RadarComplex_t *in,
+				    RadarComplex_t *out)
   
 {
   _applyWindow(_modHanning, in, out);
@@ -202,11 +203,11 @@ void Moments::applyModHanningWindow(const Complex_t *in,
 ///////////////////////////////////////////////
 // compute total power
 
-double Moments::computeTotalPower(const Complex_t *IQ)
+double Moments::computeTotalPower(const RadarComplex_t *IQ)
   
 {
   double p = 0.0;
-  const Complex_t *iq = IQ;
+  const RadarComplex_t *iq = IQ;
   for (int i = 0; i < _nSamples; i++, iq++) {
     p += ((iq->re * iq->re) + (iq->im * iq->im));
   }
@@ -220,7 +221,7 @@ double Moments::computeTotalPower(const Complex_t *IQ)
 //
 // Side-effect: passes back total power
 
-bool Moments::checkSnThreshold(const Complex_t *IQ,
+bool Moments::checkSnThreshold(const RadarComplex_t *IQ,
 			       double &totalPower)
   
 {
@@ -235,7 +236,7 @@ bool Moments::checkSnThreshold(const Complex_t *IQ,
 //////////////////////////////////////////////////////////
 // compute time-domain moments using ABP pulse-pair method
 
-void Moments::computeByAbp(const Complex_t *IQ,
+void Moments::computeByAbp(const RadarComplex_t *IQ,
 			   double prtSecs,
 			   double &power, double &vel,
 			   double &width)
@@ -250,8 +251,8 @@ void Moments::computeByAbp(const Complex_t *IQ,
   
   double a = 0.0, b = 0.0, p = 0.0;
   
-  const Complex_t *iq0 = IQ;
-  const Complex_t *iq1 = IQ + 1;
+  const RadarComplex_t *iq0 = IQ;
+  const RadarComplex_t *iq1 = IQ + 1;
   
   p += ((iq0->re * iq0->re) + (iq0->im * iq0->im));
   
@@ -271,7 +272,7 @@ void Moments::computeByAbp(const Complex_t *IQ,
   double c = 0.0, d = 0.0;
   
   iq0 = IQ;
-  const Complex_t *iq2 = IQ + 2;
+  const RadarComplex_t *iq2 = IQ + 2;
 
   for (int i = 0; i < _nSamples - 2; i++, iq0++, iq2++) {
     c += ((iq0->re * iq2->re) + (iq0->im * iq2->im));
@@ -336,7 +337,7 @@ void Moments::computeByAbp(const Complex_t *IQ,
 ///////////////////////////////////////////////
 // compute time-domain moments using pulse-pair
 
-void Moments::computeByPp(const Complex_t *IQ,
+void Moments::computeByPp(const RadarComplex_t *IQ,
 			  double prtSecs,
 			  double &power, double &vel,
 			  double &width, int &flags)
@@ -380,7 +381,7 @@ void Moments::computeByPp(const Complex_t *IQ,
 ///////////////////////////////
 // compute spectral moments
 
-void Moments::computeByFft(const Complex_t *IQ,
+void Moments::computeByFft(const RadarComplex_t *IQ,
 			   double prtSecs,
 			   double &power, double &vel,
 			   double &width, int &flags)
@@ -402,7 +403,7 @@ void Moments::computeByFft(const Complex_t *IQ,
   
   // compute fft
   
-  Complex_t spectra[_nSamples];
+  RadarComplex_t spectra[_nSamples];
   _fft->fwd(IQ, spectra);
   
   // compute vel and width
@@ -433,8 +434,8 @@ void Moments::computeByFft(const Complex_t *IQ,
 // for RV dealiasing
 // beamCode should run from [-4 to 63].
 
-void Moments::computeBySzPp(const Complex_t *IQ,
-			    const Complex_t *delta12,
+void Moments::computeBySzPp(const RadarComplex_t *IQ,
+			    const RadarComplex_t *delta12,
 			    double prtSecs,
 			    double &power1, double &vel1,
 			    double &width1, int &flags1,
@@ -460,11 +461,11 @@ void Moments::computeBySzPp(const Complex_t *IQ,
 
   // IQ data comes in cohered to trip 1
 
-  const Complex_t *iqTrip1 = IQ;
+  const RadarComplex_t *iqTrip1 = IQ;
       
   // cohere to trip 2
   
-  Complex_t iqTrip2[_nSamples];
+  RadarComplex_t iqTrip2[_nSamples];
   _cohereTrip1_to_Trip2(iqTrip1, delta12, iqTrip2);
   
   // compute R1 for each trip
@@ -477,7 +478,7 @@ void Moments::computeBySzPp(const Complex_t *IQ,
   
   double r1Ratio;
   bool trip1IsStrong;
-  const Complex_t *iqStrong;
+  const RadarComplex_t *iqStrong;
   
   if (r1Trip1 > r1Trip2) {
     trip1IsStrong = true;
@@ -515,7 +516,7 @@ void Moments::computeBySzPp(const Complex_t *IQ,
   
   // apply window to strong trip as appropriate
   
-  Complex_t windowStrong[_nSamples];
+  RadarComplex_t windowStrong[_nSamples];
   if (_szWindow == WINDOW_HANNING) {
     applyHanningWindow(iqStrong, windowStrong);
   } else if (_szWindow == WINDOW_MOD_HANNING) {
@@ -526,12 +527,12 @@ void Moments::computeBySzPp(const Complex_t *IQ,
   
   // compute FFT for strong trip
   
-  Complex_t windowStrongSpec[_nSamples];
+  RadarComplex_t windowStrongSpec[_nSamples];
   _fft->fwd(windowStrong, windowStrongSpec);
   
   // apply notch
   
-  Complex_t notched[_nSamples];
+  RadarComplex_t notched[_nSamples];
   int notchStart = _computeNotchStart(_szNotchWidth75,
 				      velStrong, prtSecs);
   _applyNotch75(notchStart, windowStrongSpec, notched);
@@ -547,12 +548,12 @@ void Moments::computeBySzPp(const Complex_t *IQ,
   
   // invert the notched spectra into the time domain
   
-  Complex_t notchedTd[_nSamples];
+  RadarComplex_t notchedTd[_nSamples];
   _fft->inv(notched, notchedTd);
   
   // cohere to the weaker trip
   
-  Complex_t weakTd[_nSamples];
+  RadarComplex_t weakTd[_nSamples];
   if (trip1IsStrong) {
     _cohereTrip1_to_Trip2(notchedTd, delta12, weakTd);
   } else {
@@ -561,7 +562,7 @@ void Moments::computeBySzPp(const Complex_t *IQ,
 
   // take fft of cohered weaker trip
   
-  Complex_t weakSpectra[_nSamples];
+  RadarComplex_t weakSpectra[_nSamples];
   _fft->fwd(weakTd, weakSpectra);
   
   // compute magnitude of cohered weak spectrum
@@ -611,7 +612,7 @@ void Moments::computeBySzPp(const Complex_t *IQ,
   // original spectrum with the ratio of the deconvoluted magnitudes
   // with the original magnitudes
 
-  Complex_t weakSpecDecon[_nSamples];
+  RadarComplex_t weakSpecDecon[_nSamples];
   for (int ii = 0; ii < _nSamples; ii++) {
     double ratio = weakMagDecon[ii] / weakMag[ii];
     weakSpecDecon[ii].re = weakSpectra[ii].re * ratio;
@@ -620,7 +621,7 @@ void Moments::computeBySzPp(const Complex_t *IQ,
 
   // invert back into time domain
 
-  Complex_t weakTdDecon[_nSamples];
+  RadarComplex_t weakTdDecon[_nSamples];
   _fft->inv(weakSpecDecon, weakTdDecon);
   
   // compute vel and width for weak trip in time domain
@@ -666,8 +667,8 @@ void Moments::computeBySzPp(const Complex_t *IQ,
 // for RV dealiasing
 // beamCode should run from [-4 to 63].
 
-void Moments::computeBySzFft(const Complex_t *IQ,
-			     const Complex_t *delta12,
+void Moments::computeBySzFft(const RadarComplex_t *IQ,
+			     const RadarComplex_t *delta12,
 			     double prtSecs,
 			     double &power1, double &vel1, 
 			     double &width1, int &flags1,
@@ -700,18 +701,18 @@ void Moments::computeBySzFft(const Complex_t *IQ,
 
   // IQ data comes in cohered to trip 1
 
-  const Complex_t *iqTrip1 = IQ;
+  const RadarComplex_t *iqTrip1 = IQ;
       
   // cohere to trip 2
   
-  Complex_t iqTrip2[_nSamples];
+  RadarComplex_t iqTrip2[_nSamples];
   _cohereTrip1_to_Trip2(iqTrip1, delta12, iqTrip2);
   
   // write FFTs for trip
   
   if (_isDebug) {
-    Complex_t trip1Spec[_nSamples];
-    Complex_t trip2Spec[_nSamples];
+    RadarComplex_t trip1Spec[_nSamples];
+    RadarComplex_t trip2Spec[_nSamples];
     _fft->fwd(iqTrip1, trip1Spec);
     _fft->fwd(iqTrip2, trip2Spec);
     _writeComplex2File("co_trip1", trip1Spec);
@@ -728,7 +729,7 @@ void Moments::computeBySzFft(const Complex_t *IQ,
   
   double r1Ratio;
   bool trip1IsStrong;
-  const Complex_t *iqStrong;
+  const RadarComplex_t *iqStrong;
   
   if (r1Trip1 > r1Trip2) {
     trip1IsStrong = true;
@@ -752,7 +753,7 @@ void Moments::computeBySzFft(const Complex_t *IQ,
     
   // apply window to strong trip as appropriate
   
-  Complex_t windowStrong[_nSamples];
+  RadarComplex_t windowStrong[_nSamples];
   if (_szWindow == WINDOW_HANNING) {
     applyHanningWindow(iqStrong, windowStrong);
   } else if (_szWindow == WINDOW_MOD_HANNING) {
@@ -763,7 +764,7 @@ void Moments::computeBySzFft(const Complex_t *IQ,
   
   // compute FFT for strong trip
   
-  Complex_t windowStrongSpec[_nSamples];
+  RadarComplex_t windowStrongSpec[_nSamples];
   _fft->fwd(windowStrong, windowStrongSpec);
   _writeComplex2File("strong", windowStrongSpec);
  
@@ -785,7 +786,7 @@ void Moments::computeBySzFft(const Complex_t *IQ,
 
   // apply notch
   
-  Complex_t notched[_nSamples];
+  RadarComplex_t notched[_nSamples];
 
   int notchStart = _computeNotchStart(_szNotchWidth75,
 				      velStrong, prtSecs);
@@ -822,13 +823,13 @@ void Moments::computeBySzFft(const Complex_t *IQ,
   
   // invert the notched spectra into the time domain
   
-  Complex_t notchedTd[_nSamples];
+  RadarComplex_t notchedTd[_nSamples];
   _fft->inv(notched, notchedTd);
   _writeComplex2File("notchedTd", notchedTd);
  
   // cohere to the weaker trip
   
-  Complex_t weakTd[_nSamples];
+  RadarComplex_t weakTd[_nSamples];
   if (trip1IsStrong) {
     _cohereTrip1_to_Trip2(notchedTd, delta12, weakTd);
   } else {
@@ -838,7 +839,7 @@ void Moments::computeBySzFft(const Complex_t *IQ,
   
   // take fft of cohered weaker trip
   
-  Complex_t weakSpectra[_nSamples];
+  RadarComplex_t weakSpectra[_nSamples];
   _fft->fwd(weakTd, weakSpectra);
   _writeComplex2File("weak", weakSpectra);
 
@@ -932,10 +933,10 @@ void Moments::computeBySzFft(const Complex_t *IQ,
 // beamCode runs from [-4 to 63].
 // Therefore trip_num can vary from 1 to 4.
 
-void Moments::cohere2Trip(const Complex_t *IQ,
-			  const Complex_t *beamCode,
+void Moments::cohere2Trip(const RadarComplex_t *IQ,
+			  const RadarComplex_t *beamCode,
 			  int trip_num,
-			  Complex_t *trip)
+			  RadarComplex_t *trip)
   
 {
 
@@ -947,7 +948,7 @@ void Moments::cohere2Trip(const Complex_t *IQ,
   // done by multiplying the i/q value by the complex conjugate
   // of the phase code
 
-  const Complex_t *code = beamCode - trip_num + 1;
+  const RadarComplex_t *code = beamCode - trip_num + 1;
   
   for (int ii = 0; ii < _nSamples; ii++, IQ++, trip++, code++) {
     trip->re = (IQ->re * code->re) + (IQ->im * code->im);
@@ -966,7 +967,7 @@ void Moments::_initPhaseCodes()
   double ratio = (double) _phaseCodeN / (double) _nSamples;
   double angle = 0.0;
   
-  Complex_t switchCode[_nSamples];
+  RadarComplex_t switchCode[_nSamples];
   for (int ii = 0; ii < _nSamples; ii++) {
     
     double code = (double) ii * (double) ii * ratio;
@@ -983,8 +984,8 @@ void Moments::_initPhaseCodes()
 
   // set the codes for trips 1 and 2
   
-  Complex_t *trip1Code = switchCode;
-  Complex_t trip2Code[_nSamples];
+  RadarComplex_t *trip1Code = switchCode;
+  RadarComplex_t trip2Code[_nSamples];
   for (int ii = 0; ii < _nSamples; ii++) {
     int jj = (ii - 1 + _nSamples) % _nSamples;
     trip2Code[ii] = trip1Code[jj];
@@ -1010,39 +1011,39 @@ void Moments::_initDeconMatrix(int notchWidth,
   
   // compute the spectra
 
-  Complex_t modSpec12[_nSamples];
-  Complex_t modSpec21[_nSamples];
+  RadarComplex_t modSpec12[_nSamples];
+  RadarComplex_t modSpec21[_nSamples];
   _fft->fwd(_modCode12, modSpec12);
   _fft->fwd(_modCode21, modSpec21);
   
   // notch the spectra
   
-  Complex_t notchedSpec12[_nSamples];
-  Complex_t notchedSpec21[_nSamples];
+  RadarComplex_t notchedSpec12[_nSamples];
+  RadarComplex_t notchedSpec21[_nSamples];
   _applyNotch(0, modSpec12, notchWidth, powerWidth, fracPower, notchedSpec12);
   _applyNotch(0, modSpec21, notchWidth, powerWidth, fracPower, notchedSpec21);
   
   // invert the notched spectra into the time domain
   
-  Complex_t notchedCode12[_nSamples];
-  Complex_t notchedCode21[_nSamples];
+  RadarComplex_t notchedCode12[_nSamples];
+  RadarComplex_t notchedCode21[_nSamples];
   _fft->inv(notchedSpec12, notchedCode12);
   _fft->inv(notchedSpec21, notchedCode21);
   
   // cohere notchedCode12 to trip 1
   
-  Complex_t cohered12[_nSamples];
+  RadarComplex_t cohered12[_nSamples];
   _subCode(notchedCode12, _modCode12, cohered12);
   
   // cohere notchedCode21 to trip 2
   
-  Complex_t cohered21[_nSamples];
+  RadarComplex_t cohered21[_nSamples];
   _subCode(notchedCode21, _modCode21, cohered21);
   
   // compute cohered spectra
   
-  Complex_t coheredSpec12[_nSamples];
-  Complex_t coheredSpec21[_nSamples];
+  RadarComplex_t coheredSpec12[_nSamples];
+  RadarComplex_t coheredSpec21[_nSamples];
   _fft->fwd(cohered12, coheredSpec12);
   _fft->fwd(cohered21, coheredSpec21);
   
@@ -1213,14 +1214,14 @@ void Moments::_initModHanning(double *window)
 // apply window
 
 void Moments::_applyWindow(const double *window,
-			   const Complex_t *in,
-			   Complex_t *out)
+			   const RadarComplex_t *in,
+			   RadarComplex_t *out)
   
 {
   
   const double *ww = window;
-  const Complex_t *inp = in;
-  Complex_t *outp = out;
+  const RadarComplex_t *inp = in;
+  RadarComplex_t *outp = out;
   
   for (int ii = 0; ii < _nSamples; ii++, ww++, inp++, outp++) {
     outp->re = inp->re * *ww;
@@ -1232,7 +1233,7 @@ void Moments::_applyWindow(const double *window,
 ///////////////////////////////
 // compute power
 
-double Moments::_computeMeanPower(const Complex_t *IQ)
+double Moments::_computeMeanPower(const RadarComplex_t *IQ)
 
 {
   
@@ -1252,7 +1253,7 @@ double Moments::_computeMeanPower(const Complex_t *IQ)
 ///////////////////////////////
 // compute R1
 
-double Moments::_computeR1(const Complex_t *IQ)
+double Moments::_computeR1(const RadarComplex_t *IQ)
 
 {
 
@@ -1262,8 +1263,8 @@ double Moments::_computeR1(const Complex_t *IQ)
 
   double a = 0.0, b = 0.0;
   
-  const Complex_t *iq0 = IQ;
-  const Complex_t *iq1 = IQ + 1;
+  const RadarComplex_t *iq0 = IQ;
+  const RadarComplex_t *iq1 = IQ + 1;
 
   for (int i = 0; i < _nSamples - 1; i++, iq0++, iq1++) {
     a += ((iq0->re * iq1->re) + (iq0->im * iq1->im));
@@ -1279,15 +1280,15 @@ double Moments::_computeR1(const Complex_t *IQ)
 //
 // Subtract delta21, which is conjugate of delta12
 
-void Moments::_cohereTrip1_to_Trip2(const Complex_t *trip1,
-				    const Complex_t *delta12,
-				    Complex_t *trip2)
+void Moments::_cohereTrip1_to_Trip2(const RadarComplex_t *trip1,
+				    const RadarComplex_t *delta12,
+				    RadarComplex_t *trip2)
   
 {
   
-  const Complex_t *t1 = trip1;
-  Complex_t *t2 = trip2;
-  const Complex_t *dd = delta12;
+  const RadarComplex_t *t1 = trip1;
+  RadarComplex_t *t2 = trip2;
+  const RadarComplex_t *dd = delta12;
   for (int ii = 0; ii < _nSamples; ii++, t1++, t2++, dd++) {
     t2->re = t1->re * dd->re + t1->im * (dd->im * -1.0);
     t2->im = t1->im * dd->re - t1->re * (dd->im * -1.0);
@@ -1300,15 +1301,15 @@ void Moments::_cohereTrip1_to_Trip2(const Complex_t *trip1,
 //
 // Subtract delta 12
 
-void Moments::_cohereTrip2_to_Trip1(const Complex_t *trip2,
-				    const Complex_t *delta12,
-				    Complex_t *trip1)
+void Moments::_cohereTrip2_to_Trip1(const RadarComplex_t *trip2,
+				    const RadarComplex_t *delta12,
+				    RadarComplex_t *trip1)
   
 {
   
-  Complex_t *t1 = trip1;
-  const Complex_t *t2 = trip2;
-  const Complex_t *dd = delta12;
+  RadarComplex_t *t1 = trip1;
+  const RadarComplex_t *t2 = trip2;
+  const RadarComplex_t *dd = delta12;
   for (int ii = 0; ii < _nSamples; ii++, t1++, t2++, dd++) {
     t1->re = t2->re * dd->re + t2->im * dd->im;
     t1->im = t2->im * dd->re - t2->re * dd->im;
@@ -1319,8 +1320,8 @@ void Moments::_cohereTrip2_to_Trip1(const Complex_t *trip2,
 ///////////////////////////////
 // add code in time domain
 
-void Moments::_addCode(const Complex_t *in, const Complex_t *code,
-		       Complex_t *sum)
+void Moments::_addCode(const RadarComplex_t *in, const RadarComplex_t *code,
+		       RadarComplex_t *sum)
 
 {
   
@@ -1331,13 +1332,13 @@ void Moments::_addCode(const Complex_t *in, const Complex_t *code,
   
 }
 
-void Moments::_addCode(const Complex_t *in, const Complex_t *code, int trip,
-		       Complex_t *sum)
+void Moments::_addCode(const RadarComplex_t *in, const RadarComplex_t *code, int trip,
+		       RadarComplex_t *sum)
 
 {
 
-  const Complex_t *_codeUpper = code + _nSamples - 1;
-  const Complex_t *_code = code + ((-(trip - 1) + _nSamples) % _nSamples);
+  const RadarComplex_t *_codeUpper = code + _nSamples - 1;
+  const RadarComplex_t *_code = code + ((-(trip - 1) + _nSamples) % _nSamples);
   
   for (int ii = 0; ii < _nSamples; ii++, in++, _code++, sum++) {
     if (_code > _codeUpper) {
@@ -1352,8 +1353,8 @@ void Moments::_addCode(const Complex_t *in, const Complex_t *code, int trip,
 ///////////////////////////////
 // subtract code in time domain
 
-void Moments::_subCode(const Complex_t *in, const Complex_t *code,
-		       Complex_t *diff)
+void Moments::_subCode(const RadarComplex_t *in, const RadarComplex_t *code,
+		       RadarComplex_t *diff)
   
 {
   
@@ -1364,13 +1365,13 @@ void Moments::_subCode(const Complex_t *in, const Complex_t *code,
   
 }
 
-void Moments::_subCode(const Complex_t *in, const Complex_t *code, int trip,
-		       Complex_t *diff)
+void Moments::_subCode(const RadarComplex_t *in, const RadarComplex_t *code, int trip,
+		       RadarComplex_t *diff)
   
 {
   
-  const Complex_t *codeUpperP = code + _nSamples - 1;
-  const Complex_t *codeP = code + ((-(trip - 1) + _nSamples) % _nSamples);
+  const RadarComplex_t *codeUpperP = code + _nSamples - 1;
+  const RadarComplex_t *codeP = code + ((-(trip - 1) + _nSamples) % _nSamples);
   
   for (int ii = 0; ii < _nSamples; ii++, in++, codeP++, diff++) {
     if (codeP > codeUpperP) {
@@ -1386,11 +1387,11 @@ void Moments::_subCode(const Complex_t *in, const Complex_t *code, int trip,
 // create conjugate
 //
 
-void Moments::_conjugate(const Complex_t *in, Complex_t *conj)
+void Moments::_conjugate(const RadarComplex_t *in, RadarComplex_t *conj)
 
 {
   
-  memcpy(conj, in, _nSamples * sizeof(Complex_t));
+  memcpy(conj, in, _nSamples * sizeof(RadarComplex_t));
   for (int ii = 0; ii < _nSamples; ii++, conj++) {
     conj->im *= -1.0;
   }
@@ -1401,7 +1402,7 @@ void Moments::_conjugate(const Complex_t *in, Complex_t *conj)
 // compute magnitudes
 //
 
-void Moments::_computeMag(const Complex_t *in, double *mag)
+void Moments::_computeMag(const RadarComplex_t *in, double *mag)
 
 {
   
@@ -1421,7 +1422,7 @@ void Moments::_computeMag(const Complex_t *in, double *mag)
 // normalize magnitudes
 //
 
-void Moments::_normalizeMag(const Complex_t *in, double *norm_mag)
+void Moments::_normalizeMag(const RadarComplex_t *in, double *norm_mag)
 
 {
   
@@ -1589,11 +1590,11 @@ int Moments::_computeNotchStart(int notchWidth,
 // apply notch given the start point
 
 void Moments::_applyNotch(int startIndex,
-			  Complex_t *in,
+			  RadarComplex_t *in,
 			  int notchWidth,
 			  int powerWidth,
 			  double fracPower,
-			  Complex_t *notched)
+			  RadarComplex_t *notched)
   
 {
   
@@ -1620,8 +1621,8 @@ void Moments::_applyNotch(int startIndex,
 
     // notch does not wrap, copy array then zero out the notch
     
-    memcpy(notched, in, _nSamples * sizeof(Complex_t));
-    memset(notched + iStart, 0, notchWidth * sizeof(Complex_t));
+    memcpy(notched, in, _nSamples * sizeof(RadarComplex_t));
+    memset(notched + iStart, 0, notchWidth * sizeof(RadarComplex_t));
     
     if (_isVerbose || _selectedPrint) {
       cerr << "--> notch does not wrap, do memcpy" << endl;
@@ -1642,9 +1643,9 @@ void Moments::_applyNotch(int startIndex,
       copyStart = iEnd - _nSamples + 1;
     }
     
-    memset(notched, 0, _nSamples * sizeof(Complex_t));
+    memset(notched, 0, _nSamples * sizeof(RadarComplex_t));
     memcpy(notched + copyStart, in + copyStart,
-	   powerWidth * sizeof(Complex_t));
+	   powerWidth * sizeof(RadarComplex_t));
 
     if (_isVerbose || _selectedPrint) {
       cerr << "--> notch does wrap" << endl;
@@ -1655,7 +1656,7 @@ void Moments::_applyNotch(int startIndex,
   
   // modify power so that power in part left is equal to original power
   
-  Complex_t *nn = notched;
+  RadarComplex_t *nn = notched;
   double mult = 1.0 / sqrt(fracPower);
   for (int ii = 0; ii < _nSamples; ii++, nn++) {
     nn->re *= mult;
@@ -1665,8 +1666,8 @@ void Moments::_applyNotch(int startIndex,
 }
 
 void Moments::_applyNotch75(int startIndex,
-			    Complex_t *in,
-			    Complex_t *notched)
+			    RadarComplex_t *in,
+			    RadarComplex_t *notched)
 
 {
   _applyNotch(startIndex, in,
@@ -1675,8 +1676,8 @@ void Moments::_applyNotch75(int startIndex,
 }
 
 void Moments::_applyNotch50(int startIndex,
-			    Complex_t *in,
-			    Complex_t *notched)
+			    RadarComplex_t *in,
+			    RadarComplex_t *notched)
 
 {
   _applyNotch(startIndex, in,
@@ -1688,7 +1689,7 @@ void Moments::_applyNotch50(int startIndex,
 //////////////////////////////////////////////////////
 // compute vel and width in time domain
 
-void Moments::_velWidthFromTd(const Complex_t *IQ,
+void Moments::_velWidthFromTd(const RadarComplex_t *IQ,
 			      double prtSecs,
 			      double &vel, double &width)
   
@@ -1698,8 +1699,8 @@ void Moments::_velWidthFromTd(const Complex_t *IQ,
   
   double a = 0.0, b = 0.0;
   
-  const Complex_t *iq0 = IQ;
-  const Complex_t *iq1 = IQ + 1;
+  const RadarComplex_t *iq0 = IQ;
+  const RadarComplex_t *iq1 = IQ + 1;
   
   for (int i = 0; i < _nSamples - 1; i++, iq0++, iq1++) {
     a += ((iq0->re * iq1->re) + (iq0->im * iq1->im));
@@ -1712,7 +1713,7 @@ void Moments::_velWidthFromTd(const Complex_t *IQ,
   double c = 0.0, d = 0.0;
   
   iq0 = IQ;
-  const Complex_t *iq2 = IQ + 2;
+  const RadarComplex_t *iq2 = IQ + 2;
 
   for (int i = 0; i < _nSamples - 2; i++, iq0++, iq2++) {
     c += ((iq0->re * iq2->re) + (iq0->im * iq2->im));
@@ -2046,7 +2047,7 @@ void Moments::_invertMatrix(double *data, int nn)
 
 void Moments::_printComplex(ostream &out,
 			    const string &heading,
-			    const Complex_t *comp)
+			    const RadarComplex_t *comp)
   
 {
   
@@ -2068,7 +2069,7 @@ void Moments::_printComplex(ostream &out,
 
 void Moments::_printVector(ostream &out,
 			   const string &heading,
-			   const Complex_t *comp)
+			   const RadarComplex_t *comp)
   
 {
   
@@ -2091,7 +2092,7 @@ void Moments::_printVector(ostream &out,
 // write spectra file from complex
 
 void Moments::_writeComplex2File(const string &heading,
-				 const Complex_t *comp)
+				 const RadarComplex_t *comp)
   
 {
   
@@ -2112,7 +2113,7 @@ void Moments::_writeComplex2File(const string &heading,
     return;
   }
   
-  const Complex_t *comp_ = comp;
+  const RadarComplex_t *comp_ = comp;
   for (int ii = 0; ii < _nSamples; ii++, comp_++) {
     double mag = sqrt(comp_->re * comp_->re + comp_->im * comp_->im);
     double angle = atan2(comp_->im, comp_->re) * RAD_TO_DEG;

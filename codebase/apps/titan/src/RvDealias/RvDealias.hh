@@ -37,10 +37,10 @@
 #include <string>
 #include <vector>
 #include <didss/DsInputPath.hh>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include "Args.hh"
 #include "Params.hh"
-#include "Complex.hh"
+#include <radar/RadarComplex.hh>
 
 class Moments;
 class Verify;
@@ -93,19 +93,19 @@ private:
 
   static const int _phaseCodeN = 8;
   static const int _phaseCodeM = 64;
-  Complex_t _phaseCode[_phaseCodeM];
+  RadarComplex_t _phaseCode[_phaseCodeM];
 
   void _initPhaseCodes();
   void _initDeconMatrix();
 
   int _processFile(const char *input_path);
   void _processBeam(int beam_num);
-  int _loadFromFile(NcFile &ncf);
+  int _loadFromFile(Nc3File &ncf);
   void _freeArrays();
 
-  void _printFile(NcFile &ncf);
-  void _printAtt(NcAtt *att);
-  void _printVarVals(NcVar *var);
+  void _printFile(Nc3File &ncf);
+  void _printAtt(Nc3Att *att);
+  void _printVarVals(Nc3Var *var);
   void _printData();
 
 };
