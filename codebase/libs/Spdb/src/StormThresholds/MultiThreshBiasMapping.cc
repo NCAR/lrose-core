@@ -11,7 +11,8 @@
 
 //------------------------------------------------------------------
 MultiThreshBiasMapping::MultiThreshBiasMapping(void) :
-  _chunkValidTime(0)
+_chunkValidTime(0), _chunkTimeWritten(0), _latlonsOptional(true)
+
 {
 }
 
@@ -19,7 +20,9 @@ MultiThreshBiasMapping::MultiThreshBiasMapping(void) :
 MultiThreshBiasMapping::MultiThreshBiasMapping(const std::string &spdb) :
   MultiThresholdsBiasMapping(),
   _url(spdb),
-  _chunkValidTime(0)
+  _chunkValidTime(0),
+  _chunkTimeWritten(0),
+  _latlonsOptional(true)
 {
 
 }
@@ -29,9 +32,12 @@ MultiThreshBiasMapping::
 MultiThreshBiasMapping(const std::string &path,
 		       const std::vector<double> &ltHours,
 		       const std::vector<std::string> &fields,
-		       const TileInfo &tiling) :
+		       const TileInfo &tiling, bool latlonsOptional) :
   MultiThresholdsBiasMapping(ltHours, fields, tiling),
-  _url(path)
+  _url(path),
+  _chunkValidTime(0),
+  _chunkTimeWritten(0),
+  _latlonsOptional(latlonsOptional)
 {
 }
 
@@ -233,7 +239,7 @@ bool MultiThreshBiasMapping::readExactPrevious(const time_t &gt,
       return true;
     }
   }
-  LOG(WARNING) << "No SPDB data up to maximum days back" << _url;
+  LOG(WARNING) << "No SPDB data up to maximum days back " << _url;
   return false;
 }
 
@@ -273,7 +279,9 @@ bool MultiThreshBiasMapping::_load(DsSpdb &s, bool fieldsLeadsTilesSet)
     {
       string xml((char *)chunk_data);
       _chunkValidTime = chunk.valid_time;
-      return MultiThresholdsBiasMapping::fromXml(xml, fieldsLeadsTilesSet);
+      _chunkTimeWritten = chunk.write_time;
+      return MultiThresholdsBiasMapping::fromXml(xml, fieldsLeadsTilesSet,
+						 _latlonsOptional);
     }
     else
     { 

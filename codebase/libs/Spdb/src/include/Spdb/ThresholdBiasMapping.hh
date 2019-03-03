@@ -102,7 +102,7 @@ public:
    *
    * @param[in] gt  Gen time
    * @param[in] maxSecondsBack
-   * @param[in] maxSecondsAhead, if < 0, no looking ahead
+   * @param[in] maxSecondsAhead if < 0, no looking ahead
    *
    * @return true if successful and state is filled in
    */

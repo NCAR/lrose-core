@@ -38,13 +38,19 @@ public:
    * @param[in] fields  The fields
    * @param[in] doTile  True to break thresholds into tiles
    * @param[in] tiling  Information about tiles
+   * @param[in] latLonsOptional  True if lat/lon information in the
+   *                             data that is read is optional or not.
+   *                             If not true, the latlon information is
+   *                             expected.  This is put in for backwards
+   *                             compatibility in reading older data.
    *
    * Thresholds not known
    */
   MultiThreshBiasMapping(const std::string &spdb,
 			 const std::vector<double> &ltHours,
 			 const std::vector<std::string> &fields,
-			 const TileInfo &tiling);
+			 const TileInfo &tiling,
+			 bool latLonsOptional=true);
 
   /**
    * Destructor
@@ -62,6 +68,7 @@ public:
    *                                       this value compared to input t
    * @param[in]  coldstartThresh  The coldstart field/threshold pairs
    *
+   *
    * @return true if successful and state is filled in
    */
   bool readFirstBefore(const time_t &t, int maxSecondsBack,
@@ -77,6 +84,7 @@ public:
    * @return true if successful and state is filled in
    */
   bool readNewestInRange(const time_t &t0, const time_t &t1);
+
 
   /**
    * Read the data within a range closest in time to a target time
@@ -140,6 +148,12 @@ public:
    */
   inline time_t getChunkValidTime(void) const {return _chunkValidTime;}
 
+  /**
+   * @return the chunk time written, which will be set with any successful
+   * read
+   */
+  inline time_t getChunkTimeWritten(void) const {return _chunkTimeWritten;}
+
 protected:
 private:  
 
@@ -153,6 +167,15 @@ private:
    */
   time_t _chunkValidTime;
 
+  /**
+   * Time written of the chunk that was loaded, when  you read
+   */
+  time_t _chunkTimeWritten;
+
+  /**
+   * True for optional lat/lon information on read
+   */
+  bool _latlonsOptional;
 
   bool _load(DsSpdb &s, bool fieldLeadsTilesSet=true);
 };
