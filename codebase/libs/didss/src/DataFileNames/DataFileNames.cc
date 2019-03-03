@@ -392,11 +392,6 @@ int DataFileNames::getDataTime(const string& file_path,
     start1 = delim1 + delim_len;
   }
 
-  // null file path?
-
-  if (start3 == NULL) {
-    return -1;
-  }
 
   // Extract the filename from the path
 

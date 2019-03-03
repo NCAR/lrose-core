@@ -457,7 +457,16 @@ void DsMessage::_allocAssembledMsg()
     }
     _assembledMsg = new ui08[_lengthAssembled];
     _nAssembledAlloc = _lengthAssembled;
+  } else {
+    // case where the allocated value is bigger
+    // than the needed value. In some cases
+    // _assembledMsg can be NULL, so it needs
+    // to be created here. (coverity bug fix)
+    if (_assembledMsg == NULL) {
+      _assembledMsg = new ui08[_nAssembledAlloc];
+    }
   }
+  
   memset(_assembledMsg, 0, _lengthAssembled);
 }
 

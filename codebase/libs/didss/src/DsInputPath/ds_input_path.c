@@ -549,13 +549,8 @@ char *DSINP_get_closest_blocking(DSINP_handle_t *handle,
     STRcopy(handle->input_path, first_after_filename, MAX_PATH_LEN);
     return(handle->input_path);
   }
-  else if (first_after_file_ptr == (char *)NULL)
-  {
-    *data_time = first_before_time;
-    STRcopy(handle->input_path, first_before_filename, MAX_PATH_LEN);
-    return(handle->input_path);
-  }
-  else if (search_time - first_before_time <= first_after_time - search_time)
+  else if (first_after_file_ptr == (char *)NULL ||
+           search_time - first_before_time <= first_after_time - search_time)
   {
     *data_time = first_before_time;
     STRcopy(handle->input_path, first_before_filename, MAX_PATH_LEN);
@@ -1993,7 +1988,7 @@ DSINP_dataset_time_t *DSINP_get_dataset_times(char *input_dir,
 	  add_dataset_time(dataset_time.unix_time, forecast_time);
 	  
 	} /* endfor - fore_dp */
-	
+        close(fore_dirp);	
       } /* endif - forecast subdirectory */
       else
       {

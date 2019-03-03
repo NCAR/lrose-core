@@ -842,7 +842,7 @@ DsInputPath::getClosestBlocking(time_t search_time,
       }
     }
     
-    if (heartbeat_func != NULL) {
+    if (heartbeat_func ) {
       heartbeat_func("DsInputPath::getClosestBlocking: waiting for data");
     }
     
@@ -1558,15 +1558,17 @@ int DsInputPath::_nextRealtimeNoLdata(bool block)
       return -1;
     }
     
-    if (_heartbeat_func != NULL) {
-      _heartbeat_func("DsInputPath - waiting for files");
+    if (_heartbeat_func) {
+         _heartbeat_func("DsInputPath - waiting for files");
     }
     if (_debug) {
       cerr << "-->> Sleeping between scans, _dir_scan_sleep_secs: "
 	   << _dir_scan_sleep_secs << endl;
     }
     for (int ii = 0; ii < _dir_scan_sleep_secs; ii++) {
-      _heartbeat_func("DsInputPath - waiting for files");
+      if(_heartbeat_func){
+         _heartbeat_func("DsInputPath - waiting for files");
+      }
       umsleep(1000);
     }
 
@@ -2093,7 +2095,7 @@ int DsInputPath::_loadTimelistInotify(bool block)
         return -1;
       }
       // call heartbeat function
-      if (_heartbeat_func != NULL) {
+      if (_heartbeat_func) {
         _heartbeat_func("DsInputPath - waiting for files");
       }
       continue;

@@ -1840,8 +1840,19 @@ int LdataInfo::_readFmq(int max_valid_age,
 
   // check size has not changed since opened
   
-  ta_stat(_fmqStatPath.c_str(), &statFileStats);
-  ta_stat(_fmqBufPath.c_str(), &bufFileStats);
+  if (ta_stat(_fmqStatPath.c_str(), &statFileStats)) {
+    cerr << "ERROR - LdataInfo::_readFmq" << endl;
+    cerr << "  Failed to stat file: " <<_fmqStatPath.c_str()  << endl;
+    return -1;
+  }
+ 
+  if (ta_stat(_fmqBufPath.c_str(), &bufFileStats) ) {
+    cerr << "ERROR - LdataInfo::_readFmq" << endl;
+    cerr << "  Failed to stat file: " <<_fmqBufPath.c_str()  << endl;
+    return -1;
+  }
+ 
+
   if (statFileStats.st_size != _statFileSize ||
       bufFileStats.st_size != _bufFileSize) {
     cerr << "WARNING: FMQ files have changed size, closing FMQ" << endl;
@@ -2819,7 +2830,9 @@ int LdataInfo::_disassembleFromXml(const char *xml_buf, int len)
 
   string max_time_str;
   if (_findXmlField(xml_buf, "max_time", max_time_str) == 0) {
-    sscanf(max_time_str.c_str(), "%ld", &_maxTime);
+    if ( sscanf(max_time_str.c_str(), "%ld", &_maxTime) != 1){
+       _maxTime = _latestTime;
+    }
   } else {
     _maxTime = _latestTime;
   }
@@ -2828,7 +2841,9 @@ int LdataInfo::_disassembleFromXml(const char *xml_buf, int len)
 
   string prev_mod_time_str;
   if (_findXmlField(xml_buf, "prev_mod_time", prev_mod_time_str) == 0) {
-    sscanf(prev_mod_time_str.c_str(), "%ld", &_prevModTime);
+    if (sscanf(prev_mod_time_str.c_str(), "%ld", &_prevModTime) != 1){
+        _debugPrint("Error reading and setting _prevModTime member from xml string");
+    }
   }
 
   return 0;
