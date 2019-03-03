@@ -31,8 +31,10 @@
 #ifndef RADXTIMEMEDIAN_H
 #define RADXTIMEMEDIAN_H
 
-#include "Params.hh"
+#include "Parms.hh"
+#include "Volume.hh"
 #include "RayHisto.hh"
+
 #include <radar/RadxApp.hh>
 #include <Radx/RayxMapping.hh>
 #include <Radx/RadxAzElev.hh>
@@ -47,13 +49,9 @@ public:
 
   /**
    * Constructor
-   * @param[in] argc  Args count
-   * @param[in] argv  Args
-   * @param[in] cleanup  Method to call on exit
-   * @param[in] outOfStore  Method to call  when not enough memory
+   * @param[in] parms Parms
    */  
-  RadxTimeMedian (int argc, char **argv, void cleanup(int),
-		  void outOfStore(void));
+  RadxTimeMedian (const Parms &parms);
 
   /**
    * Destructor
@@ -61,18 +59,34 @@ public:
   virtual ~RadxTimeMedian(void);
 
   /**
-   * Main run method.  
-   * @return 0 for good, non-zero for problems
+   * Initialize first time through
+   * @param[in,out] volume  The data
    */
-  int Run(void);
+  void initFirstTime(Volume *volume);
+  
+  /**
+   * Finish up after last volume processed
+   * @param[in,out] volume  The data
+   */
+  void processLast(Volume *volume);
 
   /**
-   * compute method for a beam, needed in threading
-   * @param[in] info  Info pointer
-   * @param[in] alg   RadxTimeMedian pointer
+   * Initialize a particular ray
+   * @param[in] ray  The ray
+   * @param[out] r  The initialized data to use
+   *
+   * @return Pointer to the histo data to use for this ray
    */
-  static void compute(void *info);
-  
+  RayHisto *initRay(const RadxRay &ray, RayxData &r);
+
+  /**
+   * Process a particular ray
+   * @param[in] r  The data to use
+   * @param[in,out] h The histogram to update
+   * @return True for success
+   */
+  bool processRay(const RayxData &r, RayHisto *h) const;
+
   int OK;  /**< True for good object */
 
   /**
@@ -96,43 +110,19 @@ public:
 protected:
 private:
 
+  Parms _parms;             /**< Params */
+  bool _first;              /**< True for first time called */
+  Volume _templateVolume;   /**< Template to use at th end */
+
+  RayxMapping _rayMap;      /**< Mapping object to map az/elev to fixed values*/
+
   /**
-   * @class RadxThreads
-   * @brief Implements TaThreadDoubleQue 
+   * Mapping from az/elev to histogram
    */
-  class RadxThreads : public TaThreadDoubleQue
-  {
-  public:
-    /**
-     * Trivial constructor
-     */
-    inline RadxThreads(void) : TaThreadDoubleQue() {}
-    /**
-     * Trivial destructor
-     */
-    inline virtual ~RadxThreads(void) {}
-    /**
-     * @return pointer to TaThread created by method
-     * @param[in] index  Index that may be used
-     */
-    TaThread *clone(int index);
-  };
-
-
-  RadxApp _alg;      /**< Library algorithm object */
-  RadxVol _templateVol;  /**< Template */
-  bool _first;           /**< True for first volume */
-  Params _params;        /**< params */
-
-  RayxMapping _rayMap;
   std::map<RadxAzElev, RayHisto> _store;/**< Map from az/elev to RayHisto */
   
-  RadxThreads _thread;    /**< Threading */
-
-  void _process(const time_t t, RadxVol &vol, const bool last);
-  void _filter(const time_t &t, const RadxRay *ray);
-  bool _filter_first(const time_t &t, const RadxRay &ray);
-  bool _filter_last(const time_t &t, RadxRay &ray);
+  bool _filter_first(const RadxRay &ray);
+  bool _filter_last(RadxRay &ray);
 };
 
 #endif

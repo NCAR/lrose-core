@@ -30,22 +30,20 @@
 /**
  * Initialization step.
  *
- * @param[in] t   First processing time
  * @param[in] vol  First volume of data at the processing time
  *
  * These are actions to take only on the first data 
  */
-virtual void initFirstTime(const RayData *vol) = 0;
+virtual void initFirstTime(const Volume *vol) = 0;
 
 /**
  * Completion step (good)
  *
- * @param[in] t   Last processing time
  * @param[in] vol  Last volume of data at the processing time
  *
  * These are actions to take only on the last data, after it is processed
  */
-virtual void finishLastTimeGood(RayData *vol) = 0;
+virtual void finishLastTimeGood(Volume *vol) = 0;
 
 /**
  * Completion step (bad)
@@ -57,14 +55,13 @@ virtual void finishBad(void) = 0;
 /**
  * Complete the processing of a volume of data.
  *
- * @param[in] t   volume time
  * @param[in] vol  volume of data at t
  *
  * @return true for success
  *
  * These are the steps taken after each ray has been processed
  */
-virtual bool processFinishVolume(RayData *vol) = 0;
+virtual bool processFinishVolume(Volume *vol) = 0;
 
 /**
  * Pre-process a ray.
@@ -117,6 +114,7 @@ virtual const
 RayClutterInfo * matchingClutterInfoConst(const double az,
 					  const double elev) const = 0;
 
+virtual bool isDone(void) const = 0;
 
 #else
 
@@ -124,22 +122,20 @@ RayClutterInfo * matchingClutterInfoConst(const double az,
 /**
  * Initialization step.
  *
- * @param[in] t   First processing time
  * @param[in] vol  First volume of data at the processing time
  *
  * These are actions to take only on the first data 
  */
-virtual void initFirstTime(const RayData *vol);
+virtual void initFirstTime(const Volume *vol);
 
 /**
  * Completion step (good)
  *
- * @param[in] t   Last processing time
  * @param[in] vol  Last volume of data at the processing time
  *
  * These are actions to take only on the last data, after it is processed
  */
-virtual void finishLastTimeGood(RayData *vol);
+virtual void finishLastTimeGood(Volume *vol);
 
 /**
  * Completion step (bad)
@@ -151,14 +147,13 @@ virtual void finishBad(void);
 /**
  * Complete the processing of a volume of data.
  *
- * @param[in] t   volume time
  * @param[in] vol  volume of data at t
  *
  * @return true for success
  *
  * These are the steps taken after each ray has been processed
  */
-virtual bool processFinishVolume(RayData *vol);
+virtual bool processFinishVolume(Volume *vol);
 
 /**
  * Pre-process a ray.
@@ -209,4 +204,7 @@ virtual RayClutterInfo *matchingClutterInfo(const double az,
 virtual const
 RayClutterInfo * matchingClutterInfoConst(const double az,
 					  const double elev) const;
+
+virtual bool isDone(void) const;
+
 #endif

@@ -26,107 +26,86 @@
  */
 
 #include "RadxTimeMedian.hh"
-#include "Params.hh"
-#include "Info.hh"
-#include <radar/RadxAppTemplate.hh>
-#include <Radx/RayxData.hh>
+#include "Volume.hh"
+
 #include <Radx/RadxRay.hh>
-#include <toolsa/LogMsg.hh>
-#include <algorithm>
-#include <stdexcept>
+#include <toolsa/LogStream.hh>
 #include <toolsa/TaThreadSimple.hh>
 
 //------------------------------------------------------------------
-TaThread *RadxTimeMedian::RadxThreads::clone(int index)
+RadxTimeMedian::RadxTimeMedian(const Parms &parms) :
+  _parms(parms), _first(true)
 {
-  TaThreadSimple *t = new TaThreadSimple(index);
-  t->setThreadContext(this);
-  t->setThreadMethod(RadxTimeMedian::compute);
-  return dynamic_cast<TaThread *>(t);
-}
-
-//------------------------------------------------------------------
-RadxTimeMedian::RadxTimeMedian(int argc, char **argv,void cleanup(int),
-			       void outOfStore(void))
-{
-  _first = true;
-  OK = parmAppInit(_params, _alg, argc, argv);
-  vector<string> input;
-  input.push_back(_params.input_field);
-  if (!_alg.init(cleanup, outOfStore, input))
-  {
-    OK = false;
-  }
-
-  _rayMap = RayxMapping(_params.fixedElevations_n, _params._fixedElevations,
-                        _params.azToleranceDegrees,
-                        _params.elevToleranceDegrees);
-
-  _thread.init(_alg.parmRef().num_threads, _alg.parmRef().thread_debug);
+  _rayMap = RayxMapping(_parms.fixedElevations_n, _parms._fixedElevations,
+                        _parms.azToleranceDegrees,
+                        _parms.elevToleranceDegrees);
   return;
 }
 
 //------------------------------------------------------------------
-// destructor
-
 RadxTimeMedian::~RadxTimeMedian()
 {
-  _alg.finish();
+  RadxApp::algFinish();
 }
 
 //------------------------------------------------------------------
-int RadxTimeMedian::Run()
+void RadxTimeMedian::initFirstTime(Volume *volume)
 {
-  RadxVol vol;
-  time_t t;
-  bool last;
-  while (_alg.trigger(vol, t, last))
+  if (_first)
   {
-    _process(t, vol, last);
-    _thread.waitForThreads();
-    if (last)
+    const vector<RadxRay *> &rays = volume->getVolRef().getRays();
+    LOG(DEBUG_VERBOSE) << "Nrays=" << rays.size();
+    volume->copy(_templateVolume);
+    LOG(DEBUG_VERBOSE) << "First: Nrays=" << rays.size();
+    for (size_t ii = 0; ii < rays.size(); ii++)
     {
-      _alg.write(vol, t);
+      RadxRay *ray = rays[ii];
+      _filter_first(*ray);
     }
+    _first = false;
   }
-  return 0;
 }
 
 //------------------------------------------------------------------
-void RadxTimeMedian::compute(void *ti)
+void RadxTimeMedian::processLast(Volume *volume)
 {
-  Info *info = static_cast<Info *>(ti);
-  RadxTimeMedian *alg = info->_alg;//static_cast<RadxTimeMedian *>(ai);
+  // // replace vol with the first template volume
+  volume->setFrom(_templateVolume);
 
-  // perform computations
-  double az = info->_ray->getAzimuthDeg();
-  double elev = info->_ray->getElevationDeg();
+  const vector<RadxRay *> &rays = volume->getVolRef().getRays();
+  LOG(DEBUG_VERBOSE) << "Nrays=" << rays.size();
 
-  RayHisto *h = alg->matchingRayHisto(az, elev);
+  for (size_t ii = 0; ii < rays.size(); ii++)
+  {
+      RadxRay *ray = rays[ii];
+      _filter_last(*ray);
+  }
+}
+
+//-----------------------------------------------------------------
+RayHisto *RadxTimeMedian::initRay(const RadxRay &ray, RayxData &r)
+{
+  if (!RadxApp::retrieveRay(_parms.input_field, ray, r))
+  {
+    return NULL;
+  }
+  
+  double az = ray.getAzimuthDeg();
+  double elev = ray.getElevationDeg();
+  RayHisto *h = matchingRayHisto(az, elev);
   if (h == NULL)
   {
-    LOGF(LogMsg::WARNING, "No histo match for az=%lf elev=%lf",
-	    az, elev);
-    return;
+    LOG(WARNING) << "No histo match for az=" << az << " elev=" << elev;
   }
-  RayxData r;
-  if (!RadxApp::retrieveRay(info->_input_field, *info->_ray, r))
-  {
-    return;
-  }
-  bool multi = alg->isMulti(az, elev);
-  if (multi)
-  {
-    alg->_thread.lockForIO();
-  }
-  h->update(r);
-  if (multi)
-  {
-    alg->_thread.unlockAfterIO();
-  }
-
-  delete info;
+  return h;
 }
+
+//-----------------------------------------------------------------
+bool RadxTimeMedian::processRay(const RayxData &r, RayHisto *h) const
+{
+  h->update(r);
+  return true;
+}  
 
 //------------------------------------------------------------------
 RayHisto *RadxTimeMedian::matchingRayHisto(const double az,
@@ -149,47 +128,7 @@ RayHisto *RadxTimeMedian::matchingRayHisto(const double az,
 }
 
 //------------------------------------------------------------------
-void RadxTimeMedian::_process(const time_t t, RadxVol &vol, const bool last)
-{
-  const vector<RadxRay *> &rays = vol.getRays();
-
-  if (_first)
-  {
-    _templateVol = vol;
-    LOGF(LogMsg::DEBUG_VERBOSE, "First: Nrays=%d",
-	 static_cast<int>(rays.size()));
-    for (size_t ii = 0; ii < rays.size(); ii++)
-    {
-      RadxRay *ray = rays[ii];
-      _filter_first(t, *ray);
-    }
-    _first = false;
-  }
-
-  // break the vol into rays and process each one, using threads if 
-  // configured for threads
-  LOGF(LogMsg::DEBUG_VERBOSE, "Nrays=%d", static_cast<int>(rays.size()));
-  for (size_t ii = 0; ii < rays.size(); ii++)
-  {
-    const RadxRay *ray = rays[ii];
-    _filter(t, ray);
-  }
-  _thread.waitForThreads();
-
-  if (last)
-  {
-    // replace vol with the first template volume
-    vol = _templateVol;
-    for (size_t ii = 0; ii < rays.size(); ii++)
-    {
-      RadxRay *ray = rays[ii];
-      _filter_last(t, *ray);
-    }
-  }    
-}
-
-//------------------------------------------------------------------
-bool RadxTimeMedian::_filter_first(const time_t &t, const RadxRay &ray)
+bool RadxTimeMedian::_filter_first(const RadxRay &ray)
 {
   double az = ray.getAzimuthDeg();
   double elev = ray.getElevationDeg();
@@ -202,47 +141,39 @@ bool RadxTimeMedian::_filter_first(const time_t &t, const RadxRay &ray)
     RadxAzElev ae = _rayMap.match(az, elev);
     if (_rayMap.isMulti(ae))
     {
-      LOGF(LogMsg::WARNING,
-	      "Multiple az,elev (%f,%f) found in volume maps to %s", 
-	      az, elev, ae.sprint().c_str());
+      LOG(WARNING) << "Multiple az,elev found in volume " << 
+	az << " " << elev << "maps to " <<  ae.sprint();
     }
     else
     {
       RayHisto h(ae.getAz(), ae.getElev(), x0, dx, nx,
-		 _params.min_bin, _params.delta_bin, _params.max_bin);
+		 _parms.min_bin, _parms.delta_bin, _parms.max_bin);
       _store[ae] = h;
     }
     return true;
   }
   else
   {
-    LOGF(LogMsg::ERROR, "Az/Elev %lf,%f not configured within tolerance\n",
-	    az, elev);
+    LOG(ERROR) << "Az/Elev not configured within tolerance" << az
+	       << " " << elev;
     return false;
   }
 }
 
 //------------------------------------------------------------------
-void RadxTimeMedian::_filter(const time_t &t, const RadxRay *ray)
-{
-  Info *info = new Info(_params.input_field, ray, this);
-  int index = 0;
-  _thread.thread(index, info);
-}
-
-//------------------------------------------------------------------
-bool RadxTimeMedian::_filter_last(const time_t &t, RadxRay &ray)
+bool RadxTimeMedian::_filter_last(RadxRay &ray)
 {
   double az = ray.getAzimuthDeg();
   double elev = ray.getElevationDeg();
   RayHisto *h = matchingRayHisto(az, elev);
   if (h == NULL)
   {
+    LOG(ERROR) << "No last";
     return false;
   }
 
   RayxData r;
-  if (!RadxApp::retrieveRay(_params.input_field, ray, r))
+  if (!RadxApp::retrieveRay("DBZ_F", ray, r))
   {
     return false;
   }
@@ -250,8 +181,10 @@ bool RadxTimeMedian::_filter_last(const time_t &t, RadxRay &ray)
   bool stat = h->computeMedian(r);
   if (stat)
   {
-    RadxApp::modifyRayForOutput(r, _params.output_field);
+    LOG(DEBUG_VERBOSE) << "Writing medians";
+    RadxApp::modifyRayForOutput(r, _parms.output_field);
     RadxApp::updateRay(r, ray);
   }
   return stat;
 }
+

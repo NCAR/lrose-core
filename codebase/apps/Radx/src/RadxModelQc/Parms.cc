@@ -88,6 +88,12 @@ void Parms::printParams(tdrp_print_mode_t printMode)
 }
 
 //------------------------------------------------------------------
+void Parms::printHelp(void)
+{
+  RadxAppParms::printHelp();
+}
+
+//------------------------------------------------------------------
 void Parms::printOperators(void) const
 {
   RadxModelQc alg;

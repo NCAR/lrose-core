@@ -1,27 +1,30 @@
 /**
  * @file RadxModelQc.hh 
+ * @brief  The algorithm class
  * @class RadxModelQc
+ * @brief  The algorithm class
  */
 
 #ifndef RadxModelQc_H
 #define RadxModelQc_H
 
 #include "Parms.hh"
-#include <FiltAlgVirtVol/Algorithm.hh>
 
-class VolumeData;
-class RayData;
+class Volume;
 class RadxApp;
 
 class RadxModelQc
 {
 public:
 
+  /**
+   * The algorithm class constructor, empty
+   */
   RadxModelQc(void);
 
   /**
-   * Constructor
-   * @param[in] parms
+   * Constructor with args
+   * @param[in] parms  Parameters
    * @param[in] cleanExit  Method to call for exiting program
    */
   RadxModelQc(const Parms &parms, void cleanExit(int));
@@ -36,6 +39,9 @@ public:
    */
   inline bool ok(void) const {return _ok;}
 
+  /**
+   * Print the operators to stdout
+   */
   void printOperators(void) const;
 
   /**
@@ -55,20 +61,26 @@ public:
   
   /**
    * Run the RadxModelQc algorithm on a volume
-   * @param[in] inputs  Input data
-   * @param[out] outputs Output data
+   *
+   * @param[in,out] volume  Data with inputs, modified to include outputs
    * @return true for success, false for error 
    */
-  bool run(RayData *inputs);
+  bool run(Volume *volume);
 
-  bool write(RayData *data);
+  /**
+   * Write a volume
+   *
+   * @param[in] volume 
+   * @return true for success, false for error 
+   */
+  bool write(Volume *volume);
 
 protected:
 private:
 
-  bool _ok;            /**< True if object well formed */
+  bool _ok;       /**< True if object well formed */
   Parms _parms;   /**< Parameters */
-  RadxApp *_alg;     /**< Algorithm pointer, pointer due to threading */
+  RadxApp *_alg;  /**< Algorithm pointer, pointer due to threading */
 };
 
 #endif

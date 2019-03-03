@@ -551,6 +551,114 @@
     tt->comment_text = tdrpStrDup("Parameters for setting time median of one input field.\nNote that this works only in ARCHIVE or FILELIST modes, with one input field, and gives its output only after the last input is processed.");
     tt++;
     
+    // Parameter 'fixed_const'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("fixed_const");
+    tt->descr = tdrpStrDup("Fixed constant strings that are interpreted by user functions");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_fixed_const - &_start_;
+    tt->array_n_offset = (char *) &fixed_const_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'user_data'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("user_data");
+    tt->descr = tdrpStrDup("Non gridded data names");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_user_data - &_start_;
+    tt->array_n_offset = (char *) &user_data_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'volume_before_filter'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("volume_before_filter");
+    tt->descr = tdrpStrDup("Volume Filters to apply before doing ray filters");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_volume_before_filter - &_start_;
+    tt->array_n_offset = (char *) &volume_before_filter_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'sweep_filter'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("sweep_filter");
+    tt->descr = tdrpStrDup("Sweep filters to apply");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_sweep_filter - &_start_;
+    tt->array_n_offset = (char *) &sweep_filter_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'ray_filter'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ray_filter");
+    tt->descr = tdrpStrDup("Single ray Filters to apply");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_ray_filter - &_start_;
+    tt->array_n_offset = (char *) &ray_filter_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'volume_after_filter'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("volume_after_filter");
+    tt->descr = tdrpStrDup("Volume Filters to apply after doing ray filters");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_volume_after_filter - &_start_;
+    tt->array_n_offset = (char *) &volume_after_filter_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt++;
+    
     // Parameter 'input_field'
     // ctype is 'char*'
     

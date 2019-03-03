@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-class RayLoopData;
+class RadxAppRayLoopData;
 class RayxData;
 class RadxRay;
 
@@ -38,7 +38,7 @@ public:
    * @return true for success
    */
   bool filter(const RayxData &data, const std::string &firType,
-	      RayLoopData *output);
+	      RadxAppRayLoopData *output);
     
 private:
 

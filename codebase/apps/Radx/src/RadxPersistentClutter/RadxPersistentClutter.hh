@@ -36,6 +36,7 @@
 #include <radar/RadxApp.hh>
 #include <Radx/RadxAzElev.hh>
 #include <Radx/RayxMapping.hh>
+#include <rapmath/MathUserData.hh>
 #include <toolsa/TaThreadDoubleQue.hh>
 #include <toolsa/LogStream.hh>
 #include <map>
@@ -43,43 +44,33 @@
 
 class FrequencyCount;
 class RadxVol;
-class RayData;
+class Volume;
 
-class RadxPersistentClutter
+class RadxPersistentClutter : public MathUserData
 {
 public:
+
+  typedef enum {FIRST_PASS, SECOND_PASS} Alg_t;
 
   /**
    * Constructor
    * @param[in] argc  Args count
    * @param[in] argv  Args
-   * @param[in] cleanup  Method to call on exit
-   * @param[in] outOfStore  Method to call  when not enough memory
    */
-  RadxPersistentClutter(const Parms &parms, void cleanup(int));
+  RadxPersistentClutter(const Parms &parms, Alg_t type);
 
+  // RadxPersistentClutter *clone(void) const;
+  
   /**
    * Destructor
    */
   virtual ~RadxPersistentClutter(void);
 
-  /**
-   * Run the algorithm (calls some of the virtual methods)
-   *
-   * @return true for success
-   */
-  bool processVolume(RayData *volume, bool &first);
-
-  /**
-   * Compute method needed by threading
-   * @param[in] info Pointer to Info
-   */
-  static void compute(void *info);
-
-
   #define MAIN
   #include "RadxPersistentClutterVirtualMethods.hh"
   #undef MAIN
+
+  #include <rapmath/MathUserDataVirtualMethods.hh>
 
 
   /**
@@ -141,6 +132,16 @@ public:
     return NULL;
   }
 
+  /**
+   * Initialize a RadxRay by converting it into RayxData, and pointing to
+   * the matchiing element of _store
+   *
+   * @param[in] ray  The data
+   * @param[out] r  The converted data
+   *
+   * @return the matching pointer, or NULL for error
+   */
+  RayClutterInfo *initRay(const RadxRay &ray, RayxData &r);
 
 
   bool OK;
@@ -171,10 +172,10 @@ protected:
   };
 
 
-  // RadxApp _alg;      /**< generic algorithm object */
   Parms _parms;         /**< The parameters */
   bool _first;          /**< True for first volume */
   RayxMapping _rayMap;
+  Alg_t _type;
 
   /**
    * The storage of all info needed to do the computations, one object per
@@ -185,26 +186,12 @@ protected:
   time_t _final_t;    /**< Last time processed, which is the time at which
 		       *   results converged */
 
-  RadxThreads _thread;  /**< Threading */
-
-  /**
-   * Initialize a RadxRay by converting it into RayxData, and pointing to
-   * the matchiing element of _store
-   *
-   * @param[in] ray  The data
-   * @param[out] r  The converted data
-   *
-   * @return the matching pointer, or NULL for error
-   */
-  RayClutterInfo *_initRayThreaded(const RadxRay &ray, RayxData &r);
-
   /**
    * Process to set things for output into vol
    *
    * @param[in,out] vol  The data to replace fields in for output
    */
-  void _processForOutput(RayData *vol);
-
+  void _processForOutput(Volume *vol);
 
   /**
    * @return number of points in _store that have a particular count
@@ -226,45 +213,14 @@ protected:
 private:
 
   /**
-   * Process inputs
-   * @param[in] t  Data time
-   * @param[in,out] vol The data
-   *
-   * @return true if this is the last data to process
-   */
-  bool _process(RayData *vol);
-
-  /**
-   * Process inputs, first time through
-   * @param[in] t  Data time
-   * @param[in] vol The data
-   */
-  void _processFirst(const RayData *vol);
-
-  /**
-   * Process inputs
-   * @param[in] t  Time of data
-   * @param[in]  ray  A ray of data
-   */
-  void _processRay(const time_t &t, const RadxRay *ray);
-
-  /**
    * Process to set things for output into a ray
    *
    * @param[in,out] ray  The data to replace fields in for output
    */
   bool _processRayForOutput(RadxRay &ray);
 
-  /**
-   * Initialize a RadxRay by converting it into RayxData, and pointing to
-   * the matchiing element of _store
-   *
-   * @param[in] ray  The data
-   * @param[out] r  The converted data
-   *
-   * @return the matching pointer, or NULL for error
-   */
   RayClutterInfo *_initRay(const RadxRay &ray, RayxData &r);
+
 };
 
 #endif

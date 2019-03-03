@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-class RayLoopData;
+class RadxAppRayLoopData;
 class RadxRay;
 class RayxData;
 
@@ -32,21 +32,19 @@ public:
    *
    * output = SCR*(1-exp(-scale*|VEL|*1.5 + WIDTH*0.5))
    *
-   * @param[in] scrName  Name of 'SCR' input field
-   * @param[in] velName  Name of velocity input field
-   * @param[in] widthName  Name of width input field
+   * @param[in] scr  'SCR' input field
+   * @param[in] vel  velocity input field
+   * @param[in] width width input field
    * @param[in] scale     param
    * @param[in] vr_shape  param
    * @param[in] sw_shape  param
-   * @param[in] ray  The current ray
-   * @param[in] data  The derived data, so far
-   * @param[out] output  
+   * @param[out] output  Where to store filter output
    * @return true if successful
    *
    */
   bool filter(const RayxData &scr, const RayxData &vel, const RayxData &width,
 	      double scale, double vr_shape, double sw_shape,
-	      RayLoopData *output);
+	      RadxAppRayLoopData *output);
     
 private:
 };

@@ -44,13 +44,15 @@ public:
 
   /**
    * @return reference to i'th AzGradientState
+   * @param[in] i
    */
-  AzGradientState & operator[](size_t i) {return _state[i];}
+  inline AzGradientState & operator[](size_t i) {return _state[i];}
 
   /**
    * @return reference to i'th AzGradientState
+   * @param[in] i
    */
-  const AzGradientState & operator[](size_t i) const {return _state[i];}
+  inline const AzGradientState & operator[](size_t i) const {return _state[i];}
 
 protected:
 private:

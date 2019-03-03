@@ -36,7 +36,7 @@
 #define RADXPERSISTENTCLUTTERSECONDPASS_H
 
 #include "RadxPersistentClutter.hh"
-#include "RayData.hh"
+#include "VolumeTemplate.hh"
 #include "RayHistoInfo.hh"
 #include <Radx/RadxVol.hh>
 #include <map>
@@ -64,13 +64,15 @@ public:
 protected:
 private:
 
-  RayData _templateVol;  /**< Saved volume used to form output */
+  VolumeTemplate _templateVol;  /**< Saved volume used to form output */
 
-  std::map<RadxAzElev, RayHistoInfo> _histo; /**< The storage of all info needed to
-					  * do the computations, running counts 
-					  * and histograms through time, one 
-					  * object per az/elev */
+  /**
+   *  The storage of all info needed to do the computations, running counts 
+   * and histograms through time, one  object per az/elev
+   */
+  std::map<RadxAzElev, RayHistoInfo> _histo; 
 
+  bool _done;  /**< Flag set to true if the last volume has been processed */
 };
 
 #endif

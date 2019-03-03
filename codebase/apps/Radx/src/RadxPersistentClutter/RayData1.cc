@@ -1,15 +1,27 @@
+/**
+ * @file RayData1.cc
+ */
 #include "RayData1.hh"
-#include "RayData.hh"
+#include "VolumeBase.hh"
+#include "RayClutterInfo.hh"
+#include "RadxPersistentClutter.hh"
+#include <radar/RadxAppRayLoopData.hh>
+#include <rapmath/ProcessingNode.hh>
 #include <toolsa/LogStream.hh>
 
+const std::string RayData1::_histoAccumStr = "AccumulateHisto";
+
+
 //------------------------------------------------------------------
-RayData1::RayData1(void) : MathData()
+RayData1::RayData1(void) : RadxAppRayData()
 {
 }
 
 //------------------------------------------------------------------
-RayData1::RayData1(const RayData &r, int index) :  MathData()
+RayData1::RayData1(const VolumeBase &r, int index) :
+  RadxAppRayData(r, r.specialRef(), index)
 {
+  _p = r.algPtr();
 }  
 
 //------------------------------------------------------------------
@@ -18,216 +30,47 @@ RayData1::~RayData1(void)
 }
 
 //------------------------------------------------------------------
-std::vector<std::pair<std::string, std::string> >
-RayData1::userUnaryOperators(void) const
+void RayData1::radxappAppendUnaryOperators(std::vector<FunctionDef> &ret) const
 {
-  std::vector<std::pair<std::string, std::string> > ret;
-  return ret;
+  ret.push_back(FunctionDef(_histoAccumStr, "v", "field",
+			    "update histogram state for this field"));
 }
 
 //------------------------------------------------------------------
-// virtual
-int RayData1::numData(void) const
+bool RayData1::radxappUserLoopFunction(const std::string &keyword,
+				       ProcessingNode &p)
 {
-  return 0;
+  if (keyword == _histoAccumStr)
+  {
+    return _processAccumHisto(*(p.unaryOpArgs()));
+  }
+  else
+  {
+    printf("Unknown keyword %s\n", keyword.c_str());
+    return false;
+  }
 }
 
 //------------------------------------------------------------------
-// virtual
-void RayData1::finishProcessingNode(int index, VolumeData *vol)
-{
-}
-
-//------------------------------------------------------------------
-// virtual
-bool RayData1::synchInputsAndOutputs(const std::string &output,
-				    const std::vector<std::string> &inputs)
-{
-  return true;
-}
-    
-//------------------------------------------------------------------
-// virtual
-MathLoopData * RayData1::dataPtr(const std::string &name)
-{
-  return NULL;
-}
-
-//------------------------------------------------------------------
-// virtual
-const MathLoopData * RayData1::dataPtrConst(const std::string &name) const
-{
-  return NULL;
-}
-
-//------------------------------------------------------------------
-// virtual 
-bool RayData1::processUserLoopFunction(ProcessingNode &p)
-{
-  LOG(ERROR) << "Not implemented for this class";
-  return false;
-}
-
-//------------------------------------------------------------------
-MathUserData *RayData1::processUserLoop2dFunction(const UnaryNode &p)
+MathUserData *RayData1::radxappUserLoopFunctionToUserData(const UnaryNode &p)
 {
   LOG(ERROR) << "Not implemented for this class";
   return NULL;
 }
 
 //------------------------------------------------------------------
-// virtual
-bool RayData1::synchUserDefinedInputs(const std::string &userKey,
-				      const std::vector<std::string> &names)
+bool RayData1::_processAccumHisto(std::vector<ProcessingNode *> &args) const
 {
-  return true;
-}
-
-//------------------------------------------------------------------
-// virtual
-bool RayData1::storeMathUserData(const std::string &name, MathUserData *s)
-{
-  return false;
-}
-
-//------------------------------------------------------------------
-// virtual
-bool RayData1::smooth(MathLoopData *l,
-		      std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-//------------------------------------------------------------------
-// virtual
-bool RayData1::smoothDBZ(MathLoopData *l,
-		      std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-
-//------------------------------------------------------------------
-// virtual
-bool RayData1::stddev(MathLoopData *l,
-		      std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-//------------------------------------------------------------------
-// virtual
-bool RayData1::fuzzy(MathLoopData *l,
-		     std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-
-//------------------------------------------------------------------
-// virtual
-bool RayData1::average(MathLoopData *l,
-		     std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-
-//------------------------------------------------------------------
-// virtual
-bool RayData1::weighted_average(MathLoopData *l,
-				std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-
-//------------------------------------------------------------------
-// virtual
-bool RayData1::weighted_angle_average(MathLoopData *l,
-				      std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-
-//------------------------------------------------------------------
-// virtual
-bool RayData1::median(MathLoopData *l,
-		      std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-
-//------------------------------------------------------------------
-// virtual
-bool RayData1::max(MathLoopData *l,
-		      std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-
-//------------------------------------------------------------------
-// virtual
-bool RayData1::max_expand(MathLoopData *l,
-			 std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-
-bool RayData1::expand_angles_laterally(MathLoopData *l,
-		     std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-
-bool RayData1::clump(MathLoopData *l,
-		     std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-
-//------------------------------------------------------------------
-// virtual
-bool RayData1::mask(MathLoopData *l,
-		     std::vector<ProcessingNode *> &args) const
-{
-  LOG(ERROR) << "Not implemented";
-  return false;
-}
-
-bool RayData1::mask_missing_to_missing(MathLoopData *out,
-				       std::vector<ProcessingNode *> &args) const
-{
-  return false;
-}
-
-bool RayData1::trapezoid(MathLoopData *out,
-			 std::vector<ProcessingNode *> &args) const
-{
-  return false;
-}
-
-bool RayData1::s_remap(MathLoopData *out,
-		       std::vector<ProcessingNode *> &args) const
-{
-  return false;
-}
-
-//------------------------------------------------------------------
-const MathUserData *RayData1::userDataPtrConst(const std::string &name) const
-{
-  return NULL;
-}
-
-//------------------------------------------------------------------
-MathUserData *RayData1::userDataPtr(const std::string &name)
-{
-  return NULL;
+  RayxData r;
+  RayClutterInfo *h = _p->initRay(*_ray, r);
+  if (h != NULL)
+  {
+    return _p->processRay(r, h);
+  }
+  else
+  {
+    LOG(ERROR) << "No init for this ray";
+    return false;
+  }
 }
 

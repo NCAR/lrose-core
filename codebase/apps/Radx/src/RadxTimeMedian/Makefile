@@ -44,7 +44,7 @@ LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_LIBS = -lradar -lRadx -lSpdb -ldsserver \
 	-lrapformats -lrapmath -ldidss -ltoolsa \
 	-ltdrp -ldataport -lfftw3 $(NETCDF4_LIBS) \
-	-lbz2 -lz
+	-lbz2 -lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -55,11 +55,14 @@ HDRS = \
 
 CPPC_SRCS = \
 	Params.cc \
+	Alg.cc \
 	Histo.cc \
-	Info.cc \
 	Main.cc \
-	RadxTimeMedian.cc \
-	RayHisto.cc
+	Parms.cc \
+	RayData1.cc \
+	RayHisto.cc \
+	RadxTimeMedian.cc  \
+	Volume.cc
 
 #
 # tdrp macros

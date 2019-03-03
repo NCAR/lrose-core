@@ -36,11 +36,8 @@
 
 #include "Parms.hh"
 #include "Alg.hh"
-#include "RayData.hh"
+#include "Volume.hh"
 #include <radar/RadxAppParmsTemplate.hh>
-
-#include "RadxPersistentClutterFirstPass.hh"
-#include "RadxPersistentClutterSecondPass.hh"
 #include <toolsa/LogStream.hh>
 
 //--------------------------------------------------------------------
@@ -49,14 +46,6 @@ static void cleanup(int sig)
 {
   exit(sig);
 }
-
-// not used:
-// //--------------------------------------------------------------------
-// // Handle out-of-memory conditions
-// static void out_of_store()
-// {
-//   exit(-1);
-// }
 
 //----------------------------------------------------------------------
 int main(int argc, char **argv)
@@ -68,51 +57,46 @@ int main(int argc, char **argv)
     exit(0);
   }
 
+  // create the Alg
   Alg alg(params, cleanup);
   if (!alg.ok())
   {
     exit(1);
   }
 
-  RayData volume(&params, argc, argv);
+  // create a Volume of data
+  Volume volume(&params, argc, argv);
   string path;
 
-  // two passes
-  bool first = true;
-  bool converged = false;
-  RadxPersistentClutterFirstPass p1(params, cleanup);
+  // Repeat:  
   while (volume.triggerRadxVolume(path))
   {
-    if (!p1.processVolume(&volume, first))
+    // Read in a volume and run the algorithm
+    if (!alg.run(&volume))
     {
-      LOG(DEBUG) << "No convergence yet";
+      LOG(ERROR) << "Processing this volume";
     }
     else
     {
-      LOG(DEBUG) << "Converged";
-      converged = true;
-      break;
+      // check out the status for actions 
+      if (volume.doWrite())
+      {
+	// write
+	alg.write(&volume);
+      }
+      if (volume.done())
+      {
+	// all done
+	break;
+      }
     }
-  }
-  if (!converged)
-  {
-    LOG(WARNING) << "Never converged";  
-    p1.finishBad();
-    return -1;
   }
 
-  RayData vol2(&params, argc, argv);
-  RadxPersistentClutterSecondPass p2(p1);
-  first = true;
-  while (vol2.triggerRadxVolume(path))
+  // If the algorithm converged, write out the final results
+  if (volume.converged())
   {
-    if (p2.processVolume(&vol2, first))
-    {
-      // done, all is well
-      return 0;
-    }
+    alg.write(&volume, params.final_output_url);
   }
-  p2.finishBad();
-  return -1;
+  LOG(DEBUG) << "Done";
+  return 0;
 }
-

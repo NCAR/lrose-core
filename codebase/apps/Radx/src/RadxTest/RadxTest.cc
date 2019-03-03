@@ -177,7 +177,7 @@ int RadxTest::Run()
   outFile->setWriteNativeByteOrder(false);
   outFile->setFileFormat(RadxFile::FILE_FORMAT_DORADE);
       
-  if (outFile->writeToDir(vol, "/home/dixon/junk/data/dorade", true, false)) {
+  if (outFile->writeToDir(vol, "/home/data/junk/data/dorade", true, false)) {
     cerr << "ERROR - RadxTest" << endl;
     cerr << outFile->getErrStr() << endl;
   } else {

@@ -25,27 +25,24 @@
  * @file RadxPersistentClutterSecondPass.cc
  */
 #include "RadxPersistentClutterSecondPass.hh"
+#include "Volume.hh"
 #include <Radx/RadxRay.hh>
 #include <toolsa/LogStream.hh>
 
 //------------------------------------------------------------------
 RadxPersistentClutterSecondPass::
 RadxPersistentClutterSecondPass(const RadxPersistentClutter &p) :
-  RadxPersistentClutter(p)
+  RadxPersistentClutter(p), _done(false)
 {
-  // For each base class store element, create a RayHistoInfo element
+  _type = SECOND_PASS;
+
+  // For each base class storage element, create a RayHistoInfo element locally
   for (std::map<RadxAzElev, RayClutterInfo>::iterator ii = _store.begin();
        ii!=_store.end(); ++ii)
   {
     RayHistoInfo h(ii->second, _parms);
     _histo[ii->first] = h;
   }
-
-  // // rewind for reprocessing
-  // _alg.rewind();
-
-  // redo the threading
-  _thread.reinit(_parms.num_threads, _parms.thread_debug);
 }
 
 //------------------------------------------------------------------
@@ -54,17 +51,18 @@ RadxPersistentClutterSecondPass::~RadxPersistentClutterSecondPass(void)
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterSecondPass::initFirstTime(const RayData *vol)
+void RadxPersistentClutterSecondPass::initFirstTime(const Volume *vol)
 {
   // Save this volume, will use its time information later
-  _templateVol = *vol;
+  // (can change this to a VolumeBase operator=)
+  ((VolumeBase *)&_templateVol)->setV(*((VolumeBase *)vol));
+  _done = false;
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterSecondPass::finishLastTimeGood(RayData *vol)
+void RadxPersistentClutterSecondPass::finishLastTimeGood(Volume *vol)
 {
   // The input volume and time are what is to be written out, do so now
-  vol->write(_parms.final_output_url);
   LOG(DEBUG) << "Successful second pass";
 }
 
@@ -75,16 +73,19 @@ void RadxPersistentClutterSecondPass::finishBad(void)
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterSecondPass::processFinishVolume(RayData *vol)
+bool RadxPersistentClutterSecondPass::processFinishVolume(Volume *vol)
 {
   if (vol->getTime() == _final_t)
   {
     // replace vol with the first template volume when time matches final time
     // from first pass
-    (*vol) = _templateVol;
+    vol->setV(_templateVol);
 
     // prepare this volume for output
     _processForOutput(vol);
+
+    // return true indicating write, with _done set to true
+    _done = true;
     return true;
   }
   else
@@ -152,5 +153,11 @@ matchingClutterInfoConst(const double az,
   // we match off of _histo, not the base class _store.
   // note this is what makes processRay and setRayForOutput work o.k.
   return matchInfoConst(_histo, az, elev);
+}
+
+//------------------------------------------------------------------
+bool RadxPersistentClutterSecondPass::isDone(void) const
+{
+  return _done;
 }
 

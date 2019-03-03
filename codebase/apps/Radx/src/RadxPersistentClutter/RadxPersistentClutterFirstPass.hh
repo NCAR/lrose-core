@@ -32,8 +32,8 @@
  */
 
 
-#ifndef RADXPERSISTENTCLUTTERFIRSTPASS_H
-#define RADXPERSISTENTCLUTTERFIRSTPASS_H
+#ifndef RADX_PERSISTENT_CLUTTER_FIRSTPASS_H
+#define RADX_PERSISTENT_CLUTTER_FIRSTPASS_H
 
 #include "RadxPersistentClutter.hh"
 
@@ -44,12 +44,9 @@ public:
 
   /**
    * Constructor
-   * @param[in] argc  Args count
-   * @param[in] argv  Args
-   * @param[in] cleanup  Method to call on exit
-   * @param[in] outOfStore  Method to call  when not enough memory
+   * @param[in] parms  Parameters
    */
-  RadxPersistentClutterFirstPass(const Parms &parms, void cleanup(int));
+  RadxPersistentClutterFirstPass(const Parms &parms);
 
   /**
    * Destructor
@@ -75,6 +72,8 @@ private:
 				    *   in increasing volume order */
   int _kstar;                      /**< K* value from paper */
 
+  bool _converged;               
+
   /**
    * Initializes using a ray, updating _az, and _store members
    *
@@ -98,12 +97,12 @@ private:
    * Return true if clutter detection has converged
    * @param[in] t  Time value
    */
-  bool _output_for_graphics(const time_t &t);
+  bool _outputForGraphics(const time_t &t);
 
   /**
    * Return true if clutter detection has converged
    */
-  bool _check_convergence(void);
+  bool _checkConvergence(void);
 
 };
 

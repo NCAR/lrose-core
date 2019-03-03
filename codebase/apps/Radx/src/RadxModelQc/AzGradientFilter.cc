@@ -1,6 +1,5 @@
 #include "AzGradientFilter.hh"
 #include "AzGradientStateSpecialData.hh"
-#include "RayData.hh"
 #include "RayData1.hh"
 #include <Radx/RadxRay.hh>
 #include <Radx/RayxData.hh>
@@ -20,14 +19,16 @@ bool AzGradientFilter::filter(const AzGradientStateSpecialData &state, double v,
 			      const RayxData &rdata,
 			      const std::string &name, 
 			      const RayData1 &rdata1,
-			      RayLoopData *output)
+			      RadxAppRayLoopData *output)
 {
   _state = &state;
 
   // get the field from the center ray
   //RayxData r, r0, r1;
   RayxData r0, r1;
+
   RayxData r(rdata);
+
   // if (!RayData::retrieveRay(name, *ray, _data, r, true))
   // {
   //   return false;

@@ -64,12 +64,12 @@ CPPC_SRCS = \
 	RadxPersistentClutterFirstPass.cc \
 	RadxPersistentClutterSecondPass.cc \
         RayClutterInfo.cc \
-	RayData.cc \
 	RayData1.cc \
-	RayData2.cc \
 	RayHistoInfo.cc \
-	Main.cc
-
+	Main.cc \
+	Volume.cc \
+	VolumeBase.cc \
+	VolumeTemplate.cc
 
 #
 # tdrp macros

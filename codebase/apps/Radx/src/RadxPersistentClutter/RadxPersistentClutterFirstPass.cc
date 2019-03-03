@@ -27,7 +27,7 @@
 
 #include "RadxPersistentClutterFirstPass.hh"
 #include "FrequencyCount.hh"
-#include "RayData.hh"
+#include "Volume.hh"
 #include <Radx/RadxRay.hh>
 #include <toolsa/LogStream.hh>
 #include <toolsa/Path.hh>
@@ -60,16 +60,16 @@ static double _omega(const vector<double> &p, const int k)
 
 //------------------------------------------------------------------
 RadxPersistentClutterFirstPass::
-RadxPersistentClutterFirstPass(const Parms &parms, void cleanup(int)) :
-  RadxPersistentClutter(parms, cleanup)
+RadxPersistentClutterFirstPass(const Parms &parms) :
+  RadxPersistentClutter(parms, FIRST_PASS), _nvolume(0), _total_pixels(0),
+  _kstar(0), _converged(false)
 {
-  _nvolume = 0;
-  _total_pixels = 0;
 }
 
 //------------------------------------------------------------------
 RadxPersistentClutterFirstPass::~RadxPersistentClutterFirstPass(void)
 {
+  // create output ascii before calling it a day
   if (!_ascii_output.empty())
   {
     FILE *fp = fopen(_ascii_fname.c_str(), "w");
@@ -120,7 +120,7 @@ RadxPersistentClutterFirstPass::~RadxPersistentClutterFirstPass(void)
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterFirstPass::initFirstTime(const RayData *vol)
+void RadxPersistentClutterFirstPass::initFirstTime(const Volume *vol)
 {
   // build path
   _ascii_fname = _parms.output_ascii_path;
@@ -146,7 +146,7 @@ void RadxPersistentClutterFirstPass::initFirstTime(const RayData *vol)
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterFirstPass::finishLastTimeGood(RayData *vol)
+void RadxPersistentClutterFirstPass::finishLastTimeGood(Volume *vol)
 {
   LOG(DEBUG) << "Finished, with convergence";
 
@@ -161,7 +161,7 @@ void RadxPersistentClutterFirstPass::finishBad(void)
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterFirstPass::processFinishVolume(RayData *vol)
+bool RadxPersistentClutterFirstPass::processFinishVolume(Volume *vol)
 {
   // Up the volume count
   ++_nvolume;
@@ -170,15 +170,18 @@ bool RadxPersistentClutterFirstPass::processFinishVolume(RayData *vol)
   _kstar = _computeHistoCutoff();
 
   // output some ASCII stuff that can be graphed later
-  bool ret = _output_for_graphics(vol->getTime());
+  _converged = _outputForGraphics(vol->getTime());
 
   if (_parms.diagnostic_output)
   {
-    // prepare this volume for output, and write it out
+    // prepare this volume for output, and return true indicating write 
     _processForOutput(vol);
-    vol->write();
+    return true;
   }
-  return ret;
+  else
+  {
+    return false;
+  }
 }
 
 //------------------------------------------------------------------
@@ -253,10 +256,15 @@ RadxPersistentClutterFirstPass::matchingClutterInfo(const double az,
 
 //------------------------------------------------------------------
 const RayClutterInfo * RadxPersistentClutterFirstPass::
-matchingClutterInfoConst(const double az,
-			 const double elev) const
+matchingClutterInfoConst(const double az, const double elev) const
 {
   return matchInfoConst(_store, az, elev);
+}
+
+//------------------------------------------------------------------
+bool RadxPersistentClutterFirstPass::isDone(void) const
+{
+  return _converged;
 }
 
 //------------------------------------------------------------------
@@ -310,7 +318,7 @@ int RadxPersistentClutterFirstPass::_computeHistoCutoff(void) const
   double muT = _mu(p, T);
 
   int maxk = -1;
-  double maxphisq;
+  double maxphisq = 0;
 
   for (int i=0; i<T; ++i)
   {
@@ -336,7 +344,7 @@ int RadxPersistentClutterFirstPass::_computeHistoCutoff(void) const
 
 //------------------------------------------------------------------
 bool
-RadxPersistentClutterFirstPass::_output_for_graphics(const time_t &t)
+RadxPersistentClutterFirstPass::_outputForGraphics(const time_t &t)
 
 {
   // create a FrequencyCount object
@@ -370,11 +378,11 @@ RadxPersistentClutterFirstPass::_output_for_graphics(const time_t &t)
   _change.push_back(ch);
 
   // see if things are stable, based on params, return true if so
-  return _check_convergence();
+  return _checkConvergence();
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterFirstPass::_check_convergence(void)
+bool RadxPersistentClutterFirstPass::_checkConvergence(void)
 {
   // need at least a minimum number of volumes
   int n = static_cast<int>(_threshold.size());

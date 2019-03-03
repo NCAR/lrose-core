@@ -2,7 +2,7 @@
  * @file QscaleFilter.cc
  */
 #include "QscaleFilter.hh"
-#include "RayData.hh"
+#include <radar/RadxAppRayLoopData.hh>
 #include <Radx/RayxData.hh>
 #include <toolsa/LogStream.hh>
 #include <vector>
@@ -17,7 +17,7 @@ QscaleFilter::~QscaleFilter(void) {}
 //------------------------------------------
 bool QscaleFilter::filter(const RayxData &data, double scale, double topv,
 			  double lowv, bool subtractFromOne, 
-			  RayLoopData *output)
+			  RadxAppRayLoopData *output)
 {
   output->transferData(data);
 

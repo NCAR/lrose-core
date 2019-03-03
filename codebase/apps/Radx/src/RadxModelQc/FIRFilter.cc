@@ -2,7 +2,7 @@
  * @file FiltFIR.cc
  */
 #include "FIRFilter.hh"
-#include "RayData.hh"
+#include <radar/RadxAppRayLoopData.hh>
 #include <Radx/RayxData.hh>
 #include <toolsa/LogStream.hh>
 #include <cmath>
@@ -43,7 +43,7 @@ FIRFilter::~FIRFilter()
 
 //------------------------------------------------------------------
 bool FIRFilter::filter(const RayxData &data, const std::string &firType,
-		       RayLoopData *output)
+		       RadxAppRayLoopData *output)
 {
   RayxData::FirFilter_t _edge;
   if (firType == "USE_FIRST_DATA")

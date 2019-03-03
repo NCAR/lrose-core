@@ -2,7 +2,7 @@
  * @file FiltClutter2dQual.cc
  */
 #include "Clutter2dQualFilter.hh"
-#include "RayData.hh"
+#include <radar/RadxAppRayLoopData.hh>
 #include <Radx/RayxData.hh>
 #include <toolsa/LogStream.hh>
 
@@ -10,7 +10,7 @@
 bool Clutter2dQualFilter::
 filter(const RayxData &fscr, const RayxData &vel, const RayxData &width,
        double scale, double vr_shape, double sw_shape,
-       RayLoopData *output)
+       RadxAppRayLoopData *output)
 {
 
   // copy contents of vel into output

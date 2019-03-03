@@ -63,7 +63,6 @@ VertPrecipData::VertPrecipData(const Data &data, int igt, int iaz,
   _index = index;
 }
 
-
 //----------------------------------------------------------------
 VertPrecipData::~VertPrecipData(void)
 {

@@ -36,6 +36,7 @@ public:
 
   /**
    * @return reference to indexed indivdual lookup
+   * @param[in] i
    */
   inline const CircularLookup & operator[](const std::size_t i) const
   {

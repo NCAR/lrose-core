@@ -1,14 +1,14 @@
 #include "RadxModelQc.hh"
 #include "Parms.hh"
-#include "CircularLookupHandler.hh"
-#include "RayData.hh"
+#include "Volume.hh"
 #include <radar/RadxAppParmsTemplate.hh>
+#include <radar/RadxAppCircularLookupHandler.hh>
 #include <toolsa/LogStream.hh>
 
-static CircularLookupHandler *_lookup = NULL;
+static RadxAppCircularLookupHandler *_lookup = NULL;
 
 static void _createLookups(double r, RadxVol &vol);
-static bool _processVolume(const Parms &parms, RayData &vol,
+static bool _processVolume(const Parms &parms, Volume &vol,
 			   RadxModelQc &alg);
 
 //--------------------------------------------------------------------
@@ -22,12 +22,12 @@ static void cleanup(int sig)
   exit(sig);
 }
 
-//--------------------------------------------------------------------
-// Handle out-of-memory conditions
-static void out_of_store()
-{
-  exit(-1);
-}
+// //--------------------------------------------------------------------
+// // Handle out-of-memory conditions
+// static void out_of_store()
+// {
+//   exit(-1);
+// }
 
 //--------------------------------------------------------------------
 int main(int argc, char **argv)
@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     exit(1);
   }
   
-  RayData volume(&params, argc, argv);
+  Volume volume(&params, argc, argv);
   string path;
   while (volume.triggerRadxVolume(path))
   {
@@ -74,11 +74,11 @@ static void _createLookups(double r, RadxVol &vol)
   }
 
   // pass in # as arg
-  _lookup = new CircularLookupHandler(r, vol);
+  _lookup = new RadxAppCircularLookupHandler(r, vol);
 }
 
 //-----------------------------------------------------------------------
-static bool _processVolume(const Parms &parms, RayData &volume,
+static bool _processVolume(const Parms &parms, Volume &volume,
 			   RadxModelQc &alg)
 {
   volume.initialize(_lookup);

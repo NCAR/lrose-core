@@ -24,55 +24,51 @@
 /**
  * @file Main.cc
  */
-#include "RadxTimeMedian.hh"
-#include <toolsa/LogMsg.hh>
-#include <csignal>
-#include <new>
-#include <iostream>
+#include "Parms.hh"
+#include "Alg.hh"
+#include "Volume.hh"
+#include <radar/RadxAppParmsTemplate.hh>
+#include <toolsa/LogStream.hh>
 
-static void tidy_and_exit (int sig);
-static void out_of_store(void);
-static RadxTimeMedian *Prog = NULL;
+//------------------------------------------------------------------
+static void tidy_and_exit (int sig)
+{
+  exit(sig);
+}
+
+// //------------------------------------------------------------------
+// static void out_of_store(void)
+// {
+//   LOG(FATAL) << "Operator new failed - out of store";
+//   exit(-1);
+// }
 
 //------------------------------------------------------------------
 int main(int argc, char **argv)
 
 {
-  Prog = new RadxTimeMedian(argc, argv, tidy_and_exit, out_of_store);
-  if (!Prog->OK)
+  Parms params;
+  if (!parmAppInit(params, argc, argv))
   {
-    LOG(LogMsg::FATAL, "Could not create RadxTimeMedian object.");
-    return(1);
-  }
-
-  int iret = Prog->Run();
-  if (iret < 0)
-  {
-    LOG(LogMsg::ERROR, "running RadxTimeMedian");
+    exit(-1);
   }
   
+  Alg alg(params, tidy_and_exit);
+  if (!alg.ok())
+  {
+    exit(-1);
+  }
+
+  Volume volume(&params, argc, argv);
+  string path;
+  while (volume.triggerRadxVolume(path))
+  {
+    alg.processVolume(&volume);
+  }
+  alg.processLast(&volume);
+
   // clean up
-  tidy_and_exit(iret);
-  return (iret);
-  
+  tidy_and_exit(0);
+  return (0);
 }
 
-//------------------------------------------------------------------
-// tidy up on exit
-static void tidy_and_exit (int sig)
-{
-  if (Prog)
-  {
-    delete Prog;
-    Prog = NULL;
-  }
-  exit(sig);
-}
-
-//------------------------------------------------------------------
-// Handle out-of-memory conditions
-static void out_of_store(void)
-{
-  LOG(LogMsg::FATAL, "Operator new failed - out of store");
-  exit(-1);
-}

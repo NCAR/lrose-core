@@ -8,6 +8,8 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 MODULE_TYPE=progcpp
 TARGET_FILE=RadxModelQc
+MY_CPPCHECKFLAGS = -E Params.cc -E Params.hh
+LOC_INC_DIR = .
 
 LOC_INCLUDES = $(NETCDF4_INCS) -I.
 LOC_LIBS = -lNcxx -lradar -lRadx -lNcxx -lSpdb -ldsserver \
@@ -22,21 +24,16 @@ CPPC_SRCS = \
 	Parms.cc \
 	Main.cc \
 	RadxModelQc.cc \
-	CircularLookupHandler.cc \
-	CircularLookup.cc \
 	AzGradientStateSpecialData.cc \
 	AzGradientFilter.cc \
 	Clutter2dQualFilter.cc \
 	FIRFilter.cc \
 	QscaleFilter.cc \
-	RayData.cc \
 	RayData1.cc \
-	RayData2.cc \
-	RayLoopData.cc \
-	RayLoopSweepData.cc \
 	Special0Filter.cc \
 	Special1Filter.cc \
-	Variance1dFilter.cc
+	Variance1dFilter.cc \
+	Volume.cc
 
 # RayUnaryFilter.cc \
 

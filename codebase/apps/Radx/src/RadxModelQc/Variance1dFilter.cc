@@ -25,14 +25,14 @@
  * @file FiltVariance1d.cc
  */
 #include "Variance1dFilter.hh"
-#include "RayData.hh"
+#include <radar/RadxAppRayLoopData.hh>
 #include <toolsa/LogStream.hh>
 #include <Radx/RayxData.hh>
 #include <cmath>
 
 //------------------------------------------------------------------
 bool Variance1dFilter::filter(const RayxData &data,
-			      RayLoopData *output)
+			      RadxAppRayLoopData *output)
 {
   // copy contents of vel into output
   output->transferData(data);

@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-class RayLoopData;
+class RadxAppRayLoopData;
 class RayxData;
 class RadxRay;
 
@@ -43,7 +43,7 @@ public:
    * @return true for success
    */
   bool filter(const RayxData &data, double scale, double topv,
-	      double lowv, bool subtractFromOne, RayLoopData *output);
+	      double lowv, bool subtractFromOne, RadxAppRayLoopData *output);
     
 private:
 };

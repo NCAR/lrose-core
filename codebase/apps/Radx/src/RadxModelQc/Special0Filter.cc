@@ -25,7 +25,7 @@
  * @file FiltSpecial0.cc
  */
 #include "Special0Filter.hh"
-#include "RayData.hh"
+#include <radar/RadxAppRayLoopData.hh>
 #include <toolsa/LogStream.hh>
 #include <Radx/RayxData.hh>
 #include <cmath>
@@ -33,7 +33,7 @@
 //------------------------------------------------------------------
 bool Special0Filter::filter(const RayxData &width, double meanPrt,
 			    double meanNsamples,
-			    RayLoopData *output)
+			    RadxAppRayLoopData *output)
 {
   // copy contents into output
   output->transferData(width);
@@ -42,7 +42,6 @@ bool Special0Filter::filter(const RayxData &width, double meanPrt,
   //"SD_DBZ = 10*log10(1 + sqrt(1.0/(WIDTH0*(4.0*sqrt(PI)*MeanPrt*MeanNSamples/0.10))))",
   double PI = 3.14159;
   double arg = 4.0*sqrt(PI)*meanPrt*meanNsamples/0.10;
-
   output->multiply(arg);
   output->invert();
   output->squareRoot();

@@ -1,13 +1,13 @@
-/.cvsignore/1.1/Thu Dec 29 22:57:32 2016//
-/Args.cc/1.5/Thu Dec 29 22:57:32 2016//
-/Args.hh/1.2/Thu Dec 29 22:57:32 2016//
-/Main.cc/1.5/Thu Dec 29 22:57:32 2016//
-/paramdef.RadxCov2Mom/1.90/Thu Dec 29 22:57:32 2016//
-/Moments.cc/1.56/Fri Dec 30 16:51:02 2016//
-/Moments.hh/1.27/Fri Dec 30 16:47:50 2016//
-/RadxCov2Mom.hh/1.61/Mon Mar 13 18:35:38 2017//
 D/test////
-/Makefile/1.16/Wed Sep 27 23:06:22 2017//
-/Params.cc/1.97/Thu May 31 01:00:13 2018//
-/Params.hh/1.87/Thu May 31 01:00:13 2018//
-/RadxCov2Mom.cc/1.132/Wed Oct 17 16:27:52 2018//
+/.cvsignore/1.1/Sun Mar  3 03:35:28 2019//
+/Args.cc/1.5/Sun Mar  3 03:35:28 2019//
+/Args.hh/1.2/Sun Mar  3 03:35:28 2019//
+/Main.cc/1.5/Sun Mar  3 03:35:28 2019//
+/Makefile/1.16/Sun Mar  3 03:35:28 2019//
+/RadxCov2Mom.cc/1.132/Sun Mar  3 03:35:28 2019//
+/RadxCov2Mom.hh/1.61/Sun Mar  3 03:35:28 2019//
+/Moments.cc/1.57/Mon Feb 25 22:04:26 2019//
+/Moments.hh/1.28/Mon Feb 25 21:56:24 2019//
+/Params.cc/1.98/Sun Mar  3 22:38:15 2019//
+/Params.hh/1.88/Sun Mar  3 22:38:15 2019//
+/paramdef.RadxCov2Mom/1.91/Mon Feb 25 21:55:21 2019//

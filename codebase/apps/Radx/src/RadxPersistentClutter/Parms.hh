@@ -25,12 +25,15 @@ public:
   /**
    * Constructor that reads a file
    * @param[in] parmFileName  Name of file to read
+   * @param[in] expandEnv  True to expand out env vars when reading
    */
   Parms(const std::string &parmFileName, bool expandEnv);
 
   /**
-   * Constructor that reads a file
+   * Constructor that reads a file, and sets up to process particular files
    * @param[in] parmFileName  Name of file to read
+   * @param[in] files  The files to process
+   * @param[in] expandEnv  True to expand out env vars when reading
    */
   Parms(const std::string &parmFileName, const std::vector<std::string> &files,
 	bool expandEnv);
@@ -45,6 +48,11 @@ public:
    */
   void printParams(tdrp_print_mode_t printMode);
 
+  /**
+   * Print usage, and base class useage
+   */
+  void printHelp(void);
+  
   #include <radar/RadxAppParmsVirtualMethods.hh>
 
 protected:

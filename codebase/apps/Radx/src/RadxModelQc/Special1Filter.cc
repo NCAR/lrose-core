@@ -25,7 +25,7 @@
  * @file FiltSpecial1.cc
  */
 #include "Special1Filter.hh"
-#include "RayData.hh"
+#include <radar/RadxAppRayLoopData.hh>
 #include <toolsa/LogStream.hh>
 #include <Radx/RayxData.hh>
 // #include <toolsa/globals.h>
@@ -34,7 +34,7 @@
 
 //------------------------------------------------------------------
 bool Special1Filter::filter(const RayxData &width, double meanPrt,
-			    double meanNsamples,  RayLoopData *output)
+			    double meanNsamples,  RadxAppRayLoopData *output)
 {
 
   output->transferData(width);
