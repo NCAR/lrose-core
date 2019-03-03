@@ -425,6 +425,8 @@ public:
 
   char* instance;
 
+  int procmap_register_interval;
+
   mode_t mode;
 
   char* trigger_url;
@@ -512,6 +514,8 @@ public:
 
   char* derived_field_units;
 
+  tdrp_bool_t errors_to_warnings;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -519,7 +523,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[55];
+  mutable TDRPtable _table[57];
 
   const char *_className;
 

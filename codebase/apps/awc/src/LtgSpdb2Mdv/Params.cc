@@ -594,6 +594,18 @@
     tt->single_val.s = tdrpStrDup("Test");
     tt++;
     
+    // Parameter 'procmap_register_interval'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("procmap_register_interval");
+    tt->descr = tdrpStrDup("Interval for registering with procmap (secs).");
+    tt->help = tdrpStrDup("The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.");
+    tt->val_offset = (char *) &procmap_register_interval - &_start_;
+    tt->single_val.i = 60;
+    tt++;
+    
     // Parameter 'mode'
     // ctype is '_mode_t'
     
@@ -793,7 +805,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("polarity_flag");
     tt->descr = tdrpStrDup("Polarity flag");
-    tt->help = tdrpStrDup("Indicates the polarity of the lightning strikes to be included in the resulting grids.");
+    tt->help = tdrpStrDup("Indicates the polarity of the lightning strikes to be included in the resulting grids.  LOOKING AT THE SOURCE CODE - I DON'T THINK THIS WORKS.  PLEASE CHECK IF YOU ARE USING IT.");
     tt->val_offset = (char *) &polarity_flag - &_start_;
     tt->enum_def.name = tdrpStrDup("polarity_flag_t");
     tt->enum_def.nfields = 3;
@@ -1344,6 +1356,18 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &derived_field_units - &_start_;
     tt->single_val.s = tdrpStrDup("dBZ");
+    tt++;
+    
+    // Parameter 'errors_to_warnings'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("errors_to_warnings");
+    tt->descr = tdrpStrDup("Convert Errors when there is no ltg spdb data to warnings");
+    tt->help = tdrpStrDup("This is useful to remove false positive when greping for error in the logs");
+    tt->val_offset = (char *) &errors_to_warnings - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // trailing entry has param_name set to NULL

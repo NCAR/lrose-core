@@ -56,6 +56,12 @@ paramdef string {
   p_help = "Used for registration with procmap.";
 } instance;
 
+paramdef int {
+  p_default = 60;
+  p_descr = "Interval for registering with procmap (secs).";
+  p_help = "The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.";
+} procmap_register_interval;
+
 typedef enum {
   ARCHIVE, REALTIME, TIME_LIST
 } mode_t;
@@ -175,7 +181,7 @@ typedef enum {
 paramdef enum polarity_flag_t
 {
   p_descr = "Polarity flag";
-  p_help = "Indicates the polarity of the lightning strikes to be included in the resulting grids.";
+  p_help = "Indicates the polarity of the lightning strikes to be included in the resulting grids.  LOOKING AT THE SOURCE CODE - I DON'T THINK THIS WORKS.  PLEASE CHECK IF YOU ARE USING IT.";
   p_default = POLAR_BOTH;
 } polarity_flag;
 
@@ -434,3 +440,8 @@ paramdef string {
   p_descr = "Units for derived data.";
 } derived_field_units;
 
+paramdef boolean {
+  p_descr = "Convert Errors when there is no ltg spdb data to warnings";
+  p_help = "This is useful to remove false positive when greping for error in the logs";
+  p_default = false;
+} errors_to_warnings;

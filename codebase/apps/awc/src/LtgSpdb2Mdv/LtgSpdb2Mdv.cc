@@ -105,8 +105,8 @@ LtgSpdb2Mdv::LtgSpdb2Mdv(int argc, char **argv)
 
   PMU_auto_init((char *) _progName.c_str(),
 		_params.instance,
-		PROCMAP_REGISTER_INTERVAL);
-  
+		_params.procmap_register_interval);
+
   // initialize the trigger object
   
   if (_params.debug >= Params::DEBUG_NORM)
