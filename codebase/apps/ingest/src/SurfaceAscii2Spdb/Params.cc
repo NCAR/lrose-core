@@ -1,26 +1,9 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+// ** Copyright UCAR (c) 1992 - 2019
+// ** University Corporation for Atmospheric Research(UCAR)
+// ** National Center for Atmospheric Research(NCAR)
+// ** Boulder, Colorado, USA
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -471,8 +454,8 @@ using namespace std;
   {
     out << "TDRP args: [options as below]\n"
         << "   [ -params/--params path ] specify params file path\n"
-        << "   [ -check_params] check which params are not set\n"
-        << "   [ -print_params [mode]] print parameters\n"
+        << "   [ -check_params/--check_params] check which params are not set\n"
+        << "   [ -print_params/--print_params [mode]] print parameters\n"
         << "     using following modes, default mode is 'norm'\n"
         << "       short:   main comments only, no help or descr\n"
         << "                structs and arrays on a single line\n"
@@ -738,16 +721,18 @@ using namespace std;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("output_report_type");
     tt->descr = tdrpStrDup("Type of station report to put in the output SPDB database");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("Use STATION_REPORT if input pressure is sea level pressure. Use PRESSURE_STATION_REPORT if pressure is station pressure.");
     tt->val_offset = (char *) &output_report_type - &_start_;
     tt->enum_def.name = tdrpStrDup("output_report_type_t");
-    tt->enum_def.nfields = 2;
+    tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("STATION_REPORT");
       tt->enum_def.fields[0].val = STATION_REPORT;
-      tt->enum_def.fields[1].name = tdrpStrDup("XML");
-      tt->enum_def.fields[1].val = XML;
+      tt->enum_def.fields[1].name = tdrpStrDup("PRESSURE_STATION_REPORT");
+      tt->enum_def.fields[1].val = PRESSURE_STATION_REPORT;
+      tt->enum_def.fields[2].name = tdrpStrDup("XML");
+      tt->enum_def.fields[2].val = XML;
     tt->single_val.e = STATION_REPORT;
     tt++;
     

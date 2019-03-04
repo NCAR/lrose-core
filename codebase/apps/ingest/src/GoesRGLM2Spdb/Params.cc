@@ -1,26 +1,9 @@
-/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/* ** Copyright UCAR                                                         */
-/* ** University Corporation for Atmospheric Research (UCAR)                 */
-/* ** National Center for Atmospheric Research (NCAR)                        */
-/* ** Boulder, Colorado, USA                                                 */
-/* ** BSD licence applies - redistribution and use in source and binary      */
-/* ** forms, with or without modification, are permitted provided that       */
-/* ** the following conditions are met:                                      */
-/* ** 1) If the software is modified to produce derivative works,            */
-/* ** such modified software should be clearly marked, so as not             */
-/* ** to confuse it with the version available from UCAR.                    */
-/* ** 2) Redistributions of source code must retain the above copyright      */
-/* ** notice, this list of conditions and the following disclaimer.          */
-/* ** 3) Redistributions in binary form must reproduce the above copyright   */
-/* ** notice, this list of conditions and the following disclaimer in the    */
-/* ** documentation and/or other materials provided with the distribution.   */
-/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
-/* ** if any, may be used to endorse or promote products derived from        */
-/* ** this software without specific prior written permission.               */
-/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
-/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
-/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
-/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+// ** Copyright UCAR (c) 1992 - 2018
+// ** University Corporation for Atmospheric Research(UCAR)
+// ** National Center for Atmospheric Research(NCAR)
+// ** Boulder, Colorado, USA
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -50,6 +33,8 @@
  * @author Automatically generated
  *
  */
+using namespace std;
+
 #include "Params.hh"
 #include <cstring>
 
@@ -548,7 +533,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("GoesRGLM2Spdb");
-    tt->comment_text = tdrpStrDup("This program reads a set of GOES-R netCDF-formatted files and writes the data to an MDV file. The netCDF files used are from running goes-restitch.py which can be found at https://github.com/Unidata/ldm-alchemy/blob/master/goes-restitch.py goes-restitch.py works on the NOTHER LDM feed (TI....) and stitches the Sectorized Cloud Moisture Images (SCMI) back together.\n\n This currently only works on the CONUS and MESOSCLAE scans with a lambert conformal projection. There are issues when testing on the Puerto Rico region which uses a Mercator projection. The Full Disk data from NoaaPort has 6km resolution and there is no current need for this data so the GEOSTATIONARY mapping has not been implemented.\n\n Flashes and Groups have data quality flags associated with them: \n flag_values = 0, 1, 3, 5 \n flag_meanings = \n good_quality \n degraded_due_to_flash_constituent_events_out_of_time_order \n degraded_due_to_flash_constituent_event_count_exceeds_threshold \n degraded_due_to_flash_duration_exceeds_threshold");
+    tt->comment_text = tdrpStrDup("This program reads a set of GOES-R GLM netCDF-formatted files and writes the data to an spdb file.\n\n Flashes and Groups have data quality flags associated with them: \n flag_values = 0, 1, 3, 5 \n flag_meanings = \n good_quality \n degraded_due_to_flash_constituent_events_out_of_time_order \n degraded_due_to_flash_constituent_event_count_exceeds_threshold \n degraded_due_to_flash_duration_exceeds_threshold");
     tt++;
     
     // Parameter 'Comment 1'

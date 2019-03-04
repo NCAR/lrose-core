@@ -71,6 +71,8 @@ int WWA2Spdb::process_warn(char *start_ptr, int warn_len,DsSpdb &OutSpdb)
 		return -1;
 	}
 
+        
+
 	UTIMstruct it;
 	UTIMstruct et;
 	char buf[32]; // Temp parsing buffer
@@ -82,6 +84,14 @@ int WWA2Spdb::process_warn(char *start_ptr, int warn_len,DsSpdb &OutSpdb)
 	if(P.Debug) fprintf(stderr,"    Station: %s\n",buf);
 
 	memset(buf,0,32); // Clean out buffer
+
+         // Grab Event Tracking Number (ETN)
+         memset(buf,0,32); // Clean out buffer
+         memcpy(buf, oc_line+17,4);
+         int etn = Spdb::hash4CharsToInt32(buf);
+         if (P.Debug) fprintf(stderr, "    EventTrackingNumber: %s\n",buf);
+
+         memset(buf,0,32); // Clean out buffer
 
         /* Reference : http://weather.gov/os/vtec/pdfs/VTEC_explanation6.pdf
 	   Actions string meaning:
@@ -99,13 +109,29 @@ int WWA2Spdb::process_warn(char *start_ptr, int warn_len,DsSpdb &OutSpdb)
 
 	// Grab Actions type
 	memcpy(buf,oc_line+3,3);
-	string A_type;
-	A_type = buf;
-	if(A_type == "NEW" || A_type == "CAN" || A_type == "CON"){
-	  cerr << "Action type: " << A_type << endl;
-	  cerr << "Future work to use this\n";
-	  cerr << "information properly.\n";
-	}
+	string action;
+	action = buf;
+        if(action == "NEW")
+           W._hdr.action =  ACT_NEW;
+        else if (action == "CON")
+           W._hdr.action =  ACT_CON;
+        else if (action == "EXT")
+           W._hdr.action =  ACT_EXT;
+        else if (action == "EXA")
+           W._hdr.action =  ACT_EXA;
+        else if (action == "EXB")
+           W._hdr.action =  ACT_EXB;
+        else if (action == "UPG")
+           W._hdr.action =  ACT_UPG;
+        else if (action == "CAN")
+           W._hdr.action =  ACT_CAN;
+        else if (action == "EXP")
+           W._hdr.action =  ACT_EXP;
+        else if (action == "COR")
+           W._hdr.action =  ACT_COR;
+        else if (action == "ROU")
+           W._hdr.action =  ACT_ROU;
+
 	
 	memset(buf,0,32); // Clean out buffer
 
@@ -296,7 +322,8 @@ int WWA2Spdb::process_warn(char *start_ptr, int warn_len,DsSpdb &OutSpdb)
 
 	W.assemble(); // Build output data chunk 
 
+    // note etn or event tracking number is added as data_type2
     OutSpdb.addPutChunk(Fo_Id,W._hdr.issue_time,W._hdr.expire_time,
-			            W.getBufLen(), W.getBufPtr(),0);
+			            W.getBufLen(), W.getBufPtr(),etn);
 	return 0;
 }

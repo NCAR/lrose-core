@@ -31,17 +31,8 @@
 commentdef
 {
   p_header = "GoesRGLM2Spdb";
-  p_text = "This program reads a set of GOES-R netCDF-formatted files "
-            "and writes the data to an MDV file. The netCDF files used "
-            "are from running goes-restitch.py which can be found at "
-            "https://github.com/Unidata/ldm-alchemy/blob/master/goes-restitch.py "
-            "goes-restitch.py works on the NOTHER LDM feed (TI....) and stitches the "
-            "Sectorized Cloud Moisture Images (SCMI) back together.\n\n "
-            "This currently only works on the CONUS and MESOSCLAE scans with a "
-            "lambert conformal projection. There are issues when testing on "
-            "the Puerto Rico region which uses a Mercator projection. "
-            "The Full Disk data from NoaaPort has 6km resolution and there is no "
-            "current need for this data so the GEOSTATIONARY mapping has not been implemented.\n\n "
+  p_text = "This program reads a set of GOES-R GLM netCDF-formatted files "
+            "and writes the data to an spdb file.\n\n "
             "Flashes and Groups have data quality flags associated with them: \n "
             "flag_values = 0, 1, 3, 5 \n "
             "flag_meanings = \n "

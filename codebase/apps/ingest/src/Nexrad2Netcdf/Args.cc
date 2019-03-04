@@ -102,6 +102,8 @@ int Args::parse(int argc, char **argv, string prog_name, Params *params)
     else if ( !strcmp(argv[i], "-verbose" )) {
       sprintf( paramVal, "verbose = true;" );
       TDRP_add_override( &override, paramVal );
+      sprintf( paramVal, "debug = true;" );
+      TDRP_add_override( &override, paramVal );
     }
 
     //

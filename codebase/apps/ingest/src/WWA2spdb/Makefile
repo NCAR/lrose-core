@@ -41,7 +41,7 @@ LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
 	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz -lpthread -lm
 
-LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS) -L/d1/test/libs/rapformats
 
 LOC_CFLAGS =
 

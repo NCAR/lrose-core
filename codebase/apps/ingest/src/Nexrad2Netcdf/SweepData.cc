@@ -28,7 +28,7 @@
 // Jaimi Yee, RAP, NCAR, P.O.Box 3000, Boulder, CO, 
 //   80307-3000, USA
 //
-// $Id: SweepData.cc,v 1.23 2018/10/16 20:43:22 jcraig Exp $
+// $Id: SweepData.cc,v 1.24 2019/02/01 21:52:27 jcraig Exp $
 //
 /////////////////////////////////////////////////////////
 #include <math.h>
@@ -429,9 +429,10 @@ void SweepData::fillRec()
    
    
    //
-   // If we did not have overlap in the beam azimuths...
+   // If we did not have overlap in the beam azimuths to cover the rec window width
    //
-   if( sumOfDiffs <= 359.5 ) {
+   int degBeamQueue = 2 * ((int) (maxBeamQueueSize / 2));
+   if( sumOfDiffs - degBeamQueue <= 359.5 ) {
 
       float firstAzimuth = (beams[0])->getAzimuth();
       float lastAzimuth  = (beams[n-1])->getAzimuth();
@@ -450,9 +451,9 @@ void SweepData::fillRec()
          //   after the last beam was done, but before the sweep
          //   was written out.
          //
-         int nMissing = 2 * ((int) (maxBeamQueueSize / 2));
 
-         for( int i = 0; i < nMissing; i++ ) {
+
+         for( int i = 0; i < degBeamQueue; i++ ) {
             addBeamToQueue( beams[i] );
 
             if( (int) beamQueue.size() == maxBeamQueueSize ) {

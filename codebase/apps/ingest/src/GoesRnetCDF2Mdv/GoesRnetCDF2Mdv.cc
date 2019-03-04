@@ -597,7 +597,8 @@ bool GoesRnetCDF2Mdv::_initTrigger(void)
     DsInputPathTrigger *trigger = new DsInputPathTrigger();
     if (trigger->init(_params->input_dir,
 		      _params->max_valid_secs,
-		      PMU_auto_register) != 0)
+		      PMU_auto_register,
+		      false, true ) != 0)
     {
       cerr << ERROR_STR << method_name << endl;
       cerr << "Error initializing REALTIME trigger:" << endl;
@@ -878,8 +879,15 @@ void GoesRnetCDF2Mdv::_readGlobalAttributes()
     _file.readGlobAttr(TIME_COVERAGE_END, _globalAtts.timeCoverageEnd);
     _file.readGlobAttr(CREATED_BY, _globalAtts.createdBy);
   } catch (NcxxException& e) {
+    string errStr = e.what();
+    size_t ePos = errStr.find("ERROR");
+    while (ePos != string::npos){
+      errStr.replace(ePos,std::string("ERROR").length(), "WARNING");
+      ePos = errStr.find("ERROR");
+    }
+    cerr << errStr << endl;
     cerr << WARN_STR  << methodName << endl;
-    cerr << "  didn't find global attribute, " << e.what() << endl;
+    cerr << "  didn't find global attribute, " << errStr << endl;
   }
 
   try {

@@ -153,12 +153,15 @@ commentdef {
 typedef enum
 {
   STATION_REPORT,
+  PRESSURE_STATION_REPORT,
   XML
 } output_report_type_t;
 
 paramdef enum output_report_type_t
 {
   p_descr = "Type of station report to put in the output SPDB database";
+  p_help = "Use STATION_REPORT if input pressure is sea level pressure. "
+           "Use PRESSURE_STATION_REPORT if pressure is station pressure.";
   p_default = STATION_REPORT;
 } output_report_type;
 

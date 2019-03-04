@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/07 01:23:09 $
-//   $Id: ihopNcarSfcCdf2Spdb.cc,v 1.6 2016/03/07 01:23:09 dixon Exp $
-//   $Revision: 1.6 $
+//   $Date: 2019/03/04 00:13:38 $
+//   $Id: ihopNcarSfcCdf2Spdb.cc,v 1.7 2019/03/04 00:13:38 dixon Exp $
+//   $Revision: 1.7 $
 //   $State: Exp $
 //
  

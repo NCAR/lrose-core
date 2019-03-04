@@ -1222,8 +1222,7 @@ bool GoesRGLM2Spdb::_readCountVars(const char *CountVar, size_t &ProductCount) {
 
   for (size_t i = 0; i < _productCount; i++) {
 
-    // convert from milliseconds to seconds.
-    _productTime[i] = _beginTime + time_t(float(.001) *  ( static_cast<short>(svals[i]) * scaleFactor + offset ) );
+    _productTime[i] = _beginTime + static_cast<time_t>(svals[i] * scaleFactor + offset);
   }
   delete[] svals;
 

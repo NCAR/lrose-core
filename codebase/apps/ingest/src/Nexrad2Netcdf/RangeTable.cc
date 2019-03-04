@@ -31,7 +31,7 @@
 //   80307-3000, USA
 //
 //
-// $Id: RangeTable.cc,v 1.3 2016/03/07 01:23:03 dixon Exp $
+// $Id: RangeTable.cc,v 1.4 2019/01/10 17:01:07 jcraig Exp $
 //
 /////////////////////////////////////////////////////////
 #include <stdio.h>
@@ -110,9 +110,10 @@ status_t RangeTable::setup( char* filePath )
 
 float RangeTable::getRange( float elevation ) 
 {
-   if ( elevation < 0 ) {
-      return( 0 );
-   }
+  if(elevation < 0.0 && elevation > -0.4)
+    elevation = 0.0;
+  if( elevation < 0.0 )
+    return( 0.0 );
 
    //
    // Round the elevation to the nearest .1 degree

@@ -33,9 +33,9 @@
  * RCS info
  * $Author: dixon $
  * $Locker:  $
- * $Date: 2016/03/07 01:23:04 $
- * $Id: orpg_product.h,v 1.2 2016/03/07 01:23:04 dixon Exp $
- * $Revision: 1.2 $
+ * $Date: 2019/03/04 00:13:38 $
+ * $Id: orpg_product.hh,v 1.1 2019/03/04 00:13:38 dixon Exp $
+ * $Revision: 1.1 $
  * $State: Exp $
  */
 

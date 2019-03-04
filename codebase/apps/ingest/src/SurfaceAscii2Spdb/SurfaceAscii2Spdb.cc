@@ -243,6 +243,8 @@ int SurfaceAscii2Spdb::_processFile(const char *file_path)
     
     if (_params.output_report_type == Params::STATION_REPORT) {
       obs.assembleAsReport(STATION_REPORT);
+    } else if (_params.output_report_type == Params::PRESSURE_STATION_REPORT) {
+        obs.assembleAsReport(PRESSURE_STATION_REPORT);
     } else if (_params.output_report_type == Params::XML) {
       obs.assembleAsXml();
     } else {
@@ -365,8 +367,14 @@ int SurfaceAscii2Spdb::_fillObs(const vector<string> &toks, WxObs &obs, si32 &st
     return 0;
   }
   double pressure = _decodeDouble(toks[14]);
-  if (pressure > -9990) {
-    obs.addPressureMb(pressure);
+  if (_params.output_report_type == Params::STATION_REPORT) {
+    if (pressure > -9990) {
+      obs.addSeaLevelPressureMb(pressure);
+    }
+  } else {
+    if (pressure > -9990) {
+      obs.addPressureMb(pressure);
+    }
   }
 
   if (toks.size() < 16) {

@@ -1,13 +1,13 @@
-/.cvsignore/1.1/Thu Dec 29 22:57:34 2016//
-/DataMgr.hh/1.7/Thu Dec 29 22:57:34 2016//
-/Makefile/1.7/Thu Dec 29 22:57:34 2016//
-/SndgIngest.cc/1.3/Thu Dec 29 22:57:34 2016//
-/SndgIngest.hh/1.2/Thu Dec 29 22:57:34 2016//
-/main.cc/1.2/Thu Dec 29 22:57:34 2016//
-/paramdef.sndgIngest/1.4/Thu Dec 29 22:57:34 2016//
-/DataMgr.cc/1.13/Mon Oct  8 20:02:14 2018//
-/dieGracefully.cc/1.2/Mon Oct  8 20:02:14 2018//
-/fileSelect.cc/1.2/Mon Oct  8 20:02:14 2018//
-/Params.cc/1.4/Thu May 31 01:00:13 2018//
-/Params.hh/1.4/Thu May 31 01:00:13 2018//
+/.cvsignore/1.1/Thu Jan 10 23:56:17 2019//
+/DataMgr.cc/1.13/Thu Jan 10 23:56:17 2019//
+/DataMgr.hh/1.7/Thu Jan 10 23:56:17 2019//
+/Makefile/1.7/Thu Jan 10 23:56:17 2019//
+/Params.cc/1.4/Thu Jan 10 23:56:17 2019//
+/Params.hh/1.4/Thu Jan 10 23:56:17 2019//
+/SndgIngest.cc/1.3/Thu Jan 10 23:56:17 2019//
+/SndgIngest.hh/1.2/Thu Jan 10 23:56:17 2019//
+/dieGracefully.cc/1.2/Thu Jan 10 23:56:17 2019//
+/fileSelect.cc/1.2/Thu Jan 10 23:56:17 2019//
+/main.cc/1.2/Thu Jan 10 23:56:17 2019//
+/paramdef.sndgIngest/1.4/Thu Jan 10 23:56:17 2019//
 D
