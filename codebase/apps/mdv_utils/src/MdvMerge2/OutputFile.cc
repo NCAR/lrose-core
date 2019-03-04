@@ -112,6 +112,8 @@ int OutputFile::write(const time_t& mergeTime,
   } else {
     mhdr.data_dimension = 3;
   }
+  mhdr.forecast_time = _exampleMhdr.forecast_time;
+  mhdr.forecast_delta = _exampleMhdr.forecast_delta;  
   mhdr.data_collection_type = _exampleMhdr.data_collection_type;
   mhdr.native_vlevel_type = _exampleMhdr.native_vlevel_type;
   mhdr.vlevel_type = _exampleMhdr.vlevel_type;

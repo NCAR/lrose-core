@@ -82,6 +82,19 @@ public:
   } arithmetic_operator_t;
 
   typedef enum {
+    PROJ_LATLON = 0,
+    PROJ_LAMBERT_CONF = 3,
+    PROJ_MERCATOR = 4,
+    PROJ_POLAR_STEREO = 5,
+    PROJ_FLAT = 8,
+    PROJ_OBLIQUE_STEREO = 12,
+    PROJ_TRANS_MERCATOR = 15,
+    PROJ_ALBERS = 16,
+    PROJ_LAMBERT_AZIM = 17,
+    PROJ_VERT_PERSP = 18
+  } projection_t;
+
+  typedef enum {
     ENCODING_MDV_ASIS = 0,
     ENCODING_MDV_INT8 = 1,
     ENCODING_MDV_INT16 = 2,
@@ -94,6 +107,15 @@ public:
     char* start_time;
     char* end_time;
   } time_list_trigger_t;
+
+  typedef struct {
+    int nx;
+    int ny;
+    double minx;
+    double miny;
+    double dx;
+    double dy;
+  } grid_params_t;
 
   ///////////////////////////
   // Member functions
@@ -434,6 +456,46 @@ public:
 
   float max_value;
 
+  tdrp_bool_t remap_xy;
+
+  tdrp_bool_t auto_remap_to_latlon;
+
+  tdrp_bool_t remap_at_source;
+
+  projection_t remap_projection;
+
+  grid_params_t remap_grid;
+
+  double remap_rotation;
+
+  double remap_origin_lat;
+
+  double remap_origin_lon;
+
+  double remap_lat1;
+
+  double remap_lat2;
+
+  double remap_central_scale;
+
+  double remap_tangent_lat;
+
+  double remap_tangent_lon;
+
+  tdrp_bool_t remap_pole_is_north;
+
+  double remap_persp_radius;
+
+  double remap_false_northing;
+
+  double remap_false_easting;
+
+  tdrp_bool_t remap_set_offset_origin;
+
+  double remap_offset_origin_latitude;
+
+  double remap_offset_origin_longitude;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -441,7 +503,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[31];
+  mutable TDRPtable _table[52];
 
   const char *_className;
 

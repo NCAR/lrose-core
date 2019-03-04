@@ -126,7 +126,7 @@ paramdef string
   p_descr = "Trigger URL";
   p_help = "This is the URL to use to trigger processing.  The valid time of the new data is used as the runtime for\n"
   	   "ARCHIVE mode, but not for realtime mode where the current time is used as the runtime.";
-  p_default = "mdvp:://localhost::mdv/metar_mapper";
+  p_default = "";
 } trigger_url;
 
 paramdef int

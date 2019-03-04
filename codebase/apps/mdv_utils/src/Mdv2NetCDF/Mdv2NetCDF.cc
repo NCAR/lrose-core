@@ -1,25 +1,11 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// Copyright, University Corporation for Atmospheric Research (UCAR) 2009-2017. 
+// The Government's right to use this data and/or software is restricted per 
+// the terms of Cooperative Agreement between UCAR and the National  Science 
+// Foundation, to government use only which includes the nonexclusive, 
+// nontransferable, irrevocable, royalty-free license to exercise or have 
+// exercised for or on behalf of the U.S. Government throughout the world. 
+// All other rights are reserved. 
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ////////////////////////////////////////////////////////////
 // Mdv2NetCDF.cc
@@ -40,8 +26,10 @@
 #include "Mdv2NetCDF.hh"
 #include <toolsa/Path.hh>
 #include <Mdv/MdvxChunk.hh>
+#ifndef NO_RADX_DATA
 #include <Mdv/MdvxRadar.hh>
 #include <Radx/DoradeRadxFile.hh>
+#endif
 using namespace std;
 
 /////////////////////////////////////////////////
@@ -56,11 +44,12 @@ Mdv2NetCDF::Mdv2NetCDF(int argc, char **argv)
   _trigger = NULL;
   _commentWasSet = false;
   _comment = "";
+  _paramsPath = (char *) "unknown";
 
   // set programe name
 
   _progName = "Mdv2NetCDF";
-
+ 
   ucopyright((char *) _progName.c_str());
 
   // get command line args
@@ -74,8 +63,6 @@ Mdv2NetCDF::Mdv2NetCDF(int argc, char **argv)
   }
 
   // get TDRP params
-
-  _paramsPath = (char *) "unknown";
 
   if (_params.loadFromArgs(argc, argv, _args.override.list,
                            &_paramsPath))
@@ -114,7 +101,7 @@ Mdv2NetCDF::Mdv2NetCDF(int argc, char **argv)
     return;
   }
 
-// init process mapper registration
+  // init process mapper registration
   int pmuRegSec = PROCMAP_REGISTER_INTERVAL;
 
   if(_params.procmap_register_interval_secs > PROCMAP_REGISTER_INTERVAL) {
@@ -203,17 +190,22 @@ int Mdv2NetCDF::_setUpTrigger()
 
     DsTimeListTrigger *archive_trigger = new DsTimeListTrigger();
 
-    if (archive_trigger->init(_params.mdv_url,
-                              _args.startTime,
-                              _args.endTime) != 0)
+    if (archive_trigger) 
     {
-      cerr << archive_trigger->getErrStr();
-      _trigger = 0;
-      return 1;
-    }
-    else
-    {
+      if (archive_trigger->init(_params.mdv_url,
+                                 _args.startTime,
+                                 _args.endTime) != 0)
+      {
+	cerr << archive_trigger->getErrStr();
+	delete archive_trigger;
+	_trigger = 0;
+	return 1;
+      }
       _trigger = archive_trigger;
+    }
+    else 
+    {
+      _trigger = 0;
     }
   }
   else  if ( _params.mode == Params::FILELIST )
@@ -227,15 +219,24 @@ int Mdv2NetCDF::_setUpTrigger()
         cerr << "FileInput::init: Initializing archive FILELIST mode." << endl;
 
       DsFileListTrigger *file_trigger = new DsFileListTrigger();
-
-      if  (file_trigger->init( _args.inputFileList ) )
-      {
-        cerr << file_trigger->getErrStr();
-        _trigger = 0;
-        return 1;
+      
+      if (file_trigger)
+      { 
+	if  (file_trigger->init( _args.inputFileList ) )
+	{
+	  cerr << file_trigger->getErrStr();
+	  delete file_trigger;
+	  _trigger = 0;
+	  return 1;
+	}
+	_trigger = file_trigger;
       }
       else
-        _trigger = file_trigger;
+      {
+        _trigger = 0;
+	cerr << "Error creating file trigger" << endl;
+	return 1;
+      }
     }
   }
   else if (_params.mode == Params::REALTIME || 
@@ -249,21 +250,27 @@ int Mdv2NetCDF::_setUpTrigger()
     // realtime mode
 
     DsLdataTrigger *realtime_trigger = new DsLdataTrigger();
-
-    if (realtime_trigger->init(_params.mdv_url,
-                               _params.max_valid_realtime_age,
-                               PMU_auto_register))
+    
+    if (realtime_trigger)
     {
-      cerr << realtime_trigger->getErrStr();
-      _trigger = 0;
-      return 1;
+      if (realtime_trigger->init(_params.mdv_url,
+                                 _params.max_valid_realtime_age,
+                                 PMU_auto_register))
+      {
+        cerr << realtime_trigger->getErrStr();
+        delete realtime_trigger;
+        _trigger = 0;
+        return 1;
+      }
+      _trigger = realtime_trigger;
     }
     else
     {
-      _trigger = realtime_trigger;
+      cerr << "ERROR creating realtime trigger" << endl;
+      _trigger = 0;
+      return 1;
     }
   }
-
   else if (_params.mode == Params::SPEC_FCST_REALTIME)
   {
     if (_params.debug)
@@ -279,25 +286,33 @@ int Mdv2NetCDF::_setUpTrigger()
 
     fcast_lead_times.push_back(_params.fcast_lead_time.lead_time_secs);
 
-    if (spec_trigger->init(_params.mdv_url,
-                           fcast_lead_times,
-                           _params.fcast_lead_time.use_gen_time,
-                           7200, PMU_auto_register) != 0)
-    {
-      cerr << spec_trigger->getErrStr() << endl;
-	  
-      _trigger = 0;
+    if (spec_trigger)
+    { 
+      if (spec_trigger->init(_params.mdv_url,
+                             fcast_lead_times,
+                             _params.fcast_lead_time.use_gen_time,
+                             7200, PMU_auto_register) != 0)
+      {
+        cerr << spec_trigger->getErrStr() << endl;
+        delete spec_trigger;	  
+        _trigger = 0;
+        return 1;
+      }
+      _trigger = spec_trigger;
     }
     else
     {
-      _trigger = spec_trigger;
-    }
-  }
+      cerr << "ERROR creating specific forecast trigger" << endl;
+      _trigger = 0;
+      return 1;
+    }  
+  } 
   else
+  { 
     return 1;
-
+  }
+  
   return 0;
-
 }
 
 ///////////////////////////////////
@@ -382,6 +397,7 @@ int Mdv2NetCDF::_processData(time_t inputTime, int leadTime,
 
   // perform the translation
 
+#ifndef NO_RADX_DATA
   if (mdvx.getProjection() == Mdvx::PROJ_POLAR_RADAR && 
       _params.radial_file_type != Params::FILE_TYPE_CF) {
 
@@ -407,13 +423,16 @@ int Mdv2NetCDF::_processData(time_t inputTime, int leadTime,
     _writeLdataInfo(mdvx, outputPath);
 
   } else {
+#endif
 
     // basic CF
 
     string outputPath = _computeOutputPath(mdvx);
     Mdv2NcfTrans trans;
     trans.setDebug(_params.debug);
+#ifndef NO_RADX_DATA
     trans.setRadialFileType(DsMdvx::RADIAL_TYPE_CF);
+#endif
     if (trans.translate(mdvx, outputPath)) {
       cerr << "ERROR - Mdv2NetCDF::_processData()" << endl;
       cerr << trans.getErrStr() << endl;
@@ -423,7 +442,9 @@ int Mdv2NetCDF::_processData(time_t inputTime, int leadTime,
     // write latest data info
     _writeLdataInfo(mdvx, outputPath);
     
+#ifndef NO_RADX_DATA
   }
+#endif
     
   return 0;
 
@@ -526,6 +547,8 @@ string Mdv2NetCDF::_computeOutputPath(const DsMdvx &mdvx)
     isForecast = false;
   }
 
+#ifndef NO_RADX_DATA
+
   // determine if we have polar radar data
 
   bool isPolar = false;
@@ -560,6 +583,7 @@ string Mdv2NetCDF::_computeOutputPath(const DsMdvx &mdvx)
     cerr << "  isSector: " << (isSector?"Y":"N") << endl;
     cerr << "  fixedAngle: " << fixedAngle << endl;
   }
+#endif
 
   // compute output dir
 

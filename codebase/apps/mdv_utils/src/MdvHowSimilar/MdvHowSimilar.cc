@@ -374,11 +374,13 @@ void MdvHowSimilar::_readInputFiles(){
 
   if (_mdvx1.readVolume()){
     cerr << "Failed to read from file " << _args->file1 << endl;
+    cerr << _mdvx1.getErrStr();
     exit (-1);
   }
 
   if (_mdvx2.readVolume()){
     cerr << "Failed to read from file " << _args->file2 << endl;
+    cerr << _mdvx2.getErrStr();
     exit (-1);
   }
 
@@ -386,8 +388,31 @@ void MdvHowSimilar::_readInputFiles(){
 	
 }
 
+void MdvHowSimilar::_printExplanationHeader()
+{
+	//nDiffPts: %10i   TotalDiff: %10.4f   TotalAbsDiff: %10.4f   MeanDiff: %10.4f   STD: %10.4f   RMS: %10.4f Bad1: %i Bad2: %i\n",
+
+	*rout << "nDiffPts - The number of points (i,j) on the current k-level that had a difference more than the \"significant_difference\" parameter in the param file. This uses the absolute value of the difference.\n";
+	
+	*rout << "TotalDiff - The sum of the differences at each point (when neither point is missing or bad).\n";
+
+	*rout << "TotalAbsDiff - The sum of the absolute value of the differences at each point (when neither point is missing or bad).\n";
+
+	*rout << "MeanDiff - TotalDiff divide by the total # of points in the field that are not missing or bad.\n";
+
+	*rout << "STD -  STD of the TotalDiff population\n";
+
+	*rout << "RMS - root mean square difference of the TotalDiff population.\n";
+
+	*rout << "Bad1 - # of points where input 1 is bad/missing, but input 2 is valid data.\n";
+
+	*rout << "Bad2 - # of points where input 2 is bad/missing, but input 1 is valid data. \n";
+
+}
+
 void MdvHowSimilar::_compareInputFiles()
 {
+	_printExplanationHeader();
 
   for (fciIx_t fciIx = fieldComparisonInfo.begin(); fciIx != fieldComparisonInfo.end(); fciIx++){
     field_comparison_info_t& fci = *fciIx;
@@ -408,7 +433,7 @@ void MdvHowSimilar::_compareInputFiles()
     float rmsTotal = 0;
     float diffTotal = 0.0;
     float absDiffTotal = 0.0;
-    int count = 0;
+
     for (int iz=0; iz < fh1.nz; iz++){
       string header(fci.field_name );
       header += " : k = ";

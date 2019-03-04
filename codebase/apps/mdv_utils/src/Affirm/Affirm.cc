@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: hardt $
 //   $Locker:  $
-//   $Date: 2017/06/15 17:54:23 $
-//   $Id: Affirm.cc,v 1.27 2017/06/15 17:54:23 hardt Exp $
-//   $Revision: 1.27 $
+//   $Date: 2018/05/22 18:24:45 $
+//   $Id: Affirm.cc,v 1.29 2018/05/22 18:24:45 hardt Exp $
+//   $Revision: 1.29 $
 //   $State: Exp $
 //
 
@@ -78,7 +78,7 @@ const double Affirm::MISSING_DATA_VALUE = -999.0;
  */
 
 Affirm::Affirm(int argc, char **argv) :
-        _lastRealtimeFileTime(0) {
+  _lastRealtimeFileTime(0) {
   static char *routine_name = (char *) "Constructor";
 
   // Make sure the singleton wasn't already created.
@@ -684,7 +684,6 @@ void Affirm::_processFile(const DsMdvx &first_input_file, const DsMdvx &sec_inpu
 
 // if the grid is 2D don't worry about checking minz or dz
   if (first_field_hdr.nz == 1 && sec_field_hdr.nz == 1) {
-    cout << "diff: " << fabs(first_field_hdr.grid_minx - sec_field_hdr.grid_minx) << endl;
     if (fabs(first_field_hdr.grid_minx - sec_field_hdr.grid_minx) > _gridDeltaTol ||
         fabs(first_field_hdr.grid_miny - sec_field_hdr.grid_miny) > _gridDeltaTol) {
       cerr << "WARNING: " << _className() << "::" << routine_name << endl;
@@ -710,8 +709,19 @@ void Affirm::_processFile(const DsMdvx &first_input_file, const DsMdvx &sec_inpu
     }
   } else {
     if (fabs(first_field_hdr.grid_minx - sec_field_hdr.grid_minx) > _gridDeltaTol ||
-        fabs(first_field_hdr.grid_miny - sec_field_hdr.grid_miny) > _gridDeltaTol ||
-        fabs(first_field_hdr.grid_minz - sec_field_hdr.grid_minz) > _gridDeltaTol) {
+        fabs(first_field_hdr.grid_miny - sec_field_hdr.grid_miny) > _gridDeltaTol) {
+      cerr << "WARNING: " << _className() << "::" << routine_name << endl;
+      cerr << "Cannot process file for time " <<
+           utimstr(first_input_file.getMasterHeader().time_centroid) << endl;
+      cerr << "component field grids do not match" << endl;
+      cerr << "The field minimum grid values differ" << endl;
+      cerr << "*** Skipping ***" << endl << endl;
+
+      return;
+    }
+
+    if ((first_field_hdr.nz != 1) && (sec_field_hdr.nz != 1) &&
+        (fabs(first_field_hdr.grid_minz - sec_field_hdr.grid_minz) > _gridDeltaTol)) {
       cerr << "WARNING: " << _className() << "::" << routine_name << endl;
       cerr << "Cannot process file for time " <<
            utimstr(first_input_file.getMasterHeader().time_centroid) << endl;
@@ -832,7 +842,7 @@ DsMdvx *Affirm::_readFile(const time_t search_time,
                           const int field_num,
                           const char *field_name,
                           const int level_num,
-                          const int search_margin) const {
+                          const int search_margin)const {
   const string routine_name = "_readFile()";
 
   if (_params->debug)
@@ -863,6 +873,10 @@ DsMdvx *Affirm::_readFile(const time_t search_time,
 
   if (_params->debug)
     mdv_file->printReadRequest(cout);
+
+  if (_params->remap_xy) {
+    _remap(mdv_file);
+  }
 
   // Read in the data
 
@@ -1091,3 +1105,117 @@ void Affirm::_runRealtime(void) {
   } // while true
 
 }
+
+////////////////////////////////////////////
+// remap
+
+void Affirm::_remap(DsMdvx *input_mdv) const {
+
+  if (_params->remap_projection == Params::PROJ_LATLON) {
+    input_mdv->setReadRemapLatlon(_params->remap_grid.nx,
+                                  _params->remap_grid.ny,
+                                  _params->remap_grid.minx,
+                                  _params->remap_grid.miny,
+                                  _params->remap_grid.dx,
+                                  _params->remap_grid.dy);
+  } else if (_params->remap_projection == Params::PROJ_FLAT) {
+    input_mdv->setReadRemapFlat(_params->remap_grid.nx,
+                                _params->remap_grid.ny,
+                                _params->remap_grid.minx,
+                                _params->remap_grid.miny,
+                                _params->remap_grid.dx,
+                                _params->remap_grid.dy,
+                                _params->remap_origin_lat,
+                                _params->remap_origin_lon,
+                                _params->remap_rotation);
+  } else if (_params->remap_projection == Params::PROJ_LAMBERT_CONF) {
+    input_mdv->setReadRemapLambertConf(_params->remap_grid.nx,
+                                       _params->remap_grid.ny,
+                                       _params->remap_grid.minx,
+                                       _params->remap_grid.miny,
+                                       _params->remap_grid.dx,
+                                       _params->remap_grid.dy,
+                                       _params->remap_origin_lat,
+                                       _params->remap_origin_lon,
+                                       _params->remap_lat1,
+                                       _params->remap_lat2);
+  } else if (_params->remap_projection == Params::PROJ_POLAR_STEREO) {
+    Mdvx::pole_type_t poleType = Mdvx::POLE_NORTH;
+    if (!_params->remap_pole_is_north) {
+      poleType = Mdvx::POLE_SOUTH;
+    }
+    input_mdv->setReadRemapPolarStereo(_params->remap_grid.nx,
+                                       _params->remap_grid.ny,
+                                       _params->remap_grid.minx,
+                                       _params->remap_grid.miny,
+                                       _params->remap_grid.dx,
+                                       _params->remap_grid.dy,
+                                       _params->remap_origin_lat,
+                                       _params->remap_origin_lon,
+                                       _params->remap_tangent_lon,
+                                       poleType,
+                                       _params->remap_central_scale);
+  } else if (_params->remap_projection == Params::PROJ_OBLIQUE_STEREO) {
+    input_mdv->setReadRemapObliqueStereo(_params->remap_grid.nx,
+                                         _params->remap_grid.ny,
+                                         _params->remap_grid.minx,
+                                         _params->remap_grid.miny,
+                                         _params->remap_grid.dx,
+                                         _params->remap_grid.dy,
+                                         _params->remap_origin_lat,
+                                         _params->remap_origin_lon,
+                                         _params->remap_tangent_lat,
+                                         _params->remap_tangent_lon,
+                                         _params->remap_central_scale);
+  } else if (_params->remap_projection == Params::PROJ_MERCATOR) {
+    input_mdv->setReadRemapMercator(_params->remap_grid.nx,
+                                    _params->remap_grid.ny,
+                                    _params->remap_grid.minx,
+                                    _params->remap_grid.miny,
+                                    _params->remap_grid.dx,
+                                    _params->remap_grid.dy,
+                                    _params->remap_origin_lat,
+                                    _params->remap_origin_lon);
+  } else if (_params->remap_projection == Params::PROJ_TRANS_MERCATOR) {
+    input_mdv->setReadRemapTransverseMercator(_params->remap_grid.nx,
+                                              _params->remap_grid.ny,
+                                              _params->remap_grid.minx,
+                                              _params->remap_grid.miny,
+                                              _params->remap_grid.dx,
+                                              _params->remap_grid.dy,
+                                              _params->remap_origin_lat,
+                                              _params->remap_origin_lon,
+                                              _params->remap_central_scale);
+  } else if (_params->remap_projection == Params::PROJ_ALBERS) {
+    input_mdv->setReadRemapAlbers(_params->remap_grid.nx,
+                                  _params->remap_grid.ny,
+                                  _params->remap_grid.minx,
+                                  _params->remap_grid.miny,
+                                  _params->remap_grid.dx,
+                                  _params->remap_grid.dy,
+                                  _params->remap_origin_lat,
+                                  _params->remap_origin_lon,
+                                  _params->remap_lat1,
+                                  _params->remap_lat2);
+  } else if (_params->remap_projection == Params::PROJ_LAMBERT_AZIM) {
+    input_mdv->setReadRemapLambertAzimuthal(_params->remap_grid.nx,
+                                            _params->remap_grid.ny,
+                                            _params->remap_grid.minx,
+                                            _params->remap_grid.miny,
+                                            _params->remap_grid.dx,
+                                            _params->remap_grid.dy,
+                                            _params->remap_origin_lat,
+                                            _params->remap_origin_lon);
+  } else if (_params->remap_projection == Params::PROJ_VERT_PERSP) {
+    input_mdv->setReadRemapVertPersp(_params->remap_grid.nx,
+                                     _params->remap_grid.ny,
+                                     _params->remap_grid.minx,
+                                     _params->remap_grid.miny,
+                                     _params->remap_grid.dx,
+                                     _params->remap_grid.dy,
+                                     _params->remap_origin_lat,
+                                     _params->remap_origin_lon,
+                                     _params->remap_persp_radius);
+  }
+}
+

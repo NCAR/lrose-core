@@ -44,6 +44,7 @@
 
 #include <dsdata/DsTrigger.hh>
 #include <Mdv/DsMdvx.hh>
+#include <Mdv/MdvxRemapLut.hh>
 
 #include "Args.hh"
 #include "Params.hh"
@@ -143,6 +144,7 @@ class MdvArithmetic
   Params *_params;
   
   DsTrigger *_dataTrigger;
+  MdvxRemapLut _remapLut;
   
 
   /////////////////////
@@ -182,7 +184,10 @@ class MdvArithmetic
 		  const DateTime &fcst_time,
 		  const int max_input_secs,
 		  DsMdvx &input_mdvx) const;
-  
+
+  void _remap(DsMdvx &mdvx);
+
+  void _autoRemapToLatLon(DsMdvx &mdvx);
 
 };
 

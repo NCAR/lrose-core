@@ -33,7 +33,7 @@
  * 
  *  @date August, 2014
  *
- *  @version $Id: MdvBlender.cc,v 1.30 2017/10/17 19:16:03 mccabe Exp $
+ *  @version $Id: MdvBlender.cc,v 1.35 2018/11/14 00:19:41 mccabe Exp $
  *
  */
 
@@ -169,21 +169,15 @@ int MdvBlender::run()
     cerr << "Running:" << endl;
   } 
 
-  //  bool moreDataTimes = true;
-
-  //  while(moreDataTimes){
   while(!_inputTrigger->endOfData()) {
     PMU_auto_register("In main loop");
     // GET NEXT RUN TIME
-    //    if((_params->run_mode == Params::REALTIME) ||
-    //      (_params->run_mode == Params::ARCHIVE)) {
+    if(_inputTrigger->getTimeNext(_runTime) == -1) {
+      cerr << "getTimeNext failed." << endl;
+      cerr << _inputTrigger->getErrStr() << endl;
+      return false;
+    }
     
-      if(_inputTrigger->getTimeNext(_runTime) == -1) {
-        cerr << "getTimeNext failed." << endl;
-        cerr << _inputTrigger->getErrStr() << endl;
-        return false;
-      }
-      //    }    
     if (_params->run_mode == Params::REALTIME){
       int totalSleep = 0;
       if (_params->trigger_sleep> 0){
@@ -207,9 +201,7 @@ int MdvBlender::run()
 
     /* Do blending */
     if(!_readInputFiles()) {
-      //      _cleanUp();
       continue;
-      //      return -1;
     }
 
     if(!_verifyAllDimensions()) {
@@ -219,33 +211,21 @@ int MdvBlender::run()
     if(!_initializeOutputs()) {
       continue;
     }
-    // TODO: re add verifyDimensions to compare fields across files 
+
     if(!_doBlend()) {
-      //      _cleanUp();
       _cleanupOutputData();
       continue;
-      //      return -3;
     }   
 
     if(!_addPassThroughFields()) {
       cerr << "ERROR: Could not add pass through fields" << endl;
       _cleanupOutputData();
-      //      _cleanUp();
       continue;      
-      //      return -4;
     } 
 
     _writeOutput();
 
     _cleanupOutputData();
-
-    //if given a specific runtime, just run once & exit.
-    //    if(_params->run_mode == Params::RUNTIME){
-    //      moreDataTimes  = false;
-    //    }		 
-    //    else{
-    //      moreDataTimes = !_inputTrigger->endOfData();
-    //    }
   }
 
   _cleanUp();
@@ -265,9 +245,9 @@ int MdvBlender::run()
 
 void MdvBlender::_cleanUp(){
   vector<unsigned int>::iterator it;
-  for(it =_indices.begin(); it < _indices.end(); it++) {
+
+  for(it = _indices.begin(); it != _indices.end(); it++) {
     unsigned int i = *it;
-    //  for(unsigned int i = 0; i < _mdvs.size(); i++) {
     delete _mdvs[i];
   }
   _mdvs.clear();
@@ -320,8 +300,17 @@ bool MdvBlender::_initialize(int argc, char **argv)
   // initialize the input trigger
   _inputTrigger = new DsMdvxInput();
 
+  // set trigger URL to 1st input URL if empty
+  string trigger_url;
+  if(strlen(_params->trigger_url) == 0) {
+    trigger_url = _params->_inputs[0].url;
+  }
+  else {
+    trigger_url = _params->trigger_url;
+  }
+
   if(_params->run_mode == Params::REALTIME) {
-    if(_inputTrigger->setRealtime(_params->trigger_url, 
+    if(_inputTrigger->setRealtime(trigger_url, 
                                   _params->trigger_max_valid_age,
 	                                (DsMdvxInput::heartbeat_t)PMU_auto_register)) {
       cerr << "ERROR - " << endl;
@@ -333,7 +322,7 @@ bool MdvBlender::_initialize(int argc, char **argv)
     time_t startTime = DateTime::parseDateTime(_params->start_time);
     time_t endTime = DateTime::parseDateTime(_params->end_time);
     
-    if(_inputTrigger->setArchive(_params->trigger_url, startTime, endTime)) {
+    if(_inputTrigger->setArchive(trigger_url, startTime, endTime)) {
       cerr << "ERROR - " << endl;
       cerr << "  setup for archive mode failed." << endl;
       cerr << _inputTrigger->getErrStr() << endl;
@@ -343,7 +332,7 @@ bool MdvBlender::_initialize(int argc, char **argv)
     cerr << "WARNING: RUNTIME mode has not been throughly tested" << endl;
     _runTime = DateTime::parseDateTime(_params->run_time);
     
-    if(_inputTrigger->setArchive(_params->trigger_url, _runTime, _runTime)) {
+    if(_inputTrigger->setArchive(trigger_url, _runTime, _runTime)) {
       cerr << "ERROR - " << endl;
       cerr << "  setup for runtimee mode failed." << endl;
       cerr << _inputTrigger->getErrStr() << endl;
@@ -419,7 +408,7 @@ bool MdvBlender::_parseParams()
       }
       vector<string> items;
 
-      pass_through_t pt; // = new pass_through_t();
+      pass_through_t pt;
       _fillVector(_params->__input_pass_throughs[ix][pix], items);
       pt.inputName = items[0];
       pt.outputName = items[1];
@@ -662,7 +651,7 @@ bool MdvBlender::_allocateOutputData(int fix) {
   if(numX != _numX ||
      numY != _numY) {
 	  cerr << "ERROR: Field " << inName << " dimensions do not match first grid " << numX << " " << _numX << " and " << numY << " " << _numY << endl;
-	  return false;
+	  exit(1);
   }
   _numElem = _numX*_numY*numZ;
   float* vol = new float[_numElem];
@@ -767,15 +756,12 @@ bool MdvBlender::_writeOutput()
 bool MdvBlender::_addPassThroughFields()
 {
   PMU_force_register("Adding pass through fields");
-  //  for(unsigned int i = 0; i < _params->input_pass_throughs_n1; i++) {
-  //  for(unsigned int i = 0; i < _blenderFieldNames->inputPassThroughs.size(); i++) {
-  vector<unsigned int>::iterator it;
-  for(it=_indices.begin(); it < _indices.end(); it++) {
+  vector<unsigned int>::iterator it; 
+  for(it = _indices.begin(); it != _indices.end(); it++) {
     unsigned int i = *it;
     _mdvs[i]->clearReadFields();
     _mdvs[i]->setReadTime(Mdvx::READ_FIRST_BEFORE, _params->_inputs[i].url,  _params->_inputs[i].max_valid_age, _runTime);
 
-    //    for(int j=0; j<_params->input_pass_throughs_n2; j++) {
     for(unsigned int j=0; j<_blenderFieldNames->inputPassThroughs[i].size(); j++) {      
       if(_blenderFieldNames->inputPassThroughs[i][j].inputName.length() != 0) {
         _mdvs[i]->addReadField(_blenderFieldNames->inputPassThroughs[i][j].inputName);
@@ -826,10 +812,10 @@ float* MdvBlender::_ditherFields(vector<const float*> dataVols, vector<float> mi
   float* out = new float[_numElem];
   // loop grid and select data from vols based on useInputs
   for(unsigned int j = 0; j < _numElem; j++) {
-    vector<unsigned int>::iterator it;
     int count = 0;
-    for(it=_indices.begin(); it < _indices.end(); it++, count++) {
-      unsigned int i = *it;
+    vector<unsigned int>::iterator it;
+    for(it = _indices.begin(); it != _indices.end(); it++) {
+      unsigned int i = *it;    
       if(_useInputs[j] == i) {
 
         if(dataVols[count][j] != miss[count] && dataVols[count][j] != bad[count]) {
@@ -839,6 +825,7 @@ float* MdvBlender::_ditherFields(vector<const float*> dataVols, vector<float> mi
           out[j] = Constants::MISSING_DATA_VALUE;
         }
       }
+      count++;
     }
   }
   return out;
@@ -849,9 +836,7 @@ float* MdvBlender::_averageFields(vector<const float*> dataVols, vector<float> c
   for(unsigned int j = 0; j < _numElem; j++) {
     float numerator = 0.0;
     float denominator = 0.0;
-    vector<unsigned int>::iterator it;
-    int count = 0;
-    for(it=_indices.begin(); it < _indices.end(); it++, count++) {      
+    for(unsigned int count = 0; count < _indices.size(); count++) {
       if( dataVols[count][j] != miss[count] && dataVols[count][j] != bad[count]) {
         if(constants[count] == 0) {
           numerator += dataVols[count][j] * weightVols[count][j];
@@ -890,9 +875,9 @@ bool MdvBlender::_doBlend() {
   // loop over indices
   //   check if any dithering is done, set bool
   bool doDither = false;
-  vector<unsigned int>::iterator it;
-  for(it=_indices.begin(); it < _indices.end(); it++) {
-    unsigned int i = *it;
+  vector<unsigned int>::iterator it;  
+  for(it = _indices.begin(); it != _indices.end(); it++) {
+    unsigned int i = *it;      
     if(_blenderFieldNames->blendMethods[i] == Params::BLEND_DITHER) {
       doDither = true;
     }
@@ -903,8 +888,8 @@ bool MdvBlender::_doBlend() {
    
     for(unsigned int j = 0; j < _numElem; j++) {
       w.clear();
-      for(it=_indices.begin(); it < _indices.end(); it++) {
-        int i = *it;
+      for(it = _indices.begin(); it != _indices.end(); it++) {
+        unsigned int i = *it;            
         if(_blenderFieldNames->inputWeightNames[i] == "") {
           w.push_back(_blenderFieldNames->inputConstantWeights[i]);
 	}
@@ -932,12 +917,14 @@ bool MdvBlender::_doBlend() {
     if(_blenderFieldNames->blendMethods[fix] == Params::BLEND_DITHER) {
       vector<const float*> dataVols;
       vector<float> miss;
-      vector<float> bad;      
-      for(it=_indices.begin(); it < _indices.end(); it++) {
-        int i = *it;	
-        dataVols.push_back(static_cast<const float*>(_mdvs[i]->getFieldByName(_blenderFieldNames->inputFieldNames[i][fix])->getVol()));
-        miss.push_back(_mdvs[i]->getFieldByName(_blenderFieldNames->inputFieldNames[i][fix])->getFieldHeader().missing_data_value);
-        bad.push_back(_mdvs[i]->getFieldByName(_blenderFieldNames->inputFieldNames[i][fix])->getFieldHeader().bad_data_value);		
+      vector<float> bad;
+      for(it = _indices.begin(); it != _indices.end(); it++) {
+        unsigned int i = *it;            
+	const string inputName = _blenderFieldNames->inputFieldNames[i][fix];
+	const MdvxField* inputField = _mdvs[i]->getFieldByName(inputName);
+        dataVols.push_back(static_cast<const float*>(inputField->getVol()));
+        miss.push_back(inputField->getFieldHeader().missing_data_value);
+        bad.push_back(inputField->getFieldHeader().bad_data_value);
       }
       _vols[name] = _ditherFields(dataVols,miss,bad);
     }
@@ -947,9 +934,11 @@ bool MdvBlender::_doBlend() {
       vector<const float*> weightVols;
       vector<float> miss;
       vector<float> bad;
-      for(it=_indices.begin(); it < _indices.end(); it++) {
-        int i = *it;	
-        dataVols.push_back(static_cast<const float*>(_mdvs[i]->getFieldByName(_blenderFieldNames->inputFieldNames[i][fix])->getVol()));
+      for(it = _indices.begin(); it != _indices.end(); it++) {
+        unsigned int i = *it;                  
+        const string inputName = _blenderFieldNames->inputFieldNames[i][fix];
+	const MdvxField* inputField = _mdvs[i]->getFieldByName(inputName);
+        dataVols.push_back(static_cast<const float*>(inputField->getVol()));
 	if(_blenderFieldNames->inputWeightNames[i] == "") {
           weightVols.push_back(NULL);
           constants.push_back(_blenderFieldNames->inputConstantWeights[i]);
@@ -957,151 +946,12 @@ bool MdvBlender::_doBlend() {
           weightVols.push_back(static_cast<const float*>(_mdvs[i]->getFieldByName(_blenderFieldNames->inputWeightNames[i])->getVol()));
           constants.push_back(0);
 	}
-        miss.push_back(_mdvs[i]->getFieldByName(_blenderFieldNames->inputFieldNames[i][fix])->getFieldHeader().missing_data_value);
-        bad.push_back(_mdvs[i]->getFieldByName(_blenderFieldNames->inputFieldNames[i][fix])->getFieldHeader().bad_data_value);	
+        miss.push_back(inputField->getFieldHeader().missing_data_value);
+        bad.push_back(inputField->getFieldHeader().bad_data_value);	
       }
       _vols[name] = _averageFields(dataVols, constants, weightVols, miss, bad);
     }
-    //  }
-  /*
-  // if output decision is set, loop over _useInputs and add 1, then add to output 
-  
-  //  unsigned int numInputs = _params->inputs_n;
-  //  for(unsigned int i = 0; i < numInputs; i++) {
-  //  vector<unsigned int>::iterator it;
-  unsigned int count = 0;
-  for(it=_indices.begin(); it < _indices.end(); it++, count++) {
-    unsigned int i = *it;
-    if(_blenderFieldNames->inputWeightNames[i] == "") {
-      useConstant.push_back(true);
-      constants.push_back(_blenderFieldNames->inputConstantWeights[i]);
-      weightFields.push_back(NULL);
-      weightData.push_back(NULL);
-    }
-    else {
-      useConstant.push_back(false);
-      weightFields.push_back(_mdvs[i]->getFieldByName(_blenderFieldNames->inputWeightNames[i]));
-      constants.push_back(-1);
-      weightData.push_back(static_cast<const float*>(weightFields[count]->getVol())); 
-    }
-  }
-
-  // if using DITHER mode, loop over grid and determine which input to use
-  if(_params->blend_method == Params::BLEND_DITHER) {
-    _numElem = _numX*_numY*_numZ;
-    _useInputs = new float[_numElem];
-   
-    for(unsigned int j = 0; j < _numElem; j++) {
-      w.clear();
-      for(it=_indices.begin(); it < _indices.end(); it++) {
-        int i = *it;
-        if(useConstant[i]) {
-          w.push_back(constants[i]);
-	}
-        else {
-          w.push_back(weightData[i][j]);
-        }
-      }
-      _useInputs[j] = _indices[_evaluateDither(w)];
-    }
-    // TODO: Move to bottom of function in another params blend metho == DITHER
-    if(_params->output_decision) {
-      //    for(unsigned int j = 0; j < _numElem; j++) {
-      //           float* 
-    //	    }
-      _vols["decision"] = _useInputs;
-      _addFieldToOutput("decision", "dither decision", "1-N");
-    }
-  }
-  
-  for(unsigned int fix=0; fix<_blenderFieldNames->inputFieldNames[0].size(); fix++) {
-    string pmuStr = string("Blending field: ") + _blenderFieldNames->inputFieldNames[0][fix];
-    PMU_force_register(pmuStr.c_str());
     
-    if(!_allocateOutputData(fix)) {
-      continue;
-    }
-    vector<string> inputNames;
-    vector<MdvxField*> inputFields;
-    vector<const float*> inputData;
-    vector<double> miss;
-    vector<double> bad;
-
-    //    for(int i = 0 ; i < _params->inputs_n; i++) {
-    count = 0;
-    for(it=_indices.begin(); it < _indices.end(); it++, count++) {
-      unsigned int i = *it;
-      inputNames.push_back(_blenderFieldNames->inputFieldNames[i][fix]);
-      inputFields.push_back(_mdvs[i]->getFieldByName(inputNames[count]));
-      inputData.push_back(static_cast<const float*>(inputFields[count]->getVol()));
-      miss.push_back(inputFields[count]->getFieldHeader().missing_data_value);
-      bad.push_back(inputFields[count]->getFieldHeader().bad_data_value);
-
-      // verify dimensions are the same
-      if(i != 0) {
-        if(!_verifyDimensions(inputFields[0], inputFields[count])) {
-          return false;
-        }
-      }
-
-      if(!useConstant[count]) {
-        if(!_verifyDimensions(inputFields[count],weightFields[count])) {
-          return false;
-        } 
-      }
-    }
-
-    for(unsigned int j=0; j<_numElem; j++) {
-      if(_params->debug >= Params::DEBUG_GARRULOUS) {
-        int z = j / (_numX*_numY);
-        int temp = j % (_numX*_numY);
-        int y = temp / _numX;
-        int x = temp % _numX;
-        if(_params->debug >= Params::DEBUG_GARRULOUS) {
-          cout << "[" << x << "," << y << "," << z << "]:";
-        }
-      }
-      
-      if(_params->blend_method == Params::BLEND_AVERAGE) {
-        w.clear();
-        dataPts.clear();
-	      //	miss.clear();
-	
-	      //	for(int i = 0; i < _params->inputs_n; i++) {
-        count = 0;
-        for(it=_indices.begin(); it < _indices.end(); it++, count++) {
-          unsigned int i = *it;
-          if(useConstant[count]) {
-            w.push_back(constants[count]);
-	  }
-	  else {
-	    w.push_back(weightData[count][j]);
-	  }
-	  dataPts.push_back(inputData[count][j]);
-		      //          miss.push_back(inputFields[i]->getFieldHeader().missing_data_value);
-        }
- 
-        string name = _blenderFieldNames->outputFieldNames[fix];
-        _vols[name][j] = _evaluateAverage(dataPts, w, miss, bad, _blenderFieldNames->outputRounding[fix]);
-      }
-      else { // if(_params->blend_method == Params::BLEND_DITHER) {
-	      //        for(int i = 0; i < _params->inputs_n; i++) {
-        count = 0;
-        for(it=_indices.begin(); it < _indices.end(); it++, count++) {
-          unsigned int i = *it;
-          if(_useInputs[j] == i) {
-            string name = _blenderFieldNames->outputFieldNames[fix];
-            if(inputData[count][j] != miss[count] && inputData[count][j] != bad[count]) {
-              _vols[name][j] = inputData[count][j];
-	    }
-	    else {
-	      _vols[name][j] = Constants::MISSING_DATA_VALUE;
-	    }
-	  }
-        }
-      }
-    }
-*/
     _addFieldToOutput(_blenderFieldNames->outputFieldNames[fix],_blenderFieldNames->outputFieldLongNames[fix], _blenderFieldNames->outputFieldUnits[fix]);
    
   }
@@ -1138,8 +988,8 @@ void MdvBlender::_setFieldHeader(Mdvx::field_header_t& hdr, const string& name,
   hdr.nx = nx;
   hdr.ny = ny;
   hdr.nz = nz;
-  hdr.forecast_time = 0; //_outFieldHdr.forecast_time;
-  hdr.forecast_delta = 0; //_outFieldHdr.forecast_delta;
+  hdr.forecast_time = 0;
+  hdr.forecast_delta = 0;
   hdr.field_code = fCode;
   hdr.proj_type = _outFieldHdr.proj_type;
   hdr.encoding_type = Mdvx::ENCODING_FLOAT32;
@@ -1233,19 +1083,26 @@ bool MdvBlender::_verifyAllDimensions()
 {
   // loop over fields
   for(unsigned int fix=0; fix<_blenderFieldNames->inputFieldNames[0].size(); fix++) {
-	  // loop each file and verify dimensions are the same
-	  unsigned int first = *_indices.begin();
-    string name1 = _blenderFieldNames->inputFieldNames[first][fix];
-	  MdvxField* field1 = _mdvs[first]->getFieldByName(name1);
-    
-	  for(vector<unsigned int>::iterator it = _indices.begin()+1; it < _indices.end(); it++) {
-      unsigned int i = *it;
-      string name2 = _blenderFieldNames->inputFieldNames[i][fix];      
-      MdvxField* field2 = _mdvs[i]->getFieldByName(name2);
-  	  if(!_verifyDimensions(field1, field2)) {
-  		  return false;
-	    }
-	  }
+    // loop each file and verify dimensions are the same
+    string name1;
+    MdvxField* field1;
+    bool first = true;
+    vector<unsigned int>::iterator it;      
+    for(it = _indices.begin(); it != _indices.end(); it++) {
+      unsigned int i = *it;                      
+      if(first) {
+        name1 = _blenderFieldNames->inputFieldNames[i][fix];
+        field1 = _mdvs[i]->getFieldByName(name1);
+	first = false;
+      }
+      else {
+        string name2 = _blenderFieldNames->inputFieldNames[i][fix];      
+        MdvxField* field2 = _mdvs[i]->getFieldByName(name2);
+        if(!_verifyDimensions(field1, field2)) {
+          return false;
+        }
+      }
+    }
   }
   return true;
 }
@@ -1297,20 +1154,10 @@ bool MdvBlender::_verifyDimensions(MdvxField* input1Field, MdvxField* input2Fiel
     weightSum += w[i];
   }
   double random = ((double)rand() / RAND_MAX) * (weightSum);
-  if(_params->debug >= Params::DEBUG_VERBOSE) {
-    for(unsigned int i = 0; i < w.size(); i++) {
-      unsigned int ip1 = i+1;
-      cout << "W" << ip1 << ": " << w[i] << " ";
-    }
-    cout << " Value: " << random;
-  }
+
   for(unsigned int i = 0; i < w.size(); i++) {
-    unsigned int ip1 = i+1;
     runningWeight += w[i];
     if(random < runningWeight) {
-      if(_params->debug >= Params::DEBUG_VERBOSE) {
-        cout << " - Using input " << ip1 << " data" << std::endl;
-      }
       return i;
     }
   }
@@ -1335,16 +1182,13 @@ double MdvBlender::_evaluateAverage(vector<double> d, vector<double> w, vector<d
   double total = 0;
   if(round == Params::ROUND_UP) {
     return ceil(weightedData / totalWeights);
-    //    return ceil( floor(d1 * w1 + 0.5) + floor(d2 * w2 + 0.5)  );
   }
   else if(round == Params::ROUND_DOWN) {
     return floor(weightedData / totalWeights);
-    //    return floor( floor(d1 * w1 + 0.5) + floor(d2 * w2 + 0.5)  );
   }
   else if(round == Params::ROUND_CLOSEST) {
     total = (weightedData + 0.5) / totalWeights;
     return floor(total);
-    //    return floor( d1 * w1 + d2 * w2 + 0.5 );
   }
   return weightedData / totalWeights;
 }

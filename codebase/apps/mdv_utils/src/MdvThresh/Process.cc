@@ -387,6 +387,12 @@ int Process::Derive(Params *P, time_t T){
   if (ThreshField != 0)
     delete ThreshField;
   
+  if (MinThreshField != 0)
+    delete MinThreshField;
+
+  if (MaxThreshField != 0)
+    delete MaxThreshField;
+  
   if (P->Debug){
     cerr << "Finished data processing for this time." << endl << endl;
   }

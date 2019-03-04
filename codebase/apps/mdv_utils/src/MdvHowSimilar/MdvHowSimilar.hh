@@ -33,7 +33,7 @@
  * 
  *  @date September 2015
  *
- *  @version $Id: MdvHowSimilar.hh,v 1.9 2017/09/13 19:42:57 mccabe Exp $
+ *  @version $Id: MdvHowSimilar.hh,v 1.10 2018/02/16 21:43:04 prestop Exp $
  */
 
 
@@ -134,6 +134,8 @@ private:
 	                                              const Mdvx::field_header_t& fh2, const fl32* data2,
 				       const float sigDiff, fl32* outData, float& totalDiff, float& totalAbsDiff);
 
+	void _printExplanationHeader();
+	
 	bool _allocateOutputData();
 
 	void _writeOutput();

@@ -949,6 +949,321 @@
     tt->single_val.f = 1;
     tt++;
     
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("Optional Projection Parameters");
+    tt->comment_text = tdrpStrDup("Parameters describing the ouput projection.");
+    tt++;
+    
+    // Parameter 'remap_xy'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("remap_xy");
+    tt->descr = tdrpStrDup("Option to remap grid in x,y.");
+    tt->help = tdrpStrDup("If true, set the remap parameters below.");
+    tt->val_offset = (char *) &remap_xy - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'auto_remap_to_latlon'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("auto_remap_to_latlon");
+    tt->descr = tdrpStrDup("Option to automatically remap the grid to a lat-lon projection.");
+    tt->help = tdrpStrDup("If true, the data in the file will be remapped to a latlon grid which matches the existing grid in resolution and extent. Other remap parameters will be ignored.");
+    tt->val_offset = (char *) &auto_remap_to_latlon - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'remap_at_source'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("remap_at_source");
+    tt->descr = tdrpStrDup("Flag indicating where to do the remapping.");
+    tt->help = tdrpStrDup("If set to true, the remapping is done on the source machine by setting the remapping in the MDV read request. This is the default.If set to false, the remapping is done on the destination machine by doing a remap command after the read is done. This is useful if you are reading the data from a machine that is overloaded.");
+    tt->val_offset = (char *) &remap_at_source - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'remap_projection'
+    // ctype is '_projection_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("remap_projection");
+    tt->descr = tdrpStrDup("Projection for remapping in x,y. See projection param below.");
+    tt->help = tdrpStrDup("\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n\tPROJ_MERCATOR: Mercator - EW orientation\n\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n\tPROJ_ALBERS: Albers Equal Area Conic\n\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n");
+    tt->val_offset = (char *) &remap_projection - &_start_;
+    tt->enum_def.name = tdrpStrDup("projection_t");
+    tt->enum_def.nfields = 10;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("PROJ_LATLON");
+      tt->enum_def.fields[0].val = PROJ_LATLON;
+      tt->enum_def.fields[1].name = tdrpStrDup("PROJ_LAMBERT_CONF");
+      tt->enum_def.fields[1].val = PROJ_LAMBERT_CONF;
+      tt->enum_def.fields[2].name = tdrpStrDup("PROJ_MERCATOR");
+      tt->enum_def.fields[2].val = PROJ_MERCATOR;
+      tt->enum_def.fields[3].name = tdrpStrDup("PROJ_POLAR_STEREO");
+      tt->enum_def.fields[3].val = PROJ_POLAR_STEREO;
+      tt->enum_def.fields[4].name = tdrpStrDup("PROJ_FLAT");
+      tt->enum_def.fields[4].val = PROJ_FLAT;
+      tt->enum_def.fields[5].name = tdrpStrDup("PROJ_OBLIQUE_STEREO");
+      tt->enum_def.fields[5].val = PROJ_OBLIQUE_STEREO;
+      tt->enum_def.fields[6].name = tdrpStrDup("PROJ_TRANS_MERCATOR");
+      tt->enum_def.fields[6].val = PROJ_TRANS_MERCATOR;
+      tt->enum_def.fields[7].name = tdrpStrDup("PROJ_ALBERS");
+      tt->enum_def.fields[7].val = PROJ_ALBERS;
+      tt->enum_def.fields[8].name = tdrpStrDup("PROJ_LAMBERT_AZIM");
+      tt->enum_def.fields[8].val = PROJ_LAMBERT_AZIM;
+      tt->enum_def.fields[9].name = tdrpStrDup("PROJ_VERT_PERSP");
+      tt->enum_def.fields[9].val = PROJ_VERT_PERSP;
+    tt->single_val.e = PROJ_FLAT;
+    tt++;
+    
+    // Parameter 'remap_grid'
+    // ctype is '_grid_params_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("remap_grid");
+    tt->descr = tdrpStrDup("Grid parameters for remapping in x,y.");
+    tt->help = tdrpStrDup("Units in km, except for LATLON, which is in degrees.");
+    tt->val_offset = (char *) &remap_grid - &_start_;
+    tt->struct_def.name = tdrpStrDup("grid_params_t");
+    tt->struct_def.nfields = 6;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[0].fname = tdrpStrDup("nx");
+      tt->struct_def.fields[0].ptype = INT_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &remap_grid.nx - (char *) &remap_grid;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[1].fname = tdrpStrDup("ny");
+      tt->struct_def.fields[1].ptype = INT_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &remap_grid.ny - (char *) &remap_grid;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("minx");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &remap_grid.minx - (char *) &remap_grid;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("miny");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &remap_grid.miny - (char *) &remap_grid;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("dx");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &remap_grid.dx - (char *) &remap_grid;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[5].fname = tdrpStrDup("dy");
+      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &remap_grid.dy - (char *) &remap_grid;
+    tt->n_struct_vals = 6;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].i = 1;
+      tt->struct_vals[1].i = 1;
+      tt->struct_vals[2].d = 0;
+      tt->struct_vals[3].d = 0;
+      tt->struct_vals[4].d = 1;
+      tt->struct_vals[5].d = 1;
+    tt++;
+    
+    // Parameter 'remap_rotation'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_rotation");
+    tt->descr = tdrpStrDup("Remapped grid rotation.");
+    tt->help = tdrpStrDup("This applies only to PROJ_FLAT projections.");
+    tt->val_offset = (char *) &remap_rotation - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'remap_origin_lat'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_origin_lat");
+    tt->descr = tdrpStrDup("Remapped grid origin latitude.");
+    tt->help = tdrpStrDup("This applies to all projections except LATLON.");
+    tt->val_offset = (char *) &remap_origin_lat - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'remap_origin_lon'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_origin_lon");
+    tt->descr = tdrpStrDup("Remapped grid origin longitude.");
+    tt->help = tdrpStrDup("This applies to all projections except LATLON.");
+    tt->val_offset = (char *) &remap_origin_lon - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'remap_lat1'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_lat1");
+    tt->descr = tdrpStrDup("Remapped grid reference latitude 1.");
+    tt->help = tdrpStrDup("This applies to LAMBERT_CONF and ALBERS projections.");
+    tt->val_offset = (char *) &remap_lat1 - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'remap_lat2'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_lat2");
+    tt->descr = tdrpStrDup("Remapped grid reference latitude 2.");
+    tt->help = tdrpStrDup("This applies to LAMBERT_CONF and ALBERS projections.");
+    tt->val_offset = (char *) &remap_lat2 - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'remap_central_scale'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_central_scale");
+    tt->descr = tdrpStrDup("Central scale for remapped projections.");
+    tt->help = tdrpStrDup("This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR projections.");
+    tt->val_offset = (char *) &remap_central_scale - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'remap_tangent_lat'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_tangent_lat");
+    tt->descr = tdrpStrDup("Remapped tangent latitude (deg).");
+    tt->help = tdrpStrDup("This applies to OBLIQUE_STEREO only.");
+    tt->val_offset = (char *) &remap_tangent_lat - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'remap_tangent_lon'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_tangent_lon");
+    tt->descr = tdrpStrDup("Remapped tangent longitude (deg).");
+    tt->help = tdrpStrDup("This applies to OBLIQUE_STEREO and POLAR_STEREO.");
+    tt->val_offset = (char *) &remap_tangent_lon - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'remap_pole_is_north'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("remap_pole_is_north");
+    tt->descr = tdrpStrDup("Flag indicating stereogtraphic is over the NORTH pole.");
+    tt->help = tdrpStrDup("This applies to POLAR_STEREO. If false, the projection is over the south pole.");
+    tt->val_offset = (char *) &remap_pole_is_north - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'remap_persp_radius'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_persp_radius");
+    tt->descr = tdrpStrDup("Radius of perspective point (km).");
+    tt->help = tdrpStrDup("This applies to VERT_PERSP.");
+    tt->val_offset = (char *) &remap_persp_radius - &_start_;
+    tt->single_val.d = 35786;
+    tt++;
+    
+    // Parameter 'remap_false_northing'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_false_northing");
+    tt->descr = tdrpStrDup("Remapped false northing correction.");
+    tt->help = tdrpStrDup("Occasionally, this is added to the Y coordinate so that all coordinates are positive. Normally 0. As an alternative to false_northing and false_easting, you can set the offset_latitude and offset_longitude");
+    tt->val_offset = (char *) &remap_false_northing - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'remap_false_easting'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_false_easting");
+    tt->descr = tdrpStrDup("Remapped false easting correction.");
+    tt->help = tdrpStrDup("Occasionally, this is added to the X coordinate so that all coordinates are positive. Normally 0.");
+    tt->val_offset = (char *) &remap_false_easting - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'remap_set_offset_origin'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("remap_set_offset_origin");
+    tt->descr = tdrpStrDup("Do you want to specify an offset origin using lat/lon instead of false_northing and false_easting?");
+    tt->help = tdrpStrDup("If true, set remap_offset_origin_latitude and remap_offset_origin_longitude.");
+    tt->val_offset = (char *) &remap_set_offset_origin - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'remap_offset_origin_latitude'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_offset_origin_latitude");
+    tt->descr = tdrpStrDup("Latitude of offset origin.");
+    tt->help = tdrpStrDup("See remap_set_offset_origin.");
+    tt->val_offset = (char *) &remap_offset_origin_latitude - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'remap_offset_origin_longitude'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("remap_offset_origin_longitude");
+    tt->descr = tdrpStrDup("Longitude of offset origin.");
+    tt->help = tdrpStrDup("See remap_set_offset_origin.");
+    tt->val_offset = (char *) &remap_offset_origin_longitude - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

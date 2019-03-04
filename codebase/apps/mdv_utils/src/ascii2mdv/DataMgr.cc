@@ -28,7 +28,7 @@
 //  Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 //  June 1999
 //
-//  $Id: DataMgr.cc,v 1.12 2016/03/04 02:22:14 dixon Exp $
+//  $Id: DataMgr.cc,v 1.13 2019/03/04 00:22:25 dixon Exp $
 //
 ////////////////////////////////////////////////////////////////////////////////
 #include <string>

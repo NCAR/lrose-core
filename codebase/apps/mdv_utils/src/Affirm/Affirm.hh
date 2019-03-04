@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: hardt $
  *   $Locker:  $
- *   $Date: 2016/03/04 02:22:09 $
- *   $Id: Affirm.hh,v 1.7 2016/03/04 02:22:09 dixon Exp $
- *   $Revision: 1.7 $
+ *   $Date: 2018/05/22 18:24:45 $
+ *   $Id: Affirm.hh,v 1.8 2018/05/22 18:24:45 hardt Exp $
+ *   $Revision: 1.8 $
  *   $State: Exp $
  */
  
@@ -195,6 +195,8 @@ class Affirm
   // Run the algorithm in REALTIME mode.
 
   void _runRealtime(void);
+
+  void _remap(DsMdvx *mdvx) const;
   
   // Return the class name for error messages.
 
