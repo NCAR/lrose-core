@@ -981,7 +981,8 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
      unsigned short numtimes, dcase, flag=1, wsuccess;
 
      // determine max number of bins from data
-     Rsl::verifyEqualDimensionsGetMaxDimensions(rvVolume, soundVolume, &maxNBins, &maxNRays);
+     double degreeThreshold = params.angle_variance;
+     Rsl::verifyEqualDimensionsGetMaxDimensions(rvVolume, soundVolume, degreeThreshold, &maxNBins, &maxNRays);
 
      /*
      Rsl::findMaxNBins(rvVolume, &countNBins, &countNRays);

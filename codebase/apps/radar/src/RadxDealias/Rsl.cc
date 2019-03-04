@@ -29,6 +29,7 @@
 
 #include <iostream>
 #include <climits>
+#include <cmath>
 #include "Rsl.hh"
 
 Radar *Rsl::new_radar(Radx::si32 nvolumes) {
@@ -443,7 +444,8 @@ void Rsl::verifyEqualDimensions(Volume *currDbzVol, Volume *currVelVol) {
   }
 }
 
-void Rsl::verifyEqualDimensionsGetMaxDimensions(Volume *currDbzVol, Volume *currVelVol, int *maxNBins, int *maxNRays) {
+void Rsl::verifyEqualDimensionsGetMaxDimensions(Volume *currDbzVol, Volume *currVelVol, 
+						float degreeThreshold, int *maxNBins, int *maxNRays) {
 
   if ((currDbzVol == NULL) || (currVelVol == NULL))
     throw "ERROR - velocity or reflectivity Volume is NULL";
@@ -489,8 +491,25 @@ void Rsl::verifyEqualDimensionsGetMaxDimensions(Volume *currDbzVol, Volume *curr
       if (nbins > maxBins)
 	maxBins = nbins;
 
-    } // for bins
-  } // for rays
+      // check the elevation and azimuth; make sure they are about the same
+      float diffInAzimuth = currDbzVol->sweep[s]->ray[r]->h.azimuth - currVelVol->sweep[s]->ray[r]->h.azimuth; 
+      float diffInElev = currDbzVol->sweep[s]->ray[r]->h.elev - currVelVol->sweep[s]->ray[r]->h.elev; 
+
+      if (abs(diffInAzimuth) > degreeThreshold) {
+	  char msg[1024];
+	  sprintf(msg, "ERROR - azimuth angle differs by more than threshold (%g): %g\n. Check sweep %d ray %d\n", 
+		  degreeThreshold, diffInAzimuth, s, r);
+	  throw msg;
+      }
+
+      if (abs(diffInElev) > degreeThreshold) { 
+	  char msg[1024];
+	  sprintf(msg, "ERROR - elevation angle differs by more than threshold (%g): %g\n. Check sweep %d ray %d\n", 
+		  degreeThreshold, diffInElev, s, r);
+	  throw msg;
+      }
+    } // for rays
+  } // for sweeps
 
   *maxNBins = maxBins;
   *maxNRays = maxRays;

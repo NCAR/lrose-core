@@ -363,3 +363,11 @@ paramdef float {
   p_default = 0.0;
 } avg_wind_v;
 
+paramdef float {
+  p_descr = "Maximum amount ray angles can vary between successive volumes (in degrees)";
+  p_help = "Ray azimuth and elevation angles must be about the same between successive volumes.";
+  p_min = 0.0001;
+  p_max = 10.0;
+  p_default = 0.10;
+} angle_variance;
+
