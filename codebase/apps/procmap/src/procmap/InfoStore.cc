@@ -252,7 +252,7 @@ void InfoStore::Purge(time_t now)
       
     } // ii
 
-  } while (!done);
+  }
   
   // unlock store
 

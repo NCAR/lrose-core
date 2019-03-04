@@ -16,6 +16,7 @@ INSTALL_LIB_DIR=$(RAP_LIB_DIR)/perl5
 
 SCRIPTS = \
 	auto_restart \
+	DataMapper_list_check \
 	procmap_list_kill \
 	procmap_list_start \
 	procmap_auto_restart \

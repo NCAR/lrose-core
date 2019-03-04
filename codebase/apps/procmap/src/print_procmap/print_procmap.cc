@@ -656,7 +656,7 @@ string print_procmap::_tdiffStr(int tdiff)
   if (tdiff > 86399) {
     sprintf(str, "%.3g d", (double) tdiff / 86400.0);
   } else {
-    sprintf(str, "%d:%d:%d",
+    sprintf(str, "%d:%02d:%02d",
 	    tdiff/3600,
 	    (tdiff%3600)/60,
 	    tdiff%60);
@@ -685,8 +685,8 @@ void print_procmap::_computeFormat(int nProcs,
     
     const char *name = dinfo->name;
     const char *instance = dinfo->instance;
-    const char *host = _stripHost(dinfo->host).c_str();
     const char *user = dinfo->user;
+    const string host = _stripHost(dinfo->host); 
 
     if ((int) strlen(name) > nameColWidth) {
       nameColWidth = (int) strlen(name);
@@ -696,8 +696,8 @@ void print_procmap::_computeFormat(int nProcs,
       instanceColWidth = (int) strlen(instance);
     }
 
-    if ((int) strlen(host) > hostColWidth) {
-      hostColWidth = (int) strlen(host);
+    if ((int) strlen(host.c_str()) > hostColWidth) {
+      hostColWidth = (int) strlen(host.c_str());
     }
     
     if ((int) strlen(user) > userColWidth) {
