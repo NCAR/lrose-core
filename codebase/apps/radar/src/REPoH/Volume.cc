@@ -5,18 +5,18 @@
 //------------------------------------------------------------------
 #include "Volume.hh"
 #include "Sweep.hh"
+#include <rapmath/FunctionDef.hh>
 #include <toolsa/LogStream.hh>
 #include <cstdlib>
 
 //------------------------------------------------------------------
-Volume::Volume(void) : VolumeMdv()
+Volume::Volume(void) : VirtVolVolume()
 {
 }
 
 //------------------------------------------------------------------
 Volume::Volume(const Parms &parms, int argc, char **argv):
-  VolumeMdv(&parms, argc, argv),
-  _parms(parms)
+  VirtVolVolume(&parms, argc, argv),  _parms(parms)
 {
 }
 
@@ -26,17 +26,16 @@ Volume::~Volume(void)
 }
 
 //------------------------------------------------------------------
-std::vector<std::pair<std::string, std::string> >
-Volume::userUnaryOperators(void) const
+std::vector<FunctionDef> Volume::userUnaryOperators(void) const
 {
-  std::vector<std::pair<std::string, std::string> > ret;
+  std::vector<FunctionDef> ret;
   return ret;
 }
 
 //------------------------------------------------------------------
 bool Volume::trigger(time_t &t)
 {
-  if (!triggerMdv(t))
+  if (!triggerVirtVol(t))
   {
     return false;
   }
@@ -56,8 +55,8 @@ bool Volume::trigger(time_t &t)
 //------------------------------------------------------------------
 void Volume::addNew(int zIndex, const MathData *s)
 {
-  const SweepMdv *smdv = (const SweepMdv *)s;
-  addNewMdv(zIndex, *smdv);
+  const VirtVolSweep *smdv = (const VirtVolSweep *)s;
+  addNewSweep(zIndex, *smdv);
 }
 //------------------------------------------------------------------
 void Volume::repohOutput(const time_t &t)
@@ -68,7 +67,7 @@ void Volume::repohOutput(const time_t &t)
   //   _mdvInfo.outputToUrl(t, _parms._outputs[i], _data);
   // }
 
-  VolumeMdv::output(t);
+  VirtVolVolume::output(t);
   _kernelOutputs.output(t, _proj);
 }
 
@@ -89,7 +88,7 @@ MathData *Volume::initializeProcessingNode(int index, bool twoD) const
 }
 
 //------------------------------------------------------------------
-bool Volume::synchUserDefinedInputs(const std::string &userKey,
+bool Volume::virtVolSynchUserInputs(const std::string &userKey,
 				    const std::vector<std::string> &names)
 {
   return false;
@@ -105,5 +104,5 @@ MathUserData *Volume::processUserVolumeFunction(const UnaryNode &p)
 //------------------------------------------------------------------
 bool Volume::storeMathUserData(const std::string &name, MathUserData *v)
 {
-  return storeMathUserDataMdv(name, v);
+  return storeMathUserDataVirtVol(name, v);
 }

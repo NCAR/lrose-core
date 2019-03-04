@@ -55,6 +55,12 @@ void Parms::printOperators(void) const
 }
 
 //------------------------------------------------------------------
+void Parms::printHelp(void)
+{
+  FiltAlgParms::printHelp();
+}
+
+//------------------------------------------------------------------
 void Parms::printParams(tdrp_print_mode_t mode)
 {
   RepohParams::print(stdout, mode);

@@ -27,6 +27,7 @@
 #include "Kernels.hh"
 #include <euclid/Grid2d.hh>
 #include <Spdb/DsSpdb.hh>
+#include <toolsa/LogStream.hh>
 
 /*----------------------------------------------------------------*/
 Kernels::Kernels(void)
@@ -107,6 +108,7 @@ bool Kernels::writeGenpoly(const string &url, const time_t &time,
   D.setPutMode(Spdb::putModeAdd);
   D.addUrl(url);
   bool stat = true;
+  LOG(DEBUG) << "Writing " << _k.size() <<  " Kernels";
   for (int i=0; i<(int)_k.size(); ++i)
     if (!_k[i].writeGenpoly(time, outside, proj, D))
       stat = false;

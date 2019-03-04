@@ -154,6 +154,7 @@ bool Kernel::writeGenpoly(const time_t &t, bool outside, const MdvxProj &proj,
 
   GenPolyGrid poly;
   GridAlgs gr("tmp", nx, ny, -1);
+
   _kpts.toGrid(gr, 1.0, outside);
   if (!poly.setBoxes(t, t, _color, gr, proj))
   {

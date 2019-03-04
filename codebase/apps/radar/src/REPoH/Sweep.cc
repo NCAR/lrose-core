@@ -21,14 +21,35 @@
 #include <cmath>
 #include <algorithm>
 
+const std::string Sweep::_createClumpsStr = "create_clumps";
+const std::string Sweep::_clumpsToGridStr = "clumps_to_grid";
+const std::string Sweep::_removeSmallClumpsStr = "remove_small_clumps";
+const std::string Sweep::_associateClumpsStr = "associate_clumps";
+const std::string Sweep::_buildGapsStr = "build_gaps";
+const std::string Sweep::_getEdgeStr = "get_edge";
+const std::string Sweep::_getOutsideStr = "get_outside";
+const std::string Sweep::_removeSmallGapsStr = "remove_small_gaps";
+const std::string Sweep::_filterSoNotTooFarInsideStr =
+  "filter_so_not_too_far_inside";
+const std::string Sweep::_inverseMaskStr = "inverse_mask";
+const std::string Sweep::_kernelBuildStr = "kernel_build";
+const std::string Sweep::_centerPointsStr = "centerpoints";
+const std::string Sweep::_nptBetweenGoodStr = "npt_between_good";
+const std::string Sweep::_computeAttenuationStr = "compute_attenuation";
+const std::string Sweep::_computeHumidityStr = "compute_humidity";
+const std::string Sweep::_setAsciiOutputStr = "set_ascii_output";
+const std::string Sweep::_filterKernelsStr = "filter_kernels";
+const std::string Sweep::_organizeGridsStr = "organize_grids";
+const std::string Sweep::_kernelsToGenPolyStr = "kernels_to_genpoly";
+
 //------------------------------------------------------------------
-Sweep::Sweep(void)  : SweepMdv()
+Sweep::Sweep(void)  : VirtVolSweep()
 {
 }
 
 //------------------------------------------------------------------
 Sweep::Sweep(const Volume &volume, int index, double vlevel) :
-  SweepMdv(volume, index, vlevel),
+  VirtVolSweep(volume, index, vlevel),
   _kernelOutputs(volume._kernelOutputs),
   _asciiOutputs(volume._asciiOutputs),
   _parms(volume._parms)
@@ -44,31 +65,33 @@ Sweep::~Sweep(void)
 }
 
 //------------------------------------------------------------------
-std::vector<std::pair<std::string, std::string> >
-Sweep::userUnaryOperators(void) const
+std::vector<FunctionDef> Sweep::userUnaryOperators(void) const
 {
-  std::vector<std::pair<std::string, std::string> > ret;
+  std::vector<FunctionDef> ret;
 
-  ret.push_back(pair<string,string>("create_clumps_and_map_to_colors","clumped = clumped"));
-  ret.push_back(pair<string,string>("create_clumps", "clump_regions = create_clumps(clumps)"));
-  ret.push_back(pair<string,string>("clumps_to_grid", "clumps_to_grid(clump_regions)"));
-  ret.push_back(pair<string,string>("remove_small_clumps", "clumpFilt = remove_small_clumps(clumps, minPt)"));
-  ret.push_back(pair<string,string>("associate_clumps","associate_clumps(clumps, pclumps)"));
-  ret.push_back(pair<string,string>("build_gaps", "build_gaps"));
-  ret.push_back(pair<string,string>("get_edge", "get_edge"));
-  ret.push_back(pair<string,string>("get_outside","get_outside"));
-  ret.push_back(pair<string,string>("remove_small_gaps", "remove_small_gaps"));
-  ret.push_back(pair<string,string>("filter_so_not_too_far_inside","filter_so_not_too_far_inside"));
-  ret.push_back(pair<string,string>("inverse_mask","inverse_mask(clump_regions)"));
-  ret.push_back(pair<string,string>("kernel_build", "kernel_build(time, outside_mask, gaps)"));
-  ret.push_back(pair<string,string>("centerpoints","centerpoints(kernels)"));
-  ret.push_back(pair<string,string>("compute_attenuation", "compute_attenuation(kernels)"));
-  ret.push_back(pair<string,string>("compute_humidity", "compute_humidity(kernels)"));
-  ret.push_back(pair<string,string>("set_ascii_output","set_ascii_output(kernels)"));
-  ret.push_back(pair<string,string>("filter_kernels", "filter_kernels(kernels)"));
-  ret.push_back(pair<string,string>("organize_grids",
-				    "organize_grids(pid,snoise,knoise,sdbz,kdbz,szdr,srhohv,kdbzAdjusted)"));
-  ret.push_back(pair<string,string>("kernels_to_genpoly", "kernels_to_genpoly(filtered_kernels, outside)"));
+  ret.push_back(FunctionDef(_createClumpsStr, "clump_regions", "clumps", ""));
+  ret.push_back(FunctionDef(_clumpsToGridStr, "grid", "clump_regions", ""));
+  ret.push_back(FunctionDef(_removeSmallClumpsStr, "clumpFilt",
+			    "clumps,minPt", ""));
+  ret.push_back(FunctionDef(_associateClumpsStr, "a", "clumps, pclumps)", ""));
+  ret.push_back(FunctionDef(_buildGapsStr, "b", "", ""));
+  ret.push_back(FunctionDef(_getEdgeStr, "b", "", ""));
+  ret.push_back(FunctionDef(_getOutsideStr, "b", "", ""));
+  ret.push_back(FunctionDef(_removeSmallGapsStr, "b", "", ""));
+  ret.push_back(FunctionDef(_filterSoNotTooFarInsideStr, "b", "", ""));
+  ret.push_back(FunctionDef(_inverseMaskStr, "b", "clump_regions", ""));
+  ret.push_back(FunctionDef(_kernelBuildStr, "kernels",
+			    "time,outsideMask,gaps", ""));
+  ret.push_back(FunctionDef(_centerPointsStr, "c", "kernels", ""));
+  ret.push_back(FunctionDef(_nptBetweenGoodStr, "c", "", ""));
+  ret.push_back(FunctionDef(_computeAttenuationStr, "a", "kernels", ""));
+  ret.push_back(FunctionDef(_computeHumidityStr, "h", "kernels", ""));
+  ret.push_back(FunctionDef(_setAsciiOutputStr, "a", "kernels", ""));
+  ret.push_back(FunctionDef(_filterKernelsStr, "kfilt", "kernels", ""));
+  ret.push_back(FunctionDef(_organizeGridsStr, "g",
+			    "pid,snoise,knoise,sdbz,kdbz,szdr,srhohv,kdbzAdjusted)", ""));
+  ret.push_back(FunctionDef(_kernelsToGenPolyStr, "g",
+			    "filtered_kernels, outside", ""));
   return ret;
 }
 
@@ -99,58 +122,58 @@ bool Sweep::processUserLoopFunction(ProcessingNode &p)
   {
     return false;
   }
-  if (keyword == "clumps_to_grid")
+  if (keyword == _clumpsToGridStr)
   {
     return _clumpsToGrid(*(p.unaryOpArgs()));
   }
-  else if (keyword == "remove_small_clumps")
+  else if (keyword == _removeSmallClumpsStr)
   {
     return _processRemoveSmallClumps(*(p.unaryOpArgs()));
   }
-  else if (keyword == "get_edge")
+  else if (keyword == _getEdgeStr)
   {
     return _getEdge(*(p.unaryOpArgs()));
   }
-  else if (keyword == "get_outside")
+  else if (keyword == _getOutsideStr)
   {
     return _getOutside(*(p.unaryOpArgs()));
   }
-  else if (keyword == "inverse_mask")
+  else if (keyword == _inverseMaskStr)
   {
     return _inverseMask(*(p.unaryOpArgs()));
   }
-  else if (keyword == "centerpoints")
+  else if (keyword == _centerPointsStr)
   {
     return _centerPoints(*(p.unaryOpArgs()));
   }
-  else if (keyword == "compute_attenuation")
+  else if (keyword == _computeAttenuationStr)
   {
     return _attenuation(*(p.unaryOpArgs()));
   }
-  else if (keyword == "npt_between_good")
+  else if (keyword == _nptBetweenGoodStr)
   {
     return _nptBetweenGood(*(p.unaryOpArgs()));
   }
-  else if (keyword == "total_attenuation")
-  {
-    return _totalAttenuation(*(p.unaryOpArgs()));
-  }
-  else if (keyword == "average_attenuation")
-  {
-    return _averageAttenuation(*(p.unaryOpArgs()));
-  }
-  else if (keyword == "sumZ")
-  {
-    return _sumZ(*(p.unaryOpArgs()));
-  }
-  else if (keyword == "compute_humidity")
+  // else if (keyword == _totalAttenuationStr)
+  // {
+  //   return _totalAttenuation(*(p.unaryOpArgs()));
+  // }
+  // else if (keyword == _averageAttenuationStr)
+  // {
+  //   return _averageAttenuation(*(p.unaryOpArgs()));
+  // }
+  // else if (keyword == _sumZStr)
+  // {
+  //   return _sumZ(*(p.unaryOpArgs()));
+  // }
+  else if (keyword == _computeHumidityStr)
   {
     return _humidity(*(p.unaryOpArgs()));
   }
-  else if (keyword == "FIR")
-  {
-    return _fir(*(p.unaryOpArgs()));
-  }
+  // else if (keyword == _firStr)
+  // {
+  //   return _fir(*(p.unaryOpArgs()));
+  // }
   else
   {
     printf("Unknown keyword %s\n", keyword.c_str());
@@ -159,7 +182,7 @@ bool Sweep::processUserLoopFunction(ProcessingNode &p)
 }
 
 //------------------------------------------------------------------
-MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
+MathUserData *Sweep::processUserLoopFunctionToUserData(const UnaryNode &p)
 {
   string keyword;
   if (!p.getUserUnaryKeyword(keyword))
@@ -167,7 +190,7 @@ MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
     return NULL;
   }
   vector<string> args = p.getUnaryNodeArgStrings();
-  if (keyword == "create_clumps")
+  if (keyword == _createClumpsStr)
   {
     if (args.size() != 1)
     {
@@ -176,7 +199,7 @@ MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
     }
     return _createClumps(args[0]);
   }
-  else if (keyword == "associate_clumps")
+  else if (keyword == _associateClumpsStr)
   {
     if (args.size() != 3)
     {
@@ -185,7 +208,7 @@ MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
     }
     return _processAssociateClumps(args[0], args[1], args[2]);
   }
-  else if (keyword == "organize_grids")
+  else if (keyword == _organizeGridsStr)
   {
     if (args.size() != 9)
     {
@@ -195,7 +218,7 @@ MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
     return _organize(args[0], args[1], args[2], args[3], args[4], args[5],
 		     args[6], args[7], args[8]);
   }
-  else if (keyword == "build_gaps")
+  else if (keyword == _buildGapsStr)
   {
     if (args.size() != 2)
     {
@@ -204,7 +227,7 @@ MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
     }
     return _processBuildGaps(args[0], args[1]);
   }
-  else if (keyword == "remove_small_gaps")
+  else if (keyword == _removeSmallGapsStr)
   {
     if (args.size() != 2)
     {
@@ -213,7 +236,7 @@ MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
     }
     return _removeSmallGaps(args[0], args[1]);
   }
-  else if (keyword == "filter_so_not_too_far_inside")
+  else if (keyword == _filterSoNotTooFarInsideStr)
   {
     if (args.size() != 4)
     {
@@ -222,7 +245,7 @@ MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
     }
     return _filterGapsInside(args[0], args[1],args[2], args[3]);
   }
-  else if (keyword == "kernel_build")
+  else if (keyword == _kernelBuildStr)
   {
     if (args.size() != 4)
     {
@@ -231,7 +254,7 @@ MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
     }
     return _kernelBuild(args[0], args[1], args[2], args[3]);
   }
-  else if (keyword == "filter_kernels")
+  else if (keyword == _filterKernelsStr)
   {
     if (args.size() != 1)
     {
@@ -240,7 +263,7 @@ MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
     }
     return _kernelFilter(args[0]);
   }
-  else if (keyword == "kernels_to_genpoly")
+  else if (keyword == _kernelsToGenPolyStr)
   {
     if (args.size() != 1)
     {
@@ -249,7 +272,7 @@ MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
     }
     return _kernelToGenPoly(args[0]);
   }
-  else if (keyword == "set_ascii_output")
+  else if (keyword == _setAsciiOutputStr)
   {
     if (args.size() != 1)
     {
@@ -269,14 +292,13 @@ MathUserData *Sweep::processUserLoop2dFunction(const UnaryNode &p)
 bool Sweep::synchUserDefinedInputs(const std::string &userKey,
 				   const std::vector<std::string> &names)
 {
-  _inps.clear();
-  _outputSweep = NULL;
+  // _inps.clear();
+  // _outputSweep = NULL;
   if (!_needToSynch(userKey))
   {
     return true;
   }
-
-  if (userKey == "clumps_to_grid")
+  if (userKey == _clumpsToGridStr)
   {
     // the one input is special data, see if we have it
     if (names.size() != 1)
@@ -290,10 +312,10 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
       return false;
     }
   }
-  else if (userKey == "remove_small_clumps")
+  else if (userKey == _removeSmallClumpsStr)
   {
-    // expect 3 args, 1st arg is a grid, 2nd is a user data
-    if (names.size() != 3)
+    // expect 2 args, 1st arg is a grid, 2nd is a user data
+    if (names.size() != 2)
     {
       LOG(ERROR) << "Inputs messed up";
       return false;
@@ -302,7 +324,7 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
     GriddedData *m = _refToData(names[0], false);
     if (m == NULL)
     {
-      LOG(ERROR) << "Cannot synch";
+      LOG(ERROR) << "Cannot synch" << names[0];
       return false;
     }
     if (!_special.hasName(names[1]))
@@ -311,7 +333,7 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
       return false;
     }
   }
-  else if (userKey == "associate_clumps")
+  else if (userKey == _associateClumpsStr)
   {
     // expect 3 args, 1st arg is a ClumpRegions (user data), 2nd & 3rd are grids
     if (names.size() != 3)
@@ -323,22 +345,22 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
     GriddedData *m = _refToData(names[1], false);
     if (m == NULL)
     {
-      LOG(ERROR) << "Cannot synch";
+      LOG(ERROR) << "Cannot synch" << names[1];
       return false;
     }
     m = _refToData(names[2], false);
     if (m == NULL)
     {
-      LOG(ERROR) << "Cannot synch";
+      LOG(ERROR) << "Cannot synch" << names[2];
       return false;
     }
     if (!_special.hasName(names[0]))
     {
-      LOG(ERROR) << "Input not there " << names[1];
+      LOG(ERROR) << "Input not there " << names[0];
       return false;
     }
   }
-  else if (userKey == "remove_small_gaps")
+  else if (userKey == _removeSmallClumpsStr)
   {
     // expect 2 args:  gaps, number
     if (names.size() != 2)
@@ -349,11 +371,11 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
 
     if (!_special.hasName(names[0]))
     {
-      LOG(ERROR) << "Input not there " << names[1];
+      LOG(ERROR) << "Input not there " << names[0];
       return false;
     }
   }
-  else if (userKey == "get_edge")
+  else if (userKey == _getEdgeStr)
   {
     // expect 1 arg:  gaps
     if (names.size() != 1)
@@ -363,11 +385,11 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
     }
     if (!_special.hasName(names[0]))
     {
-      LOG(ERROR) << "Input not there " << names[1];
+      LOG(ERROR) << "Input not there " << names[0];
       return false;
     }
   }
-  else if (userKey == "get_outside")
+  else if (userKey == _getOutsideStr)
   {
     // expect 1 arg:  gaps
     if (names.size() != 1)
@@ -377,14 +399,14 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
     }
     if (!_special.hasName(names[0]))
     {
-      LOG(ERROR) << "Input not there " << names[1];
+      LOG(ERROR) << "Input not there " << names[0];
       return false;
     }
   }
-  else if (userKey == "filter_so_not_too_far_inside")
+  else if (userKey == _filterSoNotTooFarInsideStr)
   {
-    // expect 4 args:  gaps, clumps, associated clumps, number
-    if (names.size() != 4)
+    // expect 3 non-# inputs, gaps, clumps, associated clumps
+    if (names.size() != 3)
     {
       LOG(ERROR) << "Inputs messed up";
       return false;
@@ -393,21 +415,22 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
     GriddedData *m = _refToData(names[1], false);
     if (m == NULL)
     {
-      LOG(ERROR) << "Cannot synch";
+      LOG(ERROR) << "Cannot synch" << names[1];
       return false;
     }
     if (!_special.hasName(names[0]))
     {
-      LOG(ERROR) << "Input not there " << names[1];
+      LOG(ERROR) << "Input not there " << names[0];
       return false;
     }
     if (!_special.hasName(names[2]))
     {
-      LOG(ERROR) << "Input not there " << names[1];
+      LOG(ERROR) << "Input not there " << names[2];
       return false;
     }
+    return true;
   }
-  else if (userKey == "organize_grids")
+  else if (userKey == _organizeGridsStr)
   {
     // all the inputs (9) should be grids that are available
     if (names.size() != 9)
@@ -420,12 +443,12 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
       GriddedData *m = _refToData(names[i], false);
       if (m == NULL)
       {
-	LOG(ERROR) << "Cannot synch";
+	LOG(ERROR) << "Cannot synch" << names[i];
 	return false;
       }
     }
   }
-  else if (userKey == "set_ascii_output")
+  else if (userKey == _setAsciiOutputStr)
   {
     // expect 1 arg
     if (names.size() != 1)
@@ -436,11 +459,11 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
 
     if (!_special.hasName(names[0]))
     {
-      LOG(ERROR) << "Input not there " << names[1];
+      LOG(ERROR) << "Input not there " << names[0];
       return false;
     }
   }
-  else if (userKey == "remove_small_clumps")
+  else if (userKey == _removeSmallClumpsStr)
   {
     // expect 3 args, 1st arg is a grid, 2nd is a user data
     if (names.size() != 3)
@@ -452,7 +475,7 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
     GriddedData *m = _refToData(names[0], false);
     if (m == NULL)
     {
-      LOG(ERROR) << "Cannot synch";
+      LOG(ERROR) << "Cannot synch" << names[0];
       return false;
     }
     if (!_special.hasName(names[1]))
@@ -462,95 +485,95 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
     }
   }
 
-  else if (userKey == "km_between_good")
-  {
-    // expect 2 args, both grids
-    if (names.size() != 2)
-    {
-      LOG(ERROR) << "Inputs messed up";
-      return false;
-    }
-    GriddedData *m = _refToData(names[0], false);
-    if (m == NULL)
-    {
-      LOG(ERROR) << "Cannot synch";
-      return false;
-    }
-    m = _refToData(names[1], false);
-    if (m == NULL)
-    {
-      LOG(ERROR) << "Cannot synch";
-      return false;
-    }
-  }
-  else if (userKey == "total_attenuation")
-  {
-    // expect 2 args, both grids
-    if (names.size() != 2)
-    {
-      LOG(ERROR) << "Inputs messed up";
-      return false;
-    }
-    GriddedData *m = _refToData(names[0], false);
-    if (m == NULL)
-    {
-      LOG(ERROR) << "Cannot synch";
-      return false;
-    }
-    m = _refToData(names[1], false);
-    if (m == NULL)
-    {
-      LOG(ERROR) << "Cannot synch";
-      return false;
-    }
-  }
-  else if (userKey == "average_attenuation")
-  {
-    // expect 2 args, both grids
-    if (names.size() != 2)
-    {
-      LOG(ERROR) << "Inputs messed up";
-      return false;
-    }
-    GriddedData *m = _refToData(names[0], false);
-    if (m == NULL)
-    {
-      LOG(ERROR) << "Cannot synch";
-      return false;
-    }
-    m = _refToData(names[1], false);
-    if (m == NULL)
-    {
-      LOG(ERROR) << "Cannot synch";
-      return false;
-    }
-  }
-  else if (userKey == "sumZ")
-  {
-    // expect 3 args, first 2 grids, last a number
-    if (names.size() != 3)
-    {
-      LOG(ERROR) << "Inputs messed up";
-      return false;
-    }
-    GriddedData *m = _refToData(names[0], false);
-    if (m == NULL)
-    {
-      LOG(ERROR) << "Cannot synch";
-      return false;
-    }
-    m = _refToData(names[1], false);
-    if (m == NULL)
-    {
-      LOG(ERROR) << "Cannot synch";
-      return false;
-    }
-    if (!MathParser::isFloat(names[2]))
-    {
-      LOG(ERROR) << "Not a number";
-      return false;
-    }
-  }
+  // else if (userKey == "km_between_good")
+  // {
+  //   // expect 2 args, both grids
+  //   if (names.size() != 2)
+  //   {
+  //     LOG(ERROR) << "Inputs messed up";
+  //     return false;
+  //   }
+  //   GriddedData *m = _refToData(names[0], false);
+  //   if (m == NULL)
+  //   {
+  //     LOG(ERROR) << "Cannot synch";
+  //     return false;
+  //   }
+  //   m = _refToData(names[1], false);
+  //   if (m == NULL)
+  //   {
+  //     LOG(ERROR) << "Cannot synch";
+  //     return false;
+  //   }
+  // }
+  // else if (userKey == "total_attenuation")
+  // {
+  //   // expect 2 args, both grids
+  //   if (names.size() != 2)
+  //   {
+  //     LOG(ERROR) << "Inputs messed up";
+  //     return false;
+  //   }
+  //   GriddedData *m = _refToData(names[0], false);
+  //   if (m == NULL)
+  //   {
+  //     LOG(ERROR) << "Cannot synch";
+  //     return false;
+  //   }
+  //   m = _refToData(names[1], false);
+  //   if (m == NULL)
+  //   {
+  //     LOG(ERROR) << "Cannot synch";
+  //     return false;
+  //   }
+  // }
+  // else if (userKey == "average_attenuation")
+  // {
+  //   // expect 2 args, both grids
+  //   if (names.size() != 2)
+  //   {
+  //     LOG(ERROR) << "Inputs messed up";
+  //     return false;
+  //   }
+  //   GriddedData *m = _refToData(names[0], false);
+  //   if (m == NULL)
+  //   {
+  //     LOG(ERROR) << "Cannot synch";
+  //     return false;
+  //   }
+  //   m = _refToData(names[1], false);
+  //   if (m == NULL)
+  //   {
+  //     LOG(ERROR) << "Cannot synch";
+  //     return false;
+  //   }
+  // }
+  // else if (userKey == "sumZ")
+  // {
+  //   // expect 3 args, first 2 grids, last a number
+  //   if (names.size() != 3)
+  //   {
+  //     LOG(ERROR) << "Inputs messed up";
+  //     return false;
+  //   }
+  //   GriddedData *m = _refToData(names[0], false);
+  //   if (m == NULL)
+  //   {
+  //     LOG(ERROR) << "Cannot synch";
+  //     return false;
+  //   }
+  //   m = _refToData(names[1], false);
+  //   if (m == NULL)
+  //   {
+  //     LOG(ERROR) << "Cannot synch";
+  //     return false;
+  //   }
+  //   if (!MathParser::isFloat(names[2]))
+  //   {
+  //     LOG(ERROR) << "Not a number";
+  //     return false;
+  //   }
+  // }
   else
   {
     // assume all grids and numerical input
@@ -559,7 +582,7 @@ bool Sweep::synchUserDefinedInputs(const std::string &userKey,
       GriddedData *m = _refToData(names[i], false);
       if (m == NULL)
       {
-	LOG(ERROR) << "Cannot synch";
+	LOG(ERROR) << "Cannot synch" << names[i];
 	return false;
       }
     }

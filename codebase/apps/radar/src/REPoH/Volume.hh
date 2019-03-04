@@ -11,12 +11,12 @@
 #include "Parms.hh"
 #include "KernelOutputs.hh"
 #include "AsciiOutputs.hh"
-#include <FiltAlgVirtVol/VolumeMdv.hh>
+#include <FiltAlgVirtVol/VirtVolVolume.hh>
 #include <ctime>
 #include <vector>
 
 //------------------------------------------------------------------
-class Volume : public VolumeMdv
+class Volume : public VirtVolVolume
 {
   friend class Sweep;
 
@@ -38,6 +38,10 @@ public:
   #include <rapmath/VolumeDataVirtualMethods.hh>
   #undef FILTALG_DERIVED
 
+#include <FiltAlgVirtVol/VirtVolVolumeVirtualMethods.hh>
+
+  // virtual bool synchUserInputsForMdv(const std::string &userKey,
+  // 				     const std::vector<std::string> &names);
   /**
    * Triggering method. Waits till new data triggers a return.
    *

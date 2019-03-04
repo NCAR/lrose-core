@@ -11,7 +11,7 @@
 #include "Parms.hh"
 #include "KernelOutputs.hh"
 #include "AsciiOutputs.hh"
-#include <FiltAlgVirtVol/SweepMdv.hh>
+#include <FiltAlgVirtVol/VirtVolSweep.hh>
 #include <vector>
 #include <map>
 
@@ -21,7 +21,7 @@ class ClumpRegions;
 class GriddedData;
 
 //------------------------------------------------------------------
-class Sweep : public SweepMdv
+class Sweep : public VirtVolSweep
 {
 public:
 
@@ -61,6 +61,26 @@ public:
 
 protected:
 private:
+
+  static const std::string _createClumpsStr;
+  static const std::string _clumpsToGridStr;
+  static const std::string _removeSmallClumpsStr;
+  static const std::string _associateClumpsStr;
+  static const std::string _buildGapsStr;
+  static const std::string _getEdgeStr;
+  static const std::string _getOutsideStr;
+  static const std::string _removeSmallGapsStr;
+  static const std::string _filterSoNotTooFarInsideStr;
+  static const std::string _inverseMaskStr;
+  static const std::string _kernelBuildStr;
+  static const std::string _centerPointsStr;
+  static const std::string _nptBetweenGoodStr;
+  static const std::string _computeAttenuationStr;
+  static const std::string _computeHumidityStr;
+  static const std::string _setAsciiOutputStr;
+  static const std::string _filterKernelsStr;
+  static const std::string _organizeGridsStr;
+  static const std::string _kernelsToGenPolyStr;
 
   // VolumeMdvInfo _mdvInfo;       /**< Input from volume */
   KernelOutputs _kernelOutputs; /**< Input from volume, shared by volume */

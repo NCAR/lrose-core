@@ -20,10 +20,10 @@ LOC_LIBS = -lFiltAlgVirtVol -lradar -lphysics \
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_INC_DIR = .
-MY_CPPCHECKFLAGS = 
+MY_CPPCHECKFLAGS = -E Params.cc -E Params.hh -AllowPrivateNoDoxygen 
+
 LOC_CFLAGS = 
 LOC_CPPC_CFLAGS = 
-
 HDRS = 
 
 CPPC_SRCS = \
