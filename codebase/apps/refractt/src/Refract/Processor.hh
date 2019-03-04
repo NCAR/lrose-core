@@ -287,7 +287,7 @@ class Processor
    */
 
   bool _getQuality(const FieldWithData &snr, const FieldWithData &quality,
-		   const time_t &t);
+		   const time_t &t, FieldWithData &qualityOutputField);
   
   /**
    * @brief Create the masked output field to be added to the output
@@ -306,6 +306,29 @@ class Processor
 			      const double min_data_value,
 			      const double max_data_value) const;
   
+  MdvxField *_maskOutputField(const MdvxField &mask_field,
+			      const FieldWithData &output_field,
+			      const double min_data_value,
+			      const double max_data_value,
+			      const FieldWithData &quality,
+			      double quality_thresh) const;
+
+  MdvxField *_maskOutputField(const MdvxField &mask_field,
+			      const MdvxField &mask_field2,
+			      const FieldWithData &output_field,
+			      const double min_data_value,
+			      const double max_data_value,
+			      const FieldWithData &quality,
+			      double quality_thresh) const;
+
+  MdvxField *_maskOutputField(const MdvxField &mask_field,
+			      const MdvxField &mask_field2,
+			      double mask_field2_threshold,
+			      const FieldWithData &output_field,
+			      const double min_data_value,
+			      const double max_data_value,
+			      const FieldWithData &quality,
+			      double quality_thresh) const;
 
 };
 

@@ -131,7 +131,6 @@ void PhaseFit::initFit(const TargetVector &target,
   _iq.copyLargeR(_rMin, _numGates, _numBeams, difData);
 
   // set quality and iq based on difData or target iq
-  int offset = 0;
   _quality.setAllZero();
 
   if (isPhaseDiff)

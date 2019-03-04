@@ -761,6 +761,42 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'quality_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("quality_threshold");
+    tt->descr = tdrpStrDup("Quality threshold");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &quality_threshold - &_start_;
+    tt->single_val.d = 0.9;
+    tt++;
+    
+    // Parameter 'threshold_using_sigma_n'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("threshold_using_sigma_n");
+    tt->descr = tdrpStrDup("Threshold on SigmaN for N and DN");
+    tt->help = tdrpStrDup("Set to TRUE if you want to threshold N and DN using SigmaN values");
+    tt->val_offset = (char *) &threshold_using_sigma_n - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'max_sigma_n'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_sigma_n");
+    tt->descr = tdrpStrDup("maximum sigmaN value when threshold_using_sigma_n = TRUE");
+    tt->help = tdrpStrDup("if threshold_using_sigma_n = TRUE and sigmaN > max_sigma_n, N and DN are set to missing.  If threshold_using_sigma_n = FALSE, this value is ignored");
+    tt->val_offset = (char *) &max_sigma_n - &_start_;
+    tt->single_val.d = 30;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

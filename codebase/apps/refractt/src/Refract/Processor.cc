@@ -145,8 +145,10 @@ bool Processor::processScan(const RefractInput &input, const time_t &t,
   // for the algorithm.
   _rawPhase.copyIQFilterBadOrMissing(iq);
 
+  FieldWithData qualityField(I.getFieldPtrConst(), "Quality", "none", 0.0);
+
   // Compute the quality
-  _getQuality(Snr, Qual, t);
+  _getQuality(Snr, Qual, t, qualityField);
   
   // Compute phase diff. fields
   LOG(DEBUG_VERBOSE) << "Computing phase differences...";
@@ -167,15 +169,41 @@ bool Processor::processScan(const RefractInput &input, const time_t &t,
   
   // Add copies of the output fields to the data file.  Use the I field
   // to mask out missing beams.
-  data_file.addField(_maskOutputField(*(iq.getI()), _nField,
-				      MIN_N_VALUE, MAX_N_VALUE));
-  data_file.addField(_maskOutputField(*(iq.getI()), _dnField,
-				      MIN_DN_VALUE, MAX_DN_VALUE));
-  data_file.addField(_maskOutputField(*(iq.getI()), _sigmaNField,
-				      MIN_SIGMA_N_VALUE, MAX_SIGMA_N_VALUE));
+  MdvxField  *sigmaN = _maskOutputField(*(iq.getI()), _sigmaNField,
+					MIN_SIGMA_N_VALUE, MAX_SIGMA_N_VALUE);
+
+  if (_parms.threshold_using_sigma_n)
+  {
+    data_file.addField(_maskOutputField(*(iq.getI()), *sigmaN,
+					_parms.max_sigma_n, _nField,
+					MIN_N_VALUE, MAX_N_VALUE, qualityField,
+					_parms.quality_threshold));
+    data_file.addField(_maskOutputField(*(iq.getI()), *sigmaN,
+					_parms.max_sigma_n, _dnField,
+					MIN_DN_VALUE, MAX_DN_VALUE,
+					qualityField,
+					_parms.quality_threshold));
+  }
+  else
+  {
+    data_file.addField(_maskOutputField(*(iq.getI()), *sigmaN, _nField,
+					MIN_N_VALUE, MAX_N_VALUE, qualityField,
+					_parms.quality_threshold));
+    data_file.addField(_maskOutputField(*(iq.getI()), *sigmaN, _dnField,
+					MIN_DN_VALUE, MAX_DN_VALUE,
+					qualityField,
+					_parms.quality_threshold));
+  }
+    
+
+  // mask the N and DN fields both from iq and from sigmaN
+
   data_file.addField(_maskOutputField(*(iq.getI()), _sigmaDnField,
 				      MIN_SIGMA_DN_VALUE, MAX_SIGMA_DN_VALUE));
+  data_file.addField(_maskOutputField(*(iq.getI()), qualityField, 0, 1));
   
+  data_file.addField(sigmaN);
+
   // Transfer old I/Q data to _difPrevScan to get ready for next scan
   _difPrevScan.copyIQ(_rawPhase);
   return true;
@@ -336,7 +364,8 @@ void Processor::_freeArrays()
  */
 
 bool Processor::_getQuality(const FieldWithData &snr,
-			    const FieldWithData &qual, const time_t &t)
+			    const FieldWithData &qual, const time_t &t,
+			    FieldWithData &qualityOutputField)
 {
   LOG(DEBUG) << "Computing echo quality";
 
@@ -350,6 +379,8 @@ bool Processor::_getQuality(const FieldWithData &snr,
 			_refparms.quality_source == RefParms::QUALITY_FROM_CPA,
 			THRESH_WIDTH, ABRUPT_FACTOR);
 
+  for (size_t i=0; i<quality.size(); ++i)
+    qualityOutputField[i] = quality[i];
 
   // set a phase error array from the quality array
   vector<double> phase_er =
@@ -408,3 +439,187 @@ MdvxField *Processor::_maskOutputField(const MdvxField &mask_field,
   
   return masked_field;
 }
+
+
+MdvxField *Processor::_maskOutputField(const MdvxField &mask_field,
+				       const FieldWithData &output_field,
+				       const double min_data_value,
+				       const double max_data_value,
+				       const FieldWithData &quality,
+				       double quality_thresh) const
+{
+  // Create a copy of the output field to add to the output file
+
+  MdvxField *masked_field = output_field.fieldCopy();
+  
+  // Set the output field values to missing where the mask field is missing
+  Mdvx::field_header_t mask_field_hdr = mask_field.getFieldHeader();
+  fl32 *mask_data = (fl32 *)mask_field.getVol();
+  
+  Mdvx::field_header_t output_field_hdr = masked_field->getFieldHeader();
+  fl32 *output_data = (fl32 *)masked_field->getVol();
+  
+  int volume_size = mask_field_hdr.nx * mask_field_hdr.ny * mask_field_hdr.nz;
+  
+  for (int i = 0; i < volume_size; ++i)
+  {
+    // Mask the data based on the mask field.
+
+    if (mask_data[i] == mask_field_hdr.bad_data_value ||
+	mask_data[i] == mask_field_hdr.missing_data_value)
+    {
+      output_data[i] = output_field_hdr.missing_data_value;
+      continue;
+    }
+    if (quality.isBadAtIndex(i))
+    {
+      output_data[i] = output_field_hdr.missing_data_value;
+      continue;
+    }
+    if (quality[i] <= quality_thresh)
+    {
+      output_data[i] = output_field_hdr.missing_data_value;
+      continue;
+    }
+    
+    // Set data values outside of the defined range to bad
+
+    if (output_data[i] != output_field_hdr.bad_data_value &&
+	output_data[i] != output_field_hdr.missing_data_value &&
+	(output_data[i] < min_data_value ||
+	 output_data[i] > max_data_value))
+      output_data[i] = output_field_hdr.bad_data_value;
+    
+  } /* endfor - i */
+  
+  return masked_field;
+}
+
+MdvxField *Processor::_maskOutputField(const MdvxField &mask_field,
+				       const MdvxField &mask_field2,
+				       const FieldWithData &output_field,
+				       const double min_data_value,
+				       const double max_data_value,
+				       const FieldWithData &quality,
+				       double quality_thresh) const
+{
+  // Create a copy of the output field to add to the output file
+
+  MdvxField *masked_field = output_field.fieldCopy();
+  
+  // Set the output field values to missing where the mask field or mask2
+  // field is missing
+  Mdvx::field_header_t mask_field_hdr = mask_field.getFieldHeader();
+  fl32 *mask_data = (fl32 *)mask_field.getVol();
+  
+  Mdvx::field_header_t output_field_hdr = masked_field->getFieldHeader();
+  fl32 *output_data = (fl32 *)masked_field->getVol();
+  
+  int volume_size = mask_field_hdr.nx * mask_field_hdr.ny * mask_field_hdr.nz;
+  
+  Mdvx::field_header_t mask_field_hdr2 = mask_field2.getFieldHeader();
+  fl32 *mask_data2 = (fl32 *)mask_field2.getVol();
+  
+  for (int i = 0; i < volume_size; ++i)
+  {
+    // Mask the data based on the mask field.
+
+    if (mask_data[i] == mask_field_hdr.bad_data_value ||
+	mask_data[i] == mask_field_hdr.missing_data_value ||
+	mask_data2[i] == mask_field_hdr2.bad_data_value ||
+	mask_data2[i] == mask_field_hdr2.missing_data_value)
+    {
+      output_data[i] = output_field_hdr.missing_data_value;
+      continue;
+    }
+    if (quality.isBadAtIndex(i))
+    {
+      output_data[i] = output_field_hdr.missing_data_value;
+      continue;
+    }
+    if (quality[i] <= quality_thresh)
+    {
+      output_data[i] = output_field_hdr.missing_data_value;
+      continue;
+    }
+    
+    // Set data values outside of the defined range to bad
+
+    if (output_data[i] != output_field_hdr.bad_data_value &&
+	output_data[i] != output_field_hdr.missing_data_value &&
+	(output_data[i] < min_data_value ||
+	 output_data[i] > max_data_value))
+      output_data[i] = output_field_hdr.bad_data_value;
+    
+  } /* endfor - i */
+  
+  return masked_field;
+}
+
+MdvxField *Processor::_maskOutputField(const MdvxField &mask_field,
+				       const MdvxField &mask_field2,
+				       double mask_field2_threshold,
+				       const FieldWithData &output_field,
+				       const double min_data_value,
+				       const double max_data_value,
+				       const FieldWithData &quality,
+				       double quality_thresh) const
+{
+  // Create a copy of the output field to add to the output file
+
+  MdvxField *masked_field = output_field.fieldCopy();
+  
+  // Set the output field values to missing where the mask field or mask2
+  // field is missing
+  Mdvx::field_header_t mask_field_hdr = mask_field.getFieldHeader();
+  fl32 *mask_data = (fl32 *)mask_field.getVol();
+  
+  Mdvx::field_header_t output_field_hdr = masked_field->getFieldHeader();
+  fl32 *output_data = (fl32 *)masked_field->getVol();
+  
+  int volume_size = mask_field_hdr.nx * mask_field_hdr.ny * mask_field_hdr.nz;
+  
+  Mdvx::field_header_t mask_field_hdr2 = mask_field2.getFieldHeader();
+  fl32 *mask_data2 = (fl32 *)mask_field2.getVol();
+  
+  for (int i = 0; i < volume_size; ++i)
+  {
+    // Mask the data based on the mask field.
+
+    if (mask_data[i] == mask_field_hdr.bad_data_value ||
+	mask_data[i] == mask_field_hdr.missing_data_value ||
+	mask_data2[i] == mask_field_hdr2.bad_data_value ||
+	mask_data2[i] == mask_field_hdr2.missing_data_value)
+    {
+      output_data[i] = output_field_hdr.missing_data_value;
+      continue;
+    }
+    if (quality.isBadAtIndex(i))
+    {
+      output_data[i] = output_field_hdr.missing_data_value;
+      continue;
+    }
+    if (quality[i] <= quality_thresh)
+    {
+      output_data[i] = output_field_hdr.missing_data_value;
+      continue;
+    }
+    
+    if (mask_data2[i] > mask_field2_threshold)
+    {
+      output_data[i] = output_field_hdr.missing_data_value;
+      continue;
+    }
+
+    // Set data values outside of the defined range to bad
+    if (output_data[i] != output_field_hdr.bad_data_value &&
+	output_data[i] != output_field_hdr.missing_data_value &&
+	(output_data[i] < min_data_value ||
+	 output_data[i] > max_data_value))
+      output_data[i] = output_field_hdr.bad_data_value;
+    
+  } /* endfor - i */
+  
+  return masked_field;
+}
+

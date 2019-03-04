@@ -385,6 +385,12 @@ public:
 
   tdrp_bool_t do_relax;
 
+  double quality_threshold;
+
+  tdrp_bool_t threshold_using_sigma_n;
+
+  double max_sigma_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -392,7 +398,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[17];
+  mutable TDRPtable _table[20];
 
   const char *_className;
 

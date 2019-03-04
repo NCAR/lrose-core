@@ -161,3 +161,23 @@ paramdef boolean
   p_default = false;
 } do_relax;
 
+paramdef double
+{
+  p_descr = "Quality threshold";
+  p_default = 0.9;
+} quality_threshold;
+
+
+paramdef boolean
+{
+  p_descr = "Threshold on SigmaN for N and DN";
+  p_help = "Set to TRUE if you want to threshold N and DN using SigmaN values";
+  p_default = FALSE;
+} threshold_using_sigma_n;
+
+paramdef double
+{
+  p_descr = "maximum sigmaN value when threshold_using_sigma_n = TRUE";
+  p_help = "if threshold_using_sigma_n = TRUE and sigmaN > max_sigma_n, N and DN are set to missing.  If threshold_using_sigma_n = FALSE, this value is ignored";
+  p_default = 30;
+} max_sigma_n;
