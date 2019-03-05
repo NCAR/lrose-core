@@ -72,6 +72,11 @@ private:
   vector<string> _useCommandLineFileList();
   void _readFile(const string &filePath, RadxVol &vol);
 
+  int _processOne(string filePath);
+  int _runWithCompleteFileList(vector<string> fileList);
+  int _runRealtimeWithLdata();
+  int _runRealtimeNoLdata();
+
   //
   // Dealias _currRadarVol if possible
   //

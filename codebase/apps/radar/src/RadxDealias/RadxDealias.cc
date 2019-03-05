@@ -36,7 +36,10 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
+#include <dsserver/DsLdataInfo.hh>
+#include <didss/DsInputPath.hh>
 #include "RadxDealias.hh"
+
 using namespace std;
 
 ///////////////////////////////////////////////////////
@@ -117,13 +120,13 @@ int RadxDealias::Run()
   // then process the list of files 
   if (_params.mode == Params::ARCHIVE) {
     const vector<string> &fileList = _useCommandLineStartEndTimes();
-    return _run(fileList);
+    return _runWithCompleteFileList(fileList);
   } else if (_params.mode == Params::FILELIST) {
     vector<string> fileList = _useCommandLineFileList();
     cerr << "fileList ";
     for (vector<string>::iterator it = fileList.begin(); it < fileList.end(); it++) 
       cerr << *it << endl;
-    return _run(fileList);
+    return _runWithCompleteFileList(fileList);
 
   } else {
 
@@ -131,15 +134,13 @@ int RadxDealias::Run()
     // register with procmap
     //
     PMU_auto_register("Run");
-    /*
-    while (true) {
-      _run();
-      cerr << "RadxDealias::Run:" << endl;
-      cerr << "  Trying to contact input server at url: "
-	   << _params.input_fmq_url << endl;
-      sleep(2);
+
+    if (_params.latest_data_info_avail) {
+      return _runRealtimeWithLdata();
+    } else {
+      return _runRealtimeNoLdata();
     }
-    */
+
   }
   } catch (const char *errMsg) {
     cerr << errMsg << endl;
@@ -172,8 +173,8 @@ vector<string>  RadxDealias::_useCommandLineFileList()
 
 
 
-
-int RadxDealias::_run(vector<string> fileList)
+/*
+int RadxDealias::_runOriginal(vector<string> fileList)
 {
   
   int iret = 0;
@@ -212,17 +213,11 @@ int RadxDealias::_run(vector<string> fileList)
 	// convert from RadxVol to Volume structures
 
 	currDbzVol = _extractFieldData(vol, _params._required_fields[0], 0.0); 
+	// override Nyquist frequency if directed from params file
 	currVelVol = _extractFieldData(vol, _params._required_fields[1], _params.nyquist_mps);
 
 	if ((currDbzVol == NULL) || (currVelVol == NULL))
 	  throw "Error, velocity or reflectivity field could not be read from data file";
-
-	// TODO: this could be coordinated with find maxNBins & maxNRays
-	//Rsl::verifyEqualDimensions(currDbzVol, currVelVol);
-
-	// override Nyquist frequency if directed from params file
-	if (_params.nyquist_mps != 0.0) {
-	}
 
 	time_t volTime = vol.getStartTimeSecs();
 
@@ -262,6 +257,195 @@ int RadxDealias::_run(vector<string> fileList)
       // clear all data on volume object
       vol.clear();
     } // end for each file
+
+  if (_params.debug) {
+    cerr << "RadxDealias done" << endl;
+    cerr << "====>> n good files processed: " << nGood << endl;
+  }
+
+  return iret;
+
+}
+*/
+
+/*
+// in parameters:
+// vol - current RadxVolume 
+// prevVelVol - Volume from previous run, or NULL, if the first time
+// out parameters:
+// currVelVol - current Volume form of RadxVolume; send as prevVelVol on next call
+// function returns 0 on success; throws any exceptions encountered to calling method
+//
+int RadxDealias::_processOne(RadxVol *vol, Volume *prevVelVol, Volume *currVelVol)
+{
+  
+  int iret = 0;
+
+  if (_params.debug) {
+    cerr << "processingOne volume ..." << endl;
+  }
+
+  // Volume *currVelVol = NULL;    
+  //Volume *prevVelVol = NULL;
+  Volume *currDbzVol = NULL;
+
+  //RadxVol vol;
+
+
+	vol.loadFieldsFromRays();
+	vol.remapToFinestGeom();
+
+        vol.setNGatesConstant();
+
+        vol.convertToFl32(); // does FourDD use signed ints? No, it seems to use floats
+	// convert from RadxVol to Volume structures
+
+	currDbzVol = _extractFieldData(vol, _params._required_fields[0], 0.0); 
+	// override Nyquist frequency if directed from params file
+	currVelVol = _extractFieldData(vol, _params._required_fields[1], _params.nyquist_mps);
+
+	if ((currDbzVol == NULL) || (currVelVol == NULL))
+	  throw "Error, velocity or reflectivity field could not be read from data file";
+
+	time_t volTime = vol.getStartTimeSecs();
+
+	_processVol(prevVelVol, currVelVol, currDbzVol, volTime);
+
+	//move the unfolded data back into the RadxVol structure
+	// first, move the data back to the rays, so that we can add a couple
+	// new fields to the rays                                                                                             
+	vol.loadRaysFromFields();
+
+	// only the velocity should change; NOT the reflectivity
+	_insertFieldData(&vol, _params._required_fields[1], currVelVol);
+
+	// load the data back into the fields
+        vol.loadFieldsFromRays();
+
+        vector<string> fieldNamesNow = vol.getUniqueFieldNameList();
+
+	// write the volume data
+	_writeVol(vol);
+
+      // reset and free memory as needed
+      //Rsl::free_volume(prevVelVol);
+      Rsl::free_volume(currDbzVol);
+
+      // seed the next unfolding with the results
+      //prevVelVol = currVelVol;
+
+      // clear all data on volume object
+      //vol.clear();
+
+      return iret;
+}
+*/
+
+//
+// in parameters:
+// string filePath 
+// function returns 0 on success; throws any exceptions encountered to calling method
+//
+int RadxDealias::_processOne(string filePath)
+{
+  
+  int iret = 0;
+
+  if (_params.debug) {
+    cerr << "processingOne volume from file ..." << filePath << endl;
+  }
+
+  static Volume *prevVelVol = NULL;
+  Volume *currVelVol = NULL;    
+  Volume *currDbzVol = NULL;
+
+  RadxVol vol;
+
+  // read input file
+  _readFile(filePath, vol);
+
+  vol.loadFieldsFromRays();
+  vol.remapToFinestGeom();
+
+  vol.setNGatesConstant();
+
+  vol.convertToFl32(); // does FourDD use signed ints? No, it seems to use floats
+
+  // convert from RadxVol to Volume structures
+  currDbzVol = _extractFieldData(vol, _params._required_fields[0], 0.0);
+  // override Nyquist frequency if directed from params file
+  currVelVol = _extractFieldData(vol, _params._required_fields[1], _params.nyquist_mps);
+
+  if ((currDbzVol == NULL) || (currVelVol == NULL))
+    throw "Error, velocity or reflectivity field could not be read from data file";
+
+  time_t volTime = vol.getStartTimeSecs();
+
+  _processVol(prevVelVol, currVelVol, currDbzVol, volTime);
+
+  // move the unfolded data back into the RadxVol structure
+  // first, move the data back to the rays, so that we can add a couple
+  // new fields to the rays                                                                                             
+  vol.loadRaysFromFields();
+
+  // only the velocity should change; NOT the reflectivity
+  _insertFieldData(&vol, _params._required_fields[1], currVelVol);
+
+  // load the data back into the fields
+  vol.loadFieldsFromRays();
+
+  //vector<string> fieldNamesNow = vol.getUniqueFieldNameList();
+
+  // write the volume data
+  _writeVol(vol);
+
+  // reset and free memory as needed
+  Rsl::free_volume(prevVelVol);
+  Rsl::free_volume(currDbzVol);
+
+  // seed the next unfolding with the results
+  prevVelVol = currVelVol;
+
+  // clear all data on volume object
+  vol.clear();
+
+  return iret;
+}
+
+
+
+int RadxDealias::_runWithCompleteFileList(vector<string> fileList)
+{
+  
+  int iret = 0;
+
+  if (_params.debug) {
+    cerr << "RadxDealias is running ..." << endl;
+    cerr << fileList.size() << " input file(s) " << endl;
+  }
+
+  int nGood = 0;
+  int nError = 0;
+
+  // loop through the file list
+
+  for (int ii = 0; ii < (int) fileList.size(); ii++) {
+    if (_params.debug) {
+      cerr << "reading " << fileList[ii] << endl;
+    }
+            
+    try {
+      _processOne(fileList[ii]);
+      nGood++;
+    } catch (const char*  errorMsg) {
+      iret = -1;
+      nError++;
+      cerr << errorMsg << endl;
+    }
+
+    statusReport(nError, nGood);
+
+  } // end for each file
 
   if (_params.debug) {
     cerr << "RadxDealias done" << endl;
@@ -326,192 +510,186 @@ vector<string> RadxDealias::_useCommandLineStartEndTimes()
 }
 
 
-
 /*
-//////////////////////////////////////////////////////////////
-//
-// _run: initialize fmqs, create Dsr2Radar and FourDD objects
-//       for storing beams and dealiasing volumes,
-//       start reading messages, processing and writing volumes.
-//
-int RadxDealias::_run ()
+int RadxDealias::_runRealTime(vector<string> fileList)
 {
-  // Instantiate and initialize the DsRadar queues
-  //
-
-  DsRadarQueue radarQueue, outputQueue;
-
-  DsRadarMsg radarMsg;
-
-  //
-  // Option to pad the beam data to a constant number of gates
-  //
-
-  if ( _params.input_num_gates > 0 )
-    {
-      radarMsg.padBeams( true, _params.input_num_gates );
-    }
-
-  if (_params.seek_to_end_of_input)
-    {
-      if (radarQueue.init(_params.input_fmq_url, _progName.c_str(),
-                          _params.debug,
-                          DsFmq::BLOCKING_READ_ONLY, DsFmq::END ))
-        {
-          fprintf(stderr, "ERROR - %s:RadxDealias::_run\n", _progName.c_str());
-          fprintf(stderr, "Could not initialize radar queue '%s'\n",
-                  _params.input_fmq_url);
-          return -1;
-        }
-    }
-  else
-    {
-      if (radarQueue.init(_params.input_fmq_url, _progName.c_str(),
-                          _params.debug,
-                          DsFmq::BLOCKING_READ_ONLY, DsFmq::START ))
-        {
-          fprintf(stderr, "ERROR - %s:RadxDealias::_run\n", _progName.c_str());
-          fprintf(stderr, "Could not initialize radar queue '%s'\n",
-                  _params.input_fmq_url);
-          return -1;
-        }
-    }
-
-  if( outputQueue.init( _params.output_fmq_url,
-                        _progName.c_str(),
-                        _params.debug,
-                        DsFmq::READ_WRITE, DsFmq::END,
-                        _params.output_fmq_compress,
-                        _params.output_fmq_nslots,
-                        _params.output_fmq_size, 1000) )
-    {
-      fprintf(stderr, "Error - %s: Could not initialize fmq %s", _progName.c_str(), _params.output_fmq_url );
-      return( -1);
-    }
-
-  //
-  // Create Dsr2Radar objects for reformatting and storing radar data
-
-  //_currRadarVol = new Dsr2Radar(_params);
-  //_prevRadarVol = new Dsr2Radar(_params);
-
-  // Create FourDD object for dealiasing
-  _fourDD = new FourDD(_params);
-
-  // Read beams from the queue and process them
-
-  while (true)
-    {
-      bool end_of_vol;
-      int contents;
-      if (_readMsg(radarQueue, radarMsg, end_of_vol, contents) == 0)
-        {
-          if (end_of_vol)
-            {
-              _processVol();
-              _writeVol(outputQueue);
-              _reset();
-            }
-        } //  if (_readMsg() 
-    } // while (true)
-
-  return 0;
-}
-*/
-
-//////////////////////////////////////////////////////////////
-// 
-// _run: X initialize fmqs, create Dsr2Radar and FourDD objects
-//       for storing beams and dealiasing volumes,
-//       X start reading messages, processing and writing volumes.  
-//       open data file(s) pass RadxVol to FourDD as an RSL radar structure.
-/*
-int RadxDealias::_run ()
-{
-
-  //
-  // Option to pad the beam data to a constant number of gates
-  //
-  if ( _params.input_num_gates > 0 ) 
-    {
-      radarMsg.padBeams( true, _params.input_num_gates );
-    }
-
-  if (_params.seek_to_end_of_input) 
-    {
-      if (radarQueue.init(_params.input_fmq_url, _progName.c_str(),
-			  _params.debug,
-			  DsFmq::BLOCKING_READ_ONLY, DsFmq::END )) 
-	{
-	  fprintf(stderr, "ERROR - %s:RadxDealias::_run\n", _progName.c_str());
-	  fprintf(stderr, "Could not initialize radar queue '%s'\n",
-		  _params.input_fmq_url);
-	  return -1;
-	}
-    } 
-  else 
-    {
-      if (radarQueue.init(_params.input_fmq_url, _progName.c_str(),
-			  _params.debug,
-			  DsFmq::BLOCKING_READ_ONLY, DsFmq::START )) 
-	{
-	  fprintf(stderr, "ERROR - %s:RadxDealias::_run\n", _progName.c_str());
-	  fprintf(stderr, "Could not initialize radar queue '%s'\n",
-		  _params.input_fmq_url);
-	  return -1;
-	}
-    }
   
-  if( outputQueue.init( _params.output_fmq_url,
-                        _progName.c_str(),
-                        _params.debug,
-                        DsFmq::READ_WRITE, DsFmq::END,
-                        _params.output_fmq_compress,
-                        _params.output_fmq_nslots,
-                        _params.output_fmq_size, 1000) ) 
-    {
-      fprintf(stderr, "Error - %s: Could not initialize fmq %s", _progName.c_str(), _params.output_fmq_url );
-      return( -1);
-    }
+  int iret = 0;
 
-  //
-  // Create Dsr2Radar objects for reformatting and storing radar data
-  //
-  _currRadarVol = new Dsr2Radar(_params);
-  
-  _prevRadarVol = new Dsr2Radar(_params);
+  if (_params.debug) {
+    cerr << "RadxDealias is running ..." << endl;
+    cerr << fileList.size() << " input file(s) " << endl;
+  }
 
-  //
-  // Create FourDD object for dealiasing
-  //
-  _fourDD = new FourDD(_params);
+  int nGood = 0;
+  int nError = 0;
 
+  Volume *prevVelVol = NULL;
+  Volume *currVelVol = NULL;  
 
+  RadxVol vol;
 
-  //
-  // Read beams from the queue and process them
-  //
-  while (true) 
-    {
-      bool end_of_vol;
-            
-      int contents;
-      
-      string path; 
-      RadxVol radxVol;
+    // loop through the file list
 
-      int error = ncfRadxFile.readFromPath(path, radxVol);
-      
-      if (!error) {
-         _processVol(radxVol);
-	 _writeVol(radxVol);
-     	 _reset();
+    for (int ii = 0; ii < (int) fileList.size(); ii++) {
+      if (_params.debug) {
+	cerr << "reading " << fileList[ii] << endl;
       }
-    } // while (true)
-  
-  return 0;
+            
+      try {
+      _processOne(fileList[ii]);
+
+	// read input file
+	_readFile(fileList[ii], vol);
+
+        _processOne(vol, prevVelVol, currVelVol);
+	
+	nGood++;
+      } catch (const char*  errorMsg) {
+	  iret = -1;
+	  nError++;
+          cerr << errorMsg << endl;
+      }
+
+      statusReport(nError, nGood);
+
+      // reset and free memory as needed
+      Rsl::free_volume(prevVelVol);
+      //      Rsl::free_volume(currDbzVol);
+
+      // seed the next unfolding with the results
+      prevVelVol = currVelVol;
+
+      // clear all data on volume object
+      vol.clear();
+    } // end for each file
+
+    // free the last Volume held as memory
+    Rsl::free_volume(prevVelVol);
+
+
+  if (_params.debug) {
+    cerr << "RadxDealias done" << endl;
+    cerr << "====>> n good files processed: " << nGood << endl;
+  }
+
+  return iret;
+
 }
 */
+
+
+//////////////////////////////////////////////////
+// Run in realtime mode with latest data info
+
+int RadxDealias::_runRealtimeWithLdata()
+{
+
+  // init process mapper registration
+
+  PMU_auto_init(_progName.c_str(), _params.instance,
+                PROCMAP_REGISTER_INTERVAL);
+
+  // watch for new data to arrive
+
+  LdataInfo ldata(_params.input_dir,
+                  _params.debug >= Params::DEBUG_VERBOSE);
+  if (strlen(_params.search_ext) > 0) {
+    ldata.setDataFileExt(_params.search_ext);
+  }
+
+  int iret = 0;
+  int nGood = 0;
+  int nError = 0;
+
+  int msecsWait = _params.wait_between_checks * 1000;
+  while (true) {
+    ldata.readBlocking(_params.max_realtime_data_age_secs,
+                       msecsWait, PMU_auto_register);
+    const string path = ldata.getDataPath();
+
+      try {
+	_processOne(path);	
+	nGood++;
+      } catch (const char*  errorMsg) {
+	  iret = -1;
+	  nError++;
+          cerr << errorMsg << endl;
+      }
+
+      statusReport(nError, nGood);
+
+  } // end while true
+
+  return iret;
+
+}
+
+//////////////////////////////////////////////////
+// Run in realtime mode without latest data info
+
+int RadxDealias::_runRealtimeNoLdata()
+{
+
+  // init process mapper registration
+
+  PMU_auto_init(_progName.c_str(), _params.instance,
+                PROCMAP_REGISTER_INTERVAL);
+  
+  // Set up input path
+
+  DsInputPath input(_progName,
+		    _params.debug >= Params::DEBUG_VERBOSE,
+		    _params.input_dir,
+		    _params.max_realtime_data_age_secs,
+		    PMU_auto_register,
+		    _params.latest_data_info_avail,
+		    false);
+
+  input.setFileQuiescence(_params.file_quiescence);
+  input.setSearchExt(_params.search_ext);
+  input.setRecursion(_params.search_recursively);
+  input.setMaxRecursionDepth(_params.max_recursion_depth);
+  input.setMaxDirAge(_params.max_realtime_data_age_secs);
+
+  int iret = 0;
+  int nGood = 0;
+  int nError = 0;
+
+  while(true) {
+
+    // check for new data
+    
+    char *path = input.next(false);
+    
+    if (path == NULL) {
+      
+      // sleep a bit
+      
+      PMU_auto_register("Waiting for data");
+      umsleep(_params.wait_between_checks * 1000);
+
+    } else {
+
+      try {
+	_processOne(path);	
+	nGood++;
+      } catch (const char*  errorMsg) {
+	  iret = -1;
+	  nError++;
+          cerr << errorMsg << endl;
+      }
+
+      statusReport(nError, nGood);
+  
+    } // end else path != NULL
+
+  } // while
+
+  return iret;
+
+}
+
 //////////////////////////////////////////////////
 // Read in a file
 // accounting for special cases such as gematronik
