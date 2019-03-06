@@ -658,7 +658,8 @@ int Dsr2Radx::_processRay(RadxRay *ray)
       if (_endOfVol) {
         if (_endOfVolAutomatic ||
             _params.end_of_vol_decision == Params::CHANGE_IN_VOL_NUM ||
-            _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
+            _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM ||
+            _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_MODE) {
           _cachedRay = ray;
         } else {
           _addRayToVol(ray);
