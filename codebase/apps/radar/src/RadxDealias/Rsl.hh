@@ -286,7 +286,7 @@ public:
   static void free_sweep(Sweep *sweep);
   static void free_ray(Ray *ray);
 
-  static Volume *copy_volume(Volume *v);
+  static Volume *copy_volume(Volume *v, bool debug=false);
   static Sweep  *copy_sweep(Sweep *sweep);
   static Ray    *copy_ray(Ray *ray);
 
@@ -303,9 +303,10 @@ public:
   static void print_sweep_header(Sweep_header header);
 
   static void verifyEqualDimensionsGetMaxDimensions(Volume *currDbzVol,
-    Volume *currVelVol, float degreeThreshold, int *maxNBins, int *maxNRays);
+		Volume *currVelVol, float degreeThreshold, int *maxNBins, int *maxNRays,
+                bool debug=false);
   static void verifyEqualDimensions(Volume *currDbzVol, Volume *currVelVol);
-  static void findMaxNBins(Volume *volume, int *maxNBins, int *maxNRays);
+  static void findMaxNBins(Volume *volume, int *maxNBins, int *maxNRays, bool debug=false);
 };
 
 #endif

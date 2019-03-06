@@ -140,7 +140,7 @@ int FourDD::Dealias(Volume *lastVelVol, Volume *currVelVol, Volume *currDbzVol,
       // Get a copy of the radial velocity, if unfolding fails we'll 
       // have the original data
       //
-      velVolCopy = Rsl::copy_volume(currVelVol);
+    velVolCopy = Rsl::copy_volume(currVelVol, params.debug);
   } else {
       fprintf(stderr, "No Radial Velocity field available to unfold; aborting\n");
       exit(-1);
@@ -149,7 +149,7 @@ int FourDD::Dealias(Volume *lastVelVol, Volume *currVelVol, Volume *currDbzVol,
   //
   // Create first guess field from VAD and put in soundVolume.
   //  
-  soundVolume = Rsl::copy_volume(currVelVol);
+  soundVolume = Rsl::copy_volume(currVelVol, params.debug);
   // Rsl::verifyEqualDimensions(soundVolume, currVelVol);
 
   firstGuess(soundVolume, params.missing_vel, &firstGuessSuccess, volTime);
@@ -982,19 +982,8 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
 
      // determine max number of bins from data
      double degreeThreshold = params.angle_variance;
-     Rsl::verifyEqualDimensionsGetMaxDimensions(rvVolume, soundVolume, degreeThreshold, &maxNBins, &maxNRays);
-
-     /*
-     Rsl::findMaxNBins(rvVolume, &countNBins, &countNRays);
-     if (countNBins > maxNBins) maxNBins = countNBins;
-     if (countNRays > maxNRays) maxNRays = countNRays;
-     Rsl::findMaxNBins(rvVolume, &countNBins, &countNRays);
-     if (countNBins > maxNBins) maxNBins = countNBins;
-     if (countNRays > maxNRays) maxNRays = countNRays;
-     Rsl::findMaxNBins(rvVolume, &countNBins, &countNRays);
-     if (countNBins > maxNBins) maxNBins = countNBins;
-     if (countNRays > maxNRays) maxNRays = countNRays;
-     */     
+     Rsl::verifyEqualDimensionsGetMaxDimensions(rvVolume, soundVolume,
+	    degreeThreshold, &maxNBins, &maxNRays, params.debug);
 
      // determine max number of rays from data
      short **GOOD = (short **) umalloc2(maxNBins,
@@ -1006,7 +995,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
      Volume* VALS;
 
      numSweeps = rvVolume->h.nsweeps;
-     VALS=Rsl::copy_volume(rvVolume);
+     VALS=Rsl::copy_volume(rvVolume, params.debug);
      if (params.comp_thresh>1.0 || params.comp_thresh<=0.0 ) fraction=0.25;
      else fraction=params.comp_thresh;
      if (params.comp_thresh2>1.0 || params.comp_thresh2<=0.0 ) fraction2=0.25;
@@ -1028,10 +1017,11 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
 	 // agrees with both the previous sweep and previous volume within
 	 // a params.comp_thresh of the Nyquist velocity). This produces a number
 	 // of good data points from which to begin unfolding assuming spatial
-         // continuity.  
-	 printf("Sweep: %d\n", sweepIndex);
-	 if (params.debug) printf("NyqVelocity: %f, missingVal: %f\n",
-			     NyqVelocity, missingVal);
+         // continuity.
+	 if (params.debug) {
+	   printf("Sweep: %d\n", sweepIndex);
+	   printf("NyqVelocity: %f, missingVal: %f\n", NyqVelocity, missingVal);
+	 }
 	 flag=1;
 
 	 for (currIndex=0;currIndex<numRays;currIndex++) 

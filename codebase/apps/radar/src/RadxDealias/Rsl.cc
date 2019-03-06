@@ -219,7 +219,7 @@ Sweep *Rsl::copy_sweep(Sweep *sweep) {
 
 
 
-Volume *Rsl::copy_volume(Volume *v) {
+Volume *Rsl::copy_volume(Volume *v, bool debug) {
 
   if (v == NULL) return NULL;
 
@@ -246,9 +246,11 @@ Volume *Rsl::copy_volume(Volume *v) {
   }
 
   // does this do a deep copy? does it copy all the rays and data, too? Yes.
-  cout << "copy of volume" << endl;
-  print_volume(vcopy);
-  cout << "end copy of volume" << endl;
+  if (debug) {  // for debugging
+    cout << "copy of volume" << endl;
+    print_volume(vcopy);
+    cout << "end copy of volume" << endl;
+  }
 
   return vcopy;
 }
@@ -369,7 +371,7 @@ void Rsl::print_sweep(Sweep *sweep)
   }
 }
 
-void Rsl::findMaxNBins(Volume *volume, int *maxNBins, int *maxNRays) {
+void Rsl::findMaxNBins(Volume *volume, int *maxNBins, int *maxNRays, bool debug) {
 
   cout << "Finding max number of bins and rays ... " << endl;
 
@@ -394,7 +396,9 @@ void Rsl::findMaxNBins(Volume *volume, int *maxNBins, int *maxNRays) {
   *maxNBins = maxBins;
   *maxNRays = maxRays;
 
-  cout << " found " << *maxNBins << " bins and " << *maxNRays << " rays" << endl;
+  if (debug) {
+    cout << " found " << *maxNBins << " bins and " << *maxNRays << " rays" << endl;
+  }
 }
 
 // print the Volume and walk down the pointers to Rays and print the contents
@@ -445,7 +449,8 @@ void Rsl::verifyEqualDimensions(Volume *currDbzVol, Volume *currVelVol) {
 }
 
 void Rsl::verifyEqualDimensionsGetMaxDimensions(Volume *currDbzVol, Volume *currVelVol, 
-						float degreeThreshold, int *maxNBins, int *maxNRays) {
+						float degreeThreshold, int *maxNBins, int *maxNRays,
+						bool debug) {
 
   if ((currDbzVol == NULL) || (currVelVol == NULL))
     throw "ERROR - velocity or reflectivity Volume is NULL";
@@ -513,7 +518,8 @@ void Rsl::verifyEqualDimensionsGetMaxDimensions(Volume *currDbzVol, Volume *curr
 
   *maxNBins = maxBins;
   *maxNRays = maxRays;
-
-  cout << " found " << *maxNBins << " bins and " << *maxNRays << " rays" << endl;
+  
+  if (debug) 
+    cout << " found " << *maxNBins << " bins and " << *maxNRays << " rays" << endl;
 
 }

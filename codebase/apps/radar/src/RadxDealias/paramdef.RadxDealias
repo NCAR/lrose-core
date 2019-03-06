@@ -141,13 +141,6 @@ paramdef enum repeated_tilt_decision_t {
   p_help = "Used if delete_repeat_tilts is true.";
 } delete_tilt_decision;
 
-paramdef int {
-  p_default = 1;
-  p_descr = "Option for padding the number of gates in the beam data so that "
-            "a constant beam geometry is processed. The dealiasing algorithm requires the same number of gates for all rays and sweeps.";
-  p_help = "Set to a positive number to activate padding.";
-} input_num_gates;
-
 commentdef {
   p_header = "RADAR PARAMETERS";
 }
