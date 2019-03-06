@@ -525,7 +525,7 @@ int Dsr2Radx::_processRay(RadxRay *ray)
   }
     
   // end of vol condition
-  
+
   if (_params.end_of_vol_decision == Params::ELAPSED_TIME) {
     
     if (_endOfVolTime < 0) {

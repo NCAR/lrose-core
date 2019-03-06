@@ -141,6 +141,7 @@ private:
   int _prevVolNum;
   int _prevTiltNum;
   int _prevSweepNum;
+  Radx::SweepMode_t _prevSweepMode;
   int _sweepNumOverride;
   bool _sweepNumDecreasing;
   bool _endOfVol;
