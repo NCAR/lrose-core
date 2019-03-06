@@ -111,10 +111,11 @@ public:
     END_OF_VOL_FLAG = 0,
     CHANGE_IN_VOL_NUM = 1,
     CHANGE_IN_SWEEP_NUM = 2,
-    EVERY_360_DEG = 3,
-    LAST_SWEEP_IN_VOL = 4,
-    AUTOMATIC = 5,
-    ELAPSED_TIME = 6
+    CHANGE_IN_SWEEP_MODE = 3,
+    EVERY_360_DEG = 4,
+    LAST_SWEEP_IN_VOL = 5,
+    AUTOMATIC = 6,
+    ELAPSED_TIME = 7
   } end_of_vol_decision_t;
 
   typedef enum {

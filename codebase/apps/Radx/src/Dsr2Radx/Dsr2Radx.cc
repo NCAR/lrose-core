@@ -83,6 +83,7 @@ Dsr2Radx::Dsr2Radx(int argc, char **argv)
   _prevVolNum = -99999;
   _prevTiltNum = -1;
   _prevSweepNum = -1;
+  _prevSweepMode = Radx::SWEEP_MODE_NOT_SET;
   _sweepNumOverride = 1;
   _sweepNumDecreasing = false;
   _endOfVol = false;
@@ -558,6 +559,17 @@ int Dsr2Radx::_processRay(RadxRay *ray)
         _endOfVol = true;
       }
       _prevSweepNum = sweepNum;
+    }
+    
+  } else if (_params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_MODE) {
+    
+    Radx::SweepMode_t sweepMode = ray->getSweepMode();
+    if (sweepMode != Radx::SWEEP_MODE_NOT_SET && 
+        sweepMode != _prevSweepMode) {
+      if (_prevSweepMode != Radx::SWEEP_MODE_NOT_SET) {
+        _endOfVol = true;
+      }
+      _prevSweepMode = sweepMode;
     }
     
   } else if (_params.end_of_vol_decision == Params::CHANGE_IN_VOL_NUM) {
