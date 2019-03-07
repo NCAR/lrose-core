@@ -184,6 +184,8 @@ private:
   // functions
   
   void _setNGatesMax();
+  void _checkAltMode();
+
   bool _checkInfoChanged(const IwrfTsPulse &pulse);
   bool _checkReadyToWrite(const IwrfTsPulse &pulse);
   int _handlePulse(IwrfTsPulse &pulse);
@@ -195,6 +197,7 @@ private:
   int _writeFile();
   int _writeFileTmp();
   int _computeOutputFilePaths();
+
 
   void _addGlobAtt(Nc3File &out);
   

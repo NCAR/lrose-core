@@ -224,13 +224,22 @@ int Ts2NetCDF::Run ()
 
   if (_params.pad_n_gates_to_max) {
     _setNGatesMax();
-    _pulseReader->reset();
     if (_params.debug) {
       cerr << "DEBUG - padding ngates out to max" << endl;
       cerr << "  nGatesMax: " << _nGatesMax << endl;
     }
   }
 
+  // check for alternating mode by inspecting the HV flag
+
+  _checkAltMode();
+  if (_params.debug) {
+    if (_alternatingMode) {
+      cerr << "NOTE: alternating mode" << endl;
+    } else {
+      cerr << "NOTE: NOT alternating mode" << endl;
+    }
+  }
 
   while (true) {
     
@@ -309,6 +318,7 @@ void Ts2NetCDF::_setNGatesMax()
   while (true) {
     
     if (_pulseReader->endOfFile()) {
+      _pulseReader->reset();
       return;
     }
     
@@ -316,6 +326,7 @@ void Ts2NetCDF::_setNGatesMax()
     
     IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
     if (pulse == NULL) {
+      _pulseReader->reset();
       return;
     }
     
@@ -336,6 +347,73 @@ void Ts2NetCDF::_setNGatesMax()
 
   } // while
   
+}
+
+////////////////////////////////////////
+// check for alternating mode
+
+void Ts2NetCDF::_checkAltMode()
+  
+{
+
+  // initialize
+
+  int count = 0;
+  int prevHvFlag = 0;
+  _alternatingMode = false;
+
+  // read a few pulses from start of queue
+
+  while (true) {
+    
+    if (_pulseReader->endOfFile()) {
+      // end of data
+      _pulseReader->reset();
+      return;
+    }
+    
+    // read next pulse
+    
+    IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
+    if (pulse == NULL) {
+      // end of data
+      _pulseReader->reset();
+      return;
+    }
+    int hvFlag = pulse->getHdr().hv_flag;
+    delete pulse;
+
+    // initialize isHoriz flag
+
+    if (count == 0) {
+      prevHvFlag = hvFlag;
+      count++;
+      continue;
+    }
+    
+    if (count > 2 && (prevHvFlag == hvFlag)) {
+      // not alternating
+      _alternatingMode = false;
+      _pulseReader->reset();
+      return;
+    }
+    
+    if (count > 4) {
+      // alternating
+      _alternatingMode = true;
+      _pulseReader->reset();
+      return;
+    }
+
+    prevHvFlag = hvFlag;
+    count++;
+
+  } // while
+
+  _alternatingMode = false;
+  _pulseReader->reset();
+  return;
+
 }
 
 /////////////////////////////////////////
@@ -538,10 +616,7 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
   
   if ((_nGates == _nGatesSave) || _params.pad_n_gates_to_max) {
 
-    if (_xmitRcvMode == IWRF_ALT_HV_CO_ONLY ||
-        _xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
-        _xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
-      _alternatingMode = true;
+    if (_alternatingMode) {
       if (pulse.isHoriz()) {
         if (_savePulseDataAltH(pulse)) {
           return -1;
@@ -553,7 +628,6 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
         }
       }
     } else {
-      _alternatingMode = false;
       if (_savePulseData(pulse)) {
         return -1;
       }
