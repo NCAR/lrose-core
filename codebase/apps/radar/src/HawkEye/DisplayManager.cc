@@ -105,6 +105,8 @@ DisplayManager::DisplayManager(const Params &params,
   _radarLon = -9999.0;
   _radarAltKm = -9999.0;
 
+  _altitudeInFeet = false;
+
 }
 
 // destructor
