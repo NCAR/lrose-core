@@ -91,6 +91,7 @@ void SweepManager::set(const RadxVol &vol)
   // zero length case
   
   if (sweepsInVol.size() == 0) {
+    setGuiIndex(0);
     return;
   }
 
@@ -117,8 +118,10 @@ void SweepManager::set(const RadxVol &vol)
 
   // initialize sweep index if needed
 
-  if (init) {
+  if (init || _guiIndex > ((int) _sweeps.size()-1)) {
     setGuiIndex(_sweeps.size() - 1);
+  } else if (_guiIndex < 0) {
+    _guiIndex = 0;
   }
 
   // set selected angle
@@ -218,19 +221,16 @@ double SweepManager::getFixedAngleDeg(ssize_t sweepIndex /* = -1*/) const
 {
   
   if (sweepIndex < 0) {
-
     if (_guiIndex < 0) {
       return 0.0;
     } else {
       return _sweeps[_guiIndex].radx->getFixedAngleDeg();
     }
-
   } 
 
   if (sweepIndex < (ssize_t) _sweeps.size()) {
     return _sweeps[sweepIndex].radx->getFixedAngleDeg();
   }
-
 
   return _sweeps[_sweeps.size()-1].radx->getFixedAngleDeg();
 

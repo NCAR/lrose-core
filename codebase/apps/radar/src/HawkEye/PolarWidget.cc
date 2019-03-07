@@ -114,6 +114,7 @@ PolarWidget::PolarWidget(QWidget* parent,
   _worldPressY = 0.0;
   _worldReleaseX = 0.0;
   _worldReleaseY = 0.0;
+  _pointClicked = false;
   _mousePressX = 0;
   _mousePressY = 0;
   _mouseReleaseX = 0;

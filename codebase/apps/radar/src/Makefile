@@ -29,7 +29,7 @@ SUB_DIRS = \
 	Hsrl2Radx \
 	IntfRemove \
 	Iq2Dsr \
-	JamesDealias \
+	RadxDealias \
 	KinGin2Ncf \
 	Mdv2Vad \
 	MdvFold \
