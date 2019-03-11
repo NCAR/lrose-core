@@ -290,11 +290,11 @@ public:
   static Sweep  *copy_sweep(Sweep *sweep);
   static Ray    *copy_ray(Ray *ray);
 
-  static Radx::fl32 DZ_F(Range x);
-  static Radx::fl32 VR_F(Range x);
+  //  static Radx::fl32 DZ_F(Range x);
+  //static Radx::fl32 VR_F(Range x);
 
-  static Range DZ_INVF(Radx::fl32 x);
-  static Range VR_INVF(Radx::fl32 x);
+  //static Range DZ_INVF(Radx::fl32 x);
+  //static Range VR_INVF(Radx::fl32 x);
 
   static void print_volume(Volume *volume);
   static void print_sweep(Sweep *sweep);

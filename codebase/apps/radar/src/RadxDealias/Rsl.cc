@@ -260,7 +260,7 @@ Volume *Rsl::copy_volume(Volume *v, bool debug) {
 /* Internal storage conversion functions. These may be any conversion and
  * may be dynamically defined; based on the input data conversion.
  */
-
+/*
 // convert from 4 bytes <==> 2 bytes
 Radx::fl32 Rsl::DZ_F(Range x) {
   return (Radx::fl32) x;
@@ -269,7 +269,8 @@ Radx::fl32 Rsl::DZ_F(Range x) {
 Radx::fl32 Rsl::VR_F(Range x) {
   return (Radx::fl32) x;
 }
-
+*/
+/*
 // TODO: do I need to use the scale and bias to convert these?
 
 Range Rsl::DZ_INVF(Radx::fl32 x)
@@ -292,6 +293,7 @@ Range Rsl::VR_INVF(Radx::fl32 x)
     throw std::out_of_range("value too small for conversion to 2-byte unsigned int");
   return (Range) x;
 }
+*/
 
 void Rsl::print_ray_header(Ray_header header) {
 
