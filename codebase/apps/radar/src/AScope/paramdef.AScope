@@ -1,0 +1,344 @@
+/*********************************************************
+ * parameter definitions for AScope
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * March 2019
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "AScope is the spectral display for time series data";
+  p_text = "This is a C++ application using the QT GUI toolkit.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to register this process with the process mapper (procmap).";
+  p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
+} register_with_procmap;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "REALTIME DATA INPUT";
+}
+
+typedef enum {
+  IWRF_FMQ_INPUT, 
+  IWRF_TCP_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = IWRF_FMQ_INPUT;
+  p_descr = "Method for reading the input data";
+  p_help = "\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/test";
+  p_descr = "DSR_FMQ_INPUT or IWRF_FMQ_INPUT mode: input URL for moments data from an FMQ";
+  p_help = "Full url is of the form fmqp:://hostname:port:path. Path does not in lude the file extension.";
+} input_fmq_url;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to seek to the start of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the start of the fmq and read the entire contents at startup. If FALSE, it will read only new data as it arrives.";
+} seek_to_start_of_fmq;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "IWRF_TCP_INPUT: name of host running IWRF moments server.";
+} input_tcp_host;
+
+paramdef int {
+  p_default = 11000;
+  p_descr = "IWRF_TCP_INPUT: port for IWRF moments server.";
+} input_tcp_port;
+
+commentdef {
+  p_header = "ARCHIVE MODE";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to begin in archive mode.";
+  p_help = "If TRUE, the app will start up and read data from the archive_data_url, at the specified start time. If the start time is not set, the start time will be set to NOW.";
+} begin_in_archive_mode;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Start time for archive mode.";
+  p_help = "In archive mode, data retrieval starts at this time.";
+} archive_start_time;
+
+paramdef double {
+  p_default = 3600;
+  p_descr = "Time span in ARCHIVE mode (secs).";
+  p_help = "Archive end time = archive_start_time + archive_time_span.";
+} archive_time_span_secs;
+
+paramdef string {
+  p_default = "/data/cfradial/kddc";
+  p_descr = "URL for archive data files.";
+  p_help = "This should point to a CfRadial moments data set.";
+} archive_data_url;
+
+commentdef {
+  p_header = "STATUS TO BE SHOWN IN GUI";
+}
+
+typedef struct {
+
+  boolean azimuth;
+  boolean elevation;
+  boolean fixed_angle;
+  boolean volume_number;
+  boolean sweep_number;
+  boolean n_samples;
+  boolean n_gates;
+  boolean gate_length;
+  boolean pulse_width;
+  boolean prf_mode;
+  boolean prf;
+  boolean nyquist;
+  boolean max_range;
+  boolean unambiguous_range;
+  boolean measured_power_h;
+  boolean measured_power_v;
+  boolean scan_name;
+  boolean scan_mode;
+  boolean polarization_mode;
+  boolean latitude;
+  boolean longitude;
+  boolean altitude;
+  boolean altitude_rate;
+  boolean sun_elevation;
+  boolean sun_azimuth;
+  boolean speed;
+  boolean heading;
+  boolean track;
+
+} show_status_t;
+
+paramdef struct show_status_t {
+
+  p_default = {
+    azimuth = true,
+    elevation = true,
+    fixed_angle = true,
+    volume_number = false,
+    sweep_number = true,
+    n_samples = true,
+    n_gates = true,
+    gate_length = true,
+    pulse_width = true,
+    prf_mode = true,
+    prf = true,
+    nyquist = true,
+    max_range = true,
+    unambiguous_range = true,
+    measured_power_h = false,
+    measured_power_v = false,
+    scan_name = false,
+    scan_mode = true,
+    polarization_mode = true,
+    latitude = true,
+    longitude = true,
+    altitude = true,
+    altitude_rate = false,
+    sun_elevation = true,
+    sun_azimuth = true,
+    speed = false,
+    heading = false,
+    track = false
+  };
+
+  p_descr = "Indicate which status items to show in GUI.";
+
+  p_help = "These items are shown in the left panel in the GUI. Setting an item to false will hide it in the GUI.";
+
+} show_status_in_gui;
+
+commentdef {
+  p_header = "INITIAL MAX RANGE";
+}
+
+paramdef double {
+  p_default = 225.0;
+  p_descr = "Max range for the display (km).";
+} max_range_km;
+
+commentdef {
+  p_header = "NAMES AND LABELS";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override radar name in the data.";
+} override_radar_name;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Radar name if overridden.";
+} radar_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to display the site name in the left panel.";
+} display_site_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override site name in the data.";
+} override_site_name;
+
+paramdef string {
+  p_default = "MARSHALL";
+  p_descr = "Site name if overridden.";
+} site_name;
+
+commentdef {
+  p_header = "WINDOW DIMENSIONS AND PLOTTING DETAILS";
+}
+
+paramdef int {
+  p_default = 1050;
+  p_descr = "Startup width of main window (pixels).";
+} main_window_width;
+
+paramdef int {
+  p_default = 635;
+  p_descr = "Startup height of main window (pixels).";
+} main_window_height;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup X for main window (pixels).";
+} main_window_start_x;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup Y for main window (pixels).";
+} main_window_start_y;
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of color scale (pixels).";
+} color_scale_width;
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Basic font size for labels (pixels).";
+  p_help = "Some of the labels are scaled relative to this size.";
+} label_font_size;
+
+paramdef string {
+  p_default = "black";
+  p_descr = "Color of main display background.";
+} background_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of overlays.";
+} overlay_color;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size for labels on overlays (pixels).";
+} overlay_font_size;
+
+paramdef int {
+  p_default = 11;
+  p_descr = "Size of cross at click point (pixels).";
+  p_help = "Size of cross drawn at click point, to select data.";
+} click_cross_size;
+
+commentdef {
+  p_header = "ASCOPE MODE DISPLAY";
+}
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Aspect ratio (width/height) of ASCOPE window.";
+  p_descr = "Set to -1 to allow aspect ratio to vary as the main window is resized.";
+} ascope_aspect_ratio;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set ASCOPE grids overlay on at startup.";
+} ascope_grids_on_at_startup;
+
+typedef enum {
+  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
+} legend_pos_t;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of main legend in the ASCOPE plot window";
+  p_help = "This include time, field name and elevation angle.";
+} ascope_main_legend_pos;
+
+commentdef {
+  p_header = "ASCOPE MARGINS";
+}
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Height of top margin in ASCOPE mode (pixels).";
+  p_help = "Titles go in the top margin.";
+} ascope_top_margin;
+
+paramdef int {
+  p_default = 45;
+  p_descr = "Height of bottom margin in ASCOPE mode (pixels).";
+  p_help = "Time scale goes in the bottom margin.";
+} ascope_bottom_margin;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Width of left margin in ASCOPE mode (pixels).";
+  p_help = "Height scale goes in the left margin.";
+} ascope_left_margin;
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of right margin in ASCOPE mode (pixels).";
+  p_help = "Height scale goes in the right margin.";
+} ascope_right_margin;
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Length of ticks on axes (pixels).";
+} ascope_axis_tick_len;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Ideal number of ticks on axes.";
+} ascope_n_ticks_ideal;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Margin around some text (pixels).";
+} ascope_text_margin;
+

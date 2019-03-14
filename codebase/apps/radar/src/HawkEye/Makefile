@@ -61,7 +61,6 @@ HDRS = \
 	FieldRenderer.hh \
 	HawkEye.hh \
 	PaletteManager.hh \
-	Params.hh \
 	PpiBeam.hh \
 	PolarManager.hh \
 	PolarWidget.hh \

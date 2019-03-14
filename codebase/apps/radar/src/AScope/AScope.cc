@@ -22,81 +22,93 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
+// AScope.cc
 //
-// main for HawkEye
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// March 2019
 //
-// July 2010
+///////////////////////////////////////////////////////////////
+//
+// AScope is the time series display for IWRF data
 //
 ///////////////////////////////////////////////////////////////
 
-#include "HawkEye.hh"
+#include "AScope.hh"
+#include "ColorMap.hh"
+#include "Params.hh"
+#include <toolsa/Path.hh>
+
+#include <string>
+#include <iostream>
 #include <QApplication>
-#include <toolsa/uusleep.h>
-#include <QIcon>
 
-// file scope
+using namespace std;
 
-static void tidy_and_exit (int sig);
-static HawkEye *Prog;
-static QApplication *app;
+// Constructor
 
-// override QApplication exception handling
-// via notify
-
-// class Application final : public QApplication {
-//  public:
-//   Application(int& argc, char** argv) : QApplication(argc, argv) {}
-//   virtual bool notify(QObject *receiver, QEvent *e) override {
-//     // cerr << "Main Application - caught exception" << endl;
-//     // cerr << *e << endl;
-//     return false;
-//   }
-// };
-
-// main
-
-int main(int argc, char **argv)
+AScope::AScope(int argc, char **argv) :
+        _args("AScope")
 
 {
+  
+  OK = true;
+  _displayManager = NULL;
 
-  // create program object
+  // set programe name
 
-  try {
-    
-    app = new QApplication(argc, argv);
-    app->setWindowIcon(QIcon("://HawkEyePolarIcon.icns"));
-    //app->setWindowIcon(QIcon(":/radar.HawkEye.png"));
-    cerr << "After setting Window Icon\n";
-    HawkEye *Prog;
-    Prog = new HawkEye(argc, argv);
-    if (!Prog->OK) {
-      return(-1);
-    }
-    
-    // run it
-    
-    int iret = Prog->Run(*app);
-    
-    // clean up
-    
-    tidy_and_exit(iret);
-    return (iret);
-    
-  } catch (std::bad_alloc &a) {
-    cerr << ">>>>> bad alloc: " << a.what() << endl;
+  _progName = strdup("AScope");
+  
+  // get command line args
+  
+  if (_args.parse(argc, (const char **) argv)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with command line args" << endl;
+    OK = false;
+    return;
+  }
+
+  // load TDRP params from command line
+  
+  char *paramsPath = (char *) "unknown";
+  if (_params.loadFromArgs(argc, argv,
+			   _args.override.list,
+			   &paramsPath)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with TDRP parameters." << endl;
+    OK = false;
+    return;
+  }
+
+  // init process mapper registration
+
+  if (_params.register_with_procmap) {
+    PMU_auto_init((char *) _progName.c_str(),
+                  _params.instance,
+                  PROCMAP_REGISTER_INTERVAL);
   }
 
 }
 
-// tidy up on exit
+// destructor
 
-static void tidy_and_exit (int sig)
+AScope::~AScope()
 
 {
-  app->exit();
-  delete(Prog);
-  umsleep(1000);
-  exit(sig);
+
+  if (_displayManager) {
+    delete _displayManager;
+  }
+
 }
+
+//////////////////////////////////////////////////
+// Run
+
+int AScope::Run(QApplication &app)
+{
+
+  return -1;
+
+}
+

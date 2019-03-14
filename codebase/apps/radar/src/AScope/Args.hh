@@ -21,82 +21,54 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+// Args.hh: Command line object
 //
-// main for HawkEye
+// Mike Dixon, EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// March 2019
 //
-// July 2010
-//
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
-#include "HawkEye.hh"
-#include <QApplication>
-#include <toolsa/uusleep.h>
-#include <QIcon>
+#ifndef ARGS_H
+#define ARGS_H
 
-// file scope
+#include <tdrp/tdrp.h>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
 
-static void tidy_and_exit (int sig);
-static HawkEye *Prog;
-static QApplication *app;
+class Args {
+  
+public:
 
-// override QApplication exception handling
-// via notify
+  // constructor
 
-// class Application final : public QApplication {
-//  public:
-//   Application(int& argc, char** argv) : QApplication(argc, argv) {}
-//   virtual bool notify(QObject *receiver, QEvent *e) override {
-//     // cerr << "Main Application - caught exception" << endl;
-//     // cerr << *e << endl;
-//     return false;
-//   }
-// };
+  Args (const string &prog_name);
 
-// main
+  // destructor
 
-int main(int argc, char **argv)
+  ~Args ();
 
-{
+  // parse command line
+  // Returns 0 on success, -1 on failure
 
-  // create program object
+  int parse (const int argc, const char **argv);
 
-  try {
-    
-    app = new QApplication(argc, argv);
-    app->setWindowIcon(QIcon("://HawkEyePolarIcon.icns"));
-    //app->setWindowIcon(QIcon(":/radar.HawkEye.png"));
-    cerr << "After setting Window Icon\n";
-    HawkEye *Prog;
-    Prog = new HawkEye(argc, argv);
-    if (!Prog->OK) {
-      return(-1);
-    }
-    
-    // run it
-    
-    int iret = Prog->Run(*app);
-    
-    // clean up
-    
-    tidy_and_exit(iret);
-    return (iret);
-    
-  } catch (std::bad_alloc &a) {
-    cerr << ">>>>> bad alloc: " << a.what() << endl;
-  }
+  // public data
 
-}
+  tdrp_override_t override;
+  vector<string> inputFileList;
 
-// tidy up on exit
+protected:
+  
+private:
 
-static void tidy_and_exit (int sig)
+  string _progName;
+  void _usage(ostream &out);
+  
+};
 
-{
-  app->exit();
-  delete(Prog);
-  umsleep(1000);
-  exit(sig);
-}
+#endif

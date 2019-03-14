@@ -23,15 +23,15 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
 //
-// main for HawkEye
+// main for AScope
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// July 2010
+// March 2019
 //
 ///////////////////////////////////////////////////////////////
 
-#include "HawkEye.hh"
+#include "AScope.hh"
 #include <QApplication>
 #include <toolsa/uusleep.h>
 #include <QIcon>
@@ -39,21 +39,8 @@
 // file scope
 
 static void tidy_and_exit (int sig);
-static HawkEye *Prog;
+static AScope *Prog;
 static QApplication *app;
-
-// override QApplication exception handling
-// via notify
-
-// class Application final : public QApplication {
-//  public:
-//   Application(int& argc, char** argv) : QApplication(argc, argv) {}
-//   virtual bool notify(QObject *receiver, QEvent *e) override {
-//     // cerr << "Main Application - caught exception" << endl;
-//     // cerr << *e << endl;
-//     return false;
-//   }
-// };
 
 // main
 
@@ -66,11 +53,10 @@ int main(int argc, char **argv)
   try {
     
     app = new QApplication(argc, argv);
-    app->setWindowIcon(QIcon("://HawkEyePolarIcon.icns"));
-    //app->setWindowIcon(QIcon(":/radar.HawkEye.png"));
+    app->setWindowIcon(QIcon("://AScopePolarIcon.icns"));
     cerr << "After setting Window Icon\n";
-    HawkEye *Prog;
-    Prog = new HawkEye(argc, argv);
+    AScope *Prog;
+    Prog = new AScope(argc, argv);
     if (!Prog->OK) {
       return(-1);
     }

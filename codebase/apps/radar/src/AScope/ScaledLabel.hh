@@ -21,82 +21,53 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-///////////////////////////////////////////////////////////////
+// ScaledLabel.h: interface for the ScaledLabel class.
 //
-// main for HawkEye
-//
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// July 2010
-//
-///////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-#include "HawkEye.hh"
-#include <QApplication>
-#include <toolsa/uusleep.h>
-#include <QIcon>
+#if !defined(SCALEDLABEL_HH)
+#define SCALEDLABEL_HH
 
-// file scope
+#include <string>
+#include <sstream>
+#include <map>
 
-static void tidy_and_exit (int sig);
-static HawkEye *Prog;
-static QApplication *app;
-
-// override QApplication exception handling
-// via notify
-
-// class Application final : public QApplication {
-//  public:
-//   Application(int& argc, char** argv) : QApplication(argc, argv) {}
-//   virtual bool notify(QObject *receiver, QEvent *e) override {
-//     // cerr << "Main Application - caught exception" << endl;
-//     // cerr << *e << endl;
-//     return false;
-//   }
-// };
-
-// main
-
-int main(int argc, char **argv)
-
+/**
+Create a label that is scaled in engineering units. At
+construction, ScaledLabel is instructed on the type of
+conversion it will perform. Subsequent calls to scale(double)
+will return a string, scaled accordingly.
+*/
+class ScaledLabel  
 {
-
-  // create program object
-
-  try {
+public:
+    enum ScalingType {
+      /// Scale for distance, in engineering units, 
+      /// with the appropriate units designation appended.
+        DistanceEng
+    };
     
-    app = new QApplication(argc, argv);
-    app->setWindowIcon(QIcon("://HawkEyePolarIcon.icns"));
-    //app->setWindowIcon(QIcon(":/radar.HawkEye.png"));
-    cerr << "After setting Window Icon\n";
-    HawkEye *Prog;
-    Prog = new HawkEye(argc, argv);
-    if (!Prog->OK) {
-      return(-1);
-    }
+    // Constructor. 
+    ScaledLabel(
+        /// The type of scaling to apply.
+        ScalingType t);
     
-    // run it
+    //Destructor
+    virtual ~ScaledLabel();
     
-    int iret = Prog->Run(*app);
+    /// Return a string containing the scaled representation.
+    std::string scale(
+        /// The value to be scaled.
+        double scale
+        );
     
-    // clean up
+protected:
+    /// The type of scaling we are performing.
+    ScalingType m_scalingType;
     
-    tidy_and_exit(iret);
-    return (iret);
-    
-  } catch (std::bad_alloc &a) {
-    cerr << ">>>>> bad alloc: " << a.what() << endl;
-  }
+    /// A stringstream used to format numbers
+    std::ostringstream m_stringStr;
+};
 
-}
+#endif // !defined(SCALEDLABEL_H)
 
-// tidy up on exit
-
-static void tidy_and_exit (int sig)
-
-{
-  app->exit();
-  delete(Prog);
-  umsleep(1000);
-  exit(sig);
-}

@@ -21,82 +21,67 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-///////////////////////////////////////////////////////////////
+// ScaledLabel.cpp: implementation of the ScaledLabel class.
 //
-// main for HawkEye
-//
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// July 2010
-//
-///////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-#include "HawkEye.hh"
-#include <QApplication>
-#include <toolsa/uusleep.h>
-#include <QIcon>
+#include "ScaledLabel.hh"
+#include <iomanip>
+#include <math.h>
 
-// file scope
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
 
-static void tidy_and_exit (int sig);
-static HawkEye *Prog;
-static QApplication *app;
-
-// override QApplication exception handling
-// via notify
-
-// class Application final : public QApplication {
-//  public:
-//   Application(int& argc, char** argv) : QApplication(argc, argv) {}
-//   virtual bool notify(QObject *receiver, QEvent *e) override {
-//     // cerr << "Main Application - caught exception" << endl;
-//     // cerr << *e << endl;
-//     return false;
-//   }
-// };
-
-// main
-
-int main(int argc, char **argv)
-
+ScaledLabel::ScaledLabel(ScalingType t)
 {
-
-  // create program object
-
-  try {
+    m_scalingType = t;
+    m_stringStr << std::setiosflags(std::ios_base::fixed);
     
-    app = new QApplication(argc, argv);
-    app->setWindowIcon(QIcon("://HawkEyePolarIcon.icns"));
-    //app->setWindowIcon(QIcon(":/radar.HawkEye.png"));
-    cerr << "After setting Window Icon\n";
-    HawkEye *Prog;
-    Prog = new HawkEye(argc, argv);
-    if (!Prog->OK) {
-      return(-1);
+}
+
+ScaledLabel::~ScaledLabel()
+{
+    
+}
+
+//////////////////////////////////////////////////////////////////////
+std::string
+ScaledLabel::scale(double value) {
+    
+    // value is in km. 
+    
+    double exp = floor(log10(value));
+    std::string units;
+    
+    double scaleFactor;
+    if (exp < -3) {
+        units = "mm";
+        scaleFactor = 0.000001;
+    } else {
+        if (exp < 0) {
+            units = "m";
+            scaleFactor = 0.001;
+        } else {
+            units = "km";
+            scaleFactor = 1;
+        }
     }
     
-    // run it
-    
-    int iret = Prog->Run(*app);
-    
-    // clean up
-    
-    tidy_and_exit(iret);
-    return (iret);
-    
-  } catch (std::bad_alloc &a) {
-    cerr << ">>>>> bad alloc: " << a.what() << endl;
-  }
+    double m = value/scaleFactor;
+    if (m >=100) {
+        m_stringStr << std::setprecision(0);
+    } else { 
+        if (m >= 10.0) {
+            m_stringStr << std::setprecision(1);
+        } else {
+            m_stringStr << std::setprecision(2);
+        }
+    }
 
+    m_stringStr.str("");
+    m_stringStr << m << units;
+    return m_stringStr.str();
+    
 }
 
-// tidy up on exit
-
-static void tidy_and_exit (int sig)
-
-{
-  app->exit();
-  delete(Prog);
-  umsleep(1000);
-  exit(sig);
-}
