@@ -36,12 +36,13 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = HawkEye
 
+QJSENGINE = -F/usr/local/Cellar/qt/5.12.0/lib -framework QtQml
 LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -lradar -lrapformats -lFmq -lRadx -lNcxx \
 	-ldsserver -ldidss -leuclid -lphysics \
 	-lrapmath -ltoolsa -ldataport -ltdrp \
-	$(QT_LIBS) $(NETCDF4_LIBS) \
+	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \
 	-lfftw3 -lbz2 -lz -lpthread -lm
 
 LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
@@ -55,12 +56,15 @@ HDRS = \
 	BscanBeam.hh \
 	BscanManager.hh \
 	BscanWidget.hh \
+	ColorBar.hh \
 	ColorMap.hh \
 	ColorTableManager.hh \
 	DisplayManager.hh \
 	FieldRenderer.hh \
+	FlowLayout.hh \
 	HawkEye.hh \
 	PaletteManager.hh \
+	Params.hh \
 	PpiBeam.hh \
 	PolarManager.hh \
 	PolarWidget.hh \
@@ -72,18 +76,25 @@ HDRS = \
 	ScaledLabel.hh \
 	SiiPalette.hh \
 	SoloDefaultColorWrapper.hh \
+	SpreadSheetController.hh \
+	SpreadSheetItem.hh \
+	SpreadSheetModel.hh \
+	SpreadSheetUtils.hh \
+	SpreadSheetView.hh \
 	SweepManager.hh \
 	TimeScaleWidget.hh \
 	WorldPlot.hh
 
 NORM_SRCS = \
 	$(PARAMS_CC) \
+	AllocCheck.cc \
 	Args.cc \
 	Beam.cc \
 	BscanBeam.cc \
 	ColorMap.cc \
 	ColorTableManager.cc \
 	DisplayField.cc \
+	FlowLayout.cc \
 	HawkEye.cc \
 	Main.cc \
 	PaletteManager.cc \
@@ -93,25 +104,41 @@ NORM_SRCS = \
 	ScaledLabel.cc \
 	SiiPalette.cc \
 	SoloDefaultColorWrapper.cc \
+	SoloFunctions.cc \
+	SoloFunctionsModel.cc \
+	SpreadSheetController.cc \
+	SpreadSheetItem.cc \
+	SpreadSheetModel.cc \
+	SpreadSheetUtils.cc \
 	SweepManager.cc \
-	WorldPlot.cc \
-	AllocCheck.cc
+	WorldPlot.cc 
 
 MOC_SRCS = \
 	BscanManager.cc \
 	BscanWidget.cc \
-	FieldRenderer.cc \
+	ContextEditingView.cc \
 	DisplayManager.cc \
+	FieldRenderer.cc \
 	PolarManager.cc \
 	PolarWidget.cc \
 	PpiWidget.cc \
 	RhiWidget.cc \
 	RhiWindow.cc \
 	TimeScaleWidget.cc \
+	ParameterColorDialog.cc \
+	ColorBar.cc \
+	ColorMapTemplates.cc \
+	ClickableLabel.cc \
+	TextEdit.cc \
+	SpreadSheetView.cc \
+	SpreadSheetDelegate.cc \
+	FunctionEditor.cc 
+	
 
 MOC_OUTPUT = \
 	moc_BscanManager.cpp \
 	moc_BscanWidget.cpp \
+	moc_ContextEditingView.cpp \
 	moc_DisplayManager.cpp \
 	moc_FieldRenderer.cpp \
 	moc_PolarManager.cpp \
@@ -119,7 +146,15 @@ MOC_OUTPUT = \
 	moc_PpiWidget.cpp \
 	moc_RhiWidget.cpp \
 	moc_RhiWindow.cpp \
-	moc_TimeScaleWidget.cpp
+	moc_TimeScaleWidget.cpp \
+	moc_ParameterColorDialog.cpp \
+	moc_ColorBar.cpp \
+	moc_ColorMapTemplates.cpp \
+	moc_ClickableLabel.cpp \
+	moc_TextEdit.cpp \
+	moc_SpreadSheetView.cpp \
+	moc_SpreadSheetDelegate.cpp \
+	moc_FunctionEditor.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT)
@@ -145,7 +180,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 #
 # local targets
 #
-# in order to build SiiTest_Main, comment any calls to Qt and QBrush, etc. in ColorMap.cc/.hh
+# in order to build SiiTest_Main, comment any calls to Qt and QBrush, etc. in ColorMap.cpp/.hh
 #
 
 SiiTest_Main: ColorMap.o SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o
@@ -183,6 +218,16 @@ hawkeye_app:
 	cp ~/Desktop/arrow.pdf HawkEye_bkg_test/.background
 	rsync -r HawkEye.app HawkEye_bkg_test/.
 	hdiutil create -volname HawkEye_Installer4 -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye_bkg_test -ov -format UDZO HawkEye_test4.dmg
+	
+
+
+	# rm -r HawkEye_staging/HawkEye.app
+	# mkdir -p HawkEye_staging
+	# cp arrow.pdf HawkEye_staging/.background
+	# ln -s /Applications HawkEye_staging/Applications
+	# rsync -r HawkEye.app HawkEye_staging/.
+	hdiutil create -volname HawkEye_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye.app  -ov -format UDZO HawkEye_Blaze.dmg
+
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

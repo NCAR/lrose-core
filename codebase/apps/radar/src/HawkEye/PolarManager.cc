@@ -44,6 +44,7 @@
 #include "Params.hh"
 #include "Reader.hh"
 #include "AllocCheck.hh"
+#include "ContextEditingView.hh"
 
 #include <string>
 #include <cmath>
@@ -490,6 +491,13 @@ void PolarManager::_setupWindows()
           this, SLOT(_ppiLocationClicked(double, double, const RadxRay*)));
   connect(_rhi, SIGNAL(locationClicked(double, double, const RadxRay*)),
           this, SLOT(_rhiLocationClicked(double, double, const RadxRay*)));
+
+
+  // add a right-click context menu to the image
+  setContextMenuPolicy(Qt::CustomContextMenu);
+  // customContextMenuRequested(e->pos());
+  connect(_ppi, SIGNAL(customContextMenuRequested(const QPoint &)),
+	  this, SLOT(ShowContextMenu(const QPoint &)));
 
   // create status panel
 
@@ -2783,6 +2791,16 @@ void PolarManager::_saveImageToFile(bool interactive)
 
 }
 
+
+
+void PolarManager::ShowContextMenu(const QPoint &pos) {
+
+  cout << "Showing Context Menu ... " << endl;
+  ContextEditingView contextEditingView(_ppi);
+  contextEditingView.ShowContextMenu(pos);
+
+}
+
 /////////////////////////////////////////////////////
 // howto help
 
@@ -2807,4 +2825,3 @@ void PolarManager::_howto()
   text += "  Click in main window\n";
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
-
