@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// AScope.cc
+// Sprite.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,11 +30,11 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// AScope is the time series display for IWRF data
+// Sprite is the time series display for IWRF data
 //
 ///////////////////////////////////////////////////////////////
 
-#include "AScope.hh"
+#include "Sprite.hh"
 #include "ColorMap.hh"
 #include "Params.hh"
 #include <toolsa/Path.hh>
@@ -47,8 +47,8 @@ using namespace std;
 
 // Constructor
 
-AScope::AScope(int argc, char **argv) :
-        _args("AScope")
+Sprite::Sprite(int argc, char **argv) :
+        _args("Sprite")
 
 {
   
@@ -57,7 +57,7 @@ AScope::AScope(int argc, char **argv) :
 
   // set programe name
 
-  _progName = strdup("AScope");
+  _progName = strdup("Sprite");
   
   // get command line args
   
@@ -92,7 +92,7 @@ AScope::AScope(int argc, char **argv) :
 
 // destructor
 
-AScope::~AScope()
+Sprite::~Sprite()
 
 {
 
@@ -105,7 +105,7 @@ AScope::~AScope()
 //////////////////////////////////////////////////
 // Run
 
-int AScope::Run(QApplication &app)
+int Sprite::Run(QApplication &app)
 {
 
   return -1;

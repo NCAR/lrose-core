@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for AScope program
+# Makefile for Sprite program
 #
 # Mike Dixon, EOL, NCAR
 # POBox 3000, Boulder, CO, 80307, USA
@@ -34,7 +34,7 @@
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
-TARGET_FILE = AScope
+TARGET_FILE = Sprite
 
 LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
@@ -51,8 +51,9 @@ LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
+	AScopeManager.hh \
 	ColorMap.hh \
-	AScope.hh \
+	Sprite.hh \
 	ScaledLabel.hh \
 	WorldPlot.hh
 
@@ -60,19 +61,19 @@ NORM_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
 	ColorMap.cc \
-	AScope.cc \
+	Sprite.cc \
 	Main.cc \
 	ScaledLabel.cc \
 	WorldPlot.cc
 
 MOC_SRCS = \
-	DisplayManager.cc \
-	DisplayWidget.cc \
+	AScopeManager.cc \
+	AScopeWidget.cc \
 	TimeScaleWidget.cc \
 
 MOC_OUTPUT = \
-	moc_DisplayManager.cpp \
-	moc_DisplayWidget.cpp \
+	moc_AScopeManager.cpp \
+	moc_AScopeWidget.cpp \
 	moc_TimeScaleWidget.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
