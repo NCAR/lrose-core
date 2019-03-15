@@ -4,8 +4,8 @@
 #  libglut-dev
 
 TEMPLATE = app
-TARGET = AScope
-ICON = AScopePolarIcon.icns 
+TARGET = Sprite
+ICON = SpritePolarIcon.icns 
 
 CONFIG += qt
 CONFIG += debug
@@ -23,7 +23,7 @@ HEADERS += ColorTableManager.hh
 HEADERS += DisplayField.hh
 HEADERS += DisplayManager.hh
 HEADERS += FieldRenderer.hh
-HEADERS += AScope.hh
+HEADERS += Sprite.hh
 HEADERS += PaletteManager.hh
 HEADERS += Params.hh
 HEADERS += PpiBeam.hh
@@ -52,7 +52,7 @@ SOURCES += ColorTableManager.cc
 SOURCES += FieldRenderer.cc
 SOURCES += DisplayField.cc
 SOURCES += DisplayManager.cc
-SOURCES += AScope.cc
+SOURCES += Sprite.cc
 SOURCES += Main.cc
 SOURCES += PaletteManager.cc
 SOURCES += Params.cc

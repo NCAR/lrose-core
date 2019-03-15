@@ -104,7 +104,7 @@ int DisplayManager::run(QApplication &app)
 {
 
   if (_params.debug) {
-    cerr << "Running in AScope mode" << endl;
+    cerr << "Running in Sprite mode" << endl;
   }
 
   // make window visible

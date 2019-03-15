@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
 //
-// main for AScope
+// main for Sprite
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -31,7 +31,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "AScope.hh"
+#include "Sprite.hh"
 #include <QApplication>
 #include <toolsa/uusleep.h>
 #include <QIcon>
@@ -39,7 +39,7 @@
 // file scope
 
 static void tidy_and_exit (int sig);
-static AScope *Prog;
+static Sprite *Prog;
 static QApplication *app;
 
 // main
@@ -53,10 +53,10 @@ int main(int argc, char **argv)
   try {
     
     app = new QApplication(argc, argv);
-    app->setWindowIcon(QIcon("://AScopePolarIcon.icns"));
+    app->setWindowIcon(QIcon("://SpritePolarIcon.icns"));
     cerr << "After setting Window Icon\n";
-    AScope *Prog;
-    Prog = new AScope(argc, argv);
+    Sprite *Prog;
+    Prog = new Sprite(argc, argv);
     if (!Prog->OK) {
       return(-1);
     }

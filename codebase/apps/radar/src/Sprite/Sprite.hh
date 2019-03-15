@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AScope.h
+// Sprite.h
 //
-// AScope object
+// Sprite object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,12 +32,12 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// AScope is the time series display for IWRF data
+// Sprite is the time series display for IWRF data
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef AScope_HH
-#define AScope_HH
+#ifndef Sprite_HH
+#define Sprite_HH
 
 #include <string>
 #include <vector>
@@ -48,17 +48,17 @@ class DisplayManager;
 
 class QApplication;
 
-class AScope {
+class Sprite {
   
 public:
 
   // constructor
 
-  AScope (int argc, char **argv);
+  Sprite (int argc, char **argv);
 
   // destructor
   
-  ~AScope();
+  ~Sprite();
 
   // run 
 

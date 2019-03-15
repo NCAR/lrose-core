@@ -1,5 +1,5 @@
 /*********************************************************
- * parameter definitions for AScope
+ * parameter definitions for Sprite
  *
  * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
  *
@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "AScope is the spectral display for time series data";
+  p_header = "Sprite is the spectral display for time series data";
   p_text = "This is a C++ application using the QT GUI toolkit.";
 }
 
