@@ -33,7 +33,7 @@ SOURCES += DisplayWidget.cc
 SOURCES += Main.cc
 SOURCES += Params.cc
 SOURCES += ScaledLabel.cc
-SSOURCES += prite.cc
+SOURCES += Sprite.cc
 SOURCES += TsReader.cc
 SOURCES += WorldPlot.cc
 

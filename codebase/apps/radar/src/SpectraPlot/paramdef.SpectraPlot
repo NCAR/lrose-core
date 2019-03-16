@@ -28,7 +28,7 @@ paramdef enum debug_t
 } debug;
 
 paramdef string {
-  p_default = "Test";
+  p_default = "test";
   p_descr = "Process instance";
   p_help = "Used for registration with procmap.";
 } instance;

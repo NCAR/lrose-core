@@ -75,9 +75,18 @@ public:
   } debug_t;
 
   typedef enum {
-    IWRF_FMQ_INPUT = 0,
-    IWRF_TCP_INPUT = 1
+    REALTIME_FMQ_MODE = 0,
+    REALTIME_TCP_MODE = 1,
+    ARCHIVE_TIME_MODE = 2,
+    FILE_LIST_MODE = 3,
+    FOLLOW_MOMENTS_MODE = 4
   } input_mode_t;
+
+  typedef enum {
+    WINDOW_RECT = 0,
+    WINDOW_VONHANN = 1,
+    WINDOW_BLACKMAN = 2
+  } window_t;
 
   typedef enum {
     LEGEND_TOP_LEFT = 0,
@@ -418,31 +427,65 @@ public:
 
   tdrp_bool_t seek_to_start_of_fmq;
 
-  char* input_tcp_host;
+  char* input_tcp_address;
 
   int input_tcp_port;
 
-  tdrp_bool_t begin_in_archive_mode;
+  char* archive_data_dir;
 
   char* archive_start_time;
 
   double archive_time_span_secs;
 
-  char* archive_data_url;
+  int moments_shmem_key;
 
-  show_status_t show_status_in_gui;
+  double moments_max_search_angle_error;
 
-  double max_range_km;
+  int n_samples;
+
+  tdrp_bool_t indexed_beams;
+
+  double indexed_resolution_ppi;
+
+  double indexed_resolution_rhi;
+
+  tdrp_bool_t invert_hv_flag;
+
+  tdrp_bool_t prt_is_for_previous_interval;
+
+  tdrp_bool_t check_for_missing_pulses;
 
   tdrp_bool_t override_radar_name;
 
   char* radar_name;
 
-  tdrp_bool_t display_site_name;
+  tdrp_bool_t override_radar_location;
 
-  tdrp_bool_t override_site_name;
+  double radar_latitude_deg;
 
-  char* site_name;
+  double radar_longitude_deg;
+
+  double radar_altitude_meters;
+
+  tdrp_bool_t override_gate_geometry;
+
+  double gate_spacing_meters;
+
+  double start_range_meters;
+
+  tdrp_bool_t override_radar_wavelength;
+
+  double radar_wavelength_cm;
+
+  window_t window;
+
+  char* cal_file_path;
+
+  tdrp_bool_t use_cal_from_time_series;
+
+  show_status_t show_status_in_gui;
+
+  double max_range_km;
 
   int main_window_width;
 
@@ -527,7 +570,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[71];
+  mutable TDRPtable _table[91];
 
   const char *_className;
 

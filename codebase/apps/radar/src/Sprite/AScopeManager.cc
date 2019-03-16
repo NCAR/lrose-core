@@ -104,20 +104,19 @@ AScopeManager::AScopeManager(const Params &params,
   _archiveModeButton = NULL;
 
   _timeSpanSecs = _params.ascope_time_span_secs;
-  _archiveMode = _params.begin_in_archive_mode;
+  if (_params.input_mode == Params::ARCHIVE_TIME_MODE ||
+      _params.input_mode == Params::FILE_LIST_MODE) {
+    _archiveMode = true;
+  } else {
+    _archiveMode = false;
+  }
   _archiveRetrievalPending = false;
   _archiveTimeBox = NULL;
   _archiveStartTimeEdit = NULL;
   _archiveEndTimeEcho = NULL;
 
   _archiveStartTime.set(_params.archive_start_time);
-
-  _dwellSpecsBox = NULL;
-  _dwellAutoBox = NULL;
-  _dwellAutoVal = NULL;
-  _dwellSpecifiedEdit = NULL;
-  _dwellSpecifiedFrame = NULL;
-  _dwellStatsComboBox = NULL;
+  _archiveEndTime = _archiveStartTime + _timeSpanSecs;
 
   // set up windows
   
@@ -468,9 +467,9 @@ void AScopeManager::timerEvent(QTimerEvent *event)
     }
     _statusLayout->setColumnMinimumWidth(1, maxWidth);
   
-    if (_archiveMode) {
-      _archiveRetrievalPending = true;
-    }
+    // if (_archiveMode) {
+    //   _archiveRetrievalPending = true;
+    // }
 
     _firstTimerEvent = false;
 
@@ -480,15 +479,15 @@ void AScopeManager::timerEvent(QTimerEvent *event)
 
   if (event->timerId() == _dataTimerId) {
 
-    if (_archiveMode) {
-      if (_archiveRetrievalPending) {
-        _setDwellAutoVal();
-        _handleArchiveData();
-        _archiveRetrievalPending = false;
-      }
-    } else {
+    // if (_archiveMode) {
+    //   if (_archiveRetrievalPending) {
+    //     _setDwellAutoVal();
+    //     _handleArchiveData();
+    //     _archiveRetrievalPending = false;
+    //   }
+    // } else {
       _handleRealtimeData();
-    }
+    // }
 
   }
 
@@ -1126,9 +1125,9 @@ void AScopeManager::_unzoom()
 
 void AScopeManager::_refresh()
 {
-  if (_archiveMode) {
+  // if (_archiveMode) {
     _performArchiveRetrieval();
-  }
+  // }
 }
 
 //////////////////////////////
@@ -1220,25 +1219,24 @@ void AScopeManager::enableZoomButton() const
 void AScopeManager::_setTimeSpan()
 {
 
-  // double timeSpan;
-  // if (sscanf(_timeSpanEdit->text().toLocal8Bit().data(), 
-  //            "%lg", &timeSpan) != 1) {
-  //   QErrorMessage errMsg(_timeSpanEdit);
-  //   string text("Bad entry for time span: ");
-  //   text += _timeSpanEdit->text().toLocal8Bit().data();
-  //   errMsg.setModal(true);
-  //   errMsg.showMessage(text.c_str());
-  //   errMsg.exec();
-  //   _resetTimeSpanToDefault();
-  //   return;
-  // }
+  double timeSpan;
+  if (sscanf(_timeSpanEdit->text().toLocal8Bit().data(), 
+             "%lg", &timeSpan) != 1) {
+    QErrorMessage errMsg(_timeSpanEdit);
+    string text("Bad entry for time span: ");
+    text += _timeSpanEdit->text().toLocal8Bit().data();
+    errMsg.setModal(true);
+    errMsg.showMessage(text.c_str());
+    errMsg.exec();
+    _resetTimeSpanToDefault();
+    return;
+  }
   
-  // _timeSpanSecs = timeSpan;
-  // _plotEndTime = _plotStartTime + _timeSpanSecs;
+  _timeSpanSecs = timeSpan;
+  _plotEndTime = _plotStartTime + _timeSpanSecs;
     
-  // _setArchiveEndTime();
-  // _setDwellAutoVal();
-  // _configureAxes();
+  _setArchiveEndTime();
+  _configureAxes();
 
 }
 
@@ -1251,7 +1249,6 @@ void AScopeManager::_resetTimeSpanToDefault()
     _timeSpanEdit->setText(text);
   }
   _setArchiveEndTime();
-  _setDwellAutoVal();
   _configureAxes();
 }
 
@@ -1337,21 +1334,19 @@ void AScopeManager::_setArchiveEndTime()
 
 void AScopeManager::_setDataRetrievalMode()
 {
-  if (!_archiveTimeBox || !_dwellSpecsBox) {
+  if (!_archiveTimeBox) {
     return;
   }
   if (_realtimeModeButton && _realtimeModeButton->isChecked()) {
     if (_archiveMode) {
       _archiveMode = false;
       _archiveTimeBox->setEnabled(false);
-      _dwellSpecsBox->setEnabled(false);
       _ascope->activateRealtimeRendering();
     }
   } else {
     if (!_archiveMode) {
       _archiveMode = true;
       _archiveTimeBox->setEnabled(true);
-      _dwellSpecsBox->setEnabled(true);
       if (_plotStartTime.utime() != 0) {
         _setArchiveStartTime(_plotStartTime - _timeSpanSecs);
         _setGuiFromStartTime();
@@ -1411,122 +1406,9 @@ void AScopeManager::_performArchiveRetrieval()
 }
 
 ////////////////////////////////////////////////////////
-// set dwell to defaults
+// Open file
 
-void AScopeManager::_setDwellToDefaults()
-
-{
-
-  // _dwellAuto = _params.bscan_archive_dwell_auto;
-  // _dwellSpecifiedSecs = _params.bscan_archive_dwell_secs;
-
-  // int index = 0;
-  // switch (_params.bscan_dwell_stats) {
-  //   case Params::DWELL_STATS_MEAN:
-  //     _dwellStatsMethod = RadxField::STATS_METHOD_MEAN;
-  //     index = 0;
-  //     break;
-  //   case Params::DWELL_STATS_MEDIAN:
-  //     _dwellStatsMethod = RadxField::STATS_METHOD_MEDIAN;
-  //     index = 1;
-  //     break;
-  //   case Params::DWELL_STATS_MAXIMUM:
-  //     _dwellStatsMethod = RadxField::STATS_METHOD_MAXIMUM;
-  //     index = 2;
-  //     break;
-  //   case Params::DWELL_STATS_MINIMUM:
-  //     _dwellStatsMethod = RadxField::STATS_METHOD_MINIMUM;
-  //     index = 3;
-  //     break;
-  //   case Params::DWELL_STATS_MIDDLE:
-  //   default:
-  //     _dwellStatsMethod = RadxField::STATS_METHOD_MIDDLE;
-  //     index = 4;
-  //     break;
-  // }
-
-  // if (_dwellStatsComboBox) {
-  //   _dwellStatsComboBox->setCurrentIndex(index);
-  // }
-
-}
-
-//////////////////////////////////////
-// set the specified dwell
-
-void AScopeManager::_setDwellSpecified()
-
-{
-
-  double dwellSecs;
-  bool error = false;
-  if (sscanf(_dwellSpecifiedEdit->text().toLocal8Bit().data(),
-             "%lg", &dwellSecs) != 1) {
-    error = true;
-  }
-  if (dwellSecs <= 0) {
-    error = true;
-  }
-  if (error) {
-    QErrorMessage errMsg(_dwellSpecifiedEdit);
-    string text("Bad entry for dwell: ");
-    text += _dwellSpecifiedEdit->text().toLocal8Bit().data();
-    text += " Must be >= 0";
-    errMsg.setModal(true);
-    errMsg.showMessage(text.c_str());
-    errMsg.exec();
-    _resetDwellSpecifiedToDefault();
-    return;
-  }
-  
-  _dwellSpecifiedSecs = dwellSecs;
-
-}
-
-void AScopeManager::_resetDwellSpecifiedToDefault()
-
-{
-  // _dwellSpecifiedSecs = _params.bscan_archive_dwell_secs;
-  // char text[1024];
-  // sprintf(text, "%g", _dwellSpecifiedSecs);
-  // _dwellSpecifiedEdit->setText(text);
-}
-
-
-//////////////////////////////////////
-// set the dwell from auto selection
-
-void AScopeManager::_setDwellAuto()
-
-{
-  // if (_dwellAutoBox) {
-  //   _dwellAuto = _dwellAutoBox->isChecked();
-  // } else {
-  //   _dwellAuto = _params.bscan_archive_dwell_auto;
-  // }
-  // if (_dwellSpecifiedFrame) {
-  //   _dwellSpecifiedFrame->setEnabled(!_dwellAuto);
-  // }
-}
-
-void AScopeManager::_setDwellAutoVal()
-
-{
-  // if (_dwellAutoVal) {
-  //   _configureAxes();
-  //   const WorldPlot &world = _ascope->getFullWorld();
-  //   double nPixelsPlot = world.getPlotWidth();
-  //   _dwellAutoSecs = _timeSpanSecs / nPixelsPlot;
-  //   char text[128];
-  //   sprintf(text, "%lg", _dwellAutoSecs);
-  //   _dwellAutoVal->setText(text);
-  // }
-}
-
-///////////////////////////////////////////
-// set dwell stats from combo box selection
-
-void AScopeManager::_setDwellStats()
+void AScopeManager::_openFile()
 {
 }
 

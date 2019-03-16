@@ -10,7 +10,7 @@
 
 commentdef {
   p_header = "Sprite is the spectral display for time series data";
-  p_text = "This is a C++ application using the QT GUI toolkit.";
+  p_text = "This is a C++ application based on the QT GUI toolkit.";
 }
 
 commentdef {
@@ -46,24 +46,27 @@ paramdef boolean {
 } check_alloc;
 
 commentdef {
-  p_header = "REALTIME DATA INPUT";
+  p_header = "DATA INPUT MODE";
 }
 
 typedef enum {
-  IWRF_FMQ_INPUT, 
-  IWRF_TCP_INPUT
+  REALTIME_FMQ_MODE, 
+  REALTIME_TCP_MODE, 
+  ARCHIVE_TIME_MODE,
+  FILE_LIST_MODE,
+  FOLLOW_MOMENTS_MODE
 } input_mode_t;
 
 paramdef enum input_mode_t {
-  p_default = IWRF_FMQ_INPUT;
-  p_descr = "Method for reading the input data";
-  p_help = "\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.";
+  p_default = REALTIME_FMQ_MODE;
+  p_descr = "Method for reading the input time series data";
+  p_help = "\n\nREALTIME_FMQ_MODE: read a real-time IWRF data stream from an FMQ.\n\nREALTIME_TCP_MODE: read a real-time IWRF data stream from a TCP server.\n\nARCHIVE_TIME_MODE: given a time span and data directory, identify the list of files within that time span and read those files.\n\nFILE_LIST_MODE: the list of time series files is specified on the command line.\n\nFOLLOW_MOMENTS_MODE: the user is running a moments display (e.g. HawkEye or CIDD) and clicks on locations of interest. Sprite polls a shared memory segment for information on the user's clicks, and reads in the data for the time and location specified in the latest click.";
 } input_mode;
 
 paramdef string {
-  p_default = "/tmp/fmq/test";
-  p_descr = "DSR_FMQ_INPUT or IWRF_FMQ_INPUT mode: input URL for moments data from an FMQ";
-  p_help = "Full url is of the form fmqp:://hostname:port:path. Path does not in lude the file extension.";
+  p_default = "/tmp/fmq/ts";
+  p_descr = "REALTIME_FMQ_MODE: input URL for moments data from an FMQ";
+  p_help = "A fully-qualified url is of the form fmqp:://hostname:port:path. The path does not include the file extension.";
 } input_fmq_url;
 
 paramdef boolean {
@@ -74,41 +77,193 @@ paramdef boolean {
 
 paramdef string {
   p_default = "localhost";
-  p_descr = "IWRF_TCP_INPUT: name of host running IWRF moments server.";
-} input_tcp_host;
+  p_descr = "REALTIME_TCP_MODE: ip address of host running IWRF moments server.";
+} input_tcp_address;
 
 paramdef int {
   p_default = 11000;
-  p_descr = "IWRF_TCP_INPUT: port for IWRF moments server.";
+  p_descr = "REALTIME_TCP_MODE: TCP port for IWRF moments server.";
 } input_tcp_port;
 
-commentdef {
-  p_header = "ARCHIVE MODE";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to begin in archive mode.";
-  p_help = "If TRUE, the app will start up and read data from the archive_data_url, at the specified start time. If the start time is not set, the start time will be set to NOW.";
-} begin_in_archive_mode;
+paramdef string {
+  p_default = "/data/time_series/spol";
+  p_descr = "ARCHIVE_TIME_MODE: directory path for time series files.";
+  p_help = "This should point to the top dir of a time series data set. Below this will be date directories - i.e. yyyymmdd.";
+} archive_data_dir;
 
 paramdef string {
-  p_default = "1970 01 01 00 00 00";
-  p_descr = "Start time for archive mode.";
-  p_help = "In archive mode, data retrieval starts at this time.";
+  p_default = "2019 03 01 00 00 00";
+  p_descr = "ARCHIVE_TIME_MODE: start time (yyyy mm dd hh mm ss).";
+  p_help = "Data retrieval starts at this time.";
 } archive_start_time;
 
 paramdef double {
-  p_default = 3600;
-  p_descr = "Time span in ARCHIVE mode (secs).";
-  p_help = "Archive end time = archive_start_time + archive_time_span.";
+  p_default = 600;
+  p_descr = "ARCHIVE_TIME_MODE: time span (secs).";
+  p_help = "archive_end_time = archive_start_time + archive_time_span.";
 } archive_time_span_secs;
 
+commentdef {
+  p_header = "GETTING CLICK-POINT INFO FROM MOMENTS DISPLAY (CIDD or HawkEye)";
+}
+
+paramdef int {
+  p_default = 61500;
+  p_descr = "The shared memory key for the moments display coordinate struct.";
+  p_help = "When the user clicks in the moments main window, the coordinate struct is updated with the location and time.";
+} moments_shmem_key;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Max angular error when searching for spectra close to the click point (deg).";
+  p_help = "When the user clicks in CIDD, the (x) location is saved. From this, the elevation, elevation and range of the click point can be determined. The data base is then searched for spectra from a beam close to this. This parameter gives the max angular error allowable in this search.";
+} moments_max_search_angle_error;
+
+commentdef {
+  p_header = "BEAM SAMPLING";
+};
+
+paramdef int {
+  p_default = 64;
+  p_descr = "Number of samples (pulses) per dwell.";
+} n_samples;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Index the beams on even centers?";
+  p_help = "If false, the pulses are formed into beams sequentially, with no overlap.";
+} indexed_beams;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Dwell width in azimuth (deg).";
+  p_help = "Applies to PPI mode.";
+} indexed_resolution_ppi;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Dwell width in elevation (deg).";
+  p_help = "Applies to RHI mode.";
+} indexed_resolution_rhi;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to invert the sense of the HV flag in alternating mode.";
+  p_help = "In alternating dual-pol mode, the HV flag indicates whether the pulse is horizontally or vertically polarized. Normally 1 indicates H and 0 V. This parameter allows you to invert the sense of the flag, so that 1 is interpreted as V and 0 as H.";
+} invert_hv_flag;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Does the PRT in the pulse header refer to the previous time interval?.";
+  p_help = "If TRUE, the PRT in the pulse header refers to the time from the PREVIOUS pulse to THIS pulse. If FALSE, the PRT in the header refers to the time from THIS pulse to the NEXT pulse.";
+} prt_is_for_previous_interval;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to check for missing pulses in the time series.";
+  p_help = "If missing pulses are found, the beam formed by those pulses will be discarded.";
+} check_for_missing_pulses;
+
+commentdef {
+  p_header = "OVERRIDING RADAR PARAMETERS";
+  p_text = "Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar name.";
+  p_help = "If true, the name in this file will be used. If not, the name in the time series data will be used.";
+} override_radar_name;
+
 paramdef string {
-  p_default = "/data/cfradial/kddc";
-  p_descr = "URL for archive data files.";
-  p_help = "This should point to a CfRadial moments data set.";
-} archive_data_url;
+  p_default = "SPOL";
+  p_descr = "Name of the radar.";
+  p_help = "See 'override_radar_name'.";
+} radar_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar location.";
+  p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
+} override_radar_location;
+
+paramdef double {
+  p_default = 39.93208;
+  p_descr = "Radar latitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_latitude_deg;
+
+paramdef double {
+  p_default = -105.18175;
+  p_descr = "Radar longitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_longitude_deg;
+
+paramdef double {
+  p_default = 1742;
+  p_descr = "Radar altitude (meters).";
+  p_help = "See override_radar_location.";
+} radar_altitude_meters;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the gate geometry.";
+  p_help = "If true, the gate_spacing and start_range in the time series data is overridden by the parameters in this file.";
+} override_gate_geometry;
+
+paramdef double {
+  p_default = 150;
+  p_descr = "Gate spacing (meters).";
+  p_help = "See override_gate_geometry.";
+} gate_spacing_meters;
+
+paramdef double {
+  p_default = 150;
+  p_descr = "Start range (meters).";
+  p_help = "See override_gate_geometry.";
+} start_range_meters;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar wavelength.";
+  p_help = "If true, the radar wavelength in this file will be used. If not, the wavelength in the time series data will be used if available.";
+} override_radar_wavelength;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Radar wavelength (cm).";
+  p_help = "See override_radar_wavelength.";
+} radar_wavelength_cm;
+
+commentdef {
+  p_header = "FFT WINDOW";
+}
+
+typedef enum {
+  WINDOW_RECT,
+  WINDOW_VONHANN,
+  WINDOW_BLACKMAN
+} window_t;
+
+paramdef enum window_t {
+  p_default = WINDOW_VONHANN;
+  p_descr = "Window to be applied to time series before computing spectra.";
+} window;
+
+commentdef {
+  p_header = "RADAR CALIBRATION";
+}
+
+paramdef string {
+  p_default = "./radar_cal.xml";
+  p_descr = "File name for XML calibration file.";
+} cal_file_path;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override cal in time series data.";
+  p_help = "If false, the cal information in the time series data will be used. If true, the cal info in the param file will be used.";
+} use_cal_from_time_series;
 
 commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
@@ -194,35 +349,6 @@ paramdef double {
   p_default = 225.0;
   p_descr = "Max range for the display (km).";
 } max_range_km;
-
-commentdef {
-  p_header = "NAMES AND LABELS";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override radar name in the data.";
-} override_radar_name;
-
-paramdef string {
-  p_default = "SPOL";
-  p_descr = "Radar name if overridden.";
-} radar_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to display the site name in the left panel.";
-} display_site_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override site name in the data.";
-} override_site_name;
-
-paramdef string {
-  p_default = "MARSHALL";
-  p_descr = "Site name if overridden.";
-} site_name;
 
 commentdef {
   p_header = "WINDOW DIMENSIONS AND PLOTTING DETAILS";

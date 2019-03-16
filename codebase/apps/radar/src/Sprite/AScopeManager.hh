@@ -291,18 +291,6 @@ private:
   QLabel *_archiveEndTimeEcho;
   RadxTime _archiveEndTime;
   
-  QGroupBox *_dwellSpecsBox;
-  QCheckBox *_dwellAutoBox;
-  QLabel *_dwellAutoVal;
-  bool _dwellAuto;
-  double _dwellAutoSecs;
-  double _dwellSpecifiedSecs;
-  double _dwellSecs;
-  QLineEdit *_dwellSpecifiedEdit;
-  QFrame *_dwellSpecifiedFrame;
-  QComboBox *_dwellStatsComboBox;
-  RadxField::StatsMethod_t _dwellStatsMethod;
-
   double _xSecsClicked;
   double _yKmClicked;
 
@@ -380,7 +368,6 @@ private:
   int _getArchiveData();
   void _plotArchiveData();
   void _setupVolRead(RadxFile &file);
-  void _setDwellAutoVal();
 
 private slots:
 
@@ -418,12 +405,6 @@ private slots:
 
   void _performArchiveRetrieval();
   
-  void _setDwellToDefaults();
-  void _setDwellSpecified();
-  void _resetDwellSpecifiedToDefault();
-  void _setDwellAuto();
-  void _setDwellStats();
-
 };
 
 #endif

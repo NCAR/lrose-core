@@ -84,6 +84,10 @@ Sprite::Sprite(int argc, char **argv) :
     return;
   }
 
+  // create the data source reader
+  
+  _reader = new TsReader(_progName, _params, _args);
+  
   // init process mapper registration
 
   if (_params.register_with_procmap) {
@@ -126,13 +130,8 @@ int Sprite::Run(QApplication &app)
   _radarId = 0;
   _burstChan = -1;
 
-  // create the data source reader
-  
-  _reader = new TsReader(_serverHost, _serverPort, _serverFmq,
-                         _simulMode, _radarId, _burstChan, _debugLevel);
-  
   // create the ascope manager
-
+  
   _ascopeManager = new AScopeManager(_params, _reader);
 
   return -1;
