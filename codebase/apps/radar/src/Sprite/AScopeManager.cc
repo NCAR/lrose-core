@@ -37,13 +37,11 @@
 ///////////////////////////////////////////////////////////////
 
 #include "AScopeManager.hh"
-#include "DisplayField.hh"
-#include "BscanWidget.hh"
+#include "AScopeWidget.hh"
 #include "ColorMap.hh"
 #include "Params.hh"
-#include "Reader.hh"
+#include "TsReader.hh"
 #include "AllocCheck.hh"
-#include "SoloDefaultColorWrapper.hh"
 #include <radar/RadarComplex.hh>
 #include <toolsa/file_io.h>
 
@@ -83,36 +81,29 @@
 #include <dsserver/DsLdataInfo.hh>
 
 using namespace std;
+bool AScopeManager::_firstTimerEvent = true;
 
 // Constructor
 
 AScopeManager::AScopeManager(const Params &params,
-                           Reader *reader,
-                           const vector<DisplayField *> &fields,
-                           bool haveFilteredFields) :
-        DisplayManager(params, reader, fields, haveFilteredFields),
+                             TsReader *reader) :
+        _params(params),
+        _reader(reader),
         _plotStart(true)
         
 {
   
-  _bscan = NULL;
+  _ascope = NULL;
 
   _prevAltKm = -9999.0;
   _altRateMps = 0.0;
   
   // initialize geometry
   
-  _setRangeLimitsToDefaults();
-  _setAltitudeLimitsToDefaults();
-  _setCensorDataBelowSurfaceToDefaults();
-
-  _requestedRangeAxisMode = _params.bscan_range_axis_mode;
-  _rangeAxisMode = _requestedRangeAxisMode;
-  
   _realtimeModeButton = NULL;
   _archiveModeButton = NULL;
 
-  _timeSpanSecs = _params.bscan_time_span_secs;
+  _timeSpanSecs = _params.ascope_time_span_secs;
   _archiveMode = _params.begin_in_archive_mode;
   _archiveRetrievalPending = false;
   _archiveTimeBox = NULL;
@@ -120,9 +111,6 @@ AScopeManager::AScopeManager(const Params &params,
   _archiveEndTimeEcho = NULL;
 
   _archiveStartTime.set(_params.archive_start_time);
-
-  _archiveImagesStartTime.set(_params.images_archive_start_time);
-  _archiveImagesEndTime.set(_params.images_archive_end_time);
 
   _dwellSpecsBox = NULL;
   _dwellAutoBox = NULL;
@@ -137,7 +125,7 @@ AScopeManager::AScopeManager(const Params &params,
 
   // set initial field to 0
   
-  _changeField(0, false);
+  // _changeField(0, false);
 
 }
 
@@ -147,8 +135,8 @@ AScopeManager::~AScopeManager()
 
 {
 
-  if (_bscan) {
-    delete _bscan;
+  if (_ascope) {
+    delete _ascope;
   }
 
 }
@@ -169,7 +157,7 @@ int AScopeManager::run(QApplication &app)
   
   // set timer running
   
-  _beamTimerId = startTimer(5);
+  _dataTimerId = startTimer(5);
   
   return app.exec();
 
@@ -197,37 +185,30 @@ void AScopeManager::_setupWindows()
   
   // bscan - main window
 
-  _bscanFrame = new QFrame(_main);
-  _bscanFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  _ascopeFrame = new QFrame(_main);
+  _ascopeFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   // configure the BSCAN
 
-  _bscan = new BscanWidget(_bscanFrame, *this, _params,
-                           _fields, _haveFilteredFields);
+  _ascope = new AScopeWidget(_ascopeFrame, *this, _params);
   connect(this, SIGNAL(frameResized(const int, const int)),
-	  _bscan, SLOT(resize(const int, const int)));
+	  _ascope, SLOT(resize(const int, const int)));
   
   // connect slots for location change
   
-  connect(_bscan, SIGNAL(locationClicked(double, double, const RadxRay*)),
-          this, SLOT(_bscanLocationClicked(double, double, const RadxRay*)));
+  connect(_ascope, SIGNAL(locationClicked(double, double, const RadxRay*)),
+          this, SLOT(_ascopeLocationClicked(double, double, const RadxRay*)));
   
   // create status panel
   
-  _createStatusPanel();
-
-  // create fields panel
-  
-  _createFieldPanel();
+  // _createStatusPanel();
 
   // main window layout
   
   QHBoxLayout *mainLayout = new QHBoxLayout(_main);
   mainLayout->setMargin(3);
   mainLayout->addWidget(_statusPanel);
-  mainLayout->addWidget(_fieldPanel);
-  mainLayout->addWidget(_bscanFrame);
-  //   mainLayout->addWidget(_colorBar);
+  mainLayout->addWidget(_ascopeFrame);
 
   _createActions();
   _createMenus();
@@ -247,15 +228,15 @@ void AScopeManager::_setupWindows()
 
   // set up field click dialog
 
-  _createClickReportDialog();
+  // _createClickReportDialog();
 
   // create the range axis settings dialog
 
-  _createRangeAxisDialog();
+  // _createRangeAxisDialog();
 
   // create the time axis settings dialog
   
-  _createTimeAxisDialog();
+  // _createTimeAxisDialog();
 
 }
 
@@ -343,7 +324,7 @@ void AScopeManager::_createActions()
 
   _clearAct = new QAction(tr("Clear"), this);
   _clearAct->setStatusTip(tr("Clear data"));
-  connect(_clearAct, SIGNAL(triggered()), _bscan, SLOT(clear()));
+  connect(_clearAct, SIGNAL(triggered()), _ascope, SLOT(clear()));
 
   // exit app
 
@@ -358,7 +339,7 @@ void AScopeManager::_createActions()
   _rangeGridAct->setStatusTip(tr("Turn range grid on/off"));
   _rangeGridAct->setCheckable(true);
   connect(_rangeGridAct, SIGNAL(triggered(bool)),
-	  _bscan, SLOT(setRangeGridEnabled(bool)));
+	  _ascope, SLOT(setRangeGridEnabled(bool)));
 
   // show time grid lines
 
@@ -366,7 +347,7 @@ void AScopeManager::_createActions()
   _timeGridAct->setStatusTip(tr("Turn time grid on/off"));
   _timeGridAct->setCheckable(true);
   connect(_timeGridAct, SIGNAL(triggered(bool)),
-	  _bscan, SLOT(setTimeGridEnabled(bool)));
+	  _ascope, SLOT(setTimeGridEnabled(bool)));
   
   // show instrument height line in altitude display
 
@@ -374,7 +355,7 @@ void AScopeManager::_createActions()
   _instHtLineAct->setStatusTip(tr("Turn instrument height line on/off"));
   _instHtLineAct->setCheckable(true);
   connect(_instHtLineAct, SIGNAL(triggered(bool)),
-	  _bscan, SLOT(setInstHtLineEnabled(bool)));
+	  _ascope, SLOT(setInstHtLineEnabled(bool)));
 
   // show latlon legend
 
@@ -382,7 +363,7 @@ void AScopeManager::_createActions()
   _latlonLegendAct->setStatusTip(tr("Display starting lat/lon as a legend"));
   _latlonLegendAct->setCheckable(true);
   connect(_latlonLegendAct, SIGNAL(triggered(bool)),
-	  _bscan, SLOT(setLatlonLegendEnabled(bool)));
+	  _ascope, SLOT(setLatlonLegendEnabled(bool)));
 
   // show dist/track legend
 
@@ -390,7 +371,7 @@ void AScopeManager::_createActions()
   _speedTrackLegendAct->setStatusTip(tr("Display mean speed and track as a legend"));
   _speedTrackLegendAct->setCheckable(true);
   connect(_speedTrackLegendAct, SIGNAL(triggered(bool)),
-	  _bscan, SLOT(setSpeedTrackLegendEnabled(bool)));
+	  _ascope, SLOT(setSpeedTrackLegendEnabled(bool)));
 
   // display distance ticks
 
@@ -428,40 +409,16 @@ void AScopeManager::_createActions()
 void AScopeManager::_initActions()
 {
 
-  if (_params.bscan_draw_range_grid_lines) {
+  if (_params.ascope_draw_x_grid_lines) {
     _rangeGridAct->setChecked(true);
   } else {
     _rangeGridAct->setChecked(false);
   }
 
-  if (_params.bscan_draw_time_grid_lines) {
+  if (_params.ascope_draw_time_grid_lines) {
     _timeGridAct->setChecked(true);
   } else {
     _timeGridAct->setChecked(false);
-  }
-
-  if (_params.bscan_draw_instrument_height_line) {
-    _instHtLineAct->setChecked(true);
-  } else {
-    _instHtLineAct->setChecked(false);
-  }
-
-  if (_params.bscan_plot_starting_latlon_as_legend) {
-    _latlonLegendAct->setChecked(true);
-  } else {
-    _latlonLegendAct->setChecked(false);
-  }
-
-  if (_params.bscan_plot_mean_track_and_speed_as_legend) {
-    _speedTrackLegendAct->setChecked(true);
-  } else {
-    _speedTrackLegendAct->setChecked(false);
-  }
-
-  if (_params.bscan_add_distance_to_time_axis) {
-    _distScaleAct->setChecked(true);
-  } else {
-    _distScaleAct->setChecked(false);
   }
 
 }
@@ -473,677 +430,9 @@ void AScopeManager::_configureAxes()
   
 {
   
-  _bscan->configureAxes(_requestedRangeAxisMode,
-                        _minPlotRangeKm,
-                        _maxPlotRangeKm,
-                        _minPlotAltitudeKm,
-                        _maxPlotAltitudeKm,
-                        _timeSpanSecs);
-
-}
-
-///////////////////////////////////////////////////////
-// create the range axis settings dialog
-//
-// This allows the user to control the range axis
-
-void AScopeManager::_createRangeAxisDialog()
-{
-  
-  _rangeAxisDialog = new QDialog(this);
-  _rangeAxisDialog->setWindowTitle("Range axis settings");
-  
-  QBoxLayout *rangeAxisDialogLayout =
-    new QBoxLayout(QBoxLayout::TopToBottom, _rangeAxisDialog);
-  
-  // range axis scale mode
-  
-  {
-
-    _rangeAxisModeBox = new QGroupBox(_rangeAxisDialog);
-    QVBoxLayout *modeBoxLayout = new QVBoxLayout;
-    _rangeAxisModeBox->setLayout(modeBoxLayout);
-    _rangeAxisModeBox->setTitle("Set mode for range axis");
-    
-    _rangeAxisModeUpButton = new QRadioButton(tr("Plot range up"), this);
-    _rangeAxisModeUpButton->setStatusTip
-      (tr("Plot range from instrument, positive upwards"));
-    _rangeAxisModeUpButton->setCheckable(true);
-    connect(_rangeAxisModeUpButton, SIGNAL(clicked()),
-            this, SLOT(_setRangeAxisRangeUp()));
-    modeBoxLayout->addWidget(_rangeAxisModeUpButton);
-    
-    _rangeAxisModeDownButton = new QRadioButton(tr("Plot range down"), this);
-    _rangeAxisModeDownButton->setStatusTip
-      (tr("Plot range from instrument, positive downwards"));
-    _rangeAxisModeDownButton->setCheckable(true);
-    connect(_rangeAxisModeDownButton, SIGNAL(clicked()), 
-            this, SLOT(_setRangeAxisRangeDown()));
-    modeBoxLayout->addWidget(_rangeAxisModeDownButton);
-    
-    _rangeAxisModeAltitudeButton = new QRadioButton(tr("Plot altitude"), this);
-    _rangeAxisModeAltitudeButton->setStatusTip(tr("Plot altitude on vertical axis"));
-    _rangeAxisModeAltitudeButton->setCheckable(true);
-    connect(_rangeAxisModeAltitudeButton, SIGNAL(clicked()), 
-            this, SLOT(_setRangeAxisAltitude()));
-    modeBoxLayout->addWidget(_rangeAxisModeAltitudeButton);
-    
-    QButtonGroup *modeGroup = new QButtonGroup(this);
-    modeGroup->setExclusive(true);
-    modeGroup->addButton(_rangeAxisModeUpButton);
-    modeGroup->addButton(_rangeAxisModeDownButton);
-    modeGroup->addButton(_rangeAxisModeAltitudeButton);
-    
-    switch (_params.bscan_range_axis_mode) {
-      case Params::RANGE_AXIS_DOWN:
-        _rangeAxisModeDownButton->setChecked(true);
-        break;
-      case Params::RANGE_AXIS_ALTITUDE:
-        _rangeAxisModeAltitudeButton->setChecked(true);
-        break;
-      case Params::RANGE_AXIS_UP:
-      default:
-        _rangeAxisModeUpButton->setChecked(true);
-    }
-    
-    rangeAxisDialogLayout->addWidget(_rangeAxisModeBox, Qt::AlignCenter);
-    
-  }
-  
-  // set altitude limits
-
-  {
-    
-    _rangeAxisAltitudeBox = new QGroupBox(_rangeAxisDialog);
-    QVBoxLayout *altitudeLayout = new QVBoxLayout;
-    _rangeAxisAltitudeBox->setLayout(altitudeLayout);
-    _rangeAxisAltitudeBox->setTitle("Set limits for altitude plotting mode");
-    
-    _altitudeInFeetBox = new QCheckBox(_rangeAxisAltitudeBox);
-    _altitudeInFeetBox->setText("Label altitude in feet?");
-    _altitudeInFeetBox->setChecked(_altitudeInFeet);
-    altitudeLayout->addWidget(_altitudeInFeetBox);
-    connect(_altitudeInFeetBox, SIGNAL(clicked()), this, SLOT(_setAltitudeInFeet()));
-    
-    char textMin[1024], textMax[1024];
-    sprintf(textMin, "%g", _minPlotAltitudeKm);
-    sprintf(textMax, "%g", _maxPlotAltitudeKm);
-    if (_altitudeInFeet) {
-      _minAltitudeEdit =
-        _addInputRow(_rangeAxisAltitudeBox, altitudeLayout,
-                     "Min altitude (kft)", textMin, 0, &_minAltitudeLabel);
-      _maxAltitudeEdit =
-        _addInputRow(_rangeAxisAltitudeBox, altitudeLayout,
-                     "Max altitude (kft)", textMin, 0, &_maxAltitudeLabel);
-    } else {
-      _minAltitudeEdit =
-        _addInputRow(_rangeAxisAltitudeBox, altitudeLayout,
-                     "Min altitude (km)", textMin, 0, &_minAltitudeLabel);
-      _maxAltitudeEdit =
-        _addInputRow(_rangeAxisAltitudeBox, altitudeLayout,
-                     "Max altitude (km)", textMin, 0, &_maxAltitudeLabel);
-    }
-    connect(_minAltitudeEdit, SIGNAL(returnPressed()), this, SLOT(_setAltitudeLimits()));
-    connect(_maxAltitudeEdit, SIGNAL(returnPressed()), this, SLOT(_setAltitudeLimits()));
-
-    QFrame *acceptCancel = new QFrame;
-    QHBoxLayout *horiz = new QHBoxLayout;
-    acceptCancel->setLayout(horiz);
-    
-    _altitudeAccept = new QPushButton(acceptCancel);
-    _altitudeAccept->setText("Accept");
-    horiz->addWidget(_altitudeAccept);
-    connect(_altitudeAccept, SIGNAL(clicked()), this, SLOT(_setAltitudeLimits()));
-    connect(_altitudeAccept, SIGNAL(clicked()), this, SLOT(_refresh()));
-    
-    _altitudeCancel = new QPushButton(acceptCancel);
-    _altitudeCancel->setText("Cancel");
-    horiz->addWidget(_altitudeCancel);
-    connect(_altitudeCancel, SIGNAL(clicked()), this, SLOT(_cancelRangeAxisChanges()));
-
-    altitudeLayout->addWidget(acceptCancel);
-    
-    _rangeAxisSetAltitudeFromZoom = new QPushButton(_rangeAxisAltitudeBox);
-    _rangeAxisSetAltitudeFromZoom->setText("Set limits from current zoom");
-    altitudeLayout->addWidget(_rangeAxisSetAltitudeFromZoom);
-    connect(_rangeAxisSetAltitudeFromZoom, SIGNAL(clicked()), this,
-            SLOT(_setAltitudeLimitsFromZoom()));
-    
-    _rangeAxisResetAltitudeLimits = new QPushButton(_rangeAxisAltitudeBox);
-    _rangeAxisResetAltitudeLimits->setText("Reset to defaults");
-    altitudeLayout->addWidget(_rangeAxisResetAltitudeLimits);
-    connect(_rangeAxisResetAltitudeLimits, SIGNAL(clicked()), this,
-            SLOT(_resetAltitudeLimitsToDefaults()));
-
-    rangeAxisDialogLayout->addWidget(_rangeAxisAltitudeBox, Qt::AlignCenter);
-
-  }
-  
-  // set range limits if appropriate
-
-  {
-    
-    _rangeAxisRangeBox = new QGroupBox(_rangeAxisDialog);
-    QVBoxLayout *rangeLayout = new QVBoxLayout;
-    _rangeAxisRangeBox->setLayout(rangeLayout);
-    _rangeAxisRangeBox->setTitle("Option to set limits for range");
-    
-    _specifyRangeLimitsBox = new QCheckBox(_rangeAxisRangeBox);
-    _specifyRangeLimitsBox->setText("Specify range limits?");
-    _specifyRangeLimitsBox->setChecked(_specifyRangeLimits);
-    rangeLayout->addWidget(_specifyRangeLimitsBox);
-    connect(_specifyRangeLimitsBox, SIGNAL(clicked()),
-            this, SLOT(_setSpecifyRangeLimits()));
-
-    char text[1024];
-    sprintf(text, "%g", _minPlotRangeKm);
-    QLabel *minRangeLabel;
-    _minRangeEdit = _addInputRow(_rangeAxisRangeBox, rangeLayout, 
-                                 "Min range (km)", text, 0, &minRangeLabel);
-    sprintf(text, "%g", _minPlotRangeKm);
-    QLabel *maxRangeLabel;
-    _maxRangeEdit = _addInputRow(_rangeAxisRangeBox, rangeLayout,
-                                 "Max range (km)", text, 0, &maxRangeLabel);
-    
-    QFrame *acceptCancel = new QFrame;
-    QHBoxLayout *horiz = new QHBoxLayout;
-    acceptCancel->setLayout(horiz);
-
-    _rangeAccept = new QPushButton(acceptCancel);
-    _rangeAccept->setText("Accept");
-    horiz->addWidget(_rangeAccept);
-    connect(_rangeAccept, SIGNAL(clicked()), this, SLOT(_setRangeLimits()));
-    connect(_rangeAccept, SIGNAL(clicked()), this, SLOT(_refresh()));
-
-    _rangeCancel = new QPushButton(acceptCancel);
-    _rangeCancel->setText("Cancel");
-    horiz->addWidget(_rangeCancel);
-    connect(_rangeCancel, SIGNAL(clicked()), 
-            this, SLOT(_cancelRangeAxisChanges()));
-
-    rangeLayout->addWidget(acceptCancel);
-
-    _rangeAxisSetRangeFromZoom = new QPushButton(_rangeAxisRangeBox);
-    _rangeAxisSetRangeFromZoom->setText("Set limits from current zoom");
-    rangeLayout->addWidget(_rangeAxisSetRangeFromZoom);
-    connect(_rangeAxisSetRangeFromZoom, SIGNAL(clicked()),
-            this, SLOT(_setRangeLimitsFromZoom()));
-    
-    _rangeAxisResetRangeLimits = new QPushButton(_rangeAxisRangeBox);
-    _rangeAxisResetRangeLimits->setText("Reset to defaults");
-    rangeLayout->addWidget(_rangeAxisResetRangeLimits);
-    connect(_rangeAxisResetRangeLimits, SIGNAL(clicked()), 
-            this, SLOT(_resetRangeLimitsToDefaults()));
-
-    rangeAxisDialogLayout->addWidget(_rangeAxisRangeBox, Qt::AlignCenter);
-
-  }
-  
-  // censor data below surface
-
-  {
-    
-    _censorDataBelowSurfaceBox = new QGroupBox(_rangeAxisDialog);
-    QVBoxLayout *censorBelowSurfaceLayout = new QVBoxLayout;
-    _censorDataBelowSurfaceBox->setLayout(censorBelowSurfaceLayout);
-    _censorDataBelowSurfaceBox->setTitle("Option to censor data below surface");
-    
-    _censorDataToggleBox = new QCheckBox(_censorDataBelowSurfaceBox);
-    _censorDataToggleBox->setText("Censor data below surface?");
-    _censorDataToggleBox->setChecked(_censorDataBelowSurface);
-    censorBelowSurfaceLayout->addWidget(_censorDataToggleBox);
-    connect(_censorDataToggleBox, SIGNAL(clicked()),
-            this, SLOT(_setCensorDataBelowSurface()));
-    
-    char text[1024];
-
-    sprintf(text, "%s", _surfaceField.c_str());
-    QLabel *surfaceFieldLabel;
-    _surfaceFieldEdit =
-      _addInputRow(_censorDataBelowSurfaceBox, censorBelowSurfaceLayout,
-                   "Surface field name", text, 0, &surfaceFieldLabel);
-    
-    sprintf(text, "%g", _minRangeToSurfaceKm);
-    QLabel *minRangeToSurfaceLabel;
-    _minRangeToSurfaceEdit =
-      _addInputRow(_censorDataBelowSurfaceBox, censorBelowSurfaceLayout,
-                   "Min range to surface (km)", text, 0, &minRangeToSurfaceLabel);
-
-    sprintf(text, "%g", _surfaceRangeMarginKm);
-    QLabel *surfaceRangeMarginLabel;
-    _surfaceRangeMarginEdit =
-      _addInputRow(_censorDataBelowSurfaceBox, censorBelowSurfaceLayout,
-                   "Surface range margin (km)", text, 0, &surfaceRangeMarginLabel);
-    
-    QFrame *acceptCancel = new QFrame;
-    QHBoxLayout *horiz = new QHBoxLayout;
-    acceptCancel->setLayout(horiz);
-    
-    _censorDataBelowSurfaceAccept = new QPushButton(acceptCancel);
-    _censorDataBelowSurfaceAccept->setText("Accept");
-    horiz->addWidget(_censorDataBelowSurfaceAccept);
-    connect(_censorDataBelowSurfaceAccept, SIGNAL(clicked()),
-            this, SLOT(_setCensorDataBelowSurface()));
-    connect(_censorDataBelowSurfaceAccept, SIGNAL(clicked()),
-            this, SLOT(_refresh()));
-
-    _censorDataBelowSurfaceCancel = new QPushButton(acceptCancel);
-    _censorDataBelowSurfaceCancel->setText("Cancel");
-    horiz->addWidget(_censorDataBelowSurfaceCancel);
-    connect(_censorDataBelowSurfaceCancel, SIGNAL(clicked()),
-            this, SLOT(_cancelCensorDataBelowSurfaceChanges()));
-    
-    censorBelowSurfaceLayout->addWidget(acceptCancel);
-
-    _rangeAxisResetCensorDataBelowSurface = 
-      new QPushButton(_censorDataBelowSurfaceBox);
-    _rangeAxisResetCensorDataBelowSurface->setText("Reset to defaults");
-    censorBelowSurfaceLayout->addWidget(_rangeAxisResetCensorDataBelowSurface);
-    connect(_rangeAxisResetCensorDataBelowSurface, SIGNAL(clicked()), 
-            this, SLOT(_resetCensorDataBelowSurfaceToDefaults()));
-
-    rangeAxisDialogLayout->addWidget(_censorDataBelowSurfaceBox, Qt::AlignCenter);
-
-  }
-  
-  // done?
-
-  {
-    
-    _rangeAxisDoneBox = new QGroupBox(_rangeAxisDialog);
-    QGridLayout *doneLayout = new QGridLayout;
-    _rangeAxisDoneBox->setLayout(doneLayout);
-    _rangeAxisDoneBox->setTitle("Done with all changes");
-    
-    int row = 0;
-    QPushButton *done = new QPushButton(_rangeAxisDoneBox);
-    done->setText("Done");
-    doneLayout->addWidget(done, row++, 0, Qt::AlignCenter);
-    connect(done, SIGNAL(clicked()), this, SLOT(_doneWithRangeAxis()));
-
-    rangeAxisDialogLayout->addWidget(_rangeAxisDoneBox, Qt::AlignCenter);
-
-  }
-
-  _refreshRangeAxisDialog();
-  
-}
-
-///////////////////////////////////////////////////////
-// set the state on the range axis dialog
-
-void AScopeManager::_refreshRangeAxisDialog()
-{
-  
-  char text[1024];
-
-  // set altitude limits text
-
-  sprintf(text, "%g", _minPlotAltitudeKm * _altitudeUnitsMult);
-  _minAltitudeEdit->setText(text);
-
-  sprintf(text, "%g", _maxPlotAltitudeKm * _altitudeUnitsMult);
-  _maxAltitudeEdit->setText(text);
-
-  _altitudeInFeetBox->setChecked(_altitudeInFeet);
-
-  // set range limits text
-
-  sprintf(text, "%g", _minPlotRangeKm);
-  _minRangeEdit->setText(text);
-
-  sprintf(text, "%g", _maxPlotRangeKm);
-  _maxRangeEdit->setText(text);
-
-  // enable/disable widgets depending on mode
-
-  switch (_requestedRangeAxisMode) {
-    case Params::RANGE_AXIS_UP:
-    case Params::RANGE_AXIS_DOWN: {
-      // _rangeAxisRangeBox->setEnabled(true);
-      _rangeAxisAltitudeBox->setEnabled(false);
-      break;
-    }
-    case Params::RANGE_AXIS_ALTITUDE:
-    default: {
-      // _rangeAxisRangeBox->setEnabled(false);
-      _rangeAxisAltitudeBox->setEnabled(true);
-      break;
-    }
-  }
-
-  _specifyRangeLimitsBox->setChecked(_specifyRangeLimits);
-  
-  if (_specifyRangeLimits) {
-    _minRangeEdit->setEnabled(true);
-    _maxRangeEdit->setEnabled(true);
-  } else {
-    _minRangeEdit->setEnabled(false);
-    _maxRangeEdit->setEnabled(false);
-  }
-
-  // set censor below surface text
-  
-  _censorDataToggleBox->setChecked(_censorDataBelowSurface);
-
-  sprintf(text, "%s", _surfaceField.c_str());
-  _surfaceFieldEdit->setText(text);
-
-  sprintf(text, "%g", _minRangeToSurfaceKm);
-  _minRangeToSurfaceEdit->setText(text);
-
-  sprintf(text, "%g", _surfaceRangeMarginKm);
-  _surfaceRangeMarginEdit->setText(text);
-
-}
-
-///////////////////////////////////////////////////////
-// create the time axis settings dialog
-//
-// This allows the user to control the time axis
-
-void AScopeManager::_createTimeAxisDialog()
-{
-  
-  _timeAxisDialog = new QDialog(this);
-  _timeAxisDialog->setWindowTitle("Time axis settings");
-  
-  QBoxLayout *timeAxisDialogLayout =
-    new QBoxLayout(QBoxLayout::TopToBottom, _timeAxisDialog);
-  
-  {  // set time span
-
-    QGroupBox *timeSpanBox = new QGroupBox(_timeAxisDialog);
-    QVBoxLayout *timeSpanLayout = new QVBoxLayout;
-    timeSpanBox->setLayout(timeSpanLayout);
-    timeSpanBox->setTitle("Set time span for plot");
-    
-    QFrame *timeSpanEditLabel;
-    _timeSpanEdit = _addInputRow(timeSpanBox, timeSpanLayout, 
-                                 "Time span for plot (secs)", "",
-                                 0, &timeSpanEditLabel);
-    _resetTimeSpanToDefault();
-    
-    QFrame *acceptCancelReset = new QFrame;
-    QHBoxLayout *horiz = new QHBoxLayout;
-    acceptCancelReset->setLayout(horiz);
-    
-    QPushButton *acceptButton = new QPushButton(timeSpanBox);
-    acceptButton->setText("Accept");
-    horiz->addWidget(acceptButton);
-    connect(acceptButton, SIGNAL(clicked()), this, SLOT(_setTimeSpan()));
-    
-    QPushButton *cancelButton = new QPushButton(timeSpanBox);
-    cancelButton->setText("Cancel");
-    horiz->addWidget(cancelButton);
-    connect(cancelButton, SIGNAL(clicked()), this,
-            SLOT(_cancelTimeAxisChanges()));
-    
-    QPushButton *resetButton = new QPushButton(timeSpanBox);
-    resetButton->setText("Reset to default");
-    horiz->addWidget(resetButton);
-    connect(resetButton, SIGNAL(clicked()), this,
-            SLOT(_resetTimeSpanToDefault()));
-
-    timeSpanLayout->addWidget(acceptCancelReset);
-
-    // add to main dialog
-
-    timeAxisDialogLayout->addWidget(timeSpanBox, Qt::AlignCenter);
-
-  } // time span
-  
-  {  // archive / realtime mode
-  
-    QGroupBox *modeBox = new QGroupBox(_timeAxisDialog);
-    QHBoxLayout *modeBoxLayout = new QHBoxLayout;
-    modeBox->setLayout(modeBoxLayout);
-    modeBox->setTitle("Set data retrieval mode");
-    
-    _realtimeModeButton = new QRadioButton(tr("Realtime mode"), this);
-    _realtimeModeButton->setStatusTip(tr("Run in realtime mode"));
-    _realtimeModeButton->setCheckable(true);
-    connect(_realtimeModeButton, SIGNAL(clicked()), this,
-            SLOT(_setDataRetrievalMode()));
-    modeBoxLayout->addWidget(_realtimeModeButton);
-    
-    _archiveModeButton = new QRadioButton(tr("Archive mode"), this);
-    _archiveModeButton->setStatusTip(tr("Run in archive mode"));
-    _archiveModeButton->setCheckable(true);
-    connect(_archiveModeButton, SIGNAL(clicked()), this,
-            SLOT(_setDataRetrievalMode()));
-    modeBoxLayout->addWidget(_archiveModeButton);
-    
-    QButtonGroup *modeGroup = new QButtonGroup(this);
-    modeGroup->setExclusive(true);
-    modeGroup->addButton(_realtimeModeButton);
-    modeGroup->addButton(_archiveModeButton);
-    
-    if (_archiveMode) {
-      _archiveModeButton->setChecked(true);
-    } else {
-      _realtimeModeButton->setChecked(true);
-    }
-    _setDataRetrievalMode();
-    
-    timeAxisDialogLayout->addWidget(modeBox, Qt::AlignCenter);
-    
-  } // archive / realtime mode
-  
-  {  // set archival time retrieval
-
-    // box for setting start timew
-
-    _archiveTimeBox = new QGroupBox(_timeAxisDialog);
-    QVBoxLayout *archiveTimeLayout = new QVBoxLayout;
-    _archiveTimeBox->setLayout(archiveTimeLayout);
-    _archiveTimeBox->setTitle("Set times for archive mode");
-
-    // start time edit
-
-    QFrame *timeStartFrame = new QFrame;
-    QHBoxLayout *timeStartLayout = new QHBoxLayout;
-    timeStartFrame->setLayout(timeStartLayout);
-    
-    QLabel *timeStartLabel = new QLabel(timeStartFrame);
-    timeStartLabel->setText("Start time (UTC)");
-    timeStartLayout->addWidget(timeStartLabel);
-    
-    _archiveStartTimeEdit = new QDateTimeEdit(_archiveTimeBox);
-    _archiveStartTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
-    _setArchiveStartTimeToDefault();
-    timeStartLayout->addWidget(_archiveStartTimeEdit);
-    connect(_archiveStartTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
-            this, SLOT(_setStartTimeFromGui(const QDateTime &)));
-    
-    archiveTimeLayout->addWidget(timeStartFrame);
-
-    // end time echo
-
-    QFrame *timeEndFrame = new QFrame;
-    QHBoxLayout *timeEndLayout = new QHBoxLayout;
-    timeEndFrame->setLayout(timeEndLayout);
-    
-    QLabel *timeEndLabel = new QLabel(timeEndFrame);
-    timeEndLabel->setText("End time (UTC)");
-    timeEndLayout->addWidget(timeEndLabel);
-    
-    _archiveEndTimeEcho = new QLabel(_archiveTimeBox);
-    _setArchiveEndTime();
-    timeEndLayout->addWidget(_archiveEndTimeEcho);
-    
-    archiveTimeLayout->addWidget(timeEndFrame);
-
-    // back / forward
-    
-    QFrame *backFwd = new QFrame;
-    QHBoxLayout *layout1 = new QHBoxLayout;
-    backFwd->setLayout(layout1);
-    
-    QPushButton *back5 = new QPushButton(backFwd);
-    back5->setText("Back <<");
-    layout1->addWidget(back5);
-    connect(back5, SIGNAL(clicked()), this, SLOT(_goBack5()));
-    
-    QPushButton *back1 = new QPushButton(backFwd);
-    back1->setText("Back <");
-    layout1->addWidget(back1);
-    connect(back1, SIGNAL(clicked()), this, SLOT(_goBack1()));
-    
-    QPushButton *fwd1 = new QPushButton(backFwd);
-    fwd1->setText("Fwd >");
-    layout1->addWidget(fwd1);
-    connect(fwd1, SIGNAL(clicked()), this, SLOT(_goFwd1()));
-    
-    QPushButton *fwd5 = new QPushButton(backFwd);
-    fwd5->setText("Fwd >>");
-    layout1->addWidget(fwd5);
-    connect(fwd5, SIGNAL(clicked()), this, SLOT(_goFwd5()));
-    
-    archiveTimeLayout->addWidget(backFwd);
-
-    // accept / cancel / reset
-    
-    QFrame *goCancelReset = new QFrame;
-    QHBoxLayout *layout2 = new QHBoxLayout;
-    goCancelReset->setLayout(layout2);
-    
-    QPushButton *goButton = new QPushButton(goCancelReset);
-    goButton->setText("Go");
-    QPalette goPalette = goButton->palette();
-    QColor goColor(0, 210, 0); // green
-    goPalette.setColor(QPalette::Active, QPalette::Button, goColor);
-    // pal.setColor( QPalette::Inactive, QPalette::Button, color );
-    goButton->setPalette(goPalette);
-    layout2->addWidget(goButton);
-    connect(goButton, SIGNAL(clicked()), this, 
-            SLOT(_performArchiveRetrieval()));
-    
-    QPushButton *cancelButton = new QPushButton(goCancelReset);
-    cancelButton->setText("Cancel");
-    layout2->addWidget(cancelButton);
-    connect(cancelButton, SIGNAL(clicked()), this,
-            SLOT(_cancelTimeAxisChanges()));
-    
-    QPushButton *resetButton = new QPushButton(goCancelReset);
-    resetButton->setText("Reset to default");
-    layout2->addWidget(resetButton);
-    connect(resetButton, SIGNAL(clicked()), this,
-            SLOT(_setArchiveStartTimeToDefault()));
-
-    archiveTimeLayout->addWidget(goCancelReset);
-
-    // add to main dialog
-
-    timeAxisDialogLayout->addWidget(_archiveTimeBox, Qt::AlignCenter);
-
-  }  // set archival time retrieval
-  
-  {  // Dwell specifications
-
-    _setDwellToDefaults();
-    
-    _dwellSpecsBox = new QGroupBox(_timeAxisDialog);
-    QVBoxLayout *dwellLayout = new QVBoxLayout;
-    _dwellSpecsBox->setLayout(dwellLayout);
-    _dwellSpecsBox->setTitle("Set dwell specifications");
-
-    // set the dwell automatically from window width and time span
-
-    QFrame *dwellAutoFrame = new QFrame;
-    QHBoxLayout *dwellAutoLayout = new QHBoxLayout;
-    dwellAutoFrame->setLayout(dwellAutoLayout);
-    
-    _dwellAutoBox = new QCheckBox(_dwellSpecsBox);
-    _dwellAutoBox->setText("Dwell auto (secs)?");
-    _dwellAutoBox->setChecked(_dwellAuto);
-    dwellAutoLayout->addWidget(_dwellAutoBox);
-    connect(_dwellAutoBox, SIGNAL(clicked()), this,
-            SLOT(_setDwellAuto()));
-    
-    _dwellAutoVal = new QLabel();
-    dwellAutoLayout->addWidget(_dwellAutoVal);
-     _setDwellAutoVal();
-
-    dwellLayout->addWidget(dwellAutoFrame);
-
-    // specify the dwell
-
-    _dwellSpecifiedEdit = _addInputRow(_dwellSpecsBox, dwellLayout,
-                                       "Set the dwell (secs)", "", 0,
-                                       &_dwellSpecifiedFrame);
-    _resetDwellSpecifiedToDefault();
-    connect(_dwellSpecifiedEdit, SIGNAL(returnPressed()), this,
-            SLOT(_setDwellSpecified()));
-
-    // set the auto selection
-
-    _setDwellAuto();
-
-    // dwell stats method
-
-    QFrame *statsFrame = new QFrame;
-    QHBoxLayout *statsLayout = new QHBoxLayout;
-    statsFrame->setLayout(statsLayout);
-    
-    QLabel *statsLabel = new QLabel(statsFrame);
-    statsLabel->setText("Dwell stats method");
-    statsLayout->addWidget(statsLabel);
-
-    _dwellStatsComboBox = new QComboBox(_dwellSpecsBox);
-    _dwellStatsComboBox->addItem("Mean");
-    _dwellStatsComboBox->addItem("Median");
-    _dwellStatsComboBox->addItem("Maximum");
-    _dwellStatsComboBox->addItem("Minimum");
-    _dwellStatsComboBox->addItem("Middle");
-    statsLayout->addWidget(_dwellStatsComboBox);
-    connect(_dwellStatsComboBox, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(_setDwellStats()));
-
-    dwellLayout->addWidget(statsFrame);
-    _setDwellToDefaults();
-    
-    // add to main dialog
-
-    timeAxisDialogLayout->addWidget(_dwellSpecsBox, Qt::AlignCenter);
-
-  } // dwell
-  
-  // done?
-  
-  {
-    
-    QGroupBox *doneBox = new QGroupBox(_timeAxisDialog);
-    QGridLayout *doneLayout = new QGridLayout;
-    doneBox->setLayout(doneLayout);
-    doneBox->setTitle("Done with all changes");
-
-    int row = 0;
-    QPushButton *done = new QPushButton(doneBox);
-    done->setText("Done");
-    doneLayout->addWidget(done, row++, 0, Qt::AlignCenter);
-    connect(done, SIGNAL(clicked()), this, SLOT(_cancelTimeAxisChanges()));
-    
-    timeAxisDialogLayout->addWidget(doneBox, Qt::AlignCenter);
-
-  } // done
-  
-  _refreshTimeAxisDialog();
-  
-}
-
-///////////////////////////////////////////////////////
-// set the state on the time axis dialog
-
-void AScopeManager::_refreshTimeAxisDialog()
-{
-  
-  char text[1024];
-
-  // set altitude limits text
-
-  sprintf(text, "%g", _timeSpanSecs);
-  _timeSpanEdit->setText(text);
+  _ascope->configureAxes(_params.ascope_min_amplitude,
+                         _params.ascope_max_amplitude,
+                         _params.ascope_time_span_secs);
 
 }
 
@@ -1164,7 +453,7 @@ void AScopeManager::timerEvent(QTimerEvent *event)
   
   if (_firstTimerEvent) {
 
-    _bscan->resize(_bscanFrame->width(), _bscanFrame->height());
+    _ascope->resize(_ascopeFrame->width(), _ascopeFrame->height());
     
     // Set the size of the second column to the size of the largest
     // label.  This should keep the column from wiggling as the values change.
@@ -1187,36 +476,9 @@ void AScopeManager::timerEvent(QTimerEvent *event)
 
   }
 
-  // check for image creation
-
-  if (_params.images_auto_create) {
-
-    // if we are just creating files in archive mode and then exiting,
-    // do that now
-    
-    if ((_params.images_creation_mode ==
-         Params::CREATE_IMAGES_THEN_EXIT) ||
-        (_params.images_creation_mode ==
-         Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE)) {
-      _createImageFilesArchiveMode();
-      close();
-      return;
-    }
-    
-    // if we are creating files in realtime mode, do that now
-    
-    if (_params.images_creation_mode ==
-        Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
-      _handleRealtimeDataForImages();
-      _checkCreateImagesRealtimeMode();
-      return;
-    }
-
-  }
-  
   // handle event
 
-  if (event->timerId() == _beamTimerId) {
+  if (event->timerId() == _dataTimerId) {
 
     if (_archiveMode) {
       if (_archiveRetrievalPending) {
@@ -1241,7 +503,7 @@ void AScopeManager::resizeEvent(QResizeEvent *event)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent" << endl;
   }
-  emit frameResized(_bscanFrame->width(), _bscanFrame->height());
+  emit frameResized(_ascopeFrame->width(), _ascopeFrame->height());
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1253,6 +515,9 @@ void AScopeManager::keyPressEvent(QKeyEvent * e)
   // get key pressed
 
   Qt::KeyboardModifiers mods = e->modifiers();
+  if (mods & Qt::AltModifier) {
+    cerr << "!!!!!!!!!!!!" << endl;
+  }
   char keychar = e->text().toLatin1().data()[0];
   int key = e->key();
   
@@ -1264,9 +529,9 @@ void AScopeManager::keyPressEvent(QKeyEvent * e)
   // for '.', swap with previous field
 
   if (keychar == '.') {
-    QRadioButton *button = (QRadioButton *) _fieldGroup->button(_prevFieldNum);
-    button->click();
-    return;
+    // QRadioButton *button = (QRadioButton *) _fieldGroup->button(_prevFieldNum);
+    // button->click();
+    // return;
   }
   
   // for ESC, freeze / unfreeze
@@ -1278,40 +543,40 @@ void AScopeManager::keyPressEvent(QKeyEvent * e)
   
   // check for short-cut keys to fields
 
-  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+  // for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
     
-    const DisplayField *field = _fields[ifield];
+  //   const DisplayField *field = _fields[ifield];
 
-    char shortcut = 0;
-    if (field->getShortcut().size() > 0) {
-      shortcut = field->getShortcut()[0];
-    }
+  //   char shortcut = 0;
+  //   if (field->getShortcut().size() > 0) {
+  //     shortcut = field->getShortcut()[0];
+  //   }
     
-    bool correctField = false;
-    if (shortcut == keychar) {
-      if (mods & Qt::AltModifier) {
-        if (field->getIsFilt()) {
-          correctField = true;
-        }
-      } else {
-        if (!field->getIsFilt()) {
-          correctField = true;
-        }
-      }
-    }
+  //   bool correctField = false;
+  //   if (shortcut == keychar) {
+  //     if (mods & Qt::AltModifier) {
+  //       if (field->getIsFilt()) {
+  //         correctField = true;
+  //       }
+  //     } else {
+  //       if (!field->getIsFilt()) {
+  //         correctField = true;
+  //       }
+  //     }
+  //   }
 
-    if (correctField) {
-      if (_params.debug) {
-	cerr << "Short-cut key pressed: " << shortcut << endl;
-	cerr << "  field label: " << field->getLabel() << endl;
-	cerr << "  field name: " << field->getName() << endl;
-      }
-      QRadioButton *button = (QRadioButton *) _fieldGroup->button(ifield);
-      button->click();
-      break;
-    }
+  //   if (correctField) {
+  //     if (_params.debug) {
+  //       cerr << "Short-cut key pressed: " << shortcut << endl;
+  //       cerr << "  field label: " << field->getLabel() << endl;
+  //       cerr << "  field name: " << field->getName() << endl;
+  //     }
+  //     QRadioButton *button = (QRadioButton *) _fieldGroup->button(ifield);
+  //     button->click();
+  //     break;
+  //   }
 
-  }
+  // }
 
   // check for back or forward in time
 
@@ -1360,70 +625,70 @@ void AScopeManager::_handleRealtimeData()
 
   // get all available beams
   
-  while (true) {
+  // while (true) {
     
-    // get the next ray from the reader queue
-    // responsibility for this ray memory passes to
-    // this (the master) thread
+  //   // get the next ray from the reader queue
+  //   // responsibility for this ray memory passes to
+  //   // this (the master) thread
     
-    RadxRay *ray = _reader->getNextRay(_platform);
-    if (ray == NULL) {
-      return; // no pending rays
-    }
+  //   RadxRay *ray = _reader->getNextRay(_platform);
+  //   if (ray == NULL) {
+  //     return; // no pending rays
+  //   }
     
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "  Got a ray, time, el, az: "
-           << DateTime::strm(ray->getTimeSecs()) << ", "
-           << ray->getElevationDeg() << ", "
-           << ray->getAzimuthDeg() << endl;
-    }
+  //   if (_params.debug >= Params::DEBUG_EXTRA) {
+  //     cerr << "  Got a ray, time, el, az: "
+  //          << DateTime::strm(ray->getTimeSecs()) << ", "
+  //          << ray->getElevationDeg() << ", "
+  //          << ray->getAzimuthDeg() << endl;
+  //   }
     
-    RadxTime thisRayTime = ray->getRadxTime();
-    double timeSincePrev = thisRayTime - _readerRayTime;
-    if ((timeSincePrev > 0) &&
-        (timeSincePrev < _params.bscan_min_secs_between_reading_beams)) {
-      // discard
-      if (_params.debug >= Params::DEBUG_EXTRA) {
-        cerr << "  Discarding ray, not enough elapsed time" << endl;
-      }
-      delete ray;
-      AllocCheck::inst().addFree();
-      continue;
-    } else if (timeSincePrev < 0) {
-      // gone back in time, so reset times
-      _imagesScheduledTime.set(RadxTime::ZERO);
-    }
-    _readerRayTime = thisRayTime;
+  //   RadxTime thisRayTime = ray->getRadxTime();
+  //   double timeSincePrev = thisRayTime - _readerRayTime;
+  //   if ((timeSincePrev > 0) &&
+  //       (timeSincePrev < _params.bscan_min_secs_between_reading_beams)) {
+  //     // discard
+  //     if (_params.debug >= Params::DEBUG_EXTRA) {
+  //       cerr << "  Discarding ray, not enough elapsed time" << endl;
+  //     }
+  //     delete ray;
+  //     AllocCheck::inst().addFree();
+  //     continue;
+  //   } else if (timeSincePrev < 0) {
+  //     // gone back in time, so reset times
+  //     _imagesScheduledTime.set(RadxTime::ZERO);
+  //   }
+  //   _readerRayTime = thisRayTime;
 
-    // compute altitude rate every 2 secs
+  //   // compute altitude rate every 2 secs
 
-    if (_prevAltKm > -9990) {
-      double deltaTime = ray->getRadxTime() - _prevAltTime;
-      if (deltaTime > 2.0) {
-        if (ray->getGeoreference()) {
-          double altKm = ray->getGeoreference()->getAltitudeKmMsl();
-          double deltaAltKm = altKm - _prevAltKm;
-          _altRateMps = (deltaAltKm / deltaTime) * 1000.0;
-          _prevAltKm = ray->getGeoreference()->getAltitudeKmMsl();
-        }
-        _prevAltTime = ray->getRadxTime();
-      }
-    } else {
-      if (ray->getGeoreference()) {
-        _prevAltKm = ray->getGeoreference()->getAltitudeKmMsl();
-      }
-      _prevAltTime = ray->getRadxTime();
-    }
+  //   if (_prevAltKm > -9990) {
+  //     double deltaTime = ray->getRadxTime() - _prevAltTime;
+  //     if (deltaTime > 2.0) {
+  //       if (ray->getGeoreference()) {
+  //         double altKm = ray->getGeoreference()->getAltitudeKmMsl();
+  //         double deltaAltKm = altKm - _prevAltKm;
+  //         _altRateMps = (deltaAltKm / deltaTime) * 1000.0;
+  //         _prevAltKm = ray->getGeoreference()->getAltitudeKmMsl();
+  //       }
+  //       _prevAltTime = ray->getRadxTime();
+  //     }
+  //   } else {
+  //     if (ray->getGeoreference()) {
+  //       _prevAltKm = ray->getGeoreference()->getAltitudeKmMsl();
+  //     }
+  //     _prevAltTime = ray->getRadxTime();
+  //   }
     
-    // update the status panel
+  //   // update the status panel
     
-    _updateStatusPanel(ray);
+  //   _updateStatusPanel(ray);
 
-    // draw the beam
+  //   // draw the beam
     
-    _handleRay(ray);
+  //   _handleRay(ray);
     
-  } // while (true)
+  // } // while (true)
 
 }
 
@@ -1436,42 +701,42 @@ void AScopeManager::_handleRealtimeDataForImages()
 
   // get all available beams
   
-  while (true) {
+  // while (true) {
     
-    // get the next ray from the reader queue
-    // responsibility for this ray memory passes to
-    // this (the master) thread
+  //   // get the next ray from the reader queue
+  //   // responsibility for this ray memory passes to
+  //   // this (the master) thread
     
-    RadxRay *ray = _reader->getNextRay(_platform);
-    if (ray == NULL) {
-      return; // no pending rays
-    }
+  //   RadxRay *ray = _reader->getNextRay(_platform);
+  //   if (ray == NULL) {
+  //     return; // no pending rays
+  //   }
     
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "  Got a ray, time, el, az: "
-           << DateTime::strm(ray->getTimeSecs()) << ", "
-           << ray->getElevationDeg() << ", "
-           << ray->getAzimuthDeg() << endl;
-    }
+  //   if (_params.debug >= Params::DEBUG_EXTRA) {
+  //     cerr << "  Got a ray, time, el, az: "
+  //          << DateTime::strm(ray->getTimeSecs()) << ", "
+  //          << ray->getElevationDeg() << ", "
+  //          << ray->getAzimuthDeg() << endl;
+  //   }
     
-    RadxTime thisRayTime = ray->getRadxTime();
-    double timeSincePrev = thisRayTime - _readerRayTime;
-    if (timeSincePrev < 0) {
-      // gone back in time, so reset times
-      _imagesScheduledTime.set(RadxTime::ZERO);
-    }
-    _readerRayTime = thisRayTime;
+  //   RadxTime thisRayTime = ray->getRadxTime();
+  //   double timeSincePrev = thisRayTime - _readerRayTime;
+  //   if (timeSincePrev < 0) {
+  //     // gone back in time, so reset times
+  //     _imagesScheduledTime.set(RadxTime::ZERO);
+  //   }
+  //   _readerRayTime = thisRayTime;
     
-    // update the status panel
+  //   // update the status panel
     
-    _updateStatusPanel(ray);
+  //   _updateStatusPanel(ray);
     
-    // delete the ray
+  //   // delete the ray
     
-    delete ray;
-    AllocCheck::inst().addFree();
+  //   delete ray;
+  //   AllocCheck::inst().addFree();
     
-  } // while (true)
+  // } // while (true)
 
 }
 
@@ -1489,8 +754,8 @@ void AScopeManager::_handleArchiveData()
 
   // erase plot and set time axis
 
-  _bscan->setPlotStartTime(_plotStartTime, true);
-  _bscan->activateArchiveRendering();
+  _ascope->setPlotStartTime(_plotStartTime, true);
+  _ascope->activateArchiveRendering();
 
   // set cursor to wait cursor
 
@@ -1524,40 +789,40 @@ int AScopeManager::_getArchiveData()
   // set up file object for reading
   
   RadxFile file;
-  _vol.clear();
-  _setupVolRead(file);
+  // _vol.clear();
+  // _setupVolRead(file);
 
-  if (_params.debug) {
-    cerr << "----------------------------------------------------" << endl;
-    cerr << "perform archive retrieval" << endl;
-    cerr << "  archive start time: " << _archiveStartTime.asString() << endl;
-    cerr << "  archive end time: " << _archiveEndTime.asString() << endl;
-    cerr << "  dwell secs: " << _dwellSecs << endl;
-    cerr << "  dwell stats method: "
-         << RadxField::statsMethodToStr(_dwellStatsMethod) << endl;
-    cerr << "----------------------------------------------------" << endl;
-  }
+  // if (_params.debug) {
+  //   cerr << "----------------------------------------------------" << endl;
+  //   cerr << "perform archive retrieval" << endl;
+  //   cerr << "  archive start time: " << _archiveStartTime.asString() << endl;
+  //   cerr << "  archive end time: " << _archiveEndTime.asString() << endl;
+  //   cerr << "  dwell secs: " << _dwellSecs << endl;
+  //   cerr << "  dwell stats method: "
+  //        << RadxField::statsMethodToStr(_dwellStatsMethod) << endl;
+  //   cerr << "----------------------------------------------------" << endl;
+  // }
   
-  if (file.readFromDir(_params.archive_data_url, _vol)) {
-    string errMsg = "ERROR - Cannot retrieve archive data\n";
-    errMsg += "AScopeManager::_getArchiveData\n";
-    errMsg += file.getErrStr() + "\n";
-    errMsg += "  start time: " + _archiveStartTime.asString() + "\n";
-    errMsg += "  end time: " + _archiveEndTime.asString() + "\n";
-    char text[1024];
-    sprintf(text, "  dwell secs: %g\n", _dwellSecs);
-    errMsg += text;
-    cerr << errMsg;
-    if (!_params.images_auto_create)  {
-      QErrorMessage errorDialog;
-      errorDialog.setMinimumSize(400, 250);
-      errorDialog.showMessage(errMsg.c_str());
-      errorDialog.exec();
-    }
-    return -1;
-  }
+  // if (file.readFromDir(_params.archive_data_url, _vol)) {
+  //   string errMsg = "ERROR - Cannot retrieve archive data\n";
+  //   errMsg += "AScopeManager::_getArchiveData\n";
+  //   errMsg += file.getErrStr() + "\n";
+  //   errMsg += "  start time: " + _archiveStartTime.asString() + "\n";
+  //   errMsg += "  end time: " + _archiveEndTime.asString() + "\n";
+  //   char text[1024];
+  //   sprintf(text, "  dwell secs: %g\n", _dwellSecs);
+  //   errMsg += text;
+  //   cerr << errMsg;
+  //   if (!_params.images_auto_create)  {
+  //     QErrorMessage errorDialog;
+  //     errorDialog.setMinimumSize(400, 250);
+  //     errorDialog.showMessage(errMsg.c_str());
+  //     errorDialog.exec();
+  //   }
+  //   return -1;
+  // }
 
-  _platform = _vol.getPlatform();
+  // _platform = _vol.getPlatform();
 
   return 0;
 
@@ -1578,24 +843,24 @@ void AScopeManager::_plotArchiveData()
 
   // initialize plotting
 
-  _initialRay = true;
+  // _initialRay = true;
 
-  // handle the rays
+  // // handle the rays
   
-  const vector<RadxRay *> &rays = _vol.getRays();
-  if (rays.size() < 1) {
-    cerr << "ERROR - _plotArchiveData" << endl;
-    cerr << "  No rays found" << endl;
-  }
+  // const vector<RadxRay *> &rays = _vol.getRays();
+  // if (rays.size() < 1) {
+  //   cerr << "ERROR - _plotArchiveData" << endl;
+  //   cerr << "  No rays found" << endl;
+  // }
   
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    RadxRay *ray = rays[ii];
-    _handleRay(ray);
-  }
+  // for (size_t ii = 0; ii < rays.size(); ii++) {
+  //   RadxRay *ray = rays[ii];
+  //   _handleRay(ray);
+  // }
 
-  // update the status panel
+  // // update the status panel
   
-  _updateStatusPanel(rays[0]);
+  // _updateStatusPanel(rays[0]);
 
 }
 
@@ -1613,268 +878,77 @@ void AScopeManager::_setupVolRead(RadxFile &file)
     file.setVerbose(true);
   }
 
-  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-    const DisplayField *field = _fields[ifield];
-    file.addReadField(field->getName());
-  }
+  // for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+  //   const DisplayField *field = _fields[ifield];
+  //   file.addReadField(field->getName());
+  // }
 
-  _dwellSecs = _dwellSpecifiedSecs;
-  if (_dwellAuto) {
-    _dwellSecs = _dwellAutoSecs;
-  }
+  // _dwellSecs = _dwellSpecifiedSecs;
+  // if (_dwellAuto) {
+  //   _dwellSecs = _dwellAutoSecs;
+  // }
   
-  file.setReadRaysInInterval(_archiveStartTime, _archiveEndTime,
-                             _dwellSecs, _dwellStatsMethod);
+  // file.setReadRaysInInterval(_archiveStartTime, _archiveEndTime,
+  //                            _dwellSecs, _dwellStatsMethod);
 
 }
 
-//////////////////////////////////////////////////////////////
-// handle an incoming ray
-
-void AScopeManager::_handleRay(const RadxRay *ray)
-  
-{
-
-  // do we need to reconfigure the BSCAN?
-
-  int nGates = ray->getNGates();
-  double minRange = ray->getStartRangeKm() - ray->getGateSpacingKm() / 2.0;
-  double maxRange = minRange + nGates * ray->getGateSpacingKm();
-  
-  if (fabs(_rayMinRangeKm - minRange) > 0.001 ||
-      fabs(_rayMaxRangeKm - maxRange) > 0.001) {
-    _rayMinRangeKm = minRange;
-    _rayMaxRangeKm = maxRange;
-    if (_bscan->getRangeAxisMode() != Params::RANGE_AXIS_ALTITUDE && !_specifyRangeLimits) {
-      _minPlotRangeKm = _rayMinRangeKm;
-      _maxPlotRangeKm = _rayMaxRangeKm;
-      _configureAxes();
-    }
-  }
-
-  // get time
-
-  RadxTime rayTime = ray->getRadxTime();
-
-  // add to ray vector
-  
-  _rays.push_back(ray);
-
-  // in realtime mode, set up initial plot time window
-
-  if (!_archiveMode) {
-    if (_plotStart || (rayTime < _plotStartTime)) {
-      if (_params.bscan_truncate_start_time) {
-        _plotStartTime.set(ray->getTimeSecs());
-      } else {
-        _plotStartTime.set(ray->getTimeSecs(), ray->getNanoSecs() / 1.0e9);
-      }
-      _plotEndTime = _plotStartTime + _timeSpanSecs;
-      _bscan->setPlotStartTime(_plotStartTime);
-      _bscan->clear();
-      _plotStart = false;
-    }
-  }
-
-  // first ray in series, or after unfreezing display?
-    
-  if (_initialRay) {
-    _prevRayTime.set(ray->getTimeSecs(), ray->getNanoSecs() / 1.0e9);
-    _initialRay = false;
-  }
-
-  _addRay(ray);
-
-  // in realtime mode, do we need to move time domain?
-
-  if (!_archiveMode && (rayTime > _plotEndTime)) {
-
-    if(_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "======== Moving time domain =======================" << endl;
-      cerr << "======>> rayTime: " << rayTime.asString(3) << endl;
-      cerr << "======>> plotStartTime: " << _plotStartTime.asString(3) << endl;
-      cerr << "======>> plotEndTime: " << _plotEndTime.asString(3) << endl;
-    }
-
-    // move domain
-    
-    double secsSaved = _params.bscan_realtime_fraction_saved * _timeSpanSecs;
-    double secsDeleted = floor(_timeSpanSecs - secsSaved);
-    
-    _plotStartTime += secsDeleted;
-    _plotEndTime += secsDeleted;
-    
-    // reset the start time on the widget, which will release unwanted beams
-
-    _bscan->resetPlotStartTime(_plotStartTime);
-    
-  }
-
-}
-
-////////////////////////////////////////////////////////////////
-
-void AScopeManager::_addRay(const RadxRay *ray)
-
-{
-
-  RadxTime rayTime(ray->getTimeSecs(), ray->getNanoSecs() / 1.0e9);
-  double halfDwellTime = (rayTime - _prevRayTime) / 2.0;
-  RadxTime rayStartTime(rayTime - halfDwellTime);
-  RadxTime rayEndTime(rayTime + halfDwellTime);
-  _prevRayTime = rayTime;
-  if (halfDwellTime <= 0) {
-    return;
-  }
-
-  // create 2D field data vector
-
-  vector< vector<double> > fieldData;
-  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-    vector<double> field;
-    fieldData.push_back(field);
-  }
-
-  // do we censor?
-
-  bool doCensoring = false;
-  double censorMinRange = 0.0;
-  double censorMaxRange = 9999.0;
-  
-  // get surface range if required
-
-  if (_censorDataBelowSurface) {
-    double el = ray->getElevationDeg();
-    // are we pointing at the ground?
-    if (el < -45 || el > 225) {
-      censorMaxRange = _getCensorRange(ray);
-      doCensoring = true;
-    }
-  }
-  
-  if (_specifyRangeLimits) {
-    if (censorMaxRange > _maxPlotRangeKm) {
-      censorMaxRange = _maxPlotRangeKm;
-    }
-    censorMinRange = _minPlotRangeKm;
-    doCensoring = true;
-  }
-  
-  // fill data vector
-  
-  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-
-    vector<double> &data = fieldData[ifield];
-
-    RadxField *rfld = (RadxField *) ray->getField(_fields[ifield]->getName());
-
-    // at this point, we know the data values for the field AND the color map
-
-    bool haveColorMap = _fields[ifield]->haveColorMap();
-    Radx::fl32 min = FLT_MAX;;
-    Radx::fl32 max = FLT_MIN;
-
-    if (rfld == NULL) {
-      // fill with missing
-      for (size_t igate = 0; igate < ray->getNGates(); igate++) {
-        data.push_back(-9999);
-      }
-    } else {
-      rfld->convertToFl32();
-      const Radx::fl32 *fdata = rfld->getDataFl32();
-      const Radx::fl32 missingVal = rfld->getMissingFl32();
-      double range = ray->getStartRangeKm();
-      double drange = ray->getGateSpacingKm();
-      for (size_t igate = 0; igate < ray->getNGates();
-           igate++, fdata++, range += drange) {
-        Radx::fl32 val = *fdata;
-        if (doCensoring &&
-            (range < censorMinRange || range > censorMaxRange)) {
-          data.push_back(-9999);
-        } else if (fabs(val - missingVal) < 0.0001) {
-          data.push_back(-9999);
-        } else {
-          data.push_back(*fdata);  // ==> We know the data value here; determine min and max of values
-	  if (!haveColorMap) {
-	    // keep track of min and max data values
-            if (*fdata < min) min = *fdata;
-            if (*fdata > max) max = *fdata;	 
-	  }
-        } 
-      } // end for each gate
-      if (!haveColorMap) {
-	_fields[ifield]->setColorMapRange(min, max); 
-	_fields[ifield]->changeColorMap(); // just change bounds on existing map
-	// ==> set the colorMap min and max,  only once, the first time we read it
-      } // end do not have color map
-    } // end else vector not NULL
-
-  } // ifield
-
-  // Add the beam to the display
-  
-  _bscan->addBeam(ray, _getInstHtKm(ray),
-                  _plotStartTime, rayStartTime, rayEndTime,
-                  fieldData, _fields);
-
-}
-  
 /////////////////////////////////////////////////////////////////////  
 // slots
 
 ///////////////////////////////////////////////////////////
 // respond to change field request from field button group
 
-void AScopeManager::_changeField(int fieldId, bool guiMode)
+// void AScopeManager::_changeField(int fieldId, bool guiMode)
 
-{
+// {
 
-  _selectedField = _fields[fieldId];
+//   _selectedField = _fields[fieldId];
   
-  if (_params.debug) {
-    cerr << "Changing to field id: " << fieldId << endl;
-    _selectedField->print(cerr);
-  }
+//   if (_params.debug) {
+//     cerr << "Changing to field id: " << fieldId << endl;
+//     _selectedField->print(cerr);
+//   }
 
-  // if we click the already-selected field, go back to previous field
+//   // if we click the already-selected field, go back to previous field
 
-  if (guiMode) {
-    if (_fieldNum == fieldId && _prevFieldNum >= 0) {
-      QRadioButton *button =
-        (QRadioButton *) _fieldGroup->button(_prevFieldNum);
-      button->click();
-      return;
-    }
-  }
+//   if (guiMode) {
+//     if (_fieldNum == fieldId && _prevFieldNum >= 0) {
+//       QRadioButton *button =
+//         (QRadioButton *) _fieldGroup->button(_prevFieldNum);
+//       button->click();
+//       return;
+//     }
+//   }
 
-  _prevFieldNum = _fieldNum;
-  _fieldNum = fieldId;
+//   _prevFieldNum = _fieldNum;
+//   _fieldNum = fieldId;
   
-  _bscan->selectVar(_fieldNum);
+//   _ascope->selectVar(_fieldNum);
 
-  // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
-  _selectedName = _selectedField->getName();
-  _selectedLabel = _selectedField->getLabel();
-  _selectedUnits = _selectedField->getUnits();
+//   // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
+//   _selectedName = _selectedField->getName();
+//   _selectedLabel = _selectedField->getLabel();
+//   _selectedUnits = _selectedField->getUnits();
   
-  _selectedLabelWidget->setText(_selectedLabel.c_str());
-  char text[128];
-  if (_selectedField->getSelectValue() > -9990) {
-    sprintf(text, "%g %s", 
-            _selectedField->getSelectValue(),
-            _selectedField->getUnits().c_str());
-  } else {
-    text[0] = '\0';
-  }
-  _valueLabel->setText(text);
+//   _selectedLabelWidget->setText(_selectedLabel.c_str());
+//   char text[128];
+//   if (_selectedField->getSelectValue() > -9990) {
+//     sprintf(text, "%g %s", 
+//             _selectedField->getSelectValue(),
+//             _selectedField->getUnits().c_str());
+//   } else {
+//     text[0] = '\0';
+//   }
+//   _valueLabel->setText(text);
 
-}
+// }
 
 /////////////////////////////////////////////////////////
 // respond to a change in click location on the BSCAN
 
-void AScopeManager::_bscanLocationClicked(double xsecs, double ykm,
-                                         const RadxRay *closestRay)
+void AScopeManager::_locationClicked(double xsecs, double ykm,
+                                     const RadxRay *closestRay)
   
 {
   if (_params.debug) {
@@ -1882,222 +956,168 @@ void AScopeManager::_bscanLocationClicked(double xsecs, double ykm,
   }
   _xSecsClicked = xsecs;
   _yKmClicked = ykm;
-  _rayClicked = closestRay;
+  // _rayClicked = closestRay;
 
-  _locationClicked(_xSecsClicked, _yKmClicked, _rayClicked);
+  // _locationClicked(_xSecsClicked, _yKmClicked, _rayClicked);
 
 }
 
 //////////////////////////////////////////////////////////////////
 // respond to a change in click location on one of the windows
 
-void AScopeManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray)
+// void AScopeManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray)
 
-{
+// {
 
 
-  if (_params.debug) {
-    cerr << "*** Entering AScopeManager::_locationClicked()" << endl;
-  }
+//   if (_params.debug) {
+//     cerr << "*** Entering AScopeManager::_locationClicked()" << endl;
+//   }
 
-  // check the ray
+//   // check the ray
 
-  if (ray == NULL) {
-    return;
-  }
+//   if (ray == NULL) {
+//     return;
+//   }
 
-  double range = 0.0, altitude = 0.0;
-  double sinEl = sin(ray->getElevationDeg() * DEG_TO_RAD);
+//   double range = 0.0, altitude = 0.0;
+//   double sinEl = sin(ray->getElevationDeg() * DEG_TO_RAD);
 
-  if (_bscan->getRangeAxisMode() == Params::RANGE_AXIS_ALTITUDE) {
+//   if (_ascope->getRangeAxisMode() == Params::RANGE_AXIS_ALTITUDE) {
     
-    altitude = ykm;
-    range = (altitude - _getInstHtKm(ray)) / sinEl;
+//     altitude = ykm;
+//     range = (altitude - _getInstHtKm(ray)) / sinEl;
     
-  } else {
+//   } else {
     
-    range = ykm;
-    altitude = _getInstHtKm(ray) + range * sinEl;
+//     range = ykm;
+//     altitude = _getInstHtKm(ray) + range * sinEl;
     
-  }
+//   }
 
-  int gate = (int) ((range - ray->getStartRangeKm()) / ray->getGateSpacingKm());
+//   int gate = (int) ((range - ray->getStartRangeKm()) / ray->getGateSpacingKm());
 
-  if (gate < 0 || gate >= (int) ray->getNGates())
-  {
-    //user clicked outside of ray
-    return;
-  }
+//   if (gate < 0 || gate >= (int) ray->getNGates())
+//   {
+//     //user clicked outside of ray
+//     return;
+//   }
   
-  if (_params.debug) {
-    cerr << "Clicked on location: xsecs, ykm: " << xsecs << ", " << ykm << endl;
-    cerr << "  range start, spacing: " << ray->getStartRangeKm() << ", "
-         << ray->getGateSpacingKm() << endl;
-    cerr << "  range, gate: " << range << ", " << gate << endl;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      ray->print(cerr);
-    }
-  }
+//   if (_params.debug) {
+//     cerr << "Clicked on location: xsecs, ykm: " << xsecs << ", " << ykm << endl;
+//     cerr << "  range start, spacing: " << ray->getStartRangeKm() << ", "
+//          << ray->getGateSpacingKm() << endl;
+//     cerr << "  range, gate: " << range << ", " << gate << endl;
+//     if (_params.debug >= Params::DEBUG_VERBOSE) {
+//       ray->print(cerr);
+//     }
+//   }
   
-  DateTime rayTime(ray->getTimeSecs());
-  char text[256];
-  sprintf(text, "%.4d/%.2d/%.2d",
-          rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
-  _dateClicked->setText(text);
+//   DateTime rayTime(ray->getTimeSecs());
+//   char text[256];
+//   sprintf(text, "%.4d/%.2d/%.2d",
+//           rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
+//   _dateClicked->setText(text);
 
-  sprintf(text, "%.2d:%.2d:%.2d.%.3d",
-          rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
-          ((int) (ray->getNanoSecs() / 1000000)));
-  _timeClicked->setText(text);
+//   sprintf(text, "%.2d:%.2d:%.2d.%.3d",
+//           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
+//           ((int) (ray->getNanoSecs() / 1000000)));
+//   _timeClicked->setText(text);
 
-  if (fabs(ray->getElevationDeg()) < 10000) {
-    _setText(text, "%6.2f (deg)", ray->getElevationDeg());
-    _elevClicked->setText(text);
-  }
+//   if (fabs(ray->getElevationDeg()) < 10000) {
+//     _setText(text, "%6.2f (deg)", ray->getElevationDeg());
+//     _elevClicked->setText(text);
+//   }
   
-  if (fabs(ray->getAzimuthDeg()) < 10000) {
-    _setText(text, "%6.2f (deg)", ray->getAzimuthDeg());
-    _azClicked->setText(text);
-  }
+//   if (fabs(ray->getAzimuthDeg()) < 10000) {
+//     _setText(text, "%6.2f (deg)", ray->getAzimuthDeg());
+//     _azClicked->setText(text);
+//   }
     
-  _setText(text, "%d", gate);
-  _gateNumClicked->setText(text);
+//   _setText(text, "%d", gate);
+//   _gateNumClicked->setText(text);
   
-  _setText(text, "%6.2f (km)", range);
-  _rangeClicked->setText(text);
+//   _setText(text, "%6.2f (km)", range);
+//   _rangeClicked->setText(text);
 
-  if (_altitudeInFeet) {
-    _setText(text, "%6.2f (kft)", altitude * _altitudeUnitsMult);
-  } else {
-    _setText(text, "%6.2f (km)", altitude * _altitudeUnitsMult);
-  }
-  _altitudeClicked->setText(text);
+//   if (_altitudeInFeet) {
+//     _setText(text, "%6.2f (kft)", altitude * _altitudeUnitsMult);
+//   } else {
+//     _setText(text, "%6.2f (km)", altitude * _altitudeUnitsMult);
+//   }
+//   _altitudeClicked->setText(text);
   
-  for (size_t ii = 0; ii < _fields.size(); ii++) {
-    _fields[ii]->setSelectValue(-9999);
-    _fields[ii]->setDialogText("----");
-  }
+//   for (size_t ii = 0; ii < _fields.size(); ii++) {
+//     _fields[ii]->setSelectValue(-9999);
+//     _fields[ii]->setDialogText("----");
+//   }
   
-  for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
-    const RadxField *field = ray->getField(ifield);
-    const string fieldName = field->getName();
-    if (fieldName.size() == 0) {
-      continue;
-    }
-    Radx::fl32 *data = (Radx::fl32 *) field->getData();
-    double val = data[gate];
-    const string fieldUnits = field->getUnits();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Field name, selected name: "
-	   << fieldName << ", "
-	   << _selectedName << endl;
-    }
-    if (fieldName == _selectedName) {
-      char text[128];
-      if (fabs(val) < 10000) {
-        sprintf(text, "%g %s", val, fieldUnits.c_str());
-      } else {
-        sprintf(text, "%g %s", -9999.0, fieldUnits.c_str());
-      }
-      _valueLabel->setText(text);
-    }
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Field name, units, val: "
-	   << field->getName() << ", "
-	   << field->getUnits() << ", "
-	   << val << endl;
-    }
-    for (size_t ii = 0; ii < _fields.size(); ii++) {
-      if (_fields[ii]->getName() == fieldName) {
-	_fields[ii]->setSelectValue(val);
-        char text[128];
-        if (fabs(val) > 10000) {
-          sprintf(text, "----");
-        } else if (fabs(val) > 10) {
-          sprintf(text, "%.2f", val);
-        } else {
-          sprintf(text, "%g", val);
-        }
-        _fields[ii]->setDialogText(text);
-      }
-    } // ii
+//   for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
+//     const RadxField *field = ray->getField(ifield);
+//     const string fieldName = field->getName();
+//     if (fieldName.size() == 0) {
+//       continue;
+//     }
+//     Radx::fl32 *data = (Radx::fl32 *) field->getData();
+//     double val = data[gate];
+//     const string fieldUnits = field->getUnits();
+//     if (_params.debug >= Params::DEBUG_VERBOSE) {
+//       cerr << "Field name, selected name: "
+// 	   << fieldName << ", "
+// 	   << _selectedName << endl;
+//     }
+//     if (fieldName == _selectedName) {
+//       char text[128];
+//       if (fabs(val) < 10000) {
+//         sprintf(text, "%g %s", val, fieldUnits.c_str());
+//       } else {
+//         sprintf(text, "%g %s", -9999.0, fieldUnits.c_str());
+//       }
+//       _valueLabel->setText(text);
+//     }
+//     if (_params.debug >= Params::DEBUG_VERBOSE) {
+//       cerr << "Field name, units, val: "
+// 	   << field->getName() << ", "
+// 	   << field->getUnits() << ", "
+// 	   << val << endl;
+//     }
+//     for (size_t ii = 0; ii < _fields.size(); ii++) {
+//       if (_fields[ii]->getName() == fieldName) {
+// 	_fields[ii]->setSelectValue(val);
+//         char text[128];
+//         if (fabs(val) > 10000) {
+//           sprintf(text, "----");
+//         } else if (fabs(val) > 10) {
+//           sprintf(text, "%.2f", val);
+//         } else {
+//           sprintf(text, "%g", val);
+//         }
+//         _fields[ii]->setDialogText(text);
+//       }
+//     } // ii
 
-  } // ifield
+//   } // ifield
   
-  // set altitude rate if possible
+//   // set altitude rate if possible
   
-  if (ray->getGeoreference()) {
-    _altRateMps = ray->getGeoreference()->getVertVelocity();
-  } else {
-    _altRateMps = -9999.0;
-  }
+//   if (ray->getGeoreference()) {
+//     _altRateMps = ray->getGeoreference()->getVertVelocity();
+//   } else {
+//     _altRateMps = -9999.0;
+//   }
     
   // update the status panel
   
-  _updateStatusPanel(ray);
+// _updateStatusPanel(ray);
     
-}
-
-/////////////////////////////////////
-// show the range axis dialog
-
-void AScopeManager::_showRangeAxisDialog()
-{
-  if (_rangeAxisDialog) {
-    if (_rangeAxisDialog->isVisible()) {
-      _rangeAxisDialog->setVisible(false);
-    } else {
-      _refreshRangeAxisDialog();
-      _rangeAxisDialog->setVisible(true);
-      _rangeAxisDialog->raise();
-      if (_rangeAxisDialog->x() == 0 &&
-          _rangeAxisDialog->y() == 0) {
-        QPoint pos;
-        pos.setX(x() + width() + 5);
-        pos.setY(y() + (height() - _rangeAxisDialog->height()));
-        _rangeAxisDialog->move(pos);
-      }
-    }
-  }
-}
-
-/////////////////////////////////////
-// show the time axis dialog
-
-void AScopeManager::_showTimeAxisDialog()
-{
-
-  // compute the auto dwell value
-
-  _setDwellAutoVal();
-
-  if (_timeAxisDialog) {
-    if (_timeAxisDialog->isVisible()) {
-      _timeAxisDialog->setVisible(false);
-    } else {
-      if (!_archiveMode) {
-        _setArchiveStartTime(_plotStartTime);
-      }
-      _refreshTimeAxisDialog();
-      _timeAxisDialog->setVisible(true);
-      _timeAxisDialog->raise();
-      if (_timeAxisDialog->x() == 0 &&
-          _timeAxisDialog->y() == 0) {
-        QPoint pos;
-        pos.setX(x() + width() + 5);
-        pos.setY(y() + (height() - _timeAxisDialog->height()));
-        _timeAxisDialog->move(pos);
-      }
-    }
-  }
-}
+// }
 
 ////////////////////////////////
 // unzoom display
 
 void AScopeManager::_unzoom()
 {
-  _bscan->unzoomView();
+  _ascope->unzoomView();
   _unzoomAct->setEnabled(false);
 }
 
@@ -2120,7 +1140,7 @@ void AScopeManager::_freeze()
     _frozen = false;
     _freezeAct->setText("Freeze");
     _freezeAct->setStatusTip(tr("Click to freeze display, or hit ESC"));
-    _initialRay = true;
+    // _initialRay = true;
   } else {
     _frozen = true;
     _freezeAct->setText("Unfreeze");
@@ -2136,336 +1156,63 @@ void AScopeManager::enableZoomButton() const
   _unzoomAct->setEnabled(true);
 }
 
-//////////////////////////////////////////////////
-// change range axis mode
-
-void AScopeManager::_setRangeAxisRangeUp()
-{
-  _requestedRangeAxisMode = Params::RANGE_AXIS_UP;
-  _refreshRangeAxisDialog();
-  _configureAxes();
-}
-
-void AScopeManager::_setRangeAxisRangeDown()
-{
-  _requestedRangeAxisMode = Params::RANGE_AXIS_DOWN;
-  _refreshRangeAxisDialog();
-  _configureAxes();
-}
-
-void AScopeManager::_setRangeAxisAltitude()
-{
-  _requestedRangeAxisMode = Params::RANGE_AXIS_ALTITUDE;
-  _refreshRangeAxisDialog();
-  _configureAxes();
-}
-
-void AScopeManager::_cancelRangeAxisChanges()
-{
-  _rangeAxisDialog->setVisible(false);
-  _refreshRangeAxisDialog();
-}
-
-void AScopeManager::_doneWithRangeAxis()
-{
-  _rangeAxisDialog->setVisible(false);
-}
-
-//////////////////////////////////////////////////
-// time axis changes
-
-void AScopeManager::_cancelTimeAxisChanges()
-{
-  _refreshTimeAxisDialog();
-  _timeAxisDialog->setVisible(false);
-}
-
 ////////////////////////////////////////////////////////
 // change altitude limits
 
-void AScopeManager::_setAltitudeLimits()
-{
+// void AScopeManager::_setAltitudeLimits()
+// {
 
-  // limits
+//   // limits
 
-  double minAltitude;
-  if (sscanf(_minAltitudeEdit->text().toLocal8Bit().data(), "%lg", &minAltitude) != 1) {
-    QErrorMessage errMsg(_minAltitudeEdit);
-    string text("Bad entry for min altitude: ");
-    text += _minAltitudeEdit->text().toLocal8Bit().data();
-    errMsg.setModal(true);
-    errMsg.showMessage(text.c_str());
-    errMsg.exec();
-    _resetAltitudeLimitsToDefaults();
-    return;
-  }
-  double maxAltitude;
-  if (sscanf(_maxAltitudeEdit->text().toLocal8Bit().data(), "%lg", &maxAltitude) != 1) {
-    QErrorMessage errMsg(_maxAltitudeEdit);
-    string text("Bad entry for max altitude: ");
-    text += _maxAltitudeEdit->text().toLocal8Bit().data();
-    errMsg.setModal(true);
-    errMsg.showMessage(text.c_str());
-    errMsg.exec();
-    _resetAltitudeLimitsToDefaults();
-    return;
-  }
+//   double minAltitude;
+//   if (sscanf(_minAltitudeEdit->text().toLocal8Bit().data(), "%lg", &minAltitude) != 1) {
+//     QErrorMessage errMsg(_minAltitudeEdit);
+//     string text("Bad entry for min altitude: ");
+//     text += _minAltitudeEdit->text().toLocal8Bit().data();
+//     errMsg.setModal(true);
+//     errMsg.showMessage(text.c_str());
+//     errMsg.exec();
+//     _resetAltitudeLimitsToDefaults();
+//     return;
+//   }
+//   double maxAltitude;
+//   if (sscanf(_maxAltitudeEdit->text().toLocal8Bit().data(), "%lg", &maxAltitude) != 1) {
+//     QErrorMessage errMsg(_maxAltitudeEdit);
+//     string text("Bad entry for max altitude: ");
+//     text += _maxAltitudeEdit->text().toLocal8Bit().data();
+//     errMsg.setModal(true);
+//     errMsg.showMessage(text.c_str());
+//     errMsg.exec();
+//     _resetAltitudeLimitsToDefaults();
+//     return;
+//   }
 
-  if (minAltitude > maxAltitude) {
-    QErrorMessage errMsg(_maxAltitudeEdit);
-    string text("Bad entry for min/max altitudes: ");
-    text += _minAltitudeEdit->text().toLocal8Bit().data();
-    text += " / ";
-    text += _maxAltitudeEdit->text().toLocal8Bit().data();
-    text += "  Max must exceed min";
-    errMsg.setModal(true);
-    errMsg.showMessage(text.c_str());
-    errMsg.exec();
-    _resetAltitudeLimitsToDefaults();
-    return;
-  }
+//   if (minAltitude > maxAltitude) {
+//     QErrorMessage errMsg(_maxAltitudeEdit);
+//     string text("Bad entry for min/max altitudes: ");
+//     text += _minAltitudeEdit->text().toLocal8Bit().data();
+//     text += " / ";
+//     text += _maxAltitudeEdit->text().toLocal8Bit().data();
+//     text += "  Max must exceed min";
+//     errMsg.setModal(true);
+//     errMsg.showMessage(text.c_str());
+//     errMsg.exec();
+//     _resetAltitudeLimitsToDefaults();
+//     return;
+//   }
 
-  _minPlotAltitudeKm = minAltitude / _altitudeUnitsMult;
-  _maxPlotAltitudeKm = maxAltitude / _altitudeUnitsMult;
+//   _minPlotAltitudeKm = minAltitude / _altitudeUnitsMult;
+//   _maxPlotAltitudeKm = maxAltitude / _altitudeUnitsMult;
 
-  _refreshRangeAxisDialog();
+//   _refreshRangeAxisDialog();
 
-  // refresh
+//   // refresh
 
-  _configureAxes();
+//   _configureAxes();
 
-  // _rangeAxisDialog->setVisible(false);
+//   // _rangeAxisDialog->setVisible(false);
 
-}
-
-////////////////////////////////////////////////////
-// set the altitude to be displayed in feet
-
-void AScopeManager::_setAltitudeInFeet()
-{
-
-  // units
-
-  if (_altitudeInFeetBox->isChecked()) {
-    _altitudeInFeet = true;
-    _altitudeUnitsMult = 1.0 / 0.3048;
-    _altitudeUnits = "kft";
-    _altLabel->setText("Alt(kft)");
-    _altRateLabel->setText("AltRate(ft/s)");
-    _minAltitudeLabel->setText("Min altitude (kft)");
-    _maxAltitudeLabel->setText("Max altitude (kft)");
-  } else {
-    _altitudeInFeet = false;
-    _altitudeUnitsMult = 1.0;
-    _altitudeUnits = "km";
-    _altLabel->setText("Alt(km)");
-    _altRateLabel->setText("AltRate(m/s)");
-    _minAltitudeLabel->setText("Min altitude (km)");
-    _maxAltitudeLabel->setText("Max altitude (km)");
-  }
-  _bscan->setAltitudeInFeet(_altitudeInFeet);
-
-  _refreshRangeAxisDialog();
-
-}
-
-////////////////////////////////////////////////////
-// set the altitude limits from the current zoom
-
-void AScopeManager::_setAltitudeLimitsFromZoom()
-{
-  if (_requestedRangeAxisMode == Params::RANGE_AXIS_ALTITUDE) {
-    _minPlotAltitudeKm = _bscan->getZoomWorld().getYMinWorld();
-    _maxPlotAltitudeKm = _bscan->getZoomWorld().getYMaxWorld();
-  }
-  _refreshRangeAxisDialog();
-  _configureAxes();
-}
-
-////////////////////////////////////////////////////
-// set the range limits from the current zoom
-
-void AScopeManager::_setRangeLimitsFromZoom()
-{
-  if (_requestedRangeAxisMode == Params::RANGE_AXIS_UP) {
-    _minPlotRangeKm = _bscan->getZoomWorld().getYMinWorld();
-    _maxPlotRangeKm = _bscan->getZoomWorld().getYMaxWorld();
-    _specifyRangeLimits = true;
-  } else {
-    _minPlotRangeKm = _bscan->getZoomWorld().getYMaxWorld();
-    _maxPlotRangeKm = _bscan->getZoomWorld().getYMinWorld();
-    _specifyRangeLimits = true;
-  }
-  _refreshRangeAxisDialog();
-  _configureAxes();
-                          
-}
-
-///////////////////////////////////////////////////////
-// set altitude limits to defaults
-
-void AScopeManager::_setAltitudeLimitsToDefaults()
-{
-  _altitudeInFeet = _params.bscan_altitude_in_feet;
-  if (_altitudeInFeet) {
-    _altitudeUnits = "kft";
-    _altitudeUnitsMult = 1.0 / 0.3048;
-  } else {
-    _altitudeUnits = "km";
-    _altitudeUnitsMult = 1.0;
-  }
-  _minPlotAltitudeKm = _params.bscan_min_altitude_km;
-  _maxPlotAltitudeKm = _params.bscan_max_altitude_km;
-}
-
-void AScopeManager::_resetAltitudeLimitsToDefaults()
-{
-  _setAltitudeLimitsToDefaults();
-  _altitudeInFeetBox->setChecked(_altitudeInFeet);
-  _setAltitudeInFeet();
-  _refreshRangeAxisDialog();
-  _configureAxes();
-}
-
-///////////////////////////////////////////////////////
-// set censor below surface to defaults
-
-void AScopeManager::_setCensorDataBelowSurfaceToDefaults()
-{
-  _censorDataBelowSurface = _params.bscan_censor_data_below_surface;
-  _surfaceField = _params.bscan_surface_field;
-  _minRangeToSurfaceKm = _params.bscan_min_range_to_surface_km;
-  _surfaceRangeMarginKm = _params.bscan_surface_range_margin_km;
-}
-
-void AScopeManager::_resetCensorDataBelowSurfaceToDefaults()
-{
-  _setCensorDataBelowSurfaceToDefaults();
-  _refreshRangeAxisDialog();
-}
-
-void AScopeManager::_cancelCensorDataBelowSurfaceChanges()
-{
-  _refreshRangeAxisDialog();
-}
-
-////////////////////////////////////////////////////////
-// set censor below surface
-
-void AScopeManager::_setCensorDataBelowSurface()
-{
-
-  _censorDataBelowSurface = _censorDataToggleBox->isChecked();
-    
-  _surfaceField = _surfaceFieldEdit->text().toLocal8Bit().data();
-
-  double minRange;
-  if (sscanf(_minRangeToSurfaceEdit->text().toLocal8Bit().data(), 
-             "%lg", &minRange) != 1) {
-    QErrorMessage errMsg(_minRangeToSurfaceEdit);
-    string text("Bad entry for min range: ");
-    text += _minRangeToSurfaceEdit->text().toLocal8Bit().data();
-    errMsg.setModal(true);
-    errMsg.showMessage(text.c_str());
-    errMsg.exec();
-    _setCensorDataBelowSurfaceToDefaults();
-    return;
-  }
-  _minRangeToSurfaceKm = minRange;
-
-  double rangeMargin;
-  if (sscanf(_surfaceRangeMarginEdit->text().toLocal8Bit().data(),
-             "%lg", &rangeMargin) != 1) {
-    QErrorMessage errMsg(_surfaceRangeMarginEdit);
-    string text("Bad entry for range margin: ");
-    text += _surfaceRangeMarginEdit->text().toLocal8Bit().data();
-    errMsg.setModal(true);
-    errMsg.showMessage(text.c_str());
-    errMsg.exec();
-    _setCensorDataBelowSurfaceToDefaults();
-    return;
-  }
-  _surfaceRangeMarginKm = rangeMargin;
-
-  _surfaceFieldEdit->setEnabled(_censorDataBelowSurface);
-  _minRangeToSurfaceEdit->setEnabled(_censorDataBelowSurface);
-  _surfaceRangeMarginEdit->setEnabled(_censorDataBelowSurface);
-
-}
-
-////////////////////////////////////////////////////////
-// change range limits
-
-void AScopeManager::_setRangeLimits()
-{
-  double minRange;
-  if (sscanf(_minRangeEdit->text().toLocal8Bit().data(),
-             "%lg", &minRange) != 1) {
-    QErrorMessage errMsg(_minRangeEdit);
-    string text("Bad entry for min range: ");
-    text += _minRangeEdit->text().toLocal8Bit().data();
-    errMsg.setModal(true);
-    errMsg.showMessage(text.c_str());
-    errMsg.exec();
-    _resetRangeLimitsToDefaults();
-    return;
-  }
-  double maxRange;
-  if (sscanf(_maxRangeEdit->text().toLocal8Bit().data(),
-             "%lg", &maxRange) != 1) {
-    QErrorMessage errMsg(_maxRangeEdit);
-    string text("Bad entry for max range: ");
-    text += _maxRangeEdit->text().toLocal8Bit().data();
-    errMsg.setModal(true);
-    errMsg.showMessage(text.c_str());
-    errMsg.exec();
-    _resetRangeLimitsToDefaults();
-    return;
-  }
-  _minPlotRangeKm = minRange;
-  _maxPlotRangeKm = maxRange;
-  // _rangeAxisDialog->setVisible(false);
-  _configureAxes();
-}
-
-void AScopeManager::_setSpecifyRangeLimits()
-{
-  if (_specifyRangeLimitsBox->isChecked()) {
-    _specifyRangeLimits = true;
-  } else {
-    _specifyRangeLimits = false;
-  }
-  _refreshRangeAxisDialog();
-  _configureAxes();
-}
-
-void AScopeManager::_resetRangeLimitsToDefaults()
-{
-  _setRangeLimitsToDefaults();
-  _refreshRangeAxisDialog();
-  
-  // _rangeAxisDialog->setVisible(false);
-  _configureAxes();
-}
-
-void AScopeManager::_setRangeLimitsToDefaults()
-{
-  _specifyRangeLimits = _params.bscan_specify_range_limits;
-  _rayMinRangeKm = _params.bscan_min_range_km;
-  _rayMaxRangeKm = _params.bscan_max_range_km;
-  _minPlotRangeKm = _rayMinRangeKm;
-  _maxPlotRangeKm = _rayMaxRangeKm;
-}
-
-////////////////////////////////////////////////////////
-// change range limits
-
-void AScopeManager::_setDistScaleEnabled()
-{
-  bool enabled = _distScaleAct->isChecked();
-  _bscan->setDistScaleEnabled(enabled);
-  _configureAxes();
-}
+// }
 
 ////////////////////////////////////////////////////////
 // change time span
@@ -2473,31 +1220,31 @@ void AScopeManager::_setDistScaleEnabled()
 void AScopeManager::_setTimeSpan()
 {
 
-  double timeSpan;
-  if (sscanf(_timeSpanEdit->text().toLocal8Bit().data(), 
-             "%lg", &timeSpan) != 1) {
-    QErrorMessage errMsg(_timeSpanEdit);
-    string text("Bad entry for time span: ");
-    text += _timeSpanEdit->text().toLocal8Bit().data();
-    errMsg.setModal(true);
-    errMsg.showMessage(text.c_str());
-    errMsg.exec();
-    _resetTimeSpanToDefault();
-    return;
-  }
+  // double timeSpan;
+  // if (sscanf(_timeSpanEdit->text().toLocal8Bit().data(), 
+  //            "%lg", &timeSpan) != 1) {
+  //   QErrorMessage errMsg(_timeSpanEdit);
+  //   string text("Bad entry for time span: ");
+  //   text += _timeSpanEdit->text().toLocal8Bit().data();
+  //   errMsg.setModal(true);
+  //   errMsg.showMessage(text.c_str());
+  //   errMsg.exec();
+  //   _resetTimeSpanToDefault();
+  //   return;
+  // }
   
-  _timeSpanSecs = timeSpan;
-  _plotEndTime = _plotStartTime + _timeSpanSecs;
+  // _timeSpanSecs = timeSpan;
+  // _plotEndTime = _plotStartTime + _timeSpanSecs;
     
-  _setArchiveEndTime();
-  _setDwellAutoVal();
-  _configureAxes();
+  // _setArchiveEndTime();
+  // _setDwellAutoVal();
+  // _configureAxes();
 
 }
 
 void AScopeManager::_resetTimeSpanToDefault()
 {
-  _timeSpanSecs = _params.bscan_time_span_secs;
+  _timeSpanSecs = _params.ascope_time_span_secs;
   char text[1024];
   sprintf(text, "%g", _timeSpanSecs);
   if (_timeSpanEdit) {
@@ -2598,7 +1345,7 @@ void AScopeManager::_setDataRetrievalMode()
       _archiveMode = false;
       _archiveTimeBox->setEnabled(false);
       _dwellSpecsBox->setEnabled(false);
-      _bscan->activateRealtimeRendering();
+      _ascope->activateRealtimeRendering();
     }
   } else {
     if (!_archiveMode) {
@@ -2609,7 +1356,7 @@ void AScopeManager::_setDataRetrievalMode()
         _setArchiveStartTime(_plotStartTime - _timeSpanSecs);
         _setGuiFromStartTime();
       }
-      _bscan->activateArchiveRendering();
+      _ascope->activateArchiveRendering();
     }
   }
   _configureAxes();
@@ -2644,15 +1391,15 @@ void AScopeManager::_goFwd5()
 
 void AScopeManager::_changeRange(int deltaGates)
 {
-  if (!_bscan->getPointClicked()) {
+  if (!_ascope->getPointClicked()) {
     return;
   }
-  if (_requestedRangeAxisMode == Params::RANGE_AXIS_DOWN) {
-    deltaGates *= -1;
-  }
-  _yKmClicked += deltaGates * _rayClicked->getGateSpacingKm();
-  _locationClicked(_xSecsClicked, _yKmClicked, _rayClicked);
-  _bscan->setMouseClickPoint(_xSecsClicked, _yKmClicked);
+  // if (_requestedRangeAxisMode == Params::RANGE_AXIS_DOWN) {
+  //   deltaGates *= -1;
+  // }
+  // _yKmClicked += deltaGates * _rayClicked->getGateSpacingKm();
+  // _locationClicked(_xSecsClicked, _yKmClicked, _rayClicked);
+  // _ascope->setMouseClickPoint(_xSecsClicked, _yKmClicked);
 }
 
 ////////////////////////////////////////////////////////
@@ -2670,37 +1417,37 @@ void AScopeManager::_setDwellToDefaults()
 
 {
 
-  _dwellAuto = _params.bscan_archive_dwell_auto;
-  _dwellSpecifiedSecs = _params.bscan_archive_dwell_secs;
+  // _dwellAuto = _params.bscan_archive_dwell_auto;
+  // _dwellSpecifiedSecs = _params.bscan_archive_dwell_secs;
 
-  int index = 0;
-  switch (_params.bscan_dwell_stats) {
-    case Params::DWELL_STATS_MEAN:
-      _dwellStatsMethod = RadxField::STATS_METHOD_MEAN;
-      index = 0;
-      break;
-    case Params::DWELL_STATS_MEDIAN:
-      _dwellStatsMethod = RadxField::STATS_METHOD_MEDIAN;
-      index = 1;
-      break;
-    case Params::DWELL_STATS_MAXIMUM:
-      _dwellStatsMethod = RadxField::STATS_METHOD_MAXIMUM;
-      index = 2;
-      break;
-    case Params::DWELL_STATS_MINIMUM:
-      _dwellStatsMethod = RadxField::STATS_METHOD_MINIMUM;
-      index = 3;
-      break;
-    case Params::DWELL_STATS_MIDDLE:
-    default:
-      _dwellStatsMethod = RadxField::STATS_METHOD_MIDDLE;
-      index = 4;
-      break;
-  }
+  // int index = 0;
+  // switch (_params.bscan_dwell_stats) {
+  //   case Params::DWELL_STATS_MEAN:
+  //     _dwellStatsMethod = RadxField::STATS_METHOD_MEAN;
+  //     index = 0;
+  //     break;
+  //   case Params::DWELL_STATS_MEDIAN:
+  //     _dwellStatsMethod = RadxField::STATS_METHOD_MEDIAN;
+  //     index = 1;
+  //     break;
+  //   case Params::DWELL_STATS_MAXIMUM:
+  //     _dwellStatsMethod = RadxField::STATS_METHOD_MAXIMUM;
+  //     index = 2;
+  //     break;
+  //   case Params::DWELL_STATS_MINIMUM:
+  //     _dwellStatsMethod = RadxField::STATS_METHOD_MINIMUM;
+  //     index = 3;
+  //     break;
+  //   case Params::DWELL_STATS_MIDDLE:
+  //   default:
+  //     _dwellStatsMethod = RadxField::STATS_METHOD_MIDDLE;
+  //     index = 4;
+  //     break;
+  // }
 
-  if (_dwellStatsComboBox) {
-    _dwellStatsComboBox->setCurrentIndex(index);
-  }
+  // if (_dwellStatsComboBox) {
+  //   _dwellStatsComboBox->setCurrentIndex(index);
+  // }
 
 }
 
@@ -2739,10 +1486,10 @@ void AScopeManager::_setDwellSpecified()
 void AScopeManager::_resetDwellSpecifiedToDefault()
 
 {
-  _dwellSpecifiedSecs = _params.bscan_archive_dwell_secs;
-  char text[1024];
-  sprintf(text, "%g", _dwellSpecifiedSecs);
-  _dwellSpecifiedEdit->setText(text);
+  // _dwellSpecifiedSecs = _params.bscan_archive_dwell_secs;
+  // char text[1024];
+  // sprintf(text, "%g", _dwellSpecifiedSecs);
+  // _dwellSpecifiedEdit->setText(text);
 }
 
 
@@ -2752,28 +1499,28 @@ void AScopeManager::_resetDwellSpecifiedToDefault()
 void AScopeManager::_setDwellAuto()
 
 {
-  if (_dwellAutoBox) {
-    _dwellAuto = _dwellAutoBox->isChecked();
-  } else {
-    _dwellAuto = _params.bscan_archive_dwell_auto;
-  }
-  if (_dwellSpecifiedFrame) {
-    _dwellSpecifiedFrame->setEnabled(!_dwellAuto);
-  }
+  // if (_dwellAutoBox) {
+  //   _dwellAuto = _dwellAutoBox->isChecked();
+  // } else {
+  //   _dwellAuto = _params.bscan_archive_dwell_auto;
+  // }
+  // if (_dwellSpecifiedFrame) {
+  //   _dwellSpecifiedFrame->setEnabled(!_dwellAuto);
+  // }
 }
 
 void AScopeManager::_setDwellAutoVal()
 
 {
-  if (_dwellAutoVal) {
-    _configureAxes();
-    const WorldPlot &world = _bscan->getFullWorld();
-    double nPixelsPlot = world.getPlotWidth();
-    _dwellAutoSecs = _timeSpanSecs / nPixelsPlot;
-    char text[128];
-    sprintf(text, "%lg", _dwellAutoSecs);
-    _dwellAutoVal->setText(text);
-  }
+  // if (_dwellAutoVal) {
+  //   _configureAxes();
+  //   const WorldPlot &world = _ascope->getFullWorld();
+  //   double nPixelsPlot = world.getPlotWidth();
+  //   _dwellAutoSecs = _timeSpanSecs / nPixelsPlot;
+  //   char text[128];
+  //   sprintf(text, "%lg", _dwellAutoSecs);
+  //   _dwellAutoVal->setText(text);
+  // }
 }
 
 ///////////////////////////////////////////
@@ -2781,378 +1528,31 @@ void AScopeManager::_setDwellAutoVal()
 
 void AScopeManager::_setDwellStats()
 {
-  if (_dwellStatsComboBox) {
-    int index = _dwellStatsComboBox->currentIndex();
-    switch (index) {
-      case 0:
-        _dwellStatsMethod = RadxField::STATS_METHOD_MEAN;
-        break;
-      case 1:
-        _dwellStatsMethod = RadxField::STATS_METHOD_MEDIAN;
-        break;
-      case 2:
-        _dwellStatsMethod = RadxField::STATS_METHOD_MAXIMUM;
-        break;
-      case 3:
-        _dwellStatsMethod = RadxField::STATS_METHOD_MINIMUM;
-        break;
-      case 4:
-      default:
-        _dwellStatsMethod = RadxField::STATS_METHOD_MIDDLE;
-        break;
-    }
-  }
 }
 
-///////////////////////////////////////////
-// get range at which to censor the data
+/////////////////////////////////////////////////////////////////////  
+// slots
 
-double AScopeManager::_getCensorRange(const RadxRay *ray)
+/////////////////////////////
+// show data at click point
 
+void AScopeManager::_showClick()
 {
-
-  double censorRange = 9999.0;
-
-  // get surface field
-
-  const RadxField *cfld = ray->getField(_params.bscan_surface_field);
-  if (cfld == NULL) {
-    return censorRange;
-  }
-
-  // find range to max
-
-  double maxVal = -1.0e99;
-  double range = cfld->getStartRangeKm();
-  double drange = cfld->getGateSpacingKm();
-  Radx::fl32 missing = cfld->getMissingFl32();
-  const Radx::fl32 *vals = cfld->getDataFl32();
-  for (size_t ii = 0; ii < cfld->getNPoints(); ii++, range += drange) {
-    if (range < _minRangeToSurfaceKm) {
-      continue;
-    }
-    Radx::fl32 val = vals[ii];
-    if (val != missing) {
-      if (val > maxVal) {
-        maxVal = val;
-        censorRange = range;
-      }
-    }
-  }
-
-  // no max found - all data missing
-
-  if (censorRange > 9990) {
-    return censorRange;
-  }
-
-  // increment range by margin
-
-  censorRange += _surfaceRangeMarginKm;
-
-  // now check field values below the surface
-
-  int igate = (int) ((censorRange - cfld->getStartRangeKm()) / 
-                     cfld->getGateSpacingKm() + 0.5);
-  for (size_t ii = igate; ii < cfld->getNPoints(); ii++) {
-    Radx::fl32 val = vals[ii];
-    if (val != missing) {
-      if (val > _params.bscan_max_field_val_below_surface) {
-        // found large field value below the surface
-        // so surface location is not reliable
-        // no censoring
-        return 9999.0;
-      }
-    }
-  }
-
-  return censorRange;
-
-}
-
-/////////////////////////////////////////////////////
-// save image to file
-// If interactive is true, use dialog boxes to indicate errors or report
-// where the image was saved.
-
-void AScopeManager::_saveImageToFile(bool interactive)
-{
-
-  // create image
-  
-  QPixmap pixmap = QPixmap::grabWidget(_bscan);
-  QImage image = pixmap.toImage();
-
-  // compute output dir
-  
-  string outputDir(_params.images_output_dir);
-  char dayStr[1024];
-  if (_params.images_write_to_day_dir) {
-    sprintf(dayStr, "%.4d%.2d%.2d",
-            _plotStartTime.getYear(),
-            _plotStartTime.getMonth(),
-            _plotStartTime.getDay());
-    outputDir += PATH_DELIM;
-    outputDir += dayStr;
-  }
-  
-  // make sure output dir exists
-
-  if (ta_makedir_recurse(outputDir.c_str())) {
-    string errmsg("Cannot create output dir: " + outputDir);
-    cerr << "ERROR - AScopeManager::_saveImageToFile()" << endl;
-    cerr << "  " << errmsg << endl;
-    if (interactive) {
-        QMessageBox::critical(this, "Error", errmsg.c_str());
-    }
-    return;
-  }
-
-  // compute file name
-
-  string fileName;
-
-  // category
-
-  if (strlen(_params.images_file_name_category) > 0) {
-    fileName += _params.images_file_name_category;
-  }
-
-  // platform
-
-  if (strlen(_params.images_file_name_platform) > 0) {
-    fileName += _params.images_file_name_delimiter;
-    fileName += _params.images_file_name_platform;
-  }
-
-  // time
-
-  if (_params.images_include_time_part_in_file_name) {
-    fileName += _params.images_file_name_delimiter;
-    char timeStr[1024];
-    if (_params.images_include_seconds_in_time_part) {
-      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d%.2d",
-              _plotStartTime.getYear(),
-              _plotStartTime.getMonth(),
-              _plotStartTime.getDay(),
-              _plotStartTime.getHour(),
-              _plotStartTime.getMin(),
-              _plotStartTime.getSec());
+  if (_clickReportDialog) {
+    if (_clickReportDialog->isVisible()) {
+      _clickReportDialog->setVisible(false);
     } else {
-      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d",
-              _plotStartTime.getYear(),
-              _plotStartTime.getMonth(),
-              _plotStartTime.getDay(),
-              _plotStartTime.getHour(),
-              _plotStartTime.getMin());
-    }
-    fileName += timeStr;
-  }
-
-  // field label
-
-  if (_params.images_include_field_label_in_file_name) {
-    fileName += _params.images_file_name_delimiter;
-    fileName += getSelectedFieldLabel();
-  }
-
-  // extension
-
-  fileName += ".";
-  fileName += _params.images_file_name_extension;
-
-  // compute output path
-
-  string outputPath(outputDir);
-  outputPath += PATH_DELIM;
-  outputPath += fileName;
-
-  // write the file
-  
-  if (!image.save(outputPath.c_str())) {
-    string errmsg("Cannot save image to file: " + outputPath);
-    cerr << "ERROR - AScopeManager::_saveImageToFile()" << endl;
-    cerr << "  " << errmsg << endl;
-    if (interactive) {
-        QMessageBox::critical(this, "Error", errmsg.c_str());
-    }
-    return;
-  }
-
-  if (interactive) {
-      string infoMsg("Saved image to file " + outputPath);
-      QMessageBox::information(this, "Image Saved", infoMsg.c_str());
-  }
-
-  if (_params.debug) {
-    cerr << "==>> saved image to file: " << outputPath << endl;
-  }
-
-  // write latest data info
-
-  if (_params.images_write_latest_data_info) {
-    
-    DsLdataInfo ldataInfo(_params.images_output_dir);
-    
-    string relPath;
-    Path::stripDir(_params.images_output_dir, outputPath, relPath);
-    
-    if(_params.debug) {
-      ldataInfo.setDebug();
-    }
-    ldataInfo.setLatestTime(_plotStartTime.utime());
-    ldataInfo.setWriter("HawkEye");
-    ldataInfo.setDataFileExt(_params.images_file_name_extension);
-    ldataInfo.setDataType(_params.images_file_name_extension);
-    ldataInfo.setRelDataPath(relPath);
-    
-    if(ldataInfo.write(_plotStartTime.utime())) {
-      cerr << "ERROR - AScopeManager::_saveImageToFile()" << endl;
-      cerr << "  Cannot write _latest_data_info to dir: " << outputDir << endl;
-      return;
-    }
-    
-  } // if (_params.images_write_latest_data_info)
-
-}
-
-/////////////////////////////////////////////////////
-// check whether to create realtime images
-
-void AScopeManager::_checkCreateImagesRealtimeMode()
-{
-
-  int interval = _params.images_schedule_interval_secs;
-  int delay = _params.images_schedule_delay_secs;
-  time_t latestRayTime = _readerRayTime.utime();
-  
-  // initialize the schedule if required
-
-  if (_imagesScheduledTime.utime() == 0) {
-    if (latestRayTime == 0) {
-      // no data yet
-      return;
-    }
-    time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
-    _imagesScheduledTime.set(nextUtime + delay);
-    if (_params.debug) {
-      cerr << "Next scheduled time for images: " 
-           << _imagesScheduledTime.asString() << endl;
+      if (_clickReportDialog->x() == 0 &&
+          _clickReportDialog->y() == 0) {
+        QPoint pos;
+        pos.setX(x() + width() + 5);
+        pos.setY(y());
+        _clickReportDialog->move(pos);
+      }
+      _clickReportDialog->setVisible(true);
+      _clickReportDialog->raise();
     }
   }
-  
-  if (_readerRayTime > _imagesScheduledTime) {
-
-    // temporarily put in archive mode
-    // since data retrieval uses archive mode
-
-    bool prevMode = _archiveMode;
-    _archiveMode = true;
-
-    // create images
-
-    _archiveEndTime = _imagesScheduledTime - delay;
-    _archiveStartTime = _archiveEndTime - _timeSpanSecs;
-    _createImageFiles();
-
-    // restore archive mode to previous value
-
-    _archiveMode = prevMode;
-
-    // set next scheduled time
-    
-    time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
-    _imagesScheduledTime.set(nextUtime + delay);
-    if (_params.debug) {
-      cerr << "Next scheduled time for images: "
-           << _imagesScheduledTime.asString() << endl;
-    }
-
-  }
-
-}
-
-/////////////////////////////////////////////////////
-// creating image files in archive mode
-
-void AScopeManager::_createImageFilesArchiveMode()
-{
-
-  if (_params.images_creation_mode ==
-      Params::CREATE_IMAGES_THEN_EXIT) {
-
-    _createImageFiles();
-
-  } else if (_params.images_creation_mode ==
-             Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
-
-    for (time_t stime = _archiveImagesStartTime.utime();
-         stime <= _archiveImagesEndTime.utime();
-         stime += _params.images_schedule_interval_secs) {
-      
-      _archiveStartTime.set(stime);
-      _archiveEndTime = _archiveStartTime + _timeSpanSecs;
-
-      _createImageFiles();
-      
-    } // stime
-
-  } // if (_params.images_creation_mode ...
-
-}
-
-/////////////////////////////////////////////////////
-// creating one image per field
-
-void AScopeManager::_createImageFiles()
-{
-
-  if (_params.debug) {
-    cerr << "AScopeManager::_createImageFiles()" << endl;
-    cerr << "  _archiveStartTime: " << RadxTime::strm(_archiveStartTime.utime()) << endl;
-    cerr << "  _archiveEndTime: " << RadxTime::strm(_archiveEndTime.utime()) << endl;
-  }
-
-  PMU_auto_register("createImageFiles");
-
-  // retrieve data
-
-  _setDwellAutoVal();
-  _handleArchiveData();
-
-  // save current field
-
-  int fieldNum = _fieldNum;
-  
-  // loop through fields
-
-  for (size_t ii = 0; ii < _fields.size(); ii++) {
-    
-    // select field
-    
-    _changeField(ii, false);
-    _bscan->update();
-    
-    // create plot
-    
-    if (_params.debug) {
-      cerr << "Creating image for field: " << getSelectedFieldLabel() << endl;
-    }
-    
-    // save image for plot
-
-    _saveImageToFile(false);
-
-  }
-  
-  // change field back
-
-  _changeField(fieldNum, false);
-
-  if (_params.debug) {
-    cerr << "Done creating image files" << endl;
-  }
-
 }
 
 /////////////////////////////////////////////////////
@@ -3178,5 +1578,38 @@ void AScopeManager::_howto()
   text += "To see field data at a point:\n";
   text += "  Click in main window\n";
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
+}
+
+void AScopeManager::_about()
+{
+  string text;
+  
+  text += "HawkEye is an LROSE application for engineering and research display of radar data. \n\n";
+  text += "Get help with HawkEye ...  \n ";
+  text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
+  text += "\nHawkEye Version ... \n ";  
+  text += "\nCopyright UCAR (c) 1990 - 2018  ";  
+  text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
+  text += "\nNational Center for Atmospheric Research (NCAR)   ";  
+  text += "\nBoulder, Colorado, USA ";  
+  text += "\n\nBSD licence applies - redistribution and use in source and binary";  
+  text += " forms, with or without modification, are permitted provided that";  
+  text += " the following conditions are met: ";  
+  text += "\n1) If the software is modified to produce derivative works,";  
+  text += " such modified software should be clearly marked, so as not";  
+  text += " to confuse it with the version available from UCAR. ";  
+  text += "\n2) Redistributions of source code must retain the above copyright";  
+  text += " notice, this list of conditions and the following disclaimer.";  
+  text += "\n3) Redistributions in binary form must reproduce the above copyright";  
+  text += " notice, this list of conditions and the following disclaimer in the";  
+  text += " documentation and/or other materials provided with the distribution.";  
+  text += "\n4) Neither the name of UCAR nor the names of its contributors,";  
+  text += "if any, may be used to endorse or promote products derived from";  
+  text += " this software without specific prior written permission.";  
+  text += "\n\nDISCLAIMER: THIS SOFTWARE IS PROVIDED \"AS IS\" AND WITHOUT ANY EXPRESS ";  
+  text += " OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED";  
+  text += " WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.";  
+
+  QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
 }
 

@@ -54,7 +54,7 @@
 #include <Radx/RadxVol.hh>
 
 class TsReader;
-class AscopeWidget;
+class AScopeWidget;
 
 class QApplication;
 class QButtonGroup;
@@ -75,7 +75,7 @@ class QSlider;
 class QVBoxLayout;
 class QWidget;
 
-class AScopeManager {
+class AScopeManager : public QMainWindow {
   
   Q_OBJECT
   
@@ -103,6 +103,19 @@ public:
 
 signals:
 
+  ////////////////
+  // Qt signals //
+  ////////////////
+
+  /**
+   * @brief Signal emitted when the main frame is resized.
+   *
+   * @param[in] width    The new width of the frame.
+   * @param[in] height   The new height of the frame.
+   */
+  
+  void frameResized(const int width, const int height);
+  
 private:
 
   const Params &_params;
@@ -214,8 +227,8 @@ private:
 
   // windows
 
-  QFrame *_bscanFrame;
-  AscopeWidget *_widget;
+  QFrame *_ascopeFrame;
+  AScopeWidget *_ascope;
 
   // times for rays
 
@@ -278,9 +291,6 @@ private:
   QLabel *_archiveEndTimeEcho;
   RadxTime _archiveEndTime;
   
-  RadxTime _archiveImagesStartTime;
-  RadxTime _archiveImagesEndTime;
-
   QGroupBox *_dwellSpecsBox;
   QCheckBox *_dwellAutoBox;
   QLabel *_dwellAutoVal;

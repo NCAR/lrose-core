@@ -410,6 +410,8 @@ public:
 
   char* instance;
 
+  tdrp_bool_t check_alloc;
+
   input_mode_t input_mode;
 
   char* input_fmq_url;
@@ -466,8 +468,6 @@ public:
 
   tdrp_bool_t ascope_grids_on_at_startup;
 
-  legend_pos_t ascope_main_legend_pos;
-
   int ascope_top_margin;
 
   int ascope_bottom_margin;
@@ -482,6 +482,44 @@ public:
 
   int ascope_text_margin;
 
+  double ascope_time_span_secs;
+
+  double ascope_min_amplitude;
+
+  double ascope_max_amplitude;
+
+  double ascope_min_secs_between_rendering;
+
+  int ascope_title_font_size;
+
+  int ascope_axis_label_font_size;
+
+  int ascope_axis_values_font_size;
+
+  char* ascope_axes_color;
+
+  char* ascope_grid_color;
+
+  char* ascope_labels_color;
+
+  tdrp_bool_t ascope_draw_time_grid_lines;
+
+  tdrp_bool_t ascope_draw_x_grid_lines;
+
+  tdrp_bool_t ascope_draw_instrument_height_line;
+
+  char* ascope_instrument_height_color;
+
+  legend_pos_t ascope_main_legend_pos;
+
+  tdrp_bool_t ascope_plot_legend1;
+
+  legend_pos_t ascope_legend1_pos;
+
+  legend_pos_t ascope_legend2_pos;
+
+  tdrp_bool_t ascope_plot_legend2;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -489,7 +527,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[50];
+  mutable TDRPtable _table[71];
 
   const char *_className;
 

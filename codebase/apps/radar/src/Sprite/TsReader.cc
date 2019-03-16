@@ -33,7 +33,6 @@ TsReader::TsReader(const string &host,
                    int port,
                    const string &fmqPath,
                    bool simulMode,
-                   AScopeManager &ascope,
                    int radarId,
                    int burstChan,
                    int debugLevel):
@@ -44,9 +43,9 @@ TsReader::TsReader(const string &host,
         _serverPort(port),
         _serverFmq(fmqPath),
         _simulMode(simulMode),
-        _scope(ascope),
-  _pulseCount(0),
-  _tsSeqNum(0)
+        _nSamples(256),
+        _pulseCount(0),
+        _tsSeqNum(0)
 {
   
   // this are required in order to send structured data types
@@ -115,8 +114,6 @@ int TsReader::_readData()
 {
 
   // read data until nSamples pulses have been gathered
-  
-  _nSamples = _scope.getBlockSize();
   
   MemBuf buf;
   while (true) {
@@ -510,5 +507,60 @@ void TsReader::returnItemSlot(TimeSeries ts)
     delete[] (fl32 *) ts.IQbeams[ii];
   }
   
+}
+
+//////////////////////////////////////////////////////////////////////
+void TsReader::newTSItemSlot(TsReader::TimeSeries pItem) 
+{
+  
+  int chanId = pItem.chanId;
+  int tsLength = pItem.IQbeams.size();
+  _gates = pItem.gates;
+  _sampleRateHz = pItem.sampleRateHz;
+  
+  if (!_combosInitialized) {
+    // initialize the combo selectors
+    initCombos(4, _gates);
+    _combosInitialized = true;
+    
+  }
+  
+  if (chanId == _channel && !_paused && _capture) {
+    // extract the time series from the DDS sample
+    if (_alongBeam) {
+      _I.resize(_gates);
+      _Q.resize(_gates);
+      _nextIQ = 0;
+      for (int i = 0; i < _gates; i++)  {
+        _I[_nextIQ] = pItem.i(0, _nextIQ);
+        _Q[_nextIQ] = pItem.q(0, _nextIQ);
+        _nextIQ++;
+      }
+    } else {
+      for (int t = 0; t < tsLength; t++) {
+        _I[_nextIQ] = pItem.i(t, _gateChoice);
+        _Q[_nextIQ] = pItem.q(t, _gateChoice);
+        _nextIQ++;
+        if (_nextIQ == _I.size()) {
+          break;
+        }
+      }
+    }
+    
+    // now see if we have collected enough samples
+    if (_nextIQ == _I.size()) {
+      // process the time series
+      processTimeSeries(_I, _Q);
+      _nextIQ = 0;
+      _capture = false;
+    }
+  }
+  
+  // return the DDS item
+  emit returnTSItem(pItem);
+  
+  // bump the activity bar
+  _activityBar->setValue((_activityBar->value()+1) % 100);
+
 }
 

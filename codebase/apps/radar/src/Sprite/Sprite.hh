@@ -44,7 +44,8 @@
 
 #include "Args.hh"
 #include "Params.hh"
-class DisplayManager;
+class AScopeManager;
+class TsReader;
 
 class QApplication;
 
@@ -77,9 +78,24 @@ private:
   Params _params;
   Args _args;
 
+  // reading in the data
+
+  TsReader *_reader;
+
   // managing the rendering objects
 
-  DisplayManager *_displayManager;
+  AScopeManager *_ascopeManager;
+
+  double _refreshHz;
+  string _serverHost;
+  int _serverPort;
+  string _serverFmq;
+  int _debugLevel;
+  string _saveDir;
+  string _title;
+  bool _simulMode;
+  int _radarId;
+  int _burstChan;
 
   // methods
   

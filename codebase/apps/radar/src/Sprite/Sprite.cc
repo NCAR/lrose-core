@@ -36,7 +36,10 @@
 
 #include "Sprite.hh"
 #include "ColorMap.hh"
+#include "TsReader.hh"
+#include "AScopeManager.hh"
 #include "Params.hh"
+
 #include <toolsa/Path.hh>
 
 #include <string>
@@ -53,7 +56,8 @@ Sprite::Sprite(int argc, char **argv) :
 {
   
   OK = true;
-  _displayManager = NULL;
+  _ascopeManager = NULL;
+  _reader = NULL;
 
   // set programe name
 
@@ -96,8 +100,12 @@ Sprite::~Sprite()
 
 {
 
-  if (_displayManager) {
-    delete _displayManager;
+  if (_ascopeManager) {
+    delete _ascopeManager;
+  }
+
+  if (_reader) {
+    delete _reader;
   }
 
 }
@@ -107,6 +115,25 @@ Sprite::~Sprite()
 
 int Sprite::Run(QApplication &app)
 {
+
+  _saveDir = "/tmp";
+  _title = "Sprite";
+  _refreshHz = 25.0;
+  _serverHost = "localhost";
+  _serverPort = 10000;
+  _serverFmq.clear();
+  _debugLevel = 0;
+  _radarId = 0;
+  _burstChan = -1;
+
+  // create the data source reader
+  
+  _reader = new TsReader(_serverHost, _serverPort, _serverFmq,
+                         _simulMode, _radarId, _burstChan, _debugLevel);
+  
+  // create the ascope manager
+
+  _ascopeManager = new AScopeManager(_params, _reader);
 
   return -1;
 

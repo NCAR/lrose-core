@@ -38,7 +38,7 @@ TARGET_FILE = Sprite
 
 LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
-LOC_LIBS = -lradar -lrapformats -lFmq \
+LOC_LIBS = -lRadx -lNcxx -lradar -lrapformats -lFmq \
 	-ldsserver -ldidss -leuclid -lphysics \
 	-lrapmath -ltoolsa -ldataport -ltdrp \
 	$(QT_LIBS) $(NETCDF4_LIBS) \
@@ -52,7 +52,6 @@ HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
 	AScopeManager.hh \
-	ColorMap.hh \
 	Sprite.hh \
 	ScaledLabel.hh \
 	WorldPlot.hh
@@ -60,7 +59,6 @@ HDRS = \
 NORM_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
-	ColorMap.cc \
 	Sprite.cc \
 	Main.cc \
 	ScaledLabel.cc \
@@ -69,14 +67,12 @@ NORM_SRCS = \
 MOC_SRCS = \
 	AScopeManager.cc \
 	AScopeWidget.cc \
-	TsReader.cc \
-	TimeScaleWidget.cc
+	TsReader.cc
 
 MOC_OUTPUT = \
 	moc_AScopeManager.cpp \
 	moc_AScopeWidget.cpp \
-	moc_TsReader.cpp \
-	moc_TimeScaleWidget.cpp
+	moc_TsReader.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT)

@@ -608,6 +608,18 @@
     tt->single_val.s = tdrpStrDup("test");
     tt++;
     
+    // Parameter 'check_alloc'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_alloc");
+    tt->descr = tdrpStrDup("Option to check memory allocations.");
+    tt->help = tdrpStrDup("For debugging memory usage.");
+    tt->val_offset = (char *) &check_alloc - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1189,30 +1201,6 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'ascope_main_legend_pos'
-    // ctype is '_legend_pos_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("ascope_main_legend_pos");
-    tt->descr = tdrpStrDup("Position of main legend in the ASCOPE plot window");
-    tt->help = tdrpStrDup("This include time, field name and elevation angle.");
-    tt->val_offset = (char *) &ascope_main_legend_pos - &_start_;
-    tt->enum_def.name = tdrpStrDup("legend_pos_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
-      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
-      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
-      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
-      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
-      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
-      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
-      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
-    tt->single_val.e = LEGEND_TOP_LEFT;
-    tt++;
-    
     // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1304,6 +1292,288 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_text_margin - &_start_;
     tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'ascope_time_span_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("ascope_time_span_secs");
+    tt->descr = tdrpStrDup("Time span for ASCOPE (secs).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_time_span_secs - &_start_;
+    tt->single_val.d = 3600;
+    tt++;
+    
+    // Parameter 'ascope_min_amplitude'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("ascope_min_amplitude");
+    tt->descr = tdrpStrDup("Min amplitude for ascope.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_min_amplitude - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'ascope_max_amplitude'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("ascope_max_amplitude");
+    tt->descr = tdrpStrDup("Max amplitude for ascope.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_max_amplitude - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'ascope_min_secs_between_rendering'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("ascope_min_secs_between_rendering");
+    tt->descr = tdrpStrDup("Min time between rendering (secs).");
+    tt->help = tdrpStrDup("Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU.");
+    tt->val_offset = (char *) &ascope_min_secs_between_rendering - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("ASCOPE TITLES, LABELS AND AXES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'ascope_title_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_title_font_size");
+    tt->descr = tdrpStrDup("Font size of center title (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_title_font_size - &_start_;
+    tt->single_val.i = 12;
+    tt++;
+    
+    // Parameter 'ascope_axis_label_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axis_label_font_size");
+    tt->descr = tdrpStrDup("Font size of axis labels in ascope (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axis_label_font_size - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'ascope_axis_values_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axis_values_font_size");
+    tt->descr = tdrpStrDup("Font size of axis values (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axis_values_font_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'ascope_axes_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axes_color");
+    tt->descr = tdrpStrDup("Color of axes in ascope.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axes_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'ascope_grid_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_grid_color");
+    tt->descr = tdrpStrDup("Color of grid lines on ascope.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_grid_color - &_start_;
+    tt->single_val.s = tdrpStrDup("gray");
+    tt++;
+    
+    // Parameter 'ascope_labels_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_labels_color");
+    tt->descr = tdrpStrDup("Color of labels in ascope.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_labels_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'ascope_draw_time_grid_lines'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_draw_time_grid_lines");
+    tt->descr = tdrpStrDup("Option to draw grid lines across plot at regular time intervals.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_draw_time_grid_lines - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'ascope_draw_x_grid_lines'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_draw_x_grid_lines");
+    tt->descr = tdrpStrDup("Option to draw grid lines across plot at regular range intervals.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_draw_x_grid_lines - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'ascope_draw_instrument_height_line'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_draw_instrument_height_line");
+    tt->descr = tdrpStrDup("Option to draw a line for the instrument location.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_draw_instrument_height_line - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'ascope_instrument_height_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_instrument_height_color");
+    tt->descr = tdrpStrDup("Color of instrument height line in ALTITUDE plot.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_instrument_height_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'Comment 11'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 11");
+    tt->comment_hdr = tdrpStrDup("ASCOPE LEGENDS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'ascope_main_legend_pos'
+    // ctype is '_legend_pos_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("ascope_main_legend_pos");
+    tt->descr = tdrpStrDup("Position of main legend in the ASCOPE plot window");
+    tt->help = tdrpStrDup("This include time, field name and elevation angle.");
+    tt->val_offset = (char *) &ascope_main_legend_pos - &_start_;
+    tt->enum_def.name = tdrpStrDup("legend_pos_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
+      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
+      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
+      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
+      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
+      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
+      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
+      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
+    tt->single_val.e = LEGEND_TOP_LEFT;
+    tt++;
+    
+    // Parameter 'ascope_plot_legend1'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_plot_legend1");
+    tt->descr = tdrpStrDup("Option to plot the starting lat/lon position as a legend.");
+    tt->help = tdrpStrDup("This helps in geolocating the data from a mobile system.");
+    tt->val_offset = (char *) &ascope_plot_legend1 - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'ascope_legend1_pos'
+    // ctype is '_legend_pos_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("ascope_legend1_pos");
+    tt->descr = tdrpStrDup("Position of lat/lon legend in plot");
+    tt->help = tdrpStrDup("The starting latitude/longitude will be plotted as a legend in the location specified. See 'ascope_plot_starting_latlon_as_legend'.");
+    tt->val_offset = (char *) &ascope_legend1_pos - &_start_;
+    tt->enum_def.name = tdrpStrDup("legend_pos_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
+      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
+      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
+      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
+      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
+      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
+      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
+      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
+    tt->single_val.e = LEGEND_TOP_LEFT;
+    tt++;
+    
+    // Parameter 'ascope_legend2_pos'
+    // ctype is '_legend_pos_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("ascope_legend2_pos");
+    tt->descr = tdrpStrDup("Position of lat/lon legend in plot");
+    tt->help = tdrpStrDup("The starting latitude/longitude will be plotted as a legend in the location specified. See 'ascope_plot_starting_latlon_as_legend'.");
+    tt->val_offset = (char *) &ascope_legend2_pos - &_start_;
+    tt->enum_def.name = tdrpStrDup("legend_pos_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
+      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
+      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
+      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
+      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
+      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
+      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
+      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
+    tt->single_val.e = LEGEND_TOP_LEFT;
+    tt++;
+    
+    // Parameter 'ascope_plot_legend2'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_plot_legend2");
+    tt->descr = tdrpStrDup("Option to plot the starting lat/lon position as a legend.");
+    tt->help = tdrpStrDup("This helps in geolocating the data from a mobile system.");
+    tt->val_offset = (char *) &ascope_plot_legend2 - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // trailing entry has param_name set to NULL

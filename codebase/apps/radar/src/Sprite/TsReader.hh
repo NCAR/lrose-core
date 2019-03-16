@@ -37,8 +37,6 @@
 #include <radar/IwrfTsBurst.hh>
 #include <radar/IwrfTsReader.hh>
 
-#include "AScopeManager.hh"
-
 class TsReader : public QObject
 {
   
@@ -106,15 +104,17 @@ public:
            int port,
            const std::string &fmqPath,
            bool simulMode,
-           AScopeManager &ascope,
            int radarId,
            int burstChan,
            int debugLevel);
 
   /// Destructor
   virtual ~TsReader();
+
+  // set the number of samples
+  void setNSamples(int val) { _nSamples = val; }
   
-  signals:
+signals:
 
   /// This signal provides an item that falls within
   /// the desired bandwidth specification.
@@ -124,6 +124,10 @@ public:
   void newItem(TimeSeries pItem);
 
 public slots:
+
+  /// Feed new timeseries data via this slot.
+  /// @param pItem This contains some metadata and pointers to I/Q data
+  void newTSItemSlot(TimeSeries pItem);
 
   /// Use this slot to return an item
   /// @param pItem the item to be returned.
@@ -147,8 +151,6 @@ private:
   std::string _serverFmq;
   bool _simulMode;
 
-  AScopeManager &_scope;
-  
   // read in data
 
   IwrfTsReader *_pulseReader;
@@ -177,6 +179,16 @@ private:
   // sequence number for time series to ascope
 
   size_t _tsSeqNum;
+
+  /// The number of gates. Initially zero, it is diagnosed from the data stream
+  int _gates;
+  
+  /// The sample rate in Hz.
+  double _sampleRateHz;
+
+  /// Set false to cause initialization of blocksize and 
+  /// gate choices when the first data is received.
+  bool _combosInitialized;
 
   // methods
   

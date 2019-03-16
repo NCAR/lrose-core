@@ -107,7 +107,7 @@ void AllocCheck::doPrint(bool force)
 {
   
   if (_params != NULL &&
-      _params->check_ray_alloc == FALSE) {
+      _params->check_alloc == FALSE) {
     return;
   }
 

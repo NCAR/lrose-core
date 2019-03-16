@@ -107,12 +107,9 @@ class DLL_EXPORT AScopeWidget : public QWidget
 
   // configure the axes
   
-  // void configureAxes(Params::range_axis_mode_t range_axis_mode,
-  //                    double min_range,
-  //                    double max_range,
-  //                    double min_altitude,
-  //                    double max_altitude,
-  //                    double time_span_secs);
+  void configureAxes(double min_amplitude,
+                     double max_amplitude,
+                     double time_span_secs);
 
   /**
    * @brief Select the field to display.
@@ -319,12 +316,17 @@ class DLL_EXPORT AScopeWidget : public QWidget
    */
 
   ScaledLabel _scaledLabel;
-
-  // start time of plot
+  
+  // time of plot
 
   RadxTime _plotStartTime;
   RadxTime _plotEndTime;
   double _timeSpanSecs;
+
+  // amplitude of plot
+
+  double _minAmplitude;
+  double _maxAmplitude;
 
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for

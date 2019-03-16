@@ -60,13 +60,6 @@ AScopeWidget::AScopeWidget(QWidget* parent,
   
   _colorScaleWidth = _params.color_scale_width;
 
-  _rangeGridEnabled = _params.bscan_draw_range_grid_lines;
-  _timeGridEnabled = _params.bscan_draw_time_grid_lines;
-  _instHtLineEnabled = _params.bscan_draw_instrument_height_line;
-  _latlonLegendEnabled = _params.bscan_plot_starting_latlon_as_legend;
-  _speedTrackLegendEnabled = _params.bscan_plot_mean_track_and_speed_as_legend;
-  _distScaleEnabled = _params.bscan_add_distance_to_time_axis;
-
   // Set up the background color
 
   QPalette new_palette = palette();
@@ -89,26 +82,11 @@ AScopeWidget::AScopeWidget(QWidget* parent,
   
   qRegisterMetaType<size_t>("size_t");
 
-  // create the field renderers
-  
-  for (size_t ii = 0; ii < _fields.size(); ii++) {
-    FieldRenderer *fieldRenderer = 
-      new FieldRenderer(_params, ii, *_fields[ii]);
-    fieldRenderer->createImage(width(), height());
-    _fieldRenderers.push_back(fieldRenderer);
-  }
-  
   // set up world views
   
-  configureAxes(_params.bscan_range_axis_mode,
-                _params.bscan_min_range_km,
-                _params.bscan_max_range_km,
-                _params.bscan_min_altitude_km,
-                _params.bscan_max_altitude_km,
-                _params.bscan_time_span_secs);
-  
-  _altitudeInFeet = _params.bscan_altitude_in_feet;
-  _rangeInFeet = _params.bscan_range_in_feet;
+  configureAxes(_params.ascope_min_amplitude,
+                _params.ascope_max_amplitude,
+                _params.ascope_time_span_secs);
   
 }
 
@@ -119,20 +97,6 @@ AScopeWidget::AScopeWidget(QWidget* parent,
 AScopeWidget::~AScopeWidget()
 {
 
-  // delete all of the dynamically created beams
-
-  for (size_t i = 0; i < _beams.size(); ++i) {
-    Beam::deleteIfUnused(_beams[i]);
-  }
-  _beams.clear();
-
-  // Delete all of the field renderers
-
-  for (size_t i = 0; i < _fieldRenderers.size(); ++i) {
-    delete _fieldRenderers[i];
-  }
-  _fieldRenderers.clear();
-
 }
 
 
@@ -140,73 +104,34 @@ AScopeWidget::~AScopeWidget()
  * configure the axes
  */
 
-void AScopeWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
-                                double min_range,
-                                double max_range,
-                                double min_altitude,
-                                double max_altitude,
-                                double time_span_secs)
-
+void AScopeWidget::configureAxes(double min_amplitude,
+                                 double max_amplitude,
+                                 double time_span_secs)
+  
 {
 
-  _rangeAxisMode = range_axis_mode;
-  _minRange = min_range;
-  _maxRangeKm = max_range;
-  _minAltitude = min_altitude;
-  _maxAltitude = max_altitude;
+  _minAmplitude = min_amplitude;
+  _maxAmplitude = max_amplitude;
   _timeSpanSecs = time_span_secs;
   _plotEndTime = _plotStartTime + _timeSpanSecs;
-
+  
   // set bottom margin - increase this if we are plotting the distance labels and ticks
+  
+  int bottomMargin = _params.ascope_bottom_margin;
 
-  int bottomMargin = _params.bscan_bottom_margin;
-  if (_distScaleEnabled) {
-    bottomMargin += (int) (_params.bscan_axis_values_font_size * 3.0 / 2.0 + 0.5);
-  }
-
-  if (range_axis_mode == Params::RANGE_AXIS_UP) {
-    _fullWorld.set(width(), height(),
-                   _params.bscan_left_margin,
-                   _params.bscan_right_margin,
-                   _params.bscan_top_margin,
-                   bottomMargin,
-                   _colorScaleWidth,
-                   0.0,
-                   _minRange,
-                   _timeSpanSecs,
-                   _maxRangeKm,
-                   _params.bscan_axis_tick_len,
-                   _params.bscan_n_ticks_ideal,
-                   _params.bscan_text_margin);
-  } else if (range_axis_mode == Params::RANGE_AXIS_DOWN) {
-    _fullWorld.set(width(), height(),
-                   _params.bscan_left_margin,
-                   _params.bscan_right_margin,
-                   _params.bscan_top_margin,
-                   bottomMargin,
-                   _colorScaleWidth,
-                   0.0,
-                   _maxRangeKm,
-                   _timeSpanSecs,
-                   _minRange,
-                   _params.bscan_axis_tick_len,
-                   _params.bscan_n_ticks_ideal,
-                   _params.bscan_text_margin);
-  } else {
-    _fullWorld.set(width(), height(),
-                   _params.bscan_left_margin,
-                   _params.bscan_right_margin,
-                   _params.bscan_top_margin,
-                   bottomMargin,
-                   _colorScaleWidth,
-                   0.0,
-                   _minAltitude,
-                   _timeSpanSecs,
-                   _maxAltitude,
-                   _params.bscan_axis_tick_len,
-                   _params.bscan_n_ticks_ideal,
-                   _params.bscan_text_margin);
-  }
+  _fullWorld.set(width(), height(),
+                 _params.ascope_left_margin,
+                 _params.ascope_right_margin,
+                 _params.ascope_top_margin,
+                 bottomMargin,
+                 _colorScaleWidth,
+                 0.0,
+                 _minAmplitude,
+                 _timeSpanSecs,
+                 _maxAmplitude,
+                 _params.ascope_axis_tick_len,
+                 _params.ascope_n_ticks_ideal,
+                 _params.ascope_text_margin);
   
   _zoomWorld = _fullWorld;
   _isZoomed = false;
@@ -227,10 +152,6 @@ void AScopeWidget::clear()
 
   // Clear out the beam array
   
-  for (size_t i = 0; i < _beams.size(); i++) {
-    Beam::deleteIfUnused(_beams[i]);
-  }
-  _beams.clear();
   _pointClicked = false;
   
   // Now rerender the images
@@ -268,131 +189,16 @@ void AScopeWidget::unzoomView()
  * setGrids()
  */
 
-void AScopeWidget::setRangeGridEnabled(bool state)
+void AScopeWidget::setXGridEnabled(bool state)
 {
-  _rangeGridEnabled = state;
+  _xGridEnabled = state;
   update();
 }
 
-void AScopeWidget::setTimeGridEnabled(bool state)
+void AScopeWidget::setYGridEnabled(bool state)
 {
-  _timeGridEnabled = state;
+  _yGridEnabled = state;
   update();
-}
-
-
-void AScopeWidget::setInstHtLineEnabled(bool state)
-{
-  _instHtLineEnabled = state;
-  refresh();
-}
-
-void AScopeWidget::setLatlonLegendEnabled(bool state)
-{
-  _latlonLegendEnabled = state;
-  refresh();
-}
-
-void AScopeWidget::setSpeedTrackLegendEnabled(bool state)
-{
-  _speedTrackLegendEnabled = state;
-  refresh();
-}
-
-void AScopeWidget::setDistScaleEnabled(bool state)
-{
-  _distScaleEnabled = state;
-  refresh();
-}
-
-void AScopeWidget::setAltitudeInFeet(bool state)
-{
-  _altitudeInFeet = state;
-  _refreshImages();
-}
-
-void AScopeWidget::setRangeInFeet(bool state)
-{
-  _rangeInFeet = state;
-  _refreshImages();
-}
-
-
-/*************************************************************************
- * numBeams()
- */
-
-size_t AScopeWidget::getNumBeams() const
-{
-  return _beams.size();
-}
-
-
-/*************************************************************************
- * selectVar()
- */
-
-void AScopeWidget::selectVar(size_t index)
-{
-
-  // If the field index isn't actually changing, we don't need to do anything
-
-  if (_selectedField == index) {
-    return;
-  }
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> AScopeWidget::selectVar() for field index: " 
-         << index << endl;
-  }
-
-  // If this field isn't being rendered in the background, render all of
-  // the beams for it
-
-  if (!_fieldRenderers[index]->isBackgroundRendered()) {
-    std::vector< AScopeBeam* >::iterator beam;
-    for (beam = _beams.begin(); beam != _beams.end(); ++beam) {
-      (*beam)->setBeingRendered(index, true);
-      _fieldRenderers[index]->addBeam(*beam);
-    }
-  }
-  _performRendering();
-  
-  // Do any needed housekeeping when the field selection is changed
-
-  _fieldRenderers[_selectedField]->unselectField();
-  _fieldRenderers[index]->selectField();
-  
-  // Change the selected field index
-
-  _selectedField = index;
-
-  // Update the display
-
-  update();
-
-}
-
-/*************************************************************************
- * clearVar()
- */
-
-void AScopeWidget::clearVar(size_t index)
-{
-  if (index >= _fieldRenderers.size())
-    return;
-
-  // Set the brush for every beam/gate for this field to use the background
-  // color
-
-  std::vector< AScopeBeam* >::iterator beam;
-  for (beam = _beams.begin(); beam != _beams.end(); ++beam)
-    (*beam)->resetFieldBrush(index, &_backgroundBrush);
-  
-  if (index == _selectedField) {
-    update();
-  }
-
 }
 
 /*************************************************************************
@@ -401,9 +207,9 @@ void AScopeWidget::clearVar(size_t index)
 
 void AScopeWidget::activateArchiveRendering()
 {
-  for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-    _fieldRenderers[ii]->setBackgroundRenderingOn();
-  }
+  // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
+  //   _fieldRenderers[ii]->setBackgroundRenderingOn();
+  // }
 }
 
 
@@ -414,11 +220,11 @@ void AScopeWidget::activateArchiveRendering()
 void AScopeWidget::activateRealtimeRendering()
 {
   
-  for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-    if (ii != _selectedField) {
-      _fieldRenderers[ii]->activateBackgroundRendering();
-    }
-  }
+  // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
+  //   if (ii != _selectedField) {
+  //     _fieldRenderers[ii]->activateBackgroundRendering();
+  //   }
+  // }
 
 }
 
@@ -427,49 +233,49 @@ void AScopeWidget::activateRealtimeRendering()
  * addBeam()
  */
 
-void AScopeWidget::addBeam(const RadxRay *ray,
-                          double instHtKm,
-                          const RadxTime &plot_start_time,
-                          const RadxTime &beam_start_time,
-                          const RadxTime &beam_end_time,
-                          const std::vector< std::vector< double > > &beam_data,
-                          const std::vector< DisplayField* > &fields)
-{
+// void AScopeWidget::addBeam(const RadxRay *ray,
+//                           double instHtKm,
+//                           const RadxTime &plot_start_time,
+//                           const RadxTime &beam_start_time,
+//                           const RadxTime &beam_end_time,
+//                           const std::vector< std::vector< double > > &beam_data,
+//                           const std::vector< DisplayField* > &fields)
+// {
 
-  // Create the new beam, to keep track of the display information.
-  // Beam start and stop angles are adjusted here so that they always 
-  // increase clockwise. Likewise, if a beam crosses the 0 degree boundary,
-  // it is split into two beams, each of them again obeying the clockwise
-  // rule. Prescribing these rules makes the beam culling logic a lot simpler.
+//   // Create the new beam, to keep track of the display information.
+//   // Beam start and stop angles are adjusted here so that they always 
+//   // increase clockwise. Likewise, if a beam crosses the 0 degree boundary,
+//   // it is split into two beams, each of them again obeying the clockwise
+//   // rule. Prescribing these rules makes the beam culling logic a lot simpler.
 
-  AScopeBeam *beam = new AScopeBeam(_params,
-                                  ray,
-                                  instHtKm,
-                                  _fieldRenderers.size(),
-                                  plot_start_time,
-                                  _timeSpanSecs,
-                                  beam_start_time, beam_end_time);
-  beam->addClient();
-  _beams.push_back(beam);
+//   AScopeBeam *beam = new AScopeBeam(_params,
+//                                   ray,
+//                                   instHtKm,
+//                                   _fieldRenderers.size(),
+//                                   plot_start_time,
+//                                   _timeSpanSecs,
+//                                   beam_start_time, beam_end_time);
+//   beam->addClient();
+//   _beams.push_back(beam);
 
-  beam->fillColors(beam_data, fields, &_backgroundBrush);
+//   beam->fillColors(beam_data, fields, &_backgroundBrush);
 
-  // Add the new beams to the render lists for each of the fields
+//   // Add the new beams to the render lists for each of the fields
   
-  for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
-    if (field == _selectedField ||
-        _fieldRenderers[field]->isBackgroundRendered()) {
-      _fieldRenderers[field]->addBeam(beam);
-    } else {
-      beam->setBeingRendered(field, false);
-    }
-  }
+//   for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
+//     if (field == _selectedField ||
+//         _fieldRenderers[field]->isBackgroundRendered()) {
+//       _fieldRenderers[field]->addBeam(beam);
+//     } else {
+//       beam->setBeingRendered(field, false);
+//     }
+//   }
   
-  // run the threads to render the new beams
+//   // run the threads to render the new beams
   
-  _performRendering();
+//   _performRendering();
 
-}
+// }
 
 
 /*************************************************************************
@@ -589,31 +395,31 @@ void AScopeWidget::mouseReleaseEvent(QMouseEvent *e)
     
     // convert to real units of distance and time
 
-    double y_km = _worldReleaseY;
-    double x_secs = _worldReleaseX;
-    RadxTime clickTime(_plotStartTime.utime(), x_secs);
+    // double y_km = _worldReleaseY;
+    // double x_secs = _worldReleaseX;
+    // RadxTime clickTime(_plotStartTime.utime(), x_secs);
     
     // get closest ray to this time
     
-    double minDiff = 1.0e99;
-    const RadxRay *closestRay = NULL;
-    for (size_t ii = 0; ii < _beams.size(); ii++) {
-      const RadxRay *ray = _beams[ii]->getRay();
-      RadxTime rayTime(ray->getTimeSecs(), ray->getNanoSecs() / 1.0e9);
-      double diff = fabs(rayTime - clickTime);
-      if (diff < minDiff) {
-        closestRay = ray;
-        minDiff = diff;
-      }
-    }
+    // double minDiff = 1.0e99;
+    // const RadxRay *closestRay = NULL;
+    // for (size_t ii = 0; ii < _beams.size(); ii++) {
+    //   const RadxRay *ray = _beams[ii]->getRay();
+    //   RadxTime rayTime(ray->getTimeSecs(), ray->getNanoSecs() / 1.0e9);
+    //   double diff = fabs(rayTime - clickTime);
+    //   if (diff < minDiff) {
+    //     closestRay = ray;
+    //     minDiff = diff;
+    //   }
+    // }
 
     // Emit a signal to indicate that the click location has changed
 
     _pointClicked = true;
 
-    if (closestRay != NULL) {
-      emit locationClicked(x_secs, y_km, closestRay);
-    }
+    // if (closestRay != NULL) {
+    //   emit locationClicked(x_secs, y_km, closestRay);
+    // }
 
   } else {
 
@@ -652,7 +458,7 @@ void AScopeWidget::paintEvent(QPaintEvent *event)
 
   RadxTime now(RadxTime::NOW);
   double timeSinceLast = now - _timeLastRendered;
-  if (timeSinceLast < _params.bscan_min_secs_between_rendering_beams) {
+  if (timeSinceLast < _params.ascope_min_secs_between_rendering) {
     return;
   }
   _timeLastRendered = now;
@@ -661,7 +467,7 @@ void AScopeWidget::paintEvent(QPaintEvent *event)
   painter.save();
   painter.eraseRect(0, 0, width(), height());
   _zoomWorld.setClippingOn(painter);
-  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
+  // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
   painter.restore();
   _drawOverlays(painter);
 
@@ -754,157 +560,96 @@ void AScopeWidget::_drawOverlays(QPainter &painter)
   
   // Set the painter to use the right color and font
 
-  painter.setPen(_params.bscan_axes_color);
+  painter.setPen(_params.ascope_axes_color);
   
   // axes and labels
 
   QFont font(origFont);
-  font.setPointSizeF(_params.bscan_axis_label_font_size);
+  font.setPointSizeF(_params.ascope_axis_label_font_size);
   painter.setFont(font);
   // painter.setWindow(0, 0, width(), height());
 
   // axes
 
-  QColor lineColor(_params.bscan_axes_color);
-  QColor gridColor(_params.bscan_grid_color);
-  QColor textColor(_params.bscan_labels_color);
+  QColor lineColor(_params.ascope_axes_color);
+  QColor gridColor(_params.ascope_grid_color);
+  QColor textColor(_params.ascope_labels_color);
 
   QFont labelFont(origFont);
-  labelFont.setPointSizeF(_params.bscan_axis_label_font_size);
+  labelFont.setPointSizeF(_params.ascope_axis_label_font_size);
   QFont valuesFont(origFont);
-  valuesFont.setPointSizeF(_params.bscan_axis_values_font_size);
+  valuesFont.setPointSizeF(_params.ascope_axis_values_font_size);
   
-  if (_rangeAxisMode == Params::RANGE_AXIS_ALTITUDE) {
-    if (_altitudeInFeet) {
-      _zoomWorld.drawRangeAxes(painter,
-                               "kft", _rangeGridEnabled,
-                               lineColor, gridColor, textColor,
-                               labelFont, valuesFont, true);
-    } else {
-      _zoomWorld.drawRangeAxes(painter,
-                               "km", _rangeGridEnabled,
-                               lineColor, gridColor, textColor,
-                               labelFont, valuesFont, false);
-    }
-  } else {
-    if (_rangeInFeet) {
-      _zoomWorld.drawRangeAxes(painter,
-                               "kft", _rangeGridEnabled,
-                               lineColor, gridColor, textColor,
-                               labelFont, valuesFont, true);
-    } else {
-      _zoomWorld.drawRangeAxes(painter,
-                               "km", _rangeGridEnabled,
-                               lineColor, gridColor, textColor,
-                               labelFont, valuesFont, false);
-    }
-  }
+  _zoomWorld.drawRangeAxes(painter,
+                           "amp", _yGridEnabled,
+                           lineColor, gridColor, textColor,
+                           labelFont, valuesFont, true);
   
   _zoomWorld.drawTimeAxes(painter,
                           _plotStartTime, _plotEndTime,
-                          _timeGridEnabled,
+                          _xGridEnabled,
                           lineColor, gridColor, textColor,
                           labelFont, valuesFont,
-                          _distScaleEnabled);
+                          false);
   
   // y label
 
-  painter.setPen(_params.bscan_labels_color);
-  if (_rangeAxisMode == Params::RANGE_AXIS_ALTITUDE) {
-    if (_altitudeInFeet) {
-      _zoomWorld.drawYAxisLabelLeft(painter, "Altitude MSL (kft)");
-    } else {
-      _zoomWorld.drawYAxisLabelLeft(painter, "Altitude MSL (km)");
-    }
-  } else {
-    if (_rangeInFeet) {
-      _zoomWorld.drawYAxisLabelLeft(painter, "Range (kft)");
-    } else {
-      _zoomWorld.drawYAxisLabelLeft(painter, "Range (km)");
+  painter.setPen(_params.ascope_labels_color);
+  _zoomWorld.drawYAxisLabelLeft(painter, "Amplitude (**)");
+  
+  // legends
+  
+  vector<string> legends;
+  char text[1024];
+  sprintf(text, "Legend1: %g", 1.0);
+  legends.push_back(text);
+  sprintf(text, "Legend2 lon: %g", 2.0);
+  legends.push_back(text);
+
+  if (_params.ascope_plot_legend1) {
+    switch (_params.ascope_legend1_pos) {
+      case Params::LEGEND_TOP_LEFT:
+        _zoomWorld.drawLegendsTopLeft(painter, legends);
+        break;
+      case Params::LEGEND_TOP_RIGHT:
+        _zoomWorld.drawLegendsTopRight(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_LEFT:
+        _zoomWorld.drawLegendsBottomLeft(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_RIGHT:
+        _zoomWorld.drawLegendsBottomRight(painter, legends);
+        break;
+      default: {}
     }
   }
-
-  // compute info for legends and distance scale
-
-  _computeSummaryDistanceSpeedTrack();
-
-  // legends
-
-  if (_latlonLegendEnabled) {
-    if (_distLocs.size() > 1) {
-      vector<string> legends;
-      char text[1024];
-      sprintf(text, "Start lat: %g", _startLat);
-      legends.push_back(text);
-      sprintf(text, "Start lon: %g", _startLon);
-      legends.push_back(text);
-      
-      switch (_params.bscan_starting_latlon_legend_pos) {
-        case Params::LEGEND_TOP_LEFT:
-          _zoomWorld.drawLegendsTopLeft(painter, legends);
-          break;
-        case Params::LEGEND_TOP_RIGHT:
-          _zoomWorld.drawLegendsTopRight(painter, legends);
-          break;
-        case Params::LEGEND_BOTTOM_LEFT:
-          _zoomWorld.drawLegendsBottomLeft(painter, legends);
-          break;
-        case Params::LEGEND_BOTTOM_RIGHT:
-          _zoomWorld.drawLegendsBottomRight(painter, legends);
-          break;
-        default: {}
-      }
-    }
-  } // if (_latlonLegendEnabled ...
     
-  if (_speedTrackLegendEnabled) {
-    if (_distLocs.size() > 1) {
-      vector<string> legends;
-      char text[1024];
-      sprintf(text, "Mean speed m/s: %.1f", _meanSpeedMps);
-      legends.push_back(text);
-      sprintf(text, "Mean dirn degT: %.1f", _meanDirnDeg);
-      legends.push_back(text);
-      
-      switch (_params.bscan_mean_track_and_speed_legend_pos) {
-        case Params::LEGEND_TOP_LEFT:
-          _zoomWorld.drawLegendsTopLeft(painter, legends);
-          break;
-        case Params::LEGEND_TOP_RIGHT:
-          _zoomWorld.drawLegendsTopRight(painter, legends);
-          break;
-        case Params::LEGEND_BOTTOM_LEFT:
-          _zoomWorld.drawLegendsBottomLeft(painter, legends);
-          break;
-        case Params::LEGEND_BOTTOM_RIGHT:
-          _zoomWorld.drawLegendsBottomRight(painter, legends);
-          break;
-        default: {}
-      }
+  if (_params.ascope_plot_legend2) {
+    switch (_params.ascope_legend2_pos) {
+      case Params::LEGEND_TOP_LEFT:
+        _zoomWorld.drawLegendsTopLeft(painter, legends);
+        break;
+      case Params::LEGEND_TOP_RIGHT:
+        _zoomWorld.drawLegendsTopRight(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_LEFT:
+        _zoomWorld.drawLegendsBottomLeft(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_RIGHT:
+        _zoomWorld.drawLegendsBottomRight(painter, legends);
+        break;
+      default: {}
     }
-  } // if (_speedTrackLegendEnabled ....
-
-  if (_distScaleEnabled) {
-    _plotDistanceOnTimeAxis(painter);
   }
     
   // title
     
-  font.setPointSizeF(_params.bscan_title_font_size);
+  font.setPointSizeF(_params.ascope_title_font_size);
   painter.setFont(font);
 
   string radarName(_params.radar_name);
   string title;
-  if (_params.use_field_label_in_title) {
-    title = (radarName + "   BSCAN   -   " +
-             _manager.getSelectedFieldLabel());
-  } else {
-    title = (radarName + "   BSCAN   -   " +
-             _manager.getSelectedFieldName());
-  }
-  if (_manager.getSelectedFieldUnits().size() > 0) {
-    title += (" (" + _manager.getSelectedFieldUnits() + ")");
-  }
+  title = (radarName + "   ASCOPE   ");
   _zoomWorld.drawTitleTopCenter(painter, title);
 
   // click point cross hairs
@@ -927,9 +672,9 @@ void AScopeWidget::_drawOverlays(QPainter &painter)
 
   // draw the color scale
 
-  const DisplayField &field = _manager.getSelectedField();
-  _zoomWorld.drawColorScale(field.getColorMap(), painter,
-                            _params.bscan_axis_label_font_size);
+  // const DisplayField &field = _manager.getSelectedField();
+  // _zoomWorld.drawColorScale(field.getColorMap(), painter,
+  //                           _params.ascope_axis_label_font_size);
   
   return;
   
@@ -942,39 +687,39 @@ void AScopeWidget::_drawOverlays(QPainter &painter)
 void AScopeWidget::_refreshImages()
 {
 
-  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
 
-    FieldRenderer *field = _fieldRenderers[ifield];
+  //   FieldRenderer *field = _fieldRenderers[ifield];
 
-    // If needed, create new image for this field
+  //   // If needed, create new image for this field
     
-    if (size() != field->getImage()->size()) {
-      field->createImage(width(), height());
-    }
+  //   if (size() != field->getImage()->size()) {
+  //     field->createImage(width(), height());
+  //   }
 
-    // clear image
+  //   // clear image
     
-    field->getImage()->fill(_backgroundBrush.color().rgb());
+  //   field->getImage()->fill(_backgroundBrush.color().rgb());
     
-    // set up rendering details
+  //   // set up rendering details
 
-    field->setTransform(_zoomTransform);
-    field->setUseHeight(_rangeAxisMode == Params::RANGE_AXIS_ALTITUDE);
-    field->setDrawInstHt(_instHtLineEnabled);
+  //   field->setTransform(_zoomTransform);
+  //   field->setUseHeight(_rangeAxisMode == Params::RANGE_AXIS_ALTITUDE);
+  //   field->setDrawInstHt(_instHtLineEnabled);
     
-    // Add pointers to the beams to be rendered
+  //   // Add pointers to the beams to be rendered
 
-    if (ifield == _selectedField || field->isBackgroundRendered()) {
+  //   if (ifield == _selectedField || field->isBackgroundRendered()) {
 
-      std::vector< AScopeBeam* >::iterator beam;
-      for (beam = _beams.begin(); beam != _beams.end(); ++beam) {
-	(*beam)->setBeingRendered(ifield, true);
-	field->addBeam(*beam);
-      }
+  //     std::vector< AScopeBeam* >::iterator beam;
+  //     for (beam = _beams.begin(); beam != _beams.end(); ++beam) {
+  //       (*beam)->setBeingRendered(ifield, true);
+  //       field->addBeam(*beam);
+  //     }
       
-    }
+  //   }
     
-  } // ifield
+  // } // ifield
   
   // call threads to do the rendering
   
@@ -1006,9 +751,9 @@ void AScopeWidget::_updateRenderers()
   
   // Update the window in the renderers
   
-  for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
-    _fieldRenderers[field]->setTransform(_zoomTransform);
-  }
+  // for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
+  //   _fieldRenderers[field]->setTransform(_zoomTransform);
+  // }
 
   // Refresh the images
 
@@ -1027,12 +772,12 @@ void AScopeWidget::setPlotStartTime(const RadxTime &plot_start_time,
   _plotEndTime = _plotStartTime + _timeSpanSecs;
   _pointClicked = false;
 
-  if (clearBeams) {
-    for (size_t ii = 0; ii < _beams.size(); ii++) {
-      Beam::deleteIfUnused(_beams[ii]);
-    }
-    _beams.clear();
-  }
+  // if (clearBeams) {
+  //   for (size_t ii = 0; ii < _beams.size(); ii++) {
+  //     Beam::deleteIfUnused(_beams[ii]);
+  //   }
+  //   _beams.clear();
+  // }
 
   _refreshImages();
 
@@ -1050,29 +795,29 @@ void AScopeWidget::resetPlotStartTime(const RadxTime &plot_start_time)
 
   // find the index for which the time is later than plot start time
   
-  vector<AScopeBeam *> toBeKept, toBeErased;
-  for (size_t ii = 0; ii < _beams.size(); ii++) {
-    AScopeBeam *beam = _beams[ii];
-    if ((beam->getBeamStartTime() - plot_start_time) >= 0.0) {
-      toBeKept.push_back(beam);
-    } else {
-      toBeErased.push_back(beam);
-    }
-  } // ii
+  // vector<AScopeBeam *> toBeKept, toBeErased;
+  // for (size_t ii = 0; ii < _beams.size(); ii++) {
+  //   AScopeBeam *beam = _beams[ii];
+  //   if ((beam->getBeamStartTime() - plot_start_time) >= 0.0) {
+  //     toBeKept.push_back(beam);
+  //   } else {
+  //     toBeErased.push_back(beam);
+  //   }
+  // } // ii
 
   // erase beams
   
-  for (size_t ii = 0; ii < toBeErased.size(); ii++) {
-    Beam::deleteIfUnused(toBeErased[ii]);
-  }
-  _beams.clear();
-  _beams = toBeKept;
+  // for (size_t ii = 0; ii < toBeErased.size(); ii++) {
+  //   Beam::deleteIfUnused(toBeErased[ii]);
+  // }
+  // _beams.clear();
+  // _beams = toBeKept;
   
   // set plot start time on remaining beams
   
-  for (size_t ii = 0; ii < _beams.size(); ii++) {
-    _beams[ii]->resetPlotStartTime(_plotStartTime);
-  }
+  // for (size_t ii = 0; ii < _beams.size(); ii++) {
+  //   _beams[ii]->resetPlotStartTime(_plotStartTime);
+  // }
 
   // re-render
 
@@ -1089,208 +834,24 @@ void AScopeWidget::_performRendering()
 
   // start the rendering
   
-  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    if (ifield == _selectedField ||
-	_fieldRenderers[ifield]->isBackgroundRendered()) {
-      _fieldRenderers[ifield]->signalRunToStart();
-    }
-  } // ifield
+  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+  //   if (ifield == _selectedField ||
+  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
+  //     _fieldRenderers[ifield]->signalRunToStart();
+  //   }
+  // } // ifield
 
   // wait for rendering to complete
   
-  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    if (ifield == _selectedField ||
-	_fieldRenderers[ifield]->isBackgroundRendered()) {
-      _fieldRenderers[ifield]->waitForRunToComplete();
-    }
-  } // ifield
+  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+  //   if (ifield == _selectedField ||
+  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
+  //     _fieldRenderers[ifield]->waitForRunToComplete();
+  //   }
+  // } // ifield
 
   update();
 
 }
 
 
-/*************************************************************************
- * Compute the distance details, starting lat/lon and mean track/speed
- */
-
-void AScopeWidget::_computeSummaryDistanceSpeedTrack()
-{
-
-  // load up position data for computing distances
-
-  _distLocs.clear();
-  _startLat = 0.0;
-  _startLon = 0.0;
-  _meanSpeedMps = 0.0;
-  _meanDirnDeg = 0.0;
-
-  int nBeams = _beams.size();
-  int nSegs = _params.bscan_n_segments_for_computing_distance;
-
-  if (nBeams < nSegs + 1) {
-    return;
-  }
-
-  int nBeamsPerSegment = nBeams / nSegs;
-  if (nBeamsPerSegment < 1) {
-    nBeamsPerSegment = 1;
-  }
-  
-  double radarLat = _manager.getRadarLat();
-  double radarLon = _manager.getRadarLon();
-  
-  int ibeam = 0;
-  int iseg = 0;
-  while (true) {
-    AScopeBeam *beam = _beams[ibeam];
-    const RadxRay *ray = beam->getRay();
-    if (ray->getGeoreference() != NULL) {
-      radarLat = ray->getGeoreference()->getLatitude();
-      radarLon = ray->getGeoreference()->getLongitude();
-    }
-    DistLoc loc(ibeam, ray->getRadxTime(), radarLat, radarLon);
-    _distLocs.push_back(loc);
-    if (ibeam == nBeams - 1) {
-      break;
-    }
-    iseg++;
-    ibeam += nBeamsPerSegment;
-    if (ibeam > nBeams - 1) {
-      ibeam = nBeams - 1;
-    }
-  }
-
-  _startLat = _distLocs[0].lat;
-  _startLon = _distLocs[0].lon;
-
-  // compute the distances and directions
-
-  _sumDistKm = 0.0;
-  for (size_t ii = 1; ii < _distLocs.size(); ii++) {
-    DistLoc &loc1 = _distLocs[ii-1];
-    DistLoc &loc2 = _distLocs[ii];
-    double distKm, trackDeg;
-    PJGLatLon2RTheta(loc1.lat, loc1.lon, loc2.lat, loc2.lon, &distKm, &trackDeg);
-    double deltaSecs = loc2.time - loc1.time;
-    double speedMps = (distKm * 1000.0) / deltaSecs;
-    _sumDistKm += distKm;
-    loc2.speedMps = speedMps;
-    loc2.dirnDeg = trackDeg;
-    loc2.distKm = distKm;
-    loc2.sumDistKm = _sumDistKm;
-  }
-  
-  const DistLoc &locStart = _distLocs[0];
-  const DistLoc &locEnd = _distLocs[_distLocs.size()-1];
-  double totDistKm, meanTrackDeg;
-  PJGLatLon2RTheta(locStart.lat, locStart.lon, 
-                   locEnd.lat, locEnd.lon,
-                   &totDistKm, &meanTrackDeg);
-
-  double totSecs = locEnd.time - locStart.time;
-  _meanSpeedMps = (_sumDistKm * 1000.0) / totSecs;
-  _meanDirnDeg = meanTrackDeg;
-  if (_meanDirnDeg < 0) {
-    _meanDirnDeg += 360.0;
-  }
-
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    for (size_t ii = 0; ii < _distLocs.size(); ii++) {
-      DistLoc &loc = _distLocs[ii];
-      cerr << "==========>> loc ii: " << ii << endl;
-      cerr << "  beamNum: " << loc.beamNum << endl;
-      cerr << "  time: " << loc.time.asString() << endl;
-      cerr << "  lat: " << loc.lat << endl;
-      cerr << "  lon: " << loc.lon << endl;
-      cerr << "  speedMps: " << loc.speedMps << endl;
-      cerr << "  dirnDeg: " << loc.dirnDeg << endl;
-      cerr << "  distKm: " << loc.distKm << endl;
-      cerr << "  sumDistKm: " << loc.sumDistKm << endl;
-      cerr << "==============================" << endl;
-    }
-  }
-    
-}
-
-/*************************************************************************
- * Add distance scale to the time axis
- */
-
-void AScopeWidget::_plotDistanceOnTimeAxis(QPainter &painter)
-
-{
-
-  // compute distance ticks
-
-  int nTicksIdeal = _params.bscan_n_ticks_ideal;
-  
-  vector<double> tickDists =
-    WorldPlot::linearTicks(0.0, _sumDistKm, nTicksIdeal);
-
-  vector<RadxTime> tickTimes;
-  for (size_t ii = 0; ii < tickDists.size(); ii++) {
-    RadxTime tickTime = _getTimeForDistanceVal(tickDists[ii]);
-    tickTimes.push_back(tickTime);
-  }
-
-  // plot them
-
-  QColor lineColor(_params.bscan_axes_color);
-  QColor textColor(_params.bscan_labels_color);
-
-  QFont origFont = painter.font();
-  QFont valuesFont(origFont);
-  valuesFont.setPointSizeF(_params.bscan_axis_values_font_size);
-
-  _zoomWorld.drawDistanceTicks(painter,
-                               _plotStartTime,
-                               tickDists, tickTimes,
-                               lineColor, textColor, valuesFont);
-  
-}
-
-/*************************************************************************
- * get time for a specified distance value
- */
-
-RadxTime AScopeWidget::_getTimeForDistanceVal(double distKm)
-
-{
-
-  if (_distLocs.size() == 0) {
-    return RadxTime(0);
-  }
-
-  if (_distLocs.size() == 1) {
-    return _distLocs[_distLocs.size()-1].time;
-  }
-
-  for (size_t ii = 0; ii < _distLocs.size() - 1; ii++) {
-    DistLoc &locThis = _distLocs[ii];
-    DistLoc &locNext = _distLocs[ii+1];
-    if (distKm == locThis.sumDistKm) {
-      return locThis.time;
-    }
-    if (distKm == locNext.sumDistKm) {
-      return locNext.time;
-    }
-    if (distKm > locThis.sumDistKm && distKm < locNext.sumDistKm) {
-      double fraction =
-        (distKm - locThis.sumDistKm) / (locNext.sumDistKm - locThis.sumDistKm);
-      double timeSpan = (locNext.time - locThis.time);
-      double timeFrac = timeSpan * fraction;
-      RadxTime timeForDist = locThis.time + timeFrac;
-      // cerr << "====>>  ii, fraction timeSpan timeFrac time: "
-      //      << ii << ", "
-      //      << fraction << ", "
-      //      << timeSpan << ", "
-      //      << timeFrac << ", "
-      //      << timeForDist.asString() << endl;
-      return timeForDist;
-    }
-  }
-
-  return _distLocs[_distLocs.size()-1].time;
-  
-}

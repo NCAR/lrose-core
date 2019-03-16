@@ -39,6 +39,12 @@ paramdef string {
   p_help = "Used for registration with procmap.";
 } instance;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check memory allocations.";
+  p_help = "For debugging memory usage.";
+} check_alloc;
+
 commentdef {
   p_header = "REALTIME DATA INPUT";
 }
@@ -289,16 +295,6 @@ paramdef boolean {
   p_descr = "Set ASCOPE grids overlay on at startup.";
 } ascope_grids_on_at_startup;
 
-typedef enum {
-  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
-} legend_pos_t;
-
-paramdef enum legend_pos_t {
-  p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of main legend in the ASCOPE plot window";
-  p_help = "This include time, field name and elevation angle.";
-} ascope_main_legend_pos;
-
 commentdef {
   p_header = "ASCOPE MARGINS";
 }
@@ -341,4 +337,118 @@ paramdef int {
   p_default = 5;
   p_descr = "Margin around some text (pixels).";
 } ascope_text_margin;
+
+paramdef double {
+  p_default = 3600;
+  p_descr = "Time span for ASCOPE (secs).";
+} ascope_time_span_secs;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Min amplitude for ascope.";
+} ascope_min_amplitude;
+
+paramdef double {
+  p_default = 1;
+  p_descr = "Max amplitude for ascope.";
+} ascope_max_amplitude;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min time between rendering (secs).";
+  p_help = "Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU.";
+} ascope_min_secs_between_rendering;
+
+commentdef {
+  p_header = "ASCOPE TITLES, LABELS AND AXES";
+}
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Font size of center title (pixels).";
+} ascope_title_font_size;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Font size of axis labels in ascope (pixels).";
+} ascope_axis_label_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size of axis values (pixels).";
+} ascope_axis_values_font_size;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of axes in ascope.";
+} ascope_axes_color;
+
+paramdef string {
+  p_default = "gray";
+  p_descr = "Color of grid lines on ascope.";
+} ascope_grid_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of labels in ascope.";
+} ascope_labels_color;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines across plot at regular time intervals.";
+} ascope_draw_time_grid_lines;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines across plot at regular range intervals.";
+} ascope_draw_x_grid_lines;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw a line for the instrument location.";
+  p_descr = "Applies to RANGE_AXIS_SCALE_ALTITUDE option only.";
+} ascope_draw_instrument_height_line;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of instrument height line in ALTITUDE plot.";
+} ascope_instrument_height_color;
+
+commentdef {
+  p_header = "ASCOPE LEGENDS";
+}
+
+typedef enum {
+  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
+} legend_pos_t;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of main legend in the ASCOPE plot window";
+  p_help = "This include time, field name and elevation angle.";
+} ascope_main_legend_pos;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot the starting lat/lon position as a legend.";
+  p_help = "This helps in geolocating the data from a mobile system.";
+} ascope_plot_legend1;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of lat/lon legend in plot";
+  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'ascope_plot_starting_latlon_as_legend'.";
+} ascope_legend1_pos;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of lat/lon legend in plot";
+  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'ascope_plot_starting_latlon_as_legend'.";
+} ascope_legend2_pos;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot the starting lat/lon position as a legend.";
+  p_help = "This helps in geolocating the data from a mobile system.";
+} ascope_plot_legend2;
 
