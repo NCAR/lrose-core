@@ -21,75 +21,33 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef COLORBAR_HH
-#define COLORBAR_HH
+/////////////////////////////////////////////////////////////
+// SpreadSheet.hh
+//
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Sept 2018
+//
+///////////////////////////////////////////////////////////////
 
-#include "ColorMap.hh"
+#ifndef SPREADSHEETUTILS_HH
+#define SPREADSHEETUTILS_HH
 
-#include <QWidget>
-#include <QLayout>
-#include <QVBoxLayout>
-#include <vector>
-#include <string>
-#include <QImage>
-#include <QPixmap>
+//#include <string>
+//#include <sys/types.h>
+//using namespace std;
 
-#ifndef DLL_EXPORT
-#ifdef WIN32
-#ifdef QT_PLUGIN
-#define DLL_EXPORT __declspec(dllexport)
-#else
-#define DLL_EXPORT __declspec(dllimport)
-#endif
-#else
-#define DLL_EXPORT
-#endif
-#endif
+#include <QString>
 
-/// A widget that displays a representation of ColorMap.
-/// Swatches are displayed in a vertical column, with text labels
-/// indicating the value of the swatch.
-class DLL_EXPORT ColorBar: public QWidget
-{
+class SpreadSheetUtils {
 
-  Q_OBJECT
+public: 
 
-public:
-
-  ColorBar(int width,
-           const ColorMap *cmap,
-           QWidget* parent = 0);
-
-  virtual ~ColorBar(void);
-  
-  /// Set the color map, update the view
-  /// @param map The corresponding color map.
-  void setColorMap(const ColorMap *map);
-  
-  /// @returns An image of the color bar. The caller must delte
-  /// it when finished.
-  QImage* getImage();
-  
-  /// @returns A pixmap of the color bar. The caller must delete it 
-  /// when finished.
-  QPixmap* getPixmap();
-  
- signals:
-
-  void released();
-  
- protected:
-
-  /// Capture a mouse release and emit a released() signal.
-  virtual void mouseReleaseEvent(QMouseEvent* e);
-
-  /// The paint event is where we will draw the color bar.
-  virtual void paintEvent(QPaintEvent* e);
-
-  /// A default color map, so that the plugin can
-  /// display something.
-  const ColorMap *_colorMap;
+  static void decode_pos(const QString &pos, int *row, int *col);
+  static QString encode_pos(int row, int col);
 
 };
 
 #endif
+
+

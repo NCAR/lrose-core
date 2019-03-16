@@ -302,6 +302,12 @@ QPixmap* PolarWidget::getPixmap()
 void PolarWidget::mousePressEvent(QMouseEvent *e)
 {
 
+
+  if (e->button() == Qt::RightButton) {
+    emit customContextMenuRequested(e->pos());
+  } else {
+
+
   _rubberBand->setGeometry(QRect(e->pos(), QSize()));
   _rubberBand->show();
 
@@ -310,7 +316,7 @@ void PolarWidget::mousePressEvent(QMouseEvent *e)
 
   _worldPressX = _zoomWorld.getXWorld(_mousePressX);
   _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-
+  }
 }
 
 
@@ -360,6 +366,10 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 
   _pointClicked = false;
+
+  if (e->button() == Qt::RightButton) {
+    emit customContextMenuRequested(e->pos());
+  } else {
 
   QRect rgeom = _rubberBand->geometry();
 
@@ -431,7 +441,7 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
 
   _rubberBand->hide();
   update();
-
+  }
 }
 
 /**************   testing ******/

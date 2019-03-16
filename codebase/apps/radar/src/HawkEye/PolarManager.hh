@@ -374,6 +374,8 @@ private slots:
   void _refreshFileChooserDialog();
   void _showFileChooserDialog();
 
+  // context editing (SOLO)
+  void ShowContextMenu(const QPoint &pos);
 
 };
 
