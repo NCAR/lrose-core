@@ -45,18 +45,35 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include "TsReader.hh"
+
 #include <QMainWindow>
+
+#include <euclid/SunPosn.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxVol.hh>
 
+class TsReader;
+class AscopeWidget;
+
+class QApplication;
+class QButtonGroup;
 class QCheckBox;
-class QPushButton;
-class QDateTimeEdit;
-class QDateTime;
 class QComboBox;
-class BscanWidget;
+class QDateTime;
+class QDateTimeEdit;
+class QDialog;
+class QFrame;
+class QGridLayout;
+class QGroupBox;
+class QHBoxLayout;
+class QLabel;
+class QLineEdit;
+class QPushButton;
+class QRadioButton;
+class QSlider;
+class QVBoxLayout;
+class QWidget;
 
 class AScopeManager {
   
@@ -81,6 +98,9 @@ public:
   
   virtual void enableZoomButton() const;
   
+  /// Get the current block size
+  unsigned int getBlockSize() const { return _blockSize; }
+
 signals:
 
 private:
@@ -238,9 +258,6 @@ private:
   QRadioButton *_rangeAxisModeDownButton;
   QRadioButton *_rangeAxisModeAltitudeButton;
 
-  Params::range_axis_mode_t _rangeAxisMode;
-  Params::range_axis_mode_t _requestedRangeAxisMode;
-
   // time axis settings dialog
   
   QDialog *_timeAxisDialog;
@@ -279,9 +296,12 @@ private:
   double _xSecsClicked;
   double _yKmClicked;
 
+  /// The current block size
+  unsigned int _blockSize;
+  
   // set top bar
 
-  virtual void _setTitleBar(const string &radarName) = 0;
+  virtual void _setTitleBar(const string &radarName);
 
   // panels
   
@@ -332,10 +352,6 @@ private:
   virtual void timerEvent (QTimerEvent * event);
   virtual void resizeEvent (QResizeEvent * event);
   virtual void keyPressEvent(QKeyEvent* event);
-  
-  // set top bar
-
-  virtual void _setTitleBar(const string &radarName);
   
   // local methods
   
@@ -397,10 +413,6 @@ private slots:
   void _resetDwellSpecifiedToDefault();
   void _setDwellAuto();
   void _setDwellStats();
-
-  // override howto
-
-  void _howto();
 
 };
 

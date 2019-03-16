@@ -69,11 +69,13 @@ NORM_SRCS = \
 MOC_SRCS = \
 	AScopeManager.cc \
 	AScopeWidget.cc \
-	TimeScaleWidget.cc \
+	TsReader.cc \
+	TimeScaleWidget.cc
 
 MOC_OUTPUT = \
 	moc_AScopeManager.cpp \
 	moc_AScopeWidget.cpp \
+	moc_TsReader.cpp \
 	moc_TimeScaleWidget.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)

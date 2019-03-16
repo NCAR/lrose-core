@@ -26,6 +26,7 @@
 
 #include <QObject>
 #include <QMetaType>
+#include <QTimerEvent>
 
 #include <string>
 #include <toolsa/Socket.hh>
@@ -36,34 +37,82 @@
 #include <radar/IwrfTsBurst.hh>
 #include <radar/IwrfTsReader.hh>
 
-#include "AScopeWidget.hh"
+#include "AScopeManager.hh"
 
-/// A Time series reader for the AScope. It reads IWRF data and translates
-/// DDS samples to AScope::TimeSeries.
-
-Q_DECLARE_METATYPE(AScope::TimeSeries)
-  
-class AScopeReader : public QObject
+class TsReader : public QObject
 {
-
+  
   Q_OBJECT
-
+  
 public:
-    
+  
+  /// The timeseries type for importing data. The actual data
+  /// are passed by reference, hopefully eliminating an
+  /// unnecessary copy.
+  class TimeSeries {
+  public:
+    // Data types we deal with. 
+    enum TsDataTypeEnum { VOIDDATA, FLOATDATA, SHORTDATA };
+    /*
+     * The default constructor sets dataType to VOIDDATA, and this 
+     * value must be set to the correct type by the user before trying 
+     * to extract data using the i() and q() methods.
+     */
+    TimeSeries();
+    TimeSeries(TsDataTypeEnum type);
+    // Get I values by pulse number and gate.
+    inline double i(int pulse, int gate) const;
+    // Get I values by pulse number and gate.
+    inline double q(int pulse, int gate) const;
+    /// I and Q for each beam is in a vector containing I,Q for each gate.
+    /// IQbeams contains pointers to each IQ vector for all
+    /// of the beams in the timeseries. The length of the timeseries
+    /// can be found from IQbeams.size(). The data types pointed to
+    /// are defined by our dataType.
+    std::vector<void*> IQbeams;
+    /// Data type of the pointers in IQbeams
+    TsDataTypeEnum dataType;
+    /// The number of gates
+    int gates;
+    /// The channel id
+    int chanId;
+    /// The sample rate, in Hz
+    double sampleRateHz;
+    /// An opaque pointer that can be used to store
+    /// anything that the caller wants to track along 
+    /// with the TimeSeries. This will be useful when 
+    /// the TimeSeries is returned to the owner,
+    /// if for example when an associated object such as a
+    /// DDS sample needs to be returned to DDS.
+    void* handle;
+  };
+  
+  /// TimeSeries subclasses for short* and float* data pointers
+  class ShortTimeSeries : public TimeSeries {
+  public:
+    ShortTimeSeries() : TimeSeries(TimeSeries::SHORTDATA) {}
+  };
+  
+  class FloatTimeSeries : public TimeSeries {
+  public:
+    FloatTimeSeries() : TimeSeries(TimeSeries::FLOATDATA) {}
+  };
+  
   /// Constructor
   /// @param host The server host
   /// @param port The server port
   /// @param fmqPath - set in FMQ mode
-    AScopeReader(const std::string &host, int port,
-                 const std::string &fmqPath,
-                 bool simulMode,
-                 AScope &scope, 
-                 int radarId,
-                 int burstChan,
-                 int debugLevel);
+  TsReader(const std::string &host,
+           int port,
+           const std::string &fmqPath,
+           bool simulMode,
+           AScopeManager &ascope,
+           int radarId,
+           int burstChan,
+           int debugLevel);
 
   /// Destructor
-  virtual ~AScopeReader();
+  virtual ~TsReader();
   
   signals:
 
@@ -72,14 +121,14 @@ public:
   /// @param pItem A pointer to the item.
   /// It must be returned via returnItem().
     
-  void newItem(AScope::TimeSeries pItem);
+  void newItem(TimeSeries pItem);
 
 public slots:
 
   /// Use this slot to return an item
   /// @param pItem the item to be returned.
 
-  void returnItemSlot(AScope::TimeSeries pItem);
+  void returnItemSlot(TimeSeries pItem);
   
   // respond to timer events
   
@@ -98,7 +147,7 @@ private:
   std::string _serverFmq;
   bool _simulMode;
 
-  AScope &_scope;
+  AScopeManager &_scope;
   
   // read in data
 
@@ -132,18 +181,26 @@ private:
   // methods
   
   int _readData();
+
   IwrfTsPulse *_getNextPulse();
+
   void _sendDataToAScope();
+
   int _loadTs(int nGates,
               int channelIn,
               const vector<IwrfTsPulse *> &pulses,
               int channelOut,
-              AScope::FloatTimeSeries &ts);
+              FloatTimeSeries &ts);
+
   int _loadBurst(const IwrfTsBurst &burst,
                  int channelOut,
-                 AScope::FloatTimeSeries &ts);
+                 FloatTimeSeries &ts);
 
 };
 
+/// A Time series reader for the AScope. It reads IWRF data and translates
+/// DDS samples to TsReader::TimeSeries.
 
-#endif /*ASCOPEREADER_H_*/
+Q_DECLARE_METATYPE(TsReader::TimeSeries)
+  
+#endif /* TSREADER_HH_*/

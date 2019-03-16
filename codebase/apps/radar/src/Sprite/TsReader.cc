@@ -21,7 +21,7 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#include "TsReader.h"
+#include "TsReader.hh"
 #include <cerrno>
 #include <radar/iwrf_functions.hh>
 #include <toolsa/uusleep.h>
@@ -33,7 +33,7 @@ TsReader::TsReader(const string &host,
                    int port,
                    const string &fmqPath,
                    bool simulMode,
-                   AScope &scope,
+                   AScopeManager &ascope,
                    int radarId,
                    int burstChan,
                    int debugLevel):
@@ -44,14 +44,14 @@ TsReader::TsReader(const string &host,
         _serverPort(port),
         _serverFmq(fmqPath),
         _simulMode(simulMode),
-        _scope(scope),
-        _pulseCount(0),
-        _tsSeqNum(0)
+        _scope(ascope),
+  _pulseCount(0),
+  _tsSeqNum(0)
 {
   
   // this are required in order to send structured data types
   // via a qt signal
-  qRegisterMetaType<AScope::TimeSeries>();
+  qRegisterMetaType<TimeSeries>();
   
   // start timer for checking socket every 50 msecs
   _dataTimerId = startTimer(50);
@@ -270,21 +270,21 @@ void TsReader::_sendDataToAScope()
 
     // load H chan 0, send to scope
 
-    AScope::FloatTimeSeries tsChan0;
+    FloatTimeSeries tsChan0;
     if (_loadTs(nGates, 0, _pulses, 0, tsChan0) == 0) {
       emit newItem(tsChan0);
     }
 
     // load H chan 1, send to scope
 
-    AScope::FloatTimeSeries tsChan1;
+    FloatTimeSeries tsChan1;
     if (_loadTs(nGates, 1, _pulses, 1, tsChan1) == 0) {
       emit newItem(tsChan1);
     }
 
     // load burst, send to scope as chan 2
 
-    AScope::FloatTimeSeries tsChan2;
+    FloatTimeSeries tsChan2;
     if (_loadBurst(_pulseReader->getBurst(), 2, tsChan2) == 0) {
       emit newItem(tsChan2);
     }
@@ -293,21 +293,21 @@ void TsReader::_sendDataToAScope()
 
     // load V chan 0, send to scope
     
-    AScope::FloatTimeSeries tsChan0;
+    FloatTimeSeries tsChan0;
     if (_loadTs(nGates, 0, _pulsesV, 0, tsChan0) == 0) {
       emit newItem(tsChan0);
     }
 
     // load V chan 1, send to scope
 
-    AScope::FloatTimeSeries tsChan1;
+    FloatTimeSeries tsChan1;
     if (_loadTs(nGates, 1, _pulsesV, 1, tsChan1) == 0) {
       emit newItem(tsChan1);
     }
     
     // load V burst, send to scope as chan 3
     
-    AScope::FloatTimeSeries tsChan3;
+    FloatTimeSeries tsChan3;
     if (_loadBurst(_pulseReader->getBurst(), 3, tsChan3) == 0) {
       emit newItem(tsChan3);
     }
@@ -321,12 +321,12 @@ void TsReader::_sendDataToAScope()
     // load H chan 0, (h-co), into channel 0
 
     if (_burstChan == 0) {
-      AScope::FloatTimeSeries tsChan0;
+      FloatTimeSeries tsChan0;
       if (_loadBurst(_pulseReader->getBurst(), 0, tsChan0) == 0) {
         emit newItem(tsChan0);
       }
     } else {
-      AScope::FloatTimeSeries tsChan0;
+      FloatTimeSeries tsChan0;
       if (_loadTs(nGates, 0, _pulses, 0, tsChan0) == 0) {
         emit newItem(tsChan0);
       }
@@ -335,12 +335,12 @@ void TsReader::_sendDataToAScope()
     // load H chan 1, (v-cross), into channel 3
     
     if (_burstChan == 3) {
-      AScope::FloatTimeSeries tsChan3;
+      FloatTimeSeries tsChan3;
       if (_loadBurst(_pulseReader->getBurst(), 3, tsChan3) == 0) {
         emit newItem(tsChan3);
       }
     } else {
-      AScope::FloatTimeSeries tsChan3;
+      FloatTimeSeries tsChan3;
       if (_loadTs(nGates, 1, _pulses, 3, tsChan3) == 0) {
         emit newItem(tsChan3);
       }
@@ -349,12 +349,12 @@ void TsReader::_sendDataToAScope()
     // load V chan 0, (v-co) into channel 1
     
     if (_burstChan == 1) {
-      AScope::FloatTimeSeries tsChan1;
+      FloatTimeSeries tsChan1;
       if (_loadBurst(_pulseReader->getBurst(), 1, tsChan1) == 0) {
         emit newItem(tsChan1);
       }
     } else {
-      AScope::FloatTimeSeries tsChan1;
+      FloatTimeSeries tsChan1;
       if (_loadTs(nGates, 0, _pulsesV, 1, tsChan1) == 0) {
         emit newItem(tsChan1);
       }
@@ -363,12 +363,12 @@ void TsReader::_sendDataToAScope()
     // load V chan 1, (h_cross) into channel 2
 
     if (_burstChan == 2) {
-      AScope::FloatTimeSeries tsChan2;
+      FloatTimeSeries tsChan2;
       if (_loadBurst(_pulseReader->getBurst(), 2, tsChan2) == 0) {
         emit newItem(tsChan2);
       }
     } else {
-      AScope::FloatTimeSeries tsChan2;
+      FloatTimeSeries tsChan2;
       if (_loadTs(nGates, 1, _pulsesV, 2, tsChan2) == 0) {
         emit newItem(tsChan2);
       }
@@ -394,10 +394,10 @@ void TsReader::_sendDataToAScope()
 // load up time series object
 
 int TsReader::_loadTs(int nGates,
-                          int channelIn,
-                          const vector<IwrfTsPulse *> &pulses,
-                          int channelOut,
-                          AScope::FloatTimeSeries &ts)
+                      int channelIn,
+                      const vector<IwrfTsPulse *> &pulses,
+                      int channelOut,
+                      FloatTimeSeries &ts)
   
 {
 
@@ -449,8 +449,8 @@ int TsReader::_loadTs(int nGates,
 // load up burst data
 
 int TsReader::_loadBurst(const IwrfTsBurst &burst,
-                             int channelOut,
-                             AScope::FloatTimeSeries &ts)
+                         int channelOut,
+                         FloatTimeSeries &ts)
 
 {
   
@@ -496,7 +496,7 @@ int TsReader::_loadBurst(const IwrfTsBurst &burst,
 //////////////////////////////////////////////////////////////////////////////
 // Clean up when iq data is returned from display
 
-void TsReader::returnItemSlot(AScope::TimeSeries ts)
+void TsReader::returnItemSlot(TimeSeries ts)
 
 {
 
