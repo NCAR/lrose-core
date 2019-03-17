@@ -58,6 +58,10 @@ public:
   
   IwrfTsInfo(IwrfDebug_t debug = IWRF_DEBUG_OFF);
 
+  // copy constructor
+  
+  IwrfTsInfo(const IwrfTsInfo &rhs);
+
   // destructor
   
   ~IwrfTsInfo();
@@ -928,6 +932,10 @@ public:
   string get_rvp8_s_version_string() const;
 
 protected:
+  
+  // copy
+  
+  virtual IwrfTsInfo &_copy(const IwrfTsInfo &rhs);
   
 private:
 
