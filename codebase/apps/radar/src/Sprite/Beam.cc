@@ -193,6 +193,8 @@ Beam::~Beam()
 
 {
 
+  cerr << "NNNNNNNNNNNNNNNNNNNNNN" << endl;
+
 }
 
 ////////////////////////////////////////////////

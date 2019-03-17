@@ -207,6 +207,9 @@ void AScopeWidget::setYGridEnabled(bool state)
 
 void AScopeWidget::activateArchiveRendering()
 {
+
+  cerr << "RRRRRRRRRRRRRRRRRRRRRRR" << endl;
+
   // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
   //   _fieldRenderers[ii]->setBackgroundRenderingOn();
   // }

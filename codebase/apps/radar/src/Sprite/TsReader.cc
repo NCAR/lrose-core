@@ -91,6 +91,7 @@ TsReader::TsReader(const string &prog_name,
   _scanType = SCAN_TYPE_UNKNOWN;
   
   _pulseSeqNum = 0;
+  _nPulsesRead = 0;
   
   _nSamples = _params.n_samples;
   
@@ -201,13 +202,13 @@ Beam *TsReader::getNextBeam()
     PMU_auto_register("getNextBeam");
     
     IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
-    
     if (pulse == NULL) {
       cerr << "ERROR - TsReader::getNextBeam()" << endl;
       cerr << "  end of data" << endl;
       _clearPulseQueue();
       return NULL;
     }
+    _nPulsesRead++;
     
     if (_params.invert_hv_flag) {
       pulse->setInvertHvFlag(true);
@@ -306,16 +307,81 @@ Beam *TsReader::getNextBeam()
     }
   }
 
-  _az = _conditionAz(_az);
-  _el = _conditionEl(_el);
-
   _filePath = _pulseReader->getPathInUse();
-  
-  if (_isRhi) {
-    return _getBeamRhi();
-  } else {
-    return _getBeamPpi();
+
+  size_t midIndex = _pulseQueue.size() / 2;
+  _az = _conditionAz(_pulseQueue[midIndex]->getAz());
+  _el = _conditionEl(_pulseQueue[midIndex]->getEl());
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "got beam, _nPulsesRead: " << _nPulsesRead << endl;
   }
+
+  return _makeBeam(midIndex);
+
+}
+
+/////////////////////////////////////////////////////////
+// get the previous beam in realtime or archive sequence
+// we need to reset the queue and position to read the 
+// previous beam
+//
+// returns Beam object pointer on success, NULL on failure
+// caller must free beam
+
+Beam *TsReader::getPreviousBeam()
+  
+{
+  
+  // first position for previous beam
+
+  if (positionForPreviousBeam()) {
+    cerr << "ERROR - TsReader::getPreviousBeam()" << endl;
+    return NULL;
+  }
+
+  // then read the next beam
+
+  return getNextBeam();
+
+}
+
+////////////////////////////////////////////////////////////////////
+// position to get the previous beam in realtime or archive sequence
+// we need to reset the queue and position to read the previous beam
+// returns 0 on success, -1 on error
+
+int TsReader::positionForPreviousBeam()
+  
+{
+
+  // save the location to which we want to return
+
+  int64_t seekLoc = _nPulsesRead - (_nSamples + 4) * 2;
+  if (seekLoc < 0) {
+    seekLoc = 0;
+  }
+
+  // reset the pulse queue
+
+  _pulseReader->reset();
+
+  // read pulses to move to seek location
+
+  _nPulsesRead = 0;
+  while (_nPulsesRead < seekLoc) {
+    IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
+    if (pulse == NULL) {
+      cerr << "ERROR - TsReader::positionForPreviousBeam()" << endl;
+      cerr << "  Cannot reposition to seekLoc: " << seekLoc << endl;
+      _clearPulseQueue();
+      return -1;
+    }
+    _nPulsesRead++;
+    delete pulse;
+  }
+
+  return 0;
 
 }
 
@@ -453,35 +519,42 @@ bool TsReader::_checkIsBeamPpi(size_t midIndex)
   double midAz1 = _conditionAz(_pulseQueue[midIndex]->getAz(), _az);
   double midAz2 = _conditionAz(_pulseQueue[midIndex+1]->getAz(), midAz1);
   
+  cerr << "_az, midAz1, midAz2: " << _az << ", " << midAz1 << ", " << midAz2 << endl;
+
   // Check if the azimuths at the center of the data straddle
   // the target azimuth
   
   if (midAz1 <= _az && midAz2 >= _az) {
 
     // az1 is below and az2 above - clockwise rotation
+    cerr << "TTTTTTTTTTT111111111111" << endl;
     return true;
     
   } else if (midAz1 >= _az && midAz2 <= _az) {
     
     // az1 is above and az2 below - counterclockwise rotation
+    cerr << "TTTTTTTTTTT22222222222222" << endl;
     return true;
     
   } else if (_az == 0.0) {
     
     if (midAz1 > 360.0 - _indexedRes && midAz2 < _indexedRes) {
       
-	// az1 is below 0 and az2 above 0 - clockwise rotation
-	return true;
+      // az1 is below 0 and az2 above 0 - clockwise rotation
+      cerr << "TTTTTTTTTTT33333333333333" << endl;
+      return true;
 	
     } else if (midAz2 > 360.0 - _indexedRes && midAz1 < _indexedRes) {
       
       // az1 is above 0 and az2 below 0 - counterclockwise rotation
+      cerr << "TTTTTTTTTTT4444444444444" << endl;
       return true;
       
     }
 
   }
   
+  cerr << "FFFFFFFFFFFFFFFFFFFFF" << endl;
   return false;
 
 }
@@ -541,8 +614,7 @@ Beam *TsReader::_makeBeam(size_t midIndex)
   }
 
   // adjust to make sure we start on correct pulse
-
- 
+  
   if (_isAlternating) {
     bool startsOnHoriz = _pulseQueue[startIndex]->isHoriz();
     if (!startsOnHoriz) {

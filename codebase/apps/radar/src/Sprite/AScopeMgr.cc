@@ -86,9 +86,9 @@ bool AScopeMgr::_firstTimerEvent = true;
 // Constructor
 
 AScopeMgr::AScopeMgr(const Params &params,
-                             TsReader *reader) :
+                     TsReader *tsReader) :
         _params(params),
-        _reader(reader),
+        _tsReader(tsReader),
         _plotStart(true)
         
 {
@@ -145,10 +145,6 @@ AScopeMgr::~AScopeMgr()
 
 int AScopeMgr::run(QApplication &app)
 {
-
-  if (_params.debug) {
-    cerr << "Running in BSCAN mode" << endl;
-  }
 
   // make window visible
 
@@ -445,7 +441,6 @@ void AScopeMgr::_configureAxes()
 void AScopeMgr::timerEvent(QTimerEvent *event)
 {
 
-
   // register with procmap
 
   PMU_auto_register("timerEvent");
@@ -471,30 +466,29 @@ void AScopeMgr::timerEvent(QTimerEvent *event)
     }
     _statusLayout->setColumnMinimumWidth(1, maxWidth);
   
-    // if (_archiveMode) {
-    //   _archiveRetrievalPending = true;
-    // }
+    if (_archiveMode) {
+      _archiveRetrievalPending = true;
+    }
 
     _firstTimerEvent = false;
 
   }
 
-  // handle event
+  // handle data
 
   if (event->timerId() == _dataTimerId) {
-
-    // if (_archiveMode) {
-    //   if (_archiveRetrievalPending) {
-    //     _setDwellAutoVal();
-    //     _handleArchiveData();
-    //     _archiveRetrievalPending = false;
-    //   }
-    // } else {
+    
+    if (_archiveMode) {
+      if (_archiveRetrievalPending) {
+        _handleArchiveData();
+        _archiveRetrievalPending = false;
+      }
+    } else {
       _handleRealtimeData();
-    // }
-
+    }
+    
   }
-
+  
 }
 
 
@@ -750,19 +744,50 @@ void AScopeMgr::_handleArchiveData()
 
 {
 
+  if (_params.debug) {
+    cerr << "AScopeMgr::_handleArchiveData()" << endl;
+  }
+
+  // set cursor to wait cursor
+  
+  this->setCursor(Qt::WaitCursor);
+  
+  // read in a beam
+
+  cerr << "CCCCCCCCCCCCCCCCCCCCCCCCCC" << endl;
+  Beam *beam = _tsReader->getNextBeam();
+  if (beam == NULL) {
+    cerr << "ERROR - end of data in archive mode" << endl;
+    // reset cursor
+    this->setCursor(Qt::ArrowCursor);
+    return;
+  }
+
+  // set cursor to wait cursor
+  
+  this->setCursor(Qt::WaitCursor);
+  _ascope->activateArchiveRendering();
+
+  // plot the data
+
+  _plotArchiveData(beam);
+  this->setCursor(Qt::ArrowCursor);
+
+  // clean up
+
+  cerr << "DDDDDDDDDDDDDDDDDDDDDDDDDDD" << endl;
+  delete beam;
+  cerr << "EEEEEEEEEEEEEEEEEEEE" << endl;
+
   // set up plot times
 
-  _plotStartTime = _archiveStartTime;
-  _plotEndTime = _archiveEndTime;
+  // _plotStartTime = _archiveStartTime;
+  // _plotEndTime = _archiveEndTime;
 
   // erase plot and set time axis
 
-  _ascope->setPlotStartTime(_plotStartTime, true);
-  _ascope->activateArchiveRendering();
+  // _ascope->setPlotStartTime(_plotStartTime, true);
 
-  // set cursor to wait cursor
-
-  this->setCursor(Qt::WaitCursor);
   // _timeAxisDialog->setCursor(Qt::WaitCursor);
 
   // get data
@@ -773,10 +798,6 @@ void AScopeMgr::_handleArchiveData()
   //   return;
   // }
 
-  // plot the data
-
-  // _plotArchiveData();
-  // this->setCursor(Qt::ArrowCursor);
   // _timeAxisDialog->setCursor(Qt::ArrowCursor);
 
 }
@@ -834,7 +855,7 @@ int AScopeMgr::_getArchiveData()
 /////////////////////////////
 // plot data in archive mode
 
-void AScopeMgr::_plotArchiveData()
+void AScopeMgr::_plotArchiveData(Beam *beam)
 
 {
 
@@ -1129,9 +1150,9 @@ void AScopeMgr::_unzoom()
 
 void AScopeMgr::_refresh()
 {
-  // if (_archiveMode) {
+  if (_archiveMode) {
     _performArchiveRetrieval();
-  // }
+  }
 }
 
 //////////////////////////////
@@ -1366,6 +1387,7 @@ void AScopeMgr::_setDataRetrievalMode()
 
 void AScopeMgr::_goBack1()
 {
+  _tsReader->positionForPreviousBeam();
   _archiveStartTime -= 1 * _timeSpanSecs;
   _setGuiFromStartTime();
 }

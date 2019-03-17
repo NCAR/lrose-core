@@ -55,6 +55,7 @@
 
 class TsReader;
 class AScopeWidget;
+class Beam;
 
 class QApplication;
 class QButtonGroup;
@@ -84,7 +85,7 @@ public:
   // constructor
 
   AScopeMgr(const Params &params,
-                TsReader *reader);
+            TsReader *tsReader);
   
   // destructor
   
@@ -119,7 +120,7 @@ private:
   
   // reading data in
   
-  TsReader *_reader;
+  TsReader *_tsReader;
   
   // beam reading timer
 
@@ -361,7 +362,7 @@ private:
   void _handleRealtimeDataForImages();
   void _handleArchiveData();
   int _getArchiveData();
-  void _plotArchiveData();
+  void _plotArchiveData(Beam *beam);
   void _setupVolRead(RadxFile &file);
 
 private slots:

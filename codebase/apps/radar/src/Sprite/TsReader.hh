@@ -115,6 +115,18 @@ public:
   
   Beam *getNextBeam();
   
+  // get the previous beam in realtime or archive sequence
+  // returns Beam object pointer on success, NULL on failure
+  // caller must free beam
+  
+  Beam *getPreviousBeam();
+  
+  // position to get the previous beam in realtime or archive sequence
+  // we need to reset the queue and position to read the previous beam
+  // returns 0 on success, -1 on error
+  
+  int positionForPreviousBeam();
+  
   // get the closest beam to the location specified
   // and within the specified time
   // returns Beam object pointer on success, NULL on failure
@@ -163,6 +175,7 @@ private:
   
   deque<const IwrfTsPulse *> _pulseQueue;
   long _pulseSeqNum;
+  int64_t _nPulsesRead;
   
   // number of gates
 
