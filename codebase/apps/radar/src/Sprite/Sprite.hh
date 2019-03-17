@@ -44,8 +44,10 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include <rapformats/coord_export.h>
 class AScopeManager;
 class TsReader;
+class BeamMgr;
 
 class QApplication;
 
@@ -80,7 +82,9 @@ private:
 
   // reading in the data
 
-  TsReader *_reader;
+  coord_export_t *_coordShmem;
+  TsReader *_tsReader;
+  BeamMgr *_beamMgr;
 
   // managing the rendering objects
 

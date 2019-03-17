@@ -38,6 +38,7 @@
 #include <vector>
 #include <deque>
 #include <set>
+#include <toolsa/DateTime.hh>
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsReader.hh>
@@ -99,12 +100,31 @@ public:
 
   // constructor OK?
 
-  bool constructorOK;
+  bool OK;
 
-  // find the best file to read
+  // set the number of samples
 
-  int findBestFile(time_t startTime, time_t endTime,
-                   double az, double el, bool isRhi);
+  void setNSamples(int val) { _nSamples = val; }
+
+  //////////////////////////////////////////////////////
+  // read the next beam
+  
+  // get the next beam in realtime or archive sequence
+  // returns Beam object pointer on success, NULL on failure
+  // caller must free beam
+  
+  Beam *getNextBeam();
+  
+  // get the closest beam to the location specified
+  // and within the specified time
+  // returns Beam object pointer on success, NULL on failure
+  // caller must free beam
+  
+  Beam *getClosestBeam(time_t startTime, time_t endTime,
+                       double az, double el, bool isRhi);
+
+  //////////////////////////////////////////////////////
+  // reading data in follow mode
 
   // get the path to best file
 
@@ -114,16 +134,6 @@ public:
 
   string getScanModeStr() const { return _scanModeStr; }
   
-  // read all pulses into queue
-  
-  int readAllPulses();
-  
-  // get a beam
-  // returns Beam object pointer on success, NULL on failure
-  // caller must free beam
-  
-  Beam *getBeam(double az, double el);
-    
   // get ops info
 
   const IwrfTsInfo &getOpsInfo() const { return _pulseReader->getOpsInfo(); }
@@ -145,6 +155,9 @@ private:
   
   IwrfTsReader *_pulseReader;
   string _filePath;
+  DateTime _archiveStartTime;
+  DateTime _archiveEndTime;
+  int _timeSpanSecs;
 
   // pulse queue
   
@@ -186,27 +199,25 @@ private:
 
   // private functions
 
-  void _clear();
-  void _clearPulseQueue();
-
   Beam *_getBeamPpi();
   Beam *_getBeamRhi();
-
   bool _checkIsBeamPpi(size_t midIndex);
   bool _checkIsBeamRhi(size_t midIndex);
-  
   Beam *_makeBeam(size_t midIndex);
   
-  bool _beamReady();
-  bool _beamReadyPpi();
-  bool _beamReadyRhi();
+  void _addPulseToQueue(const IwrfTsPulse *pulse);
+  void _clearPulseQueue();
+
+  int _findBestFile(time_t startTime, time_t endTime,
+                    double az, double el, bool isRhi);
+  void _getDayDirs(const string &topDir, TimePathSet &dayDirs);
+  int _readFile();
+  
   void _checkIsAlternating();
   void _checkIsStaggeredPrt();
   double _conditionAz(double az);
   double _conditionAz(double az, double refAz);
   double _conditionEl(double el);
-  void _addPulseToQueue(const IwrfTsPulse *pulse);
-  void _getDayDirs(const string &topDir, TimePathSet &dayDirs);
   
 
 };

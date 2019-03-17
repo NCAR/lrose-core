@@ -36,14 +36,45 @@
 
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
-#include <toolsa/DateTime.hh>
 #include <toolsa/ReadDir.hh>
 #include <toolsa/Path.hh>
 #include "TsReader.hh"
 using namespace std;
 
+/////////////////////////
+// TimePath constructor
+
+TsReader::TimePath::TimePath(time_t valid_time,
+                             time_t start_time,
+                             time_t end_time,
+                             const string &name,
+                             const string &path) :
+        validTime(valid_time), 
+        startTime(start_time), 
+        endTime(end_time), 
+        fileName(name),
+        filePath(path)
+  
+{
+
+  // scan name for fixed angle
+
+  fixedAngle = 0.0;
+  int iang;
+  int year, month, day, hour, min, sec;
+  
+  if (sscanf(fileName.c_str(),
+             "%4d%2d%2d_%2d%2d%2d_%d",
+             &year, &month, &day, 
+             &hour, &min, &sec, 
+             &iang) == 7) {
+    fixedAngle = iang / 10.0;
+  }
+
+}
+
 ////////////////////////////////////////////////////
-// Constructor
+// TsReader Constructor
 
 TsReader::TsReader(const string &prog_name,
                    const Params &params,
@@ -54,7 +85,7 @@ TsReader::TsReader(const string &prog_name,
   
 {
 
-  constructorOK = true;
+  OK = true;
 
   _pulseReader = NULL;
   _scanType = SCAN_TYPE_UNKNOWN;
@@ -89,23 +120,58 @@ TsReader::TsReader(const string &prog_name,
   _scanType = SCAN_TYPE_PPI;
   _indexedRes = _params.indexed_resolution_ppi;
 
+  switch (_params.input_mode) {
+    case Params::REALTIME_FMQ_MODE:
+    default: {
+      _pulseReader = new IwrfTsReaderFmq(_params.input_fmq_url,
+                                         _iwrfDebug,
+                                         _params.seek_to_start_of_fmq);
+      break;
+    }
+    case Params::REALTIME_TCP_MODE: {
+      _pulseReader = new IwrfTsReaderTcp(_params.input_tcp_address,
+                                         _params.input_tcp_port,
+                                         _iwrfDebug);
+      break;
+    }
+    case Params::ARCHIVE_TIME_MODE: {
+      _timeSpanSecs = _params.ascope_time_span_secs;
+      _archiveStartTime.set(_params.archive_start_time);
+      _archiveEndTime = _archiveStartTime + _timeSpanSecs;
+      DsInputPath input(_progName,
+                        _params.debug >= Params::DEBUG_VERBOSE,
+                        _params.archive_data_dir,
+                        _archiveStartTime.utime(),
+                        _archiveEndTime.utime());
+      vector<string> paths = input.getPathList();
+      if (paths.size() < 1) {
+        cerr << "ERROR: " << _progName << " - ARCHIVE mode" << endl;
+        cerr << "  No paths found, dir: " << _params.archive_data_dir << endl;
+        cerr << "  Start time: " << DateTime::strm(_archiveStartTime.utime()) << endl;
+        cerr << "  End time: " << DateTime::strm(_archiveEndTime.utime()) << endl;
+        OK = false;
+      }
+      _pulseReader = new IwrfTsReaderFile(paths, _iwrfDebug);
+      break;
+    }
+    case Params::FILE_LIST_MODE: {
+      _pulseReader = new IwrfTsReaderFile(_args.inputFileList,
+                                          _iwrfDebug);
+      break;
+    }
+    case Params::FOLLOW_MOMENTS_MODE: {
+      // leave pulse reader NULL for now
+      break;
+    }
+
+  } // switch
+
 }
 
 //////////////////////////////////////////////////////////////////
 // destructor
 
 TsReader::~TsReader()
-
-{
-
-  _clear();
-
-}
-
-//////////////////////////////////////////////////////////////////
-// clear reader and data
-
-void TsReader::_clear()
 
 {
 
@@ -117,47 +183,30 @@ void TsReader::_clear()
 
 }
 
-//////////////////////////////////////////////////////////////////
-// clear data
+/////////////////////////////////////////////////////////
+// get the next beam in realtime or archive sequence
+// returns Beam object pointer on success, NULL on failure
+// caller must free beam
 
-void TsReader::_clearPulseQueue()
-
-{
-
-  for (size_t ii = 0; ii < _pulseQueue.size(); ii++) {
-    // only delete the pulse object if it is no longer being used
-    if (_pulseQueue[ii]->removeClient() == 0) {
-      delete _pulseQueue[ii];
-    }
-  } // ii
-  _pulseQueue.clear();
-
-}
-
-//////////////////////////////////////////////////
-// read all pulses
-
-int TsReader::readAllPulses()
+Beam *TsReader::getNextBeam()
   
 {
-
+  
   _clearPulseQueue();
-
-  // read in pulse, load up pulse queue
-
-  while (true) {
-
-    PMU_auto_register("readAllPulses");
   
+  // read in pulses, load up pulse queue
+  
+  while (true) {
+    
+    PMU_auto_register("getNextBeam");
+    
     IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
     
     if (pulse == NULL) {
-      if (_params.debug) {
-        cerr << "TsReader::readAllPulses: found n pulses: "
-             << _pulseQueue.size() << ", scan mode: "
-             << _scanModeStr << endl;
-      }
-      break;
+      cerr << "ERROR - TsReader::getNextBeam()" << endl;
+      cerr << "  end of data" << endl;
+      _clearPulseQueue();
+      return NULL;
     }
     
     if (_params.invert_hv_flag) {
@@ -172,11 +221,19 @@ int TsReader::readAllPulses()
     
     int scanMode = pulse->getScanMode();
     if (scanMode == IWRF_SCAN_MODE_RHI) {
+      if (!_isRhi) {
+        // change in scan mode, clear pulse queue
+        _clearPulseQueue();
+      }
       _isRhi = true;
       _scanModeStr = "RHI";
       _scanType = SCAN_TYPE_RHI;
       _indexedRes = _params.indexed_resolution_rhi;
     } else {
+      if (_isRhi) {
+        // change in scan mode, clear pulse queue
+        _clearPulseQueue();
+      }
       _isRhi = false;
       _scanModeStr = "PPI";
       _scanType = SCAN_TYPE_PPI;
@@ -190,8 +247,13 @@ int TsReader::readAllPulses()
     // elements to the left.
     
     // add pulse to queue, managing memory appropriately
-
+    
     _addPulseToQueue(pulse);
+
+    if ((int) _pulseQueue.size() == (_nSamples + 4)) {
+      // got the pulses we need
+      break;
+    }
     
   } // while
 
@@ -219,14 +281,14 @@ int TsReader::readAllPulses()
     int nGates0 = _pulseQueue[0]->getNGates();
     for (int i = 1; i < (int) _pulseQueue.size(); i += 2) {
       if (_pulseQueue[i]->getNGates() != nGates0) {
-        cerr << "ERROR - TsReader::readAllPulses()" << endl;
+        cerr << "ERROR - TsReader::getNextBeam()" << endl;
         cerr << "  nGates varies in non-staggered mode" << endl;
-        return -1;
+        return NULL;
       }
     }
   }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     if (_isAlternating) {
       cerr << "==>> Fast alternating mode" << endl;
       cerr << "     prt: " << _prt << endl;
@@ -244,21 +306,76 @@ int TsReader::readAllPulses()
     }
   }
 
-  return 0;
+  _az = _conditionAz(_az);
+  _el = _conditionEl(_el);
+
+  _filePath = _pulseReader->getPathInUse();
+  
+  if (_isRhi) {
+    return _getBeamRhi();
+  } else {
+    return _getBeamPpi();
+  }
 
 }
 
-//////////////////////////////////////////////////
-// get a beam
+/////////////////////////////////////////////////////////
+// get the closest beam to the location specified
+// and within the specified time
 // returns Beam object pointer on success, NULL on failure
 // caller must free beam
 
-Beam *TsReader::getBeam(double az, double el)
+Beam *TsReader::getClosestBeam(time_t startTime, time_t endTime,
+                               double az, double el, bool isRhi)
   
 {
 
+  if (_params.debug) {
+    cerr << "TsReader - finding closest beam" << endl;
+    cerr << "  Data start time: " << DateTime::strm(startTime) << endl;
+    cerr << "  Data end time: " << DateTime::strm(endTime) << endl;
+    cerr << "  Az, el: " << az << ", " << el << endl;
+    cerr << "  isRhi: " << isRhi << endl;
+  }
+
+  // find the best file for the requested time and location
+
+  if (_findBestFile(startTime, endTime, az, el, isRhi)) {
+    cerr << "ERROR - TsReader::getClosestBeam()" << endl;
+    cerr << "  no suitable data found" << endl;
+    _clearPulseQueue();
+    return NULL;
+  }
+  
+  // clear the queue, delete the pulse reader
+
+  if (_pulseReader) {
+    delete _pulseReader;
+  }
+  _clearPulseQueue();
+
+  // create new pulse reader for this file
+
+  vector<string> fileList;
+  fileList.push_back(_filePath);
+  _pulseReader = new IwrfTsReaderFile(fileList, _iwrfDebug);
+
+  // read all pulses in File
+  
+  if (_readFile()) {
+    cerr << "ERROR - TsReader::getClosestBeam()" << endl;
+    cerr << "  cannot read file: " << _filePath << endl;
+    _clearPulseQueue();
+    return NULL;
+  }
+
+  // check we have enough pulses
+
   if ((int) _pulseQueue.size() < (_nSamples + 4)) {
     // too few pulses
+    cerr << "ERROR - TsReader::getClosestBeam()" << endl;
+    cerr << "  too few pulses, file: " << _filePath << endl;
+    _clearPulseQueue();
     return NULL;
   }
 
@@ -476,6 +593,356 @@ Beam *TsReader::_makeBeam(size_t midIndex)
   
 }
 
+/////////////////////////////////////////////////
+// add the pulse to the pulse queue
+    
+void TsReader::_addPulseToQueue(const IwrfTsPulse *pulse)
+  
+{
+
+  // push pulse onto back of queue
+  
+  pulse->addClient();
+  _pulseQueue.push_back(pulse);
+
+  // print missing pulses in verbose mode
+  
+  if ((int) pulse->getSeqNum() != (int) (_pulseSeqNum + 1)) {
+    if (_params.debug >= Params::DEBUG_VERBOSE && _pulseSeqNum != 0) {
+      cerr << "******** Missing seq num: Expected=" << _pulseSeqNum+1
+	   << " Rx'd=" <<  pulse->getSeqNum() << " ********" << endl;
+    }
+  }
+
+  _pulseSeqNum = pulse->getSeqNum();
+
+}
+
+//////////////////////////////////////////////////////////////////
+// clear data
+
+void TsReader::_clearPulseQueue()
+
+{
+
+  for (size_t ii = 0; ii < _pulseQueue.size(); ii++) {
+    // only delete the pulse object if it is no longer being used
+    if (_pulseQueue[ii]->removeClient() == 0) {
+      delete _pulseQueue[ii];
+    }
+  } // ii
+  _pulseQueue.clear();
+
+}
+
+//////////////////////////////////////////////////////
+// find the files for the requested time and location
+
+int TsReader::_findBestFile(time_t startTime, time_t endTime,
+                            double az, double el, bool isRhi)
+  
+{
+
+  double fixedAngle = el;
+  if (isRhi) {
+    fixedAngle = az;
+  }
+
+  TimePathSet dayDirs;
+  _getDayDirs(_params.archive_data_dir, dayDirs);
+  
+  // check for suitable days
+  
+  TimePathSet filePaths;
+  TimePathSet::iterator ii;
+  for (ii = dayDirs.begin(); ii != dayDirs.end(); ii++) {
+    
+    if (startTime > ii->endTime || endTime < ii->startTime) {
+      // no overlap in time
+      continue;
+    }
+    
+    const string &dayDir = ii->filePath;
+    
+    ReadDir rdir;
+    if (rdir.open(dayDir.c_str())) {
+      return -1;
+    }
+      
+    // Loop thru directory looking for the data file names
+
+    struct dirent *dp;
+    for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
+      
+      // exclude dir entries beginning with '.'
+      
+      if (dp->d_name[0] == '.') {
+	continue;
+      }
+
+      // ignore transitional files
+
+      if (strstr(dp->d_name, "_trans.iwrf_ts") != NULL) {
+        continue;
+      }
+      
+      // is this in yyyymmdd_hhmmss format?
+      
+      int year, month, day;
+      int hour, min, sec;
+      if (sscanf(dp->d_name, "%4d%2d%2d_%2d%2d%2d",
+                 &year, &month, &day, &hour, &min, &sec) == 6) {
+	if (hour >= 0 && hour <= 23 && min >= 0 && min <= 59 &&
+	    sec >= 0 && sec <= 59) {
+          DateTime dtime(year, month, day, hour, min, sec);
+          time_t validTime = dtime.utime();
+          string pathStr = dayDir;
+          pathStr += PATH_DELIM;
+          pathStr += dp->d_name;
+          TimePath tpath(validTime, validTime, validTime, 
+                         dp->d_name, pathStr);
+          filePaths.insert(filePaths.end(), tpath);
+        }
+      }
+    } // dp
+    
+    rdir.close();
+    
+  } // ii
+  
+  if (filePaths.size() < 1) {
+    if (_params.debug) {
+      cerr << "No data found" << endl;
+    }
+    return -1;
+  }
+
+  // find file with valid time within start and end times
+  // give 1 seconds leeway
+  
+  TimePathSet::iterator jj;
+  bool fileFound = false;
+  string bestPath = filePaths.begin()->filePath;
+  time_t bestTime = filePaths.begin()->validTime;
+  double minAngleDiff = 1.0e99;
+  for (jj = filePaths.begin(); jj != filePaths.end(); jj++) {
+    string name = jj->fileName;
+    time_t fileTime = jj->validTime;
+    if (fileTime >= startTime && fileTime <= endTime) {
+      double angleDiff = fabs(fixedAngle - jj->fixedAngle);
+      if (angleDiff < minAngleDiff) {
+        bestPath = jj->filePath;
+        bestTime = jj->validTime;
+        minAngleDiff = angleDiff;
+        fileFound = true;
+      }
+    }
+  }
+
+  if (!fileFound) {
+    if (_params.debug) {
+      cerr << "No data found" << endl;
+    }
+    return -1;
+  }
+  _filePath = bestPath;
+  
+  if (_params.debug) {
+    cerr << "Found file, time: "
+         << bestPath << ", "
+         << DateTime::strm(bestTime) << endl;
+  }
+
+  return 0;
+
+}
+  
+/////////////////////////////////////
+// get day dirs for top dir
+
+void TsReader::_getDayDirs(const string &topDir,
+                           TimePathSet &dayDirs)
+  
+{
+  
+  // set up dirs in time order
+  
+  ReadDir rdir;
+  if (rdir.open(topDir.c_str())) {
+    return;
+  }
+  
+  // Loop thru directory looking for subdir names which represent dates
+  
+  struct dirent *dp;
+  for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
+    
+    // exclude dir entries and files beginning with '.'
+    
+    if (dp->d_name[0] == '.') {
+      continue;
+    }
+
+    // is this a yyyy directory - using extended paths?
+    // if so, call this routine recursively
+
+    if (strlen(dp->d_name) == 4) {
+      int yyyy;
+      if (sscanf(dp->d_name, "%4d", &yyyy) == 1) {
+        // year dir, call this recursively
+        string yyyyDir = topDir;
+        yyyyDir += PATH_DELIM;
+        yyyyDir += dp->d_name;
+        _getDayDirs(yyyyDir, dayDirs);
+      }
+      continue;
+    }
+
+    // exclude dir entries too short for yyyymmdd
+    
+    if (strlen(dp->d_name) < 8 || dp->d_name[0] == '.') {
+      continue;
+    }
+
+    // check that subdir name is in the correct format
+    
+    int year, month, day;
+    if (sscanf(dp->d_name, "%4d%2d%2d", &year, &month, &day) != 3) {
+      continue;
+    }
+    if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
+      continue;
+    }
+    
+    DateTime midday(year, month, day, 12, 0, 0);
+    DateTime start(year, month, day, 0, 0, 0);
+    DateTime end(year, month, day, 23, 59, 59);
+    Path dayDirPath(topDir, dp->d_name);
+    string pathStr(dayDirPath.getPath());
+    TimePath tpath(midday.utime(), start.utime(), end.utime(), 
+                   dp->d_name, pathStr);
+    dayDirs.insert(dayDirs.end(), tpath);
+
+  } // for (dp ...
+  
+  rdir.close();
+    
+}
+
+//////////////////////////////////////////////////
+// read all pulses in File
+
+int TsReader::_readFile()
+  
+{
+
+  _clearPulseQueue();
+
+  // read in pulse, load up pulse queue
+
+  while (true) {
+
+    PMU_auto_register("readFile");
+    
+    IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
+    
+    if (pulse == NULL) {
+      if (_params.debug) {
+        cerr << "TsReader::readFilePulses: found n pulses: "
+             << _pulseQueue.size() << ", scan mode: "
+             << _scanModeStr << endl;
+      }
+      break;
+    }
+    
+    if (_params.invert_hv_flag) {
+      pulse->setInvertHvFlag(true);
+    }
+    
+    if (!_params.prt_is_for_previous_interval) {
+      pulse->swapPrtValues();
+    }
+    
+    // check scan mode and type
+    
+    int scanMode = pulse->getScanMode();
+    if (scanMode == IWRF_SCAN_MODE_RHI) {
+      _isRhi = true;
+      _scanModeStr = "RHI";
+      _scanType = SCAN_TYPE_RHI;
+      _indexedRes = _params.indexed_resolution_rhi;
+    } else {
+      _isRhi = false;
+      _scanModeStr = "PPI";
+      _scanType = SCAN_TYPE_PPI;
+      _indexedRes = _params.indexed_resolution_ppi;
+    }
+    
+    // Create a new pulse object and save a pointer to it in the
+    // _pulseQueue.  _pulseQueue is a FIFO, with elements
+    // added at the end and dropped off the beginning. So if we have a
+    // full buffer delete the first element before shifting the
+    // elements to the left.
+    
+    // add pulse to queue, managing memory appropriately
+
+    _addPulseToQueue(pulse);
+    
+  } // while
+
+  // set prt and nGates, assuming single PRT for now
+  
+  _prt = _pulseQueue[0]->getPrt();
+  _nGates = _pulseQueue[0]->getNGates();
+  
+  // check if we have alternating h/v pulses
+  
+  _checkIsAlternating();
+
+  // check if we have staggered PRT pulses - does not apply
+  // to alternating mode
+
+  if (_isAlternating) {
+    _isStaggeredPrt = false;
+  } else {
+    _checkIsStaggeredPrt();
+  }
+
+  // in non-staggered mode check we have constant nGates
+  
+  if (!_isStaggeredPrt) {
+    int nGates0 = _pulseQueue[0]->getNGates();
+    for (int i = 1; i < (int) _pulseQueue.size(); i += 2) {
+      if (_pulseQueue[i]->getNGates() != nGates0) {
+        cerr << "ERROR - TsReader::readFile()" << endl;
+        cerr << "  nGates varies in non-staggered mode" << endl;
+        return -1;
+      }
+    }
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_isAlternating) {
+      cerr << "==>> Fast alternating mode" << endl;
+      cerr << "     prt: " << _prt << endl;
+      cerr << "     ngates: " << _nGates << endl;
+    } else if (_isStaggeredPrt) {
+      cerr << "==>> Staggered PRT mode" << endl;
+      cerr << "     prt short: " << _prtShort << endl;
+      cerr << "     prt long: " << _prtLong << endl;
+      cerr << "     ngates short PRT: " << _nGatesPrtShort << endl;
+      cerr << "     ngates long PRT: " << _nGatesPrtLong << endl;
+    } else {
+      cerr << "==>> Single PRT mode" << endl;
+      cerr << "     prt: " << _prt << endl;
+      cerr << "     ngates: " << _nGates << endl;
+    }
+  }
+
+  return 0;
+
+}
+
 ///////////////////////////////////////////      
 // check if we have alternating h/v pulses
 // 
@@ -607,269 +1074,3 @@ double TsReader::_conditionEl(double el)
   return el;
 }
   
-
-/////////////////////////////////////////////////
-// add the pulse to the pulse queue
-    
-void TsReader::_addPulseToQueue(const IwrfTsPulse *pulse)
-  
-{
-
-  // push pulse onto back of queue
-  
-  pulse->addClient();
-  _pulseQueue.push_back(pulse);
-
-  // print missing pulses in verbose mode
-  
-  if ((int) pulse->getSeqNum() != (int) (_pulseSeqNum + 1)) {
-    if (_params.debug >= Params::DEBUG_VERBOSE && _pulseSeqNum != 0) {
-      cerr << "******** Missing seq num: Expected=" << _pulseSeqNum+1
-	   << " Rx'd=" <<  pulse->getSeqNum() << " ********" << endl;
-    }
-  }
-
-  _pulseSeqNum = pulse->getSeqNum();
-
-}
-
-//////////////////////////////////////////////////
-// find the files for the requested time
-
-int TsReader::findBestFile(time_t startTime, time_t endTime,
-                           double az, double el, bool isRhi)
-  
-{
-
-  if (_params.debug) {
-    cerr << "TsReader - finding time series files" << endl;
-    cerr << "  Data start time: " << DateTime::strm(startTime) << endl;
-    cerr << "  Data end time: " << DateTime::strm(endTime) << endl;
-    cerr << "  Az, el: " << az << ", " << el << endl;
-    cerr << "  isRhi: " << isRhi << endl;
-  }
-
-  double fixedAngle = el;
-  if (isRhi) {
-    fixedAngle = az;
-  }
-
-  TimePathSet dayDirs;
-  _getDayDirs(_params.archive_data_dir, dayDirs);
-  
-  // check for suitable days
-  
-  TimePathSet filePaths;
-  TimePathSet::iterator ii;
-  for (ii = dayDirs.begin(); ii != dayDirs.end(); ii++) {
-    
-    if (startTime > ii->endTime || endTime < ii->startTime) {
-      // no overlap in time
-      continue;
-    }
-    
-    const string &dayDir = ii->filePath;
-    
-    ReadDir rdir;
-    if (rdir.open(dayDir.c_str())) {
-      return -1;
-    }
-      
-    // Loop thru directory looking for the data file names
-
-    struct dirent *dp;
-    for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
-      
-      // exclude dir entries beginning with '.'
-      
-      if (dp->d_name[0] == '.') {
-	continue;
-      }
-
-      // ignore transitional files
-
-      if (strstr(dp->d_name, "_trans.iwrf_ts") != NULL) {
-        continue;
-      }
-      
-      // is this in yyyymmdd_hhmmss format?
-      
-      int year, month, day;
-      int hour, min, sec;
-      if (sscanf(dp->d_name, "%4d%2d%2d_%2d%2d%2d",
-                 &year, &month, &day, &hour, &min, &sec) == 6) {
-	if (hour >= 0 && hour <= 23 && min >= 0 && min <= 59 &&
-	    sec >= 0 && sec <= 59) {
-          DateTime dtime(year, month, day, hour, min, sec);
-          time_t validTime = dtime.utime();
-          string pathStr = dayDir;
-          pathStr += PATH_DELIM;
-          pathStr += dp->d_name;
-          TimePath tpath(validTime, validTime, validTime, 
-                         dp->d_name, pathStr);
-          filePaths.insert(filePaths.end(), tpath);
-        }
-      }
-    } // dp
-    
-    rdir.close();
-    
-  } // ii
-  
-  if (filePaths.size() < 1) {
-    if (_params.debug) {
-      cerr << "No data found" << endl;
-    }
-    return -1;
-  }
-
-  // find file with valid time within start and end times
-  // give 1 seconds leeway
-  
-  TimePathSet::iterator jj;
-  bool fileFound = false;
-  string bestPath = filePaths.begin()->filePath;
-  time_t bestTime = filePaths.begin()->validTime;
-  double minAngleDiff = 1.0e99;
-  for (jj = filePaths.begin(); jj != filePaths.end(); jj++) {
-    string name = jj->fileName;
-    time_t fileTime = jj->validTime;
-    if (fileTime >= startTime && fileTime <= endTime) {
-      double angleDiff = fabs(fixedAngle - jj->fixedAngle);
-      if (angleDiff < minAngleDiff) {
-        bestPath = jj->filePath;
-        bestTime = jj->validTime;
-        minAngleDiff = angleDiff;
-        fileFound = true;
-      }
-    }
-  }
-
-  if (!fileFound) {
-    if (_params.debug) {
-      cerr << "No data found" << endl;
-    }
-    return -1;
-  }
-
-  if (_params.debug) {
-    cerr << "Found file, time: "
-         << bestPath << ", "
-         << DateTime::strm(bestTime) << endl;
-  }
-
-  _clear();
-
-  _filePath = bestPath;
-  vector<string> fileList;
-  fileList.push_back(bestPath);
-  _pulseReader = new IwrfTsReaderFile(fileList, _iwrfDebug);
-  
-  return 0;
-
-}
-  
-/////////////////////////////////////
-// get day dirs for top dir
-
-void TsReader::_getDayDirs(const string &topDir,
-                           TimePathSet &dayDirs)
-  
-{
-  
-  // set up dirs in time order
-  
-  ReadDir rdir;
-  if (rdir.open(topDir.c_str())) {
-    return;
-  }
-  
-  // Loop thru directory looking for subdir names which represent dates
-  
-  struct dirent *dp;
-  for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
-    
-    // exclude dir entries and files beginning with '.'
-    
-    if (dp->d_name[0] == '.') {
-      continue;
-    }
-
-    // is this a yyyy directory - using extended paths?
-    // if so, call this routine recursively
-
-    if (strlen(dp->d_name) == 4) {
-      int yyyy;
-      if (sscanf(dp->d_name, "%4d", &yyyy) == 1) {
-        // year dir, call this recursively
-        string yyyyDir = topDir;
-        yyyyDir += PATH_DELIM;
-        yyyyDir += dp->d_name;
-        _getDayDirs(yyyyDir, dayDirs);
-      }
-      continue;
-    }
-
-    // exclude dir entries too short for yyyymmdd
-    
-    if (strlen(dp->d_name) < 8 || dp->d_name[0] == '.') {
-      continue;
-    }
-
-    // check that subdir name is in the correct format
-    
-    int year, month, day;
-    if (sscanf(dp->d_name, "%4d%2d%2d", &year, &month, &day) != 3) {
-      continue;
-    }
-    if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
-      continue;
-    }
-    
-    DateTime midday(year, month, day, 12, 0, 0);
-    DateTime start(year, month, day, 0, 0, 0);
-    DateTime end(year, month, day, 23, 59, 59);
-    Path dayDirPath(topDir, dp->d_name);
-    string pathStr(dayDirPath.getPath());
-    TimePath tpath(midday.utime(), start.utime(), end.utime(), 
-                   dp->d_name, pathStr);
-    dayDirs.insert(dayDirs.end(), tpath);
-
-  } // for (dp ...
-  
-  rdir.close();
-    
-}
-
-/////////////////////////
-// TimePath constructor
-
-TsReader::TimePath::TimePath(time_t valid_time,
-                             time_t start_time,
-                             time_t end_time,
-                             const string &name,
-                             const string &path) :
-        validTime(valid_time), 
-        startTime(start_time), 
-        endTime(end_time), 
-        fileName(name),
-        filePath(path)
-  
-{
-
-  // scan name for fixed angle
-
-  fixedAngle = 0.0;
-  int iang;
-  int year, month, day, hour, min, sec;
-  
-  if (sscanf(fileName.c_str(),
-             "%4d%2d%2d_%2d%2d%2d_%d",
-             &year, &month, &day, 
-             &hour, &min, &sec, 
-             &iang) == 7) {
-    fixedAngle = iang / 10.0;
-  }
-
-}
-
