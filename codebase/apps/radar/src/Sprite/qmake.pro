@@ -3,33 +3,29 @@
 
 TEMPLATE = app
 TARGET = Sprite
-ICON = SpritePolarIcon.icns 
+ICON = Sprite.icns 
 
 CONFIG += qt
 CONFIG += debug
 
 RESOURCES = resources.qrc 
 
-HEADERS += AScopeManager.hh
+HEADERS += AScopeMgr.hh
 HEADERS += AScopeWidget.hh
 HEADERS += AllocCheck.hh
 HEADERS += Args.hh
 HEADERS += ColorMap.hh
-HEADERS += DisplayManager.hh
-HEADERS += DisplayWidget.hh
 HEADERS += Params.hh
 HEADERS += ScaledLabel.hh
 HEADERS += Sprite.hh
 HEADERS += TsReader.hh
 HEADERS += WorldPlot.hh
 
-SOURCES += AScopeManager.cc
+SOURCES += AScopeMgr.cc
 SOURCES += AScopeWidget.cc
 SOURCES += AllocCheck.cc
 SOURCES += Args.cc
 SOURCES += ColorMap.cc
-SOURCES += DisplayManager.cc
-SOURCES += DisplayWidget.cc
 SOURCES += Main.cc
 SOURCES += Params.cc
 SOURCES += ScaledLabel.cc

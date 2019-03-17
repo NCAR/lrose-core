@@ -38,7 +38,7 @@
 #include "ColorMap.hh"
 #include "TsReader.hh"
 #include "BeamMgr.hh"
-#include "AScopeManager.hh"
+#include "AScopeMgr.hh"
 #include "Params.hh"
 
 #include <toolsa/Path.hh>
@@ -109,10 +109,6 @@ Sprite::Sprite(int argc, char **argv) :
     }
   }
   
-  // create the time series reader
-  
-  _tsReader = new TsReader(_progName, _params, _args);
-  
   // init process mapper registration
 
   if (_params.register_with_procmap) {
@@ -145,21 +141,18 @@ Sprite::~Sprite()
 int Sprite::Run(QApplication &app)
 {
 
-  _saveDir = "/tmp";
-  _title = "Sprite";
-  _refreshHz = 25.0;
-  _serverHost = "localhost";
-  _serverPort = 10000;
-  _serverFmq.clear();
-  _debugLevel = 0;
-  _radarId = 0;
-  _burstChan = -1;
-
+  // create the time series reader
+  
+  _tsReader = new TsReader(_progName, _params, _args);
+  if (!_tsReader->OK) {
+    return -1;
+  }
+  
   // create the ascope manager
   
-  _ascopeManager = new AScopeManager(_params, _tsReader);
+  _ascopeManager = new AScopeMgr(_params, _tsReader);
 
-  return -1;
+  return _ascopeManager->run(app);
 
 }
 

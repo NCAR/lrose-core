@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AScopeManager.hh
+// AScopeMgr.hh
 //
-// AScopeManager object
+// AScopeMgr object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,13 +32,13 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// AScopeManager manages BSCAN data - vert pointing etc
+// AScopeMgr manages BSCAN data - vert pointing etc
 // Rendering is delegated to BscanWidget
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef AScopeManager_HH
-#define AScopeManager_HH
+#ifndef AScopeMgr_HH
+#define AScopeMgr_HH
 
 #include <string>
 #include <vector>
@@ -75,7 +75,7 @@ class QSlider;
 class QVBoxLayout;
 class QWidget;
 
-class AScopeManager : public QMainWindow {
+class AScopeMgr : public QMainWindow {
   
   Q_OBJECT
   
@@ -83,12 +83,12 @@ public:
 
   // constructor
 
-  AScopeManager(const Params &params,
+  AScopeMgr(const Params &params,
                 TsReader *reader);
   
   // destructor
   
-  ~AScopeManager();
+  ~AScopeMgr();
 
   // run 
   

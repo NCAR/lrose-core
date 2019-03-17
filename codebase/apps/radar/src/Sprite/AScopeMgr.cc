@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// AScopeManager.cc
+// AScopeMgr.cc
 //
-// AScopeManager object
+// AScopeMgr object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,11 +32,11 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// AScopeManager manages BSCAN rendering - vert pointing etc
+// AScopeMgr manages BSCAN rendering - vert pointing etc
 //
 ///////////////////////////////////////////////////////////////
 
-#include "AScopeManager.hh"
+#include "AScopeMgr.hh"
 #include "AScopeWidget.hh"
 #include "ColorMap.hh"
 #include "Params.hh"
@@ -81,11 +81,11 @@
 #include <dsserver/DsLdataInfo.hh>
 
 using namespace std;
-bool AScopeManager::_firstTimerEvent = true;
+bool AScopeMgr::_firstTimerEvent = true;
 
 // Constructor
 
-AScopeManager::AScopeManager(const Params &params,
+AScopeMgr::AScopeMgr(const Params &params,
                              TsReader *reader) :
         _params(params),
         _reader(reader),
@@ -130,7 +130,7 @@ AScopeManager::AScopeManager(const Params &params,
 
 // destructor
 
-AScopeManager::~AScopeManager()
+AScopeMgr::~AScopeMgr()
 
 {
 
@@ -143,7 +143,7 @@ AScopeManager::~AScopeManager()
 //////////////////////////////////////////////////
 // Run
 
-int AScopeManager::run(QApplication &app)
+int AScopeMgr::run(QApplication &app)
 {
 
   if (_params.debug) {
@@ -165,7 +165,7 @@ int AScopeManager::run(QApplication &app)
 ////////////////////////////////////////////////////////////////////////
 // Set the label in the title bar.
 
-void AScopeManager::_setTitleBar(const string &radarName)
+void AScopeMgr::_setTitleBar(const string &radarName)
 {
   string windowTitle = "HAWK_EYE BSCAN -- " + radarName;
   setWindowTitle(tr(windowTitle.c_str()));
@@ -174,7 +174,7 @@ void AScopeManager::_setTitleBar(const string &radarName)
 //////////////////////////////////////////////////
 // set up windows and widgets
   
-void AScopeManager::_setupWindows()
+void AScopeMgr::_setupWindows()
 {
 
   // set up windows
@@ -239,7 +239,7 @@ void AScopeManager::_setupWindows()
 
 }
 
-void AScopeManager::_createMenus()
+void AScopeMgr::_createMenus()
 {
 
   _fileMenu = menuBar()->addMenu(tr("&File"));
@@ -274,7 +274,7 @@ void AScopeManager::_createMenus()
 
 }
 
-void AScopeManager::_createActions()
+void AScopeMgr::_createActions()
 {
 
   // freeze display
@@ -405,7 +405,7 @@ void AScopeManager::_createActions()
 ///////////////////////
 // initialize actions
 
-void AScopeManager::_initActions()
+void AScopeMgr::_initActions()
 {
 
   if (_params.ascope_draw_x_grid_lines) {
@@ -425,7 +425,7 @@ void AScopeManager::_initActions()
 ///////////////////////////////////////////////////////
 // configure the plot axes
 
-void AScopeManager::_configureAxes()
+void AScopeMgr::_configureAxes()
   
 {
   
@@ -438,7 +438,7 @@ void AScopeManager::_configureAxes()
 //////////////////////////////////////////////////////////////
 // override timer event to respond to timer
   
-void AScopeManager::timerEvent(QTimerEvent *event)
+void AScopeMgr::timerEvent(QTimerEvent *event)
 {
 
 
@@ -497,7 +497,7 @@ void AScopeManager::timerEvent(QTimerEvent *event)
 ///////////////////////////
 // override resize event
 
-void AScopeManager::resizeEvent(QResizeEvent *event)
+void AScopeMgr::resizeEvent(QResizeEvent *event)
 {
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent" << endl;
@@ -508,7 +508,7 @@ void AScopeManager::resizeEvent(QResizeEvent *event)
 ////////////////////////////////////////////////////////////////
 // override key press event
 
-void AScopeManager::keyPressEvent(QKeyEvent * e)
+void AScopeMgr::keyPressEvent(QKeyEvent * e)
 {
   
   // get key pressed
@@ -612,7 +612,7 @@ void AScopeManager::keyPressEvent(QKeyEvent * e)
 /////////////////////////////
 // get data in realtime mode
 
-void AScopeManager::_handleRealtimeData()
+void AScopeMgr::_handleRealtimeData()
 
 {
 
@@ -694,7 +694,7 @@ void AScopeManager::_handleRealtimeData()
 /////////////////////////////////////////////
 // get data in realtime image generation mode
 
-void AScopeManager::_handleRealtimeDataForImages()
+void AScopeMgr::_handleRealtimeDataForImages()
 
 {
 
@@ -742,7 +742,7 @@ void AScopeManager::_handleRealtimeDataForImages()
 ///////////////////////////////////////
 // handle data in archive mode
 
-void AScopeManager::_handleArchiveData()
+void AScopeMgr::_handleArchiveData()
 
 {
 
@@ -781,7 +781,7 @@ void AScopeManager::_handleArchiveData()
 // get data in archive mode
 // returns 0 on success, -1 on failure
 
-int AScopeManager::_getArchiveData()
+int AScopeMgr::_getArchiveData()
 
 {
 
@@ -804,7 +804,7 @@ int AScopeManager::_getArchiveData()
   
   // if (file.readFromDir(_params.archive_data_url, _vol)) {
   //   string errMsg = "ERROR - Cannot retrieve archive data\n";
-  //   errMsg += "AScopeManager::_getArchiveData\n";
+  //   errMsg += "AScopeMgr::_getArchiveData\n";
   //   errMsg += file.getErrStr() + "\n";
   //   errMsg += "  start time: " + _archiveStartTime.asString() + "\n";
   //   errMsg += "  end time: " + _archiveEndTime.asString() + "\n";
@@ -830,7 +830,7 @@ int AScopeManager::_getArchiveData()
 /////////////////////////////
 // plot data in archive mode
 
-void AScopeManager::_plotArchiveData()
+void AScopeMgr::_plotArchiveData()
 
 {
 
@@ -866,7 +866,7 @@ void AScopeManager::_plotArchiveData()
 //////////////////////////////////////////////////
 // set up read
 
-void AScopeManager::_setupVolRead(RadxFile &file)
+void AScopeMgr::_setupVolRead(RadxFile &file)
 {
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -898,7 +898,7 @@ void AScopeManager::_setupVolRead(RadxFile &file)
 ///////////////////////////////////////////////////////////
 // respond to change field request from field button group
 
-// void AScopeManager::_changeField(int fieldId, bool guiMode)
+// void AScopeMgr::_changeField(int fieldId, bool guiMode)
 
 // {
 
@@ -946,7 +946,7 @@ void AScopeManager::_setupVolRead(RadxFile &file)
 /////////////////////////////////////////////////////////
 // respond to a change in click location on the BSCAN
 
-void AScopeManager::_locationClicked(double xsecs, double ykm,
+void AScopeMgr::_locationClicked(double xsecs, double ykm,
                                      const RadxRay *closestRay)
   
 {
@@ -964,13 +964,13 @@ void AScopeManager::_locationClicked(double xsecs, double ykm,
 //////////////////////////////////////////////////////////////////
 // respond to a change in click location on one of the windows
 
-// void AScopeManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray)
+// void AScopeMgr::_locationClicked(double xsecs, double ykm, const RadxRay *ray)
 
 // {
 
 
 //   if (_params.debug) {
-//     cerr << "*** Entering AScopeManager::_locationClicked()" << endl;
+//     cerr << "*** Entering AScopeMgr::_locationClicked()" << endl;
 //   }
 
 //   // check the ray
@@ -1114,7 +1114,7 @@ void AScopeManager::_locationClicked(double xsecs, double ykm,
 ////////////////////////////////
 // unzoom display
 
-void AScopeManager::_unzoom()
+void AScopeMgr::_unzoom()
 {
   _ascope->unzoomView();
   _unzoomAct->setEnabled(false);
@@ -1123,7 +1123,7 @@ void AScopeManager::_unzoom()
 ////////////////////////////////////////////
 // refresh
 
-void AScopeManager::_refresh()
+void AScopeMgr::_refresh()
 {
   // if (_archiveMode) {
     _performArchiveRetrieval();
@@ -1133,7 +1133,7 @@ void AScopeManager::_refresh()
 //////////////////////////////
 // freeze display
 
-void AScopeManager::_freeze()
+void AScopeMgr::_freeze()
 {
   if (_frozen) {
     _frozen = false;
@@ -1150,7 +1150,7 @@ void AScopeManager::_freeze()
 //////////////////////////////////////////////////
 // enable the zoom button - called by BscanWidget
 
-void AScopeManager::enableZoomButton() const
+void AScopeMgr::enableZoomButton() const
 {
   _unzoomAct->setEnabled(true);
 }
@@ -1158,7 +1158,7 @@ void AScopeManager::enableZoomButton() const
 ////////////////////////////////////////////////////////
 // change altitude limits
 
-// void AScopeManager::_setAltitudeLimits()
+// void AScopeMgr::_setAltitudeLimits()
 // {
 
 //   // limits
@@ -1216,7 +1216,7 @@ void AScopeManager::enableZoomButton() const
 ////////////////////////////////////////////////////////
 // change time span
 
-void AScopeManager::_setTimeSpan()
+void AScopeMgr::_setTimeSpan()
 {
 
   double timeSpan;
@@ -1240,7 +1240,7 @@ void AScopeManager::_setTimeSpan()
 
 }
 
-void AScopeManager::_resetTimeSpanToDefault()
+void AScopeMgr::_resetTimeSpanToDefault()
 {
   _timeSpanSecs = _params.ascope_time_span_secs;
   char text[1024];
@@ -1255,7 +1255,7 @@ void AScopeManager::_resetTimeSpanToDefault()
 ////////////////////////////////////////////////////////
 // set start time from gui widget
 
-void AScopeManager::_setStartTimeFromGui(const QDateTime &datetime1)
+void AScopeMgr::_setStartTimeFromGui(const QDateTime &datetime1)
 {
   QDateTime datetime = _archiveStartTimeEdit->dateTime();
   QDate date = datetime.date();
@@ -1268,7 +1268,7 @@ void AScopeManager::_setStartTimeFromGui(const QDateTime &datetime1)
 ////////////////////////////////////////////////////////
 // set gui widget from start time
 
-void AScopeManager::_setGuiFromStartTime()
+void AScopeMgr::_setGuiFromStartTime()
 {
   QDate date(_archiveStartTime.getYear(),
              _archiveStartTime.getMonth(), _archiveStartTime.getDay());
@@ -1281,7 +1281,7 @@ void AScopeManager::_setGuiFromStartTime()
 ////////////////////////////////////////////////////////
 // set start time to defaults
 
-void AScopeManager::_setArchiveStartTimeToDefault()
+void AScopeMgr::_setArchiveStartTimeToDefault()
 
 {
 
@@ -1297,7 +1297,7 @@ void AScopeManager::_setArchiveStartTimeToDefault()
 ////////////////////////////////////////////////////////
 // set start time
 
-void AScopeManager::_setArchiveStartTime(const RadxTime &rtime)
+void AScopeMgr::_setArchiveStartTime(const RadxTime &rtime)
 
 {
 
@@ -1317,7 +1317,7 @@ void AScopeManager::_setArchiveStartTime(const RadxTime &rtime)
 ////////////////////////////////////////////////////////
 // set end time from start time and span
 
-void AScopeManager::_setArchiveEndTime()
+void AScopeMgr::_setArchiveEndTime()
 
 {
 
@@ -1332,7 +1332,7 @@ void AScopeManager::_setArchiveEndTime()
 ////////////////////////////////////////////////////////
 // change modes
 
-void AScopeManager::_setDataRetrievalMode()
+void AScopeMgr::_setDataRetrievalMode()
 {
   if (!_archiveTimeBox) {
     return;
@@ -1360,31 +1360,31 @@ void AScopeManager::_setDataRetrievalMode()
 ////////////////////////////////////////////////////////
 // change start time
 
-void AScopeManager::_goBack1()
+void AScopeMgr::_goBack1()
 {
   _archiveStartTime -= 1 * _timeSpanSecs;
   _setGuiFromStartTime();
 }
 
-void AScopeManager::_goBack5()
+void AScopeMgr::_goBack5()
 {
   _archiveStartTime -= 5 * _timeSpanSecs;
   _setGuiFromStartTime();
 }
 
-void AScopeManager::_goFwd1()
+void AScopeMgr::_goFwd1()
 {
   _archiveStartTime += 1 * _timeSpanSecs;
   _setGuiFromStartTime();
 }
 
-void AScopeManager::_goFwd5()
+void AScopeMgr::_goFwd5()
 {
   _archiveStartTime += 5 * _timeSpanSecs;
   _setGuiFromStartTime();
 }
 
-void AScopeManager::_changeRange(int deltaGates)
+void AScopeMgr::_changeRange(int deltaGates)
 {
   if (!_ascope->getPointClicked()) {
     return;
@@ -1400,7 +1400,7 @@ void AScopeManager::_changeRange(int deltaGates)
 ////////////////////////////////////////////////////////
 // perform archive retrieval
 
-void AScopeManager::_performArchiveRetrieval()
+void AScopeMgr::_performArchiveRetrieval()
 {
   _archiveRetrievalPending = true;
 }
@@ -1408,7 +1408,7 @@ void AScopeManager::_performArchiveRetrieval()
 ////////////////////////////////////////////////////////
 // Open file
 
-void AScopeManager::_openFile()
+void AScopeMgr::_openFile()
 {
 }
 
@@ -1418,7 +1418,7 @@ void AScopeManager::_openFile()
 /////////////////////////////
 // show data at click point
 
-void AScopeManager::_showClick()
+void AScopeMgr::_showClick()
 {
   if (_clickReportDialog) {
     if (_clickReportDialog->isVisible()) {
@@ -1440,7 +1440,7 @@ void AScopeManager::_showClick()
 /////////////////////////////////////////////////////
 // howto help
 
-void AScopeManager::_howto()
+void AScopeMgr::_howto()
 {
   string text;
   text += "HOWTO HINTS FOR HAWK-EYE in BSCAN mode\n";
@@ -1462,7 +1462,7 @@ void AScopeManager::_howto()
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
 
-void AScopeManager::_about()
+void AScopeMgr::_about()
 {
   string text;
   

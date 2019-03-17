@@ -428,7 +428,7 @@ codebase/apps/radar/src/HawkEye/moc_predefs.h
 
 codebase/apps/radar/src/Sprite/Sprite
 codebase/apps/radar/src/Sprite/Makefile.qmake
-codebase/apps/radar/src/Sprite/moc_AScopeManager.cpp
+codebase/apps/radar/src/Sprite/moc_AScopeMgr.cpp
 codebase/apps/radar/src/Sprite/moc_AScopeWidget.cpp
 codebase/apps/radar/src/Sprite/moc_TimeScaleWidget.cpp
 codebase/apps/radar/src/Sprite/moc_predefs.h

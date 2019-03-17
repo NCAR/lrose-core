@@ -37,12 +37,12 @@
 #include <QStylePainter>
 
 #include "AScopeWidget.hh"
-#include "AScopeManager.hh"
+#include "AScopeMgr.hh"
 
 using namespace std;
 
 AScopeWidget::AScopeWidget(QWidget* parent,
-                           const AScopeManager &manager,
+                           const AScopeMgr &manager,
                            const Params &params) :
         QWidget(parent),
         _parent(parent),

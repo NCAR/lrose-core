@@ -53,7 +53,7 @@ HDRS = \
 	Args.hh \
 	Beam.hh \
 	BeamMgr.hh \
-	AScopeManager.hh \
+	AScopeMgr.hh \
 	AScopeWidget.hh \
 	RadarSpectra.hh \
 	ScaledLabel.hh \
@@ -74,11 +74,11 @@ NORM_SRCS = \
 	WorldPlot.cc
 
 MOC_SRCS = \
-	AScopeManager.cc \
+	AScopeMgr.cc \
 	AScopeWidget.cc
 
 MOC_OUTPUT = \
-	moc_AScopeManager.cpp \
+	moc_AScopeMgr.cpp \
 	moc_AScopeWidget.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)

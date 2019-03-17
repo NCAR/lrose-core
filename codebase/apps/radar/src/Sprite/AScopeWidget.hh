@@ -52,7 +52,7 @@
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
 
-class AScopeManager;
+class AScopeMgr;
 class RadxRay;
 
 /// Base class for widgets displaying BSCAN data.
@@ -96,7 +96,7 @@ class DLL_EXPORT AScopeWidget : public QWidget
    */
 
   AScopeWidget(QWidget* parent,
-               const AScopeManager &manager,
+               const AScopeMgr &manager,
                const Params &params);
   
   /**
@@ -289,7 +289,7 @@ class DLL_EXPORT AScopeWidget : public QWidget
    */
   
   QWidget *_parent;
-  const AScopeManager &_manager;
+  const AScopeMgr &_manager;
 
   /**
    * @brief TDRP params.

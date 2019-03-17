@@ -45,7 +45,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <rapformats/coord_export.h>
-class AScopeManager;
+class AScopeMgr;
 class TsReader;
 class BeamMgr;
 
@@ -88,18 +88,7 @@ private:
 
   // managing the rendering objects
 
-  AScopeManager *_ascopeManager;
-
-  double _refreshHz;
-  string _serverHost;
-  int _serverPort;
-  string _serverFmq;
-  int _debugLevel;
-  string _saveDir;
-  string _title;
-  bool _simulMode;
-  int _radarId;
-  int _burstChan;
+  AScopeMgr *_ascopeManager;
 
   // methods
   
