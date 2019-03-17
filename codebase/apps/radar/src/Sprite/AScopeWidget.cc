@@ -201,35 +201,35 @@ void AScopeWidget::setYGridEnabled(bool state)
   update();
 }
 
-/*************************************************************************
- * turn on archive-style rendering - all fields
- */
+// /*************************************************************************
+//  * turn on archive-style rendering - all fields
+//  */
 
-void AScopeWidget::activateArchiveRendering()
-{
+// void AScopeWidget::activateArchiveRendering()
+// {
 
-  cerr << "RRRRRRRRRRRRRRRRRRRRRRR" << endl;
+//   cerr << "RRRRRRRRRRRRRRRRRRRRRRR" << endl;
 
-  // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-  //   _fieldRenderers[ii]->setBackgroundRenderingOn();
-  // }
-}
+//   // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
+//   //   _fieldRenderers[ii]->setBackgroundRenderingOn();
+//   // }
+// }
 
 
-/*************************************************************************
- * turn on reatlime-style rendering - non-selected fields in background
- */
+// /*************************************************************************
+//  * turn on reatlime-style rendering - non-selected fields in background
+//  */
 
-void AScopeWidget::activateRealtimeRendering()
-{
+// void AScopeWidget::activateRealtimeRendering()
+// {
   
-  // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-  //   if (ii != _selectedField) {
-  //     _fieldRenderers[ii]->activateBackgroundRendering();
-  //   }
-  // }
+//   // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
+//   //   if (ii != _selectedField) {
+//   //     _fieldRenderers[ii]->activateBackgroundRendering();
+//   //   }
+//   // }
 
-}
+// }
 
 
 /*************************************************************************

@@ -581,13 +581,13 @@ void AScopeMgr::keyPressEvent(QKeyEvent * e)
     if (_params.debug) {
       cerr << "Clicked left arrow, go back in time" << endl;
     }
-    _goBack1();
+    _goBack();
     _performArchiveRetrieval();
   } else if (key == Qt::Key_Right) {
     if (_params.debug) {
       cerr << "Clicked right arrow, go forward in time" << endl;
     }
-    _goFwd1();
+    _goFwd();
     _performArchiveRetrieval();
   }
 
@@ -754,7 +754,6 @@ void AScopeMgr::_handleArchiveData()
   
   // read in a beam
 
-  cerr << "CCCCCCCCCCCCCCCCCCCCCCCCCC" << endl;
   Beam *beam = _tsReader->getNextBeam();
   if (beam == NULL) {
     cerr << "ERROR - end of data in archive mode" << endl;
@@ -766,7 +765,7 @@ void AScopeMgr::_handleArchiveData()
   // set cursor to wait cursor
   
   this->setCursor(Qt::WaitCursor);
-  _ascope->activateArchiveRendering();
+  // _ascope->activateArchiveRendering();
 
   // plot the data
 
@@ -775,9 +774,7 @@ void AScopeMgr::_handleArchiveData()
 
   // clean up
 
-  cerr << "DDDDDDDDDDDDDDDDDDDDDDDDDDD" << endl;
   delete beam;
-  cerr << "EEEEEEEEEEEEEEEEEEEE" << endl;
 
   // set up plot times
 
@@ -1385,28 +1382,16 @@ void AScopeMgr::_setDataRetrievalMode()
 ////////////////////////////////////////////////////////
 // change start time
 
-void AScopeMgr::_goBack1()
+void AScopeMgr::_goBack()
 {
   _tsReader->positionForPreviousBeam();
   _archiveStartTime -= 1 * _timeSpanSecs;
   _setGuiFromStartTime();
 }
 
-void AScopeMgr::_goBack5()
-{
-  _archiveStartTime -= 5 * _timeSpanSecs;
-  _setGuiFromStartTime();
-}
-
-void AScopeMgr::_goFwd1()
+void AScopeMgr::_goFwd()
 {
   _archiveStartTime += 1 * _timeSpanSecs;
-  _setGuiFromStartTime();
-}
-
-void AScopeMgr::_goFwd5()
-{
-  _archiveStartTime += 5 * _timeSpanSecs;
   _setGuiFromStartTime();
 }
 

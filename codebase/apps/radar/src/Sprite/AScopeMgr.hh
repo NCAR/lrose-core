@@ -393,10 +393,8 @@ private slots:
   void _setArchiveStartTime(const RadxTime &rtime);
   void _setArchiveEndTime();
   void _setDataRetrievalMode();
-  void _goBack1();
-  void _goFwd1();
-  void _goBack5();
-  void _goFwd5();
+  void _goBack();
+  void _goFwd();
   void _changeRange(int deltaGates);
 
   void _performArchiveRetrieval();

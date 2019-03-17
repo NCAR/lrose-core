@@ -129,18 +129,18 @@ class DLL_EXPORT AScopeWidget : public QWidget
 
   // void clearVar(size_t index);
   
-  /*************************************************************************
-   * archive mode - turn on background rendering for all fields
-   */
+  // /*************************************************************************
+  //  * archive mode - turn on background rendering for all fields
+  //  */
   
-  void activateArchiveRendering();
+  // void activateArchiveRendering();
 
-  /*************************************************************************
-   * reatime mode - turn on background rendering for non-selected fields
-   * for limited time
-   */
+  // /*************************************************************************
+  //  * reatime mode - turn on background rendering for non-selected fields
+  //  * for limited time
+  //  */
   
-  void activateRealtimeRendering();
+  // void activateRealtimeRendering();
 
   /**
    * @brief Add a new beam to the display. Data for all fields and all
