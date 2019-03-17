@@ -53,8 +53,7 @@ int main(int argc, char **argv)
   try {
     
     app = new QApplication(argc, argv);
-    app->setWindowIcon(QIcon("://SpritePolarIcon.icns"));
-    cerr << "After setting Window Icon\n";
+    app->setWindowIcon(QIcon("://Sprite.icns"));
     Sprite *Prog;
     Prog = new Sprite(argc, argv);
     if (!Prog->OK) {

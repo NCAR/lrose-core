@@ -545,7 +545,7 @@ public:
 
   char* ascope_labels_color;
 
-  tdrp_bool_t ascope_draw_time_grid_lines;
+  tdrp_bool_t ascope_draw_y_grid_lines;
 
   tdrp_bool_t ascope_draw_x_grid_lines;
 

@@ -98,9 +98,6 @@ public:
   
   virtual void enableZoomButton() const;
   
-  /// Get the current block size
-  unsigned int getBlockSize() const { return _blockSize; }
-
 signals:
 
   ////////////////
@@ -242,61 +239,59 @@ private:
   QMenu *_configMenu;
   QMenu *_overlaysMenu;
   QMenu *_actionsMenu;
-  QMenu *_vertMenu;
+  // QMenu *_vertMenu;
   QMenu *_helpMenu;
 
   // actions
 
-  QAction *_rangeGridAct;
-  QAction *_timeGridAct;
-  QAction *_instHtLineAct;
+  QAction *_xGridAct;
+  QAction *_yGridAct;
 
-  QAction *_rangeAxisAct;
-  QAction *_timeAxisAct;
-  QAction *_saveImageAct;
+  QAction *_xAxisAct;
+  QAction *_yAxisAct;
 
-  QAction *_latlonLegendAct;
-  QAction *_speedTrackLegendAct;
-  QAction *_distScaleAct;
+  // QAction *_saveImageAct;
+
+  // QAction *_latlonLegendAct;
+  // QAction *_speedTrackLegendAct;
+  // QAction *_distScaleAct;
 
   // range axis settings dialog
 
-  QDialog *_rangeAxisDialog;
-  QGroupBox *_rangeAxisModeBox;
-  QGroupBox *_rangeAxisAltitudeBox;
-  QGroupBox *_rangeAxisRangeBox;
-  QGroupBox *_rangeAxisDoneBox;
+  // QDialog *_rangeAxisDialog;
+  // QGroupBox *_rangeAxisModeBox;
+  // QGroupBox *_rangeAxisAltitudeBox;
+  // QGroupBox *_rangeAxisRangeBox;
+  // QGroupBox *_rangeAxisDoneBox;
   
-  QRadioButton *_rangeAxisModeUpButton;
-  QRadioButton *_rangeAxisModeDownButton;
-  QRadioButton *_rangeAxisModeAltitudeButton;
+  // QRadioButton *_rangeAxisModeUpButton;
+  // QRadioButton *_rangeAxisModeDownButton;
+  // QRadioButton *_rangeAxisModeAltitudeButton;
 
   // time axis settings dialog
   
-  QDialog *_timeAxisDialog;
-  QLabel *_timeAxisInfo;
+  // QDialog *_timeAxisDialog;
+  // QLabel *_timeAxisInfo;
 
-  QLineEdit *_timeSpanEdit;
+  // QLineEdit *_timeSpanEdit;
+
   double _timeSpanSecs;
 
   bool _archiveMode;
   bool _archiveRetrievalPending;
-  QRadioButton *_realtimeModeButton;
-  QRadioButton *_archiveModeButton;
+  // QRadioButton *_realtimeModeButton;
+  // QRadioButton *_archiveModeButton;
 
-  QGroupBox *_archiveTimeBox;
-  QDateTimeEdit *_archiveStartTimeEdit;
+  // QGroupBox *_archiveTimeBox;
+  // QDateTimeEdit *_archiveStartTimeEdit;
   RadxTime _archiveStartTime;
 
-  QLabel *_archiveEndTimeEcho;
+  // QLabel *_archiveEndTimeEcho;
   RadxTime _archiveEndTime;
   
-  double _xSecsClicked;
-  double _yKmClicked;
+  double _xLocClicked;
+  double _yLocClicked;
 
-  /// The current block size
-  unsigned int _blockSize;
-  
   // set top bar
 
   virtual void _setTitleBar(const string &radarName);

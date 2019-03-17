@@ -1670,15 +1670,15 @@
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'ascope_draw_time_grid_lines'
+    // Parameter 'ascope_draw_y_grid_lines'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_draw_time_grid_lines");
-    tt->descr = tdrpStrDup("Option to draw grid lines across plot at regular time intervals.");
+    tt->param_name = tdrpStrDup("ascope_draw_y_grid_lines");
+    tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_draw_time_grid_lines - &_start_;
+    tt->val_offset = (char *) &ascope_draw_y_grid_lines - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
@@ -1688,7 +1688,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("ascope_draw_x_grid_lines");
-    tt->descr = tdrpStrDup("Option to draw grid lines across plot at regular range intervals.");
+    tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_draw_x_grid_lines - &_start_;
     tt->single_val.b = pTRUE;

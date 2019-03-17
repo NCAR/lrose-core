@@ -100,8 +100,8 @@ AScopeMgr::AScopeMgr(const Params &params,
   
   // initialize geometry
   
-  _realtimeModeButton = NULL;
-  _archiveModeButton = NULL;
+  // _realtimeModeButton = NULL;
+  // _archiveModeButton = NULL;
 
   _timeSpanSecs = _params.ascope_time_span_secs;
   if (_params.input_mode == Params::ARCHIVE_TIME_MODE ||
@@ -111,9 +111,9 @@ AScopeMgr::AScopeMgr(const Params &params,
     _archiveMode = false;
   }
   _archiveRetrievalPending = false;
-  _archiveTimeBox = NULL;
-  _archiveStartTimeEdit = NULL;
-  _archiveEndTimeEcho = NULL;
+  // _archiveTimeBox = NULL;
+  // _archiveStartTimeEdit = NULL;
+  // _archiveEndTimeEcho = NULL;
 
   _archiveStartTime.set(_params.archive_start_time);
   _archiveEndTime = _archiveStartTime + _timeSpanSecs;
@@ -167,7 +167,7 @@ int AScopeMgr::run(QApplication &app)
 
 void AScopeMgr::_setTitleBar(const string &radarName)
 {
-  string windowTitle = "HAWK_EYE BSCAN -- " + radarName;
+  string windowTitle = "Sprite Time Series Tool - " + radarName;
   setWindowTitle(tr(windowTitle.c_str()));
 }
 
@@ -182,12 +182,12 @@ void AScopeMgr::_setupWindows()
   _main = new QFrame(this);
   setCentralWidget(_main);
   
-  // bscan - main window
+  // ascope - main window
 
   _ascopeFrame = new QFrame(_main);
   _ascopeFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-  // configure the BSCAN
+  // configure the ASCOPE
 
   _ascope = new AScopeWidget(_ascopeFrame, *this, _params);
   connect(this, SIGNAL(frameResized(const int, const int)),
@@ -195,12 +195,12 @@ void AScopeMgr::_setupWindows()
   
   // connect slots for location change
   
-  connect(_ascope, SIGNAL(locationClicked(double, double, const RadxRay*)),
-          this, SLOT(_ascopeLocationClicked(double, double, const RadxRay*)));
+  // connect(_ascope, SIGNAL(locationClicked(double, double, const RadxRay*)),
+  //         this, SLOT(_ascopeLocationClicked(double, double, const RadxRay*)));
   
   // create status panel
-  
-  // _createStatusPanel();
+
+  _createStatusPanel();
 
   // main window layout
   
@@ -210,12 +210,15 @@ void AScopeMgr::_setupWindows()
   mainLayout->addWidget(_ascopeFrame);
 
   _createActions();
+
   _createMenus();
+
   _initActions();
+
   
   // QString message = tr("A context menu is available by right-clicking");
   // statusBar()->showMessage(message);
-
+  
   _setTitleBar(_params.radar_name);
   setMinimumSize(400, 300);
   resize(_params.main_window_width, _params.main_window_height);
@@ -237,27 +240,24 @@ void AScopeMgr::_setupWindows()
   
   // _createTimeAxisDialog();
 
+  _ascope->refresh();
+
 }
 
 void AScopeMgr::_createMenus()
 {
 
   _fileMenu = menuBar()->addMenu(tr("&File"));
-  _fileMenu->addAction(_saveImageAct);
+  // _fileMenu->addAction(_saveImageAct);
   _fileMenu->addAction(_exitAct);
-
+  
   _configMenu = menuBar()->addMenu(tr("&Config"));
-  _configMenu->addAction(_rangeAxisAct);
-  _configMenu->addAction(_timeAxisAct);
+  // _configMenu->addAction(_rangeAxisAct);
+  // _configMenu->addAction(_timeAxisAct);
 
   _overlaysMenu = menuBar()->addMenu(tr("Overlays"));
-  _overlaysMenu->addAction(_rangeGridAct);
-  _overlaysMenu->addAction(_timeGridAct);
-  _overlaysMenu->addAction(_instHtLineAct);
-  _overlaysMenu->addAction(_latlonLegendAct);
-  _overlaysMenu->addAction(_speedTrackLegendAct);
-  _overlaysMenu->addAction(_distScaleAct);
-
+  _overlaysMenu->addAction(_xGridAct);
+  _overlaysMenu->addAction(_yGridAct);
 
   _actionsMenu = menuBar()->addMenu(tr("&Actions"));
   _actionsMenu->addAction(_showClickAct);
@@ -292,19 +292,19 @@ void AScopeMgr::_createActions()
 
   // set range axis settings
 
-  _rangeAxisAct = new QAction(tr("Range-Config"), this);
-  _rangeAxisAct->setStatusTip(tr("Set configuration for range axis"));
-  connect(_rangeAxisAct,
-          SIGNAL(triggered()), this,
-          SLOT(_showRangeAxisDialog()));
+  // _rangeAxisAct = new QAction(tr("Range-Config"), this);
+  // _rangeAxisAct->setStatusTip(tr("Set configuration for range axis"));
+  // connect(_rangeAxisAct,
+  //         SIGNAL(triggered()), this,
+  //         SLOT(_showRangeAxisDialog()));
 
   // set time axis settings
 
-  _timeAxisAct = new QAction(tr("Time-Config"), this);
-  _timeAxisAct->setStatusTip(tr("Set configuration for time axis"));
-  connect(_timeAxisAct,
-          SIGNAL(triggered()),
-          this, SLOT(_showTimeAxisDialog()));
+  // _timeAxisAct = new QAction(tr("Time-Config"), this);
+  // _timeAxisAct->setStatusTip(tr("Set configuration for time axis"));
+  // connect(_timeAxisAct,
+  //         SIGNAL(triggered()),
+  //         this, SLOT(_showTimeAxisDialog()));
 
   // unzoom display
 
@@ -332,53 +332,53 @@ void AScopeMgr::_createActions()
   _exitAct->setStatusTip(tr("Exit the application"));
   connect(_exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-  // show range grid lines
+  // show X grid lines
 
-  _rangeGridAct = new QAction(tr("Range Grid"), this);
-  _rangeGridAct->setStatusTip(tr("Turn range grid on/off"));
-  _rangeGridAct->setCheckable(true);
-  connect(_rangeGridAct, SIGNAL(triggered(bool)),
-	  _ascope, SLOT(setRangeGridEnabled(bool)));
+  _xGridAct = new QAction(tr("X Grid"), this);
+  _xGridAct->setStatusTip(tr("Turn X grid on/off"));
+  _xGridAct->setCheckable(true);
+  connect(_xGridAct, SIGNAL(triggered(bool)),
+          _ascope, SLOT(setXGridEnabled(bool)));
 
-  // show time grid lines
+  // show Y grid lines
 
-  _timeGridAct = new QAction(tr("Time Grid"), this);
-  _timeGridAct->setStatusTip(tr("Turn time grid on/off"));
-  _timeGridAct->setCheckable(true);
-  connect(_timeGridAct, SIGNAL(triggered(bool)),
-	  _ascope, SLOT(setTimeGridEnabled(bool)));
+  _yGridAct = new QAction(tr("Y Grid"), this);
+  _yGridAct->setStatusTip(tr("Turn Y grid on/off"));
+  _yGridAct->setCheckable(true);
+  connect(_yGridAct, SIGNAL(triggered(bool)),
+          _ascope, SLOT(setYGridEnabled(bool)));
   
   // show instrument height line in altitude display
 
-  _instHtLineAct = new QAction(tr("Instrument Ht Line"), this);
-  _instHtLineAct->setStatusTip(tr("Turn instrument height line on/off"));
-  _instHtLineAct->setCheckable(true);
-  connect(_instHtLineAct, SIGNAL(triggered(bool)),
-	  _ascope, SLOT(setInstHtLineEnabled(bool)));
+  // _instHtLineAct = new QAction(tr("Instrument Ht Line"), this);
+  // _instHtLineAct->setStatusTip(tr("Turn instrument height line on/off"));
+  // _instHtLineAct->setCheckable(true);
+  // connect(_instHtLineAct, SIGNAL(triggered(bool)),
+  //         _ascope, SLOT(setInstHtLineEnabled(bool)));
 
   // show latlon legend
 
-  _latlonLegendAct = new QAction(tr("Starting lat/lon legend"), this);
-  _latlonLegendAct->setStatusTip(tr("Display starting lat/lon as a legend"));
-  _latlonLegendAct->setCheckable(true);
-  connect(_latlonLegendAct, SIGNAL(triggered(bool)),
-	  _ascope, SLOT(setLatlonLegendEnabled(bool)));
+  // _latlonLegendAct = new QAction(tr("Starting lat/lon legend"), this);
+  // _latlonLegendAct->setStatusTip(tr("Display starting lat/lon as a legend"));
+  // _latlonLegendAct->setCheckable(true);
+  // connect(_latlonLegendAct, SIGNAL(triggered(bool)),
+  //         _ascope, SLOT(setLatlonLegendEnabled(bool)));
 
   // show dist/track legend
 
-  _speedTrackLegendAct = new QAction(tr("Mean speed/track legend"), this);
-  _speedTrackLegendAct->setStatusTip(tr("Display mean speed and track as a legend"));
-  _speedTrackLegendAct->setCheckable(true);
-  connect(_speedTrackLegendAct, SIGNAL(triggered(bool)),
-	  _ascope, SLOT(setSpeedTrackLegendEnabled(bool)));
+  // _speedTrackLegendAct = new QAction(tr("Mean speed/track legend"), this);
+  // _speedTrackLegendAct->setStatusTip(tr("Display mean speed and track as a legend"));
+  // _speedTrackLegendAct->setCheckable(true);
+  // connect(_speedTrackLegendAct, SIGNAL(triggered(bool)),
+  //         _ascope, SLOT(setSpeedTrackLegendEnabled(bool)));
 
   // display distance ticks
 
-  _distScaleAct = new QAction(tr("Distance scale"), this);
-  _distScaleAct->setStatusTip(tr("Display distance scale in addition to time scale"));
-  _distScaleAct->setCheckable(true);
-  connect(_distScaleAct, SIGNAL(triggered(bool)),
-	  this, SLOT(_setDistScaleEnabled()));
+  // _distScaleAct = new QAction(tr("Distance scale"), this);
+  // _distScaleAct->setStatusTip(tr("Display distance scale in addition to time scale"));
+  // _distScaleAct->setCheckable(true);
+  // connect(_distScaleAct, SIGNAL(triggered(bool)),
+  //         this, SLOT(_setDistScaleEnabled()));
 
   // howto / about
 
@@ -396,9 +396,9 @@ void AScopeMgr::_createActions()
 
   // save image
   
-  _saveImageAct = new QAction(tr("Save-Image"), this);
-  _saveImageAct->setStatusTip(tr("Save image to png file"));
-  connect(_saveImageAct, SIGNAL(triggered()), this, SLOT(_saveImageToFile()));
+  // _saveImageAct = new QAction(tr("Save-Image"), this);
+  // _saveImageAct->setStatusTip(tr("Save image to png file"));
+  // connect(_saveImageAct, SIGNAL(triggered()), this, SLOT(_saveImageToFile()));
 
 }
 
@@ -409,15 +409,19 @@ void AScopeMgr::_initActions()
 {
 
   if (_params.ascope_draw_x_grid_lines) {
-    _rangeGridAct->setChecked(true);
+    _xGridAct->setChecked(false); // initialize to false
+    _xGridAct->trigger();         // toggle to true
   } else {
-    _rangeGridAct->setChecked(false);
+    _xGridAct->setChecked(true); // initialize to true
+    _xGridAct->trigger();        // toggle to false
   }
-
-  if (_params.ascope_draw_time_grid_lines) {
-    _timeGridAct->setChecked(true);
+  
+  if (_params.ascope_draw_y_grid_lines) {
+    _yGridAct->setChecked(false); // initialize to false
+    _yGridAct->trigger();         // toggle to true
   } else {
-    _timeGridAct->setChecked(false);
+    _yGridAct->setChecked(true);  // initialize to true
+    _yGridAct->trigger();         // toggle to false
   }
 
 }
@@ -759,21 +763,21 @@ void AScopeMgr::_handleArchiveData()
   // set cursor to wait cursor
 
   this->setCursor(Qt::WaitCursor);
-  _timeAxisDialog->setCursor(Qt::WaitCursor);
+  // _timeAxisDialog->setCursor(Qt::WaitCursor);
 
   // get data
 
-  if (_getArchiveData()) {
-    this->setCursor(Qt::ArrowCursor);
-    _timeAxisDialog->setCursor(Qt::ArrowCursor);
-    return;
-  }
+  // if (_getArchiveData()) {
+  //   this->setCursor(Qt::ArrowCursor);
+  //   _timeAxisDialog->setCursor(Qt::ArrowCursor);
+  //   return;
+  // }
 
   // plot the data
 
-  _plotArchiveData();
-  this->setCursor(Qt::ArrowCursor);
-  _timeAxisDialog->setCursor(Qt::ArrowCursor);
+  // _plotArchiveData();
+  // this->setCursor(Qt::ArrowCursor);
+  // _timeAxisDialog->setCursor(Qt::ArrowCursor);
 
 }
 
@@ -953,8 +957,8 @@ void AScopeMgr::_locationClicked(double xsecs, double ykm,
   if (_params.debug) {
     cerr << "====>> location clicked - xsecs, ykm: " << xsecs << ", " << ykm << endl;
   }
-  _xSecsClicked = xsecs;
-  _yKmClicked = ykm;
+  // _xSecsClicked = xsecs;
+  // _yKmClicked = ykm;
   // _rayClicked = closestRay;
 
   // _locationClicked(_xSecsClicked, _yKmClicked, _rayClicked);
@@ -1219,37 +1223,37 @@ void AScopeMgr::enableZoomButton() const
 void AScopeMgr::_setTimeSpan()
 {
 
-  double timeSpan;
-  if (sscanf(_timeSpanEdit->text().toLocal8Bit().data(), 
-             "%lg", &timeSpan) != 1) {
-    QErrorMessage errMsg(_timeSpanEdit);
-    string text("Bad entry for time span: ");
-    text += _timeSpanEdit->text().toLocal8Bit().data();
-    errMsg.setModal(true);
-    errMsg.showMessage(text.c_str());
-    errMsg.exec();
-    _resetTimeSpanToDefault();
-    return;
-  }
+  // double timeSpan;
+  // if (sscanf(_timeSpanEdit->text().toLocal8Bit().data(), 
+  //            "%lg", &timeSpan) != 1) {
+  //   QErrorMessage errMsg(_timeSpanEdit);
+  //   string text("Bad entry for time span: ");
+  //   text += _timeSpanEdit->text().toLocal8Bit().data();
+  //   errMsg.setModal(true);
+  //   errMsg.showMessage(text.c_str());
+  //   errMsg.exec();
+  //   _resetTimeSpanToDefault();
+  //   return;
+  // }
   
-  _timeSpanSecs = timeSpan;
-  _plotEndTime = _plotStartTime + _timeSpanSecs;
+  // _timeSpanSecs = timeSpan;
+  // _plotEndTime = _plotStartTime + _timeSpanSecs;
     
-  _setArchiveEndTime();
-  _configureAxes();
+  // _setArchiveEndTime();
+  // _configureAxes();
 
 }
 
 void AScopeMgr::_resetTimeSpanToDefault()
 {
-  _timeSpanSecs = _params.ascope_time_span_secs;
-  char text[1024];
-  sprintf(text, "%g", _timeSpanSecs);
-  if (_timeSpanEdit) {
-    _timeSpanEdit->setText(text);
-  }
-  _setArchiveEndTime();
-  _configureAxes();
+  // _timeSpanSecs = _params.ascope_time_span_secs;
+  // char text[1024];
+  // sprintf(text, "%g", _timeSpanSecs);
+  // if (_timeSpanEdit) {
+  //   _timeSpanEdit->setText(text);
+  // }
+  // _setArchiveEndTime();
+  // _configureAxes();
 }
 
 ////////////////////////////////////////////////////////
@@ -1257,12 +1261,12 @@ void AScopeMgr::_resetTimeSpanToDefault()
 
 void AScopeMgr::_setStartTimeFromGui(const QDateTime &datetime1)
 {
-  QDateTime datetime = _archiveStartTimeEdit->dateTime();
-  QDate date = datetime.date();
-  QTime time = datetime.time();
-  _archiveStartTime.set(date.year(), date.month(), date.day(),
-                        time.hour(), time.minute(), time.second());
-  _setArchiveEndTime();
+  // QDateTime datetime = _archiveStartTimeEdit->dateTime();
+  // QDate date = datetime.date();
+  // QTime time = datetime.time();
+  // _archiveStartTime.set(date.year(), date.month(), date.day(),
+  //                       time.hour(), time.minute(), time.second());
+  // _setArchiveEndTime();
 }
 
 ////////////////////////////////////////////////////////
@@ -1270,12 +1274,12 @@ void AScopeMgr::_setStartTimeFromGui(const QDateTime &datetime1)
 
 void AScopeMgr::_setGuiFromStartTime()
 {
-  QDate date(_archiveStartTime.getYear(),
-             _archiveStartTime.getMonth(), _archiveStartTime.getDay());
-  QTime time(_archiveStartTime.getHour(),
-             _archiveStartTime.getMin(), _archiveStartTime.getSec());
-  QDateTime datetime(date, time);
-  _archiveStartTimeEdit->setDateTime(datetime);
+  // QDate date(_archiveStartTime.getYear(),
+  //            _archiveStartTime.getMonth(), _archiveStartTime.getDay());
+  // QTime time(_archiveStartTime.getHour(),
+  //            _archiveStartTime.getMin(), _archiveStartTime.getSec());
+  // QDateTime datetime(date, time);
+  // _archiveStartTimeEdit->setDateTime(datetime);
 }
 
 ////////////////////////////////////////////////////////
@@ -1285,12 +1289,12 @@ void AScopeMgr::_setArchiveStartTimeToDefault()
 
 {
 
-  _archiveStartTime.set(_params.archive_start_time);
-  if (!_archiveStartTime.isValid()) {
-    _archiveStartTime.set(RadxTime::NOW);
-  }
-  _setGuiFromStartTime();
-  _setArchiveEndTime();
+  // _archiveStartTime.set(_params.archive_start_time);
+  // if (!_archiveStartTime.isValid()) {
+  //   _archiveStartTime.set(RadxTime::NOW);
+  // }
+  // _setGuiFromStartTime();
+  // _setArchiveEndTime();
 
 }
 
@@ -1301,16 +1305,16 @@ void AScopeMgr::_setArchiveStartTime(const RadxTime &rtime)
 
 {
 
-  if (rtime.utime() == 0) {
-    return;
-  }
+  // if (rtime.utime() == 0) {
+  //   return;
+  // }
 
-  _archiveStartTime = rtime;
-  if (!_archiveStartTime.isValid()) {
-    _archiveStartTime.set(RadxTime::NOW);
-  }
-  _setGuiFromStartTime();
-  _setArchiveEndTime();
+  // _archiveStartTime = rtime;
+  // if (!_archiveStartTime.isValid()) {
+  //   _archiveStartTime.set(RadxTime::NOW);
+  // }
+  // _setGuiFromStartTime();
+  // _setArchiveEndTime();
 
 }
 
@@ -1321,10 +1325,10 @@ void AScopeMgr::_setArchiveEndTime()
 
 {
 
-  _archiveEndTime = _archiveStartTime + _timeSpanSecs;
-  if (_archiveEndTimeEcho) {
-    _archiveEndTimeEcho->setText(_archiveEndTime.asString(3).c_str());
-  }
+  // _archiveEndTime = _archiveStartTime + _timeSpanSecs;
+  // if (_archiveEndTimeEcho) {
+  //   _archiveEndTimeEcho->setText(_archiveEndTime.asString(3).c_str());
+  // }
 
 }
 
@@ -1334,27 +1338,27 @@ void AScopeMgr::_setArchiveEndTime()
 
 void AScopeMgr::_setDataRetrievalMode()
 {
-  if (!_archiveTimeBox) {
-    return;
-  }
-  if (_realtimeModeButton && _realtimeModeButton->isChecked()) {
-    if (_archiveMode) {
-      _archiveMode = false;
-      _archiveTimeBox->setEnabled(false);
-      _ascope->activateRealtimeRendering();
-    }
-  } else {
-    if (!_archiveMode) {
-      _archiveMode = true;
-      _archiveTimeBox->setEnabled(true);
-      if (_plotStartTime.utime() != 0) {
-        _setArchiveStartTime(_plotStartTime - _timeSpanSecs);
-        _setGuiFromStartTime();
-      }
-      _ascope->activateArchiveRendering();
-    }
-  }
-  _configureAxes();
+  // if (!_archiveTimeBox) {
+  //   return;
+  // }
+  // if (_realtimeModeButton && _realtimeModeButton->isChecked()) {
+  //   if (_archiveMode) {
+  //     _archiveMode = false;
+  //     _archiveTimeBox->setEnabled(false);
+  //     _ascope->activateRealtimeRendering();
+  //   }
+  // } else {
+  //   if (!_archiveMode) {
+  //     _archiveMode = true;
+  //     _archiveTimeBox->setEnabled(true);
+  //     if (_plotStartTime.utime() != 0) {
+  //       _setArchiveStartTime(_plotStartTime - _timeSpanSecs);
+  //       _setGuiFromStartTime();
+  //     }
+  //     _ascope->activateArchiveRendering();
+  //   }
+  // }
+  // _configureAxes();
 }
 
 ////////////////////////////////////////////////////////
@@ -1443,8 +1447,8 @@ void AScopeMgr::_showClick()
 void AScopeMgr::_howto()
 {
   string text;
-  text += "HOWTO HINTS FOR HAWK-EYE in BSCAN mode\n";
-  text += "======================================\n";
+  text += "HOWTO HINTS FOR SPRITE\n";
+  text += "======================\n";
   text += "\n";
   text += "To go forward  in time, click in data window, hit Right Arrow\n";
   text += "To go backward in time, click in data window, hit Left  Arrow\n";
@@ -1466,11 +1470,10 @@ void AScopeMgr::_about()
 {
   string text;
   
-  text += "HawkEye is an LROSE application for engineering and research display of radar data. \n\n";
-  text += "Get help with HawkEye ...  \n ";
+  text += "Sprite is the LROSE app for display of time series data\n\n";
+  text += "Get help with Sprite ...  \n ";
   text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
-  text += "\nHawkEye Version ... \n ";  
-  text += "\nCopyright UCAR (c) 1990 - 2018  ";  
+  text += "\nCopyright UCAR (c) 1990 - 2019  ";  
   text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
   text += "\nNational Center for Atmospheric Research (NCAR)   ";  
   text += "\nBoulder, Colorado, USA ";  
@@ -1493,5 +1496,279 @@ void AScopeMgr::_about()
   text += " WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.";  
 
   QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
+}
+
+//////////////////////////////////////////////
+// create the status panel
+
+void AScopeMgr::_createStatusPanel()
+{
+ 
+  Qt::Alignment alignLeft(Qt::AlignLeft);
+  Qt::Alignment alignRight(Qt::AlignRight);
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  Qt::Alignment alignTop(Qt::AlignTop);
+
+  // status panel - rows of label value pairs
+  
+  _statusPanel = new QGroupBox(_main);
+  _statusLayout = new QGridLayout(_statusPanel);
+  _statusLayout->setVerticalSpacing(5);
+
+  int row = 0;
+  
+  // fonts
+  
+  QLabel dummy;
+  QFont font = dummy.font();
+  QFont font2 = dummy.font();
+  QFont font6 = dummy.font();
+  int fsize = _params.label_font_size;
+  int fsize2 = _params.label_font_size + 2;
+  int fsize6 = _params.label_font_size + 6;
+  font.setPixelSize(fsize);
+  font2.setPixelSize(fsize2);
+  font6.setPixelSize(fsize6);
+
+  // radar and site name
+  
+  _radarName = new QLabel(_statusPanel);
+  string rname(_params.radar_name);
+  _radarName->setText(rname.c_str());
+  _radarName->setFont(font6);
+  _statusLayout->addWidget(_radarName, row, 0, 1, 4, alignCenter);
+  row++;
+
+  // date and time
+
+  _dateVal = new QLabel("9999/99/99", _statusPanel);
+  _dateVal->setFont(font2);
+  _statusLayout->addWidget(_dateVal, row, 0, 1, 2, alignCenter);
+  row++;
+
+  _timeVal = new QLabel("99:99:99.999", _statusPanel);
+  _timeVal->setFont(font2);
+  _statusLayout->addWidget(_timeVal, row, 0, 1, 2, alignCenter);
+  row++;
+
+
+  // other labels.  Note that we set the minimum size of the column
+  // containing the right hand labels in timerEvent() to prevent the
+  // wiggling we were seeing in certain circumstances.  For this to work,
+  // the default values for these fields must represent the maximum digits
+  // posible for each field.
+
+  _elevVal = _createStatusVal("Elev", "-99.99", row++, fsize2);
+  _azVal = _createStatusVal("Az", "-999.99", row++, fsize2);
+
+  if (_params.show_status_in_gui.fixed_angle) {
+    _fixedAngVal = _createStatusVal("Fixed ang", "-99.99", row++, fsize2);
+  } else {
+    _fixedAngVal = NULL;
+  }
+  
+  if (_params.show_status_in_gui.volume_number) {
+    _volNumVal = _createStatusVal("Volume", "0", row++, fsize);
+  } else {
+    _volNumVal = NULL;
+  }
+  
+  if (_params.show_status_in_gui.sweep_number) {
+    _sweepNumVal = _createStatusVal("Sweep", "0", row++, fsize);
+  } else {
+    _sweepNumVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.n_samples) {
+    _nSamplesVal = _createStatusVal("N samp", "0", row++, fsize);
+  } else {
+    _nSamplesVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.n_gates) {
+    _nGatesVal = _createStatusVal("N gates", "0", row++, fsize);
+  } else {
+    _nGatesVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.gate_length) {
+    _gateSpacingVal = _createStatusVal("Gate len", "0", row++, fsize);
+  } else {
+    _gateSpacingVal = NULL;
+  }
+  
+  if (_params.show_status_in_gui.pulse_width) {
+    _pulseWidthVal = _createStatusVal("Pulse width", "-9999", row++, fsize);
+  } else {
+    _pulseWidthVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.prf_mode) {
+    _prfModeVal = _createStatusVal("PRF mode", "Fixed", row++, fsize);
+  } else {
+    _prfModeVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.prf) {
+    _prfVal = _createStatusVal("PRF", "-9999", row++, fsize);
+  } else {
+    _prfVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.nyquist) {
+    _nyquistVal = _createStatusVal("Nyquist", "-9999", row++, fsize);
+  } else {
+    _nyquistVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.max_range) {
+    _maxRangeVal = _createStatusVal("Max range", "-9999", row++, fsize);
+  } else {
+    _maxRangeVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.unambiguous_range) {
+    _unambigRangeVal = _createStatusVal("U-A range", "-9999", row++, fsize);
+  } else {
+    _unambigRangeVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.measured_power_h) {
+    _powerHVal = _createStatusVal("Power H", "-9999", row++, fsize);
+  } else {
+    _powerHVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.measured_power_v) {
+    _powerVVal = _createStatusVal("Power V", "-9999", row++, fsize);
+  } else {
+    _powerVVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.scan_name) {
+    _scanNameVal = _createStatusVal("Scan name", "unknown", row++, fsize);
+  } else {
+    _scanNameVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.scan_mode) {
+    _sweepModeVal = _createStatusVal("Scan mode", "SUR", row++, fsize);
+  } else {
+    _sweepModeVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.polarization_mode) {
+    _polModeVal = _createStatusVal("Pol mode", "Single", row++, fsize);
+  } else {
+    _polModeVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.latitude) {
+    _latVal = _createStatusVal("Lat", "-99.999", row++, fsize);
+  } else {
+    _latVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.longitude) {
+    _lonVal = _createStatusVal("Lon", "-999.999", row++, fsize);
+  } else {
+    _lonVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.altitude) {
+    if (_altitudeInFeet) {
+      _altVal = _createStatusVal("Alt(kft)", "-999.999",
+                                 row++, fsize, &_altLabel);
+    } else {
+      _altVal = _createStatusVal("Alt(km)", "-999.999",
+                                 row++, fsize, &_altLabel);
+    }
+  } else {
+    _altVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.altitude_rate) {
+    if (_altitudeInFeet) {
+      _altRateVal = _createStatusVal("AltRate(ft/s)", "-999.999",
+                                     row++, fsize, &_altRateLabel);
+    } else {
+      _altRateVal = _createStatusVal("AltRate(m/s)", "-999.999",
+                                     row++, fsize, &_altRateLabel);
+    }
+  } else {
+    _altRateVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.speed) {
+    _speedVal = _createStatusVal("Speed(m/s)", "-999.99", row++, fsize);
+  } else {
+    _speedVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.heading) {
+    _headingVal = _createStatusVal("Heading(deg)", "-999.99", row++, fsize);
+  } else {
+    _headingVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.track) {
+    _trackVal = _createStatusVal("Track(deg)", "-999.99", row++, fsize);
+  } else {
+    _trackVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.sun_elevation) {
+    _sunElVal = _createStatusVal("Sun el (deg)", "-999.999", row++, fsize);
+  } else {
+    _sunElVal = NULL;
+  }
+
+  if (_params.show_status_in_gui.sun_azimuth) {
+    _sunAzVal = _createStatusVal("Sun az (deg)", "-999.999", row++, fsize);
+  } else {
+    _sunAzVal = NULL;
+  }
+
+  QLabel *spacerRow = new QLabel("", _statusPanel);
+  _statusLayout->addWidget(spacerRow, row, 0);
+  _statusLayout->setRowStretch(row, 1);
+  row++;
+
+}
+
+//////////////////////////////////////////////////
+// create a row in the status panel
+
+QLabel *AScopeMgr::_createStatusVal(const string &leftLabel,
+                                    const string &rightLabel,
+                                    int row, 
+                                    int fontSize,
+                                    QLabel **label)
+  
+{
+
+  QLabel *left = new QLabel(_statusPanel);
+  left->setText(leftLabel.c_str());
+  Qt::Alignment alignRight(Qt::AlignRight);
+  _statusLayout->addWidget(left, row, 0, alignRight);
+  if (label != NULL) {
+    *label = left;
+  }
+
+  QLabel *right = new QLabel(_statusPanel);
+  right->setText(rightLabel.c_str());
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  _statusLayout->addWidget(right, row, 1, alignRight);
+
+  if (fontSize > 0) {
+    QFont font = left->font();
+    font.setPixelSize(fontSize);
+    left->setFont(font);
+    right->setFont(font);
+  }
+
+  _valsRight.push_back(right);
+
+  return right;
 }
 
