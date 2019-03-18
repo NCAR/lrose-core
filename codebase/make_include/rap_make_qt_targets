@@ -76,7 +76,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_cf_bin_targets
 include $(RAP_MAKE_INC_DIR)/rap_make_misc_targets
 
 clean_moc:
-	$(RM) moc_*.cpp Makefile.qmake
+	$(RM) moc_*.cc moc_*.cpp Makefile.qmake
 
 clean_qmake:
 	$(RM) Makefile.qmake

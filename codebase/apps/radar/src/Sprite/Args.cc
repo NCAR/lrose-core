@@ -177,7 +177,7 @@ int Args::parse (const int argc, const char **argv)
       if (i < argc - 1) {
         sprintf(tmp_str, "archive_start_time = \"%s\";", argv[++i]);
         TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "begin_in_archive_mode = TRUE;");
+        sprintf(tmp_str, "input_mode = ARCHIVE_TIME_MODE;");
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -186,9 +186,9 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-time_span")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "bscan_time_span_secs = %s;", argv[++i]);
-        TDRP_add_override(&override, tmp_str);
         sprintf(tmp_str, "archive_time_span_secs = %s;", argv[i]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "input_mode = ARCHIVE_TIME_MODE;");
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -199,7 +199,7 @@ int Args::parse (const int argc, const char **argv)
       if (i < argc - 1) {
         sprintf(tmp_str, "archive_data_url = \"%s\";", argv[++i]);
         TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "begin_in_archive_mode = TRUE;");
+        sprintf(tmp_str, "input_mode = ARCHIVE_TIME_MODE;");
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -217,7 +217,7 @@ int Args::parse (const int argc, const char **argv)
 	    inputFileList.push_back(argv[j]);
 	  }
 	}
-        sprintf(tmp_str, "begin_in_archive_mode = TRUE;");
+        sprintf(tmp_str, "input_mode = FILE_LIST_MODE;");
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;

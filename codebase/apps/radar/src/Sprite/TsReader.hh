@@ -1,149 +1,244 @@
-/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/* ** Copyright UCAR (c) 1990 - 2016                                         */
-/* ** University Corporation for Atmospheric Research (UCAR)                 */
-/* ** National Center for Atmospheric Research (NCAR)                        */
-/* ** Boulder, Colorado, USA                                                 */
-/* ** BSD licence applies - redistribution and use in source and binary      */
-/* ** forms, with or without modification, are permitted provided that       */
-/* ** the following conditions are met:                                      */
-/* ** 1) If the software is modified to produce derivative works,            */
-/* ** such modified software should be clearly marked, so as not             */
-/* ** to confuse it with the version available from UCAR.                    */
-/* ** 2) Redistributions of source code must retain the above copyright      */
-/* ** notice, this list of conditions and the following disclaimer.          */
-/* ** 3) Redistributions in binary form must reproduce the above copyright   */
-/* ** notice, this list of conditions and the following disclaimer in the    */
-/* ** documentation and/or other materials provided with the distribution.   */
-/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
-/* ** if any, may be used to endorse or promote products derived from        */
-/* ** this software without specific prior written permission.               */
-/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
-/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
-/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
-/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-#ifndef TSREADER_HH_
-#define TSREADER_HH_
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// ** Copyright UCAR (c) 1990 - 2016                                         
+// ** University Corporation for Atmospheric Research (UCAR)                 
+// ** National Center for Atmospheric Research (NCAR)                        
+// ** Boulder, Colorado, USA                                                 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from UCAR.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of UCAR nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+/////////////////////////////////////////////////////////////
+// TsReader.hh
+//
+// Mike Dixon, EOL, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// March 2019
+//
+///////////////////////////////////////////////////////////////
 
-#include <QObject>
-#include <QMetaType>
+#ifndef TsReader_hh
+#define TsReader_hh
 
 #include <string>
-#include <toolsa/Socket.hh>
-#include <toolsa/MemBuf.hh>
-#include <radar/iwrf_data.h>
+#include <vector>
+#include <deque>
+#include <set>
+#include <toolsa/DateTime.hh>
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
-#include <radar/IwrfTsBurst.hh>
 #include <radar/IwrfTsReader.hh>
+#include "Params.hh"
+#include "Args.hh"
+#include "Beam.hh"
+using namespace std;
 
-#include "AScopeWidget.hh"
+////////////////////////
+// This class
 
-/// A Time series reader for the AScope. It reads IWRF data and translates
-/// DDS samples to AScope::TimeSeries.
-
-Q_DECLARE_METATYPE(AScope::TimeSeries)
+class TsReader {
   
-class AScopeReader : public QObject
-{
-
-  Q_OBJECT
-
 public:
-    
-  /// Constructor
-  /// @param host The server host
-  /// @param port The server port
-  /// @param fmqPath - set in FMQ mode
-    AScopeReader(const std::string &host, int port,
-                 const std::string &fmqPath,
-                 bool simulMode,
-                 AScope &scope, 
-                 int radarId,
-                 int burstChan,
-                 int debugLevel);
-
-  /// Destructor
-  virtual ~AScopeReader();
   
-  signals:
+  // inner class for storing paths and their times
 
-  /// This signal provides an item that falls within
-  /// the desired bandwidth specification.
-  /// @param pItem A pointer to the item.
-  /// It must be returned via returnItem().
-    
-  void newItem(AScope::TimeSeries pItem);
-
-public slots:
-
-  /// Use this slot to return an item
-  /// @param pItem the item to be returned.
-
-  void returnItemSlot(AScope::TimeSeries pItem);
+  class TimePath {
+  public:
+    time_t validTime;
+    time_t startTime;
+    time_t endTime;
+    string fileName;
+    string filePath;
+    double fixedAngle;
+    TimePath(time_t valid_time,
+             time_t start_time,
+             time_t end_time,
+             const string &name,
+             const string &path);
+  };
   
-  // respond to timer events
+  class TimePathCompare {
+  public:
+    bool operator()(const TimePath &a, const TimePath &b) const {
+      return a.validTime < b.validTime;
+    }
+  };
+
+  typedef set<TimePath, TimePathCompare > TimePathSet;
+
+  // scan mode for determining PPI vs RHI operations
   
-  void timerEvent(QTimerEvent *event);
-    
+  typedef enum {
+    SCAN_TYPE_UNKNOWN,
+    SCAN_TYPE_PPI,
+    SCAN_TYPE_RHI
+  } scan_type_t;
+  
+  // constructor
+  
+  TsReader (const string &prog_name,
+            const Params &params,
+            const Args &args);
+  
+  // destructor
+  
+  ~TsReader();
+
+  // constructor OK?
+
+  bool OK;
+
+  // set the number of samples
+
+  void setNSamples(int val) { _nSamples = val; }
+
+  //////////////////////////////////////////////////////
+  // read the next beam
+  
+  // get the next beam in realtime or archive sequence
+  // returns Beam object pointer on success, NULL on failure
+  // caller must free beam
+  
+  Beam *getNextBeam();
+  
+  // get the previous beam in realtime or archive sequence
+  // returns Beam object pointer on success, NULL on failure
+  // caller must free beam
+  
+  Beam *getPreviousBeam();
+  
+  // position to get the previous beam in realtime or archive sequence
+  // we need to reset the queue and position to read the previous beam
+  // returns 0 on success, -1 on error
+  
+  int positionForPreviousBeam();
+  
+  // position at end of queue
+  
+  void seekToEndOfQueue();
+
+  // get the closest beam to the location specified
+  // and within the specified time
+  // returns Beam object pointer on success, NULL on failure
+  // caller must free beam
+  
+  Beam *getClosestBeam(time_t startTime, time_t endTime,
+                       double az, double el, bool isRhi);
+
+  //////////////////////////////////////////////////////
+  // reading data in follow mode
+
+  // get the path to best file
+
+  string getFilePath() const { return _filePath; }
+  
+  // get scan mode
+
+  string getScanModeStr() const { return _scanModeStr; }
+  
+  // get ops info
+
+  const IwrfTsInfo &getOpsInfo() const { return _pulseReader->getOpsInfo(); }
+  bool isOpsInfoNew() const { return _pulseReader->isOpsInfoNew(); }
+  scan_type_t getScanType() const { return _scanType; }
+
 protected:
-
+  
 private:
 
-  int _radarId;
-  int _burstChan;
-  int _debugLevel;
+  string _progName;
+  const Params &_params;
+  const Args &_args;
+  bool _isRhi;
+  string _scanModeStr;
+  IwrfDebug_t _iwrfDebug;
 
-  std::string _serverHost;
-  int _serverPort;
-  std::string _serverFmq;
-  bool _simulMode;
-
-  AScope &_scope;
+  // Pulse reader
   
-  // read in data
-
   IwrfTsReader *_pulseReader;
-  bool _haveChan1;
-  int _dataTimerId;
+  string _filePath;
+  DateTime _archiveStartTime;
+  DateTime _archiveEndTime;
+  int _timeSpanSecs;
 
-  // pulse stats
+  // pulse queue
+  
+  deque<const IwrfTsPulse *> _pulseQueue;
+  long _pulseSeqNum;
+  int64_t _nPulsesRead;
+  int64_t _prevPulseSeqNum;
+  
+  // number of gates
 
+  int _nGates;
+
+  // number of samples
+  
   int _nSamples;
-  int _pulseCount;
+
+  // indexing
+
+  bool _indexedBeams;
+  double _indexedRes;
+
+  // beam time and location
+
+  scan_type_t _scanType;
+  time_t _time;
+  double _az;
+  double _el;
+  double _prt;
+
+  // pulse-to-pulse HV alternating mode
+
+  bool _isAlternating;
+
+  // staggered PRT
+
+  bool _isStaggeredPrt;
+  double _prtShort;
+  double _prtLong;
+  int _nGatesPrtShort;
+  int _nGatesPrtLong;
+
+  // private functions
+
+  Beam *_getBeamPpi();
+  Beam *_getBeamRhi();
+  bool _checkIsBeamPpi(size_t midIndex);
+  bool _checkIsBeamRhi(size_t midIndex);
+  Beam *_makeBeam(size_t midIndex);
   
-  // info and pulses
+  void _addPulseToQueue(const IwrfTsPulse *pulse);
+  void _clearPulseQueue();
 
-  vector<IwrfTsPulse *> _pulses; // SIM mode, or when H/V flag is 1
-  vector<IwrfTsPulse *> _pulsesV; // when H/V flag is 0
-
-  // xmit mode
-
-  typedef enum {
-    CHANNEL_MODE_HV_SIM,
-    CHANNEL_MODE_V_ONLY,
-    CHANNEL_MODE_ALTERNATING
-  } channelMode_t;
-  channelMode_t _channelMode;
-
-  // sequence number for time series to ascope
-
-  size_t _tsSeqNum;
-
-  // methods
+  int _findBestFile(time_t startTime, time_t endTime,
+                    double az, double el, bool isRhi);
+  void _getDayDirs(const string &topDir, TimePathSet &dayDirs);
+  int _readFile();
   
-  int _readData();
-  IwrfTsPulse *_getNextPulse();
-  void _sendDataToAScope();
-  int _loadTs(int nGates,
-              int channelIn,
-              const vector<IwrfTsPulse *> &pulses,
-              int channelOut,
-              AScope::FloatTimeSeries &ts);
-  int _loadBurst(const IwrfTsBurst &burst,
-                 int channelOut,
-                 AScope::FloatTimeSeries &ts);
+  void _checkIsAlternating();
+  void _checkIsStaggeredPrt();
+  double _conditionAz(double az);
+  double _conditionAz(double az, double refAz);
+  double _conditionEl(double el);
+  
 
 };
 
+#endif
 
-#endif /*ASCOPEREADER_H_*/

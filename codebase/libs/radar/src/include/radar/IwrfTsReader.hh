@@ -244,15 +244,15 @@ public:
   // Calls heartbeat_func when blocked, if non-null.
   
   IwrfTsReaderFile(const char *input_dir,
-                    int max_realtime_age_secs = 3600,
-                    DsInput_heartbeat_t heartbeat_func = PMU_auto_register,
-                    bool use_ldata_info = TRUE,
-                    IwrfDebug_t debug = IWRF_DEBUG_OFF);
-
+                   int max_realtime_age_secs = 3600,
+                   DsInput_heartbeat_t heartbeat_func = PMU_auto_register,
+                   bool use_ldata_info = TRUE,
+                   IwrfDebug_t debug = IWRF_DEBUG_OFF);
+  
   // ARCHIVE mode - specify list of files to be read
   
   IwrfTsReaderFile(const vector<string> &fileList,
-                    IwrfDebug_t debug = IWRF_DEBUG_OFF);
+                   IwrfDebug_t debug = IWRF_DEBUG_OFF);
  
   // destructor
   

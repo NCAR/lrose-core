@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef DisplayWidget_HH
-#define DisplayWidget_HH
+#ifndef AScopeWidget_HH
+#define AScopeWidget_HH
 
 #ifndef DLL_EXPORT
 #ifdef WIN32
@@ -49,16 +49,17 @@
 #include <QTransform>
 
 #include "Params.hh"
-#include "BscanBeam.hh"
-#include "FieldRenderer.hh"
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
 
-class DisplayManager;
+class AScopeMgr;
+class Beam;
+class RadxRay;
 
-/// Class for displaying data
+/// Widget class - AScope mode
+/// Plot the AScope and spectra for a beam
 
-class DLL_EXPORT DisplayWidget : public QWidget
+class DLL_EXPORT AScopeWidget : public QWidget
 {
 
   // must include this if you use Qt signals/slots
@@ -76,103 +77,37 @@ class DLL_EXPORT DisplayWidget : public QWidget
    * @param[in] parent         Parent widget.
    * @param[in] params         TDRP parameters.
    */
-  
-  DisplayWidget(QWidget* parent,
-                const DisplayManager &manager,
-                const Params &params,
-                const vector<DisplayField *> &fields,
-                bool haveFilteredFields);
+
+  AScopeWidget(QWidget* parent,
+               const AScopeMgr &manager,
+               const Params &params);
   
   /**
    * @brief Destructor.
    */
 
-  virtual ~DisplayWidget();
+  virtual ~AScopeWidget();
 
   // configure the axes
   
-  void configureAxes(Params::range_axis_mode_t range_axis_mode,
-                     double min_range,
-                     double max_range,
-                     double min_altitude,
-                     double max_altitude,
+  void configureAxes(double min_amplitude,
+                     double max_amplitude,
                      double time_span_secs);
-
-  /**
-   * @brief Select the field to display.
-   *
-   * @param[in] index   Index of the field to display, zero based.
-   */
-
-  void selectVar(size_t index);
-
-  /**
-   * @brief Clear the specified field.
-   *
-   * @param[in] index    Index of the field to be cleared, zero based.
-   *
-   * @notes This method is not currently called anywhere.
-   */
-
-  void clearVar(size_t index);
   
-  /*************************************************************************
-   * archive mode - turn on background rendering for all fields
-   */
-  
-  void activateArchiveRendering();
-
-  /*************************************************************************
-   * reatime mode - turn on background rendering for non-selected fields
-   * for limited time
-   */
-  
-  void activateRealtimeRendering();
-
-  /**
-   * @brief Add a new beam to the display. Data for all fields and all
-   *        gates are provided, as well as color maps for all fields.
-   *        addBeam() will map the field values to  the correct color, and
-   *        render the beam for each field in the appropriate pixamp. The
-   *        existing wedge for this beam will be discarded.
-   *
-   */
-
-  void addBeam(const RadxRay *ray,
-               double instHtKm, // height of instrument in km
-               const RadxTime &plot_start_time,
-               const RadxTime &beam_start_time,
-               const RadxTime &beam_end_time,
-               const std::vector< std::vector< double > > &beam_data,
-               const std::vector< DisplayField* > &fields);
-
   /**
    * @brief Specify the background color.
-   *
    * @param[in] color     The background color.
-   *
    * @notes This method is not currently called anywhere.
    */
 
   void setBackgroundColor(const QColor &color);
 
-  /**
-   * @brief Get the current number of beams. This is interesting to monitor
-   *        when DisplayWidget is operating in the dynamically allocated beam mode.
-   *
-   * @return Returns the current number of beams.
-   *
-   * @notes This method is not currently called anywhere.
-   */
+  // plot a beam
 
-  size_t getNumBeams() const;
-
-  // get the vertical scale type
-  
-  Params::range_axis_mode_t getRangeAxisMode() const { return _rangeAxisMode; }
+  void plotBeam(Beam *beam);
 
   // get the world coords
-
+  
   const WorldPlot &getFullWorld() const { return _fullWorld; }
   const WorldPlot &getZoomWorld() const { return _zoomWorld; }
   bool getIsZoomed() const { return _isZoomed; }
@@ -262,14 +197,8 @@ class DLL_EXPORT DisplayWidget : public QWidget
    * @param[in] state True to show them, false otherwise.
    */
 
-  void setRangeGridEnabled(bool state);
-  void setTimeGridEnabled(bool state);
-  void setInstHtLineEnabled(bool state);
-  void setLatlonLegendEnabled(bool state);
-  void setSpeedTrackLegendEnabled(bool state);
-  void setDistScaleEnabled(bool state);
-  void setAltitudeInFeet(bool state);
-  void setRangeInFeet(bool state);
+  void setXGridEnabled(bool state);
+  void setYGridEnabled(bool state);
 
  protected:
 
@@ -280,38 +209,15 @@ class DLL_EXPORT DisplayWidget : public QWidget
   /**
    * @brief Parent widget.
    */
-
+  
   QWidget *_parent;
-  const BscanManager &_manager;
+  const AScopeMgr &_manager;
 
   /**
    * @brief TDRP params.
    */
 
   const Params &_params;
-
-  // data fields
-
-  const vector<DisplayField *> &_fields;
-  bool _haveFilteredFields;
-
-  /**
-   * @brief Pointers to all of the active beams are saved here.
-   */
-
-  std::vector<BscanBeam*> _beams;
-  
-  /**
-   * @brief The renderer for each field.
-   */
-
-  vector<FieldRenderer*> _fieldRenderers;
-  
-  /**
-   * @brief The index of the field selected for display.
-   */
-
-  size_t _selectedField;
 
   /**
    * @brief The brush for the background.
@@ -323,12 +229,8 @@ class DLL_EXPORT DisplayWidget : public QWidget
    * Overlays
    */
 
-  bool _rangeGridEnabled;
-  bool _timeGridEnabled;
-  bool _instHtLineEnabled;
-  bool _latlonLegendEnabled;
-  bool _speedTrackLegendEnabled;
-  bool _distScaleEnabled;
+  bool _xGridEnabled;
+  bool _yGridEnabled;
 
   /**
    * @brief This will create labels wiith nicely scaled values and
@@ -336,24 +238,17 @@ class DLL_EXPORT DisplayWidget : public QWidget
    */
 
   ScaledLabel _scaledLabel;
-
-  /**
-   * @brief The maximum range of the beams, in km.  It affects the
-   *        labelling of the range rings
-   */
-
-  double _minRange;
-  double _maxRangeKm;
-  double _minAltitude;
-  double _maxAltitude;
-  bool _altitudeInFeet;
-  bool _rangeInFeet;
-
-  // start time of plot
+  
+  // time of plot
 
   RadxTime _plotStartTime;
   RadxTime _plotEndTime;
   double _timeSpanSecs;
+
+  // amplitude of plot
+
+  double _minAmplitude;
+  double _maxAmplitude;
 
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for
@@ -406,33 +301,11 @@ class DLL_EXPORT DisplayWidget : public QWidget
   
   // vertical scale state
   
-  Params::range_axis_mode_t _rangeAxisMode;
+  // Params::range_axis_mode_t _rangeAxisMode;
   
   // time since last rendered
   
   RadxTime _timeLastRendered;
-
-  // distance, speed and track data
-
-  class DistLoc {
-  public:
-    int beamNum;
-    RadxTime time;
-    double lat;
-    double lon;
-    double speedMps;
-    double dirnDeg;
-    double distKm;
-    double sumDistKm;
-    DistLoc(int beamNum_, RadxTime time_, double lat_, double lon_) :
-            beamNum(beamNum_), time(time_), lat(lat_), lon(lon_),
-            speedMps(0), dirnDeg(0), distKm(0), sumDistKm(0) {}
-  };
-  
-  vector<DistLoc> _distLocs;
-  double _startLat, _startLon;
-  double _meanSpeedMps, _meanDirnDeg;
-  double _sumDistKm;
 
   ///////////////////////
   // Protected methods //
@@ -519,18 +392,6 @@ class DLL_EXPORT DisplayWidget : public QWidget
   // call the renderers for each field
 
   void _performRendering();
-
-  // Compute the distance details, starting lat/lon and mean track/speed
-
-  void _computeSummaryDistanceSpeedTrack();
-
-  // add distance scale to time axis
-
-  void _plotDistanceOnTimeAxis(QPainter &painter);
-
-  // get time for a specified distance value
-
-  RadxTime _getTimeForDistanceVal(double distKm);
 
 };
 

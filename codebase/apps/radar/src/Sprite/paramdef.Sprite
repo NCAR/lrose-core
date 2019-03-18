@@ -10,7 +10,7 @@
 
 commentdef {
   p_header = "Sprite is the spectral display for time series data";
-  p_text = "This is a C++ application using the QT GUI toolkit.";
+  p_text = "This is a C++ application based on the QT GUI toolkit.";
 }
 
 commentdef {
@@ -39,25 +39,34 @@ paramdef string {
   p_help = "Used for registration with procmap.";
 } instance;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check memory allocations.";
+  p_help = "For debugging memory usage.";
+} check_alloc;
+
 commentdef {
-  p_header = "REALTIME DATA INPUT";
+  p_header = "DATA INPUT MODE";
 }
 
 typedef enum {
-  IWRF_FMQ_INPUT, 
-  IWRF_TCP_INPUT
+  REALTIME_FMQ_MODE, 
+  REALTIME_TCP_MODE, 
+  ARCHIVE_TIME_MODE,
+  FILE_LIST_MODE,
+  FOLLOW_MOMENTS_MODE
 } input_mode_t;
 
 paramdef enum input_mode_t {
-  p_default = IWRF_FMQ_INPUT;
-  p_descr = "Method for reading the input data";
-  p_help = "\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.";
+  p_default = REALTIME_FMQ_MODE;
+  p_descr = "Method for reading the input time series data";
+  p_help = "\n\nREALTIME_FMQ_MODE: read a real-time IWRF data stream from an FMQ.\n\nREALTIME_TCP_MODE: read a real-time IWRF data stream from a TCP server.\n\nARCHIVE_TIME_MODE: given a time span and data directory, identify the list of files within that time span and read those files.\n\nFILE_LIST_MODE: the list of time series files is specified on the command line.\n\nFOLLOW_MOMENTS_MODE: the user is running a moments display (e.g. HawkEye or CIDD) and clicks on locations of interest. Sprite polls a shared memory segment for information on the user's clicks, and reads in the data for the time and location specified in the latest click.";
 } input_mode;
 
 paramdef string {
-  p_default = "/tmp/fmq/test";
-  p_descr = "DSR_FMQ_INPUT or IWRF_FMQ_INPUT mode: input URL for moments data from an FMQ";
-  p_help = "Full url is of the form fmqp:://hostname:port:path. Path does not in lude the file extension.";
+  p_default = "/tmp/fmq/ts";
+  p_descr = "REALTIME_FMQ_MODE: input URL for moments data from an FMQ";
+  p_help = "A fully-qualified url is of the form fmqp:://hostname:port:path. The path does not include the file extension.";
 } input_fmq_url;
 
 paramdef boolean {
@@ -68,41 +77,204 @@ paramdef boolean {
 
 paramdef string {
   p_default = "localhost";
-  p_descr = "IWRF_TCP_INPUT: name of host running IWRF moments server.";
-} input_tcp_host;
+  p_descr = "REALTIME_TCP_MODE: ip address of host running IWRF moments server.";
+} input_tcp_address;
 
 paramdef int {
   p_default = 11000;
-  p_descr = "IWRF_TCP_INPUT: port for IWRF moments server.";
+  p_descr = "REALTIME_TCP_MODE: TCP port for IWRF moments server.";
 } input_tcp_port;
 
-commentdef {
-  p_header = "ARCHIVE MODE";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to begin in archive mode.";
-  p_help = "If TRUE, the app will start up and read data from the archive_data_url, at the specified start time. If the start time is not set, the start time will be set to NOW.";
-} begin_in_archive_mode;
+paramdef string {
+  p_default = "/data/time_series/spol";
+  p_descr = "ARCHIVE_TIME_MODE: directory path for time series files.";
+  p_help = "This should point to the top dir of a time series data set. Below this will be date directories - i.e. yyyymmdd.";
+} archive_data_dir;
 
 paramdef string {
-  p_default = "1970 01 01 00 00 00";
-  p_descr = "Start time for archive mode.";
-  p_help = "In archive mode, data retrieval starts at this time.";
+  p_default = "2019 03 01 00 00 00";
+  p_descr = "ARCHIVE_TIME_MODE: start time (yyyy mm dd hh mm ss).";
+  p_help = "Data retrieval starts at this time.";
 } archive_start_time;
 
 paramdef double {
-  p_default = 3600;
-  p_descr = "Time span in ARCHIVE mode (secs).";
-  p_help = "Archive end time = archive_start_time + archive_time_span.";
+  p_default = 600;
+  p_descr = "ARCHIVE_TIME_MODE: time span (secs).";
+  p_help = "archive_end_time = archive_start_time + archive_time_span.";
 } archive_time_span_secs;
 
+commentdef {
+  p_header = "GETTING CLICK-POINT INFO FROM MOMENTS DISPLAY (CIDD or HawkEye)";
+}
+
+paramdef int {
+  p_default = 61500;
+  p_descr = "The shared memory key for the moments display coordinate struct.";
+  p_help = "When the user clicks in the moments main window, the coordinate struct is updated with the location and time.";
+} moments_shmem_key;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Max angular error when searching for spectra close to the click point (deg).";
+  p_help = "When the user clicks in CIDD, the (x) location is saved. From this, the elevation, elevation and range of the click point can be determined. The data base is then searched for spectra from a beam close to this. This parameter gives the max angular error allowable in this search.";
+} moments_max_search_angle_error;
+
+commentdef {
+  p_header = "BEAM SAMPLING";
+};
+
+paramdef int {
+  p_default = 256;
+  p_descr = "Number of samples (pulses) per dwell.";
+} n_samples;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Index the beams on even centers?";
+  p_help = "If false, the pulses are formed into beams sequentially, with no overlap.";
+} indexed_beams;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Dwell width in azimuth (deg).";
+  p_help = "Applies to PPI mode.";
+} indexed_resolution_ppi;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Dwell width in elevation (deg).";
+  p_help = "Applies to RHI mode.";
+} indexed_resolution_rhi;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to invert the sense of the HV flag in alternating mode.";
+  p_help = "In alternating dual-pol mode, the HV flag indicates whether the pulse is horizontally or vertically polarized. Normally 1 indicates H and 0 V. This parameter allows you to invert the sense of the flag, so that 1 is interpreted as V and 0 as H.";
+} invert_hv_flag;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Does the PRT in the pulse header refer to the previous time interval?.";
+  p_help = "If TRUE, the PRT in the pulse header refers to the time from the PREVIOUS pulse to THIS pulse. If FALSE, the PRT in the header refers to the time from THIS pulse to the NEXT pulse.";
+} prt_is_for_previous_interval;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to check for missing pulses in the time series.";
+  p_help = "If missing pulses are found, the beam formed by those pulses will be discarded.";
+} check_for_missing_pulses;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to swap the H and V channels for IQ data from the receiver.";
+  p_help = "It is possible that the receiver was incorrectly connected and the channels (H and V for example) are swapped. If this flag is set to TRUE, the channels in the data will be swapped before computing the moments.";
+} swap_receiver_channels;
+
+commentdef {
+  p_header = "OVERRIDING RADAR PARAMETERS";
+  p_text = "Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar name.";
+  p_help = "If true, the name in this file will be used. If not, the name in the time series data will be used.";
+} override_radar_name;
+
 paramdef string {
-  p_default = "/data/cfradial/kddc";
-  p_descr = "URL for archive data files.";
-  p_help = "This should point to a CfRadial moments data set.";
-} archive_data_url;
+  p_default = "SPOL";
+  p_descr = "Name of the radar.";
+  p_help = "See 'override_radar_name'.";
+} radar_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar location.";
+  p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
+} override_radar_location;
+
+paramdef double {
+  p_default = 39.93208;
+  p_descr = "Radar latitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_latitude_deg;
+
+paramdef double {
+  p_default = -105.18175;
+  p_descr = "Radar longitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_longitude_deg;
+
+paramdef double {
+  p_default = 1742;
+  p_descr = "Radar altitude (meters).";
+  p_help = "See override_radar_location.";
+} radar_altitude_meters;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the gate geometry.";
+  p_help = "If true, the gate_spacing and start_range in the time series data is overridden by the parameters in this file.";
+} override_gate_geometry;
+
+paramdef double {
+  p_default = 150;
+  p_descr = "Gate spacing (meters).";
+  p_help = "See override_gate_geometry.";
+} gate_spacing_meters;
+
+paramdef double {
+  p_default = 150;
+  p_descr = "Start range (meters).";
+  p_help = "See override_gate_geometry.";
+} start_range_meters;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar wavelength.";
+  p_help = "If true, the radar wavelength in this file will be used. If not, the wavelength in the time series data will be used if available.";
+} override_radar_wavelength;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Radar wavelength (cm).";
+  p_help = "See override_radar_wavelength.";
+} radar_wavelength_cm;
+
+commentdef {
+  p_header = "FFT WINDOW";
+}
+
+typedef enum {
+  WINDOW_RECT,
+  WINDOW_VONHANN,
+  WINDOW_BLACKMAN,
+  WINDOW_BLACKMAN_NUTTALL,
+  WINDOW_TUKEY_10,
+  WINDOW_TUKEY_20,
+  WINDOW_TUKEY_30,
+  WINDOW_TUKEY_50
+} window_t;
+
+paramdef enum window_t {
+  p_default = WINDOW_VONHANN;
+  p_descr = "Window to be applied to time series before computing spectra.";
+} window;
+
+commentdef {
+  p_header = "RADAR CALIBRATION";
+}
+
+paramdef string {
+  p_default = "./radar_cal.xml";
+  p_descr = "File name for XML calibration file.";
+} cal_file_path;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override cal in time series data.";
+  p_help = "If false, the cal information in the time series data will be used. If true, the cal info in the param file will be used.";
+} use_cal_from_time_series;
 
 commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
@@ -132,12 +304,8 @@ typedef struct {
   boolean latitude;
   boolean longitude;
   boolean altitude;
-  boolean altitude_rate;
   boolean sun_elevation;
   boolean sun_azimuth;
-  boolean speed;
-  boolean heading;
-  boolean track;
 
 } show_status_t;
 
@@ -147,7 +315,7 @@ paramdef struct show_status_t {
     azimuth = true,
     elevation = true,
     fixed_angle = true,
-    volume_number = false,
+    volume_number = true,
     sweep_number = true,
     n_samples = true,
     n_gates = true,
@@ -158,20 +326,17 @@ paramdef struct show_status_t {
     nyquist = true,
     max_range = true,
     unambiguous_range = true,
-    measured_power_h = false,
-    measured_power_v = false,
-    scan_name = false,
+    measured_power_h = true,
+    measured_power_v = true,
+    scan_name = true,
     scan_mode = true,
     polarization_mode = true,
     latitude = true,
     longitude = true,
     altitude = true,
-    altitude_rate = false,
     sun_elevation = true,
-    sun_azimuth = true,
-    speed = false,
-    heading = false,
-    track = false
+    sun_azimuth = true
+
   };
 
   p_descr = "Indicate which status items to show in GUI.";
@@ -188,35 +353,6 @@ paramdef double {
   p_default = 225.0;
   p_descr = "Max range for the display (km).";
 } max_range_km;
-
-commentdef {
-  p_header = "NAMES AND LABELS";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override radar name in the data.";
-} override_radar_name;
-
-paramdef string {
-  p_default = "SPOL";
-  p_descr = "Radar name if overridden.";
-} radar_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to display the site name in the left panel.";
-} display_site_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override site name in the data.";
-} override_site_name;
-
-paramdef string {
-  p_default = "MARSHALL";
-  p_descr = "Site name if overridden.";
-} site_name;
 
 commentdef {
   p_header = "WINDOW DIMENSIONS AND PLOTTING DETAILS";
@@ -289,16 +425,6 @@ paramdef boolean {
   p_descr = "Set ASCOPE grids overlay on at startup.";
 } ascope_grids_on_at_startup;
 
-typedef enum {
-  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
-} legend_pos_t;
-
-paramdef enum legend_pos_t {
-  p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of main legend in the ASCOPE plot window";
-  p_help = "This include time, field name and elevation angle.";
-} ascope_main_legend_pos;
-
 commentdef {
   p_header = "ASCOPE MARGINS";
 }
@@ -341,4 +467,290 @@ paramdef int {
   p_default = 5;
   p_descr = "Margin around some text (pixels).";
 } ascope_text_margin;
+
+paramdef double {
+  p_default = 3600;
+  p_descr = "Time span for ASCOPE (secs).";
+} ascope_time_span_secs;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Min amplitude for ascope.";
+} ascope_min_amplitude;
+
+paramdef double {
+  p_default = 1;
+  p_descr = "Max amplitude for ascope.";
+} ascope_max_amplitude;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min time between rendering (secs).";
+  p_help = "Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU.";
+} ascope_min_secs_between_rendering;
+
+commentdef {
+  p_header = "ASCOPE TITLES, LABELS AND AXES";
+}
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Font size of center title (pixels).";
+} ascope_title_font_size;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Font size of axis labels in ascope (pixels).";
+} ascope_axis_label_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size of axis values (pixels).";
+} ascope_axis_values_font_size;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of axes in ascope.";
+} ascope_axes_color;
+
+paramdef string {
+  p_default = "gray";
+  p_descr = "Color of grid lines on ascope.";
+} ascope_grid_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of labels in ascope.";
+} ascope_labels_color;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines in the Y direction.";
+} ascope_draw_y_grid_lines;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines in the X direction.";
+} ascope_draw_x_grid_lines;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw a line for the instrument location.";
+  p_descr = "Applies to RANGE_AXIS_SCALE_ALTITUDE option only.";
+} ascope_draw_instrument_height_line;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of instrument height line in ALTITUDE plot.";
+} ascope_instrument_height_color;
+
+commentdef {
+  p_header = "ASCOPE LEGENDS";
+}
+
+typedef enum {
+  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
+} legend_pos_t;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of main legend in the ASCOPE plot window";
+  p_help = "This include time, field name and elevation angle.";
+} ascope_main_legend_pos;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot the starting lat/lon position as a legend.";
+  p_help = "This helps in geolocating the data from a mobile system.";
+} ascope_plot_legend1;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of lat/lon legend in plot";
+  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'ascope_plot_starting_latlon_as_legend'.";
+} ascope_legend1_pos;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of lat/lon legend in plot";
+  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'ascope_plot_starting_latlon_as_legend'.";
+} ascope_legend2_pos;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot the starting lat/lon position as a legend.";
+  p_help = "This helps in geolocating the data from a mobile system.";
+} ascope_plot_legend2;
+
+commentdef {
+  p_header = "CLUTTER FILTERING";
+  p_text = "The default clutter filtering method is the Adaptive Filter, with residue correction activated.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to apply residue correction to adaptive filter.";
+  p_help = "At some gates, the spectral noise floor may be high. If this correction is applied, the spectral noise floor will be reduced to the measured noise value.";
+} apply_residue_correction_in_adaptive_filter;
+
+paramdef double {
+  p_default = 75;
+  p_descr = "Min SNR for applying the residue correction (dB).";
+  p_help = "Spectral residue seems to occur at high powers, when the receiver is close to saturated. This is probably related to increased phase noise. Only apply residue correction if SNR exceeds this value. Otherwise, do not apply a correction.";
+} min_snr_db_for_residue_correction;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply a regression clutter filter.";
+  p_help = "For the regression filter, a polynomial fit is performed on the I and Q data individually. The filtered time series is computed as the original minus the regression fit. If true, this takes preference over the notch filter.";
+} use_polynomial_regression_clutter_filter;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Order of the polynomial fit for the regression filter.";
+} regression_filter_polynomial_order;
+
+paramdef boolean {
+  p_default  = true;
+  p_descr = "For the regression filter, option to interpolate power across the notch.";
+  p_help = "If true, the spectral power in the notch created by the filter will be interpolated using values to each side of the notch.";
+} regression_filter_interp_across_notch;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use a simple notch for clutter filtering.";
+  p_help = "If false, spectral adaptive clutter filtering is used. If true, a simple notch is used instead. The width is specified in notch_filter_width_mps. The depth of the notch is down to the calibrated noise floor.";
+} use_simple_notch_clutter_filter;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Width of simple clutter notch (m/s).";
+  p_help = "See use_simple_notch_clutter_filter";
+} simple_notch_filter_width_mps;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Length of median filter applied to unfolding interval for staggered PRT.";
+  p_help = "If less than 3, no filtering will be performed.";
+} staggered_prt_median_filter_len;
+
+commentdef {
+  p_header = "SPECTRUM WIDTH METHOD";
+}
+
+typedef enum {
+  WIDTH_METHOD_R0R1,
+  WIDTH_METHOD_R1R2,
+  WIDTH_METHOD_HYBRID
+} spectrum_width_method_t;
+
+paramdef enum spectrum_width_method_t {
+  p_default = WIDTH_METHOD_R0R1;
+  p_descr = "Method for computing spectrum width.";
+  p_help = "R0R1 is the default. For staggered we use R0Rm in this case. Otherwise we use R1R2 if applicable. For staggered, we use the hybrid if R0R1 is not selected.";
+} spectrum_width_method;
+
+commentdef {
+  p_header = "COMPUTING KDP USING ADAPTIVE FILTER METHOD";
+  p_text = "Parameters for computing KDP.";
+}
+
+typedef enum {
+  FIR_LEN_125, FIR_LEN_60, FIR_LEN_40, FIR_LEN_30, FIR_LEN_20, FIR_LEN_10
+} fir_filter_len_t;
+  
+paramdef enum fir_filter_len_t {
+  p_default = FIR_LEN_20;
+  p_descr = "Filter length for the FIR filter for PHIDP (gates)";
+  p_help = "When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.";
+} KDP_fir_filter_len;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Sets the number of iterations for the initial FIR filter for unfolded PHIDP.";
+  p_help = "After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
+} KDP_n_filt_iterations_unfolded;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Sets the number of iterations for the final FIR filter for conditioned PHIDP.";
+  p_help = "In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
+} KDP_n_filt_iterations_conditioned;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Perform iterative filtering to locate backscatter phase shift.";
+  p_descr = "This is the Hubbert-Bringi method.";
+} KDP_use_iterative_filtering;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "Difference threshold for the iterative filtering method.";
+  p_help = "The FIR filter is applied successively, KDP_n_filt_iterations_conditioned times. After each iteration the result is checked against the original. If the difference is less than this parameter, the original value at that gate is retained. If the difference exceeds this parameter, the new filtered value is retained.";
+} KDP_phidp_difference_threshold;
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Number of gates over which the phidp mean, sdev and jitter are computed.";
+  p_help = "The mean, sdev and jitter of phidp are computed over a consecutive number of gates in range, centered on the current gate of interest. This parameter is the number of gates over which these statistics are computed.";
+} KDP_ngates_for_stats;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Sets the threshold for the standard deviation of phidp in range.";
+  p_help = "The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+} KDP_phidp_sdev_max;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Sets the threshold for the jitter of phidp in range.";
+  p_help = "The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+} KDP_phidp_jitter_max;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Check the SNR.";
+  p_descr = "This test can help identify regions of good PHIDP.";
+} KDP_check_snr;
+
+paramdef double {
+  p_default = -6.0;
+  p_descr = "Sets the threshold for checking SNR (dB).";
+  p_help = "If the SNR drops below this value, KDP will not be computed at this gate.";
+} KDP_snr_threshold;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Check the RHOHV.";
+  p_descr = "This test can help identify regions of good PHIDP.";
+} KDP_check_rhohv;
+
+paramdef double {
+  p_default = 0.95;
+  p_descr = "Sets the threshold for checking RHOHV.";
+  p_help = "If the RHOHV drops below this value, KDP will not be computed at this gate.";
+} KDP_rhohv_threshold;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Check the standard deviation of ZDR in range?";
+  p_descr = "This test can help identify regions of clutter, and hence noisy PHIDP.";
+} KDP_check_zdr_sdev;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Sets the threshold for the standard deviation of zdr in range.";
+  p_help = "The sdev of zdr is a good test for clutter. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+} KDP_zdr_sdev_max;
+
+paramdef double {
+  p_default = 0.025;
+  p_descr = "Sets the min valid KDP value.";
+  p_help = "Values less than this are set to 0.";
+} KDP_min_valid_abs_kdp;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print debug messages in KDP computation.";
+} KDP_debug;
 

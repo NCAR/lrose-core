@@ -22,78 +22,83 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// DisplayManager.hh
+// AScopeMgr.hh
 //
-// DisplayManager object
+// AScopeMgr object
 //
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// March 2019
+// Oct 2014
 //
 ///////////////////////////////////////////////////////////////
 //
-// DisplayManager manages data
-// Rendering is delegated to DisplayWidget
+// AScopeMgr manages BSCAN data - vert pointing etc
+// Rendering is delegated to BscanWidget
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef DisplayManager_HH
-#define DisplayManager_HH
+#ifndef AScopeMgr_HH
+#define AScopeMgr_HH
 
 #include <string>
 #include <vector>
 
 #include "Args.hh"
 #include "Params.hh"
+
 #include <QMainWindow>
+
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxTime.hh>
-#include <Radx/RadxPlatform.hh>
+#include <Radx/RadxField.hh>
+#include <Radx/RadxVol.hh>
+
+class TsReader;
+class AScopeWidget;
+class Beam;
 
 class QApplication;
 class QButtonGroup;
-class QRadioButton;
-class QFrame;
+class QCheckBox;
+class QComboBox;
+class QDateTime;
+class QDateTimeEdit;
 class QDialog;
-class QLabel;
-class QGroupBox;
+class QFrame;
 class QGridLayout;
+class QGroupBox;
 class QHBoxLayout;
-class QVBoxLayout;
+class QLabel;
 class QLineEdit;
+class QPushButton;
+class QRadioButton;
 class QSlider;
+class QVBoxLayout;
 class QWidget;
-class DisplayWidget;
 
-class DisplayManager : public QMainWindow {
+class AScopeMgr : public QMainWindow {
   
   Q_OBJECT
-
+  
 public:
 
   // constructor
-  
-  DisplayManager(const Params &params);
+
+  AScopeMgr(const Params &params,
+            TsReader *tsReader);
   
   // destructor
   
-  ~DisplayManager();
+  ~AScopeMgr();
 
   // run 
-
-  virtual int run(QApplication &app);
   
-  // location
+  int run(QApplication &app);
 
-  double getRadarLat() const { return _radarLat; }
-  double getRadarLon() const { return _radarLon; }
-  double getRadarAltKm() const { return _radarAltKm; }
-  const RadxPlatform &getPlatform() const { return _platform; }
-
-  // enable the zoom button
+  // enable the zoom button - called by AscopeWidget
   
   virtual void enableZoomButton() const;
-
+  
 signals:
 
   ////////////////
@@ -109,25 +114,23 @@ signals:
   
   void frameResized(const int width, const int height);
   
-protected:
-  
+private:
+
   const Params &_params;
   
-  // instrument platform details 
-
-  RadxPlatform _platform;
+  // reading data in
+  
+  TsReader *_tsReader;
   
   // beam reading timer
 
   static bool _firstTimerEvent;
-  int _beamTimerId;
+  int _dataTimerId;
   bool _frozen;
 
   // windows
 
   QFrame *_main;
-  QFrame *_displayFrame;
-  DisplayWidget *_display;
 
   // actions
   
@@ -181,20 +184,20 @@ protected:
   QLabel *_altVal;
   QLabel *_altLabel;
 
-  QLabel *_altRateVal;
-  QLabel *_altRateLabel;
-  double _prevAltKm;
-  RadxTime _prevAltTime;
-  double _altRateMps;
+  // QLabel *_altRateVal;
+  // QLabel *_altRateLabel;
+  // double _prevAltKm;
+  // RadxTime _prevAltTime;
+  // double _altRateMps;
 
-  QLabel *_speedVal;
-  QLabel *_headingVal;
-  QLabel *_trackVal;
+  // QLabel *_speedVal;
+  // QLabel *_headingVal;
+  // QLabel *_trackVal;
 
   QLabel *_sunElVal;
   QLabel *_sunAzVal;
 
-  bool _altitudeInFeet;
+  // bool _altitudeInFeet;
 
   vector<QLabel *> _valsRight;
   
@@ -212,7 +215,83 @@ protected:
 
   // sun position calculator
   
-  double _radarLat, _radarLon, _radarAltKm;
+  double _radarLat, _radarLon, _radarAltM;
+  SunPosn _sunPosn;
+
+  // input data
+  
+  bool _plotStart;
+  RadxTime _readerRayTime;
+
+  // windows
+
+  QFrame *_ascopeFrame;
+  AScopeWidget *_ascope;
+
+  // times for rays
+
+  RadxTime _plotStartTime;
+  RadxTime _plotEndTime;
+  RadxTime _prevRayTime;
+  
+  // menus
+
+  QMenu *_fileMenu;
+  QMenu *_configMenu;
+  QMenu *_overlaysMenu;
+  QMenu *_actionsMenu;
+  // QMenu *_vertMenu;
+  QMenu *_helpMenu;
+
+  // actions
+
+  QAction *_xGridAct;
+  QAction *_yGridAct;
+
+  QAction *_xAxisAct;
+  QAction *_yAxisAct;
+
+  // QAction *_saveImageAct;
+
+  // QAction *_latlonLegendAct;
+  // QAction *_speedTrackLegendAct;
+  // QAction *_distScaleAct;
+
+  // range axis settings dialog
+
+  // QDialog *_rangeAxisDialog;
+  // QGroupBox *_rangeAxisModeBox;
+  // QGroupBox *_rangeAxisAltitudeBox;
+  // QGroupBox *_rangeAxisRangeBox;
+  // QGroupBox *_rangeAxisDoneBox;
+  
+  // QRadioButton *_rangeAxisModeUpButton;
+  // QRadioButton *_rangeAxisModeDownButton;
+  // QRadioButton *_rangeAxisModeAltitudeButton;
+
+  // time axis settings dialog
+  
+  // QDialog *_timeAxisDialog;
+  // QLabel *_timeAxisInfo;
+
+  // QLineEdit *_timeSpanEdit;
+
+  double _timeSpanSecs;
+
+  bool _archiveMode;
+  bool _archiveRetrievalPending;
+  // QRadioButton *_realtimeModeButton;
+  // QRadioButton *_archiveModeButton;
+
+  // QGroupBox *_archiveTimeBox;
+  // QDateTimeEdit *_archiveStartTimeEdit;
+  RadxTime _archiveStartTime;
+
+  // QLabel *_archiveEndTimeEcho;
+  RadxTime _archiveEndTime;
+  
+  double _xLocClicked;
+  double _yLocClicked;
 
   // set top bar
 
@@ -221,8 +300,9 @@ protected:
   // panels
   
   void _createStatusPanel();
-  void _createClickReportDialog();
-  void _updateStatusPanel();
+  // void _createClickReportDialog();
+  void _updateStatusPanel(const Beam *beam);
+  // double _getInstHtKm(const RadxRay *ray);
 
   // setting text
 
@@ -260,20 +340,59 @@ protected:
                           int fontSize = 0,
                           QFrame **framePtr = NULL);
 
-protected slots:
 
-  //////////////
-  // Qt slots //
-  //////////////
+  // override event handling
   
+  virtual void timerEvent (QTimerEvent * event);
+  virtual void resizeEvent (QResizeEvent * event);
+  virtual void keyPressEvent(QKeyEvent* event);
+  
+  // local methods
+  
+  void _setupWindows();
+  void _createMenus();
+  void _createActions();
+  void _initActions();
+
+  void _configureAxes();
+
+  // retrieve data
+  
+  void _handleRealtimeData();
+  void _handleArchiveData();
+
+private slots:
+
+  // Qt slots //
+
   virtual void _howto();
   void _about();
   void _showClick();
+  virtual void _openFile();
+  
   virtual void _freeze();
   virtual void _unzoom();
   virtual void _refresh();
-  virtual void _openFile();
+  
+  // local slots
 
+  void _locationClicked(double xkm, double ykm, const RadxRay *closestRay);
+
+  void _setTimeSpan();
+  void _resetTimeSpanToDefault();
+  
+  void _setStartTimeFromGui(const QDateTime &datetime1);
+  void _setGuiFromStartTime();
+  void _setArchiveStartTimeToDefault();
+  void _setArchiveStartTime(const RadxTime &rtime);
+  void _setArchiveEndTime();
+  void _setDataRetrievalMode();
+  void _goBack();
+  void _goFwd();
+  void _changeRange(int deltaGates);
+
+  void _performArchiveRetrieval();
+  
 };
 
 #endif

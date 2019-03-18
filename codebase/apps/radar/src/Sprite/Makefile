@@ -38,7 +38,7 @@ TARGET_FILE = Sprite
 
 LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
-LOC_LIBS = -lradar -lrapformats -lFmq \
+LOC_LIBS = -lradar -lRadx -lNcxx -lrapformats -lFmq \
 	-ldsserver -ldidss -leuclid -lphysics \
 	-lrapmath -ltoolsa -ldataport -ltdrp \
 	$(QT_LIBS) $(NETCDF4_LIBS) \
@@ -51,30 +51,35 @@ LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	AScopeManager.hh \
-	ColorMap.hh \
-	Sprite.hh \
+	Beam.hh \
+	BeamMgr.hh \
+	AScopeMgr.hh \
+	AScopeWidget.hh \
+	RadarSpectra.hh \
 	ScaledLabel.hh \
+	Sprite.hh \
+	TsReader.hh \
 	WorldPlot.hh
 
 NORM_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
-	ColorMap.cc \
-	Sprite.cc \
+	Beam.cc \
+	BeamMgr.cc \
 	Main.cc \
+	RadarSpectra.cc \
 	ScaledLabel.cc \
+	Sprite.cc \
+	TsReader.cc \
 	WorldPlot.cc
 
 MOC_SRCS = \
-	AScopeManager.cc \
-	AScopeWidget.cc \
-	TimeScaleWidget.cc \
+	AScopeMgr.cc \
+	AScopeWidget.cc
 
 MOC_OUTPUT = \
-	moc_AScopeManager.cpp \
-	moc_AScopeWidget.cpp \
-	moc_TimeScaleWidget.cpp
+	moc_AScopeMgr.cpp \
+	moc_AScopeWidget.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT)

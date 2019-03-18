@@ -36,7 +36,11 @@
 
 #include "Sprite.hh"
 #include "ColorMap.hh"
+#include "TsReader.hh"
+#include "BeamMgr.hh"
+#include "AScopeMgr.hh"
 #include "Params.hh"
+
 #include <toolsa/Path.hh>
 
 #include <string>
@@ -53,7 +57,10 @@ Sprite::Sprite(int argc, char **argv) :
 {
   
   OK = true;
-  _displayManager = NULL;
+  _ascopeManager = NULL;
+  _coordShmem = NULL;
+  _tsReader = NULL;
+  _beamMgr = NULL;
 
   // set programe name
 
@@ -80,6 +87,28 @@ Sprite::Sprite(int argc, char **argv) :
     return;
   }
 
+  // create CIDD coord shmem 
+  
+  _coordShmem = (coord_export_t *)
+    ushm_create(_params.moments_shmem_key, sizeof(coord_export_t), 0666);
+  if (_coordShmem == NULL) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "  Could not attach shared memory from moments display app" << endl;
+    cerr << "  shmem key: " << _params.moments_shmem_key << endl;
+    OK = false;
+  }
+
+  // beam manager
+
+  _beamMgr = new BeamMgr(_progName, _params);
+  if (!_params.use_cal_from_time_series) {
+    if (_beamMgr->readCalFromFile(_params.cal_file_path)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Cannot read cal file: " << _params.cal_file_path << endl;
+      OK = false;
+    }
+  }
+  
   // init process mapper registration
 
   if (_params.register_with_procmap) {
@@ -96,8 +125,12 @@ Sprite::~Sprite()
 
 {
 
-  if (_displayManager) {
-    delete _displayManager;
+  if (_ascopeManager) {
+    delete _ascopeManager;
+  }
+
+  if (_tsReader) {
+    delete _tsReader;
   }
 
 }
@@ -108,7 +141,18 @@ Sprite::~Sprite()
 int Sprite::Run(QApplication &app)
 {
 
-  return -1;
+  // create the time series reader
+  
+  _tsReader = new TsReader(_progName, _params, _args);
+  if (!_tsReader->OK) {
+    return -1;
+  }
+  
+  // create the ascope manager
+  
+  _ascopeManager = new AScopeMgr(_params, _tsReader);
+
+  return _ascopeManager->run(app);
 
 }
 

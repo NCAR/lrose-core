@@ -44,7 +44,10 @@
 
 #include "Args.hh"
 #include "Params.hh"
-class DisplayManager;
+#include <rapformats/coord_export.h>
+class AScopeMgr;
+class TsReader;
+class BeamMgr;
 
 class QApplication;
 
@@ -77,9 +80,15 @@ private:
   Params _params;
   Args _args;
 
+  // reading in the data
+
+  coord_export_t *_coordShmem;
+  TsReader *_tsReader;
+  BeamMgr *_beamMgr;
+
   // managing the rendering objects
 
-  DisplayManager *_displayManager;
+  AScopeMgr *_ascopeManager;
 
   // methods
   

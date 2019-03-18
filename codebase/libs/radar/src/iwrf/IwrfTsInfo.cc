@@ -57,6 +57,17 @@ IwrfTsInfo::IwrfTsInfo(IwrfDebug_t debug) :
   _debugPrintCount = 0;
 }
 
+/////////////////////////////
+// Copy constructor
+
+IwrfTsInfo::IwrfTsInfo(const IwrfTsInfo &rhs)
+
+{
+  if (this != &rhs) {
+    _copy(rhs);
+  }
+}
+
 //////////////////////////////////////////////////////////////////
 // destructor
 
@@ -64,6 +75,78 @@ IwrfTsInfo::~IwrfTsInfo()
 
 {
   _clearMetaQueue();
+}
+
+/////////////////////////////
+// copy
+
+IwrfTsInfo &IwrfTsInfo::_copy(const IwrfTsInfo &rhs)
+
+{
+
+  if (&rhs == this) {
+    return *this;
+  }
+
+  // copy members
+
+  _debug = rhs._debug;
+  _debugPrintCount = 0;
+  _radar_info = rhs._radar_info;
+  _scan_seg = rhs._scan_seg;
+  _ant_corr = rhs._ant_corr;
+  _proc = rhs._proc;
+  _xmit_power = rhs._xmit_power;
+  _rx_power = rhs._rx_power;
+  _xmit_sample = rhs._xmit_sample;
+  _status_xml_hdr = rhs._status_xml_hdr;
+  _status_xml_str = rhs._status_xml_str;
+  _calib = rhs._calib;
+  _enotice = rhs._enotice;
+  _phasecode = rhs._phasecode;
+  _xmit_info = rhs._xmit_info;
+  _rvp8 = rhs._rvp8;
+  _rvp8SaturationMult = rhs._rvp8SaturationMult;
+  _platform_georef0 = rhs._platform_georef0;
+  _platform_georef1 = rhs._platform_georef1;
+  _radar_info_active = rhs._radar_info_active;
+  _scan_seg_active = rhs._scan_seg_active;
+  _ant_corr_active = rhs._ant_corr_active;
+  _proc_active = rhs._proc_active;
+  _xmit_power_active = rhs._xmit_power_active;
+  _rx_power_active = rhs._rx_power_active;
+  _xmit_sample_active = rhs._xmit_sample_active;
+  _status_xml_active = rhs._status_xml_active;
+  _calib_active = rhs._calib_active;
+  _enotice_active = rhs._enotice_active;
+  _phasecode_active = rhs._phasecode_active;
+  _xmit_info_active = rhs._xmit_info_active;
+  _rvp8_active = rhs._rvp8_active;
+  _platform_georef0_active = rhs._platform_georef0_active;
+  _platform_georef1_active = rhs._platform_georef1_active;
+
+  for (size_t ii = 0; ii < rhs._metaQueue.size(); ii++) {
+    MemBuf *mcopy = new MemBuf(*rhs._metaQueue[ii]);
+    _metaQueue.push_back(mcopy);
+  }
+  
+  _startOfSweepFlag = rhs._startOfSweepFlag;
+  _endOfSweepFlag = rhs._endOfSweepFlag;
+  _startOfVolumeFlag = rhs._startOfVolumeFlag;
+  _endOfVolumeFlag = rhs._endOfVolumeFlag;
+
+  return *this;
+
+}
+
+/////////////////////////////
+// Assignment
+//
+
+IwrfTsInfo &IwrfTsInfo::operator=(const IwrfTsInfo &rhs)
+
+{
+  return _copy(rhs);
 }
 
 //////////////////////////////////////////////////////////////////
