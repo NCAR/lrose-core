@@ -8,8 +8,8 @@
 #include <QtWidgets>
 
 #include "SpreadSheetController.hh"
-#include "spreadsheetdelegate.hh"
-#include "spreadsheetitem.hh"
+#include "SpreadSheetDelegate.hh"
+#include "SpreadSheetItem.hh"
 #include <Radx/RadxVol.hh>
 
 

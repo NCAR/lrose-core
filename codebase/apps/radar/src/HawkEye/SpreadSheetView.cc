@@ -10,8 +10,8 @@
 
 //#include "TextEdit.hh"
 #include "SpreadSheetView.hh"
-#include "spreadsheetdelegate.hh"
-#include "spreadsheetitem.hh"
+#include "SpreadSheetDelegate.hh"
+#include "SpreadSheetItem.hh"
 #include "SoloFunctions.hh"
 #include "DataField.hh"
 
