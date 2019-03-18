@@ -53,28 +53,11 @@
 #include "WorldPlot.hh"
 
 class AScopeMgr;
+class Beam;
 class RadxRay;
 
-/// Base class for widgets displaying BSCAN data.
-///
-/// A beam is the basic building block for the scan. It has
-/// a starting time, ending time, a fixed number of range 
-/// gates, and a fixed number of fields that can be rendered 
-/// on the beam.
-///
-/// The scan is given color maps for each of the fields. 
-/// It is then simply called with the data for all fields
-/// for a given beam. As each beam is received, the current field
-/// and any fields in the beam that are being background rendered
-/// are rendered into QImages.  The QImage for the current field is
-/// then popped up on the display.  When the selected field is changed,
-/// the image is cleared, and either the QImage for the new field is
-/// popped up on the display or the new field is rendered. This
-/// allows for quick switches between fields being rendered in the
-/// background (which are the most recently viewed fields), without
-/// the overhead of rendering all fields in the background.
-///
-/// Zooming is accomplished using the QtTransform.
+/// Widget class - AScope mode
+/// Plot the AScope and spectra for a beam
 
 class DLL_EXPORT AScopeWidget : public QWidget
 {
@@ -110,82 +93,21 @@ class DLL_EXPORT AScopeWidget : public QWidget
   void configureAxes(double min_amplitude,
                      double max_amplitude,
                      double time_span_secs);
-
-  /**
-   * @brief Select the field to display.
-   *
-   * @param[in] index   Index of the field to display, zero based.
-   */
-
-  // void selectVar(size_t index);
-
-  /**
-   * @brief Clear the specified field.
-   *
-   * @param[in] index    Index of the field to be cleared, zero based.
-   *
-   * @notes This method is not currently called anywhere.
-   */
-
-  // void clearVar(size_t index);
   
-  // /*************************************************************************
-  //  * archive mode - turn on background rendering for all fields
-  //  */
-  
-  // void activateArchiveRendering();
-
-  // /*************************************************************************
-  //  * reatime mode - turn on background rendering for non-selected fields
-  //  * for limited time
-  //  */
-  
-  // void activateRealtimeRendering();
-
-  /**
-   * @brief Add a new beam to the display. Data for all fields and all
-   *        gates are provided, as well as color maps for all fields.
-   *        addBeam() will map the field values to  the correct color, and
-   *        render the beam for each field in the appropriate pixamp. The
-   *        existing wedge for this beam will be discarded.
-   *
-   */
-
-  // void addBeam(const RadxRay *ray,
-  //              double instHtKm, // height of instrument in km
-  //              const RadxTime &plot_start_time,
-  //              const RadxTime &beam_start_time,
-  //              const RadxTime &beam_end_time,
-  //              const std::vector< std::vector< double > > &beam_data,
-  //              const std::vector< DisplayField* > &fields);
-
   /**
    * @brief Specify the background color.
-   *
    * @param[in] color     The background color.
-   *
    * @notes This method is not currently called anywhere.
    */
 
   void setBackgroundColor(const QColor &color);
 
-  /**
-   * @brief Get the current number of beams. This is interesting to monitor
-   *        when AScopeWidget is operating in the dynamically allocated beam mode.
-   *
-   * @return Returns the current number of beams.
-   *
-   * @notes This method is not currently called anywhere.
-   */
+  // plot a beam
 
-  // size_t getNumBeams() const;
-
-  // get the vertical scale type
-  
-  // Params::range_axis_mode_t getRangeAxisMode() const { return _rangeAxisMode; }
+  void plotBeam(Beam *beam);
 
   // get the world coords
-
+  
   const WorldPlot &getFullWorld() const { return _fullWorld; }
   const WorldPlot &getZoomWorld() const { return _zoomWorld; }
   bool getIsZoomed() const { return _isZoomed; }

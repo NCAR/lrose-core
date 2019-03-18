@@ -184,20 +184,20 @@ private:
   QLabel *_altVal;
   QLabel *_altLabel;
 
-  QLabel *_altRateVal;
-  QLabel *_altRateLabel;
-  double _prevAltKm;
-  RadxTime _prevAltTime;
-  double _altRateMps;
+  // QLabel *_altRateVal;
+  // QLabel *_altRateLabel;
+  // double _prevAltKm;
+  // RadxTime _prevAltTime;
+  // double _altRateMps;
 
-  QLabel *_speedVal;
-  QLabel *_headingVal;
-  QLabel *_trackVal;
+  // QLabel *_speedVal;
+  // QLabel *_headingVal;
+  // QLabel *_trackVal;
 
   QLabel *_sunElVal;
   QLabel *_sunAzVal;
 
-  bool _altitudeInFeet;
+  // bool _altitudeInFeet;
 
   vector<QLabel *> _valsRight;
   
@@ -215,7 +215,7 @@ private:
 
   // sun position calculator
   
-  double _radarLat, _radarLon, _radarAltKm;
+  double _radarLat, _radarLon, _radarAltM;
   SunPosn _sunPosn;
 
   // input data
@@ -300,9 +300,9 @@ private:
   // panels
   
   void _createStatusPanel();
-  void _createClickReportDialog();
-  void _updateStatusPanel(const RadxRay *ray);
-  double _getInstHtKm(const RadxRay *ray);
+  // void _createClickReportDialog();
+  void _updateStatusPanel(const Beam *beam);
+  // double _getInstHtKm(const RadxRay *ray);
 
   // setting text
 
@@ -359,17 +359,11 @@ private:
   // retrieve data
   
   void _handleRealtimeData();
-  void _handleRealtimeDataForImages();
   void _handleArchiveData();
-  int _getArchiveData();
-  void _plotArchiveData(Beam *beam);
-  void _setupVolRead(RadxFile &file);
 
 private slots:
 
-  //////////////
   // Qt slots //
-  //////////////
 
   virtual void _howto();
   void _about();
@@ -380,7 +374,7 @@ private slots:
   virtual void _unzoom();
   virtual void _refresh();
   
-  // local
+  // local slots
 
   void _locationClicked(double xkm, double ykm, const RadxRay *closestRay);
 

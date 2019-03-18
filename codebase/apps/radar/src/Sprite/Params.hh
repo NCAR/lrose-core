@@ -85,7 +85,12 @@ public:
   typedef enum {
     WINDOW_RECT = 0,
     WINDOW_VONHANN = 1,
-    WINDOW_BLACKMAN = 2
+    WINDOW_BLACKMAN = 2,
+    WINDOW_BLACKMAN_NUTTALL = 3,
+    WINDOW_TUKEY_10 = 4,
+    WINDOW_TUKEY_20 = 5,
+    WINDOW_TUKEY_30 = 6,
+    WINDOW_TUKEY_50 = 7
   } window_t;
 
   typedef enum {
@@ -94,6 +99,21 @@ public:
     LEGEND_BOTTOM_LEFT = 2,
     LEGEND_BOTTOM_RIGHT = 3
   } legend_pos_t;
+
+  typedef enum {
+    WIDTH_METHOD_R0R1 = 0,
+    WIDTH_METHOD_R1R2 = 1,
+    WIDTH_METHOD_HYBRID = 2
+  } spectrum_width_method_t;
+
+  typedef enum {
+    FIR_LEN_125 = 0,
+    FIR_LEN_60 = 1,
+    FIR_LEN_40 = 2,
+    FIR_LEN_30 = 3,
+    FIR_LEN_20 = 4,
+    FIR_LEN_10 = 5
+  } fir_filter_len_t;
 
   // struct typedefs
 
@@ -120,12 +140,8 @@ public:
     tdrp_bool_t latitude;
     tdrp_bool_t longitude;
     tdrp_bool_t altitude;
-    tdrp_bool_t altitude_rate;
     tdrp_bool_t sun_elevation;
     tdrp_bool_t sun_azimuth;
-    tdrp_bool_t speed;
-    tdrp_bool_t heading;
-    tdrp_bool_t track;
   } show_status_t;
 
   ///////////////////////////
@@ -455,6 +471,8 @@ public:
 
   tdrp_bool_t check_for_missing_pulses;
 
+  tdrp_bool_t swap_receiver_channels;
+
   tdrp_bool_t override_radar_name;
 
   char* radar_name;
@@ -563,6 +581,56 @@ public:
 
   tdrp_bool_t ascope_plot_legend2;
 
+  tdrp_bool_t apply_residue_correction_in_adaptive_filter;
+
+  double min_snr_db_for_residue_correction;
+
+  tdrp_bool_t use_polynomial_regression_clutter_filter;
+
+  int regression_filter_polynomial_order;
+
+  tdrp_bool_t regression_filter_interp_across_notch;
+
+  tdrp_bool_t use_simple_notch_clutter_filter;
+
+  double simple_notch_filter_width_mps;
+
+  int staggered_prt_median_filter_len;
+
+  spectrum_width_method_t spectrum_width_method;
+
+  fir_filter_len_t KDP_fir_filter_len;
+
+  int KDP_n_filt_iterations_unfolded;
+
+  int KDP_n_filt_iterations_conditioned;
+
+  tdrp_bool_t KDP_use_iterative_filtering;
+
+  double KDP_phidp_difference_threshold;
+
+  int KDP_ngates_for_stats;
+
+  double KDP_phidp_sdev_max;
+
+  double KDP_phidp_jitter_max;
+
+  tdrp_bool_t KDP_check_snr;
+
+  double KDP_snr_threshold;
+
+  tdrp_bool_t KDP_check_rhohv;
+
+  double KDP_rhohv_threshold;
+
+  tdrp_bool_t KDP_check_zdr_sdev;
+
+  double KDP_zdr_sdev_max;
+
+  double KDP_min_valid_abs_kdp;
+
+  tdrp_bool_t KDP_debug;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -570,7 +638,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[91];
+  mutable TDRPtable _table[120];
 
   const char *_className;
 

@@ -127,6 +127,10 @@ public:
   
   int positionForPreviousBeam();
   
+  // position at end of queue
+  
+  void seekToEndOfQueue();
+
   // get the closest beam to the location specified
   // and within the specified time
   // returns Beam object pointer on success, NULL on failure
@@ -176,6 +180,7 @@ private:
   deque<const IwrfTsPulse *> _pulseQueue;
   long _pulseSeqNum;
   int64_t _nPulsesRead;
+  int64_t _prevPulseSeqNum;
   
   // number of gates
 

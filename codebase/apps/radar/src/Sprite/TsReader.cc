@@ -209,7 +209,7 @@ Beam *TsReader::getNextBeam()
       return NULL;
     }
     _nPulsesRead++;
-    
+
     if (_params.invert_hv_flag) {
       pulse->setInvertHvFlag(true);
     }
@@ -239,6 +239,18 @@ Beam *TsReader::getNextBeam()
       _scanModeStr = "PPI";
       _scanType = SCAN_TYPE_PPI;
       _indexedRes = _params.indexed_resolution_ppi;
+    }
+
+    // check for missing pulses
+    if (_pulseQueue.size() == 0) {
+      _prevPulseSeqNum = pulse->get_pulse_seq_num();
+    } else {
+      if (pulse->get_pulse_seq_num() != _prevPulseSeqNum + 1) {
+        cerr << "ERROR - TsReader::getNextBeam()" << endl;
+        cerr << "  missing pulses, clearing queue" << endl;
+        _clearPulseQueue();
+      }
+      _prevPulseSeqNum = pulse->get_pulse_seq_num();
     }
     
     // Create a new pulse object and save a pointer to it in the
@@ -385,6 +397,15 @@ int TsReader::positionForPreviousBeam()
 
 }
 
+////////////////////////////////////////////////////////////////////
+// position at end of queue
+
+void TsReader::seekToEndOfQueue()
+  
+{
+  _pulseReader->seekToEnd();
+}
+
 /////////////////////////////////////////////////////////
 // get the closest beam to the location specified
 // and within the specified time
@@ -527,13 +548,11 @@ bool TsReader::_checkIsBeamPpi(size_t midIndex)
   if (midAz1 <= _az && midAz2 >= _az) {
 
     // az1 is below and az2 above - clockwise rotation
-    cerr << "TTTTTTTTTTT111111111111" << endl;
     return true;
     
   } else if (midAz1 >= _az && midAz2 <= _az) {
     
     // az1 is above and az2 below - counterclockwise rotation
-    cerr << "TTTTTTTTTTT22222222222222" << endl;
     return true;
     
   } else if (_az == 0.0) {
@@ -541,20 +560,17 @@ bool TsReader::_checkIsBeamPpi(size_t midIndex)
     if (midAz1 > 360.0 - _indexedRes && midAz2 < _indexedRes) {
       
       // az1 is below 0 and az2 above 0 - clockwise rotation
-      cerr << "TTTTTTTTTTT33333333333333" << endl;
       return true;
 	
     } else if (midAz2 > 360.0 - _indexedRes && midAz1 < _indexedRes) {
       
       // az1 is above 0 and az2 below 0 - counterclockwise rotation
-      cerr << "TTTTTTTTTTT4444444444444" << endl;
       return true;
       
     }
 
   }
   
-  cerr << "FFFFFFFFFFFFFFFFFFFFF" << endl;
   return false;
 
 }
@@ -640,26 +656,19 @@ Beam *TsReader::_makeBeam(size_t midIndex)
 
   // create new beam
   
-  Beam *beam = NULL;
-  if (_scanType == SCAN_TYPE_PPI) {
-    beam = new Beam(_progName, _params,
-                    true, _az,
-                    _isAlternating, _isStaggeredPrt,
-                    _nGates, _nGatesPrtLong,
-                    _prt, _prtLong,
-                    _indexedBeams, _indexedRes,
-                    _pulseReader->getOpsInfo(),
-                    beamPulses);
-  } else {
-    beam = new Beam(_progName, _params,
-                    false, _el,
-                    _isAlternating, _isStaggeredPrt,
-                    _nGates, _nGatesPrtLong,
-                    _prt, _prtLong,
-                    _indexedBeams, _indexedRes,
-                    _pulseReader->getOpsInfo(),
-                    beamPulses);
-  }
+  Beam *beam = new Beam(_progName, _params);
+  beam->init(_scanType == SCAN_TYPE_RHI,
+             _nSamples,
+             _nGates,
+             _nGatesPrtLong,
+             _indexedBeams,
+             _indexedRes,
+             _isAlternating,
+             _isStaggeredPrt,
+             _prt,
+             _prtLong,
+             _pulseReader->getOpsInfo(),
+             beamPulses);
   
   return beam;
   

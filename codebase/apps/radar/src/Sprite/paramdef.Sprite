@@ -124,7 +124,7 @@ commentdef {
 };
 
 paramdef int {
-  p_default = 64;
+  p_default = 256;
   p_descr = "Number of samples (pulses) per dwell.";
 } n_samples;
 
@@ -163,6 +163,12 @@ paramdef boolean {
   p_descr = "Option to check for missing pulses in the time series.";
   p_help = "If missing pulses are found, the beam formed by those pulses will be discarded.";
 } check_for_missing_pulses;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to swap the H and V channels for IQ data from the receiver.";
+  p_help = "It is possible that the receiver was incorrectly connected and the channels (H and V for example) are swapped. If this flag is set to TRUE, the channels in the data will be swapped before computing the moments.";
+} swap_receiver_channels;
 
 commentdef {
   p_header = "OVERRIDING RADAR PARAMETERS";
@@ -242,7 +248,12 @@ commentdef {
 typedef enum {
   WINDOW_RECT,
   WINDOW_VONHANN,
-  WINDOW_BLACKMAN
+  WINDOW_BLACKMAN,
+  WINDOW_BLACKMAN_NUTTALL,
+  WINDOW_TUKEY_10,
+  WINDOW_TUKEY_20,
+  WINDOW_TUKEY_30,
+  WINDOW_TUKEY_50
 } window_t;
 
 paramdef enum window_t {
@@ -293,12 +304,8 @@ typedef struct {
   boolean latitude;
   boolean longitude;
   boolean altitude;
-  boolean altitude_rate;
   boolean sun_elevation;
   boolean sun_azimuth;
-  boolean speed;
-  boolean heading;
-  boolean track;
 
 } show_status_t;
 
@@ -308,7 +315,7 @@ paramdef struct show_status_t {
     azimuth = true,
     elevation = true,
     fixed_angle = true,
-    volume_number = false,
+    volume_number = true,
     sweep_number = true,
     n_samples = true,
     n_gates = true,
@@ -319,20 +326,17 @@ paramdef struct show_status_t {
     nyquist = true,
     max_range = true,
     unambiguous_range = true,
-    measured_power_h = false,
-    measured_power_v = false,
-    scan_name = false,
+    measured_power_h = true,
+    measured_power_v = true,
+    scan_name = true,
     scan_mode = true,
     polarization_mode = true,
     latitude = true,
     longitude = true,
     altitude = true,
-    altitude_rate = false,
     sun_elevation = true,
-    sun_azimuth = true,
-    speed = false,
-    heading = false,
-    track = false
+    sun_azimuth = true
+
   };
 
   p_descr = "Indicate which status items to show in GUI.";
@@ -577,4 +581,176 @@ paramdef boolean {
   p_descr = "Option to plot the starting lat/lon position as a legend.";
   p_help = "This helps in geolocating the data from a mobile system.";
 } ascope_plot_legend2;
+
+commentdef {
+  p_header = "CLUTTER FILTERING";
+  p_text = "The default clutter filtering method is the Adaptive Filter, with residue correction activated.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to apply residue correction to adaptive filter.";
+  p_help = "At some gates, the spectral noise floor may be high. If this correction is applied, the spectral noise floor will be reduced to the measured noise value.";
+} apply_residue_correction_in_adaptive_filter;
+
+paramdef double {
+  p_default = 75;
+  p_descr = "Min SNR for applying the residue correction (dB).";
+  p_help = "Spectral residue seems to occur at high powers, when the receiver is close to saturated. This is probably related to increased phase noise. Only apply residue correction if SNR exceeds this value. Otherwise, do not apply a correction.";
+} min_snr_db_for_residue_correction;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply a regression clutter filter.";
+  p_help = "For the regression filter, a polynomial fit is performed on the I and Q data individually. The filtered time series is computed as the original minus the regression fit. If true, this takes preference over the notch filter.";
+} use_polynomial_regression_clutter_filter;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Order of the polynomial fit for the regression filter.";
+} regression_filter_polynomial_order;
+
+paramdef boolean {
+  p_default  = true;
+  p_descr = "For the regression filter, option to interpolate power across the notch.";
+  p_help = "If true, the spectral power in the notch created by the filter will be interpolated using values to each side of the notch.";
+} regression_filter_interp_across_notch;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use a simple notch for clutter filtering.";
+  p_help = "If false, spectral adaptive clutter filtering is used. If true, a simple notch is used instead. The width is specified in notch_filter_width_mps. The depth of the notch is down to the calibrated noise floor.";
+} use_simple_notch_clutter_filter;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Width of simple clutter notch (m/s).";
+  p_help = "See use_simple_notch_clutter_filter";
+} simple_notch_filter_width_mps;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Length of median filter applied to unfolding interval for staggered PRT.";
+  p_help = "If less than 3, no filtering will be performed.";
+} staggered_prt_median_filter_len;
+
+commentdef {
+  p_header = "SPECTRUM WIDTH METHOD";
+}
+
+typedef enum {
+  WIDTH_METHOD_R0R1,
+  WIDTH_METHOD_R1R2,
+  WIDTH_METHOD_HYBRID
+} spectrum_width_method_t;
+
+paramdef enum spectrum_width_method_t {
+  p_default = WIDTH_METHOD_R0R1;
+  p_descr = "Method for computing spectrum width.";
+  p_help = "R0R1 is the default. For staggered we use R0Rm in this case. Otherwise we use R1R2 if applicable. For staggered, we use the hybrid if R0R1 is not selected.";
+} spectrum_width_method;
+
+commentdef {
+  p_header = "COMPUTING KDP USING ADAPTIVE FILTER METHOD";
+  p_text = "Parameters for computing KDP.";
+}
+
+typedef enum {
+  FIR_LEN_125, FIR_LEN_60, FIR_LEN_40, FIR_LEN_30, FIR_LEN_20, FIR_LEN_10
+} fir_filter_len_t;
+  
+paramdef enum fir_filter_len_t {
+  p_default = FIR_LEN_20;
+  p_descr = "Filter length for the FIR filter for PHIDP (gates)";
+  p_help = "When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.";
+} KDP_fir_filter_len;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Sets the number of iterations for the initial FIR filter for unfolded PHIDP.";
+  p_help = "After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
+} KDP_n_filt_iterations_unfolded;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Sets the number of iterations for the final FIR filter for conditioned PHIDP.";
+  p_help = "In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
+} KDP_n_filt_iterations_conditioned;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Perform iterative filtering to locate backscatter phase shift.";
+  p_descr = "This is the Hubbert-Bringi method.";
+} KDP_use_iterative_filtering;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "Difference threshold for the iterative filtering method.";
+  p_help = "The FIR filter is applied successively, KDP_n_filt_iterations_conditioned times. After each iteration the result is checked against the original. If the difference is less than this parameter, the original value at that gate is retained. If the difference exceeds this parameter, the new filtered value is retained.";
+} KDP_phidp_difference_threshold;
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Number of gates over which the phidp mean, sdev and jitter are computed.";
+  p_help = "The mean, sdev and jitter of phidp are computed over a consecutive number of gates in range, centered on the current gate of interest. This parameter is the number of gates over which these statistics are computed.";
+} KDP_ngates_for_stats;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Sets the threshold for the standard deviation of phidp in range.";
+  p_help = "The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+} KDP_phidp_sdev_max;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Sets the threshold for the jitter of phidp in range.";
+  p_help = "The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+} KDP_phidp_jitter_max;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Check the SNR.";
+  p_descr = "This test can help identify regions of good PHIDP.";
+} KDP_check_snr;
+
+paramdef double {
+  p_default = -6.0;
+  p_descr = "Sets the threshold for checking SNR (dB).";
+  p_help = "If the SNR drops below this value, KDP will not be computed at this gate.";
+} KDP_snr_threshold;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Check the RHOHV.";
+  p_descr = "This test can help identify regions of good PHIDP.";
+} KDP_check_rhohv;
+
+paramdef double {
+  p_default = 0.95;
+  p_descr = "Sets the threshold for checking RHOHV.";
+  p_help = "If the RHOHV drops below this value, KDP will not be computed at this gate.";
+} KDP_rhohv_threshold;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Check the standard deviation of ZDR in range?";
+  p_descr = "This test can help identify regions of clutter, and hence noisy PHIDP.";
+} KDP_check_zdr_sdev;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Sets the threshold for the standard deviation of zdr in range.";
+  p_help = "The sdev of zdr is a good test for clutter. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+} KDP_zdr_sdev_max;
+
+paramdef double {
+  p_default = 0.025;
+  p_descr = "Sets the min valid KDP value.";
+  p_help = "Values less than this are set to 0.";
+} KDP_min_valid_abs_kdp;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print debug messages in KDP computation.";
+} KDP_debug;
 

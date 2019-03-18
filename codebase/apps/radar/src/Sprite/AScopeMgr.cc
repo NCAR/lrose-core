@@ -95,8 +95,8 @@ AScopeMgr::AScopeMgr(const Params &params,
   
   _ascope = NULL;
 
-  _prevAltKm = -9999.0;
-  _altRateMps = 0.0;
+  // _prevAltKm = -9999.0;
+  // _altRateMps = 0.0;
   
   // initialize geometry
   
@@ -235,9 +235,8 @@ void AScopeMgr::_setupWindows()
   // create the time axis settings dialog
   
   // _createTimeAxisDialog();
-
   _ascope->refresh();
-
+ 
 }
 
 void AScopeMgr::_createMenus()
@@ -518,7 +517,7 @@ void AScopeMgr::keyPressEvent(QKeyEvent * e)
   char keychar = e->text().toLatin1().data()[0];
   int key = e->key();
   
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Clicked char: " << keychar << ":" << (int) keychar << endl;
     cerr << "         key: " << hex << key << dec << endl;
   }
@@ -538,68 +537,31 @@ void AScopeMgr::keyPressEvent(QKeyEvent * e)
     return;
   }
   
-  // check for short-cut keys to fields
-
-  // for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-    
-  //   const DisplayField *field = _fields[ifield];
-
-  //   char shortcut = 0;
-  //   if (field->getShortcut().size() > 0) {
-  //     shortcut = field->getShortcut()[0];
-  //   }
-    
-  //   bool correctField = false;
-  //   if (shortcut == keychar) {
-  //     if (mods & Qt::AltModifier) {
-  //       if (field->getIsFilt()) {
-  //         correctField = true;
-  //       }
-  //     } else {
-  //       if (!field->getIsFilt()) {
-  //         correctField = true;
-  //       }
-  //     }
-  //   }
-
-  //   if (correctField) {
-  //     if (_params.debug) {
-  //       cerr << "Short-cut key pressed: " << shortcut << endl;
-  //       cerr << "  field label: " << field->getLabel() << endl;
-  //       cerr << "  field name: " << field->getName() << endl;
-  //     }
-  //     QRadioButton *button = (QRadioButton *) _fieldGroup->button(ifield);
-  //     button->click();
-  //     break;
-  //   }
-
-  // }
-
   // check for back or forward in time
 
   if (key == Qt::Key_Left) {
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Clicked left arrow, go back in time" << endl;
     }
     _goBack();
     _performArchiveRetrieval();
   } else if (key == Qt::Key_Right) {
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Clicked right arrow, go forward in time" << endl;
     }
     _goFwd();
     _performArchiveRetrieval();
   }
-
+  
   // check for increase/decreas in range
 
   if (key == Qt::Key_Up) {
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Clicked up arrow, change range by 1 gate" << endl;
     }
     _changeRange(1);
   } else if (key == Qt::Key_Down) {
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Clicked down arrow, change range by 1 gate" << endl;
     }
     _changeRange(-1);
@@ -614,126 +576,50 @@ void AScopeMgr::_handleRealtimeData()
 
 {
 
+  // seek to the end of the data queue
+
+  _tsReader->seekToEndOfQueue();
+  
   // do nothing if freeze is on
 
   if (_frozen) {
     return;
   }
 
-  // get all available beams
+  if (_params.debug) {
+    cerr << "AScopeMgr::_handleRealtimeData()" << endl;
+  }
+
+  // set cursor to wait cursor
   
-  // while (true) {
-    
-  //   // get the next ray from the reader queue
-  //   // responsibility for this ray memory passes to
-  //   // this (the master) thread
-    
-  //   RadxRay *ray = _reader->getNextRay(_platform);
-  //   if (ray == NULL) {
-  //     return; // no pending rays
-  //   }
-    
-  //   if (_params.debug >= Params::DEBUG_EXTRA) {
-  //     cerr << "  Got a ray, time, el, az: "
-  //          << DateTime::strm(ray->getTimeSecs()) << ", "
-  //          << ray->getElevationDeg() << ", "
-  //          << ray->getAzimuthDeg() << endl;
-  //   }
-    
-  //   RadxTime thisRayTime = ray->getRadxTime();
-  //   double timeSincePrev = thisRayTime - _readerRayTime;
-  //   if ((timeSincePrev > 0) &&
-  //       (timeSincePrev < _params.bscan_min_secs_between_reading_beams)) {
-  //     // discard
-  //     if (_params.debug >= Params::DEBUG_EXTRA) {
-  //       cerr << "  Discarding ray, not enough elapsed time" << endl;
-  //     }
-  //     delete ray;
-  //     AllocCheck::inst().addFree();
-  //     continue;
-  //   } else if (timeSincePrev < 0) {
-  //     // gone back in time, so reset times
-  //     _imagesScheduledTime.set(RadxTime::ZERO);
-  //   }
-  //   _readerRayTime = thisRayTime;
-
-  //   // compute altitude rate every 2 secs
-
-  //   if (_prevAltKm > -9990) {
-  //     double deltaTime = ray->getRadxTime() - _prevAltTime;
-  //     if (deltaTime > 2.0) {
-  //       if (ray->getGeoreference()) {
-  //         double altKm = ray->getGeoreference()->getAltitudeKmMsl();
-  //         double deltaAltKm = altKm - _prevAltKm;
-  //         _altRateMps = (deltaAltKm / deltaTime) * 1000.0;
-  //         _prevAltKm = ray->getGeoreference()->getAltitudeKmMsl();
-  //       }
-  //       _prevAltTime = ray->getRadxTime();
-  //     }
-  //   } else {
-  //     if (ray->getGeoreference()) {
-  //       _prevAltKm = ray->getGeoreference()->getAltitudeKmMsl();
-  //     }
-  //     _prevAltTime = ray->getRadxTime();
-  //   }
-    
-  //   // update the status panel
-    
-  //   _updateStatusPanel(ray);
-
-  //   // draw the beam
-    
-  //   _handleRay(ray);
-    
-  // } // while (true)
-
-}
-
-/////////////////////////////////////////////
-// get data in realtime image generation mode
-
-void AScopeMgr::_handleRealtimeDataForImages()
-
-{
-
-  // get all available beams
+  this->setCursor(Qt::WaitCursor);
   
-  // while (true) {
-    
-  //   // get the next ray from the reader queue
-  //   // responsibility for this ray memory passes to
-  //   // this (the master) thread
-    
-  //   RadxRay *ray = _reader->getNextRay(_platform);
-  //   if (ray == NULL) {
-  //     return; // no pending rays
-  //   }
-    
-  //   if (_params.debug >= Params::DEBUG_EXTRA) {
-  //     cerr << "  Got a ray, time, el, az: "
-  //          << DateTime::strm(ray->getTimeSecs()) << ", "
-  //          << ray->getElevationDeg() << ", "
-  //          << ray->getAzimuthDeg() << endl;
-  //   }
-    
-  //   RadxTime thisRayTime = ray->getRadxTime();
-  //   double timeSincePrev = thisRayTime - _readerRayTime;
-  //   if (timeSincePrev < 0) {
-  //     // gone back in time, so reset times
-  //     _imagesScheduledTime.set(RadxTime::ZERO);
-  //   }
-  //   _readerRayTime = thisRayTime;
-    
-  //   // update the status panel
-    
-  //   _updateStatusPanel(ray);
-    
-  //   // delete the ray
-    
-  //   delete ray;
-  //   AllocCheck::inst().addFree();
-    
-  // } // while (true)
+  // read in a beam
+
+  Beam *beam = _tsReader->getNextBeam();
+  if (beam == NULL) {
+    cerr << "ERROR - end of data in realtime mode" << endl;
+    // reset cursor
+    this->setCursor(Qt::ArrowCursor);
+    return;
+  }
+
+  // update status
+
+  _updateStatusPanel(beam);
+
+  // set cursor to wait cursor
+  
+  this->setCursor(Qt::WaitCursor);
+
+  // plot the data
+  
+  _ascope->plotBeam(beam);
+  this->setCursor(Qt::ArrowCursor);
+
+  // clean up
+
+  delete beam;
 
 }
 
@@ -762,40 +648,22 @@ void AScopeMgr::_handleArchiveData()
     return;
   }
 
+  // update status
+
+  _updateStatusPanel(beam);
+
   // set cursor to wait cursor
   
   this->setCursor(Qt::WaitCursor);
-  // _ascope->activateArchiveRendering();
 
   // plot the data
 
-  _plotArchiveData(beam);
+  _ascope->plotBeam(beam);
   this->setCursor(Qt::ArrowCursor);
 
   // clean up
 
   delete beam;
-
-  // set up plot times
-
-  // _plotStartTime = _archiveStartTime;
-  // _plotEndTime = _archiveEndTime;
-
-  // erase plot and set time axis
-
-  // _ascope->setPlotStartTime(_plotStartTime, true);
-
-  // _timeAxisDialog->setCursor(Qt::WaitCursor);
-
-  // get data
-
-  // if (_getArchiveData()) {
-  //   this->setCursor(Qt::ArrowCursor);
-  //   _timeAxisDialog->setCursor(Qt::ArrowCursor);
-  //   return;
-  // }
-
-  // _timeAxisDialog->setCursor(Qt::ArrowCursor);
 
 }
 
@@ -803,173 +671,14 @@ void AScopeMgr::_handleArchiveData()
 // get data in archive mode
 // returns 0 on success, -1 on failure
 
-int AScopeMgr::_getArchiveData()
-
-{
-
-  // set up file object for reading
-  
-  RadxFile file;
-  // _vol.clear();
-  // _setupVolRead(file);
-
-  // if (_params.debug) {
-  //   cerr << "----------------------------------------------------" << endl;
-  //   cerr << "perform archive retrieval" << endl;
-  //   cerr << "  archive start time: " << _archiveStartTime.asString() << endl;
-  //   cerr << "  archive end time: " << _archiveEndTime.asString() << endl;
-  //   cerr << "  dwell secs: " << _dwellSecs << endl;
-  //   cerr << "  dwell stats method: "
-  //        << RadxField::statsMethodToStr(_dwellStatsMethod) << endl;
-  //   cerr << "----------------------------------------------------" << endl;
-  // }
-  
-  // if (file.readFromDir(_params.archive_data_url, _vol)) {
-  //   string errMsg = "ERROR - Cannot retrieve archive data\n";
-  //   errMsg += "AScopeMgr::_getArchiveData\n";
-  //   errMsg += file.getErrStr() + "\n";
-  //   errMsg += "  start time: " + _archiveStartTime.asString() + "\n";
-  //   errMsg += "  end time: " + _archiveEndTime.asString() + "\n";
-  //   char text[1024];
-  //   sprintf(text, "  dwell secs: %g\n", _dwellSecs);
-  //   errMsg += text;
-  //   cerr << errMsg;
-  //   if (!_params.images_auto_create)  {
-  //     QErrorMessage errorDialog;
-  //     errorDialog.setMinimumSize(400, 250);
-  //     errorDialog.showMessage(errMsg.c_str());
-  //     errorDialog.exec();
-  //   }
-  //   return -1;
-  // }
-
-  // _platform = _vol.getPlatform();
-
-  return 0;
-
-}
-
-/////////////////////////////
-// plot data in archive mode
-
-void AScopeMgr::_plotArchiveData(Beam *beam)
-
-{
-
-  if(_params.debug) {
-    cerr << "======== Plotting archive data =======================" << endl;
-    cerr << "======>>   plotStartTime: " << _plotStartTime.asString(3) << endl;
-    cerr << "======>>   plotEndTime: " << _plotEndTime.asString(3) << endl;
-  }
-
-  // initialize plotting
-
-  // _initialRay = true;
-
-  // // handle the rays
-  
-  // const vector<RadxRay *> &rays = _vol.getRays();
-  // if (rays.size() < 1) {
-  //   cerr << "ERROR - _plotArchiveData" << endl;
-  //   cerr << "  No rays found" << endl;
-  // }
-  
-  // for (size_t ii = 0; ii < rays.size(); ii++) {
-  //   RadxRay *ray = rays[ii];
-  //   _handleRay(ray);
-  // }
-
-  // // update the status panel
-  
-  // _updateStatusPanel(rays[0]);
-
-}
-
-//////////////////////////////////////////////////
-// set up read
-
-void AScopeMgr::_setupVolRead(RadxFile &file)
-{
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    file.setDebug(true);
-  }
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    file.setDebug(true);
-    file.setVerbose(true);
-  }
-
-  // for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-  //   const DisplayField *field = _fields[ifield];
-  //   file.addReadField(field->getName());
-  // }
-
-  // _dwellSecs = _dwellSpecifiedSecs;
-  // if (_dwellAuto) {
-  //   _dwellSecs = _dwellAutoSecs;
-  // }
-  
-  // file.setReadRaysInInterval(_archiveStartTime, _archiveEndTime,
-  //                            _dwellSecs, _dwellStatsMethod);
-
-}
-
 /////////////////////////////////////////////////////////////////////  
 // slots
-
-///////////////////////////////////////////////////////////
-// respond to change field request from field button group
-
-// void AScopeMgr::_changeField(int fieldId, bool guiMode)
-
-// {
-
-//   _selectedField = _fields[fieldId];
-  
-//   if (_params.debug) {
-//     cerr << "Changing to field id: " << fieldId << endl;
-//     _selectedField->print(cerr);
-//   }
-
-//   // if we click the already-selected field, go back to previous field
-
-//   if (guiMode) {
-//     if (_fieldNum == fieldId && _prevFieldNum >= 0) {
-//       QRadioButton *button =
-//         (QRadioButton *) _fieldGroup->button(_prevFieldNum);
-//       button->click();
-//       return;
-//     }
-//   }
-
-//   _prevFieldNum = _fieldNum;
-//   _fieldNum = fieldId;
-  
-//   _ascope->selectVar(_fieldNum);
-
-//   // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
-//   _selectedName = _selectedField->getName();
-//   _selectedLabel = _selectedField->getLabel();
-//   _selectedUnits = _selectedField->getUnits();
-  
-//   _selectedLabelWidget->setText(_selectedLabel.c_str());
-//   char text[128];
-//   if (_selectedField->getSelectValue() > -9990) {
-//     sprintf(text, "%g %s", 
-//             _selectedField->getSelectValue(),
-//             _selectedField->getUnits().c_str());
-//   } else {
-//     text[0] = '\0';
-//   }
-//   _valueLabel->setText(text);
-
-// }
 
 /////////////////////////////////////////////////////////
 // respond to a change in click location on the BSCAN
 
 void AScopeMgr::_locationClicked(double xsecs, double ykm,
-                                     const RadxRay *closestRay)
+                                 const RadxRay *closestRay)
   
 {
   if (_params.debug) {
@@ -1569,7 +1278,7 @@ void AScopeMgr::_createStatusPanel()
   _azVal = _createStatusVal("Az", "-999.99", row++, fsize2);
 
   if (_params.show_status_in_gui.fixed_angle) {
-    _fixedAngVal = _createStatusVal("Fixed ang", "-99.99", row++, fsize2);
+    _fixedAngVal = _createStatusVal("FixedAng", "-99.99", row++, fsize2);
   } else {
     _fixedAngVal = NULL;
   }
@@ -1587,31 +1296,31 @@ void AScopeMgr::_createStatusPanel()
   }
 
   if (_params.show_status_in_gui.n_samples) {
-    _nSamplesVal = _createStatusVal("N samp", "0", row++, fsize);
+    _nSamplesVal = _createStatusVal("NSamp", "0", row++, fsize);
   } else {
     _nSamplesVal = NULL;
   }
 
   if (_params.show_status_in_gui.n_gates) {
-    _nGatesVal = _createStatusVal("N gates", "0", row++, fsize);
+    _nGatesVal = _createStatusVal("NGates", "0", row++, fsize);
   } else {
     _nGatesVal = NULL;
   }
 
   if (_params.show_status_in_gui.gate_length) {
-    _gateSpacingVal = _createStatusVal("Gate len", "0", row++, fsize);
+    _gateSpacingVal = _createStatusVal("GateLen(m)", "0", row++, fsize);
   } else {
     _gateSpacingVal = NULL;
   }
   
   if (_params.show_status_in_gui.pulse_width) {
-    _pulseWidthVal = _createStatusVal("Pulse width", "-9999", row++, fsize);
+    _pulseWidthVal = _createStatusVal("PulseLen", "-9999", row++, fsize);
   } else {
     _pulseWidthVal = NULL;
   }
 
   if (_params.show_status_in_gui.prf_mode) {
-    _prfModeVal = _createStatusVal("PRF mode", "Fixed", row++, fsize);
+    _prfModeVal = _createStatusVal("PRF-mode", "Fixed", row++, fsize);
   } else {
     _prfModeVal = NULL;
   }
@@ -1629,43 +1338,43 @@ void AScopeMgr::_createStatusPanel()
   }
 
   if (_params.show_status_in_gui.max_range) {
-    _maxRangeVal = _createStatusVal("Max range", "-9999", row++, fsize);
+    _maxRangeVal = _createStatusVal("MaxRng(km)", "-9999", row++, fsize);
   } else {
     _maxRangeVal = NULL;
   }
 
   if (_params.show_status_in_gui.unambiguous_range) {
-    _unambigRangeVal = _createStatusVal("U-A range", "-9999", row++, fsize);
+    _unambigRangeVal = _createStatusVal("UARng(km)", "-9999", row++, fsize);
   } else {
     _unambigRangeVal = NULL;
   }
 
   if (_params.show_status_in_gui.measured_power_h) {
-    _powerHVal = _createStatusVal("Power H", "-9999", row++, fsize);
+    _powerHVal = _createStatusVal("XmitPwrH", "-9999", row++, fsize);
   } else {
     _powerHVal = NULL;
   }
 
   if (_params.show_status_in_gui.measured_power_v) {
-    _powerVVal = _createStatusVal("Power V", "-9999", row++, fsize);
+    _powerVVal = _createStatusVal("XmitPwrVV", "-9999", row++, fsize);
   } else {
     _powerVVal = NULL;
   }
 
   if (_params.show_status_in_gui.scan_name) {
-    _scanNameVal = _createStatusVal("Scan name", "unknown", row++, fsize);
+    _scanNameVal = _createStatusVal("ScanName", "unknown", row++, fsize);
   } else {
     _scanNameVal = NULL;
   }
 
   if (_params.show_status_in_gui.scan_mode) {
-    _sweepModeVal = _createStatusVal("Scan mode", "SUR", row++, fsize);
+    _sweepModeVal = _createStatusVal("ScanMode", "sur", row++, fsize);
   } else {
     _sweepModeVal = NULL;
   }
 
   if (_params.show_status_in_gui.polarization_mode) {
-    _polModeVal = _createStatusVal("Pol mode", "Single", row++, fsize);
+    _polModeVal = _createStatusVal("PolMode", "single", row++, fsize);
   } else {
     _polModeVal = NULL;
   }
@@ -1683,55 +1392,20 @@ void AScopeMgr::_createStatusPanel()
   }
 
   if (_params.show_status_in_gui.altitude) {
-    if (_altitudeInFeet) {
-      _altVal = _createStatusVal("Alt(kft)", "-999.999",
-                                 row++, fsize, &_altLabel);
-    } else {
-      _altVal = _createStatusVal("Alt(km)", "-999.999",
-                                 row++, fsize, &_altLabel);
-    }
+    _altVal = _createStatusVal("Alt(m)", "-999.999",
+                               row++, fsize, &_altLabel);
   } else {
     _altVal = NULL;
   }
 
-  if (_params.show_status_in_gui.altitude_rate) {
-    if (_altitudeInFeet) {
-      _altRateVal = _createStatusVal("AltRate(ft/s)", "-999.999",
-                                     row++, fsize, &_altRateLabel);
-    } else {
-      _altRateVal = _createStatusVal("AltRate(m/s)", "-999.999",
-                                     row++, fsize, &_altRateLabel);
-    }
-  } else {
-    _altRateVal = NULL;
-  }
-
-  if (_params.show_status_in_gui.speed) {
-    _speedVal = _createStatusVal("Speed(m/s)", "-999.99", row++, fsize);
-  } else {
-    _speedVal = NULL;
-  }
-
-  if (_params.show_status_in_gui.heading) {
-    _headingVal = _createStatusVal("Heading(deg)", "-999.99", row++, fsize);
-  } else {
-    _headingVal = NULL;
-  }
-
-  if (_params.show_status_in_gui.track) {
-    _trackVal = _createStatusVal("Track(deg)", "-999.99", row++, fsize);
-  } else {
-    _trackVal = NULL;
-  }
-
   if (_params.show_status_in_gui.sun_elevation) {
-    _sunElVal = _createStatusVal("Sun el (deg)", "-999.999", row++, fsize);
+    _sunElVal = _createStatusVal("SunEl(deg)", "-999.999", row++, fsize);
   } else {
     _sunElVal = NULL;
   }
 
   if (_params.show_status_in_gui.sun_azimuth) {
-    _sunAzVal = _createStatusVal("Sun az (deg)", "-999.999", row++, fsize);
+    _sunAzVal = _createStatusVal("SunAz(deg)", "-999.999", row++, fsize);
   } else {
     _sunAzVal = NULL;
   }
@@ -1777,5 +1451,284 @@ QLabel *AScopeMgr::_createStatusVal(const string &leftLabel,
   _valsRight.push_back(right);
 
   return right;
+}
+
+//////////////////////////////////////////////
+// update the status panel
+
+void AScopeMgr::_updateStatusPanel(const Beam *beam)
+{
+
+  // set time etc
+
+  char text[1024];
+  
+  QString prev_radar_name = _radarName->text();
+  
+  string rname(beam->getInfo().get_radar_name());
+  if (_params.override_radar_name) rname = _params.radar_name;
+  _radarName->setText(rname.c_str());
+
+  if (prev_radar_name != _radarName->text()) {
+    _setTitleBar(rname);
+  }
+  
+  DateTime beamTime(beam->getTimeSecs());
+  sprintf(text, "%.4d/%.2d/%.2d",
+          beamTime.getYear(), beamTime.getMonth(), beamTime.getDay());
+  _dateVal->setText(text);
+
+  int nanoSecs = beam->getNanoSecs();
+  sprintf(text, "%.2d:%.2d:%.2d.%.3d",
+          beamTime.getHour(), beamTime.getMin(), beamTime.getSec(),
+          (nanoSecs / 1000000));
+  _timeVal->setText(text);
+  
+  if (_volNumVal) {
+    _setText(text, "%d", beam->getVolumeNumber());
+    _volNumVal->setText(text);
+  }
+  
+  if (_sweepNumVal) {
+    _setText(text, "%d", beam->getSweepNumber());
+    _sweepNumVal->setText(text);
+  }
+  
+  if (_fixedAngVal) {  
+    _setText(text, "%6.2f", beam->getTargetAngle());
+    _fixedAngVal->setText(text);
+  }
+  
+  if (_elevVal) {
+    if (fabs(beam->getEl()) < 1000) {
+      _setText(text, "%6.2f", beam->getEl());
+      _elevVal->setText(text);
+    }
+  }
+
+  if (_azVal) {
+    if (fabs(beam->getAz()) < 1000) {
+      _setText(text, "%6.2f", beam->getAz());
+      _azVal->setText(text);
+    }
+  }
+  
+  if (_nSamplesVal) {
+    _setText(text, "%d", (int) beam->getNSamples());
+    _nSamplesVal->setText(text);
+  }
+  
+  if (_nGatesVal) {
+    _setText(text, "%d", (int) beam->getNGates());
+    _nGatesVal->setText(text);
+  }
+  
+  if (_gateSpacingVal) {
+    _setText(text, "%.1f", beam->getGateSpacingKm() * 1000.0);
+    _gateSpacingVal->setText(text);
+  }
+  
+  if (_pulseWidthVal) {
+    _setText(text, "%.2f", beam->getPulseWidth());
+    _pulseWidthVal->setText(text);
+  }
+
+  if (_prfVal) {
+    if (!beam->getIsStagPrt()) {
+      if (beam->getPrt() <= 0) {
+        _setText(text, "%d", -9999);
+      } else {
+        _setText(text, "%d", (int) ((1.0 / beam->getPrt()) * 10.0 + 0.5) / 10);
+      }
+    } else {
+      double prtSec = beam->getPrt();
+      if (prtSec <= 0) {
+        _setText(text, "%d", -9999);
+      } else {
+        int iprt = (int) ((1.0 / beam->getPrt()) * 10.0 + 0.5) / 10;
+        snprintf(text, 1024, "%d(%d/%d)", iprt, beam->getStagM(), beam->getStagN());
+      }
+    }
+    _prfVal->setText(text);
+  }
+
+  if (_nyquistVal) {
+    if (fabs(beam->getNyquist()) < 1000) {
+      _setText(text, "%.1f", beam->getNyquist());
+      _nyquistVal->setText(text);
+    }
+  }
+
+  if (_maxRangeVal) {
+    double maxRangeData =
+      beam->getStartRangeKm() + beam->getGateSpacingKm() * beam->getNGates();
+    _setText(text, "%.1f", maxRangeData);
+    _maxRangeVal->setText(text);
+  }
+
+  if (_unambigRangeVal) {
+    if (fabs(beam->getUnambigRange()) < 100000) {
+      _setText(text, "%.1f", beam->getUnambigRange());
+      _unambigRangeVal->setText(text);
+    }
+  }
+  
+  if (_powerHVal) {
+    if (beam->getMeasXmitPowerDbmH() > -9990) {
+      _setText(text, "%.1f", beam->getMeasXmitPowerDbmH());
+      _powerHVal->setText(text);
+    }
+  }
+   
+  if (_powerVVal) {
+    if (beam->getMeasXmitPowerDbmV() > -9990) {
+      _setText(text, "%.1f", beam->getMeasXmitPowerDbmV());
+      _powerVVal->setText(text);
+    }
+  }
+
+  if (_scanNameVal) {
+    string scanName = beam->getInfo().get_scan_segment_name();
+    size_t len = scanName.size();
+    if (len > 8) {
+      scanName = scanName.substr(0, 8);
+    }
+    _scanNameVal->setText(scanName.c_str());
+  }
+
+  if (_sweepModeVal) {
+    switch (beam->getScanMode()) {
+      case IWRF_SCAN_MODE_SECTOR: {
+        _sweepModeVal->setText("sec"); break;
+      }
+      case IWRF_SCAN_MODE_COPLANE: {
+        _sweepModeVal->setText("coplane"); break;
+      }
+      case IWRF_SCAN_MODE_EL_SUR_360: {
+      case IWRF_SCAN_MODE_RHI: {
+        _sweepModeVal->setText("rhi"); break;
+      }
+      case IWRF_SCAN_MODE_VERTICAL_POINTING: {
+        _sweepModeVal->setText("vert"); break;
+      }
+      case IWRF_SCAN_MODE_IDLE: {
+        _sweepModeVal->setText("idle"); break;
+      }
+      case IWRF_SCAN_MODE_AZ_SUR_360:
+        _sweepModeVal->setText("sur"); break;
+      }
+      case IWRF_SCAN_MODE_SUNSCAN: {
+        _sweepModeVal->setText("sun"); break;
+      }
+      case IWRF_SCAN_MODE_POINTING: {
+        _sweepModeVal->setText("point"); break;
+      }
+      default: {
+        _sweepModeVal->setText("---");
+      }
+    }
+  }
+
+  if (_polModeVal) {
+    switch (beam->getInfo().get_proc_xmit_rcv_mode()) {
+      case IWRF_SINGLE_POL:
+      default:
+        _polModeVal->setText("single");
+        break;
+      case IWRF_ALT_HV_CO_ONLY:
+      case IWRF_ALT_HV_CO_CROSS:
+      case IWRF_ALT_HV_FIXED_HV:
+        _polModeVal->setText("alt");
+        break;
+      case IWRF_SIM_HV_FIXED_HV:
+      case IWRF_SIM_HV_SWITCHED_HV:
+        _polModeVal->setText("sim");
+        break;
+      case IWRF_H_ONLY_FIXED_HV:
+        _polModeVal->setText("xmit_h_dual");
+        break;
+      case IWRF_V_ONLY_FIXED_HV:
+        _polModeVal->setText("xmit_v_dual");
+        break;
+    }
+  }
+   
+  if (_prfModeVal) {
+    if (beam->getIsStagPrt()) {
+      _prfModeVal->setText("staggered");
+    } else {
+      _prfModeVal->setText("fixed");
+    }
+  }
+
+  if (_params.override_radar_location) {
+    _radarLat = _params.radar_latitude_deg;
+    _radarLon = _params.radar_longitude_deg;
+    _radarAltM = _params.radar_altitude_meters;
+  } else {
+    _radarLat = beam->getInfo().get_radar_latitude_deg();
+    _radarLon = beam->getInfo().get_radar_longitude_deg();
+    _radarAltM = beam->getInfo().get_radar_altitude_m();
+  }
+  if (beam->getInfo().isPlatformGeorefActive()) {
+    iwrf_platform_georef_t georef = beam->getInfo().getPlatformGeoref();
+    _radarLat = georef.latitude;
+    _radarLon = georef.longitude;
+    _radarAltM = georef.altitude_msl_km * 1000.0;
+  }
+
+  _sunPosn.setLocation(_radarLat, _radarLon, _radarAltM);
+
+  if (_latVal) {
+    _setText(text, "%.3f", _radarLat);
+    _latVal->setText(text);
+  }
+     
+  if (_lonVal) {
+    _setText(text, "%.3f", _radarLon);
+    _lonVal->setText(text);
+  }
+    
+  if (_altVal) {
+    _setText(text, "%.0f", _radarAltM);
+    _altVal->setText(text);
+  }
+  
+  double sunEl, sunAz;
+  _sunPosn.computePosn(beam->getTimeDouble(), sunEl, sunAz);
+  _setText(text, "%.3f", sunEl);
+  if (_sunElVal) {
+    _sunElVal->setText(text);
+  }
+  _setText(text, "%.3f", sunAz);
+  if (_sunAzVal) {
+    _sunAzVal->setText(text);
+  }
+
+}
+
+///////////////////////////////////////////
+// set text for GUI panels
+
+void AScopeMgr::_setText(char *text,
+                         const char *format,
+                         int val)
+{
+  if (abs(val) < 9999) {
+    sprintf(text, format, val);
+  } else {
+    sprintf(text, format, -9999);
+  }
+}
+
+void AScopeMgr::_setText(char *text,
+                         const char *format,
+                         double val)
+{
+  if (fabs(val) < 9999) {
+    sprintf(text, format, val);
+  } else {
+    sprintf(text, format, -9999.0);
+  }
 }
 

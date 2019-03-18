@@ -26,6 +26,7 @@
 #include <iostream>
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
+#include <toolsa/DateTime.hh>
 #include <toolsa/pjg.h>
 
 #include <QTimer>
@@ -38,6 +39,7 @@
 
 #include "AScopeWidget.hh"
 #include "AScopeMgr.hh"
+#include "Beam.hh"
 
 using namespace std;
 
@@ -201,85 +203,21 @@ void AScopeWidget::setYGridEnabled(bool state)
   update();
 }
 
-// /*************************************************************************
-//  * turn on archive-style rendering - all fields
-//  */
-
-// void AScopeWidget::activateArchiveRendering()
-// {
-
-//   cerr << "RRRRRRRRRRRRRRRRRRRRRRR" << endl;
-
-//   // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-//   //   _fieldRenderers[ii]->setBackgroundRenderingOn();
-//   // }
-// }
-
-
-// /*************************************************************************
-//  * turn on reatlime-style rendering - non-selected fields in background
-//  */
-
-// void AScopeWidget::activateRealtimeRendering()
-// {
-  
-//   // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-//   //   if (ii != _selectedField) {
-//   //     _fieldRenderers[ii]->activateBackgroundRendering();
-//   //   }
-//   // }
-
-// }
-
-
 /*************************************************************************
- * addBeam()
+ * plot a beam
  */
 
-// void AScopeWidget::addBeam(const RadxRay *ray,
-//                           double instHtKm,
-//                           const RadxTime &plot_start_time,
-//                           const RadxTime &beam_start_time,
-//                           const RadxTime &beam_end_time,
-//                           const std::vector< std::vector< double > > &beam_data,
-//                           const std::vector< DisplayField* > &fields)
-// {
+void AScopeWidget::plotBeam(Beam *beam)
 
-//   // Create the new beam, to keep track of the display information.
-//   // Beam start and stop angles are adjusted here so that they always 
-//   // increase clockwise. Likewise, if a beam crosses the 0 degree boundary,
-//   // it is split into two beams, each of them again obeying the clockwise
-//   // rule. Prescribing these rules makes the beam culling logic a lot simpler.
+{
 
-//   AScopeBeam *beam = new AScopeBeam(_params,
-//                                   ray,
-//                                   instHtKm,
-//                                   _fieldRenderers.size(),
-//                                   plot_start_time,
-//                                   _timeSpanSecs,
-//                                   beam_start_time, beam_end_time);
-//   beam->addClient();
-//   _beams.push_back(beam);
+  if(_params.debug) {
+    cerr << "======== Plotting beam data ================" << endl;
+    DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
+    cerr << "  Beam time: " << beamTime.asString(3) << endl;
+  }
 
-//   beam->fillColors(beam_data, fields, &_backgroundBrush);
-
-//   // Add the new beams to the render lists for each of the fields
-  
-//   for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
-//     if (field == _selectedField ||
-//         _fieldRenderers[field]->isBackgroundRendered()) {
-//       _fieldRenderers[field]->addBeam(beam);
-//     } else {
-//       beam->setBeingRendered(field, false);
-//     }
-//   }
-  
-//   // run the threads to render the new beams
-  
-//   _performRendering();
-
-// }
-
+}
 
 /*************************************************************************
  * backgroundColor()
