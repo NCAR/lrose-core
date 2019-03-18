@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "SoloFunctionsModel.hh"
-#include "../SoloFunctionsApi/RemoveAcMotion.cc"
+#include "RemoveAcMotion.cc"
 
 
 #include <Radx/RadxField.hh>

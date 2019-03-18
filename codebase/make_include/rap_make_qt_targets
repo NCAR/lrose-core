@@ -31,7 +31,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_cf_recursive_targets
 #
 
 QT_EXEC_PATH=$(shell PKG_CONFIG_PATH="$(PKG_CONFIG_PATH)" pkg-config --variable=exec_prefix Qt5Core)
-QT_INCLUDES = $(shell PKG_CONFIG_PATH="$(PKG_CONFIG_PATH)" pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui)
+QT_INCLUDES = $(shell PKG_CONFIG_PATH="$(PKG_CONFIG_PATH)" pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Qml)
 QT_INCLUDE = $(subst -I,,$(QT_INCLUDES))
 moc: $(MOC_SRCS)
 	$(QT_EXEC_PATH)/bin/qmake -o Makefile.qmake "INCLUDEPATH=$(QT_INCLUDE)"

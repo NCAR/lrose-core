@@ -50,7 +50,7 @@
 ****************************************************************************/
 
 
-#include "spreadsheetitem.hh"
+#include "SpreadSheetItem.hh"
 
 SpreadSheetItem::SpreadSheetItem()
         : QTableWidgetItem(), isResolving(false)
