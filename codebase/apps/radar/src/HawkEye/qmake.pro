@@ -14,8 +14,8 @@ ICON = HawkEyePolarIcon.icns
 CONFIG += qt
 CONFIG += debug
 
-RESOURCES = resources.qrc 
-RESOURCES += customcompleter.qrc
+# RESOURCES = resources.qrc 
+RESOURCES = customcompleter.qrc
 
 HEADERS += AllocCheck.hh
 HEADERS += Args.hh
@@ -100,7 +100,6 @@ SOURCES += ParameterColorDialog.cc
 SOURCES += DialogOptionsWidget.cc
 SOURCES += ColorMapTemplates.cc
 SOURCES += ClickableLabel.cc
-SOURCES += MY_WACKY_FILE.cc
 SOURCES += TextEdit.cc
 SOURCES += SpreadSheetController.cc
 SOURCES += SpreadSheetView.cc
