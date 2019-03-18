@@ -628,6 +628,7 @@ def writeMakefileAm():
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Gui)\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Widgets)\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Network)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Qml)\n")
     fo.write("\n")
 
     fo.write("# load flags\n")
@@ -649,6 +650,7 @@ def writeMakefileAm():
         fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Gui)\n")
         fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Widgets)\n")
         fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Network)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Qml)\n")
     fo.write("\n")
 
     if (len(loadLibList) > 0):
