@@ -1,6 +1,6 @@
 
 
-#include "spreadsheetdelegate.hh"
+#include "SpreadSheetDelegate.hh"
 #include "TextEdit.hh"
 
 #include <QtWidgets>
