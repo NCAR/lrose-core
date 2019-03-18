@@ -389,6 +389,7 @@ int TsReader::positionForPreviousBeam()
       _clearPulseQueue();
       return -1;
     }
+    _prevPulseSeqNum = pulse->get_pulse_seq_num();
     _nPulsesRead++;
     delete pulse;
   }
