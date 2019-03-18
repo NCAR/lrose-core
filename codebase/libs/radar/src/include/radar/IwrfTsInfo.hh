@@ -62,6 +62,10 @@ public:
   
   IwrfTsInfo(const IwrfTsInfo &rhs);
 
+  // assignment
+  
+  IwrfTsInfo & operator=(const IwrfTsInfo &rhs);
+
   // destructor
   
   ~IwrfTsInfo();

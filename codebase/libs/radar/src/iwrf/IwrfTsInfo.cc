@@ -139,6 +139,16 @@ IwrfTsInfo &IwrfTsInfo::_copy(const IwrfTsInfo &rhs)
 
 }
 
+/////////////////////////////
+// Assignment
+//
+
+IwrfTsInfo &IwrfTsInfo::operator=(const IwrfTsInfo &rhs)
+
+{
+  return _copy(rhs);
+}
+
 //////////////////////////////////////////////////////////////////
 // clear all
 
