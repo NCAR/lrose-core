@@ -37,7 +37,7 @@ sudo yum install -y \
     libpng-devel libtiff-devel zlib-devel \
     expat-devel libcurl-devel \
     flex-devel fftw3-devel \
-    bzip2-devel qt5-qtbase-devel \
+    bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
     hdf5-devel netcdf-devel \
     xorg-x11-xauth xorg-x11-apps \
     rpm-build redhat-rpm-config \
@@ -58,7 +58,8 @@ sudo apt-get install -y \
     automake make libtool pkg-config python \
     libcurl3-dev curl \
     libfl-dev libbz2-dev libx11-dev libpng-dev \
-    libfftw3-dev qtbase5-dev libexpat1-dev \
+    libfftw3-dev libexpat1-dev \
+    qtbase5-dev qtdeclarative5-dev \
     libgeographic-dev libeigen3-dev libzip-dev \
     libnetcdf-dev netcdf-bin libhdf5-dev hdf5-tools
 

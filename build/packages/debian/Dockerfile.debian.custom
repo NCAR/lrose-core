@@ -13,7 +13,8 @@ RUN apt-get update && \
     automake make libtool pkg-config python \
     libcurl3-dev curl \
     libfl-dev libbz2-dev libx11-dev libpng-dev \
-    libfftw3-dev qtbase5-dev libexpat1-dev \
+    qtbase5-dev qtdeclarative5-dev \
+    libfftw3-dev libexpat1-dev \
     libgeographic-dev libeigen3-dev libzip-dev \
     libnetcdf-dev netcdf-bin libhdf5-dev hdf5-tools
 

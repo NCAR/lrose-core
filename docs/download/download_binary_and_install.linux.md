@@ -21,7 +21,7 @@ Recommended distributions are:
 For the Qt apps (e.g. HawkEye) to run, make sure Qt5 is installed:
 
 ```
-  yum install -y qt5-qtbase-devel
+  yum install -y qt5-qtbase-devel qt5-qtdeclarative-devel
 ```
 
 <a name="download"/>
