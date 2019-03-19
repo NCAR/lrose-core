@@ -85,6 +85,9 @@ WorldPlot::WorldPlot(int widthPixels,
                      int textMargin)
 {
     
+  _xOffset = 0;
+  _yOffset = 0;
+
   set(widthPixels,
       heightPixels,
       leftMargin,
@@ -556,8 +559,7 @@ void WorldPlot::drawTitleTopCenter(QPainter &painter,
   QRect tRect(painter.fontMetrics().tightBoundingRect(title.c_str()));
   
   qreal xx = (qreal) ((_xMinPixel + _xMaxPixel - tRect.width()) / 2.0);
-  qreal yy;
-  yy = (qreal) 2 * _textMargin;
+  qreal yy = (qreal) (2 * _textMargin + _yOffset);
   
   QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 4);
     

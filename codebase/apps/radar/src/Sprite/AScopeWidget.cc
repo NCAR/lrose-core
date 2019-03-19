@@ -121,7 +121,7 @@ void AScopeWidget::configureAxes(double min_amplitude,
   
   int bottomMargin = _params.ascope_bottom_margin;
 
-  _fullWorld.set(width() / 1, height() / 1,
+  _fullWorld.set(width() / 2, height() / 2,
                  _params.ascope_left_margin,
                  _params.ascope_right_margin,
                  _params.ascope_top_margin,
@@ -135,8 +135,8 @@ void AScopeWidget::configureAxes(double min_amplitude,
                  _params.ascope_n_ticks_ideal,
                  _params.ascope_text_margin);
 
-  _fullWorld.setXOffset(0);
-  _fullWorld.setYOffset(0);
+  _fullWorld.setXOffset(200);
+  _fullWorld.setYOffset(200);
   
   _zoomWorld = _fullWorld;
   _isZoomed = false;
@@ -453,10 +453,10 @@ void AScopeWidget::_resetWorld(int width, int height)
 
   cerr << "111111111111 width, height: " << width << ", " << height << endl;
 
-  _fullWorld.resize(width / 1, height / 1);
+  _fullWorld.resize(width / 2, height / 2);
 
-  // _fullWorld.setXOffset(width / 4);
-  // _fullWorld.setYOffset(height / 4);
+  _fullWorld.setXOffset(200);
+  _fullWorld.setYOffset(200);
 
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
