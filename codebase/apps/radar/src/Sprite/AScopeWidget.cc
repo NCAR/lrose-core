@@ -121,7 +121,7 @@ void AScopeWidget::configureAxes(double min_amplitude,
   
   int bottomMargin = _params.ascope_bottom_margin;
 
-  _fullWorld.set(width(), height(),
+  _fullWorld.set(width() / 1, height() / 1,
                  _params.ascope_left_margin,
                  _params.ascope_right_margin,
                  _params.ascope_top_margin,
@@ -134,6 +134,9 @@ void AScopeWidget::configureAxes(double min_amplitude,
                  _params.ascope_axis_tick_len,
                  _params.ascope_n_ticks_ideal,
                  _params.ascope_text_margin);
+
+  _fullWorld.setXOffset(0);
+  _fullWorld.setYOffset(0);
   
   _zoomWorld = _fullWorld;
   _isZoomed = false;
@@ -448,7 +451,13 @@ void AScopeWidget::_resetWorld(int width, int height)
 
 {
 
-  _fullWorld.resize(width, height);
+  cerr << "111111111111 width, height: " << width << ", " << height << endl;
+
+  _fullWorld.resize(width / 1, height / 1);
+
+  // _fullWorld.setXOffset(width / 4);
+  // _fullWorld.setYOffset(height / 4);
+
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
 
@@ -522,7 +531,7 @@ void AScopeWidget::_drawOverlays(QPainter &painter)
   valuesFont.setPointSizeF(_params.ascope_axis_values_font_size);
   
   _zoomWorld.drawRangeAxes(painter,
-                           "amp", _yGridEnabled,
+                           "xxx", _yGridEnabled,
                            lineColor, gridColor, textColor,
                            labelFont, valuesFont, true);
   

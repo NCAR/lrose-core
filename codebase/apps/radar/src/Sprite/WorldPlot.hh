@@ -117,6 +117,9 @@ public:
   void setYscaleFromXscale();
   
   // set methods
+
+  inline void setXOffset(int val) { _xOffset = val; }
+  inline void setYOffset(int val) { _yOffset = val; }
   
   inline void setAxisTickLen(int len) { _axisTickLen = len; }
   inline void setNTicksIdeal(int nTicks) { _nTicksIdeal = nTicks; }
@@ -130,6 +133,9 @@ public:
   }
 
   // get methods
+
+  inline int getXOffset() const { return _xOffset; }
+  inline int getYOffset() const { return _yOffset; }
 
   inline int getWidthPixels() const { return _widthPixels; }
   inline int getHeightPixels() const { return _heightPixels; }
@@ -164,11 +170,11 @@ public:
   QTransform getTransform() const { return _transform; }
   
   inline double getXPixel(double xWorld) const {
-    return (xWorld - _xMinWorld) * _xPixelsPerWorld + _xMinPixel;
+    return (xWorld - _xMinWorld) * _xPixelsPerWorld + _xMinPixel + _xOffset;
   }
   
   inline double getYPixel(double yWorld) const {
-    return (yWorld - _yMinWorld) * _yPixelsPerWorld + _yMinPixel;
+    return (yWorld - _yMinWorld) * _yPixelsPerWorld + _yMinPixel + _yOffset;
   }
 
   inline int getIxPixel(double xWorld) const {
@@ -180,18 +186,18 @@ public:
   }
   
   inline double getXWorld(double xPixel) const {
-    return (xPixel - _xMinPixel) / _xPixelsPerWorld + _xMinWorld;
+    return (xPixel - _xMinPixel - _xOffset) / _xPixelsPerWorld + _xMinWorld;
   }
   
   inline double getYWorld(double yPixel) const {
-    return (yPixel - _yMinPixel) / _yPixelsPerWorld + _yMinWorld;
+    return (yPixel - _yMinPixel - _yOffset) / _yPixelsPerWorld + _yMinWorld;
   }
   
   // draw a line in pixel coords
   
   void drawPixelLine(QPainter &painter,
-                      double xx1, double yy1,
-                      double xx2, double yy2);
+                     double xx1, double yy1,
+                     double xx2, double yy2);
 
   // draw a line in world coords
 
@@ -389,6 +395,12 @@ public:
 
 protected:
 private:
+
+  // offset of the window in pixels
+  // from the top-left of the main canvas
+
+  int _xOffset;
+  int _yOffset;
 
   // dimensions of the window in pixels
 

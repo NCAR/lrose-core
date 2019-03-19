@@ -50,6 +50,9 @@ using namespace std;
 WorldPlot::WorldPlot()
 {
     
+  _xOffset = 0;
+  _yOffset = 0;
+
   set(100, 100,     // size
       0, 0, 0, 0,   // margins
       0,            // color scale width
@@ -134,6 +137,9 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   }
 
   // copy the meta data
+
+  _xOffset = rhs._xOffset;
+  _yOffset = rhs._yOffset;
 
   _widthPixels = rhs._widthPixels;
   _heightPixels = rhs._heightPixels;
@@ -1502,10 +1508,10 @@ void WorldPlot::_computeTransform()
   _plotWidth = _widthPixels - _leftMargin - _rightMargin - _colorScaleWidth;
   _plotHeight = _heightPixels - _topMargin - _bottomMargin;
     
-  _xMinPixel = _leftMargin;
+  _xMinPixel = _leftMargin + _xOffset;
   _xMaxPixel = _xMinPixel + _plotWidth - 1;
-  _yMinPixel = _topMargin + _plotHeight - 1;
-  _yMaxPixel = _topMargin;
+  _yMaxPixel = _topMargin + _yOffset;
+  _yMinPixel = _yMaxPixel + _plotHeight - 1;
     
   _xPixelsPerWorld =
     (_xMaxPixel - _xMinPixel) / (_xMaxWorld - _xMinWorld);
