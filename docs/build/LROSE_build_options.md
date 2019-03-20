@@ -131,7 +131,8 @@ yum install -y \
 tcsh perl perl-Env ftp git svn cvs tkcvs emacs tkcvs m4 \
 gcc gcc-c++ gcc-gfortran glibc-devel libX11-devel libXext-devel \
 libpng-devel libtiff-devel jasper-devel zlib-devel expat-devel libcurl-devel \
-flex-devel fftw3-devel bzip2-devel jasper-devel qt5-qtbase-devel xrdb \
+flex-devel fftw3-devel bzip2-devel jasper-devel \
+qt5-qtbase-devel qt5-qtdeclarative-devel xrdb \
 Xvfb xorg-x11-fonts-misc xorg-x11-fonts-75dpi xorg-x11-fonts-100dpi \
 gnuplot ImageMagick-devel ImageMagick-c++-devel
 ```
@@ -143,7 +144,7 @@ On Debian-based hosts you can install the packages required to build the lrose-b
 sudo apt-get update 
 sudo apt-get install -y  \
     libbz2-dev libx11-dev libpng-dev libfftw3-dev \
-    libjasper-dev qtbase5-dev git \
+    libjasper-dev qtbase5-dev qtdeclarative5-dev git \
     gcc g++ gfortran libfl-dev \
     automake make libtool pkg-config libexpat1-dev python
 
