@@ -50,8 +50,8 @@ using namespace std;
 WorldPlot::WorldPlot()
 {
     
-  _xOffset = 0;
-  _yOffset = 0;
+  _xPixOffset = 0;
+  _yPixOffset = 0;
 
   set(100, 100,     // size
       0, 0, 0, 0,   // margins
@@ -85,8 +85,8 @@ WorldPlot::WorldPlot(int widthPixels,
                      int textMargin)
 {
     
-  _xOffset = 0;
-  _yOffset = 0;
+  _xPixOffset = 0;
+  _yPixOffset = 0;
 
   set(widthPixels,
       heightPixels,
@@ -141,8 +141,8 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
 
   // copy the meta data
 
-  _xOffset = rhs._xOffset;
-  _yOffset = rhs._yOffset;
+  _xPixOffset = rhs._xPixOffset;
+  _yPixOffset = rhs._yPixOffset;
 
   _widthPixels = rhs._widthPixels;
   _heightPixels = rhs._heightPixels;
@@ -559,7 +559,7 @@ void WorldPlot::drawTitleTopCenter(QPainter &painter,
   QRect tRect(painter.fontMetrics().tightBoundingRect(title.c_str()));
   
   qreal xx = (qreal) ((_xMinPixel + _xMaxPixel - tRect.width()) / 2.0);
-  qreal yy = (qreal) (2 * _textMargin + _yOffset);
+  qreal yy = (qreal) getYPixCanvas(2 * _textMargin);
   
   QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 4);
     
@@ -581,7 +581,7 @@ void WorldPlot::drawYAxisLabelLeft(QPainter &painter,
   
   QRect tRect(painter.fontMetrics().tightBoundingRect(label.c_str()));
     
-  qreal xx = (qreal) tRect.height() / 2.0;
+  qreal xx = (qreal) getXPixCanvas(tRect.height() / 2.0);
   qreal yy = (qreal) ((_yMinPixel + _yMaxPixel) / 2.0);
 
   QRectF bRect(0, 0, tRect.width() + 2, tRect.height() + 2);
@@ -819,7 +819,7 @@ void WorldPlot::drawAxisBottom(QPainter &painter,
                                bool doTicks, bool doLabels) 
 
 {
-	
+
   // axis line
   
   if (doLine) {
@@ -1049,6 +1049,8 @@ void WorldPlot::drawRangeAxes(QPainter &painter,
                               
 {
 
+  cerr << "BBBBBBBBBBBBBBBBBBBBBBB" << endl;
+
   double unitsMult = 1.0;
   if (unitsInFeet) {
     unitsMult = 1.0 / 0.3048;
@@ -1232,6 +1234,8 @@ void WorldPlot::drawTimeAxes(QPainter &painter,
   qreal unitsX = (qreal) (_xMaxPixel - unitsRect.width() / 2);
   qreal unitsY =
     (qreal) (_yMinPixel + (unitsRect.height() + _textMargin));
+  cerr << "1111111111 unitsX, unitsY: " << unitsX << ", " << unitsY << endl;
+  cerr << "1111111111 nTicks: " << nTicks << endl;
   if (drawDistTicks) {
     unitsY += (int) (labelHt * 3.0 / 2.0 + 0.5);
   }
@@ -1510,9 +1514,9 @@ void WorldPlot::_computeTransform()
   _plotWidth = _widthPixels - _leftMargin - _rightMargin - _colorScaleWidth;
   _plotHeight = _heightPixels - _topMargin - _bottomMargin;
     
-  _xMinPixel = _leftMargin + _xOffset;
+  _xMinPixel = _leftMargin + _xPixOffset;
   _xMaxPixel = _xMinPixel + _plotWidth - 1;
-  _yMaxPixel = _topMargin + _yOffset;
+  _yMaxPixel = _topMargin + _yPixOffset;
   _yMinPixel = _yMaxPixel + _plotHeight - 1;
     
   _xPixelsPerWorld =

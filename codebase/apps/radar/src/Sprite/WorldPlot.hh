@@ -118,8 +118,8 @@ public:
   
   // set methods
 
-  inline void setXOffset(int val) { _xOffset = val; }
-  inline void setYOffset(int val) { _yOffset = val; }
+  inline void setXPixOffset(int val) { _xPixOffset = val; }
+  inline void setYPixOffset(int val) { _yPixOffset = val; }
   
   inline void setAxisTickLen(int len) { _axisTickLen = len; }
   inline void setNTicksIdeal(int nTicks) { _nTicksIdeal = nTicks; }
@@ -134,8 +134,11 @@ public:
 
   // get methods
 
-  inline int getXOffset() const { return _xOffset; }
-  inline int getYOffset() const { return _yOffset; }
+  inline int getXPixOffset() const { return _xPixOffset; }
+  inline int getYPixOffset() const { return _yPixOffset; }
+
+  inline int getXPixCanvas(int xPix) const { return _xPixOffset + xPix; }
+  inline int getYPixCanvas(int yPix) const { return _yPixOffset + yPix; }
 
   inline int getWidthPixels() const { return _widthPixels; }
   inline int getHeightPixels() const { return _heightPixels; }
@@ -170,11 +173,11 @@ public:
   QTransform getTransform() const { return _transform; }
   
   inline double getXPixel(double xWorld) const {
-    return (xWorld - _xMinWorld) * _xPixelsPerWorld + _xMinPixel + _xOffset;
+    return (xWorld - _xMinWorld) * _xPixelsPerWorld + _xMinPixel;
   }
   
   inline double getYPixel(double yWorld) const {
-    return (yWorld - _yMinWorld) * _yPixelsPerWorld + _yMinPixel + _yOffset;
+    return (yWorld - _yMinWorld) * _yPixelsPerWorld + _yMinPixel;
   }
 
   inline int getIxPixel(double xWorld) const {
@@ -186,11 +189,11 @@ public:
   }
   
   inline double getXWorld(double xPixel) const {
-    return (xPixel - _xMinPixel - _xOffset) / _xPixelsPerWorld + _xMinWorld;
+    return (xPixel - _xMinPixel) / _xPixelsPerWorld + _xMinWorld;
   }
   
   inline double getYWorld(double yPixel) const {
-    return (yPixel - _yMinPixel - _yOffset) / _yPixelsPerWorld + _yMinWorld;
+    return (yPixel - _yMinPixel) / _yPixelsPerWorld + _yMinWorld;
   }
   
   // draw a line in pixel coords
@@ -399,8 +402,8 @@ private:
   // offset of the window in pixels
   // from the top-left of the main canvas
 
-  int _xOffset;
-  int _yOffset;
+  int _xPixOffset;
+  int _yPixOffset;
 
   // dimensions of the window in pixels
 

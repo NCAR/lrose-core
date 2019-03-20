@@ -186,7 +186,7 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-time_span")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "archive_time_span_secs = %s;", argv[i]);
+        sprintf(tmp_str, "archive_time_span_secs = %s;", argv[++i]);
         TDRP_add_override(&override, tmp_str);
         sprintf(tmp_str, "input_mode = ARCHIVE_TIME_MODE;");
         TDRP_add_override(&override, tmp_str);
@@ -255,14 +255,14 @@ void Args::_usage(ostream &out)
       << "       [ -fmq_url ? ] set input fmq URL\n"
       << "       [ -instance ? ] set instance for procmap\n"
       << "       [ -start_time \"yyyy mm dd hh mm ss\"]\n"
-      << "            set start time for archive mode\n"
+      << "          set start time for archive mode\n"
       << "       [ -start_x ? ] start x location of main window\n"
       << "       [ -start_y ? ] start y location of main window\n"
       << "       [ -tcp_mode] IWRF_TCP_INPUT mode\n"
       << "       [ -tcp_host ? ] set TCP server host\n"
       << "       [ -tcp_port ? ] set TCP server port\n"
       << "       [ -time_span ?]\n"
-      << "            set time span (secs)\n"
+      << "          set time span (secs)\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"
       << "       [ -vv, -extra ] print extra verbose debug messages\n"
       << endl;
