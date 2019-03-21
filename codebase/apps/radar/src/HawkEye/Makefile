@@ -36,8 +36,9 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = HawkEye
 
-QJSENGINE = -F/usr/local/Cellar/qt/5.12.0/lib -framework QtQml
 LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
+
+# Note: QJSENGINE is defined in rap_make.OSX_LINUX
 
 LOC_LIBS = -lSpdb -lradar -lrapformats -lFmq -lRadx -lNcxx \
 	-ldsserver -ldidss -leuclid -lphysics \
@@ -133,7 +134,6 @@ MOC_SRCS = \
 	SpreadSheetView.cc \
 	SpreadSheetDelegate.cc \
 	FunctionEditor.cc 
-	
 
 MOC_OUTPUT = \
 	moc_BscanManager.cpp \
@@ -187,7 +187,7 @@ SiiTest_Main: ColorMap.o SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o P
 	g++ -o SiiTest_Main SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o ColorMap.o -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp  -L/usr/local/Cellar/qt/5.10.1/lib -F/usr/local/Cellar/qt/5.10.1/lib -framework QtWidgets -F/usr/local/Cellar/qt/5.10.1/lib -framework QtGui -F/usr/local/Cellar/qt/5.10.1/lib -framework QtCore -lz -lm -g
 
 #SiiTest_MainNoQt: ColorMap.o SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o
-	#g++ -o SiiTest_Main SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o ColorMap.o -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp -lz -lm -g
+#g++ -o SiiTest_Main SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o ColorMap.o -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp -lz -lm -g
 
 SiiTest_MainNoQt: 
 	g++ -o SiiTest_Main SiiPalette.cc SiiTest_Main.cc SoloDefaultColorWrapper.cc PaletteManager.cc ColorTableManager.cc ColorMap.cc -I/Users/brenda/lrose/include -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp -lz -lm -g
@@ -199,11 +199,11 @@ SiiTest_MainNoQt:
 # build Mac OSX application
 #
 hawkeye_app:
-	# Make HawkEye and the Makefile.qmake
+# Make HawkEye and the Makefile.qmake
 	make 
-	# Make the bundle (HawkEye.app tree structure)
+# Make the bundle (HawkEye.app tree structure)
 	make from_qmake
-	# copy the system libraries to the .app tree structure
+# copy the system libraries to the .app tree structure
 	mkdir -p HawkEye.app/Contents/Frameworks
 	cp /usr/lib/libexpat.1.dylib  HawkEye.app/Contents/Frameworks/.
 	cp /usr/lib/libbz2.1.0.dylib  HawkEye.app/Contents/Frameworks/.
@@ -211,21 +211,20 @@ hawkeye_app:
 	cp /usr/lib/libSystem.B.dylib HawkEye.app/Contents/Frameworks/.
 	mkdir -p HawkEye.app/Contents/MacOS/../share
 	cp -r ~/git/lrose-displays/color_scales HawkEye.app/Contents/MacOS/../share/.
-	# make the dmg  
+# make the dmg  
 	macdeployqt HawkEye.app -dmg -always-overwrite -codesign="${CERT_NAME}"
-	# now build the folder for the dmg installer
+# now build the folder for the dmg installer
 	mkdir -p HawkEye_bkg_test
 	cp ~/Desktop/arrow.pdf HawkEye_bkg_test/.background
 	rsync -r HawkEye.app HawkEye_bkg_test/.
 	hdiutil create -volname HawkEye_Installer4 -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye_bkg_test -ov -format UDZO HawkEye_test4.dmg
-	
 
 
-	# rm -r HawkEye_staging/HawkEye.app
-	# mkdir -p HawkEye_staging
-	# cp arrow.pdf HawkEye_staging/.background
-	# ln -s /Applications HawkEye_staging/Applications
-	# rsync -r HawkEye.app HawkEye_staging/.
+# rm -r HawkEye_staging/HawkEye.app
+# mkdir -p HawkEye_staging
+# cp arrow.pdf HawkEye_staging/.background
+# ln -s /Applications HawkEye_staging/Applications
+# rsync -r HawkEye.app HawkEye_staging/.
 	hdiutil create -volname HawkEye_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye.app  -ov -format UDZO HawkEye_Blaze.dmg
 
 
