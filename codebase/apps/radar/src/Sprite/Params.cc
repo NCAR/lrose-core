@@ -736,7 +736,7 @@
     tt->descr = tdrpStrDup("ARCHIVE_TIME_MODE: time span (secs).");
     tt->help = tdrpStrDup("archive_end_time = archive_start_time + archive_time_span.");
     tt->val_offset = (char *) &archive_time_span_secs - &_start_;
-    tt->single_val.d = 600;
+    tt->single_val.d = 200;
     tt++;
     
     // Parameter 'Comment 3'
@@ -1464,7 +1464,7 @@
     tt->descr = tdrpStrDup("Height of top margin in ASCOPE mode (pixels).");
     tt->help = tdrpStrDup("Titles go in the top margin.");
     tt->val_offset = (char *) &ascope_top_margin - &_start_;
-    tt->single_val.i = 40;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'ascope_bottom_margin'
@@ -1476,7 +1476,7 @@
     tt->descr = tdrpStrDup("Height of bottom margin in ASCOPE mode (pixels).");
     tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
     tt->val_offset = (char *) &ascope_bottom_margin - &_start_;
-    tt->single_val.i = 45;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'ascope_left_margin'
@@ -1488,7 +1488,7 @@
     tt->descr = tdrpStrDup("Width of left margin in ASCOPE mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the left margin.");
     tt->val_offset = (char *) &ascope_left_margin - &_start_;
-    tt->single_val.i = 50;
+    tt->single_val.i = 40;
     tt++;
     
     // Parameter 'ascope_right_margin'
@@ -1500,7 +1500,7 @@
     tt->descr = tdrpStrDup("Width of right margin in ASCOPE mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the right margin.");
     tt->val_offset = (char *) &ascope_right_margin - &_start_;
-    tt->single_val.i = 40;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'ascope_axis_tick_len'
@@ -1512,7 +1512,7 @@
     tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_axis_tick_len - &_start_;
-    tt->single_val.i = 6;
+    tt->single_val.i = 4;
     tt++;
     
     // Parameter 'ascope_n_ticks_ideal'
@@ -1524,7 +1524,7 @@
     tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_n_ticks_ideal - &_start_;
-    tt->single_val.i = 10;
+    tt->single_val.i = 6;
     tt++;
     
     // Parameter 'ascope_text_margin'
@@ -1536,7 +1536,7 @@
     tt->descr = tdrpStrDup("Margin around some text (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_text_margin - &_start_;
-    tt->single_val.i = 5;
+    tt->single_val.i = 3;
     tt++;
     
     // Parameter 'ascope_time_span_secs'
@@ -1548,7 +1548,7 @@
     tt->descr = tdrpStrDup("Time span for ASCOPE (secs).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_time_span_secs - &_start_;
-    tt->single_val.d = 3600;
+    tt->single_val.d = 600;
     tt++;
     
     // Parameter 'ascope_min_amplitude'
@@ -1605,7 +1605,7 @@
     tt->descr = tdrpStrDup("Font size of center title (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_title_font_size - &_start_;
-    tt->single_val.i = 12;
+    tt->single_val.i = 8;
     tt++;
     
     // Parameter 'ascope_axis_label_font_size'
@@ -1617,7 +1617,7 @@
     tt->descr = tdrpStrDup("Font size of axis labels in ascope (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_axis_label_font_size - &_start_;
-    tt->single_val.i = 10;
+    tt->single_val.i = 6;
     tt++;
     
     // Parameter 'ascope_axis_values_font_size'
@@ -1629,7 +1629,7 @@
     tt->descr = tdrpStrDup("Font size of axis values (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_axis_values_font_size - &_start_;
-    tt->single_val.i = 8;
+    tt->single_val.i = 6;
     tt++;
     
     // Parameter 'ascope_axes_color'

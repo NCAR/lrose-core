@@ -581,8 +581,8 @@ void WorldPlot::drawYAxisLabelLeft(QPainter &painter,
   
   QRect tRect(painter.fontMetrics().tightBoundingRect(label.c_str()));
     
-  qreal xx = (qreal) getXPixCanvas(tRect.height() / 2.0);
-  qreal yy = (qreal) ((_yMinPixel + _yMaxPixel) / 2.0);
+  qreal xx = (qreal) (getXPixCanvas(tRect.height() / 2.0));
+  qreal yy = (qreal) ((_yMinPixel + _yMaxPixel + tRect.width()) / 2.0);
 
   QRectF bRect(0, 0, tRect.width() + 2, tRect.height() + 2);
 
@@ -948,7 +948,7 @@ void WorldPlot::drawAxesBox(QPainter &painter)
   drawLine(painter, _xMinWorld, _yMinWorld, _xMinWorld, _yMaxWorld);
   drawLine(painter, _xMaxWorld, _yMinWorld, _xMaxWorld, _yMaxWorld);
   drawLine(painter, _xMinWorld, _yMinWorld, _xMaxWorld, _yMinWorld);
-  drawLine(painter, _xMinWorld, _yMaxWorld, _xMinWorld, _yMaxWorld);
+  drawLine(painter, _xMinWorld, _yMaxWorld, _xMaxWorld, _yMaxWorld);
 
 }
 
@@ -1048,8 +1048,6 @@ void WorldPlot::drawRangeAxes(QPainter &painter,
                               bool unitsInFeet)
                               
 {
-
-  cerr << "BBBBBBBBBBBBBBBBBBBBBBB" << endl;
 
   double unitsMult = 1.0;
   if (unitsInFeet) {
@@ -1234,8 +1232,6 @@ void WorldPlot::drawTimeAxes(QPainter &painter,
   qreal unitsX = (qreal) (_xMaxPixel - unitsRect.width() / 2);
   qreal unitsY =
     (qreal) (_yMinPixel + (unitsRect.height() + _textMargin));
-  cerr << "1111111111 unitsX, unitsY: " << unitsX << ", " << unitsY << endl;
-  cerr << "1111111111 nTicks: " << nTicks << endl;
   if (drawDistTicks) {
     unitsY += (int) (labelHt * 3.0 / 2.0 + 0.5);
   }

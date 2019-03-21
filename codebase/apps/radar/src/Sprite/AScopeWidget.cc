@@ -121,7 +121,7 @@ void AScopeWidget::configureAxes(double min_amplitude,
   
   int bottomMargin = _params.ascope_bottom_margin;
 
-  _fullWorld.set(width() / 2, height() / 2,
+  _fullWorld.set(width() / 3, height() / 3,
                  _params.ascope_left_margin,
                  _params.ascope_right_margin,
                  _params.ascope_top_margin,
@@ -135,8 +135,8 @@ void AScopeWidget::configureAxes(double min_amplitude,
                  _params.ascope_n_ticks_ideal,
                  _params.ascope_text_margin);
 
-  _fullWorld.setXPixOffset(200);
-  _fullWorld.setYPixOffset(200);
+  _fullWorld.setXPixOffset(50);
+  _fullWorld.setYPixOffset(50);
   
   _zoomWorld = _fullWorld;
   _isZoomed = false;
@@ -451,10 +451,10 @@ void AScopeWidget::_resetWorld(int width, int height)
 
 {
 
-  _fullWorld.resize(width / 2, height / 2);
+  _fullWorld.resize(width / 3, height / 3);
 
-  _fullWorld.setXPixOffset(200);
-  _fullWorld.setYPixOffset(200);
+  _fullWorld.setXPixOffset(50);
+  _fullWorld.setYPixOffset(50);
 
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
@@ -528,17 +528,20 @@ void AScopeWidget::_drawOverlays(QPainter &painter)
   QFont valuesFont(origFont);
   valuesFont.setPointSizeF(_params.ascope_axis_values_font_size);
   
-  _zoomWorld.drawRangeAxes(painter,
-                           "xxx", _yGridEnabled,
-                           lineColor, gridColor, textColor,
-                           labelFont, valuesFont, true);
+  // _zoomWorld.drawRangeAxes(painter,
+  //                          "xxx", _yGridEnabled,
+  //                          lineColor, gridColor, textColor,
+  //                          labelFont, valuesFont, true);
   
-  _zoomWorld.drawTimeAxes(painter,
-                          _plotStartTime, _plotEndTime,
-                          _xGridEnabled,
-                          lineColor, gridColor, textColor,
-                          labelFont, valuesFont,
-                          false);
+  // _zoomWorld.drawTimeAxes(painter,
+  //                         _plotStartTime, _plotEndTime,
+  //                         _xGridEnabled,
+  //                         lineColor, gridColor, textColor,
+  //                         labelFont, valuesFont,
+  //                         false);
+
+  _zoomWorld.drawAxisBottom(painter, "xu", true, true, true);
+  _zoomWorld.drawAxisLeft(painter, "yu", true, true, true);
   
   // y label
 
@@ -600,10 +603,12 @@ void AScopeWidget::_drawOverlays(QPainter &painter)
   title = (radarName + "   ASCOPE   ");
   _zoomWorld.drawTitleTopCenter(painter, title);
 
+  _zoomWorld.drawAxesBox(painter);
+
   // click point cross hairs
   
   if (_pointClicked) {
-
+    
     int startX = _mouseReleaseX - _params.click_cross_size / 2;
     int endX = _mouseReleaseX + _params.click_cross_size / 2;
     int startY = _mouseReleaseY - _params.click_cross_size / 2;
