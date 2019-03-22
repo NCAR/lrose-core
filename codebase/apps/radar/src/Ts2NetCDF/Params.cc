@@ -810,6 +810,18 @@
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'save_file_when_processing_details_change'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("save_file_when_processing_details_change");
+    tt->descr = tdrpStrDup("If true, save to output file when processing details change.");
+    tt->help = tdrpStrDup("Only applies to TS_FILE_INPUT mode, in which the input files are specified on the command line. Write an output file if the scan or processing details change.");
+    tt->val_offset = (char *) &save_file_when_processing_details_change - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'save_scans_in_sectors'
     // ctype is 'tdrp_bool_t'
     
@@ -843,7 +855,7 @@
     tt->descr = tdrpStrDup("Maximum number of pulses per output file.");
     tt->help = tdrpStrDup("Once this maximum is exceeded, the current file will be closed and a new one started.");
     tt->val_offset = (char *) &max_pulses_per_file - &_start_;
-    tt->single_val.i = 50000;
+    tt->single_val.i = 250000;
     tt++;
     
     // Parameter 'specify_n_gates_save'

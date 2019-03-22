@@ -264,6 +264,14 @@ IwrfTsReaderFile::IwrfTsReaderFile(const vector<string> &fileList,
   _input = new DsInputPath("IwrfTsReaderFile", debug, _fileList);
   _in = NULL;
   _fileIsRvp8Type = false;
+  if (_debug) {
+    cerr << "INFO - IwrfTsReaderFile" << endl;
+    const vector<string> &pathList = _input->getPathList();
+    for (size_t ii = 0; ii < pathList.size(); ii++) {
+      cerr << "  using file: " << pathList[ii] << endl;
+    }
+  }
+
 }
 
 //////////////////////////////////////////////////////////////////
@@ -332,7 +340,7 @@ IwrfTsPulse*
   }
 
   // read in pulse headers and data, opening new files as needed
-  
+
   while (_in != NULL) {
 
     int iret = 0;
@@ -591,7 +599,7 @@ int IwrfTsReaderFile::_resync()
   si32 check[2];
 
   while (!feof(_in)) {
-    
+
     // read in the next 8 bytes
     
     if (fread(check, sizeof(si32), 2, _in) != 2) {
@@ -664,6 +672,11 @@ void IwrfTsReaderFile::reset()
   if (_input) {
     _input->reset();
   }
+  if (_in) {
+    fclose(_in);
+    _in = NULL;
+  } 
+  IwrfTsReader::reset();
 }
 
 //////////////////////////////////////////////////////////////////
@@ -934,6 +947,7 @@ void IwrfTsReaderFmq::reset()
 
 {
   _fmq.seek(Fmq::FMQ_SEEK_START);
+  IwrfTsReader::reset();
 }
 
 //////////////////////////////////////////////////////////////////
@@ -1314,6 +1328,7 @@ int IwrfTsReaderTcp::_peekAtBuffer(void *buf, int nbytes)
 void IwrfTsReaderTcp::reset()
 
 {
+  IwrfTsReader::reset();
 }
 
 //////////////////////////////////////////////////////////////////

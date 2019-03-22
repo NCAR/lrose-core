@@ -397,6 +397,8 @@ public:
 
   tdrp_bool_t save_one_file_per_input_file;
 
+  tdrp_bool_t save_file_when_processing_details_change;
+
   tdrp_bool_t save_scans_in_sectors;
 
   int max_sector_size;
@@ -418,7 +420,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[30];
+  mutable TDRPtable _table[31];
 
   const char *_className;
 

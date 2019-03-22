@@ -223,6 +223,9 @@ int Ts2NetCDF::Run ()
   // also compute maxNGates
 
   if (_params.pad_n_gates_to_max) {
+    if (_params.debug) {
+      cerr << "==>> checking for n gates max" << endl;
+    }
     _setNGatesMax();
     if (_params.debug) {
       cerr << "DEBUG - padding ngates out to max" << endl;
@@ -232,13 +235,20 @@ int Ts2NetCDF::Run ()
 
   // check for alternating mode by inspecting the HV flag
 
+  if (_params.debug) {
+    cerr << "==>> checking for alternating mode" << endl;
+  }
   _checkAltMode();
   if (_params.debug) {
     if (_alternatingMode) {
-      cerr << "NOTE: alternating mode" << endl;
+      cerr << "==>> alternating mode" << endl;
     } else {
-      cerr << "NOTE: NOT alternating mode" << endl;
+      cerr << "==>> NOT alternating mode" << endl;
     }
+  }
+
+  if (_params.debug) {
+    cerr << "==>> reading in data to convert" << endl;
   }
 
   while (true) {
@@ -502,22 +512,26 @@ bool Ts2NetCDF::_checkReadyToWrite(const IwrfTsPulse &pulse)
 {
 
   _nPulsesFile++;
-
-  // check for change in scan or proc params
-
-  bool infoChanged = false;
-  if (_checkInfoChanged(pulse)) {
-    infoChanged = true;
-  }
   if (_nPulsesFile < 2) {
     return false;
   }
 
   // base decision on end-of-file?
-
+  
   if (_params.input_mode == Params::TS_FILE_INPUT &&
       _params.save_one_file_per_input_file) {
-    if (_pulseReader->endOfFile() || infoChanged) {
+    if (_pulseReader->endOfFile()) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
+  // check for change in scan or proc params
+
+  if (_params.input_mode == Params::TS_FILE_INPUT &&
+      _params.save_file_when_processing_details_change) {
+    if (_checkInfoChanged(pulse)) {
       return true;
     } else {
       return false;

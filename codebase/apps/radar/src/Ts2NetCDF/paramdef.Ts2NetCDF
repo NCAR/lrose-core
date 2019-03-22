@@ -134,6 +134,12 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = false;
+  p_descr = "If true, save to output file when processing details change.";
+  p_help = "Only applies to TS_FILE_INPUT mode, in which the input files are specified on the command line. Write an output file if the scan or processing details change.";
+} save_file_when_processing_details_change;
+
+paramdef boolean {
+  p_default = false;
   p_descr = "Option to save scans out in sectors to limit the file size.";
   p_help = "If false, each fixed angle will be in a single file. If true, the angular change will be limited per file. See max_sector_size.";
 } save_scans_in_sectors;
@@ -145,7 +151,7 @@ paramdef int {
 } max_sector_size;
 
 paramdef int {
-  p_default = 50000;
+  p_default = 250000;
   p_descr = "Maximum number of pulses per output file.";
   p_help = "Once this maximum is exceeded, the current file will be closed and a new one started.";
 } max_pulses_per_file;
