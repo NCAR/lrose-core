@@ -149,8 +149,10 @@ public:
   // Set the heartbeat function. This function will be called while
   // the 'blocking' open and read calls are waiting.
   //
-  // If set_heartbeat is not called, no heartbeat function will be
-  // called.
+  // The default heartbeat_func is PMU_auto_regsister.
+  // 
+  // If you do not want heartbeat calls to procmap, use this
+  // method to set it to NULL.
   
   void setHeartbeat(TA_heartbeat_t heartbeat_func);
 
