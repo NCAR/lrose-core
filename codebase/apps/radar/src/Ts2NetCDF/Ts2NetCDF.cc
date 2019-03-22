@@ -1112,6 +1112,8 @@ int Ts2NetCDF::_writeFile()
     cerr << "  ================================================" << endl;
   }
 
+  cerr << "  Wrote file: " << _outputPath << endl;
+
   // reset data variables
 
   _reset();
