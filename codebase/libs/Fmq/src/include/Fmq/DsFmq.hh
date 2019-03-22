@@ -308,9 +308,9 @@ public:
   
   int writeTheCache();
   
-  // get queue details
+  // is queue open?
   
-  virtual bool isOpen() { return _socket != NULL; }
+  virtual bool isOpen();
 
   // Get URL info
 

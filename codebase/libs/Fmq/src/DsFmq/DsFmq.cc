@@ -345,6 +345,22 @@ int DsFmq::closeMsgQueue()
 
 }
 
+///////////////////////////////////////////////////////////////////
+// is queue open?
+// returns true if open, false otherwise
+  
+bool DsFmq::isOpen()
+{
+
+  if (!_isServed) {
+    // local
+    return Fmq::isOpen();
+  }
+  
+  return _socket != NULL; 
+
+}
+
 /////////////////////////////////////////////////////////////////
 // setting the compression method - default is ZLIB compression
 // Returns 0 on success, -1 on error
