@@ -1418,52 +1418,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("ASCOPE MODE DISPLAY");
+    tt->comment_hdr = tdrpStrDup("SPECTRA MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'ascope_aspect_ratio'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("ascope_aspect_ratio");
-    tt->descr = tdrpStrDup("Aspect ratio (width/height) of ASCOPE window.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_aspect_ratio - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'ascope_grids_on_at_startup'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_grids_on_at_startup");
-    tt->descr = tdrpStrDup("Set ASCOPE grids overlay on at startup.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_grids_on_at_startup - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 12'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
-    tt->comment_hdr = tdrpStrDup("ASCOPE MARGINS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'ascope_top_margin'
+    // Parameter 'ascope_left_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_top_margin");
-    tt->descr = tdrpStrDup("Height of top margin in ASCOPE mode (pixels).");
-    tt->help = tdrpStrDup("Titles go in the top margin.");
-    tt->val_offset = (char *) &ascope_top_margin - &_start_;
+    tt->param_name = tdrpStrDup("ascope_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin for ascope plot (pixels).");
+    tt->help = tdrpStrDup("The Y axis labels are plotted here.");
+    tt->val_offset = (char *) &ascope_left_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
@@ -1473,118 +1440,271 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("ascope_bottom_margin");
-    tt->descr = tdrpStrDup("Height of bottom margin in ASCOPE mode (pixels).");
-    tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
+    tt->descr = tdrpStrDup("Height of bottom margin for ascope plot (pixels).");
+    tt->help = tdrpStrDup("The X axis labels are plotted here.");
     tt->val_offset = (char *) &ascope_bottom_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'ascope_left_margin'
+    // Parameter 'spectra_top_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_left_margin");
-    tt->descr = tdrpStrDup("Width of left margin in ASCOPE mode (pixels).");
-    tt->help = tdrpStrDup("Height scale goes in the left margin.");
-    tt->val_offset = (char *) &ascope_left_margin - &_start_;
-    tt->single_val.i = 40;
-    tt++;
-    
-    // Parameter 'ascope_right_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_right_margin");
-    tt->descr = tdrpStrDup("Width of right margin in ASCOPE mode (pixels).");
-    tt->help = tdrpStrDup("Height scale goes in the right margin.");
-    tt->val_offset = (char *) &ascope_right_margin - &_start_;
+    tt->param_name = tdrpStrDup("spectra_top_margin");
+    tt->descr = tdrpStrDup("Height of top margin in SPECTRA mode (pixels).");
+    tt->help = tdrpStrDup("Titles go in the top margin.");
+    tt->val_offset = (char *) &spectra_top_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'ascope_axis_tick_len'
+    // Parameter 'spectra_bottom_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_axis_tick_len");
+    tt->param_name = tdrpStrDup("spectra_bottom_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin in SPECTRA mode (pixels).");
+    tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
+    tt->val_offset = (char *) &spectra_bottom_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'spectra_left_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spectra_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin in SPECTRA mode (pixels).");
+    tt->help = tdrpStrDup("Height scale goes in the left margin.");
+    tt->val_offset = (char *) &spectra_left_margin - &_start_;
+    tt->single_val.i = 40;
+    tt++;
+    
+    // Parameter 'spectra_right_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spectra_right_margin");
+    tt->descr = tdrpStrDup("Width of right margin in SPECTRA mode (pixels).");
+    tt->help = tdrpStrDup("Height scale goes in the right margin.");
+    tt->val_offset = (char *) &spectra_right_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'spectra_axis_tick_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spectra_axis_tick_len");
     tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_axis_tick_len - &_start_;
+    tt->val_offset = (char *) &spectra_axis_tick_len - &_start_;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'ascope_n_ticks_ideal'
+    // Parameter 'spectra_n_ticks_ideal'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_n_ticks_ideal");
+    tt->param_name = tdrpStrDup("spectra_n_ticks_ideal");
     tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_n_ticks_ideal - &_start_;
+    tt->val_offset = (char *) &spectra_n_ticks_ideal - &_start_;
     tt->single_val.i = 6;
     tt++;
     
-    // Parameter 'ascope_text_margin'
+    // Parameter 'spectra_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_text_margin");
+    tt->param_name = tdrpStrDup("spectra_text_margin");
     tt->descr = tdrpStrDup("Margin around some text (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_text_margin - &_start_;
+    tt->val_offset = (char *) &spectra_text_margin - &_start_;
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'ascope_time_span_secs'
+    // Parameter 'spectra_time_span_secs'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("ascope_time_span_secs");
-    tt->descr = tdrpStrDup("Time span for ASCOPE (secs).");
+    tt->param_name = tdrpStrDup("spectra_time_span_secs");
+    tt->descr = tdrpStrDup("Time span for SPECTRA (secs).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_time_span_secs - &_start_;
+    tt->val_offset = (char *) &spectra_time_span_secs - &_start_;
     tt->single_val.d = 600;
     tt++;
     
-    // Parameter 'ascope_min_amplitude'
+    // Parameter 'spectra_min_amplitude'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("ascope_min_amplitude");
-    tt->descr = tdrpStrDup("Min amplitude for ascope.");
+    tt->param_name = tdrpStrDup("spectra_min_amplitude");
+    tt->descr = tdrpStrDup("Min amplitude for spectra.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_min_amplitude - &_start_;
+    tt->val_offset = (char *) &spectra_min_amplitude - &_start_;
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'ascope_max_amplitude'
+    // Parameter 'spectra_max_amplitude'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("ascope_max_amplitude");
-    tt->descr = tdrpStrDup("Max amplitude for ascope.");
+    tt->param_name = tdrpStrDup("spectra_max_amplitude");
+    tt->descr = tdrpStrDup("Max amplitude for spectra.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_max_amplitude - &_start_;
+    tt->val_offset = (char *) &spectra_max_amplitude - &_start_;
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'ascope_min_secs_between_rendering'
+    // Parameter 'spectra_min_secs_between_rendering'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("ascope_min_secs_between_rendering");
+    tt->param_name = tdrpStrDup("spectra_min_secs_between_rendering");
     tt->descr = tdrpStrDup("Min time between rendering (secs).");
     tt->help = tdrpStrDup("Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU.");
-    tt->val_offset = (char *) &ascope_min_secs_between_rendering - &_start_;
+    tt->val_offset = (char *) &spectra_min_secs_between_rendering - &_start_;
     tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'Comment 12'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 12");
+    tt->comment_hdr = tdrpStrDup("SPECTRA TITLES, LABELS AND AXES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'spectra_title_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spectra_title_font_size");
+    tt->descr = tdrpStrDup("Font size of center title (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_title_font_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'spectra_axis_label_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spectra_axis_label_font_size");
+    tt->descr = tdrpStrDup("Font size of axis labels in spectra (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_axis_label_font_size - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'spectra_axis_values_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spectra_axis_values_font_size");
+    tt->descr = tdrpStrDup("Font size of axis values (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_axis_values_font_size - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'spectra_axes_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("spectra_axes_color");
+    tt->descr = tdrpStrDup("Color of axes in spectra.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_axes_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'spectra_grid_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("spectra_grid_color");
+    tt->descr = tdrpStrDup("Color of grid lines on spectra.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_grid_color - &_start_;
+    tt->single_val.s = tdrpStrDup("gray");
+    tt++;
+    
+    // Parameter 'spectra_labels_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("spectra_labels_color");
+    tt->descr = tdrpStrDup("Color of labels in spectra.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_labels_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'spectra_draw_y_grid_lines'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("spectra_draw_y_grid_lines");
+    tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_draw_y_grid_lines - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'spectra_draw_x_grid_lines'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("spectra_draw_x_grid_lines");
+    tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_draw_x_grid_lines - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'spectra_draw_instrument_height_line'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("spectra_draw_instrument_height_line");
+    tt->descr = tdrpStrDup("Option to draw a line for the instrument location.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_draw_instrument_height_line - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'spectra_instrument_height_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("spectra_instrument_height_color");
+    tt->descr = tdrpStrDup("Color of instrument height line in ALTITUDE plot.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_instrument_height_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'Comment 13'
@@ -1592,128 +1712,104 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 13");
-    tt->comment_hdr = tdrpStrDup("ASCOPE TITLES, LABELS AND AXES");
+    tt->comment_hdr = tdrpStrDup("SPECTRA LEGENDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'ascope_title_font_size'
-    // ctype is 'int'
+    // Parameter 'spectra_main_legend_pos'
+    // ctype is '_legend_pos_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_title_font_size");
-    tt->descr = tdrpStrDup("Font size of center title (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_title_font_size - &_start_;
-    tt->single_val.i = 8;
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("spectra_main_legend_pos");
+    tt->descr = tdrpStrDup("Position of main legend in the SPECTRA plot window");
+    tt->help = tdrpStrDup("This include time, field name and elevation angle.");
+    tt->val_offset = (char *) &spectra_main_legend_pos - &_start_;
+    tt->enum_def.name = tdrpStrDup("legend_pos_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
+      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
+      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
+      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
+      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
+      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
+      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
+      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
+    tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
-    // Parameter 'ascope_axis_label_font_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_axis_label_font_size");
-    tt->descr = tdrpStrDup("Font size of axis labels in ascope (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_axis_label_font_size - &_start_;
-    tt->single_val.i = 6;
-    tt++;
-    
-    // Parameter 'ascope_axis_values_font_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_axis_values_font_size");
-    tt->descr = tdrpStrDup("Font size of axis values (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_axis_values_font_size - &_start_;
-    tt->single_val.i = 6;
-    tt++;
-    
-    // Parameter 'ascope_axes_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ascope_axes_color");
-    tt->descr = tdrpStrDup("Color of axes in ascope.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_axes_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
-    tt++;
-    
-    // Parameter 'ascope_grid_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ascope_grid_color");
-    tt->descr = tdrpStrDup("Color of grid lines on ascope.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_grid_color - &_start_;
-    tt->single_val.s = tdrpStrDup("gray");
-    tt++;
-    
-    // Parameter 'ascope_labels_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ascope_labels_color");
-    tt->descr = tdrpStrDup("Color of labels in ascope.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_labels_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
-    tt++;
-    
-    // Parameter 'ascope_draw_y_grid_lines'
+    // Parameter 'spectra_plot_legend1'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_draw_y_grid_lines");
-    tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_draw_y_grid_lines - &_start_;
+    tt->param_name = tdrpStrDup("spectra_plot_legend1");
+    tt->descr = tdrpStrDup("Option to plot the starting lat/lon position as a legend.");
+    tt->help = tdrpStrDup("This helps in geolocating the data from a mobile system.");
+    tt->val_offset = (char *) &spectra_plot_legend1 - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'ascope_draw_x_grid_lines'
+    // Parameter 'spectra_legend1_pos'
+    // ctype is '_legend_pos_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("spectra_legend1_pos");
+    tt->descr = tdrpStrDup("Position of lat/lon legend in plot");
+    tt->help = tdrpStrDup("The starting latitude/longitude will be plotted as a legend in the location specified. See 'spectra_plot_starting_latlon_as_legend'.");
+    tt->val_offset = (char *) &spectra_legend1_pos - &_start_;
+    tt->enum_def.name = tdrpStrDup("legend_pos_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
+      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
+      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
+      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
+      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
+      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
+      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
+      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
+    tt->single_val.e = LEGEND_TOP_LEFT;
+    tt++;
+    
+    // Parameter 'spectra_legend2_pos'
+    // ctype is '_legend_pos_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("spectra_legend2_pos");
+    tt->descr = tdrpStrDup("Position of lat/lon legend in plot");
+    tt->help = tdrpStrDup("The starting latitude/longitude will be plotted as a legend in the location specified. See 'spectra_plot_starting_latlon_as_legend'.");
+    tt->val_offset = (char *) &spectra_legend2_pos - &_start_;
+    tt->enum_def.name = tdrpStrDup("legend_pos_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
+      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
+      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
+      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
+      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
+      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
+      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
+      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
+    tt->single_val.e = LEGEND_TOP_LEFT;
+    tt++;
+    
+    // Parameter 'spectra_plot_legend2'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_draw_x_grid_lines");
-    tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_draw_x_grid_lines - &_start_;
+    tt->param_name = tdrpStrDup("spectra_plot_legend2");
+    tt->descr = tdrpStrDup("Option to plot the starting lat/lon position as a legend.");
+    tt->help = tdrpStrDup("This helps in geolocating the data from a mobile system.");
+    tt->val_offset = (char *) &spectra_plot_legend2 - &_start_;
     tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'ascope_draw_instrument_height_line'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_draw_instrument_height_line");
-    tt->descr = tdrpStrDup("Option to draw a line for the instrument location.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_draw_instrument_height_line - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'ascope_instrument_height_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ascope_instrument_height_color");
-    tt->descr = tdrpStrDup("Color of instrument height line in ALTITUDE plot.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_instrument_height_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'Comment 14'
@@ -1721,111 +1817,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 14");
-    tt->comment_hdr = tdrpStrDup("ASCOPE LEGENDS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'ascope_main_legend_pos'
-    // ctype is '_legend_pos_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("ascope_main_legend_pos");
-    tt->descr = tdrpStrDup("Position of main legend in the ASCOPE plot window");
-    tt->help = tdrpStrDup("This include time, field name and elevation angle.");
-    tt->val_offset = (char *) &ascope_main_legend_pos - &_start_;
-    tt->enum_def.name = tdrpStrDup("legend_pos_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
-      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
-      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
-      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
-      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
-      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
-      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
-      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
-    tt->single_val.e = LEGEND_TOP_LEFT;
-    tt++;
-    
-    // Parameter 'ascope_plot_legend1'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_plot_legend1");
-    tt->descr = tdrpStrDup("Option to plot the starting lat/lon position as a legend.");
-    tt->help = tdrpStrDup("This helps in geolocating the data from a mobile system.");
-    tt->val_offset = (char *) &ascope_plot_legend1 - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'ascope_legend1_pos'
-    // ctype is '_legend_pos_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("ascope_legend1_pos");
-    tt->descr = tdrpStrDup("Position of lat/lon legend in plot");
-    tt->help = tdrpStrDup("The starting latitude/longitude will be plotted as a legend in the location specified. See 'ascope_plot_starting_latlon_as_legend'.");
-    tt->val_offset = (char *) &ascope_legend1_pos - &_start_;
-    tt->enum_def.name = tdrpStrDup("legend_pos_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
-      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
-      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
-      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
-      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
-      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
-      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
-      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
-    tt->single_val.e = LEGEND_TOP_LEFT;
-    tt++;
-    
-    // Parameter 'ascope_legend2_pos'
-    // ctype is '_legend_pos_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("ascope_legend2_pos");
-    tt->descr = tdrpStrDup("Position of lat/lon legend in plot");
-    tt->help = tdrpStrDup("The starting latitude/longitude will be plotted as a legend in the location specified. See 'ascope_plot_starting_latlon_as_legend'.");
-    tt->val_offset = (char *) &ascope_legend2_pos - &_start_;
-    tt->enum_def.name = tdrpStrDup("legend_pos_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
-      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
-      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
-      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
-      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
-      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
-      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
-      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
-    tt->single_val.e = LEGEND_TOP_LEFT;
-    tt++;
-    
-    // Parameter 'ascope_plot_legend2'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_plot_legend2");
-    tt->descr = tdrpStrDup("Option to plot the starting lat/lon position as a legend.");
-    tt->help = tdrpStrDup("This helps in geolocating the data from a mobile system.");
-    tt->val_offset = (char *) &ascope_plot_legend2 - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'Comment 15'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("CLUTTER FILTERING");
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
@@ -1926,11 +1917,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("SPECTRUM WIDTH METHOD");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1957,11 +1948,11 @@
     tt->single_val.e = WIDTH_METHOD_R0R1;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP USING ADAPTIVE FILTER METHOD");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
     tt++;

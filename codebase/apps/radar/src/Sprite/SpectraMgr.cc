@@ -103,7 +103,7 @@ SpectraMgr::SpectraMgr(const Params &params,
   // _realtimeModeButton = NULL;
   // _archiveModeButton = NULL;
 
-  _timeSpanSecs = _params.ascope_time_span_secs;
+  _timeSpanSecs = _params.spectra_time_span_secs;
   if (_params.input_mode == Params::ARCHIVE_TIME_MODE ||
       _params.input_mode == Params::FILE_LIST_MODE) {
     _archiveMode = true;
@@ -403,7 +403,7 @@ void SpectraMgr::_createActions()
 void SpectraMgr::_initActions()
 {
 
-  if (_params.ascope_draw_x_grid_lines) {
+  if (_params.spectra_draw_x_grid_lines) {
     _xGridAct->setChecked(false); // initialize to false
     _xGridAct->trigger();         // toggle to true
   } else {
@@ -411,7 +411,7 @@ void SpectraMgr::_initActions()
     _xGridAct->trigger();        // toggle to false
   }
   
-  if (_params.ascope_draw_y_grid_lines) {
+  if (_params.spectra_draw_y_grid_lines) {
     _yGridAct->setChecked(false); // initialize to false
     _yGridAct->trigger();         // toggle to true
   } else {
@@ -428,9 +428,9 @@ void SpectraMgr::_configureAxes()
   
 {
   
-  _ascope->configureAxes(_params.ascope_min_amplitude,
-                         _params.ascope_max_amplitude,
-                         _params.ascope_time_span_secs);
+  _ascope->configureAxes(_params.spectra_min_amplitude,
+                         _params.spectra_max_amplitude,
+                         _params.spectra_time_span_secs);
 
 }
 
@@ -973,7 +973,7 @@ void SpectraMgr::_setTimeSpan()
 
 void SpectraMgr::_resetTimeSpanToDefault()
 {
-  // _timeSpanSecs = _params.ascope_time_span_secs;
+  // _timeSpanSecs = _params.spectra_time_span_secs;
   // char text[1024];
   // sprintf(text, "%g", _timeSpanSecs);
   // if (_timeSpanEdit) {

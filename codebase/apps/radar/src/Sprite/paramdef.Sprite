@@ -411,141 +411,138 @@ paramdef int {
 } click_cross_size;
 
 commentdef {
-  p_header = "ASCOPE MODE DISPLAY";
-}
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Aspect ratio (width/height) of ASCOPE window.";
-  p_descr = "Set to -1 to allow aspect ratio to vary as the main window is resized.";
-} ascope_aspect_ratio;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Set ASCOPE grids overlay on at startup.";
-} ascope_grids_on_at_startup;
-
-commentdef {
-  p_header = "ASCOPE MARGINS";
+  p_header = "SPECTRA MODE DISPLAY";
 }
 
 paramdef int {
   p_default = 20;
-  p_descr = "Height of top margin in ASCOPE mode (pixels).";
-  p_help = "Titles go in the top margin.";
-} ascope_top_margin;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Height of bottom margin in ASCOPE mode (pixels).";
-  p_help = "Time scale goes in the bottom margin.";
-} ascope_bottom_margin;
-
-paramdef int {
-  p_default = 40;
-  p_descr = "Width of left margin in ASCOPE mode (pixels).";
-  p_help = "Height scale goes in the left margin.";
+  p_descr = "Width of left margin for ascope plot (pixels).";
+  p_help = "The Y axis labels are plotted here.";
 } ascope_left_margin;
 
 paramdef int {
   p_default = 20;
-  p_descr = "Width of right margin in ASCOPE mode (pixels).";
+  p_descr = "Height of bottom margin for ascope plot (pixels).";
+  p_help = "The X axis labels are plotted here.";
+} ascope_bottom_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Height of top margin in SPECTRA mode (pixels).";
+  p_help = "Titles go in the top margin.";
+} spectra_top_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Height of bottom margin in SPECTRA mode (pixels).";
+  p_help = "Time scale goes in the bottom margin.";
+} spectra_bottom_margin;
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of left margin in SPECTRA mode (pixels).";
+  p_help = "Height scale goes in the left margin.";
+} spectra_left_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Width of right margin in SPECTRA mode (pixels).";
   p_help = "Height scale goes in the right margin.";
-} ascope_right_margin;
+} spectra_right_margin;
 
 paramdef int {
   p_default = 4;
   p_descr = "Length of ticks on axes (pixels).";
-} ascope_axis_tick_len;
+} spectra_axis_tick_len;
 
 paramdef int {
   p_default = 6;
   p_descr = "Ideal number of ticks on axes.";
-} ascope_n_ticks_ideal;
+} spectra_n_ticks_ideal;
 
 paramdef int {
   p_default = 3;
   p_descr = "Margin around some text (pixels).";
-} ascope_text_margin;
+} spectra_text_margin;
 
 paramdef double {
   p_default = 600;
-  p_descr = "Time span for ASCOPE (secs).";
-} ascope_time_span_secs;
+  p_descr = "Time span for SPECTRA (secs).";
+} spectra_time_span_secs;
 
 paramdef double {
   p_default = 0;
-  p_descr = "Min amplitude for ascope.";
-} ascope_min_amplitude;
+  p_descr = "Min amplitude for spectra.";
+} spectra_min_amplitude;
 
 paramdef double {
   p_default = 1;
-  p_descr = "Max amplitude for ascope.";
-} ascope_max_amplitude;
+  p_descr = "Max amplitude for spectra.";
+} spectra_max_amplitude;
 
 paramdef double {
   p_default = 0.0;
   p_descr = "Min time between rendering (secs).";
   p_help = "Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU.";
-} ascope_min_secs_between_rendering;
+} spectra_min_secs_between_rendering;
 
 commentdef {
-  p_header = "ASCOPE TITLES, LABELS AND AXES";
+  p_header = "SPECTRA TITLES, LABELS AND AXES";
 }
 
 paramdef int {
   p_default = 8;
   p_descr = "Font size of center title (pixels).";
-} ascope_title_font_size;
+} spectra_title_font_size;
 
 paramdef int {
   p_default = 6;
-  p_descr = "Font size of axis labels in ascope (pixels).";
-} ascope_axis_label_font_size;
+  p_descr = "Font size of axis labels in spectra (pixels).";
+} spectra_axis_label_font_size;
 
 paramdef int {
   p_default = 6;
   p_descr = "Font size of axis values (pixels).";
-} ascope_axis_values_font_size;
+} spectra_axis_values_font_size;
 
 paramdef string {
   p_default = "white";
-  p_descr = "Color of axes in ascope.";
-} ascope_axes_color;
+  p_descr = "Color of axes in spectra.";
+} spectra_axes_color;
 
 paramdef string {
   p_default = "gray";
-  p_descr = "Color of grid lines on ascope.";
-} ascope_grid_color;
+  p_descr = "Color of grid lines on spectra.";
+} spectra_grid_color;
 
 paramdef string {
   p_default = "white";
-  p_descr = "Color of labels in ascope.";
-} ascope_labels_color;
+  p_descr = "Color of labels in spectra.";
+} spectra_labels_color;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to draw grid lines in the Y direction.";
-} ascope_draw_y_grid_lines;
+} spectra_draw_y_grid_lines;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to draw grid lines in the X direction.";
-} ascope_draw_x_grid_lines;
+} spectra_draw_x_grid_lines;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to draw a line for the instrument location.";
   p_descr = "Applies to RANGE_AXIS_SCALE_ALTITUDE option only.";
-} ascope_draw_instrument_height_line;
+} spectra_draw_instrument_height_line;
 
 paramdef string {
   p_default = "white";
   p_descr = "Color of instrument height line in ALTITUDE plot.";
-} ascope_instrument_height_color;
+} spectra_instrument_height_color;
 
 commentdef {
-  p_header = "ASCOPE LEGENDS";
+  p_header = "SPECTRA LEGENDS";
 }
 
 typedef enum {
@@ -554,33 +551,33 @@ typedef enum {
 
 paramdef enum legend_pos_t {
   p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of main legend in the ASCOPE plot window";
+  p_descr = "Position of main legend in the SPECTRA plot window";
   p_help = "This include time, field name and elevation angle.";
-} ascope_main_legend_pos;
+} spectra_main_legend_pos;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to plot the starting lat/lon position as a legend.";
   p_help = "This helps in geolocating the data from a mobile system.";
-} ascope_plot_legend1;
+} spectra_plot_legend1;
 
 paramdef enum legend_pos_t {
   p_default = LEGEND_TOP_LEFT;
   p_descr = "Position of lat/lon legend in plot";
-  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'ascope_plot_starting_latlon_as_legend'.";
-} ascope_legend1_pos;
+  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'spectra_plot_starting_latlon_as_legend'.";
+} spectra_legend1_pos;
 
 paramdef enum legend_pos_t {
   p_default = LEGEND_TOP_LEFT;
   p_descr = "Position of lat/lon legend in plot";
-  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'ascope_plot_starting_latlon_as_legend'.";
-} ascope_legend2_pos;
+  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'spectra_plot_starting_latlon_as_legend'.";
+} spectra_legend2_pos;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to plot the starting lat/lon position as a legend.";
   p_help = "This helps in geolocating the data from a mobile system.";
-} ascope_plot_legend2;
+} spectra_plot_legend2;
 
 commentdef {
   p_header = "CLUTTER FILTERING";

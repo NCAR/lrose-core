@@ -136,7 +136,7 @@ TsReader::TsReader(const string &prog_name,
       break;
     }
     case Params::ARCHIVE_TIME_MODE: {
-      _timeSpanSecs = _params.ascope_time_span_secs;
+      _timeSpanSecs = _params.spectra_time_span_secs;
       _archiveStartTime.set(_params.archive_start_time);
       _archiveEndTime = _archiveStartTime + _timeSpanSecs;
       DsInputPath input(_progName,

@@ -37,24 +37,18 @@
 #include <QResizeEvent>
 #include <QStylePainter>
 
-#include "SpectraWidget.hh"
+#include "AScopePlot.hh"
 #include "SpectraMgr.hh"
 #include "Beam.hh"
 
 using namespace std;
 
-SpectraWidget::SpectraWidget(QWidget* parent,
-                             const SpectraMgr &manager,
-                             const Params &params) :
-        QWidget(parent),
+AScopePlot::AScopePlot(QWidget* parent,
+                       const Params &params) :
         _parent(parent),
-        _manager(manager),
         _params(params),
         _backgroundBrush(QColor(_params.background_color)),
-        _scaledLabel(ScaledLabel::DistanceEng),
-        _worldReleaseX(0),
-        _worldReleaseY(0),
-        _rubberBand(0)
+        _scaledLabel(ScaledLabel::DistanceEng)
 
 {
 
@@ -64,21 +58,21 @@ SpectraWidget::SpectraWidget(QWidget* parent,
 
   // Set up the background color
 
-  QPalette new_palette = palette();
-  new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
-  setPalette(new_palette);
+  // QPalette new_palette = parent->palette();
+  // new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
+  // parent->setPalette(new_palette);
   
-  setBackgroundRole(QPalette::Dark);
-  setAutoFillBackground(true);
-  setAttribute(Qt::WA_OpaquePaintEvent);
+  // setBackgroundRole(QPalette::Dark);
+  // setAutoFillBackground(true);
+  // setAttribute(Qt::WA_OpaquePaintEvent);
   
   // Allow the widget to get focus
   
-  setFocusPolicy(Qt::StrongFocus);
+  // setFocusPolicy(Qt::StrongFocus);
   
   // create the rubber band
 
-  _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+  // _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
 
   // Allow the size_t type to be passed to slots
   
@@ -86,9 +80,9 @@ SpectraWidget::SpectraWidget(QWidget* parent,
 
   // set up world views
   
-  configureAxes(_params.spectra_min_amplitude,
-                _params.spectra_max_amplitude,
-                _params.spectra_time_span_secs);
+  // configureAxes(_params.ascope_min_amplitude,
+  //               _params.ascope_max_amplitude,
+  //               _params.ascope_time_span_secs);
   
 }
 
@@ -96,41 +90,32 @@ SpectraWidget::SpectraWidget(QWidget* parent,
  * Destructor
  */
 
-SpectraWidget::~SpectraWidget()
+AScopePlot::~AScopePlot()
 {
 
 }
 
 
 /*************************************************************************
- * configure the axes
+ * configure the plot
  */
 
-void SpectraWidget::configureAxes(double min_amplitude,
-                                  double max_amplitude,
-                                  double time_span_secs)
+void AScopePlot::configure(int width,
+                           int height,
+                           int xOffset,
+                           int yOffset,
+                           const Beam &beam)
   
 {
 
-  _minAmplitude = min_amplitude;
-  _maxAmplitude = max_amplitude;
-  _timeSpanSecs = time_span_secs;
-  _plotEndTime = _plotStartTime + _timeSpanSecs;
-  
   // set bottom margin - increase this if we are plotting the distance labels and ticks
   
-  int bottomMargin = _params.spectra_bottom_margin;
-
-  _fullWorld.set(width() / 3, height() / 3,
-                 _params.spectra_left_margin,
-                 _params.spectra_right_margin,
-                 _params.spectra_top_margin,
-                 bottomMargin,
-                 _colorScaleWidth,
-                 0.0,
-                 _minAmplitude,
-                 _timeSpanSecs,
-                 _maxAmplitude,
+  _fullWorld.set(width, height,
+                 _params.ascope_left_margin, 0,
+                 0, _params.ascope_bottom_margin,
+                 0,
+                 0.0, -30,
+                 beam.getMaxRange(), 80,
                  _params.spectra_axis_tick_len,
                  _params.spectra_n_ticks_ideal,
                  _params.spectra_text_margin);
@@ -152,7 +137,7 @@ void SpectraWidget::configureAxes(double min_amplitude,
  * clear()
  */
 
-void SpectraWidget::clear()
+void AScopePlot::clear()
 {
 
   // Clear out the beam array
@@ -170,7 +155,7 @@ void SpectraWidget::clear()
  * refresh()
  */
 
-void SpectraWidget::refresh()
+void AScopePlot::refresh()
 {
   _refreshImages();
 }
@@ -179,7 +164,7 @@ void SpectraWidget::refresh()
  * unzoom the view
  */
 
-void SpectraWidget::unzoomView()
+void AScopePlot::unzoomView()
 {
 
   _zoomWorld = _fullWorld;
@@ -194,13 +179,13 @@ void SpectraWidget::unzoomView()
  * setGrids()
  */
 
-void SpectraWidget::setXGridEnabled(bool state)
+void AScopePlot::setXGridEnabled(bool state)
 {
   _xGridEnabled = state;
   update();
 }
 
-void SpectraWidget::setYGridEnabled(bool state)
+void AScopePlot::setYGridEnabled(bool state)
 {
   _yGridEnabled = state;
   update();
@@ -210,7 +195,7 @@ void SpectraWidget::setYGridEnabled(bool state)
  * plot a beam
  */
 
-void SpectraWidget::plotBeam(Beam *beam)
+void AScopePlot::plotBeam(Beam *beam)
 
 {
 
@@ -226,7 +211,7 @@ void SpectraWidget::plotBeam(Beam *beam)
  * backgroundColor()
  */
 
-void SpectraWidget::setBackgroundColor(const QColor &color)
+void AScopePlot::setBackgroundColor(const QColor &color)
 {
 
   _backgroundBrush.setColor(color);
@@ -244,7 +229,7 @@ void SpectraWidget::setBackgroundColor(const QColor &color)
  * getImage()
  */
 
-QImage* SpectraWidget::getImage()
+QImage* AScopePlot::getImage()
 {
 
   QPixmap pixmap = QPixmap::grabWidget(this);
@@ -258,7 +243,7 @@ QImage* SpectraWidget::getImage()
  * getPixmap()
  */
 
-QPixmap* SpectraWidget::getPixmap()
+QPixmap* AScopePlot::getPixmap()
 {
 
   QPixmap* pixmap = new QPixmap(QPixmap::grabWidget(this));
@@ -275,7 +260,7 @@ QPixmap* SpectraWidget::getPixmap()
  * mousePressEvent()
  */
 
-void SpectraWidget::mousePressEvent(QMouseEvent *e)
+void AScopePlot::mousePressEvent(QMouseEvent *e)
 {
 
   _rubberBand->setGeometry(QRect(e->pos(), QSize()));
@@ -294,7 +279,7 @@ void SpectraWidget::mousePressEvent(QMouseEvent *e)
  * mouseMoveEvent()
  */
 
-void SpectraWidget::mouseMoveEvent(QMouseEvent * e)
+void AScopePlot::mouseMoveEvent(QMouseEvent * e)
 {
   // Zooming with the mouse
 
@@ -315,7 +300,7 @@ void SpectraWidget::mouseMoveEvent(QMouseEvent * e)
  * mouseReleaseEvent()
  */
 
-void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
+void AScopePlot::mouseReleaseEvent(QMouseEvent *e)
 {
 
   _pointClicked = false;
@@ -362,7 +347,7 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
     _pointClicked = true;
 
     // if (closestRay != NULL) {
-    //   emit locationClicked(x_secs, y_km, closestRay);
+    //   emit locationClicked(x_secs, y_km);
     // }
 
   } else {
@@ -397,12 +382,12 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
  * paintEvent()
  */
 
-void SpectraWidget::paintEvent(QPaintEvent *event)
+void AScopePlot::paintEvent(QPaintEvent *event)
 {
 
   RadxTime now(RadxTime::NOW);
   double timeSinceLast = now - _timeLastRendered;
-  if (timeSinceLast < _params.spectra_min_secs_between_rendering) {
+  if (timeSinceLast < _params.ascope_min_secs_between_rendering) {
     return;
   }
   _timeLastRendered = now;
@@ -422,7 +407,7 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
  * resizeEvent()
  */
 
-void SpectraWidget::resizeEvent(QResizeEvent * e)
+void AScopePlot::resizeEvent(QResizeEvent * e)
 {
 
   _resetWorld(width(), height());
@@ -436,7 +421,7 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
  * resize()
  */
 
-void SpectraWidget::resize(int width, int height)
+void AScopePlot::resize(int width, int height)
 {
 
   setGeometry(0, 0, width, height);
@@ -447,7 +432,7 @@ void SpectraWidget::resize(int width, int height)
 //////////////////////////////////////////////////////////////
 // reset the pixel size of the world view
 
-void SpectraWidget::_resetWorld(int width, int height)
+void AScopePlot::_resetWorld(int width, int height)
 
 {
 
@@ -466,7 +451,7 @@ void SpectraWidget::_resetWorld(int width, int height)
  * mouse release event
  */
 
-void SpectraWidget::setMouseClickPoint(double worldX,
+void AScopePlot::setMouseClickPoint(double worldX,
                                        double worldY)
 {
 
@@ -495,7 +480,7 @@ void SpectraWidget::setMouseClickPoint(double worldX,
  * Draw the overlays, axes, legends etc
  */
 
-void SpectraWidget::_drawOverlays(QPainter &painter)
+void AScopePlot::_drawOverlays(QPainter &painter)
 {
 
   // save painter state
@@ -508,25 +493,25 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   
   // Set the painter to use the right color and font
 
-  painter.setPen(_params.spectra_axes_color);
+  painter.setPen(_params.ascope_axes_color);
   
   // axes and labels
 
   QFont font(origFont);
-  font.setPointSizeF(_params.spectra_axis_label_font_size);
+  font.setPointSizeF(_params.ascope_axis_label_font_size);
   painter.setFont(font);
   // painter.setWindow(0, 0, width(), height());
 
   // axes
 
-  QColor lineColor(_params.spectra_axes_color);
-  QColor gridColor(_params.spectra_grid_color);
-  QColor textColor(_params.spectra_labels_color);
+  QColor lineColor(_params.ascope_axes_color);
+  QColor gridColor(_params.ascope_grid_color);
+  QColor textColor(_params.ascope_labels_color);
 
   QFont labelFont(origFont);
-  labelFont.setPointSizeF(_params.spectra_axis_label_font_size);
+  labelFont.setPointSizeF(_params.ascope_axis_label_font_size);
   QFont valuesFont(origFont);
-  valuesFont.setPointSizeF(_params.spectra_axis_values_font_size);
+  valuesFont.setPointSizeF(_params.ascope_axis_values_font_size);
   
   // _zoomWorld.drawRangeAxes(painter,
   //                          "xxx", _yGridEnabled,
@@ -545,7 +530,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   
   // y label
 
-  painter.setPen(_params.spectra_labels_color);
+  painter.setPen(_params.ascope_labels_color);
   _zoomWorld.drawYAxisLabelLeft(painter, "Amplitude (**)");
   
   // legends
@@ -557,8 +542,8 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   sprintf(text, "Legend2 lon: %g", 2.0);
   legends.push_back(text);
 
-  if (_params.spectra_plot_legend1) {
-    switch (_params.spectra_legend1_pos) {
+  if (_params.ascope_plot_legend1) {
+    switch (_params.ascope_legend1_pos) {
       case Params::LEGEND_TOP_LEFT:
         _zoomWorld.drawLegendsTopLeft(painter, legends);
         break;
@@ -575,8 +560,8 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
     }
   }
     
-  if (_params.spectra_plot_legend2) {
-    switch (_params.spectra_legend2_pos) {
+  if (_params.ascope_plot_legend2) {
+    switch (_params.ascope_legend2_pos) {
       case Params::LEGEND_TOP_LEFT:
         _zoomWorld.drawLegendsTopLeft(painter, legends);
         break;
@@ -595,7 +580,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
     
   // title
     
-  font.setPointSizeF(_params.spectra_title_font_size);
+  font.setPointSizeF(_params.ascope_title_font_size);
   painter.setFont(font);
 
   string radarName(_params.radar_name);
@@ -627,7 +612,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
 
   // const DisplayField &field = _manager.getSelectedField();
   // _zoomWorld.drawColorScale(field.getColorMap(), painter,
-  //                           _params.spectra_axis_label_font_size);
+  //                           _params.ascope_axis_label_font_size);
   
   return;
   
@@ -637,7 +622,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
  * _refreshImages()
  */
 
-void SpectraWidget::_refreshImages()
+void AScopePlot::_refreshImages()
 {
 
   // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
@@ -686,7 +671,7 @@ void SpectraWidget::_refreshImages()
 ////////////////////
 // set the transform
 
-void SpectraWidget::_setTransform(const QTransform &transform)
+void AScopePlot::_setTransform(const QTransform &transform)
 {
   
   _fullTransform = transform;
@@ -698,7 +683,7 @@ void SpectraWidget::_setTransform(const QTransform &transform)
  * update the renderers
  */
 
-void SpectraWidget::_updateRenderers()
+void AScopePlot::_updateRenderers()
 
 {
   
@@ -717,7 +702,7 @@ void SpectraWidget::_updateRenderers()
 //////////////////////////////////
 // initalize the plot start time
 
-void SpectraWidget::setPlotStartTime(const RadxTime &plot_start_time,
+void AScopePlot::setPlotStartTime(const RadxTime &plot_start_time,
                                      bool clearBeams /* = false */)
 {
   
@@ -739,7 +724,7 @@ void SpectraWidget::setPlotStartTime(const RadxTime &plot_start_time,
 //////////////////////////////
 // reset the plot start time
 
-void SpectraWidget::resetPlotStartTime(const RadxTime &plot_start_time)
+void AScopePlot::resetPlotStartTime(const RadxTime &plot_start_time)
 {
 
   // reset the plot start time
@@ -782,7 +767,7 @@ void SpectraWidget::resetPlotStartTime(const RadxTime &plot_start_time)
  * call the renderers for each field
  */
 
-void SpectraWidget::_performRendering()
+void AScopePlot::_performRendering()
 {
 
   // start the rendering

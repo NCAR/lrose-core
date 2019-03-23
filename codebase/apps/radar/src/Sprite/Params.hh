@@ -525,61 +525,61 @@ public:
 
   int click_cross_size;
 
-  double ascope_aspect_ratio;
-
-  tdrp_bool_t ascope_grids_on_at_startup;
-
-  int ascope_top_margin;
+  int ascope_left_margin;
 
   int ascope_bottom_margin;
 
-  int ascope_left_margin;
+  int spectra_top_margin;
 
-  int ascope_right_margin;
+  int spectra_bottom_margin;
 
-  int ascope_axis_tick_len;
+  int spectra_left_margin;
 
-  int ascope_n_ticks_ideal;
+  int spectra_right_margin;
 
-  int ascope_text_margin;
+  int spectra_axis_tick_len;
 
-  double ascope_time_span_secs;
+  int spectra_n_ticks_ideal;
 
-  double ascope_min_amplitude;
+  int spectra_text_margin;
 
-  double ascope_max_amplitude;
+  double spectra_time_span_secs;
 
-  double ascope_min_secs_between_rendering;
+  double spectra_min_amplitude;
 
-  int ascope_title_font_size;
+  double spectra_max_amplitude;
 
-  int ascope_axis_label_font_size;
+  double spectra_min_secs_between_rendering;
 
-  int ascope_axis_values_font_size;
+  int spectra_title_font_size;
 
-  char* ascope_axes_color;
+  int spectra_axis_label_font_size;
 
-  char* ascope_grid_color;
+  int spectra_axis_values_font_size;
 
-  char* ascope_labels_color;
+  char* spectra_axes_color;
 
-  tdrp_bool_t ascope_draw_y_grid_lines;
+  char* spectra_grid_color;
 
-  tdrp_bool_t ascope_draw_x_grid_lines;
+  char* spectra_labels_color;
 
-  tdrp_bool_t ascope_draw_instrument_height_line;
+  tdrp_bool_t spectra_draw_y_grid_lines;
 
-  char* ascope_instrument_height_color;
+  tdrp_bool_t spectra_draw_x_grid_lines;
 
-  legend_pos_t ascope_main_legend_pos;
+  tdrp_bool_t spectra_draw_instrument_height_line;
 
-  tdrp_bool_t ascope_plot_legend1;
+  char* spectra_instrument_height_color;
 
-  legend_pos_t ascope_legend1_pos;
+  legend_pos_t spectra_main_legend_pos;
 
-  legend_pos_t ascope_legend2_pos;
+  tdrp_bool_t spectra_plot_legend1;
 
-  tdrp_bool_t ascope_plot_legend2;
+  legend_pos_t spectra_legend1_pos;
+
+  legend_pos_t spectra_legend2_pos;
+
+  tdrp_bool_t spectra_plot_legend2;
 
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 
@@ -638,7 +638,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[120];
+  mutable TDRPtable _table[119];
 
   const char *_className;
 
