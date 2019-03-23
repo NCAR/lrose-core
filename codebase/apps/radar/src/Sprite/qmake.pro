@@ -10,25 +10,25 @@ CONFIG += debug
 
 RESOURCES = resources.qrc 
 
-HEADERS += AScopeMgr.hh
-HEADERS += AScopeWidget.hh
 HEADERS += AllocCheck.hh
 HEADERS += Args.hh
 HEADERS += ColorMap.hh
 HEADERS += Params.hh
 HEADERS += ScaledLabel.hh
+HEADERS += SpectraMgr.hh
+HEADERS += SpectraWidget.hh
 HEADERS += Sprite.hh
 HEADERS += TsReader.hh
 HEADERS += WorldPlot.hh
 
-SOURCES += AScopeMgr.cc
-SOURCES += AScopeWidget.cc
 SOURCES += AllocCheck.cc
 SOURCES += Args.cc
 SOURCES += ColorMap.cc
 SOURCES += Main.cc
 SOURCES += Params.cc
 SOURCES += ScaledLabel.cc
+SOURCES += SpectraMgr.cc
+SOURCES += SpectraWidget.cc
 SOURCES += Sprite.cc
 SOURCES += TsReader.cc
 SOURCES += WorldPlot.cc

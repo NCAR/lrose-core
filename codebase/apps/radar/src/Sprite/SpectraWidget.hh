@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef AScopeWidget_HH
-#define AScopeWidget_HH
+#ifndef SpectraWidget_HH
+#define SpectraWidget_HH
 
 #ifndef DLL_EXPORT
 #ifdef WIN32
@@ -52,14 +52,14 @@
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
 
-class AScopeMgr;
+class SpectraMgr;
 class Beam;
 class RadxRay;
 
-/// Widget class - AScope mode
-/// Plot the AScope and spectra for a beam
+/// Widget class - Spectra mode
+/// Plot the Spectra and spectra for a beam
 
-class DLL_EXPORT AScopeWidget : public QWidget
+class DLL_EXPORT SpectraWidget : public QWidget
 {
 
   // must include this if you use Qt signals/slots
@@ -78,15 +78,15 @@ class DLL_EXPORT AScopeWidget : public QWidget
    * @param[in] params         TDRP parameters.
    */
 
-  AScopeWidget(QWidget* parent,
-               const AScopeMgr &manager,
+  SpectraWidget(QWidget* parent,
+               const SpectraMgr &manager,
                const Params &params);
   
   /**
    * @brief Destructor.
    */
 
-  virtual ~AScopeWidget();
+  virtual ~SpectraWidget();
 
   // configure the axes
   
@@ -211,7 +211,7 @@ class DLL_EXPORT AScopeWidget : public QWidget
    */
   
   QWidget *_parent;
-  const AScopeMgr &_manager;
+  const SpectraMgr &_manager;
 
   /**
    * @brief TDRP params.

@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// AScopeMgr.cc
+// SpectraMgr.cc
 //
-// AScopeMgr object
+// SpectraMgr object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,12 +32,12 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// AScopeMgr manages BSCAN rendering - vert pointing etc
+// SpectraMgr manages BSCAN rendering - vert pointing etc
 //
 ///////////////////////////////////////////////////////////////
 
-#include "AScopeMgr.hh"
-#include "AScopeWidget.hh"
+#include "SpectraMgr.hh"
+#include "SpectraWidget.hh"
 #include "ColorMap.hh"
 #include "Params.hh"
 #include "TsReader.hh"
@@ -81,12 +81,12 @@
 #include <dsserver/DsLdataInfo.hh>
 
 using namespace std;
-bool AScopeMgr::_firstTimerEvent = true;
+bool SpectraMgr::_firstTimerEvent = true;
 
 // Constructor
 
-AScopeMgr::AScopeMgr(const Params &params,
-                     TsReader *tsReader) :
+SpectraMgr::SpectraMgr(const Params &params,
+                       TsReader *tsReader) :
         _params(params),
         _tsReader(tsReader),
         _plotStart(true)
@@ -130,7 +130,7 @@ AScopeMgr::AScopeMgr(const Params &params,
 
 // destructor
 
-AScopeMgr::~AScopeMgr()
+SpectraMgr::~SpectraMgr()
 
 {
 
@@ -143,7 +143,7 @@ AScopeMgr::~AScopeMgr()
 //////////////////////////////////////////////////
 // Run
 
-int AScopeMgr::run(QApplication &app)
+int SpectraMgr::run(QApplication &app)
 {
 
   // make window visible
@@ -161,7 +161,7 @@ int AScopeMgr::run(QApplication &app)
 ////////////////////////////////////////////////////////////////////////
 // Set the label in the title bar.
 
-void AScopeMgr::_setTitleBar(const string &radarName)
+void SpectraMgr::_setTitleBar(const string &radarName)
 {
   string windowTitle = "Sprite Time Series Tool - " + radarName;
   setWindowTitle(tr(windowTitle.c_str()));
@@ -170,7 +170,7 @@ void AScopeMgr::_setTitleBar(const string &radarName)
 //////////////////////////////////////////////////
 // set up windows and widgets
   
-void AScopeMgr::_setupWindows()
+void SpectraMgr::_setupWindows()
 {
 
   // set up windows
@@ -185,7 +185,7 @@ void AScopeMgr::_setupWindows()
 
   // configure the ASCOPE
 
-  _ascope = new AScopeWidget(_ascopeFrame, *this, _params);
+  _ascope = new SpectraWidget(_ascopeFrame, *this, _params);
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _ascope, SLOT(resize(const int, const int)));
   
@@ -239,7 +239,7 @@ void AScopeMgr::_setupWindows()
  
 }
 
-void AScopeMgr::_createMenus()
+void SpectraMgr::_createMenus()
 {
 
   _fileMenu = menuBar()->addMenu(tr("&File"));
@@ -269,7 +269,7 @@ void AScopeMgr::_createMenus()
 
 }
 
-void AScopeMgr::_createActions()
+void SpectraMgr::_createActions()
 {
 
   // freeze display
@@ -400,7 +400,7 @@ void AScopeMgr::_createActions()
 ///////////////////////
 // initialize actions
 
-void AScopeMgr::_initActions()
+void SpectraMgr::_initActions()
 {
 
   if (_params.ascope_draw_x_grid_lines) {
@@ -424,7 +424,7 @@ void AScopeMgr::_initActions()
 ///////////////////////////////////////////////////////
 // configure the plot axes
 
-void AScopeMgr::_configureAxes()
+void SpectraMgr::_configureAxes()
   
 {
   
@@ -437,7 +437,7 @@ void AScopeMgr::_configureAxes()
 //////////////////////////////////////////////////////////////
 // override timer event to respond to timer
   
-void AScopeMgr::timerEvent(QTimerEvent *event)
+void SpectraMgr::timerEvent(QTimerEvent *event)
 {
 
   // register with procmap
@@ -494,7 +494,7 @@ void AScopeMgr::timerEvent(QTimerEvent *event)
 ///////////////////////////
 // override resize event
 
-void AScopeMgr::resizeEvent(QResizeEvent *event)
+void SpectraMgr::resizeEvent(QResizeEvent *event)
 {
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent" << endl;
@@ -505,7 +505,7 @@ void AScopeMgr::resizeEvent(QResizeEvent *event)
 ////////////////////////////////////////////////////////////////
 // override key press event
 
-void AScopeMgr::keyPressEvent(QKeyEvent * e)
+void SpectraMgr::keyPressEvent(QKeyEvent * e)
 {
   
   // get key pressed
@@ -572,7 +572,7 @@ void AScopeMgr::keyPressEvent(QKeyEvent * e)
 /////////////////////////////
 // get data in realtime mode
 
-void AScopeMgr::_handleRealtimeData()
+void SpectraMgr::_handleRealtimeData()
 
 {
 
@@ -587,7 +587,7 @@ void AScopeMgr::_handleRealtimeData()
   }
 
   if (_params.debug) {
-    cerr << "AScopeMgr::_handleRealtimeData()" << endl;
+    cerr << "SpectraMgr::_handleRealtimeData()" << endl;
   }
 
   // set cursor to wait cursor
@@ -626,12 +626,12 @@ void AScopeMgr::_handleRealtimeData()
 ///////////////////////////////////////
 // handle data in archive mode
 
-void AScopeMgr::_handleArchiveData()
+void SpectraMgr::_handleArchiveData()
 
 {
 
   if (_params.debug) {
-    cerr << "AScopeMgr::_handleArchiveData()" << endl;
+    cerr << "SpectraMgr::_handleArchiveData()" << endl;
   }
 
   // set cursor to wait cursor
@@ -677,8 +677,8 @@ void AScopeMgr::_handleArchiveData()
 /////////////////////////////////////////////////////////
 // respond to a change in click location on the BSCAN
 
-void AScopeMgr::_locationClicked(double xsecs, double ykm,
-                                 const RadxRay *closestRay)
+void SpectraMgr::_locationClicked(double xsecs, double ykm,
+                                  const RadxRay *closestRay)
   
 {
   if (_params.debug) {
@@ -695,13 +695,13 @@ void AScopeMgr::_locationClicked(double xsecs, double ykm,
 //////////////////////////////////////////////////////////////////
 // respond to a change in click location on one of the windows
 
-// void AScopeMgr::_locationClicked(double xsecs, double ykm, const RadxRay *ray)
+// void SpectraMgr::_locationClicked(double xsecs, double ykm, const RadxRay *ray)
 
 // {
 
 
 //   if (_params.debug) {
-//     cerr << "*** Entering AScopeMgr::_locationClicked()" << endl;
+//     cerr << "*** Entering SpectraMgr::_locationClicked()" << endl;
 //   }
 
 //   // check the ray
@@ -836,7 +836,7 @@ void AScopeMgr::_locationClicked(double xsecs, double ykm,
 //     _altRateMps = -9999.0;
 //   }
     
-  // update the status panel
+// update the status panel
   
 // _updateStatusPanel(ray);
     
@@ -845,7 +845,7 @@ void AScopeMgr::_locationClicked(double xsecs, double ykm,
 ////////////////////////////////
 // unzoom display
 
-void AScopeMgr::_unzoom()
+void SpectraMgr::_unzoom()
 {
   _ascope->unzoomView();
   _unzoomAct->setEnabled(false);
@@ -854,7 +854,7 @@ void AScopeMgr::_unzoom()
 ////////////////////////////////////////////
 // refresh
 
-void AScopeMgr::_refresh()
+void SpectraMgr::_refresh()
 {
   if (_archiveMode) {
     _performArchiveRetrieval();
@@ -864,7 +864,7 @@ void AScopeMgr::_refresh()
 //////////////////////////////
 // freeze display
 
-void AScopeMgr::_freeze()
+void SpectraMgr::_freeze()
 {
   if (_frozen) {
     _frozen = false;
@@ -881,7 +881,7 @@ void AScopeMgr::_freeze()
 //////////////////////////////////////////////////
 // enable the zoom button - called by BscanWidget
 
-void AScopeMgr::enableZoomButton() const
+void SpectraMgr::enableZoomButton() const
 {
   _unzoomAct->setEnabled(true);
 }
@@ -889,7 +889,7 @@ void AScopeMgr::enableZoomButton() const
 ////////////////////////////////////////////////////////
 // change altitude limits
 
-// void AScopeMgr::_setAltitudeLimits()
+// void SpectraMgr::_setAltitudeLimits()
 // {
 
 //   // limits
@@ -947,7 +947,7 @@ void AScopeMgr::enableZoomButton() const
 ////////////////////////////////////////////////////////
 // change time span
 
-void AScopeMgr::_setTimeSpan()
+void SpectraMgr::_setTimeSpan()
 {
 
   // double timeSpan;
@@ -971,7 +971,7 @@ void AScopeMgr::_setTimeSpan()
 
 }
 
-void AScopeMgr::_resetTimeSpanToDefault()
+void SpectraMgr::_resetTimeSpanToDefault()
 {
   // _timeSpanSecs = _params.ascope_time_span_secs;
   // char text[1024];
@@ -986,7 +986,7 @@ void AScopeMgr::_resetTimeSpanToDefault()
 ////////////////////////////////////////////////////////
 // set start time from gui widget
 
-void AScopeMgr::_setStartTimeFromGui(const QDateTime &datetime1)
+void SpectraMgr::_setStartTimeFromGui(const QDateTime &datetime1)
 {
   // QDateTime datetime = _archiveStartTimeEdit->dateTime();
   // QDate date = datetime.date();
@@ -999,7 +999,7 @@ void AScopeMgr::_setStartTimeFromGui(const QDateTime &datetime1)
 ////////////////////////////////////////////////////////
 // set gui widget from start time
 
-void AScopeMgr::_setGuiFromStartTime()
+void SpectraMgr::_setGuiFromStartTime()
 {
   // QDate date(_archiveStartTime.getYear(),
   //            _archiveStartTime.getMonth(), _archiveStartTime.getDay());
@@ -1012,7 +1012,7 @@ void AScopeMgr::_setGuiFromStartTime()
 ////////////////////////////////////////////////////////
 // set start time to defaults
 
-void AScopeMgr::_setArchiveStartTimeToDefault()
+void SpectraMgr::_setArchiveStartTimeToDefault()
 
 {
 
@@ -1028,7 +1028,7 @@ void AScopeMgr::_setArchiveStartTimeToDefault()
 ////////////////////////////////////////////////////////
 // set start time
 
-void AScopeMgr::_setArchiveStartTime(const RadxTime &rtime)
+void SpectraMgr::_setArchiveStartTime(const RadxTime &rtime)
 
 {
 
@@ -1048,7 +1048,7 @@ void AScopeMgr::_setArchiveStartTime(const RadxTime &rtime)
 ////////////////////////////////////////////////////////
 // set end time from start time and span
 
-void AScopeMgr::_setArchiveEndTime()
+void SpectraMgr::_setArchiveEndTime()
 
 {
 
@@ -1063,7 +1063,7 @@ void AScopeMgr::_setArchiveEndTime()
 ////////////////////////////////////////////////////////
 // change modes
 
-void AScopeMgr::_setDataRetrievalMode()
+void SpectraMgr::_setDataRetrievalMode()
 {
   // if (!_archiveTimeBox) {
   //   return;
@@ -1091,20 +1091,20 @@ void AScopeMgr::_setDataRetrievalMode()
 ////////////////////////////////////////////////////////
 // change start time
 
-void AScopeMgr::_goBack()
+void SpectraMgr::_goBack()
 {
   _tsReader->positionForPreviousBeam();
   _archiveStartTime -= 1 * _timeSpanSecs;
   _setGuiFromStartTime();
 }
 
-void AScopeMgr::_goFwd()
+void SpectraMgr::_goFwd()
 {
   _archiveStartTime += 1 * _timeSpanSecs;
   _setGuiFromStartTime();
 }
 
-void AScopeMgr::_changeRange(int deltaGates)
+void SpectraMgr::_changeRange(int deltaGates)
 {
   if (!_ascope->getPointClicked()) {
     return;
@@ -1120,7 +1120,7 @@ void AScopeMgr::_changeRange(int deltaGates)
 ////////////////////////////////////////////////////////
 // perform archive retrieval
 
-void AScopeMgr::_performArchiveRetrieval()
+void SpectraMgr::_performArchiveRetrieval()
 {
   _archiveRetrievalPending = true;
 }
@@ -1128,7 +1128,7 @@ void AScopeMgr::_performArchiveRetrieval()
 ////////////////////////////////////////////////////////
 // Open file
 
-void AScopeMgr::_openFile()
+void SpectraMgr::_openFile()
 {
 }
 
@@ -1138,7 +1138,7 @@ void AScopeMgr::_openFile()
 /////////////////////////////
 // show data at click point
 
-void AScopeMgr::_showClick()
+void SpectraMgr::_showClick()
 {
   if (_clickReportDialog) {
     if (_clickReportDialog->isVisible()) {
@@ -1160,7 +1160,7 @@ void AScopeMgr::_showClick()
 /////////////////////////////////////////////////////
 // howto help
 
-void AScopeMgr::_howto()
+void SpectraMgr::_howto()
 {
   string text;
   text += "HOWTO HINTS FOR SPRITE\n";
@@ -1182,7 +1182,7 @@ void AScopeMgr::_howto()
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
 
-void AScopeMgr::_about()
+void SpectraMgr::_about()
 {
   string text;
   
@@ -1217,7 +1217,7 @@ void AScopeMgr::_about()
 //////////////////////////////////////////////
 // create the status panel
 
-void AScopeMgr::_createStatusPanel()
+void SpectraMgr::_createStatusPanel()
 {
  
   Qt::Alignment alignLeft(Qt::AlignLeft);
@@ -1420,11 +1420,11 @@ void AScopeMgr::_createStatusPanel()
 //////////////////////////////////////////////////
 // create a row in the status panel
 
-QLabel *AScopeMgr::_createStatusVal(const string &leftLabel,
-                                    const string &rightLabel,
-                                    int row, 
-                                    int fontSize,
-                                    QLabel **label)
+QLabel *SpectraMgr::_createStatusVal(const string &leftLabel,
+                                     const string &rightLabel,
+                                     int row, 
+                                     int fontSize,
+                                     QLabel **label)
   
 {
 
@@ -1456,7 +1456,7 @@ QLabel *AScopeMgr::_createStatusVal(const string &leftLabel,
 //////////////////////////////////////////////
 // update the status panel
 
-void AScopeMgr::_updateStatusPanel(const Beam *beam)
+void SpectraMgr::_updateStatusPanel(const Beam *beam)
 {
 
   // set time etc
@@ -1605,17 +1605,17 @@ void AScopeMgr::_updateStatusPanel(const Beam *beam)
         _sweepModeVal->setText("coplane"); break;
       }
       case IWRF_SCAN_MODE_EL_SUR_360: {
-      case IWRF_SCAN_MODE_RHI: {
-        _sweepModeVal->setText("rhi"); break;
-      }
-      case IWRF_SCAN_MODE_VERTICAL_POINTING: {
-        _sweepModeVal->setText("vert"); break;
-      }
-      case IWRF_SCAN_MODE_IDLE: {
-        _sweepModeVal->setText("idle"); break;
-      }
-      case IWRF_SCAN_MODE_AZ_SUR_360:
-        _sweepModeVal->setText("sur"); break;
+        case IWRF_SCAN_MODE_RHI: {
+          _sweepModeVal->setText("rhi"); break;
+        }
+        case IWRF_SCAN_MODE_VERTICAL_POINTING: {
+          _sweepModeVal->setText("vert"); break;
+        }
+        case IWRF_SCAN_MODE_IDLE: {
+          _sweepModeVal->setText("idle"); break;
+        }
+        case IWRF_SCAN_MODE_AZ_SUR_360:
+          _sweepModeVal->setText("sur"); break;
       }
       case IWRF_SCAN_MODE_SUNSCAN: {
         _sweepModeVal->setText("sun"); break;
@@ -1710,9 +1710,9 @@ void AScopeMgr::_updateStatusPanel(const Beam *beam)
 ///////////////////////////////////////////
 // set text for GUI panels
 
-void AScopeMgr::_setText(char *text,
-                         const char *format,
-                         int val)
+void SpectraMgr::_setText(char *text,
+                          const char *format,
+                          int val)
 {
   if (abs(val) < 9999) {
     sprintf(text, format, val);
@@ -1721,9 +1721,9 @@ void AScopeMgr::_setText(char *text,
   }
 }
 
-void AScopeMgr::_setText(char *text,
-                         const char *format,
-                         double val)
+void SpectraMgr::_setText(char *text,
+                          const char *format,
+                          double val)
 {
   if (fabs(val) < 9999) {
     sprintf(text, format, val);

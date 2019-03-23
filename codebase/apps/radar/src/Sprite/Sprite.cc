@@ -38,7 +38,7 @@
 #include "ColorMap.hh"
 #include "TsReader.hh"
 #include "BeamMgr.hh"
-#include "AScopeMgr.hh"
+#include "SpectraMgr.hh"
 #include "Params.hh"
 
 #include <toolsa/Path.hh>
@@ -150,7 +150,7 @@ int Sprite::Run(QApplication &app)
   
   // create the ascope manager
   
-  _ascopeManager = new AScopeMgr(_params, _tsReader);
+  _ascopeManager = new SpectraMgr(_params, _tsReader);
 
   return _ascopeManager->run(app);
 

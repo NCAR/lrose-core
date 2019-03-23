@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AScopeMgr.hh
+// SpectraMgr.hh
 //
-// AScopeMgr object
+// SpectraMgr object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,13 +32,13 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// AScopeMgr manages BSCAN data - vert pointing etc
+// SpectraMgr manages BSCAN data - vert pointing etc
 // Rendering is delegated to BscanWidget
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef AScopeMgr_HH
-#define AScopeMgr_HH
+#ifndef SpectraMgr_HH
+#define SpectraMgr_HH
 
 #include <string>
 #include <vector>
@@ -54,7 +54,7 @@
 #include <Radx/RadxVol.hh>
 
 class TsReader;
-class AScopeWidget;
+class SpectraWidget;
 class Beam;
 
 class QApplication;
@@ -76,7 +76,7 @@ class QSlider;
 class QVBoxLayout;
 class QWidget;
 
-class AScopeMgr : public QMainWindow {
+class SpectraMgr : public QMainWindow {
   
   Q_OBJECT
   
@@ -84,12 +84,12 @@ public:
 
   // constructor
 
-  AScopeMgr(const Params &params,
+  SpectraMgr(const Params &params,
             TsReader *tsReader);
   
   // destructor
   
-  ~AScopeMgr();
+  ~SpectraMgr();
 
   // run 
   
@@ -226,7 +226,7 @@ private:
   // windows
 
   QFrame *_ascopeFrame;
-  AScopeWidget *_ascope;
+  SpectraWidget *_ascope;
 
   // times for rays
 

@@ -37,15 +37,15 @@
 #include <QResizeEvent>
 #include <QStylePainter>
 
-#include "AScopeWidget.hh"
-#include "AScopeMgr.hh"
+#include "SpectraWidget.hh"
+#include "SpectraMgr.hh"
 #include "Beam.hh"
 
 using namespace std;
 
-AScopeWidget::AScopeWidget(QWidget* parent,
-                           const AScopeMgr &manager,
-                           const Params &params) :
+SpectraWidget::SpectraWidget(QWidget* parent,
+                             const SpectraMgr &manager,
+                             const Params &params) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
@@ -96,7 +96,7 @@ AScopeWidget::AScopeWidget(QWidget* parent,
  * Destructor
  */
 
-AScopeWidget::~AScopeWidget()
+SpectraWidget::~SpectraWidget()
 {
 
 }
@@ -106,9 +106,9 @@ AScopeWidget::~AScopeWidget()
  * configure the axes
  */
 
-void AScopeWidget::configureAxes(double min_amplitude,
-                                 double max_amplitude,
-                                 double time_span_secs)
+void SpectraWidget::configureAxes(double min_amplitude,
+                                  double max_amplitude,
+                                  double time_span_secs)
   
 {
 
@@ -152,7 +152,7 @@ void AScopeWidget::configureAxes(double min_amplitude,
  * clear()
  */
 
-void AScopeWidget::clear()
+void SpectraWidget::clear()
 {
 
   // Clear out the beam array
@@ -170,7 +170,7 @@ void AScopeWidget::clear()
  * refresh()
  */
 
-void AScopeWidget::refresh()
+void SpectraWidget::refresh()
 {
   _refreshImages();
 }
@@ -179,7 +179,7 @@ void AScopeWidget::refresh()
  * unzoom the view
  */
 
-void AScopeWidget::unzoomView()
+void SpectraWidget::unzoomView()
 {
 
   _zoomWorld = _fullWorld;
@@ -194,13 +194,13 @@ void AScopeWidget::unzoomView()
  * setGrids()
  */
 
-void AScopeWidget::setXGridEnabled(bool state)
+void SpectraWidget::setXGridEnabled(bool state)
 {
   _xGridEnabled = state;
   update();
 }
 
-void AScopeWidget::setYGridEnabled(bool state)
+void SpectraWidget::setYGridEnabled(bool state)
 {
   _yGridEnabled = state;
   update();
@@ -210,7 +210,7 @@ void AScopeWidget::setYGridEnabled(bool state)
  * plot a beam
  */
 
-void AScopeWidget::plotBeam(Beam *beam)
+void SpectraWidget::plotBeam(Beam *beam)
 
 {
 
@@ -226,7 +226,7 @@ void AScopeWidget::plotBeam(Beam *beam)
  * backgroundColor()
  */
 
-void AScopeWidget::setBackgroundColor(const QColor &color)
+void SpectraWidget::setBackgroundColor(const QColor &color)
 {
 
   _backgroundBrush.setColor(color);
@@ -244,7 +244,7 @@ void AScopeWidget::setBackgroundColor(const QColor &color)
  * getImage()
  */
 
-QImage* AScopeWidget::getImage()
+QImage* SpectraWidget::getImage()
 {
 
   QPixmap pixmap = QPixmap::grabWidget(this);
@@ -258,7 +258,7 @@ QImage* AScopeWidget::getImage()
  * getPixmap()
  */
 
-QPixmap* AScopeWidget::getPixmap()
+QPixmap* SpectraWidget::getPixmap()
 {
 
   QPixmap* pixmap = new QPixmap(QPixmap::grabWidget(this));
@@ -275,7 +275,7 @@ QPixmap* AScopeWidget::getPixmap()
  * mousePressEvent()
  */
 
-void AScopeWidget::mousePressEvent(QMouseEvent *e)
+void SpectraWidget::mousePressEvent(QMouseEvent *e)
 {
 
   _rubberBand->setGeometry(QRect(e->pos(), QSize()));
@@ -294,7 +294,7 @@ void AScopeWidget::mousePressEvent(QMouseEvent *e)
  * mouseMoveEvent()
  */
 
-void AScopeWidget::mouseMoveEvent(QMouseEvent * e)
+void SpectraWidget::mouseMoveEvent(QMouseEvent * e)
 {
   // Zooming with the mouse
 
@@ -315,7 +315,7 @@ void AScopeWidget::mouseMoveEvent(QMouseEvent * e)
  * mouseReleaseEvent()
  */
 
-void AScopeWidget::mouseReleaseEvent(QMouseEvent *e)
+void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 
   _pointClicked = false;
@@ -397,7 +397,7 @@ void AScopeWidget::mouseReleaseEvent(QMouseEvent *e)
  * paintEvent()
  */
 
-void AScopeWidget::paintEvent(QPaintEvent *event)
+void SpectraWidget::paintEvent(QPaintEvent *event)
 {
 
   RadxTime now(RadxTime::NOW);
@@ -422,7 +422,7 @@ void AScopeWidget::paintEvent(QPaintEvent *event)
  * resizeEvent()
  */
 
-void AScopeWidget::resizeEvent(QResizeEvent * e)
+void SpectraWidget::resizeEvent(QResizeEvent * e)
 {
 
   _resetWorld(width(), height());
@@ -436,7 +436,7 @@ void AScopeWidget::resizeEvent(QResizeEvent * e)
  * resize()
  */
 
-void AScopeWidget::resize(int width, int height)
+void SpectraWidget::resize(int width, int height)
 {
 
   setGeometry(0, 0, width, height);
@@ -447,7 +447,7 @@ void AScopeWidget::resize(int width, int height)
 //////////////////////////////////////////////////////////////
 // reset the pixel size of the world view
 
-void AScopeWidget::_resetWorld(int width, int height)
+void SpectraWidget::_resetWorld(int width, int height)
 
 {
 
@@ -466,8 +466,8 @@ void AScopeWidget::_resetWorld(int width, int height)
  * mouse release event
  */
 
-void AScopeWidget::setMouseClickPoint(double worldX,
-                                     double worldY)
+void SpectraWidget::setMouseClickPoint(double worldX,
+                                       double worldY)
 {
 
   if (_pointClicked) {
@@ -495,7 +495,7 @@ void AScopeWidget::setMouseClickPoint(double worldX,
  * Draw the overlays, axes, legends etc
  */
 
-void AScopeWidget::_drawOverlays(QPainter &painter)
+void SpectraWidget::_drawOverlays(QPainter &painter)
 {
 
   // save painter state
@@ -637,7 +637,7 @@ void AScopeWidget::_drawOverlays(QPainter &painter)
  * _refreshImages()
  */
 
-void AScopeWidget::_refreshImages()
+void SpectraWidget::_refreshImages()
 {
 
   // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
@@ -664,7 +664,7 @@ void AScopeWidget::_refreshImages()
 
   //   if (ifield == _selectedField || field->isBackgroundRendered()) {
 
-  //     std::vector< AScopeBeam* >::iterator beam;
+  //     std::vector< SpectraBeam* >::iterator beam;
   //     for (beam = _beams.begin(); beam != _beams.end(); ++beam) {
   //       (*beam)->setBeingRendered(ifield, true);
   //       field->addBeam(*beam);
@@ -686,7 +686,7 @@ void AScopeWidget::_refreshImages()
 ////////////////////
 // set the transform
 
-void AScopeWidget::_setTransform(const QTransform &transform)
+void SpectraWidget::_setTransform(const QTransform &transform)
 {
   
   _fullTransform = transform;
@@ -698,7 +698,7 @@ void AScopeWidget::_setTransform(const QTransform &transform)
  * update the renderers
  */
 
-void AScopeWidget::_updateRenderers()
+void SpectraWidget::_updateRenderers()
 
 {
   
@@ -717,8 +717,8 @@ void AScopeWidget::_updateRenderers()
 //////////////////////////////////
 // initalize the plot start time
 
-void AScopeWidget::setPlotStartTime(const RadxTime &plot_start_time,
-                                   bool clearBeams /* = false */)
+void SpectraWidget::setPlotStartTime(const RadxTime &plot_start_time,
+                                     bool clearBeams /* = false */)
 {
   
   _plotStartTime = plot_start_time;
@@ -739,7 +739,7 @@ void AScopeWidget::setPlotStartTime(const RadxTime &plot_start_time,
 //////////////////////////////
 // reset the plot start time
 
-void AScopeWidget::resetPlotStartTime(const RadxTime &plot_start_time)
+void SpectraWidget::resetPlotStartTime(const RadxTime &plot_start_time)
 {
 
   // reset the plot start time
@@ -748,9 +748,9 @@ void AScopeWidget::resetPlotStartTime(const RadxTime &plot_start_time)
 
   // find the index for which the time is later than plot start time
   
-  // vector<AScopeBeam *> toBeKept, toBeErased;
+  // vector<SpectraBeam *> toBeKept, toBeErased;
   // for (size_t ii = 0; ii < _beams.size(); ii++) {
-  //   AScopeBeam *beam = _beams[ii];
+  //   SpectraBeam *beam = _beams[ii];
   //   if ((beam->getBeamStartTime() - plot_start_time) >= 0.0) {
   //     toBeKept.push_back(beam);
   //   } else {
@@ -782,7 +782,7 @@ void AScopeWidget::resetPlotStartTime(const RadxTime &plot_start_time)
  * call the renderers for each field
  */
 
-void AScopeWidget::_performRendering()
+void SpectraWidget::_performRendering()
 {
 
   // start the rendering

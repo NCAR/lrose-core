@@ -45,7 +45,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <rapformats/coord_export.h>
-class AScopeMgr;
+class SpectraMgr;
 class TsReader;
 class BeamMgr;
 
@@ -88,7 +88,7 @@ private:
 
   // managing the rendering objects
 
-  AScopeMgr *_ascopeManager;
+  SpectraMgr *_ascopeManager;
 
   // methods
   
