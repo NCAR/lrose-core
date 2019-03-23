@@ -511,6 +511,8 @@ bool Ts2NetCDF::_checkReadyToWrite(const IwrfTsPulse &pulse)
 
 {
 
+  bool infoChanged = _checkInfoChanged(pulse);
+
   _nPulsesFile++;
   if (_nPulsesFile < 2) {
     return false;
@@ -531,7 +533,7 @@ bool Ts2NetCDF::_checkReadyToWrite(const IwrfTsPulse &pulse)
 
   if (_params.input_mode == Params::TS_FILE_INPUT &&
       _params.save_file_when_processing_details_change) {
-    if (_checkInfoChanged(pulse)) {
+    if (infoChanged) {
       return true;
     } else {
       return false;
