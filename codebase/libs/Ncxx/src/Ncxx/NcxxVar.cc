@@ -3268,6 +3268,26 @@ void NcxxVar::addScalarAttr(const string &name, short val)
 // add ncbyte attribute
 // Throws NcxxException on error
 
+void NcxxVar::addScalarAttr(const string &name, signed char val)
+{
+  clearErrStr();
+  try {
+    NcxxType vtype(NcxxType::nc_BYTE);
+    putAtt(name.c_str(), vtype, 1, &val);
+  } catch (NcxxException& e) {
+    addErrStr("ERROR - NcxxVar::addAttr");
+    addErrStr("  Cannot add signed char var attr, name: ", name);
+    addErrDbl("  val: ", (int) val, "%d");
+    addErrStr("  var name: ", getName());
+    addErrStr("  exception: ", e.what());
+    throw NcxxException(getErrStr(), __FILE__, __LINE__);
+  }
+}
+
+///////////////////////////////////////////
+// add unsigned byte attribute
+// Throws NcxxException on error
+
 void NcxxVar::addScalarAttr(const string &name, unsigned char val)
 {
   clearErrStr();
@@ -3276,7 +3296,7 @@ void NcxxVar::addScalarAttr(const string &name, unsigned char val)
     putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcxxException& e) {
     addErrStr("ERROR - NcxxVar::addAttr");
-    addErrStr("  Cannot add byte var attr, name: ", name);
+    addErrStr("  Cannot add unsigned byte var attr, name: ", name);
     addErrDbl("  val: ", (int) val, "%d");
     addErrStr("  var name: ", getName());
     addErrStr("  exception: ", e.what());

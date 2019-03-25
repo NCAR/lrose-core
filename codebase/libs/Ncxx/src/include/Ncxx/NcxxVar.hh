@@ -1677,6 +1677,7 @@ public:
   /// throws NcxxException on error
     
   void addScalarAttr(const string &name, const string &val);
+  void addScalarAttr(const string &name, signed char val);
   void addScalarAttr(const string &name, unsigned char val);
   void addScalarAttr(const string &name, short val);
   void addScalarAttr(const string &name, int val);
