@@ -294,8 +294,9 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
               __FILE__, __LINE__,
               "var", getName(), "putAtt(char*)");
   else
-    ncxxCheck(nc_put_att_uchar(groupId, myId,
-                               name.c_str(), type.getId(), len, dataValues),
+    ncxxCheck(nc_put_att_schar(groupId, myId,
+                               name.c_str(), type.getId(), len, 
+                               (const signed char*) dataValues),
               __FILE__, __LINE__,
               "var", getName(), "putAtt(char*)");
   // finally instantiate this attribute and return
