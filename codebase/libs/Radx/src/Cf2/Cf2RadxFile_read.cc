@@ -3339,7 +3339,7 @@ void Cf2RadxFile::_addSi08FieldToRays(NcxxVar &var,
   Radx::si08 *data = data_.alloc(nVals);
   
   try {
-    var.getVal(data);
+    var.getVal((signed char *) data);
   } catch (NcxxException& e) {
     NcxxErrStr err;
     err.addErrStr("ERROR - Cf2RadxFile::_addSi08FieldToRays");

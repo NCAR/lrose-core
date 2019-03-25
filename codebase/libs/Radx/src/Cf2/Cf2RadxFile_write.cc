@@ -2579,14 +2579,6 @@ void Cf2RadxFile::_addSweepFields(const RadxSweep *sweep,
       continue;
     }
 
-    // convert byte fields to shorts - shorts are
-    // better handled in NetCDF
-    
-    Radx::DataType_t fieldType = copy->getDataType();
-    if (fieldType == Radx::SI08 || fieldType == Radx::UI08) {
-      copy->convertToSi16();
-    }
-    
     // create the variable
     
     NcxxVar var;
