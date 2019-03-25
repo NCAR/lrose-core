@@ -392,18 +392,21 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   try {
     _addGlobalAttributes();
   } catch (NcxxException e) {
+    cerr << _errStr << endl;
     return _closeOnError("_addGlobalAttributes");
   }
 
   try {
     _addRootDimensions();
   } catch (NcxxException e) {
+    cerr << _errStr << endl;
     return _closeOnError("_addRootDimensions");
   }
 
   try {
     _addRootScalarVariables();
   } catch (NcxxException e) {
+    cerr << _errStr << endl;
     return _closeOnError("_addRootScalarVariables");
   }
 
@@ -411,12 +414,14 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
     try {
       _addRadarParameters();
     } catch (NcxxException e) {
+      cerr << _errStr << endl;
       return _closeOnError("_addRadarParameters");
     }
   } else {
     try {
       _addLidarParameters();
     } catch (NcxxException e) {
+      cerr << _errStr << endl;
       return _closeOnError("_addLidarParameters");
     }
   }
@@ -424,6 +429,7 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   try {
     _addRadarCalibration();
   } catch (NcxxException e) {
+    cerr << _errStr << endl;
     return _closeOnError("_addRadarCalibration");
   }
 
@@ -431,6 +437,7 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
     try {
       _addGeorefCorrections();
     } catch (NcxxException e) {
+      cerr << _errStr << endl;
       return _closeOnError("_addGeorefCorrections");
     }
   }
@@ -438,12 +445,14 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   try {
     _addLocation();
   } catch (NcxxException e) {
+    cerr << _errStr << endl;
     return _closeOnError("_addLocation");
   }
 
   try {
     _addProjection();
   } catch (NcxxException e) {
+    cerr << _errStr << endl;
     return _closeOnError("_addProjection");
   }
 
@@ -452,6 +461,7 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   try {
     _addSweeps();
   } catch (NcxxException e) {
+    cerr << _errStr << endl;
     return _closeOnError("_addSweeps");
   }
 
@@ -2568,6 +2578,14 @@ void Cf2RadxFile::_addSweepFields(const RadxSweep *sweep,
       }
       continue;
     }
+
+    // convert byte fields to shorts - shorts are
+    // better handled in NetCDF
+    
+    Radx::DataType_t fieldType = copy->getDataType();
+    if (fieldType == Radx::SI08 || fieldType == Radx::UI08) {
+      copy->convertToSi16();
+    }
     
     // create the variable
     
@@ -2646,20 +2664,20 @@ NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
   
   // Add var and the attributes relevant to no data packing
 
-  NcxxType ncxxType = _getNcxxType(field.getDataType());
+  NcxxType ncType = _getNcxxType(field.getDataType());
   NcxxVar var;
 
   try {
     vector<NcxxDim> dims;
     dims.push_back(timeDim);
     dims.push_back(rangeDim);
-    var = sweepGroup.addVar(fieldName, ncxxType, dims);
+    var = sweepGroup.addVar(fieldName, ncType, dims);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_addFieldVar");
     _addErrStr("  Cannot add variable to Ncxx file object");
     _addErrStr("  Input field name: ", name);
     _addErrStr("  Output field name: ", fieldName);
-    _addErrStr("  NcxxType: ", Ncxx::ncxxTypeToStr(ncxxType));
+    _addErrStr("  NcxxType: ", Ncxx::ncxxTypeToStr(ncType));
     _addErrStr("  Time dim name: ", timeDim.getName());
     _addErrInt("  Time dim size: ", timeDim.getSize());
     _addErrStr("  Range dim name: ", rangeDim.getName());
@@ -2701,7 +2719,7 @@ NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
       var.putAtt(IS_DISCRETE, "true");
     }
     
-    switch (ncxxType.getTypeClass()) {
+    switch (ncType.getTypeClass()) {
       case NcxxType::nc_DOUBLE: {
         var.addScalarAttr(FILL_VALUE, (double) field.getMissingFl64());
         break;
