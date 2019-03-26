@@ -551,6 +551,25 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   virtual const RadxRay *_getClosestRay(double x_km, double y_km) = 0;
 
+ public:
+
+  /* 
+  virtual void ShowContextMenu(const QPoint &pos);
+  void setFont();
+  virtual void ExamineEdit(const RadxRay *closestRay);
+  void notImplemented();
+  void informationMessage();
+
+ public slots:
+
+  void contextMenuCancel();
+  void contextMenuParameterColors();
+  void contextMenuView();
+  void contextMenuEditor();
+  virtual void contextMenuExamine(); // const QPoint &pos);
+  void contextMenuDataWidget();
+  */
+
 };
 
 #endif

@@ -118,6 +118,9 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   const RadxTime &getPlotStartTime() { return _plotStartTime; }
   const RadxTime &getPlotEndTime() { return _plotEndTime; }
 
+  void ShowContextMenu(const QPoint &pos);
+  void ExamineEdit(const RadxRay *closestRay);
+
   //////////////
   // Qt slots //
   //////////////
@@ -129,6 +132,9 @@ class DLL_EXPORT PpiWidget : public PolarWidget
    */
 
   void clear();
+
+  void contextMenuExamine();
+
 
  protected:
 
@@ -214,5 +220,6 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   inline int _beamIndex(const double start_angle, const double stop_angle);
 
 };
+
 
 #endif

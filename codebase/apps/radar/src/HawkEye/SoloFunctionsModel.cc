@@ -19,7 +19,7 @@ SoloFunctionsModel::SoloFunctionsModel() {
 }
 */
 
-vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, SpreadSheetModel *context) {
+vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVol &vol) { // SpreadSheetModel *context) {
 
   // TODO: what is being returned? the name of the new field in the model that
   // contains the results.
@@ -33,7 +33,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, Spread
   // gather data from context -- most of the data are in a DoradeRadxFile object
 
   // TODO: convert the context RadxVol to DoradeRadxFile and DoradeData format;
-  RadxVol vol = context->_vol;
+  //RadxVol vol = context->_vol;
   // make sure the radar angles have been calculated.
 
   
@@ -143,7 +143,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, Spread
 
 
 
-vector<double> SoloFunctionsModel::RemoveAircraftMotion(vector<double> data, SpreadSheetModel *context) {
+vector<double> SoloFunctionsModel::RemoveAircraftMotion(vector<double> data, RadxVol &vol) { // SpreadSheetModel *context) {
 
   // TODO: what is being returned? the name of the new field in the model that
   // contains the results.
@@ -157,7 +157,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(vector<double> data, Spr
   // gather data from context -- most of the data are in a DoradeRadxFile object
 
   // TODO: convert the context RadxVol to DoradeRadxFile and DoradeData format;
-  RadxVol vol = context->_vol;
+  //RadxVol vol = context->_vol;
   // make sure the radar angles have been calculated.
 
   /*

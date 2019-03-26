@@ -5,8 +5,9 @@
 #include <QMainWindow>
 #include "TextEdit.hh"
 #include "SpreadSheetUtils.hh"
-#include "SpreadSheetController.hh"
+//#include "SpreadSheetController.hh"
 #include "SpreadSheetDelegate.hh"
+#include "SoloFunctions.hh"
 
 #include <QWidget>
 #include <QAction>
@@ -24,8 +25,12 @@ class SpreadSheetView : public QMainWindow
 
 public:
 
-  SpreadSheetView(std::string fileName, QWidget *parent = 0);
+  //  SpreadSheetView(std::string fileName, QWidget *parent = 0);
   SpreadSheetView(QWidget *parent = 0);
+
+  //  void setController(SpreadSheetController *controller);
+
+  void init();
 
   void newDataReady();
 
@@ -59,10 +64,21 @@ public slots:
   void actionDisplayEditHist();
 
   void notImplementedMessage();
+
+
+  void setupSoloFunctions(SoloFunctions *soloFunctions);
+
+  void fieldNamesProvided(vector<string> fieldNames);
+  void fieldDataSent(vector<double> data, int useless, int c);
+
+signals:
+
+  void needFieldNames();
+  void needDataForField(string fieldName, int r, int c);
+
 protected:
     void setupContextMenu();
     void setupContents();
-    void setupSoloFunctions();
     void setupMenuBar();
     void createActions();
     void addVariableToSpreadSheet(QString name, QJSValue value);
@@ -80,8 +96,8 @@ protected:
                         QString *cell1, QString *cell2, QString *outCell);
 private:
 
-    SpreadSheetController *_controller;
-
+  //     SpreadSheetController *_controller;
+  // vector<std::string> _fieldNames;
 
     QToolBar *toolBar;
     QAction *colorAction;

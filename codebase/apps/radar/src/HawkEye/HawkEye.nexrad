@@ -192,7 +192,9 @@ archive_start_time = "2015 06 26 00 00 59";
 // Type: double
 //
 
-archive_time_span_secs = 3600;
+// archive_time_span_secs = 3600;
+archive_scan_interval_secs = 300;
+archive_n_scans = 12;
 
 ///////////// archive_data_url ////////////////////////
 //
@@ -269,17 +271,17 @@ show_status_in_gui = {
     nyquist = TRUE,
     max_range = TRUE,
     unambiguous_range = TRUE,
-    measured_power_h = FALSE,
-    measured_power_v = FALSE,
-    scan_name = FALSE,
-    scan_mode = FALSE,
-    polarization_mode = FALSE,
+    measured_power_h = TRUE,
+    measured_power_v = TRUE,
+    scan_name = TRUE,
+    scan_mode = TRUE,
+    polarization_mode = TRUE,
     latitude = TRUE,
     longitude = TRUE,
     altitude = TRUE,
-    altitude_rate = FALSE,
-    sun_elevation = FALSE,
-    sun_azimuth = FALSE,
+    altitude_rate = TRUE,
+    sun_elevation = TRUE,
+    sun_azimuth = TRUE,
     speed = FALSE,
     heading = FALSE,
     track = FALSE

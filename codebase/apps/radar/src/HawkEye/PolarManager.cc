@@ -44,7 +44,7 @@
 #include "Params.hh"
 #include "Reader.hh"
 #include "AllocCheck.hh"
-#include "ContextEditingView.hh"
+//#include "ContextEditingView.hh"
 
 #include <string>
 #include <cmath>
@@ -491,7 +491,6 @@ void PolarManager::_setupWindows()
           this, SLOT(_ppiLocationClicked(double, double, const RadxRay*)));
   connect(_rhi, SIGNAL(locationClicked(double, double, const RadxRay*)),
           this, SLOT(_rhiLocationClicked(double, double, const RadxRay*)));
-
 
   // add a right-click context menu to the image
   setContextMenuPolicy(Qt::CustomContextMenu);
@@ -1593,6 +1592,50 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
   _valueLabel->setText(text);
 
 }
+
+/*
+void PolarManager::_ppiContextExamineEditRequested(double xkm, double ykm, 
+                                       const RadxRay *closestRay)
+
+{
+
+  // find the relevant ray
+  // ignore closest ray sent in
+  
+  double azDeg = 0.0;
+  if (xkm != 0 || ykm != 0) {
+    azDeg = atan2(xkm, ykm) * RAD_TO_DEG;
+    if (azDeg < 0) {
+      azDeg += 360.0;
+    }
+  }
+  if (_params.debug) {
+    cerr << "    azDeg = " << azDeg << endl;
+  }
+  
+  int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
+  if (_params.debug) {
+    cerr << "    rayIndex = " << rayIndex << endl;
+  }
+  
+  const RadxRay *ray = _ppiRayLoc[rayIndex].ray;
+  if (ray == NULL) {
+    // no ray data yet
+    if (_params.debug) {
+      cerr << "    No ray data yet..." << endl;
+      cerr << "      active = " << _ppiRayLoc[rayIndex].active << endl;
+      // cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
+      cerr << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex << endl;
+      cerr << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex << endl;
+    }
+    return;
+  }
+
+  _locationClicked(xkm, ykm, _ppiRayLoc, ray);
+
+}
+*/
+
 
 ///////////////////////////////////////////////////
 // respond to a change in click location on the PPI
@@ -2795,11 +2838,121 @@ void PolarManager::_saveImageToFile(bool interactive)
 
 void PolarManager::ShowContextMenu(const QPoint &pos) {
 
+  _ppi->ShowContextMenu(pos);
+  /*
   cout << "Showing Context Menu ... " << endl;
   ContextEditingView contextEditingView(_ppi);
-  contextEditingView.ShowContextMenu(pos);
+  contextEditingView.ShowContextMenu(pos); // , _vol);
+  //  _ppi->ShowContextMenu(pos);
+  */
+}
+
+/*
+void PolarManager::ExamineEdit(const RadxRay *closestRay) {
+
+  //  RadxRay *closestRayCopy = new RadxRay(*closestRay);
+
+  // create the view
+  SpreadSheetView *sheetView;
+  sheetView = new SpreadSheetView(this);
+
+  // create the model with the RadxVol
+  SpreadSheetModel *model = new SpreadSheetModel(_vol);
+
+  // create the controller
+  SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
+
+  // finish the other connections ..                                                                                                                                  
+  //sheetView->addController(sheetController);                                                                                                                        
+  // model->setController(sheetController);                                                                                                                           
+  sheetView->init();
+  sheetView->show();
+  sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
 
 }
+
+void PolarManager::contextMenuExamine()
+{
+  cout << "inside PolarManager::contextMenuExamine ... " << endl;
+
+  // get click location in world coords                                                                                                                               
+  // by using the location stored in class variables                                                                                                                  
+  //double x_km = _worldPressX;
+  //double y_km = _worldPressY;
+
+  // get ray closest to click point                                                                                                                                   
+
+  //const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+  // TODO: make sure the point is in the valid area                                                                                                                   
+  //------------                                                                                                                                                      
+  ExamineEdit(closestRay);
+}
+
+void PolarManager::ShowContextMenu(const QPoint &pos)
+{
+  QMenu contextMenu("Context menu", this);
+
+  QAction action1("Cancel", this);
+  connect(&action1, SIGNAL(triggered()), this, SLOT(contextMenuCancel()));
+  contextMenu.addAction(&action1);
+
+  QAction action3("Parameters + Colors", this);
+  connect(&action3, SIGNAL(triggered()), this, SLOT(contextMenuParameterColors()));
+  contextMenu.addAction(&action3);
+
+  QAction action4("View", this);
+  connect(&action4, SIGNAL(triggered()), this, SLOT(contextMenuView()));
+  contextMenu.addAction(&action4);
+
+  QAction action5("Editor", this);
+  connect(&action5, SIGNAL(triggered()), this, SLOT(contextMenuEditor()));
+  contextMenu.addAction(&action5);
+
+  QAction action6("Examine", this);
+  connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine()));
+  contextMenu.addAction(&action6);
+
+  QAction action7("Data Widget", this);
+  connect(&action7, SIGNAL(triggered()), this, SLOT(contextMenuDataWidget()));
+  contextMenu.addAction(&action7);
+
+  contextMenu.exec(this->mapToGlobal(pos));
+}
+
+
+void PolarManager::notImplemented()
+{
+  cerr << "inside notImplemented() ... " << endl;
+
+  QErrorMessage errorMessageDialog; //  = new QErrorMessage(this);                                                
+  QLabel informationLabel; //  = new QLabel();                                                                    
+
+  errorMessageDialog.showMessage("This option is not implemented yet.");
+  QLabel errorLabel;
+  int frameStyle = QFrame::Sunken | QFrame::Panel;
+  errorLabel.setFrameStyle(frameStyle);
+  errorLabel.setText("If the box is unchecked, the message "
+                     "won't appear again.");
+
+  cerr << "exiting notImplemented() " << endl;
+
+}
+
+void PolarManager::informationMessage()
+{
+  QMessageBox::StandardButton reply;
+  reply = QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
+  if (reply == QMessageBox::Ok) {
+    //informationLabel->setText("OK");                                                                            
+    //    if (_debug)                                                                                             
+    cout << "Not implemented reply: OK" << endl;
+  } else {
+    //informationLabel->setText("Escape");                                                                        
+    //if (_debug)                                                                                                 
+    cout << "Not implemented reply: Escape" << endl;
+  }
+}
+*/
 
 /////////////////////////////////////////////////////
 // howto help

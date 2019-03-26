@@ -24,9 +24,11 @@
 	     "by pressing the Show Details... button.")
 
 
-ContextEditingView::ContextEditingView(QWidget *parent) : QWidget(parent) {
+ContextEditingView::ContextEditingView(PolarWidget *parent) : QWidget(parent) {
   errorMessageDialog = new QErrorMessage(parent);
   informationLabel = new QLabel();
+  _parent = parent;
+  //_data = _vol;
 }
 
 ContextEditingView::~ContextEditingView() {
@@ -60,7 +62,7 @@ void ContextEditingView::ShowContextMenu(const QPoint &pos)
   contextMenu.addAction(&action5);
 
   QAction action6("Examine", this);
-  connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine()));
+  connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine(pos)));
   contextMenu.addAction(&action6);
 
   QAction action7("Data Widget", this);
@@ -106,12 +108,12 @@ void ContextEditingView::contextMenuEditor()
   //  notImplemented();
 }
 
-void ContextEditingView::contextMenuExamine()
+void ContextEditingView::contextMenuExamine() // RadxRay *closestRay)
 {
   //informationMessage();
 
   //   notImplemented();                                                                                     
-  ExamineEdit();
+  ExamineEdit(); // closestRay);
 }
 
 void ContextEditingView::contextMenuDataWidget()
@@ -134,6 +136,23 @@ void ContextEditingView::setFont()
   */
 }
 
+
+void ContextEditingView::ExamineEdit(QPoint pos) {
+
+  // get the data associated with the request
+  // copy it and 
+  // give to controller ...
+  //const RadxRay *closestRay = _parent->_getClosestRay(pos.x(), pos.y());
+  //RadxRay closestRayCopy = *closestRay;
+
+  SpreadSheetView *sheetView;
+
+  sheetView = new SpreadSheetView();
+  SpreadSheetController sheetControl(sheetView, closestRayCopy);
+  sheetView->show();
+  sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
+
+}
 
 void ContextEditingView::ExamineEdit() {
   SpreadSheetView *sheetView;

@@ -8,10 +8,9 @@
 #include <QtWidgets>
 
 #include "SpreadSheetController.hh"
-#include "SpreadSheetDelegate.hh"
-#include "SpreadSheetItem.hh"
-#include <Radx/RadxVol.hh>
-
+//#include "SpreadSheetDelegate.hh"
+//#include "SpreadSheetItem.hh"
+#include "SpreadSheetModel.hh"
 
 SpreadSheetController::SpreadSheetController(SpreadSheetView *view)
 {
@@ -22,9 +21,46 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view)
   _currentView = view;
   _currentModel = new SpreadSheetModel();
 
+  //  functionsModel = new SoloFunctionsModel(_currentModel);
+
+    // connect controller slots to model signals 
+
+    // connect model signals to controller slots 
+  /*
+    connect(table, &QTableWidget::currentItemChanged,
+            this, &SpreadSheetController::updateStatus);
+    connect(table, &QTableWidget::currentItemChanged,
+            this, &SpreadSheetController::updateColor);
+    connect(table, &QTableWidget::currentItemChanged,
+            this, &SpreadSheetController::updateLineEdit);
+    connect(table, &QTableWidget::itemChanged,
+            this, &SpreadSheetController::updateStatus);
+    connect(formulaInput, &QLineEdit::returnPressed, this, &SpreadSheetController::returnPressed);
+    connect(table, &QTableWidget::itemChanged,
+            this, &SpreadSheetController::updateLineEdit);
+  */
+}
+
+
+SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetModel *model)
+{
+  int rows;
+  int cols;
+
+
+  _currentView = view;
+
+  _currentModel = model;
 
   //  functionsModel = new SoloFunctionsModel(_currentModel);
-  
+  _soloFunctions = new SoloFunctions(_currentModel->_vol);
+  _currentView->setupSoloFunctions(_soloFunctions);
+
+  // connect view signals to controller slots
+
+  connect(_currentView, SIGNAL(needFieldNames()), this, SLOT(needFieldNames()));
+  connect(_currentView, SIGNAL(needDataForField(string, int, int)), 
+	  this, SLOT(needDataForField(string, int, int)));
 
     // connect controller slots to model signals 
 
@@ -64,6 +100,16 @@ vector<double>  SpreadSheetController::getData(string fieldName)
 
   return data;
 }
+
+void  SpreadSheetController::needFieldNames() {
+  _currentView->fieldNamesProvided(getFieldNames());
+}
+
+void  SpreadSheetController::needDataForField(string fieldName, int r, int c) {
+
+  _currentView->fieldDataSent(getData(fieldName), r, c);
+}
+
 
 void SpreadSheetController::open(string fileName)
 {

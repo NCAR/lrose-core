@@ -21,24 +21,10 @@ using namespace std;
 Q_DECLARE_METATYPE(QVector<int>)
 Q_DECLARE_METATYPE(QVector<double>)
 
-/*
-static QScriptValue getSetFoo(QScriptContext *context, QScriptEngine *engine)
-{
-  QScriptValue callee = context->callee();
-  if (context->argumentCount() == 1) { // writing?
-    callee.setProperty("value", context->argument(0));
-  }
-  return callee.property("value");
-}
-*/
-  /*
-  QVector<int> v = qscriptvalue_cast<QVector<int> >(engine->evaluate("[5, 1, 3, 2]"));
-qSort(v.begin(), v.end());
-QScriptValue a = engine->toScriptValue(v);
-qDebug() << a.toString(); // outputs "[1, 2, 3, 5]"     
-  */
 
-
+// SpreadSheetView sill emit signals that are followed by the controller
+//
+//
 
 SpreadSheetView::SpreadSheetView(QWidget *parent)
         : QMainWindow(parent)
@@ -48,7 +34,7 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
   int rows;
   int cols;
 
-  _controller = new SpreadSheetController(this);
+  //_controller = new SpreadSheetController(this);
   //_controller->open(fileName);
   //vector<std::string> fieldNames = _controller->getFieldNames();
   //cols = displayInfo.getNumFields();
@@ -143,18 +129,19 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
 
     setWindowTitle(tr("Spreadsheet"));
 
-    setupSoloFunctions();
+    //setupSoloFunctions();
 }
 
-
+// use when a new file is opened ...
+/*
 SpreadSheetView::SpreadSheetView(std::string fileName, QWidget *parent)
         : QMainWindow(parent)
 {
   int rows;
   int cols;
 
-  _controller = new SpreadSheetController(this);
-  _controller->open(fileName);
+  //_controller = new SpreadSheetController(this);
+  //_controller->open(fileName);
   vector<std::string> fieldNames = _controller->getFieldNames();
   //cols = displayInfo.getNumFields();
   // vector<std::string> fieldNames = vol.getUniqueFieldNameList();
@@ -217,7 +204,66 @@ SpreadSheetView::SpreadSheetView(std::string fileName, QWidget *parent)
 
     setWindowTitle(tr("Spreadsheet"));
 
-    setupSoloFunctions();
+    //setupSoloFunctions();
+}
+*/
+
+
+
+void SpreadSheetView::init()
+{
+  //  emit a signal to the controller to get the data for display
+  emit needFieldNames();
+  
+  int rows;
+  int cols;
+
+  cols = 5; 
+  rows = 20;
+
+    addToolBar(toolBar = new QToolBar());
+
+    cellLabel = new QLabel(toolBar);
+    cellLabel->setMinimumSize(80, 0);
+
+    toolBar->addWidget(cellLabel);
+
+    table = new QTableWidget(rows, cols, this);
+    table->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
+    // set the column headers to the data fields
+
+    table->setItemPrototype(table->item(rows - 1, cols - 1));
+    table->setItemDelegate(new SpreadSheetDelegate());
+
+    createActions();
+    cout << "Actions created\n";
+    updateColor(0);
+    cout << "update Color\n";
+    setupMenuBar();
+    cout << "setupMenuBar\n";
+    setupContents();
+    cout << "setupContents\n";
+    setupContextMenu();
+    cout << "setupContextMenu\n";
+    setCentralWidget(table);
+    cout << "setCentralWidgets\n";
+
+    statusBar();
+    connect(table, &QTableWidget::currentItemChanged,
+            this, &SpreadSheetView::updateStatus);
+    connect(table, &QTableWidget::currentItemChanged,
+            this, &SpreadSheetView::updateColor);
+    connect(table, &QTableWidget::currentItemChanged,
+            this, &SpreadSheetView::updateTextEdit);
+    connect(table, &QTableWidget::itemChanged,
+            this, &SpreadSheetView::updateStatus);
+    // connect(formulaInput, &QTextEdit::returnPressed, this, &SpreadSheetView::returnPressed);
+    connect(table, &QTableWidget::itemChanged,
+            this, &SpreadSheetView::updateTextEdit);
+
+    setWindowTitle(tr("Spreadsheet"));
+
+    //setupSoloFunctions();
 }
 
 void SpreadSheetView::createActions()
@@ -402,10 +448,12 @@ float  SpreadSheetView::myPow()
   return(999.9);
 }
 
+void SpreadSheetView::setupSoloFunctions(SoloFunctions *soloFunctions) {
 
-void SpreadSheetView::setupSoloFunctions() {
+  //  emit radarVolumeDataRequest();  make the request for the data inside the SoloFunctions object
 
-    QJSValue myExt = engine.newQObject(new SoloFunctions(_controller));
+  //    QJSValue myExt = engine.newQObject(new SoloFunctions(_controller));
+  QJSValue myExt = engine.newQObject(soloFunctions); // new SoloFunctions());
     engine.globalObject().setProperty("cat", myExt.property("cat"));
     engine.globalObject().setProperty("sqrt", myExt.property("sqrt"));
     engine.globalObject().setProperty("REMOVE_AIRCRAFT_MOTION", myExt.property("REMOVE_AIRCRAFT_MOTION"));
@@ -925,22 +973,10 @@ void SpreadSheetView::setupContents()
     QFont titleFont = table->font();
     titleFont.setBold(true);
 
+}
 
-    int index;
-    index = 0;
-
-    vector<string> fieldNames = _controller->getFieldNames();
-    table->setColumnCount(fieldNames.size());
-
-    int c = 0;
-    vector<string>::iterator it; 
-    for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
-      QString the_name(QString::fromStdString(*it));
-      cerr << *it << endl;
-      table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
-       
-      vector<double> data = _controller->getData(*it);
-
+// request filled by Controller in response to needFieldData 
+void SpreadSheetView::fieldDataSent(vector<double> data, int useless, int c) {
       cerr << "number of data values = " << data.size() << endl;
 
       string format = "%g";
@@ -952,9 +988,27 @@ void SpreadSheetView::setupContents()
         cerr << "setting " << r << "," << c << "= " << formattedData << endl; 
         table->setItem(r, c, new SpreadSheetItem(formattedData));
       }
+}
+
+// request filled by Controller in response to needFieldNames signal
+void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
+
+  int useless = 0;
+
+  // fill everything that needs the fieldNames ...
+
+    table->setColumnCount(fieldNames.size());
+
+    int c = 0;
+    vector<string>::iterator it; 
+    for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
+      QString the_name(QString::fromStdString(*it));
+      cerr << *it << endl;
+      table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
+       
+      emit needDataForField(*it, useless, c);
       c += 1;
     }
-
 
     //======
 
@@ -963,60 +1017,23 @@ void SpreadSheetView::setupContents()
     // the variable name as a string is substituted.
     //     
     // for each field in model (RadxVol)
-    
-    if (_controller != NULL) {
-    vector<string> fieldNames = _controller->getFieldNames();
 
-    int c = 0;
-    vector<string>::iterator it;
     for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
       QString fieldName(QString::fromStdString(*it));
       //    try {
-        //vector<double> data = _controller->getData(*it);
         QJSValue objectValue = engine.newQObject(new DataField(*it));
         engine.globalObject().setProperty(fieldName, objectValue.property("name"));
 	//} catch (Exception ex) {
 	// cerr << "ERROR - problem setting property on field " << *it << endl;
 	//}
     }
-    }
-    // end set global field values
-
-    //==========
-
-    /*
-    //======
-
-    // This section of code makes every data field in volume a variable
-    // When the variable name is referenced in the formula bar,
-    // the data values are substituted.
-    //     
-    // for each field in model (RadxVol)
-    
-    if (_controller != NULL) {
-    vector<string> fieldNames = _controller->getFieldNames();
-
-    int c = 0;
-    vector<string>::iterator it;
-    for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
-      QString fieldName(QString::fromStdString(*it));
-      vector<double> data = _controller->getData(*it);
-      QVector<double> qData = QVector<double>::fromStdVector(data);
-      QJSValue objectValue = engine.newQObject(new DataField(qData));
-      engine.globalObject().setProperty(fieldName, objectValue.property("values"));
-    }
-    }
-    // end set global field values
-
-    //==========
-    */
 }
 
 void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
 
 
-    string format = "%g";
-    char formattedData[250];
+  string format = "%g";
+  char formattedData[250];
 
 
   if (value.isArray()) {
@@ -1026,12 +1043,8 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
     QString the_name(QString::fromStdString(*it));
     cerr << *it << endl;
     table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
-
     vector<double> data = _controller->getData(*it);
-
     cerr << "number of data values = " << data.size() << endl;
-
-
     for (int r=0; r<20; r++) {
       //    sprintf(formattedData, format, data[0]);                                                                                             
       sprintf(formattedData, "%g", data.at(r));
@@ -1114,21 +1127,14 @@ void SpreadSheetView::showAbout()
 void SpreadSheetView::print()
 {
   cerr << "ERROR - Print not supported" << endl;
-  /*
-#if QT_CONFIG(printpreviewdialog)
-    QPrinter printer(QPrinter::ScreenResolution);
-    QPrintPreviewDialog dlg(&printer);
-    PrintView view;
-    view.setModel(table->model());
-    connect(&dlg, &QPrintPreviewDialog::paintRequested, &view, &PrintView::print);
-    dlg.exec();
-#endif
-  */
 }
 
 QString SpreadSheetView::open()
 {
+  cerr << "Open not implemented" << endl;
+  
   QString fileName;
+  /*
   fileName = QFileDialog::getOpenFileName(this,
      tr("Open Image"), "/tmp", tr("Sweep Files (*.*)"));
 
@@ -1139,9 +1145,8 @@ QString SpreadSheetView::open()
 
   // load new data
   newDataReady();
-
+  */
   return fileName;
-
 }
 
 void  SpreadSheetView::newDataReady()

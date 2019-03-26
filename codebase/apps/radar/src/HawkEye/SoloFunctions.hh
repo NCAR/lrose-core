@@ -10,7 +10,7 @@
 #include <vector>
 #include <iostream>
 
-#include "SpreadSheetController.hh"
+#include "Radx/RadxVol.hh"
 
 using namespace std;
 
@@ -56,7 +56,8 @@ class SoloFunctions : public QObject
 
 public:
   //  SoloFunctions(SpreadSheetController *controller);
-  SoloFunctions(SpreadSheetController *controller, QObject *parent = nullptr) : QObject(parent) { _controller = controller;}
+  SoloFunctions(RadxVol &data, QObject *parent = nullptr) : QObject(parent) {_data = data;}
+  //SoloFunctions(QObject *parent = nullptr) : QObject(parent) { }
 
   Q_INVOKABLE QString cat(QString animal) {return animal+"_cat"; }
   Q_INVOKABLE QString REMOVE_AIRCRAFT_MOTION(QString field); // return the name of the new field that contains the result
@@ -69,13 +70,13 @@ public:
  
 private:
 
-  SpreadSheetController *_controller;
+  RadxVol _data;
 
   template<typename Out>
   void split(const string &s, char delim, Out result);
   vector<string> split(const string &s, char delim);
   vector<double> splitDouble(const string &s, char delim);
-
+ 
 };
 
 

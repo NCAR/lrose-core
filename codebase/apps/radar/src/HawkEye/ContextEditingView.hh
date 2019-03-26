@@ -15,7 +15,7 @@ class ContextEditingView : QWidget
 
   ContextEditingView(QWidget *parent);
   ~ContextEditingView();
-  void ShowContextMenu(const QPoint &pos);
+  void ShowContextMenu(const QPoint &pos); // , RadxVol &_vol);
 
   private slots:
 
@@ -29,7 +29,7 @@ class ContextEditingView : QWidget
 
   private:
 
-  //  PolarWidget  *window;
+  PolarWidget  *_parent;
   void notImplemented();
   void criticalMessage();
   void informationMessage();
@@ -38,6 +38,8 @@ class ContextEditingView : QWidget
   void errorMessage();
   void ExamineEdit();
   
+  void ExamineEdit(QPoint pos);
+
   QLabel *fontLabel;
   QLabel *directoryLabel;
   QLabel *openFileNameLabel;

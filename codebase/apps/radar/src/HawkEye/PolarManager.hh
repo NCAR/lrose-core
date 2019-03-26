@@ -49,6 +49,7 @@
 #include "Params.hh"
 #include "DisplayManager.hh"
 #include "RayLoc.hh"
+#include "ContextEditingView.hh"
 #include <QMainWindow>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxRay.hh>
@@ -119,6 +120,23 @@ public:
   // returns 0 on success, -1 on failure
   
   int loadArchiveFileList();
+
+  /*
+  void ShowContextMenu(const QPoint &pos);
+  void ExamineEdit(const RadxRay *closestRay);
+  void contextMenuExamine();
+  void ShowContextMenu(const QPoint &pos);
+  void notImplemented();
+  void informationMessage();
+
+public slots:
+  void contextMenuCancel();
+  void contextMenuParameterColors();
+  void contextMenuView(); 
+  void contextMenuEditor();
+  virtual void contextMenuExamine();
+  void contextMenuDataWidget();
+  */
 
 signals:
 

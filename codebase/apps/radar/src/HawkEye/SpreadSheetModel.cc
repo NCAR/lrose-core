@@ -15,6 +15,10 @@ SpreadSheetModel::SpreadSheetModel()
 
 }
 
+SpreadSheetModel::SpreadSheetModel(RadxRay *closestRay)
+{
+  _closestRay = closestRay;
+}
 
 //////////////////////////////////////////////////                                                             
 // set up read                                                                                                 
@@ -109,9 +113,30 @@ void SpreadSheetModel::initData(string fileName)
 
 vector<string> SpreadSheetModel::getFields()
 {
-  // vector<string> names = {"alpha", "beta", "gamma"};
-  vector<string> fieldNames = _vol.getUniqueFieldNameList();
+  vector<string> fieldNames;
+  if (_closestRay != NULL) {
+    //   ray->loadFieldNameMap();
+    /*
+map<string, int>::iterator it;
 
+for ( it = symbolTable.begin(); it != symbolTable.end(); it++ )
+{
+std::cout << it->first  // string (key)
+<< ':'
+<< it->second   // string's value 
+<< std::endl ;
+}
+    */
+
+    RadxRay::FieldNameMap fieldNameMap = _closestRay->getFieldNameMap();
+    RadxRay::FieldNameMapIt it;
+    for (it = fieldNameMap.begin(); it != fieldNameMap.end(); it++) {
+      //fieldNames.push_back(it->
+      cout << it->first << ':' << it->second << endl;
+    }
+  } else {
+    vector<string> fieldNames = _vol.getUniqueFieldNameList();
+  }
   return fieldNames;
 }
 

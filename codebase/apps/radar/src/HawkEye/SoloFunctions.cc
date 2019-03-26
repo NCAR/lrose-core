@@ -42,7 +42,6 @@ vector<double> SoloFunctions::splitDouble(const string &s, char delim) {
 QString  SoloFunctions::REMOVE_AIRCRAFT_MOTION(QString field) { 
 
   SoloFunctionsModel soloFunctionsModel;
-  SpreadSheetModel *dataModel = _controller->getDataModel(); 
 
   // the value of the field has been substituted; If the field is a vector,
   // then the QString contains all the values as a comma separated list in a string
@@ -56,7 +55,7 @@ QString  SoloFunctions::REMOVE_AIRCRAFT_MOTION(QString field) {
   cerr << endl;
   */
 
-  vector<double> result = soloFunctionsModel.RemoveAircraftMotion(field.toStdString(), dataModel);
+  vector<double> result = soloFunctionsModel.RemoveAircraftMotion(field.toStdString(), _data);
   //  vector<double> result = soloFunctionsModel.RemoveAircraftMotion(x, dataModel);
 
   // TODO: what is being returned? the name of the new field in the model that

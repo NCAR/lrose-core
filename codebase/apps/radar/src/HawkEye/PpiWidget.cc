@@ -23,7 +23,16 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include "PpiWidget.hh"
 #include "PolarManager.hh"
+#include "SpreadSheetView.hh"
+#include "SpreadSheetController.hh"
+
 #include <toolsa/toolsa_macros.h>
+#include <QMenu>
+#include <QAction>
+#include <QLabel>
+#include <QLayout>
+#include <QMessageBox>
+#include <QErrorMessage>
 
 using namespace std;
 
@@ -1084,5 +1093,80 @@ void PpiWidget::_refreshImages()
 }
 
 
+void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
+
+  RadxRay *closestRayCopy = new RadxRay(*closestRay);
+
+  // create the view
+  SpreadSheetView *sheetView;
+  sheetView = new SpreadSheetView(this);
+
+  // create the model
+  SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
+
+  // create the controller
+  SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
+
+  // finish the other connections ..
+  //sheetView->addController(sheetController);
+  // model->setController(sheetController);
+  
+  
+  sheetView->init();
+  sheetView->show();
+  sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
+
+}
 
 
+
+void PpiWidget::contextMenuExamine()
+{
+  cout << "inside PpiWidget::contextMenuExamine ... " << endl;
+
+  // get click location in world coords
+  // by using the location stored in class variables
+  double x_km = _worldPressX;
+  double y_km = _worldPressY;
+
+  // get ray closest to click point
+                                                                                                 
+  const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+  // TODO: make sure the point is in the valid area                                                                    
+  //------------                                                                                                       
+
+  ExamineEdit(closestRay);
+}
+
+void PpiWidget::ShowContextMenu(const QPoint &pos)
+{
+  QMenu contextMenu("Context menu", this);
+  /*
+  QAction action1("Cancel", this);
+  connect(&action1, SIGNAL(triggered()), this, SLOT(contextMenuCancel()));
+  contextMenu.addAction(&action1);
+
+  QAction action3("Parameters + Colors", this);
+  connect(&action3, SIGNAL(triggered()), this, SLOT(contextMenuParameterColors()));
+  contextMenu.addAction(&action3);
+
+  QAction action4("View", this);
+  connect(&action4, SIGNAL(triggered()), this, SLOT(contextMenuView()));
+  contextMenu.addAction(&action4);
+
+  QAction action5("Editor", this);
+  connect(&action5, SIGNAL(triggered()), this, SLOT(contextMenuEditor()));
+  contextMenu.addAction(&action5);
+  */
+  QAction action6("Examine", this);
+  connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine()));
+  contextMenu.addAction(&action6);
+
+  /*
+  QAction action7("Data Widget", this);
+  connect(&action7, SIGNAL(triggered()), this, SLOT(contextMenuDataWidget()));
+  contextMenu.addAction(&action7);
+  */
+
+  contextMenu.exec(this->mapToGlobal(pos));
+}
