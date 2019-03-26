@@ -72,6 +72,9 @@ TsMaxPower2Fmq::TsMaxPower2Fmq(int argc, char **argv)
   _gateForMax0 = 0;
   _gateForMax1 = 0;
 
+  _dwellSecs = 0.01;
+  _reportIntervalSecs = 0.1;
+
   _outputFmqOpen = false;
 
   // set programe name
@@ -205,7 +208,9 @@ int TsMaxPower2Fmq::Run ()
 
   char msg[1024];
   snprintf(msg, 1024, "Reading FMQ: %s", _params.input_fmq_path);
-  
+  double prevStartTime = 0;
+  double pulseTime = 0;
+
   while (true) {
 
     // reg with procmap
@@ -218,6 +223,7 @@ int TsMaxPower2Fmq::Run ()
     _initMaxPowerStats();
     
     // accumulate max power stats
+
     
     for (int ipulse = 0; ipulse < _nSamplesUsed; ipulse++) {
       
@@ -231,6 +237,7 @@ int TsMaxPower2Fmq::Run ()
         return -1;
       }
 
+      pulseTime = pulse->getFTime();
       pulse->convertToFL32();
       _addToMaxPower(*pulse);
       _pulseCount++;
@@ -238,6 +245,12 @@ int TsMaxPower2Fmq::Run ()
       delete pulse;
       
     } // ipulse
+
+    // compute the dwell length in secs
+
+    if (prevStartTime != 0) {
+      _dwellSecs = pulseTime - prevStartTime;
+    }
 
     // compute max power stats
     
@@ -265,8 +278,19 @@ int TsMaxPower2Fmq::Run ()
         }
         return -1;
       }
+      pulseTime = pulse->getFTime();
       delete pulse;
     } // ipulse
+
+    // compute the reporting interval in secs
+
+    if (prevStartTime != 0) {
+      _reportIntervalSecs = pulseTime - prevStartTime;
+    }
+
+    // save start time
+
+    prevStartTime = pulseTime;
 
   } // while
 
@@ -444,11 +468,10 @@ void TsMaxPower2Fmq::_compileXmlStr(string &xmlStr)
   int midMSecs = (int) ((_midTime - midSecs) * 1000.0 + 0.5);
   double prf = 1.0 / _midPrt;
 
-  double dwellSecs = (_endTime - _startTime) * ((double) _nSamplesUsed / ((double) _nSamplesUsed - 1.0));
-
   xmlStr += TaXml::writeTime("time", 1, midSecs);
   xmlStr += TaXml::writeDouble("msecs", 1, midMSecs);
-  xmlStr += TaXml::writeDouble("dwellSecs", 1, dwellSecs);
+  xmlStr += TaXml::writeDouble("dwellSecs", 1, _dwellSecs);
+  xmlStr += TaXml::writeDouble("reportIntervalSecs", 1, _reportIntervalSecs);
   xmlStr += TaXml::writeDouble("prf", 1, prf);
   xmlStr += TaXml::writeInt("nSamples", 1, _nSamplesUsed);
   xmlStr += TaXml::writeInt("startGate", 1, _startGate);

@@ -105,6 +105,8 @@ private:
   double _midAz, _midEl;
   double _startTime, _endTime;
 
+  double _dwellSecs, _reportIntervalSecs;
+
   vector<double> _maxPowers0, _maxPowers1;
   double _meanMaxPower0, _meanMaxPower1;
   double _peakMaxPower0, _peakMaxPower1;
