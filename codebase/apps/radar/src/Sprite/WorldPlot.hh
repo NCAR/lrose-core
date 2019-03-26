@@ -86,7 +86,7 @@ public:
   
   WorldPlot& operator=(const WorldPlot &rhs);
   
-  // set world view
+  // set methods
   
   void set(int widthPixels,
            int heightPixels,
@@ -103,10 +103,16 @@ public:
            int nTicksIdeal,
            int textMargin);
   
-  void set(double xMinWorld,
-           double yMinWorld,
-           double xMaxWorld,
-           double yMaxWorld);
+  void setMargins(int leftMargin,
+                  int rightMargin,
+                  int topMargin,
+                  int bottomMargin,
+                  int textMargin);
+  
+  void setWorldLimits(double xMinWorld,
+                      double yMinWorld,
+                      double xMaxWorld,
+                      double yMaxWorld);
 
   // resize the plot
   

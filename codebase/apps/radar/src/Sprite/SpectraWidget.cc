@@ -372,7 +372,8 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
     _worldPressY = _zoomWorld.getYWorld(_mousePressY);
 
-    _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
+                              _worldReleaseX, _worldReleaseY);
     _setTransform(_zoomWorld.getTransform());
 
     // enable unzoom button

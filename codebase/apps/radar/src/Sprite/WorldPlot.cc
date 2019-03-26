@@ -229,10 +229,10 @@ void WorldPlot::set(int widthPixels,
 
 }
 
-void WorldPlot::set(double xMinWorld,
-                    double yMinWorld,
-                    double xMaxWorld,
-                    double yMaxWorld)
+void WorldPlot::setWorldLimits(double xMinWorld,
+                               double yMinWorld,
+                               double xMaxWorld,
+                               double yMaxWorld)
 {
 
   
@@ -1525,10 +1525,10 @@ void WorldPlot::_computeTransform()
   _transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
   _transform.translate(-_xMinWorld, -_yMinWorld);
     
-  _xMinWindow = getXWorld(0);
-  _yMinWindow = getYWorld(0);
-  _xMaxWindow = getXWorld(_widthPixels);
-  _yMaxWindow = getYWorld(_heightPixels);
+  _xMinWindow = getXWorld(_xPixOffset);
+  _yMinWindow = getYWorld(_yPixOffset);
+  _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
+  _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
 }
 

@@ -24,7 +24,7 @@
 /////////////////////////////////////////////////////////////
 // AScopePlot.hh
 //
-// Plotting for power in an ascope
+// Plotting for power vs range in an ascope
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //

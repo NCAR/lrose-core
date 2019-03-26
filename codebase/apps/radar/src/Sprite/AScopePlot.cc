@@ -21,6 +21,17 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+/////////////////////////////////////////////////////////////
+// AScopePlot.cc
+//
+// Plotting for power vs range in an ascope
+//
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// March 2019
+//
+///////////////////////////////////////////////////////////////
+
 #include <assert.h>
 #include <cmath>
 #include <iostream>
