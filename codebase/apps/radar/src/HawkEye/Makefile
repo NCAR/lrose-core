@@ -107,7 +107,6 @@ NORM_SRCS = \
 	SoloDefaultColorWrapper.cc \
 	SoloFunctions.cc \
 	SoloFunctionsModel.cc \
-	SpreadSheetController.cc \
 	SpreadSheetItem.cc \
 	SpreadSheetModel.cc \
 	SpreadSheetUtils.cc \
@@ -117,7 +116,6 @@ NORM_SRCS = \
 MOC_SRCS = \
 	BscanManager.cc \
 	BscanWidget.cc \
-	ContextEditingView.cc \
 	DisplayManager.cc \
 	FieldRenderer.cc \
 	PolarManager.cc \
@@ -132,13 +130,13 @@ MOC_SRCS = \
 	ClickableLabel.cc \
 	TextEdit.cc \
 	SpreadSheetView.cc \
+	SpreadSheetController.cc \
 	SpreadSheetDelegate.cc \
 	FunctionEditor.cc 
 
 MOC_OUTPUT = \
 	moc_BscanManager.cpp \
 	moc_BscanWidget.cpp \
-	moc_ContextEditingView.cpp \
 	moc_DisplayManager.cpp \
 	moc_FieldRenderer.cpp \
 	moc_PolarManager.cpp \
@@ -153,6 +151,7 @@ MOC_OUTPUT = \
 	moc_ClickableLabel.cpp \
 	moc_TextEdit.cpp \
 	moc_SpreadSheetView.cpp \
+	moc_SpreadSheetController.cpp \
 	moc_SpreadSheetDelegate.cpp \
 	moc_FunctionEditor.cpp
 
