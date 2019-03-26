@@ -94,7 +94,9 @@ private:
   ssize_t _pulseCount;
   bool _haveChan1;
 
-  int _nSamples;
+  int _nSamplesUsed;
+  int _nSamplesSkipped;
+  
   int _startGateRequested;
   int _nGates, _startGate;
   double _startRangeM, _gateSpacingM;

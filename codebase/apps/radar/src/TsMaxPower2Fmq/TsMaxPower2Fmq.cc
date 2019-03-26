@@ -171,7 +171,9 @@ TsMaxPower2Fmq::TsMaxPower2Fmq(int argc, char **argv)
   
   // initialize from params
 
-  _nSamples = _params.n_samples;
+  _nSamplesUsed = _params.n_samples_used;
+  _nSamplesSkipped = _params.n_samples_skipped;
+
   _startGateRequested = _params.start_gate;
   _nGates = 0;
 
@@ -217,7 +219,7 @@ int TsMaxPower2Fmq::Run ()
     
     // accumulate max power stats
     
-    for (int ipulse = 0; ipulse < _nSamples; ipulse++) {
+    for (int ipulse = 0; ipulse < _nSamplesUsed; ipulse++) {
       
       // read next pulse
       
@@ -251,6 +253,20 @@ int TsMaxPower2Fmq::Run ()
     if (_writeToFmq(xmlStr)) {
       return -1;
     }
+
+    // read, and skip, a number of samples
+    // this will save CPU
+
+    for (int ipulse = 0; ipulse < _nSamplesUsed; ipulse++) {
+      IwrfTsPulse *pulse = _getNextPulse();
+      if (pulse == NULL) {
+        if (_pulseReader->endOfFile()) {
+          return 0;
+        }
+        return -1;
+      }
+      delete pulse;
+    } // ipulse
 
   } // while
 
@@ -347,7 +363,7 @@ void TsMaxPower2Fmq::_saveCardinalValues(const IwrfTsPulse &pulse)
     _startTime = pulse.getFTime();
   }
 
-  if (_pulseCount == _nSamples / 2) {
+  if (_pulseCount == _nSamplesUsed / 2) {
     _midTime = pulse.getFTime();
     _midPrt = pulse.getPrt();
     _midEl = pulse.getEl();
@@ -428,13 +444,13 @@ void TsMaxPower2Fmq::_compileXmlStr(string &xmlStr)
   int midMSecs = (int) ((_midTime - midSecs) * 1000.0 + 0.5);
   double prf = 1.0 / _midPrt;
 
-  double dwellSecs = (_endTime - _startTime) * ((double) _nSamples / ((double) _nSamples - 1.0));
+  double dwellSecs = (_endTime - _startTime) * ((double) _nSamplesUsed / ((double) _nSamplesUsed - 1.0));
 
   xmlStr += TaXml::writeTime("time", 1, midSecs);
   xmlStr += TaXml::writeDouble("msecs", 1, midMSecs);
   xmlStr += TaXml::writeDouble("dwellSecs", 1, dwellSecs);
   xmlStr += TaXml::writeDouble("prf", 1, prf);
-  xmlStr += TaXml::writeInt("nSamples", 1, _nSamples);
+  xmlStr += TaXml::writeInt("nSamples", 1, _nSamplesUsed);
   xmlStr += TaXml::writeInt("startGate", 1, _startGate);
   xmlStr += TaXml::writeInt("nGates", 1, _nGates);
   xmlStr += TaXml::writeDouble("el", 1, _midEl);
@@ -562,22 +578,22 @@ double TsMaxPower2Fmq::_computeVel(const vector<RadarComplex_t> &iq)
   
 {
 
-  if ((int) iq.size() != _nSamples) {
+  if ((int) iq.size() != _nSamplesUsed) {
     return -9999.0;
   }
 
   // put IQ data into array form
 
   TaArray<RadarComplex_t> IQ_;
-  RadarComplex_t *IQ = IQ_.alloc(_nSamples);
-  for (int ii = 0; ii < _nSamples; ii++) {
+  RadarComplex_t *IQ = IQ_.alloc(_nSamplesUsed);
+  for (int ii = 0; ii < _nSamplesUsed; ii++) {
     IQ[ii] = iq[ii];
   }
 
   // compute lag1 covariance
 
   RadarComplex_t lag1 =
-    RadarComplex::meanConjugateProduct(IQ + 1, IQ, _nSamples - 1);
+    RadarComplex::meanConjugateProduct(IQ + 1, IQ, _nSamplesUsed - 1);
 
   // compute phase
 

@@ -69,9 +69,15 @@ commentdef {
 };
 
 paramdef int {
-  p_default = 1000;
+  p_default = 100;
   p_descr = "Number of pulse samples to be used in computing stats.";
-} n_samples;
+} n_samples_used;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Number of pulse samples to be skipped.";
+  p_help = "Skipping some samples lowers the CPU usage.";
+} n_samples_skipped;
 
 paramdef int {
   p_default = 0;

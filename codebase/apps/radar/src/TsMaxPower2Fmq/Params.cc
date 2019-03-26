@@ -670,16 +670,28 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'n_samples'
+    // Parameter 'n_samples_used'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_samples");
+    tt->param_name = tdrpStrDup("n_samples_used");
     tt->descr = tdrpStrDup("Number of pulse samples to be used in computing stats.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &n_samples - &_start_;
-    tt->single_val.i = 1000;
+    tt->val_offset = (char *) &n_samples_used - &_start_;
+    tt->single_val.i = 100;
+    tt++;
+    
+    // Parameter 'n_samples_skipped'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("n_samples_skipped");
+    tt->descr = tdrpStrDup("Number of pulse samples to be skipped.");
+    tt->help = tdrpStrDup("Skipping some samples lowers the CPU usage.");
+    tt->val_offset = (char *) &n_samples_skipped - &_start_;
+    tt->single_val.i = 400;
     tt++;
     
     // Parameter 'start_gate'

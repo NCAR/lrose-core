@@ -381,7 +381,9 @@ public:
 
   tdrp_bool_t use_secondary_georeference;
 
-  int n_samples;
+  int n_samples_used;
+
+  int n_samples_skipped;
 
   int start_gate;
 
@@ -408,7 +410,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[23];
+  mutable TDRPtable _table[24];
 
   const char *_className;
 
