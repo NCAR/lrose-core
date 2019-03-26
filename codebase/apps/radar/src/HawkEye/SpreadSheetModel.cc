@@ -15,11 +15,17 @@ SpreadSheetModel::SpreadSheetModel()
 
 }
 
-SpreadSheetModel::SpreadSheetModel(RadxRay *closestRay)
+SpreadSheetModel::SpreadSheetModel(RadxRay *closestRay, RadxVol dataVolume)
 {
   _closestRay = closestRay;
+  if (_closestRay == NULL) 
+    cout << "in SpreadSheetModel, closestRay is NULL" << endl;
+  else
+   cout << "in SpreadSheetModel, closestRay is NOT  NULL" << endl;
+  _vol = dataVolume;
 }
 
+/*
 //////////////////////////////////////////////////                                                             
 // set up read                                                                                                 
 void SpreadSheetModel::_setupVolRead(RadxFile *file)
@@ -43,12 +49,12 @@ void SpreadSheetModel::_setupVolRead(RadxFile *file)
   //
 
 }
-
+*/
 
 ///////////////////////////// 
 // get data in archive mode
 // returns 0 on success, -1 on failure
-
+/*
 int SpreadSheetModel::_getArchiveData(string inputPath)
 {
 
@@ -110,32 +116,23 @@ void SpreadSheetModel::initData(string fileName)
 {
   _getArchiveData(fileName);
 }
+*/
 
 vector<string> SpreadSheetModel::getFields()
 {
   vector<string> fieldNames;
   if (_closestRay != NULL) {
-    //   ray->loadFieldNameMap();
-    /*
-map<string, int>::iterator it;
-
-for ( it = symbolTable.begin(); it != symbolTable.end(); it++ )
-{
-std::cout << it->first  // string (key)
-<< ':'
-<< it->second   // string's value 
-<< std::endl ;
-}
-    */
+    _closestRay->loadFieldNameMap();
 
     RadxRay::FieldNameMap fieldNameMap = _closestRay->getFieldNameMap();
     RadxRay::FieldNameMapIt it;
     for (it = fieldNameMap.begin(); it != fieldNameMap.end(); it++) {
-      //fieldNames.push_back(it->
+      fieldNames.push_back(it->first);
       cout << it->first << ':' << it->second << endl;
     }
   } else {
-    vector<string> fieldNames = _vol.getUniqueFieldNameList();
+    _vol.loadFieldsFromRays();
+    fieldNames = _vol.getUniqueFieldNameList();
   }
   return fieldNames;
 }

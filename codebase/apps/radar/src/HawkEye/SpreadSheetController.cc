@@ -85,6 +85,7 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
 vector<string>  SpreadSheetController::getFieldNames()
 {
   vector<string> names = _currentModel->getFields();
+  cout << " In SpreadSheetController::getFieldNames, there are " << names.size() << " field names" << endl;
   return names;
 }
 
@@ -114,7 +115,7 @@ void  SpreadSheetController::needDataForField(string fieldName, int r, int c) {
 void SpreadSheetController::open(string fileName)
 {
 
-  _currentModel->initData(fileName);
+  // _currentModel->initData(fileName);
 
   // signal the view to pull the data
   // for each fieldName ...

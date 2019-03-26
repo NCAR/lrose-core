@@ -215,7 +215,7 @@ void SpreadSheetView::init()
   //  emit a signal to the controller to get the data for display
   emit needFieldNames();
   
-  int rows;
+  /*  int rows;
   int cols;
 
   cols = 5; 
@@ -262,7 +262,7 @@ void SpreadSheetView::init()
             this, &SpreadSheetView::updateTextEdit);
 
     setWindowTitle(tr("Spreadsheet"));
-
+  */
     //setupSoloFunctions();
 }
 
@@ -998,12 +998,13 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
   // fill everything that needs the fieldNames ...
 
     table->setColumnCount(fieldNames.size());
+    cout << "In SpreadSheetView::fieldNamesProvided, there are " << fieldNames.size() << " field namess" << endl;
 
     int c = 0;
     vector<string>::iterator it; 
     for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
       QString the_name(QString::fromStdString(*it));
-      cerr << *it << endl;
+      cout << *it << endl;
       table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
        
       emit needDataForField(*it, useless, c);

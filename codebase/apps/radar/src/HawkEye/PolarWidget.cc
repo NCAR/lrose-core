@@ -601,39 +601,8 @@ void PolarWidget::_performRendering()
 
 }
 
+
 /*
-void PolarWidget::ShowContextMenu(const QPoint &pos)
-{
-  QMenu contextMenu("Context menu", this);
-
-  QAction action1("Cancel", this);
-  connect(&action1, SIGNAL(triggered()), this, SLOT(contextMenuCancel()));
-  contextMenu.addAction(&action1);
-
-  QAction action3("Parameters + Colors", this);
-  connect(&action3, SIGNAL(triggered()), this, SLOT(contextMenuParameterColors()));
-  contextMenu.addAction(&action3);
-
-  QAction action4("View", this);
-  connect(&action4, SIGNAL(triggered()), this, SLOT(contextMenuView()));
-  contextMenu.addAction(&action4);
-
-  QAction action5("Editor", this);
-  connect(&action5, SIGNAL(triggered()), this, SLOT(contextMenuEditor()));
-  contextMenu.addAction(&action5);
-
-  QAction action6("Examine", this);
-  connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine()));
-  contextMenu.addAction(&action6);
-
-  QAction action7("Data Widget", this);
-  connect(&action7, SIGNAL(triggered()), this, SLOT(contextMenuDataWidget()));
-  contextMenu.addAction(&action7);
-
-  contextMenu.exec(this->mapToGlobal(pos));
-}
-
-
 // slots for context editing; create and show the associated modeless dialog and return                                   
 
 void PolarWidget::contextMenuCancel()
@@ -676,62 +645,5 @@ void PolarWidget::contextMenuDataWidget()
   informationMessage();
 
   //  notImplemented();                                                                                                   
-}
-/*
-void PolarWidget::ExamineEdit(const RadxRay *closestRay) {
-
-  RadxRay *closestRayCopy = new RadxRay(*closestRay);
-
-  // create the view                                                                                                           
-  SpreadSheetView *sheetView;
-  sheetView = new SpreadSheetView(this);
-
-  // create the model                                                                                                          
-  SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
-
-  // create the controller                                                                                                     
-  SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
-
-  // finish the other connections ..                                                                                           
-  //sheetView->addController(sheetController);
-  // model->setController(sheetController);                                                                                    
-
-
-  sheetView->init();
-  sheetView->show();
-  sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
-}
-
-void PolarWidget::notImplemented()
-{
-  cerr << "inside notImplemented() ... " << endl;
-
-  QErrorMessage errorMessageDialog; //  = new QErrorMessage(this);
-  QLabel informationLabel; //  = new QLabel();
-
-  errorMessageDialog.showMessage("This option is not implemented yet.");
-  QLabel errorLabel;
-  int frameStyle = QFrame::Sunken | QFrame::Panel;
-  errorLabel.setFrameStyle(frameStyle);
-  errorLabel.setText("If the box is unchecked, the message "
-		     "won't appear again.");
-
-  cerr << "exiting notImplemented() " << endl;
-
-}
-
-void PolarWidget::informationMessage()
-{
-  QMessageBox::StandardButton reply;
-  reply = QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
-  if (reply == QMessageBox::Ok) {
-    //informationLabel->setText("OK");
-    //    if (_debug) 
-      cout << "Not implemented reply: OK" << endl;
-  } else {
-    //informationLabel->setText("Escape");
-    //if (_debug) 
-      cout << "Not implemented reply: Escape" << endl;
-  }
 }
 */

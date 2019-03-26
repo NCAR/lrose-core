@@ -121,6 +121,8 @@ public:
   
   int loadArchiveFileList();
 
+  //  const RadxVol getDataVolume();
+
   /*
   void ShowContextMenu(const QPoint &pos);
   void ExamineEdit(const RadxRay *closestRay);
@@ -315,6 +317,8 @@ private:
   // override howto
 
   void _howto();
+
+  //  SpreadSheetModel *_radarDataModel;
 
 private slots:
 

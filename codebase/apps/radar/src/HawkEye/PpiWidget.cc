@@ -1102,7 +1102,9 @@ void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
   sheetView = new SpreadSheetView(this);
 
   // create the model
-  SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
+
+  // SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
+  SpreadSheetModel *model = new SpreadSheetModel(NULL, _vol); // closestRayCopy, _vol);
 
   // create the controller
   SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
@@ -1138,8 +1140,11 @@ void PpiWidget::contextMenuExamine()
   ExamineEdit(closestRay);
 }
 
-void PpiWidget::ShowContextMenu(const QPoint &pos)
+void PpiWidget::ShowContextMenu(const QPoint &pos, RadxVol &vol)
 {
+
+  _vol = vol;
+
   QMenu contextMenu("Context menu", this);
   /*
   QAction action1("Cancel", this);

@@ -13,9 +13,9 @@ class SpreadSheetModel
 public:
 
   SpreadSheetModel();
-  SpreadSheetModel(RadxRay *closestRay);
+  SpreadSheetModel(RadxRay *closestRay, RadxVol dataVolume);
   
-  void initData(string fileName);
+  //void initData(string fileName);
 
   // return lists of data
   vector<double> getData(string fieldName);
@@ -25,9 +25,10 @@ public:
   RadxVol _vol;
   RadxRay *_closestRay;
 
-
+  /*
   void _setupVolRead(RadxFile *file);
   int _getArchiveData(string inputPath);
+  */
 };
 
 #endif // SPREADSHEETMODEL_H
