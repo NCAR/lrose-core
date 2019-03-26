@@ -257,7 +257,7 @@ int TsMaxPower2Fmq::Run ()
     // read, and skip, a number of samples
     // this will save CPU
 
-    for (int ipulse = 0; ipulse < _nSamplesUsed; ipulse++) {
+    for (int ipulse = 0; ipulse < _nSamplesSkipped; ipulse++) {
       IwrfTsPulse *pulse = _getNextPulse();
       if (pulse == NULL) {
         if (_pulseReader->endOfFile()) {
