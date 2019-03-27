@@ -361,7 +361,6 @@ int TsStatusMonitor::_runRealtime()
     // read next pulse
 
     IwrfTsPulse *pulse = _pulseReader->getNextPulse();
-    _pulseLatestTime = pulse->getTime();
 
     if (pulse == NULL) {
       
@@ -379,6 +378,7 @@ int TsStatusMonitor::_runRealtime()
       
       // handle this pulse
       
+      _pulseLatestTime = pulse->getTime();
       if (_handlePulseRealtime(*pulse)) {
         delete pulse;
         return -1;
