@@ -1296,6 +1296,10 @@ public:
   
   size_t getNRaysTransition() const;
 
+  /// Get number of non-transition rays in volume.
+  
+  size_t getNRaysNonTransition() const;
+
   /// Get number of fields in volume.
 
   inline size_t getNFields() const { return _fields.size(); }
@@ -1841,6 +1845,10 @@ private:
   // not required in serialization
 
   vector<bool> _transitionFlags;
+
+  // number of transition rays
+
+  size_t _nRaysTransition;
   
   // pseudo RHIs
   // not required in serialization
@@ -1870,6 +1878,7 @@ private:
   void _constrainBySweepIndex(vector<int> &sweepIndexes);
   void _checkForIndexedRays(const RadxSweep *sweep) const;
   double _computeRoundedAngleRes(double res) const;
+  void _computeNRaysTransition();
   void _findTransitions(int nRaysMargin);
   void _setPredomSweepModeFromAngles() const;
   void _augmentSweepFields(size_t target, size_t source);

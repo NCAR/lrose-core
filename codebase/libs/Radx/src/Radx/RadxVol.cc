@@ -448,6 +448,15 @@ void RadxVol::addRay(RadxRay *ray)
   addToPacking(ray->getNGates());
   copyRangeGeom(*ray);
 
+  // add to transitions
+
+  if (ray->getAntennaTransition()) {
+    _nRaysTransition++;
+    if (_nRaysTransition > _rays.size()) {
+      _computeNRaysTransition();
+    }
+  }
+
 }
 
 //////////////////////////////////////////////////////////////
@@ -1468,6 +1477,7 @@ void RadxVol::clearRays()
     RadxRay::deleteIfUnused(_rays[ii]);
   }
   _rays.clear();
+  _nRaysTransition = 0;
 
 }
 
@@ -1895,6 +1905,7 @@ void RadxVol::filterOnPredomGeom()
   // replace rays vector
 
   _rays = good;
+  _computeNRaysTransition();
 
   // set geometry
 
@@ -2056,6 +2067,7 @@ void RadxVol::removeBadRays(vector<RadxRay *> &goodRays,
     RadxRay::deleteIfUnused(badRays[ii]);
   }
   _rays = goodRays;
+  _computeNRaysTransition();
 
   // load up the volume and sweep information from the rays
 
@@ -2077,6 +2089,7 @@ void RadxVol::clearTransitionFlagOnAllRays()
       ray->setAntennaTransition(false);
     }
   }
+  _computeNRaysTransition();
 
   // load up the volume and sweep information from the rays
 
@@ -2092,17 +2105,38 @@ size_t RadxVol::getNRaysTransition() const
 
 {
 
-  size_t count = 0;
+  if (_nRaysTransition > _rays.size()) {
+    return _rays.size();
+  } else {
+    return _nRaysTransition;
+  }
 
+}
+
+///////////////////////////////////////////////////////////
+/// Get number of non-transition rays
+
+size_t RadxVol::getNRaysNonTransition() const
+
+{
+
+  return _rays.size() - getNRaysTransition();
+
+}
+
+///////////////////////////////////////////////////////////
+/// Compute the number of transition rays
+
+void RadxVol::_computeNRaysTransition()
+
+{
+  _nRaysTransition = 0;
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     RadxRay *ray = _rays[iray];
     if (ray->getAntennaTransition()) {
-      count++;
+      _nRaysTransition++;
     }
   }
-
-  return count;
-
 }
 
 ///////////////////////////////////////////////////////////
@@ -2126,6 +2160,7 @@ void RadxVol::removeTransitionRays()
   }
 
   _rays = goodRays;
+  _computeNRaysTransition();
 
   // load up the volume and sweep information from the rays
 
@@ -2182,6 +2217,7 @@ void RadxVol::removeTransitionRays(int nRaysMargin)
   // save to _rays
 
   _rays = goodRays;
+  _computeNRaysTransition();
 
   // load up current information
 
@@ -2634,6 +2670,7 @@ void RadxVol::reorderSweepsAscendingAngle()
     // copy sorted rays to main array
     
     _rays = sortedRays;
+    _computeNRaysTransition();
     checkRayTimesIncrease();
     
     // load up the sweep information from the rays
@@ -3354,7 +3391,8 @@ void RadxVol::_adjustSweepLimitsRhi()
     }
 
     // find transition location
-    // find min or max elevation depending on whether this sweep is going up or down
+    // find min or max elevation depending on whether
+    // this sweep is going up or down
     // we will use this inflection point as the transition to the next sweep
 
     size_t irayTrans = 0;
@@ -4173,6 +4211,7 @@ void RadxVol::sortSweepsByFixedAngle()
   // replace original with sorted
 
   _rays = sortedRays;
+  _computeNRaysTransition();
 
   // load sweep info from rays
 
@@ -4230,6 +4269,7 @@ void RadxVol::sortSweepRaysByAzimuth()
   // set _rays to sorted vector
 
   _rays = sortedRays;
+  _computeNRaysTransition();
 
 }
 
@@ -4440,6 +4480,7 @@ void RadxVol::_constrainBySweepIndex(vector<int> &sweepIndexes)
     }
   }
   _rays = goodRays;
+  _computeNRaysTransition();
 
   // load up sweep info from the revised list of rays
 
@@ -4464,6 +4505,7 @@ void RadxVol::removeRaysWithDataAllMissing()
     }
   }
   _rays = goodRays;
+  _computeNRaysTransition();
 
   // load up sweep info from the revised list of rays
 
@@ -5317,6 +5359,7 @@ void RadxVol::combineSweepsAtSameFixedAngleAndGeom
   } // ii
 
   _rays = keepRays;
+  _computeNRaysTransition();
 
   // reload the sweep info
 
