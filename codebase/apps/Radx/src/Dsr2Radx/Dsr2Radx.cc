@@ -743,6 +743,9 @@ int Dsr2Radx::_processVol()
       notEnoughRays = true;
     }
   }
+  if ((int) _vol.getNRaysTransition() < _params.min_non_transition_rays_in_vol) {
+    notEnoughRays = true;
+  }
   if (notEnoughRays) {
     cerr << "WARNING - Dsr2Radx::_processVol()" << endl;
     cerr << "  Too few rays: " << _vol.getNRays() << endl;

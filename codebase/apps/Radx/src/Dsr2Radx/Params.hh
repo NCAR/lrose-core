@@ -640,6 +640,8 @@ public:
 
   int min_rays_per_rhi_vol;
 
+  int min_non_transition_rays_in_vol;
+
   tdrp_bool_t debug_auto_detection;
 
   output_field_t *_output_fields;
@@ -751,7 +753,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[172];
+  mutable TDRPtable _table[173];
 
   const char *_className;
 

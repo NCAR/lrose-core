@@ -534,7 +534,7 @@ paramdef boolean {
 
 commentdef {
   p_header = "OPTION TO ADJUST SWEEP LIMITS USING FIXED AND MEASURED ANGLES";
-  p_text = "Sometimes the transitions from one fixed angle to another are not accurately described by the scan flags, and as a result rays are not correctly assigned to the sweeps. This option goes through the volume in ray order, and adjusts the way rays are associated with each sweep. It does this by comparing the actual angle with the fixed angle, and minimizes the angular difference at the transition from one sweep to the next.";
+  p_text = "Sometimes the transitions from one fixed angle to another are not accurately described by the scan flags, and as a result rays are not correctly assigned to the sweeps. This option goes through the volume in ray order, and adjusts the way rays are associated with each sweep. It does this by comparing the actual angle with the fixed angle, and minimizes the angular difference at the transition from one sweep to the next. If you use this section, then 'filter_antenna_transitions' should be set to FALSE.";
 }
 
 paramdef boolean {
@@ -715,6 +715,12 @@ paramdef int {
   p_descr = "Min number of rays per RHI volume.";
   p_help = "Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume.";
 } min_rays_per_rhi_vol;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "The minimum number of non-transition rays in a volume.";
+  p_help = "This is optionally used to filter out small transition volumes between other volumes. If most of the volume is filled with transitions, you probably do not want to save the volume. This is only relevant if 'clear_transition_flag_on_all_rays' is FALSE and 'filter_antenna_transitions' is FALSE.";
+} min_non_transition_rays_in_vol;
 
 paramdef boolean {
   p_default = FALSE;
