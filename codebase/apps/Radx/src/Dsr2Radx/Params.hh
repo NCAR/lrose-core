@@ -464,8 +464,6 @@ public:
 
   int procmap_register_interval;
 
-  tdrp_bool_t use_legacy_processing;
-
   char* input_fmq_url;
 
   tdrp_bool_t seek_to_end_of_input;
@@ -614,7 +612,9 @@ public:
 
   int nsecs_per_volume;
 
-  int min_rays_in_vol;
+  int min_rays_per_ppi_vol;
+
+  int min_rays_per_rhi_vol;
 
   int max_rays_in_vol;
 
@@ -635,12 +635,6 @@ public:
   double min_el_change_rhi;
 
   int max_az_change_per_sweep;
-
-  int min_rays_per_ppi_vol;
-
-  int min_rays_per_rhi_vol;
-
-  int min_non_transition_rays_in_vol;
 
   tdrp_bool_t debug_auto_detection;
 
@@ -753,7 +747,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[173];
+  mutable TDRPtable _table[170];
 
   const char *_className;
 

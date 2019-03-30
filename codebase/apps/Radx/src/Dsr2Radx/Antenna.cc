@@ -398,9 +398,15 @@ void Antenna::_handlePpi(double delta_az, bool &endOfVol)
   }
   
   if (_mode == MODE_RHI) {
-    endOfVol = true;
-    if (_params.debug_auto_detection) {
-      cerr << "===========>> RHI - END OF VOL <<==========" << endl;
+    if (_nRaysVol < _params.min_rays_per_rhi_vol) {
+      if (_params.debug_auto_detection) {
+	cerr << "===>> Cancel RHI end-of-vol - too few rays <<===" << endl;
+      }
+    } else {
+      endOfVol = true;
+      if (_params.debug_auto_detection) {
+        cerr << "===========>> RHI - END OF VOL <<==========" << endl;
+      }
     }
   }
   

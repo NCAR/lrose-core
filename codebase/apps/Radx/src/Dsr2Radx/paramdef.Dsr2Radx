@@ -39,11 +39,11 @@ paramdef int {
   p_help = "The auto_restart script expects registration at this interval. If registration does not occur in twice this time, the process is killed and restarted. Therefore, if writing the output files takes longer than 60 seconds because the files are large and compressed, then increase this interval, to say 120 secs.";
 } procmap_register_interval;
 
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to use legacy processing - reading the DsRadarQueue directly.";
-  p_help = "This will be the default until the new IwrfMomReader code is fully tested and debugger. Set to FALSE to use the new IwrfMomReader code.";
-} use_legacy_processing;
+// paramdef boolean {
+//   p_default = TRUE;
+//   p_descr = "Option to use legacy processing - reading the DsRadarQueue directly.";
+//   p_help = "This will be the default until the new IwrfMomReader code is fully tested and debugger. Set to FALSE to use the new IwrfMomReader code.";
+// } use_legacy_processing;
 
 commentdef {
   p_header = "DATA INPUT";
@@ -632,11 +632,23 @@ paramdef int {
   p_help = "Applies to ELAPSED_TIME mode - see 'end_of_volume_decision'";
 } nsecs_per_volume;
 
+// paramdef int {
+//   p_default = 1;
+//   p_descr = "The minimum number of rays in a volume.";
+//   p_help = "This filters out small unwanted bits of data between genuine volumes.";
+// } min_rays_in_vol;
+
 paramdef int {
-  p_default = 1;
-  p_descr = "The minimum number of rays in a volume.";
-  p_help = "This filters out small unwanted bits of data between genuine volumes.";
-} min_rays_in_vol;
+  p_default = 180;
+  p_descr = "Min number of non-transition rays per PPI volume.";
+  p_help = "Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume.";
+} min_rays_per_ppi_vol;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Min number of non-transition rays per RHI volume.";
+  p_help = "Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume.";
+} min_rays_per_rhi_vol;
 
 paramdef int {
   p_default = 20000;
@@ -703,24 +715,6 @@ paramdef int {
   p_descr = "Maximum azimuth change per sweep (deg).";
   p_help = "If the sweep elevation has not changed by the time the azimuth has changed by this number of degrees, an end-of-volume condition is triggered. This is used to handle the single-elevation surveillance case in which the antenna scans in PPI at a single elevation angle."; 
 } max_az_change_per_sweep;
-
-paramdef int {
-  p_default = 180;
-  p_descr = "Min number of rays per PPI volume.";
-  p_help = "Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume.";
-} min_rays_per_ppi_vol;
-
-paramdef int {
-  p_default = 30;
-  p_descr = "Min number of rays per RHI volume.";
-  p_help = "Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume.";
-} min_rays_per_rhi_vol;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "The minimum number of non-transition rays in a volume.";
-  p_help = "This is optionally used to filter out small transition volumes between other volumes. If most of the volume is filled with transitions, you probably do not want to save the volume. This is only relevant if 'clear_transition_flag_on_all_rays' is FALSE and 'filter_antenna_transitions' is FALSE.";
-} min_non_transition_rays_in_vol;
 
 paramdef boolean {
   p_default = FALSE;

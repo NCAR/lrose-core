@@ -231,12 +231,12 @@ int Dsr2Radx::Run ()
   
   // check for legacy processing
 
-  if (_params.use_legacy_processing) {
-    Legacy *legacy = new Legacy(_progName, _params);
-    int iret = legacy->Run();
-    delete legacy;
-    return iret;
-  }
+  // if (_params.use_legacy_processing) {
+  //   Legacy *legacy = new Legacy(_progName, _params);
+  //   int iret = legacy->Run();
+  //   delete legacy;
+  //   return iret;
+  // }
 
   // normal processing
   // register with procmap
@@ -336,8 +336,7 @@ int Dsr2Radx::_run ()
     RadxRay *ray = _reader->readNextRay();
     if (ray == NULL) {
       // read error - no data
-      if (_nRaysRead > _params.min_rays_in_vol &&
-	  _params.write_end_of_vol_when_data_stops) {
+      if (_params.write_end_of_vol_when_data_stops) {
         _processEndOfVol();
       }
       continue;
@@ -735,16 +734,13 @@ int Dsr2Radx::_processVol()
   
   bool notEnoughRays = false;
   if (_scanMode == SCAN_MODE_RHI) {
-    if ((int) _vol.getNRays() < _params.min_rays_per_rhi_vol) {
+    if ((int) _vol.getNRaysNonTransition() < _params.min_rays_per_rhi_vol) {
       notEnoughRays = true;
     }
   } else {
-    if ((int) _vol.getNRays() < _params.min_rays_per_ppi_vol) {
+    if ((int) _vol.getNRaysNonTransition() < _params.min_rays_per_ppi_vol) {
       notEnoughRays = true;
     }
-  }
-  if ((int) _vol.getNRaysTransition() < _params.min_non_transition_rays_in_vol) {
-    notEnoughRays = true;
   }
   if (notEnoughRays) {
     cerr << "WARNING - Dsr2Radx::_processVol()" << endl;
@@ -1043,18 +1039,19 @@ int Dsr2Radx::_doWrite()
     
     // check nrays in vol for volume-type formats
 
-    if (dset.format == Params::OUTPUT_FORMAT_UF ||
-        dset.format == Params::OUTPUT_FORMAT_CFRADIAL) {
-      if ((int) _vol.getNRays() < _params.min_rays_in_vol) {
-        if (_params.debug) {
-          cerr << "NOTE - Dsr2Radx::_doWrite(), nrays: " << _vol.getNRays() << endl;
-          cerr << "  dataType: " << dataType << endl;
-          cerr << "  outputDir: " << outputDir << endl;
-          cerr << "  too few rays, will not be saved" << endl;
-        }
-        continue;
-      }
-    }
+    // if (dset.format == Params::OUTPUT_FORMAT_UF ||
+    //     dset.format == Params::OUTPUT_FORMAT_CFRADIAL) {
+    //   if ((int) _vol.getNRays() < _params.min_rays_in_vol) {
+    //     if (_params.debug) {
+    //       cerr << "NOTE - Dsr2Radx::_doWrite(), nrays: " 
+    //            << _vol.getNRays() << endl;
+    //       cerr << "  dataType: " << dataType << endl;
+    //       cerr << "  outputDir: " << outputDir << endl;
+    //       cerr << "  too few rays, will not be saved" << endl;
+    //     }
+    //     continue;
+    //   }
+    // }
 
     // write out
     

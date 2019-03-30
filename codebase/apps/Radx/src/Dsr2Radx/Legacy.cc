@@ -310,8 +310,7 @@ int Legacy::_run ()
 
     if (_readMsg(radarQueue, radarMsg)) {
       // timed out
-      if (_nRaysRead > _params.min_rays_in_vol &&
-	  _params.write_end_of_vol_when_data_stops) {
+      if (_params.write_end_of_vol_when_data_stops) {
         _endOfVol = true;
       }
       if (!_endOfVol) {
@@ -610,11 +609,11 @@ int Legacy::_processVol()
   
   bool notEnoughRays = false;
   if (_scanMode == SCAN_MODE_RHI) {
-    if ((int) _vol.getNRays() < _params.min_rays_per_rhi_vol) {
+    if ((int) _vol.getNRaysNonTransition() < _params.min_rays_per_rhi_vol) {
       notEnoughRays = true;
     }
   } else {
-    if ((int) _vol.getNRays() < _params.min_rays_per_ppi_vol) {
+    if ((int) _vol.getNRaysNonTransition() < _params.min_rays_per_ppi_vol) {
       notEnoughRays = true;
     }
   }
@@ -867,18 +866,18 @@ int Legacy::_doWrite()
     
     // check nrays in vol for volume-type formats
 
-    if (dset.format == Params::OUTPUT_FORMAT_UF ||
-        dset.format == Params::OUTPUT_FORMAT_CFRADIAL) {
-      if ((int) _vol.getNRays() < _params.min_rays_in_vol) {
-        if (_params.debug) {
-          cerr << "NOTE - Legacy::_doWrite(), nrays: " << _vol.getNRays() << endl;
-          cerr << "  dataType: " << dataType << endl;
-          cerr << "  outputDir: " << outputDir << endl;
-          cerr << "  too few rays, will not be saved" << endl;
-        }
-        continue;
-      }
-    }
+    // if (dset.format == Params::OUTPUT_FORMAT_UF ||
+    //     dset.format == Params::OUTPUT_FORMAT_CFRADIAL) {
+    //   if ((int) _vol.getNRays() < _params.min_rays_in_vol) {
+    //     if (_params.debug) {
+    //       cerr << "NOTE - Legacy::_doWrite(), nrays: " << _vol.getNRays() << endl;
+    //       cerr << "  dataType: " << dataType << endl;
+    //       cerr << "  outputDir: " << outputDir << endl;
+    //       cerr << "  too few rays, will not be saved" << endl;
+    //     }
+    //     continue;
+    //   }
+    // }
 
     // write out
 

@@ -608,18 +608,6 @@
     tt->single_val.i = 60;
     tt++;
     
-    // Parameter 'use_legacy_processing'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_legacy_processing");
-    tt->descr = tdrpStrDup("Option to use legacy processing - reading the DsRadarQueue directly.");
-    tt->help = tdrpStrDup("This will be the default until the new IwrfMomReader code is fully tested and debugger. Set to FALSE to use the new IwrfMomReader code.");
-    tt->val_offset = (char *) &use_legacy_processing - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1801,16 +1789,28 @@
     tt->single_val.i = 60;
     tt++;
     
-    // Parameter 'min_rays_in_vol'
+    // Parameter 'min_rays_per_ppi_vol'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("min_rays_in_vol");
-    tt->descr = tdrpStrDup("The minimum number of rays in a volume.");
-    tt->help = tdrpStrDup("This filters out small unwanted bits of data between genuine volumes.");
-    tt->val_offset = (char *) &min_rays_in_vol - &_start_;
-    tt->single_val.i = 1;
+    tt->param_name = tdrpStrDup("min_rays_per_ppi_vol");
+    tt->descr = tdrpStrDup("Min number of non-transition rays per PPI volume.");
+    tt->help = tdrpStrDup("Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume.");
+    tt->val_offset = (char *) &min_rays_per_ppi_vol - &_start_;
+    tt->single_val.i = 180;
+    tt++;
+    
+    // Parameter 'min_rays_per_rhi_vol'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_rays_per_rhi_vol");
+    tt->descr = tdrpStrDup("Min number of non-transition rays per RHI volume.");
+    tt->help = tdrpStrDup("Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume.");
+    tt->val_offset = (char *) &min_rays_per_rhi_vol - &_start_;
+    tt->single_val.i = 30;
     tt++;
     
     // Parameter 'max_rays_in_vol'
@@ -1942,42 +1942,6 @@
     tt->help = tdrpStrDup("If the sweep elevation has not changed by the time the azimuth has changed by this number of degrees, an end-of-volume condition is triggered. This is used to handle the single-elevation surveillance case in which the antenna scans in PPI at a single elevation angle.");
     tt->val_offset = (char *) &max_az_change_per_sweep - &_start_;
     tt->single_val.i = 540;
-    tt++;
-    
-    // Parameter 'min_rays_per_ppi_vol'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("min_rays_per_ppi_vol");
-    tt->descr = tdrpStrDup("Min number of rays per PPI volume.");
-    tt->help = tdrpStrDup("Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume.");
-    tt->val_offset = (char *) &min_rays_per_ppi_vol - &_start_;
-    tt->single_val.i = 180;
-    tt++;
-    
-    // Parameter 'min_rays_per_rhi_vol'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("min_rays_per_rhi_vol");
-    tt->descr = tdrpStrDup("Min number of rays per RHI volume.");
-    tt->help = tdrpStrDup("Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume.");
-    tt->val_offset = (char *) &min_rays_per_rhi_vol - &_start_;
-    tt->single_val.i = 30;
-    tt++;
-    
-    // Parameter 'min_non_transition_rays_in_vol'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("min_non_transition_rays_in_vol");
-    tt->descr = tdrpStrDup("The minimum number of non-transition rays in a volume.");
-    tt->help = tdrpStrDup("This is optionally used to filter out small transition volumes between other volumes. If most of the volume is filled with transitions, you probably do not want to save the volume. This is only relevant if 'clear_transition_flag_on_all_rays' is FALSE and 'filter_antenna_transitions' is FALSE.");
-    tt->val_offset = (char *) &min_non_transition_rays_in_vol - &_start_;
-    tt->single_val.i = 0;
     tt++;
     
     // Parameter 'debug_auto_detection'
