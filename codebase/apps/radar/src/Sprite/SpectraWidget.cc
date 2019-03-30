@@ -119,25 +119,36 @@ void SpectraWidget::configureAxes(double min_amplitude,
   
   // set bottom margin - increase this if we are plotting the distance labels and ticks
   
-  int bottomMargin = _params.spectra_bottom_margin;
+  _fullWorld.setWindowGeom(width() / 3, height() / 3,
+                           50, 50);
 
-  _fullWorld.set(width() / 3, height() / 3,
-                 _params.spectra_left_margin,
-                 _params.spectra_right_margin,
-                 _params.spectra_top_margin,
-                 bottomMargin,
-                 _colorScaleWidth,
-                 0.0,
-                 _minAmplitude,
-                 _timeSpanSecs,
-                 _maxAmplitude,
-                 _params.spectra_axis_tick_len,
-                 _params.spectra_n_ticks_ideal,
-                 _params.spectra_text_margin);
+  _fullWorld.setWorldLimits(0.0, _minAmplitude,
+                            _timeSpanSecs, _maxAmplitude);
 
-  _fullWorld.setXPixOffset(50);
-  _fullWorld.setYPixOffset(50);
-  
+  _fullWorld.setLeftMargin(_params.spectra_left_margin);
+  _fullWorld.setRightMargin(_params.spectra_right_margin);
+  _fullWorld.setTopMargin(_params.spectra_top_margin);
+  _fullWorld.setBottomMargin(_params.spectra_bottom_margin);
+  _fullWorld.setTitleTextMargin(_params.spectra_title_text_margin);
+  _fullWorld.setLegendTextMargin(_params.spectra_legend_text_margin);
+  _fullWorld.setAxisTextMargin(_params.spectra_axis_text_margin);
+
+  _fullWorld.setColorScaleWidth(0);
+
+  _fullWorld.setXAxisTickLen(_params.spectra_axis_tick_len);
+  _fullWorld.setXNTicksIdeal(_params.spectra_n_ticks_ideal);
+  _fullWorld.setAxisTickLabelsInside(_params.spectra_axis_tick_labels_inside);
+
+  _fullWorld.setTitleFontSize(_params.spectra_title_font_size);
+  _fullWorld.setAxisLabelFontSize(_params.spectra_axis_label_font_size);
+  _fullWorld.setTickValuesFontSize(_params.spectra_tick_values_font_size);
+  _fullWorld.setLegendFontSize(_params.spectra_legend_font_size);
+
+  _fullWorld.setTitleColor(_params.spectra_title_color);
+  _fullWorld.setAxisLineColor(_params.spectra_axes_color);
+  _fullWorld.setAxisTextColor(_params.spectra_axes_color);
+  _fullWorld.setGridColor(_params.spectra_grid_color);
+
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
@@ -454,8 +465,7 @@ void SpectraWidget::_resetWorld(int width, int height)
 
   _fullWorld.resize(width / 3, height / 3);
 
-  _fullWorld.setXPixOffset(50);
-  _fullWorld.setYPixOffset(50);
+  _fullWorld.setWindowOffsets(50, 50);
 
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
@@ -527,7 +537,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   QFont labelFont(origFont);
   labelFont.setPointSizeF(_params.spectra_axis_label_font_size);
   QFont valuesFont(origFont);
-  valuesFont.setPointSizeF(_params.spectra_axis_values_font_size);
+  valuesFont.setPointSizeF(_params.spectra_tick_values_font_size);
   
   // _zoomWorld.drawRangeAxes(painter,
   //                          "xxx", _yGridEnabled,
@@ -541,9 +551,9 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   //                         labelFont, valuesFont,
   //                         false);
 
-  _zoomWorld.drawAxisBottom(painter, "xu", true, true, true);
-  _zoomWorld.drawAxisLeft(painter, "yu", true, true, true);
-  
+  _zoomWorld.drawAxisBottom(painter, "xu", true, true, true, _xGridEnabled);
+  _zoomWorld.drawAxisLeft(painter, "yu", true, true, true, _yGridEnabled);
+
   // y label
 
   painter.setPen(_params.spectra_labels_color);

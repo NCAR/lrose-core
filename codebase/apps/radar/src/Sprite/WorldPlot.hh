@@ -25,12 +25,12 @@
 //
 // WorldPlot
 //
-// World-coord plotting.
+// Class for transforming world coords into pixel space.
+// Actual drawing is performed in pixel space
 //
-// Mike Dixon
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Developed in Java, Jan 2003
-// Ported to C++, Oct 2014
+// March 2019
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -56,124 +56,138 @@ class WorldPlot
 {
 
 public:
-
+  
   // default constructor
 
   WorldPlot();
   
-  // normal constructor
-  
-  WorldPlot(int widthPixels,
-            int heightPixels,
-            int leftMargin,
-            int rightMargin,
-            int topMargin,
-            int bottomMargin,
-            int colorScaleWidth,
-            double xMinWorld,
-            double yMinWorld,
-            double xMaxWorld,
-            double yMaxWorld,
-            int axisTickLen,
-            int nTicksIdeal,
-            int textMargin);
-
   // copy constructor
   
   WorldPlot(const WorldPlot &rhs);
 
-  /// Assignment.
+  // Assignment.
   
   WorldPlot& operator=(const WorldPlot &rhs);
   
-  // set methods
+  // set size and location of plotting window within the main canvas
+  // side effect - recomputes transform
   
-  void set(int widthPixels,
-           int heightPixels,
-           int leftMargin,
-           int rightMargin,
-           int topMargin,
-           int bottomMargin,
-           int colorScaleWidth,
-           double xMinWorld,
-           double yMinWorld,
-           double xMaxWorld,
-           double yMaxWorld,
-           int axisTickLen,
-           int nTicksIdeal,
-           int textMargin);
-  
-  void setMargins(int leftMargin,
-                  int rightMargin,
-                  int topMargin,
-                  int bottomMargin,
-                  int textMargin);
+  void setWindowGeom(int width,
+                     int height,
+                     int xOffset,
+                     int yOffset);
+
+  // set world coord limits for window
+  // side effect - recomputes transform
   
   void setWorldLimits(double xMinWorld,
                       double yMinWorld,
                       double xMaxWorld,
                       double yMaxWorld);
 
+  // set margins
+
+  inline void setLeftMargin(int val) { _leftMargin = val; }
+  inline void setRightMargin(int val) { _rightMargin = val; }
+  inline void setTopMargin(int val) { _topMargin = val; }
+  inline void setBottomMargin(int val) { _bottomMargin = val; }
+  inline void setTitleTextMargin(int val) { _titleTextMargin = val; }
+  inline void setAxisTextMargin(int val) { _axisTextMargin = val; }
+  inline void setLegendTextMargin(int val) { _legendTextMargin = val; }
+
+  // width of color scale
+  
+  void setColorScaleWidth(int val) { _colorScaleWidth = val; }
+
+  // x ticks
+
+  inline void setXAxisTickLen(int len) { _xAxisTickLen = len; }
+  inline void setXNTicksIdeal(int nTicks) { _xNTicksIdeal = nTicks; }
+  inline void specifyXTicks(double tickMin, double tickDelta) {
+    _xSpecifyTicks = true;
+    _xTickMin = tickMin;
+    _xTickDelta = tickDelta;
+  }
+  inline void unspecifyXTicks() { _xSpecifyTicks = false; }
+
+  // y ticks
+
+  inline void setYAxisTickLen(int len) { _yAxisTickLen = len; }
+  inline void setYNTicksIdeal(int nTicks) { _yNTicksIdeal = nTicks; }
+  inline void specifyYTicks(double tickMin, double tickDelta) {
+    _ySpecifyTicks = true;
+    _yTickMin = tickMin;
+    _yTickDelta = tickDelta;
+  }
+  inline void unspecifyYTicks() { _ySpecifyTicks = false; }
+
+  // drawing titles, axes etc
+
+  inline void setAxisTickLabelsInside(bool val) { _axisTickLabelsInside = val; }
+
+  inline void setTitleFontSize(int val) { _titleFontSize = val; }
+  inline void setAxisLabelFontSize(int val) { _axisLabelFontSize = val; }
+  inline void setTickValuesFontSize(int val) { _tickValuesFontSize = val; }
+  inline void setLegendFontSize(int val) { _legendFontSize = val; }
+
+  inline void setTitleColor(const string &val) { _titleColor = val; }
+  inline void setAxisLineColor(const string &val) { _axisLineColor = val; }
+  inline void setAxisTextColor(const string &val) { _axisTextColor = val; }
+  inline void setGridColor(const string &val) { _gridColor = val; }
+
   // resize the plot
   
   void resize(int width, int height);
+
+  // reset the offsets
+  
+  void setWindowOffsets(int xOffset, int yOffset);
 
   // set the y scale from the x scale - for plotting with aspect ration 1.0
 
   void setYscaleFromXscale();
   
-  // set methods
-
-  inline void setXPixOffset(int val) { _xPixOffset = val; }
-  inline void setYPixOffset(int val) { _yPixOffset = val; }
-  
-  inline void setAxisTickLen(int len) { _axisTickLen = len; }
-  inline void setNTicksIdeal(int nTicks) { _nTicksIdeal = nTicks; }
-
-  inline void setSpecifyTicks(bool specifyTicks,
-                              double tickMin = 0.0,
-                              double tickDelta = 0.0) {
-    _specifyTicks = specifyTicks;
-    _tickMin = tickMin;
-    _tickDelta = tickDelta;
-  }
-
   // get methods
-
-  inline int getXPixOffset() const { return _xPixOffset; }
-  inline int getYPixOffset() const { return _yPixOffset; }
-
-  inline int getXPixCanvas(int xPix) const { return _xPixOffset + xPix; }
-  inline int getYPixCanvas(int yPix) const { return _yPixOffset + yPix; }
 
   inline int getWidthPixels() const { return _widthPixels; }
   inline int getHeightPixels() const { return _heightPixels; }
+
+  inline int getXPixOffset() const { return _xPixOffset; }
+  inline int getYPixOffset() const { return _yPixOffset; }
 
   inline int getLeftMargin() const { return _leftMargin; }
   inline int getRightMargin() const { return _rightMargin; }
   inline int getTopMargin() const { return _topMargin; }
   inline int getBottomMargin() const { return _bottomMargin; }
+  inline int getTitleTextMargin() const { return _titleTextMargin; }
+  inline int getAxisTextMargin() const { return _axisTextMargin; }
+  inline int getLegendTextMargin() const { return _legendTextMargin; }
 
-  inline int getPlotWidth() const { return _plotWidth; }
-  inline int getPlotHeight() const { return _plotHeight; }
+  inline int getColorScaleWidth() const { return _colorScaleWidth; }
 
   inline double getXMinWorld() const { return _xMinWorld; }
   inline double getXMaxWorld() const { return _xMaxWorld; }
   inline double getYMinWorld() const { return _yMinWorld; }
   inline double getYMaxWorld() const { return _yMaxWorld; }
 
-  inline double getXPixelsPerWorld() const { return _xPixelsPerWorld; }
-  inline double getYPixelsPerWorld() const { return _yPixelsPerWorld; }
-
-  inline double getXMinWindow() const { return _xMinWindow; }
-  inline double getXMaxWindow() const { return _xMaxWindow; }
-  inline double getYMinWindow() const { return _yMinWindow; }
-  inline double getYMaxWindow() const { return _yMaxWindow; }
+  inline int getPlotWidth() const { return _plotWidth; }
+  inline int getPlotHeight() const { return _plotHeight; }
 
   inline int getXMinPixel() const { return _xMinPixel; }
   inline int getYMinPixel() const { return _yMinPixel; }
   inline int getXMaxPixel() const { return _xMaxPixel; }
   inline int getYMaxPixel() const { return _yMaxPixel; }
+
+  inline double getXPixelsPerWorld() const { return _xPixelsPerWorld; }
+  inline double getYPixelsPerWorld() const { return _yPixelsPerWorld; }
+
+  inline int getXPixCanvas(int xPix) const { return _xPixOffset + xPix; }
+  inline int getYPixCanvas(int yPix) const { return _yPixOffset + yPix; }
+
+  inline double getXMinWindow() const { return _xMinWindow; }
+  inline double getXMaxWindow() const { return _xMaxWindow; }
+  inline double getYMinWindow() const { return _yMinWindow; }
+  inline double getYMaxWindow() const { return _yMaxWindow; }
 
   QRect getWorldWindow() const;
   QTransform getTransform() const { return _transform; }
@@ -299,24 +313,36 @@ public:
 	
   // left axis
     
-  void drawAxisLeft(QPainter &painter, const string &units,
-                    bool doLine, bool doTicks,
-                    bool doLabels);
+  void drawAxisLeft(QPainter &painter,
+                    const string &units,
+                    bool doLine,
+                    bool doTicks,
+                    bool doLabels,
+                    bool doGrid);
   // right axis
   
-  void drawAxisRight(QPainter &painter, const string &units,
-                     bool doLine, bool doTicks,
-                     bool doLabels);
+  void drawAxisRight(QPainter &painter,
+                     const string &units,
+                     bool doLine,
+                     bool doTicks,
+                     bool doLabels,
+                     bool doGrid);
   // bottom axis
     
   void drawAxisBottom(QPainter &painter,
-                      const string &units, bool doLine,
-                      bool doTicks, bool doLabels);
+                      const string &units,
+                      bool doLine,
+                      bool doTicks,
+                      bool doLabels,
+                      bool doGrid);
   // top axis
   
   void drawAxisTop(QPainter &painter,
-                   const string &units, bool doLine,
-                   bool doTicks, bool doLabels);
+                   const string &units,
+                   bool doLine,
+                   bool doTicks,
+                   bool doLabels,
+                   bool doGrid);
   
   // draw range axes left and right, for bscan
   
@@ -405,16 +431,16 @@ public:
 protected:
 private:
 
+  // dimensions of the window in pixels
+  
+  int _widthPixels;
+  int _heightPixels;
+
   // offset of the window in pixels
   // from the top-left of the main canvas
 
   int _xPixOffset;
   int _yPixOffset;
-
-  // dimensions of the window in pixels
-
-  int _widthPixels;
-  int _heightPixels;
 
   // margins in pixels
 
@@ -422,12 +448,41 @@ private:
   int _rightMargin;
   int _topMargin;
   int _bottomMargin;
+  int _titleTextMargin;
+  int _axisTextMargin;
+  int _legendTextMargin;
+
+  // width for color scale if present
+
   int _colorScaleWidth;
 
-  // size of data area in pixels
+  // axis ticks
 
-  int _plotWidth;
-  int _plotHeight;
+  int _xAxisTickLen;
+  int _xNTicksIdeal;
+  bool _xSpecifyTicks;
+  double _xTickMin;
+  double _xTickDelta;
+
+  int _yAxisTickLen;
+  int _yNTicksIdeal;
+  bool _ySpecifyTicks;
+  double _yTickMin;
+  double _yTickDelta;
+
+  // control of axes, labels, grid
+
+  bool _axisTickLabelsInside;
+
+  int _titleFontSize;
+  int _axisLabelFontSize;
+  int _tickValuesFontSize;
+  int _legendFontSize;
+
+  string _titleColor;
+  string _axisLineColor;
+  string _axisTextColor;
+  string _gridColor;
   
   // world coord limits of data area
 
@@ -436,6 +491,11 @@ private:
   double _yMinWorld;
   double _yMaxWorld;
 
+  // size of data area in pixels
+
+  int _plotWidth;
+  int _plotHeight;
+  
   // pixel coords of data area
   
   int _xMinPixel;
@@ -455,13 +515,7 @@ private:
   double _yMinWindow;
   double _yMaxWindow;
 
-  // axis plotting details
-
-  int _axisTickLen;
-  int _nTicksIdeal;
-  int _textMargin;
-  bool _specifyTicks;
-  double _tickMin, _tickDelta;
+  // axis ticks
 
   vector<double> _topTicks;
   vector<double> _bottomTicks;

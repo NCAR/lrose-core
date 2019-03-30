@@ -1494,6 +1494,18 @@
     tt->single_val.i = 20;
     tt++;
     
+    // Parameter 'spectra_axis_tick_labels_inside'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("spectra_axis_tick_labels_inside");
+    tt->descr = tdrpStrDup("Location of tick labels, relative to axes.");
+    tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
+    tt->val_offset = (char *) &spectra_axis_tick_labels_inside - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'spectra_axis_tick_len'
     // ctype is 'int'
     
@@ -1518,15 +1530,39 @@
     tt->single_val.i = 6;
     tt++;
     
-    // Parameter 'spectra_text_margin'
+    // Parameter 'spectra_title_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_text_margin");
-    tt->descr = tdrpStrDup("Margin around some text (pixels).");
+    tt->param_name = tdrpStrDup("spectra_title_text_margin");
+    tt->descr = tdrpStrDup("Margin around title text (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_text_margin - &_start_;
+    tt->val_offset = (char *) &spectra_title_text_margin - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'spectra_legend_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spectra_legend_text_margin");
+    tt->descr = tdrpStrDup("Margin around legend text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_legend_text_margin - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'spectra_axis_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spectra_axis_text_margin");
+    tt->descr = tdrpStrDup("Margin around axis text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_axis_text_margin - &_start_;
     tt->single_val.i = 3;
     tt++;
     
@@ -1611,16 +1647,40 @@
     tt->single_val.i = 6;
     tt++;
     
-    // Parameter 'spectra_axis_values_font_size'
+    // Parameter 'spectra_tick_values_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_axis_values_font_size");
-    tt->descr = tdrpStrDup("Font size of axis values (pixels).");
+    tt->param_name = tdrpStrDup("spectra_tick_values_font_size");
+    tt->descr = tdrpStrDup("Font size of axis tick values (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_axis_values_font_size - &_start_;
+    tt->val_offset = (char *) &spectra_tick_values_font_size - &_start_;
     tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'spectra_legend_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spectra_legend_font_size");
+    tt->descr = tdrpStrDup("Font size for plot legends (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_legend_font_size - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'spectra_title_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("spectra_title_color");
+    tt->descr = tdrpStrDup("Color of plot title.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spectra_title_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'spectra_axes_color'
@@ -1632,7 +1692,7 @@
     tt->descr = tdrpStrDup("Color of axes in spectra.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &spectra_axes_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
+    tt->single_val.s = tdrpStrDup("green");
     tt++;
     
     // Parameter 'spectra_grid_color'
@@ -1644,7 +1704,7 @@
     tt->descr = tdrpStrDup("Color of grid lines on spectra.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &spectra_grid_color - &_start_;
-    tt->single_val.s = tdrpStrDup("gray");
+    tt->single_val.s = tdrpStrDup("blue");
     tt++;
     
     // Parameter 'spectra_labels_color'
@@ -1656,30 +1716,30 @@
     tt->descr = tdrpStrDup("Color of labels in spectra.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &spectra_labels_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
+    tt->single_val.s = tdrpStrDup("red");
     tt++;
     
-    // Parameter 'spectra_draw_y_grid_lines'
+    // Parameter 'spectra_y_grid_lines_on'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("spectra_draw_y_grid_lines");
+    tt->param_name = tdrpStrDup("spectra_y_grid_lines_on");
     tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_draw_y_grid_lines - &_start_;
+    tt->val_offset = (char *) &spectra_y_grid_lines_on - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'spectra_draw_x_grid_lines'
+    // Parameter 'spectra_x_grid_lines_on'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("spectra_draw_x_grid_lines");
+    tt->param_name = tdrpStrDup("spectra_x_grid_lines_on");
     tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_draw_x_grid_lines - &_start_;
+    tt->val_offset = (char *) &spectra_x_grid_lines_on - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
@@ -1693,18 +1753,6 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &spectra_draw_instrument_height_line - &_start_;
     tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'spectra_instrument_height_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("spectra_instrument_height_color");
-    tt->descr = tdrpStrDup("Color of instrument height line in ALTITUDE plot.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_instrument_height_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'Comment 13'

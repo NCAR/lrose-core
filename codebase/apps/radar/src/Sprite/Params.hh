@@ -537,11 +537,17 @@ public:
 
   int spectra_right_margin;
 
+  tdrp_bool_t spectra_axis_tick_labels_inside;
+
   int spectra_axis_tick_len;
 
   int spectra_n_ticks_ideal;
 
-  int spectra_text_margin;
+  int spectra_title_text_margin;
+
+  int spectra_legend_text_margin;
+
+  int spectra_axis_text_margin;
 
   double spectra_time_span_secs;
 
@@ -555,7 +561,11 @@ public:
 
   int spectra_axis_label_font_size;
 
-  int spectra_axis_values_font_size;
+  int spectra_tick_values_font_size;
+
+  int spectra_legend_font_size;
+
+  char* spectra_title_color;
 
   char* spectra_axes_color;
 
@@ -563,13 +573,11 @@ public:
 
   char* spectra_labels_color;
 
-  tdrp_bool_t spectra_draw_y_grid_lines;
+  tdrp_bool_t spectra_y_grid_lines_on;
 
-  tdrp_bool_t spectra_draw_x_grid_lines;
+  tdrp_bool_t spectra_x_grid_lines_on;
 
   tdrp_bool_t spectra_draw_instrument_height_line;
-
-  char* spectra_instrument_height_color;
 
   legend_pos_t spectra_main_legend_pos;
 
@@ -638,7 +646,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[119];
+  mutable TDRPtable _table[123];
 
   const char *_className;
 
