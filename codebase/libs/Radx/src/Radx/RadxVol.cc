@@ -2086,6 +2086,26 @@ void RadxVol::clearTransitionFlagOnAllRays()
 }
 
 ///////////////////////////////////////////////////////////
+/// Get number of transition rays
+
+size_t RadxVol::getNRaysTransition() const
+
+{
+
+  size_t count = 0;
+
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RadxRay *ray = _rays[iray];
+    if (ray->getAntennaTransition()) {
+      count++;
+    }
+  }
+
+  return count;
+
+}
+
+///////////////////////////////////////////////////////////
 /// Remove rays with the antenna transition flag set.
 
 void RadxVol::removeTransitionRays()

@@ -1292,6 +1292,10 @@ public:
   
   inline size_t getNRays() const { return _rays.size(); }
 
+  /// Get number of transition rays in volume.
+  
+  size_t getNRaysTransition() const;
+
   /// Get number of fields in volume.
 
   inline size_t getNFields() const { return _fields.size(); }
