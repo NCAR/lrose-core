@@ -477,7 +477,7 @@ paramdef int {
 } spectra_legend_text_margin;
 
 paramdef int {
-  p_default = 3;
+  p_default = 2;
   p_descr = "Margin around axis text (pixels).";
 } spectra_axis_text_margin;
 

@@ -137,6 +137,8 @@ void SpectraWidget::configureAxes(double min_amplitude,
 
   _fullWorld.setXAxisTickLen(_params.spectra_axis_tick_len);
   _fullWorld.setXNTicksIdeal(_params.spectra_n_ticks_ideal);
+  _fullWorld.setYAxisTickLen(_params.spectra_axis_tick_len);
+  _fullWorld.setYNTicksIdeal(_params.spectra_n_ticks_ideal);
   _fullWorld.setAxisTickLabelsInside(_params.spectra_axis_tick_labels_inside);
 
   _fullWorld.setTitleFontSize(_params.spectra_title_font_size);

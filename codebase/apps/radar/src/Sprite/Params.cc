@@ -1563,7 +1563,7 @@
     tt->descr = tdrpStrDup("Margin around axis text (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &spectra_axis_text_margin - &_start_;
-    tt->single_val.i = 3;
+    tt->single_val.i = 2;
     tt++;
     
     // Parameter 'spectra_time_span_secs'

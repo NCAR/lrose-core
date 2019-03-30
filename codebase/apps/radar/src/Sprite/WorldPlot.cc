@@ -744,21 +744,6 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
       painter.drawLine(qline);
     }
 	    
-    // labels
-
-    string label(getAxisLabel(delta, val));
-    QRect labelRect(painter.fontMetrics().tightBoundingRect(label.c_str()));
-    qreal labelX = (qreal) (_xMinPixel - labelRect.width() - _axisTextMargin);
-    qreal labelY = (qreal) (ypix - (labelRect.height() / 2));
-    QRectF bRect2(labelX, labelY,
-                  labelRect.width() + 2, labelRect.height() + 2);
-    if ((fabs(labelY - unitsY) > labelRect.height() + _axisTextMargin) &&
-        (fabs(labelY - _yMinPixel) > labelRect.height() + _axisTextMargin)) {
-      if (doLabels) {
-        painter.drawText(bRect2, Qt::AlignCenter, label.c_str());
-      }
-    }
-
     // grid
     
     if (doGrid) {
@@ -771,7 +756,26 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
         painter.restore();
       }
     }
-  }
+
+    // labels
+
+    string label(getAxisLabel(delta, val));
+    QRect labelRect(painter.fontMetrics().tightBoundingRect(label.c_str()));
+    qreal labelX = (qreal) (_xMinPixel + _axisTextMargin);
+    if (_axisTickLabelsInside) {
+      labelX = (qreal) (_xMinPixel - labelRect.width() - _axisTextMargin);
+    }
+    qreal labelY = (qreal) (ypix - (labelRect.height() / 2));
+    QRectF bRect2(labelX, labelY,
+                  labelRect.width() + 2, labelRect.height() + 2);
+    if ((fabs(labelY - unitsY) > labelRect.height() + _axisTextMargin) &&
+        (fabs(labelY - _yMinPixel) > labelRect.height() + _axisTextMargin)) {
+      if (doLabels) {
+        painter.drawText(bRect2, Qt::AlignCenter, label.c_str());
+      }
+    }
+
+  } // i
 	
 }
 
@@ -879,8 +883,7 @@ void WorldPlot::drawAxisBottom(QPainter &painter,
 	
   QRect unitsRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
   qreal unitsX = (qreal) (_xMaxPixel - unitsRect.width() / 2);
-  qreal unitsY =
-    (qreal) (_yMinPixel + (unitsRect.height() + _axisTextMargin));
+  qreal unitsY = (qreal) (_yMinPixel + unitsRect.height());
   QRectF bRect(unitsX, unitsY,
                unitsRect.width() + 2, unitsRect.height() + 2);
   if (doLabels) {
