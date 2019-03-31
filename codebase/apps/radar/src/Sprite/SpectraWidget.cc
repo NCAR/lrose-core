@@ -40,6 +40,7 @@
 #include "SpectraWidget.hh"
 #include "SpectraMgr.hh"
 #include "Beam.hh"
+#include "AscopePlot.hh"
 
 using namespace std;
 
@@ -54,7 +55,9 @@ SpectraWidget::SpectraWidget(QWidget* parent,
         _scaledLabel(ScaledLabel::DistanceEng),
         _worldReleaseX(0),
         _worldReleaseY(0),
-        _rubberBand(0)
+        _rubberBand(0),
+        _ascope(NULL),
+        _currentBeam(NULL)
 
 {
 
@@ -93,6 +96,11 @@ SpectraWidget::SpectraWidget(QWidget* parent,
   configureAxes(_params.spectra_min_amplitude,
                 _params.spectra_max_amplitude,
                 _params.spectra_time_span_secs);
+
+  // create ascope and configure it
+
+  _createAscope();
+  _configureAscope();
   
 }
 
@@ -102,6 +110,10 @@ SpectraWidget::SpectraWidget(QWidget* parent,
 
 SpectraWidget::~SpectraWidget()
 {
+
+  if (_ascope) {
+    delete _ascope;
+  }
 
 }
 
@@ -231,9 +243,15 @@ void SpectraWidget::plotBeam(Beam *beam)
 {
 
   if(_params.debug) {
-    cerr << "======== Plotting beam data ================" << endl;
+    cerr << "======== SpectraWidget plotting beam data ================" << endl;
     DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
+  }
+  
+  if (_ascope) {
+    _currentBeam = beam;
+    _configureAscope();
+    update();
   }
 
 }
@@ -417,12 +435,12 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
 void SpectraWidget::paintEvent(QPaintEvent *event)
 {
 
-  RadxTime now(RadxTime::NOW);
-  double timeSinceLast = now - _timeLastRendered;
-  if (timeSinceLast < _params.spectra_min_secs_between_rendering) {
-    return;
-  }
-  _timeLastRendered = now;
+  // RadxTime now(RadxTime::NOW);
+  // double timeSinceLast = now - _timeLastRendered;
+  // if (timeSinceLast < _params.spectra_min_secs_between_rendering) {
+  //   return;
+  // }
+  // _timeLastRendered = now;
 
   QPainter painter(this);
   painter.save();
@@ -431,6 +449,13 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
   // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
   painter.restore();
   _drawOverlays(painter);
+  
+  // if we have a current beam, plot it
+  if (_currentBeam) {
+    _ascope->plotBeam(painter, _currentBeam, _xGridEnabled, _yGridEnabled);
+    // _currentBeam = NULL;
+    cerr << "AAAAAAAAAAAAAAAAAAAAAA" << endl;
+  }
 
 }
 
@@ -884,4 +909,67 @@ void SpectraWidget::_performRendering()
 
 }
 
+/*************************************************************************
+ * create the ascope
+ */
+
+void SpectraWidget::_createAscope()
+  
+{
+
+  _ascope = new AscopePlot(this, _params);
+
+  WorldPlot &ascopeWorld = _ascope->getFullWorld();
+  
+  ascopeWorld.setLeftMargin(_params.spectra_left_margin);
+  ascopeWorld.setRightMargin(_params.spectra_right_margin);
+  ascopeWorld.setTopMargin(_params.spectra_top_margin);
+  ascopeWorld.setBottomMargin(_params.spectra_bottom_margin);
+  ascopeWorld.setTitleTextMargin(_params.spectra_title_text_margin);
+  ascopeWorld.setLegendTextMargin(_params.spectra_legend_text_margin);
+  ascopeWorld.setAxisTextMargin(_params.spectra_axis_text_margin);
+
+  ascopeWorld.setColorScaleWidth(0);
+  
+  ascopeWorld.setXAxisTickLen(_params.spectra_axis_tick_len);
+  ascopeWorld.setXNTicksIdeal(_params.spectra_n_ticks_ideal);
+  ascopeWorld.setYAxisTickLen(_params.spectra_axis_tick_len);
+  ascopeWorld.setYNTicksIdeal(_params.spectra_n_ticks_ideal);
+  ascopeWorld.setAxisTickLabelsInside(_params.spectra_axis_tick_labels_inside);
+
+  ascopeWorld.setTitleFontSize(_params.spectra_title_font_size);
+  ascopeWorld.setAxisLabelFontSize(_params.spectra_axis_label_font_size);
+  ascopeWorld.setTickValuesFontSize(_params.spectra_tick_values_font_size);
+  ascopeWorld.setLegendFontSize(_params.spectra_legend_font_size);
+
+  ascopeWorld.setTitleColor(_params.spectra_title_color);
+  ascopeWorld.setAxisLineColor(_params.spectra_axes_color);
+  ascopeWorld.setAxisTextColor(_params.spectra_axes_color);
+  ascopeWorld.setGridColor(_params.spectra_grid_color);
+
+  ascopeWorld.setWindowGeom(_ascopeWidth, _ascopeHeight,
+                            0, _titleMargin);
+  
+  ascopeWorld.setWorldLimits(0.0, 0.0, 1.0, 1.0);
+  
+}
+
+/*************************************************************************
+ * configure the ascope
+ */
+
+void SpectraWidget::_configureAscope()
+  
+{
+
+  _ascope->setWindowGeom(_ascopeWidth, _ascopeHeight,
+                         0, _titleMargin);
+  
+  if (_currentBeam == NULL) {
+    return;
+  }
+  
+  _ascope->setWorldLimits(-30, 0.0, 100, _currentBeam->getMaxRange());
+
+}
 

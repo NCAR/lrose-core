@@ -51,6 +51,7 @@ LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
+	AscopePlot.hh \
 	Beam.hh \
 	BeamMgr.hh \
 	RadarSpectra.hh \
@@ -64,6 +65,7 @@ HDRS = \
 NORM_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
+	AscopePlot.cc \
 	Beam.cc \
 	BeamMgr.cc \
 	Main.cc \

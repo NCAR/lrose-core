@@ -54,6 +54,7 @@
 
 class SpectraMgr;
 class Beam;
+class AscopePlot;
 class RadxRay;
 
 /// Widget class - Spectra mode
@@ -319,6 +320,14 @@ class DLL_EXPORT SpectraWidget : public QWidget
   
   RadxTime _timeLastRendered;
 
+  // ascope
+
+  AscopePlot *_ascope;
+
+  // beam data
+
+  Beam *_currentBeam;
+
   ///////////////////////
   // Protected methods //
   ///////////////////////
@@ -404,6 +413,14 @@ class DLL_EXPORT SpectraWidget : public QWidget
   // call the renderers for each field
 
   void _performRendering();
+
+  // create the ascope panel
+
+  void _createAscope();
+
+  // configure the ascope
+
+  void _configureAscope();
 
 };
 
