@@ -658,18 +658,18 @@ Beam *TsReader::_makeBeam(size_t midIndex)
   // create new beam
   
   Beam *beam = new Beam(_progName, _params);
-  beam->init(_scanType == SCAN_TYPE_RHI,
-             _nSamples,
-             _nGates,
-             _nGatesPrtLong,
-             _indexedBeams,
-             _indexedRes,
-             _isAlternating,
-             _isStaggeredPrt,
-             _prt,
-             _prtLong,
-             _pulseReader->getOpsInfo(),
-             beamPulses);
+  beam->setPulses(_scanType == SCAN_TYPE_RHI,
+                  _nSamples,
+                  _nGates,
+                  _nGatesPrtLong,
+                  _indexedBeams,
+                  _indexedRes,
+                  _isAlternating,
+                  _isStaggeredPrt,
+                  _prt,
+                  _prtLong,
+                  _pulseReader->getOpsInfo(),
+                  beamPulses);
   
   return beam;
   

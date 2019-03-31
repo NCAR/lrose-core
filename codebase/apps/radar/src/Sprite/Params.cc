@@ -1171,7 +1171,7 @@
     tt->descr = tdrpStrDup("Height of bottom margin in SPECTRA mode (pixels).");
     tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
     tt->val_offset = (char *) &spectra_bottom_margin - &_start_;
-    tt->single_val.i = 20;
+    tt->single_val.i = 18;
     tt++;
     
     // Parameter 'spectra_left_margin'
@@ -1183,7 +1183,7 @@
     tt->descr = tdrpStrDup("Width of left margin in SPECTRA mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the left margin.");
     tt->val_offset = (char *) &spectra_left_margin - &_start_;
-    tt->single_val.i = 30;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'spectra_right_margin'
@@ -1336,7 +1336,7 @@
     tt->descr = tdrpStrDup("Font size of center title (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &spectra_title_font_size - &_start_;
-    tt->single_val.i = 8;
+    tt->single_val.i = 10;
     tt++;
     
     // Parameter 'spectra_axis_label_font_size'
@@ -1348,7 +1348,7 @@
     tt->descr = tdrpStrDup("Font size of axis labels in spectra (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &spectra_axis_label_font_size - &_start_;
-    tt->single_val.i = 6;
+    tt->single_val.i = 8;
     tt++;
     
     // Parameter 'spectra_tick_values_font_size'

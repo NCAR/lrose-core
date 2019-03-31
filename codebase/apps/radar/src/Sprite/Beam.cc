@@ -57,6 +57,187 @@ Beam::Beam(const string &progName,
         _params(params)
         
 {
+  _init();
+}
+
+////////////////////////////////////////
+// copy constructor
+
+Beam::Beam(const Beam &rhs) :
+        _params(rhs._params)
+        
+{
+  _init();
+  _copy(rhs);
+}
+
+/////////////////////////////
+// Assignment
+//
+
+Beam &Beam::operator=(const Beam &rhs)
+  
+{
+  return _copy(rhs);
+}
+
+////////////////////////////////////////
+// copy method
+
+Beam &Beam::_copy(const Beam &rhs)
+
+{
+    
+  if (&rhs == this) {
+    return *this;
+  }
+
+  // copy the meta data
+
+  _progName = rhs._progName;
+
+  _pulses = rhs._pulses;
+  _isRhi = rhs._isRhi;
+
+  _nSamples = rhs._nSamples;
+  _nSamplesHalf = rhs._nSamplesHalf;
+  _nSamplesAlloc = rhs._nSamplesAlloc;
+
+  _nGates = rhs._nGates;
+  _nGatesOut = rhs._nGatesOut;
+  _nGatesOutAlloc = rhs._nGatesOutAlloc;
+
+  _timeSecs = rhs._timeSecs;
+  _nanoSecs = rhs._nanoSecs;
+  _timeDouble = rhs._timeDouble;
+
+  _el = rhs._el;
+  _az = rhs._az;
+  _targetAngle = rhs._targetAngle;
+
+  _scanMode = rhs._scanMode;
+  _xmitRcvMode = rhs._xmitRcvMode;
+  _sweepNum = rhs._sweepNum;
+  _volNum = rhs._volNum;
+
+  _startRangeKm = rhs._startRangeKm;
+  _gateSpacingKm = rhs._gateSpacingKm;
+
+  _georef = rhs._georef;
+  _georefActive = rhs._georefActive;
+
+  _beamIsIndexed = rhs._beamIsIndexed;
+  _angularResolution = rhs._angularResolution;
+  _isAlternating = rhs._isAlternating;
+  _dualPol = rhs._dualPol;
+  _switchingReceiver = rhs._switchingReceiver;
+
+  _prt = rhs._prt;
+  _nyquist = rhs._nyquist;
+  _pulseWidth = rhs._pulseWidth;
+  _unambigRange = rhs._unambigRange;
+
+  _isStagPrt = rhs._isStagPrt;
+  _prtShort = rhs._prtShort;
+  _prtLong = rhs._prtLong;
+  _nGatesPrtShort = rhs._nGatesPrtShort;
+  _nGatesPrtLong = rhs._nGatesPrtLong;
+  _nGatesStagPrt = rhs._nGatesStagPrt;
+  _nyquistPrtShort = rhs._nyquistPrtShort;
+  _nyquistPrtLong = rhs._nyquistPrtLong;
+  _stagM = rhs._stagM;
+  _stagN = rhs._stagN;
+
+  _measXmitPowerDbmH = rhs._measXmitPowerDbmH;
+  _measXmitPowerDbmV = rhs._measXmitPowerDbmV;
+  
+  _opsInfo = rhs._opsInfo;
+  _wavelengthM = rhs._wavelengthM;
+
+  // calibration
+
+  _calib = rhs._calib;
+
+  // Moments computations
+
+  if (_mom) {
+    delete _mom;
+  }
+  _mom = new RadarMoments(_nGatesOut,
+                          _params.debug >= Params::DEBUG_NORM,
+                          _params.debug >= Params::DEBUG_VERBOSE);
+  
+  _applyFiltering = rhs._applyFiltering;
+
+  // KDP
+  
+  _kdpInit();
+
+  _snrArray_ = rhs._snrArray_;
+  _dbzArray_ = rhs._dbzArray_;
+  _zdrArray_ = rhs._zdrArray_;
+  _rhohvArray_ = rhs._rhohvArray_;
+  _phidpArray_ = rhs._phidpArray_;
+  
+  _snrArray = _snrArray_.buf();
+  _dbzArray = _dbzArray_.buf();
+  _zdrArray = _zdrArray_.buf();
+  _rhohvArray = _rhohvArray_.buf();
+  _phidpArray = _phidpArray_.buf();
+
+  // fields for moments
+
+  _outFields_ = rhs._outFields_;
+  _outFields = _outFields_.buf();
+
+  _outFieldsF_ = rhs._outFieldsF_;
+  _outFieldsF = _outFieldsF_.buf();
+
+  _compFields_ = rhs._compFields_;
+  _compFields = _compFields_.buf();
+
+  _compFieldsF_ = rhs._compFieldsF_;
+  _compFieldsF = _compFieldsF_.buf();
+
+  // gate data
+
+  _haveChan1 = rhs._haveChan1;
+  _gateData = rhs._gateData;
+  for (size_t ii = 0; ii < _gateData.size(); ii++) {
+    _gateData[ii] = new GateData(*rhs._gateData[ii]);
+  }
+
+  // channel data
+
+  _iqChan0_ = rhs._iqChan0_;
+  _iqChan0 = _iqChan0_.buf();
+
+  _iqChan1_ = rhs._iqChan1_;
+  _iqChan1 = _iqChan1_.buf();
+
+  // FFTs
+
+  _fftInit();
+
+  // regression filter
+
+  _regrInit();
+
+  // FFT windows
+
+  _freeWindows();
+  _computeWindows();
+  
+  return *this;
+
+}
+
+////////////////////////////////////////
+// initialize
+
+void Beam::_init()
+        
+{
 
   _nSamples = 0;
   _nSamplesHalf = 0;
@@ -106,8 +287,8 @@ Beam::Beam(const string &progName,
   _measXmitPowerDbmH = 0;
   _measXmitPowerDbmV = 0;
 
-  _fields = NULL;
-  _fieldsF = NULL;
+  _outFields = NULL;
+  _outFieldsF = NULL;
 
   _mom = NULL;
 
@@ -127,7 +308,7 @@ Beam::Beam(const string &progName,
   _fft = new RadarFft();
   _fftHalf = new RadarFft();
   _fftStag = new RadarFft();
-
+  
   _regr = new RegressionFilter();
   _regrHalf = new RegressionFilter();
   _regrStag = new RegressionFilter();
@@ -139,20 +320,20 @@ Beam::Beam(const string &progName,
 }
 
 ////////////////////////////////////////////////////
-// Initialize before use
+// Initialize the pulse sequence
 
-void Beam::init(bool isRhi,
-                int nSamples,
-                int nGates,
-                int nGatesPrtLong,
-                bool beamIsIndexed,
-                double angularResolution,
-                bool isAlternating,
-                bool isStagPrt,
-                double prt,
-                double prtLong,
-                const IwrfTsInfo &opsInfo,
-                const deque<const IwrfTsPulse *> &pulses)
+void Beam::setPulses(bool isRhi,
+                     int nSamples,
+                     int nGates,
+                     int nGatesPrtLong,
+                     bool beamIsIndexed,
+                     double angularResolution,
+                     bool isAlternating,
+                     bool isStagPrt,
+                     double prt,
+                     double prtLong,
+                     const IwrfTsInfo &opsInfo,
+                     const deque<const IwrfTsPulse *> &pulses)
   
 {
 
@@ -267,35 +448,19 @@ void Beam::init(bool isRhi,
 
   // ffts and regression filter
 
-  // initialize the FFT objects on the threads
-  // Note: the initialization is not thread safe so it 
-  // must be protected by a mutex
-  
-  _fft->init(_nSamples);
-  _fftHalf->init(_nSamplesHalf);
-  int nStag =
-    RadarMoments::computeNExpandedStagPrt(_nSamples, _stagM, _stagN);
-  _fftStag->init(nStag);
-  
-  // initialize the regression objects
-  
-  if (_params.use_polynomial_regression_clutter_filter) {
-    int order = _params.regression_filter_polynomial_order;
-    _regr->setup(_nSamples, order);
-    _regrHalf->setup(_nSamplesHalf, order);
-    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order);
-  }
+  _fftInit();
+  _regrInit();
 
   // alloc fields at each gate
 
   if (_nGatesOut > _nGatesOutAlloc) {
 
-    if (_fields) delete[] _fields;
-    if (_fieldsF) delete[] _fieldsF;
+    if (_outFields) delete[] _outFields;
+    if (_outFieldsF) delete[] _outFieldsF;
     if (_mom) delete _mom;
 
-    _fields = new MomentsFields[_nGatesOut];
-    _fieldsF = new MomentsFields[_nGatesOut];
+    _outFields = new MomentsFields[_nGatesOut];
+    _outFieldsF = new MomentsFields[_nGatesOut];
     
     _mom = new RadarMoments(_nGatesOut,
                             _params.debug >= Params::DEBUG_NORM,
@@ -308,8 +473,8 @@ void Beam::init(bool isRhi,
   // initialize fields
 
   for (int ii = 0; ii < _nGatesOut; ii++) {
-    _fields[ii].init();
-    _fieldsF[ii].init();
+    _outFields[ii].init();
+    _outFieldsF[ii].init();
   }
 
   _mom->setMeasXmitPowerDbmH(_measXmitPowerDbmH);
@@ -416,12 +581,12 @@ Beam::~Beam()
 
 {
 
-  if (_fields) {
-    delete[] _fields;
+  if (_outFields) {
+    delete[] _outFields;
   }
 
-  if (_fieldsF) {
-    delete[] _fieldsF;
+  if (_outFieldsF) {
+    delete[] _outFieldsF;
   }
   
   if (_mom) {
@@ -750,17 +915,17 @@ void Beam::_computeMomSpH()
 
 {
 
-  // copy gate fields to _momFields array
+  // copy gate fields to _compFields array
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _momFields[igate] = _gateData[igate]->fields;
+    _compFields[igate] = _gateData[igate]->fields;
   }
 
   // compute main moments
   
   for (int igate = 0; igate < _nGates; igate++) {
     
-    MomentsFields &fields = _momFields[igate];
+    MomentsFields &fields = _compFields[igate];
       
     _mom->computeMomSinglePolH(fields.lag0_hc,
                                fields.lag1_hc,
@@ -774,7 +939,7 @@ void Beam::_computeMomSpH()
   // copy back to gate data
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fields = _momFields[igate];
+    _gateData[igate]->fields = _compFields[igate];
   }
 
 }
@@ -787,17 +952,17 @@ void Beam::_computeMomSpV()
 
 {
 
-  // copy gate fields to _momFields array
+  // copy gate fields to _compFields array
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _momFields[igate] = _gateData[igate]->fields;
+    _compFields[igate] = _gateData[igate]->fields;
   }
 
   // compute main moments
   
   for (int igate = 0; igate < _nGates; igate++) {
     
-    MomentsFields &fields = _momFields[igate];
+    MomentsFields &fields = _compFields[igate];
       
     _mom->computeMomSinglePolV(fields.lag0_vc,
                                fields.lag1_vc,
@@ -811,7 +976,7 @@ void Beam::_computeMomSpV()
   // copy back to gate data
   
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fields = _momFields[igate];
+    _gateData[igate]->fields = _compFields[igate];
   }
 
 }
@@ -824,10 +989,10 @@ void Beam::_computeMomSpStagPrt()
   
 {
 
-  // copy gate fields to _momFields array
+  // copy gate fields to _compFields array
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _momFields[igate] = _gateData[igate]->fields;
+    _compFields[igate] = _gateData[igate]->fields;
   }
 
   // moments computations
@@ -835,7 +1000,7 @@ void Beam::_computeMomSpStagPrt()
   for (int igate = 0; igate < _nGates; igate++) {
       
     GateData *gate = _gateData[igate];
-    MomentsFields &fields = _momFields[igate];
+    MomentsFields &fields = _compFields[igate];
       
     // compute main moments
       
@@ -849,7 +1014,7 @@ void Beam::_computeMomSpStagPrt()
   // copy back to gate data
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fields = _momFields[igate];
+    _gateData[igate]->fields = _compFields[igate];
   }
 
 }
@@ -861,15 +1026,15 @@ void Beam::_computeMomSpStagPrt()
 void Beam::_computeMomDpAltHvCoCross()
 {
 
-  // copy gate fields to _momFields array
+  // copy gate fields to _compFields array
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _momFields[igate] = _gateData[igate]->fields;
+    _compFields[igate] = _gateData[igate]->fields;
   }
 
   for (int igate = 0; igate < _nGates; igate++) {
       
-    MomentsFields &fields = _momFields[igate];
+    MomentsFields &fields = _compFields[igate];
       
     // compute moments for this gate
 
@@ -893,7 +1058,7 @@ void Beam::_computeMomDpAltHvCoCross()
   // copy back to gate data
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fields = _momFields[igate];
+    _gateData[igate]->fields = _compFields[igate];
   }
 
 }
@@ -905,15 +1070,15 @@ void Beam::_computeMomDpAltHvCoCross()
 void Beam::_computeMomDpAltHvCoOnly()
 {
 
-  // copy gate fields to _momFields array
+  // copy gate fields to _compFields array
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _momFields[igate] = _gateData[igate]->fields;
+    _compFields[igate] = _gateData[igate]->fields;
   }
 
   for (int igate = 0; igate < _nGates; igate++) {
       
-    MomentsFields &fields = _momFields[igate];
+    MomentsFields &fields = _compFields[igate];
       
     // compute moments for this gate
       
@@ -931,7 +1096,7 @@ void Beam::_computeMomDpAltHvCoOnly()
   // copy back to gate data
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fields = _momFields[igate];
+    _gateData[igate]->fields = _compFields[igate];
   }
 
 }
@@ -960,15 +1125,15 @@ void Beam::_computeMomDpSimHv()
     return;
   }
 
-  // copy gate fields to _momFields array
+  // copy gate fields to _compFields array
   
   for (int igate = 0; igate < _nGates; igate++) {
-    _momFields[igate] = _gateData[igate]->fields;
+    _compFields[igate] = _gateData[igate]->fields;
   }
 
   for (int igate = 0; igate < _nGates; igate++) {
       
-    MomentsFields &fields = _momFields[igate];
+    MomentsFields &fields = _compFields[igate];
       
     // compute moments for this gate
       
@@ -989,7 +1154,7 @@ void Beam::_computeMomDpSimHv()
   // copy back to gate data
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fields = _momFields[igate];
+    _gateData[igate]->fields = _compFields[igate];
   }
 
 }
@@ -1001,16 +1166,16 @@ void Beam::_computeMomDpSimHv()
 void Beam::_computeMomDpSimHvStagPrt()
 {
 
-  // copy gate fields to _momFields array
+  // copy gate fields to _compFields array
   
   for (int igate = 0; igate < _nGates; igate++) {
-    _momFields[igate] = _gateData[igate]->fields;
+    _compFields[igate] = _gateData[igate]->fields;
   }
 
   for (int igate = 0; igate < _nGates; igate++) {
       
     GateData *gate = _gateData[igate];
-    MomentsFields &fields = _momFields[igate];
+    MomentsFields &fields = _compFields[igate];
       
     // compute moments for this gate
       
@@ -1027,7 +1192,7 @@ void Beam::_computeMomDpSimHvStagPrt()
   // copy back to gate data
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fields = _momFields[igate];
+    _gateData[igate]->fields = _compFields[igate];
   }
 
 }
@@ -1058,15 +1223,15 @@ void Beam::_computeMomDpHOnly()
     return;
   }
 
-  // copy gate fields to _momFields array
+  // copy gate fields to _compFields array
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _momFields[igate] = _gateData[igate]->fields;
+    _compFields[igate] = _gateData[igate]->fields;
   }
 
   for (int igate = 0; igate < _nGates; igate++) {
       
-    MomentsFields &fields = _momFields[igate];
+    MomentsFields &fields = _compFields[igate];
       
     // compute moments for this gate
     
@@ -1083,7 +1248,7 @@ void Beam::_computeMomDpHOnly()
   // copy back to gate data
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fields = _momFields[igate];
+    _gateData[igate]->fields = _compFields[igate];
   }
 
 }
@@ -1112,15 +1277,15 @@ void Beam::_computeMomDpVOnly()
     return;
   }
 
-  // copy gate fields to _momFields array
+  // copy gate fields to _compFields array
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _momFields[igate] = _gateData[igate]->fields;
+    _compFields[igate] = _gateData[igate]->fields;
   }
 
   for (int igate = 0; igate < _nGates; igate++) {
       
-    MomentsFields &fields = _momFields[igate];
+    MomentsFields &fields = _compFields[igate];
       
     // compute moments for this gate
       
@@ -1137,7 +1302,7 @@ void Beam::_computeMomDpVOnly()
   // copy back to gate data
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fields = _momFields[igate];
+    _gateData[igate]->fields = _compFields[igate];
   }
 
 }
@@ -1439,10 +1604,10 @@ void Beam::_filterAdapSpStagPrt()
 void Beam::_filterDpAltHvCoCross()
 {
 
-  // copy gate fields to _momFieldsF array
+  // copy gate fields to _compFieldsF array
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _momFieldsF[igate] = _gateData[igate]->fieldsF;
+    _compFieldsF[igate] = _gateData[igate]->fieldsF;
   }
 
   double calibNoise = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
@@ -1451,7 +1616,7 @@ void Beam::_filterDpAltHvCoCross()
       
     GateData *gate = _gateData[igate];
     MomentsFields &fields = gate->fields;
-    MomentsFields &fieldsF = _momFieldsF[igate];
+    MomentsFields &fieldsF = _compFieldsF[igate];
     
     // filter the HC time series, save the filter ratio
     
@@ -1555,7 +1720,7 @@ void Beam::_filterDpAltHvCoCross()
   // copy back to gate data
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fieldsF = _momFieldsF[igate];
+    _gateData[igate]->fieldsF = _compFieldsF[igate];
   }
 
 }
@@ -1567,10 +1732,10 @@ void Beam::_filterDpAltHvCoCross()
 void Beam::_filterDpAltHvCoOnly()
 {
 
-  // copy gate fields to _momFieldsF array
+  // copy gate fields to _compFieldsF array
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _momFieldsF[igate] = _gateData[igate]->fieldsF;
+    _compFieldsF[igate] = _gateData[igate]->fieldsF;
   }
 
   double calibNoise = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
@@ -1579,7 +1744,7 @@ void Beam::_filterDpAltHvCoOnly()
       
     GateData *gate = _gateData[igate];
     MomentsFields &fields = gate->fields;
-    MomentsFields &fieldsF = _momFieldsF[igate];
+    MomentsFields &fieldsF = _compFieldsF[igate];
     
     // filter the HC time series, save the filter ratio
     
@@ -1644,7 +1809,7 @@ void Beam::_filterDpAltHvCoOnly()
   // copy back to gate data
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fieldsF = _momFieldsF[igate];
+    _gateData[igate]->fieldsF = _compFieldsF[igate];
   }
 
 }
@@ -2249,7 +2414,6 @@ void Beam::_computeWindows()
 
 }
 
-
 //////////////////////////////////////
 // initialize moments computations object
   
@@ -2338,6 +2502,43 @@ void Beam::_kdpInit()
 
   if (_params.KDP_debug) {
     _kdp.setDebug(true);
+  }
+
+}
+
+//////////////////////////////
+// initialize FFTs
+  
+void Beam::_fftInit()
+
+{
+
+  // initialize the FFT objects on the threads
+  // Note: the initialization is not thread safe so it 
+  // must be protected by a mutex
+  
+  _fft->init(_nSamples);
+  _fftHalf->init(_nSamplesHalf);
+  int nStag =
+    RadarMoments::computeNExpandedStagPrt(_nSamples, _stagM, _stagN);
+  _fftStag->init(nStag);
+  
+}
+
+////////////////////////////////
+// initialize regression filter
+  
+void Beam::_regrInit()
+
+{
+
+  // initialize the regression objects
+  
+  if (_params.use_polynomial_regression_clutter_filter) {
+    int order = _params.regression_filter_polynomial_order;
+    _regr->setup(_nSamples, order);
+    _regrHalf->setup(_nSamplesHalf, order);
+    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order);
   }
 
 }
@@ -2475,8 +2676,8 @@ void Beam::_allocGateData(int nGates)
   for (size_t ii = 0; ii < _gateData.size(); ii++) {
     _gateData[ii]->allocArrays(_nSamples, _applyFiltering, _isStagPrt, false);
   }
-  _momFields = _momFields_.alloc(_gateData.size());
-  _momFieldsF = _momFieldsF_.alloc(_gateData.size());
+  _compFields = _compFields_.alloc(_gateData.size());
+  _compFieldsF = _compFieldsF_.alloc(_gateData.size());
 }
 
 /////////////////////////////////////////////////////////////////
@@ -3273,8 +3474,8 @@ void Beam::_copyDataToOutputFields()
   }
   
   for (int ii = 0; ii < maxGates; ii++) {
-    _fields[ii] = _gateData[ii]->fields;
-    _fieldsF[ii] = _gateData[ii]->fieldsF;
+    _outFields[ii] = _gateData[ii]->fields;
+    _outFieldsF[ii] = _gateData[ii]->fieldsF;
   }
   
 }

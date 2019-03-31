@@ -711,6 +711,12 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
     drawLine(painter, _xMinWorld, _yMinWorld, _xMinWorld, _yMaxWorld);
   }
 
+  // font
+
+  QFont font(painter.font());
+  font.setPointSizeF(_axisLabelFontSize);
+  painter.setFont(font);
+
   // axis units label
 
   QRect unitsRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
@@ -759,6 +765,9 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
 
     // labels
 
+    font.setPointSizeF(_tickValuesFontSize);
+    painter.setFont(font);
+
     string label(getAxisLabel(delta, val));
     QRect labelRect(painter.fontMetrics().tightBoundingRect(label.c_str()));
     qreal labelX = (qreal) (_xMinPixel + _axisTextMargin);
@@ -796,6 +805,12 @@ void WorldPlot::drawAxisRight(QPainter &painter,
   if (doLine) {
     drawLine(painter, _xMaxWorld, _yMinWorld, _xMaxWorld, _yMaxWorld);
   }
+
+  // font
+
+  QFont font(painter.font());
+  font.setPointSizeF(_axisLabelFontSize);
+  painter.setFont(font);
 
   // axis units label
 	
@@ -843,6 +858,9 @@ void WorldPlot::drawAxisRight(QPainter &painter,
 
     // labels
 
+    font.setPointSizeF(_tickValuesFontSize);
+    painter.setFont(font);
+
     string label(getAxisLabel(delta, val));
     QRect labelRect(painter.fontMetrics().tightBoundingRect(label.c_str()));
     qreal labelX = (qreal) (_xMaxPixel +_axisTextMargin);
@@ -879,11 +897,17 @@ void WorldPlot::drawAxisBottom(QPainter &painter,
     drawLine(painter, _xMinWorld, _yMinWorld, _xMaxWorld, _yMinWorld);
   }
     
+  // font
+
+  QFont font(painter.font());
+  font.setPointSizeF(_axisLabelFontSize);
+  painter.setFont(font);
+
   // axis units label
 	
   QRect unitsRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
-  qreal unitsX = (qreal) (_xMaxPixel - unitsRect.width() / 2);
-  qreal unitsY = (qreal) (_yMinPixel + unitsRect.height());
+  qreal unitsX = (qreal) (_xMaxPixel - unitsRect.width());
+  qreal unitsY = (qreal) (_yMinPixel + unitsRect.height() - 2);
   QRectF bRect(unitsX, unitsY,
                unitsRect.width() + 2, unitsRect.height() + 2);
   if (doLabels) {
@@ -927,6 +951,9 @@ void WorldPlot::drawAxisBottom(QPainter &painter,
     
     // labels
 
+    font.setPointSizeF(_tickValuesFontSize);
+    painter.setFont(font);
+
     string label(getAxisLabel(delta, val));
     QRect labelRect(painter.fontMetrics().tightBoundingRect(label.c_str()));
     if (((xpix + labelRect.width() / 2 + _axisTextMargin) < unitsX) &&
@@ -962,6 +989,12 @@ void WorldPlot::drawAxisTop(QPainter &painter,
     drawLine(painter, _xMinWorld, _yMaxWorld, _xMaxWorld, _yMaxWorld);
   }
 	
+  // font
+
+  QFont font(painter.font());
+  font.setPointSizeF(_axisLabelFontSize);
+  painter.setFont(font);
+
   // axis units label
 	
   QRect unitsRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
@@ -1005,6 +1038,9 @@ void WorldPlot::drawAxisTop(QPainter &painter,
     }
 
     // labels
+
+    font.setPointSizeF(_tickValuesFontSize);
+    painter.setFont(font);
 
     string label(getAxisLabel(delta, val));
     QRect labelRect(painter.fontMetrics().boundingRect(label.c_str()));

@@ -65,20 +65,28 @@ public:
   Beam(const string &progName,
        const Params &params);
   
-  // initialize before use
+  // copy constructor
   
-  void init(bool isRhi,
-            int nSamples,
-            int nGates,
-            int nGatesPrtLong,
-            bool beamIsIndexed,
-            double angularResolution,
-            bool isAlternating,
-            bool isStagPrt,
-            double prt,
-            double prtLong,
-            const IwrfTsInfo &opsInfo,
-            const deque<const IwrfTsPulse *> &pulses);
+  Beam(const Beam &rhs);
+
+  // Assignment.
+  
+  Beam& operator=(const Beam &rhs);
+  
+  // initialize the pulse sequence
+  
+  void setPulses(bool isRhi,
+                 int nSamples,
+                 int nGates,
+                 int nGatesPrtLong,
+                 bool beamIsIndexed,
+                 double angularResolution,
+                 bool isAlternating,
+                 bool isStagPrt,
+                 double prt,
+                 double prtLong,
+                 const IwrfTsInfo &opsInfo,
+                 const deque<const IwrfTsPulse *> &pulses);
 
   // destructor
   
@@ -142,8 +150,8 @@ public:
 
   const IwrfTsInfo &getInfo() const { return _opsInfo; }
 
-  const MomentsFields* getFields() const { return _fields; }
-  const MomentsFields* getFieldsF() const { return _fieldsF; }
+  const MomentsFields* getOutFields() const { return _outFields; }
+  const MomentsFields* getOutFieldsF() const { return _outFieldsF; }
 
   const IwrfCalib &getCalib() const { return _calib; }
 
@@ -250,11 +258,6 @@ private:
   IwrfTsInfo _opsInfo;
   double _wavelengthM;
 
-  // moments fields at each gate
-
-  MomentsFields *_fields;
-  MomentsFields *_fieldsF;
-
   // calibration
 
   IwrfCalib _calib;
@@ -302,15 +305,23 @@ private:
   double *_rhohvArray;
   double *_phidpArray;
 
-  // fields for moments
+  // moments output fields at each gate
 
-  TaArray<MomentsFields> _momFields_;
-  MomentsFields *_momFields;
+  TaArray<MomentsFields> _outFields_;
+  MomentsFields *_outFields;
 
-  TaArray<MomentsFields> _momFieldsF_;
-  MomentsFields *_momFieldsF;
+  TaArray<MomentsFields> _outFieldsF_;
+  MomentsFields *_outFieldsF;
 
-  // gate data
+  // internal fields for moments computations
+  
+  TaArray<MomentsFields> _compFields_;
+  MomentsFields *_compFields;
+
+  TaArray<MomentsFields> _compFieldsF_;
+  MomentsFields *_compFieldsF;
+
+  // gate data - internal to object
 
   bool _haveChan1;
   vector<GateData *> _gateData;
@@ -342,7 +353,8 @@ private:
   RegressionFilter *_regrStag;
 
   // private functions
-  
+
+  void _init();
   void _freeWindows();
   int _getVolNum();
   int _getSweepNum();
@@ -379,6 +391,8 @@ private:
   void _overrideOpsInfo();
   void _computeWindows();
   void _initMomentsObject();
+  void _fftInit();
+  void _regrInit();
 
   void _kdpInit();
   void _kdpCompute(bool isFiltered);
@@ -399,6 +413,10 @@ private:
   
   double _computeClutPower(const MomentsFields &unfiltered,
                            const MomentsFields &filtered);
+
+  // copy method for assignment and copy constructor
+
+  Beam & _copy(const Beam &rhs);
 
 };
 

@@ -231,8 +231,12 @@ class DLL_EXPORT SpectraWidget : public QWidget
   int _nRows;
   int _nCols;
   int _titleMargin;
+
   int _ascopeWidth;
   int _ascopeHeight;
+  int _ascopeXOffset;
+  int _ascopeYOffset;
+
   int _spectraGrossWidth;
   int _spectraGrossHeight;
   int _subPanelWidths;

@@ -88,7 +88,7 @@ private:
 
   // managing the rendering objects
 
-  SpectraMgr *_ascopeManager;
+  SpectraMgr *_spectraMgr;
 
   // methods
   

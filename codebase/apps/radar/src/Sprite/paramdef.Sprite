@@ -287,13 +287,13 @@ paramdef int {
 } spectra_top_margin;
 
 paramdef int {
-  p_default = 20;
+  p_default = 18;
   p_descr = "Height of bottom margin in SPECTRA mode (pixels).";
   p_help = "Time scale goes in the bottom margin.";
 } spectra_bottom_margin;
 
 paramdef int {
-  p_default = 30;
+  p_default = 20;
   p_descr = "Width of left margin in SPECTRA mode (pixels).";
   p_help = "Height scale goes in the left margin.";
 } spectra_left_margin;
@@ -361,12 +361,12 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 8;
+  p_default = 10;
   p_descr = "Font size of center title (pixels).";
 } spectra_title_font_size;
 
 paramdef int {
-  p_default = 6;
+  p_default = 8;
   p_descr = "Font size of axis labels in spectra (pixels).";
 } spectra_axis_label_font_size;
 

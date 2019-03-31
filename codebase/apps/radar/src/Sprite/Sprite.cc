@@ -57,7 +57,7 @@ Sprite::Sprite(int argc, char **argv) :
 {
   
   OK = true;
-  _ascopeManager = NULL;
+  _spectraMgr = NULL;
   _coordShmem = NULL;
   _tsReader = NULL;
   _beamMgr = NULL;
@@ -125,8 +125,8 @@ Sprite::~Sprite()
 
 {
 
-  if (_ascopeManager) {
-    delete _ascopeManager;
+  if (_spectraMgr) {
+    delete _spectraMgr;
   }
 
   if (_tsReader) {
@@ -150,9 +150,9 @@ int Sprite::Run(QApplication &app)
   
   // create the ascope manager
   
-  _ascopeManager = new SpectraMgr(_params, _tsReader);
+  _spectraMgr = new SpectraMgr(_params, _tsReader);
 
-  return _ascopeManager->run(app);
+  return _spectraMgr->run(app);
 
 }
 

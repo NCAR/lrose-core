@@ -435,26 +435,23 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
 void SpectraWidget::paintEvent(QPaintEvent *event)
 {
 
-  // RadxTime now(RadxTime::NOW);
-  // double timeSinceLast = now - _timeLastRendered;
-  // if (timeSinceLast < _params.spectra_min_secs_between_rendering) {
-  //   return;
-  // }
-  // _timeLastRendered = now;
+  RadxTime now(RadxTime::NOW);
+  double timeSinceLast = now - _timeLastRendered;
+  if (timeSinceLast < _params.spectra_min_secs_between_rendering) {
+    return;
+  }
+  _timeLastRendered = now;
 
   QPainter painter(this);
   painter.save();
   painter.eraseRect(0, 0, width(), height());
   _zoomWorld.setClippingOn(painter);
-  // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
   painter.restore();
   _drawOverlays(painter);
   
   // if we have a current beam, plot it
   if (_currentBeam) {
     _ascope->plotBeam(painter, _currentBeam, _xGridEnabled, _yGridEnabled);
-    // _currentBeam = NULL;
-    cerr << "AAAAAAAAAAAAAAAAAAAAAA" << endl;
   }
 
 }
@@ -468,6 +465,9 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
 {
 
   _ascopeHeight = height() - _titleMargin;
+  _ascopeXOffset = 0;
+  _ascopeYOffset = _titleMargin;
+
   _spectraGrossHeight = height() - _titleMargin;
   _spectraGrossWidth = width() - _ascopeWidth;
   _subPanelWidths = _spectraGrossWidth / _nCols;
@@ -479,9 +479,11 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
     cerr << "  height: " << height() << endl;
     cerr << "  _nRows: " << _nRows << endl;
     cerr << "  _nCols: " << _nCols << endl;
-    cerr << "  _ascopeHeight: " << _ascopeHeight << endl;
     cerr << "  _titleMargin: " << _titleMargin << endl;
     cerr << "  _ascopeWidth: " << _ascopeWidth << endl;
+    cerr << "  _ascopeHeight: " << _ascopeHeight << endl;
+    cerr << "  _ascopeXOffset: " << _ascopeXOffset << endl;
+    cerr << "  _ascopeYOffset: " << _ascopeYOffset << endl;
     cerr << "  _spectraGrossWidth: " << _spectraGrossWidth << endl;
     cerr << "  _spectraGrossHeight: " << _spectraGrossHeight << endl;
     cerr << "  _subPanelWidths: " << _subPanelWidths << endl;
@@ -948,7 +950,7 @@ void SpectraWidget::_createAscope()
   ascopeWorld.setGridColor(_params.spectra_grid_color);
 
   ascopeWorld.setWindowGeom(_ascopeWidth, _ascopeHeight,
-                            0, _titleMargin);
+                            _ascopeXOffset, _ascopeYOffset);
   
   ascopeWorld.setWorldLimits(0.0, 0.0, 1.0, 1.0);
   
@@ -963,7 +965,7 @@ void SpectraWidget::_configureAscope()
 {
 
   _ascope->setWindowGeom(_ascopeWidth, _ascopeHeight,
-                         0, _titleMargin);
+                         _ascopeXOffset, _ascopeYOffset);
   
   if (_currentBeam == NULL) {
     return;
