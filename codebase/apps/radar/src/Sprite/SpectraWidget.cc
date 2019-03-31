@@ -59,8 +59,12 @@ SpectraWidget::SpectraWidget(QWidget* parent,
 {
 
   _pointClicked = false;
-  
   _colorScaleWidth = _params.color_scale_width;
+
+  _nRows = _params.spectra_n_rows;
+  _nCols = _params.spectra_n_columns;
+  _titleMargin = _params.main_window_title_margin;
+  _ascopeWidth = _params.ascope_width_in_spectra_panel;
 
   // Set up the background color
 
@@ -119,8 +123,7 @@ void SpectraWidget::configureAxes(double min_amplitude,
   
   // set bottom margin - increase this if we are plotting the distance labels and ticks
   
-  _fullWorld.setWindowGeom(width() / 3, height() / 3,
-                           50, 50);
+  _fullWorld.setWindowGeom(width() / 3, height() / 3, 0, 0);
 
   _fullWorld.setWorldLimits(0.0, _minAmplitude,
                             _timeSpanSecs, _maxAmplitude);
@@ -439,10 +442,32 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
 void SpectraWidget::resizeEvent(QResizeEvent * e)
 {
 
+  _ascopeHeight = height() - _titleMargin;
+  _spectraGrossHeight = height() - _titleMargin;
+  _spectraGrossWidth = width() - _ascopeWidth;
+  _subPanelWidths = _spectraGrossWidth / _nCols;
+  _subPanelHeights = _spectraGrossHeight / _nRows;
+
+  if (_params.debug) {
+    cerr << "SpectraWidget::resizeEvent" << endl;
+    cerr << "  width: " << width() << endl;
+    cerr << "  height: " << height() << endl;
+    cerr << "  _nRows: " << _nRows << endl;
+    cerr << "  _nCols: " << _nCols << endl;
+    cerr << "  _ascopeHeight: " << _ascopeHeight << endl;
+    cerr << "  _titleMargin: " << _titleMargin << endl;
+    cerr << "  _ascopeWidth: " << _ascopeWidth << endl;
+    cerr << "  _spectraGrossWidth: " << _spectraGrossWidth << endl;
+    cerr << "  _spectraGrossHeight: " << _spectraGrossHeight << endl;
+    cerr << "  _subPanelWidths: " << _subPanelWidths << endl;
+    cerr << "  _subPanelHeights: " << _subPanelHeights << endl;
+  }
+
   _resetWorld(width(), height());
+
   _refreshImages();
   update();
-
+  
 }
 
 
@@ -464,13 +489,15 @@ void SpectraWidget::resize(int width, int height)
 void SpectraWidget::_resetWorld(int width, int height)
 
 {
-
+  
   _fullWorld.resize(width / 3, height / 3);
 
-  _fullWorld.setWindowOffsets(50, 50);
-
+  _fullWorld.setWindowOffsets(_ascopeWidth, _titleMargin);
+  
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
+
+  
 
 }
 
@@ -632,6 +659,43 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
 
   }
 
+  // draw panel dividing lines
+
+  painter.save();
+  QPen dividerPen(_params.main_window_panel_divider_color);
+  dividerPen.setWidth(_params.main_window_panel_divider_line_width);
+  painter.setPen(dividerPen);
+
+  // top line
+  {
+    QLineF topLine(0, _titleMargin, width(), _titleMargin);
+    painter.drawLine(topLine);
+  }
+
+  // ascope right boundary
+  {
+    QLineF ascopeBoundary(_ascopeWidth, _titleMargin, _ascopeWidth, height());
+    painter.drawLine(ascopeBoundary);
+  }
+
+  // spectra panels lower boundaries
+
+  for (int irow = 1; irow < _nRows; irow++) {
+    QLineF lowerBoundary(_ascopeWidth, _titleMargin + irow * _subPanelHeights,
+                         width(), _titleMargin + irow * _subPanelHeights);
+    painter.drawLine(lowerBoundary);
+  }
+
+  // spectra panels right boundaries
+
+  for (int icol = 1; icol < _nCols; icol++) {
+    QLineF rightBoundary(_ascopeWidth + icol * _subPanelWidths, _titleMargin,
+                         _ascopeWidth + icol * _subPanelWidths, height());
+    painter.drawLine(rightBoundary);
+  }
+
+  painter.restore();
+  
   // reset painter state
   
   painter.restore();

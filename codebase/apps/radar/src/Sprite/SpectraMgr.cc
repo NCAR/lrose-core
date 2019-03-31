@@ -93,7 +93,7 @@ SpectraMgr::SpectraMgr(const Params &params,
         
 {
   
-  _ascope = NULL;
+  _spectra = NULL;
 
   // _prevAltKm = -9999.0;
   // _altRateMps = 0.0;
@@ -134,8 +134,8 @@ SpectraMgr::~SpectraMgr()
 
 {
 
-  if (_ascope) {
-    delete _ascope;
+  if (_spectra) {
+    delete _spectra;
   }
 
 }
@@ -180,19 +180,19 @@ void SpectraMgr::_setupWindows()
   
   // ascope - main window
 
-  _ascopeFrame = new QFrame(_main);
-  _ascopeFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  _spectraFrame = new QFrame(_main);
+  _spectraFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   // configure the ASCOPE
 
-  _ascope = new SpectraWidget(_ascopeFrame, *this, _params);
+  _spectra = new SpectraWidget(_spectraFrame, *this, _params);
   connect(this, SIGNAL(frameResized(const int, const int)),
-	  _ascope, SLOT(resize(const int, const int)));
+	  _spectra, SLOT(resize(const int, const int)));
   
   // connect slots for location change
   
-  // connect(_ascope, SIGNAL(locationClicked(double, double, const RadxRay*)),
-  //         this, SLOT(_ascopeLocationClicked(double, double, const RadxRay*)));
+  // connect(_spectra, SIGNAL(locationClicked(double, double, const RadxRay*)),
+  //         this, SLOT(_spectraLocationClicked(double, double, const RadxRay*)));
   
   // create status panel
 
@@ -203,7 +203,7 @@ void SpectraMgr::_setupWindows()
   QHBoxLayout *mainLayout = new QHBoxLayout(_main);
   mainLayout->setMargin(3);
   mainLayout->addWidget(_statusPanel);
-  mainLayout->addWidget(_ascopeFrame);
+  mainLayout->addWidget(_spectraFrame);
 
   _createActions();
 
@@ -235,7 +235,7 @@ void SpectraMgr::_setupWindows()
   // create the time axis settings dialog
   
   // _createTimeAxisDialog();
-  _ascope->refresh();
+  _spectra->refresh();
  
 }
 
@@ -318,7 +318,7 @@ void SpectraMgr::_createActions()
 
   _clearAct = new QAction(tr("Clear"), this);
   _clearAct->setStatusTip(tr("Clear data"));
-  connect(_clearAct, SIGNAL(triggered()), _ascope, SLOT(clear()));
+  connect(_clearAct, SIGNAL(triggered()), _spectra, SLOT(clear()));
 
   // exit app
 
@@ -333,7 +333,7 @@ void SpectraMgr::_createActions()
   _xGridAct->setStatusTip(tr("Turn X grid on/off"));
   _xGridAct->setCheckable(true);
   connect(_xGridAct, SIGNAL(triggered(bool)),
-          _ascope, SLOT(setXGridEnabled(bool)));
+          _spectra, SLOT(setXGridEnabled(bool)));
 
   // show Y grid lines
 
@@ -341,7 +341,7 @@ void SpectraMgr::_createActions()
   _yGridAct->setStatusTip(tr("Turn Y grid on/off"));
   _yGridAct->setCheckable(true);
   connect(_yGridAct, SIGNAL(triggered(bool)),
-          _ascope, SLOT(setYGridEnabled(bool)));
+          _spectra, SLOT(setYGridEnabled(bool)));
   
   // show instrument height line in altitude display
 
@@ -349,7 +349,7 @@ void SpectraMgr::_createActions()
   // _instHtLineAct->setStatusTip(tr("Turn instrument height line on/off"));
   // _instHtLineAct->setCheckable(true);
   // connect(_instHtLineAct, SIGNAL(triggered(bool)),
-  //         _ascope, SLOT(setInstHtLineEnabled(bool)));
+  //         _spectra, SLOT(setInstHtLineEnabled(bool)));
 
   // show latlon legend
 
@@ -357,7 +357,7 @@ void SpectraMgr::_createActions()
   // _latlonLegendAct->setStatusTip(tr("Display starting lat/lon as a legend"));
   // _latlonLegendAct->setCheckable(true);
   // connect(_latlonLegendAct, SIGNAL(triggered(bool)),
-  //         _ascope, SLOT(setLatlonLegendEnabled(bool)));
+  //         _spectra, SLOT(setLatlonLegendEnabled(bool)));
 
   // show dist/track legend
 
@@ -365,7 +365,7 @@ void SpectraMgr::_createActions()
   // _speedTrackLegendAct->setStatusTip(tr("Display mean speed and track as a legend"));
   // _speedTrackLegendAct->setCheckable(true);
   // connect(_speedTrackLegendAct, SIGNAL(triggered(bool)),
-  //         _ascope, SLOT(setSpeedTrackLegendEnabled(bool)));
+  //         _spectra, SLOT(setSpeedTrackLegendEnabled(bool)));
 
   // display distance ticks
 
@@ -428,7 +428,7 @@ void SpectraMgr::_configureAxes()
   
 {
   
-  _ascope->configureAxes(_params.spectra_min_amplitude,
+  _spectra->configureAxes(_params.spectra_min_amplitude,
                          _params.spectra_max_amplitude,
                          _params.spectra_time_span_secs);
 
@@ -450,7 +450,7 @@ void SpectraMgr::timerEvent(QTimerEvent *event)
   
   if (_firstTimerEvent) {
 
-    _ascope->resize(_ascopeFrame->width(), _ascopeFrame->height());
+    _spectra->resize(_spectraFrame->width(), _spectraFrame->height());
     
     // Set the size of the second column to the size of the largest
     // label.  This should keep the column from wiggling as the values change.
@@ -499,7 +499,7 @@ void SpectraMgr::resizeEvent(QResizeEvent *event)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent" << endl;
   }
-  emit frameResized(_ascopeFrame->width(), _ascopeFrame->height());
+  emit frameResized(_spectraFrame->width(), _spectraFrame->height());
 }
 
 ////////////////////////////////////////////////////////////////
@@ -614,7 +614,7 @@ void SpectraMgr::_handleRealtimeData()
 
   // plot the data
   
-  _ascope->plotBeam(beam);
+  _spectra->plotBeam(beam);
   this->setCursor(Qt::ArrowCursor);
 
   // clean up
@@ -658,7 +658,7 @@ void SpectraMgr::_handleArchiveData()
 
   // plot the data
 
-  _ascope->plotBeam(beam);
+  _spectra->plotBeam(beam);
   this->setCursor(Qt::ArrowCursor);
 
   // clean up
@@ -713,7 +713,7 @@ void SpectraMgr::_locationClicked(double xsecs, double ykm,
 //   double range = 0.0, altitude = 0.0;
 //   double sinEl = sin(ray->getElevationDeg() * DEG_TO_RAD);
 
-//   if (_ascope->getRangeAxisMode() == Params::RANGE_AXIS_ALTITUDE) {
+//   if (_spectra->getRangeAxisMode() == Params::RANGE_AXIS_ALTITUDE) {
     
 //     altitude = ykm;
 //     range = (altitude - _getInstHtKm(ray)) / sinEl;
@@ -847,7 +847,7 @@ void SpectraMgr::_locationClicked(double xsecs, double ykm,
 
 void SpectraMgr::_unzoom()
 {
-  _ascope->unzoomView();
+  _spectra->unzoomView();
   _unzoomAct->setEnabled(false);
 }
 
@@ -1072,7 +1072,7 @@ void SpectraMgr::_setDataRetrievalMode()
   //   if (_archiveMode) {
   //     _archiveMode = false;
   //     _archiveTimeBox->setEnabled(false);
-  //     _ascope->activateRealtimeRendering();
+  //     _spectra->activateRealtimeRendering();
   //   }
   // } else {
   //   if (!_archiveMode) {
@@ -1082,7 +1082,7 @@ void SpectraMgr::_setDataRetrievalMode()
   //       _setArchiveStartTime(_plotStartTime - _timeSpanSecs);
   //       _setGuiFromStartTime();
   //     }
-  //     _ascope->activateArchiveRendering();
+  //     _spectra->activateArchiveRendering();
   //   }
   // }
   // _configureAxes();
@@ -1106,7 +1106,7 @@ void SpectraMgr::_goFwd()
 
 void SpectraMgr::_changeRange(int deltaGates)
 {
-  if (!_ascope->getPointClicked()) {
+  if (!_spectra->getPointClicked()) {
     return;
   }
   // if (_requestedRangeAxisMode == Params::RANGE_AXIS_DOWN) {
@@ -1114,7 +1114,7 @@ void SpectraMgr::_changeRange(int deltaGates)
   // }
   // _yKmClicked += deltaGates * _rayClicked->getGateSpacingKm();
   // _locationClicked(_xSecsClicked, _yKmClicked, _rayClicked);
-  // _ascope->setMouseClickPoint(_xSecsClicked, _yKmClicked);
+  // _spectra->setMouseClickPoint(_xSecsClicked, _yKmClicked);
 }
 
 ////////////////////////////////////////////////////////

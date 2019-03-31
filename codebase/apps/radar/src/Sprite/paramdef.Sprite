@@ -120,163 +120,6 @@ paramdef double {
 } moments_max_search_angle_error;
 
 commentdef {
-  p_header = "BEAM SAMPLING";
-};
-
-paramdef int {
-  p_default = 256;
-  p_descr = "Number of samples (pulses) per dwell.";
-} n_samples;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Index the beams on even centers?";
-  p_help = "If false, the pulses are formed into beams sequentially, with no overlap.";
-} indexed_beams;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Dwell width in azimuth (deg).";
-  p_help = "Applies to PPI mode.";
-} indexed_resolution_ppi;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Dwell width in elevation (deg).";
-  p_help = "Applies to RHI mode.";
-} indexed_resolution_rhi;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to invert the sense of the HV flag in alternating mode.";
-  p_help = "In alternating dual-pol mode, the HV flag indicates whether the pulse is horizontally or vertically polarized. Normally 1 indicates H and 0 V. This parameter allows you to invert the sense of the flag, so that 1 is interpreted as V and 0 as H.";
-} invert_hv_flag;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Does the PRT in the pulse header refer to the previous time interval?.";
-  p_help = "If TRUE, the PRT in the pulse header refers to the time from the PREVIOUS pulse to THIS pulse. If FALSE, the PRT in the header refers to the time from THIS pulse to the NEXT pulse.";
-} prt_is_for_previous_interval;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to check for missing pulses in the time series.";
-  p_help = "If missing pulses are found, the beam formed by those pulses will be discarded.";
-} check_for_missing_pulses;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to swap the H and V channels for IQ data from the receiver.";
-  p_help = "It is possible that the receiver was incorrectly connected and the channels (H and V for example) are swapped. If this flag is set to TRUE, the channels in the data will be swapped before computing the moments.";
-} swap_receiver_channels;
-
-commentdef {
-  p_header = "OVERRIDING RADAR PARAMETERS";
-  p_text = "Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.";
-};
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the radar name.";
-  p_help = "If true, the name in this file will be used. If not, the name in the time series data will be used.";
-} override_radar_name;
-
-paramdef string {
-  p_default = "SPOL";
-  p_descr = "Name of the radar.";
-  p_help = "See 'override_radar_name'.";
-} radar_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the radar location.";
-  p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
-} override_radar_location;
-
-paramdef double {
-  p_default = 39.93208;
-  p_descr = "Radar latitude (deg).";
-  p_help = "See override_radar_location.";
-} radar_latitude_deg;
-
-paramdef double {
-  p_default = -105.18175;
-  p_descr = "Radar longitude (deg).";
-  p_help = "See override_radar_location.";
-} radar_longitude_deg;
-
-paramdef double {
-  p_default = 1742;
-  p_descr = "Radar altitude (meters).";
-  p_help = "See override_radar_location.";
-} radar_altitude_meters;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the gate geometry.";
-  p_help = "If true, the gate_spacing and start_range in the time series data is overridden by the parameters in this file.";
-} override_gate_geometry;
-
-paramdef double {
-  p_default = 150;
-  p_descr = "Gate spacing (meters).";
-  p_help = "See override_gate_geometry.";
-} gate_spacing_meters;
-
-paramdef double {
-  p_default = 150;
-  p_descr = "Start range (meters).";
-  p_help = "See override_gate_geometry.";
-} start_range_meters;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the radar wavelength.";
-  p_help = "If true, the radar wavelength in this file will be used. If not, the wavelength in the time series data will be used if available.";
-} override_radar_wavelength;
-
-paramdef double {
-  p_default = 10.0;
-  p_descr = "Radar wavelength (cm).";
-  p_help = "See override_radar_wavelength.";
-} radar_wavelength_cm;
-
-commentdef {
-  p_header = "FFT WINDOW";
-}
-
-typedef enum {
-  WINDOW_RECT,
-  WINDOW_VONHANN,
-  WINDOW_BLACKMAN,
-  WINDOW_BLACKMAN_NUTTALL,
-  WINDOW_TUKEY_10,
-  WINDOW_TUKEY_20,
-  WINDOW_TUKEY_30,
-  WINDOW_TUKEY_50
-} window_t;
-
-paramdef enum window_t {
-  p_default = WINDOW_VONHANN;
-  p_descr = "Window to be applied to time series before computing spectra.";
-} window;
-
-commentdef {
-  p_header = "RADAR CALIBRATION";
-}
-
-paramdef string {
-  p_default = "./radar_cal.xml";
-  p_descr = "File name for XML calibration file.";
-} cal_file_path;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override cal in time series data.";
-  p_help = "If false, the cal information in the time series data will be used. If true, the cal info in the param file will be used.";
-} use_cal_from_time_series;
-
-commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
 }
 
@@ -355,7 +198,7 @@ paramdef double {
 } max_range_km;
 
 commentdef {
-  p_header = "WINDOW DIMENSIONS AND PLOTTING DETAILS";
+  p_header = "MAIN WINDOW DIMENSIONS AND PLOTTING DETAILS";
 }
 
 paramdef int {
@@ -379,6 +222,11 @@ paramdef int {
 } main_window_start_y;
 
 paramdef int {
+  p_default = 20;
+  p_descr = "Height of top title margin, main window (pixels).";
+} main_window_title_margin;
+
+paramdef int {
   p_default = 40;
   p_descr = "Width of color scale (pixels).";
 } color_scale_width;
@@ -394,15 +242,15 @@ paramdef string {
   p_descr = "Color of main display background.";
 } background_color;
 
-paramdef string {
-  p_default = "white";
-  p_descr = "Color of overlays.";
-} overlay_color;
-
 paramdef int {
-  p_default = 8;
-  p_descr = "Font size for labels on overlays (pixels).";
-} overlay_font_size;
+  p_default = 1;
+  p_descr = "Width for lines dividing up the main window into panels.";
+} main_window_panel_divider_line_width;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color for lines dividing up the main window into panels.";
+} main_window_panel_divider_color;
 
 paramdef int {
   p_default = 11;
@@ -411,20 +259,26 @@ paramdef int {
 } click_cross_size;
 
 commentdef {
-  p_header = "SPECTRA MODE DISPLAY";
+  p_header = "SPECTRA DISPLAY";
 }
 
 paramdef int {
-  p_default = 20;
-  p_descr = "Width of left margin for ascope plot (pixels).";
-  p_help = "The Y axis labels are plotted here.";
-} ascope_left_margin;
+  p_default = 2;
+  p_descr = "Number of rows of plots in spectra display.";
+  p_help = "The spectra display is made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of rows.";
+} spectra_n_rows;
 
 paramdef int {
-  p_default = 20;
-  p_descr = "Height of bottom margin for ascope plot (pixels).";
-  p_help = "The X axis labels are plotted here.";
-} ascope_bottom_margin;
+  p_default = 2;
+  p_descr = "Number of columns of plots in spectra display.";
+  p_help = "The spectra display is made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.";
+} spectra_n_columns;
+
+paramdef int {
+  p_default = 100;
+  p_descr = "Width of ASCOPE panel in spectra window (pixels).";
+  p_help = "The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.";
+} ascope_width_in_spectra_panel;
 
 paramdef int {
   p_default = 20;
@@ -601,6 +455,23 @@ paramdef boolean {
 } spectra_plot_legend2;
 
 commentdef {
+  p_header = "ASCOPE DISPLAY PANEL";
+  p_text = "The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.";
+}
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Width of left margin for ascope plot (pixels).";
+  p_help = "The Y axis labels are plotted here.";
+} ascope_left_margin;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Height of bottom margin for ascope plot (pixels).";
+  p_help = "The X axis labels are plotted here.";
+} ascope_bottom_margin;
+
+commentdef {
   p_header = "CLUTTER FILTERING";
   p_text = "The default clutter filtering method is the Adaptive Filter, with residue correction activated.";
 }
@@ -771,4 +642,161 @@ paramdef boolean {
   p_default = false;
   p_descr = "Option to print debug messages in KDP computation.";
 } KDP_debug;
+
+commentdef {
+  p_header = "BEAM SAMPLING";
+};
+
+paramdef int {
+  p_default = 256;
+  p_descr = "Number of samples (pulses) per dwell.";
+} n_samples;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Index the beams on even centers?";
+  p_help = "If false, the pulses are formed into beams sequentially, with no overlap.";
+} indexed_beams;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Dwell width in azimuth (deg).";
+  p_help = "Applies to PPI mode.";
+} indexed_resolution_ppi;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Dwell width in elevation (deg).";
+  p_help = "Applies to RHI mode.";
+} indexed_resolution_rhi;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to invert the sense of the HV flag in alternating mode.";
+  p_help = "In alternating dual-pol mode, the HV flag indicates whether the pulse is horizontally or vertically polarized. Normally 1 indicates H and 0 V. This parameter allows you to invert the sense of the flag, so that 1 is interpreted as V and 0 as H.";
+} invert_hv_flag;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Does the PRT in the pulse header refer to the previous time interval?.";
+  p_help = "If TRUE, the PRT in the pulse header refers to the time from the PREVIOUS pulse to THIS pulse. If FALSE, the PRT in the header refers to the time from THIS pulse to the NEXT pulse.";
+} prt_is_for_previous_interval;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to check for missing pulses in the time series.";
+  p_help = "If missing pulses are found, the beam formed by those pulses will be discarded.";
+} check_for_missing_pulses;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to swap the H and V channels for IQ data from the receiver.";
+  p_help = "It is possible that the receiver was incorrectly connected and the channels (H and V for example) are swapped. If this flag is set to TRUE, the channels in the data will be swapped before computing the moments.";
+} swap_receiver_channels;
+
+commentdef {
+  p_header = "OVERRIDING RADAR PARAMETERS";
+  p_text = "Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar name.";
+  p_help = "If true, the name in this file will be used. If not, the name in the time series data will be used.";
+} override_radar_name;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Name of the radar.";
+  p_help = "See 'override_radar_name'.";
+} radar_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar location.";
+  p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
+} override_radar_location;
+
+paramdef double {
+  p_default = 39.93208;
+  p_descr = "Radar latitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_latitude_deg;
+
+paramdef double {
+  p_default = -105.18175;
+  p_descr = "Radar longitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_longitude_deg;
+
+paramdef double {
+  p_default = 1742;
+  p_descr = "Radar altitude (meters).";
+  p_help = "See override_radar_location.";
+} radar_altitude_meters;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the gate geometry.";
+  p_help = "If true, the gate_spacing and start_range in the time series data is overridden by the parameters in this file.";
+} override_gate_geometry;
+
+paramdef double {
+  p_default = 150;
+  p_descr = "Gate spacing (meters).";
+  p_help = "See override_gate_geometry.";
+} gate_spacing_meters;
+
+paramdef double {
+  p_default = 150;
+  p_descr = "Start range (meters).";
+  p_help = "See override_gate_geometry.";
+} start_range_meters;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar wavelength.";
+  p_help = "If true, the radar wavelength in this file will be used. If not, the wavelength in the time series data will be used if available.";
+} override_radar_wavelength;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Radar wavelength (cm).";
+  p_help = "See override_radar_wavelength.";
+} radar_wavelength_cm;
+
+commentdef {
+  p_header = "FFT WINDOWING";
+}
+
+typedef enum {
+  WINDOW_RECT,
+  WINDOW_VONHANN,
+  WINDOW_BLACKMAN,
+  WINDOW_BLACKMAN_NUTTALL,
+  WINDOW_TUKEY_10,
+  WINDOW_TUKEY_20,
+  WINDOW_TUKEY_30,
+  WINDOW_TUKEY_50
+} window_t;
+
+paramdef enum window_t {
+  p_default = WINDOW_VONHANN;
+  p_descr = "Window to be applied to time series before computing spectra.";
+} window;
+
+commentdef {
+  p_header = "RADAR CALIBRATION";
+}
+
+paramdef string {
+  p_default = "./radar_cal.xml";
+  p_descr = "File name for XML calibration file.";
+} cal_file_path;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override cal in time series data.";
+  p_help = "If false, the cal information in the time series data will be used. If true, the cal info in the param file will be used.";
+} use_cal_from_time_series;
 

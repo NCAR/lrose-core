@@ -225,8 +225,20 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   QBrush _backgroundBrush;
 
+  // plot panel layouts
+
+  int _nRows;
+  int _nCols;
+  int _titleMargin;
+  int _ascopeWidth;
+  int _ascopeHeight;
+  int _spectraGrossWidth;
+  int _spectraGrossHeight;
+  int _subPanelWidths;
+  int _subPanelHeights;
+
   /**
-   * Overlays
+   * Grid overlays
    */
 
   bool _xGridEnabled;

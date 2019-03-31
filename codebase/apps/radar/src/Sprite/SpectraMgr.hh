@@ -95,7 +95,7 @@ public:
   
   int run(QApplication &app);
 
-  // enable the zoom button - called by AscopeWidget
+  // enable the zoom button - called by SpectraWidget
   
   virtual void enableZoomButton() const;
   
@@ -225,8 +225,8 @@ private:
 
   // windows
 
-  QFrame *_ascopeFrame;
-  SpectraWidget *_ascope;
+  QFrame *_spectraFrame;
+  SpectraWidget *_spectra;
 
   // times for rays
 

@@ -83,17 +83,6 @@ public:
   } input_mode_t;
 
   typedef enum {
-    WINDOW_RECT = 0,
-    WINDOW_VONHANN = 1,
-    WINDOW_BLACKMAN = 2,
-    WINDOW_BLACKMAN_NUTTALL = 3,
-    WINDOW_TUKEY_10 = 4,
-    WINDOW_TUKEY_20 = 5,
-    WINDOW_TUKEY_30 = 6,
-    WINDOW_TUKEY_50 = 7
-  } window_t;
-
-  typedef enum {
     LEGEND_TOP_LEFT = 0,
     LEGEND_TOP_RIGHT = 1,
     LEGEND_BOTTOM_LEFT = 2,
@@ -114,6 +103,17 @@ public:
     FIR_LEN_20 = 4,
     FIR_LEN_10 = 5
   } fir_filter_len_t;
+
+  typedef enum {
+    WINDOW_RECT = 0,
+    WINDOW_VONHANN = 1,
+    WINDOW_BLACKMAN = 2,
+    WINDOW_BLACKMAN_NUTTALL = 3,
+    WINDOW_TUKEY_10 = 4,
+    WINDOW_TUKEY_20 = 5,
+    WINDOW_TUKEY_30 = 6,
+    WINDOW_TUKEY_50 = 7
+  } window_t;
 
   // struct typedefs
 
@@ -457,50 +457,6 @@ public:
 
   double moments_max_search_angle_error;
 
-  int n_samples;
-
-  tdrp_bool_t indexed_beams;
-
-  double indexed_resolution_ppi;
-
-  double indexed_resolution_rhi;
-
-  tdrp_bool_t invert_hv_flag;
-
-  tdrp_bool_t prt_is_for_previous_interval;
-
-  tdrp_bool_t check_for_missing_pulses;
-
-  tdrp_bool_t swap_receiver_channels;
-
-  tdrp_bool_t override_radar_name;
-
-  char* radar_name;
-
-  tdrp_bool_t override_radar_location;
-
-  double radar_latitude_deg;
-
-  double radar_longitude_deg;
-
-  double radar_altitude_meters;
-
-  tdrp_bool_t override_gate_geometry;
-
-  double gate_spacing_meters;
-
-  double start_range_meters;
-
-  tdrp_bool_t override_radar_wavelength;
-
-  double radar_wavelength_cm;
-
-  window_t window;
-
-  char* cal_file_path;
-
-  tdrp_bool_t use_cal_from_time_series;
-
   show_status_t show_status_in_gui;
 
   double max_range_km;
@@ -513,21 +469,25 @@ public:
 
   int main_window_start_y;
 
+  int main_window_title_margin;
+
   int color_scale_width;
 
   int label_font_size;
 
   char* background_color;
 
-  char* overlay_color;
+  int main_window_panel_divider_line_width;
 
-  int overlay_font_size;
+  char* main_window_panel_divider_color;
 
   int click_cross_size;
 
-  int ascope_left_margin;
+  int spectra_n_rows;
 
-  int ascope_bottom_margin;
+  int spectra_n_columns;
+
+  int ascope_width_in_spectra_panel;
 
   int spectra_top_margin;
 
@@ -589,6 +549,10 @@ public:
 
   tdrp_bool_t spectra_plot_legend2;
 
+  int ascope_left_margin;
+
+  int ascope_bottom_margin;
+
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 
   double min_snr_db_for_residue_correction;
@@ -639,6 +603,50 @@ public:
 
   tdrp_bool_t KDP_debug;
 
+  int n_samples;
+
+  tdrp_bool_t indexed_beams;
+
+  double indexed_resolution_ppi;
+
+  double indexed_resolution_rhi;
+
+  tdrp_bool_t invert_hv_flag;
+
+  tdrp_bool_t prt_is_for_previous_interval;
+
+  tdrp_bool_t check_for_missing_pulses;
+
+  tdrp_bool_t swap_receiver_channels;
+
+  tdrp_bool_t override_radar_name;
+
+  char* radar_name;
+
+  tdrp_bool_t override_radar_location;
+
+  double radar_latitude_deg;
+
+  double radar_longitude_deg;
+
+  double radar_altitude_meters;
+
+  tdrp_bool_t override_gate_geometry;
+
+  double gate_spacing_meters;
+
+  double start_range_meters;
+
+  tdrp_bool_t override_radar_wavelength;
+
+  double radar_wavelength_cm;
+
+  window_t window;
+
+  char* cal_file_path;
+
+  tdrp_bool_t use_cal_from_time_series;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -646,7 +654,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[123];
+  mutable TDRPtable _table[128];
 
   const char *_className;
 

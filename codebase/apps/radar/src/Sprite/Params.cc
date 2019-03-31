@@ -777,326 +777,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("BEAM SAMPLING");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'n_samples'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_samples");
-    tt->descr = tdrpStrDup("Number of samples (pulses) per dwell.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &n_samples - &_start_;
-    tt->single_val.i = 256;
-    tt++;
-    
-    // Parameter 'indexed_beams'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("indexed_beams");
-    tt->descr = tdrpStrDup("Index the beams on even centers?");
-    tt->help = tdrpStrDup("If false, the pulses are formed into beams sequentially, with no overlap.");
-    tt->val_offset = (char *) &indexed_beams - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'indexed_resolution_ppi'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("indexed_resolution_ppi");
-    tt->descr = tdrpStrDup("Dwell width in azimuth (deg).");
-    tt->help = tdrpStrDup("Applies to PPI mode.");
-    tt->val_offset = (char *) &indexed_resolution_ppi - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'indexed_resolution_rhi'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("indexed_resolution_rhi");
-    tt->descr = tdrpStrDup("Dwell width in elevation (deg).");
-    tt->help = tdrpStrDup("Applies to RHI mode.");
-    tt->val_offset = (char *) &indexed_resolution_rhi - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'invert_hv_flag'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("invert_hv_flag");
-    tt->descr = tdrpStrDup("Option to invert the sense of the HV flag in alternating mode.");
-    tt->help = tdrpStrDup("In alternating dual-pol mode, the HV flag indicates whether the pulse is horizontally or vertically polarized. Normally 1 indicates H and 0 V. This parameter allows you to invert the sense of the flag, so that 1 is interpreted as V and 0 as H.");
-    tt->val_offset = (char *) &invert_hv_flag - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'prt_is_for_previous_interval'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("prt_is_for_previous_interval");
-    tt->descr = tdrpStrDup("Does the PRT in the pulse header refer to the previous time interval?.");
-    tt->help = tdrpStrDup("If TRUE, the PRT in the pulse header refers to the time from the PREVIOUS pulse to THIS pulse. If FALSE, the PRT in the header refers to the time from THIS pulse to the NEXT pulse.");
-    tt->val_offset = (char *) &prt_is_for_previous_interval - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'check_for_missing_pulses'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("check_for_missing_pulses");
-    tt->descr = tdrpStrDup("Option to check for missing pulses in the time series.");
-    tt->help = tdrpStrDup("If missing pulses are found, the beam formed by those pulses will be discarded.");
-    tt->val_offset = (char *) &check_for_missing_pulses - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'swap_receiver_channels'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("swap_receiver_channels");
-    tt->descr = tdrpStrDup("Option to swap the H and V channels for IQ data from the receiver.");
-    tt->help = tdrpStrDup("It is possible that the receiver was incorrectly connected and the channels (H and V for example) are swapped. If this flag is set to TRUE, the channels in the data will be swapped before computing the moments.");
-    tt->val_offset = (char *) &swap_receiver_channels - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("OVERRIDING RADAR PARAMETERS");
-    tt->comment_text = tdrpStrDup("Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.");
-    tt++;
-    
-    // Parameter 'override_radar_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_radar_name");
-    tt->descr = tdrpStrDup("Option to override the radar name.");
-    tt->help = tdrpStrDup("If true, the name in this file will be used. If not, the name in the time series data will be used.");
-    tt->val_offset = (char *) &override_radar_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'radar_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("radar_name");
-    tt->descr = tdrpStrDup("Name of the radar.");
-    tt->help = tdrpStrDup("See 'override_radar_name'.");
-    tt->val_offset = (char *) &radar_name - &_start_;
-    tt->single_val.s = tdrpStrDup("SPOL");
-    tt++;
-    
-    // Parameter 'override_radar_location'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_radar_location");
-    tt->descr = tdrpStrDup("Option to override the radar location.");
-    tt->help = tdrpStrDup("If true, the location in this file will be used. If not, the location in the time series data will be used.");
-    tt->val_offset = (char *) &override_radar_location - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'radar_latitude_deg'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("radar_latitude_deg");
-    tt->descr = tdrpStrDup("Radar latitude (deg).");
-    tt->help = tdrpStrDup("See override_radar_location.");
-    tt->val_offset = (char *) &radar_latitude_deg - &_start_;
-    tt->single_val.d = 39.9321;
-    tt++;
-    
-    // Parameter 'radar_longitude_deg'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("radar_longitude_deg");
-    tt->descr = tdrpStrDup("Radar longitude (deg).");
-    tt->help = tdrpStrDup("See override_radar_location.");
-    tt->val_offset = (char *) &radar_longitude_deg - &_start_;
-    tt->single_val.d = -105.182;
-    tt++;
-    
-    // Parameter 'radar_altitude_meters'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("radar_altitude_meters");
-    tt->descr = tdrpStrDup("Radar altitude (meters).");
-    tt->help = tdrpStrDup("See override_radar_location.");
-    tt->val_offset = (char *) &radar_altitude_meters - &_start_;
-    tt->single_val.d = 1742;
-    tt++;
-    
-    // Parameter 'override_gate_geometry'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_gate_geometry");
-    tt->descr = tdrpStrDup("Option to override the gate geometry.");
-    tt->help = tdrpStrDup("If true, the gate_spacing and start_range in the time series data is overridden by the parameters in this file.");
-    tt->val_offset = (char *) &override_gate_geometry - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'gate_spacing_meters'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("gate_spacing_meters");
-    tt->descr = tdrpStrDup("Gate spacing (meters).");
-    tt->help = tdrpStrDup("See override_gate_geometry.");
-    tt->val_offset = (char *) &gate_spacing_meters - &_start_;
-    tt->single_val.d = 150;
-    tt++;
-    
-    // Parameter 'start_range_meters'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("start_range_meters");
-    tt->descr = tdrpStrDup("Start range (meters).");
-    tt->help = tdrpStrDup("See override_gate_geometry.");
-    tt->val_offset = (char *) &start_range_meters - &_start_;
-    tt->single_val.d = 150;
-    tt++;
-    
-    // Parameter 'override_radar_wavelength'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_radar_wavelength");
-    tt->descr = tdrpStrDup("Option to override the radar wavelength.");
-    tt->help = tdrpStrDup("If true, the radar wavelength in this file will be used. If not, the wavelength in the time series data will be used if available.");
-    tt->val_offset = (char *) &override_radar_wavelength - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'radar_wavelength_cm'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("radar_wavelength_cm");
-    tt->descr = tdrpStrDup("Radar wavelength (cm).");
-    tt->help = tdrpStrDup("See override_radar_wavelength.");
-    tt->val_offset = (char *) &radar_wavelength_cm - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("FFT WINDOW");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'window'
-    // ctype is '_window_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("window");
-    tt->descr = tdrpStrDup("Window to be applied to time series before computing spectra.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &window - &_start_;
-    tt->enum_def.name = tdrpStrDup("window_t");
-    tt->enum_def.nfields = 8;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("WINDOW_RECT");
-      tt->enum_def.fields[0].val = WINDOW_RECT;
-      tt->enum_def.fields[1].name = tdrpStrDup("WINDOW_VONHANN");
-      tt->enum_def.fields[1].val = WINDOW_VONHANN;
-      tt->enum_def.fields[2].name = tdrpStrDup("WINDOW_BLACKMAN");
-      tt->enum_def.fields[2].val = WINDOW_BLACKMAN;
-      tt->enum_def.fields[3].name = tdrpStrDup("WINDOW_BLACKMAN_NUTTALL");
-      tt->enum_def.fields[3].val = WINDOW_BLACKMAN_NUTTALL;
-      tt->enum_def.fields[4].name = tdrpStrDup("WINDOW_TUKEY_10");
-      tt->enum_def.fields[4].val = WINDOW_TUKEY_10;
-      tt->enum_def.fields[5].name = tdrpStrDup("WINDOW_TUKEY_20");
-      tt->enum_def.fields[5].val = WINDOW_TUKEY_20;
-      tt->enum_def.fields[6].name = tdrpStrDup("WINDOW_TUKEY_30");
-      tt->enum_def.fields[6].val = WINDOW_TUKEY_30;
-      tt->enum_def.fields[7].name = tdrpStrDup("WINDOW_TUKEY_50");
-      tt->enum_def.fields[7].val = WINDOW_TUKEY_50;
-    tt->single_val.e = WINDOW_VONHANN;
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("RADAR CALIBRATION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'cal_file_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("cal_file_path");
-    tt->descr = tdrpStrDup("File name for XML calibration file.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &cal_file_path - &_start_;
-    tt->single_val.s = tdrpStrDup("./radar_cal.xml");
-    tt++;
-    
-    // Parameter 'use_cal_from_time_series'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_cal_from_time_series");
-    tt->descr = tdrpStrDup("Option to override cal in time series data.");
-    tt->help = tdrpStrDup("If false, the cal information in the time series data will be used. If true, the cal info in the param file will be used.");
-    tt->val_offset = (char *) &use_cal_from_time_series - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("STATUS TO BE SHOWN IN GUI");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1263,11 +943,11 @@
       tt->struct_vals[23].b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("INITIAL MAX RANGE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1284,12 +964,12 @@
     tt->single_val.d = 225;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("WINDOW DIMENSIONS AND PLOTTING DETAILS");
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("MAIN WINDOW DIMENSIONS AND PLOTTING DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1341,6 +1021,18 @@
     tt->single_val.i = 0;
     tt++;
     
+    // Parameter 'main_window_title_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("main_window_title_margin");
+    tt->descr = tdrpStrDup("Height of top title margin, main window (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_window_title_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
     // Parameter 'color_scale_width'
     // ctype is 'int'
     
@@ -1377,28 +1069,28 @@
     tt->single_val.s = tdrpStrDup("black");
     tt++;
     
-    // Parameter 'overlay_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("overlay_color");
-    tt->descr = tdrpStrDup("Color of overlays.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &overlay_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
-    tt++;
-    
-    // Parameter 'overlay_font_size'
+    // Parameter 'main_window_panel_divider_line_width'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("overlay_font_size");
-    tt->descr = tdrpStrDup("Font size for labels on overlays (pixels).");
+    tt->param_name = tdrpStrDup("main_window_panel_divider_line_width");
+    tt->descr = tdrpStrDup("Width for lines dividing up the main window into panels.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &overlay_font_size - &_start_;
-    tt->single_val.i = 8;
+    tt->val_offset = (char *) &main_window_panel_divider_line_width - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'main_window_panel_divider_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("main_window_panel_divider_color");
+    tt->descr = tdrpStrDup("Color for lines dividing up the main window into panels.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_window_panel_divider_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
     tt++;
     
     // Parameter 'click_cross_size'
@@ -1413,37 +1105,49 @@
     tt->single_val.i = 11;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("SPECTRA MODE DISPLAY");
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("SPECTRA DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'ascope_left_margin'
+    // Parameter 'spectra_n_rows'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_left_margin");
-    tt->descr = tdrpStrDup("Width of left margin for ascope plot (pixels).");
-    tt->help = tdrpStrDup("The Y axis labels are plotted here.");
-    tt->val_offset = (char *) &ascope_left_margin - &_start_;
-    tt->single_val.i = 20;
+    tt->param_name = tdrpStrDup("spectra_n_rows");
+    tt->descr = tdrpStrDup("Number of rows of plots in spectra display.");
+    tt->help = tdrpStrDup("The spectra display is made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of rows.");
+    tt->val_offset = (char *) &spectra_n_rows - &_start_;
+    tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'ascope_bottom_margin'
+    // Parameter 'spectra_n_columns'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_bottom_margin");
-    tt->descr = tdrpStrDup("Height of bottom margin for ascope plot (pixels).");
-    tt->help = tdrpStrDup("The X axis labels are plotted here.");
-    tt->val_offset = (char *) &ascope_bottom_margin - &_start_;
-    tt->single_val.i = 20;
+    tt->param_name = tdrpStrDup("spectra_n_columns");
+    tt->descr = tdrpStrDup("Number of columns of plots in spectra display.");
+    tt->help = tdrpStrDup("The spectra display is made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.");
+    tt->val_offset = (char *) &spectra_n_columns - &_start_;
+    tt->single_val.i = 2;
+    tt++;
+    
+    // Parameter 'ascope_width_in_spectra_panel'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_width_in_spectra_panel");
+    tt->descr = tdrpStrDup("Width of ASCOPE panel in spectra window (pixels).");
+    tt->help = tdrpStrDup("The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.");
+    tt->val_offset = (char *) &ascope_width_in_spectra_panel - &_start_;
+    tt->single_val.i = 100;
     tt++;
     
     // Parameter 'spectra_top_margin'
@@ -1614,11 +1318,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("SPECTRA TITLES, LABELS AND AXES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1755,11 +1459,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("SPECTRA LEGENDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1860,11 +1564,44 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("ASCOPE DISPLAY PANEL");
+    tt->comment_text = tdrpStrDup("The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.");
+    tt++;
+    
+    // Parameter 'ascope_left_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin for ascope plot (pixels).");
+    tt->help = tdrpStrDup("The Y axis labels are plotted here.");
+    tt->val_offset = (char *) &ascope_left_margin - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'ascope_bottom_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_bottom_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin for ascope plot (pixels).");
+    tt->help = tdrpStrDup("The X axis labels are plotted here.");
+    tt->val_offset = (char *) &ascope_bottom_margin - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'Comment 11'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("CLUTTER FILTERING");
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
@@ -1965,11 +1702,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("SPECTRUM WIDTH METHOD");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1996,11 +1733,11 @@
     tt->single_val.e = WIDTH_METHOD_R0R1;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP USING ADAPTIVE FILTER METHOD");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
     tt++;
@@ -2210,6 +1947,326 @@
     tt->descr = tdrpStrDup("Option to print debug messages in KDP computation.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &KDP_debug - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 14'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 14");
+    tt->comment_hdr = tdrpStrDup("BEAM SAMPLING");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'n_samples'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("n_samples");
+    tt->descr = tdrpStrDup("Number of samples (pulses) per dwell.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &n_samples - &_start_;
+    tt->single_val.i = 256;
+    tt++;
+    
+    // Parameter 'indexed_beams'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("indexed_beams");
+    tt->descr = tdrpStrDup("Index the beams on even centers?");
+    tt->help = tdrpStrDup("If false, the pulses are formed into beams sequentially, with no overlap.");
+    tt->val_offset = (char *) &indexed_beams - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'indexed_resolution_ppi'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("indexed_resolution_ppi");
+    tt->descr = tdrpStrDup("Dwell width in azimuth (deg).");
+    tt->help = tdrpStrDup("Applies to PPI mode.");
+    tt->val_offset = (char *) &indexed_resolution_ppi - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'indexed_resolution_rhi'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("indexed_resolution_rhi");
+    tt->descr = tdrpStrDup("Dwell width in elevation (deg).");
+    tt->help = tdrpStrDup("Applies to RHI mode.");
+    tt->val_offset = (char *) &indexed_resolution_rhi - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'invert_hv_flag'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("invert_hv_flag");
+    tt->descr = tdrpStrDup("Option to invert the sense of the HV flag in alternating mode.");
+    tt->help = tdrpStrDup("In alternating dual-pol mode, the HV flag indicates whether the pulse is horizontally or vertically polarized. Normally 1 indicates H and 0 V. This parameter allows you to invert the sense of the flag, so that 1 is interpreted as V and 0 as H.");
+    tt->val_offset = (char *) &invert_hv_flag - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'prt_is_for_previous_interval'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("prt_is_for_previous_interval");
+    tt->descr = tdrpStrDup("Does the PRT in the pulse header refer to the previous time interval?.");
+    tt->help = tdrpStrDup("If TRUE, the PRT in the pulse header refers to the time from the PREVIOUS pulse to THIS pulse. If FALSE, the PRT in the header refers to the time from THIS pulse to the NEXT pulse.");
+    tt->val_offset = (char *) &prt_is_for_previous_interval - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'check_for_missing_pulses'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_for_missing_pulses");
+    tt->descr = tdrpStrDup("Option to check for missing pulses in the time series.");
+    tt->help = tdrpStrDup("If missing pulses are found, the beam formed by those pulses will be discarded.");
+    tt->val_offset = (char *) &check_for_missing_pulses - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'swap_receiver_channels'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("swap_receiver_channels");
+    tt->descr = tdrpStrDup("Option to swap the H and V channels for IQ data from the receiver.");
+    tt->help = tdrpStrDup("It is possible that the receiver was incorrectly connected and the channels (H and V for example) are swapped. If this flag is set to TRUE, the channels in the data will be swapped before computing the moments.");
+    tt->val_offset = (char *) &swap_receiver_channels - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 15'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 15");
+    tt->comment_hdr = tdrpStrDup("OVERRIDING RADAR PARAMETERS");
+    tt->comment_text = tdrpStrDup("Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.");
+    tt++;
+    
+    // Parameter 'override_radar_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_radar_name");
+    tt->descr = tdrpStrDup("Option to override the radar name.");
+    tt->help = tdrpStrDup("If true, the name in this file will be used. If not, the name in the time series data will be used.");
+    tt->val_offset = (char *) &override_radar_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'radar_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("radar_name");
+    tt->descr = tdrpStrDup("Name of the radar.");
+    tt->help = tdrpStrDup("See 'override_radar_name'.");
+    tt->val_offset = (char *) &radar_name - &_start_;
+    tt->single_val.s = tdrpStrDup("SPOL");
+    tt++;
+    
+    // Parameter 'override_radar_location'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_radar_location");
+    tt->descr = tdrpStrDup("Option to override the radar location.");
+    tt->help = tdrpStrDup("If true, the location in this file will be used. If not, the location in the time series data will be used.");
+    tt->val_offset = (char *) &override_radar_location - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'radar_latitude_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("radar_latitude_deg");
+    tt->descr = tdrpStrDup("Radar latitude (deg).");
+    tt->help = tdrpStrDup("See override_radar_location.");
+    tt->val_offset = (char *) &radar_latitude_deg - &_start_;
+    tt->single_val.d = 39.9321;
+    tt++;
+    
+    // Parameter 'radar_longitude_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("radar_longitude_deg");
+    tt->descr = tdrpStrDup("Radar longitude (deg).");
+    tt->help = tdrpStrDup("See override_radar_location.");
+    tt->val_offset = (char *) &radar_longitude_deg - &_start_;
+    tt->single_val.d = -105.182;
+    tt++;
+    
+    // Parameter 'radar_altitude_meters'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("radar_altitude_meters");
+    tt->descr = tdrpStrDup("Radar altitude (meters).");
+    tt->help = tdrpStrDup("See override_radar_location.");
+    tt->val_offset = (char *) &radar_altitude_meters - &_start_;
+    tt->single_val.d = 1742;
+    tt++;
+    
+    // Parameter 'override_gate_geometry'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_gate_geometry");
+    tt->descr = tdrpStrDup("Option to override the gate geometry.");
+    tt->help = tdrpStrDup("If true, the gate_spacing and start_range in the time series data is overridden by the parameters in this file.");
+    tt->val_offset = (char *) &override_gate_geometry - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'gate_spacing_meters'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("gate_spacing_meters");
+    tt->descr = tdrpStrDup("Gate spacing (meters).");
+    tt->help = tdrpStrDup("See override_gate_geometry.");
+    tt->val_offset = (char *) &gate_spacing_meters - &_start_;
+    tt->single_val.d = 150;
+    tt++;
+    
+    // Parameter 'start_range_meters'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("start_range_meters");
+    tt->descr = tdrpStrDup("Start range (meters).");
+    tt->help = tdrpStrDup("See override_gate_geometry.");
+    tt->val_offset = (char *) &start_range_meters - &_start_;
+    tt->single_val.d = 150;
+    tt++;
+    
+    // Parameter 'override_radar_wavelength'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_radar_wavelength");
+    tt->descr = tdrpStrDup("Option to override the radar wavelength.");
+    tt->help = tdrpStrDup("If true, the radar wavelength in this file will be used. If not, the wavelength in the time series data will be used if available.");
+    tt->val_offset = (char *) &override_radar_wavelength - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'radar_wavelength_cm'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("radar_wavelength_cm");
+    tt->descr = tdrpStrDup("Radar wavelength (cm).");
+    tt->help = tdrpStrDup("See override_radar_wavelength.");
+    tt->val_offset = (char *) &radar_wavelength_cm - &_start_;
+    tt->single_val.d = 10;
+    tt++;
+    
+    // Parameter 'Comment 16'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 16");
+    tt->comment_hdr = tdrpStrDup("FFT WINDOWING");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'window'
+    // ctype is '_window_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("window");
+    tt->descr = tdrpStrDup("Window to be applied to time series before computing spectra.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &window - &_start_;
+    tt->enum_def.name = tdrpStrDup("window_t");
+    tt->enum_def.nfields = 8;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("WINDOW_RECT");
+      tt->enum_def.fields[0].val = WINDOW_RECT;
+      tt->enum_def.fields[1].name = tdrpStrDup("WINDOW_VONHANN");
+      tt->enum_def.fields[1].val = WINDOW_VONHANN;
+      tt->enum_def.fields[2].name = tdrpStrDup("WINDOW_BLACKMAN");
+      tt->enum_def.fields[2].val = WINDOW_BLACKMAN;
+      tt->enum_def.fields[3].name = tdrpStrDup("WINDOW_BLACKMAN_NUTTALL");
+      tt->enum_def.fields[3].val = WINDOW_BLACKMAN_NUTTALL;
+      tt->enum_def.fields[4].name = tdrpStrDup("WINDOW_TUKEY_10");
+      tt->enum_def.fields[4].val = WINDOW_TUKEY_10;
+      tt->enum_def.fields[5].name = tdrpStrDup("WINDOW_TUKEY_20");
+      tt->enum_def.fields[5].val = WINDOW_TUKEY_20;
+      tt->enum_def.fields[6].name = tdrpStrDup("WINDOW_TUKEY_30");
+      tt->enum_def.fields[6].val = WINDOW_TUKEY_30;
+      tt->enum_def.fields[7].name = tdrpStrDup("WINDOW_TUKEY_50");
+      tt->enum_def.fields[7].val = WINDOW_TUKEY_50;
+    tt->single_val.e = WINDOW_VONHANN;
+    tt++;
+    
+    // Parameter 'Comment 17'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 17");
+    tt->comment_hdr = tdrpStrDup("RADAR CALIBRATION");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'cal_file_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cal_file_path");
+    tt->descr = tdrpStrDup("File name for XML calibration file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cal_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("./radar_cal.xml");
+    tt++;
+    
+    // Parameter 'use_cal_from_time_series'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_cal_from_time_series");
+    tt->descr = tdrpStrDup("Option to override cal in time series data.");
+    tt->help = tdrpStrDup("If false, the cal information in the time series data will be used. If true, the cal info in the param file will be used.");
+    tt->val_offset = (char *) &use_cal_from_time_series - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
