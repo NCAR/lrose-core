@@ -94,7 +94,7 @@ public:
 
   // compute moments
   
-  void computeMoments();
+  int computeMoments();
 
   // set methods
 

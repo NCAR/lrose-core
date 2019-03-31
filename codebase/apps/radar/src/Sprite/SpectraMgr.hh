@@ -42,6 +42,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 
 #include "Args.hh"
 #include "Params.hh"
@@ -293,6 +294,10 @@ private:
   double _xLocClicked;
   double _yLocClicked;
 
+  // deque for beam memory
+
+  deque<Beam *> _beamQueue;
+
   // set top bar
 
   virtual void _setTitleBar(const string &radarName);
@@ -374,6 +379,8 @@ private slots:
   virtual void _unzoom();
   virtual void _refresh();
   
+  void _manageBeamQueue(Beam *beam);
+
   // local slots
 
   void _locationClicked(double xkm, double ykm, const RadxRay *closestRay);

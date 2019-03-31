@@ -1,6 +1,8 @@
 /*********************************************************
  * parameter definitions for Sprite
  *
+ * Spectral Plot for Radar Iq Time sEries
+ *
  * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
  *
  * March 2019
@@ -275,7 +277,7 @@ paramdef int {
 } spectra_n_columns;
 
 paramdef int {
-  p_default = 180;
+  p_default = 150;
   p_descr = "Width of ASCOPE panel in spectra window (pixels).";
   p_help = "The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.";
 } ascope_width_in_spectra_panel;
@@ -790,7 +792,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "./radar_cal.xml";
+  p_default = "./sband_cal.xml";
   p_descr = "File name for XML calibration file.";
 } cal_file_path;
 

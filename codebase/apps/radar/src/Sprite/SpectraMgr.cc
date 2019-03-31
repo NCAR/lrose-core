@@ -618,8 +618,8 @@ void SpectraMgr::_handleRealtimeData()
   this->setCursor(Qt::ArrowCursor);
 
   // clean up
-
-  delete beam;
+  
+  _manageBeamQueue(beam);
 
 }
 
@@ -652,20 +652,54 @@ void SpectraMgr::_handleArchiveData()
 
   _updateStatusPanel(beam);
 
-  // set cursor to wait cursor
+  // compute the moments
   
-  this->setCursor(Qt::WaitCursor);
+  if (beam->computeMoments()) {
 
-  // plot the data
+    cerr << "ERROR - SpectraMgr::_handleArchiveData()" << endl;
+    cerr << "  Cannot compute moments" << endl;
 
-  _spectra->plotBeam(beam);
-  this->setCursor(Qt::ArrowCursor);
+  } else {
+
+    // set cursor to wait cursor
+    
+    this->setCursor(Qt::WaitCursor);
+    
+    // plot the data
+    
+    _spectra->plotBeam(beam);
+    this->setCursor(Qt::ArrowCursor);
+
+  }
 
   // clean up
-
-  delete beam;
+  
+  _manageBeamQueue(beam);
 
 }
+
+///////////////////////////////////////
+// manage the beam memory
+
+void SpectraMgr::_manageBeamQueue(Beam *beam)
+
+{
+
+  // push the beam onto the queue
+
+  _beamQueue.push_front(beam);
+
+  // if the queue is too big, pop one element and delete it
+
+  if (_beamQueue.size() > 16) {
+    Beam *oldest = _beamQueue.back();
+    delete oldest;
+    _beamQueue.pop_back();
+  }
+
+}
+
+
 
 /////////////////////////////
 // get data in archive mode

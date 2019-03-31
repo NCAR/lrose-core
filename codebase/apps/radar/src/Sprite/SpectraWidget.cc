@@ -67,7 +67,11 @@ SpectraWidget::SpectraWidget(QWidget* parent,
   _nRows = _params.spectra_n_rows;
   _nCols = _params.spectra_n_columns;
   _titleMargin = _params.main_window_title_margin;
+
   _ascopeWidth = _params.ascope_width_in_spectra_panel;
+  _ascopeHeight = 100;
+  _ascopeXOffset = 0;
+  _ascopeYOffset = 0;
 
   // Set up the background color
 
@@ -452,6 +456,9 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
   // if we have a current beam, plot it
   if (_currentBeam) {
     _ascope->plotBeam(painter, _currentBeam, _xGridEnabled, _yGridEnabled);
+    string title("Ascope");
+    WorldPlot &ascopeWorld = _ascope->getFullWorld();
+    ascopeWorld.drawTitleTopCenter(painter, title);
   }
 
 }
@@ -467,6 +474,8 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
   _ascopeHeight = height() - _titleMargin;
   _ascopeXOffset = 0;
   _ascopeYOffset = _titleMargin;
+  _ascope->setWindowGeom(_ascopeWidth, _ascopeHeight,
+                         _ascopeXOffset, _ascopeYOffset);
 
   _spectraGrossHeight = height() - _titleMargin;
   _spectraGrossWidth = width() - _ascopeWidth;
@@ -667,7 +676,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
 
   string radarName(_params.radar_name);
   string title;
-  title = (radarName + "   ASCOPE   ");
+  title = (radarName + "   SPECTRAL PLOTS   ");
   _zoomWorld.drawTitleTopCenter(painter, title);
 
   _zoomWorld.drawAxesBox(painter);

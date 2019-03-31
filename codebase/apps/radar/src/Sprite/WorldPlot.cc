@@ -362,7 +362,7 @@ void WorldPlot::drawLines(QPainter &painter, QVector<QPointF> &points)
   QPainterPath path;
 
   double xx0 = getXPixel(points[0].x());
-  double yy0 = getXPixel(points[0].y());
+  double yy0 = getYPixel(points[0].y());
 
   path.moveTo(xx0, yy0);
 
@@ -371,7 +371,7 @@ void WorldPlot::drawLines(QPainter &painter, QVector<QPointF> &points)
   for (int ii = 1; ii < points.size(); ii++) {
 
     double xx = getXPixel(points[ii].x());
-    double yy = getXPixel(points[ii].y());
+    double yy = getYPixel(points[ii].y());
       
     path.lineTo(xx, yy);
 

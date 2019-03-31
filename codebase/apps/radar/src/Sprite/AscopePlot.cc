@@ -121,6 +121,26 @@ void AscopePlot::plotBeam(QPainter &painter,
     cerr << "  Max range: " << beam->getMaxRange() << endl;
   }
 
+  // draw the reflectivity field vs range
+
+  const MomentsFields* fields = beam->getOutFields();
+  int nGates = beam->getNGates();
+  double startRange = beam->getStartRangeKm();
+  double gateSpacing = beam->getGateSpacingKm();
+  QVector<QPointF> pts;
+  for (int ii = 0; ii < nGates; ii++) {
+    double range = startRange + gateSpacing * ii;
+    // double val = fields[ii].snr;
+    double val = fields[ii].dbz;
+    if (val > -9990) {
+      QPointF pt(val, range);
+      pts.push_back(pt);
+    }
+  }
+  _fullWorld.drawLines(painter, pts);
+
+  // finally draw the overlays
+
   _drawOverlays(painter, xGridEnabled, yGridEnabled);
 
 }

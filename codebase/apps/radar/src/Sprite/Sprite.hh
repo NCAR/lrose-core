@@ -26,6 +26,8 @@
 //
 // Sprite object
 //
+// Spectral Plot for Radar Iq Time sEries
+//
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // March 2019

@@ -1147,7 +1147,7 @@
     tt->descr = tdrpStrDup("Width of ASCOPE panel in spectra window (pixels).");
     tt->help = tdrpStrDup("The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.");
     tt->val_offset = (char *) &ascope_width_in_spectra_panel - &_start_;
-    tt->single_val.i = 180;
+    tt->single_val.i = 150;
     tt++;
     
     // Parameter 'spectra_top_margin'
@@ -2255,7 +2255,7 @@
     tt->descr = tdrpStrDup("File name for XML calibration file.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &cal_file_path - &_start_;
-    tt->single_val.s = tdrpStrDup("./radar_cal.xml");
+    tt->single_val.s = tdrpStrDup("./sband_cal.xml");
     tt++;
     
     // Parameter 'use_cal_from_time_series'

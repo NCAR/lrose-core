@@ -450,31 +450,15 @@ void Beam::setPulses(bool isRhi,
 
   _fftInit();
   _regrInit();
-
-  // alloc fields at each gate
+  
+  // moments computations object
 
   if (_nGatesOut > _nGatesOutAlloc) {
-
-    if (_outFields) delete[] _outFields;
-    if (_outFieldsF) delete[] _outFieldsF;
     if (_mom) delete _mom;
-
-    _outFields = new MomentsFields[_nGatesOut];
-    _outFieldsF = new MomentsFields[_nGatesOut];
-    
     _mom = new RadarMoments(_nGatesOut,
                             _params.debug >= Params::DEBUG_NORM,
                             _params.debug >= Params::DEBUG_VERBOSE);
-
     _nGatesOutAlloc = _nGatesOut;
-
-  }
-
-  // initialize fields
-
-  for (int ii = 0; ii < _nGatesOut; ii++) {
-    _outFields[ii].init();
-    _outFieldsF[ii].init();
   }
 
   _mom->setMeasXmitPowerDbmH(_measXmitPowerDbmH);
@@ -581,13 +565,13 @@ Beam::~Beam()
 
 {
 
-  if (_outFields) {
-    delete[] _outFields;
-  }
+  // if (_outFields) {
+  //   delete[] _outFields;
+  // }
 
-  if (_outFieldsF) {
-    delete[] _outFieldsF;
-  }
+  // if (_outFieldsF) {
+  //   delete[] _outFieldsF;
+  // }
   
   if (_mom) {
     delete _mom;
@@ -693,14 +677,19 @@ int Beam::_getSweepNum()
 /////////////////////////////////////////////////
 // compute moments
     
-void Beam::computeMoments()
+int Beam::computeMoments()
   
 {
 
   // set calibration data on Moments object, ready for computations
-  
+
+  string errStr;
+  if (_calib.readFromXmlFile(_params.cal_file_path, errStr)) {
+    cerr << "ERROR reading cal file: " << _params.cal_file_path << endl;
+    return -1;
+  }
   _mom->setCalib(_calib);
-  
+
   // compute the moments
   
   _computeMoments();
@@ -747,6 +736,8 @@ void Beam::computeMoments()
   // copy the results to the output beam Field vectors
 
   _copyDataToOutputFields();
+
+  return 0;
 
 }
 
@@ -921,6 +912,14 @@ void Beam::_computeMomSpH()
     _compFields[igate] = _gateData[igate]->fields;
   }
 
+  // compute covariances
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    GateData *gate = _gateData[igate];
+    MomentsFields &fields = _compFields[igate];
+    _mom->computeCovarSinglePolH(gate->iqhc, fields);
+  }
+  
   // compute main moments
   
   for (int igate = 0; igate < _nGates; igate++) {
@@ -958,6 +957,14 @@ void Beam::_computeMomSpV()
     _compFields[igate] = _gateData[igate]->fields;
   }
 
+  // compute covariances
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    GateData *gate = _gateData[igate];
+    MomentsFields &fields = _compFields[igate];
+    _mom->computeCovarSinglePolV(gate->iqvc, fields);
+  }
+  
   // compute main moments
   
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1032,6 +1039,16 @@ void Beam::_computeMomDpAltHvCoCross()
     _compFields[igate] = _gateData[igate]->fields;
   }
 
+  // compute covariances
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    GateData *gate = _gateData[igate];
+    MomentsFields &fields = _compFields[igate];
+    _mom->computeCovarDpAltHvCoCross(gate->iqhc, gate->iqvc,
+                                     gate->iqhx, gate->iqvx, 
+                                     fields);
+  }
+  
   for (int igate = 0; igate < _nGates; igate++) {
       
     MomentsFields &fields = _compFields[igate];
@@ -1076,6 +1093,14 @@ void Beam::_computeMomDpAltHvCoOnly()
     _compFields[igate] = _gateData[igate]->fields;
   }
 
+  // compute covariances
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    GateData *gate = _gateData[igate];
+    MomentsFields &fields = _compFields[igate];
+    _mom->computeCovarDpAltHvCoOnly(gate->iqhc, gate->iqvc, fields);
+  }
+  
   for (int igate = 0; igate < _nGates; igate++) {
       
     MomentsFields &fields = _compFields[igate];
@@ -1131,6 +1156,14 @@ void Beam::_computeMomDpSimHv()
     _compFields[igate] = _gateData[igate]->fields;
   }
 
+  // compute covariances
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    GateData *gate = _gateData[igate];
+    MomentsFields &fields = _compFields[igate];
+    _mom->computeCovarDpSimHv(gate->iqhc, gate->iqvc, fields);
+  }
+  
   for (int igate = 0; igate < _nGates; igate++) {
       
     MomentsFields &fields = _compFields[igate];
@@ -1229,6 +1262,14 @@ void Beam::_computeMomDpHOnly()
     _compFields[igate] = _gateData[igate]->fields;
   }
 
+  // compute covariances
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    GateData *gate = _gateData[igate];
+    MomentsFields &fields = _compFields[igate];
+    _mom->computeCovarDpHOnly(gate->iqhc, gate->iqvx, fields);
+  }
+  
   for (int igate = 0; igate < _nGates; igate++) {
       
     MomentsFields &fields = _compFields[igate];
@@ -1283,6 +1324,14 @@ void Beam::_computeMomDpVOnly()
     _compFields[igate] = _gateData[igate]->fields;
   }
 
+  // compute covariances
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    GateData *gate = _gateData[igate];
+    MomentsFields &fields = _compFields[igate];
+    _mom->computeCovarDpVOnly(gate->iqvc, gate->iqhx, fields);
+  }
+  
   for (int igate = 0; igate < _nGates; igate++) {
       
     MomentsFields &fields = _compFields[igate];
@@ -1322,12 +1371,6 @@ void Beam::_filterSpH()
     MomentsFields &fields = gate->fields;
     MomentsFields &fieldsF = gate->fieldsF;
 
-    // check if we have clutter at this gate
-    
-    // if (!gate->fields.cmd_flag) {
-    //   continue;
-    // }
-      
     // filter the HC time series
     
     double spectralNoise = 1.0e-13;
@@ -2666,6 +2709,7 @@ void Beam::_kdpCompute(bool isFiltered)
 void Beam::_allocGateData(int nGates)
 
 {
+
   int nNeeded = nGates - (int) _gateData.size();
   if (nNeeded > 0) {
     for (int ii = 0; ii < nNeeded; ii++) {
@@ -2673,11 +2717,24 @@ void Beam::_allocGateData(int nGates)
       _gateData.push_back(gate);
     }
   }
+
   for (size_t ii = 0; ii < _gateData.size(); ii++) {
     _gateData[ii]->allocArrays(_nSamples, _applyFiltering, _isStagPrt, false);
   }
-  _compFields = _compFields_.alloc(_gateData.size());
-  _compFieldsF = _compFieldsF_.alloc(_gateData.size());
+
+  _outFields = _outFields_.alloc(nGates);
+  _outFieldsF = _outFieldsF_.alloc(nGates);
+  _compFields = _compFields_.alloc(nGates);
+  _compFieldsF = _compFieldsF_.alloc(nGates);
+
+  for (int ii = 0; ii < nGates; ii++) {
+    _outFields[ii].init();
+    _outFieldsF[ii].init();
+    _compFields[ii].init();
+    _compFieldsF[ii].init();
+  }
+
+
 }
 
 /////////////////////////////////////////////////////////////////
