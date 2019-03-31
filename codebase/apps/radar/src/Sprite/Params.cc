@@ -1147,7 +1147,7 @@
     tt->descr = tdrpStrDup("Width of ASCOPE panel in spectra window (pixels).");
     tt->help = tdrpStrDup("The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.");
     tt->val_offset = (char *) &ascope_width_in_spectra_panel - &_start_;
-    tt->single_val.i = 100;
+    tt->single_val.i = 180;
     tt++;
     
     // Parameter 'spectra_top_margin'
@@ -1159,7 +1159,7 @@
     tt->descr = tdrpStrDup("Height of top margin in SPECTRA mode (pixels).");
     tt->help = tdrpStrDup("Titles go in the top margin.");
     tt->val_offset = (char *) &spectra_top_margin - &_start_;
-    tt->single_val.i = 20;
+    tt->single_val.i = 0;
     tt++;
     
     // Parameter 'spectra_bottom_margin'
@@ -1183,7 +1183,7 @@
     tt->descr = tdrpStrDup("Width of left margin in SPECTRA mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the left margin.");
     tt->val_offset = (char *) &spectra_left_margin - &_start_;
-    tt->single_val.i = 40;
+    tt->single_val.i = 30;
     tt++;
     
     // Parameter 'spectra_right_margin'
@@ -1195,7 +1195,7 @@
     tt->descr = tdrpStrDup("Width of right margin in SPECTRA mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the right margin.");
     tt->val_offset = (char *) &spectra_right_margin - &_start_;
-    tt->single_val.i = 20;
+    tt->single_val.i = 0;
     tt++;
     
     // Parameter 'spectra_axis_tick_labels_inside'

@@ -275,13 +275,13 @@ paramdef int {
 } spectra_n_columns;
 
 paramdef int {
-  p_default = 100;
+  p_default = 180;
   p_descr = "Width of ASCOPE panel in spectra window (pixels).";
   p_help = "The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.";
 } ascope_width_in_spectra_panel;
 
 paramdef int {
-  p_default = 20;
+  p_default = 0;
   p_descr = "Height of top margin in SPECTRA mode (pixels).";
   p_help = "Titles go in the top margin.";
 } spectra_top_margin;
@@ -293,13 +293,13 @@ paramdef int {
 } spectra_bottom_margin;
 
 paramdef int {
-  p_default = 40;
+  p_default = 30;
   p_descr = "Width of left margin in SPECTRA mode (pixels).";
   p_help = "Height scale goes in the left margin.";
 } spectra_left_margin;
 
 paramdef int {
-  p_default = 20;
+  p_default = 0;
   p_descr = "Width of right margin in SPECTRA mode (pixels).";
   p_help = "Height scale goes in the right margin.";
 } spectra_right_margin;
