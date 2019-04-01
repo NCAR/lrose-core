@@ -232,15 +232,19 @@ class DLL_EXPORT SpectraWidget : public QWidget
   int _nCols;
   int _titleMargin;
 
+  int _nAscopes;
   int _ascopeWidth;
   int _ascopeHeight;
-  int _ascopeXOffset;
-  int _ascopeYOffset;
-
+  int _ascopeGrossWidth;
+  
   int _spectraGrossWidth;
   int _spectraGrossHeight;
   int _subPanelWidths;
   int _subPanelHeights;
+  
+  // ascopes
+  
+  vector<AscopePlot *> _ascopes;
 
   /**
    * Grid overlays
@@ -323,10 +327,6 @@ class DLL_EXPORT SpectraWidget : public QWidget
   // time since last rendered
   
   RadxTime _timeLastRendered;
-
-  // ascope
-
-  AscopePlot *_ascope;
 
   // beam data
 
@@ -420,11 +420,11 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   // create the ascope panel
 
-  void _createAscope();
+  void _createAscope(int id);
 
   // configure the ascope
 
-  void _configureAscope();
+  void _configureAscope(int id);
 
 };
 

@@ -56,7 +56,6 @@ SpectraWidget::SpectraWidget(QWidget* parent,
         _worldReleaseX(0),
         _worldReleaseY(0),
         _rubberBand(0),
-        _ascope(NULL),
         _currentBeam(NULL)
 
 {
@@ -68,10 +67,10 @@ SpectraWidget::SpectraWidget(QWidget* parent,
   _nCols = _params.spectra_n_columns;
   _titleMargin = _params.main_window_title_margin;
 
-  _ascopeWidth = _params.ascope_width_in_spectra_panel;
+  _nAscopes = _params.ascope_n_panels_in_spectra_window;
+  _ascopeWidth = _params.ascope_width_in_spectra_window; // constant
   _ascopeHeight = 100;
-  _ascopeXOffset = 0;
-  _ascopeYOffset = 0;
+  _ascopeGrossWidth = _ascopeWidth * _nAscopes;
 
   // Set up the background color
 
@@ -101,11 +100,13 @@ SpectraWidget::SpectraWidget(QWidget* parent,
                 _params.spectra_max_amplitude,
                 _params.spectra_time_span_secs);
 
-  // create ascope and configure it
+  // create ascopes and configure them
 
-  _createAscope();
-  _configureAscope();
-  
+  for (int ii = 0; ii < _nAscopes; ii++) {
+    _createAscope(ii);
+    _configureAscope(ii);
+  }
+
 }
 
 /*************************************************************************
@@ -115,9 +116,10 @@ SpectraWidget::SpectraWidget(QWidget* parent,
 SpectraWidget::~SpectraWidget()
 {
 
-  if (_ascope) {
-    delete _ascope;
+  for (size_t ii = 0; ii < _ascopes.size(); ii++) {
+    delete _ascopes[ii];
   }
+  _ascopes.clear();
 
 }
 
@@ -251,10 +253,12 @@ void SpectraWidget::plotBeam(Beam *beam)
     DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
   }
-  
-  if (_ascope) {
+
+  if (_ascopes.size() > 0) {
     _currentBeam = beam;
-    _configureAscope();
+    for (size_t ii = 0; ii < _ascopes.size(); ii++) {
+      _configureAscope(ii);
+    }
     update();
   }
 
@@ -455,10 +459,9 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
   
   // if we have a current beam, plot it
   if (_currentBeam) {
-    _ascope->plotBeam(painter, _currentBeam, _xGridEnabled, _yGridEnabled);
-    string title("Ascope");
-    WorldPlot &ascopeWorld = _ascope->getFullWorld();
-    ascopeWorld.drawTitleTopCenter(painter, title);
+    for (size_t ii = 0; ii < _ascopes.size(); ii++) {
+      _ascopes[ii]->plotBeam(painter, _currentBeam, _xGridEnabled, _yGridEnabled);
+    }
   }
 
 }
@@ -471,34 +474,45 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
 void SpectraWidget::resizeEvent(QResizeEvent * e)
 {
 
-  _ascopeHeight = height() - _titleMargin;
-  _ascopeXOffset = 0;
-  _ascopeYOffset = _titleMargin;
-  _ascope->setWindowGeom(_ascopeWidth, _ascopeHeight,
-                         _ascopeXOffset, _ascopeYOffset);
-
   _spectraGrossHeight = height() - _titleMargin;
-  _spectraGrossWidth = width() - _ascopeWidth;
+  _spectraGrossWidth = width() - _ascopeGrossWidth;
   _subPanelWidths = _spectraGrossWidth / _nCols;
   _subPanelHeights = _spectraGrossHeight / _nRows;
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "SpectraWidget::resizeEvent" << endl;
     cerr << "  width: " << width() << endl;
     cerr << "  height: " << height() << endl;
     cerr << "  _nRows: " << _nRows << endl;
     cerr << "  _nCols: " << _nCols << endl;
     cerr << "  _titleMargin: " << _titleMargin << endl;
-    cerr << "  _ascopeWidth: " << _ascopeWidth << endl;
-    cerr << "  _ascopeHeight: " << _ascopeHeight << endl;
-    cerr << "  _ascopeXOffset: " << _ascopeXOffset << endl;
-    cerr << "  _ascopeYOffset: " << _ascopeYOffset << endl;
     cerr << "  _spectraGrossWidth: " << _spectraGrossWidth << endl;
     cerr << "  _spectraGrossHeight: " << _spectraGrossHeight << endl;
     cerr << "  _subPanelWidths: " << _subPanelWidths << endl;
     cerr << "  _subPanelHeights: " << _subPanelHeights << endl;
   }
 
+  for (size_t ii = 0; ii < _ascopes.size(); ii++) {
+
+    _ascopeHeight = height() - _titleMargin;
+    int ascopeXOffset = ii * _ascopeWidth;
+    int ascopeYOffset = _titleMargin;
+    _ascopes[ii]->setWindowGeom(_ascopeWidth, _ascopeHeight,
+                                ascopeXOffset, ascopeYOffset);
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "  ascopeWidth[" << ii << "]: "
+           << _ascopes[ii]->getWidth() << endl;
+      cerr << "  ascopeHeight[" << ii << "]: "
+           << _ascopes[ii]->getHeight() << endl;
+      cerr << "  ascopeXOffset[" << ii << "]: "
+           << _ascopes[ii]->getXOffset() << endl;
+      cerr << "  ascopeYOffset[" << ii << "]: "
+           << _ascopes[ii]->getYOffset() << endl;
+    }
+
+  }
+  
   _resetWorld(width(), height());
 
   _refreshImages();
@@ -528,12 +542,10 @@ void SpectraWidget::_resetWorld(int width, int height)
   
   _fullWorld.resize(width / 3, height / 3);
 
-  _fullWorld.setWindowOffsets(_ascopeWidth, _titleMargin);
+  _fullWorld.setWindowOffsets(_ascopeGrossWidth, _titleMargin);
   
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
-
-  
 
 }
 
@@ -708,16 +720,17 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
     painter.drawLine(topLine);
   }
 
-  // ascope right boundary
-  {
-    QLineF ascopeBoundary(_ascopeWidth, _titleMargin, _ascopeWidth, height());
+  // ascope right boundaries
+  for (int ii = 0; ii < _nAscopes; ii++) {
+    QLineF ascopeBoundary(_ascopeWidth * (ii+1), _titleMargin,
+                          _ascopeWidth * (ii+1), height());
     painter.drawLine(ascopeBoundary);
   }
 
   // spectra panels lower boundaries
 
   for (int irow = 1; irow < _nRows; irow++) {
-    QLineF lowerBoundary(_ascopeWidth, _titleMargin + irow * _subPanelHeights,
+    QLineF lowerBoundary(_ascopeGrossWidth, _titleMargin + irow * _subPanelHeights,
                          width(), _titleMargin + irow * _subPanelHeights);
     painter.drawLine(lowerBoundary);
   }
@@ -725,8 +738,8 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   // spectra panels right boundaries
 
   for (int icol = 1; icol < _nCols; icol++) {
-    QLineF rightBoundary(_ascopeWidth + icol * _subPanelWidths, _titleMargin,
-                         _ascopeWidth + icol * _subPanelWidths, height());
+    QLineF rightBoundary(_ascopeGrossWidth + icol * _subPanelWidths, _titleMargin,
+                         _ascopeGrossWidth + icol * _subPanelWidths, height());
     painter.drawLine(rightBoundary);
   }
 
@@ -924,13 +937,14 @@ void SpectraWidget::_performRendering()
  * create the ascope
  */
 
-void SpectraWidget::_createAscope()
+void SpectraWidget::_createAscope(int id)
   
 {
 
-  _ascope = new AscopePlot(this, _params);
+  AscopePlot *ascope = new AscopePlot(this, _params);
+  ascope->setMomentType(_params._ascope_moments[id]);
 
-  WorldPlot &ascopeWorld = _ascope->getFullWorld();
+  WorldPlot &ascopeWorld = ascope->getFullWorld();
   
   ascopeWorld.setLeftMargin(_params.spectra_left_margin);
   ascopeWorld.setRightMargin(_params.spectra_right_margin);
@@ -958,10 +972,14 @@ void SpectraWidget::_createAscope()
   ascopeWorld.setAxisTextColor(_params.spectra_axes_color);
   ascopeWorld.setGridColor(_params.spectra_grid_color);
 
+  int xOffset = id * _ascopeWidth;
+  int yOffset = _titleMargin;
   ascopeWorld.setWindowGeom(_ascopeWidth, _ascopeHeight,
-                            _ascopeXOffset, _ascopeYOffset);
+                            xOffset, yOffset);
   
   ascopeWorld.setWorldLimits(0.0, 0.0, 1.0, 1.0);
+
+  _ascopes.push_back(ascope);
   
 }
 
@@ -969,18 +987,20 @@ void SpectraWidget::_createAscope()
  * configure the ascope
  */
 
-void SpectraWidget::_configureAscope()
+void SpectraWidget::_configureAscope(int id)
   
 {
 
-  _ascope->setWindowGeom(_ascopeWidth, _ascopeHeight,
-                         _ascopeXOffset, _ascopeYOffset);
+  int xOffset = id * _ascopeWidth;
+  int yOffset = _titleMargin;
+  _ascopes[id]->setWindowGeom(_ascopeWidth, _ascopeHeight,
+                              xOffset, yOffset);
   
   if (_currentBeam == NULL) {
     return;
   }
   
-  _ascope->setWorldLimits(-30, 0.0, 100, _currentBeam->getMaxRange());
+  _ascopes[id]->setWorldLimits(-30, 0.0, 100, _currentBeam->getMaxRange());
 
 }
 

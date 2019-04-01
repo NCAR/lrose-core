@@ -90,6 +90,20 @@ public:
   } legend_pos_t;
 
   typedef enum {
+    DBZ = 0,
+    VEL = 1,
+    WIDTH = 2,
+    NCP = 3,
+    SNR = 4,
+    DBM = 5,
+    ZDR = 6,
+    LDR = 7,
+    RHOHV = 8,
+    PHIDP = 9,
+    KDP = 10
+  } moment_type_t;
+
+  typedef enum {
     WIDTH_METHOD_R0R1 = 0,
     WIDTH_METHOD_R1R2 = 1,
     WIDTH_METHOD_HYBRID = 2
@@ -487,8 +501,6 @@ public:
 
   int spectra_n_columns;
 
-  int ascope_width_in_spectra_panel;
-
   int spectra_top_margin;
 
   int spectra_bottom_margin;
@@ -549,9 +561,20 @@ public:
 
   tdrp_bool_t spectra_plot_legend2;
 
+  int ascope_n_panels_in_spectra_window;
+
+  moment_type_t *_ascope_moments;
+  int ascope_moments_n;
+
+  int ascope_width_in_spectra_window;
+
   int ascope_left_margin;
 
   int ascope_bottom_margin;
+
+  char* ascope_line_color;
+
+  char* ascope_fill_color;
 
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 
@@ -654,7 +677,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[128];
+  mutable TDRPtable _table[133];
 
   const char *_className;
 

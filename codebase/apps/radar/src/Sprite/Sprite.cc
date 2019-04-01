@@ -89,6 +89,19 @@ Sprite::Sprite(int argc, char **argv) :
     return;
   }
 
+  // check params
+
+  if (_params.ascope_n_panels_in_spectra_window != _params.ascope_moments_n) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "  Mismatch in number of ascope panels in spectra window" << endl;
+    cerr << "  Parameters specify n ascopes: " 
+         << _params.ascope_n_panels_in_spectra_window << endl;
+    cerr << "  Parameters specify n fields for ascopes: " 
+         << _params.ascope_moments_n << endl;
+    cerr << "  These must be equal, fix params file and try again" << endl;
+    OK = false;
+  }
+
   // create CIDD coord shmem 
   
   _coordShmem = (coord_export_t *)

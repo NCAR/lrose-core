@@ -1138,18 +1138,6 @@
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'ascope_width_in_spectra_panel'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_width_in_spectra_panel");
-    tt->descr = tdrpStrDup("Width of ASCOPE panel in spectra window (pixels).");
-    tt->help = tdrpStrDup("The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.");
-    tt->val_offset = (char *) &ascope_width_in_spectra_panel - &_start_;
-    tt->single_val.i = 150;
-    tt++;
-    
     // Parameter 'spectra_top_margin'
     // ctype is 'int'
     
@@ -1573,6 +1561,85 @@
     tt->comment_text = tdrpStrDup("The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.");
     tt++;
     
+    // Parameter 'Comment 11'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 11");
+    tt->comment_hdr = tdrpStrDup("MOMENTS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'ascope_n_panels_in_spectra_window'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_n_panels_in_spectra_window");
+    tt->descr = tdrpStrDup("Number of ascope panels in spectra window (pixels).");
+    tt->help = tdrpStrDup("The ascopes will be on the left of the plot. Set to 0 for no ASCOPE panel.");
+    tt->val_offset = (char *) &ascope_n_panels_in_spectra_window - &_start_;
+    tt->single_val.i = 2;
+    tt++;
+    
+    // Parameter 'ascope_moments'
+    // ctype is '_moment_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("ascope_moments");
+    tt->descr = tdrpStrDup("Moments to be displaed on ascope panels.");
+    tt->help = tdrpStrDup("The number of specified moments must match the number of ascope panels.");
+    tt->array_offset = (char *) &_ascope_moments - &_start_;
+    tt->array_n_offset = (char *) &ascope_moments_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(moment_type_t);
+    tt->array_n = 2;
+    tt->enum_def.name = tdrpStrDup("moment_type_t");
+    tt->enum_def.nfields = 11;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("DBZ");
+      tt->enum_def.fields[0].val = DBZ;
+      tt->enum_def.fields[1].name = tdrpStrDup("VEL");
+      tt->enum_def.fields[1].val = VEL;
+      tt->enum_def.fields[2].name = tdrpStrDup("WIDTH");
+      tt->enum_def.fields[2].val = WIDTH;
+      tt->enum_def.fields[3].name = tdrpStrDup("NCP");
+      tt->enum_def.fields[3].val = NCP;
+      tt->enum_def.fields[4].name = tdrpStrDup("SNR");
+      tt->enum_def.fields[4].val = SNR;
+      tt->enum_def.fields[5].name = tdrpStrDup("DBM");
+      tt->enum_def.fields[5].val = DBM;
+      tt->enum_def.fields[6].name = tdrpStrDup("ZDR");
+      tt->enum_def.fields[6].val = ZDR;
+      tt->enum_def.fields[7].name = tdrpStrDup("LDR");
+      tt->enum_def.fields[7].val = LDR;
+      tt->enum_def.fields[8].name = tdrpStrDup("RHOHV");
+      tt->enum_def.fields[8].val = RHOHV;
+      tt->enum_def.fields[9].name = tdrpStrDup("PHIDP");
+      tt->enum_def.fields[9].val = PHIDP;
+      tt->enum_def.fields[10].name = tdrpStrDup("KDP");
+      tt->enum_def.fields[10].val = KDP;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].e = DBZ;
+      tt->array_vals[1].e = SNR;
+    tt++;
+    
+    // Parameter 'ascope_width_in_spectra_window'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_width_in_spectra_window");
+    tt->descr = tdrpStrDup("Width of ASCOPE panel in spectra window (pixels).");
+    tt->help = tdrpStrDup("The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.");
+    tt->val_offset = (char *) &ascope_width_in_spectra_window - &_start_;
+    tt->single_val.i = 150;
+    tt++;
+    
     // Parameter 'ascope_left_margin'
     // ctype is 'int'
     
@@ -1597,11 +1664,35 @@
     tt->single_val.i = 10;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'ascope_line_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_line_color");
+    tt->descr = tdrpStrDup("Color of ascope line.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_line_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'ascope_fill_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_fill_color");
+    tt->descr = tdrpStrDup("Color of ascope fill.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_fill_color - &_start_;
+    tt->single_val.s = tdrpStrDup("slategray");
+    tt++;
+    
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("CLUTTER FILTERING");
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
@@ -1702,11 +1793,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("SPECTRUM WIDTH METHOD");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1733,11 +1824,11 @@
     tt->single_val.e = WIDTH_METHOD_R0R1;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP USING ADAPTIVE FILTER METHOD");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
     tt++;
@@ -1950,11 +2041,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("BEAM SAMPLING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2055,11 +2146,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("OVERRIDING RADAR PARAMETERS");
     tt->comment_text = tdrpStrDup("Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.");
     tt++;
@@ -2196,11 +2287,11 @@
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("FFT WINDOWING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2237,11 +2328,11 @@
     tt->single_val.e = WINDOW_VONHANN;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("RADAR CALIBRATION");
     tt->comment_text = tdrpStrDup("");
     tt++;

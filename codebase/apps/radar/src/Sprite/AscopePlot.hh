@@ -51,6 +51,7 @@
 #include "WorldPlot.hh"
 
 class Beam;
+class MomentsFields;
 
 /// AScope plotting
 
@@ -82,12 +83,6 @@ public:
   
   void clear();
 
-  // get the world plot objects
-  
-  WorldPlot &getFullWorld() { return _fullWorld; }
-  WorldPlot &getZoomWorld() { return _zoomWorld; }
-  bool getIsZoomed() const { return _isZoomed; }
-  
   // set the window geometry
   
   void setWindowGeom(int width,
@@ -102,6 +97,10 @@ public:
                       double xMaxWorld,
                       double yMaxWorld);
 
+  // set the moment type
+
+  void setMomentType(Params::moment_type_t val) { _momentType = val; }
+  
   // unzoom the view
 
   void unzoomView();
@@ -112,6 +111,26 @@ public:
                 Beam *beam,
                 bool xGridEnabled,
                 bool yGridEnabled);
+  
+  // get the world plot objects
+  
+  WorldPlot &getFullWorld() { return _fullWorld; }
+  WorldPlot &getZoomWorld() { return _zoomWorld; }
+  bool getIsZoomed() const { return _isZoomed; }
+
+  // get the window geom
+
+  int getWidth() const { return _fullWorld.getWidthPixels(); }
+  int getHeight() const { return _fullWorld.getHeightPixels(); }
+  int getXOffset() const { return _fullWorld.getXPixOffset(); }
+  int getYOffset() const { return _fullWorld.getYPixOffset(); }
+  
+  // get the moment type
+
+  const Params::moment_type_t getMomentType() const { return _momentType; }
+  static string momentTypeStr(Params::moment_type_t mtype);
+  static double getFieldVal(Params::moment_type_t mtype,
+                            const MomentsFields &fields);
   
 protected:
 
@@ -135,6 +154,10 @@ protected:
 
   double _minRangeKm;
   double _maxRangeKm;
+
+  // moment type
+
+  Params::moment_type_t _momentType;
   
   /**
    * @brief Transform for unzoomed state

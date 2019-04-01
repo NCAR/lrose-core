@@ -422,6 +422,43 @@ void WorldPlot::fillRectangle(QPainter &painter,
 
 }
 
+///////////////////
+// fill a trapezium
+
+void WorldPlot::fillTrap(QPainter &painter,
+                         QBrush &brush,
+                         double x0, double y0,
+                         double x1, double y1,
+                         double x2, double y2,
+                         double x3, double y3)
+  
+{
+
+  // create a vector of points
+
+  QVector<QPointF> pts;
+  QPointF pt0(getXPixel(x0), getYPixel(y0));
+  pts.push_back(pt0);
+  QPointF pt1(getXPixel(x1), getYPixel(y1));
+  pts.push_back(pt1);
+  QPointF pt2(getXPixel(x2), getYPixel(y2));
+  pts.push_back(pt2);
+  QPointF pt3(getXPixel(x3), getYPixel(y3));
+  pts.push_back(pt3);
+  pts.push_back(pt0); // close
+
+  // create a polygon from the points
+  QPolygonF poly(pts);
+
+  // add the polygon to a painter path
+  QPainterPath path;
+  path.addPolygon(poly);
+
+  // fill the path
+  painter.fillPath(path, brush);
+
+}
+
 //////////////
 // draw an arc
 
@@ -1525,7 +1562,8 @@ void WorldPlot::drawDistanceTicks(QPainter &painter,
     
 void WorldPlot::drawImage(QPainter &painter, QImage &image,
                           double xMinWorldImage, double xMaxWorldImage,
-                          double yMinWorldImage, double yMaxWorldImage) {
+                          double yMinWorldImage, double yMaxWorldImage) 
+{
 	
   qreal xMinPixelDest = getXPixel(xMinWorldImage);
   qreal xMaxPixelDest = getXPixel(xMaxWorldImage);

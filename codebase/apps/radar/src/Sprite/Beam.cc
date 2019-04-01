@@ -22,19 +22,16 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// Beam2.cc
+// Beam.cc
 //
-// Beam2 object
+// Beam object
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// April 2005
+// March 2019
 //
 ///////////////////////////////////////////////////////////////
-//
-// Beam2 object holds time series and moment data.
-//
-////////////////////////////////////////////////////////////////
 
 #include <cassert>
 #include <iostream>

@@ -277,12 +277,6 @@ paramdef int {
 } spectra_n_columns;
 
 paramdef int {
-  p_default = 150;
-  p_descr = "Width of ASCOPE panel in spectra window (pixels).";
-  p_help = "The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.";
-} ascope_width_in_spectra_panel;
-
-paramdef int {
   p_default = 0;
   p_descr = "Height of top margin in SPECTRA mode (pixels).";
   p_help = "Titles go in the top margin.";
@@ -461,6 +455,42 @@ commentdef {
   p_text = "The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.";
 }
 
+commentdef {
+  p_header = "MOMENTS";
+}
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Number of ascope panels in spectra window (pixels).";
+  p_help = "The ascopes will be on the left of the plot. Set to 0 for no ASCOPE panel.";
+} ascope_n_panels_in_spectra_window;
+
+typedef enum {
+  DBZ,
+  VEL,
+  WIDTH,
+  NCP,
+  SNR,
+  DBM,
+  ZDR,
+  LDR,
+  RHOHV,
+  PHIDP,
+  KDP
+} moment_type_t;
+
+paramdef enum moment_type_t {
+  p_default = { DBZ, SNR };
+  p_descr = "Moments to be displaed on ascope panels.";
+  p_help = "The number of specified moments must match the number of ascope panels.";
+} ascope_moments[];
+
+paramdef int {
+  p_default = 150;
+  p_descr = "Width of ASCOPE panel in spectra window (pixels).";
+  p_help = "The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.";
+} ascope_width_in_spectra_window;
+
 paramdef int {
   p_default = 10;
   p_descr = "Width of left margin for ascope plot (pixels).";
@@ -472,6 +502,16 @@ paramdef int {
   p_descr = "Height of bottom margin for ascope plot (pixels).";
   p_help = "The X axis labels are plotted here.";
 } ascope_bottom_margin;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of ascope line.";
+} ascope_line_color;
+
+paramdef string {
+  p_default = "slategray";
+  p_descr = "Color of ascope fill.";
+} ascope_fill_color;
 
 commentdef {
   p_header = "CLUTTER FILTERING";

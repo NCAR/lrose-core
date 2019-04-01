@@ -91,12 +91,22 @@ void AscopePlot::unzoomView()
 
   _zoomWorld = _fullWorld;
   _isZoomed = false;
-  // _setTransform(_zoomWorld.getTransform());
-  // _refreshImages();
-  // _updateRenderers();
+  _setTransform(_zoomWorld.getTransform());
+  _parent->update();
 
 }
 
+////////////////////
+// set the transform
+
+void AscopePlot::_setTransform(const QTransform &transform)
+{
+  
+  _fullTransform = transform;
+  _zoomTransform = transform;
+  
+}
+  
 /*************************************************************************
  * plot a beam
  */
@@ -121,28 +131,124 @@ void AscopePlot::plotBeam(QPainter &painter,
     cerr << "  Max range: " << beam->getMaxRange() << endl;
   }
 
-  // draw the reflectivity field vs range
-
   const MomentsFields* fields = beam->getOutFields();
   int nGates = beam->getNGates();
   double startRange = beam->getStartRangeKm();
   double gateSpacing = beam->getGateSpacingKm();
+
+  // first use filled polygons (trapezia)
+  
+  double xMin = _fullWorld.getXMinWorld();
+  QBrush brush(_params.ascope_fill_color);
+  brush.setStyle(Qt::SolidPattern);
+  
+  for (int ii = 1; ii < nGates; ii++) {
+    double rangePrev = startRange + gateSpacing * (ii-1);
+    double range = startRange + gateSpacing * (ii);
+    double valPrev = getFieldVal(_momentType, fields[ii-1]);
+    double val = getFieldVal(_momentType, fields[ii]);
+    if (val > -9990 && valPrev > -9990) {
+      _fullWorld.fillTrap(painter, brush,
+                          xMin, rangePrev,
+                          valPrev, rangePrev,
+                          val, range,
+                          xMin, range);
+    }
+  }
+
+  // draw the reflectivity field vs range - as line
+
+  painter.save();
+  painter.setPen(_params.ascope_line_color);
   QVector<QPointF> pts;
   for (int ii = 0; ii < nGates; ii++) {
     double range = startRange + gateSpacing * ii;
-    // double val = fields[ii].snr;
-    double val = fields[ii].dbz;
+    double val = getFieldVal(_momentType, fields[ii]);
     if (val > -9990) {
       QPointF pt(val, range);
       pts.push_back(pt);
     }
   }
   _fullWorld.drawLines(painter, pts);
+  painter.restore();
 
-  // finally draw the overlays
+  // draw the overlays
 
   _drawOverlays(painter, xGridEnabled, yGridEnabled);
 
+  // draw the title
+
+  string title("Ascope:");
+  title.append(momentTypeStr(_momentType));
+  _fullWorld.drawTitleTopCenter(painter, title);
+
+}
+
+//////////////////////////////////
+// get a string for the field type
+
+string AscopePlot::momentTypeStr(Params::moment_type_t mtype)
+{
+  switch (mtype) {
+    case Params::DBZ:
+      return "DBZ";
+    case Params::VEL:
+      return "VEL";
+    case Params::WIDTH:
+      return "WIDTH";
+    case Params::NCP:
+      return "NCP";
+    case Params::SNR:
+      return "SNR";
+    case Params::DBM:
+      return "DBM";
+    case Params::ZDR:
+      return "ZDR";
+    case Params::LDR:
+      return "LDR";
+    case Params::RHOHV:
+      return "RHOHV";
+    case Params::PHIDP:
+      return "PHIDP";
+    case Params::KDP:
+      return "KDP";
+    default:
+      return "UNKNOWN";
+  }
+}
+
+////////////////////////////////////////////
+// get a field value based on the field type
+
+double AscopePlot::getFieldVal(Params::moment_type_t mtype,
+                               const MomentsFields &fields)
+{
+  switch (mtype) {
+    case Params::DBZ:
+      return fields.dbz;
+    case Params::VEL:
+      return fields.vel;
+    case Params::WIDTH:
+      return fields.width;
+    case Params::NCP:
+      return fields.ncp;
+    case Params::SNR:
+      return fields.snr;
+    case Params::DBM:
+      return fields.dbm;
+    case Params::ZDR:
+      return fields.zdr;
+    case Params::LDR:
+      return fields.ldr;
+    case Params::RHOHV:
+      return fields.rhohv;
+    case Params::PHIDP:
+      return fields.phidp;
+    case Params::KDP:
+      return fields.kdp;
+    default:
+      return -9999.0;
+  }
 }
 
 /*************************************************************************
@@ -154,7 +260,6 @@ void AscopePlot::setWindowGeom(int width, int height,
 {
 
   _fullWorld.setWindowGeom(width, height, xOffset, yOffset);
-
   _zoomWorld = _fullWorld;
 
 }
@@ -228,18 +333,6 @@ void AscopePlot::_drawOverlays(QPainter &painter,
   QFont valuesFont(origFont);
   valuesFont.setPointSizeF(_params.ascope_axis_values_font_size);
   
-  // _zoomWorld.drawRangeAxes(painter,
-  //                          "xxx", _yGridEnabled,
-  //                          lineColor, gridColor, textColor,
-  //                          labelFont, valuesFont, true);
-  
-  // _zoomWorld.drawTimeAxes(painter,
-  //                         _plotStartTime, _plotEndTime,
-  //                         _xGridEnabled,
-  //                         lineColor, gridColor, textColor,
-  //                         labelFont, valuesFont,
-  //                         false);
-
   // y label
 
   painter.setPen(_params.ascope_labels_color);
