@@ -51,7 +51,7 @@ SpectraWidget::SpectraWidget(QWidget* parent,
         _parent(parent),
         _manager(manager),
         _params(params),
-        _backgroundBrush(QColor(_params.background_color)),
+        _backgroundBrush(QColor(_params.main_background_color)),
         _scaledLabel(ScaledLabel::DistanceEng),
         _worldReleaseX(0),
         _worldReleaseY(0),
@@ -61,7 +61,7 @@ SpectraWidget::SpectraWidget(QWidget* parent,
 {
 
   _pointClicked = false;
-  _colorScaleWidth = _params.color_scale_width;
+  _colorScaleWidth = _params.main_color_scale_width;
 
   _nRows = _params.spectra_n_rows;
   _nCols = _params.spectra_n_columns;
@@ -456,6 +456,7 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
   _zoomWorld.setClippingOn(painter);
   painter.restore();
   _drawOverlays(painter);
+  _drawMainTitle(painter);
   
   // if we have a current beam, plot it
   if (_currentBeam) {
@@ -1006,6 +1007,61 @@ void SpectraWidget::_configureAscope(int id)
   
   _ascopes[id]->setWorldLimits(minVal, 0.0,
                                maxVal, _currentBeam->getMaxRange());
+
+}
+
+/////////////////////////////////////////////////////////////	
+// Title
+    
+void SpectraWidget::_drawMainTitle(QPainter &painter) 
+
+{
+
+  painter.save();
+
+  // set the font and color
+  
+  QFont font = painter.font();
+  font.setPointSizeF(_params.main_title_font_size);
+  painter.setFont(font);
+  painter.setPen(_params.main_title_color);
+
+  string title("SPRITE");
+
+  if (_currentBeam) {
+    string rname(_currentBeam->getInfo().get_radar_name());
+    if (_params.override_radar_name) rname = _params.radar_name;
+    title.append(":");
+    title.append(rname);
+    char dateStr[1024];
+    DateTime beamTime(_currentBeam->getTimeSecs());
+    snprintf(dateStr, 1024, "%.4d/%.2d/%.2d",
+             beamTime.getYear(), beamTime.getMonth(), beamTime.getDay());
+    title.append(" ");
+    title.append(dateStr);
+    char timeStr[1024];
+    int nanoSecs = _currentBeam->getNanoSecs();
+    snprintf(timeStr, 1024, "%.2d:%.2d:%.2d.%.3d",
+             beamTime.getHour(), beamTime.getMin(), beamTime.getSec(),
+             (nanoSecs / 1000000));
+    title.append("-");
+    title.append(timeStr);
+  }
+
+
+  // get bounding rectangle
+  
+  QRect tRect(painter.fontMetrics().tightBoundingRect(title.c_str()));
+  
+  qreal xx = (qreal) ((width() / 2.0) - (tRect.width() / 2.0));
+  qreal yy = (qreal) (_titleMargin - tRect.height()) / 2.0;
+  QRectF bRect(xx, yy, tRect.width() + 6, tRect.height() + 6);
+                      
+  // draw the text
+  
+  painter.drawText(bRect, Qt::AlignTop, title.c_str());
+
+  painter.restore();
 
 }
 

@@ -485,15 +485,19 @@ public:
 
   int main_window_title_margin;
 
-  int color_scale_width;
+  int main_title_font_size;
 
-  int label_font_size;
+  char* main_title_color;
 
-  char* background_color;
+  int main_label_font_size;
+
+  char* main_background_color;
 
   int main_window_panel_divider_line_width;
 
   char* main_window_panel_divider_color;
+
+  int main_color_scale_width;
 
   int click_cross_size;
 
@@ -571,6 +575,8 @@ public:
   int ascope_left_margin;
 
   int ascope_bottom_margin;
+
+  char* ascope_axis_label_color;
 
   char* ascope_line_color;
 
@@ -679,7 +685,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[134];
+  mutable TDRPtable _table[137];
 
   const char *_className;
 

@@ -1030,42 +1030,54 @@
     tt->descr = tdrpStrDup("Height of top title margin, main window (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &main_window_title_margin - &_start_;
-    tt->single_val.i = 20;
+    tt->single_val.i = 24;
     tt++;
     
-    // Parameter 'color_scale_width'
+    // Parameter 'main_title_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("color_scale_width");
-    tt->descr = tdrpStrDup("Width of color scale (pixels).");
+    tt->param_name = tdrpStrDup("main_title_font_size");
+    tt->descr = tdrpStrDup("Font size of main title (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &color_scale_width - &_start_;
-    tt->single_val.i = 40;
+    tt->val_offset = (char *) &main_title_font_size - &_start_;
+    tt->single_val.i = 10;
     tt++;
     
-    // Parameter 'label_font_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("label_font_size");
-    tt->descr = tdrpStrDup("Basic font size for labels (pixels).");
-    tt->help = tdrpStrDup("Some of the labels are scaled relative to this size.");
-    tt->val_offset = (char *) &label_font_size - &_start_;
-    tt->single_val.i = 12;
-    tt++;
-    
-    // Parameter 'background_color'
+    // Parameter 'main_title_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("background_color");
+    tt->param_name = tdrpStrDup("main_title_color");
+    tt->descr = tdrpStrDup("Text color for main title.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_title_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'main_label_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("main_label_font_size");
+    tt->descr = tdrpStrDup("Basic font size for labels (pixels).");
+    tt->help = tdrpStrDup("Some of the labels are scaled relative to this size.");
+    tt->val_offset = (char *) &main_label_font_size - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'main_background_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("main_background_color");
     tt->descr = tdrpStrDup("Color of main display background.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &background_color - &_start_;
+    tt->val_offset = (char *) &main_background_color - &_start_;
     tt->single_val.s = tdrpStrDup("black");
     tt++;
     
@@ -1091,6 +1103,18 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &main_window_panel_divider_color - &_start_;
     tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
+    // Parameter 'main_color_scale_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("main_color_scale_width");
+    tt->descr = tdrpStrDup("Width of color scale (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_color_scale_width - &_start_;
+    tt->single_val.i = 40;
     tt++;
     
     // Parameter 'click_cross_size'
@@ -1579,7 +1603,7 @@
     tt->descr = tdrpStrDup("Number of ascope panels in spectra window (pixels).");
     tt->help = tdrpStrDup("The ascopes will be on the left of the plot. Set to 0 for no ASCOPE panel.");
     tt->val_offset = (char *) &ascope_n_panels_in_spectra_window - &_start_;
-    tt->single_val.i = 3;
+    tt->single_val.i = 2;
     tt++;
     
     // Parameter 'ascope_moments'
@@ -1595,7 +1619,7 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(moment_type_t);
-    tt->array_n = 3;
+    tt->array_n = 2;
     tt->enum_def.name = tdrpStrDup("moment_type_t");
     tt->enum_def.nfields = 11;
     tt->enum_def.fields = (enum_field_t *)
@@ -1625,8 +1649,7 @@
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].e = DBZ;
-      tt->array_vals[1].e = SNR;
-      tt->array_vals[2].e = VEL;
+      tt->array_vals[1].e = VEL;
     tt++;
     
     // Parameter 'ascope_width_in_spectra_window'
@@ -1663,6 +1686,18 @@
     tt->help = tdrpStrDup("The X axis labels are plotted here.");
     tt->val_offset = (char *) &ascope_bottom_margin - &_start_;
     tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'ascope_axis_label_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axis_label_color");
+    tt->descr = tdrpStrDup("Color of ascope line.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axis_label_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'ascope_line_color'

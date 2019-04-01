@@ -86,7 +86,7 @@ public:
   // constructor
 
   SpectraMgr(const Params &params,
-            TsReader *tsReader);
+             TsReader *tsReader);
   
   // destructor
   
@@ -99,7 +99,11 @@ public:
   // enable the zoom button - called by SpectraWidget
   
   virtual void enableZoomButton() const;
-  
+
+  // get methods
+
+  string getWindowTitle() const { return _windowTitle; }
+
 signals:
 
   ////////////////
@@ -132,7 +136,8 @@ private:
   // windows
 
   QFrame *_main;
-
+  string _windowTitle;
+  
   // actions
   
   QAction *_exitAct;

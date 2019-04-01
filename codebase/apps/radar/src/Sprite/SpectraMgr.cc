@@ -163,8 +163,8 @@ int SpectraMgr::run(QApplication &app)
 
 void SpectraMgr::_setTitleBar(const string &radarName)
 {
-  string windowTitle = "SPRITE - Spectral Plot for Radar Iq Time sEries - " + radarName;
-  setWindowTitle(tr(windowTitle.c_str()));
+  _windowTitle = "SPRITE - Spectral Plot for Radar Iq Time sEries - " + radarName;
+  setWindowTitle(tr(_windowTitle.c_str()));
 }
 
 //////////////////////////////////////////////////
@@ -1273,9 +1273,9 @@ void SpectraMgr::_createStatusPanel()
   QFont font = dummy.font();
   QFont font2 = dummy.font();
   QFont font6 = dummy.font();
-  int fsize = _params.label_font_size;
-  int fsize2 = _params.label_font_size + 2;
-  int fsize6 = _params.label_font_size + 6;
+  int fsize = _params.main_label_font_size;
+  int fsize2 = _params.main_label_font_size + 2;
+  int fsize6 = _params.main_label_font_size + 6;
   font.setPixelSize(fsize);
   font2.setPixelSize(fsize2);
   font6.setPixelSize(fsize6);

@@ -52,10 +52,10 @@
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
 
-class SpectraMgr;
 class Beam;
 class AscopePlot;
 class RadxRay;
+class SpectraMgr;
 
 /// Widget class - Spectra mode
 /// Plot the Spectra and spectra for a beam
@@ -80,8 +80,8 @@ class DLL_EXPORT SpectraWidget : public QWidget
    */
 
   SpectraWidget(QWidget* parent,
-               const SpectraMgr &manager,
-               const Params &params);
+                const SpectraMgr &manager,
+                const Params &params);
   
   /**
    * @brief Destructor.
@@ -426,6 +426,10 @@ class DLL_EXPORT SpectraWidget : public QWidget
   // configure the ascope
 
   void _configureAscope(int id);
+
+  // draw the main title
+  
+  void _drawMainTitle(QPainter &painter);
 
 };
 
