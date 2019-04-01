@@ -230,9 +230,10 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   int _nRows;
   int _nCols;
+  int _nAscopes;
+
   int _titleMargin;
 
-  int _nAscopes;
   int _ascopeWidth;
   int _ascopeHeight;
   int _ascopeGrossWidth;

@@ -128,9 +128,12 @@ public:
   // get the moment type
 
   const Params::moment_type_t getMomentType() const { return _momentType; }
-  static string momentTypeStr(Params::moment_type_t mtype);
+  static string getName(Params::moment_type_t mtype);
+  static string getUnits(Params::moment_type_t mtype);
   static double getFieldVal(Params::moment_type_t mtype,
                             const MomentsFields &fields);
+  static double getMinVal(Params::moment_type_t mtype);
+  static double getMaxVal(Params::moment_type_t mtype);
   
 protected:
 

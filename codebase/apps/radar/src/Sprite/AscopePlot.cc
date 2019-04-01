@@ -178,16 +178,19 @@ void AscopePlot::plotBeam(QPainter &painter,
 
   // draw the title
 
+  painter.save();
+  painter.setPen(_params.ascope_title_color);
   string title("Ascope:");
-  title.append(momentTypeStr(_momentType));
+  title.append(getName(_momentType));
   _fullWorld.drawTitleTopCenter(painter, title);
+  painter.restore();
 
 }
 
 //////////////////////////////////
-// get a string for the field type
+// get a string for the field name
 
-string AscopePlot::momentTypeStr(Params::moment_type_t mtype)
+string AscopePlot::getName(Params::moment_type_t mtype)
 {
   switch (mtype) {
     case Params::DBZ:
@@ -214,6 +217,39 @@ string AscopePlot::momentTypeStr(Params::moment_type_t mtype)
       return "KDP";
     default:
       return "UNKNOWN";
+  }
+}
+
+//////////////////////////////////
+// get a string for the field units
+
+string AscopePlot::getUnits(Params::moment_type_t mtype)
+{
+  switch (mtype) {
+    case Params::DBZ:
+      return "dBZ";
+    case Params::VEL:
+      return "m/s";
+    case Params::WIDTH:
+      return "m/s";
+    case Params::NCP:
+      return "";
+    case Params::SNR:
+      return "dB";
+    case Params::DBM:
+      return "dBm";
+    case Params::ZDR:
+      return "dB";
+    case Params::LDR:
+      return "dB";
+    case Params::RHOHV:
+      return "";
+    case Params::PHIDP:
+      return "deg";
+    case Params::KDP:
+      return "deg/km";
+    default:
+      return "";
   }
 }
 
@@ -248,6 +284,72 @@ double AscopePlot::getFieldVal(Params::moment_type_t mtype,
       return fields.kdp;
     default:
       return -9999.0;
+  }
+}
+
+////////////////////////////////////////////
+// get min val for plotting
+
+double AscopePlot::getMinVal(Params::moment_type_t mtype)
+{
+  switch (mtype) {
+    case Params::DBZ:
+      return -30;
+    case Params::VEL:
+      return -40;
+    case Params::WIDTH:
+      return 0;
+    case Params::NCP:
+      return 0;
+    case Params::SNR:
+      return -20;
+    case Params::DBM:
+      return -120;
+    case Params::ZDR:
+      return -4;
+    case Params::LDR:
+      return -40;
+    case Params::RHOHV:
+      return 0;
+    case Params::PHIDP:
+      return -180;
+    case Params::KDP:
+      return -2;
+    default:
+      return 0;
+  }
+}
+
+////////////////////////////////////////////
+// get max val for plotting
+
+double AscopePlot::getMaxVal(Params::moment_type_t mtype)
+{
+  switch (mtype) {
+    case Params::DBZ:
+      return 80;
+    case Params::VEL:
+      return 40;
+    case Params::WIDTH:
+      return 20;
+    case Params::NCP:
+      return 1;
+    case Params::SNR:
+      return 80;
+    case Params::DBM:
+      return 10;
+    case Params::ZDR:
+      return 16;
+    case Params::LDR:
+      return 15;
+    case Params::RHOHV:
+      return 1;
+    case Params::PHIDP:
+      return 180;
+    case Params::KDP:
+      return 8;
+    default:
+      return 10;
   }
 }
 
@@ -302,10 +404,13 @@ void AscopePlot::_drawOverlays(QPainter &painter,
   
   QFont origFont = painter.font();
   
-  _zoomWorld.drawAxisBottom(painter, "dBZ", 
+  _zoomWorld.drawAxisBottom(painter, getUnits(_momentType),
                             true, true, true, xGridEnabled);
   _zoomWorld.drawAxisLeft(painter, "km", 
                           true, true, true, yGridEnabled);
+
+  painter.setPen(_params.ascope_axis_label_color);
+  _fullWorld.drawYAxisLabelLeft(painter, "Range");
 
   painter.restore();
 

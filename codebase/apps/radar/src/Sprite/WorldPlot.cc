@@ -342,6 +342,9 @@ void WorldPlot::drawLine(QPainter &painter,
 
 {
 	
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth,  _plotHeight);
+
   double xx1 = getXPixel(x1);
   double yy1 = getYPixel(y1);
   double xx2 = xx1 + (x2 - x1) * _xPixelsPerWorld;
@@ -349,6 +352,8 @@ void WorldPlot::drawLine(QPainter &painter,
 
   QLineF qline(xx1, yy1, xx2, yy2);
   painter.drawLine(qline);
+
+  painter.restore();
 
 }
 
@@ -358,6 +363,9 @@ void WorldPlot::drawLine(QPainter &painter,
 void WorldPlot::drawLines(QPainter &painter, QVector<QPointF> &points) 
 
 {
+
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth,  _plotHeight);
 
   QPainterPath path;
 
@@ -378,7 +386,7 @@ void WorldPlot::drawLines(QPainter &painter, QVector<QPointF> &points)
   }
 
   painter.drawPath(path);
-
+  painter.restore();
 }
 
 /////////////////////////
@@ -434,6 +442,9 @@ void WorldPlot::fillTrap(QPainter &painter,
   
 {
 
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth,  _plotHeight);
+  
   // create a vector of points
 
   QVector<QPointF> pts;
@@ -455,7 +466,11 @@ void WorldPlot::fillTrap(QPainter &painter,
   path.addPolygon(poly);
 
   // fill the path
+
   painter.fillPath(path, brush);
+  // drawPath(painter, path);
+
+  painter.restore();
 
 }
 

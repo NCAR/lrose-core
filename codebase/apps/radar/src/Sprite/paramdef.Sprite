@@ -204,12 +204,12 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 1050;
+  p_default = 1250;
   p_descr = "Startup width of main window (pixels).";
 } main_window_width;
 
 paramdef int {
-  p_default = 635;
+  p_default = 800;
   p_descr = "Startup height of main window (pixels).";
 } main_window_height;
 
@@ -312,7 +312,7 @@ paramdef int {
 } spectra_axis_tick_len;
 
 paramdef int {
-  p_default = 6;
+  p_default = 5;
   p_descr = "Ideal number of ticks on axes.";
 } spectra_n_ticks_ideal;
 
@@ -377,7 +377,7 @@ paramdef int {
 } spectra_legend_font_size;
 
 paramdef string {
-  p_default = "white";
+  p_default = "red";
   p_descr = "Color of plot title.";
 } spectra_title_color;
 
@@ -460,7 +460,7 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 2;
+  p_default = 3;
   p_descr = "Number of ascope panels in spectra window (pixels).";
   p_help = "The ascopes will be on the left of the plot. Set to 0 for no ASCOPE panel.";
 } ascope_n_panels_in_spectra_window;
@@ -480,7 +480,7 @@ typedef enum {
 } moment_type_t;
 
 paramdef enum moment_type_t {
-  p_default = { DBZ, SNR };
+  p_default = { DBZ, SNR, VEL };
   p_descr = "Moments to be displaed on ascope panels.";
   p_help = "The number of specified moments must match the number of ascope panels.";
 } ascope_moments[];
@@ -512,6 +512,11 @@ paramdef string {
   p_default = "slategray";
   p_descr = "Color of ascope fill.";
 } ascope_fill_color;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color of ascope title.";
+} ascope_title_color;
 
 commentdef {
   p_header = "CLUTTER FILTERING";

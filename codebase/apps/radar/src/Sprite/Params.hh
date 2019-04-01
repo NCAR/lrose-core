@@ -576,6 +576,8 @@ public:
 
   char* ascope_fill_color;
 
+  char* ascope_title_color;
+
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 
   double min_snr_db_for_residue_correction;
@@ -677,7 +679,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[133];
+  mutable TDRPtable _table[134];
 
   const char *_className;
 

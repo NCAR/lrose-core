@@ -999,8 +999,13 @@ void SpectraWidget::_configureAscope(int id)
   if (_currentBeam == NULL) {
     return;
   }
+
+  Params::moment_type_t momentType = _ascopes[id]->getMomentType();
+  double minVal = AscopePlot::getMinVal(momentType);
+  double maxVal = AscopePlot::getMaxVal(momentType);
   
-  _ascopes[id]->setWorldLimits(-30, 0.0, 100, _currentBeam->getMaxRange());
+  _ascopes[id]->setWorldLimits(minVal, 0.0,
+                               maxVal, _currentBeam->getMaxRange());
 
 }
 

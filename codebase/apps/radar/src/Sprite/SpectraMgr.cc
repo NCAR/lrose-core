@@ -163,7 +163,7 @@ int SpectraMgr::run(QApplication &app)
 
 void SpectraMgr::_setTitleBar(const string &radarName)
 {
-  string windowTitle = "Sprite Time Series Tool - " + radarName;
+  string windowTitle = "SPRITE - Spectral Plot for Radar Iq Time sEries - " + radarName;
   setWindowTitle(tr(windowTitle.c_str()));
 }
 

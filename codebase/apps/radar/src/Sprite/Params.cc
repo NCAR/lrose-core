@@ -982,7 +982,7 @@
     tt->descr = tdrpStrDup("Startup width of main window (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &main_window_width - &_start_;
-    tt->single_val.i = 1050;
+    tt->single_val.i = 1250;
     tt++;
     
     // Parameter 'main_window_height'
@@ -994,7 +994,7 @@
     tt->descr = tdrpStrDup("Startup height of main window (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &main_window_height - &_start_;
-    tt->single_val.i = 635;
+    tt->single_val.i = 800;
     tt++;
     
     // Parameter 'main_window_start_x'
@@ -1219,7 +1219,7 @@
     tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &spectra_n_ticks_ideal - &_start_;
-    tt->single_val.i = 6;
+    tt->single_val.i = 5;
     tt++;
     
     // Parameter 'spectra_title_text_margin'
@@ -1372,7 +1372,7 @@
     tt->descr = tdrpStrDup("Color of plot title.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &spectra_title_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
+    tt->single_val.s = tdrpStrDup("red");
     tt++;
     
     // Parameter 'spectra_axes_color'
@@ -1579,7 +1579,7 @@
     tt->descr = tdrpStrDup("Number of ascope panels in spectra window (pixels).");
     tt->help = tdrpStrDup("The ascopes will be on the left of the plot. Set to 0 for no ASCOPE panel.");
     tt->val_offset = (char *) &ascope_n_panels_in_spectra_window - &_start_;
-    tt->single_val.i = 2;
+    tt->single_val.i = 3;
     tt++;
     
     // Parameter 'ascope_moments'
@@ -1595,7 +1595,7 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(moment_type_t);
-    tt->array_n = 2;
+    tt->array_n = 3;
     tt->enum_def.name = tdrpStrDup("moment_type_t");
     tt->enum_def.nfields = 11;
     tt->enum_def.fields = (enum_field_t *)
@@ -1626,6 +1626,7 @@
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].e = DBZ;
       tt->array_vals[1].e = SNR;
+      tt->array_vals[2].e = VEL;
     tt++;
     
     // Parameter 'ascope_width_in_spectra_window'
@@ -1686,6 +1687,18 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_fill_color - &_start_;
     tt->single_val.s = tdrpStrDup("slategray");
+    tt++;
+    
+    // Parameter 'ascope_title_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_title_color");
+    tt->descr = tdrpStrDup("Color of ascope title.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_title_color - &_start_;
+    tt->single_val.s = tdrpStrDup("red");
     tt++;
     
     // Parameter 'Comment 12'
