@@ -158,7 +158,7 @@ $(TARGET_FILE): $(OBJS) Makefile
 		$(OBJS) $(DEBUG_LDFLAGS) $(LDFLAGS) \
 		$(LIBS); \
 	else \
-		echo ERROR - unknown module type '$(MODULE_TYPE)'; \
+		echo WARNING - unknown module type '$(MODULE_TYPE)'; \
 		exit -1; \
 	fi
 
