@@ -68,6 +68,12 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
  public:
 
+  typedef enum {
+    PANEL_TITLE,
+    PANEL_ASCOPE,
+    PANEL_SPECTRA
+  } panel_type_t;
+
   ////////////////////
   // Public methods //
   ////////////////////
@@ -281,6 +287,12 @@ class DLL_EXPORT SpectraWidget : public QWidget
   int _mousePressX, _mousePressY;
   int _mouseReleaseX, _mouseReleaseY;
 
+  panel_type_t _mousePressPanelType;
+  int _mousePressPanelId;
+
+  panel_type_t _mouseReleasePanelType;
+  int _mouseReleasePanelId;
+
   /**
    * @brief Location world of the latest click point.
    */
@@ -430,6 +442,12 @@ class DLL_EXPORT SpectraWidget : public QWidget
   // draw the main title
   
   void _drawMainTitle(QPainter &painter);
+
+  // determine the panel type selected by a click
+
+  void _getPanelSelected(int xx, int yy,
+                         panel_type_t &panelType,
+                         int &panelId);
 
 };
 

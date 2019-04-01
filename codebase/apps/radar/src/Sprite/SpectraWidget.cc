@@ -329,6 +329,11 @@ void SpectraWidget::mousePressEvent(QMouseEvent *e)
   _worldPressX = _zoomWorld.getXWorld(_mousePressX);
   _worldPressY = _zoomWorld.getYWorld(_mousePressY);
 
+  // save the panel details for the mouse press point
+
+  _getPanelSelected(_mousePressX, _mousePressY,
+                    _mousePressPanelType, _mousePressPanelId);
+
 }
 
 
@@ -371,6 +376,11 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
   
   _mouseReleaseX = clickPos.x();
   _mouseReleaseY = clickPos.y();
+  
+  // save the panel details for the mouse release point
+
+  _getPanelSelected(_mouseReleaseX, _mouseReleaseY,
+                    _mouseReleasePanelType, _mouseReleasePanelId);
 
   // get click location in world coords
 
@@ -715,7 +725,20 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   dividerPen.setWidth(_params.main_window_panel_divider_line_width);
   painter.setPen(dividerPen);
 
-  // top line
+  // borders
+
+  {
+    QLineF upperBorder(0, 0, width()-1, 0);
+    painter.drawLine(upperBorder);
+    QLineF lowerBorder(0, height()-1, width()-1, height()-1);
+    painter.drawLine(lowerBorder);
+    QLineF leftBorder(0, 0, 0, height()-1);
+    painter.drawLine(leftBorder);
+    QLineF rightBorder(width()-1, 0, width()-1, height()-1);
+    painter.drawLine(rightBorder);
+  }
+    
+  // line below title
   {
     QLineF topLine(0, _titleMargin, width(), _titleMargin);
     painter.drawLine(topLine);
@@ -1064,4 +1087,49 @@ void SpectraWidget::_drawMainTitle(QPainter &painter)
   painter.restore();
 
 }
+
+/////////////////////////////////////////////////////////////	
+// determine the selected panel
+    
+void SpectraWidget::_getPanelSelected(int xx, int yy,
+                                      panel_type_t &panelType,
+                                      int &panelId)
+
+{
+
+  // frist check for clicks in the top title bar
+
+  cerr << "111111111 xx, yy: " << xx << ", " << yy << endl;
+
+  if (yy < _titleMargin) {
+    cerr << "11111111111 TITLE" << endl;
+    panelType = PANEL_TITLE;
+    panelId = 0;
+    return;
+  }
+
+  // then check for clicks in the ascope panels to the left
+
+  if (xx < _ascopeGrossWidth) {
+    panelType = PANEL_ASCOPE;
+    panelId = xx / _ascopeWidth;
+    cerr << "11111111111 ASCOPE" << endl;
+    cerr << "11111111111 panelId: " << panelId << endl;
+    return;
+  }
+
+  // we must therefore be in the spectra panels
+
+  panelType = PANEL_SPECTRA;
+  int icol = (xx - _ascopeGrossWidth) / _subPanelWidths;
+  int irow = (yy - _titleMargin) / _subPanelHeights;
+  panelId = irow * _nRows + icol;
+
+  cerr << "11111111111 SPECTRA" << endl;
+  cerr << "11111111111 icol: " << icol << endl;
+  cerr << "22222222222 irow: " << irow << endl;
+  cerr << "11111111111 panelId: " << panelId << endl;
+
+}
+
 

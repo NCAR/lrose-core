@@ -1078,7 +1078,7 @@
     tt->descr = tdrpStrDup("Color of main display background.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &main_background_color - &_start_;
-    tt->single_val.s = tdrpStrDup("black");
+    tt->single_val.s = tdrpStrDup("darkslateblue");
     tt++;
     
     // Parameter 'main_window_panel_divider_line_width'
@@ -1420,7 +1420,7 @@
     tt->descr = tdrpStrDup("Color of grid lines on spectra.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &spectra_grid_color - &_start_;
-    tt->single_val.s = tdrpStrDup("blue");
+    tt->single_val.s = tdrpStrDup("gray");
     tt++;
     
     // Parameter 'spectra_labels_color'
@@ -1721,7 +1721,7 @@
     tt->descr = tdrpStrDup("Color of ascope fill.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_fill_color - &_start_;
-    tt->single_val.s = tdrpStrDup("slategray");
+    tt->single_val.s = tdrpStrDup("darkgreen");
     tt++;
     
     // Parameter 'ascope_title_color'
@@ -1733,7 +1733,7 @@
     tt->descr = tdrpStrDup("Color of ascope title.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_title_color - &_start_;
-    tt->single_val.s = tdrpStrDup("red");
+    tt->single_val.s = tdrpStrDup("yellow");
     tt++;
     
     // Parameter 'Comment 12'
