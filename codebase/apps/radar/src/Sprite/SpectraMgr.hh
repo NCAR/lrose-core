@@ -96,9 +96,9 @@ public:
   
   int run(QApplication &app);
 
-  // enable the zoom button - called by SpectraWidget
+  // enable the unzoom button - called by SpectraWidget
   
-  virtual void enableZoomButton() const;
+  virtual void enableUnzoomButton() const;
 
   // get methods
 

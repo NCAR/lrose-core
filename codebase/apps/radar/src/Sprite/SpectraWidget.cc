@@ -71,6 +71,7 @@ SpectraWidget::SpectraWidget(QWidget* parent,
   _ascopeWidth = _params.ascope_width_in_spectra_window; // constant
   _ascopeHeight = 100;
   _ascopeGrossWidth = _ascopeWidth * _nAscopes;
+  _ascopesConfigured = false;
 
   // Set up the background color
 
@@ -100,11 +101,11 @@ SpectraWidget::SpectraWidget(QWidget* parent,
                 _params.spectra_max_amplitude,
                 _params.spectra_time_span_secs);
 
-  // create ascopes and configure them
+  // create ascopes
 
   for (int ii = 0; ii < _nAscopes; ii++) {
     _createAscope(ii);
-    _configureAscope(ii);
+    // _configureAscope(ii);
   }
 
 }
@@ -213,13 +214,17 @@ void SpectraWidget::refresh()
  * unzoom the view
  */
 
-void SpectraWidget::unzoomView()
+void SpectraWidget::unzoom()
 {
 
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
   _refreshImages();
+  for (size_t ii = 0; ii < _ascopes.size(); ii++) {
+    _ascopes[ii]->unzoom();
+  }
+  update();
   // _updateRenderers();
 
 }
@@ -254,13 +259,16 @@ void SpectraWidget::plotBeam(Beam *beam)
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
   }
 
-  if (_ascopes.size() > 0) {
-    _currentBeam = beam;
+  _currentBeam = beam;
+
+  if (_ascopes.size() > 0 && !_ascopesConfigured) {
     for (size_t ii = 0; ii < _ascopes.size(); ii++) {
       _configureAscope(ii);
     }
-    update();
+    _ascopesConfigured = true;
   }
+  
+  update();
 
 }
 
@@ -331,8 +339,8 @@ void SpectraWidget::mousePressEvent(QMouseEvent *e)
 
   // save the panel details for the mouse press point
 
-  _getPanelSelected(_mousePressX, _mousePressY,
-                    _mousePressPanelType, _mousePressPanelId);
+  _identSelectedPanel(_mousePressX, _mousePressY,
+                      _mousePressPanelType, _mousePressPanelId);
 
 }
 
@@ -379,8 +387,8 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
   
   // save the panel details for the mouse release point
 
-  _getPanelSelected(_mouseReleaseX, _mouseReleaseY,
-                    _mouseReleasePanelType, _mouseReleasePanelId);
+  _identSelectedPanel(_mouseReleaseX, _mouseReleaseY,
+                      _mouseReleasePanelType, _mouseReleasePanelId);
 
   // get click location in world coords
 
@@ -420,6 +428,33 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
   } else {
 
     // mouse moved more than 20 pixels, so a zoom occurred
+
+    if (_mousePressPanelType == PANEL_ASCOPE &&
+        _mouseReleasePanelType == PANEL_ASCOPE) {
+      // ascope zoom
+      if (_mousePressPanelId == _mouseReleasePanelId) {
+        // zoom in one panel, reflect the range change in 
+        // other panels
+        for (int ii = 0; ii < (int) _ascopes.size(); ii++) {
+          AscopePlot *ascope = _ascopes[ii];
+          if (ii == _mouseReleasePanelId) {
+            // perform 2D zoom
+            ascope->setZoomLimits(_mousePressX, _mousePressY,
+                                  _mouseReleaseX, _mouseReleaseY);
+          } else {
+            // perform zoom in range only
+            ascope->setZoomLimitsY(_mousePressY, _mouseReleaseY);
+          }
+        } // ii
+      } else {
+        // zoom box crosses panels, zoom in range only
+        for (int ii = 0; ii < (int) _ascopes.size(); ii++) {
+          AscopePlot *ascope = _ascopes[ii];
+          ascope->setZoomLimitsY(_mousePressY, _mouseReleaseY);
+        }
+      }
+
+    } // if (_mousePressPanelType == PANEL_ASCOPE
     
     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
     _worldPressY = _zoomWorld.getYWorld(_mousePressY);
@@ -430,7 +465,7 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
 
     // enable unzoom button
 
-    _manager.enableZoomButton();
+    _manager.enableUnzoomButton();
     
     // Update the window in the renderers
     
@@ -826,7 +861,7 @@ void SpectraWidget::_refreshImages()
   
   // call threads to do the rendering
   
-  _performRendering();
+  // _performRendering();
 
   update();
 
@@ -965,7 +1000,7 @@ void SpectraWidget::_createAscope(int id)
   
 {
 
-  AscopePlot *ascope = new AscopePlot(this, _params);
+  AscopePlot *ascope = new AscopePlot(this, _params, id);
   ascope->setMomentType(_params._ascope_moments[id]);
 
   WorldPlot &ascopeWorld = ascope->getFullWorld();
@@ -1091,18 +1126,15 @@ void SpectraWidget::_drawMainTitle(QPainter &painter)
 /////////////////////////////////////////////////////////////	
 // determine the selected panel
     
-void SpectraWidget::_getPanelSelected(int xx, int yy,
-                                      panel_type_t &panelType,
-                                      int &panelId)
+void SpectraWidget::_identSelectedPanel(int xx, int yy,
+                                        panel_type_t &panelType,
+                                        int &panelId)
 
 {
 
   // frist check for clicks in the top title bar
 
-  cerr << "111111111 xx, yy: " << xx << ", " << yy << endl;
-
   if (yy < _titleMargin) {
-    cerr << "11111111111 TITLE" << endl;
     panelType = PANEL_TITLE;
     panelId = 0;
     return;
@@ -1113,8 +1145,6 @@ void SpectraWidget::_getPanelSelected(int xx, int yy,
   if (xx < _ascopeGrossWidth) {
     panelType = PANEL_ASCOPE;
     panelId = xx / _ascopeWidth;
-    cerr << "11111111111 ASCOPE" << endl;
-    cerr << "11111111111 panelId: " << panelId << endl;
     return;
   }
 
@@ -1124,11 +1154,6 @@ void SpectraWidget::_getPanelSelected(int xx, int yy,
   int icol = (xx - _ascopeGrossWidth) / _subPanelWidths;
   int irow = (yy - _titleMargin) / _subPanelHeights;
   panelId = irow * _nRows + icol;
-
-  cerr << "11111111111 SPECTRA" << endl;
-  cerr << "11111111111 icol: " << icol << endl;
-  cerr << "22222222222 irow: " << irow << endl;
-  cerr << "11111111111 panelId: " << panelId << endl;
 
 }
 

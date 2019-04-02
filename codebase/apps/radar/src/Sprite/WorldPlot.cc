@@ -252,6 +252,41 @@ void WorldPlot::setWorldLimits(double xMinWorld,
 
 }
 
+///////////////////////////////////////////////////////
+// set zoom limits from pixel space
+
+void WorldPlot::setZoomLimits(int xMin,
+                              int yMin,
+                              int xMax,
+                              int yMax)
+  
+{
+  setWorldLimits(getXWorld(xMin),
+                 getYWorld(yMin),
+                 getXWorld(xMax),
+                 getYWorld(yMax));
+}
+
+void WorldPlot::setZoomLimitsX(int xMin,
+                               int xMax)
+  
+{
+  setWorldLimits(getXWorld(xMin),
+                 _yMinWorld,
+                 getXWorld(xMax),
+                 _yMaxWorld);
+}
+
+void WorldPlot::setZoomLimitsY(int yMin,
+                               int yMax)
+  
+{
+  setWorldLimits(_xMinWorld,
+                 getYWorld(yMin),
+                 _xMaxWorld,
+                 getYWorld(yMax));
+}
+
 ////////////////////////////////////////
 // resize the plot
 
@@ -1868,3 +1903,37 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 
 }
 
+/////////////////////////////////////////////////////
+// print
+
+void WorldPlot::print(ostream &out)
+  
+{
+
+  out << "================= WorldPlot properties ===================" << endl;
+
+  out << "  _widthPixels     : " << _widthPixels << endl;
+  out << "  _heightPixels    : " << _heightPixels << endl;
+  out << "  _xPixOffset      : " << _xPixOffset << endl;
+  out << "  _yPixOffset      : " << _yPixOffset << endl;
+  out << "  _xMinWorld       : " << _xMinWorld << endl;
+  out << "  _xMaxWorld       : " << _xMaxWorld << endl;
+  out << "  _yMinWorld       : " << _yMinWorld << endl;
+  out << "  _yMaxWorld       : " << _yMaxWorld << endl;
+  out << "  _plotWidth       : " << _plotWidth << endl;
+  out << "  _plotHeight      : " << _plotHeight << endl;
+  out << "  _xMinPixel       : " << _xMinPixel << endl;
+  out << "  _yMinPixel       : " << _yMinPixel << endl;
+  out << "  _xMaxPixel       : " << _xMaxPixel << endl;
+  out << "  _yMaxPixel       : " << _yMaxPixel << endl;
+  out << "  _xPixelsPerWorld : " << _xPixelsPerWorld << endl;
+  out << "  _yPixelsPerWorld : " << _yPixelsPerWorld << endl;
+  out << "  _xMinWindow      : " << _xMinWindow << endl;
+  out << "  _xMaxWindow      : " << _xMaxWindow << endl;
+  out << "  _yMinWindow      : " << _yMinWindow << endl;
+  out << "  _yMaxWindow      : " << _yMaxWindow << endl;
+
+  out << "==========================================================" << endl;
+
+}
+  

@@ -177,7 +177,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
    * @brief Reset the view to unzoomed.
    */
 
-  void unzoomView();
+  void unzoom();
 
   /**
    * @brief Clear the data in the view.
@@ -252,6 +252,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
   // ascopes
   
   vector<AscopePlot *> _ascopes;
+  bool _ascopesConfigured;
 
   /**
    * Grid overlays
@@ -445,9 +446,9 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   // determine the panel type selected by a click
 
-  void _getPanelSelected(int xx, int yy,
-                         panel_type_t &panelType,
-                         int &panelId);
+  void _identSelectedPanel(int xx, int yy,
+                           panel_type_t &panelType,
+                           int &panelId);
 
 };
 

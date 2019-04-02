@@ -238,10 +238,7 @@ int NcfRadxFile::_readPath(const string &path, size_t pathNum)
   
   // read position variables - lat/lon/alt
   
-  if (_readPositionVariables()) {
-    _addErrStr(errStr);
-    return -1;
-  }
+  _readPositionVariables();
 
   // read in sweep variables
 
@@ -310,10 +307,7 @@ int NcfRadxFile::_readPath(const string &path, size_t pathNum)
 
   // read in calibration variables
   
-  if (_readCalibrationVariables()) {
-    _addErrStr(errStr);
-    return -1;
-  }
+  _readCalibrationVariables();
 
   // close file
 
@@ -1271,165 +1265,67 @@ int NcfRadxFile::_readCorrectionVariables()
   
 }
 
-///////////////////////////////////
+////////////////////////////////////////////////////
 // read the position variables
+// read variables for latitude, longitude, altitude
 
-int NcfRadxFile::_readPositionVariables()
+void NcfRadxFile::_readPositionVariables()
 
 {
 
-  // time
-
-  _georefTimeVar = _file.getNc3File()->get_var(GEOREF_TIME);
-  if (_georefTimeVar != NULL) {
-    if (_georefTimeVar->num_vals() < 1) {
-      _addErrStr("ERROR - NcfRadxFile::_readPositionVariables");
-      _addErrStr("  Cannot read georef time");
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      return -1;
-    }
-    if (_latitudeVar->type() != nc3Double) {
-      _addErrStr("ERROR - NcfRadxFile::_readPositionVariables");
-      _addErrStr("  georef time is incorrect type: ", 
-                 Nc3xFile::ncTypeToStr(_georefTimeVar->type()));
-      _addErrStr("  expecting type: double");
-      return -1;
-    }
-  }
-
-  // find latitude, longitude, altitude
-
   _latitudeVar = _file.getNc3File()->get_var(LATITUDE);
-  if (_latitudeVar != NULL) {
-    if (_latitudeVar->num_vals() < 1) {
-      _addErrStr("ERROR - NcfRadxFile::_readPositionVariables");
-      _addErrStr("  Cannot read latitude");
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      return -1;
-    }
+  if (_latitudeVar && _latitudeVar->num_vals() > 0) {
     if (_latitudeVar->type() != nc3Double) {
-      _addErrStr("ERROR - NcfRadxFile::_readPositionVariables");
-      _addErrStr("  latitude is incorrect type: ", 
-                 Nc3xFile::ncTypeToStr(_latitudeVar->type()));
-      _addErrStr("  expecting type: double");
-      return -1;
+      cerr << "WARNING - NcfRadxFile::_readPositionVariables" << endl;
+      cerr << " latitude should be type double" << endl;
+    }
+    for (int ii = 0; ii < _latitudeVar->num_vals(); ii++) {
+      _latitude.push_back(_latitudeVar->as_double(ii));
     }
   } else {
     cerr << "WARNING - NcfRadxFile::_readPositionVariables" << endl;
-    cerr << "  No latitude variable" << endl;
-    cerr << "  Setting latitude to 0" << endl;
-  }
-
-  _longitudeVar = _file.getNc3File()->get_var(LONGITUDE);
-  if (_longitudeVar != NULL) {
-    if (_longitudeVar->num_vals() < 1) {
-      _addErrStr("ERROR - NcfRadxFile::_readPositionVariables");
-      _addErrStr("  Cannot read longitude");
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      return -1;
-    }
-    if (_longitudeVar->type() != nc3Double) {
-      _addErrStr("ERROR - NcfRadxFile::_readPositionVariables");
-      _addErrStr("  longitude is incorrect type: ",
-                 Nc3xFile::ncTypeToStr(_longitudeVar->type()));
-      _addErrStr("  expecting type: double");
-      return -1;
-    }
-  } else {
-    cerr << "WARNING - NcfRadxFile::_readPositionVariables" << endl;
-    cerr << "  No longitude variable" << endl;
-    cerr << "  Setting longitude to 0" << endl;
-  }
-
-  _altitudeVar = _file.getNc3File()->get_var(ALTITUDE);
-  if (_altitudeVar != NULL) {
-    if (_altitudeVar->num_vals() < 1) {
-      _addErrStr("ERROR - NcfRadxFile::_readPositionVariables");
-      _addErrStr("  Cannot read altitude");
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      return -1;
-    }
-    if (_altitudeVar->type() != nc3Double) {
-      _addErrStr("ERROR - NcfRadxFile::_readPositionVariables");
-      _addErrStr("  altitude is incorrect type: ",
-                 Nc3xFile::ncTypeToStr(_altitudeVar->type()));
-      _addErrStr("  expecting type: double");
-      return -1;
-    }
-  } else {
-    cerr << "WARNING - NcfRadxFile::_readPositionVariables" << endl;
-    cerr << "  No altitude variable" << endl;
-    cerr << "  Setting altitude to 0" << endl;
-  }
-
-  _altitudeAglVar = _file.getNc3File()->get_var(ALTITUDE_AGL);
-  if (_altitudeAglVar != NULL) {
-    if (_altitudeAglVar->num_vals() < 1) {
-      _addErrStr("WARNING - NcfRadxFile::_readPositionVariables");
-      _addErrStr("  Bad variable - altitudeAgl");
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-    }
-    if (_altitudeAglVar->type() != nc3Double) {
-      _addErrStr("WARNING - NcfRadxFile::_readPositionVariables");
-      _addErrStr("  altitudeAgl is incorrect type: ",
-                 Nc3xFile::ncTypeToStr(_altitudeAglVar->type()));
-      _addErrStr("  expecting type: double");
-    }
-  }
-
-  // set variables
-
-  if (_latitudeVar != NULL) {
-    double *data = new double[_latitudeVar->num_vals()];
-    if (_latitudeVar->get(data, _latitudeVar->num_vals())) {
-      double *dd = data;
-      for (int ii = 0; ii < _latitudeVar->num_vals(); ii++, dd++) {
-        _latitude.push_back(*dd);
-      }
-    }
-    delete[] data;
-  } else {
+    cerr << "  No latitude variable, setting latitude to 0" << endl;
     _latitude.push_back(0.0);
   }
 
-  if (_longitudeVar != NULL) {
-    double *data = new double[_longitudeVar->num_vals()];
-    if (_longitudeVar->get(data, _longitudeVar->num_vals())) {
-      double *dd = data;
-      for (int ii = 0; ii < _longitudeVar->num_vals(); ii++, dd++) {
-        _longitude.push_back(*dd);
-      }
+  _longitudeVar = _file.getNc3File()->get_var(LONGITUDE);
+  if (_longitudeVar && _longitudeVar->num_vals() > 0) {
+    if (_longitudeVar->type() != nc3Double) {
+      cerr << "WARNING - NcfRadxFile::_readPositionVariables" << endl;
+      cerr << " longitude should be type double" << endl;
     }
-    delete[] data;
+    for (int ii = 0; ii < _longitudeVar->num_vals(); ii++) {
+      _longitude.push_back(_longitudeVar->as_double(ii));
+    }
   } else {
+    cerr << "WARNING - NcfRadxFile::_readPositionVariables" << endl;
+    cerr << "  No longitude variable, setting longitude to 0" << endl;
     _longitude.push_back(0.0);
   }
 
-  if (_altitudeVar != NULL) {
-    double *data = new double[_altitudeVar->num_vals()];
-    if (_altitudeVar->get(data, _altitudeVar->num_vals())) {
-      double *dd = data;
-      for (int ii = 0; ii < _altitudeVar->num_vals(); ii++, dd++) {
-        _altitude.push_back(*dd);
-      }
+  _altitudeVar = _file.getNc3File()->get_var(ALTITUDE);
+  if (_altitudeVar && _altitudeVar->num_vals() > 0) {
+    if (_altitudeVar->type() != nc3Double) {
+      cerr << "WARNING - NcfRadxFile::_readPositionVariables" << endl;
+      cerr << " altitude should be type double" << endl;
     }
-    delete[] data;
+    for (int ii = 0; ii < _altitudeVar->num_vals(); ii++) {
+      _altitude.push_back(_altitudeVar->as_double(ii));
+    }
   } else {
+    cerr << "WARNING - NcfRadxFile::_readPositionVariables" << endl;
+    cerr << "  No altitude variable, setting altitude to 0" << endl;
     _altitude.push_back(0.0);
   }
 
-  if (_altitudeAglVar != NULL) {
-    double *data = new double[_altitudeAglVar->num_vals()];
-    if (_altitudeAglVar->get(data, _altitudeAglVar->num_vals())) {
-      double *dd = data;
-      for (int ii = 0; ii < _altitudeAglVar->num_vals(); ii++, dd++) {
-        _altitudeAgl.push_back(*dd);
-      }
+  _altitudeAglVar = _file.getNc3File()->get_var(ALTITUDE_AGL);
+  if (_altitudeAglVar && _altitudeAglVar->num_vals() > 0) {
+    for (int ii = 0; ii < _altitudeAglVar->num_vals(); ii++) {
+      _altitudeAgl.push_back(_altitudeAglVar->as_double(ii));
     }
-    delete[] data;
+  } else {
+    _altitudeAgl.push_back(0.0);
   }
-
-  return 0;
 
 }
 
@@ -1635,10 +1531,13 @@ int NcfRadxFile::_readGeorefVariables()
   _clearGeorefVariables();
   int iret = 0;
 
-  _readRayVar(_georefTimeVar, GEOREF_TIME, _geoTime);
+  // georef time
+
+  _readRayVar(_georefTimeVar, GEOREF_TIME, _geoTime, false);
   if (_geoTime.size() < _raysFromFile.size()) {
     // iret = -1;
   }
+
   _readRayVar(_latitudeVar, LATITUDE, _geoLatitude);
   if (_geoLatitude.size() < _raysFromFile.size()) {
     iret = -1;
@@ -1727,31 +1626,38 @@ int NcfRadxFile::_readRayVariables()
   _clearRayVariables();
   int iret = 0;
 
-  _readRayVar(_azimuthVar, AZIMUTH, _rayAzimuths);
-  if (_rayAzimuths.size() < _raysFromFile.size()) {
-    _addErrStr("ERROR - azimuth variable required");
-    iret = -1;
-  }
-
-  // HSRL?
-
-  if (_readRayVar(_elevationVar, "telescope_roll_angle_offset",
-                  _rayElevations, true) == 0) {
+  // read azimuth and elevation
+  // for HSRL, look for telescope_roll_angle_offset variable
+  
+  Nc3Var *rollAngleOffsetVar = _getRayVar("telescope_roll_angle_offset", false);
+  if (rollAngleOffsetVar) {
     // is HSRL
-    for (size_t ii = 0; ii < _rayElevations.size(); ii++) {
-      _rayElevations[ii] *= -1.0;
-    }
-    for (size_t ii = 0; ii < _rayAzimuths.size(); ii++) {
-      _rayAzimuths[ii] = 0.0;
+    if (_readRayVar(_elevationVar, "telescope_roll_angle_offset",
+                    _rayElevations, true) == 0) {
+      for (size_t ii = 0; ii < _rayElevations.size(); ii++) {
+        _rayElevations[ii] *= -1.0;
+      }
+      for (size_t ii = 0; ii < _rayAzimuths.size(); ii++) {
+        _rayAzimuths[ii] = 0.0;
+      }
+    } else {
+      _addErrStr("ERROR - reading HSRL CfRadial file");
+      _addErrStr("        telescope_roll_angle_offset required");
+      iret = -1;
     }
   } else {
     // not HSRL
     clearErrStr();
     _readRayVar(_elevationVar, ELEVATION, _rayElevations);
-  }
-  if (_rayElevations.size() < _raysFromFile.size()) {
-    _addErrStr("ERROR - elevation variable required");
-    iret = -1;
+    if (_rayElevations.size() < _raysFromFile.size()) {
+      _addErrStr("ERROR - elevation variable required");
+      iret = -1;
+    }
+    _readRayVar(_azimuthVar, AZIMUTH, _rayAzimuths);
+    if (_rayAzimuths.size() < _raysFromFile.size()) {
+      _addErrStr("ERROR - azimuth variable required");
+      iret = -1;
+    }
   }
 
   _readRayVar(_pulseWidthVar, PULSE_WIDTH, _rayPulseWidths, false);
@@ -2069,10 +1975,10 @@ void NcfRadxFile::_readRayGateGeom()
   // read start range and gate spacing if available
 
   bool rayGateGeomAvail = true;
-  if (_readRayVar(_rayStartRangeVar, RAY_START_RANGE, _rayStartRange)) {
+  if (_readRayVar(_rayStartRangeVar, RAY_START_RANGE, _rayStartRange, false)) {
     rayGateGeomAvail = false;
   }
-  if (_readRayVar(_rayGateSpacingVar, RAY_GATE_SPACING, _rayGateSpacing)) {
+  if (_readRayVar(_rayGateSpacingVar, RAY_GATE_SPACING, _rayGateSpacing, false)) {
     rayGateGeomAvail = false;
   }
   
@@ -2162,21 +2068,22 @@ int NcfRadxFile::_readCalibrationVariables()
   for (int ii = 0; ii < _calDim->size(); ii++) {
     RadxRcalib *cal = new RadxRcalib;
     if (_readCal(*cal, ii)) {
-      _addErrStr("ERROR - NcfRadxFile::_readCalibrationVariables");
-      _addErrStr("  calibration required, but error on read");
+      _addErrStr("WARNING - NcfRadxFile::_readCalibrationVariables");
+      _addErrStr("  calibration included, but error on read");
       iret = -1;
-    }
-    // check that this is not a duplicate
-    bool alreadyAdded = false;
-    for (size_t ii = 0; ii < _rCals.size(); ii++) {
-      const RadxRcalib *rcal = _rCals[ii];
-      if (fabs(rcal->getPulseWidthUsec()
-               - cal->getPulseWidthUsec()) < 0.0001) {
-        alreadyAdded = true;
+    } else {
+      // check that this is not a duplicate
+      bool alreadyAdded = false;
+      for (size_t ii = 0; ii < _rCals.size(); ii++) {
+        const RadxRcalib *rcal = _rCals[ii];
+        if (fabs(rcal->getPulseWidthUsec()
+                 - cal->getPulseWidthUsec()) < 0.0001) {
+          alreadyAdded = true;
+        }
       }
-    }
-    if (!alreadyAdded) {
-      _rCals.push_back(cal);
+      if (!alreadyAdded) {
+        _rCals.push_back(cal);
+      }
     }
   } // ii
 
@@ -2184,6 +2091,17 @@ int NcfRadxFile::_readCalibrationVariables()
 
 }
   
+////////////////////////////////////////////////////////
+// Read in cal
+//
+// The minimum required information for a cal is:
+//
+//   measured noise
+//   receiver gain
+//   dbz01km
+//
+// If these are not present, the cal cannot be used.
+
 int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
 
 {
@@ -2201,9 +2119,10 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
 
   // pulse width
 
-  iret |= _readCalVar(R_CALIB_PULSE_WIDTH, 
-                      _rCalPulseWidthVar, index, val, true);
-  cal.setPulseWidthUsec(val * 1.0e6);
+  if (_readCalVar(R_CALIB_PULSE_WIDTH, 
+                  _rCalPulseWidthVar, index, val) == 0) {
+    cal.setPulseWidthUsec(val * 1.0e6);
+  }
 
   // xmit power
 
@@ -2284,6 +2203,8 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   if (_readCalVar(R_CALIB_NOISE_HC, 
                   _rCalNoiseHcVar, index, val, true) == 0) {
     cal.setNoiseDbmHc(val);
+  } else {
+    iret = -1;
   }
 
   if (_readCalVar(R_CALIB_NOISE_HX, 
@@ -2304,7 +2225,7 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   // i0 dbm
 
   if (_readCalVar(R_CALIB_I0_DBM_HC, 
-                  _rCalI0HcVar, index, val, true) == 0) {
+                  _rCalI0HcVar, index, val) == 0) {
     cal.setI0DbmHc(val);
   }
 
@@ -2328,6 +2249,8 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   if (_readCalVar(R_CALIB_RECEIVER_GAIN_HC, 
                   _rCalReceiverGainHcVar, index, val, true) == 0) {
     cal.setReceiverGainDbHc(val);
+  } else {
+    iret = -1;
   }
 
   if (_readCalVar(R_CALIB_RECEIVER_GAIN_HX, 
@@ -2370,7 +2293,7 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   // dynamic range
 
   if (_readCalVar(R_CALIB_DYNAMIC_RANGE_DB_HC, 
-                  _rCalI0HcVar, index, val, true) == 0) {
+                  _rCalI0HcVar, index, val) == 0) {
     cal.setDynamicRangeDbHc(val);
   }
 
@@ -2392,8 +2315,10 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
   // base dbz 1km
   
   if (_readCalVar(R_CALIB_BASE_DBZ_1KM_HC, 
-                  _rCalBaseDbz1kmHcVar, index, val) == 0) {
+                  _rCalBaseDbz1kmHcVar, index, val, true) == 0) {
     cal.setBaseDbz1kmHc(val);
+  } else {
+    iret = -1;
   }
 
   if (_readCalVar(R_CALIB_BASE_DBZ_1KM_HX, 
@@ -2823,11 +2748,10 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
-      return 0;
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readRayVar");
-      return -1;
     }
+    return -1;
   }
 
   // load up data
@@ -2844,13 +2768,12 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
-      // clearErrStr();
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
-      iret = -1;
     }
+    iret = -1;
   }
   delete[] data;
   return iret;
@@ -2887,12 +2810,10 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(Radx::missingMetaInt);
       }
-      // clearErrStr();
-      return 0;
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readRayVar");
-      return -1;
     }
+    return -1;
   }
 
   // load up data
@@ -2909,13 +2830,12 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(Radx::missingMetaInt);
       }
-      // clearErrStr();
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
-      iret = -1;
     }
+    iret = -1;
   }
   delete[] data;
   return iret;
@@ -2952,12 +2872,10 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(false);
       }
-      // clearErrStr();
-      return 0;
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readRayVar");
-      return -1;
     }
+    return -1;
   }
 
   // load up data
@@ -2977,7 +2895,7 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
     for (size_t ii = 0; ii < _nTimesInFile; ii++) {
       vals.push_back(false);
     }
-    // clearErrStr();
+    iret = -1;
   }
   delete[] data;
   return iret;
@@ -3411,15 +3329,13 @@ int NcfRadxFile::_readCalVar(const string &name, Nc3Var* &var,
   var = _file.getNc3File()->get_var(name.c_str());
 
   if (var == NULL) {
-    if (!required) {
-      return 0;
-    } else {
-      _addErrStr("ERROR - NcfRadxFile::_readCalVar");
+    if (required) {
+      _addErrStr("WARNING - NcfRadxFile::_readCalVar");
       _addErrStr("  cal variable name: ", name);
       _addErrStr("  Cannot read calibration variable");
       _addErrStr(_file.getNc3Error()->get_errmsg());
-      return -1;
     }
+    return -1;
   }
 
   if (var->num_vals() < index-1) {

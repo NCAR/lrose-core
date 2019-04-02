@@ -37,6 +37,7 @@
 #ifndef WorldPlot_HH
 #define WorldPlot_HH
 
+#include <iostream>
 #include <cmath>
 #include <string>
 #include <vector>
@@ -84,6 +85,19 @@ public:
                       double yMinWorld,
                       double xMaxWorld,
                       double yMaxWorld);
+
+  // set zoom limits from pixel space
+  
+  void setZoomLimits(int xMin,
+                     int yMin,
+                     int xMax,
+                     int yMax);
+  
+  void setZoomLimitsX(int xMin,
+                      int xMax);
+
+  void setZoomLimitsY(int yMin,
+                      int yMax);
 
   // set margins
 
@@ -436,6 +450,10 @@ public:
   void drawColorScale(const ColorMap &colorMap,
                       QPainter &painter,
                       int unitsFontSize);
+
+  // print
+
+  void print(ostream &out);
 
 protected:
 private:

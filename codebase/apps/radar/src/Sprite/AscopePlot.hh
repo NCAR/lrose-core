@@ -69,7 +69,8 @@ public:
    */
   
   AscopePlot(QWidget *parent,
-             const Params &params);
+             const Params &params,
+             int id);
   
   /**
    * @brief Destructor.
@@ -97,13 +98,27 @@ public:
                       double xMaxWorld,
                       double yMaxWorld);
 
+  // set the zoom limits, using pixel space
+
+  void setZoomLimits(int xMin,
+                     int yMin,
+                     int xMax,
+                     int yMax);
+  
+  void setZoomLimitsX(int xMin,
+                      int xMax);
+
+  void setZoomLimitsY(int yMin,
+                      int yMax);
+
   // set the moment type
 
   void setMomentType(Params::moment_type_t val) { _momentType = val; }
   
-  // unzoom the view
+  // zooming
 
-  void unzoomView();
+  void zoom(int x1, int y1, int x2, int y2);
+  void unzoom();
 
   // plot a beam
   
@@ -152,6 +167,10 @@ protected:
    */
 
   const Params &_params;
+
+  // id of this object
+
+  int _id;
 
   // range of plot
 

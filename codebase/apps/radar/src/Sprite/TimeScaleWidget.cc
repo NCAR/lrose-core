@@ -159,10 +159,8 @@ void TimeScaleWidget::_refresh()
   QPainter painter(this);
   QPaintDevice *device = painter.device();
   if (device == 0) {
-    cerr << "uuuuuuuuuuuuuuuuuuuuuuuu - painter device not active" << endl;
     return;
   }
-  cerr << "xxxxxxxxxxxxxxxxxxxxxxx" << endl;
   _drawOverlays(painter);
 }
 

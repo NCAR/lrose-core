@@ -55,9 +55,11 @@
 using namespace std;
 
 AscopePlot::AscopePlot(QWidget* parent,
-                       const Params &params) :
+                       const Params &params,
+                       int id) :
         _parent(parent),
-        _params(params)
+        _params(params),
+        _id(id)
         
 {
   
@@ -83,16 +85,29 @@ void AscopePlot::clear()
 }
 
 /*************************************************************************
+ * perform zoom
+ */
+
+void AscopePlot::zoom(int x1, int y1, int x2, int y2)
+{
+
+  _zoomWorld.setZoomLimits(x1, y1, x2, y2);
+  _isZoomed = true;
+  _setTransform(_zoomWorld.getTransform());
+
+}
+
+/*************************************************************************
  * unzoom the view
  */
 
-void AscopePlot::unzoomView()
+void AscopePlot::unzoom()
 {
 
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
-  _parent->update();
+  // _parent->update();
 
 }
 
@@ -138,7 +153,7 @@ void AscopePlot::plotBeam(QPainter &painter,
 
   // first use filled polygons (trapezia)
   
-  double xMin = _fullWorld.getXMinWorld();
+  double xMin = _zoomWorld.getXMinWorld();
   QBrush brush(_params.ascope_fill_color);
   brush.setStyle(Qt::SolidPattern);
   
@@ -148,7 +163,7 @@ void AscopePlot::plotBeam(QPainter &painter,
     double valPrev = getFieldVal(_momentType, fields[ii-1]);
     double val = getFieldVal(_momentType, fields[ii]);
     if (val > -9990 && valPrev > -9990) {
-      _fullWorld.fillTrap(painter, brush,
+      _zoomWorld.fillTrap(painter, brush,
                           xMin, rangePrev,
                           valPrev, rangePrev,
                           val, range,
@@ -169,7 +184,7 @@ void AscopePlot::plotBeam(QPainter &painter,
       pts.push_back(pt);
     }
   }
-  _fullWorld.drawLines(painter, pts);
+  _zoomWorld.drawLines(painter, pts);
   painter.restore();
 
   // draw the overlays
@@ -182,7 +197,7 @@ void AscopePlot::plotBeam(QPainter &painter,
   painter.setPen(_params.ascope_title_color);
   string title("Ascope:");
   title.append(getName(_momentType));
-  _fullWorld.drawTitleTopCenter(painter, title);
+  _zoomWorld.drawTitleTopCenter(painter, title);
   painter.restore();
 
 }
@@ -354,20 +369,18 @@ double AscopePlot::getMaxVal(Params::moment_type_t mtype)
 }
 
 /*************************************************************************
- * set the geometry
+ * set the geometry - unzooms
  */
 
 void AscopePlot::setWindowGeom(int width, int height,
                                int xOffset, int yOffset)
 {
-
   _fullWorld.setWindowGeom(width, height, xOffset, yOffset);
   _zoomWorld = _fullWorld;
-
 }
 
 /*************************************************************************
- * set the world limits
+ * set the world limits - unzooms
  */
 
 void AscopePlot::setWorldLimits(double xMinWorld,
@@ -375,12 +388,33 @@ void AscopePlot::setWorldLimits(double xMinWorld,
                                 double xMaxWorld,
                                 double yMaxWorld)
 {
-
   _fullWorld.setWorldLimits(xMinWorld, yMinWorld,
                             xMaxWorld, yMaxWorld);
-
   _zoomWorld = _fullWorld;
+}
 
+/*************************************************************************
+ * set the zoom limits, from pixel space
+ */
+
+void AscopePlot::setZoomLimits(int xMin,
+                               int yMin,
+                               int xMax,
+                               int yMax)
+{
+  _zoomWorld.setZoomLimits(xMin, yMin, xMax, yMax);
+}
+
+void AscopePlot::setZoomLimitsX(int xMin,
+                                int xMax)
+{
+  _zoomWorld.setZoomLimitsX(xMin, xMax);
+}
+
+void AscopePlot::setZoomLimitsY(int yMin,
+                                int yMax)
+{
+  _zoomWorld.setZoomLimitsY(yMin, yMax);
 }
 
 /*************************************************************************
@@ -410,7 +444,7 @@ void AscopePlot::_drawOverlays(QPainter &painter,
                           true, true, true, yGridEnabled);
 
   painter.setPen(_params.ascope_axis_label_color);
-  _fullWorld.drawYAxisLabelLeft(painter, "Range");
+  _zoomWorld.drawYAxisLabelLeft(painter, "Range");
 
   painter.restore();
 

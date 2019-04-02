@@ -586,7 +586,7 @@ private:
   int _readRangeVariable();
   int _readScalarVariables();
   int _readCorrectionVariables();
-  int _readPositionVariables();
+  void _readPositionVariables();
   int _readSweepVariables();
   void _clearGeorefVariables();
   int _readGeorefVariables();

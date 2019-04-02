@@ -881,7 +881,7 @@ void SpectraMgr::_locationClicked(double xsecs, double ykm,
 
 void SpectraMgr::_unzoom()
 {
-  _spectra->unzoomView();
+  _spectra->unzoom();
   _unzoomAct->setEnabled(false);
 }
 
@@ -913,9 +913,9 @@ void SpectraMgr::_freeze()
 }
 
 //////////////////////////////////////////////////
-// enable the zoom button - called by BscanWidget
+// enable the unzoom button
 
-void SpectraMgr::enableZoomButton() const
+void SpectraMgr::enableUnzoomButton() const
 {
   _unzoomAct->setEnabled(true);
 }
