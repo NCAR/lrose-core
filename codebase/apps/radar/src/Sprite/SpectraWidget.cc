@@ -36,6 +36,7 @@
 #include <QPen>
 #include <QResizeEvent>
 #include <QStylePainter>
+#include <QMenu>
 
 #include "SpectraWidget.hh"
 #include "SpectraMgr.hh"
@@ -107,6 +108,10 @@ SpectraWidget::SpectraWidget(QWidget* parent,
     _createAscope(ii);
     // _configureAscope(ii);
   }
+
+  this->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), 
+          this, SLOT(showContextMenu(const QPoint &)));
 
 }
 
@@ -372,6 +377,16 @@ void SpectraWidget::mouseMoveEvent(QMouseEvent * e)
 
 void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
 {
+
+  if (e->button() == Qt::LeftButton) {
+    cerr << "FFFFFFFFFFE - left button" << endl;
+  } else if (e->button() == Qt::MiddleButton) {
+    cerr << "FFFFFFFFFFE - middle button" << endl;
+  } else if (e->button() == Qt::RightButton) {
+    cerr << "FFFFFFFFFFE - right button" << endl;
+    // right button is used for context menu
+    return;
+  }
 
   _pointClicked = false;
 
@@ -1155,6 +1170,152 @@ void SpectraWidget::_identSelectedPanel(int xx, int yy,
   int irow = (yy - _titleMargin) / _subPanelHeights;
   panelId = irow * _nRows + icol;
 
+}
+
+void SpectraWidget::showContextMenu(const QPoint &pos) 
+{
+
+  _identSelectedPanel(pos.x(), pos.y(),
+                      _contextMenuPanelType,
+                      _contextMenuPanelId);
+  cerr << "Context menu, x, y: " << pos.x() << ", " << pos.y() << endl;
+  if (_contextMenuPanelType == PANEL_ASCOPE) {
+    cerr << "In ASCOPE, id: " << _contextMenuPanelId << endl;
+  } else if (_contextMenuPanelType == PANEL_SPECTRA) {
+    cerr << "In SPECTRA, id: " << _contextMenuPanelId << endl;
+  } else {
+    cerr << "In title" << endl;
+  }
+
+  if (_contextMenuPanelType == PANEL_ASCOPE) {
+
+    QMenu contextMenu("AscopeMenu", this);
+
+    QAction setToDbz("Set to DBZ", this);
+    connect(&setToDbz, SIGNAL(triggered()), this,
+            SLOT(setAscopeFieldToDbz()));
+    contextMenu.addAction(&setToDbz);
+  
+    QAction setToVel("Set to VEL", this);
+    connect(&setToVel, SIGNAL(triggered()), this,
+            SLOT(setAscopeFieldToVel()));
+    contextMenu.addAction(&setToVel);
+  
+    QAction setToWidth("Set to WIDTH", this);
+    connect(&setToWidth, SIGNAL(triggered()), this,
+            SLOT(setAscopeFieldToWidth()));
+    contextMenu.addAction(&setToWidth);
+  
+    QAction setToNcp("Set to NCP", this);
+    connect(&setToNcp, SIGNAL(triggered()), this,
+            SLOT(setAscopeFieldToNcp()));
+    contextMenu.addAction(&setToNcp);
+  
+    QAction setToSnr("Set to SNR", this);
+    connect(&setToSnr, SIGNAL(triggered()), this,
+            SLOT(setAscopeFieldToSnr()));
+    contextMenu.addAction(&setToSnr);
+  
+    QAction setToDbm("Set to DBM", this);
+    connect(&setToDbm, SIGNAL(triggered()), this,
+            SLOT(setAscopeFieldToDbm()));
+    contextMenu.addAction(&setToDbm);
+  
+    QAction setToZdr("Set to ZDR", this);
+    connect(&setToZdr, SIGNAL(triggered()), this,
+            SLOT(setAscopeFieldToZdr()));
+    contextMenu.addAction(&setToZdr);
+  
+    QAction setToLdr("Set to LDR", this);
+    connect(&setToLdr, SIGNAL(triggered()), this,
+            SLOT(setAscopeFieldToLdr()));
+    contextMenu.addAction(&setToLdr);
+  
+    QAction setToRhohv("Set to RHOHV", this);
+    connect(&setToRhohv, SIGNAL(triggered()), this,
+            SLOT(setAscopeFieldToRhohv()));
+    contextMenu.addAction(&setToRhohv);
+  
+    QAction setToPhidp("Set to PHIDP", this);
+    connect(&setToPhidp, SIGNAL(triggered()), this,
+            SLOT(setAscopeFieldToPhidp()));
+    contextMenu.addAction(&setToPhidp);
+  
+    QAction setToKdp("Set to KDP", this);
+    connect(&setToKdp, SIGNAL(triggered()), this,
+            SLOT(setAscopeFieldToKdp()));
+    contextMenu.addAction(&setToKdp);
+  
+    contextMenu.exec(this->mapToGlobal(pos));
+
+  }
+
+}
+
+void SpectraWidget::setAscopeFieldToDbz()
+{
+  _ascopes[_contextMenuPanelId]->setMomentType(Params::DBZ);
+  _configureAscope(_contextMenuPanelId);
+}
+
+void SpectraWidget::setAscopeFieldToVel()
+{
+  _ascopes[_contextMenuPanelId]->setMomentType(Params::VEL);
+  _configureAscope(_contextMenuPanelId);
+}
+
+void SpectraWidget::setAscopeFieldToWidth()
+{
+  _ascopes[_contextMenuPanelId]->setMomentType(Params::WIDTH);
+  _configureAscope(_contextMenuPanelId);
+}
+
+void SpectraWidget::setAscopeFieldToSnr()
+{
+  _ascopes[_contextMenuPanelId]->setMomentType(Params::SNR);
+  _configureAscope(_contextMenuPanelId);
+}
+
+void SpectraWidget::setAscopeFieldToNcp()
+{
+  _ascopes[_contextMenuPanelId]->setMomentType(Params::NCP);
+  _configureAscope(_contextMenuPanelId);
+}
+
+void SpectraWidget::setAscopeFieldToDbm()
+{
+  _ascopes[_contextMenuPanelId]->setMomentType(Params::DBM);
+  _configureAscope(_contextMenuPanelId);
+}
+
+void SpectraWidget::setAscopeFieldToZdr()
+{
+  _ascopes[_contextMenuPanelId]->setMomentType(Params::ZDR);
+  _configureAscope(_contextMenuPanelId);
+}
+
+void SpectraWidget::setAscopeFieldToLdr()
+{
+  _ascopes[_contextMenuPanelId]->setMomentType(Params::LDR);
+  _configureAscope(_contextMenuPanelId);
+}
+
+void SpectraWidget::setAscopeFieldToRhohv()
+{
+  _ascopes[_contextMenuPanelId]->setMomentType(Params::RHOHV);
+  _configureAscope(_contextMenuPanelId);
+}
+
+void SpectraWidget::setAscopeFieldToPhidp()
+{
+  _ascopes[_contextMenuPanelId]->setMomentType(Params::PHIDP);
+  _configureAscope(_contextMenuPanelId);
+}
+
+void SpectraWidget::setAscopeFieldToKdp()
+{
+  _ascopes[_contextMenuPanelId]->setMomentType(Params::KDP);
+  _configureAscope(_contextMenuPanelId);
 }
 
 

@@ -207,6 +207,24 @@ class DLL_EXPORT SpectraWidget : public QWidget
   void setXGridEnabled(bool state);
   void setYGridEnabled(bool state);
 
+  // show context menu in response to right click
+  
+  void showContextMenu(const QPoint &pos);
+
+  // actions examine the context menu
+
+  void setAscopeFieldToDbz();
+  void setAscopeFieldToVel();
+  void setAscopeFieldToWidth();
+  void setAscopeFieldToNcp();
+  void setAscopeFieldToSnr();
+  void setAscopeFieldToDbm();
+  void setAscopeFieldToZdr();
+  void setAscopeFieldToLdr();
+  void setAscopeFieldToRhohv();
+  void setAscopeFieldToPhidp();
+  void setAscopeFieldToKdp();
+
  protected:
 
   ///////////////////////
@@ -293,6 +311,9 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   panel_type_t _mouseReleasePanelType;
   int _mouseReleasePanelId;
+
+  panel_type_t _contextMenuPanelType;
+  int _contextMenuPanelId;
 
   /**
    * @brief Location world of the latest click point.
