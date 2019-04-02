@@ -184,7 +184,7 @@ void SpectraWidget::configureAxes(double min_amplitude,
 
   // refresh all paints
 
-  _refreshImages();
+  _refresh();
 
 }
 
@@ -201,7 +201,7 @@ void SpectraWidget::clear()
   
   // Now rerender the images
   
-  _refreshImages();
+  _refresh();
   
 }
 
@@ -212,7 +212,7 @@ void SpectraWidget::clear()
 
 void SpectraWidget::refresh()
 {
-  _refreshImages();
+  _refresh();
 }
 
 /*************************************************************************
@@ -225,7 +225,7 @@ void SpectraWidget::unzoom()
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
-  _refreshImages();
+  _refresh();
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
     _ascopes[ii]->unzoom();
   }
@@ -290,7 +290,7 @@ void SpectraWidget::setBackgroundColor(const QColor &color)
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   setPalette(new_palette);
   
-  _refreshImages();
+  _refresh();
 
 }
 
@@ -378,15 +378,15 @@ void SpectraWidget::mouseMoveEvent(QMouseEvent * e)
 void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 
-  if (e->button() == Qt::LeftButton) {
-    cerr << "FFFFFFFFFFE - left button" << endl;
-  } else if (e->button() == Qt::MiddleButton) {
-    cerr << "FFFFFFFFFFE - middle button" << endl;
-  } else if (e->button() == Qt::RightButton) {
-    cerr << "FFFFFFFFFFE - right button" << endl;
-    // right button is used for context menu
-    return;
-  }
+  // if (e->button() == Qt::LeftButton) {
+  //   cerr << "FFFFFFFFFFE - left button" << endl;
+  // } else if (e->button() == Qt::MiddleButton) {
+  //   cerr << "FFFFFFFFFFE - middle button" << endl;
+  // } else if (e->button() == Qt::RightButton) {
+  //   cerr << "FFFFFFFFFFE - right button" << endl;
+  //   // right button is used for context menu
+  //   return;
+  // }
 
   _pointClicked = false;
 
@@ -484,7 +484,7 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
     
     // Update the window in the renderers
     
-    _refreshImages();
+    _refresh();
 
   }
     
@@ -576,7 +576,7 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
   
   _resetWorld(width(), height());
 
-  _refreshImages();
+  _refresh();
   update();
   
 }
@@ -834,10 +834,10 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
 }
 
 /*************************************************************************
- * _refreshImages()
+ * _refresh()
  */
 
-void SpectraWidget::_refreshImages()
+void SpectraWidget::_refresh()
 {
 
   // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
@@ -874,10 +874,6 @@ void SpectraWidget::_refreshImages()
     
   // } // ifield
   
-  // call threads to do the rendering
-  
-  // _performRendering();
-
   update();
 
 }
@@ -910,7 +906,7 @@ void SpectraWidget::_updateRenderers()
 
   // Refresh the images
 
-  _refreshImages();
+  _refresh();
 
 }
 
@@ -932,7 +928,7 @@ void SpectraWidget::setPlotStartTime(const RadxTime &plot_start_time,
   //   _beams.clear();
   // }
 
-  _refreshImages();
+  _refresh();
 
 }
 
@@ -974,36 +970,7 @@ void SpectraWidget::resetPlotStartTime(const RadxTime &plot_start_time)
 
   // re-render
 
-  _refreshImages();
-
-}
-
-/*************************************************************************
- * call the renderers for each field
- */
-
-void SpectraWidget::_performRendering()
-{
-
-  // start the rendering
-  
-  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-  //   if (ifield == _selectedField ||
-  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
-  //     _fieldRenderers[ifield]->signalRunToStart();
-  //   }
-  // } // ifield
-
-  // wait for rendering to complete
-  
-  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-  //   if (ifield == _selectedField ||
-  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
-  //     _fieldRenderers[ifield]->waitForRunToComplete();
-  //   }
-  // } // ifield
-
-  update();
+  _refresh();
 
 }
 
@@ -1178,14 +1145,14 @@ void SpectraWidget::showContextMenu(const QPoint &pos)
   _identSelectedPanel(pos.x(), pos.y(),
                       _contextMenuPanelType,
                       _contextMenuPanelId);
-  cerr << "Context menu, x, y: " << pos.x() << ", " << pos.y() << endl;
-  if (_contextMenuPanelType == PANEL_ASCOPE) {
-    cerr << "In ASCOPE, id: " << _contextMenuPanelId << endl;
-  } else if (_contextMenuPanelType == PANEL_SPECTRA) {
-    cerr << "In SPECTRA, id: " << _contextMenuPanelId << endl;
-  } else {
-    cerr << "In title" << endl;
-  }
+
+  // if (_contextMenuPanelType == PANEL_ASCOPE) {
+  //   cerr << "In ASCOPE, id: " << _contextMenuPanelId << endl;
+  // } else if (_contextMenuPanelType == PANEL_SPECTRA) {
+  //   cerr << "In SPECTRA, id: " << _contextMenuPanelId << endl;
+  // } else {
+  //   cerr << "In title" << endl;
+  // }
 
   if (_contextMenuPanelType == PANEL_ASCOPE) {
 
@@ -1193,58 +1160,63 @@ void SpectraWidget::showContextMenu(const QPoint &pos)
 
     QAction setToDbz("Set to DBZ", this);
     connect(&setToDbz, SIGNAL(triggered()), this,
-            SLOT(setAscopeFieldToDbz()));
+            SLOT(ascopeSetFieldToDbz()));
     contextMenu.addAction(&setToDbz);
   
     QAction setToVel("Set to VEL", this);
     connect(&setToVel, SIGNAL(triggered()), this,
-            SLOT(setAscopeFieldToVel()));
+            SLOT(ascopeSetFieldToVel()));
     contextMenu.addAction(&setToVel);
   
     QAction setToWidth("Set to WIDTH", this);
     connect(&setToWidth, SIGNAL(triggered()), this,
-            SLOT(setAscopeFieldToWidth()));
+            SLOT(ascopeSetFieldToWidth()));
     contextMenu.addAction(&setToWidth);
   
     QAction setToNcp("Set to NCP", this);
     connect(&setToNcp, SIGNAL(triggered()), this,
-            SLOT(setAscopeFieldToNcp()));
+            SLOT(ascopeSetFieldToNcp()));
     contextMenu.addAction(&setToNcp);
   
     QAction setToSnr("Set to SNR", this);
     connect(&setToSnr, SIGNAL(triggered()), this,
-            SLOT(setAscopeFieldToSnr()));
+            SLOT(ascopeSetFieldToSnr()));
     contextMenu.addAction(&setToSnr);
   
     QAction setToDbm("Set to DBM", this);
     connect(&setToDbm, SIGNAL(triggered()), this,
-            SLOT(setAscopeFieldToDbm()));
+            SLOT(ascopeSetFieldToDbm()));
     contextMenu.addAction(&setToDbm);
   
     QAction setToZdr("Set to ZDR", this);
     connect(&setToZdr, SIGNAL(triggered()), this,
-            SLOT(setAscopeFieldToZdr()));
+            SLOT(ascopeSetFieldToZdr()));
     contextMenu.addAction(&setToZdr);
   
     QAction setToLdr("Set to LDR", this);
     connect(&setToLdr, SIGNAL(triggered()), this,
-            SLOT(setAscopeFieldToLdr()));
+            SLOT(ascopeSetFieldToLdr()));
     contextMenu.addAction(&setToLdr);
   
     QAction setToRhohv("Set to RHOHV", this);
     connect(&setToRhohv, SIGNAL(triggered()), this,
-            SLOT(setAscopeFieldToRhohv()));
+            SLOT(ascopeSetFieldToRhohv()));
     contextMenu.addAction(&setToRhohv);
   
     QAction setToPhidp("Set to PHIDP", this);
     connect(&setToPhidp, SIGNAL(triggered()), this,
-            SLOT(setAscopeFieldToPhidp()));
+            SLOT(ascopeSetFieldToPhidp()));
     contextMenu.addAction(&setToPhidp);
   
     QAction setToKdp("Set to KDP", this);
     connect(&setToKdp, SIGNAL(triggered()), this,
-            SLOT(setAscopeFieldToKdp()));
+            SLOT(ascopeSetFieldToKdp()));
     contextMenu.addAction(&setToKdp);
+  
+    QAction unzoom("Unzoom", this);
+    connect(&unzoom, SIGNAL(triggered()), this,
+            SLOT(ascopeUnzoom()));
+    contextMenu.addAction(&unzoom);
   
     contextMenu.exec(this->mapToGlobal(pos));
 
@@ -1252,70 +1224,78 @@ void SpectraWidget::showContextMenu(const QPoint &pos)
 
 }
 
-void SpectraWidget::setAscopeFieldToDbz()
+void SpectraWidget::ascopeSetFieldToDbz()
 {
   _ascopes[_contextMenuPanelId]->setMomentType(Params::DBZ);
   _configureAscope(_contextMenuPanelId);
 }
 
-void SpectraWidget::setAscopeFieldToVel()
+void SpectraWidget::ascopeSetFieldToVel()
 {
   _ascopes[_contextMenuPanelId]->setMomentType(Params::VEL);
   _configureAscope(_contextMenuPanelId);
 }
 
-void SpectraWidget::setAscopeFieldToWidth()
+void SpectraWidget::ascopeSetFieldToWidth()
 {
   _ascopes[_contextMenuPanelId]->setMomentType(Params::WIDTH);
   _configureAscope(_contextMenuPanelId);
 }
 
-void SpectraWidget::setAscopeFieldToSnr()
+void SpectraWidget::ascopeSetFieldToSnr()
 {
   _ascopes[_contextMenuPanelId]->setMomentType(Params::SNR);
   _configureAscope(_contextMenuPanelId);
 }
 
-void SpectraWidget::setAscopeFieldToNcp()
+void SpectraWidget::ascopeSetFieldToNcp()
 {
   _ascopes[_contextMenuPanelId]->setMomentType(Params::NCP);
   _configureAscope(_contextMenuPanelId);
 }
 
-void SpectraWidget::setAscopeFieldToDbm()
+void SpectraWidget::ascopeSetFieldToDbm()
 {
   _ascopes[_contextMenuPanelId]->setMomentType(Params::DBM);
   _configureAscope(_contextMenuPanelId);
 }
 
-void SpectraWidget::setAscopeFieldToZdr()
+void SpectraWidget::ascopeSetFieldToZdr()
 {
   _ascopes[_contextMenuPanelId]->setMomentType(Params::ZDR);
   _configureAscope(_contextMenuPanelId);
 }
 
-void SpectraWidget::setAscopeFieldToLdr()
+void SpectraWidget::ascopeSetFieldToLdr()
 {
   _ascopes[_contextMenuPanelId]->setMomentType(Params::LDR);
   _configureAscope(_contextMenuPanelId);
 }
 
-void SpectraWidget::setAscopeFieldToRhohv()
+void SpectraWidget::ascopeSetFieldToRhohv()
 {
   _ascopes[_contextMenuPanelId]->setMomentType(Params::RHOHV);
   _configureAscope(_contextMenuPanelId);
 }
 
-void SpectraWidget::setAscopeFieldToPhidp()
+void SpectraWidget::ascopeSetFieldToPhidp()
 {
   _ascopes[_contextMenuPanelId]->setMomentType(Params::PHIDP);
   _configureAscope(_contextMenuPanelId);
 }
 
-void SpectraWidget::setAscopeFieldToKdp()
+void SpectraWidget::ascopeSetFieldToKdp()
 {
   _ascopes[_contextMenuPanelId]->setMomentType(Params::KDP);
   _configureAscope(_contextMenuPanelId);
 }
+
+void SpectraWidget::ascopeUnzoom()
+{
+  for (size_t ii = 0; ii < _ascopes.size(); ii++) {
+    _ascopes[ii]->unzoom();
+  }
+}
+
 
 

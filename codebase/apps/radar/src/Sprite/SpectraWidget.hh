@@ -213,17 +213,18 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   // actions examine the context menu
 
-  void setAscopeFieldToDbz();
-  void setAscopeFieldToVel();
-  void setAscopeFieldToWidth();
-  void setAscopeFieldToNcp();
-  void setAscopeFieldToSnr();
-  void setAscopeFieldToDbm();
-  void setAscopeFieldToZdr();
-  void setAscopeFieldToLdr();
-  void setAscopeFieldToRhohv();
-  void setAscopeFieldToPhidp();
-  void setAscopeFieldToKdp();
+  void ascopeSetFieldToDbz();
+  void ascopeSetFieldToVel();
+  void ascopeSetFieldToWidth();
+  void ascopeSetFieldToNcp();
+  void ascopeSetFieldToSnr();
+  void ascopeSetFieldToDbm();
+  void ascopeSetFieldToZdr();
+  void ascopeSetFieldToLdr();
+  void ascopeSetFieldToRhohv();
+  void ascopeSetFieldToPhidp();
+  void ascopeSetFieldToKdp();
+  void ascopeUnzoom();
 
  protected:
 
@@ -376,7 +377,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
    *        should only be called where needed.
    */
 
-  void _refreshImages();
+  void _refresh();
 
   /**
    * @brief Render the axes, grids, labels and other overlays
@@ -448,10 +449,6 @@ class DLL_EXPORT SpectraWidget : public QWidget
   // reset the pixel size of the world view
 
   void _resetWorld(int width, int height);
-
-  // call the renderers for each field
-
-  void _performRendering();
 
   // create the ascope panel
 

@@ -992,11 +992,12 @@ void WorldPlot::drawAxisBottom(QPainter &painter,
 
   // axis units label
 	
+  QRect capRect(painter.fontMetrics().tightBoundingRect("XXX"));
   QRect unitsRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
   qreal unitsX = (qreal) (_xMaxPixel - unitsRect.width());
-  qreal unitsY = (qreal) (_yMinPixel + unitsRect.height() - 2);
+  qreal unitsY = (qreal) (_yMinPixel + capRect.height() - 2);
   QRectF bRect(unitsX, unitsY,
-               unitsRect.width() + 2, unitsRect.height() + 2);
+               unitsRect.width() + 2, capRect.height() + 2);
   if (doLabels) {
     painter.drawText(bRect, Qt::AlignCenter, units.c_str());
   }
