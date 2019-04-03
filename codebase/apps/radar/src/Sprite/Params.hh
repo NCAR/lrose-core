@@ -547,6 +547,10 @@ public:
 
   tdrp_bool_t iqplot_draw_instrument_height_line;
 
+  tdrp_bool_t iqplot_x_axis_labels_inside;
+
+  tdrp_bool_t iqplot_y_axis_labels_inside;
+
   legend_pos_t iqplot_main_legend_pos;
 
   tdrp_bool_t iqplot_plot_legend1;
@@ -707,7 +711,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[147];
+  mutable TDRPtable _table[149];
 
   const char *_className;
 

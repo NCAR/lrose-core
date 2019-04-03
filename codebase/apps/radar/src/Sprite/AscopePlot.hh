@@ -123,9 +123,7 @@ public:
   // plot a beam
   
   void plotBeam(QPainter &painter,
-                Beam *beam,
-                bool xGridEnabled,
-                bool yGridEnabled);
+                Beam *beam);
 
   // set grid lines on/off
 

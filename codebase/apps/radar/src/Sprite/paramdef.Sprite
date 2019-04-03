@@ -401,6 +401,18 @@ paramdef boolean {
   p_descr = "Applies to RANGE_AXIS_SCALE_ALTITUDE option only.";
 } iqplot_draw_instrument_height_line;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Location of tick labels, relative to x axis.";
+  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
+} iqplot_x_axis_labels_inside;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Location of tick labels, relative to y axis.";
+  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
+} iqplot_y_axis_labels_inside;
+
 commentdef {
   p_header = "IQPLOT LEGENDS";
 }

@@ -42,6 +42,7 @@
 #include "SpectraMgr.hh"
 #include "Beam.hh"
 #include "AscopePlot.hh"
+#include "IqPlot.hh"
 
 using namespace std;
 
@@ -61,18 +62,29 @@ SpectraWidget::SpectraWidget(QWidget* parent,
 
 {
 
+  // init
+
   _pointClicked = false;
   _colorScaleWidth = _params.main_color_scale_width;
 
-  _nRows = _params.iqplots_n_rows;
-  _nCols = _params.iqplots_n_columns;
   _titleMargin = _params.main_window_title_margin;
 
   _nAscopes = _params.ascope_n_panels_in_spectra_window;
   _ascopeWidth = _params.ascope_width_in_spectra_window; // constant
   _ascopeHeight = 100;
   _ascopeGrossWidth = _ascopeWidth * _nAscopes;
+
+  _nIqRows = _params.iqplots_n_rows;
+  _nIqCols = _params.iqplots_n_columns;
+  _nIqPlots = _nIqRows * _nIqCols;
+  
+  _iqGrossHeight = height() - _titleMargin;
+  _iqGrossWidth = width() - _ascopeGrossWidth;
+  _iqPlotWidth = _iqGrossWidth / _nIqCols;
+  _iqPlotHeight = _iqGrossHeight / _nIqRows;
+
   _ascopesConfigured = false;
+  _iqPlotsConfigured = false;
 
   // Set up the background color
 
@@ -105,8 +117,15 @@ SpectraWidget::SpectraWidget(QWidget* parent,
 
   for (int ii = 0; ii < _nAscopes; ii++) {
     _createAscope(ii);
-    // _configureAscope(ii);
   }
+
+  // create iqPlots
+
+  for (int ii = 0; ii < _nIqPlots; ii++) {
+    _createIqPlot(ii);
+  }
+
+  // set up context menus
 
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), 
@@ -125,6 +144,11 @@ SpectraWidget::~SpectraWidget()
     delete _ascopes[ii];
   }
   _ascopes.clear();
+
+  for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
+    delete _iqPlots[ii];
+  }
+  _iqPlots.clear();
 
 }
 
@@ -227,11 +251,16 @@ void SpectraWidget::unzoom()
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
   _refresh();
+
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
     _ascopes[ii]->unzoom();
   }
+
+  for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
+    _iqPlots[ii]->unzoom();
+  }
+
   update();
-  // _updateRenderers();
 
 }
 
@@ -245,6 +274,9 @@ void SpectraWidget::setXGridEnabled(bool state)
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
     _ascopes[ii]->setXGridLinesOn(state);
   }
+  for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
+    _iqPlots[ii]->setXGridLinesOn(state);
+  }
   update();
 }
 
@@ -253,6 +285,9 @@ void SpectraWidget::setYGridEnabled(bool state)
   _yGridEnabled = state;
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
     _ascopes[ii]->setYGridLinesOn(state);
+  }
+  for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
+    _iqPlots[ii]->setYGridLinesOn(state);
   }
   update();
 }
@@ -278,6 +313,13 @@ void SpectraWidget::plotBeam(Beam *beam)
       _configureAscope(ii);
     }
     _ascopesConfigured = true;
+  }
+  
+  if (_iqPlots.size() > 0 && !_iqPlotsConfigured) {
+    for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
+      _configureIqPlot(ii);
+    }
+    _iqPlotsConfigured = true;
   }
   
   update();
@@ -385,16 +427,6 @@ void SpectraWidget::mouseMoveEvent(QMouseEvent * e)
 void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 
-  // if (e->button() == Qt::LeftButton) {
-  //   cerr << "FFFFFFFFFFE - left button" << endl;
-  // } else if (e->button() == Qt::MiddleButton) {
-  //   cerr << "FFFFFFFFFFE - middle button" << endl;
-  // } else if (e->button() == Qt::RightButton) {
-  //   cerr << "FFFFFFFFFFE - right button" << endl;
-  //   // right button is used for context menu
-  //   return;
-  // }
-
   _pointClicked = false;
 
   QRect rgeom = _rubberBand->geometry();
@@ -476,6 +508,25 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
         }
       }
 
+    } else if (_mousePressPanelType == PANEL_IQPLOT &&
+               _mouseReleasePanelType == PANEL_IQPLOT) {
+      // iqplot zoom
+      if (_mousePressPanelId == _mouseReleasePanelId) {
+        // zoom in one panel, reflect the range change in 
+        // other panels
+        for (int ii = 0; ii < (int) _iqPlots.size(); ii++) {
+          IqPlot *iqPlot = _iqPlots[ii];
+          if (ii == _mouseReleasePanelId) {
+            // perform 2D zoom
+            iqPlot->setZoomLimits(_mousePressX, _mousePressY,
+                                  _mouseReleaseX, _mouseReleaseY);
+          // } else {
+          //   // perform zoom in range only
+          //   iqPlot->setZoomLimitsY(_mousePressY, _mouseReleaseY);
+          }
+        } // ii
+      }
+
     } // if (_mousePressPanelType == PANEL_ASCOPE
     
     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
@@ -510,6 +561,8 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
 void SpectraWidget::paintEvent(QPaintEvent *event)
 {
 
+  // check on time since rendered
+
   RadxTime now(RadxTime::NOW);
   double timeSinceLast = now - _timeLastRendered;
   if (timeSinceLast < _params.min_secs_between_rendering) {
@@ -517,20 +570,32 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
   }
   _timeLastRendered = now;
 
+  // clear plot
+
   QPainter painter(this);
   painter.save();
   painter.eraseRect(0, 0, width(), height());
   _zoomWorld.setClippingOn(painter);
   painter.restore();
-  _drawOverlays(painter);
-  _drawMainTitle(painter);
-  
-  // if we have a current beam, plot it
+
+  // render ascopes and iq plots
+
   if (_currentBeam) {
     for (size_t ii = 0; ii < _ascopes.size(); ii++) {
-      _ascopes[ii]->plotBeam(painter, _currentBeam, _xGridEnabled, _yGridEnabled);
+      _ascopes[ii]->plotBeam(painter, _currentBeam);
+    }
+    for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
+      _iqPlots[ii]->plotBeam(painter, _currentBeam);
     }
   }
+
+  // draw main title
+
+  _drawMainTitle(painter);
+  
+  // draw averlays
+
+  _drawOverlays(painter);
 
 }
 
@@ -542,44 +607,70 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
 void SpectraWidget::resizeEvent(QResizeEvent * e)
 {
 
+  _ascopeHeight = height() - _titleMargin;
+
+  for (size_t ii = 0; ii < _ascopes.size(); ii++) {
+
+    int xOffset = ii * _ascopeWidth;
+    int yOffset = _titleMargin;
+    _ascopes[ii]->setWindowGeom(_ascopeWidth, _ascopeHeight,
+                                xOffset, yOffset);
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "   ascopeWidth[" << ii << "]: "
+           << _ascopes[ii]->getWidth() << endl;
+      cerr << "  ascopeHeight[" << ii << "]: "
+           << _ascopes[ii]->getHeight() << endl;
+      cerr << "       xOffset[" << ii << "]: "
+           << _ascopes[ii]->getXOffset() << endl;
+      cerr << "       yOffset[" << ii << "]: "
+           << _ascopes[ii]->getYOffset() << endl;
+    }
+
+  }
+  
   _iqGrossHeight = height() - _titleMargin;
   _iqGrossWidth = width() - _ascopeGrossWidth;
-  _iqPanelWidths = _iqGrossWidth / _nCols;
-  _iqPanelHeights = _iqGrossHeight / _nRows;
+  _iqPlotWidth = _iqGrossWidth / _nIqCols;
+  _iqPlotHeight = _iqGrossHeight / _nIqRows;
+
+  for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
+
+    int rowNum = ii / _nIqCols;
+    int colNum = ii - rowNum * _nIqCols; 
+    int xOffset = _ascopeGrossWidth + colNum * _iqPlotWidth;
+    int yOffset = _titleMargin + rowNum * _iqPlotHeight; 
+
+    _iqPlots[ii]->setWindowGeom(_iqPlotWidth, _iqPlotHeight,
+                                xOffset, yOffset);
+    
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "    iqPlotWidth[" << ii << "]: "
+           << _iqPlots[ii]->getWidth() << endl;
+      cerr << "   iqPlotHeight[" << ii << "]: "
+           << _iqPlots[ii]->getHeight() << endl;
+      cerr << "  iqPlotXOffset[" << ii << "]: "
+           << _iqPlots[ii]->getXOffset() << endl;
+      cerr << "  iqPlotYOffset[" << ii << "]: "
+           << _iqPlots[ii]->getYOffset() << endl;
+    }
+
+  }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "SpectraWidget::resizeEvent" << endl;
     cerr << "  width: " << width() << endl;
     cerr << "  height: " << height() << endl;
-    cerr << "  _nRows: " << _nRows << endl;
-    cerr << "  _nCols: " << _nCols << endl;
+    cerr << "  _nIqRows: " << _nIqRows << endl;
+    cerr << "  _nIqCols: " << _nIqCols << endl;
     cerr << "  _titleMargin: " << _titleMargin << endl;
     cerr << "  _iqGrossWidth: " << _iqGrossWidth << endl;
     cerr << "  _iqGrossHeight: " << _iqGrossHeight << endl;
-    cerr << "  _iqPanelWidths: " << _iqPanelWidths << endl;
-    cerr << "  _iqPanelHeights: " << _iqPanelHeights << endl;
+    cerr << "  _iqPlotWidth: " << _iqPlotWidth << endl;
+    cerr << "  _iqPlotHeight: " << _iqPlotHeight << endl;
   }
 
-  for (size_t ii = 0; ii < _ascopes.size(); ii++) {
 
-    _ascopeHeight = height() - _titleMargin;
-    int ascopeXOffset = ii * _ascopeWidth;
-    int ascopeYOffset = _titleMargin;
-    _ascopes[ii]->setWindowGeom(_ascopeWidth, _ascopeHeight,
-                                ascopeXOffset, ascopeYOffset);
-
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "  ascopeWidth[" << ii << "]: "
-           << _ascopes[ii]->getWidth() << endl;
-      cerr << "  ascopeHeight[" << ii << "]: "
-           << _ascopes[ii]->getHeight() << endl;
-      cerr << "  ascopeXOffset[" << ii << "]: "
-           << _ascopes[ii]->getXOffset() << endl;
-      cerr << "  ascopeYOffset[" << ii << "]: "
-           << _ascopes[ii]->getYOffset() << endl;
-    }
-
-  }
   
   _resetWorld(width(), height());
 
@@ -654,10 +745,75 @@ void SpectraWidget::setMouseClickPoint(double worldX,
 void SpectraWidget::_drawOverlays(QPainter &painter)
 {
 
-  // save painter state
+  // draw panel dividing lines
 
   painter.save();
+  QPen dividerPen(_params.main_window_panel_divider_color);
+  dividerPen.setWidth(_params.main_window_panel_divider_line_width);
+  painter.setPen(dividerPen);
 
+  // borders
+
+  {
+    QLineF upperBorder(0, 0, width()-1, 0);
+    painter.drawLine(upperBorder);
+    QLineF lowerBorder(0, height()-1, width()-1, height()-1);
+    painter.drawLine(lowerBorder);
+    QLineF leftBorder(0, 0, 0, height()-1);
+    painter.drawLine(leftBorder);
+    QLineF rightBorder(width()-1, 0, width()-1, height()-1);
+    painter.drawLine(rightBorder);
+  }
+    
+  // line below title
+  {
+    QLineF topLine(0, _titleMargin, width(), _titleMargin);
+    painter.drawLine(topLine);
+  }
+
+  // ascope right boundaries
+  for (int ii = 0; ii < _nAscopes; ii++) {
+    QLineF ascopeBoundary(_ascopeWidth * (ii+1), _titleMargin,
+                          _ascopeWidth * (ii+1), height());
+    painter.drawLine(ascopeBoundary);
+  }
+
+  // iq panels lower boundaries
+
+  for (int irow = 1; irow < _nIqRows; irow++) {
+    QLineF lowerBoundary(_ascopeGrossWidth, _titleMargin + irow * _iqPlotHeight,
+                         width(), _titleMargin + irow * _iqPlotHeight);
+    painter.drawLine(lowerBoundary);
+  }
+
+  // iq panels right boundaries
+  
+  for (int icol = 1; icol < _nIqCols; icol++) {
+    QLineF rightBoundary(_ascopeGrossWidth + icol * _iqPlotWidth, _titleMargin,
+                         _ascopeGrossWidth + icol * _iqPlotWidth, height());
+    painter.drawLine(rightBoundary);
+  }
+  painter.restore();
+  
+  // click point cross hairs
+  
+  if (_pointClicked) {
+    
+    painter.save();
+
+    int startX = _mouseReleaseX - _params.click_cross_size / 2;
+    int endX = _mouseReleaseX + _params.click_cross_size / 2;
+    int startY = _mouseReleaseY - _params.click_cross_size / 2;
+    int endY = _mouseReleaseY + _params.click_cross_size / 2;
+
+    painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
+    painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
+
+    painter.restore();
+
+  }
+
+#ifdef JUNK
   // store font
   
   QFont origFont = painter.font();
@@ -761,82 +917,13 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
 
   _zoomWorld.drawAxesBox(painter);
 
-  // click point cross hairs
-  
-  if (_pointClicked) {
-    
-    int startX = _mouseReleaseX - _params.click_cross_size / 2;
-    int endX = _mouseReleaseX + _params.click_cross_size / 2;
-    int startY = _mouseReleaseY - _params.click_cross_size / 2;
-    int endY = _mouseReleaseY + _params.click_cross_size / 2;
-
-    painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
-    painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
-
-  }
-
-  // draw panel dividing lines
-
-  painter.save();
-  QPen dividerPen(_params.main_window_panel_divider_color);
-  dividerPen.setWidth(_params.main_window_panel_divider_line_width);
-  painter.setPen(dividerPen);
-
-  // borders
-
-  {
-    QLineF upperBorder(0, 0, width()-1, 0);
-    painter.drawLine(upperBorder);
-    QLineF lowerBorder(0, height()-1, width()-1, height()-1);
-    painter.drawLine(lowerBorder);
-    QLineF leftBorder(0, 0, 0, height()-1);
-    painter.drawLine(leftBorder);
-    QLineF rightBorder(width()-1, 0, width()-1, height()-1);
-    painter.drawLine(rightBorder);
-  }
-    
-  // line below title
-  {
-    QLineF topLine(0, _titleMargin, width(), _titleMargin);
-    painter.drawLine(topLine);
-  }
-
-  // ascope right boundaries
-  for (int ii = 0; ii < _nAscopes; ii++) {
-    QLineF ascopeBoundary(_ascopeWidth * (ii+1), _titleMargin,
-                          _ascopeWidth * (ii+1), height());
-    painter.drawLine(ascopeBoundary);
-  }
-
-  // spectra panels lower boundaries
-
-  for (int irow = 1; irow < _nRows; irow++) {
-    QLineF lowerBoundary(_ascopeGrossWidth, _titleMargin + irow * _iqPanelHeights,
-                         width(), _titleMargin + irow * _iqPanelHeights);
-    painter.drawLine(lowerBoundary);
-  }
-
-  // spectra panels right boundaries
-
-  for (int icol = 1; icol < _nCols; icol++) {
-    QLineF rightBoundary(_ascopeGrossWidth + icol * _iqPanelWidths, _titleMargin,
-                         _ascopeGrossWidth + icol * _iqPanelWidths, height());
-    painter.drawLine(rightBoundary);
-  }
-
-  painter.restore();
-  
-  // reset painter state
-  
-  painter.restore();
-
   // draw the color scale
 
   // const DisplayField &field = _manager.getSelectedField();
   // _zoomWorld.drawColorScale(field.getColorMap(), painter,
   //                           _params.iqplot_axis_label_font_size);
   
-  return;
+#endif
   
 }
 
@@ -981,84 +1068,6 @@ void SpectraWidget::resetPlotStartTime(const RadxTime &plot_start_time)
 
 }
 
-/*************************************************************************
- * create the ascope
- */
-
-void SpectraWidget::_createAscope(int id)
-  
-{
-
-  AscopePlot *ascope = new AscopePlot(this, _params, id);
-  ascope->setMomentType(_params._ascope_moments[id]);
-
-  WorldPlot &ascopeWorld = ascope->getFullWorld();
-  
-  ascopeWorld.setLeftMargin(_params.ascope_left_margin);
-  ascopeWorld.setRightMargin(0);
-  ascopeWorld.setTopMargin(0);
-  ascopeWorld.setBottomMargin(_params.ascope_bottom_margin);
-  ascopeWorld.setTitleTextMargin(_params.ascope_title_text_margin);
-  ascopeWorld.setLegendTextMargin(_params.ascope_legend_text_margin);
-  ascopeWorld.setAxisTextMargin(_params.ascope_axis_text_margin);
-
-  ascopeWorld.setColorScaleWidth(0);
-  
-  ascopeWorld.setXAxisTickLen(_params.ascope_axis_tick_len);
-  ascopeWorld.setXNTicksIdeal(_params.ascope_n_ticks_ideal);
-  ascopeWorld.setYAxisTickLen(_params.ascope_axis_tick_len);
-  ascopeWorld.setYNTicksIdeal(_params.ascope_n_ticks_ideal);
-
-  ascopeWorld.setXAxisLabelsInside(_params.ascope_x_axis_labels_inside);
-  ascopeWorld.setYAxisLabelsInside(_params.ascope_y_axis_labels_inside);
-
-  ascopeWorld.setTitleFontSize(_params.ascope_title_font_size);
-  ascopeWorld.setAxisLabelFontSize(_params.ascope_axis_label_font_size);
-  ascopeWorld.setTickValuesFontSize(_params.ascope_tick_values_font_size);
-  ascopeWorld.setLegendFontSize(_params.ascope_legend_font_size);
-
-  ascopeWorld.setTitleColor(_params.ascope_title_color);
-  ascopeWorld.setAxisLineColor(_params.ascope_axes_color);
-  ascopeWorld.setAxisTextColor(_params.ascope_axes_color);
-  ascopeWorld.setGridColor(_params.ascope_grid_color);
-
-  int xOffset = id * _ascopeWidth;
-  int yOffset = _titleMargin;
-  ascopeWorld.setWindowGeom(_ascopeWidth, _ascopeHeight,
-                            xOffset, yOffset);
-  
-  ascopeWorld.setWorldLimits(0.0, 0.0, 1.0, 1.0);
-
-  _ascopes.push_back(ascope);
-  
-}
-
-/*************************************************************************
- * configure the ascope
- */
-
-void SpectraWidget::_configureAscope(int id)
-  
-{
-
-  int xOffset = id * _ascopeWidth;
-  int yOffset = _titleMargin;
-  _ascopes[id]->setWindowGeom(_ascopeWidth, _ascopeHeight,
-                              xOffset, yOffset);
-  
-  if (_currentBeam == NULL) {
-    return;
-  }
-
-  Params::moment_type_t momentType = _ascopes[id]->getMomentType();
-  double minVal = AscopePlot::getMinVal(momentType);
-  double maxVal = AscopePlot::getMaxVal(momentType);
-  
-  _ascopes[id]->setWorldLimits(minVal, 0.0,
-                               maxVal, _currentBeam->getMaxRange());
-
-}
-
 /////////////////////////////////////////////////////////////	
 // Title
     
@@ -1114,6 +1123,168 @@ void SpectraWidget::_drawMainTitle(QPainter &painter)
 
 }
 
+/*************************************************************************
+ * create ascope
+ */
+
+void SpectraWidget::_createAscope(int id)
+  
+{
+
+  AscopePlot *ascope = new AscopePlot(this, _params, id);
+  ascope->setMomentType(_params._ascope_moments[id]);
+
+  WorldPlot &ascopeWorld = ascope->getFullWorld();
+  
+  ascopeWorld.setLeftMargin(_params.ascope_left_margin);
+  ascopeWorld.setRightMargin(0);
+  ascopeWorld.setTopMargin(0);
+  ascopeWorld.setBottomMargin(_params.ascope_bottom_margin);
+  ascopeWorld.setTitleTextMargin(_params.ascope_title_text_margin);
+  ascopeWorld.setLegendTextMargin(_params.ascope_legend_text_margin);
+  ascopeWorld.setAxisTextMargin(_params.ascope_axis_text_margin);
+
+  ascopeWorld.setColorScaleWidth(0);
+  
+  ascopeWorld.setXAxisTickLen(_params.ascope_axis_tick_len);
+  ascopeWorld.setXNTicksIdeal(_params.ascope_n_ticks_ideal);
+  ascopeWorld.setYAxisTickLen(_params.ascope_axis_tick_len);
+  ascopeWorld.setYNTicksIdeal(_params.ascope_n_ticks_ideal);
+
+  ascopeWorld.setXAxisLabelsInside(_params.ascope_x_axis_labels_inside);
+  ascopeWorld.setYAxisLabelsInside(_params.ascope_y_axis_labels_inside);
+
+  ascopeWorld.setTitleFontSize(_params.ascope_title_font_size);
+  ascopeWorld.setAxisLabelFontSize(_params.ascope_axis_label_font_size);
+  ascopeWorld.setTickValuesFontSize(_params.ascope_tick_values_font_size);
+  ascopeWorld.setLegendFontSize(_params.ascope_legend_font_size);
+
+  ascopeWorld.setTitleColor(_params.ascope_title_color);
+  ascopeWorld.setAxisLineColor(_params.ascope_axes_color);
+  ascopeWorld.setAxisTextColor(_params.ascope_axes_color);
+  ascopeWorld.setGridColor(_params.ascope_grid_color);
+
+  int xOffset = id * _ascopeWidth;
+  int yOffset = _titleMargin;
+  ascopeWorld.setWindowGeom(_ascopeWidth, _ascopeHeight,
+                            xOffset, yOffset);
+  
+  ascopeWorld.setWorldLimits(0.0, 0.0, 1.0, 1.0);
+
+  _ascopes.push_back(ascope);
+  
+}
+
+/*************************************************************************
+ * configure ascope
+ */
+
+void SpectraWidget::_configureAscope(int id)
+  
+{
+
+  int xOffset = id * _ascopeWidth;
+  int yOffset = _titleMargin;
+  _ascopes[id]->setWindowGeom(_ascopeWidth, _ascopeHeight,
+                              xOffset, yOffset);
+  
+  if (_currentBeam == NULL) {
+    return;
+  }
+
+  Params::moment_type_t momentType = _ascopes[id]->getMomentType();
+  double minVal = AscopePlot::getMinVal(momentType);
+  double maxVal = AscopePlot::getMaxVal(momentType);
+  
+  _ascopes[id]->setWorldLimits(minVal, 0.0,
+                               maxVal, _currentBeam->getMaxRange());
+
+}
+
+/*************************************************************************
+ * create IqPlot
+ */
+
+void SpectraWidget::_createIqPlot(int id)
+  
+{
+  
+  IqPlot *iqplot = new IqPlot(this, _params, id);
+  iqplot->setMomentType(Params::DBZ);
+
+  WorldPlot &iqplotWorld = iqplot->getFullWorld();
+  
+  iqplotWorld.setLeftMargin(_params.iqplot_left_margin);
+  iqplotWorld.setRightMargin(0);
+  iqplotWorld.setTopMargin(0);
+  iqplotWorld.setBottomMargin(_params.iqplot_bottom_margin);
+  iqplotWorld.setTitleTextMargin(_params.iqplot_title_text_margin);
+  iqplotWorld.setLegendTextMargin(_params.iqplot_legend_text_margin);
+  iqplotWorld.setAxisTextMargin(_params.iqplot_axis_text_margin);
+
+  iqplotWorld.setColorScaleWidth(0);
+  
+  iqplotWorld.setXAxisTickLen(_params.iqplot_axis_tick_len);
+  iqplotWorld.setXNTicksIdeal(_params.iqplot_n_ticks_ideal);
+  iqplotWorld.setYAxisTickLen(_params.iqplot_axis_tick_len);
+  iqplotWorld.setYNTicksIdeal(_params.iqplot_n_ticks_ideal);
+
+  iqplotWorld.setXAxisLabelsInside(_params.iqplot_x_axis_labels_inside);
+  iqplotWorld.setYAxisLabelsInside(_params.iqplot_y_axis_labels_inside);
+
+  iqplotWorld.setTitleFontSize(_params.iqplot_title_font_size);
+  iqplotWorld.setAxisLabelFontSize(_params.iqplot_axis_label_font_size);
+  iqplotWorld.setTickValuesFontSize(_params.iqplot_tick_values_font_size);
+  iqplotWorld.setLegendFontSize(_params.iqplot_legend_font_size);
+
+  iqplotWorld.setTitleColor(_params.iqplot_title_color);
+  iqplotWorld.setAxisLineColor(_params.iqplot_axes_color);
+  iqplotWorld.setAxisTextColor(_params.iqplot_axes_color);
+  iqplotWorld.setGridColor(_params.iqplot_grid_color);
+
+  int rowNum = id / _nIqCols;
+  int colNum = id - rowNum * _nIqCols; 
+  int xOffset = _ascopeGrossWidth + colNum * _iqPlotWidth;
+  int yOffset = _titleMargin + rowNum * _iqPlotHeight; 
+
+  iqplotWorld.setWindowGeom(_iqPlotWidth, _iqPlotHeight,
+                            xOffset, yOffset);
+  
+  iqplotWorld.setWorldLimits(0.0, 0.0, 1.0, 1.0);
+
+  _iqPlots.push_back(iqplot);
+  
+}
+
+/*************************************************************************
+ * configure the iqplot
+ */
+
+void SpectraWidget::_configureIqPlot(int id)
+  
+{
+
+  int rowNum = id / _nIqCols;
+  int colNum = id - rowNum * _nIqCols; 
+  int xOffset = _ascopeGrossWidth + colNum * _iqPlotWidth;
+  int yOffset = _titleMargin + rowNum * _iqPlotHeight; 
+  
+  _iqPlots[id]->setWindowGeom(_iqPlotWidth, _iqPlotHeight,
+                              xOffset, yOffset);
+  
+  if (_currentBeam == NULL) {
+    return;
+  }
+
+  Params::moment_type_t momentType = _iqPlots[id]->getMomentType();
+  double minVal = IqPlot::getMinVal(momentType);
+  double maxVal = IqPlot::getMaxVal(momentType);
+  
+  _iqPlots[id]->setWorldLimits(minVal, 0.0,
+                               maxVal, _currentBeam->getMaxRange());
+
+}
+
 /////////////////////////////////////////////////////////////	
 // determine the selected panel
     
@@ -1142,9 +1313,9 @@ void SpectraWidget::_identSelectedPanel(int xx, int yy,
   // we must therefore be in the spectra panels
 
   panelType = PANEL_IQPLOT;
-  int icol = (xx - _ascopeGrossWidth) / _iqPanelWidths;
-  int irow = (yy - _titleMargin) / _iqPanelHeights;
-  panelId = irow * _nRows + icol;
+  int icol = (xx - _ascopeGrossWidth) / _iqPlotWidth;
+  int irow = (yy - _titleMargin) / _iqPlotHeight;
+  panelId = irow * _nIqRows + icol;
 
 }
 

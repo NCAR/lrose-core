@@ -115,9 +115,7 @@ void AscopePlot::unzoom()
  */
 
 void AscopePlot::plotBeam(QPainter &painter,
-                          Beam *beam,
-                          bool xGridEnabled,
-                          bool yGridEnabled)
+                          Beam *beam)
   
 {
 

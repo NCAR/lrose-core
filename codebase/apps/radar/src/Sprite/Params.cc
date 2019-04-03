@@ -1423,6 +1423,30 @@
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'iqplot_x_axis_labels_inside'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("iqplot_x_axis_labels_inside");
+    tt->descr = tdrpStrDup("Location of tick labels, relative to x axis.");
+    tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
+    tt->val_offset = (char *) &iqplot_x_axis_labels_inside - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'iqplot_y_axis_labels_inside'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("iqplot_y_axis_labels_inside");
+    tt->descr = tdrpStrDup("Location of tick labels, relative to y axis.");
+    tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
+    tt->val_offset = (char *) &iqplot_y_axis_labels_inside - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));

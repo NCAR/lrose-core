@@ -54,6 +54,7 @@
 
 class Beam;
 class AscopePlot;
+class IqPlot;
 class RadxRay;
 class SpectraMgr;
 
@@ -259,37 +260,37 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   // plot panel layouts
 
-  int _nRows;
-  int _nCols;
+  int _titleMargin;
+
   int _nAscopes;
 
-  int _titleMargin;
+  int _nIqRows;
+  int _nIqCols;
+  int _nIqPlots;
 
   int _ascopeWidth;
   int _ascopeHeight;
   int _ascopeGrossWidth;
   
+  int _iqPlotWidth;
+  int _iqPlotHeight;
   int _iqGrossWidth;
   int _iqGrossHeight;
-  int _iqPanelWidths;
-  int _iqPanelHeights;
   
   // ascopes
   
   vector<AscopePlot *> _ascopes;
   bool _ascopesConfigured;
 
-  /**
-   * Grid overlays
-   */
+  // IQ plots
+  
+  vector<IqPlot *> _iqPlots;
+  bool _iqPlotsConfigured;
+
+  // Grid overlays
 
   bool _xGridEnabled;
   bool _yGridEnabled;
-
-  /**
-   * @brief This will create labels wiith nicely scaled values and
-   *        approriate units.
-   */
 
   ScaledLabel _scaledLabel;
   
@@ -456,17 +457,19 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   void _resetWorld(int width, int height);
 
-  // create the ascope panel
-
-  void _createAscope(int id);
-
-  // configure the ascope
-
-  void _configureAscope(int id);
-
   // draw the main title
   
   void _drawMainTitle(QPainter &painter);
+
+  // ascope panels
+
+  void _createAscope(int id);
+  void _configureAscope(int id);
+
+  // iqplots
+
+  void _createIqPlot(int id);
+  void _configureIqPlot(int id);
 
   // determine the panel type selected by a click
 
