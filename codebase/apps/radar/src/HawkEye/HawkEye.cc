@@ -46,6 +46,8 @@
 #include "AllocCheck.hh"
 #include "SoloDefaultColorWrapper.hh"
 #include <toolsa/Path.hh>
+#include <toolsa/LogStream.hh>
+#include <toolsa/Log.hh>
 
 #include <string>
 #include <iostream>
@@ -68,6 +70,11 @@ HawkEye::HawkEye(int argc, char **argv) :
   // set programe name
 
   _progName = strdup("HawkEye");
+
+  Log logger("HawkEye");
+  logger.setDayMode();
+  logger.setOutputDir("/tmp");
+  LOG(DEBUG) << "HawkEye starting";
   
   // get command line args
   
@@ -328,9 +335,7 @@ int HawkEye::_setupDisplayFields()
           SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
           ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
           cerr << "  found default color map for " <<  pfld.label  << endl;
-          if (_params.debug) {
-             if (_params.debug) colorMap.print(cout);
-          }
+          // if (_params.debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
           map = colorMap;
           // HERE: What is missing from the ColorMap object??? 
         } catch (std::out_of_range ex) {

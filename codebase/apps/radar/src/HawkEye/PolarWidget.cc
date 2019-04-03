@@ -601,13 +601,43 @@ void PolarWidget::_performRendering()
 
 }
 
+void PolarWidget::informationMessage()
+{
+  QMessageBox::StandardButton reply;
+  QLabel *informationLabel;
 
-/*
+  reply = QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
+  //  if (reply == QMessageBox::Ok)
+  //  informationLabel->setText("OK");
+  //else
+  //  informationLabel->setText("Escape");
+
+}
+
+void PolarWidget::notImplemented()
+{
+  cerr << "inside notImplemented() ... " << endl;
+
+  QErrorMessage *errorMessageDialog = new QErrorMessage(_parent);
+  QLabel *informationLabel = new QLabel();
+
+  errorMessageDialog->showMessage("This option is not implemented yet.");
+  QLabel errorLabel;
+  int frameStyle = QFrame::Sunken | QFrame::Panel;
+  errorLabel.setFrameStyle(frameStyle);
+  errorLabel.setText("If the box is unchecked, the message "
+		     "won't appear again.");
+
+  cerr << "exiting notImplemented() " << endl;
+
+}
+
+
 // slots for context editing; create and show the associated modeless dialog and return                                   
 
 void PolarWidget::contextMenuCancel()
 {
-  informationMessage();
+  //  informationMessage();
 
   //notImplemented();                                                                                                     
 }
@@ -646,4 +676,15 @@ void PolarWidget::contextMenuDataWidget()
 
   //  notImplemented();                                                                                                   
 }
-*/
+
+
+void PolarWidget::ExamineEdit(const RadxRay *closestRay) 
+{
+  notImplemented();
+}
+
+void PolarWidget::ShowContextMenu(const QPoint &pos) 
+{  
+  notImplemented();
+}
+

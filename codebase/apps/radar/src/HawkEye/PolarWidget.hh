@@ -553,22 +553,22 @@ class DLL_EXPORT PolarWidget : public QWidget
 
  public:
 
-  /* 
+  
   virtual void ShowContextMenu(const QPoint &pos);
   void setFont();
   virtual void ExamineEdit(const RadxRay *closestRay);
   void notImplemented();
-  void informationMessage();
+  virtual void informationMessage();
 
  public slots:
 
-  void contextMenuCancel();
-  void contextMenuParameterColors();
-  void contextMenuView();
-  void contextMenuEditor();
+  virtual void contextMenuCancel();
+  virtual void contextMenuParameterColors();
+  virtual void contextMenuView();
+  virtual void contextMenuEditor();
   virtual void contextMenuExamine(); // const QPoint &pos);
-  void contextMenuDataWidget();
-  */
+  virtual void contextMenuDataWidget();
+  
 
 };
 

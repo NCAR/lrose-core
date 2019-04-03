@@ -26,6 +26,7 @@
 #include <toolsa/TaXml.hh>
 #include <toolsa/TaFile.hh>
 #include <toolsa/MemBuf.hh>
+#include <toolsa/LogStream.hh>
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -907,11 +908,9 @@ int ColorMap::readXmlMap(const std::string &file_path)
     return -1;
   }
   
-  if (_debug) {
-    cerr << "Reading in color scale file: " << _path << endl;
-    cerr << "Contents:" << endl;
-    cerr << xmlBuf;
-  }
+    LOG(DEBUG_VERBOSE) << "Reading in color scale file: " << _path;
+    LOG(DEBUG_VERBOSE) << "Contents:";
+    LOG(DEBUG_VERBOSE) << xmlBuf;
 
   string id;
   if (TaXml::readStringAttr(attrs, "id", id)) {
@@ -945,13 +944,11 @@ int ColorMap::readXmlMap(const std::string &file_path)
     }
   }
 
-  if (_debug) {
-    cerr << "DEBUG - reading colorScale name: " << _name << endl;
-    cerr << "=====>> id: " << id << endl;
-    cerr << "=====>> gradation: " << gradation << endl;
-    cerr << "=====>> saturation: " << _saturation << endl;
-    cerr << "=====>> labelsSetByValue: " << labelsSetByValue << endl;
-  }
+    LOG(DEBUG_VERBOSE) << "DEBUG - reading colorScale name: " << _name;
+    LOG(DEBUG_VERBOSE) << "=====>> id: " << id;
+    LOG(DEBUG_VERBOSE) << "=====>> gradation: " << gradation;
+    LOG(DEBUG_VERBOSE) << "=====>> saturation: " << _saturation;
+    LOG(DEBUG_VERBOSE) << "=====>> labelsSetByValue: " << labelsSetByValue;
 
   // read in color range tags
   

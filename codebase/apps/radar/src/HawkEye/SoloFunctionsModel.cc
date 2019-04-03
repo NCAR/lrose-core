@@ -10,6 +10,7 @@
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxCfactors.hh>
 #include <Radx/RadxGeoref.hh>
+#include <toolsa/LogStream.hh>
 
 using namespace std;
 
@@ -28,7 +29,8 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
   // maybe return a pointer to std::vector<double> ?? then when presenting the data, we can convert it to string,
   // but maintain the precision in the model (RadxVol)??
 
-  cerr << "RemoveAircraftMotion ... "  << endl;
+  LOG(DEBUG) << "entry with fieldName ... ";
+  LOG(DEBUG) << fieldName;
 
   // gather data from context -- most of the data are in a DoradeRadxFile object
 
@@ -40,7 +42,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
   const RadxField *field;
   field = vol.getFieldFromRay(fieldName);
   if (field == NULL) {
-    cerr << "no RadxField found " <<  endl;
+    LOG(DEBUG) << "no RadxField found in volume";
     throw "No data field with name " + fieldName;;
   }
   
@@ -48,14 +50,20 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
   // TODO: get the ray for this field 
   const vector<RadxRay *>  &rays = vol.getRays();
   if (rays.size() > 1) {
-    cerr << "ERROR - more than one ray; expected only one\n";
+    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
   }
   RadxRay *ray = rays.at(0);
   if (ray == NULL) {
-    cerr << "ERROR - first ray is NULL" << endl;
+    LOG(DEBUG) << "ERROR - first ray is NULL";
+    throw "Ray is null";
   } 
-  const RadxGeoref *georef = ray->getGeoreference();
 
+  const RadxGeoref *georef = ray->getGeoreference();
+  if (georef == NULL) {
+    LOG(DEBUG) << "ERROR - georef is NULL";
+    throw "Georef is null";
+  } 
+ 
   float vert_velocity = georef->getVertVelocity();  // fl32
   float ew_velocity = georef->getEwVelocity(); // fl32
   float ns_velocity = georef->getNsVelocity(); // fl32;
@@ -101,24 +109,20 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
   short dds_radd_eff_unamb_vel = ray->getNyquistMps(); // doradeData.eff_unamb_vel;
   int seds_nyquist_velocity; // TODO: what is this value?
 
+  LOG(DEBUG) << "sizeof(short) = " << sizeof(short);
 
-  cerr << "sizeof(short) = " << sizeof(short) << endl;
-
-
-  cerr << "args: " << endl <<
-    "vert_velocity " << vert_velocity << endl <<
-    "ew_velocity " << ew_velocity << endl <<
-    "ns_velocity " << ns_velocity << endl <<
-    "ew_gndspd_corr " << ew_gndspd_corr << endl <<
-    "tilt " << tilt << endl <<
-    "elevation " << elevation << endl <<
-    "bad " << bad << endl <<
-    "parameter_scale " << parameter_scale << endl <<
-    "dgi_clip_gate " << dgi_clip_gate << endl <<
-    "dds_radd_eff_unamb_vel " << dds_radd_eff_unamb_vel << endl <<
-    "seds_nyquist_velocity " << "??" << 
-    endl;
-
+  LOG(DEBUG) << "args: ";
+  LOG(DEBUG) << "vert_velocity " << vert_velocity;
+  LOG(DEBUG) <<   "ew_velocity " << ew_velocity;
+  LOG(DEBUG) <<   "ns_velocity " << ns_velocity;
+  LOG(DEBUG) <<   "ew_gndspd_corr " << ew_gndspd_corr;
+  LOG(DEBUG) <<   "tilt " << tilt;
+  LOG(DEBUG) <<   "elevation " << elevation;
+  LOG(DEBUG) <<   "bad " << bad;
+  LOG(DEBUG) <<   "parameter_scale " << parameter_scale;
+  LOG(DEBUG) <<   "dgi_clip_gate " << dgi_clip_gate;
+  LOG(DEBUG) <<   "dds_radd_eff_unamb_vel " << dds_radd_eff_unamb_vel;
+  LOG(DEBUG) <<   "seds_nyquist_velocity " << "??";
   
   //SoloFunctionsApi soloFunctionsApi;
   int result = se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
@@ -126,18 +130,18 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
      field->getDataSi16(), bad, parameter_scale, parameter_bias, dgi_clip_gate,
      dds_radd_eff_unamb_vel, seds_nyquist_velocity);
   
-  cerr << " A few data values ";
+  LOG(DEBUG) << " A few data values ";
   for (int i=0; i< 10; i++) {
-    cerr << field->getDoubleValue(i) << ", ";
+      LOG(DEBUG) << field->getDoubleValue(i);
   }
-  cerr << endl;
-
-
 
   // TODO: We are converting from short to double!!!  <=====
   vector<double> newData; // (data, dgi_clip_gate+1);
   //  for (vector<double>::iterator it = data.begin(); it != data.end(); ++it)
   //  newData.push_back(*it * 2.0);
+
+  LOG(DEBUG) << "exit ";
+
   return newData;
 }
 

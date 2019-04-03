@@ -1146,7 +1146,7 @@ void PpiWidget::ShowContextMenu(const QPoint &pos, RadxVol &vol)
   _vol = vol;
 
   QMenu contextMenu("Context menu", this);
-  /*
+  
   QAction action1("Cancel", this);
   connect(&action1, SIGNAL(triggered()), this, SLOT(contextMenuCancel()));
   contextMenu.addAction(&action1);
@@ -1162,7 +1162,7 @@ void PpiWidget::ShowContextMenu(const QPoint &pos, RadxVol &vol)
   QAction action5("Editor", this);
   connect(&action5, SIGNAL(triggered()), this, SLOT(contextMenuEditor()));
   contextMenu.addAction(&action5);
-  */
+  
   QAction action6("Examine", this);
   connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine()));
   contextMenu.addAction(&action6);

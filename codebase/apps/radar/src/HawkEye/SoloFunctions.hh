@@ -52,7 +52,7 @@ static QJSValue VectorOp(QJSContext *context, QJSEngine *engine)
 
 class SoloFunctions : public QObject
 {
-
+  Q_OBJECT
 
 public:
   //  SoloFunctions(SpreadSheetController *controller);

@@ -94,6 +94,9 @@ protected:
                         const QString &opText,
                         const QString &outText,
                         QString *cell1, QString *cell2, QString *outCell);
+
+  void criticalMessage(std::string message);
+
 private:
 
   //     SpreadSheetController *_controller;

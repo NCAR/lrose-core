@@ -77,6 +77,7 @@ HDRS = \
 	ScaledLabel.hh \
 	SiiPalette.hh \
 	SoloDefaultColorWrapper.hh \
+	SoloFunctions.hh \
 	SpreadSheetController.hh \
 	SpreadSheetItem.hh \
 	SpreadSheetModel.hh \
@@ -105,7 +106,6 @@ NORM_SRCS = \
 	ScaledLabel.cc \
 	SiiPalette.cc \
 	SoloDefaultColorWrapper.cc \
-	SoloFunctions.cc \
 	SoloFunctionsModel.cc \
 	SpreadSheetItem.cc \
 	SpreadSheetModel.cc \
@@ -129,6 +129,7 @@ MOC_SRCS = \
 	ColorMapTemplates.cc \
 	ClickableLabel.cc \
 	TextEdit.cc \
+	SoloFunctions.cc \
 	SpreadSheetView.cc \
 	SpreadSheetController.cc \
 	SpreadSheetDelegate.cc \
@@ -150,10 +151,12 @@ MOC_OUTPUT = \
 	moc_ColorMapTemplates.cpp \
 	moc_ClickableLabel.cpp \
 	moc_TextEdit.cpp \
+	moc_SoloFunctions.cpp \
 	moc_SpreadSheetView.cpp \
 	moc_SpreadSheetController.cpp \
 	moc_SpreadSheetDelegate.cpp \
-	moc_FunctionEditor.cpp
+	moc_FunctionEditor.cpp \
+	qrc_customcompleter.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT)
