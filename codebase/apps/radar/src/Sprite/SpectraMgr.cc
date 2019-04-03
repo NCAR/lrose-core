@@ -403,21 +403,21 @@ void SpectraMgr::_createActions()
 void SpectraMgr::_initActions()
 {
 
-  if (_params.spectra_x_grid_lines_on) {
-    _xGridAct->setChecked(false); // initialize to false
-    _xGridAct->trigger();         // toggle to true
-  } else {
-    _xGridAct->setChecked(true); // initialize to true
-    _xGridAct->trigger();        // toggle to false
-  }
+  // if (_params.iqplot_x_grid_lines_on) {
+  _xGridAct->setChecked(false); // initialize to false
+  //   _xGridAct->trigger();         // toggle to true
+  // } else {
+    // _xGridAct->setChecked(true); // initialize to true
+    // _xGridAct->trigger();        // toggle to false
+  // }
   
-  if (_params.spectra_y_grid_lines_on) {
-    _yGridAct->setChecked(false); // initialize to false
-    _yGridAct->trigger();         // toggle to true
-  } else {
-    _yGridAct->setChecked(true);  // initialize to true
-    _yGridAct->trigger();         // toggle to false
-  }
+  // if (_params.iqplot_y_grid_lines_on) {
+  _yGridAct->setChecked(false); // initialize to false
+  //   _yGridAct->trigger();         // toggle to true
+  // } else {
+    // _yGridAct->setChecked(true);  // initialize to true
+    // _yGridAct->trigger();         // toggle to false
+  // }
 
 }
 

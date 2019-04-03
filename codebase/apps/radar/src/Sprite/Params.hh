@@ -503,61 +503,59 @@ public:
 
   int click_cross_size;
 
-  int spectra_n_rows;
+  int iqplots_n_rows;
 
-  int spectra_n_columns;
+  int iqplots_n_columns;
 
-  int spectra_top_margin;
+  int iqplot_top_margin;
 
-  int spectra_bottom_margin;
+  int iqplot_bottom_margin;
 
-  int spectra_left_margin;
+  int iqplot_left_margin;
 
-  int spectra_right_margin;
+  int iqplot_right_margin;
 
-  int spectra_axis_tick_len;
+  int iqplot_axis_tick_len;
 
-  int spectra_n_ticks_ideal;
+  int iqplot_n_ticks_ideal;
 
-  int spectra_title_text_margin;
+  int iqplot_title_text_margin;
 
-  int spectra_legend_text_margin;
+  int iqplot_legend_text_margin;
 
-  int spectra_axis_text_margin;
+  int iqplot_axis_text_margin;
 
-  double spectra_time_span_secs;
+  int iqplot_title_font_size;
 
-  int spectra_title_font_size;
+  int iqplot_axis_label_font_size;
 
-  int spectra_axis_label_font_size;
+  int iqplot_tick_values_font_size;
 
-  int spectra_tick_values_font_size;
+  int iqplot_legend_font_size;
 
-  int spectra_legend_font_size;
+  char* iqplot_title_color;
 
-  char* spectra_title_color;
+  char* iqplot_axes_color;
 
-  char* spectra_axes_color;
+  char* iqplot_grid_color;
 
-  char* spectra_grid_color;
+  char* iqplot_labels_color;
 
-  char* spectra_labels_color;
+  tdrp_bool_t iqplot_y_grid_lines_on;
 
-  tdrp_bool_t spectra_y_grid_lines_on;
+  tdrp_bool_t iqplot_x_grid_lines_on;
 
-  tdrp_bool_t spectra_x_grid_lines_on;
+  tdrp_bool_t iqplot_draw_instrument_height_line;
 
-  tdrp_bool_t spectra_draw_instrument_height_line;
+  legend_pos_t iqplot_main_legend_pos;
 
-  legend_pos_t spectra_main_legend_pos;
+  tdrp_bool_t iqplot_plot_legend1;
 
-  tdrp_bool_t spectra_plot_legend1;
+  legend_pos_t iqplot_legend1_pos;
 
-  legend_pos_t spectra_legend1_pos;
+  legend_pos_t iqplot_legend2_pos;
 
-  legend_pos_t spectra_legend2_pos;
-
-  tdrp_bool_t spectra_plot_legend2;
+  tdrp_bool_t iqplot_plot_legend2;
 
   int ascope_n_panels_in_spectra_window;
 
@@ -587,6 +585,10 @@ public:
   int ascope_left_margin;
 
   int ascope_bottom_margin;
+
+  tdrp_bool_t ascope_x_grid_lines_on;
+
+  tdrp_bool_t ascope_y_grid_lines_on;
 
   char* ascope_axis_label_color;
 

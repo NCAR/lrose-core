@@ -1146,152 +1146,140 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("SPECTRA DISPLAY");
+    tt->comment_hdr = tdrpStrDup("IQ PLOTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'spectra_n_rows'
+    // Parameter 'iqplots_n_rows'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_n_rows");
-    tt->descr = tdrpStrDup("Number of rows of plots in spectra display.");
-    tt->help = tdrpStrDup("The spectra display is made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of rows.");
-    tt->val_offset = (char *) &spectra_n_rows - &_start_;
+    tt->param_name = tdrpStrDup("iqplots_n_rows");
+    tt->descr = tdrpStrDup("Number of rows of plots in iq plots.");
+    tt->help = tdrpStrDup("The iq plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of rows.");
+    tt->val_offset = (char *) &iqplots_n_rows - &_start_;
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'spectra_n_columns'
+    // Parameter 'iqplots_n_columns'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_n_columns");
-    tt->descr = tdrpStrDup("Number of columns of plots in spectra display.");
-    tt->help = tdrpStrDup("The spectra display is made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.");
-    tt->val_offset = (char *) &spectra_n_columns - &_start_;
+    tt->param_name = tdrpStrDup("iqplots_n_columns");
+    tt->descr = tdrpStrDup("Number of columns of plots in iq plots.");
+    tt->help = tdrpStrDup("The iq plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.");
+    tt->val_offset = (char *) &iqplots_n_columns - &_start_;
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'spectra_top_margin'
+    // Parameter 'iqplot_top_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_top_margin");
-    tt->descr = tdrpStrDup("Height of top margin in SPECTRA mode (pixels).");
+    tt->param_name = tdrpStrDup("iqplot_top_margin");
+    tt->descr = tdrpStrDup("Height of top margin in IQPLOT mode (pixels).");
     tt->help = tdrpStrDup("Titles go in the top margin.");
-    tt->val_offset = (char *) &spectra_top_margin - &_start_;
+    tt->val_offset = (char *) &iqplot_top_margin - &_start_;
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'spectra_bottom_margin'
+    // Parameter 'iqplot_bottom_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_bottom_margin");
-    tt->descr = tdrpStrDup("Height of bottom margin in SPECTRA mode (pixels).");
+    tt->param_name = tdrpStrDup("iqplot_bottom_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin in IQPLOT mode (pixels).");
     tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
-    tt->val_offset = (char *) &spectra_bottom_margin - &_start_;
+    tt->val_offset = (char *) &iqplot_bottom_margin - &_start_;
     tt->single_val.i = 18;
     tt++;
     
-    // Parameter 'spectra_left_margin'
+    // Parameter 'iqplot_left_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_left_margin");
-    tt->descr = tdrpStrDup("Width of left margin in SPECTRA mode (pixels).");
+    tt->param_name = tdrpStrDup("iqplot_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin in IQPLOT mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the left margin.");
-    tt->val_offset = (char *) &spectra_left_margin - &_start_;
+    tt->val_offset = (char *) &iqplot_left_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'spectra_right_margin'
+    // Parameter 'iqplot_right_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_right_margin");
-    tt->descr = tdrpStrDup("Width of right margin in SPECTRA mode (pixels).");
+    tt->param_name = tdrpStrDup("iqplot_right_margin");
+    tt->descr = tdrpStrDup("Width of right margin in IQPLOT mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the right margin.");
-    tt->val_offset = (char *) &spectra_right_margin - &_start_;
+    tt->val_offset = (char *) &iqplot_right_margin - &_start_;
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'spectra_axis_tick_len'
+    // Parameter 'iqplot_axis_tick_len'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_axis_tick_len");
+    tt->param_name = tdrpStrDup("iqplot_axis_tick_len");
     tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_axis_tick_len - &_start_;
+    tt->val_offset = (char *) &iqplot_axis_tick_len - &_start_;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'spectra_n_ticks_ideal'
+    // Parameter 'iqplot_n_ticks_ideal'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_n_ticks_ideal");
+    tt->param_name = tdrpStrDup("iqplot_n_ticks_ideal");
     tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_n_ticks_ideal - &_start_;
+    tt->val_offset = (char *) &iqplot_n_ticks_ideal - &_start_;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'spectra_title_text_margin'
+    // Parameter 'iqplot_title_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_title_text_margin");
+    tt->param_name = tdrpStrDup("iqplot_title_text_margin");
     tt->descr = tdrpStrDup("Margin around title text (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_title_text_margin - &_start_;
+    tt->val_offset = (char *) &iqplot_title_text_margin - &_start_;
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'spectra_legend_text_margin'
+    // Parameter 'iqplot_legend_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_legend_text_margin");
+    tt->param_name = tdrpStrDup("iqplot_legend_text_margin");
     tt->descr = tdrpStrDup("Margin around legend text (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_legend_text_margin - &_start_;
+    tt->val_offset = (char *) &iqplot_legend_text_margin - &_start_;
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'spectra_axis_text_margin'
+    // Parameter 'iqplot_axis_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_axis_text_margin");
+    tt->param_name = tdrpStrDup("iqplot_axis_text_margin");
     tt->descr = tdrpStrDup("Margin around axis text (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_axis_text_margin - &_start_;
+    tt->val_offset = (char *) &iqplot_axis_text_margin - &_start_;
     tt->single_val.i = 2;
-    tt++;
-    
-    // Parameter 'spectra_time_span_secs'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("spectra_time_span_secs");
-    tt->descr = tdrpStrDup("Time span for SPECTRA (secs).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_time_span_secs - &_start_;
-    tt->single_val.d = 600;
     tt++;
     
     // Parameter 'Comment 8'
@@ -1299,139 +1287,139 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("SPECTRA TITLES, LABELS AND AXES");
+    tt->comment_hdr = tdrpStrDup("IQPLOT TITLES, LABELS AND AXES");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'spectra_title_font_size'
+    // Parameter 'iqplot_title_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_title_font_size");
+    tt->param_name = tdrpStrDup("iqplot_title_font_size");
     tt->descr = tdrpStrDup("Font size of center title (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_title_font_size - &_start_;
+    tt->val_offset = (char *) &iqplot_title_font_size - &_start_;
     tt->single_val.i = 10;
     tt++;
     
-    // Parameter 'spectra_axis_label_font_size'
+    // Parameter 'iqplot_axis_label_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_axis_label_font_size");
+    tt->param_name = tdrpStrDup("iqplot_axis_label_font_size");
     tt->descr = tdrpStrDup("Font size of axis labels in spectra (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_axis_label_font_size - &_start_;
+    tt->val_offset = (char *) &iqplot_axis_label_font_size - &_start_;
     tt->single_val.i = 8;
     tt++;
     
-    // Parameter 'spectra_tick_values_font_size'
+    // Parameter 'iqplot_tick_values_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_tick_values_font_size");
+    tt->param_name = tdrpStrDup("iqplot_tick_values_font_size");
     tt->descr = tdrpStrDup("Font size of axis tick values (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_tick_values_font_size - &_start_;
+    tt->val_offset = (char *) &iqplot_tick_values_font_size - &_start_;
     tt->single_val.i = 6;
     tt++;
     
-    // Parameter 'spectra_legend_font_size'
+    // Parameter 'iqplot_legend_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spectra_legend_font_size");
+    tt->param_name = tdrpStrDup("iqplot_legend_font_size");
     tt->descr = tdrpStrDup("Font size for plot legends (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_legend_font_size - &_start_;
+    tt->val_offset = (char *) &iqplot_legend_font_size - &_start_;
     tt->single_val.i = 6;
     tt++;
     
-    // Parameter 'spectra_title_color'
+    // Parameter 'iqplot_title_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("spectra_title_color");
+    tt->param_name = tdrpStrDup("iqplot_title_color");
     tt->descr = tdrpStrDup("Color of plot title.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_title_color - &_start_;
+    tt->val_offset = (char *) &iqplot_title_color - &_start_;
     tt->single_val.s = tdrpStrDup("red");
     tt++;
     
-    // Parameter 'spectra_axes_color'
+    // Parameter 'iqplot_axes_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("spectra_axes_color");
+    tt->param_name = tdrpStrDup("iqplot_axes_color");
     tt->descr = tdrpStrDup("Color of axes in spectra.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_axes_color - &_start_;
+    tt->val_offset = (char *) &iqplot_axes_color - &_start_;
     tt->single_val.s = tdrpStrDup("green");
     tt++;
     
-    // Parameter 'spectra_grid_color'
+    // Parameter 'iqplot_grid_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("spectra_grid_color");
+    tt->param_name = tdrpStrDup("iqplot_grid_color");
     tt->descr = tdrpStrDup("Color of grid lines on spectra.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_grid_color - &_start_;
+    tt->val_offset = (char *) &iqplot_grid_color - &_start_;
     tt->single_val.s = tdrpStrDup("gray");
     tt++;
     
-    // Parameter 'spectra_labels_color'
+    // Parameter 'iqplot_labels_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("spectra_labels_color");
+    tt->param_name = tdrpStrDup("iqplot_labels_color");
     tt->descr = tdrpStrDup("Color of labels in spectra.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_labels_color - &_start_;
+    tt->val_offset = (char *) &iqplot_labels_color - &_start_;
     tt->single_val.s = tdrpStrDup("red");
     tt++;
     
-    // Parameter 'spectra_y_grid_lines_on'
+    // Parameter 'iqplot_y_grid_lines_on'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("spectra_y_grid_lines_on");
+    tt->param_name = tdrpStrDup("iqplot_y_grid_lines_on");
     tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_y_grid_lines_on - &_start_;
+    tt->val_offset = (char *) &iqplot_y_grid_lines_on - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'spectra_x_grid_lines_on'
+    // Parameter 'iqplot_x_grid_lines_on'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("spectra_x_grid_lines_on");
+    tt->param_name = tdrpStrDup("iqplot_x_grid_lines_on");
     tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_x_grid_lines_on - &_start_;
+    tt->val_offset = (char *) &iqplot_x_grid_lines_on - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'spectra_draw_instrument_height_line'
+    // Parameter 'iqplot_draw_instrument_height_line'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("spectra_draw_instrument_height_line");
+    tt->param_name = tdrpStrDup("iqplot_draw_instrument_height_line");
     tt->descr = tdrpStrDup("Option to draw a line for the instrument location.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_draw_instrument_height_line - &_start_;
+    tt->val_offset = (char *) &iqplot_draw_instrument_height_line - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
@@ -1440,19 +1428,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("SPECTRA LEGENDS");
+    tt->comment_hdr = tdrpStrDup("IQPLOT LEGENDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'spectra_main_legend_pos'
+    // Parameter 'iqplot_main_legend_pos'
     // ctype is '_legend_pos_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("spectra_main_legend_pos");
-    tt->descr = tdrpStrDup("Position of main legend in the SPECTRA plot window");
+    tt->param_name = tdrpStrDup("iqplot_main_legend_pos");
+    tt->descr = tdrpStrDup("Position of main legend in the IQPLOT plot window");
     tt->help = tdrpStrDup("This include time, field name and elevation angle.");
-    tt->val_offset = (char *) &spectra_main_legend_pos - &_start_;
+    tt->val_offset = (char *) &iqplot_main_legend_pos - &_start_;
     tt->enum_def.name = tdrpStrDup("legend_pos_t");
     tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
@@ -1468,27 +1456,27 @@
     tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
-    // Parameter 'spectra_plot_legend1'
+    // Parameter 'iqplot_plot_legend1'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("spectra_plot_legend1");
+    tt->param_name = tdrpStrDup("iqplot_plot_legend1");
     tt->descr = tdrpStrDup("Option to plot the starting lat/lon position as a legend.");
     tt->help = tdrpStrDup("This helps in geolocating the data from a mobile system.");
-    tt->val_offset = (char *) &spectra_plot_legend1 - &_start_;
+    tt->val_offset = (char *) &iqplot_plot_legend1 - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'spectra_legend1_pos'
+    // Parameter 'iqplot_legend1_pos'
     // ctype is '_legend_pos_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("spectra_legend1_pos");
+    tt->param_name = tdrpStrDup("iqplot_legend1_pos");
     tt->descr = tdrpStrDup("Position of lat/lon legend in plot");
-    tt->help = tdrpStrDup("The starting latitude/longitude will be plotted as a legend in the location specified. See 'spectra_plot_starting_latlon_as_legend'.");
-    tt->val_offset = (char *) &spectra_legend1_pos - &_start_;
+    tt->help = tdrpStrDup("The starting latitude/longitude will be plotted as a legend in the location specified. See 'iqplot_plot_starting_latlon_as_legend'.");
+    tt->val_offset = (char *) &iqplot_legend1_pos - &_start_;
     tt->enum_def.name = tdrpStrDup("legend_pos_t");
     tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
@@ -1504,15 +1492,15 @@
     tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
-    // Parameter 'spectra_legend2_pos'
+    // Parameter 'iqplot_legend2_pos'
     // ctype is '_legend_pos_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("spectra_legend2_pos");
+    tt->param_name = tdrpStrDup("iqplot_legend2_pos");
     tt->descr = tdrpStrDup("Position of lat/lon legend in plot");
-    tt->help = tdrpStrDup("The starting latitude/longitude will be plotted as a legend in the location specified. See 'spectra_plot_starting_latlon_as_legend'.");
-    tt->val_offset = (char *) &spectra_legend2_pos - &_start_;
+    tt->help = tdrpStrDup("The starting latitude/longitude will be plotted as a legend in the location specified. See 'iqplot_plot_starting_latlon_as_legend'.");
+    tt->val_offset = (char *) &iqplot_legend2_pos - &_start_;
     tt->enum_def.name = tdrpStrDup("legend_pos_t");
     tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
@@ -1528,15 +1516,15 @@
     tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
-    // Parameter 'spectra_plot_legend2'
+    // Parameter 'iqplot_plot_legend2'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("spectra_plot_legend2");
+    tt->param_name = tdrpStrDup("iqplot_plot_legend2");
     tt->descr = tdrpStrDup("Option to plot the starting lat/lon position as a legend.");
     tt->help = tdrpStrDup("This helps in geolocating the data from a mobile system.");
-    tt->val_offset = (char *) &spectra_plot_legend2 - &_start_;
+    tt->val_offset = (char *) &iqplot_plot_legend2 - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
@@ -1547,15 +1535,6 @@
     tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("ASCOPE DISPLAY PANEL");
     tt->comment_text = tdrpStrDup("The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.");
-    tt++;
-    
-    // Parameter 'Comment 11'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("MOMENTS");
-    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'ascope_n_panels_in_spectra_window'
@@ -1760,6 +1739,30 @@
     tt->single_val.i = 18;
     tt++;
     
+    // Parameter 'ascope_x_grid_lines_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_x_grid_lines_on");
+    tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_x_grid_lines_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'ascope_y_grid_lines_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_y_grid_lines_on");
+    tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_y_grid_lines_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'ascope_axis_label_color'
     // ctype is 'char*'
     
@@ -1856,11 +1859,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("CLUTTER FILTERING");
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
@@ -1961,11 +1964,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("SPECTRUM WIDTH METHOD");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1992,11 +1995,11 @@
     tt->single_val.e = WIDTH_METHOD_R0R1;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP USING ADAPTIVE FILTER METHOD");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
     tt++;
@@ -2209,11 +2212,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("BEAM SAMPLING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2314,11 +2317,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("OVERRIDING RADAR PARAMETERS");
     tt->comment_text = tdrpStrDup("Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.");
     tt++;
@@ -2455,11 +2458,11 @@
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("FFT WINDOWING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2496,11 +2499,11 @@
     tt->single_val.e = WINDOW_VONHANN;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("RADAR CALIBRATION");
     tt->comment_text = tdrpStrDup("");
     tt++;

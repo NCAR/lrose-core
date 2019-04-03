@@ -126,6 +126,11 @@ public:
                 Beam *beam,
                 bool xGridEnabled,
                 bool yGridEnabled);
+
+  // set grid lines on/off
+
+  void setXGridLinesOn(bool val) { _xGridLinesOn = val; }
+  void setYGridLinesOn(bool val) { _yGridLinesOn = val; }
   
   // get the world plot objects
   
@@ -139,6 +144,11 @@ public:
   int getHeight() const { return _fullWorld.getHeightPixels(); }
   int getXOffset() const { return _fullWorld.getXPixOffset(); }
   int getYOffset() const { return _fullWorld.getYPixOffset(); }
+  
+  // get grid lines state
+
+  bool getXGridLinesOn() const { return _xGridLinesOn; }
+  bool getYGridLinesOn() const { return _yGridLinesOn; }
   
   // get the moment type
 
@@ -156,76 +166,36 @@ protected:
   // Protected members //
   ///////////////////////
 
-  /**
-   * parent widget - canvas of which this is part
-   */
-  
   QWidget *_parent;
-
-  /**
-   * @brief TDRP params.
-   */
-
   const Params &_params;
-
-  // id of this object
-
   int _id;
 
-  // range of plot
-
-  double _minRangeKm;
-  double _maxRangeKm;
-
-  // moment type
+  // moment type active for plotting
 
   Params::moment_type_t _momentType;
   
-  /**
-   * @brief Transform for unzoomed state
-   */
+  // unzoomed world
 
-  QTransform _fullTransform;
   WorldPlot _fullWorld;
-  
-  /**
-   * @brief Transformed for zoomed state
-   */
+
+  // zoomed world
 
   bool _isZoomed;
-  QTransform _zoomTransform;
   WorldPlot _zoomWorld;
+
+  // grid lines
+
+  bool _xGridLinesOn;
+  bool _yGridLinesOn;
   
   ///////////////////////
   // Protected methods //
   ///////////////////////
 
-  /**
-   * @brief Render the axes, grids, labels and other overlays
-   *
-   * @param[in] painter    Painter to use for rendering.
-   */
+  // draw the overlays
   
-  void _drawOverlays(QPainter &painter,
-                     bool xGridEnabled,
-                     bool yGridEnabled);
+  void _drawOverlays(QPainter &painter);
   
-  /**
-   * @brief Initialize the full window transform to use for the plot.
-   *
-   * @param[in] window    The full window to use for the plot.
-   */
-
-  void _setTransform(const QTransform &transform);
-  
-  // reset the pixel size of the world view
-
-  void _resetWorld(int width, int height);
-  
-  // call the renderers for each field
-
-  void _performRendering();
-
 };
 
 #endif

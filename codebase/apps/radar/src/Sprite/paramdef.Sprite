@@ -277,137 +277,132 @@ paramdef int {
 } click_cross_size;
 
 commentdef {
-  p_header = "SPECTRA DISPLAY";
+  p_header = "IQ PLOTS";
 }
 
 paramdef int {
   p_default = 2;
-  p_descr = "Number of rows of plots in spectra display.";
-  p_help = "The spectra display is made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of rows.";
-} spectra_n_rows;
+  p_descr = "Number of rows of plots in iq plots.";
+  p_help = "The iq plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of rows.";
+} iqplots_n_rows;
 
 paramdef int {
   p_default = 2;
-  p_descr = "Number of columns of plots in spectra display.";
-  p_help = "The spectra display is made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.";
-} spectra_n_columns;
+  p_descr = "Number of columns of plots in iq plots.";
+  p_help = "The iq plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.";
+} iqplots_n_columns;
 
 paramdef int {
   p_default = 0;
-  p_descr = "Height of top margin in SPECTRA mode (pixels).";
+  p_descr = "Height of top margin in IQPLOT mode (pixels).";
   p_help = "Titles go in the top margin.";
-} spectra_top_margin;
+} iqplot_top_margin;
 
 paramdef int {
   p_default = 18;
-  p_descr = "Height of bottom margin in SPECTRA mode (pixels).";
+  p_descr = "Height of bottom margin in IQPLOT mode (pixels).";
   p_help = "Time scale goes in the bottom margin.";
-} spectra_bottom_margin;
+} iqplot_bottom_margin;
 
 paramdef int {
   p_default = 20;
-  p_descr = "Width of left margin in SPECTRA mode (pixels).";
+  p_descr = "Width of left margin in IQPLOT mode (pixels).";
   p_help = "Height scale goes in the left margin.";
-} spectra_left_margin;
+} iqplot_left_margin;
 
 paramdef int {
   p_default = 0;
-  p_descr = "Width of right margin in SPECTRA mode (pixels).";
+  p_descr = "Width of right margin in IQPLOT mode (pixels).";
   p_help = "Height scale goes in the right margin.";
-} spectra_right_margin;
+} iqplot_right_margin;
 
 paramdef int {
   p_default = 4;
   p_descr = "Length of ticks on axes (pixels).";
-} spectra_axis_tick_len;
+} iqplot_axis_tick_len;
 
 paramdef int {
   p_default = 5;
   p_descr = "Ideal number of ticks on axes.";
-} spectra_n_ticks_ideal;
+} iqplot_n_ticks_ideal;
 
 paramdef int {
   p_default = 3;
   p_descr = "Margin around title text (pixels).";
-} spectra_title_text_margin;
+} iqplot_title_text_margin;
 
 paramdef int {
   p_default = 3;
   p_descr = "Margin around legend text (pixels).";
-} spectra_legend_text_margin;
+} iqplot_legend_text_margin;
 
 paramdef int {
   p_default = 2;
   p_descr = "Margin around axis text (pixels).";
-} spectra_axis_text_margin;
-
-paramdef double {
-  p_default = 600;
-  p_descr = "Time span for SPECTRA (secs).";
-} spectra_time_span_secs;
+} iqplot_axis_text_margin;
 
 commentdef {
-  p_header = "SPECTRA TITLES, LABELS AND AXES";
+  p_header = "IQPLOT TITLES, LABELS AND AXES";
 }
 
 paramdef int {
   p_default = 10;
   p_descr = "Font size of center title (pixels).";
-} spectra_title_font_size;
+} iqplot_title_font_size;
 
 paramdef int {
   p_default = 8;
   p_descr = "Font size of axis labels in spectra (pixels).";
-} spectra_axis_label_font_size;
+} iqplot_axis_label_font_size;
 
 paramdef int {
   p_default = 6;
   p_descr = "Font size of axis tick values (pixels).";
-} spectra_tick_values_font_size;
+} iqplot_tick_values_font_size;
 
 paramdef int {
   p_default = 6;
   p_descr = "Font size for plot legends (pixels).";
-} spectra_legend_font_size;
+} iqplot_legend_font_size;
 
 paramdef string {
   p_default = "red";
   p_descr = "Color of plot title.";
-} spectra_title_color;
+} iqplot_title_color;
 
 paramdef string {
   p_default = "green";
   p_descr = "Color of axes in spectra.";
-} spectra_axes_color;
+} iqplot_axes_color;
 
 paramdef string {
   p_default = "gray";
   p_descr = "Color of grid lines on spectra.";
-} spectra_grid_color;
+} iqplot_grid_color;
 
 paramdef string {
   p_default = "red";
   p_descr = "Color of labels in spectra.";
-} spectra_labels_color;
+} iqplot_labels_color;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to draw grid lines in the Y direction.";
-} spectra_y_grid_lines_on;
+} iqplot_y_grid_lines_on;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to draw grid lines in the X direction.";
-} spectra_x_grid_lines_on;
+} iqplot_x_grid_lines_on;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to draw a line for the instrument location.";
   p_descr = "Applies to RANGE_AXIS_SCALE_ALTITUDE option only.";
-} spectra_draw_instrument_height_line;
+} iqplot_draw_instrument_height_line;
 
 commentdef {
-  p_header = "SPECTRA LEGENDS";
+  p_header = "IQPLOT LEGENDS";
 }
 
 typedef enum {
@@ -416,41 +411,37 @@ typedef enum {
 
 paramdef enum legend_pos_t {
   p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of main legend in the SPECTRA plot window";
+  p_descr = "Position of main legend in the IQPLOT plot window";
   p_help = "This include time, field name and elevation angle.";
-} spectra_main_legend_pos;
+} iqplot_main_legend_pos;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to plot the starting lat/lon position as a legend.";
   p_help = "This helps in geolocating the data from a mobile system.";
-} spectra_plot_legend1;
+} iqplot_plot_legend1;
 
 paramdef enum legend_pos_t {
   p_default = LEGEND_TOP_LEFT;
   p_descr = "Position of lat/lon legend in plot";
-  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'spectra_plot_starting_latlon_as_legend'.";
-} spectra_legend1_pos;
+  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'iqplot_plot_starting_latlon_as_legend'.";
+} iqplot_legend1_pos;
 
 paramdef enum legend_pos_t {
   p_default = LEGEND_TOP_LEFT;
   p_descr = "Position of lat/lon legend in plot";
-  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'spectra_plot_starting_latlon_as_legend'.";
-} spectra_legend2_pos;
+  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'iqplot_plot_starting_latlon_as_legend'.";
+} iqplot_legend2_pos;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to plot the starting lat/lon position as a legend.";
   p_help = "This helps in geolocating the data from a mobile system.";
-} spectra_plot_legend2;
+} iqplot_plot_legend2;
 
 commentdef {
   p_header = "ASCOPE DISPLAY PANEL";
   p_text = "The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.";
-}
-
-commentdef {
-  p_header = "MOMENTS";
 }
 
 paramdef int {
@@ -541,6 +532,16 @@ paramdef int {
   p_descr = "Height of bottom margin for ascope plot (pixels).";
   p_help = "The X axis labels are plotted here.";
 } ascope_bottom_margin;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines in the X direction.";
+} ascope_x_grid_lines_on;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines in the Y direction.";
+} ascope_y_grid_lines_on;
 
 paramdef string {
   p_default = "white";

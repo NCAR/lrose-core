@@ -224,7 +224,13 @@ class DLL_EXPORT SpectraWidget : public QWidget
   void ascopeSetFieldToRhohv();
   void ascopeSetFieldToPhidp();
   void ascopeSetFieldToKdp();
+
   void ascopeUnzoom();
+  
+  void ascopeSetXGridLinesOn();
+  void ascopeSetXGridLinesOff();
+  void ascopeSetYGridLinesOn();
+  void ascopeSetYGridLinesOff();
 
  protected:
 

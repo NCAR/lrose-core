@@ -64,8 +64,8 @@ SpectraWidget::SpectraWidget(QWidget* parent,
   _pointClicked = false;
   _colorScaleWidth = _params.main_color_scale_width;
 
-  _nRows = _params.spectra_n_rows;
-  _nCols = _params.spectra_n_columns;
+  _nRows = _params.iqplots_n_rows;
+  _nCols = _params.iqplots_n_columns;
   _titleMargin = _params.main_window_title_margin;
 
   _nAscopes = _params.ascope_n_panels_in_spectra_window;
@@ -151,33 +151,33 @@ void SpectraWidget::configureAxes(double min_amplitude,
   _fullWorld.setWorldLimits(0.0, _minAmplitude,
                             _timeSpanSecs, _maxAmplitude);
 
-  _fullWorld.setLeftMargin(_params.spectra_left_margin);
-  _fullWorld.setRightMargin(_params.spectra_right_margin);
-  _fullWorld.setTopMargin(_params.spectra_top_margin);
-  _fullWorld.setBottomMargin(_params.spectra_bottom_margin);
-  _fullWorld.setTitleTextMargin(_params.spectra_title_text_margin);
-  _fullWorld.setLegendTextMargin(_params.spectra_legend_text_margin);
-  _fullWorld.setAxisTextMargin(_params.spectra_axis_text_margin);
+  _fullWorld.setLeftMargin(_params.iqplot_left_margin);
+  _fullWorld.setRightMargin(_params.iqplot_right_margin);
+  _fullWorld.setTopMargin(_params.iqplot_top_margin);
+  _fullWorld.setBottomMargin(_params.iqplot_bottom_margin);
+  _fullWorld.setTitleTextMargin(_params.iqplot_title_text_margin);
+  _fullWorld.setLegendTextMargin(_params.iqplot_legend_text_margin);
+  _fullWorld.setAxisTextMargin(_params.iqplot_axis_text_margin);
 
   _fullWorld.setColorScaleWidth(0);
 
-  _fullWorld.setXAxisTickLen(_params.spectra_axis_tick_len);
-  _fullWorld.setXNTicksIdeal(_params.spectra_n_ticks_ideal);
-  _fullWorld.setYAxisTickLen(_params.spectra_axis_tick_len);
-  _fullWorld.setYNTicksIdeal(_params.spectra_n_ticks_ideal);
+  _fullWorld.setXAxisTickLen(_params.iqplot_axis_tick_len);
+  _fullWorld.setXNTicksIdeal(_params.iqplot_n_ticks_ideal);
+  _fullWorld.setYAxisTickLen(_params.iqplot_axis_tick_len);
+  _fullWorld.setYNTicksIdeal(_params.iqplot_n_ticks_ideal);
 
   // _fullWorld.setXAxisLabelsInside(_params.ascope_x_axis_labels_inside);
   // _fullWorld.setYAxisLabelsInside(_params.ascope_y_axis_labels_inside);
 
-  _fullWorld.setTitleFontSize(_params.spectra_title_font_size);
-  _fullWorld.setAxisLabelFontSize(_params.spectra_axis_label_font_size);
-  _fullWorld.setTickValuesFontSize(_params.spectra_tick_values_font_size);
-  _fullWorld.setLegendFontSize(_params.spectra_legend_font_size);
+  _fullWorld.setTitleFontSize(_params.iqplot_title_font_size);
+  _fullWorld.setAxisLabelFontSize(_params.iqplot_axis_label_font_size);
+  _fullWorld.setTickValuesFontSize(_params.iqplot_tick_values_font_size);
+  _fullWorld.setLegendFontSize(_params.iqplot_legend_font_size);
 
-  _fullWorld.setTitleColor(_params.spectra_title_color);
-  _fullWorld.setAxisLineColor(_params.spectra_axes_color);
-  _fullWorld.setAxisTextColor(_params.spectra_axes_color);
-  _fullWorld.setGridColor(_params.spectra_grid_color);
+  _fullWorld.setTitleColor(_params.iqplot_title_color);
+  _fullWorld.setAxisLineColor(_params.iqplot_axes_color);
+  _fullWorld.setAxisTextColor(_params.iqplot_axes_color);
+  _fullWorld.setGridColor(_params.iqplot_grid_color);
 
   _zoomWorld = _fullWorld;
   _isZoomed = false;
@@ -242,12 +242,18 @@ void SpectraWidget::unzoom()
 void SpectraWidget::setXGridEnabled(bool state)
 {
   _xGridEnabled = state;
+  for (size_t ii = 0; ii < _ascopes.size(); ii++) {
+    _ascopes[ii]->setXGridLinesOn(state);
+  }
   update();
 }
 
 void SpectraWidget::setYGridEnabled(bool state)
 {
   _yGridEnabled = state;
+  for (size_t ii = 0; ii < _ascopes.size(); ii++) {
+    _ascopes[ii]->setYGridLinesOn(state);
+  }
   update();
 }
 
@@ -658,25 +664,25 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   
   // Set the painter to use the right color and font
 
-  painter.setPen(_params.spectra_axes_color);
+  painter.setPen(_params.iqplot_axes_color);
   
   // axes and labels
 
   QFont font(origFont);
-  font.setPointSizeF(_params.spectra_axis_label_font_size);
+  font.setPointSizeF(_params.iqplot_axis_label_font_size);
   painter.setFont(font);
   // painter.setWindow(0, 0, width(), height());
 
   // axes
 
-  QColor lineColor(_params.spectra_axes_color);
-  QColor gridColor(_params.spectra_grid_color);
-  QColor textColor(_params.spectra_labels_color);
+  QColor lineColor(_params.iqplot_axes_color);
+  QColor gridColor(_params.iqplot_grid_color);
+  QColor textColor(_params.iqplot_labels_color);
 
   QFont labelFont(origFont);
-  labelFont.setPointSizeF(_params.spectra_axis_label_font_size);
+  labelFont.setPointSizeF(_params.iqplot_axis_label_font_size);
   QFont valuesFont(origFont);
-  valuesFont.setPointSizeF(_params.spectra_tick_values_font_size);
+  valuesFont.setPointSizeF(_params.iqplot_tick_values_font_size);
   
   // _zoomWorld.drawRangeAxes(painter,
   //                          "xxx", _yGridEnabled,
@@ -695,7 +701,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
 
   // y label
 
-  painter.setPen(_params.spectra_labels_color);
+  painter.setPen(_params.iqplot_labels_color);
   _zoomWorld.drawYAxisLabelLeft(painter, "Amplitude (**)");
   
   // legends
@@ -707,8 +713,8 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   sprintf(text, "Legend2 lon: %g", 2.0);
   legends.push_back(text);
 
-  if (_params.spectra_plot_legend1) {
-    switch (_params.spectra_legend1_pos) {
+  if (_params.iqplot_plot_legend1) {
+    switch (_params.iqplot_legend1_pos) {
       case Params::LEGEND_TOP_LEFT:
         _zoomWorld.drawLegendsTopLeft(painter, legends);
         break;
@@ -725,8 +731,8 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
     }
   }
     
-  if (_params.spectra_plot_legend2) {
-    switch (_params.spectra_legend2_pos) {
+  if (_params.iqplot_plot_legend2) {
+    switch (_params.iqplot_legend2_pos) {
       case Params::LEGEND_TOP_LEFT:
         _zoomWorld.drawLegendsTopLeft(painter, legends);
         break;
@@ -745,7 +751,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
     
   // title
     
-  font.setPointSizeF(_params.spectra_title_font_size);
+  font.setPointSizeF(_params.iqplot_title_font_size);
   painter.setFont(font);
 
   string radarName(_params.radar_name);
@@ -828,7 +834,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
 
   // const DisplayField &field = _manager.getSelectedField();
   // _zoomWorld.drawColorScale(field.getColorMap(), painter,
-  //                           _params.spectra_axis_label_font_size);
+  //                           _params.iqplot_axis_label_font_size);
   
   return;
   
@@ -1069,7 +1075,7 @@ void SpectraWidget::_drawMainTitle(QPainter &painter)
   painter.setFont(font);
   painter.setPen(_params.main_title_color);
 
-  string title("SPRITE");
+  string title("TIME SERIES PLOTS");
 
   if (_currentBeam) {
     string rname(_currentBeam->getInfo().get_radar_name());
@@ -1215,12 +1221,38 @@ void SpectraWidget::showContextMenu(const QPoint &pos)
     connect(&setToKdp, SIGNAL(triggered()), this,
             SLOT(ascopeSetFieldToKdp()));
     contextMenu.addAction(&setToKdp);
-  
+
     QAction unzoom("Unzoom", this);
     connect(&unzoom, SIGNAL(triggered()), this,
             SLOT(ascopeUnzoom()));
-    contextMenu.addAction(&unzoom);
-  
+    if (_ascopes[_contextMenuPanelId]->getIsZoomed()) {
+      contextMenu.addAction(&unzoom);
+    }
+      
+    QAction xGridLinesOn("X grid lines on", this);
+    connect(&xGridLinesOn, SIGNAL(triggered()), this,
+            SLOT(ascopeSetXGridLinesOn()));
+    QAction xGridLinesOff("X grid lines off", this);
+    connect(&xGridLinesOff, SIGNAL(triggered()), this,
+            SLOT(ascopeSetXGridLinesOff()));
+    if (_ascopes[_contextMenuPanelId]->getXGridLinesOn()) {
+      contextMenu.addAction(&xGridLinesOff);
+    } else {
+      contextMenu.addAction(&xGridLinesOn);
+    }
+      
+    QAction yGridLinesOn("Y grid lines on", this);
+    connect(&yGridLinesOn, SIGNAL(triggered()), this,
+            SLOT(ascopeSetYGridLinesOn()));
+    QAction yGridLinesOff("Y grid lines off", this);
+    connect(&yGridLinesOff, SIGNAL(triggered()), this,
+            SLOT(ascopeSetYGridLinesOff()));
+    if (_ascopes[_contextMenuPanelId]->getYGridLinesOn()) {
+      contextMenu.addAction(&yGridLinesOff);
+    } else {
+      contextMenu.addAction(&yGridLinesOn);
+    }
+      
     contextMenu.exec(this->mapToGlobal(pos));
 
   }
@@ -1299,3 +1331,24 @@ void SpectraWidget::ascopeUnzoom()
     _ascopes[ii]->unzoom();
   }
 }
+
+void SpectraWidget::ascopeSetXGridLinesOn()
+{
+  _ascopes[_contextMenuPanelId]->setXGridLinesOn(true);
+}
+
+void SpectraWidget::ascopeSetXGridLinesOff()
+{
+  _ascopes[_contextMenuPanelId]->setXGridLinesOn(false);
+}
+
+void SpectraWidget::ascopeSetYGridLinesOn()
+{
+  _ascopes[_contextMenuPanelId]->setYGridLinesOn(true);
+}
+
+void SpectraWidget::ascopeSetYGridLinesOff()
+{
+  _ascopes[_contextMenuPanelId]->setYGridLinesOn(false);
+}
+

@@ -62,7 +62,9 @@ AscopePlot::AscopePlot(QWidget* parent,
         _id(id)
         
 {
-  
+  _isZoomed = false;
+  _xGridLinesOn = _params.ascope_x_grid_lines_on;
+  _yGridLinesOn = _params.ascope_y_grid_lines_on;
 }
 
 /*************************************************************************
@@ -93,7 +95,6 @@ void AscopePlot::zoom(int x1, int y1, int x2, int y2)
 
   _zoomWorld.setZoomLimits(x1, y1, x2, y2);
   _isZoomed = true;
-  _setTransform(_zoomWorld.getTransform());
 
 }
 
@@ -106,22 +107,9 @@ void AscopePlot::unzoom()
 
   _zoomWorld = _fullWorld;
   _isZoomed = false;
-  _setTransform(_zoomWorld.getTransform());
-  // _parent->update();
 
 }
 
-////////////////////
-// set the transform
-
-void AscopePlot::_setTransform(const QTransform &transform)
-{
-  
-  _fullTransform = transform;
-  _zoomTransform = transform;
-  
-}
-  
 /*************************************************************************
  * plot a beam
  */
@@ -189,7 +177,7 @@ void AscopePlot::plotBeam(QPainter &painter,
 
   // draw the overlays
 
-  _drawOverlays(painter, xGridEnabled, yGridEnabled);
+  _drawOverlays(painter);
 
   // draw the title
 
@@ -403,18 +391,21 @@ void AscopePlot::setZoomLimits(int xMin,
                                int yMax)
 {
   _zoomWorld.setZoomLimits(xMin, yMin, xMax, yMax);
+  _isZoomed = true;
 }
 
 void AscopePlot::setZoomLimitsX(int xMin,
                                 int xMax)
 {
   _zoomWorld.setZoomLimitsX(xMin, xMax);
+  _isZoomed = true;
 }
 
 void AscopePlot::setZoomLimitsY(int yMin,
                                 int yMax)
 {
   _zoomWorld.setZoomLimitsY(yMin, yMax);
+  _isZoomed = true;
 }
 
 /*************************************************************************
@@ -425,9 +416,7 @@ void AscopePlot::setZoomLimitsY(int yMin,
  * Draw the overlays, axes, legends etc
  */
 
-void AscopePlot::_drawOverlays(QPainter &painter,
-                               bool xGridEnabled,
-                               bool yGridEnabled)
+void AscopePlot::_drawOverlays(QPainter &painter)
 {
 
   // save painter state
@@ -441,155 +430,14 @@ void AscopePlot::_drawOverlays(QPainter &painter,
   painter.setPen(_params.ascope_axis_label_color);
 
   _zoomWorld.drawAxisBottom(painter, getUnits(_momentType),
-                            true, true, true, xGridEnabled);
+                            true, true, true, _xGridLinesOn);
+
   _zoomWorld.drawAxisLeft(painter, "km", 
-                          true, true, true, yGridEnabled);
+                          true, true, true, _yGridLinesOn);
 
   _zoomWorld.drawYAxisLabelLeft(painter, "Range");
 
   painter.restore();
 
-#ifdef JUNK
-  
-  // Set the painter to use the right color and font
-
-  painter.setPen(_params.ascope_axes_color);
-  
-  // axes and labels
-
-  QFont font(origFont);
-  font.setPointSizeF(_params.ascope_axis_label_font_size);
-  painter.setFont(font);
-  // painter.setWindow(0, 0, width(), height());
-
-  // axes
-
-  QColor lineColor(_params.ascope_axes_color);
-  QColor gridColor(_params.ascope_grid_color);
-  QColor textColor(_params.ascope_labels_color);
-
-  QFont labelFont(origFont);
-  labelFont.setPointSizeF(_params.ascope_axis_label_font_size);
-  QFont valuesFont(origFont);
-  valuesFont.setPointSizeF(_params.ascope_axis_values_font_size);
-  
-  // y label
-
-  painter.setPen(_params.ascope_labels_color);
-  _zoomWorld.drawYAxisLabelLeft(painter, "Amplitude (**)");
-  
-  // legends
-  
-  vector<string> legends;
-  char text[1024];
-  sprintf(text, "Legend1: %g", 1.0);
-  legends.push_back(text);
-  sprintf(text, "Legend2 lon: %g", 2.0);
-  legends.push_back(text);
-
-  if (_params.ascope_plot_legend1) {
-    switch (_params.ascope_legend1_pos) {
-      case Params::LEGEND_TOP_LEFT:
-        _zoomWorld.drawLegendsTopLeft(painter, legends);
-        break;
-      case Params::LEGEND_TOP_RIGHT:
-        _zoomWorld.drawLegendsTopRight(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_LEFT:
-        _zoomWorld.drawLegendsBottomLeft(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_RIGHT:
-        _zoomWorld.drawLegendsBottomRight(painter, legends);
-        break;
-      default: {}
-    }
-  }
-    
-  if (_params.ascope_plot_legend2) {
-    switch (_params.ascope_legend2_pos) {
-      case Params::LEGEND_TOP_LEFT:
-        _zoomWorld.drawLegendsTopLeft(painter, legends);
-        break;
-      case Params::LEGEND_TOP_RIGHT:
-        _zoomWorld.drawLegendsTopRight(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_LEFT:
-        _zoomWorld.drawLegendsBottomLeft(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_RIGHT:
-        _zoomWorld.drawLegendsBottomRight(painter, legends);
-        break;
-      default: {}
-    }
-  }
-    
-  // title
-    
-  font.setPointSizeF(_params.ascope_title_font_size);
-  painter.setFont(font);
-
-  string radarName(_params.radar_name);
-  string title;
-  title = (radarName + "   ASCOPE   ");
-  _zoomWorld.drawTitleTopCenter(painter, title);
-
-  _zoomWorld.drawAxesBox(painter);
-
-  // click point cross hairs
-  
-  if (_pointClicked) {
-    
-    int startX = _mouseReleaseX - _params.click_cross_size / 2;
-    int endX = _mouseReleaseX + _params.click_cross_size / 2;
-    int startY = _mouseReleaseY - _params.click_cross_size / 2;
-    int endY = _mouseReleaseY + _params.click_cross_size / 2;
-
-    painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
-    painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
-
-  }
-
-  // reset painter state
-  
-  painter.restore();
-
-  // draw the color scale
-
-  // const DisplayField &field = _manager.getSelectedField();
-  // _zoomWorld.drawColorScale(field.getColorMap(), painter,
-  //                           _params.ascope_axis_label_font_size);
-  
-  return;
-
-#endif
-  
 }
-
-/*************************************************************************
- * call the renderers for each field
- */
-
-void AscopePlot::_performRendering()
-{
-
-  // start the rendering
-  
-  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-  //   if (ifield == _selectedField ||
-  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
-  //     _fieldRenderers[ifield]->signalRunToStart();
-  //   }
-  // } // ifield
-
-  // wait for rendering to complete
-  
-  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-  //   if (ifield == _selectedField ||
-  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
-  //     _fieldRenderers[ifield]->waitForRunToComplete();
-  //   }
-  // } // ifield
-
-}
-
 
