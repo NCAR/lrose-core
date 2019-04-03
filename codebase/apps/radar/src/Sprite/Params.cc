@@ -1222,18 +1222,6 @@
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'spectra_axis_tick_labels_inside'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("spectra_axis_tick_labels_inside");
-    tt->descr = tdrpStrDup("Location of tick labels, relative to axes.");
-    tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
-    tt->val_offset = (char *) &spectra_axis_tick_labels_inside - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'spectra_axis_tick_len'
     // ctype is 'int'
     
@@ -1649,7 +1637,7 @@
     tt->descr = tdrpStrDup("Width of left margin for ascope plot (pixels).");
     tt->help = tdrpStrDup("The Y axis labels are plotted here.");
     tt->val_offset = (char *) &ascope_left_margin - &_start_;
-    tt->single_val.i = 10;
+    tt->single_val.i = 18;
     tt++;
     
     // Parameter 'ascope_bottom_margin'
@@ -1661,7 +1649,7 @@
     tt->descr = tdrpStrDup("Height of bottom margin for ascope plot (pixels).");
     tt->help = tdrpStrDup("The X axis labels are plotted here.");
     tt->val_offset = (char *) &ascope_bottom_margin - &_start_;
-    tt->single_val.i = 10;
+    tt->single_val.i = 18;
     tt++;
     
     // Parameter 'ascope_axis_label_color'
@@ -1685,7 +1673,7 @@
     tt->descr = tdrpStrDup("Color of ascope line.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_line_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
+    tt->single_val.s = tdrpStrDup("lightgray");
     tt++;
     
     // Parameter 'ascope_fill_color'
@@ -1710,6 +1698,30 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_title_color - &_start_;
     tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
+    // Parameter 'ascope_x_axis_labels_inside'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_x_axis_labels_inside");
+    tt->descr = tdrpStrDup("Location of tick labels, relative to x axis.");
+    tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
+    tt->val_offset = (char *) &ascope_x_axis_labels_inside - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'ascope_y_axis_labels_inside'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_y_axis_labels_inside");
+    tt->descr = tdrpStrDup("Location of tick labels, relative to y axis.");
+    tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
+    tt->val_offset = (char *) &ascope_y_axis_labels_inside - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 12'

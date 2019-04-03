@@ -515,8 +515,6 @@ public:
 
   int spectra_right_margin;
 
-  tdrp_bool_t spectra_axis_tick_labels_inside;
-
   int spectra_axis_tick_len;
 
   int spectra_n_ticks_ideal;
@@ -579,6 +577,10 @@ public:
   char* ascope_fill_color;
 
   char* ascope_title_color;
+
+  tdrp_bool_t ascope_x_axis_labels_inside;
+
+  tdrp_bool_t ascope_y_axis_labels_inside;
 
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 
@@ -681,7 +683,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[135];
+  mutable TDRPtable _table[136];
 
   const char *_className;
 

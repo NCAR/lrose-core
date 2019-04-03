@@ -137,7 +137,8 @@ public:
 
   // drawing titles, axes etc
 
-  inline void setAxisTickLabelsInside(bool val) { _axisTickLabelsInside = val; }
+  inline void setXAxisLabelsInside(bool val) { _xAxisLabelsInside = val; }
+  inline void setYAxisLabelsInside(bool val) { _yAxisLabelsInside = val; }
 
   inline void setTitleFontSize(int val) { _titleFontSize = val; }
   inline void setAxisLabelFontSize(int val) { _axisLabelFontSize = val; }
@@ -499,7 +500,8 @@ private:
 
   // control of axes, labels, grid
 
-  bool _axisTickLabelsInside;
+  bool _xAxisLabelsInside;
+  bool _yAxisLabelsInside;
 
   int _titleFontSize;
   int _axisLabelFontSize;

@@ -438,12 +438,13 @@ void AscopePlot::_drawOverlays(QPainter &painter,
   
   QFont origFont = painter.font();
   
+  painter.setPen(_params.ascope_axis_label_color);
+
   _zoomWorld.drawAxisBottom(painter, getUnits(_momentType),
                             true, true, true, xGridEnabled);
   _zoomWorld.drawAxisLeft(painter, "km", 
                           true, true, true, yGridEnabled);
 
-  painter.setPen(_params.ascope_axis_label_color);
   _zoomWorld.drawYAxisLabelLeft(painter, "Range");
 
   painter.restore();

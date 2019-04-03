@@ -78,7 +78,8 @@ WorldPlot::WorldPlot()
   _yTickMin = 0;
   _yTickDelta = 1;
 
-  _axisTickLabelsInside = true;
+  _xAxisLabelsInside = true;
+  _yAxisLabelsInside = true;
 
   _titleFontSize = 9;
   _axisLabelFontSize = 7;
@@ -159,7 +160,9 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _yTickMin = rhs._yTickMin;
   _yTickDelta = rhs._yTickDelta;
 
-  _axisTickLabelsInside = rhs._axisTickLabelsInside;
+  _xAxisLabelsInside = rhs._xAxisLabelsInside;
+  _yAxisLabelsInside = rhs._yAxisLabelsInside;
+
   _titleFontSize = rhs._titleFontSize;
   _axisLabelFontSize = rhs._axisLabelFontSize;
   _tickValuesFontSize = rhs._tickValuesFontSize;
@@ -679,8 +682,14 @@ void WorldPlot::drawYAxisLabelLeft(QPainter &painter,
   
   QRect tRect(painter.fontMetrics().tightBoundingRect(label.c_str()));
     
-  qreal xx = (qreal) (getXPixCanvas(tRect.height() / 2.0));
+  // qreal xx = (qreal) (getXPixCanvas(tRect.height() / 2.0));
   qreal yy = (qreal) ((_yMinPixel + _yMaxPixel + tRect.width()) / 2.0);
+
+  qreal xx =
+    (qreal) (_xMinPixel - tRect.height() - _axisTextMargin);
+  if (_yAxisLabelsInside) {
+    xx = (qreal) (_xMinPixel + _axisTextMargin);
+  }
 
   QRectF bRect(0, 0, tRect.width() + 2, tRect.height() + 2);
 
@@ -809,6 +818,9 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
   QRect unitsRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
   qreal unitsX =
     (qreal) (_xMinPixel - unitsRect.width() - _axisTextMargin);
+  if (_yAxisLabelsInside) {
+    unitsX = (qreal) (_xMinPixel + _axisTextMargin);
+  }
   qreal unitsY = (qreal) (_yMaxPixel + (unitsRect.height() / 2));
   QRectF bRect(unitsX, unitsY, 
                unitsRect.width() + 2, unitsRect.height() + 2);
@@ -857,9 +869,9 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
 
     string label(getAxisLabel(delta, val));
     QRect labelRect(painter.fontMetrics().tightBoundingRect(label.c_str()));
-    qreal labelX = (qreal) (_xMinPixel + _axisTextMargin);
-    if (_axisTickLabelsInside) {
-      labelX = (qreal) (_xMinPixel - labelRect.width() - _axisTextMargin);
+    qreal labelX = (qreal) (_xMinPixel - labelRect.width() - _axisTextMargin);
+    if (_yAxisLabelsInside) {
+      labelX = (qreal) (_xMinPixel + _axisTextMargin);
     }
     qreal labelY = (qreal) (ypix - (labelRect.height() / 2));
     QRectF bRect2(labelX, labelY,
@@ -996,6 +1008,9 @@ void WorldPlot::drawAxisBottom(QPainter &painter,
   QRect unitsRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
   qreal unitsX = (qreal) (_xMaxPixel - unitsRect.width());
   qreal unitsY = (qreal) (_yMinPixel + capRect.height() - 2);
+  if (_xAxisLabelsInside) {
+    unitsY = (qreal) (_yMinPixel - capRect.height() - 2);
+  }
   QRectF bRect(unitsX, unitsY,
                unitsRect.width() + 2, capRect.height() + 2);
   if (doLabels) {

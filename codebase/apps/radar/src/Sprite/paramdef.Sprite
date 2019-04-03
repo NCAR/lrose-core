@@ -316,12 +316,6 @@ paramdef int {
   p_help = "Height scale goes in the right margin.";
 } spectra_right_margin;
 
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Location of tick labels, relative to axes.";
-  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
-} spectra_axis_tick_labels_inside;
-
 paramdef int {
   p_default = 4;
   p_descr = "Length of ticks on axes (pixels).";
@@ -492,13 +486,13 @@ paramdef int {
 } ascope_width_in_spectra_window;
 
 paramdef int {
-  p_default = 10;
+  p_default = 18;
   p_descr = "Width of left margin for ascope plot (pixels).";
   p_help = "The Y axis labels are plotted here.";
 } ascope_left_margin;
 
 paramdef int {
-  p_default = 10;
+  p_default = 18;
   p_descr = "Height of bottom margin for ascope plot (pixels).";
   p_help = "The X axis labels are plotted here.";
 } ascope_bottom_margin;
@@ -509,7 +503,7 @@ paramdef string {
 } ascope_axis_label_color;
 
 paramdef string {
-  p_default = "white";
+  p_default = "lightgray";
   p_descr = "Color of ascope line.";
 } ascope_line_color;
 
@@ -522,6 +516,18 @@ paramdef string {
   p_default = "yellow";
   p_descr = "Color of ascope title.";
 } ascope_title_color;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Location of tick labels, relative to x axis.";
+  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
+} ascope_x_axis_labels_inside;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Location of tick labels, relative to y axis.";
+  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
+} ascope_y_axis_labels_inside;
 
 commentdef {
   p_header = "CLUTTER FILTERING";

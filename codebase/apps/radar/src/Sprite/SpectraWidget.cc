@@ -165,7 +165,9 @@ void SpectraWidget::configureAxes(double min_amplitude,
   _fullWorld.setXNTicksIdeal(_params.spectra_n_ticks_ideal);
   _fullWorld.setYAxisTickLen(_params.spectra_axis_tick_len);
   _fullWorld.setYNTicksIdeal(_params.spectra_n_ticks_ideal);
-  _fullWorld.setAxisTickLabelsInside(_params.spectra_axis_tick_labels_inside);
+
+  // _fullWorld.setXAxisLabelsInside(_params.ascope_x_axis_labels_inside);
+  // _fullWorld.setYAxisLabelsInside(_params.ascope_y_axis_labels_inside);
 
   _fullWorld.setTitleFontSize(_params.spectra_title_font_size);
   _fullWorld.setAxisLabelFontSize(_params.spectra_axis_label_font_size);
@@ -986,10 +988,10 @@ void SpectraWidget::_createAscope(int id)
 
   WorldPlot &ascopeWorld = ascope->getFullWorld();
   
-  ascopeWorld.setLeftMargin(_params.spectra_left_margin);
-  ascopeWorld.setRightMargin(_params.spectra_right_margin);
-  ascopeWorld.setTopMargin(_params.spectra_top_margin);
-  ascopeWorld.setBottomMargin(_params.spectra_bottom_margin);
+  ascopeWorld.setLeftMargin(_params.ascope_left_margin);
+  ascopeWorld.setRightMargin(0);
+  ascopeWorld.setTopMargin(0);
+  ascopeWorld.setBottomMargin(_params.ascope_bottom_margin);
   ascopeWorld.setTitleTextMargin(_params.spectra_title_text_margin);
   ascopeWorld.setLegendTextMargin(_params.spectra_legend_text_margin);
   ascopeWorld.setAxisTextMargin(_params.spectra_axis_text_margin);
@@ -1000,14 +1002,16 @@ void SpectraWidget::_createAscope(int id)
   ascopeWorld.setXNTicksIdeal(_params.spectra_n_ticks_ideal);
   ascopeWorld.setYAxisTickLen(_params.spectra_axis_tick_len);
   ascopeWorld.setYNTicksIdeal(_params.spectra_n_ticks_ideal);
-  ascopeWorld.setAxisTickLabelsInside(_params.spectra_axis_tick_labels_inside);
+
+  ascopeWorld.setXAxisLabelsInside(_params.ascope_x_axis_labels_inside);
+  ascopeWorld.setYAxisLabelsInside(_params.ascope_y_axis_labels_inside);
 
   ascopeWorld.setTitleFontSize(_params.spectra_title_font_size);
   ascopeWorld.setAxisLabelFontSize(_params.spectra_axis_label_font_size);
   ascopeWorld.setTickValuesFontSize(_params.spectra_tick_values_font_size);
   ascopeWorld.setLegendFontSize(_params.spectra_legend_font_size);
 
-  ascopeWorld.setTitleColor(_params.spectra_title_color);
+  ascopeWorld.setTitleColor(_params.ascope_title_color);
   ascopeWorld.setAxisLineColor(_params.spectra_axes_color);
   ascopeWorld.setAxisTextColor(_params.spectra_axes_color);
   ascopeWorld.setGridColor(_params.spectra_grid_color);
@@ -1295,6 +1299,3 @@ void SpectraWidget::ascopeUnzoom()
     _ascopes[ii]->unzoom();
   }
 }
-
-
-
