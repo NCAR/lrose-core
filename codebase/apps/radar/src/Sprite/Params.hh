@@ -566,11 +566,33 @@ public:
 
   int ascope_width_in_spectra_window;
 
+  int ascope_title_font_size;
+
+  int ascope_axis_label_font_size;
+
+  int ascope_tick_values_font_size;
+
+  int ascope_legend_font_size;
+
+  int ascope_title_text_margin;
+
+  int ascope_legend_text_margin;
+
+  int ascope_axis_text_margin;
+
+  int ascope_axis_tick_len;
+
+  int ascope_n_ticks_ideal;
+
   int ascope_left_margin;
 
   int ascope_bottom_margin;
 
   char* ascope_axis_label_color;
+
+  char* ascope_axes_color;
+
+  char* ascope_grid_color;
 
   char* ascope_line_color;
 
@@ -683,7 +705,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[136];
+  mutable TDRPtable _table[147];
 
   const char *_className;
 

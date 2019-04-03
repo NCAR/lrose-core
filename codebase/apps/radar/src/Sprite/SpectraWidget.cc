@@ -992,29 +992,29 @@ void SpectraWidget::_createAscope(int id)
   ascopeWorld.setRightMargin(0);
   ascopeWorld.setTopMargin(0);
   ascopeWorld.setBottomMargin(_params.ascope_bottom_margin);
-  ascopeWorld.setTitleTextMargin(_params.spectra_title_text_margin);
-  ascopeWorld.setLegendTextMargin(_params.spectra_legend_text_margin);
-  ascopeWorld.setAxisTextMargin(_params.spectra_axis_text_margin);
+  ascopeWorld.setTitleTextMargin(_params.ascope_title_text_margin);
+  ascopeWorld.setLegendTextMargin(_params.ascope_legend_text_margin);
+  ascopeWorld.setAxisTextMargin(_params.ascope_axis_text_margin);
 
   ascopeWorld.setColorScaleWidth(0);
   
-  ascopeWorld.setXAxisTickLen(_params.spectra_axis_tick_len);
-  ascopeWorld.setXNTicksIdeal(_params.spectra_n_ticks_ideal);
-  ascopeWorld.setYAxisTickLen(_params.spectra_axis_tick_len);
-  ascopeWorld.setYNTicksIdeal(_params.spectra_n_ticks_ideal);
+  ascopeWorld.setXAxisTickLen(_params.ascope_axis_tick_len);
+  ascopeWorld.setXNTicksIdeal(_params.ascope_n_ticks_ideal);
+  ascopeWorld.setYAxisTickLen(_params.ascope_axis_tick_len);
+  ascopeWorld.setYNTicksIdeal(_params.ascope_n_ticks_ideal);
 
   ascopeWorld.setXAxisLabelsInside(_params.ascope_x_axis_labels_inside);
   ascopeWorld.setYAxisLabelsInside(_params.ascope_y_axis_labels_inside);
 
-  ascopeWorld.setTitleFontSize(_params.spectra_title_font_size);
-  ascopeWorld.setAxisLabelFontSize(_params.spectra_axis_label_font_size);
-  ascopeWorld.setTickValuesFontSize(_params.spectra_tick_values_font_size);
-  ascopeWorld.setLegendFontSize(_params.spectra_legend_font_size);
+  ascopeWorld.setTitleFontSize(_params.ascope_title_font_size);
+  ascopeWorld.setAxisLabelFontSize(_params.ascope_axis_label_font_size);
+  ascopeWorld.setTickValuesFontSize(_params.ascope_tick_values_font_size);
+  ascopeWorld.setLegendFontSize(_params.ascope_legend_font_size);
 
   ascopeWorld.setTitleColor(_params.ascope_title_color);
-  ascopeWorld.setAxisLineColor(_params.spectra_axes_color);
-  ascopeWorld.setAxisTextColor(_params.spectra_axes_color);
-  ascopeWorld.setGridColor(_params.spectra_grid_color);
+  ascopeWorld.setAxisLineColor(_params.ascope_axes_color);
+  ascopeWorld.setAxisTextColor(_params.ascope_axes_color);
+  ascopeWorld.setGridColor(_params.ascope_grid_color);
 
   int xOffset = id * _ascopeWidth;
   int yOffset = _titleMargin;

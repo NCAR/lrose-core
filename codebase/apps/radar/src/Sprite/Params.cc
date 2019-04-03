@@ -1628,6 +1628,114 @@
     tt->single_val.i = 150;
     tt++;
     
+    // Parameter 'ascope_title_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_title_font_size");
+    tt->descr = tdrpStrDup("Font size of center title (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_title_font_size - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'ascope_axis_label_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axis_label_font_size");
+    tt->descr = tdrpStrDup("Font size of axis labels in ascope (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axis_label_font_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'ascope_tick_values_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_tick_values_font_size");
+    tt->descr = tdrpStrDup("Font size of axis tick values (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_tick_values_font_size - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'ascope_legend_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_legend_font_size");
+    tt->descr = tdrpStrDup("Font size for plot legends (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_legend_font_size - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'ascope_title_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_title_text_margin");
+    tt->descr = tdrpStrDup("Margin around title text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_title_text_margin - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'ascope_legend_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_legend_text_margin");
+    tt->descr = tdrpStrDup("Margin around legend text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_legend_text_margin - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'ascope_axis_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axis_text_margin");
+    tt->descr = tdrpStrDup("Margin around axis text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axis_text_margin - &_start_;
+    tt->single_val.i = 2;
+    tt++;
+    
+    // Parameter 'ascope_axis_tick_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axis_tick_len");
+    tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axis_tick_len - &_start_;
+    tt->single_val.i = 4;
+    tt++;
+    
+    // Parameter 'ascope_n_ticks_ideal'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_n_ticks_ideal");
+    tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_n_ticks_ideal - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
     // Parameter 'ascope_left_margin'
     // ctype is 'int'
     
@@ -1662,6 +1770,30 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_axis_label_color - &_start_;
     tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'ascope_axes_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axes_color");
+    tt->descr = tdrpStrDup("Color of axes in ascope.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axes_color - &_start_;
+    tt->single_val.s = tdrpStrDup("green");
+    tt++;
+    
+    // Parameter 'ascope_grid_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_grid_color");
+    tt->descr = tdrpStrDup("Color of grid lines on ascope.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_grid_color - &_start_;
+    tt->single_val.s = tdrpStrDup("gray");
     tt++;
     
     // Parameter 'ascope_line_color'
