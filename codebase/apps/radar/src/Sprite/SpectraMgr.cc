@@ -103,7 +103,7 @@ SpectraMgr::SpectraMgr(const Params &params,
   // _realtimeModeButton = NULL;
   // _archiveModeButton = NULL;
 
-  _timeSpanSecs = _params.spectra_time_span_secs;
+  _timeSpanSecs = _params.archive_time_span_secs;
   if (_params.input_mode == Params::ARCHIVE_TIME_MODE ||
       _params.input_mode == Params::FILE_LIST_MODE) {
     _archiveMode = true;
@@ -428,9 +428,8 @@ void SpectraMgr::_configureAxes()
   
 {
   
-  _spectra->configureAxes(_params.spectra_min_amplitude,
-                         _params.spectra_max_amplitude,
-                         _params.spectra_time_span_secs);
+  _spectra->configureAxes(0.0, 1.0,
+                          _params.archive_time_span_secs);
 
 }
 

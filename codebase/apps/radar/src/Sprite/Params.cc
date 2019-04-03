@@ -739,6 +739,18 @@
     tt->single_val.d = 200;
     tt++;
     
+    // Parameter 'min_secs_between_rendering'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_secs_between_rendering");
+    tt->descr = tdrpStrDup("Min time between rendering (secs).");
+    tt->help = tdrpStrDup("Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU.");
+    tt->val_offset = (char *) &min_secs_between_rendering - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1292,42 +1304,6 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &spectra_time_span_secs - &_start_;
     tt->single_val.d = 600;
-    tt++;
-    
-    // Parameter 'spectra_min_amplitude'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("spectra_min_amplitude");
-    tt->descr = tdrpStrDup("Min amplitude for spectra.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_min_amplitude - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'spectra_max_amplitude'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("spectra_max_amplitude");
-    tt->descr = tdrpStrDup("Max amplitude for spectra.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_max_amplitude - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'spectra_min_secs_between_rendering'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("spectra_min_secs_between_rendering");
-    tt->descr = tdrpStrDup("Min time between rendering (secs).");
-    tt->help = tdrpStrDup("Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU.");
-    tt->val_offset = (char *) &spectra_min_secs_between_rendering - &_start_;
-    tt->single_val.d = 0;
     tt++;
     
     // Parameter 'Comment 8'

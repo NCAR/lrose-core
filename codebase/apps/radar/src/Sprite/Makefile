@@ -54,6 +54,7 @@ HDRS = \
 	AscopePlot.hh \
 	Beam.hh \
 	BeamMgr.hh \
+	IqPlot.hh \
 	RadarSpectra.hh \
 	ScaledLabel.hh \
 	SpectraMgr.hh \
@@ -68,6 +69,7 @@ NORM_SRCS = \
 	AscopePlot.cc \
 	Beam.cc \
 	BeamMgr.cc \
+	IqPlot.cc \
 	Main.cc \
 	RadarSpectra.cc \
 	ScaledLabel.cc \

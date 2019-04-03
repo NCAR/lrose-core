@@ -105,6 +105,12 @@ paramdef double {
   p_help = "archive_end_time = archive_start_time + archive_time_span.";
 } archive_time_span_secs;
 
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min time between rendering (secs).";
+  p_help = "Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU.";
+} min_secs_between_rendering;
+
 commentdef {
   p_header = "GETTING CLICK-POINT INFO FROM MOMENTS DISPLAY (CIDD or HawkEye)";
 }
@@ -345,22 +351,6 @@ paramdef double {
   p_default = 600;
   p_descr = "Time span for SPECTRA (secs).";
 } spectra_time_span_secs;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Min amplitude for spectra.";
-} spectra_min_amplitude;
-
-paramdef double {
-  p_default = 1;
-  p_descr = "Max amplitude for spectra.";
-} spectra_max_amplitude;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Min time between rendering (secs).";
-  p_help = "Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU.";
-} spectra_min_secs_between_rendering;
 
 commentdef {
   p_header = "SPECTRA TITLES, LABELS AND AXES";

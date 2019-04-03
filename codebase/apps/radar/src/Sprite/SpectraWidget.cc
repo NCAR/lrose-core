@@ -98,9 +98,8 @@ SpectraWidget::SpectraWidget(QWidget* parent,
 
   // set up world views
   
-  configureAxes(_params.spectra_min_amplitude,
-                _params.spectra_max_amplitude,
-                _params.spectra_time_span_secs);
+  configureAxes(0.0, 1.0,
+                _params.archive_time_span_secs);
 
   // create ascopes
 
@@ -505,7 +504,7 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
 
   RadxTime now(RadxTime::NOW);
   double timeSinceLast = now - _timeLastRendered;
-  if (timeSinceLast < _params.spectra_min_secs_between_rendering) {
+  if (timeSinceLast < _params.min_secs_between_rendering) {
     return;
   }
   _timeLastRendered = now;
@@ -535,10 +534,10 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
 void SpectraWidget::resizeEvent(QResizeEvent * e)
 {
 
-  _spectraGrossHeight = height() - _titleMargin;
-  _spectraGrossWidth = width() - _ascopeGrossWidth;
-  _subPanelWidths = _spectraGrossWidth / _nCols;
-  _subPanelHeights = _spectraGrossHeight / _nRows;
+  _iqGrossHeight = height() - _titleMargin;
+  _iqGrossWidth = width() - _ascopeGrossWidth;
+  _iqPanelWidths = _iqGrossWidth / _nCols;
+  _iqPanelHeights = _iqGrossHeight / _nRows;
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "SpectraWidget::resizeEvent" << endl;
@@ -547,10 +546,10 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
     cerr << "  _nRows: " << _nRows << endl;
     cerr << "  _nCols: " << _nCols << endl;
     cerr << "  _titleMargin: " << _titleMargin << endl;
-    cerr << "  _spectraGrossWidth: " << _spectraGrossWidth << endl;
-    cerr << "  _spectraGrossHeight: " << _spectraGrossHeight << endl;
-    cerr << "  _subPanelWidths: " << _subPanelWidths << endl;
-    cerr << "  _subPanelHeights: " << _subPanelHeights << endl;
+    cerr << "  _iqGrossWidth: " << _iqGrossWidth << endl;
+    cerr << "  _iqGrossHeight: " << _iqGrossHeight << endl;
+    cerr << "  _iqPanelWidths: " << _iqPanelWidths << endl;
+    cerr << "  _iqPanelHeights: " << _iqPanelHeights << endl;
   }
 
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
@@ -804,16 +803,16 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   // spectra panels lower boundaries
 
   for (int irow = 1; irow < _nRows; irow++) {
-    QLineF lowerBoundary(_ascopeGrossWidth, _titleMargin + irow * _subPanelHeights,
-                         width(), _titleMargin + irow * _subPanelHeights);
+    QLineF lowerBoundary(_ascopeGrossWidth, _titleMargin + irow * _iqPanelHeights,
+                         width(), _titleMargin + irow * _iqPanelHeights);
     painter.drawLine(lowerBoundary);
   }
 
   // spectra panels right boundaries
 
   for (int icol = 1; icol < _nCols; icol++) {
-    QLineF rightBoundary(_ascopeGrossWidth + icol * _subPanelWidths, _titleMargin,
-                         _ascopeGrossWidth + icol * _subPanelWidths, height());
+    QLineF rightBoundary(_ascopeGrossWidth + icol * _iqPanelWidths, _titleMargin,
+                         _ascopeGrossWidth + icol * _iqPanelWidths, height());
     painter.drawLine(rightBoundary);
   }
 
@@ -1132,9 +1131,9 @@ void SpectraWidget::_identSelectedPanel(int xx, int yy,
 
   // we must therefore be in the spectra panels
 
-  panelType = PANEL_SPECTRA;
-  int icol = (xx - _ascopeGrossWidth) / _subPanelWidths;
-  int irow = (yy - _titleMargin) / _subPanelHeights;
+  panelType = PANEL_IQPLOT;
+  int icol = (xx - _ascopeGrossWidth) / _iqPanelWidths;
+  int irow = (yy - _titleMargin) / _iqPanelHeights;
   panelId = irow * _nRows + icol;
 
 }

@@ -467,6 +467,8 @@ public:
 
   double archive_time_span_secs;
 
+  double min_secs_between_rendering;
+
   int moments_shmem_key;
 
   double moments_max_search_angle_error;
@@ -526,12 +528,6 @@ public:
   int spectra_axis_text_margin;
 
   double spectra_time_span_secs;
-
-  double spectra_min_amplitude;
-
-  double spectra_max_amplitude;
-
-  double spectra_min_secs_between_rendering;
 
   int spectra_title_font_size;
 
@@ -685,7 +681,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[137];
+  mutable TDRPtable _table[135];
 
   const char *_className;
 
