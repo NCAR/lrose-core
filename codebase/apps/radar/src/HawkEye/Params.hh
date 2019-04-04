@@ -608,6 +608,12 @@ public:
 
   range_axis_mode_t bscan_range_axis_mode;
 
+  tdrp_bool_t bscan_specify_elevation_limits;
+
+  double bscan_min_elevation_deg;
+
+  double bscan_max_elevation_deg;
+
   tdrp_bool_t bscan_censor_data_below_surface;
 
   char* bscan_surface_field;
@@ -724,7 +730,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[160];
+  mutable TDRPtable _table[164];
 
   const char *_className;
 
