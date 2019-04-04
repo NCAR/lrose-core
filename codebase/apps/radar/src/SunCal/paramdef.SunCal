@@ -663,6 +663,12 @@ paramdef string {
   p_descr = "Name for global output file.";
 } global_file_name;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out gridded text files.";
+  p_help = "These can be used for plotting in Matlab or similar.";
+} write_gridded_files;
+
 commentdef {
   p_header = "OUTPUT RESULTS TO MDV FILES";
 };

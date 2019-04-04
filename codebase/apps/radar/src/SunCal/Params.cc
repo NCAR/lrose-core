@@ -1935,6 +1935,18 @@
     tt->single_val.s = tdrpStrDup("SunCal.global_results.txt");
     tt++;
     
+    // Parameter 'write_gridded_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_gridded_files");
+    tt->descr = tdrpStrDup("Option to write out gridded text files.");
+    tt->help = tdrpStrDup("These can be used for plotting in Matlab or similar.");
+    tt->val_offset = (char *) &write_gridded_files - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));

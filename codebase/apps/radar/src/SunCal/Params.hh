@@ -576,6 +576,8 @@ public:
 
   char* global_file_name;
 
+  tdrp_bool_t write_gridded_files;
+
   tdrp_bool_t write_mdv_files;
 
   char* mdv_output_url;
@@ -599,7 +601,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[123];
+  mutable TDRPtable _table[124];
 
   const char *_className;
 

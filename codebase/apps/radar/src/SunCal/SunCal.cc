@@ -2059,10 +2059,13 @@ int SunCal::_performAnalysis(bool force)
   if (_validCentroid || !_params.only_write_for_valid_centroid) {
 
     if (_params.write_text_files) {
-      if (_writeGriddedTextFiles()) {
+      if (_writeSummaryText()) {
         iret = -1;
       }
-      if (_writeSummaryText()) {
+    }
+    
+    if (_params.write_gridded_files) {
+      if (_writeGriddedTextFiles()) {
         iret = -1;
       }
       if (_params.test_nexrad_processing) {
