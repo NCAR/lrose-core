@@ -4027,6 +4027,42 @@ int RadxVol::constrainBySweepNum(int minSweepNum,
 
 }
 
+////////////////////////////////////////////////////////////
+// Constrain the data by specifying elevation angle limits.
+//
+// Rays with elevation angles outside of these limits
+// will be removed.
+//
+// Returns 0 on success, -1 if no rays pass the test
+
+int RadxVol::constrainByElevAngle(double minElevAngleDeg,
+                                  double maxElevAngleDeg)
+{
+
+  vector<RadxRay *> goodRays;
+  for (size_t ii = 0; ii < _rays.size(); ii++) {
+    RadxRay *ray = _rays[ii];
+    double elev = ray->getElevationDeg();
+    if (elev < minElevAngleDeg || elev > maxElevAngleDeg) {
+      RadxRay::deleteIfUnused(_rays[ii]);
+    } else {
+      goodRays.push_back(_rays[ii]);
+    }
+  }
+  _rays = goodRays;
+  if (_rays.size() == 0) {
+    return -1;
+  }
+
+  // load up sweep info from the revised list of rays
+
+  loadSweepInfoFromRays();
+  loadVolumeInfoFromRays();
+
+  return 0;
+
+}
+
 /////////////////////////////////////////////////////////////////
 // Ensure ray times are monotonically increasing by
 // interpolating the times if there are duplicates

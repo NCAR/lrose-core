@@ -763,6 +763,16 @@ public:
   int constrainBySweepNum(int minSweepNum,
                           int maxSweepNum,
                           bool strictChecking = false);
+  
+  /// Constrain the data by specifying elevation angle limits.
+  ///
+  /// Rays with elevation angles outside of these limits
+  /// will be removed.
+  ///
+  /// Returns 0 on success, -1 if no rays pass the test
+  
+  int constrainByElevAngle(double minElevAngleDeg,
+                           double maxElevAngleDeg);
 
   /// remove rays with all missing data
   
