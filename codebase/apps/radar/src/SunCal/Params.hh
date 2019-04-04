@@ -554,9 +554,15 @@ public:
 
   tdrp_bool_t compute_test_pulse_powers;
 
-  double test_pulse_min_range_km;
+  double test_pulse_range_km_hc;
 
-  double test_pulse_max_range_km;
+  double test_pulse_range_km_hx;
+
+  double test_pulse_range_km_vc;
+
+  double test_pulse_range_km_vx;
+
+  int test_pulse_n_samples;
 
   tdrp_bool_t compute_mean_transmit_powers;
 
@@ -593,7 +599,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[120];
+  mutable TDRPtable _table[123];
 
   const char *_className;
 

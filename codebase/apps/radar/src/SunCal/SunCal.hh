@@ -345,10 +345,10 @@ private:
 
   // test pulse results
 
-  double _meanTestPulsePowerHcDbm;
-  double _meanTestPulsePowerVcDbm;
-  double _meanTestPulsePowerHxDbm;
-  double _meanTestPulsePowerVxDbm;
+  double _testPulseDbmHc;
+  double _testPulseDbmVc;
+  double _testPulseDbmHx;
+  double _testPulseDbmVx;
 
   // transmit powers
 
@@ -401,9 +401,9 @@ private:
   int _computeMomentsSunDualAlt(MomentsSun *moments, int startGate, int endGate);
   int _computeMomentsSunDualSim(MomentsSun *moments, int startGate, int endGate);
   int _computeMomentsSunSinglePol(MomentsSun *moments, int startGate, int endGate);
-  void _addToXpol(int startGate, int nGates);
-  void _addToTestPulse();
-  void _addToXmitPowers(const IwrfTsPulse *pulse);
+  void _accumForXpol(int startGate, int nGates);
+  void _accumForTestPulse();
+  void _accumForXmitPowers(const IwrfTsPulse *pulse);
   
   void _checkForNorthCrossing(double &az0, double &az1);
 

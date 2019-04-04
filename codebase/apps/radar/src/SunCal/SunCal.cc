@@ -339,10 +339,10 @@ void SunCal::_initMembers()
   _meanXpolRatioDb = 0;
   _zdrCorr = 0;
 
-  _meanTestPulsePowerHcDbm = 0;
-  _meanTestPulsePowerVcDbm = 0;
-  _meanTestPulsePowerHxDbm = 0;
-  _meanTestPulsePowerVxDbm = 0;
+  _testPulseDbmHc = MomentsSun::missing;
+  _testPulseDbmVc = MomentsSun::missing;
+  _testPulseDbmHx = MomentsSun::missing;
+  _testPulseDbmVx = MomentsSun::missing;
 
   _sumXmitPowerHDbm = 0;
   _sumXmitPowerVDbm = 0;
@@ -832,7 +832,7 @@ int SunCal::_processPulse(const IwrfTsPulse *pulse)
       if (endGateXpol > _nGates - 1) {
         endGateXpol = _nGates - 1;
       }
-      _addToXpol(startGateXpol, endGateXpol);
+      _accumForXpol(startGateXpol, endGateXpol);
     }
 
   }
@@ -840,13 +840,13 @@ int SunCal::_processPulse(const IwrfTsPulse *pulse)
   // add to test pulse data
 
   if (_params.compute_test_pulse_powers) {
-    _addToTestPulse();
+    _accumForTestPulse();
   }
 
   // add to xmit power data
 
   if (_params.compute_mean_transmit_powers) {
-    _addToXmitPowers(pulse);
+    _accumForXmitPowers(pulse);
   }
 
   // check for end of volume
@@ -1805,10 +1805,10 @@ void SunCal::_initForAnalysis()
   _deleteTestPulseMomentsArray();
   _stats.clear();
 
-  _meanTestPulsePowerHcDbm = MomentsSun::missing;
-  _meanTestPulsePowerVcDbm = MomentsSun::missing;
-  _meanTestPulsePowerHxDbm = MomentsSun::missing;
-  _meanTestPulsePowerVxDbm = MomentsSun::missing;
+  _testPulseDbmHc = MomentsSun::missing;
+  _testPulseDbmVc = MomentsSun::missing;
+  _testPulseDbmHx = MomentsSun::missing;
+  _testPulseDbmVx = MomentsSun::missing;
 
   _sumXmitPowerHDbm = 0.0;
   _sumXmitPowerVDbm = 0.0;
@@ -2463,12 +2463,12 @@ int SunCal::_computeMomentsSunSinglePol(MomentsSun *moments,
 ////////////////////////////////////////////
 // Compute xpol values, add to array
 
-void SunCal::_addToXpol(int startGate, int endGate)
+void SunCal::_accumForXpol(int startGate, int endGate)
 
 {
   
   if (!_alternating) {
-    cerr << "WARNING - SunCal::_addToXpol" << endl;
+    cerr << "WARNING - SunCal::_accumForXpol" << endl;
     cerr << "  Cross polar method only applicable in alternating mode" << endl;
     return;
   }
@@ -2500,41 +2500,57 @@ void SunCal::_addToXpol(int startGate, int endGate)
 ////////////////////////////////////////////
 // Compute test pulse powers, add to array
 
-void SunCal::_addToTestPulse()
+void SunCal::_accumForTestPulse()
 
 {
   
-  // compute gate limits
+  // compute test pulse gate number for each channel
 
   const IwrfTsPulse &pulse0 = *_pulseQueue[0];
-  
   int nGates = pulse0.getNGates();
-  double startRangeKm = pulse0.get_start_range_km();
-  double gateSpacingKm = pulse0.get_gate_spacing_km();
-  int startGate =
-    (int) floor((_params.test_pulse_min_range_km - startRangeKm) / gateSpacingKm + 0.5);
-  int endGate =
-    (int) floor((_params.test_pulse_max_range_km - startRangeKm) / gateSpacingKm + 0.5);
-  if (startGate < 0) {
-    startGate = 0;
-  }
-  if (startGate > nGates - 1) {
-    startGate = nGates - 1;
-  }
-  if (endGate < 0) {
-    endGate = 0;
-  }
-  if (endGate > nGates - 1) {
-    endGate = nGates - 1;
-  }
-  
-  if (startGate > endGate) {
-    return;
-  }
+  double startRange = pulse0.get_start_range_km();
+  double gateSpacing = pulse0.get_gate_spacing_km();
 
-  // set gate range
+  int gateNumHc = (int)
+    ((_params.test_pulse_range_km_hc - startRange) / gateSpacing + 0.5);
+  if (gateNumHc < 0) gateNumHc = 0;
+  if (gateNumHc > nGates - 1) gateNumHc = nGates - 1;
   
-  for (int igate = startGate; igate <= endGate; igate++) {
+  int gateNumHx = (int)
+    ((_params.test_pulse_range_km_hx - startRange) / gateSpacing + 0.5);
+  if (gateNumHx < 0) gateNumHx = 0;
+  if (gateNumHx > nGates - 1) gateNumHx = nGates - 1;
+  
+  int gateNumVc = (int)
+    ((_params.test_pulse_range_km_vc - startRange) / gateSpacing + 0.5);
+  if (gateNumVc < 0) gateNumVc = 0;
+  if (gateNumVc > nGates - 1) gateNumVc = nGates - 1;
+  
+  int gateNumVx = (int)
+    ((_params.test_pulse_range_km_vx - startRange) / gateSpacing + 0.5);
+  if (gateNumVx < 0) gateNumVx = 0;
+  if (gateNumVx > nGates - 1) gateNumVx = nGates - 1;
+
+  // compute gate range
+
+  int minGate = gateNumHc;
+  minGate = MIN(minGate, gateNumVc);
+  minGate = MIN(minGate, gateNumHx);
+  minGate = MIN(minGate, gateNumVx);
+
+  int maxGate = gateNumHc;
+  maxGate = MAX(maxGate, gateNumVc);
+  maxGate = MAX(maxGate, gateNumHx);
+  maxGate = MAX(maxGate, gateNumVx);
+  
+  // compute mean power for test pulse in each channel
+  
+  double testPulsePowerHc = MomentsSun::missing;
+  double testPulsePowerVc = MomentsSun::missing;
+  double testPulsePowerHx = MomentsSun::missing;
+  double testPulsePowerVx = MomentsSun::missing;
+  
+  for (int igate = minGate; igate <= maxGate; igate++) {
 
     double nnH = 0;
     double nnV = 0;
@@ -2594,28 +2610,48 @@ void SunCal::_addToTestPulse()
       
     } // ipulse
 
-    double meanPowerHc = 0.0;
-    double meanPowerVc = 0.0;
-    double meanPowerHx = 0.0;
-    double meanPowerVx = 0.0;
+    double powerHc = 0.0;
+    double powerVc = 0.0;
+    double powerHx = 0.0;
+    double powerVx = 0.0;
     
     if (nnH > 0 && nnV > 0) {
-      meanPowerHc = sumPowerHc / nnH;
-      meanPowerVc = sumPowerVc / nnV;
-      meanPowerVx = sumPowerVx / nnH;
-      meanPowerHx = sumPowerHx / nnV;
-      TestPulse tpm(meanPowerHc, meanPowerVc, meanPowerHx, meanPowerVx);
-      _testPulseMoments.push_back(tpm);
+      powerHc = sumPowerHc / nnH;
+      powerVc = sumPowerVc / nnV;
+      powerVx = sumPowerVx / nnH;
+      powerHx = sumPowerHx / nnV;
+    }
+
+    if (igate == gateNumHc) {
+      testPulsePowerHc = powerHc;
+    }
+    if (igate == gateNumVc) {
+      testPulsePowerVc = powerVc;
+    }
+    if (igate == gateNumHx) {
+      testPulsePowerHx = powerHx;
+    }
+    if (igate == gateNumVx) {
+      testPulsePowerVx = powerVx;
     }
     
   } // igate
+
+  // store for later
   
+  TestPulse tpm(testPulsePowerHc,
+                testPulsePowerVc,
+                testPulsePowerHx,
+                testPulsePowerVx);
+
+  _testPulseMoments.push_back(tpm);
+
 }
 
 /////////////////////
 // add to xmit powers
 
-void SunCal::_addToXmitPowers(const IwrfTsPulse *pulse)
+void SunCal::_accumForXmitPowers(const IwrfTsPulse *pulse)
 
 {
 
@@ -3957,10 +3993,10 @@ void SunCal::_computeTestPulse()
   
 {
 
-  _meanTestPulsePowerHcDbm = MomentsSun::missing;
-  _meanTestPulsePowerVcDbm = MomentsSun::missing;
-  _meanTestPulsePowerHxDbm = MomentsSun::missing;
-  _meanTestPulsePowerVxDbm = MomentsSun::missing;
+  _testPulseDbmHc = MomentsSun::missing;
+  _testPulseDbmVc = MomentsSun::missing;
+  _testPulseDbmHx = MomentsSun::missing;
+  _testPulseDbmVx = MomentsSun::missing;
   
   double sumPowerHc = 0.0;
   double sumPowerVc = 0.0;
@@ -4012,31 +4048,31 @@ void SunCal::_computeTestPulse()
   }
 
   if (nHc > 0) {
-    _meanTestPulsePowerHcDbm = 10.0 * log10(sumPowerHc / nHc);
+    _testPulseDbmHc = 10.0 * log10(sumPowerHc / nHc);
   }
 
   if (nVc > 0) {
-    _meanTestPulsePowerVcDbm = 10.0 * log10(sumPowerVc / nHc);
+    _testPulseDbmVc = 10.0 * log10(sumPowerVc / nHc);
   }
 
   if (nHx > 0) {
-    _meanTestPulsePowerHxDbm = 10.0 * log10(sumPowerHx / nHx);
+    _testPulseDbmHx = 10.0 * log10(sumPowerHx / nHx);
   }
 
   if (nVx > 0) {
-    _meanTestPulsePowerVxDbm = 10.0 * log10(sumPowerVx / nVx);
+    _testPulseDbmVx = 10.0 * log10(sumPowerVx / nVx);
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "=============== test pulse powers ================" << endl;
-    cerr << "  nHc, _meanTestPulsePowerHcDbm: "
-         << nHc << ", " << _meanTestPulsePowerHcDbm << endl;
-    cerr << "  nvc, _meanTestPulsePowerVcDbm: "
-         << nVc << ", " << _meanTestPulsePowerVcDbm << endl;
-    cerr << "  nHx, _meanTestPulsePowerHxDbm: "
-         << nHx << ", " << _meanTestPulsePowerHxDbm << endl;
-    cerr << "  nVx, _meanTestPulsePowerVxDbm: "
-         << nVx << ", " << _meanTestPulsePowerVxDbm << endl;
+    cerr << "  nHc, _testPulseDbmHc: "
+         << nHc << ", " << _testPulseDbmHc << endl;
+    cerr << "  nvc, _testPulseDbmVc: "
+         << nVc << ", " << _testPulseDbmVc << endl;
+    cerr << "  nHx, _testPulseDbmHx: "
+         << nHx << ", " << _testPulseDbmHx << endl;
+    cerr << "  nVx, _testPulseDbmVx: "
+         << nVx << ", " << _testPulseDbmVx << endl;
     cerr << "==================================================" << endl;
   }
 
@@ -5144,10 +5180,10 @@ void SunCal::_writeSummaryText(FILE *out)
 
   if (_params.compute_test_pulse_powers) {
     fprintf(out, "=============== test pulse powers ================\n");
-    fprintf(out, "  _meanTestPulsePowerHcDbm: %g\n", _meanTestPulsePowerHcDbm);
-    fprintf(out, "  _meanTestPulsePowerVcDbm: %g\n", _meanTestPulsePowerVcDbm);
-    fprintf(out, "  _meanTestPulsePowerHxDbm: %g\n", _meanTestPulsePowerHxDbm);
-    fprintf(out, "  _meanTestPulsePowerVxDbm: %g\n", _meanTestPulsePowerVxDbm);
+    fprintf(out, "  _testPulseDbmHc: %g\n", _testPulseDbmHc);
+    fprintf(out, "  _testPulseDbmVc: %g\n", _testPulseDbmVc);
+    fprintf(out, "  _testPulseDbmHx: %g\n", _testPulseDbmHx);
+    fprintf(out, "  _testPulseDbmVx: %g\n", _testPulseDbmVx);
     fprintf(out, "==================================================\n\n");
   }
 
@@ -5322,18 +5358,18 @@ int SunCal::_appendToGlobalResults()
   }
 
   if (_params.compute_test_pulse_powers) {
-    _appendFloatToFile(out, _meanTestPulsePowerHcDbm);
-    _appendFloatToFile(out, _meanTestPulsePowerVcDbm);
-    _appendFloatToFile(out, _meanTestPulsePowerHxDbm);
-    _appendFloatToFile(out, _meanTestPulsePowerVxDbm);
+    _appendFloatToFile(out, _testPulseDbmHc);
+    _appendFloatToFile(out, _testPulseDbmVc);
+    _appendFloatToFile(out, _testPulseDbmHx);
+    _appendFloatToFile(out, _testPulseDbmVx);
     _appendFloatToFile(out,
-                       _meanTestPulsePowerVcDbm - _meanTestPulsePowerHcDbm);
+                       _testPulseDbmVc - _testPulseDbmHc);
     _appendFloatToFile(out,
-                       _meanTestPulsePowerVxDbm - _meanTestPulsePowerHxDbm);
+                       _testPulseDbmVx - _testPulseDbmHx);
     _appendFloatToFile(out,
-                       _meanTestPulsePowerVcDbm - _meanTestPulsePowerHxDbm);
+                       _testPulseDbmVc - _testPulseDbmHx);
     _appendFloatToFile(out,
-                       _meanTestPulsePowerVxDbm - _meanTestPulsePowerHcDbm);
+                       _testPulseDbmVx - _testPulseDbmHc);
   }
 
   if (_params.compute_mean_transmit_powers) {
@@ -6050,6 +6086,11 @@ int SunCal::_writeSummaryToSpdb()
   xml += TaXml::writeDouble("widthRatioElAzVc", 1, _widthRatioElAzVc);
   xml += TaXml::writeDouble("widthRatioElAzDiffHV", 1, _widthRatioElAzDiffHV);
   xml += TaXml::writeDouble("zdrDiffElAz", 1, _zdrDiffElAz);
+
+  xml += TaXml::writeDouble("testPulseDbmHc", 1, _testPulseDbmHc);
+  xml += TaXml::writeDouble("testPulseDbmHx", 1, _testPulseDbmHx);
+  xml += TaXml::writeDouble("testPulseDbmVc", 1, _testPulseDbmVc);
+  xml += TaXml::writeDouble("testPulseDbmVx", 1, _testPulseDbmVx);
 
   if (_params.read_xpol_ratio_from_spdb) {
     xml += TaXml::writeDouble("xpolRatioDbFromSpdb", 1, _xpolRatioDbFromSpdb);

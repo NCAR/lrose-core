@@ -593,16 +593,33 @@ paramdef boolean {
 } compute_test_pulse_powers;
 
 paramdef double {
-  p_default = 147.5;
-  p_descr = "Range to start of test pulse (km).";
-  p_help = "This delimits the test pulse gates in the moments.";
-} test_pulse_min_range_km;
+  p_default = 148.7;
+  p_descr = "Range to test pulse for HC channel (km).";
+  p_help = "We compute the gate number from this range.";
+} test_pulse_range_km_hc;
 
 paramdef double {
-  p_default = 147.8;
-  p_descr = "Range to end of test pulse (km).";
-  p_help = "This delimits the test pulse gates in the moments.";
-} test_pulse_max_range_km;
+  p_default = 148.7;
+  p_descr = "Range to test pulse for HX channel (km).";
+  p_help = "We compute the gate number from this range.";
+} test_pulse_range_km_hx;
+
+paramdef double {
+  p_default = 149.0;
+  p_descr = "Range to test pulse for VC channel (km).";
+  p_help = "We compute the gate number from this range.";
+} test_pulse_range_km_vc;
+
+paramdef double {
+  p_default = 149.0;
+  p_descr = "Range to test pulse for VX channel (km).";
+  p_help = "We compute the gate number from this range.";
+} test_pulse_range_km_vx;
+
+paramdef int {
+  p_default = 5000;
+  p_descr = "Number of samples used to compute test pulse power.";
+} test_pulse_n_samples;
 
 commentdef {
   p_header = "TRANSMITTER POWERS";

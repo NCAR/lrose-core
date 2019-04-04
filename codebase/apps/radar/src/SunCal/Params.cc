@@ -1785,28 +1785,64 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'test_pulse_min_range_km'
+    // Parameter 'test_pulse_range_km_hc'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("test_pulse_min_range_km");
-    tt->descr = tdrpStrDup("Range to start of test pulse (km).");
-    tt->help = tdrpStrDup("This delimits the test pulse gates in the moments.");
-    tt->val_offset = (char *) &test_pulse_min_range_km - &_start_;
-    tt->single_val.d = 147.5;
+    tt->param_name = tdrpStrDup("test_pulse_range_km_hc");
+    tt->descr = tdrpStrDup("Range to test pulse for HC channel (km).");
+    tt->help = tdrpStrDup("We compute the gate number from this range.");
+    tt->val_offset = (char *) &test_pulse_range_km_hc - &_start_;
+    tt->single_val.d = 148.7;
     tt++;
     
-    // Parameter 'test_pulse_max_range_km'
+    // Parameter 'test_pulse_range_km_hx'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("test_pulse_max_range_km");
-    tt->descr = tdrpStrDup("Range to end of test pulse (km).");
-    tt->help = tdrpStrDup("This delimits the test pulse gates in the moments.");
-    tt->val_offset = (char *) &test_pulse_max_range_km - &_start_;
-    tt->single_val.d = 147.8;
+    tt->param_name = tdrpStrDup("test_pulse_range_km_hx");
+    tt->descr = tdrpStrDup("Range to test pulse for HX channel (km).");
+    tt->help = tdrpStrDup("We compute the gate number from this range.");
+    tt->val_offset = (char *) &test_pulse_range_km_hx - &_start_;
+    tt->single_val.d = 148.7;
+    tt++;
+    
+    // Parameter 'test_pulse_range_km_vc'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("test_pulse_range_km_vc");
+    tt->descr = tdrpStrDup("Range to test pulse for VC channel (km).");
+    tt->help = tdrpStrDup("We compute the gate number from this range.");
+    tt->val_offset = (char *) &test_pulse_range_km_vc - &_start_;
+    tt->single_val.d = 149;
+    tt++;
+    
+    // Parameter 'test_pulse_range_km_vx'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("test_pulse_range_km_vx");
+    tt->descr = tdrpStrDup("Range to test pulse for VX channel (km).");
+    tt->help = tdrpStrDup("We compute the gate number from this range.");
+    tt->val_offset = (char *) &test_pulse_range_km_vx - &_start_;
+    tt->single_val.d = 149;
+    tt++;
+    
+    // Parameter 'test_pulse_n_samples'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("test_pulse_n_samples");
+    tt->descr = tdrpStrDup("Number of samples used to compute test pulse power.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &test_pulse_n_samples - &_start_;
+    tt->single_val.i = 5000;
     tt++;
     
     // Parameter 'Comment 17'
