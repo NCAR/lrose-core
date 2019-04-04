@@ -771,8 +771,18 @@ public:
   ///
   /// Returns 0 on success, -1 if no rays pass the test
   
-  int constrainByElevAngle(double minElevAngleDeg,
-                           double maxElevAngleDeg);
+  int constrainByElevation(double minElevationDeg,
+                           double maxElevationDeg);
+  
+  /// Constrain the data by specifying azimuth angle limits.
+  ///
+  /// Rays with azimuth angles outside of these limits
+  /// will be removed.
+  ///
+  /// Returns 0 on success, -1 if no rays pass the test
+  
+  int constrainByAzimuth(double minAzimuthDeg,
+                         double maxAzimuthDeg);
 
   /// remove rays with all missing data
   
