@@ -514,8 +514,8 @@ void PolarManager::_setupWindows()
 
   // sweep panel
 
-  _createSweepPanel();
   if (_archiveMode) {
+    _createSweepPanel();
     mainLayout->addWidget(_sweepPanel);
   }
 
