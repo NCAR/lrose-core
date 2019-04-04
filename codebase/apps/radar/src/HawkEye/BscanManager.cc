@@ -1395,11 +1395,21 @@ void BscanManager::_handleRealtimeData()
     }
     _readerRayTime = thisRayTime;
 
-    // check elevation limits?
+    // check angle limits?
+
     if (_params.bscan_specify_elevation_limits) {
       double elev = ray->getElevationDeg();
       if (elev < _params.bscan_min_elevation_deg ||
           elev > _params.bscan_max_elevation_deg) {
+        delete ray;
+        continue;
+      }
+    }
+
+    if (_params.bscan_specify_azimuth_limits) {
+      double elev = ray->getAzimuthDeg();
+      if (elev < _params.bscan_min_azimuth_deg ||
+          elev > _params.bscan_max_azimuth_deg) {
         delete ray;
         continue;
       }
@@ -1571,7 +1581,7 @@ int BscanManager::_getArchiveData()
 
   // check elevation limits?
   if (_params.bscan_specify_elevation_limits) {
-    if (_vol.constrainByElevAngle(_params.bscan_min_elevation_deg,
+    if (_vol.constrainByElevation(_params.bscan_min_elevation_deg,
                                   _params.bscan_max_elevation_deg)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
       errMsg += "BscanManager::_getArchiveData\n";
@@ -1580,6 +1590,29 @@ int BscanManager::_getArchiveData()
       sprintf(text, "  minElev: %g\n", _params.bscan_min_elevation_deg);
       errMsg += text;
       sprintf(text, "  maxElev: %g\n", _params.bscan_max_elevation_deg);
+      errMsg += text;
+      cerr << errMsg;
+      if (!_params.images_auto_create)  {
+        QErrorMessage errorDialog;
+        errorDialog.setMinimumSize(400, 250);
+        errorDialog.showMessage(errMsg.c_str());
+        errorDialog.exec();
+      }
+      return -1;
+    }
+  }
+
+  // check azimuth limits?
+  if (_params.bscan_specify_azimuth_limits) {
+    if (_vol.constrainByAzimuth(_params.bscan_min_azimuth_deg,
+                                _params.bscan_max_azimuth_deg)) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "BscanManager::_getArchiveData\n";
+      errMsg += "  Constraining azimuth angles - no rays found\n";
+      char text[1024];
+      sprintf(text, "  minAz: %g\n", _params.bscan_min_azimuth_deg);
+      errMsg += text;
+      sprintf(text, "  maxAz: %g\n", _params.bscan_max_azimuth_deg);
       errMsg += text;
       cerr << errMsg;
       if (!_params.images_auto_create)  {

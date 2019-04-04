@@ -614,6 +614,12 @@ public:
 
   double bscan_max_elevation_deg;
 
+  tdrp_bool_t bscan_specify_azimuth_limits;
+
+  double bscan_min_azimuth_deg;
+
+  double bscan_max_azimuth_deg;
+
   tdrp_bool_t bscan_censor_data_below_surface;
 
   char* bscan_surface_field;
@@ -730,7 +736,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[164];
+  mutable TDRPtable _table[167];
 
   const char *_className;
 

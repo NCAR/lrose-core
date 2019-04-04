@@ -1997,7 +1997,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 15");
-    tt->comment_hdr = tdrpStrDup("BSCAN ELEVATION ANGLE LIMITS");
+    tt->comment_hdr = tdrpStrDup("BSCAN ANGLE LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -2034,6 +2034,42 @@
     tt->descr = tdrpStrDup("Max elevation angle to be plotted (deg).");
     tt->help = tdrpStrDup("Used if 'bscan_specify_elevation_limits' is true.");
     tt->val_offset = (char *) &bscan_max_elevation_deg - &_start_;
+    tt->single_val.d = 91;
+    tt++;
+    
+    // Parameter 'bscan_specify_azimuth_limits'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("bscan_specify_azimuth_limits");
+    tt->descr = tdrpStrDup("Specify the min and max azimuth angle.");
+    tt->help = tdrpStrDup("If true, only beams within the specified limits will be plotted.");
+    tt->val_offset = (char *) &bscan_specify_azimuth_limits - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'bscan_min_azimuth_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("bscan_min_azimuth_deg");
+    tt->descr = tdrpStrDup("Min azimuth angle to be plotted (deg).");
+    tt->help = tdrpStrDup("Used if 'bscan_specify_azimuth_limits' is true.");
+    tt->val_offset = (char *) &bscan_min_azimuth_deg - &_start_;
+    tt->single_val.d = 89;
+    tt++;
+    
+    // Parameter 'bscan_max_azimuth_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("bscan_max_azimuth_deg");
+    tt->descr = tdrpStrDup("Max azimuth angle to be plotted (deg).");
+    tt->help = tdrpStrDup("Used if 'bscan_specify_azimuth_limits' is true.");
+    tt->val_offset = (char *) &bscan_max_azimuth_deg - &_start_;
     tt->single_val.d = 91;
     tt++;
     

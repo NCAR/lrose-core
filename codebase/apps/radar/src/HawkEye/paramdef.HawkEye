@@ -722,7 +722,7 @@ paramdef enum range_axis_mode_t {
 } bscan_range_axis_mode;
 
 commentdef {
-  p_header = "BSCAN ELEVATION ANGLE LIMITS";
+  p_header = "BSCAN ANGLE LIMITS";
 }
 
 paramdef boolean {
@@ -742,6 +742,24 @@ paramdef double {
   p_descr = "Max elevation angle to be plotted (deg).";
   p_help = "Used if 'bscan_specify_elevation_limits' is true.";
 } bscan_max_elevation_deg;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Specify the min and max azimuth angle.";
+  p_help = "If true, only beams within the specified limits will be plotted.";
+} bscan_specify_azimuth_limits;
+
+paramdef double {
+  p_default = 89;
+  p_descr = "Min azimuth angle to be plotted (deg).";
+  p_help = "Used if 'bscan_specify_azimuth_limits' is true.";
+} bscan_min_azimuth_deg;
+
+paramdef double {
+  p_default = 91;
+  p_descr = "Max azimuth angle to be plotted (deg).";
+  p_help = "Used if 'bscan_specify_azimuth_limits' is true.";
+} bscan_max_azimuth_deg;
 
 commentdef {
   p_header = "BSCAN CENSOR DATA BELOW SURFACE";
