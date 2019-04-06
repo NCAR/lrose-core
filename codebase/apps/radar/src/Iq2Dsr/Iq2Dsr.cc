@@ -188,7 +188,7 @@ Iq2Dsr::Iq2Dsr(int argc, char **argv)
 
     _threadPoolSize = _params.n_compute_threads;
     for (int ii = 0; ii < _threadPoolSize; ii++) {
-      ComputeThread *thread = new ComputeThread();
+      ComputeThread *thread = new ComputeThread;
       thread->setApp(this);
       pthread_t pth = 0;
       pthread_create(&pth, NULL, _computeMomentsInThread, thread);
@@ -200,7 +200,7 @@ Iq2Dsr::Iq2Dsr(int argc, char **argv)
 
     // create write thread
     
-    _writeThread = new WriteThread();
+    _writeThread = new WriteThread;
     _writeThread->setApp(this);
     pthread_t writeTh;
     pthread_create(&writeTh, NULL, _handleWrites, _writeThread);

@@ -70,7 +70,7 @@ Helpers &Helpers::inst()
 {
 
   if (_instance == (Helpers *)NULL) {
-    _instance = new Helpers();
+    _instance = new Helpers;
   }
 
   return *_instance;

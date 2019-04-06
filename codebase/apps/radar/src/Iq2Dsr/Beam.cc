@@ -156,13 +156,13 @@ Beam::Beam(const string &progName,
 
   _cmd = new Cmd(_progName, _params, _gateData);
   
-  _fft = new RadarFft();
-  _fftHalf = new RadarFft();
-  _fftStag = new RadarFft();
+  _fft = new RadarFft;
+  _fftHalf = new RadarFft;
+  _fftStag = new RadarFft;
 
-  _regr = new RegressionFilter();
-  _regrHalf = new RegressionFilter();
-  _regrStag = new RegressionFilter();
+  _regr = new RegressionFilter;
+  _regrHalf = new RegressionFilter;
+  _regrStag = new RegressionFilter;
 
 }
 
@@ -3656,7 +3656,7 @@ int Beam::_noiseInit()
 {
 
   if (_noise == NULL) {
-    _noise = new NoiseLocator();
+    _noise = new NoiseLocator;
   }
 
   // initialize noise location
@@ -3860,7 +3860,7 @@ void Beam::_allocGateData(int nGates)
   int nNeeded = nGates - (int) _gateData.size();
   if (nNeeded > 0) {
     for (int ii = 0; ii < nNeeded; ii++) {
-      GateData *gate = new GateData();
+      GateData *gate = new GateData;
       _gateData.push_back(gate);
     }
   }

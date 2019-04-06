@@ -544,7 +544,7 @@ int OutputFmq::_openFmq()
     delete _rQueue;
   }
 
-  _rQueue = new DsRadarQueue();
+  _rQueue = new DsRadarQueue;
 
   // initialize the output queue
   
