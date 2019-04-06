@@ -44,7 +44,6 @@
 #include <radar/MomentsFields.hh>
 #include <radar/iwrf_data.h>
 #include <toolsa/TaArray.hh>
-
 using namespace std;
 
 class GateData {

@@ -411,4 +411,3 @@ void GateData::_freeArrays()
   _freeArray(iqTrip4, _iqTrip4);
 
 }
-
