@@ -204,138 +204,138 @@ void GateData::allocArrays(int nSamples,
 
   // perform allocation
 
-  _allocArray(iqhcOrig, _nSamples);
-  _allocArray(iqvcOrig, _nSamples);
-  _allocArray(iqhxOrig, _nSamples);
-  _allocArray(iqvxOrig, _nSamples);
+  _allocArray(iqhcOrig, _iqhcOrig, _nSamples);
+  _allocArray(iqvcOrig, _iqvcOrig, _nSamples);
+  _allocArray(iqhxOrig, _iqhxOrig, _nSamples);
+  _allocArray(iqvxOrig, _iqvxOrig, _nSamples);
   
-  _allocArray(iqhc, _nSamples);
-  _allocArray(iqvc, _nSamples);
-  _allocArray(iqhx, _nSamples);
-  _allocArray(iqvx, _nSamples);
+  _allocArray(iqhc, _iqhc, _nSamples);
+  _allocArray(iqvc, _iqvc, _nSamples);
+  _allocArray(iqhx, _iqhx, _nSamples);
+  _allocArray(iqvx, _iqvx, _nSamples);
   
-  _allocArray(specHc, _nSamples);
-  _allocArray(specVc, _nSamples);
+  _allocArray(specHc, _specHc, _nSamples);
+  _allocArray(specVc, _specVc, _nSamples);
 
   if (_needFiltering) {
 
-    _allocArray(iqhcF, _nSamples);
-    _allocArray(iqvcF, _nSamples);
-    _allocArray(iqhxF, _nSamples);
-    _allocArray(iqvxF, _nSamples);
+    _allocArray(iqhcF, _iqhcF, _nSamples);
+    _allocArray(iqvcF, _iqvcF, _nSamples);
+    _allocArray(iqhxF, _iqhxF, _nSamples);
+    _allocArray(iqvxF, _iqvxF, _nSamples);
 
-    _allocArray(iqhcNotched, _nSamples);
-    _allocArray(iqvcNotched, _nSamples);
+    _allocArray(iqhcNotched, _iqhcNotched, _nSamples);
+    _allocArray(iqvcNotched, _iqvcNotched, _nSamples);
 
   } else {
 
-    _freeArray(iqhcF);
-    _freeArray(iqvcF);
-    _freeArray(iqhxF);
-    _freeArray(iqvxF);
+    _freeArray(iqhcF, _iqhcF);
+    _freeArray(iqvcF, _iqvcF);
+    _freeArray(iqhxF, _iqhxF);
+    _freeArray(iqvxF, _iqvxF);
 
-    _freeArray(iqhcNotched);
-    _freeArray(iqvcNotched);
+    _freeArray(iqhcNotched, _iqhcNotched);
+    _freeArray(iqvcNotched, _iqvcNotched);
 
   }
 
   if (_isStagPrt) {
 
-    _allocArray(iqhcPrtShortOrig, _nSamplesHalf);
-    _allocArray(iqhcPrtLongOrig, _nSamplesHalf);
-    _allocArray(iqvcPrtShortOrig, _nSamplesHalf);
-    _allocArray(iqvcPrtLongOrig, _nSamplesHalf);
+    _allocArray(iqhcPrtShortOrig, _iqhcPrtShortOrig, _nSamplesHalf);
+    _allocArray(iqhcPrtLongOrig, _iqhcPrtLongOrig, _nSamplesHalf);
+    _allocArray(iqvcPrtShortOrig, _iqvcPrtShortOrig, _nSamplesHalf);
+    _allocArray(iqvcPrtLongOrig, _iqvcPrtLongOrig, _nSamplesHalf);
     
-    _allocArray(iqhxPrtShortOrig, _nSamplesHalf);
-    _allocArray(iqhxPrtLongOrig, _nSamplesHalf);
-    _allocArray(iqvxPrtShortOrig, _nSamplesHalf);
-    _allocArray(iqvxPrtLongOrig, _nSamplesHalf);
+    _allocArray(iqhxPrtShortOrig, _iqhxPrtShortOrig, _nSamplesHalf);
+    _allocArray(iqhxPrtLongOrig, _iqhxPrtLongOrig, _nSamplesHalf);
+    _allocArray(iqvxPrtShortOrig, _iqvxPrtShortOrig, _nSamplesHalf);
+    _allocArray(iqvxPrtLongOrig, _iqvxPrtLongOrig, _nSamplesHalf);
     
-    _allocArray(iqhcPrtShort, _nSamplesHalf);
-    _allocArray(iqhcPrtLong, _nSamplesHalf);
-    _allocArray(iqvcPrtShort, _nSamplesHalf);
-    _allocArray(iqvcPrtLong, _nSamplesHalf);
+    _allocArray(iqhcPrtShort, _iqhcPrtShort, _nSamplesHalf);
+    _allocArray(iqhcPrtLong, _iqhcPrtLong, _nSamplesHalf);
+    _allocArray(iqvcPrtShort, _iqvcPrtShort, _nSamplesHalf);
+    _allocArray(iqvcPrtLong, _iqvcPrtLong, _nSamplesHalf);
     
-    _allocArray(iqhxPrtShort, _nSamplesHalf);
-    _allocArray(iqhxPrtLong, _nSamplesHalf);
-    _allocArray(iqvxPrtShort, _nSamplesHalf);
-    _allocArray(iqvxPrtLong, _nSamplesHalf);
+    _allocArray(iqhxPrtShort, _iqhxPrtShort, _nSamplesHalf);
+    _allocArray(iqhxPrtLong, _iqhxPrtLong, _nSamplesHalf);
+    _allocArray(iqvxPrtShort, _iqvxPrtShort, _nSamplesHalf);
+    _allocArray(iqvxPrtLong, _iqvxPrtLong, _nSamplesHalf);
     
   } else {
 
-    _freeArray(iqhcPrtShortOrig);
-    _freeArray(iqhcPrtLongOrig);
-    _freeArray(iqvcPrtShortOrig);
-    _freeArray(iqvcPrtLongOrig);
+    _freeArray(iqhcPrtShortOrig, _iqhcPrtShortOrig);
+    _freeArray(iqhcPrtLongOrig, _iqhcPrtLongOrig);
+    _freeArray(iqvcPrtShortOrig, _iqvcPrtShortOrig);
+    _freeArray(iqvcPrtLongOrig, _iqvcPrtLongOrig);
     
-    _freeArray(iqhxPrtShortOrig);
-    _freeArray(iqhxPrtLongOrig);
-    _freeArray(iqvxPrtShortOrig);
-    _freeArray(iqvxPrtLongOrig);
+    _freeArray(iqhxPrtShortOrig, _iqhxPrtShortOrig);
+    _freeArray(iqhxPrtLongOrig, _iqhxPrtLongOrig);
+    _freeArray(iqvxPrtShortOrig, _iqvxPrtShortOrig);
+    _freeArray(iqvxPrtLongOrig, _iqvxPrtLongOrig);
     
-    _freeArray(iqhcPrtShort);
-    _freeArray(iqhcPrtLong);
-    _freeArray(iqvcPrtShort);
-    _freeArray(iqvcPrtLong);
+    _freeArray(iqhcPrtShort, _iqhcPrtShort);
+    _freeArray(iqhcPrtLong, _iqhcPrtLong);
+    _freeArray(iqvcPrtShort, _iqvcPrtShort);
+    _freeArray(iqvcPrtLong, _iqvcPrtLong);
     
-    _freeArray(iqhxPrtShort);
-    _freeArray(iqhxPrtLong);
-    _freeArray(iqvxPrtShort);
-    _freeArray(iqvxPrtLong);
+    _freeArray(iqhxPrtShort, _iqhxPrtShort);
+    _freeArray(iqhxPrtLong, _iqhxPrtLong);
+    _freeArray(iqvxPrtShort, _iqvxPrtShort);
+    _freeArray(iqvxPrtLong, _iqvxPrtLong);
     
   }
   
   if (_isStagPrt && _needFiltering) {
     
-    _allocArray(iqhcPrtShortF, _nSamplesHalf);
-    _allocArray(iqhcPrtLongF, _nSamplesHalf);
-    _allocArray(iqvcPrtShortF, _nSamplesHalf);
-    _allocArray(iqvcPrtLongF, _nSamplesHalf);
+    _allocArray(iqhcPrtShortF, _iqhcPrtShortF, _nSamplesHalf);
+    _allocArray(iqhcPrtLongF, _iqhcPrtLongF, _nSamplesHalf);
+    _allocArray(iqvcPrtShortF, _iqvcPrtShortF, _nSamplesHalf);
+    _allocArray(iqvcPrtLongF, _iqvcPrtLongF, _nSamplesHalf);
     
-    _allocArray(iqhxPrtShortF, _nSamplesHalf);
-    _allocArray(iqhxPrtLongF, _nSamplesHalf);
-    _allocArray(iqvxPrtShortF, _nSamplesHalf);
-    _allocArray(iqvxPrtLongF, _nSamplesHalf);
+    _allocArray(iqhxPrtShortF, _iqhxPrtShortF, _nSamplesHalf);
+    _allocArray(iqhxPrtLongF, _iqhxPrtLongF, _nSamplesHalf);
+    _allocArray(iqvxPrtShortF, _iqvxPrtShortF, _nSamplesHalf);
+    _allocArray(iqvxPrtLongF, _iqvxPrtLongF, _nSamplesHalf);
     
   } else {
     
-    _freeArray(iqhcPrtShortF);
-    _freeArray(iqhcPrtLongF);
-    _freeArray(iqvcPrtShortF);
-    _freeArray(iqvcPrtLongF);
+    _freeArray(iqhcPrtShortF, _iqhcPrtShortF);
+    _freeArray(iqhcPrtLongF, _iqhcPrtLongF);
+    _freeArray(iqvcPrtShortF, _iqvcPrtShortF);
+    _freeArray(iqvcPrtLongF, _iqvcPrtLongF);
     
-    _freeArray(iqhxPrtShortF);
-    _freeArray(iqhxPrtLongF);
-    _freeArray(iqvxPrtShortF);
-    _freeArray(iqvxPrtLongF);
+    _freeArray(iqhxPrtShortF, _iqhxPrtShortF);
+    _freeArray(iqhxPrtLongF, _iqhxPrtLongF);
+    _freeArray(iqvxPrtShortF, _iqvxPrtShortF);
+    _freeArray(iqvxPrtLongF, _iqvxPrtLongF);
     
   }
 
   if (_isSz) {
 
-    _allocArray(iqStrong, _nSamples);
-    _allocArray(iqWeak, _nSamples);
-    _allocArray(iqStrongF, _nSamples);
-    _allocArray(iqWeakF, _nSamples);
+    _allocArray(iqStrong, _iqStrong, _nSamples);
+    _allocArray(iqWeak, _iqWeak, _nSamples);
+    _allocArray(iqStrongF, _iqStrongF, _nSamples);
+    _allocArray(iqWeakF, _iqWeakF, _nSamples);
     
-    _allocArray(iqMeas, _nSamples);
-    _allocArray(iqTrip1, _nSamples);
-    _allocArray(iqTrip2, _nSamples);
-    _allocArray(iqTrip3, _nSamples);
-    _allocArray(iqTrip4, _nSamples);
+    _allocArray(iqMeas, _iqMeas, _nSamples);
+    _allocArray(iqTrip1, _iqTrip1, _nSamples);
+    _allocArray(iqTrip2, _iqTrip2, _nSamples);
+    _allocArray(iqTrip3, _iqTrip3, _nSamples);
+    _allocArray(iqTrip4, _iqTrip4, _nSamples);
 
   } else {
 
-    _freeArray(iqStrong);
-    _freeArray(iqWeak);
-    _freeArray(iqStrongF);
-    _freeArray(iqWeakF);
+    _freeArray(iqStrong, _iqStrong);
+    _freeArray(iqWeak, _iqWeak);
+    _freeArray(iqStrongF, _iqStrongF);
+    _freeArray(iqWeakF, _iqWeakF);
     
-    _freeArray(iqMeas);
-    _freeArray(iqTrip1);
-    _freeArray(iqTrip2);
-    _freeArray(iqTrip3);
-    _freeArray(iqTrip4);
+    _freeArray(iqMeas, _iqMeas);
+    _freeArray(iqTrip1, _iqTrip1);
+    _freeArray(iqTrip2, _iqTrip2);
+    _freeArray(iqTrip3, _iqTrip3);
+    _freeArray(iqTrip4, _iqTrip4);
 
   }
     
@@ -348,67 +348,67 @@ void GateData::_freeArrays()
 
 {
 
-  _freeArray(iqhcOrig);
-  _freeArray(iqhxOrig);
-  _freeArray(iqvcOrig);
-  _freeArray(iqvxOrig);
+  _freeArray(iqhcOrig, _iqhcOrig);
+  _freeArray(iqhxOrig, _iqhxOrig);
+  _freeArray(iqvcOrig, _iqvcOrig);
+  _freeArray(iqvxOrig, _iqvxOrig);
 
-  _freeArray(iqhc);
-  _freeArray(iqhx);
-  _freeArray(iqvc);
-  _freeArray(iqvx);
+  _freeArray(iqhc, _iqhc);
+  _freeArray(iqhx, _iqhx);
+  _freeArray(iqvc, _iqvc);
+  _freeArray(iqvx, _iqvx);
 
-  _freeArray(specHc);
-  _freeArray(specVc);
+  _freeArray(specHc, _specHc);
+  _freeArray(specVc, _specVc);
 
-  _freeArray(iqhcF);
-  _freeArray(iqhxF);
-  _freeArray(iqvcF);
-  _freeArray(iqvxF);
+  _freeArray(iqhcF, _iqhcF);
+  _freeArray(iqhxF, _iqhxF);
+  _freeArray(iqvcF, _iqvcF);
+  _freeArray(iqvxF, _iqvxF);
 
-  _freeArray(iqhcNotched);
-  _freeArray(iqvcNotched);
+  _freeArray(iqhcNotched, _iqhcNotched);
+  _freeArray(iqvcNotched, _iqvcNotched);
 
-  _freeArray(iqhcPrtShortOrig);
-  _freeArray(iqhcPrtLongOrig);
-  _freeArray(iqvcPrtShortOrig);
-  _freeArray(iqvcPrtLongOrig);
+  _freeArray(iqhcPrtShortOrig, _iqhcPrtShortOrig);
+  _freeArray(iqhcPrtLongOrig, _iqhcPrtLongOrig);
+  _freeArray(iqvcPrtShortOrig, _iqvcPrtShortOrig);
+  _freeArray(iqvcPrtLongOrig, _iqvcPrtLongOrig);
 
-  _freeArray(iqhxPrtShortOrig);
-  _freeArray(iqhxPrtLongOrig);
-  _freeArray(iqvxPrtShortOrig);
-  _freeArray(iqvxPrtLongOrig);
+  _freeArray(iqhxPrtShortOrig, _iqhxPrtShortOrig);
+  _freeArray(iqhxPrtLongOrig, _iqhxPrtLongOrig);
+  _freeArray(iqvxPrtShortOrig, _iqvxPrtShortOrig);
+  _freeArray(iqvxPrtLongOrig, _iqvxPrtLongOrig);
 
-  _freeArray(iqhcPrtShort);
-  _freeArray(iqhcPrtLong);
-  _freeArray(iqvcPrtShort);
-  _freeArray(iqvcPrtLong);
+  _freeArray(iqhcPrtShort, _iqhcPrtShort);
+  _freeArray(iqhcPrtLong, _iqhcPrtLong);
+  _freeArray(iqvcPrtShort, _iqvcPrtShort);
+  _freeArray(iqvcPrtLong, _iqvcPrtLong);
 
-  _freeArray(iqhxPrtShort);
-  _freeArray(iqhxPrtLong);
-  _freeArray(iqvxPrtShort);
-  _freeArray(iqvxPrtLong);
+  _freeArray(iqhxPrtShort, _iqhxPrtShort);
+  _freeArray(iqhxPrtLong, _iqhxPrtLong);
+  _freeArray(iqvxPrtShort, _iqvxPrtShort);
+  _freeArray(iqvxPrtLong, _iqvxPrtLong);
 
-  _freeArray(iqhcPrtShortF);
-  _freeArray(iqhcPrtLongF);
-  _freeArray(iqvcPrtShortF);
-  _freeArray(iqvcPrtLongF);
+  _freeArray(iqhcPrtShortF, _iqhcPrtShortF);
+  _freeArray(iqhcPrtLongF, _iqhcPrtLongF);
+  _freeArray(iqvcPrtShortF, _iqvcPrtShortF);
+  _freeArray(iqvcPrtLongF, _iqvcPrtLongF);
 
-  _freeArray(iqhxPrtShortF);
-  _freeArray(iqhxPrtLongF);
-  _freeArray(iqvxPrtShortF);
-  _freeArray(iqvxPrtLongF);
+  _freeArray(iqhxPrtShortF, _iqhxPrtShortF);
+  _freeArray(iqhxPrtLongF, _iqhxPrtLongF);
+  _freeArray(iqvxPrtShortF, _iqvxPrtShortF);
+  _freeArray(iqvxPrtLongF, _iqvxPrtLongF);
 
-  _freeArray(iqStrong);
-  _freeArray(iqWeak);
-  _freeArray(iqStrongF);
-  _freeArray(iqWeakF);
+  _freeArray(iqStrong, _iqStrong);
+  _freeArray(iqWeak, _iqWeak);
+  _freeArray(iqStrongF, _iqStrongF);
+  _freeArray(iqWeakF, _iqWeakF);
 
-  _freeArray(iqMeas);
-  _freeArray(iqTrip1);
-  _freeArray(iqTrip2);
-  _freeArray(iqTrip3);
-  _freeArray(iqTrip4);
+  _freeArray(iqMeas, _iqMeas);
+  _freeArray(iqTrip1, _iqTrip1);
+  _freeArray(iqTrip2, _iqTrip2);
+  _freeArray(iqTrip3, _iqTrip3);
+  _freeArray(iqTrip4, _iqTrip4);
 
 }
 

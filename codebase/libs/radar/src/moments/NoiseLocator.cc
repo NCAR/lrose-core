@@ -41,6 +41,7 @@ using namespace std;
 
 // mutexes
 
+int NoiseLocator::_idCount = 0;
 pthread_mutex_t NoiseLocator::_prevGridMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t NoiseLocator::_computeMethodMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t NoiseLocator::_runningMedianMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -52,7 +53,7 @@ NoiseLocator::compute_method_t NoiseLocator::_computeMethod
 
 // grid for storing previous noise values
 
-NoiseLocator::noise_val_t **NoiseLocator::_previousGrid = NULL;
+NoiseLocator::noise_val_t **NoiseLocator::_historyGrid = NULL;
 const double NoiseLocator::_gridResEl = 360.0 / _gridSizeEl;
 const double NoiseLocator::_gridResAz = 360.0 / _gridSizeAz;
 
@@ -90,16 +91,20 @@ NoiseLocator::NoiseLocator()
 
   _debug = false;
   _equalBiasInAllChannels = false;
+  _idCount++;
+  _id = _idCount;
 
-  // create grid if not yet done
+  // create history grid if not yet done
   // grid resolution is 0.5 degreed in each dimension (el, az)
   // init to 0
-
+  // this is a static array on the class, so it is only
+  // allocate once
+  
   pthread_mutex_lock(&_prevGridMutex);
-  if (_previousGrid == NULL) {
-    _previousGrid = (noise_val_t **)
-      umalloc2(720, 720, sizeof(noise_val_t));
-    memset(*_previousGrid, 0, 720 * 720 * sizeof(noise_val_t));
+  if (_historyGrid == NULL) {
+    _historyGrid = (noise_val_t **)
+      umalloc2(_gridSizeEl, _gridSizeAz, sizeof(noise_val_t));
+    memset(*_historyGrid, 0, _gridSizeEl * _gridSizeAz * sizeof(noise_val_t));
   }
   pthread_mutex_unlock(&_prevGridMutex);
 
@@ -125,12 +130,8 @@ NoiseLocator::~NoiseLocator()
   
 {
 
-  pthread_mutex_lock(&_prevGridMutex);
-  if (_previousGrid) {
-    ufree2((void **) _previousGrid);
-    _previousGrid = NULL;
-  }
-  pthread_mutex_unlock(&_prevGridMutex);
+  // note we do not free _historyGrid, because it is static
+  // on the class
 
   if (_interestMapPhaseChangeErrorForNoise) {
     delete _interestMapPhaseChangeErrorForNoise;
@@ -569,7 +570,7 @@ void NoiseLocator::computeNoiseSinglePolH(MomentsFields *mfields)
       // save the data in a grid
       
       pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
+      noise_val_t &nval = _historyGrid[_gridIndexEl][_gridIndexAz];
       nval.noiseHc = _medianNoiseDbmHc;
       pthread_mutex_unlock(&_prevGridMutex);
       
@@ -671,7 +672,7 @@ void NoiseLocator::computeNoiseSinglePolV(MomentsFields *mfields)
       // save the data in a grid
       
       pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
+      noise_val_t &nval = _historyGrid[_gridIndexEl][_gridIndexAz];
       nval.noiseVc = _medianNoiseDbmVc;
       pthread_mutex_unlock(&_prevGridMutex);
       
@@ -781,7 +782,7 @@ void NoiseLocator::computeNoiseDpAltHvCoOnly(MomentsFields *mfields)
       // save the data in a grid
       
       pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
+      noise_val_t &nval = _historyGrid[_gridIndexEl][_gridIndexAz];
       nval.noiseHc = _medianNoiseDbmHc;
       nval.noiseVc = _medianNoiseDbmVc;
       pthread_mutex_unlock(&_prevGridMutex);
@@ -917,7 +918,7 @@ void NoiseLocator::computeNoiseDpAltHvCoCross(MomentsFields *mfields)
       // save the data in a grid
       
       pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
+      noise_val_t &nval = _historyGrid[_gridIndexEl][_gridIndexAz];
       nval.noiseHc = _medianNoiseDbmHc;
       nval.noiseVc = _medianNoiseDbmVc;
       nval.noiseHx = _medianNoiseDbmHx;
@@ -1065,7 +1066,7 @@ void NoiseLocator::computeNoiseDpSimHv(MomentsFields *mfields)
       // save the data in a grid
       
       pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
+      noise_val_t &nval = _historyGrid[_gridIndexEl][_gridIndexAz];
       nval.noiseHc = _medianNoiseDbmHc;
       nval.noiseVc = _medianNoiseDbmVc;
       pthread_mutex_unlock(&_prevGridMutex);
@@ -1186,7 +1187,7 @@ void NoiseLocator::computeNoiseDpHOnly(MomentsFields *mfields)
       // save the data in a grid
       
       pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
+      noise_val_t &nval = _historyGrid[_gridIndexEl][_gridIndexAz];
       nval.noiseHc = _medianNoiseDbmHc;
       nval.noiseVx = _medianNoiseDbmVx;
       pthread_mutex_unlock(&_prevGridMutex);
@@ -1308,7 +1309,7 @@ void NoiseLocator::computeNoiseDpVOnly(MomentsFields *mfields)
       // save the data in a grid
       
       pthread_mutex_lock(&_prevGridMutex);
-      noise_val_t &nval = _previousGrid[_gridIndexEl][_gridIndexAz];
+      noise_val_t &nval = _historyGrid[_gridIndexEl][_gridIndexAz];
       nval.noiseVc = _medianNoiseDbmVc;
       nval.noiseHx = _medianNoiseDbmHx;
       pthread_mutex_unlock(&_prevGridMutex);
@@ -1485,7 +1486,7 @@ int NoiseLocator::_getSavedNoiseClosestHc(noise_val_t &closest)
     if (iaz >= _gridSizeAz) iaz -= _gridSizeAz;
     
     pthread_mutex_lock(&_prevGridMutex);
-    noise_val_t prev = _previousGrid[iel][iaz];
+    noise_val_t prev = _historyGrid[iel][iaz];
     pthread_mutex_unlock(&_prevGridMutex);
     if (prev.noiseHc != 0) {
       closest = prev;
@@ -1526,7 +1527,7 @@ int NoiseLocator::_getSavedNoiseClosestVc(noise_val_t &closest)
     if (iaz >= _gridSizeAz) iaz -= _gridSizeAz;
     
     pthread_mutex_lock(&_prevGridMutex);
-    const noise_val_t prev = _previousGrid[iel][iaz];
+    const noise_val_t prev = _historyGrid[iel][iaz];
     pthread_mutex_unlock(&_prevGridMutex);
     if (prev.noiseVc != 0) {
       closest = prev;

@@ -296,7 +296,9 @@ private:
 
   int _gridIndexAz;
   int _gridIndexEl;
-  static noise_val_t **_previousGrid;
+  int _id;
+  static int _idCount;
+  static noise_val_t **_historyGrid;
   static pthread_mutex_t _prevGridMutex;
 
   static const double _gridResEl;
