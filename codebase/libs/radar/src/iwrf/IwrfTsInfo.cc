@@ -126,11 +126,12 @@ IwrfTsInfo &IwrfTsInfo::_copy(const IwrfTsInfo &rhs)
   _platform_georef1_active = rhs._platform_georef1_active;
 
   // free up existing meta-data queue entries
+
   for (size_t ii = 0; ii < _metaQueue.size(); ii++) {
     delete _metaQueue[ii];
   }
   _metaQueue.clear();
-
+  
   // copy over meta-data queue entries
   for (size_t ii = 0; ii < rhs._metaQueue.size(); ii++) {
     MemBuf *mcopy = new MemBuf(*rhs._metaQueue[ii]);
