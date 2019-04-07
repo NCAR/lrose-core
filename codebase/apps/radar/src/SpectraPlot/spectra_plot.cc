@@ -1693,7 +1693,7 @@ static void load_plot_data_single_prt()
   
   // compute moments
 
-  moments.singlePol(iq, _gateNum, false, _gateMoments);
+  moments.singlePolH(iq, _gateNum, false, _gateMoments);
   _gateMoments.mvar = moments.computeMvar(iq, _nSamples, _spectra.getPrt());
   _gateMoments.tpt = moments.computeTpt(iq, _nSamples);
   _gateMoments.cpd = moments.computeCpd(iq, _nSamples);
@@ -1905,7 +1905,7 @@ static void load_plot_data_single_prt()
   
   // compute moments after adaptive filter
   
-  moments.singlePol(filtWindowed, _gateNum, false, _filtMoments);
+  moments.singlePolH(filtWindowed, _gateNum, false, _filtMoments);
 
   // power spectrum of adaptively-filtered data
 
@@ -2272,7 +2272,7 @@ static void load_plot_data_staggered_prt()
   
   // compute moments for this gate
   
-  moments.singlePolStagPrt(iq, iqShort, iqLong, _gateNum, false, _gateMoments);
+  moments.singlePolHStagPrt(iq, iqShort, iqLong, _gateNum, false, _gateMoments);
   _gateMoments.mvar = moments.computeMvar(iq, _nSamples, _spectra.getPrt());
   _gateMoments.tpt = moments.computeTpt(iq, _nSamples);
   _gateMoments.cpd = moments.computeCpd(iq, _nSamples);
@@ -2325,8 +2325,8 @@ static void load_plot_data_staggered_prt()
   RadarComplex_t *regrShort = regrShort_.alloc(_nSamplesHalf);
   RadarComplex_t *regrLong = regrLong_.alloc(_nSamplesHalf);
   RadarMoments::separateStagIq(_nSamples, regrFiltered, regrShort, regrLong);
-  moments.singlePolStagPrt(regrFiltered, regrShort, regrLong,
-                           _gateNum, false, _filtMoments);
+  moments.singlePolHStagPrt(regrFiltered, regrShort, regrLong,
+                            _gateNum, false, _filtMoments);
 
   // compute expanded time series
   

@@ -593,7 +593,7 @@
     tt->descr = tdrpStrDup("Process instance");
     tt->help = tdrpStrDup("Used for registration with procmap.");
     tt->val_offset = (char *) &instance - &_start_;
-    tt->single_val.s = tdrpStrDup("Test");
+    tt->single_val.s = tdrpStrDup("test");
     tt++;
     
     // Parameter 'staggered_mode'
