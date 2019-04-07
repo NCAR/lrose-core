@@ -82,6 +82,16 @@ def main():
     if (options.verbose):
         options.debug = True
 
+    # check package name
+
+    if (options.package != "lrose-core" and
+        options.package != "lrose-blaze" and
+        options.package != "lrose-radx" and
+        options.package != "lrose-cidd") :
+        print("ERROR: invalid package name: %s:" % options.package, file=sys.stderr)
+        print("  options: lrose-core, lrose-blaze, lrose-radx, lrose-cidd", file=sys.stderr)
+        sys.exit(1)
+
     # for CIDD, set to static linkage
     if (options.package == "lrose-cidd"):
         options.static = True
