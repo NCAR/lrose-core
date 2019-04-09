@@ -4947,12 +4947,14 @@ int Beam::_correctHcrVRxGainForTemp()
   
   const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
   if (chunks.size() < 1) {
-    cerr << "ERROR - Beam::_correctHcrVRxGainForTemp()" << endl;
-    cerr << "  No suitable gain data from URL: "
-         << _params.hcr_delta_gain_spdb_url << endl;
-    cerr << "  Search time: " << DateTime::strm(_timeSecs) << endl;
-    cerr << "  Search margin (secs): "
-         << _params.hcr_delta_gain_search_margin_secs << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - Beam::_correctHcrVRxGainForTemp()" << endl;
+      cerr << "  No suitable gain data from URL: "
+           << _params.hcr_delta_gain_spdb_url << endl;
+      cerr << "  Search time: " << DateTime::strm(_timeSecs) << endl;
+      cerr << "  Search margin (secs): "
+           << _params.hcr_delta_gain_search_margin_secs << endl;
+    }
     return -1;
   }
   const Spdb::chunk_t &chunk = chunks[0];
