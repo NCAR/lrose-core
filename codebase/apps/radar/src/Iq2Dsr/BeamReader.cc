@@ -39,6 +39,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
+#include <didss/DsInputPath.hh>
 #include <Radx/RadxTime.hh>
 #include "BeamReader.hh"
 using namespace std;
@@ -154,9 +155,10 @@ BeamReader::BeamReader(const string &prog_name,
 
   _initPpiMode();
   
-  // check that file list set in archive and simulate mode
+  // check that file list set in FILELIST mode
   
-  if (_params.mode == Params::ARCHIVE && args.inputFileList.size() == 0) {
+  vector<string> inputPathList;
+  if (_params.mode == Params::FILELIST && args.inputFileList.size() == 0) {
     cerr << "ERROR: BeamReader::BeamReader." << endl;
     cerr << "  Mode is ARCHIVE."; 
     cerr << "  You must use -f to specify files on the command line."
@@ -164,8 +166,12 @@ BeamReader::BeamReader(const string &prog_name,
     args.usage(_progName, cerr);
     constructorOK = false;
     return;
+  } else {
+    inputPathList = args.inputFileList;
   }
     
+  // check that file list set in SIMLATE mode
+  
   if (_params.mode == Params::SIMULATE && args.inputFileList.size() == 0) {
     cerr << "ERROR: BeamReader::BeamReader." << endl;
     cerr << "  Mode is SIMULATE."; 
@@ -174,8 +180,29 @@ BeamReader::BeamReader(const string &prog_name,
     args.usage(_progName, cerr);
     constructorOK = false;
     return;
+  } else {
+    inputPathList = args.inputFileList;
   }
 
+  // in ARCHIVE mode, check we can get a file list
+  
+  if (_params.mode == Params::ARCHIVE) {
+    DsInputPath dsInput(_progName, _params.debug >= Params::DEBUG_VERBOSE,
+                        _params.input_dir,
+                        args.startTime, args.endTime);
+    inputPathList = dsInput.getPathList();
+    if (inputPathList.size() < 0) {
+      cerr << "ERROR: BeamReader::BeamReader." << endl;
+      cerr << "  Mode is ARCHIVE."; 
+      cerr << "  No files found in input_dir: " << _params.input_dir << endl;
+      cerr << "    start_time: " << DateTime::strm(_args.startTime) << endl;
+      cerr << "    end_time: " << DateTime::strm(_args.endTime) << endl;
+      args.usage(_progName, cerr);
+      constructorOK = false;
+      return;
+    }
+  }
+    
   // create the pulse reader
   
   IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
@@ -190,7 +217,7 @@ BeamReader::BeamReader(const string &prog_name,
                                        iwrfDebug,
                                        _params.position_fmq_at_start);
   } else {
-    _pulseReader = new IwrfTsReaderFile(_args.inputFileList, iwrfDebug);
+    _pulseReader = new IwrfTsReaderFile(inputPathList, iwrfDebug);
   }
 
   if (_params.cohere_iq_to_burst_phase) {

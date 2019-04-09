@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./Iq2Dsr
+ * TDRP params for Iq2Dsr
  **********************************************************************/
 
 //======================================================================
@@ -102,15 +102,18 @@ n_compute_threads = 8;
 // Operating mode.
 //
 // In REALTIME mode, the program waits for a new input file. In ARCHIVE 
-//   mode, it moves through the list of file names specified on the 
-//   command line. In SIMULATE mode, the program moves repeatedly through 
-//   the file list, creating output files with times set to now. This is 
-//   useful for simulating an operational radar. In FMQ mode, the program 
-//   opens the input_fmq, and reads time series data from the queue.
+//   mode, it moves through the files between the start and end times 
+//   specified on the command line. In FILELIST mode, it moves through the 
+//   list of file names specified on the command line. In SIMULATE mode, 
+//   the program moves repeatedly through the file list, creating output 
+//   files with times set to now. This is useful for simulating an 
+//   operational radar. In FMQ mode, the program opens the input_fmq, and 
+//   reads time series data from the queue.
 //
 //
 // Type: enum
 // Options:
+//     FILELIST
 //     ARCHIVE
 //     REALTIME
 //     SIMULATE
@@ -150,14 +153,14 @@ position_fmq_at_start = FALSE;
 //
 // Dir for input data files.
 //
-// This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, 
-//   the file paths are specified on the command line.
+// This is used in REALTIME and ARCHIVE modes. In FILELIST and SIMULATE 
+//   modes, the file paths are specified on the command line.
 //
 //
 // Type: string
 //
 
-input_dir = "./input";
+input_dir = "/scr/snow2/rsfdata/projects/socrates/hcr/time_series/wband/save";
 
 ///////////// use_ldata_info_file /////////////////////
 //
@@ -690,6 +693,43 @@ apply_elevation_offset = FALSE;
 
 elevation_offset = 0;
 
+///////////// override_scan_mode //////////////////////
+//
+// Option to override the scan mode in the time series data.
+//
+// Set this to TRUE if the scan_mode is incorrect in the time series, 
+//   and you can override to a constant scan mode.
+//
+//
+// Type: boolean
+//
+
+override_scan_mode = FALSE;
+
+///////////// scan_mode_for_override //////////////////
+//
+// Select the scan mode for override.
+//
+// See 'override_scan_mode'.
+//
+//
+// Type: enum
+// Options:
+//     SCAN_MODE_UNKNOWN
+//     SCAN_MODE_SECTOR
+//     SCAN_MODE_COPLANE
+//     SCAN_MODE_RHI
+//     SCAN_MODE_VERTICAL_POINTING
+//     SCAN_MODE_IDLE
+//     SCAN_MODE_SURVEILLANCE
+//     SCAN_MODE_SUNSCAN
+//     SCAN_MODE_POINTING
+//     SCAN_MODE_MANUAL_PPI
+//     SCAN_MODE_MANUAL_RHI
+//
+
+scan_mode_for_override = SCAN_MODE_UNKNOWN;
+
 //======================================================================
 //
 // MOMENTS COMPUTATIONS.
@@ -725,7 +765,9 @@ elevation_offset = 0;
 //   power in the central part of the time series. The adjustment corrects 
 //   beam_n_samples by computing the fraction of the window in which 90% 
 //   of the power occurs. For the VONHANN window this factor is just below 
-//   2.0, and for the BLACKMAN window it is just above 2.0.
+//   2.0, and for the BLACKMAN window it is just above 2.0. TUKEY_10 
+//   refers to a Tukey window with alpha of 0.1. Similarly TUKEY_20 means 
+//   alpha is 0.2, etc.
 // (f) switching_receiver: DEPRECATED (NO LONGER USED), we assuming a 
 //   switching receiver for the following modes: DP_ALT_HV_CO_ONLY, 
 //   DP_ALT_HV_CO_CROSS, DP_SIM_HV_SWITCHED_HV.
@@ -736,7 +778,8 @@ elevation_offset = 0;
 //   parameter file.
 //
 // xmit_rcv_mode options:
-//  SP: Single polarization
+//  SINGLE_POL: single polarization, H channel.
+//  SINGLE_POL_V: single polarization, V channel.
 //  DP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar 
 //   receiver only (e.g. CP2 S-band)
 //  DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and 
@@ -760,6 +803,19 @@ elevation_offset = 0;
 //   velocity sign is incorrect. Set this flag to TRUE to change the sign.
 //
 // proc_flags: special processing options, not active yet.
+//
+// beam_method:
+// SPECIFY_N_SAMPLES:
+//   take the next N samples to form the beam;
+// SPECIFY_ANGLE:
+//   check the scanning angles, use those pulses that traverse the 
+//   specified angular arc;
+// CONSTANT_STEERING_ANGLE:
+//   process all pulses with a constant azimuth and elevation - this 
+//   applies to some electronically-steered radars, where the beam is 
+//   steered to a fixed angle for a while, and then jumps to a different 
+//   pointing direction. We use all of the pulses with a constant steering 
+//   angle to form the beam.
 //
 //
 // Type: struct
@@ -788,6 +844,7 @@ elevation_offset = 0;
 //        Options:
 //          BEAM_SPECIFY_N_SAMPLES
 //          BEAM_SPECIFY_ANGLE
+//          BEAM_CONSTANT_STEERING_ANGLE
 //      int beam_n_samples;
 //      double beam_angle_deg;
 //      boolean index_the_beams;
@@ -799,6 +856,10 @@ elevation_offset = 0;
 //          WINDOW_VONHANN
 //          WINDOW_BLACKMAN
 //          WINDOW_BLACKMAN_NUTTALL
+//          WINDOW_TUKEY_10
+//          WINDOW_TUKEY_20
+//          WINDOW_TUKEY_30
+//          WINDOW_TUKEY_50
 //      boolean switching_receiver;
 //      xmit_rcv_mode_t xmit_rcv_mode;
 //        Options:
@@ -810,6 +871,7 @@ elevation_offset = 0;
 //          DP_SIM_HV_SWITCHED_HV
 //          DP_H_ONLY_FIXED_HV
 //          DP_V_ONLY_FIXED_HV
+//          SINGLE_POL_V
 //      boolean apply_clutter_filter;
 //      boolean apply_sz;
 //      boolean change_velocity_sign;
@@ -1253,6 +1315,7 @@ set_cal_by_pulse_width = FALSE;
 //          DP_SIM_HV_SWITCHED_HV
 //          DP_H_ONLY_FIXED_HV
 //          DP_V_ONLY_FIXED_HV
+//          SINGLE_POL_V
 //      double zdr_correction_db;
 //      double system_phidp_deg;
 //   }
@@ -3592,7 +3655,7 @@ write_blocking = FALSE;
 //
 // Wait per beam (milli-secs).
 //
-// ARCHIVE and SIMULATE modes only.
+// FILELIST, ARCHIVE and SIMULATE modes only.
 //
 //
 // Type: int

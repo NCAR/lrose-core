@@ -53,6 +53,7 @@ public:
   // public data
 
   tdrp_override_t override;
+  time_t startTime, endTime;
   vector<string> inputFileList;
 
   void usage(string &prog_name, ostream &out) const;

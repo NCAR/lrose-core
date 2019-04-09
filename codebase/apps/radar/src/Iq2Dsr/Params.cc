@@ -659,20 +659,22 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar. In FMQ mode, the program opens the input_fmq, and reads time series data from the queue.");
+    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the files between the start and end times specified on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar. In FMQ mode, the program opens the input_fmq, and reads time series data from the queue.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
-    tt->enum_def.nfields = 4;
+    tt->enum_def.nfields = 5;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("ARCHIVE");
-      tt->enum_def.fields[0].val = ARCHIVE;
-      tt->enum_def.fields[1].name = tdrpStrDup("REALTIME");
-      tt->enum_def.fields[1].val = REALTIME;
-      tt->enum_def.fields[2].name = tdrpStrDup("SIMULATE");
-      tt->enum_def.fields[2].val = SIMULATE;
-      tt->enum_def.fields[3].name = tdrpStrDup("FMQ");
-      tt->enum_def.fields[3].val = FMQ;
+      tt->enum_def.fields[0].name = tdrpStrDup("FILELIST");
+      tt->enum_def.fields[0].val = FILELIST;
+      tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
+      tt->enum_def.fields[1].val = ARCHIVE;
+      tt->enum_def.fields[2].name = tdrpStrDup("REALTIME");
+      tt->enum_def.fields[2].val = REALTIME;
+      tt->enum_def.fields[3].name = tdrpStrDup("SIMULATE");
+      tt->enum_def.fields[3].val = SIMULATE;
+      tt->enum_def.fields[4].name = tdrpStrDup("FMQ");
+      tt->enum_def.fields[4].val = FMQ;
     tt->single_val.e = FMQ;
     tt++;
     
@@ -707,7 +709,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_dir");
     tt->descr = tdrpStrDup("Dir for input data files.");
-    tt->help = tdrpStrDup("This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, the file paths are specified on the command line.");
+    tt->help = tdrpStrDup("This is used in REALTIME and ARCHIVE modes. In FILELIST and SIMULATE modes, the file paths are specified on the command line.");
     tt->val_offset = (char *) &input_dir - &_start_;
     tt->single_val.s = tdrpStrDup("./input");
     tt++;
@@ -4155,7 +4157,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("beam_wait_msecs");
     tt->descr = tdrpStrDup("Wait per beam (milli-secs)");
-    tt->help = tdrpStrDup("ARCHIVE and SIMULATE modes only.");
+    tt->help = tdrpStrDup("FILELIST, ARCHIVE and SIMULATE modes only.");
     tt->val_offset = (char *) &beam_wait_msecs - &_start_;
     tt->single_val.i = 0;
     tt++;

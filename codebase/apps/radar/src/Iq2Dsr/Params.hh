@@ -75,10 +75,11 @@ public:
   } debug_t;
 
   typedef enum {
-    ARCHIVE = 0,
-    REALTIME = 1,
-    SIMULATE = 2,
-    FMQ = 3
+    FILELIST = 0,
+    ARCHIVE = 1,
+    REALTIME = 2,
+    SIMULATE = 3,
+    FMQ = 4
   } mode_t;
 
   typedef enum {

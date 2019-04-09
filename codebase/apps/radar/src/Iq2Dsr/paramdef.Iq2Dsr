@@ -60,13 +60,13 @@ commentdef {
 };
 
 typedef enum {
-  ARCHIVE, REALTIME, SIMULATE, FMQ
+  FILELIST, ARCHIVE, REALTIME, SIMULATE, FMQ
 } mode_t;
 
 paramdef enum mode_t {
   p_default = FMQ;
   p_descr = "Operating mode";
-  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar. In FMQ mode, the program opens the input_fmq, and reads time series data from the queue.";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the files between the start and end times specified on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar. In FMQ mode, the program opens the input_fmq, and reads time series data from the queue.";
 } mode;
 
 paramdef string {
@@ -84,7 +84,7 @@ paramdef boolean {
 paramdef string {
   p_default = "./input";
   p_descr = "Dir for input data files.";
-  p_help = "This is used in REALTIME mode only. In ARCHIVE and SIMULATE modes, the file paths are specified on the command line.";
+  p_help = "This is used in REALTIME and ARCHIVE modes. In FILELIST and SIMULATE modes, the file paths are specified on the command line.";
 } input_dir;
 
 paramdef boolean {
@@ -1703,7 +1703,7 @@ paramdef boolean {
 paramdef int {
   p_default = 0;
   p_descr = "Wait per beam (milli-secs)";
-  p_help = "ARCHIVE and SIMULATE modes only.";
+  p_help = "FILELIST, ARCHIVE and SIMULATE modes only.";
 } beam_wait_msecs;
 
 typedef enum {

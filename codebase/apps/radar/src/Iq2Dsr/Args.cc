@@ -33,6 +33,7 @@
 #include "Args.hh"
 #include <cstring>
 #include <cstdlib>
+#include <toolsa/DateTime.hh>
 
 // constructor
 
@@ -40,6 +41,8 @@ Args::Args()
 
 {
   TDRP_init_override(&override);
+  startTime = 0;
+  endTime = 0;
 }
 
 // destructor
@@ -129,12 +132,46 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	    inputFileList.push_back(argv[j]);
 	  }
 	}
-	sprintf(tmp_str, "mode = ARCHIVE;");
+	sprintf(tmp_str, "mode = FILELIST;");
 	TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
       }
       
+    } else if (!strcmp(argv[i], "-start")) {
+      
+      if (i < argc - 1) {
+	startTime = DateTime::parseDateTime(argv[++i]);
+	if (startTime == DateTime::NEVER)
+	{
+	  iret = -1;
+	}
+	else
+	{
+	  sprintf(tmp_str, "mode = ARCHIVE;");
+	  TDRP_add_override(&override, tmp_str);
+	}
+      } else {
+	iret = -1;
+      }
+
+    } else if (!strcmp(argv[i], "-end")) {
+      
+      if (i < argc - 1) {
+	endTime = DateTime::parseDateTime(argv[++i]);
+	if (endTime == DateTime::NEVER)
+	{
+	  iret = -1;
+	}
+	else
+	{
+	  sprintf(tmp_str, "mode = ARCHIVE;");
+	  TDRP_add_override(&override, tmp_str);
+	}
+      } else {
+	iret = -1;
+      }
+    
     } // if
     
   } // i
@@ -143,7 +180,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
     usage(prog_name, cerr);
   }
 
-  return (iret);
+  return iret;
     
 }
 
@@ -152,17 +189,21 @@ void Args::usage(string &prog_name, ostream &out) const
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"
-      << "       [ --, -h, -help, -man ] produce this list.\n"
-      << "       [ -d, -debug ] print debug messages\n"
-      << "       [ -f ? ?] input file list\n"
-      << "         ARCHIVE and SIMULATE modes only\n"
-      << "       [ -mode ?] ARCHIVE, REALTIME or SIMULATE\n"
-      << "       [ -noise ] prints out average noise value\n"
-      << "         Does not send data to FMQ\n"
-      << "       [ -radar_id ? ] filter on this radar_id\n"
-      << "       [ -v, -verbose ] print verbose debug messages\n"
-      << "       [ -vv, -extra ] print extra verbose debug messages\n"
-      << "       [ -write_blocking ] set output FMQ to block\n"
+      << "  [ --, -h, -help, -man ] produce this list.\n"
+      << "  [ -d, -debug ] print debug messages\n"
+      << "  [ -end \"yyyy mm dd hh mm ss\"] end time\n"
+      << "    ARCHIVE mode only\n"
+      << "  [ -f ? ?] input file list\n"
+      << "    FILELIST and SIMULATE modes only\n"
+      << "  [ -mode ?] FILELIST, ARCHIVE, REALTIME or SIMULATE\n"
+      << "  [ -noise ] prints out average noise value\n"
+      << "    Does not send data to FMQ\n"
+      << "  [ -radar_id ? ] filter on this radar_id\n"
+      << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
+      << "     ARCHIVE mode only\n"
+      << "  [ -v, -verbose ] print verbose debug messages\n"
+      << "  [ -vv, -extra ] print extra verbose debug messages\n"
+      << "  [ -write_blocking ] set output FMQ to block\n"
       << endl;
   
   Params::usage(out);
