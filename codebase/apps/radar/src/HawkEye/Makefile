@@ -65,6 +65,9 @@ HDRS = \
 	FlowLayout.hh \
 	HawkEye.hh \
 	PaletteManager.hh \
+        ParameterColorView.hh \
+        FieldColorController.hh \
+        DisplayFieldModel.hh \
 	Params.hh \
 	PpiBeam.hh \
 	PolarManager.hh \
@@ -96,6 +99,7 @@ NORM_SRCS = \
 	ColorMap.cc \
 	ColorTableManager.cc \
 	DisplayField.cc \
+	DisplayFieldModel.cc \
 	FlowLayout.cc \
 	HawkEye.cc \
 	Main.cc \
@@ -124,7 +128,8 @@ MOC_SRCS = \
 	RhiWidget.cc \
 	RhiWindow.cc \
 	TimeScaleWidget.cc \
-	ParameterColorDialog.cc \
+	ParameterColorView.cc \
+        FieldColorController.cc \
 	ColorBar.cc \
 	ColorMapTemplates.cc \
 	ClickableLabel.cc \
@@ -146,7 +151,8 @@ MOC_OUTPUT = \
 	moc_RhiWidget.cpp \
 	moc_RhiWindow.cpp \
 	moc_TimeScaleWidget.cpp \
-	moc_ParameterColorDialog.cpp \
+	moc_ParameterColorView.cpp \
+        moc_FieldColorController.cpp \
 	moc_ColorBar.cpp \
 	moc_ColorMapTemplates.cpp \
 	moc_ClickableLabel.cpp \

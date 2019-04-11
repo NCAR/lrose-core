@@ -76,6 +76,7 @@
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/LogStream.hh>
 #include <Radx/RadxFile.hh>
 
 using namespace std;
@@ -522,6 +523,30 @@ void DisplayManager::_changeFieldVariable(bool value) {
     }
   }
 
+}
+
+void DisplayManager::changeToDisplayField(string fieldName, ColorMap newColorMap) {
+  // connect the new color map with the field
+  // find the fieldName in the list of FieldDisplays
+  bool found = false;
+  vector<DisplayField *>::iterator it;
+  for (it = _fields.begin(); it != _fields.end(); it++) {
+    DisplayField *field = *it;
+   
+    string name = field->getName();
+    if (name.compare(fieldName) == 0) {
+      found = true;
+      field->replaceColorMap(newColorMap);
+    }
+  }
+  if (!found) {
+    LOG(ERROR) << fieldName;
+    LOG(ERROR) << "ERROR - field not found; no color map change";
+    // TODO: present error message box 
+  } else {
+    // change the field variable
+    _changeFieldVariable(true); // ?? 
+  }
 }
 
 void DisplayManager::_openFile() {

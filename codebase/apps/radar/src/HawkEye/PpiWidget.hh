@@ -135,7 +135,7 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   void clear();
 
   void contextMenuExamine();
-
+  void contextMenuParameterColors();
 
  protected:
 

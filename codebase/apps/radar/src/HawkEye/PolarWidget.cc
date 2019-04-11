@@ -28,6 +28,7 @@
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/uusleep.h>
+#include <toolsa/LogStream.hh>
 
 #include <QTimer>
 #include <QBrush>
@@ -44,6 +45,9 @@
 #include <QMessageBox>
 #include <QErrorMessage>
 
+#include "ParameterColorView.hh"
+#include "DisplayFieldModel.hh"
+#include "FieldColorController.hh"
 #include "PolarWidget.hh"
 #include "PolarManager.hh"
 #include "SpreadSheetView.hh"
@@ -644,11 +648,37 @@ void PolarWidget::contextMenuCancel()
 
 void PolarWidget::contextMenuParameterColors()
 {
-  //  setColor();                                                                                                         
+  /*
+  LOG(DEBUG) << "enter";
+
+  //DisplayField selectedField;
+
+  const DisplayField &field = _manager.getSelectedField();
+  const ColorMap &colorMapForSelectedField = field.getColorMap();
+  ParameterColorView *parameterColorView = new ParameterColorView(this);
+  vector<DisplayField> displayFields = _manager.getDisplayFields();
+  DisplayFieldModel *displayFieldModel = new DisplayFieldModel(displayFields);
+  FieldColorController fieldColorController(parameterColorView, displayFieldModel);
+  // connect some signals and slots in order to retrieve information
+  // and send changes back to display 
+  connect(&parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
+  connect(&parameterColorView, SIGNAL(changesToDisplay()), &_manager, SLOT(changesToDisplayFields()));
+
+  // TODO: move this call to the controller?
+  parameterColorView.exec();
+
+  if(parameterColorController.Changes()) {
+    // TODO: what are changes?  new displayField(s)?
+  }
+  
+  // TODO: where to delete the ParameterColor objects & disconnect the signals and slots??
+  delete parameterColorView;
+  delete parameterColorModel;
+
+  LOG(DEBUG) << "exit ";
+  */
   informationMessage();
-
-  //  notImplemented();                                                                                                   
-
+   
 }
 
 void PolarWidget::contextMenuView()

@@ -132,3 +132,7 @@ void DisplayField::setColorMapRange(double min, double max)
     " => nice min, max = " << niceMin << "," << niceMax << endl;
 }
 
+void DisplayField::replaceColorMap(ColorMap newColorMap)
+{
+  _colorMap = newColorMap;
+}

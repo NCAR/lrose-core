@@ -66,6 +66,7 @@ public:
   bool haveColorMap() const { return _haveColorMap; }
   void setNoColorMap() { _haveColorMap = false; }
   void changeColorMap() { _haveColorMap = true; }
+  void replaceColorMap(ColorMap newColorMap);
 
   void setSelectValue(double value) { _selectValue = value; }
   double getSelectValue() const { return _selectValue; }

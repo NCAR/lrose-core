@@ -25,8 +25,12 @@
 #include "PolarManager.hh"
 #include "SpreadSheetView.hh"
 #include "SpreadSheetController.hh"
+#include "ParameterColorView.hh"
+#include "FieldColorController.hh"
+#include "DisplayFieldModel.hh"
 
 #include <toolsa/toolsa_macros.h>
+#include <toolsa/LogStream.hh>
 #include <QMenu>
 #include <QAction>
 #include <QLabel>
@@ -1091,6 +1095,41 @@ void PpiWidget::_refreshImages()
 
   update();
 }
+
+void PpiWidget::contextMenuParameterColors()
+{
+
+  LOG(DEBUG) << "enter";
+
+  //DisplayField selectedField;                                                                             
+
+  const DisplayField &field = _manager.getSelectedField();
+  const ColorMap &colorMapForSelectedField = field.getColorMap();
+  ParameterColorView *parameterColorView = new ParameterColorView(this);
+  vector<DisplayField *> displayFields = _manager.getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
+  DisplayField selectedField = _manager.getSelectedField();
+  DisplayFieldModel *displayFieldModel = new DisplayFieldModel(displayFields, selectedField.getName());
+  FieldColorController fieldColorController(parameterColorView, displayFieldModel);
+  // connect some signals and slots in order to retrieve information                                        
+  // and send changes back to display                                                                       
+  //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
+  connect(&fieldColorController, SIGNAL(colorMapRedefined(string, ColorMap)),
+	  &_manager, SLOT(changeToDisplayField(string, ColorMap)));
+
+  //connect(parameterColorView, SIGNAL(needFieldNames()), this, SLOT(getFieldNames()));
+  //connect(this, SIGNAL(fieldNamesSupplied(vector<string>)), 
+  //  parameterColorView, SLOT(fieldNamesSupplied(vector<string>));
+  // TODO: move this call to the controller?                                                                
+	  // parameterColorView.exec();
+
+  //  if(parameterColorController.Changes()) {
+    // TODO: what are changes?  new displayField(s)?                                                        
+  //}
+ 
+  LOG(DEBUG) << "exit ";
+
+}
+
 
 
 void PpiWidget::ExamineEdit(const RadxRay *closestRay) {

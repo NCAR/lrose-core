@@ -44,6 +44,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include "ColorMap.hh"
 #include <QMainWindow>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxTime.hh>
@@ -98,6 +99,7 @@ public:
   const string &getSelectedFieldName() const { return _selectedName; }
   const string &getSelectedFieldUnits() const { return _selectedUnits; }
   const DisplayField &getSelectedField() const { return *_fields[_fieldNum]; }
+  const vector<DisplayField *> &getDisplayFields() const { return _fields; }
 
   // location
 
@@ -109,6 +111,9 @@ public:
   // enable the zoom button
   
   virtual void enableZoomButton() const = 0;
+
+  void changeToDisplayField(string fieldName, ColorMap newColorMap);
+
 
 signals:
 
@@ -124,6 +129,7 @@ signals:
    */
   
   void frameResized(const int width, const int height);
+
   
 protected:
   
