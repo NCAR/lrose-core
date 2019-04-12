@@ -484,6 +484,24 @@ void
 }
 
 /**********************************************************/
+void
+  ColorMap::setRangeMin(double rangeMin) {
+
+  _rangeMin = rangeMin;
+  _resetMap();
+
+}
+
+/**********************************************************/
+void
+  ColorMap::setRangeMax(double rangeMax) {
+
+  _rangeMax = rangeMax;
+  _resetMap();
+
+}
+
+/**********************************************************/
 ColorMap::~ColorMap()
 {
 }
@@ -1443,6 +1461,26 @@ int ColorMap::_getLutIndex(double data) const
   }
 
   return index;
+
+}
+
+////////////////////
+// extract the r,g,b values and reset the map
+
+void
+  ColorMap::_resetMap() {
+
+  vector<CmapEntry>::iterator it;
+  vector<int> red;
+  vector<int> green;
+  vector<int> blue;
+
+  for (it = _entries.begin(); it != _entries.end(); it++) {
+    red.push_back(it->red);
+    green.push_back(it->green);
+    blue.push_back(it->blue);
+  }
+  setMap(_rangeMin, _rangeMax, red, green, blue);
 
 }
 

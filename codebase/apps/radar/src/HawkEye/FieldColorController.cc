@@ -13,6 +13,9 @@ FieldColorController::FieldColorController(ParameterColorView *parameterColorVie
   connect(_view, SIGNAL(getColorMap(string)), this, SLOT(getColorMap(string)));
   //connect(_view, SIGNAL(setV()), this, SLOT(setV()));
 
+  connect(_view, SIGNAL(colorMapMaxChanged(double)), this, SLOT(colorMapMaxChanged(double)));
+  connect(_view, SIGNAL(colorMapMinChanged(double)), this, SLOT(colorMapMinChanged(double)));
+
   //connect(this, SIGNAL(updateEvent(vector<string>, string)),
   // _view, SLOT(updateEvent(vector<string>, string)));
 
@@ -57,7 +60,21 @@ void FieldColorController::getColorMap(string fieldName)
    _view->colorMapProvided(fieldName, colorMap);
 }
 
+void FieldColorController::colorMapMaxChanged(double newValue) {
 
+  ColorMap *colorMap =_model->colorMapMaxChanged(newValue);
+
+  //  send new working colorMap to _view
+  _view->colorMapProvided("", colorMap); 
+}
+
+void FieldColorController::colorMapMinChanged(double newValue) {
+
+  ColorMap *colorMap =_model->colorMapMinChanged(newValue);
+
+  //  send new working colorMap to _view
+  _view->colorMapProvided("", colorMap); 
+}
 
 /*
 void FieldColorController::getFieldNames() {

@@ -229,6 +229,14 @@ class DLL_EXPORT ColorMap {
   void setRange(double rangeMin,  ///< The minimum map range
                 double rangeMax); ///< The maximum map range
 
+  /// Change the range min of an existing map; update the Lut.
+
+  void setRangeMin(double rangeMin);  ///< The minimum map range
+
+  /// Change the range max of an existing map; update the Lut.
+
+  void setRangeMax(double rangeMax); ///< The maximum map range
+
   // set map by reading color map file
   // Returns 0 on success, -1 on failure
         
@@ -441,6 +449,9 @@ class DLL_EXPORT ColorMap {
 
   ColorMap &_copy(const ColorMap &rhs);
 
+  // extract the r,g,b values and reset the map
+
+  void _resetMap();
 };
 
 #endif

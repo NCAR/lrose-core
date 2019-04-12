@@ -29,58 +29,11 @@ public:
 
 public slots:
   void getColorMap(string fieldName);
+  void colorMapMaxChanged(double newValue);
+  void colorMapMinChanged(double newValue);
 
 private slots:
 
-  /*
-    void setCenterPoint();
-    void setMaxPoint();
-    void setMinPoint();
-    void setStepPoint();
-    void setColorOnButton(QPushButton *button, QColor color);
-    void setValueOnLineEdit(QLineEdit *editor, double value);
-    void setGridColor();
-    void setBoundaryColor();
-    void setExceededColor();
-    void setMissingColor();
-    void setAnnotationColor();
-    void setBackgroundColor();
-    void setEmphasisColor();
-    void cancelColorScale();
-    void saveColorScale();
-    void replotColorScale();
-    void pickColorPalette();
-
-private:
-    QLabel *centerColorLabel;
-    QLineEdit *centerColorLineEdit;
-    QLabel *minColorLabel;
-    QLineEdit *minColorLineEdit;
-    QLabel *maxColorLabel;
-    QLineEdit *maxColorLineEdit;
-    QLabel *stepColorLabel;
-    QLineEdit *stepColorLineEdit;
-
-
-
-
-    QLabel *gridColorLabel;
-    QPushButton *gridColorButton;
-    QLabel *boundaryColorLabel;
-    QPushButton *boundaryColorButton;
-    QLabel *exceededColorLabel;
-    QPushButton *exceededColorButton;
-    QLabel *missingColorLabel;
-    QPushButton *missingColorButton;
-    QLabel *annotationColorLabel;
-    QPushButton *annotationColorButton;
-    QLabel *backgroundColorLabel;
-    QPushButton *backgroundColorButton;
-    QLabel *emphasisColorLabel;
-    QPushButton *emphasisColorButton;
-
-    DialogOptionsWidget *colorDialogOptionsWidget;
-  */
 };
 
 #endif

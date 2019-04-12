@@ -30,6 +30,8 @@ public slots:
 
 signals:
   void getColorMap(string selectedField);
+  void colorMapMaxChanged(double value);
+  void colorMapMinChanged(double value);
   void replot(string selectedField);
 
 private slots:

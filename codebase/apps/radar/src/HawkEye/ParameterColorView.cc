@@ -81,9 +81,13 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
     minColorLabel->setText(tr("Min"));
     minColorLineEdit = new QLineEdit();
 
+    QString maxInputMask("####.#");
+    minColorLineEdit->setInputMask(maxInputMask);
+
     maxColorLabel = new QLabel;
     maxColorLabel->setText(tr("Max"));
     maxColorLineEdit = new QLineEdit();
+    maxColorLineEdit->setInputMask(maxInputMask);
 
     stepColorLabel = new QLabel;
     stepColorLabel->setText(tr("Step"));
@@ -166,6 +170,9 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
     connect(annotationColorButton, &QAbstractButton::clicked, this, &ParameterColorView::setAnnotationColor);
     connect(backgroundColorButton, &QAbstractButton::clicked, this, &ParameterColorView::setBackgroundColor);
     connect(emphasisColorButton, &QAbstractButton::clicked, this, &ParameterColorView::setEmphasisColor);
+
+    connect(maxColorLineEdit, &QLineEdit::editingFinished, this, &ParameterColorView::setMaxPoint);
+    connect(minColorLineEdit, &QLineEdit::editingFinished, this, &ParameterColorView::setMinPoint);
 
     //    connect(cmapLabel, &ClickableLabel::clicked, this, &ParameterColorView::pickColorPalette);
 
@@ -250,7 +257,7 @@ void ParameterColorView::colorMapProvided(string fieldName, ColorMap *colorMap) 
     errorMessage("field not found", fieldName);
   } else {
   // delete and free the previous color map
-    if (currentColorMap != NULL) delete currentColorMap;
+    //if (currentColorMap != NULL) delete currentColorMap;
     if (colorBar != NULL) delete colorBar;
     if (cmapLabel != NULL) delete cmapLabel;
 
@@ -351,6 +358,10 @@ void ParameterColorView::setMaxPoint()
   } else {
     printf("unrecognized value entered\n");
   }
+
+  // modify the working colorMap
+  emit colorMapMaxChanged(value);
+
   //qvalue = centerColorLineEdit->text();
   //std::string value = qvalue.toStdString();
   //sscanf(value.c_str(),"%g", &newCenterPoint);
@@ -368,6 +379,10 @@ void ParameterColorView::setMinPoint()
   } else {
     printf("unrecognized value entered\n");
   }
+
+  // modify the working colorMap
+  emit colorMapMinChanged(value);
+
   //qvalue = centerColorLineEdit->text();
   //std::string value = qvalue.toStdString();
   //sscanf(value.c_str(),"%g", &newCenterPoint);
