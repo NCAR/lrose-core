@@ -83,6 +83,13 @@ public:
   } input_mode_t;
 
   typedef enum {
+    SPECTRUM = 0,
+    TIME_SERIES = 1,
+    I_VS_Q = 2,
+    PHASOR = 3
+  } iqplot_type_t;
+
+  typedef enum {
     LEGEND_TOP_LEFT = 0,
     LEGEND_TOP_RIGHT = 1,
     LEGEND_BOTTOM_LEFT = 2,
@@ -507,6 +514,9 @@ public:
 
   int iqplots_n_columns;
 
+  iqplot_type_t *_iqplot_types;
+  int iqplot_types_n;
+
   int iqplot_top_margin;
 
   int iqplot_bottom_margin;
@@ -533,11 +543,15 @@ public:
 
   int iqplot_legend_font_size;
 
+  char* iqplot_axis_label_color;
+
   char* iqplot_title_color;
 
   char* iqplot_axes_color;
 
   char* iqplot_grid_color;
+
+  char* iqplot_fill_color;
 
   char* iqplot_labels_color;
 
@@ -711,7 +725,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[149];
+  mutable TDRPtable _table[152];
 
   const char *_className;
 

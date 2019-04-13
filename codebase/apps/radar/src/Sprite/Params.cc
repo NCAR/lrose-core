@@ -1174,6 +1174,40 @@
     tt->single_val.i = 2;
     tt++;
     
+    // Parameter 'iqplot_types'
+    // ctype is '_iqplot_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("iqplot_types");
+    tt->descr = tdrpStrDup("Array of types of IQ plots for each sub panel.");
+    tt->help = tdrpStrDup("The array size must match n_rows times n_columns.");
+    tt->array_offset = (char *) &_iqplot_types - &_start_;
+    tt->array_n_offset = (char *) &iqplot_types_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(iqplot_type_t);
+    tt->array_n = 4;
+    tt->enum_def.name = tdrpStrDup("iqplot_type_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("SPECTRUM");
+      tt->enum_def.fields[0].val = SPECTRUM;
+      tt->enum_def.fields[1].name = tdrpStrDup("TIME_SERIES");
+      tt->enum_def.fields[1].val = TIME_SERIES;
+      tt->enum_def.fields[2].name = tdrpStrDup("I_VS_Q");
+      tt->enum_def.fields[2].val = I_VS_Q;
+      tt->enum_def.fields[3].name = tdrpStrDup("PHASOR");
+      tt->enum_def.fields[3].val = PHASOR;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].e = SPECTRUM;
+      tt->array_vals[1].e = TIME_SERIES;
+      tt->array_vals[2].e = I_VS_Q;
+      tt->array_vals[3].e = PHASOR;
+    tt++;
+    
     // Parameter 'iqplot_top_margin'
     // ctype is 'int'
     
@@ -1309,7 +1343,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("iqplot_axis_label_font_size");
-    tt->descr = tdrpStrDup("Font size of axis labels in spectra (pixels).");
+    tt->descr = tdrpStrDup("Font size of axis labels in iq plots (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_axis_label_font_size - &_start_;
     tt->single_val.i = 8;
@@ -1339,6 +1373,18 @@
     tt->single_val.i = 6;
     tt++;
     
+    // Parameter 'iqplot_axis_label_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("iqplot_axis_label_color");
+    tt->descr = tdrpStrDup("Color of iqplot axis labels.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &iqplot_axis_label_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
     // Parameter 'iqplot_title_color'
     // ctype is 'char*'
     
@@ -1348,7 +1394,7 @@
     tt->descr = tdrpStrDup("Color of plot title.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_title_color - &_start_;
-    tt->single_val.s = tdrpStrDup("red");
+    tt->single_val.s = tdrpStrDup("orange");
     tt++;
     
     // Parameter 'iqplot_axes_color'
@@ -1357,7 +1403,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("iqplot_axes_color");
-    tt->descr = tdrpStrDup("Color of axes in spectra.");
+    tt->descr = tdrpStrDup("Color of axes in iq plots.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_axes_color - &_start_;
     tt->single_val.s = tdrpStrDup("green");
@@ -1369,10 +1415,22 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("iqplot_grid_color");
-    tt->descr = tdrpStrDup("Color of grid lines on spectra.");
+    tt->descr = tdrpStrDup("Color of grid lines on iq plots.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_grid_color - &_start_;
     tt->single_val.s = tdrpStrDup("gray");
+    tt++;
+    
+    // Parameter 'iqplot_fill_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("iqplot_fill_color");
+    tt->descr = tdrpStrDup("Color of area fill for IQ plots.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &iqplot_fill_color - &_start_;
+    tt->single_val.s = tdrpStrDup("pink");
     tt++;
     
     // Parameter 'iqplot_labels_color'
@@ -1381,7 +1439,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("iqplot_labels_color");
-    tt->descr = tdrpStrDup("Color of labels in spectra.");
+    tt->descr = tdrpStrDup("Color of labels in iq plots.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_labels_color - &_start_;
     tt->single_val.s = tdrpStrDup("red");
@@ -1793,7 +1851,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("ascope_axis_label_color");
-    tt->descr = tdrpStrDup("Color of ascope line.");
+    tt->descr = tdrpStrDup("Color of ascope axis labels.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_axis_label_color - &_start_;
     tt->single_val.s = tdrpStrDup("white");

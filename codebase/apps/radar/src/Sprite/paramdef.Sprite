@@ -292,6 +292,19 @@ paramdef int {
   p_help = "The iq plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.";
 } iqplots_n_columns;
 
+typedef enum {
+  SPECTRUM,
+  TIME_SERIES,
+  I_VS_Q,
+  PHASOR
+} iqplot_type_t;
+
+paramdef enum iqplot_type_t {
+  p_default = { SPECTRUM, TIME_SERIES, I_VS_Q, PHASOR };
+  p_descr = "Array of types of IQ plots for each sub panel.";
+  p_help = "The array size must match n_rows times n_columns.";
+} iqplot_types[];
+
 paramdef int {
   p_default = 0;
   p_descr = "Height of top margin in IQPLOT mode (pixels).";
@@ -352,7 +365,7 @@ paramdef int {
 
 paramdef int {
   p_default = 8;
-  p_descr = "Font size of axis labels in spectra (pixels).";
+  p_descr = "Font size of axis labels in iq plots (pixels).";
 } iqplot_axis_label_font_size;
 
 paramdef int {
@@ -366,23 +379,33 @@ paramdef int {
 } iqplot_legend_font_size;
 
 paramdef string {
-  p_default = "red";
+  p_default = "white";
+  p_descr = "Color of iqplot axis labels.";
+} iqplot_axis_label_color;
+
+paramdef string {
+  p_default = "orange";
   p_descr = "Color of plot title.";
 } iqplot_title_color;
 
 paramdef string {
   p_default = "green";
-  p_descr = "Color of axes in spectra.";
+  p_descr = "Color of axes in iq plots.";
 } iqplot_axes_color;
 
 paramdef string {
   p_default = "gray";
-  p_descr = "Color of grid lines on spectra.";
+  p_descr = "Color of grid lines on iq plots.";
 } iqplot_grid_color;
 
 paramdef string {
+  p_default = "pink";
+  p_descr = "Color of area fill for IQ plots.";
+} iqplot_fill_color;
+
+paramdef string {
   p_default = "red";
-  p_descr = "Color of labels in spectra.";
+  p_descr = "Color of labels in iq plots.";
 } iqplot_labels_color;
 
 paramdef boolean {
@@ -557,7 +580,7 @@ paramdef boolean {
 
 paramdef string {
   p_default = "white";
-  p_descr = "Color of ascope line.";
+  p_descr = "Color of ascope axis labels.";
 } ascope_axis_label_color;
 
 paramdef string {

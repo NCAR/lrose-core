@@ -1210,7 +1210,8 @@ void SpectraWidget::_createIqPlot(int id)
 {
   
   IqPlot *iqplot = new IqPlot(this, _params, id);
-  iqplot->setMomentType(Params::DBZ);
+  Params::iqplot_type_t plotType = _params._iqplot_types[id];
+  iqplot->setPlotType(plotType);
 
   WorldPlot &iqplotWorld = iqplot->getFullWorld();
   
@@ -1276,12 +1277,12 @@ void SpectraWidget::_configureIqPlot(int id)
     return;
   }
 
-  Params::moment_type_t momentType = _iqPlots[id]->getMomentType();
-  double minVal = IqPlot::getMinVal(momentType);
-  double maxVal = IqPlot::getMaxVal(momentType);
+  Params::iqplot_type_t plotType = _iqPlots[id]->getPlotType();
+  double minVal = IqPlot::getMinVal(plotType);
+  double maxVal = IqPlot::getMaxVal(plotType);
   
-  _iqPlots[id]->setWorldLimits(minVal, 0.0,
-                               maxVal, _currentBeam->getMaxRange());
+  _iqPlots[id]->setWorldLimits(0.0, minVal,
+                               _params.n_samples, maxVal);
 
 }
 

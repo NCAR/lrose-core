@@ -63,8 +63,8 @@ IqPlot::IqPlot(QWidget* parent,
         
 {
   _isZoomed = false;
-  _xGridLinesOn = _params.ascope_x_grid_lines_on;
-  _yGridLinesOn = _params.ascope_y_grid_lines_on;
+  _xGridLinesOn = _params.iqplot_x_grid_lines_on;
+  _yGridLinesOn = _params.iqplot_y_grid_lines_on;
 }
 
 /*************************************************************************
@@ -126,52 +126,52 @@ void IqPlot::plotBeam(QPainter &painter,
   }
   
   if(_params.debug) {
-    cerr << "======== Ascope - plotting beam data ================" << endl;
+    cerr << "======== Iqplot - plotting beam data ================" << endl;
     DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
     cerr << "  Max range: " << beam->getMaxRange() << endl;
   }
 
-  const MomentsFields* fields = beam->getOutFields();
-  int nGates = beam->getNGates();
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  // const MomentsFields* fields = beam->getOutFields();
+  // int nGates = beam->getNGates();
+  // double startRange = beam->getStartRangeKm();
+  // double gateSpacing = beam->getGateSpacingKm();
 
   // first use filled polygons (trapezia)
   
-  double xMin = _zoomWorld.getXMinWorld();
-  QBrush brush(_params.ascope_fill_color);
+  // double xMin = _zoomWorld.getXMinWorld();
+  QBrush brush(_params.iqplot_fill_color);
   brush.setStyle(Qt::SolidPattern);
   
-  for (int ii = 1; ii < nGates; ii++) {
-    double rangePrev = startRange + gateSpacing * (ii-1);
-    double range = startRange + gateSpacing * (ii);
-    double valPrev = getFieldVal(_momentType, fields[ii-1]);
-    double val = getFieldVal(_momentType, fields[ii]);
-    if (val > -9990 && valPrev > -9990) {
-      _zoomWorld.fillTrap(painter, brush,
-                          xMin, rangePrev,
-                          valPrev, rangePrev,
-                          val, range,
-                          xMin, range);
-    }
-  }
+  // for (int ii = 1; ii < nGates; ii++) {
+  //   double rangePrev = startRange + gateSpacing * (ii-1);
+  //   double range = startRange + gateSpacing * (ii);
+  //   double valPrev = getFieldVal(_plotType, fields[ii-1]);
+  //   double val = getFieldVal(_plotType, fields[ii]);
+  //   if (val > -9990 && valPrev > -9990) {
+  //     _zoomWorld.fillTrap(painter, brush,
+  //                         xMin, rangePrev,
+  //                         valPrev, rangePrev,
+  //                         val, range,
+  //                         xMin, range);
+  //   }
+  // }
 
   // draw the reflectivity field vs range - as line
 
-  painter.save();
-  painter.setPen(_params.ascope_line_color);
-  QVector<QPointF> pts;
-  for (int ii = 0; ii < nGates; ii++) {
-    double range = startRange + gateSpacing * ii;
-    double val = getFieldVal(_momentType, fields[ii]);
-    if (val > -9990) {
-      QPointF pt(val, range);
-      pts.push_back(pt);
-    }
-  }
-  _zoomWorld.drawLines(painter, pts);
-  painter.restore();
+  // painter.save();
+  // painter.setPen(_params.iqplot_line_color);
+  // QVector<QPointF> pts;
+  // for (int ii = 0; ii < nGates; ii++) {
+  //   double range = startRange + gateSpacing * ii;
+  //   double val = getFieldVal(_plotType, fields[ii]);
+  //   if (val > -9990) {
+  //     QPointF pt(val, range);
+  //     pts.push_back(pt);
+  //   }
+  // }
+  // _zoomWorld.drawLines(painter, pts);
+  // painter.restore();
 
   // draw the overlays
 
@@ -180,9 +180,8 @@ void IqPlot::plotBeam(QPainter &painter,
   // draw the title
 
   painter.save();
-  painter.setPen(_params.ascope_title_color);
-  string title("Ascope:");
-  title.append(getName(_momentType));
+  painter.setPen(_params.iqplot_title_color);
+  string title(getName(_plotType));
   _zoomWorld.drawTitleTopCenter(painter, title);
   painter.restore();
 
@@ -191,131 +190,74 @@ void IqPlot::plotBeam(QPainter &painter,
 //////////////////////////////////
 // get a string for the field name
 
-string IqPlot::getName(Params::moment_type_t mtype)
+string IqPlot::getName(Params::iqplot_type_t ptype)
 {
-  switch (mtype) {
-    case Params::DBZ:
-      return "DBZ";
-    case Params::VEL:
-      return "VEL";
-    case Params::WIDTH:
-      return "WIDTH";
-    case Params::NCP:
-      return "NCP";
-    case Params::SNR:
-      return "SNR";
-    case Params::DBM:
-      return "DBM";
-    case Params::ZDR:
-      return "ZDR";
-    case Params::LDR:
-      return "LDR";
-    case Params::RHOHV:
-      return "RHOHV";
-    case Params::PHIDP:
-      return "PHIDP";
-    case Params::KDP:
-      return "KDP";
+  switch (ptype) {
+    case Params::SPECTRUM:
+      return "SPECTRUM";
+    case Params::TIME_SERIES:
+      return "TIME_SERIES";
+    case Params::I_VS_Q:
+      return "I_VS_Q";
+    case Params::PHASOR:
+      return "PHASOR";
     default:
       return "UNKNOWN";
   }
 }
 
 //////////////////////////////////
-// get a string for the field units
+// get a string for the X axis units
 
-string IqPlot::getUnits(Params::moment_type_t mtype)
+string IqPlot::getXUnits(Params::iqplot_type_t ptype)
 {
-  switch (mtype) {
-    case Params::DBZ:
-      return "dBZ";
-    case Params::VEL:
-      return "m/s";
-    case Params::WIDTH:
-      return "m/s";
-    case Params::NCP:
-      return "";
-    case Params::SNR:
-      return "dB";
-    case Params::DBM:
-      return "dBm";
-    case Params::ZDR:
-      return "dB";
-    case Params::LDR:
-      return "dB";
-    case Params::RHOHV:
-      return "";
-    case Params::PHIDP:
-      return "deg";
-    case Params::KDP:
-      return "deg/km";
+  switch (ptype) {
+    case Params::SPECTRUM:
+      return "sample";
+    case Params::TIME_SERIES:
+      return "sample";
+    case Params::I_VS_Q:
+      return "volts";
+    case Params::PHASOR:
+      return "sample";
     default:
       return "";
   }
 }
 
-////////////////////////////////////////////
-// get a field value based on the field type
+//////////////////////////////////
+// get a string for the Y axis units
 
-double IqPlot::getFieldVal(Params::moment_type_t mtype,
-                           const MomentsFields &fields)
+string IqPlot::getYUnits(Params::iqplot_type_t ptype)
 {
-  switch (mtype) {
-    case Params::DBZ:
-      return fields.dbz;
-    case Params::VEL:
-      return fields.vel;
-    case Params::WIDTH:
-      return fields.width;
-    case Params::NCP:
-      return fields.ncp;
-    case Params::SNR:
-      return fields.snr;
-    case Params::DBM:
-      return fields.dbm;
-    case Params::ZDR:
-      return fields.zdr;
-    case Params::LDR:
-      return fields.ldr;
-    case Params::RHOHV:
-      return fields.rhohv;
-    case Params::PHIDP:
-      return fields.phidp;
-    case Params::KDP:
-      return fields.kdp;
+  switch (ptype) {
+    case Params::SPECTRUM:
+      return "power";
+    case Params::TIME_SERIES:
+      return "volts";
+    case Params::I_VS_Q:
+      return "volts";
+    case Params::PHASOR:
+      return "volts";
     default:
-      return -9999.0;
+      return "";
   }
 }
 
 ////////////////////////////////////////////
 // get min val for plotting
 
-double IqPlot::getMinVal(Params::moment_type_t mtype)
+double IqPlot::getMinVal(Params::iqplot_type_t ptype)
 {
-  switch (mtype) {
-    case Params::DBZ:
-      return -30;
-    case Params::VEL:
-      return -40;
-    case Params::WIDTH:
-      return 0;
-    case Params::NCP:
-      return 0;
-    case Params::SNR:
-      return -20;
-    case Params::DBM:
+  switch (ptype) {
+    case Params::SPECTRUM:
       return -120;
-    case Params::ZDR:
-      return -4;
-    case Params::LDR:
-      return -40;
-    case Params::RHOHV:
+    case Params::TIME_SERIES:
+      return -120;
+    case Params::I_VS_Q:
+      return -120;
+    case Params::PHASOR:
       return 0;
-    case Params::PHIDP:
-      return -180;
-    case Params::KDP:
-      return -2;
     default:
       return 0;
   }
@@ -324,33 +266,19 @@ double IqPlot::getMinVal(Params::moment_type_t mtype)
 ////////////////////////////////////////////
 // get max val for plotting
 
-double IqPlot::getMaxVal(Params::moment_type_t mtype)
+double IqPlot::getMaxVal(Params::iqplot_type_t ptype)
 {
-  switch (mtype) {
-    case Params::DBZ:
-      return 80;
-    case Params::VEL:
-      return 40;
-    case Params::WIDTH:
+  switch (ptype) {
+    case Params::SPECTRUM:
       return 20;
-    case Params::NCP:
+    case Params::TIME_SERIES:
+      return 20;
+    case Params::I_VS_Q:
+      return 20;
+    case Params::PHASOR:
       return 1;
-    case Params::SNR:
-      return 80;
-    case Params::DBM:
-      return 10;
-    case Params::ZDR:
-      return 16;
-    case Params::LDR:
-      return 15;
-    case Params::RHOHV:
-      return 1;
-    case Params::PHIDP:
-      return 180;
-    case Params::KDP:
-      return 8;
     default:
-      return 10;
+      return 0;
   }
 }
 
@@ -425,15 +353,15 @@ void IqPlot::_drawOverlays(QPainter &painter)
   
   QFont origFont = painter.font();
   
-  painter.setPen(_params.ascope_axis_label_color);
+  painter.setPen(_params.iqplot_axis_label_color);
 
-  _zoomWorld.drawAxisBottom(painter, getUnits(_momentType),
+  _zoomWorld.drawAxisBottom(painter, getXUnits(_plotType),
                             true, true, true, _xGridLinesOn);
 
-  _zoomWorld.drawAxisLeft(painter, "km", 
+  _zoomWorld.drawAxisLeft(painter, getYUnits(_plotType), 
                           true, true, true, _yGridLinesOn);
 
-  _zoomWorld.drawYAxisLabelLeft(painter, "Range");
+  // _zoomWorld.drawYAxisLabelLeft(painter, "Range");
 
   painter.restore();
 

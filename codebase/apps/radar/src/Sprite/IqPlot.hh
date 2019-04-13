@@ -67,8 +67,8 @@ public:
    */
   
   IqPlot(QWidget *parent,
-             const Params &params,
-             int id);
+         const Params &params,
+         int id);
   
   /**
    * @brief Destructor.
@@ -111,7 +111,7 @@ public:
 
   // set the moment type
 
-  void setMomentType(Params::moment_type_t val) { _momentType = val; }
+  void setPlotType(Params::iqplot_type_t val) { _plotType = val; }
   
   // zooming
 
@@ -148,13 +148,12 @@ public:
   
   // get the moment type
 
-  const Params::moment_type_t getMomentType() const { return _momentType; }
-  static string getName(Params::moment_type_t mtype);
-  static string getUnits(Params::moment_type_t mtype);
-  static double getFieldVal(Params::moment_type_t mtype,
-                            const MomentsFields &fields);
-  static double getMinVal(Params::moment_type_t mtype);
-  static double getMaxVal(Params::moment_type_t mtype);
+  const Params::iqplot_type_t getPlotType() const { return _plotType; }
+  static string getName(Params::iqplot_type_t ptype);
+  static string getXUnits(Params::iqplot_type_t ptype);
+  static string getYUnits(Params::iqplot_type_t ptype);
+  static double getMinVal(Params::iqplot_type_t ptype);
+  static double getMaxVal(Params::iqplot_type_t ptype);
   
 protected:
 
@@ -168,7 +167,7 @@ protected:
 
   // moment type active for plotting
 
-  Params::moment_type_t _momentType;
+  Params::iqplot_type_t _plotType;
   
   // unzoomed world
 
