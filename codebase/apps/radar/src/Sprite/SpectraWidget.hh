@@ -160,6 +160,10 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   bool getPointClicked() const { return _pointClicked; }
 
+  // increment/decrement the range in response to up/down arrow keys
+
+  void changeRange(int nGatesDelta);
+
   ////////////////
   // Qt signals //
   ////////////////
@@ -293,6 +297,10 @@ class DLL_EXPORT SpectraWidget : public QWidget
   bool _yGridEnabled;
 
   ScaledLabel _scaledLabel;
+
+  // currently selected range
+
+  double _selectedRangeKm;
   
   // time of plot
 

@@ -1139,9 +1139,10 @@ void SpectraMgr::_goFwd()
 
 void SpectraMgr::_changeRange(int deltaGates)
 {
-  if (!_spectra->getPointClicked()) {
-    return;
-  }
+  _spectra->changeRange(deltaGates);
+  // if (!_spectra->getPointClicked()) {
+  //   return;
+  // }
   // if (_requestedRangeAxisMode == Params::RANGE_AXIS_DOWN) {
   //   deltaGates *= -1;
   // }

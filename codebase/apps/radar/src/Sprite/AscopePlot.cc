@@ -115,7 +115,8 @@ void AscopePlot::unzoom()
  */
 
 void AscopePlot::plotBeam(QPainter &painter,
-                          Beam *beam)
+                          Beam *beam,
+                          double selectedRangeKm)
   
 {
 
@@ -175,7 +176,7 @@ void AscopePlot::plotBeam(QPainter &painter,
 
   // draw the overlays
 
-  _drawOverlays(painter);
+  _drawOverlays(painter, selectedRangeKm);
 
   // draw the title
 
@@ -414,7 +415,7 @@ void AscopePlot::setZoomLimitsY(int yMin,
  * Draw the overlays, axes, legends etc
  */
 
-void AscopePlot::_drawOverlays(QPainter &painter)
+void AscopePlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
 {
 
   // save painter state
@@ -434,6 +435,13 @@ void AscopePlot::_drawOverlays(QPainter &painter)
                           true, true, true, _yGridLinesOn);
 
   _zoomWorld.drawYAxisLabelLeft(painter, "Range");
+
+  // selected range line
+  
+  painter.setPen(_params.ascope_selected_range_color);
+  _zoomWorld.drawLine(painter,
+                      _zoomWorld.getXMinWorld(), selectedRangeKm,
+                      _zoomWorld.getXMaxWorld(), selectedRangeKm);
 
   painter.restore();
 

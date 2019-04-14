@@ -123,7 +123,8 @@ public:
   // plot a beam
   
   void plotBeam(QPainter &painter,
-                Beam *beam);
+                Beam *beam,
+                double selectedRangeKm);
 
   // set grid lines on/off
 
@@ -192,7 +193,7 @@ protected:
 
   // draw the overlays
   
-  void _drawOverlays(QPainter &painter);
+  void _drawOverlays(QPainter &painter, double selectedRangeKm);
   
 };
 

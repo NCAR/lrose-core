@@ -128,6 +128,16 @@ paramdef double {
 } moments_max_search_angle_error;
 
 commentdef {
+  p_header = "INITIAL RANGE";
+}
+
+paramdef double {
+  p_default = 50.0;
+  p_descr = "Initial range for selecting a radar gate (km).";
+  p_help = "The display begins using this range. The user can then change the range either by selecting a point in CIDD or HawkEye, or by clicking in the ascope plots.";
+} selected_range_km;
+
+commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
 }
 
@@ -195,15 +205,6 @@ paramdef struct show_status_t {
   p_help = "These items are shown in the left panel in the GUI. Setting an item to false will hide it in the GUI.";
 
 } show_status_in_gui;
-
-commentdef {
-  p_header = "INITIAL MAX RANGE";
-}
-
-paramdef double {
-  p_default = 225.0;
-  p_descr = "Max range for the display (km).";
-} max_range_km;
 
 commentdef {
   p_header = "MAIN WINDOW DIMENSIONS AND PLOTTING DETAILS";
@@ -597,6 +598,12 @@ paramdef string {
   p_default = "lightgray";
   p_descr = "Color of ascope line.";
 } ascope_line_color;
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of line showing currently selected range.";
+  p_help = "The user can double click in the ascope to move this line.";
+} ascope_selected_range_color;
 
 paramdef string {
   p_default = "darkgreen";

@@ -789,6 +789,27 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("INITIAL RANGE");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'selected_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("selected_range_km");
+    tt->descr = tdrpStrDup("Initial range for selecting a radar gate (km).");
+    tt->help = tdrpStrDup("The display begins using this range. The user can then change the range either by selecting a point in CIDD or HawkEye, or by clicking in the ascope plots.");
+    tt->val_offset = (char *) &selected_range_km - &_start_;
+    tt->single_val.d = 50;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("STATUS TO BE SHOWN IN GUI");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -953,27 +974,6 @@
       tt->struct_vals[21].b = pTRUE;
       tt->struct_vals[22].b = pTRUE;
       tt->struct_vals[23].b = pTRUE;
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("INITIAL MAX RANGE");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'max_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_range_km");
-    tt->descr = tdrpStrDup("Max range for the display (km).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &max_range_km - &_start_;
-    tt->single_val.d = 225;
     tt++;
     
     // Parameter 'Comment 6'
@@ -1891,6 +1891,18 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &ascope_line_color - &_start_;
     tt->single_val.s = tdrpStrDup("lightgray");
+    tt++;
+    
+    // Parameter 'ascope_selected_range_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_selected_range_color");
+    tt->descr = tdrpStrDup("Color of line showing currently selected range.");
+    tt->help = tdrpStrDup("The user can double click in the ascope to move this line.");
+    tt->val_offset = (char *) &ascope_selected_range_color - &_start_;
+    tt->single_val.s = tdrpStrDup("cyan");
     tt++;
     
     // Parameter 'ascope_fill_color'

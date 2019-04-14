@@ -480,9 +480,9 @@ public:
 
   double moments_max_search_angle_error;
 
-  show_status_t show_status_in_gui;
+  double selected_range_km;
 
-  double max_range_km;
+  show_status_t show_status_in_gui;
 
   int main_window_width;
 
@@ -616,6 +616,8 @@ public:
 
   char* ascope_line_color;
 
+  char* ascope_selected_range_color;
+
   char* ascope_fill_color;
 
   char* ascope_title_color;
@@ -725,7 +727,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[152];
+  mutable TDRPtable _table[153];
 
   const char *_className;
 

@@ -115,7 +115,8 @@ void IqPlot::unzoom()
  */
 
 void IqPlot::plotBeam(QPainter &painter,
-                      Beam *beam)
+                      Beam *beam,
+                      double selectedRangeKm)
   
 {
 
@@ -175,7 +176,7 @@ void IqPlot::plotBeam(QPainter &painter,
 
   // draw the overlays
 
-  _drawOverlays(painter);
+  _drawOverlays(painter, selectedRangeKm);
 
   // draw the title
 
@@ -342,7 +343,7 @@ void IqPlot::setZoomLimitsY(int yMin,
  * Draw the overlays, axes, legends etc
  */
 
-void IqPlot::_drawOverlays(QPainter &painter)
+void IqPlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
 {
 
   // save painter state

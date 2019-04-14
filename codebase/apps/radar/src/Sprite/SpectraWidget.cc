@@ -86,6 +86,8 @@ SpectraWidget::SpectraWidget(QWidget* parent,
   _ascopesConfigured = false;
   _iqPlotsConfigured = false;
 
+  _selectedRangeKm = _params.selected_range_km;
+
   // Set up the background color
 
   QPalette new_palette = palette();
@@ -451,9 +453,16 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
 
   if (rgeom.width() <= 20) {
     
-    // convert to real units of distance and time
-
-    // double y_km = _worldReleaseY;
+    if (_mousePressPanelType == PANEL_ASCOPE &&
+        _mouseReleasePanelType == PANEL_ASCOPE &&
+        _mousePressPanelId == _mouseReleasePanelId) {
+      // change ascope range
+      AscopePlot *ascope = _ascopes[_mouseReleasePanelId];
+      _selectedRangeKm = ascope->getZoomWorld().getYWorld(_mouseReleaseY);
+    } else {
+      _pointClicked = true;
+    }
+    
     // double x_secs = _worldReleaseX;
     // RadxTime clickTime(_plotStartTime.utime(), x_secs);
     
@@ -472,9 +481,7 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
     // }
 
     // Emit a signal to indicate that the click location has changed
-
-    _pointClicked = true;
-
+    // _pointClicked = true;
     // if (closestRay != NULL) {
     //   emit locationClicked(x_secs, y_km, closestRay);
     // }
@@ -582,10 +589,10 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
 
   if (_currentBeam) {
     for (size_t ii = 0; ii < _ascopes.size(); ii++) {
-      _ascopes[ii]->plotBeam(painter, _currentBeam);
+      _ascopes[ii]->plotBeam(painter, _currentBeam, _selectedRangeKm);
     }
     for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
-      _iqPlots[ii]->plotBeam(painter, _currentBeam);
+      _iqPlots[ii]->plotBeam(painter, _currentBeam, _selectedRangeKm);
     }
   }
 
@@ -731,6 +738,25 @@ void SpectraWidget::setMouseClickPoint(double worldX,
 
   }
 
+}
+
+/*************************************************************************
+ * increment/decrement the range in response to up/down arrow keys
+ */
+
+void SpectraWidget::changeRange(int nGatesDelta)
+{
+  if (_currentBeam != NULL) {
+    _selectedRangeKm += nGatesDelta * _currentBeam->getGateSpacingKm();
+    double maxRange = _currentBeam->getStartRangeKm() +
+      _currentBeam->getGateSpacingKm() * _currentBeam->getNGates();
+    if (_selectedRangeKm < _currentBeam->getStartRangeKm()) {
+      _selectedRangeKm = _currentBeam->getStartRangeKm();
+    } else if (_selectedRangeKm > maxRange) {
+      _selectedRangeKm = maxRange;
+    }
+  }
+  update();
 }
 
 
