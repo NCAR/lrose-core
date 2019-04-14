@@ -137,6 +137,9 @@ public:
   int getNGatesPrtShort() const { return _nGatesPrtShort; }
   int getNGatesPrtLong() const { return _nGatesPrtLong; }
 
+  int getGateNum(double range) const;
+  double getRange(int gateNum) const;
+  double getClosestRange(double range) const;
   double getMaxRange() const;
 
   double getStartRangeKm() const { return _startRangeKm; }

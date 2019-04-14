@@ -459,6 +459,9 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
       // change ascope range
       AscopePlot *ascope = _ascopes[_mouseReleasePanelId];
       _selectedRangeKm = ascope->getZoomWorld().getYWorld(_mouseReleaseY);
+      if (_currentBeam != NULL) {
+        _selectedRangeKm = _currentBeam->getClosestRange(_selectedRangeKm);
+      }
     } else {
       _pointClicked = true;
     }
@@ -748,8 +751,7 @@ void SpectraWidget::changeRange(int nGatesDelta)
 {
   if (_currentBeam != NULL) {
     _selectedRangeKm += nGatesDelta * _currentBeam->getGateSpacingKm();
-    double maxRange = _currentBeam->getStartRangeKm() +
-      _currentBeam->getGateSpacingKm() * _currentBeam->getNGates();
+    double maxRange = _currentBeam->getMaxRange();
     if (_selectedRangeKm < _currentBeam->getStartRangeKm()) {
       _selectedRangeKm = _currentBeam->getStartRangeKm();
     } else if (_selectedRangeKm > maxRange) {

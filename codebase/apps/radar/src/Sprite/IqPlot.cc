@@ -130,7 +130,8 @@ void IqPlot::plotBeam(QPainter &painter,
     cerr << "======== Iqplot - plotting beam data ================" << endl;
     DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
-    cerr << "  Max range: " << beam->getMaxRange() << endl;
+    cerr << "  selected range: " << selectedRangeKm << endl;
+    cerr << "  gate num: " << beam->getGateNum(selectedRangeKm) << endl;
   }
 
   // const MomentsFields* fields = beam->getOutFields();
@@ -182,7 +183,9 @@ void IqPlot::plotBeam(QPainter &painter,
 
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  string title(getName(_plotType));
+  char title[1024];
+  snprintf(title, 1024, "%s range: %.3fkm",
+           getName(_plotType).c_str(), selectedRangeKm);
   _zoomWorld.drawTitleTopCenter(painter, title);
   painter.restore();
 

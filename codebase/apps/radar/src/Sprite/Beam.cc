@@ -772,17 +772,49 @@ int Beam::getScanMode() const
 }
 
 ////////////////////////////////////////////////
+// get gate num for a given range
+
+int Beam::getGateNum(double range) const
+
+{
+  int gateNum = (int) floor((range - _startRangeKm) / _gateSpacingKm + 0.5);
+  if (gateNum < 0) {
+    gateNum = 0;
+  } else if (gateNum > _nGates) {
+    gateNum = _nGates;
+  }
+  return gateNum;
+}
+
+////////////////////////////////////////////////
+// get range for a given gate
+
+double Beam::getRange(int gateNum) const
+  
+{
+  double range = _startRangeKm + gateNum * _gateSpacingKm;
+  return range;
+}
+
+////////////////////////////////////////////////
+// get closest exact range to a give range
+
+double Beam::getClosestRange(double range) const
+  
+{
+  int gateNum = getGateNum(range);
+  double closestRange = getRange(gateNum);
+  return closestRange;
+}
+
+////////////////////////////////////////////////
 // get maximum range
 
 double Beam::getMaxRange() const
 
 {
-
-  double maxRange = _opsInfo.get_proc_start_range_km() +
-    _nGatesOut * _opsInfo.get_proc_gate_spacing_km();
-  
+  double maxRange = _startRangeKm + _nGates * _gateSpacingKm;
   return maxRange;
-
 }
 
 ///////////////////////////////////////////////////////////
