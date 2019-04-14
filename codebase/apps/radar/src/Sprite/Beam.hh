@@ -103,6 +103,7 @@ public:
   // get methods
 
   int getNSamples() const { return _nSamples; }
+  int getNSamplesHalf() const { return _nSamplesHalf; }
   
   double getEl() const { return _el; }
   double getAz() const { return _az; }

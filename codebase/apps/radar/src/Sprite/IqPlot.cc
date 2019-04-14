@@ -39,6 +39,10 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/pjg.h>
+#include <radar/GateData.hh>
+#include <radar/RadarFft.hh>
+#include <radar/RegressionFilter.hh>
+#include <radar/ClutFilter.hh>
 
 #include <QTimer>
 #include <QBrush>
@@ -126,38 +130,90 @@ void IqPlot::plotBeam(QPainter &painter,
     return;
   }
   
+  int gateNum = beam->getGateNum(selectedRangeKm);
+
   if(_params.debug) {
     cerr << "======== Iqplot - plotting beam data ================" << endl;
     DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
     cerr << "  selected range: " << selectedRangeKm << endl;
-    cerr << "  gate num: " << beam->getGateNum(selectedRangeKm) << endl;
+    cerr << "  gate num: " << gateNum << endl;
   }
 
-  // const MomentsFields* fields = beam->getOutFields();
-  // int nGates = beam->getNGates();
-  // double startRange = beam->getStartRangeKm();
-  // double gateSpacing = beam->getGateSpacingKm();
-
-  // first use filled polygons (trapezia)
-  
-  // double xMin = _zoomWorld.getXMinWorld();
   QBrush brush(_params.iqplot_fill_color);
   brush.setStyle(Qt::SolidPattern);
   
-  // for (int ii = 1; ii < nGates; ii++) {
-  //   double rangePrev = startRange + gateSpacing * (ii-1);
-  //   double range = startRange + gateSpacing * (ii);
-  //   double valPrev = getFieldVal(_plotType, fields[ii-1]);
-  //   double val = getFieldVal(_plotType, fields[ii]);
-  //   if (val > -9990 && valPrev > -9990) {
-  //     _zoomWorld.fillTrap(painter, brush,
-  //                         xMin, rangePrev,
-  //                         valPrev, rangePrev,
-  //                         val, range,
-  //                         xMin, range);
-  //   }
-  // }
+  // get data for this gate
+
+  const GateData &gateData = *beam->getGateData()[gateNum];
+  
+  // create window for the iq data, for FFT operations
+
+  int nSamples = beam->getNSamples();
+  TaArray<double> windowCoeff_;
+  double *windowCoeff = windowCoeff_.alloc(nSamples);
+  switch (_params.window) {
+    case Params::WINDOW_RECT:
+    default:
+      RadarMoments::initWindowRect(nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_VONHANN:
+      RadarMoments::initWindowVonhann(nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_BLACKMAN:
+      RadarMoments::initWindowBlackman(nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_BLACKMAN_NUTTALL:
+      RadarMoments::initWindowBlackmanNuttall(nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_TUKEY_10:
+      RadarMoments::initWindowTukey(0.1, nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_TUKEY_20:
+      RadarMoments::initWindowTukey(0.2, nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_TUKEY_30:
+      RadarMoments::initWindowTukey(0.3, nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_TUKEY_50:
+      RadarMoments::initWindowTukey(0.5, nSamples, windowCoeff);
+      break;
+  }
+
+  // compute power spectrum
+  
+  TaArray<RadarComplex_t> iqWindowed_;
+  RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
+  RadarMoments::applyWindow(gateData.iqhcOrig, windowCoeff, iqWindowed, nSamples);
+  
+  TaArray<RadarComplex_t> powerSpec_;
+  RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
+  RadarFft fft(nSamples);
+  fft.fwd(iqWindowed, powerSpec);
+
+  // compute power
+
+  TaArray<double> powerDbm_;
+  double *powerDbm = powerDbm_.alloc(nSamples);
+  for (int ii = 0; ii < nSamples; ii++) {
+    double power = RadarComplex::power(powerSpec[ii]);
+    if (power <= 0) {
+      powerDbm[ii] = -120.0;
+    } else {
+      powerDbm[ii] = 10.0 * log10(power);
+    }
+  }
+  
+  double yMin = _zoomWorld.getYMinWorld();
+  for (int ii = 1; ii < nSamples; ii++) {
+    double valPrev = powerDbm[ii-1];
+    double val = powerDbm[ii];
+    _zoomWorld.fillTrap(painter, brush,
+                        ii-1, yMin,
+                        ii, yMin,
+                        ii, val,
+                        ii-1, valPrev);
+  }
 
   // draw the reflectivity field vs range - as line
 
@@ -175,6 +231,7 @@ void IqPlot::plotBeam(QPainter &painter,
   // _zoomWorld.drawLines(painter, pts);
   // painter.restore();
 
+  
   // draw the overlays
 
   _drawOverlays(painter, selectedRangeKm);
