@@ -86,11 +86,6 @@ public:
   RadarComplex_t *iqhxOrig;
   RadarComplex_t *iqvxOrig;
 
-  TaArray<RadarComplex_t> _iqhcOrig;
-  TaArray<RadarComplex_t> _iqvcOrig;
-  TaArray<RadarComplex_t> _iqhxOrig;
-  TaArray<RadarComplex_t> _iqvxOrig;
-
   // windowed IQ
   // may have rectangular window (no difference from raw)
   // single pol uses iqhc
@@ -100,18 +95,10 @@ public:
   RadarComplex_t *iqhx;
   RadarComplex_t *iqvx;
 
-  TaArray<RadarComplex_t> _iqhc;
-  TaArray<RadarComplex_t> _iqvc;
-  TaArray<RadarComplex_t> _iqhx;
-  TaArray<RadarComplex_t> _iqvx;
-
   // spectrum for windowed time series
   
   RadarComplex_t *specHc;
   RadarComplex_t *specVc;
-
-  TaArray<RadarComplex_t> _specHc;
-  TaArray<RadarComplex_t> _specVc;
 
   bool specHcComputed;
   bool specVcComputed;
@@ -124,18 +111,10 @@ public:
   RadarComplex_t *iqhxF;
   RadarComplex_t *iqvxF;
 
-  TaArray<RadarComplex_t> _iqhcF;
-  TaArray<RadarComplex_t> _iqvcF;
-  TaArray<RadarComplex_t> _iqhxF;
-  TaArray<RadarComplex_t> _iqvxF;
-
   // notched time series for some dual pol moments
 
   RadarComplex_t *iqhcNotched;
   RadarComplex_t *iqvcNotched;
-
-  TaArray<RadarComplex_t> _iqhcNotched;
-  TaArray<RadarComplex_t> _iqvcNotched;
 
   // staggered PRT
   // original time series - unwindowed IQ
@@ -145,20 +124,10 @@ public:
   RadarComplex_t *iqvcPrtShortOrig;
   RadarComplex_t *iqvcPrtLongOrig;
 
-  TaArray<RadarComplex_t> _iqhcPrtShortOrig;
-  TaArray<RadarComplex_t> _iqhcPrtLongOrig;
-  TaArray<RadarComplex_t> _iqvcPrtShortOrig;
-  TaArray<RadarComplex_t> _iqvcPrtLongOrig;
-
   RadarComplex_t *iqhxPrtShortOrig;
   RadarComplex_t *iqhxPrtLongOrig;
   RadarComplex_t *iqvxPrtShortOrig;
   RadarComplex_t *iqvxPrtLongOrig;
-
-  TaArray<RadarComplex_t> _iqhxPrtShortOrig;
-  TaArray<RadarComplex_t> _iqhxPrtLongOrig;
-  TaArray<RadarComplex_t> _iqvxPrtShortOrig;
-  TaArray<RadarComplex_t> _iqvxPrtLongOrig;
 
   // staggered PRT
   // windowed IQ
@@ -168,20 +137,10 @@ public:
   RadarComplex_t *iqvcPrtShort;
   RadarComplex_t *iqvcPrtLong;
 
-  TaArray<RadarComplex_t> _iqhcPrtShort;
-  TaArray<RadarComplex_t> _iqhcPrtLong;
-  TaArray<RadarComplex_t> _iqvcPrtShort;
-  TaArray<RadarComplex_t> _iqvcPrtLong;
-
   RadarComplex_t *iqhxPrtShort;
   RadarComplex_t *iqhxPrtLong;
   RadarComplex_t *iqvxPrtShort;
   RadarComplex_t *iqvxPrtLong;
-
-  TaArray<RadarComplex_t> _iqhxPrtShort;
-  TaArray<RadarComplex_t> _iqhxPrtLong;
-  TaArray<RadarComplex_t> _iqvxPrtShort;
-  TaArray<RadarComplex_t> _iqvxPrtLong;
 
   // staggered PRT
   // filtered IQ
@@ -191,42 +150,21 @@ public:
   RadarComplex_t *iqvcPrtShortF;
   RadarComplex_t *iqvcPrtLongF;
 
-  TaArray<RadarComplex_t> _iqhcPrtShortF;
-  TaArray<RadarComplex_t> _iqhcPrtLongF;
-  TaArray<RadarComplex_t> _iqvcPrtShortF;
-  TaArray<RadarComplex_t> _iqvcPrtLongF;
-
   RadarComplex_t *iqhxPrtShortF;
   RadarComplex_t *iqhxPrtLongF;
   RadarComplex_t *iqvxPrtShortF;
   RadarComplex_t *iqvxPrtLongF;
-
-  TaArray<RadarComplex_t> _iqhxPrtShortF;
-  TaArray<RadarComplex_t> _iqhxPrtLongF;
-  TaArray<RadarComplex_t> _iqvxPrtShortF;
-  TaArray<RadarComplex_t> _iqvxPrtLongF;
 
   RadarComplex_t *iqStrong;
   RadarComplex_t *iqWeak;
   RadarComplex_t *iqStrongF;
   RadarComplex_t *iqWeakF;
 
-  TaArray<RadarComplex_t> _iqStrong;
-  TaArray<RadarComplex_t> _iqWeak;
-  TaArray<RadarComplex_t> _iqStrongF;
-  TaArray<RadarComplex_t> _iqWeakF;
-
   RadarComplex_t *iqMeas;
   RadarComplex_t *iqTrip1;
   RadarComplex_t *iqTrip2;
   RadarComplex_t *iqTrip3;
   RadarComplex_t *iqTrip4;
-
-  TaArray<RadarComplex_t> _iqMeas;
-  TaArray<RadarComplex_t> _iqTrip1;
-  TaArray<RadarComplex_t> _iqTrip2;
-  TaArray<RadarComplex_t> _iqTrip3;
-  TaArray<RadarComplex_t> _iqTrip4;
 
   // fields
 
@@ -267,6 +205,91 @@ private:
   bool _isStagPrt;
   bool _isSz;
   
+  // original time series - unwindowed IQ
+  // single pol uses iqhc
+
+  TaArray<RadarComplex_t> _iqhcOrig;
+  TaArray<RadarComplex_t> _iqvcOrig;
+  TaArray<RadarComplex_t> _iqhxOrig;
+  TaArray<RadarComplex_t> _iqvxOrig;
+
+  // windowed IQ
+  // may have rectangular window (no difference from raw)
+  // single pol uses iqhc
+
+  TaArray<RadarComplex_t> _iqhc;
+  TaArray<RadarComplex_t> _iqvc;
+  TaArray<RadarComplex_t> _iqhx;
+  TaArray<RadarComplex_t> _iqvx;
+
+  // spectrum for windowed time series
+  
+  TaArray<RadarComplex_t> _specHc;
+  TaArray<RadarComplex_t> _specVc;
+
+  // filtered IQ dual pol
+  // single pol uses iqhcF
+
+  TaArray<RadarComplex_t> _iqhcF;
+  TaArray<RadarComplex_t> _iqvcF;
+  TaArray<RadarComplex_t> _iqhxF;
+  TaArray<RadarComplex_t> _iqvxF;
+
+  // notched time series for some dual pol moments
+
+  TaArray<RadarComplex_t> _iqhcNotched;
+  TaArray<RadarComplex_t> _iqvcNotched;
+
+  // staggered PRT
+  // original time series - unwindowed IQ
+  
+  TaArray<RadarComplex_t> _iqhcPrtShortOrig;
+  TaArray<RadarComplex_t> _iqhcPrtLongOrig;
+  TaArray<RadarComplex_t> _iqvcPrtShortOrig;
+  TaArray<RadarComplex_t> _iqvcPrtLongOrig;
+
+  TaArray<RadarComplex_t> _iqhxPrtShortOrig;
+  TaArray<RadarComplex_t> _iqhxPrtLongOrig;
+  TaArray<RadarComplex_t> _iqvxPrtShortOrig;
+  TaArray<RadarComplex_t> _iqvxPrtLongOrig;
+
+  // staggered PRT
+  // windowed IQ
+  
+  TaArray<RadarComplex_t> _iqhcPrtShort;
+  TaArray<RadarComplex_t> _iqhcPrtLong;
+  TaArray<RadarComplex_t> _iqvcPrtShort;
+  TaArray<RadarComplex_t> _iqvcPrtLong;
+
+  TaArray<RadarComplex_t> _iqhxPrtShort;
+  TaArray<RadarComplex_t> _iqhxPrtLong;
+  TaArray<RadarComplex_t> _iqvxPrtShort;
+  TaArray<RadarComplex_t> _iqvxPrtLong;
+
+  // staggered PRT
+  // filtered IQ
+  
+  TaArray<RadarComplex_t> _iqhcPrtShortF;
+  TaArray<RadarComplex_t> _iqhcPrtLongF;
+  TaArray<RadarComplex_t> _iqvcPrtShortF;
+  TaArray<RadarComplex_t> _iqvcPrtLongF;
+
+  TaArray<RadarComplex_t> _iqhxPrtShortF;
+  TaArray<RadarComplex_t> _iqhxPrtLongF;
+  TaArray<RadarComplex_t> _iqvxPrtShortF;
+  TaArray<RadarComplex_t> _iqvxPrtLongF;
+
+  TaArray<RadarComplex_t> _iqStrong;
+  TaArray<RadarComplex_t> _iqWeak;
+  TaArray<RadarComplex_t> _iqStrongF;
+  TaArray<RadarComplex_t> _iqWeakF;
+
+  TaArray<RadarComplex_t> _iqMeas;
+  TaArray<RadarComplex_t> _iqTrip1;
+  TaArray<RadarComplex_t> _iqTrip2;
+  TaArray<RadarComplex_t> _iqTrip3;
+  TaArray<RadarComplex_t> _iqTrip4;
+
   // modes
 
   // iwrf_xmit_rcv_mode_t _xmitRcvMode;
