@@ -1,12 +1,12 @@
 # Building CSU FRACTL
 
-## checkout fractl
+## Checkout fractl from CSU
 
 ```
   git clone https://github.com/mmbell/fractl.git 
 ```
 
-## install required packages
+## Install required packages
 
 ### On Redhat-based hosts, run the following (as root or sudo):
 
@@ -52,7 +52,7 @@ sudo apt-get install -y \
     libzip-dev libcurl4-openssl-dev
 ```
 
-## do the build - uses cmake
+## Do the build - uses cmake
 
 ```
   cd fractl
