@@ -50,6 +50,7 @@ sudo apt-get install -y \
     libnetcdf-dev netcdf-bin libhdf5-dev hdf5-tools \
     libgeographic-dev libeigen3-dev \
     libzip-dev libcurl4-openssl-dev
+```
 
 ## do the build - uses cmake
 
