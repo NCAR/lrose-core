@@ -31,12 +31,14 @@ sudo yum install -y epel-release
 sudo yum install -y \
     tcsh wget git \
     tkcvs emacs rsync python \
-    m4 make libtool autoconf automake \
+    m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel \
     libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel \
+    libpng-devel libtiff-devel \
+    zlib-devel libzip-devel bzip2-devel \
     expat-devel libcurl-devel \
     flex-devel fftw3-devel \
+    GeographicLib-devel eigen3-devel \
     bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
     hdf5-devel netcdf-devel \
     xorg-x11-xauth xorg-x11-apps \
@@ -60,7 +62,9 @@ sudo apt-get install -y \
     libfftw3-dev libexpat1-dev \
     qtbase5-dev qtdeclarative5-dev \
     libgeographic-dev libeigen3-dev libzip-dev \
-    libnetcdf-dev netcdf-bin libhdf5-dev hdf5-tools
+    libnetcdf-dev netcdf-bin libhdf5-dev hdf5-tools \
+    libgeographic-dev libeigen3-dev \
+    libzip-dev libcurl4-openssl-dev
 
 # create link for qtmake
 
