@@ -591,6 +591,7 @@ protected:
                          const string &outputPath,
                          const string &dataType);
 
+#ifdef NOTNOW
   int _convertMdv2NcfViaServer(const string &url);
   int _convertNcf2MdvViaServer(const string &url);
   int _readAllHeadersNcfViaServer(const string &url);
@@ -598,6 +599,7 @@ protected:
   int _readAllHeadersRadxViaServer(const string &url);
   int _readRadxViaServer(const string &url);
   int _constrainNcfViaServer(const string &url);
+#endif
 
 private:
 };

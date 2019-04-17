@@ -1589,7 +1589,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("FILE FORMAT");
-    tt->comment_text = tdrpStrDup("The data may be represented in normal MDV format, or in alternate XML and NCF formats. For converions to/from NCF, the NcMdvServer must be running on the host to which the URL points.");
+    tt->comment_text = tdrpStrDup("The data may be represented in normal MDV format, or in alternate XML and NCF formats.");
     tt++;
     
     // Parameter 'file_format'

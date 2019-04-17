@@ -1981,83 +1981,6 @@ int DsMdvx::convertMdv2Ncf(const string &url)
 }
 
 ////////////////////////////////////////////////
-// convert MDV format to NETCDF CF format
-// using the NcMdvServer (deprecated)
-// returns 0 on success, -1 on failure
-
-int DsMdvx::_convertMdv2NcfViaServer(const string &url)
-  
-{
-  
-  if (_currentFormat != FORMAT_MDV) {
-    _errStr += "ERROR - DsMdvx::convertMdv2Ncf.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
-    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_MDV));
-    return -1;
-  }
-
-  // set up URL for doing conversion via NcMdvServer
-
-  DsURL trans_url(url);
-  trans_url.setProtocol("mdvp");
-  trans_url.setTranslator("NcMdvServer");
-  
-  DsLOCATOR locator;
-  bool contact_server;
-  if (locator.resolve(trans_url, &contact_server, false)) {
-    _errStr += "ERROR - COMM - DsMdvx::convertMdv2Ncf.\n";
-    _errStr += "  Cannot resolve URL: ";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-  
-  if (_debug) {
-    cerr << "convertMdv2Ncf(): MDV to NCF" << endl;
-    cerr << "  URL: " << trans_url.getURLStr() << endl;
-  }
-
-  // assemble message packet
-
-  DsMdvxMsg msg;
-  if (_debug) {
-    msg.setDebug();
-  }
-  void *msgBuf =
-    msg.assembleConvertMdv2Ncf(*this, trans_url.getURLStr());
-  if (msgBuf == NULL) {
-    _errStr += "ERROR - DsMdvx::convertMdv2Ncf.\n";
-    _errStr += "  Assembling outgoing message, URL:\n";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-
-  // communicate with server
-
-  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
-    _errStr += "ERROR - COMM - DsMdvx::convertMdv2Ncf.\n";
-    _errStr += "  Communicating with server\n";
-    return -1;
-  }
-
-  if (msg.getError()) {
-    return -1;
-  }
-
-  if (msg.getSubType() != DsMdvxMsg::MDVP_CONVERT_MDV_TO_NCF) {
-    _errStr += "ERROR - DsMdvx::convertMdv2Ncf\n";
-    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
-    return -1;
-  }
-
-  _ncfConstrained = true;
-
-  return 0;
-
-}
-
-////////////////////////////////////////////////
 // convert NETCDF CF to MDV
 // given an object containing a netcdf file buffer
 // returns 0 on success, -1 on failure
@@ -2144,98 +2067,6 @@ int DsMdvx::convertNcf2Mdv(const string &url)
 
 }
 
-////////////////////////////////////////////////
-// convert NETCDF CF format to MDV format
-// using the NcMdvServer (deprecated)
-// returns 0 on success, -1 on failure
-
-int DsMdvx::_convertNcf2MdvViaServer(const string &url)
-  
-{
-
-  if (_currentFormat != FORMAT_NCF) {
-    _errStr += "ERROR - DsMdvx::convertNcf2Mdv.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
-    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
-    return -1;
-  }
-  
-  // save read details
-
-  Mdvx::encoding_type_t readEncodingType = _readEncodingType;
-  Mdvx::compression_type_t readCompressionType = _readCompressionType;
-  Mdvx::scaling_type_t readScalingType = _readScalingType;
-  double readScale = _readScale;
-  double readBias = _readBias;
-
-  // set up URL for doing conversion via NcMdvServer
-  
-  DsURL trans_url(url);
-  trans_url.setProtocol("mdvp");
-  trans_url.setTranslator("NcMdvServer");
-  
-  if (_debug) {
-    cerr << "convertNcf2Mdv(): NCF to MDV" << endl;
-    cerr << "  URL: " << trans_url.getURLStr() << endl;
-  }
-
-  DsLOCATOR locator;
-  bool contact_server;
-  if (locator.resolve(trans_url, &contact_server, false)) {
-    _errStr += "ERROR - COMM - DsMdvx::convertNcf2Mdv.\n";
-    _errStr += "  Cannot resolve URL: ";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-  
-  // assemble message packet
-
-  DsMdvxMsg msg;
-  if (_debug) {
-    msg.setDebug();
-  }
-  void *msgBuf =
-    msg.assembleConvertNcf2Mdv(*this, trans_url.getURLStr());
-  if (msgBuf == NULL) {
-    _errStr += "ERROR - DsMdvx::convertNcf2Mdv.\n";
-    _errStr += "  Assembling outgoing message, URL:\n";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-
-  // communicate with server
-
-  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
-    _errStr += "ERROR - COMM - DsMdvx::convertNcf2Mdv.\n";
-    _errStr += "  Communicating with server\n";
-    return -1;
-  }
-
-  if (msg.getError()) {
-    return -1;
-  }
-
-  if (msg.getSubType() != DsMdvxMsg::MDVP_CONVERT_NCF_TO_MDV) {
-    _errStr += "ERROR - DsMdvx::convertNcf2Mdv.\n";
-    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
-    return -1;
-  }
-
-  // convert the output fields appropriately
-
-  for (int ii = 0; ii < (int) _fields.size(); ii++) {
-    _fields[ii]->convertType(readEncodingType,
-                             readCompressionType,
-                             readScalingType,
-                             readScale, readBias);
-  }
-
-  return 0;
-
-}
-
 //////////////////////////////////////////////////////
 // Read the headers from a NETCDF CF file into MDV, given the file path
 // Convert to NCF at the end if required
@@ -2279,81 +2110,6 @@ int DsMdvx::readAllHeadersNcf(const string &url)
   }
   
   return 0;
-}
-
-////////////////////////////////////////////////
-// read the headers from a NCF file, using the NcMdvServer
-// deprecated
-// returns 0 on success, -1 on failure
-
-int DsMdvx::_readAllHeadersNcfViaServer(const string &url)
-  
-{
-
-  if (_currentFormat != FORMAT_NCF) {
-    _errStr += "ERROR - DsMdvx::readAllHeadersNcf.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
-    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
-    return -1;
-  }
-  
-  // set up URL for doing conversion via NcMdvServer
-  
-  DsURL trans_url(url);
-  trans_url.setProtocol("mdvp");
-  trans_url.setTranslator("NcMdvServer");
-  
-  if (_debug) {
-    cerr << "readAllHeadersNcf(): Reading headers from NCF-type file" << endl;
-    cerr << "  URL: " << trans_url.getURLStr() << endl;
-  }
-
-  DsLOCATOR locator;
-  bool contact_server;
-  if (locator.resolve(trans_url, &contact_server, false)) {
-    _errStr += "ERROR - COMM - DsMdvx::readAllHeadersNcf\n";
-    _errStr += "  Cannot resolve URL: ";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-  
-  // assemble message packet
-  
-  DsMdvxMsg msg;
-  if (_debug) {
-    msg.setDebug();
-  }
-  void *msgBuf =
-    msg.assembleReadAllHdrsNcf(*this, trans_url.getURLStr());
-  if (msgBuf == NULL) {
-    _errStr += "ERROR - DsMdvx::readAllHeadersNcf\n";
-    _errStr += "  Assembling outgoing message, URL:\n";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-
-  // communicate with server
-  
-  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
-    _errStr += "ERROR - COMM - DsMdvx::readAllHeadersNcf\n";
-    _errStr += "  Communicating with server\n";
-    return -1;
-  }
-
-  if (msg.getError()) {
-    return -1;
-  }
-
-  if (msg.getSubType() != DsMdvxMsg::MDVP_READ_ALL_HDRS_NCF) {
-    _errStr += "ERROR - DsMdvx::readAllHeadersNcf\n";
-    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
-    return -1;
-  }
-  
-  return 0;
-  
 }
 
 //////////////////////////////////////////////////////
@@ -2438,100 +2194,6 @@ int DsMdvx::readNcf(const string &url)
 
   return 0;
 
-}
-
-////////////////////////////////////////////////
-// read NCF file, using the NcMdvServer
-// deprecated
-// returns 0 on success, -1 on failure
-
-int DsMdvx::_readNcfViaServer(const string &url)
-  
-{
-  
-  if (_currentFormat != FORMAT_NCF) {
-    _errStr += "ERROR - DsMdvx::readNcf.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
-    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
-    return -1;
-  }
-  
-  // save read details
-  
-  Mdvx::encoding_type_t readEncodingType = _readEncodingType;
-  Mdvx::compression_type_t readCompressionType = _readCompressionType;
-  Mdvx::scaling_type_t readScalingType = _readScalingType;
-  double readScale = _readScale;
-  double readBias = _readBias;
-
-  // set up URL for doing conversion via NcMdvServer
-  
-  DsURL trans_url(url);
-  trans_url.setProtocol("mdvp");
-  trans_url.setTranslator("NcMdvServer");
-  
-  if (_debug) {
-    cerr << "readNcf(): Reading NCF-type file" << endl;
-    cerr << "  URL: " << trans_url.getURLStr() << endl;
-  }
-
-  DsLOCATOR locator;
-  bool contact_server;
-  if (locator.resolve(trans_url, &contact_server, false)) {
-    _errStr += "ERROR - COMM - DsMdvx::readNcf\n";
-    _errStr += "  Cannot resolve URL: ";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-  
-  // assemble message packet
-  
-  DsMdvxMsg msg;
-  if (_debug) {
-    msg.setDebug();
-  }
-  void *msgBuf =
-    msg.assembleReadNcf(*this, trans_url.getURLStr());
-  if (msgBuf == NULL) {
-    _errStr += "ERROR - DsMdvx::readNcf\n";
-    _errStr += "  Assembling outgoing message, URL:\n";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-
-  // communicate with server
-  
-  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
-    _errStr += "ERROR - COMM - DsMdvx::readNcf\n";
-    _errStr += "  Communicating with server\n";
-    return -1;
-  }
-
-  if (msg.getError()) {
-    return -1;
-  }
-
-  if (msg.getSubType() != DsMdvxMsg::MDVP_READ_NCF) {
-    _errStr += "ERROR - DsMdvx::readNcf\n";
-    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
-    return -1;
-  }
-  
-  // for MDV format, convert the output fields appropriately
-  
-  if (_currentFormat == FORMAT_MDV) {
-    for (int ii = 0; ii < (int) _fields.size(); ii++) {
-      _fields[ii]->convertType(readEncodingType,
-                               readCompressionType,
-                               readScalingType,
-                               readScale, readBias);
-    }
-  }
-
-  return 0;
-  
 }
 
 //////////////////////////////////////////////////////
@@ -2696,81 +2358,6 @@ int DsMdvx::readAllHeadersRadx(const string &url)
 }
 
 ////////////////////////////////////////////////
-// read the headers from a RADX file, using the NcMdvServer
-// deprecated
-// returns 0 on success, -1 on failure
-
-int DsMdvx::_readAllHeadersRadxViaServer(const string &url)
-  
-{
-
-  if (_currentFormat != FORMAT_RADX) {
-    _errStr += "ERROR - DsMdvx::readAllHeadersRadx.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
-    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_RADX));
-    return -1;
-  }
-  
-  // set up URL for doing conversion via NcMdvServer
-  
-  DsURL trans_url(url);
-  trans_url.setProtocol("mdvp");
-  trans_url.setTranslator("NcMdvServer");
-  
-  if (_debug) {
-    cerr << "readAllHeadersRadx(): Reading headers from RADX-type file" << endl;
-    cerr << "  URL: " << trans_url.getURLStr() << endl;
-  }
-
-  DsLOCATOR locator;
-  bool contact_server;
-  if (locator.resolve(trans_url, &contact_server, false)) {
-    _errStr += "ERROR - COMM - DsMdvx::readAllHeadersRadx\n";
-    _errStr += "  Cannot resolve URL: ";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-  
-  // assemble message packet
-  
-  DsMdvxMsg msg;
-  if (_debug) {
-    msg.setDebug();
-  }
-  void *msgBuf =
-    msg.assembleReadAllHdrsRadx(*this, trans_url.getURLStr());
-  if (msgBuf == NULL) {
-    _errStr += "ERROR - DsMdvx::readAllHeadersRadx\n";
-    _errStr += "  Assembling outgoing message, URL:\n";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-
-  // communicate with server
-  
-  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
-    _errStr += "ERROR - COMM - DsMdvx::readAllHeadersRadx\n";
-    _errStr += "  Communicating with server\n";
-    return -1;
-  }
-
-  if (msg.getError()) {
-    return -1;
-  }
-
-  if (msg.getSubType() != DsMdvxMsg::MDVP_READ_ALL_HDRS_RADX) {
-    _errStr += "ERROR - DsMdvx::readAllHeadersRadx\n";
-    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
-    return -1;
-  }
-  
-  return 0;
-  
-}
-
-////////////////////////////////////////////////
 // Read a RADX-type file, convert to MDV
 // Convert to RADX at the end if required
 // returns 0 on success, -1 on failure
@@ -2886,100 +2473,6 @@ int DsMdvx::readRadx(const string &url)
 }
 
 ////////////////////////////////////////////////
-// read RADX file, using the NcMdvServer
-// deprecated
-// returns 0 on success, -1 on failure
-
-int DsMdvx::_readRadxViaServer(const string &url)
-  
-{
-  
-  if (_currentFormat != FORMAT_RADX) {
-    _errStr += "ERROR - DsMdvx::readRadx.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
-    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_RADX));
-    return -1;
-  }
-  
-  // save read details
-  
-  Mdvx::encoding_type_t readEncodingType = _readEncodingType;
-  Mdvx::compression_type_t readCompressionType = _readCompressionType;
-  Mdvx::scaling_type_t readScalingType = _readScalingType;
-  double readScale = _readScale;
-  double readBias = _readBias;
-
-  // set up URL for doing conversion via NcMdvServer
-  
-  DsURL trans_url(url);
-  trans_url.setProtocol("mdvp");
-  trans_url.setTranslator("NcMdvServer");
-  
-  if (_debug) {
-    cerr << "readRadx(): Reading RADX-type file" << endl;
-    cerr << "  URL: " << trans_url.getURLStr() << endl;
-  }
-
-  DsLOCATOR locator;
-  bool contact_server;
-  if (locator.resolve(trans_url, &contact_server, false)) {
-    _errStr += "ERROR - COMM - DsMdvx::readRadx\n";
-    _errStr += "  Cannot resolve URL: ";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-  
-  // assemble message packet
-  
-  DsMdvxMsg msg;
-  if (_debug) {
-    msg.setDebug();
-  }
-  void *msgBuf =
-    msg.assembleReadRadx(*this, trans_url.getURLStr());
-  if (msgBuf == NULL) {
-    _errStr += "ERROR - DsMdvx::readRadx\n";
-    _errStr += "  Assembling outgoing message, URL:\n";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-
-  // communicate with server
-  
-  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
-    _errStr += "ERROR - COMM - DsMdvx::readRadx\n";
-    _errStr += "  Communicating with server\n";
-    return -1;
-  }
-
-  if (msg.getError()) {
-    return -1;
-  }
-
-  if (msg.getSubType() != DsMdvxMsg::MDVP_READ_RADX) {
-    _errStr += "ERROR - DsMdvx::readRadx\n";
-    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
-    return -1;
-  }
-  
-  // for MDV format, convert the output fields appropriately
-
-  if (_currentFormat == FORMAT_MDV) {
-    for (int ii = 0; ii < (int) _fields.size(); ii++) {
-      _fields[ii]->convertType(readEncodingType,
-                               readCompressionType,
-                               readScalingType,
-                               readScale, readBias);
-    }
-  }
-
-  return 0;
-
-}
-
-////////////////////////////////////////////////
 // write NCF file, using the NcMdvServer
 // returns 0 on success, -1 on failure
 
@@ -3073,83 +2566,6 @@ int DsMdvx::constrainNcf(const string &url)
     return -1;
   }
   
-  return 0;
-
-}
-
-/////////////////////////////////////////////////////////////
-// constrain NETCDF CF using read qualifiers, via NcMdvServer
-// deprecated
-// Used when and NC file is read, and NC data is requested
-// returns 0 on success, -1 on failure
-
-int DsMdvx::_constrainNcfViaServer(const string &url)
-  
-{
-
-  if (_currentFormat != FORMAT_NCF) {
-    _errStr += "ERROR - DsMdvx::constrainNcf.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
-    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
-    return -1;
-  }
-  
-  // set up URL for doing conversion via NcMdvServer
-  
-  DsURL trans_url(url);
-  trans_url.setTranslator("NcMdvServer");
-  
-  if (_debug) {
-    cerr << "constrainNcf(): NCF to MDV to NCF" << endl;
-    cerr << "  URL: " << trans_url.getURLStr() << endl;
-  }
-
-  DsLOCATOR locator;
-  bool contact_server;
-  if (locator.resolve(trans_url, &contact_server, false)) {
-    _errStr += "ERROR - COMM - DsMdvx::constrainNcf.\n";
-    _errStr += "  Cannot resolve URL: ";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-  
-  // assemble message packet
-
-  DsMdvxMsg msg;
-  if (_debug) {
-    msg.setDebug();
-  }
-  void *msgBuf =
-    msg.assembleConstrainNcf(*this, trans_url.getURLStr());
-  if (msgBuf == NULL) {
-    _errStr += "ERROR - DsMdvx::constrainNcf.\n";
-    _errStr += "  Assembling outgoing message, URL:\n";
-    _errStr += trans_url.getURLStr();
-    _errStr += "\n";
-    return -1;
-  }
-
-  // communicate with server
-  
-  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
-    _errStr += "ERROR - COMM - DsMdvx::constrainNcf.\n";
-    _errStr += "  Communicating with server\n";
-    return -1;
-  }
-  
-  if (msg.getError()) {
-    return -1;
-  }
-
-  if (msg.getSubType() != DsMdvxMsg::MDVP_CONSTRAIN_NCF) {
-    _errStr += "ERROR - DsMdvx::constrainNcf.\n";
-    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
-    return -1;
-  }
-
-  _ncfConstrained = true;
-
   return 0;
 
 }
@@ -3568,3 +2984,590 @@ void DsMdvx::_doWriteLdataInfo(const string &outputDir,
 
 }
 
+#ifdef NOTNOW
+
+////////////////////////////////////////////////
+// convert MDV format to NETCDF CF format
+// using the NcMdvServer (deprecated)
+// returns 0 on success, -1 on failure
+
+int DsMdvx::_convertMdv2NcfViaServer(const string &url)
+  
+{
+  
+  if (_currentFormat != FORMAT_MDV) {
+    _errStr += "ERROR - DsMdvx::convertMdv2Ncf.\n";
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_MDV));
+    return -1;
+  }
+
+  // set up URL for doing conversion via NcMdvServer
+
+  DsURL trans_url(url);
+  trans_url.setProtocol("mdvp");
+  trans_url.setTranslator("NcMdvServer");
+  
+  DsLOCATOR locator;
+  bool contact_server;
+  if (locator.resolve(trans_url, &contact_server, false)) {
+    _errStr += "ERROR - COMM - DsMdvx::convertMdv2Ncf.\n";
+    _errStr += "  Cannot resolve URL: ";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+  
+  if (_debug) {
+    cerr << "convertMdv2Ncf(): MDV to NCF" << endl;
+    cerr << "  URL: " << trans_url.getURLStr() << endl;
+  }
+
+  // assemble message packet
+
+  DsMdvxMsg msg;
+  if (_debug) {
+    msg.setDebug();
+  }
+  void *msgBuf =
+    msg.assembleConvertMdv2Ncf(*this, trans_url.getURLStr());
+  if (msgBuf == NULL) {
+    _errStr += "ERROR - DsMdvx::convertMdv2Ncf.\n";
+    _errStr += "  Assembling outgoing message, URL:\n";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+
+  // communicate with server
+
+  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
+    _errStr += "ERROR - COMM - DsMdvx::convertMdv2Ncf.\n";
+    _errStr += "  Communicating with server\n";
+    return -1;
+  }
+
+  if (msg.getError()) {
+    return -1;
+  }
+
+  if (msg.getSubType() != DsMdvxMsg::MDVP_CONVERT_MDV_TO_NCF) {
+    _errStr += "ERROR - DsMdvx::convertMdv2Ncf\n";
+    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
+    return -1;
+  }
+
+  _ncfConstrained = true;
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////
+// convert NETCDF CF format to MDV format
+// using the NcMdvServer (deprecated)
+// returns 0 on success, -1 on failure
+
+int DsMdvx::_convertNcf2MdvViaServer(const string &url)
+  
+{
+
+  if (_currentFormat != FORMAT_NCF) {
+    _errStr += "ERROR - DsMdvx::convertNcf2Mdv.\n";
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
+    return -1;
+  }
+  
+  // save read details
+
+  Mdvx::encoding_type_t readEncodingType = _readEncodingType;
+  Mdvx::compression_type_t readCompressionType = _readCompressionType;
+  Mdvx::scaling_type_t readScalingType = _readScalingType;
+  double readScale = _readScale;
+  double readBias = _readBias;
+
+  // set up URL for doing conversion via NcMdvServer
+  
+  DsURL trans_url(url);
+  trans_url.setProtocol("mdvp");
+  trans_url.setTranslator("NcMdvServer");
+  
+  if (_debug) {
+    cerr << "convertNcf2Mdv(): NCF to MDV" << endl;
+    cerr << "  URL: " << trans_url.getURLStr() << endl;
+  }
+
+  DsLOCATOR locator;
+  bool contact_server;
+  if (locator.resolve(trans_url, &contact_server, false)) {
+    _errStr += "ERROR - COMM - DsMdvx::convertNcf2Mdv.\n";
+    _errStr += "  Cannot resolve URL: ";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+  
+  // assemble message packet
+
+  DsMdvxMsg msg;
+  if (_debug) {
+    msg.setDebug();
+  }
+  void *msgBuf =
+    msg.assembleConvertNcf2Mdv(*this, trans_url.getURLStr());
+  if (msgBuf == NULL) {
+    _errStr += "ERROR - DsMdvx::convertNcf2Mdv.\n";
+    _errStr += "  Assembling outgoing message, URL:\n";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+
+  // communicate with server
+
+  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
+    _errStr += "ERROR - COMM - DsMdvx::convertNcf2Mdv.\n";
+    _errStr += "  Communicating with server\n";
+    return -1;
+  }
+
+  if (msg.getError()) {
+    return -1;
+  }
+
+  if (msg.getSubType() != DsMdvxMsg::MDVP_CONVERT_NCF_TO_MDV) {
+    _errStr += "ERROR - DsMdvx::convertNcf2Mdv.\n";
+    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
+    return -1;
+  }
+
+  // convert the output fields appropriately
+
+  for (int ii = 0; ii < (int) _fields.size(); ii++) {
+    _fields[ii]->convertType(readEncodingType,
+                             readCompressionType,
+                             readScalingType,
+                             readScale, readBias);
+  }
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////
+// read the headers from a NCF file, using the NcMdvServer
+// deprecated
+// returns 0 on success, -1 on failure
+
+int DsMdvx::_readAllHeadersNcfViaServer(const string &url)
+  
+{
+
+  if (_currentFormat != FORMAT_NCF) {
+    _errStr += "ERROR - DsMdvx::readAllHeadersNcf.\n";
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
+    return -1;
+  }
+  
+  // set up URL for doing conversion via NcMdvServer
+  
+  DsURL trans_url(url);
+  trans_url.setProtocol("mdvp");
+  trans_url.setTranslator("NcMdvServer");
+  
+  if (_debug) {
+    cerr << "readAllHeadersNcf(): Reading headers from NCF-type file" << endl;
+    cerr << "  URL: " << trans_url.getURLStr() << endl;
+  }
+
+  DsLOCATOR locator;
+  bool contact_server;
+  if (locator.resolve(trans_url, &contact_server, false)) {
+    _errStr += "ERROR - COMM - DsMdvx::readAllHeadersNcf\n";
+    _errStr += "  Cannot resolve URL: ";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+  
+  // assemble message packet
+  
+  DsMdvxMsg msg;
+  if (_debug) {
+    msg.setDebug();
+  }
+  void *msgBuf =
+    msg.assembleReadAllHdrsNcf(*this, trans_url.getURLStr());
+  if (msgBuf == NULL) {
+    _errStr += "ERROR - DsMdvx::readAllHeadersNcf\n";
+    _errStr += "  Assembling outgoing message, URL:\n";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+
+  // communicate with server
+  
+  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
+    _errStr += "ERROR - COMM - DsMdvx::readAllHeadersNcf\n";
+    _errStr += "  Communicating with server\n";
+    return -1;
+  }
+
+  if (msg.getError()) {
+    return -1;
+  }
+
+  if (msg.getSubType() != DsMdvxMsg::MDVP_READ_ALL_HDRS_NCF) {
+    _errStr += "ERROR - DsMdvx::readAllHeadersNcf\n";
+    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
+    return -1;
+  }
+  
+  return 0;
+  
+}
+
+////////////////////////////////////////////////
+// read NCF file, using the NcMdvServer
+// deprecated
+// returns 0 on success, -1 on failure
+
+int DsMdvx::_readNcfViaServer(const string &url)
+  
+{
+  
+  if (_currentFormat != FORMAT_NCF) {
+    _errStr += "ERROR - DsMdvx::readNcf.\n";
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
+    return -1;
+  }
+  
+  // save read details
+  
+  Mdvx::encoding_type_t readEncodingType = _readEncodingType;
+  Mdvx::compression_type_t readCompressionType = _readCompressionType;
+  Mdvx::scaling_type_t readScalingType = _readScalingType;
+  double readScale = _readScale;
+  double readBias = _readBias;
+
+  // set up URL for doing conversion via NcMdvServer
+  
+  DsURL trans_url(url);
+  trans_url.setProtocol("mdvp");
+  trans_url.setTranslator("NcMdvServer");
+  
+  if (_debug) {
+    cerr << "readNcf(): Reading NCF-type file" << endl;
+    cerr << "  URL: " << trans_url.getURLStr() << endl;
+  }
+
+  DsLOCATOR locator;
+  bool contact_server;
+  if (locator.resolve(trans_url, &contact_server, false)) {
+    _errStr += "ERROR - COMM - DsMdvx::readNcf\n";
+    _errStr += "  Cannot resolve URL: ";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+  
+  // assemble message packet
+  
+  DsMdvxMsg msg;
+  if (_debug) {
+    msg.setDebug();
+  }
+  void *msgBuf =
+    msg.assembleReadNcf(*this, trans_url.getURLStr());
+  if (msgBuf == NULL) {
+    _errStr += "ERROR - DsMdvx::readNcf\n";
+    _errStr += "  Assembling outgoing message, URL:\n";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+
+  // communicate with server
+  
+  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
+    _errStr += "ERROR - COMM - DsMdvx::readNcf\n";
+    _errStr += "  Communicating with server\n";
+    return -1;
+  }
+
+  if (msg.getError()) {
+    return -1;
+  }
+
+  if (msg.getSubType() != DsMdvxMsg::MDVP_READ_NCF) {
+    _errStr += "ERROR - DsMdvx::readNcf\n";
+    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
+    return -1;
+  }
+  
+  // for MDV format, convert the output fields appropriately
+  
+  if (_currentFormat == FORMAT_MDV) {
+    for (int ii = 0; ii < (int) _fields.size(); ii++) {
+      _fields[ii]->convertType(readEncodingType,
+                               readCompressionType,
+                               readScalingType,
+                               readScale, readBias);
+    }
+  }
+
+  return 0;
+  
+}
+
+////////////////////////////////////////////////
+// read the headers from a RADX file, using the NcMdvServer
+// deprecated
+// returns 0 on success, -1 on failure
+
+int DsMdvx::_readAllHeadersRadxViaServer(const string &url)
+  
+{
+
+  if (_currentFormat != FORMAT_RADX) {
+    _errStr += "ERROR - DsMdvx::readAllHeadersRadx.\n";
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_RADX));
+    return -1;
+  }
+  
+  // set up URL for doing conversion via NcMdvServer
+  
+  DsURL trans_url(url);
+  trans_url.setProtocol("mdvp");
+  trans_url.setTranslator("NcMdvServer");
+  
+  if (_debug) {
+    cerr << "readAllHeadersRadx(): Reading headers from RADX-type file" << endl;
+    cerr << "  URL: " << trans_url.getURLStr() << endl;
+  }
+
+  DsLOCATOR locator;
+  bool contact_server;
+  if (locator.resolve(trans_url, &contact_server, false)) {
+    _errStr += "ERROR - COMM - DsMdvx::readAllHeadersRadx\n";
+    _errStr += "  Cannot resolve URL: ";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+  
+  // assemble message packet
+  
+  DsMdvxMsg msg;
+  if (_debug) {
+    msg.setDebug();
+  }
+  void *msgBuf =
+    msg.assembleReadAllHdrsRadx(*this, trans_url.getURLStr());
+  if (msgBuf == NULL) {
+    _errStr += "ERROR - DsMdvx::readAllHeadersRadx\n";
+    _errStr += "  Assembling outgoing message, URL:\n";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+
+  // communicate with server
+  
+  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
+    _errStr += "ERROR - COMM - DsMdvx::readAllHeadersRadx\n";
+    _errStr += "  Communicating with server\n";
+    return -1;
+  }
+
+  if (msg.getError()) {
+    return -1;
+  }
+
+  if (msg.getSubType() != DsMdvxMsg::MDVP_READ_ALL_HDRS_RADX) {
+    _errStr += "ERROR - DsMdvx::readAllHeadersRadx\n";
+    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
+    return -1;
+  }
+  
+  return 0;
+  
+}
+
+////////////////////////////////////////////////
+// read RADX file, using the NcMdvServer
+// deprecated
+// returns 0 on success, -1 on failure
+
+int DsMdvx::_readRadxViaServer(const string &url)
+  
+{
+  
+  if (_currentFormat != FORMAT_RADX) {
+    _errStr += "ERROR - DsMdvx::readRadx.\n";
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_RADX));
+    return -1;
+  }
+  
+  // save read details
+  
+  Mdvx::encoding_type_t readEncodingType = _readEncodingType;
+  Mdvx::compression_type_t readCompressionType = _readCompressionType;
+  Mdvx::scaling_type_t readScalingType = _readScalingType;
+  double readScale = _readScale;
+  double readBias = _readBias;
+
+  // set up URL for doing conversion via NcMdvServer
+  
+  DsURL trans_url(url);
+  trans_url.setProtocol("mdvp");
+  trans_url.setTranslator("NcMdvServer");
+  
+  if (_debug) {
+    cerr << "readRadx(): Reading RADX-type file" << endl;
+    cerr << "  URL: " << trans_url.getURLStr() << endl;
+  }
+
+  DsLOCATOR locator;
+  bool contact_server;
+  if (locator.resolve(trans_url, &contact_server, false)) {
+    _errStr += "ERROR - COMM - DsMdvx::readRadx\n";
+    _errStr += "  Cannot resolve URL: ";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+  
+  // assemble message packet
+  
+  DsMdvxMsg msg;
+  if (_debug) {
+    msg.setDebug();
+  }
+  void *msgBuf =
+    msg.assembleReadRadx(*this, trans_url.getURLStr());
+  if (msgBuf == NULL) {
+    _errStr += "ERROR - DsMdvx::readRadx\n";
+    _errStr += "  Assembling outgoing message, URL:\n";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+
+  // communicate with server
+  
+  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
+    _errStr += "ERROR - COMM - DsMdvx::readRadx\n";
+    _errStr += "  Communicating with server\n";
+    return -1;
+  }
+
+  if (msg.getError()) {
+    return -1;
+  }
+
+  if (msg.getSubType() != DsMdvxMsg::MDVP_READ_RADX) {
+    _errStr += "ERROR - DsMdvx::readRadx\n";
+    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
+    return -1;
+  }
+  
+  // for MDV format, convert the output fields appropriately
+
+  if (_currentFormat == FORMAT_MDV) {
+    for (int ii = 0; ii < (int) _fields.size(); ii++) {
+      _fields[ii]->convertType(readEncodingType,
+                               readCompressionType,
+                               readScalingType,
+                               readScale, readBias);
+    }
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////
+// constrain NETCDF CF using read qualifiers, via NcMdvServer
+// deprecated
+// Used when and NC file is read, and NC data is requested
+// returns 0 on success, -1 on failure
+
+int DsMdvx::_constrainNcfViaServer(const string &url)
+  
+{
+
+  if (_currentFormat != FORMAT_NCF) {
+    _errStr += "ERROR - DsMdvx::constrainNcf.\n";
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
+    return -1;
+  }
+  
+  // set up URL for doing conversion via NcMdvServer
+  
+  DsURL trans_url(url);
+  trans_url.setTranslator("NcMdvServer");
+  
+  if (_debug) {
+    cerr << "constrainNcf(): NCF to MDV to NCF" << endl;
+    cerr << "  URL: " << trans_url.getURLStr() << endl;
+  }
+
+  DsLOCATOR locator;
+  bool contact_server;
+  if (locator.resolve(trans_url, &contact_server, false)) {
+    _errStr += "ERROR - COMM - DsMdvx::constrainNcf.\n";
+    _errStr += "  Cannot resolve URL: ";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+  
+  // assemble message packet
+
+  DsMdvxMsg msg;
+  if (_debug) {
+    msg.setDebug();
+  }
+  void *msgBuf =
+    msg.assembleConstrainNcf(*this, trans_url.getURLStr());
+  if (msgBuf == NULL) {
+    _errStr += "ERROR - DsMdvx::constrainNcf.\n";
+    _errStr += "  Assembling outgoing message, URL:\n";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+
+  // communicate with server
+  
+  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
+    _errStr += "ERROR - COMM - DsMdvx::constrainNcf.\n";
+    _errStr += "  Communicating with server\n";
+    return -1;
+  }
+  
+  if (msg.getError()) {
+    return -1;
+  }
+
+  if (msg.getSubType() != DsMdvxMsg::MDVP_CONSTRAIN_NCF) {
+    _errStr += "ERROR - DsMdvx::constrainNcf.\n";
+    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
+    return -1;
+  }
+
+  _ncfConstrained = true;
+
+  return 0;
+
+}
+
+#endif

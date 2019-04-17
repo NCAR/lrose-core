@@ -539,7 +539,7 @@ paramdef string {
 
 commentdef {
   p_header = "FILE FORMAT";
-  p_text = "The data may be represented in normal MDV format, or in alternate XML and NCF formats. For converions to/from NCF, the NcMdvServer must be running on the host to which the URL points.";
+  p_text = "The data may be represented in normal MDV format, or in alternate XML and NCF formats.";
 }
 
 typedef enum {
