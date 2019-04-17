@@ -25,6 +25,8 @@ public:
   void updateEvent(vector<string> fieldNames, string selectedField);
   bool getChanges();
 
+
+
 public slots:
   void colorMapProvided(string fieldName, ColorMap *colorMap);
 
@@ -32,7 +34,7 @@ signals:
   void getColorMap(string selectedField);
   void colorMapMaxChanged(double value);
   void colorMapMinChanged(double value);
-  void replot(string selectedField);
+  void replotFieldColorMapChanges(); // (string selectedField);
 
 private slots:
 
@@ -64,9 +66,6 @@ private:
     QLineEdit *maxColorLineEdit;
     QLabel *stepColorLabel;
     QLineEdit *stepColorLineEdit;
-
-
-
 
     QLabel *gridColorLabel;
     QPushButton *gridColorButton;

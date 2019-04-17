@@ -25,12 +25,16 @@ public:
 
   //  void getFieldNames();
 
-  void modelChanged(string fieldName); // , ColorMap newColorMap);
+  void startUp();
+
+signals:
+  void colorMapRedefineSent(string fieldName, ColorMap newColorMap);
 
 public slots:
   void getColorMap(string fieldName);
   void colorMapMaxChanged(double newValue);
   void colorMapMinChanged(double newValue);
+  void modelChanged(); // string fieldName); // , ColorMap newColorMap);
 
 private slots:
 

@@ -121,6 +121,7 @@ public:
   
   int loadArchiveFileList();
 
+
   //  const RadxVol getDataVolume();
 
   /*
@@ -130,8 +131,9 @@ public:
   void ShowContextMenu(const QPoint &pos);
   void notImplemented();
   void informationMessage();
-
+  */
 public slots:
+/*
   void contextMenuCancel();
   void contextMenuParameterColors();
   void contextMenuView(); 
@@ -139,6 +141,10 @@ public slots:
   virtual void contextMenuExamine();
   void contextMenuDataWidget();
   */
+
+  //colorMapRedefineReceived(string, ColorMap)
+  void colorMapRedefineReceived(string fieldName, ColorMap newColorMap);
+
 
 signals:
 

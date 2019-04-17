@@ -83,6 +83,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/file_io.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/LogStream.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <radar/RadarComplex.hh>
 #include <Radx/RadxFile.hh>
@@ -1596,6 +1597,40 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
   }
   _valueLabel->setText(text);
 
+}
+
+// PolarManager::colorMapRedefineReceived(string, ColorMap)
+void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap) {
+
+  LOG(DEBUG) << "enter";
+  // connect the new color map with the field                                                       
+  // find the fieldName in the list of FieldDisplays                                                
+  bool found = false;
+  vector<DisplayField *>::iterator it;
+  int fieldId = -1;
+
+  it = _fields.begin();
+  while ( it != _fields.end() && !found ) {
+    DisplayField *field = *it;
+
+    string name = field->getName();
+    if (name.compare(fieldName) == 0) {
+      found = true;
+      field->replaceColorMap(newColorMap);
+    }
+    fieldId++;
+    it++;
+  }
+  if (!found) {
+    LOG(ERROR) << fieldName;
+    LOG(ERROR) << "ERROR - field not found; no color map change";
+    // TODO: present error message box                                                              
+  } else {
+    // look up the fieldId from the fieldName                                                       
+    // change the field variable                                                                    
+    _changeField(fieldId, false);
+  }
+  LOG(DEBUG) << "exit";
 }
 
 /*

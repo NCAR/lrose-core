@@ -43,12 +43,14 @@ void DisplayFieldModel::setSelectedField(string fieldName) {
   LOG(DEBUG) << "exit";
 } 
 
+/*
 bool DisplayFieldModel::getChanges() {
 
    //show();
    return false;
 
 }
+*/
 
 ColorMap *DisplayFieldModel::_getOriginalColorMap(string fieldName) {
 
@@ -164,4 +166,3 @@ bool DisplayFieldModel::backgroundChanged(string fieldName) {
   LOG(DEBUG) << "background changed";
   return false;
 }
-

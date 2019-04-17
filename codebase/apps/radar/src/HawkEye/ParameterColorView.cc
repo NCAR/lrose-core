@@ -15,6 +15,7 @@ ParameterColorView::ParameterColorView(QWidget *parent) :
     QDialog(parent)
 {
   _parent = parent;
+  resize(200,300);
   currentColorMap = NULL;
   colorBar = NULL;
   cmapLabel = NULL;
@@ -72,14 +73,25 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
     QPushButton *cancelButton = new QPushButton("Cancel");
     QPushButton *saveButton = new QPushButton(tr("Save"));
     QPushButton *replotButton = new QPushButton(tr("Replot"));
+    // Note: Command buttons in dialogs are by default auto-default buttons.
+    // A default button is a push button that is activated when the user 
+    // presses the Enter or Return key in a dialog.
+    // We only want the replot button to be the default button,
+    // therefore, setAutoDefault(false) for all the other pushButtons.
+    // Otherwise, when Enter/Return is pressed, the color buttons
+    // will be activated and the colorDialog chooser pops-up.
+    cancelButton->setAutoDefault(false);
+    saveButton->setAutoDefault(false);
 
     centerColorLabel = new QLabel;
     centerColorLabel->setText(tr("Center"));
     centerColorLineEdit = new QLineEdit();
+    //centerColorLineEdit->setAutoDefault(false);
     
     minColorLabel = new QLabel;
     minColorLabel->setText(tr("Min"));
     minColorLineEdit = new QLineEdit();
+    //minColorLineEdit->setAutoDefault(false);
 
     QString maxInputMask("####.#");
     minColorLineEdit->setInputMask(maxInputMask);
@@ -88,15 +100,18 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
     maxColorLabel->setText(tr("Max"));
     maxColorLineEdit = new QLineEdit();
     maxColorLineEdit->setInputMask(maxInputMask);
+    //maxColorLineEdit->setAutoDefault(false);
 
     stepColorLabel = new QLabel;
     stepColorLabel->setText(tr("Step"));
     stepColorLineEdit = new QLineEdit();
+    //stepColorLineEdit->setAutoDefault(false);
 
     gridColorLabel = new QLabel;
     gridColorLabel->setText(tr("Grid"));
     gridColorButton = new QPushButton(tr(""));
     gridColorButton->setFlat(true);
+    gridColorButton->setAutoDefault(false);
     setColorOnButton(gridColorButton, QColor("white"));
 
     // TODO: how to get the color map data from the model?    setColorOnButton(gridColorButton, QColor("white"));
@@ -106,11 +121,13 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
     boundaryColorLabel->setText(tr("Boundary"));
     boundaryColorButton = new QPushButton(tr(""));
     boundaryColorButton->setFlat(true);
+    boundaryColorButton->setAutoDefault(false);
     setColorOnButton(boundaryColorButton, QColor("blue"));
 
     exceededColorLabel = new QLabel;
     exceededColorLabel->setText(tr("Exceeded"));
     exceededColorButton = new QPushButton(tr(""));
+    exceededColorButton->setAutoDefault(false);
     exceededColorButton->setFlat(true);
     setColorOnButton(exceededColorButton, QColor("black"));
 
@@ -118,24 +135,28 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
     missingColorLabel->setText(tr("Missing"));
     missingColorButton = new QPushButton(tr(""));
     missingColorButton->setFlat(true);
+    missingColorButton->setAutoDefault(false);
     setColorOnButton(missingColorButton, QColor("black"));
 
     annotationColorLabel = new QLabel;
     annotationColorLabel->setText(tr("Annotation"));
     annotationColorButton = new QPushButton(tr(""));
     annotationColorButton->setFlat(true);
+    annotationColorButton->setAutoDefault(false);
     setColorOnButton(annotationColorButton, QColor("white"));
 
     backgroundColorLabel = new QLabel;
     backgroundColorLabel->setText(tr("Background"));
     backgroundColorButton = new QPushButton(tr(""));
     backgroundColorButton->setFlat(true);
+    backgroundColorButton->setAutoDefault(false);
     setColorOnButton(backgroundColorButton, QColor("grey"));
 
     emphasisColorLabel = new QLabel;
     emphasisColorLabel->setText(tr("Emphasis"));
     emphasisColorButton = new QPushButton(tr(""));
     emphasisColorButton->setFlat(true);
+    emphasisColorButton->setAutoDefault(false);
     setColorOnButton(emphasisColorButton, QColor("pink"));
 
     QLabel *paletteLabel = new QLabel();
@@ -173,8 +194,6 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
 
     connect(maxColorLineEdit, &QLineEdit::editingFinished, this, &ParameterColorView::setMaxPoint);
     connect(minColorLineEdit, &QLineEdit::editingFinished, this, &ParameterColorView::setMinPoint);
-
-    //    connect(cmapLabel, &ClickableLabel::clicked, this, &ParameterColorView::pickColorPalette);
 
     layout->addWidget(parameterLabel, 0, 0, 1, 1, Qt::AlignCenter);
     layout->addWidget(parameterList, 1, 0, 8, 1);
@@ -263,20 +282,23 @@ void ParameterColorView::colorMapProvided(string fieldName, ColorMap *colorMap) 
 
   currentColorMap = colorMap;
   colorBar = new ColorBar(1, colorMap);
-  QPixmap *pixmap = colorBar->getPixmap();
+  QPixmap *pixmap = colorBar->getPixmap(1,3);
   cmapLabel = new ClickableLabel();
-  cmapLabel->clear();
-  cmapLabel->setPixmap(*pixmap);
+  int w = cmapLabel->width();
+  int h = cmapLabel->height();
 
+  cmapLabel->clear();
+  cmapLabel->setPixmap(*pixmap); //
+  //QSize size;
+  //size.setWidth(1); 
+  // this doesn't allow scaling of image ... (pixmap->scaled(w/2,h*2)); // (*pixmap);
+  //cmapLabel->sizeHint = size;
   setValueOnLineEdit(minColorLineEdit, currentColorMap->rangeMin());
   setValueOnLineEdit(maxColorLineEdit, currentColorMap->rangeMax());
 
   connect(cmapLabel, &ClickableLabel::clicked, this, &ParameterColorView::pickColorPalette);
 
     layout->addWidget(cmapLabel, 1, 3, -1, 1);
-
-    //setLayout(layout);
-
 
   }
   LOG(DEBUG) << "exit";
@@ -331,6 +353,7 @@ bool ParameterColorView::getChanges() {
 
 void ParameterColorView::setCenterPoint()
 {
+  LOG(DEBUG) << "enter";
   QString qvalue;
   bool ok = false;
   qvalue = centerColorLineEdit->text();
@@ -344,10 +367,14 @@ void ParameterColorView::setCenterPoint()
   //qvalue = centerColorLineEdit->text();
   //std::string value = qvalue.toStdString();
   //sscanf(value.c_str(),"%g", &newCenterPoint);
+  LOG(DEBUG) << "exit";
+
 }       
 
 void ParameterColorView::setMaxPoint()
 {
+  LOG(DEBUG) << "enter";
+
   QString qvalue;
   bool ok = false;
   qvalue = maxColorLineEdit->text();
@@ -369,6 +396,8 @@ void ParameterColorView::setMaxPoint()
 
 void ParameterColorView::setMinPoint()
 {
+  LOG(DEBUG) << "enter";
+
   QString qvalue;
   bool ok = false;
   qvalue = minColorLineEdit->text();
@@ -390,6 +419,8 @@ void ParameterColorView::setMinPoint()
 
 void ParameterColorView::setStepPoint()
 {
+  LOG(DEBUG) << "enter";
+
   QString qvalue;
   bool ok = false;
   qvalue = stepColorLineEdit->text();
@@ -406,6 +437,7 @@ void ParameterColorView::setStepPoint()
 }
 
 void ParameterColorView::saveColorScale() {
+  LOG(DEBUG) << "enter";
 
   QString qvalue;
   bool ok = false;
@@ -422,18 +454,28 @@ void ParameterColorView::saveColorScale() {
 
 void ParameterColorView::replotColorScale() {
 
+  LOG(DEBUG) << "enter";
+
   QString qvalue;
   bool ok = false;
+  
+  LOG(DEBUG) << "enter";
+  LOG(DEBUG) << "emit replotFieldColorMapChanges";
 
-  emit replot(_selectedField);
-
+  emit replotFieldColorMapChanges(); // _selectedField);
+/*
   QMessageBox msgBox;
-  msgBox.setText("Replot Clicked!");
+  msgBox.setText("Replot ...");
   msgBox.exec();
+*/
+  LOG(DEBUG) << "exit";
 }
 
 void ParameterColorView::setGridColor()
 {   
+  LOG(DEBUG) << "enter";
+
+  
     // const QColorView::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
     const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
@@ -441,10 +483,14 @@ void ParameterColorView::setGridColor()
         gridColorButton->setPalette(QPalette(color));
         gridColorButton->setAutoFillBackground(true);
     }
+  
+  LOG(DEBUG) << "exit";
 }
 
 void ParameterColorView::setBoundaryColor()
 {
+  LOG(DEBUG) << "enter";
+
     // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
     const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
@@ -452,10 +498,14 @@ void ParameterColorView::setBoundaryColor()
         boundaryColorButton->setPalette(QPalette(color));
         boundaryColorButton->setAutoFillBackground(true);
     }
+  LOG(DEBUG) << "exit";
+
 }
 
 void ParameterColorView::setExceededColor()
 {
+  LOG(DEBUG) << "enter";
+
     // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
     const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
@@ -463,10 +513,14 @@ void ParameterColorView::setExceededColor()
         exceededColorButton->setPalette(QPalette(color));
         exceededColorButton->setAutoFillBackground(true);
     }
+  LOG(DEBUG) << "exit";
+
 }
 
 void ParameterColorView::setMissingColor()
 {
+  LOG(DEBUG) << "enter";
+
     // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
     const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
@@ -474,10 +528,14 @@ void ParameterColorView::setMissingColor()
         missingColorButton->setPalette(QPalette(color));
         missingColorButton->setAutoFillBackground(true);
     }
+  LOG(DEBUG) << "exit";
+
 }
 
 void ParameterColorView::setAnnotationColor()
 {
+  LOG(DEBUG) << "enter";
+
     // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
     const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
@@ -485,10 +543,14 @@ void ParameterColorView::setAnnotationColor()
         annotationColorButton->setPalette(QPalette(color));
         annotationColorButton->setAutoFillBackground(true);
     }
+  LOG(DEBUG) << "exit";
+
 }
 
 void ParameterColorView::setBackgroundColor()
 {
+  LOG(DEBUG) << "enter";
+
     // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
     const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
@@ -496,18 +558,26 @@ void ParameterColorView::setBackgroundColor()
         backgroundColorButton->setPalette(QPalette(color));
         backgroundColorButton->setAutoFillBackground(true);
     }
+  LOG(DEBUG) << "exit";
+
 }
 
 void ParameterColorView::setColorOnButton(QPushButton *button, QColor color)
 {
+  LOG(DEBUG) << "enter";
+
     if (color.isValid()) {
         button->setPalette(QPalette(color));
         button->setAutoFillBackground(true);
     }
+  LOG(DEBUG) << "exit";
+
 }
 
 void ParameterColorView::setEmphasisColor()
 {
+  LOG(DEBUG) << "enter";
+
     // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
     const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
@@ -515,6 +585,8 @@ void ParameterColorView::setEmphasisColor()
         emphasisColorButton->setPalette(QPalette(color));
         emphasisColorButton->setAutoFillBackground(true);
     }
+  LOG(DEBUG) << "exit";
+
 }
 
 void ParameterColorView::setValueOnLineEdit(QLineEdit *editor, double value) {

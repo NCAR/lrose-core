@@ -112,7 +112,9 @@ public:
   
   virtual void enableZoomButton() const = 0;
 
-  void changeToDisplayField(string fieldName, ColorMap newColorMap);
+public slots:
+
+  void colorMapRedefineReceived(string fieldName, ColorMap newColorMap);
 
 
 signals:

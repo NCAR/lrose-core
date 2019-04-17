@@ -1,4 +1,5 @@
 
+#include "toolsa/LogStream.hh"
 #include "FieldColorController.hh"
 #include "DisplayField.hh"
 #include "ColorMap.hh"
@@ -20,13 +21,11 @@ FieldColorController::FieldColorController(ParameterColorView *parameterColorVie
   // _view, SLOT(updateEvent(vector<string>, string)));
 
   // TODO replot is messed up; try naming more specific
-  //  connect(_view, SIGNAL(replot()), this, SLOT(modelChanged));
+  connect(_view, SIGNAL(replotFieldColorMapChanges()), this, SLOT(modelChanged()));
   vector<string> fieldNames = _model->getFieldNames();
   string selectedField = _model->getSelectedField();
   // ColorMap colorMap = _model->getColorMap(selectedField);
   _view->updateEvent(fieldNames, selectedField);
-
-  _view->exec();
 
 }
 
@@ -39,17 +38,29 @@ FieldColorController::~FieldColorController() {
   //delete *_model;
 }
 
-void FieldColorController::modelChanged(string fieldName) // , ColorMap newColorMap) 
+void FieldColorController::startUp()
 {
-  // TODO: need to fix this up a bit ...
-  // TODO: Save state somehow in model ...
+  _view->exec();
+}
+
+void FieldColorController::modelChanged() // string fieldName) // , ColorMap newColorMap) 
+{
+  LOG(DEBUG) << "enter"; 
+
+  string selectedField = _model->getSelectedField();
+
   // get changes from model
+  /*
   if (_model->colorMapChanged(fieldName)) {
   }
   if (_model->backgroundChanged(fieldName)) {
   }
-  //  emit colorMapRedefined(fieldName, newColorMap);
-
+  */
+  ColorMap *newColorMap = _model->getColorMap(selectedField);
+  //  fieldName should be current working fieldName & colorMap
+  LOG(DEBUG) << "emit colorMapRedefineSent";
+  emit colorMapRedefineSent(selectedField, *newColorMap);
+  LOG(DEBUG) << "exit";
 }
 
 void FieldColorController::getColorMap(string fieldName) 

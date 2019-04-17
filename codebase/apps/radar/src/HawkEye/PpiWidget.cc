@@ -192,6 +192,8 @@ void PpiWidget::addBeam(const RadxRay *ray,
                         const std::vector< DisplayField* > &fields)
 {
 
+  LOG(DEBUG) << "enter";
+
   // add a new beam to the display. 
   // The steps are:
   // 1. preallocate mode: find the beam to be drawn, or dynamic mode:
@@ -253,7 +255,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
   }
 
   // compute angles and times in archive mode
-  
+
   if (newBeams.size() > 0) {
     
     if (_isArchiveMode) {
@@ -269,7 +271,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
       _sumElev += ray->getElevationDeg();
       _nRays++;
       _meanElev = _sumElev / _nRays;
-    
+      LOG(DEBUG) << "isArchiveMode _nRays = " << _nRays;    
     } // if (_isArchiveMode) 
     
   } // if (newBeams.size() > 0) 
@@ -279,6 +281,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
       _ppiBeams.size() % 10 == 0) {
     cerr << "==>> _ppiBeams.size(): " << _ppiBeams.size() << endl;
   }
+  LOG(DEBUG) << "number of new Beams " << newBeams.size();
 
   // newBeams has pointers to all of the newly added beams.  Render the
   // beam data.
@@ -309,6 +312,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
 
   _performRendering();
 
+  LOG(DEBUG) << "exit";
 }
 
 
@@ -1098,7 +1102,7 @@ void PpiWidget::_refreshImages()
 
 void PpiWidget::contextMenuParameterColors()
 {
-
+  
   LOG(DEBUG) << "enter";
 
   //DisplayField selectedField;                                                                             
@@ -1109,12 +1113,21 @@ void PpiWidget::contextMenuParameterColors()
   vector<DisplayField *> displayFields = _manager.getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
   DisplayField selectedField = _manager.getSelectedField();
   DisplayFieldModel *displayFieldModel = new DisplayFieldModel(displayFields, selectedField.getName());
-  FieldColorController fieldColorController(parameterColorView, displayFieldModel);
-  // connect some signals and slots in order to retrieve information                                        
-  // and send changes back to display                                                                       
+  FieldColorController *fieldColorController = new FieldColorController(parameterColorView, displayFieldModel);
+  // connect some signals and slots in order to retrieve information
+  // and send changes back to display
+                                                                         
   //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
-  connect(&fieldColorController, SIGNAL(colorMapRedefined(string, ColorMap)),
-	  &_manager, SLOT(changeToDisplayField(string, ColorMap)));
+  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap)),
+  	  &_manager, SLOT(colorMapRedefineReceived(string, ColorMap))); // THIS IS NOT CALLED!!
+  //  PolarManager::colorMapRedefineReceived(string, ColorMap)
+  //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
+  //	  this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
+
+  //  connect(fieldColorController, SIGNAL(sillySent()),
+  //	  this, SLOT(sillyReceived())); // THIS IS NOT CALLED!!
+
+  fieldColorController->startUp(); 
 
   //connect(parameterColorView, SIGNAL(needFieldNames()), this, SLOT(getFieldNames()));
   //connect(this, SIGNAL(fieldNamesSupplied(vector<string>)), 
@@ -1127,13 +1140,56 @@ void PpiWidget::contextMenuParameterColors()
   //}
  
   LOG(DEBUG) << "exit ";
-
+  
 }
 
+/*
+void PpiWidget::sillyReceived() {
+  LOG(DEBUG) << "enter";
+  LOG(DEBUG) << "exit";
+}
+*/
+/*
+void PpiWidget::changeToDisplayField(string fieldName)  // , ColorMap newColorMap) {
+{
+  LOG(DEBUG) << "enter";
+  // connect the new color map with the field                                                                    
+  // find the fieldName in the list of FieldDisplays                                                             
+  
+  bool found = false;
+  vector<DisplayField *>::iterator it;
+  int fieldId = 0;
+
+  it = _fields.begin();
+  while ( it != _fields.end() && !found ) {
+    DisplayField *field = *it;
+
+    string name = field->getName();
+    if (name.compare(fieldName) == 0) {
+      found = true;
+      field->replaceColorMap(newColorMap);
+    }
+    fieldId++;
+    it++;
+  }
+  if (!found) {
+    LOG(ERROR) << fieldName;
+    LOG(ERROR) << "ERROR - field not found; no color map change";
+    // TODO: present error message box                                                                           
+  } else {
+    // look up the fieldId from the fieldName                                                                    
+    // change the field variable                                                                                 
+    _changeField(fieldId, true);
+  }
+  
+  LOG(DEBUG) << "exit";
+}
+*/
 
 
+ 
 void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
-
+  
   RadxRay *closestRayCopy = new RadxRay(*closestRay);
 
   // create the view
@@ -1156,7 +1212,7 @@ void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
   sheetView->init();
   sheetView->show();
   sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
-
+  
 }
 
 

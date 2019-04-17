@@ -52,7 +52,6 @@ HEADERS += WorldPlot.hh
 
 # for soloii editing 
 HEADERS += FlowLayout.hh
-HEADERS += ParameterColorDialog.hh
 HEADERS += DialogOptionsWidget.hh
 HEADERS += ColorMapTemplates.hh
 HEADERS += ClickableLabel.hh
@@ -100,7 +99,6 @@ SOURCES += SoloDefaultColorWrapper.cc
 SOURCES += SweepManager.cc
 SOURCES += TimeScaleWidget.cc
 SOURCES += FlowLayout.cc
-SOURCES += ParameterColorDialog.cc
 SOURCES += DialogOptionsWidget.cc
 SOURCES += ColorMapTemplates.cc
 SOURCES += ClickableLabel.cc

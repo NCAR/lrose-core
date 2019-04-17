@@ -392,18 +392,13 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   _pointClicked = false;
 
   if (e->button() == Qt::RightButton) {
-  //    emit customContextMenuRequested(e->pos());
 
       QPointF clickPos(e->pos());
 
       _mousePressX = e->x();
       _mousePressY = e->y();
 
-      //     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-      //_worldPressY = _zoomWorld.getYWorld(_mousePressY);
-
       emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
-
 
   } else {
 

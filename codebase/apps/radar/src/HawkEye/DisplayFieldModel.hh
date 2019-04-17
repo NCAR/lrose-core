@@ -18,7 +18,7 @@ public:
   vector<string> getFieldNames();
   string getSelectedField();
   void setSelectedField(string fieldName);
-  bool getChanges();
+  //  bool getChanges();
   ColorMap *getColorMap(string fieldName);
   bool colorMapChanged(string fieldName);
   bool backgroundChanged(string fieldName);

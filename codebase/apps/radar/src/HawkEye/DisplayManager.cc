@@ -525,12 +525,18 @@ void DisplayManager::_changeFieldVariable(bool value) {
 
 }
 
-void DisplayManager::changeToDisplayField(string fieldName, ColorMap newColorMap) {
+void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap) {
+
+  LOG(DEBUG) << "enter"; 
+  
   // connect the new color map with the field
   // find the fieldName in the list of FieldDisplays
   bool found = false;
   vector<DisplayField *>::iterator it;
-  for (it = _fields.begin(); it != _fields.end(); it++) {
+  int fieldId = 0;
+
+  it = _fields.begin(); 
+  while ( it != _fields.end() && !found ) {
     DisplayField *field = *it;
    
     string name = field->getName();
@@ -538,16 +544,22 @@ void DisplayManager::changeToDisplayField(string fieldName, ColorMap newColorMap
       found = true;
       field->replaceColorMap(newColorMap);
     }
+    fieldId++;
+    it++;
   }
   if (!found) {
     LOG(ERROR) << fieldName;
     LOG(ERROR) << "ERROR - field not found; no color map change";
     // TODO: present error message box 
   } else {
+    // look up the fieldId from the fieldName
     // change the field variable
-    _changeFieldVariable(true); // ?? 
+    _changeField(fieldId, true); 
   }
+  
+  LOG(DEBUG) << "exit";
 }
+
 
 void DisplayManager::_openFile() {
 }

@@ -73,6 +73,10 @@ public:
   /// @returns A pixmap of the color bar. The caller must delete it 
   /// when finished.
   QPixmap* getPixmap();
+
+  QPixmap* getPixmap(int width, int height);
+
+
   
  signals:
 

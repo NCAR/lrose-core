@@ -158,7 +158,7 @@ void
 /******************************************************************/
 QImage* ColorBar::getImage()
 {	
-  QPixmap pixmap = QPixmap::grabWidget(this);
+  QPixmap pixmap = grab();
   QImage* image = new QImage(pixmap.toImage());
   return image;
 }
@@ -166,6 +166,16 @@ QImage* ColorBar::getImage()
 /******************************************************************/
 QPixmap* ColorBar::getPixmap()
 {	
-  QPixmap* pixmap = new QPixmap(QPixmap::grabWidget(this));
+  QPixmap* pixmap = new QPixmap(grab());
+  return pixmap;
+}
+
+/******************************************************************/
+QPixmap* ColorBar::getPixmap(int someWidth, int someHeight)
+{	
+  // we want the middle third 
+  int leftThird = width()/3;
+  QRect rect(QPoint(leftThird, 0), QSize(width()/3, height()));
+  QPixmap *pixmap = new QPixmap(grab(rect)); // new QPixmap(QPixmap::grab());
   return pixmap;
 }
