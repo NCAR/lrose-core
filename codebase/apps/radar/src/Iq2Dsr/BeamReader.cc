@@ -67,6 +67,9 @@ BeamReader::BeamReader(const string &prog_name,
 
   _pulseReader = NULL;
 
+  _startTime = args.startTime;
+  _endTime = args.endTime;
+
   _endOfSweepFlag = false;
   _endOfVolFlag = false;
   
@@ -189,7 +192,7 @@ BeamReader::BeamReader(const string &prog_name,
   if (_params.mode == Params::ARCHIVE) {
     DsInputPath dsInput(_progName, _params.debug >= Params::DEBUG_VERBOSE,
                         _params.input_dir,
-                        args.startTime, args.endTime);
+                        _startTime, _endTime);
     inputPathList = dsInput.getPathList();
     if (inputPathList.size() < 0) {
       cerr << "ERROR: BeamReader::BeamReader." << endl;
@@ -1172,6 +1175,16 @@ IwrfTsPulse *BeamReader::_getNextPulse()
         !_pulseReader->getOpsInfo().isTsProcessingActive()) {
       delete pulse;
       continue;
+    }
+
+    // check pulse time in archive mode
+
+    if (_params.mode == Params::ARCHIVE) {
+      time_t pulseTime = pulse->getTime();
+      if (pulseTime < _startTime || pulseTime > _endTime) {
+        delete pulse;
+        continue;
+      }
     }
 
     // override scan mode if appropriate

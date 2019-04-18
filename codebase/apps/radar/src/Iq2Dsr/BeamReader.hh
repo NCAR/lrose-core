@@ -116,6 +116,11 @@ private:
   
   IwrfTsReader *_pulseReader;
 
+  // start/end times - archive mode
+
+  time_t _startTime;
+  time_t _endTime;
+
   // end of sweep and vol flags
   
   bool _endOfSweepFlag;
