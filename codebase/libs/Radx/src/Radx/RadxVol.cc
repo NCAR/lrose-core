@@ -2279,7 +2279,11 @@ void RadxVol::_findTransitions(int nRaysMargin)
 void RadxVol::optimizeSurveillanceTransitions(double maxFixedAngleErrorDeg)
 
 {
-  
+ 
+  // ensure sweep info is up to date
+
+  loadSweepInfoFromRays();
+
   if (_sweeps.size() < 2) {
     return;
   }
@@ -2297,10 +2301,6 @@ void RadxVol::optimizeSurveillanceTransitions(double maxFixedAngleErrorDeg)
     // not predominantly surveillance
     return;
   }
-
-  // ensure sweep info is up to date
-
-  loadSweepInfoFromRays();
 
   // loop through sweeps, working on pairs of sweeps
   // we consider the transition from one sweep to the next
@@ -2469,7 +2469,7 @@ void RadxVol::trimSurveillanceSweepsTo360Deg()
 
   // does not apply to RHIs
 
-  if (!checkIsRhi()) {
+  if (checkIsRhi()) {
     return;
   }
   
@@ -2490,7 +2490,7 @@ void RadxVol::trimSurveillanceSweepsTo360Deg()
     if (sweep->getSweepMode() != Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE) {
       continue;
     }
-
+    
     double azCovered = computeAzCovered(sweep);
     if (azCovered <= 360.0) {
       continue;
@@ -3272,6 +3272,8 @@ void RadxVol::adjustSweepLimitsUsingAngles()
 
   if (checkIsRhi()) {
     _adjustSweepLimitsRhi();
+  } else if (checkIsSurveillance()) {
+    optimizeSurveillanceTransitions(2.0);
   } else {
     _adjustSweepLimitsPpi();
   }
@@ -3312,8 +3314,8 @@ void RadxVol::_adjustSweepLimitsPpi()
     size_t irayTrans = 0;
     for (size_t iray = iray0; iray < iray3; iray++) {
       RadxRay *ray = _rays[iray];
-      double fixedAngle = ray->getElevationDeg();
-      double diff = fabs(fixedAngleNext - fixedAngle);
+      double elev = ray->getElevationDeg();
+      double diff = fabs(fixedAngleNext - elev);
       if (diff > 180.0) {
         diff = fabs(diff - 360.0); // correct for north crossing
       }
@@ -3323,7 +3325,7 @@ void RadxVol::_adjustSweepLimitsPpi()
         break;
       }
     }
-    
+
     if (irayTrans == 0) {
       // no transition found, do nothing
       continue;
@@ -5284,7 +5286,7 @@ double RadxVol::computeAzCovered(size_t startRayIndex,
   if (endRayIndex <= startRayIndex) {
     return 0.0;
   }
-  
+
   // sum up azimuth covered by the sweep
   
   double count = 0.0;

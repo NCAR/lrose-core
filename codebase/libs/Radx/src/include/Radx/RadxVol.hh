@@ -641,6 +641,12 @@ public:
   
   void adjustSweepLimitsUsingAngles();
   
+  /// Check transitions in surveillance mode, ensuring that the
+  /// pointing angle error is within the  given margin and that
+  /// the ray belongs to the correct sweep.
+  
+  void optimizeSurveillanceTransitions(double maxFixedAngleErrorDeg);
+
   /// Adjust surveillance sweep limits based on azimuth.
   ///
   /// Some radars (e.g. DOWs) always change elevation angle at a
@@ -903,12 +909,6 @@ public:
   /// number of rays
   
   void removeTransitionRays(int nRaysMargin);
-
-  /// Check transitions in surveillance mode, ensuring that the
-  /// pointing angle error is within the  given margin and that
-  /// the ray belongs to the correct sweep.
-  
-  void optimizeSurveillanceTransitions(double maxFixedAngleErrorDeg);
 
   /// Trim surveillance sweeps to 360 deg
   /// Remove extra rays in each surveillance sweep
