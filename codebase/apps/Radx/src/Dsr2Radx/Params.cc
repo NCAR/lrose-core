@@ -547,15 +547,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Dsr2Radx program");
-    tt->comment_text = tdrpStrDup("Dsr2Radx reads radial radar data from an input FMQ, and writes the data to files in formats supported by Radx.");
-    tt++;
-    
-    // Parameter 'Comment 1'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 1");
     tt->comment_hdr = tdrpStrDup("DEBUGGING AND PROCESS CONTROL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -608,11 +599,11 @@
     tt->single_val.i = 60;
     tt++;
     
-    // Parameter 'Comment 2'
+    // Parameter 'Comment 1'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 2");
+    tt->param_name = tdrpStrDup("Comment 1");
     tt->comment_hdr = tdrpStrDup("DATA INPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -653,11 +644,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 2");
     tt->comment_hdr = tdrpStrDup("RADAR PARAMETERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -794,11 +785,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE INSTRUMENT TYPE, PLATFORM TYPE AND PRIMARY AXIS.");
     tt->comment_text = tdrpStrDup("This applies to read operations.");
     tt++;
@@ -937,11 +928,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("CENSORING OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("You have the option of censoring the output data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression. This leads to smaller data files.");
     tt++;
@@ -1029,11 +1020,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("FILTER DATA BASED ON GEOMETRY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1191,11 +1182,11 @@
       tt->array_vals[2].i = 2;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("FILTER DATA BASED ON ANTENNA or SCAN STATE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1272,11 +1263,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT GATE GEOMETRY");
     tt->comment_text = tdrpStrDup("You can only choose one range geometry remapping option. If none are picked, all rays which do not match the predominant geometry will be discarded.");
     tt++;
@@ -1353,11 +1344,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("COMPUTING THE SWEEP ANGLE HISTOGRAM");
     tt->comment_text = tdrpStrDup("Normally we use the sweep numbers in the input data to logically separate the sweeps. Optionally, however, if the scan information is not available in the data, we can use a histogram technique to determine the sweep information instead.");
     tt++;
@@ -1412,11 +1403,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("CROPPING ABOVE A GIVEN HEIGHT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1445,11 +1436,11 @@
     tt->single_val.d = 25;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("REMOVING TEST PULSE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1478,11 +1469,11 @@
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("CHECKING SWEEP DATA");
     tt->comment_text = tdrpStrDup("Checking whether sweeps should be included.");
     tt++;
@@ -1511,11 +1502,59 @@
     tt->single_val.i = 180;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'check_min_rays_in_ppi_sweep'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_min_rays_in_ppi_sweep");
+    tt->descr = tdrpStrDup("Option to check the number of rays in a PPI sweep.");
+    tt->help = tdrpStrDup("If TRUE, a PPI sweep is only considered valid if the number of rays exceeds 'min_rays_in_ppi_sweep'.");
+    tt->val_offset = (char *) &check_min_rays_in_ppi_sweep - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_rays_in_ppi_sweep'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_rays_in_ppi_sweep");
+    tt->descr = tdrpStrDup("The min number of rays for a PPI sweep to be valid.");
+    tt->help = tdrpStrDup("See 'check_min_rays_in_ppi_sweep'.");
+    tt->val_offset = (char *) &min_rays_in_ppi_sweep - &_start_;
+    tt->single_val.i = 180;
+    tt++;
+    
+    // Parameter 'check_min_rays_in_rhi_sweep'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_min_rays_in_rhi_sweep");
+    tt->descr = tdrpStrDup("Option to check the number of rays in a RHI sweep.");
+    tt->help = tdrpStrDup("If TRUE, a RHI sweep is only considered valid if the number of rays exceeds 'min_rays_in_rhi_sweep'.");
+    tt->val_offset = (char *) &check_min_rays_in_rhi_sweep - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_rays_in_rhi_sweep'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_rays_in_rhi_sweep");
+    tt->descr = tdrpStrDup("The min number of rays for a RHI sweep to be valid.");
+    tt->help = tdrpStrDup("See 'check_min_rays_in_rhi_sweep'.");
+    tt->val_offset = (char *) &min_rays_in_rhi_sweep - &_start_;
+    tt->single_val.i = 45;
+    tt++;
+    
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("COMPUTING FIXED ANGLES FROM RAYS");
     tt->comment_text = tdrpStrDup("NOTE: if the antenna control system does not point the antenna correctly, there will be an offset between the fixed (commanded) angles and the measured antenna angles. This option allows you to re-compute the fixed angles so that they are derived from the measured angles.");
     tt++;
@@ -1556,11 +1595,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("INCREMENTING SWEEP NUMBERS BASED ON MODE CHANGES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1589,11 +1628,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("OPTION TO ADJUST SWEEP LIMITS USING FIXED AND MEASURED ANGLES");
     tt->comment_text = tdrpStrDup("Sometimes the transitions from one fixed angle to another are not accurately described by the scan flags, and as a result rays are not correctly assigned to the sweeps. This option goes through the volume in ray order, and adjusts the way rays are associated with each sweep. It does this by comparing the actual angle with the fixed angle, and minimizes the angular difference at the transition from one sweep to the next. If you use this section, then 'filter_antenna_transitions' should be set to FALSE.");
     tt++;
@@ -1608,6 +1647,18 @@
     tt->help = tdrpStrDup("We compare the actual angle with the fixed angle, and minimize the angular difference at the transition from one sweep to the next.");
     tt->val_offset = (char *) &adjust_sur_sweep_limits_using_angles - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'adjust_sur_sweep_max_angle_error'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("adjust_sur_sweep_max_angle_error");
+    tt->descr = tdrpStrDup("Max angle error to be used when adjusting sur sweep limits (deg).");
+    tt->help = tdrpStrDup("See 'adjust_sur_sweep_limits_using angles'. We only adjust sweeps for which the elevation error is less than this.");
+    tt->val_offset = (char *) &adjust_sur_sweep_max_angle_error - &_start_;
+    tt->single_val.d = 2;
     tt++;
     
     // Parameter 'adjust_sector_sweep_limits_using_angles'
@@ -1634,11 +1685,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("OPTION TO MAKE SURVEILLANCE SWEEP TRANSITIONS OCCUR AT A SPECIFIED AZIMUTH");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1667,11 +1718,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("TRIM SURVEILLANCE SWEEPS TO SPAN ONLY 360 DEG");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1688,11 +1739,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("DETERMINING END OF VOL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1825,11 +1876,11 @@
     tt->single_val.i = 20000;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("AUTOMATIC END-OF-VOLUME DETECTION");
     tt->comment_text = tdrpStrDup("These parameters are used if end_of_volume_decision is set to AUTOMATIC. This assumes a simple bottom-up or top-down scan strategy. No attempt will be made to search for RHIs, or other complicattions in the SCAN strategy.");
     tt++;
@@ -1956,11 +2007,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2040,11 +2091,11 @@
       tt->struct_vals[11].e = OUTPUT_SHORT;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("OUTPUT DATA SETS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2122,11 +2173,11 @@
     tt->single_val.e = START_AND_END_TIMES;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("APPENDING YEAR AND/OR DAY DIRS TO OUTPUT DIR");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2155,11 +2206,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("SEPARATING VOLUMES BY TYPE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2332,11 +2383,11 @@
     tt->single_val.s = tdrpStrDup("Solar");
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("OUTPUT FILE NAME OPTIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2425,11 +2476,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("REGISTERING LATEST DATA INFO");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2470,11 +2521,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("NETCDF STYLE");
     tt->comment_text = tdrpStrDup("Only applies to CfRadial format files.");
     tt++;
@@ -2503,11 +2554,11 @@
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("These parameters are applied as appropriate. Not all file formats require or support them.");
     tt++;
@@ -2552,11 +2603,11 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("OUTPUT DATA SET INFORMATION");
     tt->comment_text = tdrpStrDup("Will be stored in CfRadial files, and other formats to the extent supported by the format.");
     tt++;
@@ -2633,11 +2684,11 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 29'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 29");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE MISSING VALUES");
     tt->comment_text = tdrpStrDup("Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n");
     tt++;

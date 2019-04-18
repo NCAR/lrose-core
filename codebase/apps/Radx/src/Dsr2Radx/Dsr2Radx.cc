@@ -769,7 +769,7 @@ int Dsr2Radx::_processVol()
   if (!isRhi) {
     isSurveillance = _vol.checkIsSurveillance();
   }
-  
+
   if (isRhi) {
     // RHI
     if (_params.adjust_rhi_sweep_limits_using_angles) {
@@ -780,7 +780,7 @@ int Dsr2Radx::_processVol()
   } else if (isSurveillance) {
     // SUR
     if (_params.adjust_sur_sweep_limits_using_angles) {
-      _vol.adjustSweepLimitsUsingAngles();
+      _vol.optimizeSurveillanceTransitions(_params.adjust_sur_sweep_max_angle_error);
     } else {
       _vol.loadSweepInfoFromRays();
     }
@@ -832,18 +832,21 @@ int Dsr2Radx::_processVol()
 
   // trim sweeps with too few rays
 
+  size_t nraysVolBefore = _vol.getNRays();
   if (_params.check_min_rays_in_sweep) {
-    size_t nraysVolBefore = _vol.getNRays();
     _vol.removeSweepsWithTooFewRays(_params.min_rays_in_sweep);
+  } else if (_params.check_min_rays_in_ppi_sweep && !isRhi) {
+    _vol.removeSweepsWithTooFewRays(_params.min_rays_in_ppi_sweep);
+  } else if (_params.check_min_rays_in_rhi_sweep && isRhi) {
+    _vol.removeSweepsWithTooFewRays(_params.min_rays_in_rhi_sweep);
+  }
+  if (_params.debug) {
     if (nraysVolBefore != _vol.getNRays()) {
-      if (_params.debug) {
-        cerr << "NOTE: removed sweeps with nrays < "
-             << _params.min_rays_in_sweep << endl;
-        cerr << "  nrays in vol before removal: "
-             << nraysVolBefore << endl;
-        cerr << "  nrays in vol after  removal: "
-             << _vol.getNRays() << endl;
-      }
+      cerr << "NOTE: removed sweeps with too few rays" << endl;
+      cerr << "  nrays in vol before removal: "
+           << nraysVolBefore << endl;
+      cerr << "  nrays in vol after  removal: "
+           << _vol.getNRays() << endl;
     }
   }
 

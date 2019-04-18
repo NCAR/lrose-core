@@ -578,6 +578,14 @@ public:
 
   int min_rays_in_sweep;
 
+  tdrp_bool_t check_min_rays_in_ppi_sweep;
+
+  int min_rays_in_ppi_sweep;
+
+  tdrp_bool_t check_min_rays_in_rhi_sweep;
+
+  int min_rays_in_rhi_sweep;
+
   tdrp_bool_t compute_ppi_fixed_angles_from_measured_elevation;
 
   tdrp_bool_t compute_rhi_fixed_angles_from_measured_azimuth;
@@ -589,6 +597,8 @@ public:
   tdrp_bool_t increment_sweep_num_when_prt_mode_changes;
 
   tdrp_bool_t adjust_sur_sweep_limits_using_angles;
+
+  double adjust_sur_sweep_max_angle_error;
 
   tdrp_bool_t adjust_sector_sweep_limits_using_angles;
 
@@ -747,7 +757,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[170];
+  mutable TDRPtable _table[174];
 
   const char *_className;
 

@@ -493,6 +493,30 @@ paramdef int {
   p_help = "See 'check_min_rays_in_sweep'.";
 } min_rays_in_sweep;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check the number of rays in a PPI sweep.";
+  p_help = "If TRUE, a PPI sweep is only considered valid if the number of rays exceeds 'min_rays_in_ppi_sweep'.";
+} check_min_rays_in_ppi_sweep;
+
+paramdef int {
+  p_default = 180;
+  p_descr = "The min number of rays for a PPI sweep to be valid.";
+  p_help = "See 'check_min_rays_in_ppi_sweep'.";
+} min_rays_in_ppi_sweep;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check the number of rays in a RHI sweep.";
+  p_help = "If TRUE, a RHI sweep is only considered valid if the number of rays exceeds 'min_rays_in_rhi_sweep'.";
+} check_min_rays_in_rhi_sweep;
+
+paramdef int {
+  p_default = 45;
+  p_descr = "The min number of rays for a RHI sweep to be valid.";
+  p_help = "See 'check_min_rays_in_rhi_sweep'.";
+} min_rays_in_rhi_sweep;
+
 commentdef {
   p_header = "COMPUTING FIXED ANGLES FROM RAYS";
   p_text = "NOTE: if the antenna control system does not point the antenna correctly, there will be an offset between the fixed (commanded) angles and the measured antenna angles. This option allows you to re-compute the fixed angles so that they are derived from the measured angles.";
@@ -542,6 +566,12 @@ paramdef boolean {
   p_descr = "Adjust the limits of sweeps in surveillance mode.";
   p_help = "We compare the actual angle with the fixed angle, and minimize the angular difference at the transition from one sweep to the next.";
 } adjust_sur_sweep_limits_using_angles;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Max angle error to be used when adjusting sur sweep limits (deg).";
+  p_help = "See 'adjust_sur_sweep_limits_using angles'. We only adjust sweeps for which the elevation error is less than this.";
+} adjust_sur_sweep_max_angle_error;
 
 paramdef boolean {
   p_default = FALSE;
@@ -631,12 +661,6 @@ paramdef int {
   p_descr = "Number of secs in a volume.";
   p_help = "Applies to ELAPSED_TIME mode - see 'end_of_volume_decision'";
 } nsecs_per_volume;
-
-// paramdef int {
-//   p_default = 1;
-//   p_descr = "The minimum number of rays in a volume.";
-//   p_help = "This filters out small unwanted bits of data between genuine volumes.";
-// } min_rays_in_vol;
 
 paramdef int {
   p_default = 180;
