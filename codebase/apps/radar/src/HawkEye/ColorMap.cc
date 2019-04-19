@@ -372,6 +372,9 @@ ColorMap::ColorMap(
     blue.push_back(colors[i].b);
   }
   setMap(rangeMin, rangeMax, red, green, blue);
+
+  _name = builtinName;
+
 }
 
 ////////////////////////////////////////////////////////
@@ -504,6 +507,8 @@ void
 /**********************************************************/
 ColorMap::~ColorMap()
 {
+  LOG(DEBUG) << "entry " << _name;
+  LOG(DEBUG) << "exit"; 
 }
 
 /**********************************************************/

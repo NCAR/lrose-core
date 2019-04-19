@@ -35,8 +35,14 @@ public slots:
   void colorMapMaxChanged(double newValue);
   void colorMapMinChanged(double newValue);
   void modelChanged(); // string fieldName); // , ColorMap newColorMap);
+  void pickColorPaletteRequest();
+  void newColorPaletteSelected(string newColorMapName);
 
 private slots:
+
+
+private:
+  ColorMapTemplates *_colorMapTemplates;
 
 };
 

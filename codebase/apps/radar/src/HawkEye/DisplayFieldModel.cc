@@ -115,6 +115,26 @@ ColorMap *DisplayFieldModel::getColorMap(string fieldName) {
   return workingCopyColorMap;
 }
 
+// make a working copy of the colorMaps ... 
+// return NULL if not found
+void DisplayFieldModel::setColorMap(string fieldName, ColorMap *newColorMap) {
+  
+  LOG(DEBUG) << "entry " << fieldName;
+
+  // first, look in the working copies
+  map<string, ColorMap *>::iterator it = _workingCopies.find(fieldName);
+  if (it != _workingCopies.end()) {
+    LOG(DEBUG) << "found in the workingCopies";
+    _workingCopies.erase(it);  
+  } 
+
+  // insert new version into list
+  _workingCopies[fieldName] = newColorMap;
+
+  LOG(DEBUG) << "exit";
+  
+}
+
 
 ColorMap *DisplayFieldModel::colorMapMaxChanged(double newValue) {
   LOG(DEBUG) << "entry " << newValue;
@@ -155,10 +175,22 @@ ColorMap *DisplayFieldModel::colorMapMinChanged(double newValue) {
   return workingVersion;
 }
 
-bool DisplayFieldModel::colorMapChanged(string fieldName) {
-  LOG(DEBUG) << fieldName;
-  LOG(DEBUG) << "color map changed";
-  return false;
+void DisplayFieldModel::colorMapChanged(string newColorMapName) {
+  LOG(DEBUG) << "enter";
+  // change the ColorMap for the currently selected field
+  ColorMap *workingVersion = getColorMap(_selectedFieldName);
+
+  // maintain the current min, max, step, center points
+  ColorMap *colorMap;
+  colorMap = new ColorMap(workingVersion->rangeMin(), 
+				       workingVersion->rangeMax(), newColorMapName);
+  //  newColorMap->setRangeMax(workingVersion->rangeMax());  
+  //newColorMap->setRangeMin(workingVersion->rangeMin());  
+  // currently only using built in names
+  setColorMap(_selectedFieldName, colorMap);
+
+  
+  LOG(DEBUG) << "exit";
 }
 
 bool DisplayFieldModel::backgroundChanged(string fieldName) {

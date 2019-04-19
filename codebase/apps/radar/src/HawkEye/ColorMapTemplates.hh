@@ -7,8 +7,8 @@
 // #include "FlowLayout.hh"
 // #include "Dialog.hh"
 //#include "ParameterColorDialog.hh"
-// #include "DialogOptionsWidget.hh"
-// #include "../HawkEye/ColorMap.hh"
+#include "ClickableLabel.hh"
+#include "ColorMap.hh"
 // #include "../HawkEye/ColorBar.hh"
 
 
@@ -18,8 +18,41 @@ class ColorMapTemplates : public QDialog
 
 public:
     ColorMapTemplates(QWidget *parent = 0);
+    ~ColorMapTemplates();
+
+signals:
+  void newColorPaletteSelected(string newColorMapName);
+
 
 private slots:
+
+
+  void defaultClicked();
+  void rainbowClicked();
+  void eldoraDbzClicked();
+  void eldoraVelClicked();
+  void spolVelClicked();
+  void spolDivClicked();
+  void spolDbzClicked();
+
+private:
+
+  ClickableLabel *_defaultColorMapLabel;
+  ClickableLabel *_rainbowColorMapLabel;
+  ClickableLabel *_eldoraDbzColorMapLabel;
+  ClickableLabel *_spolDbzColorMapLabel;
+  ClickableLabel *_eldoraVelColorMapLabel;
+  ClickableLabel *_spolVelColorMapLabel;
+  ClickableLabel *_spolDivColorMapLabel;
+
+
+  ColorMap *_defaultColorMap;
+  ColorMap *_rainbowColorMap;
+  ColorMap *_eldoraDbzColorMap;
+  ColorMap *_spolDbzColorMap;
+  ColorMap *_eldoraVelColorMap;
+  ColorMap *_spolVelColorMap;
+  ColorMap *_spolDivColorMap;
 
 };
 

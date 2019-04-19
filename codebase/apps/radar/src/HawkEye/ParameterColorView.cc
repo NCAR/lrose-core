@@ -596,7 +596,9 @@ void ParameterColorView::setValueOnLineEdit(QLineEdit *editor, double value) {
 
 void ParameterColorView::pickColorPalette()
 {
-    ColorMapTemplates colorMapTemplates(this);
-    colorMapTemplates.exec();
+  emit pickColorPaletteRequest();
+
+  // ColorMapTemplates colorMapTemplates(this);
+  //  colorMapTemplates.exec();
     // bool changed = parameterColorDialog.getChanges();
 }

@@ -41,6 +41,7 @@ ColorBar::ColorBar(int width, const ColorMap *cmap,
   setMinimumSize(width, 100);
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   update();
+  _annotation = true;
 }
 
 /******************************************************************/
@@ -52,6 +53,11 @@ ColorBar::~ColorBar()
 void ColorBar::setColorMap(const ColorMap *map) {
   _colorMap = map;
   update();
+}
+
+/******************************************************************/
+void ColorBar::setAnnotationOff() {
+  _annotation = false;
 }
 
 /******************************************************************/
@@ -120,6 +126,7 @@ void
     p.setFont(scaledFont);
   }
   
+  if (_annotation) {
   // add labels
 
   p.setBrush(Qt::black);
@@ -145,6 +152,8 @@ void
   p.drawText(0, 0, w, iDeltaY, 
              Qt::AlignVCenter | Qt::AlignHCenter, units);
   
+  }
+
   p.end();
 
 }

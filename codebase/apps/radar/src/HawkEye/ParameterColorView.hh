@@ -35,7 +35,8 @@ signals:
   void colorMapMaxChanged(double value);
   void colorMapMinChanged(double value);
   void replotFieldColorMapChanges(); // (string selectedField);
-
+  void pickColorPaletteRequest();
+  
 private slots:
 
     void setCenterPoint();

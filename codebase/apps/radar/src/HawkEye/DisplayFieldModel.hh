@@ -20,9 +20,11 @@ public:
   void setSelectedField(string fieldName);
   //  bool getChanges();
   ColorMap *getColorMap(string fieldName);
-  bool colorMapChanged(string fieldName);
+  void setColorMap(string fieldName, ColorMap *newColorMap);
+  void colorMapChanged(string newColorMapName);
   bool backgroundChanged(string fieldName);
 
+  //  void colorMapMaxChanged(ColorMap *newColorMap);
   ColorMap *colorMapMaxChanged(double newValue);
   ColorMap *colorMapMinChanged(double newValue);
 

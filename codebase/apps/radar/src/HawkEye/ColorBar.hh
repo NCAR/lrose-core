@@ -65,6 +65,9 @@ public:
   /// Set the color map, update the view
   /// @param map The corresponding color map.
   void setColorMap(const ColorMap *map);
+
+  /// Turn on/off annotation
+  void setAnnotationOff();
   
   /// @returns An image of the color bar. The caller must delte
   /// it when finished.
@@ -75,8 +78,6 @@ public:
   QPixmap* getPixmap();
 
   QPixmap* getPixmap(int width, int height);
-
-
   
  signals:
 
@@ -93,6 +94,10 @@ public:
   /// A default color map, so that the plugin can
   /// display something.
   const ColorMap *_colorMap;
+
+ private:
+  
+  bool _annotation;
 
 };
 
