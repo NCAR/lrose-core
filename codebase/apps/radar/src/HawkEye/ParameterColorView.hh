@@ -29,14 +29,26 @@ public:
 
 public slots:
   void colorMapProvided(string fieldName, ColorMap *colorMap);
+  void gridColorProvided(QColor color);
+  void emphasisColorProvided(QColor color);
+  void annotationColorProvided(QColor color);
+  void backgroundColorProvided(QColor color);
 
 signals:
   void getColorMap(string selectedField);
+  void getGridColor();
+  void getEmphasisColor();
+  void getAnnotationColor();
+  void getBackgroundColor();
   void colorMapMaxChanged(double value);
   void colorMapMinChanged(double value);
   void replotFieldColorMapChanges(); // (string selectedField);
   void pickColorPaletteRequest();
-  
+  void gridColorChanged(QColor color);  
+  //void backgroundColorChanged(QColor color);  
+  //void backgroundColorChanged(QColor color);  
+  void backgroundColorChanged(QColor color);  
+
 private slots:
 
     void setCenterPoint();

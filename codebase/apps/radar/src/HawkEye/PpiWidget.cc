@@ -1112,20 +1112,29 @@ void PpiWidget::contextMenuParameterColors()
   ParameterColorView *parameterColorView = new ParameterColorView(this);
   vector<DisplayField *> displayFields = _manager.getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
   DisplayField selectedField = _manager.getSelectedField();
-  DisplayFieldModel *displayFieldModel = new DisplayFieldModel(displayFields, selectedField.getName());
+  string emphasis_color = "white";
+  string annotation_color = "white";
+  DisplayFieldModel *displayFieldModel = 
+    new DisplayFieldModel(displayFields, selectedField.getName(),
+			  _params.grid_and_range_ring_color,
+			  emphasis_color,
+			  annotation_color,
+			  _params.background_color);
   FieldColorController *fieldColorController = new FieldColorController(parameterColorView, displayFieldModel);
   // connect some signals and slots in order to retrieve information
   // and send changes back to display
                                                                          
   //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
-  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap)),
-  	  &_manager, SLOT(colorMapRedefineReceived(string, ColorMap))); // THIS IS NOT CALLED!!
+  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
+  	  &_manager, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
   //  PolarManager::colorMapRedefineReceived(string, ColorMap)
   //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
   //	  this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
 
-  //  connect(fieldColorController, SIGNAL(sillySent()),
-  //	  this, SLOT(sillyReceived())); // THIS IS NOT CALLED!!
+  /* TODO: combine with replot
+  connect(fieldColorController, SIGNAL(backgroundColorSet(QColor)),
+  	  this, SLOT(backgroundColor(QColor)));
+  */
 
   fieldColorController->startUp(); 
 

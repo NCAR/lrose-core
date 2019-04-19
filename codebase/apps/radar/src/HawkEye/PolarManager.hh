@@ -143,7 +143,11 @@ public slots:
   */
 
   //colorMapRedefineReceived(string, ColorMap)
-  void colorMapRedefineReceived(string fieldName, ColorMap newColorMap);
+  void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
+				QColor gridColor,
+				QColor emphasisColor,
+				QColor annotationColor,
+				QColor backgroundColor);
 
 
 signals:

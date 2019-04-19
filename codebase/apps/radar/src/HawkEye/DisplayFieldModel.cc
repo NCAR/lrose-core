@@ -6,11 +6,20 @@
 #include "ColorBar.hh"
 
 
-DisplayFieldModel::DisplayFieldModel(vector<DisplayField *> displayFields, string selectedFieldName)
+DisplayFieldModel::DisplayFieldModel(vector<DisplayField *> displayFields,
+				     string selectedFieldName,
+				     string gridColor,
+				     string emphasisColor,
+				     string annotationColor,
+				     string backgroundColor)
 {
   LOG(DEBUG) << "enter";
   _fields = displayFields;
   _selectedFieldName = selectedFieldName;
+  _gridColor = gridColor;
+  _emphasisColor = emphasisColor;
+  _annotationColor = annotationColor;
+  _backgroundColor = backgroundColor;
   LOG(DEBUG) << "exit";
 }
 
@@ -198,3 +207,39 @@ bool DisplayFieldModel::backgroundChanged(string fieldName) {
   LOG(DEBUG) << "background changed";
   return false;
 }
+
+string DisplayFieldModel::getGridColor() {
+  return _gridColor;
+}
+
+void DisplayFieldModel::setGridColor(string colorName) {
+  LOG(DEBUG) << "enter " << colorName;
+  _gridColor = colorName;
+  LOG(DEBUG) << "exit";
+}
+
+string DisplayFieldModel::getEmphasisColor() {
+  return _emphasisColor;
+}
+
+void DisplayFieldModel::setEmphasisColor(string colorName) {
+  _emphasisColor = colorName;
+}
+
+string DisplayFieldModel::getAnnotationColor() {
+  return _annotationColor;
+}
+
+void DisplayFieldModel::setAnnotationColor(string colorName) {
+  _annotationColor = colorName;
+}
+
+string DisplayFieldModel::getBackgroundColor() {
+  return _backgroundColor;
+}
+
+void DisplayFieldModel::setBackgroundColor(string colorName) {
+  _backgroundColor = colorName;
+}
+
+

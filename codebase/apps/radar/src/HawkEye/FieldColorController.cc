@@ -12,13 +12,15 @@ FieldColorController::FieldColorController(ParameterColorView *parameterColorVie
   _model = displayFieldModel;
   // connections ...
   connect(_view, SIGNAL(getColorMap(string)), this, SLOT(getColorMap(string)));
+  connect(_view, SIGNAL(getBackgroundColor()), this, SLOT(getBackgroundColor()));
   //connect(_view, SIGNAL(setV()), this, SLOT(setV()));
 
   connect(_view, SIGNAL(colorMapMaxChanged(double)), this, SLOT(colorMapMaxChanged(double)));
   connect(_view, SIGNAL(colorMapMinChanged(double)), this, SLOT(colorMapMinChanged(double)));
 
   connect(_view, SIGNAL(pickColorPaletteRequest()), this, SLOT(pickColorPaletteRequest()));
-
+  connect(_view, SIGNAL(gridColorChanged(QColor)), this, SLOT(newGridColorSelected(QColor)));
+  connect(_view, SIGNAL(backgroundColorChanged(QColor)), this, SLOT(newBackgroundColorSelected(QColor)));
   //connect(this, SIGNAL(updateEvent(vector<string>, string)),
   // _view, SLOT(updateEvent(vector<string>, string)));
 
@@ -45,6 +47,19 @@ void FieldColorController::startUp()
   _view->exec();
 }
 
+QColor FieldColorController::_stringToQColor(string colorName) {
+
+  QString colorNameQ = QString::fromStdString(colorName);
+  if (QColor::isValidColor(colorNameQ)) {
+    QColor color(colorNameQ);
+    return color;
+  }
+  else {
+    throw "Cannot recognize color";
+  }
+}
+
+// in response to Replot from View
 void FieldColorController::modelChanged() // string fieldName) // , ColorMap newColorMap) 
 {
   LOG(DEBUG) << "enter"; 
@@ -59,9 +74,22 @@ void FieldColorController::modelChanged() // string fieldName) // , ColorMap new
   }
   */
   ColorMap *newColorMap = _model->getColorMap(selectedField);
+  string color;
+  color = _model->getGridColor();
+  LOG(DEBUG) << "grid:" << color;
+  QColor gridColor = _stringToQColor(color);
+  color = _model->getEmphasisColor();
+  QColor emphasisColor = _stringToQColor(color);
+  color = _model->getAnnotationColor();
+  QColor annotationColor = _stringToQColor(color);
+  color = _model->getBackgroundColor();
+  QColor backgroundColor = _stringToQColor(color);
+
   //  fieldName should be current working fieldName & colorMap
   LOG(DEBUG) << "emit colorMapRedefineSent";
-  emit colorMapRedefineSent(selectedField, *newColorMap);
+  LOG(DEBUG) << "grid:" << gridColor.name().toStdString();
+  emit colorMapRedefineSent(selectedField, *newColorMap, gridColor, emphasisColor,
+			    annotationColor, backgroundColor);
   LOG(DEBUG) << "exit";
 }
 
@@ -71,6 +99,66 @@ void FieldColorController::getColorMap(string fieldName)
   ColorMap *colorMap = _model->getColorMap(fieldName);
   
    _view->colorMapProvided(fieldName, colorMap);
+}
+
+void FieldColorController::getGridColor() 
+{
+  // get info from model
+  string colorName = _model->getGridColor();
+  QColor color = _stringToQColor(colorName);
+  _view->gridColorProvided(color);
+
+  /*  QString colorNameQ = QString::fromStdString(colorName);
+  if (QColor::isValidColor(colorNameQ)) {
+    QColor color(colorNameQ);
+    _view->gridColorProvided(color);
+  }
+  else {
+    throw "Cannot recognize color";
+  }
+  */
+}
+
+void FieldColorController::getEmphasisColor() 
+{
+  // get info from model
+  string colorName = _model->getEmphasisColor();
+  QString colorNameQ = QString::fromStdString(colorName);
+  if (QColor::isValidColor(colorNameQ)) {
+    QColor color(colorNameQ);
+    _view->emphasisColorProvided(color);
+  }
+  else {
+    throw "Cannot recognize color";
+  }
+}
+
+void FieldColorController::getAnnotationColor() 
+{
+  // get info from model
+  string colorName = _model->getAnnotationColor();
+  QString colorNameQ = QString::fromStdString(colorName);
+  if (QColor::isValidColor(colorNameQ)) {
+    QColor color(colorNameQ);
+    _view->annotationColorProvided(color);
+  }
+  else {
+    throw "Cannot recognize color";
+  }
+}
+
+void FieldColorController::getBackgroundColor() 
+{
+  // get info from model
+  string colorName = _model->getBackgroundColor();
+  QString colorNameQ = QString::fromStdString(colorName);
+  if (QColor::isValidColor(colorNameQ)) {
+    QColor color(colorNameQ);
+    _view->backgroundColorProvided(color);
+  }
+  else {
+    throw "Cannot recognize color";
+  }
 }
 
 void FieldColorController::colorMapMaxChanged(double newValue) {
@@ -108,12 +196,40 @@ void FieldColorController::newColorPaletteSelected(string newColorMapName) {
 
 }
 
-
-/*
-void FieldColorController::getFieldNames() {
-  vector<string> fieldNames = _model->getFieldNames();
-  _view->hereAreFieldNames(fieldNames);
+void FieldColorController::newGridColorSelected(QColor newColor) {
+  LOG(DEBUG) << "enter ";
+  string color = newColor.name().toStdString();
+  LOG(DEBUG) << color;
+  _model->setGridColor(color);
+  emit gridColorSet(newColor);
+  LOG(DEBUG) << "exit";
 }
-*/
-//map<string, string> colorMap???
+
+void FieldColorController::newEmphasisColorSelected(QColor newColor) {
+  LOG(DEBUG) << "enter ";
+  string color = newColor.name().toStdString();
+  LOG(DEBUG) << color;
+  _model->setEmphasisColor(color);
+  emit emphasisColorSet(newColor);
+  LOG(DEBUG) << "exit";
+}
+
+void FieldColorController::newAnnotationColorSelected(QColor newColor) {
+  LOG(DEBUG) << "enter ";
+  string color = newColor.name().toStdString();
+  LOG(DEBUG) << color;
+  _model->setAnnotationColor(color);
+  emit annotationColorSet(newColor);
+  LOG(DEBUG) << "exit";
+}
+
+void FieldColorController::newBackgroundColorSelected(QColor newColor) {
+  LOG(DEBUG) << "enter ";
+  string color = newColor.name().toStdString();
+  LOG(DEBUG) << color;
+  _model->setBackgroundColor(color);
+  emit backgroundColorSet(newColor);
+  LOG(DEBUG) << "exit";
+}
+
 

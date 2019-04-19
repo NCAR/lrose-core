@@ -275,8 +275,10 @@ void PolarWidget::backgroundColor(const QColor &color)
 
 void PolarWidget::gridRingsColor(const QColor &color)
 {
+  LOG(DEBUG) << "enter " << color.name().toStdString();
   _gridRingsColor = color;
   update();
+  LOG(DEBUG) << "exit";
 }
 
 

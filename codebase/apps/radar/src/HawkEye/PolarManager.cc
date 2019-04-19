@@ -1600,7 +1600,12 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
 }
 
 // PolarManager::colorMapRedefineReceived(string, ColorMap)
-void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap) {
+// TODO: need to add the background changed, etc. 
+void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
+					    QColor gridColor,
+					    QColor emphasisColor,
+					    QColor annotationColor,
+					    QColor backgroundColor) {
 
   LOG(DEBUG) << "enter";
   // connect the new color map with the field                                                       
@@ -1628,7 +1633,10 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
   } else {
     // look up the fieldId from the fieldName                                                       
     // change the field variable                                                                    
+    _ppi->backgroundColor(backgroundColor);
+    _ppi->gridRingsColor(gridColor);
     _changeField(fieldId, false);
+
   }
   LOG(DEBUG) << "exit";
 }
