@@ -57,7 +57,6 @@ Use the following if you need to set up an environment suitable for code develop
 | [codebase/apps](./codebase/apps) | application source code |
 | [codebase/make_bin](./codebase/make_bin) | scripts to support release and build tasks |
 | [codebase/make_include](./codebase/make_include) | macros and rules for NCAR-style make system |
-| [codebase/make_include](./codebase/make_include) | macros and rules for NCAR-style make system |
 | [LROSE_DOCS_OVERVIEW.md](./docs/LROSE_DOCS_OVERVIEW.md) | Documentation index |
 | [RadxDualPolApps.md](./docs/apps/radx/dualpol/README_RadxDualpolApps.md) | Documentation index |
 
