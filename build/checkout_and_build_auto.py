@@ -180,13 +180,6 @@ def main():
     includeDir = os.path.join(prefix, 'include')
     shareDir = os.path.join(prefix, 'share')
     
-    # initialize logging
-
-    if (os.path.isdir(options.logDir) == False):
-        os.makedirs(options.logDir)
-    logPath = os.path.join(options.logDir, "initialize");
-    logFp = open(logPath, "w+")
-
     # debug print
 
     if (options.debug):
@@ -213,6 +206,13 @@ def main():
     
     createBuildDir()
 
+    # initialize logging
+
+    if (os.path.isdir(options.logDir) == False):
+        os.makedirs(options.logDir)
+    logPath = os.path.join(options.logDir, "initialize");
+    logFp = open(logPath, "w+")
+    
     # make tmp dirs
 
     try:
