@@ -14,8 +14,8 @@
 
 SpreadSheetController::SpreadSheetController(SpreadSheetView *view)
 {
-  int rows;
-  int cols;
+  // int rows;
+  // int cols;
 
 
   _currentView = view;
@@ -44,8 +44,8 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view)
 
 SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetModel *model)
 {
-  int rows;
-  int cols;
+  // int rows;
+  // int cols;
 
 
   _currentView = view;

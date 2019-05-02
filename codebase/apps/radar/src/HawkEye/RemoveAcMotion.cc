@@ -29,12 +29,13 @@ int  se_remove_ac_motion(float vert_velocity, float ew_velocity, float ns_veloci
     /* remove the aircraft motion from velocities
      */
     //struct ui_command *cmdq=cmds+1; /* point to the first argument */
-    int ii, nc, nn, mark, pn, sn;
-    int scaled_nyqv, scaled_nyqi, fold_count, scaled_ac_vel, adjust;
-    char *name;
-    short *ss, *tt, *zz, *bnd, vx; // bnd is a boundary mask
-    float nyqv, scale, bias, rcp_nyqi, ac_vel;
-    double d;
+    // int ii, nc, nn, mark, pn, sn;
+    int nc;
+    int scaled_nyqv, scaled_nyqi, scaled_ac_vel, adjust;
+    // char *name;
+    short *ss, *zz, vx; // bnd is a boundary mask
+    float nyqv, scale, bias, ac_vel;
+    // double d;
     //struct dd_general_info *dgi, *dd_window_dgi();
     //struct dds_structs *dds;
     //struct solo_edit_stuff *seds, *return_sed_stuff();

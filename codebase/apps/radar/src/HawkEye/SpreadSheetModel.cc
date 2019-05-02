@@ -154,8 +154,8 @@ vector<float> SpreadSheetModel::getSampleData()
 // field name
 vector<double> SpreadSheetModel::getData(string fieldName)
 {
-  int cols;
-  int rows;
+  // int cols;
+  // int rows;
 
   vector <double> dataVector;
   const RadxField *field;

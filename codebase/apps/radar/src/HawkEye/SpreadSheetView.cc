@@ -378,8 +378,8 @@ void SpreadSheetView::setupMenuBar()
     //cellMenu->addAction(refreshAction);
 
 
-    QMenu *optionsMenu = menuBar()->addMenu(tr("&Options"));
-    QMenu *replotMenu = menuBar()->addMenu(tr("&Replot"));
+    // QMenu *optionsMenu = menuBar()->addMenu(tr("&Options"));
+    // QMenu *replotMenu = menuBar()->addMenu(tr("&Replot"));
 
     menuBar()->addSeparator();
 
@@ -993,7 +993,7 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
   LOG(DEBUG) << "adding variable to spreadsheet " << name.toStdString();
 
   string format = "%g";
-  char formattedData[250];
+  // char formattedData[250];
 
 
   if (value.isArray()) {
@@ -1099,19 +1099,21 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
 
 void SpreadSheetView::criticalMessage(std::string message)
 {
-  QMessageBox::StandardButton reply;
-  reply = QMessageBox::critical(this, "QMessageBox::critical()",
-                                QString::fromStdString(message),
-				QMessageBox::Ok);
-
-  /*                                QMessageBox::Abort | QMessageBox::Retry | QMessageBox::Ignore);
+  QMessageBox::StandardButton reply =
+    QMessageBox::critical(this, "QMessageBox::critical()",
+                          QString::fromStdString(message),
+                          QMessageBox::Ok);
+  
+  //  QMessageBox::Abort | QMessageBox::Retry | QMessageBox::Ignore);
   if (reply == QMessageBox::Abort)
-    criticalLabel->setText("Abort");
+    LOG(DEBUG) << "Abort";
+    // criticalLabel->setText("Abort");
   else if (reply == QMessageBox::Retry)
-    criticalLabel->setText("Retry");
+    LOG(DEBUG) << "Retry";
+    // criticalLabel->setText("Retry");
   else
-    criticalLabel->setText("Ignore");
-  */
+    LOG(DEBUG) << "Ignore";
+    // criticalLabel->setText("Ignore");
 }
 
 

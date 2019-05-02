@@ -1107,8 +1107,8 @@ void PpiWidget::contextMenuParameterColors()
 
   //DisplayField selectedField;                                                                             
 
-  const DisplayField &field = _manager.getSelectedField();
-  const ColorMap &colorMapForSelectedField = field.getColorMap();
+  // const DisplayField &field = _manager.getSelectedField();
+  // const ColorMap &colorMapForSelectedField = field.getColorMap();
   ParameterColorView *parameterColorView = new ParameterColorView(this);
   vector<DisplayField *> displayFields = _manager.getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
   DisplayField selectedField = _manager.getSelectedField();
@@ -1199,7 +1199,7 @@ void PpiWidget::changeToDisplayField(string fieldName)  // , ColorMap newColorMa
  
 void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
   
-  RadxRay *closestRayCopy = new RadxRay(*closestRay);
+  // RadxRay *closestRayCopy = new RadxRay(*closestRay);
 
   // create the view
   SpreadSheetView *sheetView;
@@ -1208,10 +1208,10 @@ void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
   // create the model
 
   // SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
-  SpreadSheetModel *model = new SpreadSheetModel(NULL, _vol); // closestRayCopy, _vol);
-
+  // SpreadSheetModel *model = new SpreadSheetModel(NULL, _vol); // closestRayCopy, _vol);
+  
   // create the controller
-  SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
+  // SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
 
   // finish the other connections ..
   //sheetView->addController(sheetController);

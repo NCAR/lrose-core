@@ -81,7 +81,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
   // TODO:  look up the dataField and get the associated values
   // look through DoradeRadxFile::_ddParms for a parameter_t type that has parameter_name that matches
   // the dataField.
-  short *data; // data is in and out parameter
+  // short *data; // data is in and out parameter
   if (field->getDataType() != Radx::SI16) {
     throw  "ERROR - data is not 16-bit signed integer as expected";
   } 
@@ -107,7 +107,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
   float parameter_bias = -1.0 * field->getOffset() * field->getScale(); // doradeData.parameter_bias; 
   int dgi_clip_gate = field->getNPoints(); // field->num_samples; // or number_cells
   short dds_radd_eff_unamb_vel = ray->getNyquistMps(); // doradeData.eff_unamb_vel;
-  int seds_nyquist_velocity; // TODO: what is this value?
+  int seds_nyquist_velocity = 0; // TODO: what is this value?
 
   LOG(DEBUG) << "sizeof(short) = " << sizeof(short);
 
@@ -130,6 +130,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
      field->getDataSi16(), bad, parameter_scale, parameter_bias, dgi_clip_gate,
      dds_radd_eff_unamb_vel, seds_nyquist_velocity);
   
+  LOG(DEBUG) << " result: " << result;
   LOG(DEBUG) << " A few data values ";
   for (int i=0; i< 10; i++) {
       LOG(DEBUG) << field->getDoubleValue(i);
@@ -183,21 +184,22 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(vector<double> data, Rad
   if (ray == NULL) {
     cerr << "ERROR - first ray is NULL" << endl;
   } 
-  const RadxGeoref *georef = ray->getGeoreference();
+  //const RadxGeoref *georef = ray->getGeoreference();
 
-  float vert_velocity = georef->getVertVelocity();  // fl32
-  float ew_velocity = georef->getEwVelocity(); // fl32
-  float ns_velocity = georef->getNsVelocity(); // fl32;
+  // float vert_velocity = georef->getVertVelocity();  // fl32
+  // float ew_velocity = georef->getEwVelocity(); // fl32
+  // float ns_velocity = georef->getNsVelocity(); // fl32;
 
   float ew_gndspd_corr = 0.0; 
   const RadxCfactors *cfactors = ray->getCfactors();
   if (cfactors != NULL) {
     ew_gndspd_corr = cfactors->getEwVelCorr(); // ?? _gndspd_corr; // fl32;
   }
+  LOG(DEBUG) << "ew_gndspd_corr: " << ew_gndspd_corr;
  
-  float tilt = georef->getTilt(); // fl32; 
+  // float tilt = georef->getTilt(); // fl32; 
   // TODO: elevation changes with different rays/fields how to get the current one???
-  float elevation = ray->getElevationDeg(); // doradeData.elevation; // fl32;
+  // float elevation = ray->getElevationDeg(); // doradeData.elevation; // fl32;
 
   // TODO:  look up the dataField and get the associated values
   // look through DoradeRadxFile::_ddParms for a parameter_t type that has parameter_name that matches

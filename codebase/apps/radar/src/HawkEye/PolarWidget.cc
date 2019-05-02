@@ -604,10 +604,11 @@ void PolarWidget::_performRendering()
 
 void PolarWidget::informationMessage()
 {
-  QMessageBox::StandardButton reply;
-  QLabel *informationLabel;
+  // QMessageBox::StandardButton reply;
+  // QLabel *informationLabel;
 
-  reply = QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
+  // reply = QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
+  QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
   //  if (reply == QMessageBox::Ok)
   //  informationLabel->setText("OK");
   //else
@@ -620,7 +621,7 @@ void PolarWidget::notImplemented()
   cerr << "inside notImplemented() ... " << endl;
 
   QErrorMessage *errorMessageDialog = new QErrorMessage(_parent);
-  QLabel *informationLabel = new QLabel();
+  // QLabel *informationLabel = new QLabel();
 
   errorMessageDialog->showMessage("This option is not implemented yet.");
   QLabel errorLabel;

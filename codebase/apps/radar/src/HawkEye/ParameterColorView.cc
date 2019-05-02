@@ -50,7 +50,7 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
 
     // move this code to SLOT(DisplayFieldsSupplied)
     //  iterator over fieldNames
-    int selectedIndex = -1;
+    // int selectedIndex = -1;
     int idx = 0;
     for (vector<string>::iterator fieldName = fieldNames.begin(); fieldName != fieldNames.end(); fieldName++) {
      
@@ -287,8 +287,8 @@ void ParameterColorView::colorMapProvided(string fieldName, ColorMap *colorMap) 
   colorBar = new ColorBar(1, colorMap);
   QPixmap *pixmap = colorBar->getPixmap(1,3);
   cmapLabel = new ClickableLabel();
-  int w = cmapLabel->width();
-  int h = cmapLabel->height();
+  // int w = cmapLabel->width();
+  // int h = cmapLabel->height();
 
   cmapLabel->clear();
   cmapLabel->setPixmap(*pixmap); //
@@ -337,7 +337,7 @@ void ParameterColorView::cancelColorScale() {
 void ParameterColorView::saveColorScale() {
 
   QString qvalue;
-  bool ok = false;
+  // bool ok = false;
 
   QMessageBox msgBox;
   msgBox.setText("Not Implemented");
@@ -460,7 +460,7 @@ void ParameterColorView::replotColorScale() {
   LOG(DEBUG) << "enter";
 
   QString qvalue;
-  bool ok = false;
+  // bool ok = false;
   
   LOG(DEBUG) << "enter";
   LOG(DEBUG) << "emit replotFieldColorMapChanges";
