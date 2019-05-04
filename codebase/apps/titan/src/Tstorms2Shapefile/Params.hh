@@ -404,6 +404,10 @@ public:
 
   datetime_structure_t datetime_structure;
 
+  tdrp_bool_t write_shapefile_if_no_entries;
+
+  tdrp_bool_t append_forecast_minutes_to_output_filename;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -411,7 +415,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[16];
+  mutable TDRPtable _table[18];
 
   const char *_className;
 

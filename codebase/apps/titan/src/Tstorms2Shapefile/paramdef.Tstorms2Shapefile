@@ -92,14 +92,14 @@ paramdef long {
            "Use a lead time of zero to capture storm detections";
 } forecast_lead_time[];
 
-paramdef char* {
-  p_default = {"./shapefile"};
+paramdef string{
+  p_default = "./shapefile";
   p_descr = "Input directory";
   p_help = "Directory for writting output shapefile";
 } output_dir;
 
-paramdef char* {
-  p_default = {"storms"};
+paramdef string{
+  p_default = "storms";
   p_descr = "Base filename for shapefile";
   p_help = "Shapefile extensions will automatically be added "
            "to the base filename based on data and forecast lead times.\n"
@@ -122,3 +122,14 @@ paramdef enum datetime_structure_t
            "the shapefile basename.";
 } datetime_structure;
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to write the shapefile even if there are no entries at that time.";
+  p_help = "If TRUE, the shapefile will be written, but will not contain storm shapes. If FALSE, no file will be written if no storms exist at that time.";
+} write_shapefile_if_no_entries;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to append the lead time in mins to the output file name.";
+  p_help = "If FALSE, the filename will end in '_F'.";
+} append_forecast_minutes_to_output_filename;

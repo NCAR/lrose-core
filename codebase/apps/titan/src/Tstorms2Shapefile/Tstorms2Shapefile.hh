@@ -72,10 +72,10 @@ public:
 
   bool isOK;
 
-   //
-   // Messaging
-   //
-   MsgLog&             getMsgLog(){ return msgLog; }
+  //
+  // Messaging
+  //
+  MsgLog&             getMsgLog(){ return msgLog; }
 
 protected:
   
@@ -110,27 +110,36 @@ private:
 		    const track_file_entry_t &entry,
 		    const storm_file_global_props_t &gprops,
 		    const track_file_forecast_props_t &fprops,
-		    const titan_grid_t &grid,
-                    double leadTimeHr );
-     
-   //
-   // Output file management 
-   //
-   Path             outputPath;
+		    const titan_grid_t &grid,  double leadTimeHr, time_t valid_time);
+  
+      
+  //
+  // Output file management 
+  //
 
-   DBFHandle        outputDbf;
-   SHPHandle        outputShp;
+  Path             _outputPath;
 
-   SHPHandle        directionShp;
-   DBFHandle        directionDbf;
+  DBFHandle        _outputDbf;
+  SHPHandle        _outputShp;
 
-   int areaField, massField, hailProbField, hailMassField;
-   int speedField, directionField;
-
-   //
-   // Messaging
-   //
-   MsgLog             msgLog;
+  SHPHandle        _directionShp;
+  DBFHandle        _directionDbf;
+  
+  int _datetimeField, _tracknumberField, _vilField, _vildField, _precipField;
+  int _complextracknumberField;
+  int _areaField, _massField, _hailProbField;
+  int _speedField, _directionField;
+  int _VolField, _VolCentrxField, _VolCentryField, _topField;
+  int _baseField, _hmaxZField, _ZmaxField, _ZmeanField;
+  int _vilhailField, _hailmassaloftField, _FOKRField;
+  int _tiltanField, _tiltdirField;
+  int _radmajorField, _radminorField, _hailsizeField;
+  int _leadTimeMinField;
+  
+  //
+  // Messaging
+  //
+  MsgLog             msgLog;
 
 };
 
@@ -138,9 +147,9 @@ private:
 // Make one instance global
 //
 #ifdef _TSTORMS2SHAPEFILE_MAIN_
-          Tstorms2Shapefile *driver;
+Tstorms2Shapefile *driver;
 #else
-   extern Tstorms2Shapefile *driver;
+extern Tstorms2Shapefile *driver;
 #endif
 
 //

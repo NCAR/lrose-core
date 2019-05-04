@@ -775,6 +775,30 @@
     tt->single_val.e = DATETIME_AS_DIRECTORY;
     tt++;
     
+    // Parameter 'write_shapefile_if_no_entries'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_shapefile_if_no_entries");
+    tt->descr = tdrpStrDup("Option to write the shapefile even if there are no entries at that time.");
+    tt->help = tdrpStrDup("If TRUE, the shapefile will be written, but will not contain storm shapes. If FALSE, no file will be written if no storms exist at that time.");
+    tt->val_offset = (char *) &write_shapefile_if_no_entries - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'append_forecast_minutes_to_output_filename'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("append_forecast_minutes_to_output_filename");
+    tt->descr = tdrpStrDup("Option to append the lead time in mins to the output file name.");
+    tt->help = tdrpStrDup("If FALSE, the filename will end in '_F'.");
+    tt->val_offset = (char *) &append_forecast_minutes_to_output_filename - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;
