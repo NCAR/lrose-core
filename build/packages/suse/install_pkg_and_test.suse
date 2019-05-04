@@ -1,0 +1,117 @@
+#! /bin/bash
+
+###########################################################
+# in clean docker image
+# install rpm and test that the apps work
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Install lrose rpm in clean docker container"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set lrose_pkg"
+    echo "          e.g. core, blaze, cyclone, radx"
+    echo "  -t ? :  set os_type"
+    echo "          e.g. centos, fedora"
+    echo "  -v ? :  set os_version"
+    echo "          e.g. 7 for centos 7, 29 for fedora 29"
+    echo
+}
+
+scriptName=$(basename $0)
+
+os_type=centos
+os_version=7
+lrose_pkg=core
+debug=true
+
+# Parse command line options.
+while getopts hdt:v:p: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            lrose_pkg=$OPTARG
+            ;;
+        t)
+            os_type=$OPTARG
+            ;;
+        v)
+            os_version=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  installing lrose rpm in clean docker container"
+  echo "    os_type: ${os_type}"
+  echo "    os_version: ${os_version}"
+  echo "    lrose_pkg: ${lrose_pkg}"
+fi
+
+# go to scripts dir
+
+cd ~/git/lrose-core/build/packages/redhat
+
+# compute Dockerfile path
+
+DockerfilePath=/tmp/docker/Dockerfile.install.${os_type}.${os_version}.${lrose_pkg}
+echo "Dockerfile path: " $DockerfilePath
+
+# create Dockerfile preamble with the FROM command
+
+mkdir -p /tmp/docker
+echo "#####################################################" > ${DockerfilePath}
+echo "FROM ${os_type}:${os_version}" >> ${DockerfilePath}
+echo "#" >> ${DockerfilePath}
+
+# append the body of the Dockerfile
+
+cat Dockerfile.redhat.install >> ${DockerfilePath}
+echo "Dockerfile content:"
+cat ${DockerfilePath}
+
+# remove any old image
+
+tag=install.${lrose_pkg}/${os_type}:${os_version}
+docker image rm -f ${tag}
+
+# make rpm file available to container
+
+pkgDir=/tmp/${os_type}-${os_version}-${lrose_pkg}/pkgs
+
+# make install scripts available to container
+
+scriptsDir=`pwd`
+
+# run the install, creating a new image for it
+
+cd /tmp/docker
+
+docker build \
+    -v ${pkgDir}:/pkgs \
+    -v ${scriptsDir}:/scripts \
+    --build-arg OS_TYPE=${os_type} \
+    --tag ${tag} \
+    --file ${DockerfilePath} .
+
+

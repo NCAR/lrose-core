@@ -1,0 +1,70 @@
+#! /bin/bash
+
+###########################################################
+# install rpm from within a container and test it
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Perform lrose rpm install"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -t ? :  set os_type"
+    echo "          e.g. opensuse"
+    echo
+}
+
+scriptName=$(basename $0)
+
+os_type=opensuse
+debug=true
+
+# Parse command line options.
+while getopts hdt: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        t)
+            os_type=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  performing rpm install"
+  echo "    os_type: ${os_type}"
+fi
+
+# install the rpm
+
+rpmPath=`ls /pkgs/*/*.rpm`
+echo "  rpm: $rpmPath"
+
+zypper install -y ${rpmPath}
+
+# check that RadxPrint runs
+
+if [ -f "/usr/local/cidd/bin/CIDD" ]
+then
+  /usr/local/cidd/bin/CIDD -h
+else
+  /usr/local/lrose/bin/RadxPrint -h
+fi
