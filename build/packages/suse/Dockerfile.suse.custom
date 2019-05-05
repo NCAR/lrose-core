@@ -8,9 +8,6 @@ ARG OS_TYPE=suse
 # install required packages
 
 RUN \
-    echo "OS_TYPE: ${OS_TYPE}";
-
-RUN \
     zypper install -y tcsh wget git \
     tkdiff emacs rsync python docker \
     m4 make libtool autoconf automake \

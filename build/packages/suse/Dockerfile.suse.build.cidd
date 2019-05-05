@@ -1,11 +1,11 @@
 #===================================================
-# build lrose in redhat container
+# build lrose in suse container
 
 ARG LROSE_PKG=cidd
 ARG RELEASE_DATE=latest
 
 RUN \
-    echo "Building lrose in redhat container"; \
+    echo "Building lrose in suse container"; \
     echo "  package is: ${LROSE_PKG}" 
 
 # run the checkout and build script

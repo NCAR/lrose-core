@@ -21,14 +21,14 @@ function usage() {
     echo "  -t ? :  set os_type"
     echo "          e.g. opensuse"
     echo "  -v ? :  set os_version"
-    echo "          e.g. 14 or 15 for opensuse"
+    echo "          e.g. latest, leap, tumbleweed"
     echo
 }
 
 scriptName=$(basename $0)
 
 os_type=opensuse
-os_version=14
+os_version=latest
 lrose_pkg=core
 release_date=latest
 debug=true
@@ -87,7 +87,7 @@ echo "Dockerfile path: " $DockerfilePath
 
 mkdir -p /tmp/docker
 echo "####################################################" > ${DockerfilePath}
-echo "FROM custom/${os_type}" >> ${DockerfilePath}
+echo "FROM custom/${os_type}:${os_version}" >> ${DockerfilePath}
 echo "#" >> ${DockerfilePath}
 
 # append the body of the Dockerfile

@@ -8,10 +8,7 @@ To make use of these you will need to install docker.
 
 These builds have been tested on the following versions:
 
-  * centos 6
-  * centos 7
-  * fedora 28
-  * fedora 29
+  * opensuse latest
 
 ## Steps in the process
 
@@ -31,10 +28,10 @@ For the test step, the RPM is installed into a clean container, and one of the a
 ### opensuse for core
 
 ```
-  make_custom_image.suse opensuse 0
-  do_lrose_build.suse opensuse 0 core
-  make_package.suse opensuse 0 core
-  install_pkg_and_test.suse opensuse 0 core
+  make_custom_image.suse opensuse latest
+  do_lrose_build.suse opensuse latest core
+  make_package.suse opensuse latest core
+  install_pkg_and_test.suse opensuse latest core
 ```
 
 ## Location of RPMs
@@ -46,7 +43,7 @@ After the RPMs are built they are placed in /tmp.
 For example:
 
 ```
-  /tmp/opensuse-core/pkgs/x86_64/lrose-blaze-20190127.opensuse_0.x86_64.rpm
+  /tmp/opensuse-core/pkgs/x86_64/lrose-blaze-20190127.opensuse_latest.x86_64.rpm
 ```
 
 These are also copied into the release directories:
@@ -61,7 +58,7 @@ These are also copied into the release directories:
 Use zypper to install the RPM. For example:
 
 ```
-  zypper install -y ./lrose-blaze-20190127.suse_0.x86_64.rpm
+  zypper install -y ./lrose-blaze-20190127.suse_latest.x86_64.rpm
 ```
 
 Note that you need to specify the absolute path, hence the '.'.

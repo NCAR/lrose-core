@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #################################################################
-# This script is to be executed inside a docker redhat container
+# This script is to be executed inside a docker suse container
 # It assume lrose-base is installed at /usr/local/lrose
 #
 # The package will be built and copied to the cross-mounted dir
@@ -23,16 +23,16 @@ function usage() {
     echo "  -r ? :  set release_date"
     echo "          e.g. latest, 20190105"
     echo "  -t ? :  set os_type"
-    echo "          e.g. centos, fedora"
+    echo "          e.g. opensuse"
     echo "  -v ? :  set os_version"
-    echo "          e.g. 7 for centos 7, 29 for fedora 29"
+    echo "          e.g. latest, leap, tumbleweed"
     echo
 }
 
 scriptName=$(basename $0)
 
-os_type=centos
-os_version=7
+os_type=opensuse
+os_version=latest
 lrose_pkg=core
 debug=true
 release_date=latest

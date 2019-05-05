@@ -18,9 +18,9 @@ function usage() {
     echo "  -p ? :  set lrose_pkg"
     echo "          e.g. core, blaze, cyclone, radx"
     echo "  -t ? :  set os_type"
-    echo "          e.g. centos, fedora"
+    echo "          e.g. opensuse"
     echo "  -v ? :  set os_version"
-    echo "          e.g. 7 for centos 7, 29 for fedora 29"
+    echo "          e.g. latest, leap, tumbleweed"
     echo
 }
 
@@ -70,7 +70,7 @@ fi
 
 # go to scripts dir
 
-cd ~/git/lrose-core/build/packages/redhat
+cd ~/git/lrose-core/build/packages/suse
 
 # compute Dockerfile path
 
@@ -86,7 +86,7 @@ echo "#" >> ${DockerfilePath}
 
 # append the body of the Dockerfile
 
-cat Dockerfile.redhat.install >> ${DockerfilePath}
+cat Dockerfile.suse.install >> ${DockerfilePath}
 echo "Dockerfile content:"
 cat ${DockerfilePath}
 

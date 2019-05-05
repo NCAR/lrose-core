@@ -77,7 +77,7 @@ fi
 
 # go to scripts dir
 
-cd ~/git/lrose-core/build/packages/redhat
+cd ~/git/lrose-core/build/packages/suse
 
 # create directory that will hold the .rpm file
 
@@ -93,7 +93,7 @@ docker run \
     -v ${pkgDir}:/pkgs \
     -v `pwd`:/scripts \
     build.${lrose_pkg}/${os_type}:${os_version} \
-    /scripts/build_rpm.redhat \
+    /scripts/build_rpm.suse \
     -t ${os_type} -v ${os_version} \
     -p ${lrose_pkg} -r ${release_date}
 
