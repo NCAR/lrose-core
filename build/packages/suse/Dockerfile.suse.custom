@@ -19,7 +19,8 @@ RUN \
     libpng-devel libtiff-devel zlib-devel \
     libexpat-devel libcurl-devel \
     flex fftw3-devel \
-    bzip2 libqt5-qtbase-devel libqt5-qtdeclarative-devel \
+    libbz2-devel libzip-devel \
+    libqt5-qtbase-devel libqt5-qtdeclarative-devel \
     hdf5-devel netcdf-devel \
     xorg-x11-xauth \
     rpm-build rpm-devel rpmdevtools
@@ -32,16 +33,14 @@ RUN \
 
 # 32-bit libs etc for CIDD build
 
-#RUN \
-#    yum install -y \
-#    xrdb \
-#    glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
-#    libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686 \
-#    libstdc++-devel.i686 libtiff-devel.i686 \
-#    zlib-devel.i686 expat-devel.i686 flex-devel.i686 \
-#    fftw-devel.i686 bzip2-devel.i686 \
-#    gnuplot ImageMagick-devel ImageMagick-c++-devel \
-#    xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi \
-#    xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi \
-#    xorg-x11-fonts-misc
+RUN \
+    zypper install -y \
+    xrdb \
+    glibc-devel-32bit libX11-devel-32bit libXext-devel-32bit \
+    libtiff-devel-32bit libpng-devel-32bit libcurl-devel-32bit \
+    libstdc++-devel-32bit libtiff-devel-32bit \
+    zlib-devel-32bit libexpat-devel-32bit flex-32bit \
+    libfftw3-3-32bit libbz2-devel-32bit \
+    gnuplot ImageMagick-devel-32bit \
+    xorg-x11 xorg-x11-devel xorg-x11-fonts xorg-x11-fonts-core
 
