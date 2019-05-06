@@ -168,13 +168,13 @@ void BufrProductGeneric::createSweep() {
       
   realData = decompressDataFl32();
   if (realData == NULL) {
-    throw "ERROR - could not decompress data";
+    throw string("ERROR - could not decompress data");
   }
   SweepData newSweep;
   // there will only be one time stamp and a duration
   int nTimeStamps = timeStampStack.size();
   if (nTimeStamps < 2) 
-    throw "Missing start time stamp for sweep.";
+    throw string("Missing start time stamp for sweep.");
   // grab the first time stamp, because the second one
   // is for the last calibration
   timeStampStack.pop_back();
@@ -220,7 +220,7 @@ void BufrProductGeneric::addData(unsigned char value) {
   //  if (nData < maxData)
   //  dataBuffer[nData++] = value;
   //else 
-  //  throw "out of space in dataBuffer";
+  //  throw string("out of space in dataBuffer");
 
   //  set 255 to zero, so that both 255 and zero are marked as missing
   if (value == 255)

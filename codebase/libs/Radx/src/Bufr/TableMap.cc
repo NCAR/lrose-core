@@ -135,7 +135,7 @@ int TableMap::ReadTableB(string fileName) {
   if (!filein.is_open()) {
     string _errString;
     Radx::addErrStr(_errString, "ERROR: cannot read BUFR table ", fileName, true);
-    throw _errString.c_str();
+    throw _errString;
   }
 
   for (std::string line; std::getline(filein, line); ) {
@@ -192,7 +192,7 @@ int TableMap::ReadInternalTableD(const char **internalBufrTable,
   // read table d which has pointers
 
   if (internalBufrTable == NULL) {
-    throw "ERROR: cannot read BUFR table ";
+    throw string("ERROR: cannot read BUFR table ");
   }
 
   for (size_t i=0; i<n; i++) { 
@@ -313,7 +313,7 @@ int TableMap::ReadTableD(string fileName) {
   std::ifstream fileind(fileName.c_str());
 
   if (!fileind.is_open()) {
-    throw "ERROR: cannot read BUFR table " + fileName;
+    throw (string("ERROR: cannot read BUFR table ") + fileName);
   }
 
   for (std::string line; std::getline(fileind, line); ) {
@@ -414,7 +414,7 @@ int TableMap::ImportTables(unsigned int masterTableVersion,
     try {    
       ImportTablesFromPath(masterTableVersion, generatingCenter,
 			   localTableVersion, tablePath);
-    } catch (const char *msg) {
+    } catch (const string &msg) {
       cerr << msg << endl;
       cerr << "  Attempting to use internal table definitions ..." << endl;
     }
@@ -509,7 +509,7 @@ int TableMap::ImportTables(unsigned int masterTableVersion,
   default:
     string _errString;
     Radx::addErrInt(_errString, "ERROR: unrecognized master BUFR table ", masterTableVersion , true);
-    throw _errString.c_str();
+    throw _errString;
   }
 
 
@@ -588,7 +588,7 @@ int TableMap::ImportTables(unsigned int masterTableVersion,
       Radx::addErrInt(_errString, "ERROR: unrecognized BUFR local table generating center ",
 		      generatingCenter , true);
       Radx::addErrInt(_errString, "  local table version ", localTableVersion , true);
-      throw _errString.c_str();
+      throw _errString;
     }
     break;
   case 247:
@@ -623,7 +623,7 @@ int TableMap::ImportTables(unsigned int masterTableVersion,
       Radx::addErrInt(_errString, "ERROR: unrecognized BUFR local table generating center ",
 		      generatingCenter , true);
       Radx::addErrInt(_errString, "  local table version ", localTableVersion , true);
-      throw _errString.c_str();
+      throw _errString;
     }
     break;
   case 255:
@@ -651,7 +651,7 @@ int TableMap::ImportTables(unsigned int masterTableVersion,
     Radx::addErrInt(_errString, "  local table version ", localTableVersion , true);
     cerr << _errString << endl;
     cerr << " continuing with master table only " << endl;
-    // throw _errString.c_str();
+    // throw _errString;
     }
   } // end if !filled() 
   return 0;

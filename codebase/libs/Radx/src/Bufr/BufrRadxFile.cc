@@ -442,7 +442,7 @@ void BufrRadxFile::lookupFieldName(string fieldName, string &units,
     if (!matches) {
       _addErrStr("WARNING - BufrRadxFile::lookupFieldName");
       _addErrStr("  Unrecognized field: ", fieldName);
-      throw _errStr.c_str();
+      throw _errStr;
     }
   }
 }
@@ -503,7 +503,7 @@ bool BufrRadxFile::fieldNamesWithinFileName(const string &path)
       _accumulateFieldFirstTime(fieldName, units, standardName, longName);
       if (_verbose) 
         printNative(fileNames[ii], cout, true, true);
-    } catch (const char *msg) {
+    } catch (const string &msg) {
       // report error message and move to the next field
       _addErrStr("ERROR - BufrRadxFile::fieldNamesWithinFileName");
       _addErrStr("  Cannot read in field from path: ", filePaths[ii]);
@@ -970,7 +970,7 @@ void BufrRadxFile::getFieldNamesWithData(const string &path)
     if (_verbose) 
       printNative(path, cout, true, true);
 
-  } catch (const char *msg) {
+  } catch (const string &msg) {
     // report error message
     _addErrStr("ERROR - BufrRadxFile::getFieldNamesWithData");
     _addErrStr("  Cannot read from path: ", path);
@@ -1027,7 +1027,7 @@ int BufrRadxFile::readFromPath(const string &path,
       _errStr.clear();
       getFieldNamesWithData(path); 
     }
-  } catch (const char *msg) {
+  } catch (const string &msg) {
     _addErrStr(msg);
     return -1;
   } 
@@ -1183,9 +1183,9 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName,
     			   false);
       }
     } // end for each sweep
-  } catch (const char *msg) {
+  } catch (const string &msg) {
     _addErrStr(msg);
-    throw _errStr.c_str();
+    throw _errStr;
   }
 }
 
@@ -1222,10 +1222,9 @@ void BufrRadxFile::_accumulateField(string fieldName, string units,
   // verify required dimensions
   const char *location = "ERROR - BufrRadxFile::_accumulateField";
   if (_file.getTimeDimension() != _nTimesInFile) {
-    throw ;
     _errorMessage(location, "Time dimension incompatible, found ",
 		  _file.getTimeDimension(),_nTimesInFile);
-    throw "incompatible";
+    throw string("incompatible");
   }
 
   /*
@@ -1233,7 +1232,7 @@ void BufrRadxFile::_accumulateField(string fieldName, string units,
     // check the size of the range bins
     _errorMessage(location, "Range bin size (meters) incompatible, found ",
     _file.getRangeBinSizeMeters(), _rangeBinSizeMeters);
-    throw "incompatible";
+    throw string("incompatible");
     }
   */
 
@@ -1245,7 +1244,7 @@ void BufrRadxFile::_accumulateField(string fieldName, string units,
 		  _file.getHdrMonth(), _month_attr);
     _errorMessage(location, "Date is incompatible, found ",
 		  _file.getHdrDay(), _day_attr);
-    throw "incompatible";
+    throw string("incompatible");
   }
   if ((_siteName != _file.getTypeOfStationId()) || 
       (_instrumentName != _file.getStationId())) {
@@ -1253,7 +1252,7 @@ void BufrRadxFile::_accumulateField(string fieldName, string units,
 		  _file.getTypeOfStationId(), _siteName);
     _errorMessage(location, "Global data are incompatible, found ",
 		  _file.getStationId(), _instrumentName);
-    throw "incompatible";
+    throw string("incompatible");
   }
   
   // verify lat/lon/alt 
@@ -1265,7 +1264,7 @@ void BufrRadxFile::_accumulateField(string fieldName, string units,
     _addErrStr("ERROR - BufrRadxFile::_accumulateField");
     _addErrInt("Number of sweeps incompatible: found ", nDataSegments);
     _addErrInt(" expected ",  _sweeps.size());
-    throw _errStr.c_str();
+    throw _errStr;
   }
 
   try {
@@ -1294,9 +1293,9 @@ void BufrRadxFile::_accumulateField(string fieldName, string units,
       //  _readMetadataOnly);
 
     } // end for each sweep
-  } catch (const char *msg) {
+  } catch (const string &msg) {
     _addErrStr(msg);
-    throw _errStr.c_str();
+    throw _errStr;
   }
 }
 
@@ -1654,7 +1653,7 @@ int BufrRadxFile::_addFieldVariables(RadxSweep *sweep, int dataSection,
         iret = -1;
       }
       attempted = true;
-    } catch(const char *msg) {
+    } catch(const string &msg) {
       cerr << msg << endl;
       // just use the unknowns
     }

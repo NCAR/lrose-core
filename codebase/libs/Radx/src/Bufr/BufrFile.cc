@@ -188,8 +188,8 @@ void BufrFile::readThatField(string fileName,
     readData(); 
     readSection5();
     close();
-  } catch (const char *msg) {
-    throw _errString.c_str();
+  } catch (const string &msg) {
+    throw _errString;
   }
 }
 
@@ -252,7 +252,7 @@ int BufrFile::openRead(const string &path)
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::_openRead", true);
     Radx::addErrStr(_errString, "  Cannot open file for reading, path: ", path, true);
     Radx::addErrStr(_errString, "  ", strerror(errNum), true);
-    throw _errString.c_str();
+    throw _errString;
   }
 
   // prime the pump
@@ -293,7 +293,7 @@ int BufrFile::readSection0()
     if (fread(id, 1, 4, _file) != 4) {
       int errNum = errno;
       sprintf(temp, "  Cannot read BUFR starting code: %s", strerror(errNum));
-      throw temp;
+      throw string(temp);
     }
     */
     string value;
@@ -303,12 +303,12 @@ int BufrFile::readSection0()
     _nBitsRead = 8; // reset this count after finding "B"
     value = ExtractText(8*3);
     if (value.find("UFR") == string::npos)
-      throw "Not a BUFR file"; // "  Cannot read BUFR starting code";
+      throw string("Not a BUFR file"); // "  Cannot read BUFR starting code";
     //_numBytesRead += 4;
     /*
     string idStr(id);
     if ((id[0] != 'B') || (id[1] != 'U') || (id[2] != 'F') || (id[3] != 'R')) {
-      throw "Not a BUFR file";
+      throw string("Not a BUFR file");
     }
     */
 
@@ -322,7 +322,7 @@ int BufrFile::readSection0()
     if (fread(id2, 1, 3, _file) != 3) {
       int errNum = errno;
       sprintf(temp, "  Cannot read length of section in octets: %s", strerror(errNum));
-      throw temp;
+      throw string(temp);
     }
 
     _numBytesRead += 3;
@@ -341,7 +341,7 @@ int BufrFile::readSection0()
     if (fread(&bufr_edition, 1, 1, _file) != 1) {
       int errNum = errno;
       sprintf(temp, "  Cannot read BUFR edition: %s", strerror(errNum));
-      throw temp;
+      throw string(temp);
       }*/
 
     _s0.edition = bufr_edition;   
@@ -352,12 +352,12 @@ int BufrFile::readSection0()
       printf("Processing BUFR message %d at nBytes %d\n", _bufrMessageCount,
              _getCurrentBytePositionInFile());
     }
-  } catch (const char *msg) {
+  } catch (const string &msg) {
     close();
     Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection0()", true);
     //    Radx::addErrStr(_errString, "  File path: ", _pathInUse, true);
     Radx::addErrStr(_errString, "", msg, true);
-    throw _errString.c_str();
+    throw _errString;
   }
   return 0;
 }
@@ -384,7 +384,7 @@ int BufrFile::readSection1() {
     close();
     Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection1()", true);
     Radx::addErrInt(_errString, "  unrecognized BUFR edition: ", _s0.edition, true);
-    throw _errString.c_str();
+    throw _errString;
   }
   return 0;
 }
@@ -453,7 +453,7 @@ int BufrFile::readSection1_edition4()
   Radx::ui08 seconds;
 
   if (_s0.edition != 4)
-    throw "ERROR - Wrong version of section1 called ";
+    throw string("ERROR - Wrong version of section1 called");
 
     _s1.masterTable = ExtractIt(8); //  octet 4
     _s1.generatingCenter =  ExtractIt(16); // octet 5-6  originating/generating center
@@ -507,11 +507,12 @@ int BufrFile::readSection1_edition4()
   //_numBytesRead += sectionLen;
   // delete[] buffer;
   return 0;
-  } catch (char *msg) {
+  } catch (const string &msg) {
     int errNum = errno;
     Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection1()", true);
     Radx::addErrStr(_errString, "  Cannot read data", strerror(errNum), true);
     Radx::addErrStr(_errString, "  File path: ", _pathInUse, true);
+    Radx::addErrStr(_errString, "", msg, true);
     // delete[] buffer;
     // close();
     throw _errString;
@@ -586,7 +587,7 @@ int BufrFile::readSection1_edition2()
 
 
   if (_s0.edition != 2) 
-    throw "ERROR - Wrong version of section1 called ";
+    throw string("ERROR - Wrong version of section1 called");
   _s1.masterTable = ExtractIt(8); // Octet 4
   _s1.originatingSubcenter  =  0; 
   _s1.generatingCenter = ExtractIt(16); // octets 5,6
@@ -783,7 +784,7 @@ int BufrFile::readSection5() {
     // skip the last 7, because we hit end of file reading it.
     value = ExtractText(16);
     if (value.compare("77") != 0) {
-      throw " Did not find ending code ";
+      throw string("Did not find ending code");
     }
     */
     int countSeven = 0;
@@ -798,14 +799,14 @@ int BufrFile::readSection5() {
       }
     } while (!foundEndMark);
 
-  } catch (const char *msg) {
+  } catch (const string &msg) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::readSection5", true);
     Radx::addErrStr(_errString, " ", " Could not read ending code", true);
-    throw _errString.c_str();
+    throw _errString;
   }
 
   if (!foundEndMark) {
-    throw " Did not find ending code ";
+    throw string("Did not find ending code");
   }
   
   return 0;
@@ -852,10 +853,10 @@ bool BufrFile::isEndInSight() {
       if (endMarkFound)  printf("  found >3 contiguous 7's\n");
       else  printf("  endMarkFound not found\n");
     }
-  } catch (const char *msg) {
+  } catch (const string &msg) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::isEndInSight", true);
     Radx::addErrStr(_errString, " ", " Could not find ending code before end of file", true);
-    throw _errString.c_str();
+    throw _errString;
   }
   
   // of course, this doesn't work if we are right on the end of the buffer
@@ -931,7 +932,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
       Radx::addErrStr(_errString, " ", " Cannot read length of section 3 in octets", true);
       Radx::addErrStr(_errString, "  ", strerror(errNum), true);
       close();
-      throw _errString.c_str();
+      throw _errString;
     }
     nBytes = 0;
     nBytes = nBytes | id[2];
@@ -953,7 +954,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
       Radx::addErrStr(_errString, " ", " Cannot read section 3", true);
       Radx::addErrStr(_errString, "  ", strerror(errNum), true);
       close();
-      throw _errString.c_str();
+      throw _errString;
     }
     */
 
@@ -1141,13 +1142,13 @@ int BufrFile::readData() {  // read section 4
       tableMap.ImportTables(_s1.masterTableVersionNumber,
 			    _s1.generatingCenter, _s1.localTableVersionNumber,
 			    _tablePath);
-  } catch (const char *msg) {
+  } catch (const string &msg) {
     Radx::addErrStr(_errString, "", msg, true);
-    throw _errString.c_str();
+    throw _errString;
   }
   try {
     TraverseNew(_descriptorsToProcess);
-  } catch (const char *msg) {
+  } catch (const string &msg) {
     // try to recover by continuing to next message
     cerr << "Attempting recovery ... \n";
   }
@@ -1203,7 +1204,7 @@ bool BufrFile::NextBit() {
       currentBufferLengthBits = currentBufferLengthBytes * 8;
       currentBufferIndexBits = 0;
       if (currentBufferLengthBits <= 0) {
-        throw "ERROR - End of file reached before end of descriptors.";
+        throw string("ERROR - End of file reached before end of descriptors.");
       }
     }
     return bitValue;
@@ -1221,7 +1222,7 @@ void BufrFile::MoveToNextByteBoundary() {
       currentBufferLengthBits = currentBufferLengthBytes * 8;
       currentBufferIndexBits = 0;
       if (currentBufferLengthBits <= 0) {
-        throw "ERROR - End of file reached before end of descriptors.";
+        throw string("ERROR - End of file reached before end of descriptors.");
       }
     }
   }
@@ -1248,7 +1249,7 @@ string BufrFile::ExtractText(unsigned int nBits) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractText", true);
     Radx::addErrStr(_errString, "  ",
 		    "Text width is not multiple of 8; cannot read in data.", true);
-    throw _errString.c_str();
+    throw _errString;
   }
 
   unsigned int i=0;
@@ -1280,7 +1281,7 @@ string BufrFile::ExtractText(unsigned int nBits) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractText", true);
     Radx::addErrStr(_errString, "  ", 
 		    "Ran out of data before completing the value.", true);
-    throw _errString.c_str(); 
+    throw _errString; 
   }  else {
     _nBitsRead += nBits;
     return _trim(val);
@@ -1313,7 +1314,7 @@ Radx::ui32 BufrFile::ExtractIt(unsigned int nBits) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractIt", true);
     Radx::addErrInt(_errString, "  Request to extract > 32 bits: ", 
 		    nBits, true);
-    throw _errString.c_str();
+    throw _errString;
   }
 
   val = 0;
@@ -1337,7 +1338,7 @@ Radx::ui32 BufrFile::ExtractIt(unsigned int nBits) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractIt", true);
     Radx::addErrStr(_errString, "  ", 
 		    "Ran out of data before completing the value.", true);
-    throw _errString.c_str(); 
+    throw _errString; 
   }  else {
     _nBitsRead += nBits;
     return val;
@@ -1409,7 +1410,7 @@ double BufrFile::fastPow10(int n)
     };
 
   if ((n > 10) || (n < -10))
-    throw "Scale outside of bounds; must be between -10 and 10";
+    throw string("Scale outside of bounds; must be between -10 and 10");
   else
     return pow10[n+10]; 
 }
@@ -1629,7 +1630,7 @@ bool BufrFile::StuffIt(string name, double value) {
 	  Radx::addErrStr(_errString, "  Expected Type of Product code for ", 
 			  temp.c_str(), true);
 	  Radx::addErrInt(_errString, "  Found code ", code, true);
-	  throw _errString.c_str();
+	  throw _errString;
 	}
       } else {
         //  TODO: we'll need to use the currentTemplate->typeOfProduct as the field name
@@ -2209,7 +2210,7 @@ int BufrFile::_descend(DNode *tree) {
       } else {
         Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
 	Radx::addErrInt(_errString, "   unrecognized table map key: ", des, true);
-	throw _errString.c_str();
+	throw _errString;
       }
     } // end while p!= NULL
     if (compressionStart) {
@@ -2220,12 +2221,12 @@ int BufrFile::_descend(DNode *tree) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
     Radx::addErrInt(_errString, "   unknown descriptor: ", des, true);
     cerr << _errString;
-    throw _errString.c_str();
-  } catch (const char *msg) {
+    throw _errString;
+  } catch (const string &msg) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
     Radx::addErrStr(_errString, "  ", msg, true);
     cerr << _errString;
-    throw _errString.c_str();
+    throw _errString;
   }
   return 0;
 }
@@ -2555,7 +2556,7 @@ int BufrFile::_descend(DNode *tree) {
       } else {
         Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
 	Radx::addErrInt(_errString, "   unrecognized table map key: ", des, true);
-	throw _errString.c_str();
+	throw _errString;
       }
     } // end while p!= NULL
     if (compressionStart) {
@@ -2568,12 +2569,12 @@ int BufrFile::_descend(DNode *tree) {
     sprintf(desString, "unknown descriptor: (%u;%u;%u) ", f,x,y);
     Radx::addErrInt(_errString, desString, des, true);
     cerr << _errString;
-    throw _errString.c_str();
-  } catch (const char *msg) {
+    throw _errString;
+  } catch (const string &msg) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
     Radx::addErrStr(_errString, "  ", msg, true);
     cerr << _errString;
-    throw _errString.c_str();
+    throw _errString;
   }
   // printf("Leaving _descend\n");
   return 0;

@@ -118,7 +118,7 @@ size_t BufrProduct::getNBinsAlongTheRadial(int sweepNumber) {
 void BufrProduct::setAntennaElevationDegrees(double value) {
   // if (sweepData.size() > 0) {
   //  if (value!= sweepData[0].antennaElevationDegrees)
-  //    throw "Cannot change the antenna elevation.";
+  //    throw string("Cannot change the antenna elevation.");
   // }
   antennaElevationDegrees = value;
 }
@@ -142,7 +142,7 @@ double BufrProduct::getRangeBinSizeMeters(int sweepNumber) {
 void BufrProduct::setRangeBinOffsetMeters(double value) {
   if (sweepData.size() > 0) {
     if (value != sweepData[0].rangeBinOffsetMeters)
-      throw "Cannot change the range bin offset.";
+      throw string("Cannot change the range bin offset.");
   }
   rangeBinOffsetMeters = value;
 }
@@ -153,7 +153,7 @@ double BufrProduct::getRangeBinOffsetMeters() {
 void BufrProduct::setNAzimuths(size_t value) {
   if (sweepData.size() > 0) {
     if (value != sweepData[0].nAzimuths)
-      throw "Cannot change the number of azimuths.";
+      throw string("Cannot change the number of azimuths.");
   }
   nAzimuths = value;
 }
@@ -164,7 +164,7 @@ size_t BufrProduct::getNAzimuths() {
 void BufrProduct::setAntennaBeamAzimuthDegrees(double value) {
   //if (sweepData.size() > 0) {
   //  if (value != sweepData[0].antennaBeamAzimuthDegrees)
-  //    throw "Cannot change the antenna beam azimuth.";
+  //    throw string("Cannot change the antenna beam azimuth.");
   //}
   antennaBeamAzimuthDegrees = value;
 }
@@ -197,7 +197,7 @@ void BufrProduct::storeReplicator(unsigned int value) {
     allocateSpace(value); 
     break;
   default:
-    throw "Unexpected number of entries in Replicator store";
+    throw string("Unexpected number of entries in Replicator store");
   }
 }
 
@@ -224,7 +224,7 @@ void BufrProduct::trashReplicator() {
     }
     break;
   default:
-    throw "Unexpected number of replicators in store";
+    throw string("Unexpected number of replicators in store");
   }
   replicators.pop_back();
 }
@@ -234,12 +234,12 @@ void BufrProduct::createSweep() {
       
   float *realData = decompressDataFl32();
   if (realData == NULL) {
-    throw "ERROR - could not decompress data";
+    throw string("ERROR - could not decompress data");
   }
   SweepData newSweep;
   int nTimeStamps = timeStampStack.size();
   if (nTimeStamps < 2) 
-    throw "Missing start or end time stamp for sweep.";
+    throw string("Missing start or end time stamp for sweep.");
   newSweep.endTime = timeStampStack.back();
   // Ok, don't remove the time stamps, just pick the last two
   // values
@@ -272,7 +272,7 @@ void BufrProduct::addData(unsigned char value) {
   if (nData < maxData)
     dataBuffer[nData++] = value;
   else 
-    throw "out of space in dataBuffer";
+    throw string("out of space in dataBuffer");
 }
 
 bool BufrProduct::StuffIt(unsigned short des, string fieldName, string &value) {
@@ -412,7 +412,7 @@ bool BufrProduct::StuffIt(unsigned short des, string name, double value) {
 	  Radx::addErrStr(_errString, "  Expected Type of Product code for ", 
 			  temp.c_str(), true);
 	  Radx::addErrInt(_errString, "  Found code ", code, true);
-	  throw _errString.c_str();
+	  throw _errString;
 	}
       } else {
         //  TODO: we'll need to use the typeOfProduct as the field name
@@ -475,15 +475,15 @@ float *BufrProduct::decompressDataFl32() {
     
     switch(result) {
     case Z_BUF_ERROR:	 	
-      throw "The buffer dest was not large enough to hold the uncompressed data.";
+      throw string("The buffer dest was not large enough to hold the uncompressed data.");
       break;
 
     case Z_MEM_ERROR:	 	
-      throw "Insufficient memory.";
+      throw string("Insufficient memory.");
       break;
 
     case Z_DATA_ERROR:	 	
-      throw "The compressed data (referenced by source) was corrupted.";
+      throw string("The compressed data (referenced by source) was corrupted.");
       break;
     default:
       return NULL;

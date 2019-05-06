@@ -358,13 +358,13 @@ void BufrProduct_gsi::createSweep() {
       
   realData = decompressDataFl32();
   if (realData == NULL) {
-    throw "ERROR - could not decompress data";
+    throw string("ERROR - could not decompress data");
   }
   SweepData newSweep;
   // there will only be one time stamp and a duration
   int nTimeStamps = timeStampStack.size();
   if (nTimeStamps < 2) 
-    throw "Missing start time stamp for sweep.";
+    throw string("Missing start time stamp for sweep.");
   // grab the first time stamp, because the second one
   // is for the last calibration
   timeStampStack.pop_back();
