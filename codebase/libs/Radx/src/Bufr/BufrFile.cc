@@ -1687,9 +1687,8 @@ double BufrFile::getStartTimeForSweep(int sweepNumber) {
   // RadxTime rTime(t.year, t.month, t.day, t.hour, t.minute, t.second); 
   // return rTime.asDouble();
   //return currentTemplate->sweepData.at(sweepNumber).startTime.asDouble();
-  RadxTime *time;
-  time = currentTemplate->sweepData.at(sweepNumber).startTime;
-  return time->asDouble();
+  RadxTime stime = currentTemplate->sweepData.at(sweepNumber).startTime;
+  return stime.asDouble();
 }
 
 double BufrFile::getEndTimeForSweep(int sweepNumber) {
@@ -1699,21 +1698,18 @@ double BufrFile::getEndTimeForSweep(int sweepNumber) {
   // return rTime.asDouble();
   //return currentTemplate->sweepData.at(sweepNumber).endTime.asDouble();
   // TODO: shouldn't this be a time_t value?? instead of a double??
-  RadxTime *time;
-  time = currentTemplate->sweepData.at(sweepNumber).endTime;
-  return time->asDouble();
+  RadxTime stime = currentTemplate->sweepData.at(sweepNumber).endTime;
+  return stime.asDouble();
 }
 
 time_t BufrFile::getStartUTime(int sweepNumber) {
-  RadxTime *time;
-  time = currentTemplate->sweepData.at(sweepNumber).startTime;
-  return time->utime();
+  RadxTime stime = currentTemplate->sweepData.at(sweepNumber).startTime;
+  return stime.utime();
 }
 
 time_t BufrFile::getEndUTime(int sweepNumber) {
-  RadxTime *time;
-  time = currentTemplate->sweepData.at(sweepNumber).endTime;
-  return time->utime();
+  RadxTime stime = currentTemplate->sweepData.at(sweepNumber).endTime;
+  return stime.utime();
 }
 
 float *BufrFile::getDataForSweepFl32(int sweepNumber) { 

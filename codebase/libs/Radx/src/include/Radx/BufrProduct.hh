@@ -116,7 +116,7 @@ public:
   enum DataType {CM, TV, DBZH, VRAD, TH, WRAD,  KDP, PHIDP, RHOHV,
     OTHER};
 
-  vector<RadxTime *> timeStampStack;
+  vector<RadxTime> timeStampStack;
 
   RadxBuf compressedData; // dataBuffer;
 
@@ -142,17 +142,16 @@ public:
   } ParameterDataFl64;
 
   typedef struct {
-    RadxTime *startTime;
-    RadxTime *endTime;
-    double    antennaElevationDegrees;
-    size_t    nBinsAlongTheRadial;
-    double    rangeBinSizeMeters;
-    double    rangeBinOffsetMeters;
-    size_t    nAzimuths;
-    double    antennaBeamAzimuthDegrees;
+    RadxTime startTime;
+    RadxTime endTime;
+    double   antennaElevationDegrees;
+    size_t   nBinsAlongTheRadial;
+    double   rangeBinSizeMeters;
+    double   rangeBinOffsetMeters;
+    size_t   nAzimuths;
+    double   antennaBeamAzimuthDegrees;
     vector<ParameterData> parameterData;
     vector<ParameterDataFl64> parameterDataFl64;
-
   } SweepData;
 
   vector<SweepData> sweepData;

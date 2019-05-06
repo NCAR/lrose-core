@@ -363,31 +363,32 @@ void BufrProduct_gsi::createSweep() {
   SweepData newSweep;
   // there will only be one time stamp and a duration
   int nTimeStamps = timeStampStack.size();
-  if (nTimeStamps < 2) 
+  if (nTimeStamps < 2) {
+    delete[] realData;
     throw string("Missing start time stamp for sweep.");
+  }
   // grab the first time stamp, because the second one
   // is for the last calibration
   timeStampStack.pop_back();
   newSweep.startTime = timeStampStack.back();
   // convert RadxTime to time_t
-  RadxTime *endTime = new RadxTime();
-  endTime->copy(*(timeStampStack.back()));
+  RadxTime endTime = timeStampStack.back();
   // add the duration
-  *endTime += duration;
+  endTime += duration;
   // convert back to RadxTime object
   newSweep.endTime = endTime; 
 
-  cerr << endTime->getW3cStr() << endl;
-  cerr << newSweep.startTime->getW3cStr() << endl;
+  cerr << endTime.getW3cStr() << endl;
+  cerr << newSweep.startTime.getW3cStr() << endl;
   cerr << "------------" << endl;
 
   timeStampStack.pop_back();
 
   if (_debug) {
-    RadxTime *time = newSweep.startTime;
-    cerr << "startTime " << time->asString() << endl; 
-    time = newSweep.endTime;
-    cerr << "endTime " << time->asString() << endl; 
+    RadxTime stime = newSweep.startTime;
+    cerr << "startTime " << stime.asString() << endl; 
+    stime = newSweep.endTime;
+    cerr << "endTime " << stime.asString() << endl; 
   }
   newSweep.antennaElevationDegrees = antennaElevationDegrees;
   newSweep.nBinsAlongTheRadial = nBinsAlongTheRadial;

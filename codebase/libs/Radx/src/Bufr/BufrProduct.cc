@@ -60,10 +60,7 @@ BufrProduct::BufrProduct()
 
 BufrProduct::~BufrProduct()
 {
-  if (dataBuffer != NULL) {
-    delete[] dataBuffer;
-    dataBuffer = NULL;
-  }
+  reset();
 }
 
 void BufrProduct::reset() {
@@ -76,7 +73,15 @@ void BufrProduct::reset() {
     delete[] dataBuffer;
     dataBuffer = NULL;
   }
-  dataBuffer = NULL;
+  // for (size_t ii = 0; ii < sweepData.size(); ii++) {
+  //   SweepData &sweep = sweepData[ii];
+  //   for (size_t jj = 0; jj < sweep.parameterData.size(); jj++) {
+  //     delete[] sweep.parameterData[jj].data;
+  //   }
+  //   for (size_t jj = 0; jj < sweep.parameterDataFl64.size(); jj++) {
+  //     delete[] sweep.parameterDataFl64[jj].data;
+  //   }
+  // }
   sweepData.clear(); // assume that the Rays are copied
   // reset the replicators vector
   while (!replicators.empty()) 
@@ -238,8 +243,10 @@ void BufrProduct::createSweep() {
   }
   SweepData newSweep;
   int nTimeStamps = timeStampStack.size();
-  if (nTimeStamps < 2) 
+  if (nTimeStamps < 2) {
+    delete[] realData;
     throw string("Missing start or end time stamp for sweep.");
+  }
   newSweep.endTime = timeStampStack.back();
   // Ok, don't remove the time stamps, just pick the last two
   // values
@@ -248,10 +255,10 @@ void BufrProduct::createSweep() {
   newSweep.startTime = timeStampStack.at(nTimeStamps-2); // back(); 
   //timeStampStack.pop_back();
   if (_debug) {
-    RadxTime *time = newSweep.startTime;
-    cerr << "startTime " << time->asString() << endl; 
+    RadxTime time(newSweep.startTime);
+    cerr << "startTime " << time.asString() << endl; 
     time = newSweep.endTime;
-    cerr << "endTime " << time->asString() << endl; 
+    cerr << "endTime " << time.asString() << endl; 
   }
   newSweep.antennaElevationDegrees = antennaElevationDegrees;
   newSweep.nBinsAlongTheRadial = nBinsAlongTheRadial;
@@ -427,6 +434,7 @@ bool BufrProduct::StuffIt(unsigned short des, string name, double value) {
 
 
 double *BufrProduct::decompressData() {
+
   unsigned long nn = nBinsAlongTheRadial * nAzimuths * sizeof(double);
 
   unsigned char *UnCompDataBuff = new unsigned char[nn];
@@ -435,9 +443,10 @@ double *BufrProduct::decompressData() {
   if (uncompress(UnCompDataBuff, &DestBuffSize, 
 		 (unsigned char *) compressedData.getPtr(), 
 		 compressedData.getLen()) != Z_OK) {
-		 //                 nData) != Z_OK) {
+    delete[] UnCompDataBuff;
     return NULL;
   }
+
 #if __BYTE_ORDER == __BIG_ENDIAN
   unsigned char str[sizeof(double)];
   for(int i = 0; i < nn/sizeof(double); ++i) {
@@ -449,26 +458,27 @@ double *BufrProduct::decompressData() {
     }
   }
 #endif
+
   compressedData.clear();
-  double *temp;
-  temp = (double *)UnCompDataBuff;
+  double *temp = (double *)UnCompDataBuff;
   if (_debug) { 
     printf ("--> %g %g %g\n", temp[0], temp[1], temp[2]);
     //printf (" ... %g %g %g <--\n", temp[n-3], temp[n-2], temp[n-1]);
   }
-  return (double *)UnCompDataBuff;
+  return temp;
+
 }
 
 float *BufrProduct::decompressDataFl32() {
 
   unsigned long nn = nBinsAlongTheRadial * nAzimuths * sizeof(double);
 
-  unsigned char *UnCompDataBuff = new unsigned char [nn];
+  unsigned char *UnCompDataBuff = new unsigned char[nn];
   unsigned long DestBuffSize = nn;
   
   int result;
   result = uncompress(UnCompDataBuff, &DestBuffSize, 
-		 (unsigned char *) compressedData.getPtr(), 
+                      (unsigned char *) compressedData.getPtr(), 
 		      compressedData.getLen()); 
 
   if (result != Z_OK) {
@@ -477,17 +487,18 @@ float *BufrProduct::decompressDataFl32() {
     case Z_BUF_ERROR:	 	
       throw string("The buffer dest was not large enough to hold the uncompressed data.");
       break;
-
+      
     case Z_MEM_ERROR:	 	
       throw string("Insufficient memory.");
       break;
 
     case Z_DATA_ERROR:	 	
-      throw string("The compressed data (referenced by source) was corrupted.");
-      break;
-    default:
-      return NULL;
+      default:
+        throw string("The compressed data (referenced by source) was corrupted.");
+        break;
     }
+    delete[] UnCompDataBuff;
+    return NULL;
   }
 
 #if __BYTE_ORDER == __BIG_ENDIAN
@@ -501,20 +512,16 @@ float *BufrProduct::decompressDataFl32() {
     }
   }
 #endif
+
   compressedData.clear();
-  double *temp;
-  temp = (double *)UnCompDataBuff;
+  double *temp = (double *)UnCompDataBuff;
   if (_debug) {
     printf ("--> %g %g %g\n", temp[0], temp[1], temp[2]);
     //printf (" ... %g %g %g <--\n", temp[n-3], temp[n-2], temp[n-1]);
   }
-
+  
   // convert the data to float
-  unsigned long n32;
-  n32 = nBinsAlongTheRadial * nAzimuths * sizeof(float);
-  unsigned char *UnCompDataBuff32 = new unsigned char[n32];
-  float *temp32;
-  temp32 = (float *) UnCompDataBuff32;
+  float *temp32 = new float[nBinsAlongTheRadial * nAzimuths];
   for (unsigned long i=0; i< nBinsAlongTheRadial * nAzimuths; i++) {
     temp32[i] = (float) temp[i];
   }
@@ -536,27 +543,27 @@ float *BufrProduct::decompressDataFl32() {
 // start a new timestamp with Year,
 // always update the top timestamp with day, hour, etc.
 void BufrProduct::putYear(double value) {
-  RadxTime *timeStamp = new RadxTime();
-  timeStamp->setYear((int) value);
-  if (_debug) cerr << "timeStamp " << timeStamp->asString() << endl;
+  RadxTime timeStamp;
+  timeStamp.setYear((int) value);
+  if (_debug) cerr << "timeStamp " << timeStamp.asString() << endl;
   timeStampStack.push_back(timeStamp);
 }
 
 void BufrProduct::putMonth(double value) {
-  timeStampStack.back()->setMonth((int) value);
+  timeStampStack.back().setMonth((int) value);
 }
 
 void BufrProduct::putDay(double value)  {
-  timeStampStack.back()->setDay((int) value);
+  timeStampStack.back().setDay((int) value);
 }
 void BufrProduct::putHour(double value)  {
-  timeStampStack.back()->setHour((int) value);
+  timeStampStack.back().setHour((int) value);
 }
 void BufrProduct::putMinute(double value)  {
-  timeStampStack.back()->setMin((int) value);
+  timeStampStack.back().setMin((int) value);
 }
 void BufrProduct::putSecond(double value)  {
-  timeStampStack.back()->setSec((int) value);
+  timeStampStack.back().setSec((int) value);
 }
 
 void BufrProduct::printSweepData(ostream &out) {
@@ -565,11 +572,11 @@ void BufrProduct::printSweepData(ostream &out) {
   for (vector<SweepData>::iterator sw = sweepData.begin();
        sw != sweepData.end(); ++sw) {
     out << "sweep: " << i << endl;
-    RadxTime *time;
-    time = sw->startTime;
-    out << "   start time: " << time->asString() << endl;
-    time = sw->endTime;
-    out << "     end time: " << time->asString() << endl;
+    RadxTime stime;
+    stime = sw->startTime;
+    out << "   start time: " << stime.asString() << endl;
+    stime = sw->endTime;
+    out << "     end time: " << stime.asString() << endl;
 
     // TimeStamp time = sw->startTime;
     // out << "   start time: " << time.year << "/" << time.month << "/" <<
