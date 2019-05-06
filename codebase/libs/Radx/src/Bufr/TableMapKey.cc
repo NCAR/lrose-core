@@ -67,7 +67,7 @@ void TableMapKey::Decode(unsigned short key, unsigned char *f, unsigned char *x,
   if (_key < 0x4000) { // 00 XX
     return true;
   } else { 
-      return false;
+    return false;
   }
 }
 
@@ -75,7 +75,7 @@ void TableMapKey::Decode(unsigned short key, unsigned char *f, unsigned char *x,
   if ((_key >= 0x4000) && (_key < 0x8000)) { // 01 XX
     return true;
   } else { 
-      return false;
+    return false;
   }
 }
 
@@ -83,14 +83,14 @@ void TableMapKey::Decode(unsigned short key, unsigned char *f, unsigned char *x,
   if ((_key >= 0x8000) && (_key < 0xC000)) { // 10 XX
     return true;
   } else { 
-      return false;
+    return false;
   }
-}
+ }
 
- bool TableMapKey::isAnotherNode() {
+bool TableMapKey::isAnotherNode() {
   if (_key >= 0xC000) { // 11 XX
     return true;
   } else { 
-      return false;
+    return false;
   }
 }

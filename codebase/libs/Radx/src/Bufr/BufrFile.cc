@@ -195,43 +195,16 @@ void BufrFile::readThatField(string fileName,
 
 /*
 //////////////////////////////////////////////
-/// open netcdf file for writing
-/// create error object so we can handle errors
-/// set the netcdf format, before a write
-/// format options are:
-///   Classic - classic format (i.e. version 1 format)
-///   Offset64Bits - 64-bit offset format
-///   Netcdf4 - netCDF-4 using HDF5 format
-///   Netcdf4Classic - netCDF-4 using HDF5 but only netCDF-3 calls
+/// open file for writing
 /// Returns 0 on success, -1 on failure
 
-int BufrFile::openWrite(const string &path,
-                        Nc3File::FileFormat format) 
+int BufrFile::openWrite(const string &path) 
 
 {
   
   close();
   _pathInUse = path;
-  _ncFormat = format;
-  _ncFile = new Nc3File(path.c_str(), Nc3File::Replace, NULL, 0, _ncFormat);
   
-  if (!_ncFile || !_ncFile->is_valid()) {
-    _addErrStr("ERROR - BufrFile::openWrite");
-    _addErrStr("  Cannot open netCDF file for writing: ", path);
-    close();
-    return -1;
-  }
-  
-  // Change the error behavior of the netCDF C++ API by creating an
-  // Nc3Error object. Until it is destroyed, this Nc3Error object will
-  // ensure that the netCDF C++ API silently returns error codes
-  // on any failure, and leaves any other error handling to the
-  // calling program.
-  
-  if (_err == NULL) {
-    _err = new Nc3Error(Nc3Error::silent_nonfatal);
-  }
-
   return 0;
 
 }
@@ -256,15 +229,9 @@ void BufrFile::close()
   
   if (_file) {
     fclose(_file);
-    //delete _ncFile;
     _file = NULL;
   }
-  /*
-  if (_err) {
-    delete _err;
-    _err = NULL;
-  }
-  */
+
 }
 
 //////////////////////////////////////
@@ -458,19 +425,18 @@ int BufrFile::readSection1_edition4()
 
   if (_verbose) cerr << "sectionLen " << sectionLen << endl;
   /*
-  Radx::ui08 *buffer;
-  buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
-  memset(buffer, 0, sectionLen);
-
-  if (fread(buffer, 1, sectionLen-3, _file) != sectionLen-3) {
+    Radx::ui08 *buffer = new Radx::ui08[sectionLen]
+    memset(buffer, 0, sectionLen);
+    
+    if (fread(buffer, 1, sectionLen-3, _file) != sectionLen-3) {
     int errNum = errno;
     Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection1()", true);
     Radx::addErrStr(_errString, "  Cannot read data", strerror(errNum), true);
     Radx::addErrStr(_errString, "  File path: ", _pathInUse, true);
-    free(buffer);
+    delete[] buffer;
     close();
     return -1;
-  }
+    }
   */
 
   //Radx::ui08 bufrMasterTable;
@@ -539,14 +505,14 @@ int BufrFile::readSection1_edition4()
 		       yearOfCentury, month, day, hour, minute, seconds); 
     
   //_numBytesRead += sectionLen;
-  //free(buffer);
+  // delete[] buffer;
   return 0;
   } catch (char *msg) {
     int errNum = errno;
     Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection1()", true);
     Radx::addErrStr(_errString, "  Cannot read data", strerror(errNum), true);
     Radx::addErrStr(_errString, "  File path: ", _pathInUse, true);
-    // free(buffer);
+    // delete[] buffer;
     // close();
     throw _errString;
   }
@@ -585,8 +551,7 @@ int BufrFile::readSection1_edition2()
   if (_verbose) cerr << "sectionLen " << sectionLen << endl;
 
   /*
-  Radx::ui08 *buffer;
-  buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
+  Radx::ui08 *buffer = new Radx::ui08[sectionLen]
   memset(buffer, 0, sectionLen);
 
   if (fread(buffer, 1, sectionLen-3, _file) != sectionLen-3) {
@@ -594,7 +559,7 @@ int BufrFile::readSection1_edition2()
     Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection1()", true);
     Radx::addErrStr(_errString, "  Cannot read data", strerror(errNum), true);
     Radx::addErrStr(_errString, "  File path: ", _pathInUse, true);
-    free(buffer);
+    delete[] buffer;
     close();
     return -1;
   }
@@ -709,8 +674,7 @@ int BufrFile::readSection1_edition3()
 
   if (_verbose) cerr << "sectionLen " << sectionLen << endl;
   /*
-  Radx::ui08 *buffer;
-  buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
+  Radx::ui08 *buffer = new Radx::ui08[sectionLen]
   memset(buffer, 0, sectionLen);
 
   if (fread(buffer, 1, sectionLen-3, _file) != sectionLen-3) {
@@ -718,7 +682,7 @@ int BufrFile::readSection1_edition3()
     Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection1()", true);
     Radx::addErrStr(_errString, "  Cannot read data", strerror(errNum), true);
     Radx::addErrStr(_errString, "  File path: ", _pathInUse, true);
-    free(buffer);
+    delete[] buffer;
     close();
     return -1;
   }
@@ -796,7 +760,7 @@ ExtractIt(8);  // data sub-category
 		       yearOfCentury, month, day, hour, minute, seconds); 
     
   //_numBytesRead += sectionLen;
-  //free(buffer);
+  //delete[] buffer;
   return 0;
 }
 
@@ -908,8 +872,9 @@ void BufrFile::printSection1(ostream &out) {
   out << "  data category subtype : " << (unsigned int) _s1.dataCategorySubtype << endl; 
   out << "  master table version  : " << (unsigned int) _s1.masterTableVersionNumber << endl; 
   out << "  local table version   : " << (unsigned int) _s1.localTableVersionNumber << endl; 
-  char buffer[50];
-  sprintf(buffer, "%4d-%02d-%02d %02d:%02d:%02d", _s1.year, _s1.month, _s1.day,
+  char buffer[1024];
+  snprintf(buffer, 1024, "%4d-%02d-%02d %02d:%02d:%02d",
+           _s1.year, _s1.month, _s1.day,
 	  _s1.hour, _s1.minute, _s1.seconds);
   out << "  YY-MM-DD HH:MM:SS     : " << buffer << endl;  
 }
@@ -978,8 +943,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
 
     if (_debug) cerr << "sectionLen in octets " << sectionLenOctets << endl;
     /*
-    Radx::ui08 *buffer;
-    buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
+    Radx::ui08 *buffer = new Radx::ui08[sectionLen]
     memset(buffer, 0, sectionLen);
     int nBytesToSectionEnd;
     nBytesToSectionEnd = sectionLen-3;
@@ -1090,7 +1054,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
       key = TableMapKey().EncodeKey(d.f, d.x, d.y);
       _descriptorsToProcess.insert(_descriptorsToProcess.begin(), key);
     }
-    free(buffer);
+    delete[] buffer;
     _numBytesRead += sectionLen;
     */
 
@@ -1771,7 +1735,7 @@ void BufrFile::_deleteAfter(DNode *p) {
   if (p!=NULL) {
     q = p->next;
     p->next = q->next;
-    free(q);
+    delete q;
   }
 }
 
@@ -1962,7 +1926,6 @@ void BufrFile::freeTree(DNode *tree) {
     // free the children
     q=p->children;
     if (q != NULL) {
-      //freeTree(q);
       delete q;
     }
     DNode *temp;
@@ -2301,7 +2264,7 @@ void BufrFile::_visitTableBNode(DNode *p, bool *compressionStart) {
     p->somejunksvalue = _tempStringValue;
     if (!currentTemplate->StuffIt(des, val1._descriptor.fieldName,
                                   _tempStringValue )) {
-      Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+      Radx::addErrStr(_errString, "", "WARNING - BufrFile::_visitTableBNode", true);
       Radx::addErrStr(_errString, "Unrecognized descriptor: ",
                       val1._descriptor.fieldName, true);
       // since this is just a warning, just print the message, no need
@@ -2313,7 +2276,7 @@ void BufrFile::_visitTableBNode(DNode *p, bool *compressionStart) {
     if (_verbose) printf(" valueFromData = %f\n", valueFromData);
     if (!currentTemplate->StuffIt(des, val1._descriptor.fieldName, valueFromData)) {
       if ((des != 7681) && 0) {
-        Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+        Radx::addErrStr(_errString, "", "WARNING - BufrFile::_visitTableBNode", true);
         Radx::addErrStr(_errString, "Unrecognized descriptor: ",
                         val1._descriptor.fieldName, true);
         // since this is just a warning, just print the message, no need
@@ -2365,7 +2328,7 @@ void BufrFile::_visitTableCNode(DNode *p) {
       Apply(*dummy);
       delete dummy;
       if (!currentTemplate->StuffIt(des, "", _tempStringValue )) {
-        Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+        Radx::addErrStr(_errString, "", "WARNING - BufrFile::_visitTableCNode", true);
         Radx::addErrStr(_errString, "Unrecognized descriptor: ", "DUMMY", true);
         // since this is just a warning, just print the message, no need
         // to exit

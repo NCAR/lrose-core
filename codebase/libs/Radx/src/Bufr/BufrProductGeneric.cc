@@ -236,7 +236,7 @@ double *BufrProductGeneric::decompressData() {
 
   //int i, j;
   //unsigned char str[sizeof(double)];
-  unsigned char *UnCompDataBuff = (unsigned char *) malloc(n);
+  unsigned char *UnCompDataBuff = new unsigned char[n];
   unsigned long DestBuffSize = n;
   
   if (uncompress(UnCompDataBuff, &DestBuffSize, 
@@ -275,7 +275,7 @@ float *BufrProductGeneric::decompressDataFl32() {
   std::vector<unsigned char> *uCharVec;
   uCharVec = genericStore.back();
   int n = uCharVec->size();
-  float *temp32 = (float *) malloc(n*sizeof(float));
+  float *temp32 = new float[n];
   for (int i = 0; i < n; ++i)
     temp32[i] = (float) uCharVec->at(i);
 
@@ -348,7 +348,7 @@ float *BufrProductGeneric::decompressDataFl32VitVraipol() {
   //    if (uCharVec[i] == 0) temp32[i] = 
   //  }
 
-  // TODO:  free(UnCompDataBuff);
+  // TODO: delete[] UnCompDataBuff;
   return temp32.data();
 }
 */

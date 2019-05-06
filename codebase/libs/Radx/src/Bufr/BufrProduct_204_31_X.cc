@@ -61,8 +61,10 @@ BufrProduct_204_31_X::BufrProduct_204_31_X()
 
 BufrProduct_204_31_X::~BufrProduct_204_31_X()
 {
-  if (dataBuffer != NULL)
-    free(dataBuffer);
+  if (dataBuffer != NULL) {
+    delete[] dataBuffer;
+    dataBuffer = NULL;
+  }
 }
 
 /*
@@ -107,8 +109,10 @@ void BufrProduct_204_31_X::reset() {
   maxData = 0;
   _maxBinsAlongTheRadial = 0;
   //totalData = 0;
-  if (dataBuffer != NULL)
-    free(dataBuffer);
+  if (dataBuffer != NULL) {
+    delete[] dataBuffer;
+    dataBuffer = NULL;
+  }
   dataBuffer = NULL;
   sweepData.clear(); // assume that the Rays are copied
   // reset the replicators vector
@@ -118,7 +122,7 @@ void BufrProduct_204_31_X::reset() {
 
 void BufrProduct_204_31_X::allocateSpace(unsigned int n) {
   if (dataBuffer == NULL) {
-    dataBuffer = (unsigned char *) malloc(n);
+    dataBuffer = new unsigned char[n];
     maxData = n;
   }
 }
@@ -247,7 +251,7 @@ void BufrProduct_204_31_X::trashReplicator() {
       size = nData; 
       compressedData.add(dataBuffer, size);
       nData = 0;
-      free(dataBuffer);
+      delete[] dataBuffer;
       dataBuffer = NULL;
     }
     break;
@@ -313,7 +317,7 @@ double *BufrProduct_204_31_X::decompressData() {
 
   //int i, j;
   //unsigned char str[sizeof(double)];
-  unsigned char *UnCompDataBuff = (unsigned char *) malloc(n);
+  unsigned char *UnCompDataBuff = new unsigned char[n];
   unsigned long DestBuffSize = n;
   
   if (uncompress(UnCompDataBuff, &DestBuffSize, 
@@ -348,7 +352,7 @@ float *BufrProduct_204_31_X::decompressDataFl32() {
 
   //int i, j;
   //unsigned char str[sizeof(double)];
-  unsigned char *UnCompDataBuff = (unsigned char *) malloc(n);
+  unsigned char *UnCompDataBuff = new unsigned char[n];
   unsigned long DestBuffSize = n;
   
   int result;
@@ -396,7 +400,7 @@ float *BufrProduct_204_31_X::decompressDataFl32() {
   // convert the data to float
   unsigned long n32;
   n32 = nBinsAlongTheRadial * nAzimuths * sizeof(float);
-  unsigned char *UnCompDataBuff32 = (unsigned char *) malloc(n32);
+  unsigned char *UnCompDataBuff32 = new unsigned char[n32];
   float *temp32;
   temp32 = (float *) UnCompDataBuff32;
   for (unsigned long i=0; i< nBinsAlongTheRadial * nAzimuths; i++) {
@@ -412,7 +416,7 @@ float *BufrProduct_204_31_X::decompressDataFl32() {
     //	    temp32[201], temp32[202]);
   }
 
-  free(UnCompDataBuff);
+  delete[] UnCompDataBuff;
   return temp32; //  (float *)UnCompDataBuff32;
 }
 

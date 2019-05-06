@@ -60,8 +60,10 @@ BufrProduct::BufrProduct()
 
 BufrProduct::~BufrProduct()
 {
-  if (dataBuffer != NULL)
-    free(dataBuffer);
+  if (dataBuffer != NULL) {
+    delete[] dataBuffer;
+    dataBuffer = NULL;
+  }
 }
 
 void BufrProduct::reset() {
@@ -70,8 +72,10 @@ void BufrProduct::reset() {
   maxData = 0;
   _maxBinsAlongTheRadial = 0;
   //totalData = 0;
-  if (dataBuffer != NULL)
-    free(dataBuffer);
+  if (dataBuffer != NULL) {
+    delete[] dataBuffer;
+    dataBuffer = NULL;
+  }
   dataBuffer = NULL;
   sweepData.clear(); // assume that the Rays are copied
   // reset the replicators vector
@@ -81,7 +85,7 @@ void BufrProduct::reset() {
 
 void BufrProduct::allocateSpace(unsigned int n) {
   if (dataBuffer == NULL) {
-    dataBuffer = (unsigned char *) malloc(n);
+    dataBuffer =  new unsigned char[n];
     maxData = n;
   }
 }
@@ -215,7 +219,7 @@ void BufrProduct::trashReplicator() {
       size = nData; 
       compressedData.add(dataBuffer, size);
       nData = 0;
-      free(dataBuffer);
+      delete[] dataBuffer;
       dataBuffer = NULL;
     }
     break;
@@ -227,41 +231,39 @@ void BufrProduct::trashReplicator() {
 
 // Record all the information now that we have all the data values
 void BufrProduct::createSweep() {
-  //double *realData;
-  float *realData;
       
-      realData = decompressDataFl32();
-      if (realData == NULL) {
-	throw "ERROR - could not decompress data";
-      }
-      SweepData newSweep;
-      int nTimeStamps = timeStampStack.size();
-      if (nTimeStamps < 2) 
-        throw "Missing start or end time stamp for sweep.";
-      newSweep.endTime = timeStampStack.back();
-      // Ok, don't remove the time stamps, just pick the last two
-      // values
-      // timeStampStack.pop_back();
-
-      newSweep.startTime = timeStampStack.at(nTimeStamps-2); // back(); 
-      //timeStampStack.pop_back();
-      if (_debug) {
-        RadxTime *time = newSweep.startTime;
-        cerr << "startTime " << time->asString() << endl; 
-        time = newSweep.endTime;
-        cerr << "endTime " << time->asString() << endl; 
-      }
-      newSweep.antennaElevationDegrees = antennaElevationDegrees;
-      newSweep.nBinsAlongTheRadial = nBinsAlongTheRadial;
-      newSweep.rangeBinSizeMeters = rangeBinSizeMeters;
-      newSweep.rangeBinOffsetMeters = rangeBinOffsetMeters;
-      newSweep.nAzimuths = nAzimuths;
-      newSweep.antennaBeamAzimuthDegrees = antennaBeamAzimuthDegrees;
-      ParameterData parameterData;
-      parameterData.typeOfProduct = typeOfProduct;
-      parameterData.data = realData;
-      newSweep.parameterData.push_back(parameterData);
-      sweepData.push_back(newSweep);
+  float *realData = decompressDataFl32();
+  if (realData == NULL) {
+    throw "ERROR - could not decompress data";
+  }
+  SweepData newSweep;
+  int nTimeStamps = timeStampStack.size();
+  if (nTimeStamps < 2) 
+    throw "Missing start or end time stamp for sweep.";
+  newSweep.endTime = timeStampStack.back();
+  // Ok, don't remove the time stamps, just pick the last two
+  // values
+  // timeStampStack.pop_back();
+  
+  newSweep.startTime = timeStampStack.at(nTimeStamps-2); // back(); 
+  //timeStampStack.pop_back();
+  if (_debug) {
+    RadxTime *time = newSweep.startTime;
+    cerr << "startTime " << time->asString() << endl; 
+    time = newSweep.endTime;
+    cerr << "endTime " << time->asString() << endl; 
+  }
+  newSweep.antennaElevationDegrees = antennaElevationDegrees;
+  newSweep.nBinsAlongTheRadial = nBinsAlongTheRadial;
+  newSweep.rangeBinSizeMeters = rangeBinSizeMeters;
+  newSweep.rangeBinOffsetMeters = rangeBinOffsetMeters;
+  newSweep.nAzimuths = nAzimuths;
+  newSweep.antennaBeamAzimuthDegrees = antennaBeamAzimuthDegrees;
+  ParameterData parameterData;
+  parameterData.typeOfProduct = typeOfProduct;
+  parameterData.data = realData;
+  newSweep.parameterData.push_back(parameterData);
+  sweepData.push_back(newSweep);
 }
 
 void BufrProduct::addData(unsigned char value) {
@@ -427,7 +429,7 @@ bool BufrProduct::StuffIt(unsigned short des, string name, double value) {
 double *BufrProduct::decompressData() {
   unsigned long nn = nBinsAlongTheRadial * nAzimuths * sizeof(double);
 
-  unsigned char *UnCompDataBuff = (unsigned char *) malloc(nn);
+  unsigned char *UnCompDataBuff = new unsigned char[nn];
   unsigned long DestBuffSize = nn;
   
   if (uncompress(UnCompDataBuff, &DestBuffSize, 
@@ -458,9 +460,10 @@ double *BufrProduct::decompressData() {
 }
 
 float *BufrProduct::decompressDataFl32() {
+
   unsigned long nn = nBinsAlongTheRadial * nAzimuths * sizeof(double);
 
-  unsigned char *UnCompDataBuff = (unsigned char *) malloc(nn);
+  unsigned char *UnCompDataBuff = new unsigned char [nn];
   unsigned long DestBuffSize = nn;
   
   int result;
@@ -509,7 +512,7 @@ float *BufrProduct::decompressDataFl32() {
   // convert the data to float
   unsigned long n32;
   n32 = nBinsAlongTheRadial * nAzimuths * sizeof(float);
-  unsigned char *UnCompDataBuff32 = (unsigned char *) malloc(n32);
+  unsigned char *UnCompDataBuff32 = new unsigned char[n32];
   float *temp32;
   temp32 = (float *) UnCompDataBuff32;
   for (unsigned long i=0; i< nBinsAlongTheRadial * nAzimuths; i++) {
@@ -525,7 +528,7 @@ float *BufrProduct::decompressDataFl32() {
     //	    temp32[201], temp32[202]);
   }
 
-  free(UnCompDataBuff);
+  delete[] UnCompDataBuff;
   return temp32; //  (float *)UnCompDataBuff32;
 }
 

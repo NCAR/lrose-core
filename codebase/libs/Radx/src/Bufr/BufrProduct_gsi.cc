@@ -425,7 +425,7 @@ float *BufrProduct_gsi::decompressDataFl32() {
     std::vector<unsigned char> *uCharVec;
     uCharVec = genericStore.back();
     int n = uCharVec->size();
-    temp32 = (float *) malloc(n*sizeof(float));
+    temp32 = new float[n];
     for (int i = 0; i < n; ++i)
       temp32[i] = (float) uCharVec->at(i);
 

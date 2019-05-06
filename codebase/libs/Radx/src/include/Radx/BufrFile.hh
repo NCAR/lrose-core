@@ -119,17 +119,10 @@ public:
   
   int openRead(const string &path);
 
-  /// open netcdf file for writing
-  /// create error object so we can handle errors
-  /// set the netcdf format, before a write
-  /// format options are:
-  ///   Classic - classic format (i.e. version 1 format)
-  ///   Offset64Bits - 64-bit offset format
-  ///   Netcdf4 - netCDF-4 using HDF5 format
-  ///   Netcdf4Classic - netCDF-4 using HDF5 but only netCDF-3 calls
+  /// open file for writing
   /// Returns 0 on success, -1 on failure
   
-  // int openWrite(const string &path, Nc3File::FileFormat format);
+  // int openWrite(const string &path);
 
   int readSection0();
   int readSection1();
