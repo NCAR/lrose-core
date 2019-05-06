@@ -442,6 +442,7 @@ codebase/apps/radar/src/PidZdrStats/PidZdrStats
 codebase/apps/radar/src/PointingCpCompute/PointingCpCompute
 codebase/apps/radar/src/PowerInfo2Spdb/PowerInfo2Spdb
 codebase/apps/radar/src/Qmap2Cidd/Qmap2Cidd
+codebase/apps/radar/src/QpeVerify/QpeVerify
 codebase/apps/radar/src/QuadratureTest/QuadratureTest
 codebase/apps/radar/src/RadarCal/RadarCal
 codebase/apps/radar/src/RadarConst/RadarConst
