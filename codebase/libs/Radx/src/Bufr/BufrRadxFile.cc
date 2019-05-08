@@ -1848,7 +1848,7 @@ int BufrRadxFile::_addFl32FieldToRays(RadxSweep *sweep, int dataSection,
     nAz += 1;
   } // end for ii
 
-  delete[] data;
+  // delete[] data;
   return 0;
   
 }

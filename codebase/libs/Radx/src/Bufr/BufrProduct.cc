@@ -73,16 +73,33 @@ void BufrProduct::reset() {
     delete[] dataBuffer;
     dataBuffer = NULL;
   }
-  // for (size_t ii = 0; ii < sweepData.size(); ii++) {
-  //   SweepData &sweep = sweepData[ii];
-  //   for (size_t jj = 0; jj < sweep.parameterData.size(); jj++) {
-  //     delete[] sweep.parameterData[jj].data;
-  //   }
-  //   for (size_t jj = 0; jj < sweep.parameterDataFl64.size(); jj++) {
-  //     delete[] sweep.parameterDataFl64[jj].data;
-  //   }
-  // }
+  vector<SweepData>::iterator sweepDataItr;
+  for (sweepDataItr=sweepData.begin(); sweepDataItr != sweepData.end(); 
+       sweepDataItr++) {
+
+    vector<ParameterData>::iterator paramDataItr;
+
+    for (paramDataItr = sweepDataItr->parameterData.begin();
+	 paramDataItr != sweepDataItr->parameterData.end();
+	 paramDataItr++) {
+
+      delete[] paramDataItr->data;
+    }
+    sweepDataItr->parameterData.clear();
+
+    vector<ParameterDataFl64>::iterator paramDataItr64;
+
+    for (paramDataItr64 = sweepDataItr->parameterDataFl64.begin();
+	 paramDataItr64 != sweepDataItr->parameterDataFl64.end();
+	 paramDataItr++) {
+
+      delete[] paramDataItr->data;
+    }
+    sweepDataItr->parameterDataFl64.clear();
+
+  }
   sweepData.clear(); // assume that the Rays are copied
+
   // reset the replicators vector
   while (!replicators.empty()) 
     trashReplicator();
