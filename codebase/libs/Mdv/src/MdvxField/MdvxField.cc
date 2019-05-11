@@ -493,10 +493,13 @@ void MdvxField::setVolData(const void *vol_data,
 {
 
   _fhdr.data_element_nbytes = Mdvx::dataElementSize(encoding_type);
+  ssize_t expectedVolSize =
+    _fhdr.nz * _fhdr.ny * _fhdr.nx * _fhdr.data_element_nbytes;
 
-  if (volume_size == 0) {
+  if (volume_size != expectedVolSize) {
     cerr << "WARNING - MdvxField::setVolData" << endl;
-    cerr << "  Volume size is 0" << endl;
+    cerr << "  Volume size is: " << volume_size << endl;
+    cerr << "  Should be: " << expectedVolSize << endl;
     cerr << "  Field name: " << _fhdr.field_name << endl;
     cerr << "  Volume size: " << _fhdr.volume_size << endl;
     cerr << "  element nbytes: " << _fhdr.data_element_nbytes << endl;
@@ -530,8 +533,12 @@ void MdvxField::setVolData(const void *vol_data,
 {
 
   _fhdr.data_element_nbytes = Mdvx::dataElementSize(encoding_type);
+  _fhdr.nz = nz;
+  _fhdr.ny = ny;
+  _fhdr.nx = nx;
 
   int volume_size = nz * ny * nx * _fhdr.data_element_nbytes;
+
   setVolData(vol_data, volume_size,
              encoding_type, scaling_type,
              scale, bias);
@@ -542,10 +549,6 @@ void MdvxField::setVolData(const void *vol_data,
     cerr << "  nx: " << nx << endl;
   }
   
-  _fhdr.nz = nz;
-  _fhdr.ny = ny;
-  _fhdr.nx = nx;
-
 }
 
 
@@ -7671,6 +7674,7 @@ void MdvxField::_check_finite(const void *vol_data)
     if (!isfinite(*floatData)) {
       numNans++;
       *floatData = bad;
+      cerr << "+";
     }
     
   }

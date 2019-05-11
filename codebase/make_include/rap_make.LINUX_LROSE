@@ -209,15 +209,15 @@ QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
 
 # do not have jasper lib
 
-JASPER_CPPC_CFLAGS = -DNO_JASPER_LIB
-JASPER_INCLUDES =
-JASPER_LDFLAGS =
-JASPER_LIBS =
+#JASPER_CPPC_CFLAGS =
+#JASPER_INCLUDES =
+#JASPER_LDFLAGS =
+#JASPER_LIBS =
 
 # have jasper lib
 
-# JASPER_CPPC_CFLAGS =
-# JASPER_INCLUDES = -I/usr/local/jasper/include
-# JASPER_LDFLAGS = -L/usr/local/jasper/lib
-# JASPER_LIBS = -ljasper
+JASPER_CPPC_CFLAGS =
+JASPER_INCLUDES = -I/usr/local/jasper/include
+JASPER_LDFLAGS = -L/usr/local/jasper/lib
+JASPER_LIBS = -ljasper
 
