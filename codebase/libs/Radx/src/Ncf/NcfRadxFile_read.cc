@@ -2000,6 +2000,9 @@ void NcfRadxFile::_readRayGateGeom()
       }
     }
   } else {
+    // clear the arrays and set to constant geom
+    _rayStartRange.clear();
+    _rayGateSpacing.clear();
     for (size_t ii = 0; ii < _nTimesInFile; ii++) {
       // range geom not set on ray-by-ray basis
       // use global values instead
@@ -2007,7 +2010,7 @@ void NcfRadxFile::_readRayGateGeom()
       _rayGateSpacing.push_back(_geom.getGateSpacingKm() * 1000.0);
     }
   }
-  
+
 }
 
 /////////////////////////////////////
