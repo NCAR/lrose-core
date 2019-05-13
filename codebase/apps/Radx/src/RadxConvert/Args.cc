@@ -161,6 +161,28 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	TDRP_add_override(&override, tmp_str);
       }
 	
+    } else if (!strcmp(argv[i], "-ant_gain")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "override_antenna_gain = TRUE;");
+        TDRP_add_override(&override, tmp_str);
+	sprintf(tmp_str, "antenna_gain_db_h = %s;", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+	sprintf(tmp_str, "antenna_gain_db_v = %s;", argv[i]);
+	TDRP_add_override(&override, tmp_str);
+      }
+      
+    } else if (!strcmp(argv[i], "-beam_width")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "override_beam_width = TRUE;");
+        TDRP_add_override(&override, tmp_str);
+	sprintf(tmp_str, "beam_width_deg_h = %s;", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+	sprintf(tmp_str, "beam_width_deg_v = %s;", argv[i]);
+	TDRP_add_override(&override, tmp_str);
+      }
+      
     } else if (!strcmp(argv[i], "-ag")) {
       
       sprintf(tmp_str, "aggregate_sweep_files_on_read = TRUE;");
@@ -857,10 +879,18 @@ void Args::_usage(ostream &out)
       << "     available. If so, this is applied and appropriate corrections made.\n"
       << "     Earth-centric azimuth and elevation angles will be computed.\n"
       << "\n"
+      << "  [ -ant_gain ? ] override antenna gain (dB)\n"
+      << "     To use this, H and V gains must be equal\n"
+      << "     If H and V gains differ, set them in the parameter file\n"
+      << "\n"
       << "  [ -author ? ] override the author string\n"
       << "\n"
+      << "  [ -beam_width ? ] override beam width (deg)\n"
+      << "     To use this, H and V beam widths must be equal\n"
+      << "     If H and V beam widths differ, set them in the parameter file\n"
+      << "\n"
       << "  [ -change_lat_sign] change the sign of the radar latitude\n"
-      << "    Useful for RAPIC files that always have a positive latitude.\n"
+      << "     Useful for RAPIC files that always have a positive latitude.\n"
       << "\n"
       << "  [ -cfradial ] convert to cfradial (the default)\n"
       << "  [ -cf2 ] convert to cfradial2, forces use of netcdf4\n"

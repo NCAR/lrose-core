@@ -516,6 +516,40 @@ paramdef enum primary_axis_t {
   p_help = "See override_primary_axis.";
 } primary_axis;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the beam width.";
+} override_beam_width;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Beam width in the horizontal plane (deg).";
+  p_help = "See override_beam_width.";
+} beam_width_deg_h;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Beam width in the vertical plane (deg).";
+  p_help = "See override_beam_width.";
+} beam_width_deg_v;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the antenna gain.";
+} override_antenna_gain;
+
+paramdef double {
+  p_default = 45.1;
+  p_descr = "antenna gain in the horizontal plane (dB).";
+  p_help = "See override_antenna_gain.";
+} antenna_gain_db_h;
+
+paramdef double {
+  p_default = 45.1;
+  p_descr = "antenna gain in the vertical plane (dB).";
+  p_help = "See override_antenna_gain.";
+} antenna_gain_db_v;
+
 commentdef {
   p_header = "OPTION TO FORCE RELOAD OF SWEEP AND/OR VOLUME INFO, or RECOMPUTE SWEEP FIXED ANGLE.";
 }

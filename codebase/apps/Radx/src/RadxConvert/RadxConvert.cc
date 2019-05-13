@@ -546,6 +546,18 @@ int RadxConvert::_readFile(const string &readPath,
       vol.applyGeorefs();
     }
   }
+  if (_params.override_beam_width || _params.override_antenna_gain) {
+    RadxPlatform platform = vol.getPlatform();
+    if (_params.override_beam_width) {
+      platform.setRadarBeamWidthDegH(_params.beam_width_deg_h);
+      platform.setRadarBeamWidthDegV(_params.beam_width_deg_v);
+    }
+    if (_params.override_antenna_gain) {
+      platform.setRadarAntennaGainDbH(_params.antenna_gain_db_h);
+      platform.setRadarAntennaGainDbV(_params.antenna_gain_db_v);
+    }
+    vol.setPlatform(platform);
+  }
 
   return 0;
 

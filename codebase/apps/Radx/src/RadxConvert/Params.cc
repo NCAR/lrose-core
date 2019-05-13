@@ -1528,6 +1528,78 @@
     tt->single_val.e = PRIMARY_AXIS_Z;
     tt++;
     
+    // Parameter 'override_beam_width'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_beam_width");
+    tt->descr = tdrpStrDup("Option to override the beam width.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &override_beam_width - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'beam_width_deg_h'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("beam_width_deg_h");
+    tt->descr = tdrpStrDup("Beam width in the horizontal plane (deg).");
+    tt->help = tdrpStrDup("See override_beam_width.");
+    tt->val_offset = (char *) &beam_width_deg_h - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'beam_width_deg_v'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("beam_width_deg_v");
+    tt->descr = tdrpStrDup("Beam width in the vertical plane (deg).");
+    tt->help = tdrpStrDup("See override_beam_width.");
+    tt->val_offset = (char *) &beam_width_deg_v - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'override_antenna_gain'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_antenna_gain");
+    tt->descr = tdrpStrDup("Option to override the antenna gain.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &override_antenna_gain - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'antenna_gain_db_h'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("antenna_gain_db_h");
+    tt->descr = tdrpStrDup("antenna gain in the horizontal plane (dB).");
+    tt->help = tdrpStrDup("See override_antenna_gain.");
+    tt->val_offset = (char *) &antenna_gain_db_h - &_start_;
+    tt->single_val.d = 45.1;
+    tt++;
+    
+    // Parameter 'antenna_gain_db_v'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("antenna_gain_db_v");
+    tt->descr = tdrpStrDup("antenna gain in the vertical plane (dB).");
+    tt->help = tdrpStrDup("See override_antenna_gain.");
+    tt->val_offset = (char *) &antenna_gain_db_v - &_start_;
+    tt->single_val.d = 45.1;
+    tt++;
+    
     // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));

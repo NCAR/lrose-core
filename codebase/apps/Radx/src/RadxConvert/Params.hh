@@ -626,6 +626,18 @@ public:
 
   primary_axis_t primary_axis;
 
+  tdrp_bool_t override_beam_width;
+
+  double beam_width_deg_h;
+
+  double beam_width_deg_v;
+
+  tdrp_bool_t override_antenna_gain;
+
+  double antenna_gain_db_h;
+
+  double antenna_gain_db_v;
+
   tdrp_bool_t reload_sweep_info_from_rays;
 
   tdrp_bool_t reload_volume_info_from_rays;
@@ -779,7 +791,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[166];
+  mutable TDRPtable _table[172];
 
   const char *_className;
 
