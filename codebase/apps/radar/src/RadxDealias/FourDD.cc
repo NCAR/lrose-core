@@ -1010,6 +1010,8 @@ void FourDD::AssessNeighborhood2(short **STATE, Volume *rvVolume, int sweepIndex
   numberOfDealiasedNeighbors = nDealiased;
   numberOfTbdNeighbors = nTbd;
 
+  // printf("numberTBD=%d  numberDEALIASED=%d\n", nTbd, nDealiased);
+
   int in=0;
   int out=0;
   int numneg=0;
@@ -1037,7 +1039,7 @@ void FourDD::AssessNeighborhood2(short **STATE, Volume *rvVolume, int sweepIndex
   *nOutsideNyquist = out;
   *nPositiveFolds = numpos;
   *nNegativeFolds = numneg;
-  if (numberOfTbdNeighbors+numberOfDealiasedNeighbors < 1)
+  if (numberOfTbdNeighbors + numberOfDealiasedNeighbors < 1)
     *noHope = true;
   else 
     *noHope = false;
@@ -1526,7 +1528,6 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
   for(int i=0; i < max_bins; i++) 
     STATE[i] = new short[max_rays];
 
-
   numSweeps = rvVolume->h.nsweeps;
 
   // VALS is supposed to be the encoded form of the Volume data; with separate scale & bias
@@ -1607,9 +1608,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
   //
   Rsl::free_volume(original);
 
-  for(int i=0; i < max_bins; i++) 
-    delete[] STATE[i];
-  delete[] STATE;
+  DestroySTATE(STATE, max_bins);
 
   return;
 }
@@ -1758,10 +1757,11 @@ float FourDD::Unfold(float foldedValue, float referenceValue,
   } //  else direction=1;
 
   int numtimes = 0;
-  while (diff > 0.99999*NyqVelocity && numtimes <= max_count) {
+  while (diff > 0.99999*NyqVelocity && numtimes < max_count) {
     val = val + NyqInterval*direction;
     numtimes = numtimes + 1;
     diff = cval-val;
+    // printf("%d: val=%g diff=%g\n",  numtimes, val, diff);
     if (diff<0.0) {
       diff = -diff;
       direction = -1;
@@ -1770,4 +1770,25 @@ float FourDD::Unfold(float foldedValue, float referenceValue,
   return val;
 }
 
+short **FourDD::CreateSTATE(Volume *rvVolume, short initialValue) {
+
+
+  int max_bins, max_rays;
+  bool debug = false;
+  Rsl::findMaxNBins(rvVolume, &max_bins, &max_rays, debug);
+  short **STATE = new short*[max_bins];
+  for(int i=0; i < max_bins; i++) {
+    STATE[i] = new short[max_rays];
+    for (int j=0; j < max_rays; j++)
+      STATE[i][j] = initialValue;
+  }
+
+  return STATE;
+}
+
+void FourDD::DestroySTATE(short **STATE, int nbins) {
+  for(int i=0; i < nbins; i++) 
+    delete[] STATE[i];
+  delete[] STATE;
+}
 

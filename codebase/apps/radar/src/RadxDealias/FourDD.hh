@@ -175,13 +175,17 @@ public:
   float Unfold(float foldedValue, float referenceValue,
 	       int max_count, float NyqVelocity);
 
-
-private:
+  short **CreateSTATE(Volume *rvVolume, short initialValue = TBD);
+  void  DestroySTATE(short **STATE, int nbins);
 
   const static short UNSUCCESSFUL = -2;
   const static short MISSING      = -1;
   const static short TBD          =  0; // To Be Dealiased
   const static short DEALIASED    =  1;
+
+
+private:
+
 
   //  SoundingGet       sounding;
 
