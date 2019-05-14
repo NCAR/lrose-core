@@ -52,11 +52,11 @@ typedef Radx::fl32 Range;  // 4 bytes
 // Ray
 
 typedef struct {
-  Radx::si32   month; /* Date for this ray; month (1-12). */
-  Radx::si32   day;   /* Date for this ray; day (1-31).   */
-  Radx::si32   year;  /* Date for this ray; year (eg. 1993). */
-  Radx::si32   hour;  /* Time for this ray; hour (0-23). */
-  Radx::si32   minute;/* Time for this ray; minute (0-59).*/
+  Radx::si32 month; /* Date for this ray; month (1-12). */
+  Radx::si32 day;   /* Date for this ray; day (1-31).   */
+  Radx::si32 year;  /* Date for this ray; year (eg. 1993). */
+  Radx::si32 hour;  /* Time for this ray; hour (0-23). */
+  Radx::si32 minute;/* Time for this ray; minute (0-59).*/
   Radx::fl32 sec;   /* Time for this ray; second + fraction of second. */
   Radx::fl32 unam_rng;  /* Unambiguous range. (KM). */
   Radx::fl32 azimuth;   /* Azimuth angle. (degrees). Must be positive
@@ -65,14 +65,14 @@ typedef struct {
                     * Eg. for NSIG the beginning and end azimuths are
                     * averaged.
                     */
-  Radx::si32   ray_num;   /* Ray no. within elevation scan. */
+  Radx::si32 ray_num;   /* Ray no. within elevation scan. */
   Radx::fl32 elev;       /* Elevation angle. (degrees). */
-  Radx::si32   elev_num;   /* Elevation no. within volume scan. */
+  Radx::si32 elev_num;   /* Elevation no. within volume scan. */
 
-  Radx::si32   range_bin1; /* Range to first gate.(meters) */
-  Radx::si32   gate_size;  /* Data gate size (meters)*/
+  Radx::si32 range_bin1; /* Range to first gate.(meters) */
+  Radx::si32 gate_size;  /* Data gate size (meters)*/
 
-  Radx::fl32  vel_res;    /* Doppler velocity resolution */
+  Radx::fl32 vel_res;    /* Doppler velocity resolution */
   Radx::fl32 sweep_rate;   /* Sweep rate. Full sweeps/min. */
 
   Radx::fl32 scale;
@@ -90,7 +90,7 @@ typedef struct {
   Radx::fl32 heading_rate; /* (angle/sec) */
   Radx::fl32 lat;          /* Latitude (degrees) */
   Radx::fl32 lon;          /* Longitude (degrees) */
-  Radx::si32   alt;          /* Altitude (m) */
+  Radx::si32 alt;          /* Altitude (m) */
   Radx::fl32 rvc;          /* Radial velocity correction (m/sec) */
   Radx::fl32 vel_east;     /* Platform velocity to the east (negative for west)   (m/sec) */
   Radx::fl32 vel_north;    /* Platform velocity to the north (negative for south) (m/sec) */
@@ -143,6 +143,7 @@ typedef struct {
   char *type_str;  /* One of:'Reflectivity', 'Velocity' or 'Spectrum width' */
   Radx::si32 nsweeps;
   Radx::fl32 calibr_const;        /* Calibration constant. */
+  Radx::fl32 missing;             /* missing data value */
   //Radx::fl32 (*f)(Range x);       /* Data conversion function. f(x). */
   //Range (*invf)(Radx::fl32 x);    /* Data conversion function. invf(x). */
 } Volume_header;
@@ -189,6 +190,7 @@ typedef struct {
 
 typedef struct {
   Radar_header h;
+  // one Volume for each Field (DBZ, VEL, etc.)
   Volume **v;   /* Array 0..nvolumes-1 of poRadx::si32ers to Volumes.
                       * 0 = DZ_INDEX = reflectivity.
                       * 1 = VR_INDEX = velocity.

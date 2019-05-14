@@ -23,6 +23,7 @@ HDRS = \
 	$(PARAMS_HH) \
 	Rsl.hh \
 	Args.hh \
+	FirstGuess.hh \
 	RadxDealias.hh \
 	FourDD.hh
 
@@ -30,6 +31,7 @@ CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Rsl.cc \
 	Args.cc \
+	FirstGuess.cc \
 	RadxDealias.cc \
 	FourDD.cc \
 	Main.cc 

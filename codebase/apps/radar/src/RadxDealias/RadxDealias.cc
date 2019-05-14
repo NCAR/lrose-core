@@ -39,6 +39,7 @@
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/DsInputPath.hh>
 #include "RadxDealias.hh"
+#include "FirstGuess.hh"
 
 using namespace std;
 
@@ -105,6 +106,10 @@ RadxDealias::~RadxDealias()
 
 }
 
+bool RadxDealias::tdrp_bool_t_to_bool(tdrp_bool_t value) {  // convert from debug_t
+  return (value == pTRUE); 
+}
+
 ////////////////////////////////////////////////////////
 //
 // Run
@@ -113,7 +118,76 @@ int RadxDealias::Run()
 {
 
   // create the dealiasing object and send it the input parameters
-  _fourDD = new FourDD(_params);
+  /* these are the input parameters FourDD needs ...
+  params = parameters;
+  (params.debug)
+   params.sounding_url );
+   params.sounding_look_back*60,
+   params.wind_alt_min*1000,
+   params.wind_alt_max*1000,
+   params.avg_wind_u,
+   params.avg_wind_v );
+   params.prep) {
+   params.filt, &unfoldSuccess);
+   params.output_soundVol) {
+   params.max_shear &&                                
+   params.sign<0)        
+   params.del_num_bins; i++) {
+   params.no_dbz_rm_rv==1)
+   params.low_dbz)||
+   params.high_dbz))&&
+   params.angle_variance;
+   params.comp_thresh>1.0 || 
+   params.comp_thresh2;
+   params.strict_first_pass) {                                                        
+   params.max_count)                                            
+   params.ck_val) {
+   params.proximity;   
+   params.min_good)           
+   params.std_thresh*NyqVelocity) 
+   params.epsilon
+  */
+  // note: missing data value is set when extracting the velocity field  
+  //  _fourDD = new FourDD(_params);
+
+  bool param_debug = (_params.debug > Params::DEBUG_NORM);  // convert from debug_t
+  bool param_prep = tdrp_bool_t_to_bool(_params.prep);   
+  bool param_filt = tdrp_bool_t_to_bool(_params.filt); 
+  bool param_output_soundVol = tdrp_bool_t_to_bool(_params.output_soundVol);
+  bool param_no_dbz_rm_rv = tdrp_bool_t_to_bool(_params.no_dbz_rm_rv);
+  bool param_strict_first_pass = tdrp_bool_t_to_bool(_params.strict_first_pass);
+
+  if (sizeof(Radx::fl32) != sizeof(float))
+    throw "Incompatible size of float and size of Radx::fl32";
+
+
+ _fourDD = new FourDD(
+		      param_debug,
+		      _params.sounding_url,
+		      (float) _params.sounding_look_back,
+		      (float) _params.wind_alt_min,
+		      (float) _params.wind_alt_max,
+		      (float) _params.avg_wind_u,
+		      (float) _params.avg_wind_v,
+		      param_prep,
+		      param_filt,
+		      param_output_soundVol,
+		      (float) _params.max_shear,         
+		      _params.sign,
+		      _params.del_num_bins,
+		      param_no_dbz_rm_rv,
+		      (float) _params.low_dbz,
+		      (float) _params.high_dbz,
+		      (float) _params.angle_variance,
+		      (float) _params.comp_thresh,
+		      (float) _params.comp_thresh2,
+		      param_strict_first_pass,
+		      _params.max_count,                   
+		      (float) _params.ck_val,
+		      _params.proximity,
+		      _params.min_good,
+		      (float) _params.std_thresh);
+
 
   try {
   // build the list of files depending on the mode
@@ -201,11 +275,30 @@ int RadxDealias::_processOne(string filePath)
   vol.setNGatesConstant();
 
   vol.convertToFl32(); // does FourDD use signed ints? No, it seems to use floats
+ 
+  string velocityFieldName = _params._required_fields[1];
+  float nyquist_mps = 0.0; 
+  if (_params.nyquist_mps != 0.0) { // then use the Nyquist frequency from the the param file
+    nyquist_mps = _params.nyquist_mps;
+  } else { // estimate the Nyquist frequency from the max velocity of the volume
+    vol.estimateSweepNyquistFromVel(velocityFieldName);
+    // this puts the estimate in each ray; to be used in the extractFieldData step below
+  }
 
   // convert from RadxVol to Volume structures
-  currDbzVol = _extractFieldData(vol, _params._required_fields[0], 0.0);
+  currDbzVol = _extractFieldData(vol, _params._required_fields[0]);
   // override Nyquist frequency if directed from params file
-  currVelVol = _extractFieldData(vol, _params._required_fields[1], _params.nyquist_mps);
+  //  currVelVol = _extractFieldData(vol, _params._required_fields[1], _params.nyquist_mps);
+
+  /*  TODO:  here ... 
+  // override missing values                                                                                            
+  if (_params.override_missing_field_values) {
+    // TODO: use these variables? or missing_velocity?
+    Radx::setMissingFl32(_params.missing_field_fl32);
+  }
+  */ 
+  currVelVol = _extractVelocityFieldData(vol, velocityFieldName, nyquist_mps, 
+    _params.override_missing_field_values, _params.velocity_field_missing_value);
 
   if ((currDbzVol == NULL) || (currVelVol == NULL))
     throw "Error, velocity or reflectivity field could not be read from data file";
@@ -570,10 +663,51 @@ void RadxDealias::_processVol(Volume *prevVelVol, Volume *currVelVol,
     }
   }
 
+  Volume *soundVolume = NULL;
+
   if (!okToProceed) {
     fprintf(stderr, "Cannot dealias velocity volumes of different sizes. Time associated with volume %ld\n", volTime);
   } else { 
-     _fourDD->Dealias(prevVelVol, currVelVol, currDbzVol, volTime);
+    FirstGuess firstGuess(
+		      _params.debug,
+		      _params.sounding_url,
+		      (float) _params.sounding_look_back,
+		      (float) _params.wind_alt_min,
+		      (float) _params.wind_alt_max,
+		      (float) _params.avg_wind_u,
+		      (float) _params.avg_wind_v,
+		      (float) _params.max_shear,         
+		      _params.sign);
+    soundVolume = Rsl::copy_volume(currVelVol);
+    bool firstGuessSuccess = firstGuess.firstGuess(soundVolume, volTime); 
+    if (!firstGuessSuccess) {
+      Rsl::free_volume(soundVolume);
+      soundVolume = NULL;
+    }
+
+    //
+    // Unfold Volume if we have either a previous volume or VAD data
+    //
+    if (firstGuessSuccess  || prevVelVol != NULL) {
+      _fourDD->Dealias(prevVelVol, currVelVol, currDbzVol, soundVolume);
+    }
+    if(soundVolume != NULL) {
+      /* TODO: work out this logic ...
+      if (_output_soundVol) {
+	int nSweeps = currVelVol->h.nsweeps;
+	int nRays = currVelVol->sweep[0]->h.nrays;
+	int nBins = currVelVol->sweep[0]->ray[0]->h.nbins;
+
+	for (int i = 0; i < nSweeps;  i++)
+	  for (int j = 0; j < nRays ; j ++)
+	    for (int k = 0; k < nBins  ; k++) {
+	      currVelVol->sweep[i]->ray[j]->range[k] = soundVolume->sweep[i]->ray[j]->range[k];
+	    }
+	fprintf(stderr, "\nREPLACED VELOCITY DATA WITH SOUNDING DATA!!\n");
+      }
+      */
+      Rsl::free_volume(soundVolume);
+    }
   }
 }
 
@@ -592,7 +726,7 @@ void RadxDealias::_processVol(Volume *prevVelVol, Volume *currVelVol,
 //  (ray) h.nyq_vel
 //   
 
-Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName, float override_nyquist_vel) {
+Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName) {
 
   if (_params.debug) {
     cerr << " looking for data in field " << fieldName << endl;
@@ -636,10 +770,126 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName,
       newRay->h.azimuth = radxRay->getAzimuthDeg();
       newRay->h.elev = radxRay->getElevationDeg();
 
+      /*
       if (override_nyquist_vel != 0.0) {
 	newRay->h.nyq_vel = override_nyquist_vel;
       } else {
 	newRay->h.nyq_vel = radxRay->getNyquistMps();
+      }
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+	cout << "Using " << newRay->h.nyq_vel << " as Nyquist Velocity" << endl;
+      }
+      */
+
+      // TRMM RSL wants altitude in meters
+      newRay->h.alt = radxVol.getAltitudeKm()*1000.0;
+
+      // get the Range Geometry
+      if (!radxRay->getRangeGeomSet())
+	radxRay->copyRangeGeomFromFields();
+      // trmm rsl expects gate size and distance to first gate in meters 
+      newRay->h.gate_size = radxRay->getStartRangeKm() * 1000.0; 
+      newRay->h.range_bin1 = radxRay->getGateSpacingKm() * 1000.0;
+
+      // move the field data
+      RadxField *radxField = radxRay->getField(fieldName);
+      // check the original data type
+      Radx::DataType_t originalDataType = radxField->getDataType();
+      if (originalDataType != Radx::FL32)
+        throw "Error - Expected float 32 data";
+      Radx::fl32 *data = radxField->getDataFl32();
+
+      if (data == NULL) 
+	cout << "data values are NULL" << endl;
+      else {
+        if (0) { // _params.debug) {
+	  cout << "data values for " << fieldName << " " ;
+	  for (int i = 0; i< 10; i++) 
+	    cout << data[i] << " ";
+	  cout << endl;
+	}
+      }
+
+      newRay->h.bias = radxField->getOffset();
+      newRay->h.scale = radxField->getScale();
+
+      // pull the missing value  from the associated RadxField
+      // TODO: this gets set multiple times, but I cannot think
+      // of a better way to do this right now. 
+      volume->h.missing = radxField->getMissingFl32();
+
+      // copy the data ...
+
+      newRay->range = (Range *) malloc(sizeof(Range) * newRay->h.nbins);
+      newRay->h.binDataAllocated = true;
+      memcpy(newRay->range, data, sizeof(Range) * newRay->h.nbins);
+
+    } // for each ray
+  } // for each sweep  
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    Rsl::print_volume(volume);
+  }
+  return volume;
+}
+
+
+Volume *RadxDealias::_extractVelocityFieldData(const RadxVol &radxVol, string fieldName,
+					       float override_nyquist_vel,
+					       bool override_missing_field_values,
+					       float velocity_field_missing_value) {
+
+  if (_params.debug) {
+    cerr << " looking for data in field " << fieldName << endl;
+  }
+
+  // 1st, make sure the field is in the volume
+  //  vector<string> getUniqueFieldNameList() const;
+  vector<string> fieldNames = radxVol.getUniqueFieldNameList();
+  vector<string>::iterator s;
+  bool found = false;
+  for (s=fieldNames.begin(); s != fieldNames.end(); s++) {
+    if (fieldName.compare(*s) == 0) {
+      found = true;
+    }
+  }
+  if (!found) {
+    cerr << "ERROR - no field found in data " << fieldName << endl;
+    return NULL;
+  }
+
+  Radx::fl32 missing = 0.0;
+
+  // Volume
+  Volume *volume = Rsl::new_volume(radxVol.getNSweeps());  
+
+  // Sweeps
+  for (int i=0; i<volume->h.nsweeps; i++) {
+    Sweep **sweeps = volume->sweep;
+    Sweep *newSweep = Rsl::new_sweep(radxVol.getNRays());
+    sweeps[i] = newSweep;
+
+    // Rays    
+    Ray **rays = newSweep->ray;
+
+    vector<RadxRay *> radxRays = radxVol.getRays();      
+    for (int j=0; j<newSweep->h.nrays; j++) {
+
+      RadxRay *radxRay = radxRays.at(j);
+
+      // convert the rays
+      Ray *newRay = Rsl::new_ray(radxRay->getNGates());
+      rays[j] = newRay;
+      newRay->h.azimuth = radxRay->getAzimuthDeg();
+      newRay->h.elev = radxRay->getElevationDeg();
+
+      if (override_nyquist_vel != 0.0) {
+	newRay->h.nyq_vel = override_nyquist_vel;
+      } else {
+	newRay->h.nyq_vel = radxRay->getNyquistMps();
+      }
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+	cout << "Using " << newRay->h.nyq_vel << " as Nyquist Velocity" << endl;
       }
 
       // TRMM RSL wants altitude in meters
@@ -671,17 +921,32 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName,
 	}
       }
 
-      newRay->h.bias = velocityField->getOffset();
-      newRay->h.scale = velocityField->getScale();
+      // pull the missing value from the associated RadxField
+      missing = velocityField->getMissingFl32();
+
+      // These should not be needed, or set to 1.0 & 0.0
+      // because we are pulling the Fl32 data which have
+      // the scale and bias applied
+     
+      newRay->h.bias = 0.0; // velocityField->getOffset();
+      newRay->h.scale = 1.0; // velocityField->getScale();
 
       // copy the data ...
 
+      // TODO: be sure to free this memory!! 
       newRay->range = (Range *) malloc(sizeof(Range) * newRay->h.nbins);
       newRay->h.binDataAllocated = true;
       memcpy(newRay->range, data, sizeof(Range) * newRay->h.nbins);
 
     } // for each ray
   } // for each sweep  
+
+  if (override_missing_field_values) {
+    volume->h.missing = velocity_field_missing_value;
+  } else {
+    // pull the missing value from the associated RadxField
+    volume->h.missing = missing; 
+  }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     Rsl::print_volume(volume);
@@ -728,7 +993,10 @@ void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *v
       int nGates = volume->sweep[sweepNumber]->ray[rayNum]->h.nbins;
       // pull the missing value  from the associated RadxField
       RadxField *radxField = radxRay->getField(fieldName);
-      double missingValue = (double) radxField->getMissingFl32();
+
+      //  pull the missing and nyquist values from the RSL structures; they should have propogated ...
+      double missingValue = volume->h.missing; // (double) radxField->getMissingFl32();
+      
       // get the units; this should be pulled from the associate RadxRay
       string units = radxField->getUnits();
 

@@ -451,7 +451,9 @@ public:
 
   tdrp_bool_t filt;
 
-  float missing_vel;
+  tdrp_bool_t override_missing_field_values;
+
+  float velocity_field_missing_value;
 
   tdrp_bool_t strict_first_pass;
 

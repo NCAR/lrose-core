@@ -77,6 +77,8 @@ private:
   int _runRealtimeWithLdata();
   int _runRealtimeNoLdata();
 
+  bool tdrp_bool_t_to_bool(tdrp_bool_t value);
+
   //
   // Dealias _currRadarVol if possible
   //
@@ -112,7 +114,12 @@ private:
 
   Params _params;
 
-  Volume *_extractFieldData(const RadxVol &radxVol, string fieldName, float override_nyquist_vel);
+  Volume *_extractFieldData(const RadxVol &radxVol, string fieldName);
+  Volume *_extractVelocityFieldData(const RadxVol &radxVol, string velocityFieldName,
+				    float override_nyquist_vel,
+				    bool override_missing_field_values,
+				    float velocity_field_missing_value);
+
   void _insertFieldData(RadxVol *radxVol, string fieldName, Volume *volume);
 
 

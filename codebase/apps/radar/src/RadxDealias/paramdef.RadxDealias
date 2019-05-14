@@ -284,11 +284,17 @@ paramdef boolean {
   p_help = "";
 } filt ;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the missing values for field data";
+  p_help = "See following parameter options.";
+} override_missing_field_values;
+
 paramdef float{
   p_default = 0;
-  p_descr = "Missing velocity value.";
-  p_help = "This is the encoded Range value of velocity.";
-} missing_vel ;
+  p_descr = "Missing value for velocity field data.";
+  p_help = "Only applies if override_missing_field_values is TRUE";
+} velocity_field_missing_value;
 
 paramdef boolean{
   p_default = false;
