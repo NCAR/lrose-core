@@ -78,13 +78,13 @@ def main():
                       help='Tag to check out lrose-core')
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDirDefault,
-                      help='Install directory')
+                      help='Install directory, default is ~/lrose')
     parser.add_option('--buildDir',
                       dest='buildDir', default=buildDirDefault,
-                      help='Temporary build dir')
+                      help='Temporary build dir, default is /tmp/lrose_build')
     parser.add_option('--logDir',
                       dest='logDir', default=logDirDefault,
-                      help='Logging dir')
+                      help='Logging dir, default is /tmp/lrose_build/logs')
     parser.add_option('--static',
                       dest='static', default=False,
                       action="store_true",
@@ -103,10 +103,10 @@ def main():
                       'Install dynamic runtime lrose libraries for all binaries, ' + \
                       'in a directory relative to the bin dir. ' + \
                       'System libraries are not included.')
-    parser.add_option('--scripts',
-                      dest='installScripts', default=False,
+    parser.add_option('--noScripts',
+                      dest='noScripts', default=False,
                       action="store_true",
-                      help='Install scripts as well as binaries')
+                      help='Do not install runtime scripts as well as binaries')
     parser.add_option('--useSystemNetcdf',
                       dest='useSystemNetcdf', default=False,
                       action="store_true",
@@ -629,7 +629,7 @@ def buildPackage():
 
     # optionally install the scripts
 
-    if (options.installScripts):
+    if (options.noScripts == False):
 
         logPath = prepareLogFile("install-scripts-to-tmp");
 
