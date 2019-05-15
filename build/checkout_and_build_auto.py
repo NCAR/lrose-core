@@ -103,10 +103,10 @@ def main():
                       'Install dynamic runtime lrose libraries for all binaries, ' + \
                       'in a directory relative to the bin dir. ' + \
                       'System libraries are not included.')
-    parser.add_option('--scripts',
-                      dest='installScripts', default=False,
+    parser.add_option('--noScripts',
+                      dest='noScripts', default=False,
                       action="store_true",
-                      help='Install scripts as well as binaries')
+                      help='So not install scripts as well as binaries')
     parser.add_option('--useSystemNetcdf',
                       dest='useSystemNetcdf', default=False,
                       action="store_true",
@@ -629,7 +629,7 @@ def buildPackage():
 
     # optionally install the scripts
 
-    if (options.installScripts):
+    if (options.noScripts == False):
 
         logPath = prepareLogFile("install-scripts-to-tmp");
 
