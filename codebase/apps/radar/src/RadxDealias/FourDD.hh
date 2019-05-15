@@ -151,7 +151,7 @@ public:
   */
 
   void AssessNeighborhood2(short **STATE, Volume *rvVolume, int sweepIndex, int currIndex, int i,
-                           float foldedValue,
+                           int del_num_bins, float foldedValue,
                            float pfraction, float NyqVelocity,
                            int *nWithinNyquist, int *nOutsideNyquist,
                            int *nPositiveFolds, int *nNegativeFolds,
@@ -169,7 +169,8 @@ public:
                                                      bool soundVolumeNull, bool lastVolumeNull);
 
   void SecondPassUsingSoundVolumeOnly(short **STATE, Volume *soundVolume, Volume *original, Volume *rvVolume,
-                                      int sweepIndex, float fraction2, float pfraction,
+                                      int sweepIndex, int del_num_bins,
+                                      float fraction2, float pfraction,
                                       float NyqVelocity, int max_count, float ck_val);
 
   float Unfold(float foldedValue, float referenceValue,

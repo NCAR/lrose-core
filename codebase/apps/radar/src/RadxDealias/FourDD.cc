@@ -894,7 +894,8 @@ void FourDD::AssessNeighborhood(short **STATE, int currIndex, int i, int numRays
 //  flag                       - 0 no neighbors are dealiased; 1 if found a dealiased neighbor 
 // Note: flag is only set to 1, if a DEALIASED neighbor is found, so just
 // use the number of dealiased neighbors to determine the flag
-void FourDD::AssessNeighborhood2(short **STATE, Volume *rvVolume, int sweepIndex, int currIndex, int i, 
+void FourDD::AssessNeighborhood2(short **STATE, Volume *rvVolume, int sweepIndex, int currIndex, int i,
+                                 int del_num_bins, 
 				 float foldedValue,
 				 float pfraction, float NyqVelocity,
 				 int *nWithinNyquist, int *nOutsideNyquist,
@@ -929,7 +930,7 @@ void FourDD::AssessNeighborhood2(short **STATE, Volume *rvVolume, int sweepIndex
   prev=i-1;
 
   // Look at all bins adjacent to current bin in question:  
-  if (i>_del_num_bins) {
+  if (i > del_num_bins) { // if del_num_bins = 0, then i has to be 1, then prev is in bounds
     if (STATE[prev][left] == DEALIASED) {
       binindex[nDealiased]=prev;
       rayindex[nDealiased]=left;
@@ -976,7 +977,7 @@ void FourDD::AssessNeighborhood2(short **STATE, Volume *rvVolume, int sweepIndex
   if (STATE[i][right] == TBD) {
     nTbd=nTbd+1;
   }
-  if (i<numBins-1) {  
+  if (i < numBins-1) { // then next is within bounds  
     if (STATE[next][left] == DEALIASED) {
       binindex[nDealiased]=next;
       rayindex[nDealiased]=left;
@@ -1016,7 +1017,7 @@ void FourDD::AssessNeighborhood2(short **STATE, Volume *rvVolume, int sweepIndex
   int out=0;
   int numneg=0;
   int numpos=0;
-  int diffs[8];
+  float diffs[8];
 
   for (int l=0; l<numberOfDealiasedNeighbors; l++) {
     int goodNeighborBin = binindex[l];
@@ -1175,7 +1176,7 @@ void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
 	  int numpos, numneg;
           bool noHope = false;
 	  AssessNeighborhood2(STATE, rvVolume, sweepIndex, currIndex, i, 
-                              val, 
+                              del_num_bins, val, 
                               pfraction, NyqVelocity,
                               &in, &out, &numpos, &numneg, &noHope);
 
@@ -1329,7 +1330,8 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 // g. Auxiliary dealiasing
 //
 void FourDD::SecondPassUsingSoundVolumeOnly(short **STATE, Volume *soundVolume, Volume *original, Volume *rvVolume, 
-                                            int sweepIndex, float fraction2, float pfraction,
+                                            int sweepIndex, int del_num_bins,
+                                            float fraction2, float pfraction,
                                             float NyqVelocity, int max_count, float ck_val) {
 
   /*
@@ -1408,7 +1410,7 @@ void FourDD::SecondPassUsingSoundVolumeOnly(short **STATE, Volume *soundVolume, 
             int numpos, numneg;
             bool noHope = false;
             AssessNeighborhood2(STATE, rvVolume, sweepIndex, currIndex, i,
-                                val, 
+                                del_num_bins, val, 
                                 pfraction, NyqVelocity,
                                 &in, &out, &numpos, &numneg, &noHope);
 
@@ -1589,7 +1591,8 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
       //
       if (lastVolume!=NULL && soundVolume!=NULL) {
         SecondPassUsingSoundVolumeOnly(STATE, soundVolume, original, rvVolume,
-                                       sweepIndex, fraction2, pfraction,
+                                       sweepIndex, _del_num_bins,
+                                       fraction2, pfraction,
                                        NyqVelocity, _max_count, _ck_val);
       }
 
