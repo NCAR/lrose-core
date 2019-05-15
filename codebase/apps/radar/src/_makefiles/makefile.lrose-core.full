@@ -42,6 +42,7 @@ SUB_DIRS = \
 	RadarCal \
 	RadarConst \
 	RadarMdvCompare \
+	RadxDealias \
 	RapMap2Chill \
 	SimCpCompute \
 	SpectraPrint \
