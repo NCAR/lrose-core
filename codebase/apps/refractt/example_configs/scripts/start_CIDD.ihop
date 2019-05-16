@@ -1,0 +1,18 @@
+#! /bin/csh
+#
+
+source ../../envs/env_set.ihop
+setenv DEMO_TIME        "20:00 05/14/2002"
+    
+setenv DBZ_NAME    DZ
+setenv WIDTH_NAME  SW
+setenv SNR_NAME    SNRHC
+setenv AIQ_NAME    AIQ
+setenv NIQ_NAME    NIQ
+setenv DM_NAME     DM
+setenv LATITUDE   36.57112
+setenv LONGITUDE -100.7828
+
+cd ../params
+CIDD -p CIDD.params
+

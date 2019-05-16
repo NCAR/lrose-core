@@ -1,0 +1,448 @@
+/**********************************************************************
+ * TDRP params for RefParams
+ **********************************************************************/
+
+//======================================================================
+//
+// Refract.
+//
+// Common Parameters for the Refract algorithms.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING PARAMETERS.
+//
+// Parameters controlling debug outputs.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// debug flag.
+//
+//
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// verbose /////////////////////////////////
+//
+// verbose debug flag.
+//
+// If true, verbose debug messages will be printed.
+//
+//
+// Type: boolean
+//
+
+verbose = FALSE;
+
+///////////// debug_show_source_code_method_and_line //
+//
+// Source code methods/line numbers flag.
+//
+// true to show with debug output, ,false to hide.
+//
+//
+// Type: boolean
+//
+
+debug_show_source_code_method_and_line = FALSE;
+
+//======================================================================
+//
+// PROCESS PARAMETERS.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROCESS TRIGGERING PARAMETERS.
+//
+// Parameters describing the process triggering.
+//
+//======================================================================
+ 
+///////////// trigger_mode ////////////////////////////
+//
+// Input triggering mode.
+//
+// In LATEST_DATA mode, the program triggers whenever a new input file 
+//   appears.
+// In TIME_LIST mode, the program operates on every input file between 
+//   the start and end times specified on the command line.
+//
+//
+// Type: enum
+// Options:
+//     LATEST_DATA
+//     TIME_LIST
+//
+
+trigger_mode = TIME_LIST;
+
+///////////// max_valid_secs //////////////////////////
+//
+// Number of seconds the input files are valid.
+//
+// Used only if trigger_mode is set to LATEST_DATA.
+//
+//
+// Type: long
+//
+
+max_valid_secs = 300;
+
+//======================================================================
+//
+// PROCESS I/O PARAMETERS.
+//
+// Parameters describing the input and output locations.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// Input URL.
+//
+//
+// Type: string
+//
+
+input_url = "mdvp:://$(DATA_HOST)::$(DATA_DIR)";
+
+///////////// raw_iq_in_input /////////////////////////
+//
+// Flag indicating whether the raw I and Q values are included in the 
+//   input stream.
+//
+// If true, the raw fields will be read from the input stream. If false, 
+//   the raw fields will be calculated from the NIQ/AIQ values which must 
+//   be inluded in the input stream instead.
+//
+//
+// Type: boolean
+//
+
+raw_iq_in_input = FALSE;
+
+///////////// raw_i_field_name ////////////////////////
+//
+// Raw I field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to TRUE.
+//
+//
+// Type: string
+//
+
+raw_i_field_name = "MeanI";
+
+///////////// raw_q_field_name ////////////////////////
+//
+// Raw Q field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to TRUE.
+//
+//
+// Type: string
+//
+
+raw_q_field_name = "MeanQ";
+
+///////////// niq_field_name //////////////////////////
+//
+// NIQ field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to FALSE.
+//
+//
+// Type: string
+//
+
+niq_field_name = "NIQ";
+
+///////////// input_niq_scale /////////////////////////
+//
+// Input NIQ scale value.
+//
+// The NIQ value from the input source is multiplied by this value 
+//   before the data is used. For most radars this value should be 0.1. 
+//   For SPOL this value should be 0.025.
+//
+//
+// Type: double
+//
+
+input_niq_scale = 0.1;
+
+///////////// invert_target_angle_sign ////////////////
+//
+// Flag indicating whether to invert the sign of the target angles.
+//
+// This fix should be done upstream, but is added here just in case.
+// Used only if raw_iq_in_input is set to FALSE.
+//
+//
+// Type: boolean
+//
+
+invert_target_angle_sign = FALSE;
+
+///////////// aiq_field_name //////////////////////////
+//
+// AIQ field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to FALSE.
+//
+//
+// Type: string
+//
+
+aiq_field_name = "AIQ";
+
+///////////// snr_in_input ////////////////////////////
+//
+// Flag indicating whether the SNR field is included in the input 
+//   stream.
+//
+// If true, the SNR field will be read from the input stream. If false, 
+//   the SNR field will be calculated from the power field which must be 
+//   inluded in the input stream.
+// The SNR field is only needed if the raw I/Q values are not included 
+//   in the input files and so must be calculated from the NIQ/AIQ values.
+//
+//
+// Type: boolean
+//
+
+snr_in_input = $(SNR_IN_INPUT);
+
+///////////// snr_field_name //////////////////////////
+//
+// Signal-to-noise ratio field name in the input stream.
+//
+//
+// Type: string
+//
+
+snr_field_name = "SNRHC";
+
+///////////// power_field_name ////////////////////////
+//
+// Power field name in the input stream.
+//
+//
+// Type: string
+//
+
+power_field_name = "DM";
+
+///////////// quality_source //////////////////////////
+//
+// Which field to use when calculating the quality value.
+//
+// 	QUALITY_FROM_WIDTH - The quality field is calculated using a 
+//   spectrum width field.
+// 	QUALITY_FROM_CPA - The quality field is calculated using a CPA 
+//   field.
+//
+//
+// Type: enum
+// Options:
+//     QUALITY_FROM_WIDTH
+//     QUALITY_FROM_CPA
+//
+
+quality_source = QUALITY_FROM_WIDTH;
+
+///////////// quality_field_name //////////////////////
+//
+// Name of field to use in the quality calculations.
+//
+// If quality_source is set to QUALITY_FROM_WIDTH then this should be a 
+//   spectrum width field.
+// If quality_source is set to QUALITY_FROM_CPA then this shoudl be a 
+//   probability of clutter field. The probability of clutter field should 
+//   range from 0.0 to 1.0 with 0.0 indicating the gate definitely doesn't 
+//   contain clutter and 1.0 indicating that the gate definitely is 
+//   clutter.
+//
+//
+// Type: string
+//
+
+quality_field_name = "WIDTH";
+
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+//
+//
+// Type: string
+//
+
+output_url = "mdvp:://$(ALG_HOST)::$(PHASEDIFF_OUTPUT_PATH)";
+
+///////////// specify_elevation_by_index //////////////
+//
+// Flag indicating whether to specify the desired elevation by index or 
+//   by angle limits.
+//
+// If true, the elevation is specfied by index in the elevation_num 
+//   parameter.
+// If false, the elevation is specified by angle in the elevation_angle 
+//   parameter.
+//
+//
+// Type: boolean
+//
+
+specify_elevation_by_index = FALSE;
+
+///////////// elevation_num ///////////////////////////
+//
+// Elevation number to use from the MDV files.
+//
+// Used only if specify_elevation_by_index is set to true.
+//
+//
+// Type: long
+//
+
+elevation_num = 0;
+
+///////////// elevation_angle /////////////////////////
+//
+// The angle limits for the desired elevation angle. Only sweeps with 
+//   elevation angles between these limits will be used in the 
+//   calibration.
+//
+// Used only if specify_elevation_by_index is set to false.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double min_angle;
+//      double max_angle;
+//   }
+//
+//
+
+elevation_angle = {
+    min_angle = 0.45,
+    max_angle = 0.55
+};
+
+///////////// scan_mode ///////////////////////////////
+//
+// Input scan mode.
+//
+//
+// Type: enum
+// Options:
+//     ALL_SCAN_STRATEGIES
+//     MULTIPLE_ELEV_ONLY
+//     SINGLE_ELEV_ONLY
+//
+
+scan_mode = ALL_SCAN_STRATEGIES;
+
+///////////// num_azim ////////////////////////////////
+//
+// Number of azimuths used in data processing.
+//
+// Minimum val: 1
+//
+// Type: long
+//
+
+num_azim = $(NUM_AZIM);
+
+///////////// num_range_bins //////////////////////////
+//
+// Number of range bins used in data processing.
+//
+// Minimum val: 1
+//
+// Type: long
+//
+
+num_range_bins = $(NUM_RANGE_BINS);
+
+///////////// debug_latlon ////////////////////////////
+//
+// debug lat/lon.
+//
+// Extreme debugging at a point, set to -1,-1 to disable.
+//
+//
+// Type: double
+// 1D array - fixed length - 2 elements.
+//
+
+debug_latlon = {
+ -1,
+ -1
+};
+
+///////////// debug_npt ///////////////////////////////
+//
+// debug npt.
+//
+// Extreme debugging radius around the debug point to keep showing 
+//   debugging, number of gridpoints.
+//
+//
+// Type: int
+//
+
+debug_npt = 1;
+
+/**********************************************************************
+ * TDRP params for Params
+ **********************************************************************/
+
+//======================================================================
+//
+// DataScanning.
+//
+// This program spits out scanning information.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// ALGORITHM PARAMETERS.
+//
+//======================================================================
+ 
+///////////// scan_mode ///////////////////////////////
+//
+// Input scan mode.
+//
+//
+// Type: enum
+// Options:
+//     ALL_SCAN_STRATEGIES
+//     MULTIPLE_ELEV_ONLY
+//     SINGLE_ELEV_ONLY
+//
+
+scan_mode = ALL_SCAN_STRATEGIES;
+

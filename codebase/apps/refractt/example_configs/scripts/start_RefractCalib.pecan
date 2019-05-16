@@ -1,0 +1,70 @@
+#! /bin/csh
+
+source ../../envs/env_set.pecan
+
+setenv TARGET_YEAR1 2015
+setenv TARGET_MONTH1  06
+setenv TARGET_DAY1    13
+setenv TARGET_HOUR1   12
+setenv TARGET_MIN1     0
+setenv TARGET_SEC1     0
+
+setenv TARGET_YEAR2 2015
+setenv TARGET_MONTH2  06
+setenv TARGET_DAY2    13
+setenv TARGET_HOUR2   12
+setenv TARGET_MIN2    30
+setenv TARGET_SEC2     0
+
+setenv CALIB_YEAR1 2015
+setenv CALIB_MONTH1  06
+setenv CALIB_DAY1    13
+setenv CALIB_HOUR1   12
+setenv CALIB_MIN1     0
+setenv CALIB_SEC1     0
+
+setenv CALIB_YEAR2 2015
+setenv CALIB_MONTH2  06
+setenv CALIB_DAY2    13
+setenv CALIB_HOUR2   12
+setenv CALIB_MIN2    30
+setenv CALIB_SEC2     0
+
+setenv CALIB_REF_FILE_NAME  $CALIB_REF_FILE_NAME_DAY
+
+cd ../params
+$BIN_DIR/RefractCalib -params RefractCalib.params
+
+setenv TARGET_YEAR1 2015
+setenv TARGET_MONTH1  06
+setenv TARGET_DAY1    27
+setenv TARGET_HOUR1   08
+setenv TARGET_MIN1    30
+setenv TARGET_SEC1     0
+
+setenv TARGET_YEAR2 2015
+setenv TARGET_MONTH2  06
+setenv TARGET_DAY2    27
+setenv TARGET_HOUR2   09
+setenv TARGET_MIN2     0
+setenv TARGET_SEC2     0
+
+setenv CALIB_YEAR1 2015
+setenv CALIB_MONTH1  06
+setenv CALIB_DAY1    27
+setenv CALIB_HOUR1   08
+setenv CALIB_MIN1    30
+setenv CALIB_SEC1     0
+
+setenv CALIB_YEAR2 2015
+setenv CALIB_MONTH2  06
+setenv CALIB_DAY2    27
+setenv CALIB_HOUR2   09
+setenv CALIB_MIN2    00
+setenv CALIB_SEC2     0
+
+setenv CALIB_REF_FILE_NAME  $CALIB_REF_FILE_NAME_NIGHT
+
+cd ../params
+$BIN_DIR/RefractCalib -params RefractCalib.params
+

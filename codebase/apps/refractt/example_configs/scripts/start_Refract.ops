@@ -1,0 +1,16 @@
+#! /bin/csh
+
+if (-f $PROJ_DIR/refract/envs/env_set.ops) then
+  source $PROJ_DIR/refract/envs/env_set.ops
+endif
+
+cd $PROJ_DIR/refract/params
+
+running "Refract -params Refract.ops"
+if ($status == 1) then
+  Refract -params Refract.ops -debug |& \
+    LogFilter -d $ERRORS_LOG_DIR -p Refract -i ops &
+endif
+
+    
+

@@ -1,0 +1,8 @@
+#! /bin/csh
+
+source ../../envs/env_set.ihop
+
+cd ../params
+$BIN_DIR/PhaseDiff -params PhaseDiff.params -start "2002 05 14 20 00 00" -end "2002 05 14 21 00 00"
+    
+

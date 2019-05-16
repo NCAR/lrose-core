@@ -1,0 +1,37 @@
+#! /bin/csh
+
+source ../../envs/env_set.colo
+
+setenv TARGET_YEAR1 2017
+setenv TARGET_MONTH1  07
+setenv TARGET_DAY1    20
+setenv TARGET_HOUR1   17
+setenv TARGET_MIN1    10
+setenv TARGET_SEC1     0
+
+setenv TARGET_YEAR2 2017
+setenv TARGET_MONTH2  07
+setenv TARGET_DAY2    20
+setenv TARGET_HOUR2   18
+setenv TARGET_MIN2    22
+setenv TARGET_SEC2     0
+
+setenv CALIB_YEAR1 2017
+setenv CALIB_MONTH1  07
+setenv CALIB_DAY1    12
+setenv CALIB_HOUR1   18
+setenv CALIB_MIN1    21 
+setenv CALIB_SEC1     0
+
+setenv CALIB_YEAR2 2017
+setenv CALIB_MONTH2  07
+setenv CALIB_DAY2    12
+setenv CALIB_HOUR2   18
+setenv CALIB_MIN2    36
+setenv CALIB_SEC2     0
+
+cd ../params
+setenv CALIB_REF_FILE_NAME  $CALIB_REF_FILE_NAME_DAY
+$BIN_DIR/RefractCalib -params RefractCalib_colo.params
+
+# at this point both the DAY and NIGHT files are set to the same file

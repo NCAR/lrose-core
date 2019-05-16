@@ -1,0 +1,35 @@
+#! /bin/csh
+
+source ../../envs/env_set.ihop
+
+setenv TARGET_YEAR1 2015
+setenv TARGET_MONTH1  06
+setenv TARGET_DAY1    13
+setenv TARGET_HOUR1   12
+setenv TARGET_MIN1     0
+setenv TARGET_SEC1     0
+
+setenv TARGET_YEAR2 2015
+setenv TARGET_MONTH2  06
+setenv TARGET_DAY2    13
+setenv TARGET_HOUR2   12
+setenv TARGET_MIN2    30
+setenv TARGET_SEC2     0
+
+setenv CALIB_YEAR1 2015
+setenv CALIB_MONTH1  05
+setenv CALIB_DAY1    23
+setenv CALIB_HOUR1   16
+setenv CALIB_MIN1    15
+setenv CALIB_SEC1     0
+
+setenv CALIB_YEAR2 2015
+setenv CALIB_MONTH2  05
+setenv CALIB_DAY2    23
+setenv CALIB_HOUR2   16
+setenv CALIB_MIN2    45
+setenv CALIB_SEC2     0
+
+cd ../params
+$BIN_DIR/RefractCalib -params RefractCalib.params
+

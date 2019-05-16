@@ -1,0 +1,21 @@
+#! /bin/csh
+#
+
+source ../../envs/env_set.pecan
+setenv DEMO_TIME        "16:45 05/23/2015"
+setenv DEMO_TIME        "12:30 06/13/2015"
+setenv DEMO_TIME        "22:00 06/20/2015"
+
+setenv DBZ_NAME    DBZ
+setenv VEL_NAME    DBZ
+setenv WIDTH_NAME  WIDTH
+setenv SNR_NAME    SNRHC
+setenv AIQ_NAME    AIQ
+setenv NIQ_NAME    NIQ
+setenv DM_NAME     DM
+setenv LATITUDE   38.5534
+setenv LONGITUDE  -99.536
+    
+cd ../params
+CIDD -p CIDD.params
+

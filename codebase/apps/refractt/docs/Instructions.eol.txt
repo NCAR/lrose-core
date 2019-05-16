@@ -1,0 +1,84 @@
+Instructions for 'pecan'.  For other configurations replace 'pecan' with some
+other name below, such as 'colo'.
+
+
+1. Make a copy of the Refractt project
+   (be sure to save out your previous version)
+          cp -r /scr/tmp/dave/projects  <your place>
+
+2. Edit the environment
+          cd <your place>/projects/Refractt/
+	  cd envs
+	  edit env_set.pecan
+	        change RAP_DATA_DIR to your preferred data location
+                make sure BIN_DIR is set to /scr/tmp/dave/bin
+
+3. For RefractCalib:  Edit the script environment variables
+       cd <your place>/projects/Refractt/alg/bin
+       edit start_RefractCalib.pecan
+
+           TARGET_*        = time range for target algorithm
+           CALIB_*         = time range for calibration algorithm
+           note it is set up for day and night done individually
+	   
+4. For RefractCalib:  Run the app
+       start_RefractCalib.pecan
+
+          Should run and produce output, if you chose a time range that has
+	  some data.
+
+          Should produce four output files:
+
+	     1. the reference file(s)
+                   $CALIB_FILE_PATH/ref_calib/$CALIB_FILE_NAME_DAY
+                   $CALIB_FILE_PATH/ref_calib/$CALIB_FILE_NAME_NIGHT
+
+             2. same data written to standard MDV
+  	        yyyymmddhhmmss = time of last data processed,
+	        so that it easily can be viewed in CIDD.
+                   $CALIB_FILE_PATH/calib/yyyymmdd/hhmmss.mdv
+
+                If day and night are different, there will be two such
+		files, with two different times
+		
+5. For PhaseDiff
+       edit the start script and set the range of times
+         start_PhaseDiff.pecan
+       run 
+
+6. For Refract
+       edit the start script and set the range of times
+         start_Refract.pecan
+       run
+
+7. View in CIDD:
+      cd <your_place>projects/Refractt/display/bin
+      Optional:
+        edit start_CIDD_refractt.pecan
+   	     DEMO_TIME = set to the starting time
+      start_CIDD_refractt.pecan
+
+    The CIDD params are set up for each app, with data groups:
+
+           PhaseDiff
+	   RefractCalib
+	   Refract
+
+8. Playing around:
+
+           You can easily have the same calibration used for day AND night
+	   by modifying Refract.params and setting both calib files to the same
+	   file name.
+
+           You can modify the 'transition between day and night'.  In 
+	   Refact.params change this value, currently 0:
+
+                day_night_transition_delta_minutes = 0;
+
+           Then run Refract over a transiton period between day and night
+	   or night and day to see the effect. What gets interpolated are
+	   the calibration values used by Refract.
+
+
+
+            

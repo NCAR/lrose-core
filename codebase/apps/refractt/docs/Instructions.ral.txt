@@ -1,0 +1,47 @@
+1. Add this to your path
+   or take the binaries from there and put into your path:
+
+          /scratch/WEEKLY/dave/bin
+
+2. Make a copy of the params/scripts (be sure to save out your previous version)
+
+          cp -r /scragtch/WEEKLY/dave/projects  <your place>
+
+3. Edit the script environment variables
+
+       cd <your place>/projects/Refractt/alg/bin
+       edit start_RefractCalib
+
+           CALIB_FILE_PATH = output data location
+           TARGET_*        = time range for target algorithm
+           CALIB_*         = time range for calibration algorithm
+
+4. Run the app
+
+       start_RefractCalib
+
+          Should run and produce output, if you chose a time range that has
+	  some data here:
+
+           rain.eol.ucar.edu:$RAP_DATA_DIR/pecan/cfradial/spol/moments/sband/sur
+
+          Should produce two output files:
+
+	     1. the reference file
+                   $CALIB_FILE_PATH/ref_calib/$CALIB_FILE_NAME
+
+             2. same data written as standard MDV
+  	        yyyymmddhhmmss = time of last data processed,
+	        so that it easily can be viewed in CIDD.
+                   $CALIB_FILE_PATH/calib/yyyymmdd/hhmmss.mdv
+5. View in CIDD:
+
+      cd <your_place>projects/Refractt/display/bin
+      edit start_CIDD
+          ALG_PATH = set to same as CALIB_FILE_PATH above
+	  DEMO_TIME = set to the starting time
+      start_CIDD
+          If you set movie to near the processing period latest time, you
+	  should be able to display outputs.
+
+

@@ -1,0 +1,74 @@
+#! /bin/csh
+
+#
+# Binaries
+#
+setenv BIN_DIR          /home/dave/bin
+
+#
+#  Incoming Radar data
+#
+setenv DATA_HOST        hail.eol.ucar.edu
+setenv DATA_DIR         /scr/hail1/rsfdata/eolbase/cfradial/spol/moments/sband/sur
+setenv SNR_IN_INPUT     TRUE
+
+#
+#  Local top level data path and host
+#
+setenv RAP_DATA_DIR     /d1/dave/tmp
+setenv ALG_HOST         jerk.rap.ucar.edu
+
+#
+# Top level Refract related output path, relative to $RAP_DATA_DIR
+# (all the output will go to $RAP_DATA_DIR/$ALG_PATH/<something>)    
+#
+setenv ALG_PATH        Refract/mdv/realtime
+
+#
+# Location of fixed calibration output MDV file (created by RefractCalib)
+# and the file name , it will be used by Refract
+#    
+setenv CALIB_REF_FILE_PATH        $RAP_DATA_DIR/$ALG_PATH/ref_calib
+setenv CALIB_REF_FILE_NAME_DAY    RefractCalib.mdv
+setenv CALIB_REF_FILE_NAME_NIGHT  RefractCalib.mdv
+
+#
+# Location of time stamped output calibration MDV file (created by RefractCalib)
+# This is a fixed file with the time = to the last time in the calibration
+# time range.  It can be viewed in CIDD    
+#
+setenv CALIB_FILE_PATH  $RAP_DATA_DIR/$ALG_PATH/calib
+
+#
+# Location of Refract output MDV files (created by Refract)
+# relative to $RAP_DATA_DIR, i.e. output will be in
+#     $RAP_DATA_DIR/$REFRACT_OUTPUT_PATH
+#    
+setenv REFRACT_OUTPUT_PATH  $ALG_PATH/Refract
+
+#
+# Location of PhaseDiff output MDV files (created by PhaseDiff)
+# relative to $RAP_DATA_DIR, i.e. output will be in
+#     $RAP_DATA_DIR/$PHASEDIFF_OUTPUT_PATH
+#    
+setenv PHASEDIFF_OUTPUT_PATH  $ALG_PATH/PhaseDiff
+
+#
+# Location of Phase output MDV files (created by Phase)
+# relative to $RAP_DATA_DIR, i.e. output will be in
+#     $RAP_DATA_DIR/$PHASE_OUTPUT_PATH
+#    
+setenv PHASE_OUTPUT_PATH  $ALG_PATH/Phase
+
+#
+# Shared algorithm params
+# Number of azimuths used in processing
+#
+setenv NUM_AZIM 360
+
+#
+# Shared algorithm params
+# Number of range bins used in processing
+#
+setenv NUM_RANGE_BINS 450
+    

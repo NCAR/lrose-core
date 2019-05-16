@@ -1,0 +1,801 @@
+/**********************************************************************
+ * TDRP params for RefParams
+ **********************************************************************/
+
+//======================================================================
+//
+// Refract.
+//
+// Common Parameters for the Refract algorithms.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING PARAMETERS.
+//
+// Parameters controlling debug outputs.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// debug flag.
+//
+//
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// verbose /////////////////////////////////
+//
+// verbose debug flag.
+//
+// If true, verbose debug messages will be printed.
+//
+//
+// Type: boolean
+//
+
+verbose = TRUE;
+
+///////////// debug_show_source_code_method_and_line //
+//
+// Source code methods/line numbers flag.
+//
+// true to show with debug output, ,false to hide.
+//
+//
+// Type: boolean
+//
+
+debug_show_source_code_method_and_line = FALSE;
+
+//======================================================================
+//
+// PROCESS PARAMETERS.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// PROCESS TRIGGERING PARAMETERS.
+//
+// Parameters describing the process triggering.
+//
+//======================================================================
+ 
+///////////// trigger_mode ////////////////////////////
+//
+// Input triggering mode.
+//
+// In LATEST_DATA mode, the program triggers whenever a new input file 
+//   appears.
+// In TIME_LIST mode, the program operates on every input file between 
+//   the start and end times specified on the command line.
+//
+//
+// Type: enum
+// Options:
+//     LATEST_DATA
+//     TIME_LIST
+//
+
+trigger_mode = LATEST_DATA;
+
+///////////// max_valid_secs //////////////////////////
+//
+// Number of seconds the input files are valid.
+//
+// Used only if trigger_mode is set to LATEST_DATA.
+//
+//
+// Type: long
+//
+
+max_valid_secs = 300;
+
+//======================================================================
+//
+// PROCESS I/O PARAMETERS.
+//
+// Parameters describing the input and output locations.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// Input URL.
+//
+//
+// Type: string
+//
+
+input_url = "not used";
+
+///////////// raw_iq_in_input /////////////////////////
+//
+// Flag indicating whether the raw I and Q values are included in the 
+//   input stream.
+//
+// If true, the raw fields will be read from the input stream. If false, 
+//   the raw fields will be calculated from the NIQ/AIQ values which must 
+//   be inluded in the input stream instead.
+//
+//
+// Type: boolean
+//
+
+raw_iq_in_input = FALSE;
+
+///////////// raw_i_field_name ////////////////////////
+//
+// Raw I field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to TRUE.
+//
+//
+// Type: string
+//
+
+raw_i_field_name = "MeanI";
+
+///////////// raw_q_field_name ////////////////////////
+//
+// Raw Q field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to TRUE.
+//
+//
+// Type: string
+//
+
+raw_q_field_name = "MeanQ";
+
+///////////// niq_field_name //////////////////////////
+//
+// NIQ field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to FALSE.
+//
+//
+// Type: string
+//
+
+niq_field_name = "NIQ";
+
+///////////// input_niq_scale /////////////////////////
+//
+// Input NIQ scale value.
+//
+// The NIQ value from the input source is multiplied by this value 
+//   before the data is used. For most radars this value should be 0.1. 
+//   For SPOL this value should be 0.025.
+//
+//
+// Type: double
+//
+
+input_niq_scale = 0.1;
+
+///////////// invert_target_angle_sign ////////////////
+//
+// Flag indicating whether to invert the sign of the target angles.
+//
+// This fix should be done upstream, but is added here just in case.
+// Used only if raw_iq_in_input is set to FALSE.
+//
+//
+// Type: boolean
+//
+
+invert_target_angle_sign = TRUE;
+
+///////////// aiq_field_name //////////////////////////
+//
+// AIQ field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to FALSE.
+//
+//
+// Type: string
+//
+
+aiq_field_name = "AIQ";
+
+///////////// snr_in_input ////////////////////////////
+//
+// Flag indicating whether the SNR field is included in the input 
+//   stream.
+//
+// If true, the SNR field will be read from the input stream. If false, 
+//   the SNR field will be calculated from the power field which must be 
+//   inluded in the input stream.
+// The SNR field is only needed if the raw I/Q values are not included 
+//   in the input files and so must be calculated from the NIQ/AIQ values.
+//
+//
+// Type: boolean
+//
+
+snr_in_input = $(SNR_IN_INPUT);
+
+///////////// snr_field_name //////////////////////////
+//
+// Signal-to-noise ratio field name in the input stream.
+//
+//
+// Type: string
+//
+
+snr_field_name = "SNRHC";
+
+///////////// power_field_name ////////////////////////
+//
+// Power field name in the input stream.
+//
+//
+// Type: string
+//
+
+power_field_name = "DM";
+
+///////////// quality_source //////////////////////////
+//
+// Which field to use when calculating the quality value.
+//
+// 	QUALITY_FROM_WIDTH - The quality field is calculated using a 
+//   spectrum width field.
+// 	QUALITY_FROM_CPA - The quality field is calculated using a CPA 
+//   field.
+//
+//
+// Type: enum
+// Options:
+//     QUALITY_FROM_WIDTH
+//     QUALITY_FROM_CPA
+//
+
+quality_source = QUALITY_FROM_WIDTH;
+
+///////////// quality_field_name //////////////////////
+//
+// Name of field to use in the quality calculations.
+//
+// If quality_source is set to QUALITY_FROM_WIDTH then this should be a 
+//   spectrum width field.
+// If quality_source is set to QUALITY_FROM_CPA then this shoudl be a 
+//   probability of clutter field. The probability of clutter field should 
+//   range from 0.0 to 1.0 with 0.0 indicating the gate definitely doesn't 
+//   contain clutter and 1.0 indicating that the gate definitely is 
+//   clutter.
+//
+//
+// Type: string
+//
+
+quality_field_name = "WIDTH";
+
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+//
+//
+// Type: string
+//
+
+output_url = "not used";
+
+///////////// specify_elevation_by_index //////////////
+//
+// Flag indicating whether to specify the desired elevation by index or 
+//   by angle limits.
+//
+// If true, the elevation is specfied by index in the elevation_num 
+//   parameter.
+// If false, the elevation is specified by angle in the elevation_angle 
+//   parameter.
+//
+//
+// Type: boolean
+//
+
+specify_elevation_by_index = FALSE;
+
+///////////// elevation_num ///////////////////////////
+//
+// Elevation number to use from the MDV files.
+//
+// Used only if specify_elevation_by_index is set to true.
+//
+//
+// Type: long
+//
+
+elevation_num = 0;
+
+///////////// elevation_angle /////////////////////////
+//
+// The angle limits for the desired elevation angle. Only sweeps with 
+//   elevation angles between these limits will be used in the 
+//   calibration.
+//
+// Used only if specify_elevation_by_index is set to false.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double min_angle;
+//      double max_angle;
+//   }
+//
+//
+
+elevation_angle = {
+    min_angle = 0.45,
+    max_angle = 0.55
+};
+
+///////////// scan_mode ///////////////////////////////
+//
+// Input scan mode.
+//
+//
+// Type: enum
+// Options:
+//     ALL_SCAN_STRATEGIES
+//     MULTIPLE_ELEV_ONLY
+//     SINGLE_ELEV_ONLY
+//
+
+scan_mode = ALL_SCAN_STRATEGIES;
+
+///////////// num_azim ////////////////////////////////
+//
+// Number of azimuths used in data processing.
+//
+// Minimum val: 1
+//
+// Type: long
+//
+
+num_azim = $(NUM_AZIM);
+
+///////////// num_range_bins //////////////////////////
+//
+// Number of range bins used in data processing.
+//
+// Minimum val: 1
+//
+// Type: long
+//
+
+num_range_bins = $(NUM_RANGE_BINS);
+
+///////////// debug_latlon ////////////////////////////
+//
+// debug lat/lon.
+//
+// Extreme debugging at a point, set to -1,-1 to disable.
+//
+//
+// Type: double
+// 1D array - fixed length - 2 elements.
+//
+
+debug_latlon = {
+ -1,
+ -1
+};
+
+///////////// debug_npt ///////////////////////////////
+//
+// debug npt.
+//
+// Extreme debugging radius around the debug point to keep showing 
+//   debugging, number of gridpoints.
+//
+//
+// Type: int
+//
+
+debug_npt = 1;
+
+/**********************************************************************
+ * TDRP params for Params
+ **********************************************************************/
+
+//======================================================================
+//
+// RefractCalib.
+//
+// This program creates the calibration file used by Refract.
+//
+//======================================================================
+ 
+///////////// write_debug_mdv_files ///////////////////
+//
+// Flag indicating whether to write debug MDV files.
+//
+//
+// Type: boolean
+//
+
+write_debug_mdv_files = TRUE;
+
+///////////// debug_mdv_url ///////////////////////////
+//
+// Debug MDV file URL.
+//
+//
+// Type: string
+//
+
+debug_mdv_url = "mdvp:://$(ALG_HOST)::$(CALIB_FILE_PATH)/debug/RefractCalib";
+
+///////////// file_list_inputs ////////////////////////
+//
+// Flag indicating whether to use a file list for input data, or a range 
+//   of times.
+//
+// TRUE means use the file list, FALSE means use a range of times.
+//
+//
+// Type: boolean
+//
+
+file_list_inputs = FALSE;
+
+///////////// target_files_host ///////////////////////
+//
+// Host on which target files are found.
+//
+//
+// Type: string
+//
+
+target_files_host = "$(DATA_HOST)";
+
+///////////// calibration_files_host //////////////////
+//
+// Host on which calibration files are found.
+//
+//
+// Type: string
+//
+
+calibration_files_host = "$(DATA_HOST)";
+
+///////////// target_id_file_list /////////////////////
+//
+// List of files to use for target identification, when 
+//   file_list_inputs=true.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+target_id_file_list = {
+};
+
+///////////// calibration_file_list ///////////////////
+//
+// List of files to use for calibration, when file_list_inputs=true.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+calibration_file_list = {
+};
+
+///////////// target_files_path ///////////////////////
+//
+// Path with files to use for target identification when 
+//   file_list_inputs = false, can be relative to $RAP_DATA_DIR.
+//
+//
+// Type: string
+//
+
+target_files_path = "$(DATA_DIR)";
+
+///////////// target_files_time_range /////////////////
+//
+// Starting/ending time for target identification data when 
+//   file_list_inputs = false.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+// 1D array - fixed length - 2 elements.
+//
+
+target_files_time_range = {
+  {
+    year = $(TARGET_YEAR1),
+    month = $(TARGET_MONTH1),
+    day = $(TARGET_DAY1),
+    hour = $(TARGET_HOUR1),
+    min = $(TARGET_MIN1),
+    sec = $(TARGET_SEC1)
+  }
+  ,
+  {
+    year = $(TARGET_YEAR2),
+    month = $(TARGET_MONTH2),
+    day = $(TARGET_DAY2),
+    hour = $(TARGET_HOUR2),
+    min = $(TARGET_MIN2),
+    sec = $(TARGET_SEC2)
+  }
+};
+
+///////////// calibration_files_path //////////////////
+//
+// Path with files to use for calibration when file_list_inputs = false, 
+//   can be relative to $RAP_DATA_DIR.
+//
+//
+// Type: string
+//
+
+calibration_files_path = "$(DATA_DIR)";
+
+///////////// calibration_files_time_range ////////////
+//
+// Starting/ending time for calibration data when file_list_inputs = 
+//   false.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+// 1D array - fixed length - 2 elements.
+//
+
+calibration_files_time_range = {
+  {
+    year = $(CALIB_YEAR1),
+    month = $(CALIB_MONTH1),
+    day = $(CALIB_DAY1),
+    hour = $(CALIB_HOUR1),
+    min = $(CALIB_MIN1),
+    sec = $(CALIB_SEC1)
+  }
+  ,
+  {
+    year = $(CALIB_YEAR2),
+    month = $(CALIB_MONTH2),
+    day = $(CALIB_DAY2),
+    hour = $(CALIB_HOUR2),
+    min = $(CALIB_MIN2),
+    sec = $(CALIB_SEC2)
+  }
+};
+
+//======================================================================
+//
+// ALGORITHM PARAMETERS.
+//
+//======================================================================
+ 
+///////////// ref_file_path ///////////////////////////
+//
+// Reference file path.
+//
+// Full path for the file containing calibration information.  This is 
+//   the file that is created by the calibration and used as input to the 
+//   Refract algorithm.
+//
+//
+// Type: string
+//
+
+ref_file_path = "mdvp:://$(ALG_HOST)::$(CALIB_REF_FILE_PATH)/$(CALIB_REF_FILE_NAME)";
+
+///////////// ref_url /////////////////////////////////
+//
+// Reference file url.
+//
+// Second path in which time stamped MDV is written so as to be useful 
+//   in display.
+//
+//
+// Type: string
+//
+
+ref_url = "mdvp:://$(ALG_HOST)::$(CALIB_FILE_PATH)";
+
+///////////// beam_width //////////////////////////////
+//
+// Antenna beam width in degrees.
+//
+//
+// Type: double
+//
+
+beam_width = 0.92;
+
+///////////// r_min ///////////////////////////////////
+//
+// Min range gate of ground echo.
+//
+// Minimum val: 1
+//
+// Type: long
+//
+
+r_min = 4;
+
+///////////// side_lobe_pow ///////////////////////////
+//
+// Side lobe power.
+//
+// Echoes below this value of integrated power are considered to be from 
+//   sidelobes.
+//
+// Maximum val: -10
+//
+// Type: double
+//
+
+side_lobe_pow = -75;
+
+///////////// entry_type //////////////////////////////
+//
+// Type of data entry for the calibration calculation.
+//
+// 	ENTER_N - N is entered directly in the calib_n parameter.
+// 	ENTER_P_T_TD - Pressure is entered in the calib_pressure parameter, 
+//   temperature is entered in the calib_temperature parameter and dew 
+//   point temperature is entered in the calib_dewpoint_temperature 
+//   paramtere.
+//
+//
+// Type: enum
+// Options:
+//     ENTER_N
+//     ENTER_P_T_TD
+//
+
+entry_type = ENTER_N;
+
+///////////// calib_n /////////////////////////////////
+//
+// N value to use in the calibration.
+//
+// Used only if entry_type is set to ENTER_N.
+//
+//
+// Type: double
+//
+
+calib_n = 338.0;
+
+///////////// calib_pressure //////////////////////////
+//
+// Pressure value to use in the calibration.
+//
+// This is the station pressure, NOT the sea level pressure. Used only 
+//   if entry_type is set to ENTER_P_T_TD.
+//
+//
+// Type: double
+//
+
+calib_pressure = 260;
+
+///////////// calib_temperature ///////////////////////
+//
+// Temperature value to use in the calibration.
+//
+// Used only if entry_type is set to ENTER_P_T_TD.
+//
+//
+// Type: double
+//
+
+calib_temperature = 1;
+
+///////////// calib_dewpoint_temperature //////////////
+//
+// Dewpoint temperature to use in the calibration.
+//
+// Unsed only if entry_type is set to ENTER_P_T_TD.
+//
+//
+// Type: double
+//
+
+calib_dewpoint_temperature = 1;
+
+//======================================================================
+//
+// COLORSCALE PARAMETERS.
+//
+// These colorscale files can be generated as a convenience to the user. 
+//   They are not required for the calculating of the calibration.
+//
+//======================================================================
+ 
+///////////// create_strength_colorscale //////////////
+//
+// Flag indicating whether to create the strength colorscale file.
+//
+// This creates a CIDD colorscale file that matches the colors used by 
+//   Frederic Fabry in his original n_viewcalib program.
+//
+//
+// Type: boolean
+//
+
+create_strength_colorscale = FALSE;
+
+///////////// strength_colorscale_path ////////////////
+//
+// Full path for the strength colorscale file.
+//
+// Used only if create_strength_colorscale is set to true.
+//
+//
+// Type: string
+//
+
+strength_colorscale_path = "colorscale/strength.colors";
+
+///////////// create_quality_colorscale ///////////////
+//
+// Flag indicating whether to create the quality colorscale file.
+//
+// This creates a CIDD colorscale file that matches the colors used by 
+//   Frederic Fabry in his original n_viewcalib program.
+//
+//
+// Type: boolean
+//
+
+create_quality_colorscale = FALSE;
+
+///////////// quality_colorscale_path /////////////////
+//
+// Full path for the quality colorscale file.
+//
+// Used only if create_quality_colorscale is set to true.
+//
+//
+// Type: string
+//
+
+quality_colorscale_path = "colorscale/quality.colors";
+

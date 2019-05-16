@@ -1,0 +1,18 @@
+#! /bin/csh
+#
+
+source ../../envs/env_set.realtime
+setenv DEMO_TIME  "09:44 02/01/2018"
+setenv DBZ_NAME    DBZ
+setenv VEL_NAME    VEL
+setenv WIDTH_NAME  WIDTH
+setenv SNR_NAME    SNRHCF
+setenv AIQ_NAME    AIQ
+setenv NIQ_NAME    NIQ
+setenv DM_NAME     DM
+setenv LATITUDE   39.949
+setenv LONGITUDE  -105.195
+    
+cd ../params
+CIDD -p CIDD.params
+

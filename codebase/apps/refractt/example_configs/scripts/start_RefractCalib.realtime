@@ -1,0 +1,36 @@
+#! /bin/csh
+
+source ../../envs/env_set.realtime
+
+setenv TARGET_YEAR1 2018
+setenv TARGET_MONTH1  05
+setenv TARGET_DAY1    12
+setenv TARGET_HOUR1   11
+setenv TARGET_MIN1    12
+setenv TARGET_SEC1     0
+
+setenv TARGET_YEAR2 2018
+setenv TARGET_MONTH2  05
+setenv TARGET_DAY2    12
+setenv TARGET_HOUR2   11
+setenv TARGET_MIN2    47
+setenv TARGET_SEC2     0
+
+setenv CALIB_YEAR1 2018
+setenv CALIB_MONTH1  05
+setenv CALIB_DAY1    12
+setenv CALIB_HOUR1   11
+setenv CALIB_MIN1    12
+setenv CALIB_SEC1     0
+
+setenv CALIB_YEAR2 2018
+setenv CALIB_MONTH2  05
+setenv CALIB_DAY2    12
+setenv CALIB_HOUR2   11
+setenv CALIB_MIN2    47
+setenv CALIB_SEC2     0
+
+setenv CALIB_REF_FILE_NAME  $CALIB_REF_FILE_NAME_DAY
+
+cd ../params
+$BIN_DIR/RefractCalib -params RefractCalib.params
