@@ -1090,7 +1090,7 @@
     tt->val_offset = (char *) &filt - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
-
+    
     // Parameter 'override_missing_field_values'
     // ctype is 'tdrp_bool_t'
     
@@ -1108,7 +1108,7 @@
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = FLOAT_TYPE;
-    tt->param_name = tdrpStrDup("missing_vel");
+    tt->param_name = tdrpStrDup("velocity_field_missing_value");
     tt->descr = tdrpStrDup("Missing value for velocity field data.");
     tt->help = tdrpStrDup("Only applies if override_missing_field_values is TRUE");
     tt->val_offset = (char *) &velocity_field_missing_value - &_start_;

@@ -97,15 +97,15 @@ FourDD::~FourDD()
 
 float FourDD::getMissingValue(Volume *volume) {
   if (volume == NULL)
-    throw std::invalid_argument("volume is NULL");
+    throw std::string("volume is NULL");
   return volume->h.missing; 
 }
 
 float FourDD::getNyqVelocity(Volume *volume, int sweepIndex) {
   if (volume == NULL) 
-    throw std::invalid_argument("volume is NULL");
+    throw std::string("volume is NULL");
   if ((sweepIndex < 0) || (sweepIndex >= volume->h.nsweeps)) 
-    throw std::invalid_argument("sweepIndex outside range");
+    throw std::string("sweepIndex outside range");
   return volume->sweep[sweepIndex]->ray[0]->h.nyq_vel;
 }
 
@@ -115,16 +115,16 @@ float FourDD::getNyqInterval(float nyqVelocity) { // Volume *volume, int sweepIn
 
 int FourDD::getNumBins(Volume *volume, int sweepIndex) {
   if (volume == NULL) 
-    throw std::invalid_argument("volume is NULL");
+    throw std::string("volume is NULL");
   if ((sweepIndex < 0) || (sweepIndex >= volume->h.nsweeps)) 
-    throw std::invalid_argument("sweepIndex outside range");
+    throw std::string("sweepIndex outside range");
   return volume->sweep[sweepIndex]->ray[0]->h.nbins;
 }
 int FourDD::getNumRays(Volume *volume, int sweepIndex) {
   if (volume == NULL) 
-    throw std::invalid_argument("volume is NULL");
+    throw std::string("volume is NULL");
   if ((sweepIndex < 0) || (sweepIndex >= volume->h.nsweeps)) 
-    throw std::invalid_argument("sweepIndex outside range");
+    throw std::string("sweepIndex outside range");
   return volume->sweep[sweepIndex]->h.nrays;
 }
 
@@ -132,17 +132,17 @@ int FourDD::getNumRays(Volume *volume, int sweepIndex) {
 int FourDD::getMaxNumBins(Volume *volume) {
   // TODO: HERE find the max dimensions
   if (volume == NULL) 
-    throw std::invalid_argument("volume is NULL");
+    throw std::string("volume is NULL");
   int sweepIndex = 0;
   if ((sweepIndex < 0) || (sweepIndex >= volume->h.nsweeps)) 
-    throw std::invalid_argument("sweepIndex outside range");
+    throw std::string("sweepIndex outside range");
   return volume->sweep[sweepIndex]->ray[0]->h.nbins;
 }
 int FourDD::getMaxNumRays(Volume *volume, int sweepIndex) {
   if (volume == NULL) 
-    throw std::invalid_argument("volume is NULL");
+    throw std::string("volume is NULL");
   if ((sweepIndex < 0) || (sweepIndex >= volume->h.nsweeps)) 
-    throw std::invalid_argument("sweepIndex outside range");
+    throw std::string("sweepIndex outside range");
   return volume->sweep[sweepIndex]->h.nrays;
 }
 */
@@ -513,18 +513,18 @@ short FourDD::Filter3x3(Volume *original, int i, int currIndex, int sweepIndex) 
   int prev, next;
 
   if (original == NULL) 
-    throw std::invalid_argument("original is NULL");
+    throw std::string("original is NULL");
 
   if ((sweepIndex < 0) || (sweepIndex >= original->h.nsweeps)) 
-    throw std::invalid_argument("sweepIndex outside range");
+    throw std::string("sweepIndex outside range");
  
   int numRays = original->sweep[sweepIndex]->h.nrays;
     if ((currIndex < 0) || (currIndex >= numRays))
-    throw std::invalid_argument("currIndex outside range");
+    throw std::string("currIndex outside range");
 
   int numBins = original->sweep[sweepIndex]->ray[0]->h.nbins;
   if ((i < 0) || (i >= numBins))
-    throw std::invalid_argument("bin index, i,  outside range");
+    throw std::string("bin index, i,  outside range");
 
 
   if (currIndex==0) left=numRays-1;
@@ -594,20 +594,20 @@ void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *sou
   //  int flag=1;
   
   if (rvVolume == NULL) 
-    throw std::invalid_argument("rvVolume is NULL");
+    throw std::string("rvVolume is NULL");
 
   if ((sweepIndex < 0) || (sweepIndex >= rvVolume->h.nsweeps)) 
-    throw std::invalid_argument("sweepIndex outside range");
+    throw std::string("sweepIndex outside range");
  
   int numSweeps = rvVolume->h.nsweeps;
   int numRays = rvVolume->sweep[sweepIndex]->h.nrays;
   /*
     if ((currIndex < 0) || (currIndex >= numRays))
-    throw std::invalid_argument("currIndex outside range");
+    throw std::string("currIndex outside range");
   */
   int numBins = rvVolume->sweep[sweepIndex]->ray[0]->h.nbins;
   if ((del_num_bins < 0) || (del_num_bins >= numBins))
-    throw std::invalid_argument("del_num_bins  outside range");
+    throw std::string("del_num_bins  outside range");
   /*
 
          NyqVelocity = rvVolume->sweep[sweepIndex]->ray[0]->
