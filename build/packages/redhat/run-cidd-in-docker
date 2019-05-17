@@ -1,8 +1,19 @@
 #!/usr/bin/env bash
 
 #
+# script to run CIDD from a docker container, on a mac
+#
+# Dependencies:
+#  * docker
+#  * socat
+#
+# Install docker from the DMG
+# Install socat with: new install socat
+
+#
 # version number for cidd-docker script
 #
+
 lrose_cidd_docker_version='latest'
 
 # cidd-docker
@@ -52,10 +63,17 @@ if [[ "$@" = '' ]] ; then
   exit 1
 fi
 
+# start socat to connect X server from container
+
+lrose_uname=$(uname)
+if [[ $lrose_uname = 'Darwin' ]]; then
+  socat TCP-LISTEN:6000,reuseaddr,fork UNIX-CLIENT:\"$DISPLAY\" >& /tmp/socat.log &
+  cat /tmp/socat.log
+fi
+
 # get params URL from first arg
 
 cidd_params_url=$1
-
 cidd_docker_image='ncareol/lrose-cidd'
 
 #
@@ -104,7 +122,12 @@ lrose_docker_run_options () {
 
 _echo_version
 
-echo=1
+echo "running cmd: docker run \
+    -v $HOME/.Xauthority:/root/.Xauthority \
+    $(lrose_docker_run_options) \
+    ${cidd_docker_image} \
+    /usr/local/cidd/bin/CIDD -font fixed \
+    -p $cidd_params_url"
 
 docker run \
     -v $HOME/.Xauthority:/root/.Xauthority \
