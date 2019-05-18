@@ -38,7 +38,7 @@ RUN \
     gnuplot ImageMagick-devel ImageMagick-c++-devel \
     xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi \
     xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi \
-    xorg-x11-fonts-misc;
+    xorg-x11-fonts-misc; \
     \
 #   then create link for qtmake
     cd /usr/bin; \
@@ -50,4 +50,4 @@ RUN \
     --buildDir /tmp/cidd_build \
     --logDir /tmp/cidd_build_logs; \
 # then clean up
-#    /bin/rm -rf /tmp/cidd_build /tmp/cidd_build_logs
+    /bin/rm -rf /tmp/cidd_build /tmp/cidd_build_logs

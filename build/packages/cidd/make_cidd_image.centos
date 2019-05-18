@@ -47,11 +47,19 @@ cd ~/git/lrose-core/build/packages/cidd
 DockerfilePath=Dockerfile.centos.cidd
 echo "  Dockerfile path: " $DockerfilePath
 
+# remove old image if present
+
+tag=build.lrose-cidd/centos:latest
+docker image rm -f ${tag}
+
+# make build script available to container
+
+scriptsDir=~/git/lrose-core/build
+
 # create the image
 
-cd /tmp/docker
-
 docker build \
-    --tag build/lrose-cidd:latest \
+    -v ${scriptsDir}:/scripts \
+    --tag ${tag} \
     --file ${DockerfilePath} .
 
