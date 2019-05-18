@@ -82,8 +82,6 @@ lrose_docker_run_options () {
     fi
 }
 
-logPath = /tmp/${cidd_params_url}.log
-
 echo "======================================"
 echo "running cmd:"
 echo "  docker run -v $HOME/.Xauthority:/root/.Xauthority $(lrose_docker_run_options) ${cidd_docker_image} /usr/local/cidd/bin/CIDD -font fixed -p $cidd_params_url"
