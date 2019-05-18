@@ -10,12 +10,7 @@ SUB_DIRS = \
          Acars2Symprod \
          AcTrack2Symprod \
          Bdry2Symprod \
-         DataMapper \
-         DissectURL \
          DsFCopyServer \
-         DsFileDist \
-         DsFmqServer \
-         DsLdataServer \
          DsMdvServer \
          DsProxyServer \
          DsServerMgr \
@@ -31,19 +26,13 @@ SUB_DIRS = \
          Ltg2Symprod \
          Mad2Symprod \
          Metar2Symprod \
-         NcMdvServer \
          Pirep2Symprod \
          PosnRpt2Symprod \
-         PrintDataMap \
-         print_server_mgr \
          resolve_host \
          ResolveUrl \
          Rhi2Symprod \
          SigAirMet2Symprod \
-         SpdbQuery \
          SunCal2Symprod \
-         SyncDataMap \
-         TestDataMap \
          Tstorms2Symprod \
          Vergrid2Symprod \
          WxHazards2Symprod

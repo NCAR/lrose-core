@@ -50,4 +50,4 @@ RUN \
     --buildDir /tmp/cidd_build \
     --logDir /tmp/cidd_build_logs; \
 # then clean up
-    /bin/rm -rf /tmp/cidd_build /tmp/cidd_build_logs
+#    /bin/rm -rf /tmp/cidd_build /tmp/cidd_build_logs
