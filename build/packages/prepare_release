@@ -45,13 +45,13 @@ done
 
 # perform the builds
 
-perform_builds -p blaze -r ${release_date}
+#perform_builds -p blaze -r ${release_date}
 perform_builds -p core  -r ${release_date}
-perform_builds -p radx  -r ${release_date}
+#perform_builds -p radx  -r ${release_date}
 
 # make the packages
 
-make_packages -p blaze -r ${release_date}
+#make_packages -p blaze -r ${release_date}
 make_packages -p core  -r ${release_date}
-make_packages -p radx  -r ${release_date}
+#make_packages -p radx  -r ${release_date}
 

@@ -55,11 +55,13 @@ done
 ./redhat/make_package.redhat -t centos -v 7  -p ${lrose_pkg} -r ${release_date}
 ./redhat/make_package.redhat -t fedora -v 28 -p ${lrose_pkg} -r ${release_date}
 ./redhat/make_package.redhat -t fedora -v 29 -p ${lrose_pkg} -r ${release_date}
+./redhat/make_package.redhat -t fedora -v 30 -p ${lrose_pkg} -r ${release_date}
 
 ./debian/make_package.debian -t debian -v 9      -p ${lrose_pkg} -r ${release_date}
 ./debian/make_package.debian -t ubuntu -v 16.04  -p ${lrose_pkg} -r ${release_date}
 ./debian/make_package.debian -t ubuntu -v 18.04  -p ${lrose_pkg} -r ${release_date}
 ./debian/make_package.debian -t ubuntu -v 18.10  -p ${lrose_pkg} -r ${release_date}
+./debian/make_package.debian -t ubuntu -v 19.04  -p ${lrose_pkg} -r ${release_date}
 
 # perform the install and test
 
@@ -67,10 +69,12 @@ done
 ./redhat/install_pkg_and_test.redhat -t centos -v 7  -p ${lrose_pkg}
 ./redhat/install_pkg_and_test.redhat -t fedora -v 28 -p ${lrose_pkg}
 ./redhat/install_pkg_and_test.redhat -t fedora -v 29 -p ${lrose_pkg}
+./redhat/install_pkg_and_test.redhat -t fedora -v 30 -p ${lrose_pkg}
 
 ./debian/install_pkg_and_test.debian -t debian -v 9      -p ${lrose_pkg}
 ./debian/install_pkg_and_test.debian -t ubuntu -v 16.04  -p ${lrose_pkg}
 ./debian/install_pkg_and_test.debian -t ubuntu -v 18.04  -p ${lrose_pkg}
 ./debian/install_pkg_and_test.debian -t ubuntu -v 18.10  -p ${lrose_pkg}
+./debian/install_pkg_and_test.debian -t ubuntu -v 19.04  -p ${lrose_pkg}
 
 
