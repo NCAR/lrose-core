@@ -1,11 +1,8 @@
-# packages needed
-#  open gl
-#  libqt4-opengl-dev
-#  libglut-dev
+# qmake.pro for HawkEye
 
 QT += widgets
 QT += qml
-requires(qtConfig(filedialog))
+# requires(qtConfig(filedialog))
 
 TEMPLATE = app
 TARGET = HawkEye
@@ -15,7 +12,7 @@ CONFIG += qt
 CONFIG += debug
 
 # RESOURCES = resources.qrc 
-RESOURCES = customcompleter.qrc
+# RESOURCES = customcompleter.qrc
 
 HEADERS += AllocCheck.hh
 HEADERS += Args.hh
