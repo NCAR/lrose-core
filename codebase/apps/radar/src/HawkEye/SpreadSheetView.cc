@@ -1064,10 +1064,10 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
     }
 
   }
-  if (value.isQMetaObject()) {
-    LOG(DEBUG) << "variable isQMetaObject " << name.toStdString();
-    qDebug() << "variable isQMetaObject " << name << endl;
-  }
+  // if (value.isQMetaObject()) {
+  //   LOG(DEBUG) << "variable isQMetaObject " << name.toStdString();
+  //   qDebug() << "variable isQMetaObject " << name << endl;
+  // }
   if (value.isQObject()) {
     LOG(DEBUG) << "variable isQObject " << name.toStdString();
     qDebug() << "variable isQObject " << name << endl;
