@@ -16,26 +16,25 @@ Group:          Scientific Tools
 AutoReqProv:    no
 License:        BSD
  
-Requires: glibc-devel.i686
-Requires: libX11-devel.i686
-Requires: libXext-devel.i686
-Requires: libtiff-devel.i686
-Requires: libpng-devel.i686
-Requires: libcurl-devel.i686
-Requires: libstdc++-devel.i686
-Requires: libtiff-devel.i686
-Requires: zlib-devel.i686
-Requires: expat-devel.i686
-Requires: flex-devel.i686
-Requires: fftw-devel.i686
-Requires: bzip2-devel.i686
-Requires: ImageMagick-devel
-Requires: ImageMagick-c++-devel
-Requires: xorg-x11-fonts-100dpi
-Requires: xorg-x11-fonts-ISO8859-1-100dpi
-Requires: xorg-x11-fonts-75dpi
-Requires: xorg-x11-fonts-ISO8859-1-75dpi
-Requires: xorg-x11-fonts-misc
+Requires: glibc-devel-32bit
+Requires: libX11-devel-32bit
+Requires: libXext-devel-32bit
+Requires: libtiff-devel-32bit
+Requires: libpng-devel-32bit
+Requires: libcurl-devel-32bit
+Requires: libstdc++-devel-32bit
+Requires: libtiff-devel-32bit
+Requires: zlib-devel-32bit
+Requires: libexpat-devel-32bit
+Requires: flex-32bit
+Requires: libfftw3-3-32bit
+Requires: libbz2-devel-32bit
+Requires: gnuplot
+Requires: ImageMagick-devel-32bit
+Requires: xorg-x11
+Requires: xorg-x11-devel
+Requires: xorg-x11-fonts
+Requires: xorg-x11-fonts-core
 
 %description
 CIDD - Cartesian Interactive Data Display

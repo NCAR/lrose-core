@@ -58,7 +58,7 @@ fi
 rpmPath=`ls /pkgs/*/*.rpm`
 echo "  rpm: $rpmPath"
 
-zypper install -y ${rpmPath}
+zypper --no-gpg-checks install -y ${rpmPath}
 
 # check that RadxPrint runs
 

@@ -21,16 +21,17 @@ Requires: libXext-devel
 Requires: libpng-devel
 Requires: libtiff-devel
 Requires: zlib-devel
-Requires: expat-devel
+Requires: libexpat-devel
 Requires: libcurl-devel
-Requires: flex-devel
+Requires: flex
 Requires: fftw3-devel
-Requires: bzip2-devel
-Requires: qt5-qtbase-devel
+Requires: libbz2-devel
+Requires: libzip-devel
+Requires: libqt5-qtbase-devel
+Requires: libqt5-qtdeclarative-devel
 Requires: hdf5-devel
 Requires: netcdf-devel
 Requires: xorg-x11-xauth
-Requires: xorg-x11-apps
 
 %description
 LROSE - Lidar Radar Open Software Environment
