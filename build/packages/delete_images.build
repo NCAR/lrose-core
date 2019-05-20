@@ -47,11 +47,17 @@ done
 
 docker image rm -f build.${lrose_pkg}/centos:6
 docker image rm -f build.${lrose_pkg}/centos:7
+
 docker image rm -f build.${lrose_pkg}/fedora:28
 docker image rm -f build.${lrose_pkg}/fedora:29
+docker image rm -f build.${lrose_pkg}/fedora:30
 
 docker image rm -f build.${lrose_pkg}/debian:9
+
 docker image rm -f build.${lrose_pkg}/ubuntu:16.04
 docker image rm -f build.${lrose_pkg}/ubuntu:18.04
 docker image rm -f build.${lrose_pkg}/ubuntu:18.10
+docker image rm -f build.${lrose_pkg}/ubuntu:19.04
 
+docker image rm -f build.${lrose_pkg}/opensuse:leap
+docker image rm -f build.${lrose_pkg}/opensuse:latest
