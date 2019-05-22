@@ -109,13 +109,14 @@ public:
   //  void firstGuess(Volume* soundVolume, float missingVal,short unsigned int *,time_t volTime);
 
   void unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVolume,
-		    float missingVal, unsigned short rm, unsigned short* success);
+		    int del_num_bins, float missingVal, unsigned short rm,
+                    unsigned short* success);
 
   float window(Volume* rvVolume, int sweepIndex, int startray, int endray,
                int firstbin, int lastbin, float std_thresh,
                bool* success);
 
-  void prepVolume (Volume* DBZVolume, Volume* rvVolume, float missingVal);
+  void prepVolume (Volume* DBZVolume, Volume* rvVolume, int del_num_bins, float missingVal);
 
   int findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int 
 	       sweepIndex2, int currIndex1);
@@ -134,7 +135,8 @@ public:
   int getNumBins(Volume *volume, int sweepIndex);
   int getNumRays(Volume *volume, int sweepIndex);
 
-  short Filter3x3(Volume *VALS, int i, int currIndex, int sweepIndex);
+  short Filter3x3(Volume *VALS, int i, int currIndex, int sweepIndex,
+                  int del_num_bins);
 
   void InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *soundVolume, Volume *original,
 			 int sweepIndex, int del_num_bins, short **STATE, bool filt, float fraction);
