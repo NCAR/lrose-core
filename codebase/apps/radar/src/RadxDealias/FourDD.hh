@@ -145,7 +145,9 @@ public:
 						      float abVal, float soundVal, 
 						      float startingVal, float prevVal, bool lastVolumeIsNull,
 						      float fraction, float NyqVelocity,
-						     float *unfoldedValue, bool *successful);
+                                                      bool first_pass_only,
+                                                      int max_count,
+                                                      float *unfoldedValue, bool *successful);
 
   /*  void AssessNeighborhood(short **STATE, int currIndex, int i, int numRays, int numBins,
 			  int *numberOfDealiasedNeighbors, int *numberOfTbdNeighbors,

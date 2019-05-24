@@ -1,5 +1,6 @@
 
 #include "FourDD.hh"
+#include <cmath>
 #include <stdexcept>
 
 using namespace std;
@@ -649,73 +650,79 @@ void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *sou
   */
   
   int prevIndex = 0;
-  int abIndex = 0;
+  int aboveIndex = 0;
   float missingVal = getMissingValue(rvVolume);
 
-  // for each ray ...                                                                                                               
-  for (int currIndex=0; currIndex<numRays; currIndex++) {
+  // for each ray ...
+  for (int rayIndex=0; rayIndex<numRays; rayIndex++) {
     if (lastVolume!=NULL)
-      prevIndex=findRay(rvVolume, lastVolume, sweepIndex, sweepIndex, currIndex);
+      prevIndex=findRay(rvVolume, lastVolume, sweepIndex, sweepIndex, rayIndex);
 
     // find the closest ray in the next sweep of the same volume
     if (sweepIndex < numSweeps-1)
-      abIndex=findRay(rvVolume, rvVolume, sweepIndex, sweepIndex+1, currIndex);
+      aboveIndex=findRay(rvVolume, rvVolume, sweepIndex, sweepIndex+1, rayIndex);
 
     for (int i=del_num_bins; i < numBins; i++) {
 
       // Initialize Output Sweep with missing values:                                                       
-      rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = missingVal;
+      rvVolume->sweep[sweepIndex]->ray[rayIndex]->range[i] = missingVal;
 
-      float startingValue = original->sweep[sweepIndex]->ray[currIndex]->range[i];
+      float startingValue = original->sweep[sweepIndex]->ray[rayIndex]->range[i];
 
       if (startingValue == missingVal) {
-	STATE[i][currIndex] = MISSING;
+	STATE[i][rayIndex] = MISSING;
       } else {  // check the neighborhood for information
 	if (filt) {
-	  STATE[i][currIndex] = Filter3x3(original, i, currIndex, sweepIndex,
-                                          del_num_bins);
+	  STATE[i][rayIndex] = Filter3x3(original, i, rayIndex, sweepIndex,
+                                         del_num_bins);
 	} else {
 	  // If no filter is being applied save bin for dealiasing:
-	  STATE[i][currIndex] = TBD;
+	  STATE[i][rayIndex] = TBD;
 	}
-      }
+      
+        if ((STATE[i][rayIndex] == TBD) &&  (fabs(startingValue) > _ck_val)) {
+            float unfoldedValue;
+            bool successful;
 
-      if (STATE[i][currIndex] == TBD) {
-	float unfoldedValue;
-	bool successful;
+            float prevVal = missingVal;
+            if (lastVolume != NULL) {
+              // TODO: what if prevIndex is out of bounds?
+              prevVal = lastVolume->sweep[sweepIndex]->ray[prevIndex]->range[i];
+            }
+            float soundVal = missingVal;
+            if (soundVolume!=NULL && lastVolume == NULL) {
+              soundVal = soundVolume->sweep[sweepIndex]->ray[rayIndex]->range[i];
+            }
+            // aboveIndex is the closest ray in the next higher sweep
+            float aboveVal = missingVal;
+            if (sweepIndex<numSweeps-1) {
+              aboveVal = rvVolume->sweep[sweepIndex+1]->ray[aboveIndex]->range[i];
+            }
 
-	float prevVal = missingVal;
-	if (startingValue != missingVal && lastVolume != NULL) {
-          // TODO: what if prevIndex is out of bounds?
-	  prevVal = lastVolume->sweep[sweepIndex]->ray[prevIndex]->range[i];
-	}
-	float soundVal = missingVal;
-	if (startingValue!=missingVal && soundVolume!=NULL && lastVolume == NULL) {
-	  soundVal = soundVolume->sweep[sweepIndex]->ray[currIndex]->range[i];
-	}
-	// abIndex is the closest ray in the next sweep
-	float abVal = missingVal;
-	if (startingValue!=missingVal && sweepIndex<numSweeps-1) {
-	  abVal = rvVolume->sweep[sweepIndex+1]->ray[abIndex]->range[i];
-	}
-
-	float NyqVelocity = getNyqVelocity(rvVolume, sweepIndex);
-	TryToDealiasUsingVerticalAndTemporalContinuity(missingVal,
-						       abVal, soundVal,
-						       startingValue, prevVal, lastVolume==NULL,
-						       fraction, NyqVelocity,
-							&unfoldedValue, &successful);
-	if (successful) {
-	  rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = unfoldedValue;
-	  STATE[i][currIndex] = DEALIASED;
-	}
-      } //end if ( STATE[i][currIndex]==TBD)                                                                             
-    } // end for (i=del_num_bins;i<numBins;i++)                                                                                  
-  } //end for (currIndex=0;currIndex<numRays;currIndex++)          
+            float NyqVelocity = getNyqVelocity(rvVolume, sweepIndex);
+            //float fractionNyqVelocity = fraction * NyqVelocity;
+            TryToDealiasUsingVerticalAndTemporalContinuity(missingVal,
+                                                           aboveVal, soundVal,
+                                                           startingValue, prevVal, lastVolume==NULL,
+                                                           fraction, NyqVelocity,
+                                                           _strict_first_pass,
+                                                           _max_count,
+                                                           &unfoldedValue, &successful);
+            if (successful) {
+              rvVolume->sweep[sweepIndex]->ray[rayIndex]->range[i] = unfoldedValue;
+              STATE[i][rayIndex] = DEALIASED;
+            }
+      
+          } //end if ( STATE[i][rayIndex]==TBD) && (startingValue > _ck_val)
+      } // check neighborhood for information
+    } // end for (i=del_num_bins;i<numBins;i++)
+                                                                                  
+  } //end for (rayIndex=0;rayIndex<numRays;rayIndex++)          
 }
 
 
-// TODO: maybe send currentValue, previousValue, abValue, and soundValue
+// NOTE: precondition startingValue != missingValue
+// Send currentValue, previousValue, abValue, and soundValue
 // then, no need for all the indexes, and Volumes?
 void FourDD::TryToDealiasUsingVerticalAndTemporalContinuity(
 							    float missingValue,
@@ -723,13 +730,13 @@ void FourDD::TryToDealiasUsingVerticalAndTemporalContinuity(
 							    float startingValue, float prevValue,
 							    bool lastVolumeIsNull,
 							    float fraction, float NyqVelocity,
+                                                            bool first_pass_only,
+                                                            int max_count,
 							    float *unfoldedValue, bool *successful) {
 
-  float valcheck = startingValue;
+  //  float valcheck = startingValue;
   float cval;
   int dcase = 0;
-
-  //  float missingVal = getMissingValue(rvVolume);
 
   *unfoldedValue = missingValue;
   *successful = false;
@@ -740,19 +747,19 @@ void FourDD::TryToDealiasUsingVerticalAndTemporalContinuity(
   //
 
   // determine case ... 
-  if (startingValue != missingValue && lastVolumeIsNull && 
+  if (lastVolumeIsNull && 
       soundValue != missingValue && abValue == missingValue) {
     cval=soundValue;
     dcase=1;
-  } else if (startingValue != missingValue && lastVolumeIsNull && 
+  } else if (lastVolumeIsNull && 
 	   soundValue != missingValue && abValue!= missingValue) {
     cval=abValue;
     dcase=2;
-  } else if (startingValue != missingValue && prevValue != missingValue && 
-	   abValue!=missingValue && !_strict_first_pass) {	       
+  } else if (prevValue != missingValue && 
+	   abValue!=missingValue && !first_pass_only) {	       
     cval=prevValue;
     dcase=3;
-  } else if (_strict_first_pass && startingValue != missingValue && 
+  } else if (first_pass_only && 
 	   prevValue != missingValue && abValue != missingValue &&
 	   soundValue != missingValue) {
     cval = prevValue;
@@ -764,12 +771,19 @@ void FourDD::TryToDealiasUsingVerticalAndTemporalContinuity(
 
   if (dcase>0) {
  
-    float potentialUnfoldedValue = Unfold(startingValue, cval, _max_count, NyqVelocity);
+    float potentialUnfoldedValue = Unfold(startingValue, cval, max_count, NyqVelocity);
+    printf("case: %d potentialUnfoldedValue = %g\n", dcase, potentialUnfoldedValue);
+
     float diff = cval - potentialUnfoldedValue;
     float fractionNyqVelocity = fraction * NyqVelocity;
 
+        float v1 = fabs(abValue-potentialUnfoldedValue); // < fractionNyqVelocity
+	float v2 = fabs(soundValue-potentialUnfoldedValue); //  < fractionNyqVelocity) {
+        printf("v1=%g v2=%g\n", v1, v2);
+
+
     bool good = false;
-    if (diff < fractionNyqVelocity && fabs(valcheck)>_ck_val) { 
+    if (diff < fractionNyqVelocity) { //  && fabs(valcheck)>_ck_val) { 
       switch(dcase) {
       case 1: 
 	good = true;
@@ -782,8 +796,10 @@ void FourDD::TryToDealiasUsingVerticalAndTemporalContinuity(
 	  good = true;
 	}
 	break;
-      case 4: if (fabs(abValue-potentialUnfoldedValue) < fractionNyqVelocity
+      case 4: 
+        if (fabs(abValue-potentialUnfoldedValue) < fractionNyqVelocity
 		  && fabs(soundValue-potentialUnfoldedValue) < fractionNyqVelocity) {
+          // case:  strict_first_pass 
 	  good = true;
 	}
 	break;
@@ -1799,7 +1815,7 @@ float FourDD::Unfold(float foldedValue, float referenceValue,
     val = val + NyqInterval*direction;
     numtimes = numtimes + 1;
     diff = cval-val;
-    // printf("%d: val=%g diff=%g\n",  numtimes, val, diff);
+    printf("%d: val=%g diff=%g\n",  numtimes, val, diff);
     if (diff<0.0) {
       diff = -diff;
       direction = -1;
