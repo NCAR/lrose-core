@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# install selected scripts in the lib dir
+# First arg is the target dir
+
+lib_dir=$1/perl5
+
+mkdir -p $lib_dir
+
+/bin/cp -f *pm $lib_dir
