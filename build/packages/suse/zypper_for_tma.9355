@@ -1,0 +1,29 @@
+#==============================================================
+# provision a Docker image for building lrose
+# start with clean image
+# install the required packages
+
+zypper install -y \
+       glibc-devel-32bit \
+       libtiff-devel-32bit \
+       libtiff-devel-32bit \
+       zlib-devel-32bit \
+       libexpat-devel-32bit flex-32bit \
+       libfftw3-3-32bit libbz2-devel-32bit \
+       ImageMagick-devel-32bit \
+       xorg-x11 xorg-x11-devel \
+       xorg-x11-fonts \
+       xorg-x11-fonts-core
+
+zypper install -y libstdc++33-devel \
+       libstdc++33-devel-32bit \
+       libpng12-compat-devel \
+       libpng12-compat-devel-32bit \
+       libcurl-devel \
+       fftw3-devel 
+
+zypper install -y libX11-devel \
+       libX11-devel-32bit \
+       libXext-devel \
+       libXext-devel-32bit
+
