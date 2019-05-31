@@ -217,13 +217,14 @@ int FourDD::Dealias(Volume *lastVelVol, Volume *currVelVol, Volume *currDbzVol,
 
     //
     // Remove any bins where reflectivity is missing (if 
-    // _no_dbz_rm_rv == 1 or ouside the interval 
+    // _no_dbz_rm_rv == 1 or outside the interval 
     // _low_dbz <= dbz <=_high_dbz.
     //
     if (_prep) {
 
       // TODO: make sure the missing value is for velocity? or Dbz (reflectivity)?
-      prepVolume(currDbzVol, currVelVol, _del_num_bins, velocityMissingValue);
+      prepVolume(currDbzVol, currVelVol, _del_num_bins, velocityMissingValue,
+                 _low_dbz, _high_dbz, _no_dbz_rm_rv);
     } 
 
     //
@@ -413,6 +414,8 @@ float applyScaleAndBias(float base, float scale, float bias) {
 //      This routine thresholds VR bins where reflectivity is below
 //      _low_dbz or missing (if _no_dbz_rm_rv==1).
 //
+//  dbz_rm_rv: If true, all radial velocity bins with dbz values missing will be deleted
+//
 //  DEVELOPER:
 //	Curtis N. James 20 Mar 98
 //      Modified by C. James 25 Jan 99
@@ -420,109 +423,98 @@ float applyScaleAndBias(float base, float scale, float bias) {
 //
 // 
 //
-void FourDD::prepVolume(Volume* DBZVolume, Volume* rvVolume, int del_num_bins, float missingVal) {
+void FourDD::prepVolume(Volume* DBZVolume, Volume* rvVolume, int del_num_bins, float missingVal,
+                        float low_dbz, float high_dbz, bool dbz_rm_rv) {
 
-     int currIndex, sweepIndex, i, j, DBZIndex, numRays, numBins, numDBZRays,
-       numDBZBins, numSweepsRV, numSweepsDZ;
-     float  dzval, minpossDBZ = -50.0;
-     int DBZGateSize = 0, DBZfloatBin1 = 0, DBZfactor,limit;
-     int rvGateSize = 0, rvfloatBin1 = 0, remainder;
-     div_t ratioGateSize;
+  int currIndex, sweepIndex, i, j, DBZIndex, numRays, numBins, numDBZRays,
+    numDBZBins, numSweepsRV, numSweepsDZ;
+  float  dzval, minpossDBZ = -50.0;
+  int DBZGateSize = 0, DBZfloatBin1 = 0, DBZfactor,limit;
+  int rvGateSize = 0, rvfloatBin1 = 0, remainder;
+  div_t ratioGateSize;
+
+  if ((DBZVolume == NULL) || (rvVolume == NULL)) return;
      
-     numSweepsRV = rvVolume->h.nsweeps;
-     numSweepsDZ = DBZVolume->h.nsweeps;
-     if (numSweepsRV!=numSweepsDZ) {
-       return;
-     } 
+  numSweepsRV = rvVolume->h.nsweeps;
+  numSweepsDZ = DBZVolume->h.nsweeps;
+  if (numSweepsRV!=numSweepsDZ) {
+    return;
+  } 
 
-     for (sweepIndex=0;sweepIndex<numSweepsRV;sweepIndex++) {
-       numRays = rvVolume->sweep[sweepIndex]->h.nrays;
-       numBins = rvVolume->sweep[sweepIndex]->ray[0]->h.nbins;
-       if (DBZVolume!=NULL) {
-	 numDBZRays = DBZVolume->sweep[sweepIndex]->h.nrays;
-	 numDBZBins = DBZVolume->sweep[sweepIndex]->ray[0]->h.nbins;
-       }
+  for (sweepIndex=0; sweepIndex<numSweepsRV; sweepIndex++) {
+    numRays = rvVolume->sweep[sweepIndex]->h.nrays;
+    numBins = rvVolume->sweep[sweepIndex]->ray[0]->h.nbins;
+    numDBZRays = DBZVolume->sweep[sweepIndex]->h.nrays;
+    numDBZBins = DBZVolume->sweep[sweepIndex]->ray[0]->h.nbins;
      
-       // Get the bin geometry for both DBZ and rv:  
+    // Get the bin geometry for both DBZ and rv:  
 
-       if (_debug) printf(" ...preparing sweep...\n");
-       if (DBZVolume!=NULL) {
-	   DBZGateSize=DBZVolume->sweep[sweepIndex]->ray[0]->
-	     h.gate_size;
-	   DBZfloatBin1=DBZVolume->sweep[sweepIndex]->ray[0]->
-	     h.range_bin1;
-       }
-       rvGateSize=rvVolume->sweep[sweepIndex]->ray[0]->h.gate_size;
-       rvfloatBin1=rvVolume->sweep[sweepIndex]->ray[0]->h.range_bin1;
+    DBZGateSize=DBZVolume->sweep[sweepIndex]->ray[0]->h.gate_size;
+    DBZfloatBin1=DBZVolume->sweep[sweepIndex]->ray[0]->h.range_bin1;
+    rvGateSize=rvVolume->sweep[sweepIndex]->ray[0]->h.gate_size;
+    rvfloatBin1=rvVolume->sweep[sweepIndex]->ray[0]->h.range_bin1;
 
-	 // Terminate routine if the locations of the first range bins
-	 // in DBZ and rv do not coincide.  
+    // Terminate routine if the locations of the first range bins
+    // in DBZ and rv do not coincide.  
        
-       if ((DBZfloatBin1!=rvfloatBin1 || numDBZRays!=numRays) && DBZVolume!=NULL) {
-	 return;
-       }
-       // Compare the bin geometry between DBZ and rv to know which
-       // DBZ bin(s) corresponds spatially to the rv bin(s) 
+    if ( (DBZfloatBin1!=rvfloatBin1 || numDBZRays!=numRays) ) {
+      return;
+    }
+    // Compare the bin geometry between DBZ and rv to know which
+    // DBZ bin(s) corresponds spatially to the rv bin(s) 
        
-       if (DBZVolume!=NULL) {
-	 ratioGateSize=div(rvGateSize,DBZGateSize);
-	 remainder=ratioGateSize.rem;
-	 if (remainder!=0) {
-	   return;
-	 } else if (remainder==0 && rvGateSize!=0 && DBZGateSize !=0) {
-	   DBZfactor=ratioGateSize.quot;
-	 } else {
-	   return;
-	 }
-       }
+    ratioGateSize = div(rvGateSize,DBZGateSize);
+    remainder = ratioGateSize.rem;
+    if (remainder!=0) {
+      return;
+    } else if (remainder==0 && rvGateSize!=0 && DBZGateSize !=0) {
+      DBZfactor = ratioGateSize.quot;
+    } else {
+      return;
+    }
 
-       // Erase the first del_num_bins bins of DBZ and radial velocity, as per
-       //  communication with Peter Hildebrand.  
-       for (currIndex=0;currIndex<numRays;currIndex++) {
-	 for (i = 0; i < del_num_bins; i++) {
-	     
-	   rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i]= (float) (missingVal);
+    // Erase the first del_num_bins bins of DBZ and radial velocity, as per
+    //  communication with Peter Hildebrand.  
+    for (currIndex=0;currIndex<numRays;currIndex++) {
+      for (i = 0; i < del_num_bins; i++) {	     
+        rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = (float) (missingVal);
 
-	   if (DBZVolume!=NULL) {
-	     for (j=0; j<DBZfactor; j++) {	       
-	       DBZIndex=i*DBZfactor+j;
-	       DBZVolume->sweep[sweepIndex]->ray[currIndex]->range[DBZIndex]= (float) (missingVal);	
-	     }
-	   }
-	 }
-       }
+        for (j=0; j<DBZfactor; j++) {	       
+          DBZIndex = i*DBZfactor+j;
+          DBZVolume->sweep[sweepIndex]->ray[currIndex]->range[DBZIndex] = (float) (missingVal);	
+        }
+      }
+    }
 	 
-       // Now that we know the bin geometry, we assign missingVal to any
-       // velocity bins where the reflectivity is missing (if _no_dbz_rm_rv==1)
-       // or outside _low_dbz and _high_dbz.  
-       if (DBZVolume == NULL) return;
+    // Now that we know the bin geometry, we assign missingVal to any
+    // velocity bins where the reflectivity is missing (if dbz_rm_rv is true)
+    // or outside _low_dbz and _high_dbz.  
 	       
-       limit=numBins;
-	 for (currIndex=0; currIndex<numRays; currIndex++) {
-	   for (i=del_num_bins; i<limit; i++) {
-	     for (j=0; j<DBZfactor; j++) {	       
-	       DBZIndex=i*DBZfactor+j;
-	       if (DBZIndex>=numDBZBins) {        
-		 printf("Invalid bin geometry!\n");
-		 return;
-	       }
-	       if ( DBZVolume->sweep[sweepIndex]->ray[currIndex]->range[DBZIndex] == missingVal && _no_dbz_rm_rv==1) {       
-		 rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i]=(float) (missingVal);
-	       } else  {
-		 dzval = DBZVolume->sweep[sweepIndex]->ray[currIndex]->range[DBZIndex];
-		 if ((dzval >= minpossDBZ && dzval < _low_dbz) ||
-		    (((dzval < minpossDBZ)||(dzval > _high_dbz)) &&
-		     _no_dbz_rm_rv == 1)) {
-		     rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i]=(float) (missingVal);     
-		 } // end if((dzval>=minpossDBZ ...
-	       } //else 
-	     } // end for j
-	   }//end for (i=del_num_bins
-	 }// end 
-       }//for (currIndex=0 ...
+    limit = numBins;
+    for (currIndex=0; currIndex<numRays; currIndex++) {
+      for (i=del_num_bins; i < limit; i++) {
+        for (j=0; j < DBZfactor; j++) {	       
+          DBZIndex = i*DBZfactor+j;
+          if (DBZIndex >= numDBZBins) {        
+            printf("Invalid bin geometry!\n");
+            return;
+          }
+          if ( DBZVolume->sweep[sweepIndex]->ray[currIndex]->range[DBZIndex] == missingVal &&
+               dbz_rm_rv) {
+            rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = missingVal;
+          } else  {
+            dzval = DBZVolume->sweep[sweepIndex]->ray[currIndex]->range[DBZIndex];
+            if ( (dzval >= minpossDBZ && dzval < low_dbz) ||
+                 (((dzval < minpossDBZ) || (dzval > high_dbz)) && dbz_rm_rv) ) {
+              rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = missingVal;     
+            } // end if((dzval>=minpossDBZ ...
+          } //else 
+        } // end for j
+      }//end for i=del_num_bins
+    }// end for each ray (currIndex=0) ... 
+  }//for each sweep
 
-     if (_debug) printf(" ...volume prepped.\n");      
-     return;
+  return;
 }
 
 
@@ -617,6 +609,7 @@ short FourDD::Filter3x3(Volume *original, int i, int currIndex, int sweepIndex,
 
 // rvVolume (in/out) initial dealiased values on output
 // original     (in)  original values
+// STATE    (out)    the state for each bin {TBD, MISSING, etc.}
 void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *soundVolume,
 			       Volume *original,
 			       int sweepIndex, int del_num_bins, short **STATE,
@@ -663,7 +656,8 @@ void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *sou
       aboveIndex=findRay(rvVolume, rvVolume, sweepIndex, sweepIndex+1, rayIndex);
 
     for (int i=del_num_bins; i < numBins; i++) {
-
+      // Doesn't this overwrite any missingVal set in prepVolume? TODO: redundant code?
+      // TODO: is prepVolume needed at all?
       // Initialize Output Sweep with missing values:                                                       
       rvVolume->sweep[sweepIndex]->ray[rayIndex]->range[i] = missingVal;
 
@@ -749,15 +743,15 @@ void FourDD::TryToDealiasUsingVerticalAndTemporalContinuity(
   // determine case ... 
   if (lastVolumeIsNull && 
       soundValue != missingValue && abValue == missingValue) {
-    cval=soundValue;
-    dcase=1;
+    cval = soundValue;
+    dcase = 1;
   } else if (lastVolumeIsNull && 
 	   soundValue != missingValue && abValue!= missingValue) {
-    cval=abValue;
-    dcase=2;
+    cval = abValue;
+    dcase = 2;
   } else if (prevValue != missingValue && 
 	   abValue!=missingValue && !first_pass_only) {	       
-    cval=prevValue;
+    cval = prevValue;
     dcase=3;
   } else if (first_pass_only && 
 	   prevValue != missingValue && abValue != missingValue &&
@@ -765,7 +759,7 @@ void FourDD::TryToDealiasUsingVerticalAndTemporalContinuity(
     cval = prevValue;
     dcase = 4;
   } else { 
-    dcase=0;
+    dcase = 0;
     cval = 0.0;
   }
 

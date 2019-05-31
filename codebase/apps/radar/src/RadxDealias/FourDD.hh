@@ -116,7 +116,8 @@ public:
                int firstbin, int lastbin, float std_thresh,
                bool* success);
 
-  void prepVolume (Volume* DBZVolume, Volume* rvVolume, int del_num_bins, float missingVal);
+  void prepVolume (Volume* DBZVolume, Volume* rvVolume, int del_num_bins, float missingVal,
+                   float low_dbz, float high_dbz, bool dbz_rm_rv);
 
   int findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int 
 	       sweepIndex2, int currIndex1);
