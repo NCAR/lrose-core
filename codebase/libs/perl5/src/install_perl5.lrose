@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# install selected perl modules in the lib dir
+# First arg is the target dir
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Usage: install_perl5.lrose install_dir"
+    echo
+    echo "Set install dir to location of installed *.pm modules"
+    echo
+}
+
+#--------------------------------------------------------------------
+# check args
+
+if [ $# != 1 ]
+then
+    echo "ERROR - bad command line"
+    usage
+    exit -1
+fi
+
+lib_dir=$1/perl5
+
+mkdir -p $lib_dir
+
+/bin/cp -f *pm $lib_dir

@@ -32,10 +32,10 @@ TARGET_FILE = MdvGenerateSpatialFilter
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -leuclid \
-	-ldidss -lrapformats -ltoolsa -ldataport \
-	-ltdrp -lrapmath $(NETCDF4_LIBS) -lbz2 \
-	-lz -lpthread -lm
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
+	-ldidss -lrapformats -ltoolsa -ltdrp \
+	-ldataport $(NETCDF4_LIBS) -lbz2 -lz \
+	-lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

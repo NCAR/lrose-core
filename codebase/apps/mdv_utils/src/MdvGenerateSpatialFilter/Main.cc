@@ -254,8 +254,8 @@ int main(int argc, char *argv[]){
   //
   // OK - write out the data at this time.
   //
-  outMdvx.setWritePath(TDRP_params.OutPath);
-  if (outMdvx.writeToPath()) {
+
+  if (outMdvx.writeToPath(TDRP_params.OutPath)) {
     cerr << "ERROR - Output::write" << endl;
     cerr << "  Cannot write to path : " << TDRP_params.OutPath << endl;
     cerr << outMdvx.getErrStr() << endl;

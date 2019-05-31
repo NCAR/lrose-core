@@ -1,5 +1,0 @@
-#!/bin/csh
-#
-# How to run Mdv2AxfCont in archive mode.
-#
-./Mdv2Axf -archive 19990922020202 19990924020202 -params Mdv2Axf.params  
