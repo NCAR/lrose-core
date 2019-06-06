@@ -4,20 +4,42 @@
 //  SoloBlackOps(function(ray,bounday))
 //
 
+// TODO: remove seds
+//       remove sebs
+//
+
 void SoloBlackOps::addBoundary() {}
 void SoloBlackOps::deleteBoundary() {}
 
-float *SoloBlackOps::applyFunction(string functionName, float *ray) { 
+float *SoloBlackOps::run(string functionName, float *rayData, float *boundaryPoints) { 
   //if (functionName.compare("remove_ac_motion") == 0) {
   // actually, use a dictionary to look up name, function
   // short *bnd;
   // return f(bnd, ray);
+
+
+  // run the "one-time" commands 
+  se_process_data(commands, data);
+
+  // run the "for-each-ray" commands
+  // TODO: map boundaryPoints to boundaryMask, etc. for ray
+  // is radar_in_boundary ?
+  // dd_edd is split into two pieces; I think this cannot be split.
+  // the boundary is for one ray
+  //bnd = dd_edd_get_boundary_mask(boundaryPoints, radar);
+  //dd_edd_process_for_each_cmd(bnd, data);
+  dd_edd(commands, data, boundaryList);
+
   return NULL;
 }
 
 //
+// se_process_data is more of a script evaluator
+// processes the "one-time" commands
+// does it use a boundary?  I don't think so!
+
 // calls dd_edd to set boundary flag for given ray data & boundary sets
-int se_process_data(arg, cmds, time_series, automatic, down, d_ctr, frame_num)
+int SoloBlackOps::se_process_data(arg, cmds, time_series, automatic, down, d_ctr, frame_num)
   int arg, frame_num;
   struct ui_command *cmds;
   int time_series, automatic, down;
@@ -56,7 +78,7 @@ int se_process_data(arg, cmds, time_series, automatic, down, d_ctr, frame_num)
         return(TRUE);
     }
 
-    se_push_all_ssms(&seds->once_cmds);
+    se_push_all_ssms(&seds->once_cmds);  // <==== once_cmds
     oto_count = 0;
     if (nc = se_text_to_ssms (seds->oto_lines, &seds->once_cmds)) {
        if (!se_interpret_commands (seds->once_cmds, seds->first_oto_cmd
