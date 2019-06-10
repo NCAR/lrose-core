@@ -44,6 +44,11 @@ use Time::Local;                   # make 'date' available
 use Env qw(ADDSHOME);                    #...Get ADDS Home Dir
 use lib "$ADDSHOME/perl_lib";
 
+# External NCAR/RAP libraries
+# Rel to PROJ_DIR
+use Env qw(PROJ_DIR);
+use lib "$PROJ_DIR/system/lib/perl5/";
+
 use Toolsa;
 
 #

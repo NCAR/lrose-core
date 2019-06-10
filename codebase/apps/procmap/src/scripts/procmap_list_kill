@@ -86,10 +86,12 @@ use Sys::Hostname;
 #
 # RAP procmap module
 #
+use Env qw(PROJ_DIR);
 use Env qw(RAP_INST_LIB_DIR);
 use Env qw(RAP_SHARED_LIB_DIR);
 use Env qw(RAP_LIB_DIR);
 
+use lib "$PROJ_DIR/system/lib/perl5/";
 use lib "$RAP_INST_LIB_DIR/perl5/";
 use lib "$RAP_SHARED_LIB_DIR/perl5/";
 use lib "$RAP_LIB_DIR/perl5/";
