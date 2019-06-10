@@ -46,8 +46,10 @@ use lib "$ADDSHOME/perl_lib";
 
 # External NCAR/RAP libraries
 # Rel to PROJ_DIR
+use Env qw(HOME);
+use lib "$HOME/git/lrose-core/codebase/libs/perl5/src/";
 use Env qw(PROJ_DIR);
-use lib "$PROJ_DIR/system/lib/perl5/";
+use lib "$PROJ_DIR/lrose/lib/perl5/";
 
 use Toolsa;
 

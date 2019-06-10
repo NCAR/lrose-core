@@ -110,10 +110,13 @@ use Env qw(RAP_INST_LIB_DIR);
 use Env qw(RAP_SHARED_LIB_DIR);
 use Env qw(RAP_LIB_DIR);
 
-use lib "$PROJ_DIR/system/lib/perl5/";
+use lib "$PROJ_DIR/lrose/lib/perl5/";
 use lib "$RAP_INST_LIB_DIR/perl5/";
 use lib "$RAP_SHARED_LIB_DIR/perl5/";
 use lib "$RAP_LIB_DIR/perl5/";
+
+use Env qw(HOME);
+use lib "$HOME/git/lrose-core/codebase/libs/perl5/src/";
 
 # Need this for Operational ADDS, which no longer has compile-time
 # dirs in place for the runtime system. DO NOT REMOVE! - P McCarthy.
