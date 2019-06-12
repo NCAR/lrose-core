@@ -28,7 +28,8 @@
 #include <vector>
 #include <string>
 #include <iostream>
-
+#include "Solo/BoundaryHeader.hh"
+#include "Solo/BoundaryPointManagement.hh"
 
 using namespace std;
 
@@ -41,11 +42,6 @@ class OneBoundary {
   ~OneBoundary();
   void addBoundaryPoint(int x, int y);
 
- private:
-
-  // TODO: use a vector?
-  OneBoundary *last;
-  OneBoundary *next;
 
   // TODO: use a stack?
   // What do all of these mean?  top, x, y, first, next, last?
@@ -68,9 +64,14 @@ class OneBoundary {
   double max_y;                       /* meters */
   double min_z;                       /* meters */
   double max_z;                       /* meters */
-  int radar_inside_boundary;  // boolean if radar is inside this boundary
+  bool radar_inside_boundary;  // boolean if radar is inside this boundary
   int open_boundary;
   BoundaryHeader *bh;
+
+
+  // TODO: use a vector?
+  OneBoundary *last;
+  OneBoundary *next;
 
 
 };

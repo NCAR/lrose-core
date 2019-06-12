@@ -17,9 +17,14 @@
 //
 //
 
+#include <cmath>
+
+#include "Solo/BoundaryPointMap.hh"
+#include "Solo/dd_math.h"
+
+
   // determine if point is left or right of line 
-int xse_ccw(x0, y0, x1, y1)
-  double x0, y0, x1, y1;
+int BoundaryPointMap::xse_ccw(double x0, double y0, double x1, double y1)
 {
   /* is point 0 left or right of a line between the origin and point 1                                      
    * form a line between the origin and point 0 called line 0                                               
@@ -40,11 +45,12 @@ int xse_ccw(x0, y0, x1, y1)
 
 /* c------------------------------------------------------------------------ */
 
-int xse_set_intxn(x, y, slope, bpm, ob)
-  double x, y;
-  double slope;
-  BoundaryPointManagement *bpm;
-  struct one_boundary *ob;
+// The return value is not used; The function produces
+// side effects only; it add a new intersection point,
+// if there is one.
+void BoundaryPointMap::xse_set_intxn(double x, double y, double slope,
+                                     BoundaryPointManagement *bpm,
+                                     OneBoundary *ob)
 {
     /* compute the intersection of a ray and a boundary segment
      * x & y are the endpoints of the ray and "slope" is
@@ -54,7 +60,7 @@ int xse_set_intxn(x, y, slope, bpm, ob)
      * x,y values because the boundary may be for another radar
      */
     BoundaryPointManagement *bpmx;
-    double dd, xx, yy, sqrt();
+    double xx, yy; //  sqrt();
 
     /*
      * first compute the x coordinate of the intersection
@@ -70,10 +76,10 @@ int xse_set_intxn(x, y, slope, bpm, ob)
     }
     if(x < 0) {                 /* check for an imaginary intersection */
         if(xx < x || xx > 0)
-              return(NO);
+          return; // (NO);
     }
     else if(xx < 0 || xx > x)
-          return(NO);
+      return; // (NO);
 
     if(!y) {                    /* the ray is horizontal */
         yy = 0;
@@ -86,13 +92,13 @@ int xse_set_intxn(x, y, slope, bpm, ob)
     }
     if(y < 0) {                 /* check for an imaginary intersection */
         if(yy < y || yy > 0)
-              return(NO);
+          return; // (NO);
     }
     else if(yy < 0 || yy > y)
-          return(NO);
+      return; // (NO);
 
     ob->num_intxns++;
-    bpm->rx = sqrt(((double)SQ(xx)+(double)SQ(yy)));
+    bpm->rx = sqrt(((double)(xx*xx)+(double)(yy*yy)));
 
     bpm->next_intxn = NULL;
 
@@ -100,7 +106,7 @@ int xse_set_intxn(x, y, slope, bpm, ob)
         ob->first_intxn = bpm->last_intxn = bpm;
                                 /* first intxn always points to
                                  * the last intxn tacked on */
-        return(YES);
+        return; // (YES);
     }
     /*
      * insert this intxn and preserve the order
@@ -125,42 +131,45 @@ int xse_set_intxn(x, y, slope, bpm, ob)
         bpm->last_intxn = ob->first_intxn->last_intxn;
         ob->first_intxn->last_intxn = bpm;
     }
-    return(YES);
+    return; // (YES);
 }
 
 
 
 /* c------------------------------------------------------------------------ */
-
-int se_radar_inside_bnd(OneBoundary *ob)
+//
+// return value is not used; function used for side effect only
+// sets ob->radar_inside_boundary to true or false
+// 
+void BoundaryPointMap::se_radar_inside_bnd(OneBoundary *ob)
 {
-  /* determine if the radar is inside or outside the boundary                                               
-   */
-  BoundaryPointManagement *bpm, *bpmx;
-  double dd, sqrt(), atan2(), fmod();
+  // determine if the radar is inside or outside the boundary
+
+  BoundaryPointManagement *bpm; //  *bpmx;
+  //double dd  , sqrt(), atan2(), fmod();
   double r, x, y, theta;
-  int ii, nBoundaryPoints = ob->num_points-1, nn, mark, inside_count=0;
+  int ii, nBoundaryPoints = ob->num_points-1, nn, inside_count=0;
 
 
   if(ob->bh->force_inside_outside) {
     if(ob->bh->force_inside_outside == BND_FIX_RADAR_INSIDE) {
-      return(ob->radar_inside_boundary = YES);
+      ob->radar_inside_boundary = true;
     }
     if(ob->bh->force_inside_outside == BND_FIX_RADAR_OUTSIDE) {
-      return(ob->radar_inside_boundary = NO);
+      ob->radar_inside_boundary = false;
     }
   }
 
   bpm = ob->top_bpm;
-  x = ABS(bpm->_x);
-  y = ABS(bpm->_y);
+  x = abs(bpm->_x);
+  y = abs(bpm->_y);
   /*
    * we are using the shifted values of x and y in case this boundary
    * is for a different radar
    */
   for(bpm = bpm->next; nBoundaryPoints--; bpm = bpm->next) {
-    if(ABS(bpm->_x) > x) x = ABS(bpm->_x);
-    if(ABS(bpm->_y) > y) y = ABS(bpm->_y);
+    if(abs(bpm->_x) > x) x = abs(bpm->_x);
+    if(abs(bpm->_y) > y) y = abs(bpm->_y);
   }
   x += 11;
   y += 11;
@@ -179,7 +188,7 @@ int se_radar_inside_bnd(OneBoundary *ob)
       default:                /* case 0: both positive */
         break;
     }
-    r = sqrt(SQ(x)+SQ(y));
+    r = sqrt((x*x)+(y*y));
     theta = atan2(y, x);
     theta = DEGREES(theta);
     theta = CART_ANGLE(theta);
@@ -190,24 +199,23 @@ int se_radar_inside_bnd(OneBoundary *ob)
     inside_count += (int)(nn & 1); /* i.e. and odd number of intxns */
   }
   ob->radar_inside_boundary = inside_count > 2;
-  return(ob->radar_inside_boundary);
+  // return(ob->radar_inside_boundary);
 }
 
 
 /* c------------------------------------------------------------------------ */
 
-int xse_find_intxns(angle, range, ob)
-  double angle, range;
-  struct one_boundary *ob; 
+int BoundaryPointMap::xse_find_intxns(double angle, double range,
+                                      OneBoundary *ob)
 {
     /* this routine creates a list of endpoints of lines that 
      * intersect the current ray
      */   
     BoundaryPointManagement *bpm, *bpmx;
-    double theta = RADIANS(CART_ANGLE(angle)), cos(), sin();
+    double theta = RADIANS(CART_ANGLE(angle)); //, cos(), sin();
     double slope=0, xx, yy;
     long x, y;
-    int ii, mm, nn, nx=0, mark;
+    int  mm; // ii, nn, nx=0;
 
 
     ob->num_intxns = 0; 
@@ -266,15 +274,13 @@ int xse_find_intxns(angle, range, ob)
 }
 /* c------------------------------------------------------------------------ */
 
-void se_ts_find_intxns(radar_alt, d_max_range, ob, d_time, d_pointing
-                       , automatic, down, d_ctr)
-  double radar_alt, d_max_range, d_time, d_pointing, d_ctr;
-struct one_boundary *ob;
-int down, automatic;
+void BoundaryPointMap::se_ts_find_intxns(double radar_alt, double d_max_range,
+                                         OneBoundary *ob, double d_time, double d_pointing,
+                                         int automatic, int down, double d_ctr)
 {
   int mm;
-  BoundaryPointManagement *bpm, *bpmx, *bpma, *bpmb;
-  double d, time_span, ta, tb, xx, zz;
+  BoundaryPointManagement *bpm,  *bpma, *bpmb;
+  double d, ta, tb, zz;
 
 
 
@@ -284,10 +290,7 @@ int down, automatic;
   bpm = ob->top_bpm;
   d_time += .005;
   d = RADIANS(CART_ANGLE(d_pointing));
-  /*                                                                                                         
-   * we bump the time by 5 milliseconds so a ray and a vertex                                                
-   * are not coincident in time                                                                              
-   */
+  // we bump the time by 5 milliseconds so a ray and a vertex are not coincident in time
   if(automatic) {
     down = sin(d) < 0;
   }
@@ -308,11 +311,11 @@ int down, automatic;
     tb = bpmb->pisp->time;
 
     if(d_time >= ta && d_time < tb) {
-      /* possible intxn */
+      // possible intxn 
       zz = ((d_time - ta)/(tb - ta)) * (bpmb->pisp->z - bpma->pisp->z)
         + bpma->pisp->z;
       if((down && zz < radar_alt) || (!down && zz > radar_alt)) {
-        /* intxn! */
+        // intxn! 
             bpm->rx = down
               ? KM_TO_M(radar_alt -zz) : KM_TO_M(zz - radar_alt);
             ob->num_intxns++;
@@ -322,29 +325,28 @@ int down, automatic;
     }
   }
   ob->radar_inside_boundary = ob->num_intxns & 1;
-  /* i.e. an odd number of intxns implies radar inside */
+  // i.e. an odd number of intxns implies radar inside
 
   if(ob->bh->force_inside_outside) {
     if(ob->bh->force_inside_outside == BND_FIX_RADAR_INSIDE) {
-      ob->radar_inside_boundary = YES;
+      ob->radar_inside_boundary = true;
     }
     if(ob->bh->force_inside_outside == BND_FIX_RADAR_OUTSIDE) {
-      ob->radar_inside_boundary = NO;
+      ob->radar_inside_boundary = false;
     }
   }
 }
 
 /* c------------------------------------------------------------------------ */
-
-int se_merge_intxn(bpm, ob)
-  BoundaryPointManagement *bpm;
-struct one_boundary *ob;
+//
+// function used for side effect only
+void BoundaryPointMap::se_merge_intxn(BoundaryPointManagement *bpm, OneBoundary *ob)
 {
   BoundaryPointManagement *bpmx;
 
-  if(!(bpmx = ob->first_intxn)) { /* first intersection */
+  if(!(bpmx = ob->first_intxn)) { // first intersection
     ob->first_intxn = bpm->last_intxn = bpm;
-    return(YES);
+    return; // (YES);
   }
 
   for(; bpmx; bpmx = bpmx->next_intxn) {
@@ -367,19 +369,126 @@ struct one_boundary *ob;
     bpm->last_intxn = ob->first_intxn->last_intxn;
     ob->first_intxn->last_intxn = bpm;
   }
-  return(YES);
+  return; // (YES);
+}
+
+/*c------------------------------------------------------------------------ */
+
+
+int BoundaryPointMap::loop_ll2xy_v3(double *plat, double *plon, double *palt,
+                                    double *x, double *y, double *z, double olat,
+                                    double olon, double oalt, double  R_earth, int num_pts)
+//  double *plat, *plon, *palt, olat, olon, oalt, R_earth;
+//double *x, *y, *z;
+//int num_pts;
+{
+  /* calculate (x,y,z) of (plat,plon) relative to (olat,olon) */
+  /* all dimensions in km. */
+
+  /* transform to earth coordinates and then to lat/lon/alt */
+
+  /* These calculations are from the book                                                
+   * "Aerospace Coordinate Systems and Transformations"                                  
+   * by G. Minkler/J. Minkler                                                            
+   * these are the ECEF/ENU point transformations                                        
+   */
+
+  int nn = num_pts;
+  double delta_o, lambda_o, R_p, R_p_pr, delta_p, lambda_p;
+  //double R, rr, abscissa, dlat,
+  // double dlon;
+  double xe, ye, ze, sinLambda, cosLambda, sinDelta, cosDelta;
+  double h, a, b, c;
+
+
+  h = R_earth + oalt;
+  delta_o = RADIANS( olat );  /* read delta sub oh */
+  lambda_o = RADIANS( olon );
+
+  sinLambda = sin( lambda_o );
+  cosLambda = cos( lambda_o );
+  sinDelta = sin( delta_o );
+  cosDelta = cos( delta_o );
+  /*                                                                                     
+    printf( "\n" );                                                                        
+  */
+
+  for(; nn--; plat++, plon++, palt++, x++, y++, z++ ) {
+
+    R_p = R_earth + (*palt);
+    delta_p = RADIANS( *plat );
+    lambda_p = RADIANS( *plon );
+    R_p_pr = R_p * cos( delta_p );
+
+    xe = R_p * sin( delta_p );
+    ye = -R_p_pr * sin( lambda_p );
+    ze = R_p_pr * cos( lambda_p );
+
+    /* transform to ENU coordinates */
+
+    a = -h * sinDelta + xe;
+    b =  h * cosDelta * sinLambda + ye;
+    c = -h * cosDelta * cosLambda + ze;
+
+    *x = -cosLambda * b  -sinLambda * c;
+       *y = cosDelta * a  +  sinLambda * sinDelta * b
+         -cosLambda * sinDelta * c;
+       *z = sinDelta * a  -sinLambda * cosDelta * b
+         +cosLambda * cosDelta * c;
+       /*                                                                                  
+       printf( "%f %f %f      %f %f %f\n", *plat, *plon, *palt, *x, *y, *z );              
+       */
+  }
+  return num_pts;
 }
 
 /* c------------------------------------------------------------------------ */
 
-void dd_latlon_relative(p0, p1)
-  struct point_in_space *p0, *p1;
+
+double BoundaryPointMap::dd_earthr(double lat)
+{
+  static double *earth_r=NULL;
+
+  double major=6378388;       /* radius in meters */
+  double minor=6356911.946;
+  double tt;
+  double d, theta=0, x, y;
+  int ii, nn;
+
+  if(!earth_r) {
+    earth_r = (double *)malloc(20*sizeof(double));
+
+    for(ii=0; theta < 90.; ii++, theta += 5.) {
+      /* create an entry every 5 degrees                                             
+       */
+      tt = tan(RADIANS(theta));
+      d = sqrt(1.+SQ(tt*major/minor));
+      x = major/d;
+      y = x*tt;
+      *(earth_r +ii) = sqrt(SQ(x) + SQ(y));
+    }
+  }
+  nn = fabs(lat*.2);
+  d = nn < 18 ? *(earth_r +nn) : minor;
+  d *= .001;                  /* km.! */
+  return(d);
+}
+
+
+/* c------------------------------------------------------------------------ */
+
+// out params:
+//    p1->x,y,z
+//
+void BoundaryPointMap::dd_latlon_relative(PointInSpace *p0, PointInSpace *p1)
 {
     /* routine to calculate (x,y,z) for p1 so as to line up                                                   
      * with (0,0,0) for p0                                                                                    
      */
-    double del_lat, del_lon, lat=RADIANS(p1->latitude);
-    double dd_earthr(), r_earth, xx, yy, zz, R_earth;
+  //double del_lat;
+ //del_lon,
+ //double lat=RADIANS(p1->latitude);
+    double xx, yy, zz, R_earth;
 
     R_earth = dd_earthr(p1->latitude);
     loop_ll2xy_v3( &p0->latitude, &p0->longitude, &p0->altitude
@@ -401,8 +510,8 @@ void dd_latlon_relative(p0, p1)
 //void dd_edd(time_series, automatic, down, d_ctr)
 //  int time_series, automatic, down;
 //  double d_ctr;
-
-short *BoundaryPointMain::dd_edd(commands, data, boundaryList) 
+/*
+short *BoundaryPointMap::dd_edd(commands, data, boundaryList) 
 //  int time_series, 
 //  int automatic,
 //  int down,
@@ -458,15 +567,15 @@ short *BoundaryPointMain::dd_edd(commands, data, boundaryList)
    }
    bool boundary_exists = nn ? true : false;
    
-   for(;;) {                    /* for each ray */
+   for(;;) {                    // for each ray 
           
       count++;
 
       if(ddswp_next_ray_v3(usi) == END_OF_TIME_SPAN) {
          break;
       }    
-      if(!seds->process_ray_count) { /* first time through
-                                      * tack on the seds cmds */
+      if(!seds->process_ray_count) { // first time through
+                                     // tack on the seds cmds 
          se_tack_on_cmds(&dgi->seds, &dgi->sizeof_seds);
      
          if(boundary_exists) {
@@ -480,12 +589,12 @@ short *BoundaryPointMain::dd_edd(commands, data, boundaryList)
             // calculate x,y,z for radar to line up with (0,0,0) of boundary origin
             // calculated values are returned in radar->x,y,z
             dd_latlon_relative(sebs->origin, radar);
-            /*
-             * radar->x is now the x coordinate of the boundary origin
-             * relative to the radar
-             * check to see if the boundary origin and the radar origin
-             * are within 100m of each other
-             */
+             //
+             // radar->x is now the x coordinate of the boundary origin
+             // relative to the radar
+             // check to see if the boundary origin and the radar origin
+             // are within 100m of each other
+             //
             not_aligned = (SQ(radar->x) + SQ(radar->y)) > .1;
             airborne = dgi->dds->radd->scan_mode == RHI ||
               !(dgi->dds->radd->radar_type == GROUND ||
@@ -505,8 +614,8 @@ short *BoundaryPointMain::dd_edd(commands, data, boundaryList)
 // sets ob->radar_inside_boundary = T/F 
                }
             }
-         } /* boundary exists? */
-      } /* first time through */
+         } // boundary exists? 
+} // first time through 
 
       if(dgi->new_vol) {
          dd_new_vol(dgi);
@@ -559,18 +668,18 @@ short *BoundaryPointMain::dd_edd(commands, data, boundaryList)
             else if(not_aligned) {
                shift_bnd = YES;
             }
-            else if(FABS(radar->tilt - sebs->origin->tilt) > .2) {
-               /* boundary and radar origin are the same but
-                * not the same tilt
-                */
+            else if(fabs(radar->tilt - sebs->origin->tilt) > .2) {
+               // boundary and radar origin are the same but
+               // not the same tilt
+               //
                shift_bnd = YES;
             }
             else {
                shift_bnd = NO;
             }
          }
-         /* for each boundary, set up the mask
-          */
+         // for each boundary, set up the mask
+          
          for(ob = sebs->first_boundary; ob ; ob = ob->next) {
             if(ob->num_points < 3)
               continue;
@@ -578,13 +687,13 @@ short *BoundaryPointMain::dd_edd(commands, data, boundaryList)
             if(dgi->new_sweep) {
                if(shift_bnd && !time_series) {
                   // shift the boundary's points to be relative to current radar represented by "usi"
-                  se_shift_bnd(ob, sebs->origin, radar
-                               , dgi->dds->radd->scan_mode
-                               , dd_tilt_angle(dgi));
+                  se_shift_bnd(ob, sebs_origin, radar
+                               , radd_scan_mode
+                               , tilt_angle);
                }
                if(time_series || (not_aligned && !airborne)) {
-                  /* see if radar inside this boundary
-                   */
+                  // see if radar inside this boundary
+                  //
                   se_radar_inside_bnd(ob);
 // there must be some side effects of this. What are they?
 // sets ob->radar_inside_boundary = T/F 
@@ -609,41 +718,41 @@ short *BoundaryPointMain::dd_edd(commands, data, boundaryList)
                g1 = dd_cell_num(dgi->dds, 0, r1);
                g2 = dd_cell_num(dgi->dds, 0, r2) +1;
 
-               for(; g1 < g2; g1++) { /* set boundary flags */
+               for(; g1 < g2; g1++) { // set boundary flags 
                   *(bnd + g1) = bflag;
                }
-            } /* end segments loop */
+            } // end segments loop 
 
-         } /* end boundary for loop */
+         } // end boundary for loop 
 
-      } /* boundary exists */
+      } // boundary exists 
 
-      else {                    /* no boundary */
+      else {                    // no boundary
          seds->use_boundary = NO;
          seds->boundary_mask = seds->all_ones_array;
       }
-   } /* end of loop through data */
+   } // end of loop through data 
 
 
-   if(boundary_exists) {  /* pack up the current boundary */
+   if(boundary_exists) {  // pack up the current boundary 
       size = se_sizeof_bnd_set();
       bbuf = (char *)malloc(size);
       memset(bbuf, 0, size);
       se_pack_bnd_set(bbuf);
 
       if(seds->last_pbs && size == seds->last_pbs->sizeof_set) {
-         /* see if this boundary is different from the last boundary
-          */
+         // see if this boundary is different from the last boundary
+          
          new_bnd = se_compare_bnds(seds->last_pbs->at, bbuf, size);
       }
       else {
          new_bnd = YES;
       }
 
-      if(new_bnd) {             /* put this boundary in the queue */
+      if(new_bnd) {             // put this boundary in the queue 
          if(seds->num_prev_bnd_sets < 7) {
-            /* grow the circular queue till it reaches 7 boundaries
-             */
+            // grow the circular queue till it reaches 7 boundaries
+             
             seds->num_prev_bnd_sets++;
             seds->pbs = (struct prev_bnd_sets *)
               malloc(sizeof(struct prev_bnd_sets));
@@ -670,20 +779,23 @@ short *BoundaryPointMain::dd_edd(commands, data, boundaryList)
       if(!getenv("SOLO_DONT_CLEAR_BOUNDARIES"))
         se_clr_all_bnds();
 
-      /* we should now be ready to draw the next boundary or to
-       * retreive  the last boundary we just put in the queue
-       */
+      // we should now be ready to draw the next boundary or to
+      // retreive  the last boundary we just put in the queue
+      //
 
-   } /* end packing up current boundary */
+   } // end packing up current boundary 
 
    printf ("Finished!\n");
    return bnd;
 }
+*/
+
 /* c------------------------------------------------------------------------ */
 
 // Q: what is the difference between dd_edd ...for each  and se_process_data?
 // dd_edd          processes the "for-each" commands
 // se_process_data processes the "one-time" commands
+/*
 void dd_edd_process_for_each_cmd(
   int time_series, 
   int automatic,
@@ -695,7 +807,6 @@ void dd_edd_process_for_each_cmd(
   float *rays;
   BoundaryStuff *sebs)
 {
-   /* c...mark */
    int ii, jj, mm, nn, nc,  mark, nx, g1, g2, num_segments=0, bflag;
    int not_aligned, shift_bnd, old_usi_swp_count=-1;
    int new_bnd, size, airborne, stopped = NO;
@@ -728,7 +839,7 @@ void dd_edd_process_for_each_cmd(
    // dis = dd_return_sweepfile_structs_v3();
    // dis->editing = YES; 
    usi = dis->usi_top;
-   dd_output_flag(YES);
+   // dd_output_flag(YES);
    //dgi = dd_window_dgi(usi->radar_num, "UNK");
    celv = dgi->dds->celvc;
    //dgi->compression_scheme = HRD_COMPRESSION;
@@ -744,8 +855,9 @@ void dd_edd_process_for_each_cmd(
    }
    bool boundary_exists = nn ? true : false;
 
-   //if(!seds->process_ray_count) { /* first time through
-                                   /* tack on the seds cmds */
+   //if(!seds->process_ray_count) { 
+   // first time through
+   // tack on the seds cmds 
   //se_tack_on_cmds(&dgi->seds, &dgi->sizeof_seds);
      
   // if there are boundaries, translate the the origins to align
@@ -756,12 +868,12 @@ void dd_edd_process_for_each_cmd(
        // calculate x,y,z for radar to line up with (0,0,0) of boundary origin
        // calculated values are returned in radar->x,y,z
        dd_latlon_relative(sebs->origin, radar);
-       /*
-        * radar->x is now the x coordinate of the boundary origin
-        * relative to the radar
-        * check to see if the boundary origin and the radar origin
-        * are within 100m of each other
-        */
+       //
+       // radar->x is now the x coordinate of the boundary origin
+       // relative to the radar
+       // check to see if the boundary origin and the radar origin
+       // are within 100m of each other
+       //
        not_aligned = (SQ(radar->x) + SQ(radar->y)) > .1;
        airborne = scan_mode == RHI ||
          !(radar_type == GROUND ||
@@ -783,10 +895,10 @@ void dd_edd_process_for_each_cmd(
            // sets ob->radar_inside_boundary = T/F 
          }
        }
-     } /* boundary exists? */
-     //} /* first time through */
+       } // boundary exists? 
+     //} // first time through 
 
-    /* for each ray */
+     /// for each ray 
    bool done = false;
    //----
      // TODO: this is the loop advance
@@ -812,9 +924,9 @@ void dd_edd_process_for_each_cmd(
      ssm = seds->fer_cmds;
      nn = seds->num_fer_cmds;
 
-     /*
-      * loop through the for-each-ray operations
-      */
+     //
+     // loop through the for-each-ray operations
+     //
      se_perform_cmds (seds->first_fer_cmd, seds->num_fer_cmds,
                       data, bnd);
 
@@ -822,13 +934,13 @@ void dd_edd_process_for_each_cmd(
        // Q: Are results of commands written to a file?
        dd_dump_ray(dgi);
 
-       if (dgi->sweep_fid < 0) { /* unable to open the new sweepfile */
+       if (dgi->sweep_fid < 0) { // unable to open the new sweepfile
          seds->punt = YES;
          break;
          // TODO: report error; throw exception
        }
 
-       if(ddswp_last_ray(usi)) { /* end of current sweep */
+       if(ddswp_last_ray(usi)) { // end of current sweep 
          dd_flush(usi->radar_num);
        }
        if(usi->ray_num <= 1) {
@@ -842,7 +954,7 @@ void dd_edd_process_for_each_cmd(
      if(usi->swp_count > usi->num_swps) {
        done = true;
      }
-   } /* end of loop through data */
+     } // end of loop through data 
 
    dis->editing = NO;
 
@@ -852,123 +964,374 @@ void dd_edd_process_for_each_cmd(
    //seds->finish_up = YES;
    ssm = seds->fer_cmds;
    nn = seds->num_fer_cmds;
-   /*
-    * make a final pass through all operations in case they
-    * need to finish up
-    */
+   //
+   // make a final pass through all operations in case they
+   // need to finish up
+   ///
    se_perform_cmds (seds->first_fer_cmd, seds->num_fer_cmds, data);
-   //se_free_raqs();              /* free running average queues
-                                 /* if any where set up */
+   //se_free_raqs();              // free running average queues
+   // if any where set up 
    // TODO: signal GUI update?
    //   if(seds->modified) {
    //      seds->time_modified = time_now();
    //      ddir_rescan_urgent(seds->se_frame);
    //   }
 
-   if(boundary_exists) {  /* pack up the current boundary */
-     pack_up_current_boundary(); 
+   //if(boundary_exists) { 
+   //  pack_up_current_boundary(); 
 
-      /* we should now be ready to draw the next boundary or to
-       * retreive  the last boundary we just put in the queue
-       */
+// we should now be ready to draw the next boundary or to
+// retreive  the last boundary we just put in the queue
+      
 
-   } /* end packing up current boundary */
+} // end packing up current boundary 
 
    printf ("Finished!\n");
    return;
 }
+*/
+
+/* c------------------------------------------------------------------------ */
+// out params:
+// r0, r1, the start and stop range of the segment
+// ob 
+void BoundaryPointMap::se_nab_segment(int num, double *r0, double *r1,
+                                      OneBoundary *ob)
+{
+  // this routine returns the start and stop range of the
+  // requested segment
+  //   
+  //int ii, nn, mark;
+  //  struct bnd_point_mgmt *bpm;
+
+  if(num < 0 || num >= ob->num_segments) {
+    *r0 = -999999.;
+    *r1 = -999998.;
+    return;
+  }    
+  // what are ob->r0 & ob->r1 & next_intxn->rx?
+  if(num) {
+    *r0 = ob->next_segment->rx;
+    if(ob->next_segment->next_intxn) {
+      *r1 = ob->next_segment->next_intxn->rx;
+      ob->next_segment = ob->next_segment->next_intxn->next_intxn;
+    }    
+    else {
+      *r1 = 1.e9;
+    }    
+  }    
+  else {                      // first segment 
+    *r0 = ob->r0;
+    *r1 = ob->r1;
+  }    
+}
+
+/* c------------------------------------------------------------------------ */
+
+// TODO: what to do about this function? We aren't using a "uniform spacing
+// lookup table"
+// let's assume the gates are uniformly spaced
+int BoundaryPointMap::dd_cell_num(int nGates, float gateSize,
+                                  float distanceToFirstGate,  float range)
+//int parameter_num;
+//float range;
+{
+  // find the cell corresponding to this range
+  //
+  int ii;
+
+  ii = ((range-distanceToFirstGate)/gateSize) + .5;
+  if(ii < 0)
+    ii = 0;
+  else if(ii >= nGates)
+    ii = nGates-1;
+
+  return(ii);
+}
+
+/* c------------------------------------------------------------------------ */
+
+int xse_num_segments(OneBoundary *ob)
+{
+  // calculate the number of segments and set up                                         
+  // the first segment                                                                   
+  //
+  //int ii, nn,
+  int  nx; // , mark;
+
+  nx = ob->num_intxns;
+
+  if(ob->radar_inside_boundary) {
+    if(!nx) {
+      // the end of the ray is inside the boundary 
+      ob->num_segments = 1;
+      ob->r0 = 0;
+      ob->r1 = 1.e9;
+      return(1);
+    }
+    ob->r0 = 0;
+    ob->r1 = ob->first_intxn->rx;
+    ob->next_segment = ob->first_intxn->next_intxn;
+
+    if(nx & 1) {            // no funny stuff
+      ob->num_segments = (nx+1)/2;
+    }
+    else {
+      //                                                       
+      // even number of intersections                                                
+      // assume the boundary is past the end of the ray                              
+      //
+      ob->num_segments = nx/2 +1;
+    }
+    return(ob->num_segments);
+  }
+  // radar is outside the boundary                                                       
+   
+  if(!nx) {
+    ob->num_segments = 0;
+    return(ob->num_segments);
+  }
+  ob->r0 = ob->first_intxn->rx;
+
+  if(nx & 1) {                // the boundary is past the end of the ray 
+    if(nx == 1) {
+      ob->num_segments = 1;
+      ob->r1 = 1.e9;
+      return(1);
+    }
+    ob->num_segments = (nx+1)/2;
+  }
+  else {
+    ob->num_segments = nx/2;
+  }
+  ob->r1 = ob->first_intxn->next_intxn->rx;
+  ob->next_segment = ob->first_intxn->next_intxn->next_intxn;
+
+  return(ob->num_segments);
+}
+
+/* c------------------------------------------------------------------------ */
+
+void BoundaryPointMap::se_shift_bnd( // ob, boundary_radar, current_radar, scan_mode, current_tilt)
+  OneBoundary *ob,
+  PointInSpace *boundary_radar, 
+  PointInSpace *current_radar,
+  int scan_mode,
+  double current_tilt)
+{
+  /* shift this boundary's points so as to be relative to                                
+   * the current radar represented by "usi"                                              
+   */
+  int mm;
+  BoundaryPointManagement *bpm;
+  //PointInSpace radar;
+  double x, y, z, costilt, untilt, tiltfactor;
+
+  /*                                                                                     
+   * calculate the offset between the radar that is the origin                           
+   * of the boundary and the current radar                                               
+   */
+  dd_latlon_relative(boundary_radar, current_radar);
+  x = KM_TO_M(current_radar->x);
+  y = KM_TO_M(current_radar->y);
+  z = KM_TO_M(current_radar->z);
+
+  untilt = fabs(cos(RADIANS(boundary_radar->tilt)));
+
+  if(fabs(costilt = cos(fabs(RADIANS(current_tilt)))) > 1.e-6) {
+    tiltfactor = 1./costilt;
+  }
+  else {
+    tiltfactor = 0;
+  }
+  bpm = ob->top_bpm;
+  mm = ob->num_points;
+
+  if(scan_mode == AIR) {
+    //for(; mm--; bpm = bpm->last) {
+    //}
+    // TODO: log warning ... not implemented.
+  }
+
+  else {                      /* ground based */
+    /* you need to project the original values                                         
+     * and then unproject the new values                                               
+     */
+    for(; mm--; bpm = bpm->last) {
+      bpm->_x = (bpm->x * untilt + x) * tiltfactor;
+      bpm->_y = (bpm->y * untilt + y) * tiltfactor;
+    }
+  }
+}
+
+
+
 /* c------------------------------------------------------------------------ */
 
 // returns boundary mask
-short *get_boundary_mask(
-        PointInSpace *radar,
-) {
-  // TODO: we won't be using the seds structures
-  //seds->use_boundary = YES;
-         ob = sebs->current_boundary = sebs->first_boundary;
-         rota = d = dd_rotation_angle(dgi);
-         // distanceToCellNInMeters is the distance from the radar to cell n in meters
-         distanceToCellNInMeters = celv->dist_cells[celv->number_cells-1];
-         
-         bnd = seds->boundary_mask_array;
-         nn = nc +1;
-         if(sebs->operate_outside_bnd) {
-            bflag = 0;
-            for(ii=0; ii < nn; *(bnd+ii++) = 1);
-         }
-         else {
-            bflag = 1;
-            memset(bnd, 0, nn * sizeof(*seds->boundary_mask));
-         }
-         // Q: I don't understand this new_sweep logic
-         if(dgi->new_sweep) {
-            if(airborne) {
-               shift_bnd = NO;
-            }
-            else if(not_aligned) {
-               shift_bnd = YES;
-            }
-            else if(FABS(radar->tilt - sebs->origin->tilt) > .2) {
-               /* boundary and radar origin are the same but
-                * not the same tilt
-                */
-               shift_bnd = YES;
-            }
-            else {
-               shift_bnd = NO;
-            }
-         }
-         // for each boundary, add to the mask; the mask is the intersection
-         // of all boundaries?
-         //
-         for(ob = sebs->first_boundary; ob ; ob = ob->next) {
-            if(ob->num_points < 3)
-              continue;
+// NOTE: This is a Frankenstein method ... it has been pieced together
+//       from different sections of the original Soloii code. 
+//
+short *BoundaryPointMap::get_boundary_mask(
+        OneBoundary *boundaryList,
+        // bool new_sweep,  // assume new_sweep
+        //        bool operate_outside_bnd,
+        //bool shift_bnd,  // always shift
+        PointInSpace *radar_origin,
+        PointInSpace *boundary_origin,
+        int nGates,
+        float gateSize,
+        float distanceToCellNInMeters,
+        float azimuth,
+        int radar_scan_mode,
+        int radar_type,
+        float tilt_angle,  // TODO: are tilt_angle & rotation_angle the same thing?
+        float rotation_angle) {
 
-            if(dgi->new_sweep) {
-               if(shift_bnd && !time_series) {
-                  // shift the boundary's points to be relative to current radar represented by "usi"
-                  se_shift_bnd(ob, sebs->origin, radar
-                               , dgi->dds->radd->scan_mode
-                               , dd_tilt_angle(dgi));
-               }
-               if(time_series || (not_aligned && !airborne)) {
-                  /* see if radar inside this boundary
-                   */
-                  se_radar_inside_bnd(ob);
-// there must be some side effects of this. What are they?
-// sets ob->radar_inside_boundary = T/F 
-               }
-            }
-            if(time_series) {
-               se_ts_find_intxns(dd_altitude(dgi), distanceToCellNInMeters, ob
-                                 , dgi->time, ts_pointing_angle(dgi)
-                                 , automatic, down, d_ctr);
-            }
-            else {
-               xse_find_intxns(d, distanceToCellNInMeters, ob);
-            }
-            xse_num_segments(ob);
-            seds->num_segments += ob->num_segments;
+  OneBoundary *ob;
+  //rota = d = dd_rotation_angle(dgi);
+  short bflag;
 
-            for(ii=0; ii < ob->num_segments; ii++) {
-               se_nab_segment(ii, &range1, &range2, ob);
-               if(range2 <= 0)
-                 continue;
-               r1 = range1; r2 = range2;
-               g1 = dd_cell_num(dgi->dds, 0, r1);
-               g2 = dd_cell_num(dgi->dds, 0, r2) +1;
+  short *bnd = new short[nGates];
+  int nn = nGates;
+    bflag = 1;
+    memset(bnd, 0, nn * sizeof(short));
+  // for each boundary, add to the mask; the mask is the intersection
+  // of all boundaries?
+  //
+  for(ob = boundaryList; ob ; ob = ob->next) {
+    if(ob->num_points < 3)
+      continue;
 
-               for(; g1 < g2; g1++) { /* set boundary flags */
-                  *(bnd + g1) = bflag;
-               }
-            } /* end segments loop */
+        // shift the boundary's points to be relative to current radar represented by "usi"
+        se_shift_bnd(ob, boundary_origin, radar_origin,
+                     radar_scan_mode,
+                      tilt_angle);
 
-         } /* end boundary for loop */
-         return bnd;
+        //--------
+        /*  NOTE: this should be filled by the calling function
+        radar->latitude = dd_latitude(dgi);
+        radar->longitude = dd_longitude(dgi);
+        radar->altitude = dd_altitude(dgi);
+        radar->earth_radius = dd_earthr(radar->latitude);
+        radar->tilt = dd_tilt_angle(dgi);
+        radar->tilt = dgi->dds->swib->fixed_angle;
+       
+        dd_latlon_relative(boundary_origin, radar_origin);
+        */
+
+        /*                                                                             
+         * radar->x is now the x coordinate of the boundary origin                     
+         * relative to the radar                                                       
+         * check to see if the boundary origin and the radar origin                    
+         * are within 100m of each other                                               
+         */
+        bool not_aligned = (SQ(radar_origin->x) + SQ(radar_origin->y)) > .1;
+        bool airborne = radar_scan_mode == RHI ||
+              !(radar_type == GROUND ||
+                radar_type == SHIP);
+
+            //---------------
+
+      if(not_aligned && !airborne) {
+        // see if radar is inside this boundary
+        se_radar_inside_bnd(ob);
+        // there must be some side effects of this. What are they?
+        // sets ob->radar_inside_boundary = T/F 
+      }
+    xse_find_intxns(rotation_angle, distanceToCellNInMeters, ob);
+    xse_num_segments(ob);
+    
+    double range1;
+    double range2;
+
+    for(int ii=0; ii < ob->num_segments; ii++) {
+      se_nab_segment(ii, &range1, &range2, ob);
+      if(range2 <= 0)
+        continue;
+      double r1 = range1; 
+      double r2 = range2;
+      int g1 = dd_cell_num(nGates, gateSize, distanceToCellNInMeters, r1);
+      int g2 = dd_cell_num(nGates, gateSize, distanceToCellNInMeters, r2) +1;
+
+      for(; g1 < g2; g1++) { /* set boundary flags */
+        *(bnd + g1) = bflag;
+      }
+    } /* end segments loop */
+
+  } /* end boundary for loop */
+  return bnd;
 }
 
-void pack_up_current_boundary() {
+/*
+// returns boundary mask
+short *BoundaryPointMap::get_boundary_mask_time_series(
+        OneBoundary *boundaryList,
+        bool new_sweep,
+        bool operate_outside_bnd,
+        bool shift_bnd,
+        PointInSpace *radar_origin,
+        PointInSpace *boundary_origin,
+        int nGates,
+        float gateSize,
+        float distanceToCellNInMeters,
+        float azimuth) {
+
+  OneBoundary *ob;
+  //rota = d = dd_rotation_angle(dgi);
+  short bflag;
+
+  short *bnd = new short[nGates];
+  int nn = nGates;
+  if(operate_outside_bnd) {
+    bflag = 0;
+    for(int ii=0; ii < nn; *(bnd+ii++) = 1);
+  }
+  else {
+    bflag = 1;
+    memset(bnd, 0, nn * sizeof(short));
+  }
+  // for each boundary, add to the mask; the mask is the intersection
+  // of all boundaries?
+  //
+  for(ob = boundaryList; ob ; ob = ob->next) {
+    if(ob->num_points < 3)
+      continue;
+
+    if(new_sweep) {
+      if(not_aligned && !airborne) {
+        // see if radar is inside this boundary
+        se_radar_inside_bnd(ob);
+        // there must be some side effects of this. What are they?
+        // sets ob->radar_inside_boundary = T/F 
+      }
+    }
+    se_ts_find_intxns(altitude, distanceToCellNInMeters, ob,
+                        time, ts_pointing_angle,
+                        automatic, down, d_ctr);
+    xse_num_segments(ob);
+    seds->num_segments += ob->num_segments;
+
+    for(ii=0; ii < ob->num_segments; ii++) {
+      se_nab_segment(ii, &range1, &range2, ob);
+      if(range2 <= 0)
+        continue;
+      r1 = range1; r2 = range2;
+      g1 = dd_cell_num(nGates, gateSize, distanceToCellNInMeters, r1);
+      g2 = dd_cell_num(nGates, gateSize, distanceToCellNInMeters, r2) +1;
+
+      for(; g1 < g2; g1++) { // set boundary flags 
+        *(bnd + g1) = bflag;
+      }
+} // end segments loop 
+
+} // end boundary for loop 
+  return bnd;
+}
+*/
+
+/* TODO: probably move this to controller or view?
+void BoundaryPointMap::pack_up_current_boundary() {
 
       size = se_sizeof_bnd_set();
       bbuf = (char *)malloc(size);
@@ -976,18 +1339,17 @@ void pack_up_current_boundary() {
       se_pack_bnd_set(bbuf);
 
       if(seds->last_pbs && size == seds->last_pbs->sizeof_set) {
-         /* see if this boundary is different from the last boundary
-          */
+         // see if this boundary is different from the last boundary
          new_bnd = se_compare_bnds(seds->last_pbs->at, bbuf, size);
       }
       else {
          new_bnd = YES;
       }
 
-      if(new_bnd) {             /* put this boundary in the queue */
+      if(new_bnd) {             // put this boundary in the queue 
          if(seds->num_prev_bnd_sets < 7) {
-            /* grow the circular queue till it reaches 7 boundaries
-             */
+            // grow the circular queue till it reaches 7 boundaries
+             
             seds->num_prev_bnd_sets++;
             seds->pbs = (struct prev_bnd_sets *)
               malloc(sizeof(struct prev_bnd_sets));
@@ -1014,10 +1376,12 @@ void pack_up_current_boundary() {
       if(!getenv("SOLO_DONT_CLEAR_BOUNDARIES"))
         se_clr_all_bnds();
 }
+*/
 
 /* c------------------------------------------------------------------------ */
 
-int se_perform_cmds (struct ui_cmd_mgmt *the_ucm, int num_cmds)
+/*
+int BoundaryPointMap::se_perform_cmds (struct ui_cmd_mgmt *the_ucm, int num_cmds)
 {
   typedef int (*UI_FUNC)(int, struct ui_command *);
 
@@ -1044,3 +1408,4 @@ int main(int argc, char *argv[]) {
 //    the start and stop are intersection points
 
 }
+*/

@@ -30,5 +30,7 @@ public:
     long state;                 /* which bits are set */
 
     char id[16];
+
+  void print();
 };
 

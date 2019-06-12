@@ -33,14 +33,13 @@
 using namespace std;
 
 // Code copied from Soloii
-
+// NOTE: probably don't need this code
+//       mostly metadata that we won't need
 class BoundaryHeader {
 
  public:
   BoundaryHeader();
   ~BoundaryHeader();
-
- private:
 
     char name_struct[4];        /* "BDHD" */
     long sizeof_struct;

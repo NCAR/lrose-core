@@ -28,7 +28,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
-
+#include "Solo/PointInSpace.hh"
 
 using namespace std;
 
@@ -40,7 +40,7 @@ class BoundaryPointManagement {
   BoundaryPointManagement();
   ~BoundaryPointManagement();
 
- private:
+  void LocateThisPoint(double x, double y, int frame);
 
     // TODO: double linked list
     BoundaryPointManagement *last;
@@ -80,7 +80,7 @@ class BoundaryPointManagement {
     int which_frame;
     int which_side;
     int mid_level;
-    struct point_in_space *pisp;
+    PointInSpace *pisp;
     long _x;            /* x shifted */
     long _y;            /* y shifted */
     long _z;            /* z shifted */

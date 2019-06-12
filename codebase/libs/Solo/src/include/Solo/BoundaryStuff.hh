@@ -33,6 +33,8 @@
 using namespace std;
 
 // Code copied from Soloii
+// NOTE: this is mostly list management, and user interface stuff
+//       can probably remove this class
 
 class BoundaryStuff {
 
@@ -45,7 +47,7 @@ class BoundaryStuff {
     OneBoundary *first_boundary;
 
     BoundaryHeader *bh;
-    struct point_in_space *origin;
+    PointInSpace *origin;
 
     int operate_outside_bnd;    /* zero implies inside the boundary                                           
                                  * non-zero implies outside the boundary */
@@ -77,7 +79,7 @@ class BoundaryStuff {
                                  * times the PP unless the line width is                                      
                                  * less than the PP. Then the PP is defined                                   
                                  * as .666 times the length of the line */
-    struct point_in_space *pisp;
+    PointInSpace *pisp;
     long linked_windows[16];
     int view_bounds;
     int absorbing_boundary;
