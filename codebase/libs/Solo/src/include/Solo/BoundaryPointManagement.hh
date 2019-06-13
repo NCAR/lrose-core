@@ -40,6 +40,8 @@ class BoundaryPointManagement {
   BoundaryPointManagement();
   ~BoundaryPointManagement();
 
+  void print();
+
   void LocateThisPoint(double x, double y, int frame);
 
     // TODO: double linked list
@@ -55,31 +57,30 @@ class BoundaryPointManagement {
     BoundaryPointManagement *last_intxn; // last intersection
     BoundaryPointManagement *next_intxn; // next intersection
 
-    BoundaryPointManagement *x_parent;
-    BoundaryPointManagement *x_left;
-    BoundaryPointManagement *x_right;
+  BoundaryPointManagement *x_parent;
+  BoundaryPointManagement *x_left;
+  BoundaryPointManagement *x_right;
 
-    BoundaryPointManagement *y_parent;
-    BoundaryPointManagement *y_left;
-    BoundaryPointManagement *y_right;
+  BoundaryPointManagement *y_parent;
+  BoundaryPointManagement *y_left;
+  BoundaryPointManagement *y_right;
 
     float slope;
-    float slope_90;             /* slope of line perpendicular                                                
-                                 * to this line*/
+    float slope_90;             // slope of line perpendicular to this line
     float len;
 
-    long x_mid;                 /* midpoint of the line */
-    long y_mid;                 /* midpoint of the line */
+  long x_mid;                 /* midpoint of the line */
+  long y_mid;                 /* midpoint of the line */
     long dy;                    /* last->y - this->y */
     long dx;                    /* last->x - this->x */
     long rx;                    /* intersection with a ray */
 
-    int bnd_num;
-    int segment_num;
-    int what_happened;
-    int which_frame;
+  //int bnd_num;
+  //int segment_num;
+  //  int what_happened;
+  //int which_frame;
     int which_side;
-    int mid_level;
+  //int mid_level;
     PointInSpace *pisp;
     long _x;            /* x shifted */
     long _y;            /* y shifted */
@@ -92,8 +93,8 @@ class BoundaryPointManagement {
     float r_mid;
     float dr;
 
-    int screen_x;
-    int screen_y;
+  //int screen_x;
+  //int screen_y;
 
 };
 

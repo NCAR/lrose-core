@@ -22,6 +22,329 @@
 #include "Solo/BoundaryPointMap.hh"
 #include "Solo/dd_math.h"
 
+/* c------------------------------------------------------------------------ */
+
+void BoundaryPointMap::se_delete_bnd_pt(BoundaryPointManagement *bpm,
+                                        OneBoundary *ob)
+{
+  /* remove this point from the boundary                                                 
+   * remember to recalculate mins, maxs, slopes and deltas                               
+   */
+  //  struct boundary_stuff *sebs, *return_se_bnd_struct();
+  //BoundaryPointManagement *bpmx;
+
+  //sebs = return_se_bnd_struct();
+  //ob = sebs->current_boundary;
+
+  if(bpm == ob->top_bpm) {
+    if(!bpm->next) {        /* this is the only point */
+      ob->top_bpm = NULL;
+    }
+    ob->top_bpm->next->last = ob->top_bpm->last;
+    ob->top_bpm = ob->top_bpm->next;
+  }
+  else {
+    bpm->last->next = bpm->next;
+    if(bpm->next) bpm->next->last = bpm->last;
+    if(bpm == ob->top_bpm->last) ob->top_bpm->last = bpm->last;
+  }
+  // memory management; bpms are maintained in a stack called bpm_spairs
+  //se_push_bpm(bpm);
+  /*                                                                                     
+   * now do it for the line between this point and the first point                       
+   */
+  bpm = ob->top_bpm;
+  se_bnd_pt_atts(bpm);
+
+  ob->max_x = ob->min_x = bpm->x;
+  ob->max_y = ob->min_y = bpm->y;
+  for(bpm=bpm->next;  bpm;  bpm=bpm->next) {
+    if(bpm->x > ob->max_x)
+      ob->max_x = bpm->x;
+    if(bpm->x < ob->min_x)
+      ob->min_x = bpm->x;
+    if(bpm->y > ob->max_y)
+      ob->max_y = bpm->y;
+    if(bpm->y < ob->min_y)
+      ob->min_y = bpm->y;
+  }
+}
+
+void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob) {
+
+  BoundaryPointManagement *bpm = new BoundaryPointManagement();
+
+  se_append_bpm(&ob->top_bpm, bpm); /* the append happens first so                       
+                                     * the last pointers are fresh */
+  bpm->x = x;
+  bpm->y = y;
+
+  if(++ob->num_points > 1) {  /* avoid duplicates */
+    if((bpm->x == bpm->last->x) && (bpm->y == bpm->last->y)) {
+      ob->num_points--;
+      se_delete_bnd_pt(bpm, ob);
+      return;
+    }
+  }
+  //# ifdef obsolete
+  //  bpm->r = .5 +sqrt((SQ((double)x)+SQ((double)y)));
+  //# endif
+  //  bpm->which_frame = sci->frame;
+
+  //if(!(sebs->view_bounds || sebs->absorbing_boundary)) {
+  // loads the pisp struct with all the position info 
+    sp_locate_this_point(sci, bpm); /* this routine is in                              
+                                     * ../perusal/sp_clkd.c */
+    //# ifdef obsolete
+    //    bpm->pisp->state =
+    //      PISP_PLOT_RELATIVE | PISP_AZELRG |  PISP_EARTH;
+    //    strcpy(bpm->pisp->id, "BND_PT_V1");
+    //# endif
+   
+      //}
+  
+  else if(sebs->absorbing_boundary) {
+    memcpy(bpm->pisp, sebs->pisp, sizeof(PointInSpace));
+    bpm->r = KM_TO_M(bpm->pisp->range);
+  }
+  if(bpm->pisp->state & PISP_TIME_SERIES) {
+    x = bpm->pisp->time;
+    y = bpm->pisp->range;
+  }
+  /* the rasterization code sets sebs->view_bounds to YES and also uses                  
+   * this routine and others to bound the rasterization                                  
+   */
+  if(ob->num_points > 1) {
+    if(!sebs->view_bounds) {
+      //se_draw_bnd(bpm, 2, NO);
+      //seds->boundary_exists = YES;
+      sii_set_boundary_pt_count (sci->frame, ob->num_points);
+    }
+    if(x > ob->max_x)
+      ob->max_x = x;
+    if(x < ob->min_x)
+      ob->min_x = x;
+    if(y > ob->max_y)
+      ob->max_y = y;
+    if(y < ob->min_y)
+      ob->min_y = y;
+    /*                                                                                 
+     * calculate boundary point attributes                                             
+     */
+    se_bnd_pt_atts(bpm);
+    xse_x_insert(bpm, ob);
+    xse_y_insert(bpm, ob);
+
+    /*                                                                                 
+     * now do it for the line between this point and the first point                   
+     */
+    bpm = ob->top_bpm;
+    se_bnd_pt_atts(bpm);
+  }
+  else {                      /* first point */
+    //if(!(sebs->absorbing_boundary || sebs->view_bounds)) {
+      /* get the radar origin and radar name from the first point                    
+       */
+      //solo_return_radar_name(sci->frame, ob->bh->radar_name);
+      //memcpy(sebs->origin, bpm->pisp, sizeof(struct point_in_space));
+      //strcpy(sebs->origin->id, "BND_ORIGIN");
+    }
+    ob->min_x = ob->max_x = x;
+    ob->min_y = ob->max_y = y;
+  }
+}
+
+/* c------------------------------------------------------------------------ */
+
+void BoundaryPointMap::xse_x_insert(BoundaryPointManagement *bpm, 
+                                    OneBoundary *ob)
+//  struct bnd_point_mgmt *bpm;
+//struct one_boundary *ob;
+{
+  /* insert sort of x coorinates of the midpoints of the line                            
+   */
+  int ii=0, nn;
+  BoundaryPointManagement *bpmx;
+
+  if(ob->num_points < 1)
+    return;
+  bpm->x_left = bpm->x_right = NULL;
+
+  if(!(bpmx = ob->x_mids)) {
+    bpm->x_parent = NULL;
+    ob->x_mids = bpm;
+    return;
+  }
+  /*                                                                                     
+   * the top node is an x value                                                          
+   */
+  if(bpm->pisp->state & PISP_TIME_SERIES) {
+    for(;;) {
+      if(bpm->t_mid < bpmx->t_mid) {
+        if(!bpmx->x_left) {
+          bpm->x_parent = bpmx;
+          bpmx->x_left = bpm;
+          break;
+        }
+        bpmx = bpmx->x_left;
+      }
+      else {
+        if(!bpmx->x_right) {
+          bpm->x_parent = bpmx;
+          bpmx->x_right = bpm;
+          break;
+        }
+        bpmx = bpmx->x_right;
+      }
+    }
+  }
+  else {
+    for(;;) {
+      if(bpm->x_mid < bpmx->x_mid) {
+        if(!bpmx->x_left) {
+          bpm->x_parent = bpmx;
+          bpmx->x_left = bpm;
+          break;
+        }
+        bpmx = bpmx->x_left;
+      }
+      else {
+        if(!bpmx->x_right) {
+          bpm->x_parent = bpmx;
+          bpmx->x_right = bpm;
+          break;
+        }
+        bpmx = bpmx->x_right;
+      }
+    }
+  }
+}
+/* c------------------------------------------------------------------------ */
+
+void BoundaryPointMap::xse_y_insert(BoundaryPointManagement *bpm,
+                               OneBoundary *ob)
+{
+  /* insert sort of x coorinates of the midpoints of the line                            
+   */
+  int ii=0, nn;
+  BoundaryPointManagement *bpmx;
+
+  if(ob->num_points < 1)
+    return;
+  bpm->y_left = bpm->y_right = NULL;
+
+  if(!(bpmx = ob->y_mids)) {
+    bpm->y_parent = NULL;
+    ob->y_mids = bpm;
+    return;
+  }
+  /*                                                                                     
+   * the top node is an x value                                                          
+   */
+  if(bpm->pisp->state & PISP_TIME_SERIES) {
+    for(;;) {
+      if(bpm->r_mid < bpmx->r_mid) {
+        if(!bpmx->y_left) {
+          bpm->y_parent = bpmx;
+          bpmx->y_left = bpm;
+          break;
+        }
+        bpmx = bpmx->y_left;
+      }
+      else {
+        if(!bpmx->y_right) {
+          bpm->y_parent = bpmx;
+          bpmx->y_right = bpm;
+          break;
+        }
+        bpmx = bpmx->y_right;
+      }
+    }
+  }
+  else {
+    for(;;) {
+      if(bpm->y_mid < bpmx->y_mid) {
+        if(!bpmx->y_left) {
+          bpm->y_parent = bpmx;
+          bpmx->y_left = bpm;
+          break;
+        }
+        bpmx = bpmx->y_left;
+      }
+      else {
+        if(!bpmx->y_right) {
+          bpm->y_parent = bpmx;
+          bpmx->y_right = bpm;
+          break;
+        }
+        bpmx = bpmx->y_right;
+      }
+    }
+  }
+}
+
+
+/* c------------------------------------------------------------------------ */
+
+void BoundaryPointMap::se_bnd_pt_atts(BoundaryPointManagement *bpm)
+//  struct bnd_point_mgmt *bpm;
+{
+
+  if(bpm->pisp->state & PISP_TIME_SERIES) {
+    bpm->dt = bpm->last->pisp->time - bpm->pisp->time;
+    bpm->dr = bpm->last->pisp->range - bpm->pisp->range;
+    if(bpm->dt) bpm->slope = bpm->dr/bpm->dt;
+    if(bpm->dr) bpm->slope_90 = -1./bpm->slope;
+    bpm->len = SQRT(SQ(bpm->dt) + SQ(bpm->dr));
+    bpm->t_mid = bpm->pisp->time + 0.5 * bpm->dt;
+    bpm->r_mid = bpm->pisp->range + 0.5 * bpm->dr;
+  }
+  else {
+    bpm->dy = bpm->last->y - bpm->y;
+    bpm->dx = bpm->last->x - bpm->x;
+
+    if(bpm->dx)
+      bpm->slope = (double)bpm->dy/bpm->dx;
+
+    if(bpm->dy)
+      bpm->slope_90 = -1./bpm->slope; /* slope of the line                         
+                                       * perpendicular to this line */
+
+    bpm->len = sqrt((SQ((double)bpm->dx) + SQ((double)bpm->dy)));
+    bpm->x_mid = bpm->x + 0.5 * bpm->dx;
+    bpm->y_mid = bpm->y + 0.5 * bpm->dy;
+  }
+}
+
+
+/* c------------------------------------------------------------------------ */
+
+void BoundaryPointMap::se_append_bpm(BoundaryPointManagement **top_bpm, 
+BoundaryPointManagement *bpm)
+//  struct bnd_point_mgmt **top_bpm, *bpm;
+{
+  /* append this point to the list of boundary points                                    
+   * (*top_bpm)->last always points to the last point appended                           
+   * to the boundary this all points are linked by the last pointer                      
+   * except for the last point appended the next pointer points                          
+   * to the next point and the NULL pointer in the last point                            
+   * serves to terminate loops                                                           
+   */
+  if(!(*top_bpm)) {                   /* no list yet */
+    *top_bpm = bpm;
+    (*top_bpm)->last = bpm;
+  }
+  else {
+    (*top_bpm)->last->next = bpm; /* last bpm on list should point                     
+                                   * to this one */
+    bpm->last = (*top_bpm)->last;
+    (*top_bpm)->last = bpm;
+  }
+  bpm->next = NULL;
+  return;
+}
+/* c------------------------------------------------------------------------ */
+
 
   // determine if point is left or right of line 
 int BoundaryPointMap::xse_ccw(double x0, double y0, double x1, double y1)
@@ -1051,7 +1374,7 @@ int BoundaryPointMap::dd_cell_num(int nGates, float gateSize,
 
 /* c------------------------------------------------------------------------ */
 
-int xse_num_segments(OneBoundary *ob)
+int BoundaryPointMap::xse_num_segments(OneBoundary *ob)
 {
   // calculate the number of segments and set up                                         
   // the first segment                                                                   

@@ -2,6 +2,38 @@
 #include "Solo/dd_math.h"
 #include "Solo/BoundaryPointManagement.hh"
 
+
+
+void BoundaryPointManagement::print() {
+
+  printf("x = %ld, y = %ld, z = %ld, r = %ld\n", x, y, z, r);
+  printf("x = %ld, y = %ld, z = %ld, shifted\n", _x, _y, _z);
+
+  BoundaryPointManagement *bpm = next_intxn;
+  if (bpm == NULL) 
+    printf("next_intxn is NULL\n");
+  else {
+    printf("next_intxn ...\n");
+    while (bpm != NULL) {
+      bpm->print();
+      bpm = bpm->next_intxn;
+    }
+  }
+
+  bpm = next;
+  if (bpm == NULL) 
+    printf("next is NULL\n");
+  else {
+    printf("next ...\n");
+    while (bpm != NULL) {
+      bpm->print();
+      bpm = bpm->next;
+    }
+  }
+
+
+}
+
 /*
 void BoundaryPointManagement::BoundaryPointAtts() {
 

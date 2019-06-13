@@ -5,7 +5,53 @@
 
 OneBoundary::OneBoundary() {}
 
+// OneBoundary::OneBoundary(int *xpoints, int *ypoints, int npoints) {}
+
 OneBoundary::~OneBoundary() {}
+
+void OneBoundary::print() {
+
+  printf("num_points %d\n", num_points);
+  printf("num_intxns %d\n", num_intxns);
+  printf("num_segments %d\n", num_segments);
+
+  if (top_bpm == NULL)
+    printf("top_bpm is NULL\n");
+  else {
+    BoundaryPointManagement *bpm = top_bpm;
+    while (bpm != NULL) {
+      bpm->print();
+      bpm = bpm->next;
+    }
+  }
+
+  if (first_intxn == NULL)
+    printf("first_intxn is NULL\n");
+  else {
+    BoundaryPointManagement *bpm = first_intxn;
+    while (bpm != NULL) {
+      bpm->print();
+      bpm = bpm->next;
+    }
+  }
+
+  if (next_segment == NULL)
+    printf("next_segment is NULL\n");
+  else {
+    BoundaryPointManagement *bpm = next_segment;
+    while (bpm != NULL) {
+      bpm->print();
+      bpm = bpm->next;
+    }
+  }
+
+  printf("radar_inside_boundary ");
+  if (radar_inside_boundary)
+    printf("true\n");
+  else
+    printf("false\n");
+}
+
 
 /*
 // TODO: x,y are in which coordinates?

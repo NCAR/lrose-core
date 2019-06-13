@@ -40,18 +40,18 @@ class OneBoundary {
  public:
   OneBoundary();
   ~OneBoundary();
-  void addBoundaryPoint(int x, int y);
-
+  void addBoundary(int x, int y);
+  void print();
 
   // TODO: use a stack?
-  // What do all of these mean?  top, x, y, first, next, last?
+  // What do all of these mean?  top, x, y, first?
   BoundaryPointManagement *top_bpm;
-  BoundaryPointManagement *x_mids;
-  BoundaryPointManagement *y_mids;
   BoundaryPointManagement *first_intxn; // first intersection 
   BoundaryPointManagement *next_segment;
-  BoundaryPointManagement *last_line;
-  BoundaryPointManagement *last_point;
+  //BoundaryPointManagement *last_line;
+  //BoundaryPointManagement *last_point;
+  BoundaryPointManagement *x_mids;
+  BoundaryPointManagement *y_mids;
 
   float r0;
   float r1;
@@ -69,7 +69,7 @@ class OneBoundary {
   BoundaryHeader *bh;
 
 
-  // TODO: use a vector?
+  // double linked list
   OneBoundary *last;
   OneBoundary *next;
 

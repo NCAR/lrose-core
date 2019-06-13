@@ -7,6 +7,22 @@ class BoundaryPointMap {
 
 public:
 
+  void se_delete_bnd_pt(BoundaryPointManagement *bpm,
+                        OneBoundary *ob);
+
+  void xse_add_bnd_pt(long x, long y, OneBoundary *ob);
+
+  void xse_x_insert(BoundaryPointManagement *bpm,
+                    OneBoundary *ob);
+  void xse_y_insert(BoundaryPointManagement *bpm,
+                    OneBoundary *ob);
+
+  void se_bnd_pt_atts(BoundaryPointManagement *bpm);
+
+  void se_append_bpm(BoundaryPointManagement **top_bpm,
+                     BoundaryPointManagement *bpm);
+
+
   int xse_ccw(double x0, double y0, double x1, double y1);
 
   void xse_set_intxn(double x, double y, double slope, 
