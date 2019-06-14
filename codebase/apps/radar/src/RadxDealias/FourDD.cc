@@ -334,7 +334,26 @@ int FourDD::findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int
      if ((rayIndex < 0) || (rayIndex >= numRays1)) 
        throw std::invalid_argument("rayIndex out of bounds");
      // end of argument validation 
-     
+
+     float targetAz = rvVolume1->sweep[sweepIndex1]->ray[rayIndex]->h.azimuth;
+     float scale = 360.0/numRays2;
+     float baseAz = rvVolume2->sweep[sweepIndex2]->ray[0]->h.azimuth;
+     int closestEstimate = fabs(targetAz - baseAz)/scale;
+     int index = closestEstimate % numRays2;
+     // the closest ray will be the estimated index or estimated index +/- 1
+     float diff1 = fabs(rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth - targetAz);
+     int indexPlus1 = (index + 1) % numRays2;
+     float diffPlus1 = fabs(rvVolume2->sweep[sweepIndex2]->ray[indexPlus1]->h.azimuth - targetAz);
+     int indexMinus1 = (index - 1 + numRays2) % numRays2;
+     float diffMinus1 = fabs(rvVolume2->sweep[sweepIndex2]->ray[indexMinus1]->h.azimuth - targetAz);
+     if (diff1 < diffPlus1) {
+       if (diff1 < diffMinus1) return index;
+       else return indexMinus1;
+     } else {
+       if (diffPlus1 < diffMinus1) return indexPlus1;
+       else return indexMinus1;
+     }
+     /*     
      // TODO: numRays1 or numRays2?    HERE !!!!
      az0 = rvVolume1->sweep[sweepIndex1]->ray[rayIndex]->h.azimuth;
      if (rayIndex < numRays2) rayIndex1=rayIndex;
@@ -347,11 +366,16 @@ int FourDD::findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int
        // is NOT important.
        // Estimate ray spacing ...
        // abs(last az - first az)/nrays
-       spacing = fabs(rvVolume2->sweep[sweepIndex2]->ray[0]->h.azimuth -
+       // NOTE: numRays2 must be > 1 otherwise, set spacing to ??
+       if (numRays2 > 1) {
+         spacing = fabs(rvVolume2->sweep[sweepIndex2]->ray[0]->h.azimuth -
 		      rvVolume2->sweep[sweepIndex2]->ray[numRays2-1]->h.azimuth);
-       printf("findRay spacing %g, numRays2 = %d\n", spacing, numRays2);
-       //       if (spacing > 180) spacing= 360.0 - spacing;
-       spacing = spacing/(float) (numRays2 - 1);   // <--- this is off
+         printf("findRay spacing %g, numRays2 = %d\n", spacing, numRays2);
+         //       if (spacing > 180) spacing= 360.0 - spacing;
+         spacing = spacing/(float) (numRays2 - 1);   // <--- this is off
+       } else {
+         spacing = 1.0;
+       }
        printf("findRay spacing %g\n", spacing);
 
        // Compute the difference in azimuth between the two rays:  
@@ -361,8 +385,9 @@ int FourDD::findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int
        
        // Get close to the correct index:  
        rayIndex1 = rayIndex1 + (int) (diffaz/spacing);
-       if (rayIndex1 >= numRays2) rayIndex1 = rayIndex1 - numRays2;
-       if (rayIndex1<0) rayIndex1 = numRays2 + rayIndex1;
+       if ((rayIndex1 >= numRays2) || (rayIndex1 < 0)) rayIndex1 = rayIndex1 % numRays2;
+       //if (rayIndex1<0) rayIndex1 = numRays2 + rayIndex1;
+       printf("rayIndex1 = %d\n", rayIndex1);
        az1=rvVolume2->sweep[sweepIndex2]->ray[rayIndex1]->h.azimuth;
        diffaz = az0 - az1;
        if (diffaz >= 180.0) diffaz = diffaz - 360.0;
@@ -390,6 +415,7 @@ int FourDD::findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int
        }
        return rayIndex1;
      }
+     */
 }
 
 // If the values are already converted to float, then this is not needed
@@ -607,13 +633,16 @@ short FourDD::Filter3x3(Volume *original, int i, int currIndex, int sweepIndex,
 // d. Initial Dealiasing
 //
 
-// rvVolume (in/out) initial dealiased values on output
+// rvVolume (in/out) working volume; initial dealiased values on output
+// rvVolume->h.missing  (in)
+// rvVolume->sweep[sweepIndex]->ray[0]->h.nyq_vel;      (in)
 // original     (in)  original values
 // STATE    (out)    the state for each bin {TBD, MISSING, etc.}
 void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *soundVolume,
 			       Volume *original,
 			       int sweepIndex, int del_num_bins, short **STATE,
-			       bool filt, float fraction) {
+			       bool filt, float fraction, float ck_val,
+                               bool strict_first_pass, int max_count) {
 
   //  int flag=1;
   
@@ -674,7 +703,7 @@ void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *sou
 	  STATE[i][rayIndex] = TBD;
 	}
       
-        if ((STATE[i][rayIndex] == TBD) &&  (fabs(startingValue) > _ck_val)) {
+        if ((STATE[i][rayIndex] == TBD) &&  (fabs(startingValue) > ck_val)) {
             float unfoldedValue;
             bool successful;
 
@@ -692,15 +721,15 @@ void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *sou
             if (sweepIndex<numSweeps-1) {
               aboveVal = rvVolume->sweep[sweepIndex+1]->ray[aboveIndex]->range[i];
             }
-
+            // TODO: where do we want to get the NyqVelocity? from original? or rvVolume?
             float NyqVelocity = getNyqVelocity(rvVolume, sweepIndex);
             //float fractionNyqVelocity = fraction * NyqVelocity;
             TryToDealiasUsingVerticalAndTemporalContinuity(missingVal,
                                                            aboveVal, soundVal,
                                                            startingValue, prevVal, lastVolume==NULL,
                                                            fraction, NyqVelocity,
-                                                           _strict_first_pass,
-                                                           _max_count,
+                                                           strict_first_pass,
+                                                           max_count,
                                                            &unfoldedValue, &successful);
             if (successful) {
               rvVolume->sweep[sweepIndex]->ray[rayIndex]->range[i] = unfoldedValue;
@@ -1612,7 +1641,8 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
       // continuity.  
 
       InitialDealiasing(rvVolume, lastVolume, soundVolume, original,
-                        sweepIndex, del_num_bins, STATE, filt, fraction);
+                        sweepIndex, del_num_bins, STATE, filt, fraction,
+                        _ck_val, _strict_first_pass, _max_count);
 
       // Now, unfold STATE=TBD bins assuming spatial continuity:  
       UnfoldTbdBinsAssumingSpatialContinuity(STATE, original, rvVolume, sweepIndex, 

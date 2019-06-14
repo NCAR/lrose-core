@@ -331,7 +331,7 @@ void Rsl::print_ray(Ray *ray)
     // print the data
     if (ray->range != NULL) {
       Range *bin = ray->range;
-      int maxToPrint = 10; // ray->h.nbins;
+      int maxToPrint = min(10, ray->h.nbins);
       for (int i = 0; i < maxToPrint; i++) {
 	cout << bin[i] << " ";
       }
@@ -364,7 +364,7 @@ void Rsl::print_sweep(Sweep *sweep)
     // print each ray
     if (sweep->ray != NULL) {
       Ray **ray = sweep->ray;
-      int maxToPrint = 5; // sweep->h.nrays
+      int maxToPrint = min(5, sweep->h.nrays);
       for (int i = 0; i < maxToPrint; i++) {
         cout << "  Ray " << i << endl;
 	print_ray(ray[i]);

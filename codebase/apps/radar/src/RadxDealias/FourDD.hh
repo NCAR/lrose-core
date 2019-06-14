@@ -140,7 +140,8 @@ public:
                   int del_num_bins);
 
   void InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *soundVolume, Volume *original,
-			 int sweepIndex, int del_num_bins, short **STATE, bool filt, float fraction);
+			 int sweepIndex, int del_num_bins, short **STATE, bool filt, float fraction,
+                         float ck_val, bool strict_first_pass, int max_count);
 
   void TryToDealiasUsingVerticalAndTemporalContinuity(float missingVal,
 						      float abVal, float soundVal, 
