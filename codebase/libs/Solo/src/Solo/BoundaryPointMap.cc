@@ -93,8 +93,8 @@ void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob) {
 
   //if(!(sebs->view_bounds || sebs->absorbing_boundary)) {
   // loads the pisp struct with all the position info 
-    sp_locate_this_point(sci, bpm); /* this routine is in                              
-                                     * ../perusal/sp_clkd.c */
+  // TODO: put this coordinate transform from world to local in a controller?
+  //  sp_locate_this_point(sci, bpm); // this routine is in ../perusal/sp_clkd.c 
     //# ifdef obsolete
     //    bpm->pisp->state =
     //      PISP_PLOT_RELATIVE | PISP_AZELRG |  PISP_EARTH;
@@ -102,11 +102,12 @@ void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob) {
     //# endif
    
       //}
-  
-  else if(sebs->absorbing_boundary) {
-    memcpy(bpm->pisp, sebs->pisp, sizeof(PointInSpace));
-    bpm->r = KM_TO_M(bpm->pisp->range);
-  }
+  // TODO: I don't understand this ... calculating the range?
+  // What is "absorbing_boundary" mean?  
+  //else if(sebs->absorbing_boundary) {
+  //  memcpy(bpm->pisp, sebs->pisp, sizeof(PointInSpace));
+  //  bpm->r = KM_TO_M(bpm->pisp->range);
+  //}
   if(bpm->pisp->state & PISP_TIME_SERIES) {
     x = bpm->pisp->time;
     y = bpm->pisp->range;
@@ -115,11 +116,11 @@ void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob) {
    * this routine and others to bound the rasterization                                  
    */
   if(ob->num_points > 1) {
-    if(!sebs->view_bounds) {
+    //if(!sebs->view_bounds) {  // this is UI stuff
       //se_draw_bnd(bpm, 2, NO);
       //seds->boundary_exists = YES;
-      sii_set_boundary_pt_count (sci->frame, ob->num_points);
-    }
+      //sii_set_boundary_pt_count (sci->frame, ob->num_points);
+    //}
     if(x > ob->max_x)
       ob->max_x = x;
     if(x < ob->min_x)
@@ -148,7 +149,7 @@ void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob) {
       //solo_return_radar_name(sci->frame, ob->bh->radar_name);
       //memcpy(sebs->origin, bpm->pisp, sizeof(struct point_in_space));
       //strcpy(sebs->origin->id, "BND_ORIGIN");
-    }
+    //}
     ob->min_x = ob->max_x = x;
     ob->min_y = ob->max_y = y;
   }
@@ -163,7 +164,7 @@ void BoundaryPointMap::xse_x_insert(BoundaryPointManagement *bpm,
 {
   /* insert sort of x coorinates of the midpoints of the line                            
    */
-  int ii=0, nn;
+  //int ii=0, nn;
   BoundaryPointManagement *bpmx;
 
   if(ob->num_points < 1)
@@ -226,7 +227,7 @@ void BoundaryPointMap::xse_y_insert(BoundaryPointManagement *bpm,
 {
   /* insert sort of x coorinates of the midpoints of the line                            
    */
-  int ii=0, nn;
+  //int ii=0, nn;
   BoundaryPointManagement *bpmx;
 
   if(ob->num_points < 1)

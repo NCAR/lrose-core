@@ -19,6 +19,7 @@
 # define RADIANS(x) ((x)*0.017453292)
 
 # define SQ(x) ((x)*(x))
+# define SQRT(x) (sqrt((double)(x)))
 
 /*
 # define LOG10(x) (log10((double)(x)))
@@ -39,6 +40,8 @@
 
 # define  BND_FIX_RADAR_INSIDE 0x0001
 # define  BND_FIX_RADAR_OUTSIDE 0x0002
+
+# define   PISP_TIME_SERIES 0x00000020
 
 /* Scan modes */
 # define              CAL 0
