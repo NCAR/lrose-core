@@ -41,7 +41,7 @@
 # define  BND_FIX_RADAR_INSIDE 0x0001
 # define  BND_FIX_RADAR_OUTSIDE 0x0002
 
-# define   PISP_TIME_SERIES 0x00000020
+//# define   PISP_TIME_SERIES 0x00000020
 
 /* Scan modes */
 # define              CAL 0

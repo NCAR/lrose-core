@@ -3,7 +3,10 @@
 
 
 
-OneBoundary::OneBoundary() {}
+OneBoundary::OneBoundary() {
+  num_points = 0;
+  x_mids = NULL;
+}
 
 // OneBoundary::OneBoundary(int *xpoints, int *ypoints, int npoints) {}
 

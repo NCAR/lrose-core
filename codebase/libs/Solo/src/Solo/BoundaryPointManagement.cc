@@ -3,6 +3,21 @@
 #include "Solo/BoundaryPointManagement.hh"
 
 
+BoundaryPointManagement::BoundaryPointManagement() {
+
+  //  pisp = new PointInSpace();
+
+}
+
+BoundaryPointManagement::~BoundaryPointManagement() {
+
+  if (pisp != NULL)
+    delete pisp;
+
+}
+
+
+
 
 void BoundaryPointManagement::print() {
 

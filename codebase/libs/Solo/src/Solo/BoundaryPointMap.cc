@@ -70,7 +70,8 @@ void BoundaryPointMap::se_delete_bnd_pt(BoundaryPointManagement *bpm,
   }
 }
 
-void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob) {
+void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob, 
+                                      bool time_series) {
 
   BoundaryPointManagement *bpm = new BoundaryPointManagement();
 
@@ -78,6 +79,12 @@ void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob) {
                                      * the last pointers are fresh */
   bpm->x = x;
   bpm->y = y;
+  PointInSpace *pisp = new PointInSpace();
+  bpm->pisp = pisp;
+  pisp->state = PointInSpace::PISP_AZELRG | PointInSpace::PISP_EARTH;
+  if (time_series) {
+    pisp->state |= PointInSpace::PISP_TIME_SERIES;
+  }
 
   if(++ob->num_points > 1) {  /* avoid duplicates */
     if((bpm->x == bpm->last->x) && (bpm->y == bpm->last->y)) {
@@ -108,10 +115,11 @@ void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob) {
   //  memcpy(bpm->pisp, sebs->pisp, sizeof(PointInSpace));
   //  bpm->r = KM_TO_M(bpm->pisp->range);
   //}
-  if(bpm->pisp->state & PISP_TIME_SERIES) {
-    x = bpm->pisp->time;
-    y = bpm->pisp->range;
-  }
+  // TODO: I don't understand this ...
+  //if(bpm->pisp->state & PISP_TIME_SERIES) {
+  //  x = bpm->pisp->time;
+  //  y = bpm->pisp->range;
+  //}
   /* the rasterization code sets sebs->view_bounds to YES and also uses                  
    * this routine and others to bound the rasterization                                  
    */
@@ -177,9 +185,11 @@ void BoundaryPointMap::xse_x_insert(BoundaryPointManagement *bpm,
     return;
   }
   /*                                                                                     
-   * the top node is an x value                                                          
+   * the top node is an x value    
+   * TODO: the code is the same, only the comparison is different;
+   *   make a separate function???? for the comparison
    */
-  if(bpm->pisp->state & PISP_TIME_SERIES) {
+  if(bpm->pisp->state & PointInSpace::PISP_TIME_SERIES) {
     for(;;) {
       if(bpm->t_mid < bpmx->t_mid) {
         if(!bpmx->x_left) {
@@ -242,7 +252,7 @@ void BoundaryPointMap::xse_y_insert(BoundaryPointManagement *bpm,
   /*                                                                                     
    * the top node is an x value                                                          
    */
-  if(bpm->pisp->state & PISP_TIME_SERIES) {
+  if(bpm->pisp->state & PointInSpace::PISP_TIME_SERIES) {
     for(;;) {
       if(bpm->r_mid < bpmx->r_mid) {
         if(!bpmx->y_left) {
@@ -291,7 +301,7 @@ void BoundaryPointMap::se_bnd_pt_atts(BoundaryPointManagement *bpm)
 //  struct bnd_point_mgmt *bpm;
 {
 
-  if(bpm->pisp->state & PISP_TIME_SERIES) {
+  if(bpm->pisp->state & PointInSpace::PISP_TIME_SERIES) {
     bpm->dt = bpm->last->pisp->time - bpm->pisp->time;
     bpm->dr = bpm->last->pisp->range - bpm->pisp->range;
     if(bpm->dt) bpm->slope = bpm->dr/bpm->dt;

@@ -10,7 +10,8 @@ public:
   void se_delete_bnd_pt(BoundaryPointManagement *bpm,
                         OneBoundary *ob);
 
-  void xse_add_bnd_pt(long x, long y, OneBoundary *ob);
+  void xse_add_bnd_pt(long x, long y, OneBoundary *ob,
+                      bool time_series = false);
 
   void xse_x_insert(BoundaryPointManagement *bpm,
                     OneBoundary *ob);
