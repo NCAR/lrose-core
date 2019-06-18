@@ -6,6 +6,9 @@
 OneBoundary::OneBoundary() {
   num_points = 0;
   x_mids = NULL;
+  y_mids = NULL;
+  next = NULL;
+  last = NULL;
 }
 
 // OneBoundary::OneBoundary(int *xpoints, int *ypoints, int npoints) {}

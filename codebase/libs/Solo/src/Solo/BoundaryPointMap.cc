@@ -1516,10 +1516,10 @@ short *BoundaryPointMap::get_boundary_mask(
         int nGates,
         float gateSize,
         float distanceToCellNInMeters,
-        float azimuth,
+        float azimuth,    // TODO: are azimuth & rotation_angle the same thing? YES
         int radar_scan_mode,
         int radar_type,
-        float tilt_angle,  // TODO: are tilt_angle & rotation_angle the same thing?
+        float tilt_angle, 
         float rotation_angle) {
 
   OneBoundary *ob;
@@ -1573,7 +1573,8 @@ short *BoundaryPointMap::get_boundary_mask(
         // there must be some side effects of this. What are they?
         // sets ob->radar_inside_boundary = T/F 
       }
-    xse_find_intxns(rotation_angle, distanceToCellNInMeters, ob);
+      double range = distanceToCellNInMeters + nGates*gateSize;
+    xse_find_intxns(azimuth, range, ob);
     xse_num_segments(ob);
     
     double range1;
