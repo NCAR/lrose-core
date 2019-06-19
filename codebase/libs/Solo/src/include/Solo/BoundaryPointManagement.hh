@@ -41,6 +41,7 @@ class BoundaryPointManagement {
   ~BoundaryPointManagement();
 
   void print();
+  void print_intxns();
 
   void LocateThisPoint(double x, double y, int frame);
 

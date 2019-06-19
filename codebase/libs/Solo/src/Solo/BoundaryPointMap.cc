@@ -77,6 +77,7 @@ void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob,
 
   se_append_bpm(&ob->top_bpm, bpm); /* the append happens first so                       
                                      * the last pointers are fresh */
+
   bpm->x = x;
   bpm->y = y;
   PointInSpace *pisp = new PointInSpace();
@@ -129,6 +130,7 @@ void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob,
       //seds->boundary_exists = YES;
       //sii_set_boundary_pt_count (sci->frame, ob->num_points);
     //}
+
     if(x > ob->max_x)
       ob->max_x = x;
     if(x < ob->min_x)
@@ -158,6 +160,7 @@ void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob,
       //memcpy(sebs->origin, bpm->pisp, sizeof(struct point_in_space));
       //strcpy(sebs->origin->id, "BND_ORIGIN");
     //}
+
     ob->min_x = ob->max_x = x;
     ob->min_y = ob->max_y = y;
   }

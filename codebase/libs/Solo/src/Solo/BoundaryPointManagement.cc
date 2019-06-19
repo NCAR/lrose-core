@@ -21,32 +21,53 @@ BoundaryPointManagement::~BoundaryPointManagement() {
 
 void BoundaryPointManagement::print() {
 
-  printf("x = %ld, y = %ld, z = %ld, r = %ld\n", x, y, z, r);
-  printf("x = %ld, y = %ld, z = %ld, shifted\n", _x, _y, _z);
+  printf("\tBPM: \n");
+  printf("\tx = %ld, y = %ld, z = %ld, r = %ld\n", x, y, z, r);
+  printf("\tx = %ld, y = %ld, z = %ld, shifted\n", _x, _y, _z);
 
+  printf("\tnext_intxn ...\n");
   BoundaryPointManagement *bpm = next_intxn;
   if (bpm == NULL) 
-    printf("next_intxn is NULL\n");
+    printf("\t   is NULL\n");
   else {
-    printf("next_intxn ...\n");
+    printf("\t   next_intxn ...\n");
     while (bpm != NULL) {
       bpm->print();
       bpm = bpm->next_intxn;
     }
   }
 
+  printf("\t  next ...\n");
   bpm = next;
   if (bpm == NULL) 
-    printf("next is NULL\n");
+    printf("\t     is NULL\n");
   else {
-    printf("next ...\n");
     while (bpm != NULL) {
       bpm->print();
       bpm = bpm->next;
     }
   }
+  printf("\tPBM end\n");
+
+}
 
 
+// print the secondary double-linked list of intersections
+// that wind through the boundary points
+//
+void BoundaryPointManagement::print_intxns() {
+
+  // printf("\tBPM: \n");
+  //printf("\tx = %ld, y = %ld, z = %ld, r = %ld\n", x, y, z, r);
+  //printf("\tx = %ld, y = %ld, z = %ld, shifted\n", _x, _y, _z);
+
+  printf("  rx: %ld --> ", rx);
+  BoundaryPointManagement *bpm = next_intxn;
+  if (bpm == NULL) 
+    printf(" NULL\n");
+  else {
+    bpm->print_intxns();
+  }
 }
 
 /*
