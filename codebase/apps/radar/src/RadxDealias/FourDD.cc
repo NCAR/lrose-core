@@ -1203,19 +1203,20 @@ void FourDD::AssessNeighborhood2(short **STATE, Volume *rvVolume, int sweepIndex
 
 void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
 						    Volume *original, Volume *rvVolume,
-						    int sweepIndex, int del_num_bins, float pfraction) {
+						    int sweepIndex, int del_num_bins, 
+                                                    float NyqVelocity, float pfraction,
+                                                    int max_count) {
 
-  /*
-         NyqVelocity = rvVolume->sweep[sweepIndex]->ray[0]->
-           h.nyq_vel;
-         NyqInterval = 2.0 * NyqVelocity;
-         numRays = rvVolume->sweep[sweepIndex]->h.nrays;
-         numBins = rvVolume->sweep[sweepIndex]->ray[0]->h.nbins;
 
-  */
+  if (sweepIndex < 0)
+    throw std::invalid_argument("sweepIndex negative");
+
+  //  sanity check the Nyquist velocity
+  if (fabs(NyqVelocity*pfraction) < 1)
+    throw std::invalid_argument("Nyquist velocity and pfraction too small");
 
   float missingVal = getMissingValue(original);
-  float NyqVelocity = getNyqVelocity(original, sweepIndex);
+  //float NyqVelocity = getNyqVelocity(original, sweepIndex);
   float NyqInterval = getNyqInterval(NyqVelocity);
 
   int loopcount = 0;
@@ -1226,7 +1227,9 @@ void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
   int numBins = getNumBins(original, sweepIndex);
   int numRays = getNumRays(original, sweepIndex);
 
+  // exit the loop when no change has been made; or max number of loops?
   while (flag==1) {
+    printf("loopcount = %d ", loopcount);
     loopcount=loopcount+1;
     flag=0;
     if (step==1) {
@@ -1243,52 +1246,65 @@ void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
       for (int currIndex=startindex; currIndex!=endindex; currIndex=currIndex+step) {
 		
 	float val = original->sweep[sweepIndex]->ray[currIndex]->range[i];
+        printf("working val = %g ... \n", val);
+        if (val != missingVal) {
+          int numtimes = 0;          // <<======
+          while (STATE[i][currIndex] == TBD  && numtimes <= max_count) {
+            numtimes = numtimes + 1; // <<====
 
-	if (STATE[i][currIndex] == TBD  && val!=missingVal) {
-	  int in, out;
-	  int numpos, numneg;
-          bool noHope = false;
-	  AssessNeighborhood2(STATE, rvVolume, sweepIndex, currIndex, i, 
-                              del_num_bins, val, 
-                              pfraction, NyqVelocity,
-                              &in, &out, &numpos, &numneg, &noHope);
+            int in, out;
+            int numpos, numneg;
+            bool noHope = false;
+            AssessNeighborhood2(STATE, rvVolume, sweepIndex, currIndex, i, 
+                                del_num_bins, val, 
+                                pfraction, NyqVelocity,
+                                &in, &out, &numpos, &numneg, &noHope);
 
-	  int numberOfDealiasedNeighbors = in + out;
+            int numberOfDealiasedNeighbors = in + out;
+            printf("number of dealiased neighbors = %d \n", numberOfDealiasedNeighbors);
+            // Perform last step of Bergen and Albers filter:  
+            //	  if (loopcount == 1 && numberOfTbdNeighbors+numberOfDealiasedNeighbors < 1)
+            if (loopcount == 1 && noHope)
+              STATE[i][currIndex] = MISSING; 
 
-	  // Perform last step of Bergen and Albers filter:  
-          //	  if (loopcount == 1 && numberOfTbdNeighbors+numberOfDealiasedNeighbors < 1)
-	  if (loopcount == 1 && noHope)
-	    STATE[i][currIndex] = MISSING; 
+            // otherwise, try to unfold this value
+            if (numberOfDealiasedNeighbors >= 1) {
+              bool withinNyqVelocity = (in > 0) && (out == 0);
+              if (withinNyqVelocity) {
+                rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = val;
+                STATE[i][currIndex] = DEALIASED;
+                flag = 1;
+              } else { // in == 0 || out != 0
+                if ((numpos+numneg)<(in+out-(numpos+numneg))) {
+                  if (loopcount>2) {
+                    // Keep the value after two passes through data.
+                    rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = val;
+                    STATE[i][currIndex] = DEALIASED;
+                    flag = 1;
+                  } 
+                  // end  ((numpos+numneg)<(in+out-(numpos+numneg)))
+                  // TODO: what use are these? as we get a new val each time through the loop??
+                } else if (numpos>numneg) {
+                  val=val+NyqInterval; 
+                } else if (numneg>numpos) {
+                  val=val-NyqInterval;
+                } else {
+                  // Save bin for windowing if unsuccessful after four passes:
+                  if (loopcount>4) STATE[i][currIndex] = UNSUCCESSFUL;
+                }
+              } // end else (in == 0 || out != 0)
+              printf("numtimes = %d val = %g\n", numtimes, val);
+              //} // end while still unfolding (STATE == TBD)
+            } // end if (numberOfDealiasedNeighbors>=1)
 
-	  // otherwise, try to unfold this value
-	  if ((STATE[i][currIndex] == TBD) && (numberOfDealiasedNeighbors >= 1)) {
-	    bool withinNyqVelocity = (in > 0) && (out == 0);
-	    if (withinNyqVelocity) {
-	      rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = val;
-	      STATE[i][currIndex] = DEALIASED;
-	    } else { // in == 0 || out != 0
-	      if ((numpos+numneg)<(in+out-(numpos+numneg))) {
-		if (loopcount>2) {
-		  // Keep the value after two passes through data.
-		  rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = val;
-		  STATE[i][currIndex] = DEALIASED;
-		} 
-		// end  ((numpos+numneg)<(in+out-(numpos+numneg)))
-	      } else if (numpos>numneg) {
-		val=val+NyqInterval; 
-	      } else if (numneg>numpos) {
-		val=val-NyqInterval;
-	      } else {
-		// Save bin for windowing if unsuccessful after four passes:
-		if (loopcount>4) STATE[i][currIndex] = UNSUCCESSFUL;
-	      }
-	    } // end else (in == 0 || out != 0)       
-          } // end if (STATE[i][currIndex] == TBD) &&  (numberOfDealiasedNeighbors>=1)
+          } // while (STATE[i][currIndex]== TBD) && numtime <= max_count
+          if (numtimes > max_count) {
+            // Remove bin:
+            STATE[i][currIndex] = UNSUCCESSFUL;
+          }
+        } // end if val != missing
 
-	} //end if (STATE[i][currIndex]== TBD)
-        if (STATE[i][currIndex] == DEALIASED) {
-          flag = 1;
-        }
+        printf("flag = %d STATE[%1d][%1d] = %d\n", flag, i, currIndex, STATE[i][currIndex]);
       }// end for (currIndex= ...
     } // end for (i=del_num_bins;i<numBins;i++)
   } // while flag == 1
@@ -1629,6 +1645,8 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
 
       NyqVelocity = rvVolume->sweep[sweepIndex]->ray[0]->
         h.nyq_vel;
+      // TODO: validate NyqVelocity is NOT TOO SMALL!
+
       NyqInterval = 2.0 * NyqVelocity;
       numRays = rvVolume->sweep[sweepIndex]->h.nrays;
       numBins = rvVolume->sweep[sweepIndex]->ray[0]->h.nbins;
@@ -1646,7 +1664,9 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
 
       // Now, unfold STATE=TBD bins assuming spatial continuity:  
       UnfoldTbdBinsAssumingSpatialContinuity(STATE, original, rvVolume, sweepIndex, 
-                                             del_num_bins, pfraction);
+                                             del_num_bins, 
+                                             NyqVelocity, pfraction,
+                                             _max_count);
 
       //
       // Unfold remote bins or those that were previously unsuccessful
