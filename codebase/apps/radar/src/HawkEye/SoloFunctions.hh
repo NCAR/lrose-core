@@ -63,9 +63,28 @@ public:
   Q_INVOKABLE QString REMOVE_AIRCRAFT_MOTION(QString field); // return the name of the new field that contains the result
   //  Q_INVOKABLE QString  REMOVE_AIRCRAFT_MOTION(QString field); //  { return field+"_trump"; }
   Q_INVOKABLE double sqrt(double value) { return qSqrt(value); }
-  Q_INVOKABLE QVector<double> add(QVector<double> v, QVector<double> v2) { 
-    // int size = v.size(); if (size == v2.size()) {
-    QVector<double> v3(3); for (int i=0; i<3; i++) v3[i]=v[i]+v2[i]; return v3; }
+  Q_INVOKABLE QVector<double> add(QVector<double> v, QVector<double> v2) {
+    int size = v.size();
+    if (size != v2.size()) {
+      // TODO: throw exception                                                                           
+      // return the size of the shorter?                                                                 
+      QVector<double> v0(0);
+      return v0;
+    }
+    //    QVector<double> v3 = v + v2; return v3; } // this appends one v2 elements to v 
+                                                                                                       
+    QVector<double> v3(size);
+    for (int i=0; i<size; i++)
+      v3[i]=v[i]+v2[i];
+    return v3;
+  }
+
+  /* { 
+    int size = v.size(); if (size == v2.size()) {
+    //    QVector<double> v3 = v + v2; return v3; } // this appends one v2 elements to v
+      QVector<double> v3(size); 
+     for (int i=0; i<3; i++) v3[i]=v[i]+v2[i]; return v3; }
+  */
   Q_INVOKABLE QVector<int> addI(QVector<int> v, QVector<int> v2) { QVector<int> v3(3); for (int i=0; i<3; i++) v3[i]=v[i]+v2[i]; return v3; }
  
 private:

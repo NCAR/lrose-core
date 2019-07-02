@@ -918,12 +918,30 @@ void SpreadSheetView::fieldDataSent(vector<double> data, int useless, int c) {
       string format = "%g";
       char formattedData[250];
 
+      // TODO: get the globalObject for this field and set the values
+
+      //------
+      QTableWidgetItem *headerItem = table->horizontalHeaderItem(c);
+      QString fieldName = headerItem->text();
+      QJSValue fieldArray = engine.newArray(20);
+      QString vectorName = fieldName;
+      //for (int i=0; i<20; i++) {
+      //  fieldArray.setProperty(i, someValue);
+      //}
+                                                                                    
+      //------
+
       for (int r=0; r<20; r++) {
         //    sprintf(formattedData, format, data[0]);
         sprintf(formattedData, "%g", data.at(r));
         cerr << "setting " << r << "," << c << "= " << formattedData << endl; 
         table->setItem(r, c, new SpreadSheetItem(formattedData));
+        fieldArray.setProperty(r, data.at(r));
       }
+      cout << "adding vector form " << vectorName.toStdString() << endl;
+      engine.globalObject().setProperty(vectorName, fieldArray);
+      cout << "end adding vector form " << vectorName.toStdString() << endl;
+
 }
 
 // request filled by Controller in response to needFieldNames signal
@@ -942,7 +960,7 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
       QString the_name(QString::fromStdString(*it));
       cout << *it << endl;
       table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
-       
+      // TODO: what about setHorizontalHeaderLabels(const QStringList &labels) instead? would it be faster?
       emit needDataForField(*it, useless, c);
       c += 1;
     }
@@ -959,16 +977,30 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
     //     
     // for each field in model (RadxVol)
 
+    /* int someValue = 0;
     for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
       QString fieldName(QString::fromStdString(*it));
       // //    try {
-      //QJSValue objectValue = engine.newQObject(new DataField(*it));
-      //engine.globalObject().setProperty(fieldName, objectValue.property("name"));
-      engine.globalObject().setProperty(fieldName, fieldName);
+      ////QJSValue objectValue = engine.newQObject(new DataField(*it));
+      ////engine.globalObject().setProperty(fieldName, objectValue.property("name"));
+      //engine.globalObject().setProperty(fieldName, fieldName);
+
+      QJSValue fieldArray = engine.newArray(20);
+      QString vectorName = fieldName; //  + "_VECTOR";
+      for (int i=0; i<20; i++) {
+        fieldArray.setProperty(i, someValue);
+      }
+      cout << "adding vector form " << vectorName.toStdString() << endl;
+      engine.globalObject().setProperty(vectorName, fieldArray);
+      cout << "end adding vector form " << vectorName.toStdString() << endl;
+
+      //someValue += 1;
+
       // //} catch (Exception ex) {
       // // cerr << "ERROR - problem setting property on field " << *it << endl;
       // //}
     }
+    */
 
     // print the context ...                                                                                                   
     LOG(DEBUG) << "current QJSEngine context ... after fieldNamesProvided";
@@ -995,10 +1027,24 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
   string format = "%g";
   // char formattedData[250];
 
+  int variableLength = value.property("length").toInt();
+  if ( variableLength > 1) {
+    // this is a vector
+    LOG(DEBUG) << "variable is a vector " << name.toStdString();
+      QJSValue fieldArray = engine.newArray(variableLength);
+      QString vectorName = name;
+      for (int i=0; i<variableLength; i++) {
+        fieldArray.setProperty(i, value.property(i).toInt());
+      }
+      cout << "adding vector form " << vectorName.toStdString() << endl;
+      engine.globalObject().setProperty(vectorName, fieldArray);
+      cout << "end adding vector form " << vectorName.toStdString() << endl;
+  }
 
   if (value.isArray()) {
     qDebug() << "variable isArray " << name << endl;
     LOG(DEBUG) << "variable isArray " << name.toStdString();
+
     /*
   for(it = value.begin(); it != value.end(); it++) {
     QString the_name(QString::fromStdString(*it));

@@ -36,6 +36,22 @@ vector<double> SoloFunctions::splitDouble(const string &s, char delim) {
   split(s, delim, back_inserter(elems));
   return elems;
 }
+/*
+QVector<double> add(QVector<double> v, QVector<double> v2) {
+  int size = v.size(); 
+  if (size != v2.size()) {
+    // TODO: throw exception
+    // return the size of the shorter?
+    QVector<double> v0(0);
+    return v0;
+  }
+    //    QVector<double> v3 = v + v2; return v3; } // this appends one v2 elements to v                          
+    QVector<double> v3(size);
+    for (int i=0; i<size; i++) 
+      v3[i]=v[i]+v2[i];
+    return v3;
+}
+*/
 
 
 // TODO:  parameters should be DataField ??
