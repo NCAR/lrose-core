@@ -13,7 +13,7 @@
 
 #include <vector>
 
-//class SpreadSheetView;
+class SpreadSheetView;
 
 using namespace std;
 

@@ -22,7 +22,9 @@ SpreadSheetModel::SpreadSheetModel(RadxRay *closestRay, RadxVol dataVolume)
     cout << "in SpreadSheetModel, closestRay is NULL" << endl;
   else
    cout << "in SpreadSheetModel, closestRay is NOT  NULL" << endl;
+  closestRay->print(cout);
   _vol = dataVolume;
+  _vol.loadFieldsFromRays();
 }
 
 /*
@@ -159,9 +161,11 @@ vector<double> SpreadSheetModel::getData(string fieldName)
 
   vector <double> dataVector;
   const RadxField *field;
-  field = _vol.getFieldFromRay(fieldName);  // <--- Why is this returning NULL
+  //  field = _vol.getFieldFromRay(fieldName);  // <--- Why is this returning NULL
   // because the type is 
   // from debugger:  *((vol.getFieldFromRay("VEL"))->getDataSi16()+1)
+  field = _closestRay->getField(fieldName);
+
   if (field == NULL) {
     cerr << "no RadxField found " <<  endl;
     return dataVector;

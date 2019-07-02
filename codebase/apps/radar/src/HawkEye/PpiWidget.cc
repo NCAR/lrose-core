@@ -455,7 +455,8 @@ const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
 
 {
 
-  double clickAz = atan2(x_km, y_km) * DEG_TO_RAD;
+  double clickAz = atan2(y_km, x_km) * RAD_TO_DEG; // 180.0 / M_PI; //  * DEG_TO_RAD;
+  printf("clickAz = %g from x_km, y_km = %g, %g\n", clickAz, x_km, y_km);
 
   double minDiff = 1.0e99;
   const RadxRay *closestRay = NULL;
@@ -472,6 +473,7 @@ const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
     }
   }
 
+  printf("closestRay has azimuth %g\n", closestRay->getAzimuthDeg());
   return closestRay;
 
 }
@@ -1199,7 +1201,7 @@ void PpiWidget::changeToDisplayField(string fieldName)  // , ColorMap newColorMa
  
 void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
   
-  // RadxRay *closestRayCopy = new RadxRay(*closestRay);
+  RadxRay *closestRayCopy = new RadxRay(*closestRay);
 
   // create the view
   SpreadSheetView *sheetView;
@@ -1208,10 +1210,10 @@ void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
   // create the model
 
   // SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
-  // SpreadSheetModel *model = new SpreadSheetModel(NULL, _vol); // closestRayCopy, _vol);
+  SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy, _vol);
   
   // create the controller
-  // SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
+  SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
 
   // finish the other connections ..
   //sheetView->addController(sheetController);

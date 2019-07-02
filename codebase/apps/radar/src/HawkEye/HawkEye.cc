@@ -73,9 +73,9 @@ HawkEye::HawkEye(int argc, char **argv) :
 
   Log logger("HawkEye");
   logger.setDayMode();
-  logger.setOutputDir("/tmp");
+  logger.setOutputDir("/tmp/Applications/HawkEye/Logs");
   LOG(DEBUG) << "HawkEye starting";
-  
+
   // get command line args
   
   if (_args.parse(argc, (const char **) argv)) {
@@ -117,6 +117,13 @@ HawkEye::HawkEye(int argc, char **argv) :
   // set params on alloc checker
 
   AllocCheck::inst().setParams(&_params);
+
+  if (_params.debug) {
+    LOG_STREAM_INIT(true, false, true, true);
+  } else {
+    LOG_STREAM_INIT(false, false, false, false);
+    LOG_STREAM_TO_CERR();
+  }
 
   // print color scales if debugging
   if (_params.debug) {

@@ -35,7 +35,7 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
   int rows;
   int cols;
 
-  //_controller = new SpreadSheetController(this);
+  // _controller = new SpreadSheetController(this);
   //_controller->open(fileName);
   //vector<std::string> fieldNames = _controller->getFieldNames();
   //cols = displayInfo.getNumFields();

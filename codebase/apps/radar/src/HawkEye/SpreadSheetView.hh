@@ -5,7 +5,7 @@
 #include <QMainWindow>
 #include "TextEdit.hh"
 #include "SpreadSheetUtils.hh"
-//#include "SpreadSheetController.hh"
+#include "SpreadSheetController.hh"
 #include "SpreadSheetDelegate.hh"
 #include "SoloFunctions.hh"
 
@@ -99,8 +99,8 @@ protected:
 
 private:
 
-  //     SpreadSheetController *_controller;
-  // vector<std::string> _fieldNames;
+  //SpreadSheetController *_controller;
+    vector<std::string> _fieldNames;
 
     QToolBar *toolBar;
     QAction *colorAction;
