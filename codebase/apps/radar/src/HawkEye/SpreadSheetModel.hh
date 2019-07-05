@@ -21,6 +21,7 @@ public:
   vector<double> getData(string fieldName);
   vector<float> getSampleData();
   vector<string> getFields();
+  RadxVol getVolume(); 
 
   RadxVol _vol;
   RadxRay *_closestRay;

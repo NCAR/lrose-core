@@ -1141,6 +1141,52 @@ int PolarManager::_getArchiveData()
 
 }
 
+
+/////////////////////////////
+// apply new, edited  data in archive mode
+// returns 0 on success, -1 on failure
+
+void PolarManager::_applyDataEdits(const RadxVol &editedVol)
+{
+
+  // set up file object for reading
+  
+  _vol.clear();
+    
+    if(_params.debug) {
+      cerr << "  applying edit changes: " << endl;
+    }
+    
+    _vol = editedVol; // TODO: just replace sections of the data fields
+
+
+  // compute the fixed angles from the rays
+  // so that we reflect reality
+  
+  _vol.computeFixedAnglesFromRays();
+
+  // load the sweep manager
+  
+  _sweepManager.set(_vol);
+
+  /*
+  if (_params.debug) {
+    cerr << "----------------------------------------------------" << endl;
+    cerr << "perform archive retrieval" << endl;
+    cerr << "  read file: " << _vol.getPathInUse() << endl;
+    cerr << "  nSweeps: " << _vol.getNSweeps() << endl;
+    cerr << "  guiIndex, fixedAngle: " 
+         << _sweepManager.getGuiIndex() << ", "
+         << _sweepManager.getSelectedAngle() << endl;
+    cerr << "----------------------------------------------------" << endl;
+  }
+  
+   _platform = _vol.getPlatform();
+  */
+
+
+}
+
 /*
 RadxVol PolarManager::getDataVolume() {
   return _vol;
@@ -1639,6 +1685,18 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
 
   }
   LOG(DEBUG) << "exit";
+}
+
+void PolarManager::setVolume(const RadxVol &radarDataVolume) {
+
+  LOG(DEBUG) << "enter";
+
+  // _applyDataEdits(radarDataVolume);
+
+  LOG(DEBUG) << "exit";
+
+
+
 }
 
 /*

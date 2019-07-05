@@ -41,7 +41,7 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
   //cols = displayInfo.getNumFields();
   // vector<std::string> fieldNames = vol.getUniqueFieldNameList();
   cols = 3; // (int) fieldNames.size();
-  rows = 20;
+  rows = 200;
 
   //_volumeData = vol;
     addToolBar(toolBar = new QToolBar());
@@ -73,6 +73,11 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
     connect(okAct, &QAction::triggered, this, &SpreadSheetView::acceptFormulaInput);
     toolBar->addAction(okAct);
 
+    QAction *applyAct = new QAction(tr("&Apply"), this);
+    applyAct->setStatusTip(tr("Apply changes to display"));
+    connect(applyAct, &QAction::triggered, this, &SpreadSheetView::applyChanges);
+    toolBar->addAction(applyAct);
+
     /*
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
     buttonsLayout->addStretch(1);
@@ -88,7 +93,9 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
 
     // ============
     table = new QTableWidget(rows, cols, this);
-    table->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
+    QHeaderView* header = table->horizontalHeader();
+    header->setSectionResizeMode(QHeaderView::Stretch);
+    // table->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
     // set the column headers to the data fields
     
     
@@ -473,12 +480,22 @@ void SpreadSheetView::setupSoloFunctions(SoloFunctions *soloFunctions) {
       QJSValueIterator it(theGlobalObject);
       while (it.hasNext()) {
 	it.next();
-	qDebug() << it.name() << ": " << it.value().toString();
+        QString theValue = it.value().toString();
+        theValue.truncate(100);
+
+	qDebug() << it.name() << ": " << theValue; // it.value().toString().truncate(100);
         currentVariableContext[it.name()] = it.value().toString();
       }
       LOG(DEBUG) << "end current QJSEngine context";
 
   
+}
+
+void SpreadSheetView::applyChanges()
+{
+  // TODO: send a list of the variables in the GlobalObject of the
+  // QJSEngine to the model (via the controller?)
+  emit applyVolumeEdits();
 }
 
 void SpreadSheetView::acceptFormulaInput()
@@ -497,7 +514,10 @@ void SpreadSheetView::acceptFormulaInput()
     QJSValueIterator it(theGlobalObject);
     while (it.hasNext()) {
       it.next();
-      qDebug() << it.name() << ": " << it.value().toString();
+      QString theValue = it.value().toString();
+      theValue.truncate(100);
+
+      qDebug() << it.name() << ": " << theValue; // it.value().toString().truncate(100);
       currentVariableContext[it.name()] = it.value().toString();
     }
       // ======
@@ -526,10 +546,12 @@ void SpreadSheetView::acceptFormulaInput()
 	QJSValueIterator it2(newGlobalObject);
 	while (it2.hasNext()) {
 	  it2.next();
-	  qDebug() << it2.name() << ": " << it2.value().toString();
+          QString theValue = it2.value().toString();
+          theValue.truncate(100);
+	  qDebug() << it2.name() << ": " << theValue; // it2.value().toString().truncate(100);
 	  if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
 	    // we have a newly defined variable
-	    qDebug() << "NEW VARIABLE " << it2.name() <<  ": " << it2.value().toString();
+	    qDebug() << "NEW VARIABLE " << it2.name() <<  ": " << theValue; // it2.value().toString().truncate(100);
 	    addVariableToSpreadSheet(it2.name(), it2.value());
 	  }
 	}
@@ -923,15 +945,12 @@ void SpreadSheetView::fieldDataSent(vector<double> data, int useless, int c) {
       //------
       QTableWidgetItem *headerItem = table->horizontalHeaderItem(c);
       QString fieldName = headerItem->text();
-      QJSValue fieldArray = engine.newArray(20);
+      QJSValue fieldArray = engine.newArray(data.size());
       QString vectorName = fieldName;
-      //for (int i=0; i<20; i++) {
-      //  fieldArray.setProperty(i, someValue);
-      //}
-                                                                                    
-      //------
 
-      for (int r=0; r<20; r++) {
+      // 752019 table->setRowCount(data.size());
+      for (int r=0; r<200; r++) {
+      // 752019 for (std::size_t r=0; r<data.size(); r++) {
         //    sprintf(formattedData, format, data[0]);
         sprintf(formattedData, "%g", data.at(r));
         cerr << "setting " << r << "," << c << "= " << formattedData << endl; 
@@ -967,6 +986,7 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
 
     // test: adding some missing code
     // TODO: magic number 20 = number of rows
+    //table->setItemPrototype(table->item(20 - 1, c - 1));
     table->setItemPrototype(table->item(20 - 1, c - 1));
     table->setItemDelegate(new SpreadSheetDelegate());
     // end test: adding some missing code
@@ -1011,7 +1031,10 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
     QJSValueIterator it2(theGlobalObject);
     while (it2.hasNext()) {
       it2.next();
-      qDebug() << it2.name() << ": " << it2.value().toString();
+      QString theValue = it2.value().toString();
+      theValue.truncate(100);
+
+      qDebug() << it2.name() << ": " << theValue; // it2.value().toString().truncate(100);
       currentVariableContext[it2.name()] = it2.value().toString();
     }
     LOG(DEBUG) << "end current QJSEngine context";

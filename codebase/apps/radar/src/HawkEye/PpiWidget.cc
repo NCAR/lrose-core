@@ -1218,7 +1218,13 @@ void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
   // finish the other connections ..
   //sheetView->addController(sheetController);
   // model->setController(sheetController);
-  
+
+  // connect some signals and slots in order to retrieve information
+  // and send changes back to display
+                                                                         
+  connect(sheetControl, SIGNAL(volumeChanged(RadxVol)),
+  	  &_manager, SLOT(setVolume(RadxVol)));
+
   
   sheetView->init();
   sheetView->show();

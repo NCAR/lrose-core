@@ -124,23 +124,7 @@ public:
 
   //  const RadxVol getDataVolume();
 
-  /*
-  void ShowContextMenu(const QPoint &pos);
-  void ExamineEdit(const RadxRay *closestRay);
-  void contextMenuExamine();
-  void ShowContextMenu(const QPoint &pos);
-  void notImplemented();
-  void informationMessage();
-  */
 public slots:
-/*
-  void contextMenuCancel();
-  void contextMenuParameterColors();
-  void contextMenuView(); 
-  void contextMenuEditor();
-  virtual void contextMenuExamine();
-  void contextMenuDataWidget();
-  */
 
   //colorMapRedefineReceived(string, ColorMap)
   void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
@@ -148,7 +132,7 @@ public slots:
 				QColor emphasisColor,
 				QColor annotationColor,
 				QColor backgroundColor);
-
+  void setVolume(const RadxVol &radarDataVolume);
 
 signals:
 
@@ -296,6 +280,8 @@ private:
   int _getArchiveData();
   void _plotArchiveData();
   void _setupVolRead(RadxFile &file);
+  //  int _applyDataEdits(RadxVol _editedVol);  // & or * ??
+  void _applyDataEdits(const RadxVol &editedVol);
 
   // draw beam
 
@@ -328,7 +314,6 @@ private:
 
   void _howto();
 
-  //  SpreadSheetModel *_radarDataModel;
 
 private slots:
 

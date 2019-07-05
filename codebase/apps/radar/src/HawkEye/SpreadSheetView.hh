@@ -71,10 +71,13 @@ public slots:
   void fieldNamesProvided(vector<string> fieldNames);
   void fieldDataSent(vector<double> data, int useless, int c);
 
+  void applyChanges();
+
 signals:
 
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
+  void applyVolumeEdits();
 
 protected:
     void setupContextMenu();

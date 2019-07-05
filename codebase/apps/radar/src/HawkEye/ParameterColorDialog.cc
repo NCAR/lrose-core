@@ -21,7 +21,7 @@ ParameterColorDialog::ParameterColorDialog(QWidget *parent) :
     parameterLabel->setText(tr("Parameters"));
 
     QListWidget *parameterList = new QListWidget(this);
-    for (int i=0; i<20; i++) 
+    for (int i=0; i<20; i++)    // TODO: get a real list of the field Names?? 
       parameterList->addItem("DBZ");
 
     // Color Palette Editor widget creations ...

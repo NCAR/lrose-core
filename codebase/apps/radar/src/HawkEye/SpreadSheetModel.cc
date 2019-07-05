@@ -171,8 +171,10 @@ vector<double> SpreadSheetModel::getData(string fieldName)
     return dataVector;
   } 
   // Radx::fl32 *data = field->getDataFl32();
-  // TODO: how may gates?
-  for (int i=0; i<20; i++) { 
+  // how may gates?
+  size_t nPoints = field->getNPoints();
+  //  for (size_t i=0; i<nPoints; i++) { 
+  for (size_t i=0; i<200; i++) { 
     double value = field->getDoubleValue(i);
     cout << value << " ";
     dataVector.push_back(value); // data[i]);
@@ -180,6 +182,10 @@ vector<double> SpreadSheetModel::getData(string fieldName)
   cout << endl;
   // convert data to vector
   return dataVector;
+}
+
+RadxVol SpreadSheetModel::getVolume() {
+  return _vol;
 }
 
 

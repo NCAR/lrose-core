@@ -61,6 +61,8 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
   connect(_currentView, SIGNAL(needFieldNames()), this, SLOT(needFieldNames()));
   connect(_currentView, SIGNAL(needDataForField(string, int, int)), 
 	  this, SLOT(needDataForField(string, int, int)));
+  connect(_currentView, SIGNAL(applyVolumeEdits()), 
+	  this, SLOT(getVolumeChanges()));
 
     // connect controller slots to model signals 
 
@@ -109,6 +111,11 @@ void  SpreadSheetController::needFieldNames() {
 void  SpreadSheetController::needDataForField(string fieldName, int r, int c) {
 
   _currentView->fieldDataSent(getData(fieldName), r, c);
+}
+
+
+void SpreadSheetController::getVolumeChanges() {
+  emit volumeChanged(_currentModel->getVolume());
 }
 
 

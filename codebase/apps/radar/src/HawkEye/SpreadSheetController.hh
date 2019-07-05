@@ -17,7 +17,7 @@ class SpreadSheetView;
 
 using namespace std;
 
-class SpreadSheetController : QObject
+class SpreadSheetController : public QObject
 {
 
   Q_OBJECT
@@ -34,9 +34,13 @@ public:
 
   SpreadSheetModel *getDataModel() {return _currentModel;};
 
+signals:
+  void volumeChanged(const RadxVol &radarDataVolume);
+
 public slots:
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
+  void getVolumeChanges();
 
 private:
 
