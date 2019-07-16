@@ -37,6 +37,12 @@ public:
 
   float myPow();
 
+  vector<string> *getVariablesFromSpreadSheet();
+  vector<double> *getDataForVariableFromSpreadSheet(int column, string fieldName);
+
+   void setSelectionToValue(QString value);
+
+
 public slots:
     void updateStatus(QTableWidgetItem *item);
     void updateColor(QTableWidgetItem *item);
@@ -147,7 +153,6 @@ const char *htmlText =
 "<li>Summing the contents of an arbitrary number of cells.</li>"
   "</HTML>";
 };
-
 
 
 

@@ -29,10 +29,12 @@ public:
 
   vector<string> getFieldNames();
   vector<double> getData(string fieldName);
+  void setData(string fieldName, vector<double> *data);
 
   void open(string fileName);
 
   SpreadSheetModel *getDataModel() {return _currentModel;};
+  void volumeUpdated();
 
 signals:
   void volumeChanged(const RadxVol &radarDataVolume);

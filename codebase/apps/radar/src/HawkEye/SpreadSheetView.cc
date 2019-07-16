@@ -441,7 +441,7 @@ void SpreadSheetView::updateTextEdit(QTableWidgetItem *item)
 void SpreadSheetView::returnPressed()
 {
     QString text = formulaInput->getText();
-    cerr << "text entered: " << text.toStdString() << endl;
+    LOG(DEBUG) << "text entered: " << text.toStdString();
 
     int row = table->currentRow();
     int col = table->currentColumn();
@@ -524,17 +524,27 @@ void SpreadSheetView::acceptFormulaInput()
     try {
       QJSValue result = engine.evaluate(text);
       if (result.isError()) {
+        QString message;
+        message.append(result.toString());
+        message.append(" on line number ");
+        message.append(result.property("lineNumber").toString());
+        criticalMessage(message.toStdString()); 
         qDebug()
 	  << "Uncaught exception at line"
   	  << result.property("lineNumber").toInt()
 	  << ":" << result.toString();
       } else {
+
+	cerr << " the result is " << result.toString().toStdString() << endl;
+
 	if (result.isArray()) {
 	  cerr << " the result is an array\n"; 
         //vector<int> myvector;
         //myvector = engine.fromScriptValue(result);
-	}
-	cerr << " the result is " << result.toString().toStdString() << endl;
+	} 
+        if (result.isNumber()) {
+          setSelectionToValue(result.toString());
+        }
 
       // ======
       //  YES! This works.  The new global variables are listed here;
@@ -556,14 +566,18 @@ void SpreadSheetView::acceptFormulaInput()
 	  }
 	}
 	// ======
-
+        /*
 	int row = table->currentRow();
 	int col = table->currentColumn();
 	QTableWidgetItem *item = table->item(row, col);
-	if (!item)
+	if (!item) {
+          LOG(DEBUG) << "considered not item ";
 	  table->setItem(row, col, new SpreadSheetItem(result.toString())); // text));
-        else
+        } else {
+          LOG(DEBUG) << "considered item";
 	  item->setData(Qt::EditRole, result.toString()); // text);
+        }
+        */
 	table->viewport()->update();
       }
     } catch (const std::exception& ex) {
@@ -593,6 +607,111 @@ void SpreadSheetView::cancelFormulaInput()
     */
 }
 
+
+// TODO: I have to be careful here ...
+// addField will always work, it just renames the field if it already
+// exists.  If the field hasn't changed, then don't send it in the list.
+// Hmmm, how to detect and keep track of changes?  
+// 1) Just always add new field and then allow a delete of a field? 
+//     Uck, this requires another dialog.
+// 2) Select which fields to write to save file?
+//     Uck, same ... requires another dialog
+// 3) Save them all; use RadxConvert to select fields.
+//     Easy, simple. Do it!
+//
+// Hmm, maybe we want to get the information from the spreadsheet table?
+// Yes, get them from spreadsheet (QTableWidget) NOT from the QJSEngine.
+// QJSEngine has a bunch of context variables and functions, which we don't want.
+vector<string> *SpreadSheetView::getVariablesFromSpreadSheet() {
+
+  vector<string> *names = new vector<string>;
+
+  
+  // try iterating over the properties of the globalObject to find new variables
+  //QJSValue newGlobalObject = engine.globalObject();
+
+  //QJSValueIterator it2(newGlobalObject);
+  //while (it2.hasNext()) {
+  //  it2.next();
+    //QString theValue = it2.value().toString(); // TODO: this could be the bottle neck; try sending list of double?
+    //theValue.truncate(100);
+
+  for (int c=0; c < table->columnCount(); c++) {
+    QTableWidgetItem *tableWidgetItem = table->horizontalHeaderItem(c);
+    string fieldName = tableWidgetItem->text().toStdString(); 
+    LOG(DEBUG) << fieldName; 
+    //if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
+    //  // we have a newly defined variable
+    //  qDebug() << "NEW VARIABLE " << it2.name() <<  ": " << theValue; // it2.value().toString().truncate(100);
+    //  addVariableToSpreadSheet(it2.name(), it2.value());
+    //}
+    names->push_back(fieldName);
+  }
+	
+  return names;
+}
+
+//
+// Get data from spreadsheet/table because we need to capture individual cell edits
+//
+vector<double> *SpreadSheetView::getDataForVariableFromSpreadSheet(int column, string fieldName) {
+
+  vector<double> *data = new vector<double>;
+
+  int c = 0;
+  QTableWidgetItem *tableWidgetItem = table->horizontalHeaderItem(c);
+  // TODO; verify fieldName and matches expected name
+  LOG(DEBUG) << "getting data for column " << column << ", " << fieldName;;
+  // go through the rows and put the data into a vector
+  for (int r = 0; r < table->rowCount(); r++) {
+    QTableWidgetItem *tableWidgetItem = table->item(r, c);
+    bool ok;
+    double value = tableWidgetItem->text().toDouble(&ok);
+    if (ok) {
+      data->push_back(value);
+      LOG(DEBUG) << value;
+    } else {
+      int ret = QMessageBox::warning(this, tr("HawkEye"),
+                                     tr("Could not convert to number.\n"),
+                                     QMessageBox::Abort);
+    }
+    
+  }
+  /*
+    for (int r=0; r<value.property("length").toInt(); r++) {
+      //qDebug() << it.name() << ": " << it.value().toString();
+      QString valueAsString = value.property(r).toString();
+      //      sprintf(formattedData, "%g", value.property(r).toInt());
+      //table->setItem(r, c, new SpreadSheetItem(formattedData));
+      QTableWidgetItem *tableItem = table->item(r,c);
+    }
+  */
+	
+  return data;
+}
+
+
+void SpreadSheetView::setSelectionToValue(QString value)
+{
+  //    QTableWidgetItem *item = table->currentItem();
+  //    QColor col = item ? item->backgroundColor() : table->palette().base().color();
+  //    col = QColorDialog::getColor(col, this);
+  //    if (!col.isValid())
+  //        return;
+
+    QList<QTableWidgetItem*> selected = table->selectedItems();
+    if (selected.count() == 0)
+        return;
+
+    foreach (QTableWidgetItem *i, selected) {
+        if (i)
+          i->setText(value); // setBackgroundColor(col);
+    }
+
+    //updateColor(table->currentItem());
+}
+
+
 void SpreadSheetView::selectColor()
 {
     QTableWidgetItem *item = table->currentItem();
@@ -612,6 +731,7 @@ void SpreadSheetView::selectColor()
 
     updateColor(table->currentItem());
 }
+
 
 void SpreadSheetView::selectFont()
 {

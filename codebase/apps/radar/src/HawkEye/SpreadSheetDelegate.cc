@@ -75,12 +75,13 @@ QWidget *SpreadSheetDelegate::createEditor(QWidget *parent,
                                           const QStyleOptionViewItem &,
                                           const QModelIndex &index) const
 {
-    if (index.column() == 1) {
-        QDateTimeEdit *editor = new QDateTimeEdit(parent);
-        editor->setDisplayFormat("dd/M/yyyy");
-        editor->setCalendarPopup(true);
-        return editor;
-    }
+
+  //    if (index.column() == 1) {
+  //      QDateTimeEdit *editor = new QDateTimeEdit(parent);
+  //      editor->setDisplayFormat("dd/M/yyyy");
+  //      editor->setCalendarPopup(true);
+  //      return editor;
+  //  }
 
     // TODO: here create a TextEditor with custom auto complete ...
     TextEdit *editor = new TextEdit(parent);

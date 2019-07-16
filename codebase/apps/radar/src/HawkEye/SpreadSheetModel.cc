@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "SpreadSheetModel.hh"
+#include <toolsa/LogStream.hh>
 //#include "spreadsheet.hh"
 //#include "spreadsheetdelegate.hh"
 //#include "spreadsheetitem.hh"
@@ -156,8 +157,6 @@ vector<float> SpreadSheetModel::getSampleData()
 // field name
 vector<double> SpreadSheetModel::getData(string fieldName)
 {
-  // int cols;
-  // int rows;
 
   vector <double> dataVector;
   const RadxField *field;
@@ -188,87 +187,41 @@ RadxVol SpreadSheetModel::getVolume() {
   return _vol;
 }
 
+// set data values for the field in the Volume 
+void SpreadSheetModel::setData(string fieldName, vector<double> *data)
+{
+  LOG(DEBUG) << "fieldName=" << fieldName;
+
+  //const RadxField *field;
+  //  field = _vol.getFieldFromRay(fieldName);  // <--- Why is this returning NULL
+  // because the type is 
+  // from debugger:  *((vol.getFieldFromRay("VEL"))->getDataSi16()+1)
+  //field = _closestRay->getField(fieldName);
+
+  // addField just modifies the name if there is a duplicate name,
+  // so we can always add the field; we don't need to modify
+  // an existing field.
+
+  size_t nGates = data->size();
+  //if (field == NULL) {
+    char units[] = "DBZ"; 
+    bool isLocal = true;
+    double missingValue = Radx::missingFl64;
+    vector<double> deref = *data;
+    double *radxData = &deref[0];
+    cerr << "adding new field " <<  endl;
+    _closestRay->addField(fieldName, units, nGates, missingValue, radxData, isLocal);
+    //} else {
+    // replace the data values in the existing field
+  // Radx::fl32 *data = field->getDataFl32();
+  // how may gates?
+  //  size_t nPoints = field->getNPoints();
+  //  field->addDataFl64(nGates, &data[0]);
+  //}
+}
+
 
 /*
-void SpreadSheetModel::actionSum()
-{
-    int row_first = 0;
-    int row_last = 0;
-    int row_cur = 0;
-
-    int col_first = 0;
-    int col_last = 0;
-    int col_cur = 0;
-
-    QList<QTableWidgetItem*> selected = table->selectedItems();
-
-    if (!selected.isEmpty()) {
-        QTableWidgetItem *first = selected.first();
-        QTableWidgetItem *last = selected.last();
-        row_first = table->row(first);
-        row_last = table->row(last);
-        col_first = table->column(first);
-        col_last = table->column(last);
-    }
-
-    QTableWidgetItem *current = table->currentItem();
-
-    if (current) {
-        row_cur = table->row(current);
-        col_cur = table->column(current);
-    }
-
-    QString cell1 = SpreadSheetUtils::encode_pos(row_first, col_first);
-    QString cell2 = SpreadSheetUtils::encode_pos(row_last, col_last);
-    QString out = SpreadSheetUtils::encode_pos(row_cur, col_cur);
-
-    if (runInputDialog(tr("Sum cells"), tr("First cell:"), tr("Last cell:"),
-                       QString("%1").arg(QChar(0x03a3)), tr("Output to:"),
-                       &cell1, &cell2, &out)) {
-        int row;
-        int col;
-        SpreadSheetUtils::decode_pos(out, &row, &col);
-        table->item(row, col)->setText(tr("sum %1 %2").arg(cell1, cell2));
-    }
-}
-
-void SpreadSheetModel::actionMath_helper(const QString &title, const QString &op)
-{
-    QString cell1 = "C1";
-    QString cell2 = "C2";
-    QString out = "C3";
-
-    QTableWidgetItem *current = table->currentItem();
-    if (current)
-        out = SpreadSheetUtils::encode_pos(table->currentRow(), table->currentColumn());
-
-    if (runInputDialog(title, tr("Cell 1"), tr("Cell 2"), op, tr("Output to:"),
-                       &cell1, &cell2, &out)) {
-        int row, col;
-        SpreadSheetUtils::decode_pos(out, &row, &col);
-        table->item(row, col)->setText(tr("%1 %2 %3").arg(op, cell1, cell2));
-    }
-}
-
-void SpreadSheetModel::actionAdd()
-{
-    actionMath_helper(tr("Addition"), "+");
-}
-
-void SpreadSheetModel::actionSubtract()
-{
-    actionMath_helper(tr("Subtraction"), "-");
-}
-
-void SpreadSheetModel::actionMultiply()
-{
-    actionMath_helper(tr("Multiplication"), "*");
-}
-void SpreadSheetModel::actionDivide()
-{
-    actionMath_helper(tr("Division"), "/");
-}
-
 void SpreadSheetModel::clear()
 {
     foreach (QTableWidgetItem *i, table->selectedItems())

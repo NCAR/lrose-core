@@ -23,6 +23,7 @@ public:
   vector<string> getFields();
   RadxVol getVolume(); 
 
+  void setData(string fieldName, vector<double> *data);
   RadxVol _vol;
   RadxRay *_closestRay;
 

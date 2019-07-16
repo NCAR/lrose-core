@@ -11,6 +11,7 @@
 //#include "SpreadSheetDelegate.hh"
 //#include "SpreadSheetItem.hh"
 #include "SpreadSheetModel.hh"
+#include <toolsa/LogStream.hh>
 
 SpreadSheetController::SpreadSheetController(SpreadSheetView *view)
 {
@@ -94,15 +95,22 @@ vector<string>  SpreadSheetController::getFieldNames()
 vector<double>  SpreadSheetController::getData(string fieldName)
 {
 
-  cerr << "getting values for " << fieldName << endl;
+  LOG(DEBUG) << "getting values for " << fieldName;
 
   //  vector<float> SpreadSheetModel::getData(string fieldName)
   vector<double> data = _currentModel->getData(fieldName);
 
-  cerr << " found " << data.size() << " data values " << endl;
+  LOG(DEBUG) << " found " << data.size() << " data values ";
 
   return data;
 }
+
+void SpreadSheetController::setData(string fieldName, vector<double> *data)
+{
+  LOG(DEBUG) << "setting values for " << fieldName;
+  _currentModel->setData(fieldName, data);
+}
+
 
 void  SpreadSheetController::needFieldNames() {
   _currentView->fieldNamesProvided(getFieldNames());
@@ -115,6 +123,20 @@ void  SpreadSheetController::needDataForField(string fieldName, int r, int c) {
 
 
 void SpreadSheetController::getVolumeChanges() {
+
+  LOG(DEBUG) << "enter";
+  vector<string> *fields = _currentView->getVariablesFromSpreadSheet();
+  int column = 0;
+  for(vector<string>::iterator s = fields->begin(); s != fields->end(); s++) {
+    vector<double> *data = _currentView->getDataForVariableFromSpreadSheet(column, *s);
+    setData(*s, data);
+    column++;
+  }
+  volumeUpdated();
+  LOG(DEBUG) << "exit";
+}
+
+void SpreadSheetController::volumeUpdated() {
   emit volumeChanged(_currentModel->getVolume());
 }
 
