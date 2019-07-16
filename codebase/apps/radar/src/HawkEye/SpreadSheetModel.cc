@@ -3,7 +3,7 @@
 // SpreadSheetModel provides the interface to Radx utilities, and file I/O
 
 #include <stdio.h>
-
+#include <stdexcept>
 #include "SpreadSheetModel.hh"
 #include <toolsa/LogStream.hh>
 //#include "spreadsheet.hh"
@@ -155,10 +155,11 @@ vector<float> SpreadSheetModel::getSampleData()
 
 // return a list of data values for the given
 // field name
-vector<double> SpreadSheetModel::getData(string fieldName)
+// vector<double>
+vector<float> *SpreadSheetModel::getData(string fieldName)
 {
 
-  vector <double> dataVector;
+  // vector <double> *dataVector = NULL;
   const RadxField *field;
   //  field = _vol.getFieldFromRay(fieldName);  // <--- Why is this returning NULL
   // because the type is 
@@ -166,21 +167,37 @@ vector<double> SpreadSheetModel::getData(string fieldName)
   field = _closestRay->getField(fieldName);
 
   if (field == NULL) {
-    cerr << "no RadxField found " <<  endl;
-    return dataVector;
+    throw std::invalid_argument("no RadxField found "); //  <<  endl;
+    //return NULL; // dataVector;
   } 
   // Radx::fl32 *data = field->getDataFl32();
   // how may gates?
   size_t nPoints = field->getNPoints();
-  //  for (size_t i=0; i<nPoints; i++) { 
-  for (size_t i=0; i<200; i++) { 
+  LOG(DEBUG) << "nGates = " << nPoints;
+  float *data = (float *) field->getDataFl32();
+  LOG(DEBUG) << data << ", " << data+1 << ", " << data +2;
+  vector<float> *dataVector = new vector<float>(data, data + nPoints);
+  //  LOG(DEBUG) << dataVector.at[0] << ", " << dataVector.at[1] << ", " << dataVector.at[2];
+
+  //vector<float> *dataVectorPtr = &dataVector;
+  for (int i=0; i<3; i++) {
+    float value = dataVector->at(i);
+    LOG(DEBUG) << value;
+  }
+
+  return dataVector;
+
+  /*
+  for (size_t i=0; i<nPoints; i++) { 
+    //for (size_t i=0; i<200; i++) { 
     double value = field->getDoubleValue(i);
-    cout << value << " ";
+    //cout << value << " ";
     dataVector.push_back(value); // data[i]);
   }
   cout << endl;
   // convert data to vector
   return dataVector;
+  */
 }
 
 RadxVol SpreadSheetModel::getVolume() {
@@ -203,6 +220,10 @@ void SpreadSheetModel::setData(string fieldName, vector<double> *data)
   // an existing field.
 
   size_t nGates = data->size();
+  size_t nGatesInRay = _closestRay->getNGates();
+  if (nGates < nGatesInRay) {
+    // TODO: expand, filling with missing Value
+  }
   //if (field == NULL) {
     char units[] = "DBZ"; 
     bool isLocal = true;

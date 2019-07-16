@@ -1054,8 +1054,9 @@ void SpreadSheetView::setupContents()
 }
 
 // request filled by Controller in response to needFieldData 
-void SpreadSheetView::fieldDataSent(vector<double> data, int useless, int c) {
-      cerr << "number of data values = " << data.size() << endl;
+void SpreadSheetView::fieldDataSent(vector<float> *data, int useless, int c) {
+  size_t nPoints = data->size();
+      cerr << "number of data values = " << nPoints << endl;
 
       string format = "%g";
       char formattedData[250];
@@ -1065,17 +1066,20 @@ void SpreadSheetView::fieldDataSent(vector<double> data, int useless, int c) {
       //------
       QTableWidgetItem *headerItem = table->horizontalHeaderItem(c);
       QString fieldName = headerItem->text();
-      QJSValue fieldArray = engine.newArray(data.size());
+      QJSValue fieldArray = engine.newArray(nPoints);
       QString vectorName = fieldName;
 
-      // 752019 table->setRowCount(data.size());
-      for (int r=0; r<200; r++) {
+      table->setRowCount(nPoints);
+      vector<float> dataVector = *data;
+      float *dp = &dataVector[0];
+      for (int r=0; r<nPoints; r++) {
       // 752019 for (std::size_t r=0; r<data.size(); r++) {
         //    sprintf(formattedData, format, data[0]);
-        sprintf(formattedData, "%g", data.at(r));
+        sprintf(formattedData, "%g", *dp); // data->at(r));
         cerr << "setting " << r << "," << c << "= " << formattedData << endl; 
         table->setItem(r, c, new SpreadSheetItem(formattedData));
-        fieldArray.setProperty(r, data.at(r));
+        fieldArray.setProperty(r, *dp); // data.at(r));
+        dp++;
       }
       cout << "adding vector form " << vectorName.toStdString() << endl;
       engine.globalObject().setProperty(vectorName, fieldArray);

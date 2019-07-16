@@ -18,7 +18,7 @@ public:
   //void initData(string fileName);
 
   // return lists of data
-  vector<double> getData(string fieldName);
+  vector<float> *getData(string fieldName);
   vector<float> getSampleData();
   vector<string> getFields();
   RadxVol getVolume(); 

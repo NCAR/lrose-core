@@ -75,7 +75,7 @@ public slots:
   void setupSoloFunctions(SoloFunctions *soloFunctions);
 
   void fieldNamesProvided(vector<string> fieldNames);
-  void fieldDataSent(vector<double> data, int useless, int c);
+  void fieldDataSent(vector<float> *data, int useless, int c);
 
   void applyChanges();
 

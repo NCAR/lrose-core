@@ -92,17 +92,21 @@ vector<string>  SpreadSheetController::getFieldNames()
   return names;
 }
 
-vector<double>  SpreadSheetController::getData(string fieldName)
+vector<float> *SpreadSheetController::getData(string fieldName)
 {
 
   LOG(DEBUG) << "getting values for " << fieldName;
 
+  
+  //return _currentModel->getData(fieldName);
+  
   //  vector<float> SpreadSheetModel::getData(string fieldName)
-  vector<double> data = _currentModel->getData(fieldName);
+  vector<float> *data = _currentModel->getData(fieldName);
 
-  LOG(DEBUG) << " found " << data.size() << " data values ";
+  LOG(DEBUG) << " found " << data->size() << " data values ";
 
   return data;
+ 
 }
 
 void SpreadSheetController::setData(string fieldName, vector<double> *data)

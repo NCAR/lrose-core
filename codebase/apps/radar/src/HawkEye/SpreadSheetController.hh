@@ -28,7 +28,7 @@ public:
   SpreadSheetController(SpreadSheetView *view, SpreadSheetModel *model);
 
   vector<string> getFieldNames();
-  vector<double> getData(string fieldName);
+  vector<float> *getData(string fieldName);
   void setData(string fieldName, vector<double> *data);
 
   void open(string fileName);
