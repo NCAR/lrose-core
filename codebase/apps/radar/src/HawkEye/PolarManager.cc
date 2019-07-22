@@ -2354,8 +2354,8 @@ void PolarManager::_openFile()
 
 void PolarManager::_saveFile()
 {
-  /*
-  QString finalPattern = "All files (*.*)";
+  
+  QString finalPattern = "All files (*.nc)";
 
   QString inputPath = QDir::currentPath();
   // get the path of the current file, if available 
@@ -2364,7 +2364,7 @@ void PolarManager::_saveFile()
     inputPath = temp.absolutePath();
   } 
 
-  QString filename =  QFileDialog::getOpenFileName(
+  QString filename =  QFileDialog::getSaveFileName(
           this,
           "Save Radar Volume",
           inputPath, finalPattern);
@@ -2377,44 +2377,19 @@ void PolarManager::_saveFile()
       cerr << "selected file path : " << name << endl;
     }
 
-    // trying this ... to get the data from the file selected
-    _setArchiveRetrievalPending();
-    vector<string> list;
-    list.push_back(name);
-    setArchiveFileList(list, false);
-  */
     // TODO: hold it! the save message should
     // go to the Model (Data) level because
     // we'll be using Radx utilities.
     // 
     RadxFile outFile;
     try {
-      LOG(DEBUG) << "writing to file " << "/tmp/testingHawkeyeEdit.nc";
-      outFile.writeToPath(_vol, "/tmp/testingHawkeyeEdit.nc");
-      //      _saveArchiveData();
+      LOG(DEBUG) << "writing to file " << name;
+      outFile.writeToPath(_vol, name);
     } catch (FileIException ex) {
       this->setCursor(Qt::ArrowCursor);
-      // _timeControl->setCursor(Qt::ArrowCursor);
       return;
     }
-    //}
-/*
-  // now update the time controller window
-  QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
-  _setArchiveStartTimeFromGui(epoch);
-  QDateTime now = QDateTime::currentDateTime();
-  _setArchiveEndTimeFromGui(now);
-
-  
-  _archiveStartTime = _guiStartTime;
-  _archiveEndTime = _guiEndTime;
-  QFileInfo fileInfo(filename);
-  string absolutePath = fileInfo.absolutePath().toStdString();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "changing to path " << absolutePath << endl;
   }
-*/
-
 }
 
 void PolarManager::_createFileChooserDialog()
