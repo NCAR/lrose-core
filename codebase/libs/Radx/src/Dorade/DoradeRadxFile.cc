@@ -614,15 +614,15 @@ string DoradeRadxFile::computeFileName(int volNum,
     instrumentName.resize(8);
   }
 
-  // replaces spaces in strings with underscores
+  // replaces spaces and slashes in strings with underscores
 
   for (size_t ii = 0; ii < instrumentName.size(); ii++) {
-    if (isspace(instrumentName[ii])) {
+    if (isspace(instrumentName[ii]) || instrumentName[ii] == '/') {
       instrumentName[ii] = '_';
     }
   }
   for (size_t ii = 0; ii < scanType.size(); ii++) {
-    if (isspace(scanType[ii] == ' ')) {
+    if (isspace(scanType[ii]) || scanType[ii] == '/') {
       scanType[ii] = '_';
     }
   }
@@ -1348,7 +1348,7 @@ int DoradeRadxFile::_openRead(const string &path)
 
 int DoradeRadxFile::_openWrite(const string &path) 
 {
-  
+
   _close();
   _file = fopen(path.c_str(), "w");
   
