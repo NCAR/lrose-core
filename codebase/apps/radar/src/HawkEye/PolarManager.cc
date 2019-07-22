@@ -79,6 +79,7 @@
 #include <QGraphicsAnchorLayout>
 #include <QGraphicsProxyWidget>
 
+#include <fstream>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
 #include <toolsa/file_io.h>
@@ -621,12 +622,19 @@ void PolarManager::_createActions()
   _exitAct->setStatusTip(tr("Exit the application"));
   connect(_exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-  // file chooser
+  // file chooser for Open
 
   _openFileAct = new QAction(tr("O&pen"), this);
   _openFileAct->setShortcut(tr("Ctrl+F"));
   _openFileAct->setStatusTip(tr("Open File"));
   connect(_openFileAct, SIGNAL(triggered()), this, SLOT(_openFile()));
+
+  // file chooser for Save
+
+  _saveFileAct = new QAction(tr("S&ave"), this);
+  //_saveFileAct->setShortcut(tr("Ctrl+S"));
+  _saveFileAct->setStatusTip(tr("Save File"));
+  connect(_saveFileAct, SIGNAL(triggered()), this, SLOT(_saveFile()));
 
   // show range rings
 
@@ -692,6 +700,7 @@ void PolarManager::_createMenus()
   _fileMenu = menuBar()->addMenu(tr("&File"));
   _fileMenu->addSeparator();
   _fileMenu->addAction(_openFileAct);
+  _fileMenu->addAction(_saveFileAct);
   _fileMenu->addAction(_saveImageAct);
   _fileMenu->addAction(_exitAct);
 
@@ -1145,10 +1154,12 @@ int PolarManager::_getArchiveData()
 /////////////////////////////
 // apply new, edited  data in archive mode
 // returns 0 on success, -1 on failure
+// the volume has been updated 
 
-void PolarManager::_applyDataEdits(const RadxVol &editedVol)
+void PolarManager::_applyDataEdits() // const RadxVol &editedVol)
 {
 
+  /*
   // set up file object for reading
   
   _vol.clear();
@@ -1169,22 +1180,31 @@ void PolarManager::_applyDataEdits(const RadxVol &editedVol)
   
   _sweepManager.set(_vol);
 
-  /*
+  
   if (_params.debug) {
     cerr << "----------------------------------------------------" << endl;
     cerr << "perform archive retrieval" << endl;
-    cerr << "  read file: " << _vol.getPathInUse() << endl;
+    //cerr << "  read file: " << _vol.getPathInUse() << endl;
     cerr << "  nSweeps: " << _vol.getNSweeps() << endl;
     cerr << "  guiIndex, fixedAngle: " 
          << _sweepManager.getGuiIndex() << ", "
          << _sweepManager.getSelectedAngle() << endl;
     cerr << "----------------------------------------------------" << endl;
-  }
-  
-   _platform = _vol.getPlatform();
+  } 
+   
+  _platform = _vol.getPlatform();
   */
+  std::ofstream outfile("/tmp/voldebug_PolarManager_applyDataEdits.txt");
+  _vol.printWithFieldData(outfile);  
 
+  outfile << "_vol = " << &_vol << endl;
 
+  _plotArchiveData();
+  //_refresh();
+  //_ppi->_performRendering();
+  //_ppi->selectVar(_fieldNum);
+  //_changeField(0, true);
+  //_handleRay(_platform, ray);
 }
 
 /*
@@ -1682,16 +1702,15 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
     _ppi->backgroundColor(backgroundColor);
     _ppi->gridRingsColor(gridColor);
     _changeField(fieldId, false);
-
   }
   LOG(DEBUG) << "exit";
 }
 
-void PolarManager::setVolume(const RadxVol &radarDataVolume) {
+void PolarManager::setVolume() { // const RadxVol &radarDataVolume) {
 
   LOG(DEBUG) << "enter";
 
-  // _applyDataEdits(radarDataVolume);
+  _applyDataEdits(); // radarDataVolume);
 
   LOG(DEBUG) << "exit";
 
@@ -2327,6 +2346,77 @@ void PolarManager::_openFile()
   } // end else pathList is not empty
 }
 
+////////////////////////////////////////////////////
+// create the file chooser dialog
+//
+// This allows the user to choose the name of a
+// file in which to save Volume data
+
+void PolarManager::_saveFile()
+{
+  /*
+  QString finalPattern = "All files (*.*)";
+
+  QString inputPath = QDir::currentPath();
+  // get the path of the current file, if available 
+  if (_archiveFileList.size() > 0) {
+    QDir temp(_archiveFileList[0].c_str());
+    inputPath = temp.absolutePath();
+  } 
+
+  QString filename =  QFileDialog::getOpenFileName(
+          this,
+          "Save Radar Volume",
+          inputPath, finalPattern);
+ 
+  if( !filename.isNull() )
+  {
+    QByteArray qb = filename.toUtf8();
+    const char *name = qb.constData();
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "selected file path : " << name << endl;
+    }
+
+    // trying this ... to get the data from the file selected
+    _setArchiveRetrievalPending();
+    vector<string> list;
+    list.push_back(name);
+    setArchiveFileList(list, false);
+  */
+    // TODO: hold it! the save message should
+    // go to the Model (Data) level because
+    // we'll be using Radx utilities.
+    // 
+    RadxFile outFile;
+    try {
+      LOG(DEBUG) << "writing to file " << "/tmp/testingHawkeyeEdit.nc";
+      outFile.writeToPath(_vol, "/tmp/testingHawkeyeEdit.nc");
+      //      _saveArchiveData();
+    } catch (FileIException ex) {
+      this->setCursor(Qt::ArrowCursor);
+      // _timeControl->setCursor(Qt::ArrowCursor);
+      return;
+    }
+    //}
+/*
+  // now update the time controller window
+  QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
+  _setArchiveStartTimeFromGui(epoch);
+  QDateTime now = QDateTime::currentDateTime();
+  _setArchiveEndTimeFromGui(now);
+
+  
+  _archiveStartTime = _guiStartTime;
+  _archiveEndTime = _guiEndTime;
+  QFileInfo fileInfo(filename);
+  string absolutePath = fileInfo.absolutePath().toStdString();
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "changing to path " << absolutePath << endl;
+  }
+*/
+
+}
+
 void PolarManager::_createFileChooserDialog()
 {
   _refreshFileChooserDialog();
@@ -2944,7 +3034,7 @@ void PolarManager::_saveImageToFile(bool interactive)
 
 void PolarManager::ShowContextMenu(const QPoint &pos) {
 
-  _ppi->ShowContextMenu(pos, _vol);
+  _ppi->ShowContextMenu(pos, &_vol);
   /*
   cout << "Showing Context Menu ... " << endl;
   ContextEditingView contextEditingView(_ppi);

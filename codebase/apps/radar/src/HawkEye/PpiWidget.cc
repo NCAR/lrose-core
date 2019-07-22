@@ -156,6 +156,41 @@ void PpiWidget::selectVar(const size_t index)
 
 
 /*************************************************************************
+ * updateVars()
+ 
+
+// TODO: maybe just update the beam that changed?
+void PpiWidget::updateVars()
+{
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=========>> PpiWidget::updateVars()" <<  endl;
+  }
+
+  // TODO: see, it would be nice to render only the beam ???
+  // If this field isn't being rendered in the background, render all of
+  // the beams for it
+
+  // TODO: clear the Var first?
+
+  // for each field in beam
+
+  if (!_fieldRenderers[index]->isBackgroundRendered()) {
+    std::vector< PpiBeam* >::iterator beam;
+    for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
+      (*beam)->setBeingRendered(index, true);
+      _fieldRenderers[index]->addBeam(*beam);
+    }
+  }
+  _performRendering();
+
+  // Update the display
+
+  update();
+}
+*/
+
+/*************************************************************************
  * clearVar()
  */
 
@@ -456,14 +491,17 @@ const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
 {
 
   double clickAz = atan2(y_km, x_km) * RAD_TO_DEG; // 180.0 / M_PI; //  * DEG_TO_RAD;
+  double radarDisplayAz = 90.0 - clickAz;
+  if (radarDisplayAz < 0.0) radarDisplayAz += 360.0;
   printf("clickAz = %g from x_km, y_km = %g, %g\n", clickAz, x_km, y_km);
+  printf("radarDisplayAz = %g from x_km, y_km = %g, %g\n", radarDisplayAz, x_km, y_km);
 
   double minDiff = 1.0e99;
   const RadxRay *closestRay = NULL;
   for (size_t ii = 0; ii < _ppiBeams.size(); ii++) {
     const RadxRay *ray = _ppiBeams[ii]->getRay();
     double rayAz = ray->getAzimuthDeg();
-    double diff = fabs(clickAz - rayAz);
+    double diff = fabs(radarDisplayAz - rayAz);
     if (diff > 180.0) {
       diff = fabs(diff - 360.0);
     }
@@ -1201,7 +1239,36 @@ void PpiWidget::changeToDisplayField(string fieldName)  // , ColorMap newColorMa
  
 void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
   
-  RadxRay *closestRayCopy = new RadxRay(*closestRay);
+
+  // get an version of the ray that we can edit
+  // we'll need the az, and sweep number to get a list from
+  // the volume
+
+  vector<RadxRay *> rays = _vol->getRays();
+  // find that ray
+  bool foundIt = false;
+  RadxRay *closestRayToEdit = NULL;
+  vector<RadxRay *>::iterator r;
+  r=rays.begin();
+  int idx = 0;
+  while(r<rays.end()) {
+    RadxRay *rayr = *r;
+    if (closestRay->getAzimuthDeg() == rayr->getAzimuthDeg()) {
+      if (closestRay->getElevationDeg() == rayr->getElevationDeg()) {
+        foundIt = true;
+        closestRayToEdit = *r;
+        LOG(DEBUG) << "Found closest ray: index = " << idx << " pointer = " << closestRayToEdit;
+        closestRay->print(cout); 
+      }
+    }
+    r += 1;
+    idx += 1;
+  }  
+  if (!foundIt || closestRayToEdit == NULL)
+    throw "couldn't find closest ray";
+
+  
+  //RadxRay *closestRayCopy = new RadxRay(*closestRay);
 
   // create the view
   SpreadSheetView *sheetView;
@@ -1210,7 +1277,8 @@ void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
   // create the model
 
   // SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
-  SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy, _vol);
+  SpreadSheetModel *model = new SpreadSheetModel(closestRayToEdit, _vol);
+  //SpreadSheetModel *model = new SpreadSheetModel(closestRay, _vol);
   
   // create the controller
   SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
@@ -1222,17 +1290,24 @@ void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
   // connect some signals and slots in order to retrieve information
   // and send changes back to display
                                                                          
-  connect(sheetControl, SIGNAL(volumeChanged(RadxVol)),
-  	  &_manager, SLOT(setVolume(RadxVol)));
-
+  connect(sheetControl, SIGNAL(volumeChanged()),
+  	  &_manager, SLOT(setVolume()));
+  // TODO: may not need _manager access; just issue _performRendering?
+  // send the index of the ray that was changed
+  //connect(sheetControl, SIGNAL(rayChanged(int)),
+  //	  this, SLOT(addRayEdits(int)));
   
   sheetView->init();
   sheetView->show();
   sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
   
 }
-
-
+/*
+void PpiWidget::addRayEdits() {
+  // add the new data to the ray in the list of beams
+  // find the beam for the ray data
+}
+*/
 
 void PpiWidget::contextMenuExamine()
 {
@@ -1252,7 +1327,7 @@ void PpiWidget::contextMenuExamine()
   ExamineEdit(closestRay);
 }
 
-void PpiWidget::ShowContextMenu(const QPoint &pos, RadxVol &vol)
+void PpiWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol)
 {
 
   _vol = vol;

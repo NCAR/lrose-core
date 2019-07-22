@@ -109,7 +109,7 @@ vector<float> *SpreadSheetController::getData(string fieldName)
  
 }
 
-void SpreadSheetController::setData(string fieldName, vector<double> *data)
+void SpreadSheetController::setData(string fieldName, vector<float> *data)
 {
   LOG(DEBUG) << "setting values for " << fieldName;
   _currentModel->setData(fieldName, data);
@@ -132,7 +132,7 @@ void SpreadSheetController::getVolumeChanges() {
   vector<string> *fields = _currentView->getVariablesFromSpreadSheet();
   int column = 0;
   for(vector<string>::iterator s = fields->begin(); s != fields->end(); s++) {
-    vector<double> *data = _currentView->getDataForVariableFromSpreadSheet(column, *s);
+    vector<float> *data = _currentView->getDataForVariableFromSpreadSheet(column, *s);
     setData(*s, data);
     column++;
   }
@@ -141,7 +141,7 @@ void SpreadSheetController::getVolumeChanges() {
 }
 
 void SpreadSheetController::volumeUpdated() {
-  emit volumeChanged(_currentModel->getVolume());
+  emit volumeChanged(); // _currentModel->getVolume());
 }
 
 

@@ -29,7 +29,7 @@ public:
 
   vector<string> getFieldNames();
   vector<float> *getData(string fieldName);
-  void setData(string fieldName, vector<double> *data);
+  void setData(string fieldName, vector<float> *data);
 
   void open(string fileName);
 
@@ -37,7 +37,7 @@ public:
   void volumeUpdated();
 
 signals:
-  void volumeChanged(const RadxVol &radarDataVolume);
+  void volumeChanged(); // const RadxVol &radarDataVolume);
 
 public slots:
   void needFieldNames();

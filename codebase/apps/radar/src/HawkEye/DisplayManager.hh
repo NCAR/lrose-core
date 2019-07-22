@@ -175,6 +175,7 @@ protected:
   QAction *_aboutAct;
   QAction *_aboutQtAct;
   QAction *_openFileAct;
+  QAction *_saveFileAct;
 
   // status panel
 
@@ -326,6 +327,7 @@ protected slots:
   virtual void _refresh() = 0;
   virtual void _changeField(int fieldId, bool guiMode) = 0;
   virtual void _openFile();
+  virtual void _saveFile();
 
   void _changeFieldVariable(bool value);
 

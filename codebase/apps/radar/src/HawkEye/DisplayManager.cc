@@ -564,6 +564,9 @@ void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColo
 void DisplayManager::_openFile() {
 }
 
+void DisplayManager::_saveFile() {
+}
+
 ///////////////////////////////////////////////////////
 // create the click report dialog
 //

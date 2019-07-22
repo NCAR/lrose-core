@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include "SpreadSheetModel.hh"
 #include <toolsa/LogStream.hh>
+#include <fstream>
 //#include "spreadsheet.hh"
 //#include "spreadsheetdelegate.hh"
 //#include "spreadsheetitem.hh"
@@ -16,7 +17,7 @@ SpreadSheetModel::SpreadSheetModel()
 
 }
 
-SpreadSheetModel::SpreadSheetModel(RadxRay *closestRay, RadxVol dataVolume)
+SpreadSheetModel::SpreadSheetModel(RadxRay *closestRay, RadxVol *dataVolume)
 {
   _closestRay = closestRay;
   if (_closestRay == NULL) 
@@ -25,7 +26,7 @@ SpreadSheetModel::SpreadSheetModel(RadxRay *closestRay, RadxVol dataVolume)
    cout << "in SpreadSheetModel, closestRay is NOT  NULL" << endl;
   closestRay->print(cout);
   _vol = dataVolume;
-  _vol.loadFieldsFromRays();
+  _vol->loadFieldsFromRays();
 }
 
 /*
@@ -134,8 +135,8 @@ vector<string> SpreadSheetModel::getFields()
       cout << it->first << ':' << it->second << endl;
     }
   } else {
-    _vol.loadFieldsFromRays();
-    fieldNames = _vol.getUniqueFieldNameList();
+    _vol->loadFieldsFromRays();
+    fieldNames = _vol->getUniqueFieldNameList();
   }
   return fieldNames;
 }
@@ -200,12 +201,14 @@ vector<float> *SpreadSheetModel::getData(string fieldName)
   */
 }
 
+/*
 RadxVol SpreadSheetModel::getVolume() {
   return _vol;
 }
+*/
 
 // set data values for the field in the Volume 
-void SpreadSheetModel::setData(string fieldName, vector<double> *data)
+void SpreadSheetModel::setData(string fieldName, vector<float> *data)
 {
   LOG(DEBUG) << "fieldName=" << fieldName;
 
@@ -224,14 +227,28 @@ void SpreadSheetModel::setData(string fieldName, vector<double> *data)
   if (nGates < nGatesInRay) {
     // TODO: expand, filling with missing Value
   }
-  //if (field == NULL) {
-    char units[] = "DBZ"; 
-    bool isLocal = true;
-    double missingValue = Radx::missingFl64;
-    vector<double> deref = *data;
-    double *radxData = &deref[0];
-    cerr << "adding new field " <<  endl;
-    _closestRay->addField(fieldName, units, nGates, missingValue, radxData, isLocal);
+
+  RadxField *field = _closestRay->getField(fieldName);
+
+  if (field == NULL) {
+    throw std::invalid_argument("no RadxField found ");
+  } 
+
+  //RadxField *fieldCopy = new RadxField(*field);
+
+    vector<float> deref = *data;
+    const Radx::fl32 *radxData = &deref[0];
+    bool isLocal = true;  //?? not sure about this 
+    field->setDataFl32(nGates, radxData, isLocal);
+  
+    // make sure the new data are there ...
+    field->printWithData(cout);
+
+    //cerr << "replacing data in field " <<  endl;
+    //int result = _closestRay->replaceField(fieldCopy); 
+    //if (result == -1)
+    //  throw "Error replacing Field";
+    //    _closestRay->addField("WIDTH", units, nGates, missingValue, radxData, isLocal);
     //} else {
     // replace the data values in the existing field
   // Radx::fl32 *data = field->getDataFl32();
@@ -239,14 +256,23 @@ void SpreadSheetModel::setData(string fieldName, vector<double> *data)
   //  size_t nPoints = field->getNPoints();
   //  field->addDataFl64(nGates, &data[0]);
   //}
+
+    // data should be copied, so free the memory
+    // delete data;
+
+    // again, make sure the data are there
+    _closestRay->printWithFieldData(cout);
+
+    //    _vol.addRay(_closestRay);
+
+
+    _vol->loadRaysFromFields();
+    //_vol->loadFieldsFromRays();
+    //_vol->loadSweepInfoFromRays();
+
+    std::ofstream outfile("/tmp/voldebug.txt");
+    // finally, make sure the data are there
+    _vol->printWithFieldData(outfile);
+
+    outfile << "_vol = " << _vol << endl;
 }
-
-
-/*
-void SpreadSheetModel::clear()
-{
-    foreach (QTableWidgetItem *i, table->selectedItems())
-        i->setText("");
-}
-*/
-

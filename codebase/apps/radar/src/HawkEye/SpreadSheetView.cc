@@ -654,9 +654,9 @@ vector<string> *SpreadSheetView::getVariablesFromSpreadSheet() {
 //
 // Get data from spreadsheet/table because we need to capture individual cell edits
 //
-vector<double> *SpreadSheetView::getDataForVariableFromSpreadSheet(int column, string fieldName) {
+vector<float> *SpreadSheetView::getDataForVariableFromSpreadSheet(int column, string fieldName) {
 
-  vector<double> *data = new vector<double>;
+  vector<float> *data = new vector<float>;
 
   int c = 0;
   QTableWidgetItem *tableWidgetItem = table->horizontalHeaderItem(c);
@@ -666,7 +666,7 @@ vector<double> *SpreadSheetView::getDataForVariableFromSpreadSheet(int column, s
   for (int r = 0; r < table->rowCount(); r++) {
     QTableWidgetItem *tableWidgetItem = table->item(r, c);
     bool ok;
-    double value = tableWidgetItem->text().toDouble(&ok);
+    float value = tableWidgetItem->text().toFloat(&ok);
     if (ok) {
       data->push_back(value);
       LOG(DEBUG) << value;

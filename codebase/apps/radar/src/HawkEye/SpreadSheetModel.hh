@@ -13,7 +13,7 @@ class SpreadSheetModel
 public:
 
   SpreadSheetModel();
-  SpreadSheetModel(RadxRay *closestRay, RadxVol dataVolume);
+  SpreadSheetModel(RadxRay *closestRay, RadxVol *dataVolume);
   
   //void initData(string fileName);
 
@@ -21,10 +21,10 @@ public:
   vector<float> *getData(string fieldName);
   vector<float> getSampleData();
   vector<string> getFields();
-  RadxVol getVolume(); 
+  //  RadxVol getVolume(); 
 
-  void setData(string fieldName, vector<double> *data);
-  RadxVol _vol;
+  void setData(string fieldName, vector<float> *data);
+  RadxVol *_vol;
   RadxRay *_closestRay;
 
   /*

@@ -38,7 +38,7 @@ public:
   float myPow();
 
   vector<string> *getVariablesFromSpreadSheet();
-  vector<double> *getDataForVariableFromSpreadSheet(int column, string fieldName);
+  vector<float> *getDataForVariableFromSpreadSheet(int column, string fieldName);
 
    void setSelectionToValue(QString value);
 

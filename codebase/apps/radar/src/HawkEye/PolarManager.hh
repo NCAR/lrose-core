@@ -132,7 +132,7 @@ public slots:
 				QColor emphasisColor,
 				QColor annotationColor,
 				QColor backgroundColor);
-  void setVolume(const RadxVol &radarDataVolume);
+  void setVolume(); // const RadxVol &radarDataVolume);
 
 signals:
 
@@ -201,6 +201,7 @@ private:
   
   QAction *_timeControllerAct;
   QAction *_openFileAct;
+  QAction *_saveFileAct;
   QAction *_saveImageAct;
 
   // archive mode
@@ -260,6 +261,7 @@ private:
   // open File 
 
   void _openFile();
+  void _saveFile();
   void _moveUpDown();
 
   // set top bar
@@ -281,7 +283,7 @@ private:
   void _plotArchiveData();
   void _setupVolRead(RadxFile &file);
   //  int _applyDataEdits(RadxVol _editedVol);  // & or * ??
-  void _applyDataEdits(const RadxVol &editedVol);
+  void _applyDataEdits(); // const RadxVol &editedVol);
 
   // draw beam
 
