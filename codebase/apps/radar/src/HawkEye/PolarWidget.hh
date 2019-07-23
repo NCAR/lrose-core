@@ -49,6 +49,7 @@
 #include <QTransform>
 
 #include <Radx/RadxPlatform.hh>
+#include <Radx/RadxVol.hh>
 
 #include "Params.hh"
 #include "PpiBeam.hh"
@@ -554,7 +555,8 @@ class DLL_EXPORT PolarWidget : public QWidget
  public:
 
   
-  virtual void ShowContextMenu(const QPoint &pos);
+  //  virtual void ShowContextMenu(const QPoint &pos);
+  virtual void ShowContextMenu(const QPoint &pos, RadxVol *vol);
   void setFont();
   virtual void ExamineEdit(const RadxRay *closestRay);
   void notImplemented();

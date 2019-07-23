@@ -711,7 +711,7 @@ void PolarWidget::ExamineEdit(const RadxRay *closestRay)
   notImplemented();
 }
 
-void PolarWidget::ShowContextMenu(const QPoint &pos) 
+void PolarWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol) 
 {  
   notImplemented();
 }

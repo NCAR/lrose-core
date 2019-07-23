@@ -44,7 +44,6 @@
 #include "Params.hh"
 #include "Reader.hh"
 #include "AllocCheck.hh"
-//#include "ContextEditingView.hh"
 
 #include <string>
 #include <cmath>
@@ -1678,50 +1677,6 @@ void PolarManager::setVolume() { // const RadxVol &radarDataVolume) {
 
 }
 
-/*
-void PolarManager::_ppiContextExamineEditRequested(double xkm, double ykm, 
-                                       const RadxRay *closestRay)
-
-{
-
-  // find the relevant ray
-  // ignore closest ray sent in
-  
-  double azDeg = 0.0;
-  if (xkm != 0 || ykm != 0) {
-    azDeg = atan2(xkm, ykm) * RAD_TO_DEG;
-    if (azDeg < 0) {
-      azDeg += 360.0;
-    }
-  }
-  if (_params.debug) {
-    cerr << "    azDeg = " << azDeg << endl;
-  }
-  
-  int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
-  if (_params.debug) {
-    cerr << "    rayIndex = " << rayIndex << endl;
-  }
-  
-  const RadxRay *ray = _ppiRayLoc[rayIndex].ray;
-  if (ray == NULL) {
-    // no ray data yet
-    if (_params.debug) {
-      cerr << "    No ray data yet..." << endl;
-      cerr << "      active = " << _ppiRayLoc[rayIndex].active << endl;
-      // cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
-      cerr << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex << endl;
-      cerr << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex << endl;
-    }
-    return;
-  }
-
-  _locationClicked(xkm, ykm, _ppiRayLoc, ray);
-
-}
-*/
-
-
 ///////////////////////////////////////////////////
 // respond to a change in click location on the PPI
 
@@ -2968,14 +2923,7 @@ void PolarManager::_saveImageToFile(bool interactive)
 
 
 void PolarManager::ShowContextMenu(const QPoint &pos) {
-
   _ppi->ShowContextMenu(pos, &_vol);
-  /*
-  cout << "Showing Context Menu ... " << endl;
-  ContextEditingView contextEditingView(_ppi);
-  contextEditingView.ShowContextMenu(pos); // , _vol);
-  //  _ppi->ShowContextMenu(pos);
-  */
 }
 
 

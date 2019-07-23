@@ -659,7 +659,7 @@ vector<float> *SpreadSheetView::getDataForVariableFromSpreadSheet(int column, st
   vector<float> *data = new vector<float>;
 
   int c = 0;
-  QTableWidgetItem *tableWidgetItem = table->horizontalHeaderItem(c);
+  // QTableWidgetItem *tableWidgetItem = table->horizontalHeaderItem(c);
   // TODO; verify fieldName and matches expected name
   LOG(DEBUG) << "getting data for column " << column << ", " << fieldName;;
   // go through the rows and put the data into a vector
@@ -671,9 +671,9 @@ vector<float> *SpreadSheetView::getDataForVariableFromSpreadSheet(int column, st
       data->push_back(value);
       LOG(DEBUG) << value;
     } else {
-      int ret = QMessageBox::warning(this, tr("HawkEye"),
-                                     tr("Could not convert to number.\n"),
-                                     QMessageBox::Abort);
+      QMessageBox::warning(this, tr("HawkEye"),
+                           tr("Could not convert to number.\n"),
+                           QMessageBox::Abort);
     }
     
   }
