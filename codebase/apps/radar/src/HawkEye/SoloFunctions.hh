@@ -56,7 +56,7 @@ class SoloFunctions : public QObject
 
 public:
   //  SoloFunctions(SpreadSheetController *controller);
-  SoloFunctions(RadxVol &data, QObject *parent = nullptr) : QObject(parent) {_data = data;}
+  SoloFunctions(RadxVol *data, QObject *parent = nullptr) : QObject(parent) {_data = data;}
   //SoloFunctions(QObject *parent = nullptr) : QObject(parent) { }
 
   Q_INVOKABLE QString cat(QString animal) {return animal+"_cat"; }
@@ -89,7 +89,7 @@ public:
  
 private:
 
-  RadxVol _data;
+  RadxVol *_data;
 
   template<typename Out>
   void split(const string &s, char delim, Out result);

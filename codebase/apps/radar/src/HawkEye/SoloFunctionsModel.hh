@@ -18,8 +18,8 @@ class SoloFunctionsModel
 public:
   SoloFunctionsModel() {}
 
-  vector<double> RemoveAircraftMotion(vector<double>, RadxVol &vol); // SpreadSheetModel *context);
-  vector<double> RemoveAircraftMotion(string fieldName, RadxVol &vol); // SpreadSheetModel *context);
+  vector<double> RemoveAircraftMotion(vector<double>, RadxVol *vol); // SpreadSheetModel *context);
+  vector<double> RemoveAircraftMotion(string fieldName, RadxVol *vol); // SpreadSheetModel *context);
  
 private:
 

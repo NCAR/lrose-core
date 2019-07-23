@@ -20,7 +20,7 @@ SoloFunctionsModel::SoloFunctionsModel() {
 }
 */
 
-vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVol &vol) { // SpreadSheetModel *context) {
+vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVol *vol) { // SpreadSheetModel *context) {
 
   // TODO: what is being returned? the name of the new field in the model that
   // contains the results.
@@ -40,7 +40,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
 
   
   const RadxField *field;
-  field = vol.getFieldFromRay(fieldName);
+  field = vol->getFieldFromRay(fieldName);
   if (field == NULL) {
     LOG(DEBUG) << "no RadxField found in volume";
     throw "No data field with name " + fieldName;;
@@ -48,7 +48,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
   
 
   // TODO: get the ray for this field 
-  const vector<RadxRay *>  &rays = vol.getRays();
+  const vector<RadxRay *>  &rays = vol->getRays();
   if (rays.size() > 1) {
     LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
   }
@@ -148,7 +148,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
 
 
 
-vector<double> SoloFunctionsModel::RemoveAircraftMotion(vector<double> data, RadxVol &vol) { // SpreadSheetModel *context) {
+vector<double> SoloFunctionsModel::RemoveAircraftMotion(vector<double> data, RadxVol *vol) { // SpreadSheetModel *context) {
 
   // TODO: what is being returned? the name of the new field in the model that
   // contains the results.
@@ -175,7 +175,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(vector<double> data, Rad
   */
 
   // TODO: get the ray for this field 
-  const vector<RadxRay *>  &rays = vol.getRays();
+  const vector<RadxRay *>  &rays = vol->getRays();
   if (rays.size() > 1) {
     cerr << "ERROR - more than one ray; expected only one\n";
   }

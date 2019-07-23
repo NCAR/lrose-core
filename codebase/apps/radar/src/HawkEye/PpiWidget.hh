@@ -134,7 +134,7 @@ class DLL_EXPORT PpiWidget : public PolarWidget
 
   void clear();
 
-  void contextMenuExamine();
+  void contextMenuEditor();
   void contextMenuParameterColors();
   //  void changeToDisplayField(string fieldName); // , ColorMap newColorMap);
 

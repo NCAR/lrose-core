@@ -490,11 +490,13 @@ const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
 
 {
 
-  double clickAz = atan2(y_km, x_km) * RAD_TO_DEG; // 180.0 / M_PI; //  * DEG_TO_RAD;
+  double clickAz = atan2(y_km, x_km) * RAD_TO_DEG;
   double radarDisplayAz = 90.0 - clickAz;
   if (radarDisplayAz < 0.0) radarDisplayAz += 360.0;
-  printf("clickAz = %g from x_km, y_km = %g, %g\n", clickAz, x_km, y_km);
-  printf("radarDisplayAz = %g from x_km, y_km = %g, %g\n", radarDisplayAz, x_km, y_km);
+  LOG(DEBUG) << "clickAz = " << clickAz << " from x_km, y_km = " 
+                          << x_km << "," << y_km; 
+  LOG(DEBUG) << "radarDisplayAz = " << radarDisplayAz << " from x_km, y_km = "
+             << x_km << y_km;
 
   double minDiff = 1.0e99;
   const RadxRay *closestRay = NULL;
@@ -511,7 +513,7 @@ const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
     }
   }
 
-  printf("closestRay has azimuth %g\n", closestRay->getAzimuthDeg());
+  LOG(DEBUG) << "closestRay has azimuth " << closestRay->getAzimuthDeg();
   return closestRay;
 
 }
@@ -1292,26 +1294,16 @@ void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
                                                                          
   connect(sheetControl, SIGNAL(volumeChanged()),
   	  &_manager, SLOT(setVolume()));
-  // TODO: may not need _manager access; just issue _performRendering?
-  // send the index of the ray that was changed
-  //connect(sheetControl, SIGNAL(rayChanged(int)),
-  //	  this, SLOT(addRayEdits(int)));
   
   sheetView->init();
   sheetView->show();
   sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
   
 }
-/*
-void PpiWidget::addRayEdits() {
-  // add the new data to the ray in the list of beams
-  // find the beam for the ray data
-}
-*/
 
-void PpiWidget::contextMenuExamine()
+void PpiWidget::contextMenuEditor()
 {
-  cout << "inside PpiWidget::contextMenuExamine ... " << endl;
+  LOG(DEBUG) << "enter";
 
   // get click location in world coords
   // by using the location stored in class variables
@@ -1319,12 +1311,12 @@ void PpiWidget::contextMenuExamine()
   double y_km = _worldPressY;
 
   // get ray closest to click point
-                                                                                                 
   const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-  // TODO: make sure the point is in the valid area                                                                    
-  //------------                                                                                                       
+  // TODO: make sure the point is in the valid area
 
   ExamineEdit(closestRay);
+
+  LOG(DEBUG) << "exit";
 }
 
 void PpiWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol)

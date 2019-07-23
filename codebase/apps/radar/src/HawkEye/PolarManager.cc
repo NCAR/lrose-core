@@ -1153,58 +1153,18 @@ int PolarManager::_getArchiveData()
 
 /////////////////////////////
 // apply new, edited  data in archive mode
-// returns 0 on success, -1 on failure
 // the volume has been updated 
 
-void PolarManager::_applyDataEdits() // const RadxVol &editedVol)
+void PolarManager::_applyDataEdits()
 {
 
-  /*
-  // set up file object for reading
-  
-  _vol.clear();
-    
-    if(_params.debug) {
-      cerr << "  applying edit changes: " << endl;
-    }
-    
-    _vol = editedVol; // TODO: just replace sections of the data fields
-
-
-  // compute the fixed angles from the rays
-  // so that we reflect reality
-  
-  _vol.computeFixedAnglesFromRays();
-
-  // load the sweep manager
-  
-  _sweepManager.set(_vol);
-
-  
   if (_params.debug) {
-    cerr << "----------------------------------------------------" << endl;
-    cerr << "perform archive retrieval" << endl;
-    //cerr << "  read file: " << _vol.getPathInUse() << endl;
-    cerr << "  nSweeps: " << _vol.getNSweeps() << endl;
-    cerr << "  guiIndex, fixedAngle: " 
-         << _sweepManager.getGuiIndex() << ", "
-         << _sweepManager.getSelectedAngle() << endl;
-    cerr << "----------------------------------------------------" << endl;
-  } 
-   
-  _platform = _vol.getPlatform();
-  */
-  std::ofstream outfile("/tmp/voldebug_PolarManager_applyDataEdits.txt");
-  _vol.printWithFieldData(outfile);  
-
-  outfile << "_vol = " << &_vol << endl;
+    std::ofstream outfile("/tmp/voldebug_PolarManager_applyDataEdits.txt");
+    _vol.printWithFieldData(outfile);  
+    outfile << "_vol = " << &_vol << endl;
+  }
 
   _plotArchiveData();
-  //_refresh();
-  //_ppi->_performRendering();
-  //_ppi->selectVar(_fieldNum);
-  //_changeField(0, true);
-  //_handleRay(_platform, ray);
 }
 
 /*
@@ -2374,7 +2334,7 @@ void PolarManager::_saveFile()
     QByteArray qb = filename.toUtf8();
     const char *name = qb.constData();
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "selected file path : " << name << endl;
+      LOG(DEBUG) << "selected file path : " << name;
     }
 
     // TODO: hold it! the save message should
