@@ -18,7 +18,8 @@ SUB_DIRS = \
 	RadxClutMon \
 	RadxConvert \
 	RadxCov2Mom \
-	RadxDiff \
+	RadxDiffFields \
+	RadxDiffVol \
 	RadxDwellCombine \
 	RadxEvad \
 	RadxFilter \

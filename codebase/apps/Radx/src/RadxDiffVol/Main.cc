@@ -21,94 +21,95 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// RadxDiff.hh
+///////////////////////////////////////////////////////////////
 //
-// RadxDiff object
+// main for RadxDiffVol
 //
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// March 2013
+// Jan 2010
 //
 ///////////////////////////////////////////////////////////////
+//
+// Prints out files conforming to Radx formats
+//
+////////////////////////////////////////////////////////////////
 
-#ifndef RadxDiff_H
-#define RadxDiff_H
-
+#include "RadxDiffVol.hh"
+#include <signal.h>
+#include <new>
 #include <iostream>
-#include <fstream>
-#include <string>
-#include <Radx/RadxVol.hh>
-#include "Args.hh"
-#include "Params.hh"
-class RadxFile;
 using namespace std;
 
-class RadxDiff {
+// file scope
+
+static void tidy_and_exit (int sig);
+static void out_of_store();
+static RadxDiffVol *Prog = NULL;
+
+// main
+
+int main(int argc, char **argv)
+
+{
+
+  // create program object
+
+  Prog = new RadxDiffVol(argc, argv);
+  if (!Prog->OK) {
+    cerr << "Error: Could not create RadxDiffVol object." << endl;
+    return(-1);
+  }
+
+  // set signal handling
   
-public:
+  signal(SIGINT, tidy_and_exit);
+  signal(SIGHUP, tidy_and_exit);
+  signal(SIGTERM, tidy_and_exit);
+  signal(SIGPIPE, SIG_IGN);
 
-  // constructor
+  // set new() memory failure handler function
+
+  set_new_handler(out_of_store);
+
+  // run it
+
+  int iret = Prog->Run();
+  if (iret < 0) {
+    cerr << "ERROR - running RadxDiffVol" << endl;
+  }
   
-  RadxDiff (int argc, char **argv);
+  // clean up
 
-  // destructor
+  tidy_and_exit(iret);
+  return (iret);
   
-  ~RadxDiff();
+}
 
-  // run 
+// tidy up on exit
 
-  int Run();
+static void tidy_and_exit (int sig)
 
-  // data members
+{
+  if (Prog) {
+    delete Prog;
+    Prog = NULL;
+  }
+  exit(sig);
+}
 
-  int OK;
+////////////////////////////////////
+// out_of_store()
+//
+// Handle out-of-memory conditions
+//
 
-protected:
-private:
+static void out_of_store()
 
-  string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
+{
 
-  time_t _readSearchTime;
+  cerr << "FATAL ERROR - program RadxDiffVol" << endl;
+  cerr << "  Operator new failed - out of store" << endl;
+  exit(-1);
 
-  RadxVol _vol1;
-  RadxVol _vol2;
-
-  string _path1;
-  string _path2;
-
-  double _totalPoints;
-  double _totalErrors;
-
-  ostream *_out;
-  ofstream _outFile;
-
-  int _handleViaPaths(const string &path1, const string &path2);
-  int _handleViaTime();
-  int _readFile(const string &path, RadxVol &vol, bool isFile1);
-  int _getPathForTime(const string &dir, string &path);
-  void _setupRead(RadxFile &file, bool isFile1);
-  int _performDiff();
-  int _diffVolMetaData();
-  int _diffSweeps();
-  int _diffSweeps(int isweep,
-                  const RadxSweep *sweep1,
-                  const RadxSweep *sweep2);
-  int _diffRays();
-  int _diffRays(int iray,
-                const RadxRay *ray1,
-                const RadxRay *ray2);
-  int _diffFields(int iray,
-                  const RadxRay *ray1,
-                  const RadxRay *ray2);
-  int _diffFields(int iray,
-                  int ifield,
-                  const RadxField *field1,
-                  const RadxField *field2);
-  
-};
-
-#endif
+}

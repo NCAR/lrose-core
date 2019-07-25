@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for RadxDiff program
+# Makefile for RadxDiffVol program
 #
 # Mike Dixon, RAP, NCAR, Boulder, CO, 80307, USA
 #
@@ -33,7 +33,7 @@
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
-TARGET_FILE = RadxDiff
+TARGET_FILE = RadxDiffVol
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
@@ -48,13 +48,13 @@ LOC_CFLAGS =
 HDRS = \
 	Params.hh \
 	Args.hh \
-	RadxDiff.hh
+	RadxDiffVol.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
 	Main.cc \
-	RadxDiff.cc
+	RadxDiffVol.cc
 
 #
 # tdrp macros

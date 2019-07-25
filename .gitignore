@@ -612,7 +612,7 @@ codebase/apps/Radx/src/RadxClutMon/RadxClutMon
 codebase/apps/Radx/src/RadxConvert/RadxConvert
 codebase/apps/Radx/src/RadxCov2Mom/RadxCov2Mom
 codebase/apps/Radx/src/RadxCreateVol/RadxCreateVol
-codebase/apps/Radx/src/RadxDiff/RadxDiff
+codebase/apps/Radx/src/RadxDiffVol/RadxDiffVol
 codebase/apps/Radx/src/RadxDiffFields/RadxDiffFields
 codebase/apps/Radx/src/RadxDwellCombine/RadxDwellCombine
 codebase/apps/Radx/src/RadxEvad/RadxEvad

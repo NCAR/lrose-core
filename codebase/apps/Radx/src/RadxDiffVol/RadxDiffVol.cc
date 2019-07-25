@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// RadxDiff.cc
+// RadxDiffVol.cc
 //
-// RadxDiff object
+// RadxDiffVol object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "RadxDiff.hh"
+#include "RadxDiffVol.hh"
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxSweep.hh>
@@ -48,7 +48,7 @@ using namespace std;
 
 // Constructor
 
-RadxDiff::RadxDiff(int argc, char **argv)
+RadxDiffVol::RadxDiffVol(int argc, char **argv)
 {
 
   OK = TRUE;
@@ -56,7 +56,7 @@ RadxDiff::RadxDiff(int argc, char **argv)
 
   // set programe name
 
-  _progName = "RadxDiff";
+  _progName = "RadxDiffVol";
   
   // parse command line args
   
@@ -100,7 +100,7 @@ RadxDiff::RadxDiff(int argc, char **argv)
 
 // destructor
 
-RadxDiff::~RadxDiff()
+RadxDiffVol::~RadxDiffVol()
 
 {
   if (_outFile.is_open()) {
@@ -111,7 +111,7 @@ RadxDiff::~RadxDiff()
 //////////////////////////////////////////////////
 // Run
 
-int RadxDiff::Run()
+int RadxDiffVol::Run()
 {
 
   // set the output device
@@ -124,7 +124,7 @@ int RadxDiff::Run()
     RadxPath opath(_params.output_file_path);
     if (ta_makedir_recurse(opath.getDirectory().c_str())) {
       int errNum = errno;
-      cerr << "ERROR - RadxDiff::Run" << endl;
+      cerr << "ERROR - RadxDiffVol::Run" << endl;
       cerr << "  Cannot create output dir: " << opath.getDirectory() << endl;
       cerr << strerror(errNum) << endl;
       return -1;
@@ -137,7 +137,7 @@ int RadxDiff::Run()
       }
     }
     catch (std::ofstream::failure e) {
-      cerr << "ERROR - RadxDiff::Run" << endl;
+      cerr << "ERROR - RadxDiffVol::Run" << endl;
       cerr << "Exception opening file: " << _params.output_file_path << endl;
       cerr << e.what() << endl;
       return -1;
@@ -155,10 +155,10 @@ int RadxDiff::Run()
   }
 
   if (iret) {
-    *_out << "RadxDiff - FAILURE" << endl;
+    *_out << "RadxDiffVol - FAILURE" << endl;
     return 1;
   } else {
-    cerr << "RadxDiff - SUCCESS" << endl;
+    cerr << "RadxDiffVol - SUCCESS" << endl;
     return 0;
   }
 
@@ -167,7 +167,7 @@ int RadxDiff::Run()
 //////////////////////////////////////////////////
 // handle file via specified paths
 
-int RadxDiff::_handleViaPaths(const string &path1,
+int RadxDiffVol::_handleViaPaths(const string &path1,
                               const string &path2)
 {
 
@@ -175,12 +175,12 @@ int RadxDiff::_handleViaPaths(const string &path1,
   _path2 = path2;
   
   if (_readFile(_path1, _vol1, true)) {
-    *_out << "ERROR - RadxDiff::_handleViaPaths" << endl;
+    *_out << "ERROR - RadxDiffVol::_handleViaPaths" << endl;
     return -1;
   }
 
   if (_readFile(_path2, _vol2, false)) {
-    *_out << "ERROR - RadxDiff::_handleViaPaths" << endl;
+    *_out << "ERROR - RadxDiffVol::_handleViaPaths" << endl;
     return -1;
   }
   
@@ -222,23 +222,23 @@ int RadxDiff::_handleViaPaths(const string &path1,
 ////////////////////////////////////////////////////
 // Handle search via specified time and search mode
 
-int RadxDiff::_handleViaTime()
+int RadxDiffVol::_handleViaTime()
 {
 
   string path1;
   if (_getPathForTime(_params.file1_dir, path1)) {
-    *_out << "ERROR - RadxDiff::_handleViaTime()" << endl;
+    *_out << "ERROR - RadxDiffVol::_handleViaTime()" << endl;
     return -1;
   }
 
   string path2;
   if (_getPathForTime(_params.file2_dir, path1)) {
-    *_out << "ERROR - RadxDiff::_handleViaTime()" << endl;
+    *_out << "ERROR - RadxDiffVol::_handleViaTime()" << endl;
     return -1;
   }
 
   if (_handleViaPaths(path1, path2)) {
-    *_out << "ERROR - RadxDiff::_handleViaPaths" << endl;
+    *_out << "ERROR - RadxDiffVol::_handleViaPaths" << endl;
     return -1;
   }
 
@@ -249,7 +249,7 @@ int RadxDiff::_handleViaTime()
 //////////////////////////////////////////////////
 // read in file
 
-int RadxDiff::_readFile(const string &path,
+int RadxDiffVol::_readFile(const string &path,
                         RadxVol &vol,
                         bool isFile1)
 
@@ -260,7 +260,7 @@ int RadxDiff::_readFile(const string &path,
   struct stat fileStat;
   if (stat(path.c_str(), &fileStat)) {
     int errNum = errno;
-    *_out << "ERROR - RadxDiff::_readFile" << endl;
+    *_out << "ERROR - RadxDiffVol::_readFile" << endl;
     *_out << "  Cannot stat file: " << path << endl;
     *_out << strerror(errNum) << endl;
     return -1;
@@ -278,7 +278,7 @@ int RadxDiff::_readFile(const string &path,
   // read in file
   
   if (file.readFromPath(path, vol)) {
-    *_out << "ERROR - RadxDiff::_readFile" << endl;
+    *_out << "ERROR - RadxDiffVol::_readFile" << endl;
     *_out << "  Reading file: " << path << endl;
     *_out << file.getErrStr() << endl;
     return -1;
@@ -291,7 +291,7 @@ int RadxDiff::_readFile(const string &path,
 ////////////////////////////////////////////////////
 // Handle search via specified time and search mode
 
-int RadxDiff::_getPathForTime(const string &dir,
+int RadxDiffVol::_getPathForTime(const string &dir,
                               string &path)
 
 {
@@ -323,7 +323,7 @@ int RadxDiff::_getPathForTime(const string &dir,
   }
 
   if (tlist.compile()) {
-    *_out << "ERROR - RadxDiff::_getPathForTime()" << endl;
+    *_out << "ERROR - RadxDiffVol::_getPathForTime()" << endl;
     *_out << "  Cannot get file path via time list" << endl;
     *_out << "  Dir: " << dir << endl;
     *_out << tlist.getErrStr() << endl;
@@ -333,7 +333,7 @@ int RadxDiff::_getPathForTime(const string &dir,
   const vector<string> &pathList = tlist.getPathList();
 
   if (pathList.size() < 1) {
-    *_out << "ERROR - RadxDiff::_getPathForTime()" << endl;
+    *_out << "ERROR - RadxDiffVol::_getPathForTime()" << endl;
     *_out << "  No files found" << endl;
     return -1;
   }
@@ -357,7 +357,7 @@ int RadxDiff::_getPathForTime(const string &dir,
 //////////////////////////////////////////////////
 // set up read
 
-void RadxDiff::_setupRead(RadxFile &file, bool isFile1)
+void RadxDiffVol::_setupRead(RadxFile &file, bool isFile1)
 {
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -423,7 +423,7 @@ void RadxDiff::_setupRead(RadxFile &file, bool isFile1)
 //////////////////////////////////////////////////
 // perform the difference
 
-int RadxDiff::_performDiff()
+int RadxDiffVol::_performDiff()
 {
 
   _totalPoints = 0.0;
@@ -485,7 +485,7 @@ int RadxDiff::_performDiff()
 //////////////////////////////////////////////////
 // perform the difference on the volume metadata
 
-int RadxDiff::_diffVolMetaData()
+int RadxDiffVol::_diffVolMetaData()
 {
 
   int iret = 0;
@@ -577,7 +577,7 @@ int RadxDiff::_diffVolMetaData()
 //////////////////////////////////////////////////
 // perform the difference on the sweep details
 
-int RadxDiff::_diffSweeps()
+int RadxDiffVol::_diffSweeps()
 {
 
   int iret = 0;
@@ -612,7 +612,7 @@ int RadxDiff::_diffSweeps()
 //////////////////////////////////////////////////
 // perform the difference on the sweep details
 
-int RadxDiff::_diffSweeps(int isweep,
+int RadxDiffVol::_diffSweeps(int isweep,
                           const RadxSweep *sweep1,
                           const RadxSweep *sweep2)
 {
@@ -700,7 +700,7 @@ int RadxDiff::_diffSweeps(int isweep,
 //////////////////////////////////////////////////
 // perform the difference on the ray details
 
-int RadxDiff::_diffRays()
+int RadxDiffVol::_diffRays()
 {
 
   int iret = 0;
@@ -735,7 +735,7 @@ int RadxDiff::_diffRays()
 //////////////////////////////////////////////////
 // perform the difference on the ray details
 
-int RadxDiff::_diffRays(int iray,
+int RadxDiffVol::_diffRays(int iray,
                         const RadxRay *ray1,
                         const RadxRay *ray2)
 
@@ -834,7 +834,7 @@ int RadxDiff::_diffRays(int iray,
 //////////////////////////////////////////////////
 // perform the difference on the fields in a ray
 
-int RadxDiff::_diffFields(int iray,
+int RadxDiffVol::_diffFields(int iray,
                           const RadxRay *ray1,
                           const RadxRay *ray2)
 
@@ -893,7 +893,7 @@ int RadxDiff::_diffFields(int iray,
 ///////////////////////////////////////////////////////
 // diff fields for given ray and field index
 
-int RadxDiff::_diffFields(int iray,
+int RadxDiffVol::_diffFields(int iray,
                           int ifield,
                           const RadxField *field1,
                           const RadxField *field2)
