@@ -12,4 +12,7 @@ create_src_release.py --package lrose-radx --osx
 create_src_release.py --package lrose-blaze
 create_src_release.py --package lrose-blaze --osx
 
+create_src_release.py --package lrose-cyclone
+create_src_release.py --package lrose-cyclone --osx
+
 

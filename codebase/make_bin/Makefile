@@ -15,6 +15,7 @@ SCRIPTS = \
 	createMakefile.am.app.cidd.py \
 	createMakefile.am.app.lrose-blaze.py \
 	createMakefile.am.app.lrose-core.py \
+	createMakefile.am.app.lrose-cyclone.py \
 	createMakefile.am.app.py \
 	createMakefile.am.app.radx.py \
 	createMakefile.am.app.shared.py \
