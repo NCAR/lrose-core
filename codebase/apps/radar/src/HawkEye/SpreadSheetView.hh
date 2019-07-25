@@ -26,7 +26,7 @@ class SpreadSheetView : public QMainWindow
 public:
 
   //  SpreadSheetView(std::string fileName, QWidget *parent = 0);
-  SpreadSheetView(QWidget *parent = 0);
+  SpreadSheetView(QWidget *parent = 0, float rayAzimuth = 0.0);
 
   //  void setController(SpreadSheetController *controller);
 
@@ -78,6 +78,8 @@ public slots:
   void fieldDataSent(vector<float> *data, int useless, int c);
 
   void applyChanges();
+
+  void printQJSEngineContext();
 
 signals:
 
@@ -141,6 +143,9 @@ private:
 
   QJSEngine engine;
 
+  
+  //  const char *LogFileName = "/tmp/HawkEye_log.txt";
+ 
 const char *htmlText =
 "<HTML>"
 "<p><b>"

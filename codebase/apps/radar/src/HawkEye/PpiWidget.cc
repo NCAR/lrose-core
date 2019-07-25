@@ -513,7 +513,10 @@ const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
     }
   }
 
-  LOG(DEBUG) << "closestRay has azimuth " << closestRay->getAzimuthDeg();
+  if (closestRay != NULL)
+    LOG(DEBUG) << "closestRay has azimuth " << closestRay->getAzimuthDeg();
+  else
+    LOG(DEBUG) << "Error: No ray found";
   return closestRay;
 
 }
@@ -1274,7 +1277,7 @@ void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
 
   // create the view
   SpreadSheetView *sheetView;
-  sheetView = new SpreadSheetView(this);
+  sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg());
 
   // create the model
 
@@ -1313,11 +1316,21 @@ void PpiWidget::contextMenuEditor()
   // get ray closest to click point
   const RadxRay *closestRay = _getClosestRay(x_km, y_km);
   // TODO: make sure the point is in the valid area
-
-  ExamineEdit(closestRay);
-
+  if (closestRay == NULL) {
+    // report error
+    QMessageBox::information(this, QString::fromStdString(""), QString::fromStdString("No ray found at location clicked"));
+    // TODO: move to this ...  errorMessage("", "No ray found at location clicked");
+  } else {
+    ExamineEdit(closestRay);
+  }
   LOG(DEBUG) << "exit";
 }
+
+/* TODO add to PolarWidget class
+void PolarWidget::errorMessage(string title, string message) {
+  QMessageBox::information(this, QString::fromStdString(title), QString::fromStdString(message));
+}
+*/
 
 void PpiWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol)
 {

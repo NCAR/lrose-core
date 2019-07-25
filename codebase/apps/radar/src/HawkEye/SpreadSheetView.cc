@@ -23,12 +23,14 @@ Q_DECLARE_METATYPE(QVector<int>)
 Q_DECLARE_METATYPE(QVector<double>)
 
 
-// SpreadSheetView sill emit signals that are followed by the controller
+// SpreadSheetView will emit signals that are followed by the controller
 //
 //
 
-SpreadSheetView::SpreadSheetView(QWidget *parent)
-        : QMainWindow(parent)
+// Qt::WindowMinMaxButtonsHint
+
+  SpreadSheetView::SpreadSheetView(QWidget *parent, float rayAzimuth)
+  : QMainWindow(parent)
 {
   LOG(DEBUG) << "in SpreadSheetView constructor";
   //  initSpreadSheet();
@@ -46,13 +48,20 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
   //_volumeData = vol;
     addToolBar(toolBar = new QToolBar());
     formulaInput = new TextEdit(this);
-    // formulaInput = new QTextEdit();
-
+    //QSize sizeHint = formulaInput->viewportSizeHint();
+    // get the font to determine height of one row
+    QFontMetrics m(formulaInput->font());
+    int rowHeight = m.lineSpacing();
+    formulaInput->setFixedHeight(3*rowHeight);
     cellLabel = new QLabel(toolBar);
-    cellLabel->setMinimumSize(80, 0);
+    //cellLabel->setMaximumSize(50, 10);
+    //cellLabel->setMinimumSize(80, 10);
 
     toolBar->addWidget(cellLabel);
     toolBar->addWidget(formulaInput);
+
+    int actionFontSize = 14;
+
     // =======
 
     //QPushButton cancelButton(tr("Cancel"), this);
@@ -65,18 +74,37 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
     //addWidget(&okButton);
     QAction *cancelAct = new QAction(tr("&Cancel"), this);
     cancelAct->setStatusTip(tr("Cancel changes"));
+    QFont cancelFont = cancelAct->font();
+    cancelFont.setBold(true);
+    cancelFont.setPointSize(actionFontSize);
+    cancelAct->setFont(cancelFont);
     connect(cancelAct, &QAction::triggered, this, &SpreadSheetView::cancelFormulaInput);
     toolBar->addAction(cancelAct);
 
+    //    const QIcon okIcon(":/HawkEyePolarIcon.icns"); // (":/ok_check.png");
     QAction *okAct = new QAction(tr("&Ok"), this);
     okAct->setStatusTip(tr("Accept changes"));
+    QFont okFont = okAct->font();
+    okFont.setBold(true);
+    okFont.setPointSize(actionFontSize);
+    okAct->setFont(okFont);
     connect(okAct, &QAction::triggered, this, &SpreadSheetView::acceptFormulaInput);
     toolBar->addAction(okAct);
 
     QAction *applyAct = new QAction(tr("&Apply"), this);
     applyAct->setStatusTip(tr("Apply changes to display"));
+    QFont applyFont = applyAct->font();
+    applyFont.setBold(true);
+    applyFont.setPointSize(actionFontSize);
+    applyAct->setFont(applyFont);
     connect(applyAct, &QAction::triggered, this, &SpreadSheetView::applyChanges);
     toolBar->addAction(applyAct);
+
+    /*
+    toolBar->addAction(okAct);
+    toolBar->addAction(applyAct);
+    toolBar->addAction(cancelAct);
+    */
 
     /*
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
@@ -94,7 +122,7 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
     // ============
     table = new QTableWidget(rows, cols, this);
     QHeaderView* header = table->horizontalHeader();
-    header->setSectionResizeMode(QHeaderView::Stretch);
+    header->setSectionResizeMode(QHeaderView::Interactive);
     // table->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
     // set the column headers to the data fields
     
@@ -136,7 +164,11 @@ SpreadSheetView::SpreadSheetView(QWidget *parent)
     connect(table, &QTableWidget::itemChanged,
             this, &SpreadSheetView::updateTextEdit);
 
-    setWindowTitle(tr("Spreadsheet"));
+
+    QString title("Spreadsheet Editor for Ray ");
+    title.append(QString::number(rayAzimuth, 'f', 2));
+    title.append(" degrees");
+    setWindowTitle(title);
 
     //setupSoloFunctions();
 }
@@ -1056,7 +1088,7 @@ void SpreadSheetView::setupContents()
 // request filled by Controller in response to needFieldData 
 void SpreadSheetView::fieldDataSent(vector<float> *data, int useless, int c) {
   size_t nPoints = data->size();
-      cerr << "number of data values = " << nPoints << endl;
+  LOG(DEBUG) << "number of data values = " << nPoints;
 
       string format = "%g";
       char formattedData[250];
@@ -1076,14 +1108,14 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int useless, int c) {
       // 752019 for (std::size_t r=0; r<data.size(); r++) {
         //    sprintf(formattedData, format, data[0]);
         sprintf(formattedData, "%g", *dp); // data->at(r));
-        cerr << "setting " << r << "," << c << "= " << formattedData << endl; 
+        LOG(DEBUG) << "setting " << r << "," << c << "= " << formattedData; 
         table->setItem(r, c, new SpreadSheetItem(formattedData));
         fieldArray.setProperty(r, *dp); // data.at(r));
         dp++;
       }
-      cout << "adding vector form " << vectorName.toStdString() << endl;
+      LOG(DEBUG) << "adding vector form " << vectorName.toStdString();
       engine.globalObject().setProperty(vectorName, fieldArray);
-      cout << "end adding vector form " << vectorName.toStdString() << endl;
+      LOG(DEBUG) << "end adding vector form " << vectorName.toStdString();
 
 }
 
@@ -1095,13 +1127,13 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
   // fill everything that needs the fieldNames ...
 
     table->setColumnCount(fieldNames.size());
-    cout << "In SpreadSheetView::fieldNamesProvided, there are " << fieldNames.size() << " field namess" << endl;
+    LOG(DEBUG) << "In SpreadSheetView::fieldNamesProvided, there are " << fieldNames.size() << " field namess";
 
     int c = 0;
     vector<string>::iterator it; 
     for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
       QString the_name(QString::fromStdString(*it));
-      cout << *it << endl;
+      LOG(DEBUG) << *it;
       table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
       // TODO: what about setHorizontalHeaderLabels(const QStringList &labels) instead? would it be faster?
       emit needDataForField(*it, useless, c);
@@ -1145,10 +1177,13 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
       // //}
     }
     */
-
+    
+    //if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG)) { // causes a segmentation fault
     // print the context ...                                                                                                   
-    LOG(DEBUG) << "current QJSEngine context ... after fieldNamesProvided";
+      LOG(DEBUG) << "current QJSEngine context ... after fieldNamesProvided";
 
+      //printQJSEngineContext();
+      
     std::map<QString, QString> currentVariableContext;
     QJSValue theGlobalObject = engine.globalObject();
 
@@ -1158,12 +1193,14 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
       QString theValue = it2.value().toString();
       theValue.truncate(100);
 
-      qDebug() << it2.name() << ": " << theValue; // it2.value().toString().truncate(100);
+      //      LOG(DEBUG) << it2.name().toStdString() << ": " << theValue;
+      qDebug() << it2.name() << ": " << theValue;
       currentVariableContext[it2.name()] = it2.value().toString();
     }
-    LOG(DEBUG) << "end current QJSEngine context";
-
-
+      
+      LOG(DEBUG) << "end current QJSEngine context";
+      //}
+    
 
 }
 
@@ -1346,4 +1383,28 @@ void  SpreadSheetView::newDataReady()
 {
   LOG(DEBUG) << "newDataReady ...";
   setupContents();
+}
+
+void SpreadSheetView::printQJSEngineContext() {
+
+    // print the context ...                                                                                                   
+    LOG(DEBUG) << "current QJSEngine context ...";
+
+    LOG(DEBUG) << "pepsi cola";
+    /*
+    std::map<QString, QString> currentVariableContext;
+    QJSValue theGlobalObject = engine.globalObject();
+
+    QJSValueIterator it2(theGlobalObject);
+    while (it2.hasNext()) {
+      it2.next();
+      QString theValue = it2.value().toString();
+      theValue.truncate(100);
+
+      LOG(DEBUG) << it2.name() << ": " << theValue;
+      currentVariableContext[it2.name()] = it2.value().toString();
+    }
+    */
+    LOG(DEBUG) << "end current QJSEngine context";
+
 }
