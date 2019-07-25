@@ -1,14 +1,19 @@
 ####################################
-# list of lrose-blaze applications
+# list of lrose-cyclone applications
 ####################################
 HawkEye
 Radx2Grid
 RadxBeamBlock
 RadxBufr
 RadxConvert
+RadxDiffFields
+RadxDiffVol
 RadxEvad
+RadxFilter
 RadxKdp
+RadxMergeFields
 RadxPartRain
+RadxPersistentClutter
 RadxPid
 RadxPrint
 RadxRate

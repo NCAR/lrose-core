@@ -1,0 +1,18 @@
+####################################
+# list of requried RADX libraries
+####################################
+libFmq.a
+libMdv.a
+#libNcfMdv.a
+libRadx.a
+libSpdb.a
+libdataport.a
+libdidss.a
+libdsserver.a
+libeuclid.a
+libkd.a
+libradar.a
+librapformats.a
+librapmath.a
+libtdrp.a
+libtoolsa.a
