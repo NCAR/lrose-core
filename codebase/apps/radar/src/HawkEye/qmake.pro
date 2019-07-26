@@ -49,7 +49,7 @@ HEADERS += WorldPlot.hh
 
 # for soloii editing 
 HEADERS += FlowLayout.hh
-HEADERS += DialogOptionsWidget.hh
+# HEADERS += DialogOptionsWidget.hh
 HEADERS += ColorMapTemplates.hh
 HEADERS += ClickableLabel.hh
 HEADERS += TextEdit.hh
@@ -96,12 +96,13 @@ SOURCES += SoloDefaultColorWrapper.cc
 SOURCES += SweepManager.cc
 SOURCES += TimeScaleWidget.cc
 SOURCES += FlowLayout.cc
-SOURCES += DialogOptionsWidget.cc
+# SOURCES += DialogOptionsWidget.cc
 SOURCES += ColorMapTemplates.cc
 SOURCES += ClickableLabel.cc
 SOURCES += TextEdit.cc
 SOURCES += SpreadSheetController.cc
 SOURCES += SpreadSheetView.cc
+SOURCES += SpreadSheetModel.cc
 SOURCES += SpreadSheetItem.cc
 SOURCES += SpreadSheetUtils.cc
 SOURCES += SpreadSheetDelegate.cc

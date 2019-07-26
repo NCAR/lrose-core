@@ -253,7 +253,7 @@ void PolarManager::timerEvent(QTimerEvent *event)
     }
     _statusLayout->setColumnMinimumWidth(1, maxWidth);
   
-    if (_archiveMode) {
+    if ((_archiveMode) && (_urlOK)) {
       _archiveRetrievalPending = true;
     }
 
@@ -515,10 +515,8 @@ void PolarManager::_setupWindows()
 
   // sweep panel
 
-  if (_archiveMode) {
-    _createSweepPanel();
-    mainLayout->addWidget(_sweepPanel);
-  }
+   _createSweepPanel();
+   mainLayout->addWidget(_sweepPanel);
 
   // time panel
 
@@ -549,7 +547,22 @@ void PolarManager::_setupWindows()
   if (_archiveMode) {
     _showTimeControl();
   }
+   _setSweepPanelVisibility();
 
+}
+
+//////////////////////////////
+// add/remove  sweep panel (archive mode only)
+
+void PolarManager::_setSweepPanelVisibility()
+{
+  if (_sweepPanel != NULL) {
+    if (_archiveMode) {
+      _sweepPanel->setVisible(true);
+    } else {
+      _sweepPanel->setVisible(false);
+    }
+  }
 }
 
 //////////////////////////////
@@ -794,12 +807,14 @@ void PolarManager::_clearSweepRadioButtons()
 {
 
   QLayoutItem* child;
-  while (_sweepVBoxLayout->count() !=0) {
-    child = _sweepVBoxLayout->takeAt(0);
-    if (child->widget() !=0) {
-      delete child->widget();
+  if (_sweepVBoxLayout != NULL) {
+    while (_sweepVBoxLayout->count() !=0) {
+      child = _sweepVBoxLayout->takeAt(0);
+      if (child->widget() !=0) {
+        delete child->widget();
+      }
+      delete child;
     }
-    delete child;
   }
  
 }
@@ -990,11 +1005,11 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
 int PolarManager::loadArchiveFileList()
 
 {
-
   RadxTimeList timeList;
   timeList.setDir(_params.archive_data_url);
   timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
   timeList.compile();
+  _urlOK = true;
 
   if (timeList.getPathList().size() < 1) {
     cerr << "ERROR - PolarManager::loadArchiveFileList()" << endl;
@@ -1002,7 +1017,23 @@ int PolarManager::loadArchiveFileList()
          << _params.archive_data_url << endl;
     cerr << "  Start time: " << _archiveStartTime.getStr() << endl;
     cerr << "  End time: " << _archiveEndTime.getStr() << endl;
+    _urlOK = false;
     return -1;
+
+    /*
+    if (_archiveFileList.size() > 0) {
+      cerr << "Trying previously opened file ..." << endl;
+      // try to read from previous Open file chooser
+      try {
+        _getArchiveData();
+      } catch (FileIException ex) {
+        cerr << "   failed. " << endl;
+        return -1;
+      }
+    } else {
+      return -1;
+    }
+    */
   }
 
   setArchiveFileList(timeList.getPathList(), false);
@@ -2160,10 +2191,9 @@ void PolarManager::_openFile()
   // seed with files for the day currently in view
   // generate like this: *yyyymmdd*
   string pattern = _archiveStartTime.getDateStrPlain();
-  QString finalPattern = "All files (*";
+  QString finalPattern = "Cfradial (*.nc);; All Files (*.*);; All files (*";
   finalPattern.append(pattern.c_str());
   finalPattern.append("*)");
-  finalPattern.append(";;All files (*.*)");
 
   QString inputPath = QDir::currentPath();
   // get the path of the current file, if available 
@@ -2194,7 +2224,7 @@ void PolarManager::_openFile()
 
     try {
       _getArchiveData();
-    } catch (FileIException ex) {
+    } catch (FileIException ex) { 
       this->setCursor(Qt::ArrowCursor);
       // _timeControl->setCursor(Qt::ArrowCursor);
       return;
@@ -2206,9 +2236,6 @@ void PolarManager::_openFile()
   _setArchiveStartTimeFromGui(epoch);
   QDateTime now = QDateTime::currentDateTime();
   _setArchiveEndTimeFromGui(now);
-  //_params.archive_data_url = "/Users/brenda/data/dorade/dow"; 
-  //_acceptGuiTimes();  // also loads associated data files
-
   
   _archiveStartTime = _guiStartTime;
   _archiveEndTime = _guiEndTime;
@@ -2518,6 +2545,8 @@ void PolarManager::_clear()
 void PolarManager::_setArchiveMode(bool state)
 {
   _archiveMode = state;
+  _setSweepPanelVisibility();
+
   if (_ppi) {
     _ppi->setArchiveMode(state);
   }

@@ -202,11 +202,19 @@ int HawkEye::Run(QApplication &app)
       TDRP_str_replace(&_params.archive_data_url, url.c_str());
     } else if (_params.begin_in_archive_mode) {
       if (_polarManager->loadArchiveFileList()) {
-        cerr << "ERROR - hawkEye" << endl;
-        cerr << "  Cannot find archive files within specified time limits" 
-             << endl;
-        cerr << "  url: " << _params.archive_data_url << endl;
-        return -1;
+
+        string errMsg = "ERROR - HawkEye\n";
+        errMsg.append("<p> Cannot find archive files within specified time limits.</p>");
+        errMsg.append("<p>Looking in url: ");
+        errMsg.append(_params.archive_data_url);
+        errMsg.append("</p>");
+
+        QErrorMessage errorDialog;
+        errorDialog.setMinimumSize(400, 250);
+        errorDialog.showMessage(errMsg.c_str());
+        errorDialog.exec();
+
+        // return -1;
       }
     }
 

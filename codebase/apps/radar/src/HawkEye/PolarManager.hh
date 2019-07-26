@@ -139,6 +139,7 @@ signals:
 private:
 
   bool _firstTime;
+  bool _urlOK;
 
   // beam geometry
   
@@ -307,6 +308,7 @@ private:
   void _setGuiFromArchiveStartTime();
   void _setGuiFromArchiveEndTime();
   void _setGuiFromSelectedTime();
+  void _setSweepPanelVisibility();
 
   // time slider
 

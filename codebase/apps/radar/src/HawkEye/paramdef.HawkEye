@@ -95,7 +95,7 @@ commentdef {
 }
 
 paramdef boolean {
-  p_default = FALSE;
+  p_default = TRUE;
   p_descr = "Option to begin in archive mode.";
   p_help = "If TRUE, the app will start up and read data from the archive_data_url, at the specified start time. If the start time is not set, the start time will be set to NOW.";
 } begin_in_archive_mode;
@@ -113,7 +113,7 @@ paramdef double {
 } archive_time_span_secs;
 
 paramdef string {
-  p_default = "/data/cfradial/kddc";
+  p_default = ".";
   p_descr = "URL for archive data files.";
   p_help = "This should point to a CfRadial moments data set.";
 } archive_data_url;
@@ -375,7 +375,7 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 1050;
+  p_default = 1100;
   p_descr = "Startup width of main window (pixels).";
 } main_window_width;
 

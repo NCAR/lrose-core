@@ -731,7 +731,7 @@
     tt->descr = tdrpStrDup("Option to begin in archive mode.");
     tt->help = tdrpStrDup("If TRUE, the app will start up and read data from the archive_data_url, at the specified start time. If the start time is not set, the start time will be set to NOW.");
     tt->val_offset = (char *) &begin_in_archive_mode - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'archive_start_time'
@@ -767,7 +767,7 @@
     tt->descr = tdrpStrDup("URL for archive data files.");
     tt->help = tdrpStrDup("This should point to a CfRadial moments data set.");
     tt->val_offset = (char *) &archive_data_url - &_start_;
-    tt->single_val.s = tdrpStrDup("/data/cfradial/kddc");
+    tt->single_val.s = tdrpStrDup(".");
     tt++;
     
     // Parameter 'Comment 4'
@@ -1250,7 +1250,7 @@
     tt->descr = tdrpStrDup("Startup width of main window (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &main_window_width - &_start_;
-    tt->single_val.i = 1050;
+    tt->single_val.i = 1100;
     tt++;
     
     // Parameter 'main_window_height'
