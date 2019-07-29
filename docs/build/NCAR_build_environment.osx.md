@@ -107,7 +107,7 @@ The software development system at NCAR/RAL (formerly RAP) and NCAR/EOL makes us
 
 Therefore, before performing the build, you need to set up the correct environment, as follows:
 
-### Set the environment variable for the directory into which you wish to install the build:
+### Set an environment variable for the install directory:
 
 ```
   $LROSE_INSTALL_DIR
@@ -119,7 +119,7 @@ This will normally be:
   ~/lrose
 ```
 
-The build will be installed in:
+The software is automatically installed in:
 
 ```
   $LROSE_INSTALL_DIR/bin
@@ -127,21 +127,19 @@ The build will be installed in:
   $LROSE_INSTALL_DIR/include
 ```
 
-### Set the environment variable to point to the git lrose-core directory:
+#### Set an environment variable
 
 ```
   $LROSE_CORE_DIR
 ```
 
-This should point to the top of the distribution, i.e. lrose-core.
-
-This will normally be:
+#### to the git lrose-core directory (i.e. the top of the distribution):
 
 ```
   ~/git/lrose-core
 ```
 
-### Source the environment, depending on the shell you are using:
+### Setup the environment by running the source command.
 
 For sh or bash:
 ```
@@ -155,9 +153,9 @@ For csh or tcsh:
   source build/set_build_env.osx.csh
 ```
 
-Preferably, you should permanently copy the contents of these these files
+Preferably, you should permanently copy the contents of these files
 directly into your `.cshrc` or `.bashrc` file.
-That way the environment will always be correcty set.
+Then the environment will always be correctly set.
 
 This will set the following important environment variables:
 
@@ -189,13 +187,13 @@ To install the **lrose** standard package makefiles, perform the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py
+  ./make_bin/installPackageMakefiles.py
 ```
 This is equivalent to the following
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py --package lrose
+  ./make_bin/installPackageMakefiles.py --package lrose
 ```
 
 If you want to perform a specific package package, you can specify that on the command line.
@@ -204,14 +202,14 @@ For the **radx** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py --package radx
+  ./make_bin/installPackageMakefiles.py --package radx
 ```
 
 For the **titan** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py --package titan
+  ./make_bin/installPackageMakefiles.py --package titan
 ```
 
 ### Perform the build
@@ -234,7 +232,7 @@ For the **titan** distribtion, run the following:
   make -j 8 install
 ```
 
-#### (c) Build and instal the applications
+#### (c) Build and install the applications
 
 ```
   cd $LROSE_CORE_DIR/codebase/apps
