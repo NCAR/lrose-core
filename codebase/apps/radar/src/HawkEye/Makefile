@@ -64,6 +64,7 @@ HDRS = \
 	FieldRenderer.hh \
 	FlowLayout.hh \
 	HawkEye.hh \
+	HawkEyeLogger.hh \
 	PaletteManager.hh \
         ParameterColorView.hh \
         FieldColorController.hh \
@@ -102,6 +103,7 @@ NORM_SRCS = \
 	DisplayFieldModel.cc \
 	FlowLayout.cc \
 	HawkEye.cc \
+	HawkEyeLogger.cc \
 	Main.cc \
 	PaletteManager.cc \
 	PpiBeam.cc \

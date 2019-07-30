@@ -47,7 +47,9 @@
 #include "SoloDefaultColorWrapper.hh"
 #include <toolsa/Path.hh>
 #include <toolsa/LogStream.hh>
-#include <toolsa/Log.hh>
+//#include <toolsa/Log.hh>
+//#include <toolsa/MsgLog.hh>
+#include "HawkEyeLogger.hh"
 
 #include <string>
 #include <iostream>
@@ -71,10 +73,12 @@ HawkEye::HawkEye(int argc, char **argv) :
 
   _progName = strdup("HawkEye");
 
-  Log logger("HawkEye");
+  HawkEyeLogger logger("HawkEye");
   logger.setDayMode();
   logger.setOutputDir("/tmp/Applications/HawkEye/Logs");
-  LOG(DEBUG) << "HawkEye starting";
+  logger.openFile();
+  logger.postLine("HawkEye starting");
+  logger.closeFile();
 
   // get command line args
   
@@ -177,6 +181,7 @@ HawkEye::~HawkEye()
     delete _displayFields[ii];
   }
   _displayFields.clear();
+  // logger.closeFile();
 
 }
 
@@ -202,13 +207,14 @@ int HawkEye::Run(QApplication &app)
       TDRP_str_replace(&_params.archive_data_url, url.c_str());
     } else if (_params.begin_in_archive_mode) {
       if (_polarManager->loadArchiveFileList()) {
-
-        string errMsg = "ERROR - HawkEye\n";
-        errMsg.append("<p> Cannot find archive files within specified time limits.</p>");
-        errMsg.append("<p>Looking in url: ");
-        errMsg.append(_params.archive_data_url);
-        errMsg.append("</p>");
-
+        
+        string errMsg = "WARNING\n";
+        errMsg.append("<p>HawkEye cannot find archive data files. </p>");
+        errMsg.append("<p> Choose a file to open or change the time limits. </p>");
+        //errMsg.append(" in startup location. </p>");
+        //errMsg.append(_params.archive_data_url);
+        //errMsg.append(")</p>");
+        //errMsg.append("<p> Click OK to continue to use HawkEye.</p>");
         QErrorMessage errorDialog;
         errorDialog.setMinimumSize(400, 250);
         errorDialog.showMessage(errMsg.c_str());
