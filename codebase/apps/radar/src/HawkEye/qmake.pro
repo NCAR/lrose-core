@@ -6,12 +6,12 @@ QT += qml
 
 TEMPLATE = app
 TARGET = HawkEye
-ICON = HawkEyePolarIcon.icns 
+ICON = HawkEyeCycloneIcon.icns 
 
 CONFIG += qt
 CONFIG += debug
 
-# RESOURCES = resources.qrc 
+RESOURCES = resources.qrc 
 # RESOURCES = customcompleter.qrc
 
 HEADERS += AllocCheck.hh

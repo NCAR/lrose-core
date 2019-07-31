@@ -71,8 +71,12 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
 
     // Color Palette Editor widget creations ...
     QPushButton *cancelButton = new QPushButton("Cancel");
+    // TODO: consider making the PushButtons Actions instead and put them in a toolbar??
+    //QAction *cancelButton = new QAction("&Cancel", this);
+    cancelButton->setIcon(QIcon(":/images/cancel_x.png"));
     QPushButton *saveButton = new QPushButton(tr("Save"));
     QPushButton *replotButton = new QPushButton(tr("Replot"));
+    replotButton->setIcon(QIcon(":/images/apply.png"));
     // Note: Command buttons in dialogs are by default auto-default buttons.
     // A default button is a push button that is activated when the user 
     // presses the Enter or Return key in a dialog.
@@ -181,6 +185,7 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
     connect(parameterList, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)),
 	    this, SLOT(fieldSelected(QListWidgetItem *, QListWidgetItem *))); 
     connect(cancelButton, &QAbstractButton::clicked, this, &ParameterColorView::cancelColorScale);
+    //connect(cancelButton, &QAction::triggered, this, &ParameterColorView::cancelColorScale);
     connect(saveButton, &QAbstractButton::clicked, this, &ParameterColorView::saveColorScale);
     connect(replotButton, &QAbstractButton::clicked, this, &ParameterColorView::replotColorScale);
    
@@ -224,6 +229,7 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
     layout->addWidget(emphasisColorLabel, base+6, 1);
     layout->addWidget(saveButton, base+7, 2);
     layout->addWidget(cancelButton, base+7, 1);
+    //layout->addAction(cancelButton, base+7, 1);
     layout->addWidget(replotButton, base+7, 0);
 //    layout->addWidget(saveButton, 1, 0);
 

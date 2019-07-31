@@ -74,25 +74,27 @@ Q_DECLARE_METATYPE(QVector<double>)
     //addWidget(&okButton);
     QAction *cancelAct = new QAction(tr("&Cancel"), this);
     cancelAct->setStatusTip(tr("Cancel changes"));
-    QFont cancelFont = cancelAct->font();
-    cancelFont.setBold(true);
-    cancelFont.setPointSize(actionFontSize);
-    cancelAct->setFont(cancelFont);
+    cancelAct->setIcon(QIcon(":/images/cancel_x.png"));
+    //QFont cancelFont = cancelAct->font();
+    //cancelFont.setBold(true);
+    //cancelFont.setPointSize(actionFontSize);
+    //cancelAct->setFont(cancelFont);
     connect(cancelAct, &QAction::triggered, this, &SpreadSheetView::cancelFormulaInput);
     toolBar->addAction(cancelAct);
 
-    //    const QIcon okIcon(":/HawkEyePolarIcon.icns"); // (":/ok_check.png");
     QAction *okAct = new QAction(tr("&Ok"), this);
     okAct->setStatusTip(tr("Accept changes"));
-    QFont okFont = okAct->font();
-    okFont.setBold(true);
-    okFont.setPointSize(actionFontSize);
-    okAct->setFont(okFont);
+    okAct->setIcon(QIcon(":/images/ok_check.png"));
+    //QFont okFont = okAct->font();
+    //okFont.setBold(true);
+    //okFont.setPointSize(actionFontSize);
+    //okAct->setFont(okFont);
     connect(okAct, &QAction::triggered, this, &SpreadSheetView::acceptFormulaInput);
     toolBar->addAction(okAct);
 
     QAction *applyAct = new QAction(tr("&Apply"), this);
     applyAct->setStatusTip(tr("Apply changes to display"));
+    applyAct->setIcon(QIcon(":/images/apply.png"));
     QFont applyFont = applyAct->font();
     applyFont.setBold(true);
     applyFont.setPointSize(actionFontSize);

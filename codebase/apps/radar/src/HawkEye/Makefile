@@ -164,6 +164,7 @@ MOC_OUTPUT = \
 	moc_SpreadSheetController.cpp \
 	moc_SpreadSheetDelegate.cpp \
 	moc_FunctionEditor.cpp \
+	qrc_resources.cpp \
 	qrc_customcompleter.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
@@ -235,7 +236,7 @@ hawkeye_app:
 # cp arrow.pdf HawkEye_staging/.background
 # ln -s /Applications HawkEye_staging/Applications
 # rsync -r HawkEye.app HawkEye_staging/.
-	hdiutil create -volname HawkEye_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye.app  -ov -format UDZO HawkEye_Blaze.dmg
+	hdiutil create -volname HawkEye_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye.app  -ov -format UDZO HawkEye_Cyclone.dmg
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

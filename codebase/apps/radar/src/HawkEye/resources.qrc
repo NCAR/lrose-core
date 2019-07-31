@@ -1,5 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-  <file>radar.HawkEye.png</file>
+  <file>images/ok_check.png</file>
+  <file>images/cancel_x.png</file>
+  <file>images/apply.png</file>
 </qresource>
 </RCC>
