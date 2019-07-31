@@ -630,7 +630,7 @@ def buildPackage():
 
     # optionally install the scripts
 
-    if (options.noScripts == False):
+    if (options.package == "lrose-core" and options.noScripts == False):
 
         logPath = prepareLogFile("install-scripts-to-tmp");
 

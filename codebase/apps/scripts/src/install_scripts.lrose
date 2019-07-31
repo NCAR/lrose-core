@@ -7,7 +7,7 @@
 # usage function
 #
 
-function usage() {
+usage() {
     echo
     echo "Usage: install_scripts.lrose install_dir"
     echo
