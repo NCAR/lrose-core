@@ -533,6 +533,9 @@ def trimToMakefiles(subDir):
         if (entry == "perl5") or (entry == "scripts") or (entry == "include"):
             # always keep scripts directories
             continue
+        if (entry == "images") or (entry == "resources"):
+            # always keep QT resources
+            continue
         if (os.path.isdir(theName)):
             if (entry not in subNameList):
                 if (options.verbose):
@@ -540,7 +543,7 @@ def trimToMakefiles(subDir):
                 shutil.rmtree(theName)
             else:
                 if (options.verbose):
-                    print("keeping it and recurring", file=logFp)
+                    print("keeping it and recursing", file=logFp)
                 # check this child's required subdirectories (recurse)
                 trimToMakefiles(os.path.join(subDir, entry))
 
