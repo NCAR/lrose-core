@@ -50,6 +50,7 @@ static void write_comments_assignment(FILE *out);
 static void write_comments_load_from_args(FILE *out);
 static void write_comments_load_apply_args(FILE *out);
 static void write_comments_is_arg_valid(FILE *out);
+static void write_comments_is_arg_validN(FILE *out);
 static void write_comments_load(FILE *out);
 static void write_comments_load_from_buf(FILE *out);
 static void write_comments_load_defaults(FILE *out);
@@ -312,6 +313,13 @@ int write_hh_file(const char *class_name,
   fprintf(hfile,
 	  "  static bool isArgValid(const char *arg);\n\n");
   
+  write_comments_is_arg_validN(hfile);
+
+  fprintf(hfile,
+	  "  static int isArgValidN(const char *arg);\n\n");
+  
+
+
   /*
    * low-level load for multiple classes per program
    */
@@ -809,6 +817,15 @@ int write_cc_file(const char *class_name,
 	  "  bool %s::isArgValid(const char *arg)\n"
 	  "  {\n"
 	  "    return (tdrpIsArgValid(arg));\n"
+	  "  }\n\n",
+	  class_name);
+  
+  write_comments_is_arg_validN(cfile);
+
+  fprintf(cfile,
+	  "  int %s::isArgValidN(const char *arg)\n"
+	  "  {\n"
+	  "    return (tdrpIsArgValidN(arg));\n"
 	  "  }\n\n",
 	  class_name);
   
@@ -1621,7 +1638,22 @@ static void write_comments_is_arg_valid(FILE *out)
 	  "  //\n\n");
 
 }
+
+static void write_comments_is_arg_validN(FILE *out)
      
+{
+  
+  fprintf(out,
+	  "  ////////////////////////////////////////////\n"
+	  "  // isArgValid()\n"
+	  "  // \n"
+	  "  // Check if a command line arg is a valid TDRP arg.\n"
+	  "  // return number of args consumed.\n"
+	  "  //\n\n");
+
+}
+     
+
 /***********************
  * write_comments_load()
  */
