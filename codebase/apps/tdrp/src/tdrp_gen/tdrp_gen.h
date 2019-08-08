@@ -171,13 +171,15 @@ extern int write_hh_file(const char *module,
                          const TDRPtable *t_entries,
 			 int n_defs,
                          const char *prog_name,
-                         const char *lib_name);
+                         const char *lib_name,
+                         int singleton);
 
 extern int write_cc_file(const char *module,
                          const TDRPtable *t_entries,
 			 int n_defs,
                          const char *prog_name,
-                         const char *lib_name);
+                         const char *lib_name,
+                         int singleton);
 
 #ifdef __cplusplus
 }

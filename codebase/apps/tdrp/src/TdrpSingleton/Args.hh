@@ -21,90 +21,50 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//////////////////////////////////////////////////////////
-// Args.cc : command line args
+/////////////////////////////////////////////////////////////
+// Args.h: Command line object
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Sept 1998
+// August 2019
 //
-//////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
+#ifndef ARGS_H
+#define ARGS_H
 
 using namespace std;
 
-#include "Args.hh"
-#include "Params.hh"
-#include <string.h>
-#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <tdrp/tdrp.h>
 
-// Constructor
-
-Args::Args (int argc, char **argv, char *prog_name)
-
-{
-
-  char tmp_str[BUFSIZ];
-
-  // intialize
-
-  OK = TRUE;
-  TDRP_init_override(&override);
+class Args {
   
-  // loop through args
+public:
+
+  // constructor
+
+  Args (int argc, char **argv, char *prog_name);
+
+  // Destructor
+
+  ~Args();
+
+  // public data
+
+  int OK;
+  tdrp_override_t override;
+
+protected:
   
-  for (int i =  1; i < argc; i++) {
+private:
 
-    if (!strcmp(argv[i], "-h")) {
-      
-      _usage(prog_name, cout);
-      exit (0);
-      
-    } else if (!strcmp(argv[i], "-debug")) {
-      
-      sprintf(tmp_str, "debug = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-verbose")) {
-      
-      sprintf(tmp_str, "debug = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } // if
-    
-  } // i
-
-  if (!OK) {
-    _usage(prog_name, cerr);
-  }
-    
-}
-
-// Destructor
-
-Args::~Args ()
-
-{
-
-  TDRP_free_override(&override);
-
-}
+  void _usage(char *prog_name, ostream &out);
   
-void Args::_usage(char *prog_name, ostream &out)
-{
+};
 
-  out << "Usage: " << prog_name << " [options as below]\n"
-      << "options:\n"
-      << "       [ -h ] produce this list.\n"
-      << "       [ -debug ] print debug messages\n"
-      <<  "       [ -verbose ] print verbose debug messages\n"
-      << endl;
-
-  Params::usage(out);
-
-}
-
-
-
+#endif
 
 
 

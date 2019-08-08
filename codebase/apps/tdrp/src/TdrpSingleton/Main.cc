@@ -21,90 +21,58 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//////////////////////////////////////////////////////////
-// Args.cc : command line args
+///////////////////////////////////////////////////////////////
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// main for TdrpSingleton
 //
-// Sept 1998
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-//////////////////////////////////////////////////////////
+// August 2019
+//
+///////////////////////////////////////////////////////////////
+//
+// TdrpSingleton tests out the C++ mode of TDRP
+//
+////////////////////////////////////////////////////////////////
 
-using namespace std;
+#include "TdrpSingleton.hh"
+#include <stdlib.h>
 
-#include "Args.hh"
-#include "Params.hh"
-#include <string.h>
-#include <cstdlib>
+// file scope
 
-// Constructor
+static void tidy_and_exit (int sig);
+static TdrpSingleton *Prog;
 
-Args::Args (int argc, char **argv, char *prog_name)
+// main
+
+int main(int argc, char **argv)
 
 {
 
-  char tmp_str[BUFSIZ];
+  // create program object
 
-  // intialize
-
-  OK = TRUE;
-  TDRP_init_override(&override);
-  
-  // loop through args
-  
-  for (int i =  1; i < argc; i++) {
-
-    if (!strcmp(argv[i], "-h")) {
-      
-      _usage(prog_name, cout);
-      exit (0);
-      
-    } else if (!strcmp(argv[i], "-debug")) {
-      
-      sprintf(tmp_str, "debug = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-verbose")) {
-      
-      sprintf(tmp_str, "debug = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } // if
-    
-  } // i
-
-  if (!OK) {
-    _usage(prog_name, cerr);
+  TdrpSingleton *Prog;
+  Prog = new TdrpSingleton(argc, argv);
+  if (!Prog->OK) {
+    return(-1);
   }
-    
-}
 
-// Destructor
+  // run it
 
-Args::~Args ()
+  int iret = Prog->Run();
 
-{
+  // clean up
 
-  TDRP_free_override(&override);
-
-}
+  tidy_and_exit(iret);
+  return (iret);
   
-void Args::_usage(char *prog_name, ostream &out)
-{
-
-  out << "Usage: " << prog_name << " [options as below]\n"
-      << "options:\n"
-      << "       [ -h ] produce this list.\n"
-      << "       [ -debug ] print debug messages\n"
-      <<  "       [ -verbose ] print verbose debug messages\n"
-      << endl;
-
-  Params::usage(out);
-
 }
 
+// tidy up on exit
 
+static void tidy_and_exit (int sig)
 
-
-
-
+{
+  delete(Prog);
+  exit(sig);
+}

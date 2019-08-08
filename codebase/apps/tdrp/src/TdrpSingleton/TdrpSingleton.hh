@@ -21,90 +21,61 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//////////////////////////////////////////////////////////
-// Args.cc : command line args
+/////////////////////////////////////////////////////////////
+// TdrpSingleton.h
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// TdrpSingleton object
 //
-// Sept 1998
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-//////////////////////////////////////////////////////////
+// August 2019
+//
+///////////////////////////////////////////////////////////////
+//
+// TdrpSingleton tests the C++ singleton functionality of TDRP
+//
+///////////////////////////////////////////////////////////////
+
+#ifndef TdrpSingleton_HH
+#define TdrpSingleton_HH
 
 using namespace std;
 
+#include <tdrp/tdrp.h>
+
 #include "Args.hh"
 #include "Params.hh"
-#include <string.h>
-#include <cstdlib>
 
-// Constructor
-
-Args::Args (int argc, char **argv, char *prog_name)
-
-{
-
-  char tmp_str[BUFSIZ];
-
-  // intialize
-
-  OK = TRUE;
-  TDRP_init_override(&override);
+class TdrpSingleton {
   
-  // loop through args
+public:
+
+  // constructor
+
+  TdrpSingleton (int argc, char **argv);
+
+  // destructor
   
-  for (int i =  1; i < argc; i++) {
+  ~TdrpSingleton();
 
-    if (!strcmp(argv[i], "-h")) {
-      
-      _usage(prog_name, cout);
-      exit (0);
-      
-    } else if (!strcmp(argv[i], "-debug")) {
-      
-      sprintf(tmp_str, "debug = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-verbose")) {
-      
-      sprintf(tmp_str, "debug = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } // if
-    
-  } // i
+  // run 
 
-  if (!OK) {
-    _usage(prog_name, cerr);
-  }
-    
-}
+  int Run();
 
-// Destructor
+  // data members
 
-Args::~Args ()
+  int OK;
 
-{
-
-  TDRP_free_override(&override);
-
-}
+protected:
   
-void Args::_usage(char *prog_name, ostream &out)
-{
+private:
 
-  out << "Usage: " << prog_name << " [options as below]\n"
-      << "options:\n"
-      << "       [ -h ] produce this list.\n"
-      << "       [ -debug ] print debug messages\n"
-      <<  "       [ -verbose ] print verbose debug messages\n"
-      << endl;
+  char *_progName;
+  char *_paramsPath;
+  Args *_args;
 
-  Params::usage(out);
+  void _doPrintout(FILE *out);
 
-}
+};
 
-
-
-
-
-
+#endif

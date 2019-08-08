@@ -71,6 +71,7 @@ int main(int argc, char **argv)
   int n_defs;
   int debug = FALSE;
   int cplusplus = FALSE;
+  int singleton = FALSE;
   int fname_set = FALSE;
   tdrpToken_t *tokens;
   TDRPtable *t_entries;
@@ -101,6 +102,8 @@ int main(int argc, char **argv)
       debug = TRUE;
     } else if (!strcmp(argv[i], "-c++")) {
       cplusplus = TRUE;
+    } else if (!strcmp(argv[i], "-singleton")) {
+      singleton = TRUE;
     } else if (!strcmp(argv[i], "-f")) {
       if (i < argc - 1) {
 	paramdef_path = argv[++i];
@@ -235,7 +238,8 @@ int main(int argc, char **argv)
      * write out C++ mode header file
      */
     
-    if (write_hh_file(class_name, t_entries, n_defs, prog_name, lib_name)) {
+    if (write_hh_file(class_name, t_entries, n_defs, 
+                      prog_name, lib_name, singleton)) {
       return (-1);
     }
     
@@ -243,7 +247,8 @@ int main(int argc, char **argv)
      * write out C++ code file
      */
     
-    if (write_cc_file(class_name, t_entries, n_defs, prog_name, lib_name)) {
+    if (write_cc_file(class_name, t_entries, n_defs,
+                      prog_name, lib_name, singleton)) {
       return (-1);
     }
 
@@ -318,6 +323,7 @@ static void Usage(FILE *out)
 	  "  [-lib libName] Library name if the params reside in a library.\n"
 	  "    This ensures the includes are set correctly.\n"
 	  "  [-prog progName] Program name for documenting code files.\n"
+	  "  [-singleton] Create a singleton object. Only in C++ mode.\n"
 	  "  [-debug] print debug messages.\n"
 	  );
 

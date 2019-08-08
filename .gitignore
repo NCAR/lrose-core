@@ -637,6 +637,7 @@ codebase/apps/Radx/src/RadxBeamBlock/RadxBeamBlock
 codebase/apps/Radx/src/TestRadxMsg/TestRadxMsg
 
 codebase/apps/tdrp/src/TdrpTest/TdrpTest
+codebase/apps/tdrp/src/TdrpSingleton/TdrpSingleton
 codebase/apps/tdrp/src/tdrp_gen/tdrp_gen
 codebase/apps/tdrp/src/tdrp_test/tdrp_test
 
