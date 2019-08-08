@@ -264,30 +264,12 @@ PGI_NETCDF4_LDFLAGS=$(MY_PGI_NETCDF4_LDFLAGS) -L/usr/local/netcdf4-pgi/lib
 INTEL_NETCDF4_INCS=$(MY_INTEL_NETCDF4_INCS) -I/usr/local/netcdf4-ifort/include
 INTEL_NETCDF4_LDFLAGS=$(MY_INTEL_NETCDF4_LDFLAGS) -L/usr/local/netcdf4-ifort/lib
 
-# !!!
-# These are to be removed, Only netcdf4 will be supported starting Debian Jessie !!!
-NETCDF3_INCS=$(MY_NETCDF3_INCS) -I/usr/local/netcdf/include -I/usr/local/include -I/opt/include -I/opt/netcdf/include
-NETCDF3_LIBS=$(MY_NETCDF3_LIBS) -L/usr/local/netcdf/lib -L/usr/local/lib -L/opt/netcdf/lib -L/opt/lib
-NETCDF_INCS=$(MY_NETCDF_INCS) $(NETCDF3_INCS) $(UDUNITS_INCS) -I/opt/netcdf4/include
-NETCDF_LDFLAGS=$(MY_NETCDF_LDFLAGS) $(NETCDF3_LIBS) -L/opt/netcdf4/lib
-
-PGI_NETCDF3_INCS=$(MY_PGI_NETCDF3_INCS) -I/usr/local/netcdf-3.6.2-pgi7/include
-PGI_NETCDF3_LIBS=$(MY_PGI_NETCDF3_LIBS) -L/usr/local/netcdf-3-6-2-pgi7/lib
-PGI_NETCDF_INCS=$(MY_PGI_NETCDF_INCS) $(PGI_NETCDF3_INCS)
-PGI_NETCDF_LDFLAGS=$(MY_PGI_NETCDF_LDFLAGS) $(PGI_NETCDF3_LIBS)
-
-INTEL_NETCDF3_INCS=$(MY_INTEL_NETCDF3_INCS) -I/usr/local/netcdf3-ifort/include
-INTEL_NETCDF3_LIBS=$(MY_INTEL_NETCDF3_LIBS) -L/usr/local/netcdf3-ifort/lib
-INTEL_NETCDF_INCS=$(MY_INTEL_NETCDF_INCS) $(INTEL_NETCDF3_INCS)
-INTEL_NETCDF_LDFLAGS=$(MY_INTEL_NETCDF_LDFLAGS) $(INTEL_NETCDF3_LIBS)
-# To Be Removed Above !!!
-
 NETCDF_C_LIB=-lnetcdf
 NETCDF_C++_LIB=-lnetcdf_c++
 NETCDF_FF_LIB=-lnetcdff
 NETCDF_C_AND_C++_LIBS=-lnetcdf -lnetcdf_c++
 NETCDF_C_AND_F_LIBS=-lnetcdff -lnetcdf
-NETCDF4_LIBS=-lNcxx -lnetcdf_c++ -lnetcdf -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat
+NETCDF4_LIBS=-lNcxx -lnetcdf -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat
 NETCDF_LIB_LIST=$(NETCDF4_LIBS)
 NETCDF_INCLUDES=$(NETCDF4_INCS)
 NETCDF_LDFLAGS=$(NETCDF4_LDFLAGS)

@@ -87,7 +87,7 @@ INTEL_SYS_CFLAGS = -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 $(MY_INTEL_CFLAGS)
 # cc
 #
 
-SYS_CPPC_CFLAGS = $(SYS_CFLAGS) $(MY_CPPC_CFLAGS) 
+SYS_CPPC_CFLAGS = $(SYS_CFLAGS) $(MY_CPPC_CFLAGS) -std=c++0x
 CPPC = g++
 SYS_CPPC_INCLUDES =
 ACC = $(CC)
@@ -251,8 +251,8 @@ ZLIB_INCLUDES=$(MY_ZLIB_INCS) -I/opt/zlib/include
 ZLIB_LDFLAGS=$(MY_ZLIB_LDFLAGS) -Wl,-rpath,/opt/zlib/lib -L/opt/zlib/lib
 ZLIB_LIBS=$(MY_ZLIB_LIBS) -lz
 
-UDUNITS_INCS=$(MY_UDUNITS_INCS) -I/opt/udunits/include -I/opt/include -I/usr/include/udunits2
-UDUNITS_LDFLAGS=$(MY_UDUNITS_LDFLAGS) -L/opt/udunits/lib -L/usr/lib64
+UDUNITS_INCS=$(MY_UDUNITS_INCS) -I/opt/udunits/include -I/opt/include -I/usr/include/udunits2 -I/opt/udunits-2.1.24/include
+UDUNITS_LDFLAGS=$(MY_UDUNITS_LDFLAGS) -L/opt/udunits/lib -L/opt/udunits-2.1.24/lib -L/usr/lib64
 
 NETCDF3_INCS=$(MY_NETCDF3_INCS) -I/opt/netcdf/include -I/opt/include -I/opt/include -I/opt/netcdf/include
 NETCDF3_LIBS=$(MY_NETCDF3_LIBS) -L/opt/netcdf/lib -L/opt/lib -L/opt/netcdf/lib -L/opt/lib

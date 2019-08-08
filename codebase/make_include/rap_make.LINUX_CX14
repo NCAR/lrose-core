@@ -268,7 +268,7 @@ NETCDF_C++_LIB=-lnetcdf_c++
 NETCDF_FF_LIB=-lnetcdff
 NETCDF_C_AND_C++_LIBS=-lnetcdf -lnetcdf_c++
 NETCDF_C_AND_F_LIBS=-lnetcdff -lnetcdf
-NETCDF4_LIBS=-lNcxx -lnetcdf_c++ -lnetcdf -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat
+NETCDF4_LIBS=-lNcxx -lnetcdf -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -lbz2
 NETCDF_LIB_LIST=$(NETCDF4_LIBS)
 NETCDF_INCLUDES=$(NETCDF4_INCS)
 NETCDF_LDFLAGS=$(NETCDF4_LDFLAGS)
@@ -318,6 +318,15 @@ QT4_LDFLAGS = \
             -L/usr/local/qt4/lib
 
 QT4_LIBS = -lQtCore
+
+#
+# Jasper
+#
+
+JASPER_CPPC_CFLAGS = -DNO_JASPER_LIB
+JASPER_INCLUDES = 
+JASPER_LDFLAGS = 
+JASPER_LIBS = 
 
 # MADIS
 # These have the MY_MADIS_LIBS first intentionally.
