@@ -149,6 +149,68 @@ int tdrpIsArgValid(const char *arg)
   return FALSE;
 }
 
+/*********************************************************
+ * tdrpIsArgValidN()
+ *
+ * returns number of tokens consumed by arg
+ * returns zero if arg is not a valid tdrp command line arg.
+ */
+
+int tdrpIsArgValidN(const char *arg)
+
+{
+
+  if (!strcmp(arg, "-params")) {
+    return 2;
+  }
+  if (!strcmp(arg, "--params")) {
+    return 2;
+  }
+  if (!strcmp(arg, "-print_params")) {
+    return 1;
+  }
+  if (!strcmp(arg, "--print_params")) {
+    return 1;
+  }
+  if (!strcmp(arg, "-check_params")) {
+    return 1;
+  }
+  if (!strcmp(arg, "--check_params")) {
+    return 1;
+  }
+  if (!strcmp(arg, "short")) {
+    return 1;
+  }
+  if (!strcmp(arg, "norm")) {
+    return 1;
+  }
+  if (!strcmp(arg, "long")) {
+    return 1;
+  }
+  if (!strcmp(arg, "verbose")) {
+    return 1;
+  }
+  if (!strcmp(arg, "short_expand")) {
+    return 1;
+  }
+  if (!strcmp(arg, "norm_expand")) {
+    return 1;
+  }
+  if (!strcmp(arg, "long_expand")) {
+    return 1;
+  }
+  if (!strcmp(arg, "verbose_expand")) {
+    return 1;
+  }
+  if (!strcmp(arg, "-tdrp_debug")) {
+    return 1;
+  }
+  if (!strcmp(arg, "-tdrp_usage")) {
+    return 1;
+  }
+  return 0;
+}
+
 /*************************************************************************
  * tdrpLoadFromArgs()
  *
