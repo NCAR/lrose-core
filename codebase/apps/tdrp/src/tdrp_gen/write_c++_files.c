@@ -674,8 +674,10 @@ int write_cc_file(const char *class_name,
 	  "    freeAll();\n\n");
 
   if (singleton) {
-    fprintf(cfile, "    delete _instance;\n");
-    fprintf(cfile, "    _instance = NULL;\n");
+    fprintf(cfile, "    if (_instance) {\n");
+    fprintf(cfile, "      delete _instance;\n");
+    fprintf(cfile, "      _instance = NULL;\n");
+    fprintf(cfile, "    }\n");
   }
 
   fprintf(cfile, "  }\n\n");

@@ -138,8 +138,10 @@ Params *Params::_instance = (Params *) NULL;
 
     freeAll();
 
-    delete _instance;
-    _instance = NULL;
+    if (_instance) {
+      delete _instance;
+      _instance = NULL;
+    }
   }
 
   ////////////////////////////////////////////
