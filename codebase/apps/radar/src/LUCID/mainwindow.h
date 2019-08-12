@@ -1,8 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <v_section.h>
-#include <statusdialog.h>
+#include "v_section.h"
+#include "statusdialog.h"
 
 #include <cmath>
 

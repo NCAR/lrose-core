@@ -8,7 +8,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QChartView>
+// #include <QChartView>
 
 #include <QToolBar>
 #include <QString>
