@@ -1,0 +1,28 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>graph.png</file>
+        <file>map.png</file>
+        <file>newProject.png</file>
+        <file>openProject.png</file>
+        <file>print.png</file>
+        <file>save.png</file>
+        <file>play.png</file>
+        <file>ffwd.png</file>
+        <file>pause.png</file>
+        <file>rwd.png</file>
+        <file>layers.png</file>
+        <file>mapRoad.png</file>
+        <file>movie.png</file>
+        <file>product.png</file>
+        <file>statusWindow.png</file>
+        <file>stop.png</file>
+        <file>wind.png</file>
+        <file>outline.png</file>
+        <file>fields.png</file>
+        <file>redo.png</file>
+        <file>Undo.png</file>
+        <file>ZoomIn.png</file>
+        <file>ZoomOut.png</file>
+        <file>dBzScale.png</file>
+    </qresource>
+</RCC>
