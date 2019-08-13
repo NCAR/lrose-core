@@ -726,8 +726,15 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     }
     vol.sortSweepsByFixedAngle();
   }
+  
+  // reorder rays by time if requested
 
-
+  if (_params.sort_rays_by_time) {
+    if (_params.debug) {
+      cerr << "DEBUG - sorting rays by time in ascending order" << endl;
+    }
+    vol.sortRaysByTime();
+  }
   
   // censor as needed
 

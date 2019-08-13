@@ -311,6 +311,15 @@ public:
   static bool isArgValid(const char *arg);
 
   ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  static int isArgValidN(const char *arg);
+
+  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.
@@ -652,6 +661,8 @@ public:
 
   tdrp_bool_t sort_sweeps_by_fixed_angle;
 
+  tdrp_bool_t sort_rays_by_time;
+
   char* version_override;
 
   char* title_override;
@@ -791,7 +802,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[172];
+  mutable TDRPtable _table[174];
 
   const char *_className;
 
