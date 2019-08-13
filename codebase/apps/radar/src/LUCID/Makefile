@@ -36,15 +36,16 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = LUCID
 
-LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS) -I/usr/local/Cellar/qt/5.13.0/lib/QtCharts.framework/Headers
+# need to add $(NETCDF4_INCS) 
+LOC_INCLUDES = $(QT_INCLUDES) $(HDRS) -I/usr/local/Cellar/qt/5.13.0/lib/QtCharts.framework/Headers
 
 
-
-LOC_LIBS =  -lRadx -lNcxx -ltoolsa -ldataport -ltdrp \
-	$(QT_LIBS) $(NETCDF4_LIBS) \
+# need to add -lRadx -lNcxx -ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS)
+LOC_LIBS = $(QT_LIBS)  \
 	-lfftw3 -lbz2 -lz -lpthread -lm
 
-LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
+# need to add $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS)  -F/usr/local/Cellar/qt/5.13.0/lib -framework QtCharts
 
 LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 
@@ -54,11 +55,15 @@ HDRS = \
 	statusdialog.h \
 	v_section.h
 
+UI_HDRS = \
+	ui_mainwindow.h \
+	ui_statusdialog.h \
+	ui_v_section.h
 
+# need 	#$(PARAMS_CC) \
 NORM_SRCS = \
-	#$(PARAMS_CC) \
-	main.cpp \
 	mainwindow.cpp \
+	main.cpp \
 	statusdialog.cpp \
 	v_section.cpp
 
@@ -73,8 +78,11 @@ MOC_OUTPUT = \
 	moc_v_section.cpp \
 	qrc_res.cpp 
 
-CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
-CPP_SRCS = $(MOC_OUTPUT)
+
+
+
+CC_SRCS = 
+CPP_SRCS = main.cpp $(NORM_SRCS) $(MOC_SRCS) $(MOC_OUTPUT)
 
 #
 # tdrp macros

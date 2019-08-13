@@ -28,7 +28,7 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         statusdialog.cpp \
-        v_section.cpp
+        v_section.cpp 
 
 HEADERS += \
         mainwindow.h \
