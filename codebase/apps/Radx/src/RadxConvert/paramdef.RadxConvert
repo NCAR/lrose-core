@@ -605,6 +605,16 @@ paramdef boolean {
 } sort_sweeps_by_fixed_angle;
 
 commentdef {
+  p_header = "OPTION TO SORT RAYS BY TIME";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Sort the rays in time-ascending order.";
+  p_help = "For some volumes, the rays are not strictly in ascending time order. If this is set, the rays will be sorted by time.";
+} sort_rays_by_time;
+
+commentdef {
   p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
 }
 
