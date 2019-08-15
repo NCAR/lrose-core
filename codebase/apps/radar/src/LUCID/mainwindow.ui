@@ -20,7 +20,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>LUCID Main View</string>
   </property>
   <property name="windowOpacity">
    <double>1.000000000000000</double>
@@ -54,17 +54,6 @@
      <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuCIDD">
-    <property name="title">
-     <string>CIDD</string>
-    </property>
-    <addaction name="actionAbout_CIDD"/>
-    <addaction name="actionPreferences"/>
-    <addaction name="actionHide_CIDD"/>
-    <addaction name="actionHide_others"/>
-    <addaction name="actionShow_all"/>
-    <addaction name="actionQuit_CIDD"/>
-   </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
@@ -115,15 +104,24 @@
      <addaction name="actionWind_Layer"/>
      <addaction name="actionStatus_Window"/>
     </widget>
-    <addaction name="actionZoomIn"/>
-    <addaction name="actionZoomOut"/>
+    <widget class="QMenu" name="menuZoom">
+     <property name="title">
+      <string>Zoom</string>
+     </property>
+     <addaction name="actionZoomIn"/>
+     <addaction name="actionZoomOut"/>
+     <addaction name="actionZoom_Window"/>
+    </widget>
     <addaction name="menuWindow"/>
     <addaction name="menuShow"/>
+    <addaction name="menuZoom"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
      <string>Tools</string>
     </property>
+    <addaction name="actionPlay_Loop"/>
+    <addaction name="actionValues_Cursor"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -131,7 +129,6 @@
     </property>
     <addaction name="actionView_Tutorial_Page"/>
    </widget>
-   <addaction name="menuCIDD"/>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
@@ -157,12 +154,12 @@ background-color: lightgray;
     padding: 1px;
 }
 
-/*
+
 QToolButton:checked{
 	background-color: gray;
    border-style: inset;
 }
-*/
+
 
 </string>
    </property>
@@ -172,10 +169,13 @@ QToolButton:checked{
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionPlay_Loop"/>
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
    <addaction name="actionZoomIn"/>
    <addaction name="actionZoomOut"/>
+   <addaction name="actionZoom_Window"/>
+   <addaction name="actionValues_Cursor"/>
    <addaction name="actionMovie_Player"/>
    <addaction name="actionVsection"/>
    <addaction name="actionFields"/>
@@ -187,39 +187,9 @@ QToolButton:checked{
    <addaction name="actionStatus_Window"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionAbout_CIDD">
-   <property name="text">
-    <string>About CIDD</string>
-   </property>
-  </action>
-  <action name="actionPreferences">
-   <property name="text">
-    <string>Preferences</string>
-   </property>
-  </action>
-  <action name="actionHide_CIDD">
-   <property name="text">
-    <string>Hide CIDD</string>
-   </property>
-  </action>
-  <action name="actionHide_others">
-   <property name="text">
-    <string>Hide Others</string>
-   </property>
-  </action>
-  <action name="actionShow_all">
-   <property name="text">
-    <string>Show All</string>
-   </property>
-  </action>
-  <action name="actionQuit_CIDD">
-   <property name="text">
-    <string>Quit CIDD</string>
-   </property>
-  </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/images/openProject.png</normaloff>:/images/openProject.png</iconset>
    </property>
    <property name="text">
@@ -231,7 +201,7 @@ QToolButton:checked{
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/images/save.png</normaloff>:/images/save.png</iconset>
    </property>
    <property name="text">
@@ -243,7 +213,7 @@ QToolButton:checked{
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/images/print.png</normaloff>:/images/print.png</iconset>
    </property>
    <property name="text">
@@ -260,7 +230,7 @@ QToolButton:checked{
   </action>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/images/newProject.png</normaloff>:/images/newProject.png</iconset>
    </property>
    <property name="text">
@@ -273,7 +243,7 @@ QToolButton:checked{
   <action name="actionRedo">
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/redo.png</normaloff>:/images/redo.png</iconset>
+     <normaloff>:/images/images/redo.png</normaloff>:/images/images/redo.png</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -300,7 +270,7 @@ QToolButton:checked{
   <action name="actionZoomIn">
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/ZoomIn.png</normaloff>:/images/ZoomIn.png</iconset>
+     <normaloff>:/images/images/ZoomIn.png</normaloff>:/images/images/ZoomIn.png</iconset>
    </property>
    <property name="text">
     <string>Zoom In</string>
@@ -315,7 +285,7 @@ QToolButton:checked{
   <action name="actionVsection">
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/graph.png</normaloff>:/images/graph.png</iconset>
+     <normaloff>:/images/images/graph.png</normaloff>:/images/images/graph.png</iconset>
    </property>
    <property name="text">
     <string>Vsection</string>
@@ -327,7 +297,7 @@ QToolButton:checked{
    </property>
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/fields.png</normaloff>:/images/fields.png</iconset>
+     <normaloff>:/images/images/fields.png</normaloff>:/images/images/fields.png</iconset>
    </property>
    <property name="text">
     <string>Fields</string>
@@ -345,7 +315,7 @@ QToolButton:checked{
    </property>
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/mapRoad.png</normaloff>:/images/mapRoad.png</iconset>
+     <normaloff>:/images/images/map.png</normaloff>:/images/images/map.png</iconset>
    </property>
    <property name="text">
     <string>Map Layers</string>
@@ -360,7 +330,7 @@ QToolButton:checked{
    </property>
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/product.png</normaloff>:/images/product.png</iconset>
+     <normaloff>:/images/images/product.png</normaloff>:/images/images/product.png</iconset>
    </property>
    <property name="text">
     <string>Products</string>
@@ -369,7 +339,7 @@ QToolButton:checked{
   <action name="actionData_Layers">
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/layers.png</normaloff>:/images/layers.png</iconset>
+     <normaloff>:/images/images/layers.png</normaloff>:/images/images/layers.png</iconset>
    </property>
    <property name="text">
     <string>Grid Data Layers</string>
@@ -378,7 +348,7 @@ QToolButton:checked{
   <action name="actionContour_Layer">
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/outline.png</normaloff>:/images/outline.png</iconset>
+     <normaloff>:/images/images/outline.png</normaloff>:/images/images/outline.png</iconset>
    </property>
    <property name="text">
     <string>Contour Layers</string>
@@ -387,7 +357,7 @@ QToolButton:checked{
   <action name="actionWind_Layer">
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/wind.png</normaloff>:/images/wind.png</iconset>
+     <normaloff>:/images/images/wind.png</normaloff>:/images/images/wind.png</iconset>
    </property>
    <property name="text">
     <string>Wind Layers</string>
@@ -396,7 +366,7 @@ QToolButton:checked{
   <action name="actionStatus_Window">
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/statusWindow.png</normaloff>:/images/statusWindow.png</iconset>
+     <normaloff>:/images/images/statusWindow.png</normaloff>:/images/images/statusWindow.png</iconset>
    </property>
    <property name="text">
     <string>Status Window</string>
@@ -423,7 +393,7 @@ QToolButton:checked{
    </property>
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/play.png</normaloff>:/images/play.png</iconset>
+     <normaloff>:/images/images/play.png</normaloff>:/images/images/play.png</iconset>
    </property>
    <property name="text">
     <string>Show Movie Player</string>
@@ -435,7 +405,7 @@ QToolButton:checked{
   <action name="actionUndo">
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/Undo.png</normaloff>:/images/Undo.png</iconset>
+     <normaloff>:/images/images/Undo.png</normaloff>:/images/images/Undo.png</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -447,13 +417,43 @@ QToolButton:checked{
   <action name="actionZoomOut">
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/images/ZoomOut.png</normaloff>:/images/ZoomOut.png</iconset>
+     <normaloff>:/images/images/ZoomOut.png</normaloff>:/images/images/ZoomOut.png</iconset>
    </property>
    <property name="text">
     <string>Zoom Out</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionZoom_Window">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/images/images/zoomOptions.png</normaloff>:/images/images/zoomOptions.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Window</string>
+   </property>
+  </action>
+  <action name="actionPlay_Loop">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/images/images/loop.png</normaloff>:/images/images/loop.png</iconset>
+   </property>
+   <property name="text">
+    <string>Play Loop</string>
+   </property>
+  </action>
+  <action name="actionValues_Cursor">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/images/images/valuesCursor.png</normaloff>:/images/images/valuesCursor.png</iconset>
+   </property>
+   <property name="text">
+    <string>Values Cursor</string>
    </property>
   </action>
  </widget>
