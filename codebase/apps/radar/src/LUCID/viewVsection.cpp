@@ -1,22 +1,12 @@
-#include "v_section.h"
-#include "ui_v_section.h"
+#include "viewVsection.h"
 
-
-
-QT_CHARTS_USE_NAMESPACE
-
-V_section::V_section(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::V_section)
+viewVsection::viewVsection(QWidget *parent) : QDialog(parent)
 {
-    ui->setupUi(this);
-
 
     //initialize layouts
     group = new QGroupBox;
     buttonLayout = new QHBoxLayout();
     mainLayout = new QVBoxLayout();
-
 
     //initialize buttons
     clear = new QPushButton(tr("Clear"));
@@ -45,10 +35,10 @@ V_section::V_section(QWidget *parent) :
 
     //DUMMY GRAPH-----------------------------------------------------
     //make dummy numbers for the dummy graph
-    QLineSeries *series = new QLineSeries();
-    QLineSeries *series1 = new QLineSeries();
-    QLineSeries *series2 = new QLineSeries();
-    QLineSeries *series3 = new QLineSeries();
+    series = new QLineSeries();
+    series1 = new QLineSeries();
+    series2 = new QLineSeries();
+    series3 = new QLineSeries();
     for(int i=0; i<40; i++)
     {
         *series << QPointF(i,(i/15)+i);
@@ -57,12 +47,12 @@ V_section::V_section(QWidget *parent) :
         *series3 << QPointF(i,(i/9)+i);
     }
     //make dummy chart
-    QChart *chart = new QChart();
+    chart = new QChart();
     //add dummy numbers to dummy chart
     chart->addSeries(series);
     chart->addSeries(series1);
     chart->addSeries(series2);
-    chart->addSeries(series3); 
+    chart->addSeries(series3);
     QStringList categories;
     categories << "2013" << "2014" << "2015" << "2016" << "2017" << "2018";
     //mod looks of dummy chart
@@ -77,24 +67,15 @@ V_section::V_section(QWidget *parent) :
 
 
     //initialize chartview to show dummy chart
-    QChartView *chartView = new QChartView(chart);
+    chartView = new QChartView(chart);
     //add top row group, and chartview to the main Vlayout
     mainLayout->addWidget(group);
     mainLayout->addWidget(chartView);
-
-    QWidget *placeholderWidget = new QWidget;
-    placeholderWidget->setLayout(mainLayout);
-    setCentralWidget(placeholderWidget);
+    setLayout(mainLayout);
+    resize(825, 800);
 }
 
-V_section::~V_section()
+viewVsection::~viewVsection()
 {
-    delete ui;
+
 }
-
-
-
-
-
-
-

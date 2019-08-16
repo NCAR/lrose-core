@@ -4,9 +4,6 @@
 
 #include <QLocale>
 #include <QDateTime>
-//#include <Q
-
-
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -30,15 +27,14 @@ MainWindow::MainWindow(QWidget *parent) :
     MainWindow::movieLooperDock(); //create movie player dock
     MainWindow::makeZoomOptions();
     MainWindow::makeValuesDisplay();
-    MainWindow::makeWindsConfiguration();
-    MainWindow::makeGridConfiguration();
 
 
-    Vsec = new V_section(this); //this line makes a new Vsection box
-    V_section(this); // the 'this' makes the main window the parent, so if the parent is closed, then the window is closed too.
 
-    Stat = new StatusDialog(this);
-    StatusDialog(this);
+    Vsec = new viewVsection(this); //this line makes a new Vsection box
+    //V_section(this) the 'this' makes the main window the parent, so if the parent is closed, then the window is closed too.
+    Stat = new viewStatusDialog(this);
+    windDialog = new viewWindDialog(this);
+    gridConfigDialog = new viewGridConfigDialog(this);
 
 }
 
@@ -48,18 +44,9 @@ MainWindow::~MainWindow()
 }
 
 
-
-
 //-------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------
 //functions and whatnot
-
-
-
-
-
-
-
 
 
 //this little function make it so that when you hold left click in the main window,
@@ -72,7 +59,6 @@ void MainWindow::mouseMoveEvent(QMouseEvent* event)
                        QString::number( event->pos().x() ) + ", " +
                        QString::number( event->pos().y() ));
 }
-
 
 
 //create main dummy image and scale bar
@@ -128,8 +114,6 @@ void MainWindow::startImage()
 }
 
 
-
-
 //create dummy toolbars for products, and maps
 void MainWindow::startToolBars()
 {
@@ -160,8 +144,6 @@ void MainWindow::startToolBars()
 }
 
 
-
-
 //make spacers to go in the main toolbar at the top of the main window.
 //also ready to add spacers elsewhere
 void MainWindow::toolBarSpacers()
@@ -176,8 +158,6 @@ void MainWindow::toolBarSpacers()
     //ui->mainToolBar->insertWidget(ui->actionVsection, empty2);
     //ui->mainToolBar->insertWidget(ui->actionVsection, empty3);
 }
-
-
 
 
 //create dummy field dock
@@ -239,8 +219,6 @@ void MainWindow::fieldDockMaker()
     MainWindow::addDockWidget(Qt::RightDockWidgetArea, fieldDock);
     fieldDock->hide();
 }
-
-
 
 
 //create movie player dock
@@ -423,8 +401,6 @@ void MainWindow::movieLooperDock()
 }
 
 
-
-
 void MainWindow::makeZoomOptions()
 {
     zoomOptions = new QDialog(this);
@@ -506,387 +482,11 @@ void MainWindow::makeValuesDisplay()
 
 
 
-void MainWindow::makeWindsConfiguration()
-{
-    windsConfig = new QDialog(this);
-    windsConfig->setWindowTitle("Winds Configuration");
-
-    windSelectLabel = new QLabel;
-    windSelectLabel->setText("Select Wind Layer:");
-    windSelector = new QComboBox;
-    windSelector->addItem("Surf");
-    windSelector->addItem("RUC");
-    windSelector->addItem("VDRAS");
-    windSelector->addItem("DDOP");
-
-    windUrlLabel = new QLabel;
-    windUrlLabel->setText("Url:");
-    windUrlInput = new QLineEdit;
-
-    windColorSelectText = new QLabel;
-    windColorSelectText->setText("Select Color:");
-    windColorSelect = new QComboBox;
-    windColorSelect->addItem("yellow");
-    windColorSelect->addItem("cyan");
-    windColorSelect->addItem("orange");
-    windColorSelect->addItem("red");
-
-    windNumLabel = new QLabel;
-    windNumLabel->setText("Number:");
-    windNumSlider = new QSlider(Qt::Horizontal, windsConfig);
-
-    windWidthLabel = new QLabel;
-    windWidthLabel->setText("Width:");
-    windWidthSlider = new QSlider(Qt::Horizontal, windsConfig);
-
-    windLengthLabel = new QLabel;
-    windLengthLabel->setText("Length:");
-    windLengthSlider = new QSlider(Qt::Horizontal, windsConfig);
-
-    UNameLabel = new QLabel;
-    UNameLabel->setText("UName:");
-    UNameInput = new QLineEdit;
-    UNameInput->setText("UWind");
-
-    VNameLabel = new QLabel;
-    VNameLabel->setText("VName:");
-    VNameInput = new QLineEdit;
-    VNameInput->setText("VWind");
-
-    WNameLabel = new QLabel;
-    WNameLabel->setText("WName:");
-    WNameInput = new QLineEdit;
-    WNameInput->setText("NA");
-
-    windTimeSlopLabel = new QLabel;
-    windTimeSlopLabel->setText("Time Slop:");
-    windTimeSlopInput = new QLineEdit;
-    windTimeSlopInput->setText("100v/t");
-
-    windTimeOffsetLabel = new QLabel;
-    windTimeOffsetLabel->setText("Time Offset:");
-    windTimeOffsetInput = new QLineEdit;
-    windTimeOffsetInput->setText("0v/t");
-
-    windAltitudeOffsetLabel = new QLabel;
-    windAltitudeOffsetLabel->setText("Altitude Offset:");
-    windAltitudeOffsetInput = new QLineEdit;
-    windAltitudeOffsetInput->setText("0v/t");
-
-    windStylesLabel = new QLabel;
-    windStylesLabel->setText("Style:");
-    windStyles = new QComboBox;
-    windStyles->addItem("Arrows");
-    windStyles->addItem("Tufts");
-    windStyles->addItem("Barbs");
-    windStyles->addItem("Vectors");
-    windStyles->addItem("T Vectors");
-    windStyles->addItem("L Barbs");
-    windStyles->addItem("Met Barbs");
-    windStyles->addItem("SH Barbs");
-    windStyles->addItem("LSH Barbs");
-
-    windLegendLabel = new QLabel;
-    windLegendLabel->setText("Show Legend:");
-    windLegendSelect = new QCheckBox;
-
-    windLayoutH1 = new QHBoxLayout;
-    windLayoutH2 = new QHBoxLayout;
-    windLayoutH3 = new QHBoxLayout;
-
-    windLayoutV1 = new QVBoxLayout;
-    windLayoutV2 = new QVBoxLayout;
-    windLayoutV3 = new QVBoxLayout;
-    windLayoutV4 = new QVBoxLayout;
-    windLayoutVAll = new QVBoxLayout;
-
-    windLayoutH1->addWidget(windSelectLabel);
-    windLayoutH1->addWidget(windSelector);
-    windLayoutH1->addStretch(0);
-
-    windLayoutH2->addWidget(windUrlLabel);
-    windLayoutH2->addWidget(windUrlInput);
-
-    windLayoutV1->addWidget(windColorSelectText);
-    windLayoutV1->addWidget(windColorSelect);
-    windLayoutV1->addStretch(0);
-    windLayoutV1->addWidget(windStylesLabel);
-    windLayoutV1->addWidget(windStyles);
-    windLayoutV1->addStretch(0);
-    windLayoutV1->addWidget(windLegendLabel);
-    windLayoutV1->addWidget(windLegendSelect);
-
-    windLayoutV2->addWidget(windNumLabel);
-    windLayoutV2->addWidget(windNumSlider);
-    windLayoutV2->addSpacing(10);
-    windLayoutV2->addStretch(0);
-    windLayoutV2->addWidget(windWidthLabel);
-    windLayoutV2->addWidget(windWidthSlider);
-    windLayoutV2->addSpacing(10);
-    windLayoutV2->addStretch(0);
-    windLayoutV2->addWidget(windLengthLabel);
-    windLayoutV2->addWidget(windLengthSlider);
-
-    windLayoutV3->addWidget(UNameLabel);
-    windLayoutV3->addWidget(UNameInput);
-    windLayoutV3->addSpacing(10);
-    windLayoutV3->addStretch(0);
-    windLayoutV3->addWidget(VNameLabel);
-    windLayoutV3->addWidget(VNameInput);
-    windLayoutV3->addSpacing(10);
-    windLayoutV3->addStretch(0);
-    windLayoutV3->addWidget(WNameLabel);
-    windLayoutV3->addWidget(WNameInput);
-
-    windLayoutV4->addWidget(windTimeSlopLabel);
-    windLayoutV4->addWidget(windTimeSlopInput);
-    windLayoutV4->addSpacing(10);
-    windLayoutV4->addStretch(0);
-    windLayoutV4->addWidget(windTimeOffsetLabel);
-    windLayoutV4->addWidget(windTimeOffsetInput);
-    windLayoutV4->addSpacing(10);
-    windLayoutV4->addStretch(0);
-    windLayoutV4->addWidget(windAltitudeOffsetLabel);
-    windLayoutV4->addWidget(windAltitudeOffsetInput);
-
-    windLayoutH3->addLayout(windLayoutV1);
-        line = new QFrame(windsConfig);
-        line->setFrameShape(QFrame::VLine);
-        line->setFrameShadow(QFrame::Raised);
-        line->setLineWidth(5);
-        windLayoutH3->addWidget(line);
-    windLayoutH3->addLayout(windLayoutV2);
-    windLayoutH3->addLayout(windLayoutV3);
-    windLayoutH3->addLayout(windLayoutV4);
-    windLayoutH3->addStretch(0);
-
-    windLayoutVAll->addLayout(windLayoutH1);
-    windLayoutVAll->addLayout(windLayoutH2);
-    windLayoutVAll->addLayout(windLayoutH3);
-
-
-    windsConfig->setLayout(windLayoutVAll);
-}
-
-
-
-void MainWindow::makeGridConfiguration()
-{
-    gridDataLayers = new QDialog(this);
-    gridDataLayers->setWindowTitle("Grid Data Layers Configuration");
-
-    gridLayerLabel = new QLabel;
-    gridLayerLabel->setText("Grid Data Layer:");
-    gridLayerSelector = new QComboBox;
-    for(int i=0; i<16; i++)
-    {   gridLayerSelector->addItem(QString::number(i+1));   }
-
-    gridLabel = new QLabel;
-    gridLabel->setText("Grid:");
-    gridSelector = new QComboBox;
-    gridSelector->addItem("KFTG DBZ");
-    gridSelector->addItem("=NEXRAD=");
-    gridSelector->addItem("=NEXRAD=");
-    gridSelector->addItem("=NEXRAD=");
-    gridSelector->addItem("=NEXRAD=");
-    gridSelector->addItem("MANY MORE");
-
-    gridUrlLabel = new QLabel;
-    gridUrlLabel->setText("Url:");
-    gridUrlInput = new QLineEdit;
-
-    gridTopBotLabel = new QLabel;
-    gridTopBotLabel->setText("Layers on:");
-    gridTopBotSelector = new QComboBox;
-    gridTopBotSelector->addItem("Top");
-    gridTopBotSelector->addItem("Bottom");
-
-    gridLegendLabel = new QLabel;
-    gridLegendLabel->setText("Show Legend:");
-    gridLegendBox = new QCheckBox;
-
-
-    gridMinValueLabel = new QLabel;
-    gridMinValueLabel->setText("Colors Min Value:");
-    gridMinValueInput = new QLineEdit;
-    gridMinValueInput->setText("-30");
-
-    gridMaxValueLabel = new QLabel;
-    gridMaxValueLabel->setText("Colors Max Value:");
-    gridMaxValueInput = new QLineEdit;
-    gridMaxValueInput->setText("100");
-
-    gridDeltaLabel = new QLabel;
-    gridDeltaLabel->setText("Delta:");
-    gridDeltaInput = new QLineEdit;
-
-    gridTimeSlopLabel = new QLabel;
-    gridTimeSlopLabel->setText("Time Slop (min):");
-    gridTimeSlopInput = new QLineEdit;
-    gridTimeSlopInput->setText("100");
-
-    gridTimeOffsetLabel = new QLabel;
-    gridTimeOffsetLabel->setText("Time Offset (min);");
-    gridTimeOffsetInput = new QLineEdit;
-    gridTimeOffsetInput->setText("0");
-
-    gridAltOffsetLabel = new QLabel;
-    gridAltOffsetLabel->setText("Altitude Offset:");
-    gridAltOffsetInput = new QLineEdit;
-    gridAltOffsetInput->setText("0");
-
-    gridColorMap = new QPushButton;
-    gridColorMap->setText("Color Map");
-
-    gridAutoUpdateLabel = new QLabel;
-    gridAutoUpdateLabel->setText("Auto Update:");
-    gridAutoUpdateBox = new QCheckBox;
-
-    gridRequestCompositeLabel = new QLabel;
-    gridRequestCompositeLabel->setText("Request Composite:");
-    gridRequestCompositeBox = new QCheckBox;
-
-    gridAutoscaleLabel = new QLabel;
-    gridAutoscaleLabel->setText("Autoscale:");
-    gridAutoscaleBox = new QCheckBox;
-
-    gridColorScale = new QLabel;
-    gridColorScale->setText("Colorscale: dbz.colors (editable?)");
-
-    gridUnits = new QLabel;
-    gridUnits->setText("Units: dBz (editable?)");
-
-    gridRenderAsLabel = new QLabel;
-    gridRenderAsLabel->setText("Render as:");
-    gridRenderAsSelector = new QComboBox;
-    gridRenderAsSelector->addItem("Polygons");
-    gridRenderAsSelector->addItem("Contours");
-    gridRenderAsSelector->addItem("Auto Contours");
-    gridRenderAsSelector->addItem("Line Contours");
-
-
-
-    gridWindowLayoutH1 = new QHBoxLayout;
-    gridWindowLayoutH2 = new QHBoxLayout;
-    gridWindowLayoutH3 = new QHBoxLayout;
-    gridWindowLayoutH4 = new QHBoxLayout;
-    gridWindowLayoutH5 = new QHBoxLayout;
-    gridWindowLayoutH6 = new QHBoxLayout;
-    gridWindowLayoutH7 = new QHBoxLayout;
-    gridWindowLayoutH8 = new QHBoxLayout;
-    gridWindowLayoutH9 = new QHBoxLayout;
-    gridWindowLayoutH10 = new QHBoxLayout;
-    gridWindowLayoutH11 = new QHBoxLayout;
-    gridWindowLayoutH12 = new QHBoxLayout;
-    gridWindowLayoutH13 = new QHBoxLayout;
-    gridWindowLayoutH14 = new QHBoxLayout;
-    gridWindowLayoutH15 = new QHBoxLayout;
-    gridWindowLayoutH16 = new QHBoxLayout;
-    gridWindowLayoutV1 = new QVBoxLayout;
-    gridWindowLayoutV2 = new QVBoxLayout;
-    gridWindowLayoutVAll = new QVBoxLayout;
-
-
-    gridWindowLayoutH1->addWidget(gridLayerLabel);
-    gridWindowLayoutH1->addWidget(gridLayerSelector);
-    gridWindowLayoutH1->addWidget(gridLabel);
-    gridWindowLayoutH1->addWidget(gridSelector);
-    gridWindowLayoutH1->addStretch(0);
-
-    gridWindowLayoutH2->addWidget(gridUrlLabel);
-    gridWindowLayoutH2->addWidget(gridUrlInput);
-
-    gridWindowLayoutH3->addWidget(gridUnits);
-    gridWindowLayoutH3->addWidget(gridColorMap);
-    gridWindowLayoutH3->addWidget(gridColorScale);
-
-
-    gridWindowLayoutH4->addWidget(gridLegendLabel);
-    gridWindowLayoutH4->addWidget(gridLegendBox);
-    gridWindowLayoutH4->addStretch(0);
-    gridWindowLayoutH5->addWidget(gridAutoUpdateLabel);
-    gridWindowLayoutH5->addWidget(gridAutoUpdateBox);
-    gridWindowLayoutH5->addStretch(0);
-    gridWindowLayoutH6->addWidget(gridRequestCompositeLabel);
-    gridWindowLayoutH6->addWidget(gridRequestCompositeBox);
-    gridWindowLayoutH6->addStretch(0);
-    gridWindowLayoutH7->addWidget(gridAutoscaleLabel);
-    gridWindowLayoutH7->addWidget(gridAutoscaleBox);
-    gridWindowLayoutH7->addStretch(0);
-    gridWindowLayoutH8->addWidget(gridTopBotLabel);
-    gridWindowLayoutH8->addWidget(gridTopBotSelector);
-    gridWindowLayoutH8->addStretch(0);
-    gridWindowLayoutH9->addWidget(gridRenderAsLabel);
-    gridWindowLayoutH9->addWidget(gridRenderAsSelector);
-    gridWindowLayoutH9->addStretch(0);
-    gridWindowLayoutV1->addLayout(gridWindowLayoutH4);
-    gridWindowLayoutV1->addLayout(gridWindowLayoutH5);
-    gridWindowLayoutV1->addLayout(gridWindowLayoutH6);
-    gridWindowLayoutV1->addLayout(gridWindowLayoutH7);
-    gridWindowLayoutV1->addLayout(gridWindowLayoutH8);
-    gridWindowLayoutV1->addLayout(gridWindowLayoutH9);
-
-    gridWindowLayoutH10->addWidget(gridMinValueLabel);
-    gridWindowLayoutH10->addStretch(0);
-    gridWindowLayoutH10->addWidget(gridMinValueInput);
-    gridWindowLayoutH11->addWidget(gridMaxValueLabel);
-    gridWindowLayoutH11->addStretch(0);
-    gridWindowLayoutH11->addWidget(gridMaxValueInput);
-    gridWindowLayoutH12->addWidget(gridDeltaLabel);
-    gridWindowLayoutH12->addStretch(0);
-    gridWindowLayoutH12->addWidget(gridDeltaInput);
-    gridWindowLayoutH13->addWidget(gridTimeSlopLabel);
-    gridWindowLayoutH13->addStretch(0);
-    gridWindowLayoutH13->addWidget(gridTimeSlopInput);
-    gridWindowLayoutH14->addWidget(gridTimeOffsetLabel);
-    gridWindowLayoutH14->addStretch(0);
-    gridWindowLayoutH14->addWidget(gridTimeOffsetInput);
-    gridWindowLayoutH15->addWidget(gridAltOffsetLabel);
-    gridWindowLayoutH15->addStretch(0);
-    gridWindowLayoutH15->addWidget(gridAltOffsetInput);
-    gridWindowLayoutV2->addLayout(gridWindowLayoutH10);
-    gridWindowLayoutV2->addLayout(gridWindowLayoutH11);
-    gridWindowLayoutV2->addLayout(gridWindowLayoutH12);
-    gridWindowLayoutV2->addLayout(gridWindowLayoutH13);
-    gridWindowLayoutV2->addLayout(gridWindowLayoutH14);
-    gridWindowLayoutV2->addLayout(gridWindowLayoutH15);
-
-    gridWindowLayoutH16->addLayout(gridWindowLayoutV1);
-    gridWindowLayoutH16->addLayout(gridWindowLayoutV2);
-
-    gridWindowLayoutVAll->addLayout(gridWindowLayoutH1);
-    gridWindowLayoutVAll->addLayout(gridWindowLayoutH2);
-    gridWindowLayoutVAll->addLayout(gridWindowLayoutH3);
-    gridWindowLayoutVAll->addLayout(gridWindowLayoutH16);
-
-    gridDataLayers->setLayout(gridWindowLayoutVAll);
-}
-
-
-
 
 
 //-------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------
 //SLOTS n actions n stuff
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -898,9 +498,6 @@ void MainWindow::UpdateTime()
     QString temp = QLocale("en_EN").toString(UTC, "dddd MMMM dd yyyy  hh:mm:ss (UTC)");
     currentTime->setText(temp);
 }
-
-
-
 
 //function is used in moviedock,
 //it's for connectiong the slider, frame indicator, and number of frames input.
@@ -981,7 +578,6 @@ void MainWindow::on_actionZoom_Window_triggered()
     zoomOptions->raise();
 }
 
-
 void MainWindow::on_actionValues_Cursor_toggled(bool arg1)
 {
     if (arg1==0){
@@ -1000,21 +596,19 @@ void MainWindow::on_actionWind_Layer_triggered()
 {
     QPoint p = MainWindow::pos();
     QSize  s = MainWindow::frameSize();
-    windsConfig->move(p.x()+s.width(), p.y()+50);
-    windsConfig->show();
-    windsConfig->raise();
+    windDialog->move(p.x()+s.width(), p.y()+50);
+    windDialog->show();
+    windDialog->raise();
 }
 
 void MainWindow::on_actionData_Layers_triggered()
 {
     QPoint p = MainWindow::pos();
     QSize  s = MainWindow::frameSize();
-    gridDataLayers->move(p.x()+s.width(), p.y()+25);
-    gridDataLayers->show();
-    gridDataLayers->raise();
+    gridConfigDialog->move(p.x()+s.width(), p.y()+25);
+    gridConfigDialog->show();
+    gridConfigDialog->raise();
 }
-
-
 
 //cruddy zooms that need replacing
 void MainWindow::on_actionZoomOut_triggered()

@@ -1,32 +1,31 @@
-#ifndef STATUSDIALOG_H
-#define STATUSDIALOG_H
+#ifndef VIEWSTATUSDIALOG_H
+#define VIEWSTATUSDIALOG_H
 
 #include <QDialog>
 #include <QListWidget>
+#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
-#include <QGroupBox>
 
-namespace Ui {
-class StatusDialog;
-}
-
-class StatusDialog : public QDialog
+class viewStatusDialog : public QDialog
 {
     Q_OBJECT
-
 public:
-    explicit StatusDialog(QWidget *parent = nullptr);
-    ~StatusDialog();
+    explicit viewStatusDialog(QWidget *parent = nullptr);
+    ~viewStatusDialog();
+
+signals:
+
+public slots:
 
 private:
-    Ui::StatusDialog *ui;
     QListWidget *statuses;
     QPushButton *clear, *close;
     QGroupBox *group;
     QHBoxLayout *buttonLayout;
     QVBoxLayout *mainLayout;
+
 };
 
-#endif // STATUSDIALOG_H
+#endif // VIEWSTATUSDIALOG_H

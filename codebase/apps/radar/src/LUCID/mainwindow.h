@@ -1,8 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "v_section.h"
-#include "statusdialog.h"
+
+#include "viewWindDialog.h"
+#include "viewGridConfigDialog.h"
+#include "viewVsection.h"
+#include "viewStatusDialog.h"
 
 #include <cmath>
 
@@ -60,8 +63,6 @@ private slots:
     void UpdateTime();
 
 
-
-
     void on_actionZoom_Window_triggered();
 
     void on_actionValues_Cursor_toggled(bool arg1);
@@ -80,8 +81,13 @@ private:
     QTimer *timer_1s;
 
     //to get the other windows going in MainWindow()
-    V_section *Vsec;
-    StatusDialog *Stat;
+    viewVsection *Vsec;
+    viewStatusDialog *Stat;
+    viewWindDialog *windDialog;
+    viewGridConfigDialog *gridConfigDialog;
+
+
+   // windDialogView *windDialog;
 
     //main image starter
     void startImage();
@@ -148,35 +154,6 @@ private:
     QVBoxLayout *valuesLayout;
 
 
-    void makeWindsConfiguration();
-    QDialog *windsConfig;
-    QLabel *windSelectLabel, *windUrlLabel, *windColorSelectText, *windNumLabel, *windWidthLabel, *windLengthLabel,
-            *UNameLabel, *VNameLabel, *WNameLabel,*windTimeSlopLabel, *windTimeOffsetLabel, *windAltitudeOffsetLabel,
-            *windStylesLabel, *windLegendLabel;
-    QComboBox *windSelector, *windColorSelect, *windStyles;
-    QLineEdit *windUrlInput, *UNameInput, *VNameInput, *WNameInput, *windTimeSlopInput, *windTimeOffsetInput,
-            *windAltitudeOffsetInput;
-    QSlider *windNumSlider, *windWidthSlider, *windLengthSlider;
-    QCheckBox *windLegendSelect;
-    QHBoxLayout *windLayoutH1, *windLayoutH2, *windLayoutH3;
-    QVBoxLayout *windLayoutV1, *windLayoutV2, *windLayoutV3, *windLayoutV4, *windLayoutVAll;
-
-    void makeGridConfiguration();
-    QDialog *gridDataLayers;
-    QLabel *gridLayerLabel, *gridLabel, *gridUrlLabel, *gridTopBotLabel, *gridLegendLabel, *gridMinValueLabel,
-            *gridMaxValueLabel, *gridDeltaLabel, *gridTimeSlopLabel, *gridTimeOffsetLabel, *gridAltOffsetLabel,
-            *gridAutoUpdateLabel, *gridRequestCompositeLabel, *gridAutoscaleLabel, *gridColorScale, *gridUnits,
-            *gridRenderAsLabel;
-    QComboBox *gridLayerSelector, *gridSelector, *gridTopBotSelector, *gridRenderAsSelector;
-    QLineEdit *gridUrlInput, *gridMinValueInput, *gridMaxValueInput, *gridDeltaInput, *gridTimeSlopInput,
-            *gridTimeOffsetInput, *gridAltOffsetInput, *gridColorMapInput;
-    QCheckBox *gridLegendBox, *gridAutoUpdateBox, *gridRequestCompositeBox, *gridAutoscaleBox;
-    QPushButton *gridColorMap;
-    QHBoxLayout *gridWindowLayoutH1, *gridWindowLayoutH2, *gridWindowLayoutH3, *gridWindowLayoutH4,
-            *gridWindowLayoutH5, *gridWindowLayoutH6, *gridWindowLayoutH7, *gridWindowLayoutH8,
-            *gridWindowLayoutH9, *gridWindowLayoutH10, *gridWindowLayoutH11, *gridWindowLayoutH12,
-            *gridWindowLayoutH13, *gridWindowLayoutH14, *gridWindowLayoutH15, *gridWindowLayoutH16;
-    QVBoxLayout *gridWindowLayoutV1, *gridWindowLayoutV2, *gridWindowLayoutV3, *gridWindowLayoutV4, *gridWindowLayoutVAll;
 
 
 

@@ -52,30 +52,36 @@ LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 HDRS = \
 	#$(PARAMS_HH) \
 	mainwindow.h \
-	statusdialog.h \
-	v_section.h
+	viewStatusDialog.h \
+	viewVsection.h \
+	viewGridConfigDialog.h \
+	viewWindDialog.h
 
 UI_HDRS = \
 	ui_mainwindow.h \
-	ui_statusdialog.h \
-	ui_v_section.h
 
 # need 	#$(PARAMS_CC) \
 NORM_SRCS = \
 	mainwindow.cpp \
 	main.cpp \
-	statusdialog.cpp \
-	v_section.cpp
+	viewStatusDialog.cpp \
+	viewVsection.cpp \
+	viewGridConfigDialog.cpp \
+	viewWindDialog.cpp
 
 MOC_SRCS = \
 	mainwindow.cpp \
-	statusdialog.cpp \
-	v_section.cpp
+	viewStatusDialog.cpp \
+	viewVsection.cpp \
+	viewGridConfigDialog.cpp \
+	viewWindDialog.cpp
 
 MOC_OUTPUT = \
 	moc_mainwindow.cpp \
-	moc_statusdialog.cpp \
-	moc_v_section.cpp \
+	moc_viewStatusDialog.cpp \
+	moc_viewVsection.cpp \
+	moc_viewGridConfigDialog.cpp \
+	moc_viewWindDialog.cpp \
 	qrc_res.cpp 
 
 

@@ -1,12 +1,7 @@
-#include "statusdialog.h"
-#include "ui_statusdialog.h"
+#include "viewStatusDialog.h"
 
-
-StatusDialog::StatusDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::StatusDialog)
+viewStatusDialog::viewStatusDialog(QWidget *parent) : QDialog(parent)
 {
-    ui->setupUi(this);
     setWindowTitle(tr("Status Window"));
 
     //initialize layouts
@@ -15,8 +10,10 @@ StatusDialog::StatusDialog(QWidget *parent) :
     mainLayout = new QVBoxLayout;
 
     //make buttons
+
     clear = new QPushButton(tr("Clear"));
     close = new QPushButton(tr("Close"));
+
     //and add them to the Hlayout
     buttonLayout->insertStretch(0,0);
     buttonLayout->addWidget(clear);
@@ -41,7 +38,7 @@ StatusDialog::StatusDialog(QWidget *parent) :
     setLayout(mainLayout);
 }
 
-StatusDialog::~StatusDialog()
+viewStatusDialog::~viewStatusDialog()
 {
-    delete ui;
+
 }

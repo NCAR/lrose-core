@@ -27,18 +27,20 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-        statusdialog.cpp \
-        v_section.cpp 
+        viewGridConfigDialog.cpp \
+        viewStatusDialog.cpp \
+        viewVsection.cpp \
+        viewWindDialog.cpp
 
 HEADERS += \
         mainwindow.h \
-        statusdialog.h \
-        v_section.h
+        viewGridConfigDialog.h \
+        viewStatusDialog.h \
+        viewVsection.h \
+        viewWindDialog.h
 
 FORMS += \
-        mainwindow.ui \
-        statusdialog.ui \
-        v_section.ui
+        mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
