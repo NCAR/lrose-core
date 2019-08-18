@@ -99,23 +99,9 @@ The CIDD display uses the xview library, which must be compiled with 32-bit emul
 **It is important** to keep the **cidd** build/install separate from the main build,
 so that you do not mix 32-bit object files with 64-bit executables.
 
-So, for a CIDD build we recommend you use a temporary prefix location, for example:
+So, for a CIDD build we recommend you use a separate prefix location, for example:
 
-  `/tmp/cidd_m32`
-
-After the package has been built into this temporary location, it can be copied into the final location.
-
-## Check out, build and install netcdf support
-
-Build and install netcdf into the temporary build area:
-
-```
-  git clone https://github.com/NCAR/lrose-netcdf
-  cd lrose-netcdf
-  ./build_and_install_netcdf.m32 -x /tmp/cidd_m32
-```
-
-This will install in `/tmp/cidd_m32`
+  `$HOME/cidd`
 
 ## Check out LROSE
 
@@ -123,47 +109,138 @@ This will install in `/tmp/cidd_m32`
   git clone https://github.com/NCAR/lrose-core
 ```
 
-<!---
-## Install the makefile tree
+## Run the CIDD checkout and build
 
-The `make` application can use files named either `Makefile` or `makefile`.
-
-The lower-case version takes preference.
-
-The codebase contains, by default, upper-case Makefiles throughout the tree. These are **NOT** appropriate for the cidd build.
-
-To get the correct build, you must install the lower-case makefiles relevant to the package you want to build.
-
-To install the makefiles for the **cidd** package, perform the following:
+You will run the CIDD build from within the ```lrose-core/build``` directory.
 
 ```
-  ./make_bin/install_package_makefiles.py --package cidd
-```
---->
-
-## Perform the build
-
-Build using automake:
-
-```
-  cd lrose-core
-  ./build/build_lrose.py --package cidd --prefix /tmp/cidd_m32
+  cd lrose-core/build  
+  ./checkout_and_build_auto.py --package lrose-cidd --prefix $HOME/cidd
 ```
 
-## Copy the binaries to the final install location
+## Build output and log files
 
-Use rsync to copy the binaries to the final location.
-
-For example:
+The build process creates log files as it proceeds. You should see the following messages during the build:
 
 ```
-  rsync -av /tmp/cidd_m32/bin ${HOME}/lrose
+========================= git-checkout =========================
+Running cmd: git clone --branch master https://github.com/NCAR/lrose-core
+Log file is: /tmp/lrose_build/logs/git-checkout.log
+    ....
+    done
+Running cmd: git clone https://github.com/NCAR/lrose-netcdf
+Log file is: /tmp/lrose_build/logs/git-checkout.log
+    ....
+    done
+Running cmd: git clone https://github.com/NCAR/lrose-displays
+Log file is: /tmp/lrose_build/logs/git-checkout.log
+    ....
+    done
+========================= install-package-makefiles =========================
+Running cmd: ./make_bin/installPackageMakefiles.py --package lrose-cidd --codedir .
+Log file is: /tmp/lrose_build/logs/install-package-makefiles.log
+    ....
+    done
+========================= setup-autoconf =========================
+Running cmd: ./make_bin/createConfigure.am.py --dir . --baseName configure.base --pkg lrose-cidd --debug 
+Log file is: /tmp/lrose_build/logs/setup-autoconf.log
+    ....
+    done
+========================= create-qt-moc-files =========================
+========================= build-netcdf =========================
+Running cmd: ./build_and_install_netcdf.m32 -x /tmp/lrose_build/scratch
+Log file is: /tmp/lrose_build/logs/build-netcdf.log
+    ....
+    done
+========================= print-environment =========================
+Running cmd: env
+Log file is: /tmp/lrose_build/logs/print-environment.log
+    ....
+    done
+========================= run-configure =========================
+Running cmd: ./configure --with-hdf5=/tmp/lrose_build/scratch --with-netcdf=/tmp/lrose_build/scratch --prefix=/tmp/lrose_build/scratch
+Log file is: /tmp/lrose_build/logs/run-configure.log
+    ....
+    done
+========================= build-libs =========================
+Running cmd: make -k -j 8
+Log file is: /tmp/lrose_build/logs/build-libs.log
+    ....
+    done
+========================= install-libs-to-tmp =========================
+Running cmd: make -k install-strip
+Log file is: /tmp/lrose_build/logs/install-libs-to-tmp.log
+    ....
+    done
+========================= build-apps =========================
+Running cmd: make -k -j 8
+Log file is: /tmp/lrose_build/logs/build-apps.log
+    ....
+    done
+========================= install-apps-to-tmp =========================
+Running cmd: make -k install-strip
+Log file is: /tmp/lrose_build/logs/install-apps-to-tmp.log
+    ....
+    done
+========================= do-final-install =========================
+Running cmd: rsync -av LICENSE.txt /tmp/cidd
+Log file is: /tmp/lrose_build/logs/do-final-install.log
+    ....
+    done
+Running cmd: rsync -av release_notes /tmp/cidd
+Log file is: /tmp/lrose_build/logs/do-final-install.log
+    ....
+    done
+Running cmd: rsync -av docs /tmp/cidd
+Log file is: /tmp/lrose_build/logs/do-final-install.log
+    ....
+    done
+Running cmd: rsync -av ./codebase/apps/cidd/src/CIDD/scripts /tmp/cidd
+Log file is: /tmp/lrose_build/logs/do-final-install.log
+    ....
+    done
+Running cmd: rsync -av color_scales /tmp/cidd/share
+Log file is: /tmp/lrose_build/logs/do-final-install.log
+    ....
+    done
+Running cmd: rsync -av bin /tmp/cidd
+Log file is: /tmp/lrose_build/logs/do-final-install.log
+    ....
+    done
+Running cmd: rsync -av lib /tmp/cidd
+Log file is: /tmp/lrose_build/logs/do-final-install.log
+    ....
+    done
+Running cmd: rsync -av include /tmp/cidd
+Log file is: /tmp/lrose_build/logs/do-final-install.log
+    ....
+    done
+============= Checking libs for lrose-cidd =============
+Running cmd: ./codebase/make_bin/check_libs.py --listPath ./build/checklists/libs_check_list.lrose-cidd --libDir /tmp/cidd/lib --label lrose-cidd --maxAge 3600
+=================>> SUCCESS <<===================
+=========>> ALL lrose-cidd LIBS INSTALLED <<========
+=================================================
+    done
+====================================================
+============= Checking apps for lrose-cidd =============
+Running cmd: ./codebase/make_bin/check_apps.py --listPath ./build/checklists/apps_check_list.lrose-cidd --appDir /tmp/cidd/bin --label lrose-cidd --maxAge 3600
+================>> SUCCESS <<==================
+=========>> ALL lrose-cidd APPS INSTALLED <<========
+===============================================
+    done
+====================================================
+
 ```
 
-The final install will be in:
+If problems occur, you should view the last log file to appear in the printout, because that is where the error is most likely to have occurred.
+
+## Install directory
+
+That build should install CIDD in:
 
 ```
-  ${HOME}/lrose/bin
+  $HOME//bin
 ```
+
 
 
