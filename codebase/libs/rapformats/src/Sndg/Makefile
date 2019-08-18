@@ -30,6 +30,7 @@ TARGET_FILE = ../librapformats.a
 HDRS =
 
 CPPC_SRCS = \
+        CapeCinSounding.cc \
 	Sndg.cc
 
 #

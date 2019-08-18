@@ -33,8 +33,7 @@ HDRS = \
 	$(INCDIR)/physics/IcaoStdAtmos.hh \
 	$(INCDIR)/physics/density.h \
 	$(INCDIR)/physics/physics.h \
-	$(INCDIR)/physics/thermo.h \
-	$(INCDIR)/physics/CapeCinSounding.hh
+	$(INCDIR)/physics/thermo.h
 
 SRCS = \
 	density.c \
@@ -48,7 +47,6 @@ SRCS = \
 CPPC_SRCS = \
 	AdiabatTempLookupTable.cc \
 	CapeCin.cc \
-        CapeCinSounding.cc \
 	IcaoStdAtmos.cc
 
 #

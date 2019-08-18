@@ -180,7 +180,7 @@ namespace PhysicsLib {
 	  for (int parcel_level = true_min_calc_level;
 	       parcel_level <= true_max_calc_level; ++parcel_level)
 	  {
-	    int lcl_level = -1;
+	    // int lcl_level = -1;
 	    
 	    // Make sure all of the input data is valid.  If it's not,
 	    // continue on to the next grid point.
@@ -406,7 +406,7 @@ namespace PhysicsLib {
 		// LCL level rather than at the current level and have added
 		// the LCL level buoyancy to the buoyancy arrays.
 
-		lcl_level = buoy_level;  // Not used -- commented out below
+		// lcl_level = buoy_level;  // Not used -- commented out below
 		lcl_indicator = 2;
 		--lift_level;
 		continue;

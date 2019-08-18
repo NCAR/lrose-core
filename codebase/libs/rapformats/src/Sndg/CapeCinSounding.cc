@@ -27,7 +27,7 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-#include <physics/CapeCinSounding.hh>
+#include <rapformats/CapeCinSounding.hh>
 
 const float  CapeCinSounding::CAPE_MISSING = -999.0;
 const float  CapeCinSounding::CIN_MISSING  = -999.0;

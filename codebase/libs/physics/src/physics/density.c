@@ -41,8 +41,15 @@
 #include <math.h>
 
 #include <physics/density.h>
-#include <rapmath/math_macros.h>
 #include <toolsa/mem.h>
+
+#ifndef TEMP_C_TO_K
+#define TEMP_C_TO_K(c)   (c + 273.15)
+#endif
+
+#ifndef TEMP_K_TO_C
+#define TEMP_K_TO_C(k)   (k - 273.15)
+#endif
 
 /********************************************************************
  * PHYdenALCL()

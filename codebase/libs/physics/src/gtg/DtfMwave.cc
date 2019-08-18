@@ -409,12 +409,13 @@ int DtfMwave::dtf4_code__()
   /* Local variables */
   float crff, epln, prnd, zsfc, zlev, ztop;
   int k;
-  float depth;
+  // float depth;
   float a2, br;
   float dz, alb, arg, all, rff, als;
   float tke_dtf4__;
-  float c1, c2, c3, c13, c23, ce, alinf,
+  float c1, c2, c3, c13, c23, alinf,
     akarm, cr, c5, crf, e0, dt, cmu;
+  // float ce;
   
   /* System generated locals */
   int i__1;
@@ -424,7 +425,7 @@ int DtfMwave::dtf4_code__()
   c3 = 1.92;
   c13 = c1/c3;
   c23 = c2/c3;
-  ce = 0.19;
+  // ce = 0.19;
   alinf = 200.0;
   akarm = 0.35;
   cr = 0.54;
@@ -476,7 +477,7 @@ int DtfMwave::dtf4_code__()
       zlev =  z__[k - 1];
       if (zsfc <= zlev && zlev <= ztop) 
 	{
-	  depth = ztop - zsfc;
+	  // depth = ztop - zsfc;
 	  
 	  prnd = prand_(& ri[k - 1]);
 	  
@@ -567,7 +568,7 @@ int DtfMwave::dtf5_code__()
   /* System generated locals */
   int i__1;
   float r__1;
-  double d__1 = 0.0;
+  // double d__1 = 0.0;
   
   /* Local variables */
   float cnhf, cnhn, snhf, fnot, snhn;
@@ -641,7 +642,7 @@ int DtfMwave::dtf5_code__()
 	  epn = (float)0.;
 	}
       
-      d__1 = (double) epn;
+      // d__1 = (double) epn;
       
       tke_kh__[k - 1] = pow((double) epn, (double) .333333333);
       
@@ -661,7 +662,7 @@ int DtfMwave::new_richson_v__()
 {
   /* System generated locals */
   int i__1;
-  double d__1;
+  // double d__1;
   
   /* Local variables */
   float beta, shru, shrv;
@@ -682,7 +683,7 @@ int DtfMwave::new_richson_v__()
   i__1 =  klev - 1;
   for (k = 2; k <= i__1; ++k) 
     {
-      d__1 =  p[k] / p00;
+      // d__1 =  p[k] / p00;
       
       pi3 = pow((double) p[k] / p00 , (double) rocp);
       
@@ -807,7 +808,7 @@ int DtfMwave::dtf3_code__()
   
   /* System generated locals */
   int i__1;
-  double d__1;
+  // double d__1;
   
   /* Local variables */
   float zsfc, zlev, ztop;
@@ -875,7 +876,7 @@ int DtfMwave::dtf3_code__()
 		  
 		  all = dmin(alb,als);
 		  
-		  d__1 = (double) (all *  epsilon[k - 1]);
+		  // d__1 = (double) (all *  epsilon[k - 1]);
 		  tke_kh__[k - 1] = pow((double) all *  epsilon[k - 1], .666666);
 		  
 		}
@@ -955,10 +956,12 @@ int DtfMwave::new_kep_anl__()
   float bb;
   
   float rr, rff, tke_sfc__, 
-    arg1, arg2, arg3, arg4, arg5, arg6;
+    arg1, arg2, arg4, arg5, arg6;
+  // float arg3;
   
-  float c1,c2,c3,cmu,c13,c23,tke0,time,exp0,ce1,ce2,cu,a1,
+  float ce1,ce2,cu,a1,
       b1,b2,cc2,cc3,e1,e2,rfc,b;
+  // float c1, c2, c3, cmu, c13, c23, tke0, time, exp0;
 
   float *epn = new float[klev];
   float *epr = new float[klev];
@@ -968,15 +971,15 @@ int DtfMwave::new_kep_anl__()
   memset(epr,0, sizeof(float) * klev);
   memset(rfx,0, sizeof(float) * klev);
 
-  c1 = 1.44;
-  c2 = 1.0;
-  c3 = 1.92;
-  cmu = 0.09;
-  c13 = c1/c3;
-  c23 = c2/c3;
-  tke0 = 3.0;
-  time = 1000.0;
-  exp0 = 2.5;
+  // c1 = 1.44;
+  // c2 = 1.0;
+  // c3 = 1.92;
+  // cmu = 0.09;
+  // c13 = c1/c3;
+  // c23 = c2/c3;
+  // tke0 = 3.0;
+  // time = 1000.0;
+  // exp0 = 2.5;
   ce1 = 1.4; 
   ce2 = 1.9; 
   cu = 0.09;
@@ -1009,7 +1012,7 @@ int DtfMwave::new_kep_anl__()
 	  else 
 	    {
 	      arg2 = a * arg1;
-	      arg3 = e0ep0 / arg1;
+	      // arg3 = e0ep0 / arg1;
 	      r__1 = e0ep0 / arg1;
 	      arg4 = atanh_(&r__1);
 	      arg5 = (float)1. / arg4;
@@ -1088,13 +1091,13 @@ double DtfMwave::rf_(float *ri)
   float ret_val;
   
   /* Local variables */
-  float e1, e2, e3, e4, e5, f1, f2, f3, f4, f42;
-  
+  float e1, e3, e4, e5, f1, f2, f3, f4, f42;
+  // float e2;
   
   e1 = b1 - (float)6. * a1;
   
-  e2 = b1 + a1 * (float)12. * ((float)1. - c2) + b2 * (float)3. * 
-    ((float)1. - c3);
+  // e2 = b1 + a1 * (float)12. * ((float)1. - c2) + b2 * (float)3. * 
+  //   ((float)1. - c3);
   
   e3 = b1 * ((float)1. - c1 * (float)3.) - a1 * (float)6.;
   
@@ -1132,13 +1135,14 @@ int DtfMwave::new_kep_expo__()
 {
   /* System generated locals */
   int i__1;
-  double d__1;
+  // double d__1;
   
   /* Local variables */
   float anum, prnd, zsfc, test, ztop;
   int k;
-  float depth, br, dz = 0.0, prandl, alb, den, arg, all, als, tke1, tke2 = 0.0;
-  float c1,c2,c3,cmu,c13,c23,tke0,time,exp0,ce,akm,alinf,akarm,cr;
+  float depth, br, dz = 0.0, prandl, alb, den, arg, all, als, tke2 = 0.0;
+  float c1,c2,c3,cmu,c13,c23,tke0,time,exp0,akm,alinf,akarm;
+  // float tke1, ce, cr = 0;
   
   c1=1.44;
   c2=1.0;
@@ -1149,11 +1153,11 @@ int DtfMwave::new_kep_expo__()
   tke0=3.0;
   time=1200.0;
   exp0=2.5;
-  ce=0.19;
+  // ce=0.19;
   akm = 2.25e+2;
   alinf = 200.0;
   akarm = 0.35;
-  cr = 0.54;
+  // cr = 0.54;
   
   i__1 =  klev;
   for (k = 1; k <= i__1; ++k) 
@@ -1219,7 +1223,7 @@ int DtfMwave::new_kep_expo__()
 	  
 	  if ( brnt[k - 1] < (float)0.) 
 	    {
-	      tke1 = (float)0.;
+	      // tke1 = (float)0.;
 	    } 
 	  else 
 	    {
@@ -1233,7 +1237,7 @@ int DtfMwave::new_kep_expo__()
 	      
 	      all = dmin(alb,als);
 	      
-	      d__1 = (double) (all *  epsilon[k - 1]);
+	      // d__1 = (double) (all *  epsilon[k - 1]);
 	      tke2 = pow( (double) (all *  epsilon[k - 1]) , .666666);
 	    }
 	  
@@ -1285,9 +1289,10 @@ int DtfMwave::sn_gwriflux__(int *nxp, int *nyp)
   float frud, brns, rigw, rhos, taus, sumr, sumu, sumv;
   int k;
   float wproj, ul, vl, us, vs, uu, ux, vy;
-  float tervar, sumbrn, ri2, ri4, den, brn, rii, epp, 
+  float tervar, sumbrn, ri2, ri4, den, brn, epp, 
     ubs, dzl, sum, 
     tau_tke__, dzl2;
+  // float rii;
   
   float *dsig = new float[klev];
   float *rho = new float[klev];
@@ -1412,7 +1417,7 @@ int DtfMwave::sn_gwriflux__(int *nxp, int *nyp)
 	      
 	      ri4 = sqrt(ri2);
 	      
-	      rii = sqrt(ri2 * (float)2. + (float)1.);
+	      // rii = sqrt(ri2 * (float)2. + (float)1.);
 	      
 	      epp = rifunc_(&ri2, &ri4, &ric);
 	      
@@ -1475,8 +1480,9 @@ int DtfMwave::we_gwriflux__(int *nxp, int *nyp)
   float frud, brns, rigw, rhos, taus, sumr, sumu, sumv;
   int k;
   float wproj, ul, vl, us, vs, uu, ux, vy;
-  float tervar, sumbrn, ri2, ri4, den, brn, rii, epp,
+  float tervar, sumbrn, ri2, ri4, den, brn, epp,
     ubs, dzl, sum, tau_tke__, dzl2;
+  // float rii;
   
 
   float *dsig = new float[klev];
@@ -1608,7 +1614,7 @@ int DtfMwave::we_gwriflux__(int *nxp, int *nyp)
 		  
 		  ri4 = sqrt(ri2);
 		  
-		  rii = sqrt(ri2 * (float)2.0 + (float)1.0);
+		  // rii = sqrt(ri2 * (float)2.0 + (float)1.0);
 		  
 		  epp = rifunc_(&ri2, &ri4, &ric);
 		  
@@ -1770,15 +1776,16 @@ int DtfMwave::mwave_(float terasmWE, float terasmSN, float tercnvWE,
     long  k;
     float ahalf, dthdp, zhalf, xcncv, ycncv, a0, zrefl, h0 = 0.0;
     long  nlyrs;
-    float delta0;
+    // float delta0;
     float lambda = 0.0;
     long  jj;
     float ar;
     long  kk, ll = 0, mm, nn;
     float es, qs, rcoeff;
     long havrfl, abvtop;
-    float bv0, pi1, pi2, pi3, th1, th2, th3, zhydro, acs, dnl, drg, spd, 
+    float bv0, pi1, pi2, pi3, th1, th2, th3, dnl, drg, spd, 
 	    spd0, pnu0 = 0.0;
+    // float zhydro, acs = 0.0;
 
 
     terasmwe = terasmWE;
@@ -2148,15 +2155,15 @@ int DtfMwave::mwave_(float terasmWE, float terasmSN, float tercnvWE,
       
       if (fabs(h0) < (float)1e-6) {
 	
-	acs = Pi/2;
+	// acs = Pi/2;
 	
-	delta0 = (float)0.;
+	// delta0 = (float)0.;
       } 
       else {
 	
-	delta0 = -sqrt((h0 * h0 + h0 * sqrt(h0 * h0 + 4)) / (float)2.);
+	// delta0 = -sqrt((h0 * h0 + h0 * sqrt(h0 * h0 + 4)) / (float)2.);
 	
-	acs = acos(h0 / delta0);
+	// acs = acos(h0 / delta0);
       }
       
       kk = 0;
@@ -2186,7 +2193,7 @@ int DtfMwave::mwave_(float terasmWE, float terasmSN, float tercnvWE,
 		  
 		  amax = a[mm - 1];
 		  
-		  zhydro = hght[mm - 1];
+                  // zhydro = hght[mm - 1];
 		}
 	    }
 	  
