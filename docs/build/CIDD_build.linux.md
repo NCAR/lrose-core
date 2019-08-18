@@ -239,8 +239,27 @@ If problems occur, you should view the last log file to appear in the printout, 
 That build should install CIDD in:
 
 ```
-  $HOME//bin
+  $HOME/cidd/bin
 ```
+
+## Running CIDD
+
+If you perform the build as above you will need to add:
+
+```
+  $HOME/cidd/bin
+```
+
+to your path.
+
+As a test, run:
+
+```
+  CIDD -font fixed -p http://front.eol.ucar.edu/displayParams/CIDD.pecan
+```
+
+
+
 
 
 
