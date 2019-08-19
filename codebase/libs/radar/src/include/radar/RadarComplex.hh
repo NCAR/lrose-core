@@ -233,5 +233,83 @@ private:
 
 };
 
+//////////////////////////////////////////////
+// class for holding complex sum
+
+class ComplexSum {
+public:
+  // default constructor - magnitude of 1, phase of 0
+  ComplexSum() :
+          _sum(0.0, 0.0),
+          _count(0.0) {}
+  // initialize to zero
+  void initToZero() {
+    _sum.re = 0.0;
+    _sum.im = 0.0;
+    _count = 0.0;
+  }
+  // add a value
+  void add(RadarComplex_t x) {
+    _sum.re += x.re;
+    _sum.im += x.im;
+    _count++;
+  }
+  // get the mean
+  RadarComplex_t getMean() const {
+    RadarComplex_t mean(_sum.re / _count, _sum.im / _count);
+    return mean;
+  }
+  // get the sum
+  const RadarComplex_t &getSum() const {
+    return _sum;
+  }
+  // get the count
+  double getCount() const {
+    return _count;
+  }
+private:
+  // data
+  RadarComplex_t _sum;
+  double _count;
+};
+
+//////////////////////////////////////////////
+// class for holding scalar sum
+
+class ScalarSum {
+public:
+  // default constructor - magnitude of 1, phase of 0
+  ScalarSum() :
+          _sum(0.0),
+          _count(0.0) {}
+  // initialize to zero
+  void initToZero() {
+    _sum = 0.0;
+    _count = 0.0;
+  }
+  // add a value
+  void add(double x) {
+    _sum += x;
+    _count++;
+  }
+  // get the mean
+  double getMean() const {
+    double mean(_sum / _count);
+    return mean;
+  }
+  // get the sum
+  const double &getSum() const {
+    return _sum;
+  }
+  // get the count
+  double getCount() const {
+    return _count;
+  }
+private:
+  // data
+  double _sum;
+  double _count;
+};
+
 #endif
 
