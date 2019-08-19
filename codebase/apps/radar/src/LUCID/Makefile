@@ -55,7 +55,11 @@ HDRS = \
 	viewStatusDialog.h \
 	viewVsection.h \
 	viewGridConfigDialog.h \
-	viewWindDialog.h
+	viewWindDialog.h \
+	viewPlayerDock.h \
+	viewZoomOptions.h \
+	viewValuesDisplay.h \
+	viewMainImage.h
 
 UI_HDRS = \
 	ui_mainwindow.h \
@@ -67,14 +71,22 @@ NORM_SRCS = \
 	viewStatusDialog.cpp \
 	viewVsection.cpp \
 	viewGridConfigDialog.cpp \
-	viewWindDialog.cpp
+	viewWindDialog.cpp \
+	viewPlayerDock.cpp \
+	viewZoomOptions.cpp \
+	viewValuesDisplay.cpp \
+	viewMainImage.cpp
 
 MOC_SRCS = \
 	mainwindow.cpp \
 	viewStatusDialog.cpp \
 	viewVsection.cpp \
 	viewGridConfigDialog.cpp \
-	viewWindDialog.cpp
+	viewWindDialog.cpp \
+	viewPlayerDock.cpp \
+	viewZoomOptions.cpp \
+	viewValuesDisplay.cpp \
+	viewMainImage.cpp
 
 MOC_OUTPUT = \
 	moc_mainwindow.cpp \
@@ -82,7 +94,12 @@ MOC_OUTPUT = \
 	moc_viewVsection.cpp \
 	moc_viewGridConfigDialog.cpp \
 	moc_viewWindDialog.cpp \
+	moc_viewPlayerDock.cpp \
+	moc_viewZoomOptions.cpp \
+	moc_viewValuesDisplay.cpp \
+	moc_viewMainImage.cpp \
 	qrc_res.cpp 
+
 
 
 

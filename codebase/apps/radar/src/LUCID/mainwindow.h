@@ -6,35 +6,22 @@
 #include "viewGridConfigDialog.h"
 #include "viewVsection.h"
 #include "viewStatusDialog.h"
-
-#include <cmath>
+#include "viewPlayerDock.h"
+#include "viewZoomOptions.h"
+#include "viewValuesDisplay.h"
+#include "viewMainImage.h"
 
 #include <QMainWindow>
-//#include <QToolTip>
-#include <QLabel>
-#include <QDockWidget>
-#include <QPushButton>
-#include <QGroupBox>
-#include <QLCDNumber>
-#include <QSlider>
-#include <QLineEdit>
-#include <QDateTimeEdit>
-#include <QToolButton>
-#include <QComboBox>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QFormLayout>
-#include <QSpinBox>
-#include <QString>
 #include <QToolBar>
-#include <QTimer>
-#include <QTime>
-
-#include <QGraphicsScene>
-#include <QGraphicsView>
+#include <QWidget>
+#include <QDockWidget>
+#include <QListWidget>
+#include <QVBoxLayout>
+#include <QPushButton>
+#include <QGridLayout>
+#include <QGroupBox>
 #include <QMouseEvent>
-
-
+#include <QLabel>
 
 namespace Ui {
 class MainWindow;
@@ -50,8 +37,6 @@ public:
 
 private slots:
 
-    void frameChanged();
-
     void on_actionFields_toggled(bool arg1);
     void on_actionProducts_toggled(bool arg1);
     void on_actionMaps_toggled(bool arg1);
@@ -60,15 +45,9 @@ private slots:
     void on_actionZoomIn_triggered();
     void on_actionStatus_Window_triggered();
     void on_actionVsection_triggered();
-    void UpdateTime();
-
-
     void on_actionZoom_Window_triggered();
-
     void on_actionValues_Cursor_toggled(bool arg1);
-
     void on_actionWind_Layer_triggered();
-
     void on_actionData_Layers_triggered();
 
 private:
@@ -77,31 +56,15 @@ private:
     //for showing coordinated of cursor in main window
     void mouseMoveEvent(QMouseEvent* event);
 
-    //for reseting the clock in main window every second
-    QTimer *timer_1s;
-
     //to get the other windows going in MainWindow()
     viewVsection *Vsec;
     viewStatusDialog *Stat;
     viewWindDialog *windDialog;
     viewGridConfigDialog *gridConfigDialog;
-
-
-   // windDialogView *windDialog;
-
-    //main image starter
-    void startImage();
-    QLabel *mainImage, *scale, *currentTime, *currentDate;
-    QPixmap *img, *scaleImg;
-    QHBoxLayout *mainLayout, *dateTimeLayout;
-    QVBoxLayout *timeLayout;
-    QWidget *placeholderWidget;
-
-    QGraphicsView *view;
-    QGraphicsScene *scene;
-    QGraphicsPixmapItem *item;
-
-
+    viewPlayerDock *playerDock;
+    viewZoomOptions *zoomWindow;
+    viewValuesDisplay *valuesWindow;
+    viewMainImage *centralImage;
 
     //toolbar maker
     void startToolBars();
@@ -119,43 +82,6 @@ private:
     QPushButton *field[3][10];
     QGridLayout *grid;
     QGroupBox *fieldGroup;
-
-    //moviedock widget
-    void movieLooperDock();
-    QDockWidget *movieDock;
-    QSlider *posIndicator;
-    QLCDNumber *frameIndicator;
-    QLineEdit *frameIntervalInput;
-    QLineEdit *numFramesInput;
-    QLabel *frameLabel, *frameTime, *frameDate, *timeLabel, *frameIntervalLabel, *numFramesLabel, *playbackLabel, *delayLabel;
-    QToolButton *rwd, *play, *pause, *fwd;
-    QDateTimeEdit *timeInput;
-    QComboBox *playback, *delay, *realArchive, *loopSweep;
-    QHBoxLayout *topRow, *midRow, *botRow;
-    QVBoxLayout *threeRows;
-    QGroupBox *group;
-    QFrame *line;
-
-    QGraphicsView *sliderView;
-    QGraphicsScene *sliderScene;
-    QGraphicsPixmapItem *sliderItem;
-
-
-    void makeZoomOptions();
-    QDialog *zoomOptions;
-    QPushButton *zoom10, *zoom100, *zoom1000, *zoomSaved, *zoomSaved2, *zoomReset;
-    QVBoxLayout *zoomLayout;
-
-    void makeValuesDisplay();
-    QDialog *valuesDisplay;
-    QLabel *valueLabel1, *valueLabel2, *valueLabel3, *valueLabel4;
-    QTextBrowser *valueOf1, *valueOf2, *valueOf3, *valueOf4;
-    QHBoxLayout *valueCombo1, *valueCombo2, *valueCombo3, *valueCombo4;
-    QVBoxLayout *valuesLayout;
-
-
-
-
 
 };
 

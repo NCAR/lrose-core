@@ -28,16 +28,24 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         viewGridConfigDialog.cpp \
+        viewMainImage.cpp \
+        viewPlayerDock.cpp \
         viewStatusDialog.cpp \
+        viewValuesDisplay.cpp \
         viewVsection.cpp \
-        viewWindDialog.cpp
+        viewWindDialog.cpp \
+        viewZoomOptions.cpp
 
 HEADERS += \
         mainwindow.h \
         viewGridConfigDialog.h \
+        viewMainImage.h \
+        viewPlayerDock.h \
         viewStatusDialog.h \
+        viewValuesDisplay.h \
         viewVsection.h \
-        viewWindDialog.h
+        viewWindDialog.h \
+        viewZoomOptions.h
 
 FORMS += \
         mainwindow.ui
