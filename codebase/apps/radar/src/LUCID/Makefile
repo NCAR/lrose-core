@@ -49,8 +49,8 @@ LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS)  -F/usr/local/Cellar/qt/5
 
 LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 
+#$(PARAMS_HH) \
 HDRS = \
-	$(PARAMS_HH) \
 	mainwindow.h \
 	viewStatusDialog.h \
 	viewVsection.h \
@@ -64,11 +64,10 @@ HDRS = \
 	Params.hh
 
 UI_HDRS = \
-	ui_mainwindow.h \
+	ui_mainwindow.h 
 
-# need 	#$(PARAMS_CC) \
+#$(PARAMS_CC) \
 NORM_SRCS = \
-	$(PARAMS_CC) \
 	mainwindow.cpp \
 	main.cpp \
 	viewStatusDialog.cpp \
@@ -104,10 +103,6 @@ MOC_OUTPUT = \
 	moc_viewValuesDisplay.cpp \
 	moc_viewMainImage.cpp \
 	qrc_res.cpp 
-
-
-
-
 
 CC_SRCS = Args.cc Params.cc
 CPP_SRCS = main.cpp $(NORM_SRCS) $(MOC_SRCS) $(MOC_OUTPUT)
