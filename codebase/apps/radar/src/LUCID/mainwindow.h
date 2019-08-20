@@ -22,6 +22,7 @@
 #include <QGroupBox>
 #include <QMouseEvent>
 #include <QLabel>
+#include <QAction>
 
 namespace Ui {
 class MainWindow;
@@ -49,6 +50,7 @@ private slots:
     void on_actionValues_Cursor_toggled(bool arg1);
     void on_actionWind_Layer_triggered();
     void on_actionData_Layers_triggered();
+
 
 private:
     Ui::MainWindow *ui;

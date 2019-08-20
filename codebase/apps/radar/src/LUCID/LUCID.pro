@@ -11,6 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = LUCID
 TEMPLATE = app
 
+INCLUDEPATH += /Users/katsampe/lrose/include
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -34,7 +36,9 @@ SOURCES += \
         viewValuesDisplay.cpp \
         viewVsection.cpp \
         viewWindDialog.cpp \
-        viewZoomOptions.cpp
+        viewZoomOptions.cpp \
+        Args.cc \
+        Params.cc
 
 HEADERS += \
         mainwindow.h \
@@ -45,10 +49,14 @@ HEADERS += \
         viewValuesDisplay.h \
         viewVsection.h \
         viewWindDialog.h \
-        viewZoomOptions.h
+        viewZoomOptions.h \
+        Args.hh \
+        Params.hh
 
 FORMS += \
         mainwindow.ui
+
+LIBS += -L/Users/katsampe/lrose/lib -ltdrp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -38,6 +38,9 @@ MainWindow::MainWindow(QWidget *parent) :
     setCentralWidget(centralImage);
     centralWidget()->setMouseTracking(true);
 
+    viewMainImage MMM;
+    MMM.Tester();
+
 }
 
 MainWindow::~MainWindow()
@@ -189,8 +192,6 @@ void MainWindow::fieldDockMaker()
 
 
 
-
-
 void MainWindow::on_actionFields_toggled(bool arg1)
 {
     if (arg1==0){
@@ -301,4 +302,6 @@ void MainWindow::on_actionZoomIn_triggered()
 {
 
 }
+
+
 

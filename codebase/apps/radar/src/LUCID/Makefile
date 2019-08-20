@@ -40,9 +40,9 @@ TARGET_FILE = LUCID
 LOC_INCLUDES = $(QT_INCLUDES) $(HDRS) -I/usr/local/Cellar/qt/5.13.0/lib/QtCharts.framework/Headers
 
 
-# need to add -lRadx -lNcxx -ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS)
+# need to add -lRadx -lNcxx -ltoolsa -ldataport  $(NETCDF4_LIBS)
 LOC_LIBS = $(QT_LIBS)  \
-	-lfftw3 -lbz2 -lz -lpthread -lm
+	-ltdrp -lfftw3 -lbz2 -lz -lpthread -lm 
 
 # need to add $(NETCDF4_LDFLAGS)
 LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS)  -F/usr/local/Cellar/qt/5.13.0/lib -framework QtCharts
@@ -50,7 +50,7 @@ LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS)  -F/usr/local/Cellar/qt/5
 LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 
 HDRS = \
-	#$(PARAMS_HH) \
+	$(PARAMS_HH) \
 	mainwindow.h \
 	viewStatusDialog.h \
 	viewVsection.h \
@@ -59,13 +59,16 @@ HDRS = \
 	viewPlayerDock.h \
 	viewZoomOptions.h \
 	viewValuesDisplay.h \
-	viewMainImage.h
+	viewMainImage.h \
+	Args.hh \
+	Params.hh
 
 UI_HDRS = \
 	ui_mainwindow.h \
 
 # need 	#$(PARAMS_CC) \
 NORM_SRCS = \
+	$(PARAMS_CC) \
 	mainwindow.cpp \
 	main.cpp \
 	viewStatusDialog.cpp \
@@ -75,7 +78,9 @@ NORM_SRCS = \
 	viewPlayerDock.cpp \
 	viewZoomOptions.cpp \
 	viewValuesDisplay.cpp \
-	viewMainImage.cpp
+	viewMainImage.cpp \
+	Args.cc \
+	Params.cc
 
 MOC_SRCS = \
 	mainwindow.cpp \
@@ -86,7 +91,7 @@ MOC_SRCS = \
 	viewPlayerDock.cpp \
 	viewZoomOptions.cpp \
 	viewValuesDisplay.cpp \
-	viewMainImage.cpp
+	viewMainImage.cpp 
 
 MOC_OUTPUT = \
 	moc_mainwindow.cpp \
@@ -104,7 +109,7 @@ MOC_OUTPUT = \
 
 
 
-CC_SRCS = 
+CC_SRCS = Args.cc Params.cc
 CPP_SRCS = main.cpp $(NORM_SRCS) $(MOC_SRCS) $(MOC_OUTPUT)
 
 #
