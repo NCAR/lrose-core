@@ -1196,7 +1196,7 @@ void IwrfTsPulse::printHeader(FILE *out) const
 
 void IwrfTsPulse::printData(FILE *out) const
 {
-  printData(out, 0, _hdr.n_gates);
+  printData(out, 0, _hdr.n_gates - 1);
 }
 
 void IwrfTsPulse::printData(FILE *out, int startGate, int endGate) const

@@ -256,6 +256,10 @@ public:
   }
   // get the mean
   RadarComplex_t getMean() const {
+    if (_count < 1) {
+      RadarComplex_t mean(NAN, NAN);
+      return mean;
+    }
     RadarComplex_t mean(_sum.re / _count, _sum.im / _count);
     return mean;
   }
@@ -294,6 +298,9 @@ public:
   }
   // get the mean
   double getMean() const {
+    if (_count < 1) {
+      return NAN;
+    }
     double mean(_sum / _count);
     return mean;
   }
