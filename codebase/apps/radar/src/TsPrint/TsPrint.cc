@@ -342,7 +342,7 @@ int TsPrint::_runPrintMode()
 
     }
     
-    if (_params.print_all_headers) {
+    if (_params.print_all_headers && !_params.print_iq_data) {
       pulse->printHeader(stdout);
     }
     if (_params.print_iq_data) {
