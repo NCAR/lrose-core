@@ -21,7 +21,6 @@ signals:
 public slots:
 
 private:
-
     QDialog *gridDataLayers;
     QLabel *gridLayerLabel, *gridLabel, *gridUrlLabel, *gridTopBotLabel, *gridLegendLabel, *gridMinValueLabel,
             *gridMaxValueLabel, *gridDeltaLabel, *gridTimeSlopLabel, *gridTimeOffsetLabel, *gridAltOffsetLabel,

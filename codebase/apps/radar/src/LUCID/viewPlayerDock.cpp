@@ -3,7 +3,9 @@
 
 viewPlayerDock::viewPlayerDock(QWidget *parent) : QDockWidget(parent)
 {
-    //initialize movie dock, and set properties
+    //class that creates the movie layer dock
+
+    //set up the dockwidget
     QString movieTitle = "Movie Player";
     setWindowTitle(movieTitle);
     setAllowedAreas(Qt::DockWidgetAreas(Qt::TopDockWidgetArea |
@@ -12,16 +14,15 @@ viewPlayerDock::viewPlayerDock(QWidget *parent) : QDockWidget(parent)
                                                            QDockWidget::DockWidgetMovable |
                                                            QDockWidget::DockWidgetFloatable));
 
-
     //make widgets for movie player
     //TOP ROW------------------------------------------
-    //frame label/indicator
+    //frame label/indicator, indicator temprarily connected to slider posIndicator
     frameLabel = new QLabel;
     QString frameLabelText = "Frame";
     frameLabel->setText(frameLabelText);
     frameIndicator = new QLCDNumber;
 
-    //buttons
+    //player buttons, dummy at the moment
     rwd = new QToolButton;
     rwd->setStyleSheet(QString("QToolButton{ background-color:lightgray;}"));
     rwd->setIcon(QIcon(QString(":/images/images/rwd.png")));
@@ -35,13 +36,14 @@ viewPlayerDock::viewPlayerDock(QWidget *parent) : QDockWidget(parent)
     fwd->setStyleSheet(QString("QToolButton{ background-color:lightgray;}"));
     fwd->setIcon(QIcon(QString(":/images/images/ffwd.png")));
 
-    //slider
+    //video tracking slider dummy at the moment, connected to frameIndicator and number of frames
     posIndicator = new QSlider(Qt::Horizontal);
     posIndicator->setTickPosition(QSlider::TicksBelow);
     posIndicator->setTickInterval(1);
     posIndicator->setMinimumWidth(400);
 
-    //time and date display
+    //time and date display with dummy representative values
+    //will represent selected time for playback loop
     frameTime = new QLabel;
     frameTime->setText("12:15:33");
     frameDate = new QLabel;
@@ -108,18 +110,12 @@ viewPlayerDock::viewPlayerDock(QWidget *parent) : QDockWidget(parent)
     sliderScene->addItem(sliderItem);
     sliderView = new QGraphicsView(sliderScene);
 
-
-
     //intialize layouts
     topRow = new QHBoxLayout();
     midRow = new QHBoxLayout();
     botRow = new QHBoxLayout();
     threeRows = new QVBoxLayout();
     group = new QGroupBox;
-
-
-
-
 
     //add widgets to layouts (in order), with spcaing for where things are too close to eachother
     topRow->addWidget(frameLabel);
@@ -155,15 +151,12 @@ viewPlayerDock::viewPlayerDock(QWidget *parent) : QDockWidget(parent)
     botRow->addWidget(loopSweep);
         botRow->addStretch(0);
 
-
     //combining the 3 rows
     threeRows->setSpacing(3);
     threeRows->addLayout(topRow);
     threeRows->addLayout(midRow);
     threeRows->addLayout(botRow);
     threeRows->addWidget(sliderView);
-
-
 
     //adding layout to the dock widget
     group->setLayout(threeRows);
@@ -174,7 +167,6 @@ viewPlayerDock::viewPlayerDock(QWidget *parent) : QDockWidget(parent)
     connect(numFramesInput, SIGNAL(returnPressed()), this, SLOT(frameChanged()));
 
 }
-
 
 //function is used in moviedock,
 //it's for connectiong the slider, frame indicator, and number of frames input.
@@ -187,12 +179,10 @@ void viewPlayerDock::frameChanged()
     frameIndicator->display(frame);
 }
 
-
-
-
 viewPlayerDock::~viewPlayerDock()
 {
-
+    //as of now, all pointers go into 'group', so that is all that needs to be deleted
+    delete group;
 }
 
 

@@ -2,6 +2,9 @@
 
 viewZoomOptions::viewZoomOptions(QWidget *parent) : QDialog(parent)
 {
+    //Eventually this widget will display options for different zoom levels
+    //it will also be neat to save zoom positions to easily go back and forth.
+    //right now though, it is just dummy stuff
     setWindowTitle("Zoomz");
     zoom10 = new QPushButton;
     zoom10->setText("Zoom 10");
@@ -29,5 +32,6 @@ viewZoomOptions::viewZoomOptions(QWidget *parent) : QDialog(parent)
 
 viewZoomOptions::~viewZoomOptions()
 {
-
+    //as of now, all pointers go into zoomLayout, so that is all that needs to be deleted
+    delete zoomLayout;
 }

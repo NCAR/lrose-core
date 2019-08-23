@@ -20,9 +20,10 @@ class viewMainImage : public QWidget
 {
     Q_OBJECT
 public:
-    explicit viewMainImage(QWidget *parent = nullptr);
+    explicit viewMainImage(QString pic, QWidget *parent = nullptr);
     ~viewMainImage();
     void Tester();
+
 
 
 signals:

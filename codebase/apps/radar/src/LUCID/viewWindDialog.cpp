@@ -3,21 +3,24 @@
 
 viewWindDialog::viewWindDialog(QWidget *parent) : QDialog(parent)
 {
+    //this class sets up the wind indicators Configuration window
     setWindowTitle("Winds Configuration");
 
+    //wind layer selector label and combobox with dummy options
     windSelectLabel = new QLabel;
     windSelectLabel->setText("Select Wind Layer:");
-
     windSelector = new QComboBox;
     windSelector->addItem("Surf");
     windSelector->addItem("RUC");
     windSelector->addItem("VDRAS");
     windSelector->addItem("DDOP");
 
+    //Url label and line edit with no conneciton yet
     windUrlLabel = new QLabel;
     windUrlLabel->setText("Url:");
     windUrlInput = new QLineEdit;
 
+    //color selector label and combobox with dummy options
     windColorSelectText = new QLabel;
     windColorSelectText->setText("Select Color:");
     windColorSelect = new QComboBox;
@@ -26,48 +29,58 @@ viewWindDialog::viewWindDialog(QWidget *parent) : QDialog(parent)
     windColorSelect->addItem("orange");
     windColorSelect->addItem("red");
 
+    //number label and slider with no connection yet
     windNumLabel = new QLabel;
     windNumLabel->setText("Number:");
     windNumSlider = new QSlider(Qt::Horizontal, this);
 
+    //width label and slider with no connection yet
     windWidthLabel = new QLabel;
     windWidthLabel->setText("Width:");
     windWidthSlider = new QSlider(Qt::Horizontal, this);
 
+    //length label and slider with no connection yet
     windLengthLabel = new QLabel;
     windLengthLabel->setText("Length:");
     windLengthSlider = new QSlider(Qt::Horizontal, this);
 
+    //Uname label and line edit with no connection yet
     UNameLabel = new QLabel;
     UNameLabel->setText("UName:");
     UNameInput = new QLineEdit;
     UNameInput->setText("UWind");
 
+    //Vname label and line edit with no connection yet
     VNameLabel = new QLabel;
     VNameLabel->setText("VName:");
     VNameInput = new QLineEdit;
     VNameInput->setText("VWind");
 
+    //Wname label and line edit with no connection yet
     WNameLabel = new QLabel;
     WNameLabel->setText("WName:");
     WNameInput = new QLineEdit;
     WNameInput->setText("NA");
 
+    //time slop label and line edit with no connection yet
     windTimeSlopLabel = new QLabel;
     windTimeSlopLabel->setText("Time Slop:");
     windTimeSlopInput = new QLineEdit;
     windTimeSlopInput->setText("100v/t");
 
+    //time offset label and line edit with no connection yet
     windTimeOffsetLabel = new QLabel;
     windTimeOffsetLabel->setText("Time Offset:");
     windTimeOffsetInput = new QLineEdit;
     windTimeOffsetInput->setText("0v/t");
 
+    //altitude offset label and line edit with no connection yet
     windAltitudeOffsetLabel = new QLabel;
     windAltitudeOffsetLabel->setText("Altitude Offset:");
     windAltitudeOffsetInput = new QLineEdit;
     windAltitudeOffsetInput->setText("0v/t");
 
+    //styles label and combo box with dummy options
     windStylesLabel = new QLabel;
     windStylesLabel->setText("Style:");
     windStyles = new QComboBox;
@@ -81,20 +94,20 @@ viewWindDialog::viewWindDialog(QWidget *parent) : QDialog(parent)
     windStyles->addItem("SH Barbs");
     windStyles->addItem("LSH Barbs");
 
+    //Show legend label and checkbox with no connection yet
     windLegendLabel = new QLabel;
     windLegendLabel->setText("Show Legend:");
     windLegendSelect = new QCheckBox;
 
+    //layouts
     windLayoutH1 = new QHBoxLayout;
     windLayoutH2 = new QHBoxLayout;
     windLayoutH3 = new QHBoxLayout;
-
     windLayoutV1 = new QVBoxLayout;
     windLayoutV2 = new QVBoxLayout;
     windLayoutV3 = new QVBoxLayout;
     windLayoutV4 = new QVBoxLayout;
     windLayoutVAll = new QVBoxLayout;
-
 
     windLayoutH1->addWidget(windSelectLabel);
     windLayoutH1->addWidget(windSelector);
@@ -161,6 +174,7 @@ viewWindDialog::viewWindDialog(QWidget *parent) : QDialog(parent)
 
 viewWindDialog::~viewWindDialog()
 {
+    //as of now, all pointers go into windLayoutVAll, so that is all that needs to be deleted
     delete windLayoutVAll;
     /*
     delete windSelectLabel;

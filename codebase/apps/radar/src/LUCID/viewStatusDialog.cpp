@@ -10,7 +10,6 @@ viewStatusDialog::viewStatusDialog(QWidget *parent) : QDialog(parent)
     mainLayout = new QVBoxLayout;
 
     //make buttons
-
     clear = new QPushButton(tr("Clear"));
     close = new QPushButton(tr("Close"));
 
@@ -26,6 +25,9 @@ viewStatusDialog::viewStatusDialog(QWidget *parent) : QDialog(parent)
     {
         statuses->addItems(QStringList() << "Something is happening with the weather");
         statuses->addItems(QStringList() << "Or maybe something is happening with CIDD");
+        statuses->addItems(QStringList() << "Hopefully this becomes something");
+        statuses->addItems(QStringList() << "Will the status of LUCID's progress be included");
+        statuses->addItems(QStringList() << "   in this status window? Doubt");
     }
 
     //connect the 2 buttons
@@ -40,5 +42,6 @@ viewStatusDialog::viewStatusDialog(QWidget *parent) : QDialog(parent)
 
 viewStatusDialog::~viewStatusDialog()
 {
-
+    //as of now, all pointers go into 'mainLayout', so that is all that needs to be deleted
+    delete mainLayout;
 }

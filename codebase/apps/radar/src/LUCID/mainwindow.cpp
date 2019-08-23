@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -9,36 +10,30 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     MainWindow::move(100,0);
 
-
-
     //MainWindow::startImage(); //create main dummy image and scale bar
     MainWindow::startToolBars(); //create dummy toolbars for products, and maps
     MainWindow::toolBarSpacers(); //create spacer for the main toobar
     MainWindow::fieldDockMaker(); //create dummy field dock
 
-
-
-    Vsec = new viewVsection(this); //this line makes a new Vsection box
+    Vsec = new viewVsection(this);
     //V_section(this) the 'this' makes the main window the parent, so if the parent is closed, then the window is closed too.
     Stat = new viewStatusDialog(this);
-
     windDialog = new viewWindDialog(this);
-
     gridConfigDialog = new viewGridConfigDialog(this);
+    zoomWindow = new viewZoomOptions(this);
+    valuesWindow = new viewValuesDisplay(this);
 
     playerDock = new viewPlayerDock(this);
     MainWindow::addDockWidget(Qt::BottomDockWidgetArea, playerDock);
     playerDock->hide();
 
-    zoomWindow = new viewZoomOptions(this);
-
-    valuesWindow = new viewValuesDisplay(this);
-
-    centralImage = new viewMainImage(this);
+    centralImage = new viewMainImage(R"(:/images/images/example.png)", this);
     setCentralWidget(centralImage);
     centralWidget()->setMouseTracking(true);
 
-    viewMainImage MMM;
+    //just a tester to access function in other file/class
+    //totally delete this later on
+    viewMainImage MMM("wut");
     MMM.Tester();
 
 }
@@ -177,12 +172,6 @@ void MainWindow::fieldDockMaker()
 
 
 
-
-
-
-
-
-
 //-------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------
 //SLOTS n actions n stuff
@@ -233,8 +222,16 @@ void MainWindow::on_actionMovie_Player_toggled(bool arg1)
     }
 }
 
+
+
+
+
 void MainWindow::on_actionStatus_Window_triggered()
 {
+    //this reads the current position and size of the main window
+    //then places the status window to the right of it
+    //shows it,
+    //and raises it in case it got covered up.
     QPoint p = MainWindow::pos();
     QSize  s = MainWindow::frameSize();
     Stat->move(p.x()+s.width(), p.y()+75);
@@ -244,6 +241,10 @@ void MainWindow::on_actionStatus_Window_triggered()
 
 void MainWindow::on_actionVsection_triggered()
 {
+    //this reads the current position and size of the main window
+    //then places the Vsection window to the right of it
+    //shows it,
+    //and raises it in case it got covered up.
     QPoint p = MainWindow::pos();
     QSize  s = MainWindow::frameSize();
     Vsec->move(p.x()+s.width(), p.y());
@@ -253,6 +254,10 @@ void MainWindow::on_actionVsection_triggered()
 
 void MainWindow::on_actionZoom_Window_triggered()
 {
+    //this reads the current position and size of the main window
+    //then places the zooms window to the right of it
+    //shows it,
+    //and raises it in case it got covered up.
     QPoint p = MainWindow::pos();
     QSize  s = MainWindow::frameSize();
     zoomWindow->move(p.x()+s.width(), p.y()+100);
@@ -266,6 +271,10 @@ void MainWindow::on_actionValues_Cursor_toggled(bool arg1)
         valuesWindow->hide();
     }
     else {
+        //this reads the current position and size of the main window
+        //then places the values window to the right of it
+        //shows it,
+        //and raises it in case it got covered up.
         QPoint p = MainWindow::pos();
         QSize  s = MainWindow::frameSize();
         valuesWindow->move(p.x()+s.width(), p.y()+125);
@@ -276,6 +285,10 @@ void MainWindow::on_actionValues_Cursor_toggled(bool arg1)
 
 void MainWindow::on_actionWind_Layer_triggered()
 {
+    //this reads the current position and size of the main window
+    //then places the wind configuration window to the right of it
+    //shows it,
+    //and raises it in case it got covered up.
     QPoint p = MainWindow::pos();
     QSize  s = MainWindow::frameSize();
     windDialog->move(p.x()+s.width(), p.y()+50);
@@ -285,12 +298,36 @@ void MainWindow::on_actionWind_Layer_triggered()
 
 void MainWindow::on_actionData_Layers_triggered()
 {
+    //this reads the current position and size of the main window
+    //then places the grid configuration window to the right of it
+    //shows it,
+    //and raises it in case it got covered up.
     QPoint p = MainWindow::pos();
     QSize  s = MainWindow::frameSize();
     gridConfigDialog->move(p.x()+s.width(), p.y()+25);
     gridConfigDialog->show();
     gridConfigDialog->raise();
 }
+
+void MainWindow::on_actionOpen_triggered()
+{
+    //right now, the open file option really is just good for setting a new image in the main window
+    //this should get MUCH more complicated.
+    //open a file dialog to get new image address
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                    "Open the file",
+                                                    "/Users",
+                                                    "Images (*.png *.xpm *.jpg)"); //opens a dialog box "open..." titles the dia box
+    if(!fileName.isEmpty())
+    {
+        //send to viewmainimage to set up a new main image.
+        //there is no filter yet, so I don't know what all can happen if a
+        //file is selected that is not an image file.
+        viewMainImage *temp = new viewMainImage(fileName, this);
+        setCentralWidget(temp);
+    }
+}
+
 
 //cruddy zooms that need replacing
 void MainWindow::on_actionZoomOut_triggered()
@@ -302,6 +339,7 @@ void MainWindow::on_actionZoomIn_triggered()
 {
 
 }
+
 
 
 

@@ -2,6 +2,8 @@
 
 viewVsection::viewVsection(QWidget *parent) : QDialog(parent)
 {
+    //eventually this widget will handle Vsection. It should get changed A LOT
+    //right now it is just a dummy representation with a bad graph
 
     //initialize layouts
     group = new QGroupBox;
@@ -77,5 +79,6 @@ viewVsection::viewVsection(QWidget *parent) : QDialog(parent)
 
 viewVsection::~viewVsection()
 {
-
+    //as of now, all pointers go into 'mainLayout', so that is all that needs to be deleted
+    delete mainLayout;
 }

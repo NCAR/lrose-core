@@ -24,6 +24,8 @@
 #include <QLabel>
 #include <QAction>
 
+
+
 namespace Ui {
 class MainWindow;
 }
@@ -33,11 +35,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    //constructor
     explicit MainWindow(QWidget *parent = nullptr);
+    //destructor
     ~MainWindow();
 
 private slots:
 
+    //actions
     void on_actionFields_toggled(bool arg1);
     void on_actionProducts_toggled(bool arg1);
     void on_actionMaps_toggled(bool arg1);
@@ -50,7 +55,7 @@ private slots:
     void on_actionValues_Cursor_toggled(bool arg1);
     void on_actionWind_Layer_triggered();
     void on_actionData_Layers_triggered();
-
+    void on_actionOpen_triggered();
 
 private:
     Ui::MainWindow *ui;

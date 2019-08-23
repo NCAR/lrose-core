@@ -2,7 +2,12 @@
 
 viewValuesDisplay::viewValuesDisplay(QWidget *parent) : QDialog(parent)
 {
+    //Eventually this widget will display the various data values under the cursor as it is moved over the display
+    //right now, it is just an vacant empty useless dialog window that kinda looks useful
+
     setWindowTitle("Values");
+
+    //labels
     valueLabel1 = new QLabel;
     valueLabel1->setText("Value of 1: ");
     valueLabel2 = new QLabel;
@@ -12,6 +17,7 @@ viewValuesDisplay::viewValuesDisplay(QWidget *parent) : QDialog(parent)
     valueLabel4 = new QLabel;
     valueLabel4->setText("Value of 4: ");
 
+    //text browsers with dummy numbers
     valueOf1 = new QTextBrowser;
     valueOf1->setText("0.01");
     valueOf1->setMaximumHeight(26);
@@ -25,6 +31,7 @@ viewValuesDisplay::viewValuesDisplay(QWidget *parent) : QDialog(parent)
     valueOf4->setText("0.04");
     valueOf4->setMaximumHeight(26);
 
+    //layouts
     valueCombo1 = new QHBoxLayout;
     valueCombo1->addWidget(valueLabel1);
     valueCombo1->addWidget(valueOf1);
@@ -50,5 +57,6 @@ viewValuesDisplay::viewValuesDisplay(QWidget *parent) : QDialog(parent)
 
 viewValuesDisplay::~viewValuesDisplay()
 {
-
+    //as of now, all pointers go into 'valuesLayout', so that is all that needs to be deleted
+    delete valuesLayout;
 }

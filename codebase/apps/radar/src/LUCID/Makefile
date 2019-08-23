@@ -41,7 +41,7 @@ LOC_INCLUDES = $(QT_INCLUDES) $(HDRS) -I/usr/local/Cellar/qt/5.13.0/lib/QtCharts
 
 
 # need to add -lRadx -lNcxx -ltoolsa -ldataport  $(NETCDF4_LIBS)
-LOC_LIBS = $(QT_LIBS)  \
+LOC_LIBS = $(QT_LIBS) \
 	-ltdrp -lfftw3 -lbz2 -lz -lpthread -lm 
 
 # need to add $(NETCDF4_LDFLAGS)
