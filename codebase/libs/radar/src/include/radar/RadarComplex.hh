@@ -271,6 +271,10 @@ public:
   double getCount() const {
     return _count;
   }
+  // is this valid? i.e. is count > 0
+  bool valid() const {
+    return (_count > 0);
+  }
 private:
   // data
   RadarComplex_t _sum;
@@ -311,6 +315,10 @@ public:
   // get the count
   double getCount() const {
     return _count;
+  }
+  // is this valid? i.e. is count > 0
+  bool valid() const {
+    return (_count > 0);
   }
 private:
   // data
