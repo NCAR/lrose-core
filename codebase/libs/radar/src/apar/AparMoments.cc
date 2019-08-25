@@ -400,10 +400,10 @@ void AparMoments::computeMoments(vector<const AparTsPulse *> &pulses,
 
   // dbm
 
-  double dbm_hc = AparMomFields::missingDouble;
-  double dbm_vc = AparMomFields::missingDouble;
-  double dbm_hx = AparMomFields::missingDouble;
-  double dbm_vx = AparMomFields::missingDouble;
+  double dbm_hc = _missing;
+  double dbm_vc = _missing;
+  double dbm_hx = _missing;
+  double dbm_vx = _missing;
 
   if (_sum_lag0_hc.valid()) {
     fields.lag0_hc_db = 10.0 * log10(fields.lag0_hc);
@@ -436,31 +436,47 @@ void AparMoments::computeMoments(vector<const AparTsPulse *> &pulses,
   
   // compute noise-subtracted lag0
   
-  double lag0_hc_ns = fields.lag0_hc - _noisePowerHc;
-  double lag0_vc_ns = fields.lag0_vc - _noisePowerVc;
-  double lag0_hx_ns = fields.lag0_hx - _noisePowerHx;
-  double lag0_vx_ns = fields.lag0_vx - _noisePowerVx;
+  bool snrHcOK = false;
+  bool snrVcOK = false;
+  bool snrHxOK = false;
+  bool snrVxOK = false;
+
+  double lag0_hc_ns = _missing;
+  double lag0_vc_ns = _missing;
+  double lag0_hx_ns = _missing;
+  double lag0_vx_ns = _missing;
   
-  // check SNR
+  if (_sum_lag0_hc.valid()) {
+    lag0_hc_ns = fields.lag0_hc - _noisePowerHc;
+    snrHcOK = true;
+  }
+  if (_sum_lag0_vc.valid()) {
+    lag0_vc_ns = fields.lag0_vc - _noisePowerVc;
+    snrVcOK = true;
+  }
+  if (_sum_lag0_hx.valid()) {
+    lag0_hx_ns = fields.lag0_hx - _noisePowerHx;
+    snrHxOK = true;
+  }
+  if (_sum_lag0_vx.valid()) {
+    lag0_vx_ns = fields.lag0_vx - _noisePowerVx;
+    snrVxOK = true;
+  }
+
+  // check snr
   
-  bool snrHcOK = true;
   double min_valid_pwr_hc = _noisePowerHc * _minDetectableSnr;
   if (lag0_hc_ns < min_valid_pwr_hc) {
     snrHcOK = false;
   }
-  bool snrVcOK = true;
   double min_valid_pwr_vc = _noisePowerVc * _minDetectableSnr;
   if (lag0_vc_ns < min_valid_pwr_vc) {
     snrVcOK = false;
   }
-  
-  bool snrHxOK = true;
   double min_valid_pwr_hx = _noisePowerHx * _minDetectableSnr;
   if (lag0_hx_ns < min_valid_pwr_hx) {
     snrHxOK = false;
   }
-
-  bool snrVxOK = true;
   double min_valid_pwr_vx = _noisePowerVx * _minDetectableSnr;
   if (lag0_vx_ns < min_valid_pwr_vx) {
     snrVxOK = false;
@@ -468,33 +484,37 @@ void AparMoments::computeMoments(vector<const AparTsPulse *> &pulses,
   
   // compute snr
   
-  double snr_hc = lag0_hc_ns / _calNoisePowerHc;
-  double snr_hx = lag0_hx_ns / _calNoisePowerHx;
-  double snr_vc = lag0_vc_ns / _calNoisePowerVc;
-  double snr_vx = lag0_vx_ns / _calNoisePowerVx;
+  double snr_hc = _missing;
+  double snr_vc = _missing;
+  double snr_hx = _missing;
+  double snr_vx = _missing;
   
   if (snrHcOK) {
+    snr_hc = lag0_hc_ns / _calNoisePowerHc;
     fields.dbmhc_ns = 10.0 * log10(lag0_hc_ns) - _receiverGainDbHc;
     fields.snrhc = 10.0 * log10(snr_hc);
   } else {
     fields.dbmhc_ns = _missing;
     fields.snrhc = _missing;
   }
-  if (snrHxOK) {
-    fields.dbmhx_ns = 10.0 * log10(lag0_hx_ns) - _receiverGainDbHx;
-    fields.snrhx = 10.0 * log10(snr_hx);
-  } else {
-    fields.dbmhx_ns = _missing;
-    fields.snrhx = _missing;
-  }
   if (snrVcOK) {
+    snr_vc = lag0_vc_ns / _calNoisePowerVc;
     fields.dbmvc_ns = 10.0 * log10(lag0_vc_ns) - _receiverGainDbVc;
     fields.snrvc = 10.0 * log10(snr_vc);
   } else {
     fields.dbmvc_ns = _missing;
     fields.snrvc = _missing;
   }
+  if (snrHxOK) {
+    snr_hx = lag0_hx_ns / _calNoisePowerHx;
+    fields.dbmhx_ns = 10.0 * log10(lag0_hx_ns) - _receiverGainDbHx;
+    fields.snrhx = 10.0 * log10(snr_hx);
+  } else {
+    fields.dbmhx_ns = _missing;
+    fields.snrhx = _missing;
+  }
   if (snrVxOK) {
+    snr_vx = lag0_vx_ns / _calNoisePowerVx;
     fields.dbmvx_ns = 10.0 * log10(lag0_vx_ns) - _receiverGainDbVx;
     fields.snrvx = 10.0 * log10(snr_vx);
   } else {
@@ -594,15 +614,16 @@ void AparMoments::computeMoments(vector<const AparTsPulse *> &pulses,
   fields.ldr_mean = _missing;
   fields.zdr_bias = _missing;
 
-  if (fields.ldrh != _missing && fields.ldrv != _missing) {
-    fields.ldr = (fields.ldrh + fields.ldrv) / 2.0;
-    fields.ldr_diff = fields.ldrv - fields.ldrh;
-    if (fields.zdr != _missing) {
-      double ldrvPrime = fields.ldrv - fields.zdr;
-      fields.ldr_mean = (fields.ldrh + ldrvPrime) / 2.0;
-      fields.zdr_bias = fields.zdr - fields.ldr_diff;
-    }
-  } else if (fields.ldrh != _missing) {
+  // if (fields.ldrh != _missing && fields.ldrv != _missing) {
+  //   fields.ldr = (fields.ldrh + fields.ldrv) / 2.0;
+  //   fields.ldr_diff = fields.ldrv - fields.ldrh;
+  //   if (fields.zdr != _missing) {
+  //     double ldrvPrime = fields.ldrv - fields.zdr;
+  //     fields.ldr_mean = (fields.ldrh + ldrvPrime) / 2.0;
+  //     fields.zdr_bias = fields.zdr - fields.ldr_diff;
+  //   }
+  // } else if (fields.ldrh != _missing) {
+  if (fields.ldrh != _missing) {
     fields.ldr = fields.ldrh;
     fields.ldr_mean = fields.ldrh;
   } else if (fields.ldrv != _missing) {

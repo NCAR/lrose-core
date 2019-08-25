@@ -10,6 +10,8 @@ SUB_DIRS = \
 	AcGeoref2Spdb \
 	AcGeorefCompare \
 	AltCpCompute \
+	AparTsPrint \
+	AparTs2Moments \
 	CalCompute \
 	CedricPrint \
 	ChillCal2Xml \
@@ -25,11 +27,12 @@ SUB_DIRS = \
 	DsrMerge \
 	DualDopplerLobes \
 	HawkEye \
+	HcrTempRxGain \
 	HcrVelCorrect \
 	Hsrl2Radx \
 	IntfRemove \
 	Iq2Dsr \
-	RadxDealias \
+	Iwrf2AparTs \
 	KinGin2Ncf \
 	Mdv2Vad \
 	MdvFold \
@@ -42,6 +45,7 @@ SUB_DIRS = \
 	RadarCal \
 	RadarConst \
 	RadarMdvCompare \
+	RadxDealias \
 	RapMap2Chill \
 	SimCpCompute \
 	SpectraPrint \
