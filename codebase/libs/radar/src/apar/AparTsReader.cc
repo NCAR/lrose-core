@@ -39,7 +39,7 @@
 #include <cerrno>
 #include <iostream>
 #include <dataport/swap.h>
-#include <apardata/AparTsReader.hh>
+#include <radar/AparTsReader.hh>
 using namespace std;
 
 ////////////////////////////////////////////////////

@@ -40,8 +40,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <apardata/AparAltModeVel.hh>
-#include <apardata/AparTsCalib.hh>
+#include <radar/AparAltModeVel.hh>
+#include <radar/AparTsCalib.hh>
 using namespace std;
 
 // Constructor

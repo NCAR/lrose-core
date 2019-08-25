@@ -1,6 +1,6 @@
 ###########################################################################
 #
-# Makefile for apar time series
+# Makefile for apar support code
 #
 # Mike Dixon, EOL, NCAR, Boulder, Co, USA, 80307
 #
@@ -8,19 +8,33 @@
 #
 ###########################################################################
 
-include $(APAR_MAKE_INC_DIR)/apar_make_macros
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
-TARGET_FILE = ../libapardata.a
+TARGET_FILE = ../radar.a
 
 LOC_INCLUDES = -I../include -I$(LROSE_INSTALL_DIR)/include
 LOC_CFLAGS =
 
 HDRS = \
-	../include/apardata/apar_ts_data.h \
-	../include/apardata/apar_ts_functions.hh
+	../include/radar/apar_ts_data.h \
+	../include/radar/apar_ts_functions.hh \
+	../include/radar/AparAltModeVel.hh \
+	../include/radar/AparGateData.hh \
+	../include/radar/AparMomFields.hh \
+	../include/radar/AparMoments.hh \
+	../include/radar/AparNoiseLocator.hh \
+	../include/radar/AparTsCalib.hh \
+	../include/radar/AparTsInfo.hh \
+	../include/radar/AparTsPulse.hh \
+	../include/radar/AparTsReader.hh \
 
 CPPC_SRCS = \
 	apar_ts_functions.cc \
+	AparAltModeVel.cc \
+	AparGateData.cc \
+	AparMomFields.cc \
+	AparMoments.cc \
+	AparNoiseLocator.cc \
 	AparTsCalib.cc \
 	AparTsInfo.cc \
 	AparTsPulse.cc \
@@ -30,7 +44,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(APAR_MAKE_INC_DIR)/apar_make_lib_module_targets
+include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
 
 #
 # local targets
