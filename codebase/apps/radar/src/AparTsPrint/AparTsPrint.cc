@@ -53,7 +53,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/ServerSocket.hh>
 #include <radar/RadarComplex.hh>
-#include <apardata/apar_ts_data.h>
+#include <radar/apar_ts_data.h>
 
 using namespace std;
 

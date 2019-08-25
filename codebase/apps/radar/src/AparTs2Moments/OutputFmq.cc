@@ -40,8 +40,8 @@
 
 #include "Calibration.hh"
 
-#include <apardata/AparTsInfo.hh>
-#include <apardata/AparTsCalib.hh>
+#include <radar/AparTsInfo.hh>
+#include <radar/AparTsCalib.hh>
 #include <radar/RadarCalib.hh>
 #include <cmath>
 #include <toolsa/uusleep.h>

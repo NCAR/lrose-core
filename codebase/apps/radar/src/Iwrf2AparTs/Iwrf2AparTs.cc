@@ -46,8 +46,8 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/str.h>
 #include <toolsa/MemBuf.hh>
-#include <apardata/apar_ts_functions.hh>
-#include <apardata/AparTsPulse.hh>
+#include <radar/apar_ts_functions.hh>
+#include <radar/AparTsPulse.hh>
 #include "Iwrf2AparTs.hh"
 
 using namespace std;

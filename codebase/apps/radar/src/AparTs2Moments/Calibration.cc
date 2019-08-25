@@ -42,7 +42,7 @@
 #include <toolsa/ReadDir.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/TaArray.hh>
-#include <apardata/AparTsInfo.hh>
+#include <radar/AparTsInfo.hh>
 #include "Calibration.hh"
 
 //////////////////

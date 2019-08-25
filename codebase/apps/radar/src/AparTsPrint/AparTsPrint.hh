@@ -46,10 +46,10 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "Stats.hh"
-#include <apardata/AparTsInfo.hh>
-#include <apardata/AparTsPulse.hh>
-#include <apardata/AparTsReader.hh>
-#include <apardata/AparTsCalib.hh>
+#include <radar/AparTsInfo.hh>
+#include <radar/AparTsPulse.hh>
+#include <radar/AparTsReader.hh>
+#include <radar/AparTsCalib.hh>
 #include <toolsa/Socket.hh>
 
 using namespace std;

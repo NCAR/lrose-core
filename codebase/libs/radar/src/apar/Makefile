@@ -10,7 +10,7 @@
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
-TARGET_FILE = ../radar.a
+TARGET_FILE = ../libradar.a
 
 LOC_INCLUDES = -I../include -I$(LROSE_INSTALL_DIR)/include
 LOC_CFLAGS =

@@ -49,8 +49,8 @@
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsReader.hh>
-#include <apardata/apar_ts_data.h>
-#include <apardata/AparTsInfo.hh>
+#include <radar/apar_ts_data.h>
+#include <radar/AparTsInfo.hh>
 
 using namespace std;
 

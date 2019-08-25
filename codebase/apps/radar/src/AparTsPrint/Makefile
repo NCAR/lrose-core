@@ -32,15 +32,15 @@
 #
 ###########################################################################
 
-include $(APAR_MAKE_INC_DIR)/apar_make_macros
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = AparTsPrint
 
-LOC_INCLUDES = -I$(RAP_INC_DIR)
+LOC_INCLUDES =
 LOC_CFLAGS =
-LOC_LDFLAGS = -L$(RAP_LIB_DIR)
+LOC_LDFLAGS =
 LOC_LIBS = \
-	-lapardata -lradar -lRadx -lFmq -ldsserver \
+	-lradar -lRadx -lFmq -ldsserver \
 	-lrapformats -ldidss -ldataport \
 	-leuclid -ltoolsa -ltdrp -lbz2 -lz
 
@@ -61,19 +61,19 @@ CPPC_SRCS = \
 # tdrp macros
 #
 
-include $(APAR_MAKE_INC_DIR)/apar_make_tdrp_macros
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
 
 #
 # standard C++ targets
 #
 
-include $(APAR_MAKE_INC_DIR)/apar_make_c++_targets
+include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
 
 #
 # tdrp targets
 #
 
-include $(APAR_MAKE_INC_DIR)/apar_make_tdrp_c++_targets
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 
 #
 # local targets

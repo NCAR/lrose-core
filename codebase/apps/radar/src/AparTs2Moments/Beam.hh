@@ -45,13 +45,13 @@
 #include <radar/AlternatingVelocity.hh>
 #include <radar/KdpFilt.hh>
 #include <radar/AtmosAtten.hh>
-#include <apardata/AparAltModeVel.hh>
-#include <apardata/AparMoments.hh>
-#include <apardata/AparGateData.hh>
-#include <apardata/AparMomFields.hh>
-#include <apardata/AparTsInfo.hh>
-#include <apardata/AparTsPulse.hh>
-#include <apardata/AparTsCalib.hh>
+#include <radar/AparAltModeVel.hh>
+#include <radar/AparMoments.hh>
+#include <radar/AparGateData.hh>
+#include <radar/AparMomFields.hh>
+#include <radar/AparTsInfo.hh>
+#include <radar/AparTsPulse.hh>
+#include <radar/AparTsCalib.hh>
 #include "Params.hh"
 // #include "MomentsMgr.hh"
 using namespace std;

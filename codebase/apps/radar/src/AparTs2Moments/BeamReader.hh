@@ -38,9 +38,9 @@
 #include <string>
 #include <vector>
 #include <deque>
-#include <apardata/AparTsInfo.hh>
-#include <apardata/AparTsPulse.hh>
-#include <apardata/AparTsReader.hh>
+#include <radar/AparTsInfo.hh>
+#include <radar/AparTsPulse.hh>
+#include <radar/AparTsReader.hh>
 #include <radar/AtmosAtten.hh>
 #include "Params.hh"
 #include "Args.hh"
