@@ -1,0 +1,8 @@
+<AparTsPrintCommands>
+  <nSamples>1000</nSamples>
+  <startGate>50</startGate>
+  <nGates>500</nGates>
+  <dualChannel>true</dualChannel>
+  <fastAlternating>true</fastAlternating>
+  <labviewRequest>true</labviewRequest>
+</AparTsPrintCommands>
