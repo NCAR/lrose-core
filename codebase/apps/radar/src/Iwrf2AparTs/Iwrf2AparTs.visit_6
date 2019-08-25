@@ -1,0 +1,111 @@
+/**********************************************************************
+ * TDRP params for Iwrf2AparTs
+ **********************************************************************/
+
+//======================================================================
+//
+// Iwrf2AparTs reads IWRF time series files, converts to APAR TS data, 
+//   and writes the files to a specified. The input files are specified on 
+//   the command line.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// OUTPUT LOCATION.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Directory for output files.
+//
+//
+// Type: string
+//
+
+output_dir = "$(HOME)/data/apar/tseries_simulate/visit_6";
+
+//======================================================================
+//
+// SPECIFY APAR TIME-SERIES DETAILS.
+//
+//======================================================================
+ 
+///////////// n_samples_per_visit /////////////////////
+//
+// Number of samples taken each time we revisit the beam location.
+//
+// We take this number of samples for an az/el, then move to sampling 
+//   for other locations, before coming back to visit this beam again.
+//
+//
+// Type: int
+//
+
+n_samples_per_visit = 6;
+
+///////////// n_visits_per_beam ///////////////////////
+//
+// Number of visits for each beam.
+//
+// During a dwell, we come back to a specific beam location this number 
+//   of times.
+//
+//
+// Type: int
+//
+
+n_visits_per_beam = 5;
+
+///////////// n_beams_per_dwell ///////////////////////
+//
+// Number of beams sampled in a dwell.
+//
+// During a dwell, we create this number of beams. Then repeat for the 
+//   next dwell.
+//
+//
+// Type: int
+//
+
+n_beams_per_dwell = 4;
+
+///////////// add_cross_pol_sample_at_end_of_visit ////
+//
+// Add 1 cross-pol sample at end of visit.
+//
+// APAR can receive in co-polar or cross-polar mode. This option allows 
+//   us to test the cross-polar mode, by including a cross-polar sample at 
+//   the end of each visit. This option effectively increases 
+//   n_samples_per_visit by 1.
+//
+//
+// Type: boolean
+//
+
+add_cross_pol_sample_at_end_of_visit = TRUE;
+

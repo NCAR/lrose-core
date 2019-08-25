@@ -156,6 +156,33 @@ DBMVC_5  DBMVC_5   $(HOME)/data/apar/moments/visit_5/sur&DBMVC  dbmlow.colors dB
 ======== ========  mdvp::static//$(DATA_HOST):0:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 ======== ========  mdvp::static//$(DATA_HOST):0:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
+# S-BAND MOMENTS - VISIT 6
+
+DBZ_6   DBZ_6   $(HOME)/data/apar/moments/visit_6/sur&DBZ    dbz.colors   dBZ -5 80 5 radial 1 0
+VEL_6   VEL_6   $(HOME)/data/apar/moments/visit_6/sur&VEL    vel.colors   m/s -5 80 5 radial 1 0
+WIDTH_6 WIDTH_6 $(HOME)/data/apar/moments/visit_6/sur&WIDTH  width.colors m/s -5 80 5 radial 1 0
+NCP_6   NCP_6   $(HOME)/data/apar/moments/visit_6/sur&NCP     ncp.colors m/s -5 80 5 radial 1 0
+
+ZDRM_6   ZDRM_6  $(HOME)/data/apar/moments/visit_6/sur&ZDRM  zdr.colors   dB  -5 80 5 radial 1 0
+ZDR_6   ZDR_6    $(HOME)/data/apar/moments/visit_6/sur&ZDR     zdr.colors   dB  -5 80 5 radial 1 0
+LDR_6   LDR_6    $(HOME)/data/apar/moments/visit_6/sur&LDR      ldr.colors   dB  -5 80 5 radial 1 0
+======== ========  mdvp::static//$(DATA_HOST):0:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+PHIDP_6 PHIDP_6  $(HOME)/data/apar/moments/visit_6/sur&PHIDP   phidp.colors deg -5 80 5 radial 1 0
+RHOHV_6 RHOHV_6  $(HOME)/data/apar/moments/visit_6/sur&RHOHV   rhohv.colors _   -5 80 5 radial 1 0
+KDP_6   KDP_6      $(HOME)/data/apar/moments/visit_6/sur&KDP    kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+======== ========  mdvp::static//$(DATA_HOST):0:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+SNRHC_6   SNRHC_6  $(HOME)/data/apar/moments/visit_6/sur&SNRHC    snr.colors   dB     -5 80 5 radial 1 0
+SNRVC_6   SNRVC_6  $(HOME)/data/apar/moments/visit_6/sur&SNRVC    snr.colors   dB     -5 80 5 radial 1 0
+DBMHC_6  DBMHC_6   $(HOME)/data/apar/moments/visit_6/sur&DBMHC  dbmlow.colors dBm -5 80 5 radial 1 0
+DBMVC_6  DBMVC_6   $(HOME)/data/apar/moments/visit_6/sur&DBMVC  dbmlow.colors dBm -5 80 5 radial 1 0
+
+======== ========  mdvp::static//$(DATA_HOST):0:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//$(DATA_HOST):0:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//$(DATA_HOST):0:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//$(DATA_HOST):0:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
 </GRIDS>
 
 <MAPS>
