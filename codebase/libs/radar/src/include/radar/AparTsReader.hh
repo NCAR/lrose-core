@@ -41,8 +41,8 @@
 #include <didss/DsInputPath.hh>
 #include <didss/DsMessage.hh>
 #include <didss/DsMsgPart.hh>
-#include <apardata/AparTsInfo.hh>
-#include <apardata/AparTsPulse.hh>
+#include <radar/AparTsInfo.hh>
+#include <radar/AparTsPulse.hh>
 using namespace std;
 
 ////////////////////////

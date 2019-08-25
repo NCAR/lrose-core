@@ -41,7 +41,7 @@
 #include <toolsa/str.h>
 #include <toolsa/mem.h>
 #include <toolsa/TaArray.hh>
-#include <apardata/AparTsInfo.hh>
+#include <radar/AparTsInfo.hh>
 #include <radar/RadarCalib.hh>
 #include <rapformats/DsRadarCalib.hh>
 using namespace std;

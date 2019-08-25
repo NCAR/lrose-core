@@ -34,7 +34,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/mem.h>
 #include <toolsa/str.h>
-#include <apardata/apar_ts_functions.hh>
+#include <radar/apar_ts_functions.hh>
 
 using namespace std;
 

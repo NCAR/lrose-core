@@ -34,7 +34,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <apardata/AparNoiseLocator.hh>
+#include <radar/AparNoiseLocator.hh>
 #include <toolsa/mem.h>
 #include <algorithm>
 using namespace std;

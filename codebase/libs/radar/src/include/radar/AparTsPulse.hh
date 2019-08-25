@@ -40,7 +40,7 @@
 #include <pthread.h>
 #include <toolsa/MemBuf.hh>
 #include <dataport/port_types.h>
-#include <apardata/AparTsInfo.hh>
+#include <radar/AparTsInfo.hh>
 #include <radar/RadarComplex.hh>
 class OpsInfo;
 

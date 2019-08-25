@@ -37,7 +37,7 @@
 #include <toolsa/sincos.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/toolsa_macros.h>
-#include <apardata/AparTsPulse.hh>
+#include <radar/AparTsPulse.hh>
 using namespace std;
 
 const double AparTsPulse::PHASE_MULT = 180.0 / 32767.0;

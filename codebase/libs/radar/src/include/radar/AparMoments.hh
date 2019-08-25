@@ -39,9 +39,9 @@
 #define AparMoments_hh
 
 #include <string>
-#include <apardata/AparTsInfo.hh>
-#include <apardata/AparTsCalib.hh>
-#include <apardata/AparMomFields.hh>
+#include <radar/AparTsInfo.hh>
+#include <radar/AparTsCalib.hh>
+#include <radar/AparMomFields.hh>
 #include <radar/RadarComplex.hh>
 #include <radar/RadarFft.hh>
 #include <radar/AtmosAtten.hh>

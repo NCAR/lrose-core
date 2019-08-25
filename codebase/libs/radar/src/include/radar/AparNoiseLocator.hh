@@ -39,8 +39,8 @@
 
 #include <pthread.h>
 #include <vector>
-#include <apardata/AparMomFields.hh>
-#include <apardata/AparTsCalib.hh>
+#include <radar/AparMomFields.hh>
+#include <radar/AparTsCalib.hh>
 #include <radar/InterestMap.hh>
 using namespace std;
 

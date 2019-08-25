@@ -67,9 +67,9 @@
 #include <toolsa/TaStr.hh>
 #include <toolsa/file_io.h>
 #include <toolsa/ugetenv.hh>
-#include <apardata/AparTsCalib.hh>
+#include <radar/AparTsCalib.hh>
 #include <radar/RadarCalib.hh>
-#include <apardata/apar_ts_functions.hh>
+#include <radar/apar_ts_functions.hh>
 #include <rapformats/DsRadarCalib.hh>
 #include <Radx/RadxRcalib.hh>
 #include <iostream>

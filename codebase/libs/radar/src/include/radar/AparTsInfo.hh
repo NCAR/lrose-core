@@ -42,8 +42,8 @@
 #include <deque>
 #include <dataport/port_types.h>
 #include <toolsa/MemBuf.hh>
-#include <apardata/apar_ts_functions.hh>
-#include <apardata/AparTsCalib.hh>
+#include <radar/apar_ts_functions.hh>
+#include <radar/AparTsCalib.hh>
 #include <didss/DsMessage.hh>
 using namespace std;
 

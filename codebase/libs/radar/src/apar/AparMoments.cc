@@ -43,8 +43,8 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaArray.hh>
 #include <rapmath/umath.h>
-#include <apardata/AparMoments.hh>
-#include <apardata/AparTsPulse.hh>
+#include <radar/AparMoments.hh>
+#include <radar/AparTsPulse.hh>
 
 const double AparMoments::_missing = AparMomFields::missingDouble;
 const double AparMoments::_phidpPhaseLimitAlt = -70;

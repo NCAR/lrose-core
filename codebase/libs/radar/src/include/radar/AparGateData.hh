@@ -41,8 +41,8 @@
 #define AparGateData_hh
 
 #include <radar/RadarComplex.hh>
-#include <apardata/AparMomFields.hh>
-#include <apardata/apar_ts_data.h>
+#include <radar/AparMomFields.hh>
+#include <radar/apar_ts_data.h>
 #include <toolsa/TaArray.hh>
 using namespace std;
 
