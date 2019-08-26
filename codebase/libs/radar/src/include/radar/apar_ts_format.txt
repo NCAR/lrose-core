@@ -1,4 +1,4 @@
-===================== APAR FORMAT ======================
+============= APAR TIME SERIES FORMAT ==================
 --------------------------------------------------------
   struct: 'apar_ts_packet_info_t'
   included in all packet types

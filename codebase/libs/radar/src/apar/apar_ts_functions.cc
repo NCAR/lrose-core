@@ -1584,7 +1584,7 @@ static void _print_format_header(FILE *out)
 void apar_ts_print_all_formats(FILE *out)
 {
 
-  fprintf(out, "===================== APAR FORMAT ======================\n");
+  fprintf(out, "============= APAR TIME SERIES FORMAT ==================\n");
 
   {
     apar_ts_packet_info_t val;
