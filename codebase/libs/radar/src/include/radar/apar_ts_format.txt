@@ -1,0 +1,445 @@
+===================== APAR FORMAT ======================
+--------------------------------------------------------
+  struct: 'apar_ts_packet_info_t'
+  included in all packet types
+  size: 64
+
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                             id       4       0
+     si32                      len_bytes       4       4
+     si64                        seq_num       8       8
+     si32                    version_num       4      16
+     si32                       radar_id       4      20
+     si64                  time_secs_utc       8      24
+     si32                 time_nano_secs       4      32
+     si32                    reserved[7]      28      36
+--------------------------------------------------------
+--------------------------------------------------------
+  struct: 'apar_ts_sync_t'
+  size: 128
+  id: 0x55550001
+
+  packet info:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                             id       4       0
+     si32                      len_bytes       4       4
+     si64                        seq_num       8       8
+     si32                    version_num       4      16
+     si32                       radar_id       4      20
+     si64                  time_secs_utc       8      24
+     si32                 time_nano_secs       4      32
+     si32                    reserved[7]      28      36
+
+  meta-data:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                      magik[16]      64      64
+--------------------------------------------------------
+--------------------------------------------------------
+  struct: 'apar_ts_version_t'
+  size: 128
+  id: 0x55550008
+
+  packet info:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                             id       4       0
+     si32                      len_bytes       4       4
+     si64                        seq_num       8       8
+     si32                    version_num       4      16
+     si32                       radar_id       4      20
+     si64                  time_secs_utc       8      24
+     si32                 time_nano_secs       4      32
+     si32                    reserved[7]      28      36
+
+  meta-data:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32              major_version_num       4      64
+     si32              minor_version_num       4      68
+     char               version_name[56]      56      72
+--------------------------------------------------------
+--------------------------------------------------------
+  struct: 'apar_ts_radar_info_t'
+  size: 256
+  id: 0x55550002
+
+  packet info:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                             id       4       0
+     si32                      len_bytes       4       4
+     si64                        seq_num       8       8
+     si32                    version_num       4      16
+     si32                       radar_id       4      20
+     si64                  time_secs_utc       8      24
+     si32                 time_nano_secs       4      32
+     si32                    reserved[7]      28      36
+
+  meta-data:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     fl64                   latitude_deg       8      64
+     fl64                  longitude_deg       8      72
+     fl32                     altitude_m       4      80
+     si32                  platform_type       4      84
+     fl32                beamwidth_deg_h       4      88
+     fl32                beamwidth_deg_v       4      92
+     fl32                  wavelength_cm       4      96
+     fl32          nominal_gain_ant_db_h       4     100
+     fl32          nominal_gain_ant_db_v       4     104
+     si32                     unused[21]      84     108
+     char                 radar_name[32]      32     192
+     char                  site_name[32]      32     224
+--------------------------------------------------------
+--------------------------------------------------------
+  struct: 'apar_ts_scan_segment_t'
+  size: 4096
+  id: 0x55550003
+
+  packet info:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                             id       4       0
+     si32                      len_bytes       4       4
+     si64                        seq_num       8       8
+     si32                    version_num       4      16
+     si32                       radar_id       4      20
+     si64                  time_secs_utc       8      24
+     si32                 time_nano_secs       4      32
+     si32                    reserved[7]      28      36
+
+  meta-data:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                      scan_mode       4      64
+     si32                     volume_num       4      68
+     si32                      sweep_num       4      72
+     fl32                       az_start       4      76
+     fl32                       el_start       4      80
+     fl32                      scan_rate       4      84
+     fl32                     left_limit       4      88
+     fl32                    right_limit       4      92
+     fl32                       up_limit       4      96
+     fl32                     down_limit       4     100
+     fl32                           step       4     104
+     fl32            current_fixed_angle       4     108
+     si32                       n_sweeps       4     112
+     fl32              fixed_angles[520]    2080     116
+     fl32       sun_scan_sector_width_az       4    2196
+     fl32       sun_scan_sector_width_el       4    2200
+     si32                    unused[456]    1824    2204
+     char               segment_name[32]      32    4028
+     char               project_name[32]      32    4060
+--------------------------------------------------------
+--------------------------------------------------------
+  struct: 'apar_ts_processing_t'
+  size: 256
+  id: 0x55550004
+
+  packet info:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                             id       4       0
+     si32                      len_bytes       4       4
+     si64                        seq_num       8       8
+     si32                    version_num       4      16
+     si32                       radar_id       4      20
+     si64                  time_secs_utc       8      24
+     si32                 time_nano_secs       4      32
+     si32                    reserved[7]      28      36
+
+  meta-data:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                       pol_mode       4      64
+     si32                       prf_mode       4      68
+     si32                    pulse_shape       4      72
+     fl32                 pulse_width_us       4      76
+     fl32                  start_range_m       4      80
+     fl32                 gate_spacing_m       4      84
+     fl32            test_pulse_range_km       4      88
+     fl32           test_pulse_length_us       4      92
+     si32                       num_prts       4      96
+     fl32                      prt_us[4]      16     100
+     si32                     unused[35]     140     116
+--------------------------------------------------------
+--------------------------------------------------------
+  struct: 'apar_ts_status_xml_t'
+  size: 128
+  id: 0x55550009
+
+  packet info:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                             id       4       0
+     si32                      len_bytes       4       4
+     si64                        seq_num       8       8
+     si32                    version_num       4      16
+     si32                       radar_id       4      20
+     si64                  time_secs_utc       8      24
+     si32                 time_nano_secs       4      32
+     si32                    reserved[7]      28      36
+
+  meta-data:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                        xml_len       4      64
+     si32                     unused[15]      60      68
+--------------------------------------------------------
+--------------------------------------------------------
+  struct: 'apar_ts_calibration_t'
+  size: 512
+  id: 0x55550005
+
+  packet info:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                             id       4       0
+     si32                      len_bytes       4       4
+     si64                        seq_num       8       8
+     si32                    version_num       4      16
+     si32                       radar_id       4      20
+     si64                  time_secs_utc       8      24
+     si32                 time_nano_secs       4      32
+     si32                    reserved[7]      28      36
+
+  meta-data:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     fl32                  wavelength_cm       4      64
+     fl32                beamwidth_deg_h       4      68
+     fl32                beamwidth_deg_v       4      72
+     fl32                  gain_ant_db_h       4      76
+     fl32                  gain_ant_db_v       4      80
+     fl32                 pulse_width_us       4      84
+     fl32               xmit_power_dbm_h       4      88
+     fl32               xmit_power_dbm_v       4      92
+     fl32    two_way_waveguide_loss_db_h       4      96
+     fl32    two_way_waveguide_loss_db_v       4     100
+     fl32       two_way_radome_loss_db_h       4     104
+     fl32       two_way_radome_loss_db_v       4     108
+     fl32      receiver_mismatch_loss_db       4     112
+     fl32                k_squared_water       4     284
+     fl32               radar_constant_h       4     116
+     fl32               radar_constant_v       4     120
+     fl32                   noise_dbm_hc       4     124
+     fl32                   noise_dbm_hx       4     128
+     fl32                   noise_dbm_vc       4     132
+     fl32                   noise_dbm_vx       4     136
+     fl32                      i0_dbm_hc       4     252
+     fl32                      i0_dbm_hx       4     256
+     fl32                      i0_dbm_vc       4     260
+     fl32                      i0_dbm_vx       4     264
+     fl32            receiver_gain_db_hc       4     140
+     fl32            receiver_gain_db_hx       4     144
+     fl32            receiver_gain_db_vc       4     148
+     fl32            receiver_gain_db_vx       4     152
+     fl32              receiver_slope_hc       4     236
+     fl32              receiver_slope_hx       4     240
+     fl32              receiver_slope_vc       4     244
+     fl32              receiver_slope_vx       4     248
+     fl32            dynamic_range_db_hc       4     268
+     fl32            dynamic_range_db_hx       4     272
+     fl32            dynamic_range_db_vc       4     276
+     fl32            dynamic_range_db_vx       4     280
+     fl32                base_dbz_1km_hc       4     156
+     fl32                base_dbz_1km_hx       4     160
+     fl32                base_dbz_1km_vc       4     164
+     fl32                base_dbz_1km_vx       4     168
+     fl32               sun_power_dbm_hc       4     172
+     fl32               sun_power_dbm_hx       4     176
+     fl32               sun_power_dbm_vc       4     180
+     fl32               sun_power_dbm_vx       4     184
+     fl32       noise_source_power_dbm_h       4     188
+     fl32       noise_source_power_dbm_v       4     192
+     fl32           power_meas_loss_db_h       4     196
+     fl32           power_meas_loss_db_v       4     200
+     fl32      coupler_forward_loss_db_h       4     204
+     fl32      coupler_forward_loss_db_v       4     208
+     fl32               test_power_dbm_h       4     212
+     fl32               test_power_dbm_v       4     216
+     fl32              zdr_correction_db       4     220
+     fl32            ldr_correction_db_h       4     224
+     fl32            ldr_correction_db_v       4     228
+     fl32                  phidp_rot_deg       4     232
+     fl32              receiver_slope_hc       4     236
+     fl32              receiver_slope_hx       4     240
+     fl32              receiver_slope_vc       4     244
+     fl32              receiver_slope_vx       4     248
+     fl32                      i0_dbm_hc       4     252
+     fl32                      i0_dbm_hx       4     256
+     fl32                      i0_dbm_vc       4     260
+     fl32                      i0_dbm_vx       4     264
+     fl32            dynamic_range_db_hc       4     268
+     fl32            dynamic_range_db_hx       4     272
+     fl32            dynamic_range_db_vc       4     276
+     fl32            dynamic_range_db_vx       4     280
+     fl32                k_squared_water       4     284
+     fl32                 dbz_correction       4     288
+     si32                     unused[47]     188     292
+     char                 radar_name[32]      32     480
+--------------------------------------------------------
+--------------------------------------------------------
+  struct: 'apar_ts_event_notice_t'
+  size: 256
+  id: 0x55550006
+
+  packet info:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                             id       4       0
+     si32                      len_bytes       4       4
+     si64                        seq_num       8       8
+     si32                    version_num       4      16
+     si32                       radar_id       4      20
+     si64                  time_secs_utc       8      24
+     si32                 time_nano_secs       4      32
+     si32                    reserved[7]      28      36
+
+  meta-data:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                 start_of_sweep       4      64
+     si32                   end_of_sweep       4      68
+     si32                start_of_volume       4      72
+     si32                  end_of_volume       4      76
+     si32                      scan_mode       4      80
+     si32                     volume_num       4      84
+     si32                      sweep_num       4      88
+     fl32            current_fixed_angle       4      92
+     si32                     unused[40]     160      96
+--------------------------------------------------------
+--------------------------------------------------------
+  struct: 'apar_ts_pulse_header_t'
+  size: 512
+  id: 0x55550007
+
+  packet info:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                             id       4       0
+     si32                      len_bytes       4       4
+     si64                        seq_num       8       8
+     si32                    version_num       4      16
+     si32                       radar_id       4      20
+     si64                  time_secs_utc       8      24
+     si32                 time_nano_secs       4      32
+     si32                    reserved[7]      28      36
+
+  meta-data:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si64                  pulse_seq_num       8      64
+     si64                  dwell_seq_num       8      72
+     si32              beam_num_in_dwell       4      80
+     si32              visit_num_in_beam       4      84
+     si32                      scan_mode       4      88
+     si32                     volume_num       4      92
+     si32                      sweep_num       4      96
+     fl32                      elevation       4     100
+     fl32                        azimuth       4     104
+     fl32                    fixed_angle       4     108
+     fl32                            prt       4     112
+     fl32                       prt_next       4     116
+     fl32                 pulse_width_us       4     120
+     si32                        n_gates       4     124
+     fl32                  start_range_m       4     128
+     fl32                 gate_spacing_m       4     132
+     si32                        hv_flag       4     136
+     si32                  phase_cohered       4     140
+     si32                    iq_encoding       4     144
+     si32                     n_channels       4     148
+     si32                         n_data       4     152
+     fl32                          scale       4     156
+     fl32                         offset       4     160
+     si32               chan_is_copol[4]      16     164
+     si32                         status       4     180
+     si32                    event_flags       4     184
+     si32                     unused[80]     320     188
+--------------------------------------------------------
+--------------------------------------------------------
+  struct: 'apar_ts_platform_georef_t'
+  size: 256
+  id: 0x5555000a
+
+  packet info:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                             id       4       0
+     si32                      len_bytes       4       4
+     si64                        seq_num       8       8
+     si32                    version_num       4      16
+     si32                       radar_id       4      20
+     si64                  time_secs_utc       8      24
+     si32                 time_nano_secs       4      32
+     si32                    reserved[7]      28      36
+
+  meta-data:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     fl64                      longitude       8      64
+     fl64                       latitude       8      72
+     si32                       unit_num       4      80
+     si32                             id       4      84
+     fl32                altitude_msl_km       4      88
+     fl32                altitude_agl_km       4      92
+     fl32                ew_velocity_mps       4      96
+     fl32                ns_velocity_mps       4     100
+     fl32              vert_velocity_mps       4     104
+     fl32                    heading_deg       4     108
+     fl32                      track_deg       4     112
+     fl32                       roll_deg       4     116
+     fl32                      pitch_deg       4     120
+     fl32                drift_angle_deg       4     124
+     fl32             rotation_angle_deg       4     128
+     fl32                       tilt_deg       4     132
+     fl32              ew_horiz_wind_mps       4     136
+     fl32              ns_horiz_wind_mps       4     140
+     fl32                  vert_wind_mps       4     144
+     fl32               heading_rate_dps       4     148
+     fl32                 pitch_rate_dps       4     152
+     fl32                  roll_rate_dps       4     156
+     si32                     unused[24]      96     160
+--------------------------------------------------------
+--------------------------------------------------------
+  struct: 'apar_ts_georef_correction_t'
+  size: 256
+  id: 0x5555000b
+
+  packet info:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     si32                             id       4       0
+     si32                      len_bytes       4       4
+     si64                        seq_num       8       8
+     si32                    version_num       4      16
+     si32                       radar_id       4      20
+     si64                  time_secs_utc       8      24
+     si32                 time_nano_secs       4      32
+     si32                    reserved[7]      28      36
+
+  meta-data:
+     type                           name    size  offset
+     ----                           ----    ----  ------
+     fl32             longitude_corr_deg       4      64
+     fl32              latitude_corr_deg       4      68
+     fl32               azimuth_corr_deg       4      72
+     fl32             elevation_corr_deg       4      76
+     fl32           range_delay_corr_mps       4      80
+     fl32           pressure_alt_corr_km       4      84
+     fl32              radar_alt_corr_km       4      88
+     fl32             ew_gndspd_corr_mps       4      92
+     fl32             ns_gndspd_corr_mps       4      96
+     fl32              vert_vel_corr_mps       4     100
+     fl32               heading_corr_deg       4     104
+     fl32                  roll_corr_deg       4     108
+     fl32                 pitch_corr_deg       4     112
+     fl32                 drift_corr_deg       4     116
+     fl32             rot_angle_corr_deg       4     120
+     fl32                  tilt_corr_deg       4     124
+     si32                     unused[32]     128     128
+--------------------------------------------------------
+========================================================
