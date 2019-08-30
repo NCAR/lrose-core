@@ -491,6 +491,13 @@ Beam *BeamReader::getNextBeam()
             _el, startEl, endEl, _beamElRate,
             _az, startAz, endAz, _beamAzRate,
             _nSamples, nSamplesEffective);
+    if (_scanType == Beam::SCAN_TYPE_PPI) {
+      cerr << "  scanType, xmitRcvMode: PPI, "
+           << iwrf_xmit_rcv_mode_to_str(xmitRcvMode) << endl;
+    } else {
+      cerr << "  scanType, xmitRcvMode: RHI, "
+           << iwrf_xmit_rcv_mode_to_str(xmitRcvMode) << endl;
+    }
   }
 
   // reset end of vol flag
