@@ -1988,7 +1988,7 @@ DSINP_dataset_time_t *DSINP_get_dataset_times(char *input_dir,
 	  add_dataset_time(dataset_time.unix_time, forecast_time);
 	  
 	} /* endfor - fore_dp */
-        close(fore_dirp);	
+        closedir(fore_dirp);	
       } /* endif - forecast subdirectory */
       else
       {
