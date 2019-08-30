@@ -14,6 +14,8 @@ public:
     explicit viewValuesDisplay(QWidget *parent = nullptr);
     ~viewValuesDisplay();
 
+    QTextBrowser *valueOf1, *valueOf2, *valueOf3, *valueOf4;
+
 signals:
 
 public slots:
@@ -21,7 +23,7 @@ public slots:
 private:
 
     QLabel *valueLabel1, *valueLabel2, *valueLabel3, *valueLabel4;
-    QTextBrowser *valueOf1, *valueOf2, *valueOf3, *valueOf4;
+
     QHBoxLayout *valueCombo1, *valueCombo2, *valueCombo3, *valueCombo4;
     QVBoxLayout *valuesLayout;
 

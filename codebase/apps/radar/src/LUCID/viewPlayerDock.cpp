@@ -105,10 +105,11 @@ viewPlayerDock::viewPlayerDock(QWidget *parent) : QDockWidget(parent)
 
     QString sliderImageText = R"(:/images/images/movieImage.png)";
     QImage sliderImage(sliderImageText);
-    sliderItem = new QGraphicsPixmapItem(QPixmap::fromImage(sliderImage));
-    sliderScene = new QGraphicsScene;
-    sliderScene->addItem(sliderItem);
-    sliderView = new QGraphicsView(sliderScene);
+
+    sliderLabel = new QLabel;
+    sliderLabel->setPixmap(QPixmap::fromImage(sliderImage));
+
+
 
     //intialize layouts
     topRow = new QHBoxLayout();
@@ -156,7 +157,7 @@ viewPlayerDock::viewPlayerDock(QWidget *parent) : QDockWidget(parent)
     threeRows->addLayout(topRow);
     threeRows->addLayout(midRow);
     threeRows->addLayout(botRow);
-    threeRows->addWidget(sliderView);
+    threeRows->addWidget(sliderLabel);
 
     //adding layout to the dock widget
     group->setLayout(threeRows);

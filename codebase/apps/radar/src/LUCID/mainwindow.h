@@ -60,7 +60,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    //for showing coordinated of cursor in main window
+    //for showing coordinate of cursor in main window
     void mouseMoveEvent(QMouseEvent* event);
 
     //to get the other windows going in MainWindow()

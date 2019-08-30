@@ -29,7 +29,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     centralImage = new viewMainImage(R"(:/images/images/example.png)", this);
     setCentralWidget(centralImage);
-    centralWidget()->setMouseTracking(true);
 
     //just a tester to access function in other file/class
     //totally delete this later on
@@ -53,6 +52,10 @@ MainWindow::~MainWindow()
 //it shows the coordinates of the cursor
 void MainWindow::mouseMoveEvent(QMouseEvent* event)
 {
+    valuesWindow->valueOf1->setText(QString::number( event->pos().x() ));
+    valuesWindow->valueOf2->setText(QString::number( event->pos().y() ));
+    valuesWindow->valueOf3->setText(QString::number( event->pos().x() ));
+    valuesWindow->valueOf4->setText(QString::number( event->pos().y() ));
     QToolTip::showText(event->globalPos(),
                        //  In most scenarios you will have to change these for
                        //  the coordinate system you are working in.
@@ -269,6 +272,7 @@ void MainWindow::on_actionValues_Cursor_toggled(bool arg1)
 {
     if (arg1==0){
         valuesWindow->hide();
+        this->setMouseTracking(false);
     }
     else {
         //this reads the current position and size of the main window
@@ -280,6 +284,7 @@ void MainWindow::on_actionValues_Cursor_toggled(bool arg1)
         valuesWindow->move(p.x()+s.width(), p.y()+125);
         valuesWindow->show();
         valuesWindow->raise();
+        this->setMouseTracking(true);
     }
 }
 

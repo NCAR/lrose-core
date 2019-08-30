@@ -14,11 +14,11 @@ viewMainImage::viewMainImage(QString pic, QWidget *parent) : QWidget(parent)
 
     //when viewMainImage is called, the main pic address is sent and used to create the main image, all just dummy stuff right now
     QImage image(pic);
-    item = new QGraphicsPixmapItem(QPixmap::fromImage(image));
-    scene = new QGraphicsScene;
-    scene->addItem(item);
-    view = new QGraphicsView(scene);
-    view->setMouseTracking(true);
+    mainImage = new QLabel;
+    mainImage->setPixmap(QPixmap::fromImage(image));
+    scrollArea = new QScrollArea;
+    scrollArea->setWidget(mainImage);
+
 
     //scale image dummy
     QString scalePic = R"(:/images/images/dBzScale.png)";
@@ -26,7 +26,7 @@ viewMainImage::viewMainImage(QString pic, QWidget *parent) : QWidget(parent)
     QPixmap *scaleImg = new QPixmap(scalePic);
 
     //will be used to show the UTC time
-    //see viewMainImage::UpdateTime()
+    //see viewMainImage::UpdateTime() for more info
     currentTime = new QLabel;
 
     //mod scale image
@@ -37,7 +37,7 @@ viewMainImage::viewMainImage(QString pic, QWidget *parent) : QWidget(parent)
 
     //add to layouts
     mainLayout = new QHBoxLayout;
-    mainLayout->addWidget(view);
+    mainLayout->addWidget(scrollArea);
     mainLayout->addWidget(scale);
     QWidget *w = new QWidget;
     w->setLayout(mainLayout);
@@ -48,7 +48,13 @@ viewMainImage::viewMainImage(QString pic, QWidget *parent) : QWidget(parent)
 
     setLayout(timeLayout);
 
-    setMouseTracking(true);
+    //mousetracking settings for value cursor
+    this->setMouseTracking(true);
+    currentTime->setMouseTracking(0);
+    w->setMouseTracking(true);
+    scale->setMouseTracking(0);
+    scrollArea->setMouseTracking(true);
+    mainImage->setMouseTracking(true);
 }
 
 //temporary funtion to be deleted for playing around with stuff

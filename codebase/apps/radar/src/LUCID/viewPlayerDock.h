@@ -46,7 +46,7 @@ private:
     QLCDNumber *frameIndicator;
     QLineEdit *frameIntervalInput;
     QLineEdit *numFramesInput;
-    QLabel *frameLabel, *frameTime, *frameDate, *timeLabel, *frameIntervalLabel, *numFramesLabel, *playbackLabel, *delayLabel;
+    QLabel *frameLabel, *frameTime, *frameDate, *timeLabel, *frameIntervalLabel, *numFramesLabel, *playbackLabel, *delayLabel, *sliderLabel;
     QToolButton *rwd, *play, *pause, *fwd;
     QDateTimeEdit *timeInput;
     QComboBox *playback, *delay, *realArchive, *loopSweep;
@@ -54,10 +54,6 @@ private:
     QVBoxLayout *threeRows;
     QGroupBox *group;
     QFrame *line;
-
-    QGraphicsView *sliderView;
-    QGraphicsScene *sliderScene;
-    QGraphicsPixmapItem *sliderItem;
 
 };
 

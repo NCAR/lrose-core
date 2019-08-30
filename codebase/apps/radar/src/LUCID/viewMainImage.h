@@ -44,9 +44,8 @@ private:
     QHBoxLayout *mainLayout, *dateTimeLayout;
     QVBoxLayout *timeLayout;
     QWidget *placeholderWidget;
-    QGraphicsView *view;
-    QGraphicsScene *scene;
-    QGraphicsPixmapItem *item;
+
+    QScrollArea *scrollArea;
 };
 
 #endif // VIEWMAINIMAGE_H
