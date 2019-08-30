@@ -241,7 +241,7 @@ string FilePath::get_name() throw (Fault){
 
     string filename = *filenameIterator_;
     
-    int lastSlash = filename.rfind("/");
+    size_t lastSlash = filename.rfind("/");
 
     if(lastSlash == string::npos){
 	return filename;
@@ -263,7 +263,7 @@ string FilePath::get_directory() throw (Fault){
 
     string filename = *filenameIterator_;
     
-    int lastSlash = filename.rfind("/");
+    size_t lastSlash = filename.rfind("/");
 
     if(lastSlash == string::npos){
 	return string("");
@@ -323,7 +323,7 @@ string FilePath::combine(const string dir, const string name) throw (Fault){
 
     string fullPath;
 
-    int lastSlash = dir.rfind("/");
+    size_t lastSlash = dir.rfind("/");
     
     if((lastSlash == string::npos) || (lastSlash != (dir.length() - 1))){
 	fullPath = dir + "/" + name;
