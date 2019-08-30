@@ -24,7 +24,6 @@ SUB_DIRS = \
 	dsserver \
         edge \
 	euclid \
-	forayRal \
 	grib \
 	grib2 \
 	hydro \
