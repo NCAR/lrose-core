@@ -18,10 +18,12 @@ TARGET_FILE = ../libradar.a
 #
 
 HDRS = \
-	../include/radar/BeamHeight.hh
+	../include/radar/BeamHeight.hh \
+	../include/radar/Egm2008.hh
 
 CPPC_SRCS = \
-	BeamHeight.cc
+	BeamHeight.cc \
+	Egm2008.cc
 
 #
 # general targets
