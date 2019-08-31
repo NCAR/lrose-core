@@ -101,8 +101,16 @@ int ReadEgm2008::Run()
     cerr << "  " << strerror(errNum) << endl;
     return -1;
   }
+  off_t nbytes = fstat.st_size;
+
+  // assume 2.5 minute file to start
 
   int nPtsPerDeg = 24;
+  if (nbytes > 149368328) {
+    // 1 minute file
+    nPtsPerDeg = 60;
+  }
+
   int nlat = 180 * nPtsPerDeg + 1;
   int nlon = 360 * nPtsPerDeg;
   int npoints = nlat * nlon;
@@ -116,7 +124,6 @@ int ReadEgm2008::Run()
     cerr << "==>> recLen: " << recLen << endl;
   }
   
-  off_t nbytes = fstat.st_size;
   int nexpected = npoints * sizeof(fl32) + nlat * 2 * sizeof(ui32);
   if (nbytes != nexpected) {
     cerr << "ERROR - bad egm2008 file: " << _params.path << endl;

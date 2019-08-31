@@ -424,6 +424,7 @@ codebase/apps/radar/src/Sprite/moc_*cpp
 codebase/apps/radar/src/Sprite/moc_predefs.h
 
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
+codebase/apps/radar/src/HcrVelCorrect/ReadEgm2008/ReadEgm2008
 codebase/apps/radar/src/HcrTempRxGain/HcrTempRxGain
 codebase/apps/radar/src/HsrlMon/HsrlMon
 codebase/apps/radar/src/Hsrl2Radx/Hsrl2Radx
