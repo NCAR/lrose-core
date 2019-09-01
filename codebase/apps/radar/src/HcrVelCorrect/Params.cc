@@ -904,6 +904,39 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("CORRECT ALTITUDE FOR EGM");
+    tt->comment_text = tdrpStrDup("Correct the GPS altitude for the geoid, using EGM-2008. See: https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.html.");
+    tt++;
+    
+    // Parameter 'correct_altitude_for_egm'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("correct_altitude_for_egm");
+    tt->descr = tdrpStrDup("Option to correct the altitude for the geoid.");
+    tt->help = tdrpStrDup("Altitude from the SDN500 is based on the WGS84 ellipsoid. To get altitude relative to MSL, a correction for the geoid based on gravitation strength is required. We use the EGM-2008 geoid table.");
+    tt->val_offset = (char *) &correct_altitude_for_egm - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'egm_2008_geoid_file'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("egm_2008_geoid_file");
+    tt->descr = tdrpStrDup("Path to geoid table file.");
+    tt->help = tdrpStrDup("Downloaded from https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/Und_min1x1_egm2008_isw=82_WGS84_TideFree.gz");
+    tt->val_offset = (char *) &egm_2008_geoid_file - &_start_;
+    tt->single_val.s = tdrpStrDup("Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree");
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT FIELD DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -932,11 +965,11 @@
     tt->single_val.e = OUTPUT_ENCODING_FLOAT32;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -977,11 +1010,11 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1094,11 +1127,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("WRITING SURFACE VEL RESULTS TO SPDB IN XML");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1127,11 +1160,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/spdb/hcr_surface_vel");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("FILTERING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1156,11 +1189,11 @@
     tt->single_val.e = FIR_FILTER;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("WAVE FILTERING");
     tt->comment_text = tdrpStrDup("We want to fiter out the effects of the ocean surface waves, but preserve the variability induced by the aircraft motion and antenna control. We first run a simple median noise filter, and the run a polynomial filter on the results of the noise filter.");
     tt++;
@@ -1201,11 +1234,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("FIR FILTERING");
     tt->comment_text = tdrpStrDup("");
     tt++;

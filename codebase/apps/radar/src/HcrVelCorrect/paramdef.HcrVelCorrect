@@ -182,6 +182,23 @@ paramdef double {
 } width_correction_beamwidth_deg;
 
 commentdef {
+  p_header = "CORRECT ALTITUDE FOR EGM";
+  p_text = "Correct the GPS altitude for the geoid, using EGM-2008. See: https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.html.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to correct the altitude for the geoid.";
+  p_help = "Altitude from the SDN500 is based on the WGS84 ellipsoid. To get altitude relative to MSL, a correction for the geoid based on gravitation strength is required. We use the EGM-2008 geoid table.";
+} correct_altitude_for_egm;
+
+paramdef string {
+  p_default = "Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree";
+  p_descr = "Path to geoid table file.";
+  p_help = "Downloaded from https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/Und_min1x1_egm2008_isw=82_WGS84_TideFree.gz";
+} egm_2008_geoid_file;
+
+commentdef {
   p_header = "OUTPUT FIELD DETAILS";
 }
 

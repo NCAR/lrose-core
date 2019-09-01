@@ -45,6 +45,7 @@
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxXml.hh>
+#include <Radx/RadxCfactors.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <Spdb/DsSpdb.hh>
 #include <didss/DsInputPath.hh>
@@ -122,6 +123,19 @@ HcrVelCorrect::HcrVelCorrect(int argc, char **argv)
                           _params._spike_filter,
                           _params.final_filter_n,
                           _params._final_filter);
+
+  // altitude correction
+
+  if (_params.correct_altitude_for_egm) {
+    if (_egm.readGeoid(_params.egm_2008_geoid_file)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Altitude correction for geoid." << endl;
+      cerr << "  Problem reading geoid file: " 
+           << _params.egm_2008_geoid_file << endl;
+      OK = FALSE;
+      return;
+    }
+  }
 
   // init process mapper registration
 
@@ -351,7 +365,13 @@ int HcrVelCorrect::_processFile(const string &readPath)
     if (_params.add_corrected_spectrum_width_field) {
       _addCorrectedSpectrumWidth(rayCopy);
     }
-    
+
+    // correct altitude
+
+    if (_params.correct_altitude_for_egm) {
+      _correctAltitudeForGeoid(rayCopy);
+    }
+
     // process the ray
     // computing vel and filtering
 
@@ -1200,6 +1220,49 @@ int HcrVelCorrect::_addCorrectedSpectrumWidth(RadxRay *ray)
 
 }
   
+//////////////////////////////////////////////////
+// correct GPS altitude for geoid
+
+void HcrVelCorrect::_correctAltitudeForGeoid(RadxRay *ray)
+
+{
+  
+  // get the georeference
+
+  RadxGeoref *georef = ray->getGeoreference();
+  if (georef == NULL) {
+    // nothing we can do
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - HcrVelCorrect::_correctAltitudeForGeoid()" << endl;
+      cerr << "No georeference available, cannot fix altitude" << endl;
+    }
+    return;
+  }
+
+  // get correction factors if they are there
+  
+  const RadxCfactors *cfac_ = ray->getCfactors();
+  RadxCfactors cfac;
+  if (cfac_ != NULL) {
+    cfac = *cfac_;
+  }
+
+  // get the geoid delta for the location
+
+  double geoidM = _egm.getGeoidM(georef->getLatitude(),
+                                 georef->getLongitude());
+
+  // the altitude correction has the opposite sign, since it
+  // is added to the measured altitude
+
+  double altCorrM = geoidM * -1.0;
+  cfac.setAltitudeCorr(altCorrM);
+  ray->setCfactors(cfac);
+  
+  double altKmMsl = georef->getAltitudeKmMsl() + altCorrM / 1000.0;
+  georef->setAltitudeKmMsl(altKmMsl);
+
+}
 
 //////////////////////////////////////////////////
 // write wave filter results to SPDB in XML
