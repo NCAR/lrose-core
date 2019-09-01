@@ -63,14 +63,88 @@ public:
   
   int readGeoid(const string &path);
 
-  // get the geoid correction in M for a given lat/lon
+  // get the closest geoid correction in M for a given lat/lon
   
-  double getGeoidM(double lat, double lon) const;
+  double getClosestGeoidM(double lat, double lon) const;
+
+  // get the interpolated geoid correction in M for a given lat/lon
+  
+  double getInterpGeoidM(double lat, double lon) const;
 
   // debugging
 
   void setDebug() { _debug = true; }
   void setVerbose() { _verbose = true; }
+
+  // grid methods
+
+  inline int getLatIndexClosest(double lat) const {
+    int ilat = (int) (((90.0 - lat) / _gridRes) + 0.5);
+    if (ilat < 0) {
+      ilat = 0;
+    } else if (ilat > _nLat - 1) {
+      ilat = _nLat - 1;
+    }
+    return ilat;
+  }
+
+  inline int getLonIndexClosest(double lon) const {
+    if (lon < 0) {
+      lon += 360.0;
+    }
+    int ilon = (int) ((lon / _gridRes) + 0.5);
+    if (ilon > _nLon - 1) {
+      ilon = 0;
+    }
+    return ilon;
+  }
+
+  inline int getLatIndexAbove(double lat) const {
+    int ilat = (int) ((90.0 - lat) / _gridRes);
+    if (ilat < 0) {
+      ilat = 0;
+    } else if (ilat > _nLat - 1) {
+      ilat = _nLat - 1;
+    }
+    return ilat;
+  }
+
+  inline int getLatIndexBelow(double lat) const {
+    int ilatAbove = getLatIndexAbove(lat);
+    int ilatBelow = ilatAbove + 1;
+    if (ilatBelow > _nLat - 1) {
+      ilatBelow = _nLat - 1;
+    }
+    return ilatBelow;
+  }
+  
+  inline int getLonIndexBelow(double lon) const {
+    if (lon < 0) {
+      lon += 360.0;
+    }
+    int ilon = (int) (lon / _gridRes);
+    if (ilon > _nLon - 1) {
+      ilon = 0;
+    }
+    return ilon;
+  }
+
+  inline int getLonIndexAbove(double lon) const {
+    int ilonBelow = getLonIndexBelow(lon);
+    int ilonAbove = ilonBelow + 1;
+    if (ilonAbove > _nLon - 1) {
+      ilonAbove = 0;
+    }
+    return ilonAbove;
+  }
+
+  inline double getLat(int latIndex) const {
+    return 90.0 - ((double) latIndex * _gridRes);
+  }
+
+  inline double getLon(int lonIndex) const {
+    return ((double) lonIndex * _gridRes);
+  }
 
 protected:
 private:
@@ -81,6 +155,7 @@ private:
   fl32 *_geoidM;
 
   int _nPtsPerDeg;
+  double _gridRes;
   int _nLat;
   int _nLon;
   int _nPoints;

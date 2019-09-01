@@ -1261,8 +1261,8 @@ void HcrVelCorrect::_correctAltitudeForGeoid(RadxRay *ray)
 
   // get the geoid delta for the location
 
-  double geoidM = _egm.getGeoidM(georef->getLatitude(),
-                                 georef->getLongitude());
+  double geoidM = _egm.getInterpGeoidM(georef->getLatitude(),
+                                       georef->getLongitude());
 
   // the altitude correction has the opposite sign, since it
   // is added to the measured altitude

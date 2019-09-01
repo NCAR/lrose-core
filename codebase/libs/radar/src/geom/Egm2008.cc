@@ -60,6 +60,7 @@ Egm2008::Egm2008()
   // initialize assuming 2.5 minute data
 
   _nPtsPerDeg = 24;
+  _gridRes = 1.0 / _nPtsPerDeg;
   _nLat = 180 * _nPtsPerDeg + 1;
   _nLon = 360 * _nPtsPerDeg;
   _nPoints = _nLat * _nLon;
@@ -105,6 +106,7 @@ int Egm2008::readGeoid(const string &path)
     // 1 minute file
     _nPtsPerDeg = 60;
   }
+  _gridRes = 1.0 / _nPtsPerDeg;
 
   _nLat = 180 * _nPtsPerDeg + 1;
   _nLon = 360 * _nPtsPerDeg;
@@ -113,6 +115,7 @@ int Egm2008::readGeoid(const string &path)
 
   if (_debug) {
     cerr << "==>> _nPtsPerDeg: " << _nPtsPerDeg << endl;
+    cerr << "==>> _gridRes: " << _gridRes << endl;
     cerr << "==>> _nLat: " << _nLat << endl;
     cerr << "==>> _nLon: " << _nLon << endl;
     cerr << "==>> _nPoints: " << _nPoints << endl;
@@ -253,9 +256,9 @@ int Egm2008::readGeoid(const string &path)
     cerr << "========== egm2008 file =====>> : " << path << endl;
     int ipt = 0;
     for (int ilat = 0; ilat < _nLat; ilat++) {
-      double lat = 90.0 - ilat / (double) _nPtsPerDeg;
+      double lat = 90.0 - ilat * _gridRes;
       for (int ilon = 0; ilon < _nLon; ilon++, ipt++) {
-        double lon = ilon / (double) _nPtsPerDeg;
+        double lon = ilon * _gridRes;
         if (lon > 180.0) {
           lon -= 360.0;
         }
@@ -270,28 +273,28 @@ int Egm2008::readGeoid(const string &path)
 }
 
 /////////////////////////////////////////////////////////////
-// Get the geoid correction for a given lat/lon
+// Get the closest geoid correction for a given lat/lon
 
-double Egm2008::getGeoidM(double lat, double lon) const
+double Egm2008::getClosestGeoidM(double lat, double lon) const
   
 {
 
   if (_geoidM == NULL) {
     // not yet initialized
-    cerr << "ERROR - Egm2008::getGeoidM" << endl;
+    cerr << "ERROR - Egm2008::getClosestGeoidM" << endl;
     cerr << "  Not initialized, returning 0" << endl;
     return 0.0;
   }
   
-  int ilat = (int) (((90.0 - lat) * (double) _nPtsPerDeg) + 0.5);
-  int ilon = (int) ((lon * (double) _nPtsPerDeg) + 0.5);
+  int ilat = (int) (((90.0 - lat) / _gridRes) + 0.5);
+  int ilon = (int) ((lon / _gridRes) + 0.5);
   if (lon < 0) {
-    ilon = (int) (((lon + 360.0) * (double) _nPtsPerDeg) + 0.5);
+    ilon = (int) (((lon + 360.0) / _gridRes) + 0.5);
   }
   
   int index = ilon + ilat * _nLon;
   if (index > _nPoints - 1) {
-    cerr << "ERROR - Egm2008::getGeoidM" << endl;
+    cerr << "ERROR - Egm2008::getClosestGeoidM" << endl;
     cerr << "  lat, lon: " << lat << ", " << lon << endl;
     cerr << "  Bad index: " << index << endl;
     cerr << "  Max allowable index: " << _nPoints - 1 << endl;
@@ -299,7 +302,90 @@ double Egm2008::getGeoidM(double lat, double lon) const
     return 0.0;
   }
 
+  cerr << "222222222222222222222222222222222222222" << endl;
+  cerr << "lat: " << lat << endl;
+  cerr << "lon: " << lon << endl;
+  cerr << "ilat: " << ilat << endl;
+  cerr << "ilon: " << ilon << endl;
+  cerr << "index: " << index << endl;
+  cerr << "closest: " << _geoidM[index] << endl;
+  cerr << "222222222222222222222222222222222222222" << endl;
+
   return _geoidM[index];
+
+}
+
+/////////////////////////////////////////////////////////////
+// Get the interpolated geoid correction for a given lat/lon
+
+double Egm2008::getInterpGeoidM(double lat, double lon) const
+  
+{
+
+  if (_geoidM == NULL) {
+    // not yet initialized
+    cerr << "ERROR - Egm2008::getInterpGeoidM" << endl;
+    cerr << "  Not initialized, returning 0" << endl;
+    return 0.0;
+  }
+
+  // compute latitude indices on either side of the point
+  
+  int ilat0 = getLatIndexBelow(lat);
+  int ilat1 = getLatIndexAbove(lat);
+  
+  // compute longitude indices on either side of the point
+
+  if (lon < 0) {
+    lon += 360.0;
+  } else if (lon > 360) {
+    lon -= 360.0;
+  }
+  int ilon0 = getLonIndexBelow(lon);
+  int ilon1 = getLonIndexAbove(lon);
+
+  // get lat and lon for the indices
+  
+  double lat0 = getLat(ilat0);
+  double lat1 = getLat(ilat1);
+  double latFraction = (lat - lat0) / _gridRes;
+  
+  double lon0 = getLon(ilon0);
+  double lon1 = getLon(ilon1);
+  double lonFraction = (lon - lon0) / _gridRes;
+
+  // interp starting with latitude
+
+  double g00 = _geoidM[ilon0 + ilat0 * _nLon];
+  double g01 = _geoidM[ilon0 + ilat1 * _nLon];
+  
+  double g10 = _geoidM[ilon1 + ilat0 * _nLon];
+  double g11 = _geoidM[ilon1 + ilat1 * _nLon];
+
+  double g0 = g00 + (g01 - g00) * latFraction;
+  double g1 = g10 + (g11 - g10) * latFraction;
+
+  double gg = g0 + (g1 - g0) * lonFraction;
+
+  cerr << "111111111111111111111111111111111111111" << endl;
+  cerr << "_nLat, _nLon: " << _nLat << ", " << _nLon << endl;
+  cerr << "_nPtsPerDeg: " << _nPtsPerDeg << endl;
+  cerr << "_gridRes: " << _gridRes << endl;
+  cerr << "lat, lon: " << lat << ", " << lon << endl;
+  cerr << "ilat0, ilat1: " << ilat0 << ", " << ilat1 << endl;
+  cerr << "ilon0, ilon1: " << ilon0 << ", " << ilon1 << endl;
+  cerr << "lat0, lat1: " << lat0 << ", " << lat1 << endl;
+  cerr << "lon0, lon1: " << lon0 << ", " << lon1 << endl;
+  cerr << "latFraction: " << latFraction << endl;
+  cerr << "lonFraction: " << lonFraction << endl;
+  cerr << "g00, g01: " << g00 << ", " << g01 << endl;
+  cerr << "g10, g11: " << g10 << ", " << g11 << endl;
+  cerr << "g0, g1: " << g0 << ", " << g1 << endl;
+  cerr << "gg: " << gg << endl;
+  cerr << "closest: " << getClosestGeoidM(lat, lon) << endl;
+  cerr << "111111111111111111111111111111111111111" << endl;
+
+  return gg;
 
 }
 
