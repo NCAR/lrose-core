@@ -351,15 +351,19 @@ int HcrVelCorrect::_processFile(const string &readPath)
     // add a client to the copy to keep track of usage
     // the filter and the write volume will both try to delete
     // the ray if no longer used
+    // note that the rayCopy memory ownership will be transferred
+    // to the filtering methods (_processRayWaveFilt or
+    // _processRayFirFilt) so the memory does not need
+    // to be freed here
     
     RadxRay *rayCopy = new RadxRay(*rays[iray]);
     rayCopy->addClient();
-
+    
     if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "====>>>> waveFilt - reading ray at time: "
            << rayCopy->getRadxTime().asString(3) << endl;
     }
-
+    
     // compute corrected spectrum width
 
     if (_params.add_corrected_spectrum_width_field) {
@@ -442,6 +446,9 @@ int HcrVelCorrect::_processRayFirFilt(RadxRay *ray)
   // add to output vol
   
   _filtVol.addRay(_filtRay);
+  if (_filtRay->getCfactors() != NULL) {
+    _filtVol.setCfactors(*_filtRay->getCfactors());
+  }
   
   // write results to SPDB in XML if requested
   
@@ -559,7 +566,7 @@ int HcrVelCorrect::_applyWaveFilt(RadxRay *ray,
   // this will also write out any rays that are discarded
   // without having been written
 
-  if (_setFilterLimits()) {
+  if (_setWaveFilterLimits()) {
     return -1;
   }
 
@@ -580,13 +587,13 @@ int HcrVelCorrect::_applyWaveFilt(RadxRay *ray,
 }
 
 //////////////////////////////////////////////////
-// Set the time limits for the filters
+// Set the time limits for the wave filters
 // Side effects:
 //   compute times
 //   write out rays to be discarded that have not been written
 //   determine if we have enough data for valid stats
 
-int HcrVelCorrect::_setFilterLimits()
+int HcrVelCorrect::_setWaveFilterLimits()
 {
 
   if (_filtQueue.size() < 1) {
@@ -782,6 +789,9 @@ void HcrVelCorrect::_addNodeRayToFiltVol(FiltNode &node)
   }
 
   _filtVol.addRay(node.ray);
+  if (_filtRay->getCfactors() != NULL) {
+    _filtVol.setCfactors(*_filtRay->getCfactors());
+  }
   
   // write vel filtering results to spdb
 
@@ -1070,11 +1080,12 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
   velField->setLongName("doppler_velocity_corrected_for_vertical_motion");
   velField->setComment("This field is computed by correcting the raw measured "
                        "velocity for the vertical motion of the aircraft.");
-
+  
   // create the field to be copied
   
-  RadxField *copyField = new RadxField(_params.corrected_vel_field_name,
-                                       velField->getUnits());
+  RadxField *copyField =
+    new RadxField(_params.corrected_vel_field_name,
+                  velField->getUnits());
   copyField->copyMetaData(*velField);
   copyField->setName(_params.corrected_vel_field_name);
   copyField->setLongName("doppler_velocity_corrected_using_surface_measurement");
@@ -1130,7 +1141,8 @@ void HcrVelCorrect::_addDeltaField(RadxRay *ray, double deltaVel)
   deltaField->setLongName("velocity_delta_from_surface_measurement");
   char comment[2048];
   snprintf(comment, 2048,
-           "This is the correction applied to the %s field to produce the %s field",
+           "This is the correction applied to the %s field "
+           "to produce the %s field",
            _params.vel_field_name, _params.corrected_vel_field_name);
   deltaField->setComment(comment);
   
@@ -1260,6 +1272,20 @@ void HcrVelCorrect::_correctAltitudeForGeoid(RadxRay *ray)
   ray->setCfactors(cfac);
   
   double altKmMsl = georef->getAltitudeKmMsl() + altCorrM / 1000.0;
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    fprintf(stderr,
+            "==>> correctAltitudeForGeoid: "
+            "lat, lon, geoidM, corrM, altBefore, altAfter: "
+            "%8.4f %8.4f %6.2f %6.2f %8.4f %8.4f\n",
+            georef->getLatitude(),
+            georef->getLongitude(),
+            geoidM,
+            altCorrM,
+            georef->getAltitudeKmMsl(),
+            altKmMsl);
+  }
+  
   georef->setAltitudeKmMsl(altKmMsl);
 
 }

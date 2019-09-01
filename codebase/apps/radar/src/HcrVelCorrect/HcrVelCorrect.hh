@@ -174,7 +174,7 @@ private:
                      double rangeToSurf,
                      bool velIsValid);
 
-  int _setFilterLimits();
+  int _setWaveFilterLimits();
 
   int _runNoiseFilter();
   int _runWaveFilter();
