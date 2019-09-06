@@ -1,0 +1,109 @@
+/**********************************************************************
+ * TDRP params for ./Egm2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// Egm2Mdv reads in an Egm2008 file, and converts into NetCDF MDV.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// Data Input.
+//
+//======================================================================
+ 
+///////////// input_file_path /////////////////////////
+//
+// Path for input file.
+//
+//
+// Type: string
+//
+
+input_file_path = "./Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree";
+
+//======================================================================
+//
+// Data Output.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Directory for writing output files.
+//
+//
+// Type: string
+//
+
+output_dir = "./output";
+
+//======================================================================
+//
+// OUTPUT METADATA STRINGS.
+//
+// These will be used if the file does not contain suitable information.
+//
+//======================================================================
+ 
+///////////// data_set_name ///////////////////////////
+//
+// Name of data set.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_name = "EGM2008";
+
+///////////// data_set_source /////////////////////////
+//
+// Source of data.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_source = "NGA";
+
+///////////// data_set_info ///////////////////////////
+//
+// Info for data set.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_info = "Created by Egm2Mdv";
+

@@ -1,0 +1,92 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for Egm2Mdv
+//
+// Mike Dixon, EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Sept 2019
+//
+
+commentdef {
+  p_header = "Egm2Mdv reads in an Egm2008 file, and converts into NetCDF MDV.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "Data Input";
+}
+
+paramdef string {
+  p_default = "./Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree";
+  p_descr = "Path for input file.";
+} input_file_path;
+
+commentdef {
+  p_header = "Data Output";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Directory for writing output files.";
+} output_dir;
+
+commentdef {
+  p_header = "OUTPUT METADATA STRINGS";
+  p_text = "These will be used if the file does not contain suitable information.";
+}
+
+paramdef string {
+  p_default = "EGM2008";
+  p_descr = "Name of data set.";
+  p_help = "Appears in Mdv master header.";
+} data_set_name;
+
+paramdef string {
+  p_default = "NGA";
+  p_descr = "Source of data.";
+  p_help = "Appears in Mdv master header.";
+} data_set_source;
+
+paramdef string {
+  p_default = "Created by Egm2Mdv";
+  p_descr = "Info for data set.";
+  p_help = "Appears in Mdv master header.";
+} data_set_info;
+
