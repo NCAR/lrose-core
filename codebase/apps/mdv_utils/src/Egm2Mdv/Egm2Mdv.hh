@@ -92,7 +92,8 @@ private:
   // private methods
   
   int _readInputFile(const char *input_path);
-  void _reorderGeoidRowsSouthToNorth();
+  void _reorderGeoidLats();
+  void _reorderGeoidLons();
   int _writeMdvFile();
 
 };

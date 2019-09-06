@@ -111,9 +111,14 @@ int Egm2Mdv::Run ()
     return -1;
   }
 
-  // reorder the rows from south to north
+  // reorder the latitude rows from south to north
 
-  _reorderGeoidRowsSouthToNorth();
+  _reorderGeoidLats();
+
+  // reorder the longitude cols from -180 to +180
+  // the data comes in as 0 to 360
+
+  _reorderGeoidLons();
 
   // write out the MDV file
 
@@ -305,12 +310,12 @@ int Egm2Mdv::_readInputFile(const char *input_path)
 
 }
 
-///////////////////////////////
-// reorder the geoid rows
+/////////////////////////////////////////////////////////
+// reorder the geoid latitude
 // the original data is north to south
 // we need the data south to north, for normal coordinates
 
-void Egm2Mdv::_reorderGeoidRowsSouthToNorth()
+void Egm2Mdv::_reorderGeoidLats()
   
 {
 
@@ -351,6 +356,54 @@ void Egm2Mdv::_reorderGeoidRowsSouthToNorth()
 }
 
 
+///////////////////////////////////////////////////////////
+// reorder the geoid longitude
+// the original data is 0 to 360
+// reorder from -180 to +180
+
+void Egm2Mdv::_reorderGeoidLons()
+  
+{
+
+  // create arrays
+
+  size_t nLonHalf = _nLon / 2;
+  fl32 *rowData = new fl32[_nLon];
+  size_t nBytesRow = _nLon * sizeof(fl32);
+  size_t nBytesHalf = nLonHalf * sizeof(fl32);
+  
+  // loop through the top half of the rows
+  
+  
+  for (int irow = 0; irow < _nLat; irow++) {
+
+    // make a copy of east half of row data
+    
+    memcpy(rowData,
+           _geoidM + irow * _nLon + nLonHalf,
+           nBytesHalf);
+    
+    // make a copy of west half of row data
+    
+    memcpy(rowData + nLonHalf,
+           _geoidM + irow * _nLon,
+           nBytesHalf);
+    
+    // copy from row data back into place
+
+    memcpy(_geoidM + irow * _nLon,
+           rowData,
+           nBytesRow);
+
+  }
+
+  // clean up
+  
+  delete[] rowData;
+
+}
+
+
 ///////////////////////////////
 // write out the MDV file
 
@@ -360,7 +413,7 @@ int Egm2Mdv::_writeMdvFile()
 
   // create master header
 
-  NcfMdvx mdvx;
+  DsMdvx mdvx;
   mdvx.clearMasterHeader();
   DateTime dtime(2008, 1, 1, 0, 0, 0);
   time_t validTime = dtime.utime();
@@ -381,8 +434,8 @@ int Egm2Mdv::_writeMdvFile()
   MEM_zero(fhdr);
 
   fhdr.proj_type = Mdvx::PROJ_LATLON;
-  fhdr.proj_origin_lat = 0.0;
-  fhdr.proj_origin_lon = 0.0;
+  fhdr.proj_origin_lat = 0;
+  fhdr.proj_origin_lon = 0;
   
   fhdr.compression_type = Mdvx::COMPRESSION_NONE;
   fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
@@ -404,7 +457,7 @@ int Egm2Mdv::_writeMdvFile()
   fhdr.ny = _nLat;
   fhdr.nz = 1;
 
-  fhdr.grid_minx = 0.0;
+  fhdr.grid_minx = -180;
   fhdr.grid_miny = -90;
   fhdr.grid_minz = 0.0;
 
@@ -433,6 +486,9 @@ int Egm2Mdv::_writeMdvFile()
   // write it out
 
   mdvx.setWriteFormat(Mdvx::FORMAT_NCF);
+  mdvx.setMdv2NcfOutput(false, false, false, false);
+  mdvx.setMdv2NcfCompression(true, 9);
+
   if (mdvx.writeToPath(_params.output_file_path)) {
     cerr << "ERROR - Egm2Mdv::_writeMdvFile()" << endl;
     cerr << "  Cannot write output file" << endl;

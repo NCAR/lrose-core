@@ -9,6 +9,7 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 SUB_DIRS = \
 	Affirm \
 	distBetweenTwoPoints \
+	Egm2Mdv \
 	GribNc2Mdv \
 	KochSurface2Mdv \
 	LatLonBIL2Mdv \

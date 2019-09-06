@@ -635,7 +635,7 @@
     tt->descr = tdrpStrDup("Path for output file.");
     tt->help = tdrpStrDup(".nc extension will be added to this file");
     tt->val_offset = (char *) &output_file_path - &_start_;
-    tt->single_val.s = tdrpStrDup("./netcdf/Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree");
+    tt->single_val.s = tdrpStrDup("./output/EGM_2008_WGS84_2.5minx2.5min");
     tt++;
     
     // Parameter 'Comment 4'
