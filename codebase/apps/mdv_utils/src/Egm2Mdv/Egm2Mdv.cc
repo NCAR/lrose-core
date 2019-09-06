@@ -42,6 +42,7 @@
 #include <toolsa/Path.hh>
 #include <toolsa/DateTime.hh>
 #include <Mdv/MdvxField.hh>
+#include <Mdv/NcfMdvx.hh>
 #include <dataport/bigend.h>
 #include <dataport/bigend.h>
 #include "Egm2Mdv.hh"
@@ -56,6 +57,7 @@ Egm2Mdv::Egm2Mdv(int argc, char **argv)
 {
 
   isOK = true;
+  _geoidM = NULL;
   
   // set programe name
   
@@ -89,6 +91,10 @@ Egm2Mdv::~Egm2Mdv()
 
 {
 
+  if (_geoidM) {
+    delete[] _geoidM;
+  }
+
 }
 
 //////////////////////////////////////////////////
@@ -97,24 +103,30 @@ Egm2Mdv::~Egm2Mdv()
 int Egm2Mdv::Run ()
 {
   
-  int iret = 0;
+  // read in the input file
   
-  // process the input file
-  
-  if (_processFile(_params.input_file_path)) {
+  if (_readInputFile(_params.input_file_path)) {
     cerr << "ERROR = Egm2Mdv::Run" << endl;
-    cerr << "  Processing file: " << _params.input_file_path << endl;
-    iret = -1;
+    cerr << "  Reading file: " << _params.input_file_path << endl;
+    return -1;
+  }
+
+  // write out the MDV file
+
+  if (_writeMdvFile()) {
+    cerr << "ERROR = Egm2Mdv::Run" << endl;
+    cerr << "  Writing MDV file" << endl;
+    return -1;
   }
     
-  return iret;
+  return 0;
 
 }
 
 ///////////////////////////////
-// process file
+// read in the input file
 
-int Egm2Mdv::_processFile(const char *input_path)
+int Egm2Mdv::_readInputFile(const char *input_path)
   
 {
 
@@ -131,26 +143,27 @@ int Egm2Mdv::_processFile(const char *input_path)
 
   // assume 2.5 minute file to start
 
-  int nPtsPerDeg = 24;
+  _nPtsPerDeg = 24;
   if (nbytes > 149368328) {
     // 1 minute file
-    nPtsPerDeg = 60;
+    _nPtsPerDeg = 60;
   }
-
-  int nlat = 180 * nPtsPerDeg + 1;
-  int nlon = 360 * nPtsPerDeg;
-  int npoints = nlat * nlon;
-  ui32 recLen = nlon * sizeof(fl32);
+  
+  _gridRes = 1.0 / (double) _nPtsPerDeg;
+  _nLat = 180 * _nPtsPerDeg + 1;
+  _nLon = 360 * _nPtsPerDeg;
+  _nPoints = _nLat * _nLon;
+  ui32 recLen = _nLon * sizeof(fl32);
 
   if (_params.debug) {
-    cerr << "==>> nPtsPerDeg: " << nPtsPerDeg << endl;
-    cerr << "==>> nlat: " << nlat << endl;
-    cerr << "==>> nlon: " << nlon << endl;
-    cerr << "==>> npoints: " << npoints << endl;
+    cerr << "==>> _nPtsPerDeg: " << _nPtsPerDeg << endl;
+    cerr << "==>> _nLat: " << _nLat << endl;
+    cerr << "==>> _nLon: " << _nLon << endl;
+    cerr << "==>> _nPoints: " << _nPoints << endl;
     cerr << "==>> recLen: " << recLen << endl;
   }
   
-  int nexpected = npoints * sizeof(fl32) + nlat * 2 * sizeof(ui32);
+  int nexpected = _nPoints * sizeof(fl32) + _nLat * 2 * sizeof(ui32);
   if (nbytes != nexpected) {
     cerr << "ERROR - bad egm2008 file: " << input_path << endl;
     cerr << "  expected nbytes: " << nexpected << endl;
@@ -167,10 +180,10 @@ int Egm2Mdv::_processFile(const char *input_path)
     cerr << "  " << strerror(errNum) << endl;
     return -1;
   }
-
+  
   // geoid data in meters
-
-  fl32 *geoidM = new fl32[npoints];
+  
+  _geoidM = new fl32[_nPoints];
   int npts = 0;
   bool mustSwap = false;
   
@@ -190,7 +203,6 @@ int Egm2Mdv::_processFile(const char *input_path)
            << input_path << endl;
       cerr << "  " << strerror(errNum) << endl;
       fclose(egmFile);
-      delete[] geoidM;
       return -1;
     }
     if (recLenStart != recLen) {
@@ -201,7 +213,6 @@ int Egm2Mdv::_processFile(const char *input_path)
       cerr << "ERROR - bad egm2008 file: " << input_path << endl;
       cerr << "  bad recLenStart: " << recLenStart << endl;
       fclose(egmFile);
-      delete[] geoidM;
       return -1;
     }
     if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -217,7 +228,6 @@ int Egm2Mdv::_processFile(const char *input_path)
       cerr << "ERROR - cannot read data from egm file: " << input_path << endl;
       cerr << "  " << strerror(errNum) << endl;
       fclose(egmFile);
-      delete[] geoidM;
       delete[] buf;
       return -1;
     }
@@ -231,7 +241,7 @@ int Egm2Mdv::_processFile(const char *input_path)
     // copy data into array
     
     for (off_t ii = 0; ii < nFl32InRec; ii++) {
-      geoidM[npts] = buf[ii];
+      _geoidM[npts] = buf[ii];
       npts++;
     }
     delete[] buf;
@@ -245,7 +255,6 @@ int Egm2Mdv::_processFile(const char *input_path)
            << input_path << endl;
       cerr << "  " << strerror(errNum) << endl;
       fclose(egmFile);
-      delete[] geoidM;
       return -1;
     }
     if (mustSwap) {
@@ -255,7 +264,6 @@ int Egm2Mdv::_processFile(const char *input_path)
       cerr << "ERROR - bad egm2008 file: " << input_path << endl;
       cerr << "  bad recLenEnd: " << recLenEnd << endl;
       fclose(egmFile);
-      delete[] geoidM;
       return -1;
     }
     if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -276,15 +284,15 @@ int Egm2Mdv::_processFile(const char *input_path)
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     int ipt = 0;
-    for (int ilat = 0; ilat < nlat; ilat++) {
-      double lat = 90.0 - ilat / (double) nPtsPerDeg;
-      for (int ilon = 0; ilon < nlon; ilon++, ipt++) {
-        double lon = ilon / (double) nPtsPerDeg;
+    for (int ilat = 0; ilat < _nLat; ilat++) {
+      double lat = 90.0 - ilat / (double) _nPtsPerDeg;
+      for (int ilon = 0; ilon < _nLon; ilon++, ipt++) {
+        double lon = ilon / (double) _nPtsPerDeg;
         if (lon > 180.0) {
           lon -= 360.0;
         }
         fprintf(stderr, "lat, lon, geoidM: %10.5f  %10.5f  %10.5f\n", 
-                lat, lon, geoidM[ipt]);
+                lat, lon, _geoidM[ipt]);
       }
     } // ilat
   }
@@ -324,7 +332,7 @@ int Egm2Mdv::_processFile(const char *input_path)
 
     // create output Mdvx file object
     
-    DsMdvx mdvx;
+    NcfMdvx mdvx;
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       mdvx.setDebug(true);
     }
@@ -373,12 +381,21 @@ int Egm2Mdv::_processFile(const char *input_path)
       cerr << "Writing file to url: " << _params.output_url << endl;
     }
 
-    if (mdvx.writeToDir(_params.output_url)) {
+    cerr << "1111111111111111111111111" << endl;
+
+    if (mdvx.convertMdv2Ncf(_params.output_url)) {
       cerr << "ERROR - Egm2Mdv" << endl;
       cerr << "  Cannot write file to url: " << _params.output_url << endl;
       cerr << mdvx.getErrStr() << endl;
       return -1;
     }
+
+    // if (mdvx.writeToDir(_params.output_url)) {
+    //   cerr << "ERROR - Egm2Mdv" << endl;
+    //   cerr << "  Cannot write file to url: " << _params.output_url << endl;
+    //   cerr << mdvx.getErrStr() << endl;
+    //   return -1;
+    // }
     
     if (_params.debug) {
       cerr << "  Wrote output file: " << mdvx.getPathInUse() << endl;
@@ -392,6 +409,110 @@ int Egm2Mdv::_processFile(const char *input_path)
 
 }
 
+///////////////////////////////
+// write out the MDV file
+
+int Egm2Mdv::_writeMdvFile()
+  
+{
+
+  // create master header
+
+  NcfMdvx mdvx;
+  mdvx.clearMasterHeader();
+  DateTime dtime(2008, 1, 1, 0, 0, 0);
+  time_t validTime = dtime.utime();
+  mdvx.setValidTime(validTime);
+  mdvx.setDataCollectionType(Mdvx::DATA_MEASURED);
+  mdvx.setDataSetName(_params.data_set_name);
+  mdvx.setDataSetSource(_params.data_set_source);
+  mdvx.setDataSetInfo(_params.data_set_info);
+  
+  if (_params.debug) {
+    cerr << "===========================================" << endl;
+    cerr << "Created data set for time: " << DateTime::strm(validTime) << endl;
+  }
+
+  // add field
+  
+  Mdvx::field_header_t fhdr;
+  MEM_zero(fhdr);
+
+  fhdr.proj_type = Mdvx::PROJ_LATLON;
+  fhdr.proj_origin_lat = 0.0;
+  fhdr.proj_origin_lon = 0.0;
+  
+  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
+  fhdr.scaling_type = Mdvx::SCALING_NONE;
+  
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.dz_constant = true;
+  fhdr.data_dimension = 2;
+
+  fhdr.bad_data_value = _missingFloat;
+  fhdr.missing_data_value = _missingFloat;
+  
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = sizeof(fl32);
+  fhdr.volume_size = _nLon * _nLat * sizeof(fl32);
+  
+  fhdr.nx = _nLon;
+  fhdr.ny = _nLat;
+  fhdr.nz = 1;
+
+  fhdr.grid_minx = -180;
+  fhdr.grid_miny = -90;
+  fhdr.grid_minz = 0.0;
+
+  fhdr.grid_dx = _gridRes;
+  fhdr.grid_dy = _gridRes;
+  fhdr.grid_dz = 1.0;
+  
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  
+  // create MdvxField object
+  // converting data to encoding and compression types
+  
+  MdvxField *field = new MdvxField(fhdr, vhdr, _geoidM);
+
+  // set names etc
+  
+  field->setFieldName("GeoidHt");
+  field->setFieldNameLong("Ht of geoid above ellipsoid");
+  field->setUnits("m");
+  field->setTransform("");
+
+  mdvx.addField(field);
+
+  // write it out
+
+  cerr << "1111111111111111111111111" << endl;
+  
+  // if (mdvx.convertMdv2Ncf(_params.output_dir)) {
+  //   cerr << "ERROR - Egm2Mdv" << endl;
+  //   cerr << "  Cannot write file to dir: " << _params.output_dir << endl;
+  //   cerr << mdvx.getErrStr() << endl;
+  //   return -1;
+  // }
+  
+  mdvx.setWriteFormat(Mdvx::FORMAT_NCF);
+  if (mdvx.writeToDir(_params.output_dir)) {
+    cerr << "ERROR - Egm2Mdv::_writeMdvFile()" << endl;
+    cerr << "  Cannot write output file" << endl;
+    cerr << mdvx.getErrStr() << endl;
+    return -1;
+  }
+
+  cerr << "Wrote output file: " << mdvx.getPathInUse() << endl;
+
+  return 0;
+
+}
+
 /////////////////////////////////////////////////
 // Set the master header from the NCF file
 //
@@ -401,30 +522,6 @@ int Egm2Mdv::_setMasterHeader(DsMdvx &mdvx)
 
 {
 
-  mdvx.clearMasterHeader();
-
-  // time
-
-  DateTime dtime(2008, 1, 1, 0, 0, 0);
-  time_t validTime = dtime.utime();
-
-  mdvx.setValidTime(validTime);
-
-  if (_params.debug) {
-    cerr << "===========================================" << endl;
-    cerr << "Created data set for time: " << DateTime::strm(validTime) << endl;
-  }
-  
-  // data collection type
-  
-  mdvx.setDataCollectionType(Mdvx::DATA_MEASURED);
-
-  // data set name, source and info
-
-  mdvx.setDataSetName(_params.data_set_name);
-  mdvx.setDataSetSource(_params.data_set_source);
-  mdvx.setDataSetInfo(_params.data_set_info);
-  
   return 0;
 
 }

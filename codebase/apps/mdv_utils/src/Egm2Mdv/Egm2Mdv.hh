@@ -82,9 +82,17 @@ private:
   Args _args;
   Params _params;
   
+  int _nPtsPerDeg;
+  int _nLat;
+  int _nLon;
+  int _nPoints;
+  double _gridRes;
+  fl32 *_geoidM;
+
   // private methods
   
-  int _processFile(const char *input_path);
+  int _readInputFile(const char *input_path);
+  int _writeMdvFile();
 
   /// set MDV headers
 

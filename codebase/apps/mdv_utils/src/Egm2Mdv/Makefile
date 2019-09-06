@@ -38,7 +38,7 @@ TARGET_FILE = Egm2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lNcxx -leuclid -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
 	-ldidss -lrapformats -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 
