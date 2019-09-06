@@ -626,16 +626,16 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'output_dir'
+    // Parameter 'output_file_path'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_dir");
-    tt->descr = tdrpStrDup("Directory for writing output files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("./output");
+    tt->param_name = tdrpStrDup("output_file_path");
+    tt->descr = tdrpStrDup("Path for output file.");
+    tt->help = tdrpStrDup(".nc extension will be added to this file");
+    tt->val_offset = (char *) &output_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("./netcdf/Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree");
     tt++;
     
     // Parameter 'Comment 4'

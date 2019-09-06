@@ -87,9 +87,9 @@ int Args::parse(int argc, char **argv, string &prog_name)
       } else {
 	iret = -1;
       }
-    } else if (!strcmp(argv[i], "-out_dir")) {
+    } else if (!strcmp(argv[i], "-out_path")) {
       if(i < argc - 1) {
-	sprintf(tmp_str, "output_dir = \"%s\";", argv[i+1]);
+	sprintf(tmp_str, "output_file_path = \"%s\";", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
       }
       else {
@@ -116,7 +116,7 @@ void Args::usage(string &prog_name, ostream &out)
       << "       [ -debug, -d ] print debug messages\n"
       << "       [ -extra, -vv ] print extra verbose debug messages\n"
       << "       [ -f ?] input file path\n"
-      << "       [ -out_dir ?] Output dir\n"
+      << "       [ -out_path ?] Output path\n"
       << "       [ -verbose, -v ] print verbose debug messages\n"
       << endl;
 

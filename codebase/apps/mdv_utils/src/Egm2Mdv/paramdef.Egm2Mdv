@@ -63,9 +63,10 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "./output";
-  p_descr = "Directory for writing output files.";
-} output_dir;
+  p_default = "./netcdf/Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree";
+  p_descr = "Path for output file.";
+  p_help = ".nc extension will be added to this file";
+} output_file_path;
 
 commentdef {
   p_header = "OUTPUT METADATA STRINGS";

@@ -372,7 +372,7 @@ public:
 
   char* input_file_path;
 
-  char* output_dir;
+  char* output_file_path;
 
   char* data_set_name;
 

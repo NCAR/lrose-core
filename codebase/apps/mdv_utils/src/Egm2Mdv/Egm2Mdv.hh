@@ -92,25 +92,8 @@ private:
   // private methods
   
   int _readInputFile(const char *input_path);
+  void _reorderGeoidRowsSouthToNorth();
   int _writeMdvFile();
-
-  /// set MDV headers
-
-  int _setMasterHeader(DsMdvx &mdvx);
-  int _addDataField(DsMdvx &mdvx);
-  
-  MdvxField *_createMdvxField(const string &fieldName,
-                              const string &longName,
-                              const string &units,
-                              int nx, int ny, int nz,
-                              double minx, double miny, double minz,
-                              double dx, double dy, double dz,
-                              const fl32 *vals);
-
-  MdvxField *_createRegularLatlonField(const string &fieldName,
-                                       const string &longName,
-                                       const string &units,
-                                       const fl32 *vals);
 
 };
 
