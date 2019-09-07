@@ -41,7 +41,8 @@
 #include <string>
 #include <vector>
 #include <cstdio>
-#include <Ncxx/Nc3File.hh>
+#include <Ncxx/Ncxx.hh>
+#include <Ncxx/NcxxFile.hh>
 
 #include "Args.hh"
 #include "Params.hh"
@@ -53,7 +54,6 @@
 #include <toolsa/MemBuf.hh>
 
 using namespace std;
-class Nc3File;
 
 ////////////////////////
 // This class
@@ -199,84 +199,72 @@ private:
   int _computeOutputFilePaths();
 
 
-  void _addGlobAtt(Nc3File &out);
+  void _addGlobAtt(NcxxFile &out);
   
-  int _writeBaseTimeVars(Nc3File &file, Nc3Error &err);
-  int _writeTimeDimVars(Nc3File &file, Nc3Error &err, Nc3Dim *timeDim);
-  int _writeTimeDimVarsAlt(Nc3File &file, Nc3Error &err, Nc3Dim *timeDim);
-  int _writeRangeVar(Nc3File &file, Nc3Error &err, Nc3Dim *rangeDim);
+  int _writeBaseTimeVars(NcxxFile &file);
+  int _writeTimeDimVars(NcxxFile &file, NcxxDim &timeDim);
+  int _writeTimeDimVarsAlt(NcxxFile &file, NcxxDim &timeDim);
+  int _writeRangeVar(NcxxFile &file, NcxxDim &rangeDim);
     
-  int _addAttr(Nc3Var *var,
+  int _addAttr(NcxxVar &var,
                const string &name,
-               const string &val,
-               Nc3Error &err);
+               const string &val);
   
-  int _addAttr(Nc3Var *var,
+  int _addAttr(NcxxVar &var,
                const string &name,
-               double val,
-               Nc3Error &err);
+               double val);
 
-  int _addAttr(Nc3Var *var,
+  int _addAttr(NcxxVar &var,
                const string &name,
-               int val,
-               Nc3Error &err);
+               int val);
 
-  int _addVar(Nc3File &file,
-              Nc3Error &err,
-              Nc3Var* &var,
-              Nc3Type ncType,
+  int _addVar(NcxxFile &file,
+              NcxxVar &var,
+              NcxxType ncType,
               const string &name,
               const string &standardName,
               const string &units = "");
 
-  int _addVar(Nc3File &file,
-              Nc3Error &err,
-              Nc3Var* &var,
-              Nc3Type ncType,
-              Nc3Dim *dim, 
+  int _addVar(NcxxFile &file,
+              NcxxVar &var,
+              NcxxType ncType,
+              NcxxDim &dim, 
               const string &name,
               const string &standardName,
               const string &units = "");
 
-  int _addVar(Nc3File &file,
-              Nc3Error &err,
-              Nc3Var* &var,
-              Nc3Type ncType,
-              Nc3Dim *dim0, 
-              Nc3Dim *dim1, 
+  int _addVar(NcxxFile &file,
+              NcxxVar &var,
+              NcxxType ncType,
+              NcxxDim &dim0, 
+              NcxxDim &dim1, 
               const string &name,
               const string &standardName,
               const string &units = "");
 
-  int _writeVar(Nc3File &file,
-                Nc3Error &err,
-                Nc3Dim *timeDim,
-                const char *name,
-                const char *standardName,
-                const char *units,
+  int _writeVar(NcxxFile &file,
+                NcxxDim &timeDim,
+                const string &name,
+                const string &standardName,
+                const string &units,
                 const vector<float> vals);
   
-  int _writeVar(Nc3File &file,
-                Nc3Error &err,
-                Nc3Dim *timeDim,
-                const char *name,
-                const char *standardName,
-                const char *units,
+  int _writeVar(NcxxFile &file,
+                NcxxDim &timeDim,
+                const string &name,
+                const string &standardName,
+                const string &units,
                 const vector<int> vals);
   
-  int _writeIqVars(Nc3File &file,
-                   Nc3Error &err,
-                   Nc3Dim *timeDim,
-                   Nc3Dim *rangeDim,
-                   const char *iName,
-                   const char *qName,
+  int _writeIqVars(NcxxFile &file,
+                   NcxxDim &timeDim,
+                   NcxxDim &rangeDim,
+                   const string &iName,
+                   const string &qName,
                    const float *ivals,
                    const float *qvals);
   
-  string _ncTypeToStr(Nc3Type nctype);
-
-  string _asString(const Nc3TypedComponent *component,
-                   int index = 0);
+  string _ncTypeToStr(NcxxType nctype);
   
 };
 
