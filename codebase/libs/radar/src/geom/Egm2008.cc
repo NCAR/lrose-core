@@ -139,12 +139,12 @@ int Egm2008::_readMdvNetcdf(const string &path)
 
   _geoidM = (const fl32*) geoidFld->getVol();
   const Mdvx::field_header_t &fhdr = geoidFld->getFieldHeader();
-  _gridRes = fhdr.grid_dx;
   _minLat = fhdr.grid_miny;
   _minLon = fhdr.grid_minx;
   _nLat = fhdr.ny;
   _nLon = fhdr.nx;
   _nPoints = _nLat * _nLon;
+  _gridRes = 360.0 / _nLon;
 
   return 0;
 
@@ -373,14 +373,16 @@ double Egm2008::getClosestGeoidM(double lat, double lon) const
   
   int index = getIndex(iLat, iLon);
 
-  cerr << "222222222222222222222222222222222222222" << endl;
-  cerr << "lat: " << lat << endl;
-  cerr << "lon: " << lon << endl;
-  cerr << "iLat: " << iLat << endl;
-  cerr << "iLon: " << iLon << endl;
-  cerr << "index: " << index << endl;
-  cerr << "closest: " << _geoidM[index] << endl;
-  cerr << "222222222222222222222222222222222222222" << endl;
+  if (_verbose) {
+    cerr << "=========== getClosestGeoidM =============" << endl;
+    cerr << "lat: " << lat << endl;
+    cerr << "lon: " << lon << endl;
+    cerr << "iLat: " << iLat << endl;
+    cerr << "iLon: " << iLon << endl;
+    cerr << "index: " << index << endl;
+    cerr << "closest: " << _geoidM[index] << endl;
+    cerr << "==========================================" << endl;
+  }
 
   return _geoidM[index];
 
@@ -440,22 +442,24 @@ double Egm2008::getInterpGeoidM(double lat, double lon) const
 
   double gg = gW + lonFraction * (gE - gW);
 
-  cerr << "111111111111111111111111111111111111111" << endl;
-  cerr << "_nLat, _nLon: " << _nLat << ", " << _nLon << endl;
-  cerr << "_gridRes: " << _gridRes << endl;
-  cerr << "lat, lon: " << lat << ", " << lon << endl;
-  cerr << "iLatS, iLatN: " << iLatS << ", " << iLatN << endl;
-  cerr << "iLonW, iLonE: " << iLonW << ", " << iLonE << endl;
-  cerr << "latS, latN: " << latS << ", " << latN << endl;
-  cerr << "lonW, lonE: " << lonW << ", " << lonE << endl;
-  cerr << "latFraction: " << latFraction << endl;
-  cerr << "lonFraction: " << lonFraction << endl;
-  cerr << "gNW, gSW: " << gNW << ", " << gSW << endl;
-  cerr << "gNE, gSE: " << gNE << ", " << gSE << endl;
-  cerr << "gW, gE: " << gW << ", " << gE << endl;
-  cerr << "gg: " << gg << endl;
-  cerr << "closest: " << getClosestGeoidM(lat, lon) << endl;
-  cerr << "111111111111111111111111111111111111111" << endl;
+  if (_verbose) {
+    cerr << "=========== getInterpGeoidM =============" << endl;
+    cerr << "_nLat, _nLon: " << _nLat << ", " << _nLon << endl;
+    cerr << "_gridRes: " << _gridRes << endl;
+    cerr << "lat, lon: " << lat << ", " << lon << endl;
+    cerr << "iLatS, iLatN: " << iLatS << ", " << iLatN << endl;
+    cerr << "iLonW, iLonE: " << iLonW << ", " << iLonE << endl;
+    cerr << "latS, latN: " << latS << ", " << latN << endl;
+    cerr << "lonW, lonE: " << lonW << ", " << lonE << endl;
+    cerr << "latFraction: " << latFraction << endl;
+    cerr << "lonFraction: " << lonFraction << endl;
+    cerr << "gNW, gNE: " << gNW << ", " << gNE << endl;
+    cerr << "gSW, gSE: " << gSW << ", " << gSE << endl;
+    cerr << "gW, gE: " << gW << ", " << gE << endl;
+    cerr << "gg: " << gg << endl;
+    cerr << "closest: " << getClosestGeoidM(lat, lon) << endl;
+    cerr << "=========================================" << endl;
+  }
 
   return gg;
 

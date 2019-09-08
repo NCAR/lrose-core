@@ -95,6 +95,12 @@ int ReadEgm2008::Run()
 {
 
   Egm2008 egm;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    egm.setVerbose();
+  } else if (_params.debug) {
+    egm.setDebug();
+  }
+
   if (egm.readGeoid(_params.egm_path)) {
     cerr << "ERROR - ReadEgm2008::Run()" << endl;
     cerr << "  Cannot read geoid file: " << _params.egm_path << endl;
