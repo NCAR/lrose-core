@@ -75,7 +75,7 @@ public:
   // debugging
 
   void setDebug() { _debug = true; }
-  void setVerbose() { _verbose = true; }
+  void setVerbose() { _debug = true; _verbose = true; }
 
   // grid methods
 
@@ -165,7 +165,8 @@ private:
   double _minLat;
   double _minLon;
 
-  int _readMdvNetcdf(const string &path);
+  int _readNetcdf(const string &path);
+  int _readMdv(const string &path);
   int _readFortranBinaryFile(const string &path);
   void _reorderGeoidLats();
   void _reorderGeoidLons();

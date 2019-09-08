@@ -47,6 +47,8 @@
 #include <radar/Egm2008.hh>
 #include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxField.hh>
+#include <Ncxx/Ncxx.hh>
+#include <Ncxx/NcxxFile.hh>
 
 using namespace std;
 
@@ -93,19 +95,30 @@ int Egm2008::readGeoid(const string &path)
 
   Path pathParts(path);
 
-  // If a netcdf file or MDV file, read in using MDV
+  if (pathParts.getExt() == "nc") {
 
-  if (pathParts.getExt() == "nc" ||
-      pathParts.getExt() == "mdv") {
+    // netcdf (from MDV)
 
-    if (_readMdvNetcdf(path) == 0) {
-      return 0;
+    if (_readNetcdf(path)) {
+      return -1;
+    }
+
+  } else if (pathParts.getExt() == "mdv") {
+
+    // mdv
+    
+    if (_readMdv(path)) {
+      return -1;
     }
     
-  }
+  } else {
     
-  if (_readFortranBinaryFile(path)) {
-    return -1;
+    // original binary file
+
+    if (_readFortranBinaryFile(path)) {
+      return -1;
+    }
+
   }
 
   return 0;
@@ -115,23 +128,170 @@ int Egm2008::readGeoid(const string &path)
 /////////////////////////////////////////////////////////////
 // read in the Geoid corrections file
 // for 2008 version of EGM
-// from an MDV NetCDF file
+// from a NetCDF-style MDV file
 // This file would be created using the Egm2Mdv app.
 
-int Egm2008::_readMdvNetcdf(const string &path)
+int Egm2008::_readNetcdf(const string &path)
+
+{
+
+  // open file
+
+  NcxxFile file;
+  try {
+    file.open(path, NcxxFile::read);
+  } catch (NcxxException& e) {
+    cerr << "ERROR - Egm2008::_readNetcdf" << endl;
+    cerr << "  Cannot open file for reading: " << path << endl;
+    cerr << "  exception: " << e.what() << endl;
+    return -1;
+  }
+
+  // read dimensions
+
+  NcxxDim timeDim, zDim, yDim, xDim;
+  size_t nTimes = 0, nZ = 0, nY = 0, nX = 0;
+  
+  try {
+
+    timeDim = file.getDim("time");
+    nTimes = timeDim.getSize();
+
+    zDim = file.getDim("z0");
+    nZ = zDim.getSize();
+
+    yDim = file.getDim("y0");
+    nY = yDim.getSize();
+
+    xDim = file.getDim("x0");
+    nX = xDim.getSize();
+
+  } catch (NcxxException e) {
+
+    cerr << "ERROR - Egm2008::_readNetcdf" << endl;
+    cerr << "  Cannot read dimensions: " << path << endl;
+    cerr << "  exception: " << e.what() << endl;
+    return -1;
+
+  }
+
+  _nLat = nY;
+  _nLon = nX;
+  _nPoints = _nLat * _nLon;
+  _gridRes = 360.0 / _nLon;
+  
+  if (_debug) {
+    cerr << "Reading netcdf geoid file: " << path << endl;
+    cerr << "  nTimes: " << nTimes << endl;
+    cerr << "  nZ: " << nZ << endl;
+    cerr << "  nY (_nLat): " << nY << endl;
+    cerr << "  nX (_nLon): " << nX << endl;
+    cerr << "  nPoints: " << _nPoints << endl;
+    cerr << "  gridRes: " << _gridRes << endl;
+  }
+
+  // read latitudes
+  
+  NcxxVar latVar = file.getVar("y0");
+  if (latVar.isNull() || latVar.numVals() < 1) {
+    cerr << "ERROR - Egm2008::_readNetcdf" << endl;
+    cerr << "  Cannot find latitude array 'y0', path" << path << endl;
+    return -1;
+  }
+  
+  vector<fl32> latitude;
+  latitude.resize(_nLat);
+  fl32 *lat = latitude.data();
+  
+  try {
+    latVar.getVal(lat);
+  } catch (NcxxException& e) {
+    cerr << "ERROR - Egm2008::_readNetcdf" << endl;
+    cerr << "  Cannot read y0 array: " << path << endl;
+    cerr << "  exception: " << e.what() << endl;
+    return -1;
+  }
+
+  _minLat = lat[0];
+
+  // read longitudes
+  
+  NcxxVar lonVar = file.getVar("x0");
+  if (lonVar.isNull() || lonVar.numVals() < 1) {
+    cerr << "ERROR - Egm2008::_readNetcdf" << endl;
+    cerr << "  Cannot find longitude array 'x0', path" << path << endl;
+    return -1;
+  }
+  
+  vector<fl32> longitude;
+  longitude.resize(_nLon);
+  fl32 *lon = longitude.data();
+  
+  try {
+    lonVar.getVal(lon);
+  } catch (NcxxException& e) {
+    cerr << "ERROR - Egm2008::_readNetcdf" << endl;
+    cerr << "  Cannot read x0 array: " << path << endl;
+    cerr << "  exception: " << e.what() << endl;
+    return -1;
+  }
+
+  _minLon = lon[0];
+
+  if (_debug) {
+    cerr << "  minLat: " << _minLat << endl;
+    cerr << "  minLon: " << _minLon << endl;
+  }
+
+  // read in geoid data
+
+  NcxxVar geoidVar = file.getVar("GeoidHt");
+  if (lonVar.isNull() || lonVar.numVals() < 1) {
+    cerr << "ERROR - Egm2008::_readNetcdf" << endl;
+    cerr << "  Cannot find longitude array 'x0', path" << path << endl;
+    return -1;
+  }
+  
+  if (_geoidBuf != NULL) {
+    delete[] _geoidBuf;
+  }
+  _geoidBuf = new fl32[_nPoints];
+  _geoidM = _geoidBuf;
+
+  try {
+    geoidVar.getVal((fl32 *) _geoidM);
+  } catch (NcxxException& e) {
+    cerr << "ERROR - Egm2008::_readNetcdf" << endl;
+    cerr << "  Cannot read GeoidHt array: " << path << endl;
+    cerr << "  exception: " << e.what() << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+  
+/////////////////////////////////////////////////////////////
+// read in the Geoid corrections file
+// for 2008 version of EGM
+// from an MDV file
+// This file would be created using the Egm2Mdv app.
+
+int Egm2008::_readMdv(const string &path)
 
 {
 
   _mdvx.setReadPath(path);
   if (_mdvx.readVolume()) {
-    cerr << "ERROR - Egm2008::_readMdvNetcdf" << endl;
+    cerr << "ERROR - Egm2008::_readMdv" << endl;
     cerr << _mdvx.getErrStr() << endl;
     return -1;
   }
 
   MdvxField *geoidFld = _mdvx.getField(0);
   if (geoidFld == NULL) {
-    cerr << "ERROR - Egm2008::_readMdvNetcdf" << endl;
+    cerr << "ERROR - Egm2008::_readMdv" << endl;
     cerr << "  Cannot find geoid correction field" << endl;
     cerr << "  Path: " << path << endl;
     return -1;
@@ -145,6 +305,16 @@ int Egm2008::_readMdvNetcdf(const string &path)
   _nLon = fhdr.nx;
   _nPoints = _nLat * _nLon;
   _gridRes = 360.0 / _nLon;
+
+  if (_debug) {
+    cerr << "Reading MDV geoid file: " << path << endl;
+    cerr << "  nLat: " << _nLat << endl;
+    cerr << "  nLon: " << _nLon << endl;
+    cerr << "  nPoints: " << _nPoints << endl;
+    cerr << "  gridRes: " << _gridRes << endl;
+    cerr << "  minLat: " << _minLat << endl;
+    cerr << "  minLon: " << _minLon << endl;
+  }
 
   return 0;
 
