@@ -43,7 +43,10 @@
 #include <sys/stat.h>
 #include <dataport/bigend.h>
 #include <toolsa/file_io.h>
+#include <toolsa/Path.hh>
 #include <radar/Egm2008.hh>
+#include <Mdv/Mdvx.hh>
+#include <Mdv/MdvxField.hh>
 
 using namespace std;
 
@@ -55,14 +58,14 @@ Egm2008::Egm2008()
   _debug = false;
   _verbose = false;
 
-  _geoidM = NULL;
+  _geoidBuf = NULL;
 
   // initialize assuming 2.5 minute data
 
-  _nPtsPerDeg = 24;
-  _gridRes = 1.0 / _nPtsPerDeg;
-  _nLat = 180 * _nPtsPerDeg + 1;
-  _nLon = 360 * _nPtsPerDeg;
+  int nPtsPerDeg = 24;
+  _gridRes = 1.0 / nPtsPerDeg;
+  _nLat = 180 * nPtsPerDeg + 1;
+  _nLon = 360 * nPtsPerDeg;
   _nPoints = _nLat * _nLon;
   
 }
@@ -73,8 +76,8 @@ Egm2008::~Egm2008()
   
 {
 
-  if (_geoidM != NULL) {
-    delete[] _geoidM;
+  if (_geoidBuf != NULL) {
+    delete[] _geoidBuf;
   }
 
 }
@@ -87,6 +90,75 @@ int Egm2008::readGeoid(const string &path)
 
 {
 
+  Path pathParts(path);
+
+  // If a netcdf file or MDV file, read in using MDV
+
+  if (pathParts.getExt() == "nc" ||
+      pathParts.getExt() == "mdv") {
+
+    if (_readMdvNetcdf(path) == 0) {
+      return 0;
+    }
+    
+  }
+    
+  if (_readFortranBinaryFile(path)) {
+    return -1;
+  }
+
+  return 0;
+
+}
+  
+/////////////////////////////////////////////////////////////
+// read in the Geoid corrections file
+// for 2008 version of EGM
+// from an MDV NetCDF file
+// This file would be created using the Egm2Mdv app.
+
+int Egm2008::_readMdvNetcdf(const string &path)
+
+{
+
+  _mdvx.setReadPath(path);
+  if (_mdvx.readVolume()) {
+    cerr << "ERROR - Egm2008::_readMdvNetcdf" << endl;
+    cerr << _mdvx.getErrStr() << endl;
+    return -1;
+  }
+  
+  MdvxField *geoidFld = _mdvx.getFieldByNum(0);
+  if (geoidFld == NULL) {
+    cerr << "ERROR - Egm2008::_readMdvNetcdf" << endl;
+    cerr << "  Cannot find geoid correction field" << endl;
+    cerr << "  Path: " << path << endl;
+    return -1;
+  }
+
+  _geoidM = (const fl32*) geoidFld->getVol();
+  const Mdvx::field_header_t &fhdr = geoidFld->getFieldHeader();
+  _gridRes = fhdr.grid_dx;
+  _minLat = fhdr.grid_miny;
+  _minLon = fhdr.grid_minx;
+  _nLat = fhdr.ny;
+  _nLon = fhdr.nx;
+  _nPoints = _nLat * _nLon;
+
+  return 0;
+
+}
+
+  
+/////////////////////////////////////////////////////////////
+// read in the Geoid corrections file
+// for 2008 version of EGM
+// from a binary file with FORTRAN record markers
+
+int Egm2008::_readFortranBinaryFile(const string &path)
+
+{
+  
   // get file size
   
   struct stat fstat;
@@ -101,20 +173,20 @@ int Egm2008::readGeoid(const string &path)
   
   // assume 2.5 minute file to start
   
-  _nPtsPerDeg = 24;
+  int nPtsPerDeg = 24;
   if (nbytes > 149368328) {
     // 1 minute file
-    _nPtsPerDeg = 60;
+    nPtsPerDeg = 60;
   }
-  _gridRes = 1.0 / _nPtsPerDeg;
+  _gridRes = 1.0 / nPtsPerDeg;
 
-  _nLat = 180 * _nPtsPerDeg + 1;
-  _nLon = 360 * _nPtsPerDeg;
+  _nLat = 180 * nPtsPerDeg + 1;
+  _nLon = 360 * nPtsPerDeg;
   _nPoints = _nLat * _nLon;
   ui32 recLen = _nLon * sizeof(fl32);
 
   if (_debug) {
-    cerr << "==>> _nPtsPerDeg: " << _nPtsPerDeg << endl;
+    cerr << "==>> nPtsPerDeg: " << nPtsPerDeg << endl;
     cerr << "==>> _gridRes: " << _gridRes << endl;
     cerr << "==>> _nLat: " << _nLat << endl;
     cerr << "==>> _nLon: " << _nLon << endl;
@@ -144,10 +216,10 @@ int Egm2008::readGeoid(const string &path)
   
   // geoid data in meters
 
-  if (_geoidM != NULL) {
-    delete[] _geoidM;
+  if (_geoidBuf != NULL) {
+    delete[] _geoidBuf;
   }
-  _geoidM = new fl32[_nPoints];
+  _geoidBuf = new fl32[_nPoints];
 
   int npts = 0;
   bool mustSwap = false;
@@ -209,7 +281,7 @@ int Egm2008::readGeoid(const string &path)
     // copy data into main array
     
     for (off_t ii = 0; ii < nFl32InRec; ii++) {
-      _geoidM[npts] = buf[ii];
+      _geoidBuf[npts] = buf[ii];
       npts++;
     }
     delete[] buf;
@@ -263,10 +335,19 @@ int Egm2008::readGeoid(const string &path)
           lon -= 360.0;
         }
         fprintf(stderr, "lat, lon, geoidM: %10.5f  %10.5f  %10.5f\n", 
-                lat, lon, _geoidM[ipt]);
+                lat, lon, _geoidBuf[ipt]);
       }
     } // ilat
   }
+
+  // reorder the data so it starts at the SW corner
+
+  _reorderGeoidLats();
+  _reorderGeoidLons();
+
+  _geoidM = _geoidBuf;
+  _minLat = -90.0;
+  _minLon = -180.0;
 
   return 0;
 
@@ -331,8 +412,8 @@ double Egm2008::getInterpGeoidM(double lat, double lon) const
 
   // compute latitude indices on either side of the point
   
-  int ilat0 = getLatIndexBelow(lat);
-  int ilat1 = getLatIndexAbove(lat);
+  int ilat0 = getLatIndexSouth(lat);
+  int ilat1 = getLatIndexNorth(lat);
   
   // compute longitude indices on either side of the point
 
@@ -341,8 +422,8 @@ double Egm2008::getInterpGeoidM(double lat, double lon) const
   } else if (lon > 360) {
     lon -= 360.0;
   }
-  int ilon0 = getLonIndexBelow(lon);
-  int ilon1 = getLonIndexAbove(lon);
+  int ilon0 = getLonIndexWest(lon);
+  int ilon1 = getLonIndexEast(lon);
 
   // get lat and lon for the indices
   
@@ -369,7 +450,6 @@ double Egm2008::getInterpGeoidM(double lat, double lon) const
 
   cerr << "111111111111111111111111111111111111111" << endl;
   cerr << "_nLat, _nLon: " << _nLat << ", " << _nLon << endl;
-  cerr << "_nPtsPerDeg: " << _nPtsPerDeg << endl;
   cerr << "_gridRes: " << _gridRes << endl;
   cerr << "lat, lon: " << lat << ", " << lon << endl;
   cerr << "ilat0, ilat1: " << ilat0 << ", " << ilat1 << endl;
@@ -388,4 +468,98 @@ double Egm2008::getInterpGeoidM(double lat, double lon) const
   return gg;
 
 }
+
+/////////////////////////////////////////////////////////
+// reorder the geoid latitude
+// the original data is north to south
+// we need the data south to north, for normal coordinates
+
+void Egm2008::_reorderGeoidLats()
+  
+{
+
+  // create an array for a line of data at a time
+
+  fl32 *rowData = new fl32[_nLon];
+
+  // loop through the top half of the rows
+
+  size_t nBytesRow = _nLon * sizeof(fl32);
+  
+  for (int irow = 0; irow < _nLat / 2; irow++) {
+
+    // make a copy of row data in northern half
+    
+    memcpy(rowData,
+           _geoidBuf + irow * _nLon,
+           nBytesRow);
+    
+    // copy from southern half to northern half
+
+    memcpy(_geoidBuf + irow * _nLon,
+           _geoidBuf + (_nLat - 1 - irow) * _nLon,
+           nBytesRow);
+
+    // copy from northern half to southern half
+    
+    memcpy(_geoidBuf + (_nLat - 1 - irow) * _nLon,
+           rowData,
+           nBytesRow);
+
+  }
+
+  // clean up
+
+  delete[] rowData;
+
+}
+
+
+///////////////////////////////////////////////////////////
+// reorder the geoid longitude
+// the original data is 0 to 360
+// reorder from -180 to +180
+
+void Egm2008::_reorderGeoidLons()
+  
+{
+
+  // create arrays
+
+  size_t nLonHalf = _nLon / 2;
+  fl32 *rowData = new fl32[_nLon];
+  size_t nBytesRow = _nLon * sizeof(fl32);
+  size_t nBytesHalf = nLonHalf * sizeof(fl32);
+  
+  // loop through the top half of the rows
+  
+  
+  for (int irow = 0; irow < _nLat; irow++) {
+
+    // make a copy of east half of row data
+    
+    memcpy(rowData,
+           _geoidBuf + irow * _nLon + nLonHalf,
+           nBytesHalf);
+    
+    // make a copy of west half of row data
+    
+    memcpy(rowData + nLonHalf,
+           _geoidBuf + irow * _nLon,
+           nBytesHalf);
+    
+    // copy from row data back into place
+
+    memcpy(_geoidBuf + irow * _nLon,
+           rowData,
+           nBytesRow);
+
+  }
+
+  // clean up
+  
+  delete[] rowData;
+
+}
+
 
