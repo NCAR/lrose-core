@@ -487,7 +487,7 @@ int Egm2Mdv::_writeMdvFile()
 
   mdvx.setWriteFormat(Mdvx::FORMAT_NCF);
   mdvx.setMdv2NcfOutput(false, false, false, false);
-  mdvx.setMdv2NcfCompression(true, 9);
+  mdvx.setMdv2NcfCompression(false, 0);
 
   if (mdvx.writeToPath(_params.output_file_path)) {
     cerr << "ERROR - Egm2Mdv::_writeMdvFile()" << endl;
