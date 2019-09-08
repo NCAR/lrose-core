@@ -81,7 +81,6 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-lat")) {
       
       if (i < argc - 1) {
-	str = argv[i+1];
         sprintf(tmp_str, "lat = %s;", argv[i+1]);
         TDRP_add_override(&override, tmp_str);
       } else {
@@ -91,7 +90,6 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-lon")) {
       
       if (i < argc - 1) {
-	str = argv[i+1];
         sprintf(tmp_str, "lon = %s;", argv[i+1]);
         TDRP_add_override(&override, tmp_str);
       } else {
@@ -101,7 +99,7 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-f")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "path = \"%s\";", argv[i+1]);
+        sprintf(tmp_str, "egm_path = \"%s\";", argv[i+1]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -126,11 +124,11 @@ void Args::_usage(ostream &out)
   out << "Usage: " << _progName << " [options as below]\n"
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
-      << "       [ -debug ] print debug messages\n"
-      << "       [ -f ?] path to test\n"
+      << "       [ -d, -debug ] print debug messages\n"
+      << "       [ -f ?] egm geoid file path\n"
       << "       [ -lat ?] latitude of desired point\n"
       << "       [ -lon ?] longitude of desired point\n"
-      << "       [ -verbose ] print verbose debug messages\n"
+      << "       [ -v, -verbose ] print verbose debug messages\n"
       << endl;
 
   Params::usage(out);

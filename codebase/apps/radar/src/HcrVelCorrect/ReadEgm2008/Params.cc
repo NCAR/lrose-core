@@ -585,15 +585,15 @@
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
-    // Parameter 'path'
+    // Parameter 'egm_path'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("path");
-    tt->descr = tdrpStrDup("");
+    tt->param_name = tdrpStrDup("egm_path");
+    tt->descr = tdrpStrDup("Path to EGM 2008 file");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &path - &_start_;
+    tt->val_offset = (char *) &egm_path - &_start_;
     tt->single_val.s = tdrpStrDup("Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree");
     tt++;
     

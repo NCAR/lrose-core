@@ -59,6 +59,7 @@ Egm2008::Egm2008()
   _verbose = false;
 
   _geoidBuf = NULL;
+  _geoidM = NULL;
 
   // initialize assuming 2.5 minute data
 
@@ -127,8 +128,8 @@ int Egm2008::_readMdvNetcdf(const string &path)
     cerr << _mdvx.getErrStr() << endl;
     return -1;
   }
-  
-  MdvxField *geoidFld = _mdvx.getFieldByNum(0);
+
+  MdvxField *geoidFld = _mdvx.getField(0);
   if (geoidFld == NULL) {
     cerr << "ERROR - Egm2008::_readMdvNetcdf" << endl;
     cerr << "  Cannot find geoid correction field" << endl;
@@ -327,10 +328,10 @@ int Egm2008::_readFortranBinaryFile(const string &path)
   if (_verbose) {
     cerr << "========== egm2008 file =====>> : " << path << endl;
     int ipt = 0;
-    for (int ilat = 0; ilat < _nLat; ilat++) {
+    for (size_t ilat = 0; ilat < _nLat; ilat++) {
       double lat = 90.0 - ilat * _gridRes;
-      for (int ilon = 0; ilon < _nLon; ilon++, ipt++) {
-        double lon = ilon * _gridRes;
+      for (size_t iLon = 0; iLon < _nLon; iLon++, ipt++) {
+        double lon = iLon * _gridRes;
         if (lon > 180.0) {
           lon -= 360.0;
         }
@@ -367,27 +368,16 @@ double Egm2008::getClosestGeoidM(double lat, double lon) const
     return 0.0;
   }
   
-  int ilat = (int) (((90.0 - lat) / _gridRes) + 0.5);
-  int ilon = (int) ((lon / _gridRes) + 0.5);
-  if (lon < 0) {
-    ilon = (int) (((lon + 360.0) / _gridRes) + 0.5);
-  }
+  int iLat = getLatIndexClosest(lat);
+  int iLon = getLonIndexClosest(lon);
   
-  int index = ilon + ilat * _nLon;
-  if (index > _nPoints - 1) {
-    cerr << "ERROR - Egm2008::getClosestGeoidM" << endl;
-    cerr << "  lat, lon: " << lat << ", " << lon << endl;
-    cerr << "  Bad index: " << index << endl;
-    cerr << "  Max allowable index: " << _nPoints - 1 << endl;
-    cerr << "  Returning 0.0" << endl;
-    return 0.0;
-  }
+  int index = getIndex(iLat, iLon);
 
   cerr << "222222222222222222222222222222222222222" << endl;
   cerr << "lat: " << lat << endl;
   cerr << "lon: " << lon << endl;
-  cerr << "ilat: " << ilat << endl;
-  cerr << "ilon: " << ilon << endl;
+  cerr << "iLat: " << iLat << endl;
+  cerr << "iLon: " << iLon << endl;
   cerr << "index: " << index << endl;
   cerr << "closest: " << _geoidM[index] << endl;
   cerr << "222222222222222222222222222222222222222" << endl;
@@ -410,57 +400,59 @@ double Egm2008::getInterpGeoidM(double lat, double lon) const
     return 0.0;
   }
 
-  // compute latitude indices on either side of the point
+  // compute indices surrounding the point
   
-  int ilat0 = getLatIndexSouth(lat);
-  int ilat1 = getLatIndexNorth(lat);
-  
-  // compute longitude indices on either side of the point
-
-  if (lon < 0) {
+  int iLatS = getLatIndexSouth(lat);
+  int iLatN = getLatIndexNorth(lat);
+  if (lon < -180) {
     lon += 360.0;
-  } else if (lon > 360) {
+  } else if (lon >= 180) {
     lon -= 360.0;
   }
-  int ilon0 = getLonIndexWest(lon);
-  int ilon1 = getLonIndexEast(lon);
+  int iLonW = getLonIndexWest(lon);
+  int iLonE = getLonIndexEast(lon);
 
-  // get lat and lon for the indices
+  // compute lats and lons of surrounding points
+
+  double latS = getLat(iLatS);
+  double latN = getLat(iLatN);
+  double lonW = getLon(iLonW);
+  double lonE = getLon(iLonE);
   
-  double lat0 = getLat(ilat0);
-  double lat1 = getLat(ilat1);
-  double latFraction = (lat - lat0) / _gridRes;
+  // compute the interpolation fractions
+
+  double diffLat = lat - latS;
+  double diffLon = lon - lonW;
+
+  double latFraction = diffLat / _gridRes;
+  double lonFraction = diffLon / _gridRes;
   
-  double lon0 = getLon(ilon0);
-  double lon1 = getLon(ilon1);
-  double lonFraction = (lon - lon0) / _gridRes;
+  // interp in latitude
 
-  // interp starting with latitude
+  double gNW = _geoidM[getIndex(iLatN, iLonW)];
+  double gSW = _geoidM[getIndex(iLatS, iLonW)];
 
-  double g00 = _geoidM[ilon0 + ilat0 * _nLon];
-  double g01 = _geoidM[ilon0 + ilat1 * _nLon];
-  
-  double g10 = _geoidM[ilon1 + ilat0 * _nLon];
-  double g11 = _geoidM[ilon1 + ilat1 * _nLon];
+  double gNE = _geoidM[getIndex(iLatN, iLonE)];
+  double gSE = _geoidM[getIndex(iLatS, iLonE)];
 
-  double g0 = g00 + (g01 - g00) * latFraction;
-  double g1 = g10 + (g11 - g10) * latFraction;
+  double gW = gSW + latFraction * (gNW - gSW);
+  double gE = gSE + latFraction * (gNE - gSE);
 
-  double gg = g0 + (g1 - g0) * lonFraction;
+  double gg = gW + lonFraction * (gE - gW);
 
   cerr << "111111111111111111111111111111111111111" << endl;
   cerr << "_nLat, _nLon: " << _nLat << ", " << _nLon << endl;
   cerr << "_gridRes: " << _gridRes << endl;
   cerr << "lat, lon: " << lat << ", " << lon << endl;
-  cerr << "ilat0, ilat1: " << ilat0 << ", " << ilat1 << endl;
-  cerr << "ilon0, ilon1: " << ilon0 << ", " << ilon1 << endl;
-  cerr << "lat0, lat1: " << lat0 << ", " << lat1 << endl;
-  cerr << "lon0, lon1: " << lon0 << ", " << lon1 << endl;
+  cerr << "iLatS, iLatN: " << iLatS << ", " << iLatN << endl;
+  cerr << "iLonW, iLonE: " << iLonW << ", " << iLonE << endl;
+  cerr << "latS, latN: " << latS << ", " << latN << endl;
+  cerr << "lonW, lonE: " << lonW << ", " << lonE << endl;
   cerr << "latFraction: " << latFraction << endl;
   cerr << "lonFraction: " << lonFraction << endl;
-  cerr << "g00, g01: " << g00 << ", " << g01 << endl;
-  cerr << "g10, g11: " << g10 << ", " << g11 << endl;
-  cerr << "g0, g1: " << g0 << ", " << g1 << endl;
+  cerr << "gNW, gSW: " << gNW << ", " << gSW << endl;
+  cerr << "gNE, gSE: " << gNE << ", " << gSE << endl;
+  cerr << "gW, gE: " << gW << ", " << gE << endl;
   cerr << "gg: " << gg << endl;
   cerr << "closest: " << getClosestGeoidM(lat, lon) << endl;
   cerr << "111111111111111111111111111111111111111" << endl;
@@ -486,7 +478,7 @@ void Egm2008::_reorderGeoidLats()
 
   size_t nBytesRow = _nLon * sizeof(fl32);
   
-  for (int irow = 0; irow < _nLat / 2; irow++) {
+  for (size_t irow = 0; irow < _nLat / 2; irow++) {
 
     // make a copy of row data in northern half
     
@@ -534,7 +526,7 @@ void Egm2008::_reorderGeoidLons()
   // loop through the top half of the rows
   
   
-  for (int irow = 0; irow < _nLat; irow++) {
+  for (size_t irow = 0; irow < _nLat; irow++) {
 
     // make a copy of east half of row data
     

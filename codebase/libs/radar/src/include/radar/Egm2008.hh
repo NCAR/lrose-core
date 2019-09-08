@@ -43,7 +43,7 @@
 #include <string>
 #include <vector>
 #include <dataport/port_types.h>
-#include <Mdv/Mdvx.hh>
+#include <Mdv/DsMdvx.hh>
 
 using namespace std;
 
@@ -79,63 +79,71 @@ public:
 
   // grid methods
 
-  inline int getLatIndexClosest(double lat,
+  inline size_t getLatIndexClosest(double lat,
                                 double rounding = 0.5) const {
     int ilat = (int) (((lat - _minLat) / _gridRes) + rounding);
     if (ilat < 0) {
       ilat = 0;
-    } else if (ilat > _nLat - 1) {
+    } else if (ilat > (int) _nLat - 1) {
       ilat = _nLat - 1;
     }
     return ilat;
   }
   
-  inline int getLatIndexSouth(double lat) const {
+  inline size_t getLatIndexSouth(double lat) const {
     return getLatIndexClosest(lat, 0.0);
   }
   
-  inline int getLatIndexNorth(double lat) const {
-    int ilatBelow = getLatIndexSouth(lat);
-    int ilatAbove = ilatBelow + 1;
-    if (ilatAbove > _nLat - 1) {
-      ilatAbove = _nLat - 1;
+  inline size_t getLatIndexNorth(double lat) const {
+    int iLatS = getLatIndexSouth(lat);
+    int iLatN = iLatS + 1;
+    if (iLatN > (int) _nLat - 1) {
+      iLatN = _nLat - 1;
     }
-    return ilatAbove;
+    return iLatN;
   }
 
-  inline int getLonIndexClosest(double lon,
+  inline size_t getLonIndexClosest(double lon,
                                 double rounding = 0.5) const {
     if (lon > 180.0) {
       lon -= 360.0;
     }
-    int ilon = (int) (((lon - _minLon) / _gridRes) + rounding);
-    if (ilon < 0) {
-      ilon = _nLon - 1;
-    } else if (ilon > _nLon - 1) {
-      ilon = 0;
+    int iLon = (int) (((lon - _minLon) / _gridRes) + rounding);
+    if (iLon < 0) {
+      iLon = _nLon - 1;
+    } else if (iLon > (int) _nLon - 1) {
+      iLon = 0;
     }
-    return ilon;
+    return iLon;
   }
 
-  inline int getLonIndexWest(double lon) const {
+  inline size_t getLonIndexWest(double lon) const {
     return getLonIndexClosest(lon, 0.0);
   }
 
-  inline int getLonIndexEast(double lon) const {
-    int ilonBelow = getLonIndexWest(lon);
-    int ilonAbove = ilonBelow + 1;
-    if (ilonAbove > _nLon - 1) {
-      ilonAbove = 0;
+  inline size_t getLonIndexEast(double lon) const {
+    int iLonW = getLonIndexWest(lon);
+    int iLonE = iLonW + 1;
+    if (iLonE > (int) _nLon - 1) {
+      iLonE = 0;
     }
-    return ilonAbove;
+    return iLonE;
+  }
+  
+  inline double getLat(int iLat) const {
+    return _minLat + (double) iLat * _gridRes;
   }
 
-  inline double getLat(int latIndex) const {
-    return _minLat + (double) latIndex * _gridRes;
+  inline double getLon(int iLon) const {
+    return _minLon + (double) iLon * _gridRes;
   }
-
-  inline double getLon(int lonIndex) const {
-    return _minLon + (double) lonIndex * _gridRes;
+  
+  inline size_t getIndex(int iLat, int iLon) const {
+    size_t index = iLon + iLat * _nLon;
+    if (index > _nPoints - 1) {
+      index = _nPoints - 1;
+    }
+    return index;
   }
 
 protected:
@@ -144,14 +152,14 @@ private:
   bool _debug;
   bool _verbose;
 
-  Mdvx _mdvx;
+  DsMdvx _mdvx;
   fl32 *_geoidBuf;
 
   const fl32 *_geoidM;
 
-  int _nLat;
-  int _nLon;
-  int _nPoints;
+  size_t _nLat;
+  size_t _nLon;
+  size_t _nPoints;
 
   double _gridRes;
   double _minLat;

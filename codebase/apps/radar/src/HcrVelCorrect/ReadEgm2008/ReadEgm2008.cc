@@ -37,13 +37,15 @@
 #include <toolsa/TaStr.hh>
 #include <toolsa/TaFile.hh>
 #include <sys/stat.h>
+#include <radar/Egm2008.hh>
+
 using namespace std;
 
 // Constructor
 
 ReadEgm2008::ReadEgm2008(int argc, char **argv) :
-  _args("ReadEgm2008")
-
+        _args("ReadEgm2008")
+  
 {
 
   OK = TRUE;
@@ -92,196 +94,20 @@ ReadEgm2008::~ReadEgm2008()
 int ReadEgm2008::Run()
 {
 
-  // get file size
-
-  struct stat fstat;
-  if (ta_stat(_params.path, &fstat)) {
-    int errNum = errno;
-    cerr << "ERROR - cannot stat egm file: " << _params.path << endl;
-    cerr << "  " << strerror(errNum) << endl;
-    return -1;
-  }
-  off_t nbytes = fstat.st_size;
-
-  // assume 2.5 minute file to start
-
-  int nPtsPerDeg = 24;
-  if (nbytes > 149368328) {
-    // 1 minute file
-    nPtsPerDeg = 60;
-  }
-
-  int nlat = 180 * nPtsPerDeg + 1;
-  int nlon = 360 * nPtsPerDeg;
-  int npoints = nlat * nlon;
-  ui32 recLen = nlon * sizeof(fl32);
-
-  if (_params.debug) {
-    cerr << "==>> nPtsPerDeg: " << nPtsPerDeg << endl;
-    cerr << "==>> nlat: " << nlat << endl;
-    cerr << "==>> nlon: " << nlon << endl;
-    cerr << "==>> npoints: " << npoints << endl;
-    cerr << "==>> recLen: " << recLen << endl;
-  }
-  
-  int nexpected = npoints * sizeof(fl32) + nlat * 2 * sizeof(ui32);
-  if (nbytes != nexpected) {
-    cerr << "ERROR - bad egm2008 file: " << _params.path << endl;
-    cerr << "  expected nbytes: " << nexpected << endl;
-    cerr << "  file size nbytes: " << nbytes << endl;
+  Egm2008 egm;
+  if (egm.readGeoid(_params.egm_path)) {
+    cerr << "ERROR - ReadEgm2008::Run()" << endl;
+    cerr << "  Cannot read geoid file: " << _params.egm_path << endl;
     return -1;
   }
 
-  // open elevation data file
-  
-  FILE *egmFile;
-  if ((egmFile = fopen(_params.path, "r")) == NULL) {
-    int errNum = errno;
-    cerr << "ERROR - cannot open egm file: " << _params.path << endl;
-    cerr << "  " << strerror(errNum) << endl;
-    return -1;
-  }
+  // get geoid for lat/lon for point of interest
 
-  // geoid data in meters
-
-  fl32 *geoidM = new fl32[npoints];
-  int npts = 0;
-  bool mustSwap = false;
-  
-  // read through the file, a fortran record at a time
-  
-  while (!feof(egmFile)) {
-    
-    // read starting fortran record len
-    
-    ui32 recLenStart;
-    if (fread(&recLenStart, sizeof(recLenStart), 1, egmFile) != 1) {
-      if (feof(egmFile)) {
-        break;
-      }
-      int errNum = errno;
-      cerr << "ERROR - cannot read start fort rec len from egm file: " 
-           << _params.path << endl;
-      cerr << "  " << strerror(errNum) << endl;
-      fclose(egmFile);
-      delete[] geoidM;
-      return -1;
-    }
-    if (recLenStart != recLen) {
-      recLenStart = BE_from_ui32(recLenStart);
-      mustSwap = true;
-    }
-    if (recLenStart != recLen) {
-      cerr << "ERROR - bad egm2008 file: " << _params.path << endl;
-      cerr << "  bad recLenStart: " << recLenStart << endl;
-      fclose(egmFile);
-      delete[] geoidM;
-      return -1;
-    }
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Start fort rec len: " << recLenStart << endl;
-    }
-    
-    // read in data
-    
-    int nFl32InRec = recLenStart / sizeof(fl32);
-    fl32 *buf = new fl32[nFl32InRec];
-    if (fread(buf, sizeof(fl32), nFl32InRec, egmFile) != (size_t) nFl32InRec) {
-      int errNum = errno;
-      cerr << "ERROR - cannot read data from egm file: " << _params.path << endl;
-      cerr << "  " << strerror(errNum) << endl;
-      fclose(egmFile);
-      delete[] geoidM;
-      delete[] buf;
-      return -1;
-    }
-    
-    // swap as needed
-
-    if (mustSwap) {
-      BE_from_array_32(buf, nFl32InRec * sizeof(fl32));
-    }
-
-    // copy data into array
-    
-    for (off_t ii = 0; ii < nFl32InRec; ii++) {
-      geoidM[npts] = buf[ii];
-      npts++;
-    }
-    delete[] buf;
-    
-    // read ending fortran record len
-    
-    ui32 recLenEnd;
-    if (fread(&recLenEnd, sizeof(recLenEnd), 1, egmFile) != 1) {
-      int errNum = errno;
-      cerr << "ERROR - cannot read end fort rec len from egm file: " 
-           << _params.path << endl;
-      cerr << "  " << strerror(errNum) << endl;
-      fclose(egmFile);
-      delete[] geoidM;
-      return -1;
-    }
-    if (mustSwap) {
-      recLenEnd = BE_from_ui32(recLenEnd);
-    }
-    if (recLenEnd != recLen) {
-      cerr << "ERROR - bad egm2008 file: " << _params.path << endl;
-      cerr << "  bad recLenEnd: " << recLenEnd << endl;
-      fclose(egmFile);
-      delete[] geoidM;
-      return -1;
-    }
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "End fort rec len: " << recLenEnd << endl;
-    }
-    
-  } // while
-  
-  // close file
-
-  fclose(egmFile);
-
-  if (_params.debug) {
-    cerr << "Read npts: " << npts << endl;
-  }
-
-  // print out in debug mode
-  
-  if (_params.debug) {
-    int ipt = 0;
-    for (int ilat = 0; ilat < nlat; ilat++) {
-      double lat = 90.0 - ilat / (double) nPtsPerDeg;
-      for (int ilon = 0; ilon < nlon; ilon++, ipt++) {
-        double lon = ilon / (double) nPtsPerDeg;
-        if (lon > 180.0) {
-          lon -= 360.0;
-        }
-        fprintf(stderr, "lat, lon, geoidM: %10.5f  %10.5f  %10.5f\n", 
-                lat, lon, geoidM[ipt]);
-      }
-    } // ilat
-  }
-
-  // get lat/lon for point of interest
-
-  int ilat = (int) (((90.0 - _params.lat) * (double) nPtsPerDeg) + 0.5);
-  int ilon = (int) ((_params.lon * (double) nPtsPerDeg) + 0.5);
-  if (_params.lon < 0) {
-    ilon = (int) (((_params.lon + 360.0) * (double) nPtsPerDeg) + 0.5);
-  }
-  
-  double lat = 90.0 - ilat / (double) nPtsPerDeg;
-  double lon = ilon / (double) nPtsPerDeg;
-  if (lon > 180) {
-    lon -= 360.0;
-  }
-
-  int index = ilon + ilat * nlon;
-  cerr << "====>> lat, lon, geoid: " 
-       << lat << ", " 
-       << lon << ", " 
-       << geoidM[index] << endl;
+  cerr << "====>> lat, lon, geoidClosest, geoidInterp: " 
+       << _params.lat << ", " 
+       << _params.lon << ", " 
+       << egm.getClosestGeoidM(_params.lat, _params.lon) << ", "
+       << egm.getInterpGeoidM(_params.lat, _params.lon) << endl;
 
   return 0;
 

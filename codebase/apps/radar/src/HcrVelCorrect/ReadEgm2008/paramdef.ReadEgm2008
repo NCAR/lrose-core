@@ -24,7 +24,8 @@ paramdef enum debug_t {
 
 paramdef string {
   p_default = "Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree";
-} path;
+  p_descr = "Path to EGM 2008 file";
+} egm_path;
 
 paramdef double {
   p_default = 0.0;

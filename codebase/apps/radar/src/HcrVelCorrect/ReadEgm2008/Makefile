@@ -15,8 +15,9 @@ TARGET_FILE = ReadEgm2008
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 LOC_LDFLAGS = -L..
-LOC_LIBS = \
-	-ltoolsa -ltdrp -ldataport -lbz2
+LOC_LIBS = -lradar -lMdv -lRadx -lNcxx -leuclid -ldsserver \
+	-ldidss -lrapformats -ltoolsa -ldataport \
+	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 
 HDRS = \
 	$(PARAMS_HH) \

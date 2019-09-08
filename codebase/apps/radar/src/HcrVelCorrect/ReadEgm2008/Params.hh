@@ -369,7 +369,7 @@ public:
 
   debug_t debug;
 
-  char* path;
+  char* egm_path;
 
   double lat;
 

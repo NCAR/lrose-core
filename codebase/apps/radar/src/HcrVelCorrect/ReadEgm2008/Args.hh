@@ -45,8 +45,6 @@ public:
 
   // public data
 
-  string str;
-  string spacer;
   tdrp_override_t override;
 
 protected:
