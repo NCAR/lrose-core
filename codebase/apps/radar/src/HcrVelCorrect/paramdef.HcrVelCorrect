@@ -193,9 +193,9 @@ paramdef boolean {
 } correct_altitude_for_egm;
 
 paramdef string {
-  p_default = "Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree";
+  p_default = "$(PROJ_DIR)/data/egm/EGM_2008_WGS84_2.5minx2.5min.nc";
   p_descr = "Path to geoid table file.";
-  p_help = "Downloads available from https://earth-info.nga.mil/GandG/wgs84/gravitymod";
+  p_help = "Downloads available from https://earth-info.nga.mil/GandG/wgs84/gravitymod. NetCDF file is on the shared drive at HCR->dataProcessing->AltitudeCorrection. The app Egm2Mdv will convert the downloadable file to a netCDF format file.";
 } egm_2008_geoid_file;
 
 commentdef {

@@ -927,9 +927,9 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("egm_2008_geoid_file");
     tt->descr = tdrpStrDup("Path to geoid table file.");
-    tt->help = tdrpStrDup("Downloads available from https://earth-info.nga.mil/GandG/wgs84/gravitymod");
+    tt->help = tdrpStrDup("Downloads available from https://earth-info.nga.mil/GandG/wgs84/gravitymod. NetCDF file is on the shared drive at HCR->dataProcessing->AltitudeCorrection. The app Egm2Mdv will convert the downloadable file to a netCDF format file.");
     tt->val_offset = (char *) &egm_2008_geoid_file - &_start_;
-    tt->single_val.s = tdrpStrDup("Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree");
+    tt->single_val.s = tdrpStrDup("$(PROJ_DIR)/data/egm/EGM_2008_WGS84_2.5minx2.5min.nc");
     tt++;
     
     // Parameter 'Comment 6'
