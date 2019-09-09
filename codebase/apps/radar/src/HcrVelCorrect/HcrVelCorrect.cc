@@ -1195,7 +1195,7 @@ int HcrVelCorrect::_addCorrectedSpectrumWidth(RadxRay *ray)
   double elev = ray->getElevationDeg();
   double sinElev = sin(elev * DEG_TO_RAD);
   double delta =
-    fabs(0.3 * speed * sinElev * 0.5 *
+    fabs(0.3 * speed * sinElev *
          (_params.width_correction_beamwidth_deg * DEG_TO_RAD));
   
   // create a copy of this field
@@ -1209,11 +1209,11 @@ int HcrVelCorrect::_addCorrectedSpectrumWidth(RadxRay *ray)
   Radx::fl32 *ww = corrWidth->getDataFl32();
   for (size_t ii = 0; ii < corrWidth->getNPoints(); ii++) {
     if (ww[ii] != miss) {
-      double corr = ww[ii] - delta;
-      if (corr < 0.05) {
-        corr = 0.05;
+      double xx = ww[ii] * ww[ii] - delta * delta;
+      if (xx < 0.01) {
+        xx = 0.01;
       }
-      ww[ii] = corr;
+      ww[ii] = sqrt(xx);
     }
   }
 
