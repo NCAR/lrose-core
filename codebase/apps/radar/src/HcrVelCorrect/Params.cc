@@ -927,7 +927,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("egm_2008_geoid_file");
     tt->descr = tdrpStrDup("Path to geoid table file.");
-    tt->help = tdrpStrDup("Downloaded from https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/Und_min1x1_egm2008_isw=82_WGS84_TideFree.gz");
+    tt->help = tdrpStrDup("Downloads available from https://earth-info.nga.mil/GandG/wgs84/gravitymod");
     tt->val_offset = (char *) &egm_2008_geoid_file - &_start_;
     tt->single_val.s = tdrpStrDup("Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree");
     tt++;
