@@ -702,6 +702,31 @@ public:
                     const string &standardName,
                     const string &longName);
 
+  /// Converts field type, and optionally changes the
+  /// names.
+  ///
+  /// If the data type is an integer type, the specified
+  /// scale an offset are used.
+  ///
+  /// If targetType is Radx::ASIS, no conversion is performed.
+  ///
+  /// If a string is empty, the value on the field will
+  /// be left unchanged.
+
+  /// Set folding behavior on for the specified field.
+  /// If the field folds, then when the value exceeds foldLimitUpper,
+  /// it wraps to foldLimitLower, and vice versa.
+  /// This occurs for radial velocity and phidp.
+  /// If useNyquist is true, we use the nyquist on the ray to compute
+  /// the folding limits.
+  /// Returns 0 on success.
+  /// Returns -1 if field does not exist on the ray.
+  
+  int setFieldFolds(const string &name,
+                    bool useNyquist,
+                    double foldLimitLower,
+                    double foldLimitUpper);
+
   /// Load the field name map.
   /// Generally this will be done automatically by the ray object.
   /// However, if you rename fields which have previously been added,

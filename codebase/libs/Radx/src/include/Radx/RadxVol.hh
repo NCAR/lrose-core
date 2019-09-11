@@ -582,7 +582,7 @@ public:
   /// fields so that they refer to the main fields on the volume.
   
   void setRayFieldPointers();
-
+  
   /// Make a copy of the field with the specified name.
   /// This forms a contiguous field from the ray data.
   /// Returns a pointer to the field on success, NULL on failure.
@@ -594,6 +594,20 @@ public:
 
   int renameField(const string &oldName, const string &newName);
   
+  /// Set folding behavior on for the specified field.
+  /// If the field folds, then when the value exceeds foldLimitUpper,
+  /// it wraps to foldLimitLower, and vice versa.
+  /// This occurs for radial velocity and phidp.
+  /// If useNyquist is true, we use the nyquist on the ray to compute
+  /// the folding limits.
+  /// Returns 0 on success.
+  /// Returns -1 if field does not exist in the vol.
+  
+  int setFieldFolds(const string &name,
+                    bool useNyquist,
+                    double foldLimitLower,
+                    double foldLimitUpper);
+
   /// Load volume information from the rays.
   ///
   /// This sets the volume number and the start and end times.

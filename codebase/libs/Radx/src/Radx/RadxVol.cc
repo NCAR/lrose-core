@@ -1348,6 +1348,42 @@ int RadxVol::renameField(const string &oldName, const string &newName)
   
 }
 
+/////////////////////////////////////////////////////////////////////
+/// Set folding behavior on for the specified field.
+/// If the field folds, then when the value exceeds foldLimitUpper,
+/// it wraps to foldLimitLower, and vice versa.
+/// This occurs for radial velocity and phidp.
+/// If useNyquist is true, we use the nyquist on the ray to compute
+/// the folding limits.
+/// Returns 0 on success.
+/// Returns -1 if field does not exist in the vol.
+
+int RadxVol::setFieldFolds(const string &name,
+                           bool useNyquist,
+                           double foldLimitLower,
+                           double foldLimitUpper)
+  
+{
+
+  int iret = -1;
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RadxRay &ray = *_rays[iray];
+    if (ray.setFieldFolds(name, useNyquist,
+                          foldLimitLower, foldLimitUpper) == 0) {
+      iret = 0;
+    }
+  }
+
+  if (iret < 0) {
+    cerr << "WARNING - RadxVol::setFieldFolds()" << endl;
+    cerr << "  field does not exist in vol: " << name << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
 //////////////////////////////////////////////////////////////
 // Load up modes from sweeps to rays
 // This assumes the sweeps meta data is filled out, but the

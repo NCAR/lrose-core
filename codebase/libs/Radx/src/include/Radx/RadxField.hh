@@ -181,8 +181,8 @@ public:
   void setSamplingRatio(double val) { _samplingRatio = val; }
 
   /// Set folding behavior on.
-  /// If the field folding, then when the value exceeds foldLimitUpper,
-  /// it wraps to the lower value, and vice versa. This occurs for
+  /// If the field folds, then when the value exceeds foldLimitUpper,
+  /// it wraps to foldLimitLower, and vice versa. This occurs for
   /// radial velocity, and phidp.
 
   void setFieldFolds(double foldLimitLower, double foldLimitUpper) {
