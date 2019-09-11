@@ -844,6 +844,69 @@
     tt->single_val.d = 9999;
     tt++;
     
+    // Parameter 'set_field_folds_attribute'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_field_folds_attribute");
+    tt->descr = tdrpStrDup("Set the 'field_folds' attribute on selected fields.");
+    tt->help = tdrpStrDup("Useful if this attribute is missing. If a field folds, and averaging is performed to combine the dwell, we need to take the folding into account.");
+    tt->val_offset = (char *) &set_field_folds_attribute - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'field_folds'
+    // ctype is '_field_folds_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("field_folds");
+    tt->descr = tdrpStrDup("Specifies fields for adding folding attribute.");
+    tt->help = tdrpStrDup("Specify the field names, plus whether to use the nyquist in the data. If use_nyquist is false, specify the lower and upper limit at which the field folds.");
+    tt->array_offset = (char *) &_field_folds - &_start_;
+    tt->array_n_offset = (char *) &field_folds_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(field_folds_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("field_folds_t");
+    tt->struct_def.nfields = 4;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("field_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_field_folds->field_name - (char *) _field_folds;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[1].fname = tdrpStrDup("use_nyquist");
+      tt->struct_def.fields[1].ptype = BOOL_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_field_folds->use_nyquist - (char *) _field_folds;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("fold_limit_lower");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_field_folds->fold_limit_lower - (char *) _field_folds;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("fold_limit_upper");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_field_folds->fold_limit_upper - (char *) _field_folds;
+    tt->n_struct_vals = 8;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("VEL");
+      tt->struct_vals[1].b = pTRUE;
+      tt->struct_vals[2].d = 0;
+      tt->struct_vals[3].d = 0;
+      tt->struct_vals[4].s = tdrpStrDup("PHIDP");
+      tt->struct_vals[5].b = pFALSE;
+      tt->struct_vals[6].d = -90;
+      tt->struct_vals[7].d = 90;
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));

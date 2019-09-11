@@ -375,6 +375,12 @@ int RadxDwellCombine::_processFile(const string &readPath)
     _applyLinearTransform(vol);
   }
 
+  // add field folding attribute if needed
+
+  if (_params.set_field_folds_attribute) {
+    _setFieldFoldsAttribute(vol);
+  }
+
   // combine the dwells
 
   if (_params.center_dwell_on_time) {
@@ -459,6 +465,25 @@ void RadxDwellCombine::_applyLinearTransform(RadxVol &vol)
     vol.applyLinearTransform(iname, scale, offset);
   } // ii
 
+}
+
+////////////////////////////////////////////////////////
+// set the field folds attribute on selected fields
+
+void RadxDwellCombine::_setFieldFoldsAttribute(RadxVol &vol)
+{
+
+  for (int ii = 0; ii < _params.field_folds_n; ii++) {
+    
+    const Params::field_folds_t &fld = _params._field_folds[ii];
+
+    vol.setFieldFolds(fld.field_name,
+                      fld.use_nyquist,
+                      fld.fold_limit_lower,
+                      fld.fold_limit_upper);
+
+  } // ii
+  
 }
 
 //////////////////////////////////////////////////

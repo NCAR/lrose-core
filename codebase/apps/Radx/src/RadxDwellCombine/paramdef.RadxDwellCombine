@@ -156,6 +156,28 @@ paramdef double {
   p_help = "Gates beyond this range are removed.";
 } max_range_km;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set the 'field_folds' attribute on selected fields.";
+  p_help = "Useful if this attribute is missing. If a field folds, and averaging is performed to combine the dwell, we need to take the folding into account.";
+} set_field_folds_attribute;
+
+typedef struct {
+  string field_name;
+  boolean use_nyquist;
+  double fold_limit_lower;
+  double fold_limit_upper;
+} field_folds_t;
+
+paramdef struct field_folds_t {
+  p_default = {
+    { "VEL", true, 0.0, 0.0},
+    { "PHIDP", false, -90.0, 90.0}
+  };
+  p_descr = "Specifies fields for adding folding attribute.";
+  p_help = "Specify the field names, plus whether to use the nyquist in the data. If use_nyquist is false, specify the lower and upper limit at which the field folds.";
+} field_folds[];
+
 commentdef {
   p_header = "SET THE DWELL DETAILS";
 }

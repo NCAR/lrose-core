@@ -133,6 +133,13 @@ public:
   // struct typedefs
 
   typedef struct {
+    char* field_name;
+    tdrp_bool_t use_nyquist;
+    double fold_limit_lower;
+    double fold_limit_upper;
+  } field_folds_t;
+
+  typedef struct {
     char* name;
     double min_valid_value;
     double max_valid_value;
@@ -489,6 +496,11 @@ public:
 
   double max_range_km;
 
+  tdrp_bool_t set_field_folds_attribute;
+
+  field_folds_t *_field_folds;
+  int field_folds_n;
+
   double dwell_time_secs;
 
   tdrp_bool_t center_dwell_on_time;
@@ -604,7 +616,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[87];
+  mutable TDRPtable _table[89];
 
   const char *_className;
 
