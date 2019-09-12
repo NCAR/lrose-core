@@ -101,6 +101,34 @@ RadxCalUpdate::~RadxCalUpdate()
 int RadxCalUpdate::Run()
 {
 
+  // read cal from XML file, as required
+  
+  if (_params.update_calibration) {
+    string errStr;
+    if (_calib.readFromXmlFile(_params.calibration_file_path,
+                               errStr)) {
+      cerr << "ERROR - RadxCalUpdate::Run()" << endl;
+      cerr << "  Cannot read cal from file: "
+           << _params.calibration_file_path << endl;
+      cerr << errStr << endl;
+      return -1;
+    }
+  }
+
+  // read height correction table, as required
+    
+  // altitude correction
+  
+  if (_params.correct_altitude_for_egm) {
+    if (_egm.readGeoid(_params.egm_2008_geoid_file)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Altitude correction for geoid." << endl;
+      cerr << "  Problem reading geoid file: " 
+           << _params.egm_2008_geoid_file << endl;
+      return -1;
+    }
+  }
+
   // run
 
   if (_params.mode == Params::ARCHIVE) {

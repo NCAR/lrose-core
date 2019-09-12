@@ -43,6 +43,8 @@
 #include "Params.hh"
 #include <string>
 #include <euclid/Rotate3d.hh>
+#include <Radx/RadxRcalib.hh>
+#include <radar/Egm2008.hh>
 class RadxVol;
 class RadxRay;
 class RadxFile;
@@ -76,7 +78,15 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+
+  // calibration
+
+  RadxRcalib _calib;
   
+  // altitude correction
+
+  Egm2008 _egm;
+
   int _runFilelist();
   int _runArchive();
   int _runRealtime();
