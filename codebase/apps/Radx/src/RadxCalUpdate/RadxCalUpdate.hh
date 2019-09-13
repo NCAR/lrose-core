@@ -81,7 +81,7 @@ private:
 
   // calibration
 
-  RadxRcalib _calib;
+  RadxRcalib _newCal;
   
   // altitude correction
 
@@ -95,11 +95,11 @@ private:
   int _processFile(const string &filePath);
 
   void _setupWrite(RadxFile &file);
-  int _writeVol(const RadxVol &vol);
+  int _writeVol(RadxVol &vol);
 
-  void _fixRay(RadxRay &ray);
-  void _fixRayCalibration(RadxRay &ray);
-  void _fixRayAltitude(RadxRay &ray);
+  void _fixRay(RadxVol &vol, RadxRay &ray);
+  void _fixRayCalibration(RadxVol &vol, RadxRay &ray);
+  void _fixRayAltitude(RadxVol &vol, RadxRay &ray);
 
 
 };

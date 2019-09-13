@@ -105,8 +105,8 @@ int RadxCalUpdate::Run()
   
   if (_params.update_calibration) {
     string errStr;
-    if (_calib.readFromXmlFile(_params.calibration_file_path,
-                               errStr)) {
+    if (_newCal.readFromXmlFile(_params.calibration_file_path,
+                                errStr)) {
       cerr << "ERROR - RadxCalUpdate::Run()" << endl;
       cerr << "  Cannot read cal from file: "
            << _params.calibration_file_path << endl;
@@ -264,8 +264,14 @@ int RadxCalUpdate::_processFile(const string &filePath)
 
   vector<RadxRay *> &rays = vol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
-    _fixRay(*rays[iray]);
+    _fixRay(vol, *rays[iray]);
   }
+
+  // set the new calib for the volume
+
+  vol.clearRcalibs();
+  RadxRcalib *newCal = new RadxRcalib(_newCal);
+  vol.addCalib(newCal);
 
   // write the file
 
@@ -330,7 +336,7 @@ void RadxCalUpdate::_setupWrite(RadxFile &file)
 //////////////////////////////////////////////////
 // write out the volume
 
-int RadxCalUpdate::_writeVol(const RadxVol &vol)
+int RadxCalUpdate::_writeVol(RadxVol &vol)
 {
 
   // output file
@@ -375,15 +381,15 @@ int RadxCalUpdate::_writeVol(const RadxVol &vol)
 //////////////////////////////////////////////////
 // fix a ray
 
-void RadxCalUpdate::_fixRay(RadxRay &ray)
+void RadxCalUpdate::_fixRay(RadxVol &vol, RadxRay &ray)
 {
 
   if (_params.update_calibration) {
-    _fixRayCalibration(ray);
+    _fixRayCalibration(vol, ray);
   }
   
   if (_params.correct_altitude_for_egm) {
-    _fixRayAltitude(ray);
+    _fixRayAltitude(vol, ray);
   }
   
 }
@@ -391,31 +397,123 @@ void RadxCalUpdate::_fixRay(RadxRay &ray)
 //////////////////////////////////////////////////
 // fix a ray's calibration
 
-void RadxCalUpdate::_fixRayCalibration(RadxRay &ray)
+void RadxCalUpdate::_fixRayCalibration(RadxVol &vol, RadxRay &ray)
 {
+  
+  if (vol.getNRcalibs() < 1) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - RadxCalUpdate::_fixRayCalibration" << endl;
+      cerr << "  No calibration for this volume" << endl;
+    }
+    return;
+  }
+  
+  // get the calibration for this ray
+  
+  int calibIndex = ray.getCalibIndex();
+  if (calibIndex > (int) vol.getNRcalibs() - 1) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - RadxCalUpdate::_fixRayCalibration" << endl;
+      cerr << "  Calib index too high: " << calibIndex << endl;
+      cerr << "  nCalibs: " << vol.getNRcalibs() << endl;
+    }
+    calibIndex = 0;
+  }
+  RadxRcalib *rayCal = vol.getRcalibs()[calibIndex];
 
-  // double fixedDeg = ray.getFixedAngleDeg();
-  // double fixedCorr = fixedDeg + _params.fixed_angle_offset;
-  // if (ray.getSweepMode() == Radx::SWEEP_MODE_RHI) {
-  //   if (fixedCorr < 0) {
-  //     fixedCorr += 360.0;
-  //   } else if (fixedCorr >= 360.0) {
-  //     fixedCorr -= 360.0;
-  //   }
-  // }
-  // ray.setFixedAngleDeg(fixedCorr);
+  // check the time
+
+  if (rayCal->getCalibTime() == _newCal.getCalibTime()) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "WARNING - RadxCalUpdate::_fixRayCalibration" << endl;
+      cerr << "  Calibrations have same time: "
+           << RadxTime::strm(_newCal.getCalibTime()) << endl;
+      cerr << "  No change" << endl;
+    }
+    return;
+  }
+  
+  // compute the deltas for the calibration
+
+  double oldBaseDbz = rayCal->getBaseDbz1kmHc();
+  double newBaseDbz = _newCal.getBaseDbz1kmHc();
+  double deltaDbz = newBaseDbz - oldBaseDbz;
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "==>> changing cal, deltaDbz = " << deltaDbz << endl;
+  }
+
+  // correct the DBZ fields for the new cal
+
+  for (int ifld = 0; ifld < _params.dbz_fields_for_update_n; ifld++) {
+    
+    // find the field we want
+
+    string fieldName = _params._dbz_fields_for_update[ifld];
+    RadxField *dbzFld = ray.getField(fieldName);
+    if (dbzFld == NULL) {
+      if (_params.debug >= Params::DEBUG_EXTRA) {
+        cerr << "WARNING - RadxCalUpdate::_fixRayCalibration" << endl;
+        cerr << "==>> ignoring field, cannot find: " << fieldName << endl;
+      }
+      continue;
+    }
+    
+    // store the data type
+    // then convert to floats
+
+    Radx::DataType_t dtype = dbzFld->getDataType();
+    dbzFld->convertToFl32();
+    Radx::fl32 *dbz = dbzFld->getDataFl32();
+    size_t nGates = dbzFld->getNPoints();
+    
+    // adjust the reflectivity for the change in cal
+
+    for (size_t igate = 0; igate < nGates; igate++) {
+      dbz[igate] = dbz[igate] + deltaDbz;
+    } // igate
+
+    // convert back to original type
+    
+    dbzFld->convertToType(dtype);
+
+  } // ifld
 
 }
 
 //////////////////////////////////////////////////
 // fix a ray's altitude
 
-void RadxCalUpdate::_fixRayAltitude(RadxRay &ray)
+void RadxCalUpdate::_fixRayAltitude(RadxVol &vol, RadxRay &ray)
 {
 
-  // double elDeg = ray.getElevationDeg();
-  // double elCorr = elDeg + _params.elevation_angle_offset;
-  // ray.setElevationDeg(elCorr);
+  // get the georef
+
+  RadxGeoref *georef = ray.getGeoreference();
+  if (georef == NULL) {
+    // no georef, so this step does not apply
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "WARNING - RadxCalUpdate::_fixRayCalibration" << endl;
+      cerr << "==>> no georefs, so no altitude correction applied" << endl;
+    }
+    return;
+  }
+
+  // get the geoid correction in meters
+  
+  double geoidM = _egm.getInterpGeoidM(georef->getLatitude(),
+                                       georef->getLongitude());
+  
+  // the altitude correction has the opposite sign, since it
+  // is added to the measured altitude
+
+  double altCorrM = geoidM * -1.0;
+  double altKmMsl = georef->getAltitudeKmMsl() + altCorrM / 1000.0;
+  georef->setAltitudeKmMsl(altKmMsl);
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "==>> changing altitude, geoidM = " << geoidM << endl;
+  }
 
 }
 
