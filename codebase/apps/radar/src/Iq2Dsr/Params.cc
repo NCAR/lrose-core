@@ -2843,6 +2843,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'max_valid_noise_bias_db'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_valid_noise_bias_db");
+    tt->descr = tdrpStrDup("Max valid value for noise bias (dB).");
+    tt->help = tdrpStrDup("The estimated noise is only used if the estimated noise bias does not exceed this value. For example, if you do not want to suppress sun spikes, you can set this value to something like 3dB, since sun spikes generally cause a noise increase of 10 dB or more, depending on the wavelength.");
+    tt->val_offset = (char *) &max_valid_noise_bias_db - &_start_;
+    tt->single_val.d = 20;
+    tt++;
+    
     // Parameter 'noise_ngates_kernel'
     // ctype is 'int'
     

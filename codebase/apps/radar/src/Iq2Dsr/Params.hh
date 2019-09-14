@@ -995,6 +995,8 @@ public:
 
   tdrp_bool_t use_estimated_noise_for_noise_subtraction;
 
+  double max_valid_noise_bias_db;
+
   int noise_ngates_kernel;
 
   int noise_min_ngates_for_ray_median;
@@ -1222,7 +1224,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[265];
+  mutable TDRPtable _table[266];
 
   const char *_className;
 
