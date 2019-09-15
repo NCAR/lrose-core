@@ -106,8 +106,11 @@ private:
   vector<IwrfTsPulse *> _dwellPulses;
   
   // functions
-  
-  int _processFile(const string &inputPath);
+
+  int _runFileMode();
+  int _runUdpMode();
+
+  int _convertFile(const string &inputPath);
   int _processDwell(vector<IwrfTsPulse *> &dwellPulses);
   int _openOutputFile(const string &inputPath,
                       const IwrfTsPulse &pulse);
@@ -140,6 +143,8 @@ private:
 
   double _conditionAngle360(double angle);
   double _conditionAngle180(double angle);
+
+  int _convert2Udp(const string &inputPath);
 
 };
 

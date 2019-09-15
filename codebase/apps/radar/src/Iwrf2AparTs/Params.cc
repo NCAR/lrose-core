@@ -601,27 +601,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("OUTPUT LOCATION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_dir");
-    tt->descr = tdrpStrDup("Directory for output files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("./output");
-    tt++;
-    
-    // Parameter 'Comment 3'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("SPECIFY APAR TIME-SERIES DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -672,6 +651,59 @@
     tt->help = tdrpStrDup("APAR can receive in co-polar or cross-polar mode. This option allows us to test the cross-polar mode, by including a cross-polar sample at the end of each visit. This option effectively increases n_samples_per_visit by 1.");
     tt->val_offset = (char *) &add_cross_pol_sample_at_end_of_visit - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("OUTPUT MODES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'output_mode'
+    // ctype is '_output_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("output_mode");
+    tt->descr = tdrpStrDup("Control what is written.");
+    tt->help = tdrpStrDup("OUTPUT_FILES - generates time series files in APAR format. OUTPUT_UDP - writes out simulated data to the DREX FPGA, via UDP.");
+    tt->val_offset = (char *) &output_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("output_mode_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_FILES");
+      tt->enum_def.fields[0].val = OUTPUT_FILES;
+      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_UDP");
+      tt->enum_def.fields[1].val = OUTPUT_UDP;
+    tt->single_val.e = OUTPUT_FILES;
+    tt++;
+    
+    // Parameter 'output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_dir");
+    tt->descr = tdrpStrDup("Directory for output files.");
+    tt->help = tdrpStrDup("For output_mode = OUTPUT_FILES.");
+    tt->val_offset = (char *) &output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("./output");
+    tt++;
+    
+    // Parameter 'udp_port'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("udp_port");
+    tt->descr = tdrpStrDup("Port for UDP data.");
+    tt->help = tdrpStrDup("For output_mode = OUTPUT_UDP.");
+    tt->val_offset = (char *) &udp_port - &_start_;
+    tt->single_val.i = 50000;
     tt++;
     
     // trailing entry has param_name set to NULL

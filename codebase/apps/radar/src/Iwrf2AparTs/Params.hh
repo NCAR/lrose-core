@@ -74,6 +74,11 @@ public:
     DEBUG_EXTRA = 3
   } debug_t;
 
+  typedef enum {
+    OUTPUT_FILES = 0,
+    OUTPUT_UDP = 1
+  } output_mode_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -370,8 +375,6 @@ public:
 
   debug_t debug;
 
-  char* output_dir;
-
   int n_samples_per_visit;
 
   int n_visits_per_beam;
@@ -380,6 +383,12 @@ public:
 
   tdrp_bool_t add_cross_pol_sample_at_end_of_visit;
 
+  output_mode_t output_mode;
+
+  char* output_dir;
+
+  int udp_port;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -387,7 +396,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[11];
+  mutable TDRPtable _table[13];
 
   const char *_className;
 

@@ -128,11 +128,27 @@ int Iwrf2AparTs::Run ()
     cerr << "Running Iwrf2AparTs - debug mode" << endl;
   }
 
+  if (_params.output_mode == Params::OUTPUT_FILES) {
+    return _runFileMode();
+  } else {
+    return _runUdpMode();
+  }
+
+}
+
+//////////////////////////////////////////////////
+// Run in file mode
+
+int Iwrf2AparTs::_runFileMode()
+{
+  
+  PMU_auto_register("_runFileMode");
+  
   // loop through the input files
 
   int iret = 0;
   for (size_t ii = 0; ii < _args.inputFileList.size(); ii++) {
-    if (_processFile(_args.inputFileList[ii])) {
+    if (_convertFile(_args.inputFileList[ii])) {
       iret = -1;
     }
   }
@@ -141,10 +157,34 @@ int Iwrf2AparTs::Run ()
 
 }
 
-////////////////////////////////////////////////////
-// Process one file
+//////////////////////////////////////////////////
+// Run in UDP mode
 
-int Iwrf2AparTs::_processFile(const string &inputPath)
+int Iwrf2AparTs::_runUdpMode()
+{
+  
+  PMU_auto_register("_runUdpMode");
+ 
+  // this is a simulation mode
+  // loop through the input files, and repeat
+
+  int iret = 0;
+  while (true) {
+    for (size_t ii = 0; ii < _args.inputFileList.size(); ii++) {
+      if (_convert2Udp(_args.inputFileList[ii])) {
+        iret = -1;
+      }
+    }
+  }
+  
+  return iret;
+
+}
+
+////////////////////////////////////////////////////
+// Convert 1 file to APAR format
+
+int Iwrf2AparTs::_convertFile(const string &inputPath)
   
 {
 
@@ -185,7 +225,7 @@ int Iwrf2AparTs::_processFile(const string &inputPath)
       delete iwrfPulse;
     }
     if (!haveMetadata) {
-      cerr << "ERROR - Iwrf2AparTs::_processFile()" << endl;
+      cerr << "ERROR - Iwrf2AparTs::_convertFile()" << endl;
       cerr << "Metadata missing for file: " << inputPath << endl;
       return -1;
     }
@@ -237,7 +277,7 @@ int Iwrf2AparTs::_processFile(const string &inputPath)
     // open output file as needed
     
     if (_openOutputFile(inputPath, *iwrfPulse)) {
-      cerr << "ERROR - Iwrf2AparTs::_processFile" << endl;
+      cerr << "ERROR - Iwrf2AparTs::_convertFile" << endl;
       cerr << "  Processing file: " << inputPath << endl;
       return -1;
     }
@@ -804,5 +844,142 @@ double Iwrf2AparTs::_conditionAngle180(double angle)
   } else {
     return angle;
   }
+}
+
+////////////////////////////////////////////////////
+// Convert 1 file to UDP
+
+int Iwrf2AparTs::_convert2Udp(const string &inputPath)
+  
+{
+  
+  if (_params.debug) {
+    cerr << "Reading input file: " << inputPath << endl;
+  }
+
+  // set up a vector with a single file entry
+
+  vector<string> fileList;
+  fileList.push_back(inputPath);
+
+  // create reader for just that one file
+
+  IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    iwrfDebug = IWRF_DEBUG_VERBOSE;
+  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+    iwrfDebug = IWRF_DEBUG_NORM;
+  } 
+  IwrfTsReaderFile reader(fileList, iwrfDebug);
+  const IwrfTsInfo &tsInfo = reader.getOpsInfo();
+
+  // read through pulses until we have current metadata
+
+  {
+    IwrfTsPulse *iwrfPulse = reader.getNextPulse();
+    bool haveMetadata = false;
+    while (iwrfPulse != NULL) {
+      if (tsInfo.isRadarInfoActive() &&
+          tsInfo.isScanSegmentActive() &&
+          tsInfo.isTsProcessingActive()) {
+        // we have the necessary metadata
+        haveMetadata = true;
+        delete iwrfPulse;
+        break;
+      }
+      delete iwrfPulse;
+    }
+    if (!haveMetadata) {
+      cerr << "ERROR - Iwrf2AparTs::_convertFile()" << endl;
+      cerr << "Metadata missing for file: " << inputPath << endl;
+      return -1;
+    }
+  }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    iwrf_radar_info_print(stderr, tsInfo.getRadarInfo());
+    iwrf_scan_segment_print(stderr, tsInfo.getScanSegment());
+    iwrf_ts_processing_print(stderr, tsInfo.getTsProcessing());
+    if (tsInfo.isCalibrationActive()) {
+      iwrf_calibration_print(stderr, tsInfo.getCalibration());
+    }
+  }
+
+  // convert the metedata to APAR types
+  // set the metadata in the info metadata queue
+
+  _convertMeta2Apar(tsInfo);
+  _aparTsInfo->setRadarInfo(_aparRadarInfo);
+  _aparTsInfo->setScanSegment(_aparScanSegment);
+  _aparTsInfo->setTsProcessing(_aparTsProcessing);
+  if (tsInfo.isCalibrationActive()) {
+    _aparTsInfo->setCalibration(_aparCalibration);
+  }
+  
+  // reset reader queue to start
+
+  reader.reset();
+
+  // compute number of pulses per dwell
+
+  size_t nPulsesPerDwell = 
+    _params.n_samples_per_visit *
+    _params.n_visits_per_beam *
+    _params.n_beams_per_dwell;
+
+  if (_params.debug) {
+    cerr << "  ==>> nPulsesPerDwell: " << nPulsesPerDwell << endl;
+  }
+
+  // read in all pulses
+
+  IwrfTsPulse *iwrfPulse = reader.getNextPulse();
+  while (iwrfPulse != NULL) {
+
+    // convert to floats
+
+    iwrfPulse->convertToFL32();
+
+    // open output file as needed
+    
+    if (_openOutputFile(inputPath, *iwrfPulse)) {
+      cerr << "ERROR - Iwrf2AparTs::_convertFile" << endl;
+      cerr << "  Processing file: " << inputPath << endl;
+      return -1;
+    }
+    
+    // add pulse to dwell
+    
+    _dwellPulses.push_back(iwrfPulse);
+
+    // if we have a full dwell, process the pulses in it
+
+    if (_dwellPulses.size() == nPulsesPerDwell) {
+
+      // process dwell
+
+      _processDwell(_dwellPulses);
+      _dwellSeqNum++;
+
+      // delete pulses to free memory
+      
+      for (size_t ii = 0; ii < _dwellPulses.size(); ii++) {
+        delete _dwellPulses[ii];
+      }
+      _dwellPulses.clear();
+
+    }
+      
+    // read next one
+
+    iwrfPulse = reader.getNextPulse();
+
+  } // while
+
+  // close output file
+
+  _closeOutputFile();
+  
+  return 0;
+  
 }
 

@@ -27,15 +27,6 @@ paramdef enum debug_t {
 } debug;
 
 commentdef {
-  p_header = "OUTPUT LOCATION";
-};
-
-paramdef string {
-  p_default = "./output";
-  p_descr = "Directory for output files.";
-} output_dir;
-
-commentdef {
   p_header = "SPECIFY APAR TIME-SERIES DETAILS";
 };
 
@@ -62,4 +53,30 @@ paramdef boolean {
   p_descr = "Add 1 cross-pol sample at end of visit.";
   p_help = "APAR can receive in co-polar or cross-polar mode. This option allows us to test the cross-polar mode, by including a cross-polar sample at the end of each visit. This option effectively increases n_samples_per_visit by 1.";
 } add_cross_pol_sample_at_end_of_visit;
+
+commentdef {
+  p_header = "OUTPUT MODES";
+};
+
+typedef enum {
+  OUTPUT_FILES, OUTPUT_UDP
+} output_mode_t;
+
+paramdef enum output_mode_t {
+  p_default = OUTPUT_FILES;
+  p_descr = "Control what is written.";
+  p_help = "OUTPUT_FILES - generates time series files in APAR format. OUTPUT_UDP - writes out simulated data to the DREX FPGA, via UDP.";
+} output_mode;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Directory for output files.";
+  p_help = "For output_mode = OUTPUT_FILES.";
+} output_dir;
+
+paramdef int {
+  p_default = 50000;
+  p_descr = "Port for UDP data.";
+  p_help = "For output_mode = OUTPUT_UDP.";
+} udp_port;
 
