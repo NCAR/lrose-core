@@ -694,15 +694,39 @@
     tt->single_val.s = tdrpStrDup("./output");
     tt++;
     
-    // Parameter 'udp_port'
+    // Parameter 'udp_source_port'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("udp_port");
-    tt->descr = tdrpStrDup("Port for UDP data.");
+    tt->param_name = tdrpStrDup("udp_source_port");
+    tt->descr = tdrpStrDup("Port for source of UDP data - i.e. this app.");
     tt->help = tdrpStrDup("For output_mode = OUTPUT_UDP.");
-    tt->val_offset = (char *) &udp_port - &_start_;
+    tt->val_offset = (char *) &udp_source_port - &_start_;
+    tt->single_val.i = 50000;
+    tt++;
+    
+    // Parameter 'udp_dest_address'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("udp_dest_address");
+    tt->descr = tdrpStrDup("Destination address for UDP.");
+    tt->help = tdrpStrDup("For output_mode = OUTPUT_UDP.");
+    tt->val_offset = (char *) &udp_dest_address - &_start_;
+    tt->single_val.s = tdrpStrDup("192.168.1.255");
+    tt++;
+    
+    // Parameter 'udp_dest_port'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("udp_dest_port");
+    tt->descr = tdrpStrDup("Port for destination of UDP data.");
+    tt->help = tdrpStrDup("For output_mode = OUTPUT_UDP.");
+    tt->val_offset = (char *) &udp_dest_port - &_start_;
     tt->single_val.i = 50000;
     tt++;
     

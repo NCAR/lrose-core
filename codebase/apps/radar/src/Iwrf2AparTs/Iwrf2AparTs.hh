@@ -90,6 +90,10 @@ private:
 
   FILE *_out;
 
+  // output UDP
+
+  int _udpFd;
+
   // APAR-style metadata
 
   AparTsInfo *_aparTsInfo;
@@ -145,6 +149,7 @@ private:
   double _conditionAngle180(double angle);
 
   int _convert2Udp(const string &inputPath);
+  int _openOutputUdp();
 
 };
 

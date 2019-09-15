@@ -76,7 +76,19 @@ paramdef string {
 
 paramdef int {
   p_default = 50000;
-  p_descr = "Port for UDP data.";
+  p_descr = "Port for source of UDP data - i.e. this app.";
   p_help = "For output_mode = OUTPUT_UDP.";
-} udp_port;
+} udp_source_port;
+
+paramdef string {
+  p_default = "192.168.1.255";
+  p_descr = "Destination address for UDP.";
+  p_help = "For output_mode = OUTPUT_UDP.";
+} udp_dest_address;
+
+paramdef int {
+  p_default = 50000;
+  p_descr = "Port for destination of UDP data.";
+  p_help = "For output_mode = OUTPUT_UDP.";
+} udp_dest_port;
 

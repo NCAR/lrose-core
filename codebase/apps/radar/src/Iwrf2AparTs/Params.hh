@@ -387,7 +387,11 @@ public:
 
   char* output_dir;
 
-  int udp_port;
+  int udp_source_port;
+
+  char* udp_dest_address;
+
+  int udp_dest_port;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -396,7 +400,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[13];
+  mutable TDRPtable _table[15];
 
   const char *_className;
 

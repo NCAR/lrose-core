@@ -40,6 +40,9 @@
 #include <cerrno>
 #include <cstdio>
 #include <unistd.h>
+
+#include <dataport/bigend.h>
+#include <dataport/swap.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
 #include <toolsa/file_io.h>
@@ -49,6 +52,12 @@
 #include <radar/apar_ts_functions.hh>
 #include <radar/AparTsPulse.hh>
 #include "Iwrf2AparTs.hh"
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#ifdef __linux
+#include <arpa/inet.h>
+#endif
 
 using namespace std;
 
@@ -62,6 +71,7 @@ Iwrf2AparTs::Iwrf2AparTs(int argc, char **argv)
   _aparTsInfo = NULL;
   _pulseSeqNum = 0;
   _dwellSeqNum = 0;
+  _udpFd = -1;
 
   // set programe name
   
@@ -858,7 +868,7 @@ int Iwrf2AparTs::_convert2Udp(const string &inputPath)
   }
 
   // set up a vector with a single file entry
-
+  
   vector<string> fileList;
   fileList.push_back(inputPath);
 
@@ -874,7 +884,7 @@ int Iwrf2AparTs::_convert2Udp(const string &inputPath)
   const IwrfTsInfo &tsInfo = reader.getOpsInfo();
 
   // read through pulses until we have current metadata
-
+  
   {
     IwrfTsPulse *iwrfPulse = reader.getNextPulse();
     bool haveMetadata = false;
@@ -890,7 +900,7 @@ int Iwrf2AparTs::_convert2Udp(const string &inputPath)
       delete iwrfPulse;
     }
     if (!haveMetadata) {
-      cerr << "ERROR - Iwrf2AparTs::_convertFile()" << endl;
+      cerr << "ERROR - Iwrf2AparTs::_convert2Udp()" << endl;
       cerr << "Metadata missing for file: " << inputPath << endl;
       return -1;
     }
@@ -942,7 +952,7 @@ int Iwrf2AparTs::_convert2Udp(const string &inputPath)
     // open output file as needed
     
     if (_openOutputFile(inputPath, *iwrfPulse)) {
-      cerr << "ERROR - Iwrf2AparTs::_convertFile" << endl;
+      cerr << "ERROR - Iwrf2AparTs::_convert2Udp" << endl;
       cerr << "  Processing file: " << inputPath << endl;
       return -1;
     }
@@ -981,5 +991,76 @@ int Iwrf2AparTs::_convert2Udp(const string &inputPath)
   
   return 0;
   
+}
+
+////////////////////////////////////////////////////
+// Open output UDP device
+// Returns 0 on success, -1 on error
+
+int Iwrf2AparTs::_openOutputUdp()
+  
+{
+
+  if (_udpFd > 0) {
+    // already open
+    return 0;
+  }
+
+  // open socket
+  
+  if  ((_udpFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
+    perror ("Could not open UDP socket: ");
+    _udpFd = -1;
+    return -1;
+  }
+  
+  // bind local address to the socket
+  
+  struct sockaddr_in localAddr;
+  MEM_zero(localAddr);
+  uint16_t sourcePort = _params.udp_source_port;
+  localAddr.sin_port = htons(sourcePort);
+  localAddr.sin_family = AF_INET;
+  localAddr.sin_addr.s_addr = htonl (INADDR_ANY);
+  
+  if (bind (_udpFd, (struct sockaddr *) &localAddr, 
+	    sizeof (localAddr)) < 0) {
+    perror ("bind error:");
+    fprintf(stderr, "Could bind UDP socket, port %d\n", sourcePort);
+    close (_udpFd);
+    _udpFd = -1;
+    return -1;
+  }
+  
+  // set socket for broadcast
+  
+  int option = 1;
+  if (setsockopt(_udpFd, SOL_SOCKET, SO_BROADCAST,
+		 (char *) &option, sizeof(option)) < 0) {
+    perror ("Could not set broadcast on - setsockopt error");
+    close (_udpFd);
+    _udpFd = -1;
+    return -1;
+  }
+
+  /*
+   * set up destination address structure
+   */
+
+  struct sockaddr_in destAddr;
+  MEM_zero(destAddr);
+  if (inet_aton(_params.udp_dest_address, &destAddr.sin_addr) == 0) {
+    fprintf(stderr, "Cannot translate address: %s - may be invalid\n",
+            _params.udp_dest_address);
+    close (_udpFd);
+    _udpFd = -1;
+    return -1;
+  }
+  destAddr.sin_family = AF_INET;
+  uint16_t destPort = _params.udp_dest_port;
+  destAddr.sin_port = htons(destPort);
+
+  return 0;
+
 }
 
