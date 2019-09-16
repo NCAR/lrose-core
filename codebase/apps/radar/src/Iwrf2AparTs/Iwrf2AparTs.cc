@@ -73,6 +73,7 @@ Iwrf2AparTs::Iwrf2AparTs(int argc, char **argv)
   _pulseSeqNum = 0;
   _dwellSeqNum = 0;
   _udpFd = -1;
+  _errCount = 0;
 
   // set programe name
   
@@ -1035,7 +1036,8 @@ int Iwrf2AparTs::_processDwellForUdp(vector<IwrfTsPulse *> &dwellPulses)
 
         // set the metadata
 
-        ui64 sampleNum = _sampleSeqNum;
+        ui64 sampleNumber = _sampleSeqNum;
+        ui64 pulseNumber = _pulseSeqNum;
         
         si64 secondsTime = iwrfPulse->getTime();
         ui32 nanoSecs = iwrfPulse->getNanoSecs();
@@ -1059,7 +1061,8 @@ int Iwrf2AparTs::_processDwellForUdp(vector<IwrfTsPulse *> &dwellPulses)
         // create the buffer for co-polar packet
         
         MemBuf pktBuf;
-        _createPacketBuf(sampleNum,
+        _createPacketBuf(sampleNumber,
+                         pulseNumber,
                          secondsTime, nanoSecs,
                          pulseStartIndex,
                          dwellNum,
@@ -1086,11 +1089,13 @@ int Iwrf2AparTs::_processDwellForUdp(vector<IwrfTsPulse *> &dwellPulses)
             ipulse == _params.n_samples_per_visit - 1) {
           
           isCoPolRx = false;
-          sampleNum = _sampleSeqNum;
+          sampleNumber = _sampleSeqNum;
+          pulseNumber = _pulseSeqNum;
           iqData += nGates * 2; // channel 1
           
           pktBuf.clear();
-          _createPacketBuf(sampleNum,
+          _createPacketBuf(sampleNumber,
+                           pulseNumber,
                            secondsTime, nanoSecs,
                            pulseStartIndex,
                            dwellNum,
@@ -1124,7 +1129,8 @@ int Iwrf2AparTs::_processDwellForUdp(vector<IwrfTsPulse *> &dwellPulses)
 ////////////////////////////////////////////////////////////////////////
 // create a packet buffer
 
-void Iwrf2AparTs::_createPacketBuf(ui64 sampleNum,
+void Iwrf2AparTs::_createPacketBuf(ui64 sampleNumber,
+                                   ui64 pulseNumber,
                                    si64 secondsTime,
                                    ui32 nanoSecs,
                                    ui32 pulseStartIndex,
@@ -1140,7 +1146,126 @@ void Iwrf2AparTs::_createPacketBuf(ui64 sampleNum,
                                    MemBuf &buf)
 
 {
+  
+  // init
 
+  buf.clear();
+
+  // message type
+
+  ui16 messageType = 0x0001;
+  BE_from_array_16(&messageType, sizeof(messageType));
+  buf.add(&messageType, sizeof(messageType));
+
+  // AESA ID
+
+  ui16 aesaId = 0;
+  BE_from_array_16(&aesaId, sizeof(aesaId));
+  buf.add(&aesaId, sizeof(aesaId));
+
+  // channel number
+
+  ui16 chanNum = 0;
+  BE_from_array_16(&chanNum, sizeof(chanNum));
+  buf.add(&chanNum, sizeof(chanNum));
+
+  // flags
+  
+  ui32 flags = 0;
+  if (isXmitH) {
+    // bit 0 indicates H transmit
+    flags |= 1;
+  }
+  if ((isXmitH && isCoPolRx) || (!isXmitH && !isCoPolRx)) {
+    // git 1 indicates H receive
+    flags |= 2;
+  }
+  // bit 3 is pulse start flag
+  // always on since we have 1 pulse per packet
+  flags |= 4;
+
+  BE_from_array_32(&flags, sizeof(flags));
+  buf.add(&flags, sizeof(flags));
+
+  // beam index - always 200 for now
+
+  ui32 beamIndex = 200;
+  BE_from_array_32(&beamIndex, sizeof(beamIndex));
+  buf.add(&beamIndex, sizeof(beamIndex));
+  
+  // sample number - first sample in this packet
+
+  ui64 sampleNum = sampleNumber;
+  BE_from_array_64(&sampleNum, sizeof(sampleNum));
+  buf.add(&sampleNum, sizeof(sampleNum));
+  
+  // pulse number
+
+  ui64 pulseNum = pulseNumber;
+  BE_from_array_64(&pulseNum, sizeof(pulseNum));
+  buf.add(&pulseNum, sizeof(pulseNum));
+
+  // time
+
+  si64 secs = secondsTime;
+  BE_from_array_64(&secs, sizeof(secs));
+  buf.add(&secs, sizeof(secs));
+
+  ui32 nsecs = nanoSecs;
+  BE_from_array_32(&nsecs, sizeof(nsecs));
+  buf.add(&nsecs, sizeof(nsecs));
+
+  // start index
+
+  ui32 startIndex = pulseStartIndex;
+  BE_from_array_32(&startIndex, sizeof(startIndex));
+  buf.add(&startIndex, sizeof(startIndex));
+
+  // angles
+
+  fl32 u = uu;
+  BE_from_array_32(&u, sizeof(u));
+  buf.add(&u, sizeof(u));
+
+  fl32 v = vv;
+  BE_from_array_32(&v, sizeof(v));
+  buf.add(&v, sizeof(v));
+
+  // dwell, beam, visit
+
+  ui64 dNum = dwellNum;
+  BE_from_array_64(&dNum, sizeof(dNum));
+  buf.add(&dNum, sizeof(dNum));
+
+  ui32 bNum = beamNumInDwell;
+  BE_from_array_32(&bNum, sizeof(bNum));
+  buf.add(&bNum, sizeof(bNum));
+
+  ui32 vNum = visitNumInBeam;
+  BE_from_array_32(&vNum, sizeof(vNum));
+  buf.add(&vNum, sizeof(vNum));
+
+  // number of samples = number of gates
+
+  ui32 nSamples = nGates;
+  BE_from_array_32(&nSamples, sizeof(nSamples));
+  buf.add(&nSamples, sizeof(nSamples));
+
+  // 3 spares
+
+  ui32 spare = 0;
+  buf.add(&spare, sizeof(spare));
+  buf.add(&spare, sizeof(spare));
+  buf.add(&spare, sizeof(spare));
+
+  // IQ data
+
+  si16 *iq = new si16[nGates * 2];
+  int nBytesIq = nGates * 2 * sizeof(si16);
+  memcpy(iq, iqData, nBytesIq);
+  BE_from_array_16(iq, nBytesIq);
+  buf.add(iq, nBytesIq);
+  delete[] iq;
 
 }
 
@@ -1187,30 +1312,13 @@ int Iwrf2AparTs::_openOutputUdp()
   // set socket for broadcast
   
   int option = 1;
-  if (setsockopt(_udpFd, SOL_SOCKET, SO_BROADCAST,
+  if (setsockopt(_udpFd, SOL_SOCKET, SO_BROADCAST | SO_REUSEADDR,
 		 (char *) &option, sizeof(option)) < 0) {
     perror ("Could not set broadcast on - setsockopt error");
     close (_udpFd);
     _udpFd = -1;
     return -1;
   }
-
-  /*
-   * set up destination address structure
-   */
-
-  struct sockaddr_in destAddr;
-  MEM_zero(destAddr);
-  if (inet_aton(_params.udp_dest_address, &destAddr.sin_addr) == 0) {
-    fprintf(stderr, "Cannot translate address: %s - may be invalid\n",
-            _params.udp_dest_address);
-    close (_udpFd);
-    _udpFd = -1;
-    return -1;
-  }
-  destAddr.sin_family = AF_INET;
-  uint16_t destPort = _params.udp_dest_port;
-  destAddr.sin_port = htons(destPort);
 
   return 0;
 
@@ -1224,6 +1332,37 @@ int Iwrf2AparTs::_writeBufToUdp(const MemBuf &buf)
   
 {
 
+  // set up destination address structure
+  
+  struct sockaddr_in destAddr;
+  MEM_zero(destAddr);
+  if (inet_aton(_params.udp_dest_address, &destAddr.sin_addr) == 0) {
+    fprintf(stderr, "Cannot translate address: %s - may be invalid\n",
+            _params.udp_dest_address);
+    close (_udpFd);
+    _udpFd = -1;
+    return -1;
+  }
+  destAddr.sin_family = AF_INET;
+  uint16_t destPort = _params.udp_dest_port;
+  destAddr.sin_port = htons(destPort);
+  destAddr.sin_addr.s_addr = inet_addr(_params.udp_dest_address);
+  
+  if (sendto(_udpFd, buf.getPtr(), buf.getLen(), 0,
+             (struct sockaddr *) &destAddr,
+             sizeof(destAddr)) != (ssize_t) buf.getLen()) {
+    if (_errCount % 1000 == 0) {
+      perror("_writeBufToUdp: ");
+      cerr << "Cannot write UDP packet to port: " << _params.udp_dest_port << endl;
+      cerr << "  Pkt len: " << buf.getLen() << endl;
+    }
+    _errCount++;
+  }
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "Sent UDP packet, len: " << buf.getLen() << endl;
+  }
+  
   return 0;
 
 }

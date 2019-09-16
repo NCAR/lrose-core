@@ -93,6 +93,7 @@ private:
   // output UDP
 
   int _udpFd;
+  int _errCount;
 
   // APAR-style metadata
 
@@ -152,7 +153,8 @@ private:
   int _convert2Udp(const string &inputPath);
   int _processDwellForUdp(vector<IwrfTsPulse *> &dwellPulses);
 
-  void _createPacketBuf(ui64 sampleNum,
+  void _createPacketBuf(ui64 sampleNumber,
+                        ui64 pulseNumber,
                         si64 secondsTime,
                         ui32 nanoSecs,
                         ui32 pulseStartIndex,
