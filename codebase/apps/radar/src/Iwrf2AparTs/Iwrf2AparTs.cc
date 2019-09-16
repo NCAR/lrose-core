@@ -69,6 +69,7 @@ Iwrf2AparTs::Iwrf2AparTs(int argc, char **argv)
 
   isOK = true;
   _aparTsInfo = NULL;
+  _sampleSeqNum = 0;
   _pulseSeqNum = 0;
   _dwellSeqNum = 0;
   _udpFd = -1;
@@ -249,7 +250,7 @@ int Iwrf2AparTs::_convertFile(const string &inputPath)
     }
   }
 
-  // convert the metedata to APAR types
+  // convert the metadata to APAR types
   // set the metadata in the info metadata queue
 
   _convertMeta2Apar(tsInfo);
@@ -302,7 +303,7 @@ int Iwrf2AparTs::_convertFile(const string &inputPath)
 
       // process dwell
 
-      _processDwell(_dwellPulses);
+      _processDwellForFile(_dwellPulses);
       _dwellSeqNum++;
 
       // delete pulses to free memory
@@ -331,7 +332,7 @@ int Iwrf2AparTs::_convertFile(const string &inputPath)
 /////////////////////////////
 // process pulses in a dwell
 
-int Iwrf2AparTs::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
+int Iwrf2AparTs::_processDwellForFile(vector<IwrfTsPulse *> &dwellPulses)
   
 {
 
@@ -411,14 +412,14 @@ int Iwrf2AparTs::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         // write ops info to file, if info has changed since last write
         
         if (_aparTsInfo->writeMetaQueueToFile(_out, true)) {
-          cerr << "Iwrf2AparTs::_processDwell" << endl;
+          cerr << "Iwrf2AparTs::_processDwellForFile" << endl;
           return -1;
         }
 
         // write pulse to file
         
         if (aparPulse.writeToFile(_out)) {
-          cerr << "Iwrf2AparTs::_processDwell" << endl;
+          cerr << "Iwrf2AparTs::_processDwellForFile" << endl;
           return -1;
         }
 
@@ -435,17 +436,17 @@ int Iwrf2AparTs::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
           AparTsPulse xpolPulse(*_aparTsInfo, _aparTsDebug);
           xpolPulse.setHeader(xpolHdr);
           
-          // add the co-pol IQ channel data as floats
+          // add the cross-pol IQ channel data as floats
           
           MemBuf xpolBuf;
           xpolBuf.add(iqChans[1], iwrfPulse->getNGates() * 2 * sizeof(fl32));
           xpolPulse.setIqFloats(iwrfPulse->getNGates(), 1,
                                 (const fl32 *) xpolBuf.getPtr());
-
+          
           // write out
-
+          
           if (xpolPulse.writeToFile(_out)) {
-            cerr << "Iwrf2AparTs::_processDwell" << endl;
+            cerr << "Iwrf2AparTs::_processDwellForFile" << endl;
             return -1;
           }
           
@@ -914,17 +915,6 @@ int Iwrf2AparTs::_convert2Udp(const string &inputPath)
     }
   }
 
-  // convert the metedata to APAR types
-  // set the metadata in the info metadata queue
-
-  _convertMeta2Apar(tsInfo);
-  _aparTsInfo->setRadarInfo(_aparRadarInfo);
-  _aparTsInfo->setScanSegment(_aparScanSegment);
-  _aparTsInfo->setTsProcessing(_aparTsProcessing);
-  if (tsInfo.isCalibrationActive()) {
-    _aparTsInfo->setCalibration(_aparCalibration);
-  }
-  
   // reset reader queue to start
 
   reader.reset();
@@ -944,30 +934,27 @@ int Iwrf2AparTs::_convert2Udp(const string &inputPath)
 
   IwrfTsPulse *iwrfPulse = reader.getNextPulse();
   while (iwrfPulse != NULL) {
-
-    // convert to floats
-
-    iwrfPulse->convertToFL32();
-
-    // open output file as needed
     
-    if (_openOutputFile(inputPath, *iwrfPulse)) {
+    // open output UDP as needed
+    
+    if (_openOutputUdp()) {
       cerr << "ERROR - Iwrf2AparTs::_convert2Udp" << endl;
       cerr << "  Processing file: " << inputPath << endl;
+      cerr << "  Cannot open UDP output device" << endl;
       return -1;
     }
     
     // add pulse to dwell
     
     _dwellPulses.push_back(iwrfPulse);
-
+    
     // if we have a full dwell, process the pulses in it
 
     if (_dwellPulses.size() == nPulsesPerDwell) {
 
       // process dwell
 
-      _processDwell(_dwellPulses);
+      _processDwellForUdp(_dwellPulses);
       _dwellSeqNum++;
 
       // delete pulses to free memory
@@ -993,6 +980,171 @@ int Iwrf2AparTs::_convert2Udp(const string &inputPath)
   
 }
 
+////////////////////////////////////////////
+// process pulses in a dwell for UDP output
+
+int Iwrf2AparTs::_processDwellForUdp(vector<IwrfTsPulse *> &dwellPulses)
+  
+{
+
+  // compute the angles for the beams in the dwell
+
+  double startAz = dwellPulses.front()->getAz();
+  double endAz = dwellPulses.back()->getAz();
+  double azRange = _conditionAngle360(endAz - startAz);
+  double deltaAzPerBeam = azRange / _params.n_beams_per_dwell;
+
+  double startEl = dwellPulses.front()->getEl();
+  double endEl = dwellPulses.back()->getEl();
+  double elRange = _conditionAngle360(endEl - startEl);
+  double deltaElPerBeam = elRange / _params.n_beams_per_dwell;
+
+  vector<double> beamAz, beamEl;
+  for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
+    beamAz.push_back(_conditionAngle360(startAz + (ii + 0.5) * deltaAzPerBeam));
+    beamEl.push_back(_conditionAngle180(startEl + (ii + 0.5) * deltaElPerBeam));
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "-----------------------------------------------" << endl;
+    cerr << "startAz, endAz, deltaAzPerBeam: "
+         << startAz << ", " << endAz << ", " << deltaAzPerBeam << endl;
+    cerr << "startEl, endEl, deltaElPerBeam: "
+         << startEl << ", " << endEl << ", " << deltaElPerBeam << endl;
+    for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
+      cerr << "  ii, az, el: "
+           << ii << ", " << beamAz[ii] << ", " << beamEl[ii] << endl;
+    }
+    cerr << "-----------------------------------------------" << endl;
+  }
+
+  // loop through all of the pulses
+
+  int pulseNumInDwell = 0;
+  for (int ivisit = 0; ivisit < _params.n_visits_per_beam; ivisit++) {
+    for (int ibeam = 0; ibeam < _params.n_beams_per_dwell; ibeam++) {
+      for (int ipulse = 0; ipulse < _params.n_samples_per_visit; 
+           ipulse++, pulseNumInDwell++) {
+        
+        // convert to si16 as needed
+        
+        IwrfTsPulse *iwrfPulse = dwellPulses[pulseNumInDwell];
+        if (iwrfPulse->getPackedEncoding() != IWRF_IQ_ENCODING_SCALED_SI16) {
+          iwrfPulse->convertToPacked(IWRF_IQ_ENCODING_SCALED_SI16);
+        }
+
+        // set the metadata
+
+        ui64 sampleNum = _sampleSeqNum;
+        
+        si64 secondsTime = iwrfPulse->getTime();
+        ui32 nanoSecs = iwrfPulse->getNanoSecs();
+        
+        ui32 pulseStartIndex = 0;
+        ui64 dwellNum = _dwellSeqNum;
+        ui32 beamNumInDwell = ibeam;
+        ui32 visitNumInBeam = ivisit;
+        
+        double azRad = beamAz[ibeam] * DEG_TO_RAD;
+        double elRad = beamEl[ibeam] * DEG_TO_RAD;
+        double uu = cos(elRad) * sin(azRad);
+        double vv = sin(elRad);
+        
+        bool isXmitH = iwrfPulse->isHoriz();
+        bool isCoPolRx = true;
+        
+        int nGates = iwrfPulse->getNGates();
+        const si16 *iqData = (const si16 *) iwrfPulse->getPackedData();
+
+        // create the buffer for co-polar packet
+        
+        MemBuf pktBuf;
+        _createPacketBuf(sampleNum,
+                         secondsTime, nanoSecs,
+                         pulseStartIndex,
+                         dwellNum,
+                         beamNumInDwell,
+                         visitNumInBeam,
+                         uu, vv, 
+                         isXmitH, isCoPolRx,
+                         nGates, iqData,
+                         pktBuf);
+
+        // write the packet to UDP
+
+        if (_writeBufToUdp(pktBuf)) {
+          cerr << "ERROR - _processDwellForUdp" << endl;
+          return -1;
+        }
+        _pulseSeqNum++;
+        _sampleSeqNum += nGates;
+
+        // optionally add a cross-pol pulse
+        // at the end of the dwell
+        
+        if (_params.add_cross_pol_sample_at_end_of_visit &&
+            ipulse == _params.n_samples_per_visit - 1) {
+          
+          isCoPolRx = false;
+          sampleNum = _sampleSeqNum;
+          iqData += nGates * 2; // channel 1
+          
+          pktBuf.clear();
+          _createPacketBuf(sampleNum,
+                           secondsTime, nanoSecs,
+                           pulseStartIndex,
+                           dwellNum,
+                           beamNumInDwell,
+                           visitNumInBeam,
+                           uu, vv, 
+                           isXmitH, isCoPolRx,
+                           nGates, iqData,
+                           pktBuf);
+
+          // write the packet to UDP
+          
+          if (_writeBufToUdp(pktBuf)) {
+            cerr << "ERROR - _processDwellForUdp" << endl;
+            return -1;
+          }
+
+          _pulseSeqNum++;
+          _sampleSeqNum += nGates;
+          
+        } // if (_params.add_cross_pol_sample_at_end_of_visit ...
+
+      } // ipulse
+    } // ibeam
+  } // ivisit
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////////////////////////////
+// create a packet buffer
+
+void Iwrf2AparTs::_createPacketBuf(ui64 sampleNum,
+                                   si64 secondsTime,
+                                   ui32 nanoSecs,
+                                   ui32 pulseStartIndex,
+                                   ui64 dwellNum,
+                                   ui32 beamNumInDwell,
+                                   ui32 visitNumInBeam,
+                                   double uu,
+                                   double vv,
+                                   bool isXmitH,
+                                   bool isCoPolRx,
+                                   int nGates,
+                                   const si16 *iqData,
+                                   MemBuf &buf)
+
+{
+
+
+}
+
+  
 ////////////////////////////////////////////////////
 // Open output UDP device
 // Returns 0 on success, -1 on error
@@ -1063,4 +1215,17 @@ int Iwrf2AparTs::_openOutputUdp()
   return 0;
 
 }
+
+////////////////////////////////////////////////////
+// Write buffer to UDP
+// Returns 0 on success, -1 on error
+
+int Iwrf2AparTs::_writeBufToUdp(const MemBuf &buf)
+  
+{
+
+  return 0;
+
+}
+
 

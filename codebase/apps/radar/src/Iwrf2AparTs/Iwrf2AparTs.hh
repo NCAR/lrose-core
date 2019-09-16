@@ -103,10 +103,11 @@ private:
   apar_ts_processing_t _aparTsProcessing;
   apar_ts_calibration_t _aparCalibration;
 
-  // vector of pulse pointers for a dwell
+  // pulse details
 
-  si64 _pulseSeqNum;
-  si64 _dwellSeqNum;
+  ui64 _dwellSeqNum;
+  ui64 _pulseSeqNum;
+  ui64 _sampleSeqNum; // for UDP only
   vector<IwrfTsPulse *> _dwellPulses;
   
   // functions
@@ -115,7 +116,7 @@ private:
   int _runUdpMode();
 
   int _convertFile(const string &inputPath);
-  int _processDwell(vector<IwrfTsPulse *> &dwellPulses);
+  int _processDwellForFile(vector<IwrfTsPulse *> &dwellPulses);
   int _openOutputFile(const string &inputPath,
                       const IwrfTsPulse &pulse);
   void _closeOutputFile();
@@ -149,8 +150,26 @@ private:
   double _conditionAngle180(double angle);
 
   int _convert2Udp(const string &inputPath);
-  int _openOutputUdp();
+  int _processDwellForUdp(vector<IwrfTsPulse *> &dwellPulses);
 
+  void _createPacketBuf(ui64 sampleNum,
+                        si64 secondsTime,
+                        ui32 nanoSecs,
+                        ui32 pulseStartIndex,
+                        ui64 dwellNum,
+                        ui32 beamNumInDwell,
+                        ui32 visitNumInBeam,
+                        double uu,
+                        double vv,
+                        bool isXmitH,
+                        bool isCoPolRx,
+                        int nGates,
+                        const si16 *iqData,
+                        MemBuf &buf);
+
+  int _openOutputUdp();
+  int _writeBufToUdp(const MemBuf &buf);
+  
 };
 
 #endif
