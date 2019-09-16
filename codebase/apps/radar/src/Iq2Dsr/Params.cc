@@ -2214,7 +2214,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("correct_hcr_v_rx_gain_for_temperature");
     tt->descr = tdrpStrDup("Option to correct the HCR V-channel receiver gain for temperature.");
-    tt->help = tdrpStrDup("Computing the HCR receiver gain correction is complicated. Therefore this is done offline, and the results are stored as XML in SPDB. Here we retrieve the values from SPDB and apply them to correct the receiver gain.");
+    tt->help = tdrpStrDup("Computing the HCR receiver gain correction is complicated. Therefore this is done offline, using the application HcrTempRxGain, and the results are stored as XML in SPDB. Here we retrieve the values from SPDB and apply them to correct the receiver gain.");
     tt->val_offset = (char *) &correct_hcr_v_rx_gain_for_temperature - &_start_;
     tt->single_val.b = pFALSE;
     tt++;

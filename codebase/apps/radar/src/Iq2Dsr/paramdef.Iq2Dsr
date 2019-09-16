@@ -847,7 +847,7 @@ commentdef {
 paramdef boolean {
   p_default = false;
   p_descr = "Option to correct the HCR V-channel receiver gain for temperature.";
-  p_help = "Computing the HCR receiver gain correction is complicated. Therefore this is done offline, and the results are stored as XML in SPDB. Here we retrieve the values from SPDB and apply them to correct the receiver gain.";
+  p_help = "Computing the HCR receiver gain correction is complicated. Therefore this is done offline, using the application HcrTempRxGain, and the results are stored as XML in SPDB. Here we retrieve the values from SPDB and apply them to correct the receiver gain.";
 } correct_hcr_v_rx_gain_for_temperature;
 
 paramdef string {
