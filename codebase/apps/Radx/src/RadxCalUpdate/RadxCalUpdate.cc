@@ -36,7 +36,6 @@
 //
 ////////////////////////////////////////////////////////////////
 
-#include "RadxCalUpdate.hh"
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
@@ -45,8 +44,12 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
-#include <dsserver/DsLdataInfo.hh>
 #include <toolsa/pmu.h>
+#include <toolsa/TaXml.hh>
+#include <toolsa/TaStr.hh>
+#include <dsserver/DsLdataInfo.hh>
+#include <Spdb/DsSpdb.hh>
+#include "RadxCalUpdate.hh"
 using namespace std;
 
 // Constructor
@@ -105,8 +108,8 @@ int RadxCalUpdate::Run()
   
   if (_params.update_calibration) {
     string errStr;
-    if (_newCal.readFromXmlFile(_params.calibration_file_path,
-                                errStr)) {
+    if (_fileCal.readFromXmlFile(_params.calibration_file_path,
+                                 errStr)) {
       cerr << "ERROR - RadxCalUpdate::Run()" << endl;
       cerr << "  Cannot read cal from file: "
            << _params.calibration_file_path << endl;
@@ -114,11 +117,10 @@ int RadxCalUpdate::Run()
       return -1;
     }
   }
+  _newCal = _fileCal;
 
-  // read height correction table, as required
+  // read altitude correction table, as required
     
-  // altitude correction
-  
   if (_params.correct_altitude_for_egm) {
     if (_egm.readGeoid(_params.egm_2008_geoid_file)) {
       cerr << "ERROR: " << _progName << endl;
@@ -258,6 +260,22 @@ int RadxCalUpdate::_processFile(const string &filePath)
     cerr << "ERROR - RadxCalUpdate::Run" << endl;
     cerr << inFile.getErrStr() << endl;
     return -1;
+  }
+
+  // correct gain for temperature if required
+  
+  if (_params.correct_hcr_v_rx_gain_for_temperature) {
+    time_t volStartTime = vol.getStartTimeSecs();
+    time_t volEndTime = vol.getEndTimeSecs();
+    time_t volMidTime = volStartTime + (volEndTime - volStartTime) / 2;
+    if (_correctHcrVRxGainForTemp(volMidTime) == 0) {
+      string newStatus = vol.getStatusXml();
+      newStatus += _deltaGainXml;
+      vol.setStatusXml(newStatus);
+    } else {
+      // failed - use file version
+      _newCal = _fileCal;
+    }
   }
 
   // fix each ray in turn
@@ -488,7 +506,7 @@ void RadxCalUpdate::_fixRayAltitude(RadxVol &vol, RadxRay &ray)
 {
 
   // get the georef
-
+  
   RadxGeoref *georef = ray.getGeoreference();
   if (georef == NULL) {
     // no georef, so this step does not apply
@@ -517,3 +535,153 @@ void RadxCalUpdate::_fixRayAltitude(RadxVol &vol, RadxRay &ray)
 
 }
 
+////////////////////////////////////////////////////////
+// Correct HCR V RX calibration gains for temperature
+// the reads in the correction from SPDB
+
+int RadxCalUpdate::_correctHcrVRxGainForTemp(time_t timeSecs)
+  
+{
+
+  // init
+
+  _deltaGainXml.clear();
+
+  // get gain correction data from SPDB
+  
+  DsSpdb spdb;
+  if (spdb.getClosest(_params.hcr_delta_gain_spdb_url,
+                      timeSecs,
+                      _params.hcr_delta_gain_search_margin_secs)) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - RadxCalUpdate::_correctHcrVRxGainForTemp()" << endl;
+      cerr << "  Cannot get delta gain from URL: "
+           << _params.hcr_delta_gain_spdb_url << endl;
+      cerr << "  Search time: " << DateTime::strm(timeSecs) << endl;
+      cerr << "  Search margin (secs): "
+           << _params.hcr_delta_gain_search_margin_secs << endl;
+      cerr << spdb.getErrStr() << endl;
+    }
+    return -1;
+  }
+  
+  // got chunks
+  
+  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  if (chunks.size() < 1) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - RadxCalUpdate::_correctHcrVRxGainForTemp()" << endl;
+      cerr << "  No suitable gain data from URL: "
+           << _params.hcr_delta_gain_spdb_url << endl;
+      cerr << "  Search time: " << DateTime::strm(timeSecs) << endl;
+      cerr << "  Search margin (secs): "
+           << _params.hcr_delta_gain_search_margin_secs << endl;
+    }
+    return -1;
+  }
+  const Spdb::chunk_t &chunk = chunks[0];
+
+  // set xml string with gain results
+  
+  _deltaGainXml = std::string((char *) chunk.data, chunk.len - 1);
+
+  // find delta gain in xml
+  
+  double deltaGainVc =
+    _getDeltaGainFromXml(_deltaGainXml, _params.hcr_v_rx_delta_gain_tag_list);
+  
+  if (isnan(deltaGainVc)) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - RadxCalUpdate::_correctHcrVRxGainForTemp()" << endl;
+      cerr << "  Cannot find deltaGain in XML: " << _deltaGainXml << endl;
+    }
+    return -1;
+  }
+
+  // copy the new cal from the input file
+
+  _newCal = _fileCal;
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "++++ CALIBRATION BEFORE HCR GAIN CORRECTION +++++++++++++" << endl;
+    _newCal.print(cerr);
+    cerr << "++++ END CALIBRATION BEFORE HCR GAIN TEMP CORRECTION ++++" << endl;
+    cerr << "Delta gain XML - created by HcrTempRxGain app" << endl;
+    cerr << _deltaGainXml << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  }
+  
+  // compute base dbz if needed
+  
+  if (!_newCal.isMissing(_newCal.getReceiverGainDbVc())) {
+    double rconst = _newCal.getRadarConstantV();
+    double noise = _newCal.getNoiseDbmVc();
+    double noiseFixed = noise + deltaGainVc;
+    double gain = _newCal.getReceiverGainDbVc();
+    double gainFixed = gain + deltaGainVc;
+    double baseDbz1km = noiseFixed - gainFixed + rconst;
+    if (!_newCal.isMissing(noise) && !_newCal.isMissing(rconst)) {
+      _newCal.setBaseDbz1kmVc(baseDbz1km);
+    }
+    _newCal.setReceiverGainDbVc(gainFixed);
+    _newCal.setNoiseDbmVc(noiseFixed);
+    _newCal.setCalibTime(timeSecs);
+  }
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "++++ CALIBRATION AFTER HCR GAIN CORRECTION +++++++++++++" << endl;
+    _newCal.print(cerr);
+    cerr << "++++ END CALIBRATION AFTER HCR GAIN TEMP CORRECTION ++++" << endl;
+  }
+    
+  return 0;
+  
+}
+
+/////////////////////////////////////////////////////////////////
+// get delta gain from XML string, given the tag list
+// returns delta gain, NAN on failure
+
+double RadxCalUpdate::_getDeltaGainFromXml(const string &xml,
+                                           const string &tagList) const
+  
+{
+  
+  // get tags in list
+  
+  vector<string> tags;
+  TaStr::tokenize(tagList, "<>", tags);
+  if (tags.size() == 0) {
+    // no tags
+    cerr << "WARNING - RadxCalUpdate::_getDeltaGainFromXml()" << endl;
+    cerr << "  deltaGain tag not found: " << tagList << endl;
+    return NAN;
+  }
+  
+  // read through the outer tags in status XML
+  
+  string buf(xml);
+  for (size_t jj = 0; jj < tags.size(); jj++) {
+    string val;
+    if (TaXml::readString(buf, tags[jj], val)) {
+      cerr << "WARNING - RadxCalUpdate::_getDeltaGainFromXml()" << endl;
+      cerr << "  Bad tags found in status xml, expecting: "
+           << tagList << endl;
+      return NAN;
+    }
+    buf = val;
+  }
+
+  // read delta gain
+  
+  double deltaGain = NAN;
+  if (TaXml::readDouble(buf, deltaGain)) {
+    cerr << "WARNING - RadxCalUpdate::_getDeltaGainFromXml()" << endl;
+    cerr << "  Bad deltaGain found in status xml, buf: " << buf << endl;
+    return NAN;
+  }
+  
+  return deltaGain;
+
+}
+  

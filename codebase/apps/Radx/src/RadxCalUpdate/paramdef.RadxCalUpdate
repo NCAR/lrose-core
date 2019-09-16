@@ -143,6 +143,32 @@ paramdef string {
 } dbz_fields_for_update[];
 
 commentdef {
+  p_header = "FOR HCR, CORRECT RECEIVER GAIN FOR TEMPERATURE USING VALUES FROM SPDB";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to correct the HCR V-channel receiver gain for temperature.";
+  p_help = "Computing the HCR receiver gain correction is complicated. Therefore this is done offline, using the application HcrTempRxGain, and the results are stored as XML in SPDB. Here we retrieve the values from SPDB and apply them to correct the receiver gain.";
+} correct_hcr_v_rx_gain_for_temperature;
+
+paramdef string {
+  p_default = "$(DATA_DIR)/$(QC_VERSION)/spdb/tempVsGain";
+  p_descr = "URL for HCR gain correction from SPDB.";
+} hcr_delta_gain_spdb_url;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin when finding gain correction data (secs).";
+  p_help = "We search for the value closest in time to the beam time. This is the search margin on either side of the search time.";
+} hcr_delta_gain_search_margin_secs;
+
+paramdef string {
+  p_default = "<HcrTempGainCorrection><v_delta_gain>";
+  p_descr = "URL for HCR gain correction from SPDB.";
+} hcr_v_rx_delta_gain_tag_list;
+
+commentdef {
   p_header = "CORRECT ALTITUDE FOR EGM";
   p_text = "Correct the GPS altitude for the geoid, using EGM-2008. See: https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.html.";
 }

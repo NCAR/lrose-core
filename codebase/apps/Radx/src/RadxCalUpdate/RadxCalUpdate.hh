@@ -81,11 +81,18 @@ private:
 
   // calibration
 
+  RadxRcalib _fileCal;
   RadxRcalib _newCal;
   
   // altitude correction
 
   Egm2008 _egm;
+
+  // correcting gain for temp
+
+  string _deltaGainXml;
+
+  // methods
 
   int _runFilelist();
   int _runArchive();
@@ -100,6 +107,10 @@ private:
   void _fixRay(RadxVol &vol, RadxRay &ray);
   void _fixRayCalibration(RadxVol &vol, RadxRay &ray);
   void _fixRayAltitude(RadxVol &vol, RadxRay &ray);
+
+  int _correctHcrVRxGainForTemp(time_t timeSecs);
+  double _getDeltaGainFromXml(const string &xml,
+                              const string &tagList) const;
 
 
 };

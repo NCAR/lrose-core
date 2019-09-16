@@ -833,6 +833,63 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("FOR HCR, CORRECT RECEIVER GAIN FOR TEMPERATURE USING VALUES FROM SPDB");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'correct_hcr_v_rx_gain_for_temperature'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("correct_hcr_v_rx_gain_for_temperature");
+    tt->descr = tdrpStrDup("Option to correct the HCR V-channel receiver gain for temperature.");
+    tt->help = tdrpStrDup("Computing the HCR receiver gain correction is complicated. Therefore this is done offline, using the application HcrTempRxGain, and the results are stored as XML in SPDB. Here we retrieve the values from SPDB and apply them to correct the receiver gain.");
+    tt->val_offset = (char *) &correct_hcr_v_rx_gain_for_temperature - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'hcr_delta_gain_spdb_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("hcr_delta_gain_spdb_url");
+    tt->descr = tdrpStrDup("URL for HCR gain correction from SPDB.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &hcr_delta_gain_spdb_url - &_start_;
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/$(QC_VERSION)/spdb/tempVsGain");
+    tt++;
+    
+    // Parameter 'hcr_delta_gain_search_margin_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("hcr_delta_gain_search_margin_secs");
+    tt->descr = tdrpStrDup("Search margin when finding gain correction data (secs).");
+    tt->help = tdrpStrDup("We search for the value closest in time to the beam time. This is the search margin on either side of the search time.");
+    tt->val_offset = (char *) &hcr_delta_gain_search_margin_secs - &_start_;
+    tt->single_val.i = 3600;
+    tt++;
+    
+    // Parameter 'hcr_v_rx_delta_gain_tag_list'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("hcr_v_rx_delta_gain_tag_list");
+    tt->descr = tdrpStrDup("URL for HCR gain correction from SPDB.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &hcr_v_rx_delta_gain_tag_list - &_start_;
+    tt->single_val.s = tdrpStrDup("<HcrTempGainCorrection><v_delta_gain>");
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("CORRECT ALTITUDE FOR EGM");
     tt->comment_text = tdrpStrDup("Correct the GPS altitude for the geoid, using EGM-2008. See: https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.html.");
     tt++;

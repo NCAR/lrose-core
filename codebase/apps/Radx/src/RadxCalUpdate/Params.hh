@@ -411,6 +411,14 @@ public:
   char* *_dbz_fields_for_update;
   int dbz_fields_for_update_n;
 
+  tdrp_bool_t correct_hcr_v_rx_gain_for_temperature;
+
+  char* hcr_delta_gain_spdb_url;
+
+  int hcr_delta_gain_search_margin_secs;
+
+  char* hcr_v_rx_delta_gain_tag_list;
+
   tdrp_bool_t correct_altitude_for_egm;
 
   char* egm_2008_geoid_file;
@@ -422,7 +430,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[25];
+  mutable TDRPtable _table[30];
 
   const char *_className;
 
