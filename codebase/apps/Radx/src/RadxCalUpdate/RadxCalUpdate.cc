@@ -417,7 +417,7 @@ void RadxCalUpdate::_fixRay(RadxVol &vol, RadxRay &ray)
 
 void RadxCalUpdate::_fixRayCalibration(RadxVol &vol, RadxRay &ray)
 {
-  
+
   if (vol.getNRcalibs() < 1) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "WARNING - RadxCalUpdate::_fixRayCalibration" << endl;
@@ -450,27 +450,27 @@ void RadxCalUpdate::_fixRayCalibration(RadxVol &vol, RadxRay &ray)
     }
     return;
   }
-  
+
   // compute the deltas for the calibration
 
   double oldBaseDbz = rayCal->getBaseDbz1kmHc();
   double newBaseDbz = _newCal.getBaseDbz1kmHc();
   double deltaDbz = newBaseDbz - oldBaseDbz;
 
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> changing cal, deltaDbz = " << deltaDbz << endl;
   }
 
   // correct the DBZ fields for the new cal
 
   for (int ifld = 0; ifld < _params.dbz_fields_for_update_n; ifld++) {
-    
+
     // find the field we want
 
     string fieldName = _params._dbz_fields_for_update[ifld];
     RadxField *dbzFld = ray.getField(fieldName);
     if (dbzFld == NULL) {
-      if (_params.debug >= Params::DEBUG_EXTRA) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
         cerr << "WARNING - RadxCalUpdate::_fixRayCalibration" << endl;
         cerr << "==>> ignoring field, cannot find: " << fieldName << endl;
       }
@@ -511,7 +511,7 @@ void RadxCalUpdate::_fixRayAltitude(RadxVol &vol, RadxRay &ray)
   if (georef == NULL) {
     // no georef, so this step does not apply
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "WARNING - RadxCalUpdate::_fixRayCalibration" << endl;
+      cerr << "WARNING - RadxCalUpdate::_fixRayAltitude" << endl;
       cerr << "==>> no georefs, so no altitude correction applied" << endl;
     }
     return;
