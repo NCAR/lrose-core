@@ -612,7 +612,7 @@ int RadxCalUpdate::_correctHcrVRxGainForTemp(time_t timeSecs)
   }
   
   // compute base dbz if needed
-  
+
   if (!_newCal.isMissing(_newCal.getReceiverGainDbVc())) {
     double rconst = _newCal.getRadarConstantV();
     double noise = _newCal.getNoiseDbmVc();
@@ -620,6 +620,14 @@ int RadxCalUpdate::_correctHcrVRxGainForTemp(time_t timeSecs)
     double gain = _newCal.getReceiverGainDbVc();
     double gainFixed = gain + deltaGainVc;
     double baseDbz1km = noiseFixed - gainFixed + rconst;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "==>> Vc noise, fixed: "
+           << noise << ", " << noiseFixed << endl;
+      cerr << "==>> Vc gain, fixed: "
+           << gain << ", " << gainFixed << endl;
+      cerr << "==>> Vc baseDbz1Km, fixed: "
+           << _newCal.getBaseDbz1kmVc() << ", " << baseDbz1km << endl;
+    }
     if (!_newCal.isMissing(noise) && !_newCal.isMissing(rconst)) {
       _newCal.setBaseDbz1kmVc(baseDbz1km);
     }
