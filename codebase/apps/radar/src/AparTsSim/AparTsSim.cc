@@ -465,7 +465,7 @@ int AparTsSim::_processDwellForFile(vector<IwrfTsPulse *> &dwellPulses)
 // open output file, if needed
 
 int AparTsSim::_openOutputFile(const string &inputPath,
-                                 const IwrfTsPulse &pulse)
+                               const IwrfTsPulse &pulse)
 
 {
 
@@ -582,7 +582,7 @@ void AparTsSim::_convertMeta2Apar(const IwrfTsInfo &info)
 // Copy members from IWRF structs to APAR structs
 
 void AparTsSim::_copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
-                                 apar_ts_packet_info_t &apar)
+                               apar_ts_packet_info_t &apar)
 {
 
   apar_ts_packet_info_init(apar);
@@ -597,7 +597,7 @@ void AparTsSim::_copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
 }
 
 void AparTsSim::_copyIwrf2Apar(const iwrf_radar_info_t &iwrf,
-                                 apar_ts_radar_info_t &apar)
+                               apar_ts_radar_info_t &apar)
 {
 
   apar_ts_radar_info_init(apar);
@@ -620,7 +620,7 @@ void AparTsSim::_copyIwrf2Apar(const iwrf_radar_info_t &iwrf,
 }
 
 void AparTsSim::_copyIwrf2Apar(const iwrf_scan_segment_t &iwrf,
-                                 apar_ts_scan_segment_t &apar)
+                               apar_ts_scan_segment_t &apar)
 {
 
   apar_ts_scan_segment_init(apar);
@@ -655,7 +655,7 @@ void AparTsSim::_copyIwrf2Apar(const iwrf_scan_segment_t &iwrf,
 }
 
 void AparTsSim::_copyIwrf2Apar(const iwrf_ts_processing_t &iwrf,
-                                 apar_ts_processing_t &apar)
+                               apar_ts_processing_t &apar)
 {
 
   apar_ts_processing_init(apar);
@@ -686,7 +686,7 @@ void AparTsSim::_copyIwrf2Apar(const iwrf_ts_processing_t &iwrf,
 }
 
 void AparTsSim::_copyIwrf2Apar(const iwrf_calibration_t &iwrf,
-                                 apar_ts_calibration_t &apar)
+                               apar_ts_calibration_t &apar)
 {
 
   apar_ts_calibration_init(apar);
@@ -756,7 +756,7 @@ void AparTsSim::_copyIwrf2Apar(const iwrf_calibration_t &iwrf,
 }
 
 void AparTsSim::_copyIwrf2Apar(const iwrf_pulse_header_t &iwrf,
-                                 apar_ts_pulse_header_t &apar)
+                               apar_ts_pulse_header_t &apar)
 {
 
   apar_ts_pulse_header_init(apar);
@@ -809,7 +809,7 @@ void AparTsSim::_copyIwrf2Apar(const iwrf_pulse_header_t &iwrf,
 }
 
 void AparTsSim::_copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
-                                 apar_ts_event_notice_t &apar)
+                               apar_ts_event_notice_t &apar)
 {
 
   apar_ts_event_notice_init(apar);
@@ -1130,20 +1130,20 @@ int AparTsSim::_processDwellForUdp(vector<IwrfTsPulse *> &dwellPulses)
 // create a packet buffer
 
 void AparTsSim::_createPacketBuf(ui64 sampleNumber,
-                                   ui64 pulseNumber,
-                                   si64 secondsTime,
-                                   ui32 nanoSecs,
-                                   ui32 pulseStartIndex,
-                                   ui64 dwellNum,
-                                   ui32 beamNumInDwell,
-                                   ui32 visitNumInBeam,
-                                   double uu,
-                                   double vv,
-                                   bool isXmitH,
-                                   bool isCoPolRx,
-                                   int nGates,
-                                   const si16 *iqData,
-                                   MemBuf &buf)
+                                 ui64 pulseNumber,
+                                 si64 secondsTime,
+                                 ui32 nanoSecs,
+                                 ui32 pulseStartIndex,
+                                 ui64 dwellNum,
+                                 ui32 beamNumInDwell,
+                                 ui32 visitNumInBeam,
+                                 double uu,
+                                 double vv,
+                                 bool isXmitH,
+                                 bool isCoPolRx,
+                                 int nGates,
+                                 const si16 *iqData,
+                                 MemBuf &buf)
 
 {
   
