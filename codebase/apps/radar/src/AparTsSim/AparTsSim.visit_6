@@ -1,10 +1,10 @@
 /**********************************************************************
- * TDRP params for Iwrf2AparTs
+ * TDRP params for AparTsSim
  **********************************************************************/
 
 //======================================================================
 //
-// Iwrf2AparTs reads IWRF time series files, converts to APAR TS data, 
+// AparTsSim reads IWRF time series files, converts to APAR TS data, 
 //   and writes the files to a specified. The input files are specified on 
 //   the command line.
 //

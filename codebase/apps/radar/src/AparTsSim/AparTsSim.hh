@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Iwrf2AparTs.hh
+// AparTsSim.hh
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -31,14 +31,14 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Iwrf2AparTs reads IWRF data from specified files, converts
+// AparTsSim reads IWRF data from specified files, converts
 // the data to APAR TS format, and writes the
 // converted files to a specified location
 //
 ////////////////////////////////////////////////////////////////
 
-#ifndef Iwrf2AparTs_H
-#define Iwrf2AparTs_H
+#ifndef AparTsSim_H
+#define AparTsSim_H
 
 #include <string>
 #include <vector>
@@ -57,17 +57,17 @@ using namespace std;
 ////////////////////////
 // This class
 
-class Iwrf2AparTs {
+class AparTsSim {
   
 public:
 
   // constructor
 
-  Iwrf2AparTs(int argc, char **argv);
+  AparTsSim(int argc, char **argv);
 
   // destructor
   
-  ~Iwrf2AparTs();
+  ~AparTsSim();
 
   // run 
 

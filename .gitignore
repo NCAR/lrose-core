@@ -394,6 +394,7 @@ codebase/apps/procmap/src/procmap_unregister/procmap_unregister
 codebase/apps/procmap/src/test_procmap/test_procmap
 
 codebase/apps/radar/src/AparTsPrint/AparTsPrint
+codebase/apps/radar/src/AparTsSim/AparTsSim
 codebase/apps/radar/src/AparTs2Moments/AparTs2Moments
 codebase/apps/radar/src/AcGeorefCompare/AcGeorefCompare
 codebase/apps/radar/src/AcGeoref2Spdb/AcGeoref2Spdb
@@ -433,7 +434,6 @@ codebase/apps/radar/src/HsrlSim/HsrlSim
 codebase/apps/radar/src/HsrlTcp2Fmq/HsrlTcp2Fmq
 codebase/apps/radar/src/IntfRemove/IntfRemove
 codebase/apps/radar/src/Iq2Dsr/Iq2Dsr
-codebase/apps/radar/src/Iwrf2AparTs/Iwrf2AparTs
 codebase/apps/radar/src/JamesDealias/JamesDealias
 codebase/apps/radar/src/RadxDealias/RadxDealias
 codebase/apps/radar/src/Mdv2Vad/Mdv2Vad

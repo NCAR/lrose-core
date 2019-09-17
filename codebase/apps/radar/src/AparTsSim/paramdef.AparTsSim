@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// parameter definitions Iwrf2AparTs
+// parameter definitions AparTsSim
 //
 // EOL, NCAR,
 // P.O.Box 3000, Boulder, CO, USA, 80307-3000
@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "Iwrf2AparTs reads IWRF time series files, converts to APAR TS data, and writes the files to a specified. The input files are specified on the command line.";
+  p_header = "AparTsSim reads IWRF time series files, converts to APAR TS data, and writes the files to a specified. The input files are specified on the command line.";
 }
 
 commentdef {

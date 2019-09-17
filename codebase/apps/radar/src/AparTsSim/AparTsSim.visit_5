@@ -1,10 +1,10 @@
 /**********************************************************************
- * TDRP params for Iwrf2AparTs
+ * TDRP params for AparTsSim
  **********************************************************************/
 
 //======================================================================
 //
-// Iwrf2AparTs reads IWRF time series files, converts to APAR TS data, 
+// AparTsSim reads IWRF time series files, converts to APAR TS data, 
 //   and writes the files to a specified. The input files are specified on 
 //   the command line.
 //
@@ -47,7 +47,7 @@ debug = DEBUG_OFF;
 // Type: string
 //
 
-output_dir = "$(HOME)/data/apar/tseries_simulate/visit_1";
+output_dir = "$(HOME)/data/apar/tseries_simulate/visit_5";
 
 //======================================================================
 //
@@ -66,7 +66,7 @@ output_dir = "$(HOME)/data/apar/tseries_simulate/visit_1";
 // Type: int
 //
 
-n_samples_per_visit = 120;
+n_samples_per_visit = 5;
 
 ///////////// n_visits_per_beam ///////////////////////
 //
@@ -79,7 +79,7 @@ n_samples_per_visit = 120;
 // Type: int
 //
 
-n_visits_per_beam = 1;
+n_visits_per_beam = 6;
 
 ///////////// n_beams_per_dwell ///////////////////////
 //
@@ -92,7 +92,7 @@ n_visits_per_beam = 1;
 // Type: int
 //
 
-n_beams_per_dwell = 1;
+n_beams_per_dwell = 4;
 
 ///////////// add_cross_pol_sample_at_end_of_visit ////
 //

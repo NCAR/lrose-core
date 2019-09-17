@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// Iwrf2AparTs.cc
+// AparTsSim.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,7 +30,7 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Iwrf2AparTs reads IWRF data from specified files, converts
+// AparTsSim reads IWRF data from specified files, converts
 // the data to APAR TS format, and writes the
 // converted files to a specified location
 //
@@ -51,7 +51,7 @@
 #include <toolsa/MemBuf.hh>
 #include <radar/apar_ts_functions.hh>
 #include <radar/AparTsPulse.hh>
-#include "Iwrf2AparTs.hh"
+#include "AparTsSim.hh"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -63,7 +63,7 @@ using namespace std;
 
 // Constructor
 
-Iwrf2AparTs::Iwrf2AparTs(int argc, char **argv)
+AparTsSim::AparTsSim(int argc, char **argv)
   
 {
 
@@ -77,7 +77,7 @@ Iwrf2AparTs::Iwrf2AparTs(int argc, char **argv)
 
   // set programe name
   
-  _progName = "Iwrf2AparTs";
+  _progName = "AparTsSim";
 
   // get command line args
 
@@ -111,7 +111,7 @@ Iwrf2AparTs::Iwrf2AparTs(int argc, char **argv)
 
 // destructor
 
-Iwrf2AparTs::~Iwrf2AparTs()
+AparTsSim::~AparTsSim()
 
 {
   
@@ -127,17 +127,17 @@ Iwrf2AparTs::~Iwrf2AparTs()
 //////////////////////////////////////////////////
 // Run
 
-int Iwrf2AparTs::Run ()
+int AparTsSim::Run ()
 {
   
   PMU_auto_register("Run");
   
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Running Iwrf2AparTs - extra verbose debug mode" << endl;
+    cerr << "Running AparTsSim - extra verbose debug mode" << endl;
   } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Running Iwrf2AparTs - verbose debug mode" << endl;
+    cerr << "Running AparTsSim - verbose debug mode" << endl;
   } else if (_params.debug) {
-    cerr << "Running Iwrf2AparTs - debug mode" << endl;
+    cerr << "Running AparTsSim - debug mode" << endl;
   }
 
   if (_params.output_mode == Params::OUTPUT_FILES) {
@@ -151,7 +151,7 @@ int Iwrf2AparTs::Run ()
 //////////////////////////////////////////////////
 // Run in file mode
 
-int Iwrf2AparTs::_runFileMode()
+int AparTsSim::_runFileMode()
 {
   
   PMU_auto_register("_runFileMode");
@@ -172,7 +172,7 @@ int Iwrf2AparTs::_runFileMode()
 //////////////////////////////////////////////////
 // Run in UDP mode
 
-int Iwrf2AparTs::_runUdpMode()
+int AparTsSim::_runUdpMode()
 {
   
   PMU_auto_register("_runUdpMode");
@@ -196,7 +196,7 @@ int Iwrf2AparTs::_runUdpMode()
 ////////////////////////////////////////////////////
 // Convert 1 file to APAR format
 
-int Iwrf2AparTs::_convertFile(const string &inputPath)
+int AparTsSim::_convertFile(const string &inputPath)
   
 {
 
@@ -237,7 +237,7 @@ int Iwrf2AparTs::_convertFile(const string &inputPath)
       delete iwrfPulse;
     }
     if (!haveMetadata) {
-      cerr << "ERROR - Iwrf2AparTs::_convertFile()" << endl;
+      cerr << "ERROR - AparTsSim::_convertFile()" << endl;
       cerr << "Metadata missing for file: " << inputPath << endl;
       return -1;
     }
@@ -289,7 +289,7 @@ int Iwrf2AparTs::_convertFile(const string &inputPath)
     // open output file as needed
     
     if (_openOutputFile(inputPath, *iwrfPulse)) {
-      cerr << "ERROR - Iwrf2AparTs::_convertFile" << endl;
+      cerr << "ERROR - AparTsSim::_convertFile" << endl;
       cerr << "  Processing file: " << inputPath << endl;
       return -1;
     }
@@ -333,7 +333,7 @@ int Iwrf2AparTs::_convertFile(const string &inputPath)
 /////////////////////////////
 // process pulses in a dwell
 
-int Iwrf2AparTs::_processDwellForFile(vector<IwrfTsPulse *> &dwellPulses)
+int AparTsSim::_processDwellForFile(vector<IwrfTsPulse *> &dwellPulses)
   
 {
 
@@ -413,14 +413,14 @@ int Iwrf2AparTs::_processDwellForFile(vector<IwrfTsPulse *> &dwellPulses)
         // write ops info to file, if info has changed since last write
         
         if (_aparTsInfo->writeMetaQueueToFile(_out, true)) {
-          cerr << "Iwrf2AparTs::_processDwellForFile" << endl;
+          cerr << "AparTsSim::_processDwellForFile" << endl;
           return -1;
         }
 
         // write pulse to file
         
         if (aparPulse.writeToFile(_out)) {
-          cerr << "Iwrf2AparTs::_processDwellForFile" << endl;
+          cerr << "AparTsSim::_processDwellForFile" << endl;
           return -1;
         }
 
@@ -447,7 +447,7 @@ int Iwrf2AparTs::_processDwellForFile(vector<IwrfTsPulse *> &dwellPulses)
           // write out
           
           if (xpolPulse.writeToFile(_out)) {
-            cerr << "Iwrf2AparTs::_processDwellForFile" << endl;
+            cerr << "AparTsSim::_processDwellForFile" << endl;
             return -1;
           }
           
@@ -464,7 +464,7 @@ int Iwrf2AparTs::_processDwellForFile(vector<IwrfTsPulse *> &dwellPulses)
 /////////////////////////////////
 // open output file, if needed
 
-int Iwrf2AparTs::_openOutputFile(const string &inputPath,
+int AparTsSim::_openOutputFile(const string &inputPath,
                                  const IwrfTsPulse &pulse)
 
 {
@@ -487,7 +487,7 @@ int Iwrf2AparTs::_openOutputFile(const string &inputPath,
   
   if (ta_makedir_recurse(subdir)) {
     int errNum = errno;
-    cerr << "ERROR - Iwrf2AparTs" << endl;
+    cerr << "ERROR - AparTsSim" << endl;
     cerr << "  Cannot make output directory: " << subdir << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
@@ -505,7 +505,7 @@ int Iwrf2AparTs::_openOutputFile(const string &inputPath,
 
   if ((_out = fopen(outputPath.c_str(), "w")) == NULL) {
     int errNum = errno;
-    cerr << "ERROR - Iwrf2AparTs" << endl;
+    cerr << "ERROR - AparTsSim" << endl;
     cerr << "  Cannot open output file: " << outputPath << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
@@ -524,7 +524,7 @@ int Iwrf2AparTs::_openOutputFile(const string &inputPath,
 //
 // Returns 0 if file already open, -1 if not
 
-void Iwrf2AparTs::_closeOutputFile()
+void AparTsSim::_closeOutputFile()
 
 {
   
@@ -540,7 +540,7 @@ void Iwrf2AparTs::_closeOutputFile()
 /////////////////////////////
 // reformat
 
-void Iwrf2AparTs::_reformat2Apar(const IwrfTsPulse &pulse)
+void AparTsSim::_reformat2Apar(const IwrfTsPulse &pulse)
   
 {
   
@@ -550,7 +550,7 @@ void Iwrf2AparTs::_reformat2Apar(const IwrfTsPulse &pulse)
 ///////////////////////////////////////////////
 // Convert the IWRF metadata to APAR structs
 
-void Iwrf2AparTs::_convertMeta2Apar(const IwrfTsInfo &info)
+void AparTsSim::_convertMeta2Apar(const IwrfTsInfo &info)
   
 {
 
@@ -581,7 +581,7 @@ void Iwrf2AparTs::_convertMeta2Apar(const IwrfTsInfo &info)
 //////////////////////////////////////////////////
 // Copy members from IWRF structs to APAR structs
 
-void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
+void AparTsSim::_copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
                                  apar_ts_packet_info_t &apar)
 {
 
@@ -596,7 +596,7 @@ void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
  
 }
 
-void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_radar_info_t &iwrf,
+void AparTsSim::_copyIwrf2Apar(const iwrf_radar_info_t &iwrf,
                                  apar_ts_radar_info_t &apar)
 {
 
@@ -619,7 +619,7 @@ void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_radar_info_t &iwrf,
 
 }
 
-void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_scan_segment_t &iwrf,
+void AparTsSim::_copyIwrf2Apar(const iwrf_scan_segment_t &iwrf,
                                  apar_ts_scan_segment_t &apar)
 {
 
@@ -654,7 +654,7 @@ void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_scan_segment_t &iwrf,
 
 }
 
-void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_ts_processing_t &iwrf,
+void AparTsSim::_copyIwrf2Apar(const iwrf_ts_processing_t &iwrf,
                                  apar_ts_processing_t &apar)
 {
 
@@ -685,7 +685,7 @@ void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_ts_processing_t &iwrf,
   
 }
 
-void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_calibration_t &iwrf,
+void AparTsSim::_copyIwrf2Apar(const iwrf_calibration_t &iwrf,
                                  apar_ts_calibration_t &apar)
 {
 
@@ -755,7 +755,7 @@ void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_calibration_t &iwrf,
   
 }
 
-void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_pulse_header_t &iwrf,
+void AparTsSim::_copyIwrf2Apar(const iwrf_pulse_header_t &iwrf,
                                  apar_ts_pulse_header_t &apar)
 {
 
@@ -808,7 +808,7 @@ void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_pulse_header_t &iwrf,
 
 }
 
-void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
+void AparTsSim::_copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
                                  apar_ts_event_notice_t &apar)
 {
 
@@ -833,7 +833,7 @@ void Iwrf2AparTs::_copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
 ////////////////////////////////////
 // condition angle from 0 to 360
 
-double Iwrf2AparTs::_conditionAngle360(double angle)
+double AparTsSim::_conditionAngle360(double angle)
 {
   if (angle < 0) {
     return angle + 360.0;
@@ -847,7 +847,7 @@ double Iwrf2AparTs::_conditionAngle360(double angle)
 ////////////////////////////////////
 // condition angle from -180 to 180
 
-double Iwrf2AparTs::_conditionAngle180(double angle)
+double AparTsSim::_conditionAngle180(double angle)
 {
   if (angle < -180) {
     return angle + 360.0;
@@ -861,7 +861,7 @@ double Iwrf2AparTs::_conditionAngle180(double angle)
 ////////////////////////////////////////////////////
 // Convert 1 file to UDP
 
-int Iwrf2AparTs::_convert2Udp(const string &inputPath)
+int AparTsSim::_convert2Udp(const string &inputPath)
   
 {
   
@@ -902,7 +902,7 @@ int Iwrf2AparTs::_convert2Udp(const string &inputPath)
       delete iwrfPulse;
     }
     if (!haveMetadata) {
-      cerr << "ERROR - Iwrf2AparTs::_convert2Udp()" << endl;
+      cerr << "ERROR - AparTsSim::_convert2Udp()" << endl;
       cerr << "Metadata missing for file: " << inputPath << endl;
       return -1;
     }
@@ -939,7 +939,7 @@ int Iwrf2AparTs::_convert2Udp(const string &inputPath)
     // open output UDP as needed
     
     if (_openOutputUdp()) {
-      cerr << "ERROR - Iwrf2AparTs::_convert2Udp" << endl;
+      cerr << "ERROR - AparTsSim::_convert2Udp" << endl;
       cerr << "  Processing file: " << inputPath << endl;
       cerr << "  Cannot open UDP output device" << endl;
       return -1;
@@ -984,7 +984,7 @@ int Iwrf2AparTs::_convert2Udp(const string &inputPath)
 ////////////////////////////////////////////
 // process pulses in a dwell for UDP output
 
-int Iwrf2AparTs::_processDwellForUdp(vector<IwrfTsPulse *> &dwellPulses)
+int AparTsSim::_processDwellForUdp(vector<IwrfTsPulse *> &dwellPulses)
   
 {
 
@@ -1129,7 +1129,7 @@ int Iwrf2AparTs::_processDwellForUdp(vector<IwrfTsPulse *> &dwellPulses)
 ////////////////////////////////////////////////////////////////////////
 // create a packet buffer
 
-void Iwrf2AparTs::_createPacketBuf(ui64 sampleNumber,
+void AparTsSim::_createPacketBuf(ui64 sampleNumber,
                                    ui64 pulseNumber,
                                    si64 secondsTime,
                                    ui32 nanoSecs,
@@ -1274,7 +1274,7 @@ void Iwrf2AparTs::_createPacketBuf(ui64 sampleNumber,
 // Open output UDP device
 // Returns 0 on success, -1 on error
 
-int Iwrf2AparTs::_openOutputUdp()
+int AparTsSim::_openOutputUdp()
   
 {
 
@@ -1328,7 +1328,7 @@ int Iwrf2AparTs::_openOutputUdp()
 // Write buffer to UDP
 // Returns 0 on success, -1 on error
 
-int Iwrf2AparTs::_writeBufToUdp(const MemBuf &buf)
+int AparTsSim::_writeBufToUdp(const MemBuf &buf)
   
 {
 

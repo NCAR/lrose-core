@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
 //
-// main driver for Iwrf2AparTs
+// main driver for AparTsSim
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -31,13 +31,13 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Iwrf2AparTs reads IWRF data from specified files, converts
+// AparTsSim reads IWRF data from specified files, converts
 // the data to APAR TS format, and writes the
 // converted files to a specified location
 //
 ////////////////////////////////////////////////////////////////
 
-#include "Iwrf2AparTs.hh"
+#include "AparTsSim.hh"
 #include <csignal>
 #include <new>
 #include <cstdio>
@@ -47,7 +47,7 @@ using namespace std;
 
 static void tidy_and_exit(int sig);
 static void out_of_store();
-static Iwrf2AparTs *_prog;
+static AparTsSim *_prog;
 
 // main
 
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
   // create program object
 
-  _prog = new Iwrf2AparTs(argc, argv);
+  _prog = new AparTsSim(argc, argv);
   if (!_prog->isOK) {
     return(-1);
   }
@@ -105,7 +105,7 @@ static void out_of_store()
 
 {
 
-  fprintf(stderr, "FATAL ERROR - program Iwrf2AparTs\n");
+  fprintf(stderr, "FATAL ERROR - program AparTsSim\n");
   fprintf(stderr, "  Operator new failed - out of store\n");
   exit(-1);
 

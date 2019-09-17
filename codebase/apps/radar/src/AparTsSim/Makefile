@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for Iwrf2AparTs program
+# Makefile for AparTsSim program
 #
 # Mike Dixon, EOL, NCAR
 # POBox 3000, Boulder, CO, 80307, USA
@@ -34,7 +34,7 @@
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
-TARGET_FILE = Iwrf2AparTs
+TARGET_FILE = AparTsSim
 
 LOC_INCLUDES =
 LOC_CFLAGS =
@@ -47,13 +47,13 @@ LOC_LIBS = -lradar -lFmq -lRadx -ldsserver -ldidss \
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	Iwrf2AparTs.hh
+	AparTsSim.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
 	Main.cc \
-	Iwrf2AparTs.cc
+	AparTsSim.cc
 
 #
 # tdrp macros
