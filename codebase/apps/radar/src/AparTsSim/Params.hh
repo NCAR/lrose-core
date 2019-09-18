@@ -393,6 +393,12 @@ public:
 
   int udp_dest_port;
 
+  int udp_max_packet_size;
+
+  int udp_n_gates;
+
+  int udp_n_channels;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -400,7 +406,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[15];
+  mutable TDRPtable _table[20];
 
   const char *_className;
 

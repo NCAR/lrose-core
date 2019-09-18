@@ -682,6 +682,15 @@
     tt->single_val.e = WRITE_FILES;
     tt++;
     
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("WRITE FILES MODE");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'output_dir'
     // ctype is 'char*'
     
@@ -692,6 +701,15 @@
     tt->help = tdrpStrDup("For run_mode = WRITE_FILES.");
     tt->val_offset = (char *) &output_dir - &_start_;
     tt->single_val.s = tdrpStrDup("./output");
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("WRITE UDP MODE");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'udp_source_port'
@@ -728,6 +746,42 @@
     tt->help = tdrpStrDup("For run_mode = WRITE_UDP.");
     tt->val_offset = (char *) &udp_dest_port - &_start_;
     tt->single_val.i = 50000;
+    tt++;
+    
+    // Parameter 'udp_max_packet_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("udp_max_packet_size");
+    tt->descr = tdrpStrDup("Ideal UDP packet size (bytes).");
+    tt->help = tdrpStrDup("We will split a pulse into packets that do not exceed this size.");
+    tt->val_offset = (char *) &udp_max_packet_size - &_start_;
+    tt->single_val.i = 4096;
+    tt++;
+    
+    // Parameter 'udp_n_gates'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("udp_n_gates");
+    tt->descr = tdrpStrDup("Number of gates for UDP simulation mode.");
+    tt->help = tdrpStrDup("If the input files contain fewer gates than this, the input gates will be sampled multiple times to create the output data.");
+    tt->val_offset = (char *) &udp_n_gates - &_start_;
+    tt->single_val.i = 2500;
+    tt++;
+    
+    // Parameter 'udp_n_channels'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("udp_n_channels");
+    tt->descr = tdrpStrDup("Number of channels for UDP simulation mode.");
+    tt->help = tdrpStrDup("If this is 1, then that represents the signals from the entire array combined into a single channel.If this is more than 1, each channel represents a single row from the array, which will be combined using beam forming on the FPGA.");
+    tt->val_offset = (char *) &udp_n_channels - &_start_;
+    tt->single_val.i = 1;
     tt++;
     
     // trailing entry has param_name set to NULL

@@ -328,28 +328,20 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
 
         // create the buffer for co-polar packet
         
-        MemBuf pktBuf;
-        _createPacketBuf(sampleNumber,
-                         pulseNumber,
-                         secondsTime, nanoSecs,
-                         pulseStartIndex,
-                         dwellNum,
-                         beamNumInDwell,
-                         visitNumInBeam,
-                         uu, vv, 
-                         isXmitH, isCoPolRx,
-                         nGates, iqData,
-                         pktBuf);
-
-        // write the packet to UDP
-
-        if (_writeBufToUdp(pktBuf)) {
+        if (_createAndSendPacket(sampleNumber,
+                                 pulseNumber,
+                                 secondsTime, nanoSecs,
+                                 pulseStartIndex,
+                                 dwellNum,
+                                 beamNumInDwell,
+                                 visitNumInBeam,
+                                 uu, vv, 
+                                 isXmitH, isCoPolRx,
+                                 nGates, iqData)) {
           cerr << "ERROR - _processDwell" << endl;
           return -1;
         }
-        _pulseSeqNum++;
-        _sampleSeqNum += nGates;
-
+        
         // optionally add a cross-pol pulse
         // at the end of the dwell
         
@@ -361,29 +353,20 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
           pulseNumber = _pulseSeqNum;
           iqData += nGates * 2; // channel 1
           
-          pktBuf.clear();
-          _createPacketBuf(sampleNumber,
-                           pulseNumber,
-                           secondsTime, nanoSecs,
-                           pulseStartIndex,
-                           dwellNum,
-                           beamNumInDwell,
-                           visitNumInBeam,
-                           uu, vv, 
-                           isXmitH, isCoPolRx,
-                           nGates, iqData,
-                           pktBuf);
-
-          // write the packet to UDP
-          
-          if (_writeBufToUdp(pktBuf)) {
+          if (_createAndSendPacket(sampleNumber,
+                                   pulseNumber,
+                                   secondsTime, nanoSecs,
+                                   pulseStartIndex,
+                                   dwellNum,
+                                   beamNumInDwell,
+                                   visitNumInBeam,
+                                   uu, vv, 
+                                   isXmitH, isCoPolRx,
+                                   nGates, iqData)) {
             cerr << "ERROR - _processDwell" << endl;
             return -1;
           }
 
-          _pulseSeqNum++;
-          _sampleSeqNum += nGates;
-          
         } // if (_params.add_cross_pol_sample_at_end_of_visit ...
 
       } // ipulse
@@ -397,28 +380,63 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
 ////////////////////////////////////////////////////////////////////////
 // create a packet buffer
 
-void WriteToUdp::_createPacketBuf(ui64 sampleNumber,
-                                  ui64 pulseNumber,
-                                  si64 secondsTime,
-                                  ui32 nanoSecs,
-                                  ui32 pulseStartIndex,
-                                  ui64 dwellNum,
-                                  ui32 beamNumInDwell,
-                                  ui32 visitNumInBeam,
-                                  double uu,
-                                  double vv,
-                                  bool isXmitH,
-                                  bool isCoPolRx,
-                                  int nGates,
-                                  const si16 *iqData,
-                                  MemBuf &buf)
-
-{
+int WriteToUdp::_createAndSendPacket(ui64 sampleNumber,
+                                     ui64 pulseNumber,
+                                     si64 secondsTime,
+                                     ui32 nanoSecs,
+                                     ui32 pulseStartIndex,
+                                     ui64 dwellNum,
+                                     ui32 beamNumInDwell,
+                                     ui32 visitNumInBeam,
+                                     double uu,
+                                     double vv,
+                                     bool isXmitH,
+                                     bool isCoPolRx,
+                                     int nGates,
+                                     const si16 *iqData)
   
-  // init
+{
 
-  buf.clear();
+  // create packet buffer
 
+  MemBuf buf;
+
+  // fill with test header, compute header length
+  
+  _addAparHeader(sampleNumber, pulseNumber,
+                 secondsTime, nanoSecs,
+                 pulseStartIndex,
+                 dwellNum, beamNumInDwell, visitNumInBeam,
+                 uu, vv,
+                 true, isXmitH, isCoPolRx,
+                 _params.udp_n_gates,
+                 buf);
+  
+  size_t headerLen = buf.getLen();
+
+  // compute sample length
+  // I/Q per gate, 2 bytes each for I and Q
+  // so 4 bytes per gate
+
+  size_t samplesLen = _params.udp_n_gates * 4;
+
+  // compute number of packets
+
+  int maxNbytesDataPerPacket = _params.udp_max_packet_size - headerLen;
+  int maxNGatesPerPacket = maxNbytesDataPerPacket / 4;
+  int nPacketsPerPulse = (_params.udp_n_gates / maxNGatesPerPacket) + 1;
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> UDP headerLen: " << headerLen << endl;
+    cerr << "==>> UDP samplesLen: " << samplesLen << endl;
+    cerr << "==>> UDP maxNbytesDataPerPacket: "
+         << maxNbytesDataPerPacket << endl;
+    cerr << "==>> UDP maxNGatesPerPacket: "
+         << maxNGatesPerPacket << endl;
+    cerr << "==>> UDP nPacketsPerPulse: "
+         << nPacketsPerPulse << endl;
+  }
+    
   // message type
 
   ui16 messageType = 0x0001;
@@ -526,6 +544,8 @@ void WriteToUdp::_createPacketBuf(ui64 sampleNumber,
   buf.add(&spare, sizeof(spare));
   buf.add(&spare, sizeof(spare));
 
+  cerr << "1111111 header size: " << buf.getLen() << endl;
+
   // IQ data
 
   si16 *iq = new si16[nGates * 2];
@@ -534,6 +554,153 @@ void WriteToUdp::_createPacketBuf(ui64 sampleNumber,
   BE_from_array_16(iq, nBytesIq);
   buf.add(iq, nBytesIq);
   delete[] iq;
+
+  cerr << "1111111 nGates: " << nGates << endl;
+  cerr << "111111111111111111 total size: " << buf.getLen() << endl;
+
+  // write the packet to UDP
+  
+  if (_writeBufToUdp(buf)) {
+    cerr << "ERROR - _createAndSendPacket" << endl;
+    return -1;
+  }
+
+  _pulseSeqNum++;
+  _sampleSeqNum += nGates;
+
+  return 0;
+
+}
+
+  
+////////////////////////////////////////////////////////////////////////
+// add header to packet
+
+void WriteToUdp::_addAparHeader(ui64 sampleNumber,
+                                ui64 pulseNumber,
+                                si64 secondsTime,
+                                ui32 nanoSecs,
+                                ui32 pulseStartIndex,
+                                ui64 dwellNum,
+                                ui32 beamNumInDwell,
+                                ui32 visitNumInBeam,
+                                double uu,
+                                double vv,
+                                bool isFirstPktInPulse,
+                                bool isXmitH,
+                                bool isCoPolRx,
+                                int nGates,
+                                MemBuf &buf)
+  
+{
+
+  // message type
+
+  ui16 messageType = 0x0001;
+  BE_from_array_16(&messageType, sizeof(messageType));
+  buf.add(&messageType, sizeof(messageType));
+
+  // AESA ID
+
+  ui16 aesaId = 0;
+  BE_from_array_16(&aesaId, sizeof(aesaId));
+  buf.add(&aesaId, sizeof(aesaId));
+
+  // channel number
+
+  ui16 chanNum = 0;
+  BE_from_array_16(&chanNum, sizeof(chanNum));
+  buf.add(&chanNum, sizeof(chanNum));
+
+  // flags
+  
+  ui32 flags = 0;
+  if (isXmitH) {
+    // bit 0 indicates H transmit
+    flags |= 1;
+  }
+  if ((isXmitH && isCoPolRx) || (!isXmitH && !isCoPolRx)) {
+    // git 1 indicates H receive
+    flags |= 2;
+  }
+  // bit 3 is pulse start flag
+  if (isFirstPktInPulse) {
+    flags |= 4;
+  }
+
+  BE_from_array_32(&flags, sizeof(flags));
+  buf.add(&flags, sizeof(flags));
+
+  // beam index - always 200 for now
+
+  ui32 beamIndex = 200;
+  BE_from_array_32(&beamIndex, sizeof(beamIndex));
+  buf.add(&beamIndex, sizeof(beamIndex));
+  
+  // sample number - first sample in this packet
+
+  ui64 sampleNum = sampleNumber;
+  BE_from_array_64(&sampleNum, sizeof(sampleNum));
+  buf.add(&sampleNum, sizeof(sampleNum));
+  
+  // pulse number
+
+  ui64 pulseNum = pulseNumber;
+  BE_from_array_64(&pulseNum, sizeof(pulseNum));
+  buf.add(&pulseNum, sizeof(pulseNum));
+
+  // time
+
+  si64 secs = secondsTime;
+  BE_from_array_64(&secs, sizeof(secs));
+  buf.add(&secs, sizeof(secs));
+
+  ui32 nsecs = nanoSecs;
+  BE_from_array_32(&nsecs, sizeof(nsecs));
+  buf.add(&nsecs, sizeof(nsecs));
+
+  // start index
+
+  ui32 startIndex = pulseStartIndex;
+  BE_from_array_32(&startIndex, sizeof(startIndex));
+  buf.add(&startIndex, sizeof(startIndex));
+
+  // angles
+
+  fl32 u = uu;
+  BE_from_array_32(&u, sizeof(u));
+  buf.add(&u, sizeof(u));
+
+  fl32 v = vv;
+  BE_from_array_32(&v, sizeof(v));
+  buf.add(&v, sizeof(v));
+
+  // dwell, beam, visit
+
+  ui64 dNum = dwellNum;
+  BE_from_array_64(&dNum, sizeof(dNum));
+  buf.add(&dNum, sizeof(dNum));
+
+  ui32 bNum = beamNumInDwell;
+  BE_from_array_32(&bNum, sizeof(bNum));
+  buf.add(&bNum, sizeof(bNum));
+
+  ui32 vNum = visitNumInBeam;
+  BE_from_array_32(&vNum, sizeof(vNum));
+  buf.add(&vNum, sizeof(vNum));
+
+  // number of samples = number of gates
+
+  ui32 nSamples = nGates;
+  BE_from_array_32(&nSamples, sizeof(nSamples));
+  buf.add(&nSamples, sizeof(nSamples));
+
+  // 3 spares
+
+  ui32 spare = 0;
+  buf.add(&spare, sizeof(spare));
+  buf.add(&spare, sizeof(spare));
+  buf.add(&spare, sizeof(spare));
 
 }
 

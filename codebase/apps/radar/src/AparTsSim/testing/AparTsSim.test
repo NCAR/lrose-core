@@ -1,0 +1,206 @@
+/**********************************************************************
+ * TDRP params for AparTsSim
+ **********************************************************************/
+
+//======================================================================
+//
+// AparTsSim simulates APAR time series data. It IWRF time series files, 
+//   converts to APAR TS data, and writes the results to files to a UDP 
+//   stream. Optionally it reads the UDP stream as a check, and converts 
+//   to APAR time series.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// SPECIFY APAR TIME-SERIES DETAILS.
+//
+//======================================================================
+ 
+///////////// n_samples_per_visit /////////////////////
+//
+// Number of samples taken each time we revisit the beam location.
+//
+// We take this number of samples for an az/el, then move to sampling 
+//   for other locations, before coming back to visit this beam again.
+//
+//
+// Type: int
+//
+
+n_samples_per_visit = 5;
+
+///////////// n_visits_per_beam ///////////////////////
+//
+// Number of visits for each beam.
+//
+// During a dwell, we come back to a specific beam location this number 
+//   of times.
+//
+//
+// Type: int
+//
+
+n_visits_per_beam = 6;
+
+///////////// n_beams_per_dwell ///////////////////////
+//
+// Number of beams sampled in a dwell.
+//
+// During a dwell, we create this number of beams. Then repeat for the 
+//   next dwell.
+//
+//
+// Type: int
+//
+
+n_beams_per_dwell = 4;
+
+///////////// add_cross_pol_sample_at_end_of_visit ////
+//
+// Add 1 cross-pol sample at end of visit.
+//
+// APAR can receive in co-polar or cross-polar mode. This option allows 
+//   us to test the cross-polar mode, by including a cross-polar sample at 
+//   the end of each visit. This option effectively increases 
+//   n_samples_per_visit by 1.
+//
+//
+// Type: boolean
+//
+
+add_cross_pol_sample_at_end_of_visit = TRUE;
+
+//======================================================================
+//
+// RUN MODES.
+//
+//======================================================================
+ 
+///////////// run_mode ////////////////////////////////
+//
+// Control write or read processing.
+//
+// WRITE_FILES - generates time series files in APAR format. WRITE_UDP - 
+//   writes out simulated data to the DREX FPGA, via UDP.
+//
+//
+// Type: enum
+// Options:
+//     WRITE_FILES
+//     WRITE_UDP
+//
+
+run_mode = WRITE_UDP;
+
+//======================================================================
+//
+// WRITE FILES MODE.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Directory for output files.
+//
+// For run_mode = WRITE_FILES.
+//
+//
+// Type: string
+//
+
+output_dir = "./output";
+
+//======================================================================
+//
+// WRITE UDP MODE.
+//
+//======================================================================
+ 
+///////////// udp_source_port /////////////////////////
+//
+// Port for source of UDP data - i.e. this app.
+//
+// For run_mode = WRITE_UDP.
+//
+//
+// Type: int
+//
+
+udp_source_port = 50000;
+
+///////////// udp_dest_address ////////////////////////
+//
+// Destination address for UDP.
+//
+// For run_mode = WRITE_UDP.
+//
+//
+// Type: string
+//
+
+udp_dest_address = "192.168.1.255";
+
+///////////// udp_dest_port ///////////////////////////
+//
+// Port for destination of UDP data.
+//
+// For run_mode = WRITE_UDP.
+//
+//
+// Type: int
+//
+
+udp_dest_port = 50000;
+
+///////////// n_gates_udp /////////////////////////////
+//
+// Number of gates for UDP simulation mode.
+//
+// If the input files contain fewer gates than this, the input gates 
+//   will be sampled multiple times to create the output data.
+//
+//
+// Type: int
+//
+
+n_gates_udp = 1000;
+
+///////////// n_channels_udp //////////////////////////
+//
+// Number of channels for UDP simulation mode.
+//
+// If this is 1, then that represents the signals from the entire array 
+//   combined into a single channel.If this is more than 1, each channel 
+//   represents a single row from the array, which will be combined using 
+//   beam forming on the FPGA.
+//
+//
+// Type: int
+//
+
+n_channels_udp = 1;
+

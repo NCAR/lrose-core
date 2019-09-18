@@ -96,21 +96,36 @@ private:
   int _convert2Udp(const string &inputPath);
   int _processDwell(vector<IwrfTsPulse *> &dwellPulses);
 
-  void _createPacketBuf(ui64 sampleNumber,
-                        ui64 pulseNumber,
-                        si64 secondsTime,
-                        ui32 nanoSecs,
-                        ui32 pulseStartIndex,
-                        ui64 dwellNum,
-                        ui32 beamNumInDwell,
-                        ui32 visitNumInBeam,
-                        double uu,
-                        double vv,
-                        bool isXmitH,
-                        bool isCoPolRx,
-                        int nGates,
-                        const si16 *iqData,
-                        MemBuf &buf);
+  int _createAndSendPacket(ui64 sampleNumber,
+                           ui64 pulseNumber,
+                           si64 secondsTime,
+                           ui32 nanoSecs,
+                           ui32 pulseStartIndex,
+                           ui64 dwellNum,
+                           ui32 beamNumInDwell,
+                           ui32 visitNumInBeam,
+                           double uu,
+                           double vv,
+                           bool isXmitH,
+                           bool isCoPolRx,
+                           int nGates,
+                           const si16 *iqData);
+
+  void _addAparHeader(ui64 sampleNumber,
+                      ui64 pulseNumber,
+                      si64 secondsTime,
+                      ui32 nanoSecs,
+                      ui32 pulseStartIndex,
+                      ui64 dwellNum,
+                      ui32 beamNumInDwell,
+                      ui32 visitNumInBeam,
+                      double uu,
+                      double vv,
+                      bool isFirstPktInPulse,
+                      bool isXmitH,
+                      bool isCoPolRx,
+                      int nGates,
+                      MemBuf &buf);
 
   int _openOutputUdp();
   int _writeBufToUdp(const MemBuf &buf);

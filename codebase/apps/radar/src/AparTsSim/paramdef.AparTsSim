@@ -68,11 +68,19 @@ paramdef enum run_mode_t {
   p_help = "WRITE_FILES - generates time series files in APAR format. WRITE_UDP - writes out simulated data to the DREX FPGA, via UDP.";
 } run_mode;
 
+commentdef {
+  p_header = "WRITE FILES MODE";
+};
+
 paramdef string {
   p_default = "./output";
   p_descr = "Directory for output files.";
   p_help = "For run_mode = WRITE_FILES.";
 } output_dir;
+
+commentdef {
+  p_header = "WRITE UDP MODE";
+};
 
 paramdef int {
   p_default = 50000;
@@ -91,4 +99,22 @@ paramdef int {
   p_descr = "Port for destination of UDP data.";
   p_help = "For run_mode = WRITE_UDP.";
 } udp_dest_port;
+
+paramdef int {
+  p_default = 4096;
+  p_descr = "Ideal UDP packet size (bytes).";
+  p_help = "We will split a pulse into packets that do not exceed this size.";
+} udp_max_packet_size;
+
+paramdef int {
+  p_default = 2500;
+  p_descr = "Number of gates for UDP simulation mode.";
+  p_help = "If the input files contain fewer gates than this, the input gates will be sampled multiple times to create the output data.";
+} udp_n_gates;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of channels for UDP simulation mode.";
+  p_help = "If this is 1, then that represents the signals from the entire array combined into a single channel.If this is more than 1, each channel represents a single row from the array, which will be combined using beam forming on the FPGA.";
+} udp_n_channels;
 
