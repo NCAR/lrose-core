@@ -72,6 +72,14 @@ public:
 
   bool isOK;
 
+  // condition angle from 0 to 360
+
+  static double conditionAngle360(double angle);
+
+  // condition angle from -180 to 180
+
+  static double conditionAngle180(double angle);
+
 protected:
   
 private:

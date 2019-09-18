@@ -60,6 +60,7 @@
 #include <radar/IwrfTsReader.hh>
 
 #include "WriteToUdp.hh"
+#include "AparTsSim.hh"
 
 using namespace std;
 
@@ -74,20 +75,11 @@ WriteToUdp::WriteToUdp(const string &progName,
   
 {
 
-  // _aparTsInfo = NULL;
   _sampleSeqNum = 0;
   _pulseSeqNum = 0;
   _dwellSeqNum = 0;
   _udpFd = -1;
   _errCount = 0;
-
-  // _aparTsDebug = APAR_TS_DEBUG_OFF;
-  // if (_params.debug >= Params::DEBUG_EXTRA) {
-  //   _aparTsDebug = APAR_TS_DEBUG_VERBOSE;
-  // } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-  //   _aparTsDebug = APAR_TS_DEBUG_NORM;
-  // }
-  // _aparTsInfo = new AparTsInfo(_aparTsDebug);
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Running WriteToUdp - extra verbose debug mode" << endl;
@@ -136,34 +128,6 @@ int WriteToUdp::Run ()
   
   return iret;
 
-}
-
-////////////////////////////////////
-// condition angle from 0 to 360
-
-double WriteToUdp::_conditionAngle360(double angle)
-{
-  if (angle < 0) {
-    return angle + 360.0;
-  } else if (angle >= 360.0) {
-    return angle - 360.0;
-  } else {
-    return angle;
-  }
-}
-
-////////////////////////////////////
-// condition angle from -180 to 180
-
-double WriteToUdp::_conditionAngle180(double angle)
-{
-  if (angle < -180) {
-    return angle + 360.0;
-  } else if (angle >= 180) {
-    return angle - 360.0;
-  } else {
-    return angle;
-  }
 }
 
 ////////////////////////////////////////////////////
@@ -296,18 +260,18 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
 
   double startAz = dwellPulses.front()->getAz();
   double endAz = dwellPulses.back()->getAz();
-  double azRange = _conditionAngle360(endAz - startAz);
+  double azRange = AparTsSim::conditionAngle360(endAz - startAz);
   double deltaAzPerBeam = azRange / _params.n_beams_per_dwell;
 
   double startEl = dwellPulses.front()->getEl();
   double endEl = dwellPulses.back()->getEl();
-  double elRange = _conditionAngle360(endEl - startEl);
+  double elRange = AparTsSim::conditionAngle360(endEl - startEl);
   double deltaElPerBeam = elRange / _params.n_beams_per_dwell;
 
   vector<double> beamAz, beamEl;
   for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
-    beamAz.push_back(_conditionAngle360(startAz + (ii + 0.5) * deltaAzPerBeam));
-    beamEl.push_back(_conditionAngle180(startEl + (ii + 0.5) * deltaElPerBeam));
+    beamAz.push_back(AparTsSim::conditionAngle360(startAz + (ii + 0.5) * deltaAzPerBeam));
+    beamEl.push_back(AparTsSim::conditionAngle180(startEl + (ii + 0.5) * deltaElPerBeam));
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {

@@ -93,9 +93,6 @@ private:
   
   // functions
 
-  double _conditionAngle360(double angle);
-  double _conditionAngle180(double angle);
-
   int _convert2Udp(const string &inputPath);
   int _processDwell(vector<IwrfTsPulse *> &dwellPulses);
 

@@ -49,7 +49,9 @@
 #include <toolsa/MemBuf.hh>
 #include <radar/apar_ts_functions.hh>
 #include <radar/AparTsPulse.hh>
+
 #include "WriteToFile.hh"
+#include "AparTsSim.hh"
 
 using namespace std;
 
@@ -270,18 +272,18 @@ int WriteToFile::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
 
   double startAz = dwellPulses.front()->getAz();
   double endAz = dwellPulses.back()->getAz();
-  double azRange = _conditionAngle360(endAz - startAz);
+  double azRange = AparTsSim::conditionAngle360(endAz - startAz);
   double deltaAzPerBeam = azRange / _params.n_beams_per_dwell;
 
   double startEl = dwellPulses.front()->getEl();
   double endEl = dwellPulses.back()->getEl();
-  double elRange = _conditionAngle360(endEl - startEl);
+  double elRange = AparTsSim::conditionAngle360(endEl - startEl);
   double deltaElPerBeam = elRange / _params.n_beams_per_dwell;
 
   vector<double> beamAz, beamEl;
   for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
-    beamAz.push_back(_conditionAngle360(startAz + (ii + 0.5) * deltaAzPerBeam));
-    beamEl.push_back(_conditionAngle180(startEl + (ii + 0.5) * deltaElPerBeam));
+    beamAz.push_back(AparTsSim::conditionAngle360(startAz + (ii + 0.5) * deltaAzPerBeam));
+    beamEl.push_back(AparTsSim::conditionAngle180(startEl + (ii + 0.5) * deltaElPerBeam));
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -757,33 +759,5 @@ void WriteToFile::_copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
   
   apar.current_fixed_angle = iwrf.current_fixed_angle;
 
-}
-
-////////////////////////////////////
-// condition angle from 0 to 360
-
-double WriteToFile::_conditionAngle360(double angle)
-{
-  if (angle < 0) {
-    return angle + 360.0;
-  } else if (angle >= 360.0) {
-    return angle - 360.0;
-  } else {
-    return angle;
-  }
-}
-
-////////////////////////////////////
-// condition angle from -180 to 180
-
-double WriteToFile::_conditionAngle180(double angle)
-{
-  if (angle < -180) {
-    return angle + 360.0;
-  } else if (angle >= 180) {
-    return angle - 360.0;
-  } else {
-    return angle;
-  }
 }
 

@@ -135,9 +135,6 @@ private:
   void _copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
                       apar_ts_event_notice_t &apar);
 
-  double _conditionAngle360(double angle);
-  double _conditionAngle180(double angle);
-
 };
 
 #endif

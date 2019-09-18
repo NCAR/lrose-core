@@ -145,3 +145,31 @@ int AparTsSim::_runWriteUdp()
 
 }
 
+////////////////////////////////////
+// condition angle from 0 to 360
+
+double AparTsSim::conditionAngle360(double angle)
+{
+  if (angle < 0) {
+    return angle + 360.0;
+  } else if (angle >= 360.0) {
+    return angle - 360.0;
+  } else {
+    return angle;
+  }
+}
+
+////////////////////////////////////
+// condition angle from -180 to 180
+
+double AparTsSim::conditionAngle180(double angle)
+{
+  if (angle < -180) {
+    return angle + 360.0;
+  } else if (angle >= 180) {
+    return angle - 360.0;
+  } else {
+    return angle;
+  }
+}
+
