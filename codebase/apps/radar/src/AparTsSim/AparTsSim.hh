@@ -83,8 +83,8 @@ private:
 
   // functions
 
-  int _runFileMode();
-  int _runUdpMode();
+  int _runWriteFiles();
+  int _runWriteUdp();
 
 };
 

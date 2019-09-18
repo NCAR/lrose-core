@@ -105,10 +105,10 @@ int AparTsSim::Run ()
     cerr << "Running AparTsSim - debug mode" << endl;
   }
 
-  if (_params.output_mode == Params::OUTPUT_FILES) {
-    return _runFileMode();
+  if (_params.run_mode == Params::WRITE_FILES) {
+    return _runWriteFiles();
   } else {
-    return _runUdpMode();
+    return _runWriteUdp();
   }
 
 }
@@ -116,10 +116,10 @@ int AparTsSim::Run ()
 //////////////////////////////////////////////////
 // Run in file mode
 
-int AparTsSim::_runFileMode()
+int AparTsSim::_runWriteFiles()
 {
   
-  PMU_auto_register("_runFileMode");
+  PMU_auto_register("_runWriteFiles");
   
   WriteToFile convertToApar(_progName,
                               _params,
@@ -132,10 +132,10 @@ int AparTsSim::_runFileMode()
 //////////////////////////////////////////////////
 // Run in UDP mode
 
-int AparTsSim::_runUdpMode()
+int AparTsSim::_runWriteUdp()
 {
   
-  PMU_auto_register("_runUdpMode");
+  PMU_auto_register("_runWriteUdp");
  
   WriteToUdp writeToUdp(_progName,
                         _params,

@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("AparTsSim reads IWRF time series files, converts to APAR TS data, and writes the files to a specified. The input files are specified on the command line.");
+    tt->comment_hdr = tdrpStrDup("AparTsSim simulates APAR time series data. It IWRF time series files, converts to APAR TS data, and writes the results to files to a UDP stream. Optionally it reads the UDP stream as a check, and converts to APAR time series.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -658,28 +658,28 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("OUTPUT MODES");
+    tt->comment_hdr = tdrpStrDup("RUN MODES");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'output_mode'
-    // ctype is '_output_mode_t'
+    // Parameter 'run_mode'
+    // ctype is '_run_mode_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_mode");
-    tt->descr = tdrpStrDup("Control what is written.");
-    tt->help = tdrpStrDup("OUTPUT_FILES - generates time series files in APAR format. OUTPUT_UDP - writes out simulated data to the DREX FPGA, via UDP.");
-    tt->val_offset = (char *) &output_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("output_mode_t");
+    tt->param_name = tdrpStrDup("run_mode");
+    tt->descr = tdrpStrDup("Control write or read processing.");
+    tt->help = tdrpStrDup("WRITE_FILES - generates time series files in APAR format. WRITE_UDP - writes out simulated data to the DREX FPGA, via UDP.");
+    tt->val_offset = (char *) &run_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("run_mode_t");
     tt->enum_def.nfields = 2;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_FILES");
-      tt->enum_def.fields[0].val = OUTPUT_FILES;
-      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_UDP");
-      tt->enum_def.fields[1].val = OUTPUT_UDP;
-    tt->single_val.e = OUTPUT_FILES;
+      tt->enum_def.fields[0].name = tdrpStrDup("WRITE_FILES");
+      tt->enum_def.fields[0].val = WRITE_FILES;
+      tt->enum_def.fields[1].name = tdrpStrDup("WRITE_UDP");
+      tt->enum_def.fields[1].val = WRITE_UDP;
+    tt->single_val.e = WRITE_FILES;
     tt++;
     
     // Parameter 'output_dir'
@@ -689,7 +689,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("output_dir");
     tt->descr = tdrpStrDup("Directory for output files.");
-    tt->help = tdrpStrDup("For output_mode = OUTPUT_FILES.");
+    tt->help = tdrpStrDup("For run_mode = WRITE_FILES.");
     tt->val_offset = (char *) &output_dir - &_start_;
     tt->single_val.s = tdrpStrDup("./output");
     tt++;
@@ -701,7 +701,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("udp_source_port");
     tt->descr = tdrpStrDup("Port for source of UDP data - i.e. this app.");
-    tt->help = tdrpStrDup("For output_mode = OUTPUT_UDP.");
+    tt->help = tdrpStrDup("For run_mode = WRITE_UDP.");
     tt->val_offset = (char *) &udp_source_port - &_start_;
     tt->single_val.i = 50000;
     tt++;
@@ -713,7 +713,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("udp_dest_address");
     tt->descr = tdrpStrDup("Destination address for UDP.");
-    tt->help = tdrpStrDup("For output_mode = OUTPUT_UDP.");
+    tt->help = tdrpStrDup("For run_mode = WRITE_UDP.");
     tt->val_offset = (char *) &udp_dest_address - &_start_;
     tt->single_val.s = tdrpStrDup("192.168.1.255");
     tt++;
@@ -725,7 +725,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("udp_dest_port");
     tt->descr = tdrpStrDup("Port for destination of UDP data.");
-    tt->help = tdrpStrDup("For output_mode = OUTPUT_UDP.");
+    tt->help = tdrpStrDup("For run_mode = WRITE_UDP.");
     tt->val_offset = (char *) &udp_dest_port - &_start_;
     tt->single_val.i = 50000;
     tt++;

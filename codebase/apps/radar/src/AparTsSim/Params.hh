@@ -75,9 +75,9 @@ public:
   } debug_t;
 
   typedef enum {
-    OUTPUT_FILES = 0,
-    OUTPUT_UDP = 1
-  } output_mode_t;
+    WRITE_FILES = 0,
+    WRITE_UDP = 1
+  } run_mode_t;
 
   ///////////////////////////
   // Member functions
@@ -383,7 +383,7 @@ public:
 
   tdrp_bool_t add_cross_pol_sample_at_end_of_visit;
 
-  output_mode_t output_mode;
+  run_mode_t run_mode;
 
   char* output_dir;
 

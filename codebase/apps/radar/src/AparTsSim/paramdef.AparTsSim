@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "AparTsSim reads IWRF time series files, converts to APAR TS data, and writes the files to a specified. The input files are specified on the command line.";
+  p_header = "AparTsSim simulates APAR time series data. It IWRF time series files, converts to APAR TS data, and writes the results to files to a UDP stream. Optionally it reads the UDP stream as a check, and converts to APAR time series.";
 }
 
 commentdef {
@@ -55,40 +55,40 @@ paramdef boolean {
 } add_cross_pol_sample_at_end_of_visit;
 
 commentdef {
-  p_header = "OUTPUT MODES";
+  p_header = "RUN MODES";
 };
 
 typedef enum {
-  OUTPUT_FILES, OUTPUT_UDP
-} output_mode_t;
+  WRITE_FILES, WRITE_UDP
+} run_mode_t;
 
-paramdef enum output_mode_t {
-  p_default = OUTPUT_FILES;
-  p_descr = "Control what is written.";
-  p_help = "OUTPUT_FILES - generates time series files in APAR format. OUTPUT_UDP - writes out simulated data to the DREX FPGA, via UDP.";
-} output_mode;
+paramdef enum run_mode_t {
+  p_default = WRITE_FILES;
+  p_descr = "Control write or read processing.";
+  p_help = "WRITE_FILES - generates time series files in APAR format. WRITE_UDP - writes out simulated data to the DREX FPGA, via UDP.";
+} run_mode;
 
 paramdef string {
   p_default = "./output";
   p_descr = "Directory for output files.";
-  p_help = "For output_mode = OUTPUT_FILES.";
+  p_help = "For run_mode = WRITE_FILES.";
 } output_dir;
 
 paramdef int {
   p_default = 50000;
   p_descr = "Port for source of UDP data - i.e. this app.";
-  p_help = "For output_mode = OUTPUT_UDP.";
+  p_help = "For run_mode = WRITE_UDP.";
 } udp_source_port;
 
 paramdef string {
   p_default = "192.168.1.255";
   p_descr = "Destination address for UDP.";
-  p_help = "For output_mode = OUTPUT_UDP.";
+  p_help = "For run_mode = WRITE_UDP.";
 } udp_dest_address;
 
 paramdef int {
   p_default = 50000;
   p_descr = "Port for destination of UDP data.";
-  p_help = "For output_mode = OUTPUT_UDP.";
+  p_help = "For run_mode = WRITE_UDP.";
 } udp_dest_port;
 
