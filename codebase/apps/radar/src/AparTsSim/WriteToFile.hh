@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// ConvertToApar.hh
+// WriteToFile.hh
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -37,8 +37,8 @@
 //
 ////////////////////////////////////////////////////////////////
 
-#ifndef ConvertToApar_HH
-#define ConvertToApar_HH
+#ifndef WriteToFile_HH
+#define WriteToFile_HH
 
 #include <string>
 #include <vector>
@@ -57,19 +57,19 @@ using namespace std;
 ////////////////////////
 // This class
 
-class ConvertToApar {
+class WriteToFile {
   
 public:
 
   // constructor
-
-  ConvertToApar(const string &progName,
-                const Params &params,
-                vector<string> &inputFileList);
+  
+  WriteToFile(const string &progName,
+              const Params &params,
+              vector<string> &inputFileList);
 
   // destructor
   
-  ~ConvertToApar();
+  ~WriteToFile();
 
   // run 
 

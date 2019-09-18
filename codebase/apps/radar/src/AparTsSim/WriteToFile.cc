@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// ConvertToApar.cc
+// WriteToFile.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -49,15 +49,15 @@
 #include <toolsa/MemBuf.hh>
 #include <radar/apar_ts_functions.hh>
 #include <radar/AparTsPulse.hh>
-#include "ConvertToApar.hh"
+#include "WriteToFile.hh"
 
 using namespace std;
 
 // Constructor
 
-ConvertToApar::ConvertToApar(const string &progName,
-                             const Params &params,
-                             vector<string> &inputFileList) :
+WriteToFile::WriteToFile(const string &progName,
+                         const Params &params,
+                         vector<string> &inputFileList) :
         _progName(progName),
         _params(params),
         _inputFileList(inputFileList)
@@ -77,18 +77,18 @@ ConvertToApar::ConvertToApar(const string &progName,
   _aparTsInfo = new AparTsInfo(_aparTsDebug);
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Running ConvertToApar - extra verbose debug mode" << endl;
+    cerr << "Running WriteToFile - extra verbose debug mode" << endl;
   } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Running ConvertToApar - verbose debug mode" << endl;
+    cerr << "Running WriteToFile - verbose debug mode" << endl;
   } else if (_params.debug) {
-    cerr << "Running ConvertToApar - debug mode" << endl;
+    cerr << "Running WriteToFile - debug mode" << endl;
   }
 
 }
 
 // destructor
 
-ConvertToApar::~ConvertToApar()
+WriteToFile::~WriteToFile()
   
 {
   
@@ -104,10 +104,10 @@ ConvertToApar::~ConvertToApar()
 //////////////////////////////////////////////////
 // Run
 
-int ConvertToApar::Run ()
+int WriteToFile::Run ()
 {
   
-  PMU_auto_register("ConvertToApar::Run");
+  PMU_auto_register("WriteToFile::Run");
   
   // loop through the input files
   
@@ -125,7 +125,7 @@ int ConvertToApar::Run ()
 ////////////////////////////////////////////////////
 // Convert 1 file to APAR format
 
-int ConvertToApar::_convertFile(const string &inputPath)
+int WriteToFile::_convertFile(const string &inputPath)
   
 {
 
@@ -166,7 +166,7 @@ int ConvertToApar::_convertFile(const string &inputPath)
       delete iwrfPulse;
     }
     if (!haveMetadata) {
-      cerr << "ERROR - ConvertToApar::_convertFile()" << endl;
+      cerr << "ERROR - WriteToFile::_convertFile()" << endl;
       cerr << "Metadata missing for file: " << inputPath << endl;
       return -1;
     }
@@ -218,7 +218,7 @@ int ConvertToApar::_convertFile(const string &inputPath)
     // open output file as needed
     
     if (_openOutputFile(inputPath, *iwrfPulse)) {
-      cerr << "ERROR - ConvertToApar::_convertFile" << endl;
+      cerr << "ERROR - WriteToFile::_convertFile" << endl;
       cerr << "  Processing file: " << inputPath << endl;
       return -1;
     }
@@ -262,7 +262,7 @@ int ConvertToApar::_convertFile(const string &inputPath)
 /////////////////////////////
 // process pulses in a dwell
 
-int ConvertToApar::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
+int WriteToFile::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
   
 {
 
@@ -342,14 +342,14 @@ int ConvertToApar::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         // write ops info to file, if info has changed since last write
         
         if (_aparTsInfo->writeMetaQueueToFile(_out, true)) {
-          cerr << "ConvertToApar::_processDwellForFile" << endl;
+          cerr << "WriteToFile::_processDwellForFile" << endl;
           return -1;
         }
 
         // write pulse to file
         
         if (aparPulse.writeToFile(_out)) {
-          cerr << "ConvertToApar::_processDwellForFile" << endl;
+          cerr << "WriteToFile::_processDwellForFile" << endl;
           return -1;
         }
 
@@ -376,7 +376,7 @@ int ConvertToApar::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
           // write out
           
           if (xpolPulse.writeToFile(_out)) {
-            cerr << "ConvertToApar::_processDwellForFile" << endl;
+            cerr << "WriteToFile::_processDwellForFile" << endl;
             return -1;
           }
           
@@ -393,8 +393,8 @@ int ConvertToApar::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
 /////////////////////////////////
 // open output file, if needed
 
-int ConvertToApar::_openOutputFile(const string &inputPath,
-                                   const IwrfTsPulse &pulse)
+int WriteToFile::_openOutputFile(const string &inputPath,
+                                 const IwrfTsPulse &pulse)
 
 {
 
@@ -416,7 +416,7 @@ int ConvertToApar::_openOutputFile(const string &inputPath,
   
   if (ta_makedir_recurse(subdir)) {
     int errNum = errno;
-    cerr << "ERROR - ConvertToApar" << endl;
+    cerr << "ERROR - WriteToFile" << endl;
     cerr << "  Cannot make output directory: " << subdir << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
@@ -434,7 +434,7 @@ int ConvertToApar::_openOutputFile(const string &inputPath,
 
   if ((_out = fopen(outputPath.c_str(), "w")) == NULL) {
     int errNum = errno;
-    cerr << "ERROR - ConvertToApar" << endl;
+    cerr << "ERROR - WriteToFile" << endl;
     cerr << "  Cannot open output file: " << outputPath << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
@@ -453,7 +453,7 @@ int ConvertToApar::_openOutputFile(const string &inputPath,
 //
 // Returns 0 if file already open, -1 if not
 
-void ConvertToApar::_closeOutputFile()
+void WriteToFile::_closeOutputFile()
 
 {
   
@@ -469,7 +469,7 @@ void ConvertToApar::_closeOutputFile()
 /////////////////////////////
 // reformat
 
-void ConvertToApar::_reformat2Apar(const IwrfTsPulse &pulse)
+void WriteToFile::_reformat2Apar(const IwrfTsPulse &pulse)
   
 {
   
@@ -479,7 +479,7 @@ void ConvertToApar::_reformat2Apar(const IwrfTsPulse &pulse)
 ///////////////////////////////////////////////
 // Convert the IWRF metadata to APAR structs
 
-void ConvertToApar::_convertMeta2Apar(const IwrfTsInfo &info)
+void WriteToFile::_convertMeta2Apar(const IwrfTsInfo &info)
   
 {
 
@@ -510,8 +510,8 @@ void ConvertToApar::_convertMeta2Apar(const IwrfTsInfo &info)
 //////////////////////////////////////////////////
 // Copy members from IWRF structs to APAR structs
 
-void ConvertToApar::_copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
-                                   apar_ts_packet_info_t &apar)
+void WriteToFile::_copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
+                                 apar_ts_packet_info_t &apar)
 {
 
   apar_ts_packet_info_init(apar);
@@ -525,8 +525,8 @@ void ConvertToApar::_copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
  
 }
 
-void ConvertToApar::_copyIwrf2Apar(const iwrf_radar_info_t &iwrf,
-                                   apar_ts_radar_info_t &apar)
+void WriteToFile::_copyIwrf2Apar(const iwrf_radar_info_t &iwrf,
+                                 apar_ts_radar_info_t &apar)
 {
 
   apar_ts_radar_info_init(apar);
@@ -548,8 +548,8 @@ void ConvertToApar::_copyIwrf2Apar(const iwrf_radar_info_t &iwrf,
 
 }
 
-void ConvertToApar::_copyIwrf2Apar(const iwrf_scan_segment_t &iwrf,
-                                   apar_ts_scan_segment_t &apar)
+void WriteToFile::_copyIwrf2Apar(const iwrf_scan_segment_t &iwrf,
+                                 apar_ts_scan_segment_t &apar)
 {
 
   apar_ts_scan_segment_init(apar);
@@ -583,8 +583,8 @@ void ConvertToApar::_copyIwrf2Apar(const iwrf_scan_segment_t &iwrf,
 
 }
 
-void ConvertToApar::_copyIwrf2Apar(const iwrf_ts_processing_t &iwrf,
-                                   apar_ts_processing_t &apar)
+void WriteToFile::_copyIwrf2Apar(const iwrf_ts_processing_t &iwrf,
+                                 apar_ts_processing_t &apar)
 {
 
   apar_ts_processing_init(apar);
@@ -614,8 +614,8 @@ void ConvertToApar::_copyIwrf2Apar(const iwrf_ts_processing_t &iwrf,
   
 }
 
-void ConvertToApar::_copyIwrf2Apar(const iwrf_calibration_t &iwrf,
-                                   apar_ts_calibration_t &apar)
+void WriteToFile::_copyIwrf2Apar(const iwrf_calibration_t &iwrf,
+                                 apar_ts_calibration_t &apar)
 {
 
   apar_ts_calibration_init(apar);
@@ -684,8 +684,8 @@ void ConvertToApar::_copyIwrf2Apar(const iwrf_calibration_t &iwrf,
   
 }
 
-void ConvertToApar::_copyIwrf2Apar(const iwrf_pulse_header_t &iwrf,
-                                   apar_ts_pulse_header_t &apar)
+void WriteToFile::_copyIwrf2Apar(const iwrf_pulse_header_t &iwrf,
+                                 apar_ts_pulse_header_t &apar)
 {
 
   apar_ts_pulse_header_init(apar);
@@ -737,8 +737,8 @@ void ConvertToApar::_copyIwrf2Apar(const iwrf_pulse_header_t &iwrf,
 
 }
 
-void ConvertToApar::_copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
-                                   apar_ts_event_notice_t &apar)
+void WriteToFile::_copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
+                                 apar_ts_event_notice_t &apar)
 {
 
   apar_ts_event_notice_init(apar);
@@ -762,7 +762,7 @@ void ConvertToApar::_copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
 ////////////////////////////////////
 // condition angle from 0 to 360
 
-double ConvertToApar::_conditionAngle360(double angle)
+double WriteToFile::_conditionAngle360(double angle)
 {
   if (angle < 0) {
     return angle + 360.0;
@@ -776,7 +776,7 @@ double ConvertToApar::_conditionAngle360(double angle)
 ////////////////////////////////////
 // condition angle from -180 to 180
 
-double ConvertToApar::_conditionAngle180(double angle)
+double WriteToFile::_conditionAngle180(double angle)
 {
   if (angle < -180) {
     return angle + 360.0;

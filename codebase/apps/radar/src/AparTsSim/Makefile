@@ -48,7 +48,7 @@ HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
 	AparTsSim.hh \
-	ConvertToApar.hh \
+	WriteToFile.hh \
 	WriteToUdp.hh
 
 CPPC_SRCS = \
@@ -56,7 +56,7 @@ CPPC_SRCS = \
 	Args.cc \
 	Main.cc \
 	AparTsSim.cc \
-	ConvertToApar.cc \
+	WriteToFile.cc \
 	WriteToUdp.cc
 
 #

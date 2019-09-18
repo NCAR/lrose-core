@@ -42,7 +42,7 @@
 #include <unistd.h>
 
 #include "AparTsSim.hh"
-#include "ConvertToApar.hh"
+#include "WriteToFile.hh"
 #include "WriteToUdp.hh"
 
 using namespace std;
@@ -121,7 +121,7 @@ int AparTsSim::_runFileMode()
   
   PMU_auto_register("_runFileMode");
   
-  ConvertToApar convertToApar(_progName,
+  WriteToFile convertToApar(_progName,
                               _params,
                               _args.inputFileList);
   
