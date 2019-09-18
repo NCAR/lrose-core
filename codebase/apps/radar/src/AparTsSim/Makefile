@@ -47,13 +47,17 @@ LOC_LIBS = -lradar -lFmq -lRadx -ldsserver -ldidss \
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	AparTsSim.hh
+	AparTsSim.hh \
+	ConvertToApar.hh \
+	WriteToUdp.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
 	Main.cc \
-	AparTsSim.cc
+	AparTsSim.cc \
+	ConvertToApar.cc \
+	WriteToUdp.cc
 
 #
 # tdrp macros
