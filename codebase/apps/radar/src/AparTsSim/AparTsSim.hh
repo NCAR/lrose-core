@@ -46,11 +46,6 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include <radar/IwrfTsInfo.hh>
-#include <radar/IwrfTsPulse.hh>
-#include <radar/IwrfTsReader.hh>
-#include <radar/apar_ts_data.h>
-#include <radar/AparTsInfo.hh>
 
 using namespace std;
 
@@ -86,92 +81,11 @@ private:
   Args _args;
   Params _params;
 
-  // output file
-
-  FILE *_out;
-
-  // output UDP
-
-  int _udpFd;
-  int _errCount;
-
-  // APAR-style metadata
-
-  AparTsInfo *_aparTsInfo;
-  AparTsDebug_t _aparTsDebug;
-  apar_ts_radar_info_t _aparRadarInfo;
-  apar_ts_scan_segment_t _aparScanSegment;
-  apar_ts_processing_t _aparTsProcessing;
-  apar_ts_calibration_t _aparCalibration;
-
-  // pulse details
-
-  ui64 _dwellSeqNum;
-  ui64 _pulseSeqNum;
-  ui64 _sampleSeqNum; // for UDP only
-  vector<IwrfTsPulse *> _dwellPulses;
-  
   // functions
 
   int _runFileMode();
   int _runUdpMode();
 
-  int _convertFile(const string &inputPath);
-  int _processDwellForFile(vector<IwrfTsPulse *> &dwellPulses);
-  int _openOutputFile(const string &inputPath,
-                      const IwrfTsPulse &pulse);
-  void _closeOutputFile();
-  
-  void _reformat2Apar(const IwrfTsPulse &pulse);
-
-  void _convertMeta2Apar(const IwrfTsInfo &info);
-
-  void _copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
-                      apar_ts_packet_info_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_radar_info_t &iwrf,
-                      apar_ts_radar_info_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_scan_segment_t &iwrf,
-                      apar_ts_scan_segment_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_ts_processing_t &iwrf,
-                      apar_ts_processing_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_calibration_t &iwrf,
-                      apar_ts_calibration_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_pulse_header_t &iwrf,
-                      apar_ts_pulse_header_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
-                      apar_ts_event_notice_t &apar);
-
-  double _conditionAngle360(double angle);
-  double _conditionAngle180(double angle);
-
-  int _convert2Udp(const string &inputPath);
-  int _processDwellForUdp(vector<IwrfTsPulse *> &dwellPulses);
-
-  void _createPacketBuf(ui64 sampleNumber,
-                        ui64 pulseNumber,
-                        si64 secondsTime,
-                        ui32 nanoSecs,
-                        ui32 pulseStartIndex,
-                        ui64 dwellNum,
-                        ui32 beamNumInDwell,
-                        ui32 visitNumInBeam,
-                        double uu,
-                        double vv,
-                        bool isXmitH,
-                        bool isCoPolRx,
-                        int nGates,
-                        const si16 *iqData,
-                        MemBuf &buf);
-
-  int _openOutputUdp();
-  int _writeBufToUdp(const MemBuf &buf);
-  
 };
 
 #endif
