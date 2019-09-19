@@ -176,7 +176,19 @@ udp_dest_address = "192.168.1.255";
 
 udp_dest_port = 50000;
 
-///////////// n_gates_udp /////////////////////////////
+///////////// udp_max_packet_size /////////////////////
+//
+// Ideal UDP packet size (bytes).
+//
+// We will split a pulse into packets that do not exceed this size.
+//
+//
+// Type: int
+//
+
+udp_max_packet_size = 4096;
+
+///////////// udp_n_gates /////////////////////////////
 //
 // Number of gates for UDP simulation mode.
 //
@@ -187,9 +199,9 @@ udp_dest_port = 50000;
 // Type: int
 //
 
-n_gates_udp = 1000;
+udp_n_gates = 2500;
 
-///////////// n_channels_udp //////////////////////////
+///////////// udp_n_channels //////////////////////////
 //
 // Number of channels for UDP simulation mode.
 //
@@ -202,5 +214,5 @@ n_gates_udp = 1000;
 // Type: int
 //
 
-n_channels_udp = 1;
+udp_n_channels = 1;
 

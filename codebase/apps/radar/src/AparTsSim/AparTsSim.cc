@@ -97,14 +97,6 @@ int AparTsSim::Run ()
   
   PMU_auto_register("Run");
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Running AparTsSim - extra verbose debug mode" << endl;
-  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Running AparTsSim - verbose debug mode" << endl;
-  } else if (_params.debug) {
-    cerr << "Running AparTsSim - debug mode" << endl;
-  }
-
   if (_params.run_mode == Params::WRITE_FILES) {
     return _runWriteFiles();
   } else {

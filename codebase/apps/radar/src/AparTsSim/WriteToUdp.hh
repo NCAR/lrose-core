@@ -96,20 +96,23 @@ private:
   int _convert2Udp(const string &inputPath);
   int _processDwell(vector<IwrfTsPulse *> &dwellPulses);
 
-  int _createAndSendPacket(ui64 sampleNumber,
-                           ui64 pulseNumber,
-                           si64 secondsTime,
-                           ui32 nanoSecs,
-                           ui32 pulseStartIndex,
-                           ui64 dwellNum,
-                           ui32 beamNumInDwell,
-                           ui32 visitNumInBeam,
-                           double uu,
-                           double vv,
-                           bool isXmitH,
-                           bool isCoPolRx,
-                           int nGates,
-                           const si16 *iqData);
+  void _fillIqData(IwrfTsPulse *iwrfPulse,
+                   int channelNum,
+                   vector<si16> &iqData);
+
+  int _sendPulse(ui64 sampleNumber,
+                 ui64 pulseNumber,
+                 si64 secondsTime,
+                 ui32 nanoSecs,
+                 ui64 dwellNum,
+                 ui32 beamNumInDwell,
+                 ui32 visitNumInBeam,
+                 double uu,
+                 double vv,
+                 bool isXmitH,
+                 bool isCoPolRx,
+                 int nGates,
+                 vector<si16> &iqApar);
 
   void _addAparHeader(ui64 sampleNumber,
                       ui64 pulseNumber,
@@ -124,7 +127,7 @@ private:
                       bool isFirstPktInPulse,
                       bool isXmitH,
                       bool isCoPolRx,
-                      int nGates,
+                      int nSamples,
                       MemBuf &buf);
 
   int _openOutputUdp();
