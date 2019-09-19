@@ -424,12 +424,6 @@ void WriteToUdp::_fillIqData(IwrfTsPulse *iwrfPulse,
 
   } // while
   
-  // cerr << "333333333333 iqApar.size(): " << iqApar.size() << endl;
-  // cerr << "333333333333 nGatesIwrf: " << nGatesIwrf << endl;
-  // cerr << "333333333333 nGatesApar: " << nGatesApar << endl;
-  // cerr << "333333333333 nCopyPerGate: " << nCopyPerGate << endl;
-  // cerr << "333333333333 nGatesOut: " << iqApar.size() / 2 << endl;
-
 }
 
 ////////////////////////////////////////////////////////////////////////

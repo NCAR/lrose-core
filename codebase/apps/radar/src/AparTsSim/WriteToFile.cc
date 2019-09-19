@@ -330,12 +330,6 @@ int WriteToFile::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         
         MemBuf iqBuf;
         fl32 **iqChans = iwrfPulse->getIqArray();
-        // for (int ichan = 0; ichan < iwrfPulse->getNChannels(); ichan++) {
-        //   iqBuf.add(iqChans[ichan], iwrfPulse->getNGates() * 2 * sizeof(fl32));
-        // }
-        // aparPulse.setIqFloats(iwrfPulse->getNGates(),
-        //                       iwrfPulse->getNChannels(),
-        //                       (const fl32 *) iqBuf.getPtr());
         iqBuf.add(iqChans[0], iwrfPulse->getNGates() * 2 * sizeof(fl32));
         aparPulse.setIqFloats(iwrfPulse->getNGates(), 1,
                               (const fl32 *) iqBuf.getPtr());
