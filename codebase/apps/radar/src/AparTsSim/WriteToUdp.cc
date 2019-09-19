@@ -401,25 +401,34 @@ void WriteToUdp::_fillIqData(IwrfTsPulse *iwrfPulse,
   
   int nGatesIwrf = iwrfPulse->getNGates();
   int nGatesApar = _params.udp_n_gates;
+  int nValsApar = nGatesApar * 2;
   int nCopyPerGate = ((nGatesApar - 1) / nGatesIwrf) + 1;
   
   // copy iwrf data into apar array
   
   const si16 *iqIwrf = (const si16 *) iwrfPulse->getPackedData() +
     channelNum * nGatesIwrf * 2;
-  
-  while ((int) iqApar.size() < nGatesApar * 2) {
 
+  
+  while ((int) iqApar.size() < nValsApar) {
+    
     for (int icopy = 0; icopy < nCopyPerGate; icopy++) {
       iqApar.push_back(*iqIwrf);       // I
       iqApar.push_back(*(iqIwrf + 1)); // Q
+      if ((int) iqApar.size() ==  nValsApar) {
+        break;
+      }
     }
 
     iqIwrf += 2;
 
   } // while
   
-  cerr << "333333333333 iqApar.size(): " << iqApar.size() << endl;
+  // cerr << "333333333333 iqApar.size(): " << iqApar.size() << endl;
+  // cerr << "333333333333 nGatesIwrf: " << nGatesIwrf << endl;
+  // cerr << "333333333333 nGatesApar: " << nGatesApar << endl;
+  // cerr << "333333333333 nCopyPerGate: " << nCopyPerGate << endl;
+  // cerr << "333333333333 nGatesOut: " << iqApar.size() / 2 << endl;
 
 }
 
