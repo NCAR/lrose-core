@@ -56,6 +56,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/str.h>
 #include <toolsa/MemBuf.hh>
+#include <toolsa/sockutil.h>
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsReader.hh>
@@ -118,13 +119,69 @@ int ReadFromUdp::Run ()
   // but in WRITE_TO_UDP mode
   
   int iret = 0;
+  ui08 inputBuf[65536];
+
   while (true) {
 
     if (_openUdpForReading()) {
       return -1;
     }
-
-  }
+    
+    struct sockaddr_in from;   // address from which packet came
+    socklen_t addrlen = sizeof(struct sockaddr_in);
+    
+    // wait on socket for up to 1 sec at a time
+    
+    int ready = 0;
+    while ((ready = SKU_read_select(_udpFd, 1000)) == -1) {
+      // timeout
+      PMU_auto_register("Waiting for udp data");
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        fprintf(stderr, "Waiting for udp data\n");
+      }
+    }
+    
+    if (ready == 1) {
+      
+      // data is available for reading
+      
+      PMU_auto_register("Reading udp data");
+      
+      errno = EINTR;
+      int pktLen;
+      while (errno == EINTR ||
+             errno == EWOULDBLOCK) {
+        errno = 0;
+        pktLen = recvfrom(_udpFd, (void *) inputBuf, 65536, 0, 
+                          (struct sockaddr *)&from, &addrlen);
+        if (errno == EINTR) {
+          PMU_auto_register("Reading udp data - EINTR");
+        } else if (errno == EWOULDBLOCK) {
+          PMU_auto_register("Reading udp data - EWOULDBLOCK");
+          umsleep(1000);
+        }
+      }
+      
+      if (pktLen > 0) {
+        
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          fprintf(stderr, "Read packet, %d bytes\n", pktLen);
+        }
+        
+        iret = 0;
+        
+      } else {
+        
+        fprintf(stderr, "ERROR - %s::ReadFromUdp::Run\n", _progName.c_str());
+        fprintf(stderr, "Reading UDP - pktLen = %d\n", pktLen);
+        perror("");
+        iret = -1;
+        
+      }
+      
+    } // if (ready == 1)
+    
+  } // while
   
   return iret;
 

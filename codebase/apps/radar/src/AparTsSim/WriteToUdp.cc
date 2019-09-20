@@ -547,7 +547,9 @@ int WriteToUdp::_sendPulse(ui64 sampleNumber,
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> UDP _pulseSeqNum: " << _pulseSeqNum << endl;
   }
-    
+
+  uusleep(100);
+
   return 0;
 
 }
