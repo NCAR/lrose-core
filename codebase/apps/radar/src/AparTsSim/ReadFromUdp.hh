@@ -61,9 +61,8 @@ public:
   // constructor
 
   ReadFromUdp(const string &progName,
-              const Params &params,
-              vector<string> &inputFileList);
-
+              const Params &params);
+  
   // destructor
   
   ~ReadFromUdp();
@@ -78,7 +77,6 @@ private:
   
   string _progName;
   const Params &_params;
-  vector<string> _inputFileList;
 
   // output UDP
 
@@ -131,7 +129,7 @@ private:
                       int nSamples,
                       MemBuf &buf);
 
-  int _openOutputUdp();
+  int _openUdpForReading();
   int _writeBufToUdp(const MemBuf &buf);
   
 };

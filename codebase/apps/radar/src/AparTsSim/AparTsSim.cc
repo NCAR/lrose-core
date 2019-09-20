@@ -149,8 +149,7 @@ int AparTsSim::_runReadFromUdp()
   PMU_auto_register("_runReadFromUdp");
   
   ReadFromUdp readFromUdp(_progName,
-                          _params,
-                          _args.inputFileList);
+                          _params);
   
   return readFromUdp.Run();
   

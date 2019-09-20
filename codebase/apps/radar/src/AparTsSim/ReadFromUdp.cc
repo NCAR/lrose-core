@@ -30,9 +30,10 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Resample IWRF time series data,
-// convert to APAR UDP format,
-// and write out to UDP stream
+// Read UDP stream that is created by the WRITE_TO_UDP mode
+// of this application.
+// Creates APAR time series format stream,
+// and write out to an FMQ
 //
 ////////////////////////////////////////////////////////////////
 
@@ -67,11 +68,9 @@ using namespace std;
 // Constructor
 
 ReadFromUdp::ReadFromUdp(const string &progName,
-                         const Params &params,
-                         vector<string> &inputFileList) :
+                         const Params &params) :
         _progName(progName),
-        _params(params),
-        _inputFileList(inputFileList)
+        _params(params)
   
 {
 
@@ -114,16 +113,17 @@ int ReadFromUdp::Run ()
   
   PMU_auto_register("ReadFromUdp::Run");
   
-  // this is a simulation mode
-  // loop through the input files, and repeat
+  // read UDP packtes from the simulator
+  // these are written by an instance of this app
+  // but in WRITE_TO_UDP mode
   
   int iret = 0;
   while (true) {
-    for (size_t ii = 0; ii < _inputFileList.size(); ii++) {
-      if (_convert2Udp(_inputFileList[ii])) {
-        iret = -1;
-      }
+
+    if (_openUdpForReading()) {
+      return -1;
     }
+
   }
   
   return iret;
@@ -210,7 +210,7 @@ int ReadFromUdp::_convert2Udp(const string &inputPath)
     
     // open output UDP as needed
     
-    if (_openOutputUdp()) {
+    if (_openUdpForReading()) {
       cerr << "ERROR - ReadFromUdp::_convert2Udp" << endl;
       cerr << "  Processing file: " << inputPath << endl;
       cerr << "  Cannot open UDP output device" << endl;
@@ -686,10 +686,10 @@ void ReadFromUdp::_addAparHeader(ui64 sampleNumber,
 
   
 ////////////////////////////////////////////////////
-// Open output UDP device
+// Open UDP for reading
 // Returns 0 on success, -1 on error
 
-int ReadFromUdp::_openOutputUdp()
+int ReadFromUdp::_openUdpForReading()
   
 {
 
@@ -706,35 +706,43 @@ int ReadFromUdp::_openOutputUdp()
     return -1;
   }
   
+  // make the socket non-blocking
+
+  // int flags;
+  // if (-1 == (flags = fcntl(_udpFd, F_GETFL, 0))) {
+  //   flags = 0;
+  // }
+  // fcntl(_udpFd, F_SETFL, flags | O_NONBLOCK);
+  
+  // set the socket for reuse
+  
+  int val = 1;
+  int valen = sizeof(val);
+  setsockopt(_udpFd, SOL_SOCKET, SO_REUSEADDR, (char *) &val, valen);
+
   // bind local address to the socket
   
   struct sockaddr_in localAddr;
   MEM_zero(localAddr);
-  uint16_t sourcePort = _params.udp_source_port;
-  localAddr.sin_port = htons(sourcePort);
+  uint16_t destPort = _params.udp_dest_port;
+  localAddr.sin_port = htons(destPort);
   localAddr.sin_family = AF_INET;
   localAddr.sin_addr.s_addr = htonl (INADDR_ANY);
   
   if (bind (_udpFd, (struct sockaddr *) &localAddr, 
 	    sizeof (localAddr)) < 0) {
     perror ("bind error:");
-    fprintf(stderr, "Could bind UDP socket, port %d\n", sourcePort);
+    fprintf(stderr, "Could bind UDP socket, port %d\n", destPort);
     close (_udpFd);
     _udpFd = -1;
     return -1;
   }
   
-  // set socket for broadcast
-  
-  int option = 1;
-  if (setsockopt(_udpFd, SOL_SOCKET, SO_BROADCAST | SO_REUSEADDR,
-		 (char *) &option, sizeof(option)) < 0) {
-    perror ("Could not set broadcast on - setsockopt error");
-    close (_udpFd);
-    _udpFd = -1;
-    return -1;
+  if (_params.debug) {
+    fprintf(stderr, "Opened UDP socket for reading, port %d\n",
+            _params.udp_dest_port);
   }
-
+  
   return 0;
 
 }
