@@ -22,23 +22,24 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AparTsSim.hh
+// ReadFromUdp.hh
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Aug 2019
+// Sept 2019
 //
 ///////////////////////////////////////////////////////////////
 //
-// AparTsSim reads IWRF data from specified files, converts
-// the data to APAR TS format, and writes the
-// converted files to a specified location
+// Read UDP stream that is created by the WRITE_TO_UDP mode
+// of this application.
+// Creates APAR time series format stream,
+// and write out to an FMQ
 //
 ////////////////////////////////////////////////////////////////
 
-#ifndef AparTsSim_H
-#define AparTsSim_H
+#ifndef ReadFromUdp_HH
+#define ReadFromUdp_HH
 
 #include <string>
 #include <vector>
@@ -47,54 +48,92 @@
 #include "Args.hh"
 #include "Params.hh"
 
+class IwrfTsPulse;
 using namespace std;
 
 ////////////////////////
 // This class
 
-class AparTsSim {
+class ReadFromUdp {
   
 public:
 
   // constructor
 
-  AparTsSim(int argc, char **argv);
+  ReadFromUdp(const string &progName,
+              const Params &params,
+              vector<string> &inputFileList);
 
   // destructor
   
-  ~AparTsSim();
+  ~ReadFromUdp();
 
   // run 
 
   int Run();
-
-  // data members
-
-  bool isOK;
-
-  // condition angle from 0 to 360
-
-  static double conditionAngle360(double angle);
-
-  // condition angle from -180 to 180
-
-  static double conditionAngle180(double angle);
-
+  
 protected:
   
 private:
   
   string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
+  const Params &_params;
+  vector<string> _inputFileList;
 
+  // output UDP
+
+  int _udpFd;
+  int _errCount;
+
+  // pulse details
+
+  ui64 _dwellSeqNum;
+  ui64 _pulseSeqNum;
+  ui64 _sampleSeqNum; // for UDP only
+  vector<IwrfTsPulse *> _dwellPulses;
+  
   // functions
 
-  int _runWriteToFile();
-  int _runWriteToUdp();
-  int _runReadFromUdp();
+  int _convert2Udp(const string &inputPath);
+  int _processDwell(vector<IwrfTsPulse *> &dwellPulses);
 
+  void _fillIqData(IwrfTsPulse *iwrfPulse,
+                   int channelNum,
+                   vector<si16> &iqData);
+
+  int _sendPulse(ui64 sampleNumber,
+                 ui64 pulseNumber,
+                 si64 secondsTime,
+                 ui32 nanoSecs,
+                 ui64 dwellNum,
+                 ui32 beamNumInDwell,
+                 ui32 visitNumInBeam,
+                 double uu,
+                 double vv,
+                 bool isXmitH,
+                 bool isCoPolRx,
+                 int nGates,
+                 vector<si16> &iqApar);
+
+  void _addAparHeader(ui64 sampleNumber,
+                      ui64 pulseNumber,
+                      si64 secondsTime,
+                      ui32 nanoSecs,
+                      ui32 pulseStartIndex,
+                      ui64 dwellNum,
+                      ui32 beamNumInDwell,
+                      ui32 visitNumInBeam,
+                      double uu,
+                      double vv,
+                      bool isFirstPktInPulse,
+                      bool isXmitH,
+                      bool isCoPolRx,
+                      int nSamples,
+                      MemBuf &buf);
+
+  int _openOutputUdp();
+  int _writeBufToUdp(const MemBuf &buf);
+  
 };
 
 #endif

@@ -44,6 +44,7 @@
 #include "AparTsSim.hh"
 #include "WriteToFile.hh"
 #include "WriteToUdp.hh"
+#include "ReadFromUdp.hh"
 
 using namespace std;
 
@@ -97,10 +98,12 @@ int AparTsSim::Run ()
   
   PMU_auto_register("Run");
   
-  if (_params.run_mode == Params::WRITE_FILES) {
-    return _runWriteFiles();
+  if (_params.run_mode == Params::WRITE_TO_FILE) {
+    return _runWriteToFile();
+  } else if (_params.run_mode == Params::WRITE_TO_UDP) {
+    return _runWriteToUdp();
   } else {
-    return _runWriteUdp();
+    return _runReadFromUdp();
   }
 
 }
@@ -108,26 +111,26 @@ int AparTsSim::Run ()
 //////////////////////////////////////////////////
 // Run in file mode
 
-int AparTsSim::_runWriteFiles()
+int AparTsSim::_runWriteToFile()
 {
   
-  PMU_auto_register("_runWriteFiles");
+  PMU_auto_register("_runWriteToFile");
   
   WriteToFile convertToApar(_progName,
-                              _params,
-                              _args.inputFileList);
+                            _params,
+                            _args.inputFileList);
   
   return convertToApar.Run();
 
 }
 
 //////////////////////////////////////////////////
-// Run in UDP mode
+// Run in write to UDP mode
 
-int AparTsSim::_runWriteUdp()
+int AparTsSim::_runWriteToUdp()
 {
   
-  PMU_auto_register("_runWriteUdp");
+  PMU_auto_register("_runWriteToUdp");
  
   WriteToUdp writeToUdp(_progName,
                         _params,
@@ -135,6 +138,22 @@ int AparTsSim::_runWriteUdp()
 
   return writeToUdp.Run();
 
+}
+
+//////////////////////////////////////////////////
+// Run in read from UDP mode
+
+int AparTsSim::_runReadFromUdp()
+{
+  
+  PMU_auto_register("_runReadFromUdp");
+  
+  ReadFromUdp readFromUdp(_progName,
+                          _params,
+                          _args.inputFileList);
+  
+  return readFromUdp.Run();
+  
 }
 
 ////////////////////////////////////

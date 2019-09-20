@@ -669,17 +669,19 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("run_mode");
     tt->descr = tdrpStrDup("Control write or read processing.");
-    tt->help = tdrpStrDup("WRITE_FILES - generates time series files in APAR format. WRITE_UDP - writes out simulated data to the DREX FPGA, via UDP.");
+    tt->help = tdrpStrDup("WRITE_TO_FILE: generates time series files in APAR format.\n\nWRITE_TO_UDP: writes out simulated data to the DREX FPGA, via UDP.\n\nREAD_FROM_UDP: for testing read UDP data stream generated in the WRITE_UDP mode. The reader creates an APAR time series data stream, and writes it out to an FMQ.");
     tt->val_offset = (char *) &run_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("run_mode_t");
-    tt->enum_def.nfields = 2;
+    tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("WRITE_FILES");
-      tt->enum_def.fields[0].val = WRITE_FILES;
-      tt->enum_def.fields[1].name = tdrpStrDup("WRITE_UDP");
-      tt->enum_def.fields[1].val = WRITE_UDP;
-    tt->single_val.e = WRITE_FILES;
+      tt->enum_def.fields[0].name = tdrpStrDup("WRITE_TO_FILE");
+      tt->enum_def.fields[0].val = WRITE_TO_FILE;
+      tt->enum_def.fields[1].name = tdrpStrDup("WRITE_TO_UDP");
+      tt->enum_def.fields[1].val = WRITE_TO_UDP;
+      tt->enum_def.fields[2].name = tdrpStrDup("READ_FROM_UDP");
+      tt->enum_def.fields[2].val = READ_FROM_UDP;
+    tt->single_val.e = WRITE_TO_FILE;
     tt++;
     
     // Parameter 'Comment 4'
@@ -698,7 +700,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("output_dir");
     tt->descr = tdrpStrDup("Directory for output files.");
-    tt->help = tdrpStrDup("For run_mode = WRITE_FILES.");
+    tt->help = tdrpStrDup("For run_mode = WRITE_TO_FILE.");
     tt->val_offset = (char *) &output_dir - &_start_;
     tt->single_val.s = tdrpStrDup("./output");
     tt++;
@@ -719,7 +721,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("udp_source_port");
     tt->descr = tdrpStrDup("Port for source of UDP data - i.e. this app.");
-    tt->help = tdrpStrDup("For run_mode = WRITE_UDP.");
+    tt->help = tdrpStrDup("For run_mode = WRITE_TO_UDP.");
     tt->val_offset = (char *) &udp_source_port - &_start_;
     tt->single_val.i = 50000;
     tt++;
@@ -731,7 +733,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("udp_dest_address");
     tt->descr = tdrpStrDup("Destination address for UDP.");
-    tt->help = tdrpStrDup("For run_mode = WRITE_UDP.");
+    tt->help = tdrpStrDup("For run_mode = WRITE_TO_UDP.");
     tt->val_offset = (char *) &udp_dest_address - &_start_;
     tt->single_val.s = tdrpStrDup("192.168.1.255");
     tt++;
@@ -743,7 +745,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("udp_dest_port");
     tt->descr = tdrpStrDup("Port for destination of UDP data.");
-    tt->help = tdrpStrDup("For run_mode = WRITE_UDP.");
+    tt->help = tdrpStrDup("For run_mode = WRITE_TO_UDP.");
     tt->val_offset = (char *) &udp_dest_port - &_start_;
     tt->single_val.i = 50000;
     tt++;
@@ -782,6 +784,123 @@
     tt->help = tdrpStrDup("If this is 1, then that represents the signals from the entire array combined into a single channel.If this is more than 1, each channel represents a single row from the array, which will be combined using beam forming on the FPGA.");
     tt->val_offset = (char *) &udp_n_channels - &_start_;
     tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("READ UDP MODE");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'output_fmq_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_path");
+    tt->descr = tdrpStrDup("Path to output FMQ.");
+    tt->help = tdrpStrDup("The FMQ consists of 2 files, ??.buf and ??.stat.");
+    tt->val_offset = (char *) &output_fmq_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/fmq/ts");
+    tt++;
+    
+    // Parameter 'output_fmq_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_size");
+    tt->descr = tdrpStrDup("Size of output FMQ, in bytes.");
+    tt->help = tdrpStrDup("This is the total size of the output FMQ buffer.");
+    tt->val_offset = (char *) &output_fmq_size - &_start_;
+    tt->single_val.i = 100000000;
+    tt++;
+    
+    // Parameter 'output_fmq_nslots'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_nslots");
+    tt->descr = tdrpStrDup("Number of slots in the output FMQ.");
+    tt->help = tdrpStrDup("The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.");
+    tt->val_offset = (char *) &output_fmq_nslots - &_start_;
+    tt->single_val.i = 1000;
+    tt++;
+    
+    // Parameter 'output_fmq_blocking'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_blocking");
+    tt->descr = tdrpStrDup("Option to set up the FMQ as blocking.");
+    tt->help = tdrpStrDup("If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data. This should only be used if there is a single client reading the FMQ.");
+    tt->val_offset = (char *) &output_fmq_blocking - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'n_pulses_per_message'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("n_pulses_per_message");
+    tt->descr = tdrpStrDup("Number of pulses per output message.");
+    tt->help = tdrpStrDup("The actual number will sometimes be 1 less than this, because an info data part may will be written once in a while.");
+    tt->val_offset = (char *) &n_pulses_per_message - &_start_;
+    tt->single_val.i = 200;
+    tt++;
+    
+    // Parameter 'n_pulses_per_info'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("n_pulses_per_info");
+    tt->descr = tdrpStrDup("How often to write an info part.");
+    tt->help = tdrpStrDup("The info part includes data which does not change on a pulse-to-pulse basis.");
+    tt->val_offset = (char *) &n_pulses_per_info - &_start_;
+    tt->single_val.i = 10000;
+    tt++;
+    
+    // Parameter 'write_latest_data_info'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_latest_data_info");
+    tt->descr = tdrpStrDup("Option to write latest_data_info for the output FMQ.");
+    tt->help = tdrpStrDup("If TRUE, latest_data_info will be written for the output FMQ, at the specified interval.");
+    tt->val_offset = (char *) &write_latest_data_info - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'latest_data_info_interval'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("latest_data_info_interval");
+    tt->descr = tdrpStrDup("Number of seconds between writing latest_data_info.");
+    tt->help = tdrpStrDup("If write_latest_data_info is TRUE, the program will register with the DataMapper when the output FMQ is written to.");
+    tt->val_offset = (char *) &latest_data_info_interval - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'data_mapper_report_interval'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("data_mapper_report_interval");
+    tt->descr = tdrpStrDup("Number of seconds between reports to DataMapper.");
+    tt->help = tdrpStrDup("If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.");
+    tt->val_offset = (char *) &data_mapper_report_interval - &_start_;
+    tt->single_val.i = 5;
     tt++;
     
     // trailing entry has param_name set to NULL

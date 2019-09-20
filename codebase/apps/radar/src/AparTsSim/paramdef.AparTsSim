@@ -59,13 +59,13 @@ commentdef {
 };
 
 typedef enum {
-  WRITE_FILES, WRITE_UDP
+  WRITE_TO_FILE, WRITE_TO_UDP, READ_FROM_UDP
 } run_mode_t;
 
 paramdef enum run_mode_t {
-  p_default = WRITE_FILES;
+  p_default = WRITE_TO_FILE;
   p_descr = "Control write or read processing.";
-  p_help = "WRITE_FILES - generates time series files in APAR format. WRITE_UDP - writes out simulated data to the DREX FPGA, via UDP.";
+  p_help = "WRITE_TO_FILE: generates time series files in APAR format.\n\nWRITE_TO_UDP: writes out simulated data to the DREX FPGA, via UDP.\n\nREAD_FROM_UDP: for testing read UDP data stream generated in the WRITE_UDP mode. The reader creates an APAR time series data stream, and writes it out to an FMQ.";
 } run_mode;
 
 commentdef {
@@ -75,7 +75,7 @@ commentdef {
 paramdef string {
   p_default = "./output";
   p_descr = "Directory for output files.";
-  p_help = "For run_mode = WRITE_FILES.";
+  p_help = "For run_mode = WRITE_TO_FILE.";
 } output_dir;
 
 commentdef {
@@ -85,19 +85,19 @@ commentdef {
 paramdef int {
   p_default = 50000;
   p_descr = "Port for source of UDP data - i.e. this app.";
-  p_help = "For run_mode = WRITE_UDP.";
+  p_help = "For run_mode = WRITE_TO_UDP.";
 } udp_source_port;
 
 paramdef string {
   p_default = "192.168.1.255";
   p_descr = "Destination address for UDP.";
-  p_help = "For run_mode = WRITE_UDP.";
+  p_help = "For run_mode = WRITE_TO_UDP.";
 } udp_dest_address;
 
 paramdef int {
   p_default = 50000;
   p_descr = "Port for destination of UDP data.";
-  p_help = "For run_mode = WRITE_UDP.";
+  p_help = "For run_mode = WRITE_TO_UDP.";
 } udp_dest_port;
 
 paramdef int {
@@ -117,4 +117,62 @@ paramdef int {
   p_descr = "Number of channels for UDP simulation mode.";
   p_help = "If this is 1, then that represents the signals from the entire array combined into a single channel.If this is more than 1, each channel represents a single row from the array, which will be combined using beam forming on the FPGA.";
 } udp_n_channels;
+
+commentdef {
+  p_header = "READ UDP MODE";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "Path to output FMQ.";
+  p_help = "The FMQ consists of 2 files, ??.buf and ??.stat.";
+} output_fmq_path;
+
+paramdef int {
+  p_default = 100000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of slots in the output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data. This should only be used if there is a single client reading the FMQ.";
+} output_fmq_blocking;
+
+paramdef int {
+  p_default = "200";
+  p_descr = "Number of pulses per output message.";
+  p_help = "The actual number will sometimes be 1 less than this, because an info data part may will be written once in a while.";
+} n_pulses_per_message;
+
+paramdef int {
+  p_default = 10000;
+  p_descr = "How often to write an info part.";
+  p_help = "The info part includes data which does not change on a pulse-to-pulse basis.";
+} n_pulses_per_info;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write latest_data_info for the output FMQ.";
+  p_help = "If TRUE, latest_data_info will be written for the output FMQ, at the specified interval.";
+} write_latest_data_info;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between writing latest_data_info.";
+  p_help = "If write_latest_data_info is TRUE, the program will register with the DataMapper when the output FMQ is written to.";
+} latest_data_info_interval;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
 

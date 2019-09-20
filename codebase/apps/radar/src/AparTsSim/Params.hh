@@ -75,8 +75,9 @@ public:
   } debug_t;
 
   typedef enum {
-    WRITE_FILES = 0,
-    WRITE_UDP = 1
+    WRITE_TO_FILE = 0,
+    WRITE_TO_UDP = 1,
+    READ_FROM_UDP = 2
   } run_mode_t;
 
   ///////////////////////////
@@ -399,6 +400,24 @@ public:
 
   int udp_n_channels;
 
+  char* output_fmq_path;
+
+  int output_fmq_size;
+
+  int output_fmq_nslots;
+
+  tdrp_bool_t output_fmq_blocking;
+
+  int n_pulses_per_message;
+
+  int n_pulses_per_info;
+
+  tdrp_bool_t write_latest_data_info;
+
+  int latest_data_info_interval;
+
+  int data_mapper_report_interval;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -406,7 +425,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[20];
+  mutable TDRPtable _table[30];
 
   const char *_className;
 
