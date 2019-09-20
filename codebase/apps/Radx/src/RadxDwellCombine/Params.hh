@@ -534,6 +534,11 @@ public:
 
   int censoring_min_valid_run;
 
+  tdrp_bool_t specify_non_censored_fields;
+
+  char* *_non_censored_fields;
+  int non_censored_fields_n;
+
   tdrp_bool_t set_output_fields;
 
   output_field_t *_output_fields;
@@ -616,7 +621,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[89];
+  mutable TDRPtable _table[91];
 
   const char *_className;
 
