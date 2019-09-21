@@ -111,7 +111,7 @@ WriteToUdp::~WriteToUdp()
 
 int WriteToUdp::Run ()
 {
-  
+
   PMU_auto_register("WriteToUdp::Run");
   
   // this is a simulation mode
@@ -119,11 +119,15 @@ int WriteToUdp::Run ()
   
   int iret = 0;
   while (true) {
+    if (_params.debug) {
+      cerr << "N input files: " << _inputFileList.size() << endl;
+    }
     for (size_t ii = 0; ii < _inputFileList.size(); ii++) {
       if (_convert2Udp(_inputFileList[ii])) {
         iret = -1;
       }
     }
+    umsleep(1000);
   }
   
   return iret;
@@ -136,6 +140,8 @@ int WriteToUdp::Run ()
 int WriteToUdp::_convert2Udp(const string &inputPath)
   
 {
+  
+  PMU_auto_register("WriteToUdp::_convert2Udp");
   
   if (_params.debug) {
     cerr << "Reading input file: " << inputPath << endl;
@@ -208,6 +214,8 @@ int WriteToUdp::_convert2Udp(const string &inputPath)
   IwrfTsPulse *iwrfPulse = reader.getNextPulse();
   while (iwrfPulse != NULL) {
     
+    PMU_auto_register("reading pulse");
+  
     // open output UDP as needed
     
     if (_openOutputUdp()) {
@@ -548,7 +556,7 @@ int WriteToUdp::_sendPulse(ui64 sampleNumber,
     cerr << "==>> UDP _pulseSeqNum: " << _pulseSeqNum << endl;
   }
 
-  uusleep(100);
+  umsleep(100);
 
   return 0;
 
@@ -702,7 +710,7 @@ int WriteToUdp::_openOutputUdp()
 
   // open socket
   
-  if  ((_udpFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
+  if  ((_udpFd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     perror ("Could not open UDP socket: ");
     _udpFd = -1;
     return -1;
@@ -710,21 +718,21 @@ int WriteToUdp::_openOutputUdp()
   
   // bind local address to the socket
   
-  struct sockaddr_in localAddr;
-  MEM_zero(localAddr);
-  uint16_t sourcePort = _params.udp_source_port;
-  localAddr.sin_port = htons(sourcePort);
-  localAddr.sin_family = AF_INET;
-  localAddr.sin_addr.s_addr = htonl (INADDR_ANY);
+  // struct sockaddr_in localAddr;
+  // MEM_zero(localAddr);
+  // uint16_t sourcePort = _params.udp_source_port;
+  // localAddr.sin_port = htons(sourcePort);
+  // localAddr.sin_family = AF_INET;
+  // localAddr.sin_addr.s_addr = htonl (INADDR_ANY);
   
-  if (bind (_udpFd, (struct sockaddr *) &localAddr, 
-	    sizeof (localAddr)) < 0) {
-    perror ("bind error:");
-    fprintf(stderr, "Could bind UDP socket, port %d\n", sourcePort);
-    close (_udpFd);
-    _udpFd = -1;
-    return -1;
-  }
+  // if (bind (_udpFd, (struct sockaddr *) &localAddr, 
+  //           sizeof (localAddr)) < 0) {
+  //   perror ("bind error:");
+  //   fprintf(stderr, "Could bind UDP socket, port %d\n", sourcePort);
+  //   close (_udpFd);
+  //   _udpFd = -1;
+  //   return -1;
+  // }
   
   // set socket for broadcast
   
@@ -753,18 +761,19 @@ int WriteToUdp::_writeBufToUdp(const MemBuf &buf)
   
   struct sockaddr_in destAddr;
   MEM_zero(destAddr);
-  if (inet_aton(_params.udp_dest_address, &destAddr.sin_addr) == 0) {
-    fprintf(stderr, "Cannot translate address: %s - may be invalid\n",
-            _params.udp_dest_address);
-    close (_udpFd);
-    _udpFd = -1;
-    return -1;
-  }
+  // if (inet_aton(_params.udp_dest_address, &destAddr.sin_addr) == 0) {
+  //   fprintf(stderr, "Cannot translate address: %s - may be invalid\n",
+  //           _params.udp_dest_address);
+  //   close (_udpFd);
+  //   _udpFd = -1;
+  //   return -1;
+  // }
   destAddr.sin_family = AF_INET;
   uint16_t destPort = _params.udp_dest_port;
   destAddr.sin_port = htons(destPort);
   destAddr.sin_addr.s_addr = inet_addr(_params.udp_dest_address);
-  
+  memset(destAddr.sin_zero, '\0', sizeof(destAddr.sin_zero));
+
   if (sendto(_udpFd, buf.getPtr(), buf.getLen(), 0,
              (struct sockaddr *) &destAddr,
              sizeof(destAddr)) != (ssize_t) buf.getLen()) {
@@ -777,7 +786,7 @@ int WriteToUdp::_writeBufToUdp(const MemBuf &buf)
     _errCount++;
   }
 
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Sent UDP packet, len: " << buf.getLen() << endl;
   }
   
