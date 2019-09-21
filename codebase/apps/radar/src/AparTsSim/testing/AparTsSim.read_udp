@@ -156,7 +156,7 @@ output_dir = "./output";
 // Type: int
 //
 
-udp_source_port = 50000;
+udp_source_port = 5555;
 
 ///////////// udp_dest_address ////////////////////////
 //
@@ -180,7 +180,7 @@ udp_dest_address = "192.168.1.255";
 // Type: int
 //
 
-udp_dest_port = 50000;
+udp_dest_port = 6666;
 
 ///////////// udp_max_packet_size /////////////////////
 //
@@ -192,7 +192,7 @@ udp_dest_port = 50000;
 // Type: int
 //
 
-udp_max_packet_size = 4096;
+udp_max_packet_size = 1400;
 
 ///////////// udp_n_gates /////////////////////////////
 //

@@ -168,7 +168,8 @@ udp_source_port = 5555;
 // Type: string
 //
 
-udp_dest_address = "192.168.1.255";
+// udp_dest_address = "192.168.1.255";
+udp_dest_address = "127.0.0.255";
 
 ///////////// udp_dest_port ///////////////////////////
 //
@@ -192,7 +193,7 @@ udp_dest_port = 6666;
 // Type: int
 //
 
-udp_max_packet_size = 4096;
+udp_max_packet_size = 1400;
 
 ///////////// udp_n_gates /////////////////////////////
 //
