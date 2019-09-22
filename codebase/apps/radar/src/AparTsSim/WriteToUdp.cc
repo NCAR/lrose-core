@@ -716,28 +716,11 @@ int WriteToUdp::_openOutputUdp()
     return -1;
   }
   
-  // bind local address to the socket
-  
-  // struct sockaddr_in localAddr;
-  // MEM_zero(localAddr);
-  // uint16_t sourcePort = _params.udp_source_port;
-  // localAddr.sin_port = htons(sourcePort);
-  // localAddr.sin_family = AF_INET;
-  // localAddr.sin_addr.s_addr = htonl (INADDR_ANY);
-  
-  // if (bind (_udpFd, (struct sockaddr *) &localAddr, 
-  //           sizeof (localAddr)) < 0) {
-  //   perror ("bind error:");
-  //   fprintf(stderr, "Could bind UDP socket, port %d\n", sourcePort);
-  //   close (_udpFd);
-  //   _udpFd = -1;
-  //   return -1;
-  // }
-  
   // set socket for broadcast
   
   int option = 1;
-  if (setsockopt(_udpFd, SOL_SOCKET, SO_BROADCAST | SO_REUSEADDR,
+  // if (setsockopt(_udpFd, SOL_SOCKET, SO_BROADCAST | SO_REUSEADDR,
+  if (setsockopt(_udpFd, SOL_SOCKET, SO_REUSEADDR,
 		 (char *) &option, sizeof(option)) < 0) {
     perror ("Could not set broadcast on - setsockopt error");
     close (_udpFd);

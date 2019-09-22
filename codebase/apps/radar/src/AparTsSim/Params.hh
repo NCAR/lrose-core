@@ -388,8 +388,6 @@ public:
 
   char* output_dir;
 
-  int udp_source_port;
-
   char* udp_dest_address;
 
   int udp_dest_port;
@@ -425,7 +423,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[30];
+  mutable TDRPtable _table[29];
 
   const char *_className;
 

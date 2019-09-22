@@ -714,18 +714,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'udp_source_port'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("udp_source_port");
-    tt->descr = tdrpStrDup("Port for source of UDP data - i.e. this app.");
-    tt->help = tdrpStrDup("For run_mode = WRITE_TO_UDP.");
-    tt->val_offset = (char *) &udp_source_port - &_start_;
-    tt->single_val.i = 50000;
-    tt++;
-    
     // Parameter 'udp_dest_address'
     // ctype is 'char*'
     
@@ -735,7 +723,7 @@
     tt->descr = tdrpStrDup("Destination address for UDP.");
     tt->help = tdrpStrDup("For run_mode = WRITE_TO_UDP.");
     tt->val_offset = (char *) &udp_dest_address - &_start_;
-    tt->single_val.s = tdrpStrDup("192.168.1.255");
+    tt->single_val.s = tdrpStrDup("127.0.0.1");
     tt++;
     
     // Parameter 'udp_dest_port'
@@ -747,7 +735,7 @@
     tt->descr = tdrpStrDup("Port for destination of UDP data.");
     tt->help = tdrpStrDup("For run_mode = WRITE_TO_UDP.");
     tt->val_offset = (char *) &udp_dest_port - &_start_;
-    tt->single_val.i = 50000;
+    tt->single_val.i = 6666;
     tt++;
     
     // Parameter 'udp_max_packet_size'
@@ -759,7 +747,7 @@
     tt->descr = tdrpStrDup("Ideal UDP packet size (bytes).");
     tt->help = tdrpStrDup("We will split a pulse into packets that do not exceed this size.");
     tt->val_offset = (char *) &udp_max_packet_size - &_start_;
-    tt->single_val.i = 4096;
+    tt->single_val.i = 1400;
     tt++;
     
     // Parameter 'udp_n_gates'

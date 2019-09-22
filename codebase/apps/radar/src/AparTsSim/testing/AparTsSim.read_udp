@@ -146,18 +146,6 @@ output_dir = "./output";
 //
 //======================================================================
  
-///////////// udp_source_port /////////////////////////
-//
-// Port for source of UDP data - i.e. this app.
-//
-// For run_mode = WRITE_TO_UDP.
-//
-//
-// Type: int
-//
-
-udp_source_port = 5555;
-
 ///////////// udp_dest_address ////////////////////////
 //
 // Destination address for UDP.
