@@ -92,6 +92,12 @@ private:
   
   // functions
 
+  int _openUdpForReading();
+  int _handlePacket(const ui08 *pktBuf, int pktLen);
+  int _decodeAparHdr(const ui08 *pktBuf, int pktLen);
+
+#ifdef JUNK
+
   int _convert2Udp(const string &inputPath);
   int _processDwell(vector<IwrfTsPulse *> &dwellPulses);
 
@@ -129,8 +135,9 @@ private:
                       int nSamples,
                       MemBuf &buf);
 
-  int _openUdpForReading();
   int _writeBufToUdp(const MemBuf &buf);
+
+#endif
   
 };
 

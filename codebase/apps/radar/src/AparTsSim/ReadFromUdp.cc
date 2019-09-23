@@ -60,6 +60,7 @@
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsReader.hh>
+#include <Radx/RadxTime.hh>
 
 #include "ReadFromUdp.hh"
 #include "AparTsSim.hh"
@@ -119,16 +120,13 @@ int ReadFromUdp::Run ()
   // but in WRITE_TO_UDP mode
   
   int iret = 0;
-  ui08 inputBuf[65536];
+  ui08 pktBuf[65536];
 
   while (true) {
 
     if (_openUdpForReading()) {
       return -1;
     }
-    
-    struct sockaddr_in from;   // address from which packet came
-    socklen_t addrlen = sizeof(struct sockaddr_in);
     
     // wait on socket for up to 1 sec at a time
     
@@ -148,11 +146,15 @@ int ReadFromUdp::Run ()
       PMU_auto_register("Reading udp data");
       
       errno = EINTR;
-      int pktLen;
+      int pktLen = 0;
+
+      struct sockaddr_in from;   // address from which packet came
+      socklen_t addrlen = sizeof(struct sockaddr_in);
+      
       while (errno == EINTR ||
              errno == EWOULDBLOCK) {
         errno = 0;
-        pktLen = recvfrom(_udpFd, (void *) inputBuf, 65536, 0, 
+        pktLen = recvfrom(_udpFd, (void *) pktBuf, 65536, 0, 
                           (struct sockaddr *)&from, &addrlen);
         if (errno == EINTR) {
           PMU_auto_register("Reading udp data - EINTR");
@@ -167,8 +169,11 @@ int ReadFromUdp::Run ()
         if (_params.debug >= Params::DEBUG_VERBOSE) {
           fprintf(stderr, "Read packet, %d bytes\n", pktLen);
         }
-        
-        iret = 0;
+        if (_handlePacket(pktBuf, pktLen)) {
+          iret = -1;
+        } else {
+          iret = 0;
+        }
         
       } else {
         
@@ -186,6 +191,221 @@ int ReadFromUdp::Run ()
   return iret;
 
 }
+
+////////////////////////////////////////////////////
+// Handle an incoming packet
+
+int ReadFromUdp::_handlePacket(const ui08 *pktBuf, int pktLen)
+
+{
+
+  if (_decodeAparHdr(pktBuf, pktLen)) {
+    return -1;
+  }
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////////
+// Decode the APAR header
+
+int ReadFromUdp::_decodeAparHdr(const ui08 *pktBuf, int pktLen)
+
+{
+
+  if (pktLen < 86) {
+    cerr << "ERROR - ReadFromUdp::_decodeAparHdr" << endl;
+    cerr << "  pktLen too short: " << pktLen << endl;
+    return -1;
+  }
+  const ui08 *loc = pktBuf;
+  
+  // message type
+
+  ui16 messageType = 0x0001;
+  memcpy(&messageType, loc, sizeof(messageType));
+  BE_to_array_16(&messageType, sizeof(messageType));
+  cerr << "==>> messageType: " << messageType << endl;
+  loc += sizeof(messageType);
+
+  // AESA ID
+  
+  ui16 aesaId;
+  memcpy(&aesaId, loc, sizeof(aesaId));
+  BE_to_array_16(&aesaId, sizeof(aesaId));
+  cerr << "==>> aesaId: " << aesaId << endl;
+  loc += sizeof(aesaId);
+
+  // channel number
+  
+  ui16 chanNum;
+  memcpy(&chanNum, loc, sizeof(chanNum));
+  BE_to_array_16(&chanNum, sizeof(chanNum));
+  cerr << "==>> chanNum: " << chanNum << endl;
+  loc += sizeof(chanNum);
+
+  // flags
+  
+  ui32 flags;
+  memcpy(&flags, loc, sizeof(flags));
+  BE_to_array_32(&flags, sizeof(flags));
+  cerr << "==>> flags: " << flags << endl;
+  loc += sizeof(flags);
+
+  bool isXmitH = ((flags & 1) != 0);
+  bool isRxH = ((flags & 2) != 0);
+  bool isCoPolRx = false;
+  if (isXmitH && isRxH) {
+    isCoPolRx = true;
+  } else if (!isXmitH && !isRxH) {
+    isCoPolRx = true;
+  }
+  bool isFirstPktInPulse = ((flags & 4) != 0);
+
+  cerr << "==>> isXmitH: " << isXmitH << endl;
+  cerr << "==>> isRxH: " << isRxH << endl;
+  cerr << "==>> isCoPolRx: " << isCoPolRx << endl;
+  cerr << "==>> isFirstPktInPulse: " << isFirstPktInPulse << endl;
+
+  // beam index
+
+  ui32 beamIndex;
+  memcpy(&beamIndex, loc, sizeof(beamIndex));
+  BE_to_array_32(&beamIndex, sizeof(beamIndex));
+  cerr << "==>> beamIndex: " << beamIndex << endl;
+  loc += sizeof(beamIndex);
+
+  // sample number
+
+  ui64 sampleNum;
+  memcpy(&sampleNum, loc, sizeof(sampleNum));
+  BE_to_array_64(&sampleNum, sizeof(sampleNum));
+  cerr << "==>> sampleNum: " << sampleNum << endl;
+  loc += sizeof(sampleNum);
+
+  // pulse number
+
+  ui64 pulseNum;
+  memcpy(&pulseNum, loc, sizeof(pulseNum));
+  BE_to_array_64(&pulseNum, sizeof(pulseNum));
+  cerr << "==>> pulseNum: " << pulseNum << endl;
+  loc += sizeof(pulseNum);
+
+  // time
+
+  ui64 secs;
+  memcpy(&secs, loc, sizeof(secs));
+  BE_to_array_64(&secs, sizeof(secs));
+  cerr << "==>> secs: " << secs << endl;
+  loc += sizeof(secs);
+
+  ui32 nsecs;
+  memcpy(&nsecs, loc, sizeof(nsecs));
+  BE_to_array_32(&nsecs, sizeof(nsecs));
+  cerr << "==>> nsecs: " << nsecs << endl;
+  loc += sizeof(nsecs);
+
+  RadxTime rtime((time_t) secs, (double) nsecs / 1.0e9);
+  cerr << "==>> rtime: " << rtime.asString(6) << endl;
+
+  // start index
+
+  ui32 startIndex;
+  memcpy(&startIndex, loc, sizeof(startIndex));
+  BE_to_array_32(&startIndex, sizeof(startIndex));
+  cerr << "==>> startIndex: " << startIndex << endl;
+  loc += sizeof(startIndex);
+
+  // angles
+
+  fl32 uu;
+  memcpy(&uu, loc, sizeof(uu));
+  BE_to_array_32(&uu, sizeof(uu));
+  loc += sizeof(uu);
+
+  fl32 vv;
+  memcpy(&vv, loc, sizeof(vv));
+  BE_to_array_32(&vv, sizeof(vv));
+  loc += sizeof(vv);
+
+  double elRad = asin(vv);
+  double azRad = asin(uu / cos(elRad));
+  double el = elRad * RAD_TO_DEG;
+  double az = azRad * RAD_TO_DEG;
+
+  cerr << "==>> uu: " << uu << endl;
+  cerr << "==>> vv: " << vv << endl;
+  cerr << "==>> el: " << el << endl;
+  cerr << "==>> az: " << az << endl;
+  
+  return 0;
+
+}
+
+////////////////////////////////////////////////////
+// Open UDP for reading
+// Returns 0 on success, -1 on error
+
+int ReadFromUdp::_openUdpForReading()
+  
+{
+
+  if (_udpFd > 0) {
+    // already open
+    return 0;
+  }
+
+  // open socket
+  
+  if  ((_udpFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
+    perror ("Could not open UDP socket: ");
+    _udpFd = -1;
+    return -1;
+  }
+  
+  // make the socket non-blocking
+
+  // int flags;
+  // if (-1 == (flags = fcntl(_udpFd, F_GETFL, 0))) {
+  //   flags = 0;
+  // }
+  // fcntl(_udpFd, F_SETFL, flags | O_NONBLOCK);
+  
+  // set the socket for reuse
+  
+  int val = 1;
+  int valen = sizeof(val);
+  setsockopt(_udpFd, SOL_SOCKET, SO_REUSEADDR, (char *) &val, valen);
+
+  // bind local address to the socket
+  
+  struct sockaddr_in localAddr;
+  MEM_zero(localAddr);
+  uint16_t destPort = _params.udp_dest_port;
+  localAddr.sin_port = htons(destPort);
+  localAddr.sin_family = AF_INET;
+  localAddr.sin_addr.s_addr = htonl (INADDR_ANY);
+  
+  if (bind (_udpFd, (struct sockaddr *) &localAddr, 
+	    sizeof (localAddr)) < 0) {
+    perror ("bind error:");
+    fprintf(stderr, "Could bind UDP socket, port %d\n", destPort);
+    close (_udpFd);
+    _udpFd = -1;
+    return -1;
+  }
+  
+  if (_params.debug) {
+    fprintf(stderr, "Opened UDP socket for reading, port %d\n",
+            _params.udp_dest_port);
+  }
+  
+  return 0;
+
+}
+
+#ifdef JUNK
 
 ////////////////////////////////////////////////////
 // Convert 1 file to UDP
@@ -743,68 +963,6 @@ void ReadFromUdp::_addAparHeader(ui64 sampleNumber,
 
   
 ////////////////////////////////////////////////////
-// Open UDP for reading
-// Returns 0 on success, -1 on error
-
-int ReadFromUdp::_openUdpForReading()
-  
-{
-
-  if (_udpFd > 0) {
-    // already open
-    return 0;
-  }
-
-  // open socket
-  
-  if  ((_udpFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
-    perror ("Could not open UDP socket: ");
-    _udpFd = -1;
-    return -1;
-  }
-  
-  // make the socket non-blocking
-
-  // int flags;
-  // if (-1 == (flags = fcntl(_udpFd, F_GETFL, 0))) {
-  //   flags = 0;
-  // }
-  // fcntl(_udpFd, F_SETFL, flags | O_NONBLOCK);
-  
-  // set the socket for reuse
-  
-  int val = 1;
-  int valen = sizeof(val);
-  setsockopt(_udpFd, SOL_SOCKET, SO_REUSEADDR, (char *) &val, valen);
-
-  // bind local address to the socket
-  
-  struct sockaddr_in localAddr;
-  MEM_zero(localAddr);
-  uint16_t destPort = _params.udp_dest_port;
-  localAddr.sin_port = htons(destPort);
-  localAddr.sin_family = AF_INET;
-  localAddr.sin_addr.s_addr = htonl (INADDR_ANY);
-  
-  if (bind (_udpFd, (struct sockaddr *) &localAddr, 
-	    sizeof (localAddr)) < 0) {
-    perror ("bind error:");
-    fprintf(stderr, "Could bind UDP socket, port %d\n", destPort);
-    close (_udpFd);
-    _udpFd = -1;
-    return -1;
-  }
-  
-  if (_params.debug) {
-    fprintf(stderr, "Opened UDP socket for reading, port %d\n",
-            _params.udp_dest_port);
-  }
-  
-  return 0;
-
-}
-
-////////////////////////////////////////////////////
 // Write buffer to UDP
 // Returns 0 on success, -1 on error
 
@@ -849,3 +1007,4 @@ int ReadFromUdp::_writeBufToUdp(const MemBuf &buf)
 }
 
 
+#endif

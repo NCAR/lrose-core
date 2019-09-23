@@ -334,6 +334,16 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         bool isXmitH = iwrfPulse->isHoriz();
         bool isCoPolRx = true;
 
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          
+          // cerr << "==>> startIndex: " << startIndex << endl;
+          cerr << "==>> uu: " << uu << endl;
+          cerr << "==>> vv: " << vv << endl;
+          cerr << "==>> el: " << beamEl[ibeam] << endl;
+          cerr << "==>> az: " << beamAz[ibeam] << endl;
+          
+        }
+
         // fill out the IQ data array
         
         vector<si16> iqApar;
@@ -610,7 +620,7 @@ void WriteToUdp::_addAparHeader(ui64 sampleNumber,
     flags |= 1;
   }
   if ((isXmitH && isCoPolRx) || (!isXmitH && !isCoPolRx)) {
-    // git 1 indicates H receive
+    // bit 1 indicates H receive
     flags |= 2;
   }
   // bit 3 is pulse start flag
