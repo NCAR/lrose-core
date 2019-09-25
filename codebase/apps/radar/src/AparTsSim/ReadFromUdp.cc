@@ -226,7 +226,6 @@ int ReadFromUdp::_decodeAparHdr(const ui08 *pktBuf, int pktLen)
   ui16 messageType = 0x0001;
   memcpy(&messageType, loc, sizeof(messageType));
   BE_to_array_16(&messageType, sizeof(messageType));
-  cerr << "==>> messageType: " << messageType << endl;
   loc += sizeof(messageType);
 
   // AESA ID
@@ -234,7 +233,6 @@ int ReadFromUdp::_decodeAparHdr(const ui08 *pktBuf, int pktLen)
   ui16 aesaId;
   memcpy(&aesaId, loc, sizeof(aesaId));
   BE_to_array_16(&aesaId, sizeof(aesaId));
-  cerr << "==>> aesaId: " << aesaId << endl;
   loc += sizeof(aesaId);
 
   // channel number
@@ -242,7 +240,6 @@ int ReadFromUdp::_decodeAparHdr(const ui08 *pktBuf, int pktLen)
   ui16 chanNum;
   memcpy(&chanNum, loc, sizeof(chanNum));
   BE_to_array_16(&chanNum, sizeof(chanNum));
-  cerr << "==>> chanNum: " << chanNum << endl;
   loc += sizeof(chanNum);
 
   // flags
@@ -250,7 +247,6 @@ int ReadFromUdp::_decodeAparHdr(const ui08 *pktBuf, int pktLen)
   ui32 flags;
   memcpy(&flags, loc, sizeof(flags));
   BE_to_array_32(&flags, sizeof(flags));
-  cerr << "==>> flags: " << flags << endl;
   loc += sizeof(flags);
 
   bool isXmitH = ((flags & 1) != 0);
@@ -263,17 +259,11 @@ int ReadFromUdp::_decodeAparHdr(const ui08 *pktBuf, int pktLen)
   }
   bool isFirstPktInPulse = ((flags & 4) != 0);
 
-  cerr << "==>> isXmitH: " << isXmitH << endl;
-  cerr << "==>> isRxH: " << isRxH << endl;
-  cerr << "==>> isCoPolRx: " << isCoPolRx << endl;
-  cerr << "==>> isFirstPktInPulse: " << isFirstPktInPulse << endl;
-
   // beam index
 
   ui32 beamIndex;
   memcpy(&beamIndex, loc, sizeof(beamIndex));
   BE_to_array_32(&beamIndex, sizeof(beamIndex));
-  cerr << "==>> beamIndex: " << beamIndex << endl;
   loc += sizeof(beamIndex);
 
   // sample number
@@ -281,7 +271,6 @@ int ReadFromUdp::_decodeAparHdr(const ui08 *pktBuf, int pktLen)
   ui64 sampleNum;
   memcpy(&sampleNum, loc, sizeof(sampleNum));
   BE_to_array_64(&sampleNum, sizeof(sampleNum));
-  cerr << "==>> sampleNum: " << sampleNum << endl;
   loc += sizeof(sampleNum);
 
   // pulse number
@@ -289,7 +278,6 @@ int ReadFromUdp::_decodeAparHdr(const ui08 *pktBuf, int pktLen)
   ui64 pulseNum;
   memcpy(&pulseNum, loc, sizeof(pulseNum));
   BE_to_array_64(&pulseNum, sizeof(pulseNum));
-  cerr << "==>> pulseNum: " << pulseNum << endl;
   loc += sizeof(pulseNum);
 
   // time
@@ -297,24 +285,20 @@ int ReadFromUdp::_decodeAparHdr(const ui08 *pktBuf, int pktLen)
   ui64 secs;
   memcpy(&secs, loc, sizeof(secs));
   BE_to_array_64(&secs, sizeof(secs));
-  cerr << "==>> secs: " << secs << endl;
   loc += sizeof(secs);
 
   ui32 nsecs;
   memcpy(&nsecs, loc, sizeof(nsecs));
   BE_to_array_32(&nsecs, sizeof(nsecs));
-  cerr << "==>> nsecs: " << nsecs << endl;
   loc += sizeof(nsecs);
 
   RadxTime rtime((time_t) secs, (double) nsecs / 1.0e9);
-  cerr << "==>> rtime: " << rtime.asString(6) << endl;
 
   // start index
 
   ui32 startIndex;
   memcpy(&startIndex, loc, sizeof(startIndex));
   BE_to_array_32(&startIndex, sizeof(startIndex));
-  cerr << "==>> startIndex: " << startIndex << endl;
   loc += sizeof(startIndex);
 
   // angles
@@ -330,14 +314,36 @@ int ReadFromUdp::_decodeAparHdr(const ui08 *pktBuf, int pktLen)
   loc += sizeof(vv);
 
   double elRad = asin(vv);
-  double azRad = asin(uu / cos(elRad));
+  double azRad = atan2(uu, sqrt(1.0 - uu * uu - vv * vv));
   double el = elRad * RAD_TO_DEG;
-  double az = azRad * RAD_TO_DEG;
+  double az = 90.0 - (azRad * RAD_TO_DEG);
+  if (az < 0.0) {
+    az += 360.0;
+  } else if (az >= 360.0) {
+    az -= 360.0;
+  }
 
-  cerr << "==>> uu: " << uu << endl;
-  cerr << "==>> vv: " << vv << endl;
-  cerr << "==>> el: " << el << endl;
-  cerr << "==>> az: " << az << endl;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "===============================================" << endl;
+    cerr << "==>> messageType: " << messageType << endl;
+    cerr << "==>> aesaId: " << aesaId << endl;
+    cerr << "==>> chanNum: " << chanNum << endl;
+    cerr << "==>> flags: " << flags << endl;
+    cerr << "==>> isXmitH: " << isXmitH << endl;
+    cerr << "==>> isRxH: " << isRxH << endl;
+    cerr << "==>> isCoPolRx: " << isCoPolRx << endl;
+    cerr << "==>> isFirstPktInPulse: " << isFirstPktInPulse << endl;
+    cerr << "==>> beamIndex: " << beamIndex << endl;
+    cerr << "==>> sampleNum: " << sampleNum << endl;
+    cerr << "==>> pulseNum: " << pulseNum << endl;
+    cerr << "==>> startIndex: " << startIndex << endl;
+    cerr << "==>> rtime: " << rtime.asString(6) << endl;
+    cerr << "==>> uu: " << uu << endl;
+    cerr << "==>> vv: " << vv << endl;
+    cerr << "==>> el: " << el << endl;
+    cerr << "==>> az: " << az << endl;
+    cerr << "===============================================" << endl;
+  }
   
   return 0;
 

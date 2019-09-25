@@ -123,7 +123,7 @@ int WriteToUdp::Run ()
       cerr << "N input files: " << _inputFileList.size() << endl;
     }
     for (size_t ii = 0; ii < _inputFileList.size(); ii++) {
-      if (_convert2Udp(_inputFileList[ii])) {
+      if (_convertToUdp(_inputFileList[ii])) {
         iret = -1;
       }
     }
@@ -137,11 +137,11 @@ int WriteToUdp::Run ()
 ////////////////////////////////////////////////////
 // Convert 1 file to UDP
 
-int WriteToUdp::_convert2Udp(const string &inputPath)
+int WriteToUdp::_convertToUdp(const string &inputPath)
   
 {
   
-  PMU_auto_register("WriteToUdp::_convert2Udp");
+  PMU_auto_register("WriteToUdp::_convertToUdp");
   
   if (_params.debug) {
     cerr << "Reading input file: " << inputPath << endl;
@@ -180,7 +180,7 @@ int WriteToUdp::_convert2Udp(const string &inputPath)
       delete iwrfPulse;
     }
     if (!haveMetadata) {
-      cerr << "ERROR - WriteToUdp::_convert2Udp()" << endl;
+      cerr << "ERROR - WriteToUdp::_convertToUdp()" << endl;
       cerr << "Metadata missing for file: " << inputPath << endl;
       return -1;
     }
@@ -219,7 +219,7 @@ int WriteToUdp::_convert2Udp(const string &inputPath)
     // open output UDP as needed
     
     if (_openOutputUdp()) {
-      cerr << "ERROR - WriteToUdp::_convert2Udp" << endl;
+      cerr << "ERROR - WriteToUdp::_convertToUdp" << endl;
       cerr << "  Processing file: " << inputPath << endl;
       cerr << "  Cannot open UDP output device" << endl;
       return -1;
@@ -234,7 +234,7 @@ int WriteToUdp::_convert2Udp(const string &inputPath)
     if (_dwellPulses.size() == nPulsesPerDwell) {
 
       // process dwell
-
+      
       _processDwell(_dwellPulses);
       _dwellSeqNum++;
 
@@ -326,7 +326,7 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         ui32 beamNumInDwell = ibeam;
         ui32 visitNumInBeam = ivisit;
         
-        double azRad = beamAz[ibeam] * DEG_TO_RAD;
+        double azRad = (90.0 - beamAz[ibeam]) * DEG_TO_RAD;
         double elRad = beamEl[ibeam] * DEG_TO_RAD;
         double uu = cos(elRad) * sin(azRad);
         double vv = sin(elRad);
@@ -334,7 +334,8 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         bool isXmitH = iwrfPulse->isHoriz();
         bool isCoPolRx = true;
 
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
+
+        if (_params.debug >= Params::DEBUG_EXTRA) {
           
           // cerr << "==>> startIndex: " << startIndex << endl;
           cerr << "==>> uu: " << uu << endl;
@@ -489,7 +490,7 @@ int WriteToUdp::_sendPulse(ui64 sampleNumber,
   int nPacketsPerPulse = (_params.udp_n_gates / maxNGatesPerPacket) + 1;
   int nGatesPerPacket = ((nGates - 1) / nPacketsPerPulse) + 1;
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "==>> UDP headerLen: " << headerLen << endl;
     cerr << "==>> UDP maxNbytesDataPerPacket: "
          << maxNbytesDataPerPacket << endl;
@@ -549,7 +550,7 @@ int WriteToUdp::_sendPulse(ui64 sampleNumber,
     nGatesRemaining -= nGatesThisPacket;
     _sampleSeqNum += nGatesThisPacket;
 
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "====>> UDP ipkt: " << ipkt << endl;
       cerr << "====>> UDP nGatesSoFar: " << nGatesSoFar << endl;
       cerr << "====>> UDP nGatesRemaining: " << nGatesRemaining << endl;
@@ -562,11 +563,12 @@ int WriteToUdp::_sendPulse(ui64 sampleNumber,
 
   _pulseSeqNum++;
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "==>> UDP _pulseSeqNum: " << _pulseSeqNum << endl;
+    cerr << "================================================" << endl;
   }
 
-  umsleep(100);
+  umsleep(20);
 
   return 0;
 
@@ -779,7 +781,7 @@ int WriteToUdp::_writeBufToUdp(const MemBuf &buf)
     _errCount++;
   }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Sent UDP packet, len: " << buf.getLen() << endl;
   }
   

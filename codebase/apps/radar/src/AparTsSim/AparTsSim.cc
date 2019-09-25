@@ -79,7 +79,19 @@ AparTsSim::AparTsSim(int argc, char **argv)
     isOK = false;
     return;
   }
-  
+
+  // check params
+
+  if (_args.inputFileList.size() < 1) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "  No input time series file specified" << endl;
+    cerr << "  You need to specify at least 1 file" << endl;
+    cerr << "  Use -f option" << endl;
+    _args.usage(_progName, cerr);
+    isOK = false;
+    return;
+  }
+
 }
 
 // destructor

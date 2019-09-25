@@ -93,7 +93,7 @@ private:
   
   // functions
 
-  int _convert2Udp(const string &inputPath);
+  int _convertToUdp(const string &inputPath);
   int _processDwell(vector<IwrfTsPulse *> &dwellPulses);
 
   void _fillIqData(IwrfTsPulse *iwrfPulse,
