@@ -47,8 +47,13 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include <radar/IwrfTsInfo.hh>
+#include <radar/IwrfTsPulse.hh>
+#include <radar/IwrfTsReader.hh>
+#include <radar/apar_ts_data.h>
+#include <radar/AparTsInfo.hh>
+#include <Radx/RadxTime.hh>
 
-class IwrfTsPulse;
 using namespace std;
 
 ////////////////////////
@@ -61,7 +66,8 @@ public:
   // constructor
 
   ReadFromUdp(const string &progName,
-              const Params &params);
+              const Params &params,
+              vector<string> &inputFileList);
   
   // destructor
   
@@ -77,6 +83,7 @@ private:
   
   string _progName;
   const Params &_params;
+  vector<string> _inputFileList;
 
   // output UDP
 
@@ -90,11 +97,48 @@ private:
   ui64 _sampleSeqNum; // for UDP only
   vector<IwrfTsPulse *> _dwellPulses;
   
+  ui16 _messageType;
+  ui16 _aesaId;
+  ui16 _chanNum;
+  ui32 _flags;
+  bool _isXmitH;
+  bool _isRxH;
+  bool _isCoPolRx;
+  bool _isFirstPktInPulse;
+  ui32 _beamIndex;
+  ui64 _sampleNum;
+  ui64 _pulseNum;
+  ui64 _secs;
+  ui32 _nsecs;
+  RadxTime _rtime;
+  ui32 _startIndex;
+  fl32 _uu;
+  fl32 _vv;
+  double _el;
+  double _az;
+
+  ui64 _dwellNum;
+  ui32 _beamNumInDwell;
+  ui32 _visitNumInBeam;
+  ui32 _nSamples;
+
+  vector<si16> _iqApar;
+
+  // APAR-style metadata
+
+  AparTsInfo *_aparTsInfo;
+  AparTsDebug_t _aparTsDebug;
+  apar_ts_radar_info_t _aparRadarInfo;
+  apar_ts_scan_segment_t _aparScanSegment;
+  apar_ts_processing_t _aparTsProcessing;
+  apar_ts_calibration_t _aparCalibration;
+
   // functions
 
   int _openUdpForReading();
-  int _handlePacket(const ui08 *pktBuf, int pktLen);
-  int _decodeAparHdr(const ui08 *pktBuf, int pktLen);
+  int _setMetadata(const string &inputPath);
+  void _convertMeta2Apar(const IwrfTsInfo &info);
+  int _handlePacket(ui08 *pktBuf, int pktLen);
 
 #ifdef JUNK
 
@@ -138,6 +182,8 @@ private:
   int _writeBufToUdp(const MemBuf &buf);
 
 #endif
+
+  int _writePulseToFmq();
   
 };
 

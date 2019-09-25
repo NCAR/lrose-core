@@ -46,6 +46,8 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include <radar/iwrf_data.h>
+#include <radar/apar_ts_data.h>
 
 using namespace std;
 
@@ -79,6 +81,29 @@ public:
   // condition angle from -180 to 180
 
   static double conditionAngle180(double angle);
+  
+  // copy metadat from IWRF to APAR
+  
+  static void copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
+                            apar_ts_packet_info_t &apar);
+  
+  static void copyIwrf2Apar(const iwrf_radar_info_t &iwrf,
+                            apar_ts_radar_info_t &apar);
+  
+  static void copyIwrf2Apar(const iwrf_scan_segment_t &iwrf,
+                            apar_ts_scan_segment_t &apar);
+  
+  static void copyIwrf2Apar(const iwrf_ts_processing_t &iwrf,
+                            apar_ts_processing_t &apar);
+  
+  static void copyIwrf2Apar(const iwrf_calibration_t &iwrf,
+                            apar_ts_calibration_t &apar);
+  
+  static void copyIwrf2Apar(const iwrf_pulse_header_t &iwrf,
+                            apar_ts_pulse_header_t &apar);
+  
+  static void copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
+                            apar_ts_event_notice_t &apar);
 
 protected:
   

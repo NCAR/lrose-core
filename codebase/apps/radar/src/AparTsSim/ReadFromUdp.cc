@@ -70,9 +70,11 @@ using namespace std;
 // Constructor
 
 ReadFromUdp::ReadFromUdp(const string &progName,
-                         const Params &params) :
+                         const Params &params,
+                         vector<string> &inputFileList) :
         _progName(progName),
-        _params(params)
+        _params(params),
+        _inputFileList(inputFileList)
   
 {
 
@@ -115,6 +117,18 @@ int ReadFromUdp::Run ()
   
   PMU_auto_register("ReadFromUdp::Run");
   
+  // initialize the metadata for later use
+
+  if (_inputFileList.size() < 1) {
+    cerr << "ERROR - ReadFromUdp::Run()" << endl;
+    cerr << "  No IWRF input file specified" << endl;
+    cerr << "  We need 1 file to initialize metadata" << endl;
+    return -1;
+  }
+  if (_setMetadata(_inputFileList[0])) {
+    return -1;
+  }
+
   // read UDP packtes from the simulator
   // these are written by an instance of this app
   // but in WRITE_TO_UDP mode
@@ -195,154 +209,176 @@ int ReadFromUdp::Run ()
 ////////////////////////////////////////////////////
 // Handle an incoming packet
 
-int ReadFromUdp::_handlePacket(const ui08 *pktBuf, int pktLen)
-
-{
-
-  if (_decodeAparHdr(pktBuf, pktLen)) {
-    return -1;
-  }
-
-  return 0;
-
-}
-
-////////////////////////////////////////////////////
-// Decode the APAR header
-
-int ReadFromUdp::_decodeAparHdr(const ui08 *pktBuf, int pktLen)
+int ReadFromUdp::_handlePacket(ui08 *pktBuf, int pktLen)
 
 {
 
   if (pktLen < 86) {
-    cerr << "ERROR - ReadFromUdp::_decodeAparHdr" << endl;
+    cerr << "ERROR - ReadFromUdp::_handlePacketr" << endl;
     cerr << "  pktLen too short: " << pktLen << endl;
     return -1;
   }
-  const ui08 *loc = pktBuf;
+  ui08 *loc = pktBuf;
   
   // message type
 
-  ui16 messageType = 0x0001;
-  memcpy(&messageType, loc, sizeof(messageType));
-  BE_to_array_16(&messageType, sizeof(messageType));
-  loc += sizeof(messageType);
+  memcpy(&_messageType, loc, sizeof(_messageType));
+  BE_to_array_16(&_messageType, sizeof(_messageType));
+  loc += sizeof(_messageType);
 
   // AESA ID
   
-  ui16 aesaId;
-  memcpy(&aesaId, loc, sizeof(aesaId));
-  BE_to_array_16(&aesaId, sizeof(aesaId));
-  loc += sizeof(aesaId);
+  memcpy(&_aesaId, loc, sizeof(_aesaId));
+  BE_to_array_16(&_aesaId, sizeof(_aesaId));
+  loc += sizeof(_aesaId);
 
   // channel number
   
-  ui16 chanNum;
-  memcpy(&chanNum, loc, sizeof(chanNum));
-  BE_to_array_16(&chanNum, sizeof(chanNum));
-  loc += sizeof(chanNum);
+  memcpy(&_chanNum, loc, sizeof(_chanNum));
+  BE_to_array_16(&_chanNum, sizeof(_chanNum));
+  loc += sizeof(_chanNum);
 
   // flags
   
-  ui32 flags;
-  memcpy(&flags, loc, sizeof(flags));
-  BE_to_array_32(&flags, sizeof(flags));
-  loc += sizeof(flags);
+  memcpy(&_flags, loc, sizeof(_flags));
+  BE_to_array_32(&_flags, sizeof(_flags));
+  loc += sizeof(_flags);
 
-  bool isXmitH = ((flags & 1) != 0);
-  bool isRxH = ((flags & 2) != 0);
-  bool isCoPolRx = false;
-  if (isXmitH && isRxH) {
-    isCoPolRx = true;
-  } else if (!isXmitH && !isRxH) {
-    isCoPolRx = true;
+  _isXmitH = ((_flags & 1) != 0);
+  _isRxH = ((_flags & 2) != 0);
+  _isCoPolRx = false;
+  if (_isXmitH && _isRxH) {
+    _isCoPolRx = true;
+  } else if (!_isXmitH && !_isRxH) {
+    _isCoPolRx = true;
   }
-  bool isFirstPktInPulse = ((flags & 4) != 0);
+  _isFirstPktInPulse = ((_flags & 4) != 0);
 
   // beam index
 
-  ui32 beamIndex;
-  memcpy(&beamIndex, loc, sizeof(beamIndex));
-  BE_to_array_32(&beamIndex, sizeof(beamIndex));
-  loc += sizeof(beamIndex);
+  memcpy(&_beamIndex, loc, sizeof(_beamIndex));
+  BE_to_array_32(&_beamIndex, sizeof(_beamIndex));
+  loc += sizeof(_beamIndex);
 
   // sample number
 
-  ui64 sampleNum;
-  memcpy(&sampleNum, loc, sizeof(sampleNum));
-  BE_to_array_64(&sampleNum, sizeof(sampleNum));
-  loc += sizeof(sampleNum);
+  memcpy(&_sampleNum, loc, sizeof(_sampleNum));
+  BE_to_array_64(&_sampleNum, sizeof(_sampleNum));
+  loc += sizeof(_sampleNum);
 
   // pulse number
 
-  ui64 pulseNum;
-  memcpy(&pulseNum, loc, sizeof(pulseNum));
-  BE_to_array_64(&pulseNum, sizeof(pulseNum));
-  loc += sizeof(pulseNum);
+  memcpy(&_pulseNum, loc, sizeof(_pulseNum));
+  BE_to_array_64(&_pulseNum, sizeof(_pulseNum));
+  loc += sizeof(_pulseNum);
 
   // time
 
-  ui64 secs;
-  memcpy(&secs, loc, sizeof(secs));
-  BE_to_array_64(&secs, sizeof(secs));
-  loc += sizeof(secs);
+  memcpy(&_secs, loc, sizeof(_secs));
+  BE_to_array_64(&_secs, sizeof(_secs));
+  loc += sizeof(_secs);
 
-  ui32 nsecs;
-  memcpy(&nsecs, loc, sizeof(nsecs));
-  BE_to_array_32(&nsecs, sizeof(nsecs));
-  loc += sizeof(nsecs);
+  memcpy(&_nsecs, loc, sizeof(_nsecs));
+  BE_to_array_32(&_nsecs, sizeof(_nsecs));
+  loc += sizeof(_nsecs);
 
-  RadxTime rtime((time_t) secs, (double) nsecs / 1.0e9);
+  _rtime.set((time_t) _secs, (double) _nsecs / 1.0e9);
 
   // start index
 
-  ui32 startIndex;
-  memcpy(&startIndex, loc, sizeof(startIndex));
-  BE_to_array_32(&startIndex, sizeof(startIndex));
-  loc += sizeof(startIndex);
+  memcpy(&_startIndex, loc, sizeof(_startIndex));
+  BE_to_array_32(&_startIndex, sizeof(_startIndex));
+  loc += sizeof(_startIndex);
 
   // angles
 
-  fl32 uu;
-  memcpy(&uu, loc, sizeof(uu));
-  BE_to_array_32(&uu, sizeof(uu));
-  loc += sizeof(uu);
+  memcpy(&_uu, loc, sizeof(_uu));
+  BE_to_array_32(&_uu, sizeof(_uu));
+  loc += sizeof(_uu);
 
-  fl32 vv;
-  memcpy(&vv, loc, sizeof(vv));
-  BE_to_array_32(&vv, sizeof(vv));
-  loc += sizeof(vv);
+  memcpy(&_vv, loc, sizeof(_vv));
+  BE_to_array_32(&_vv, sizeof(_vv));
+  loc += sizeof(_vv);
 
-  double elRad = asin(vv);
-  double azRad = atan2(uu, sqrt(1.0 - uu * uu - vv * vv));
-  double el = elRad * RAD_TO_DEG;
-  double az = 90.0 - (azRad * RAD_TO_DEG);
-  if (az < 0.0) {
-    az += 360.0;
-  } else if (az >= 360.0) {
-    az -= 360.0;
+  double elRad = asin(_vv);
+  double azRad = atan2(_uu, sqrt(1.0 - _uu * _uu - _vv * _vv));
+  _el = elRad * RAD_TO_DEG;
+  _az = 90.0 - (azRad * RAD_TO_DEG);
+  if (_az < 0.0) {
+    _az += 360.0;
+  } else if (_az >= 360.0) {
+    _az -= 360.0;
   }
+
+  // dwell details
+
+  memcpy(&_dwellNum, loc, sizeof(_dwellNum));
+  BE_to_array_32(&_dwellNum, sizeof(_dwellNum));
+  loc += sizeof(_dwellNum);
+
+  memcpy(&_beamNumInDwell, loc, sizeof(_beamNumInDwell));
+  BE_to_array_32(&_beamNumInDwell, sizeof(_beamNumInDwell));
+  loc += sizeof(_beamNumInDwell);
+
+  memcpy(&_visitNumInBeam, loc, sizeof(_visitNumInBeam));
+  BE_to_array_32(&_visitNumInBeam, sizeof(_visitNumInBeam));
+  loc += sizeof(_visitNumInBeam);
+
+  // number of samples
+
+  memcpy(&_nSamples, loc, sizeof(_nSamples));
+  BE_to_array_32(&_nSamples, sizeof(_nSamples));
+  loc += sizeof(_nSamples);
+
+  // spares
+
+  ui32 spares[3];
+  loc += sizeof(spares);
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "===============================================" << endl;
-    cerr << "==>> messageType: " << messageType << endl;
-    cerr << "==>> aesaId: " << aesaId << endl;
-    cerr << "==>> chanNum: " << chanNum << endl;
-    cerr << "==>> flags: " << flags << endl;
-    cerr << "==>> isXmitH: " << isXmitH << endl;
-    cerr << "==>> isRxH: " << isRxH << endl;
-    cerr << "==>> isCoPolRx: " << isCoPolRx << endl;
-    cerr << "==>> isFirstPktInPulse: " << isFirstPktInPulse << endl;
-    cerr << "==>> beamIndex: " << beamIndex << endl;
-    cerr << "==>> sampleNum: " << sampleNum << endl;
-    cerr << "==>> pulseNum: " << pulseNum << endl;
-    cerr << "==>> startIndex: " << startIndex << endl;
-    cerr << "==>> rtime: " << rtime.asString(6) << endl;
-    cerr << "==>> uu: " << uu << endl;
-    cerr << "==>> vv: " << vv << endl;
-    cerr << "==>> el: " << el << endl;
-    cerr << "==>> az: " << az << endl;
+    cerr << "==>> messageType: " << _messageType << endl;
+    cerr << "==>> aesaId: " << _aesaId << endl;
+    cerr << "==>> chanNum: " << _chanNum << endl;
+    cerr << "==>> flags: " << _flags << endl;
+    cerr << "==>> isXmitH: " << _isXmitH << endl;
+    cerr << "==>> isRxH: " << _isRxH << endl;
+    cerr << "==>> isCoPolRx: " << _isCoPolRx << endl;
+    cerr << "==>> isFirstPktInPulse: " << _isFirstPktInPulse << endl;
+    cerr << "==>> beamIndex: " << _beamIndex << endl;
+    cerr << "==>> sampleNum: " << _sampleNum << endl;
+    cerr << "==>> pulseNum: " << _pulseNum << endl;
+    cerr << "==>> startIndex: " << _startIndex << endl;
+    cerr << "==>> rtime: " << _rtime.asString(6) << endl;
+    cerr << "==>> uu: " << _uu << endl;
+    cerr << "==>> vv: " << _vv << endl;
+    cerr << "==>> el: " << _el << endl;
+    cerr << "==>> az: " << _az << endl;
+    cerr << "==>> dwellNum: " << _dwellNum << endl;
+    cerr << "==>> beamNumInDwell: " << _beamNumInDwell << endl;
+    cerr << "==>> visitNumInBeam: " << _visitNumInBeam << endl;
+    cerr << "==>> nSamples: " << _nSamples << endl;
     cerr << "===============================================" << endl;
+  }
+
+  // if this packet is the first in a pulse,
+  // send out the existing pulse
+
+  if (_isFirstPktInPulse) {
+    _writePulseToFmq();
+  }
+
+  // swap the IQ data
+
+  int nIq = _nSamples * 2;
+  int nBytesIq = nIq * sizeof(si16);
+  si16 *iqData = (si16 *) loc;
+  BE_swap_array_16(iqData, nBytesIq);
+
+  // add it to the IQ vector
+  
+  for (int ii = 0; ii < nIq; ii++) {
+    _iqApar.push_back(iqData[ii]);
   }
   
   return 0;
@@ -369,14 +405,6 @@ int ReadFromUdp::_openUdpForReading()
     _udpFd = -1;
     return -1;
   }
-  
-  // make the socket non-blocking
-
-  // int flags;
-  // if (-1 == (flags = fcntl(_udpFd, F_GETFL, 0))) {
-  //   flags = 0;
-  // }
-  // fcntl(_udpFd, F_SETFL, flags | O_NONBLOCK);
   
   // set the socket for reuse
   
@@ -411,6 +439,126 @@ int ReadFromUdp::_openUdpForReading()
 
 }
 
+////////////////////////////////////////////////////
+// Read the IWRF file, set the APAR-style metadata
+
+int ReadFromUdp::_setMetadata(const string &inputPath)
+  
+{
+  
+  if (_params.debug) {
+    cerr << "Reading input file: " << inputPath << endl;
+  }
+
+  // set up a vector with a single file entry
+  
+  vector<string> fileList;
+  fileList.push_back(inputPath);
+
+  // create reader for just that one file
+
+  IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    iwrfDebug = IWRF_DEBUG_VERBOSE;
+  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+    iwrfDebug = IWRF_DEBUG_NORM;
+  } 
+  IwrfTsReaderFile reader(fileList, iwrfDebug);
+  const IwrfTsInfo &tsInfo = reader.getOpsInfo();
+
+  // read through pulses until we have current metadata
+
+  IwrfTsPulse *iwrfPulse = reader.getNextPulse();
+  bool haveMetadata = false;
+  while (iwrfPulse != NULL) {
+    if (tsInfo.isRadarInfoActive() &&
+        tsInfo.isScanSegmentActive() &&
+        tsInfo.isTsProcessingActive()) {
+      // we have the necessary metadata
+      haveMetadata = true;
+      delete iwrfPulse;
+      break;
+    }
+    delete iwrfPulse;
+  }
+  if (!haveMetadata) {
+    cerr << "ERROR - WriteToFile::_setMetadata()" << endl;
+    cerr << "Metadata missing for file: " << inputPath << endl;
+    return -1;
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    iwrf_radar_info_print(stderr, tsInfo.getRadarInfo());
+    iwrf_scan_segment_print(stderr, tsInfo.getScanSegment());
+    iwrf_ts_processing_print(stderr, tsInfo.getTsProcessing());
+    if (tsInfo.isCalibrationActive()) {
+      iwrf_calibration_print(stderr, tsInfo.getCalibration());
+    }
+  }
+
+  // convert the metadata to APAR types
+  // set the metadata in the info metadata queue
+
+  _convertMeta2Apar(tsInfo);
+  _aparTsInfo->setRadarInfo(_aparRadarInfo);
+  _aparTsInfo->setScanSegment(_aparScanSegment);
+  _aparTsInfo->setTsProcessing(_aparTsProcessing);
+  if (tsInfo.isCalibrationActive()) {
+    _aparTsInfo->setCalibration(_aparCalibration);
+  }
+  
+  return 0;
+  
+}
+
+///////////////////////////////////////////////
+// Convert the IWRF metadata to APAR structs
+
+void ReadFromUdp::_convertMeta2Apar(const IwrfTsInfo &info)
+  
+{
+
+  // initialize the apar structs
+  
+  apar_ts_radar_info_init(_aparRadarInfo);
+  apar_ts_scan_segment_init(_aparScanSegment);
+  apar_ts_processing_init(_aparTsProcessing);
+  apar_ts_calibration_init(_aparCalibration);
+
+  // copy over the metadata members
+
+  AparTsSim::copyIwrf2Apar(info.getRadarInfo(), _aparRadarInfo);
+  AparTsSim::copyIwrf2Apar(info.getScanSegment(), _aparScanSegment);
+  AparTsSim::copyIwrf2Apar(info.getTsProcessing(), _aparTsProcessing);
+  if (info.isCalibrationActive()) {
+    AparTsSim::copyIwrf2Apar(info.getCalibration(), _aparCalibration);
+  }
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    apar_ts_radar_info_print(stderr, _aparRadarInfo);
+    apar_ts_scan_segment_print(stderr, _aparScanSegment);
+    apar_ts_processing_print(stderr, _aparTsProcessing);
+    apar_ts_calibration_print(stderr, _aparCalibration);
+  }
+}
+
+////////////////////////////////////////////////////
+// Write the current pulse to an output FMQ
+
+int ReadFromUdp::_writePulseToFmq()
+  
+{
+
+  // write the pulse
+
+  // clear the buffer
+
+  _iqApar.clear();
+  
+  return 0;
+
+}
+  
 #ifdef JUNK
 
 ////////////////////////////////////////////////////

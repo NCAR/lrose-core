@@ -87,6 +87,12 @@ private:
 
   FILE *_out;
 
+  // pulse details
+
+  ui64 _dwellSeqNum;
+  ui64 _pulseSeqNum;
+  vector<IwrfTsPulse *> _dwellPulses;
+  
   // APAR-style metadata
 
   AparTsInfo *_aparTsInfo;
@@ -96,12 +102,6 @@ private:
   apar_ts_processing_t _aparTsProcessing;
   apar_ts_calibration_t _aparCalibration;
 
-  // pulse details
-
-  ui64 _dwellSeqNum;
-  ui64 _pulseSeqNum;
-  vector<IwrfTsPulse *> _dwellPulses;
-  
   // functions
 
   int _convertFile(const string &inputPath);
@@ -110,30 +110,7 @@ private:
                       const IwrfTsPulse &pulse);
   void _closeOutputFile();
   
-  void _reformat2Apar(const IwrfTsPulse &pulse);
-
   void _convertMeta2Apar(const IwrfTsInfo &info);
-
-  void _copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
-                      apar_ts_packet_info_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_radar_info_t &iwrf,
-                      apar_ts_radar_info_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_scan_segment_t &iwrf,
-                      apar_ts_scan_segment_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_ts_processing_t &iwrf,
-                      apar_ts_processing_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_calibration_t &iwrf,
-                      apar_ts_calibration_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_pulse_header_t &iwrf,
-                      apar_ts_pulse_header_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
-                      apar_ts_event_notice_t &apar);
 
 };
 
