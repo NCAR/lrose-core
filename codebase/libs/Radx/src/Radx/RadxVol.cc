@@ -5223,6 +5223,15 @@ void RadxVol::_setPredomSweepModeFromAngles() const
 bool RadxVol::checkIsRhi() const
 {
 
+  // elevation surveillance - special case
+  // looks like RHI but is not
+
+  if (getPredomSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+    return false;
+  }
+
+  // check angles
+
   if (getPredomSweepModeFromAngles() == Radx::SWEEP_MODE_RHI) {
     return true;
   } else {
