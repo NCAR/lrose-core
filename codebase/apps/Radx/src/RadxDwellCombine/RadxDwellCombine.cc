@@ -122,14 +122,17 @@ int RadxDwellCombine::Run()
   switch (_params.mode) {
     case Params::FMQ:
       iret = _runFmq();
+      break;
     case Params::ARCHIVE:
       iret = _runArchive();
+      break;
     case Params::REALTIME:
       if (_params.latest_data_info_avail) {
         iret = _runRealtimeWithLdata();
       } else {
         iret = _runRealtimeNoLdata();
       }
+      break;
     case Params::FILELIST:
     default:
       iret = _runFilelist();
