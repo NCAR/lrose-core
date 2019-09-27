@@ -159,6 +159,11 @@ This will set the following important environment variables:
 
 Several other variables are set as well.
 
+Note: if there are errors related to Qt, try setting this variable
+```
+ export PKG_CONFIG_PATH="/usr/local/opt/qt/lib/pkgconfig"
+ ```
+ 
 <a name="build"/>
 
 ## 4. Build
