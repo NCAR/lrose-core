@@ -404,15 +404,9 @@ public:
 
   int output_fmq_nslots;
 
-  tdrp_bool_t output_fmq_blocking;
-
   int n_pulses_per_message;
 
   int n_pulses_per_info;
-
-  tdrp_bool_t write_latest_data_info;
-
-  int latest_data_info_interval;
 
   int data_mapper_report_interval;
 
@@ -423,7 +417,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[29];
+  mutable TDRPtable _table[26];
 
   const char *_className;
 

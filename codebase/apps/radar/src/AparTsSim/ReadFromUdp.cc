@@ -60,6 +60,7 @@
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsReader.hh>
+#include <radar/AparTsPulse.hh>
 #include <Radx/RadxTime.hh>
 
 #include "ReadFromUdp.hh"
@@ -83,6 +84,9 @@ ReadFromUdp::ReadFromUdp(const string &progName,
   _dwellSeqNum = 0;
   _udpFd = -1;
   _errCount = 0;
+  _volNum = 0;
+  _sweepNum = 0;
+  _nPulsesOut = 0;
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Running ReadFromUdp - extra verbose debug mode" << endl;
@@ -91,6 +95,14 @@ ReadFromUdp::ReadFromUdp(const string &progName,
   } else if (_params.debug) {
     cerr << "Running ReadFromUdp - debug mode" << endl;
   }
+
+  _aparTsDebug = APAR_TS_DEBUG_OFF;
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    _aparTsDebug = APAR_TS_DEBUG_VERBOSE;
+  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _aparTsDebug = APAR_TS_DEBUG_NORM;
+  }
+  _aparTsInfo = new AparTsInfo(_aparTsDebug);
 
 }
 
@@ -126,6 +138,12 @@ int ReadFromUdp::Run ()
     return -1;
   }
   if (_setMetadata(_inputFileList[0])) {
+    return -1;
+  }
+
+  // initialize the output FMQ
+
+  if (_openOutputFmq()) {
     return -1;
   }
 
@@ -447,9 +465,9 @@ int ReadFromUdp::_setMetadata(const string &inputPath)
 {
   
   if (_params.debug) {
-    cerr << "Reading input file: " << inputPath << endl;
+    cerr << "Setting metadata from file: " << inputPath << endl;
   }
-
+  
   // set up a vector with a single file entry
   
   vector<string> fileList;
@@ -482,7 +500,7 @@ int ReadFromUdp::_setMetadata(const string &inputPath)
     delete iwrfPulse;
   }
   if (!haveMetadata) {
-    cerr << "ERROR - WriteToFile::_setMetadata()" << endl;
+    cerr << "ERROR - ReadFromUdp::_setMetadata()" << endl;
     cerr << "Metadata missing for file: " << inputPath << endl;
     return -1;
   }
@@ -540,6 +558,7 @@ void ReadFromUdp::_convertMeta2Apar(const IwrfTsInfo &info)
     apar_ts_processing_print(stderr, _aparTsProcessing);
     apar_ts_calibration_print(stderr, _aparCalibration);
   }
+
 }
 
 ////////////////////////////////////////////////////
@@ -549,16 +568,216 @@ int ReadFromUdp::_writePulseToFmq()
   
 {
 
-  // write the pulse
+  int iret = 0;
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> Writing out pulse <<==" << endl;
+    cerr << "  _nPulsesOut: " << _nPulsesOut << endl;
+    cerr << "  _iqApar.size(): " << _iqApar.size() << endl;
+  }
+
+  // add metadata to outgoing message
+
+  if (_nPulsesOut % _params.n_pulses_per_info == 0) {
+    _addMetaDataToMsg();
+  }
+  
+  // create the outgoing pulse
+
+  AparTsPulse pulse(*_aparTsInfo, _aparTsDebug);
+  pulse.setTime(_secs, _nsecs);
+  int nGates = _iqApar.size() / 2;
+  pulse.setIqPacked(nGates, 1,
+                    APAR_TS_IQ_ENCODING_SCALED_SI16,
+                    _iqApar.data(),
+                    1.0, 0.0);
+
+  pulse.setBeamNumInDwell(_beamNumInDwell);
+  pulse.setVisitNumInBeam(_visitNumInBeam);
+  pulse.setPulseSeqNum(_pulseNum);
+  pulse.setDwellSeqNum(_dwellNum);
+
+  pulse.setScanMode(_aparScanSegment.scan_mode);
+  pulse.setSweepNum(_sweepNum);
+  pulse.setVolumeNum(_volNum);
+
+  pulse.setElevation(_el);
+  pulse.setAzimuth(_az);
+  pulse.setFixedAngle(_el);
+  pulse.setPrt(_aparTsProcessing.prt_us[0]);
+  pulse.setPrtNext(_aparTsProcessing.prt_us[0]);
+  pulse.setPulseWidthUs(_aparTsProcessing.pulse_width_us);
+  pulse.setHvFlag(_isXmitH);
+  pulse.setStartRangeM(_aparTsProcessing.start_range_m);
+  pulse.setGateGSpacineM(_aparTsProcessing.gate_spacing_m);
+
+  // add the pulse to the outgoing message
+
+  MemBuf pulseBuf;
+  pulse.assemble(pulseBuf);
+  _outputMsg.addPart(APAR_TS_PULSE_HEADER_ID,
+                     pulseBuf.getLen(),
+                     pulseBuf.getPtr());
+
+  // write to the queue if ready
+
+  if (_writeToOutputFmq(false)) {
+    cerr << "ERROR - ReadFromUdp::_writePulseToFmq" << endl;
+    iret = -1;
+  }
+  
   // clear the buffer
 
   _iqApar.clear();
+
+  // increment
+
+  _nPulsesOut++;
   
-  return 0;
+  return iret;
 
 }
   
+///////////////////////////////////////
+// open the output FMQ
+// returns 0 on success, -1 on failure
+
+int ReadFromUdp::_openOutputFmq()
+
+{
+
+  // initialize the output FMQ
+  
+  if (_outputFmq.initReadWrite
+      (_params.output_fmq_path,
+       _progName.c_str(),
+       _params.debug >= Params::DEBUG_EXTRA, // set debug?
+       Fmq::END, // start position
+       false,    // compression
+       _params.output_fmq_nslots,
+       _params.output_fmq_size)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "  Cannot initialize FMQ: " << _params.output_fmq_path << endl;
+    cerr << "  nSlots: " << _params.output_fmq_nslots << endl;
+    cerr << "  nBytes: " << _params.output_fmq_size << endl;
+    cerr << _outputFmq.getErrStr() << endl;
+    return -1;
+  }
+  _outputFmq.setSingleWriter();
+  if (_params.data_mapper_report_interval > 0) {
+    _outputFmq.setRegisterWithDmap(true, _params.data_mapper_report_interval);
+  }
+
+  // initialize message
+  
+  _outputMsg.clearAll();
+  _outputMsg.setType(0);
+
+  return 0;
+
+}
+
+///////////////////////////////////////
+// Add metadata to the outgoing message
+
+void ReadFromUdp::_addMetaDataToMsg()
+{
+
+
+  // radar info
+
+  _outputMsg.addPart(APAR_TS_RADAR_INFO_ID,
+                     sizeof(_aparRadarInfo),
+                     &_aparRadarInfo);
+
+  // scan segment
+
+  _outputMsg.addPart(APAR_TS_SCAN_SEGMENT_ID,
+                     sizeof(_aparScanSegment),
+                     &_aparScanSegment);
+
+  // processing info
+
+  _outputMsg.addPart(APAR_TS_PROCESSING_ID,
+                     sizeof(_aparTsProcessing),
+                     &_aparTsProcessing);
+
+  // calibration
+
+  _outputMsg.addPart(APAR_TS_CALIBRATION_ID,
+                     sizeof(_aparCalibration),
+                     &_aparCalibration);
+
+
+}
+
+///////////////////////////////////////
+// write to output FMQ if ready
+// returns 0 on success, -1 on failure
+
+int ReadFromUdp::_writeToOutputFmq(bool force)
+
+{
+
+  // if the message is large enough, write to the FMQ
+  
+  int nParts = _outputMsg.getNParts();
+  if (!force && nParts < _params.n_pulses_per_message) {
+    return 0;
+  }
+
+  PMU_auto_register("writeToFmq");
+
+  void *buf = _outputMsg.assemble();
+  int len = _outputMsg.lengthAssembled();
+  if (_outputFmq.writeMsg(0, 0, buf, len)) {
+    cerr << "ERROR - ReadFromUdp" << endl;
+    cerr << "  Cannot write FMQ: " << _params.output_fmq_path << endl;
+    _outputMsg.clearParts();
+    return -1;
+  }
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "  Wrote msg, nparts, len, path: "
+         << nParts << ", " << len << ", "
+         << _params.output_fmq_path << endl;
+  }
+  _outputMsg.clearParts();
+
+  return 0;
+
+}
+    
+///////////////////////////////////////
+// write end-of-vol to output FMQ
+// returns 0 on success, -1 on failure
+
+int ReadFromUdp::_writeEndOfVol()
+
+{
+
+  iwrf_event_notice_t notice;
+  iwrf_event_notice_init(notice);
+
+  notice.end_of_volume = true;
+  notice.volume_num = _volNum;
+  notice.sweep_num = _sweepNum;
+
+  _outputMsg.addPart(IWRF_EVENT_NOTICE_ID, sizeof(notice), &notice);
+
+  if (_params.debug) {
+    cerr << "Writing end of volume event" << endl;
+    iwrf_event_notice_print(stderr, notice);
+  }
+
+  if (_writeToOutputFmq(true)) {
+    return -1;
+  }
+
+  return 0;
+
+}
+
 #ifdef JUNK
 
 ////////////////////////////////////////////////////

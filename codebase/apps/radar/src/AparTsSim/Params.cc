@@ -819,18 +819,6 @@
     tt->single_val.i = 1000;
     tt++;
     
-    // Parameter 'output_fmq_blocking'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_blocking");
-    tt->descr = tdrpStrDup("Option to set up the FMQ as blocking.");
-    tt->help = tdrpStrDup("If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data. This should only be used if there is a single client reading the FMQ.");
-    tt->val_offset = (char *) &output_fmq_blocking - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'n_pulses_per_message'
     // ctype is 'int'
     
@@ -853,30 +841,6 @@
     tt->help = tdrpStrDup("The info part includes data which does not change on a pulse-to-pulse basis.");
     tt->val_offset = (char *) &n_pulses_per_info - &_start_;
     tt->single_val.i = 10000;
-    tt++;
-    
-    // Parameter 'write_latest_data_info'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_latest_data_info");
-    tt->descr = tdrpStrDup("Option to write latest_data_info for the output FMQ.");
-    tt->help = tdrpStrDup("If TRUE, latest_data_info will be written for the output FMQ, at the specified interval.");
-    tt->val_offset = (char *) &write_latest_data_info - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'latest_data_info_interval'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("latest_data_info_interval");
-    tt->descr = tdrpStrDup("Number of seconds between writing latest_data_info.");
-    tt->help = tdrpStrDup("If write_latest_data_info is TRUE, the program will register with the DataMapper when the output FMQ is written to.");
-    tt->val_offset = (char *) &latest_data_info_interval - &_start_;
-    tt->single_val.i = 5;
     tt++;
     
     // Parameter 'data_mapper_report_interval'

@@ -132,7 +132,17 @@ private:
   apar_ts_scan_segment_t _aparScanSegment;
   apar_ts_processing_t _aparTsProcessing;
   apar_ts_calibration_t _aparCalibration;
+  int _volNum;
+  int _sweepNum;
+  si64 _nPulsesOut;
 
+  // output message and FMQ
+  // we conbine a number of packets into a message before
+  // writing to the FMQ
+
+  DsFmq _outputFmq;
+  DsMessage _outputMsg;
+  
   // functions
 
   int _openUdpForReading();
@@ -140,6 +150,14 @@ private:
   void _convertMeta2Apar(const IwrfTsInfo &info);
   int _handlePacket(ui08 *pktBuf, int pktLen);
 
+  // write to FMQ
+
+  int _writePulseToFmq();
+  int _openOutputFmq();
+  void _addMetaDataToMsg();
+  int _writeToOutputFmq(bool force = false);
+  int _writeEndOfVol();
+  
 #ifdef JUNK
 
   int _convert2Udp(const string &inputPath);
@@ -183,8 +201,6 @@ private:
 
 #endif
 
-  int _writePulseToFmq();
-  
 };
 
 #endif
