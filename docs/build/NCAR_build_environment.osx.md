@@ -8,7 +8,7 @@ by the GNU tools autoconf and automake.
 
 1. [prepare](#prepare)
 2. [download](#download)
-3. [setenv](#setenv)
+3. [set environment variables](#setenv)
 4. [build](#build)
 
 <a name="prepare"/>
@@ -108,15 +108,16 @@ The software development system at NCAR/RAL (formerly RAP) and NCAR/EOL makes us
 Therefore, before performing the build, you need to set up the correct environment, as follows:
 
 ### Set an environment variable for the install directory:
-
+For sh or bash:
 ```
-  $LROSE_INSTALL_DIR
+export LROSE_INSTALL_DIR=/Users/myname/lrose
+export LROSE_CORE_DIR=/Users/myname/git/lrose-core
 ```
 
-This will normally be:
-
+For csh or tcsh:
 ```
-  ~/lrose
+setenv LROSE_INSTALL_DIR /Users/myname/lrose
+setenv LROSE_CORE_DIR /Users/myname/git/lrose-core
 ```
 
 The software is automatically installed in:
@@ -125,18 +126,6 @@ The software is automatically installed in:
   $LROSE_INSTALL_DIR/bin
   $LROSE_INSTALL_DIR/lib
   $LROSE_INSTALL_DIR/include
-```
-
-#### Set an environment variable
-
-```
-  $LROSE_CORE_DIR
-```
-
-#### to the git lrose-core directory (i.e. the top of the distribution):
-
-```
-  ~/git/lrose-core
 ```
 
 ### Setup the environment by running the source command.
