@@ -568,7 +568,7 @@ int WriteToUdp::_sendPulse(ui64 sampleNumber,
     cerr << "================================================" << endl;
   }
 
-  umsleep(20);
+  uusleep(_params.pulse_sleep_usecs);
 
   return 0;
 

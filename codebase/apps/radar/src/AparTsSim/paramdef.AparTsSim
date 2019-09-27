@@ -112,6 +112,12 @@ paramdef int {
   p_help = "If this is 1, then that represents the signals from the entire array combined into a single channel.If this is more than 1, each channel represents a single row from the array, which will be combined using beam forming on the FPGA.";
 } udp_n_channels;
 
+paramdef int {
+  p_default = 1000;
+  p_descr = "Sleep per outgoing pulse (msecs).";
+  p_help = "Sleep period between outgoing pulses, to simulate a specific data rate.";
+} pulse_sleep_usecs;
+
 commentdef {
   p_header = "READ UDP MODE";
 };

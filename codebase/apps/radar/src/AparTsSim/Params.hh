@@ -398,6 +398,8 @@ public:
 
   int udp_n_channels;
 
+  int pulse_sleep_usecs;
+
   char* output_fmq_path;
 
   int output_fmq_size;
@@ -417,7 +419,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[26];
+  mutable TDRPtable _table[27];
 
   const char *_className;
 

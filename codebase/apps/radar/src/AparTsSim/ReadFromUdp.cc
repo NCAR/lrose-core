@@ -137,7 +137,7 @@ int ReadFromUdp::Run ()
     cerr << "  We need 1 file to initialize metadata" << endl;
     return -1;
   }
-  if (_setMetadata(_inputFileList[0])) {
+  if (_initMetaData(_inputFileList[0])) {
     return -1;
   }
 
@@ -198,7 +198,7 @@ int ReadFromUdp::Run ()
       
       if (pktLen > 0) {
         
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
+        if (_params.debug >= Params::DEBUG_EXTRA) {
           fprintf(stderr, "Read packet, %d bytes\n", pktLen);
         }
         if (_handlePacket(pktBuf, pktLen)) {
@@ -353,7 +353,7 @@ int ReadFromUdp::_handlePacket(ui08 *pktBuf, int pktLen)
   ui32 spares[3];
   loc += sizeof(spares);
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "===============================================" << endl;
     cerr << "==>> messageType: " << _messageType << endl;
     cerr << "==>> aesaId: " << _aesaId << endl;
@@ -460,7 +460,7 @@ int ReadFromUdp::_openUdpForReading()
 ////////////////////////////////////////////////////
 // Read the IWRF file, set the APAR-style metadata
 
-int ReadFromUdp::_setMetadata(const string &inputPath)
+int ReadFromUdp::_initMetaData(const string &inputPath)
   
 {
   
@@ -476,11 +476,11 @@ int ReadFromUdp::_setMetadata(const string &inputPath)
   // create reader for just that one file
 
   IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    iwrfDebug = IWRF_DEBUG_VERBOSE;
-  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-    iwrfDebug = IWRF_DEBUG_NORM;
-  } 
+  // if (_params.debug >= Params::DEBUG_EXTRA) {
+  //   iwrfDebug = IWRF_DEBUG_VERBOSE;
+  // } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+  //   iwrfDebug = IWRF_DEBUG_NORM;
+  // } 
   IwrfTsReaderFile reader(fileList, iwrfDebug);
   const IwrfTsInfo &tsInfo = reader.getOpsInfo();
 
@@ -505,15 +505,6 @@ int ReadFromUdp::_setMetadata(const string &inputPath)
     return -1;
   }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    iwrf_radar_info_print(stderr, tsInfo.getRadarInfo());
-    iwrf_scan_segment_print(stderr, tsInfo.getScanSegment());
-    iwrf_ts_processing_print(stderr, tsInfo.getTsProcessing());
-    if (tsInfo.isCalibrationActive()) {
-      iwrf_calibration_print(stderr, tsInfo.getCalibration());
-    }
-  }
-
   // convert the metadata to APAR types
   // set the metadata in the info metadata queue
 
@@ -525,6 +516,15 @@ int ReadFromUdp::_setMetadata(const string &inputPath)
     _aparTsInfo->setCalibration(_aparCalibration);
   }
   
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    apar_ts_radar_info_print(stderr, _aparRadarInfo);
+    apar_ts_scan_segment_print(stderr, _aparScanSegment);
+    apar_ts_processing_print(stderr, _aparTsProcessing);
+    if (tsInfo.isCalibrationActive()) {
+      apar_ts_calibration_print(stderr, _aparCalibration);
+    }
+  }
+
   return 0;
   
 }
@@ -552,7 +552,7 @@ void ReadFromUdp::_convertMeta2Apar(const IwrfTsInfo &info)
     AparTsSim::copyIwrf2Apar(info.getCalibration(), _aparCalibration);
   }
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     apar_ts_radar_info_print(stderr, _aparRadarInfo);
     apar_ts_scan_segment_print(stderr, _aparScanSegment);
     apar_ts_processing_print(stderr, _aparTsProcessing);
@@ -570,7 +570,7 @@ int ReadFromUdp::_writePulseToFmq()
 
   int iret = 0;
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "==>> Writing out pulse <<==" << endl;
     cerr << "  _nPulsesOut: " << _nPulsesOut << endl;
     cerr << "  _iqApar.size(): " << _iqApar.size() << endl;
@@ -579,6 +579,7 @@ int ReadFromUdp::_writePulseToFmq()
   // add metadata to outgoing message
 
   if (_nPulsesOut % _params.n_pulses_per_info == 0) {
+    cerr << "11111111111111111111" << endl;
     _addMetaDataToMsg();
   }
   
@@ -726,7 +727,15 @@ int ReadFromUdp::_writeToOutputFmq(bool force)
     return 0;
   }
 
-  PMU_auto_register("writeToFmq");
+  PMU_auto_register("writeToOutputFmq");
+
+  // if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "========= Output Message =========" << endl;
+    _outputMsg.printHeader(cerr);
+    _outputMsg.printPartHeaders(cerr);
+    cerr << "==================================" << endl;
+    // }
+
 
   void *buf = _outputMsg.assemble();
   int len = _outputMsg.lengthAssembled();
@@ -737,11 +746,12 @@ int ReadFromUdp::_writeToOutputFmq(bool force)
     return -1;
   }
 
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "  Wrote msg, nparts, len, path: "
          << nParts << ", " << len << ", "
          << _params.output_fmq_path << endl;
   }
+
   _outputMsg.clearParts();
 
   return 0;
@@ -778,606 +788,3 @@ int ReadFromUdp::_writeEndOfVol()
 
 }
 
-#ifdef JUNK
-
-////////////////////////////////////////////////////
-// Convert 1 file to UDP
-
-int ReadFromUdp::_convert2Udp(const string &inputPath)
-  
-{
-  
-  if (_params.debug) {
-    cerr << "Reading input file: " << inputPath << endl;
-  }
-
-  // set up a vector with a single file entry
-  
-  vector<string> fileList;
-  fileList.push_back(inputPath);
-
-  // create reader for just that one file
-
-  IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    iwrfDebug = IWRF_DEBUG_VERBOSE;
-  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-    iwrfDebug = IWRF_DEBUG_NORM;
-  } 
-  IwrfTsReaderFile reader(fileList, iwrfDebug);
-  const IwrfTsInfo &tsInfo = reader.getOpsInfo();
-
-  // read through pulses until we have current metadata
-  
-  {
-    IwrfTsPulse *iwrfPulse = reader.getNextPulse();
-    bool haveMetadata = false;
-    while (iwrfPulse != NULL) {
-      if (tsInfo.isRadarInfoActive() &&
-          tsInfo.isScanSegmentActive() &&
-          tsInfo.isTsProcessingActive()) {
-        // we have the necessary metadata
-        haveMetadata = true;
-        delete iwrfPulse;
-        break;
-      }
-      delete iwrfPulse;
-    }
-    if (!haveMetadata) {
-      cerr << "ERROR - ReadFromUdp::_convert2Udp()" << endl;
-      cerr << "Metadata missing for file: " << inputPath << endl;
-      return -1;
-    }
-  }
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    iwrf_radar_info_print(stderr, tsInfo.getRadarInfo());
-    iwrf_scan_segment_print(stderr, tsInfo.getScanSegment());
-    iwrf_ts_processing_print(stderr, tsInfo.getTsProcessing());
-    if (tsInfo.isCalibrationActive()) {
-      iwrf_calibration_print(stderr, tsInfo.getCalibration());
-    }
-  }
-
-  // reset reader queue to start
-
-  reader.reset();
-
-  // compute number of pulses per dwell
-
-  size_t nPulsesPerDwell = 
-    _params.n_samples_per_visit *
-    _params.n_visits_per_beam *
-    _params.n_beams_per_dwell;
-
-  if (_params.debug) {
-    cerr << "  ==>> nPulsesPerDwell: " << nPulsesPerDwell << endl;
-  }
-
-  // read in all pulses
-
-  IwrfTsPulse *iwrfPulse = reader.getNextPulse();
-  while (iwrfPulse != NULL) {
-    
-    // open output UDP as needed
-    
-    if (_openUdpForReading()) {
-      cerr << "ERROR - ReadFromUdp::_convert2Udp" << endl;
-      cerr << "  Processing file: " << inputPath << endl;
-      cerr << "  Cannot open UDP output device" << endl;
-      return -1;
-    }
-    
-    // add pulse to dwell
-    
-    _dwellPulses.push_back(iwrfPulse);
-    
-    // if we have a full dwell, process the pulses in it
-
-    if (_dwellPulses.size() == nPulsesPerDwell) {
-
-      // process dwell
-
-      _processDwell(_dwellPulses);
-      _dwellSeqNum++;
-
-      // delete pulses to free memory
-      
-      for (size_t ii = 0; ii < _dwellPulses.size(); ii++) {
-        delete _dwellPulses[ii];
-      }
-      _dwellPulses.clear();
-
-    }
-      
-    // read next one
-
-    iwrfPulse = reader.getNextPulse();
-
-  } // while
-
-  return 0;
-  
-}
-
-////////////////////////////////////////////
-// process pulses in a dwell for UDP output
-
-int ReadFromUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
-  
-{
-
-  // compute the angles for the beams in the dwell
-
-  double startAz = dwellPulses.front()->getAz();
-  double endAz = dwellPulses.back()->getAz();
-  double azRange = AparTsSim::conditionAngle360(endAz - startAz);
-  double deltaAzPerBeam = azRange / _params.n_beams_per_dwell;
-
-  double startEl = dwellPulses.front()->getEl();
-  double endEl = dwellPulses.back()->getEl();
-  double elRange = AparTsSim::conditionAngle360(endEl - startEl);
-  double deltaElPerBeam = elRange / _params.n_beams_per_dwell;
-
-  vector<double> beamAz, beamEl;
-  for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
-    double az = AparTsSim::conditionAngle360(startAz + 
-                                             (ii + 0.5) * deltaAzPerBeam);
-    double el = AparTsSim::conditionAngle180(startEl + 
-                                             (ii + 0.5) * deltaElPerBeam);
-    beamAz.push_back(az);
-    beamEl.push_back(el);
-  }
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "-----------------------------------------------" << endl;
-    cerr << "startAz, endAz, deltaAzPerBeam: "
-         << startAz << ", " << endAz << ", " << deltaAzPerBeam << endl;
-    cerr << "startEl, endEl, deltaElPerBeam: "
-         << startEl << ", " << endEl << ", " << deltaElPerBeam << endl;
-    for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
-      cerr << "  ii, az, el: "
-           << ii << ", " << beamAz[ii] << ", " << beamEl[ii] << endl;
-    }
-    cerr << "-----------------------------------------------" << endl;
-  }
-
-  // loop through all of the pulses
-
-  int pulseNumInDwell = 0;
-  for (int ivisit = 0; ivisit < _params.n_visits_per_beam; ivisit++) {
-    for (int ibeam = 0; ibeam < _params.n_beams_per_dwell; ibeam++) {
-      for (int ipulse = 0; ipulse < _params.n_samples_per_visit; 
-           ipulse++, pulseNumInDwell++) {
-        
-        // convert to si16 as needed
-        
-        IwrfTsPulse *iwrfPulse = dwellPulses[pulseNumInDwell];
-        if (iwrfPulse->getPackedEncoding() != IWRF_IQ_ENCODING_SCALED_SI16) {
-          iwrfPulse->convertToPacked(IWRF_IQ_ENCODING_SCALED_SI16);
-        }
-
-        // set the metadata
-
-        ui64 sampleNumber = _sampleSeqNum;
-        ui64 pulseNumber = _pulseSeqNum;
-        
-        si64 secondsTime = iwrfPulse->getTime();
-        ui32 nanoSecs = iwrfPulse->getNanoSecs();
-        
-        ui64 dwellNum = _dwellSeqNum;
-        ui32 beamNumInDwell = ibeam;
-        ui32 visitNumInBeam = ivisit;
-        
-        double azRad = beamAz[ibeam] * DEG_TO_RAD;
-        double elRad = beamEl[ibeam] * DEG_TO_RAD;
-        double uu = cos(elRad) * sin(azRad);
-        double vv = sin(elRad);
-        
-        bool isXmitH = iwrfPulse->isHoriz();
-        bool isCoPolRx = true;
-
-        // fill out the IQ data array
-        
-        vector<si16> iqApar;
-        _fillIqData(iwrfPulse, 0, iqApar); // channel 0, co-pol
-
-        // create the buffer for co-polar packet
-        
-        if (_sendPulse(sampleNumber,
-                       pulseNumber,
-                       secondsTime, nanoSecs,
-                       dwellNum,
-                       beamNumInDwell,
-                       visitNumInBeam,
-                       uu, vv, 
-                       isXmitH, isCoPolRx,
-                       _params.udp_n_gates,
-                       iqApar)) {
-          cerr << "ERROR - _processDwell" << endl;
-          return -1;
-        }
-        
-        // optionally add a cross-pol pulse
-        // at the end of the dwell
-        
-        if (_params.add_cross_pol_sample_at_end_of_visit &&
-            ipulse == _params.n_samples_per_visit - 1) {
-          
-          isCoPolRx = false;
-          sampleNumber = _sampleSeqNum;
-          pulseNumber = _pulseSeqNum;
-          
-          _fillIqData(iwrfPulse, 1, iqApar); // channel 1, cross-pol
-
-          if (_sendPulse(sampleNumber,
-                         pulseNumber,
-                         secondsTime, nanoSecs,
-                         dwellNum,
-                         beamNumInDwell,
-                         visitNumInBeam,
-                         uu, vv, 
-                         isXmitH, isCoPolRx,
-                         _params.udp_n_gates,
-                         iqApar)) {
-            cerr << "ERROR - _processDwell" << endl;
-            return -1;
-          }
-
-        } // if (_params.add_cross_pol_sample_at_end_of_visit ...
-
-      } // ipulse
-    } // ibeam
-  } // ivisit
-
-  return 0;
-
-}
-
-////////////////////////////////////////////////////////////////////////
-// fill out IQ data array
-
-void ReadFromUdp::_fillIqData(IwrfTsPulse *iwrfPulse,
-                              int channelNum,
-                              vector<si16> &iqApar)
-
-{
-
-  // init
-
-  iqApar.clear();
-
-  // determine how many copies we need to make for each
-  // gate to fill out the apar array
-  
-  int nGatesIwrf = iwrfPulse->getNGates();
-  int nGatesApar = _params.udp_n_gates;
-  int nValsApar = nGatesApar * 2;
-  int nCopyPerGate = ((nGatesApar - 1) / nGatesIwrf) + 1;
-  
-  // copy iwrf data into apar array
-  
-  const si16 *iqIwrf = (const si16 *) iwrfPulse->getPackedData() +
-    channelNum * nGatesIwrf * 2;
-
-  
-  while ((int) iqApar.size() < nValsApar) {
-    
-    for (int icopy = 0; icopy < nCopyPerGate; icopy++) {
-      iqApar.push_back(*iqIwrf);       // I
-      iqApar.push_back(*(iqIwrf + 1)); // Q
-      if ((int) iqApar.size() ==  nValsApar) {
-        break;
-      }
-    }
-
-    iqIwrf += 2;
-
-  } // while
-  
-}
-
-////////////////////////////////////////////////////////////////////////
-// create a packet buffer
-
-int ReadFromUdp::_sendPulse(ui64 sampleNumber,
-                            ui64 pulseNumber,
-                            si64 secondsTime,
-                            ui32 nanoSecs,
-                            ui64 dwellNum,
-                            ui32 beamNumInDwell,
-                            ui32 visitNumInBeam,
-                            double uu,
-                            double vv,
-                            bool isXmitH,
-                            bool isCoPolRx,
-                            int nGates,
-                            vector<si16> &iqApar)
-  
-{
-
-  // create packet buffer
-
-  MemBuf buf;
-
-  // add header to buffer, compute header length
-  
-  ui32 pulseStartIndex = 0;
-  
-  _addAparHeader(sampleNumber, pulseNumber,
-                 secondsTime, nanoSecs,
-                 pulseStartIndex,
-                 dwellNum, beamNumInDwell, visitNumInBeam,
-                 uu, vv,
-                 true, isXmitH, isCoPolRx,
-                 nGates,
-                 buf);
-  
-  size_t headerLen = buf.getLen();
-
-  // compute number of packets per pulse
-
-  int maxNbytesDataPerPacket = _params.udp_max_packet_size - headerLen;
-  int maxNGatesPerPacket = maxNbytesDataPerPacket / 4;
-  int nPacketsPerPulse = (_params.udp_n_gates / maxNGatesPerPacket) + 1;
-  int nGatesPerPacket = ((nGates - 1) / nPacketsPerPulse) + 1;
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "==>> UDP headerLen: " << headerLen << endl;
-    cerr << "==>> UDP maxNbytesDataPerPacket: "
-         << maxNbytesDataPerPacket << endl;
-    cerr << "==>> UDP maxNGatesPerPacket: "
-         << maxNGatesPerPacket << endl;
-    cerr << "==>> UDP nPacketsPerPulse: "
-         << nPacketsPerPulse << endl;
-    cerr << "==>> UDP nGatesPerPacket: "
-         << nGatesPerPacket << endl;
-  }
-
-  // create the pulse packets
-
-  int nGatesRemaining = nGates;
-  int nGatesSoFar = 0;
-
-  for (int ipkt = 0; ipkt < nPacketsPerPulse; ipkt++) {
-
-    //  init
-
-    buf.clear();
-    bool isFirstPacket = (ipkt == 0);
-
-    // compute number of gates for this packet
-  
-    int nGatesThisPacket = nGatesPerPacket;
-    if (nGatesThisPacket > nGatesRemaining) {
-      nGatesThisPacket = nGatesRemaining;
-    }
-
-    // add header to buffer
-  
-    _addAparHeader(sampleNumber, pulseNumber,
-                   secondsTime, nanoSecs,
-                   pulseStartIndex,
-                   dwellNum, beamNumInDwell, visitNumInBeam,
-                   uu, vv,
-                   isFirstPacket, isXmitH, isCoPolRx,
-                   nGatesThisPacket,
-                   buf);
-
-    // add IQ data to buffer
-
-    buf.add(iqApar.data() + nGatesSoFar * 2,
-            nGatesThisPacket * 2 * 2);
-
-    // write the packet to UDP
-    
-    if (_writeBufToUdp(buf)) {
-      cerr << "ERROR - _sendPulse" << endl;
-      return -1;
-    }
-    
-    // increment / decrement
-
-    nGatesSoFar += nGatesThisPacket;
-    nGatesRemaining -= nGatesThisPacket;
-    _sampleSeqNum += nGatesThisPacket;
-
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "====>> UDP ipkt: " << ipkt << endl;
-      cerr << "====>> UDP nGatesSoFar: " << nGatesSoFar << endl;
-      cerr << "====>> UDP nGatesRemaining: " << nGatesRemaining << endl;
-      cerr << "====>> UDP _sampleSeqNum: " << _sampleSeqNum << endl;
-    }
-    
-  } // ipkt
-
-  // sent 1 pulse
-
-  _pulseSeqNum++;
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "==>> UDP _pulseSeqNum: " << _pulseSeqNum << endl;
-  }
-    
-  return 0;
-
-}
-
-  
-////////////////////////////////////////////////////////////////////////
-// add header to packet
-
-void ReadFromUdp::_addAparHeader(ui64 sampleNumber,
-                                 ui64 pulseNumber,
-                                 si64 secondsTime,
-                                 ui32 nanoSecs,
-                                 ui32 pulseStartIndex,
-                                 ui64 dwellNum,
-                                 ui32 beamNumInDwell,
-                                 ui32 visitNumInBeam,
-                                 double uu,
-                                 double vv,
-                                 bool isFirstPktInPulse,
-                                 bool isXmitH,
-                                 bool isCoPolRx,
-                                 int nSamples,
-                                 MemBuf &buf)
-  
-{
-
-  // message type
-
-  ui16 messageType = 0x0001;
-  BE_from_array_16(&messageType, sizeof(messageType));
-  buf.add(&messageType, sizeof(messageType));
-
-  // AESA ID
-
-  ui16 aesaId = 0;
-  BE_from_array_16(&aesaId, sizeof(aesaId));
-  buf.add(&aesaId, sizeof(aesaId));
-
-  // channel number
-
-  ui16 chanNum = 0;
-  BE_from_array_16(&chanNum, sizeof(chanNum));
-  buf.add(&chanNum, sizeof(chanNum));
-
-  // flags
-  
-  ui32 flags = 0;
-  if (isXmitH) {
-    // bit 0 indicates H transmit
-    flags |= 1;
-  }
-  if ((isXmitH && isCoPolRx) || (!isXmitH && !isCoPolRx)) {
-    // git 1 indicates H receive
-    flags |= 2;
-  }
-  // bit 3 is pulse start flag
-  if (isFirstPktInPulse) {
-    flags |= 4;
-  }
-
-  BE_from_array_32(&flags, sizeof(flags));
-  buf.add(&flags, sizeof(flags));
-
-  // beam index - always 200 for now
-
-  ui32 beamIndex = 200;
-  BE_from_array_32(&beamIndex, sizeof(beamIndex));
-  buf.add(&beamIndex, sizeof(beamIndex));
-  
-  // sample number - first sample in this packet
-
-  ui64 sampleNum = sampleNumber;
-  BE_from_array_64(&sampleNum, sizeof(sampleNum));
-  buf.add(&sampleNum, sizeof(sampleNum));
-  
-  // pulse number
-
-  ui64 pulseNum = pulseNumber;
-  BE_from_array_64(&pulseNum, sizeof(pulseNum));
-  buf.add(&pulseNum, sizeof(pulseNum));
-
-  // time
-
-  si64 secs = secondsTime;
-  BE_from_array_64(&secs, sizeof(secs));
-  buf.add(&secs, sizeof(secs));
-
-  ui32 nsecs = nanoSecs;
-  BE_from_array_32(&nsecs, sizeof(nsecs));
-  buf.add(&nsecs, sizeof(nsecs));
-
-  // start index
-
-  ui32 startIndex = pulseStartIndex;
-  BE_from_array_32(&startIndex, sizeof(startIndex));
-  buf.add(&startIndex, sizeof(startIndex));
-
-  // angles
-
-  fl32 u = uu;
-  BE_from_array_32(&u, sizeof(u));
-  buf.add(&u, sizeof(u));
-
-  fl32 v = vv;
-  BE_from_array_32(&v, sizeof(v));
-  buf.add(&v, sizeof(v));
-
-  // dwell, beam, visit
-
-  ui64 dNum = dwellNum;
-  BE_from_array_64(&dNum, sizeof(dNum));
-  buf.add(&dNum, sizeof(dNum));
-
-  ui32 bNum = beamNumInDwell;
-  BE_from_array_32(&bNum, sizeof(bNum));
-  buf.add(&bNum, sizeof(bNum));
-
-  ui32 vNum = visitNumInBeam;
-  BE_from_array_32(&vNum, sizeof(vNum));
-  buf.add(&vNum, sizeof(vNum));
-
-  // number of samples = number of gates
-
-  ui32 nSamp = nSamples;
-  BE_from_array_32(&nSamp, sizeof(nSamp));
-  buf.add(&nSamp, sizeof(nSamp));
-
-  // 3 spares
-
-  ui32 spare = 0;
-  buf.add(&spare, sizeof(spare));
-  buf.add(&spare, sizeof(spare));
-  buf.add(&spare, sizeof(spare));
-
-}
-
-  
-////////////////////////////////////////////////////
-// Write buffer to UDP
-// Returns 0 on success, -1 on error
-
-int ReadFromUdp::_writeBufToUdp(const MemBuf &buf)
-  
-{
-
-  // set up destination address structure
-  
-  struct sockaddr_in destAddr;
-  MEM_zero(destAddr);
-  if (inet_aton(_params.udp_dest_address, &destAddr.sin_addr) == 0) {
-    fprintf(stderr, "Cannot translate address: %s - may be invalid\n",
-            _params.udp_dest_address);
-    close (_udpFd);
-    _udpFd = -1;
-    return -1;
-  }
-  destAddr.sin_family = AF_INET;
-  uint16_t destPort = _params.udp_dest_port;
-  destAddr.sin_port = htons(destPort);
-  destAddr.sin_addr.s_addr = inet_addr(_params.udp_dest_address);
-  
-  if (sendto(_udpFd, buf.getPtr(), buf.getLen(), 0,
-             (struct sockaddr *) &destAddr,
-             sizeof(destAddr)) != (ssize_t) buf.getLen()) {
-    if (_errCount % 1000 == 0) {
-      perror("_writeBufToUdp: ");
-      cerr << "Cannot write UDP packet to port: "
-           << _params.udp_dest_port << endl;
-      cerr << "  Pkt len: " << buf.getLen() << endl;
-    }
-    _errCount++;
-  }
-
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Sent UDP packet, len: " << buf.getLen() << endl;
-  }
-  
-  return 0;
-
-}
-
-
-#endif

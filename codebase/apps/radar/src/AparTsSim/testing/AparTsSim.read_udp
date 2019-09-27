@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for AparTsSim
+ * TDRP params for ./AparTsSim
  **********************************************************************/
 
 //======================================================================
@@ -210,6 +210,19 @@ udp_n_gates = 2500;
 
 udp_n_channels = 1;
 
+///////////// pulse_sleep_usecs ///////////////////////
+//
+// Sleep per outgoing pulse (msecs).
+//
+// Sleep period between outgoing pulses, to simulate a specific data 
+//   rate.
+//
+//
+// Type: int
+//
+
+pulse_sleep_usecs = 1000;
+
 //======================================================================
 //
 // READ UDP MODE.
@@ -254,21 +267,6 @@ output_fmq_size = 100000000;
 
 output_fmq_nslots = 1000;
 
-///////////// output_fmq_blocking /////////////////////
-//
-// Option to set up the FMQ as blocking.
-//
-// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
-//   becomes full, Test2Dsr will then block until there is space for more 
-//   data. This should only be used if there is a single client reading 
-//   the FMQ.
-//
-//
-// Type: boolean
-//
-
-output_fmq_blocking = FALSE;
-
 ///////////// n_pulses_per_message ////////////////////
 //
 // Number of pulses per output message.
@@ -280,7 +278,7 @@ output_fmq_blocking = FALSE;
 // Type: int
 //
 
-n_pulses_per_message = 200;
+n_pulses_per_message = 100;
 
 ///////////// n_pulses_per_info ///////////////////////
 //
@@ -293,33 +291,7 @@ n_pulses_per_message = 200;
 // Type: int
 //
 
-n_pulses_per_info = 10000;
-
-///////////// write_latest_data_info //////////////////
-//
-// Option to write latest_data_info for the output FMQ.
-//
-// If TRUE, latest_data_info will be written for the output FMQ, at the 
-//   specified interval.
-//
-//
-// Type: boolean
-//
-
-write_latest_data_info = FALSE;
-
-///////////// latest_data_info_interval ///////////////
-//
-// Number of seconds between writing latest_data_info.
-//
-// If write_latest_data_info is TRUE, the program will register with the 
-//   DataMapper when the output FMQ is written to.
-//
-//
-// Type: int
-//
-
-latest_data_info_interval = 5;
+n_pulses_per_info = 100;
 
 ///////////// data_mapper_report_interval /////////////
 //

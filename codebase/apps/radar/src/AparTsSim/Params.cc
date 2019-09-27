@@ -774,6 +774,18 @@
     tt->single_val.i = 1;
     tt++;
     
+    // Parameter 'pulse_sleep_usecs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("pulse_sleep_usecs");
+    tt->descr = tdrpStrDup("Sleep per outgoing pulse (msecs).");
+    tt->help = tdrpStrDup("Sleep period between outgoing pulses, to simulate a specific data rate.");
+    tt->val_offset = (char *) &pulse_sleep_usecs - &_start_;
+    tt->single_val.i = 1000;
+    tt++;
+    
     // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));

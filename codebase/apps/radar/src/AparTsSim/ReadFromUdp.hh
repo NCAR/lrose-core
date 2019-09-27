@@ -90,7 +90,7 @@ private:
   int _udpFd;
   int _errCount;
 
-  // pulse details
+  // pulse metadata
 
   ui64 _dwellSeqNum;
   ui64 _pulseSeqNum;
@@ -122,6 +122,8 @@ private:
   ui32 _visitNumInBeam;
   ui32 _nSamples;
 
+  // pulse IQ
+
   vector<si16> _iqApar;
 
   // APAR-style metadata
@@ -146,7 +148,7 @@ private:
   // functions
 
   int _openUdpForReading();
-  int _setMetadata(const string &inputPath);
+  int _initMetaData(const string &inputPath);
   void _convertMeta2Apar(const IwrfTsInfo &info);
   int _handlePacket(ui08 *pktBuf, int pktLen);
 
@@ -158,49 +160,6 @@ private:
   int _writeToOutputFmq(bool force = false);
   int _writeEndOfVol();
   
-#ifdef JUNK
-
-  int _convert2Udp(const string &inputPath);
-  int _processDwell(vector<IwrfTsPulse *> &dwellPulses);
-
-  void _fillIqData(IwrfTsPulse *iwrfPulse,
-                   int channelNum,
-                   vector<si16> &iqData);
-
-  int _sendPulse(ui64 sampleNumber,
-                 ui64 pulseNumber,
-                 si64 secondsTime,
-                 ui32 nanoSecs,
-                 ui64 dwellNum,
-                 ui32 beamNumInDwell,
-                 ui32 visitNumInBeam,
-                 double uu,
-                 double vv,
-                 bool isXmitH,
-                 bool isCoPolRx,
-                 int nGates,
-                 vector<si16> &iqApar);
-
-  void _addAparHeader(ui64 sampleNumber,
-                      ui64 pulseNumber,
-                      si64 secondsTime,
-                      ui32 nanoSecs,
-                      ui32 pulseStartIndex,
-                      ui64 dwellNum,
-                      ui32 beamNumInDwell,
-                      ui32 visitNumInBeam,
-                      double uu,
-                      double vv,
-                      bool isFirstPktInPulse,
-                      bool isXmitH,
-                      bool isCoPolRx,
-                      int nSamples,
-                      MemBuf &buf);
-
-  int _writeBufToUdp(const MemBuf &buf);
-
-#endif
-
 };
 
 #endif
