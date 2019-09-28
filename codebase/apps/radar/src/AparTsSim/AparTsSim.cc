@@ -205,8 +205,6 @@ void AparTsSim::copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
                               apar_ts_packet_info_t &apar)
 {
 
-  apar_ts_packet_info_init(apar);
-  apar.id = iwrf.id;
   apar.len_bytes = iwrf.len_bytes;
   apar.seq_num = iwrf.seq_num;
   apar.version_num = iwrf.version_num;

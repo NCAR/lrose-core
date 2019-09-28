@@ -319,15 +319,11 @@ int ReadFromUdp::_handlePacket(ui08 *pktBuf, int pktLen)
   loc += sizeof(_vv);
 
   double elRad = asin(_vv);
+  // double azRad = asin(_uu / cos(elRad));
   double azRad = atan2(_uu, sqrt(1.0 - _uu * _uu - _vv * _vv));
   _el = elRad * RAD_TO_DEG;
-  _az = 90.0 - (azRad * RAD_TO_DEG);
-  if (_az < 0.0) {
-    _az += 360.0;
-  } else if (_az >= 360.0) {
-    _az -= 360.0;
-  }
-
+  _az = azRad * RAD_TO_DEG;
+  
   // dwell details
 
   memcpy(&_dwellNum, loc, sizeof(_dwellNum));
@@ -579,7 +575,6 @@ int ReadFromUdp::_writePulseToFmq()
   // add metadata to outgoing message
 
   if (_nPulsesOut % _params.n_pulses_per_info == 0) {
-    cerr << "11111111111111111111" << endl;
     _addMetaDataToMsg();
   }
   
@@ -729,12 +724,12 @@ int ReadFromUdp::_writeToOutputFmq(bool force)
 
   PMU_auto_register("writeToOutputFmq");
 
-  // if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "========= Output Message =========" << endl;
     _outputMsg.printHeader(cerr);
     _outputMsg.printPartHeaders(cerr);
     cerr << "==================================" << endl;
-    // }
+  }
 
 
   void *buf = _outputMsg.assemble();

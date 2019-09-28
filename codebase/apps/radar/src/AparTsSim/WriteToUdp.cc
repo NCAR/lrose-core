@@ -325,8 +325,13 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         ui64 dwellNum = _dwellSeqNum;
         ui32 beamNumInDwell = ibeam;
         ui32 visitNumInBeam = ivisit;
+
+        // for APAR, az ranges from -90 to +90
+        // and el from -90 to +90
         
-        double azRad = (90.0 - beamAz[ibeam]) * DEG_TO_RAD;
+        double az = beamAz[ibeam] / 2.0 - 90.0;
+        double el = beamEl[ibeam];
+        double azRad = az * DEG_TO_RAD;
         double elRad = beamEl[ibeam] * DEG_TO_RAD;
         double uu = cos(elRad) * sin(azRad);
         double vv = sin(elRad);
@@ -336,12 +341,11 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
 
 
         if (_params.debug >= Params::DEBUG_EXTRA) {
-          
-          // cerr << "==>> startIndex: " << startIndex << endl;
+        
+          cerr << "==>> el: " << el << endl;
+          cerr << "==>> az: " << az << endl;
           cerr << "==>> uu: " << uu << endl;
           cerr << "==>> vv: " << vv << endl;
-          cerr << "==>> el: " << beamEl[ibeam] << endl;
-          cerr << "==>> az: " << beamAz[ibeam] << endl;
           
         }
 
