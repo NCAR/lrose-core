@@ -837,22 +837,24 @@ double AparTsPulse::getElevation() const {
   if (isnan(_hdr.elevation)) {
     return _hdr.elevation;
   }
-  if (_hdr.elevation <= 180) {
-    return _hdr.elevation;
-  } else {
-    return (_hdr.elevation - 360.0);
-  }
+  // if (_hdr.elevation <= 180) {
+  //   return _hdr.elevation;
+  // } else {
+  //   return (_hdr.elevation - 360.0);
+  // }
+  return _hdr.elevation;
 }
 
 double AparTsPulse::getAzimuth() const {
   if (isnan(_hdr.azimuth)) {
     return _hdr.azimuth;
   }
-  if (_hdr.azimuth >= 0) {
-    return _hdr.azimuth;
-  } else {
-    return _hdr.azimuth + 360.0;
-  }
+  // if (_hdr.azimuth >= 0) {
+  //   return _hdr.azimuth;
+  // } else {
+  //   return _hdr.azimuth + 360.0;
+  // }
+  return _hdr.azimuth;
 }
 
 double AparTsPulse::getFixedAngle() const {
