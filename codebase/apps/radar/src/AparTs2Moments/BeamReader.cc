@@ -385,6 +385,13 @@ int BeamReader::_readPulsesForDwell()
       return -1;
     }
     
+    // ignore pulses with 0 gates
+    if (pulse->getNGates() == 0) {
+      delete pulse;
+      _clearDwellPulses();
+      continue;
+    }
+
     // has dwell seq num changed?
     // if so process dwell
 
@@ -660,6 +667,10 @@ int BeamReader::_computeMinNGates()
   
 {
   
+  if (_beamPulses.size() == 0) {
+    return 0;
+  }
+
   int minNGates = _beamPulses[0]->getNGates();
   for (size_t ii = 1; ii < _beamPulses.size(); ii++) {
     int thisNGates = _beamPulses[ii]->getNGates();

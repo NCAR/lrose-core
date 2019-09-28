@@ -327,7 +327,7 @@ int ReadFromUdp::_handlePacket(ui08 *pktBuf, int pktLen)
   // dwell details
 
   memcpy(&_dwellNum, loc, sizeof(_dwellNum));
-  BE_to_array_32(&_dwellNum, sizeof(_dwellNum));
+  BE_to_array_64(&_dwellNum, sizeof(_dwellNum));
   loc += sizeof(_dwellNum);
 
   memcpy(&_beamNumInDwell, loc, sizeof(_beamNumInDwell));
