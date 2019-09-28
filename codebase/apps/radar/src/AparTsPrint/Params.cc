@@ -858,30 +858,6 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'check_angle_change'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("check_angle_change");
-    tt->descr = tdrpStrDup("Check that angles do not change by more than a specified amount from pulse to pulse.");
-    tt->help = tdrpStrDup("If the elevation or azimuth change exceeds this, a warning will be printed.");
-    tt->val_offset = (char *) &check_angle_change - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'max_angle_change'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_angle_change");
-    tt->descr = tdrpStrDup("Max valid angle change between pulses (deg).");
-    tt->help = tdrpStrDup("See 'check_angle_change'.");
-    tt->val_offset = (char *) &max_angle_change - &_start_;
-    tt->single_val.d = 0.1;
-    tt++;
-    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));

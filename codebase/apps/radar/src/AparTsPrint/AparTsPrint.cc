@@ -311,12 +311,6 @@ int AparTsPrint::_runPrintMode()
       }
     }
 
-    // angle change check
-
-    if (_params.check_angle_change) {
-      _checkAngleChange(*pulse);
-    }
-
     // all headers and data?
 
     if (_params.print_all_headers || _params.print_meta_headers) {
@@ -2507,49 +2501,6 @@ void AparTsPrint::_printMaxPowerData(FILE *out)
 }
 
 
-////////////////////////////////////////////
-// check for angle changes
-
-void AparTsPrint::_checkAngleChange(const AparTsPulse &pulse)
-
-{
-
-  if (_prevElevation < -9990 && _prevAzimuth < -9990) {
-    _prevElevation = pulse.getElevation();
-    _prevAzimuth = pulse.getAzimuth();
-    return;
-  }
-
-  double el = pulse.getElevation();
-  double az = pulse.getAzimuth();
-
-  double deltaEl = fabs(el - _prevElevation);
-  if (deltaEl > 180) {
-    deltaEl = fabs(deltaEl - 360.0);
-  }
-
-  double deltaAz = fabs(az - _prevAzimuth);
-  if (deltaAz > 180) {
-    deltaAz = fabs(deltaAz - 360.0);
-  }
-
-  if (deltaEl > _params.max_angle_change) {
-    cerr << "WARNING - large elevation change: " << deltaEl << endl;
-    cerr << "  ====>> prev elevation: " << _prevElevation << endl;
-    cerr << "  ====>> this elevation: " << el << endl;
-  }
-
-  if (deltaAz > _params.max_angle_change) {
-    cerr << "WARNING - large azimuth change: " << deltaAz << endl;
-    cerr << "  ====>> prev azimuth: " << _prevAzimuth << endl;
-    cerr << "  ====>> this azimuth: " << az << endl;
-  }
-
-  _prevElevation = pulse.getElevation();
-  _prevAzimuth = pulse.getAzimuth();
-
-}
-    
 ////////////////////////////////////////////
 // print sizes of structures
 
