@@ -124,11 +124,11 @@ paramdef double {
   p_help = "This scales the IQ data so that sqrt(I*I + Q*Q) is in Watts.";
 } udp_iq_scale_for_si16;
 
-paramdef int {
-  p_default = 1000;
-  p_descr = "Sleep per outgoing pulse (msecs).";
-  p_help = "Sleep period between outgoing pulses, to simulate a specific data rate.";
-} udp_pulse_sleep_usecs;
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Target simulation data rate (MBytes/sec).";
+  p_help = "We use periodic sleeps to achieve the target data rate.";
+} udp_sim_data_rate;
 
 commentdef {
   p_header = "READ UDP MODE";

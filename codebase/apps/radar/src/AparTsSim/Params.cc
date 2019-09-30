@@ -798,16 +798,16 @@
     tt->single_val.d = 0.0001;
     tt++;
     
-    // Parameter 'udp_pulse_sleep_usecs'
-    // ctype is 'int'
+    // Parameter 'udp_sim_data_rate'
+    // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("udp_pulse_sleep_usecs");
-    tt->descr = tdrpStrDup("Sleep per outgoing pulse (msecs).");
-    tt->help = tdrpStrDup("Sleep period between outgoing pulses, to simulate a specific data rate.");
-    tt->val_offset = (char *) &udp_pulse_sleep_usecs - &_start_;
-    tt->single_val.i = 1000;
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("udp_sim_data_rate");
+    tt->descr = tdrpStrDup("Target simulation data rate (MBytes/sec).");
+    tt->help = tdrpStrDup("We use periodic sleeps to achieve the target data rate.");
+    tt->val_offset = (char *) &udp_sim_data_rate - &_start_;
+    tt->single_val.d = 20;
     tt++;
     
     // Parameter 'Comment 6'

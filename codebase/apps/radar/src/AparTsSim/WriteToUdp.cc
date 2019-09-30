@@ -80,6 +80,8 @@ WriteToUdp::WriteToUdp(const string &progName,
   _dwellSeqNum = 0;
   _udpFd = -1;
   _errCount = 0;
+  _rateStartTime.set(RadxTime::NEVER);
+  _nBytesForRate = 0;
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Running WriteToUdp - extra verbose debug mode" << endl;
@@ -545,6 +547,7 @@ int WriteToUdp::_sendPulse(ui64 sampleNumber,
       cerr << "ERROR - _sendPulse" << endl;
       return -1;
     }
+    _nBytesForRate += buf.getLen();
     
     // increment / decrement
 
@@ -570,7 +573,9 @@ int WriteToUdp::_sendPulse(ui64 sampleNumber,
     cerr << "================================================" << endl;
   }
 
-  uusleep(_params.udp_pulse_sleep_usecs);
+  _sleepForDataRate();
+
+  // uusleep(_params.udp_pulse_sleep_usecs);
 
   return 0;
 
@@ -758,13 +763,7 @@ int WriteToUdp::_writeBufToUdp(const MemBuf &buf)
   
   struct sockaddr_in destAddr;
   MEM_zero(destAddr);
-  // if (inet_aton(_params.udp_dest_address, &destAddr.sin_addr) == 0) {
-  //   fprintf(stderr, "Cannot translate address: %s - may be invalid\n",
-  //           _params.udp_dest_address);
-  //   close (_udpFd);
-  //   _udpFd = -1;
-  //   return -1;
-  // }
+
   destAddr.sin_family = AF_INET;
   uint16_t destPort = _params.udp_dest_port;
   destAddr.sin_port = htons(destPort);
@@ -791,4 +790,43 @@ int WriteToUdp::_writeBufToUdp(const MemBuf &buf)
 
 }
 
+////////////////////////////////////////////////////
+// Sleep as required to achieve the desired data rate
+// Returns 0 on success, -1 on error
 
+void WriteToUdp::_sleepForDataRate()
+  
+{
+
+  // get current time
+
+  RadxTime now(RadxTime::NOW);
+  double elapsedSecs = now - _rateStartTime;
+  if (elapsedSecs < 0.01) {
+    return;
+  }
+  
+  // compute time for data sent since last check
+
+  double targetDuration =
+    _nBytesForRate / (_params.udp_sim_data_rate * 1.0e6);
+  double sleepSecs = targetDuration - elapsedSecs;
+
+  if (sleepSecs <= 0) {
+    // we are not keeping up, so don't sleep
+    _rateStartTime = now;
+    _nBytesForRate = 0;
+    return;
+  }
+  
+  // sleep
+
+  int uSecsSleep = (int) (sleepSecs * 1.0e6 + 0.5);
+  uusleep(uSecsSleep);
+  
+  // reset
+
+  _rateStartTime = now;
+  _nBytesForRate = 0;
+
+}

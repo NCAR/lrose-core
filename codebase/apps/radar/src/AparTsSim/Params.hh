@@ -402,7 +402,7 @@ public:
 
   double udp_iq_scale_for_si16;
 
-  int udp_pulse_sleep_usecs;
+  double udp_sim_data_rate;
 
   char* output_fmq_path;
 

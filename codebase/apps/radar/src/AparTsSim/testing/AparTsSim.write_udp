@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./AparTsSim
+ * TDRP params for AparTsSim
  **********************************************************************/
 
 //======================================================================
@@ -195,6 +195,18 @@ udp_max_packet_size = 1400;
 
 udp_n_gates = 2500;
 
+///////////// udp_gate_spacing_m //////////////////////
+//
+// Gate spacing of simulated data (m).
+//
+// Overrides the gate spacing in the IWRF data.
+//
+//
+// Type: double
+//
+
+udp_gate_spacing_m = 30;
+
 ///////////// udp_n_channels //////////////////////////
 //
 // Number of channels for UDP simulation mode.
@@ -210,18 +222,29 @@ udp_n_gates = 2500;
 
 udp_n_channels = 1;
 
-///////////// pulse_sleep_usecs ///////////////////////
+///////////// udp_iq_scale_for_si16 ///////////////////
 //
-// Sleep per outgoing pulse (msecs).
+// Scale factor for converting floats to si16 in IQ data stream.
 //
-// Sleep period between outgoing pulses, to simulate a specific data 
-//   rate.
+// This scales the IQ data so that sqrt(I*I + Q*Q) is in Watts.
 //
 //
-// Type: int
+// Type: double
 //
 
-udp_pulse_sleep_usecs = 100;
+udp_iq_scale_for_si16 = 0.0001;
+
+///////////// udp_sim_data_rate ///////////////////////
+//
+// Target simulation data rate (MBytes/sec).
+//
+// We use periodic sleeps to achieve the target data rate.
+//
+//
+// Type: double
+//
+
+udp_sim_data_rate = 20;
 
 //======================================================================
 //

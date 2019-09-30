@@ -43,6 +43,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <Radx/RadxTime.hh>
 
 #include "Args.hh"
 #include "Params.hh"
@@ -90,6 +91,11 @@ private:
   ui64 _pulseSeqNum;
   ui64 _sampleSeqNum; // for UDP only
   vector<IwrfTsPulse *> _dwellPulses;
+
+  // data rate
+
+  RadxTime _rateStartTime;
+  double _nBytesForRate;
   
   // functions
 
@@ -132,6 +138,7 @@ private:
 
   int _openOutputUdp();
   int _writeBufToUdp(const MemBuf &buf);
+  void _sleepForDataRate();
   
 };
 
