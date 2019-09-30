@@ -762,6 +762,18 @@
     tt->single_val.i = 2500;
     tt++;
     
+    // Parameter 'udp_gate_spacing_m'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("udp_gate_spacing_m");
+    tt->descr = tdrpStrDup("Gate spacing of simulated data (m).");
+    tt->help = tdrpStrDup("Overrides the gate spacing in the IWRF data.");
+    tt->val_offset = (char *) &udp_gate_spacing_m - &_start_;
+    tt->single_val.d = 30;
+    tt++;
+    
     // Parameter 'udp_n_channels'
     // ctype is 'int'
     
@@ -774,15 +786,27 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'pulse_sleep_usecs'
+    // Parameter 'udp_iq_scale_for_si16'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("udp_iq_scale_for_si16");
+    tt->descr = tdrpStrDup("Scale factor for converting floats to si16 in IQ data stream.");
+    tt->help = tdrpStrDup("This scales the IQ data so that sqrt(I*I + Q*Q) is in Watts.");
+    tt->val_offset = (char *) &udp_iq_scale_for_si16 - &_start_;
+    tt->single_val.d = 0.0001;
+    tt++;
+    
+    // Parameter 'udp_pulse_sleep_usecs'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("pulse_sleep_usecs");
+    tt->param_name = tdrpStrDup("udp_pulse_sleep_usecs");
     tt->descr = tdrpStrDup("Sleep per outgoing pulse (msecs).");
     tt->help = tdrpStrDup("Sleep period between outgoing pulses, to simulate a specific data rate.");
-    tt->val_offset = (char *) &pulse_sleep_usecs - &_start_;
+    tt->val_offset = (char *) &udp_pulse_sleep_usecs - &_start_;
     tt->single_val.i = 1000;
     tt++;
     

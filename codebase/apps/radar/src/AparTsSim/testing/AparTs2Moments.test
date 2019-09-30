@@ -75,7 +75,7 @@ instance = "test";
 // Type: boolean
 //
 
-use_multiple_threads = FALSE;
+use_multiple_threads = TRUE;
 
 ///////////// n_compute_threads ///////////////////////
 //

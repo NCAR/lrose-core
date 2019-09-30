@@ -224,6 +224,10 @@ int WriteToUdp::_convertToUdp(const string &inputPath)
       cerr << "  Cannot open UDP output device" << endl;
       return -1;
     }
+
+    // convert pulse data to si16 counts
+    
+    iwrfPulse->convertToScaledSi16(_params.udp_iq_scale_for_si16, 0.0);
     
     // add pulse to dwell
     
@@ -307,15 +311,10 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
       for (int ipulse = 0; ipulse < _params.n_samples_per_visit; 
            ipulse++, pulseNumInDwell++) {
         
-        // convert to si16 as needed
+        // set the metadata
         
         IwrfTsPulse *iwrfPulse = dwellPulses[pulseNumInDwell];
-        if (iwrfPulse->getPackedEncoding() != IWRF_IQ_ENCODING_SCALED_SI16) {
-          iwrfPulse->convertToPacked(IWRF_IQ_ENCODING_SCALED_SI16);
-        }
-
-        // set the metadata
-
+        
         ui64 sampleNumber = _sampleSeqNum;
         ui64 pulseNumber = _pulseSeqNum;
         
@@ -326,11 +325,11 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         ui32 beamNumInDwell = ibeam;
         ui32 visitNumInBeam = ivisit;
 
-        // for APAR, az ranges from -90 to +90
+        // for APAR, az ranges from -60 to +60
         // and el from -90 to +90
         
-        double az = beamAz[ibeam] / 2.0 - 90.0;
-        double el = beamEl[ibeam];
+        double az = beamAz[ibeam] / 3.0 - 60.0;
+        double el = beamEl[ibeam] / 1.5;
         double azRad = az * DEG_TO_RAD;
         double elRad = beamEl[ibeam] * DEG_TO_RAD;
         double uu = cos(elRad) * sin(azRad);
@@ -432,12 +431,11 @@ void WriteToUdp::_fillIqData(IwrfTsPulse *iwrfPulse,
   const si16 *iqIwrf = (const si16 *) iwrfPulse->getPackedData() +
     channelNum * nGatesIwrf * 2;
 
-  
   while ((int) iqApar.size() < nValsApar) {
     
     for (int icopy = 0; icopy < nCopyPerGate; icopy++) {
-      iqApar.push_back(*iqIwrf);       // I
-      iqApar.push_back(*(iqIwrf + 1)); // Q
+      iqApar.push_back(BE_from_si16(*iqIwrf));       // I
+      iqApar.push_back(BE_from_si16(*(iqIwrf + 1))); // Q
       if ((int) iqApar.size() ==  nValsApar) {
         break;
       }
@@ -572,7 +570,7 @@ int WriteToUdp::_sendPulse(ui64 sampleNumber,
     cerr << "================================================" << endl;
   }
 
-  uusleep(_params.pulse_sleep_usecs);
+  uusleep(_params.udp_pulse_sleep_usecs);
 
   return 0;
 

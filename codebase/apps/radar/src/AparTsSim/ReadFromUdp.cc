@@ -507,6 +507,8 @@ int ReadFromUdp::_initMetaData(const string &inputPath)
   _convertMeta2Apar(tsInfo);
   _aparTsInfo->setRadarInfo(_aparRadarInfo);
   _aparTsInfo->setScanSegment(_aparScanSegment);
+  _aparTsProcessing.start_range_m = _params.udp_gate_spacing_m / 2.0;
+  _aparTsProcessing.gate_spacing_m = _params.udp_gate_spacing_m;
   _aparTsInfo->setTsProcessing(_aparTsProcessing);
   if (tsInfo.isCalibrationActive()) {
     _aparTsInfo->setCalibration(_aparCalibration);
@@ -586,8 +588,8 @@ int ReadFromUdp::_writePulseToFmq()
   pulse.setIqPacked(nGates, 1,
                     APAR_TS_IQ_ENCODING_SCALED_SI16,
                     _iqApar.data(),
-                    1.0, 0.0);
-
+                    _params.udp_iq_scale_for_si16, 0.0);
+  
   pulse.setBeamNumInDwell(_beamNumInDwell);
   pulse.setVisitNumInBeam(_visitNumInBeam);
   pulse.setPulseSeqNum(_pulseNum);
@@ -600,12 +602,13 @@ int ReadFromUdp::_writePulseToFmq()
   pulse.setElevation(_el);
   pulse.setAzimuth(_az);
   pulse.setFixedAngle(_el);
-  pulse.setPrt(_aparTsProcessing.prt_us[0]);
-  pulse.setPrtNext(_aparTsProcessing.prt_us[0]);
+  pulse.setPrt(_aparTsProcessing.prt_us[0] * 1.0e-6);
+  pulse.setPrtNext(_aparTsProcessing.prt_us[0] * 1.0e-6);
   pulse.setPulseWidthUs(_aparTsProcessing.pulse_width_us);
   pulse.setHvFlag(_isXmitH);
   pulse.setStartRangeM(_aparTsProcessing.start_range_m);
   pulse.setGateGSpacineM(_aparTsProcessing.gate_spacing_m);
+  pulse.setPhaseCohered(true);
 
   // add the pulse to the outgoing message
 

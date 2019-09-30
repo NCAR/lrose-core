@@ -221,7 +221,7 @@ udp_n_channels = 1;
 // Type: int
 //
 
-pulse_sleep_usecs = 1000;
+udp_pulse_sleep_usecs = 1000;
 
 //======================================================================
 //

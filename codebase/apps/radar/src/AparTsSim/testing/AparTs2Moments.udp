@@ -75,7 +75,7 @@ instance = "test";
 // Type: boolean
 //
 
-use_multiple_threads = FALSE;
+use_multiple_threads = TRUE;
 
 ///////////// n_compute_threads ///////////////////////
 //
@@ -89,7 +89,7 @@ use_multiple_threads = FALSE;
 // Type: int
 //
 
-n_compute_threads = 8;
+n_compute_threads = 4;
 
 //======================================================================
 //
@@ -559,7 +559,7 @@ spectrum_width_method = WIDTH_METHOD_R0R1;
 // Type: string
 //
 
-startup_cal_file = "./test/startup_cal.xml";
+startup_cal_file = "./testing/startup_cal.xml";
 
 ///////////// set_cal_by_pulse_width //////////////////
 //

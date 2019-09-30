@@ -511,7 +511,7 @@ use_field_label_in_title = FALSE;
 // Type: double
 //
 
-max_range_km = 225;
+max_range_km = 90.0;
 
 //======================================================================
 //
