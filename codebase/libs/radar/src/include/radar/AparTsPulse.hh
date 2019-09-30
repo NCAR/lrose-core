@@ -144,6 +144,15 @@ public:
   
   void convertToPacked(apar_ts_iq_encoding_t encoding);
 
+  // convert to scaled si16 packing
+  
+  void convertToScaledSi16(double scale, double offset);
+  
+  // set the scale and offset values for scaled si16 packing
+  // does not change the data, only the metadata
+  
+  void setScaleAndOffsetForSi16(double scale, double offset);
+  
   // swaps I and Q, because they are stored in the incorrect order
   // in the data arrays
   
