@@ -72,6 +72,21 @@ public:
 
   void inv(const RadarComplex_t *in, RadarComplex_t *out) const;
 
+  // Shift a spectrum, in place, so that DC is in the center.
+  // Swaps left and right sides.
+  // DC location location starts at index 0.
+  // After the shift:
+  //   if n is odd,  the DC location is at the center index
+  //   if n is even, the DC location is at index n/2
+  
+  void shift(RadarComplex_t *spectrum) const;
+  
+  // Unshift a spectrum, in place, to undo a previous shift.
+  // Swaps left and right sides.
+  // After the shift, DC is at index 0.
+  
+  void unshift(RadarComplex_t *spectrum) const;
+  
   // get references to sin and cos arrays
   // will be loaded as required
 
@@ -88,6 +103,7 @@ private:
   fftw_plan _fftBck;
   fftw_complex *_in;
   fftw_complex *_out;
+  fftw_complex *_tmp;
   
   mutable vector<vector<double> > _cosArray;
   mutable vector<vector<double> > _sinArray;
