@@ -426,7 +426,7 @@ void GDrawArrow(int dev,
 
 {
 
-  double xscale, yscale;
+  double xscale = 1.0, yscale = 1.0;
   double x_dev_head_length, y_dev_head_length;
   double dev_head_length;
   double arrow_slope, head_slope;
@@ -964,7 +964,7 @@ void GDrawImage(int dev,
   long i, j;
   long ddata;
 
-  double curr_x;
+  double curr_x = 0.0;
   double dx, dy;
   double x, y, startx, starty;
   double el_width, el_height;
@@ -1199,7 +1199,7 @@ void GDrawImageProgDetail(int dev,
   double dx, dy;
   double sparse_dx, sparse_dy;
   double sparse_width, sparse_height;
-  double xscale, yscale;
+  double xscale = 1.0, yscale = 1.0;
   double xpix_per_grid, ypix_per_grid;
   
   switch (dev) {
@@ -3126,7 +3126,7 @@ void GScale(int dev,
     width = (size_t) (wwidth * frame->ps->xscale + 0.5);
     height = (size_t) (wheight * frame->ps->yscale + 0.5);
 
-    fprintf(frame->psgc->file, "%d %d scale\n", width, height);
+    fprintf(frame->psgc->file, "%ld %ld scale\n", width, height);
 
     break;
 
@@ -3149,7 +3149,7 @@ void GSetClipRectangles(int dev,
 
 {
 
-  XRectangle *xrectangles;
+  XRectangle *xrectangles = NULL;
   int x, y;
   size_t width, height;
   int clip_x_origin = 0, clip_y_origin = 0;
@@ -3160,9 +3160,9 @@ void GSetClipRectangles(int dev,
 
   case XDEV:
 
-    for  (i = 0; i < n; i++) {
+    xrectangles = (XRectangle *) ucalloc(n, sizeof(XRectangle));
 
-      xrectangles = (XRectangle *) ucalloc(n, sizeof(XRectangle));
+    for  (i = 0; i < n; i++) {
 
       xrectangles[i].width =
 	(unsigned short) (grectangles[i].width * frame->x->xscale + 0.5);
@@ -3194,7 +3194,7 @@ void GSetClipRectangles(int dev,
       y = (int) ((grectangles[i].y - frame->w_ymin) * frame->ps->yscale
 		 + frame->ps->ymin + 0.5);
 
-      fprintf(psgc->file, " %d %d %d %d SetClipRect\n",
+      fprintf(psgc->file, " %d %d %ld %ld SetClipRect\n",
 	      x, y, width, height);
     
     }

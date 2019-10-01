@@ -145,18 +145,6 @@ paramdef boolean {
   p_help = "Only applies to MAX_POWER_MODE";
 } print_altitude;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Check that angles do not change by more than a specified amount from pulse to pulse.";
-  p_help = "If the elevation or azimuth change exceeds this, a warning will be printed.";
-} check_angle_change;
-
-paramdef double {
-  p_default = 0.1;
-  p_descr = "Max valid angle change between pulses (deg).";
-  p_help = "See 'check_angle_change'.";
-} max_angle_change;
-
 commentdef {
   p_header = "DATA INPUT";
 };

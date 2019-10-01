@@ -278,6 +278,18 @@
   }
 
   ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  int Params::isArgValidN(const char *arg)
+  {
+    return (tdrpIsArgValidN(arg));
+  }
+
+  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.
@@ -2202,7 +2214,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("correct_hcr_v_rx_gain_for_temperature");
     tt->descr = tdrpStrDup("Option to correct the HCR V-channel receiver gain for temperature.");
-    tt->help = tdrpStrDup("Computing the HCR receiver gain correction is complicated. Therefore this is done offline, and the results are stored as XML in SPDB. Here we retrieve the values from SPDB and apply them to correct the receiver gain.");
+    tt->help = tdrpStrDup("Computing the HCR receiver gain correction is complicated. Therefore this is done offline, using the application HcrTempRxGain, and the results are stored as XML in SPDB. Here we retrieve the values from SPDB and apply them to correct the receiver gain.");
     tt->val_offset = (char *) &correct_hcr_v_rx_gain_for_temperature - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -2829,6 +2841,18 @@
     tt->help = tdrpStrDup("We estimate the noise by identifying regions with noise and computing the mean power - see above. If this parameter is set to TRUE, we use the estimated noise instead of teh calibrated noise to compute the noise-subtracted powers.");
     tt->val_offset = (char *) &use_estimated_noise_for_noise_subtraction - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'max_valid_noise_bias_db'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_valid_noise_bias_db");
+    tt->descr = tdrpStrDup("Max valid value for noise bias (dB).");
+    tt->help = tdrpStrDup("The estimated noise is only used if the estimated noise bias does not exceed this value. For example, if you do not want to suppress sun spikes, you can set this value to something like 3dB, since sun spikes generally cause a noise increase of 10 dB or more, depending on the wavelength.");
+    tt->val_offset = (char *) &max_valid_noise_bias_db - &_start_;
+    tt->single_val.d = 20;
     tt++;
     
     // Parameter 'noise_ngates_kernel'

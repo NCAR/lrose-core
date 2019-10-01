@@ -24,7 +24,7 @@
 /////////////////////////////////////////////////////////////
 // RadxGeoref.hh
 //
-// Correction factors for Radx data
+// Georeferences for Radx data
 //
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA

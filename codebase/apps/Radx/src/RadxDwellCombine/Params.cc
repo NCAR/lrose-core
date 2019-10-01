@@ -278,6 +278,18 @@
   }
 
   ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  int Params::isArgValidN(const char *arg)
+  {
+    return (tdrpIsArgValidN(arg));
+  }
+
+  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.
@@ -832,6 +844,69 @@
     tt->single_val.d = 9999;
     tt++;
     
+    // Parameter 'set_field_folds_attribute'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_field_folds_attribute");
+    tt->descr = tdrpStrDup("Set the 'field_folds' attribute on selected fields.");
+    tt->help = tdrpStrDup("Useful if this attribute is missing. If a field folds, and averaging is performed to combine the dwell, we need to take the folding into account.");
+    tt->val_offset = (char *) &set_field_folds_attribute - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'field_folds'
+    // ctype is '_field_folds_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("field_folds");
+    tt->descr = tdrpStrDup("Specifies fields for adding folding attribute.");
+    tt->help = tdrpStrDup("Specify the field names, plus whether to use the nyquist in the data. If use_nyquist is false, specify the lower and upper limit at which the field folds.");
+    tt->array_offset = (char *) &_field_folds - &_start_;
+    tt->array_n_offset = (char *) &field_folds_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(field_folds_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("field_folds_t");
+    tt->struct_def.nfields = 4;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("field_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_field_folds->field_name - (char *) _field_folds;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[1].fname = tdrpStrDup("use_nyquist");
+      tt->struct_def.fields[1].ptype = BOOL_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_field_folds->use_nyquist - (char *) _field_folds;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("fold_limit_lower");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_field_folds->fold_limit_lower - (char *) _field_folds;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("fold_limit_upper");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_field_folds->fold_limit_upper - (char *) _field_folds;
+    tt->n_struct_vals = 8;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("VEL");
+      tt->struct_vals[1].b = pTRUE;
+      tt->struct_vals[2].d = 0;
+      tt->struct_vals[3].d = 0;
+      tt->struct_vals[4].s = tdrpStrDup("PHIDP");
+      tt->struct_vals[5].b = pFALSE;
+      tt->struct_vals[6].d = -90;
+      tt->struct_vals[7].d = 90;
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1051,7 +1126,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("censoring_fields");
-    tt->descr = tdrpStrDup("Fields to be used for censoring.");
+    tt->descr = tdrpStrDup("Fields to be used for determining censoring.");
     tt->help = tdrpStrDup("Specify the fields to be used to determine whether a gate should be censored. The name refers to the input data field names. Valid field values lie in the range from min_valid_value to max_valid_value inclusive. If the value of a field at a gate lies within this range, it is considered valid. Each specified field is examined at each gate, and is flagged as valid if its value lies in the valid range. These field flags are then combined as follows: first, all of the LOGICAL_OR flags are combined, yielding a single combined_or flag which is true if any of the LOGICAL_OR fields is true. The combined_or flag is then combined with all of the LOGICAL_AND fields, yielding a true value only if the combined_or flag and the LOGICAL_AND fields are all true. If this final flag is true, then the data at the gate is regarded as valid and is retained. If the final flag is false, the data at the gate is censored, and all of the fields at the gate are set to missing.");
     tt->array_offset = (char *) &_censoring_fields - &_start_;
     tt->array_n_offset = (char *) &censoring_fields_n - &_start_;
@@ -1114,6 +1189,38 @@
     tt->help = tdrpStrDup("Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.");
     tt->val_offset = (char *) &censoring_min_valid_run - &_start_;
     tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'specify_non_censored_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("specify_non_censored_fields");
+    tt->descr = tdrpStrDup("Option to exclude fields from censoring.");
+    tt->help = tdrpStrDup("If censoring is turned on, you also have the option of non censoring specified fields. Set this parameter to TRUE, and specify the fields to be excluded in the non_censored_fields list.");
+    tt->val_offset = (char *) &specify_non_censored_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'non_censored_fields'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("non_censored_fields");
+    tt->descr = tdrpStrDup("List of fields to be excluded from censoring.");
+    tt->help = tdrpStrDup("See 'specify_non_censored_fields'.");
+    tt->array_offset = (char *) &_non_censored_fields - &_start_;
+    tt->array_n_offset = (char *) &non_censored_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 2;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("DBMHC");
+      tt->array_vals[1].s = tdrpStrDup("DBMVC");
     tt++;
     
     // Parameter 'Comment 7'

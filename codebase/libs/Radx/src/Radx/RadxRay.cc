@@ -1275,6 +1275,40 @@ void RadxRay::convertField(const string &name,
   
 }
 
+/////////////////////////////////////////////////////////////////////
+/// Set folding behavior on for the specified field.
+/// If the field folds, then when the value exceeds foldLimitUpper,
+/// it wraps to foldLimitLower, and vice versa.
+/// This occurs for radial velocity and phidp.
+/// If useNyquist is true, we use the nyquist on the ray to compute
+/// the folding limits.
+/// Returns 0 on success.
+/// Returns -1 if field does not exist on the ray.
+
+int RadxRay::setFieldFolds(const string &name,
+                           bool useNyquist,
+                           double foldLimitLower,
+                           double foldLimitUpper)
+  
+{
+
+  RadxField *field = getField(name);
+  if (field == NULL) {
+    cerr << "WARNING - RadxRay::setFieldFolds()" << endl;
+    cerr << "  field does not exist on ray: " << name << endl;
+    return -1;
+  }
+
+  if (useNyquist) {
+    field->setFieldFolds(_nyquistMps * -1.0, _nyquistMps);
+  } else {
+    field->setFieldFolds(foldLimitLower, foldLimitUpper);
+  }
+  
+  return 0;
+
+}
+
 /////////////////////////////////////////////////
 // data type conversions
 

@@ -23,37 +23,40 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for Iwrf2AparTs program
+# Makefile for Egm2Mdv program
 #
 # Mike Dixon, EOL, NCAR
 # POBox 3000, Boulder, CO, 80307, USA
 #
-# Aug 2019
+# Sept 2019
 #
 ###########################################################################
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
-TARGET_FILE = Iwrf2AparTs
+TARGET_FILE = Egm2Mdv
 
-LOC_INCLUDES =
-LOC_CFLAGS =
-LOC_LDFLAGS =
+LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lradar -lFmq -lRadx -ldsserver -ldidss \
-	-lrapformats -lrapmath -ltoolsa \
-	-ldataport -ltdrp -lbz2 -lz
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
+	-ldidss -lrapformats -ltoolsa -ldataport \
+	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
+
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+
+LOC_CPPC_CFLAGS =
+
 
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	Iwrf2AparTs.hh
+	Egm2Mdv.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
-	Main.cc \
-	Iwrf2AparTs.cc
+	Egm2Mdv.cc \
+	Main.cc
 
 #
 # tdrp macros
@@ -77,4 +80,5 @@ include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 # local targets
 #
 
+# DO NOT DELETE THIS LINE -- make depend depends on it.
 

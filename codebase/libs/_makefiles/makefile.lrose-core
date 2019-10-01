@@ -23,7 +23,6 @@ SUB_DIRS = \
 	dsdata \
 	dsserver \
 	euclid \
-	forayRal \
 	grib \
 	grib2 \
 	hydro \

@@ -1,0 +1,39 @@
+/*********************************************************
+ * parameter definitions for ReadEgm2008
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Aug 2019
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree";
+  p_descr = "Path to EGM 2008 file";
+} egm_path;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "lat of desired point (deg).";
+} lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "lon of desired point (deg).";
+} lon;
+

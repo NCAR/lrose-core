@@ -22,125 +22,124 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Iwrf2AparTs.hh
+// WriteToUdp.hh
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Aug 2019
+// Sept 2019
 //
 ///////////////////////////////////////////////////////////////
 //
-// Iwrf2AparTs reads IWRF data from specified files, converts
-// the data to APAR TS format, and writes the
-// converted files to a specified location
+// Resample IWRF time series data,
+// convert to APAR UDP format,
+// and write out to UDP stream
 //
 ////////////////////////////////////////////////////////////////
 
-#ifndef Iwrf2AparTs_H
-#define Iwrf2AparTs_H
+#ifndef WriteToUdp_HH
+#define WriteToUdp_HH
 
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <Radx/RadxTime.hh>
 
 #include "Args.hh"
 #include "Params.hh"
-#include <radar/IwrfTsInfo.hh>
-#include <radar/IwrfTsPulse.hh>
-#include <radar/IwrfTsReader.hh>
-#include <radar/apar_ts_data.h>
-#include <radar/AparTsInfo.hh>
 
+class IwrfTsPulse;
 using namespace std;
 
 ////////////////////////
 // This class
 
-class Iwrf2AparTs {
+class WriteToUdp {
   
 public:
 
   // constructor
 
-  Iwrf2AparTs(int argc, char **argv);
+  WriteToUdp(const string &progName,
+             const Params &params,
+             vector<string> &inputFileList);
 
   // destructor
   
-  ~Iwrf2AparTs();
+  ~WriteToUdp();
 
   // run 
 
   int Run();
-
-  // data members
-
-  bool isOK;
-
+  
 protected:
   
 private:
   
   string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
+  const Params &_params;
+  vector<string> _inputFileList;
 
-  // output file
+  // output UDP
 
-  FILE *_out;
+  int _udpFd;
+  int _errCount;
 
-  // APAR-style metadata
+  // pulse details
 
-  AparTsInfo *_aparTsInfo;
-  AparTsDebug_t _aparTsDebug;
-  apar_ts_radar_info_t _aparRadarInfo;
-  apar_ts_scan_segment_t _aparScanSegment;
-  apar_ts_processing_t _aparTsProcessing;
-  apar_ts_calibration_t _aparCalibration;
-
-  // vector of pulse pointers for a dwell
-
-  si64 _pulseSeqNum;
-  si64 _dwellSeqNum;
+  ui64 _dwellSeqNum;
+  ui64 _pulseSeqNum;
+  ui64 _sampleSeqNum; // for UDP only
   vector<IwrfTsPulse *> _dwellPulses;
+
+  // data rate
+
+  RadxTime _rateStartTime;
+  double _nBytesForRate;
   
   // functions
-  
-  int _processFile(const string &inputPath);
+
+  int _convertToUdp(const string &inputPath);
   int _processDwell(vector<IwrfTsPulse *> &dwellPulses);
-  int _openOutputFile(const string &inputPath,
-                      const IwrfTsPulse &pulse);
-  void _closeOutputFile();
+
+  void _fillIqData(IwrfTsPulse *iwrfPulse,
+                   int channelNum,
+                   vector<si16> &iqData);
+
+  int _sendPulse(ui64 sampleNumber,
+                 ui64 pulseNumber,
+                 si64 secondsTime,
+                 ui32 nanoSecs,
+                 ui64 dwellNum,
+                 ui32 beamNumInDwell,
+                 ui32 visitNumInBeam,
+                 double uu,
+                 double vv,
+                 bool isXmitH,
+                 bool isCoPolRx,
+                 int nGates,
+                 vector<si16> &iqApar);
+
+  void _addAparHeader(ui64 sampleNumber,
+                      ui64 pulseNumber,
+                      si64 secondsTime,
+                      ui32 nanoSecs,
+                      ui32 pulseStartIndex,
+                      ui64 dwellNum,
+                      ui32 beamNumInDwell,
+                      ui32 visitNumInBeam,
+                      double uu,
+                      double vv,
+                      bool isFirstPktInPulse,
+                      bool isXmitH,
+                      bool isCoPolRx,
+                      int nSamples,
+                      MemBuf &buf);
+
+  int _openOutputUdp();
+  int _writeBufToUdp(const MemBuf &buf);
+  void _sleepForDataRate();
   
-  void _reformat2Apar(const IwrfTsPulse &pulse);
-
-  void _convertMeta2Apar(const IwrfTsInfo &info);
-
-  void _copyIwrf2Apar(const iwrf_packet_info_t &iwrf,
-                      apar_ts_packet_info_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_radar_info_t &iwrf,
-                      apar_ts_radar_info_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_scan_segment_t &iwrf,
-                      apar_ts_scan_segment_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_ts_processing_t &iwrf,
-                      apar_ts_processing_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_calibration_t &iwrf,
-                      apar_ts_calibration_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_pulse_header_t &iwrf,
-                      apar_ts_pulse_header_t &apar);
-
-  void _copyIwrf2Apar(const iwrf_event_notice_t &iwrf,
-                      apar_ts_event_notice_t &apar);
-
-  double _conditionAngle360(double angle);
-  double _conditionAngle180(double angle);
-
 };
 
 #endif

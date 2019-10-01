@@ -11,6 +11,7 @@ SUB_DIRS = \
 	AcGeorefCompare \
 	AltCpCompute \
 	AparTsPrint \
+	AparTsSim \
 	AparTs2Moments \
 	CalCompute \
 	CedricPrint \
@@ -32,7 +33,6 @@ SUB_DIRS = \
 	Hsrl2Radx \
 	IntfRemove \
 	Iq2Dsr \
-	Iwrf2AparTs \
 	KinGin2Ncf \
 	Mdv2Vad \
 	MdvFold \

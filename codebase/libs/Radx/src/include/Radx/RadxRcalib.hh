@@ -97,7 +97,7 @@ public:
   
   /// Check whether a value matches the missing value
   
-  bool isMissing(double val);
+  static bool isMissing(double val);
   
   /// Adjust the radar constant, based on the pulse width and
   /// the measured power.
