@@ -190,7 +190,8 @@ void IqPlot::plotBeam(QPainter &painter,
   RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
   RadarFft fft(nSamples);
   fft.fwd(iqWindowed, powerSpec);
-
+  fft.shift(powerSpec);
+  
   // compute power
 
   TaArray<double> powerDbm_;
@@ -206,6 +207,7 @@ void IqPlot::plotBeam(QPainter &painter,
   
   double yMin = _zoomWorld.getYMinWorld();
   for (int ii = 1; ii < nSamples; ii++) {
+    int jj = (ii + nSamples / 2) % nSamples;
     double valPrev = powerDbm[ii-1];
     double val = powerDbm[ii];
     _zoomWorld.fillTrap(painter, brush,
