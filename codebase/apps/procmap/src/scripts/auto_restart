@@ -215,6 +215,12 @@ $usage =
     "         that has --options on the command line.\n" .
 #    "   -a --alsorun <scriptname>          : Also run the following script on each check loop\n" .
     "   -d --debug                         : Print debugging messages to STDERR\n" .
+    "   -e --email <addr>                  : Email address for restart messages.\n" .
+    "                                        If specified, emails will be sent to the given address\n" .
+    "                                        whenever processes are restarted.\n" .
+    "                                        Specify multiple time to send email to multiple\n" .
+    "                                        addresses.\n" .
+    "                                        If not specified, no emails will be sent.\n" .
     "   -f --filelock <filename>           : Name of lockfile to use.\n" .
     "                                        Default is: \$HOME/$prog.LOCK\n" .
     "   -h --help                          : Print this usage message\n" .
@@ -251,6 +257,7 @@ $usage =
 $result = &GetOptions('debug',
 		      'help',
 		      'alsorun=s',
+		      'email=s@',
 		      'filelock=s',
 		      'ignoreoutlog',
 		      'logdebug', 
@@ -274,6 +281,10 @@ if ( $result == 0 || $opt_help ) {
 if ($opt_debug) {
     $Debug=1;
     print(STDERR "\talsorun script: $opt_alsorun\n");
+    foreach $email (@opt_email)
+    {
+	print(STDERR "\temail: $email\n");
+    }
     print(STDERR "\tignoreoutlog: $opt_ignoreoutlog\n");
     print(STDERR "\tlock file: $opt_filelock\n");
     print(STDERR "\tlogdebug: $opt_logdebug\n");
@@ -423,6 +434,8 @@ if ( $Procmap_host eq "localhost" ) {
 }
 &printLine($Do_fh_print, $use_outfh, $No_debug_print, "\n");
 
+SendEmail("Starting auto_restart\n", @opt_email);
+
 #
 # Close the log file so we can reopen it at the beginning of each loop.
 #
@@ -452,6 +465,11 @@ while ($forever)
 	exec_cmd_sh("localhost", 5, $Alsorun_script);
     }
 
+    # Initialize the email message for this loop
+
+    $email_msg = "";
+    $send_email_msg = 0;
+
     #
     # Get the current date and time for messages. Need both
     # UNIX time and human-readable time.
@@ -461,6 +479,8 @@ while ($forever)
     if (!$is_ok) {
 	&printLine($No_fh_print, $use_outfh, $Do_err_print, "Problem with getting date string...\n");
     }
+
+    $email_msg .= "Time for messages: $datestring\n";
 
     #
     # Reopen the log file at the beginning of each loop so we can delete
@@ -489,7 +509,11 @@ while ($forever)
 
     unless (open(PROCMAP, "print_procmap -plain -host $Procmap_host |"))
     {
-	&printLine($Do_fh_print, $use_outfh, $Debug, "$datestring: Error getting print_procmap list from $Procmap_host.\n");
+	$error_msg = "$datestring: Error getting print_procmap list from $Procmap_host.\n";
+	&printLine($Do_fh_print, $use_outfh, $Debug, $error_msg);
+	$email_msg .= $error_msg;
+	$send_email_msg = 1;
+
 	goto ERROR_EXIT;
 
     } # endunless - open print_procmap command
@@ -507,7 +531,11 @@ while ($forever)
     ($is_ok, $nexpected) = &PMP_read_proc_list_file($Proc_list_file, *expected_entries, *started, $use_outfh);
 
     if (!$is_ok) {
-	&printLine($Do_fh_print, $use_outfh, $Debug, "$datestring: Error opening expected process list file $Proc_list_file.\n");
+	$error_msg = "$datestring: Error opening expected process list file $Proc_list_file.\n";
+	&printLine($Do_fh_print, $use_outfh, $Debug, $error_msg);
+	$email_msg .= $error_msg;
+	$send_email_msg = 1;
+
 	goto ERROR_EXIT;
     }
 
@@ -556,13 +584,20 @@ while ($forever)
 
     if ($first_line =~ m/^No procmap reachable on/)
     {
-	&printLine($Do_fh_print, $use_outfh, $Debug, "$datestring: No procmap: $first_line");
+	$error_msg = "$datestring: No procmap: $first_line";
+	&printLine($Do_fh_print, $use_outfh, $Debug, "$error_msg");
+	$email_msg .= $error_msg;
+	$send_email_msg = 1;
 
-	&printLine($Do_fh_print, $use_outfh, $No_debug_print, "   Killing procmap with snuff command\n");
+	$error_msg = "   Killing procmap with snuff command\n";
+	&printLine($Do_fh_print, $use_outfh, $No_debug_print, $error_msg);
+	$email_msg .= $error_msg;
 
 	exec_cmd_sh($Procmap_host, 10, "snuff procmap");
 
-	&printLine($Do_fh_print, $use_outfh, $No_debug_print, "   Restarting procmap with start_procmap cmd\n");
+	$error_msg = "   Restarting procmap with start_procmap cmd\n";
+	&printLine($Do_fh_print, $use_outfh, $No_debug_print, $error_msg);
+	$email_msg .= $error_msg;
 
 	exec_cmd_sh($Procmap_host, 10,
 		 "$Procmap_restart_script 1> $Log_file.1  2>&1 < /dev/null & ");
@@ -581,7 +616,10 @@ while ($forever)
 
 	$kill_processes = 0;
 
-	&printLine($Do_fh_print, $use_outfh, $Debug, "$datestring: No procs registered: $first_line");
+	$error_msg = "No procs registered: " . $first_line;
+	&printLine($Do_fh_print, $use_outfh, $Debug, "$datestring: $error_msg");
+	$email_msg .= $error_msg;
+	$send_email_msg = 1;
     }
 
     #
@@ -591,7 +629,10 @@ while ($forever)
 
     if ($procmap_uptime < $Procmap_min_uptime)
     {
-	&printLine ($Debug_log, $use_outfh, $Debug, "$datestring: Procmap just restarted $procmap_uptime secs ago -- skipping\n");
+	$error_msg = "Procmap just restarted " . $procmap_uptime . " secs ago -- skipping\n";
+	&printLine ($Debug_log, $use_outfh, $Debug, "$datestring: $error_msg");
+	$email_msg .= $error_msg;
+	$send_email_msg = 1;
 
 	goto ERROR_EXIT;
     }
@@ -683,8 +724,14 @@ while ($forever)
 		    # the auto_restart_stats parsing
 		    #
 
-		    &printLine($Do_fh_print, $use_outfh, $No_debug_print, "$datestring: Restarting process $process_name $process_instance on $process_host\n");
-		    &printLine($Do_fh_print, $use_outfh, $No_debug_print, "   $procmap_entry\n");
+		    $error_msg = "$datestring: Restarting process $process_name $process_instance on $process_host\n";
+		    &printLine($Do_fh_print, $use_outfh, $No_debug_print, $error_msg);
+		    $email_msg .= $error_msg;
+		    $send_email_msg = 1;
+
+		    $error_msg = "   $procmap_entry\n";
+		    &printLine($Do_fh_print, $use_outfh, $No_debug_print, $error_msg);
+		    $email_msg .= $error_msg;
 
 		    #
 		    # Restart the process
@@ -752,7 +799,10 @@ while ($forever)
 
 	    # This  line is critical for auto_restart_stats parsing
 
-	    &printLine ($Do_fh_print, $use_outfh, $No_debug_print, "$datestring: Missing process $expected_name $expected_instance on $expected_host in procmap -- restarting.\n");
+	    $error_msg = "$datestring: Missing process $expected_name $expected_instance on $expected_host in procmap -- restarting.\n";
+	    &printLine ($Do_fh_print, $use_outfh, $No_debug_print, $error_msg);
+	    $email_msg .= $error_msg;
+	    $send_email_msg = 1;
 
 	    #
 	    # skip over if start script already used
@@ -789,6 +839,12 @@ while ($forever)
     &printLine($No_fh_print, $use_outfh, $Debug, "\n");
 
 ERROR_EXIT :
+
+    # If we had any errors, send the email message
+
+    if ($send_email_msg){
+	SendEmail($email_msg, @opt_email);
+    }
 
     #
     # Close the log file so we can reopen it at the beginning of each
@@ -864,6 +920,58 @@ sub printLine
 
     return;
 }
+
+#---------------------------------------------------------------------------
+# Subroutine SendEmail
+#
+# Usage: SendEmail(@email_list, $msg)
+#
+# Function: Send the given email message to the list of recipients
+#
+# Input:    @email_list             list of email addresses to use. If empty, do nothing.
+#           $msg                    message string
+#
+# Output:   none
+#
+# Overview:
+#
+
+sub SendEmail
+{
+    local($msg, @email_list) = @_;
+
+    # If we don't have any email addresses, don't do anything
+
+    $num_addrs = @email_list;
+    if ($num_addrs == 0) {
+	return;
+    }
+
+    # Construct the message elements
+    
+    $to = '';
+    foreach $email (@email_list) {
+	$to .= $email . ' ';
+    }
+
+    $hostname = hostname();
+    $from = 'auto_restart@' . $hostname;
+
+    $subject = 'auto_restart errors';
+ 
+    # Send the message
+
+    open(MAIL, "|/usr/sbin/sendmail -t");
+ 
+    print MAIL "To: $to\n";
+    print MAIL "From: $from\n";
+    print MAIL "Subject: $subject\n\n";
+
+    print MAIL $msg;
+
+    close(MAIL);
+}
+
 
 #---------------------------------------------------------------------------
 # Subroutine DoSignalExit
