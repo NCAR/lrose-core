@@ -51,6 +51,7 @@ RadarFft::RadarFft()
   _sqrtN = 0;
   _in = NULL;
   _out = NULL;
+  _tmp = NULL;
 
 }
 
@@ -65,7 +66,7 @@ void RadarFft::init(int n)
   }
 
   assert(n != 0);
-  
+
   _sqrtN = sqrt((double) n);
   
   // set up Fft plans
@@ -77,6 +78,7 @@ void RadarFft::init(int n)
   
   _in = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * n);
   _out = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * n);
+  _tmp = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * n);
 
   _fftFwd = fftw_plan_dft_1d(n, _in, _out, FFTW_FORWARD, FFTW_MEASURE);
   _fftBck = fftw_plan_dft_1d(n, _in, _out, FFTW_BACKWARD, FFTW_MEASURE);
@@ -86,7 +88,7 @@ void RadarFft::init(int n)
 }
 
 RadarFft::RadarFft(int n) :
-  _n(n)
+        _n(n)
   
 {
 
@@ -98,6 +100,7 @@ RadarFft::RadarFft(int n) :
 
   _in = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * _n);
   _out = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * _n);
+  _tmp = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * _n);
 
   _fftFwd = fftw_plan_dft_1d(_n, _in, _out, FFTW_FORWARD, FFTW_MEASURE);
   _fftBck = fftw_plan_dft_1d(_n, _in, _out, FFTW_BACKWARD, FFTW_MEASURE);
@@ -136,6 +139,11 @@ void RadarFft::_free()
   if (_out) {
     fftw_free(_out);
     _out = NULL;
+  }
+
+  if (_tmp) {
+    fftw_free(_tmp);
+    _tmp = NULL;
   }
 
 }
@@ -186,6 +194,49 @@ void RadarFft::inv(const RadarComplex_t *in, RadarComplex_t *out) const
     out->im = *oo / _sqrtN;
     oo++;
   }
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Shift a spectrum, in place, so that DC is in the center.
+// Swaps left and right sides.
+// DC location location starts at index 0.
+// After the shift:
+//   if n is odd,  the DC location is at the center index
+//   if n is even, the DC location is at index n/2
+
+void RadarFft::shift(RadarComplex_t *spectrum) const
+  
+{
+
+  assert(_n != 0);
+
+  int nRight = _n / 2;
+  int nLeft = _n - nRight;
+  
+  memcpy(_tmp, spectrum, nLeft * sizeof(RadarComplex_t));
+  memcpy(spectrum, spectrum + nLeft, nRight * sizeof(RadarComplex_t));
+  memcpy(spectrum + nRight, _tmp, nLeft * sizeof(RadarComplex_t));
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Unshift a spectrum, in place, to undo a previous shift.
+// Swaps left and right sides.
+// After the shift, DC is at index 0.
+
+void RadarFft::unshift(RadarComplex_t *spectrum) const
+  
+{
+
+  assert(_n != 0);
+
+  int nRight = _n / 2;
+  int nLeft = _n - nRight;
+  
+  memcpy(_tmp, spectrum, nRight * sizeof(RadarComplex_t));
+  memcpy(spectrum, spectrum + nRight, nLeft * sizeof(RadarComplex_t));
+  memcpy(spectrum + nLeft, _tmp, nRight * sizeof(RadarComplex_t));
 
 }
 
