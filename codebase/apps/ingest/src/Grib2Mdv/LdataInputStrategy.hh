@@ -65,6 +65,7 @@ public:
   typedef void (*heartbeat_t)(const char *label);
 
   LdataInputStrategy(const string &data_dir,
+                     const string &input_substring,
 		     const int max_valid_age = -1,
 		     heartbeat_t heartbeat_func = 0,
 		     const bool debug = false);
@@ -83,6 +84,8 @@ private:
   string _currInputPath;
 
   LdataInfo _ldataInfo;
+  
+  string _inputSubstring;
   
 };
 

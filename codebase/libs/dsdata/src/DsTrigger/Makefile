@@ -46,6 +46,7 @@ HDRS = \
 	../include/dsdata/DsOneFileTrigger.hh \
 	../include/dsdata/DsOneTimeTrigger.hh \
 	../include/dsdata/DsSpecificFcstLdataTrigger.hh \
+	../include/dsdata/DsSpecificFcstTimeListTrigger.hh \
 	../include/dsdata/DsSpecificGenLdataTrigger.hh \
 	../include/dsdata/DsTimeListTrigger.hh \
 	../include/dsdata/DsTrigger.hh \
@@ -81,6 +82,7 @@ CPPC_SRCS = \
 	DsOneFileTrigger.cc \
 	DsOneTimeTrigger.cc \
 	DsSpecificFcstLdataTrigger.cc \
+	DsSpecificFcstTimeListTrigger.cc \
 	DsSpecificGenLdataTrigger.cc \
 	DsTimeListTrigger.cc \
 	DsTrigger.cc \

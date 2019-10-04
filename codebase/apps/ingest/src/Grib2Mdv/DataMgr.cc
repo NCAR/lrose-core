@@ -47,6 +47,7 @@
 #include "NewFilesInputStrategy.hh"
 #include "OutputFile.hh"
 #include "Grib2Mdv.hh"
+
 using namespace std;
 
 //
@@ -109,6 +110,7 @@ DataMgr::init( Params &params )
    case Params::REALTIME :
      _inputStrategy =
        new LdataInputStrategy(_paramsPtr->input_dir,
+                              _paramsPtr->input_substring,
 			      _paramsPtr->max_input_data_age,
 			      (LdataInputStrategy::heartbeat_t)PMU_auto_register,
 			      _paramsPtr->debug);
@@ -264,14 +266,17 @@ DataMgr::getData()
       _removeNonRequestedFields();
 
       if (_paramsPtr->debug) {
-        for( vector<MdvxField*>::iterator mfi = _outputFields.begin();
-          mfi != _outputFields.end(); mfi++ ) {
-          (*mfi)->printHeaders(cout);
+        for (map< TimeIndex, vector< MdvxField* > >::const_iterator field_time_iter = _outputFields.begin();
+             field_time_iter != _outputFields.end(); ++field_time_iter) {
+          for( vector<MdvxField*>::const_iterator mfi = field_time_iter->second.begin();
+               mfi != field_time_iter->second.end(); ++mfi ) {
+            (*mfi)->printHeaders(cout);
 
-          MdvxProj proj((*mfi)->getFieldHeader());
-          proj.print(cout);
-        }
-      }
+            MdvxProj proj((*mfi)->getFieldHeader());
+            proj.print(cout);
+          } /* endfor - mfi */
+        } /* endfor - field_time_iter */
+      } /* endif - _paramsPtr->debug */
 
       //
       // Write the mdv file
@@ -288,9 +293,9 @@ DataMgr::getData()
       
       _ingester->cleanup();
       
-   }
+   } /* endwhile - true */
    
-   return(0);
+   return true;
 }
 
 
@@ -338,47 +343,60 @@ bool
 DataMgr::_writeMdvFile()
 {
   assert(_ingester != NULL);
-  time_t generateTime = _ingester->getGenerateTime();
-  int forecastTime = _ingester->getForecastTime();
-  
-  if( (generateTime < 0) || (forecastTime < 0)) {
-    cerr << " WARNING: File times don't make sense" << endl << flush;
-    return true;
-  }
+  for (map< TimeIndex, vector< MdvxField* > >::iterator field_time_iter = _outputFields.begin();
+       field_time_iter != _outputFields.end(); ++field_time_iter) {
+
+    time_t generateTime = field_time_iter->first.gen_time;
+    int forecastTime = field_time_iter->first.lead_secs;
     
-  //
-  // Tell the user what we're doing
-  //
-  if(_paramsPtr->debug) {
-    DateTime genTime( generateTime );
-    cout << "Writing grid output file at " << genTime.dtime() << " for a forecast time of " \
-	 << (forecastTime/3600) << " hours" << endl << flush;
-  }
+    if( (generateTime < 0) || (forecastTime < 0)) {
+      cerr << " WARNING: File times don't make sense" << endl << flush;
+      return true;
+    }
+    
+    //
+    // Tell the user what we're doing
+    //
+    if(_paramsPtr->debug) {
+      DateTime genTime( generateTime );
+      cout << "Writing grid output file at " << genTime.dtime() << " for a forecast time of " \
+           << (forecastTime/3600) << " hours" << endl << flush;
+    }
 
-  //
-  // Prepare the file
-  //
-  for( vector<MdvxField*>::iterator mfi = _outputFields.begin(); mfi != _outputFields.end(); 
-       mfi++ ) {
-    _outputFile->addField( *mfi );
+    //
+    // Prepare the file
+    //
+    for( vector<MdvxField*>::iterator mfi = field_time_iter->second.begin();
+         mfi != field_time_iter->second.end(); mfi++ ) {
+      _outputFile->addField( *mfi );
+      
+      //
+      // Set the vertical level type in the master header. If there are multiple fields in the output
+      // file, this will just set the file vlevel type to the type of the last field, which is okay.
+      //
+      _outputFile->setVerticalType( (*mfi)->getFieldHeader().vlevel_type );
 
-   //
-   // release ownership of MdvxField object
-   //
-    *mfi = 0;
-  }
+      //
+      // Set the pointer to 0 in the field vector since the output file is now taking control
+      // of the pointer and will delete it when finished with it
+      //
+      *mfi = 0;
+    } /* endfor - mfi */
 
-  //
-  // Write out the file 
-  //
-  if ( _outputFile->writeVol( generateTime, forecastTime ) != 0 ) {
-    return false;
-  }
-  //
-  // Clear the file for next time
-  //
-  _outputFile->clear();
+    //
+    // Write out the file 
+    //
+    if ( _outputFile->writeVol( generateTime, forecastTime ) != 0 ) {
+      return false;
+    }
 
+    //
+    // Clear the file for next time
+    //
+    _outputFile->clear();
+
+  } /* endfor - field_time_iter */
+  
   return true;
 }
 
@@ -389,37 +407,41 @@ DataMgr::_remapData()
   // if the output projection type set to be something other
   // than OUTPUT_PROJ_NATIVE, then remap the data
   if(_paramsPtr->mdv_proj_type != Params::OUTPUT_PROJ_NATIVE) {
-    for( vector<MdvxField*>::iterator mfi = _outputFields.begin(); 
-	 mfi != _outputFields.end(); mfi++ ) {
-      MdvxRemapLut lut;
-      switch( _paramsPtr->mdv_proj_type ) {
-      case Params::OUTPUT_PROJ_FLAT:
-	(*mfi)->remap2Flat(lut, _paramsPtr->output_grid.nx, _paramsPtr->output_grid.ny, 
-			   _paramsPtr->output_grid.minx, _paramsPtr->output_grid.miny, 
-			   _paramsPtr->output_grid.dx, _paramsPtr->output_grid.dy, 
-			   _paramsPtr->output_origin.lat, _paramsPtr->output_origin.lon,
-			   _paramsPtr->output_rotation);
-	break;
+    for (map< TimeIndex, vector< MdvxField* > >::iterator field_time_iter = _outputFields.begin();
+         field_time_iter != _outputFields.end(); ++field_time_iter) {
+      
+      for( vector<MdvxField*>::iterator mfi = field_time_iter->second.begin(); 
+           mfi != field_time_iter->second.end(); mfi++ ) {
+        MdvxRemapLut lut;
+        switch( _paramsPtr->mdv_proj_type ) {
+          case Params::OUTPUT_PROJ_FLAT:
+            (*mfi)->remap2Flat(lut, _paramsPtr->output_grid.nx, _paramsPtr->output_grid.ny, 
+                               _paramsPtr->output_grid.minx, _paramsPtr->output_grid.miny, 
+                               _paramsPtr->output_grid.dx, _paramsPtr->output_grid.dy, 
+                               _paramsPtr->output_origin.lat, _paramsPtr->output_origin.lon,
+                               _paramsPtr->output_rotation);
+            break;
 	  
-      case Params::OUTPUT_PROJ_LATLON:
-	(*mfi)->remap2Latlon(lut, _paramsPtr->output_grid.nx, _paramsPtr->output_grid.ny, 
-			     _paramsPtr->output_grid.minx, _paramsPtr->output_grid.miny, 
-			     _paramsPtr->output_grid.dx, _paramsPtr->output_grid.dy );
-	break;
+          case Params::OUTPUT_PROJ_LATLON:
+            (*mfi)->remap2Latlon(lut, _paramsPtr->output_grid.nx, _paramsPtr->output_grid.ny, 
+                                 _paramsPtr->output_grid.minx, _paramsPtr->output_grid.miny, 
+                                 _paramsPtr->output_grid.dx, _paramsPtr->output_grid.dy );
+            break;
 
-      case Params::OUTPUT_PROJ_LAMBERT_CONF:
-	assert((*mfi)->remap2Lc2(lut, _paramsPtr->output_grid.nx, _paramsPtr->output_grid.ny, 
-			  _paramsPtr->output_grid.minx, _paramsPtr->output_grid.miny, 
-			  _paramsPtr->output_grid.dx, _paramsPtr->output_grid.dy,
-			  _paramsPtr->output_origin.lat, _paramsPtr->output_origin.lon,
-			  _paramsPtr->output_parallel.lat1, _paramsPtr->output_parallel.lat2 ) == 0);
-	break;
-      case Params::OUTPUT_PROJ_NATIVE:
-	break;
-      }
-    }
-
-  }
+          case Params::OUTPUT_PROJ_LAMBERT_CONF:
+            assert((*mfi)->remap2Lc2(lut, _paramsPtr->output_grid.nx, _paramsPtr->output_grid.ny, 
+                                     _paramsPtr->output_grid.minx, _paramsPtr->output_grid.miny, 
+                                     _paramsPtr->output_grid.dx, _paramsPtr->output_grid.dy,
+                                     _paramsPtr->output_origin.lat, _paramsPtr->output_origin.lon,
+                                     _paramsPtr->output_parallel.lat1, _paramsPtr->output_parallel.lat2 ) == 0);
+            break;
+          case Params::OUTPUT_PROJ_NATIVE:
+            break;
+        } /* endswitch - _paramsPtr->mdv_proj_type */
+      } /* endfor - mfi */
+    } /* endfor - field_time_iter */
+    
+  } /* endif - _paramsPtr->mdv_proj_type != Params::OUTPUT_PROJ_NATIVE */
   return true;
 }
 
@@ -447,13 +469,6 @@ DataMgr::_createMdvxFields()
   const list<GribField*>& gribFieldList = _ingester->getGribFieldList();
   for( list<GribField*>::const_iterator gfi = gribFieldList.begin(); 
        gfi != gribFieldList.end(); gfi++ ) {
-
-    //
-    // pass along vertical level info to the OutputFile object for the master header
-    //
-    if ( (*gfi)->getNz() > 1 ) {
-      _outputFile->setVerticalType( (*gfi)->getVerticalLeveltype() );  
-    }  
 
     //
     // fill out the field header
@@ -600,13 +615,19 @@ DataMgr::_createMdvxFields()
     
 
     // create the MdvxField object
-    _outputFields.push_back(new MdvxField(fieldHeader, vlevelHeader, 
-				  (void *) (*gfi)->getData() ) );
-    string fieldName = _gribMgr->uniqueFieldName((*gfi)->getName(),
-      (*gfi)->getLevelId());
-    _outputFields.back()->setFieldName( fieldName.c_str() );
-    _outputFields.back()->setFieldNameLong( (*gfi)->getLongName().c_str() );
-    _outputFields.back()->setUnits( (*gfi)->getUnits().c_str() );
+
+    TimeIndex time_index;
+    time_index.gen_time = (*gfi)->getGenerateTime();
+    time_index.lead_secs = (*gfi)->getForecastTime();
+
+    MdvxField *new_field = new MdvxField(fieldHeader, vlevelHeader, 
+                                         (void *) (*gfi)->getData() );
+    new_field->setFieldName(_gribMgr->uniqueFieldName((*gfi)->getName(),
+                                                      (*gfi)->getLevelId()).c_str());
+    new_field->setFieldNameLong( (*gfi)->getLongName().c_str() );
+    new_field->setUnits( (*gfi)->getUnits().c_str() );
+    
+    _outputFields[time_index].push_back(new_field);
   }
 
   return true;
@@ -632,14 +653,22 @@ fl32 DataMgr::wrapAdjust(fl32 value, fl32 lowerBound, fl32 upperBound)
 void
 DataMgr::_clearMdvxFields() 
 {
-  for( vector<MdvxField*>::iterator mfi = _outputFields.begin(); 
-       mfi != _outputFields.end(); mfi++ ) {
-    if(*mfi) {
-      delete (*mfi);
-    }
-    *mfi = 0;
-  }
-  _outputFields.erase(_outputFields.begin(), _outputFields.end());
+  for (map< TimeIndex, vector< MdvxField* > >::iterator field_time_iter = _outputFields.begin();
+       field_time_iter != _outputFields.end(); ++field_time_iter) {
+
+    for( vector<MdvxField*>::iterator mfi = field_time_iter->second.begin(); 
+         mfi != field_time_iter->second.end(); ++mfi ) {
+      if (*mfi)
+      {
+        delete (*mfi);
+        *mfi = 0;
+      }
+      
+    } /* endfor - mfi */
+    field_time_iter->second.clear();
+  } /* endfor - field_time_iter */
+
+  _outputFields.clear();
 }
 
 
@@ -694,6 +723,12 @@ DataMgr::_convertUnits()
 	*dPtr *= PERCENT_TO_FRAC;
       }
       break;
+    case Params::KGPM2PS_TO_MMPHR :
+      (*gfi)->setUnits("mm/hr");
+      for(int i = 0; i < (*gfi)->getNumPts(); i++,dPtr++) {
+	*dPtr *= 3600.0;
+      }
+      break;
     case Params::NO_CHANGE:
     default:
       break;
@@ -726,99 +761,105 @@ void DataMgr::_deriveFields()
   if (!needWind && !needWdir)
     return;
 
-  // Do we have them already (from the grib file itself)?
-  MdvxField *ugrdPtr = NULL;
-  MdvxField *vgrdPtr = NULL;
-  for( vector<MdvxField*>::iterator mfi = _outputFields.begin();
-    mfi != _outputFields.end(); mfi++ ) {
-    if ((*mfi)->getFieldHeader().field_code == Params::WIND)
-      needWind = false;
-    if ((*mfi)->getFieldHeader().field_code == Params::WDIR)
-      needWdir = false;
+  // Derive the field for each of the output times
 
-    // as long as we're looping we might as well check for what we need
-    if ((*mfi)->getFieldHeader().field_code == Params::UGRD)
-      ugrdPtr = *mfi;
-    if ((*mfi)->getFieldHeader().field_code == Params::VGRD)
-      vgrdPtr = *mfi;
-  }
+  for (map< TimeIndex, vector< MdvxField* > >::iterator field_time_iter = _outputFields.begin();
+       field_time_iter != _outputFields.end(); ++field_time_iter) {
+    
+    // Do we have them already (from the grib file itself)?
+    MdvxField *ugrdPtr = NULL;
+    MdvxField *vgrdPtr = NULL;
+    for( vector<MdvxField*>::iterator mfi = field_time_iter->second.begin();
+         mfi != field_time_iter->second.end(); mfi++ ) {
+      if ((*mfi)->getFieldHeader().field_code == Params::WIND)
+        needWind = false;
+      if ((*mfi)->getFieldHeader().field_code == Params::WDIR)
+        needWdir = false;
 
-  if (!needWind && !needWdir)
-    return;
+      // as long as we're looping we might as well check for what we need
+      if ((*mfi)->getFieldHeader().field_code == Params::UGRD)
+        ugrdPtr = *mfi;
+      if ((*mfi)->getFieldHeader().field_code == Params::VGRD)
+        vgrdPtr = *mfi;
+    } /* endfor - mfi */
 
-  // Do we have the source fields?
-  // UGRD and VGRD do not have to be requested, but they must be present in the grib file.
-  if (ugrdPtr == NULL || vgrdPtr == NULL) {
+    if (!needWind && !needWdir)
+      continue;
+
+    // Do we have the source fields?
+    // UGRD and VGRD do not have to be requested, but they must be present in the grib file.
+    if (ugrdPtr == NULL || vgrdPtr == NULL) {
+      if (_paramsPtr->debug)
+        cout << "WIND or WDIR was requested, but cannot be derived because UGRD and VGRD are missing."
+             << endl;
+      return;
+    }
+
     if (_paramsPtr->debug)
-      cout << "WIND or WDIR was requested, but cannot be derived because UGRD and VGRD are missing."
-        << endl;
-    return;
-  }
+      cout << "Deriving fields . . ." << endl;
 
-  if (_paramsPtr->debug)
-    cout << "Deriving fields . . ." << endl;
+    // wind speed
+    MdvxField *windPtr = NULL;
+    if (needWind) {
+      // create the new field, using UGRD as a template
+      windPtr = new MdvxField(*ugrdPtr);
 
-  // wind speed
-  MdvxField *windPtr = NULL;
-  if (needWind) {
-    // create the new field, using UGRD as a template
-    windPtr = new MdvxField(*ugrdPtr);
+      // get standard grib info for wind
+      MdvxFieldCode::entry_t newEntry;
+      MdvxFieldCode::getEntryByCode(Params::WIND, newEntry);
 
-    // get standard grib info for wind
-    MdvxFieldCode::entry_t newEntry;
-    MdvxFieldCode::getEntryByCode(Params::WIND, newEntry);
+      // convert code and names to wind by replacing the field header
+      Mdvx::field_header_t newHeader = ugrdPtr->getFieldHeader(); // copy contents
+      newHeader.field_code = Params::WIND;
+      string fieldName = _gribMgr->uniqueFieldName(newEntry.abbrev, windRequest->level_id);
+      strcpy(newHeader.field_name, fieldName.c_str());
+      strcpy(newHeader.field_name_long, newEntry.name);
+      windPtr->setFieldHeader(newHeader);
 
-    // convert code and names to wind by replacing the field header
-    Mdvx::field_header_t newHeader = ugrdPtr->getFieldHeader(); // copy contents
-    newHeader.field_code = Params::WIND;
-    string fieldName = _gribMgr->uniqueFieldName(newEntry.abbrev, windRequest->level_id);
-    strcpy(newHeader.field_name, fieldName.c_str());
-    strcpy(newHeader.field_name_long, newEntry.name);
-    windPtr->setFieldHeader(newHeader);
+      // calculate the derived values
+      if (_calculateWindFunction(ugrdPtr, vgrdPtr, windPtr, PHYwind_speed)) {
+        // add field to the MDV set
+        // hands off memory management to _outputFields
+        field_time_iter->second.push_back(windPtr);
+        if (_paramsPtr->debug)
+          windPtr->printHeaders(cout);
+      } else {
+        delete windPtr;
+      }
+    } /* endif - needWind */
 
-    // calculate the derived values
-    if (_calculateWindFunction(ugrdPtr, vgrdPtr, windPtr, PHYwind_speed)) {
-      // add field to the MDV set
-      // hands off memory management to _outputFields
-      _outputFields.push_back(windPtr);
-      if (_paramsPtr->debug)
-        windPtr->printHeaders(cout);
-    } else {
-      delete windPtr;
-    }
-  }
+    // wind direction
+    MdvxField *wdirPtr = NULL;
+    if (needWdir) {
+      // create the new field, using UGRD as a template
+      wdirPtr = new MdvxField(*ugrdPtr);
 
-  // wind direction
-  MdvxField *wdirPtr = NULL;
-  if (needWdir) {
-    // create the new field, using UGRD as a template
-    wdirPtr = new MdvxField(*ugrdPtr);
+      // get standard grib info for wdir
+      MdvxFieldCode::entry_t newEntry;
+      MdvxFieldCode::getEntryByCode(Params::WDIR, newEntry);
 
-    // get standard grib info for wdir
-    MdvxFieldCode::entry_t newEntry;
-    MdvxFieldCode::getEntryByCode(Params::WDIR, newEntry);
+      // convert code and names to wdir by replacing the field header
+      Mdvx::field_header_t newHeader = ugrdPtr->getFieldHeader(); // copy contents
+      newHeader.field_code = Params::WDIR;
+      string fieldName = _gribMgr->uniqueFieldName(newEntry.abbrev, wdirRequest->level_id);
+      strcpy(newHeader.field_name, fieldName.c_str());
+      strcpy(newHeader.field_name_long, newEntry.name);
+      strcpy(newHeader.units, newEntry.units);
+      wdirPtr->setFieldHeader(newHeader);
 
-    // convert code and names to wdir by replacing the field header
-    Mdvx::field_header_t newHeader = ugrdPtr->getFieldHeader(); // copy contents
-    newHeader.field_code = Params::WDIR;
-    string fieldName = _gribMgr->uniqueFieldName(newEntry.abbrev, wdirRequest->level_id);
-    strcpy(newHeader.field_name, fieldName.c_str());
-    strcpy(newHeader.field_name_long, newEntry.name);
-    strcpy(newHeader.units, newEntry.units);
-    wdirPtr->setFieldHeader(newHeader);
-
-    // calculate the derived values
-    if (_calculateWindFunction(ugrdPtr, vgrdPtr, wdirPtr, PHYwind_dir)) {
-      // add field to the MDV set
-      // hands off memory management to _outputFields
-      _outputFields.push_back(wdirPtr);
-      if (_paramsPtr->debug)
-        wdirPtr->printHeaders(cout);
-    } else {
-      delete wdirPtr;
-    }
-  }
-
+      // calculate the derived values
+      if (_calculateWindFunction(ugrdPtr, vgrdPtr, wdirPtr, PHYwind_dir)) {
+        // add field to the MDV set
+        // hands off memory management to _outputFields
+        field_time_iter->second.push_back(wdirPtr);
+        if (_paramsPtr->debug)
+          wdirPtr->printHeaders(cout);
+      } else {
+        delete wdirPtr;
+      }
+    } /* endif - needWdir */
+  } /* endfor - field_time_iter */
+  
 }
 
 
@@ -1010,36 +1051,42 @@ bool DataMgr::_checkFieldsCompatible(MdvxField *uWind, MdvxField *vWind, MdvxFie
 
 void DataMgr::_removeNonRequestedFields()
 {
-  // separate output fields into requested and non-requested
-  vector<MdvxField *> requestedFields;
-  vector<MdvxField *> nonrequested;
+  for (map< TimeIndex, vector< MdvxField* > >::iterator field_time_iter = _outputFields.begin();
+       field_time_iter != _outputFields.end(); ++field_time_iter) {
+    
+    // separate output fields into requested and non-requested
+    vector<MdvxField *> requestedFields;
+    vector<MdvxField *> nonrequested;
 
-  // loop and categorize the fields
-  for( vector<MdvxField*>::iterator mfi = _outputFields.begin();
-    mfi != _outputFields.end(); mfi++ ) {
-    if (_isRequested(*mfi))
-      requestedFields.push_back(*mfi);
-    else
-      nonrequested.push_back(*mfi);
-  }
-
-  _outputFields.clear();
-
-  // vaporize the ones we don't want
-  for ( vector<MdvxField*>::iterator mfi = nonrequested.begin(); 
-       mfi != nonrequested.end(); mfi++ ) {
-    if(*mfi) {
-      delete (*mfi);
+    // loop and categorize the fields
+    for( vector<MdvxField*>::iterator mfi = field_time_iter->second.begin();
+         mfi != field_time_iter->second.end(); mfi++ ) {
+      if (_isRequested(*mfi))
+        requestedFields.push_back(*mfi);
+      else
+        nonrequested.push_back(*mfi);
     }
-  }
-  nonrequested.clear();
 
-  // keep the ones we do want
-  for ( vector<MdvxField *>::iterator mfi = requestedFields.begin();
-    mfi != requestedFields.end(); mfi++) {
-    _outputFields.push_back(*mfi);
-  }
-  requestedFields.clear();
+    field_time_iter->second.clear();
+
+    // vaporize the ones we don't want
+    for ( vector<MdvxField*>::iterator mfi = nonrequested.begin(); 
+          mfi != nonrequested.end(); mfi++ ) {
+      if(*mfi) {
+        delete (*mfi);
+        *mfi = 0;
+      }
+    }
+    nonrequested.clear();
+
+    // keep the ones we do want
+    for ( vector<MdvxField *>::iterator mfi = requestedFields.begin();
+          mfi != requestedFields.end(); mfi++) {
+      field_time_iter->second.push_back(*mfi);
+    }
+    requestedFields.clear();
+  } /* endfor - field_time_iter */
+  
 }
 
 

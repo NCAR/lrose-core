@@ -124,12 +124,14 @@ private:
   //
   // 
   //
-  bool _isFieldNew(const int& param_id, const int& level_id);
+  bool _isFieldNew(const int& param_id, const int& level_id,
+                   const time_t& generate_time, const int& forecast_time);
 
   //
   // 
   //
-  GribField* _getField(const int& param_id, const int& level_id);
+  GribField* _getField(const int& param_id, const int& level_id,
+                       const time_t& generate_time, const int& forecast_time);
 
   //
   // clean up the GribField objects
