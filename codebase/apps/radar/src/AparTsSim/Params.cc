@@ -596,6 +596,30 @@
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
+    // Parameter 'register_with_procmap'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("register_with_procmap");
+    tt->descr = tdrpStrDup("Option to register with procmap.");
+    tt->help = tdrpStrDup("Relevant for testing an operational system. The app will register with the process mapper once per 60 secs.");
+    tt->val_offset = (char *) &register_with_procmap - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'instance'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("instance");
+    tt->descr = tdrpStrDup("Process instance");
+    tt->help = tdrpStrDup("Used for registration with procmap.");
+    tt->val_offset = (char *) &instance - &_start_;
+    tt->single_val.s = tdrpStrDup("test");
+    tt++;
+    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
