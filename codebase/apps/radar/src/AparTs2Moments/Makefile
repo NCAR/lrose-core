@@ -36,17 +36,15 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = AparTs2Moments
 
+LOC_INCLUDES = $(NETCDF4_INCS)
+
+LOC_LIBS = -lradar -lFmq -lMdv -lRadx -lNcxx -ldsserver -ldidss \
+	-lrapformats -lrapmath -leuclid -ltoolsa -ltdrp \
+	-ldataport $(NETCDF4_LIBS) -lbz2 -lz -lfftw3 -lpthread
+
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+
 LOC_CFLAGS =
-LOC_LDFLAGS =
-LOC_INCLUDES =
-
-LOC_LIBS = -lradar -lRadx -lFmq \
-	-ldsserver -lrapformats -ldidss -lrapmath \
-	-ltoolsa -ldataport -ltdrp -lfftw3 \
-	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
-
-LOC_CPPC_CFLAGS =
-
 
 HDRS = \
 	$(PARAMS_HH) \
