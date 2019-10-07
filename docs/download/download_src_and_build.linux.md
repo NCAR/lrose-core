@@ -63,7 +63,6 @@ sudo apt-get install -y \
     qtbase5-dev qtdeclarative5-dev \
     libgeographic-dev libeigen3-dev libzip-dev \
     libnetcdf-dev netcdf-bin libhdf5-dev hdf5-tools \
-    libgeographic-dev \
     libcurl4-openssl-dev
 
 # create link for qtmake
