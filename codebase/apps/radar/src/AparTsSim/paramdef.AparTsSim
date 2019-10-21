@@ -26,6 +26,18 @@ paramdef enum debug_t {
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with procmap.";
+  p_help = "Relevant for testing an operational system. The app will register with the process mapper once per 60 secs.";
+} register_with_procmap;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
 commentdef {
   p_header = "SPECIFY APAR TIME-SERIES DETAILS";
 };

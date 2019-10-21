@@ -94,6 +94,14 @@ AparTsSim::AparTsSim(int argc, char **argv)
     return;
   }
 
+  // init process mapper registration
+
+  if (_params.register_with_procmap) {
+    PMU_auto_init((char *) _progName.c_str(),
+                  _params.instance,
+                  PROCMAP_REGISTER_INTERVAL);
+  }
+
 }
 
 // destructor
@@ -102,6 +110,10 @@ AparTsSim::~AparTsSim()
 
 {
   
+  // unregister process
+
+  PMU_auto_unregister();
+
 }
 
 //////////////////////////////////////////////////

@@ -376,6 +376,10 @@ public:
 
   debug_t debug;
 
+  tdrp_bool_t register_with_procmap;
+
+  char* instance;
+
   int n_samples_per_visit;
 
   int n_visits_per_beam;
@@ -423,7 +427,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[29];
+  mutable TDRPtable _table[31];
 
   const char *_className;
 

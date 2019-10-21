@@ -94,6 +94,15 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-instance")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "instance = \"%s\";", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+	sprintf(tmp_str, "register_with_procmap = TRUE;");
+	TDRP_add_override(&override, tmp_str);
+      }
+	
     } else if (!strcmp(argv[i], "-outdir")) {
       
       if (i < argc - 1) {
@@ -144,6 +153,7 @@ void Args::usage(string &prog_name, ostream &out)
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -d, -debug ] print debug messages\n"
       << "       [ -f ? ? ] specify input file paths\n"
+      << "       [ -instance ?] specify the instance\n"
       << "       [ -outdir ?] specify output directory for file\n"
       << "          default '.'\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"
