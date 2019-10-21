@@ -232,7 +232,7 @@ int ReadFromUdp::_handlePacket(ui08 *pktBuf, int pktLen)
 {
 
   if (pktLen < 86) {
-    cerr << "ERROR - ReadFromUdp::_handlePacketr" << endl;
+    cerr << "ERROR - ReadFromUdp::_handlePacket" << endl;
     cerr << "  pktLen too short: " << pktLen << endl;
     return -1;
   }
@@ -568,10 +568,11 @@ int ReadFromUdp::_writePulseToFmq()
 
   int iret = 0;
 
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> Writing out pulse <<==" << endl;
-    cerr << "  _nPulsesOut: " << _nPulsesOut << endl;
-    cerr << "  _iqApar.size(): " << _iqApar.size() << endl;
+    cerr << "  nPulsesOut : " << _nPulsesOut << endl;
+    cerr << "  nGates     : " << _iqApar.size() / 2 << endl;
+    cerr << "  iq.size()  : " << _iqApar.size() << endl;
   }
 
   // add metadata to outgoing message

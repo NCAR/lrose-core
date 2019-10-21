@@ -106,9 +106,7 @@ private:
                    int channelNum,
                    vector<si16> &iqData);
 
-  int _sendPulse(ui64 sampleNumber,
-                 ui64 pulseNumber,
-                 si64 secondsTime,
+  int _sendPulse(si64 secondsTime,
                  ui32 nanoSecs,
                  ui64 dwellNum,
                  ui32 beamNumInDwell,
@@ -120,9 +118,7 @@ private:
                  int nGates,
                  vector<si16> &iqApar);
 
-  void _addAparHeader(ui64 sampleNumber,
-                      ui64 pulseNumber,
-                      si64 secondsTime,
+  void _addAparHeader(si64 secondsTime,
                       ui32 nanoSecs,
                       ui32 pulseStartIndex,
                       ui64 dwellNum,
