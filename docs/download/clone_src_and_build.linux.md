@@ -48,6 +48,12 @@ cd /usr/bin
 sudo ln -s qmake-qt5 qmake
 ```
 
+For CENTOS 8 you need to add the PowerTools repo.
+
+```
+  yum config-manager --set-enabled PowerTools
+```
+
 ### On Debian-based hosts run the following (as root or sudo):
 
 ```

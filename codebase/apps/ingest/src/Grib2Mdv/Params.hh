@@ -68,12 +68,13 @@ public:
   // enum typedefs
 
   typedef enum {
-    GRIB_TYPE_RUC = 0,
-    GRIB_TYPE_AVN = 1,
-    GRIB_TYPE_ETA = 2,
-    GRIB_TYPE_WAFS = 3,
-    GRIB_TYPE_AFWA = 4,
-    GRIB_TYPE_DTRA = 5
+    GRIB_TYPE_GENERIC = 0,
+    GRIB_TYPE_RUC = 1,
+    GRIB_TYPE_AVN = 2,
+    GRIB_TYPE_ETA = 3,
+    GRIB_TYPE_WAFS = 4,
+    GRIB_TYPE_AFWA = 5,
+    GRIB_TYPE_DTRA = 6
   } grib_type_t;
 
   typedef enum {
@@ -198,6 +199,10 @@ public:
     CAPE = 157,
     TURBULENT_KINETIC_ENERGY = 158,
     SOILL = 160,
+    CLOUD_FORCING_NET_LONG_WAVE_FLUX = 165,
+    VISIBLE_BEAM_DOWNWARD_SOLAR_FLUX = 166,
+    VISIBLE_DIFFUSE_DOWNWARD_SOLAR_FLUX = 167,
+    NEAR_IR_BEAM_DOWNWARD_SOLAR_FLUX = 168,
     RAIN_WATER_MIXING_RATIO = 170,
     SNOW_MIXING_RATIO = 171,
     MOMENTUM_FLUX = 172,
@@ -236,6 +241,7 @@ public:
     VEGETATION_TYPE = 225,
     VGTYP = 225,
     TB = 226,
+    POTENTIAL_EVAPORATION = 228,
     SNOW_PHASE_CHANGE_HEAT_FLUX = 229,
     FIVE_WAVA = 230,
     LAT = 230,
@@ -289,7 +295,8 @@ public:
     PASCALS_TO_MBAR = 4,
     KELVIN_TO_CELSIUS = 5,
     KGPKG_TO_GPKG = 6,
-    PERCENT_TO_FRACTION = 7
+    PERCENT_TO_FRACTION = 7,
+    KGPM2PS_TO_MMPHR = 8
   } out_units_t;
 
   typedef enum {
