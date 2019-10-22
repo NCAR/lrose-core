@@ -52,7 +52,6 @@ cd /usr/bin
 sudo ln -s qmake-qt5 qmake
 ```
 
-<<<<<<< HEAD
 For CENTOS 8 you need to add the PowerTools repo, and python packages
 
 ```
@@ -60,8 +59,6 @@ For CENTOS 8 you need to add the PowerTools repo, and python packages
   yum install -y python2-devel platform-python-devel
 ```
 
-=======
->>>>>>> 2e75be60517ec0a21dfd9072680db441034867a6
 ### On Debian-based hosts run the following (as root or sudo):
 
 ```
