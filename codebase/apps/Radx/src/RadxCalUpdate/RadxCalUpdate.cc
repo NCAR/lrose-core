@@ -451,32 +451,36 @@ void RadxCalUpdate::_fixRayCalibration(RadxVol &vol, RadxRay &ray)
     return;
   }
 
-  // compute the deltas for the calibration
-
-  double oldBaseDbz = rayCal->getBaseDbz1kmHc();
-  double newBaseDbz = _newCal.getBaseDbz1kmHc();
-  double deltaDbz = newBaseDbz - oldBaseDbz;
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "==>> changing cal, deltaDbz = " << deltaDbz << endl;
-  }
-
   // correct the DBZ fields for the new cal
 
   for (int ifld = 0; ifld < _params.dbz_fields_for_update_n; ifld++) {
 
     // find the field we want
-
-    string fieldName = _params._dbz_fields_for_update[ifld];
+    
+    string fieldName = _params._dbz_fields_for_update[ifld].name;
     RadxField *dbzFld = ray.getField(fieldName);
     if (dbzFld == NULL) {
       if (_params.debug >= Params::DEBUG_VERBOSE) {
         cerr << "WARNING - RadxCalUpdate::_fixRayCalibration" << endl;
-        cerr << "==>> ignoring field, cannot find: " << fieldName << endl;
+        cerr << "==>> ignoring DBZ field, cannot find: " << fieldName << endl;
       }
       continue;
     }
     
+    // compute the deltas for the calibration
+    
+    double oldBaseDbz = rayCal->getBaseDbz1kmHc();
+    double newBaseDbz = _newCal.getBaseDbz1kmHc();
+    if (_params._dbz_fields_for_update[ifld].channel == Params::CHANNEL_VC) {
+      oldBaseDbz = rayCal->getBaseDbz1kmVc();
+      newBaseDbz = _newCal.getBaseDbz1kmVc();
+    }
+    double deltaDbz = newBaseDbz - oldBaseDbz;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "==>> changing DBZ cal, field, deltaDbz = " 
+           << fieldName << ", " << deltaDbz << endl;
+    }
+
     // store the data type
     // then convert to floats
 
@@ -494,6 +498,62 @@ void RadxCalUpdate::_fixRayCalibration(RadxVol &vol, RadxRay &ray)
     // convert back to original type
     
     dbzFld->convertToType(dtype);
+
+  } // ifld
+
+  // correct the DBM fields for the new cal
+
+  for (int ifld = 0; ifld < _params.dbm_fields_for_update_n; ifld++) {
+
+    // find the field we want
+    
+    string fieldName = _params._dbm_fields_for_update[ifld].name;
+    RadxField *dbmFld = ray.getField(fieldName);
+    if (dbmFld == NULL) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "WARNING - RadxCalUpdate::_fixRayCalibration" << endl;
+        cerr << "==>> ignoring DBM field, cannot find: " << fieldName << endl;
+      }
+      continue;
+    }
+    
+    // compute the deltas for the calibration
+    
+    double oldGainDb = rayCal->getReceiverGainDbHc();
+    double newGainDb = _newCal.getReceiverGainDbHc();
+    if (_params._dbm_fields_for_update[ifld].channel == Params::CHANNEL_VC) {
+      oldGainDb = rayCal->getReceiverGainDbVc();
+      newGainDb = _newCal.getReceiverGainDbVc();
+    } else if (_params._dbm_fields_for_update[ifld].channel == Params::CHANNEL_HX) {
+      oldGainDb = rayCal->getReceiverGainDbHx();
+      newGainDb = _newCal.getReceiverGainDbHx();
+    } else if (_params._dbm_fields_for_update[ifld].channel == Params::CHANNEL_VX) {
+      oldGainDb = rayCal->getReceiverGainDbVx();
+      newGainDb = _newCal.getReceiverGainDbVx();
+    }
+    double deltaGainDb = newGainDb - oldGainDb;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "==>> changing DBM cal, field, deltaGainDb = "
+           << fieldName << ", " << deltaGainDb << endl;
+    }
+
+    // store the data type
+    // then convert to floats
+
+    Radx::DataType_t dtype = dbmFld->getDataType();
+    dbmFld->convertToFl32();
+    Radx::fl32 *dbm = dbmFld->getDataFl32();
+    size_t nGates = dbmFld->getNPoints();
+    
+    // adjust the reflectivity for the change in cal
+
+    for (size_t igate = 0; igate < nGates; igate++) {
+      dbm[igate] = dbm[igate] - deltaGainDb;
+    } // igate
+
+    // convert back to original type
+    
+    dbmFld->convertToType(dtype);
 
   } // ifld
 

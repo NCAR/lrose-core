@@ -86,6 +86,20 @@ public:
     END_TIME_ONLY = 2
   } filename_mode_t;
 
+  typedef enum {
+    CHANNEL_HC = 0,
+    CHANNEL_VC = 1,
+    CHANNEL_HX = 2,
+    CHANNEL_VX = 3
+  } channel_t;
+
+  // struct typedefs
+
+  typedef struct {
+    channel_t channel;
+    char* name;
+  } field_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -408,8 +422,11 @@ public:
 
   char* calibration_file_path;
 
-  char* *_dbz_fields_for_update;
+  field_t *_dbz_fields_for_update;
   int dbz_fields_for_update_n;
+
+  field_t *_dbm_fields_for_update;
+  int dbm_fields_for_update_n;
 
   tdrp_bool_t correct_hcr_v_rx_gain_for_temperature;
 
@@ -430,7 +447,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[30];
+  mutable TDRPtable _table[31];
 
   const char *_className;
 

@@ -136,11 +136,35 @@ paramdef string {
   p_help = "The new calibration will be read in from this file. It must be in Radx calibration XML format.";
 } calibration_file_path;
 
-paramdef string {
-  p_default = { "DBZ" , "DBZ_F" };
-  p_descr = "Names of DBZ fields to be updated.";
-  p_help = "Only the fields in this list will be updated for the new cal.";
+typedef enum {
+  CHANNEL_HC,
+  CHANNEL_VC,
+  CHANNEL_HX,
+  CHANNEL_VX
+} channel_t;
+
+typedef struct {
+  channel_t channel;
+  string name;
+} field_t;
+
+paramdef struct field_t {
+  p_default = {
+    {CHANNEL_HC, "DBZ"},
+    {CHANNEL_HC, "DBZ_F"}
+  };
+  p_descr = "Description of DBZ fields to be updated.";
+  p_help = "Only the fields in this list will be updated for the new cal. The calibration changes will vary per channel, hence the channel is specified along with the name.";
 } dbz_fields_for_update[];
+
+paramdef struct field_t {
+  p_default = {
+    {CHANNEL_HC, "DBMHC"},
+    {CHANNEL_VC, "DBMVC"}
+  };
+  p_descr = "Description of DBM fields to be updated.";
+  p_help = "Only the fields in this list will be updated for the new cal. The calibration changes will vary per channel, hence the channel is specified along with the name.";
+} dbm_fields_for_update[];
 
 commentdef {
   p_header = "FOR HCR, CORRECT RECEIVER GAIN FOR TEMPERATURE USING VALUES FROM SPDB";

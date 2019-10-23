@@ -809,23 +809,101 @@
     tt++;
     
     // Parameter 'dbz_fields_for_update'
-    // ctype is 'char*'
+    // ctype is '_field_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
+    tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("dbz_fields_for_update");
-    tt->descr = tdrpStrDup("Names of DBZ fields to be updated.");
-    tt->help = tdrpStrDup("Only the fields in this list will be updated for the new cal.");
+    tt->descr = tdrpStrDup("Description of DBZ fields to be updated.");
+    tt->help = tdrpStrDup("Only the fields in this list will be updated for the new cal. The calibration changes will vary per channel, hence the channel is specified along with the name.");
     tt->array_offset = (char *) &_dbz_fields_for_update - &_start_;
     tt->array_n_offset = (char *) &dbz_fields_for_update_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
+    tt->array_elem_size = sizeof(field_t);
     tt->array_n = 2;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("DBZ");
-      tt->array_vals[1].s = tdrpStrDup("DBZ_F");
+    tt->struct_def.name = tdrpStrDup("field_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("channel_t");
+      tt->struct_def.fields[0].fname = tdrpStrDup("channel");
+      tt->struct_def.fields[0].ptype = ENUM_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_dbz_fields_for_update->channel - (char *) _dbz_fields_for_update;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("channel_t");
+        tt->struct_def.fields[0].enum_def.nfields = 4;
+        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("CHANNEL_HC");
+        tt->struct_def.fields[0].enum_def.fields[0].val = CHANNEL_HC;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("CHANNEL_VC");
+        tt->struct_def.fields[0].enum_def.fields[1].val = CHANNEL_VC;
+        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("CHANNEL_HX");
+        tt->struct_def.fields[0].enum_def.fields[2].val = CHANNEL_HX;
+        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("CHANNEL_VX");
+        tt->struct_def.fields[0].enum_def.fields[3].val = CHANNEL_VX;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("name");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_dbz_fields_for_update->name - (char *) _dbz_fields_for_update;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].e = CHANNEL_HC;
+      tt->struct_vals[1].s = tdrpStrDup("DBZ");
+      tt->struct_vals[2].e = CHANNEL_HC;
+      tt->struct_vals[3].s = tdrpStrDup("DBZ_F");
+    tt++;
+    
+    // Parameter 'dbm_fields_for_update'
+    // ctype is '_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("dbm_fields_for_update");
+    tt->descr = tdrpStrDup("Description of DBM fields to be updated.");
+    tt->help = tdrpStrDup("Only the fields in this list will be updated for the new cal. The calibration changes will vary per channel, hence the channel is specified along with the name.");
+    tt->array_offset = (char *) &_dbm_fields_for_update - &_start_;
+    tt->array_n_offset = (char *) &dbm_fields_for_update_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(field_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("field_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("channel_t");
+      tt->struct_def.fields[0].fname = tdrpStrDup("channel");
+      tt->struct_def.fields[0].ptype = ENUM_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_dbm_fields_for_update->channel - (char *) _dbm_fields_for_update;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("channel_t");
+        tt->struct_def.fields[0].enum_def.nfields = 4;
+        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("CHANNEL_HC");
+        tt->struct_def.fields[0].enum_def.fields[0].val = CHANNEL_HC;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("CHANNEL_VC");
+        tt->struct_def.fields[0].enum_def.fields[1].val = CHANNEL_VC;
+        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("CHANNEL_HX");
+        tt->struct_def.fields[0].enum_def.fields[2].val = CHANNEL_HX;
+        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("CHANNEL_VX");
+        tt->struct_def.fields[0].enum_def.fields[3].val = CHANNEL_VX;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("name");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_dbm_fields_for_update->name - (char *) _dbm_fields_for_update;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].e = CHANNEL_HC;
+      tt->struct_vals[1].s = tdrpStrDup("DBMHC");
+      tt->struct_vals[2].e = CHANNEL_VC;
+      tt->struct_vals[3].s = tdrpStrDup("DBMVC");
     tt++;
     
     // Parameter 'Comment 6'
