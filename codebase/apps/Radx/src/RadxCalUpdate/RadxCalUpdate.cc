@@ -663,9 +663,9 @@ int RadxCalUpdate::_correctHcrVRxGainForTemp(time_t timeSecs)
   _newCal = _fileCal;
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "++++ CALIBRATION BEFORE HCR GAIN CORRECTION +++++++++++++" << endl;
+    cerr << "++++ CALIBRATION BEFORE HCR GAIN TEMP CORRECTION - START +++++++++++++" << endl;
     _newCal.print(cerr);
-    cerr << "++++ END CALIBRATION BEFORE HCR GAIN TEMP CORRECTION ++++" << endl;
+    cerr << "++++ CALIBRATION BEFORE HCR GAIN TEMP CORRECTION - END +++++++++++++++" << endl;
     cerr << "Delta gain XML - created by HcrTempRxGain app" << endl;
     cerr << _deltaGainXml << endl;
     cerr << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
@@ -697,9 +697,9 @@ int RadxCalUpdate::_correctHcrVRxGainForTemp(time_t timeSecs)
   }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "++++ CALIBRATION AFTER HCR GAIN CORRECTION +++++++++++++" << endl;
+    cerr << "++++ CALIBRATION AFTER HCR GAIN TEMP CORRECTION - START +++++++++++++" << endl;
     _newCal.print(cerr);
-    cerr << "++++ END CALIBRATION AFTER HCR GAIN TEMP CORRECTION ++++" << endl;
+    cerr << "++++ CALIBRATION AFTER HCR GAIN TEMP CORRECTION - END +++++++++++++++" << endl;
   }
     
   return 0;
