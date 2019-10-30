@@ -82,7 +82,7 @@ private:
   // calibration
 
   RadxRcalib _fileCal;
-  RadxRcalib _newCal;
+  RadxRcalib _tempCorrCal;
   
   // altitude correction
 

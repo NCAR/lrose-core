@@ -117,7 +117,7 @@ int RadxCalUpdate::Run()
       return -1;
     }
   }
-  _newCal = _fileCal;
+  _tempCorrCal = _fileCal;
 
   // read altitude correction table, as required
     
@@ -274,7 +274,7 @@ int RadxCalUpdate::_processFile(const string &filePath)
       vol.setStatusXml(newStatus);
     } else {
       // failed - use file version
-      _newCal = _fileCal;
+      _tempCorrCal = _fileCal;
     }
   }
 
@@ -288,7 +288,7 @@ int RadxCalUpdate::_processFile(const string &filePath)
   // set the new calib for the volume
 
   vol.clearRcalibs();
-  RadxRcalib *newCal = new RadxRcalib(_newCal);
+  RadxRcalib *newCal = new RadxRcalib(_tempCorrCal);
   vol.addCalib(newCal);
 
   // write the file
@@ -441,11 +441,11 @@ void RadxCalUpdate::_fixRayCalibration(RadxVol &vol, RadxRay &ray)
 
   // check the time
 
-  if (rayCal->getCalibTime() == _newCal.getCalibTime()) {
+  if (rayCal->getCalibTime() == _tempCorrCal.getCalibTime()) {
     if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "WARNING - RadxCalUpdate::_fixRayCalibration" << endl;
       cerr << "  Calibrations have same time: "
-           << RadxTime::strm(_newCal.getCalibTime()) << endl;
+           << RadxTime::strm(_tempCorrCal.getCalibTime()) << endl;
       cerr << "  No change" << endl;
     }
     return;
@@ -479,10 +479,10 @@ void RadxCalUpdate::_fixRayCalibration(RadxVol &vol, RadxRay &ray)
     // compute the deltas for the calibration
     
     double oldBaseDbz = rayCal->getBaseDbz1kmHc();
-    double newBaseDbz = _newCal.getBaseDbz1kmHc();
+    double newBaseDbz = _tempCorrCal.getBaseDbz1kmHc();
     if (_params._dbz_fields_for_update[ifld].channel == Params::CHANNEL_VC) {
       oldBaseDbz = rayCal->getBaseDbz1kmVc();
-      newBaseDbz = _newCal.getBaseDbz1kmVc();
+      newBaseDbz = _tempCorrCal.getBaseDbz1kmVc();
     }
     double deltaDbz = newBaseDbz - oldBaseDbz;
     if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -529,16 +529,16 @@ void RadxCalUpdate::_fixRayCalibration(RadxVol &vol, RadxRay &ray)
     // compute the deltas for the calibration
     
     double oldGainDb = rayCal->getReceiverGainDbHc();
-    double newGainDb = _newCal.getReceiverGainDbHc();
+    double newGainDb = _tempCorrCal.getReceiverGainDbHc();
     if (_params._dbm_fields_for_update[ifld].channel == Params::CHANNEL_VC) {
       oldGainDb = rayCal->getReceiverGainDbVc();
-      newGainDb = _newCal.getReceiverGainDbVc();
+      newGainDb = _tempCorrCal.getReceiverGainDbVc();
     } else if (_params._dbm_fields_for_update[ifld].channel == Params::CHANNEL_HX) {
       oldGainDb = rayCal->getReceiverGainDbHx();
-      newGainDb = _newCal.getReceiverGainDbHx();
+      newGainDb = _tempCorrCal.getReceiverGainDbHx();
     } else if (_params._dbm_fields_for_update[ifld].channel == Params::CHANNEL_VX) {
       oldGainDb = rayCal->getReceiverGainDbVx();
-      newGainDb = _newCal.getReceiverGainDbVx();
+      newGainDb = _tempCorrCal.getReceiverGainDbVx();
     }
     double deltaGainDb = newGainDb - oldGainDb;
     if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -669,48 +669,42 @@ int RadxCalUpdate::_correctHcrVRxGainForTemp(time_t timeSecs)
 
   // copy the new cal from the input file
 
-  _newCal = _fileCal;
-  
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "++++ CALIBRATION BEFORE HCR GAIN TEMP CORRECTION - START +++++++++++++" << endl;
-    _newCal.print(cerr);
-    cerr << "++++ CALIBRATION BEFORE HCR GAIN TEMP CORRECTION - END +++++++++++++++" << endl;
-    cerr << "Delta gain XML - created by HcrTempRxGain app" << endl;
-    cerr << _deltaGainXml << endl;
-    cerr << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  }
+  _tempCorrCal = _fileCal;
   
   // compute base dbz if needed
 
-  if (!_newCal.isMissing(_newCal.getReceiverGainDbVc())) {
-    double rconst = _newCal.getRadarConstantV();
-    double noise = _newCal.getNoiseDbmVc();
-    double noiseFixed = noise + deltaGainVc;
-    double gain = _newCal.getReceiverGainDbVc();
-    double gainFixed = gain + deltaGainVc;
-    double baseDbz1km = noiseFixed - gainFixed + rconst;
+  if (!_tempCorrCal.isMissing(_tempCorrCal.getReceiverGainDbVc())) {
+    double rconst = _fileCal.getRadarConstantV();
+    double noise = _fileCal.getNoiseDbmVc();
+    // we assume the noise does not change based on temp
+    // not quite accurate, but good enough
+    double noiseCorr = noise;
+    double gain = _fileCal.getReceiverGainDbVc();
+    double gainCorr = gain + deltaGainVc;
+    double baseDbz1km = _fileCal.getBaseDbz1kmVc();
+    double baseDbz1kmCorr = noiseCorr - gainCorr + rconst;
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "==>> Vc noise, fixed: "
-           << noise << ", " << noiseFixed << endl;
-      cerr << "==>> Vc gain, fixed: "
-           << gain << ", " << gainFixed << endl;
-      cerr << "==>> Vc baseDbz1Km, fixed: "
-           << _newCal.getBaseDbz1kmVc() << ", " << baseDbz1km << endl;
+      cerr << "==>> Vc noise, corr, delta: "
+           << noise << ", "
+           << noiseCorr << ", "
+           << noiseCorr - noise << endl;
+      cerr << "==>> Vc gain, corr, delta: "
+           << gain << ", " 
+           << gainCorr << ", "
+           << gainCorr - gain << endl;
+      cerr << "==>> Vc baseDbz1Km, corr, delta: "
+           << baseDbz1km << ", "
+           << baseDbz1kmCorr << ", "
+           << baseDbz1kmCorr - baseDbz1km << endl;
     }
-    if (!_newCal.isMissing(noise) && !_newCal.isMissing(rconst)) {
-      _newCal.setBaseDbz1kmVc(baseDbz1km);
+    if (!_tempCorrCal.isMissing(noise) && !_tempCorrCal.isMissing(rconst)) {
+      _tempCorrCal.setBaseDbz1kmVc(baseDbz1kmCorr);
     }
-    _newCal.setReceiverGainDbVc(gainFixed);
-    _newCal.setNoiseDbmVc(noiseFixed);
-    _newCal.setCalibTime(timeSecs);
+    _tempCorrCal.setReceiverGainDbVc(gainCorr);
+    _tempCorrCal.setNoiseDbmVc(noiseCorr);
+    _tempCorrCal.setCalibTime(timeSecs);
   }
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "++++ CALIBRATION AFTER HCR GAIN TEMP CORRECTION - START +++++++++++++" << endl;
-    _newCal.print(cerr);
-    cerr << "++++ CALIBRATION AFTER HCR GAIN TEMP CORRECTION - END +++++++++++++++" << endl;
-  }
-    
   return 0;
   
 }
