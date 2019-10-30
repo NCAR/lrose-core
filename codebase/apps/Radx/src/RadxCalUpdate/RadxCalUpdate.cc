@@ -451,6 +451,15 @@ void RadxCalUpdate::_fixRayCalibration(RadxVol &vol, RadxRay &ray)
     return;
   }
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "===== Working on ray, time: " << ray.getRadxTime().asString(3)
+         << " =====" << endl;
+  }
+
+  // correct the cal for temp
+
+  _correctHcrVRxGainForTemp(ray.getTimeSecs());
+
   // correct the DBZ fields for the new cal
 
   for (int ifld = 0; ifld < _params.dbz_fields_for_update_n; ifld++) {
@@ -545,7 +554,7 @@ void RadxCalUpdate::_fixRayCalibration(RadxVol &vol, RadxRay &ray)
     Radx::fl32 *dbm = dbmFld->getDataFl32();
     size_t nGates = dbmFld->getNPoints();
     
-    // adjust the reflectivity for the change in cal
+    // adjust the dbm for the change in cal
 
     for (size_t igate = 0; igate < nGates; igate++) {
       dbm[igate] = dbm[igate] - deltaGainDb;
@@ -662,7 +671,7 @@ int RadxCalUpdate::_correctHcrVRxGainForTemp(time_t timeSecs)
 
   _newCal = _fileCal;
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "++++ CALIBRATION BEFORE HCR GAIN TEMP CORRECTION - START +++++++++++++" << endl;
     _newCal.print(cerr);
     cerr << "++++ CALIBRATION BEFORE HCR GAIN TEMP CORRECTION - END +++++++++++++++" << endl;
@@ -680,7 +689,7 @@ int RadxCalUpdate::_correctHcrVRxGainForTemp(time_t timeSecs)
     double gain = _newCal.getReceiverGainDbVc();
     double gainFixed = gain + deltaGainVc;
     double baseDbz1km = noiseFixed - gainFixed + rconst;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "==>> Vc noise, fixed: "
            << noise << ", " << noiseFixed << endl;
       cerr << "==>> Vc gain, fixed: "
@@ -696,7 +705,7 @@ int RadxCalUpdate::_correctHcrVRxGainForTemp(time_t timeSecs)
     _newCal.setCalibTime(timeSecs);
   }
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "++++ CALIBRATION AFTER HCR GAIN TEMP CORRECTION - START +++++++++++++" << endl;
     _newCal.print(cerr);
     cerr << "++++ CALIBRATION AFTER HCR GAIN TEMP CORRECTION - END +++++++++++++++" << endl;
