@@ -141,10 +141,8 @@ void TimeSample::computeDeltaGain(double lnaRefTempC,
 
   if (!std::isnan(_lnaDeltaGain) && !std::isnan(_rxDeltaGain)) {
     _sumDeltaGain = _lnaDeltaGain + _rxDeltaGain;
-  } else if (!std::isnan(_lnaDeltaGain)) {
-    _sumDeltaGain = _lnaDeltaGain;
-  } else if (!std::isnan(_rxDeltaGain)) {
-    _sumDeltaGain = _rxDeltaGain;
+  } else {
+    _sumDeltaGain = NAN;
   }
 
 }
