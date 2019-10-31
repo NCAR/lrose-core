@@ -465,34 +465,42 @@ int HcrTempRxGain::_processTime(time_t procTime)
 
   // compute delta gain
 
-  procSampleV.computeDeltaGain(_params.v_lna_reference_temperature_c,
-                              _params.v_lna_gain_change_per_c,
-                              _params.pod_reference_temperature_c,
-                              _params.v_rx_gain_change_per_c);
+  if (procSampleV.computeDeltaGain(_params.v_lna_reference_temperature_c,
+                                   _params.v_lna_gain_change_per_c,
+                                   _params.pod_reference_temperature_c,
+                                   _params.v_rx_gain_change_per_c) == 0) {
   
-  // debug print
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    // debug print
     
-    cerr << "==>> temps for time    : "
-         << DateTime::strm(procSampleV.getTime()) << endl ;
-    cerr << "     N obs LNA         : " << procSampleV.getLnaTempN() << endl;
-    cerr << "     N obs POD         : " << procSampleV.getRxTempN() << endl;
-    cerr << "     mean temp LNA     : " << procSampleV.getLnaTempMean() << endl;
-    cerr << "     mean temp POD     : " << procSampleV.getRxTempMean() << endl;
-    cerr << "     smoothed N LNA    : " << procSampleV.getLnaSmoothedN() << endl;
-    cerr << "     smoothed N POD    : " << procSampleV.getRxSmoothedN() << endl;
-    cerr << "     smoothed temp LNA : " << procSampleV.getLnaTempSmoothed() << endl;
-    cerr << "     smoothed temp POD : " << procSampleV.getRxTempSmoothed() << endl;
-    cerr << "     delta gain LNA    : " << procSampleV.getLnaDeltaGain() << endl;
-    cerr << "     delta gain RX     : " << procSampleV.getRxDeltaGain() << endl;
-    cerr << "     delta gain SUM    : " << procSampleV.getSumDeltaGain() << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      
+      cerr << "==>> temps for time    : "
+           << DateTime::strm(procSampleV.getTime()) << endl ;
+      cerr << "     N obs LNA         : " << procSampleV.getLnaTempN() << endl;
+      cerr << "     N obs POD         : " << procSampleV.getRxTempN() << endl;
+      cerr << "     mean temp LNA     : " << procSampleV.getLnaTempMean() << endl;
+      cerr << "     mean temp POD     : " << procSampleV.getRxTempMean() << endl;
+      cerr << "     smoothed N LNA    : " << procSampleV.getLnaSmoothedN() << endl;
+      cerr << "     smoothed N POD    : " << procSampleV.getRxSmoothedN() << endl;
+      cerr << "     smoothed temp LNA : " << procSampleV.getLnaTempSmoothed() << endl;
+      cerr << "     smoothed temp POD : " << procSampleV.getRxTempSmoothed() << endl;
+      cerr << "     delta gain LNA    : " << procSampleV.getLnaDeltaGain() << endl;
+      cerr << "     delta gain RX     : " << procSampleV.getRxDeltaGain() << endl;
+      cerr << "     delta gain SUM    : " << procSampleV.getSumDeltaGain() << endl;
+      
+    }
+    
+    // write the gain results to SPBD
+    
+    _writeToSpdb(procTime, procSampleV);
+
+  } else {
+    
+    cerr << "ERROR - computeDeltaGain() failed" << endl;
+    cerr << "  time: " << DateTime::strm(procSampleV.getTime()) << endl ;
+    cerr << "  no results written to SPDB" << endl;
 
   }
-
-  // write the gain results to SPBD
-
-  _writeToSpdb(procTime, procSampleV);
 
   return 0;
 
