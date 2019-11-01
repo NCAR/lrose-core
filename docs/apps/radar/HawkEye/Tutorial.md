@@ -150,7 +150,7 @@ executable.
 * undo editing
 * A few screen shots
 
-### Boundary Editor ###
+### Boundary Editor Video Tutorial ###
 https://vimeo.com/369963107
 
 ### Examine as Spreadsheet
