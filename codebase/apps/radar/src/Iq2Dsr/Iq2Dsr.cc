@@ -42,6 +42,7 @@
 #include <iostream>
 #include <toolsa/pmu.h>
 #include <Spdb/DsSpdb.hh>
+#include "EgmCorrection.hh"
 #include "SpectraPrint.hh"
 #include "Iq2Dsr.hh"
 using namespace std;
@@ -215,6 +216,20 @@ Iq2Dsr::Iq2Dsr(int argc, char **argv)
   // create SpectraFile object
 
   SpectraPrint::Inst(_params);
+
+  // initialize EGM correction for georef height, if needed
+
+  if (_params.correct_altitude_for_egm) {
+    EgmCorrection &egm = EgmCorrection::inst();
+    egm.setParams(_params);
+    if (egm.loadEgmData()) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Cannot read in EGM data" << endl;
+      cerr << "  File: " << _params.egm_2008_geoid_file << endl;
+      constructorOK = false;
+      return;
+    }
+  }
   
   // init process mapper registration
   

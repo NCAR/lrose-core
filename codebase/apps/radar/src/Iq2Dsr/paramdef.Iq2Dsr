@@ -842,6 +842,7 @@ paramdef struct rx_temp_gain_correction_t {
 
 commentdef {
   p_header = "FOR HCR, CORRECT RECEIVER GAIN FOR TEMPERATURE USING VALUES FROM SPDB";
+  p_text = "Also, optionally correct georeference height.";
 }
 
 paramdef boolean {
@@ -865,6 +866,18 @@ paramdef string {
   p_default = "<HcrTempGainCorrection><v_delta_gain>";
   p_descr = "URL for HCR gain correction from SPDB.";
 } hcr_v_rx_delta_gain_tag_list;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to correct the altitude for the geoid.";
+  p_help = "This only applies for moving platforms. Altitude from some GPS units is based on the WGS84 ellipsoid. To get altitude relative to MSL, a correction for the geoid based on gravitation strength is required. We use the EGM-2008 geoid table. See: https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.html.";
+} correct_altitude_for_egm;
+
+paramdef string {
+  p_default = "./EGM_2008_WGS84_2.5minx2.5min.nc";
+  p_descr = "Path to geoid table file.";
+  p_help = "Downloads available from https://earth-info.nga.mil/GandG/wgs84/gravitymod. NetCDF file is on the shared drive at HCR->dataProcessing->AltitudeCorrection. The app Egm2Mdv will convert the downloadable file to a netCDF format file.";
+} egm_2008_geoid_file;
 
 commentdef {
   p_header = "PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR";

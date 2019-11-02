@@ -49,6 +49,7 @@
 #include <radar/FilterUtils.hh>
 #include <Spdb/DsSpdb.hh>
 #include "Beam.hh"
+#include "EgmCorrection.hh"
 using namespace std;
 
 const double Beam::_missingDbl = MomentsFields::missingDouble;
@@ -415,6 +416,9 @@ void Beam::_prepareForComputeMoments()
   if (midPulse->getGeorefActive()) {
     _georef = midPulse->getPlatformGeoref();
     _georefActive = true;
+    if (_params.correct_altitude_for_egm) {
+      _correctAltitudeForEgm();
+    }
   }
 
   // set elevation / azimuth
@@ -5927,3 +5931,21 @@ double Beam::_getCorrectedEl(double el)
   return el;
 
 }
+
+//////////////////////////////////////////////////////////////////
+/// Correct georef altitude for EGM
+/// See:
+///   https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.html
+
+void Beam::_correctAltitudeForEgm()
+
+{
+
+  EgmCorrection &egm = EgmCorrection::inst();
+  double geoidM = egm.getGeoidM(_georef.latitude, _georef.longitude);
+  double altCorrKm = (geoidM * -1.0) / 1000.0;
+  _georef.altitude_msl_km += altCorrKm;
+
+}
+
+  

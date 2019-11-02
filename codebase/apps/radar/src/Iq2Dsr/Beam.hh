@@ -516,6 +516,8 @@ private:
   double _getCorrectedAz(double az);
   double _getCorrectedEl(double el);
 
+  void _correctAltitudeForEgm();
+
 };
 
 #endif

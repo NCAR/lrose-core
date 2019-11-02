@@ -2204,7 +2204,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("FOR HCR, CORRECT RECEIVER GAIN FOR TEMPERATURE USING VALUES FROM SPDB");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("Also, optionally correct georeference height.");
     tt++;
     
     // Parameter 'correct_hcr_v_rx_gain_for_temperature'
@@ -2253,6 +2253,30 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &hcr_v_rx_delta_gain_tag_list - &_start_;
     tt->single_val.s = tdrpStrDup("<HcrTempGainCorrection><v_delta_gain>");
+    tt++;
+    
+    // Parameter 'correct_altitude_for_egm'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("correct_altitude_for_egm");
+    tt->descr = tdrpStrDup("Option to correct the altitude for the geoid.");
+    tt->help = tdrpStrDup("This only applies for moving platforms. Altitude from some GPS units is based on the WGS84 ellipsoid. To get altitude relative to MSL, a correction for the geoid based on gravitation strength is required. We use the EGM-2008 geoid table. See: https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.html.");
+    tt->val_offset = (char *) &correct_altitude_for_egm - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'egm_2008_geoid_file'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("egm_2008_geoid_file");
+    tt->descr = tdrpStrDup("Path to geoid table file.");
+    tt->help = tdrpStrDup("Downloads available from https://earth-info.nga.mil/GandG/wgs84/gravitymod. NetCDF file is on the shared drive at HCR->dataProcessing->AltitudeCorrection. The app Egm2Mdv will convert the downloadable file to a netCDF format file.");
+    tt->val_offset = (char *) &egm_2008_geoid_file - &_start_;
+    tt->single_val.s = tdrpStrDup("./EGM_2008_WGS84_2.5minx2.5min.nc");
     tt++;
     
     // Parameter 'Comment 11'
