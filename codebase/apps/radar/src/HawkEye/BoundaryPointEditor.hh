@@ -281,6 +281,10 @@ enum class BoundaryToolType
 class BoundaryPointEditor
 {
   public:
+
+	string getBoundaryFilePath(string boundaryDir, int fieldIndex, int sweepIndex, string boundaryFileName);
+	string getBoundaryDirFromRadarFilePath(string rootBoundaryDir, string radarFilePath);
+
 	static BoundaryPointEditor* Instance();
 	void makeCircle(int x, int y, float radius);
 	void addToBrushShape(float x, float y);

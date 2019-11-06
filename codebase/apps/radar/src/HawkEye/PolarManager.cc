@@ -2202,17 +2202,11 @@ void PolarManager::_timeSliderPressed()
   }
 }
 
-// sets the directory into which boundary files will be read/written
+// sets the directory (_boundaryDir) into which boundary files will be read/written for current radar file (_openFilePath)
 void PolarManager::setBoundaryDir()
 {
 	if (!_openFilePath.empty())
-	{
-		hash<string> str_hash;
-		long hash = str_hash(_openFilePath);
-		stringstream ss;
-		ss << hash;
-		_boundaryDir = _rootBoundaryDir + PATH_DELIM + ss.str();
-	}
+		_boundaryDir = BoundaryPointEditor::Instance()->getBoundaryDirFromRadarFilePath(_rootBoundaryDir, _openFilePath);
 	else
 		_boundaryDir = _rootBoundaryDir;
 }
@@ -3197,9 +3191,11 @@ void PolarManager::brushBtnBoundaryEditorClick()
 }
 
 // returns the file path for the boundary file, given the currently selected field and sweep
+// boundaryFileName will be one of 5 values: "Boundary1", "Boundary2"..."Boundary5"
 string PolarManager::getBoundaryFilePath(string boundaryFileName)
 {
-	return(_boundaryDir + PATH_DELIM + "field" + to_string(_fieldNum) + "-sweep" + to_string(_sweepManager.getGuiIndex()) + "-" + boundaryFileName);
+	return(BoundaryPointEditor::Instance()->getBoundaryFilePath(_boundaryDir, _fieldNum, _sweepManager.getGuiIndex(), boundaryFileName));
+//	return(_boundaryDir + PATH_DELIM + "field" + to_string(_fieldNum) + "-sweep" + to_string(_sweepManager.getGuiIndex()) + "-" + boundaryFileName);
 }
 
 // user clicked on one of the 5 boundaries in the boundary editor list, so load that boundary

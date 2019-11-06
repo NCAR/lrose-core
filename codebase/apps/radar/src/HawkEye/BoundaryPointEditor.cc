@@ -34,7 +34,7 @@
 //   field2-sweep0-Boundary1
 //
 //   Fields are zero indexed. For example, we might have fields "DBZ" (0), "REF" (1), "VEL" (2), ...
-//   Sweeps are zero indexed. For example, we might have sweeps "0.47" (0), "1.48" (1), "2.49" (2), ...
+//   Sweeps are zero indexed. For example, we might have sweeps "4.47" (0), "3.50" (1), ... "0.47" (4)
 //
 //   So if a radar file has 8 fields, 5 sweeps (and since there are 5 potential boundaries in the screen list),
 //   the maximum possible boundaries the user could potentially save to disk in the boundary directory is:
@@ -726,6 +726,27 @@ void BoundaryPointEditor::load(string path)
 	}
 	else
 		cout << path << " doesn't exist, skipping..." << endl;
+}
+
+// rootBoundaryDir will be something like "/home/jeff/HawkEyeBoundaries" (home directory + "/HawkEyeBoundaries")
+// radarFilePath will be something like "/media/sf_lrose/ncswp_SPOL_RHI_.nc"
+// returns the boundary dir for this radar file (e.g. "/home/jeff/HawkEyeBoundaries/1736437357943458505")
+string BoundaryPointEditor::getBoundaryDirFromRadarFilePath(string rootBoundaryDir, string radarFilePath)
+{
+	hash<string> str_hash;
+	long hash = str_hash(radarFilePath); //e.g., converts "/media/sf_lrose/ncswp_SPOL_RHI_.nc" to something like 1736437357943458505
+	stringstream ss;
+	ss << hash;
+	return(rootBoundaryDir + "/" + ss.str());
+}
+
+// boundaryDir will be something like "/home/jeff/HawkEyeBoundaries/1736437357943458505" (where "1736437357943458505" is the hash code of the radar source filepath)
+// fieldIndex is zero based. E.g., "DBZ" is usually fieldIndex 0, "REF" is fieldIndex 1
+// sweepIndex is zero based. E.g., "4.47" might be sweepIndex 0, "3.50" sweepIndex 1, ... "0.47" sweepIndex 4
+// boundaryFileName will be one of 5 values ("Boundary1" .. "Boundary5")
+string BoundaryPointEditor::getBoundaryFilePath(string boundaryDir, int fieldIndex, int sweepIndex, string boundaryFileName)
+{
+	return(boundaryDir + "/field" + to_string(fieldIndex) + "-sweep" + to_string(sweepIndex) + "-" + boundaryFileName);
 }
 
 /*
