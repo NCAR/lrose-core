@@ -49,6 +49,7 @@
 #include <radar/FilterUtils.hh>
 #include <Spdb/DsSpdb.hh>
 #include "Beam.hh"
+#include "EgmCorrection.hh"
 using namespace std;
 
 const double Beam::_missingDbl = MomentsFields::missingDouble;
@@ -415,6 +416,9 @@ void Beam::_prepareForComputeMoments()
   if (midPulse->getGeorefActive()) {
     _georef = midPulse->getPlatformGeoref();
     _georefActive = true;
+    if (_params.correct_altitude_for_egm) {
+      _correctAltitudeForEgm();
+    }
   }
 
   // set elevation / azimuth
@@ -1091,8 +1095,10 @@ void Beam::_computeMomSpH()
   
   double noisePowerHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
   if (_params.use_estimated_noise_for_noise_subtraction) {
-    _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
-    noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
+    if (_noise->getNoiseBiasDbHc() < _params.max_valid_noise_bias_db) {
+      _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
+      noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
+    };
   }
 
   // compute main moments
@@ -1211,8 +1217,10 @@ void Beam::_computeMomSpV()
   
   double noisePowerVc = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
   if (_params.use_estimated_noise_for_noise_subtraction) {
-    _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
-    noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
+    if (_noise->getNoiseBiasDbVc() < _params.max_valid_noise_bias_db) {
+      _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
+      noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
+    }
   }
 
   // compute main moments
@@ -1306,7 +1314,9 @@ void Beam::_computeMomSpStagPrt()
   // override noise for moments computations
   
   if (_params.use_estimated_noise_for_noise_subtraction) {
-    _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
+    if (_noise->getNoiseBiasDbHc() < _params.max_valid_noise_bias_db) {
+      _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
+    }
   }
 
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1372,11 +1382,13 @@ void Beam::_computeMomDpAltHvCoCross()
   double noisePowerHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
-    _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
-    _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
-    _mom->setEstimatedNoiseDbmHx(_noise->getMedianNoiseDbmHx());
-    _mom->setEstimatedNoiseDbmVx(_noise->getMedianNoiseDbmVx());
-    noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
+    if (_noise->getNoiseBiasDbHc() < _params.max_valid_noise_bias_db) {
+      _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
+      _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
+      _mom->setEstimatedNoiseDbmHx(_noise->getMedianNoiseDbmHx());
+      _mom->setEstimatedNoiseDbmVx(_noise->getMedianNoiseDbmVx());
+      noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
+    }
   }
     
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1467,9 +1479,11 @@ void Beam::_computeMomDpAltHvCoOnly()
   double noisePowerHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
-    _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
-    _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
-    noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
+    if (_noise->getNoiseBiasDbHc() < _params.max_valid_noise_bias_db) {
+      _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
+      _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
+      noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
+    }
   }
     
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1571,9 +1585,11 @@ void Beam::_computeMomDpSimHv()
   double noisePowerHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
-    _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
-    _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
-    noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
+    if (_noise->getNoiseBiasDbHc() < _params.max_valid_noise_bias_db) {
+      _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
+      _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
+      noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
+    }
   }
     
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1656,8 +1672,10 @@ void Beam::_computeMomDpSimHvStagPrt()
   // override noise for moments computations
   
   if (_params.use_estimated_noise_for_noise_subtraction) {
-    _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
-    _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
+    if (_noise->getNoiseBiasDbHc() < _params.max_valid_noise_bias_db) {
+      _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
+      _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
+    }
   }
     
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1740,9 +1758,11 @@ void Beam::_computeMomDpHOnly()
   double noisePowerHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
-    _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
-    _mom->setEstimatedNoiseDbmVx(_noise->getMedianNoiseDbmVx());
-    noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
+    if (_noise->getNoiseBiasDbHc() < _params.max_valid_noise_bias_db) {
+      _mom->setEstimatedNoiseDbmHc(_noise->getMedianNoiseDbmHc());
+      _mom->setEstimatedNoiseDbmVx(_noise->getMedianNoiseDbmVx());
+      noisePowerHc = pow(10.0, _noise->getMedianNoiseDbmHc() / 10.0);
+    }
   }
     
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1838,9 +1858,11 @@ void Beam::_computeMomDpVOnly()
   double noisePowerVc = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
 
   if (_params.use_estimated_noise_for_noise_subtraction) {
-    _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
-    _mom->setEstimatedNoiseDbmHx(_noise->getMedianNoiseDbmHx());
-    noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
+    if (_noise->getNoiseBiasDbVc() < _params.max_valid_noise_bias_db) {
+      _mom->setEstimatedNoiseDbmVc(_noise->getMedianNoiseDbmVc());
+      _mom->setEstimatedNoiseDbmHx(_noise->getMedianNoiseDbmHx());
+      noisePowerVc = pow(10.0, _noise->getMedianNoiseDbmVc() / 10.0);
+    }
   }
     
   for (int igate = 0; igate < _nGates; igate++) {
@@ -5909,3 +5931,21 @@ double Beam::_getCorrectedEl(double el)
   return el;
 
 }
+
+//////////////////////////////////////////////////////////////////
+/// Correct georef altitude for EGM
+/// See:
+///   https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.html
+
+void Beam::_correctAltitudeForEgm()
+
+{
+
+  EgmCorrection &egm = EgmCorrection::inst();
+  double geoidM = egm.getGeoidM(_georef.latitude, _georef.longitude);
+  double altCorrKm = (geoidM * -1.0) / 1000.0;
+  _georef.altitude_msl_km += altCorrKm;
+
+}
+
+  

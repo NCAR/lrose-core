@@ -32,18 +32,21 @@
 //
 //////////////////////////////////////////////////////////
 
+#include <toolsa/Path.hh>
 
 #include "LdataInputStrategy.hh"
 
 using namespace std;
 
 LdataInputStrategy::LdataInputStrategy(const string &data_dir,
+                                       const string &input_substring,
 				       const int max_valid_age,
 				       heartbeat_t heartbeat_func,
 				       const bool debug) :
   InputStrategy(debug),
   _maxValidAge(max_valid_age),
-  _heartbeatFunc(heartbeat_func)
+  _heartbeatFunc(heartbeat_func),
+  _inputSubstring(input_substring)
 {
   _ldataInfo.setDir(data_dir);
 }
@@ -53,18 +56,29 @@ LdataInputStrategy::~LdataInputStrategy()
 }
 
 
-const string&LdataInputStrategy::next()
+const string &LdataInputStrategy::next()
 {  
   // Wait for the next input file
 
-  _ldataInfo.readBlocking(_maxValidAge,
-			  1000,
-			  _heartbeatFunc);
+  bool found = false;
+  Path new_filepath;
   
-  _currInputPath = _ldataInfo.getDataPath();
+  while (!found)
+  {
+    _ldataInfo.readBlocking(_maxValidAge,
+                            1000,
+                            _heartbeatFunc);
+    new_filepath = _ldataInfo.getDataPath();
+
+    // If the user has specified an input substring, make sure that the
+    // filename contains that substring or don't process it
+    
+    if (_inputSubstring == "" ||
+        new_filepath.getFile().find(_inputSubstring) != string::npos)
+      found = true;
+  }
   
-  if (_debug)
-    cerr << "---> Next input file: " << _currInputPath << endl;
+  _currInputPath = new_filepath.getPath();
   
   return(_currInputPath);
 }

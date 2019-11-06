@@ -51,7 +51,6 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
 #include <toolsa/file_io.h>
-#include <toolsa/ServerSocket.hh>
 #include <radar/RadarComplex.hh>
 
 using namespace std;
@@ -903,7 +902,7 @@ int Ts2NetCDF::_savePulseDataAltV(IwrfTsPulse &pulse)
 
   _timeArrayVc.push_back(_pulseTime);
   _dtimeArrayVc.push_back((_pulseTimeSecs - _startTime) 
-                        + pulse.getNanoSecs() * 1.0e-9);
+                          + pulse.getNanoSecs() * 1.0e-9);
   _prtArrayVc.push_back(_prt);
   _pulseWidthArrayVc.push_back(pulse.getPulseWidthUs());
   _elArrayVc.push_back(_el);
@@ -1136,11 +1135,13 @@ int Ts2NetCDF::_writeFileTmp()
   ////////////////////////
   // create Nc3File object
   
-  Nc3Error err(Nc3Error::verbose_nonfatal);
-  Nc3File file(_tmpPath.c_str(), Nc3File::Replace);
-  if (!file.is_valid()) {
+  NcxxFile file;
+  try {
+    file.open(_tmpPath, NcxxFile::replace, NcxxFile::nc4);
+  } catch (NcxxException& e) {
     cerr << "ERROR - Ts2NetCDF::_writeFileTmp" << endl;
-    cerr << "  Cannot create file: " << _tmpPath << endl;
+    cerr << "  Cannot open tmp Ncxx file for writing: " << _tmpPath << endl;
+    cerr << "  exception: " << e.what() << endl;
     return -1;
   }
   int iret = 0;
@@ -1152,18 +1153,18 @@ int Ts2NetCDF::_writeFileTmp()
   //////////////////
   // add dimensions
   
-  Nc3Dim *gatesDim = file.add_dim("gates", _nGates);
-  Nc3Dim *timeDim = file.add_dim("time", _nTimes);
+  NcxxDim gatesDim = file.addDim("gates", _nGates);
+  NcxxDim timeDim = file.addDim("time", _nTimes);
 
   /////////////////////////////////
   // add vars and their attributes
   
-  if (_writeBaseTimeVars(file, err)) {
+  if (_writeBaseTimeVars(file)) {
     cerr << "ERROR - Ts2NetCDF::_writeFileTmp" << endl;
     return -1;
   }
 
-  if (_writeRangeVar(file, err, gatesDim)) {
+  if (_writeRangeVar(file, gatesDim)) {
     cerr << "ERROR - Ts2NetCDF::_writeFileTmp" << endl;
     return -1;
   }
@@ -1172,14 +1173,14 @@ int Ts2NetCDF::_writeFileTmp()
     
     // alternating mode
     
-    if (_writeTimeDimVarsAlt(file, err, timeDim)) {
+    if (_writeTimeDimVarsAlt(file, timeDim)) {
       cerr << "ERROR - Ts2NetCDF::_writeFileTmp" << endl;
       return -1;
     }
 
   } else {
     
-    if (_writeTimeDimVars(file, err, timeDim)) {
+    if (_writeTimeDimVars(file, timeDim)) {
       cerr << "ERROR - Ts2NetCDF::_writeFileTmp" << endl;
       return -1;
     }
@@ -1187,7 +1188,7 @@ int Ts2NetCDF::_writeFileTmp()
   }
 
   if (_nPulsesHc > 0) {
-    if (_writeIqVars(file, err, timeDim, gatesDim, "IHc", "QHc",
+    if (_writeIqVars(file, timeDim, gatesDim, "IHc", "QHc",
                      (float *) _iBufHc.getPtr(),
                      (float *) _qBufHc.getPtr())) {
       return -1;
@@ -1195,7 +1196,7 @@ int Ts2NetCDF::_writeFileTmp()
   }
 
   if (_nPulsesVc > 0) {
-    if (_writeIqVars(file, err, timeDim, gatesDim, "IVc", "QVc",
+    if (_writeIqVars(file, timeDim, gatesDim, "IVc", "QVc",
                      (float *) _iBufVc.getPtr(),
                      (float *) _qBufVc.getPtr())) {
       return -1;
@@ -1203,7 +1204,7 @@ int Ts2NetCDF::_writeFileTmp()
   }
 
   if (_nPulsesHx > 0) {
-    if (_writeIqVars(file, err, timeDim, gatesDim, "IHx", "QHx",
+    if (_writeIqVars(file, timeDim, gatesDim, "IHx", "QHx",
                      (float *) _iBufHx.getPtr(),
                      (float *) _qBufHx.getPtr())) {
       return -1;
@@ -1211,7 +1212,7 @@ int Ts2NetCDF::_writeFileTmp()
   }
 
   if (_nPulsesVx > 0) {
-    if (_writeIqVars(file, err, timeDim, gatesDim, "IVx", "QVx",
+    if (_writeIqVars(file, timeDim, gatesDim, "IVx", "QVx",
                      (float *) _iBufVx.getPtr(),
                      (float *) _qBufVx.getPtr())) {
       return -1;
@@ -1225,7 +1226,7 @@ int Ts2NetCDF::_writeFileTmp()
 ////////////////////////////////////////
 // add global attributes
 
-void Ts2NetCDF::_addGlobAtt(Nc3File &file)
+void Ts2NetCDF::_addGlobAtt(NcxxFile &file)
   
 {
 
@@ -1244,222 +1245,222 @@ void Ts2NetCDF::_addGlobAtt(Nc3File &file)
 	  startingSample, endingSample, startGate, endGate,
 	  _startAz, _startEl);
 
-  file.add_att("Description", desc);
-  file.add_att("FirstGate", startGate);
-  file.add_att("LastGate", endGate);
+  file.addGlobAttr("Description", desc);
+  file.addGlobAttr("FirstGate", startGate);
+  file.addGlobAttr("LastGate", endGate);
 
   if (_params.pad_n_gates_to_max) {
-    file.add_att("n_gates_padded_to_max", _nGatesMax);
+    file.addGlobAttr("n_gates_padded_to_max", _nGatesMax);
   }
 
   // radar info
 
   iwrf_radar_info_t radarInfo(_radarPrev);
-  file.add_att("radar_latitude_deg", radarInfo.latitude_deg);
-  file.add_att("radar_longitude_deg", radarInfo.longitude_deg);
-  file.add_att("radar_altitude_m", radarInfo.altitude_m);
-  file.add_att("radar_platform_type", radarInfo.platform_type);
-  file.add_att("radar_beamwidth_deg_h", radarInfo.beamwidth_deg_h);
-  file.add_att("radar_beamwidth_deg_v", radarInfo.beamwidth_deg_v);
-  file.add_att("radar_wavelength_cm", radarInfo.wavelength_cm);
-  file.add_att("radar_nominal_gain_ant_db_h", 
-               radarInfo.nominal_gain_ant_db_h);
-  file.add_att("radar_name", radarInfo.radar_name);
-  file.add_att("radar_site_name", radarInfo.site_name);
+  file.addGlobAttr("radar_latitude_deg", radarInfo.latitude_deg);
+  file.addGlobAttr("radar_longitude_deg", radarInfo.longitude_deg);
+  file.addGlobAttr("radar_altitude_m", radarInfo.altitude_m);
+  file.addGlobAttr("radar_platform_type", radarInfo.platform_type);
+  file.addGlobAttr("radar_beamwidth_deg_h", radarInfo.beamwidth_deg_h);
+  file.addGlobAttr("radar_beamwidth_deg_v", radarInfo.beamwidth_deg_v);
+  file.addGlobAttr("radar_wavelength_cm", radarInfo.wavelength_cm);
+  file.addGlobAttr("radar_nominal_gain_ant_db_h", 
+                   radarInfo.nominal_gain_ant_db_h);
+  file.addGlobAttr("radar_name", radarInfo.radar_name);
+  file.addGlobAttr("radar_site_name", radarInfo.site_name);
   
   // scan info
 
   iwrf_scan_segment_t scanSeg(_scanPrev);
 
-  file.add_att("scan_scan_mode", 
-               iwrf_scan_mode_to_str(scanSeg.scan_mode).c_str());
-  file.add_att("scan_follow_mode", 
-               iwrf_follow_mode_to_str(scanSeg.follow_mode).c_str());
-  file.add_att("scan_volume_num", scanSeg.volume_num);
-  file.add_att("scan_sweep_num", scanSeg.sweep_num);
-  file.add_att("scan_time_limit", scanSeg.time_limit);
-  file.add_att("scan_az_manual", scanSeg.az_manual);
-  file.add_att("scan_el_manual", scanSeg.el_manual);
-  file.add_att("scan_az_start", scanSeg.az_start);
-  file.add_att("scan_el_start", scanSeg.el_start);
-  file.add_att("scan_scan_rate", scanSeg.scan_rate);
-  file.add_att("scan_left_limit", scanSeg.left_limit);
-  file.add_att("scan_right_limit", scanSeg.right_limit);
-  file.add_att("scan_up_limit", scanSeg.up_limit);
-  file.add_att("scan_down_limit", scanSeg.down_limit);
-  file.add_att("scan_step", scanSeg.step);
-  file.add_att("scan_current_fixed_angle", scanSeg.current_fixed_angle);
-  file.add_att("scan_init_direction_cw", scanSeg.init_direction_cw);
-  file.add_att("scan_init_direction_up", scanSeg.init_direction_up);
-  file.add_att("scan_n_sweeps", scanSeg.n_sweeps);
-  file.add_att("scan_sun_scan_sector_width_az", 
-               scanSeg.sun_scan_sector_width_az);
-  file.add_att("scan_sun_scan_sector_width_el", 
-               scanSeg.sun_scan_sector_width_el);
-  file.add_att("scan_segment_name", scanSeg.segment_name);
-  file.add_att("scan_project_name", scanSeg.project_name);
+  file.addGlobAttr("scan_scan_mode", 
+                   iwrf_scan_mode_to_str(scanSeg.scan_mode).c_str());
+  file.addGlobAttr("scan_follow_mode", 
+                   iwrf_follow_mode_to_str(scanSeg.follow_mode).c_str());
+  file.addGlobAttr("scan_volume_num", scanSeg.volume_num);
+  file.addGlobAttr("scan_sweep_num", scanSeg.sweep_num);
+  file.addGlobAttr("scan_time_limit", scanSeg.time_limit);
+  file.addGlobAttr("scan_az_manual", scanSeg.az_manual);
+  file.addGlobAttr("scan_el_manual", scanSeg.el_manual);
+  file.addGlobAttr("scan_az_start", scanSeg.az_start);
+  file.addGlobAttr("scan_el_start", scanSeg.el_start);
+  file.addGlobAttr("scan_scan_rate", scanSeg.scan_rate);
+  file.addGlobAttr("scan_left_limit", scanSeg.left_limit);
+  file.addGlobAttr("scan_right_limit", scanSeg.right_limit);
+  file.addGlobAttr("scan_up_limit", scanSeg.up_limit);
+  file.addGlobAttr("scan_down_limit", scanSeg.down_limit);
+  file.addGlobAttr("scan_step", scanSeg.step);
+  file.addGlobAttr("scan_current_fixed_angle", scanSeg.current_fixed_angle);
+  file.addGlobAttr("scan_init_direction_cw", scanSeg.init_direction_cw);
+  file.addGlobAttr("scan_init_direction_up", scanSeg.init_direction_up);
+  file.addGlobAttr("scan_n_sweeps", scanSeg.n_sweeps);
+  file.addGlobAttr("scan_sun_scan_sector_width_az", 
+                   scanSeg.sun_scan_sector_width_az);
+  file.addGlobAttr("scan_sun_scan_sector_width_el", 
+                   scanSeg.sun_scan_sector_width_el);
+  file.addGlobAttr("scan_segment_name", scanSeg.segment_name);
+  file.addGlobAttr("scan_project_name", scanSeg.project_name);
 
   // processor info
 
   iwrf_ts_processing_t proc(_procPrev);
 
-  file.add_att("proc_xmit_rcv_mode",
-              iwrf_xmit_rcv_mode_to_str(proc.xmit_rcv_mode).c_str());
-  file.add_att("proc_xmit_phase_mode",
-              iwrf_xmit_phase_mode_to_str(proc.xmit_phase_mode).c_str());
-  file.add_att("proc_prf_mode", 
-              iwrf_prf_mode_to_str(proc.prf_mode).c_str());
-  file.add_att("proc_pulse_type", 
-              iwrf_pulse_type_to_str(proc.pulse_type).c_str());
-  file.add_att("proc_prt_usec", proc.prt_usec);
-  file.add_att("proc_prt2_usec", proc.prt2_usec);
-  file.add_att("proc_cal_type", 
-              iwrf_cal_type_to_str(proc.cal_type).c_str());
-  file.add_att("proc_burst_range_offset_m", proc.burst_range_offset_m);
-  file.add_att("proc_pulse_width_us", proc.pulse_width_us);
-  file.add_att("proc_start_range_m", proc.start_range_m);
-  file.add_att("proc_gate_spacing_m", proc.gate_spacing_m);
-  file.add_att("proc_integration_cycle_pulses",
-               proc.integration_cycle_pulses);
-  file.add_att("proc_clutter_filter_number", proc.clutter_filter_number);
-  file.add_att("proc_range_gate_averaging", proc.range_gate_averaging);
-  file.add_att("proc_max_gate", proc.max_gate);
-  file.add_att("proc_test_power_dbm", proc.test_power_dbm);
-  file.add_att("proc_test_pulse_range_km", proc.test_pulse_range_km);
-  file.add_att("proc_test_pulse_length_usec", proc.test_pulse_length_usec);
-  file.add_att("proc_pol_mode", proc.pol_mode);
-  file.add_att("proc_xmit_flag[0]", proc.xmit_flag[0]);
-  file.add_att("proc_xmit_flag[1]", proc.xmit_flag[1]);
-  file.add_att("proc_beams_are_indexed", proc.beams_are_indexed);
-  file.add_att("proc_specify_dwell_width", proc.specify_dwell_width);
-  file.add_att("proc_indexed_beam_width_deg", proc.indexed_beam_width_deg);
-  file.add_att("proc_indexed_beam_spacing_deg",
-               proc.indexed_beam_spacing_deg);
-  file.add_att("proc_num_prts", proc.num_prts);
-  file.add_att("proc_prt3_usec", proc.prt3_usec);
-  file.add_att("proc_prt4_usec", proc.prt4_usec);
+  file.addGlobAttr("proc_xmit_rcv_mode",
+                   iwrf_xmit_rcv_mode_to_str(proc.xmit_rcv_mode).c_str());
+  file.addGlobAttr("proc_xmit_phase_mode",
+                   iwrf_xmit_phase_mode_to_str(proc.xmit_phase_mode).c_str());
+  file.addGlobAttr("proc_prf_mode", 
+                   iwrf_prf_mode_to_str(proc.prf_mode).c_str());
+  file.addGlobAttr("proc_pulse_type", 
+                   iwrf_pulse_type_to_str(proc.pulse_type).c_str());
+  file.addGlobAttr("proc_prt_usec", proc.prt_usec);
+  file.addGlobAttr("proc_prt2_usec", proc.prt2_usec);
+  file.addGlobAttr("proc_cal_type", 
+                   iwrf_cal_type_to_str(proc.cal_type).c_str());
+  file.addGlobAttr("proc_burst_range_offset_m", proc.burst_range_offset_m);
+  file.addGlobAttr("proc_pulse_width_us", proc.pulse_width_us);
+  file.addGlobAttr("proc_start_range_m", proc.start_range_m);
+  file.addGlobAttr("proc_gate_spacing_m", proc.gate_spacing_m);
+  file.addGlobAttr("proc_integration_cycle_pulses",
+                   proc.integration_cycle_pulses);
+  file.addGlobAttr("proc_clutter_filter_number", proc.clutter_filter_number);
+  file.addGlobAttr("proc_range_gate_averaging", proc.range_gate_averaging);
+  file.addGlobAttr("proc_max_gate", proc.max_gate);
+  file.addGlobAttr("proc_test_power_dbm", proc.test_power_dbm);
+  file.addGlobAttr("proc_test_pulse_range_km", proc.test_pulse_range_km);
+  file.addGlobAttr("proc_test_pulse_length_usec", proc.test_pulse_length_usec);
+  file.addGlobAttr("proc_pol_mode", proc.pol_mode);
+  file.addGlobAttr("proc_xmit_flag[0]", proc.xmit_flag[0]);
+  file.addGlobAttr("proc_xmit_flag[1]", proc.xmit_flag[1]);
+  file.addGlobAttr("proc_beams_are_indexed", proc.beams_are_indexed);
+  file.addGlobAttr("proc_specify_dwell_width", proc.specify_dwell_width);
+  file.addGlobAttr("proc_indexed_beam_width_deg", proc.indexed_beam_width_deg);
+  file.addGlobAttr("proc_indexed_beam_spacing_deg",
+                   proc.indexed_beam_spacing_deg);
+  file.addGlobAttr("proc_num_prts", proc.num_prts);
+  file.addGlobAttr("proc_prt3_usec", proc.prt3_usec);
+  file.addGlobAttr("proc_prt4_usec", proc.prt4_usec);
 
   // calibration
 
   if (_params.override_radar_cal) {
 
     const DsRadarCalib &cal(_calOverride);
-    file.add_att("cal_wavelength_cm", (float) cal.getWavelengthCm());
-    file.add_att("cal_beamwidth_deg_h", (float) cal.getBeamWidthDegH());
-    file.add_att("cal_beamwidth_deg_v", (float) cal.getBeamWidthDegV());
-    file.add_att("cal_gain_ant_db_h", (float) cal.getAntGainDbH());
-    file.add_att("cal_gain_ant_db_v", (float) cal.getAntGainDbV());
-    file.add_att("cal_pulse_width_us", (float) cal.getPulseWidthUs());
-    file.add_att("cal_xmit_power_dbm_h", (float) cal.getXmitPowerDbmH());
-    file.add_att("cal_xmit_power_dbm_v", (float) cal.getXmitPowerDbmV());
-    file.add_att("cal_two_way_waveguide_loss_db_h",
-                 (float) cal.getTwoWayWaveguideLossDbH());
-    file.add_att("cal_two_way_waveguide_loss_db_v",
-                 (float) cal.getTwoWayWaveguideLossDbV());
-    file.add_att("cal_two_way_radome_loss_db_h",
-                 (float) cal.getTwoWayRadomeLossDbH());
-    file.add_att("cal_two_way_radome_loss_db_v",
-                 (float) cal.getTwoWayRadomeLossDbV());
-    file.add_att("cal_receiver_mismatch_loss_db",
-                 (float) cal.getReceiverMismatchLossDb());
-    file.add_att("cal_radar_constant_h", (float) cal.getRadarConstH());
-    file.add_att("cal_radar_constant_v", (float) cal.getRadarConstV());
-    file.add_att("cal_noise_dbm_hc", (float) cal.getNoiseDbmHc());
-    file.add_att("cal_noise_dbm_hx", (float) cal.getNoiseDbmHx());
-    file.add_att("cal_noise_dbm_vc", (float) cal.getNoiseDbmVc());
-    file.add_att("cal_noise_dbm_vx", (float) cal.getNoiseDbmVx());
-    file.add_att("cal_receiver_gain_db_hc", (float) cal.getReceiverGainDbHc());
-    file.add_att("cal_receiver_gain_db_hx", (float) cal.getReceiverGainDbHx());
-    file.add_att("cal_receiver_gain_db_vc", (float) cal.getReceiverGainDbVc());
-    file.add_att("cal_receiver_gain_db_vx", (float) cal.getReceiverGainDbVx());
-    file.add_att("cal_receiver_slope_hc", (float) cal.getReceiverSlopeDbHc());
-    file.add_att("cal_receiver_slope_hx", (float) cal.getReceiverSlopeDbHx());
-    file.add_att("cal_receiver_slope_vc", (float) cal.getReceiverSlopeDbVc());
-    file.add_att("cal_receiver_slope_vx", (float) cal.getReceiverSlopeDbVx());
-    file.add_att("cal_base_dbz_1km_hc", (float) cal.getBaseDbz1kmHc());
-    file.add_att("cal_base_dbz_1km_hx", (float) cal.getBaseDbz1kmHx());
-    file.add_att("cal_base_dbz_1km_vc", (float) cal.getBaseDbz1kmVc());
-    file.add_att("cal_base_dbz_1km_vx", (float) cal.getBaseDbz1kmVx());
-    file.add_att("cal_sun_power_dbm_hc", (float) cal.getSunPowerDbmHc());
-    file.add_att("cal_sun_power_dbm_hx", (float) cal.getSunPowerDbmHx());
-    file.add_att("cal_sun_power_dbm_vc", (float) cal.getSunPowerDbmVc());
-    file.add_att("cal_sun_power_dbm_vx", (float) cal.getSunPowerDbmVx());
-    file.add_att("cal_noise_source_power_dbm_h",
-                 (float) cal.getNoiseSourcePowerDbmH());
-    file.add_att("cal_noise_source_power_dbm_v",
-                 (float) cal.getNoiseSourcePowerDbmV());
-    file.add_att("cal_power_meas_loss_db_h", (float) cal.getPowerMeasLossDbH());
-    file.add_att("cal_power_meas_loss_db_v", (float) cal.getPowerMeasLossDbV());
-    file.add_att("cal_coupler_forward_loss_db_h",
-                 (float) cal.getCouplerForwardLossDbH());
-    file.add_att("cal_coupler_forward_loss_db_v",
-                 (float) cal.getCouplerForwardLossDbV());
-    file.add_att("cal_test_power_dbm_h", (float) cal.getTestPowerDbmH());
-    file.add_att("cal_test_power_dbm_v", (float) cal.getTestPowerDbmV());
-    file.add_att("cal_zdr_correction_db", (float) cal.getZdrCorrectionDb());
-    file.add_att("cal_ldr_correction_db_h", (float) cal.getLdrCorrectionDbH());
-    file.add_att("cal_ldr_correction_db_v", (float) cal.getLdrCorrectionDbV());
-    file.add_att("cal_phidp_rot_deg", (float) cal.getSystemPhidpDeg());
+    file.addGlobAttr("cal_wavelength_cm", (float) cal.getWavelengthCm());
+    file.addGlobAttr("cal_beamwidth_deg_h", (float) cal.getBeamWidthDegH());
+    file.addGlobAttr("cal_beamwidth_deg_v", (float) cal.getBeamWidthDegV());
+    file.addGlobAttr("cal_gain_ant_db_h", (float) cal.getAntGainDbH());
+    file.addGlobAttr("cal_gain_ant_db_v", (float) cal.getAntGainDbV());
+    file.addGlobAttr("cal_pulse_width_us", (float) cal.getPulseWidthUs());
+    file.addGlobAttr("cal_xmit_power_dbm_h", (float) cal.getXmitPowerDbmH());
+    file.addGlobAttr("cal_xmit_power_dbm_v", (float) cal.getXmitPowerDbmV());
+    file.addGlobAttr("cal_two_way_waveguide_loss_db_h",
+                     (float) cal.getTwoWayWaveguideLossDbH());
+    file.addGlobAttr("cal_two_way_waveguide_loss_db_v",
+                     (float) cal.getTwoWayWaveguideLossDbV());
+    file.addGlobAttr("cal_two_way_radome_loss_db_h",
+                     (float) cal.getTwoWayRadomeLossDbH());
+    file.addGlobAttr("cal_two_way_radome_loss_db_v",
+                     (float) cal.getTwoWayRadomeLossDbV());
+    file.addGlobAttr("cal_receiver_mismatch_loss_db",
+                     (float) cal.getReceiverMismatchLossDb());
+    file.addGlobAttr("cal_radar_constant_h", (float) cal.getRadarConstH());
+    file.addGlobAttr("cal_radar_constant_v", (float) cal.getRadarConstV());
+    file.addGlobAttr("cal_noise_dbm_hc", (float) cal.getNoiseDbmHc());
+    file.addGlobAttr("cal_noise_dbm_hx", (float) cal.getNoiseDbmHx());
+    file.addGlobAttr("cal_noise_dbm_vc", (float) cal.getNoiseDbmVc());
+    file.addGlobAttr("cal_noise_dbm_vx", (float) cal.getNoiseDbmVx());
+    file.addGlobAttr("cal_receiver_gain_db_hc", (float) cal.getReceiverGainDbHc());
+    file.addGlobAttr("cal_receiver_gain_db_hx", (float) cal.getReceiverGainDbHx());
+    file.addGlobAttr("cal_receiver_gain_db_vc", (float) cal.getReceiverGainDbVc());
+    file.addGlobAttr("cal_receiver_gain_db_vx", (float) cal.getReceiverGainDbVx());
+    file.addGlobAttr("cal_receiver_slope_hc", (float) cal.getReceiverSlopeDbHc());
+    file.addGlobAttr("cal_receiver_slope_hx", (float) cal.getReceiverSlopeDbHx());
+    file.addGlobAttr("cal_receiver_slope_vc", (float) cal.getReceiverSlopeDbVc());
+    file.addGlobAttr("cal_receiver_slope_vx", (float) cal.getReceiverSlopeDbVx());
+    file.addGlobAttr("cal_base_dbz_1km_hc", (float) cal.getBaseDbz1kmHc());
+    file.addGlobAttr("cal_base_dbz_1km_hx", (float) cal.getBaseDbz1kmHx());
+    file.addGlobAttr("cal_base_dbz_1km_vc", (float) cal.getBaseDbz1kmVc());
+    file.addGlobAttr("cal_base_dbz_1km_vx", (float) cal.getBaseDbz1kmVx());
+    file.addGlobAttr("cal_sun_power_dbm_hc", (float) cal.getSunPowerDbmHc());
+    file.addGlobAttr("cal_sun_power_dbm_hx", (float) cal.getSunPowerDbmHx());
+    file.addGlobAttr("cal_sun_power_dbm_vc", (float) cal.getSunPowerDbmVc());
+    file.addGlobAttr("cal_sun_power_dbm_vx", (float) cal.getSunPowerDbmVx());
+    file.addGlobAttr("cal_noise_source_power_dbm_h",
+                     (float) cal.getNoiseSourcePowerDbmH());
+    file.addGlobAttr("cal_noise_source_power_dbm_v",
+                     (float) cal.getNoiseSourcePowerDbmV());
+    file.addGlobAttr("cal_power_meas_loss_db_h", (float) cal.getPowerMeasLossDbH());
+    file.addGlobAttr("cal_power_meas_loss_db_v", (float) cal.getPowerMeasLossDbV());
+    file.addGlobAttr("cal_coupler_forward_loss_db_h",
+                     (float) cal.getCouplerForwardLossDbH());
+    file.addGlobAttr("cal_coupler_forward_loss_db_v",
+                     (float) cal.getCouplerForwardLossDbV());
+    file.addGlobAttr("cal_test_power_dbm_h", (float) cal.getTestPowerDbmH());
+    file.addGlobAttr("cal_test_power_dbm_v", (float) cal.getTestPowerDbmV());
+    file.addGlobAttr("cal_zdr_correction_db", (float) cal.getZdrCorrectionDb());
+    file.addGlobAttr("cal_ldr_correction_db_h", (float) cal.getLdrCorrectionDbH());
+    file.addGlobAttr("cal_ldr_correction_db_v", (float) cal.getLdrCorrectionDbV());
+    file.addGlobAttr("cal_phidp_rot_deg", (float) cal.getSystemPhidpDeg());
 
   } else {
 
     iwrf_calibration_t cal(_calibPrev);
-    file.add_att("cal_wavelength_cm", cal.wavelength_cm);
-    file.add_att("cal_beamwidth_deg_h", cal.beamwidth_deg_h);
-    file.add_att("cal_beamwidth_deg_v", cal.beamwidth_deg_v);
-    file.add_att("cal_gain_ant_db_h", cal.gain_ant_db_h);
-    file.add_att("cal_gain_ant_db_v", cal.gain_ant_db_v);
-    file.add_att("cal_pulse_width_us", cal.pulse_width_us);
-    file.add_att("cal_xmit_power_dbm_h", cal.xmit_power_dbm_h);
-    file.add_att("cal_xmit_power_dbm_v", cal.xmit_power_dbm_v);
-    file.add_att("cal_two_way_waveguide_loss_db_h",
-                 cal.two_way_waveguide_loss_db_h);
-    file.add_att("cal_two_way_waveguide_loss_db_v",
-                 cal.two_way_waveguide_loss_db_v);
-    file.add_att("cal_two_way_radome_loss_db_h",
-                 cal.two_way_radome_loss_db_h);
-    file.add_att("cal_two_way_radome_loss_db_v",
-                 cal.two_way_radome_loss_db_v);
-    file.add_att("cal_receiver_mismatch_loss_db",
-                 cal.receiver_mismatch_loss_db);
-    file.add_att("cal_radar_constant_h", cal.radar_constant_h);
-    file.add_att("cal_radar_constant_v", cal.radar_constant_v);
-    file.add_att("cal_noise_dbm_hc", cal.noise_dbm_hc);
-    file.add_att("cal_noise_dbm_hx", cal.noise_dbm_hx);
-    file.add_att("cal_noise_dbm_vc", cal.noise_dbm_vc);
-    file.add_att("cal_noise_dbm_vx", cal.noise_dbm_vx);
-    file.add_att("cal_receiver_gain_db_hc", cal.receiver_gain_db_hc);
-    file.add_att("cal_receiver_gain_db_hx", cal.receiver_gain_db_hx);
-    file.add_att("cal_receiver_gain_db_vc", cal.receiver_gain_db_vc);
-    file.add_att("cal_receiver_gain_db_vx", cal.receiver_gain_db_vx);
-    file.add_att("cal_receiver_slope_hc", cal.receiver_slope_hc);
-    file.add_att("cal_receiver_slope_hx", cal.receiver_slope_hx);
-    file.add_att("cal_receiver_slope_vc", cal.receiver_slope_vc);
-    file.add_att("cal_receiver_slope_vx", cal.receiver_slope_vx);
-    file.add_att("cal_base_dbz_1km_hc", cal.base_dbz_1km_hc);
-    file.add_att("cal_base_dbz_1km_hx", cal.base_dbz_1km_hx);
-    file.add_att("cal_base_dbz_1km_vc", cal.base_dbz_1km_vc);
-    file.add_att("cal_base_dbz_1km_vx", cal.base_dbz_1km_vx);
-    file.add_att("cal_sun_power_dbm_hc", cal.sun_power_dbm_hc);
-    file.add_att("cal_sun_power_dbm_hx", cal.sun_power_dbm_hx);
-    file.add_att("cal_sun_power_dbm_vc", cal.sun_power_dbm_vc);
-    file.add_att("cal_sun_power_dbm_vx", cal.sun_power_dbm_vx);
-    file.add_att("cal_noise_source_power_dbm_h",
-                 cal.noise_source_power_dbm_h);
-    file.add_att("cal_noise_source_power_dbm_v",
-                 cal.noise_source_power_dbm_v);
-    file.add_att("cal_power_meas_loss_db_h", cal.power_meas_loss_db_h);
-    file.add_att("cal_power_meas_loss_db_v", cal.power_meas_loss_db_v);
-    file.add_att("cal_coupler_forward_loss_db_h",
-                 cal.coupler_forward_loss_db_h);
-    file.add_att("cal_coupler_forward_loss_db_v",
-                 cal.coupler_forward_loss_db_v);
-    file.add_att("cal_test_power_dbm_h", cal.test_power_dbm_h);
-    file.add_att("cal_test_power_dbm_v", cal.test_power_dbm_v);
-    file.add_att("cal_zdr_correction_db", cal.zdr_correction_db);
-    file.add_att("cal_ldr_correction_db_h", cal.ldr_correction_db_h);
-    file.add_att("cal_ldr_correction_db_v", cal.ldr_correction_db_v);
-    file.add_att("cal_phidp_rot_deg", cal.phidp_rot_deg);
+    file.addGlobAttr("cal_wavelength_cm", cal.wavelength_cm);
+    file.addGlobAttr("cal_beamwidth_deg_h", cal.beamwidth_deg_h);
+    file.addGlobAttr("cal_beamwidth_deg_v", cal.beamwidth_deg_v);
+    file.addGlobAttr("cal_gain_ant_db_h", cal.gain_ant_db_h);
+    file.addGlobAttr("cal_gain_ant_db_v", cal.gain_ant_db_v);
+    file.addGlobAttr("cal_pulse_width_us", cal.pulse_width_us);
+    file.addGlobAttr("cal_xmit_power_dbm_h", cal.xmit_power_dbm_h);
+    file.addGlobAttr("cal_xmit_power_dbm_v", cal.xmit_power_dbm_v);
+    file.addGlobAttr("cal_two_way_waveguide_loss_db_h",
+                     cal.two_way_waveguide_loss_db_h);
+    file.addGlobAttr("cal_two_way_waveguide_loss_db_v",
+                     cal.two_way_waveguide_loss_db_v);
+    file.addGlobAttr("cal_two_way_radome_loss_db_h",
+                     cal.two_way_radome_loss_db_h);
+    file.addGlobAttr("cal_two_way_radome_loss_db_v",
+                     cal.two_way_radome_loss_db_v);
+    file.addGlobAttr("cal_receiver_mismatch_loss_db",
+                     cal.receiver_mismatch_loss_db);
+    file.addGlobAttr("cal_radar_constant_h", cal.radar_constant_h);
+    file.addGlobAttr("cal_radar_constant_v", cal.radar_constant_v);
+    file.addGlobAttr("cal_noise_dbm_hc", cal.noise_dbm_hc);
+    file.addGlobAttr("cal_noise_dbm_hx", cal.noise_dbm_hx);
+    file.addGlobAttr("cal_noise_dbm_vc", cal.noise_dbm_vc);
+    file.addGlobAttr("cal_noise_dbm_vx", cal.noise_dbm_vx);
+    file.addGlobAttr("cal_receiver_gain_db_hc", cal.receiver_gain_db_hc);
+    file.addGlobAttr("cal_receiver_gain_db_hx", cal.receiver_gain_db_hx);
+    file.addGlobAttr("cal_receiver_gain_db_vc", cal.receiver_gain_db_vc);
+    file.addGlobAttr("cal_receiver_gain_db_vx", cal.receiver_gain_db_vx);
+    file.addGlobAttr("cal_receiver_slope_hc", cal.receiver_slope_hc);
+    file.addGlobAttr("cal_receiver_slope_hx", cal.receiver_slope_hx);
+    file.addGlobAttr("cal_receiver_slope_vc", cal.receiver_slope_vc);
+    file.addGlobAttr("cal_receiver_slope_vx", cal.receiver_slope_vx);
+    file.addGlobAttr("cal_base_dbz_1km_hc", cal.base_dbz_1km_hc);
+    file.addGlobAttr("cal_base_dbz_1km_hx", cal.base_dbz_1km_hx);
+    file.addGlobAttr("cal_base_dbz_1km_vc", cal.base_dbz_1km_vc);
+    file.addGlobAttr("cal_base_dbz_1km_vx", cal.base_dbz_1km_vx);
+    file.addGlobAttr("cal_sun_power_dbm_hc", cal.sun_power_dbm_hc);
+    file.addGlobAttr("cal_sun_power_dbm_hx", cal.sun_power_dbm_hx);
+    file.addGlobAttr("cal_sun_power_dbm_vc", cal.sun_power_dbm_vc);
+    file.addGlobAttr("cal_sun_power_dbm_vx", cal.sun_power_dbm_vx);
+    file.addGlobAttr("cal_noise_source_power_dbm_h",
+                     cal.noise_source_power_dbm_h);
+    file.addGlobAttr("cal_noise_source_power_dbm_v",
+                     cal.noise_source_power_dbm_v);
+    file.addGlobAttr("cal_power_meas_loss_db_h", cal.power_meas_loss_db_h);
+    file.addGlobAttr("cal_power_meas_loss_db_v", cal.power_meas_loss_db_v);
+    file.addGlobAttr("cal_coupler_forward_loss_db_h",
+                     cal.coupler_forward_loss_db_h);
+    file.addGlobAttr("cal_coupler_forward_loss_db_v",
+                     cal.coupler_forward_loss_db_v);
+    file.addGlobAttr("cal_test_power_dbm_h", cal.test_power_dbm_h);
+    file.addGlobAttr("cal_test_power_dbm_v", cal.test_power_dbm_v);
+    file.addGlobAttr("cal_zdr_correction_db", cal.zdr_correction_db);
+    file.addGlobAttr("cal_ldr_correction_db_h", cal.ldr_correction_db_h);
+    file.addGlobAttr("cal_ldr_correction_db_v", cal.ldr_correction_db_v);
+    file.addGlobAttr("cal_phidp_rot_deg", cal.phidp_rot_deg);
 
   }
 
@@ -1469,8 +1470,7 @@ void Ts2NetCDF::_addGlobAtt(Nc3File &file)
 // write out base time variables
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeBaseTimeVars(Nc3File &file,
-                                  Nc3Error &err)
+int Ts2NetCDF::_writeBaseTimeVars(NcxxFile &file)
   
 {
   
@@ -1481,16 +1481,15 @@ int Ts2NetCDF::_writeBaseTimeVars(Nc3File &file,
   sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
           1970, 1, 1, 0, 0, 0);
   
-  Nc3Var *baseTimeVar;
-  if (_addVar(file, err, baseTimeVar, nc3Double,
+  NcxxVar baseTimeVar;
+  if (_addVar(file, baseTimeVar, ncxxDouble,
               "base_time", "time_since_Jan1_1970", timeUnitsStr)) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_time var" << endl;
     return -1;
   }
   double baseTime = _startTime;
-  long edge = 1;
-  baseTimeVar->put(&baseTime, &edge);
+  baseTimeVar.putVal(baseTime);
 
   int year = stime.getYear();
   int month = stime.getMonth();
@@ -1499,59 +1498,59 @@ int Ts2NetCDF::_writeBaseTimeVars(Nc3File &file,
   int min = stime.getMin();
   int sec = stime.getSec();
 
-  Nc3Var *baseYearVar;
-  if (_addVar(file, err, baseYearVar, nc3Int,
+  NcxxVar baseYearVar;
+  if (_addVar(file, baseYearVar, ncxxInt,
               "base_year", "base_time_year", "")) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_year var" << endl;
     return -1;
   }
-  baseYearVar->put(&year, &edge);
+  baseYearVar.putVal(year);
 
-  Nc3Var *baseMonthVar;
-  if (_addVar(file, err, baseMonthVar, nc3Int,
+  NcxxVar baseMonthVar;
+  if (_addVar(file, baseMonthVar, ncxxInt,
               "base_month", "base_time_month", "")) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_month var" << endl;
     return -1;
   }
-  baseMonthVar->put(&month, &edge);
+  baseMonthVar.putVal(&month);
 
-  Nc3Var *baseDayVar;
-  if (_addVar(file, err, baseDayVar, nc3Int,
+  NcxxVar baseDayVar;
+  if (_addVar(file, baseDayVar, ncxxInt,
               "base_day", "base_time_day", "")) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_day var" << endl;
     return -1;
   }
-  baseDayVar->put(&day, &edge);
+  baseDayVar.putVal(&day);
 
-  Nc3Var *baseHourVar;
-  if (_addVar(file, err, baseHourVar, nc3Int,
+  NcxxVar baseHourVar;
+  if (_addVar(file, baseHourVar, ncxxInt,
               "base_hour", "base_time_hour", "")) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_hour var" << endl;
     return -1;
   }
-  baseHourVar->put(&hour, &edge);
+  baseHourVar.putVal(&hour);
 
-  Nc3Var *baseMinVar;
-  if (_addVar(file, err, baseMinVar, nc3Int,
+  NcxxVar baseMinVar;
+  if (_addVar(file, baseMinVar, ncxxInt,
               "base_min", "base_time_min", "")) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_min var" << endl;
     return -1;
   }
-  baseMinVar->put(&min, &edge);
+  baseMinVar.putVal(&min);
 
-  Nc3Var *baseSecVar;
-  if (_addVar(file, err, baseSecVar, nc3Int,
+  NcxxVar baseSecVar;
+  if (_addVar(file, baseSecVar, ncxxInt,
               "base_sec", "base_time_sec", "")) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_sec var" << endl;
     return -1;
   }
-  baseSecVar->put(&sec, &edge);
+  baseSecVar.putVal(&sec);
 
   return 0;
 
@@ -1562,9 +1561,8 @@ int Ts2NetCDF::_writeBaseTimeVars(Nc3File &file,
 // in iwrf format
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeTimeDimVars(Nc3File &file,
-                                 Nc3Error &err,
-                                 Nc3Dim *timeDim)
+int Ts2NetCDF::_writeTimeDimVars(NcxxFile &file,
+                                 NcxxDim &timeDim)
   
 {
   
@@ -1576,26 +1574,25 @@ int Ts2NetCDF::_writeTimeDimVars(Nc3File &file,
           stime.getYear(), stime.getMonth(), stime.getDay(),
           stime.getHour(), stime.getMin(), stime.getSec());
   
-  Nc3Var *timeVarHc;
-  if (_addVar(file, err, timeVarHc, nc3Double, timeDim,
+  NcxxVar timeVarHc;
+  if (_addVar(file, timeVarHc, ncxxDouble, timeDim,
               "time_offset", "time_offset_from_base_time", timeUnitsStr)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     cerr << "  Cannot create time var" << endl;
     return -1;
   }
-  timeVarHc->add_att("_FillValue", -9999.0);
+  timeVarHc.addScalarAttr("_FillValue", -9999.0);
   TaArray<double> times_;
   double *times = times_.alloc(_nTimes);
   for (size_t jj = 0; jj < _nTimes; jj++) {
     times[jj] = _dtimeArrayHc[jj];
   }
-  long edge = _nTimes;
-  timeVarHc->put(times, &edge);
+  timeVarHc.putVal(times);
 
   // ngates per ray
 
   if (_params.pad_n_gates_to_max) {
-    if (_writeVar(file, err, timeDim,
+    if (_writeVar(file, timeDim,
                   "n_gates_ray", "number_of_valid_gates_in_ray", "",
                   _nGatesRay)) {
       cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1605,7 +1602,7 @@ int Ts2NetCDF::_writeTimeDimVars(Nc3File &file,
   
   // Elevation variable
 
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "elevation", "elevation_angle", "degrees",
                 _elArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1614,7 +1611,7 @@ int Ts2NetCDF::_writeTimeDimVars(Nc3File &file,
   
   // Azimuth variable
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "azimuth", "azimuth_angle", "degrees",
                 _azArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1623,7 +1620,7 @@ int Ts2NetCDF::_writeTimeDimVars(Nc3File &file,
   
   // Fixed angle variable
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "fixed_angle", "fixed_scan_angle", "degrees",
                 _fixedAngleArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1632,7 +1629,7 @@ int Ts2NetCDF::_writeTimeDimVars(Nc3File &file,
   
   // modulation code variable
 
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "mod_code", "modulation_code", "degrees",
                 _modCodeArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1641,7 +1638,7 @@ int Ts2NetCDF::_writeTimeDimVars(Nc3File &file,
   
   // PRT variable
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "prt", "pulse_repetition_time", "seconds",
                 _prtArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1650,7 +1647,7 @@ int Ts2NetCDF::_writeTimeDimVars(Nc3File &file,
   
   // Pulse width variable
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "pulse_width", "pulse_width", "micro_seconds",
                 _pulseWidthArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1659,7 +1656,7 @@ int Ts2NetCDF::_writeTimeDimVars(Nc3File &file,
   
   // Antenna transition variable
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "antenna_transition", "antenna_is_in_transition", "",
                 _transitionFlagArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1668,28 +1665,28 @@ int Ts2NetCDF::_writeTimeDimVars(Nc3File &file,
   
   // write burst data
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "burst_mag_hc", "", "",
                 _burstMagArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "burst_mag_vc", "", "",
                 _burstMagArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "burst_arg_hc", "", "",
                 _burstArgArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "burst_arg_vc", "", "",
                 _burstArgArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1704,9 +1701,8 @@ int Ts2NetCDF::_writeTimeDimVars(Nc3File &file,
 // write out time variables in alternating dual pol mode
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeTimeDimVarsAlt(Nc3File &file,
-                                    Nc3Error &err,
-                                    Nc3Dim *timeDim)
+int Ts2NetCDF::_writeTimeDimVarsAlt(NcxxFile &file,
+                                    NcxxDim &timeDim)
   
 {
 
@@ -1720,50 +1716,49 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(Nc3File &file,
   
   // h copolar times
 
-  Nc3Var *timeVarHc;
-  if (_addVar(file, err, timeVarHc, nc3Double, timeDim,
+  NcxxVar timeVarHc;
+  if (_addVar(file, timeVarHc, ncxxDouble, timeDim,
               "time_offset_hc", "time_offset_from_base_time_hc", 
               timeUnitsStr)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     cerr << "  Cannot create time_offset_hc var" << endl;
     return -1;
   }
-  timeVarHc->add_att("_FillValue", -9999.0);
+  timeVarHc.addScalarAttr("_FillValue", -9999.0);
   TaArray<double> timesHc_;
   double *timesHc = timesHc_.alloc(_nTimes);
   for (size_t jj = 0; jj < _nTimes; jj++) {
     timesHc[jj] = _dtimeArrayHc[jj];
   }
-  long edge = _nTimes;
-  timeVarHc->put(timesHc, &edge);
+  timeVarHc.putVal(timesHc);
 
   // v copolar times
   
-  Nc3Var *timeVarVc;
-  if (_addVar(file, err, timeVarVc, nc3Double, timeDim,
+  NcxxVar timeVarVc;
+  if (_addVar(file, timeVarVc, ncxxDouble, timeDim,
               "time_offset_vc", "time_offset_from_base_time_vc", 
               timeUnitsStr)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     cerr << "  Cannot create time_offset_vc var" << endl;
     return -1;
   }
-  timeVarVc->add_att("_FillValue", -9999.0);
+  timeVarVc.addScalarAttr("_FillValue", -9999.0);
   TaArray<double> timesVc_;
   double *timesVc = timesVc_.alloc(_nTimes);
   for (size_t jj = 0; jj < _nTimes; jj++) {
     timesVc[jj] = _dtimeArrayVc[jj];
   }
-  timeVarVc->put(timesVc, &edge);
+  timeVarVc.putVal(timesVc);
 
   // Elevation variable
 
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "elevation_hc", "elevation_angle_h_copolar", "degrees",
                 _elArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "elevation_vc", "elevation_angle_v_copolar", "degrees",
                 _elArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1772,13 +1767,13 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(Nc3File &file,
   
   // Azimuth variable
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "azimuth_hc", "azimuth_angle_h_copolar", "degrees",
                 _azArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "azimuth_vc", "azimuth_angle_v_copolar", "degrees",
                 _azArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1787,13 +1782,13 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(Nc3File &file,
   
   // Fixed angle variable
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "fixed_angle_hc", "fixed_scan_angle_h_copolar", "degrees",
                 _fixedAngleArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "fixed_angle_vc", "fixed_scan_angle_v_copolar", "degrees",
                 _fixedAngleArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1802,13 +1797,13 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(Nc3File &file,
   
   // modulation code variable
 
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "mod_code_hc", "modulation_code_h_copolar", "degrees",
                 _modCodeArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "mod_code_vc", "modulation_code_v_copolar", "degrees",
                 _modCodeArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1817,13 +1812,13 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(Nc3File &file,
   
   // PRT variable
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "prt_hc", "pulse_repetition_time_h_copolar", "seconds",
                 _prtArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "prt_vc", "pulse_repetition_time_v_copolar", "seconds",
                 _prtArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1832,13 +1827,13 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(Nc3File &file,
   
   // Pulse width variable
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "pulse_width_hc", "pulse_width_h_copolar", "micro_seconds",
                 _pulseWidthArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "pulse_width_vc", "pulse_width_v_copolar", "micro_seconds",
                 _pulseWidthArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1847,14 +1842,14 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(Nc3File &file,
   
   // Antenna transition variable
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "antenna_transition_hc", "antenna_is_in_transition_h_copolar", "",
                 _transitionFlagArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
 
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "antenna_transition_vc", "antenna_is_in_transition_v_copolar", "",
                 _transitionFlagArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1863,28 +1858,28 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(Nc3File &file,
   
   // write burst data
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "burst_mag_hc", "", "",
                 _burstMagArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "burst_mag_vc", "", "",
                 _burstMagArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "burst_arg_hc", "", "",
                 _burstArgArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
-  if (_writeVar(file, err, timeDim,
+  if (_writeVar(file, timeDim,
                 "burst_arg_vc", "", "",
                 _burstArgArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1899,14 +1894,13 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(Nc3File &file,
 // write out range coordinate variable
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeRangeVar(Nc3File &file,
-                              Nc3Error &err,
-                              Nc3Dim *gatesDim)
+int Ts2NetCDF::_writeRangeVar(NcxxFile &file,
+                              NcxxDim &gatesDim)
   
 {
   
-  Nc3Var *rangeVar;
-  if (_addVar(file, err, rangeVar, nc3Float, gatesDim,
+  NcxxVar rangeVar;
+  if (_addVar(file, rangeVar, ncxxFloat, gatesDim,
               "range", "range_to_center_of_gate", "m")) {
     cerr << "ERROR - Ts2NetCDF::_writeRangeVar" << endl;
     cerr << "  Cannot create range var" << endl;
@@ -1920,8 +1914,7 @@ int Ts2NetCDF::_writeRangeVar(Nc3File &file,
   for (int ii = 0; ii < _nGates; ii++, thisRange += gateSpacing) {
     range[ii] = thisRange;
   }
-  long edge = _nGates;
-  rangeVar->put(range, &edge);
+  rangeVar.putVal(range);
 
   return 0;
 
@@ -2027,18 +2020,19 @@ int Ts2NetCDF::_computeOutputFilePaths()
 ////////////////////////////////////////////////
 // add string attribute to a variable
 
-int Ts2NetCDF::_addAttr(Nc3Var *var,
+int Ts2NetCDF::_addAttr(NcxxVar &var,
                         const string &name,
-                        const string &val,
-                        Nc3Error &err)
-
+                        const string &val)
+  
 {
-  if (!var->add_att(name.c_str(), val.c_str())) {
+  try {
+    var.addScalarAttr(name , val);
+  } catch (NcxxException& e) {
     cerr << "ERROR - Ts2NetCDF::_addAttr" << endl;
     cerr << "  Cannot add attr name: " << name << endl;
     cerr << "  val: " << val << endl;
-    cerr << "  Variable name: " << var->name() << endl;
-    cerr << err.get_errmsg() << endl;
+    cerr << "  Variable name: " << var.getName() << endl;
+    cerr << "  exception: " << e.what() << endl;
     return -1;
   }
   return 0;
@@ -2047,18 +2041,19 @@ int Ts2NetCDF::_addAttr(Nc3Var *var,
 ////////////////////////////////////////////////
 // add double attribute to a variable
 
-int Ts2NetCDF::_addAttr(Nc3Var *var,
+int Ts2NetCDF::_addAttr(NcxxVar & var,
                         const string &name,
-                        double val,
-                        Nc3Error &err)
+                        double val)
 
 {
-  if (!var->add_att(name.c_str(), val)) {
+  try {
+    var.addScalarAttr(name , val);
+  } catch (NcxxException& e) {
     cerr << "ERROR - Ts2NetCDF::_addAttr" << endl;
     cerr << "  Cannot add attr name: " << name << endl;
     cerr << "  val: " << val << endl;
-    cerr << "  Variable name: " << var->name() << endl;
-    cerr << err.get_errmsg() << endl;
+    cerr << "  Variable name: " << var.getName() << endl;
+    cerr << "  exception: " << e.what() << endl;
     return -1;
   }
   return 0;
@@ -2067,18 +2062,19 @@ int Ts2NetCDF::_addAttr(Nc3Var *var,
 ////////////////////////////////////////////////
 // add int attribute to a variable
 
-int Ts2NetCDF::_addAttr(Nc3Var *var,
+int Ts2NetCDF::_addAttr(NcxxVar &var,
                         const string &name,
-                        int val,
-                        Nc3Error &err)
+                        int val)
   
 {
-  if (!var->add_att(name.c_str(), val)) {
+  try {
+    var.addScalarAttr(name , val);
+  } catch (NcxxException& e) {
     cerr << "ERROR - Ts2NetCDF::_addAttr" << endl;
     cerr << "  Cannot add attr name: " << name << endl;
     cerr << "  val: " << val << endl;
-    cerr << "  Variable name: " << var->name() << endl;
-    cerr << err.get_errmsg() << endl;
+    cerr << "  Variable name: " << var.getName() << endl;
+    cerr << "  exception: " << e.what() << endl;
     return -1;
   }
   return 0;
@@ -2087,77 +2083,62 @@ int Ts2NetCDF::_addAttr(Nc3Var *var,
 //////////////////////////////////////////////
 // add scalar variable
 
-int Ts2NetCDF::_addVar(Nc3File &file,
-                       Nc3Error &err,
-                       Nc3Var* &var,
-                       Nc3Type ncType,
+int Ts2NetCDF::_addVar(NcxxFile &file,
+                       NcxxVar &var,
+                       NcxxType ncType,
                        const string &name,
                        const string &standardName,
                        const string &units /* = "" */)
 
 {
-  
-  var = file.add_var(name.c_str(), ncType);
-  if (var == NULL) {
+
+  try {
+    var = file.addVar(name,
+                      standardName,
+                      standardName,
+                      ncType,
+                      units);
+  } catch (NcxxException& e) {
     cerr << "ERROR - Ts2NetCDF::_addVar" << endl;
-    cerr << "  Cannot add scalar, name: " << name << endl;
+    cerr << "  Cannot add scalar var, name: " << name << endl;
     cerr << "  Type: " << _ncTypeToStr(ncType) << endl;
-    cerr << err.get_errmsg() << endl;
+    cerr << "  exception: " << e.what() << endl;
     return -1;
   }
   
-  if (standardName.length() > 0) {
-    if (_addAttr(var, "standard_name", standardName, err)) {
-      return -1;
-    }
-  }
-
-  if (units.length() > 0) {
-    if (_addAttr(var, "units", units, err)) {
-      return -1;
-    }
-  }
-
   return 0;
-
+  
 }
 
 //////////////////////////////////////////////
 // add a 1-D variable
 
-int Ts2NetCDF::_addVar(Nc3File &file,
-                       Nc3Error &err,
-                       Nc3Var* &var,
-                       Nc3Type ncType,
-                       Nc3Dim *dim, 
+int Ts2NetCDF::_addVar(NcxxFile &file,
+                       NcxxVar &var,
+                       NcxxType ncType,
+                       NcxxDim &dim, 
                        const string &name,
                        const string &standardName,
                        const string &units /* = "" */)
 
 {
   
-  var = file.add_var(name.c_str(), ncType, dim);
-  if (var == NULL) {
+  try {
+    var = file.addVar(name,
+                      standardName,
+                      standardName,
+                      ncType,
+                      dim,
+                      units);
+  } catch (NcxxException& e) {
     cerr << "ERROR - Ts2NetCDF::_addVar" << endl;
     cerr << "  Cannot add 1-D var, name: " << name << endl;
     cerr << "  Type: " << _ncTypeToStr(ncType) << endl;
-    cerr << "  Dim: " << dim->name() << endl;
-    cerr << err.get_errmsg() << endl;
+    cerr << "  Dim: " << dim.getName() << endl;
+    cerr << "  exception: " << e.what() << endl;
     return -1;
   }
-
-  if (standardName.length() > 0) {
-    if (_addAttr(var, "standard_name", standardName, err)) {
-      return -1;
-    }
-  }
-
-  if (units.length() > 0) {
-    if (_addAttr(var, "units", units, err)) {
-      return -1;
-    }
-  }
-
+  
   return 0;
 
 }
@@ -2165,39 +2146,33 @@ int Ts2NetCDF::_addVar(Nc3File &file,
 //////////////////////////////////////////////
 // add a 2-D variable
 
-int Ts2NetCDF::_addVar(Nc3File &file,
-                       Nc3Error &err,
-                       Nc3Var* &var,
-                       Nc3Type ncType,
-                       Nc3Dim *dim0, 
-                       Nc3Dim *dim1, 
+int Ts2NetCDF::_addVar(NcxxFile &file,
+                       NcxxVar &var,
+                       NcxxType ncType,
+                       NcxxDim &dim0, 
+                       NcxxDim &dim1, 
                        const string &name,
                        const string &standardName,
                        const string &units /* = "" */)
 
 {
   
-  var = file.add_var(name.c_str(), ncType, dim0, dim1);
-  if (var == NULL) {
+  try {
+    var = file.addVar(name,
+                      standardName,
+                      standardName,
+                      ncType,
+                      dim0,
+                      dim1,
+                      units);
+  } catch (NcxxException& e) {
     cerr << "ERROR - Ts2NetCDF::_addVar" << endl;
-    cerr << "  Cannot add 1-D var, name: " << name << endl;
+    cerr << "  Cannot add 2-D var, name: " << name << endl;
     cerr << "  Type: " << _ncTypeToStr(ncType) << endl;
-    cerr << "  Dim0: " << dim0->name() << endl;
-    cerr << "  Dim1: " << dim1->name() << endl;
-    cerr << err.get_errmsg() << endl;
+    cerr << "  Dim0: " << dim0.getName() << endl;
+    cerr << "  Dim1: " << dim1.getName() << endl;
+    cerr << "  exception: " << e.what() << endl;
     return -1;
-  }
-
-  if (standardName.length() > 0) {
-    if (_addAttr(var, "standard_name", standardName, err)) {
-      return -1;
-    }
-  }
-
-  if (units.length() > 0) {
-    if (_addAttr(var, "units", units, err)) {
-      return -1;
-    }
   }
 
   return 0;
@@ -2208,32 +2183,30 @@ int Ts2NetCDF::_addVar(Nc3File &file,
 // add and write float var
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeVar(Nc3File &file,
-                         Nc3Error &err,
-                         Nc3Dim *timeDim,
-                         const char *name,
-                         const char *standardName,
-                         const char *units,
+int Ts2NetCDF::_writeVar(NcxxFile &file,
+                         NcxxDim &timeDim,
+                         const string &name,
+                         const string &standardName,
+                         const string &units,
                          const vector<float> vals)
   
 {
   
   TaArray<float> floats_;
-  float *floats = floats_.alloc(timeDim->size());
-  long edge = timeDim->size();
+  float *floats = floats_.alloc(timeDim.getSize());
   
-  Nc3Var *var;
-  if (_addVar(file, err, var, nc3Float, timeDim,
+  NcxxVar var;
+  if (_addVar(file, var, ncxxFloat, timeDim,
               name, standardName, units)) {
     cerr << "ERROR - Ts2NetCDF::_addFloatVar" << endl;
     cerr << "  Cannot create var, name: " << name << endl;
     return -1;
   }
-  var->add_att("_FillValue", -9999.0f);
-  for (long jj = 0; jj < timeDim->size(); jj++) {
+  var.addScalarAttr("_FillValue", -9999.0f);
+  for (size_t jj = 0; jj < timeDim.getSize(); jj++) {
     floats[jj] = vals[jj];
   }
-  var->put(floats, &edge);
+  var.putVal(floats);
   
   return 0;
 
@@ -2243,32 +2216,30 @@ int Ts2NetCDF::_writeVar(Nc3File &file,
 // add and write int var
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeVar(Nc3File &file,
-                         Nc3Error &err,
-                         Nc3Dim *timeDim,
-                         const char *name,
-                         const char *standardName,
-                         const char *units,
+int Ts2NetCDF::_writeVar(NcxxFile &file,
+                         NcxxDim &timeDim,
+                         const string &name,
+                         const string &standardName,
+                         const string &units,
                          const vector<int> vals)
   
 {
   
   TaArray<int> ints_;
-  int *ints = ints_.alloc(timeDim->size());
-  long edge = timeDim->size();
+  int *ints = ints_.alloc(timeDim.getSize());
   
-  Nc3Var *var;
-  if (_addVar(file, err, var, nc3Int, timeDim,
+  NcxxVar var;
+  if (_addVar(file, var, ncxxInt, timeDim,
               name, standardName, units)) {
     cerr << "ERROR - Ts2NetCDF::_addIntVar" << endl;
     cerr << "  Cannot create var, name: " << name << endl;
     return -1;
   }
-  var->add_att("_FillValue", -9999);
-  for (long jj = 0; jj < timeDim->size(); jj++) {
+  var.addScalarAttr("_FillValue", -9999);
+  for (size_t jj = 0; jj < timeDim.getSize(); jj++) {
     ints[jj] = vals[jj];
   }
-  var->put(ints, &edge);
+  var.putVal(ints);
   
   return 0;
 
@@ -2278,12 +2249,11 @@ int Ts2NetCDF::_writeVar(Nc3File &file,
 // add and write IQ vars
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeIqVars(Nc3File &file,
-                            Nc3Error &err,
-                            Nc3Dim *timeDim,
-                            Nc3Dim *gatesDim,
-                            const char *iName,
-                            const char *qName,
+int Ts2NetCDF::_writeIqVars(NcxxFile &file,
+                            NcxxDim &timeDim,
+                            NcxxDim &gatesDim,
+                            const string &iName,
+                            const string &qName,
                             const float *ivals,
                             const float *qvals)
   
@@ -2291,25 +2261,27 @@ int Ts2NetCDF::_writeIqVars(Nc3File &file,
 
   // I variable
   
-  Nc3Var *iVar = file.add_var(iName, nc3Float, timeDim, gatesDim);
-  iVar->add_att("standard_name", "time_series_in_phase");
-  iVar->add_att("units", "scaled A/D counts");
-  iVar->add_att("_FillValue", (float) -9999.0);
-  
-  long edges[2];
-  edges[0] = timeDim->size();
-  edges[1] = gatesDim->size();
-
-  iVar->put(ivals, edges);
+  NcxxVar iVar = file.addVar(iName,
+                             "time_series_in_phase",
+                             "time_series_in_phase",
+                             ncxxFloat,
+                             timeDim,
+                             gatesDim,
+                             "scaled A/D counts");
+  iVar.addScalarAttr("_FillValue", (float) -9999.0);
+  iVar.putVal(ivals);
 
   // Q variable
 
-  Nc3Var *qVar = file.add_var(qName, nc3Float, timeDim, gatesDim);
-  qVar->add_att("standard_name", "time_series_quadrature");
-  qVar->add_att("units", "scaled A/D counts");
-  qVar->add_att("_FillValue", (float) -9999.0);
-
-  qVar->put(qvals, edges);
+  NcxxVar qVar = file.addVar(qName,
+                             "time_series_quadrature",
+                             "time_series_quadrature",
+                             ncxxFloat,
+                             timeDim,
+                             gatesDim,
+                             "scaled A/D counts");
+  qVar.addScalarAttr("_FillValue", (float) -9999.0);
+  qVar.putVal(qvals);
 
   return 0;
 
@@ -2318,38 +2290,9 @@ int Ts2NetCDF::_writeIqVars(Nc3File &file,
 ////////////////////////////////////////
 // convert enums to strings
 
-string Ts2NetCDF::_ncTypeToStr(Nc3Type nctype)
+string Ts2NetCDF::_ncTypeToStr(NcxxType nctype)
   
 {
-  
-  switch (nctype) {
-    case nc3Double:
-      return "nc3Double";
-    case nc3Float:
-      return "nc3Float";
-    case nc3Int:
-      return "nc3Int";
-    case nc3Short:
-      return "nc3Short";
-    case nc3Byte:
-    default:
-      return "nc3Byte";
-  }
-  
-}
-
-///////////////////////////////////////////
-// get string representation of component
-
-string Ts2NetCDF::_asString(const Nc3TypedComponent *component,
-                            int index /* = 0 */)
-  
-{
-  
-  const char* strc = component->as_string(index);
-  string strs(strc);
-  delete[] strc;
-  return strs;
-
+  return nctype.getTypeClassName();
 }
 

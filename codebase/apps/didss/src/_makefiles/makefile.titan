@@ -14,7 +14,6 @@ SUB_DIRS = \
 	Dsr2titanAscii \
 	Dsr2UF \
 	Dsr2Vol \
-	Dsr2Sweep \
 	File2Dsr \
 	Fmq2Fmq \
 	Fmq2MultMsgFmq \

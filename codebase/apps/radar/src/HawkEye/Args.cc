@@ -192,6 +192,11 @@ int Args::parse (const int argc, const char **argv)
 	iret = -1;
       }
       
+    } else if (!strcmp(argv[i], "-realtime")) {
+      
+      sprintf(tmp_str, "begin_in_archive_mode = FALSE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-start_time")) {
       
       if (i < argc - 1) {
@@ -311,6 +316,7 @@ void Args::_usage(ostream &out)
       << "            set start time for image generation mode\n"
       << "       [ -instance ?] set instance for procmap\n"
       << "       [ -polar ] run in POLAR (PPI/RHI) mode\n"
+      << "       [ -realtime] start in realtime mode\n"
       << "       [ -sim_mode] SIMULATED_INPUT mode\n"
       << "       [ -start_time \"yyyy mm dd hh mm ss\"]\n"
       << "            set start time for archive mode\n"

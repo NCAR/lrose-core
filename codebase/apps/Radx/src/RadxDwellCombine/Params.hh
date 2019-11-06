@@ -133,6 +133,13 @@ public:
   // struct typedefs
 
   typedef struct {
+    char* field_name;
+    tdrp_bool_t use_nyquist;
+    double fold_limit_lower;
+    double fold_limit_upper;
+  } field_folds_t;
+
+  typedef struct {
     char* name;
     double min_valid_value;
     double max_valid_value;
@@ -259,6 +266,15 @@ public:
   //
 
   static bool isArgValid(const char *arg);
+
+  ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  static int isArgValidN(const char *arg);
 
   ////////////////////////////////////////////
   // load()
@@ -480,6 +496,11 @@ public:
 
   double max_range_km;
 
+  tdrp_bool_t set_field_folds_attribute;
+
+  field_folds_t *_field_folds;
+  int field_folds_n;
+
   double dwell_time_secs;
 
   tdrp_bool_t center_dwell_on_time;
@@ -512,6 +533,11 @@ public:
   int censoring_fields_n;
 
   int censoring_min_valid_run;
+
+  tdrp_bool_t specify_non_censored_fields;
+
+  char* *_non_censored_fields;
+  int non_censored_fields_n;
 
   tdrp_bool_t set_output_fields;
 
@@ -595,7 +621,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[87];
+  mutable TDRPtable _table[91];
 
   const char *_className;
 

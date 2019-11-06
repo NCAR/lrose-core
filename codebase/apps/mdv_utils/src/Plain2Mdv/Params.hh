@@ -257,6 +257,15 @@ public:
   static bool isArgValid(const char *arg);
 
   ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  static int isArgValidN(const char *arg);
+
+  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.

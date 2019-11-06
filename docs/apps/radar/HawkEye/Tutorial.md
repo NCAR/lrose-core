@@ -48,7 +48,7 @@ Generally, just start HawkEye via the command line or click the App.
 HawkEye
 HawkEye -h
 HawkEye -f test_data/cfradial/kddc/20150626/cfrad.20150626_025610.151_to_20150626_030145.891_KDDC_v270_Surveillance_SUR.nc
-HawkEye -p field_project.HawkEye.params
+HawkEye -params field_project.HawkEye.params
 ```
 
 Then, you can play with the ...
@@ -144,10 +144,14 @@ executable.
 
 ## The Future of HawkEye - advertisement
 
+* Boundary Editor
 * Open Params File menu option
 * Merge SOLOII into HawkEye
 * undo editing
 * A few screen shots
+
+### Boundary Editor Video Tutorial ###
+https://vimeo.com/369963107
 
 ### Examine as Spreadsheet
 ![Examine as Spreadsheet](./images/HawkEye_SOLOII_examine.png "Examine as Spreadsheet")

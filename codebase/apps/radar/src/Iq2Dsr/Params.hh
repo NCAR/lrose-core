@@ -538,6 +538,15 @@ public:
   static bool isArgValid(const char *arg);
 
   ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  static int isArgValidN(const char *arg);
+
+  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.
@@ -904,6 +913,10 @@ public:
 
   char* hcr_v_rx_delta_gain_tag_list;
 
+  tdrp_bool_t correct_altitude_for_egm;
+
+  char* egm_2008_geoid_file;
+
   tdrp_bool_t apply_precip_attenuation_correction;
 
   tdrp_bool_t specify_coefficients_for_attenuation_correction;
@@ -985,6 +998,8 @@ public:
   double KDP_HB_rhohv_threshold;
 
   tdrp_bool_t use_estimated_noise_for_noise_subtraction;
+
+  double max_valid_noise_bias_db;
 
   int noise_ngates_kernel;
 
@@ -1213,7 +1228,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[265];
+  mutable TDRPtable _table[268];
 
   const char *_className;
 

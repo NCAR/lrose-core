@@ -189,9 +189,9 @@ void RadxRcalib::init()
 bool RadxRcalib::isMissing(double val)
 {
   if (fabs(val - Radx::missingMetaDouble) > 0.001) {
-    return true;
+    return false;
   }
-  return false;
+  return true;
 }
 
 ////////////////////////////////////////

@@ -428,6 +428,10 @@ int Beam::_getSweepNum()
   }
   sort(sweepNums.begin(), sweepNums.end());
 
+  if (_nSamplesHalf > (int) sweepNums.size() - 1) {
+    return -1;
+  }
+
   if (sweepNums[_nSamplesHalf] < 0) {
     return -1;
   }

@@ -152,11 +152,11 @@ bool FirLoc::GetFirPoints(const string &name, vector <double> &lats,
   // Search for the name to match either the station name or the
   // long name
 
-  bool found=false;
+  // bool found=false;
   for (size_t j=0;j<v1.size();j++)
   {
     if (MatchName(name, j)) {
-      found=true;
+      // found=true;
 
       for (size_t jj=0; jj< v1[j].npts; jj++) {
 	

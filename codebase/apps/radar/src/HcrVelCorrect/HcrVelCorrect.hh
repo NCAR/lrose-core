@@ -53,6 +53,7 @@
 #include <Radx/RadxTime.hh>
 #include <radar/HcrSurfaceVel.hh>
 #include <radar/HcrVelFirFilt.hh>
+#include <radar/Egm2008.hh>
 #include <rapformats/DsRadarMsg.hh>
 #include <rapmath/PolyFit.hh>
 class RadxFile;
@@ -151,6 +152,10 @@ private:
   size_t _waveIndexMid;
   size_t _waveIndexEnd;
 
+  // altitude correction
+
+  Egm2008 _egm;
+
   // methods
 
   int _runFilelist();
@@ -169,7 +174,7 @@ private:
                      double rangeToSurf,
                      bool velIsValid);
 
-  int _setFilterLimits();
+  int _setWaveFilterLimits();
 
   int _runNoiseFilter();
   int _runWaveFilter();
@@ -188,6 +193,7 @@ private:
 
   void _addDeltaField(RadxRay *ray, double deltaVel);
   int _addCorrectedSpectrumWidth(RadxRay *ray);
+  void _correctAltitudeForGeoid(RadxRay *ray);
 
   void _writeWaveFiltResultsToSpdb(FiltNode &node);
   void _writeFirFiltResultsToSpdb(const RadxRay *filtRay);

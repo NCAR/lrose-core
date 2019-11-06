@@ -454,7 +454,6 @@ int tdrpLoadApplyArgs(const char *params_path,
 {
 
   int i;
-  int iret = 0;
   int usage = FALSE;
   int debug = FALSE;
   int expand_env = TRUE;
@@ -467,7 +466,6 @@ int tdrpLoadApplyArgs(const char *params_path,
    * look for command options
    */
   
-  iret = FALSE;
   for (i =  1; i < argc; i++) {
 
     if (!strcmp(argv[i], "-print_params") ||
@@ -527,12 +525,6 @@ int tdrpLoadApplyArgs(const char *params_path,
       exit(0);
     }
   }
-
-  // remove dead code-- iret == 0
-  //if (iret != 0) {
-  //  tdrpUsage(stderr);
-  //  return (-1);
-  //}
 
   if (tdrpLoad(params_path, table, params,
 	       override_list, expand_env, debug)) {

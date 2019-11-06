@@ -234,7 +234,7 @@ public:
 
   // portable data types
   
-  typedef char si08; ///< portable unsigned 8-bit integer
+  typedef signed char si08; ///< portable signed 8-bit integer
   typedef unsigned char ui08; ///< portable unsigned 8-bit integer
   typedef int16_t si16; ///< portable signed 16-bit integer
   typedef u_int16_t ui16; ///< portable unsigned 16-bit integer

@@ -48,6 +48,7 @@ class Ingester;
 class MdvxProj;
 class MdvxField;
 class OutputFile;
+class TimeIndex;
 
 class DataMgr {
 public:
@@ -107,7 +108,7 @@ private:
   // Mdv output
   //
   bool _createMdv;
-  vector<MdvxField*> _outputFields;
+  map< TimeIndex, vector< MdvxField* > > _outputFields;
   OutputFile *_outputFile;
 
 
@@ -154,5 +155,30 @@ private:
   bool _writeMdvFile();
 
 };
+
+class TimeIndex 
+{
+public:
+  
+  time_t gen_time;
+  int lead_secs;
+
+};
+
+inline bool operator< (const TimeIndex& lhs, const TimeIndex &rhs)
+{
+  if (lhs.gen_time < rhs.gen_time)
+    return true;
+  if (lhs.gen_time > rhs.gen_time)
+    return false;
+
+  // If we get here, lhs.gen_time == rhs.gen_time
+
+  if (lhs.lead_secs < rhs.lead_secs)
+    return true;
+
+  return false;
+}
+
 
 #endif

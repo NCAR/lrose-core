@@ -14,7 +14,6 @@ libdidss.a
 libdsdata.a
 libdsserver.a
 libeuclid.a
-libforayRal.a
 libgrib.a    # Depends on gfortran app and development library
 libgrib2.a   # Depends on gfortran, and jasper library
 libhydro.a

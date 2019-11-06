@@ -83,7 +83,10 @@ Ingester::~Ingester()
 /// \param inputGribType is the kind of GRIB file to process
 void Ingester::setup(Params::grib_type_t inputGribType)
 {
-  if (inputGribType == Params::GRIB_TYPE_RUC) {
+  if (inputGribType == Params::GRIB_TYPE_GENERIC) {
+    _gribMgr = new GribMgr();
+
+  } else if (inputGribType == Params::GRIB_TYPE_RUC) {
     _gribMgr = new RucGribMgr();
 
   } else if (inputGribType == Params::GRIB_TYPE_AVN
@@ -203,7 +206,8 @@ Ingester::processFile( string& filePath )
       // copy record contents into a grib field
       GribField* gfp;
 
-      if(_isFieldNew(_gribMgr->getParameterId(), _gribMgr->getLevelId())) { 
+      if(_isFieldNew(_gribMgr->getParameterId(), _gribMgr->getLevelId(),
+                     _gribMgr->getGenerateTime(), _gribMgr->getForecastTime())) { 
 
 	_gribFields.push_back(new GribField(_paramsPtr->debug));
 	gfp = _gribFields.back();
@@ -227,7 +231,8 @@ Ingester::processFile( string& filePath )
 	}
       }
       else {
-	gfp = _getField(_gribMgr->getParameterId(), _gribMgr->getLevelId());
+	gfp = _getField(_gribMgr->getParameterId(), _gribMgr->getLevelId(),
+                        _gribMgr->getGenerateTime(), _gribMgr->getForecastTime());
       }
 
       gfp->addPlane(_gribMgr->getLevel(), _gribMgr->getData() );
@@ -336,13 +341,15 @@ Ingester::_foundField( const int& param_id, const int& level_id,
 
 
 bool
-Ingester::_isFieldNew(const int& param_id, const int& level_id)
+Ingester::_isFieldNew(const int& param_id, const int& level_id,
+                      const time_t& generate_time, const int& forecast_time)
 {
 
   list<GribField*>::iterator gfi;
   
   for( gfi = _gribFields.begin(); gfi != _gribFields.end(); gfi++ ) {
-    if (((*gfi)->getParameterId() == param_id) && ((*gfi)->getLevelId() == level_id)) {
+    if (((*gfi)->getParameterId() == param_id) && ((*gfi)->getLevelId() == level_id) &&
+        ((*gfi)->getGenerateTime() == generate_time) && ((*gfi)->getForecastTime() == forecast_time)) {
       return false;
     }
   }
@@ -352,13 +359,15 @@ Ingester::_isFieldNew(const int& param_id, const int& level_id)
 
 
 GribField*
-Ingester::_getField(const int& param_id, const int& level_id)
+Ingester::_getField(const int& param_id, const int& level_id,
+                    const time_t& generate_time, const int& forecast_time)
 {
 
   list<GribField*>::iterator gfi;
   
   for( gfi = _gribFields.begin(); gfi != _gribFields.end(); gfi++ ) {
-    if (((*gfi)->getParameterId() == param_id) && ((*gfi)->getLevelId() == level_id)) {
+    if (((*gfi)->getParameterId() == param_id) && ((*gfi)->getLevelId() == level_id) &&
+        ((*gfi)->getGenerateTime() == generate_time) && ((*gfi)->getForecastTime() == forecast_time)) {
       return *gfi;
     }
   }

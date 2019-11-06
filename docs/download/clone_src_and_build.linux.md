@@ -18,13 +18,17 @@ Recommended distributions are:
   * Debian
   * Ubuntu (based on Debian)
   * RedHat
-  * Centos (based on RedHat)
+  * CentOS (based on RedHat)
   * Fedora (based on RedHat)
 
 First, you will need to install the required packages.
 
-### On Redhat-based hosts, run the following (as root or sudo):
-
+### On RedHat-based hosts, run the following (as root or sudo):
+For *RHEL/CentOS 8 only*, you first need to enable the PowerTools repository:
+```
+  yum config-manager --set-enabled PowerTools
+```
+For *all* RedHat-based distributions, you need to add the Extra Packages for Enterprise Linux (EPEL) repository and then install the packages required for LROSE:
 ```
 sudo yum install -y epel-release
 
@@ -46,6 +50,13 @@ sudo yum install -y \
 cd /usr/bin
 
 sudo ln -s qmake-qt5 qmake
+```
+
+For CENTOS 8 you need to add the PowerTools repo, and python packages
+
+```
+  yum config-manager --set-enabled PowerTools
+  yum install -y python2-devel platform-python-devel
 ```
 
 ### On Debian-based hosts run the following (as root or sudo):
@@ -199,7 +210,7 @@ run the make as follows:
   make |& less
 ```
 
-and scroll down searchinf for `error`.
+and scroll down searching for `error`.
 
 Alternatively, run
 
