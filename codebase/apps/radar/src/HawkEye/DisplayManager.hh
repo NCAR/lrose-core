@@ -112,6 +112,7 @@ public:
   
   virtual void enableZoomButton() const = 0;
 
+
 public slots:
 
   void colorMapRedefineReceived(string fieldName, ColorMap newColorMap);
@@ -153,7 +154,6 @@ protected:
   int _beamTimerId;
   bool _frozen;
 
-
   // data fields
 
   vector<DisplayField *> _fields;
@@ -171,6 +171,7 @@ protected:
   QAction *_unzoomAct;
   QAction *_refreshAct;
   QAction *_showClickAct;
+  QAction *_showBoundaryEditorAct;
   QAction *_howtoAct;
   QAction *_aboutAct;
   QAction *_aboutQtAct;
@@ -249,7 +250,6 @@ protected:
   int _prevFieldNum;
 
   // click location report dialog
-
   QDialog *_clickReportDialog;
   QGridLayout *_clickReportDialogLayout;
   QLabel *_dateClicked;
@@ -259,9 +259,8 @@ protected:
   QLabel *_gateNumClicked;
   QLabel *_rangeClicked;
   QLabel *_altitudeClicked;
-
-  // sun position calculator
   
+  // sun position calculator
   double _radarLat, _radarLon, _radarAltKm;
   SunPosn _sunPosn;
 

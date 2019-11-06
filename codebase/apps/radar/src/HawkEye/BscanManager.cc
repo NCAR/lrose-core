@@ -246,15 +246,12 @@ void BscanManager::_setupWindows()
   move(pos);
 
   // set up field click dialog
-
   _createClickReportDialog();
 
   // create the range axis settings dialog
-
   _createRangeAxisDialog();
 
   // create the time axis settings dialog
-  
   _createTimeAxisDialog();
 
 }
@@ -305,7 +302,6 @@ void BscanManager::_createActions()
   connect(_freezeAct, SIGNAL(triggered()), this, SLOT(_freeze()));
 
   // show user click in dialog
-
   _showClickAct = new QAction(tr("Show-Click"), this);
   _showClickAct->setStatusTip(tr("Show click value dialog"));
   connect(_showClickAct, SIGNAL(triggered()), this, SLOT(_showClick()));
@@ -3245,4 +3241,3 @@ void BscanManager::_howto()
   text += "  Click in main window\n";
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
-

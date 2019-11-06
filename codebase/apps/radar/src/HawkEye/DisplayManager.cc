@@ -660,7 +660,6 @@ void DisplayManager::_createClickReportDialog()
 
     row++;
   }
-
 }
 
 //////////////////////////////////////////////
@@ -1193,7 +1192,6 @@ double DisplayManager::_getInstHtKm(const RadxRay *ray)
 
 /////////////////////////////
 // show data at click point
-
 void DisplayManager::_showClick()
 {
   if (_clickReportDialog) {
