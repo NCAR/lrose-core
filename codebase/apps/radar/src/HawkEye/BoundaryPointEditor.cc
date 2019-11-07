@@ -6,43 +6,44 @@
 #include <iterator>
 #include <QApplication>
 
-//
-// BoundaryPointEditor.cc
-// Enables users to load/save up to 5 different boundaries. The boundary names are fixed (e.g. "Boundary1")
-// in order to simplify saving/loading them (i.e., user's don't have a file save dialog pop up where they
-// navigate to a directory in which they have read/write permissions). Instead, all they have to do is click
-// Save and the file is written automatically to a location that the boundary editor knows how to read from
-// later.
-//
-// Boundary files are written to the user's home directory underneath "/HawkEyeBoundaries". For example,
-// to /home/jeff/HawkEyeBoundaries. For each radar file opened and accessed with the Boundary Editor, a
-// unique directory (name) is created underneath this directory based on the hash code of the source radar file path.
-// For example, if the radar file is loaded from /media/some/dir/cfrad.20170408_001452.962_to_20170408_002320.954_KARX_Surveillance_SUR.nc,
-// this might be hash-coded to "1736437357943458505". The boundary directory will then be
-// something like /home/jeff/HawkEyeBoundaries/1736437357943458505
-//
-// Within that directory will be any boundaries saved by the user. Unique boundaries are saved for each
-// field and sweep. So filenames in that directory might be:
-//
-//   (The user saved 3 different boundaries for field 0, sweep 4)
-//   field0-sweep4-Boundary1
-//   field0-sweep4-Boundary2
-//   field0-sweep4-Boundary3
-//
-//   (The user saved 1 boundary for field1, sweep 4, and saved one boundary for field2, sweep0)
-//   field1-sweep4-Boundary1
-//   field2-sweep0-Boundary1
-//
-//   Fields are zero indexed. For example, we might have fields "DBZ" (0), "REF" (1), "VEL" (2), ...
-//   Sweeps are zero indexed. For example, we might have sweeps "4.47" (0), "3.50" (1), ... "0.47" (4)
-//
-//   So if a radar file has 8 fields, 5 sweeps (and since there are 5 potential boundaries in the screen list),
-//   the maximum possible boundaries the user could potentially save to disk in the boundary directory is:
-//     8 * 5 * 5 = 200 files
-//
-//  Created on: Sept-Nov 2019
-//      Author: Jeff Smith
+/*
+ BoundaryPointEditor.cc (singleton)
 
+ Enables users to load/save up to 5 different boundaries. The boundary names are fixed (e.g. "Boundary1")
+ in order to simplify saving/loading them (i.e., user's don't have a file save dialog pop up where they
+ navigate to a directory in which they have read/write permissions). Instead, all they have to do is click
+ Save and the file is written automatically to a location that the boundary editor knows how to read from
+ later.
+
+ Boundary files are written to the user's home directory underneath "/HawkEyeBoundaries". For example,
+ to /home/jeff/HawkEyeBoundaries. For each radar file opened and accessed with the Boundary Editor, a
+ unique directory (name) is created underneath this directory based on the hash code of the source radar file path.
+ For example, if the radar file is loaded from /media/some/dir/cfrad.20170408_001452.962_to_20170408_002320.954_KARX_Surveillance_SUR.nc,
+ this might be hash-coded to "1736437357943458505". The boundary directory will then be
+ something like /home/jeff/HawkEyeBoundaries/1736437357943458505
+
+ Within that directory will be any boundaries saved by the user. Unique boundaries are saved for each
+ field and sweep. So filenames in that directory might be:
+
+   (The user saved 3 different boundaries for field 0, sweep 4)
+   field0-sweep4-Boundary1
+   field0-sweep4-Boundary2
+   field0-sweep4-Boundary3
+
+   (The user saved 1 boundary for field1, sweep 4, and saved one boundary for field2, sweep0)
+   field1-sweep4-Boundary1
+   field2-sweep0-Boundary1
+
+   Fields are zero indexed. For example, we might have fields "DBZ" (0), "REF" (1), "VEL" (2), ...
+   Sweeps are zero indexed. For example, we might have sweeps "4.47" (0), "3.50" (1), ... "0.47" (4)
+
+   So if a radar file has 8 fields, 5 sweeps (and since there are 5 potential boundaries in the screen list),
+   the maximum possible boundaries the user could potentially save to disk in the boundary directory is:
+     8 * 5 * 5 = 200 files
+
+  Created on: Sept-Nov 2019
+      Author: Jeff Smith
+*/
 
 // Global static pointer used to ensure a single instance of the class.
 BoundaryPointEditor* BoundaryPointEditor::m_pInstance = NULL;
@@ -238,7 +239,7 @@ void BoundaryPointEditor::moveNearestPointTo(float x, float y)
 	}
 }
 
-//return true if (x,y) is very close to any existing point
+// Return true if (x,y) is very close to any existing point
 // (relevant with the Polygon Tool)
 bool BoundaryPointEditor::isOverAnyPoint(float x, float y)
 {
@@ -256,12 +257,12 @@ bool BoundaryPointEditor::isAClosedPolygon()
 }
 
 // useful debug method
-void BoundaryPointEditor::coutPoints()
+void BoundaryPointEditor::coutPoints(vector<Point> &pts)
 {
-	cout << points.size() << " total boundary editor points: " << endl;
+	cout << pts.size() << " total boundary editor points: " << endl;
 
-	for (int i=0; i < points.size(); i++)
-		cout << "(" << points[i].x << " " << points[i].y << ") ";
+	for (int i=0; i < pts.size(); i++)
+		cout << "(" << pts[i].x << " " << pts[i].y << ") ";
 	cout << endl;
 }
 
@@ -538,9 +539,10 @@ void BoundaryPointEditor::reorderPointsSoStartingPointIsOppositeOfXY(int x, int 
 	tempPoints.swap(tempVector);
 }
 
-// erase any points closer than thresholdDistance to (x,y), and return
-// the index of the first point erased. Used to merge brush "circles" into each other
-// (relevant with the Brush Tool)
+/* erase any points closer than thresholdDistance to (x,y), and return
+   the index of the first point erased. Used to merge brush "circles" into each other
+   (relevant with the Brush Tool)
+*/
 int BoundaryPointEditor::erasePointsCloseToXYandReturnFirstIndexErased(int x, int y, int thresholdDistance)
 {
 	bool isDone = false;
@@ -686,10 +688,10 @@ void BoundaryPointEditor::load(string path)
 
 		//get number of points in file (from file size)
 		fseek(file, 0L, SEEK_END);
-		int headerSize = 5 * sizeof(int);
-		int size = ftell(file) - headerSize;
-		fseek (file, 0, SEEK_SET);
-		int numPoints = size / sizeof(Point);
+		int headerSize = 3*sizeof(int) + 2*sizeof(float);
+		int numPoints = (ftell(file) - headerSize) / sizeof(Point);
+
+		fseek (file, 0, SEEK_SET);  //back to start of file
 
 		//read the header
 		int tool;
@@ -703,13 +705,9 @@ void BoundaryPointEditor::load(string path)
 		points.clear();
 		for (int i=0; i < numPoints; i++)
 		{
-			float x, y;
-			fread(&x, sizeof(float), 1, file);
-			fread(&y, sizeof(float), 1, file);
-
 			Point pt;
-			pt.x = x;
-			pt.y = y;
+			fread(&pt.x, sizeof(float), 1, file);
+			fread(&pt.y, sizeof(float), 1, file);
 			points.push_back(pt);
 		}
 		fclose (file);
@@ -722,15 +720,69 @@ void BoundaryPointEditor::load(string path)
 			currentTool = BoundaryToolType::polygon;
 		else
 			currentTool = BoundaryToolType::brush;
-		cout << "BoundaryPointEditor, read " << points.size() << " points from " << path << endl;
 	}
-	else
-		cout << path << " doesn't exist, skipping..." << endl;
 }
 
-// rootBoundaryDir will be something like "/home/jeff/HawkEyeBoundaries" (home directory + "/HawkEyeBoundaries")
-// radarFilePath will be something like "/media/sf_lrose/ncswp_SPOL_RHI_.nc"
-// returns the boundary dir for this radar file (e.g. "/home/jeff/HawkEyeBoundaries/1736437357943458505")
+/*
+  boundaryFilePath will be something like "/home/jeff/HawkEyeBoundaries/7996122556911878505/field0-sweep0-Boundary1"
+  Method reads the binary file and returns the points within it as a vector<Point>
+ */
+vector<Point> BoundaryPointEditor::getPoints(string boundaryFilePath)
+{
+	vector<Point> pts;
+
+	ifstream infile(boundaryFilePath);
+	if (infile.good())
+	{
+		FILE *file;
+		file = fopen(boundaryFilePath.c_str(), "rb");
+
+		//get number of points in file (from file size)
+		fseek(file, 0L, SEEK_END);
+		int headerSize = 3*sizeof(int) + 2*sizeof(float);
+		int numPoints = (ftell(file) - headerSize) / sizeof(Point);
+		fseek (file, headerSize, SEEK_SET);
+
+		//now read each point and add to boundary
+		for (int i=0; i < numPoints; i++)
+		{
+			Point pt;
+			fread(&pt.x, sizeof(float), 1, file);
+			fread(&pt.y, sizeof(float), 1, file);
+			points.push_back(pt);
+		}
+		fclose (file);
+	}
+
+	return(pts);
+}
+
+
+string BoundaryPointEditor::getRootBoundaryDir()
+{
+	return(rootBoundaryDir);
+}
+
+/*
+  radarFilePath will be something like "/media/sf_lrose/ncswp_SPOL_RHI_.nc"
+  fieldIndex is zero based. E.g., "DBZ" is usually fieldIndex 0, "REF" is fieldIndex 1
+  sweepIndex is zero based. E.g., "4.47" might be sweepIndex 0, "3.50" sweepIndex 1, ... "0.47" sweepIndex 4
+  boundaryFileName will be one of 5 values ("Boundary1" .. "Boundary5")
+  Returns the list of world points as vector<Point>
+ */
+vector<Point> BoundaryPointEditor::getBoundaryPoints(string radarFilePath, int fieldIndex, int sweepIndex, string boundaryFileName)
+{
+	string boundaryDir = getBoundaryDirFromRadarFilePath(rootBoundaryDir, radarFilePath);
+	string boundaryFilePath = getBoundaryFilePath(boundaryDir, fieldIndex, sweepIndex, boundaryFileName);
+	vector<Point> pts = getPoints(boundaryFilePath);
+	return(pts);
+}
+
+/*
+  rootBoundaryDir will be something like "/home/jeff/HawkEyeBoundaries" (home directory + "/HawkEyeBoundaries")
+  radarFilePath will be something like "/media/sf_lrose/ncswp_SPOL_RHI_.nc"
+  returns the boundary dir for this radar file (e.g. "/home/jeff/HawkEyeBoundaries/1736437357943458505")
+ */
 string BoundaryPointEditor::getBoundaryDirFromRadarFilePath(string rootBoundaryDir, string radarFilePath)
 {
 	hash<string> str_hash;
@@ -740,10 +792,12 @@ string BoundaryPointEditor::getBoundaryDirFromRadarFilePath(string rootBoundaryD
 	return(rootBoundaryDir + "/" + ss.str());
 }
 
-// boundaryDir will be something like "/home/jeff/HawkEyeBoundaries/1736437357943458505" (where "1736437357943458505" is the hash code of the radar source filepath)
-// fieldIndex is zero based. E.g., "DBZ" is usually fieldIndex 0, "REF" is fieldIndex 1
-// sweepIndex is zero based. E.g., "4.47" might be sweepIndex 0, "3.50" sweepIndex 1, ... "0.47" sweepIndex 4
-// boundaryFileName will be one of 5 values ("Boundary1" .. "Boundary5")
+/*
+  boundaryDir will be something like "/home/jeff/HawkEyeBoundaries/1736437357943458505" (where "1736437357943458505" is the hash code of the radar source filepath)
+  fieldIndex is zero based. E.g., "DBZ" is usually fieldIndex 0, "REF" is fieldIndex 1
+  sweepIndex is zero based. E.g., "4.47" might be sweepIndex 0, "3.50" sweepIndex 1, ... "0.47" sweepIndex 4
+  boundaryFileName will be one of 5 values ("Boundary1" .. "Boundary5")
+*/
 string BoundaryPointEditor::getBoundaryFilePath(string boundaryDir, int fieldIndex, int sweepIndex, string boundaryFileName)
 {
 	return(boundaryDir + "/field" + to_string(fieldIndex) + "-sweep" + to_string(sweepIndex) + "-" + boundaryFileName);

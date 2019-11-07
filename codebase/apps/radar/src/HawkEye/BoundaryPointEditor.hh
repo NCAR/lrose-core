@@ -284,6 +284,8 @@ class BoundaryPointEditor
 
 	string getBoundaryFilePath(string boundaryDir, int fieldIndex, int sweepIndex, string boundaryFileName);
 	string getBoundaryDirFromRadarFilePath(string rootBoundaryDir, string radarFilePath);
+	vector<Point> getBoundaryPoints(string radarFilePath, int fieldIndex, int sweepIndex, string boundaryFileName);
+	string getRootBoundaryDir();
 
 	static BoundaryPointEditor* Instance();
 	void makeCircle(int x, int y, float radius);
@@ -311,10 +313,14 @@ class BoundaryPointEditor
 	int getBrushRadius();
 
   private:
+
+	string rootBoundaryDir = string(getenv("HOME")) + "/" + "HawkEyeBoundaries";
+	vector<Point> getPoints(string boundaryFilePath);
+
 	BoundaryPointEditor(){};
 	int getNearestPointIndex(float x, float y, vector<Point> &pts);
 	float getNearestDistToLineSegment(int x, int y, int segmentPtIndex1, int segmentPtIndex2);
-	void coutPoints();
+	void coutPoints(vector<Point> &pts);
 	void drawPointBox(WorldPlot worldPlot, QPainter &painter, Point point);
 	void checkToMovePointToOriginIfVeryClose(Point &pt);
 	int getClosestPtIndex(int x, int y);

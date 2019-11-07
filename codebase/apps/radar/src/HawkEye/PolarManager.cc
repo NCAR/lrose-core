@@ -2206,9 +2206,9 @@ void PolarManager::_timeSliderPressed()
 void PolarManager::setBoundaryDir()
 {
 	if (!_openFilePath.empty())
-		_boundaryDir = BoundaryPointEditor::Instance()->getBoundaryDirFromRadarFilePath(_rootBoundaryDir, _openFilePath);
+		_boundaryDir = BoundaryPointEditor::Instance()->getBoundaryDirFromRadarFilePath(BoundaryPointEditor::Instance()->getRootBoundaryDir(), _openFilePath);
 	else
-		_boundaryDir = _rootBoundaryDir;
+		_boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
 }
 
 ////////////////////////////////////////////////////
@@ -3205,10 +3205,8 @@ void PolarManager::onBoundaryEditorListItemClicked(QListWidgetItem* item)
 	bool found = (fileName.find("<none>") != string::npos);
 	if (!found)
 	{
-		cout << "clicked on item " << fileName << endl;
-
 		if (_boundaryDir.empty())
-			_boundaryDir = _rootBoundaryDir;
+			_boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
 		BoundaryPointEditor::Instance()->load(getBoundaryFilePath(fileName));
 
 		if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::circle)
@@ -3243,7 +3241,7 @@ void PolarManager::saveBoundaryEditorClick()
 	cout << "PolarManager, _saveBoundaryEditorClick" << endl;
 
 	if (_boundaryDir.empty())
-		_boundaryDir = _rootBoundaryDir;
+		_boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
 	ta_makedir_recurse(_boundaryDir.c_str());
 
 	string fileName = "Boundary" + to_string(_boundaryEditorList->currentRow()+1);

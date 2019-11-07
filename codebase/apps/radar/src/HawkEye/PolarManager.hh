@@ -149,7 +149,6 @@ private:
   static PolarManager* m_pInstance;
   string _openFilePath;
   string _boundaryDir;
-  string _rootBoundaryDir = string(getenv("HOME")) + "/" + "HawkEyeBoundaries";
   void setBoundaryDir();
   string getBoundaryFilePath(string boundaryFileName);
 
