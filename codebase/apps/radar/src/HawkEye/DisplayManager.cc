@@ -1240,7 +1240,7 @@ void DisplayManager::_about()
   text += "Get help with HawkEye ...  \n ";
   text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
   text += "\nHawkEye Version ... \n ";  
-  text += "\nCopyright UCAR (c) 1990 - 2018  ";  
+  text += "\nCopyright UCAR (c) 1990 - 2019  ";
   text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
   text += "\nNational Center for Atmospheric Research (NCAR)   ";  
   text += "\nBoulder, Colorado, USA ";  
