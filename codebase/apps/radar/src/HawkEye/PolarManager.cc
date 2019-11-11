@@ -2248,91 +2248,94 @@ void PolarManager::_openFile()
           inputPath, finalPattern);  //QDir::currentPath(),
   //"All files (*.*)");
 
-  if( !filePath.isNull() )
+  QTimer::singleShot(10, [=]()   //wait 10ms so the QFileDialog has time to close before proceeding...
   {
-    QByteArray qb = filePath.toUtf8();
-    const char *openFilePath = qb.constData();
-    _openFilePath = openFilePath;
+    if( !filePath.isNull() )
+    {
+      QByteArray qb = filePath.toUtf8();
+      const char *openFilePath = qb.constData();
+      _openFilePath = openFilePath;
 
-    cout << "_openFilePath=" << _openFilePath << endl;
+      cout << "_openFilePath=" << _openFilePath << endl;
 
-    //use _openFilePath to determine the new directory into which boundaries will be read/written
-    setBoundaryDir();
+      //use _openFilePath to determine the new directory into which boundaries will be read/written
+      setBoundaryDir();
 
-    // trying this ... to get the data from the file selected
-    _setArchiveRetrievalPending();
-    vector<string> list;
-    list.push_back(openFilePath);
-    setArchiveFileList(list, false);
+      // trying this ... to get the data from the file selected
+      _setArchiveRetrievalPending();
+      vector<string> list;
+      list.push_back(openFilePath);
+      setArchiveFileList(list, false);
 
 
-    try {
-      _getArchiveData();
-    } catch (FileIException ex) {
-      _ppi->showOpeningFileMsg(false);
-      this->setCursor(Qt::ArrowCursor);
-      // _timeControl->setCursor(Qt::ArrowCursor);
-      return;
-    }
-  }
-
-  // now update the time controller window
-  QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
-  _setArchiveStartTimeFromGui(epoch);
-  QDateTime now = QDateTime::currentDateTime();
-  _setArchiveEndTimeFromGui(now);
-
-  _archiveStartTime = _guiStartTime;
-  _archiveEndTime = _guiEndTime;
-  QFileInfo fileInfo(filePath);
-  string absolutePath = fileInfo.absolutePath().toStdString();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "changing to path " << absolutePath << endl;
-  }
-//  loadArchiveFileList(dir.absolutePath());
-
-  RadxTimeList timeList;
-  timeList.setDir(absolutePath);
-  timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
-  if (timeList.compile()) {
-    cerr << "ERROR - PolarManager::openFile()" << endl;
-    cerr << "  " << timeList.getErrStr() << endl;
-  }
-
-  vector<string> pathList = timeList.getPathList();
-  if (pathList.size() <= 0) {
-    cerr << "ERROR - PolarManager::openFile()" << endl;
-    cerr << "  pathList is empty" << endl;
-    cerr << "  " << timeList.getErrStr() << endl;
-  } else {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "pathList is NOT empty" << endl;
-      for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
-       cerr << *i << endl;
+      try {
+        _getArchiveData();
+      } catch (FileIException ex) {
+        _ppi->showOpeningFileMsg(false);
+        this->setCursor(Qt::ArrowCursor);
+        // _timeControl->setCursor(Qt::ArrowCursor);
+        return;
       }
-      cerr << endl;
     }
 
-    setArchiveFileList(pathList, false);
+    // now update the time controller window
+    QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
+    _setArchiveStartTimeFromGui(epoch);
+    QDateTime now = QDateTime::currentDateTime();
+    _setArchiveEndTimeFromGui(now);
 
-    // now fetch the first time and last time from the directory
-    // and set these values in the time controller display
-
-    RadxTime firstTime;
-    RadxTime lastTime;
-    timeList.getFirstAndLastTime(firstTime, lastTime);
+    _archiveStartTime = _guiStartTime;
+    _archiveEndTime = _guiEndTime;
+    QFileInfo fileInfo(filePath);
+    string absolutePath = fileInfo.absolutePath().toStdString();
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "first time " << firstTime << endl;
-      cerr << "last time " << lastTime << endl;
+      cerr << "changing to path " << absolutePath << endl;
     }
-    // convert RadxTime to QDateTime
-    _archiveStartTime = firstTime;
-    _archiveEndTime = lastTime;
-    _setGuiFromArchiveStartTime();
-    _setGuiFromArchiveEndTime();
-  } // end else pathList is not empty
+  //  loadArchiveFileList(dir.absolutePath());
 
-  _ppi->showOpeningFileMsg(false);
+    RadxTimeList timeList;
+    timeList.setDir(absolutePath);
+    timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
+    if (timeList.compile()) {
+      cerr << "ERROR - PolarManager::openFile()" << endl;
+      cerr << "  " << timeList.getErrStr() << endl;
+    }
+
+    vector<string> pathList = timeList.getPathList();
+    if (pathList.size() <= 0) {
+      cerr << "ERROR - PolarManager::openFile()" << endl;
+      cerr << "  pathList is empty" << endl;
+      cerr << "  " << timeList.getErrStr() << endl;
+    } else {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "pathList is NOT empty" << endl;
+        for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
+         cerr << *i << endl;
+        }
+        cerr << endl;
+      }
+
+      setArchiveFileList(pathList, false);
+
+      // now fetch the first time and last time from the directory
+      // and set these values in the time controller display
+
+      RadxTime firstTime;
+      RadxTime lastTime;
+      timeList.getFirstAndLastTime(firstTime, lastTime);
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "first time " << firstTime << endl;
+        cerr << "last time " << lastTime << endl;
+      }
+      // convert RadxTime to QDateTime
+      _archiveStartTime = firstTime;
+      _archiveEndTime = lastTime;
+      _setGuiFromArchiveStartTime();
+      _setGuiFromArchiveEndTime();
+
+      _ppi->showOpeningFileMsg(false);
+    } // end else pathList is not empty
+  });
 }
 
 
