@@ -82,6 +82,7 @@
 #include <QIcon>
 #include <QAction>
 #include <QTimer>
+#include <QDesktopServices>
 
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
@@ -3129,20 +3130,27 @@ void PolarManager::createBoundaryEditorDialog()
 	QListWidgetItem *newItem1 = new QListWidgetItem;
 	newItem1->setText("Boundary1");
 	_boundaryEditorList->insertItem(0, newItem1);
-
 	_boundaryEditorDialogLayout->addWidget(_boundaryEditorList, ++row, 0, 1, 2);
+  connect(_boundaryEditorList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onBoundaryEditorListItemClicked(QListWidgetItem*)));
+
+	// horizontal layout contains the "Clear", "Help", and "Save" buttons
+	QHBoxLayout *hLayout = new QHBoxLayout;
+	_boundaryEditorDialogLayout->addLayout(hLayout, ++row, 0, 1, 2);
 
 	_boundaryEditorClearBtn = new QPushButton(_boundaryEditorDialog);
 	_boundaryEditorClearBtn->setText("Clear");
-	_boundaryEditorDialogLayout->addWidget(_boundaryEditorClearBtn, ++row, 0);
+	hLayout->addWidget(_boundaryEditorClearBtn);
   connect(_boundaryEditorClearBtn, SIGNAL(clicked()), this, SLOT(clearBoundaryEditorClick()));
+
+	_boundaryEditorHelpBtn = new QPushButton(_boundaryEditorDialog);
+	_boundaryEditorHelpBtn->setText("Help");
+	hLayout->addWidget(_boundaryEditorHelpBtn);
+  connect(_boundaryEditorHelpBtn, SIGNAL(clicked()), this, SLOT(helpBoundaryEditorClick()));
 
   _boundaryEditorSaveBtn = new QPushButton(_boundaryEditorDialog);
 	_boundaryEditorSaveBtn->setText("Save");
-	_boundaryEditorDialogLayout->addWidget(_boundaryEditorSaveBtn, row, 1);
+	hLayout->addWidget(_boundaryEditorSaveBtn);
   connect(_boundaryEditorSaveBtn, SIGNAL(clicked()), this, SLOT(saveBoundaryEditorClick()));
-
-  connect(_boundaryEditorList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onBoundaryEditorListItemClicked(QListWidgetItem*)));
 }
 
 // Select the given tool and set the hint text, while also un-selecting the other tools
@@ -3236,6 +3244,11 @@ void PolarManager::clearBoundaryEditorClick()
 {
 	BoundaryPointEditor::Instance()->clear();
 	_ppi->update();   //forces repaint which clears existing polygon
+}
+
+void PolarManager::helpBoundaryEditorClick()
+{
+	QDesktopServices::openUrl(QUrl("https://vimeo.com/369963107"));
 }
 
 // user clicked the boundary editor Save button

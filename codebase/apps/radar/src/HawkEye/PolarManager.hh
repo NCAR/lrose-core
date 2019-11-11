@@ -240,6 +240,7 @@ private:
   QPushButton *_backPeriod;
   QPushButton *_fwdPeriod;
   QPushButton *_boundaryEditorClearBtn;
+  QPushButton *_boundaryEditorHelpBtn;
   QPushButton *_boundaryEditorSaveBtn;
   QPushButton *_boundaryEditorPolygonBtn;
   QPushButton *_boundaryEditorCircleBtn;
@@ -431,6 +432,7 @@ private slots:
   void showBoundaryEditor();
   void refreshBoundaries();
   void clearBoundaryEditorClick();
+  void helpBoundaryEditorClick();
   void polygonBtnBoundaryEditorClick();
   void circleBtnBoundaryEditorClick();
   void brushBtnBoundaryEditorClick();
