@@ -153,8 +153,9 @@ executable.
 ## Boundary Editor ##
 ![alt_text](./images/BoundaryEditorScreen0.jpg "Boundary Editor")
 
-#### Boundary Editor Video Tutorial
+#### Boundary Editor Video Tutorial:
 https://vimeo.com/369963107
+
 
 ### Examine as Spreadsheet
 ![Examine as Spreadsheet](./images/HawkEye_SOLOII_examine.png "Examine as Spreadsheet")
