@@ -34,7 +34,7 @@ QT_EXEC_PATH=$(shell PKG_CONFIG_PATH="$(PKG_CONFIG_PATH)" pkg-config --variable=
 QT_INCLUDES = $(shell PKG_CONFIG_PATH="$(PKG_CONFIG_PATH)" pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Qml)
 QT_INCLUDE = $(subst -I,,$(QT_INCLUDES))
 moc: $(MOC_SRCS)
-	$(QT_EXEC_PATH)/bin/qmake -o Makefile.qmake "INCLUDEPATH=$(QT_INCLUDE)"
+	$(QT_EXEC_PATH)/bin/qmake-qt5 -o Makefile.qmake "INCLUDEPATH=$(QT_INCLUDE)"
 	make -f Makefile.qmake $(MOC_OUTPUT)
 
 #
