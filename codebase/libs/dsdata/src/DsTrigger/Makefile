@@ -41,6 +41,7 @@ HDRS = \
 	../include/dsdata/DsLdataIntTrigger.hh \
 	../include/dsdata/DsLdataTrigger.hh \
 	../include/dsdata/DsMultFcstTrigger.hh \
+	../include/dsdata/DsMultInputDir.hh \
 	../include/dsdata/DsMultipleTrigger.hh \
 	../include/dsdata/DsMultTrigElem.hh \
 	../include/dsdata/DsOneFileTrigger.hh \
@@ -77,6 +78,7 @@ CPPC_SRCS = \
 	DsLdataIntTrigger.cc \
 	DsLdataTrigger.cc \
 	DsMultFcstTrigger.cc \
+	DsMultInputDirTrigger.cc \
 	DsMultipleTrigger.cc \
 	DsMultTrigElem.cc \
 	DsOneFileTrigger.cc \
