@@ -122,14 +122,17 @@ int RadxDwellCombine::Run()
   switch (_params.mode) {
     case Params::FMQ:
       iret = _runFmq();
+      break;
     case Params::ARCHIVE:
       iret = _runArchive();
+      break;
     case Params::REALTIME:
       if (_params.latest_data_info_avail) {
         iret = _runRealtimeWithLdata();
       } else {
         iret = _runRealtimeNoLdata();
       }
+      break;
     case Params::FILELIST:
     default:
       iret = _runFilelist();
@@ -375,6 +378,12 @@ int RadxDwellCombine::_processFile(const string &readPath)
     _applyLinearTransform(vol);
   }
 
+  // add field folding attribute if needed
+
+  if (_params.set_field_folds_attribute) {
+    _setFieldFoldsAttribute(vol);
+  }
+
   // combine the dwells
 
   if (_params.center_dwell_on_time) {
@@ -459,6 +468,25 @@ void RadxDwellCombine::_applyLinearTransform(RadxVol &vol)
     vol.applyLinearTransform(iname, scale, offset);
   } // ii
 
+}
+
+////////////////////////////////////////////////////////
+// set the field folds attribute on selected fields
+
+void RadxDwellCombine::_setFieldFoldsAttribute(RadxVol &vol)
+{
+
+  for (int ii = 0; ii < _params.field_folds_n; ii++) {
+    
+    const Params::field_folds_t &fld = _params._field_folds[ii];
+
+    vol.setFieldFolds(fld.field_name,
+                      fld.use_nyquist,
+                      fld.fold_limit_lower,
+                      fld.fold_limit_upper);
+
+  } // ii
+  
 }
 
 //////////////////////////////////////////////////
@@ -2039,17 +2067,52 @@ void RadxDwellCombine::_censorRay(RadxRay *ray)
   }
 
   // apply censoring by setting censored gates to missing for all fields
+  // except those specified to not be censored
 
-  for (size_t ifield = 0; ifield < fields.size(); ifield++) {
-    RadxField *field = fields[ifield];
-    Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
-    for (size_t igate = 0; igate < nGates; igate++) {
-      if (censorFlag[igate] == 1) {
-        fdata[igate] = Radx::missingFl32;
+  if (_params.specify_non_censored_fields) {
+
+    // only censor fields that are not excluded
+
+    for (size_t ifield = 0; ifield < fields.size(); ifield++) {
+      RadxField *field = fields[ifield];
+      bool applyCensoring = true;
+      for (int ii = 0; ii < _params.non_censored_fields_n; ii++) {
+        string fieldToAvoid = _params._non_censored_fields[ii];
+        if (field->getName() == fieldToAvoid) {
+          applyCensoring = false;
+          break;
+        }
       }
-    } // igate
-  } // ifield
+      if (applyCensoring) {
+        Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
+        for (size_t igate = 0; igate < nGates; igate++) {
+          if (censorFlag[igate] == 1) {
+            fdata[igate] = Radx::missingFl32;
+          }
+        } // igate
+      } else {
+        if (_params.debug >= Params::DEBUG_EXTRA) {
+          cerr << "Not censoring field: " << field->getName() << endl;
+        }
+      }
+    } // ifield
 
+  } else {
+
+    // censor all fields
+
+    for (size_t ifield = 0; ifield < fields.size(); ifield++) {
+      RadxField *field = fields[ifield];
+      Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
+      for (size_t igate = 0; igate < nGates; igate++) {
+        if (censorFlag[igate] == 1) {
+          fdata[igate] = Radx::missingFl32;
+        }
+      } // igate
+    } // ifield
+
+  }
+    
   // convert back to original types
   
   for (size_t ii = 0; ii < fields.size(); ii++) {

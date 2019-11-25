@@ -67,10 +67,12 @@ main( int argc, char **argv )
    //
    // Fire off the application
    //
-    iret = mainObj->run();
-    if ( !iret ) {
-      	cerr << mainObj->getErrStr() << endl;
-  	}
+    iret = 0;
+    
+    if (!mainObj->run()) {
+      cerr << mainObj->getErrStr() << endl;
+      iret = 1;
+    }
 
    dieGracefully( iret );
 }

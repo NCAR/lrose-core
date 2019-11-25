@@ -374,8 +374,8 @@ class DLL_EXPORT PolarWidget : public QWidget
   /**
    * @brief True if the angle lines enabled.
    */
-
   bool _angleLinesEnabled;
+
 
   /**
    * @brief This will create labels wiith nicely scaled values and

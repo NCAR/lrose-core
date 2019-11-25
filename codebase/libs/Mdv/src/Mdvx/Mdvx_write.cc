@@ -949,20 +949,37 @@ void Mdvx::_computeOutputPath(const string &outputDir,
     sprintf(yearSubdir, "%.4d", genTime.year);
 
     if (!_useExtendedPaths) {
-      sprintf(outputBase, "%.4d%.2d%.2d%sg_%.2d%.2d%.2d%sf_%.8d",
-              genTime.year, genTime.month, genTime.day,
-              PATH_DELIM, genTime.hour, genTime.min, genTime.sec,
-              PATH_DELIM, forecastDelta);
+      if (forecastDelta < 0)
+        sprintf(outputBase, "%.4d%.2d%.2d%sg_%.2d%.2d%.2d%sf_%.7d",
+                genTime.year, genTime.month, genTime.day,
+                PATH_DELIM, genTime.hour, genTime.min, genTime.sec,
+                PATH_DELIM, forecastDelta);
+      else
+        sprintf(outputBase, "%.4d%.2d%.2d%sg_%.2d%.2d%.2d%sf_%.8d",
+                genTime.year, genTime.month, genTime.day,
+                PATH_DELIM, genTime.hour, genTime.min, genTime.sec,
+                PATH_DELIM, forecastDelta);
     } else {
-      sprintf(outputBase,
-              "%.4d%.2d%.2d%s"
-              "g_%.2d%.2d%.2d%s"
-              "%.4d%.2d%.2d_g_%.2d%.2d%.2d_f_%.8d",
-              genTime.year, genTime.month, genTime.day, PATH_DELIM,
-              genTime.hour, genTime.min, genTime.sec, PATH_DELIM,
-              genTime.year, genTime.month, genTime.day,
-              genTime.hour, genTime.min, genTime.sec,
-              forecastDelta);
+      if (forecastDelta < 0)
+        sprintf(outputBase,
+                "%.4d%.2d%.2d%s"
+                "g_%.2d%.2d%.2d%s"
+                "%.4d%.2d%.2d_g_%.2d%.2d%.2d_f_%.7d",
+                genTime.year, genTime.month, genTime.day, PATH_DELIM,
+                genTime.hour, genTime.min, genTime.sec, PATH_DELIM,
+                genTime.year, genTime.month, genTime.day,
+                genTime.hour, genTime.min, genTime.sec,
+                forecastDelta);
+      else
+        sprintf(outputBase,
+                "%.4d%.2d%.2d%s"
+                "g_%.2d%.2d%.2d%s"
+                "%.4d%.2d%.2d_g_%.2d%.2d%.2d_f_%.8d",
+                genTime.year, genTime.month, genTime.day, PATH_DELIM,
+                genTime.hour, genTime.min, genTime.sec, PATH_DELIM,
+                genTime.year, genTime.month, genTime.day,
+                genTime.hour, genTime.min, genTime.sec,
+                forecastDelta);
     }
 
   } else {

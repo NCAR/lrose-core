@@ -27,12 +27,13 @@
 #include "Radx/RadxVol.hh"
 #include "PolarWidget.hh"
 
+class QLabel;
+
 // Widget representing a PPI scan.  Beams are added to the scan as they
 // are received.
 
 class DLL_EXPORT PpiWidget : public PolarWidget
 {
-
   // must include this if you use Qt signals/slots
   Q_OBJECT
 
@@ -122,6 +123,9 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   void ShowContextMenu(const QPoint &pos, RadxVol *vol);
   void ExamineEdit(const RadxRay *closestRay);
 
+  QLabel *_openingFileInfoLabel;
+  void showOpeningFileMsg(bool isVisible);
+
   //////////////
   // Qt slots //
   //////////////
@@ -157,12 +161,14 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   double _sumElev;
   double _nRays;
 
-   // override mouse release event
-
+  // override mouse release event
   virtual void mouseReleaseEvent(QMouseEvent* event);
 
-  // get ray closest to click point
+  // used to detect shift key pressed for boundary editor (switches cursor)
+  virtual void timerEvent(QTimerEvent * event);
 
+
+  // get ray closest to click point
   virtual const RadxRay *_getClosestRay(double x_km, double y_km);
 
   /**

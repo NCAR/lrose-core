@@ -113,11 +113,11 @@ bool DoradeBlockAsib::decode(Buffer &buffer) throw(Fault){
 //////////////////////////////////////////////////////////////////////
 void DoradeBlockAsib::encode(Buffer &buffer) throw(Fault){
 
-    unsigned char *bufferData;
+  // unsigned char *bufferData;
 
     try {
 	int blockSize = length_;
-	bufferData = buffer.new_data(blockSize);
+	/* bufferData = */ buffer.new_data(blockSize);
 
 	buffer.set_string           (  0,id_,4);
 	buffer.set_four_byte_integer(  4,length_);

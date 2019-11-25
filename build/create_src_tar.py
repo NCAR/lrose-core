@@ -494,7 +494,7 @@ def trimToMakefiles(subDir):
     for entry in entries:
         theName = os.path.join(dirPath, entry)
         print("considering: " + theName, file=sys.stderr)
-        if (entry == "scripts") or (entry == "include"):
+        if (entry == "scripts") or (entry == "include") or (entry == "images") or (entry == "resources"):
             # always keep scripts directories
             continue
         if (os.path.isdir(theName)):

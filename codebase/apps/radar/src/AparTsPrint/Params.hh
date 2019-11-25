@@ -435,10 +435,6 @@ public:
 
   tdrp_bool_t print_altitude;
 
-  tdrp_bool_t check_angle_change;
-
-  double max_angle_change;
-
   input_mode_t input_mode;
 
   char* input_fmq_name;
@@ -490,7 +486,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[57];
+  mutable TDRPtable _table[55];
 
   const char *_className;
 

@@ -68,7 +68,7 @@ paramdef enum mode_t {
            "the input directory. "
            "In REALTIME mode, the LDATA_FMQ_ACTIVE environment "
            "variable must be set to \"true\" if the raw RUC files might "
-           "be received more quickly than Grib2Mdv can process them."
+           "be received more quickly than Grib2Mdv can process them.\n"
            "\tREALTIME_DIR - In REALTIME_DIR mode, files are processed "
            "as they are written to the input directory. "
            "In this case new files are recognized by creating a directory "
@@ -93,7 +93,7 @@ paramdef string {
   p_default = "f00.ruc20b";
   p_descr = "Substring contained in the filenames of all files to be "
             "processed from the input directory when running in "
-            "REALTIME_DIR or NEWFILES mode.";
+            "REALTIME, REALTIME_DIR or NEWFILES mode.";
 } input_substring;
 
 paramdef boolean {
@@ -127,6 +127,7 @@ paramdef long {
 
 
 typedef enum {
+  GRIB_TYPE_GENERIC,
   GRIB_TYPE_RUC,
   GRIB_TYPE_AVN,
   GRIB_TYPE_ETA,
@@ -136,7 +137,7 @@ typedef enum {
 } grib_type_t;
 
 paramdef enum grib_type_t {
-  p_default = { GRIB_TYPE_RUC };
+  p_default = { GRIB_TYPE_GENERIC };
   p_descr = "Type of input GRIB file";
   p_help = "";
 } input_grib_type;
@@ -333,6 +334,10 @@ typedef enum {
   VOL_SOIL_MOISTURE_CONTENT=144, SOILW=144, POTENTIAL_VORTICITY=149, CLOUD_WATER_MIXING_RATIO=153, 
   CLWMR=153, O3MR=154, CONVECTIVE_INHIBITION=156, CIN=156, CONVEC_AVIAL_POT_ENERGY=157, CAPE=157,
   TURBULENT_KINETIC_ENERGY=158, SOILL=160,
+  CLOUD_FORCING_NET_LONG_WAVE_FLUX = 165,
+  VISIBLE_BEAM_DOWNWARD_SOLAR_FLUX = 166,
+  VISIBLE_DIFFUSE_DOWNWARD_SOLAR_FLUX = 167,
+  NEAR_IR_BEAM_DOWNWARD_SOLAR_FLUX = 168,
   RAIN_WATER_MIXING_RATIO=170, SNOW_MIXING_RATIO=171,
   MOMENTUM_FLUX=172, NLAT=176, ELON=177, ICE_MIXING_RATIO=178, GRAUPEL_MIXING_RATIO=179,
   WATER_VAPOR_MIXING_RATIO=185, TURB_SIGMET_AIRMET=185, ICING_SIGMET_AIRMET=186, LIGHTNING=187,
@@ -343,6 +348,7 @@ typedef enum {
   DOWN_LONGWAVE_RAD_FLUX=205, UP_SHORTWAVE_RAD_FLUX=211, UP_LONGWAVE_RAD_FLUX=212, 
   PBL_HEIGHT=221, HPBL=221, FIVE_WAVH=222, PLANT_CANOPY_SURFACE_WATER=223, SOIL_TYPE=224,
   VEGETATION_TYPE=225, VGTYP=225, TB=226,
+  POTENTIAL_EVAPORATION = 228,
   SNOW_PHASE_CHANGE_HEAT_FLUX=229, FIVE_WAVA=230,
   LAT=230, LON=231,
   MFLUX=231, TERHGT=233, TER_HT=233, BASEFLOW_GRDWATER_RUNOFF=234,
@@ -372,7 +378,8 @@ typedef enum {
   PASCALS_TO_MBAR = 4,
   KELVIN_TO_CELSIUS = 5,
   KGPKG_TO_GPKG = 6,
-  PERCENT_TO_FRACTION = 7
+  PERCENT_TO_FRACTION = 7,
+  KGPM2PS_TO_MMPHR = 8
 } out_units_t;
 
 typedef struct {
@@ -458,6 +465,7 @@ paramdef struct out_field_t {
   "KELVIN_TO_CELSIUS    -- convert degrees kelvin to to degrees celsius\n"
   "KGPKG_TO_GPKG        -- convert kilogram per kilogram to gram\n"
   "                        per kilogram\n"
+  "KGPM2PS_TO_MMPHR     -- convert kg/m^2/s to mm/hr\n"
   "PERCENT_TO_FRACTION  -- convert percentage to fraction, values\n"
   "                        between 0 and 1\n\n\n"; 
   p_help = "The integers following each GRIB field and vertical type are the actual values used "

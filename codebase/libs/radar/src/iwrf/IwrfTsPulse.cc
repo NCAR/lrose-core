@@ -705,7 +705,7 @@ void IwrfTsPulse::convertToPacked(iwrf_iq_encoding_t encoding)
 
     _packedScale = scale;
     _packedOffset = offset;
-    
+
   } else if (encoding == IWRF_IQ_ENCODING_DBM_PHASE_SI16) {
 
     // compute power and phase, save in arrays
@@ -797,6 +797,73 @@ void IwrfTsPulse::convertToPacked(iwrf_iq_encoding_t encoding)
   _hdr.scale = _packedScale;
   _hdr.offset = _packedOffset;
   _hdr.iq_encoding = _packedEncoding;
+
+}
+
+///////////////////////////////////////////////////////////
+// convert to scaled si16 packing
+
+void IwrfTsPulse::convertToScaledSi16(double scale,
+                                      double offset)
+  
+{
+  
+  if (_packedEncoding != IWRF_IQ_ENCODING_FL32 || _iqData == NULL) {
+    // make sure we have float 32 data available
+    convertToFL32();
+  }
+  
+  // prepare packed buffer
+  
+  _packed = (si16 *) _packedBuf.prepare(_hdr.n_data * sizeof(si16));
+  
+  // convert to scaled signed int16
+  
+  si16 *packed = (si16 *) _packed;
+  fl32 *iq = _iqData;
+  for (int ii = 0; ii < _hdr.n_data; ii++, iq++, packed++) {
+    int packedVal = (int) floor(*iq / scale + 0.5);
+    if (packedVal < -32767) {
+      packedVal = -32767;
+    } else if (packedVal > 32767) {
+      packedVal = 32767;
+    }
+    *packed = (si16) packedVal;
+  }
+  
+  // save scale and offset
+  
+  _packedScale = scale;
+  _packedOffset = offset;
+
+  // save values
+
+  _packedEncoding = IWRF_IQ_ENCODING_SCALED_SI16;
+  _hdr.scale = _packedScale;
+  _hdr.offset = _packedOffset;
+  _hdr.iq_encoding = _packedEncoding;
+
+}
+
+///////////////////////////////////////////////////////////
+// set the scale and offset values for scaled si16 packing
+// does not change the data, only the metadata
+
+void IwrfTsPulse::setScaleAndOffsetForSi16(double scale,
+                                           double offset)
+  
+{
+  
+  if (_packedEncoding != IWRF_IQ_ENCODING_SCALED_SI16) {
+    // do nothing, not si16 encoding
+    return;
+  }
+  
+  _packedScale = scale;
+  _packedOffset = offset;
+
+  _hdr.scale = _packedScale;
+  _hdr.offset = _packedOffset;
 
 }
 

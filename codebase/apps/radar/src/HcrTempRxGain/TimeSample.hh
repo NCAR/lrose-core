@@ -70,11 +70,12 @@ public:
   void computeMeanObs();
 
   // compute delta gain
+  // returns 0 on success, -1 on error
 
-  void computeDeltaGain(double lnaRefTempC,
-                        double lnaGainChangePerC,
-                        double rxRefTempC,
-                        double rxGainChangePerC);
+  int computeDeltaGain(double lnaRefTempC,
+                       double lnaGainChangePerC,
+                       double rxRefTempC,
+                       double rxGainChangePerC);
 
   // get methods
 

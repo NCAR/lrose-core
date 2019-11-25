@@ -50,7 +50,9 @@
 #include "DisplayManager.hh"
 #include "RayLoc.hh"
 #include "ContextEditingView.hh"
+#include "BoundaryPointEditor.hh"
 #include <QMainWindow>
+#include <QListWidgetItem>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxRay.hh>
 
@@ -59,6 +61,7 @@ class QActionGroup;
 class QButtonGroup;
 class QRadioButton;
 class QPushButton;
+class QListWidget;
 class QFrame;
 class QDialog;
 class QLabel;
@@ -81,6 +84,11 @@ class PolarManager : public DisplayManager {
   Q_OBJECT
 
 public:
+  static PolarManager* Instance();
+
+  // boundary editor dialog
+  QDialog *_boundaryEditorDialog;
+  QGridLayout *_boundaryEditorDialogLayout;
 
   // constructor
   
@@ -137,6 +145,12 @@ public slots:
 signals:
 
 private:
+
+  static PolarManager* m_pInstance;
+  string _openFilePath;
+  string _boundaryDir;
+  void setBoundaryDir();
+  string getBoundaryFilePath(string boundaryFileName);
 
   bool _firstTime;
   bool _urlOK;
@@ -225,6 +239,15 @@ private:
   QPushButton *_fwd1;
   QPushButton *_backPeriod;
   QPushButton *_fwdPeriod;
+  QPushButton *_boundaryEditorClearBtn;
+  QPushButton *_boundaryEditorHelpBtn;
+  QPushButton *_boundaryEditorSaveBtn;
+  QPushButton *_boundaryEditorPolygonBtn;
+  QPushButton *_boundaryEditorCircleBtn;
+  QPushButton *_boundaryEditorBrushBtn;
+  QListWidget *_boundaryEditorList;
+  QLabel *_boundaryEditorInfoLabel;
+  bool forceHide = true;
 
   // time controller settings dialog
   
@@ -242,6 +265,8 @@ private:
   QVBoxLayout *_timeLayout;
 
   QSlider *_timeSlider;
+  QSlider *_circleRadiusSlider;
+  QSlider *_brushRadiusSlider;
 
   RadxTime _archiveIntermediateTime;
 
@@ -264,6 +289,7 @@ private:
   void _openFile();
   void _saveFile();
   void _moveUpDown();
+  string _getOutputPath(bool interactive, string &outputDir, string fileExt);
 
   // set top bar
 
@@ -314,10 +340,9 @@ private:
 
   void _createTimeControl();
 
-  // override howto
+  // override howto and boundaryEditor
 
   void _howto();
-
 
 private slots:
 
@@ -381,6 +406,10 @@ private slots:
   void _timeSliderReleased();
   void _timeSliderPressed();
   
+  //circle radius slider for BoundaryPointEditor
+  void _circleRadiusSliderValueChanged(int value);
+  void _brushRadiusSliderValueChanged(int value);
+
   // images
 
   void _saveImageToFile(bool interactive = true);
@@ -398,6 +427,18 @@ private slots:
   // context editing (SOLO)
   void ShowContextMenu(const QPoint &pos);
 
+  // boundary editor
+  void createBoundaryEditorDialog();
+  void showBoundaryEditor();
+  void refreshBoundaries();
+  void clearBoundaryEditorClick();
+  void helpBoundaryEditorClick();
+  void polygonBtnBoundaryEditorClick();
+  void circleBtnBoundaryEditorClick();
+  void brushBtnBoundaryEditorClick();
+  void onBoundaryEditorListItemClicked(QListWidgetItem* item);
+  void saveBoundaryEditorClick();
+  void selectBoundaryTool(BoundaryToolType tool);
 };
 
 #endif

@@ -507,12 +507,12 @@ string DateTime::strfTime(const char* format, bool use_gmt) const
   return returnStr;
 }
 
-time_t DateTime::strpTime(const string& format, const string& time_str, bool add_seconds, bool UTC) const
+time_t DateTime::strpTime(const string& format, const string& time_str, bool add_seconds, bool UTC)
 {
   return strpTime(format.c_str(), time_str.c_str(), add_seconds, UTC);
 }
 
-time_t DateTime::strpTime(const char* format, const char* time_str, bool add_seconds, bool UTC) const
+time_t DateTime::strpTime(const char* format, const char* time_str, bool add_seconds, bool UTC)
 {
   struct tm timeInfo;
 

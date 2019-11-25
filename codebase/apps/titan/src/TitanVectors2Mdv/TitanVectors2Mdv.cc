@@ -113,7 +113,7 @@ TitanVectors2Mdv::TitanVectors2Mdv(int argc, char **argv) :
   // Get TDRP parameters.
 
   _params = new Params();
-  char *params_path = "unknown";
+  char *params_path = (char *)"unknown";
   
   if (_params->loadFromArgs(argc, argv,
 			    _args->override.list,
@@ -425,6 +425,8 @@ bool TitanVectors2Mdv::_calcGriddedStorms(const DateTime &data_time)
       for (storm_iter = curr_storms.begin();
 	   storm_iter != curr_storms.end(); ++storm_iter)
       {
+        PMU_auto_register("Processing storm....");
+        
       // Get a pointer to the current storm object.  This just makes
       // the syntax below a little more readable
 

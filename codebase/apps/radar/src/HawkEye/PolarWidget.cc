@@ -52,6 +52,7 @@
 #include "PolarManager.hh"
 #include "SpreadSheetView.hh"
 #include "SpreadSheetController.hh"
+#include "BoundaryPointEditor.hh"
 
 using namespace std;
 
@@ -347,11 +348,25 @@ void PolarWidget::mousePressEvent(QMouseEvent *e)
 
 
 /*************************************************************************
- * mouseMoveEvent()
+ * mouseMoveEvent(), mouse button is down and mouse is moving
  */
 
 void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 {
+  int worldX = (int)_zoomWorld.getXWorld(e->pos().x());
+  int worldY = (int)_zoomWorld.getYWorld(e->pos().y());
+
+  if (_manager._boundaryEditorDialog->isVisible())
+  {
+  	BoundaryToolType tool = BoundaryPointEditor::Instance()->getCurrentTool();
+
+  	if (tool == BoundaryToolType::polygon && BoundaryPointEditor::Instance()->isAClosedPolygon() && BoundaryPointEditor::Instance()->isOverAnyPoint(worldX, worldY))
+			BoundaryPointEditor::Instance()->moveNearestPointTo(worldX, worldY);
+  	else if (tool == BoundaryToolType::brush)
+  		BoundaryPointEditor::Instance()->addToBrushShape(worldX, worldY);
+		update();
+		return;
+	}
 
   // Zooming with the mouse
 
@@ -506,6 +521,8 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 
   _drawOverlays(painter);
+
+  BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
 }
 
 
@@ -567,10 +584,11 @@ void PolarWidget::_resetWorld(int width, int height)
 
 void PolarWidget::_setTransform(const QTransform &transform)
 {
-  
+	float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
+ 	BoundaryPointEditor::Instance()->setWorldScale(worldScale);
+
   _fullTransform = transform;
   _zoomTransform = transform;
-  
 }
   
 /*************************************************************************

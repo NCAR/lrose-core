@@ -254,8 +254,6 @@ int StationLoc::ReadData(const char *FilePath)
   char name[1024],type[1024];
   double lat,lon,alt;
   Info info;
-  int i;
- 
       
   while (!feof(IN)) {
 
@@ -267,11 +265,11 @@ int StationLoc::ReadData(const char *FilePath)
 	continue;
       }
       
-      for(i = 0; i < strlen(line); i++) {
+      for(size_t ii = 0; ii < strlen(line); ii++) {
 
 	// eliminate the comma in the data source 	
-	if(line[i] == ',') {
-	  line[i] =' ';
+	if(line[ii] == ',') {
+	  line[ii] =' ';
 	}
 	
       } 

@@ -45,6 +45,7 @@
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxXml.hh>
+#include <Radx/RadxCfactors.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <Spdb/DsSpdb.hh>
 #include <didss/DsInputPath.hh>
@@ -122,6 +123,19 @@ HcrVelCorrect::HcrVelCorrect(int argc, char **argv)
                           _params._spike_filter,
                           _params.final_filter_n,
                           _params._final_filter);
+
+  // altitude correction
+
+  if (_params.correct_altitude_for_egm) {
+    if (_egm.readGeoid(_params.egm_2008_geoid_file)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Altitude correction for geoid." << endl;
+      cerr << "  Problem reading geoid file: " 
+           << _params.egm_2008_geoid_file << endl;
+      OK = FALSE;
+      return;
+    }
+  }
 
   // init process mapper registration
 
@@ -337,21 +351,31 @@ int HcrVelCorrect::_processFile(const string &readPath)
     // add a client to the copy to keep track of usage
     // the filter and the write volume will both try to delete
     // the ray if no longer used
+    // note that the rayCopy memory ownership will be transferred
+    // to the filtering methods (_processRayWaveFilt or
+    // _processRayFirFilt) so the memory does not need
+    // to be freed here
     
     RadxRay *rayCopy = new RadxRay(*rays[iray]);
     rayCopy->addClient();
-
+    
     if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "====>>>> waveFilt - reading ray at time: "
            << rayCopy->getRadxTime().asString(3) << endl;
     }
-
+    
     // compute corrected spectrum width
 
     if (_params.add_corrected_spectrum_width_field) {
       _addCorrectedSpectrumWidth(rayCopy);
     }
-    
+
+    // correct altitude
+
+    if (_params.correct_altitude_for_egm) {
+      _correctAltitudeForGeoid(rayCopy);
+    }
+
     // process the ray
     // computing vel and filtering
 
@@ -422,6 +446,9 @@ int HcrVelCorrect::_processRayFirFilt(RadxRay *ray)
   // add to output vol
   
   _filtVol.addRay(_filtRay);
+  if (_filtRay->getCfactors() != NULL) {
+    _filtVol.setCfactors(*_filtRay->getCfactors());
+  }
   
   // write results to SPDB in XML if requested
   
@@ -539,7 +566,7 @@ int HcrVelCorrect::_applyWaveFilt(RadxRay *ray,
   // this will also write out any rays that are discarded
   // without having been written
 
-  if (_setFilterLimits()) {
+  if (_setWaveFilterLimits()) {
     return -1;
   }
 
@@ -560,13 +587,13 @@ int HcrVelCorrect::_applyWaveFilt(RadxRay *ray,
 }
 
 //////////////////////////////////////////////////
-// Set the time limits for the filters
+// Set the time limits for the wave filters
 // Side effects:
 //   compute times
 //   write out rays to be discarded that have not been written
 //   determine if we have enough data for valid stats
 
-int HcrVelCorrect::_setFilterLimits()
+int HcrVelCorrect::_setWaveFilterLimits()
 {
 
   if (_filtQueue.size() < 1) {
@@ -762,6 +789,9 @@ void HcrVelCorrect::_addNodeRayToFiltVol(FiltNode &node)
   }
 
   _filtVol.addRay(node.ray);
+  if (_filtRay->getCfactors() != NULL) {
+    _filtVol.setCfactors(*_filtRay->getCfactors());
+  }
   
   // write vel filtering results to spdb
 
@@ -1050,11 +1080,12 @@ void HcrVelCorrect::_copyVelForRay(RadxRay *ray)
   velField->setLongName("doppler_velocity_corrected_for_vertical_motion");
   velField->setComment("This field is computed by correcting the raw measured "
                        "velocity for the vertical motion of the aircraft.");
-
+  
   // create the field to be copied
   
-  RadxField *copyField = new RadxField(_params.corrected_vel_field_name,
-                                       velField->getUnits());
+  RadxField *copyField =
+    new RadxField(_params.corrected_vel_field_name,
+                  velField->getUnits());
   copyField->copyMetaData(*velField);
   copyField->setName(_params.corrected_vel_field_name);
   copyField->setLongName("doppler_velocity_corrected_using_surface_measurement");
@@ -1110,7 +1141,8 @@ void HcrVelCorrect::_addDeltaField(RadxRay *ray, double deltaVel)
   deltaField->setLongName("velocity_delta_from_surface_measurement");
   char comment[2048];
   snprintf(comment, 2048,
-           "This is the correction applied to the %s field to produce the %s field",
+           "This is the correction applied to the %s field "
+           "to produce the %s field",
            _params.vel_field_name, _params.corrected_vel_field_name);
   deltaField->setComment(comment);
   
@@ -1163,7 +1195,7 @@ int HcrVelCorrect::_addCorrectedSpectrumWidth(RadxRay *ray)
   double elev = ray->getElevationDeg();
   double sinElev = sin(elev * DEG_TO_RAD);
   double delta =
-    fabs(0.3 * speed * sinElev * 0.5 *
+    fabs(0.3 * speed * sinElev *
          (_params.width_correction_beamwidth_deg * DEG_TO_RAD));
   
   // create a copy of this field
@@ -1177,11 +1209,11 @@ int HcrVelCorrect::_addCorrectedSpectrumWidth(RadxRay *ray)
   Radx::fl32 *ww = corrWidth->getDataFl32();
   for (size_t ii = 0; ii < corrWidth->getNPoints(); ii++) {
     if (ww[ii] != miss) {
-      double corr = ww[ii] - delta;
-      if (corr < 0.05) {
-        corr = 0.05;
+      double xx = ww[ii] * ww[ii] - delta * delta;
+      if (xx < 0.01) {
+        xx = 0.01;
       }
-      ww[ii] = corr;
+      ww[ii] = sqrt(xx);
     }
   }
 
@@ -1200,6 +1232,63 @@ int HcrVelCorrect::_addCorrectedSpectrumWidth(RadxRay *ray)
 
 }
   
+//////////////////////////////////////////////////
+// correct GPS altitude for geoid
+
+void HcrVelCorrect::_correctAltitudeForGeoid(RadxRay *ray)
+
+{
+  
+  // get the georeference
+
+  RadxGeoref *georef = ray->getGeoreference();
+  if (georef == NULL) {
+    // nothing we can do
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - HcrVelCorrect::_correctAltitudeForGeoid()" << endl;
+      cerr << "No georeference available, cannot fix altitude" << endl;
+    }
+    return;
+  }
+
+  // get correction factors if they are there
+  
+  const RadxCfactors *cfac_ = ray->getCfactors();
+  RadxCfactors cfac;
+  if (cfac_ != NULL) {
+    cfac = *cfac_;
+  }
+
+  // get the geoid delta for the location
+
+  double geoidM = _egm.getInterpGeoidM(georef->getLatitude(),
+                                       georef->getLongitude());
+
+  // the altitude correction has the opposite sign, since it
+  // is added to the measured altitude
+
+  double altCorrM = geoidM * -1.0;
+  cfac.setAltitudeCorr(altCorrM);
+  ray->setCfactors(cfac);
+  
+  double altKmMsl = georef->getAltitudeKmMsl() + altCorrM / 1000.0;
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    fprintf(stderr,
+            "==>> correctAltitudeForGeoid: "
+            "lat, lon, geoidM, corrM, altBefore, altAfter: "
+            "%8.4f %8.4f %6.2f %6.2f %8.4f %8.4f\n",
+            georef->getLatitude(),
+            georef->getLongitude(),
+            geoidM,
+            altCorrM,
+            georef->getAltitudeKmMsl(),
+            altKmMsl);
+  }
+  
+  georef->setAltitudeKmMsl(altKmMsl);
+
+}
 
 //////////////////////////////////////////////////
 // write wave filter results to SPDB in XML

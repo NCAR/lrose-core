@@ -1,0 +1,286 @@
+/**********************************************************************
+ * TDRP params for RadxCalUpdate
+ **********************************************************************/
+
+//======================================================================
+//
+// Update the calibration in a Radx file. Also ajusts the DBZ fields 
+//   accordingly.
+//
+// Optionally corrects the altitude for EGM errors.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+//
+// Type: string
+//
+
+instance = "otrec";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory.
+//
+//
+// Type: string
+//
+
+input_dir = "$(PROJ_DIR)/data/cfradial/moments/100hz";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+//======================================================================
+//
+// OUTPUT COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_compressed ///////////////////////
+//
+// Option to compress CfRadial data fields on output.
+//
+//
+// Type: boolean
+//
+
+output_compressed = TRUE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level in CfRadial files, if compressed.
+//
+// 0 = no compression. 9 = max compression. 4 is a good compromise.
+//
+//
+// Type: int
+//
+
+compression_level = 4;
+
+//======================================================================
+//
+// OUTPUT CONTROL.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "$(PROJ_DIR)/data/$(QC_VERSION)/cfradial/moments/100hz";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+//
+// Path will be output_dir/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+//
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+//
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+//
+//
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+
+//======================================================================
+//
+// CALIBRATION FILE.
+//
+//======================================================================
+ 
+///////////// update_calibration //////////////////////
+//
+// Option to update the calibration used for these files.
+//
+// If true, the DBZ fields will be updated accordingly.
+//
+//
+// Type: boolean
+//
+
+update_calibration = TRUE;
+
+///////////// calibration_file_path ///////////////////
+//
+// Path to calibration file - XML format.
+//
+// The new calibration will be read in from this file. It must be in 
+//   Radx calibration XML format.
+//
+//
+// Type: string
+//
+
+calibration_file_path = "$(PROJ_DIR)/calibration/data/wband_256ns/TsCalAuto_Wband-HCR-256ns_20190619_210205.xml";
+
+///////////// dbz_fields_for_update ///////////////////
+//
+// Names of DBZ fields to be updated.
+//
+// Only the fields in this list will be updated for the new cal.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+dbz_fields_for_update = {
+ "DBZ",
+ "DBZHC"
+};
+
+//======================================================================
+//
+// CORRECT ALTITUDE FOR EGM.
+//
+// Correct the GPS altitude for the geoid, using EGM-2008. See: 
+//   https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.
+//   html.
+//
+//======================================================================
+ 
+///////////// correct_altitude_for_egm ////////////////
+//
+// Option to correct the altitude for the geoid.
+//
+// This only applies for moving platforms. Altitude from some GPS units 
+//   is based on the WGS84 ellipsoid. To get altitude relative to MSL, a 
+//   correction for the geoid based on gravitation strength is required. 
+//   We use the EGM-2008 geoid table.
+//
+//
+// Type: boolean
+//
+
+correct_altitude_for_egm = TRUE;
+
+///////////// egm_2008_geoid_file /////////////////////
+//
+// Path to geoid table file.
+//
+// Downloads available from 
+//   https://earth-info.nga.mil/GandG/wgs84/gravitymod. NetCDF file is on 
+//   the shared drive at HCR->dataProcessing->AltitudeCorrection. The app 
+//   Egm2Mdv will convert the downloadable file to a netCDF format file.
+//
+//
+// Type: string
+//
+
+egm_2008_geoid_file = "$(PROJ_DIR)/data/egm/EGM_2008_WGS84_2.5minx2.5min.nc";
+

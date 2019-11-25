@@ -28,6 +28,7 @@
 #include "ParameterColorView.hh"
 #include "FieldColorController.hh"
 #include "DisplayFieldModel.hh"
+#include "BoundaryPointEditor.hh"
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/LogStream.hh>
@@ -37,6 +38,7 @@
 #include <QLayout>
 #include <QMessageBox>
 #include <QErrorMessage>
+#include <QRect>
 
 using namespace std;
 
@@ -73,6 +75,15 @@ PpiWidget::PpiWidget(QWidget* parent,
   _sumElev = 0.0;
   _nRays = 0.0;
 
+	_openingFileInfoLabel = new QLabel("Opening file, please wait...", parent);
+	_openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; color : yellow; qproperty-alignment: AlignCenter; }");
+	_openingFileInfoLabel->setVisible(false);
+
+	//fires every 50ms. used for boundary editor to
+	// (1) detect shift key down (changes cursor)
+	// (2) get notified if user zooms in or out so the boundary can be rescaled
+	// Todo: investigate implementing a listener pattern instead
+  startTimer(50);
 }
 
 /*************************************************************************
@@ -107,7 +118,7 @@ void PpiWidget::clear()
   // Now rerender the images
   
   _refreshImages();
-
+  showOpeningFileMsg(false);
 }
 
 /*************************************************************************
@@ -408,11 +419,32 @@ void PpiWidget::configureRange(double max_range)
   
 }
 
+// Used to notify BoundaryPointEditor if the user has zoomed in/out or is pressing the Shift key
+// Todo: investigate implementing a listener pattern instead
+void PpiWidget::timerEvent(QTimerEvent *event)
+{
+	bool doUpdate = false;
+	bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
+	if (isBoundaryEditorVisible)
+	{
+		double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
+		doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);   //user may have zoomed in or out, so update the polygon point boxes so they are the right size on screen
+	}
+  bool isBoundaryFinished = BoundaryPointEditor::Instance()->isAClosedPolygon();
+  bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
+  if ((isBoundaryEditorVisible && !isBoundaryFinished) || (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown))
+    this->setCursor(Qt::CrossCursor);
+  else
+    this->setCursor(Qt::ArrowCursor);
+
+  if (doUpdate)  //only update if something has changed
+  	update();
+}
+
 
 /*************************************************************************
  * mouseReleaseEvent()
  */
-
 void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 
@@ -430,12 +462,31 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
 
   // get click location in world coords
 
-  if (rgeom.width() <= 20) {
-    
-    // Emit a signal to indicate that the click location has changed
-    
+  if (rgeom.width() <= 20)
+  {
+
+		// Emit a signal to indicate that the click location has changed
     _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
     _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+
+    // If boundary editor active, then interpret boundary mouse release event
+    if (_manager._boundaryEditorDialog->isVisible())
+    {
+    	if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::polygon)
+    	{
+				if (!BoundaryPointEditor::Instance()->isAClosedPolygon())
+					BoundaryPointEditor::Instance()->addPoint(_worldReleaseX, _worldReleaseY);
+				else  //polygon finished, user may want to insert/delete a point
+					BoundaryPointEditor::Instance()->checkToAddOrDelPoint(_worldReleaseX, _worldReleaseY);
+    	}
+    	else if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::circle)
+    	{
+				if (BoundaryPointEditor::Instance()->isAClosedPolygon())
+					BoundaryPointEditor::Instance()->checkToAddOrDelPoint(_worldReleaseX, _worldReleaseY);
+				else
+					BoundaryPointEditor::Instance()->makeCircle(_worldReleaseX, _worldReleaseY, BoundaryPointEditor::Instance()->getCircleRadius());
+    	}
+    }
 
     double x_km = _worldReleaseX;
     double y_km = _worldReleaseY;
@@ -449,7 +500,10 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
 
     emit locationClicked(x_km, y_km, closestRay);
   
-  } else {
+  }
+  else
+  {
+	  cerr << "Jeff: Zoom occurred" << endl;
 
     // mouse moved more than 20 pixels, so a zoom occurred
     
@@ -828,6 +882,13 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
   } // if (_archiveMode) {
 
+}
+
+void PpiWidget::showOpeningFileMsg(bool isVisible)
+{
+	_openingFileInfoLabel->setGeometry(width()/2 - 120, height()/2 -15, 200, 30);
+	_openingFileInfoLabel->setVisible(isVisible);
+  update();
 }
 
 ///////////////////////////////////////////////////////////////////////////

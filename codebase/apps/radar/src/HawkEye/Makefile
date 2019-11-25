@@ -53,6 +53,7 @@ LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
+	BoundaryPointEditor.hh \
 	Beam.hh \
 	BscanBeam.hh \
 	BscanManager.hh \
@@ -66,9 +67,9 @@ HDRS = \
 	HawkEye.hh \
 	HawkEyeLogger.hh \
 	PaletteManager.hh \
-        ParameterColorView.hh \
-        FieldColorController.hh \
-        DisplayFieldModel.hh \
+	ParameterColorView.hh \
+	FieldColorController.hh \
+	DisplayFieldModel.hh \
 	Params.hh \
 	PpiBeam.hh \
 	PolarManager.hh \
@@ -95,6 +96,7 @@ NORM_SRCS = \
 	$(PARAMS_CC) \
 	AllocCheck.cc \
 	Args.cc \
+	BoundaryPointEditor.cc \
 	Beam.cc \
 	BscanBeam.cc \
 	ColorMap.cc \
@@ -131,7 +133,7 @@ MOC_SRCS = \
 	RhiWindow.cc \
 	TimeScaleWidget.cc \
 	ParameterColorView.cc \
-        FieldColorController.cc \
+	FieldColorController.cc \
 	ColorBar.cc \
 	ColorMapTemplates.cc \
 	ClickableLabel.cc \
@@ -154,7 +156,7 @@ MOC_OUTPUT = \
 	moc_RhiWindow.cpp \
 	moc_TimeScaleWidget.cpp \
 	moc_ParameterColorView.cpp \
-        moc_FieldColorController.cpp \
+	moc_FieldColorController.cpp \
 	moc_ColorBar.cpp \
 	moc_ColorMapTemplates.cpp \
 	moc_ClickableLabel.cpp \
@@ -203,7 +205,7 @@ SiiTest_Main: ColorMap.o SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o P
 SiiTest_MainNoQt: 
 	g++ -o SiiTest_Main SiiPalette.cc SiiTest_Main.cc SoloDefaultColorWrapper.cc PaletteManager.cc ColorTableManager.cc ColorMap.cc -I/Users/brenda/lrose/include -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp -lz -lm -g
 
-#	g++ -o SiiTest_Main SiiPalette.cc SiiTest_Main.cc SoloDefaultColorWrapper.cc PaletteManager.cc ColorTableManager.cc ColorMap.cc -I/Users/brenda/lrose/include -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp -lz -lm -g
+#   g++ -o SiiTest_Main SiiPalette.cc SiiTest_Main.cc SoloDefaultColorWrapper.cc PaletteManager.cc ColorTableManager.cc ColorMap.cc -I/Users/brenda/lrose/include -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp -lz -lm -g
 
 
 #
@@ -216,9 +218,9 @@ hawkeye_app:
 	make from_qmake
 # copy the system libraries to the .app tree structure
 	mkdir -p HawkEye.app/Contents/Frameworks
-	cp /usr/lib/libexpat.1.dylib  HawkEye.app/Contents/Frameworks/.
-	cp /usr/lib/libbz2.1.0.dylib  HawkEye.app/Contents/Frameworks/.
-	cp /usr/lib/libz.1.dylib      HawkEye.app/Contents/Frameworks/.
+	cp /usr/lib/libexpat.1.dylib HawkEye.app/Contents/Frameworks/.
+	cp /usr/lib/libbz2.1.0.dylib HawkEye.app/Contents/Frameworks/.
+	cp /usr/lib/libz.1.dylib HawkEye.app/Contents/Frameworks/.
 	cp /usr/lib/libSystem.B.dylib HawkEye.app/Contents/Frameworks/.
 	mkdir -p HawkEye.app/Contents/MacOS/../share
 	cp -r ~/git/lrose-displays/color_scales HawkEye.app/Contents/MacOS/../share/.

@@ -38,9 +38,9 @@ TARGET_FILE = Iq2Dsr
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lradar -lRadx -lFmq \
-	-ldsserver -lrapformats -ldidss -lrapmath \
-	-ltoolsa -ldataport -ltdrp -lfftw3 \
+LOC_LIBS = -lradar -lSpdb -lMdv -lRadx -lNcxx -lFmq -ldsserver \
+	-ldidss -lrapformats -lrapmath -lkd \
+	-leuclid -ltoolsa -ltdrp -ldataport -lfftw3 \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
@@ -55,6 +55,7 @@ HDRS = \
 	BeamReader.hh \
 	Calibration.hh \
 	Cmd.hh \
+	EgmCorrection.hh \
 	Iq2Dsr.hh \
 	MomentsMgr.hh \
 	OutputFmq.hh \
@@ -69,6 +70,7 @@ CPPC_SRCS = \
 	BeamReader.cc \
 	Calibration.cc \
 	Cmd.cc \
+	EgmCorrection.cc \
 	Iq2Dsr.cc \
 	MomentsMgr.cc \
 	Main.cc \

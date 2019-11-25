@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # install selected scripts in the bin dir
 # First arg is the target dir

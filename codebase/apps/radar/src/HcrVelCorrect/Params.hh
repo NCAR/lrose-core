@@ -210,6 +210,15 @@ public:
   static bool isArgValid(const char *arg);
 
   ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  static int isArgValidN(const char *arg);
+
+  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.
@@ -437,6 +446,10 @@ public:
 
   double width_correction_beamwidth_deg;
 
+  tdrp_bool_t correct_altitude_for_egm;
+
+  char* egm_2008_geoid_file;
+
   output_encoding_t output_encoding;
 
   netcdf_style_t netcdf_style;
@@ -489,7 +502,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[57];
+  mutable TDRPtable _table[60];
 
   const char *_className;
 

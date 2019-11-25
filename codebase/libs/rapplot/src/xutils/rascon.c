@@ -151,8 +151,10 @@ static int DoMap( void);
 static int DoRow(int row);
 static int FillRows(int row);
 static int NeedLabel(int *path, int level_index, int colnum, int rownum, int ncols,int nrows);
+#ifdef NOTNOW
 static int PlotLabel(Display *disp, Drawable dw, int label_point, int col, int row,
 		     double level, double label_scale, double label_bias, GC gc);
+#endif
 static void PlotLabelsFromBuf(Display *disp, Drawable dw);
 static int AddLabel(int label_point, int col, int row,
 		    double level, double label_scale, double label_bias, GC gc);
@@ -1402,6 +1404,7 @@ static int NeedLabel(int *ppath, int level_index, int colnum, int rownum, int nc
 }
  
 /*------------------------------------------------------------------------*/
+#ifdef NOTNOW
 static int PlotLabel(Display *disp, Drawable dw, int label_point, int col, int row,
 	double level, double label_scale, double label_bias, GC gc)
 
@@ -1466,6 +1469,7 @@ static int PlotLabel(Display *disp, Drawable dw, int label_point, int col, int r
 
   return(1);
 }
+#endif
 
 /*------------------------------------------------------------------------*/
 

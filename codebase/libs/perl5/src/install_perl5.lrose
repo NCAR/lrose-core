@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # install selected perl modules in the lib dir
 # First arg is the target dir

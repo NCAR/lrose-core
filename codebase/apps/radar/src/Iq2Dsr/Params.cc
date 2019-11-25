@@ -278,6 +278,18 @@
   }
 
   ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  int Params::isArgValidN(const char *arg)
+  {
+    return (tdrpIsArgValidN(arg));
+  }
+
+  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.
@@ -2192,7 +2204,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("FOR HCR, CORRECT RECEIVER GAIN FOR TEMPERATURE USING VALUES FROM SPDB");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("Also, optionally correct georeference height.");
     tt++;
     
     // Parameter 'correct_hcr_v_rx_gain_for_temperature'
@@ -2202,7 +2214,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("correct_hcr_v_rx_gain_for_temperature");
     tt->descr = tdrpStrDup("Option to correct the HCR V-channel receiver gain for temperature.");
-    tt->help = tdrpStrDup("Computing the HCR receiver gain correction is complicated. Therefore this is done offline, and the results are stored as XML in SPDB. Here we retrieve the values from SPDB and apply them to correct the receiver gain.");
+    tt->help = tdrpStrDup("Computing the HCR receiver gain correction is complicated. Therefore this is done offline, using the application HcrTempRxGain, and the results are stored as XML in SPDB. Here we retrieve the values from SPDB and apply them to correct the receiver gain.");
     tt->val_offset = (char *) &correct_hcr_v_rx_gain_for_temperature - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -2241,6 +2253,30 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &hcr_v_rx_delta_gain_tag_list - &_start_;
     tt->single_val.s = tdrpStrDup("<HcrTempGainCorrection><v_delta_gain>");
+    tt++;
+    
+    // Parameter 'correct_altitude_for_egm'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("correct_altitude_for_egm");
+    tt->descr = tdrpStrDup("Option to correct the altitude for the geoid.");
+    tt->help = tdrpStrDup("This only applies for moving platforms. Altitude from some GPS units is based on the WGS84 ellipsoid. To get altitude relative to MSL, a correction for the geoid based on gravitation strength is required. We use the EGM-2008 geoid table. See: https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.html.");
+    tt->val_offset = (char *) &correct_altitude_for_egm - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'egm_2008_geoid_file'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("egm_2008_geoid_file");
+    tt->descr = tdrpStrDup("Path to geoid table file.");
+    tt->help = tdrpStrDup("Downloads available from https://earth-info.nga.mil/GandG/wgs84/gravitymod. NetCDF file is on the shared drive at HCR->dataProcessing->AltitudeCorrection. The app Egm2Mdv will convert the downloadable file to a netCDF format file.");
+    tt->val_offset = (char *) &egm_2008_geoid_file - &_start_;
+    tt->single_val.s = tdrpStrDup("./EGM_2008_WGS84_2.5minx2.5min.nc");
     tt++;
     
     // Parameter 'Comment 11'
@@ -2829,6 +2865,18 @@
     tt->help = tdrpStrDup("We estimate the noise by identifying regions with noise and computing the mean power - see above. If this parameter is set to TRUE, we use the estimated noise instead of teh calibrated noise to compute the noise-subtracted powers.");
     tt->val_offset = (char *) &use_estimated_noise_for_noise_subtraction - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'max_valid_noise_bias_db'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_valid_noise_bias_db");
+    tt->descr = tdrpStrDup("Max valid value for noise bias (dB).");
+    tt->help = tdrpStrDup("The estimated noise is only used if the estimated noise bias does not exceed this value. For example, if you do not want to suppress sun spikes, you can set this value to something like 3dB, since sun spikes generally cause a noise increase of 10 dB or more, depending on the wavelength.");
+    tt->val_offset = (char *) &max_valid_noise_bias_db - &_start_;
+    tt->single_val.d = 20;
     tt++;
     
     // Parameter 'noise_ngates_kernel'

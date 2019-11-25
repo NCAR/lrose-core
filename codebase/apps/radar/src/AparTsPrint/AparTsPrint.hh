@@ -216,10 +216,6 @@ private:
   double _computeVel(const vector<RadarComplex_t> &iq);
   void _printMaxPowerData(FILE *out);
 
-  // check angle change
-
-  void _checkAngleChange(const AparTsPulse &pulse);
-
   // print sizes of structures
 
   void _printStructSizes(ostream &out);

@@ -83,17 +83,8 @@ GribMgr::inventoryRecord( ui08 *gribPtr )
   }
   sectionPtr += _pds->getSize();
 
-  // try to only set time info once
-  // Note: Grib2Mdv only processes a single forecast time,
-  // and this condition ensures the the forecast time is
-  // the first one encountered in the grib file.  Some
-  // ensemble grib files contain multiple forecast times.
-  // Those later forecasts are ignored by Grib2Mdv.
-  // Carl Drews - June 13, 2006
-  if( _forecastTime < 0 ) {	// not yet set
-    _forecastTime = _pds->getForecastTime();
-    _generateTime = _pds->getGenerateTime();
-  }
+  _forecastTime = _pds->getForecastTime();
+  _generateTime = _pds->getGenerateTime();
 
   // Unpack the grid description section if it is present.
   if( _pds->gdsUsed() ) {

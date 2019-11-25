@@ -1741,6 +1741,11 @@ void SigmetRadxFile::_setVolMetaData()
   if (instName.size() < 1) {
     instName = "unknown";
   }
+  size_t lfPos = instName.find("-LF");
+  if (_isHrdTailRadar && lfPos != string::npos) {
+    instName.erase(lfPos);
+    instName.append("-TA");
+  }
   _readVol->setInstrumentName(instName);
 
   _readVol->setSiteName

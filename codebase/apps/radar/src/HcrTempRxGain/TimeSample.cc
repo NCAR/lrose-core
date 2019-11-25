@@ -117,12 +117,13 @@ void TimeSample::computeMeanObs()
 /////////////////////////////////////////////////////
 // compute the delta gain
 // assumes smoothed temperatures have been set
+// returns 0 on success, -1 on error
 
-void TimeSample::computeDeltaGain(double lnaRefTempC,
-                                  double lnaGainChangePerC,
-                                  double rxRefTempC,
-                                  double rxGainChangePerC)
-
+int TimeSample::computeDeltaGain(double lnaRefTempC,
+                                 double lnaGainChangePerC,
+                                 double rxRefTempC,
+                                 double rxGainChangePerC)
+  
 {
 
   if (!std::isnan(_lnaTempSmoothed)) {
@@ -141,10 +142,17 @@ void TimeSample::computeDeltaGain(double lnaRefTempC,
 
   if (!std::isnan(_lnaDeltaGain) && !std::isnan(_rxDeltaGain)) {
     _sumDeltaGain = _lnaDeltaGain + _rxDeltaGain;
-  } else if (!std::isnan(_lnaDeltaGain)) {
-    _sumDeltaGain = _lnaDeltaGain;
-  } else if (!std::isnan(_rxDeltaGain)) {
-    _sumDeltaGain = _rxDeltaGain;
+  } else {
+    _sumDeltaGain = NAN;
+  }
+
+  if (std::isnan(_lnaTempSmoothed) ||
+      std::isnan(_rxTempSmoothed) ||
+      std::isnan(_lnaDeltaGain) ||
+      std::isnan(_rxDeltaGain)) {
+    return -1;
+  } else {
+    return 0;
   }
 
 }
