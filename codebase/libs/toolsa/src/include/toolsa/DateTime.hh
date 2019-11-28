@@ -167,8 +167,8 @@ public:
   // Universal Time Convention (UTC) locale. Setting UTC to TRUE is highly recommended (it
   // defaults to FALSE for backward compatibility). Niles Oien July 2011.
 
-  time_t strpTime(const char* format, const char* time_str, bool add_seconds = false, bool UTC=false) const;
-  time_t strpTime(const string& format, const string& time_str, bool add_seconds = false, bool UTC=false) const;
+  static time_t strpTime(const char* format, const char* time_str, bool add_seconds = false, bool UTC=false);
+  static time_t strpTime(const string& format, const string& time_str, bool add_seconds = false, bool UTC=false);
 
   // stdC library string 
   // Returns string of format: "Day Mon DD HH:MM:SS YYYY\n"
