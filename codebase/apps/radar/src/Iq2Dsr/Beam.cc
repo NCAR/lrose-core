@@ -776,6 +776,9 @@ void Beam::computeMoments()
   if (_params.compute_velocity_corrected_for_platform_motion) {
     _computeVelocityCorrectedForMotion();
   }
+  if (_params.compute_width_corrected_for_platform_motion) {
+    _computeWidthCorrectedForMotion();
+  }
 
   // applyMedianFilter as appropriate
 
