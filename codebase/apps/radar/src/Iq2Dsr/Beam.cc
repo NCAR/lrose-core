@@ -3586,10 +3586,135 @@ void Beam::_kdpComputeBringi(bool isFiltered)
   
 }
 
-/////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 // compute velocity corrected for platform motion
-  
+//
+// NOTES from Ulrike's Matlab code
+//  
+// % Compute y_t following equation 9 Lee et al (1994)
+// y_subt=-cosd(data.rotation+data.roll).*cosd(data.drift).*cosd(data.tilt).*sind(data.pitch)...
+//     +sind(data.drift).*sind(data.rotation+data.roll).*cosd(data.tilt)...
+//     +cosd(data.pitch).*cosd(data.drift).*sind(data.tilt);
+//
+// % Compute z following equation 9 Lee et al (1994)
+// z=cosd(data.pitch).*cosd(data.tilt).*cosd(data.rotation+data.roll)+sind(data.pitch).*sind(data.tilt);
+//
+// % compute tau_t following equation 11 Lee et al (1994)
+// tau_subt=asind(y_subt);
+//
+// % Compute phi following equation 17 Lee et al (1994)
+// phi=asind(z);
+//
+// % Compute platform motion based on Eq 27 from Lee et al (1994)
+// ground_speed=sqrt(data.eastward_velocity.^2 + data.northward_velocity.^2);
+// % Use this equation when starting from VEL_RAW
+// %vr_platform=-ground_speed.*sin(tau_subt)-vertical_velocity.*sin(phi);
+// % Use this equation when starting from VEL
+// vr_platform=-ground_speed.*sind(tau_subt).*sind(phi);
+//
+// velAngCorr=data.VEL+vr_platform;
+
 void Beam::_computeVelocityCorrectedForMotion()
+
+{
+
+  // no good if no georeference available
+
+  if (!_georefActive) {
+    return;
+  }
+
+  // pre-compute sin / cosine
+
+  double cosEl, sinEl;
+  ta_sincos(_el * DEG_TO_RAD, &sinEl, &cosEl);
+
+  double cosPitch, sinPitch;
+  ta_sincos(_georef.pitch_deg * DEG_TO_RAD, &sinPitch, &cosPitch);
+  
+  double cosRoll, sinRoll;
+  ta_sincos(_georef.roll_deg * DEG_TO_RAD, &sinRoll, &cosRoll);
+  
+  double cosTilt, sinTilt;
+  ta_sincos(_georef.tilt_deg * DEG_TO_RAD, &sinTilt, &cosTilt);
+  
+  double cosDrift, sinDrift;
+  ta_sincos(_georef.drift_angle_deg * DEG_TO_RAD, &sinDrift, &cosDrift);
+  
+  double cosRotRoll, sinRotRoll;
+  double rotPlusRoll = _georef.rotation_angle_deg + _georef.roll_deg;
+  ta_sincos(rotPlusRoll * DEG_TO_RAD, &sinRotRoll, &cosRotRoll);
+
+  // compute the vel correction from horiz platform motion, including drift
+
+  // Compute y_t following equation 9 Lee et al (1994)
+
+  double y_subt = ((-cosRotRoll * cosDrift * cosTilt * sinPitch) +
+                   (sinDrift * sinRotRoll * cosTilt) +
+                   (cosPitch * cosDrift * sinTilt));
+
+  // Compute z following equation 9 Lee et al (1994)
+
+  double zz = cosPitch * cosTilt * cosRotRoll + sinPitch * sinTilt;
+
+  // compute tau_t following equation 11 Lee et al (1994) (radians)
+
+  // double tau_subt = asin(y_subt);
+
+  // Compute phi following equation 17 Lee et al (1994) (radians)
+
+  // double phi = asin(zz);
+
+  // Compute ground speed based on Eq 27 from Lee et al (1994)
+
+  double ewVel = _georef.ew_velocity_mps;
+  double nsVel = _georef.ns_velocity_mps;
+  double ground_speed = sqrt(ewVel * ewVel + nsVel * nsVel);
+
+  // compute the vert vel correction
+
+  double vertCorr = 0.0;
+  if (_georef.vert_velocity_mps > -9990) {
+    vertCorr = _georef.vert_velocity_mps * zz;
+  }
+
+  // compute the horiz vel correction
+
+  double horizCorr = -ground_speed * y_subt;
+
+  // for now just use the vertical vel correction
+
+  if (vertCorr == 0.0 && horizCorr == 0.0) {
+    // no change needed
+    return;
+  }
+
+  for (int ii = 0; ii < _nGates; ii++) {
+    
+    double vel = _gateData[ii]->fields.vel;
+    if (vel != _missingDbl) {
+      double velCorrVert = _correctForNyquist(vel + vertCorr);
+      double velCorr = _correctForNyquist(vel + vertCorr + horizCorr);
+      _gateData[ii]->fields.vel_corr_vert = velCorrVert;
+      _gateData[ii]->fields.vel_corr_motion = velCorr;
+    }
+
+    double velF = _gateData[ii]->fieldsF.vel;
+    if (velF != _missingDbl) {
+      double velFCorrVert = _correctForNyquist(velF + vertCorr);
+      double velFCorr = _correctForNyquist(velF + vertCorr + horizCorr);
+      _gateData[ii]->fieldsF.vel_corr_vert = velFCorrVert;
+      _gateData[ii]->fieldsF.vel_corr_motion = velFCorr;
+    }
+    
+  } // ii
+
+}
+
+///////////////////////////////////////////////////////////
+// compute velocity corrected for vertical platform motion
+  
+void Beam::_computeVelocityCorrectedForVertMotion()
 
 {
 
@@ -3608,62 +3733,90 @@ void Beam::_computeVelocityCorrectedForMotion()
     vertCorr = _georef.vert_velocity_mps * sinEl;
   }
   
-  // double cosAz, sinAz;
-  // ta_sincos(_az * DEG_TO_RAD, &sinAz, &cosAz);
-  // double ewCorr = 0.0;
-  // if (_georef.ew_velocity_mps > -9990) {
-  //   ewCorr = _georef.ew_velocity_mps * fabs(cosEl) * sinAz;
-  // }
-  // double nsCorr = 0.0;
-  // if (_georef.ns_velocity_mps > -9990) {
-  //   nsCorr = _georef.ns_velocity_mps * fabs(cosEl) * cosAz;
-  // }
-
-  // cerr << "111111 head, el, az, vert, ew, ns, vertCorr, ewCorr, nsCorr: "
-  //      << _georef.heading_deg << ", "
-  //      << _el << ", " << _az << ", "
-  //      << _georef.vert_velocity_mps << ", "
-  //      << _georef.ew_velocity_mps << ", "
-  //      << _georef.ns_velocity_mps << ", "
-  //      << vertCorr << ", "
-  //      << ewCorr << ", "
-  //      << nsCorr << endl;
-
-  // for now just use the vertical vel correction
-
-  double correction = vertCorr;
-
-  if (correction == 0.0) {
+  if (vertCorr == 0.0) {
     // no change needed
     return;
   }
-
+  
   for (int ii = 0; ii < _nGates; ii++) {
     
-    double velCorr = _gateData[ii]->fields.vel;
-    if (velCorr != _missingDbl) {
-      velCorr += correction;
-      // check nyquist interval
-      while (velCorr > _nyquist) {
-        velCorr -= 2.0 * _nyquist;
-      }
-      while (velCorr < -_nyquist) {
-        velCorr += 2.0 * _nyquist;
-      }
-      _gateData[ii]->fields.vel_corrected = velCorr;
+    double vel = _gateData[ii]->fields.vel;
+    if (vel != _missingDbl) {
+      double velCorr = _correctForNyquist(vel + vertCorr);
+      _gateData[ii]->fields.vel_corr_vert = velCorr;
     }
 
-    velCorr = _gateData[ii]->fieldsF.vel;
-    if (velCorr != _missingDbl) {
-      velCorr += correction;
-      // check nyquist interval
-      while (velCorr > _nyquist) {
-        velCorr -= 2.0 * _nyquist;
+    double velF = _gateData[ii]->fieldsF.vel;
+    if (velF != _missingDbl) {
+      double velFCorr = _correctForNyquist(velF + vertCorr);
+      _gateData[ii]->fieldsF.vel_corr_vert = velFCorr;
+    }
+
+  } // ii
+
+}
+
+/////////////////////////////////////////////////
+// correct velocity for nyquist
+  
+double Beam::_correctForNyquist(double vel)
+
+{
+  while (vel > _nyquist) {
+    vel -= 2.0 * _nyquist;
+  }
+  while (vel < -_nyquist) {
+    vel += 2.0 * _nyquist;
+  }
+  return vel;
+}
+
+/////////////////////////////////////////////////
+// compute width corrected for platform motion
+  
+void Beam::_computeWidthCorrectedForMotion()
+
+{
+
+  // no good if no georeference available
+
+  if (!_georefActive) {
+    return;
+  }
+
+  // get the aircraft speed
+
+  double ewVel = _georef.ew_velocity_mps;
+  double nsVel = _georef.ns_velocity_mps;
+  double speed = sqrt(ewVel * ewVel + nsVel * nsVel);
+
+  // compute the delta correction
+  
+  double sinElev = sin(_el * DEG_TO_RAD);
+  double delta =
+    fabs(0.3 * speed * sinElev *
+         (_params.width_correction_beamwidth_deg * DEG_TO_RAD));
+  
+  // compute the corrected width for each gate
+  
+  for (int ii = 0; ii < _nGates; ii++) {
+    
+    double width = _gateData[ii]->fields.width;
+    if (width != _missingDbl) {
+      double xx = width * width - delta * delta;
+      if (xx < 0.01) {
+        xx = 0.01;
       }
-      while (velCorr < -_nyquist) {
-        velCorr += 2.0 * _nyquist;
+      _gateData[ii]->fields.width_corr_motion = sqrt(xx);
+    }
+
+    double widthF = _gateData[ii]->fieldsF.width;
+    if (widthF != _missingDbl) {
+      double xx = widthF * widthF - delta * delta;
+      if (xx < 0.01) {
+        xx = 0.01;
       }
-      _gateData[ii]->fieldsF.vel_corrected = velCorr;
+      _gateData[ii]->fieldsF.width_corr_motion = sqrt(xx);
     }
 
   } // ii

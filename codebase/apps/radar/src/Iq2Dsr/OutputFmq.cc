@@ -630,8 +630,10 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.vel_alt_fold_interval - start);
     case Params::VEL_ALT_FOLD_CONFIDENCE:
       return (&_flds.vel_alt_fold_confidence - start);
-    case Params::VEL_CORRECTED:
-      return (&_flds.vel_corrected - start);
+    case Params::VEL_CORR_VERT:
+      return (&_flds.vel_corr_vert - start);
+    case Params::VEL_CORR_MOTION:
+      return (&_flds.vel_corr_motion - start);
       
       // STAGGERED PRT VEL
       
@@ -664,6 +666,8 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.width_prt_long - start);
     case Params::WIDTH_PRT_SHORT:
       return (&_flds.width_prt_short - start);
+    case Params::WIDTH_CORR_MOTION:
+      return (&_flds.width_corr_motion - start);
 
       // normalized coherent power
       
