@@ -40,7 +40,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-ltdrp -ltitan -lmdv -lrapformats \
-	-ltoolsa -ldataport -lbz2 -lz \
+	-ltoolsa -lpthread -ldataport -lbz2 -lz \
 	-lm
 
 HDRS = dva_ingest.h

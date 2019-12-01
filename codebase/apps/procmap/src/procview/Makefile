@@ -39,7 +39,7 @@ LOC_INCLUDES = $(SYS_X_INCLUDES)
 LOC_CFLAGS =
 LOC_LDFLAGS = $(SYS_X_LDFLAGS) $(TDRP_LIBS)
 LOC_LIBS = \
-	-ltoolsa -ldataport -ltdrp -lMotifApp \
+	-ltoolsa -lpthread -ldataport -ltdrp -lMotifApp \
 	-lXext -lXm -lXpm -lXt \
 	-lX11 -lbz2
 

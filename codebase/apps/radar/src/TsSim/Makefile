@@ -39,7 +39,7 @@ LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 LOC_LDFLAGS = -L..
 LOC_LIBS = \
-	-lradar -lRadx -ltoolsa -ltdrp \
+	-lradar -lRadx -ltoolsa -lpthread -ltdrp \
 	-lrapmath -lfftw3 -lbz2 -lz
 
 HDRS = \

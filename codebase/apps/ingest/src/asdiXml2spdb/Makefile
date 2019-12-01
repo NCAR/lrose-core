@@ -38,7 +38,7 @@ TARGET_FILE = asdiXml2spdb
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ltinyxml -lSpdb -ldsserver -ldidss \
-	-lrapformats -ltoolsa -ldataport -ltdrp \
+	-lrapformats -ltoolsa -lpthread -ldataport -ltdrp \
 	-lz $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

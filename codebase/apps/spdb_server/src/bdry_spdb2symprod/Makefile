@@ -42,7 +42,7 @@ LOC_CFLAGS =
 LOC_CPPC_CFLAGS = 
 LOC_LDFLAGS = 
 LOC_LIBS = \
-	-lSpdbServer -lsymprod -lrapformats -ltoolsa \
+	-lSpdbServer -lsymprod -lrapformats -ltoolsa -lpthread \
 	-ldataport -ltdrp -lrapmath -lbz2 \
 	-lz -lm
 

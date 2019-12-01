@@ -39,7 +39,7 @@ TARGET_FILE = SatOrbit2AcPosn
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
+	-ltoolsa -lpthread -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

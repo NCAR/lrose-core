@@ -39,7 +39,7 @@ LOC_INCLUDES =
 LOC_CFLAGS = -g
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-lmdv -lrapformats -ltoolsa -ldataport \
+	-lmdv -lrapformats -ltoolsa -lpthread -ldataport \
 	-lbz2 -lz -lm
 
 HDRS =  

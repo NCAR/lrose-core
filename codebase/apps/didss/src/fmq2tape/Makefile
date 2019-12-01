@@ -38,7 +38,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-ltdrp -lrapmath -lmdv -lrapformats \
-	-ltoolsa -ldataport -lrdi -lbz2 \
+	-ltoolsa -lpthread -ldataport -lrdi -lbz2 \
 	-lz -lm
 
 HDRS = fmq2tape.h

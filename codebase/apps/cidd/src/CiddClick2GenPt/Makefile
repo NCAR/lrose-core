@@ -39,7 +39,7 @@ TARGET_FILE = CiddClick2GenPt
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-ltoolsa -ldataport -lrapmath -ltdrp \
+	-ltoolsa -lpthread -ldataport -lrapmath -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

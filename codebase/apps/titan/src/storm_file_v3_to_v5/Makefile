@@ -41,7 +41,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-ltitan -lrapmath -leuclid -lmdv \
-	-lrapformats -ltoolsa -ldataport -ltdrp \
+	-lrapformats -ltoolsa -lpthread -ldataport -ltdrp \
 	-lbz2 -lz -lm
 
 HDRS = storm_file_v3_to_v5.h dix_storm.v3.h

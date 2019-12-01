@@ -38,7 +38,7 @@ TARGET_FILE = GroundEchoStats
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lradar -lFmq -lRadx -lNcxx -ldsserver \
-	-ldidss -lrapmath -lrapformats -ltoolsa \
+	-ldidss -lrapmath -lrapformats -ltoolsa -lpthread \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

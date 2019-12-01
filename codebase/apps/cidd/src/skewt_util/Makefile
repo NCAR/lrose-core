@@ -40,7 +40,7 @@ LOC_CFLAGS = -D$(HOST_OS)
 LOC_CPPFLAGS = 
 LOC_LDFLAGS =  $(SYS_XVIEW_LDFLAGS) 
 LOC_LIBS = \
-	-lrapplot -lcidd -lrapformats -ltoolsa \
+	-lrapplot -lcidd -lrapformats -ltoolsa -lpthread \
 	-ldataport -ldevguide -lxview -lolgx \
 	-lX11 -lbz2 -lz -lm
 

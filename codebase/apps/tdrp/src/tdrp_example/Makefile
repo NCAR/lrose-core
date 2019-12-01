@@ -39,7 +39,7 @@ LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 LOC_LDFLAGS = -L..
 LOC_LIBS = \
-	-ltoolsa -ltdrp -lbz2
+	-ltoolsa -lpthread -ltdrp -lbz2
 
 HDRS = $(TDRP_H) tdrp_example.h
 

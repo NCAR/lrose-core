@@ -11,7 +11,7 @@ TARGET_FILE = JamesDealias
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -lrapmath -lFmq -ldsserver \
-	-lrapformats -ldidss -leuclid -ltoolsa -ldataport \
+	-lrapformats -ldidss -leuclid -ltoolsa -lpthread -ldataport \
 	-ltdrp -ltrmm_rsl $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 

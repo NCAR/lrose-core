@@ -40,7 +40,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-ltitan -lrapmath -lmdv -lrapformats \
-	-ltoolsa -ldataport -lrdi -lbz2 \
+	-ltoolsa -lpthread -ldataport -lrdi -lbz2 \
 	-lz -lm
 
 HDRS = polar_ingest.h

@@ -38,7 +38,7 @@ TARGET_FILE = Radx2Esd
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lRadx -lMdv -ldsserver -ldidss \
-	-lrapformats -leuclid -ltoolsa -ltdrp \
+	-lrapformats -leuclid -ltoolsa -lpthread -ltdrp \
 	-ldataport $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

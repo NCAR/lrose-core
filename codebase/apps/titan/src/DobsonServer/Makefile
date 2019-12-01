@@ -40,7 +40,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-lcidd -ltitan -lmdv -lrapformats \
-	-ltoolsa -lrapmath -ldataport -ltdrp \
+	-ltoolsa -lpthread -lrapmath -ldataport -ltdrp \
 	-lbz2 -lz -lm
 
 MODULE_TYPE=program

@@ -39,7 +39,7 @@ LOC_INCLUDES = -I../include -D_LINUX_TYPES_H $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -lrapformats -ldsserver -ldidss \
 	-lmel_bufr -ltdrp -ldataport \
-	-leuclid -ltoolsa $(NETCDF4_LIBS) -lbz2 -lz \
+	-leuclid -ltoolsa -lpthread $(NETCDF4_LIBS) -lbz2 -lz \
 	-lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

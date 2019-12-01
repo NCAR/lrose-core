@@ -41,7 +41,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltdrp -ltoolsa -ldataport -lbz2 \
+	-ltdrp -ltoolsa -lpthread -ldataport -lbz2 \
 	-lz -lm
 
 HDRS = dva_mklookup.h

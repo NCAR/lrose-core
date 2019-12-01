@@ -39,7 +39,7 @@ TARGET_FILE = southWestKs2Spdb
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-leuclid -ltoolsa -ldataport -ltdrp \
+	-leuclid -ltoolsa -lpthread -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

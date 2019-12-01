@@ -38,7 +38,7 @@ TARGET_FILE = MdvFromCircles
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -leuclid \
-	-ldidss -lphysics -lrapformats -ltoolsa \
+	-ldidss -lphysics -lrapformats -ltoolsa -lpthread \
 	-ldataport -ltdrp -lrapmath $(NETCDF4_LIBS) \
 	-lbz2 -lz
 

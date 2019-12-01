@@ -40,7 +40,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS = -L..
 LOC_LIBS = \
 	-ldsserver -leuclid -lmdv -ldidss \
-	-lcidd -lrapformats -ltoolsa -ltdrp \
+	-lcidd -lrapformats -ltoolsa -lpthread -ltdrp \
 	-ldataport -lbz2 -lz
 
 HDRS = \

@@ -42,7 +42,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-lFmq -ldsserver -lrapmath -lrapformats \
-	-lrdi -ldidss -ltdrp -ltoolsa \
+	-lrdi -ldidss -ltdrp -ltoolsa -lpthread \
 	-ldataport -lbz2 -lz -lm
 
 HDRS = dsr2mmq.h

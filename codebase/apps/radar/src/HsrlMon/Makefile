@@ -38,7 +38,7 @@ TARGET_FILE = HsrlMon
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lRadx -lNcxx -lradar -ldsserver \
-	-ldidss -lrapformats -leuclid -ltoolsa -lphysics \
+	-ldidss -lrapformats -leuclid -ltoolsa -lpthread -lphysics \
 	-ltdrp -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

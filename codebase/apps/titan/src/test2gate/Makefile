@@ -42,7 +42,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-ltitan -lrapmath -lmdv -lrapformats \
-	-ltoolsa -ldataport -ltdrp -lbz2 \
+	-ltoolsa -lpthread -ldataport -ltdrp -lbz2 \
 	-lz -lm
 
 HDRS = test2gate.h

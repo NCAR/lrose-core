@@ -45,7 +45,7 @@ LOC_INCLUDES = $(JASPER_INCLUDES) $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
 	-ldsserver -ldidss -lrapformats -lgrib2 \
-	-leuclid -ltoolsa $(JASPER_LIBS) -lpng \
+	-leuclid -ltoolsa -lpthread $(JASPER_LIBS) -lpng \
 	-ldataport -ltdrp -lrapmath -lz \
 	$(NETCDF4_LIBS) -lbz2 -lz -lm
 

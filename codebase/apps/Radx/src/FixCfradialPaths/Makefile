@@ -37,7 +37,7 @@ TARGET_FILE = FixCfradialPaths
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lRadx -ldsserver -ldidss -ltoolsa \
+LOC_LIBS = -lRadx -ldsserver -ldidss -ltoolsa -lpthread \
 	-ltdrp -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

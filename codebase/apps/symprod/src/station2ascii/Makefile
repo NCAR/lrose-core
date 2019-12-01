@@ -39,7 +39,7 @@ LOC_CPPC_CFLAGS =
 LOC_LDFLAGS =
 #LOC_LIBS = -lsymprod -lSpdb -ldsserver -ldidss -lrapformats -ltoolsa  -ldataport -lm
 LOC_LIBS = \
-	-lsymprod -lrapformats -ltoolsa -ldataport \
+	-lsymprod -lrapformats -ltoolsa -lpthread -ldataport \
 	-lbz2 -lz -lm
 
 HDRS = 

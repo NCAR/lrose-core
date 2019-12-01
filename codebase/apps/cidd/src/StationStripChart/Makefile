@@ -36,7 +36,7 @@ TARGET_FILE = StationStripChart
 LOC_INCLUDES = $(SYS_XVIEW_INCLUDES) $(SYS_X_INCLUDES) -I/usr/include/g++-2 $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapplot \
-	-lrapformats -ltoolsa -ldataport -ldevguide \
+	-lrapformats -ltoolsa -lpthread -ldataport -ldevguide \
 	-ltdrp -lcidd -lxview -lolgx \
 	-lX11 -lXext -lpng $(NETCDF4_LIBS) \
 	-lbz2 -lz

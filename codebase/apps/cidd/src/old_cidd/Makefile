@@ -41,7 +41,7 @@ SYS_CFLAGS = -g -D$(HOST_OS)
 LOC_LDFLAGS = $(SYS_XVIEW_LDFLAGS) $(SYS_X_LDFLAGS) 
 LOC_LIBS = \
 	-lrapplot -lcidd -lrapformats -ldataport \
-	-lsymprod -ltoolsa -ldevguide -lxview \
+	-lsymprod -ltoolsa -lpthread -ldevguide -lxview \
 	-lolgx -lX11 -lbz2 -lz \
 	-lm
 

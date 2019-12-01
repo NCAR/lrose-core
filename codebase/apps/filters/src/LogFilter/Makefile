@@ -37,7 +37,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltoolsa -ldataport $(SYS_LIBS) -lbz2 \
+	-ltoolsa -lpthread -ldataport $(SYS_LIBS) -lbz2 \
 	-lz
 
 TARGET_FILE = LogFilter

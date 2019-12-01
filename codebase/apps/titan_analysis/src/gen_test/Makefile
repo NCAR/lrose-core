@@ -17,7 +17,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-ltitan -lrapmath -lmdv -lrapformats \
-	-ltoolsa -ldataport $(DEBUG_LIBS) -lbz2 \
+	-ltoolsa -lpthread -ldataport $(DEBUG_LIBS) -lbz2 \
 	-lz -lm
 
 MODULE_TYPE=program

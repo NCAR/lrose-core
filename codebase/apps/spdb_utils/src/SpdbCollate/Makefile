@@ -38,7 +38,7 @@ TARGET_FILE = SpdbCollate
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -ldsserver -ldidss -ltoolsa \
+LOC_LIBS = -lSpdb -ldsserver -ldidss -ltoolsa -lpthread \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

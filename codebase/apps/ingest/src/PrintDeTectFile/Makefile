@@ -41,7 +41,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-lDeTect -ltoolsa -ldataport -lrapmath \
+	-lDeTect -ltoolsa -lpthread -ldataport -lrapmath \
 	-lbz2 -lz -lm
 
 HDRS = \

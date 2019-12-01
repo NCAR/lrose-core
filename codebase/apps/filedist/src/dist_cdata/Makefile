@@ -40,7 +40,7 @@ LOC_CFLAGS = $(DEBUG_CFLAGS)
 LOC_CPPFLAGS =
 LOC_LDFLAGS = -L$(RAP_LIB_DIR)
 LOC_LIBS = \
-	-ltoolsa -ldataport $(DEBUG_LIBS) -lbz2 \
+	-ltoolsa -lpthread -ldataport $(DEBUG_LIBS) -lbz2 \
 	-lz -lm
 
 HDRS =  dist_cdata.h

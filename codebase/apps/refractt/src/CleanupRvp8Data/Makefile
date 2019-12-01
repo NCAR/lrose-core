@@ -40,7 +40,7 @@ TARGET_FILE = CleanupRvp8Data
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lMdv -lRadx -ldsserver \
-	-ldidss -lrapformats -leuclid -ltoolsa \
+	-ldidss -lrapformats -leuclid -ltoolsa -lpthread \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

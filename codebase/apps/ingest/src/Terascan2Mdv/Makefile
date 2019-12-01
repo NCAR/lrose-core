@@ -46,7 +46,7 @@ TSCANROOT=/opt/terascan
 LOC_INCLUDES = -I$(TSCANROOT)/include $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -lrapformats -leuclid \
-	-ldsserver -ldidss -ltoolsa -ldataport \
+	-ldsserver -ldidss -ltoolsa -lpthread -ldataport \
 	-ltdrp -ltscan $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 

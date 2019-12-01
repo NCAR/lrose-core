@@ -38,7 +38,7 @@ TARGET_FILE = Hash
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-lrapplot -ltoolsa -ldataport -ltdrp \
+	-lrapplot -ltoolsa -lpthread -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \
 	-lm
 

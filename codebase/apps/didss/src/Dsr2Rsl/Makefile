@@ -34,7 +34,7 @@ TARGET_FILE = Dsr2Rsl
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -lrapmath -lFmq -ldsserver \
-	-lrapformats -ldidss -ltoolsa -ldataport \
+	-lrapformats -ldidss -ltoolsa -lpthread -ldataport \
 	-ltdrp -ltrmm_rsl $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 

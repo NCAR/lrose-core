@@ -36,7 +36,7 @@ TARGET_FILE = asdi2grid
 LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
-	-lrapformats -ldidss -ltoolsa -ldataport -ltdrp \
+	-lrapformats -ldidss -ltoolsa -lpthread -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF_LDFLAGS) $(NETCDF4_LDFLAGS)

@@ -38,7 +38,7 @@ TARGET_FILE = RadxDwellCombine
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lRadx -lFmq -lMdv -ldsserver \
-	-ldidss -lrapformats -leuclid -ltoolsa \
+	-ldidss -lrapformats -leuclid -ltoolsa -lpthread \
 	-ltdrp -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

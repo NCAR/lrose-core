@@ -40,7 +40,7 @@ TARGET_FILE = DeTectHorizXml2Spdb
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lDeTect -lSpdb -ldsserver -ldidss \
-	-lrapformats -leuclid -ltoolsa -ldataport \
+	-lrapformats -leuclid -ltoolsa -lpthread -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

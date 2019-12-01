@@ -35,7 +35,7 @@ TARGET_FILE = simStations
 LOC_INCLUDES = -I. $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -lphysics -lrapformats -ldsserver \
-	-ldidss -ltoolsa -ldataport -ltdrp \
+	-ldidss -ltoolsa -lpthread -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

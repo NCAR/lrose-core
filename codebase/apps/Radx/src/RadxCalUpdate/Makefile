@@ -38,7 +38,7 @@ TARGET_FILE = RadxCalUpdate
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -lMdv -lRadx -lradar -lNcxx -ldsserver \
-	-ldidss -lrapformats -leuclid -ltoolsa \
+	-ldidss -lrapformats -leuclid -ltoolsa -lpthread \
 	-ltdrp -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

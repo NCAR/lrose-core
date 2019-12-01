@@ -18,7 +18,7 @@ LOC_INCLUDES = $(HDF5_INCLUDES) $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -lSpdb \
 	-ldsserver -ldidss -lrapformats -leuclid \
-	-lphysics -ltoolsa -ldataport -ltdrp \
+	-lphysics -ltoolsa -lpthread -ldataport -ltdrp \
 	$(HDF5_LIBS) $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = -L/usr/local/hdf5/lib -L/usr/local/szip/lib $(NETCDF4_LDFLAGS)

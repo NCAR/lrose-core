@@ -38,7 +38,7 @@ TARGET_FILE = classIngest
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-lrapmath -lphysics -ltoolsa -ldataport \
+	-lrapmath -lphysics -ltoolsa -lpthread -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

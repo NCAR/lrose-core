@@ -40,7 +40,7 @@ TARGET_FILE = tstorms_spdb2symprod
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ltitan -lSpdbServer -lsymprod \
-	-lmdv -lrapformats -leuclid -ltoolsa \
+	-lmdv -lrapformats -leuclid -ltoolsa -lpthread \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 

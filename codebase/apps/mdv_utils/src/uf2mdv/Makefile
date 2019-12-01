@@ -42,7 +42,7 @@ LOC_LDFLAGS = $(SYS_X_LDFLAGS)
 LOC_LIBS = \
 	-lcidd -lsim -lrsbutil -lsim \
 	-lctetwws -lmdv -ldataport -lrapformats \
-	-ltoolsa -ltdrp -lbz2 -lz \
+	-ltoolsa -lpthread -ltdrp -lbz2 -lz \
 	-lm
 
 HDRS = uf2mdv.h

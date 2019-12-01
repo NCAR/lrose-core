@@ -42,7 +42,7 @@ LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_LIBS = \
 	-lFmq -ldsserver -ldidss -lrapformats \
-	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
+	-ltoolsa -lpthread -ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz
 
 HDRS = \

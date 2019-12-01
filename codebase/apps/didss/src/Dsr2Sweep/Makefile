@@ -39,7 +39,7 @@ TARGET_FILE = Dsr2Sweep
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lFmq -lMdv -lRadx -lNcxx -ldsserver -ldidss \
-	-lrapformats -leuclid -ltoolsa -ltdrp \
+	-lrapformats -leuclid -ltoolsa -lpthread -ltdrp \
 	-ldataport -lforayRal $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

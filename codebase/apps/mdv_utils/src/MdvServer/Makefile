@@ -41,7 +41,7 @@ LOC_CPPC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-lmdv -lrapformats -ltdrp -ldidss \
-	-ltoolsa -ldataport -lbz2 -lz
+	-ltoolsa -lpthread -ldataport -lbz2 -lz
 
 MODULE_TYPE=progcpp
 

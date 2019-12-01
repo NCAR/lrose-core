@@ -42,7 +42,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-ltitan -leuclid -lrapmath -lmdv \
-	-lrapformats -ltoolsa -ldataport -ltdrp \
+	-lrapformats -ltoolsa -lpthread -ldataport -ltdrp \
 	-lbz2 -lz -lm
 
 HDRS = storm_track.h

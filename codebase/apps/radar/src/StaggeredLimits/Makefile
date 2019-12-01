@@ -40,7 +40,7 @@ LOC_INCLUDES =
 LOC_CPPC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-lradar -ltoolsa -lrapmath -lfftw3 \
+	-lradar -ltoolsa -lpthread -lrapmath -lfftw3 \
 	-lbz2 -lz
 
 CPPC_SRCS = \

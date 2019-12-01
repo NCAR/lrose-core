@@ -39,7 +39,7 @@ TARGET_FILE = ihop3x3Goes2Mdv
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
-	-lrapformats -leuclid -ltoolsa -ldataport \
+	-lrapformats -leuclid -ltoolsa -lpthread -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \
 	-lm
 

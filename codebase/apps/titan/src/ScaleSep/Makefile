@@ -39,7 +39,7 @@ TARGET_FILE = ScaleSep
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lradar -lMdv -lRadx -lNcxx -leuclid \
-	-ldsserver -ldidss -lrapformats -ltoolsa \
+	-ldsserver -ldidss -lrapformats -ltoolsa -lpthread \
 	-ldataport -ltdrp -lfftw3 $(NETCDF4_LIBS) \
 	-lbz2 -lz
 

@@ -40,7 +40,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltoolsa -ltdrp -lbz2 -lz \
+	-ltoolsa -lpthread -ltdrp -lbz2 -lz \
 	-lm
 
 HDRS = suncal.h

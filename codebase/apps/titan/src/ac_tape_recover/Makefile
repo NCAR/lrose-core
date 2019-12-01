@@ -40,7 +40,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltitan -lrapformats -lsymprod -ltoolsa \
+	-ltitan -lrapformats -lsymprod -ltoolsa -lpthread \
 	-ltdrp -ldataport -ltdrp -lbz2 \
 	-lz -lm
 

@@ -40,7 +40,7 @@ LOC_CFLAGS = -DNO_PROTO
 LOC_CPPC_CFLAGS = 
 LOC_LDFLAGS = 
 LOC_LIBS = \
-	-ledge -ltoolsa -ldataport -ltdrp \
+	-ledge -ltoolsa -lpthread -ldataport -ltdrp \
 	-lbz2 -lz
 
 HDRS = \

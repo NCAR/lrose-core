@@ -39,7 +39,7 @@ TARGET_FILE = Tstorms2Xml
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ltitan -lSpdb -lrapformats -ldsserver \
-	-ldidss -leuclid -ltoolsa -ldataport \
+	-ldidss -leuclid -ltoolsa -lpthread -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

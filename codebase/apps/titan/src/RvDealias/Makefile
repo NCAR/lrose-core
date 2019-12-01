@@ -40,7 +40,7 @@ LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_CFLAGS =
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_LIBS = \
-	-lradar -ldidss -ltoolsa -ldataport -ltdrp \
+	-lradar -ldidss -ltoolsa -lpthread -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lfftw3
 
 HDRS = \

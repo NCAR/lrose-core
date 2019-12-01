@@ -38,7 +38,7 @@ TARGET_FILE = mdv_be2le
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
-	-lrapformats -ltdrp -ldidss -ltoolsa \
+	-lrapformats -ltdrp -ldidss -ltoolsa -lpthread \
 	-ldataport $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
