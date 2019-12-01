@@ -3685,7 +3685,7 @@ void Beam::_computeVelocityCorrectedForMotion()
 
   double horizCorr = ground_speed * y_subt;
 
-  // for now just use the vertical vel correction
+  // check
 
   if (vertCorr == 0.0 && horizCorr == 0.0) {
     // no change needed
