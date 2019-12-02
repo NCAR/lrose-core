@@ -70,6 +70,7 @@ sudo apt-get install -y \
     libfftw3-dev libexpat1-dev \
     qtbase5-dev qtdeclarative5-dev \
     libgeographic-dev libeigen3-dev libzip-dev \
+    libarmadillo-dev \
     libnetcdf-dev netcdf-bin libhdf5-dev hdf5-tools
 
 # create link for qmake
