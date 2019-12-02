@@ -27,37 +27,7 @@ Recommended distributions are:
 
 First, you will need to install the required packages.
 
-On Redhat-based hosts, run the following (as root or sudo):
-
-```
-sudo yum install -y epel-release
-
-sudo yum install -y \
-tcsh perl perl-Env ftp git svn cvs tkcvs emacs tkcvs m4 \
-gcc gcc-c++ gcc-gfortran glibc-devel libX11-devel libXext-devel \
-libpng-devel libtiff-devel jasper-devel zlib-devel expat-devel libcurl-devel \
-flex-devel fftw3-devel bzip2-devel jasper-devel qt5-qtbase-devel xrdb \
-Xvfb xorg-x11-fonts-misc xorg-x11-fonts-75dpi xorg-x11-fonts-100dpi \
-gnuplot ImageMagick-devel ImageMagick-c++-devel
-
-cd /usr/bin; sudo ln -s qmake-qt5 qmake
-
-```
-
-On Debian-based hosts run the following (as root or sudo):
-
-```
-sudo apt-get update 
-
-sudo apt-get install -y  \
-    libbz2-dev libx11-dev libpng-dev libfftw3-dev \
-    libjasper-dev qtbase5-dev git \
-    gcc g++ gfortran libfl-dev \
-    automake make libtool pkg-config libexpat1-dev python
-
-cd /usr/bin; sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake
-
-```
+See: [LROSE package dependencies](./lrose_package_dependencies.md)
 
 <a name="download"/>
 
