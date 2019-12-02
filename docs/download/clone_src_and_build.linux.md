@@ -35,10 +35,11 @@ sudo yum install -y epel-release
 sudo yum install -y \
     tcsh wget git \
     tkcvs emacs rsync python \
-    m4 make libtool autoconf automake \
+    m4 make cmake cmake3 libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel \
     libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel \
+    libpng-devel libtiff-devel zlib-devel libzip-devel \
+    GeographicLib-devel eigen3-devel armadillo \
     expat-devel libcurl-devel \
     flex-devel fftw3-devel \
     bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
