@@ -63,7 +63,7 @@ These apply to:
 sudo apt-get update 
 
 sudo apt-get install -y \
-    git gcc g++ gfortran cmake rsync mlocate \
+    git gcc g++ gfortran cmake cmake3 rsync mlocate \
     automake make libtool pkg-config python \
     libcurl3-dev curl \
     libfl-dev libbz2-dev libx11-dev libpng-dev \
