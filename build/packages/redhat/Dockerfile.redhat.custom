@@ -4,6 +4,7 @@
 # install the required packages
 
 ARG OS_TYPE=centos
+ARG OS_VERSION=7
 
 # install required packages
 
@@ -28,6 +29,14 @@ RUN \
     xorg-x11-xauth xorg-x11-apps \
     rpm-build redhat-rpm-config \
     rpm-devel rpmdevtools
+
+# extras for CENTOS 8
+
+RUN if [ "$OS_VERSION" = "8" ]; \
+    then RUN \
+    [ yum config-manager --set-enabled PowerTools ]; \
+    [ yum install -y python2-devel platform-python-devel ]; \
+    fi
 
 # create link for qtmake
 

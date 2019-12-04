@@ -98,6 +98,7 @@ cd /tmp/docker
 
 docker build \
     --build-arg OS_TYPE=${os_type} \
+    --build-arg OS_VERSION=${os_version} \
     --tag custom/${os_type}:${os_version} \
     --file ${DockerfilePath} .
 
