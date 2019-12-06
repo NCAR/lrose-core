@@ -47,7 +47,7 @@ RUN \
     dnf install -y \
     xrdb \
     glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
-    libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686 \
+    libtiff-devel.i686 libpng-devel.i686 \
     libstdc++-devel.i686 libtiff-devel.i686 \
     zlib-devel.i686 expat-devel.i686 flex-devel.i686 \
     fftw-devel.i686 bzip2-devel.i686 \
@@ -55,3 +55,15 @@ RUN \
     xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi \
     xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi \
     xorg-x11-fonts-misc
+
+# TO-DO
+# Installing libcurl-devel.i686 created conflicts
+#
+#
+#Error: 
+# Problem: package libcurl-devel-7.61.1-8.el8.i686 requires libcurl(x86-32) = 7.61.1-8.el8, but none of the providers can be installed
+#  - package libcurl-devel-7.61.1-8.el8.i686 requires libcurl.so.4, but none of the providers can be installed
+#  - package libcurl-minimal-7.61.1-8.el8.x86_64 conflicts with libcurl provided by libcurl-7.61.1-8.el8.i686
+#  - package libcurl-minimal-7.61.1-8.el8.i686 conflicts with libcurl provided by libcurl-minimal-7.61.1-8.el8.x86_64
+#  - package libcurl-minimal-7.61.1-8.el8.x86_64 conflicts with libcurl provided by libcurl-minimal-7.61.1-8.el8.i686
+
