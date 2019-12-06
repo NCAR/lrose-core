@@ -76,6 +76,17 @@ if [ "${os_version}" = 6 ] ; then
   exit 0
 fi
 
+if [ "${os_version}" = 8 ] ; then
+  echo "  Special build - centos 8"
+  echo "  Dockerfile path: Dockerfile.centos8.custom"
+  docker build \
+      --build-arg OS_TYPE=${os_type} \
+      --build-arg OS_VERSION=${os_version} \
+      --tag custom/${os_type}:${os_version} \
+      --file Dockerfile.centos8.custom .
+  exit 0
+fi
+
 # compute Dockerfile path
 
 DockerfilePath=/tmp/docker/Dockerfile.custom.${os_type}.${os_version}

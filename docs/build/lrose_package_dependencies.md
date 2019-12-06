@@ -8,29 +8,22 @@ The following are the commands for installing those packages.
 
 These apply to:
 
-  * RedHat
-  * CentOS (based on RedHat)
+  * RedHat 6 and 7
+  * CentOS 6 and 7 (based on RedHat)
   * Fedora (based on RedHat)
 
-For *RHEL/CentOS 8 only*, you first need to enable the PowerTools repository:
-
 ```
-  yum config-manager --set-enabled PowerTools
-```
-For *all* RedHat-based distributions, you need to add the Extra Packages for Enterprise Linux (EPEL) repository and then install the packages required for LROSE:
+  yum install -y epel-release
 
-```
-sudo yum install -y epel-release
-
-sudo yum install -y \
+  yum install -y \
     tcsh wget git \
-    tkcvs emacs rsync python \
+    tkcvs emacs rsync python mlocate \
     m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel \
     libX11-devel libXext-devel \
     libpng-devel libtiff-devel zlib-devel libzip-devel \
     GeographicLib-devel eigen3-devel armadillo-devel \
-    expat-devel libcurl-devel \
+    expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
     bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
     hdf5-devel netcdf-devel \
@@ -39,11 +32,37 @@ sudo yum install -y \
     rpm-devel rpmdevtools
 ```
 
-For CENTOS 8 you need to add the PowerTools repo, and python packages:
+## CENTOS 8 and RHEL 8
 
 ```
-  yum config-manager --set-enabled PowerTools
-  yum install -y python2-devel platform-python-devel
+  dnf install -y epel-release
+  dnf install -y 'dnf-command(config-manager)'
+  dnf config-manager --set-enabled PowerTools
+  dnf install -y python3
+  dnf install -y python2-devel platform-python-devel
+  dnf install -y \
+    tcsh wget git \
+    emacs rsync python2 python3 mlocate \
+    m4 make cmake libtool autoconf automake \
+    gcc gcc-c++ gcc-gfortran glibc-devel \
+    libX11-devel libXext-devel \
+    libpng-devel libtiff-devel zlib-devel libzip-devel \
+    eigen3-devel armadillo-devel \
+    expat-devel libcurl-devel openmpi-devel \
+    flex-devel fftw3-devel \
+    bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
+    hdf5-devel netcdf-devel \
+    xorg-x11-xauth xorg-x11-apps \
+    rpm-build redhat-rpm-config \
+    rpm-devel rpmdevtools
+  alternatives --set python /usr/bin/python3
+```
+
+The following are missing from the CENTOS 8 install:
+
+```
+    tkcvs
+    GeographicLib-devel
 ```
 
 ## SUSE-based systems
@@ -70,7 +89,7 @@ sudo apt-get install -y \
     libfftw3-dev libexpat1-dev \
     qtbase5-dev qtdeclarative5-dev \
     libgeographic-dev libeigen3-dev libzip-dev \
-    libarmadillo-dev \
+    libarmadillo-dev libopenmpi.dev \
     libnetcdf-dev netcdf-bin libhdf5-dev hdf5-tools
 
 # create link for qmake
