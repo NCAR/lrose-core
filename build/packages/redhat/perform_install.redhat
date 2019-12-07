@@ -55,9 +55,20 @@ fi
 
 # for centos, install epel release
 
-if [ "$os_type" = centos ]; then
+is_centos=`grep CentOS /etc/redhat-release`
+if [ -n "$is_centos" ]; then
   echo "==>> install epel-release <<=="
   yum install -y epel-release
+fi
+
+# for centos 8, perform extra actions
+is_centos_8=`grep VERSION_ID /etc/os-release | grep 8`
+if [ -n "$is_centos_8" ]; then
+  dnf install -y epel-release
+  dnf install -y 'dnf-command(config-manager)'
+  dnf config-manager --set-enabled PowerTools
+  dnf install -y python2 python3
+  alternatives --set python /usr/bin/python3
 fi
 
 # install the rpm
