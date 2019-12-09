@@ -155,11 +155,11 @@ void Mdvx::clearWriteFormat()
 // If true, old 32-bit headers are used
 // If false, new 64-bit headers are used
 
-void Mdvx::setWrite32BitHeaders()
+void Mdvx::setWrite32BitHeaders() const
 {
   _write32BitHeaders = true;
 }
-void Mdvx::clearWrite32BitHeaders()
+void Mdvx::clearWrite32BitHeaders() const
 {
   _write32BitHeaders = false;
 }
@@ -297,19 +297,8 @@ int Mdvx::writeToPath(const string &output_path)
 
   // check write 32-bit headers
   
-  char *write32BitHeaders = getenv("MDV_WRITE_32_BIT_HEADERS");
-  if (write32BitHeaders != NULL) {
-    if (!strcasecmp(write32BitHeaders, "TRUE")) {
-      if (_debug) {
-        cerr << "Mdvx::writeToPath() - env var MDV_WRITE_32_BIT_HEADERS set to true" << endl;
-      }
-      _write32BitHeaders = true;
-    }
-  }
-  if (_debug && _write32BitHeaders) {
-    cerr << "Mdvx::writeToPath() - writing 32-bit headers" << endl;
-  }
-  
+  _checkWrite32BitHeaders();
+
   // open tmp file
 
   Path outPath(fullOutPath);
@@ -1073,8 +1062,27 @@ void Mdvx::_checkEnvBeforeWrite() const
     }
   }
   
+  _checkWrite32BitHeaders();
+
 }
 
+void Mdvx::_checkWrite32BitHeaders() const
+{
+
+  char *write32BitHeaders = getenv("MDV_WRITE_32_BIT_HEADERS");
+  if (write32BitHeaders != NULL) {
+    if (!strcasecmp(write32BitHeaders, "TRUE")) {
+      if (_debug) {
+        cerr << "DEBUG - Mdvx::_checkWrite32BitHeaders()"
+             << " - env var MDV_WRITE_32_BIT_HEADERS set to true" << endl;
+      }
+      setWrite32BitHeaders();
+    }
+  }
+  if (_debug && _write32BitHeaders) {
+    cerr << "DEBUG - Mdvx::_checkWrite32BitHeaders() - writing 32-bit headers" << endl;
+  }
+}
 
 //////////////////////////////////////////////////////
 // compute output name and path for file write

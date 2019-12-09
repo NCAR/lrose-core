@@ -741,6 +741,7 @@ protected:
                           TaFile &outfile) const;
 
   void _checkEnvBeforeWrite() const;
+  void _checkWrite32BitHeaders() const;
   void _computeOutputPath(const string &outputDir,
                           string &outputName,
                           string &outputPath,
