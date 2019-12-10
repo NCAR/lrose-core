@@ -574,6 +574,8 @@ protected:
 
   string _errStr;
 
+  bool _32Bit;  // using 32-bit headers
+
   void _clearErrStr() { _errStr = ""; }
 
   void _addHdrsAndData(const DsMdvx &mdvx);

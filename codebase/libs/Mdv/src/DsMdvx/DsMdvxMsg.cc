@@ -48,7 +48,7 @@ using namespace std;
 DsMdvxMsg::DsMdvxMsg(memModel_t mem_model /* = CopyMem */) :
   DsServerMsg(mem_model)
 {
-  
+  _32Bit = false;
 }
 
 // destructor
@@ -68,6 +68,12 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
   // print header
 
   printHeader(out, spacer);
+
+  if (_32Bit) {
+    out << "Using 32-bit headers" << endl;
+  } else {
+    out << "Using 64-bit headers" << endl;
+  }
 
   // create map of ids and labels
 
