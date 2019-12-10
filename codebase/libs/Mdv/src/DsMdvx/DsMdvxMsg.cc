@@ -84,8 +84,11 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
   labels.insert(PartHeaderLabel(MDVP_CLIENT_IPADDR_PART,
 				"MDVP_CLIENT_IPADDR_PART"));
 
-  labels.insert(PartHeaderLabel(MDVP_FILE_SEARCH_PART,
-				"MDVP_FILE_SEARCH_PART"));
+  labels.insert(PartHeaderLabel(MDVP_FILE_SEARCH_PART_32,
+				"MDVP_FILE_SEARCH_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_FILE_SEARCH_PART_64,
+				"MDVP_FILE_SEARCH_PART_64"));
+
   labels.insert(PartHeaderLabel(MDVP_APP_NAME_PART,
 				"MDVP_APP_NAME_PART"));
 
@@ -114,8 +117,12 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
 				"MDVP_READ_FILL_MISSING_PART"));
   labels.insert(PartHeaderLabel(MDVP_READ_ENCODING_PART,
 				"MDVP_READ_ENCODING_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_REMAP_PART,
-				"MDVP_READ_REMAP_PART"));
+
+  labels.insert(PartHeaderLabel(MDVP_READ_REMAP_PART_32,
+				"MDVP_READ_REMAP_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_READ_REMAP_PART_64,
+				"MDVP_READ_REMAP_PART_64"));
+
   labels.insert(PartHeaderLabel(MDVP_READ_AUTO_REMAP_TO_LATLON_PART,
 				"MDVP_READ_AUTO_REMAP_TO_LATLON_PART"));
   labels.insert(PartHeaderLabel(MDVP_READ_FIELD_FILE_HEADERS_PART,
@@ -135,8 +142,11 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
 
   labels.insert(PartHeaderLabel(MDVP_WRITE_OPTIONS_PART,
 				"MDVP_WRITE_OPTIONS_PART"));
-  labels.insert(PartHeaderLabel(MDVP_TIME_LIST_OPTIONS_PART,
-				"MDVP_TIME_LIST_OPTIONS_PART"));
+
+  labels.insert(PartHeaderLabel(MDVP_TIME_LIST_OPTIONS_PART_32,
+				"MDVP_TIME_LIST_OPTIONS_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_TIME_LIST_OPTIONS_PART_64,
+				"MDVP_TIME_LIST_OPTIONS_PART_64"));
 
   labels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_PART,
 				"MDVP_MASTER_HEADER_PART"));
@@ -209,8 +219,12 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
 
   labels.insert(PartHeaderLabel(MDVP_CLIMO_STATISTIC_TYPE_PART,
 				"MDVP_CLIMO_STATISTIC_TYPE_PART"));
-  labels.insert(PartHeaderLabel(MDVP_CLIMO_DATA_RANGE_PART,
-				"MDVP_CLIMO_DATA_RANGE_PART"));
+
+  labels.insert(PartHeaderLabel(MDVP_CLIMO_DATA_RANGE_PART_32,
+				"MDVP_CLIMO_DATA_RANGE_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_CLIMO_DATA_RANGE_PART_64,
+				"MDVP_CLIMO_DATA_RANGE_PART_64"));
+
   labels.insert(PartHeaderLabel(MDVP_CLIMO_TIME_RANGE_PART,
 				"MDVP_CLIMO_TIME_RANGE_PART"));
   

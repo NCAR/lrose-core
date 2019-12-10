@@ -125,7 +125,7 @@ int DsMdvxMsg::_addReadSearch(const DsMdvx &mdvx)
   }
 
   BE_from_array_32(&fsearch, sizeof(fsearch));
-  addPart(MDVP_FILE_SEARCH_PART, sizeof(fsearch), &fsearch);
+  addPart(MDVP_FILE_SEARCH_PART_32, sizeof(fsearch), &fsearch);
 
   // optional part to constrain forecast lead times
 
@@ -483,7 +483,7 @@ void DsMdvxMsg::_addReadRemap(const Mdvx::coord_t &coords)
 
   // add
 
-  addPart(MDVP_READ_REMAP_PART, sizeof(remap), &remap);
+  addPart(MDVP_READ_REMAP_PART_64, sizeof(remap), &remap);
 
 }
 
@@ -718,7 +718,7 @@ void DsMdvxMsg::_addTimeListOptions(Mdvx::time_list_mode_t mode,
     _print_time_list_options(options, cerr);
   }
   BE_from_array_32(&options, sizeof(options));
-  addPart(MDVP_TIME_LIST_OPTIONS_PART, sizeof(options), &options);
+  addPart(MDVP_TIME_LIST_OPTIONS_PART_64, sizeof(options), &options);
 }
 
 /////////////////////////////////
@@ -1211,7 +1211,7 @@ void DsMdvxMsg::_addClimoDataRange(const time_t start_time,
     _print_climo_data_range(data_range, cerr);
   }
   BE_from_array_32(&data_range, sizeof(data_range));
-  addPart(MDVP_CLIMO_DATA_RANGE_PART, sizeof(data_range), &data_range);
+  addPart(MDVP_CLIMO_DATA_RANGE_PART_64, sizeof(data_range), &data_range);
 }
 
 /////////////////////////////

@@ -81,7 +81,7 @@ public:
     MDVP_CLIENT_HOST_PART                = DsServerMsg::DS_CLIENT_HOST,  // 128
     MDVP_CLIENT_IPADDR_PART              = DsServerMsg::DS_CLIENT_IPADDR,// 256
 
-    MDVP_FILE_SEARCH_PART                = 50100,
+    MDVP_FILE_SEARCH_PART_32             = 50100,
     MDVP_APP_NAME_PART                   = 50105,
 
     // current, read and write formats
@@ -101,7 +101,7 @@ public:
     MDVP_READ_COMPOSITE_PART             = 50170,
     MDVP_READ_FILL_MISSING_PART          = 50175,
     MDVP_READ_ENCODING_PART              = 50180,
-    MDVP_READ_REMAP_PART                 = 50190,
+    MDVP_READ_REMAP_PART_32              = 50190,
     MDVP_READ_AUTO_REMAP_TO_LATLON_PART  = 50191,
     MDVP_READ_FIELD_FILE_HEADERS_PART    = 50195,
     MDVP_READ_VSECT_WAYPTS_PART          = 50200,
@@ -122,7 +122,7 @@ public:
 
     // time list specs
 
-    MDVP_TIME_LIST_OPTIONS_PART          = 50400,
+    MDVP_TIME_LIST_OPTIONS_PART_32       = 50400,
 
     // headers
 
@@ -184,8 +184,15 @@ public:
     // Parts used by the DsMdvClimoServer
 
     MDVP_CLIMO_STATISTIC_TYPE_PART       = 52000,
-    MDVP_CLIMO_DATA_RANGE_PART           = 52100,
-    MDVP_CLIMO_TIME_RANGE_PART           = 52200
+    MDVP_CLIMO_DATA_RANGE_PART_32        = 52100,
+    MDVP_CLIMO_TIME_RANGE_PART           = 52200,
+
+    // 64 bit headers
+    
+    MDVP_FILE_SEARCH_PART_64             = 53100,
+    MDVP_READ_REMAP_PART_64              = 53190,
+    MDVP_TIME_LIST_OPTIONS_PART_64       = 53400,
+    MDVP_CLIMO_DATA_RANGE_PART_64        = 53100
 
   } msg_part_t;
 

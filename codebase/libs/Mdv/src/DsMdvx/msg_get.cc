@@ -136,7 +136,7 @@ int DsMdvxMsg::_getReadSearch(DsMdvx &mdvx)
     cerr << "Getting URL: " << _part2Str(urlPart) << endl;
   }
 
-  DsMsgPart * searchPart = getPartByType(MDVP_FILE_SEARCH_PART);
+  DsMsgPart * searchPart = getPartByType(MDVP_FILE_SEARCH_PART_64);
   if (searchPart == NULL) {     
     _errStr += "ERROR - DsMdvxMsg::_getReadSearch.\n";
     _errStr += "  No MDVP_FILE_SEARCH_PART found.\n";
@@ -337,7 +337,7 @@ int DsMdvxMsg::_getReadQualifiers(DsMdvx &mdvx)
 
   // remapping
 
-  if (getPartByType(MDVP_READ_REMAP_PART) != NULL) {
+  if (getPartByType(MDVP_READ_REMAP_PART_64) != NULL) {
     if (_getReadRemap(mdvx)) {
       _errStr += "ERROR - DsMdvxMsg::_getReadQualifiers.\n";
       return -1;
@@ -659,7 +659,7 @@ int DsMdvxMsg::_getReadRemap(DsMdvx &mdvx)
 
   // decode part
 
-  DsMsgPart * part = getPartByType(MDVP_READ_REMAP_PART);
+  DsMsgPart * part = getPartByType(MDVP_READ_REMAP_PART_64);
   if (part == NULL) {
     return -1;
   }
@@ -1430,7 +1430,7 @@ int DsMdvxMsg::_getTimeListOptions(DsMdvx &mdvx)
   DsURL url(urlStr);
   string dirStr = url.getFile();
 
-  part = getPartByType(MDVP_TIME_LIST_OPTIONS_PART);
+  part = getPartByType(MDVP_TIME_LIST_OPTIONS_PART_64);
   if (part == NULL) {
     _errStr += "ERROR - DsMdvxMsg::_getTimeListOptions\n";
     _errStr += "  Cannot find time list options part.\n";
@@ -1997,7 +1997,7 @@ int DsMdvxMsg::_getClimoStatTypes(DsMdvx &mdvx)
 int DsMdvxMsg::_getClimoDataRange(DsMdvx &mdvx)
 {
 
-  DsMsgPart * part = getPartByType(MDVP_CLIMO_DATA_RANGE_PART);
+  DsMsgPart * part = getPartByType(MDVP_CLIMO_DATA_RANGE_PART_64);
   if (part == NULL) {
     return -1;
   }
