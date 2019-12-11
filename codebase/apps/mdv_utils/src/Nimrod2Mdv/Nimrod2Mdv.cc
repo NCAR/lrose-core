@@ -48,6 +48,7 @@
 #include <didss/DataFileNames.hh>
 #include <dataport/bigend.h>
 #include <dataport/swap.h>
+#include <euclid/PjgMath.hh>
 #include <Mdv/MdvxField.hh>
 #include "Nimrod2Mdv.hh"
 using namespace std;
@@ -649,15 +650,22 @@ void Nimrod2Mdv::_initFieldHeaders(Mdvx::field_header_t &fhdr,
     fhdr.proj_type = Mdvx::PROJ_POLAR_STEREO;
     fhdr.proj_origin_lat = hdrFloat.origin_lat;
     fhdr.proj_origin_lon = hdrFloat.origin_lon;
-    fhdr.proj_param[0] = -90; // tangent lat at south pole
-    fhdr.proj_param[1] = hdrFloat.origin_lon; // tangent lon
+    fhdr.proj_param[0] = hdrFloat.origin_lon; // tangent lon
+    fhdr.proj_param[1] = 0; // pole 0=north, 1=south
     double standardLat = hdrFloat.origin_lat;
     double centralScale = (1.0 + sin(standardLat * DEG_TO_RAD)) / 2.0;
     fhdr.proj_param[2] = centralScale;
     fhdr.grid_dx = hdrFloat.delta_x / 1000.0; // km
     fhdr.grid_dy = hdrFloat.delta_y / 1000.0; // km
-    fhdr.grid_minx = hdrFloat.xpos_of_bot_left / 1000.0;
-    fhdr.grid_miny = hdrFloat.ypos_of_bot_left / 1000.0;
+    // Convert the lat/lon of the bottom left corner to kilometers,
+    // as needed for the field header
+    PjgPolarStereoMath polar_math(hdrFloat.origin_lon, true, centralScale);
+    polar_math.setOffsetOrigin(hdrFloat.origin_lat, hdrFloat.origin_lon);
+    double x, y;
+    polar_math.latlon2xy(hdrFloat.ypos_of_bot_left, hdrFloat.xpos_of_bot_left,
+                         x, y);
+    fhdr.grid_minx = x;
+    fhdr.grid_miny = y;
   } else {
     // flat
     fhdr.proj_type = Mdvx::PROJ_FLAT;
