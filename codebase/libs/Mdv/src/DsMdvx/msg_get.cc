@@ -136,27 +136,49 @@ int DsMdvxMsg::_getReadSearch(DsMdvx &mdvx)
     cerr << "Getting URL: " << _part2Str(urlPart) << endl;
   }
 
-  DsMsgPart * searchPart = getPartByType(MDVP_FILE_SEARCH_PART_64);
-  if (searchPart == NULL) {     
-    _errStr += "ERROR - DsMdvxMsg::_getReadSearch.\n";
-    _errStr += "  No MDVP_FILE_SEARCH_PART found.\n";
-    return -1;
-  }
+  // look for 64-bit version
 
-  // part must be big enough.
   file_search_t fsearch;
-  if (searchPart->getLength() != sizeof(fsearch)) {
-    _errStr += "ERROR - DsMdvxMsg::_getReadSearch.\n";
-    _errStr += "  MDVP_FILE_SEARCH_PART is wrong size.\n";
-    return -1;
+  DsMsgPart * searchPart = getPartByType(MDVP_FILE_SEARCH_PART_64);
+  if (searchPart == NULL) {
+    // 64-bit not found, try 32-bit
+    searchPart = getPartByType(MDVP_FILE_SEARCH_PART_32);
+    if (searchPart == NULL) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadSearch.\n";
+      _errStr += "  No MDVP_FILE_SEARCH_PART found.\n";
+      return -1;
+    }
+    _use32BitHeaders = true;
+    file_search_32_t fsearch32;
+    // part must be big enough.
+    if (searchPart->getLength() != sizeof(fsearch32)) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadSearch.\n";
+      _errStr += "  MDVP_FILE_SEARCH_PART_32 is wrong size.\n";
+      return -1;
+    }
+    memcpy(&fsearch32, searchPart->getBuf(), sizeof(fsearch32));
+    // byte swap
+    BE_to_array_32(&fsearch32, sizeof(fsearch32));
+    // convert to 64-bit
+    _copyFileSearch32to64(fsearch32, fsearch);
+  } else {
+    // 64-bit
+    _use32BitHeaders = false;
+    // part must be big enough.
+    if (searchPart->getLength() != sizeof(fsearch)) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadSearch.\n";
+      _errStr += "  MDVP_FILE_SEARCH_PART_64 is wrong size.\n";
+      return -1;
+    }
+    memcpy(&fsearch, searchPart->getBuf(), sizeof(fsearch));
+    // byte swap
+    BE_to_array_64(&fsearch, sizeof(fsearch));
   }
-
-  memcpy(&fsearch, searchPart->getBuf(), sizeof(fsearch));
-  BE_to_array_32(&fsearch, sizeof(fsearch));
+  
   if (_debug) {
     _print_file_search(fsearch, cerr);
   }
- 
+
   switch (fsearch.file_search_mode) {
   case MDVP_READ_FROM_PATH:
     mdvx.setReadPath(filledPath);
@@ -344,6 +366,13 @@ int DsMdvxMsg::_getReadQualifiers(DsMdvx &mdvx)
     }
   }
 
+  if (getPartByType(MDVP_READ_REMAP_PART_32) != NULL) {
+    if (_getReadRemap32(mdvx)) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadQualifiers.\n";
+      return -1;
+    }
+  }
+
   if (getPartByType(MDVP_READ_AUTO_REMAP_TO_LATLON_PART) != NULL) {
     if (_getReadAutoRemap2LatLon(mdvx)) {
       _errStr += "ERROR - DsMdvxMsg::_getReadQualifiers.\n";
@@ -471,7 +500,11 @@ int DsMdvxMsg::_getClimoQualifiers(DsMdvx &mdvx)
   
   // Date range
   
-  _getClimoDataRange(mdvx);
+  if (getPartByType(MDVP_FILE_SEARCH_PART_64) != NULL) {
+    _getClimoDataRange(mdvx);
+  } else if (getPartByType(MDVP_FILE_SEARCH_PART_32) != NULL) {
+    _getClimoDataRange32(mdvx);
+  }
   
   // Time range
   
@@ -672,8 +705,69 @@ int DsMdvxMsg::_getReadRemap(DsMdvx &mdvx)
     TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
     return -1;
   }
+
+  _use32BitHeaders = false;
+
   memcpy(&remap, part->getBuf(), sizeof(remap));
-  BE_to_array_32(&remap, sizeof(remap));
+  BE_to_array_64(&remap, sizeof(remap));
+  if (_debug) {
+    _print_read_remap(remap, cerr);
+  }
+  
+  // load up coord from remap into
+
+  Mdvx::coord_t remapCoord;
+  remapCoord.proj_type = remap.proj_type;
+  remapCoord.nx = remap.nx;
+  remapCoord.ny = remap.ny;
+  remapCoord.dx = remap.dx;
+  remapCoord.dy = remap.dy;
+  remapCoord.minx = remap.minx;
+  remapCoord.miny = remap.miny;
+  remapCoord.proj_origin_lat = remap.origin_lat;
+  remapCoord.proj_origin_lon = remap.origin_lon;
+  MdvxProj::_projParams2Coord((Mdvx::projection_type_t) remap.proj_type,
+			      remap.proj_params, remapCoord);
+  
+  // create projection
+  
+  MdvxProj remapProj(remapCoord);
+
+  // set read remap
+
+  mdvx.setReadRemap(remapProj);
+  
+  return 0;
+
+}
+
+int DsMdvxMsg::_getReadRemap32(DsMdvx &mdvx)
+{
+   
+  // decode part
+
+  DsMsgPart * part = getPartByType(MDVP_READ_REMAP_PART_32);
+  if (part == NULL) {
+    return -1;
+  }
+  read_remap_32_t remap32;
+  // part must be big enough.
+  if (part->getLength() != sizeof(remap32)) {
+    _errStr += "ERROR - DsMdvxMsg::_getReadRemap32.\n";
+    _errStr += "  Remap coords part is incorrect size.\n";
+    TaStr::AddInt(_errStr, "  Size expected: ", sizeof(remap32));
+    TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
+    return -1;
+  }
+
+  _use32BitHeaders = true;
+
+  memcpy(&remap32, part->getBuf(), sizeof(remap32));
+  BE_to_array_32(&remap32, sizeof(remap32));
+
+  read_remap_t remap;
+  _copyReadRemap32to64(remap32, remap);
+
   if (_debug) {
     _print_read_remap(remap, cerr);
   }
@@ -1430,23 +1524,44 @@ int DsMdvxMsg::_getTimeListOptions(DsMdvx &mdvx)
   DsURL url(urlStr);
   string dirStr = url.getFile();
 
+  time_list_options_t options;
   part = getPartByType(MDVP_TIME_LIST_OPTIONS_PART_64);
   if (part == NULL) {
-    _errStr += "ERROR - DsMdvxMsg::_getTimeListOptions\n";
-    _errStr += "  Cannot find time list options part.\n";
-    return -1;
+    // 64-bit not found, try 32-bit
+    part = getPartByType(MDVP_TIME_LIST_OPTIONS_PART_32);
+    if (part == NULL) {
+      _errStr += "ERROR - DsMdvxMsg::_getTimeListOptions.\n";
+      _errStr += "  No MDVP_TIME_LIST_OPTIONS_PART found.\n";
+      return -1;
+    }
+    _use32BitHeaders = true;
+    time_list_options_32_t options32;
+    // part must be big enough.
+    if (part->getLength() != sizeof(options32)) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadSearch.\n";
+      _errStr += "  MDVP_TIME_LIST_OPTIONS_PART_32 is wrong size.\n";
+      return -1;
+    }
+    memcpy(&options32, part->getBuf(), sizeof(options32));
+    // byte swap
+    BE_to_array_32(&options32, sizeof(options32));
+    // convert to 64-bit
+    _copyTimeListOptions32to64(options32, options);
+  } else {
+    // 64-bit
+    // part must be big enough.
+    if (part->getLength() != (sizeof(options))) {
+      _errStr += "ERROR - DsMdvxMsg::_getTimeListOptions.\n";
+      _errStr += "  Encoding part is incorrect size.\n";
+      TaStr::AddInt(_errStr, "  Size expected: ", sizeof(options));
+      TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
+      return -1;
+    }
+    _use32BitHeaders = false;
+    memcpy(&options, part->getBuf(), sizeof(options));
+    BE_to_array_64(&options, sizeof(options));
   }
-  time_list_options_t options;
-  // part must be big enough.
-  if (part->getLength() != (sizeof(options))) {
-    _errStr += "ERROR - DsMdvxMsg::_getTimeListOptions.\n";
-    _errStr += "  Encoding part is incorrect size.\n";
-    TaStr::AddInt(_errStr, "  Size expected: ", sizeof(options));
-    TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
-    return -1;
-  }
-  memcpy(&options, part->getBuf(), sizeof(options));
-  BE_to_array_32(&options, sizeof(options));
+
   if (_debug) {
     _print_time_list_options(options, cerr);
   }
@@ -2012,9 +2127,49 @@ int DsMdvxMsg::_getClimoDataRange(DsMdvx &mdvx)
     TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
     return -1;
   }
+  _use32BitHeaders = false;
 
   memcpy(&data_range, part->getBuf(), sizeof(data_range));
-  BE_to_array_32(&data_range, sizeof(data_range));
+  BE_to_array_64(&data_range, sizeof(data_range));
+  if (_debug) {
+    _print_climo_data_range(data_range, cerr);
+  }
+  
+  mdvx.setClimoDataRange(data_range.start_time,
+			 data_range.end_time);
+
+  return 0;
+
+}
+
+int DsMdvxMsg::_getClimoDataRange32(DsMdvx &mdvx)
+{
+
+  DsMsgPart * part = getPartByType(MDVP_CLIMO_DATA_RANGE_PART_32);
+  if (part == NULL) {
+    return -1;
+  }
+
+  climoDataRange_32_t data_range32;
+  
+  // part must be big enough.
+  if (part->getLength() != sizeof(data_range32)) {
+    _errStr += "ERROR - DsMdvxMsg::_getClimoDateRange32.\n";
+    _errStr += "  Climo date range part is incorrect size.\n";
+    TaStr::AddInt(_errStr, "  Size expected: ", sizeof(data_range32));
+    TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
+    return -1;
+  }
+  _use32BitHeaders = true;
+
+  memcpy(&data_range32, part->getBuf(), sizeof(data_range32));
+  BE_to_array_32(&data_range32, sizeof(data_range32));
+
+  // convert to 64 bit header
+
+  climoDataRange_t data_range;
+  _copyClimoDataRange32to64(data_range32, data_range);
+  
   if (_debug) {
     _print_climo_data_range(data_range, cerr);
   }

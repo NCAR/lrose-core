@@ -124,8 +124,15 @@ int DsMdvxMsg::_addReadSearch(const DsMdvx &mdvx)
     _print_file_search(fsearch, cerr);
   }
 
-  BE_from_array_32(&fsearch, sizeof(fsearch));
-  addPart(MDVP_FILE_SEARCH_PART_32, sizeof(fsearch), &fsearch);
+  if (_use32BitHeaders) {
+    file_search_32_t fsearch32;
+    _copyFileSearch64to32(fsearch, fsearch32);
+    BE_from_array_32(&fsearch32, sizeof(fsearch32));
+    addPart(MDVP_FILE_SEARCH_PART_32, sizeof(fsearch32), &fsearch32);
+  } else {
+    BE_from_array_64(&fsearch, sizeof(fsearch));
+    addPart(MDVP_FILE_SEARCH_PART_64, sizeof(fsearch), &fsearch);
+  }
 
   // optional part to constrain forecast lead times
 
@@ -477,13 +484,15 @@ void DsMdvxMsg::_addReadRemap(const Mdvx::coord_t &coords)
     _print_read_remap(remap, cerr);
   }
 
-  // byte ordering
-
-  BE_from_array_32(&remap, sizeof(remap));
-
-  // add
-
-  addPart(MDVP_READ_REMAP_PART_64, sizeof(remap), &remap);
+  if (_use32BitHeaders) {
+    read_remap_32_t remap32;
+    _copyReadRemap64to32(remap, remap32);
+    BE_from_array_32(&remap32, sizeof(remap32));
+    addPart(MDVP_READ_REMAP_PART_32, sizeof(remap32), &remap32);
+  } else {
+    BE_from_array_64(&remap, sizeof(remap));
+    addPart(MDVP_READ_REMAP_PART_64, sizeof(remap), &remap);
+  }
 
 }
 
@@ -717,8 +726,17 @@ void DsMdvxMsg::_addTimeListOptions(Mdvx::time_list_mode_t mode,
   if (_debug) {
     _print_time_list_options(options, cerr);
   }
-  BE_from_array_32(&options, sizeof(options));
-  addPart(MDVP_TIME_LIST_OPTIONS_PART_64, sizeof(options), &options);
+
+  if (_use32BitHeaders) {
+    time_list_options_32_t options32;
+    _copyTimeListOptions64to32(options, options32);
+    BE_from_array_32(&options32, sizeof(options32));
+    addPart(MDVP_TIME_LIST_OPTIONS_PART_32, sizeof(options32), &options32);
+  } else {
+    BE_from_array_64(&options, sizeof(options));
+    addPart(MDVP_TIME_LIST_OPTIONS_PART_64, sizeof(options), &options);
+  }
+
 }
 
 /////////////////////////////////
@@ -1210,8 +1228,16 @@ void DsMdvxMsg::_addClimoDataRange(const time_t start_time,
   if (_debug) {
     _print_climo_data_range(data_range, cerr);
   }
-  BE_from_array_32(&data_range, sizeof(data_range));
-  addPart(MDVP_CLIMO_DATA_RANGE_PART_64, sizeof(data_range), &data_range);
+  if (_use32BitHeaders) {
+    climoDataRange_32_t data_range32;
+    _copyClimoDataRange64to32(data_range, data_range32);
+    BE_from_array_32(&data_range32, sizeof(data_range32));
+    addPart(MDVP_CLIMO_DATA_RANGE_PART_32, sizeof(data_range32), &data_range32);
+  } else {
+    BE_from_array_64(&data_range, sizeof(data_range));
+    addPart(MDVP_CLIMO_DATA_RANGE_PART_64, sizeof(data_range), &data_range);
+  }
+
 }
 
 /////////////////////////////

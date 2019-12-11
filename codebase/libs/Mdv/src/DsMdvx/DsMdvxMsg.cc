@@ -48,7 +48,7 @@ using namespace std;
 DsMdvxMsg::DsMdvxMsg(memModel_t mem_model /* = CopyMem */) :
   DsServerMsg(mem_model)
 {
-  _32Bit = false;
+  _use32BitHeaders = true;
 }
 
 // destructor
@@ -69,7 +69,7 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
 
   printHeader(out, spacer);
 
-  if (_32Bit) {
+  if (_use32BitHeaders) {
     out << "Using 32-bit headers" << endl;
   } else {
     out << "Using 64-bit headers" << endl;
@@ -246,5 +246,145 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
 void DsMdvxMsg::printHeader(ostream &out, const char *spacer) const
 {
   DsServerMsg::printHeader(out, spacer);
+}
+
+/////////////////////////////////////////////////////////////////////
+// file search header 32-bit to 64-bit and vice versa
+
+void DsMdvxMsg::_copyFileSearch32to64(const file_search_32_t &fsearch32,
+                                      file_search_64_t &fsearch64)
+  
+{
+
+  memset(&fsearch64, 0, sizeof(fsearch64));
+
+  fsearch64.file_search_mode = fsearch32.file_search_mode;
+  fsearch64.search_margin_secs = fsearch32.search_margin_secs;
+  fsearch64.search_time = fsearch32.search_time;
+  fsearch64.forecast_lead_secs = fsearch32.forecast_lead_secs;
+  fsearch64.valid_time_search_wt = fsearch32.valid_time_search_wt;
+
+}
+
+void DsMdvxMsg::_copyFileSearch64to32(const file_search_64_t &fsearch64,
+                                      file_search_32_t &fsearch32)
+  
+{
+
+  memset(&fsearch32, 0, sizeof(fsearch32));
+
+  fsearch32.file_search_mode = fsearch64.file_search_mode;
+  fsearch32.search_margin_secs = fsearch64.search_margin_secs;
+  fsearch32.search_time = fsearch64.search_time;
+  fsearch32.forecast_lead_secs = fsearch64.forecast_lead_secs;
+  fsearch32.valid_time_search_wt = fsearch64.valid_time_search_wt;
+
+}
+
+/////////////////////////////////////////////////////////////////////
+// read remap header 32-bit to 64-bit and vice versa
+
+void DsMdvxMsg::_copyReadRemap32to64(const read_remap_32_t &remap32,
+                                     read_remap_64_t &remap64)
+  
+{
+
+  memset(&remap64, 0, sizeof(remap64));
+
+  remap64.proj_type = remap32.proj_type;
+  remap64.nx = remap32.nx;
+  remap64.ny = remap32.ny;
+  remap64.minx = remap32.minx;
+  remap64.miny = remap32.miny;
+  remap64.dx = remap32.dx;
+  remap64.dy = remap32.dy;
+  remap64.origin_lat = remap32.origin_lat;
+  remap64.origin_lon = remap32.origin_lon;
+  for (int ii = 0; ii < MDV_MAX_PROJ_PARAMS; ii++) {
+    remap64.proj_params[ii] = remap32.proj_params[ii];
+  }
+
+}
+
+void DsMdvxMsg::_copyReadRemap64to32(const read_remap_64_t &remap64,
+                                     read_remap_32_t &remap32)
+  
+{
+
+  memset(&remap32, 0, sizeof(remap32));
+
+  remap32.proj_type = remap64.proj_type;
+  remap32.nx = remap64.nx;
+  remap32.ny = remap64.ny;
+  remap32.minx = remap64.minx;
+  remap32.miny = remap64.miny;
+  remap32.dx = remap64.dx;
+  remap32.dy = remap64.dy;
+  remap32.origin_lat = remap64.origin_lat;
+  remap32.origin_lon = remap64.origin_lon;
+  for (int ii = 0; ii < MDV_MAX_PROJ_PARAMS; ii++) {
+    remap32.proj_params[ii] = remap64.proj_params[ii];
+  }
+
+}
+
+/////////////////////////////////////////////////////////////////////
+// time list header 32-bit to 64-bit and vice versa
+
+void DsMdvxMsg::_copyTimeListOptions32to64(const time_list_options_32_t &tlist32,
+                                           time_list_options_64_t &tlist64)
+  
+{
+
+  memset(&tlist64, 0, sizeof(tlist64));
+
+  tlist64.mode = tlist32.mode;
+  tlist64.start_time = tlist32.start_time;
+  tlist64.end_time = tlist32.end_time;
+  tlist64.gen_time = tlist32.gen_time;
+  tlist64.search_time = tlist32.search_time;
+  tlist64.time_margin = tlist32.time_margin;
+
+}
+
+void DsMdvxMsg::_copyTimeListOptions64to32(const time_list_options_64_t &tlist64,
+                                           time_list_options_32_t &tlist32)
+  
+{
+
+  memset(&tlist32, 0, sizeof(tlist32));
+
+  tlist32.mode = tlist64.mode;
+  tlist32.start_time = tlist64.start_time;
+  tlist32.end_time = tlist64.end_time;
+  tlist32.gen_time = tlist64.gen_time;
+  tlist32.search_time = tlist64.search_time;
+  tlist32.time_margin = tlist64.time_margin;
+
+}
+
+/////////////////////////////////////////////////////////////////////
+// climo data range header 32-bit to 64-bit and vice versa
+
+void DsMdvxMsg::_copyClimoDataRange32to64(const climoDataRange_32_t &drange32,
+                                          climoDataRange_64_t &drange64)
+  
+{
+
+  memset(&drange64, 0, sizeof(drange64));
+  drange64.start_time = drange32.start_time;
+  drange64.end_time = drange32.end_time;
+
+}
+
+void DsMdvxMsg::_copyClimoDataRange64to32(const climoDataRange_64_t &drange64,
+                                          climoDataRange_32_t &drange32)
+  
+{
+
+  memset(&drange32, 0, sizeof(drange32));
+  drange32.start_time = drange64.start_time;
+  drange32.end_time = drange64.end_time;
+
 }
 

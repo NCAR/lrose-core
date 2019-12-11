@@ -216,12 +216,12 @@ public:
   } file_search_32_t;
    
   typedef struct {
+    si64 file_search_mode;
+    si64 search_margin_secs;
     si64 search_time;
-    si32 file_search_mode;
-    si32 search_margin_secs;
-    si32 forecast_lead_secs;
-    fl32 valid_time_search_wt;
-    si32 spare[2];
+    si64 forecast_lead_secs;
+    fl64 valid_time_search_wt;
+    si64 spare[3];
   } file_search_64_t;
 
   typedef file_search_64_t file_search_t;
@@ -292,17 +292,17 @@ public:
   } read_remap_32_t;
 
   typedef struct {
-    si32 proj_type;
-    si32 nx;
-    si32 ny;
-    si32 spare_si32[3];
+    si64 proj_type;
+    si64 nx;
+    si64 ny;
+    si64 spare_si64[5];
     fl64 minx;
     fl64 miny;
     fl64 dx;
     fl64 dy;
     fl64 origin_lat;
     fl64 origin_lon;
-    fl64 proj_params[8];
+    fl64 proj_params[MDV64_MAX_PROJ_PARAMS];
     fl64 spare_fl64[6];
   } read_remap_64_t;
 
@@ -333,6 +333,7 @@ public:
     si64 gen_time;
     si64 search_time;
     si64 time_margin;
+    si64 spare[4];
   } time_list_options_64_t;
 
   typedef time_list_options_64_t time_list_options_t;
@@ -400,7 +401,7 @@ public:
   typedef struct {
     si64 start_time;     // Start time for climo request
     si64 end_time;       // End time for climo request
-    si64 spare[2];
+    si64 spare[4];
   } climoDataRange_64_t;
 
   typedef climoDataRange_64_t climoDataRange_t;
@@ -560,6 +561,10 @@ public:
   // returns 0 on success, -1 on error
 
   int disassemble(const void *in_msg, const ssize_t msg_len, DsMdvx &mdvx);
+
+  // set the use of 32-bit headers (backward compatibility mode)
+
+  void setUse32BitHeaders(bool val = true) { _use32BitHeaders = val; }
   
   // get error string
 
@@ -574,7 +579,7 @@ protected:
 
   string _errStr;
 
-  bool _32Bit;  // using 32-bit headers
+  bool _use32BitHeaders;  // using 32-bit headers
 
   void _clearErrStr() { _errStr = ""; }
 
@@ -712,6 +717,7 @@ protected:
   int _getReadComposite(DsMdvx &mdvx);
   int _getReadEncoding(DsMdvx &mdvx);
   int _getReadRemap(DsMdvx &mdvx);
+  int _getReadRemap32(DsMdvx &mdvx);
   int _getReadAutoRemap2LatLon(DsMdvx &mdvx);
   int _getReadDecimate(DsMdvx &mdvx);
   int _getReadTimeListAlso(DsMdvx &mdvx);
@@ -764,6 +770,7 @@ protected:
   int _getClimoQualifiers(DsMdvx &mdvx);
   int _getClimoStatTypes(DsMdvx &mdvx);
   int _getClimoDataRange(DsMdvx &mdvx);
+  int _getClimoDataRange32(DsMdvx &mdvx);
   int _getClimoTimeRange(DsMdvx &mdvx);
   
   int _getAppName(DsMdvx &mdvx);
@@ -839,6 +846,32 @@ protected:
   // make sure it is null terminated etc
 
   string _part2Str(const DsMsgPart *part);
+
+  // 32-bit to 64-bit headers and vice versa
+  
+  void _copyFileSearch32to64(const file_search_32_t &fsearch32,
+                             file_search_64_t &fsearch64);
+
+  void _copyFileSearch64to32(const file_search_64_t &fsearch64,
+                             file_search_32_t &fsearch32);
+
+  void _copyReadRemap32to64(const read_remap_32_t &remap32,
+                            read_remap_64_t &remap64);
+
+  void _copyReadRemap64to32(const read_remap_64_t &remap64,
+                            read_remap_32_t &remap32);
+
+  void _copyTimeListOptions32to64(const time_list_options_32_t &tlist32,
+                                  time_list_options_64_t &tlist64);
+  
+  void _copyTimeListOptions64to32(const time_list_options_64_t &tlist64,
+                                  time_list_options_32_t &tlist32);
+  
+  void _copyClimoDataRange32to64(const climoDataRange_32_t &drange32,
+                                 climoDataRange_64_t &drange64);
+
+  void _copyClimoDataRange64to32(const climoDataRange_64_t &drange64,
+                                 climoDataRange_32_t &drange32);
 
 private:
 
