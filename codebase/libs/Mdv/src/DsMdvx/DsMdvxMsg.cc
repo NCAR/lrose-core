@@ -43,19 +43,138 @@
 #include <toolsa/mem.h>
 using namespace std;
 
+//////////////////////////////////////////
 // constructor
 
 DsMdvxMsg::DsMdvxMsg(memModel_t mem_model /* = CopyMem */) :
   DsServerMsg(mem_model)
 {
-  _use32BitHeaders = true;
+  _use32BitHeaders = false;
 }
 
+//////////////////////////////////////////
 // destructor
 
 DsMdvxMsg::~DsMdvxMsg()
 {
 
+}
+
+//////////////////////////////////////////////////
+// check parts for consistency - 32-bit or 64-bit?
+// returns 0 on success, -1 on failure
+
+int DsMdvxMsg::checkParts() const
+{
+  _use32BitHeaders = _has32BitParts();
+  bool has64Bit = _has64BitParts();
+  if (_use32BitHeaders && has64Bit) {
+    cerr << "ERROR - DsMdvxMsg::checkParts()" << endl;
+    cerr << "Message has both 32 and 64 bit headers" << endl;
+    print(cerr, "  ");
+    return -1;
+  }
+  return 0;
+}
+
+//////////////////////////////////////////
+// check for 32-bit or 64-bit parts
+//
+
+bool DsMdvxMsg::_has32BitParts() const
+{
+  
+  if (getPartByType(MDVP_MASTER_HEADER_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_MASTER_HEADER_FILE_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_FIELD_HEADER_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_FIELD_HEADER_FILE_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_FIELD_HEADER_FILE_FIELD_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_VLEVEL_HEADER_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_VLEVEL_HEADER_FILE_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_CHUNK_HEADER_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_CHUNK_HEADER_FILE_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_FILE_SEARCH_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_READ_REMAP_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_TIME_LIST_OPTIONS_PART_32) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_CLIMO_DATA_RANGE_PART_32) != NULL) {
+    return true;
+  }
+  return false;
+}
+
+bool DsMdvxMsg::_has64BitParts() const
+{
+  
+  if (getPartByType(MDVP_MASTER_HEADER_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_MASTER_HEADER_FILE_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_FIELD_HEADER_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_FIELD_HEADER_FILE_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_FIELD_HEADER_FILE_FIELD_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_VLEVEL_HEADER_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_VLEVEL_HEADER_FILE_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_CHUNK_HEADER_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_CHUNK_HEADER_FILE_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_FILE_SEARCH_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_READ_REMAP_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_TIME_LIST_OPTIONS_PART_64) != NULL) {
+    return true;
+  }
+  if (getPartByType(MDVP_CLIMO_DATA_RANGE_PART_64) != NULL) {
+    return true;
+  }
+  return false;
 }
 
 //////////////////////////////////////////
@@ -69,10 +188,11 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
 
   printHeader(out, spacer);
 
-  if (_use32BitHeaders) {
-    out << "Using 32-bit headers" << endl;
-  } else {
-    out << "Using 64-bit headers" << endl;
+  if (_has32BitParts()) {
+    out << "Contains 32-bit header parts" << endl;
+  }
+  if (_has64BitParts()) {
+    out << "Contains 64-bit header parts" << endl;
   }
 
   // create map of ids and labels
@@ -154,30 +274,52 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
   labels.insert(PartHeaderLabel(MDVP_TIME_LIST_OPTIONS_PART_64,
 				"MDVP_TIME_LIST_OPTIONS_PART_64"));
 
-  labels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_PART,
-				"MDVP_MASTER_HEADER_PART"));
-  labels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_FILE_PART,
-				"MDVP_MASTER_HEADER_FILE_PART"));
-  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_PART,
-				"MDVP_FIELD_HEADER_PART"));
-  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_PART,
-				"MDVP_FIELD_HEADER_FILE_PART"));
-  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_FIELD_PART,
-				"MDVP_FIELD_HEADER_FILE_FIELD_PART"));
-  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_PART,
-				"MDVP_VLEVEL_HEADER_PART"));
-  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_PART,
-				"MDVP_VLEVEL_HEADER_FILE_PART"));
-  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_FIELD_PART,
-				"MDVP_VLEVEL_HEADER_FILE_FIELD_PART"));
-  labels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_PART,
-				"MDVP_CHUNK_HEADER_PART"));
-  labels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_FILE_PART,
-				"MDVP_CHUNK_HEADER_FILE_PART"));
+  labels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_PART_32,
+				"MDVP_MASTER_HEADER_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_FILE_PART_32,
+				"MDVP_MASTER_HEADER_FILE_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_PART_32,
+				"MDVP_FIELD_HEADER_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_PART_32,
+				"MDVP_FIELD_HEADER_FILE_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_FIELD_PART_32,
+				"MDVP_FIELD_HEADER_FILE_FIELD_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_PART_32,
+				"MDVP_VLEVEL_HEADER_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_PART_32,
+				"MDVP_VLEVEL_HEADER_FILE_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32,
+				"MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_PART_32,
+				"MDVP_CHUNK_HEADER_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_FILE_PART_32,
+				"MDVP_CHUNK_HEADER_FILE_PART_32"));
+
   labels.insert(PartHeaderLabel(MDVP_FIELD_DATA_PART,
 				"MDVP_FIELD_DATA_PART"));
   labels.insert(PartHeaderLabel(MDVP_CHUNK_DATA_PART,
 				"MDVP_CHUNK_DATA_PART"));
+
+  labels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_PART_64,
+				"MDVP_MASTER_HEADER_PART_64"));
+  labels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_FILE_PART_64,
+				"MDVP_MASTER_HEADER_FILE_PART_64"));
+  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_PART_64,
+				"MDVP_FIELD_HEADER_PART_64"));
+  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_PART_64,
+				"MDVP_FIELD_HEADER_FILE_PART_64"));
+  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_FIELD_PART_64,
+				"MDVP_FIELD_HEADER_FILE_FIELD_PART_64"));
+  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_PART_64,
+				"MDVP_VLEVEL_HEADER_PART_64"));
+  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_PART_64,
+				"MDVP_VLEVEL_HEADER_FILE_PART_64"));
+  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64,
+				"MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64"));
+  labels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_PART_64,
+				"MDVP_CHUNK_HEADER_PART_64"));
+  labels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_FILE_PART_64,
+				"MDVP_CHUNK_HEADER_FILE_PART_64"));
 
   labels.insert(PartHeaderLabel(MDVP_VSECT_SAMPLE_PTS_PART,
 				"MDVP_VSECT_SAMPLE_PTS_PART"));

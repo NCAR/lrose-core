@@ -148,21 +148,36 @@ void *DsMdvxMsg::assembleReadAllHdrsReturn(const DsMdvx &mdvx)
 
   // add header parts
 
-  _addMasterHeader(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART);
-  
-  for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
-    _addFieldHeader(mdvx._fhdrsFile[i],
-		    MDVP_FIELD_HEADER_FILE_PART);
-  }
-
-  for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
-    _addVlevelHeader(mdvx._vhdrsFile[i],
-		     MDVP_VLEVEL_HEADER_FILE_PART);
-  }
-
-  for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
-    _addChunkHeader(mdvx._chdrsFile[i],
-		    MDVP_CHUNK_HEADER_FILE_PART);
+  if (_use32BitHeaders) {
+    // 32-bit headers
+    _addMasterHeader32(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_32);
+    for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
+      _addFieldHeader32(mdvx._fhdrsFile[i],
+                        MDVP_FIELD_HEADER_FILE_PART_32);
+    }
+    for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
+      _addVlevelHeader32(mdvx._vhdrsFile[i],
+                         MDVP_VLEVEL_HEADER_FILE_PART_32);
+    }
+    for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
+      _addChunkHeader32(mdvx._chdrsFile[i],
+                        MDVP_CHUNK_HEADER_FILE_PART_32);
+    }
+  } else {
+    // 64-bit headers
+    _addMasterHeader64(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_64);
+    for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
+      _addFieldHeader64(mdvx._fhdrsFile[i],
+                        MDVP_FIELD_HEADER_FILE_PART_64);
+    }
+    for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
+      _addVlevelHeader64(mdvx._vhdrsFile[i],
+                         MDVP_VLEVEL_HEADER_FILE_PART_64);
+    }
+    for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
+      _addChunkHeader64(mdvx._chdrsFile[i],
+                        MDVP_CHUNK_HEADER_FILE_PART_64);
+    }
   }
 
   // add path in use
@@ -875,18 +890,28 @@ void *DsMdvxMsg::assembleCompileTimeHeightReturn(const DsMdvx &mdvx)
       
     } else {
       
-      // add master header
-      _addMasterHeader(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART);
-      
-      // add fields
-      for (int i = 0; i < mdvx.getNFields(); i++) {
-        _addFieldHeader(mdvx.getFieldByNum(i)->getFieldHeader(),
-                        MDVP_FIELD_HEADER_PART);
-        _addVlevelHeader(mdvx.getFieldByNum(i)->getVlevelHeader(),
-                         MDVP_VLEVEL_HEADER_PART);
-        _addFieldData(*mdvx.getFieldByNum(i));
+      if (_use32BitHeaders) {
+        // 32-bit
+        _addMasterHeader32(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART_32);
+        for (int i = 0; i < mdvx.getNFields(); i++) {
+          _addFieldHeader32(mdvx.getFieldByNum(i)->getFieldHeader(),
+                            MDVP_FIELD_HEADER_PART_32);
+          _addVlevelHeader32(mdvx.getFieldByNum(i)->getVlevelHeader(),
+                             MDVP_VLEVEL_HEADER_PART_32);
+          _addFieldData(*mdvx.getFieldByNum(i));
+        }
+      } else {
+        // 64-bit
+        _addMasterHeader64(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART_64);
+        for (int i = 0; i < mdvx.getNFields(); i++) {
+          _addFieldHeader64(mdvx.getFieldByNum(i)->getFieldHeader(),
+                            MDVP_FIELD_HEADER_PART_64);
+          _addVlevelHeader64(mdvx.getFieldByNum(i)->getVlevelHeader(),
+                             MDVP_VLEVEL_HEADER_PART_64);
+          _addFieldData(*mdvx.getFieldByNum(i));
+        }
       }
-      
+
     }
 
   }
@@ -1266,21 +1291,36 @@ void *DsMdvxMsg::assembleReadAllHdrsNcfReturn(const DsMdvx &mdvx)
     
     // add header parts
 
-    _addMasterHeader(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART);
-  
-    for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
-      _addFieldHeader(mdvx._fhdrsFile[i],
-		      MDVP_FIELD_HEADER_FILE_PART);
-    }
-    
-    for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
-      _addVlevelHeader(mdvx._vhdrsFile[i],
-		       MDVP_VLEVEL_HEADER_FILE_PART);
-    }
-
-    for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
-      _addChunkHeader(mdvx._chdrsFile[i],
-		      MDVP_CHUNK_HEADER_FILE_PART);
+    if (_use32BitHeaders) {
+      // 32-bit
+      _addMasterHeader32(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_32);
+      for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
+        _addFieldHeader32(mdvx._fhdrsFile[i],
+                          MDVP_FIELD_HEADER_FILE_PART_32);
+      }
+      for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
+        _addVlevelHeader32(mdvx._vhdrsFile[i],
+                           MDVP_VLEVEL_HEADER_FILE_PART_32);
+      }
+      for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
+        _addChunkHeader32(mdvx._chdrsFile[i],
+                          MDVP_CHUNK_HEADER_FILE_PART_32);
+      }
+    } else {
+      // 64-bit
+      _addMasterHeader64(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_64);
+      for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
+        _addFieldHeader64(mdvx._fhdrsFile[i],
+                          MDVP_FIELD_HEADER_FILE_PART_64);
+      }
+      for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
+        _addVlevelHeader64(mdvx._vhdrsFile[i],
+                           MDVP_VLEVEL_HEADER_FILE_PART_64);
+      }
+      for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
+        _addChunkHeader64(mdvx._chdrsFile[i],
+                          MDVP_CHUNK_HEADER_FILE_PART_64);
+      }
     }
 
   }
@@ -1556,22 +1596,38 @@ void *DsMdvxMsg::assembleReadAllHdrsRadxReturn(const DsMdvx &mdvx)
     
     // add header parts
 
-    _addMasterHeader(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART);
+    if (_use32BitHeaders) {
+      // 32-bit
+      _addMasterHeader32(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_32);
+      for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
+        _addFieldHeader32(mdvx._fhdrsFile[i],
+                          MDVP_FIELD_HEADER_FILE_PART_32);
+      }
+      for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
+        _addVlevelHeader32(mdvx._vhdrsFile[i],
+                           MDVP_VLEVEL_HEADER_FILE_PART_32);
+      }
+      for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
+        _addChunkHeader32(mdvx._chdrsFile[i],
+                          MDVP_CHUNK_HEADER_FILE_PART_32);
+      }
+    } else {
+      // 64-bit
+      _addMasterHeader64(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_64);
+      for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
+        _addFieldHeader64(mdvx._fhdrsFile[i],
+                          MDVP_FIELD_HEADER_FILE_PART_64);
+      }
+      for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
+        _addVlevelHeader64(mdvx._vhdrsFile[i],
+                           MDVP_VLEVEL_HEADER_FILE_PART_64);
+      }
+      for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
+        _addChunkHeader64(mdvx._chdrsFile[i],
+                          MDVP_CHUNK_HEADER_FILE_PART_64);
+      }
+    }
 
-    for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
-      _addFieldHeader(mdvx._fhdrsFile[i],
-		      MDVP_FIELD_HEADER_FILE_PART);
-    }
-    
-    for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
-      _addVlevelHeader(mdvx._vhdrsFile[i],
-		       MDVP_VLEVEL_HEADER_FILE_PART);
-    }
-
-    for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
-      _addChunkHeader(mdvx._chdrsFile[i],
-		      MDVP_CHUNK_HEADER_FILE_PART);
-    }
 
   }
 
@@ -1913,18 +1969,36 @@ void DsMdvxMsg::_addHdrsAndData(const DsMdvx &mdvx)
 
   // add mdv headers and data
 
-  _addMasterHeader(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART);
-  for (int i = 0; i < mdvx.getNFields(); i++) {
-    _addFieldHeader(mdvx.getFieldByNum(i)->getFieldHeader(),
-                    MDVP_FIELD_HEADER_PART);
-    _addVlevelHeader(mdvx.getFieldByNum(i)->getVlevelHeader(),
-                     MDVP_VLEVEL_HEADER_PART);
-    _addFieldData(*mdvx.getFieldByNum(i));
-  }
-  for (int i = 0; i < mdvx.getNChunks(); i++) {
-    _addChunkHeader(mdvx.getChunkByNum(i)->getHeader(),
-                    MDVP_CHUNK_HEADER_PART);
-    _addChunkData(*mdvx.getChunkByNum(i));
+  if (_use32BitHeaders) {
+    // 32-bit
+    _addMasterHeader32(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART_32);
+    for (int i = 0; i < mdvx.getNFields(); i++) {
+      _addFieldHeader32(mdvx.getFieldByNum(i)->getFieldHeader(),
+                        MDVP_FIELD_HEADER_PART_32);
+      _addVlevelHeader32(mdvx.getFieldByNum(i)->getVlevelHeader(),
+                         MDVP_VLEVEL_HEADER_PART_32);
+      _addFieldData(*mdvx.getFieldByNum(i));
+    }
+    for (int i = 0; i < mdvx.getNChunks(); i++) {
+      _addChunkHeader32(mdvx.getChunkByNum(i)->getHeader(),
+                        MDVP_CHUNK_HEADER_PART_32);
+      _addChunkData(*mdvx.getChunkByNum(i));
+    }
+  } else {
+    // 64-bit
+    _addMasterHeader64(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART_64);
+    for (int i = 0; i < mdvx.getNFields(); i++) {
+      _addFieldHeader64(mdvx.getFieldByNum(i)->getFieldHeader(),
+                        MDVP_FIELD_HEADER_PART_64);
+      _addVlevelHeader64(mdvx.getFieldByNum(i)->getVlevelHeader(),
+                         MDVP_VLEVEL_HEADER_PART_64);
+      _addFieldData(*mdvx.getFieldByNum(i));
+    }
+    for (int i = 0; i < mdvx.getNChunks(); i++) {
+      _addChunkHeader64(mdvx.getChunkByNum(i)->getHeader(),
+                        MDVP_CHUNK_HEADER_PART_64);
+      _addChunkData(*mdvx.getChunkByNum(i));
+    }
   }
 
 }
@@ -1953,42 +2027,83 @@ void DsMdvxMsg::_addHdrsAndDataExtended(const DsMdvx &mdvx)
     // if requested, add headers exactly as in the file
     for (int i = 0; i < mdvx.getNFields(); i++) {
       if (mdvx.getFieldByNum(i)->getFieldHeaderFile() != NULL) {
-        _addFieldHeader(*(mdvx.getFieldByNum(i)->getFieldHeaderFile()),
-                        MDVP_FIELD_HEADER_FILE_FIELD_PART);
+        if (_use32BitHeaders) {
+          // 32-bit
+          _addFieldHeader32(*(mdvx.getFieldByNum(i)->getFieldHeaderFile()),
+                            MDVP_FIELD_HEADER_FILE_FIELD_PART_32);
+        } else {
+          // 64-bit
+          _addFieldHeader64(*(mdvx.getFieldByNum(i)->getFieldHeaderFile()),
+                            MDVP_FIELD_HEADER_FILE_FIELD_PART_64);
+        }
       }
       if (mdvx.getFieldByNum(i)->getVlevelHeaderFile() != NULL) {
-        _addVlevelHeader(*(mdvx.getFieldByNum(i)->getVlevelHeaderFile()),
-                         MDVP_VLEVEL_HEADER_FILE_FIELD_PART);
+        if (_use32BitHeaders) {
+          // 32-bit
+          _addVlevelHeader32(*(mdvx.getFieldByNum(i)->getVlevelHeaderFile()),
+                             MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32);
+        } else {
+          // 64-bit
+          _addVlevelHeader64(*(mdvx.getFieldByNum(i)->getVlevelHeaderFile()),
+                             MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64);
+        }
       }
     }
     
   } else {
     
-    // add master header
-    _addMasterHeader(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART);
-    
-    // add fields
-    for (int i = 0; i < mdvx.getNFields(); i++) {
-      _addFieldHeader(mdvx.getFieldByNum(i)->getFieldHeader(),
-                      MDVP_FIELD_HEADER_PART);
-      _addVlevelHeader(mdvx.getFieldByNum(i)->getVlevelHeader(),
-                       MDVP_VLEVEL_HEADER_PART);
-      if (mdvx.getFieldByNum(i)->getFieldHeaderFile() != NULL) {
-        _addFieldHeader(*(mdvx.getFieldByNum(i)->getFieldHeaderFile()),
-                        MDVP_FIELD_HEADER_FILE_FIELD_PART);
+    if (_use32BitHeaders) {
+      // 32-bit
+      // add master header
+      _addMasterHeader32(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART_32);
+      // add fields
+      for (int i = 0; i < mdvx.getNFields(); i++) {
+        _addFieldHeader32(mdvx.getFieldByNum(i)->getFieldHeader(),
+                          MDVP_FIELD_HEADER_PART_32);
+        _addVlevelHeader32(mdvx.getFieldByNum(i)->getVlevelHeader(),
+                           MDVP_VLEVEL_HEADER_PART_32);
+        if (mdvx.getFieldByNum(i)->getFieldHeaderFile() != NULL) {
+          _addFieldHeader32(*(mdvx.getFieldByNum(i)->getFieldHeaderFile()),
+                            MDVP_FIELD_HEADER_FILE_FIELD_PART_32);
+        }
+        if (mdvx.getFieldByNum(i)->getVlevelHeaderFile() != NULL) {
+          _addVlevelHeader32(*(mdvx.getFieldByNum(i)->getVlevelHeaderFile()),
+                             MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32);
+        }
+        _addFieldData(*mdvx.getFieldByNum(i));
+      } // i
+      // add chunks
+      for (int i = 0; i < mdvx.getNChunks(); i++) {
+        _addChunkHeader32(mdvx.getChunkByNum(i)->getHeader(),
+                          MDVP_CHUNK_HEADER_PART_32);
+        _addChunkData(*mdvx.getChunkByNum(i));
       }
-      if (mdvx.getFieldByNum(i)->getVlevelHeaderFile() != NULL) {
-        _addVlevelHeader(*(mdvx.getFieldByNum(i)->getVlevelHeaderFile()),
-                         MDVP_VLEVEL_HEADER_FILE_FIELD_PART);
+    } else {
+      // 64-bit
+      // add master header
+      _addMasterHeader64(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART_64);
+      // add fields
+      for (int i = 0; i < mdvx.getNFields(); i++) {
+        _addFieldHeader64(mdvx.getFieldByNum(i)->getFieldHeader(),
+                          MDVP_FIELD_HEADER_PART_64);
+        _addVlevelHeader64(mdvx.getFieldByNum(i)->getVlevelHeader(),
+                           MDVP_VLEVEL_HEADER_PART_64);
+        if (mdvx.getFieldByNum(i)->getFieldHeaderFile() != NULL) {
+          _addFieldHeader64(*(mdvx.getFieldByNum(i)->getFieldHeaderFile()),
+                            MDVP_FIELD_HEADER_FILE_FIELD_PART_64);
+        }
+        if (mdvx.getFieldByNum(i)->getVlevelHeaderFile() != NULL) {
+          _addVlevelHeader64(*(mdvx.getFieldByNum(i)->getVlevelHeaderFile()),
+                             MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64);
+        }
+        _addFieldData(*mdvx.getFieldByNum(i));
+      } // i
+      // add chunks
+      for (int i = 0; i < mdvx.getNChunks(); i++) {
+        _addChunkHeader64(mdvx.getChunkByNum(i)->getHeader(),
+                          MDVP_CHUNK_HEADER_PART_64);
+        _addChunkData(*mdvx.getChunkByNum(i));
       }
-      _addFieldData(*mdvx.getFieldByNum(i));
-    }
-    
-    // add chunks
-    for (int i = 0; i < mdvx.getNChunks(); i++) {
-      _addChunkHeader(mdvx.getChunkByNum(i)->getHeader(),
-                      MDVP_CHUNK_HEADER_PART);
-      _addChunkData(*mdvx.getChunkByNum(i));
     }
     
   } // if (mdvx._readFormat == Mdvx::FORMAT_XML)

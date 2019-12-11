@@ -68,6 +68,7 @@ class Mdvx
   friend class MdvxChunk;
   friend class DsMdvServer;
   friend class DsMdvClimoServer;
+  friend class DsMdvxMsg;
   friend class WMS2MdvServer;
   friend class Ncf2MdvTrans;
   friend class Ncf2MdvField;

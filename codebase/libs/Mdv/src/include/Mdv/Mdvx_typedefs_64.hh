@@ -173,6 +173,7 @@ typedef struct {
                                    //    z direction
 
   mutable si32  n_chunks;          // Number of chunks in this file
+  si32 pad_si32_2;                 // for alignment on 64-bit word boundary
     
   // The following offsets are all in bytes from beginning of file
 
@@ -193,7 +194,7 @@ typedef struct {
                                    //   are guaranteed to be available to
                                    //   users for their own purposes.
 
-  si32 pad_si32_2;                 // for alignment on 64-bit word boundary
+  si32 pad_si32_3;                 // for alignment on 64-bit word boundary
   
   mutable si64 time_written;       // time file was written to disk
 
@@ -240,7 +241,7 @@ typedef struct {
 
   char  data_set_source[MDV64_NAME_LEN]; // Where the data came from
   
-  si32 pad_si32_3;                 // for alignment on 64-bit word boundary
+  si32 pad_si32_4;                 // for alignment on 64-bit word boundary
   mutable si32  record_len2;       // Fortran record length (in bytes)
 
 }  master_header_64_t;
@@ -540,7 +541,7 @@ typedef struct {
 // are needed.  If it is used, the master header's vlevel_included 
 // flag must be set to 1 and a vlevel_header must be included for every
 // field in the file. This structure is 1 kbyte and all vlevel 
-// headers should follow the field headers.
+// headers should follow the fimeld headers.
 //
 
 typedef struct {

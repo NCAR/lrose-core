@@ -139,18 +139,16 @@ int DsMdvxMsg::_getReadSearch(DsMdvx &mdvx)
   // look for 64-bit version
 
   file_search_t fsearch;
-  DsMsgPart * searchPart = getPartByType(MDVP_FILE_SEARCH_PART_64);
-  if (searchPart == NULL) {
-    // 64-bit not found, try 32-bit
-    searchPart = getPartByType(MDVP_FILE_SEARCH_PART_32);
+  if (_use32BitHeaders) {
+    // 32-bit headers
+    DsMsgPart * searchPart = getPartByType(MDVP_FILE_SEARCH_PART_32);
     if (searchPart == NULL) {
       _errStr += "ERROR - DsMdvxMsg::_getReadSearch.\n";
-      _errStr += "  No MDVP_FILE_SEARCH_PART found.\n";
+      _errStr += "  MDVP_FILE_SEARCH_PART_32 not found.\n";
       return -1;
     }
-    _use32BitHeaders = true;
-    file_search_32_t fsearch32;
     // part must be big enough.
+    file_search_32_t fsearch32;
     if (searchPart->getLength() != sizeof(fsearch32)) {
       _errStr += "ERROR - DsMdvxMsg::_getReadSearch.\n";
       _errStr += "  MDVP_FILE_SEARCH_PART_32 is wrong size.\n";
@@ -162,8 +160,13 @@ int DsMdvxMsg::_getReadSearch(DsMdvx &mdvx)
     // convert to 64-bit
     _copyFileSearch32to64(fsearch32, fsearch);
   } else {
-    // 64-bit
-    _use32BitHeaders = false;
+    // 64-bit headers
+    DsMsgPart * searchPart = getPartByType(MDVP_FILE_SEARCH_PART_64);
+    if (searchPart == NULL) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadSearch.\n";
+      _errStr += "  MDVP_FILE_SEARCH_PART_64 not found.\n";
+      return -1;
+    }
     // part must be big enough.
     if (searchPart->getLength() != sizeof(fsearch)) {
       _errStr += "ERROR - DsMdvxMsg::_getReadSearch.\n";
@@ -174,7 +177,7 @@ int DsMdvxMsg::_getReadSearch(DsMdvx &mdvx)
     // byte swap
     BE_to_array_64(&fsearch, sizeof(fsearch));
   }
-  
+
   if (_debug) {
     _print_file_search(fsearch, cerr);
   }
@@ -1196,9 +1199,19 @@ int DsMdvxMsg::_getChunkHeader(Mdvx::chunk_header_t &chdr,
 int DsMdvxMsg::_getHeaders(DsMdvx &mdvx)
   
 {
-  if (_getMasterHeader(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART)) {
-    _errStr += "ERROR - DsMdvxMsg::_getHeaders\n";
-    return -1;
+
+  if (_use32BitHeaders) {
+    if (_getMasterHeader(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_32)) {
+      _errStr += "ERROR - DsMdvxMsg::_getHeaders\n";
+      _errStr += "Cannot find 32-bit master header file part\n";
+      return -1;
+    }
+  } else {
+    if (_getMasterHeader(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_64)) {
+      _errStr += "ERROR - DsMdvxMsg::_getHeaders\n";
+      _errStr += "Cannot find 64-bit master header file part\n";
+      return -1;
+    }
   }
 
   int n_fields = mdvx._mhdrFile.n_fields;
@@ -1206,9 +1219,18 @@ int DsMdvxMsg::_getHeaders(DsMdvx &mdvx)
   mdvx._fhdrsFile.erase(mdvx._fhdrsFile.begin(), mdvx._fhdrsFile.end());
   for (int i = 0; i < n_fields; i++) {
     Mdvx::field_header_t fhdr;
-    if (_getFieldHeader(fhdr, i, MDVP_FIELD_HEADER_FILE_PART)) {
-      _errStr += "ERROR - DsMdvxMsg::_getHeaders\n";
-      return -1;
+    if (_use32BitHeaders) {
+      if (_getFieldHeader(fhdr, i, MDVP_FIELD_HEADER_FILE_PART_32)) {
+        _errStr += "ERROR - DsMdvxMsg::_getHeaders\n";
+        _errStr += "Cannot find 32-bit field header file part\n";
+        return -1;
+      }
+    } else {
+      if (_getFieldHeader(fhdr, i, MDVP_FIELD_HEADER_FILE_PART_64)) {
+        _errStr += "ERROR - DsMdvxMsg::_getHeaders\n";
+        _errStr += "Cannot find 64-bit field header file part\n";
+        return -1;
+      }
     }
     mdvx._fhdrsFile.push_back(fhdr);
   }
@@ -1216,9 +1238,18 @@ int DsMdvxMsg::_getHeaders(DsMdvx &mdvx)
   mdvx._vhdrsFile.erase(mdvx._vhdrsFile.begin(), mdvx._vhdrsFile.end());
   for (int i = 0; i < n_fields; i++) {
     Mdvx::vlevel_header_t vhdr;
-    if (_getVlevelHeader(vhdr, i, MDVP_VLEVEL_HEADER_FILE_PART)) {
-      _errStr += "ERROR - DsMdvxMsg::_getHeaders\n";
-      return -1;
+    if (_use32BitHeaders) {
+      if (_getVlevelHeader(vhdr, i, MDVP_VLEVEL_HEADER_FILE_PART_32)) {
+        _errStr += "ERROR - DsMdvxMsg::_getHeaders\n";
+        _errStr += "Cannot find 32-bit vlevel header file part\n";
+        return -1;
+      }
+    } else {
+      if (_getVlevelHeader(vhdr, i, MDVP_VLEVEL_HEADER_FILE_PART_64)) {
+        _errStr += "ERROR - DsMdvxMsg::_getHeaders\n";
+        _errStr += "Cannot find 64-bit vlevel header file part\n";
+        return -1;
+      }
     }
     mdvx._vhdrsFile.push_back(vhdr);
   }
@@ -1228,9 +1259,18 @@ int DsMdvxMsg::_getHeaders(DsMdvx &mdvx)
   mdvx._chdrsFile.erase(mdvx._chdrsFile.begin(), mdvx._chdrsFile.end());
   for (int i = 0; i < n_chunks; i++) {
     Mdvx::chunk_header_t chdr;
-    if (_getChunkHeader(chdr, i, MDVP_CHUNK_HEADER_FILE_PART)) {
-      _errStr += "ERROR - DsMdvxMsg::_getHeaders\n";
-      return -1;
+    if (_use32BitHeaders) {
+      if (_getChunkHeader(chdr, i, MDVP_CHUNK_HEADER_FILE_PART_32)) {
+        _errStr += "ERROR - DsMdvxMsg::_getHeaders\n";
+        _errStr += "Cannot find 32-bit chunk header file part\n";
+        return -1;
+      }
+    } else {
+      if (_getChunkHeader(chdr, i, MDVP_CHUNK_HEADER_FILE_PART_64)) {
+        _errStr += "ERROR - DsMdvxMsg::_getHeaders\n";
+        _errStr += "Cannot find 64-bit chunk header file part\n";
+        return -1;
+      }
     }
     mdvx._chdrsFile.push_back(chdr);
   }
@@ -1251,11 +1291,20 @@ int DsMdvxMsg::_getHeadersAndData(DsMdvx &mdvx)
 
   // mdvx object is in separate parts
   
-  if (_getMasterHeader(mdvx._mhdr, MDVP_MASTER_HEADER_PART)) {
-    _errStr += "ERROR - DsMdvxMsg::_getHeadersAndData\n";
-    return -1;
+  if (_use32BitHeaders) {
+    if (_getMasterHeader(mdvx._mhdr, MDVP_MASTER_HEADER_PART_32)) {
+      _errStr += "ERROR - DsMdvxMsg::_getHeadersAndData\n";
+      _errStr += "Cannot find 32-bit master header part\n";
+      return -1;
+    }
+  } else {
+    if (_getMasterHeader(mdvx._mhdr, MDVP_MASTER_HEADER_PART_64)) {
+      _errStr += "ERROR - DsMdvxMsg::_getHeadersAndData\n";
+      _errStr += "Cannot find 64-bit master header part\n";
+      return -1;
+    }
   }
-  
+
   int n_fields = mdvx._mhdr.n_fields;
   mdvx.clearFields();
   for (int i = 0; i < n_fields; i++) {
@@ -1331,42 +1380,76 @@ int DsMdvxMsg::_getSingleBuffer(DsMdvx &mdvx)
   }
 
   // get file headers if they are present
-  
-  if (getPartByType(MDVP_FIELD_HEADER_FILE_FIELD_PART) != NULL &&
-      getPartByType(MDVP_VLEVEL_HEADER_FILE_FIELD_PART) != NULL) {
 
-    int n_fields = mdvx._mhdr.n_fields;
+  if (_use32BitHeaders) {
 
-    for (int ifield = 0; ifield < n_fields; ifield++) {
+    // 32-bit
 
-      MdvxField *field = mdvx.getField(ifield);
-      if (field == NULL) {
-	_errStr += "ERROR - DsMdvxMsg::_getSingleBuffer.\n";
-	TaStr::AddInt(_errStr, "  Cannot find field number: ", ifield);
-	return -1;
-      }
+    if (getPartByType(MDVP_FIELD_HEADER_FILE_FIELD_PART_32) != NULL &&
+        getPartByType(MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32) != NULL) {
+      int n_fields = mdvx._mhdr.n_fields;
+      for (int ifield = 0; ifield < n_fields; ifield++) {
+        MdvxField *field = mdvx.getField(ifield);
+        if (field == NULL) {
+          _errStr += "ERROR - DsMdvxMsg::_getSingleBuffer.\n";
+          TaStr::AddInt(_errStr, "  Cannot find field number: ", ifield);
+          return -1;
+        }
+        field->_fhdrFile = new Mdvx::field_header_t;
+        if (_getFieldHeader(*field->_fhdrFile, ifield,
+                            MDVP_FIELD_HEADER_FILE_FIELD_PART_32)) {
+          _errStr += "ERROR - DsMdvxMsg::_getSingleBuffer.\n";
+          TaStr::AddInt(_errStr,
+                        "  Cannot find file field header part for fld number: ",
+                        ifield);
+          return -1;
+        }
+        field->_vhdrFile = new Mdvx::vlevel_header_t;
+        if (_getVlevelHeader(*field->_vhdrFile, ifield,
+                             MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32)) {
+          _errStr += "ERROR - DsMdvxMsg::_getSingleBuffer.\n";
+          TaStr::AddInt(_errStr,
+                        "  Cannot find file vlevel header part for fld number: ",
+                        ifield);
+          return -1;
+        }
+      } // ii
+    }
 
-      field->_fhdrFile = new Mdvx::field_header_t;
-      if (_getFieldHeader(*field->_fhdrFile, ifield,
-			  MDVP_FIELD_HEADER_FILE_FIELD_PART)) {
-	_errStr += "ERROR - DsMdvxMsg::_getSingleBuffer.\n";
-	TaStr::AddInt(_errStr,
-		      "  Cannot find file field header part for fld number: ",
-		      ifield);
-	return -1;
-      }
-      
-      field->_vhdrFile = new Mdvx::vlevel_header_t;
-      if (_getVlevelHeader(*field->_vhdrFile, ifield,
-			   MDVP_VLEVEL_HEADER_FILE_FIELD_PART)) {
-	_errStr += "ERROR - DsMdvxMsg::_getSingleBuffer.\n";
-	TaStr::AddInt(_errStr,
-		      "  Cannot find file vlevel header part for fld number: ",
-		      ifield);
-	return -1;
-      }
+  } else {
 
-    } // ii
+    // 64-bit
+
+    if (getPartByType(MDVP_FIELD_HEADER_FILE_FIELD_PART_64) != NULL &&
+        getPartByType(MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64) != NULL) {
+      int n_fields = mdvx._mhdr.n_fields;
+      for (int ifield = 0; ifield < n_fields; ifield++) {
+        MdvxField *field = mdvx.getField(ifield);
+        if (field == NULL) {
+          _errStr += "ERROR - DsMdvxMsg::_getSingleBuffer.\n";
+          TaStr::AddInt(_errStr, "  Cannot find field number: ", ifield);
+          return -1;
+        }
+        field->_fhdrFile = new Mdvx::field_header_t;
+        if (_getFieldHeader(*field->_fhdrFile, ifield,
+                            MDVP_FIELD_HEADER_FILE_FIELD_PART_64)) {
+          _errStr += "ERROR - DsMdvxMsg::_getSingleBuffer.\n";
+          TaStr::AddInt(_errStr,
+                        "  Cannot find file field header part for fld number: ",
+                        ifield);
+          return -1;
+        }
+        field->_vhdrFile = new Mdvx::vlevel_header_t;
+        if (_getVlevelHeader(*field->_vhdrFile, ifield,
+                             MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64)) {
+          _errStr += "ERROR - DsMdvxMsg::_getSingleBuffer.\n";
+          TaStr::AddInt(_errStr,
+                        "  Cannot find file vlevel header part for fld number: ",
+                        ifield);
+          return -1;
+        }
+      } // ii
+    }
 
   }
 
@@ -1658,21 +1741,41 @@ int DsMdvxMsg::_getField(Mdvx &mdvx, int field_num)
   // get the headers
 
   Mdvx::field_header_t fhdr;
-  if (_getFieldHeader(fhdr, field_num, MDVP_FIELD_HEADER_PART)) {
-    _errStr += "ERROR - DsMdvxMsg::_getField.\n";
-    TaStr::AddInt(_errStr,
-		  "  Cannot find field header part for field number: ",
-		  field_num);
-    return -1;
+  if (_use32BitHeaders) {
+    if (_getFieldHeader(fhdr, field_num, MDVP_FIELD_HEADER_PART_32)) {
+      _errStr += "ERROR - DsMdvxMsg::_getField.\n";
+      TaStr::AddInt(_errStr,
+                    "  Cannot find 32-bit field header part for field number: ",
+                    field_num);
+      return -1;
+    }
+  } else {
+    if (_getFieldHeader(fhdr, field_num, MDVP_FIELD_HEADER_PART_64)) {
+      _errStr += "ERROR - DsMdvxMsg::_getField.\n";
+      TaStr::AddInt(_errStr,
+                    "  Cannot find 64-bit field header part for field number: ",
+                    field_num);
+      return -1;
+    }
   }
 
   Mdvx::vlevel_header_t vhdr;
-  if (_getVlevelHeader(vhdr, field_num, MDVP_VLEVEL_HEADER_PART)) {
-    _errStr += "ERROR - DsMdvxMsg::_getField.\n";
-    TaStr::AddInt(_errStr,
-		  "  Cannot find field header part for field number: ",
-		  field_num);
-    return -1;
+  if (_use32BitHeaders) {
+    if (_getVlevelHeader(vhdr, field_num, MDVP_VLEVEL_HEADER_PART_32)) {
+      _errStr += "ERROR - DsMdvxMsg::_getField.\n";
+      TaStr::AddInt(_errStr,
+                    "  Cannot find 32-bit vlevel header part for field number: ",
+                    field_num);
+      return -1;
+    }
+  } else {
+    if (_getVlevelHeader(vhdr, field_num, MDVP_VLEVEL_HEADER_PART_64)) {
+      _errStr += "ERROR - DsMdvxMsg::_getField.\n";
+      TaStr::AddInt(_errStr,
+                    "  Cannot find 64-bit vlevel header part for field number: ",
+                    field_num);
+      return -1;
+    }
   }
     
   // get the data
@@ -1712,31 +1815,66 @@ int DsMdvxMsg::_getField(Mdvx &mdvx, int field_num)
   mdvx.addField(field);
 
   // get file headers if appropriate
-  
-  if (getPartByType(MDVP_FIELD_HEADER_FILE_FIELD_PART) != NULL) {
-    field->_fhdrFile = new Mdvx::field_header_t;
-    if (_getFieldHeader(*field->_fhdrFile, field_num,
-                        MDVP_FIELD_HEADER_FILE_FIELD_PART)) {
-      _errStr += "ERROR - DsMdvxMsg::_getField.\n";
-      TaStr::AddInt(_errStr,
-		    "  Cannot find file field header part for field number: ",
-		    field_num);
-      return -1;
+
+  if (_use32BitHeaders) {
+
+    // 32-bit
+
+    if (getPartByType(MDVP_FIELD_HEADER_FILE_FIELD_PART_32) != NULL) {
+      field->_fhdrFile = new Mdvx::field_header_t;
+      if (_getFieldHeader(*field->_fhdrFile, field_num,
+                          MDVP_FIELD_HEADER_FILE_FIELD_PART_32)) {
+        _errStr += "ERROR - DsMdvxMsg::_getField.\n";
+        TaStr::AddInt(_errStr,
+                      "  Cannot find 32-bit file field header part for field number: ",
+                      field_num);
+        return -1;
+      }
     }
+    
+    if (getPartByType(MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32) != NULL) {
+      field->_vhdrFile = new Mdvx::vlevel_header_t;
+      if (_getVlevelHeader(*field->_vhdrFile, field_num,
+                           MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32)) {
+        _errStr += "ERROR - DsMdvxMsg::_getField.\n";
+        TaStr::AddInt(_errStr,
+                      "  Cannot find 32-bit file vlevel header part for field number: ",
+                      field_num);
+        return -1;
+      }
+    }
+
+  } else {
+
+    // 64-bit
+
+    if (getPartByType(MDVP_FIELD_HEADER_FILE_FIELD_PART_64) != NULL) {
+      field->_fhdrFile = new Mdvx::field_header_t;
+      if (_getFieldHeader(*field->_fhdrFile, field_num,
+                          MDVP_FIELD_HEADER_FILE_FIELD_PART_64)) {
+        _errStr += "ERROR - DsMdvxMsg::_getField.\n";
+        TaStr::AddInt(_errStr,
+                      "  Cannot find 64-bit file field header part for field number: ",
+                      field_num);
+        return -1;
+      }
+    }
+    
+    if (getPartByType(MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64) != NULL) {
+      field->_vhdrFile = new Mdvx::vlevel_header_t;
+      if (_getVlevelHeader(*field->_vhdrFile, field_num,
+                           MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64)) {
+        _errStr += "ERROR - DsMdvxMsg::_getField.\n";
+        TaStr::AddInt(_errStr,
+                      "  Cannot find 64-bit file vlevel header part for field number: ",
+                      field_num);
+        return -1;
+      }
+    }
+
   }
 
-  if (getPartByType(MDVP_VLEVEL_HEADER_FILE_FIELD_PART) != NULL) {
-    field->_vhdrFile = new Mdvx::vlevel_header_t;
-    if (_getVlevelHeader(*field->_vhdrFile, field_num,
-                        MDVP_VLEVEL_HEADER_FILE_FIELD_PART)) {
-      _errStr += "ERROR - DsMdvxMsg::_getField.\n";
-      TaStr::AddInt(_errStr,
-		    "  Cannot find file vlevel header part for field number: ",
-		    field_num);
-      return -1;
-    }
-  }
-
+    
   return 0;
 
 }
@@ -1751,12 +1889,24 @@ int DsMdvxMsg::_getChunk(Mdvx &mdvx, int chunk_num)
   // get the header
 
   Mdvx::chunk_header_t chdr;
-  if (_getChunkHeader(chdr, chunk_num, MDVP_CHUNK_HEADER_PART)) {
-    _errStr += "ERROR - DsMdvxMsg::_getChunk.\n";
-    TaStr::AddInt(_errStr,
-		  "  Cannot find chunk header part for chunk number: ",
-		  chunk_num);
-    return -1;
+  if (_use32BitHeaders) {
+    // 32-bit
+    if (_getChunkHeader(chdr, chunk_num, MDVP_CHUNK_HEADER_PART_32)) {
+      _errStr += "ERROR - DsMdvxMsg::_getChunk.\n";
+      TaStr::AddInt(_errStr,
+                    "  Cannot find 32-bit chunk header part for chunk number: ",
+                    chunk_num);
+      return -1;
+    }
+  } else {
+    // 64-bit
+    if (_getChunkHeader(chdr, chunk_num, MDVP_CHUNK_HEADER_PART_64)) {
+      _errStr += "ERROR - DsMdvxMsg::_getChunk.\n";
+      TaStr::AddInt(_errStr,
+                    "  Cannot find 64-bit chunk header part for chunk number: ",
+                    chunk_num);
+      return -1;
+    }
   }
 
   // get the data

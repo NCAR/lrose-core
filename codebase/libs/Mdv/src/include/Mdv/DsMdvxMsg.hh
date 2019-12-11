@@ -126,16 +126,17 @@ public:
 
     // headers
 
-    MDVP_MASTER_HEADER_PART              = 50500,
-    MDVP_MASTER_HEADER_FILE_PART         = 50501,
-    MDVP_FIELD_HEADER_PART               = 50510,
-    MDVP_FIELD_HEADER_FILE_PART          = 50511,
-    MDVP_FIELD_HEADER_FILE_FIELD_PART    = 50512,
-    MDVP_VLEVEL_HEADER_PART              = 50520,
-    MDVP_VLEVEL_HEADER_FILE_PART         = 50521,
-    MDVP_VLEVEL_HEADER_FILE_FIELD_PART   = 50522,
-    MDVP_CHUNK_HEADER_PART               = 50530,
-    MDVP_CHUNK_HEADER_FILE_PART          = 50531,
+    MDVP_MASTER_HEADER_PART_32              = 50500,
+    MDVP_MASTER_HEADER_FILE_PART_32         = 50501,
+    MDVP_FIELD_HEADER_PART_32               = 50510,
+    MDVP_FIELD_HEADER_FILE_PART_32          = 50511,
+    MDVP_FIELD_HEADER_FILE_FIELD_PART_32    = 50512,
+    MDVP_VLEVEL_HEADER_PART_32              = 50520,
+    MDVP_VLEVEL_HEADER_FILE_PART_32         = 50521,
+    MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32   = 50522,
+    MDVP_CHUNK_HEADER_PART_32               = 50530,
+    MDVP_CHUNK_HEADER_FILE_PART_32          = 50531,
+
     MDVP_FIELD_DATA_PART                 = 50610,
     MDVP_CHUNK_DATA_PART                 = 50620,
 
@@ -192,7 +193,18 @@ public:
     MDVP_FILE_SEARCH_PART_64             = 53100,
     MDVP_READ_REMAP_PART_64              = 53190,
     MDVP_TIME_LIST_OPTIONS_PART_64       = 53400,
-    MDVP_CLIMO_DATA_RANGE_PART_64        = 53100
+    MDVP_CLIMO_DATA_RANGE_PART_64        = 53100,
+
+    MDVP_MASTER_HEADER_PART_64            = 53500,
+    MDVP_MASTER_HEADER_FILE_PART_64       = 53501,
+    MDVP_FIELD_HEADER_PART_64             = 53510,
+    MDVP_FIELD_HEADER_FILE_PART_64        = 53511,
+    MDVP_FIELD_HEADER_FILE_FIELD_PART_64  = 53512,
+    MDVP_VLEVEL_HEADER_PART_64            = 53520,
+    MDVP_VLEVEL_HEADER_FILE_PART_64       = 53521,
+    MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64 = 53522,
+    MDVP_CHUNK_HEADER_PART_64             = 53530,
+    MDVP_CHUNK_HEADER_FILE_PART_64        = 53531
 
   } msg_part_t;
 
@@ -575,11 +587,16 @@ public:
   virtual void print(ostream &out, const char *spacer) const;
   virtual void printHeader(ostream &out, const char *spacer) const;
 
+  // check parts for consistency - 32-bit or 64-bit?
+  // returns 0 on success, -1 on failure
+  
+  int checkParts() const;
+
 protected:
 
   string _errStr;
 
-  bool _use32BitHeaders;  // using 32-bit headers
+  mutable bool _use32BitHeaders;  // using 32-bit headers
 
   void _clearErrStr() { _errStr = ""; }
 
@@ -653,10 +670,15 @@ protected:
 			      int max_lead_time,
 			      bool specify_by_gen_time);
 
-  void _addMasterHeader(const Mdvx::master_header_t & header, int part_id);
-  void _addFieldHeader(const Mdvx::field_header_t & header, int part_id);
-  void _addVlevelHeader(const Mdvx::vlevel_header_t &header, int part_id);
-  void _addChunkHeader(const Mdvx::chunk_header_t &header, int part_id);
+  void _addMasterHeader64(const Mdvx::master_header_t & header, int part_id);
+  void _addFieldHeader64(const Mdvx::field_header_t & header, int part_id);
+  void _addVlevelHeader64(const Mdvx::vlevel_header_t &header, int part_id);
+  void _addChunkHeader64(const Mdvx::chunk_header_t &header, int part_id);
+
+  void _addMasterHeader32(const Mdvx::master_header_t & header, int part_id);
+  void _addFieldHeader32(const Mdvx::field_header_t & header, int part_id);
+  void _addVlevelHeader32(const Mdvx::vlevel_header_t &header, int part_id);
+  void _addChunkHeader32(const Mdvx::chunk_header_t &header, int part_id);
 
   void _addFieldData(const MdvxField &field);
   void _addChunkData(const MdvxChunk& chunk);
@@ -872,6 +894,11 @@ protected:
 
   void _copyClimoDataRange64to32(const climoDataRange_64_t &drange64,
                                  climoDataRange_32_t &drange32);
+
+  // check parts
+
+  bool _has32BitParts() const;
+  bool _has64BitParts() const;
 
 private:
 

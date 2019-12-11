@@ -85,6 +85,15 @@ int DsMdvxMsg::disassemble(const void *in_msg, const ssize_t msg_len,
   if (_debug) {
     print(cerr, "  ");
   }
+
+  // check we are not mixing 32-bit and 64-bit header parts
+  // this also sets _use32BitHeaders
+
+  if (checkParts()) {
+    _errStr += "ERROR - DsMdvxMsg::disassemble\n";
+    _errStr += "  Message contains both 32-bit and 64-bit header parts\n";
+    return -1;
+  }
   
   // error message?
   
@@ -844,10 +853,21 @@ int DsMdvxMsg::_disassembleCompileTimeHeightReturn(DsMdvx &mdvx)
   } else {
     
     // mdvx object is in multiple parts
-    
-    if (_getMasterHeader(mdvx._mhdr, MDVP_MASTER_HEADER_PART)) {
-      _errStr += "ERROR - DsMdvxMsg::_disassembleCompileTimeHeightReturn\n";
-      return -1;
+
+    if (_use32BitHeaders) {
+      // 32-bit
+      if (_getMasterHeader(mdvx._mhdr, MDVP_MASTER_HEADER_PART_32)) {
+        _errStr += "ERROR - DsMdvxMsg::_disassembleCompileTimeHeightReturn\n";
+        _errStr += "  Cannot find 32-bit master header part\n";
+        return -1;
+      }
+    } else {
+      // 64-bit
+      if (_getMasterHeader(mdvx._mhdr, MDVP_MASTER_HEADER_PART_64)) {
+        _errStr += "ERROR - DsMdvxMsg::_disassembleCompileTimeHeightReturn\n";
+        _errStr += "  Cannot find 64-bit master header part\n";
+        return -1;
+      }
     }
 
     int n_fields = mdvx._mhdr.n_fields;

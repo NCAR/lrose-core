@@ -764,8 +764,8 @@ void DsMdvxMsg::_addConstrainLeadTimes(bool constrain_lead_times,
 /////////////////////////
 // add master header part
 
-void DsMdvxMsg::_addMasterHeader(const Mdvx::master_header_t &header,
-				 int part_id)
+void DsMdvxMsg::_addMasterHeader64(const Mdvx::master_header_t &header,
+                                   int part_id)
 {
   if (_debug) {
     Mdvx::printMasterHeader(header, cerr);
@@ -777,13 +777,27 @@ void DsMdvxMsg::_addMasterHeader(const Mdvx::master_header_t &header,
   addPart(part_id, sizeof(locHdr), &locHdr);
 }
 
+void DsMdvxMsg::_addMasterHeader32(const Mdvx::master_header_t &header,
+                                   int part_id)
+{
+  if (_debug) {
+    Mdvx::printMasterHeader(header, cerr);
+  }
+  // make 32-bit copy
+  Mdvx::master_header_32_t hdr32;
+  Mdvx::_copyMasterHeader64to32(header, hdr32);
+  Mdvx::master_header_to_BE_32(hdr32);
+  // Add the data to the message.
+  addPart(part_id, sizeof(hdr32), &hdr32);
+}
+
 /////////////////////////
 // add field header part
 
-void DsMdvxMsg::_addFieldHeader(const Mdvx::field_header_t &header,
-				int part_id)
+void DsMdvxMsg::_addFieldHeader64(const Mdvx::field_header_t &header,
+                                  int part_id)
 {
-
+  
   if (_debug) {
     Mdvx::printFieldHeader(header, cerr);
   }
@@ -794,11 +808,26 @@ void DsMdvxMsg::_addFieldHeader(const Mdvx::field_header_t &header,
   addPart(part_id, sizeof(locHdr), &locHdr);
 }
 
+void DsMdvxMsg::_addFieldHeader32(const Mdvx::field_header_t &header,
+                                  int part_id)
+{
+
+  if (_debug) {
+    Mdvx::printFieldHeader(header, cerr);
+  }
+  // make 32-bit copy
+  Mdvx::field_header_32_t hdr32;
+  Mdvx::_copyFieldHeader64to32(header, hdr32);
+  Mdvx::field_header_to_BE_32(hdr32);
+  // Add the data to the message.
+  addPart(part_id, sizeof(hdr32), &hdr32);
+}
+
 /////////////////////////
 // add vlevel header part
 
-void DsMdvxMsg::_addVlevelHeader(const Mdvx::vlevel_header_t &header,
-				 int part_id)
+void DsMdvxMsg::_addVlevelHeader64(const Mdvx::vlevel_header_t &header,
+                                   int part_id)
 {
   // make local copy for swapping
   Mdvx::vlevel_header_t locHdr = header;
@@ -807,11 +836,22 @@ void DsMdvxMsg::_addVlevelHeader(const Mdvx::vlevel_header_t &header,
   addPart(part_id, sizeof(locHdr), &locHdr);
 }
 
+void DsMdvxMsg::_addVlevelHeader32(const Mdvx::vlevel_header_t &header,
+                                   int part_id)
+{
+  // make 32-bit copy
+  Mdvx::vlevel_header_32_t hdr32;
+  Mdvx::_copyVlevelHeader64to32(header, hdr32);
+  Mdvx::vlevel_header_to_BE_32(hdr32);
+  // Add the data to the message.
+  addPart(part_id, sizeof(hdr32), &hdr32);
+}
+
 /////////////////////////
 // add chunk header part
 
-void DsMdvxMsg::_addChunkHeader(const Mdvx::chunk_header_t &header,
-				int part_id)
+void DsMdvxMsg::_addChunkHeader64(const Mdvx::chunk_header_t &header,
+                                  int part_id)
 {
   if (_debug) {
     Mdvx::printChunkHeader(header, cerr);
@@ -821,6 +861,20 @@ void DsMdvxMsg::_addChunkHeader(const Mdvx::chunk_header_t &header,
   Mdvx::chunk_header_to_BE(locHdr);
   // Add the data to the message.
   addPart(part_id, sizeof(locHdr), &locHdr);
+}
+
+void DsMdvxMsg::_addChunkHeader32(const Mdvx::chunk_header_t &header,
+                                  int part_id)
+{
+  if (_debug) {
+    Mdvx::printChunkHeader(header, cerr);
+  }
+  // make 32-bit copy
+  Mdvx::chunk_header_32_t hdr32;
+  Mdvx::_copyChunkHeader64to32(header, hdr32);
+  Mdvx::chunk_header_to_BE_32(hdr32);
+  // Add the data to the message.
+  addPart(part_id, sizeof(hdr32), &hdr32);
 }
 
 //////////////////////
