@@ -321,7 +321,7 @@ int Mdvx::writeToPath(const string &output_path)
 
   // compute offset to start of field data
 
-  long writeOffset =
+  ssize_t writeOffset =
     sizeof(master_header_t) +
     _mhdr.n_fields * (sizeof(field_header_t) + sizeof(vlevel_header_t)) +
     _mhdr.n_chunks * sizeof(chunk_header_t);
@@ -332,7 +332,7 @@ int Mdvx::writeToPath(const string &output_path)
       _mhdr.n_chunks * sizeof(chunk_header_32_t);
   }
 
-  long nextOffset;
+  ssize_t nextOffset;
 
   // write field data - this also sets the field data offset in
   // the field headers
@@ -450,6 +450,11 @@ int Mdvx::writeToPath(const string &output_path)
 void Mdvx::writeToBuffer(MemBuf &buf) const
 
 {
+
+  if (_write32BitHeaders) {
+    _writeToBuffer32(buf);
+    return;
+  }
 
   updateMasterHeader();
   
@@ -570,6 +575,147 @@ void Mdvx::writeToBuffer(MemBuf &buf) const
     ((char *) buf.getPtr() + _mhdr.chunk_hdr_offset);
   for (size_t i = 0; i < _chunks.size(); i++) {
     chunk_header_to_BE(chdrs[i]);
+  }
+  
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Write to buffer - 32-bit headers
+//
+// Write Mdvx object to a buffer as if written to file.
+
+void Mdvx::_writeToBuffer32(MemBuf &buf) const
+
+{
+
+  updateMasterHeader();
+  
+  if (_debug) {
+    cerr << "Mdvx - writing object to buffer - 32-bit headers." << endl;
+  }
+
+  // compute master header offsets
+
+  master_header_32_t mhdr32;
+  _copyMasterHeader64to32(_mhdr, mhdr32);
+  
+  mhdr32.field_hdr_offset = sizeof(master_header_32_t);
+  mhdr32.vlevel_hdr_offset =
+    mhdr32.field_hdr_offset + _fields.size() * sizeof(field_header_32_t);
+  mhdr32.chunk_hdr_offset =
+    mhdr32.vlevel_hdr_offset + _fields.size() * sizeof(vlevel_header_32_t);
+  
+  // add the headers to the buffer - they will be swapped later
+  
+  buf.free();
+  buf.add(&mhdr32, sizeof(mhdr32));
+  for (size_t i = 0; i < _fields.size(); i++) {
+    field_header_32_t fhdr32;
+    _copyFieldHeader64to32(_fields[i]->_fhdr, fhdr32);
+    buf.add(&fhdr32, sizeof(fhdr32));
+  }
+  for (size_t i = 0; i < _fields.size(); i++) {
+    vlevel_header_32_t vhdr32;
+    _copyVlevelHeader64to32(_fields[i]->_vhdr, vhdr32);
+    buf.add(&vhdr32, sizeof(vhdr32));
+  }
+  for (size_t i = 0; i < _chunks.size(); i++) {
+    chunk_header_32_t chdr32;
+    _copyChunkHeader64to32(_chunks[i]->_chdr, chdr32);
+    buf.add(&chdr32, sizeof(chdr32));
+  }
+  
+  // set field offsets, write the field data, swapping as appropriate
+  
+  for (size_t i = 0; i < _fields.size(); i++) {
+
+    // leading FORTRAN rec len
+    
+    int size = _fields[i]->getVolLen();
+    si32 BEsize = BE_from_si32(size);
+    buf.add(&BEsize, sizeof(si32));
+    
+    // data
+    
+    int offset = buf.getLen();
+    buf.add(_fields[i]->getVol(), size);
+
+    // trailing FORTRAN rec len
+
+    buf.add(&BEsize, sizeof(si32));
+
+    // set field_data_offset
+
+    field_header_32_t *fhdr32 = (field_header_32_t *)
+      ((char *) buf.getPtr() + mhdr32.field_hdr_offset +
+       i * sizeof(field_header_32_t));
+    fhdr32->field_data_offset = offset;
+    
+    // swap data
+    
+    if (fhdr32->compression_type == COMPRESSION_NONE) {
+      void *vol = ((char *) buf.getPtr() + offset);
+      switch (fhdr32->encoding_type) {
+      case Mdvx::ENCODING_INT8:
+      case Mdvx::ENCODING_RGBA32:
+	// no need to swap byte data
+	break;
+      case Mdvx::ENCODING_INT16:
+	BE_from_array_16(vol, size);
+	break;
+      case Mdvx::ENCODING_FLOAT32:
+	BE_from_array_32(vol, size);
+	break;
+      }
+    }
+  }
+
+  // set chunk offsets, write chunk data
+
+  for (size_t i = 0; i < _chunks.size(); i++) {
+
+    // leading FORTRAN rec len
+    
+    int size = _chunks[i]->getSize();
+    si32 BEsize = BE_from_si32(size);
+    buf.add(&BEsize, sizeof(si32));
+
+    // data
+
+    int offset = buf.getLen();
+    buf.add(_chunks[i]->getData(), size);
+
+    // trailing FORTRAN rec len
+
+    buf.add(&BEsize, sizeof(si32));
+
+    // set chunk_data_offset
+
+    chunk_header_32_t *chdr32 = (chunk_header_32_t *)
+      ((char *) buf.getPtr() + mhdr32.chunk_hdr_offset +
+       i * sizeof(chunk_header_32_t));
+    chdr32->chunk_data_offset = offset;
+
+  }
+
+  // go back and swap the headers
+
+  master_header_32_t *mhdr = (master_header_32_t *) buf.getPtr();
+  master_header_to_BE_32(*mhdr);
+  field_header_32_t *fhdrs = (field_header_32_t *)
+    ((char *) buf.getPtr() + mhdr32.field_hdr_offset);
+  for (size_t i = 0; i < _fields.size(); i++) {
+    field_header_to_BE_32(fhdrs[i]);
+  }
+  vlevel_header_32_t *vhdrs = (vlevel_header_32_t *)
+    ((char *) buf.getPtr() + mhdr32.vlevel_hdr_offset);
+  for (size_t i = 0; i < _fields.size(); i++) {
+    vlevel_header_to_BE_32(vhdrs[i]);
+  }
+  chunk_header_32_t *chdrs = (chunk_header_32_t *)
+    ((char *) buf.getPtr() + mhdr32.chunk_hdr_offset);
+  for (size_t i = 0; i < _chunks.size(); i++) {
+    chunk_header_to_BE_32(chdrs[i]);
   }
   
 }
@@ -783,7 +929,7 @@ int Mdvx::_write_field_header(const int field_num,
 
   // Move to the appropriate offset
   
-  long offset = _mhdr.field_hdr_offset + field_num * sizeof(field_header_t);
+  ssize_t offset = _mhdr.field_hdr_offset + field_num * sizeof(field_header_t);
   if (_write32BitHeaders) {
     offset = _mhdr.field_hdr_offset + field_num * sizeof(field_header_32_t);
   }  
@@ -875,7 +1021,7 @@ int Mdvx::_write_vlevel_header(const int field_num,
 
   // Move to the appropriate offset
 
-  long offset = _mhdr.vlevel_hdr_offset + field_num * sizeof(vlevel_header_t);
+  ssize_t offset = _mhdr.vlevel_hdr_offset + field_num * sizeof(vlevel_header_t);
   if (_write32BitHeaders) {
     offset = _mhdr.vlevel_hdr_offset + field_num * sizeof(vlevel_header_32_t);
   }  
@@ -958,7 +1104,7 @@ int Mdvx::_write_chunk_header(const int chunk_num,
 
   // Move to the appropriate offset
   
-  long offset = _mhdr.chunk_hdr_offset + chunk_num * sizeof(chunk_header_t);
+  ssize_t offset = _mhdr.chunk_hdr_offset + chunk_num * sizeof(chunk_header_t);
   if (_write32BitHeaders) {
     offset = _mhdr.vlevel_hdr_offset + chunk_num * sizeof(chunk_header_32_t);
   }  

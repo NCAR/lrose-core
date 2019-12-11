@@ -144,7 +144,7 @@ public:
   //    scale, bias
   
   MdvxField(int plane_num,
-	    int plane_size,
+	    ssize_t plane_size,
 	    const Mdvx::field_header_t &f_hdr,
 	    const Mdvx::vlevel_header_t &v_hdr,
 	    const void *plane_data = NULL);
@@ -542,7 +542,7 @@ public:
   // Decimate to max grid cell count
   // Returns 0 on success, -1 on failure.
 
-  int decimate(int max_nxy);
+  int decimate(ssize_t max_nxy);
   
   // compute the plane number from the vlevel value
 
@@ -696,7 +696,7 @@ public:
   // Scaling type, scale and bias only apply to INT8 and INT16 encoding.
 
   void setVolData(const void *vol_data,
-		  int volume_size,
+		  ssize_t volume_size,
 		  Mdvx::encoding_type_t encoding_type,
 		  Mdvx::scaling_type_t scaling_type = Mdvx::SCALING_ROUNDED,
 		  double scale = 1.0,
@@ -726,9 +726,9 @@ public:
   // access to the data as a volume
   
   const void *getVol() const { return (_volBuf.getPtr()); }
-  int getVolLen() const { return (_volBuf.getLen()); }
-  int getVolNumValues() const { return (_volBuf.getLen() /
-					_fhdr.data_element_nbytes); }
+  ssize_t getVolLen() const { return (_volBuf.getLen()); }
+  ssize_t getVolNumValues() const { return (_volBuf.getLen() /
+                                           _fhdr.data_element_nbytes); }
 
   // access to the data as a plane
   //
@@ -736,8 +736,8 @@ public:
   //       using these functions.
   
   const void *getPlane(int i) const { return (_planeData[i]); }
-  int getPlaneSize(int i) const { return (_planeSizes[i]); }
-  int getPlaneOffset(int i) const { return (_planeOffsets[i]); }
+  ssize_t getPlaneSize(int i) const { return (_planeSizes[i]); }
+  ssize_t getPlaneOffset(int i) const { return (_planeOffsets[i]); }
   
   // Set the plane pointers into the data
   //
@@ -750,8 +750,8 @@ public:
 
   // Convert data buffer to/from BE byte ordering
 
-  static void buffer_to_BE(void *buf, int buflen, int encoding_type);
-  static void buffer_from_BE(void *buf, int buflen, int encoding_type);
+  static void buffer_to_BE(void *buf, ssize_t buflen, int encoding_type);
+  static void buffer_from_BE(void *buf, ssize_t buflen, int encoding_type);
   
   // Get the Error String. This has contents when an error is returned.
   
@@ -784,8 +784,8 @@ protected:
   // The function setPlanePtrs() sets up these vectors.
   
   mutable vector<void *> _planeData;
-  mutable vector<int> _planeSizes;
-  mutable vector<int> _planeOffsets;
+  mutable vector<ssize_t> _planeSizes;
+  mutable vector<ssize_t> _planeOffsets;
 
   // error string
 
@@ -830,16 +830,16 @@ protected:
   // constraining the domain in the horizontal and vertical dimensions
 
   int _constrain_radar_horiz(const Mdvx &mdvx);
-  int _decimate_radar_horiz(int max_nxy);
-  int _decimate_rgba(int max_nxy);
+  int _decimate_radar_horiz(ssize_t max_nxy);
+  int _decimate_rgba(ssize_t max_nxy);
   void _check_lon_domain(double read_min_lon,
 			 double read_max_lon);
   
   // min/max/rounding
-
+  
   void _set_data_element_nbytes();
   double _round_up(double z);
-
+  
   // Reading / writing data volumes
   
   int _read_volume(TaFile &infile,
@@ -862,14 +862,14 @@ protected:
                               double vsection_max_lon);
   
   int _write_volume(TaFile &outfile,
-		    long this_offset,
-		    long &next_offset) const;
-
+		    ssize_t this_offset,
+		    ssize_t &next_offset) const;
+  
   // Convert data buffer to/from BE byte ordering
   
   static void _data_from_BE(const Mdvx::field_header_t &fhdr,
                             void *buf,
-                            int buflen);
+                            ssize_t buflen);
 
   // vert sections
 
@@ -893,7 +893,7 @@ protected:
   // printing
   
   void _print_voldata_verbose(ostream &out, bool print_labels);
-
+  
   void _print_voldata_packed(ostream &out, bool print_labels,
 			     bool printCanonical = false);
   

@@ -135,7 +135,7 @@ void MdvxChunk::clear()
 // If the chunk id is not recognized by Mdvx, not automatic swapping
 // will occur.
 
-void MdvxChunk::setData(const void *chunkData, size_t size)
+void MdvxChunk::setData(const void *chunkData, ssize_t size)
 {
   _dataBuf.free();
   _dataBuf.add(chunkData, size);
@@ -179,10 +179,10 @@ int MdvxChunk::_read_data(TaFile &infile)
 
   // Seek to the proper position in the input file.
 
-  int offset = _chdr.chunk_data_offset;
+  ssize_t offset = _chdr.chunk_data_offset;
   if (infile.fseek(offset, SEEK_SET) != 0) {
     _errStr += "ERROR - MdvxChunk::_read_data.\n";
-    sprintf(errstr, "  Seeking chunk data at offset %d\n", offset);
+    sprintf(errstr, "  Seeking chunk data at offset %ld\n", offset);
     _errStr += errstr;
     _errStr += " Chunk info: ";
     _errStr += _chdr.info;
@@ -192,14 +192,14 @@ int MdvxChunk::_read_data(TaFile &infile)
 
   // allocate buffer
   
-  int size = _chdr.size;
+  ssize_t size = _chdr.size;
   _dataBuf.prepare(_chdr.size);
 
   // read in
   
   if (infile.fread(_dataBuf.getPtr(), 1, size) != size) {
     _errStr += "ERROR - MdvxChunk::_read_data.\n";
-    sprintf(errstr, "  Cannot read chunk. size %d\n", size);
+    sprintf(errstr, "  Cannot read chunk. size %ld\n", size);
     _errStr += errstr;
     _errStr += " Chunk info: ";
     _errStr += _chdr.info;
@@ -228,15 +228,15 @@ int MdvxChunk::_read_data(TaFile &infile)
 // Returns 0 on success, -1 on failure.
 
 int MdvxChunk::_write_data(TaFile &outfile,
-			   long this_offset,
-			   long &next_offset) const
+			   ssize_t this_offset,
+			   ssize_t &next_offset) const
 
 {
 
   char errstr[512];
   clearErrStr();
-
-  int chunk_size = _chdr.size;
+  
+  ssize_t chunk_size = _chdr.size;
   ui32 be_size = BE_from_ui32(chunk_size);
   
   // Set the constant values in the header.

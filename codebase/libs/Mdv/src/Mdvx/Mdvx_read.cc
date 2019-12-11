@@ -1020,7 +1020,7 @@ void Mdvx::clearReadAutoRemap2LatLon()
 
 // decimation
 
-void Mdvx::setReadDecimate(int max_nxy)
+void Mdvx::setReadDecimate(size_t max_nxy)
 {
   _readDecimateMaxNxy = max_nxy;
   _readDecimate = true;

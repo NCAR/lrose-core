@@ -748,6 +748,8 @@ protected:
                           string &outputPath,
                           bool &writeAsForecast) const;
 
+  void _writeToBuffer32(MemBuf &buf) const;
+
   // print
   
   static const char *_timeStr(const time_t ttime);

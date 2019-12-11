@@ -346,7 +346,7 @@ void clearReadAutoRemap2LatLon();
 // Set the maximum number of grid points to be 
 // returned from a read.
 
-void setReadDecimate(int max_nxy);
+void setReadDecimate(size_t max_nxy);
 void clearReadDecimate();
 
 /////////////////////////////////////////////
