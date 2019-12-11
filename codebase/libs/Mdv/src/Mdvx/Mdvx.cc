@@ -1100,7 +1100,7 @@ void Mdvx::_copyFieldHeader32to64(const field_header_32_t &fhdr32,
   fhdr64.max_value = fhdr32.max_value;
   fhdr64.min_value_orig_vol = fhdr32.min_value_orig_vol;
   fhdr64.max_value_orig_vol = fhdr32.max_value_orig_vol;
-  fhdr64.unused_fl32 = fhdr32.unused_fl32;
+  fhdr64.unused_fl32[0] = fhdr32.unused_fl32;
 
   memcpy(fhdr64.field_name_long, fhdr32.field_name_long,
          sizeof(fhdr32.field_name_long));

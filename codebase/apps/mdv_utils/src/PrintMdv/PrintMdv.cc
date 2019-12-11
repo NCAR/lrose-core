@@ -74,6 +74,9 @@ PrintMdv::PrintMdv(int argc, char **argv)
     OK = FALSE;
     return;
   }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _printSizes(cerr);
+  }
 
   // parse the DateTime objects
 
@@ -140,7 +143,6 @@ PrintMdv::PrintMdv(int argc, char **argv)
 PrintMdv::~PrintMdv()
 
 {
-
 
 }
 
@@ -1046,5 +1048,67 @@ int PrintMdv::_doTest(DsMdvx *mdvx)
   
   return 0;
 
+}
+
+//////////////////////////////
+// print data sizes
+
+void PrintMdv::_printSizes(ostream &out)
+
+{
+
+  cerr << "MDV64_CHUNK_INFO_LEN   : " << MDV64_CHUNK_INFO_LEN << endl;
+  cerr << "MDV64_INFO_LEN         : " << MDV64_INFO_LEN << endl;
+  cerr << "MDV64_LONG_FIELD_LEN   : " << MDV64_LONG_FIELD_LEN << endl;
+  cerr << "MDV64_MAX_PROJ_PARAMS  : " << MDV64_MAX_PROJ_PARAMS << endl;
+  cerr << "MDV64_MAX_VLEVELS      : " << MDV64_MAX_VLEVELS << endl;
+  cerr << "MDV64_NAME_LEN         : " << MDV64_NAME_LEN << endl;
+  cerr << "MDV64_SHORT_FIELD_LEN  : " << MDV64_SHORT_FIELD_LEN << endl;
+  cerr << "MDV64_TRANSFORM_LEN    : " << MDV64_TRANSFORM_LEN << endl;
+  cerr << "MDV64_UNITS_LEN        : " << MDV64_UNITS_LEN << endl;
+  cerr << "MDV64_N_COORD_LABELS   : " << MDV64_N_COORD_LABELS << endl;
+  cerr << "MDV64_COORD_UNITS_LEN  : " << MDV64_COORD_UNITS_LEN << endl;
+  cerr << "MDV64_PROJ4_STR_LEN    : " << MDV64_PROJ4_STR_LEN << endl;
+  
+  cerr << "MDV32_CHUNK_INFO_LEN   : " << MDV32_CHUNK_INFO_LEN << endl;
+  cerr << "MDV32_INFO_LEN         : " << MDV32_INFO_LEN << endl;
+  cerr << "MDV32_LONG_FIELD_LEN   : " << MDV32_LONG_FIELD_LEN << endl;
+  cerr << "MDV32_MAX_PROJ_PARAMS  : " << MDV32_MAX_PROJ_PARAMS << endl;
+  cerr << "MDV32_MAX_VLEVELS      : " << MDV32_MAX_VLEVELS << endl;
+  cerr << "MDV32_NAME_LEN         : " << MDV32_NAME_LEN << endl;
+  cerr << "MDV32_SHORT_FIELD_LEN  : " << MDV32_SHORT_FIELD_LEN << endl;
+  cerr << "MDV32_TRANSFORM_LEN    : " << MDV32_TRANSFORM_LEN << endl;
+  cerr << "MDV32_UNITS_LEN        : " << MDV32_UNITS_LEN << endl;
+  cerr << "MDV32_N_COORD_LABELS   : " << MDV32_N_COORD_LABELS << endl;
+  cerr << "MDV32_COORD_UNITS_LEN  : " << MDV32_COORD_UNITS_LEN << endl;
+  
+  cerr << "sizeof(master_header_64_t) : " << sizeof(Mdvx::master_header_64_t) << endl;
+  cerr << "sizeof(field_header_64_t)  : " << sizeof(Mdvx::field_header_64_t) << endl;
+  cerr << "sizeof(vlevel_header_64_t) : " << sizeof(Mdvx::vlevel_header_64_t) << endl;
+  cerr << "sizeof(chunk_header_64_t)  : " << sizeof(Mdvx::chunk_header_64_t) << endl;
+  
+  cerr << "sizeof(master_header_32_t) : " << sizeof(Mdvx::master_header_32_t) << endl;
+  cerr << "sizeof(field_header_32_t)  : " << sizeof(Mdvx::field_header_32_t) << endl;
+  cerr << "sizeof(vlevel_header_32_t) : " << sizeof(Mdvx::vlevel_header_32_t) << endl;
+  cerr << "sizeof(chunk_header_32_t)  : " << sizeof(Mdvx::chunk_header_32_t) << endl;
+  
+  cerr << "64-bit-words(master_header_64_t) : " 
+       << (double) sizeof(Mdvx::master_header_64_t) / (double) sizeof(si64) << endl;
+  cerr << "64-bit-words(field_header_64_t)  : " 
+       << (double) sizeof(Mdvx::field_header_64_t) / (double) sizeof(si64) << endl;
+  cerr << "64-bit-words(vlevel_header_64_t) : "
+       << (double) sizeof(Mdvx::vlevel_header_64_t) / (double) sizeof(si64) << endl;
+  cerr << "64-bit-words(chunk_header_64_t)  : "
+       << (double) sizeof(Mdvx::chunk_header_64_t) / (double) sizeof(si64) << endl;
+  
+  cerr << "64-bit-words(master_header_32_t) : "
+       << (double) sizeof(Mdvx::master_header_32_t) / (double) sizeof(si64) << endl;
+  cerr << "64-bit-words(field_header_32_t)  : "
+       << (double) sizeof(Mdvx::field_header_32_t) / (double) sizeof(si64) << endl;
+  cerr << "64-bit-words(vlevel_header_32_t) : "
+       << (double) sizeof(Mdvx::vlevel_header_32_t) / (double) sizeof(si64) << endl;
+  cerr << "64-bit-words(chunk_header_32_t)  : "
+       << (double) sizeof(Mdvx::chunk_header_32_t) / (double) sizeof(si64) << endl;
+  
 }
 

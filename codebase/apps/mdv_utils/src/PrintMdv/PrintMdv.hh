@@ -92,6 +92,7 @@ protected:
   void _doPrintVol(const DsMdvx *mdvx) const;
 
   int _doTest(DsMdvx *mdvx);
+  void _printSizes(ostream &out);
 
   MdvxTimeList::time_list_mode_t getTimeListMode(Params::time_list_mode_t mode);
 
