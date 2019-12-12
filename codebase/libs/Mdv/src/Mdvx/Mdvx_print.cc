@@ -408,8 +408,13 @@ void Mdvx::printFieldHeader(const field_header_t &fhdr,
   out << "proj_origin_lat:        " << fhdr.proj_origin_lat << endl;
   out << "proj_rotation:          " << fhdr.proj_rotation << endl;
   for (int i = 0; i < MDV_MAX_PROJ_PARAMS; i++) {
-    out << "proj_param[" << i << "]:          "
-	<< fhdr.proj_param[i] << endl;
+    if (i < 10) {
+      out << "proj_param[" << i << "]:          "
+          << fhdr.proj_param[i] << endl;
+    } else {
+      out << "proj_param[" << i << "]:         "
+          << fhdr.proj_param[i] << endl;
+    }
   }
   out << "proj4_str:              " << fhdr.proj4_str << endl;
   out << "vert_reference:         " << fhdr.vert_reference << endl;
