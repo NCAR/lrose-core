@@ -576,7 +576,7 @@ public:
 
   // set the use of 32-bit headers (backward compatibility mode)
 
-  void setUse32BitHeaders(bool val = true) { _use32BitHeaders = val; }
+  void setUse32BitHeaders(bool val) { _use32BitHeaders = val; }
   
   // get error string
 

@@ -562,6 +562,8 @@ public:
 
   tdrp_bool_t read_as_single_part;
 
+  tdrp_bool_t read_using_32_bit_headers;
+
   time_list_mode_t time_list_mode;
 
   char* time_list_start;
@@ -605,7 +607,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[74];
+  mutable TDRPtable _table[75];
 
   const char *_className;
 

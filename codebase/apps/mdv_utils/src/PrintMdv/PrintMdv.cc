@@ -403,6 +403,12 @@ void PrintMdv::_setupRead(DsMdvx *mdvx)
     }
 
   }
+
+  if (_params.read_using_32_bit_headers) {
+    mdvx->setRead32BitHeaders(true);
+  } else {
+    mdvx->setRead32BitHeaders(false);
+  }
   
 }
 

@@ -1076,17 +1076,36 @@ int DsMdvxMsg::_getMasterHeader(Mdvx::master_header_t &mhdr,
     _errStr += "  Cannot find master header part.\n";
     return -1;
   }
-  // Part must be big enough.
-  if (part->getLength() != sizeof(mhdr)) {
-    _errStr += "ERROR - DsMdvxMsg::_getMasterHeader.\n";
-    _errStr += "  Master header part is incorrect size.\n";
-    TaStr::AddInt(_errStr, "  Size expected: ", sizeof(mhdr));
-    TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
-    return -1;
+  if (_use32BitHeaders) {
+    // 32-bit
+    Mdvx::master_header_32_t mhdr32;
+    // Part must be big enough.
+    if (part->getLength() != sizeof(mhdr32)) {
+      _errStr += "ERROR - DsMdvxMsg::_getMasterHeader.\n";
+      _errStr += "  Master header 32-bit part is incorrect size.\n";
+      TaStr::AddInt(_errStr, "  Size expected: ", sizeof(mhdr32));
+      TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
+      return -1;
+    }
+    // Copy perform byte swapping.
+    memcpy(&mhdr32, part->getBuf(), sizeof(mhdr32));
+    Mdvx::master_header_from_BE_32(mhdr32);
+    // copy to 64-bit version
+    Mdvx::_copyMasterHeader32to64(mhdr32, mhdr);
+  } else {
+    // 64-bit
+    // Part must be big enough.
+    if (part->getLength() != sizeof(mhdr)) {
+      _errStr += "ERROR - DsMdvxMsg::_getMasterHeader.\n";
+      _errStr += "  Master header 64-bit part is incorrect size.\n";
+      TaStr::AddInt(_errStr, "  Size expected: ", sizeof(mhdr));
+      TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
+      return -1;
+    }
+    // Copy perform byte swapping.
+    memcpy(&mhdr, part->getBuf(), sizeof(mhdr));
+    Mdvx::master_header_from_BE(mhdr);
   }
-  // Copy perform byte swapping.
-  memcpy(&mhdr, part->getBuf(), sizeof(mhdr));
-  Mdvx::master_header_from_BE(mhdr);
   if (_debug) {
     Mdvx::printMasterHeader(mhdr, cerr);
   }
@@ -1108,18 +1127,38 @@ int DsMdvxMsg::_getFieldHeader(Mdvx::field_header_t &fhdr,
     TaStr::AddInt(_errStr, "  Field num: ", field_num);
     return -1;
   }
-  // Part must be big enough.
-  if (part->getLength() != sizeof(fhdr)) {
-    _errStr += "ERROR - DsMdvxMsg::_getFieldHeader.\n";
-    _errStr += "  Field header part is incorrect size.\n";
-    TaStr::AddInt(_errStr, "  Field num: ", field_num);
-    TaStr::AddInt(_errStr, "  Size expected: ", sizeof(fhdr));
-    TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
-    return -1;
+  if (_use32BitHeaders) {
+    // 32-bit
+    Mdvx::field_header_32_t fhdr32;
+    // Part must be big enough.
+    if (part->getLength() != sizeof(fhdr32)) {
+      _errStr += "ERROR - DsMdvxMsg::_getFieldHeader.\n";
+      _errStr += "  Field header 32-bit part is incorrect size.\n";
+      TaStr::AddInt(_errStr, "  Field num: ", field_num);
+      TaStr::AddInt(_errStr, "  Size expected: ", sizeof(fhdr));
+      TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
+      return -1;
+    }
+    // Copy and perform byte swapping.
+    memcpy(&fhdr32, part->getBuf(), sizeof(fhdr32));
+    Mdvx::field_header_from_BE_32(fhdr32);
+    // copy to 64-bit version
+    Mdvx::_copyFieldHeader32to64(fhdr32, fhdr);
+  } else {
+    // 64-bit
+    // Part must be big enough.
+    if (part->getLength() != sizeof(fhdr)) {
+      _errStr += "ERROR - DsMdvxMsg::_getFieldHeader.\n";
+      _errStr += "  Field header 64-bit part is incorrect size.\n";
+      TaStr::AddInt(_errStr, "  Field num: ", field_num);
+      TaStr::AddInt(_errStr, "  Size expected: ", sizeof(fhdr));
+      TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
+      return -1;
+    }
+    // Copy and perform byte swapping.
+    memcpy(&fhdr, part->getBuf(), sizeof(fhdr));
+    Mdvx::field_header_from_BE(fhdr);
   }
-  // Copy and perform byte swapping.
-  memcpy(&fhdr, part->getBuf(), sizeof(fhdr));
-  Mdvx::field_header_from_BE(fhdr);
   if (_debug) {
     Mdvx::printFieldHeader(fhdr, cerr);
   }
@@ -1142,18 +1181,38 @@ int DsMdvxMsg::_getVlevelHeader(Mdvx::vlevel_header_t &vhdr,
     TaStr::AddInt(_errStr, "  Field num: ", field_num);
     return -1;
   }
-  // Part must be big enough.
-  if (part->getLength() != sizeof(vhdr)) {
-    _errStr += "ERROR - DsMdvxMsg::_getVlevelHeader.\n";
-    _errStr += "  Vlevel header part is incorrect size.\n";
-    TaStr::AddInt(_errStr, "  Field num: ", field_num);
-    TaStr::AddInt(_errStr, "  Size expected: ", sizeof(vhdr));
-    TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
-    return -1;
+  if (_use32BitHeaders) {
+    // 32-bit
+    Mdvx::vlevel_header_32_t vhdr32;
+    // Part must be big enough.
+    if (part->getLength() != sizeof(vhdr32)) {
+      _errStr += "ERROR - DsMdvxMsg::_getVlevelHeader.\n";
+      _errStr += "  Vlevel header 32-bit part is incorrect size.\n";
+      TaStr::AddInt(_errStr, "  Field num: ", field_num);
+      TaStr::AddInt(_errStr, "  Size expected: ", sizeof(vhdr));
+      TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
+      return -1;
+    }
+    // Copy and perform byte swapping.
+    memcpy(&vhdr32, part->getBuf(), sizeof(vhdr32));
+    Mdvx::vlevel_header_from_BE_32(vhdr32);
+    // copy to 64-bit version
+    Mdvx::_copyVlevelHeader32to64(vhdr32, vhdr);
+  } else {
+    // 64-bit
+    // Part must be big enough.
+    if (part->getLength() != sizeof(vhdr)) {
+      _errStr += "ERROR - DsMdvxMsg::_getVlevelHeader.\n";
+      _errStr += "  Vlevel header 64-bit part is incorrect size.\n";
+      TaStr::AddInt(_errStr, "  Field num: ", field_num);
+      TaStr::AddInt(_errStr, "  Size expected: ", sizeof(vhdr));
+      TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
+      return -1;
+    }
+    // Copy and perform byte swapping.
+    memcpy(&vhdr, part->getBuf(), sizeof(vhdr));
+    Mdvx::vlevel_header_from_BE(vhdr);
   }
-  // Copy and perform byte swapping.
-  memcpy(&vhdr, part->getBuf(), sizeof(vhdr));
-  Mdvx::vlevel_header_from_BE(vhdr);
   return 0;
 }
 
@@ -1172,18 +1231,38 @@ int DsMdvxMsg::_getChunkHeader(Mdvx::chunk_header_t &chdr,
     TaStr::AddInt(_errStr, "  Chunk num: ", chunk_num);
     return -1;
   }
-  // Part must be big enough.
-  if (part->getLength() != sizeof(chdr)) {
-    _errStr += "ERROR - DsMdvxMsg::_getChunkHeader.\n";
-    _errStr += "  Chunk header part is incorrect size.\n";
-    TaStr::AddInt(_errStr, "  Chunk num: ", chunk_num);
-    TaStr::AddInt(_errStr, "  Size expected: ", sizeof(chdr));
-    TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
-    return -1;
+  if (_use32BitHeaders) {
+    // 32-bit
+    Mdvx::chunk_header_32_t chdr32;
+    // Part must be big enough.
+    if (part->getLength() != sizeof(chdr32)) {
+      _errStr += "ERROR - DsMdvxMsg::_getChunkHeader.\n";
+      _errStr += "  Chunk header 32-bit part is incorrect size.\n";
+      TaStr::AddInt(_errStr, "  Chunk num: ", chunk_num);
+      TaStr::AddInt(_errStr, "  Size expected: ", sizeof(chdr));
+      TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
+      return -1;
+    }
+    // Copy and perform byte swapping.
+    memcpy(&chdr32, part->getBuf(), sizeof(chdr32));
+    Mdvx::chunk_header_from_BE_32(chdr32);
+    // copy to 64-bit version
+    Mdvx::_copyChunkHeader32to64(chdr32, chdr);
+  } else {
+    // 64-bit
+    // Part must be big enough.
+    if (part->getLength() != sizeof(chdr)) {
+      _errStr += "ERROR - DsMdvxMsg::_getChunkHeader.\n";
+      _errStr += "  Chunk header 64-bit part is incorrect size.\n";
+      TaStr::AddInt(_errStr, "  Chunk num: ", chunk_num);
+      TaStr::AddInt(_errStr, "  Size expected: ", sizeof(chdr));
+      TaStr::AddInt(_errStr, "  Size found in message: ", part->getLength());
+      return -1;
+    }
+    // Copy and perform byte swapping.
+    memcpy(&chdr, part->getBuf(), sizeof(chdr));
+    Mdvx::chunk_header_from_BE(chdr);
   }
-  // Copy and perform byte swapping.
-  memcpy(&chdr, part->getBuf(), sizeof(chdr));
-  Mdvx::chunk_header_from_BE(chdr);
   if (_debug) {
     Mdvx::printChunkHeader(chdr, cerr);
   }

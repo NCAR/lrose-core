@@ -57,7 +57,7 @@ void Mdvx::clearWrite()
   clearWriteAddYearSubdir();
   clearIfForecastWriteAsForecast();
   clearWriteFormat();
-  clearWrite32BitHeaders();
+  setWrite32BitHeaders(true);
   setWriteLdataInfo();
 }
 
@@ -155,13 +155,9 @@ void Mdvx::clearWriteFormat()
 // If true, old 32-bit headers are used
 // If false, new 64-bit headers are used
 
-void Mdvx::setWrite32BitHeaders() const
+void Mdvx::setWrite32BitHeaders(bool val) const
 {
-  _write32BitHeaders = true;
-}
-void Mdvx::clearWrite32BitHeaders() const
-{
-  _write32BitHeaders = false;
+  _write32BitHeaders = val;
 }
 
 ////////////////////////////////////////////////////////
@@ -1215,14 +1211,14 @@ void Mdvx::_checkEnvBeforeWrite() const
 void Mdvx::_checkWrite32BitHeaders() const
 {
 
-  char *write32BitHeaders = getenv("MDV_WRITE_32_BIT_HEADERS");
-  if (write32BitHeaders != NULL) {
-    if (!strcasecmp(write32BitHeaders, "TRUE")) {
+  char *write64BitHeaders = getenv("MDV_WRITE_64_BIT_HEADERS");
+  if (write64BitHeaders != NULL) {
+    if (!strcasecmp(write64BitHeaders, "TRUE")) {
       if (_debug) {
-        cerr << "DEBUG - Mdvx::_checkWrite32BitHeaders()"
-             << " - env var MDV_WRITE_32_BIT_HEADERS set to true" << endl;
+        cerr << "DEBUG - Mdvx::_checkWrite64BitHeaders()"
+             << " - env var MDV_WRITE_64_BIT_HEADERS set to true" << endl;
       }
-      setWrite32BitHeaders();
+      setWrite32BitHeaders(false);
     }
   }
   if (_debug && _write32BitHeaders) {

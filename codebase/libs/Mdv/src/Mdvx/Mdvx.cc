@@ -259,12 +259,15 @@ Mdvx &Mdvx::_copy(const Mdvx &rhs)
   _readTimeListAlso = rhs._readTimeListAlso;
   _readAsSingleBuffer = rhs._readAsSingleBuffer;
 
+  _read32BitHeaders = rhs._read32BitHeaders;
+
   // write request members
 
   _writeLdataInfo = rhs._writeLdataInfo;
   _writeAsForecast = rhs._writeAsForecast;
   _useExtendedPaths = rhs._useExtendedPaths;
   _writeAddYearSubdir = rhs._writeAddYearSubdir;
+  _write32BitHeaders = rhs._write32BitHeaders;
 
   // path in use - the path being used for reading/writing
 

@@ -405,6 +405,10 @@ void clearCheckLatestValidModTime();
 void setReadAsSingleBuffer();
 void clearReadAsSingleBuffer();
 
+// read using 32-bit headers
+
+void setRead32BitHeaders(bool val) { _read32BitHeaders = val; }
+
 // deprecated
 
 void setReadAsSinglePart();

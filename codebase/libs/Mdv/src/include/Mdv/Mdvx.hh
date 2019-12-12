@@ -608,6 +608,8 @@ protected:
 
   bool _readAsSingleBuffer;
 
+  bool _read32BitHeaders;
+
   // write request members
 
   bool _writeLdataInfo;

@@ -89,8 +89,7 @@ void clearWriteFormat();
 // If true, old 32-bit headers are used
 // If false, new 64-bit headers are used
 
-void setWrite32BitHeaders() const;
-void clearWrite32BitHeaders() const;
+void setWrite32BitHeaders(bool val) const;
 
 // write _latest_data_info file?
 // If true, _latest_data_info file is written in top_dir

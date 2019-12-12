@@ -86,6 +86,7 @@ void Mdvx::clearRead()
   clearReadFormat();
   clearCheckLatestValidModTime();
   clearConstrainFcastLeadTimes();
+  setRead32BitHeaders(true);
   _readQualifiersActive = false;
 }
 
@@ -1348,6 +1349,12 @@ void Mdvx::printReadRequest(ostream &out)
     out << "  Set check latest valid mod time on read?: true" << endl;
     out << "  Latest valid mod time: "
 	<< DateTime::str(_timeList.getLatestValidModTime(), false) << endl;
+  }
+
+  if (_read32BitHeaders) {
+    out << "  Read32BitHeaders?: true" << endl;
+  } else {
+    out << "  Read32BitHeaders?: false" << endl;
   }
 
 }

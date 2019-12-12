@@ -140,6 +140,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
 
+    } else if (!strcmp(argv[i], "-64_bit_hdrs")) {
+      
+      sprintf(tmp_str, "read_using_32_bit_headers = FALSE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-all_hdrs")) {
       
       sprintf(tmp_str, "get_mode = GET_ALL_HEADERS;");
@@ -633,6 +638,9 @@ void Args::_usage(ostream &out)
       << "Options:\n"
       << "\n"
       << "  [ -h ] produce this list.\n"
+      << "\n"
+      << "  [ -64_bit_hdrs ] read using the new 64-bit headers\n"
+      << "     The default is to use the legacy 32-bit headers\n"
       << "\n"
       << "  [ -all_hdrs ] only get headers\n"
       << "     exactly as they exist in the file\n"
