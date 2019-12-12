@@ -1872,37 +1872,82 @@ int Mdvx::readFromBuffer(const MemBuf &buf)
     addField(field);
     
   }
-  
+
   // chunks
   
   if (mhdr.n_chunks > 0) {
-    int min_len =
-      mhdr.chunk_hdr_offset + mhdr.n_chunks * sizeof(chunk_header_t);
-    if ((int) buf.getLen() < min_len) {
-      _errStr += "ERROR - Mdvx::readFromBuffer.\n";
-      _errStr += "  Buffer too short for chunk headers.\n";
-      TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
-      return -1;
-    }
-  }
 
-  for (int i = 0; i < mhdr.n_chunks; i++) {
-    chunk_header_t chdr =
-      *((chunk_header_t *) ((char *) buf.getPtr() + mhdr.chunk_hdr_offset +
-                            i * sizeof(chunk_header_t)));
-    chunk_header_from_BE(chdr);
-    int min_len = chdr.chunk_data_offset + chdr.size;
-    if ((int) buf.getLen() < min_len) {
-      _errStr += "ERROR - Mdvx::readFromBuffer.\n";
-      _errStr += "  Buffer too short for chunk data.\n";
-      TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
-      return -1;
-    }
-    void *chunkData = ((char *) buf.getPtr() + chdr.chunk_data_offset);
-    MdvxChunk *chunk = new MdvxChunk(chdr, chunkData);
-    addChunk(chunk);
-  }
+    if (_is64Bit) {
+      
+      // 64 bit
 
+      int min_len =
+        mhdr.chunk_hdr_offset + mhdr.n_chunks * sizeof(chunk_header_t);
+      if ((int) buf.getLen() < min_len) {
+        _errStr += "ERROR - Mdvx::readFromBuffer.\n";
+        _errStr += "  Buffer too short for chunk headers.\n";
+        TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
+        TaStr::AddInt(_errStr, "  min_len: ", min_len);
+        return -1;
+      }
+      
+      for (int i = 0; i < mhdr.n_chunks; i++) {
+        chunk_header_t chdr =
+          *((chunk_header_t *) ((char *) buf.getPtr() + mhdr.chunk_hdr_offset +
+                                i * sizeof(chunk_header_t)));
+        chunk_header_from_BE(chdr);
+        int min_len = chdr.chunk_data_offset + chdr.size;
+        if ((int) buf.getLen() < min_len) {
+          _errStr += "ERROR - Mdvx::readFromBuffer.\n";
+          _errStr += "  Buffer too short for chunk data.\n";
+          TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
+          TaStr::AddInt(_errStr, "  min_len: ", min_len);
+          return -1;
+        }
+        void *chunkData = ((char *) buf.getPtr() + chdr.chunk_data_offset);
+        MdvxChunk *chunk = new MdvxChunk(chdr, chunkData);
+        addChunk(chunk);
+      }
+
+    } else {
+      
+      // 32 bit
+
+      int min_len =
+        mhdr.chunk_hdr_offset + mhdr.n_chunks * sizeof(chunk_header_32_t);
+      if ((int) buf.getLen() < min_len) {
+        _errStr += "ERROR - Mdvx::readFromBuffer.\n";
+        _errStr += "  Buffer too short for chunk headers.\n";
+        TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
+        TaStr::AddInt(_errStr, "  min_len: ", min_len);
+        return -1;
+      }
+      
+      for (int i = 0; i < mhdr.n_chunks; i++) {
+
+        chunk_header_32_t chdr32 =
+          *((chunk_header_32_t *) ((char *) buf.getPtr() + mhdr.chunk_hdr_offset +
+                                   i * sizeof(chunk_header_32_t)));
+        chunk_header_from_BE_32(chdr32);
+        int min_len = chdr32.chunk_data_offset + chdr32.size;
+        if ((int) buf.getLen() < min_len) {
+          _errStr += "ERROR - Mdvx::readFromBuffer.\n";
+          _errStr += "  Buffer too short for chunk data.\n";
+          TaStr::AddInt(_errStr, "  Buffer len: ", buf.getLen());
+          TaStr::AddInt(_errStr, "  min_len: ", min_len);
+          return -1;
+        }
+        chunk_header_t chdr;
+        _copyChunkHeader32to64(chdr32, chdr);
+        void *chunkData = ((char *) buf.getPtr() + chdr.chunk_data_offset);
+        MdvxChunk *chunk = new MdvxChunk(chdr, chunkData);
+        addChunk(chunk);
+      }
+
+    } // 32 bit
+
+  } // if (mhdr.n_chunks > 0)
+    
   // set data set info from chunks as appropriate
 
   _setDataSetInfoFromChunks();
