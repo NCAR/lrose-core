@@ -397,7 +397,7 @@ paramdef boolean {
 } read_as_single_part;
 
 paramdef boolean {
-  p_default = true;
+  p_default = false;
   p_descr = "Read using the legacy 32-bit headers.";
   p_help = "If false, the new 64-bit headers will be used.";
 } read_using_32_bit_headers;

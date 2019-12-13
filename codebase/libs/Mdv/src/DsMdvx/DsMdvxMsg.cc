@@ -66,11 +66,15 @@ DsMdvxMsg::~DsMdvxMsg()
 
 int DsMdvxMsg::checkParts() const
 {
-  _use32BitHeaders = _has32BitParts();
+  bool has32Bit = _has32BitParts();
   bool has64Bit = _has64BitParts();
-  if (_use32BitHeaders && has64Bit) {
+  if (has64Bit) {
+    _setUse32BitHeaders(false);
+  } else if (has32Bit) {
+    _setUse32BitHeaders(true);
+  } else {
     cerr << "ERROR - DsMdvxMsg::checkParts()" << endl;
-    cerr << "Message has both 32 and 64 bit headers" << endl;
+    cerr << "Message does not have either 32 or 64 bit headers" << endl;
     print(cerr, "  ");
     return -1;
   }

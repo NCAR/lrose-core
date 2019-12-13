@@ -41,7 +41,9 @@
 using namespace std;
 
 class DsMdvxMsg : public DsServerMsg {
-  
+
+  friend class DsMdvx;
+
 public:
   
   typedef enum {
@@ -574,10 +576,6 @@ public:
 
   int disassemble(const void *in_msg, const ssize_t msg_len, DsMdvx &mdvx);
 
-  // set the use of 32-bit headers (backward compatibility mode)
-
-  void setUse32BitHeaders(bool val) { _use32BitHeaders = val; }
-  
   // get error string
 
   string &getErrStr() { return (_errStr); }
@@ -792,7 +790,6 @@ protected:
   int _getClimoQualifiers(DsMdvx &mdvx);
   int _getClimoStatTypes(DsMdvx &mdvx);
   int _getClimoDataRange(DsMdvx &mdvx);
-  int _getClimoDataRange32(DsMdvx &mdvx);
   int _getClimoTimeRange(DsMdvx &mdvx);
   
   int _getAppName(DsMdvx &mdvx);
@@ -899,6 +896,10 @@ protected:
 
   bool _has32BitParts() const;
   bool _has64BitParts() const;
+
+  // 32 bit headers
+
+  void _setUse32BitHeaders(bool val) const { _use32BitHeaders = val; }
 
 private:
 

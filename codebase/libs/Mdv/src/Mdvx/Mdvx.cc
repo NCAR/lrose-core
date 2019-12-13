@@ -1293,3 +1293,28 @@ void Mdvx::_copyChunkHeader64to32(const chunk_header_64_t &chdr64,
 
 }
 
+/////////////////////////////////////////////////////////////////////
+// copy main headers to file headers
+// useful for non-MDV reads, e.g. NetCDF
+
+void Mdvx::_copyMainHeadersToFileHeaders()
+
+{
+
+  _mhdrFile = _mhdr;
+  
+  _fhdrsFile.clear();
+  _vhdrsFile.clear();
+  _chdrsFile.clear();
+
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+    _fhdrsFile.push_back(_fields[ii]->getFieldHeader());
+    _vhdrsFile.push_back(_fields[ii]->getVlevelHeader());
+  }
+
+  for (size_t ii = 0; ii < _chunks.size(); ii++) {
+    _chdrsFile.push_back(_chunks[ii]->getHeader());
+  }
+
+}
+

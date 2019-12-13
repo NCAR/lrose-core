@@ -279,6 +279,10 @@ int NcfMdvx::convertNcf2Mdv(const string &url)
   
   clearNcf();
 
+  // copy the main headers to file headers
+
+  _copyMainHeadersToFileHeaders();
+
   // set format to MDV
   
   _currentFormat = FORMAT_MDV;
@@ -373,6 +377,10 @@ int NcfMdvx::readNcf(const string &url)
   // set nc-specific times from path
 
   _set_times_ncf();
+
+  // copy the main headers to file headers
+
+  _copyMainHeadersToFileHeaders();
 
   // set format to MDV
   
@@ -631,6 +639,10 @@ int NcfMdvx::readRadx(const string &url)
     _errStr += "  Cannot translate RadxVol.\n";
     return -1;
   }
+
+  // copy the main headers to file headers
+
+  _copyMainHeadersToFileHeaders();
 
   // set format to MDV
   

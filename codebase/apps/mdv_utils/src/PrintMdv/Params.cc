@@ -1369,7 +1369,7 @@
     tt->descr = tdrpStrDup("Read using the legacy 32-bit headers.");
     tt->help = tdrpStrDup("If false, the new 64-bit headers will be used.");
     tt->val_offset = (char *) &read_using_32_bit_headers - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 3'

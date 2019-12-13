@@ -864,6 +864,11 @@ protected:
   static void _copyChunkHeader64to32(const chunk_header_64_t &chdr64,
                                      chunk_header_32_t &chdr32);
 
+  // copy the main headers to the file headers
+  // useful for non-MDV reads, e.g. NetCDF
+
+  void _copyMainHeadersToFileHeaders();
+
   private:
 
 };
