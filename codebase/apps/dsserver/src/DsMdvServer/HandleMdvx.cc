@@ -64,7 +64,7 @@ int DsMdvServer::handleMdvxCommand(Socket *socket,
     msg.setDebug();
     mdvx.setDebug();
   }
-
+  
   if (msg.disassemble(data, dataSize, mdvx)) {
     string errMsg  = "Error in DsMdvServer::handleMdvxCommand(): ";
     TaStr::AddStr(errMsg, "Could not disassemble message");
@@ -79,6 +79,14 @@ int DsMdvServer::handleMdvxCommand(Socket *socket,
       cerr << "ERROR - COMM - DsMdvServer - " << statusString << endl;
     }
     return 0;
+  }
+
+  // should we use 32-bit headers
+
+  if (msg.getUse32BitHeaders()) {
+    mdvx.setWrite32BitHeaders(true);
+  } else {
+    mdvx.setWrite32BitHeaders(false);
   }
 
   // check security

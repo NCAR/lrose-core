@@ -455,7 +455,7 @@ void Mdvx::writeToBuffer(MemBuf &buf) const
   updateMasterHeader();
   
   if (_debug) {
-    cerr << "Mdvx - writing object to buffer." << endl;
+    cerr << "Mdvx - writing object to buffer - 64-bit headers." << endl;
   }
 
   // compute master header offsets

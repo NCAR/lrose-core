@@ -576,6 +576,10 @@ public:
 
   int disassemble(const void *in_msg, const ssize_t msg_len, DsMdvx &mdvx);
 
+  // check if message uses 32-bit headers
+
+  bool getUse32BitHeaders() const { return _use32BitHeaders; }
+
   // get error string
 
   string &getErrStr() { return (_errStr); }
