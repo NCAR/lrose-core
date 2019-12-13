@@ -59,7 +59,7 @@ ENV RAP_SHARED_BIN_DIR /usr/local/bin
 
 RUN \
   cd /usr/local/src/lrose-core; \
-  ./codebase/make_bin/install_package_makefiles.py --package cidd --debug
+  ./codebase/make_bin/installPackageMakefiles.py --package cidd --debug
 
 # build libraries
 

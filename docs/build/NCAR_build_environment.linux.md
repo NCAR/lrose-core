@@ -156,13 +156,13 @@ To install the **lrose** standard package makefiles, perform the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py
+  ./make_bin/installPackageMakefiles.py
 ```
 This is equivalent to the following
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py --package lrose
+  ./make_bin/installPackageMakefiles.py --package lrose
 ```
 
 If you want to perform a specific package package, you can specify that on the command line.
@@ -171,14 +171,14 @@ For the **radx** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py --package radx
+  ./make_bin/installPackageMakefiles.py --package radx
 ```
 
 For the **titan** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
-  ./make_bin/install_package_makefiles.py --package titan
+  ./make_bin/installPackageMakefiles.py --package titan
 ```
 
 ### Perform the build
