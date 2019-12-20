@@ -17,6 +17,7 @@ RESOURCES = resources.qrc
 HEADERS += AllocCheck.hh
 HEADERS += Args.hh
 HEADERS += Beam.hh
+HEADERS += BoundaryPointEditor.hh
 HEADERS += BscanBeam.hh
 HEADERS += BscanManager.hh
 HEADERS += BscanWidget.hh
@@ -67,6 +68,7 @@ HEADERS += DataField.hh
 SOURCES += AllocCheck.cc
 SOURCES += Args.cc
 SOURCES += Beam.cc
+SOURCES += BoundaryPointEditor.cc
 SOURCES += BscanBeam.cc
 SOURCES += BscanManager.cc
 SOURCES += BscanWidget.cc
@@ -121,14 +123,14 @@ DEFINES += _FILE_OFFSET_BITS=64
 
 INCLUDEPATH += $(HOME)/rap/include
 INCLUDEPATH += $(RAP_INC_DIR)
+INCLUDEPATH += /usr/local/include
 # INCLUDEPATH += /usr/lib/qt4/include
 # INCLUDEPATH += /usr/lib/qt3-3/include
 # INCLUDEPATH += /usr/include/qt4/QtOpenGL
 # INCLUDEPATH += /usr/include/qt4/QtDesigner
 
-# LIBS += -L$(HOME)/rap/lib
 LIBS += -L$(HOME)/lrose/lib
-# LIBS += -L$(HOME)/rap/lib
+LIBS += -L/usr/local/lib
 # LIBS += -L$(HOME)/rap/lib
 LIBS += -L$(RAP_LIB_DIR)
 # LIBS += -L/usr/lib/qt4/lib
