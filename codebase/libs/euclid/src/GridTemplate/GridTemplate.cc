@@ -133,7 +133,8 @@ GridPoint *GridTemplate::getNextInGrid(void) const
     
     _pointInGridReturn.x = _pointInGridBase.x + offset->x_offset;
     _pointInGridReturn.y = _pointInGridBase.y + offset->y_offset;
-
+    _pointInGridReturn.value = offset->value;
+    
     if (_pointInGridReturn.x >= 0 &&
 	_pointInGridReturn.x < _pointInGridNumX &&
 	_pointInGridReturn.y >= 0 &&

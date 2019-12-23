@@ -100,10 +100,19 @@ class GridTemplate
   {
     return _offsetList.size();
   }
+
+  // Get the actual points in the template. This is used to set the optional
+  // values for each point, for example when using the template to calculate
+  // distance-weighted values.
+  
+  vector< GridOffset* > getPointList()
+  {
+    return _offsetList;
+  }
   
  protected:
 
-  // The offsets that make up the circle
+  // The offsets that make up the template
 
   vector< GridOffset* > _offsetList;
 

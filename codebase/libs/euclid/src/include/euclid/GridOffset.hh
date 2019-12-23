@@ -47,7 +47,7 @@ class GridOffset
 
   // Constructors
 
-  GridOffset(int x_offset = 0, int y_offset = 0);
+  GridOffset(int x_offset = 0, int y_offset = 0, const double value = 0.0);
   GridOffset(const GridOffset& rhs);
   GridOffset(const GridOffset* rhs);
   
@@ -59,6 +59,11 @@ class GridOffset
 
   int x_offset;
   int y_offset;
+
+  // The optional value associated with the grid offset. This value is useful for things like
+  // calculating distance-weighted values. If not explicitly set, the value will be 0.0.
+
+  double value;
   
 };
 

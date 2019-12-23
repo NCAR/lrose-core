@@ -65,34 +65,39 @@ class GridPoint
     return (y * nx) + x;
   }
   
-  inline void setPoint(const int x, const int y)
+  inline void setPoint(const int x, const int y, const double value = 0.0)
   {
     this->x = x;
     this->y = y;
+    this->value = value;
   }
   
   inline void setPoint(const GridPoint *point)
   {
     x = point->x;
     y = point->y;
+    value = point->value;
   }
   
   inline void setPoint(const GridPoint &point)
   {
     x = point.x;
     y = point.y;
+    value = point.value;
   }
   
-  inline void setPoint(const GridPoint *point, const GridOffset *offset)
+  inline void setPoint(const GridPoint *point, const GridOffset *offset, const double value = 0.0)
   {
     x = point->x + offset->x_offset;
     y = point->y + offset->y_offset;
+    this->value = value;
   }
   
-  inline void setPoint(const GridPoint &point, const GridOffset &offset)
+  inline void setPoint(const GridPoint &point, const GridOffset &offset, const double value = 0.0)
   {
     x = point.x + offset.x_offset;
     y = point.y + offset.y_offset;
+    this->value = value;
   }
   
 
@@ -128,11 +133,16 @@ class GridPoint
   // Public members //
   ////////////////////
 
-  // The actual offset values
+  // The actual grid indices
 
   int x;
   int y;
-  
+
+  // The optional value associated with the grid point. This value is copied from the GridOffset object
+  // used to create the point and is useful for things like calculating distance-weighted points. If not
+  // explicitly set, the grid offset values default to 0.0.
+
+  double value;
 
  private:
 
