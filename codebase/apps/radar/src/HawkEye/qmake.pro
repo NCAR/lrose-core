@@ -123,8 +123,8 @@ DEFINES += _FILE_OFFSET_BITS=64
 
 QMAKE_CXXFLAGS += -isystem
 
-INCLUDEPATH += $(HOME)/rap/include
 INCLUDEPATH += /usr/local/include
+INCLUDEPATH += $(HOME)/rap/include
 
 # INCLUDEPATH += $(RAP_INC_DIR)
 # INCLUDEPATH += /usr/lib/qt4/include
