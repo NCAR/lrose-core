@@ -121,9 +121,12 @@ DEFINES += F_UNDERSCORE2
 DEFINES += _LARGEFILE_SOURCE
 DEFINES += _FILE_OFFSET_BITS=64
 
+QMAKE_CXXFLAGS += -isystem
+
 INCLUDEPATH += $(HOME)/rap/include
-INCLUDEPATH += $(RAP_INC_DIR)
 INCLUDEPATH += /usr/local/include
+
+# INCLUDEPATH += $(RAP_INC_DIR)
 # INCLUDEPATH += /usr/lib/qt4/include
 # INCLUDEPATH += /usr/lib/qt3-3/include
 # INCLUDEPATH += /usr/include/qt4/QtOpenGL
