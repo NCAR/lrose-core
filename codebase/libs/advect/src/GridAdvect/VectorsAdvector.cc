@@ -33,8 +33,6 @@
 ///////////////////////////////////////////////////////////////
 
 #include <advect/VectorsAdvector.hh>
-#include <euclid/CircularTemplate.hh>
-#include <euclid/EllipticalTemplate.hh>
 #include <euclid/Pjg.hh>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pjg_flat.h>
@@ -50,6 +48,7 @@ VectorsAdvector::VectorsAdvector(const double vector_spacing,
   _debugFlag(debug_flag),
   _vectorSpacing(vector_spacing),
   _smoothingRadius(smoothing_radius),
+  _gridTemplate(0),
   _motionWtData(0),
   _motionUData(0),
   _motionVData(0),
@@ -73,6 +72,8 @@ VectorsAdvector::~VectorsAdvector()
 {
   MEMbufDelete(_mbuf);
 
+  delete _gridTemplate;
+  
   delete [] _motionWtData;
   delete [] _motionUData;
   delete [] _motionVData;
@@ -227,21 +228,50 @@ bool VectorsAdvector::precompute(const Pjg &projection,
   memset(_motionUData, 0, nx * ny * sizeof(fl32));
   memset(_motionVData, 0, nx * ny * sizeof(fl32));
   
+  // Create the grid template and precompute the distance weights
+
+  if (_gridTemplate == 0 ||
+      projection != _motionProjection)
+  {
+    double major_axis = MAX(2.0 * projection.km2xGrid(_smoothingRadius), 1.0);
+    double minor_axis = MAX(2.0 * projection.km2yGrid(_smoothingRadius), 1.0);
+
+    delete _gridTemplate;
+    _gridTemplate = new EllipticalTemplate(0.0, major_axis, minor_axis);
+    
+    vector< GridOffset* > template_points = _gridTemplate->getPointList();
+    for (vector< GridOffset* >::iterator pt_iter = template_points.begin();
+         pt_iter != template_points.end(); ++ pt_iter)
+    {
+      GridOffset *offset = *pt_iter;
+    
+      // Calculate the distance from the template grid point to the
+      // center grid point
+
+      double x_dist = projection.xGrid2km((const double)offset->x_offset);
+      double y_dist = projection.yGrid2km((const double)offset->y_offset);
+    
+      double distance = sqrt((x_dist * x_dist) + (y_dist * y_dist));
+    
+      // velocity components are summmed, weighted inversely with
+      // distance from the point, dropping to 0 at smoothing radius
+      
+      double wt = 1.0 - (distance / _smoothingRadius);
+
+      // Set the weight for this offset object
+
+      offset->value = wt;
+    }
+  }
+  
   // Save the new motion projection and lead time
 
   _motionProjection = projection;
   _leadTimeSecs = lead_time_secs;
-  
+
   // load up the grid with forecast motion vectors
 
-  double major_axis = MAX(2.0 * projection.km2xGrid(_smoothingRadius), 1.0);
-  double minor_axis = MAX(2.0 * projection.km2yGrid(_smoothingRadius), 1.0);
-    
-  EllipticalTemplate grid_template(0.0,
-				   major_axis, minor_axis);
-    
-  _loadMotionGrid(grid_template,
-		  lead_time_secs);
+  _loadMotionGrid(*_gridTemplate, lead_time_secs);
 
   _vectorsPrecomputed = true;
   
@@ -383,18 +413,7 @@ void VectorsAdvector::_loadGridForVector(const double lat, const double lon,
   {
     int motion_index = point->getIndex(nx, ny);
     
-    // Calculate the distance from the template grid point to the
-    // center grid point
-
-    double x_dist = _motionProjection.xGrid2km((const double)(x_index - point->x));
-    double y_dist = _motionProjection.yGrid2km((const double)(y_index - point->y));
-    
-    double distance = sqrt((x_dist * x_dist) + (y_dist * y_dist));
-    
-    // velocity components are summmed, weighted inversely with
-    // distance from the point, dropping to 0 at smoothing radius
-      
-    double wt = 1.0 - (distance / _smoothingRadius);
+    double wt = point->value;
     
     _motionUData[motion_index] += u * wt;
     _motionVData[motion_index] += v * wt;

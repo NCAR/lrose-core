@@ -40,6 +40,7 @@
 #include <string>
 
 #include <advect/Advector.hh>
+#include <euclid/EllipticalTemplate.hh>
 #include <euclid/GridTemplate.hh>
 #include <euclid/Pjg.hh>
 #include <toolsa/mem.h>
@@ -123,6 +124,7 @@ private:
   
   double _vectorSpacing;
   double _smoothingRadius;
+  EllipticalTemplate *_gridTemplate;
   
   int _nVectors;          // number of vectors
   vectors_t *_vectors;    // vector array
