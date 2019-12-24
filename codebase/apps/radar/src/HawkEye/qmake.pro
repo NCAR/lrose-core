@@ -123,7 +123,7 @@ DEFINES += _FILE_OFFSET_BITS=64
 
 # QMAKE_CXXFLAGS += -isystem
 
-INCLUDEPATH += /usr/local/include
+INCLUDEPATH += /usr/local/include /usr/local/lrose/include
 INCLUDEPATH += $(HOME)/rap/include
 
 # INCLUDEPATH += $(RAP_INC_DIR)
@@ -134,10 +134,15 @@ INCLUDEPATH += $(HOME)/rap/include
 
 LIBS += -L$(HOME)/lrose/lib
 LIBS += -L/usr/local/lib
-# LIBS += -L$(HOME)/rap/lib
+LIBS += -L/usr/local/lrose/lib
 LIBS += -L$(RAP_LIB_DIR)
-# LIBS += -L/usr/lib/qt4/lib
-# LIBS += -L/usr/lib/qt3-3/lib
+
+lroseDir = $$(LROSE_INSTALL_DIR)
+!isEmpty(lroseDir) {
+  INCLUDEPATH += $$lroseDir/include
+  LIBS += $$lroseDir/lib
+}
+
 LIBS += -lSpdb
 LIBS += -lFmq
 LIBS += -ldsserver
