@@ -103,6 +103,7 @@
      <addaction name="actionContour_Layer"/>
      <addaction name="actionWind_Layer"/>
      <addaction name="actionStatus_Window"/>
+     <addaction name="actionMisc_Configuration"/>
     </widget>
     <widget class="QMenu" name="menuZoom">
      <property name="title">
@@ -112,9 +113,15 @@
      <addaction name="actionZoomOut"/>
      <addaction name="actionZoom_Window"/>
     </widget>
+    <widget class="QMenu" name="menuType_Here">
+     <property name="title">
+      <string>Type Here</string>
+     </property>
+    </widget>
     <addaction name="menuWindow"/>
     <addaction name="menuShow"/>
     <addaction name="menuZoom"/>
+    <addaction name="menuType_Here"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -185,6 +192,7 @@ QToolButton:checked{
    <addaction name="actionContour_Layer"/>
    <addaction name="actionWind_Layer"/>
    <addaction name="actionStatus_Window"/>
+   <addaction name="actionMisc_Configuration"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -454,6 +462,15 @@ QToolButton:checked{
    </property>
    <property name="text">
     <string>Values Cursor</string>
+   </property>
+  </action>
+  <action name="actionMisc_Configuration">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/images/images/misc.png</normaloff>:/images/images/misc.png</iconset>
+   </property>
+   <property name="text">
+    <string>Misc Configuration</string>
    </property>
   </action>
  </widget>
