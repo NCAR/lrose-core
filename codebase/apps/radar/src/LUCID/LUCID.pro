@@ -31,6 +31,7 @@ SOURCES += \
         contGridConfigDialog.cpp \
         contMainImage.cpp \
         contMiscConfig.cpp \
+        contOverlaysDialog.cpp \
         contPlayerDock.cpp \
         contStatusDialog.cpp \
         contToolBars.cpp \
@@ -43,6 +44,7 @@ SOURCES += \
         viewGridConfigDialog.cpp \
         viewMainImage.cpp \
         viewMiscConfigDialog.cpp \
+        viewOverlaysDialog.cpp \
         viewPlayerDock.cpp \
         viewStatusDialog.cpp \
         viewValuesDisplay.cpp \
@@ -57,6 +59,7 @@ HEADERS += \
         contGridConfigDialog.h \
         contMainImage.h \
         contMiscConfig.h \
+        contOverlaysDialog.h \
         contPlayerDock.h \
         contStatusDialog.h \
         contToolBars.h \
@@ -68,6 +71,7 @@ HEADERS += \
         viewGridConfigDialog.h \
         viewMainImage.h \
         viewMiscConfigDialog.h \
+        viewOverlaysDialog.h \
         viewPlayerDock.h \
         viewStatusDialog.h \
         viewValuesDisplay.h \

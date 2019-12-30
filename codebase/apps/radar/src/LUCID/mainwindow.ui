@@ -100,7 +100,7 @@
      <addaction name="separator"/>
      <addaction name="actionMaps"/>
      <addaction name="actionData_Layers"/>
-     <addaction name="actionContour_Layer"/>
+     <addaction name="actionOverlays"/>
      <addaction name="actionWind_Layer"/>
      <addaction name="actionStatus_Window"/>
      <addaction name="actionMisc_Configuration"/>
@@ -189,7 +189,7 @@ QToolButton:checked{
    <addaction name="actionProducts"/>
    <addaction name="actionMaps"/>
    <addaction name="actionData_Layers"/>
-   <addaction name="actionContour_Layer"/>
+   <addaction name="actionOverlays"/>
    <addaction name="actionWind_Layer"/>
    <addaction name="actionStatus_Window"/>
    <addaction name="actionMisc_Configuration"/>
@@ -353,13 +353,16 @@ QToolButton:checked{
     <string>Grid Data Layers</string>
    </property>
   </action>
-  <action name="actionContour_Layer">
+  <action name="actionOverlays">
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/images/images/outline.png</normaloff>:/images/images/outline.png</iconset>
    </property>
    <property name="text">
-    <string>Contour Layers</string>
+    <string>Overlays</string>
+   </property>
+   <property name="toolTip">
+    <string>Overlays</string>
    </property>
   </action>
   <action name="actionWind_Layer">

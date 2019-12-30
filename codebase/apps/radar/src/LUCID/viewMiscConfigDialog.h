@@ -20,9 +20,9 @@ public:
     QComboBox *symprodSelector, *constraintsSelector;
     QLineEdit *urlInput, *allowBeforeInput, *allowAfterInput, *textThresholdInput, *topoUrlInput, *landUseInput;
     QCheckBox *dataTypeBox;
-    QHBoxLayout *miscLayoutH1, *miscLayoutH2, *miscLayoutH3, *miscLayoutH4, *miscLayoutH5, *miscLayoutH6;
+    QHBoxLayout *miscLayoutH1, *miscLayoutH2, *miscLayoutH3, *miscLayoutH4, *miscLayoutH5, *miscLayoutH6, *miscLayoutH7;
     QVBoxLayout *miscLayoutV1;
-    QFrame *pline;
+    QFrame *line;
 
 signals:
 

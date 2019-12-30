@@ -27,6 +27,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     gridConfigDialogController = new contGridConfigDialog;
 
+    overlaysController = new contOverlaysDialog;
+    overlaysController->overlaysViewer->hide();
+
     playerDockController = new contPlayerDock;
     MainWindow::addDockWidget(Qt::BottomDockWidgetArea, playerDockController->playerDockViewer);
     playerDockController->playerDockViewer->hide();
@@ -261,6 +264,16 @@ void MainWindow::on_actionMisc_Configuration_triggered()
     miscConfigController->miscConfigViewer->raise();
 }
 
+void MainWindow::on_actionOverlays_triggered()
+{
+    QPoint p = MainWindow::pos();
+    QSize  s = MainWindow::frameSize();
+    overlaysController->overlaysViewer->move(p.x()+s.width(), p.y()+100);
+    overlaysController->overlaysViewer->show();
+    overlaysController->overlaysViewer->raise();
+}
+
+
 
 
 //cruddy zooms that need replacing
@@ -273,6 +286,7 @@ void MainWindow::on_actionZoomIn_triggered()
 {
 
 }
+
 
 
 

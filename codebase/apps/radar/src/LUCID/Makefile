@@ -66,6 +66,7 @@ HDRS = \
     contGridConfigDialog.h \
     contMainImage.h \
     contMiscConfig.h \
+    contOverlaysDialog.h \
     contPlayerDock.h \
     contStatusDialog.h \
     contToolBars.h \
@@ -73,7 +74,8 @@ HDRS = \
     contVsection.h \
     contWindDialog.h \
     contZoomOptions.h \
-    viewMiscConfigDialog.h
+    viewMiscConfigDialog.h \
+    viewOverlaysDialog.h
 
 UI_HDRS = \
 	ui_mainwindow.h 
@@ -96,6 +98,7 @@ NORM_SRCS = \
     contGridConfigDialog.cpp \
     contMainImage.cpp \
     contMiscConfig.cpp \
+    contOverlaysDialog.cpp \
     contPlayerDock.cpp \
     contStatusDialog.cpp \
     contToolBars.cpp \
@@ -103,7 +106,8 @@ NORM_SRCS = \
     contVsection.cpp \
     contWindDialog.cpp \
     contZoomOptions.cpp \
-    viewMiscConfigDialog.cpp
+    viewMiscConfigDialog.cpp \
+    viewOverlaysDialog.cpp
 
 MOC_SRCS = \
 	mainwindow.cpp \
@@ -119,6 +123,7 @@ MOC_SRCS = \
     contGridConfigDialog.cpp \
     contMainImage.cpp \
     contMiscConfig.cpp \
+    contOverlaysDialog.cpp \
     contPlayerDock.cpp \
     contStatusDialog.cpp \
     contToolBars.cpp \
@@ -126,7 +131,8 @@ MOC_SRCS = \
     contVsection.cpp \
     contWindDialog.cpp \
     contZoomOptions.cpp \
-    viewMiscConfigDialog.cpp
+    viewMiscConfigDialog.cpp \
+    viewOverlaysDialog.cpp
 
 MOC_OUTPUT = \
 	moc_mainwindow.cpp \
@@ -143,7 +149,9 @@ MOC_OUTPUT = \
     moc_contPlayerDock.cpp \
     moc_contStatusDialog.cpp \
     moc_contVsection.cpp \
-    moc_viewMiscConfigDialog.cpp
+    moc_viewMiscConfigDialog.cpp \
+    moc_contOverlaysDialog.cpp \
+    moc_viewOverlaysDialog.cpp
 
 
 CC_SRCS = Args.cc Params.cc

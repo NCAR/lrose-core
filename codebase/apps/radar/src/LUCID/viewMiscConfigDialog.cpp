@@ -4,6 +4,7 @@ viewMiscConfigDialog::viewMiscConfigDialog(QWidget *parent) : QDialog(parent)
 {
     setWindowTitle("Miscellaneous Configurations");
 
+
     symprodLabel = new QLabel;
     symprodLabel->setText("Symprod:");
     symprodSelector = new QComboBox;
@@ -58,6 +59,7 @@ viewMiscConfigDialog::viewMiscConfigDialog(QWidget *parent) : QDialog(parent)
     miscLayoutH4 = new QHBoxLayout;
     miscLayoutH5 = new QHBoxLayout;
     miscLayoutH6 = new QHBoxLayout;
+    miscLayoutH7 = new QHBoxLayout;
 
     miscLayoutV1 = new QVBoxLayout;
 
@@ -72,35 +74,37 @@ viewMiscConfigDialog::viewMiscConfigDialog(QWidget *parent) : QDialog(parent)
 
     miscLayoutH3->addWidget(dataTypeLabel);
     miscLayoutH3->addWidget(dataTypeBox);
-    miscLayoutH3->addSpacing(10);
-    miscLayoutH3->addWidget(textThresholdLabel);
-    miscLayoutH3->addWidget(textThresholdInput);
     miscLayoutH3->addStretch(0);
 
-    miscLayoutH4->addWidget(allowBeforeLabel);
-    miscLayoutH4->addWidget(allowBeforeInput);
-    miscLayoutH4->addWidget(allowAfterLabel);
-    miscLayoutH4->addWidget(allowAfterInput);
+    miscLayoutH4->addWidget(textThresholdLabel);
+    miscLayoutH4->addWidget(textThresholdInput);
     miscLayoutH4->addStretch(0);
 
-    pline = new QFrame();
-    pline->setFrameShape(QFrame::HLine);
-    pline->setLineWidth(3);
+    miscLayoutH5->addWidget(allowBeforeLabel);
+    miscLayoutH5->addWidget(allowBeforeInput);
+    miscLayoutH5->addWidget(allowAfterLabel);
+    miscLayoutH5->addWidget(allowAfterInput);
+    miscLayoutH5->addStretch(0);
 
-    miscLayoutH5->addWidget(topoUrlLabel);
-    miscLayoutH5->addWidget(topoUrlInput);
+    line = new QFrame();
+    line->setFrameShape(QFrame::HLine);
+    line->setLineWidth(3);
 
-    miscLayoutH6->addWidget(landUseLabel);
-    miscLayoutH6->addWidget(landUseInput);
+    miscLayoutH6->addWidget(topoUrlLabel);
+    miscLayoutH6->addWidget(topoUrlInput);
+
+    miscLayoutH7->addWidget(landUseLabel);
+    miscLayoutH7->addWidget(landUseInput);
 
 
     miscLayoutV1->addLayout(miscLayoutH1);
     miscLayoutV1->addLayout(miscLayoutH2);
     miscLayoutV1->addLayout(miscLayoutH3);
     miscLayoutV1->addLayout(miscLayoutH4);
-    miscLayoutV1->addWidget(pline);
     miscLayoutV1->addLayout(miscLayoutH5);
+    miscLayoutV1->addWidget(line);
     miscLayoutV1->addLayout(miscLayoutH6);
+    miscLayoutV1->addLayout(miscLayoutH7);
     setLayout(miscLayoutV1);
 }
 

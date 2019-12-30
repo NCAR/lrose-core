@@ -6,6 +6,7 @@
 #include "contFieldDock.h"
 #include "contToolBars.h"
 #include "contGridConfigDialog.h"
+#include "contOverlaysDialog.h"
 #include "contPlayerDock.h"
 #include "contStatusDialog.h"
 #include "contValuesDisplay.h"
@@ -53,6 +54,8 @@ private slots:
 
     void on_actionMisc_Configuration_triggered();
 
+    void on_actionOverlays_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -62,6 +65,7 @@ private:
     contFieldDock *fieldDockController;
     contToolBars *toolBarController;
     contGridConfigDialog *gridConfigDialogController;
+    contOverlaysDialog *overlaysController;
     contPlayerDock *playerDockController;
     contStatusDialog *statusDialogController;
     contValuesDisplay *valuesDisplayController;
