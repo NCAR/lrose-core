@@ -40,7 +40,7 @@ LOC_INCLUDES =
 LOC_CPPC_CFLAGS = -ansi
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ldidss -lrapformats -lrapmath -ltoolsa \
+	-ldidss -lrapformats -lrapmath -ltoolsa -lpthread \
 	-ldataport -ltdrp -lbz2 -lz
 
 HDRS = \

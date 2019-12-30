@@ -34,7 +34,7 @@ TARGET_FILE = distBetweenTwoPoints
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
-	-ldidss -lrapformats -ltoolsa -ldataport \
+	-ldidss -lrapformats -ltoolsa -lpthread -ldataport \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

@@ -48,6 +48,7 @@
 #include <time.h>
 #include <signal.h>
 #include <limits.h>
+#include <pthread.h>
 
 #include <netinet/in.h> /* sin_family sin_addr */
 
@@ -64,6 +65,7 @@ static int Init_done = 0;
 static long Start_time = 0;
 static si32 Status = 0;
 static int Port = -1;
+static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /*
  * byte ordering routines
@@ -292,8 +294,16 @@ void PMU_register(const char *prog_name, const char *instance,
     Start_time = time(NULL);
   }
 
+  if (pthread_mutex_trylock(&_mutex) == EBUSY) {
+    // already busy, do not need to register
+    return;
+  }
+
   PMU_register_pid(prog_name, instance, max_reg_interval,
 		   status_str, (int)getpid(), Start_time);
+
+  // unlock
+  pthread_mutex_unlock(&_mutex);
 
   if (Verbose || Debug_msgs) {
     fprintf(stderr, "-------------------------------------------------------\n");

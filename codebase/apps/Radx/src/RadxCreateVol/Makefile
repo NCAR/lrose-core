@@ -38,7 +38,7 @@ TARGET_FILE = RadxCreateVol
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -lrapformats -ldsserver \
-	-ldidss -leuclid -ltoolsa -ltdrp \
+	-ldidss -leuclid -ltoolsa -lpthread -ltdrp \
 	-ldataport $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

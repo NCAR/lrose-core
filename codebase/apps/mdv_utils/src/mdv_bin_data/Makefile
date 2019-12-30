@@ -40,7 +40,7 @@ TARGET_FILE = mdv_bin_data
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
-	-lrapformats -ldidss -ltdrp -ltoolsa \
+	-lrapformats -ldidss -ltdrp -ltoolsa -lpthread \
 	-ldataport $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

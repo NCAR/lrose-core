@@ -39,9 +39,9 @@ TARGET_FILE = ClutFilter
 LOC_INCLUDES =
 LOC_CPPC_CFLAGS =
 LOC_LDFLAGS =
-#LOC_LIBS = -ltoolsa -ldataport -lrapmath -ltdrp -lfftw3
+#LOC_LIBS = -ltoolsa -lpthread -ldataport -lrapmath -ltdrp -lfftw3
 LOC_LIBS = \
-	libgmap.a -ltoolsa -ldataport -lrapmath \
+	libgmap.a -ltoolsa -lpthread -ldataport -lrapmath \
 	-ltdrp -lfftw3 -lbz2 -lz
 
 HDRS = \

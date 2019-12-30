@@ -40,7 +40,7 @@ TARGET_FILE = AccessA2Mdv
 LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -lrapformats \
-	-ldidss -ltdrp -leuclid -ltoolsa \
+	-ldidss -ltdrp -leuclid -ltoolsa -lpthread \
 	-ldataport $(NETCDF_C++_LIB) $(NETCDF_C_LIB) $(NETCDF4_LIBS) \
 	-lbz2 -lz
 

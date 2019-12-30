@@ -39,7 +39,7 @@ TARGET_FILE = McidasNcf2Mdv
 LOC_INCLUDES = $(NETCDF4_INCS) $(HDF5_INCLUDES)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
-	-ldidss -lrapformats -ltoolsa -ldataport \
+	-ldidss -lrapformats -ltoolsa -lpthread -ldataport \
 	-ltdrp -lexpat $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

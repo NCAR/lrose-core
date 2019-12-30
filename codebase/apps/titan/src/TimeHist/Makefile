@@ -43,7 +43,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS = $(SYS_X_LDFLAGS)
 LOC_LIBS = \
 	-ltitan -ldsserver -ldidss -lrapformats \
-	-lrapplot -lphysics -lrapmath -ltoolsa \
+	-lrapplot -lphysics -lrapmath -ltoolsa -lpthread \
 	-ldataport -lX11 -lbz2 -lz
 
 HDRS = TimeHist.hh

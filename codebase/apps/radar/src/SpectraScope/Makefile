@@ -35,7 +35,7 @@ LOC_INCLUDES = $(SYS_XVIEW_INCLUDES) -I/usr/include/g++-2 $(NETCDF4_INCS)
 
 LOC_LIBS = -lFmq -lSpdb -lradar -ldsserver \
 	-ldidss -lrapplot -lrapformats -lrapmath \
-	-ltoolsa -ldataport -ldevguide -ltdrp \
+	-ltoolsa -lpthread -ldataport -ldevguide -ltdrp \
 	-lRadx -lxview -lolgx -lX11 \
 	-lfftw3 $(NETCDF4_LIBS) -lbz2 -lz \
 	-lm

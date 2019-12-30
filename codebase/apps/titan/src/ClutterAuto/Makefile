@@ -38,7 +38,7 @@ TARGET_FILE = ClutterAuto
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -lSpdb \
-	-ldsserver -lrapformats -ldidss -ltoolsa \
+	-ldsserver -lrapformats -ldidss -ltoolsa -lpthread \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 

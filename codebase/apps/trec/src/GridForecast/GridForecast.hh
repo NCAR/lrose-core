@@ -106,6 +106,7 @@ private:
 		    const string &image_file_url,
 		    const string &output_motion_url,
 		    const int lead_time_secs,
+                    const bool write_as_forecast,
 		    const Mdvx::master_header_t &image_master_hdr,
 		    const MdvxField &image_field);
   

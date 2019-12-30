@@ -37,7 +37,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltitan -lrapmath -ltoolsa -ldataport \
+	-ltitan -lrapmath -ltoolsa -lpthread -ldataport \
 	-ltdrp -lbz2 -lz -lm
 
 TARGET_FILE = CaseStats

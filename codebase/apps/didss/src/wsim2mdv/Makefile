@@ -38,7 +38,7 @@ TARGET_FILE = wsim2mdv
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ltdrp \
-	-ldsserver -lrapformats -ldidss -ltoolsa \
+	-ldsserver -lrapformats -ldidss -ltoolsa -lpthread \
 	-ldataport $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

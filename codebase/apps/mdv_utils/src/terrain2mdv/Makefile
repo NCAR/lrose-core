@@ -36,7 +36,7 @@ LOC_INCLUDES =
 LOC_CFLAGS = -g
 LOC_LDFLAGS =
 LIBS = -L/usr/lib -lnetcdf -lrapmath -lmdv -lrapformats \
-	-ltoolsa -ldataport -lm $(TDRP_LIBS) -lz
+	-ltoolsa -lpthread -ldataport -lm $(TDRP_LIBS) -lz
 
 MODULE_TYPE=program
 

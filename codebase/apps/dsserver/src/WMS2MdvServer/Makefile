@@ -38,7 +38,7 @@ TARGET_FILE = WMS2MdvServer
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
-	-lrapformats -ltoolsa -ldataport -ltdrp \
+	-lrapformats -ltoolsa -lpthread -ldataport -ltdrp \
 	-lImlib2 $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

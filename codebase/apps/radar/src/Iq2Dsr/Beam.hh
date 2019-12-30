@@ -457,7 +457,10 @@ private:
   void _kdpCompute(bool isFiltered);
   void _kdpComputeBringi(bool isFiltered);
 
+  void _computeVelocityCorrectedForVertMotion();
   void _computeVelocityCorrectedForMotion();
+  double _correctForNyquist(double vel);
+  void _computeWidthCorrectedForMotion();
 
   int _noiseInit();
   int _convertInterestParamsToVector(const string &label,

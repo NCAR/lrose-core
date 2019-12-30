@@ -38,7 +38,7 @@ TARGET_FILE = ShapeGridPt2Mdv
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -ldidss -lrapformats \
-	-leuclid -ltoolsa -ldataport -ltdrp \
+	-leuclid -ltoolsa -lpthread -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

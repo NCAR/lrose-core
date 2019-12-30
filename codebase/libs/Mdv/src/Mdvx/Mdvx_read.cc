@@ -2120,6 +2120,12 @@ int Mdvx::_read_master_header(master_header_t &mhdr,
   }
   
   master_header_from_BE(mhdr);
+
+  if (mhdr.struct_id != MASTER_HEAD_MAGIC_COOKIE) {
+    _errStr += "Cannot read master header\n";
+    TaStr::AddInt(_errStr, " Bad magic cookie: ", mhdr.struct_id);
+    return -1;
+  }
   
   return 0;
 

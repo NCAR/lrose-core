@@ -40,7 +40,7 @@ TARGET_FILE = QPESumBinary2Mdv
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -ldsdata -ldsserver \
-	-ldidss -leuclid -lrapformats -ltoolsa \
+	-ldidss -leuclid -lrapformats -ltoolsa -lpthread \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

@@ -42,7 +42,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-ltitan -lrapmath -lmdv -lrapformats \
-	-ltoolsa -ldataport -lbz2 -lz \
+	-ltoolsa -lpthread -ldataport -lbz2 -lz \
 	-lm
 
 HDRS = rctable_generate.h

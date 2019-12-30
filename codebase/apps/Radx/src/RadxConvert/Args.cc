@@ -67,6 +67,7 @@ int Args::parse (int argc, char **argv, string &prog_name)
   char tmp_str[BUFSIZ];
   bool OK = true;
   vector<string> fields;
+  vector<string> excFields;
   
   // loop through args
   
@@ -477,6 +478,14 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-exclude_field")) {
+      
+      if (i < argc - 1) {
+	excFields.push_back(argv[++i]);
+      } else {
+	OK = false;
+      }
+	
     } else if (!strcmp(argv[i], "-write_other")) {
       
       sprintf(tmp_str, "write_other_fields_unchanged = TRUE;");
@@ -849,6 +858,27 @@ int Args::parse (int argc, char **argv, string &prog_name)
     
   } // if (fields.size() ...
 
+  // set remove fields if specified
+
+  if (excFields.size() > 0) {
+
+    sprintf(tmp_str, "exclude_specified_fields = true;");
+    TDRP_add_override(&override, tmp_str);
+    
+    string excStr = "excluded_fields = { ";
+    for (size_t ii = 0; ii < excFields.size(); ii++) {
+      excStr += "\"";
+      excStr += excFields[ii];
+      excStr += "\"";
+      if (ii != excFields.size() - 1) {
+        excStr += ", ";
+      }
+    }
+    excStr += "};";
+    TDRP_add_override(&override, excStr.c_str());
+
+  } // if (fields.size() ...
+
   if (!OK) {
     _usage(cerr);
     return -1;
@@ -925,12 +955,6 @@ void Args::_usage(ostream &out)
       << "     optional for CfRadial files\n"
       << "     always applies to DORADE sweep files\n"
       << "\n"
-      << "  [ -fixed_angle ? ] set single fixed_angle\n"
-      << "     or minimum - see '-fixed_ang_max'\n"
-      << "\n"
-      << "  [ -fixed_angle_max ? ] set max fixed_angle\n"
-      << "     use '-fixed_ang' for setting minimum\n"
-      << "\n"
       << "  [ -end \"yyyy mm dd hh mm ss\"] end time\n"
       << "     Sets mode to ARCHIVE\n"
       << "\n"
@@ -942,7 +966,17 @@ void Args::_usage(ostream &out)
       << "     Use multiple -field args for multiple fields\n"
       << "     If not specified, all fields will be used\n"
       << "\n"
+      << "  [ -exclude_field ? ] Exclude the specified field from the data set\n"
+      << "     Use multiple -exclude_field args to exclude multiple fields\n"
+      << "     If not specified, all fields will be included\n"
+      << "\n"
       << "  [ -finest_geom ] remap to finest range geometry\n"
+      << "\n"
+      << "  [ -fixed_angle ? ] set single fixed_angle\n"
+      << "     or minimum - see '-fixed_ang_max'\n"
+      << "\n"
+      << "  [ -fixed_angle_max ? ] set max fixed_angle\n"
+      << "     use '-fixed_ang' for setting minimum\n"
       << "\n"
       << "  [ -foray ] convert to FORAY-1 netcdf\n"
       << "\n"

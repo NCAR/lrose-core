@@ -40,7 +40,7 @@ LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 LOC_LDFLAGS = -L..
 LOC_LIBS = \
-	-ldsserver -ldidss -ltoolsa -ldataport \
+	-ldsserver -ldidss -ltoolsa -lpthread -ldataport \
 	-ltdrp -lbz2 -lz
 
 HDRS = \

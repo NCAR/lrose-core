@@ -39,7 +39,7 @@ TARGET_FILE = grid_forecast
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ltitan -lrapmath -lMdv -lRadx -lNcxx \
-	-lrapformats -ldidss -leuclid -ltoolsa -ldataport $(NETCDF4_LIBS) \
+	-lrapformats -ldidss -leuclid -ltoolsa -lpthread -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

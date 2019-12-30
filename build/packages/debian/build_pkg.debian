@@ -120,7 +120,7 @@ echo "Version: ${VERSION}" >> control
 echo "Section: base" >> control
 echo "Priority: optional" >> control
 echo "Architecture: ${ARCH}" >> control
-echo "Depends: git, gcc, g++, gfortran, cmake, automake, make, libtool, pkg-config, python, libcurl3-dev, curl, libfl-dev, libbz2-dev, libx11-dev, libpng-dev, libfftw3-dev, qtbase5-dev, libexpat1-dev, libgeographic-dev, libeigen3-dev, libzip-dev, libnetcdf-dev, netcdf-bin, libhdf5-dev, hdf5-tools" >> control
+echo "Depends: tcsh, git, gcc, g++, gfortran, make, cmake, rsync, mlocate, automake, make, libtool, pkg-config, python, libcurl3-dev, curl, libfl-dev, libbz2-dev, libx11-dev, libpng-dev, libfftw3-dev, libexpat1-dev, qtbase5-dev, qtdeclarative5-dev, libgeographic-dev, libeigen3-dev, libzip-dev, libarmadillo-dev, libopenmpi-dev, libnetcdf-dev, netcdf-bin, libhdf5-dev, hdf5-tools" >> control
 echo "Maintainer: NCAR/EOL/RSF <lrose-help@rams.colostate.edu>" >> control
 echo "Description: lrose-${lrose_pkg}" >> control
 echo "  Binary package of lrose-${lrose_pkg} on Debian x.xx" >> control

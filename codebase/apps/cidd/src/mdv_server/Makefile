@@ -39,7 +39,7 @@ LOC_INCLUDES =
 LOC_CPPFLAGS = -D$(HOST_OS)
 SYS_CFLAGS = -D$(HOST_OS) 
 LOC_LIBS = \
-	-lcidd -lmdv -lrapformats -ltoolsa \
+	-lcidd -lmdv -lrapformats -ltoolsa -lpthread \
 	-ldataport -lbz2 -lz -lm
 
 HDRS =  mdv_server.h 

@@ -17,6 +17,7 @@ RESOURCES = resources.qrc
 HEADERS += AllocCheck.hh
 HEADERS += Args.hh
 HEADERS += Beam.hh
+HEADERS += BoundaryPointEditor.hh
 HEADERS += BscanBeam.hh
 HEADERS += BscanManager.hh
 HEADERS += BscanWidget.hh
@@ -67,6 +68,7 @@ HEADERS += DataField.hh
 SOURCES += AllocCheck.cc
 SOURCES += Args.cc
 SOURCES += Beam.cc
+SOURCES += BoundaryPointEditor.cc
 SOURCES += BscanBeam.cc
 SOURCES += BscanManager.cc
 SOURCES += BscanWidget.cc
@@ -119,20 +121,28 @@ DEFINES += F_UNDERSCORE2
 DEFINES += _LARGEFILE_SOURCE
 DEFINES += _FILE_OFFSET_BITS=64
 
+# QMAKE_CXXFLAGS += -isystem
+
+INCLUDEPATH += /usr/local/include /usr/local/lrose/include
 INCLUDEPATH += $(HOME)/rap/include
-INCLUDEPATH += $(RAP_INC_DIR)
+
+# INCLUDEPATH += $(RAP_INC_DIR)
 # INCLUDEPATH += /usr/lib/qt4/include
 # INCLUDEPATH += /usr/lib/qt3-3/include
 # INCLUDEPATH += /usr/include/qt4/QtOpenGL
 # INCLUDEPATH += /usr/include/qt4/QtDesigner
 
-# LIBS += -L$(HOME)/rap/lib
 LIBS += -L$(HOME)/lrose/lib
-# LIBS += -L$(HOME)/rap/lib
-# LIBS += -L$(HOME)/rap/lib
+LIBS += -L/usr/local/lib
+LIBS += -L/usr/local/lrose/lib
 LIBS += -L$(RAP_LIB_DIR)
-# LIBS += -L/usr/lib/qt4/lib
-# LIBS += -L/usr/lib/qt3-3/lib
+
+lroseDir = $$(LROSE_INSTALL_DIR)
+!isEmpty(lroseDir) {
+  INCLUDEPATH += $$lroseDir/include
+  LIBS += $$lroseDir/lib
+}
+
 LIBS += -lSpdb
 LIBS += -lFmq
 LIBS += -ldsserver
@@ -157,7 +167,7 @@ LIBS += -lhdf5_cpp
 LIBS += -lhdf5_hl 
 LIBS += -lhdf5 
 LIBS += -lz 
-LIBS += -ludunits2 
+# LIBS += -ludunits2 
 LIBS += -lbz2 
 LIBS += -lexpat 
 # LIBS += -lfftw3 

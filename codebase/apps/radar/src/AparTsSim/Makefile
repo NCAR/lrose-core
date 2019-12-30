@@ -41,7 +41,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 
 LOC_LIBS = -lradar -lFmq -lRadx -ldsserver -ldidss \
-	-lrapformats -lrapmath -ltoolsa \
+	-lrapformats -lrapmath -ltoolsa -lpthread \
 	-ldataport -ltdrp -lbz2 -lz
 
 HDRS = \

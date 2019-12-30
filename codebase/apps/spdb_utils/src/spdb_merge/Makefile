@@ -34,7 +34,7 @@ TARGET_FILE = spdb_merge
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -ldsserver -ldidss -ltoolsa \
+LOC_LIBS = -lSpdb -ldsserver -ldidss -ltoolsa -lpthread \
 	-ldataport $(NETCDF4_LIBS) -lbz2 -lz \
 	-lm
 

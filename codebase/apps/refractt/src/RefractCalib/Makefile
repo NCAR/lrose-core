@@ -43,7 +43,7 @@ MY_CPPCHECKFLAGS = -E Params.hh -E Params.cc
 
 LOC_LIBS = -lRefract -ldsdata -lFmq -lSpdb \
 	-lMdv -lRadx -lNcxx -ldsserver -ldidss \
-	-lrapformats -leuclid -lrapmath -ltoolsa \
+	-lrapformats -leuclid -lrapmath -ltoolsa -lpthread \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

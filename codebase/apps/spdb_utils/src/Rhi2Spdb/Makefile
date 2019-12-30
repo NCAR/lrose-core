@@ -39,7 +39,7 @@ TARGET_FILE = Rhi2Spdb
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -lMdv -lRadx -leuclid \
-	-ldsserver -ldidss -lrapformats -ltoolsa \
+	-ldsserver -ldidss -lrapformats -ltoolsa -lpthread \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

@@ -35,7 +35,7 @@ LOC_INCLUDES = $(SYS_XVIEW_INCLUDES) -I/usr/include/g++-2
 LOC_LDFLAGS =  $(SYS_XVIEW_LDFLAGS) $(SYS_X_LDFLAGS) 
 LOC_LIBS = \
 	-lradar -lFmq -ldsserver -ldidss \
-	-lrapplot -lrapformats -lrapmath -ltoolsa \
+	-lrapplot -lrapformats -lrapmath -ltoolsa -lpthread \
 	-ldataport -ldevguide -ltdrp -lRadx \
 	-lxview -lolgx -lX11 -lfftw3 \
 	-lbz2 -lz -lm

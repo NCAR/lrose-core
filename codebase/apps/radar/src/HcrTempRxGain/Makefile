@@ -38,7 +38,7 @@ TARGET_FILE = HcrTempRxGain
 LOC_INCLUDES =
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-ltoolsa -ltdrp -ldataport \
+	-ltoolsa -lpthread -ltdrp -ldataport \
 	-lbz2 -lz
 
 LOC_LDFLAGS =

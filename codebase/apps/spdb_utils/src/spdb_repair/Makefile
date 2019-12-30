@@ -35,7 +35,7 @@ TARGET_FILE = spdb_repair
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lphysics \
-	-lrapformats -ltoolsa -ldataport $(NETCDF4_LIBS) \
+	-lrapformats -ltoolsa -lpthread -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

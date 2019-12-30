@@ -39,7 +39,7 @@ TARGET_FILE = TsArchive2Dsr
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -lFmq -ldsserver -ldidss \
-	-lrapformats -lrapmath -ltoolsa -ldataport \
+	-lrapformats -lrapmath -ltoolsa -lpthread -ldataport \
 	-ltdrp -lfftw3 $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

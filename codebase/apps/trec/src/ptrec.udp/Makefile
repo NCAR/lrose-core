@@ -41,7 +41,7 @@ LOC_CFLAGS =
 #LOC_CFLAGS = -O3
 LOC_LDFLAGS = 
 LOC_LIBS = \
-	-ltitan -ltdrp -ltoolsa -ldataport \
+	-ltitan -ltdrp -ltoolsa -lpthread -ldataport \
 	-lbz2 -lz -lm
 
 HDRS = \

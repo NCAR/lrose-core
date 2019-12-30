@@ -40,7 +40,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltitan -ltoolsa -ltdrp -lbz2 \
+	-ltitan -ltoolsa -lpthread -ltdrp -lbz2 \
 	-lz -lm
 
 HDRS = bearing2latlon.h

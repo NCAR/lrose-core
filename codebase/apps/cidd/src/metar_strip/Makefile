@@ -36,7 +36,7 @@ TARGET_FILE = metar_strip
 LOC_INCLUDES = $(SYS_XVIEW_INCLUDES) $(SYS_X_INCLUDES) -I/usr/include/g++-2 $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapplot \
-	-lrapformats -lrapmath -ltoolsa -ldataport \
+	-lrapformats -lrapmath -ltoolsa -lpthread -ldataport \
 	-ldevguide -ltdrp -lxview -lolgx \
 	-lX11 $(NETCDF4_LIBS) -lbz2 -lz \
 	-lm

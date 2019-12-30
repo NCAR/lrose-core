@@ -42,7 +42,7 @@ LOC_LDFLAGS = $(SYS_X_LDFLAGS)
 
 LOC_LIBS = \
 	-lsim -lrsbutil -lsim -lmdv \
-	-lrapformats -ltoolsa -ldataport -lctetwws \
+	-lrapformats -ltoolsa -lpthread -ldataport -lctetwws \
 	-ltdrp -lbz2 -lz -lm
 
 HDRS = \

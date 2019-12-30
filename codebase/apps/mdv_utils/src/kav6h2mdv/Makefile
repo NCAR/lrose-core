@@ -41,7 +41,7 @@ LOC_CPPFLAGS =
 LOC_LDFLAGS = -L$(RAP_LIB_DIR)
 LOC_LIBS = \
 	-lrapformats -lcidd -lmdv -ldataport \
-	-lrapformats -ltoolsa $(DEBUG_LIBS) -lbz2 \
+	-lrapformats -ltoolsa -lpthread $(DEBUG_LIBS) -lbz2 \
 	-lz -lm
 
 #CC = purify -collector=[/usr/local/lib/gcc-lib/sparc-sun-sunos4.1/2.3.1/ld g++

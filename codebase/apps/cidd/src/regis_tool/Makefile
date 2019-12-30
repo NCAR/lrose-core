@@ -39,7 +39,7 @@ LOC_INCLUDES = $(SYS_XVIEW_INCLUDES) $(SYS_X_INCLUDES)
 LOC_CFLAGS =
 LOC_LDFLAGS =  $(SYS_XVIEW_LDFLAGS)
 LOC_LIBS = \
-	-lcidd -ltoolsa -ldataport -ldevguide \
+	-lcidd -ltoolsa -lpthread -ldataport -ldevguide \
 	-lxview -lolgx -lX -lbz2 \
 	-lz -lm
 

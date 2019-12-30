@@ -10,7 +10,7 @@ ARG OS_TYPE=suse
 RUN \
     zypper install -y tcsh wget git \
     tkdiff emacs rsync python docker \
-    m4 make libtool autoconf automake \
+    m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-fortran glibc-devel \
     libX11-devel libXext-devel \
     libpng-devel libtiff-devel zlib-devel \
@@ -18,7 +18,9 @@ RUN \
     flex fftw3-devel \
     libbz2-devel libzip-devel \
     libqt5-qtbase-devel libqt5-qtdeclarative-devel \
+    libgeographic-dev libeigen3-dev libzip-dev \
     hdf5-devel netcdf-devel \
+    libarmadillo-dev libopenmpi-dev \
     xorg-x11-xauth \
     rpm-build rpm-devel rpmdevtools
 

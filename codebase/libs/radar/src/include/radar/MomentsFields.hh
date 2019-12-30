@@ -73,7 +73,8 @@ public:
   double vel_v_only; // velocity using V only
   double vel_alt_fold_interval; // -1, 0 or 1
   double vel_alt_fold_confidence; // 0.0 to 1.0
-  double vel_corrected; // velocity corrected for platform motion
+  double vel_corr_vert; // vel corrected for vertical platform motion
+  double vel_corr_motion; // vel corrected for all platform motion
 
   // staggered PRT
 
@@ -94,6 +95,7 @@ public:
   double width_v_only; // width using V only
   double width_prt_long; // long-prt pulses in staggered mode
   double width_prt_short; // short-prt pulses in staggered mode
+  double width_corr_motion; // width corrected for platform motion
 
   // normalized coherent power
   // also referred to as SQI - signal quality index

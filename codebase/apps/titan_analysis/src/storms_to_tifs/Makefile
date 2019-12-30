@@ -41,7 +41,7 @@ TARGET_FILE = storms_to_tifs
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ltitan -lrapmath -lMdv -lRadx -lNcxx \
-	-lrapformats -ltoolsa -ldataport $(NETCDF4_LIBS) \
+	-lrapformats -ltoolsa -lpthread -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

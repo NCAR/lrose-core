@@ -15,7 +15,7 @@ TARGET_FILE = WinsRadar2Mdv
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
-	-lrapformats -ldidss -ltoolsa -ldataport \
+	-lrapformats -ldidss -ltoolsa -lpthread -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \
 	-lm
 

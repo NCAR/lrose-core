@@ -636,8 +636,20 @@ paramdef int {
 paramdef boolean {
   p_default = false;
   p_descr = "Option to compute velocity corrected for platform motion.";
-  p_help = "If true, we use georeference to account for platform motion, and corrected for velocity accordingly.";
+  p_help = "Measured vel can be influenced both by vertical and horizontal platform motinos. If this parameter is true, we use the georeference data to account for platform motion, and correct for velocity accordingly. We compute the correction first for vertical velocity, and then correct for the effects of horizontal veocity.";
 } compute_velocity_corrected_for_platform_motion;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute width corrected for platform motion.";
+  p_help = "For a platform in motion, spectrum width is increased because different parts of the beam observe the platform velocity differently. If this parameter is true, we use the georeference data to correct the spectrum width for platform motion effects. We specify the beam width to be used for this correction, since this may differ somewhat from the nominal beam width.";
+} compute_width_corrected_for_platform_motion;
+
+paramdef double {
+  p_default = 0.69;
+  p_descr = "Beam width to be used for correcting spectrum width for motion (deg).";
+  p_help = "This may differ from the nominal radar spectrum width.";
+} width_correction_beamwidth_deg;
 
 typedef enum {
   WIDTH_METHOD_R0R1,
@@ -1745,7 +1757,8 @@ typedef enum {
   VEL_V_ONLY,
   VEL_ALT_FOLD_INTERVAL,
   VEL_ALT_FOLD_CONFIDENCE,
-  VEL_CORRECTED,
+  VEL_CORR_VERT,
+  VEL_CORR_MOTION,
   
   // STAGGERED PRT VEL
 
@@ -1765,6 +1778,7 @@ typedef enum {
   WIDTH_V_ONLY,
   WIDTH_PRT_LONG,
   WIDTH_PRT_SHORT,
+  WIDTH_CORR_MOTION,
 
   // normalized coherent power
 

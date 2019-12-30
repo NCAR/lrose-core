@@ -33,7 +33,7 @@ LOCAL_CFLAGS =
 
 LDFLAGS = -L/usr/sigmet/rda/lib -L/usr/sigmet/libs/lib \
 	-L/usr/sigmet/lib -L$(RVP8_LIB_DIR)
-LIBS = -lradar -lrapformats -ltoolsa -ldataport -lrdasubs -ldsp -ldspi -lantenna -lconfig -luser
+LIBS = -lradar -lrapformats -ltoolsa -lpthread -ldataport -lrdasubs -ldsp -ldspi -lantenna -lconfig -luser
 
 SRCS = \
 	Args.cc \

@@ -39,7 +39,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltitan -lrapmath -lrapformats -ltoolsa \
+	-ltitan -lrapmath -lrapformats -ltoolsa -lpthread \
 	-ldataport -lbz2 -lz -lm
 
 MODULE_TYPE=program

@@ -51,7 +51,7 @@ INCLUDES = -I/usr/sigmet/include -I$(RVP8_INC_DIR)
 DEBUG_FLAGS = -g
 OPT_FLAGS = -O4
 LDFLAGS = -L/usr/sigmet/rda/lib -L/usr/sigmet/libs/lib -L$(RVP8_LIB_DIR)
-LIBS = -lradar -lRadx -lFmq -lrapformats -ldsserver -ldidss -ltoolsa -lz -ldataport -lfftw3
+LIBS = -lradar -lRadx -lFmq -lrapformats -ldsserver -ldidss -ltoolsa -lpthread -lz -ldataport -lfftw3
 
 SRCS = \
 	Args.cc \

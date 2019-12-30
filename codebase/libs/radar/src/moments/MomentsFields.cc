@@ -71,7 +71,8 @@ void MomentsFields::init()
   vel_v_only = missingDouble;
   vel_alt_fold_interval = missingDouble;
   vel_alt_fold_confidence = missingDouble;
-  vel_corrected = missingDouble;
+  vel_corr_vert = missingDouble;
+  vel_corr_motion = missingDouble;
 
   // staggered PRT
 
@@ -91,6 +92,7 @@ void MomentsFields::init()
   width_v_only = missingDouble;
   width_prt_long = missingDouble;
   width_prt_short = missingDouble;
+  width_corr_motion = missingDouble;
 
   // normalized coherent power
   // also referred to as SQI - signal quality index

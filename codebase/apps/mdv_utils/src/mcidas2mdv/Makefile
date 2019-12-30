@@ -42,7 +42,7 @@ LOC_CPPFLAGS =
 
 LOC_LIBS = \
 	-lmcidas -ltitan -lmdv -lrapformats \
-	-lrapmath -ltoolsa -ldataport -ltdrp \
+	-lrapmath -ltoolsa -lpthread -ldataport -ltdrp \
 	$(F_TO_C_LIBS) -lbz2 -lz -lm
 
 HDRS = mcidas2mdv.h

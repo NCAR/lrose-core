@@ -177,8 +177,8 @@ paramdef string {
 
 paramdef double {
   p_default = 0.69;
-  p_descr = "Maximum error from nadir pointing for computing surface velocity (deg).";
-  p_help = "We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).";
+  p_descr = "Beam width to be used for correcting spectrum width for motion (deg).";
+  p_help = "This may differ from the nominal radar spectrum width.";
 } width_correction_beamwidth_deg;
 
 commentdef {

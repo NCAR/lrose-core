@@ -39,7 +39,7 @@ LOC_INCLUDES =
 LOC_CFLAGS = -g
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-lsymprod -ltoolsa -ldataport -lbz2 \
+	-lsymprod -ltoolsa -lpthread -ldataport -lbz2 \
 	-lz -lm
 
 HDRS =  

@@ -38,7 +38,7 @@ TARGET_FILE = ReadRUCDEM
 LOC_INCLUDES = -O $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -lrapformats -ldidss \
-	-ltoolsa -ltdrp -ldataport $(NETCDF4_LIBS) \
+	-ltoolsa -lpthread -ltdrp -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

@@ -40,7 +40,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-lmdv -lsymprod -lrapformats -ldidss \
-	-ltoolsa -ltdrp -ldataport -lbz2 \
+	-ltoolsa -lpthread -ltdrp -ldataport -lbz2 \
 	-lz -lm
 
 MODULE_TYPE = progcpp

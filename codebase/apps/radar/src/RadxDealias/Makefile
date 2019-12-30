@@ -11,7 +11,7 @@ TARGET_FILE = RadxDealias
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -lRadx -lrapmath -lFmq -ldsserver \
-	-lrapformats -ldidss -leuclid -ltoolsa -ldataport \
+	-lrapformats -ldidss -leuclid -ltoolsa -lpthread -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 

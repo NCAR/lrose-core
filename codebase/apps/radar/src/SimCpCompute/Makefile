@@ -41,7 +41,7 @@ LOC_CPPC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-lradar -lRadx -lFmq -ldsserver \
-	-lrapformats -ldidss -ltoolsa -ldataport \
+	-lrapformats -ldidss -ltoolsa -lpthread -ldataport \
 	-ltdrp -lfftw3 -lbz2 -lz
 
 CPPC_SRCS = \

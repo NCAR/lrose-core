@@ -893,8 +893,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("width_correction_beamwidth_deg");
-    tt->descr = tdrpStrDup("Maximum error from nadir pointing for computing surface velocity (deg).");
-    tt->help = tdrpStrDup("We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).");
+    tt->descr = tdrpStrDup("Beam width to be used for correcting spectrum width for motion (deg).");
+    tt->help = tdrpStrDup("This may differ from the nominal radar spectrum width.");
     tt->val_offset = (char *) &width_correction_beamwidth_deg - &_start_;
     tt->single_val.d = 0.69;
     tt++;

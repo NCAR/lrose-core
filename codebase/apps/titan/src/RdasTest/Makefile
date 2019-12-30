@@ -38,9 +38,9 @@ TARGET_FILE = RdasTest
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 LOC_LDFLAGS = -L..
-#LOC_LIBS = -ltoolsa -ltdrp -ldataport
+#LOC_LIBS = -ltoolsa -lpthread -ltdrp -ldataport
 LOC_LIBS = \
-	-ltoolsa -ldataport -lbz2 -lz
+	-ltoolsa -lpthread -ldataport -lbz2 -lz
 
 HDRS = \
 	Args.hh \

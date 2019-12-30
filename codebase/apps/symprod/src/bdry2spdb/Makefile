@@ -40,7 +40,7 @@ LOC_CFLAGS =
 LOC_CPPC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-lsymprod -lrapformats -ltoolsa -ltdrp \
+	-lsymprod -lrapformats -ltoolsa -lpthread -ltdrp \
 	-ldataport -lbz2 -lz -lm
 
 HDRS = 

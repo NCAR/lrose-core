@@ -4,18 +4,21 @@
 
 # CENTOS
 
-./redhat/make_custom_image.redhat -t centos -v 6 >& /tmp/make_custom_image.centos.6.log &
+./redhat/make_custom_image.redhat -t centos -v 6 >& /tmp/make_custom_image.centos.7.log &
 ./redhat/make_custom_image.redhat -t centos -v 7 >& /tmp/make_custom_image.centos.7.log &
+./redhat/make_custom_image.redhat -t centos -v 8 >& /tmp/make_custom_image.centos.8.log &
 
 # FEDORA
 
-./redhat/make_custom_image.redhat -t fedora -v 28 >& /tmp/make_custom_image.fedora28.log &
+./redhat/make_custom_image.redhat -t fedora -v 28 >& /tmp/make_custom_image.fedora29.log &
 ./redhat/make_custom_image.redhat -t fedora -v 29 >& /tmp/make_custom_image.fedora29.log &
 ./redhat/make_custom_image.redhat -t fedora -v 30 >& /tmp/make_custom_image.fedora30.log &
+./redhat/make_custom_image.redhat -t fedora -v 31 >& /tmp/make_custom_image.fedora31.log &
 
 # DEBIAN
 
 ./debian/make_custom_image.debian -t debian -v 9 >& /tmp/make_custom_image.debian.9.log &
+./debian/make_custom_image.debian -t debian -v 10 >& /tmp/make_custom_image.debian.10.log &
 
 # UBUNTU
 
@@ -23,6 +26,7 @@
 ./debian/make_custom_image.debian -t ubuntu -v 18.04 >& /tmp/make_custom_image.ubuntu.18.04.log &
 ./debian/make_custom_image.debian -t ubuntu -v 18.10 >& /tmp/make_custom_image.ubuntu.18.10.log &
 ./debian/make_custom_image.debian -t ubuntu -v 19.04 >& /tmp/make_custom_image.ubuntu.19.04.log &
+./debian/make_custom_image.debian -t ubuntu -v 19.10 >& /tmp/make_custom_image.ubuntu.19.10.log &
 
 # SUSE
 

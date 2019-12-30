@@ -41,7 +41,7 @@ LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 LOC_LDFLAGS = $(QT_LDFLAGS)
 LOC_LIBS = \
 	-lFmq -ldsserver -lrapformats -ldidss \
-	-ltoolsa -ldataport -ltdrp $(QT_LIBS) \
+	-ltoolsa -lpthread -ldataport -ltdrp $(QT_LIBS) \
 	-lbz2 -lz
 
 HDRS = \

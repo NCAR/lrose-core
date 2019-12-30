@@ -30,7 +30,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS = -L/usr/local/lib
 LOC_LIBS = \
-	-ldataport -ltoolsa -lbz2 -lz
+	-ldataport -ltoolsa -lpthread -lbz2 -lz
 
 HDRS = \
 

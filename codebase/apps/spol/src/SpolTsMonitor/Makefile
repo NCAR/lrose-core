@@ -41,7 +41,7 @@ LOC_CPPC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-lSpdb -lradar -lRadx -lFmq \
-	-ldsserver -ldidss -lrapformats -ltoolsa \
+	-ldsserver -ldidss -lrapformats -ltoolsa -lpthread \
 	-ldataport -ltdrp $(NETCDF4_LIB_LIST) -lbz2 \
 	-lz
 

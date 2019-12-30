@@ -40,7 +40,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-ltitan -lcidd -lrapmath -lmdv \
-	-lrapformats -ltoolsa -ldataport -lbz2 \
+	-lrapformats -ltoolsa -lpthread -ldataport -lbz2 \
 	-lz -lm
 
 HDRS = polar2mdv.h

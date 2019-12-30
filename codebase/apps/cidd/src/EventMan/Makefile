@@ -37,7 +37,7 @@ LOC_CFLAGS = -DMAIN
 LOC_LDFLAGS = -L$(HOME)/cvs/lib $(SYS_X_LDFLAGS)
 #LOC_LDFLAGS = $(SYS_XVIEW_LDFLAGS) $(SYS_X_LDFLAGS)
 LOC_LIBS = \
-	-ltoolsa -ldataport -ldevguide -ltdrp \
+	-ltoolsa -lpthread -ldataport -ldevguide -ltdrp \
 	-lxview -lolgx -lX11 -lbz2 \
 	-lz
 

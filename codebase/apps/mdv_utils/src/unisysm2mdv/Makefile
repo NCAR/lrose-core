@@ -40,7 +40,7 @@ TARGET_FILE = unisysm2mdv
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
-	-leuclid -lrapformats -ltoolsa -ldataport \
+	-leuclid -lrapformats -ltoolsa -lpthread -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

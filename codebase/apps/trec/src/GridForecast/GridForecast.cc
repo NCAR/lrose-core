@@ -461,6 +461,9 @@ bool GridForecast::Run ()
       
     for (int i = 0; i < _params->forecast_output_n; i++)
     {
+      if (_params->debug >= Params::DEBUG_VERBOSE)
+        cerr << "forecast lead time: " << _params->_forecast_output[i].lead_time << endl;
+      
       vv.precompute(image_projection, _params->_forecast_output[i].lead_time);
       
       if (forecast.compute(vv,
@@ -479,6 +482,7 @@ bool GridForecast::Run ()
 		       _params->image_grid_url,
 		       _params->output_motion_url,
 		       _params->_forecast_output[i].lead_time,
+                       _params->write_motion_as_forecast,
 		       _imageFile.getMasterHeader(),
 		       *_imageField);
 	}
@@ -750,6 +754,7 @@ bool GridForecast::_writeMotion(const VectorsAdvector &vectors,
 				const string &image_file_url,
 				const string &output_motion_url,
 				const int lead_time_secs,
+                                const bool write_as_forecast,
 				const Mdvx::master_header_t &image_master_hdr,
 				const MdvxField &image_field)
 {
@@ -777,6 +782,14 @@ bool GridForecast::_writeMotion(const VectorsAdvector &vectors,
   master_hdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
   master_hdr.vlevel_type = Mdvx::VERT_TYPE_Z;
 
+  if (write_as_forecast)
+  {
+    master_hdr.time_gen = master_hdr.time_centroid;
+    master_hdr.time_begin = master_hdr.time_centroid;
+    master_hdr.time_end = master_hdr.time_centroid;
+    master_hdr.time_centroid = master_hdr.time_gen + lead_time_secs;
+  }
+  
   // append note to mdv_data_set info
 
   char text[1024];
@@ -814,6 +827,12 @@ bool GridForecast::_writeMotion(const VectorsAdvector &vectors,
   STRcopy(u_field_hdr.field_name, "U", MDV_SHORT_FIELD_LEN);
   STRcopy(u_field_hdr.units, "m/s", MDV_UNITS_LEN);
   STRcopy(u_field_hdr.transform, "none", MDV_TRANSFORM_LEN);
+
+  if (write_as_forecast)
+  {
+    u_field_hdr.forecast_delta = lead_time_secs;
+    u_field_hdr.forecast_time = master_hdr.time_centroid;
+  }
   
   MdvxField *u_field = new MdvxField(u_field_hdr,
 				     image_field.getVlevelHeader(),
@@ -847,6 +866,8 @@ bool GridForecast::_writeMotion(const VectorsAdvector &vectors,
 
   motion_file.clearWrite();
   motion_file.setWriteLdataInfo();
+  if (write_as_forecast)
+    motion_file.setWriteAsForecast();
   
   if (motion_file.writeToDir(output_motion_url.c_str()) == 0)
     return true;

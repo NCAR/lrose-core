@@ -40,7 +40,7 @@ LOC_CFLAGS = $(DEBUG_CFLAGS)
 LOC_CPPFLAGS =
 LOC_LDFLAGS = -L$(RAP_LIB_DIR)
 LOC_LIBS = \
-	-lmdv -lrapformats -ldataport -ltoolsa \
+	-lmdv -lrapformats -ldataport -ltoolsa -lpthread \
 	$(DEBUG_LIBS) -lbz2 -lz -lm
 
 

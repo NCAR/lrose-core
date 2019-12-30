@@ -40,7 +40,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-lmdv -lrapformats -ldidss -ltoolsa \
+	-lmdv -lrapformats -ldidss -ltoolsa -lpthread \
 	-ldataport -lbz2 -lz -lm
 
 HDRS =  mdv_query.h

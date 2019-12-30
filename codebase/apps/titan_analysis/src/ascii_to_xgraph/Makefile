@@ -39,7 +39,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltitan -lrapmath -ltoolsa -lbz2 \
+	-ltitan -lrapmath -ltoolsa -lpthread -lbz2 \
 	-lz -lm
 
 HDRS = ascii_to_xgraph.h

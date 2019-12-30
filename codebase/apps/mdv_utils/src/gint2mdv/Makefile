@@ -40,7 +40,7 @@ LOC_CFLAGS =
 LOC_CPPC_CFLAGS =
 LOC_LDFLAGS = $(SYS_X_LDFLAGS) 
 LOC_LIBS = \
-	-lcidd -lmdv -lrapformats -ltoolsa \
+	-lcidd -lmdv -lrapformats -ltoolsa -lpthread \
 	-ldataport -ltdrp -lbz2 -lz \
 	-lm
 

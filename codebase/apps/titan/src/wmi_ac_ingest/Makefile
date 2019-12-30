@@ -41,7 +41,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-lsymprod -ltdrp -lrapmath -lmdv \
-	-lrapformats -ltoolsa -ldataport -lbz2 \
+	-lrapformats -ltoolsa -lpthread -ldataport -lbz2 \
 	-lz -lm
 
 HDRS = wmi_ac_ingest.h

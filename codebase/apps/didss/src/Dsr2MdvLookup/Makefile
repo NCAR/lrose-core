@@ -40,7 +40,7 @@ TARGET_FILE = Dsr2MdvLookup
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -ltdrp -lrapmath \
-	-lrapformats -ltoolsa -ldataport $(NETCDF4_LIBS) \
+	-lrapformats -ltoolsa -lpthread -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

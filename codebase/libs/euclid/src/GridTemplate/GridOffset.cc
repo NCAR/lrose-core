@@ -46,10 +46,11 @@ using namespace std;
  * Constructors
  */
 
-GridOffset::GridOffset(int x_offset, int y_offset)
+GridOffset::GridOffset(int x_offset, int y_offset, const double value)
 {
   this->x_offset = x_offset;
   this->y_offset = y_offset;
+  this->value = value;
 }
 
 
@@ -57,6 +58,7 @@ GridOffset::GridOffset(const GridOffset& rhs)
 {
   x_offset = rhs.x_offset;
   y_offset = rhs.y_offset;
+  value = rhs.value;
 }
 
 
@@ -64,6 +66,7 @@ GridOffset::GridOffset(const GridOffset* rhs)
 {
   x_offset = rhs->x_offset;
   y_offset = rhs->y_offset;
+  value = rhs->value;
 }
 
 

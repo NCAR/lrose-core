@@ -38,7 +38,7 @@ TARGET_FILE = mdv_repeat_day
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
-	-lrapformats -ltoolsa -ldataport $(NETCDF4_LIBS) \
+	-lrapformats -ltoolsa -lpthread -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm -ltdrp
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

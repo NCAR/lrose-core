@@ -39,7 +39,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-lsymprod -ltoolsa -ltdrp -ldataport \
+	-lsymprod -ltoolsa -lpthread -ltdrp -ldataport \
 	-lbz2 -lz -lm
 
 HDRS = load_spdb.h

@@ -37,7 +37,7 @@ TARGET_FILE = PrintGenPt1D
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-ltoolsa -ldataport $(NETCDF4_LIBS) -lbz2 \
+	-ltoolsa -lpthread -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

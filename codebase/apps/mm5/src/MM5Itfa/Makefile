@@ -40,7 +40,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-lmm5 -leuclid -ldidss -lphysics \
-	-ltoolsa -ldataport -ltdrp -lbz2 \
+	-ltoolsa -lpthread -ldataport -ltdrp -lbz2 \
 	-lz -lm
 
 HDRS = \
