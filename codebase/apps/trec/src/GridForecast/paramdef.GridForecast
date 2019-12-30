@@ -336,3 +336,11 @@ paramdef string
            "written to this URL.";
 } output_motion_url;
 
+paramdef boolean
+{
+  p_default = false;
+  p_descr = "Flag indicating that motion files should be written use the RAL forecast directory structure";
+  p_help = "If false, the files are written in the flat directory structure and each forecast will "
+           "overwrite the previous forecast.";
+} write_motion_as_forecast;
+

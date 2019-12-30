@@ -1,26 +1,9 @@
-/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/* ** Copyright UCAR                                                         */
-/* ** University Corporation for Atmospheric Research (UCAR)                 */
-/* ** National Center for Atmospheric Research (NCAR)                        */
-/* ** Boulder, Colorado, USA                                                 */
-/* ** BSD licence applies - redistribution and use in source and binary      */
-/* ** forms, with or without modification, are permitted provided that       */
-/* ** the following conditions are met:                                      */
-/* ** 1) If the software is modified to produce derivative works,            */
-/* ** such modified software should be clearly marked, so as not             */
-/* ** to confuse it with the version available from UCAR.                    */
-/* ** 2) Redistributions of source code must retain the above copyright      */
-/* ** notice, this list of conditions and the following disclaimer.          */
-/* ** 3) Redistributions in binary form must reproduce the above copyright   */
-/* ** notice, this list of conditions and the following disclaimer in the    */
-/* ** documentation and/or other materials provided with the distribution.   */
-/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
-/* ** if any, may be used to endorse or promote products derived from        */
-/* ** this software without specific prior written permission.               */
-/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
-/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
-/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
-/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+// ** Copyright UCAR (c)
+// ** University Corporation for Atmospheric Research(UCAR)
+// ** National Center for Atmospheric Research(NCAR)
+// ** Boulder, Colorado, USA
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -50,6 +33,8 @@
  * @author Automatically generated
  *
  */
+using namespace std;
+
 #include "Params.hh"
 #include <cstring>
 
@@ -275,18 +260,6 @@
   bool Params::isArgValid(const char *arg)
   {
     return (tdrpIsArgValid(arg));
-  }
-
-  ////////////////////////////////////////////
-  // isArgValid()
-  // 
-  // Check if a command line arg is a valid TDRP arg.
-  // return number of args consumed.
-  //
-
-  int Params::isArgValidN(const char *arg)
-  {
-    return (tdrpIsArgValidN(arg));
   }
 
   ////////////////////////////////////////////
@@ -1053,6 +1026,18 @@
     tt->help = tdrpStrDup("If 'write_motion_files' is TRUE, motion files will be written to this URL.");
     tt->val_offset = (char *) &output_motion_url - &_start_;
     tt->single_val.s = tdrpStrDup("none");
+    tt++;
+    
+    // Parameter 'write_motion_as_forecast'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_motion_as_forecast");
+    tt->descr = tdrpStrDup("Flag indicating that motion files should be written use the RAL forecast directory structure");
+    tt->help = tdrpStrDup("If false, the files are written in the flat directory structure and each forecast will overwrite the previous forecast.");
+    tt->val_offset = (char *) &write_motion_as_forecast - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // trailing entry has param_name set to NULL
