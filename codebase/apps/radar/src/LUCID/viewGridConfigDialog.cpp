@@ -7,21 +7,12 @@ viewGridConfigDialog::viewGridConfigDialog(QWidget *parent) : QDialog(parent)
 
     //Grid data layer label and combo box with dummy numbers
     gridLayerLabel = new QLabel;
-    gridLayerLabel->setText("Grid Data Layer:");
     gridLayerSelector = new QComboBox;
-    for(int i=0; i<16; i++)
-    {   gridLayerSelector->addItem(QString::number(i+1));   }
 
     //Grid selector label and combo box with dummy names
     gridLabel = new QLabel;
     gridLabel->setText("Grid:");
     gridSelector = new QComboBox;
-    gridSelector->addItem("KFTG DBZ");
-    gridSelector->addItem("=NEXRAD=");
-    gridSelector->addItem("=NEXRAD=");
-    gridSelector->addItem("=NEXRAD=");
-    gridSelector->addItem("=NEXRAD=");
-    gridSelector->addItem("MANY MORE");
 
     //Url label and line edit with no conneciton yet
     gridUrlLabel = new QLabel;
@@ -32,8 +23,6 @@ viewGridConfigDialog::viewGridConfigDialog(QWidget *parent) : QDialog(parent)
     gridTopBotLabel = new QLabel;
     gridTopBotLabel->setText("Layers on:");
     gridTopBotSelector = new QComboBox;
-    gridTopBotSelector->addItem("Top");
-    gridTopBotSelector->addItem("Bottom");
 
     //Show legend label and checkbox with no connection yet
     gridLegendLabel = new QLabel;
@@ -42,15 +31,13 @@ viewGridConfigDialog::viewGridConfigDialog(QWidget *parent) : QDialog(parent)
 
     //color min value label and line edit with no conneciton yet
     gridMinValueLabel = new QLabel;
-    gridMinValueLabel->setText("Colors Min Value:");
     gridMinValueInput = new QLineEdit;
-    gridMinValueInput->setText("-30");
+    gridMinValueLabel->setText("Colors Min Value:");
 
     //color min value label and line edit with no conneciton yet
     gridMaxValueLabel = new QLabel;
-    gridMaxValueLabel->setText("Colors Max Value:");
     gridMaxValueInput = new QLineEdit;
-    gridMaxValueInput->setText("100");
+    gridMaxValueLabel->setText("Colors Max Value:");
 
     //Delta label and line edit with no conneciton yet
     gridDeltaLabel = new QLabel;
@@ -61,19 +48,16 @@ viewGridConfigDialog::viewGridConfigDialog(QWidget *parent) : QDialog(parent)
     gridTimeSlopLabel = new QLabel;
     gridTimeSlopLabel->setText("Time Slop (min):");
     gridTimeSlopInput = new QLineEdit;
-    gridTimeSlopInput->setText("100");
 
     //Time offset label and line edit with no conneciton yet
     gridTimeOffsetLabel = new QLabel;
     gridTimeOffsetLabel->setText("Time Offset (min);");
     gridTimeOffsetInput = new QLineEdit;
-    gridTimeOffsetInput->setText("0");
 
     //Altitude offset label and line edit with no conneciton yet
     gridAltOffsetLabel = new QLabel;
     gridAltOffsetLabel->setText("Altitude Offset:");
     gridAltOffsetInput = new QLineEdit;
-    gridAltOffsetInput->setText("0");
 
     //color map button with no connection yet
     gridColorMap = new QPushButton;
@@ -106,11 +90,6 @@ viewGridConfigDialog::viewGridConfigDialog(QWidget *parent) : QDialog(parent)
     gridRenderAsLabel = new QLabel;
     gridRenderAsLabel->setText("Render as:");
     gridRenderAsSelector = new QComboBox;
-    gridRenderAsSelector->addItem("Polygons");
-    gridRenderAsSelector->addItem("Contours");
-    gridRenderAsSelector->addItem("Auto Contours");
-    gridRenderAsSelector->addItem("Line Contours");
-
 
     //layout pointer initiations
     gridWindowLayoutH1 = new QHBoxLayout;
@@ -132,7 +111,6 @@ viewGridConfigDialog::viewGridConfigDialog(QWidget *parent) : QDialog(parent)
     gridWindowLayoutV1 = new QVBoxLayout;
     gridWindowLayoutV2 = new QVBoxLayout;
     gridWindowLayoutVAll = new QVBoxLayout;
-
 
     //adding widgets to layouts
     gridWindowLayoutH1->addWidget(gridLayerLabel);

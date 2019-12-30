@@ -6,6 +6,8 @@
 #include "Args.hh"
 #include "Params.hh"
 
+#include <iostream>
+
 
 
 
@@ -52,7 +54,6 @@ int main(int argc, char *argv[])
     w.show();
 
     //I'm using the below line to show parameter values, delete at a later date.
-    // std::cout << _params.  << std::endl;
-
+    // std::cout << _params. << std::endl;
     return a.exec();
 }

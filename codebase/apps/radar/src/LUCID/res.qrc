@@ -29,5 +29,6 @@
         <file>images/loop.png</file>
         <file>images/valuesCursor.png</file>
         <file>images/movieImage.png</file>
+        <file>images/misc.png</file>
     </qresource>
 </RCC>

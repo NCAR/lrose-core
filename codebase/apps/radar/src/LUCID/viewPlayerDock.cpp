@@ -38,36 +38,34 @@ viewPlayerDock::viewPlayerDock(QWidget *parent) : QDockWidget(parent)
 
     //video tracking slider dummy at the moment, connected to frameIndicator and number of frames
     posIndicator = new QSlider(Qt::Horizontal);
+    posIndicator->setMinimumWidth(400);
     posIndicator->setTickPosition(QSlider::TicksBelow);
     posIndicator->setTickInterval(1);
-    posIndicator->setMinimumWidth(400);
 
     //time and date display with dummy representative values
     //will represent selected time for playback loop
     frameTime = new QLabel;
-    frameTime->setText("12:15:33");
     frameDate = new QLabel;
-    frameDate->setText("08/15/2019");
 
     //MIDDLE ROW--------------------------------------
     //time label/input
     timeLabel = new QLabel;
+    timeInput = new QDateTimeEdit;
     QString timeLabelText = "Start Time & Date";
     timeLabel->setText(timeLabelText);
-    timeInput = new QDateTimeEdit;
 
     //frame interval label/input
     frameIntervalLabel = new QLabel;
+    frameIntervalInput = new QLineEdit;
     QString frameIntervalLabelText = "Frame Times(min)";
     frameIntervalLabel->setText(frameIntervalLabelText);
-    frameIntervalInput = new QLineEdit;
     frameIntervalInput->setMaximumWidth(100);
 
     //number of frames label/input
     numFramesLabel = new QLabel;
+    numFramesInput = new QLineEdit;
     QString numFramesLabelText = "Number of Frames";
     numFramesLabel->setText(numFramesLabelText);
-    numFramesInput = new QLineEdit;
     numFramesInput->insert("100");
     numFramesInput->setMaximumWidth(100);
 
@@ -103,13 +101,10 @@ viewPlayerDock::viewPlayerDock(QWidget *parent) : QDockWidget(parent)
     loopSweep->addItem("Loop");
     loopSweep->addItem("Sweep");
 
+    sliderLabel = new QLabel;
     QString sliderImageText = R"(:/images/images/movieImage.png)";
     QImage sliderImage(sliderImageText);
-
-    sliderLabel = new QLabel;
     sliderLabel->setPixmap(QPixmap::fromImage(sliderImage));
-
-
 
     //intialize layouts
     topRow = new QHBoxLayout();
@@ -162,23 +157,8 @@ viewPlayerDock::viewPlayerDock(QWidget *parent) : QDockWidget(parent)
     //adding layout to the dock widget
     group->setLayout(threeRows);
     setWidget(group);
-
-    //these two connects are for the slider and the number of frames, it was a toughie had to make function frameChanged()
-    connect(posIndicator, SIGNAL(sliderReleased()), this, SLOT(frameChanged()));
-    connect(numFramesInput, SIGNAL(returnPressed()), this, SLOT(frameChanged()));
-
 }
 
-//function is used in moviedock,
-//it's for connectiong the slider, frame indicator, and number of frames input.
-void viewPlayerDock::frameChanged()
-{
-    QString num = numFramesInput->text();
-    float numF = num.toFloat();
-    float pos = posIndicator->sliderPosition();
-    int frame = int(ceil(pos*(numF/100)));
-    frameIndicator->display(frame);
-}
 
 viewPlayerDock::~viewPlayerDock()
 {

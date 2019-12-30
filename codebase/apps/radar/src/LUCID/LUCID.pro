@@ -27,10 +27,22 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        contFieldDock.cpp \
+        contGridConfigDialog.cpp \
+        contMainImage.cpp \
+        contMiscConfig.cpp \
+        contPlayerDock.cpp \
+        contStatusDialog.cpp \
+        contToolBars.cpp \
+        contValuesDisplay.cpp \
+        contVsection.cpp \
+        contWindDialog.cpp \
+        contZoomOptions.cpp \
         main.cpp \
         mainwindow.cpp \
         viewGridConfigDialog.cpp \
         viewMainImage.cpp \
+        viewMiscConfigDialog.cpp \
         viewPlayerDock.cpp \
         viewStatusDialog.cpp \
         viewValuesDisplay.cpp \
@@ -41,9 +53,21 @@ SOURCES += \
         Params.cc
 
 HEADERS += \
+        contFieldDock.h \
+        contGridConfigDialog.h \
+        contMainImage.h \
+        contMiscConfig.h \
+        contPlayerDock.h \
+        contStatusDialog.h \
+        contToolBars.h \
+        contValuesDisplay.h \
+        contVsection.h \
+        contWindDialog.h \
+        contZoomOptions.h \
         mainwindow.h \
         viewGridConfigDialog.h \
         viewMainImage.h \
+        viewMiscConfigDialog.h \
         viewPlayerDock.h \
         viewStatusDialog.h \
         viewValuesDisplay.h \

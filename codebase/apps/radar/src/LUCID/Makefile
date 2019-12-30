@@ -61,7 +61,19 @@ HDRS = \
 	viewValuesDisplay.h \
 	viewMainImage.h \
 	Args.hh \
-	Params.hh
+	Params.hh \
+	contFieldDock.h \
+    contGridConfigDialog.h \
+    contMainImage.h \
+    contMiscConfig.h \
+    contPlayerDock.h \
+    contStatusDialog.h \
+    contToolBars.h \
+    contValuesDisplay.h \
+    contVsection.h \
+    contWindDialog.h \
+    contZoomOptions.h \
+    viewMiscConfigDialog.h
 
 UI_HDRS = \
 	ui_mainwindow.h 
@@ -79,7 +91,19 @@ NORM_SRCS = \
 	viewValuesDisplay.cpp \
 	viewMainImage.cpp \
 	Args.cc \
-	Params.cc
+	Params.cc \
+	contFieldDock.cpp \
+    contGridConfigDialog.cpp \
+    contMainImage.cpp \
+    contMiscConfig.cpp \
+    contPlayerDock.cpp \
+    contStatusDialog.cpp \
+    contToolBars.cpp \
+    contValuesDisplay.cpp \
+    contVsection.cpp \
+    contWindDialog.cpp \
+    contZoomOptions.cpp \
+    viewMiscConfigDialog.cpp
 
 MOC_SRCS = \
 	mainwindow.cpp \
@@ -90,7 +114,19 @@ MOC_SRCS = \
 	viewPlayerDock.cpp \
 	viewZoomOptions.cpp \
 	viewValuesDisplay.cpp \
-	viewMainImage.cpp 
+	viewMainImage.cpp \
+	contFieldDock.cpp \
+    contGridConfigDialog.cpp \
+    contMainImage.cpp \
+    contMiscConfig.cpp \
+    contPlayerDock.cpp \
+    contStatusDialog.cpp \
+    contToolBars.cpp \
+    contValuesDisplay.cpp \
+    contVsection.cpp \
+    contWindDialog.cpp \
+    contZoomOptions.cpp \
+    viewMiscConfigDialog.cpp
 
 MOC_OUTPUT = \
 	moc_mainwindow.cpp \
@@ -102,7 +138,13 @@ MOC_OUTPUT = \
 	moc_viewZoomOptions.cpp \
 	moc_viewValuesDisplay.cpp \
 	moc_viewMainImage.cpp \
-	qrc_res.cpp 
+	qrc_res.cpp \
+    moc_contMainImage.cpp \
+    moc_contPlayerDock.cpp \
+    moc_contStatusDialog.cpp \
+    moc_contVsection.cpp \
+    moc_viewMiscConfigDialog.cpp
+
 
 CC_SRCS = Args.cc Params.cc
 CPP_SRCS = main.cpp $(NORM_SRCS) $(MOC_SRCS) $(MOC_OUTPUT)

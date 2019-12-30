@@ -1,30 +1,23 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-
-#include "viewWindDialog.h"
-#include "viewGridConfigDialog.h"
-#include "viewVsection.h"
-#include "viewStatusDialog.h"
-#include "viewPlayerDock.h"
-#include "viewZoomOptions.h"
-#include "viewValuesDisplay.h"
-#include "viewMainImage.h"
+#include "contMainImage.h"
+#include "contMiscConfig.h"
+#include "contFieldDock.h"
+#include "contToolBars.h"
+#include "contGridConfigDialog.h"
+#include "contPlayerDock.h"
+#include "contStatusDialog.h"
+#include "contValuesDisplay.h"
+#include "contVsection.h"
+#include "contWindDialog.h"
+#include "contZoomOptions.h"
 
 #include <QMainWindow>
-#include <QToolBar>
 #include <QWidget>
-#include <QDockWidget>
-#include <QListWidget>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QGridLayout>
-#include <QGroupBox>
 #include <QMouseEvent>
 #include <QLabel>
 #include <QAction>
-
-
 
 namespace Ui {
 class MainWindow;
@@ -37,6 +30,7 @@ class MainWindow : public QMainWindow
 public:
     //constructor
     explicit MainWindow(QWidget *parent = nullptr);
+
     //destructor
     ~MainWindow();
 
@@ -57,39 +51,30 @@ private slots:
     void on_actionData_Layers_triggered();
     void on_actionOpen_triggered();
 
+    void on_actionMisc_Configuration_triggered();
+
 private:
     Ui::MainWindow *ui;
+
+    //to get the other windows going in MainWindow()
+    contMainImage *mainImageController;
+    contMiscConfig *miscConfigController;
+    contFieldDock *fieldDockController;
+    contToolBars *toolBarController;
+    contGridConfigDialog *gridConfigDialogController;
+    contPlayerDock *playerDockController;
+    contStatusDialog *statusDialogController;
+    contValuesDisplay *valuesDisplayController;
+    contVsection *VsectionController;
+    contWindDialog *windDialogController;
+    contZoomOptions *zoomOptionsController;
 
     //for showing coordinate of cursor in main window
     void mouseMoveEvent(QMouseEvent* event);
 
-    //to get the other windows going in MainWindow()
-    viewVsection *Vsec;
-    viewStatusDialog *Stat;
-    viewWindDialog *windDialog;
-    viewGridConfigDialog *gridConfigDialog;
-    viewPlayerDock *playerDock;
-    viewZoomOptions *zoomWindow;
-    viewValuesDisplay *valuesWindow;
-    viewMainImage *centralImage;
-
-    //toolbar maker
-    void startToolBars();
-    QToolBar *products, *maps;
-
     //spacermaker
     void toolBarSpacers();
     QWidget *emptySpacer;
-
-    //field dock maker
-    void fieldDockMaker();
-    QDockWidget *fieldDock;
-    QListWidget *fieldList;
-    QVBoxLayout *fieldLayout;
-    QPushButton *field[3][10];
-    QGridLayout *grid;
-    QGroupBox *fieldGroup;
-
 };
 
 #endif // MAINWINDOW_H

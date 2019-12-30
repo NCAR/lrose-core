@@ -1,51 +1,45 @@
 #ifndef VIEWMAINIMAGE_H
 #define VIEWMAINIMAGE_H
-
-
-
-#include <QWidget>
-#include <QLabel>
-#include <QPixmap>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QGraphicsView>
-#include <QGraphicsScene>
-#include <QGraphicsPixmapItem>
-#include <QTimer>
 #include <QDateTime>
+#include <QLabel>
 #include <QLocale>
+#include <QTimer>
+#include <QWidget>
+#include <QScrollArea>
+#include <QHBoxLayout>
+
 
 
 class viewMainImage : public QWidget
 {
     Q_OBJECT
 public:
-    explicit viewMainImage(QString pic, QWidget *parent = nullptr);
+    explicit viewMainImage(QLabel *currentTime, QString pic, QWidget *parent = nullptr);
     ~viewMainImage();
     void Tester();
 
-
+    QLabel *mainImage;
+    QScrollArea *scrollArea;
+    QVBoxLayout *timeLayout;
 
 signals:
+
 
 public slots:
 
 
 private slots:
-    void UpdateTime();
+
+
+protected:
+
 
 private:
-    //for reseting the clock in main window every second
-    QTimer *timer_1s;
+    QImage image;
+    QPixmap pixie;
+    QLabel *scale;
+    QHBoxLayout *mainLayout;
 
-
-    QLabel *mainImage, *scale, *currentTime, *currentDate;
-    QPixmap *img, *scaleImg;
-    QHBoxLayout *mainLayout, *dateTimeLayout;
-    QVBoxLayout *timeLayout;
-    QWidget *placeholderWidget;
-
-    QScrollArea *scrollArea;
 };
 
 #endif // VIEWMAINIMAGE_H

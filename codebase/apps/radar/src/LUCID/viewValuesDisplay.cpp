@@ -4,7 +4,6 @@ viewValuesDisplay::viewValuesDisplay(QWidget *parent) : QDialog(parent)
 {
     //Eventually this widget will display the various data values under the cursor as it is moved over the display
     //right now, it is just an vacant empty useless dialog window that kinda looks useful
-
     setWindowTitle("Values");
 
     //labels

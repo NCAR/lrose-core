@@ -15,17 +15,17 @@ public:
     explicit viewStatusDialog(QWidget *parent = nullptr);
     ~viewStatusDialog();
 
+    QListWidget *statuses;
+    QPushButton *clear, *close;
+
 signals:
 
 public slots:
 
 private:
-    QListWidget *statuses;
-    QPushButton *clear, *close;
     QGroupBox *group;
     QHBoxLayout *buttonLayout;
     QVBoxLayout *mainLayout;
-
 };
 
 #endif // VIEWSTATUSDIALOG_H

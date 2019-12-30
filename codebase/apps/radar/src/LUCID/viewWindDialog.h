@@ -18,6 +18,8 @@ public:
     explicit viewWindDialog(QWidget *parent = nullptr);
     ~viewWindDialog();
 
+    QComboBox *windSelector, *windColorSelect, *windStyles;
+
 signals:
 
 public slots:
@@ -26,7 +28,6 @@ private:
     QLabel *windSelectLabel, *windUrlLabel, *windColorSelectText, *windNumLabel, *windWidthLabel, *windLengthLabel,
             *UNameLabel, *VNameLabel, *WNameLabel,*windTimeSlopLabel, *windTimeOffsetLabel, *windAltitudeOffsetLabel,
             *windStylesLabel, *windLegendLabel;
-    QComboBox *windSelector, *windColorSelect, *windStyles;
     QLineEdit *windUrlInput, *UNameInput, *VNameInput, *WNameInput, *windTimeSlopInput, *windTimeOffsetInput,
             *windAltitudeOffsetInput;
     QSlider *windNumSlider, *windWidthSlider, *windLengthSlider;

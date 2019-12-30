@@ -10,10 +10,6 @@ viewWindDialog::viewWindDialog(QWidget *parent) : QDialog(parent)
     windSelectLabel = new QLabel;
     windSelectLabel->setText("Select Wind Layer:");
     windSelector = new QComboBox;
-    windSelector->addItem("Surf");
-    windSelector->addItem("RUC");
-    windSelector->addItem("VDRAS");
-    windSelector->addItem("DDOP");
 
     //Url label and line edit with no conneciton yet
     windUrlLabel = new QLabel;
@@ -24,10 +20,6 @@ viewWindDialog::viewWindDialog(QWidget *parent) : QDialog(parent)
     windColorSelectText = new QLabel;
     windColorSelectText->setText("Select Color:");
     windColorSelect = new QComboBox;
-    windColorSelect->addItem("yellow");
-    windColorSelect->addItem("cyan");
-    windColorSelect->addItem("orange");
-    windColorSelect->addItem("red");
 
     //number label and slider with no connection yet
     windNumLabel = new QLabel;
@@ -84,15 +76,6 @@ viewWindDialog::viewWindDialog(QWidget *parent) : QDialog(parent)
     windStylesLabel = new QLabel;
     windStylesLabel->setText("Style:");
     windStyles = new QComboBox;
-    windStyles->addItem("Arrows");
-    windStyles->addItem("Tufts");
-    windStyles->addItem("Barbs");
-    windStyles->addItem("Vectors");
-    windStyles->addItem("T Vectors");
-    windStyles->addItem("L Barbs");
-    windStyles->addItem("Met Barbs");
-    windStyles->addItem("SH Barbs");
-    windStyles->addItem("LSH Barbs");
 
     //Show legend label and checkbox with no connection yet
     windLegendLabel = new QLabel;
@@ -171,48 +154,10 @@ viewWindDialog::viewWindDialog(QWidget *parent) : QDialog(parent)
     setLayout(windLayoutVAll);
 }
 
-
 viewWindDialog::~viewWindDialog()
 {
     //as of now, all pointers go into windLayoutVAll, so that is all that needs to be deleted
     delete windLayoutVAll;
-    /*
-    delete windSelectLabel;
-    delete windUrlLabel;
-    delete windColorSelectText;
-    delete windNumLabel;
-    delete windWidthLabel;
-    delete windLengthLabel;
-    delete UNameLabel;
-    delete VNameLabel;
-    delete WNameLabel;
-    delete windTimeSlopLabel;
-    delete windTimeOffsetLabel;
-    delete windAltitudeOffsetLabel;
-    delete windStylesLabel;
-    delete windLegendLabel;
-    delete windSelector;
-    delete windColorSelect;
-    delete windStyles;
-    delete windUrlInput;
-    delete UNameInput;
-    delete VNameInput;
-    delete WNameInput;
-    delete windTimeSlopInput;
-    delete windTimeOffsetInput;
-    delete windAltitudeOffsetInput;
-    delete windNumSlider;
-    delete windWidthSlider;
-    delete windLengthSlider;
-    delete windLegendSelect;
-    delete windLayoutH1;
-    delete windLayoutH2;
-    delete windLayoutH3;
-    delete windLayoutV1;
-    delete windLayoutV2;
-    delete windLayoutV3;
-    delete windLayoutV4;
-    */
 }
 
 

@@ -2,40 +2,28 @@
 
 #include <iostream>
 
-viewMainImage::viewMainImage(QString pic, QWidget *parent) : QWidget(parent)
+viewMainImage::viewMainImage(QLabel *currentTime, QString pic, QWidget *parent) : QWidget(parent)
 {
-    //------
-    //this starts a timer that loops every second, it is currently being used for the clock on the Main Window
-    //The timer can be used to for other things as well though.
-    timer_1s = new QTimer(this);
-    QObject::connect(timer_1s, SIGNAL(timeout()), this, SLOT(UpdateTime()));
-    timer_1s->start(1000);
-    //------
-
-    //when viewMainImage is called, the main pic address is sent and used to create the main image, all just dummy stuff right now
-    QImage image(pic);
+    QImage recievedImage(pic);
+    image = recievedImage;
     mainImage = new QLabel;
-    mainImage->setPixmap(QPixmap::fromImage(image));
+    pixie.load(pic);
+    //mainImage->setPixmap(QPixmap::fromImage(image));
+    mainImage->setPixmap(pixie);
     scrollArea = new QScrollArea;
     scrollArea->setWidget(mainImage);
 
 
-    //scale image dummy
     QString scalePic = R"(:/images/images/dBzScale.png)";
     scale = new QLabel;
     QPixmap *scaleImg = new QPixmap(scalePic);
 
-    //will be used to show the UTC time
-    //see viewMainImage::UpdateTime() for more info
-    currentTime = new QLabel;
-
-    //mod scale image
     scale->setPixmap(*scaleImg);
     scale->setScaledContents(1);
     scale->setMinimumSize(35, 1);
     scale->setMaximumSize(36, 10000);
 
-    //add to layouts
+
     mainLayout = new QHBoxLayout;
     mainLayout->addWidget(scrollArea);
     mainLayout->addWidget(scale);
@@ -47,7 +35,6 @@ viewMainImage::viewMainImage(QString pic, QWidget *parent) : QWidget(parent)
     timeLayout->addWidget(w);
 
     setLayout(timeLayout);
-
     //mousetracking settings for value cursor
     this->setMouseTracking(true);
     currentTime->setMouseTracking(0);
@@ -57,28 +44,16 @@ viewMainImage::viewMainImage(QString pic, QWidget *parent) : QWidget(parent)
     mainImage->setMouseTracking(true);
 }
 
+
 //temporary funtion to be deleted for playing around with stuff
 void viewMainImage::Tester()
 {
     std::cout << "worked" << std::endl;
 }
 
-//function is called every second from the connection with timer_1s
-//updates the currentTime label with current UTC time
-void viewMainImage::UpdateTime()
-{
-    QDateTime local(QDateTime::currentDateTime());
-    QDateTime UTC(local.toUTC());
-    QString temp = QLocale("en_EN").toString(UTC, "dddd MMMM dd yyyy  hh:mm:ss (UTC)");
-    currentTime->setText(temp);
-}
-
 
 viewMainImage::~viewMainImage()
 {
     //as of now, all pointers go into timeLayout, so that is all that needs to be deleted
-    delete timeLayout;
+    //delete timeLayout;
 }
-
-
-

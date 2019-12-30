@@ -1,7 +1,6 @@
 #ifndef VIEWPLAYERDOCK_H
 #define VIEWPLAYERDOCK_H
 
-#include <QDialog>
 #include <QDockWidget>
 #include <QSlider>
 #include <QLCDNumber>
@@ -14,13 +13,6 @@
 #include <QVBoxLayout>
 #include <QGroupBox>
 #include <QFrame>
-#include <QGraphicsView>
-#include <QGraphicsScene>
-#include <QGraphicsPixmapItem>
-
-
-
-
 
 class viewPlayerDock : public QDockWidget
 {
@@ -29,32 +21,26 @@ public:
     explicit viewPlayerDock(QWidget *parent = nullptr);
     ~viewPlayerDock();
 
+    QLabel *frameLabel, *frameTime, *frameDate, *timeLabel, *frameIntervalLabel, *numFramesLabel, *playbackLabel, *delayLabel, *sliderLabel;
+    QToolButton *rwd, *play, *pause, *fwd;
+    QSlider *posIndicator;
+    QLineEdit *frameIntervalInput, *numFramesInput;
+    QDateTimeEdit *timeInput;
+    QComboBox *playback, *delay, *realArchive, *loopSweep;
+    QLCDNumber *frameIndicator;
+
 signals:
 
 public slots:
 
 private slots:
-    void frameChanged();
 
 private:
-
-
-
-
     QDockWidget *movieDock;
-    QSlider *posIndicator;
-    QLCDNumber *frameIndicator;
-    QLineEdit *frameIntervalInput;
-    QLineEdit *numFramesInput;
-    QLabel *frameLabel, *frameTime, *frameDate, *timeLabel, *frameIntervalLabel, *numFramesLabel, *playbackLabel, *delayLabel, *sliderLabel;
-    QToolButton *rwd, *play, *pause, *fwd;
-    QDateTimeEdit *timeInput;
-    QComboBox *playback, *delay, *realArchive, *loopSweep;
     QHBoxLayout *topRow, *midRow, *botRow;
     QVBoxLayout *threeRows;
     QGroupBox *group;
     QFrame *line;
-
 };
 
 #endif // VIEWPLAYERDOCK_H
