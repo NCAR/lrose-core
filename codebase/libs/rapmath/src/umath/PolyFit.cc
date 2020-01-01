@@ -88,7 +88,7 @@ void PolyFit::addValue(double xx, double yy)
 {
   
   _xObs.push_back(xx);
-  _yObs.push_back(xx);
+  _yObs.push_back(yy);
   _nObs = _xObs.size();
 
 }
