@@ -1519,6 +1519,10 @@ int HcrVelCorrect::_identProgressiveDepol(RadxRay *ray)
     }
   }
 
+  if ((int) poly.getNVals() < _params.ldr_filter_polynomial_order * 5) {
+    return -1;
+  }
+
   if (poly.performFit()) {
     if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "WARNING - cannot fit polynomial to LDR field" << endl;
