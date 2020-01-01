@@ -1505,28 +1505,6 @@ int HcrVelCorrect::_identProgressiveDepol(RadxRay *ray)
     }
   } // ii
 
-  // create output fields, add them to the ray
-
-  RadxField *ldrFiltField = new RadxField(*ldrField);
-  ldrFiltField->setName(_params.ldr_filt_field_name);
-  ldrFiltField->setLongName("LDR_filtered_using_polynomial");
-  ldrFiltField->setGatesToMissing(startGate, endGate);
-  Radx::fl32 *ldrFilt = ldrFiltField->getDataFl32();
-  ray->addField(ldrFiltField);
-
-  RadxField *ldrGradField = new RadxField(*ldrField);
-  ldrGradField->setName(_params.ldr_gradient_field_name);
-  ldrGradField->setLongName("LDR_gradient_with_range");
-  ldrGradField->setGatesToMissing(0, nGates - 1);
-  Radx::fl32 *ldrGrad = ldrGradField->getDataFl32();
-  ray->addField(ldrGradField);
-
-  RadxField *dbzCorrField = new RadxField(*dbzField);
-  dbzCorrField->setName(_params.dbz_corrected_field_name);
-  dbzCorrField->setLongName("DBZ_corrected_for_LDR");
-  Radx::fl32 *dbzCorr = dbzCorrField->getDataFl32();
-  ray->addField(dbzCorrField);
-
   // perform the polynomial fit for filtering
   
   PolyFit poly;
@@ -1551,22 +1529,36 @@ int HcrVelCorrect::_identProgressiveDepol(RadxRay *ray)
     }
   }
 
-  // success
-  // set the filtered field and compute the gradient
+  // create output fields, copying from existing fields
+
+  RadxField *ldrFiltField = new RadxField(*ldrField);
+  ldrFiltField->setName(_params.ldr_filt_field_name);
+  ldrFiltField->setLongName("LDR_filtered_using_polynomial");
+  Radx::fl32 *ldrFilt = ldrFiltField->getDataFl32();
+
+  RadxField *ldrGradField = new RadxField(*ldrField);
+  ldrGradField->setName(_params.ldr_gradient_field_name);
+  ldrGradField->setLongName("LDR_gradient_with_range");
   
+  ldrGradField->setGatesToMissing(0, nGates - 1);
+  Radx::fl32 *ldrGrad = ldrGradField->getDataFl32();
+
+  RadxField *dbzCorrField = new RadxField(*dbzField);
+  dbzCorrField->setName(_params.dbz_corrected_field_name);
+  dbzCorrField->setLongName("DBZ_corrected_for_LDR");
+  Radx::fl32 *dbzCorr = dbzCorrField->getDataFl32();
+  
+  // set the filtered field and compute the gradient
+
   for (size_t ii = startGate; ii <= endGate; ii++) {
     double range = startRange + ii * gateSpacing;
     ldrFilt[ii] = poly.getYEst(range);
     double deltaLdr = ldrFilt[ii] - ldrFilt[ii - 1];
-    ldrGrad[ii] = deltaLdr / gateSpacing;
-    if (dbz[ii] != dbzMiss && ldr[ii] != ldrMiss) {
-      double ldrLinear = pow(10.0, ldr[ii] / 10.0);
-      double dbzLinear = pow(10.0, dbz[ii] / 10.0);
-      double dbzCorrLinear = dbzLinear * (1.0 + ldrLinear);
-      dbzCorr[ii] = 10.0 * log10(dbzCorrLinear);
+    if (deltaLdr > 0 && deltaLdr < 20) {
+      ldrGrad[ii] = deltaLdr / gateSpacing;
     }
   }
-
+  
   // compute the DBZ corrected for the LDR
   
   for (size_t ii = 0; ii < nGates; ii++) {
@@ -1575,8 +1567,16 @@ int HcrVelCorrect::_identProgressiveDepol(RadxRay *ray)
       double dbzLinear = pow(10.0, dbz[ii] / 10.0);
       double dbzCorrLinear = dbzLinear * (1.0 + ldrLinear);
       dbzCorr[ii] = 10.0 * log10(dbzCorrLinear);
+    } else {
+      dbzCorr[ii] = dbz[ii];
     }
   }
+
+  // add fields to ray
+
+  ray->addField(ldrFiltField);
+  ray->addField(ldrGradField);
+  ray->addField(dbzCorrField);
 
   return 0;
 
