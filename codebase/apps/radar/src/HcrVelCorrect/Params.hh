@@ -503,9 +503,9 @@ public:
 
   int ldr_filter_polynomial_order;
 
-  double ldr_filter_min_range;
+  int ldr_filter_max_gap_len;
 
-  double ldr_filter_max_range;
+  double ldr_filter_min_range;
 
   char* ldr_gradient_field_name;
 

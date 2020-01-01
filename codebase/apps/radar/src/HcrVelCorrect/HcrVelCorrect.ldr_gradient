@@ -740,7 +740,19 @@ ldr_filt_field_name = "LDR_FILT";
 // Type: int
 //
 
-ldr_filter_polynomial_order = 5;
+ldr_filter_polynomial_order = 7;
+
+///////////// ldr_filter_max_gap_len //////////////////
+//
+// Max number of missing gates in gap.
+//
+// If this gap is exceeded, we stop.
+//
+//
+// Type: int
+//
+
+ldr_filter_max_gap_len = 30;
 
 ///////////// ldr_filter_min_range ////////////////////
 //

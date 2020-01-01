@@ -1532,6 +1532,18 @@
     tt->single_val.i = 9;
     tt++;
     
+    // Parameter 'ldr_filter_max_gap_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ldr_filter_max_gap_len");
+    tt->descr = tdrpStrDup("Max number of missing gates in gap.");
+    tt->help = tdrpStrDup("If this gap is exceeded, we stop.");
+    tt->val_offset = (char *) &ldr_filter_max_gap_len - &_start_;
+    tt->single_val.i = 50;
+    tt++;
+    
     // Parameter 'ldr_filter_min_range'
     // ctype is 'double'
     
@@ -1542,18 +1554,6 @@
     tt->help = tdrpStrDup("Use this to skip over bad data close to the radar.");
     tt->val_offset = (char *) &ldr_filter_min_range - &_start_;
     tt->single_val.d = 0.2;
-    tt++;
-    
-    // Parameter 'ldr_filter_max_range'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("ldr_filter_max_range");
-    tt->descr = tdrpStrDup("Maximum range for performing the polynomial fit.");
-    tt->help = tdrpStrDup("Use this to stop around the freezing level.");
-    tt->val_offset = (char *) &ldr_filter_max_range - &_start_;
-    tt->single_val.d = 10;
     tt++;
     
     // Parameter 'ldr_gradient_field_name'
