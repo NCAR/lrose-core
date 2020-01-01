@@ -1,0 +1,781 @@
+/**********************************************************************
+ * TDRP params for ./HcrVelCorrect
+ **********************************************************************/
+
+//======================================================================
+//
+// HcrVelCorrect reads in HCR moments, computes the apparent velocity of 
+//   the ground echo, filters the apparent velocity in time to remove 
+//   spurious spikes, and then corrects the weather echo velocity using 
+//   the filtered ground velocity as the correction to be applied.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// write_results_to_stdout /////////////////
+//
+// Option to write filtered data to stdout.
+//
+// If TRUE, the filtered data will be written to stdout in a manner 
+//   suitable for plotting via gnuplot and python.
+//
+//
+// Type: boolean
+//
+
+write_results_to_stdout = FALSE;
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register this process with the process mapper (procmap).
+//
+// If TRUE, every minute this process will register a heartbeat with 
+//   procmap. If the process hangs, it will be restared by the 
+//   auto_restarter.
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "ldr_gradient";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+
+// REALTIME: wait for a new input file. Expects latest_data_info to be 
+//   available. 
+//
+// ARCHIVE: move through the data between the start and end times set on 
+//   the command line. 
+//
+// FILELIST: move through the list of file names specified on the 
+//   command line. 
+// Paths (in ARCHIVE mode, at least) MUST contain a day-directory above 
+//   the data file -- ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory. REALTIME, ARCHIVE and 
+//   FILELIST modes .
+//
+//
+// Type: string
+//
+
+input_dir = "$(DATA_DIR)/$(QC_VERSION)/cfradial/moments/10hz";
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+///////////// wait_between_checks /////////////////////
+//
+// Sleep time between checking for input data (secs).
+//
+// REALTIME mode only.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+wait_between_checks = 2;
+
+///////////// search_ext //////////////////////////////
+//
+// File name extension.
+//
+// If set, only files with this extension will be processed.
+//
+//
+// Type: string
+//
+
+search_ext = "";
+
+//======================================================================
+//
+// COMPUTING THE SURFACE ECHO VELOCITY.
+//
+//======================================================================
+ 
+///////////// dbz_field_name //////////////////////////
+//
+// Name of field used to identify the surface from the data.
+//
+// The surface will be identified at the gate with the maximum value in 
+//   this field.
+//
+//
+// Type: string
+//
+
+dbz_field_name = "DBZ";
+
+///////////// min_range_to_surface_km /////////////////
+//
+// Minumum range to the surface (km).
+//
+// We will search for the surface echo in the gates beyound this range.
+//
+//
+// Type: double
+//
+
+min_range_to_surface_km = 0.5;
+
+///////////// max_surface_height_km ///////////////////
+//
+// Max expected height of the terrain (km).
+//
+// We ignore gates above this maximum, since they cannot be at the 
+//   surface.
+//
+//
+// Type: double
+//
+
+max_surface_height_km = 1;
+
+///////////// min_dbz_for_surface_echo ////////////////
+//
+// Minumum dbz value for a valid surface return.
+//
+// Gates with values below this will not be used.
+//
+//
+// Type: double
+//
+
+min_dbz_for_surface_echo = 8;
+
+///////////// ngates_for_surface_echo /////////////////
+//
+// Number of gates needed for identifying surface echo.
+//
+// We require this number of gates to exceed min_dbz_for_surface_echo.
+//
+//
+// Type: int
+//
+
+ngates_for_surface_echo = 3;
+
+///////////// vel_field_name //////////////////////////
+//
+// Name of field used to compute the apparent velocity of the surface 
+//   echo.
+//
+//
+// Type: string
+//
+
+vel_field_name = "VEL";
+
+///////////// corrected_vel_field_name ////////////////
+//
+// Name of field for corrected velocity.
+//
+// This is the main output field from this app. It will be added to the 
+//   input data as an extra field.
+//
+//
+// Type: string
+//
+
+corrected_vel_field_name = "VEL_CORR";
+
+///////////// add_delta_vel_field /////////////////////
+//
+// Option to add in the delta velocity as a separate field.
+//
+// This allows the users to see how the velocity was corrected, or if no 
+//   correction was applied.
+//
+//
+// Type: boolean
+//
+
+add_delta_vel_field = TRUE;
+
+///////////// delta_vel_field_name ////////////////////
+//
+// Name of field for delta between uncorrected and corrected velocity.
+//
+// This documents how the velocity was corrected.
+//
+//
+// Type: string
+//
+
+delta_vel_field_name = "VEL_DELTA";
+
+///////////// max_nadir_error_for_surface_vel /////////
+//
+// Maximum error from nadir pointing for computing surface velocity 
+//   (deg).
+//
+// We only try to compute the surface velocity if the beam is pointing 
+//   within this margin of nadir (vertically down).
+//
+//
+// Type: double
+//
+
+max_nadir_error_for_surface_vel = 5;
+
+//======================================================================
+//
+// COMPUTING THE CORRECTED SPECTRUM WIDTH.
+//
+// Spectrum width may be corrected for spectral broadening, cause by the 
+//   aircraft motion and the beam width.
+//
+//======================================================================
+ 
+///////////// add_corrected_spectrum_width_field //////
+//
+// Option to compute the corrected spectrum width, and add the corrected 
+//   field to the output volume.
+//
+// Spectrum width may be corrected for spectral broadening, cause by the 
+//   aircraft motion and the beam width.
+//
+//
+// Type: boolean
+//
+
+add_corrected_spectrum_width_field = TRUE;
+
+///////////// width_field_name ////////////////////////
+//
+// Name of uncorrected spectrum width field.
+//
+//
+// Type: string
+//
+
+width_field_name = "WIDTH";
+
+///////////// corrected_width_field_name //////////////
+//
+// Name of corrected spectrum width field.
+//
+//
+// Type: string
+//
+
+corrected_width_field_name = "WIDTH_CORR";
+
+///////////// width_correction_beamwidth_deg //////////
+//
+// Beam width to be used for correcting spectrum width for motion (deg).
+//
+// This may differ from the nominal radar spectrum width.
+//
+//
+// Type: double
+//
+
+width_correction_beamwidth_deg = 0.69;
+
+//======================================================================
+//
+// CORRECT ALTITUDE FOR EGM.
+//
+// Correct the GPS altitude for the geoid, using EGM-2008. See: 
+//   https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.
+//   html.
+//
+//======================================================================
+ 
+///////////// correct_altitude_for_egm ////////////////
+//
+// Option to correct the altitude for the geoid.
+//
+// Altitude from the SDN500 is based on the WGS84 ellipsoid. To get 
+//   altitude relative to MSL, a correction for the geoid based on 
+//   gravitation strength is required. We use the EGM-2008 geoid table.
+//
+//
+// Type: boolean
+//
+
+correct_altitude_for_egm = FALSE;
+
+///////////// egm_2008_geoid_file /////////////////////
+//
+// Path to geoid table file.
+//
+// Downloads available from 
+//   https://earth-info.nga.mil/GandG/wgs84/gravitymod. NetCDF file is on 
+//   the shared drive at HCR->dataProcessing->AltitudeCorrection. The app 
+//   Egm2Mdv will convert the downloadable file to a netCDF format file.
+//
+//
+// Type: string
+//
+
+egm_2008_geoid_file = "$(PROJ_DIR)/data/egm/EGM_2008_WGS84_2.5minx2.5min.nc";
+
+//======================================================================
+//
+// OUTPUT FIELD DETAILS.
+//
+//======================================================================
+ 
+///////////// output_encoding /////////////////////////
+//
+// Output encoding for all fields, if requested.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_ENCODING_FLOAT32
+//     OUTPUT_ENCODING_INT32
+//     OUTPUT_ENCODING_INT16
+//     OUTPUT_ENCODING_INT08
+//
+
+output_encoding = OUTPUT_ENCODING_INT16;
+
+//======================================================================
+//
+// OUTPUT FORMAT.
+//
+//======================================================================
+ 
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+//
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = NETCDF4;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+//
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+//
+//
+// Type: int
+//
+
+compression_level = 4;
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "$(DATA_DIR)/$(QC_VERSION)/cfradial/velcorr/10hz";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name. SPECIFY_FILE_NAME: file of this 
+//   name will be written to output_dir.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//     SPECIFY_FILE_NAME
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// output_filename_prefix //////////////////
+//
+// Optional prefix for output filename.
+//
+// If empty, the standard prefix will be used.
+//
+//
+// Type: string
+//
+
+output_filename_prefix = "";
+
+///////////// include_instrument_name_in_file_name ////
+//
+// Option to include the instrument name in the file name.
+//
+// Only applies to CfRadial files. If true, the instrument name will be 
+//   included just before the volume number in the output file name.
+//
+//
+// Type: boolean
+//
+
+include_instrument_name_in_file_name = TRUE;
+
+///////////// output_filename /////////////////////////
+//
+// Name of output file.
+//
+// Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
+//   this name will be written to output_dir.
+//
+//
+// Type: string
+//
+
+output_filename = "cfradial.test.nc";
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+//
+// Path will be output_dir/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+//
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+//
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+//
+//
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+
+//======================================================================
+//
+// WRITING SURFACE VEL RESULTS TO SPDB IN XML.
+//
+//======================================================================
+ 
+///////////// write_surface_vel_results_to_spdb ///////
+//
+// Option to write out surface velocity results to SPDB.
+//
+// The results will be written in XML, stored in SPDB. The data can then 
+//   be retrieved for plotting or other purposes.
+//
+//
+// Type: boolean
+//
+
+write_surface_vel_results_to_spdb = FALSE;
+
+///////////// surface_vel_results_spdb_output_url /////
+//
+// URL for writing surface vel results to SPDB XML.
+//
+// For local writes, specify the directory. For remote writes, specify 
+//   the full url: spdbp:://host::dir.
+//
+//
+// Type: string
+//
+
+surface_vel_results_spdb_output_url = "$(DATA_DIR)/qc/spdb/HcrVelCorrect";
+
+//======================================================================
+//
+// FILTERING.
+//
+//======================================================================
+ 
+///////////// filter_type /////////////////////////////
+//
+// Filtering option.
+//
+// The FIR filter approach was developed for the data from NOREASTER and 
+//   CSET. For SOCRATES is was found that this filter does not work with 
+//   the large waves in the southern ocean. The WAVE_FILTER approach was 
+//   developed for SOCRATES.
+//
+//
+// Type: enum
+// Options:
+//     WAVE_FILTER
+//     FIR_FILTER
+//
+
+filter_type = WAVE_FILTER;
+
+//======================================================================
+//
+// WAVE FILTERING.
+//
+// We want to fiter out the effects of the ocean surface waves, but 
+//   preserve the variability induced by the aircraft motion and antenna 
+//   control. We first run a simple median noise filter, and the run a 
+//   polynomial filter on the results of the noise filter.
+//
+//======================================================================
+ 
+///////////// noise_filter_length_secs ////////////////
+//
+// Length of the noise filter (secs).
+//
+// The noise filter is a running median to smooth out the measurement 
+//   noise in the velocity measurements. The noise filter precedes the 
+//   wave filter - i.e. is computed ahead of the wave filter.
+//
+//
+// Type: double
+//
+
+noise_filter_length_secs = 3;
+
+///////////// wave_filter_length_secs /////////////////
+//
+// Length of the wave filter (secs).
+//
+// The same length is used for mean, median and polynomial filtering. 
+//   All are computed but only the selected method is applied for the 
+//   velocity correction. We compute the filtered values at the center of 
+//   the filtered length.
+//
+//
+// Type: double
+//
+
+wave_filter_length_secs = $(WAVE_FILTER_LENGTH_SECS);
+
+///////////// wave_filter_polynomial_order ////////////
+//
+// Order of the polynomial fit for the wave filter.
+//
+//
+// Type: int
+//
+
+wave_filter_polynomial_order = 3;
+
+//======================================================================
+//
+// FIR FILTERING.
+//
+//======================================================================
+ 
+///////////// spike_filter_difference_threshold ///////
+//
+// Threshold for removing spikes in the original data and resetting the 
+//   value to that form the short filter.
+//
+// We apply both the stage-1 and spike filters to the time series of 
+//   surface velocity. If the absolute difference between the two exceeds 
+//   this threshold, then the conditioned data is set to the output from 
+//   the stage-1 filter. If the absolute difference is below this 
+//   threshold then the original data point is retained. After this step 
+//   the final filter is applied to the conditioned data to compute the 
+//   final filtered value.
+//
+//
+// Type: double
+//
+
+spike_filter_difference_threshold = 0.25;
+
+//======================================================================
+//
+// IDENTIFY PROGRESSIVE DEPOLARIZATION THROUGH DENSE PARTICLE LAYER.
+//
+//======================================================================
+ 
+///////////// identify_progressive_depol //////////////
+//
+// Option to identify progressive depolarization through a dense ice 
+//   layer.
+//
+// If true, we will compute the LDR gradient with range, and search for 
+//   regions of monotonic increase in LDR. This condition suggests 
+//   multi-path scattering from a dense ice layer.
+//
+//
+// Type: boolean
+//
+
+identify_progressive_depol = TRUE;
+
+///////////// ldr_field_name //////////////////////////
+//
+// Name of LDR field - input.
+//
+// We search for regions with monotonically increasing LDR with range.
+//
+//
+// Type: string
+//
+
+ldr_field_name = "LDR";
+
+///////////// ldr_filt_field_name /////////////////////
+//
+// Name of filtered LDR field - output.
+//
+// We filter the LDR field with a polynomial regression filter, before 
+//   computing the gradient.
+//
+//
+// Type: string
+//
+
+ldr_filt_field_name = "LDR_FILT";
+
+///////////// ldr_filter_polynomial_order /////////////
+//
+// Polynomial order for filtering the LDR.
+//
+// Use a higher order for more complex LDR profiles.
+//
+//
+// Type: int
+//
+
+ldr_filter_polynomial_order = 5;
+
+///////////// ldr_filter_min_range ////////////////////
+//
+// Minimum range for performing the polynomial fit.
+//
+// Use this to skip over bad data close to the radar.
+//
+//
+// Type: double
+//
+
+ldr_filter_min_range = 0.25;
+
+///////////// ldr_gradient_field_name /////////////////
+//
+// Name of LDR gradient field - output.
+//
+// We compute this field and add it to the output file.
+//
+//
+// Type: string
+//
+
+ldr_gradient_field_name = "LDR_GRADIENT";
+
+///////////// dbz_corrected_field_name ////////////////
+//
+// Name of corrected DBZ field - output.
+//
+// We add the LDR to the input DBZ field, to correct for the loss of 
+//   power in the co-polar channel as a result of depolarization.
+//
+//
+// Type: string
+//
+
+dbz_corrected_field_name = "DBZ_CORR";
+

@@ -1487,7 +1487,7 @@ int HcrVelCorrect::_identProgressiveDepol(RadxRay *ray)
   RadxField *ldrFiltField = new RadxField(*ldrField);
   ldrFiltField->setName(_params.ldr_filt_field_name);
   ldrFiltField->setLongName("LDR_filtered_using_polynomial");
-  ldrFiltField->setGatesToMissing(0, nGates - 1);
+  // ldrFiltField->setGatesToMissing(0, nGates - 1);
   Radx::fl32 *ldrFilt = ldrFiltField->getDataFl32();
   ray->addField(ldrFiltField);
 
@@ -1508,14 +1508,17 @@ int HcrVelCorrect::_identProgressiveDepol(RadxRay *ray)
   
   PolyFit poly;
   poly.setOrder(_params.ldr_filter_polynomial_order);
-
+  
   for (size_t ii = 0; ii < nGates; ii++) {
     if (ldr[ii] != ldrMiss) {
       double range = startRange + ii * gateSpacing;
-      poly.addValue(range, ldr[ii]);
+      if (range >= _params.ldr_filter_min_range &&
+          range <= _params.ldr_filter_max_range) {
+        poly.addValue(range, ldr[ii]);
+      }
     }
   }
-  
+
   if (poly.performFit()) {
     if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "WARNING - cannot fit polynomial to LDR field" << endl;
@@ -1523,22 +1526,27 @@ int HcrVelCorrect::_identProgressiveDepol(RadxRay *ray)
       return -1;
     }
   }
-  
+
   // success
   // set the filtered field and compute the gradient
 
   for (size_t ii = 0; ii < nGates; ii++) {
     double range = startRange + ii * gateSpacing;
-    ldrFilt[ii] = poly.getYEst(range);
-    if (ii > 0) {
-      double deltaLdr = ldrFilt[ii] - ldrFilt[ii - 1];
-      ldrGrad[ii] = deltaLdr / gateSpacing;
+    if (range <= _params.ldr_filter_max_range) {
+      ldrFilt[ii] = poly.getYEst(range);
     }
-    if (dbz[ii] != dbzMiss) {
-      double powerLost = pow(10.0, ldrFilt[ii] / 10.0);
-      double dbzLinear = pow(10.0, dbz[ii] / 10.0);
-      double dbzCorrLinear = dbzLinear + powerLost;
-      dbzCorr[ii] = log10(dbzCorrLinear * 10.0);
+    if (range >= _params.ldr_filter_min_range &&
+        range <= _params.ldr_filter_max_range) {
+      if (ii > 0) {
+        double deltaLdr = ldrFilt[ii] - ldrFilt[ii - 1];
+        ldrGrad[ii] = deltaLdr / gateSpacing;
+      }
+      if (dbz[ii] != dbzMiss && ldr[ii] != ldrMiss) {
+        double ldrLinear = pow(10.0, ldr[ii] / 10.0);
+        double dbzLinear = pow(10.0, dbz[ii] / 10.0);
+        double dbzCorrLinear = dbzLinear * (1.0 + ldrLinear);
+        dbzCorr[ii] = 10.0 * log10(dbzCorrLinear);
+      }
     }
   }
 

@@ -503,6 +503,10 @@ public:
 
   int ldr_filter_polynomial_order;
 
+  double ldr_filter_min_range;
+
+  double ldr_filter_max_range;
+
   char* ldr_gradient_field_name;
 
   char* dbz_corrected_field_name;
@@ -514,7 +518,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[67];
+  mutable TDRPtable _table[69];
 
   const char *_className;
 

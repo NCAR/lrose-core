@@ -570,6 +570,18 @@ paramdef int {
   p_help = "Use a higher order for more complex LDR profiles.";
 } ldr_filter_polynomial_order;
 
+paramdef double {
+  p_default = 0.2;
+  p_descr = "Minimum range for performing the polynomial fit.";
+  p_help = "Use this to skip over bad data close to the radar.";
+} ldr_filter_min_range;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Maximum range for performing the polynomial fit.";
+  p_help = "Use this to stop around the freezing level.";
+} ldr_filter_max_range;
+
 paramdef string {
   p_default = "LDR_GRADIENT";
   p_descr = "Name of LDR gradient field - output.";
