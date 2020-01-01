@@ -47,6 +47,7 @@ PolyFit::PolyFit()
         
 {
   _init();
+  clear();
   setOrder(3);
 }
 
