@@ -197,6 +197,9 @@ private:
 
   void _writeWaveFiltResultsToSpdb(FiltNode &node);
   void _writeFirFiltResultsToSpdb(const RadxRay *filtRay);
+
+  int _identProgressiveDepol(RadxRay *ray);
+  
   
 
 };

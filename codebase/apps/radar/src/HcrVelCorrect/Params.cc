@@ -1475,6 +1475,87 @@
       tt->array_vals[40].d = 0.000288218;
     tt++;
     
+    // Parameter 'Comment 13'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 13");
+    tt->comment_hdr = tdrpStrDup("IDENTIFY PROGRESSIVE DEPOLARIZATION THROUGH DENSE PARTICLE LAYER");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'identify_progressive_depol'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("identify_progressive_depol");
+    tt->descr = tdrpStrDup("Option to identify progressive depolarization through a dense ice layer.");
+    tt->help = tdrpStrDup("If true, we will compute the LDR gradient with range, and search for regions of monotonic increase in LDR. This condition suggests multi-path scattering from a dense ice layer.");
+    tt->val_offset = (char *) &identify_progressive_depol - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'ldr_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ldr_field_name");
+    tt->descr = tdrpStrDup("Name of LDR field - input.");
+    tt->help = tdrpStrDup("We search for regions with monotonically increasing LDR with range.");
+    tt->val_offset = (char *) &ldr_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("LDR");
+    tt++;
+    
+    // Parameter 'ldr_filt_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ldr_filt_field_name");
+    tt->descr = tdrpStrDup("Name of filtered LDR field - output.");
+    tt->help = tdrpStrDup("We filter the LDR field with a polynomial regression filter, before computing the gradient.");
+    tt->val_offset = (char *) &ldr_filt_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("LDR_FILT");
+    tt++;
+    
+    // Parameter 'ldr_filter_polynomial_order'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ldr_filter_polynomial_order");
+    tt->descr = tdrpStrDup("Polynomial order for filtering the LDR.");
+    tt->help = tdrpStrDup("Use a higher order for more complex LDR profiles.");
+    tt->val_offset = (char *) &ldr_filter_polynomial_order - &_start_;
+    tt->single_val.i = 9;
+    tt++;
+    
+    // Parameter 'ldr_gradient_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ldr_gradient_field_name");
+    tt->descr = tdrpStrDup("Name of LDR gradient field - output.");
+    tt->help = tdrpStrDup("We compute this field and add it to the output file.");
+    tt->val_offset = (char *) &ldr_gradient_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("LDR_GRADIENT");
+    tt++;
+    
+    // Parameter 'dbz_corrected_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("dbz_corrected_field_name");
+    tt->descr = tdrpStrDup("Name of corrected DBZ field - output.");
+    tt->help = tdrpStrDup("We add the LDR to the input DBZ field, to correct for the loss of power in the co-polar channel as a result of depolarization.");
+    tt->val_offset = (char *) &dbz_corrected_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DBZ_CORR");
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

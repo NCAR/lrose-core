@@ -495,6 +495,18 @@ public:
   double *_final_filter;
   int final_filter_n;
 
+  tdrp_bool_t identify_progressive_depol;
+
+  char* ldr_field_name;
+
+  char* ldr_filt_field_name;
+
+  int ldr_filter_polynomial_order;
+
+  char* ldr_gradient_field_name;
+
+  char* dbz_corrected_field_name;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -502,7 +514,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[60];
+  mutable TDRPtable _table[67];
 
   const char *_className;
 

@@ -388,6 +388,12 @@ int HcrVelCorrect::_processFile(const string &readPath)
         iret = -1;
       }
     } // if (_params.filter_type == Params::WAVE_FILTER) 
+
+    if (_params.identify_progressive_depol) {
+      if (_identProgressiveDepol(rayCopy)) {
+        iret = -1;
+      }
+    }
     
   } // iray
   
@@ -1436,3 +1442,107 @@ void HcrVelCorrect::_writeFirFiltResultsToSpdb(const RadxRay *filtRay)
  
 }
 
+//////////////////////////////////////////////////
+// identify progressive depolarization in ray
+
+int HcrVelCorrect::_identProgressiveDepol(RadxRay *ray)
+  
+{
+
+  // get LDR field
+
+  RadxField *ldrField = ray->getField(_params.ldr_field_name);
+  if (ldrField == NULL) {
+    // no ldr field, nothing to do
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - identProgressiveDepol()" << endl;
+      cerr << "  No LDR field found: " << _params.ldr_field_name << endl;
+    }
+    return -1;
+  }
+  ldrField->convertToFl32();
+  Radx::fl32 ldrMiss = ldrField->getMissingFl32();
+  Radx::fl32 *ldr = ldrField->getDataFl32();
+  size_t nGates = ldrField->getNPoints();
+  double startRange = ldrField->getStartRangeKm();
+  double gateSpacing = ldrField->getGateSpacingKm();
+
+  // get DBZ field
+
+  RadxField *dbzField = ray->getField(_params.dbz_field_name);
+  if (dbzField == NULL) {
+    // no dbz field, nothing to do
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - identProgressiveDepol()" << endl;
+      cerr << "  No DBZ field found: " << _params.dbz_field_name << endl;
+    }
+    return -1;
+  }
+  dbzField->convertToFl32();
+  Radx::fl32 dbzMiss = dbzField->getMissingFl32();
+  Radx::fl32 *dbz = dbzField->getDataFl32();
+
+  // create output fields, add them to the ray
+
+  RadxField *ldrFiltField = new RadxField(*ldrField);
+  ldrFiltField->setName(_params.ldr_filt_field_name);
+  ldrFiltField->setLongName("LDR_filtered_using_polynomial");
+  ldrFiltField->setGatesToMissing(0, nGates - 1);
+  Radx::fl32 *ldrFilt = ldrFiltField->getDataFl32();
+  ray->addField(ldrFiltField);
+
+  RadxField *ldrGradField = new RadxField(*ldrField);
+  ldrGradField->setName(_params.ldr_gradient_field_name);
+  ldrGradField->setLongName("LDR_gradient_with_range");
+  ldrGradField->setGatesToMissing(0, nGates - 1);
+  Radx::fl32 *ldrGrad = ldrGradField->getDataFl32();
+  ray->addField(ldrGradField);
+
+  RadxField *dbzCorrField = new RadxField(*dbzField);
+  dbzCorrField->setName(_params.dbz_corrected_field_name);
+  dbzCorrField->setLongName("DBZ_corrected_for_LDR");
+  Radx::fl32 *dbzCorr = dbzCorrField->getDataFl32();
+  ray->addField(dbzCorrField);
+
+  // perform the polynomial fit for filtering
+  
+  PolyFit poly;
+  poly.setOrder(_params.ldr_filter_polynomial_order);
+
+  for (size_t ii = 0; ii < nGates; ii++) {
+    if (ldr[ii] != ldrMiss) {
+      double range = startRange + ii * gateSpacing;
+      poly.addValue(range, ldr[ii]);
+    }
+  }
+  
+  if (poly.performFit()) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "WARNING - cannot fit polynomial to LDR field" << endl;
+      cerr << "Ignoring ray" << endl;
+      return -1;
+    }
+  }
+  
+  // success
+  // set the filtered field and compute the gradient
+
+  for (size_t ii = 0; ii < nGates; ii++) {
+    double range = startRange + ii * gateSpacing;
+    ldrFilt[ii] = poly.getYEst(range);
+    if (ii > 0) {
+      double deltaLdr = ldrFilt[ii] - ldrFilt[ii - 1];
+      ldrGrad[ii] = deltaLdr / gateSpacing;
+    }
+    if (dbz[ii] != dbzMiss) {
+      double powerLost = pow(10.0, ldrFilt[ii] / 10.0);
+      double dbzLinear = pow(10.0, dbz[ii] / 10.0);
+      double dbzCorrLinear = dbzLinear + powerLost;
+      dbzCorr[ii] = log10(dbzCorrLinear * 10.0);
+    }
+  }
+
+  return 0;
+
+}
+  

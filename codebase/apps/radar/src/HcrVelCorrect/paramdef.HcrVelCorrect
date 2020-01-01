@@ -542,3 +542,43 @@ paramdef double {
   p_private = TRUE;
 } final_filter[];
 
+commentdef {
+  p_header = "IDENTIFY PROGRESSIVE DEPOLARIZATION THROUGH DENSE PARTICLE LAYER";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to identify progressive depolarization through a dense ice layer.";
+  p_help = "If true, we will compute the LDR gradient with range, and search for regions of monotonic increase in LDR. This condition suggests multi-path scattering from a dense ice layer.";
+} identify_progressive_depol;
+
+paramdef string {
+  p_default = "LDR";
+  p_descr = "Name of LDR field - input.";
+  p_help = "We search for regions with monotonically increasing LDR with range.";
+} ldr_field_name;
+
+paramdef string {
+  p_default = "LDR_FILT";
+  p_descr = "Name of filtered LDR field - output.";
+  p_help = "We filter the LDR field with a polynomial regression filter, before computing the gradient.";
+} ldr_filt_field_name;
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Polynomial order for filtering the LDR.";
+  p_help = "Use a higher order for more complex LDR profiles.";
+} ldr_filter_polynomial_order;
+
+paramdef string {
+  p_default = "LDR_GRADIENT";
+  p_descr = "Name of LDR gradient field - output.";
+  p_help = "We compute this field and add it to the output file.";
+} ldr_gradient_field_name;
+
+paramdef string {
+  p_default = "DBZ_CORR";
+  p_descr = "Name of corrected DBZ field - output.";
+  p_help = "We add the LDR to the input DBZ field, to correct for the loss of power in the co-polar channel as a result of depolarization.";
+} dbz_corrected_field_name;
+
