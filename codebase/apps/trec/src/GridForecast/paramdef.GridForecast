@@ -178,6 +178,19 @@ paramdef double
            "distance of the point from the vector.";
 } smoothing_radius;
 
+paramdef boolean
+{
+  p_default = false;
+  p_descr = "Flag indicating we should do some extra processing to avoid ghosting in the "
+            "extrapolation.";
+  p_help = "When extrapolating with a vector field that only has motion in some places and is missing "
+           "in others, like when extrapolating with just TITAN vectors, data will start to appear in its "
+           "original location if the extrapolation moves completely past its original location. "
+           "Thus, the data is \"ghosted\" in its original location. "
+           "To combat this, when this flag is set we keep track of where the motion grid has valid vectors "
+           "and only put data in those locations if there were valid vectors controlling that motion.";
+} avoid_ghosting;
+
 paramdef long
 {
   p_default = 0;

@@ -774,6 +774,18 @@ using namespace std;
     tt->single_val.d = 25;
     tt++;
     
+    // Parameter 'avoid_ghosting'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("avoid_ghosting");
+    tt->descr = tdrpStrDup("Flag indicating we should do some extra processing to avoid ghosting in the extrapolation.");
+    tt->help = tdrpStrDup("When extrapolating with a vector field that only has motion in some places and is missing in others, like when extrapolating with just TITAN vectors, data will start to appear in its original location if the extrapolation moves completely past its original location. Thus, the data is \"ghosted\" in its original location. To combat this, when this flag is set we keep track of where the motion grid has valid vectors and only put data in those locations if there were valid vectors controlling that motion.");
+    tt->val_offset = (char *) &avoid_ghosting - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'u_field_num'
     // ctype is 'long'
     

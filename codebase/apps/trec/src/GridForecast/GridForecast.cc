@@ -381,6 +381,7 @@ bool GridForecast::Run ()
 
   VectorsAdvector vv(_params->vector_spacing,
 		     _params->smoothing_radius,
+                     _params->avoid_ghosting,
 		     _params->debug >= Params::DEBUG_VERBOSE);
 
   GridAdvect forecast(_params->image_val_min,
@@ -471,17 +472,24 @@ bool GridForecast::Run ()
 			   (fl32 *)_imageField->getVol(),
 			   _imageField->getFieldHeader().missing_data_value))
       {
-	_writeForecast(_params->image_grid_url,
-		       _params->_forecast_output[i].url,
-		       _params->_forecast_output[i].lead_time,
-		       _imageFile.getMasterHeader(),
-		       forecast.getForecastData());
+	if (!_writeForecast(_params->image_grid_url,
+                            _params->_forecast_output[i].url,
+                            _params->_forecast_output[i].lead_time,
+                            _imageFile.getMasterHeader(),
+                            forecast.getForecastData()))
+        {
+          cerr << "ERROR: Failed to write " << _params->_forecast_output[i].lead_time
+               << " second forecast to url: " << _params->_forecast_output[i].url << endl;
+          continue;
+        }
+        
 	if (_params->write_motion_files)
 	{
 	  _writeMotion(vv,
 		       _params->image_grid_url,
 		       _params->output_motion_url,
 		       _params->_forecast_output[i].lead_time,
+                       vv.getMissingMotionValue(),
                        _params->write_motion_as_forecast,
 		       _imageFile.getMasterHeader(),
 		       *_imageField);
@@ -731,11 +739,9 @@ bool GridForecast::_writeForecast(const string &image_file_url,
   output_file.clearWrite();
   output_file.setWriteLdataInfo();
 
-  if(_params->write_to_forecast_directory)
-  {
+  if (_params->write_to_forecast_directory)
     output_file.setWriteAsForecast();
-  }
-  
+
   if (output_file.writeToDir(output_url) == 0)
     return true;
   else
@@ -754,6 +760,7 @@ bool GridForecast::_writeMotion(const VectorsAdvector &vectors,
 				const string &image_file_url,
 				const string &output_motion_url,
 				const int lead_time_secs,
+                                const fl32 missing_data_value,
                                 const bool write_as_forecast,
 				const Mdvx::master_header_t &image_master_hdr,
 				const MdvxField &image_field)
@@ -822,6 +829,8 @@ bool GridForecast::_writeMotion(const VectorsAdvector &vectors,
   u_field_hdr.bias = 0.0;
   u_field_hdr.min_value = 0.0;
   u_field_hdr.max_value = 0.0;
+  u_field_hdr.missing_data_value = missing_data_value;
+  u_field_hdr.bad_data_value = missing_data_value;
   sprintf(text, "U for %g hr fcast", lead_time_hrs);
   STRcopy(u_field_hdr.field_name_long, text, MDV_LONG_FIELD_LEN);
   STRcopy(u_field_hdr.field_name, "U", MDV_SHORT_FIELD_LEN);

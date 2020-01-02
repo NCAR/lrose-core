@@ -392,6 +392,8 @@ public:
 
   double smoothing_radius;
 
+  tdrp_bool_t avoid_ghosting;
+
   long u_field_num;
 
   double u_plane_ht;
@@ -436,7 +438,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[37];
+  mutable TDRPtable _table[38];
 
   const char *_className;
 
