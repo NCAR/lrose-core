@@ -507,6 +507,8 @@ public:
 
   double ldr_filter_min_range;
 
+  double ldr_filter_min_altitude;
+
   char* ldr_gradient_field_name;
 
   char* dbz_corrected_field_name;
@@ -518,7 +520,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[69];
+  mutable TDRPtable _table[70];
 
   const char *_className;
 

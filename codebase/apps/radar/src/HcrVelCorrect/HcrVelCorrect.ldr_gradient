@@ -32,7 +32,7 @@
 //     DEBUG_EXTRA
 //
 
-debug = DEBUG_OFF;
+debug = DEBUG_NORM;
 
 ///////////// write_results_to_stdout /////////////////
 //
@@ -402,6 +402,7 @@ egm_2008_geoid_file = "$(PROJ_DIR)/data/egm/EGM_2008_WGS84_2.5minx2.5min.nc";
 //
 
 output_encoding = OUTPUT_ENCODING_INT16;
+// output_encoding = OUTPUT_ENCODING_FLOAT32;
 
 //======================================================================
 //
@@ -756,7 +757,7 @@ ldr_filter_max_gap_len = 30;
 
 ///////////// ldr_filter_min_range ////////////////////
 //
-// Minimum range for performing the polynomial fit.
+// Minimum range for performing the polynomial fit (km).
 //
 // Use this to skip over bad data close to the radar.
 //
@@ -765,6 +766,18 @@ ldr_filter_max_gap_len = 30;
 //
 
 ldr_filter_min_range = 0.25;
+
+///////////// ldr_filter_min_altitude /////////////////
+//
+// Minimum altitude for performing the polynomial fit (km).
+//
+// Use this to avoid surface echo.
+//
+//
+// Type: double
+//
+
+ldr_filter_min_altitude = 1;
 
 ///////////// ldr_gradient_field_name /////////////////
 //

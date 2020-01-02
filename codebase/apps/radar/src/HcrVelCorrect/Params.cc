@@ -1541,7 +1541,7 @@
     tt->descr = tdrpStrDup("Max number of missing gates in gap.");
     tt->help = tdrpStrDup("If this gap is exceeded, we stop.");
     tt->val_offset = (char *) &ldr_filter_max_gap_len - &_start_;
-    tt->single_val.i = 50;
+    tt->single_val.i = 5;
     tt++;
     
     // Parameter 'ldr_filter_min_range'
@@ -1550,10 +1550,22 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("ldr_filter_min_range");
-    tt->descr = tdrpStrDup("Minimum range for performing the polynomial fit.");
+    tt->descr = tdrpStrDup("Minimum range for performing the polynomial fit (km).");
     tt->help = tdrpStrDup("Use this to skip over bad data close to the radar.");
     tt->val_offset = (char *) &ldr_filter_min_range - &_start_;
     tt->single_val.d = 0.2;
+    tt++;
+    
+    // Parameter 'ldr_filter_min_altitude'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("ldr_filter_min_altitude");
+    tt->descr = tdrpStrDup("Minimum altitude for performing the polynomial fit (km).");
+    tt->help = tdrpStrDup("Use this to avoid surface echo.");
+    tt->val_offset = (char *) &ldr_filter_min_altitude - &_start_;
+    tt->single_val.d = 1;
     tt++;
     
     // Parameter 'ldr_gradient_field_name'
