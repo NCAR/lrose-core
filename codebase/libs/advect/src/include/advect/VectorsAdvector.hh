@@ -56,6 +56,7 @@ public:
 
   VectorsAdvector(const double vector_spacing,
 		  const double smoothing_radius,
+                  const bool avoid_ghosting,
 		  const bool debug_flag = false);
 
   // destructor
@@ -110,6 +111,11 @@ public:
   {
     return _nVectors;
   }
+
+  const fl32 getMissingMotionValue(void) const
+  {
+    return MISSING_MOTION_VALUE;
+  }
   
 protected:
   
@@ -120,6 +126,8 @@ private:
     double lat, lon, u, v;
   } vectors_t;
 
+  static const fl32 MISSING_MOTION_VALUE;
+  
   bool _debugFlag;
   
   double _vectorSpacing;
@@ -130,6 +138,12 @@ private:
   vectors_t *_vectors;    // vector array
   MEMbuf *_mbuf;          // memory buffer for vector array
   bool _vectorsPrecomputed;
+
+  // Flag indicating that we should use extra logic to avoid the ghosting in the extrapolations
+  // that happens when we are using vectors like TITAN vectors that are valid in a few areas of
+  // the grid, but missing everywhere else.
+  
+  bool _avoidGhosting;
   
   int _leadTimeSecs;
   Pjg _motionProjection;
@@ -137,7 +151,10 @@ private:
   mutable fl32 *_motionWtData;
   mutable fl32 *_motionUData;
   mutable fl32 *_motionVData;
-
+  mutable fl32 *_initMotionUData;
+  mutable fl32 *_initMotionVData;
+  mutable size_t _initMotionSize;
+  
   double _soundingUComp;
   double _soundingVComp;
   

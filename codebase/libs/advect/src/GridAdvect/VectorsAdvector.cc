@@ -39,19 +39,29 @@
 #include <toolsa/pmu.h>
 #include <math.h>
 
+
+// Globals
+
+const fl32 VectorsAdvector::MISSING_MOTION_VALUE = -999.0;
+
 //////////////
 // Constructor
 
 VectorsAdvector::VectorsAdvector(const double vector_spacing,
 				 const double smoothing_radius,
+                                 const bool avoid_ghosting,
 				 const bool debug_flag) :
   _debugFlag(debug_flag),
   _vectorSpacing(vector_spacing),
   _smoothingRadius(smoothing_radius),
   _gridTemplate(0),
+  _avoidGhosting(avoid_ghosting),
   _motionWtData(0),
   _motionUData(0),
   _motionVData(0),
+  _initMotionUData(0),
+  _initMotionVData(0),
+  _initMotionSize(0),
   _soundingUComp(0),
   _soundingVComp(0)
 {
@@ -62,6 +72,12 @@ VectorsAdvector::VectorsAdvector(const double vector_spacing,
   _nVectors = 0;
   _vectors = (vectors_t *) MEMbufPtr(_mbuf);
 
+  if (_avoidGhosting)
+  {
+    _soundingUComp = MISSING_MOTION_VALUE;
+    _soundingVComp = MISSING_MOTION_VALUE;
+  }
+  
 }
 
 /////////////
@@ -77,6 +93,8 @@ VectorsAdvector::~VectorsAdvector()
   delete [] _motionWtData;
   delete [] _motionUData;
   delete [] _motionVData;
+  delete [] _initMotionUData;
+  delete [] _initMotionVData;
 }
 
 ////////////////////////////
@@ -126,26 +144,27 @@ bool VectorsAdvector::loadVectors(const Pjg &projection,
       fl32 u_value = u_data[i];
       fl32 v_value = v_data[i];
 
-      if (u_value != u_missing && v_value != v_missing)
-      {
-	// compute vector
-
-	vectors_t vec;
+      // Skip missing motion vectors
       
-	vec.u = u_value;
-	vec.v = v_value;
+      if (u_value == u_missing || v_value == v_missing)
+        continue;
 
-	double xx = minx + dx * ix;
-	double yy = miny + dy * iy;
+      // compute vector
 
-	projection.xy2latlon(xx, yy, vec.lat, vec.lon);
+      vectors_t vec;
+      
+      vec.u = u_value;
+      vec.v = v_value;
+
+      double xx = minx + dx * ix;
+      double yy = miny + dy * iy;
+
+      projection.xy2latlon(xx, yy, vec.lat, vec.lon);
 	
-	// add to membuf
+      // add to membuf
 	
-	MEMbufAdd(_mbuf, &vec, sizeof(vectors_t));
-	_nVectors++;
-
-      } // if (u_value != u_missing && v_value != v_missing) 
+      MEMbufAdd(_mbuf, &vec, sizeof(vectors_t));
+      _nVectors++;
 
     } // ix
 
@@ -155,6 +174,44 @@ bool VectorsAdvector::loadVectors(const Pjg &projection,
 
   _vectors = (vectors_t *) MEMbufPtr(_mbuf);
 
+  // Initialize the initial motion grids.
+  // To avoid ghosting, we initialize the motion grid to missing anywhere that we have a motion vector and to 0
+  // anywhere that we don't. When calculating the actual motions, this will keep us from putting values in places
+  // where we extrapolated something, but will leave data values in places where we didn't have any vectors. The
+  // ghosting happens when we only have vectors in some places, but have missing vectors everywhere else, like when
+  // we are just using TITAN vectors to extrapolate a grid.
+
+  size_t grid_size = nx * ny;
+
+  if (_initMotionSize != grid_size)
+  {
+    cerr << "*** Allocating space for intial motion grids" << endl;
+    
+    delete [] _initMotionUData;
+    delete [] _initMotionVData;
+
+    _initMotionUData = new fl32[grid_size];
+    _initMotionVData = new fl32[grid_size];
+
+    _initMotionSize = grid_size;
+  }
+  
+  memset(_initMotionUData, 0, grid_size * sizeof(fl32));
+  memset(_initMotionVData, 0, grid_size * sizeof(fl32));
+    
+  if (_avoidGhosting)
+  {
+    for (size_t index = 0; index < grid_size; ++index)
+    {
+      if (u_data[index] != u_missing && v_data[index] != v_missing)
+      {
+        _initMotionUData[index] = MISSING_MOTION_VALUE;
+        _initMotionVData[index] = MISSING_MOTION_VALUE;
+      }
+    }
+    
+  }
+      
   return true;
 
 }
@@ -223,10 +280,12 @@ bool VectorsAdvector::precompute(const Pjg &projection,
     _motionUData  = new fl32[nx * ny];
     _motionVData  = new fl32[nx * ny];
   }
-  
-  memset(_motionWtData, 0, nx * ny * sizeof(fl32));
-  memset(_motionUData, 0, nx * ny * sizeof(fl32));
-  memset(_motionVData, 0, nx * ny * sizeof(fl32));
+
+  size_t motion_grid_size = nx * ny;
+
+  memcpy(_motionUData, _initMotionUData, motion_grid_size * sizeof(fl32));
+  memcpy(_motionVData, _initMotionVData, motion_grid_size * sizeof(fl32));
+  memset(_motionWtData, 0, motion_grid_size * sizeof(fl32));
   
   // Create the grid template and precompute the distance weights
 
@@ -298,7 +357,11 @@ int VectorsAdvector::calcFcstIndex(const int x_index,
   int index = x_index + (y_index * nx);
   
   // compute the number of grid points moved
-      
+
+  if (_motionUData[index] == MISSING_MOTION_VALUE ||
+      _motionVData[index] == MISSING_MOTION_VALUE)
+    return -1;
+  
   double x_km = _motionUData[index] * (double)_leadTimeSecs / 1000.0;
   double y_km = _motionVData[index] * (double)_leadTimeSecs / 1000.0;
 	
@@ -373,10 +436,13 @@ bool VectorsAdvector::_loadMotionGrid(GridTemplate &grid_template,
     }
     else
     {
-      _motionUData[i] = _soundingUComp;
-      _motionVData[i] = _soundingVComp;
+      if (_soundingUComp != MISSING_MOTION_VALUE &&
+          _soundingVComp != MISSING_MOTION_VALUE)
+      {
+        _motionUData[i] = _soundingUComp;
+        _motionVData[i] = _soundingVComp;
+      }
     }
-    
   } // i
 
   return true;
@@ -414,10 +480,20 @@ void VectorsAdvector::_loadGridForVector(const double lat, const double lon,
     int motion_index = point->getIndex(nx, ny);
     
     double wt = point->value;
-    
-    _motionUData[motion_index] += u * wt;
-    _motionVData[motion_index] += v * wt;
-    _motionWtData[motion_index] += wt;
+
+    if (_motionUData[motion_index] == MISSING_MOTION_VALUE ||
+        _motionVData[motion_index] == MISSING_MOTION_VALUE)
+    {
+      _motionUData[motion_index] = u * wt;
+      _motionVData[motion_index] = v * wt;
+      _motionWtData[motion_index] = wt;
+    }
+    else
+    {
+      _motionUData[motion_index] += u * wt;
+      _motionVData[motion_index] += v * wt;
+      _motionWtData[motion_index] += wt;
+    }
 
   } /* endfor - point */
   
