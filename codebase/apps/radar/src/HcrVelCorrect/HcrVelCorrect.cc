@@ -1463,7 +1463,7 @@ int HcrVelCorrect::_identProgressiveDepol(RadxRay *ray)
   ldrField->convertToFl32();
   Radx::fl32 ldrMiss = ldrField->getMissingFl32();
   Radx::fl32 *ldr = ldrField->getDataFl32();
-  size_t nGates = ldrField->getNPoints();
+  int nGates = ldrField->getNPoints();
   double startRange = ldrField->getStartRangeKm();
   double gateSpacing = ldrField->getGateSpacingKm();
 
@@ -1482,86 +1482,15 @@ int HcrVelCorrect::_identProgressiveDepol(RadxRay *ray)
   Radx::fl32 dbzMiss = dbzField->getMissingFl32();
   Radx::fl32 *dbz = dbzField->getDataFl32();
 
-  // determine the start and end gates for processing
+  // compute the DBZ corrected for the LDR
   
-  size_t startGate = 1;
-  size_t endGate = nGates - 1;
-  int gapLen = 0;
-  for (size_t ii = 0; ii < nGates; ii++) {
-    double range = startRange + ii * gateSpacing;
-    if (range < _params.ldr_filter_min_range) {
-      startGate = ii + 1;
-      endGate = startGate + 1;
-      continue;
-    }
-    if (ldr[ii] == ldrMiss) {
-      gapLen++;
-    } else {
-      gapLen = 0;
-      endGate = ii - 1;
-    }
-    if (gapLen > _params.ldr_filter_max_gap_len) {
-      break;
-    }
-  } // ii
-
-  // perform the polynomial fit for filtering
-  
-  PolyFit poly;
-  poly.setOrder(_params.ldr_filter_polynomial_order);
-  
-  for (size_t ii = startGate; ii <= endGate; ii++) {
-    if (ldr[ii] != ldrMiss) {
-      double range = startRange + ii * gateSpacing;
-      poly.addValue(range, ldr[ii]);
-    }
-  }
-
-  if ((int) poly.getNVals() < _params.ldr_filter_polynomial_order * 2) {
-    return -1;
-  }
-
-  if (poly.performFit()) {
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "WARNING - cannot fit polynomial to LDR field" << endl;
-      cerr << "Ignoring ray" << endl;
-      return -1;
-    }
-  }
-
-  // create output fields, copying from existing fields
-
-  RadxField *ldrFiltField = new RadxField(*ldrField);
-  ldrFiltField->setName(_params.ldr_filt_field_name);
-  ldrFiltField->setLongName("LDR_filtered_using_polynomial");
-  Radx::fl32 *ldrFilt = ldrFiltField->getDataFl32();
-
-  RadxField *ldrGradField = new RadxField(*ldrField);
-  ldrGradField->setName(_params.ldr_gradient_field_name);
-  ldrGradField->setLongName("LDR_gradient_with_range");
-  
-  ldrGradField->setGatesToMissing(0, nGates - 1);
-  Radx::fl32 *ldrGrad = ldrGradField->getDataFl32();
-
   RadxField *dbzCorrField = new RadxField(*dbzField);
   dbzCorrField->setName(_params.dbz_corrected_field_name);
   dbzCorrField->setLongName("DBZ_corrected_for_LDR");
   Radx::fl32 *dbzCorr = dbzCorrField->getDataFl32();
-  
-  // set the filtered field and compute the gradient
+  ray->addField(dbzCorrField);
 
-  for (size_t ii = startGate; ii <= endGate; ii++) {
-    double range = startRange + ii * gateSpacing;
-    ldrFilt[ii] = poly.getYEst(range);
-    double deltaLdr = ldrFilt[ii] - ldrFilt[ii - 1];
-    if (deltaLdr > 0 && deltaLdr < 20) {
-      ldrGrad[ii] = deltaLdr / gateSpacing;
-    }
-  }
-  
-  // compute the DBZ corrected for the LDR
-  
-  for (size_t ii = 0; ii < nGates; ii++) {
+  for (int ii = 0; ii < nGates; ii++) {
     if (dbz[ii] != dbzMiss && ldr[ii] != ldrMiss) {
       double ldrLinear = pow(10.0, ldr[ii] / 10.0);
       double dbzLinear = pow(10.0, dbz[ii] / 10.0);
@@ -1572,13 +1501,166 @@ int HcrVelCorrect::_identProgressiveDepol(RadxRay *ray)
     }
   }
 
-  // add fields to ray
+  // determine the start and end gates for processing
+  // we need to find the longest echo region without major gaps
 
+  int startGate = -1;
+  int endGate = -1;
+  _computeRangeLimits(ray, ldrField, startGate, endGate);
+
+  // perform the polynomial fit for filtering
+
+  PolyFit poly;
+  poly.setOrder(_params.ldr_filter_polynomial_order);
+  
+  for (int ii = startGate; ii <= endGate; ii++) {
+    if (ldr[ii] != ldrMiss) {
+      double range = startRange + ii * gateSpacing;
+      poly.addValue(range, ldr[ii]);
+    }
+  }
+  
+  bool gotFit = false;
+  if ((int) poly.getNVals() >= _params.ldr_filter_polynomial_order * 2) {
+    if (poly.performFit() == 0) {
+      gotFit = true;
+    }
+  }
+
+  if (!gotFit && _params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "WARNING - cannot fit polynomial to LDR field" << endl;
+    cerr << "Ignoring this ray" << endl;
+  }
+
+  // create output fields, copying from existing fields
+
+  RadxField *ldrFiltField = new RadxField(*ldrField);
+  ldrFiltField->setName(_params.ldr_filt_field_name);
+  ldrFiltField->setLongName("LDR_filtered_using_polynomial");
+  Radx::fl32 *ldrFilt = ldrFiltField->getDataFl32();
   ray->addField(ldrFiltField);
-  ray->addField(ldrGradField);
-  ray->addField(dbzCorrField);
 
+  RadxField *ldrGradField = new RadxField(*ldrField);
+  ldrGradField->setName(_params.ldr_gradient_field_name);
+  ldrGradField->setLongName("LDR_gradient_with_range");
+  ldrGradField->setGatesToMissing(0, nGates - 1);
+  Radx::fl32 *ldrGrad = ldrGradField->getDataFl32();
+  ray->addField(ldrGradField);
+  
+  // set the filtered field and compute the gradient
+  
+  if (gotFit) {
+    for (int ii = startGate; ii <= endGate; ii++) {
+      double range = startRange + ii * gateSpacing;
+      double filt = poly.getYEst(range);
+      if (filt < -50) {
+        filt = -50;
+      } else if (filt > 50) {
+        filt = 50;
+      }
+      ldrFilt[ii] = filt;
+      double deltaLdr = ldrFilt[ii] - ldrFilt[ii - 1];
+      if (deltaLdr > 0 && deltaLdr < 20) {
+        ldrGrad[ii] = deltaLdr / gateSpacing;
+      }
+    }
+  }
+  
   return 0;
 
+}
+  
+///////////////////////////////////////////////////////
+// find range limits for ident depol
+
+void HcrVelCorrect::_computeRangeLimits(RadxRay *ray,
+                                        RadxField *ldrField,
+                                        int &startGate,
+                                        int &endGate)
+  
+{
+
+  Radx::fl32 ldrMiss = ldrField->getMissingFl32();
+  Radx::fl32 *ldr = ldrField->getDataFl32();
+  int nGates = ldrField->getNPoints();
+  double startRange = ldrField->getStartRangeKm();
+  double gateSpacing = ldrField->getGateSpacingKm();
+
+  // global gate limits
+
+  double deltaRange = _params.ldr_filter_min_range - startRange;
+  int startLimit = (int) (deltaRange / gateSpacing + 1);
+  if (startLimit < 1) {
+    startLimit = 1;
+  }
+
+  int endLimit = nGates - 1;
+  double elev = ray->getElevationDeg();
+  if (elev < -80) {
+    // downward pointing
+    const RadxGeoref *georef = ray->getGeoreference();
+    if (georef != NULL) {
+      double altDiff = georef->getAltitudeKmMsl() - _params.ldr_filter_min_altitude;
+      double slantRange = fabs(altDiff / sin(elev * Radx::DegToRad));
+      endLimit = (int) ((slantRange - startRange) / gateSpacing);
+      if (endLimit >= nGates) {
+        endLimit = nGates - 1;
+      }
+    }
+  }
+
+  // loop while searching for longest available LDR run without
+  // major gaps
+
+  startGate = startLimit;
+  endGate = startGate;
+
+  while (true) {
+
+    // find starting gate
+    
+    int start = -1;
+    int end = -1;
+    for (int ii = startLimit; ii <= endLimit; ii++) {
+      if (ldr[ii] != ldrMiss) {
+        start = ii;
+        break;
+      } 
+    }
+    if (start < 0) {
+      break;
+    }
+    
+    // find ending gate
+    
+    end = start;
+    int gapLen = 0;
+    for (int ii = start + 1; ii <= endLimit; ii++) {
+      if (ldr[ii] == ldrMiss) {
+        gapLen++;
+      } else {
+        gapLen = 0;
+        end = ii - 1;
+      }
+      if (gapLen > _params.ldr_filter_max_gap_len) {
+        break;
+      }
+    } // ii
+
+    if (end == start) {
+      break;
+    }
+
+    int nGatesData = end - start + 1;
+    int nGatesPrev = endGate - startGate + 1;
+    if (nGatesData > nGatesPrev) {
+      startGate = start;
+      endGate = end;
+    }
+
+    startLimit = endGate + 1;
+    
+  } // while
+  
 }
   

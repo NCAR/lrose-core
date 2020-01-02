@@ -199,8 +199,10 @@ private:
   void _writeFirFiltResultsToSpdb(const RadxRay *filtRay);
 
   int _identProgressiveDepol(RadxRay *ray);
-  
-  
+  void _computeRangeLimits(RadxRay *ray,
+                           RadxField *ldrField,
+                           int &startGate,
+                           int &endGate);
 
 };
 

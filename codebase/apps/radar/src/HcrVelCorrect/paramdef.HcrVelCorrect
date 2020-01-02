@@ -571,16 +571,22 @@ paramdef int {
 } ldr_filter_polynomial_order;
 
 paramdef int {
-  p_default = 50;
+  p_default = 5;
   p_descr = "Max number of missing gates in gap.";
   p_help = "If this gap is exceeded, we stop.";
 } ldr_filter_max_gap_len;
 
 paramdef double {
   p_default = 0.2;
-  p_descr = "Minimum range for performing the polynomial fit.";
+  p_descr = "Minimum range for performing the polynomial fit (km).";
   p_help = "Use this to skip over bad data close to the radar.";
 } ldr_filter_min_range;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Minimum altitude for performing the polynomial fit (km).";
+  p_help = "Use this to avoid surface echo.";
+} ldr_filter_min_altitude;
 
 paramdef string {
   p_default = "LDR_GRADIENT";
