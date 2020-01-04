@@ -123,6 +123,10 @@ def main():
                       dest='build_samurai', default=False,
                       action="store_true",
                       help='Checkout and build samurai after core build is complete')
+    parser.add_option('--cmake3',
+                      dest='use_cmake3', default=False,
+                      action="store_true",
+                      help='Use cmake3 instead of cmake for samurai')
 
     (options, args) = parser.parse_args()
     
@@ -909,7 +913,10 @@ def buildSamurai():
     
     # create makefiles
 
-    cmd = "cmake3 --clean-first ."
+    if (options.use_cmake3):
+        cmd = "cmake3 --clean-first ."
+    else:
+        cmd = "cmake --clean-first ."
     shellCmd(cmd)
 
     # do the build
