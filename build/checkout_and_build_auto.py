@@ -111,6 +111,18 @@ def main():
                       dest='useSystemNetcdf', default=False,
                       action="store_true",
                       help='Use system install of NetCDF and HDF5 instead of building it here')
+    parser.add_option('--fractl',
+                      dest='build_fractl', default=False,
+                      action="store_true",
+                      help='Checkout and build fractl after core build is complete')
+    parser.add_option('--vortrac',
+                      dest='build_vortrac', default=False,
+                      action="store_true",
+                      help='Checkout and build vortrac after core build is complete')
+    parser.add_option('--samurai',
+                      dest='build_samurai', default=False,
+                      action="store_true",
+                      help='Checkout and build samurai after core build is complete')
 
     (options, args) = parser.parse_args()
     
@@ -125,7 +137,8 @@ def main():
         options.package != "lrose-radx" and
         options.package != "lrose-cidd") :
         print("ERROR: invalid package name: %s:" % options.package, file=sys.stderr)
-        print("  options: lrose-core, lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd", file=sys.stderr)
+        print("  options: lrose-core, lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd",
+              file=sys.stderr)
         sys.exit(1)
 
     # for CIDD, set to static linkage
@@ -202,6 +215,10 @@ def main():
         print("  includeDir: ", includeDir, file=sys.stderr)
         print("  shareDir: ", shareDir, file=sys.stderr)
         print("  useSystemNetcdf: ", options.useSystemNetcdf, file=sys.stderr)
+        print("  package: ", package, file=sys.stderr)
+        print("  build_fractl: ", options.build_fractl, file=sys.stderr)
+        print("  build_vortrac: ", options.build_vortrac, file=sys.stderr)
+        print("  build_samurai: ", options.build_samurai, file=sys.stderr)
 
     # create build dir
     
@@ -305,7 +322,23 @@ def main():
 
     logPath = prepareLogFile("no-logging");
     checkInstall()
-    
+
+    # build CSU packages
+
+    logPath = prepareLogFile("fractl");
+    if (options.build_fractl):
+        buildFractl()
+
+    logPath = prepareLogFile("vortrac");
+    if (options.build_vortrac):
+        buildVortrac()
+
+    logPath = prepareLogFile("samurai");
+    if (options.build_samurai):
+        buildSamurai()
+
+    sys.exit(0)
+
     # delete the tmp dir
 
     if (options.clean):
@@ -763,6 +796,133 @@ def prune(tree):
                 if (options.verbose):
                     print("pruning empty dir: " + tree, file=logFp)
                 shutil.rmtree(tree)
+
+########################################################################
+# build fractl package
+
+def buildFractl():
+
+    global logPath
+
+    print("==>> buildFractl", file=sys.stderr)
+    print("====>> prefix: ", prefix, file=sys.stderr)
+    print("====>> includeDir: ", includeDir, file=sys.stderr)
+    print("====>> libDir: ", libDir, file=sys.stderr)
+    print("====>> binDir: ", binDir, file=sys.stderr)
+
+    # check out fractl
+
+    os.chdir(options.buildDir)
+    shellCmd("git clone https://github.com/mmbell/fractl")
+    os.chdir("./fractl")
+
+    # set the environment
+
+    os.environ["LROSE_PREFIX"] = prefix
+    os.environ["LROSE_ROOT_DIR"] = prefix
+    os.environ["LROSE_INCLUDE_DIRS"] = includeDir
+    os.environ["LROSE_LIB_DIR"] = libDir
+    os.environ["LROSE_BIN_DIR"] = binDir
+    os.environ["CMAKE_INSTALL_PREFIX"] = prefix
+    
+    # create makefiles
+
+    cmd = "cmake --clean-first ."
+    shellCmd(cmd)
+
+    # do the build
+
+    cmd = "make -j 4"
+    shellCmd(cmd)
+
+    # do the install
+
+    cmd = "rsync ./build/release/bin/fractl " + binDir
+    shellCmd(cmd)
+
+    return
+
+########################################################################
+# build vortrac package
+
+def buildVortrac():
+
+    global logPath
+
+    print("====>> buildVortrac", file=sys.stderr)
+    print("====>> prefix: ", prefix, file=sys.stderr)
+
+    # check out vortrac
+
+    os.chdir(options.buildDir)
+    shellCmd("git clone https://github.com/mmbell/vortrac")
+    os.chdir("./vortrac/src")
+
+    # set the environment
+
+    os.environ["LROSE_INSTALL_DIR"] = prefix
+    
+    # create makefiles
+
+    cmd = "qmake"
+    shellCmd(cmd)
+
+    # do the build
+
+    cmd = "make -j 4"
+    shellCmd(cmd)
+
+    # do the install
+
+    cmd = "rsync ./vortrac " + binDir
+    shellCmd(cmd)
+
+    return
+
+########################################################################
+# build samurai package
+
+def buildSamurai():
+
+    global logPath
+
+    print("==>> buildSamurai", file=sys.stderr)
+    print("====>> prefix: ", prefix, file=sys.stderr)
+    print("====>> includeDir: ", includeDir, file=sys.stderr)
+    print("====>> libDir: ", libDir, file=sys.stderr)
+    print("====>> binDir: ", binDir, file=sys.stderr)
+
+    # check out samurai
+
+    os.chdir(options.buildDir)
+    shellCmd("git clone https://github.com/mmbell/samurai")
+    os.chdir("./samurai")
+
+    # set the environment
+
+    os.environ["LROSE_PREFIX"] = prefix
+    os.environ["LROSE_ROOT_DIR"] = prefix
+    os.environ["LROSE_INCLUDE_DIRS"] = includeDir
+    os.environ["LROSE_LIB_DIR"] = libDir
+    os.environ["LROSE_BIN_DIR"] = binDir
+    os.environ["CMAKE_INSTALL_PREFIX"] = prefix
+    
+    # create makefiles
+
+    cmd = "cmake3 --clean-first ."
+    shellCmd(cmd)
+
+    # do the build
+
+    cmd = "make -j 4"
+    shellCmd(cmd)
+
+    # do the install
+
+    cmd = "rsync ./build/release/bin/samurai " + binDir
+    shellCmd(cmd)
+
+    return
 
 ########################################################################
 # prepare log file
