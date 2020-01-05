@@ -9,8 +9,8 @@
 
 RUN apt-get update && \
     apt-get install -y \
-    tcsh git gcc g++ gfortran make cmake rsync mlocate \
-    automake make libtool pkg-config python \
+    tcsh git gcc g++ gfortran rsync \
+    automake make cmake mlocate libtool pkg-config python \
     libcurl3-dev curl \
     libfl-dev libbz2-dev libx11-dev libpng-dev \
     libfftw3-dev libexpat1-dev \

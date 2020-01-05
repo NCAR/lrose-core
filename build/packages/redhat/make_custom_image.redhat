@@ -64,44 +64,42 @@ fi
 
 cd ~/git/lrose-core/build/packages/redhat
 
-# rhel/centos 6  is a special case since it does
-# not natively support c++11
+# set the docker file name
 
-if [ "${os_version}" = 6 ] ; then
-  echo "  Special build - centos 6"
-  echo "  Dockerfile path: Dockerfile.centos6.custom"
-  docker build \
-      --tag custom/${os_type}:${os_version} \
-      --file Dockerfile.centos6.custom .
-  exit 0
-fi
-
-if [ "${os_version}" = 8 ] ; then
-  echo "  Special build - centos 8"
-  echo "  Dockerfile path: Dockerfile.centos8.custom"
-  docker build \
-      --build-arg OS_TYPE=${os_type} \
-      --build-arg OS_VERSION=${os_version} \
-      --tag custom/${os_type}:${os_version} \
-      --file Dockerfile.centos8.custom .
-  exit 0
+if [ "$os_type" = fedora ]
+then
+    # fedora
+    DockerfileName=Dockerfile.fedora.custom
+else
+    # various version of centos
+    if [ "$os_version" = 6 ] ; then
+        DockerfileName=Dockerfile.centos6.custom
+    elif [ "$os_version" = 7 ] ; then
+        DockerfileName=Dockerfile.centos7.custom
+    else
+        DockerfileName=Dockerfile.centos8.custom
+    fi
 fi
 
 # compute Dockerfile path
 
 DockerfilePath=/tmp/docker/Dockerfile.custom.${os_type}.${os_version}
-echo "  Dockerfile path: " $DockerfilePath
-
-# create Dockerfile preamble with the FROM command
-
+echo "  DockerfileName is: " $DockerfileName
+echo "  Creating DockerfilePath: " $DockerfilePath
 mkdir -p /tmp/docker
-echo "####################################################" > ${DockerfilePath}
-echo "FROM ${os_type}:${os_version}" >> ${DockerfilePath}
-echo "#" >> ${DockerfilePath}
+echo "####################################################" > $DockerfilePath
+
+# for fedora, create Dockerfile preamble with the FROM command
+
+if [ "$os_type" = fedora ]
+then
+    echo "FROM ${os_type}:${os_version}" >> $DockerfilePath
+    echo "#" >> $DockerfilePath
+fi
 
 # append the body of the Dockerfile
 
-cat Dockerfile.redhat.custom >> ${DockerfilePath}
+cat $DockerfileName >> $DockerfilePath
 
 # create the custom image
 
@@ -112,4 +110,3 @@ docker build \
     --build-arg OS_VERSION=${os_version} \
     --tag custom/${os_type}:${os_version} \
     --file ${DockerfilePath} .
-
