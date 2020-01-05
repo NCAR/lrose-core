@@ -92,11 +92,18 @@ echo "#" >> ${DockerfilePath}
 
 # append the body of the Dockerfile
 
-if [ "$lrose_pkg" == "cidd" ]
+if [ "$lrose_pkg" = "cidd" ]
 then
   cat Dockerfile.redhat.build.cidd >> ${DockerfilePath}
 else
-  cat Dockerfile.redhat.build >> ${DockerfilePath}
+    # normal core build
+    if [ "$os_type" = centos -a "$os_version" = 6 ] ; then
+        cat Dockerfile.centos6.build >> ${DockerfilePath}
+    elif [ "$os_type" = centos -a "$os_version" = 7 ] ; then
+        cat Dockerfile.centos7.build >> ${DockerfilePath}
+    else
+        cat Dockerfile.redhat.build >> ${DockerfilePath}
+    fi
 fi
 
 # remove old image if present
