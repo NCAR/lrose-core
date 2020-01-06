@@ -131,6 +131,10 @@ def main():
                       dest='build_geolib', default=False,
                       action="store_true",
                       help='Build and install geolib - for fractl, samurai')
+    parser.add_option('--no_core_apps',
+                      dest='no_core_apps', default=False,
+                      action="store_true",
+                      help='Do not build the lrose core apps')
 
     (options, args) = parser.parse_args()
     
@@ -229,6 +233,7 @@ def main():
         print("  build_fractl: ", options.build_fractl, file=sys.stderr)
         print("  build_vortrac: ", options.build_vortrac, file=sys.stderr)
         print("  build_samurai: ", options.build_samurai, file=sys.stderr)
+        print("  no_core_apps: ", options.no_core_apps, file=sys.stderr)
 
     # create build dir
     
@@ -665,18 +670,20 @@ def buildPackage():
     cmd = "make -k install-strip"
     shellCmd(cmd)
 
-    # build the apps
+    if (options.no_core_apps == False):
 
-    logPath = prepareLogFile("build-apps");
-    os.chdir(os.path.join(codebaseDir, "apps"))
-    cmd = "make -k -j 8"
-    shellCmd(cmd)
+        # build the apps
 
-    # install the apps
-
-    logPath = prepareLogFile("install-apps-to-tmp");
-    cmd = "make -k install-strip"
-    shellCmd(cmd)
+        logPath = prepareLogFile("build-apps");
+        os.chdir(os.path.join(codebaseDir, "apps"))
+        cmd = "make -k -j 8"
+        shellCmd(cmd)
+        
+        # install the apps
+        
+        logPath = prepareLogFile("install-apps-to-tmp");
+        cmd = "make -k install-strip"
+        shellCmd(cmd)
 
     # optionally install the scripts
 
@@ -767,12 +774,14 @@ def checkInstall():
              "--libDir " + prefix + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
-    print(("============= Checking apps for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_apps.py " + \
-             "--listPath ./build/checklists/apps_check_list." + package + " " + \
-             "--appDir " + prefix + "/bin " + \
-             "--label " + package + " --maxAge 3600")
-    print("====================================================")
+
+    if (options.no_core_apps == False):
+        print(("============= Checking apps for " + package + " ============="))
+        shellCmd("./codebase/make_bin/check_apps.py " + \
+                 "--listPath ./build/checklists/apps_check_list." + package + " " + \
+                 "--appDir " + prefix + "/bin " + \
+                 "--label " + package + " --maxAge 3600")
+        print("====================================================")
     
     print("**************************************************")
     print("*** Done building auto release *******************")
