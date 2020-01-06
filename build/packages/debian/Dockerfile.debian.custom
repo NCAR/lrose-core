@@ -9,22 +9,22 @@
 
 RUN apt-get update && \
     apt-get install -y \
-    tcsh git gcc g++ gfortran rsync \
+    tcsh git gcc g++ gfortran rsync chrpath \
     automake make cmake mlocate libtool pkg-config python \
     libcurl3-dev curl \
     libfl-dev libbz2-dev libx11-dev libpng-dev \
     libfftw3-dev libexpat1-dev \
-    qtbase5-dev qtdeclarative5-dev \
+    qtbase5-dev qtdeclarative5-dev libqt5webview5-dev \
     libgeographic-dev libeigen3-dev libzip-dev \
+    libcurl4-openssl-dev \
     libarmadillo-dev libopenmpi-dev \
     libnetcdf-dev netcdf-bin libhdf5-dev hdf5-tools
 
-# create link for qtmake
+# create link for qmake
 
 RUN \
     cd /usr/bin; \
     /bin/rm -f qmake qmake-qt5; \
     ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake; \
     ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
-
 
