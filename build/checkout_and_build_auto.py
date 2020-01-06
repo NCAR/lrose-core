@@ -127,6 +127,10 @@ def main():
                       dest='use_cmake3', default=False,
                       action="store_true",
                       help='Use cmake3 instead of cmake for samurai')
+    parser.add_option('--geolib',
+                      dest='build_geolib', default=False,
+                      action="store_true",
+                      help='Build and install geolib - for fractl, samurai')
 
     (options, args) = parser.parse_args()
     
@@ -220,13 +224,15 @@ def main():
         print("  shareDir: ", shareDir, file=sys.stderr)
         print("  useSystemNetcdf: ", options.useSystemNetcdf, file=sys.stderr)
         print("  package: ", package, file=sys.stderr)
+        print("  use_cmake3: ", options.use_cmake3, file=sys.stderr)
+        print("  build_geolib: ", options.build_geolib, file=sys.stderr)
         print("  build_fractl: ", options.build_fractl, file=sys.stderr)
         print("  build_vortrac: ", options.build_vortrac, file=sys.stderr)
         print("  build_samurai: ", options.build_samurai, file=sys.stderr)
 
     # create build dir
     
-    createBuildDir()
+    # createBuildDir()
 
     # initialize logging
 
@@ -328,6 +334,10 @@ def main():
     checkInstall()
 
     # build CSU packages
+
+    logPath = prepareLogFile("geolib");
+    if (options.build_geolib):
+        buildGeolib()
 
     logPath = prepareLogFile("fractl");
     if (options.build_fractl):
@@ -800,6 +810,48 @@ def prune(tree):
                 if (options.verbose):
                     print("pruning empty dir: " + tree, file=logFp)
                 shutil.rmtree(tree)
+
+########################################################################
+# build geographiclib
+
+def buildGeolib():
+
+    global logPath
+
+    print("==>> buildGeolib", file=sys.stderr)
+    print("====>> prefix: ", prefix, file=sys.stderr)
+
+    # check out fractl
+
+    os.chdir(options.buildDir)
+    shellCmd("git clone git://git.code.sourceforge.net/p/geographiclib/code geographiclib")
+    os.chdir("./geographiclib")
+    shellCmd("mkdir BUILD");
+    os.chdir("./BUILD")
+
+    # set the install environment
+
+    os.environ["LROSE_PREFIX"] = prefix
+    
+    # create makefiles
+
+    if (options.use_cmake3):
+        cmd = "cmake3 -D CMAKE_INSTALL_PREFIX=" + prefix + " .."
+    else:
+        cmd = "cmake -D CMAKE_INSTALL_PREFIX=" + prefix + " .."
+    shellCmd(cmd)
+
+    # do the build
+
+    cmd = "make -j 4"
+    shellCmd(cmd)
+
+    # do the install
+
+    cmd = "make install"
+    shellCmd(cmd)
+
+    return
 
 ########################################################################
 # build fractl package
