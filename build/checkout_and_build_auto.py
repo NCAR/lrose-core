@@ -892,7 +892,7 @@ def buildFractl():
     
     # create makefiles
 
-    cmd = "cmake --clean-first ."
+    cmd = "cmake -DCMAKE_INSTALL_PREFIX=" + prefix + " ."
     shellCmd(cmd)
 
     # do the build
@@ -902,7 +902,7 @@ def buildFractl():
 
     # do the install
 
-    cmd = "rsync ./build/release/bin/fractl " + binDir
+    cmd = "make install"
     shellCmd(cmd)
 
     return
@@ -975,9 +975,9 @@ def buildSamurai():
     # create makefiles
 
     if (options.use_cmake3):
-        cmd = "cmake3 --clean-first ."
+        cmd = "cmake3 -DCMAKE_INSTALL_PREFIX=" + prefix + " ."
     else:
-        cmd = "cmake --clean-first ."
+        cmd = "cmake -DCMAKE_INSTALL_PREFIX=" + prefix + " ."
     shellCmd(cmd)
 
     # do the build
@@ -987,7 +987,7 @@ def buildSamurai():
 
     # do the install
 
-    cmd = "rsync ./build/release/bin/samurai " + binDir
+    cmd = "make install"
     shellCmd(cmd)
 
     return
