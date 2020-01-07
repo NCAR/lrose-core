@@ -13,8 +13,8 @@ RUN \
     m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-fortran glibc-devel \
     libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel \
-    libexpat-devel libcurl-devel \
+    libpng-devel libtiff-devel zlib-devel libzip-devel \
+    libexpat-devel libcurl-devel openmpi-devel \
     flex fftw3-devel \
     libbz2-devel libzip-devel \
     libqt5-qtbase-devel libqt5-qtdeclarative-devel \
