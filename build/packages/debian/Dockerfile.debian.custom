@@ -14,7 +14,7 @@ RUN apt-get update && \
     libcurl3-dev curl \
     libfl-dev libbz2-dev libx11-dev libpng-dev \
     libfftw3-dev libexpat1-dev \
-    qtbase5-dev qtdeclarative5-dev libqt5webview5-dev \
+    qtbase5-dev qtdeclarative5-dev \
     libgeographic-dev libeigen3-dev libzip-dev \
     libcurl4-openssl-dev \
     libarmadillo-dev libopenmpi-dev \
