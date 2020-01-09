@@ -1,11 +1,11 @@
 #===================================================
-# build lrose in redhat container
+# build lrose in debian container
 
 ARG LROSE_PKG=core
 ARG RELEASE_DATE=latest
 
 RUN \
-    echo "Building lrose in redhat container"; \
+    echo "Building lrose in debian container"; \
     echo "  package is: ${LROSE_PKG}" 
 
 # run the checkout and build script
@@ -18,9 +18,10 @@ RUN \
     --buildDir /tmp/lrose_build \
     --logDir /tmp/build_logs \
     --useSystemNetcdf \
-    --geolib --fractl --samurai
+    --fractl --samurai
 
 # clean up
 
-RUN \
-    /bin/rm -rf /tmp/lrose_build
+#RUN \
+#    /bin/rm -rf /tmp/lrose_build
+
