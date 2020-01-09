@@ -936,8 +936,9 @@ def buildVortrac():
     osType = getOSType()
     if (osType == 'Debian GNU/Linux 10 (buster)' or
         osType == 'Ubuntu 19.10'):
-        # cmake does not work, copy in Makefile
-        shellCmd("/bin/cp -f _makefiles/Makefile.debian Makefile")
+        # cmake does not work in latest Debian versions
+        # so copy in Makefile instead of using qmake
+        shellCmd("/bin/cp -f _makefiles/Makefile.debian10 Makefile")
     else:
         # create Makefile using cmake
         cmd = "qmake ."
