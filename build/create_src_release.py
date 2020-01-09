@@ -300,6 +300,10 @@ def gitCheckout():
     shellCmd("git clone https://github.com/NCAR/lrose-core")
     shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
     shellCmd("git clone https://github.com/NCAR/lrose-displays")
+    os.chdir("./lrose-core")
+    shellCmd("git clone https://github.com/mmbell/fractl")
+    shellCmd("git clone https://github.com/mmbell/vortrac")
+    shellCmd("git clone https://github.com/mmbell/samurai")
 
 ########################################################################
 # set up autoconf for configure etc

@@ -22,23 +22,51 @@ class LroseCore < Formula
   depends_on 'flex'
   depends_on 'jpeg'
   depends_on 'libpng'
+  depends_on 'libzip'
+  depends_on 'libomp'
   depends_on 'qt'
   depends_on 'szip'
   depends_on 'pkg-config'
+  depends_on 'cmake'
+  depends_on 'eigen'
+  depends_on 'geographiclib'
+  depends_on 'armadillo'
+  depends_on 'rsync'
   depends_on :x11
 
   def install
+
     ENV["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
     Dir.chdir("codebase")
     system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"
     system "make install"
     Dir.chdir("..")
     system "rsync", "-av", "share", "#{{prefix}}"
+
+    # Build/install fractl
+    Dir.chdir("fractl")
+    ENV['LROSE_ROOT_DIR'] = prefix
+    system "cmake", "-DCMAKE_INSTALL_PREFIX=#{{prefix}}", "."
+    system "make install"
+    Dir.chdir("..")
+
+    # Build/install samurai
+    Dir.chdir("samurai")
+    ENV['LROSE_ROOT_DIR'] = prefix
+    system "cmake", "-DCMAKE_INSTALL_PREFIX=#{{prefix}}", "."
+    system "make install", "VERBOSE=1"
+    bin.install 'build/release/bin/samurai'
+    lib.install 'build/release/lib/libsamurai.a'
+    lib.install 'build/release/lib/libsamurai.dylib'
+    include.install 'src/samurai.h'
+    Dir.chdir("..")
+
   end
 
   def test
     system "#{{bin}}/RadxPrint", "-h"
   end
+
 end
 """
 
