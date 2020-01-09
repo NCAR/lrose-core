@@ -22,5 +22,5 @@ RUN \
 
 # clean up
 
-RUN \
-    /bin/rm -rf /tmp/lrose_build
+#RUN \
+#    /bin/rm -rf /tmp/lrose_build

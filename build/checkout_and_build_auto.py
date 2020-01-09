@@ -237,7 +237,7 @@ def main():
 
     # create build dir
     
-    # createBuildDir()
+    createBuildDir()
 
     # initialize logging
 
@@ -411,16 +411,19 @@ def gitCheckout():
 
     # lrose core
 
+    shellCmd("/bin/rm -rf lrose-core")
     shellCmd("git clone --branch " + releaseTag + \
              " https://github.com/NCAR/lrose-core")
 
     # netcdf and hdf5
 
     if (options.useSystemNetcdf == False):
+        shellCmd("/bin/rm -rf lrose-netcdf")
         shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
 
     # color scales and maps in displays repo
 
+    shellCmd("/bin/rm -rf lrose-displays")
     shellCmd("git clone https://github.com/NCAR/lrose-displays")
 
 ########################################################################
@@ -833,6 +836,7 @@ def buildGeolib():
     # check out fractl
 
     os.chdir(options.buildDir)
+    shellCmd("/bin/rm -rf geographiclib")
     shellCmd("git clone git://git.code.sourceforge.net/p/geographiclib/code geographiclib")
     os.chdir("./geographiclib")
     shellCmd("mkdir BUILD");
@@ -878,6 +882,7 @@ def buildFractl():
     # check out fractl
 
     os.chdir(options.buildDir)
+    shellCmd("/bin/rm -rf fractl")
     shellCmd("git clone https://github.com/mmbell/fractl")
     os.chdir("./fractl")
 
@@ -920,17 +925,23 @@ def buildVortrac():
     # check out vortrac
 
     os.chdir(options.buildDir)
+    shellCmd("/bin/rm -rf vortrac")
     shellCmd("git clone https://github.com/mmbell/vortrac")
     os.chdir("./vortrac/src")
 
     # set the environment
 
     os.environ["LROSE_INSTALL_DIR"] = prefix
-    
-    # create makefiles
 
-    cmd = "qmake"
-    shellCmd(cmd)
+    osType = getOSType()
+    if (osType == 'Debian GNU/Linux 10 (buster)' or
+        osType == 'Ubuntu 19.10'):
+        # cmake does not work, copy in Makefile
+        shellCmd("/bin/cp -f _makefiles/Makefile.debian Makefile")
+    else:
+        # create Makefile using cmake
+        cmd = "qmake ."
+        shellCmd(cmd)
 
     # do the build
 
@@ -960,6 +971,7 @@ def buildSamurai():
     # check out samurai
 
     os.chdir(options.buildDir)
+    shellCmd("/bin/rm -rf samurai")
     shellCmd("git clone https://github.com/mmbell/samurai")
     os.chdir("./samurai")
 
@@ -991,6 +1003,22 @@ def buildSamurai():
     shellCmd(cmd)
 
     return
+
+########################################################################
+# get the OS type from the /etc/os-release file in linux
+
+def getOSType():
+
+    osrelease_file = open("/etc/os-release", "rt")
+    lines = osrelease_file.readlines()
+    osrelease_file.close()
+    osType = "unknown"
+    for line in lines:
+        if (line.find('PRETTY_NAME') == 0):
+            lineParts = line.split('=')
+            osParts = lineParts[1].split('"')
+            osType = osParts[1]
+    return osType
 
 ########################################################################
 # prepare log file
