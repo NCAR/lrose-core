@@ -13,14 +13,14 @@ RUN \
     m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-fortran glibc-devel \
     libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel libzip-devel \
-    libexpat-devel libcurl-devel openmpi-devel \
+    libpng-devel libtiff-devel zlib-devel \
+    libexpat-devel libcurl-devel \
     flex fftw3-devel \
     libbz2-devel libzip-devel \
     libqt5-qtbase-devel libqt5-qtdeclarative-devel \
-    libgeographic-dev libeigen3-dev libzip-dev \
+    eigen3-devel \
     hdf5-devel netcdf-devel \
-    libarmadillo-dev libopenmpi-dev \
+    armadillo-devel openmpi-devel \
     xorg-x11-xauth \
     rpm-build rpm-devel rpmdevtools
 
