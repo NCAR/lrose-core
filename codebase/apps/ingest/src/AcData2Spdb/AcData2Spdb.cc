@@ -1003,6 +1003,12 @@ int AcData2Spdb::_decodeNoaaShip(const char *line,
   if (toks.size() < 6) {
     return -1;
   }
+
+  // remove IWG1 token if present at start of message
+
+  if (toks[0] == "IWG1") {
+    toks.erase(toks.begin(), toks.begin());
+  }
   
   if (sscanf(toks[0].c_str(), "%4d%2d%2d",
              &year, &month, &day) != 3) {
@@ -1175,10 +1181,10 @@ int AcData2Spdb::_decodeIWG1(const char *line,
     dewptC = atof(toks[20].c_str());
   }
 
-  double rh = -9999.0;
-  if (tempC > -9990.0 && dewptC > -9990.0) {
-    rh = PHYrelh(tempC, dewptC);
-  }
+  // double rh = -9999.0;
+  // if (tempC > -9990.0 && dewptC > -9990.0) {
+  //   rh = PHYrelh(tempC, dewptC);
+  // }
 
   // wind
 
@@ -1196,13 +1202,13 @@ int AcData2Spdb::_decodeIWG1(const char *line,
     windDirnDegT = atof(toks[26].c_str());
   }
 
-  double uu = -9999.0;
-  double vv = -9999.0;
+  // double uu = -9999.0;
+  // double vv = -9999.0;
   
-  if (windSpeedMps > -9990.0 && windDirnDegT > -9990.0) {
-    uu = PHYwind_u(windSpeedMps, windDirnDegT);
-    vv = PHYwind_v(windSpeedMps, windDirnDegT);
-  }
+  // if (windSpeedMps > -9990.0 && windDirnDegT > -9990.0) {
+  //   uu = PHYwind_u(windSpeedMps, windDirnDegT);
+  //   vv = PHYwind_v(windSpeedMps, windDirnDegT);
+  // }
   
   // load struct
 
