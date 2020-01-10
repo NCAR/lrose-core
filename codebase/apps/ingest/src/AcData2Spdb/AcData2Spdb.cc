@@ -1007,7 +1007,7 @@ int AcData2Spdb::_decodeNoaaShip(const char *line,
   // remove IWG1 token if present at start of message
 
   if (toks[0] == "IWG1") {
-    toks.erase(toks.begin(), toks.begin());
+    toks.erase(toks.begin(), toks.begin()+1);
   }
   
   if (sscanf(toks[0].c_str(), "%4d%2d%2d",
