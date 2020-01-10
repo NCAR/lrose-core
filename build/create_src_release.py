@@ -300,7 +300,7 @@ def gitCheckout():
     shellCmd("git clone https://github.com/NCAR/lrose-core")
     shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
     shellCmd("git clone https://github.com/NCAR/lrose-displays")
-    os.chdir("./lrose-core")
+    os.chdir(os.path.join(tmpDir, "lrose-core"))
     shellCmd("git clone https://github.com/mmbell/fractl")
     shellCmd("git clone https://github.com/mmbell/vortrac")
     shellCmd("git clone https://github.com/mmbell/samurai")
@@ -401,6 +401,9 @@ def createTarFile():
         os.rename(fileName, os.path.join(tarDir, fileName))
         
     for dirName in [ "build", "codebase", "docs", "release_notes" ]:
+        os.rename(dirName, os.path.join(tarDir, dirName))
+
+    for dirName in [ "fractl", "vortrac", "samurai" ]:
         os.rename(dirName, os.path.join(tarDir, dirName))
 
     # move netcdf support into tar dir
