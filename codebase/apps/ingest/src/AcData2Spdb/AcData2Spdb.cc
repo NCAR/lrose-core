@@ -1004,12 +1004,6 @@ int AcData2Spdb::_decodeNoaaShip(const char *line,
     return -1;
   }
 
-  // remove IWG1 token if present at start of message
-
-  if (toks[0] == "IWG1") {
-    toks.erase(toks.begin(), toks.begin()+1);
-  }
-  
   if (sscanf(toks[0].c_str(), "%4d%2d%2d",
              &year, &month, &day) != 3) {
     return -1;
@@ -1090,6 +1084,16 @@ int AcData2Spdb::_decodeIWG1(const char *line,
     return -1;
   }
 
+  // remove IWG1 token if present at start of message
+
+  if (toks[0] == "IWG1") {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "===>> IWG1 line: " << line << endl;
+      cerr << "===>> removing first token: IWG1" << endl;
+    }
+    toks.erase(toks.begin(), toks.begin()+1);
+  }
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "---> IWG1 line: " << line << endl;
     cerr << "     ntoks: " << toks.size() << endl;
