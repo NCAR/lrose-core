@@ -67,27 +67,41 @@ To see the usage:
 ```
   Usage: checkout_and_build_auto.py [options]
   Options:
-    -h, --help           show this help message and exit
-    --clean              Cleanup tmp build dir
-    --debug              Set debugging on
-    --verbose            Set verbose debugging on
-    --package=PACKAGE    Package name. Options are: lrose (default), cidd, radx,
-                         titan, lrose-blaze
-    --prefix=PREFIX      Install directory
-    --buildDir=BUILDDIR  Temporary build dir
-    --static             use static linking, default is dynamic
-    --scripts            Install scripts as well as binaries
+    -h, --help            show this help message and exit
+    --clean               Cleanup tmp build dir
+    --debug               Set debugging on
+    --verbose             Set verbose debugging on
+    --package=PACKAGE     Package name. Options are: lrose-core (default),
+                          lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd
+    --releaseDate=RELEASEDATE
+                          Tag to check out lrose-core
+    --prefix=PREFIX       Install directory, default is ~/lrose
+    --buildDir=BUILDDIR   Temporary build dir, default is /tmp/lrose_build
+    --logDir=LOGDIR       Logging dir, default is /tmp/lrose_build/logs
+    --static              use static linking, default is dynamic
+    --useSystemNetcdf     Use system install of NetCDF and HDF5 instead of
+                          building it here
+    --fractl              Checkout and build fractl after core build is complete
+    --vortrac             Checkout and build vortrac after core build is
+                          complete
+    --samurai             Checkout and build samurai after core build is
+                          complete
+    --cmake3              Use cmake3 instead of cmake for samurai
+    --geolib              Build and install geolib - for fractl, samurai
+
 ```
 
-`package` defaults to `lrose`
+`package` defaults to `lrose-core`
 
 `prefix` defaults to `${HOME}/lrose`
 
 Available packages are:
 
 ```
-  lrose lrose-blaze radx titan cidd
+  lrose-core lrose-cidd lrose-radx lrose-blaze lrose-cyclone
 ```
+
+We recommend just building the full core.
 
 The default directories for installation are:
 
@@ -106,19 +120,13 @@ To build and install the full lrose package into the default directory:
 To specfiy the sub-package, e.g.radx:
 
 ```
-  ./checkout_and_build_auto.py --package radx
+  ./checkout_and_build_auto.py --package lrose-radx
 ```
 
 To set the install directory:
 
 ```
   ./checkout_and_build_auto.py --prefix /my/install/dir
-```
-
-To install the run-time scripts as well:
-
-```
-  ./checkout_and_build_auto.py --scripts
 ```
 
 To cleanup between builds:
