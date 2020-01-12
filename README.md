@@ -35,6 +35,7 @@ To download this repository from GitHub, run:
 | [LINUX - install from RedHat .rpm package](./docs/download/download_rpm_and_install.md) |
 | [LINUX - install from Debian .deb package](./docs/download/download_deb_and_install.md) |
 | [CIDD build - 32-bit mode - LINUX](./docs/build/CIDD_build.linux.md) |
+| [Cyclone release](https://github.com/nsf-lrose/lrose-cyclone) |
 
 ### CODE DEVELOPMENT
 
