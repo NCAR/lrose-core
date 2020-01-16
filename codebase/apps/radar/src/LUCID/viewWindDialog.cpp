@@ -1,5 +1,7 @@
 #include "viewWindDialog.h"
 
+//This file controls how the wind configurations dialog window looks for the user.
+//it should work in tandem with contWindDialog
 
 viewWindDialog::viewWindDialog(QWidget *parent) : QDialog(parent)
 {

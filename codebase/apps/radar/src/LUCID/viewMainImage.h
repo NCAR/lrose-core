@@ -8,16 +8,12 @@
 #include <QScrollArea>
 #include <QHBoxLayout>
 
-
-
 class viewMainImage : public QWidget
 {
     Q_OBJECT
 public:
     explicit viewMainImage(QLabel *currentTime, QString pic, QWidget *parent = nullptr);
     ~viewMainImage();
-    void Tester();
-
     QLabel *mainImage;
     QScrollArea *scrollArea;
     QVBoxLayout *timeLayout;

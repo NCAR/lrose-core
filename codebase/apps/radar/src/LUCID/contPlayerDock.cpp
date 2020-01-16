@@ -1,5 +1,10 @@
 #include "contPlayerDock.h"
 
+
+//This file will control the movie player dock widget displayed at the bottom of the main window
+//It should work in tandem with viewPlayerDock
+//this is where the connections should be made, which for now are just for dummy interactions
+
 contPlayerDock::contPlayerDock()
 {
     playerDockViewer = new viewPlayerDock;

@@ -1,5 +1,9 @@
 #include "viewStatusDialog.h"
 
+
+//This file will control what the status window looks like.
+//It should work in tandem with contStatusDialog
+
 viewStatusDialog::viewStatusDialog(QWidget *parent) : QDialog(parent)
 {
     setWindowTitle(tr("Status Window"));

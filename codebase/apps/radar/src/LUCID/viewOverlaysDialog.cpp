@@ -1,28 +1,24 @@
 #include "viewOverlaysDialog.h"
 
+
+//This file will control how info is diplayed in the overlays dialog window.
+//It should work in tandem with contOverlaysDialog
+
 viewOverlaysDialog::viewOverlaysDialog(QWidget *parent) : QDialog(parent)
 {
     setWindowTitle("Overlays");
 
+
+    //contour layers
     lineLayerLabel = new QLabel;
     lineLayerLabel->setText("LINE CONTOUR LAYER");
     lineLayerSelector = new QComboBox;
-    for(int i=0; i<16; i++)
-    {
-        lineLayerSelector->addItem(QString::number(i));
-    }
 
     activeLabel = new QLabel;
     activeLabel->setText("Active:");
     activeCheckBox = new QCheckBox;
 
     fieldLayerSelector = new QComboBox;
-    fieldLayerSelector->addItem("KFTG DBZ");
-    fieldLayerSelector->addItem("=NEXRAD=");
-    fieldLayerSelector->addItem("=NEXRAD=");
-    fieldLayerSelector->addItem("=NEXRAD=");
-    fieldLayerSelector->addItem("=NEXRAD=");
-    fieldLayerSelector->addItem("MANY MORE");
 
     fromLabel = new QLabel;
     fromLabel->setText("From:");
@@ -41,10 +37,6 @@ viewOverlaysDialog::viewOverlaysDialog(QWidget *parent) : QDialog(parent)
     showLegendCheck = new QCheckBox;
 
     colorSelector = new QComboBox;
-    colorSelector->addItem("Black");
-    colorSelector->addItem("White");
-    colorSelector->addItem("Yellow");
-    colorSelector->addItem("Many More");
 
     lineLabelsLabel = new QLabel;
     lineLabelsLabel->setText("Line Labels:");
@@ -56,16 +48,6 @@ viewOverlaysDialog::viewOverlaysDialog(QWidget *parent) : QDialog(parent)
 
 
     //map overlays
-    line1 = new QFrame();
-    line1->setFrameShape(QFrame::HLine);
-    line1->setLineWidth(3);
-    line2 = new QFrame();
-    line2->setFrameShape(QFrame::HLine);
-    line2->setLineWidth(3);
-    line3 = new QFrame();
-    line3->setFrameShape(QFrame::HLine);
-    line3->setLineWidth(3);
-
     mapsLabel = new QLabel;
     mapsLabel->setText("MAP OVERLAYS");
 
@@ -73,12 +55,6 @@ viewOverlaysDialog::viewOverlaysDialog(QWidget *parent) : QDialog(parent)
     changeColorButton->setText("Change Color");
 
     mapsList = new QListWidget;
-    mapsList->addItems(QStringList() << "NCAR Pink");
-    mapsList->addItems(QStringList() << "NCAR Red");
-    mapsList->addItems(QStringList() << "NCAR Yellow");
-    mapsList->addItems(QStringList() << "NCAR Green");
-    mapsList->addItems(QStringList() << "NCAR Blue");
-    mapsList->addItems(QStringList() << "MANY MORE");
 
     rangeRingLabel = new QLabel;
     rangeRingLabel->setText("Range Ring:");
@@ -101,6 +77,18 @@ viewOverlaysDialog::viewOverlaysDialog(QWidget *parent) : QDialog(parent)
 
     savePlanViewButton = new QPushButton;
     savePlanViewButton->setText("Save Plan View Image to File...");
+
+
+    line1 = new QFrame();
+    line1->setFrameShape(QFrame::HLine);
+    line1->setLineWidth(3);
+    line2 = new QFrame();
+    line2->setFrameShape(QFrame::HLine);
+    line2->setLineWidth(3);
+    line3 = new QFrame();
+    line3->setFrameShape(QFrame::HLine);
+    line3->setLineWidth(3);
+
 
     overLayoutH1 = new QHBoxLayout;
     overLayoutH2 = new QHBoxLayout;
@@ -176,6 +164,7 @@ viewOverlaysDialog::viewOverlaysDialog(QWidget *parent) : QDialog(parent)
     overLayoutV1->addLayout(overLayoutH8);
     overLayoutV1->addWidget(line3);
     overLayoutV1->addWidget(savePlanViewButton);
+
 
     setLayout(overLayoutV1);
 }

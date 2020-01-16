@@ -1,5 +1,10 @@
 #include "contVsection.h"
 
+//This file controls what the vsection window will display
+//it should work in tandem with viewVsection
+//for now, it is only displaying a dummy graph,
+//however the button connections should still be valid
+
 contVsection::contVsection()
 {
     VsectionViewer = new viewVsection;

@@ -1,9 +1,12 @@
 #include "viewMiscConfigDialog.h"
 
+
+//This file will control how info is diplayed in the miscellaneous
+//configurations dialog window. It should work in tandem with contMiscConfigDialog
+
 viewMiscConfigDialog::viewMiscConfigDialog(QWidget *parent) : QDialog(parent)
 {
     setWindowTitle("Miscellaneous Configurations");
-
 
     symprodLabel = new QLabel;
     symprodLabel->setText("Symprod:");

@@ -1,5 +1,8 @@
 #include "viewVsection.h"
 
+//This file controls what the vsection window will look like.
+//it should work in tandem with contVsection
+
 viewVsection::viewVsection(QWidget *parent) : QDialog(parent)
 {
     //eventually this widget will handle Vsection. It should get changed A LOT

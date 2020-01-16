@@ -17,3 +17,13 @@ public:
 };
 
 #endif // CONTOVERLAYSDIALOG_H
+
+
+
+
+
+
+
+
+
+

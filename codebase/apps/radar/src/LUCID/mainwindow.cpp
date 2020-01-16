@@ -4,6 +4,36 @@
 #include <QFileDialog>
 #include <iostream>
 
+//LUCID
+//This program is a GUI designed to replace the GUI for CIDD.
+//For now, no parts of CIDD have been integrated into LUCID.
+//All information displayed in LUCID is dummy information being used to imitate the way CIDD looks.
+
+//Right now, LUCID is being developed in Qt Creator. It compiles and runs in Qt Creator.
+//LUCID ALSO HAS A MAKEFILE that is not shown in Qt Creator. When new files are added to the program in
+//Qt, they should also be added in the external makefile as well.
+//Often, when files are added or name changed, you need to run qmake in Qt.
+//this can be done by right clicking on LUCID[master], and selecting "run qmake"
+
+//LUCID can also be compiled with g++ in the terminal window using:
+// make
+// ./LUCID
+
+//Args.cc and Params.cc have been added to begin integrating LUCID in the lrose style.
+//Right now, these files give 14 warnings that have to do with older versions of OSX.
+//The warnings currently do no affect the performance of LUCID.
+
+//This file mainwindow is the heart of LUCID as of right now.
+//It initiates the different classes that control the main image, and all of the dialog windows.
+//this file also contains all of the slots for the QAction buttons displayed in the main window.
+
+//The QAction buttons themselves can be manipulated in the mainwindow.ui file with the Qt designer.
+
+//All of the images for LUCID buttons can be found in resources->res.qrc->/images
+//A good website I found for getting the icon images was https://icons8.com/icons/set/cow
+
+//NK
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -52,12 +82,6 @@ MainWindow::MainWindow(QWidget *parent) :
     miscConfigController = new contMiscConfig;
     miscConfigController->miscConfigViewer->hide();
 
-
-    //just a tester to access function in other file/class
-    //totally delete this later on
-//    viewMainImage MMM("wut");
-//    MMM.Tester();
-
     this->setMouseTracking(0);
 }
 
@@ -67,11 +91,10 @@ MainWindow::~MainWindow()
 }
 
 
+
 //-------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------
-//functions and whatnot
-
-
+//functions
 
 //this little function make it show the coordinates of the cursor as a tool tip
 //it is activated by "void MainWindow::on_actionValues_Cursor_toggled(bool arg1)"
@@ -81,8 +104,8 @@ void MainWindow::mouseMoveEvent(QMouseEvent* event)
     valuesDisplayController->updateValues(event, p);
 }
 
-//make spacers to go in the main toolbar at the top of the main window.
-//also ready to add spacers elsewhere
+//this function is to make spacers to go in the main toolbar at the top of the main window.
+//it is also ready to add spacers elsewhere
 void MainWindow::toolBarSpacers()
 {
     QWidget *emptySpacer = new QWidget();
@@ -95,11 +118,11 @@ void MainWindow::toolBarSpacers()
 
 
 
+
+
 //-------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------
 //SLOTS n actions n stuff
-
-
 
 void MainWindow::on_actionFields_toggled(bool arg1)
 {
@@ -141,10 +164,6 @@ void MainWindow::on_actionMovie_Player_toggled(bool arg1)
         playerDockController->playerDockViewer->show();
     }
 }
-
-
-
-
 
 void MainWindow::on_actionStatus_Window_triggered()
 {
@@ -236,6 +255,7 @@ void MainWindow::on_actionOpen_triggered()
 {
     //right now, the open file option really is just good for setting a new image in the main window
     //this should get MUCH more complicated.
+
     //open a file dialog to get new image address
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     "Open the file",
@@ -266,6 +286,7 @@ void MainWindow::on_actionMisc_Configuration_triggered()
 
 void MainWindow::on_actionOverlays_triggered()
 {
+    //same as the others
     QPoint p = MainWindow::pos();
     QSize  s = MainWindow::frameSize();
     overlaysController->overlaysViewer->move(p.x()+s.width(), p.y()+100);
@@ -273,15 +294,11 @@ void MainWindow::on_actionOverlays_triggered()
     overlaysController->overlaysViewer->raise();
 }
 
-
-
-
-//cruddy zooms that need replacing
+//empty slots for  zoom buttons
 void MainWindow::on_actionZoomOut_triggered()
 {
 
 }
-
 void MainWindow::on_actionZoomIn_triggered()
 {
 

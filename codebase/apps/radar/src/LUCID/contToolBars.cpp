@@ -1,5 +1,10 @@
 #include "contToolBars.h"
 
+//this file should be the controller for the products and maps toolbars.
+//This can be cahnged drastically, as products and maps are not toolbars in CIDD.
+//I made this to keep an example of making toolbars, as a possible alternative to dialog windows.
+
+
 contToolBars::contToolBars()
 {
     //products toolbar

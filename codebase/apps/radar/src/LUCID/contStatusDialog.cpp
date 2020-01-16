@@ -1,5 +1,10 @@
 #include "contStatusDialog.h"
 
+
+//This file will control what info is displayed in the status window.
+//It should work in tandem with viewStatusDialog
+//for now, only dummy info is displayed.
+
 contStatusDialog::contStatusDialog()
 {
     statusDialogViewer = new viewStatusDialog;

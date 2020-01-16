@@ -1,6 +1,9 @@
 #include "viewPlayerDock.h"
 #include "mainwindow.h"
 
+//This file will control what the movie player dock widget looks like at the bottom of the main window
+//It should work in tandem with contPlayerDock
+
 viewPlayerDock::viewPlayerDock(QWidget *parent) : QDockWidget(parent)
 {
     //class that creates the movie layer dock
@@ -165,6 +168,19 @@ viewPlayerDock::~viewPlayerDock()
     //as of now, all pointers go into 'group', so that is all that needs to be deleted
     delete group;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

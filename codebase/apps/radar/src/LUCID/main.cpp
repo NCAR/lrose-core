@@ -55,5 +55,6 @@ int main(int argc, char *argv[])
 
     //I'm using the below line to show parameter values, delete at a later date.
     // std::cout << _params. << std::endl;
+
     return a.exec();
 }

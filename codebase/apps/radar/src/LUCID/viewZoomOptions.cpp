@@ -1,5 +1,8 @@
 #include "viewZoomOptions.h"
 
+//This file controls how the zoom options dialog window looks.
+//it should work in tandem with contZoomOptions
+
 viewZoomOptions::viewZoomOptions(QWidget *parent) : QDialog(parent)
 {
     //Eventually this widget will display options for different zoom levels

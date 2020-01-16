@@ -1,9 +1,11 @@
 #include "viewValuesDisplay.h"
 
+//This file controlls how the values dialog window looks for the user
+//It should work in tandem with contValuesDisplay
+
 viewValuesDisplay::viewValuesDisplay(QWidget *parent) : QDialog(parent)
 {
     //Eventually this widget will display the various data values under the cursor as it is moved over the display
-    //right now, it is just an vacant empty useless dialog window that kinda looks useful
     setWindowTitle("Values");
 
     //labels

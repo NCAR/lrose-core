@@ -51,9 +51,7 @@ private slots:
     void on_actionWind_Layer_triggered();
     void on_actionData_Layers_triggered();
     void on_actionOpen_triggered();
-
     void on_actionMisc_Configuration_triggered();
-
     void on_actionOverlays_triggered();
 
 private:
@@ -82,3 +80,11 @@ private:
 };
 
 #endif // MAINWINDOW_H
+
+
+
+
+
+
+
+

@@ -1,5 +1,9 @@
 #include "contWindDialog.h"
 
+//This file controls what info is displayed in the wind configurations dialog window.
+//it should work in tandem with viewWindDialog
+//for now, only dummy data is being displayed to imitate CIDD
+
 contWindDialog::contWindDialog()
 {
     windDialogViewer = new viewWindDialog;

@@ -2,7 +2,7 @@
 
 //this file should be the controller for the field dock.
 //it will have to decide how many, and what fields to display for the user,
-//and send that to the field dock view
+
 
 //for now, it is just displaying dummy information
 contFieldDock::contFieldDock()

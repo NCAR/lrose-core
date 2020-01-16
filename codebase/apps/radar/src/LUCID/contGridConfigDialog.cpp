@@ -1,5 +1,10 @@
 #include "contGridConfigDialog.h"
 
+//This file should control what is displayed in the
+//Grid Data Layers Configuration dialog box
+//It should work hand in hand with viewGridConfigDialog,
+//which controls how the information is displayed.
+
 contGridConfigDialog::contGridConfigDialog()
 {
     //this class sets up the Grid Data Layers Configuration window

@@ -1,5 +1,10 @@
 #include "viewGridConfigDialog.h"
 
+//This file should control how data is displayed in the
+//Grid Data Layers Configuration dialog box
+//It should work hand in hand with contGridConfigDialog,
+//which controls what information is displayed.
+
 viewGridConfigDialog::viewGridConfigDialog(QWidget *parent) : QDialog(parent)
 {
     //this class sets up the Grid Data Layers Configuration window
