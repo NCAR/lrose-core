@@ -39,8 +39,8 @@ LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 LOC_LDFLAGS = -L..
 LOC_LIBS = \
-          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
-          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
+          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver \
+          -lRadx -lNcxx -lrapformats -ldidss -leuclid -lrapmath \
           -lphysics -ltoolsa -ldataport -ltdrp \
           $(NETCDF4_LIBS) \
           -lfftw3 -lbz2 -lz -lpthread
