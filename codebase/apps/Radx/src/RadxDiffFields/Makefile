@@ -37,11 +37,12 @@ TARGET_FILE = RadxDiffFields
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -lradar -lSpdb \
-	-ldsserver -lrapformats -lrapmath -ldidss \
-	-leuclid -ltoolsa -ltdrp -ldataport \
-	-lfftw3 $(NETCDF4_LIBS) -lbz2 -lz \
-	-lpthread
+LOC_LIBS = \
+          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
+          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
+          -lphysics -ltoolsa -ldataport -ltdrp \
+          $(NETCDF4_LIBS) \
+          -lfftw3 -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

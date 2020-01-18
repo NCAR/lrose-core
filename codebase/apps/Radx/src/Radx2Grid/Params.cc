@@ -3317,6 +3317,27 @@
       tt->struct_vals[5].d = 50;
     tt++;
     
+    // Parameter 'Comment 40'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 40");
+    tt->comment_hdr = tdrpStrDup("OPTION TO USE HORIZONTAL INTERPOLATION FOR LAYER FEATURES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'use_horiz_interp_for_layers'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_horiz_interp_for_layers");
+    tt->descr = tdrpStrDup("If TRUE, we will FALSE, no fields will be bounded");
+    tt->help = tdrpStrDup("Option to set limits on the values of some or all of the fields.\n\nThe parameters are set BEFORE interpolation, but the bound limits are applied AFTER interpolation.\n\nThis only applies if 'interp_mode' is set to INTERP_MODE_CART_REORDER. It can be a useful option since the linear-least-squares solution used by the REORDER interpolation can have unstable solutions that that lead to very out-of-range output values. This can in turn reduce the resolution of the output data if it is stored as a scaled integer.");
+    tt->val_offset = (char *) &use_horiz_interp_for_layers - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

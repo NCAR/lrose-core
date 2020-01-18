@@ -41,10 +41,12 @@ MY_CPPCHECKFLAGS = -E Params.cc -E Params.hh -AddStyleFAA -exclude-rules="4.16,4
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lradar -lRadx -lNcxx -lSpdb -ldsserver \
-	-lrapformats -lrapmath -ldidss -ltoolsa \
-	-ltdrp -ldataport -lfftw3 -lstdc++ \
-	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
+LOC_LIBS = \
+          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
+          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
+          -lphysics -ltoolsa -ldataport -ltdrp \
+          $(NETCDF4_LIBS) \
+          -lfftw3 -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

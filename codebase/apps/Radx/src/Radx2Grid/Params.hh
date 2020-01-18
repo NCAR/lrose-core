@@ -821,6 +821,8 @@ public:
   bound_field_t *_bounded_fields;
   int bounded_fields_n;
 
+  tdrp_bool_t use_horiz_interp_for_layers;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -828,7 +830,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[203];
+  mutable TDRPtable _table[205];
 
   const char *_className;
 

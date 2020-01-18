@@ -1351,3 +1351,13 @@ paramdef struct bound_field_t {
   p_help = "Only applies if 'bound_fields' is TRUE. At points where the output value is out of bounds, it is set to missing. \n\nNOTE: 'input_name' for this step refers to the 'input_name' in 'select_fields' and 'output_name' in 'transform_fields'. Setting the bounds on each field is performed prior to renaming fields (see below).";
 } bounded_fields[];
 
+commentdef {
+  p_header = "OPTION TO USE HORIZONTAL INTERPOLATION FOR LAYER FEATURES";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE, we will FALSE, no fields will be bounded";
+  p_help = "Option to set limits on the values of some or all of the fields.\n\nThe parameters are set BEFORE interpolation, but the bound limits are applied AFTER interpolation.\n\nThis only applies if 'interp_mode' is set to INTERP_MODE_CART_REORDER. It can be a useful option since the linear-least-squares solution used by the REORDER interpolation can have unstable solutions that that lead to very out-of-range output values. This can in turn reduce the resolution of the output data if it is stored as a scaled integer.";
+} use_horiz_interp_for_layers;
+
