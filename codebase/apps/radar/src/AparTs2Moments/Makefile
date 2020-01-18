@@ -38,9 +38,12 @@ TARGET_FILE = AparTs2Moments
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lradar -lFmq -lMdv -lRadx -lNcxx -ldsserver -ldidss \
-	-lrapformats -lrapmath -leuclid -ltoolsa -ltdrp \
-	-ldataport $(NETCDF4_LIBS) -lbz2 -lz -lfftw3 -lpthread
+LOC_LIBS = \
+          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
+          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
+          -lphysics -ltoolsa -ldataport -ltdrp \
+          $(NETCDF4_LIBS) \
+          -lfftw3 -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

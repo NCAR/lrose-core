@@ -40,9 +40,11 @@ LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-lradar -lRadx -ldsserver \
-	-ldidss -ltoolsa -ldataport -ltdrp \
-	 $(NETCDF4_LIBS) -lbz2 -lz -lpthread
+          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
+          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
+          -lphysics -ltoolsa -ldataport -ltdrp \
+          $(NETCDF4_LIBS) \
+          -lfftw3 -lbz2 -lz -lpthread
 
 HDRS = \
 	$(PARAMS_HH) \

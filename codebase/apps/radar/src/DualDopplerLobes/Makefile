@@ -34,8 +34,8 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-leuclid -ltoolsa -lpthread -ltdrp -lbz2 \
-	-lz
+	-leuclid -lrapmath -ltoolsa -lpthread -ltdrp -ldataport \
+	-lbz2 -lz
 
 HDRS = $(PARAMS_HH)
 

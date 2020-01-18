@@ -38,10 +38,12 @@ TARGET_FILE = VertCompute
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lradar -lRadx -lSpdb -lFmq \
-	-ldsserver -ldidss -lrapformats -lrapmath \
-	-ltoolsa -lpthread -ldataport -ltdrp -lfftw3 \
-	$(NETCDF4_LIBS) -lbz2 -lz
+LOC_LIBS = \
+          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
+          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
+          -lphysics -ltoolsa -ldataport -ltdrp \
+          $(NETCDF4_LIBS) \
+          -lfftw3 -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

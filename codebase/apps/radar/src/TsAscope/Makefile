@@ -43,10 +43,11 @@ LOC_CPPC_CFLAGS =
 LOC_LDFLAGS = $(QT4_LDFLAGS)
 
 LOC_LIBS = \
-	-lradar -lRadx -lFmq -ldsserver \
-	-lrapformats -ldidss -ldataport \
-	-leuclid -ltoolsa -ltdrp -lQtGui -lQtCore \
-	-lbz2 -lz -lpthread
+          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
+          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
+          -lphysics -ltoolsa -ldataport -ltdrp \
+          $(NETCDF4_LIBS) \
+          -lfftw3 -lbz2 -lz -lpthread
 
 HDRS = \
 	$(PARAMS_HH) \

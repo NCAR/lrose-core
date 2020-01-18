@@ -40,11 +40,12 @@ LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
 # Note: QJSENGINE is defined in rap_make.OSX_LINUX
 
-LOC_LIBS = -lSpdb -lradar -lrapformats -lFmq -lRadx -lNcxx \
-	-ldsserver -ldidss -leuclid -lphysics \
-	-lrapmath -ltoolsa -ldataport -ltdrp \
-	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \
-	-lfftw3 -lbz2 -lz -lpthread -lm
+LOC_LIBS = \
+          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
+          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
+          -lphysics -ltoolsa -ldataport -ltdrp \
+          $(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \
+          -lfftw3 -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 

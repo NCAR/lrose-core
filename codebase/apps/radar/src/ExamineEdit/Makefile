@@ -38,11 +38,12 @@ TARGET_FILE = ExamineEdit
 
 LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lradar -lrapformats -lFmq -lRadx \
-	-ldsserver -ldidss -leuclid -lphysics \
-	-lrapmath -ltoolsa -ldataport -ltdrp \
-	$(QT_LIBS) $(NETCDF4_LIBS) \
-	-lfftw3 -lbz2 -lz -lpthread -lm
+LOC_LIBS = \
+          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
+          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
+          -lphysics -ltoolsa -ldataport -ltdrp \
+          $(NETCDF4_LIBS) \
+          -lfftw3 -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = -g -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 

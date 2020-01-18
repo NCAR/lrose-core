@@ -40,7 +40,7 @@ LOC_INCLUDES =
 LOC_CPPC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltoolsa -lpthread -ltdrp -lbz2 -lz
+	-ltoolsa -ldataport -lpthread -ltdrp -lbz2 -lz
 
 HDRS = \
 	$(PARAMS_HH) \
