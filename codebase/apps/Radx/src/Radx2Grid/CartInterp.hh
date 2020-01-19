@@ -163,23 +163,6 @@ private:
   DerivedField *_urElDebug;
   DerivedField *_urAzDebug;
 
-#ifdef JUNK
-  DerivedField *_convStratDbzMax;
-  DerivedField *_convStratDbzCount;
-  DerivedField *_convStratDbzSum;
-  DerivedField *_convStratDbzSqSum;
-  DerivedField *_convStratDbzSqSqSum;
-  DerivedField *_convStratDbzTexture;
-  DerivedField *_convStratFilledTexture;
-  DerivedField *_convStratDbzSqTexture;
-  DerivedField *_convStratFilledSqTexture;
-
-  DerivedField *_convStratDbzColMax;
-  DerivedField *_convStratMeanTexture;
-  DerivedField *_convStratMeanSqTexture;
-  DerivedField *_convStratCategory;
-#endif
-
   vector<DerivedField *> _derived3DFields;
   vector<DerivedField *> _derived2DFields;
 
@@ -187,38 +170,6 @@ private:
 
   ConvStrat _convStrat;
   bool _gotConvStrat;
-
-#ifdef JUNK
-  typedef enum {
-    CATEGORY_MISSING = 0,
-    CATEGORY_STRATIFORM = 1,
-    CATEGORY_CONVECTIVE = 2,
-    CATEGORY_UNKNOWN
-  } category_t;
-  
-  int _nxTexture, _nyTexture;
-  int _nxConv, _nyConv;
-
-  double _convectiveRadiusKm;
-  double _textureRadiusKm;
-
-  typedef struct {
-    double distance;
-    ssize_t offset;
-  } kernel_t;
-
-  vector<kernel_t> _textureKernel;
-  vector<kernel_t> _convKernel;
-
-  // compute the lower and upper bounds of the vert levels for the
-  // texture computation, for each 0.01 km from 0 to 30 km.
-  // These are lookup tables.
-
-  static const int NLOOKUP = 3000;
-  int _textureIzLower[NLOOKUP];
-  int _textureIzUpper[NLOOKUP];
-
-#endif
 
   // private methods
 
@@ -346,15 +297,6 @@ private:
 
   int _convStratCompute();
 
-#ifdef JUNK
-
-  void _convStratPrepare();
-  static bool _compareKernels(kernel_t x, kernel_t y);
-  void _convStratComputeKernels();
-  void _convStratComputeVertLookups();
-
-#endif
-
   //////////////////////////////////////////////////////////////
   // Classes for threads
   //////////////////////////////////////////////////////////////
@@ -463,84 +405,6 @@ private:
   };
   // instantiate thread pool for interpolation
   TaThreadPool _threadPoolInterp;
-
-#ifdef JUNK
-
-  //////////////////////////////////////////////////////////////
-  // inner thread class for computing 2D texture
-
-  class ComputeTexture : public TaThread
-  {  
-  public:   
-
-    // constructor saves _sd3c pointer
-    ComputeTexture(int iz);
-
-    // destructor
-    virtual ~ComputeTexture();
-
-    // set parameters
-    void setGridSize(int nx, int ny)
-    {
-      _nx = nx;
-      _ny = ny;
-    }
-    void setKernelSize(int nx, int ny)
-    {
-      _nxTexture = nx;
-      _nyTexture = ny;
-    }
-    void setKernel(const vector<kernel_t> &kernel)
-    {
-      _kernel = kernel;
-    }
-    void setMinValidFraction(double val)
-    {
-      _minValidFraction = val;
-    }
-    void setFields(const fl32 *dbzCount,
-                   const fl32 *dbzSum,
-                   const fl32 *dbzSqSum,
-                   const fl32 *dbzSqSqSum,
-                   fl32 *dbzTexture,
-                   fl32 *dbzSqTexture,
-                   fl32 *filledTexture,
-                   fl32 *filledSqTexture)
-    {
-      _dbzCount = dbzCount;
-      _dbzSum = dbzSum;
-      _dbzSqSum = dbzSqSum;
-      _dbzSqSqSum = dbzSqSqSum;
-      _dbzTexture = dbzTexture;
-      _dbzSqTexture = dbzSqTexture;
-      _filledTexture = filledTexture;
-      _filledSqTexture = filledSqTexture;
-    }
-    
-    // override run method
-    virtual void run();
-    
-  private:
-    
-    int _iz;
-    int _nx, _ny;
-    int _nxTexture, _nyTexture;
-    double _minValidFraction;
-    vector<kernel_t> _kernel;
-    const fl32 *_dbzCount;
-    const fl32 *_dbzSum;
-    const fl32 *_dbzSqSum;
-    const fl32 *_dbzSqSqSum;
-    fl32 *_dbzTexture;
-    fl32 *_dbzSqTexture;
-    fl32 *_filledTexture;
-    fl32 *_filledSqTexture;
-
-  };
-
-  //////////////////////////////////////////////////////////////
-
-#endif
 
 };
 
