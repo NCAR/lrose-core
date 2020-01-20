@@ -136,9 +136,13 @@ CartInterp::CartInterp(const string &progName,
   // set up orientation object
 
   if (_params.use_echo_orientation) {
-    _orient = new Orient(progName, params, readVol, interpFields, interpRays);
+    _orient = new Orient(params, 
+                         readVol,
+                         interpFields,
+                         interpRays,
+                         _gridZLevels);
   }
-
+  
 }
 
 //////////////////////////////////////

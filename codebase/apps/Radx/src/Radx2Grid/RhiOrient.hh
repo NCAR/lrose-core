@@ -49,8 +49,12 @@ public:
 
   RhiOrient(const Params &params,
             PseudoRhi *rhi,
-            size_t maxNGates);
-
+            size_t maxNGates,
+            double startRangeKm,
+            double gateSpacingKm,
+            double radarAltKm,
+            const vector<double> &gridZLevels);
+            
   // destructor
 
   ~RhiOrient();
@@ -64,6 +68,10 @@ private:
   const Params &_params;
   PseudoRhi *_rhi;
   size_t _maxNGates;
+  double _startRangeKm;
+  double _gateSpacingKm;
+  double _radarAltKm;
+  vector<double> _gridZLevels;
 
   void _free();
 

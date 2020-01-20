@@ -37,10 +37,18 @@
 
 RhiOrient::RhiOrient(const Params &params,
                      PseudoRhi *rhi,
-                     size_t maxNGates) :
+                     size_t maxNGates,
+                     double startRangeKm,
+                     double gateSpacingKm,
+                     double radarAltKm,
+                     const vector<double> &gridZLevels) :
         _params(params),
         _rhi(rhi),
-        _maxNGates(maxNGates)
+        _maxNGates(maxNGates),
+        _startRangeKm(startRangeKm),
+        _gateSpacingKm(gateSpacingKm),
+        _radarAltKm(radarAltKm),
+        _gridZLevels(gridZLevels)
 
 {
 }
