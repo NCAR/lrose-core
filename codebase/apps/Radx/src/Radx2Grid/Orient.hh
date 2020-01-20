@@ -22,49 +22,48 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// CartInterp.hh
+// Orient.hh
 //
-// CartInterp class - derived from Interp.
-// Used for full 3-D Cartesian interpolation.
+// Orient class.
+// Compute echo orientation:
+//   vertical (convective)
+//   horizontal (stratiform, bright-band, anvil)
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Sept 2012
+// Jan 2020
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef CartInterp_HH
-#define CartInterp_HH
+#ifndef Orient_HH
+#define Orient_HH
 
 #include "Interp.hh"
 #include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
 #include <radar/ConvStrat.hh>
 class DsMdvx;
-class Orient;
+class RhiOrient;
 
-class CartInterp : public Interp {
-  
+class Orient {
+
 public:
 
   // constructor
-  
-  CartInterp(const string &progName,
-             const Params &params,
-             RadxVol &readVol,
-             vector<Field> &interpFields,
-             vector<Ray *> &interpRays);
-  
+
+  Orient(const string &progName,
+         const Params &params,
+         RadxVol &readVol,
+         vector<Interp::Field> &interpFields,
+         vector<Interp::Ray *> &interpRays);
+
   // destructor
   
-  virtual ~CartInterp();
-  
-  // interpolate a volume
-  // assumes volume has been read
-  // and _interpFields and _interpRays vectors are populated
-  // returns 0 on succes, -1 on failure
+  virtual ~Orient();
 
-  virtual int interpVol();
+  // determine the echo orientation
+
+  int findEchoOrientation();
   
   // get methods
 
@@ -76,6 +75,23 @@ public:
   
 protected:
 private:
+
+  // class for output grid locations
+  
+  class GridLoc {
+  public:
+    GridLoc() {
+      el = az = slantRange = gndRange = 0.0;
+      xxInstr = yyInstr = zzInstr = zz = 0;
+    }
+    ~GridLoc() { }
+    double el;
+    double az;
+    double slantRange;
+    double gndRange;
+    double xxInstr, yyInstr, zzInstr, zz;
+  };
+  GridLoc ****_gridLoc;
 
   // class for search matrix
 
@@ -97,7 +113,7 @@ private:
     int level;
     int elDist;
     int azDist;
-    const Ray *ray;
+    const Interp::Ray *ray;
     double rayEl; // el in search matrix coords
     double rayAz; // az in search matrix coords
     double interpEl; // el used for interp
@@ -151,6 +167,71 @@ private:
     double ur_outer;
   };
 
+  // class for debug fields
+
+  class DerivedField {
+  public:
+    string name;
+    string longName;
+    string units;
+    vector<double> vertLevels;
+    fl32 *data;
+    bool writeToFile;
+    DerivedField(const string &nameStr,
+                 const string &longNameStr, 
+                 const string &unitsStr,
+                 bool writeOut) :
+            name(nameStr),
+            longName(longNameStr),
+            units(unitsStr),
+            data(NULL),
+            writeToFile(writeOut),
+            _nGrid(0)
+    {
+    }
+    ~DerivedField() {
+      if (data) {
+        delete[] data;
+      }
+    }
+    void alloc(size_t nGrid, const vector<double> &zLevels) {
+      vertLevels = zLevels;
+      if (nGrid == _nGrid) {
+        return;
+      }
+      if (data) {
+        delete[] data;
+      }
+      data = new fl32[nGrid];
+      _nGrid = nGrid;
+      for (size_t ii = 0; ii < _nGrid; ii++) {
+        data[ii] = Interp::missingFl32;
+      }
+    }
+    void setToZero() {
+      for (size_t ii = 0; ii < _nGrid; ii++) {
+        data[ii] = 0.0;
+      }
+    }
+  private:
+    size_t _nGrid;
+  };
+
+  // references to main object
+  
+  string _progName;
+  const Params &_params;
+  RadxVol &_readVol;
+  bool _rhiMode;
+  vector<Interp::Field> &_interpFields;
+  vector<Interp::Ray *> &_interpRays;
+
+  // rhis
+
+  vector<RhiOrient *> _rhis;
+
+  // debug 
+
   DerivedField *_nContribDebug;
   DerivedField *_gridAzDebug;
   DerivedField *_gridElDebug;
@@ -167,14 +248,75 @@ private:
   vector<DerivedField *> _derived3DFields;
   vector<DerivedField *> _derived2DFields;
 
-  // echo orientation
-
-  Orient *_orient;
-
   // convective / stratiform split
 
   ConvStrat _convStrat;
   bool _gotConvStrat;
+
+  // checking timing performance
+
+  struct timeval _timeA;
+
+  // radar location
+  
+  double _radarLat, _radarLon, _radarAltKm;
+  double _prevRadarLat, _prevRadarLon, _prevRadarAltKm;
+  
+  // gate geometry
+
+  int _maxNGates;
+  double _startRangeKm;
+  double _gateSpacingKm;
+  double _maxRangeKm;
+
+  // beam width
+
+  double _beamWidthDegH;
+  double _beamWidthDegV;
+
+  // locating sectors
+
+  class Sector {
+  public:
+    int startAzDeg;
+    int endAzDeg;
+    int width;
+    Sector() {
+      startAzDeg = -1;
+      endAzDeg = -1;
+      width = 0;
+    }
+    Sector(int start, int end) {
+      startAzDeg = start;
+      endAzDeg = end;
+      computeWidth();
+    }
+    void computeWidth() {
+      width = endAzDeg - startAzDeg + 1;
+    }
+  };
+
+  bool _isSector;
+  bool _spansNorth;
+  double _dataSectorStartAzDeg;
+  double _dataSectorEndAzDeg;
+
+  // scan angle delta
+
+  double _scanDeltaAz;
+  double _scanDeltaEl;
+
+  // output projection and grid
+
+  MdvxProj _proj;
+  double _gridOriginLat, _gridOriginLon;
+  int _gridNx, _gridNy, _gridNz;
+  int _nPointsVol, _nPointsPlane;
+  double _gridMinx, _gridMiny;
+  double _gridDx, _gridDy;
+  vector<double> _gridZLevels;
+  double _radarX, _radarY;
+  fl32 **_outputFields;
 
   // private methods
 
@@ -197,6 +339,10 @@ private:
   
   void _computeSearchLimits();
   
+  void _computeOrientInRhis();
+  void _computeOrientMultiThreaded();
+  void _computeOrientSingleThreaded();
+
   void _computeGridRelative();
   void _computeGridRelMultiThreaded();
   void _computeGridRow(int iz, int iy);
@@ -289,8 +435,6 @@ private:
   
   double _conditionAz(double az);
 
-  int _writeOutputFile();
-
   int _writeSearchMatrices();
 
   void _addMatrixField(DsMdvx &mdvx,
@@ -301,6 +445,83 @@ private:
                        const string &units);
 
   int _convStratCompute();
+
+  virtual void _initProjection();
+
+  void _accumNearest(const Interp::Ray *ray,
+                     int ifield,
+                     int igateInner,
+                     int igateOuter,
+                     double wtInner,
+                     double wtOuter,
+                     double &closestVal,
+                     double &maxWt,
+                     int &nContrib);
+
+  void _accumNearest(const Interp::Ray *ray,
+                     int ifield,
+                     int igate,
+                     double wt,
+                     double &closestVal,
+                     double &maxWt,
+                     int &nContrib);
+  
+  void _accumInterp(const Interp::Ray *ray,
+                    int ifield,
+                    int igateInner,
+                    int igateOuter,
+                    double wtInner,
+                    double wtOuter,
+                    double &sumVals,
+                    double &sumWts,
+                    int &nContrib);
+  
+  void _accumInterp(const Interp::Ray *ray,
+                    int ifield,
+                    int igate,
+                    double wt,
+                    double &sumVals,
+                    double &sumWts,
+                    int &nContrib);
+
+  void _accumFolded(const Interp::Ray *ray,
+                    int ifield,
+                    int igateInner,
+                    int igateOuter,
+                    double wtInner,
+                    double wtOuter,
+                    double &sumX,
+                    double &sumY,
+                    double &sumWts,
+                    int &nContrib);
+  
+  void _accumFolded(const Interp::Ray *ray,
+                    int ifield,
+                    int igate,
+                    double wt,
+                    double &sumX,
+                    double &sumY,
+                    double &sumWts,
+                    int &nContrib);
+  
+  double _getFoldAngle(double val,
+                       double foldLimitLower,
+                       double foldRange) const;
+
+  double _getFoldValue(double angle,
+                       double foldLimitLower,
+                       double foldRange) const;
+
+  int _setRadarParams();
+
+  int _locateDataSector();
+
+  void _computeAzimuthDelta();
+  void _computeElevationDelta();
+
+  void _printRunTime(const string& str, bool verbose = false);
+
+  void _transformForOutput();
 
   //////////////////////////////////////////////////////////////
   // Classes for threads
@@ -313,11 +534,11 @@ private:
   {  
   public:
     // constructor
-    FillSearchLowerLeft(CartInterp *obj);
+    FillSearchLowerLeft(Orient *obj);
     // override run method
     virtual void run();
   private:
-    CartInterp *_this; // context
+    Orient *_this; // context
   };
 
   //////////////////////////////////////////////////////////////
@@ -327,11 +548,11 @@ private:
   {  
   public:
     // constructor
-    FillSearchLowerRight(CartInterp *obj);
+    FillSearchLowerRight(Orient *obj);
     // override run method
     virtual void run();
   private:
-    CartInterp *_this; // context
+    Orient *_this; // context
   };
 
   //////////////////////////////////////////////////////////////
@@ -341,11 +562,11 @@ private:
   {  
   public:
     // constructor
-    FillSearchUpperLeft(CartInterp *obj);
+    FillSearchUpperLeft(Orient *obj);
     // override run method
     virtual void run();
   private:
-    CartInterp *_this; // context
+    Orient *_this; // context
   };
 
   //////////////////////////////////////////////////////////////
@@ -355,11 +576,11 @@ private:
   {  
   public:
     // constructor
-    FillSearchUpperRight(CartInterp *obj);
+    FillSearchUpperRight(Orient *obj);
     // override run method
     virtual void run();
   private:
-    CartInterp *_this; // context
+    Orient *_this; // context
   };
 
   // instantiate threads for fill search
@@ -369,6 +590,25 @@ private:
   FillSearchUpperRight *_threadFillSearchUpperRight;
 
   //////////////////////////////////////////////////////////////
+  // inner thread class for computing orientation in RHI
+  
+  class ComputeOrientInRhi : public TaThread
+  {  
+  public:
+    // constructor
+    ComputeOrientInRhi(Orient *obj);
+    // set the RHI index to be used
+    inline void setRhiIndex(size_t index) { _index = index; }
+    // override run method
+    virtual void run();
+  private:
+    Orient *_this; // context
+    size_t _index; // index of RHI to be used
+  };
+  // instantiate thread pool for grid relative computations
+  TaThreadPool _threadPoolOrientInRhi;
+
+  //////////////////////////////////////////////////////////////
   // inner thread class for computing the grid locations
   // relative to the radar
   
@@ -376,14 +616,14 @@ private:
   {  
   public:
     // constructor
-    ComputeGridRelative(CartInterp *obj);
+    ComputeGridRelative(Orient *obj);
     // set the y and z index
     inline void setYIndex(int yIndex) { _yIndex = yIndex; }
     inline void setZIndex(int zIndex) { _zIndex = zIndex; }
     // override run method
     virtual void run();
   private:
-    CartInterp *_this; // context
+    Orient *_this; // context
     int _yIndex; // grid index of y column
     int _zIndex; // grid index of z plane
   };
@@ -397,14 +637,14 @@ private:
   {  
   public:
     // constructor
-    PerformInterp(CartInterp *obj);
+    PerformInterp(Orient *obj);
     // set the y and z index
     inline void setYIndex(int yIndex) { _yIndex = yIndex; }
     inline void setZIndex(int zIndex) { _zIndex = zIndex; }
     // override run method
     virtual void run();
   private:
-    CartInterp *_this; // context
+    Orient *_this; // context
     int _yIndex; // grid index of y column
     int _zIndex; // grid index of z plane
   };

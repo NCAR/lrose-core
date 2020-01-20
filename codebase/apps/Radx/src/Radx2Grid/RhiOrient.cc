@@ -21,61 +21,40 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef SVD_DATA_HH
-#define SVD_DATA_HH
+/////////////////////////////////////////////////////////////
+// RhiOrient.cc
+//
+// RhiOrient class.
+// Compute echo orientation in a pseudo RHI
+//
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Jan 2020
+//
+///////////////////////////////////////////////////////////////
 
-#include "ReorderInterp.hh"
-#include <vector>
+#include "RhiOrient.hh"
 
-class SvdData
+RhiOrient::RhiOrient(const Params &params,
+                     PseudoRhi *rhi,
+                     size_t maxNGates) :
+        _params(params),
+        _rhi(rhi),
+        _maxNGates(maxNGates)
+
 {
-public:
-  SvdData();
-  SvdData(const std::vector<ReorderInterp::radar_point_t> &pts, double x0,
-	  double y0, double z0);
-  ~SvdData();
+}
 
-  void init(const std::vector<ReorderInterp::radar_point_t> &pts, double x0,
-	    double y0, double z0);
+RhiOrient::~RhiOrient(void)
+{
+  _free();
+}
 
-  bool compute(const std::vector<double> &b);
-  bool computeWithMissing(const std::vector<double> &b, double missing);
+void RhiOrient::_free()
+{
+}
 
-  double getTerm(int index) const;
+void RhiOrient::computeEchoOrientation()
+{
+}
 
-  bool isOk() const {return _ok;}
-
-  void print() const;
-
-private:
-
-  bool _ok;
-  double **_a, **_u, **_v;
-  double *_w, *_b, *_x;
-  int _nrow;
-  int _ncol;
-
-
-  void _apply(double** u,	/* I - U matrix from SVD decomposition	*/ 
-	    double *w, 	/* I - W diag array from SVD decomposition	*/ 
-	    double **v, /* I - V matrix from SVD decomposition		*/
-	    int ndata, 	/* I - number of rows in U			*/
-	    int nvar,	/* I - number of cols in U, order of V, W size	*/
-	    double* b, 	/* I - known values to solve for		*/
-	    double *x 	/* O - values solved for			*/
-	    );
-  void _apply(double** u,	/* I - U matrix from SVD decomposition	*/ 
-	    double *w, 	/* I - W diag array from SVD decomposition	*/ 
-	    double **v, /* I - V matrix from SVD decomposition		*/
-	    int ndata, 	/* I - number of rows in U			*/
-	    int nvar,	/* I - number of cols in U, order of V, W size	*/
-	    double* b, 	/* I - known values to solve for		*/
-	      double missing,
-	    double *x 	/* O - values solved for			*/
-	    );
-  void _free(void);
-  void _alloc(const std::vector<ReorderInterp::radar_point_t> &pts,
-	      double x0, double y0, double z0);
-};
-
-#endif

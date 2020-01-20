@@ -22,17 +22,19 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// CartInterp class - derived from Interp.
-// Used for full 3-D Cartesian interpolation.
+// Orient class.
+// Compute echo orientation:
+//   vertical (convective)
+//   horizontal (stratiform, bright-band, anvil)
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Sept 2012
+// Jan 2020
 //
 ///////////////////////////////////////////////////////////////
 
-#include "CartInterp.hh"
 #include "Orient.hh"
+#include "RhiOrient.hh"
 #include "OutputMdv.hh"
 #include <toolsa/pjg.h>
 #include <toolsa/mem.h>
@@ -43,30 +45,62 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxSweep.hh>
+#include <Radx/PseudoRhi.hh>
 #include <Mdv/DsMdvx.hh>
 #include <algorithm>
 using namespace std;
 
-const double CartInterp::_searchResAz = 0.1;
-const double CartInterp::_searchResEl = 0.1;
-const double CartInterp::_searchAzOverlapDeg = 20.0;
-const double CartInterp::_searchAzOverlapHalf = CartInterp::_searchAzOverlapDeg / 2.0;
+const double Orient::_searchResAz = 0.1;
+const double Orient::_searchResEl = 0.1;
+const double Orient::_searchAzOverlapDeg = 20.0;
+const double Orient::_searchAzOverlapHalf = Orient::_searchAzOverlapDeg / 2.0;
 
 // Constructor
 
-CartInterp::CartInterp(const string &progName,
-                       const Params &params,
-                       RadxVol &readVol,
-                       vector<Field> &interpFields,
-                       vector<Ray *> &interpRays) :
-        Interp(progName,
-               params,
-               readVol,
-               interpFields,
-               interpRays)
-  
+Orient::Orient(const string &progName,
+               const Params &params,
+               RadxVol &readVol,
+               vector<Interp::Field> &interpFields,
+               vector<Interp::Ray *> &interpRays) :
+        _progName(progName),
+        _params(params),
+        _readVol(readVol),
+        _interpFields(interpFields),
+        _interpRays(interpRays)
+
 {
   
+  _rhiMode = false;
+
+  gettimeofday(&_timeA, NULL);
+  
+  _radarLat = 0.0;
+  _radarLon = 0.0;
+  _radarAltKm = 0.0;
+
+  _maxNGates = 0;
+  _startRangeKm = 0.0;
+  _gateSpacingKm = 0.0;
+  _maxRangeKm = 0.0;
+
+  _beamWidthDegH = 0.0;
+  _beamWidthDegV = 0.0;
+
+  _isSector = false;
+  _spansNorth = false;
+
+  _dataSectorStartAzDeg = 0.0;
+  _dataSectorEndAzDeg = 360.0;
+  _scanDeltaAz = 0.0;
+  _scanDeltaEl = 0.0;
+
+  _gridNx = _gridNy = _gridNz = 0;
+  _nPointsVol = _nPointsPlane = 0;
+  _gridMinx = _gridMiny = 0.0;
+  _gridDx = _gridDy = 0.0;
+
+  _outputFields= NULL;
+
   _searchMatrixLowerLeft = NULL;
   _searchMatrixUpperLeft = NULL;
   _searchMatrixLowerRight = NULL;
@@ -95,8 +129,6 @@ CartInterp::CartInterp(const string &progName,
   _urElDebug = NULL;
   _urAzDebug = NULL;
 
-  _orient = NULL;
-
   // create debug fields if needed
 
   if (_params.output_debug_fields) {
@@ -113,6 +145,13 @@ CartInterp::CartInterp(const string &progName,
 
   // set up ConvStrat object
 
+#ifdef NOTNOW
+  // create convective/stratiform fields if needed
+  if (_params.identify_convective_stratiform_split) {
+    _createConvStratFields();
+  }
+#endif
+  
   if (_params.identify_convective_stratiform_split) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       _convStrat.setVerbose(true);
@@ -133,18 +172,12 @@ CartInterp::CartInterp(const string &progName,
   }
   _gotConvStrat = false;
 
-  // set up orientation object
-
-  if (_params.use_echo_orientation) {
-    _orient = new Orient(progName, params, readVol, interpFields, interpRays);
-  }
-
 }
 
 //////////////////////////////////////
 // destructor
 
-CartInterp::~CartInterp()
+Orient::~Orient()
 
 {
 
@@ -153,23 +186,57 @@ CartInterp::~CartInterp()
   _freeGridLoc();
   _freeOutputArrays();
   _freeDerivedFields();
-  if (_orient) {
-    delete _orient;
-  }
 
 }
 
 //////////////////////////////////////////////////
-// interpolate a volume
-// assumes volume has been read
-// and _interpFields and _interpRays vectors are populated
-// returns 0 on succes, -1 on failure
+// determine echo orientation
 
-int CartInterp::interpVol()
+int Orient::findEchoOrientation()
 
 {
 
-  _printRunTime("Cart interp - reading data");
+  _printRunTime("Orient - findEchoOrientation");
+
+  // compute the pseudo RHIs for the volume
+
+  if (_readVol.loadPseudoRhis()) {
+    cerr << "ERROR - Orient::findEchoOrientation()" << endl;
+    cerr << "  Cannot find echo orientations" << endl;
+    return -1;
+  }
+  const vector<PseudoRhi *> &rhis = _readVol.getPseudoRhis();
+  if (rhis.size() < 2) {
+    cerr << "ERROR - Orient::findEchoOrientation()" << endl;
+    cerr << "  Cannot find echo orientations" << endl;
+    return -1;
+  }
+  size_t maxGates = rhis[0]->getMaxNGates();
+  for (size_t ii = 1; ii < rhis.size(); ii++) {
+    if (rhis[ii]->getMaxNGates() > maxGates) {
+      maxGates = rhis[ii]->getMaxNGates();
+    }
+  }
+
+  // load up pseudo RHIs
+  
+  for (size_t ii = 0; ii < _rhis.size(); ii++) {
+    delete _rhis[ii];
+  }
+  _rhis.clear();
+  for (size_t ii = 0; ii < rhis.size(); ii++) {
+    RhiOrient *rhi = new RhiOrient(_params, rhis[ii], maxGates);
+    _rhis.push_back(rhi);
+  }
+  
+  // compute echo orientation in pseudo RHIs
+
+  if (_params.debug) {
+    cerr << "  Computing echo orientation in pseudo RHIs ... " << endl;
+  }
+  _printRunTime("Orient - _computeOrientInRhis start");
+  _computeOrientInRhis();
+  _printRunTime("Orient - _computeOrientInRhis end");
 
   if (_gridLoc == NULL) {
     _initGrid();
@@ -178,7 +245,7 @@ int CartInterp::interpVol()
   // set radar params from volume
 
   if (_setRadarParams()) {
-    cerr << "ERROR - CartInterp::interpVol()" << endl;
+    cerr << "ERROR - Orient::findEchoOrientation()" << endl;
     return -1;
   }
 
@@ -239,13 +306,6 @@ int CartInterp::interpVol()
   _computeGridRelative();
   _printRunTime("Computing grid relative to radar");
 
-  // determine echo orientation
-
-  if (_orient) {
-    _orient->setRhiMode(_rhiMode);
-    _orient->findEchoOrientation();
-  }
-
   // interpolate
 
   if (_params.debug) {
@@ -271,26 +331,6 @@ int CartInterp::interpVol()
 
   _transformForOutput();
 
-  // write out data
-
-  _printRunTime("Cart interp - before _writeOutputFile");
-
-  if (_writeOutputFile()) {
-    cerr << "ERROR - CartInterp::interpVol" << endl;
-    cerr << "  Cannot write output file" << endl;
-    return -1;
-  }
-
-  // if requested, write out the search matrices
-
-  if (_params.write_search_matrix_files) {
-    if (_writeSearchMatrices()) {
-      cerr << "ERROR - CartInterp::interpVol" << endl;
-      cerr << "  Cannot write output file" << endl;
-      return -1;
-    }
-  }
-
   _printRunTime("Writing output files");
 
   // clean up
@@ -307,7 +347,7 @@ int CartInterp::interpVol()
 //////////////////////////////////////////////////
 // create the threading objects
 
-void CartInterp::_createThreads()
+void Orient::_createThreads()
 {
 
   // threads for search
@@ -316,6 +356,13 @@ void CartInterp::_createThreads()
   _threadFillSearchLowerRight = new FillSearchLowerRight(this);
   _threadFillSearchUpperLeft = new FillSearchUpperLeft(this);
   _threadFillSearchUpperRight = new FillSearchUpperRight(this);
+
+  // initialize thread pool for computing orientation in RHIs
+
+  for (int ii = 0; ii < _params.n_compute_threads; ii++) {
+    ComputeOrientInRhi *thread = new ComputeOrientInRhi(this);
+    _threadPoolOrientInRhi.addThreadToMain(thread);
+  }
 
   // initialize thread pool for grid relative to radar
 
@@ -336,7 +383,7 @@ void CartInterp::_createThreads()
 //////////////////////////////////////////////////
 // free the threading objects
 
-void CartInterp::_freeThreads()
+void Orient::_freeThreads()
 {
 
   // free threads we created for search
@@ -358,10 +405,83 @@ void CartInterp::_freeThreads()
 
 }
 
+////////////////////////////////////////////////////////////
+// Compute grid locations relative to radar
+
+void Orient::_computeOrientInRhis()
+
+{
+
+  if (_params.use_multiple_threads) {
+    _computeOrientMultiThreaded();
+  } else {
+    _computeOrientSingleThreaded();
+  }
+
+}
+
+//////////////////////////////////////////////////////
+// compute grid rows in multi-threaded mode
+
+void Orient::_computeOrientMultiThreaded()
+{
+
+  _threadPoolOrientInRhi.initForRun();
+  
+  // loop through the RHIs
+
+  for (size_t ii = 0; ii < _rhis.size(); ii++) {
+    // get a thread from the pool
+    bool isDone = true;
+    ComputeOrientInRhi *thread = 
+      (ComputeOrientInRhi *) _threadPoolOrientInRhi.getNextThread(true, isDone);
+    if (thread == NULL) {
+      break;
+    }
+    if (isDone) {
+      // if it is a done thread, return thread to the available pool
+      _threadPoolOrientInRhi.addThreadToAvail(thread);
+      // reduce ii by 1 since we did not actually process this RHI
+      // since no thread is available
+      ii--;
+    } else {
+      // available thread, set it running
+      thread->signalRunToStart();
+    } // isDone
+  } // ii
+  
+  // collect remaining done threads
+  
+  _threadPoolOrientInRhi.setReadyForDoneCheck();
+  while (!_threadPoolOrientInRhi.checkAllDone()) {
+    ComputeOrientInRhi *thread = 
+      (ComputeOrientInRhi *) _threadPoolOrientInRhi.getNextDoneThread();
+    if (thread == NULL) {
+      break;
+    } else {
+      _threadPoolOrientInRhi.addThreadToAvail(thread);
+    }
+  } // while
+
+}
+
+////////////////////////////////////////////////////////////
+// Compute grid locations for one row
+
+void Orient::_computeOrientSingleThreaded()
+
+{
+
+  for (size_t ii = 0; ii < _rhis.size(); ii++) {
+    _rhis[ii]->computeEchoOrientation();
+  }
+
+}
+
 //////////////////////////////////////////////////
 // create the debug Cart fields
 
-void CartInterp::_createDebugFields()
+void Orient::_createDebugFields()
 
 {
   
@@ -399,10 +519,90 @@ void CartInterp::_createDebugFields()
   
 }
 
+#ifdef NOTNOW
+  
+//////////////////////////////////////////////////
+// create the conv-strat fields
+
+void Orient::_createConvStratFields()
+
+{
+  
+  bool writeDebug = _params.conv_strat_write_debug_fields;
+
+  _convStratDbzMax = new DerivedField("DbzMax",
+                                      "max_dbz_for_conv_strat", 
+                                      "dbz", writeDebug);
+  _derived3DFields.push_back(_convStratDbzMax);
+  
+  _convStratDbzCount = new DerivedField("DbzCount",
+                                        "n_points_dbz_for_conv_strat", 
+                                        "count", writeDebug);
+  _derived3DFields.push_back(_convStratDbzCount);
+  
+  _convStratDbzSum = new DerivedField("DbzSum",
+                                      "sum_dbz_for_conv_strat",
+                                      "dbz", writeDebug);
+  _derived3DFields.push_back(_convStratDbzSum);
+  
+  _convStratDbzSqSum = new DerivedField("DbzSqSum",
+                                        "sum_dbz_sq_for_conv_strat", 
+                                        "dbz^2", writeDebug);
+  _derived3DFields.push_back(_convStratDbzSqSum);
+  
+  _convStratDbzSqSqSum = new DerivedField("DbzSqSqSum",
+                                          "sum_dbz_sq_sq_for_conv_strat",
+                                          "dbz^4", writeDebug);
+  _derived3DFields.push_back(_convStratDbzSqSqSum);
+  
+  _convStratDbzTexture = new DerivedField("DbzTexture",
+                                          "dbz_texture_for_conv_strat",
+                                          "dbz", writeDebug);
+  _derived3DFields.push_back(_convStratDbzTexture);
+
+  _convStratFilledTexture = new DerivedField("FilledTexture",
+                                             "filled_dbz_texture_for_conv_strat",
+                                             "dbz", writeDebug);
+  _derived3DFields.push_back(_convStratFilledTexture);
+
+  _convStratDbzSqTexture = new DerivedField("DbzSqTexture",
+                                            "dbz_sq_texture_for_conv_strat",
+                                            "dbz", writeDebug);
+  _derived3DFields.push_back(_convStratDbzSqTexture);
+  
+  _convStratFilledSqTexture = new DerivedField("FilledSqTexture",
+                                               "filled_dbz_sq_texture_for_conv_strat",
+                                               "dbz", writeDebug);
+  _derived3DFields.push_back(_convStratFilledSqTexture);
+
+  _convStratDbzColMax = new DerivedField("DbzColMax",
+                                         "col_max_dbz_for_conv_strat",
+                                         "dbz", writeDebug);
+  _derived2DFields.push_back(_convStratDbzColMax);
+
+  _convStratMeanTexture = new DerivedField("MeanTexture",
+                                           "mean_dbz_texture_for_conv_strat",
+                                           "dbz", writeDebug);
+  _derived2DFields.push_back(_convStratMeanTexture);
+
+  _convStratMeanSqTexture = new DerivedField("MeanSqTexture",
+                                             "mean_dbz_sq_texture_for_conv_strat",
+                                             "dbz", writeDebug);
+  _derived2DFields.push_back(_convStratMeanSqTexture);
+
+  _convStratCategory = new DerivedField("ConvStrat",
+                                        "category_for_conv_strat",
+                                        "", true);
+  _derived2DFields.push_back(_convStratCategory);
+  
+}
+
+#endif
+  
 //////////////////////////////////////////////////
 // free the derived fields
 
-void CartInterp::_freeDerivedFields()
+void Orient::_freeDerivedFields()
   
 {
   for (size_t ii = 0; ii < _derived3DFields.size(); ii++) {
@@ -419,7 +619,7 @@ void CartInterp::_freeDerivedFields()
 ////////////////////////////////////////////////////////////
 // Initialize Z levels
 
-void CartInterp::_initZLevels()
+void Orient::_initZLevels()
 
 {
 
@@ -451,7 +651,7 @@ void CartInterp::_initZLevels()
 ////////////////////////////////////////////////////////////
 // Free Z levels
 
-void CartInterp::_freeZLevels()
+void Orient::_freeZLevels()
 
 {
   _gridZLevels.clear();
@@ -460,7 +660,7 @@ void CartInterp::_freeZLevels()
 ////////////////////////////////////////////////////////////
 // Initialize output grid
 
-void CartInterp::_initGrid()
+void Orient::_initGrid()
 
 {
 
@@ -509,7 +709,7 @@ void CartInterp::_initGrid()
 ////////////////////////////////////////////////////////////
 // Free grid loc array
 
-void CartInterp::_freeGridLoc()
+void Orient::_freeGridLoc()
   
 {
   
@@ -533,7 +733,7 @@ void CartInterp::_freeGridLoc()
 ////////////////////////////////////////////////////////////
 // Allocate the output arrays for the gridded fields
 
-void CartInterp::_allocOutputArrays()
+void Orient::_allocOutputArrays()
   
 {
 
@@ -546,7 +746,7 @@ void CartInterp::_allocOutputArrays()
 ////////////////////////////////////////////////////////////
 // Free up the output arrays for the gridded fields
 
-void CartInterp::_freeOutputArrays()
+void Orient::_freeOutputArrays()
   
 {
   if (_outputFields) {
@@ -558,7 +758,7 @@ void CartInterp::_freeOutputArrays()
 ////////////////////////////////////////////////////////////
 // init the output arrays for the gridded fields
 
-void CartInterp::_initOutputArrays()
+void Orient::_initOutputArrays()
   
 {
 
@@ -566,7 +766,7 @@ void CartInterp::_initOutputArrays()
 
   for (size_t ii = 0; ii < _interpFields.size(); ii++) {
     for (int jj = 0; jj < _nPointsVol; jj++) {
-      _outputFields[ii][jj] = missingFl32;
+      _outputFields[ii][jj] = Interp::missingFl32;
     }
   }
 
@@ -576,7 +776,7 @@ void CartInterp::_initOutputArrays()
 // Compute the search matrix limits
 // keeping it as small as possible for efficiency
 
-void CartInterp::_computeSearchLimits()
+void Orient::_computeSearchLimits()
 {
 
   // elevation
@@ -663,7 +863,7 @@ void CartInterp::_computeSearchLimits()
 ////////////////////////////////////////////////////////////
 // Compute grid locations relative to radar
 
-void CartInterp::_computeGridRelative()
+void Orient::_computeGridRelative()
 
 {
 
@@ -720,7 +920,7 @@ void CartInterp::_computeGridRelative()
 //////////////////////////////////////////////////////
 // compute grid rows in multi-threaded mode
 
-void CartInterp::_computeGridRelMultiThreaded()
+void Orient::_computeGridRelMultiThreaded()
 {
 
   _threadPoolGridRel.initForRun();
@@ -769,7 +969,7 @@ void CartInterp::_computeGridRelMultiThreaded()
 ////////////////////////////////////////////////////////////
 // Compute grid locations for one row
 
-void CartInterp::_computeGridRow(int iz, int iy)
+void Orient::_computeGridRow(int iz, int iy)
 
 {
 
@@ -833,7 +1033,7 @@ void CartInterp::_computeGridRow(int iz, int iy)
 ////////////////////////////////////////////////////////////
 // Allocate the search matrix
 
-void CartInterp::_allocSearchMatrix()
+void Orient::_allocSearchMatrix()
 
 {
 
@@ -854,7 +1054,7 @@ void CartInterp::_allocSearchMatrix()
 ////////////////////////////////////////////////////////////
 // Free up the search matrix
 
-void CartInterp::_freeSearchMatrix()
+void Orient::_freeSearchMatrix()
 
 {
   if (_searchMatrixLowerLeft) {
@@ -878,7 +1078,7 @@ void CartInterp::_freeSearchMatrix()
 ////////////////////////////////////////////////////////////
 // Initalize the search matrix
 
-void CartInterp::_initSearchMatrix()
+void Orient::_initSearchMatrix()
 
 {
 
@@ -893,7 +1093,7 @@ void CartInterp::_initSearchMatrix()
 
   for (size_t iray = 0; iray < _interpRays.size(); iray++) {
     
-    const Ray *ray = _interpRays[iray];
+    const Interp::Ray *ray = _interpRays[iray];
 
     // compute elevation index
     
@@ -997,7 +1197,7 @@ void CartInterp::_initSearchMatrix()
 // Fill the search matrix, using the el/az for each ray
 // in the current volume
 
-void CartInterp::_fillSearchMatrix()
+void Orient::_fillSearchMatrix()
 
 {
 
@@ -1051,7 +1251,7 @@ void CartInterp::_fillSearchMatrix()
 ///////////////////////////////////////////////////////////
 // print search matrix
 
-void CartInterp::_printSearchMatrix(FILE *out, int res)
+void Orient::_printSearchMatrix(FILE *out, int res)
 {
 
   for (int iel = 0; iel < _searchNEl; iel += res) {
@@ -1104,7 +1304,7 @@ void CartInterp::_printSearchMatrix(FILE *out, int res)
 ///////////////////////////////////////////////////////////
 // print point in search matrix
 
-void CartInterp::_printSearchMatrixPoint(FILE *out, int iel, int iaz)
+void Orient::_printSearchMatrixPoint(FILE *out, int iel, int iaz)
 {
 
   const SearchPoint &ll = _searchMatrixLowerLeft[iel][iaz];
@@ -1154,7 +1354,7 @@ void CartInterp::_printSearchMatrixPoint(FILE *out, int iel, int iaz)
 // We do this by propagating the ray information up and
 // to the right.
 
-int CartInterp::_fillSearchLowerLeft(int level,
+int Orient::_fillSearchLowerLeft(int level,
                                      vector<SearchIndex> &thisSearch,
                                      vector<SearchIndex> &nextSearch)
   
@@ -1246,7 +1446,7 @@ int CartInterp::_fillSearchLowerLeft(int level,
 // We do this by propagating the ray information down and
 // to the right.
 
-int CartInterp::_fillSearchUpperLeft(int level,
+int Orient::_fillSearchUpperLeft(int level,
                                      vector<SearchIndex> &thisSearch,
                                      vector<SearchIndex> &nextSearch)
 
@@ -1339,7 +1539,7 @@ int CartInterp::_fillSearchUpperLeft(int level,
 // We do this by propagating the ray information up and
 // to the left.
 
-int CartInterp::_fillSearchLowerRight(int level,
+int Orient::_fillSearchLowerRight(int level,
                                       vector<SearchIndex> &thisSearch,
                                       vector<SearchIndex> &nextSearch)
 
@@ -1431,7 +1631,7 @@ int CartInterp::_fillSearchLowerRight(int level,
 // We do this by propagating the ray information below and
 // to the left.
 
-int CartInterp::_fillSearchUpperRight(int level,
+int Orient::_fillSearchUpperRight(int level,
                                       vector<SearchIndex> &thisSearch,
                                       vector<SearchIndex> &nextSearch)
 
@@ -1523,7 +1723,7 @@ int CartInterp::_fillSearchUpperRight(int level,
 //
 // Returns -1 if out of bounds
 
-int CartInterp::_getSearchElIndex(double el) 
+int Orient::_getSearchElIndex(double el) 
 { 
   int iel = (int) floor((el - _searchMinEl) / _searchResEl + 0.5);
   if (iel < 0) {
@@ -1540,7 +1740,7 @@ int CartInterp::_getSearchElIndex(double el)
 //
 // Returns -1 if out of bounds
 
-int CartInterp::_getSearchAzIndex(double az) 
+int Orient::_getSearchAzIndex(double az) 
 {
   int iaz = (int) ((az - _searchMinAz) / _searchResAz + 0.5);
   if (iaz < 0) {
@@ -1554,7 +1754,7 @@ int CartInterp::_getSearchAzIndex(double az)
 /////////////////////////////////////////////////////////
 // get the elevation given the search index
 
-double CartInterp::_getSearchEl(int index) 
+double Orient::_getSearchEl(int index) 
 {
   return _searchMinEl + index * _searchResEl;
 }
@@ -1562,7 +1762,7 @@ double CartInterp::_getSearchEl(int index)
 /////////////////////////////////////////////////////////
 // get the azimuth given the search index
 
-double CartInterp::_getSearchAz(int index) 
+double Orient::_getSearchAz(int index) 
 {
   return _searchMinAz + index * _searchResAz;
 }
@@ -1570,7 +1770,7 @@ double CartInterp::_getSearchAz(int index)
 //////////////////////////////////////////////////
 // interpolate onto the grid
 
-void CartInterp::_doInterp()
+void Orient::_doInterp()
 {
 
   // perform the interpolation
@@ -1586,7 +1786,7 @@ void CartInterp::_doInterp()
 //////////////////////////////////////////////////
 // interpolate entire volume in single thread
 
-void CartInterp::_interpSingleThreaded()
+void Orient::_interpSingleThreaded()
 {
   
   // interpolate one column at a time
@@ -1602,7 +1802,7 @@ void CartInterp::_interpSingleThreaded()
 //////////////////////////////////////////////////////
 // interpolate volume in threads, one X row at a time
 
-void CartInterp::_interpMultiThreaded()
+void Orient::_interpMultiThreaded()
 {
 
   _threadPoolInterp.initForRun();
@@ -1651,7 +1851,7 @@ void CartInterp::_interpMultiThreaded()
 ////////////////////////////////////////////////////////////
 // Interpolate a row at a time
 
-void CartInterp::_interpRow(int iz, int iy)
+void Orient::_interpRow(int iz, int iy)
 
 {
 
@@ -2000,7 +2200,7 @@ void CartInterp::_interpRow(int iz, int iy)
 // load up weights for case where we only
 // have 2 valid rays
   
-void CartInterp::_loadWtsFor2ValidRays(const GridLoc *loc,
+void Orient::_loadWtsFor2ValidRays(const GridLoc *loc,
                                        const SearchPoint &ll,
                                        const SearchPoint &ul,
                                        const SearchPoint &lr,
@@ -2063,7 +2263,7 @@ void CartInterp::_loadWtsFor2ValidRays(const GridLoc *loc,
 ////////////////////////////////////////////
 // load up weights for 3 or 4 valid rays
   
-void CartInterp::_loadWtsFor3Or4ValidRays(const GridLoc *loc,
+void Orient::_loadWtsFor3Or4ValidRays(const GridLoc *loc,
                                           const SearchPoint &ll,
                                           const SearchPoint &ul,
                                           const SearchPoint &lr,
@@ -2149,7 +2349,7 @@ void CartInterp::_loadWtsFor3Or4ValidRays(const GridLoc *loc,
 // load up grid point using nearest neighbor
 // returns the number of points contributing
   
-int CartInterp::_loadNearestGridPt(int ifield,
+int Orient::_loadNearestGridPt(int ifield,
                                    int ptIndex,
                                    int igateInner,
                                    int igateOuter,
@@ -2192,7 +2392,7 @@ int CartInterp::_loadNearestGridPt(int ifield,
   if (nContrib >= _params.min_nvalid_for_interp) {
     _outputFields[ifield][ptIndex] = closestVal;
   } else {
-    _outputFields[ifield][ptIndex] = missingFl32;
+    _outputFields[ifield][ptIndex] = Interp::missingFl32;
   }
 
   return nContrib;
@@ -2203,7 +2403,7 @@ int CartInterp::_loadNearestGridPt(int ifield,
 // load up data for a grid point using interpolation
 // returns the number of points contributing
   
-int CartInterp::_loadInterpGridPt(int ifield,
+int Orient::_loadInterpGridPt(int ifield,
                                   int ptIndex,
                                   int igateInner,
                                   int igateOuter,
@@ -2244,13 +2444,13 @@ int CartInterp::_loadInterpGridPt(int ifield,
   // compute weighted mean
   
   if (nContrib >= _params.min_nvalid_for_interp) {
-    double interpVal = missingDouble;
+    double interpVal = Interp::missingDouble;
     if (sumWts > 0) {
       interpVal = sumVals / sumWts;
     }
     _outputFields[ifield][ptIndex] = interpVal;
   } else {
-    _outputFields[ifield][ptIndex] = missingFl32;
+    _outputFields[ifield][ptIndex] = Interp::missingFl32;
   }
 
   return nContrib;
@@ -2262,7 +2462,7 @@ int CartInterp::_loadInterpGridPt(int ifield,
 // for a folded field
 // returns the number of points contributing
   
-int CartInterp::_loadFoldedGridPt(int ifield,
+int Orient::_loadFoldedGridPt(int ifield,
                                   int ptIndex,
                                   int igateInner,
                                   int igateOuter,
@@ -2305,13 +2505,13 @@ int CartInterp::_loadFoldedGridPt(int ifield,
   // compute weighted mean
   
   if (nContrib >= _params.min_nvalid_for_interp) {
-    const Field &intFld = _interpFields[ifield];
+    const Interp::Field &intFld = _interpFields[ifield];
     double angleInterp = atan2(sumY, sumX);
     double valInterp = _getFoldValue(angleInterp,
                                      intFld.foldLimitLower, intFld.foldRange);
     _outputFields[ifield][ptIndex] = valInterp;
   } else {
-    _outputFields[ifield][ptIndex] = missingFl32;
+    _outputFields[ifield][ptIndex] = Interp::missingFl32;
   }
 
   return nContrib;
@@ -2322,7 +2522,7 @@ int CartInterp::_loadFoldedGridPt(int ifield,
 // condition the azimuth, if we are in sector that
 // spans the north line
 
-double CartInterp::_conditionAz(double az)
+double Orient::_conditionAz(double az)
 {
   if (_isSector) {
     // sector mode
@@ -2339,84 +2539,9 @@ double CartInterp::_conditionAz(double az)
 }
 
 /////////////////////////////////////////////////////
-// write out data
-
-int CartInterp::_writeOutputFile()
-{
-
-  if (_params.debug) {
-    cerr << "  Writing output file ... " << endl;
-  }
-
-  // cedric is a special case
-  
-  if (_params.output_format == Params::CEDRIC) {
-    return _writeCedricFile(false);
-  }
-
-  // all other formats go via the MDV class
-  
-  OutputMdv out(_progName, _params);
-  out.setMasterHeader(_readVol);
-  for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
-    const Field &ifld = _interpFields[ifield];
-    out.addField(_readVol, _proj, _gridZLevels,
-                 ifld.outputName, ifld.longName, ifld.units,
-                 ifld.inputDataType,
-                 ifld.inputScale,
-                 ifld.inputOffset,
-                 missingFl32,
-                 _outputFields[ifield]);
-  } // ifield
-
-  // debug (test) fields
-
-  for (size_t ii = 0; ii < _derived3DFields.size(); ii++) {
-    const DerivedField *dfld = _derived3DFields[ii];
-    if (dfld->writeToFile) {
-      out.addField(_readVol, _proj, dfld->vertLevels,
-                   dfld->name, dfld->longName, dfld->units,
-                   Radx::FL32, 1.0, 0.0, missingFl32, dfld->data);
-    }
-  }
-
-  for (size_t ii = 0; ii < _derived2DFields.size(); ii++) {
-    const DerivedField *dfld = _derived2DFields[ii];
-    if (dfld->writeToFile) {
-      out.addField(_readVol, _proj, dfld->vertLevels,
-                   dfld->name, dfld->longName, dfld->units,
-                   Radx::FL32, 1.0, 0.0, missingFl32, dfld->data);
-    }
-  }
-
-  // convective stratiform split
-
-  if (_params.identify_convective_stratiform_split && _gotConvStrat) {
-    out.addConvStratFields(_convStrat, _readVol,
-                           _proj, _gridZLevels);
-  }
-
-  // chunks
-
-  out.addChunks(_readVol, _interpFields.size());
-  
-  // write out file
-  
-  if (out.writeVol()) {
-    cerr << "ERROR - Interp::processFile" << endl;
-    cerr << "  Cannot write file to output_dir: "
-         << _params.output_dir << endl;
-    return -1;
-  }
-
-  return 0;
-
-}
-
-/////////////////////////////////////////////////////
 // write out search matrix data
 
-int CartInterp::_writeSearchMatrices()
+int Orient::_writeSearchMatrices()
 {
 
   if (_params.debug) {
@@ -2555,7 +2680,7 @@ int CartInterp::_writeSearchMatrices()
   // write the file
 
   if (mdvx.writeToDir(_params.search_matrix_dir)) {
-    cerr << "ERROR - CartInterp::_writeSearchMatrices" << endl;
+    cerr << "ERROR - Orient::_writeSearchMatrices" << endl;
     cerr << "  Cannot write matrix file to dir: "
          << _params.search_matrix_dir << endl;
     return -1;
@@ -2572,7 +2697,7 @@ int CartInterp::_writeSearchMatrices()
 ////////////////////////////////////////////////
 // add a field to the search matrix mdv object
 
-void CartInterp::_addMatrixField(DsMdvx &mdvx,
+void Orient::_addMatrixField(DsMdvx &mdvx,
                                  const fl32 *data,
                                  fl32 missing,
                                  const string &name,
@@ -2656,7 +2781,7 @@ void CartInterp::_addMatrixField(DsMdvx &mdvx,
 //////////////////////////////////////////////////
 // Compute convective/stratiform split
 
-int CartInterp::_convStratCompute()
+int Orient::_convStratCompute()
 {
 
   // set the grid in the ConvStrat object
@@ -2673,14 +2798,14 @@ int CartInterp::_convStratCompute()
   string dbzName(_params.conv_strat_dbz_field_name);
   fl32 *dbzVals = NULL;
   for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
-    const Field &ifld = _interpFields[ifield];
+    const Interp::Field &ifld = _interpFields[ifield];
     if (ifld.radxName == dbzName) {
       dbzVals = _outputFields[ifield];
       break;
     }
   }
   if (dbzVals == NULL) {
-    cerr << "ERROR - CartInterp::_convStratCompute()" << endl;
+    cerr << "ERROR - Orient::_convStratCompute()" << endl;
     cerr << "  Cannot find dbz field: " << dbzName << endl;
     cerr << "  conv/strat partition will not be computed" << endl;
     return -1;
@@ -2688,13 +2813,13 @@ int CartInterp::_convStratCompute()
 
   // compute the convective/stratiform partition
   
-  if (_convStrat.computePartition(dbzVals, missingFl32)) {
-    cerr << "ERROR - CartInterp::_convStratCompute()" << endl;
+  if (_convStrat.computePartition(dbzVals, Interp::missingFl32)) {
+    cerr << "ERROR - Orient::_convStratCompute()" << endl;
     cerr << "  _convStrat.computePartition() failed" << endl;
     return -1;
   }
 
-  _printRunTime("CartInterp::_convStratCompute");
+  _printRunTime("Orient::_convStratCompute");
 
   return 0;
   
@@ -2704,12 +2829,12 @@ int CartInterp::_convStratCompute()
 // FillSearchLowerLeft thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::FillSearchLowerLeft::FillSearchLowerLeft(CartInterp *obj) :
+Orient::FillSearchLowerLeft::FillSearchLowerLeft(Orient *obj) :
         _this(obj)
 {
 }  
 // run method
-void CartInterp::FillSearchLowerLeft::run()
+void Orient::FillSearchLowerLeft::run()
 {
   vector<SearchIndex> thisSearch, nextSearch;
   for (int level = 0; level < _this->_searchMaxCount; level++) {
@@ -2724,12 +2849,12 @@ void CartInterp::FillSearchLowerLeft::run()
 // FillSearchLowerRight thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::FillSearchLowerRight::FillSearchLowerRight(CartInterp *obj) :
+Orient::FillSearchLowerRight::FillSearchLowerRight(Orient *obj) :
         _this(obj)
 {
 }  
 // run method
-void CartInterp::FillSearchLowerRight::run()
+void Orient::FillSearchLowerRight::run()
 {
   vector<SearchIndex> thisSearch, nextSearch;
   for (int level = 0; level < _this->_searchMaxCount; level++) {
@@ -2744,12 +2869,12 @@ void CartInterp::FillSearchLowerRight::run()
 // FillSearchUpperLeft thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::FillSearchUpperLeft::FillSearchUpperLeft(CartInterp *obj) :
+Orient::FillSearchUpperLeft::FillSearchUpperLeft(Orient *obj) :
         _this(obj)
 {
 }  
 // run method
-void CartInterp::FillSearchUpperLeft::run()
+void Orient::FillSearchUpperLeft::run()
 {
   vector<SearchIndex> thisSearch, nextSearch;
   for (int level = 0; level < _this->_searchMaxCount; level++) {
@@ -2764,12 +2889,12 @@ void CartInterp::FillSearchUpperLeft::run()
 // FillSearchUpperRight thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::FillSearchUpperRight::FillSearchUpperRight(CartInterp *obj) :
+Orient::FillSearchUpperRight::FillSearchUpperRight(Orient *obj) :
         _this(obj)
 {
 }  
 // run method
-void CartInterp::FillSearchUpperRight::run()
+void Orient::FillSearchUpperRight::run()
 {
   vector<SearchIndex> thisSearch, nextSearch;
   for (int level = 0; level < _this->_searchMaxCount; level++) {
@@ -2781,15 +2906,29 @@ void CartInterp::FillSearchUpperRight::run()
 }
 
 ///////////////////////////////////////////////////////////////
-// ComputeGridRelative thread
+// ComputeOrientInRhi thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::ComputeGridRelative::ComputeGridRelative(CartInterp *obj) :
+Orient::ComputeOrientInRhi::ComputeOrientInRhi(Orient *obj) :
         _this(obj)
 {
 }  
 // run method
-void CartInterp::ComputeGridRelative::run()
+void Orient::ComputeOrientInRhi::run()
+{
+  _this->_rhis[_index]->computeEchoOrientation();
+}
+
+///////////////////////////////////////////////////////////////
+// ComputeGridRelative thread
+///////////////////////////////////////////////////////////////
+// Constructor
+Orient::ComputeGridRelative::ComputeGridRelative(Orient *obj) :
+        _this(obj)
+{
+}  
+// run method
+void Orient::ComputeGridRelative::run()
 {
   _this->_computeGridRow(_zIndex, _yIndex);
 }
@@ -2798,13 +2937,865 @@ void CartInterp::ComputeGridRelative::run()
 // PerformInterp thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::PerformInterp::PerformInterp(CartInterp *obj) :
+Orient::PerformInterp::PerformInterp(Orient *obj) :
         _this(obj)
 {
 }  
 // run method
-void CartInterp::PerformInterp::run()
+void Orient::PerformInterp::run()
 {
   _this->_interpRow(_zIndex, _yIndex);
+}
+
+////////////////////////////////////////////////////////////
+// Initialize projection
+
+void Orient::_initProjection()
+
+{
+
+  _proj.setGrid(_gridNx, _gridNy,
+                _gridDx, _gridDy,
+                _gridMinx, _gridMiny);
+  
+  if (_params.grid_projection == Params::PROJ_LATLON) {
+    _proj.initLatlon();
+  } else if (_params.grid_projection == Params::PROJ_FLAT) {
+    _proj.initFlat(_gridOriginLat,
+                   _gridOriginLon,
+                   _params.grid_rotation);
+  } else if (_params.grid_projection == Params::PROJ_LAMBERT_CONF) {
+    _proj.initLambertConf(_gridOriginLat,
+                          _gridOriginLon,
+                          _params.grid_lat1,
+                          _params.grid_lat2);
+  } else if (_params.grid_projection == Params::PROJ_POLAR_STEREO) {
+    Mdvx::pole_type_t poleType = Mdvx::POLE_NORTH;
+    if (!_params.grid_pole_is_north) {
+      poleType = Mdvx::POLE_SOUTH;
+    }
+    _proj.initPolarStereo(_gridOriginLat,
+                          _gridOriginLon,
+                          _params.grid_tangent_lon,
+                          poleType,
+                          _params.grid_central_scale);
+  } else if (_params.grid_projection == Params::PROJ_OBLIQUE_STEREO) {
+    _proj.initObliqueStereo(_gridOriginLat,
+                            _gridOriginLon,
+                            _params.grid_tangent_lat,
+                            _params.grid_tangent_lon,
+                            _params.grid_central_scale);
+  } else if (_params.grid_projection == Params::PROJ_MERCATOR) {
+    _proj.initMercator(_gridOriginLat,
+                       _gridOriginLon);
+  } else if (_params.grid_projection == Params::PROJ_TRANS_MERCATOR) {
+    _proj.initTransMercator(_gridOriginLat,
+                            _gridOriginLon,
+                            _params.grid_central_scale);
+  } else if (_params.grid_projection == Params::PROJ_ALBERS) {
+    _proj.initAlbers(_gridOriginLat,
+                     _gridOriginLon,
+                     _params.grid_lat1,
+                     _params.grid_lat2);
+  } else if (_params.grid_projection == Params::PROJ_LAMBERT_AZIM) {
+    _proj.initLambertAzim(_gridOriginLat,
+                          _gridOriginLon);
+  } else if (_params.grid_projection == Params::PROJ_VERT_PERSP) {
+    _proj.initVertPersp(_gridOriginLat,
+                        _gridOriginLon,
+                        _params.grid_persp_radius);
+  }
+  
+  if (_params.grid_set_offset_origin) {
+    _proj.setOffsetOrigin(_params.grid_offset_origin_latitude,
+                          _params.grid_offset_origin_longitude);
+  } else {
+    _proj.setOffsetCoords(_params.grid_false_northing,
+                          _params.grid_false_easting);
+  }
+
+  _proj.latlon2xy(_readVol.getLatitudeDeg(), _readVol.getLongitudeDeg(),
+                  _radarX, _radarY);
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "============ Orient::_initProjection() ===============" << endl;
+    _proj.print(cerr, false);
+    cerr << "  radarX: " << _radarX << endl;
+    cerr << "  radarY: " << _radarY << endl;
+    cerr << "======================================================" << endl;
+  }
+        
+}
+
+//////////////////////////////////////////////////
+// accumulate data for a pt using nearest neighbor
+// this is for cart and ppi interpolation
+//   i.e. interpolate between inner and outer gates
+
+void Orient::_accumNearest(const Interp::Ray *ray,
+                           int ifield,
+                           int igateInner,
+                           int igateOuter,
+                           double wtInner,
+                           double wtOuter,
+                           double &closestVal,
+                           double &maxWt,
+                           int &nContrib)
+  
+{
+    
+  if (ray->fldData) {
+    
+    int nGates = ray->nGates;
+    fl32 missing = ray->missingVal[ifield];
+    fl32 *field = ray->fldData[ifield];
+
+    if (field != NULL) {
+      
+      if (igateInner >= 0 && igateInner < nGates) {
+        fl32 val = field[igateInner];
+        if (val != missing) {
+          if (wtInner > maxWt) {
+            closestVal = val;
+            maxWt = wtInner;
+          }
+          nContrib++;
+        }
+      }
+      
+      if (igateOuter >= 0 && igateOuter < nGates) {
+        fl32 val = field[igateOuter];
+        if (val != missing) {
+          if (wtOuter > maxWt) {
+            closestVal = val;
+            maxWt = wtOuter;
+          }
+          nContrib++;
+        }
+      }
+      
+    } // if (field != NULL) 
+    
+  } // if (ray->fldData)
+  
+}
+
+//////////////////////////////////////////////////
+// accumulate data for a pt using nearest neighbor
+// this is for a single gate
+
+void Orient::_accumNearest(const Interp::Ray *ray,
+                           int ifield,
+                           int igate,
+                           double wt,
+                           double &closestVal,
+                           double &maxWt,
+                           int &nContrib)
+  
+{
+    
+  if (ray->fldData) {
+    
+    int nGates = ray->nGates;
+    fl32 missing = ray->missingVal[ifield];
+    fl32 *field = ray->fldData[ifield];
+    
+    if (field != NULL) {
+      
+      if (igate >= 0 && igate < nGates) {
+        fl32 val = field[igate];
+        if (val != missing) {
+          if (wt > maxWt) {
+            closestVal = val;
+            maxWt = wt;
+          }
+          nContrib++;
+        }
+      }
+      
+    } // if (field != NULL) 
+    
+  } // if (ray->fldData)
+  
+}
+
+////////////////////////////////////////////////////////
+// accumulate data for a grid point using interpolation
+// this is for cart and ppi interpolation
+//   i.e. interpolate between inner and outer gates
+
+void Orient::_accumInterp(const Interp::Ray *ray,
+                          int ifield,
+                          int igateInner,
+                          int igateOuter,
+                          double wtInner,
+                          double wtOuter,
+                          double &sumVals,
+                          double &sumWts,
+                          int &nContrib)
+
+{
+
+  if (ray->fldData) {
+    
+    int nGates = ray->nGates;
+    fl32 missing = ray->missingVal[ifield];
+    fl32 *field = ray->fldData[ifield];
+
+    if (field != NULL) {
+      
+      if (igateInner >= 0 && igateInner < nGates) {
+        fl32 val = field[igateInner];
+        if (val != missing) {
+          sumVals += val * wtInner;
+          sumWts += wtInner;
+          nContrib++;
+        }
+      }
+      
+      if (igateOuter >= 0 && igateOuter < nGates) {
+        fl32 val = field[igateOuter];
+        if (val != missing) {
+          sumVals += val * wtOuter;
+          sumWts += wtOuter;
+          nContrib++;
+        }
+      }
+      
+    } // if (field != NULL) 
+    
+  } // if (ray->fldData)
+  
+}
+  
+////////////////////////////////////////////////////////
+// accumulate data for a grid point using interpolation
+// this is for a single gate
+
+void Orient::_accumInterp(const Interp::Ray *ray,
+                          int ifield,
+                          int igate,
+                          double wt,
+                          double &sumVals,
+                          double &sumWts,
+                          int &nContrib)
+
+{
+    
+  if (ray->fldData) {
+    
+    int nGates = ray->nGates;
+    fl32 missing = ray->missingVal[ifield];
+    fl32 *field = ray->fldData[ifield];
+
+    if (field != NULL) {
+      
+      if (igate >= 0 && igate < nGates) {
+        fl32 val = field[igate];
+        if (val != missing) {
+          sumVals += val * wt;
+          sumWts += wt;
+          nContrib++;
+        }
+      }
+      
+    } // if (field != NULL) 
+    
+  } // if (ray->fldData)
+  
+}
+  
+////////////////////////////////////////////////////////
+// accumulate data for a grid point using interpolation
+// for a folded field
+// this is for cart and ppi interpolation
+//   i.e. interpolate between inner and outer gates
+
+void Orient::_accumFolded(const Interp::Ray *ray,
+                          int ifield,
+                          int igateInner,
+                          int igateOuter,
+                          double wtInner,
+                          double wtOuter,
+                          double &sumX,
+                          double &sumY,
+                          double &sumWts,
+                          int &nContrib)
+
+{
+    
+  if (ray->fldData) {
+    
+    int nGates = ray->nGates;
+    fl32 missing = ray->missingVal[ifield];
+    fl32 *field = ray->fldData[ifield];
+
+    if (field != NULL) {
+      
+      const Interp::Field &intFld = _interpFields[ifield];
+
+      if (igateInner >= 0 && igateInner < nGates) {
+        fl32 val = field[igateInner];
+        if (val != missing) {
+          double angle =
+            _getFoldAngle(val, intFld.foldLimitLower, intFld.foldRange);
+          double sinVal, cosVal;
+          ta_sincos(angle, &sinVal, &cosVal);
+          sumX += cosVal * wtInner;
+          sumY += sinVal * wtInner;
+          sumWts += wtInner;
+          nContrib++;
+        }
+      }
+      
+      if (igateOuter >= 0 && igateOuter < nGates) {
+        fl32 val = field[igateOuter];
+        if (val != missing) {
+          double angle = 
+            _getFoldAngle(val, intFld.foldLimitLower, intFld.foldRange);
+          double sinVal, cosVal;
+          ta_sincos(angle, &sinVal, &cosVal);
+          sumX += cosVal * wtOuter;
+          sumY += sinVal * wtOuter;
+          sumWts += wtOuter;
+          nContrib++;
+        }
+      }
+      
+    } // if (field != NULL) 
+    
+  } // if (ray->fldData)
+  
+}
+  
+////////////////////////////////////////////////////////
+// accumulate data for a grid point using interpolation
+// for a folded field
+// this is for a single gate
+
+void Orient::_accumFolded(const Interp::Ray *ray,
+                          int ifield,
+                          int igate,
+                          double wt,
+                          double &sumX,
+                          double &sumY,
+                          double &sumWts,
+                          int &nContrib)
+
+{
+    
+  if (ray->fldData) {
+    
+    int nGates = ray->nGates;
+    fl32 missing = ray->missingVal[ifield];
+    fl32 *field = ray->fldData[ifield];
+
+    if (field != NULL) {
+      
+      const Interp::Field &intFld = _interpFields[ifield];
+
+      if (igate >= 0 && igate < nGates) {
+        fl32 val = field[igate];
+        if (val != missing) {
+          double angle =
+            _getFoldAngle(val, intFld.foldLimitLower, intFld.foldRange);
+          double sinVal, cosVal;
+          ta_sincos(angle, &sinVal, &cosVal);
+          sumX += cosVal * wt;
+          sumY += sinVal * wt;
+          sumWts += wt;
+          nContrib++;
+        }
+      }
+      
+    } // if (field != NULL) 
+    
+  } // if (ray->fldData)
+  
+}
+  
+/////////////////////////////////////////////////////////////////
+// convert a value to an angle, for a field that folds
+
+double Orient::_getFoldAngle(double val,
+                             double foldLimitLower,
+                             double foldRange) const
+{
+  double fraction = (val - foldLimitLower) / foldRange;
+  double angle = -M_PI + fraction * (M_PI * 2.0);
+  return angle;
+}
+
+/////////////////////////////////////////////////////////////////
+// convert an angle to a value, for a field that folds
+
+double Orient::_getFoldValue(double angle,
+                             double foldLimitLower,
+                             double foldRange) const
+{
+  double fraction = (angle + M_PI) / (M_PI * 2.0);
+  double val = fraction * foldRange + foldLimitLower;
+  return val;
+}
+
+//////////////////////////////////////////////////
+// set the radar details
+
+int Orient::_setRadarParams()
+
+{
+
+  // set radar location
+  
+  _radarLat = _readVol.getLatitudeDeg();
+  _radarLon = _readVol.getLongitudeDeg();
+  _radarAltKm = _readVol.getAltitudeKm();
+
+  // set beam width
+  
+  _beamWidthDegH = _readVol.getRadarBeamWidthDegH();
+  _beamWidthDegV = _readVol.getRadarBeamWidthDegV();
+
+  if (_params.interp_mode != Params::INTERP_MODE_CART_SAT) {
+    if (_beamWidthDegH <= 0 || _beamWidthDegV <= 0) {
+      cerr << "ERROR - Orient::_setRadarParams()" << endl;
+      cerr << "  Radar beam width not set" << endl;
+      cerr << "  beamWidthDegH: " << _beamWidthDegH << endl;
+      cerr << "  beamWidthDegV: " << _beamWidthDegV << endl;
+      cerr << "  You must use the option to override the beam width" << endl;
+      cerr << "  in the param file" << endl;
+      return -1;
+    }
+  }
+
+  // set gate geometry
+
+  _startRangeKm = _readVol.getStartRangeKm();
+  _gateSpacingKm = _readVol.getGateSpacingKm();
+
+  if (_startRangeKm <= -9990) {
+    cerr << "ERROR - Orient::_setRadarParams()" << endl;
+    cerr << "  Ray start range not set" << endl;
+    cerr << "  startRangeKm: " << _startRangeKm << endl;
+    cerr << "  You must use the option to override the gate geometry" << endl;
+    cerr << "  in the param file" << endl;
+    return -1;
+  }
+
+  if (_gateSpacingKm <= 0) {
+    cerr << "ERROR - Orient::_setRadarParams()" << endl;
+    cerr << "  Ray gate spacing not set" << endl;
+    cerr << "  gateSpacingKm: " << _gateSpacingKm << endl;
+    cerr << "  You must use the option to override the gate geometry" << endl;
+    cerr << "  in the param file" << endl;
+    return -1;
+  }
+
+  _maxNGates = 0;
+  const vector<RadxRay *> &rays = _readVol.getRays();
+  for (size_t ii = 0; ii < rays.size(); ii++) {
+    const RadxRay *ray = rays[ii];
+    int nGates = ray->getNGates();
+    if (nGates > _maxNGates) {
+      _maxNGates = nGates;
+    }
+  }
+  _maxRangeKm = _startRangeKm + _maxNGates * _gateSpacingKm;
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// locate empty sectors in the azimuth data
+//
+// Sets:
+//  _isSector;
+//  _dataSectorStartAzDeg
+//  _dataSectorEndAzDeg
+//
+// Returns -1 if no data, 0 otherwise
+
+int Orient::_locateDataSector()
+            
+{
+
+  _isSector = false;
+  _dataSectorStartAzDeg = 0.0;
+  _dataSectorEndAzDeg = 360.0;
+
+  // load array of number of rays per degree
+
+  int nRaysPerDeg[360];
+  for (int ii = 0; ii < 360; ii++) {
+    nRaysPerDeg[ii] = 0;
+  }
+  const vector<RadxRay *> &rays = _readVol.getRays();
+  for (size_t ii = 0; ii < rays.size(); ii++) {
+    const RadxRay *ray = rays[ii];
+    double az = ray->getAzimuthDeg();
+    int iaz = ((int) floor(az + 0.5)) % 360;
+    nRaysPerDeg[iaz]++;
+  }
+
+  // find start of first empty sector
+  
+  int firstEmptySectorStart = -9999;
+  for (int ii = 0; ii < 360; ii++) {
+    if (nRaysPerDeg[ii] == 0) {
+      firstEmptySectorStart = ii;
+      break;
+    }
+  }
+  if (firstEmptySectorStart < 0) {
+    // no empty sectors
+    return 0;
+  }
+  
+  int firstFullSectorStart = -9999;
+  for (int ii = firstEmptySectorStart + 1; ii < 360; ii++) {
+    if (nRaysPerDeg[ii] > 0) {
+      firstFullSectorStart = ii;
+      break;
+    }
+  }
+  if (firstFullSectorStart < 0) {
+    // no data
+    return -1;
+  }
+
+  // find all of the empty sectors, starting from the start of
+  // the first full sector and checking for 360 degrees
+
+  bool inGap = false;
+  vector<Sector> emptySectors;
+  Sector emptySector;
+  for (int ii = firstFullSectorStart + 1;
+       ii <= firstFullSectorStart + 360; ii++) {
+    int jj = ii % 360;
+    if (nRaysPerDeg[jj] == 0) {
+      if (!inGap) {
+        emptySector.startAzDeg = ii;
+        inGap = true;
+      }
+    } else {
+      if (inGap) {
+        emptySector.endAzDeg = ii - 1;
+        emptySector.computeWidth();
+        emptySectors.push_back(emptySector);
+        inGap = false;
+      }
+    }
+  }
+
+  if (emptySectors.size() < 1) {
+    return 0;
+  }
+  
+  int maxEmptyWidth = 0;
+  size_t maxEmptyIndex = 0;
+  for (size_t ii = 0; ii < emptySectors.size(); ii++) {
+    if (emptySectors[ii].width > maxEmptyWidth) {
+      maxEmptyIndex = ii;
+      maxEmptyWidth = emptySectors[ii].width;
+    }
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "Found sector, num: " << ii << endl;
+      cerr << "  startAz: " << emptySectors[ii].startAzDeg << endl;
+      cerr << "  endAz: " << emptySectors[ii].endAzDeg << endl;
+      cerr << "  width: " << emptySectors[ii].width << endl;
+    }
+  }
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "-->> empty sector with max width" << endl;
+    cerr << "  start, end, width: "
+         << emptySectors[maxEmptyIndex].startAzDeg << ", " 
+         << emptySectors[maxEmptyIndex].endAzDeg << ", "
+         << emptySectors[maxEmptyIndex].width << endl;
+  }
+
+  if (maxEmptyWidth < 30) {
+    // no significant empty sector
+    return 0;
+  }
+
+  _isSector = true;
+  double azBuffer = _scanDeltaAz + _beamWidthDegH + 1.0;
+  _dataSectorStartAzDeg = 
+    emptySectors[maxEmptyIndex].endAzDeg - azBuffer;
+  _dataSectorEndAzDeg =
+    emptySectors[maxEmptyIndex].startAzDeg + azBuffer + 360.0;
+  
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "   dataSectorStartAzDeg: " << _dataSectorStartAzDeg << endl;
+    cerr << "   dataSectorEndAzDeg: " << _dataSectorEndAzDeg << endl;
+  }
+  
+  if (_dataSectorStartAzDeg >= 360.0 &&
+      _dataSectorEndAzDeg >= 360.0) {
+    _dataSectorStartAzDeg -= 360;
+    _dataSectorEndAzDeg -= 360;
+  }
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "   dataSectorStartAzDeg: " << _dataSectorStartAzDeg << endl;
+    cerr << "   dataSectorEndAzDeg: " << _dataSectorEndAzDeg << endl;
+  }
+  
+  _spansNorth = false;
+  if (_dataSectorStartAzDeg < 360 && _dataSectorEndAzDeg > 360) {
+    _spansNorth = true;
+  }
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "   dataSectorStartAzDeg: " << _dataSectorStartAzDeg << endl;
+    cerr << "   dataSectorEndAzDeg: " << _dataSectorEndAzDeg << endl;
+  }
+
+  return 0;
+  
+}
+
+/////////////////////////////////////////////////////
+// Compute the azimuth difference to be used for
+// searching
+
+void Orient::_computeAzimuthDelta()
+{
+
+  // initialize to a reasonable value
+
+  _scanDeltaAz = 2.0;
+
+  if (_rhiMode) {
+
+    // this is an RHI volume
+    // so find the median difference between sweep fixed angles
+
+    if (_readVol.getNSweeps() >= 2) {
+      const vector<RadxSweep *> &sweeps = _readVol.getSweeps();
+      vector<double> deltas;
+      double prevAz = sweeps[0]->getFixedAngleDeg();
+      for (size_t ii = 1; ii < _readVol.getNSweeps(); ii++) {
+        double az = sweeps[ii]->getFixedAngleDeg();
+        double deltaAz = fabs(az - prevAz);
+        prevAz = az;
+        if (deltaAz > 180.0) {
+          deltaAz -= 360.0;
+        }
+        deltas.push_back(deltaAz);
+      }
+      sort(deltas.begin(), deltas.end());
+      _scanDeltaAz = deltas[deltas.size()/2];
+    }
+    
+  } else {
+
+    // not an RHI volume
+
+    // compute histogram of delta azimuths
+    // use resolution of 0.1 degrees, up to a max
+    // delta of 10 degrees
+
+    static const int nHist = 100;
+    int hist[nHist];
+    memset(hist, 0, nHist * sizeof(int));
+    
+    vector<RadxRay *> &rays = _readVol.getRays();
+    double prevAz = rays[0]->getAzimuthDeg();
+    int count = 0;
+    for (size_t ii = 1; ii < rays.size(); ii++) {
+      double az = rays[ii]->getAzimuthDeg();
+      double deltaAz = fabs(az - prevAz);
+      prevAz = az;
+      if (deltaAz > 180.0) {
+        deltaAz -= 360.0;
+      }
+      int index = (int) (deltaAz * 10.0 + 0.5);
+      if (index >= 0 && index < nHist) {
+        hist[index]++;
+        count++;
+      }
+    }
+
+    // find median delta
+
+    int medianIndex = 0;
+    int sum = 0;
+    int halfCount = count / 2;
+    for (int ii = 0; ii < nHist; ii++) {
+      sum += hist[ii];
+      if (sum >= halfCount) {
+        medianIndex = ii;
+        break;
+      }
+    }
+
+    if (medianIndex == 0)
+      _scanDeltaAz = 1.0;
+    else
+      _scanDeltaAz = medianIndex / 10.0;
+    
+  } // if (_rhiMode)
+
+}
+
+/////////////////////////////////////////////////////
+// Compute the elevation difference to be used for
+// searching
+
+void Orient::_computeElevationDelta()
+{
+
+  // initialize to a reasonable value
+
+  _scanDeltaEl = 10.0;
+
+  if (_rhiMode) {
+
+    // this is an RHI volume
+    // compute histogram of delta elevations
+    // use resolution of 0.1 degrees, up to a max
+    // delta of 10 degrees
+
+    static const int nHist = 100;
+    int hist[nHist];
+    memset(hist, 0, nHist * sizeof(int));
+    
+    vector<RadxRay *> &rays = _readVol.getRays();
+    double prevEl = rays[0]->getElevationDeg();
+    int count = 0;
+    for (size_t ii = 1; ii < rays.size(); ii++) {
+      double el = rays[ii]->getElevationDeg();
+      double deltaEl = fabs(el - prevEl);
+      prevEl = el;
+      int index = (int) (deltaEl * 10.0 + 0.5);
+      if (index >= 0 && index < nHist) {
+        hist[index]++;
+        count++;
+      }
+    }
+
+    // find median delta
+    
+    int medianIndex = 0;
+    int sum = 0;
+    int halfCount = count / 2;
+    for (int ii = 0; ii < nHist; ii++) {
+      sum += hist[ii];
+      if (sum >= halfCount) {
+        medianIndex = ii;
+        break;
+      }
+    }
+    
+    _scanDeltaEl = medianIndex / 10.0;
+    
+  } else {
+
+    // not an RHI volume
+    // so find the max difference between sweep fixed angles
+    
+    if (_readVol.getNSweeps() >= 2) {
+      const vector<RadxSweep *> &sweeps = _readVol.getSweeps();
+      double maxDeltaEl = 1.0;
+      double prevEl = sweeps[0]->getFixedAngleDeg();
+      for (size_t ii = 1; ii < _readVol.getNSweeps(); ii++) {
+        double el = sweeps[ii]->getFixedAngleDeg();
+        double deltaEl = fabs(el - prevEl);
+        prevEl = el;
+        if (deltaEl > maxDeltaEl) {
+          maxDeltaEl = deltaEl;
+        }
+      }
+      _scanDeltaEl = maxDeltaEl;
+    }
+    
+  } // if (_rhiMode)
+
+}
+
+// Print the elapsed run time since the previous call, in seconds.
+
+void Orient::_printRunTime(const string& str, bool verbose /* = false */)
+{
+  if (verbose) {
+    if (_params.debug < Params::DEBUG_VERBOSE) {
+      return;
+    }
+  } else if (!_params.debug) {
+    return;
+  }
+  struct timeval tvb;
+  gettimeofday(&tvb, NULL);
+  double deltaSec = tvb.tv_sec - _timeA.tv_sec
+    + 1.e-6 * (tvb.tv_usec - _timeA.tv_usec);
+  cerr << "TIMING, task: " << str << ", secs used: " << deltaSec << endl;
+  _timeA.tv_sec = tvb.tv_sec;
+  _timeA.tv_usec = tvb.tv_usec;
+}
+
+//////////////////////////////////////////////////////////////////
+// transform fields back as required for output
+
+void Orient::_transformForOutput()
+
+{
+
+  if (!_params.transform_fields_for_interpolation) {
+    return;
+  }
+
+  // loop through interp fields
+  
+  for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
+    
+    Interp::Field &ifld = _interpFields[ifield];
+    string &radxName = ifld.radxName;
+    
+    // loop through transform fields
+    
+    for (int jfield = 0; jfield < _params.transform_fields_n; jfield++) {
+
+      const Params::transform_field_t &transform =
+        _params._transform_fields[jfield];
+      string transName = transform.output_name;
+      if (radxName == transName) {
+        
+        if (transform.transform ==
+            Params::TRANSFORM_DB_TO_LINEAR_AND_BACK) {
+          
+          fl32 *data = _outputFields[ifield];
+          for (int ipt = 0; ipt < _nPointsVol; ipt++) {
+            fl32 val = data[ipt];
+            if (val != Interp::missingFl32) {
+              if (val <= 0.0) {
+                data[ipt] = Interp::missingFl32;
+              } else {
+                data[ipt] = 10.0 * log10(val);
+              }
+            }
+          } // ipt
+          
+        } else if (transform.transform ==
+                   Params::TRANSFORM_LINEAR_TO_DB_AND_BACK) {
+          
+          fl32 *data = _outputFields[ifield];
+          for (int ipt = 0; ipt < _nPointsVol; ipt++) {
+            fl32 val = data[ipt];
+            if (val != Interp::missingFl32) {
+              data[ipt] = pow(10.0, val / 10.0);
+            }
+          } // ipt
+        
+        } // if (transform.transform ...
+
+      } // if (outputName == transName)
+
+    } // jfield
+
+  } // ifield
+
 }
 

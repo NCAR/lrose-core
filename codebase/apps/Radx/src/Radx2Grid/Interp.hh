@@ -141,11 +141,13 @@ public:
 
   virtual int interpVol() = 0;
 
-protected:
+  // statics
 
   static const double PseudoDiamKm; // for earth curvature correction
   static const double missingDouble;
   static const fl32 missingFl32;
+
+protected:
 
   // references to main object
   

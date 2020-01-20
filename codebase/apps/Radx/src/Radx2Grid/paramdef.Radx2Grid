@@ -1352,12 +1352,13 @@ paramdef struct bound_field_t {
 } bounded_fields[];
 
 commentdef {
-  p_header = "OPTION TO USE HORIZONTAL INTERPOLATION FOR LAYER FEATURES";
+  p_header = "USE ECHO ORIENTATION TO INFORM INTERPOLATION GEOMETRY";
+  p_text = "Vertically-oriented echoes (convective) should be interpolated in the vertical. Horizontally-oriented echoes (stratiform, bright-band, anvil) should be interpolated in the horizontal. This attempts to prevent the typical ringing behavior we see in Cartesian products in regionis with layered structures, for example anvils.";
 }
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "If TRUE, we will FALSE, no fields will be bounded";
-  p_help = "Option to set limits on the values of some or all of the fields.\n\nThe parameters are set BEFORE interpolation, but the bound limits are applied AFTER interpolation.\n\nThis only applies if 'interp_mode' is set to INTERP_MODE_CART_REORDER. It can be a useful option since the linear-least-squares solution used by the REORDER interpolation can have unstable solutions that that lead to very out-of-range output values. This can in turn reduce the resolution of the output data if it is stored as a scaled integer.";
-} use_horiz_interp_for_layers;
+  p_descr = "If TRUE, we will try to determine echo orientation to inform interpolation.";
+  p_help = "Vertically-oriented echoes should be interpolated in the vertical. Horizontally-oriented echoes should be interpolated in the horizontal. We try to determine the principal orientation of the echoes, so that we will use the correct gates for interpolation.";
+} use_echo_orientation;
 

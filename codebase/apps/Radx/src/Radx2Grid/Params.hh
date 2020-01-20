@@ -821,7 +821,7 @@ public:
   bound_field_t *_bounded_fields;
   int bounded_fields_n;
 
-  tdrp_bool_t use_horiz_interp_for_layers;
+  tdrp_bool_t use_echo_orientation;
 
   char _end_; // end of data region
               // needed for zeroing out data
