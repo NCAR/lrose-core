@@ -98,9 +98,15 @@ int Orient::findEchoOrientation()
 
 {
 
+  if (_rhiMode) {
+    cerr << "WARNING - Orient::findEchoOrientation()" << endl;
+    cerr << "  Vol is in RHI mode - so this is not applicable" << endl;
+    return -1;
+  }
+
   _printRunTime("findEchoOrientation");
 
-  // clear as needed
+  // clear RHIs
 
   for (size_t ii = 0; ii < _rhis.size(); ii++) {
     delete _rhis[ii];
@@ -134,6 +140,9 @@ int Orient::findEchoOrientation()
   _printRunTime("Orient - _computeOrientInRhis start");
   _computeOrientInRhis();
   _printRunTime("Orient - _computeOrientInRhis end");
+
+  // TO DO
+  // add check on success
 
   return 0;
 
@@ -237,21 +246,6 @@ void Orient::_computeOrientSingleThreaded()
 
 }
 
-///////////////////////////////////////////////////////////////
-// ComputeOrientInRhi thread
-///////////////////////////////////////////////////////////////
-
-// Constructor
-Orient::ComputeOrientInRhi::ComputeOrientInRhi(Orient *obj) :
-        _this(obj)
-{
-}  
-// run method
-void Orient::ComputeOrientInRhi::run()
-{
-  _this->_rhis[_index]->computeEchoOrientation();
-}
-
 //////////////////////////////////////////////////
 // set the radar details
 
@@ -320,5 +314,21 @@ void Orient::_printRunTime(const string& str, bool verbose /* = false */)
   cerr << "TIMING, task: " << str << ", secs used: " << deltaSec << endl;
   _timeA.tv_sec = tvb.tv_sec;
   _timeA.tv_usec = tvb.tv_usec;
+}
+
+///////////////////////////////////////////////////////////////
+// ComputeOrientInRhi thread
+///////////////////////////////////////////////////////////////
+
+// Constructor
+Orient::ComputeOrientInRhi::ComputeOrientInRhi(Orient *obj) :
+        _this(obj)
+{
+}  
+
+// run method
+void Orient::ComputeOrientInRhi::run()
+{
+  _this->_rhis[_index]->computeEchoOrientation();
 }
 

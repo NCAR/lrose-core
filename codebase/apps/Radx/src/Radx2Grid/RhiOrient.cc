@@ -110,12 +110,8 @@ int RhiOrient::_loadSyntheticRhi()
   if (_readVol.checkIsRhi()) {
     return -1;
   }
-
-  // trim surveillance to 360 deg sweeps
-
-  // if (sweepMode != Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE) {
-  //   trimSurveillanceSweepsTo360Deg();
-  // }
+  
+  
 
   // compute azimuth margin for finding RHI rays
 

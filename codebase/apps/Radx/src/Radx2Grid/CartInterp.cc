@@ -96,6 +96,7 @@ CartInterp::CartInterp(const string &progName,
   _urAzDebug = NULL;
 
   _orient = NULL;
+  _echoOrientationAvailable = false;
 
   // create debug fields if needed
 
@@ -246,9 +247,13 @@ int CartInterp::interpVol()
   // determine echo orientation
   // for now this only works in PPI mode
 
-  if (_orient) {
+  if (_orient && !_rhiMode) {
     _orient->setRhiMode(_rhiMode);
-    _orient->findEchoOrientation();
+    if (_orient->findEchoOrientation() == 0) {
+      _echoOrientationAvailable = true;
+    } else {
+      _echoOrientationAvailable = false;
+    }
   }
 
   // interpolate

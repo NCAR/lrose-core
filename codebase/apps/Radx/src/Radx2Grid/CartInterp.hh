@@ -170,6 +170,7 @@ private:
   // echo orientation
 
   Orient *_orient;
+  bool _echoOrientationAvailable;
 
   // convective / stratiform split
 
