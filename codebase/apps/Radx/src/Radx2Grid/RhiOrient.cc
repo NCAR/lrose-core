@@ -34,6 +34,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "RhiOrient.hh"
+#include <cmath>
 
 RhiOrient::RhiOrient(const Params &params,
                      PseudoRhi *rhi,
@@ -64,5 +65,21 @@ void RhiOrient::_free()
 
 void RhiOrient::computeEchoOrientation()
 {
+
+  // allocate the grids
+
+  _dbz.clear();
+  _gridError.clear();
+
+  _dbz.resize(_gridZLevels.size());
+  for (size_t iz = 0; iz < _gridZLevels.size(); iz++) {
+    _dbz[iz].resize(_maxNGates);
+    _gridError[iz].resize(_maxNGates);
+    for (size_t ii = 0; ii < _maxNGates; ii++) {
+      _dbz[iz][ii] = NAN;
+      _gridError[iz][ii] = NAN;
+    }
+  }
+
 }
 

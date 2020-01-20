@@ -36,6 +36,7 @@
 #ifndef RhiOrient_HH
 #define RhiOrient_HH
 
+#include <Radx/Radx.hh>
 #include <Radx/PseudoRhi.hh>
 #include "Params.hh"
 
@@ -72,6 +73,9 @@ private:
   double _gateSpacingKm;
   double _radarAltKm;
   vector<double> _gridZLevels;
+
+  vector< vector<Radx::fl32> > _dbz; 
+  vector< vector<Radx::fl32> > _gridError; 
 
   void _free();
 
