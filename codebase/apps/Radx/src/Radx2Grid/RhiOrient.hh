@@ -64,11 +64,17 @@ public:
 
   void computeEchoOrientation();
 
+  // did this succeed
+
+  bool getSuccess() const { return _success; }
+
 private:
 
   const Params &_params;
   const RadxVol &_readVol;
 
+  bool _success;
+  
   double _azimuth;
   size_t _maxNGates;
   double _startRangeKm;
@@ -80,6 +86,7 @@ private:
   bool _nGatesVary;
   double _meanAzimuth;
 
+  double _DBZ_BAD;
   vector< vector<Radx::fl32> > _dbz; 
   vector< vector<Radx::fl32> > _gridError; 
 
@@ -88,6 +95,8 @@ private:
   void _free();
   int _loadSyntheticRhi();
   void _sortRaysByElevation();
+  int _loadDbzGrid();
+  int _getZIndex(double zz);
 
   /// sorting rays by time or azimuth
 

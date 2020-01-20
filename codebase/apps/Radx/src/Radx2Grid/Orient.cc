@@ -98,13 +98,32 @@ int Orient::findEchoOrientation()
 
 {
 
+  // check scan mode
+
   if (_rhiMode) {
     cerr << "WARNING - Orient::findEchoOrientation()" << endl;
     cerr << "  Vol is in RHI mode - so this is not applicable" << endl;
     return -1;
   }
 
-  _printRunTime("findEchoOrientation");
+  // check for DBZ field
+
+  const vector<RadxRay *> &rays = _readVol.getRays();
+  if (rays.size() < 1) {
+    cerr << "WARNING - Orient::findEchoOrientation()" << endl;
+    cerr << "  No rays in vol" << endl;
+    return -1;
+  }
+
+  if (rays[0]->getField(_params.echo_orientation_dbz_field_name) == NULL) {
+    cerr << "WARNING - Orient::findEchoOrientation()" << endl;
+    cerr << "  Cannot find field: " << _params.echo_orientation_dbz_field_name << endl;
+    return -1;
+  }
+
+  // start of processing
+
+  _printRunTime("start findEchoOrientation");
 
   // clear RHIs
 
@@ -143,6 +162,10 @@ int Orient::findEchoOrientation()
 
   // TO DO
   // add check on success
+
+  // start of processing
+
+  _printRunTime("end findEchoOrientation");
 
   return 0;
 

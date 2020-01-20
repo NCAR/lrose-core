@@ -827,6 +827,8 @@ public:
 
   double synthetic_rhis_delta_az;
 
+  char* echo_orientation_dbz_field_name;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -834,7 +836,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[207];
+  mutable TDRPtable _table[208];
 
   const char *_className;
 

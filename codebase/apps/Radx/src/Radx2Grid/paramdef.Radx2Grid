@@ -1374,3 +1374,9 @@ paramdef double {
   p_help = "To find the orientation of echoes, we use a set of synthetic RHIs. These are computed on regular azimuths. This is the delta azimuth for the set of synthetic RHIs.";
 } synthetic_rhis_delta_az;
 
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Name of reflectivity field in input data.";
+  p_help = "This is used for determining the orientation of echoes.";
+} echo_orientation_dbz_field_name;
+

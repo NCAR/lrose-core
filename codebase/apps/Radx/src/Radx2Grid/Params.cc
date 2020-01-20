@@ -3362,6 +3362,18 @@
     tt->single_val.d = 1;
     tt++;
     
+    // Parameter 'echo_orientation_dbz_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("echo_orientation_dbz_field_name");
+    tt->descr = tdrpStrDup("Name of reflectivity field in input data.");
+    tt->help = tdrpStrDup("This is used for determining the orientation of echoes.");
+    tt->val_offset = (char *) &echo_orientation_dbz_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DBZ");
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

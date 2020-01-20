@@ -38,6 +38,7 @@
 #include <set>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>
+#include <radar/BeamHeight.hh>
 
 RhiOrient::RhiOrient(const Params &params,
                      RadxVol &readVol,
@@ -56,6 +57,8 @@ RhiOrient::RhiOrient(const Params &params,
         _gridZLevels(gridZLevels)
 
 {
+  _success = false;
+  _DBZ_BAD = -200.0;
 }
 
 RhiOrient::~RhiOrient(void)
@@ -65,6 +68,7 @@ RhiOrient::~RhiOrient(void)
 
 void RhiOrient::_free()
 {
+  _success = false;
 }
 
 void RhiOrient::computeEchoOrientation()
@@ -87,7 +91,17 @@ void RhiOrient::computeEchoOrientation()
 
   // load up the synthetic RHI
 
-  _loadSyntheticRhi();
+  if (_loadSyntheticRhi()) {
+    _success = false;
+    return;
+  }
+  
+  // load up reflectivity grid
+
+  if (_loadDbzGrid()) {
+    _success = false;
+    return;
+  }
 
 }
 
@@ -110,8 +124,6 @@ int RhiOrient::_loadSyntheticRhi()
   if (_readVol.checkIsRhi()) {
     return -1;
   }
-  
-  
 
   // compute azimuth margin for finding RHI rays
 
@@ -209,3 +221,134 @@ bool RhiOrient::SortByRayElevation::operator()
   return lhs.ptr->getElevationDeg() < rhs.ptr->getElevationDeg();
 }
 
+///////////////////////////////////////////////////////////////
+/// Load up DBZ grid
+/// Returns 0 on success
+/// Returns -1 on error - i.e. if DBZ field not found
+
+int RhiOrient::_loadDbzGrid()
+  
+{
+
+  // initialize beamHeight computations
+
+  BeamHeight beamHt;
+  if (_params.override_standard_pseudo_earth_radius) {
+    beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
+  }
+  beamHt.setInstrumentHtKm(_radarAltKm);
+
+  // loop through the rays, top to bottom
+  
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+
+    RadxRay *ray = _rays[iray];
+    RadxField *dbzField = ray->getField(_params.echo_orientation_dbz_field_name);
+    if (dbzField == NULL) {
+      cerr << "ERROR - RhiOrient::_loadDbzGrid()" << endl;
+      cerr << "  Cannot find field on ray: "
+           << _params.echo_orientation_dbz_field_name << endl;
+      cerr << "  ELev, az: " 
+           << ray->getElevationDeg() << ", " << ray->getAzimuthDeg() << endl;
+      return -1;
+    }
+    dbzField->convertToFl32();
+    Radx::fl32 *dbz = dbzField->getDataFl32();
+    Radx::fl32 dbzMiss = dbzField->getMissingFl32();
+    
+    // loop through the gates
+
+    double elev = ray->getElevationDeg();
+    double range = _startRangeKm;
+    for (size_t igate = 0; igate < ray->getNGates();
+         igate++, dbz++, range += _gateSpacingKm) {
+      
+      // compute height and ground distance along RHI
+
+      double zz = beamHt.computeHtKm(elev, range);
+      double xx = beamHt.getGndRangeKm();
+      
+      // compute grid indices
+
+      int zIndex = _getZIndex(zz);
+      int xIndex = (int) (xx / _gateSpacingKm);
+
+      // store this dbz value if there is no existing value,
+      // or if the grid distance error is less than previously
+
+      if (zIndex >= 0 && zIndex >= 0 && xIndex < (int) _maxNGates) {
+
+        double zzErr = zz - _gridZLevels[zIndex];
+        double xxErr = xx - (xIndex + 0.5) * _gateSpacingKm;
+        double gridError = sqrt(zzErr * zzErr + xxErr * xxErr);
+        double dbzVal = *dbz;
+
+        if (isnan(_dbz[zIndex][xIndex])) {
+
+          // no previous dbz stored
+
+          if (dbzVal == dbzMiss) {
+            _dbz[zIndex][xIndex] = _DBZ_BAD;
+          } else {
+            _dbz[zIndex][xIndex] = dbzVal;
+          }
+
+        } else {
+
+          // previous dbz stored
+          // check grid error to decide which to use
+          
+          if (gridError < _gridError[zIndex][xIndex]) {
+            if (dbzVal == dbzMiss) {
+              _dbz[zIndex][xIndex] = _DBZ_BAD;
+            } else {
+              _dbz[zIndex][xIndex] = dbzVal;
+            }
+          }
+
+          // store grid error
+
+          _gridError[zIndex][xIndex] = gridError;
+
+        }
+
+      } // zIndex
+      
+    }
+
+  } // iray
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////
+/// Get closest Z index to given ht
+/// Returns index on success, -1 on failure
+
+int RhiOrient::_getZIndex(double zz)
+  
+{
+
+  double gridMinZ = _gridZLevels[0];
+  double gridMaxZ = _gridZLevels[_gridZLevels.size()-1];
+  if (zz < gridMinZ || zz > gridMaxZ) {
+    return -1;
+  }
+  
+  int zIndex = -1;
+  double minDelta = 1.0e6;
+  
+  for (size_t iz = 0; iz < _gridZLevels.size(); iz++) {
+    double delta = fabs(zz - _gridZLevels[iz]);
+    if (delta < minDelta) {
+      zIndex = iz;
+      minDelta = delta;
+    } else {
+      break;
+    }
+  } // iz
+
+  return zIndex;
+
+}
