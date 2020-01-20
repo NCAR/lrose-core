@@ -829,6 +829,10 @@ public:
 
   char* echo_orientation_dbz_field_name;
 
+  int echo_orientation_n_points_sdev_h;
+
+  int echo_orientation_n_points_sdev_v;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -836,7 +840,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[208];
+  mutable TDRPtable _table[210];
 
   const char *_className;
 

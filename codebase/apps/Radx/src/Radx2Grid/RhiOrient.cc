@@ -352,3 +352,20 @@ int RhiOrient::_getZIndex(double zz)
   return zIndex;
 
 }
+
+double usdev(double sum, double sumsq, double n)
+
+{
+
+  double comp;
+
+  comp = n * sumsq - sum * sum;
+
+  if (comp <= 0.0 || n < 2.0) {
+    return (0.0);
+  } else {
+    return (sqrt(comp) / (n - 1.0));
+  }
+
+}
+

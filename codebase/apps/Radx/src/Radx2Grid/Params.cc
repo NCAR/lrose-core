@@ -3374,6 +3374,30 @@
     tt->single_val.s = tdrpStrDup("DBZ");
     tt++;
     
+    // Parameter 'echo_orientation_n_points_sdev_h'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("echo_orientation_n_points_sdev_h");
+    tt->descr = tdrpStrDup("Number of grid points used to compute the standard deviation of DBZ horizontally.");
+    tt->help = tdrpStrDup("To decide on echo orientation, we need to determine whether the dbz is more constanthorizonatally or vertically. To do this we compute the standard deviation of the dbz field, horizontally and vertically.");
+    tt->val_offset = (char *) &echo_orientation_n_points_sdev_h - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'echo_orientation_n_points_sdev_v'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("echo_orientation_n_points_sdev_v");
+    tt->descr = tdrpStrDup("Number of grid points used to compute the standard deviation of DBZ vertically.");
+    tt->help = tdrpStrDup("To decide on echo orientation, we need to determine whether the dbz is more constanthorizonatally or vertically. To do this we compute the standard deviation of the dbz field, horizontally and vertically.");
+    tt->val_offset = (char *) &echo_orientation_n_points_sdev_v - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

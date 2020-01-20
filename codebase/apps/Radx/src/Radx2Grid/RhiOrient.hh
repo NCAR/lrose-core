@@ -89,6 +89,7 @@ private:
   double _DBZ_BAD;
   vector< vector<Radx::fl32> > _dbz; 
   vector< vector<Radx::fl32> > _gridError; 
+  vector< vector<Radx::fl32> > _sdevH, _sdevV; 
 
   // private methods
   

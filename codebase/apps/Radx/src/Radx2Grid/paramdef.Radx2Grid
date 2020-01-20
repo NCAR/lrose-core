@@ -1380,3 +1380,15 @@ paramdef string {
   p_help = "This is used for determining the orientation of echoes.";
 } echo_orientation_dbz_field_name;
 
+paramdef int {
+  p_default = 3;
+  p_descr = "Number of grid points used to compute the standard deviation of DBZ horizontally.";
+  p_help = "To decide on echo orientation, we need to determine whether the dbz is more constanthorizonatally or vertically. To do this we compute the standard deviation of the dbz field, horizontally and vertically.";
+} echo_orientation_n_points_sdev_h;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Number of grid points used to compute the standard deviation of DBZ vertically.";
+  p_help = "To decide on echo orientation, we need to determine whether the dbz is more constanthorizonatally or vertically. To do this we compute the standard deviation of the dbz field, horizontally and vertically.";
+} echo_orientation_n_points_sdev_v;
+
