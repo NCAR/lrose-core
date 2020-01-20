@@ -25,7 +25,7 @@
 // RhiOrient.hh
 //
 // RhiOrient class.
-// Compute echo orientation in a pseudo RHI
+// Compute echo orientation in a synthetic RHI
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -36,8 +36,8 @@
 #ifndef RhiOrient_HH
 #define RhiOrient_HH
 
+#include <Radx/RadxVol.hh>
 #include <Radx/Radx.hh>
-#include <Radx/PseudoRhi.hh>
 #include "Params.hh"
 
 class RhiOrient
@@ -49,8 +49,8 @@ public:
   // constructor
 
   RhiOrient(const Params &params,
-            PseudoRhi *rhi,
-            size_t maxNGates,
+            RadxVol &readVol,
+            double azimuth,
             double startRangeKm,
             double gateSpacingKm,
             double radarAltKm,
@@ -67,17 +67,39 @@ public:
 private:
 
   const Params &_params;
-  PseudoRhi *_rhi;
+  const RadxVol &_readVol;
+
+  double _azimuth;
   size_t _maxNGates;
   double _startRangeKm;
   double _gateSpacingKm;
   double _radarAltKm;
   vector<double> _gridZLevels;
 
+  vector<RadxRay *> _rays;
+  bool _nGatesVary;
+  double _meanAzimuth;
+
   vector< vector<Radx::fl32> > _dbz; 
   vector< vector<Radx::fl32> > _gridError; 
 
+  // private methods
+  
   void _free();
+  int _loadSyntheticRhi();
+  void _sortRaysByElevation();
+
+  /// sorting rays by time or azimuth
+
+  class RayPtr {
+  public:
+    RadxRay *ptr;
+    RayPtr(RadxRay *p) : ptr(p) {}
+  };
+  class SortByRayElevation {
+  public:
+    bool operator()(const RayPtr &lhs, const RayPtr &rhs) const;
+  };
 
 };
 

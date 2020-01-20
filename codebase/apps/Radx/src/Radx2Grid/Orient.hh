@@ -86,7 +86,7 @@ private:
   
   struct timeval _timeA;
 
-  // pseudo rhis
+  // synthetic rhis
 
   vector<RhiOrient *> _rhis;
 

@@ -25,7 +25,7 @@
 // RhiOrient.cc
 //
 // RhiOrient class.
-// Compute echo orientation in a pseudo RHI
+// Compute echo orientation in a synthetic RHI
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -35,17 +35,21 @@
 
 #include "RhiOrient.hh"
 #include <cmath>
+#include <set>
+#include <Radx/RadxSweep.hh>
+#include <Radx/RadxRay.hh>
 
 RhiOrient::RhiOrient(const Params &params,
-                     PseudoRhi *rhi,
-                     size_t maxNGates,
+                     RadxVol &readVol,
+                     double azimuth,
                      double startRangeKm,
                      double gateSpacingKm,
                      double radarAltKm,
                      const vector<double> &gridZLevels) :
         _params(params),
-        _rhi(rhi),
-        _maxNGates(maxNGates),
+        _readVol(readVol),
+        _azimuth(azimuth),
+        _maxNGates(readVol.getMaxNGates()),
         _startRangeKm(startRangeKm),
         _gateSpacingKm(gateSpacingKm),
         _radarAltKm(radarAltKm),
@@ -81,5 +85,131 @@ void RhiOrient::computeEchoOrientation()
     }
   }
 
+  // load up the synthetic RHI
+
+  _loadSyntheticRhi();
+
+}
+
+///////////////////////////////////////////////////////////////
+/// Load up synthetic RHIs, by analyzing the rays in the volume.
+/// Only relevant for surveillance and sector ppi-type volumes.
+/// Returns 0 on success
+/// Returns -1 on error - i.e. if not ppi-type scan.
+
+int RhiOrient::_loadSyntheticRhi()
+  
+{
+
+  // initialize
+
+  _rays.clear();
+
+  // check scan mode
+
+  if (_readVol.checkIsRhi()) {
+    return -1;
+  }
+
+  // trim surveillance to 360 deg sweeps
+
+  // if (sweepMode != Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE) {
+  //   trimSurveillanceSweepsTo360Deg();
+  // }
+
+  // compute azimuth margin for finding RHI rays
+
+  double azMargin = _params.synthetic_rhis_delta_az * 2.5;
+  
+  // find rays that belong to this RHI
+  
+  const vector<RadxSweep *> &sweeps = _readVol.getSweeps();
+  for (size_t isweep = 0; isweep < sweeps.size(); isweep++) {
+    RadxSweep *sweep = sweeps[isweep];
+    RadxRay *bestRay = NULL;
+    double minDeltaAz = 9999.0;
+    for (size_t jray = sweep->getStartRayIndex(); 
+         jray <= sweep->getEndRayIndex(); jray++) {
+      RadxRay *ray = _rays[jray];
+      double deltaAz = fabs(_azimuth - ray->getAzimuthDeg());
+      if (deltaAz > 180.0) {
+        deltaAz = fabs(deltaAz - 360.0);
+      }
+      if (deltaAz < azMargin && deltaAz < minDeltaAz) {
+        bestRay = ray;
+        minDeltaAz = deltaAz;
+      }
+    } // jray
+    if (bestRay != NULL) {
+      _rays.push_back(bestRay);
+    }
+  } // isweep;
+
+  // sanity check
+  
+  if (_rays.size() < 1) {
+    return -1;
+  }
+  
+  // sort the rays in elevation
+  
+  _sortRaysByElevation();
+  
+  // Compute the mean azimuth from the rays
+  // sum up (x,y) coords of measured angles
+  
+  double sumx = 0.0;
+  double sumy = 0.0;
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    const RadxRay *ray = _rays[iray];
+    double angle = ray->getAzimuthDeg();
+    double sinVal, cosVal;
+    Radx::sincos(angle * Radx::DegToRad, sinVal, cosVal);
+    sumy += sinVal;
+    sumx += cosVal;
+  } // iray
+  _meanAzimuth = atan2(sumy, sumx) * Radx::RadToDeg;
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////////  
+/// Sort the rays by elevation angle, lowest to highest
+/// Also sets the az of lowest ray,
+/// mean azimuth and max nGates.
+
+void RhiOrient::_sortRaysByElevation()
+{
+  
+  // create set with sorted ray pointers
+  
+  set<RayPtr, SortByRayElevation> sortedRayPtrs;
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RayPtr rptr(_rays[iray]);
+    sortedRayPtrs.insert(rptr);
+  }
+  
+  // add sortedRays array in elev-sorted order
+  
+  vector<RadxRay *> sortedRays;
+  for (set<RayPtr, SortByRayElevation>::iterator ii = sortedRayPtrs.begin();
+       ii != sortedRayPtrs.end(); ii++) {
+    sortedRays.push_back(ii->ptr);
+  }
+    
+  // set _rays to sorted vector
+  
+  _rays = sortedRays;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Compare rays by elevation
+
+bool RhiOrient::SortByRayElevation::operator()
+  (const RayPtr &lhs, const RayPtr &rhs) const
+{
+  return lhs.ptr->getElevationDeg() < rhs.ptr->getElevationDeg();
 }
 

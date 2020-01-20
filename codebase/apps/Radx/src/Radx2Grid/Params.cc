@@ -3338,6 +3338,30 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'synthetic_rhis_start_az'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("synthetic_rhis_start_az");
+    tt->descr = tdrpStrDup("Starting azimuth for set of synthetic RHIs computed for determining echo orientation.");
+    tt->help = tdrpStrDup("To find the orientation of echoes, we use a set of synthetic RHIs. These are computed on regular azimuths. This is the starting azimuth for the set of synthetic RHIs.");
+    tt->val_offset = (char *) &synthetic_rhis_start_az - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'synthetic_rhis_delta_az'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("synthetic_rhis_delta_az");
+    tt->descr = tdrpStrDup("Delta azimuth for set of synthetic RHIs computed for determining echo orientation.");
+    tt->help = tdrpStrDup("To find the orientation of echoes, we use a set of synthetic RHIs. These are computed on regular azimuths. This is the delta azimuth for the set of synthetic RHIs.");
+    tt->val_offset = (char *) &synthetic_rhis_delta_az - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

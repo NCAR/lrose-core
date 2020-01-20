@@ -45,7 +45,6 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxSweep.hh>
-#include <Radx/PseudoRhi.hh>
 #include <Mdv/DsMdvx.hh>
 #include <algorithm>
 using namespace std;
@@ -99,41 +98,27 @@ int Orient::findEchoOrientation()
 
 {
 
-  _printRunTime("Orient - findEchoOrientation");
+  _printRunTime("findEchoOrientation");
 
-  // compute the pseudo RHIs for the volume
+  // clear as needed
 
-  if (_readVol.loadPseudoRhis()) {
-    cerr << "ERROR - Orient::findEchoOrientation()" << endl;
-    cerr << "  Cannot find echo orientations" << endl;
-    return -1;
-  }
-  const vector<PseudoRhi *> &rhis = _readVol.getPseudoRhis();
-  if (rhis.size() < 2) {
-    cerr << "ERROR - Orient::findEchoOrientation()" << endl;
-    cerr << "  Cannot find echo orientations" << endl;
-    return -1;
-  }
-  size_t maxGates = rhis[0]->getMaxNGates();
-  for (size_t ii = 1; ii < rhis.size(); ii++) {
-    if (rhis[ii]->getMaxNGates() > maxGates) {
-      maxGates = rhis[ii]->getMaxNGates();
-    }
-  }
-
-  // load up pseudo RHIs
-  
   for (size_t ii = 0; ii < _rhis.size(); ii++) {
     delete _rhis[ii];
   }
   _rhis.clear();
-  for (size_t ii = 0; ii < rhis.size(); ii++) {
-    RhiOrient *rhi = new RhiOrient(_params, rhis[ii], maxGates,
+  
+  // create the synthetic RHIs
+  
+  double azimuth = _params.synthetic_rhis_start_az;
+  while (azimuth < 360.0) {
+    
+    RhiOrient *rhi = new RhiOrient(_params, _readVol, azimuth,
                                    _startRangeKm, _gateSpacingKm,
                                    _radarAltKm, _gridZLevels);
     _rhis.push_back(rhi);
+
   }
-  
+
   // set radar params from volume
 
   if (_setRadarParams()) {
@@ -161,7 +146,7 @@ void Orient::_createThreads()
 {
 
   // initialize thread pool for computing orientation in RHIs
-
+  
   for (int ii = 0; ii < _params.n_compute_threads; ii++) {
     ComputeOrientInRhi *thread = new ComputeOrientInRhi(this);
     _threadPoolOrientInRhi.addThreadToMain(thread);

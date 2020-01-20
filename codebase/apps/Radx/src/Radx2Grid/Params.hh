@@ -823,6 +823,10 @@ public:
 
   tdrp_bool_t use_echo_orientation;
 
+  double synthetic_rhis_start_az;
+
+  double synthetic_rhis_delta_az;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -830,7 +834,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[205];
+  mutable TDRPtable _table[207];
 
   const char *_className;
 

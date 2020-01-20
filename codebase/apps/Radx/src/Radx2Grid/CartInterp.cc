@@ -244,6 +244,7 @@ int CartInterp::interpVol()
   _printRunTime("Computing grid relative to radar");
 
   // determine echo orientation
+  // for now this only works in PPI mode
 
   if (_orient) {
     _orient->setRhiMode(_rhiMode);

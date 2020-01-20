@@ -1362,3 +1362,15 @@ paramdef boolean {
   p_help = "Vertically-oriented echoes should be interpolated in the vertical. Horizontally-oriented echoes should be interpolated in the horizontal. We try to determine the principal orientation of the echoes, so that we will use the correct gates for interpolation.";
 } use_echo_orientation;
 
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Starting azimuth for set of synthetic RHIs computed for determining echo orientation.";
+  p_help = "To find the orientation of echoes, we use a set of synthetic RHIs. These are computed on regular azimuths. This is the starting azimuth for the set of synthetic RHIs.";
+} synthetic_rhis_start_az;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Delta azimuth for set of synthetic RHIs computed for determining echo orientation.";
+  p_help = "To find the orientation of echoes, we use a set of synthetic RHIs. These are computed on regular azimuths. This is the delta azimuth for the set of synthetic RHIs.";
+} synthetic_rhis_delta_az;
+
