@@ -207,7 +207,7 @@ MdvFromCircles::MdvFromCircles(char *Filename, Params *P){
   Mdvx::vlevel_header_t Vhdr;
   MEM_zero(Vhdr);               
 
-  Fhdr.struct_id = Mdvx::FIELD_HEAD_MAGIC_COOKIE;
+  Fhdr.struct_id = Mdvx::FIELD_HEAD_MAGIC_COOKIE_64;
 
   Fhdr.user_time1 =     T.unix_time;
   Fhdr.forecast_delta = 0; 

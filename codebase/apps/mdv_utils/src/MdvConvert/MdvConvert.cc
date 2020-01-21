@@ -376,7 +376,7 @@ int MdvConvert:: _processData(time_t inputTime, int leadTime,
   }
 
   if (_params.output_32_bit_headers) {
-    mdvx.setWrite32BitHeaders();
+    mdvx.setWrite32BitHeaders(true);
   }
   
   // write using extended paths?

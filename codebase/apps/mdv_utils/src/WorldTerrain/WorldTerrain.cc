@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
   MEM_zero(Vhdr);               
 
 
-  Fhdr.struct_id = Mdvx::FIELD_HEAD_MAGIC_COOKIE;
+  Fhdr.struct_id = Mdvx::FIELD_HEAD_MAGIC_COOKIE_32;
   Fhdr.field_code = 5;
 
   Fhdr.user_time1 =     Now;
