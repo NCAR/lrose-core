@@ -1,0 +1,1728 @@
+/**********************************************************
+ * paramdef.CartSim
+ *
+ * This file contains the TDRP parameter definitions for CartSim
+ * 
+ */
+
+commentdef
+{
+  p_header = "CartSim";
+  p_text = "This program reads a configuration for simulation, and an example data file (MDV format or CFRADIAL format) to use as a template.  It then replaces the data with simulated fields specified by configuration parameters";
+};
+
+paramdef int
+{
+  p_descr = "Number of threads.";
+  p_help = "One thread is started up per processing time step.";
+  p_default = 4;
+} num_threads;
+
+paramdef boolean
+{
+  p_descr = "Thread debug";
+  p_help = "TRUE to see more details about threads";
+  p_default = FALSE;
+} thread_debug;
+
+typedef enum
+{
+  MDV,
+  CFRADIAL
+} Format_t;
+
+paramdef enum Format_t
+{
+  p_header = "Format";
+  p_help = "Format of template data";
+  p_default = MDV;
+} format;
+
+paramdef string
+{
+  p_header = "Template URL";
+  p_help = "Location of MDV or Radx template data";
+  p_default = "unknown";
+} template_url;
+
+paramdef string
+{
+  p_header = "Template URL field";
+  p_help = "Field name";
+  p_default = "unknown";
+} template_url_field;
+
+paramdef int
+{
+  p_descr = "Template data approximate time";
+  p_help = "y m d h m s";
+  p_default = {2009, 10, 27, 23, 29, 23};
+} template_time[6];
+
+paramdef boolean
+{
+  p_descr = "TRUE to change grid dimensions (shrink)";
+  p_default = FALSE;
+} change_grid;
+
+paramdef double 
+{
+  p_descr = "min/max vlevel degrees, when change_grid=TRUE";
+  p_default = {-1, -1};
+} vlevel_range[2];
+
+paramdef double 
+{
+  p_descr = "min/max azimuth degrees, when change_grid=TRUE";
+  p_default = {-1, -1};
+} azimuth_range[2];
+
+
+paramdef string
+{
+  p_header = "Output URL";
+  p_help = "Location of MDV or Radx simulation output";
+  p_default = "unknown";
+} output_url;
+
+
+typedef enum
+{
+  RADIAL_VEL,
+  VX,
+  VY,
+  VZ,
+  DBZ,
+  SNR,
+  SW,
+  CLUTTER
+} Field_t;
+
+paramdef enum Field_t
+{
+  p_descr = "Fields";
+  p_help = "Fields written to MDV output. Units of motion are meters/second";
+  p_default = {};
+} fields[];
+
+paramdef int
+{
+  p_descr = "Starting time for simulation output";
+  p_help = "y m d h m s";
+  p_default = {2013, 10, 23, 0, 0, 0};
+} start_time[6];
+
+paramdef double
+{
+  p_descr = "Length of sim";
+  p_help = "Length (minutes) of the simulated output";
+  p_default = 10;
+} simulation_length_minutes;
+
+paramdef double
+{
+  p_descr = "Step size (minutes)";
+  p_help = "Time between simulation steps (minutes)";
+  p_default = 1;
+} simulation_step_minutes;
+
+typedef struct
+{
+  int endpoint_index;
+  double radius_km;
+  double zmax_km;
+  double magnitude_knots;
+  double dbz_core;
+  double xmotion_knots;
+  double ymotion_knots;
+  boolean gain;
+  int minutes_to_intensity_fuzzy_index;
+  int minutes_to_size_fuzzy_index;
+  double start_minutes;
+  double lifetime_minutes;
+} Microburst_t;
+
+paramdef struct Microburst_t
+{
+  p_descr = "Microbursts, modelled";
+  p_help = 
+    "endpoint_index = index to endpoints (should have one endpoint for a regular microburst or two endpoints for a microburst line\n"
+    "radius_km = kilometers\n"
+    "zmax_km = km\n"
+    "magnitude_knots = windshear (knots)\n"
+    "dbz_core = dBZ value for the microburst core\n"
+    "xmotion_knots = knots motion of event\n"
+    "ymotion_knots = knots motion of event\n"
+    "gain = TRUE for a convergent event, FALSE for divergent\n"
+    "minutes_to_intensity_fuzzy_index = fuzzy index, minutes->intensity[0,1]\n"
+    "minutes_to_size_fuzzy_index = fuzzy index, minutes->size(km)\n"
+    "start_minutes = minutes after simulation start for event start\n"
+    "lifetime_minutes = minutes the event will live\n";
+  p_default = {};
+} microburst[];
+
+
+typedef struct
+{
+  int endpoint_index;
+  double radius_km;
+  double min_z_km;
+  double xmotion_knots;
+  double ymotion_knots;
+  double zmotion_knots;
+  boolean override;
+  double noise;
+  int km_from_center_to_dbz_fuzzy_index;
+  int minutes_to_intensity_fuzzy_index;
+  int minutes_to_size_fuzzy_index;
+  double start_minutes;
+  double lifetime_minutes;
+} Storm_t;
+
+paramdef struct Storm_t
+{
+  p_descr = "Storms, simple spherical objects with reflectivity within";
+  p_help = 
+    "endpoint_index = index to endpoints\n"
+    "radius_km = radius of storm (km)\n"
+    "min_z_km = minimum height (km)\n"
+    "xmotion_knots = motion of storm (knots)\n"
+    "ymotion_knots = motion of storm (knots)\n"
+    "zmotion_knots = motion of storm (knots)\n"
+    "override = true to replace dbz no matter what, false to use max of storm and existing value\n"
+    "noise = amount of noise\n"
+    "km_from_center_to_dbz_fuzzy_index = fuzzy index, km -> dbz\n"
+    "minutes_to_intensity_fuzzy_index = fuzzy index, minutes->intensity[0,1]\n"
+    "minutes_to_size_fuzzy_index = fuzzy index, minutes->size(km)\n"
+    "start_minutes = minutes after simulation start for event start\n"
+    "lifetime_minutes = minutes the event will live\n";
+  p_default = {};
+} storm[];
+
+typedef struct
+{
+  double x_km;
+  double y_km;
+  double z_km;
+  double radius_km;
+  double noise;
+  double sw;
+  double xmotion_knots;
+  double ymotion_knots;
+  double zmotion_knots;
+  int minutes_to_intensity_fuzzy_index;
+  int minutes_to_size_fuzzy_index;
+  double start_minutes;
+  double lifetime_minutes;
+} Turbulence_t;
+
+paramdef struct Turbulence_t
+{
+  p_descr = "Turbulence, simple spherical objects with turbulent winds";
+  p_help = 
+    "x_km = center (km)\n"
+    "y_km = center (km)\n"
+    "z_km = center (km)\n"
+    "radius_km = radius of event (km)\n"
+    "noise = amount of noise\n"
+    "sw = spectrum width\n"
+    "xmotion_knots = motion of event (knots)\n"
+    "ymotion_knots = motion of event (knots)\n"
+    "zmotion_knots = motion of event (knots)\n"
+    "minutes_to_intensity_fuzzy_index = fuzzy index, minutes->intensity[0,1]\n"
+    "minutes_to_size_fuzzy_index = fuzzy index, minutes->size(km)\n"
+    "start_minutes = minutes after simulation start for event start\n"
+    "lifetime_minutes = minutes the event will live\n";
+  p_default = {};
+} turbulence[];
+
+
+typedef struct
+{
+  int endpts_index;  
+  double thin_line_z_km;
+  double thin_line_x_km;
+  double thin_line_r_km;
+  double z1_km;
+  double z2_km;
+  double z3_km;
+  double x1_km;
+  double x2_km;
+  double xb_km;
+  double wbehind_knots;
+  double thin_line_dbz;
+  double xmotion_knots;
+  double ymotion_knots;
+  double side_decay;
+  boolean wave;
+  int minutes_to_intensity_fuzzy_index;
+  double start_minutes;
+  double lifetime_minutes;
+} GustFront_t;
+
+paramdef struct GustFront_t
+{
+  p_descr = "Gust Fronts, modelled";
+  p_help = 
+    "endpts_index = index to the endpoints for this front, (at least 2)\n"
+    "thin_line_z_km = param for thin line (km)\n"
+    "thin_line_x_km = param for thin line (km)\n"
+    "thin_line_r_km = param for thin line (km)\n"
+    "z1_km = param for front (km)\n"
+    "z2_km = param for front (km)\n"
+    "z3_km = param for front (km)\n"
+    "x1_km = param for front (km)\n"
+    "x2_km = param for front (km)\n"
+    "xb_km = param for front (km)\n"
+    "wbehind_knots = max wind behind the front (knots)\n"
+    "thin_line_dbz = reflectivity of the thin line\n"
+    "xmotion_knots = motion of front (knots)\n"
+    "ymotion_knots = motion of front (knots)\n"
+    "side_decay = scale factor for decay on sides of front\n"
+    "wave = true for a 'wave' front\n"
+    "minutes_to_intensity_fuzzy_index = fuzzy index, minutes->intensity[0,1]\n"
+    "start_minutes = minutes after simulation start for event start\n"
+    "lifetime_minutes = minutes the event will live\n";
+  p_default = {};
+} gust_front[];
+
+typedef struct
+{
+  double angle0_degrees;
+  double angle1_degrees;
+  double xvel_knots;
+  double yvel_knots;
+  double zvel_knots;
+  double dbz;
+  double noise;
+  double clutter;
+  double start_minutes;
+  double lifetime_minutes;
+} DeviantRay_t;
+
+paramdef struct DeviantRay_t
+{
+  p_descr = "Deviant Rays, particular orientation range with 'different' values from origin out to farthest point in domain\n";
+  p_help = 
+    "angle0_degrees = smallest (math) angle of ray\n"
+    "angle1_degrees = largest (math) angle of ray\n"
+    "xvel_knots = velocity value (knots) within ray\n"
+    "yvel_knots = velocity value (knots) within ray\n"
+    "zvel_knots = velocity value (knots) within ray\n"
+    "dbz = value within ray\n"
+    "noise = noise level within the ray\n"
+    "clutter = clutter value within the ray\n"
+    "start_minutes = minutes after simulation start for event start\n"
+    "lifetime_minutes = minutes the event will live\n";
+  p_default = {};
+} deviant_ray[];
+
+typedef struct
+{
+  double theta_degrees;
+  double phi_degrees;
+  double r_km;
+  double dtheta_degrees;
+  double dphi_degrees;
+  double dr_km;
+  double dbz;
+  double xvel_knots;
+  double yvel_knots;
+  double zvel_knots;
+  double noise;
+  double clutter;
+  double start_minutes;
+  double lifetime_minutes;
+} PolarSpeck_t;
+
+paramdef struct PolarSpeck_t
+{
+  p_descr = "Polar Specks = small specks where values are 'different', polar coordinates";
+  p_help = 
+    "theta_degrees = center of speck azimuthally (math degrees)\n"
+    "phi_degrees = center of speck elevation angle (math degrees)\n"
+    "r_km = center of speck radially (km)\n"
+    "dtheta_degrees = total width of speck azimuthally (math degrees)\n"
+    "dphi_degrees = total width of speck elevation angle (math degrees)\n"
+    "dr_km = total width of speck radially (km)\n"
+    "dbz = value within speck\n"
+    "xvel_knots = velocity value (knots) within speck\n"
+    "yvel_knots = velocity value (knots) within speck\n"
+    "zvel_knots = velocity value (knots) within speck\n"
+    "noise = noise level within the speck\n"
+    "clutter = clutter value within the speck\n"
+    "start_minutes = minutes after simulation start for event start\n"
+    "lifetime_minutes = minutes the event will live\n";
+  p_default = {};
+} polar_speck[];
+
+typedef struct
+{
+  double x_km;
+  double y_km;
+  double z_km;
+  double dx_km;
+  double dy_km;
+  double dz_km;
+  double dbz;
+  double xvel_knots;
+  double yvel_knots;
+  double zvel_knots;
+  double noise;
+  double clutter;
+  double start_minutes;
+  double lifetime_minutes;
+} CartesianSpeck_t;
+
+paramdef struct CartesianSpeck_t
+{
+  p_descr = "Cartesian Specks = small specks where values are 'different', cartesian coordinates";
+  p_help = 
+    "x_km = center of speck (km)\n"
+    "y_km = center of speck (km)\n"
+    "z_km = center of speck (km)\n"
+    "dx_km = width of speck (km)\n"
+    "dy_km = width of speck (km)\n"
+    "dz_km = width of speck (km)\n"
+    "dbz = value within speck\n"
+    "xvel_knots = velocity value (knots) within speck\n"
+    "yvel_knots = velocity value (knots) within speck\n"
+    "zvel_knots = velocity value (knots) within speck\n"
+    "noise = noise level within the speck\n"
+    "clutter = clutter value within the speck\n"
+    "start_minutes = minutes after simulation start for event start\n"
+    "lifetime_minutes = minutes the event will live\n";
+  p_default = {};
+} cartesian_speck[];
+
+typedef struct
+{
+  double x_km;
+  double y_km;
+  double z_km;
+  double radius_km;
+  double noise;
+  double xvel_knots;
+  double yvel_knots;
+  double zvel_knots;
+  double xmotion_knots;
+  double ymotion_knots;
+  double zmotion_knots;
+  double start_minutes;
+  double lifetime_minutes;
+} VelCircle_t;
+
+paramdef struct VelCircle_t
+{
+  p_descr = "Velocity Circles, spherical region where velocity values are different than surroundings";
+  p_help = 
+    "x_km = center of object km\n"
+    "y_km = center of object km\n"
+    "z_km = center of object km\n"
+    "radius_km = radius (km)\n"
+    "noise = noise level inside object\n"
+    "xvel_knots = velocity value (knots) within object\n"
+    "yvel_knots = velocity value (knots) within object\n"
+    "zvel_knots = velocity value (knots) within object\n"
+    "xmotion_knots = motion of object (knots)\n"
+    "ymotion_knots = motion of object (knots)\n"
+    "zmotion_knots = motion of object (knots)\n"
+    "start_minutes = minutes after simulation start for event start\n"
+    "lifetime_minutes = minutes the event will live\n";
+  p_default = {};
+} vel_circle[];
+
+
+typedef struct
+{
+  double theta_degrees;
+  double phi_degrees;
+  double r_km;
+  double dtheta_degrees;
+  double dphi_degrees;
+  double dr_km;
+  double dbz;
+  double vel;
+  boolean values_random;
+  double clutter;
+  double percent;
+  double percent_correct;
+  double start_minutes;
+  double lifetime_minutes;
+} ClutterRegion_t;
+
+paramdef struct ClutterRegion_t
+{
+  p_descr = "ClutterRegion = region in polar space with random clutter. Points either have clutter or not, and if they do the reflectivity is high and the velocity is 0.";
+  p_help = 
+    "theta_degrees = center azimuthally (math degrees)\n"
+    "phi_degrees = center elevation angle (math degrees)\n"
+    "r_km = center radially (km)\n"
+    "dtheta_degrees = total width azimuthally (math degrees)\n"
+    "dphi_degrees = total width elevation angle (math degrees)\n"
+    "dr_km = total width radially (km)\n"
+    "dbz = high dbz value where there is clutter\n"
+    "vel = high |vel| knots value where there is clutter, and values_random=true\n"
+    "values_random = TRUE for random data values up to high value, FALSE for vel=0 and dbz=the dbz param value\n"
+    "clutter = clutter value to use\n"
+    "percent = percent of points in region to be given dbz/vel clutter values\n"
+    "percent_correct = percent of the clutter points correctly flagged as clutter\n"
+    "start_minutes = minutes after simulation start for event start\n"
+    "lifetime_minutes = minutes the event will live\n";
+  p_default = {};
+} clutter_region[];
+
+paramdef double
+{
+  p_descr = "wind field ambient value (knots) (x,y,z)";
+  p_default = {1,1, 0};
+} ambient_vel_knots[3];
+
+paramdef double
+{
+  p_descr = "ambient reflectivity (dbz)";
+  p_default = 5.0;
+} ambient_dbz;
+
+paramdef double
+{
+  p_descr = "ambient noise, added to fields";
+  p_default = 0.25;
+} ambient_noise;
+
+paramdef double
+{
+  p_descr = "ambient spectrum width";
+  p_default = 2.0;
+} ambient_sw;
+
+paramdef double
+{
+  p_descr = "ambient snr";
+  p_default = 20.0;
+} ambient_snr;
+
+paramdef double
+{
+  p_descr = "ambient clutter";
+  p_default = 0.0;
+} ambient_clutter;
+
+  
+typedef struct
+{
+  double x;
+  double y;
+} Xy_t;
+
+
+paramdef struct Xy_t
+{
+  p_descr = "Utilda";
+  p_help = "Mapping from r/rmax to scale used by microburst model";
+  p_private = TRUE;
+  p_default = {
+  {
+    x = 0,
+    y = 0
+  }
+  ,
+  {
+    x = 0.1,
+    y = 0.094702
+  }
+  ,
+  {
+    x = 0.2,
+    y = 0.184107
+  }
+  ,
+  {
+    x = 0.3,
+    y = 0.276161
+  }
+  ,
+  {
+    x = 0.4,
+    y = 0.37881
+  }
+  ,
+  {
+    x = 0.5,
+    y = 0.5
+  }
+  ,
+  {
+    x = 0.6,
+    y = 0.642381
+  }
+  ,
+  {
+    x = 0.7,
+    y = 0.787411
+  }
+  ,
+  {
+    x = 0.8,
+    y = 0.91125
+  }
+  ,
+  {
+    x = 0.9,
+    y = 0.990059
+  }
+  ,
+  {
+    x = 1,
+    y = 1
+  }
+  ,
+  {
+    x = 1.1,
+    y = 0.926174
+  }
+  ,
+  {
+    x = 1.2,
+    y = 0.789451
+  }
+  ,
+  {
+    x = 1.3,
+    y = 0.61964
+  }
+  ,
+  {
+    x = 1.4,
+    y = 0.446553
+  }
+  ,
+  {
+    x = 1.5,
+    y = 0.3
+  }
+  ,
+  {
+    x = 1.6,
+    y = 0.202522
+  }
+  ,
+  {
+    x = 1.7,
+    y = 0.147587
+  }
+  ,
+  {
+    x = 1.8,
+    y = 0.121389
+  }
+  ,
+  {
+    x = 1.9,
+    y = 0.110128
+  }
+  ,
+  {
+    x = 2,
+    y = 0.1
+  }
+  ,
+  {
+    x = 2.1,
+    y = 0.080536
+  }
+  ,
+  {
+    x = 2.2,
+    y = 0.054603
+  }
+  ,
+  {
+    x = 2.3,
+    y = 0.028402
+  }
+  ,
+  {
+    x = 2.4,
+    y = 0.008134
+  }
+  ,
+  {
+    x = 2.5,
+    y = 0
+  }
+  };
+} utilda[];
+
+paramdef struct Xy_t
+{
+  p_descr = "Stilda";
+  p_help = "Mapping from z/zmax to scale used by microburst model";
+  p_private = true;
+  p_default = {
+  {
+    x = 0,
+    y = 0.5
+  }
+  ,
+  {
+    x = 0.1,
+    y = 0.672609
+  }
+  ,
+  {
+    x = 0.2,
+    y = 0.8
+  }
+  ,
+  {
+    x = 0.3,
+    y = 0.894738
+  }
+  ,
+  {
+    x = 0.4,
+    y = 0.962255
+  }
+  ,
+  {
+    x = 0.5,
+    y = 1.0062
+  }
+  ,
+  {
+    x = 0.6,
+    y = 1.03022
+  }
+  ,
+  {
+    x = 0.7,
+    y = 1.03796
+  }
+  ,
+  {
+    x = 0.8,
+    y = 1.03307
+  }
+  ,
+  {
+    x = 0.9,
+    y = 1.0192
+  }
+  ,
+  {
+    x = 1,
+    y = 1
+  }
+  ,
+  {
+    x = 1.1,
+    y = 0.978524
+  }
+  ,
+  {
+    x = 1.2,
+    y = 0.955473
+  }
+  ,
+  {
+    x = 1.3,
+    y = 0.930957
+  }
+  ,
+  {
+    x = 1.4,
+    y = 0.905087
+  }
+  ,
+  {
+    x = 1.5,
+    y = 0.877972
+  }
+  ,
+  {
+    x = 1.6,
+    y = 0.849723
+  }
+  ,
+  {
+    x = 1.7,
+    y = 0.820449
+  }
+  ,
+  {
+    x = 1.8,
+    y = 0.790261
+  }
+  ,
+  {
+    x = 1.9,
+    y = 0.759268
+  }
+  ,
+  {
+    x = 2,
+    y = 0.727582
+  }
+  ,
+  {
+    x = 2.1,
+    y = 0.69531
+  }
+  ,
+  {
+    x = 2.2,
+    y = 0.662565
+  }
+  ,
+  {
+    x = 2.3,
+    y = 0.629456
+  }
+  ,
+  {
+    x = 2.4,
+    y = 0.596092
+  }
+  ,
+  {
+    x = 2.5,
+    y = 0.562585
+  }
+  ,
+  {
+    x = 2.6,
+    y = 0.529043
+  }
+  ,
+  {
+    x = 2.7,
+    y = 0.495578
+  }
+  ,
+  {
+    x = 2.8,
+    y = 0.462299
+  }
+  ,
+  {
+    x = 2.9,
+    y = 0.429316
+  }
+  ,
+  {
+    x = 3,
+    y = 0.396739
+  }
+  ,
+  {
+    x = 3.1,
+    y = 0.364679
+  }
+  ,
+  {
+    x = 3.2,
+    y = 0.333245
+  }
+  ,
+  {
+    x = 3.3,
+    y = 0.302547
+  }
+  ,
+  {
+    x = 3.4,
+    y = 0.272696
+  }
+  ,
+  {
+    x = 3.5,
+    y = 0.243801
+  }
+  ,
+  {
+    x = 3.6,
+    y = 0.215973
+  }
+  ,
+  {
+    x = 3.7,
+    y = 0.189321
+  }
+  ,
+  {
+    x = 3.8,
+    y = 0.163957
+  }
+  ,
+  {
+    x = 3.9,
+    y = 0.139988
+  }
+  ,
+  {
+    x = 4,
+    y = 0.117527
+  }
+  ,
+  {
+    x = 4.1,
+    y = 0.096683
+  }
+  ,
+  {
+    x = 4.2,
+    y = 0.077565
+  }
+  ,
+  {
+    x = 4.3,
+    y = 0.060285
+  }
+  ,
+  {
+    x = 4.4,
+    y = 0.044951
+  }
+  ,
+  {
+    x = 4.5,
+    y = 0.031675
+  }
+  ,
+  {
+    x = 4.6,
+    y = 0.020565
+  }
+  ,
+  {
+    x = 4.7,
+    y = 0.011733
+  }
+  ,
+  {
+    x = 4.8,
+    y = 0.005288
+  }
+  ,
+  {
+    x = 4.9,
+    y = 0.00134
+  }
+  };
+} stilda[];
+
+paramdef struct Xy_t
+{
+  p_descr = "Wtilda";
+  p_help = "Mapping from z/zmax to scale used by microburst model";
+  p_private = TRUE;
+  p_default = {
+  {
+    x = 0,
+    y = 0
+  }
+  ,
+  {
+    x = 0.1,
+    y = 0.0032
+  }
+  ,
+  {
+    x = 0.2,
+    y = 0.012267
+  }
+  ,
+  {
+    x = 0.3,
+    y = 0.0264
+  }
+  ,
+  {
+    x = 0.4,
+    y = 0.0448
+  }
+  ,
+  {
+    x = 0.5,
+    y = 0.066667
+  }
+  ,
+  {
+    x = 0.6,
+    y = 0.0912
+  }
+  ,
+  {
+    x = 0.7,
+    y = 0.1176
+  }
+  ,
+  {
+    x = 0.8,
+    y = 0.145067
+  }
+  ,
+  {
+    x = 0.9,
+    y = 0.1728
+  }
+  ,
+  {
+    x = 1,
+    y = 0.2
+  }
+  ,
+  {
+    x = 1.1,
+    y = 0.226089
+  }
+  ,
+  {
+    x = 1.2,
+    y = 0.251378
+  }
+  ,
+  {
+    x = 1.3,
+    y = 0.2764
+  }
+  ,
+  {
+    x = 1.4,
+    y = 0.301689
+  }
+  ,
+  {
+    x = 1.5,
+    y = 0.327778
+  }
+  ,
+  {
+    x = 1.6,
+    y = 0.3552
+  }
+  ,
+  {
+    x = 1.7,
+    y = 0.384489
+  }
+  ,
+  {
+    x = 1.8,
+    y = 0.416178
+  }
+  ,
+  {
+    x = 1.9,
+    y = 0.4508
+  }
+  ,
+  {
+    x = 2,
+    y = 0.488889
+  }
+  ,
+  {
+    x = 2.1,
+    y = 0.530978
+  }
+  ,
+  {
+    x = 2.2,
+    y = 0.5776
+  }
+  ,
+  {
+    x = 2.3,
+    y = 0.629289
+  }
+  ,
+  {
+    x = 2.4,
+    y = 0.686578
+  }
+  ,
+  {
+    x = 2.5,
+    y = 0.75
+  }
+  ,
+  {
+    x = 2.6,
+    y = 0.818667
+  }
+  ,
+  {
+    x = 2.7,
+    y = 0.886
+  }
+  ,
+  {
+    x = 2.8,
+    y = 0.944
+  }
+  ,
+  {
+    x = 2.9,
+    y = 0.984667
+  }
+  ,
+  {
+    x = 3,
+    y = 1
+  }
+  ,
+  {
+    x = 5,
+    y = 1
+  }
+  ,
+  {
+    x = 5.1,
+    y = 0.996403
+  }
+  ,
+  {
+    x = 5.2,
+    y = 0.985975
+  }
+  ,
+  {
+    x = 5.3,
+    y = 0.969259
+  }
+  ,
+  {
+    x = 5.4,
+    y = 0.9468
+  }
+  ,
+  {
+    x = 5.5,
+    y = 0.919141
+  }
+  ,
+  {
+    x = 5.6,
+    y = 0.886825
+  }
+  ,
+  {
+    x = 5.7,
+    y = 0.850397
+  }
+  ,
+  {
+    x = 5.8,
+    y = 0.8104
+  }
+  ,
+  {
+    x = 5.9,
+    y = 0.767378
+  }
+  ,
+  {
+    x = 6,
+    y = 0.721875
+  }
+  ,
+  {
+    x = 6.1,
+    y = 0.674434
+  }
+  ,
+  {
+    x = 6.2,
+    y = 0.6256
+  }
+  ,
+  {
+    x = 6.3,
+    y = 0.575916
+  }
+  ,
+  {
+    x = 6.4,
+    y = 0.525925
+  }
+  ,
+  {
+    x = 6.5,
+    y = 0.476172
+  }
+  ,
+  {
+    x = 6.6,
+    y = 0.4272
+  }
+  ,
+  {
+    x = 6.7,
+    y = 0.379553
+  }
+  ,
+  {
+    x = 6.8,
+    y = 0.333775
+  }
+  ,
+  {
+    x = 6.9,
+    y = 0.290409
+  }
+  ,
+  {
+    x = 7,
+    y = 0.25
+  }
+  ,
+  {
+    x = 7.1,
+    y = 0.212975
+  }
+  ,
+  {
+    x = 7.2,
+    y = 0.179304
+  }
+  ,
+  {
+    x = 7.3,
+    y = 0.148838
+  }
+  ,
+  {
+    x = 7.4,
+    y = 0.12143
+  }
+  ,
+  {
+    x = 7.5,
+    y = 0.096933
+  }
+  ,
+  {
+    x = 7.6,
+    y = 0.0752
+  }
+  ,
+  {
+    x = 7.7,
+    y = 0.056084
+  }
+  ,
+  {
+    x = 7.8,
+    y = 0.039437
+  }
+  ,
+  {
+    x = 7.9,
+    y = 0.025113
+  }
+  ,
+  {
+    x = 8,
+    y = 0.012963
+  }
+  ,
+  {
+    x = 8.1,
+    y = 0.002841
+  }
+  ,
+  {
+    x = 8.2,
+    y = -0.0054
+  }
+  ,
+  {
+    x = 8.3,
+    y = -0.011908
+  }
+  ,
+  {
+    x = 8.4,
+    y = -0.01683
+  }
+  ,
+  {
+    x = 8.5,
+    y = -0.020312
+  }
+  ,
+  {
+    x = 8.6,
+    y = -0.022504
+  }
+  ,
+  {
+    x = 8.7,
+    y = -0.02355
+  }
+  ,
+  {
+    x = 8.8,
+    y = -0.0236
+  }
+  ,
+  {
+    x = 8.9,
+    y = -0.0228
+  }
+  ,
+  {
+    x = 9,
+    y = -0.021296
+  }
+  ,
+  {
+    x = 9.1,
+    y = -0.019238
+  }
+  ,
+  {
+    x = 9.2,
+    y = -0.01677
+  }
+  ,
+  {
+    x = 9.3,
+    y = -0.014042
+  }
+  ,
+  {
+    x = 9.4,
+    y = -0.0112
+  }
+  ,
+  {
+    x = 9.5,
+    y = -0.008391
+  }
+  ,
+  {
+    x = 9.6,
+    y = -0.005763
+  }
+  ,
+  {
+    x = 9.7,
+    y = -0.003463
+  }
+  ,
+  {
+    x = 9.8,
+    y = -0.001637
+  }
+  ,
+  {
+    x = 9.9,
+    y = -0.000434
+  }
+  };
+} wtilda[];
+
+paramdef struct Xy_t
+{
+  p_descr = "Wrmax";
+  p_help = "Mapping from r/rmax to scale used by microburst model";
+  p_private = true;
+  p_default = {
+  {
+    x = 0,
+    y = 2.5
+  }
+  ,
+  {
+    x = 0.1,
+    y = 2.05285
+  }
+  ,
+  {
+    x = 0.2,
+    y = 1.70345
+  }
+  ,
+  {
+    x = 0.3,
+    y = 1.43991
+  }
+  ,
+  {
+    x = 0.4,
+    y = 1.25035
+  }
+  ,
+  {
+    x = 0.5,
+    y = 1.12285
+  }
+  ,
+  {
+    x = 0.6,
+    y = 1.04552
+  }
+  ,
+  {
+    x = 0.7,
+    y = 1.00647
+  }
+  ,
+  {
+    x = 0.8,
+    y = 0.993793
+  }
+  ,
+  {
+    x = 0.9,
+    y = 0.995603
+  }
+  ,
+  {
+    x = 1,
+    y = 1
+  }
+  ,
+  {
+    x = 1.1,
+    y = 0.997267
+  }
+  ,
+  {
+    x = 1.2,
+    y = 0.986414
+  }
+  ,
+  {
+    x = 1.3,
+    y = 0.968629
+  }
+  ,
+  {
+    x = 1.4,
+    y = 0.945103
+  }
+  ,
+  {
+    x = 1.5,
+    y = 0.917026
+  }
+  ,
+  {
+    x = 1.6,
+    y = 0.885586
+  }
+  ,
+  {
+    x = 1.7,
+    y = 0.851974
+  }
+  ,
+  {
+    x = 1.8,
+    y = 0.817379
+  }
+  ,
+  {
+    x = 1.9,
+    y = 0.782991
+  }
+  ,
+  {
+    x = 2,
+    y = 0.75
+  }
+  ,
+  {
+    x = 2.1,
+    y = 0.71938
+  }
+  ,
+  {
+    x = 2.2,
+    y = 0.691244
+  }
+  ,
+  {
+    x = 2.3,
+    y = 0.665491
+  }
+  ,
+  {
+    x = 2.4,
+    y = 0.64202
+  }
+  ,
+  {
+    x = 2.5,
+    y = 0.62073
+  }
+  ,
+  {
+    x = 2.6,
+    y = 0.601517
+  }
+  ,
+  {
+    x = 2.7,
+    y = 0.584282
+  }
+  ,
+  {
+    x = 2.8,
+    y = 0.568922
+  }
+  ,
+  {
+    x = 2.9,
+    y = 0.555336
+  }
+  ,
+  {
+    x = 3,
+    y = 0.543423
+  }
+  ,
+  {
+    x = 3.1,
+    y = 0.53308
+  }
+  ,
+  {
+    x = 3.2,
+    y = 0.524207
+  }
+  ,
+  {
+    x = 3.3,
+    y = 0.516701
+  }
+  ,
+  {
+    x = 3.4,
+    y = 0.510462
+  }
+  ,
+  {
+    x = 3.5,
+    y = 0.505388
+  }
+  ,
+  {
+    x = 3.6,
+    y = 0.501377
+  }
+  ,
+  {
+    x = 3.7,
+    y = 0.498327
+  }
+  ,
+  {
+    x = 3.8,
+    y = 0.496138
+  }
+  ,
+  {
+    x = 3.9,
+    y = 0.494707
+  }
+  ,
+  {
+    x = 4,
+    y = 0.493934
+  }
+  ,
+  {
+    x = 4.1,
+    y = 0.493716
+  }
+  ,
+  {
+    x = 4.2,
+    y = 0.493951
+  }
+  ,
+  {
+    x = 4.3,
+    y = 0.49454
+  }
+  ,
+  {
+    x = 4.4,
+    y = 0.495379
+  }
+  ,
+  {
+    x = 4.5,
+    y = 0.496368
+  }
+  ,
+  {
+    x = 4.6,
+    y = 0.497405
+  }
+  ,
+  {
+    x = 4.7,
+    y = 0.498388
+  }
+  ,
+  {
+    x = 4.8,
+    y = 0.499216
+  }
+  ,
+  {
+    x = 4.9,
+    y = 0.499787
+  }
+  };
+} wrmax[];
+
+
+commentdef
+{
+  p_header = "Fuzzy Function params";
+  p_text = 
+    " Used internally for fuzzy mappings\n"
+    " index 0 up to 11, each one has any number of :\n"
+    "   x = fuzzy x value\n"
+    "   y = fuzzy y value\n";
+};
+
+paramdef struct Xy_t
+{
+  p_descr = "0 fuzzy f";
+  p_default = {};
+} fuzzy0[];
+paramdef struct Xy_t
+{
+  p_descr = "1 fuzzy f";
+  p_default = {};
+} fuzzy1[];
+paramdef struct Xy_t
+{
+  p_descr = "2 fuzzy f";
+  p_default = {};
+} fuzzy2[];
+paramdef struct Xy_t
+{
+  p_descr = "3 fuzzy f";
+  p_default = {};
+} fuzzy3[];
+paramdef struct Xy_t
+{
+  p_descr = "4 fuzzy f";
+  p_default = {};
+} fuzzy4[];
+paramdef struct Xy_t
+{
+  p_descr = "5 fuzzy f";
+  p_default = {};
+} fuzzy5[];
+paramdef struct Xy_t
+{
+  p_descr = "6 fuzzy f";
+  p_default = {};
+} fuzzy6[];
+paramdef struct Xy_t
+{
+  p_descr = "7 fuzzy f";
+  p_default = {};
+} fuzzy7[];
+paramdef struct Xy_t
+{
+  p_descr = "8 fuzzy f";
+  p_default = {};
+} fuzzy8[];
+paramdef struct Xy_t
+{
+  p_descr = "9 fuzzy f";
+  p_default = {};
+} fuzzy9[];
+paramdef struct Xy_t
+{
+  p_descr = "10 fuzzy f";
+  p_default = {};
+} fuzzy10[];
+paramdef struct Xy_t
+{
+  p_descr = "11 fuzzy f";
+  p_default = {};
+} fuzzy11[];
+
+commentdef
+{
+  p_header = "Endpoint params";
+  p_text = 
+    " Used internally to specify a set of points\n"
+    " index 0 up to 11, each one has any number of :\n"
+    "   x = X value (km)\n"
+    "   y = Y value (km)";
+};
+
+paramdef struct Xy_t
+{
+  p_descr = "0 endpoints";
+  p_default = {};
+} endpoint0[];
+paramdef struct Xy_t
+{
+  p_descr = "1 endpoints";
+  p_default = {};
+} endpoint1[];
+paramdef struct Xy_t
+{
+  p_descr = "2 endpoints";
+  p_default = {};
+} endpoint2[];
+paramdef struct Xy_t
+{
+  p_descr = "3 endpoints";
+  p_default = {};
+} endpoint3[];
+paramdef struct Xy_t
+{
+  p_descr = "4 endpoints";
+  p_default = {};
+} endpoint4[];
+paramdef struct Xy_t
+{
+  p_descr = "5 endpoints";
+  p_default = {};
+} endpoint5[];
+paramdef struct Xy_t
+{
+  p_descr = "6 endpoints";
+  p_default = {};
+} endpoint6[];
+paramdef struct Xy_t
+{
+  p_descr = "7 endpoints";
+  p_default = {};
+} endpoint7[];
+paramdef struct Xy_t
+{
+  p_descr = "8 endpoints";
+  p_default = {};
+} endpoint8[];
+paramdef struct Xy_t
+{
+  p_descr = "9 endpoints";
+  p_default = {};
+} endpoint9[];
+paramdef struct Xy_t
+{
+  p_descr = "10 endpoints";
+  p_default = {};
+} endpoint10[];
+paramdef struct Xy_t
+{
+  p_descr = "11 endpoints";
+  p_default = {};
+} endpoint11[];
+
