@@ -1662,7 +1662,7 @@ void Mdvx::printVolTable(ostream &out,
 	for (size_t ii = 0; ii < fields.size(); ii++) {
 	  fl32 *plane = (fl32 *) fields[ii]->getPlane(iz);
 	  const Mdvx::field_header_t &fhdr = fields[ii]->getFieldHeader();
-	  int offset = iy * fhdr.nx + ix;
+	  int64_t offset = iy * fhdr.nx + ix;
 	  fl32 val = plane[offset];
 	  out << " " << val;
 	}

@@ -486,13 +486,13 @@ void Mdvx::writeToBuffer(MemBuf &buf) const
 
     // leading FORTRAN rec len
     
-    int size = _fields[i]->getVolLen();
+    int64_t size = _fields[i]->getVolLen();
     si32 BEsize = BE_from_si32(size);
     buf.add(&BEsize, sizeof(si32));
 
     // data
 
-    int offset = buf.getLen();
+    int64_t offset = buf.getLen();
     buf.add(_fields[i]->getVol(), size);
 
     // trailing FORTRAN rec len
@@ -531,13 +531,13 @@ void Mdvx::writeToBuffer(MemBuf &buf) const
 
     // leading FORTRAN rec len
     
-    int size = _chunks[i]->getSize();
+    int64_t size = _chunks[i]->getSize();
     si32 BEsize = BE_from_si32(size);
     buf.add(&BEsize, sizeof(si32));
 
     // data
 
-    int offset = buf.getLen();
+    int64_t offset = buf.getLen();
     buf.add(_chunks[i]->getData(), size);
 
     // trailing FORTRAN rec len
@@ -627,13 +627,13 @@ void Mdvx::_writeToBuffer32(MemBuf &buf) const
 
     // leading FORTRAN rec len
     
-    int size = _fields[i]->getVolLen();
+    int64_t size = _fields[i]->getVolLen();
     si32 BEsize = BE_from_si32(size);
     buf.add(&BEsize, sizeof(si32));
     
     // data
     
-    int offset = buf.getLen();
+    int64_t offset = buf.getLen();
     buf.add(_fields[i]->getVol(), size);
 
     // trailing FORTRAN rec len
@@ -672,13 +672,13 @@ void Mdvx::_writeToBuffer32(MemBuf &buf) const
 
     // leading FORTRAN rec len
     
-    int size = _chunks[i]->getSize();
+    int64_t size = _chunks[i]->getSize();
     si32 BEsize = BE_from_si32(size);
     buf.add(&BEsize, sizeof(si32));
 
     // data
 
-    int offset = buf.getLen();
+    int64_t offset = buf.getLen();
     buf.add(_chunks[i]->getData(), size);
 
     // trailing FORTRAN rec len
@@ -766,7 +766,7 @@ int Mdvx::writeUsingBuf(const string &output_path) const
 
   // write the buffer
 
-  int size = buf.getLen();
+  int64_t size = buf.getLen();
   if (outfile.fwrite(buf.getPtr(), 1, size) != size) {
     int errNum = errno;
     _errStr += "ERROR - Mdvx::writeUsingBuf\n";

@@ -1788,7 +1788,7 @@ int Mdvx::readFromBuffer(const MemBuf &buf)
     
     if (_is64Bit) {
 
-      int min_len =
+      int64_t min_len =
         mhdr.vlevel_hdr_offset + mhdr.n_fields * sizeof(vlevel_header_t);
       if ((int) buf.getLen() < min_len) {
         _errStr += "ERROR - Mdvx::readFromBuffer.\n";
@@ -1807,7 +1807,7 @@ int Mdvx::readFromBuffer(const MemBuf &buf)
                        ifield * sizeof(vlevel_header_t)), sizeof(vhdr));
         vlevel_header_from_BE(vhdr);
         
-        int min_len = fhdr.field_data_offset + fhdr.volume_size;
+        int64_t min_len = fhdr.field_data_offset + fhdr.volume_size;
         if ((int) buf.getLen() < min_len) {
           _errStr += "ERROR - Mdvx::readFromBuffer.\n";
           _errStr += "  Buffer too short for field volume data.\n";
@@ -1821,7 +1821,7 @@ int Mdvx::readFromBuffer(const MemBuf &buf)
       
       // 32-bit
       
-      int min_len =
+      int64_t min_len =
         mhdr.vlevel_hdr_offset + mhdr.n_fields * sizeof(vlevel_header_32_t);
       if ((int) buf.getLen() < min_len) {
         _errStr += "ERROR - Mdvx::readFromBuffer.\n";
@@ -1844,7 +1844,7 @@ int Mdvx::readFromBuffer(const MemBuf &buf)
         vlevel_header_from_BE_32(vhdr32);
         _copyVlevelHeader32to64(vhdr32, vhdr);
         
-        int min_len = fhdr.field_data_offset + fhdr.volume_size;
+        int64_t min_len = fhdr.field_data_offset + fhdr.volume_size;
         if ((int) buf.getLen() < min_len) {
           _errStr += "ERROR - Mdvx::readFromBuffer.\n";
           _errStr += "  Buffer too short for field volume data.\n";
@@ -1881,7 +1881,7 @@ int Mdvx::readFromBuffer(const MemBuf &buf)
       
       // 64 bit
 
-      int min_len =
+      int64_t min_len =
         mhdr.chunk_hdr_offset + mhdr.n_chunks * sizeof(chunk_header_t);
       if ((int) buf.getLen() < min_len) {
         _errStr += "ERROR - Mdvx::readFromBuffer.\n";
@@ -1896,7 +1896,7 @@ int Mdvx::readFromBuffer(const MemBuf &buf)
           *((chunk_header_t *) ((char *) buf.getPtr() + mhdr.chunk_hdr_offset +
                                 i * sizeof(chunk_header_t)));
         chunk_header_from_BE(chdr);
-        int min_len = chdr.chunk_data_offset + chdr.size;
+        int64_t min_len = chdr.chunk_data_offset + chdr.size;
         if ((int) buf.getLen() < min_len) {
           _errStr += "ERROR - Mdvx::readFromBuffer.\n";
           _errStr += "  Buffer too short for chunk data.\n";
@@ -1913,7 +1913,7 @@ int Mdvx::readFromBuffer(const MemBuf &buf)
       
       // 32 bit
 
-      int min_len =
+      int64_t min_len =
         mhdr.chunk_hdr_offset + mhdr.n_chunks * sizeof(chunk_header_32_t);
       if ((int) buf.getLen() < min_len) {
         _errStr += "ERROR - Mdvx::readFromBuffer.\n";
@@ -1929,7 +1929,7 @@ int Mdvx::readFromBuffer(const MemBuf &buf)
           *((chunk_header_32_t *) ((char *) buf.getPtr() + mhdr.chunk_hdr_offset +
                                    i * sizeof(chunk_header_32_t)));
         chunk_header_from_BE_32(chdr32);
-        int min_len = chdr32.chunk_data_offset + chdr32.size;
+        int64_t min_len = chdr32.chunk_data_offset + chdr32.size;
         if ((int) buf.getLen() < min_len) {
           _errStr += "ERROR - Mdvx::readFromBuffer.\n";
           _errStr += "  Buffer too short for chunk data.\n";
@@ -2003,8 +2003,7 @@ int Mdvx::readUsingBuf()
     _errStr += "\n";
     return -1; 
   }
-
-  int size = infile.getStat().st_size;
+  int64_t size = infile.getStat().st_size;
 
   // prepare mem buffer
 
@@ -2338,7 +2337,7 @@ int Mdvx::_read_field_header(const int field_num,
   char errstr[128];
 
   if (_is64Bit) {
-    int hdr_offset =
+    int64_t hdr_offset =
       sizeof(master_header_t) + (field_num * sizeof(field_header_t));
     if (infile.fseek(hdr_offset, SEEK_SET)) {
       _errStr += "ERROR - Mdvx::_read_field_header\n";
@@ -2356,7 +2355,7 @@ int Mdvx::_read_field_header(const int field_num,
     field_header_from_BE(fhdr);
   } else {
     // 32-bit header
-    int hdr_offset =
+    int64_t hdr_offset =
       sizeof(master_header_32_t) + (field_num * sizeof(field_header_32_t));
     if (infile.fseek(hdr_offset, SEEK_SET)) {
       _errStr += "ERROR - Mdvx::_read_field_header\n";
@@ -2445,7 +2444,7 @@ int Mdvx::_read_vlevel_header(const int field_num,
   char errstr[128];
 
   if (_is64Bit) {
-    int offset = first_vlevel_offset + (field_num * sizeof(vlevel_header_t));
+    int64_t offset = first_vlevel_offset + (field_num * sizeof(vlevel_header_t));
     if (infile.fseek(offset, SEEK_SET)) {
       _errStr += "ERROR - Mdvx::_read_vlevel_header\n";
       sprintf(errstr, "Cannot seek to vlevel header, field %d\n", field_num);
@@ -2461,7 +2460,7 @@ int Mdvx::_read_vlevel_header(const int field_num,
     vlevel_header_from_BE(vhdr);
   } else {
     // 32 bit headers
-    int offset = first_vlevel_offset + (field_num * sizeof(vlevel_header_32_t));
+    int64_t offset = first_vlevel_offset + (field_num * sizeof(vlevel_header_32_t));
     if (infile.fseek(offset, SEEK_SET)) {
       _errStr += "ERROR - Mdvx::_read_vlevel_header\n";
       sprintf(errstr, "Cannot seek to vlevel header 32, field %d\n", field_num);
@@ -2508,7 +2507,7 @@ int Mdvx::_read_chunk_header(const int chunk_num,
   char errstr[128];
 
   if (_is64Bit) {
-    int offset = first_chunk_offset + chunk_num * sizeof(chunk_header_t);
+    int64_t offset = first_chunk_offset + chunk_num * sizeof(chunk_header_t);
     if(infile.fseek(offset, SEEK_SET)) {
       _errStr += "ERROR - Mdvx::_read_chunk_header\n";
       sprintf(errstr, "Cannot seek to chunk header, field %d\n", chunk_num);
@@ -2524,7 +2523,7 @@ int Mdvx::_read_chunk_header(const int chunk_num,
     chunk_header_from_BE(chdr);
   } else {
     // 32 bit headers
-    int offset = first_chunk_offset + chunk_num * sizeof(chunk_header_32_t);
+    int64_t offset = first_chunk_offset + chunk_num * sizeof(chunk_header_32_t);
     if(infile.fseek(offset, SEEK_SET)) {
       _errStr += "ERROR - Mdvx::_read_chunk_header\n";
       sprintf(errstr, "Cannot seek to chunk header 32, field %d\n", chunk_num);
