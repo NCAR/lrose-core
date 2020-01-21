@@ -47,7 +47,7 @@ SvdData::SvdData(const std::vector<ReorderInterp::radar_point_t> &pts,
   }
 }
 
-SvdData::~SvdData(void)
+SvdData::~SvdData()
 {
   _free();
 }
@@ -100,7 +100,7 @@ double SvdData::getTerm(int index) const
   return _x[index];
 }
 
-void SvdData::print(void) const
+void SvdData::print() const
 {
   printf("A:\n");
   for (int i=0; i<_nrow; ++i) {
@@ -244,7 +244,7 @@ SvdData::_apply(double** u,	// I - U matrix from SVD decomposition
   RMfree( utb );
 }
 
-void SvdData::_free(void)
+void SvdData::_free()
 {
   if (_nrow > 0 && _ncol > 0)
   {

@@ -122,6 +122,56 @@ public:
   };
   GridLoc ****_gridLoc;
 
+  // class for debug fields
+
+  class DerivedField {
+  public:
+    string name;
+    string longName;
+    string units;
+    vector<double> vertLevels;
+    fl32 *data;
+    bool writeToFile;
+    DerivedField(const string &nameStr,
+                 const string &longNameStr, 
+                 const string &unitsStr,
+                 bool writeOut) :
+            name(nameStr),
+            longName(longNameStr),
+            units(unitsStr),
+            data(NULL),
+            writeToFile(writeOut),
+            _nGrid(0)
+    {
+    }
+    ~DerivedField() {
+      if (data) {
+        delete[] data;
+      }
+    }
+    void alloc(size_t nGrid, const vector<double> &zLevels) {
+      vertLevels = zLevels;
+      if (nGrid == _nGrid) {
+        return;
+      }
+      if (data) {
+        delete[] data;
+      }
+      data = new fl32[nGrid];
+      _nGrid = nGrid;
+      for (size_t ii = 0; ii < _nGrid; ii++) {
+        data[ii] = missingFl32;
+      }
+    }
+    void setToZero() {
+      for (size_t ii = 0; ii < _nGrid; ii++) {
+        data[ii] = 0.0;
+      }
+    }
+  private:
+    size_t _nGrid;
+  };
+
   // constructor
   
   Interp(const string &progName,
@@ -141,11 +191,13 @@ public:
 
   virtual int interpVol() = 0;
 
-protected:
+  // statics
 
   static const double PseudoDiamKm; // for earth curvature correction
   static const double missingDouble;
   static const fl32 missingFl32;
+
+protected:
 
   // references to main object
   
@@ -203,56 +255,6 @@ protected:
   bool _spansNorth;
   double _dataSectorStartAzDeg;
   double _dataSectorEndAzDeg;
-
-  // class for debug fields
-
-  class DerivedField {
-  public:
-    string name;
-    string longName;
-    string units;
-    vector<double> vertLevels;
-    fl32 *data;
-    bool writeToFile;
-    DerivedField(const string &nameStr,
-                 const string &longNameStr, 
-                 const string &unitsStr,
-                 bool writeOut) :
-            name(nameStr),
-            longName(longNameStr),
-            units(unitsStr),
-            data(NULL),
-            writeToFile(writeOut),
-            _nGrid(0)
-    {
-    }
-    ~DerivedField() {
-      if (data) {
-        delete[] data;
-      }
-    }
-    void alloc(size_t nGrid, const vector<double> &zLevels) {
-      vertLevels = zLevels;
-      if (nGrid == _nGrid) {
-        return;
-      }
-      if (data) {
-        delete[] data;
-      }
-      data = new fl32[nGrid];
-      _nGrid = nGrid;
-      for (size_t ii = 0; ii < _nGrid; ii++) {
-        data[ii] = missingFl32;
-      }
-    }
-    void setToZero() {
-      for (size_t ii = 0; ii < _nGrid; ii++) {
-        data[ii] = 0.0;
-      }
-    }
-  private:
-    size_t _nGrid;
-  };
 
   // scan angle delta
 

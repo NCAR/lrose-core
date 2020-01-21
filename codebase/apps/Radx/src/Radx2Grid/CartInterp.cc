@@ -32,6 +32,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "CartInterp.hh"
+#include "Orient.hh"
 #include "OutputMdv.hh"
 #include <toolsa/pjg.h>
 #include <toolsa/mem.h>
@@ -94,6 +95,9 @@ CartInterp::CartInterp(const string &progName,
   _urElDebug = NULL;
   _urAzDebug = NULL;
 
+  _orient = NULL;
+  _echoOrientationAvailable = false;
+
   // create debug fields if needed
 
   if (_params.output_debug_fields) {
@@ -110,13 +114,6 @@ CartInterp::CartInterp(const string &progName,
 
   // set up ConvStrat object
 
-#ifdef NOTNOW
-  // create convective/stratiform fields if needed
-  if (_params.identify_convective_stratiform_split) {
-    _createConvStratFields();
-  }
-#endif
-  
   if (_params.identify_convective_stratiform_split) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       _convStrat.setVerbose(true);
@@ -137,6 +134,16 @@ CartInterp::CartInterp(const string &progName,
   }
   _gotConvStrat = false;
 
+  // set up orientation object
+
+  if (_params.use_echo_orientation) {
+    _orient = new Orient(params, 
+                         readVol,
+                         _gridNx,
+                         _gridNy,
+                         _gridZLevels);
+  }
+  
 }
 
 //////////////////////////////////////
@@ -151,6 +158,9 @@ CartInterp::~CartInterp()
   _freeGridLoc();
   _freeOutputArrays();
   _freeDerivedFields();
+  if (_orient) {
+    delete _orient;
+  }
 
 }
 
@@ -233,6 +243,23 @@ int CartInterp::interpVol()
   _printRunTime("Cart interp - before _computeGridRelative");
   _computeGridRelative();
   _printRunTime("Computing grid relative to radar");
+
+  // determine echo orientation
+  // for now this only works in PPI mode
+
+  if (_orient && !_rhiMode) {
+    _orient->setRhiMode(_rhiMode);
+    if (_orient->findEchoOrientation() == 0) {
+      _echoOrientationAvailable = true;
+    } else {
+      _echoOrientationAvailable = false;
+    }
+    if (_echoOrientationAvailable) {
+      _orient->loadSdevFields(_gridLoc,
+                              _sdevDbzH,
+                              _sdevDbzV);
+    }
+  }
 
   // interpolate
 
@@ -384,89 +411,16 @@ void CartInterp::_createDebugFields()
   _derived3DFields.push_back(_urElDebug);
   _urAzDebug = new DerivedField("urAz", "upper_right_az", "deg", true);
   _derived3DFields.push_back(_urAzDebug);
+
+  if (_params.use_echo_orientation) {
+    _sdevDbzH = new DerivedField("SdevDbzH", "sdev_of_dbz_horizontal", "dBZ", true);
+    _derived3DFields.push_back(_sdevDbzH);
+    _sdevDbzV = new DerivedField("SdevDbzV", "sdev_of_dbz_vertical", "dBZ", true);
+    _derived3DFields.push_back(_sdevDbzV);
+  }
   
 }
 
-#ifdef NOTNOW
-  
-//////////////////////////////////////////////////
-// create the conv-strat fields
-
-void CartInterp::_createConvStratFields()
-
-{
-  
-  bool writeDebug = _params.conv_strat_write_debug_fields;
-
-  _convStratDbzMax = new DerivedField("DbzMax",
-                                      "max_dbz_for_conv_strat", 
-                                      "dbz", writeDebug);
-  _derived3DFields.push_back(_convStratDbzMax);
-  
-  _convStratDbzCount = new DerivedField("DbzCount",
-                                        "n_points_dbz_for_conv_strat", 
-                                        "count", writeDebug);
-  _derived3DFields.push_back(_convStratDbzCount);
-  
-  _convStratDbzSum = new DerivedField("DbzSum",
-                                      "sum_dbz_for_conv_strat",
-                                      "dbz", writeDebug);
-  _derived3DFields.push_back(_convStratDbzSum);
-  
-  _convStratDbzSqSum = new DerivedField("DbzSqSum",
-                                        "sum_dbz_sq_for_conv_strat", 
-                                        "dbz^2", writeDebug);
-  _derived3DFields.push_back(_convStratDbzSqSum);
-  
-  _convStratDbzSqSqSum = new DerivedField("DbzSqSqSum",
-                                          "sum_dbz_sq_sq_for_conv_strat",
-                                          "dbz^4", writeDebug);
-  _derived3DFields.push_back(_convStratDbzSqSqSum);
-  
-  _convStratDbzTexture = new DerivedField("DbzTexture",
-                                          "dbz_texture_for_conv_strat",
-                                          "dbz", writeDebug);
-  _derived3DFields.push_back(_convStratDbzTexture);
-
-  _convStratFilledTexture = new DerivedField("FilledTexture",
-                                             "filled_dbz_texture_for_conv_strat",
-                                             "dbz", writeDebug);
-  _derived3DFields.push_back(_convStratFilledTexture);
-
-  _convStratDbzSqTexture = new DerivedField("DbzSqTexture",
-                                            "dbz_sq_texture_for_conv_strat",
-                                            "dbz", writeDebug);
-  _derived3DFields.push_back(_convStratDbzSqTexture);
-  
-  _convStratFilledSqTexture = new DerivedField("FilledSqTexture",
-                                               "filled_dbz_sq_texture_for_conv_strat",
-                                               "dbz", writeDebug);
-  _derived3DFields.push_back(_convStratFilledSqTexture);
-
-  _convStratDbzColMax = new DerivedField("DbzColMax",
-                                         "col_max_dbz_for_conv_strat",
-                                         "dbz", writeDebug);
-  _derived2DFields.push_back(_convStratDbzColMax);
-
-  _convStratMeanTexture = new DerivedField("MeanTexture",
-                                           "mean_dbz_texture_for_conv_strat",
-                                           "dbz", writeDebug);
-  _derived2DFields.push_back(_convStratMeanTexture);
-
-  _convStratMeanSqTexture = new DerivedField("MeanSqTexture",
-                                             "mean_dbz_sq_texture_for_conv_strat",
-                                             "dbz", writeDebug);
-  _derived2DFields.push_back(_convStratMeanSqTexture);
-
-  _convStratCategory = new DerivedField("ConvStrat",
-                                        "category_for_conv_strat",
-                                        "", true);
-  _derived2DFields.push_back(_convStratCategory);
-  
-}
-
-#endif
-  
 //////////////////////////////////////////////////
 // free the derived fields
 
@@ -571,15 +525,6 @@ void CartInterp::_initGrid()
   for (size_t ii = 0; ii < _derived2DFields.size(); ii++) {
     _derived2DFields[ii]->alloc(_nPointsPlane, singleLevel);
   }
-
-#ifdef JUNK
-  if (_params.identify_convective_stratiform_split) {
-    _convStratDbzCount->setToZero();
-    _convStratDbzSum->setToZero();
-    _convStratDbzSqSum->setToZero();
-    _convStratDbzSqSqSum->setToZero();
-  }
-#endif
 
 }
   
@@ -2730,107 +2675,6 @@ void CartInterp::_addMatrixField(DsMdvx &mdvx,
 
 }
 
-#ifdef JUNK
-
-//////////////////////////////////////////////////
-// Prepare for convective/stratiform analysis
-
-void CartInterp::_convStratPrepare()
-{
-
-  // initialize beamHeight computations
-  
-  BeamHeight beamHt;
-  if (_params.override_standard_pseudo_earth_radius) {
-    beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
-  }
-  beamHt.setInstrumentHtKm(_radarAltKm);
-
-  // loop through rays
-  
-  for (size_t iray = 0; iray < _interpRays.size(); iray++) {
-    
-    const Ray *ray = _interpRays[iray];
-
-    // get dbz field
-    
-    RadxRay *radxRay = ray->inputRay;
-    RadxField *dbzField = radxRay->getField(_params.conv_strat_dbz_field_name);
-    if (dbzField == NULL) {
-      continue;
-    }
-    const Radx::fl32 *dbzArray = dbzField->getDataFl32();
-    Radx::fl32 missing = dbzField->getMissingFl32();
-
-    // initialize meta data
-    
-    double el = ray->el;
-    double az = ray->az;
-    
-    double sinAz, cosAz;
-    ta_sincos(az * DEG_TO_RAD, &sinAz, &cosAz);
-    
-    int nGates = ray->nGates;
-    double range = _startRangeKm;
-
-    // loop through the gates
-
-    for (int igate = 0; igate < nGates; igate++, range += _gateSpacingKm) {
-
-      // check for good dbz data
-      
-      Radx::fl32 dbz = dbzArray[igate];
-      if (dbz == missing ||
-          dbz < _params.conv_strat_min_valid_dbz) {
-        continue;
-      }
-      double dbzSq = dbz * dbz;
-      double dbzSqSq = dbzSq * dbzSq;
-
-      // compute (zz, yy, xx) location for each gate
-    
-      double xx = _radarX + range * sinAz;
-      double yy = _radarY + range * cosAz;
-      double zz = beamHt.computeHtKm(el, range);
-
-      // compute grid indices
-
-      int ix = (int) floor((xx - _gridMinx) / _gridDx + 0.5);
-      if (ix < 0 || ix > _gridNx - 1) {
-        continue;
-      }
-
-      int iy = (int) floor((yy - _gridMiny) / _gridDy + 0.5);
-      if (iy < 0 || iy > _gridNy - 1) {
-        continue;
-      }
-
-      int iLookup = (int) (zz * 100.0 + 0.5);
-      if (iLookup >= 0 && iLookup < NLOOKUP) {
-        for (int iz = _textureIzLower[iLookup];
-             iz <= _textureIzUpper[iLookup]; iz++) {
-          
-          int index = iz * _nPointsPlane + iy * _gridNx + ix;
-          
-          fl32 dbzMax = _convStratDbzMax->data[index];
-          if (dbzMax == missingFl32 || dbzMax < dbz) {
-            _convStratDbzMax->data[index] = dbz;
-          }
-          _convStratDbzCount->data[index] += 1.0;
-          _convStratDbzSum->data[index] += dbz;
-          _convStratDbzSqSum->data[index] += dbzSq;
-          _convStratDbzSqSqSum->data[index] += dbzSqSq;
-        }
-      }
-
-    } // igate
-    
-  } // iray
-  
-}
-
-#endif
-
 //////////////////////////////////////////////////
 // Compute convective/stratiform split
 
@@ -2872,326 +2716,11 @@ int CartInterp::_convStratCompute()
     return -1;
   }
 
-#ifdef JUNK
-  
-  // prepare the data
-
-  _convStratComputeVertLookups();
-  _convStratPrepare();
-
-  // compute kernels
-
-  _convStratComputeKernels();
-  
-  // set array pointers
-
-  fl32 *dbzCount = _convStratDbzCount->data;
-  fl32 *dbzSum = _convStratDbzSum->data;
-  fl32 *dbzSqSum = _convStratDbzSqSum->data;
-  fl32 *dbzSqSqSum = _convStratDbzSqSqSum->data;
-  fl32 *texture = _convStratDbzTexture->data;
-  fl32 *sqTexture = _convStratDbzSqTexture->data;
-  fl32 *filledTexture = _convStratFilledTexture->data;
-  fl32 *filledSqTexture = _convStratFilledSqTexture->data;
-  
-  // initialize
-  
-  memset(dbzCount, 0, _nPointsPlane * sizeof(fl32));
-  memset(dbzSum, 0, _nPointsPlane * sizeof(fl32));
-  memset(dbzSqSum, 0, _nPointsPlane * sizeof(fl32));
-  memset(dbzSqSqSum, 0, _nPointsPlane * sizeof(fl32));
-  
-  for (int ii = 0; ii < _nPointsVol; ii++) {
-    texture[ii] = missingFl32;
-    sqTexture[ii] = missingFl32;
-    filledTexture[ii] = missingFl32;
-    filledSqTexture[ii] = missingFl32;
-  }
-  
-  // set up threads for computing texture at each level
-  
-  vector<ComputeTexture *> threads;
-  for (int iz = 0; iz <= _gridNz; iz++) {
-    size_t zoffset = iz * _nPointsPlane;
-    ComputeTexture *thread = new ComputeTexture(iz);
-    thread->setGridSize(_gridNx, _gridNy);
-    thread->setKernelSize(_nxTexture, _nyTexture);
-    thread->setKernel(_textureKernel);
-    thread->setMinValidFraction(_params.conv_strat_min_valid_fraction_for_texture);
-    thread->setFields(dbzCount + zoffset,
-                      dbzSum + zoffset,
-                      dbzSqSum + zoffset,
-                      dbzSqSqSum + zoffset,
-                      texture + zoffset,
-                      sqTexture + zoffset,
-                      filledTexture + zoffset,
-                      filledSqTexture + zoffset);
-    threads.push_back(thread);
-  } // iz
-
-  // set threads going
-
-  for (size_t ii = 0; ii < threads.size(); ii++) {
-    threads[ii]->signalRunToStart();
-  }
-
-  // wait until they are done
-
-  for (size_t ii = 0; ii < threads.size(); ii++) {
-    threads[ii]->waitForRunToComplete();
-  }
-
-  // delete threads
-
-  for (size_t ii = 0; ii < threads.size(); ii++) {
-    delete threads[ii];
-  }
-  threads.clear();
-  
-  // compute min and max vert indices
-
-  int minIz = 0;
-  int maxIz = _gridNz - 1;
-  for (int iz = 0; iz < _gridNz; iz++) {
-    double zz = _gridZLevels[iz];
-    if (zz <= _params.conv_strat_min_valid_height) {
-      minIz = iz;
-    }
-    if (zz <= _params.conv_strat_max_valid_height) {
-      maxIz = iz;
-    }
-  } // iz
-
-  // compute mean texture at each point, and the col max
-  
-  fl32 *dbzMax = _convStratDbzMax->data;
-  fl32 *dbzColMax = _convStratDbzColMax->data;
-  fl32 *meanTexture = _convStratMeanTexture->data;
-  fl32 *meanSqTexture = _convStratMeanSqTexture->data;
-  
-  int jj = 0;
-  for (int iy = 0; iy < _gridNy; iy++) {
-    for (int ix = 0; ix < _gridNx; ix++, jj++) {
-      int ii = jj + minIz * _nPointsPlane;
-      double nn = 0.0;
-      double sumTexture = 0.0;
-      double sumSqTexture = 0.0;
-      double colMax = missingFl32;
-      for (int iz = minIz; iz <= maxIz; iz++, ii += _nPointsPlane) {
-        fl32 text = texture[ii];
-        fl32 sqText = sqTexture[ii];
-        if (text != missingFl32) {
-          sumTexture += text;
-          sumSqTexture += sqText;
-          nn++;
-        }
-        if (dbzMax[ii] > colMax) {
-          colMax = dbzMax[ii];
-        }
-      } // iz
-      if (nn > 0) {
-        meanTexture[jj] = sumTexture / nn;
-        meanSqTexture[jj] = sumSqTexture / nn;
-      }
-      dbzColMax[jj] = colMax;
-    } // ix
-  } // iy
-
-#ifdef NOTNOW
-  // fill in col max gaps using nearest neighbor
-
-  fl32 *tmpColMax = new fl32[_nPointsPlane];
-  memcpy(tmpColMax, dbzColMax, _nPointsPlane * sizeof(fl32));
-  for (int iy = _nyTexture; iy < _gridNy - _nyTexture; iy++) {
-    int icenter = _nxTexture + iy * _gridNx;
-    for (int ix = _nxTexture; ix < _gridNx - _nxTexture; ix++, icenter++) {
-      if (dbzColMax[icenter] != missingFl32) {
-        continue;
-      }
-      for (size_t ii = 1; ii < _textureKernel.size(); ii++) {
-        int kk = icenter + _textureKernel[ii].offset;
-        if (dbzColMax[kk] != missingFl32) {
-          tmpColMax[icenter] = dbzColMax[kk];
-          break;
-        }
-      }
-    } // ix
-  } // iy
-  memcpy(dbzColMax, tmpColMax, _nPointsPlane * sizeof(fl32));
-  delete[] tmpColMax;
-#endif
-  
-  // compute the category
-  
-  fl32 *category = _convStratCategory->data;
-
-  for (int iy = _nyConv; iy < _gridNy - _nyConv; iy++) {
-    for (int ix = _nxConv; ix < _gridNx - _nxConv; ix++) {
-      
-      int ii = ix + iy * _gridNx;
-
-      // set convective flag from texture
-
-      if (meanTexture[ii] >= _params.conv_strat_min_texture_for_convection) {
-        for (size_t kk = 0; kk < _convKernel.size(); kk++) {
-          int jj = ii + _convKernel[kk].offset;
-          category[jj] = CATEGORY_CONVECTIVE;
-        }
-      }
-      
-      // set convective flag from col max dbz
-
-      if (dbzColMax[ii] >= _params.conv_strat_dbz_threshold_for_definite_convection) {
-        for (size_t kk = 0; kk < _convKernel.size(); kk++) {
-          int jj = ii + _convKernel[kk].offset;
-          category[jj] = CATEGORY_CONVECTIVE;
-        }
-      }
-      
-    } // ix
-  } // iy
-
-  // set stratiform flag for what is left
-  
-  for (int iy = _nyConv; iy < _gridNy - _nyConv; iy++) {
-    for (int ix = _nxConv; ix < _gridNx - _nxConv; ix++) {
-      int ii = ix + iy * _gridNx;
-      // if (dbzColMax[ii] < _params.conv_strat_min_valid_dbz) {
-      //   category[ii] = missingFl32;
-      // }
-      if (category[ii] == missingFl32 && meanTexture[ii] != missingFl32) {
-        category[ii] = CATEGORY_STRATIFORM;
-      }
-    }
-  }
-
-#endif
-
   _printRunTime("CartInterp::_convStratCompute");
 
   return 0;
   
 }
-
-#ifdef JUNK
-
-//////////////////////////////////////
-// compute the kernels for this grid
-
-bool CartInterp::_compareKernels(kernel_t x, kernel_t y) 
-{
-  return x.distance < y.distance; 
-}
-
-void CartInterp::_convStratComputeKernels()
-
-{
-
-  _convectiveRadiusKm = _params.conv_strat_convective_radius_km;
-  _textureRadiusKm = _params.conv_strat_texture_radius_km;
-
-  // texture kernel
-
-  _textureKernel.clear();
-
-  _nyTexture = (int) floor(_textureRadiusKm / _gridDy + 0.5);
-  _nxTexture = (int) floor(_textureRadiusKm / _gridDx + 0.5);
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Texture kernel size:" << endl;
-    cerr << "  idy: " << _nyTexture << endl;
-    cerr << "  nx: " << _nxTexture << endl;
-  }
-  
-  kernel_t entry;
-  for (int jdy = -_nyTexture; jdy <= _nyTexture; jdy++) {
-    double yy = jdy * _gridDy;
-    for (int jdx = -_nxTexture; jdx <= _nxTexture; jdx++) {
-      double xx = jdx * _gridDx;
-      entry.distance = sqrt(yy * yy + xx * xx);
-      if (entry.distance <= _textureRadiusKm) {
-        entry.offset = jdx + jdy * _gridNx;
-        _textureKernel.push_back(entry);
-      }
-    }
-  }
-
-  // sort
-
-  sort(_textureKernel.begin(), _textureKernel.end(), _compareKernels);
-
-  // convective kernel
-
-  _convKernel.clear();
-
-  _nyConv = (int) floor(_convectiveRadiusKm / _gridDy + 0.5);
-  _nxConv = (int) floor(_convectiveRadiusKm / _gridDx + 0.5);
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Convective kernel size:" << endl;
-    cerr << "  idy: " << _nyConv << endl;
-    cerr << "  nx: " << _nxConv << endl;
-  }
-  
-  for (int jdy = -_nyConv; jdy <= _nyConv; jdy++) {
-    double yy = jdy * _gridDy;
-    for (int jdx = -_nxConv; jdx <= _nxConv; jdx++) {
-      double xx = jdx * _gridDx;
-      entry.distance = sqrt(yy * yy + xx * xx);
-      if (entry.distance <= _convectiveRadiusKm) {
-        entry.offset = jdx + jdy * _gridNx;
-        _convKernel.push_back(entry);
-      }
-    }
-  }
-
-  // sort
-
-  sort(_convKernel.begin(), _convKernel.end(), _compareKernels);
-
-}
-
-/////////////////////////////////////////////
-// compute the vertical level lookup tables
-
-void CartInterp::_convStratComputeVertLookups()
-
-{
-
-  for (int ii = 0; ii < NLOOKUP; ii++) {
-    _textureIzLower[ii] = _gridNz;
-    _textureIzUpper[ii] = 0;
-  }
-
-  double conv_strat_texture_depth_km = 1.0;
-
-  for (int ii = 0; ii < NLOOKUP; ii++) {
-    
-    double zz = ii * 0.01; // ht in km
-    double zLowerLimit = zz - conv_strat_texture_depth_km / 2.0;
-    double zUpperLimit = zz + conv_strat_texture_depth_km / 2.0;
-    
-    for (int jj = 0; jj < (int) _gridZLevels.size(); jj++) {
-      double zLevel = _gridZLevels[jj];
-      if (zLevel >= zLowerLimit) {
-        _textureIzLower[ii] = jj;
-        break;
-      }
-    }
-
-    for (int jj = (int) _gridZLevels.size() - 1; jj >= 0; jj--) {
-      double zLevel = _gridZLevels[jj];
-      if (zLevel <= zUpperLimit) {
-        _textureIzUpper[ii] = jj;
-        break;
-      }
-    }
-
-  }
-
-}
-
-#endif
 
 ///////////////////////////////////////////////////////////////
 // FillSearchLowerLeft thread
@@ -3301,122 +2830,3 @@ void CartInterp::PerformInterp::run()
   _this->_interpRow(_zIndex, _yIndex);
 }
 
-#ifdef JUNK
-
-///////////////////////////////////////////////////////////////
-// ComputeTexture thread
-//
-// Compute texture for 1 level in a thread
-//
-///////////////////////////////////////////////////////////////
-
-// Constructor
-
-CartInterp::ComputeTexture::ComputeTexture(int iz) :
-        TaThread(),
-        _iz(iz)
-{
-  char name[128];
-  sprintf(name, "ComputeTexture-level-%d", _iz);
-  setThreadName(name);
-  _dbzCount = NULL;
-  _dbzSum = NULL;
-  _dbzSqSum = NULL;
-  _dbzSqSqSum = NULL;
-  _dbzTexture = NULL;
-  _dbzSqTexture = NULL;
-  _nx = _ny = 0;
-  _nxTexture = _nyTexture = 0;
-}  
-
-
-CartInterp::ComputeTexture::~ComputeTexture() 
-{
-}
-
-// override run method
-// compute texture at each point in plane
-
-void CartInterp::ComputeTexture::run()
-{
-  
-  // check for validity
-  
-  if (_dbzCount == NULL) {
-    cerr << "ERROR - ComputeTexture::run" << endl;
-    cerr << "  Initialization not complete" << endl;
-    return;
-  }
-  
-  // compute texture at each point in the plane
-
-  int minPtsForTexture = 
-    (int) (_minValidFraction * _kernel.size() + 0.5);
-  
-  for (int iy = _nyTexture; iy < _ny - _nyTexture; iy++) {
-    
-    int icenter = _nxTexture + iy * _nx;
-    
-    for (int ix = _nxTexture; ix < _nx - _nxTexture; ix++, icenter++) {
-      
-      // compute texture in circular kernel around point
-      // first we compute the standard deviation of the square of dbz
-      // then we take the square root of the sdev
-      
-      double nn = 0.0;
-      double sum = 0.0;
-      double sumSq = 0.0;
-      double sumSqSq = 0.0;
-      
-      for (size_t ii = 0; ii < _kernel.size(); ii++) {
-        int kk = icenter + _kernel[ii].offset;
-        if (_dbzCount[kk] > 0) {
-          nn += _dbzCount[kk];
-          sum += _dbzSum[kk];
-          sumSq += _dbzSqSum[kk];
-          sumSqSq += _dbzSqSqSum[kk];
-        }
-      } // ii
-      if (nn >= minPtsForTexture) {
-
-        double mean = sum / nn;
-        double var = sumSq / nn - (mean * mean);
-        if (var < 0.0) {
-          var = 0.0;
-        }
-        double sdev = sqrt(var);
-        _dbzTexture[icenter] = sdev;
-
-        double meanSq = sumSq / nn;
-        double varSq = sumSqSq / nn - (meanSq * meanSq);
-        if (varSq < 0.0) {
-          varSq = 0.0;
-        }
-        double sdevSq = sqrt(varSq);
-        _dbzSqTexture[icenter] = sqrt(sdevSq);
-
-      }
-      
-    } // ix
-    
-  } // iy
-  
-  // fill in gaps in texture using closest non-missing point
-
-  for (int iy = _nyTexture; iy < _ny - _nyTexture; iy++) {
-    int icenter = _nxTexture + iy * _nx;
-    for (int ix = _nxTexture; ix < _nx - _nxTexture; ix++, icenter++) {
-      for (size_t ii = 0; ii < _kernel.size(); ii++) {
-        int kk = icenter + _kernel[ii].offset;
-        if (_dbzTexture[kk] != missingFl32) {
-          _filledTexture[icenter] = _dbzTexture[kk];
-          _filledSqTexture[icenter] = _dbzSqTexture[kk];
-          break;
-        }
-      }
-    } // ix
-  } // iy
-  
-}
-
-#endif

@@ -821,7 +821,17 @@ public:
   bound_field_t *_bounded_fields;
   int bounded_fields_n;
 
-  tdrp_bool_t use_horiz_interp_for_layers;
+  tdrp_bool_t use_echo_orientation;
+
+  double synthetic_rhis_start_az;
+
+  double synthetic_rhis_delta_az;
+
+  char* echo_orientation_dbz_field_name;
+
+  int echo_orientation_n_points_sdev_h;
+
+  int echo_orientation_n_points_sdev_v;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -830,7 +840,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[205];
+  mutable TDRPtable _table[210];
 
   const char *_className;
 

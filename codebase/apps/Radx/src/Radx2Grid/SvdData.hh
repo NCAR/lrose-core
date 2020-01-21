@@ -30,10 +30,10 @@
 class SvdData
 {
 public:
-  SvdData(void);
+  SvdData();
   SvdData(const std::vector<ReorderInterp::radar_point_t> &pts, double x0,
 	  double y0, double z0);
-  ~SvdData(void);
+  ~SvdData();
 
   void init(const std::vector<ReorderInterp::radar_point_t> &pts, double x0,
 	    double y0, double z0);
@@ -43,9 +43,9 @@ public:
 
   double getTerm(int index) const;
 
-  bool isOk(void) const {return _ok;}
+  bool isOk() const {return _ok;}
 
-  void print(void) const;
+  void print() const;
 
 private:
 

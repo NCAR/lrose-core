@@ -53,11 +53,13 @@ HDRS = \
 	Args.hh \
 	CartInterp.hh \
 	Interp.hh \
+	Orient.hh \
 	OutputMdv.hh \
 	PpiInterp.hh \
 	PolarInterp.hh \
 	Radx2Grid.hh \
 	ReorderInterp.hh \
+	RhiOrient.hh \
 	SatInterp.hh
 
 CPPC_SRCS = \
@@ -66,11 +68,13 @@ CPPC_SRCS = \
 	CartInterp.cc \
 	Interp.cc \
 	Main.cc \
+	Orient.cc \
 	OutputMdv.cc \
 	PpiInterp.cc \
 	PolarInterp.cc \
 	Radx2Grid.cc \
 	ReorderInterp.cc \
+	RhiOrient.cc \
 	SatInterp.cc \
 	SvdData.cc
 
