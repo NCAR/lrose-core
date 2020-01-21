@@ -92,7 +92,7 @@ bool DataHandlerCfRadial::init(void)
 	      _parms._template_time[2], _parms._template_time[3],
 	      _parms._template_time[4], _parms._template_time[5]);
   time_t ttime = dt.utime();
-  tlist.setModeFirstBefore(_parms.template_url, ttime, 10000);
+  tlist.setModeFirstBefore(ttime, 10000);
   if (tlist.compile())
   {
     LOGF(LogMsg::ERROR, "Cannot compile time list, dir: %s",

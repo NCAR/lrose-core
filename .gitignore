@@ -401,6 +401,7 @@ codebase/apps/radar/src/AcGeoref2Spdb/AcGeoref2Spdb
 codebase/apps/radar/src/AltCpCompute/AltCpCompute
 codebase/apps/radar/src/CP2Udp2Fmq/CP2Udp2Fmq
 codebase/apps/radar/src/CalCompute/CalCompute
+codebase/apps/radar/src/CartSim/CartSim
 codebase/apps/radar/src/CedricPrint/CedricPrint
 codebase/apps/radar/src/ChillCal2Xml/ChillCal2Xml
 codebase/apps/radar/src/ChillSdb2Dsr/ChillSdb2Dsr

@@ -281,14 +281,15 @@ Xyz Microburst::_wind(const Xyz &v, double r, double vert, double horiz) const
 double Microburst::_windZ(double r, double z, double rscale,
 			  double size_scale) const
 {
-  double rtilda, ztilda, a, r0, z0;
-
-  r0 = _r*rscale;
+  double ztilda, a, z0;
+  // double rtilda, r0;
+  
+  // r0 = _r*rscale;
   z0 = _z*rscale;
 
   // It's defined as per the notes, in terms of wtilda and an exponential
   // drop off outside 1/2 the maximum radius
-  rtilda = r/r0;
+  // rtilda = r/r0;
   ztilda = z/z0;
   a = _Wtilda.apply(ztilda);
 

@@ -5,18 +5,19 @@
 ###########################################################################
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
-MY_CPPCHECKFLAGS = -E Params.cc -E Params.hh -AddStyleFAA -exclude-rules="4.16,4.09,4.14,4.12"
-LOC_INC_DIR = . $(NETCDF4_INCS)
-MODULE_TYPE=progcpp
-TARGET_FILE= CartSim
-LOC_INCLUDES = -I. -I$(LOC_INC_DIR)
-LOC_CFLAGS = 
-LOC_CPPC_CFLAGS = 
-LOC_LDFLAGS = $(NETCDF4_LIBS) $(HDF5_LDFLAGS) -lhdf5_cpp
 
-LOC_LIBS = -lRadx -lradar \
-	   -ldsdata -lSpdb -lMdv -ldsserver -ldidss -lrapformats -leuclid \
-	   -lrapmath -ltoolsa -ldataport -ltdrp $(NETCDF4_LIB_LIST) -lm
+TARGET_FILE = CartSim
+
+LOC_INCLUDES = $(NETCDF4_INCS)
+
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+
+LOC_LIBS = \
+          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
+          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
+          -lphysics -ltoolsa -ldataport -ltdrp \
+          $(NETCDF4_LIBS) \
+          -lfftw3 -lbz2 -lz -lpthread
  
 HDRS = 
 
