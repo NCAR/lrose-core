@@ -96,7 +96,7 @@ private:
   
   // gate geometry
   
-  int _maxNGates;
+  int _nGates;
   double _startRangeKm;
   double _gateSpacingKm;
   double _maxRangeKm;

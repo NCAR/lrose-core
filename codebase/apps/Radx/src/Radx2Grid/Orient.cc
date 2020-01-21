@@ -69,7 +69,7 @@ Orient::Orient(const Params &params,
   gettimeofday(&_timeA, NULL);
   
   _radarAltKm = 0.0;
-  _maxNGates = 0;
+  _nGates = 0;
   _startRangeKm = 0.0;
   _gateSpacingKm = 0.0;
   _maxRangeKm = 0.0;
@@ -303,16 +303,8 @@ int Orient::_setRadarParams()
     return -1;
   }
 
-  _maxNGates = 0;
-  const vector<RadxRay *> &rays = _readVol.getRays();
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    const RadxRay *ray = rays[ii];
-    int nGates = ray->getNGates();
-    if (nGates > _maxNGates) {
-      _maxNGates = nGates;
-    }
-  }
-  _maxRangeKm = _startRangeKm + _maxNGates * _gateSpacingKm;
+  _nGates = _readVol.getMaxNGates();
+  _maxRangeKm = _startRangeKm + _nGates * _gateSpacingKm;
 
   return 0;
 

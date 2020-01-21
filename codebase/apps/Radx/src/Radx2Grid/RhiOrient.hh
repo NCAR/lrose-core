@@ -39,6 +39,7 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/Radx.hh>
 #include "Params.hh"
+#include <radar/BeamHeight.hh>
 
 class RhiOrient
 
@@ -68,34 +69,57 @@ public:
 
   bool getSuccess() const { return _success; }
 
+  // clear out memory
+
+  void clear();
+
 private:
+
+  // metadata members
 
   const Params &_params;
   const RadxVol &_readVol;
-
   bool _success;
   
   double _azimuth;
-  size_t _maxNGates;
+
   double _startRangeKm;
   double _gateSpacingKm;
   double _radarAltKm;
+
+  size_t _nSweeps;
+  size_t _nGates;
+
   vector<double> _gridZLevels;
+  size_t _nZ;
+
+  // input data
 
   vector<RadxRay *> _rays;
-  bool _nGatesVary;
   double _meanAzimuth;
+  double DBZ_BAD;
 
-  double _DBZ_BAD;
-  vector< vector<Radx::fl32> > _dbz; 
-  vector< vector<Radx::fl32> > _gridError; 
-  vector< vector<Radx::fl32> > _sdevH, _sdevV; 
+  // beam height calculations
+  
+  BeamHeight _beamHt;
+
+  // working arrays - [_nZ][_nGates]
+
+  vector< vector<Radx::fl32> > _dbzGrid;
+  vector< vector<Radx::fl32> > _gridError;
+  vector< vector<Radx::fl32> > _dbzH;
+  vector< vector<Radx::fl32> > _dbzV;
+  vector< vector<Radx::fl32> > _sdevH;
+  vector< vector<Radx::fl32> > _sdevV;
 
   // private methods
   
-  void _free();
+  void _allocArrays();
+  void _clearArrays();
   int _loadSyntheticRhi();
   void _sortRaysByElevation();
+  int _loadDbzH();
+  int _loadDbzV();
   int _loadDbzGrid();
   int _getZIndex(double zz);
 
