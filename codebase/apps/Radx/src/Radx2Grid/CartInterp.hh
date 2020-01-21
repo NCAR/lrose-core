@@ -164,6 +164,9 @@ private:
   DerivedField *_urElDebug;
   DerivedField *_urAzDebug;
 
+  DerivedField *_sdevDbzH;
+  DerivedField *_sdevDbzV;
+
   vector<DerivedField *> _derived3DFields;
   vector<DerivedField *> _derived2DFields;
 

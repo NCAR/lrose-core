@@ -38,10 +38,13 @@
 #ifndef Orient_HH
 #define Orient_HH
 
-#include "Interp.hh"
 #include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
 #include <radar/ConvStrat.hh>
+#include "Interp.hh"
+#include "Params.hh"
+
+class RadxVol;
 class DsMdvx;
 class RhiOrient;
 
@@ -53,8 +56,8 @@ public:
 
   Orient(const Params &params,
          RadxVol &readVol,
-         vector<Interp::Field> &interpFields,
-         vector<Interp::Ray *> &interpRays,
+         size_t gridNx,
+         size_t gridNy,
          const vector<double> &gridZLevels);
 
   // destructor
@@ -65,9 +68,11 @@ public:
 
   int findEchoOrientation();
   
-  // get methods
+  // load the sdev fields on the cartesian grid
 
-  const Params &getParams() const { return _params; }
+  void loadSdevFields(Interp::GridLoc ****gridLoc,
+                      Interp::DerivedField *sdevDbzH,
+                      Interp::DerivedField *sdevDbzV);
 
   // set RHI mode
 
@@ -79,8 +84,6 @@ private:
   const Params &_params;
   RadxVol &_readVol;
   bool _rhiMode;
-  vector<Interp::Field> &_interpFields;
-  vector<Interp::Ray *> &_interpRays;
   
   // checking timing performance
   
@@ -88,6 +91,8 @@ private:
 
   // synthetic rhis
 
+  double _startAz;
+  double _deltaAz;
   vector<RhiOrient *> _rhis;
 
   // radar altitude
@@ -101,8 +106,9 @@ private:
   double _gateSpacingKm;
   double _maxRangeKm;
 
-  // output grid vertical details
+  // output grid geometry
 
+  size_t _gridNx, _gridNy, _gridNz;
   vector<double> _gridZLevels;
 
   // private methods

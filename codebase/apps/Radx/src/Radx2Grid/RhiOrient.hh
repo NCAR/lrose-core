@@ -36,6 +36,7 @@
 #ifndef RhiOrient_HH
 #define RhiOrient_HH
 
+#include <cassert>
 #include <Radx/RadxVol.hh>
 #include <Radx/Radx.hh>
 #include "Params.hh"
@@ -67,29 +68,52 @@ public:
 
   // did this succeed
 
-  bool getSuccess() const { return _success; }
+  inline bool getSuccess() const { return _success; }
 
   // clear out memory
 
   void clear();
 
+  // get sdev values
+
+  inline Radx::fl32 getSdevDbzH(size_t rangeIndex, size_t zIndex) const
+  {
+    assert(rangeIndex < _nRange);
+    assert(zIndex < _nZ);
+    return _sdevDbzH[zIndex][rangeIndex];
+  }
+  inline Radx::fl32 getSdevDbzV(size_t rangeIndex, size_t zIndex) const
+  {
+    assert(rangeIndex < _nRange);
+    assert(zIndex < _nZ);
+    return _sdevDbzV[zIndex][rangeIndex];
+  }
+
 private:
 
+  // check for success
+
+  bool _success;
+  
   // metadata members
 
   const Params &_params;
   const RadxVol &_readVol;
-  bool _success;
+
+  // radar geometry
   
+  size_t _nSweeps;
+  size_t _nGates;
+
   double _azimuth;
 
   double _startRangeKm;
   double _gateSpacingKm;
   double _radarAltKm;
 
-  size_t _nSweeps;
-  size_t _nGates;
+  // grids
 
+  size_t _nRange;
   vector<double> _gridZLevels;
   size_t _nZ;
 
@@ -103,14 +127,12 @@ private:
   
   BeamHeight _beamHt;
 
-  // working arrays - [_nZ][_nGates]
+  // working arrays - [_nZ][_nRange]
 
-  vector< vector<Radx::fl32> > _dbzGrid;
-  vector< vector<Radx::fl32> > _gridError;
   vector< vector<Radx::fl32> > _dbzH;
   vector< vector<Radx::fl32> > _dbzV;
-  vector< vector<Radx::fl32> > _sdevH;
-  vector< vector<Radx::fl32> > _sdevV;
+  vector< vector<Radx::fl32> > _sdevDbzH;
+  vector< vector<Radx::fl32> > _sdevDbzV;
 
   // private methods
   
@@ -120,7 +142,6 @@ private:
   void _sortRaysByElevation();
   int _loadDbzH();
   int _loadDbzV();
-  int _loadDbzGrid();
   int _loadSdevH();
   int _loadSdevV();
   int _getZIndex(double zz);

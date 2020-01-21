@@ -139,8 +139,8 @@ CartInterp::CartInterp(const string &progName,
   if (_params.use_echo_orientation) {
     _orient = new Orient(params, 
                          readVol,
-                         interpFields,
-                         interpRays,
+                         _gridNx,
+                         _gridNy,
                          _gridZLevels);
   }
   
@@ -253,6 +253,11 @@ int CartInterp::interpVol()
       _echoOrientationAvailable = true;
     } else {
       _echoOrientationAvailable = false;
+    }
+    if (_echoOrientationAvailable) {
+      _orient->loadSdevFields(_gridLoc,
+                              _sdevDbzH,
+                              _sdevDbzV);
     }
   }
 
@@ -406,6 +411,13 @@ void CartInterp::_createDebugFields()
   _derived3DFields.push_back(_urElDebug);
   _urAzDebug = new DerivedField("urAz", "upper_right_az", "deg", true);
   _derived3DFields.push_back(_urAzDebug);
+
+  if (_params.use_echo_orientation) {
+    _sdevDbzH = new DerivedField("SdevDbzH", "sdev_of_dbz_horizontal", "dBZ", true);
+    _derived3DFields.push_back(_sdevDbzH);
+    _sdevDbzV = new DerivedField("SdevDbzV", "sdev_of_dbz_vertical", "dBZ", true);
+    _derived3DFields.push_back(_sdevDbzV);
+  }
   
 }
 

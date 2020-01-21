@@ -53,13 +53,14 @@ using namespace std;
 
 Orient::Orient(const Params &params,
                RadxVol &readVol,
-               vector<Interp::Field> &interpFields,
-               vector<Interp::Ray *> &interpRays,
+               size_t gridNx,
+               size_t gridNy,
                const vector<double> &gridZLevels) :
         _params(params),
         _readVol(readVol),
-        _interpFields(interpFields),
-        _interpRays(interpRays),
+        _gridNx(gridNx),
+        _gridNy(gridNy),
+        _gridNz(gridZLevels.size()),
         _gridZLevels(gridZLevels)
 
 {
@@ -73,6 +74,9 @@ Orient::Orient(const Params &params,
   _startRangeKm = 0.0;
   _gateSpacingKm = 0.0;
   _maxRangeKm = 0.0;
+
+  _startAz = _params.synthetic_rhis_start_az;
+  _deltaAz = _params.synthetic_rhis_delta_az;
 
   // set up thread objects
 
@@ -134,14 +138,13 @@ int Orient::findEchoOrientation()
   
   // create the synthetic RHIs
   
-  double azimuth = _params.synthetic_rhis_start_az;
+  double azimuth = _startAz;
   while (azimuth < 360.0) {
-    
     RhiOrient *rhi = new RhiOrient(_params, _readVol, azimuth,
                                    _startRangeKm, _gateSpacingKm,
                                    _radarAltKm, _gridZLevels);
     _rhis.push_back(rhi);
-
+    azimuth += _deltaAz;
   }
 
   // set radar params from volume
@@ -160,14 +163,56 @@ int Orient::findEchoOrientation()
   _computeOrientInRhis();
   _printRunTime("Orient - _computeOrientInRhis end");
 
-  // TO DO
-  // add check on success
-
   // start of processing
 
   _printRunTime("end findEchoOrientation");
 
-  return 0;
+  // add check on success
+
+  int iret = 0;
+  for (size_t ii = 0; ii < _rhis.size(); ii++) {
+    if (!_rhis[ii]->getSuccess()) {
+      iret = -1;
+      break;
+    }
+  }
+
+  return iret;
+
+}
+
+//////////////////////////////////////////////////
+// load the sdev fields on the cartesian grid
+
+void Orient::loadSdevFields(Interp::GridLoc ****gridLoc,
+                            Interp::DerivedField *sdevDbzH,
+                            Interp::DerivedField *sdevDbzV)
+
+{
+
+  _printRunTime("start loadSdevFields");
+
+  // loop through the grid
+
+  size_t ii = 0;
+  for (size_t iz = 0; iz < _gridNz; iz++) {
+    for (size_t iy = 0; iy < _gridNy; iy++) {
+      for (size_t ix = 0; ix < _gridNx; ix++, ii++) {
+        const Interp::GridLoc *loc = gridLoc[iz][iy][ix];
+        double az = loc->az;
+        double gndRange = loc->gndRange;
+        size_t rhiIndex = (int) ((az - _startAz) / _deltaAz + 0.5);
+        assert (rhiIndex < _rhis.size());
+        int rangeIndex = (int) ((gndRange - _startRangeKm) / _gateSpacingKm + 0.5);
+        Radx::fl32 sdevH = _rhis[rhiIndex]->getSdevDbzH(rangeIndex, iz);
+        Radx::fl32 sdevV = _rhis[rhiIndex]->getSdevDbzV(rangeIndex, iz);
+        sdevDbzH->data[ii] = sdevH;
+        sdevDbzV->data[ii] = sdevV;
+      } // ix
+    } // iy
+  } // iz
+
+  _printRunTime("end loadSdevFields");
 
 }
 
