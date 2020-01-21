@@ -34,6 +34,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "RhiOrient.hh"
+#include <cassert>
 #include <cmath>
 #include <set>
 #include <Radx/RadxSweep.hh>
@@ -115,6 +116,17 @@ void RhiOrient::computeEchoOrientation()
     return;
   }
   if (_loadDbzV()) {
+    _success = false;
+    return;
+  }
+
+  // load up standard deviation of DBZ in H and V
+
+  if (_loadSdevH()) {
+    _success = false;
+    return;
+  }
+  if (_loadSdevV()) {
     _success = false;
     return;
   }
@@ -545,7 +557,7 @@ int RhiOrient::_loadDbzGrid()
         double gridError = sqrt(zzErr * zzErr + xxErr * xxErr);
         double dbzVal = *dbz;
 
-        if (isnan(_dbzGrid[zIndex][xIndex])) {
+        if (std::isnan(_dbzGrid[zIndex][xIndex])) {
 
           // no previous dbz stored
 
@@ -585,6 +597,178 @@ int RhiOrient::_loadDbzGrid()
 }
 
 ///////////////////////////////////////////////////////////////
+/// Load up DBZ-SDEV-H grid from DBZ-H grid
+/// Returns 0 on success
+/// Returns -1 on error
+
+int RhiOrient::_loadSdevH()
+  
+{
+  
+  // loop through the levels, bottom to top
+  
+  for (size_t iz = 0; iz < _nZ; iz++) {
+    
+    // loop through the gates
+    // loading up the dbz vals from ray intersections
+    // into a vector, along with their gate numbers
+
+    vector<double> dbzVals;
+    vector<int> gateNums;
+    for (size_t igate = 0; igate < _nGates; igate++) {
+      double dbzVal = _dbzH[iz][igate];
+      if (!std::isnan(dbzVal)) {
+        dbzVals.push_back(dbzVal);
+        gateNums.push_back(igate);
+      }
+    } // igate
+    
+    size_t nDbz = dbzVals.size();
+    if (nDbz < 2) {
+      continue;
+    }
+
+    // load up sdev vector, to match dbz vals
+    
+    vector<double> sdevH;
+
+    // compute sdev for first val - just use 2 pts
+    
+    double sdev = _computeSdev2(dbzVals[0], dbzVals[1]);
+    sdevH.push_back(sdev);
+
+    // compute sdev for interior vals
+
+    if (nDbz >= 3) {
+      for (size_t ii = 1; ii < nDbz - 2; ii++) {
+        sdev = _computeSdev3(dbzVals[ii-1], dbzVals[ii], dbzVals[ii+1]);
+        sdevH.push_back(sdev);
+      }
+    }
+    
+    // compute sdev for last val - just use 2 pts
+    
+    sdev = _computeSdev2(dbzVals[nDbz-2], dbzVals[nDbz-1]);
+    sdevH.push_back(sdev);
+
+    assert(sdevH.size() == nDbz);
+    
+    // save these computed sdev values in the array
+    
+    for (size_t ii = 0; ii < nDbz; ii++) {
+      _sdevH[iz][gateNums[ii]] = sdevH[ii];
+    }
+
+    // interpolate for the intermediate grid locations
+    
+    for (size_t ii = 1; ii < nDbz; ii++) {
+      size_t gateLower = gateNums[ii-1];
+      size_t gateUpper = gateNums[ii];
+      ssize_t nMiss = gateUpper - gateLower - 1;
+      if (nMiss < 1) {
+        continue;
+      }
+      double sdevDiff = sdevH[ii] - sdevH[ii-1];
+      double sdevDeltaPerGate = sdevDiff / (nMiss + 1.0);
+      for (ssize_t jj = 1; jj <= nMiss; jj++) {
+        double sdevInterp = sdevH[ii-1] + sdevDeltaPerGate * jj;
+        _sdevH[iz][gateNums[ii+jj]] = sdevInterp;
+      }
+    }
+
+  } // iz
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////
+/// Load up DBZ-SDEV-V grid from DBZ-V grid
+/// Returns 0 on success
+/// Returns -1 on error
+
+int RhiOrient::_loadSdevV()
+  
+{
+  
+  // loop through the gates
+  
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    
+    // loop through the levels
+    // loading up the dbz vals from ray intersections
+    // into a vector, along with their level number
+
+    vector<double> dbzVals;
+    vector<int> levelNums;
+    for (size_t iz = 0; iz < _nZ; iz++) {
+      double dbzVal = _dbzV[iz][igate];
+      if (!std::isnan(dbzVal)) {
+        dbzVals.push_back(dbzVal);
+        levelNums.push_back(iz);
+      }
+    } // igate
+    
+    size_t nDbz = dbzVals.size();
+    if (nDbz < 2) {
+      continue;
+    }
+
+    // load up sdev vector, to match dbz vals
+    
+    vector<double> sdevV;
+
+    // compute sdev for first val - just use 2 pts
+    
+    double sdev = _computeSdev2(dbzVals[0], dbzVals[1]);
+    sdevV.push_back(sdev);
+
+    // compute sdev for interior vals
+
+    if (nDbz >= 3) {
+      for (size_t ii = 1; ii < nDbz - 2; ii++) {
+        sdev = _computeSdev3(dbzVals[ii-1], dbzVals[ii], dbzVals[ii+1]);
+        sdevV.push_back(sdev);
+      }
+    }
+    
+    // compute sdev for last val - just use 2 pts
+    
+    sdev = _computeSdev2(dbzVals[nDbz-2], dbzVals[nDbz-1]);
+    sdevV.push_back(sdev);
+
+    assert(sdevV.size() == nDbz);
+    
+    // save these computed sdev values in the array
+    
+    for (size_t ii = 0; ii < nDbz; ii++) {
+      _sdevV[levelNums[ii]][igate] = sdevV[ii];
+    }
+
+    // interpolate for the intermediate grid locations
+    
+    for (size_t ii = 1; ii < nDbz; ii++) {
+      size_t levelLower = levelNums[ii-1];
+      size_t levelUpper = levelNums[ii];
+      ssize_t nMiss = levelUpper - levelLower - 1;
+      if (nMiss < 1) {
+        continue;
+      }
+      double sdevDiff = sdevV[ii] - sdevV[ii-1];
+      double sdevDeltaPerLevel = sdevDiff / (nMiss + 1.0);
+      for (ssize_t jj = 1; jj <= nMiss; jj++) {
+        double sdevInterp = sdevV[ii-1] + sdevDeltaPerLevel * jj;
+        _sdevV[levelNums[ii+jj]][igate] = sdevInterp;
+      }
+    }
+
+  } // iz
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////
 /// Get closest Z index to given ht
 /// Returns index on success, -1 on failure
 
@@ -615,19 +799,41 @@ int RhiOrient::_getZIndex(double zz)
 
 }
 
-double usdev(double sum, double sumsq, double n)
+///////////////////////////////////////////////////////////////
+/// Compute sdev for 2 points
+
+double RhiOrient::_computeSdev2(double val1, double val2)
+{
+  double sum = val1 + val2;
+  double sumsq = val1 * val1 + val2 * val2;
+  double nn = 2.0;
+  double sdev = _computeSdevFromSums(sum, sumsq, nn);
+  return sdev;
+}
+
+///////////////////////////////////////////////////////////////
+/// Compute sdev for 3 points
+
+double RhiOrient::_computeSdev3(double val1, double val2, double val3)
+{
+  double sum = val1 + val2 + val3;
+  double sumsq = val1 * val1 + val2 * val2 + val3 * val3;
+  double nn = 3.0;
+  double sdev = _computeSdevFromSums(sum, sumsq, nn);
+  return sdev;
+}
+
+///////////////////////////////////////////////////////////////
+/// Compute sdev from sum and sumsq
+
+double RhiOrient::_computeSdevFromSums(double sum, double sumsq, double nn)
 
 {
-
-  double comp;
-
-  comp = n * sumsq - sum * sum;
-
-  if (comp <= 0.0 || n < 2.0) {
-    return (0.0);
+  double comp = nn * sumsq - sum * sum;
+  if (comp <= 0.0 || nn < 2.0) {
+    return 0.0;
   } else {
-    return (sqrt(comp) / (n - 1.0));
+    return (sqrt(comp) / (nn - 1.0));
   }
-
 }
 

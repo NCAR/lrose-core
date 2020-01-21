@@ -121,7 +121,13 @@ private:
   int _loadDbzH();
   int _loadDbzV();
   int _loadDbzGrid();
+  int _loadSdevH();
+  int _loadSdevV();
   int _getZIndex(double zz);
+
+  double _computeSdev2(double val1, double val2);
+  double _computeSdev3(double val1, double val2, double val3);
+  double _computeSdevFromSums(double sum, double sumsq, double nn);
 
   /// sorting rays by time or azimuth
 
