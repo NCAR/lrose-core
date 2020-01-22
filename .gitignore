@@ -279,6 +279,7 @@ codebase/apps/interp/src/SurfInterp/SurfInterp
 codebase/apps/interp/src/surf_interp/surf_interp
 
 codebase/apps/mdv_utils/src/Binary2Mdv/Binary2Mdv
+codebase/apps/mdv_utils/src/CreateTestMdv/CreateTestMdv
 codebase/apps/mdv_utils/src/CwbRadar2Mdv/CwbRadar2Mdv
 codebase/apps/mdv_utils/src/Egm2Mdv/Egm2Mdv
 codebase/apps/mdv_utils/src/GribNc2Mdv/GribNc2Mdv
