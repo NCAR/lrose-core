@@ -243,7 +243,7 @@ void CreateTestMdv::_addField(DsMdvx &mdvx,
         double zz = (double) iz / fhdr.nz;
         double yy = (double) iy / fhdr.ny;
         double xx = (double) ix / fhdr.nx;
-        double frac = sqrt(zz * zz + yy * yy + xx * xx);
+        double frac = sqrt(zz * zz + yy * yy + xx * xx) / sqrt(3.0);
 
         // transform to get the float val
 
