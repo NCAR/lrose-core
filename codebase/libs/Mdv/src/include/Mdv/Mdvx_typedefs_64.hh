@@ -162,19 +162,17 @@ typedef struct {
                                    //    NOTE: only ORDER_XYZ supported
   
   mutable si32  n_fields;          // Number of fields in this data set
+  mutable si32  n_chunks;          // Number of chunks in this file
 
-  mutable si32  max_nx;            // Max number of array elements in 
+  mutable si64  max_nx;            // Max number of array elements in 
                                    //    x direction
 
-  mutable si32  max_ny;            // Max number of array elements in 
+  mutable si64  max_ny;            // Max number of array elements in 
                                    //    y direction
   
-  mutable si32  max_nz;            // Max number of array elements in 
+  mutable si64  max_nz;            // Max number of array elements in 
                                    //    z direction
 
-  mutable si32  n_chunks;          // Number of chunks in this file
-  si32 pad_si32_2;                 // for alignment on 64-bit word boundary
-    
   // The following offsets are all in bytes from beginning of file
 
   mutable si64 field_hdr_offset;   // offset to first field header
@@ -352,16 +350,16 @@ typedef struct {
                                //   holder after removing an obsolete
                                //   field from the header.
 
-  si32 nx;                     // Number of points in X direction
-  si32 ny;                     // Number of points in Y direction
-  si32 nz;                     // Number of points in Z direction
+  si64 nx;                     // Number of points in X direction
+  si64 ny;                     // Number of points in Y direction
+  si64 nz;                     // Number of points in Z direction
  
   si32 proj_type;              // Projection Type (e.g. PROJ_LATLON)
   
   si32 encoding_type;          // Type of data encoding (e.g.
                                //   INT8, FLOAT32)
 
-  si32 data_element_nbytes;    // Size of each data element
+  si64 data_element_nbytes;    // Size of each data element
                                //   (in bytes)
 
   mutable si64 field_data_offset;

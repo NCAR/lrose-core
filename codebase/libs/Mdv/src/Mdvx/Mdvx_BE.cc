@@ -50,8 +50,8 @@ void Mdvx::master_header_from_BE(master_header_t &m_hdr)
 
   BE_to_array_32(&m_hdr.record_len1, 4 * sizeof(si32));
   BE_to_array_64(&m_hdr.time_gen, 6 * sizeof(si64));
-  BE_to_array_32(&m_hdr.num_data_times, 16 * sizeof(si32));
-  BE_to_array_64(&m_hdr.field_hdr_offset, 3 * sizeof(si64));
+  BE_to_array_32(&m_hdr.num_data_times, 12 * sizeof(si32));
+  BE_to_array_64(&m_hdr.max_nx, 6 * sizeof(si64));
   BE_to_array_32(&m_hdr.field_grids_differ, 10 * sizeof(si32));
   BE_to_array_64(&m_hdr.time_written, 4 * sizeof(si64));
   BE_to_array_32(m_hdr.unused_si32, 8 * sizeof(si32));
@@ -81,8 +81,8 @@ void Mdvx::master_header_to_BE(master_header_t &m_hdr)
   
   BE_from_array_32(&m_hdr.record_len1, 4 * sizeof(si32));
   BE_from_array_64(&m_hdr.time_gen, 6 * sizeof(si64));
-  BE_from_array_32(&m_hdr.num_data_times, 16 * sizeof(si32));
-  BE_from_array_64(&m_hdr.field_hdr_offset, 3 * sizeof(si64));
+  BE_from_array_32(&m_hdr.num_data_times, 12 * sizeof(si32));
+  BE_from_array_64(&m_hdr.max_nx, 6 * sizeof(si64));
   BE_from_array_32(&m_hdr.field_grids_differ, 10 * sizeof(si32));
   BE_from_array_64(&m_hdr.time_written, 4 * sizeof(si64));
   BE_from_array_32(m_hdr.unused_si32, 8 * sizeof(si32));
@@ -102,10 +102,10 @@ void Mdvx::field_header_from_BE(field_header_t &f_hdr)
 {
 
   BE_to_array_32(&f_hdr.record_len1, 4 * sizeof(si32));
-  BE_to_array_64(&f_hdr.user_time1, 6 * sizeof(si64));
+  BE_to_array_64(&f_hdr.user_time1, 9 * sizeof(si64));
   
-  BE_to_array_32(&f_hdr.nx, 6 * sizeof(si32));
-  BE_to_array_64(&f_hdr.field_data_offset, 2 * sizeof(si64));
+  BE_to_array_32(&f_hdr.proj_type, 2 * sizeof(si32));
+  BE_to_array_64(&f_hdr.data_element_nbytes, 3 * sizeof(si64));
   
   BE_to_array_32(f_hdr.user_data_si32, 24 * sizeof(si32));
 
@@ -154,10 +154,10 @@ void Mdvx::field_header_to_BE(field_header_t &f_hdr)
   }
  
   BE_from_array_32(&f_hdr.record_len1, 4 * sizeof(si32));
-  BE_from_array_64(&f_hdr.user_time1, 6 * sizeof(si64));
+  BE_from_array_64(&f_hdr.user_time1, 9 * sizeof(si64));
   
-  BE_from_array_32(&f_hdr.nx, 6 * sizeof(si32));
-  BE_from_array_64(&f_hdr.field_data_offset, 2 * sizeof(si64));
+  BE_from_array_32(&f_hdr.proj_type, 2 * sizeof(si32));
+  BE_from_array_64(&f_hdr.data_element_nbytes, 3 * sizeof(si64));
   
   BE_from_array_32(f_hdr.user_data_si32, 24 * sizeof(si32));
 
