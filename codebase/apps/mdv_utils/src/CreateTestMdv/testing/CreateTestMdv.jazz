@@ -1,0 +1,528 @@
+/**********************************************************************
+ * TDRP params for ./CreateTestMdv
+ **********************************************************************/
+
+//======================================================================
+//
+// CreateTestMdv creates a dummy MDV file for testing purposes.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// CARTESIAN GRID XY DETAILS.
+//
+// Specify the grid details in (x,y). This will be a regular Cartesian 
+//   grid. The units for the grid paramters are in (km,km) for all 
+//   projections except for PROJ_LATLON. For the LATLON projection, the 
+//   units are in (deg,deg).
+//
+//======================================================================
+ 
+///////////// grid_xy_geom ////////////////////////////
+//
+// Specify the grid parameters in x,y.
+//
+// 	nx: the number of grid points in the X dimension.
+// 	ny: the number of grid points in the Y dimension.
+// 	minx: the X coordinate of the center of the SW grid cell.
+// 	miny: the Y coordinate of the center of the SW grid cell.
+// 	dx: the grid spacing in the X dimension.
+// 	dy: the grid spacing in the Y dimension.
+//
+// Units are in km, except for PROJ_LATLON, which has units in degrees.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+grid_xy_geom = {
+    nx = 2000,
+    ny = 2000,
+    minx = -160,
+    miny = -20,
+    dx = 0.01,
+    dy = 0.01
+};
+
+//======================================================================
+//
+// CARTESIAN GRID PROJECTION.
+//
+//======================================================================
+ 
+///////////// projection //////////////////////////////
+//
+// Projection details for the Cartesian grid..
+//
+// 	PROJ_LATLON: regular lat/lon grid (Equidistant Cylindrical)
+// 	PROJ_FLAT: Azimuthal Equidistant (Radar)
+// 	PROJ_LAMBERT_CONF: Lambert Conformal Conic
+// 	PROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area
+// 	PROJ_MERCATOR: Mercator - EW orientation
+// 	PROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation
+// 	PROJ_POLAR_STEREO: Stereographic- polar aspect
+// 	PROJ_OBLIQUE_STEREO: Stereographic - oblique aspect
+// 	PROJ_ALBERS: Albers Equal Area Conic
+// 	PROJ_VERT_PERSP: Vertical Perspective (satellite view).
+//
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_LAMBERT_CONF
+//     PROJ_MERCATOR
+//     PROJ_POLAR_STEREO
+//     PROJ_FLAT
+//     PROJ_OBLIQUE_STEREO
+//     PROJ_TRANS_MERCATOR
+//     PROJ_ALBERS
+//     PROJ_LAMBERT_AZIM
+//     PROJ_VERT_PERSP
+//
+
+projection = PROJ_LATLON;
+
+///////////// proj_rotation ///////////////////////////
+//
+// Grid rotation.
+//
+// This applies only to PROJ_FLAT projection.
+//
+//
+// Type: double
+//
+
+proj_rotation = 0;
+
+///////////// proj_origin_lat /////////////////////////
+//
+// Grid origin latitude.
+//
+// This applies to all projections except LATLON.
+//
+//
+// Type: double
+//
+
+proj_origin_lat = 0;
+
+///////////// proj_origin_lon /////////////////////////
+//
+// Grid origin longitude.
+//
+// This applies to all projections except LATLON.
+//
+//
+// Type: double
+//
+
+proj_origin_lon = 0;
+
+///////////// proj_lat1 ///////////////////////////////
+//
+// Grid reference latitude 1.
+//
+// This applies to LAMBERT_CONF and ALBERS projections.
+//
+//
+// Type: double
+//
+
+proj_lat1 = 20;
+
+///////////// proj_lat2 ///////////////////////////////
+//
+// Grid reference latitude 2.
+//
+// This applies to LAMBERT_CONF and ALBERS projections.
+//
+//
+// Type: double
+//
+
+proj_lat2 = 40;
+
+///////////// proj_central_scale //////////////////////
+//
+// Central scale for projections.
+//
+// This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR 
+//   projections.
+//
+//
+// Type: double
+//
+
+proj_central_scale = 1;
+
+///////////// proj_tangent_lat ////////////////////////
+//
+// Tangent latitude (deg).
+//
+// This applies to OBLIQUE_STEREO only.
+//
+//
+// Type: double
+//
+
+proj_tangent_lat = 30;
+
+///////////// proj_tangent_lon ////////////////////////
+//
+// Tangent longitude (deg).
+//
+// This applies to OBLIQUE_STEREO and POLAR_STEREO.
+//
+//
+// Type: double
+//
+
+proj_tangent_lon = 0;
+
+///////////// proj_pole_is_north //////////////////////
+//
+// Flag indicating stereogtraphic is over the NORTH pole.
+//
+// This applies to POLAR_STEREO. If false, the projection is over the 
+//   south pole.
+//
+//
+// Type: boolean
+//
+
+proj_pole_is_north = TRUE;
+
+///////////// proj_persp_radius ///////////////////////
+//
+// Radius of perspective point (km).
+//
+// This applies to VERT_PERSP.
+//
+//
+// Type: double
+//
+
+proj_persp_radius = 35786;
+
+///////////// proj_false_northing /////////////////////
+//
+// False northing correction.
+//
+// Occasionally, this is added to the Y coordinate so that all 
+//   coordinates are positive. Normally 0. As an alternative to 
+//   false_northing and false_easting, you can set the offset_latitude and 
+//   offset_longitude.
+//
+//
+// Type: double
+//
+
+proj_false_northing = 0;
+
+///////////// proj_false_easting //////////////////////
+//
+// False easting correction.
+//
+// Occasionally, this is added to the X coordinate so that all 
+//   coordinates are positive. Normally 0.
+//
+//
+// Type: double
+//
+
+proj_false_easting = 0;
+
+//======================================================================
+//
+// CARTESIAN GRID VERTICAL LEVELS.
+//
+
+// Set the vertical levels for the Cartesian grid.
+//
+// This applies to INTERP_MODE_CART, INTERP_MODE_SAT and 
+//   INTERP_MODE_REORDER.
+//
+// For INTERP_MODE_PPI and INTERP_MODE_POLAR, the vertical levels are 
+//   governed by the elevation angle for each sweep in the input volume.
+//
+// You can either specify a grid with constant vertial spacing, or you 
+//   can provide an array of heights. The latter allows you to specify a 
+//   grid with irregular vertical spacing.
+//
+//======================================================================
+ 
+///////////// vlevel_type /////////////////////////////
+//
+// Vertical level type.
+//
+// Supported types
+//   VERT_TYPE_UNKNOWN
+//   VERT_TYPE_SURFACE - Earth surface field
+//   VERT_TYPE_SIGMA_P - Sigma pressure levels
+//   VERT_TYPE_PRESSURE - Pressure levels, units = mb
+//   VERT_TYPE_Z - Constant altitude, units = Km MSL
+//   VERT_TYPE_SIGMA_Z - Model sigma Z levels
+//   VERT_TYPE_ETA - Model eta levels
+//   VERT_TYPE_THETA - Isentropic surface, units = Kelvin
+//   VERT_TYPE_MIXED - Any hybrid grid
+//   VERT_TYPE_ELEV - Elevation angles - radar
+//   VERT_TYPE_COMPOSITE - A Composite of a set of planes
+//   VERT_SATELLITE_IMAGE - Satelite Image
+//   VERT_FLIGHT_LEVEL - ICAO flight level (100's of ft)
+//   VERT_EARTH_IMAGE - Image, conformal to the surface of the earth .
+//
+//
+// Type: enum
+// Options:
+//     VERT_TYPE_UNKNOWN
+//     VERT_TYPE_SURFACE
+//     VERT_TYPE_SIGMA_P
+//     VERT_TYPE_PRESSURE
+//     VERT_TYPE_Z
+//     VERT_TYPE_SIGMA_Z
+//     VERT_TYPE_ETA
+//     VERT_TYPE_THETA
+//     VERT_TYPE_MIXED
+//     VERT_TYPE_ELEV
+//     VERT_TYPE_COMPOSITE
+//     VERT_SATELLITE_IMAGE
+//     VERT_FLIGHT_LEVEL
+//     VERT_EARTH_IMAGE
+//
+
+vlevel_type = VERT_TYPE_Z;
+
+///////////// grid_z_geom /////////////////////////////
+//
+// Specifying regular vertical grid levels.
+//
+// 	nz is the number of levels.
+// 	dz is constant spacing of the Z levels, in km.
+// 	minz is the lowest level, in km MSL.
+//
+// NOTE: Applies if specify_individual_z_levels is false.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int nz;
+//      double minz;
+//      double dz;
+//   }
+//
+//
+
+grid_z_geom = {
+    nz = 50,
+    minz = 0.25,
+    dz = 0.25
+};
+
+///////////// specify_individual_z_levels /////////////
+//
+// Option to specify each Z level individually.
+//
+// If true, you will fill out the z_level array to specify each Z level. 
+//   This allows you to set up a grid with unequal spacing in the 
+//   vertical. If false, use grid_z_geom to specify Z levels at constant 
+//   spacing.
+//
+//
+// Type: boolean
+//
+
+specify_individual_z_levels = FALSE;
+
+///////////// z_level_array ///////////////////////////
+//
+// Array of grid levels, in km MSL.
+//
+// This applies if specify_individual_z_levels is true.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+z_level_array = {
+ 0.5,
+ 1,
+ 1.5,
+ 2,
+ 2.5,
+ 3,
+ 4,
+ 5,
+ 6,
+ 7,
+ 8,
+ 9,
+ 10
+};
+
+//======================================================================
+//
+// OUTPUT FIELDS.
+//
+//======================================================================
+ 
+///////////// encoding_type ///////////////////////////
+//
+// Set encoding type.
+//
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+encoding_type = ENCODING_INT16;
+
+///////////// fields //////////////////////////////////
+//
+// Array of output fields.
+//
+// The program will create these fields.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string long_name;
+//      string units;
+//      double min_val;
+//      double max_val;
+//      encoding_type_t encoding;
+//        Options:
+//          ENCODING_INT8
+//          ENCODING_INT16
+//          ENCODING_FLOAT32
+//   }
+//
+// 1D array - variable length.
+//
+
+fields = {
+  {
+    name = "Temp",
+    long_name = "Temperature",
+    units = "C",
+    min_val = -60,
+    max_val = 50,
+    encoding = ENCODING_FLOAT32
+  }
+  ,
+  {
+    name = "RH",
+    long_name = "Relative-humidity",
+    units = "%",
+    min_val = 0,
+    max_val = 100,
+    encoding = ENCODING_FLOAT32
+  }
+};
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory.
+//
+//
+// Type: string
+//
+
+output_dir = "/tmp/MdvTest/jazz";
+
+///////////// compression /////////////////////////////
+//
+// Set compression type.
+//
+//
+// Type: enum
+// Options:
+//     COMPRESSION_NONE
+//     COMPRESSION_ZLIB
+//     COMPRESSION_BZIP
+//     COMPRESSION_GZIP
+//
+
+compression = COMPRESSION_NONE;
+
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+//
+// This short string is placed in the MDV master header for 
+//   documentation purposes.
+//
+//
+// Type: string
+//
+
+data_set_name = "Jazz test files";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+//
+// This short string is placed in the MDV master header for 
+//   documentation purposes.
+//
+//
+// Type: string
+//
+
+data_set_source = "Converted by CreateTestMdv.";
+
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+//
+// This long string is placed in the MDV master header for documentation 
+//   purposes.
+//
+//
+// Type: string
+//
+
+data_set_info = "Unknown";
+
