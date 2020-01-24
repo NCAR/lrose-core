@@ -51,6 +51,7 @@
 #include <iostream>
 #include <iomanip>
 #include <limits>
+#include <cerrno>
 using namespace std;
 
 #define PSEUDO_RADIUS 8533.0
@@ -6197,7 +6198,8 @@ int MdvxField::_write_volume(TaFile &outfile,
 
   // Write the leading FORTRAN record
   
-  if (outfile.fwrite(&be_volume_size, sizeof(be_volume_size), 1) != 1) {
+  ssize_t nwritten = outfile.fwrite(&be_volume_size, sizeof(be_volume_size), 1);
+  if (nwritten != 1) {
     _errStr += "ERROR - MdvxField::writeVol\n";
     _errStr += "  Cannot write begin fortran len for field: ";
     _errStr += _fhdr.field_name;
@@ -6207,16 +6209,21 @@ int MdvxField::_write_volume(TaFile &outfile,
 
   // Write out the data.
 
-  if (outfile.fwrite(copyBuf.getPtr(), 1, volume_size) != volume_size) {
+  nwritten = outfile.fwrite(copyBuf.getPtr(), 1, volume_size);
+  if (nwritten != volume_size) {
+    int errNum = errno;
     char errstr[128];
-    
     _errStr += "ERROR - MdvxField::writeVol\n";
     _errStr += string("  Cannot write data for field: ")
       + _fhdr.field_name + "\n";
     sprintf(errstr, "%ld", (int64_t) copyBuf.getLen());
-    _errStr += string("  copyBuf has ") + errstr + " bytes, ";
+    _errStr += string("    copyBuf has ") + errstr + " bytes\n";
     sprintf(errstr, "%ld", volume_size);
-    _errStr += string(" should have ") + errstr + " bytes.\n";
+    _errStr += string("    should have ") + errstr + " bytes.\n";
+    sprintf(errstr, "%ld", nwritten);
+    _errStr += string("    nwritten: ") + errstr + " bytes.\n";
+    _errStr += strerror(errNum);
+    _errStr += "\n";
     return -1;
   }
   

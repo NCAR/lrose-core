@@ -303,7 +303,7 @@ int Mdvx::writeToPath(const string &output_path)
   
   TaFile outfile;
   outfile.setRemoveOnDestruct();
-
+  
   if (outfile.fopen(tmpPath.c_str(), "wb") == NULL) {
     int errNum = errno;
     _errStr += "ERROR - Mdvx::writeToPath\n";
@@ -317,7 +317,7 @@ int Mdvx::writeToPath(const string &output_path)
 
   // compute offset to start of field data
 
-  ssize_t writeOffset =
+  int64_t writeOffset =
     sizeof(master_header_t) +
     _mhdr.n_fields * (sizeof(field_header_t) + sizeof(vlevel_header_t)) +
     _mhdr.n_chunks * sizeof(chunk_header_t);
@@ -328,19 +328,20 @@ int Mdvx::writeToPath(const string &output_path)
       _mhdr.n_chunks * sizeof(chunk_header_32_t);
   }
 
-  ssize_t nextOffset;
+  int64_t nextOffset = writeOffset;
 
   // write field data - this also sets the field data offset in
   // the field headers
 
   for (int i = 0; i < _mhdr.n_fields; i++) {
 
-
     if (_heartbeatFunc != NULL) {
       _heartbeatFunc("Mdvx::writeToPath");
     }
 
     if (_fields[i]->_write_volume(outfile, writeOffset, nextOffset)) {
+
+      _errStr += _fields[i]->getErrStr();
       char field_string[10];
       sprintf(field_string, "%d", i);
       
@@ -355,9 +356,10 @@ int Mdvx::writeToPath(const string &output_path)
   
   // write chunk data - this also sets the chunk data offset in the
   // chunk data headers
-  
+
   for (int i = 0; i < _mhdr.n_chunks; i++) {
     if (_chunks[i]->_write_data(outfile, writeOffset, nextOffset)) {
+      _errStr += _chunks[i]->getErrStr();
       _errStr += "ERROR - Mdvx::writeToPath\n";
       _errStr += "  Path: ";
       _errStr += fullOutPath;
@@ -925,7 +927,7 @@ int Mdvx::_write_field_header(const int field_num,
 
   // Move to the appropriate offset
   
-  ssize_t offset = _mhdr.field_hdr_offset + field_num * sizeof(field_header_t);
+  int64_t offset = _mhdr.field_hdr_offset + field_num * sizeof(field_header_t);
   if (_write32BitHeaders) {
     offset = _mhdr.field_hdr_offset + field_num * sizeof(field_header_32_t);
   }  
@@ -1017,7 +1019,7 @@ int Mdvx::_write_vlevel_header(const int field_num,
 
   // Move to the appropriate offset
 
-  ssize_t offset = _mhdr.vlevel_hdr_offset + field_num * sizeof(vlevel_header_t);
+  int64_t offset = _mhdr.vlevel_hdr_offset + field_num * sizeof(vlevel_header_t);
   if (_write32BitHeaders) {
     offset = _mhdr.vlevel_hdr_offset + field_num * sizeof(vlevel_header_32_t);
   }  
@@ -1100,7 +1102,7 @@ int Mdvx::_write_chunk_header(const int chunk_num,
 
   // Move to the appropriate offset
   
-  ssize_t offset = _mhdr.chunk_hdr_offset + chunk_num * sizeof(chunk_header_t);
+  int64_t offset = _mhdr.chunk_hdr_offset + chunk_num * sizeof(chunk_header_t);
   if (_write32BitHeaders) {
     offset = _mhdr.vlevel_hdr_offset + chunk_num * sizeof(chunk_header_32_t);
   }  
