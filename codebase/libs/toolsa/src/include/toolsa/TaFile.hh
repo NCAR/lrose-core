@@ -98,11 +98,11 @@ public:
 
   // fread - standard behavior, retries on EINTR
   
-  int fread(void *ptr, int size, int nitems);
+  size_t fread(void *ptr, size_t size, size_t nitems);
 
   // fwrite - standard behavior, retries on EINTR
 
-  int fwrite(const void *ptr, int size, int nitems);
+  size_t fwrite(const void *ptr, size_t size, size_t nitems);
 
   // fseek - standard behavior
   

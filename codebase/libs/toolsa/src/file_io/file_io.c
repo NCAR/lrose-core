@@ -64,20 +64,20 @@ static int file_uncompress(const char *path);
  *
  */
 
-int ta_fread(void *ptr, int size, int nitems, FILE *stream)
+size_t ta_fread(void *ptr, size_t size, size_t nitems, FILE *stream)
 
 {
 
-  int ireturn;
+  size_t ireturn;
 
   errno = EINTR;
-
+  
   while (errno == EINTR) {
     errno = 0;
     ireturn = fread(ptr, size, nitems, stream);
   }
 
-  return (ireturn);
+  return ireturn;
 
 }
 
@@ -88,11 +88,11 @@ int ta_fread(void *ptr, int size, int nitems, FILE *stream)
  * Returns same as fwrite()
  */
 
-int ta_fwrite(const void *ptr, int size, int nitems, FILE *stream)
+size_t ta_fwrite(const void *ptr, size_t size, size_t nitems, FILE *stream)
 
 {
 
-  int ireturn;
+  size_t ireturn;
 
   errno = EINTR;
 
@@ -101,7 +101,7 @@ int ta_fwrite(const void *ptr, int size, int nitems, FILE *stream)
     ireturn = fwrite(ptr, size, nitems, stream);
   }
 
-  return (ireturn);
+  return ireturn;
 
 }
 

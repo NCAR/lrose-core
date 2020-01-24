@@ -116,7 +116,7 @@ extern int ta_makedir_for_file(const char *file_path);
  *
  */
 
-extern int ta_fread(void *ptr, int size, int nitems, FILE *stream);
+extern size_t ta_fread(void *ptr, size_t size, size_t nitems, FILE *stream);
 
 /*********************************************************
  * ta_fwrite()
@@ -125,7 +125,7 @@ extern int ta_fread(void *ptr, int size, int nitems, FILE *stream);
  * Returns same as fwrite()
  */
 
-extern int ta_fwrite(const void *ptr, int size, int nitems, FILE *stream);
+extern size_t ta_fwrite(const void *ptr, size_t size, size_t nitems, FILE *stream);
 
 /*******************************************************
  *

@@ -192,7 +192,7 @@ void TaFile::remove()
 /////////
 // fread
 
-int TaFile::fread(void *ptr, int size, int nitems)
+size_t TaFile::fread(void *ptr, size_t size, size_t nitems)
 
 {
   return (ta_fread(ptr, size, nitems, _fp));
@@ -201,7 +201,7 @@ int TaFile::fread(void *ptr, int size, int nitems)
 /////////
 // fwrite
 
-int TaFile::fwrite(const void *ptr, int size, int nitems)
+size_t TaFile::fwrite(const void *ptr, size_t size, size_t nitems)
   
 {
   return (ta_fwrite(ptr, size, nitems, _fp));
