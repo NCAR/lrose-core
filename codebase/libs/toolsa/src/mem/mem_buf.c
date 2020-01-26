@@ -163,6 +163,25 @@ MEMbufDelete(MEMbuf * thisbuf)
 }
 
 /*___________________________________________________________________________
+ * 
+ * Delete handle, but do not delete the buffer
+ * so that the memory ownership can be transferred.
+ * The memory must be freed by the calling routine to avoid a leak.
+ * Returns a pointed to the buffer.
+ *___________________________________________________________________________
+ */ 
+
+void *
+MEMbufDeleteHandle(MEMbuf *thisbuf)
+
+{
+
+  char *bufPtr = thisbuf->buf; /* pointer to allocated buffer */
+  ufree(thisbuf); /* free the handle */
+  return bufPtr; /* return pointer to buffer, to be freed by caller */
+}
+
+/*___________________________________________________________________________
  *
  * Reset the memory buffer - sets current length to 0
  * Zero's out allocated buffer memory.
