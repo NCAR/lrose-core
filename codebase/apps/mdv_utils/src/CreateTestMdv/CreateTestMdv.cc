@@ -238,17 +238,19 @@ void CreateTestMdv::_addField(DsMdvx &mdvx,
     for (int iy = 0; iy < fhdr.ny; iy++) {
       for (int ix = 0; ix < fhdr.nx; ix++, index++) {
         
+        data[index] = 0;
+
         // compute normalized location in data space [0, 1]
         
-        double zz = (double) iz / fhdr.nz;
-        double yy = (double) iy / fhdr.ny;
-        double xx = (double) ix / fhdr.nx;
-        double frac = sqrt(zz * zz + yy * yy + xx * xx) / sqrt(3.0);
+        // double zz = (double) iz / fhdr.nz;
+        // double yy = (double) iy / fhdr.ny;
+        // double xx = (double) ix / fhdr.nx;
+        // double frac = sqrt(zz * zz + yy * yy + xx * xx) / sqrt(3.0);
 
         // transform to get the float val
 
-        fl32 val = fieldMin + frac * fieldRange;
-        data[index] = val;
+        // fl32 val = fieldMin + frac * fieldRange;
+        // data[index] = val;
 
       } // ix
     } // iy

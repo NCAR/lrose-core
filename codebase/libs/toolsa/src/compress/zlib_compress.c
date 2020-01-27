@@ -70,16 +70,16 @@
  **********************************************************************/
 
 void *zlib_compress(const void *uncompressed_buffer,
-		    unsigned int nbytes_uncompressed,
-		    unsigned int *nbytes_compressed_p)
+		    ui64 nbytes_uncompressed,
+		    ui64 *nbytes_compressed_p)
      
 {
 
   int iret;
-  unsigned int nbytes_buffer;
+  ui64 nbytes_buffer;
   unsigned char *compressed_buffer;
   unsigned char *truncated_buffer;
-  unsigned int nbytes_alloc;
+  ui64 nbytes_alloc;
   compress_buf_hdr_t *hdr;
   uLongf out_len;
  
@@ -121,10 +121,10 @@ void *zlib_compress(const void *uncompressed_buffer,
      */
 
     ufree(compressed_buffer);
-    return (_ta_no_compress(ZLIB_NOT_COMPRESSED,
-			    uncompressed_buffer,
-			    nbytes_uncompressed,
-			    nbytes_compressed_p));
+    return (ta_no_compress(ZLIB_NOT_COMPRESSED,
+                           uncompressed_buffer,
+                           nbytes_uncompressed,
+                           nbytes_compressed_p));
     
   }
   
@@ -181,7 +181,7 @@ void *zlib_compress(const void *uncompressed_buffer,
  **********************************************************************/
 
 void *zlib_decompress(const void *compressed_buffer,
-		      unsigned int *nbytes_uncompressed_p)
+		      ui64 *nbytes_uncompressed_p)
      
 {
 

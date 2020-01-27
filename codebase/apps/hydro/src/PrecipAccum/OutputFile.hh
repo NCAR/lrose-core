@@ -63,7 +63,8 @@ public:
 	    fl32 *precip,
 	    fl32 *rate,
 	    fl32 *max_dbz,
-	    fl32 *max_vil);
+	    fl32 *max_vil,
+            const fl32 missing_value);
 
 protected:
   

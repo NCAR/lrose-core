@@ -89,6 +89,8 @@ protected:
   
 private:
 
+  static const fl32 MISSING_VALUE;
+  
   const string &_progName;
   const Params &_params;
   

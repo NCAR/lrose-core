@@ -278,18 +278,6 @@
   }
 
   ////////////////////////////////////////////
-  // isArgValid()
-  // 
-  // Check if a command line arg is a valid TDRP arg.
-  // return number of args consumed.
-  //
-
-  int Params::isArgValidN(const char *arg)
-  {
-    return (tdrpIsArgValidN(arg));
-  }
-
-  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.
@@ -1258,7 +1246,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("set_missing_to_zero");
     tt->descr = tdrpStrDup("Option to set missing data values to 0.");
-    tt->help = tdrpStrDup("If set, any point in the grid with a missing data value will be set to zero.");
+    tt->help = tdrpStrDup("If TRUE, any point in the grid with a missing data value will be set to zero. If FALSE, grid points without any valid data will be set to missing in the output grids. Note that grid points that have missing data for some time periods but valid data for others will treat the missing data as 0 for calculations.");
     tt->val_offset = (char *) &set_missing_to_zero - &_start_;
     tt->single_val.b = pFALSE;
     tt++;

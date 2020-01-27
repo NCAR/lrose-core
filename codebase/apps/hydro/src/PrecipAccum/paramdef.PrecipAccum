@@ -391,7 +391,10 @@ commentdef {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to set missing data values to 0.";
-  p_help = "If set, any point in the grid with a missing data value will be set to zero.";
+  p_help = "If TRUE, any point in the grid with a missing data value will be set to zero. "
+           "If FALSE, grid points without any valid data will be set to missing in the output grids. "
+           "Note that grid points that have missing data for some time periods but valid data for "
+           "others will treat the missing data as 0 for calculations.";
 } set_missing_to_zero;
 
 paramdef boolean {
