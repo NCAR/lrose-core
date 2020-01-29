@@ -44,7 +44,7 @@ AlgorithmParams.cc: paramdef.Algorithm
 	/bin/mv -f AlgorithmParams.hh ../include/FiltAlgVirtVol
 
 VirtVolParams.cc: paramdef.VirtVol
-	tdrp_gen -f paramdef.Algorithm -c++ -class VirtVolParams -lib FiltAlgVirtVol
+	tdrp_gen -f paramdef.VirtVol -c++ -class VirtVolParams -lib FiltAlgVirtVol
 	/bin/mv -f VirtVolParams.hh ../include/FiltAlgVirtVol
 
 /bin/mv clean_tdrp:

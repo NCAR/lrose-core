@@ -557,102 +557,224 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Algorithm Parameters");
-    tt->comment_text = tdrpStrDup("Parameters used to run the Algorithm class");
+    tt->comment_hdr = tdrpStrDup("VirtVol Parameters");
+    tt->comment_text = tdrpStrDup("Triggering new data, reading in new data, writing data");
     tt++;
     
-    // Parameter 'instance'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("instance");
-    tt->descr = tdrpStrDup("instance");
-    tt->help = tdrpStrDup("for PMU");
-    tt->val_offset = (char *) &instance - &_start_;
-    tt->single_val.s = tdrpStrDup("default");
-    tt++;
-    
-    // Parameter 'debug_mode'
-    // ctype is '_debug_e'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("debug_mode");
-    tt->descr = tdrpStrDup("debugging mode");
-    tt->help = tdrpStrDup("NONE=as quiet as possible, DEBUG = minimal debug output, DEBUG_VERBOSE=more");
-    tt->val_offset = (char *) &debug_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("debug_e");
-    tt->enum_def.nfields = 3;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("NONE");
-      tt->enum_def.fields[0].val = NONE;
-      tt->enum_def.fields[1].name = tdrpStrDup("DEBUG");
-      tt->enum_def.fields[1].val = DEBUG;
-      tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_VERBOSE");
-      tt->enum_def.fields[2].val = DEBUG_VERBOSE;
-    tt->single_val.e = DEBUG;
-    tt++;
-    
-    // Parameter 'debug_threads'
+    // Parameter 'debug_triggering'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("debug_threads");
-    tt->descr = tdrpStrDup("threads debug");
-    tt->help = tdrpStrDup("set to TRUE to debug threading");
-    tt->val_offset = (char *) &debug_threads - &_start_;
+    tt->param_name = tdrpStrDup("debug_triggering");
+    tt->descr = tdrpStrDup("triggering debug");
+    tt->help = tdrpStrDup("set to TRUE to debug triggering");
+    tt->val_offset = (char *) &debug_triggering - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'num_threads'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("num_threads");
-    tt->descr = tdrpStrDup("Number of threads");
-    tt->help = tdrpStrDup("Threading is done on sweeps. (More than one sweep processed by individual threads).  Set to 1 or 0 for no threading");
-    tt->val_offset = (char *) &num_threads - &_start_;
-    tt->single_val.i = 3;
-    tt++;
-    
-    // Parameter 'input'
+    // Parameter 'trigger_url'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input");
-    tt->descr = tdrpStrDup("Inputs to the algorithm");
-    tt->help = tdrpStrDup("Names of the fields that are inputs to the algorithm");
-    tt->array_offset = (char *) &_input - &_start_;
-    tt->array_n_offset = (char *) &input_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt->param_name = tdrpStrDup("trigger_url");
+    tt->descr = tdrpStrDup("trigger url");
+    tt->help = tdrpStrDup("URL to trigger off");
+    tt->val_offset = (char *) &trigger_url - &_start_;
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'output'
-    // ctype is 'char*'
+    // Parameter 'restrict_vertical_levels'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output");
-    tt->descr = tdrpStrDup("Fields/values to export from the algorithm");
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("restrict_vertical_levels");
+    tt->descr = tdrpStrDup("Set TRUE to restrict vertical levels to a range of values, FALSE to use all the vertical levels");
     tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_output - &_start_;
-    tt->array_n_offset = (char *) &output_n - &_start_;
+    tt->val_offset = (char *) &restrict_vertical_levels - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'vertical_level_range'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("vertical_level_range");
+    tt->descr = tdrpStrDup("If restrict_vertical_levels = TRUE, this is the range of vlevels");
+    tt->help = tdrpStrDup("If set to -1, -1 it is not used, and there is no restriction");
+    tt->array_offset = (char *) &_vertical_level_range - &_start_;
+    tt->array_n_offset = (char *) &vertical_level_range_n - &_start_;
     tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
+    tt->array_len_fixed = TRUE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 2;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = -1;
+      tt->array_vals[1].d = -1;
+    tt++;
+    
+    // Parameter 'restrict_max_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("restrict_max_range");
+    tt->descr = tdrpStrDup("Set TRUE to restrict maximum range to a parameter, FALSE to use all the data");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &restrict_max_range - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'max_range'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_range");
+    tt->descr = tdrpStrDup("If restrict_max_range = TRUE, this is the max range index");
+    tt->help = tdrpStrDup("Not used when restrict_max_range = FALSE, or if the value is >=0");
+    tt->val_offset = (char *) &max_range - &_start_;
+    tt->single_val.d = -1;
+    tt++;
+    
+    // Parameter 'virtvol_input'
+    // ctype is '_External_data_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("virtvol_input");
+    tt->descr = tdrpStrDup("inputs");
+    tt->help = tdrpStrDup("The fields read in externally\ninternal_name = name used in filtering\nexternal_name = external field name");
+    tt->array_offset = (char *) &_virtvol_input - &_start_;
+    tt->array_n_offset = (char *) &virtvol_input_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(External_data_t);
+    tt->array_n = 0;
+    tt->struct_def.name = tdrpStrDup("External_data_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("internal_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_virtvol_input->internal_name - (char *) _virtvol_input;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("external_name");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_virtvol_input->external_name - (char *) _virtvol_input;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("url");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_virtvol_input->url - (char *) _virtvol_input;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("Url_t");
+      tt->struct_def.fields[3].fname = tdrpStrDup("url_type");
+      tt->struct_def.fields[3].ptype = ENUM_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_virtvol_input->url_type - (char *) _virtvol_input;
+        tt->struct_def.fields[3].enum_def.name = tdrpStrDup("Url_t");
+        tt->struct_def.fields[3].enum_def.nfields = 3;
+        tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("VIRTUAL_VOLUME");
+        tt->struct_def.fields[3].enum_def.fields[0].val = VIRTUAL_VOLUME;
+        tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("DATABASE");
+        tt->struct_def.fields[3].enum_def.fields[1].val = DATABASE;
+        tt->struct_def.fields[3].enum_def.fields[2].name = tdrpStrDup("ASCII");
+        tt->struct_def.fields[3].enum_def.fields[2].val = ASCII;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("Data_t");
+      tt->struct_def.fields[4].fname = tdrpStrDup("data_type");
+      tt->struct_def.fields[4].ptype = ENUM_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_virtvol_input->data_type - (char *) _virtvol_input;
+        tt->struct_def.fields[4].enum_def.name = tdrpStrDup("Data_t");
+        tt->struct_def.fields[4].enum_def.nfields = 3;
+        tt->struct_def.fields[4].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[4].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[4].enum_def.fields[0].name = tdrpStrDup("GRID");
+        tt->struct_def.fields[4].enum_def.fields[0].val = GRID;
+        tt->struct_def.fields[4].enum_def.fields[1].name = tdrpStrDup("VALUE");
+        tt->struct_def.fields[4].enum_def.fields[1].val = VALUE;
+        tt->struct_def.fields[4].enum_def.fields[2].name = tdrpStrDup("NOT_SET");
+        tt->struct_def.fields[4].enum_def.fields[2].val = NOT_SET;
+    tt->n_struct_vals = 0;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+    tt++;
+    
+    // Parameter 'virtvol_output'
+    // ctype is '_External_data_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("virtvol_output");
+    tt->descr = tdrpStrDup("Fields/values to write out");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_virtvol_output - &_start_;
+    tt->array_n_offset = (char *) &virtvol_output_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(External_data_t);
+    tt->array_n = 0;
+    tt->struct_def.name = tdrpStrDup("External_data_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("internal_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_virtvol_output->internal_name - (char *) _virtvol_output;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("external_name");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_virtvol_output->external_name - (char *) _virtvol_output;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("url");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_virtvol_output->url - (char *) _virtvol_output;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("Url_t");
+      tt->struct_def.fields[3].fname = tdrpStrDup("url_type");
+      tt->struct_def.fields[3].ptype = ENUM_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_virtvol_output->url_type - (char *) _virtvol_output;
+        tt->struct_def.fields[3].enum_def.name = tdrpStrDup("Url_t");
+        tt->struct_def.fields[3].enum_def.nfields = 3;
+        tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("VIRTUAL_VOLUME");
+        tt->struct_def.fields[3].enum_def.fields[0].val = VIRTUAL_VOLUME;
+        tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("DATABASE");
+        tt->struct_def.fields[3].enum_def.fields[1].val = DATABASE;
+        tt->struct_def.fields[3].enum_def.fields[2].name = tdrpStrDup("ASCII");
+        tt->struct_def.fields[3].enum_def.fields[2].val = ASCII;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("Data_t");
+      tt->struct_def.fields[4].fname = tdrpStrDup("data_type");
+      tt->struct_def.fields[4].ptype = ENUM_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_virtvol_output->data_type - (char *) _virtvol_output;
+        tt->struct_def.fields[4].enum_def.name = tdrpStrDup("Data_t");
+        tt->struct_def.fields[4].enum_def.nfields = 3;
+        tt->struct_def.fields[4].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[4].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[4].enum_def.fields[0].name = tdrpStrDup("GRID");
+        tt->struct_def.fields[4].enum_def.fields[0].val = GRID;
+        tt->struct_def.fields[4].enum_def.fields[1].name = tdrpStrDup("VALUE");
+        tt->struct_def.fields[4].enum_def.fields[1].val = VALUE;
+        tt->struct_def.fields[4].enum_def.fields[2].name = tdrpStrDup("NOT_SET");
+        tt->struct_def.fields[4].enum_def.fields[2].val = NOT_SET;
+    tt->n_struct_vals = 0;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
     tt++;
     
     // trailing entry has param_name set to NULL
