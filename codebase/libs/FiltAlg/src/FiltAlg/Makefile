@@ -72,13 +72,19 @@ CPPC_SRCS = \
 #
 # general targets
 #
-include $(RAP_MAKE_INC_DIR)/rap_make_targets
 
-FiltAlgParams.hh: FiltAlgParams.cc
-	$(CP) FiltAlgParams.hh ../include/FiltAlg
+include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+
+# local targets
+
 FiltAlgParams.cc: paramdef.FiltAlg
-	tdrp_gen -f paramdef.FiltAlg -c++ -class FiltAlgParams
-	$(CP) FiltAlgParams.hh ../include/FiltAlg
+	tdrp_gen -f paramdef.FiltAlg -c++ -class FiltAlgParams -lib FiltAlg
+	/bin/mv -f FiltAlgParams.hh ../include/FiltAlg
+
+/bin/mv clean_tdrp:
+	$(RM) FiltAlgParams.cc ../include/radar/FiltAlgParams.hh
+
+depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

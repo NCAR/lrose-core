@@ -48,7 +48,7 @@
  * @author Automatically generated
  *
  */
-#include "FiltAlgParams.hh"
+#include <FiltAlg/FiltAlgParams.hh>
 #include <cstring>
 
   ////////////////////////////////////////////
