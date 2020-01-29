@@ -82,7 +82,7 @@ FiltAlgParams.cc: paramdef.FiltAlg
 	/bin/mv -f FiltAlgParams.hh ../include/FiltAlg
 
 /bin/mv clean_tdrp:
-	$(RM) FiltAlgParams.cc ../include/radar/FiltAlgParams.hh
+	$(RM) FiltAlgParams.cc ../include/FiltAlg/FiltAlgParams.hh
 
 depend: depend_generic
 
