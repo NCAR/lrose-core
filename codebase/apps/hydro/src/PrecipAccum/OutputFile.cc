@@ -95,7 +95,8 @@ int OutputFile::write(time_t start_time,
 		      fl32 *precip,
 		      fl32 *rate,
 		      fl32 *max_dbz,
-		      fl32 *max_vil)
+		      fl32 *max_vil,
+                      const fl32 missing_value)
   
 {
   
@@ -225,18 +226,8 @@ int OutputFile::write(time_t start_time,
 
     fhdr.proj_rotation = 0.0;
 
-    // Replace missing data with a value of zero.
-    // Need to set missing to something else here.
-    if(_params.set_missing_to_zero)
-    {
-      fhdr.bad_data_value = -99.0;
-      fhdr.missing_data_value = -99.0;
-    }
-    else 
-    {
-      fhdr.bad_data_value = 0.0;
-      fhdr.missing_data_value = 0.0;
-    }
+    fhdr.bad_data_value = missing_value;
+    fhdr.missing_data_value = missing_value;
     
     if (out_field == _precipFieldNum) {
       _setFieldName(mhdr, fhdr, accum_period_secs, "precip", "Precip Accum", "mm");

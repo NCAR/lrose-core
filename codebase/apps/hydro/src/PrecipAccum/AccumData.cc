@@ -59,6 +59,8 @@
 #include <cmath>
 using namespace std;
 
+const fl32 AccumData::MISSING_VALUE = -99.0;
+
 //////////////
 // Constructor
 
@@ -223,14 +225,33 @@ int AccumData::processFile(const string &file_path, time_t inputTime, int leadTi
     _grid = proj.getCoord();
     _nxy = _grid.nx * _grid.ny;
     _precip = (fl32 *) ucalloc(_nxy, sizeof(fl32));
+    if (!_params.set_missing_to_zero) {
+      for (int i = 0; i < _nxy; ++i)
+        _precip[i] = MISSING_VALUE;
+    }
+
     _adjusted = (fl32 *) ucalloc(_nxy, sizeof(fl32));
+    if (!_params.set_missing_to_zero) {
+      for (int i = 0; i < _nxy; ++i)
+        _adjusted[i] = MISSING_VALUE;
+    }
     
     if (_params.generate_rate_grid) {
       _rate = (fl32 *) ucalloc(_nxy, sizeof(fl32));
+      if (!_params.set_missing_to_zero) {
+        for (int i = 0; i < _nxy; ++i)
+          _rate[i] = MISSING_VALUE;
+      }
     }
+
     if (_params.generate_max_dbz_grid) {
       _maxDbz = (fl32 *) ucalloc(_nxy, sizeof(fl32));
+      if (!_params.set_missing_to_zero) {
+        for (int i = 0; i < _nxy; ++i)
+          _maxDbz[i] = MISSING_VALUE;
+      }
     }
+
     if (_params.generate_max_vil_grid) {
       _vil = (fl32 *) umalloc(_nxy * sizeof(fl32));
       _maxVil = (fl32 *) ucalloc(_nxy, sizeof(fl32));
@@ -386,18 +407,25 @@ void AccumData::_updateAccumFromDbz(const MdvxField &inFld,
   fl32 minDbz = _params.low_dbz_threshold;
   fl32 *p = _precip;
   for (int i = 0; i < _nxy; i++, dbz++, p++) {
-    if (*dbz != missing && *dbz >= minDbz) {
+    if (*dbz == missing)
+      continue;
+    
+    if (*dbz >= minDbz) {
       double dbzForPrecip = *dbz;
       if (dbzForPrecip > _params.hail_dbz_threshold) {
 	dbzForPrecip = _params.hail_dbz_threshold;
       }
       double z = pow(10.0, dbzForPrecip / 10.0);
       double rate = pow((z / zrCoeff), invExpon) / 3600.0; // mm/sec
-      (*p) += rate * _volDuration;
+      if (*p == MISSING_VALUE)
+        (*p) = rate * _volDuration;
+      else
+        (*p) += rate * _volDuration;
+    } else {
+      if (*p == MISSING_VALUE)
+        *p = 0.0;
     }
-    else if (_params.set_missing_to_zero) {
-      (*p) += 0.0;
-    }
+    
   } // i
   
 }
@@ -415,7 +443,10 @@ void AccumData::_updateAccumFromRate(const MdvxField &inFld)
   fl32 *p = _precip;
   for (int i = 0; i < _nxy; i++, rate++, p++) {
     if (*rate != missing) {
-      (*p) += *rate * _volDuration / 3600.0; // mm from mm/hr
+      if (*p == MISSING_VALUE)
+        (*p) = *rate * _volDuration / 3600.0; // mm from mm/hr
+      else
+        (*p) += *rate * _volDuration / 3600.0; // mm from mm/hr
     }
   } // i
   
@@ -436,10 +467,10 @@ void AccumData::_updateAccumFromPrecip(const MdvxField &inFld)
   fl32 *p = _precip;
   for (int i = 0; i < _nxy; i++, pcpin++, p++) {
     if (*pcpin != missing) {
-      (*p) += *pcpin;
-    }
-    else if (_params.set_missing_to_zero) {
-      (*p) += 0.0;
+      if ((*p) == MISSING_VALUE)
+        (*p) = *pcpin;
+      else
+        (*p) += *pcpin;
     }
   } // i
   
@@ -690,8 +721,10 @@ void AccumData::_computeAdjusted()
     }
     
     for (int i = 0; i < _nxy; i++, p++, a++) {
-      double adjusted = *p * ratio;
-      *a = adjusted;
+      if (*p != MISSING_VALUE) {
+        double adjusted = *p * ratio;
+        *a = adjusted;
+      }
     }
     
   } else { // if (_params.adjust_for_expected_total_duration ...
@@ -723,7 +756,8 @@ void AccumData::_computeRate()
   fl32 *r = _rate;
 
   for (int i = 0; i < _nxy; i++, p++, r++) {
-    *r = *p / hrs;
+    if (*p != MISSING_VALUE)
+      *r = *p / hrs;
   }
 
 }
@@ -741,7 +775,8 @@ void AccumData::_normalizeByNSeasons(double nSeasons)
 
   fl32 *aa = _adjusted;
   for (int ii = 0; ii < _nxy; ii++, aa++) {
-    *aa = *aa / nSeasons;
+    if (*aa != MISSING_VALUE)
+      *aa = *aa / nSeasons;
   }
       
 }
@@ -759,7 +794,7 @@ void AccumData::_setMaxDepth(double maxDepth)
 
   fl32 *aa = _adjusted;
   for (int ii = 0; ii < _nxy; ii++, aa++) {
-    if (*aa > maxDepth) {
+    if (*aa != MISSING_VALUE && *aa > maxDepth) {
       *aa = maxDepth;
     }
   }
@@ -813,7 +848,8 @@ int AccumData::computeAndWrite(time_t start_time,
                 _adjusted,
                 _rate,
                 _maxDbz,
-                _maxVil)) {
+                _maxVil,
+                MISSING_VALUE)) {
     cerr << "ERROR - AccumData::computeAndWrite" << endl;
     return -1;
   }
