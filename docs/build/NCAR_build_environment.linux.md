@@ -188,7 +188,7 @@ For the **titan** distribtion, run the following:
 ```
   cd $LROSE_CORE_DIR/codebase/libs/tdrp/src
   make opt install
-  cd $LROSE_CORE_DIR/codebase/apps/tdrp/src
+  cd $LROSE_CORE_DIR/codebase/apps/tdrp/src/tdrp_gen
   make opt install
 ```
 
