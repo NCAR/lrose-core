@@ -1044,7 +1044,7 @@ DateTime DateTime::operator+ (const double secs) const
 DateTime DateTime::operator- (const DeltaTime& delta) const
 {
   DateTime answer(*this);
-  answer += delta;
+  answer -= delta;
   return answer;
 }
  
