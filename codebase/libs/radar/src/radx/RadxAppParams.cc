@@ -48,7 +48,7 @@
  * @author Automatically generated
  *
  */
-#include "RadxAppParams.hh"
+#include <radar/RadxAppParams.hh>
 #include <cstring>
 
   ////////////////////////////////////////////
