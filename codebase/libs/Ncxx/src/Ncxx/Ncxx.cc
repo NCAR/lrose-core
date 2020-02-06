@@ -50,7 +50,6 @@
 
 #include <Ncxx/Ncxx.hh>
 #include <Ncxx/NcxxPort.hh>
-#include <cstring>
 
 // missing values in meta-data
 
