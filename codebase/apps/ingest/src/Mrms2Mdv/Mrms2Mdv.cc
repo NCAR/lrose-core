@@ -264,12 +264,12 @@ int Mrms2Mdv::_getData()
 
       memset( (void *) &_fieldHeader, (int) 0, sizeof(Mdvx::field_header_t) );
       memset( (void *) &_vlevelHeader, (int) 0, sizeof(Mdvx::vlevel_header_t) );
-      _vlevelHeader.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE;
+      _vlevelHeader.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE_64;
       
       //
       // fill out the field header
       _fieldHeader.record_len1         = sizeof( Mdvx::field_header_t );
-      _fieldHeader.struct_id           = Mdvx::FIELD_HEAD_MAGIC_COOKIE;
+      _fieldHeader.struct_id           = Mdvx::FIELD_HEAD_MAGIC_COOKIE_64;
       _fieldHeader.field_code          = 0;
       _fieldHeader.forecast_delta      = 0;
       _fieldHeader.forecast_time       = input->getTime();

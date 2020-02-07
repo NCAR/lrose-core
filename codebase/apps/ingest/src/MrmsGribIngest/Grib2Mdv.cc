@@ -252,7 +252,7 @@ int Grib2Mdv::readFile(const string &filePath, DsMdvx &out)
          
         MEM_zero(_fieldHeader);
         MEM_zero(_vlevelHeader);
-        _vlevelHeader.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE;
+        _vlevelHeader.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE_64;
 	 
         if (_createFieldHdr() != 0) {
           cerr << "WARNING: File " << filePath << " not processed." << endl << flush;
@@ -456,7 +456,7 @@ void Grib2Mdv::_setMasterHdr(time_t validTime,
    // Fill the master header
 
    masterHdr.record_len1     = sizeof(Mdvx::master_header_t);
-   masterHdr.struct_id       = Mdvx::MASTER_HEAD_MAGIC_COOKIE;
+   masterHdr.struct_id       = Mdvx::MASTER_HEAD_MAGIC_COOKIE_64;
    masterHdr.revision_number = 1;
    masterHdr.num_data_times  = 1;
    masterHdr.index_number    = 0;
@@ -500,7 +500,7 @@ int Grib2Mdv::_createFieldHdr ()
   //
   // fill out the field header
   _fieldHeader.record_len1         = sizeof( Mdvx::field_header_t );
-  _fieldHeader.struct_id           = Mdvx::FIELD_HEAD_MAGIC_COOKIE;
+  _fieldHeader.struct_id           = Mdvx::FIELD_HEAD_MAGIC_COOKIE_64;
   _fieldHeader.field_code          = _gribRecord->summary->paramNumber;
   _fieldHeader.forecast_delta      = 0;
   _fieldHeader.forecast_time       = 0;

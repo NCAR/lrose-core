@@ -105,7 +105,7 @@ OutputFile::_setMasterHdr( time_t genTime, time_t leadSecs )
    // Fill the master header
    //
    masterHdr.record_len1     = sizeof( Mdvx::master_header_t );
-   masterHdr.struct_id       = Mdvx::MASTER_HEAD_MAGIC_COOKIE;
+   masterHdr.struct_id       = Mdvx::MASTER_HEAD_MAGIC_COOKIE_64;
    masterHdr.revision_number = 1;
    masterHdr.num_data_times  = 1;
    masterHdr.index_number    = 0;

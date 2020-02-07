@@ -479,7 +479,7 @@ DataMgr::_createMdvxFields()
     Mdvx::field_header_t fieldHeader;
     memset( (void *) &fieldHeader, (int) 0, sizeof(Mdvx::field_header_t) );
     fieldHeader.record_len1         = sizeof( Mdvx::field_header_t );
-    fieldHeader.struct_id           = Mdvx::FIELD_HEAD_MAGIC_COOKIE;
+    fieldHeader.struct_id           = Mdvx::FIELD_HEAD_MAGIC_COOKIE_64;
     fieldHeader.field_code          = (*gfi)->getParameterId();
     fieldHeader.forecast_delta      = (*gfi)->getForecastTime();
     fieldHeader.forecast_time       = (*gfi)->getGenerateTime() + (*gfi)->getForecastTime();
@@ -607,7 +607,7 @@ DataMgr::_createMdvxFields()
     //
     Mdvx::vlevel_header_t vlevelHeader;
     memset( (void *) &vlevelHeader, (int) 0, sizeof(Mdvx::vlevel_header_t) );
-    vlevelHeader.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE;
+    vlevelHeader.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE_64;
     for( int iz = 0; iz < fieldHeader.nz; iz++ ) {
       vlevelHeader.type[iz] = (*gfi)->getVerticalLeveltype();
       vlevelHeader.level[iz] = (*gfi)->getLevel(iz);
