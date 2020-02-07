@@ -62,7 +62,7 @@ Output::Output(time_t DataTime,
   Mdvx::master_header_t master_hdr = mdvx.getMasterHeader();;
  
 
-  master_hdr.struct_id=Mdvx::MASTER_HEAD_MAGIC_COOKIE;
+  master_hdr.struct_id=Mdvx::MASTER_HEAD_MAGIC_COOKIE_64;
   master_hdr.revision_number=Mdvx::REVISION_NUMBER;
 
   time_t Now;
@@ -154,7 +154,7 @@ Output::~Output()
 
 
   // First fill out integers.
-  fhdr.struct_id = Mdvx::FIELD_HEAD_MAGIC_COOKIE;
+  fhdr.struct_id = Mdvx::FIELD_HEAD_MAGIC_COOKIE_64;
   fhdr.field_code = FieldCode;
 
   fhdr.user_time1 =     Now.unix_time;
